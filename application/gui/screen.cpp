@@ -72,7 +72,7 @@ void Screen::refresh() {
 
 void Screen::close() {
 	shader.close();
-	terminateGL
+	terminateGL();
 }
 
 bool Screen::shouldClose() {
