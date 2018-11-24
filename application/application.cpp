@@ -1,22 +1,15 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include "gui/screen.h"
+
 int main(void) {
-	GLFWwindow* window;
+	if (!initGL())
+		return -1;
+
+	World w = World();
 	
-	/* Initialize the library */
-	if (!glfwInit()) 
-		return -1;
-
-	/* Create a windowed mode window and its OpenGL context */
-	window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
-	if (!window) {
-		glfwTerminate();
-		return -1;
-	}
-
-	/* Make the window's context current */
-	glfwMakeContextCurrent(window);
+	Screen screen = Screen(800, 640, &w);
 
 	/* Init GLEW after creating a valid rendering context */
 	if (glewInit() != GLEW_OK) {
@@ -25,17 +18,10 @@ int main(void) {
 	}
 
 	/* Loop until the user closes the window */
-	while (!glfwWindowShouldClose(window)) {
-		/* Render here */
-		glClear(GL_COLOR_BUFFER_BIT);
-
-		/* Swap front and back buffers */
-		glfwSwapBuffers(window);
-
-		/* Poll for and process events */
-		glfwPollEvents();
+	while (!screen.shouldClose()) {
+		screen.refresh();
 	}
 
-	glfwTerminate();
+	screen.~Screen();
 	return 0;
 }
