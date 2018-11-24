@@ -5,6 +5,7 @@
 
 #include <thread>
 #include <chrono>
+#include <iostream>
 
 #include "gui/screen.h"
 
@@ -22,37 +23,36 @@ World world = World();
 
 TickerThread physicsThread;
 
-std::thread t;
-
 void setupPhysics();
 
 int main(void) {
 	Log::init();
 
 	if (!initGLFW()) {
-		std::this_thread::sleep_for(std::chrono::milliseconds(500));
+		std::cin.get();
 		return -1;
 	}
 
 	Screen screen = Screen(800, 640, &world);
 
 	if (!initGLEW()) {
-		std::this_thread::sleep_for(std::chrono::milliseconds(500));
+		std::cin.get();
 		return -1;
 	}
 
 	setupPhysics();
 
-	physicsThread.start();
+	screen.init();
 
 	/* Loop until the user closes the window */
 	while (!screen.shouldClose()) {
 		screen.refresh();
 	}
 
+	screen.close();
+
 	stop(0);
 }
-
 
 
 void stop(int returnCode) {
@@ -64,7 +64,6 @@ void stop(int returnCode) {
 
 void setupPhysics() {
 	physicsThread = TickerThread(TICKS_PER_SECOND, TICK_SKIP_TIME, []() {
-		//Log::info("%.9f", physicsThread.getTPS());
 		world.tick(1 / physicsThread.getTPS());
 	});
 }

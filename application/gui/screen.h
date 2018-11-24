@@ -16,10 +16,11 @@ private:
 	World* w;
 public:
 	Screen(int width, int height, World* world);
-	~Screen();
 
 	bool shouldClose();
+	void init();
 	void refresh();
+	void close();
 
 	void makeCurrent();
 
