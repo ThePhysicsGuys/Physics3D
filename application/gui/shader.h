@@ -12,6 +12,7 @@ ShaderSource parseShader(const std::string& vertexPath, const std::string& fragm
 
 class Shader {
 public:
+	Shader() {};
 	Shader(const std::string& vertexShader, const std::string& fragmentShader);
 	Shader(ShaderSource shaderSource) : Shader(shaderSource.vertexSource, shaderSource.fragmentSource) {};
 	void bind();

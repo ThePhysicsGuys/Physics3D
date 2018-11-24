@@ -37,11 +37,13 @@ unsigned int compileShader(const std::string& source, unsigned int type) {
 unsigned int createShader(const std::string& vertexShader, const std::string& fragmentShader) {
 	unsigned int program = glCreateProgram();
 
-	Log::info("Compiling vertex shader...");
+	Log::info("Compiling vertex shader");
 	unsigned int vs = compileShader(vertexShader, GL_VERTEX_SHADER);
+	Log::info("Done compiling vertex shader");
 
-	Log::info("Compiling fragment shader...");
+	Log::info("Compiling fragment shader");
 	unsigned int fs = compileShader(fragmentShader, GL_FRAGMENT_SHADER);
+	Log::info("Done compiling fragment shader");
 
 	glAttachShader(program, vs);
 	glAttachShader(program, fs);
@@ -109,6 +111,10 @@ ShaderSource parseShader(const std::string& path) {
 				type = ShaderType::FRAGMENT;
 			}
 		} else {
+			if (type == ShaderType::NONE) {
+				Log::warn("Code in %s before the first #shader instruction will be ignored", path.c_str());
+				continue;
+			}
 			stringStream[(int) type] << line << "\n";
 		}
 	}
