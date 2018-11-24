@@ -1,14 +1,31 @@
 #include "screen.h"
-
-#include <GLFW/glfw3.h>
+#include "../../util/Log.h"
 
 #include <stdlib.h>
 
 World* curWorld = NULL;
 
-bool initGL() {
+bool initGLFW() {
 	/* Initialize the library */
-	return glfwInit() != 0;
+	if (!glfwInit()) {
+		Log::error("GLFW Failed to initialize!");
+		return false;
+	}
+
+	return true;
+}
+
+bool initGLEW() {
+	/* Init GLEW after creating a valid rendering context */
+	if (glewInit() != GLEW_OK) {
+		glfwTerminate();
+
+		Log::error("GLEW Failed to initialize!");
+
+		return false;
+	}
+
+	return true;
 }
 
 void terminateGL() {

@@ -2,9 +2,12 @@
 
 #include "../../engine/world.h"
 
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-bool initGL();
+bool initGLFW();
+bool initGLEW();
+
 void terminateGL();
 
 class Screen {
