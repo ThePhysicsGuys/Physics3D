@@ -10,18 +10,21 @@
 
 #include "../util/Log.h"
 
+#include "tickerThread.h"
+
 
 #define TICKS_PER_SECOND 500.0
 
-#define TICK_SKIP_TIME seconds(3)
+#define TICK_SKIP_TIME std::chrono::milliseconds(3000)
 
-std::thread physicsThread;
-bool running = true;
 
 World world = World();
 
+TickerThread physicsThread;
 
-void startPhysics();
+std::thread t;
+
+void setupPhysics();
 
 int main(void) {
 	Log::init();
@@ -38,7 +41,9 @@ int main(void) {
 		return -1;
 	}
 
-	startPhysics();
+	setupPhysics();
+
+	physicsThread.start();
 
 	/* Loop until the user closes the window */
 	while (!screen.shouldClose()) {
@@ -50,39 +55,16 @@ int main(void) {
 
 
 
-void startPhysics() {
-	using namespace std::chrono;
-
-	physicsThread = std::thread([]() {
-		auto tickTime = microseconds((long long) (1000000 / TICKS_PER_SECOND));
-
-		auto nextTarget = system_clock::now();
-
-		while (running) {
-			
-			world.tick(1/TICKS_PER_SECOND);
-
-			nextTarget += tickTime;
-			auto curTime = system_clock::now();
-			if (curTime < nextTarget) {
-				std::this_thread::sleep_until(nextTarget);
-			}else{
-				// We're behind schedule
-				if (nextTarget < curTime - TICK_SKIP_TIME) {
-					Log::warn("Can't keep up! Skipping ticks!");
-
-					nextTarget = curTime;
-				}
-			}
-		}
-	});
-}
-
 void stop(int returnCode) {
-	
-	running = false;
-	physicsThread.join();
+	physicsThread.stop();
 
 	glfwTerminate();
 	exit(returnCode);
+}
+
+void setupPhysics() {
+	physicsThread = TickerThread(TICKS_PER_SECOND, TICK_SKIP_TIME, []() {
+		//Log::info("%.9f", physicsThread.getTPS());
+		world.tick(1 / physicsThread.getTPS());
+	});
 }
