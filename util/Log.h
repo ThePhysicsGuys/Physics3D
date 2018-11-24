@@ -8,11 +8,11 @@ namespace Log {
 		LEVEL_FATAL = 3
 	};
 	void init();
-	void debug(const char* msg);
-	void info(const char* msg);
-	void warn(const char* msg);
-	void error(const char* msg);
-	void fatal(const char* msg);
+	void debug(const char* format, ...);
+	void info(const char* format, ...);
+	void warn(const char* format, ...);
+	void error(const char* format, ...);
+	void fatal(const char* format, ...);
 	void setLogLevel(Level logLevel);
 	Level getLogLevel();
 };

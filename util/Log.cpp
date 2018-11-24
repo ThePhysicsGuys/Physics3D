@@ -1,5 +1,6 @@
 #include <iostream>
 #include <windows.h>
+#include <string>
 #include "Log.h"
 
 namespace Log {
@@ -16,7 +17,6 @@ namespace Log {
 	Level logLevel;
 
 	void init() {
-		
 		console = GetStdHandle(STD_OUTPUT_HANDLE);
 		setLogLevel(LEVEL_INFO);
 		info("Initialized log");
@@ -30,36 +30,66 @@ namespace Log {
 		return logLevel;
 	}
 
-	void debug(const char* msg) {
+	void debug(const char* format, ...) {
+		std::string msg = "[DEBUG]: " + std::string(format) + "\n";
+		if (console == nullptr)
+			std::cout << "[WARNING]: Log not initialized, colors will be unavailable" << std::endl;
 		SetConsoleTextAttribute(console, COLOR_DEBUG);
-		std::cout << "[DEBUG]: " << msg << std::endl;
+		va_list args;
+		va_start(args, format);
+	    vprintf(msg.c_str(), args);
+		va_end(args);
 	}
 
-	void info(const char* msg) {
+	void info(const char* format, ...) {
 		if (logLevel <= LEVEL_INFO) {
+			std::string msg = "[INFO]: " + std::string(format) + "\n";
+			if (console == nullptr)
+				std::cout << "[WARNING]: Log not initialized, colors will be unavailable" << std::endl;
 			SetConsoleTextAttribute(console, COLOR_INFO);
-			std::cout << "[INFO]: " << msg << std::endl;
+			va_list args;
+			va_start(args, format);
+			vprintf(msg.c_str(), args);
+			va_end(args);
 		}
 	}
 
-	void warn(const char* msg) {
+	void warn(const char* format, ...) {
 		if (logLevel <= LEVEL_WARNING) {
+			std::string msg = "[WARNING]: " + std::string(format) + "\n";
+			if (console == nullptr)
+				std::cout << "[WARNING]: Log not initialized, colors will be unavailable" << std::endl;
 			SetConsoleTextAttribute(console, COLOR_WARNING);
-			std::cout << "[WARNING]: " << msg << std::endl;
+			va_list args;
+			va_start(args, format);
+			vprintf(msg.c_str(), args);
+			va_end(args);
 		}
 	}
 
-	void error(const char* msg) {
+	void error(const char* format, ...) {
 		if (logLevel <= LEVEL_ERROR) {
+			std::string msg = "[ERROR]: " + std::string(format) + "\n";
+			if (console == nullptr)
+				std::cout << "[WARNING]: Log not initialized, colors will be unavailable" << std::endl;
 			SetConsoleTextAttribute(console, COLOR_ERROR);
-			std::cout << "[ERROR]: " << msg << std::endl;
+			va_list args;
+			va_start(args, format);
+			vprintf(msg.c_str(), args);
+			va_end(args);
 		}
 	}
 
-	void fatal(const char* msg) {
+	void fatal(const char* format, ...) {
 		if (logLevel <= LEVEL_FATAL) {
+			std::string msg = "[FATAL]: " + std::string(format) + "\n";
+			if (console == nullptr)
+				std::cout << "[WARNING]: Log not initialized, colors will be unavailable" << std::endl;
 			SetConsoleTextAttribute(console, COLOR_FATAL);
-			std::cout << "[FATAL]: " << msg << std::endl;
+			va_list args;
+			va_start(args, format);
+			vprintf(msg.c_str(), args);
+			va_end(args);
 		}
 	}
 }
