@@ -10,6 +10,8 @@
 
 #include "../util/Log.h"
 
+#include <iostream>
+
 
 #define TICKS_PER_SECOND 500.0
 
@@ -27,28 +29,30 @@ int main(void) {
 	Log::init();
 
 	if (!initGLFW()) {
-		std::this_thread::sleep_for(std::chrono::milliseconds(500));
+		std::cin.get();
 		return -1;
 	}
 
 	Screen screen = Screen(800, 640, &world);
 
 	if (!initGLEW()) {
-		std::this_thread::sleep_for(std::chrono::milliseconds(500));
+		std::cin.get();
 		return -1;
 	}
-
+	
 	startPhysics();
+
+	screen.init();
 
 	/* Loop until the user closes the window */
 	while (!screen.shouldClose()) {
 		screen.refresh();
 	}
 
+	screen.close();
+
 	stop(0);
 }
-
-
 
 void startPhysics() {
 	using namespace std::chrono;

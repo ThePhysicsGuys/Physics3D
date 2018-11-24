@@ -1,5 +1,6 @@
 #include "screen.h"
 #include "../../util/Log.h"
+#include "shader.h"
 
 #include <stdlib.h>
 
@@ -46,8 +47,11 @@ Screen::Screen(int width, int height, World* w) {
 	makeCurrent();
 }
 
-Screen::~Screen() {
+Shader shader; 
 
+void Screen::init() {
+	ShaderSource shaderSource = parseShader("res/shaders/basic.shader");
+	shader = Shader(shaderSource);
 }
 
 void Screen::makeCurrent() {
@@ -64,6 +68,11 @@ void Screen::refresh() {
 
 	/* Poll for and process events */
 	glfwPollEvents();
+}
+
+void Screen::close() {
+	shader.close();
+	terminateGL
 }
 
 bool Screen::shouldClose() {
