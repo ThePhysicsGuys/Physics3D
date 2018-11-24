@@ -13,6 +13,8 @@
 
 #define TICKS_PER_SECOND 500.0
 
+#define TICK_SKIP_TIME seconds(3)
+
 std::thread physicsThread;
 bool running = true;
 
@@ -51,14 +53,27 @@ int main(void) {
 void startPhysics() {
 	using namespace std::chrono;
 
-	auto nextTarget = system_clock::now() + milliseconds(200);
-
 	physicsThread = std::thread([]() {
-		while (running) {
+		auto tickTime = microseconds((long long) (1000000 / TICKS_PER_SECOND));
 
+		auto nextTarget = system_clock::now();
+
+		while (running) {
+			
 			world.tick(1/TICKS_PER_SECOND);
 
-			std::this_thread::sleep_for(milliseconds(500));
+			nextTarget += tickTime;
+			auto curTime = system_clock::now();
+			if (curTime < nextTarget) {
+				std::this_thread::sleep_until(nextTarget);
+			}else{
+				// We're behind schedule
+				if (nextTarget < curTime - TICK_SKIP_TIME) {
+					Log::warn("Can't keep up! Skipping ticks!");
+
+					nextTarget = curTime;
+				}
+			}
 		}
 	});
 }
