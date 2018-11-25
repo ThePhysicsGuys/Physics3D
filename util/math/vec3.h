@@ -10,6 +10,7 @@ public:
 	Num z;
 
 	
+	Vec3Template() : x(0), y(0), z(0) {}
 	Vec3Template(Num x, Num y, Num z) : x(x), y(y), z(z) {};
 	Vec3Template(const Vec3Template& other) : x(other.x), y(other.y), z(other.z) {};
 	~Vec3Template() {};
