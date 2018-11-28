@@ -50,7 +50,7 @@ Screen::Screen(int width, int height, World* w) {
 Shader shader; 
 
 void Screen::init() {
-	ShaderSource shaderSource = parseShader("res/shaders/basic.shader");
+	ShaderSource shaderSource = parseShader("../res/shaders/basic.shader");
 	shader = Shader(shaderSource);
 }
 
