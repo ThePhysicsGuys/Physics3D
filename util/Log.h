@@ -1,11 +1,11 @@
 #pragma once
 
 namespace Log {
-	enum Level : char {
-		LEVEL_INFO = 0,
-		LEVEL_WARNING = 1,
-		LEVEL_ERROR = 2,
-		LEVEL_FATAL = 3
+	enum class Level : char {
+		INFO = 0,
+		WARNING = 1,
+		ERROR = 2,
+		FATAL = 3
 	};
 	void init();
 	void debug(const char* format, ...);
@@ -13,6 +13,6 @@ namespace Log {
 	void warn(const char* format, ...);
 	void error(const char* format, ...);
 	void fatal(const char* format, ...);
-	void setLogLevel(Level logLevel);
+	void setLogLevel(Log::Level logLevel);
 	Level getLogLevel();
 };

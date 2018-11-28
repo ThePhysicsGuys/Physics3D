@@ -1,16 +1,18 @@
 #include <iostream>
 #include <windows.h>
 #include <string>
+#undef ERROR
 #include "Log.h"
+
 
 namespace Log {
 
-	enum LevelColor {
-		COLOR_DEBUG = 10,
-		COLOR_INFO = 11,
-		COLOR_WARNING = 14,
-		COLOR_ERROR = 12,
-		COLOR_FATAL = 192
+	enum class LevelColor {
+		DEBUG = 10,
+		INFO = 11,
+		WARNING = 14,
+		ERROR = 12,
+		FATAL = 192
 	};
 
 	HANDLE console;
@@ -18,7 +20,7 @@ namespace Log {
 
 	void init() {
 		console = GetStdHandle(STD_OUTPUT_HANDLE);
-		setLogLevel(LEVEL_INFO);
+		setLogLevel(Level::INFO);
 		info("Initialized log");
 	}
 
@@ -34,7 +36,7 @@ namespace Log {
 		std::string msg = "[DEBUG]: " + std::string(format) + "\n";
 		if (console == nullptr)
 			std::cout << "[WARNING]: Log not initialized, colors will be unavailable" << std::endl;
-		SetConsoleTextAttribute(console, COLOR_DEBUG);
+		SetConsoleTextAttribute(console, (int) LevelColor::DEBUG);
 		va_list args;
 		va_start(args, format);
 	    vprintf(msg.c_str(), args);
@@ -42,11 +44,11 @@ namespace Log {
 	}
 
 	void info(const char* format, ...) {
-		if (logLevel <= LEVEL_INFO) {
+		if (logLevel <= Level::INFO) {
 			std::string msg = "[INFO]: " + std::string(format) + "\n";
 			if (console == nullptr)
 				std::cout << "[WARNING]: Log not initialized, colors will be unavailable" << std::endl;
-			SetConsoleTextAttribute(console, COLOR_INFO);
+			SetConsoleTextAttribute(console, (int) LevelColor::INFO);
 			va_list args;
 			va_start(args, format);
 			vprintf(msg.c_str(), args);
@@ -55,11 +57,11 @@ namespace Log {
 	}
 
 	void warn(const char* format, ...) {
-		if (logLevel <= LEVEL_WARNING) {
+		if (logLevel <= Level::WARNING) {
 			std::string msg = "[WARNING]: " + std::string(format) + "\n";
 			if (console == nullptr)
 				std::cout << "[WARNING]: Log not initialized, colors will be unavailable" << std::endl;
-			SetConsoleTextAttribute(console, COLOR_WARNING);
+			SetConsoleTextAttribute(console, (int)LevelColor::WARNING);
 			va_list args;
 			va_start(args, format);
 			vprintf(msg.c_str(), args);
@@ -68,11 +70,11 @@ namespace Log {
 	}
 
 	void error(const char* format, ...) {
-		if (logLevel <= LEVEL_ERROR) {
+		if (logLevel <= Level::ERROR) {
 			std::string msg = "[ERROR]: " + std::string(format) + "\n";
 			if (console == nullptr)
 				std::cout << "[WARNING]: Log not initialized, colors will be unavailable" << std::endl;
-			SetConsoleTextAttribute(console, COLOR_ERROR);
+			SetConsoleTextAttribute(console, (int)LevelColor::ERROR);
 			va_list args;
 			va_start(args, format);
 			vprintf(msg.c_str(), args);
@@ -81,11 +83,11 @@ namespace Log {
 	}
 
 	void fatal(const char* format, ...) {
-		if (logLevel <= LEVEL_FATAL) {
+		if (logLevel <= Level::FATAL) {
 			std::string msg = "[FATAL]: " + std::string(format) + "\n";
 			if (console == nullptr)
 				std::cout << "[WARNING]: Log not initialized, colors will be unavailable" << std::endl;
-			SetConsoleTextAttribute(console, COLOR_FATAL);
+			SetConsoleTextAttribute(console, (int) LevelColor::FATAL);
 			va_list args;
 			va_start(args, format);
 			vprintf(msg.c_str(), args);
