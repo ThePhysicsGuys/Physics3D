@@ -58,6 +58,7 @@ unsigned int createShader(const std::string& vertexShader, const std::string& fr
 }
 
 ShaderSource parseShader(const std::string& vertexPath, const std::string& fragmentPath) {
+	Log::info("Started parsing vertex shader: (%s), and fragment shader: %s)", vertexPath.c_str(), fragmentPath.c_str());
 	std::string line;
 	std::ifstream vertexFileStream(vertexPath);
 	std::ifstream fragmentFileStream(fragmentPath);
@@ -82,11 +83,12 @@ ShaderSource parseShader(const std::string& vertexPath, const std::string& fragm
 
 	vertexFileStream.close();
 	fragmentFileStream.close();
-
+	Log::info("Parsed vertex shader: (%s), and fragment shader: %s)", vertexPath.c_str(), fragmentPath.c_str());
 	return { vertexStringStream.str(), fragmentStringStream.str() };
 }
 
 ShaderSource parseShader(const std::string& path) {
+	Log::info("Started parsing fragment and vertex shader: (%s)", path.c_str());
 	enum class ShaderType {
 		NONE = -1,
 		VERTEX = 0,
@@ -103,16 +105,16 @@ ShaderSource parseShader(const std::string& path) {
 		Log::fatal("File could not be opened: %s", path.c_str());
 	}
 
+	int lineNumber = 0;
 	while (getline(fileStream, line)) {
-		if (line.find("#shader") != std::string::npos) {
-			if (line.find("vertex") != std::string::npos) {
-				type = ShaderType::VERTEX;
-			} else if (line.find("fragment") != std::string::npos) {
-				type = ShaderType::FRAGMENT;
-			}
+		lineNumber++;
+		if (line.find("#shader vertex") != std::string::npos) {
+			type = ShaderType::VERTEX;
+		} else if (line.find("#shader fragment") != std::string::npos) {
+			type = ShaderType::FRAGMENT;
 		} else {
 			if (type == ShaderType::NONE) {
-				Log::warn("Code in %s before the first #shader instruction will be ignored", path.c_str());
+				Log::warn("(line %d): Code in (%s) before the first #shader instruction will be ignored", lineNumber, path.c_str());
 				continue;
 			}
 			stringStream[(int) type] << line << "\n";
@@ -120,6 +122,7 @@ ShaderSource parseShader(const std::string& path) {
 	}
 
 	fileStream.close();
+	Log::info("Parsed fragment and vertex shader: (%s)", path.c_str());
 
 	return { stringStream[(int)ShaderType::VERTEX].str(), stringStream[(int)ShaderType::FRAGMENT].str() };
 }

@@ -44,14 +44,18 @@ int main(void) {
 
 	setupPhysics();
 
+	Log::info("Initializing screen");
 	screen.init();
+	Log::info("Initialized screen");
 
 	/* Loop until the user closes the window */
 	while (!screen.shouldClose()) {
 		screen.refresh();
 	}
 
+	Log::info("Closing screen");
 	screen.close();
+	Log::info("Closed screen");
 
 	stop(0);
 }

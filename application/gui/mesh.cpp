@@ -4,38 +4,71 @@
 #include <iostream>
 
 #include "mesh.h"
+#include "../util/Log.h";
 
 #include <vector>
 
-int* createElementBuffer(Triangle* triangles, const int triangleCount) {
+int* createElementBufferData(Triangle triangles[], int triangleCount) {
+	Log::debug("Creating element buffer");
 	std::vector<int> indices;
+	Log::debug("Reserving %d integers", triangleCount * 3);
+	indices.reserve(triangleCount * 3);
+	Log::debug("Reserved %d integers", triangleCount * 3);
 	for (int i = 0; i < triangleCount; i++) {
-		indices.push_back(triangleCount + i);
+		Log::debug("%d", i);
+		indices.push_back(triangles[i].firstIndex);
+		indices.push_back(triangles[i].secondIndex);
+		indices.push_back(triangles[i].thirdIndex);
 	}
+	Log::debug("Created element buffer");
 	return indices.data();
+}
+
+void createVertexArray(unsigned int &vao) {
+	Log::debug("Generating vao");
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+	Log::debug("Generated vao");
+
+}
+
+void createPositionBuffer(unsigned int& vbo, int size, double* buffer) {
+	Log::debug("Generating position vbo");
+	glGenBuffers(1, &vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ARRAY_BUFFER, size, buffer, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 0, 0);
+	Log::debug("Generated position vbo");
+}
+
+void createElementBuffer(unsigned int& vbo, int size, int* buffer) {
+	Log::debug("Generating index vbo");
+	glGenBuffers(1, &vbo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, buffer, GL_STATIC_DRAW);
+	Log::debug("Generated index vbo");
 }
 
 Mesh::Mesh(Shape shape) : vertexCount(shape.vertexCount), triangleCount(shape.triangleCount), renderMode(RenderMode::TRIANGLES) {
 	// Mesh vao
-	vao = 0;
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
+	createVertexArray(vao);
 
 	// Position VBO
-	posVbo = 0;
-	glGenBuffers(1, &posVbo);
-	glBindBuffer(GL_ARRAY_BUFFER, posVbo);
-	glBufferData(GL_ARRAY_BUFFER, vertexCount, reinterpret_cast<double*>(shape.vertices), GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 0, 0);
+	createPositionBuffer(posVbo, vertexCount, reinterpret_cast<double*>(shape.vertices));
 
 	// Indices VBO
-	indVbo = 0;
-	glGenBuffers(1, &indVbo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indVbo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, triangleCount * 3, createElementBuffer(shape.triangles, triangleCount), GL_STATIC_DRAW);
+	createElementBuffer(indVbo, triangleCount * 3, reinterpret_cast<int*>(shape.triangles));
+}
 
-	// Reset
-	glBindVertexArray(0);
+Mesh::Mesh(Vec3* vertices, int vertexCount, Triangle* triangles, int triangleCount) : vertexCount(vertexCount), triangleCount(triangleCount) , renderMode(RenderMode::TRIANGLES) {
+	// Mesh vao
+	createVertexArray(vao);
+
+	// Position VBO
+	createPositionBuffer(posVbo, vertexCount, reinterpret_cast<double*>(vertices));
+
+	// Indices VBO
+	createElementBuffer(indVbo, triangleCount * 3, reinterpret_cast<int*>(triangles));
 }
 
 void Mesh::render() {

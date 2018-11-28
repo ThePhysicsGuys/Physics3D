@@ -18,7 +18,7 @@ private:
 public:
 	Shape(int vertexCount, int triangleCount);
 
-	Shape(Vec3* vertexes, int vertexCount, Triangle* triangles, int triangleCount);
+	Shape(Vec3* vertices, int vertexCount, Triangle* triangles, int triangleCount);
 
 	~Shape();
 

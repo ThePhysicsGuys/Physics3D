@@ -66,13 +66,14 @@ Triangle triangles[triangleCount] = {
 	{ 0, 2, 3 }
 };
 
-Shape shape(vertices, vertexCount, triangles, triangleCount);
+Shape* shape = nullptr;
 Mesh* mesh = nullptr;
 
 void Screen::init() {
 	ShaderSource shaderSource = parseShader("../res/shaders/basic.shader");
 	shader = Shader(shaderSource);
-	mesh = &Mesh(shape);
+	// shape = &Shape(vertices, vertexCount, triangles, triangleCount);
+	mesh = &Mesh(vertices, vertexCount, triangles, triangleCount);
 }
 
 void Screen::makeCurrent() {
@@ -80,7 +81,6 @@ void Screen::makeCurrent() {
 }
 
 void Screen::refresh() {
-
 	/* Render here */
 	glClear(GL_COLOR_BUFFER_BIT);
 
@@ -95,6 +95,7 @@ void Screen::refresh() {
 
 void Screen::close() {
 	shader.close();
+	//mesh->close();
 	terminateGL();
 }
 

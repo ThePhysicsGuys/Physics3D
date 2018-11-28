@@ -20,6 +20,7 @@ public:
 	void render();
 	void close();
 	Mesh(Shape shape);
+	Mesh(Vec3* vertices, int vertexCount, Triangle* triangles, int triangleCount);
 	Mesh() : vertexCount(0), triangleCount(0) {}
 };
 
