@@ -7,12 +7,12 @@ struct Triangle {
 };
 
 class Shape {
-private:
-
-	Vec3 * vertices;
+public:
+	Vec3 * const vertices;
+	Triangle * const triangles;
 	const int vertexCount;
-	Triangle * triangles;
 	const int triangleCount;
+private:
 	int * const copyCount;
 
 public:
