@@ -29,6 +29,7 @@ int main(void) {
 	Log::init();
 
 	if (!initGLFW()) {
+		Log::error("GLFW not initialised");
 		std::cin.get();
 		return -1;
 	}
@@ -36,6 +37,7 @@ int main(void) {
 	Screen screen = Screen(800, 640, &world);
 
 	if (!initGLEW()) {
+		Log::error("GLEW not initialised");
 		std::cin.get();
 		return -1;
 	}

@@ -1,6 +1,8 @@
 #include "screen.h"
 #include "../../util/Log.h"
 #include "shader.h"
+#include "mesh.h"
+#include "../engine/geometry/shape.h"
 
 #include <stdlib.h>
 
@@ -47,11 +49,30 @@ Screen::Screen(int width, int height, World* w) {
 	makeCurrent();
 }
 
-Shader shader; 
+Shader shader;
+
+const unsigned int vertexCount = 4;
+const unsigned int triangleCount = 2;
+
+Vec3 vertices[vertexCount] = {
+	Vec3(-1, -1, 0),
+	Vec3(-1,  1, 0),
+	Vec3(1,  1, 0),
+	Vec3(1, -1, 0)
+};
+
+Triangle triangles[triangleCount] = {
+	{ 0, 1, 2 },
+	{ 0, 2, 3 }
+};
+
+Shape shape(vertices, vertexCount, triangles, triangleCount);
+Mesh* mesh = nullptr;
 
 void Screen::init() {
 	ShaderSource shaderSource = parseShader("../res/shaders/basic.shader");
 	shader = Shader(shaderSource);
+	mesh = &Mesh(shape);
 }
 
 void Screen::makeCurrent() {
@@ -62,6 +83,8 @@ void Screen::refresh() {
 
 	/* Render here */
 	glClear(GL_COLOR_BUFFER_BIT);
+
+	mesh->render();
 
 	/* Swap front and back buffers */
 	glfwSwapBuffers(this->window);

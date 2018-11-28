@@ -1,6 +1,5 @@
 #pragma once
 #include "../engine/geometry/shape.h"
-#include <vector>
 
 class Mesh {
 public:
