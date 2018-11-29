@@ -4,7 +4,7 @@
 #include <sstream>
 
 template<typename N>
-class Mat4Template {
+struct Mat4Template {
 public:
 	union {
 		struct {

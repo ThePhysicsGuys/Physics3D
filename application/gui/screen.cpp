@@ -1,7 +1,8 @@
 #include "screen.h"
 #include "../../util/Log.h"
 #include "shader.h"
-#include "mesh.h"
+#include "indexedMesh.h"
+#include "Mesh.h"
 #include "../engine/geometry/shape.h"
 
 #include <stdlib.h>
@@ -51,29 +52,26 @@ Screen::Screen(int width, int height, World* w) {
 
 Shader shader;
 
-const unsigned int vertexCount = 4;
+const unsigned int vertexCount = 6;
 const unsigned int triangleCount = 2;
 
-Vec3 vertices[vertexCount] = {
-	Vec3(-1, -1, 0),
-	Vec3(-1,  1, 0),
-	Vec3(1,  1, 0),
-	Vec3(1, -1, 0)
+double vertices[vertexCount] = {
+	-0.5, -0.5,
+	-0.5,  0.5,
+	0.5,  0.5
 };
 
-Triangle triangles[triangleCount] = {
-	{ 0, 1, 2 },
-	{ 0, 2, 3 }
+unsigned int triangles[triangleCount * 3] = {
+	 0, 1, 2,
+	 0, 2, 3 
 };
 
-Shape* shape = nullptr;
 Mesh* mesh = nullptr;
 
 void Screen::init() {
 	ShaderSource shaderSource = parseShader("../res/shaders/basic.shader");
 	shader = Shader(shaderSource);
-	// shape = &Shape(vertices, vertexCount, triangles, triangleCount);
-	mesh = &Mesh(vertices, vertexCount, triangles, triangleCount);
+	mesh = new Mesh(vertices, vertexCount);
 }
 
 void Screen::makeCurrent() {
@@ -84,6 +82,10 @@ void Screen::refresh() {
 	/* Render here */
 	glClear(GL_COLOR_BUFFER_BIT);
 
+	/* Use the default shader */
+	shader.bind();
+
+	/* Render the mesh */
 	mesh->render();
 
 	/* Swap front and back buffers */
@@ -95,7 +97,7 @@ void Screen::refresh() {
 
 void Screen::close() {
 	shader.close();
-	//mesh->close();
+	mesh->close();
 	terminateGL();
 }
 
