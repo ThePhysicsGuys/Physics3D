@@ -139,9 +139,9 @@ public:
 	}
 
 	Mat4Template perspective(float fov, float aspect, float zNear, float zFar) {
-		N t = tan(fov / 0.5);
-		N t00 = 1.0 / (t * aspect);
-		N t11 = 1.0 / t;
+		N t = tan(fov / 2);
+		N t00 = 1 / (t * aspect);
+		N t11 = 1 / t;
 		N t22 = (zFar + zNear) / (zNear - zFar);
 		N t32 = (zFar + zFar) * zNear / (zNear - zFar);
 		N r00 = m00 * t00;
@@ -163,7 +163,7 @@ public:
 		return Mat4Template(r00, r01, r02, r03, r10, r11, r12, r13, r20, r21, r22, r23, r30, r31, r32, r33);
 	}
 
-	Mat4Template operator+(const Mat4Template& other) {
+	Mat4Template operator+(const Mat4Template& other) const {
 		return Mat4Template(
 			m00 + other.m00,
 			m01 + other.m01,
@@ -184,7 +184,7 @@ public:
 		);
 	}
 
-	Mat4Template operator-(const Mat4Template& other) {
+	Mat4Template operator-(const Mat4Template& other) const {
 		return Mat4Template(
 			m00 - other.m00,
 			m01 - other.m01,
@@ -205,11 +205,15 @@ public:
 		);
 	}
 
-	Mat4Template operator-() {
+	Mat4Template operator-() const {
 		return Mat4Template(-m00, -m01, -m02, -m03, -m10, -m11, -m12, -m13, -m20, -m21, -m22, -m23, -m30, -m31, -m32, -m33);
 	}
 
-	Mat4Template operator*(const Mat4Template& other) {
+	Mat4Template operator~() const {
+		return inverse();
+	}
+
+	Mat4Template operator*(const Mat4Template& other) const {
 		N r00 = m00 * other.m00 + m10 * other.m01 + m20 * other.m02 + m30 * other.m03;
 		N r01 = m01 * other.m00 + m11 * other.m01 + m21 * other.m02 + m31 * other.m03;
 		N r02 = m02 * other.m00 + m12 * other.m01 + m22 * other.m02 + m32 * other.m03;
@@ -230,7 +234,7 @@ public:
 		return Mat4Template(r00, r01, r02, r03, r10, r11, r12, r13, r20, r21, r22, r23, r30, r31, r32, r33);
 	}
 
-	friend std::ostream& operator<<(std::ostream& os, const Mat4Template& matrix) {
+	friend std::ostream& operator<<(std::ostream& os, const Mat4Template& matrix) const {
 		os << "Mat4Template(";
 		for (int i = 0; i < 15; i++) {
 			os << matrix.m[i];
