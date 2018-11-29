@@ -4,9 +4,6 @@
 #include <cstring>
 
 
-Shape::Shape(int vertexCount, int triangleCount) : vertexCount(vertexCount), triangleCount(triangleCount), copyCount(new int(0)), 
-		vertices(new Vec3[vertexCount]), triangles(new Triangle[triangleCount]) {}
-
 Shape::Shape(Vec3 * vertices, int vertexCount, Triangle * triangles, int triangleCount) : vertexCount(vertexCount), triangleCount(triangleCount), copyCount(new int(0)), 
 		vertices(new Vec3[vertexCount]), triangles(new Triangle[triangleCount]) {
 	std::memcpy(this->vertices, vertices, vertexCount * sizeof(Vec3));
