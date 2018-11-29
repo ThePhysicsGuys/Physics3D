@@ -49,8 +49,6 @@ int main(void) {
 }
 
 void init() {
-	Log::init();
-
 	if (!initGLFW()) {
 		Log::error("GLFW not initialised");
 		std::cin.get();
