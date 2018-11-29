@@ -1,19 +1,20 @@
 #pragma once
 
 #include "vec3.h"
+#include "mat3.h"
 
-struct RotMat3 {
+/*struct RotMat3 {
 	Vec3 operator*(const Vec3& v) const { return Vec3(); };
 	RotMat3 operator*(const RotMat3& m) const { return RotMat3(); }
 	RotMat3 operator~() const { return RotMat3(); };
-};
+};*/
 
 struct CFrame {
 public:
 	Vec3 position;
-	RotMat3 rotation;
+	Mat3 rotation;
 
-	CFrame(Vec3 position, RotMat3 rotation) : position(position), rotation(rotation) {};
+	CFrame(Vec3 position, Mat3 rotation) : position(position), rotation(rotation) {};
 
 	Vec3 localToGlobal(Vec3 lVec) const {
 		return rotation * lVec + position;
