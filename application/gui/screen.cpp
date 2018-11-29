@@ -52,18 +52,12 @@ Screen::Screen(int width, int height, World* w) {
 
 Shader shader;
 
-const unsigned int vertexCount = 6;
-const unsigned int triangleCount = 2;
+const unsigned int vertexCount = 9;
 
 double vertices[vertexCount] = {
-	-0.5, -0.5,
-	-0.5,  0.5,
-	0.5,  0.5
-};
-
-unsigned int triangles[triangleCount * 3] = {
-	 0, 1, 2,
-	 0, 2, 3 
+	-0.5, -0.5, 0,
+	-0.5,  0.5, 0,
+	0.5,  0.5, 0
 };
 
 Mesh* mesh = nullptr;

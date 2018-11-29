@@ -46,7 +46,7 @@ public:
 
 	Mat3Template inverse() {
 		N normdet = det();
-		invdet = 1 / normdet;
+		N invdet = 1 / normdet;
 		N r00 = (m11 * m22 - m21 * m12) * invdet;
 		N r01 = (m21 * m02 - m01 * m22) * invdet;
 		N r02 = (m01 * m12 - m11 * m02) * invdet;
@@ -57,7 +57,7 @@ public:
 		N r21 = (m20 * m01 - m00 * m21) * invdet;
 		N r22 = (m00 * m11 - m10 * m01) * invdet;
 		
-		return Mat3Template(m00, m01, m02, m10, m11, m12, m20, m21, m22)
+		return Mat3Template(m00, m01, m02, m10, m11, m12, m20, m21, m22);
 	}
 
 	Mat3Template operator~() const {
@@ -87,7 +87,7 @@ public:
 		N r21 = m01 * rm20 + m11 * rm21 + m21 * rm22;
 		N r22 = m02 * rm20 + m12 * rm21 + m22 * rm22;
 
-		return Mat3Template(r00, r01, r02, r10, r11, r12, r20, r21, r22)
+		return Mat3Template(r00, r01, r02, r10, r11, r12, r20, r21, r22);
 	}
 
 	Mat3Template transpose() {
@@ -148,7 +148,7 @@ public:
 		return Mat3Template(r00, r01, r02, r10, r11, r12, r20, r21, r22);
 	}
 
-	friend std::ostream& operator<<(std::ostream& os, const Mat3Template& matrix) const {
+	friend std::ostream& operator<<(std::ostream& os, const Mat3Template& matrix) {
 		os << "Mat3Template(";
 
 		for (int i = 0; i < 8; i++) {
@@ -166,7 +166,7 @@ public:
 
 		for (int i = 0; i < 8; i++) {
 			ss << m[i];
-			ss << (((i + 1) % 4 == 0) ? "; " : ", ");
+			ss << (((i + 1) % 3 == 0) ? "; " : ", ");
 		}
 		ss << m[8] << ")";
 

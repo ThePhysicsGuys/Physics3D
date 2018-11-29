@@ -7,7 +7,7 @@ void createPositionBuffer(unsigned int& vbo, int size, double* positions) {
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, size * sizeof(double), positions, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_DOUBLE, GL_FALSE, 2 * sizeof(double), 0);
+	glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 3 * sizeof(double), 0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	Log::debug("Generated position buffer");
 }
