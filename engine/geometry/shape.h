@@ -3,7 +3,7 @@
 #include "../../util/math/vec3.h"
 
 struct Triangle {
-	int firstIndex, secondIndex, thirdIndex;
+	unsigned int firstIndex, secondIndex, thirdIndex;
 };
 
 class Shape {
@@ -26,6 +26,6 @@ public:
 
 	
 	void setVertex(int i, Vec3 vertex) { vertices[i] = vertex; };
-	void setTriangle(int i, int v1, int v2, int v3) { triangles[i] = { v1, v2, v3 }; };
+	void setTriangle(int index, unsigned int v1, unsigned int v2, unsigned int v3) { triangles[index] = { v1, v2, v3 }; };
 
 };

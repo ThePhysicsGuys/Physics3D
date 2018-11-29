@@ -15,6 +15,7 @@ private:
 	GLFWwindow* window;
 	World* w;
 public:
+	Screen() {};
 	Screen(int width, int height, World* world);
 
 	bool shouldClose();

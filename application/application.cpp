@@ -13,40 +13,28 @@
 
 #include "tickerThread.h"
 
+#include "../engine/geometry/shape.h"
 
 #define TICKS_PER_SECOND 500.0
 
 #define TICK_SKIP_TIME std::chrono::milliseconds(3000)
 
+// Test shape
+Vec3 testShapeVecs[]{ Vec3(0.0, 0.0, 0.0), Vec3(1.0, 0.0, 0.0), Vec3(0.0, 1.0, 0.0), Vec3(0.0, 0.0, 1.0) };
+Triangle testShapeTriangles[]{ {1,2,3}, {1,3,4}, {1, 4, 2}, {2, 3, 4} };
+Shape testShape(testShapeVecs, 4, testShapeTriangles, 4);
 
-World world = World();
+Screen screen;
+World world;
 
 TickerThread physicsThread;
 
+void init();
 void setupPhysics();
 
+
 int main(void) {
-	Log::init();
-
-	if (!initGLFW()) {
-		Log::error("GLFW not initialised");
-		std::cin.get();
-		return -1;
-	}
-
-	Screen screen = Screen(800, 640, &world);
-
-	if (!initGLEW()) {
-		Log::error("GLEW not initialised");
-		std::cin.get();
-		return -1;
-	}
-
-	setupPhysics();
-
-	Log::info("Initializing screen");
-	screen.init();
-	Log::info("Initialized screen");
+	init();
 
 	/* Loop until the user closes the window */
 	while (!screen.shouldClose()) {
@@ -60,6 +48,30 @@ int main(void) {
 	stop(0);
 }
 
+void init() {
+	Log::init();
+
+	if (!initGLFW()) {
+		Log::error("GLFW not initialised");
+		std::cin.get();
+		stop(-1);
+	}
+
+	screen = Screen(800, 640, &world);
+
+	if (!initGLEW()) {
+		Log::error("GLEW not initialised");
+		std::cin.get();
+		stop(-1);
+	}
+	
+	setupPhysics();
+
+	Log::info("Initializing screen");
+	screen.init();
+	Log::info("Initialized screen");
+
+}
 
 void stop(int returnCode) {
 	physicsThread.stop();
