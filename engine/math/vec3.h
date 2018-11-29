@@ -41,7 +41,9 @@ public:
 	}
 
 	Vec3Template operator%(const Vec3Template& other) const {
-		return Vec3Template(this->y*other.z - this->z*other.y, this->z*other.x - this->x*other.z, this->x*other.y - this->y*other.x);
+		return Vec3Template(this->y*other.z - this->z*other.y, 
+							this->z*other.x - this->x*other.z, 
+							this->x*other.y - this->y*other.x);
 	}
 
 	N length() const {

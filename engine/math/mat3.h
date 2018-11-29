@@ -126,7 +126,7 @@ public:
 		return Mat3Template(-m00, -m01, -m02, -m10, -m11, -m12, -m20, -m21, -m22);
 	}
 
-	Vec3Template operator*(const Vec3Template& other) const {
+	Vec3Template<N> operator*(const Vec3Template<N>& other) const {
 		return Vec3(
 			m00 * other.x + m01 * other.y + m02 * other.z, 
 			m10 * other.x + m11 * other.y + m12 * other.z, 
@@ -153,7 +153,7 @@ public:
 
 		for (int i = 0; i < 8; i++) {
 			os << matrix.m[i];
-			os << (((i + 1) % 4 == 0) ? "; " : ", ");
+			os << (((i + 1) % 3 == 0) ? "; " : ", ");
 		}
 		os << matrix.m[8] << ")";
 
@@ -174,11 +174,25 @@ public:
 	}
 };
 
+
 typedef Mat3Template<double>	Mat3;
 typedef Mat3Template<float>		Mat3f;
 typedef Mat3Template<long long>	Mat3l;
 
+Mat3 fromEulerAngles(double alpha, double beta, double gamma) {
+	double sinA = sin(alpha), cosA = cos(alpha);
+	double sinB = sin(beta), cosB = cos(beta);
+	double sinC = sin(gamma), cosC = cos(gamma);
+	return Mat3(
+		cosC*cosB - sinC*sinA*sinB, -sinC*cosA, cosC*sinB + sinC*sinA*cosB,
+		sinC*cosB + cosC*sinA*sinB, cosC*cosA, sinC*sinB - cosC*sinA*cosB,
+		-cosA*sinB, sinA, cosA*cosB
+	);
+}
+
 namespace Mat3TemplateUtil {
 	Mat3 ZERO = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	Mat3 IDENTITY = { 1, 0, 0, 0, 1, 0, 0, 0, 1 };
+
+	
 };
