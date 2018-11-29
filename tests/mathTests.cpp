@@ -3,6 +3,8 @@
 #include "testUtils.h"
 #include <iostream>
 #include "../engine/math/vec3.h"
+#include "../engine/math/mat3.h"
+#include "../engine/math/cframe.h"
 #include "../util/Log.h"
 
 TEST_CASE("Vec3 computation", "[MathTests]") {
@@ -32,4 +34,14 @@ TEST_CASE("Vec3 computation", "[MathTests]") {
 	REQUIRE_ZERO(cr * v2);
 
 	REQUIRE_VEC_ZERO((cr % cr));
+}
+
+TEST_CASE("Mat3 computation", "[MathTests]") {
+	Mat3 mz = fromEulerAngles(0.3, 0.0, 0.0);
+	Mat3 mx = fromEulerAngles(0.0, 0.5, 0.0);
+	Mat3 my = fromEulerAngles(0.0, 0.0, 0.7);
+
+	std::cout << "mz: " << mz << "\n";
+	std::cout << "mx: " << mx << "\n";
+	std::cout << "my: " << my << "\n";
 }
