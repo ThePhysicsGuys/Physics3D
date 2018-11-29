@@ -2,16 +2,16 @@
 
 #include <math.h>
 
-template<typename Num>
+template<typename N>
 struct Vec3Template {
 public:
-	Num x;
-	Num y;
-	Num z;
+	N x;
+	N y;
+	N z;
 
 	
 	Vec3Template() : x(0), y(0), z(0) {}
-	Vec3Template(Num x, Num y, Num z) : x(x), y(y), z(z) {};
+	Vec3Template(N x, N y, N z) : x(x), y(y), z(z) {};
 	Vec3Template(const Vec3Template& other) : x(other.x), y(other.y), z(other.z) {};
 	~Vec3Template() {};
 
@@ -28,15 +28,15 @@ public:
 		return Vec3Template(-x, -y, -z);
 	}
 
-	Vec3Template operator*(const Num& d) const {
+	Vec3Template operator*(const N& d) const {
 		return Vec3Template(x*d, y*d, z*d);
 	}
 
-	Vec3Template operator/(const Num& d) const {
+	Vec3Template operator/(const N& d) const {
 		return Vec3Template(x / d, y / d, z / d);
 	}
 
-	Num operator*(const Vec3Template& other) const {
+	N operator*(const Vec3Template& other) const {
 		return this->x*other.x + this->y*other.y + this->z*other.z;
 	}
 
@@ -44,33 +44,33 @@ public:
 		return Vec3Template(this->y*other.z - this->z*other.y, this->z*other.x - this->x*other.z, this->x*other.y - this->y*other.x);
 	}
 
-	Num length() const {
+	N length() const {
 		return sqrt(lengthSquared());
 	}
 
-	Num lengthSquared() const {
+	N lengthSquared() const {
 		return x*x + y*y + z*z;
 	}
 
-	Vec3Template withLength(Num newLength) const {
-		Num f = newLength / this->length();
+	Vec3Template withLength(N newLength) const {
+		N f = newLength / this->length();
 		return Vec3Template(x*f, y*f, z*f);
 	}
 
-	Vec3Template maxLength(Num maxLength) const {
-		Num lengthSquared = this->lengthSquared();
+	Vec3Template maxLength(N maxLength) const {
+		N lengthSquared = this->lengthSquared();
 		if (maxLength*maxLength < lengthSquared) {
-			Num f = maxLength / length();
+			N f = maxLength / length();
 			return Vec3Template(x*f, y*f, z*f);
 		}
 		else
 			return *this;
 	}
 
-	Vec3Template minLength(Num maxLength) const {
-		Num lengthSquared = this->lengthSquared();
+	Vec3Template minLength(N maxLength) const {
+		N lengthSquared = this->lengthSquared();
 		if (maxLength*maxLength > lengthSquared) {
-			Num f = maxLength / length();
+			N f = maxLength / length();
 			return Vec3Template(x*f, y*f, z*f);
 		}
 		else
@@ -86,7 +86,7 @@ public:
 	* @param v the result of this->dot(someVec)
 	* @return this vector times (v/lengthSquared())
 	*/
-	Vec3Template reProject(Num v) const {
+	Vec3Template reProject(N v) const {
 		return *this * (v / lengthSquared());
 	}
 
@@ -103,11 +103,11 @@ public:
 		return acos(this->normalize() * (other.normalize()));
 	}
 
-	bool isLongerThan(Num length) const {
+	bool isLongerThan(N length) const {
 		return lengthSquared() > length*length;
 	}
 
-	bool isShorterThan(Num length) const {
+	bool isShorterThan(N length) const {
 		return lengthSquared() < length*length;
 	}
 
@@ -116,7 +116,7 @@ public:
 	* @param point
 	* @return the distance
 	*/
-	Num pointToLineDistance(const Vec3Template point) const {
+	N pointToLineDistance(const Vec3Template point) const {
 		return (point % (*this)).length() / length();
 	}
 
@@ -125,8 +125,8 @@ public:
 	* @param point
 	* @return the square of the distance
 	*/
-	Num pointToLineDistanceSquared(const Vec3Template point) const {
-		Num crossProd = (point % *this).length();
+	N pointToLineDistanceSquared(const Vec3Template point) const {
+		N crossProd = (point % *this).length();
 		return crossProd*crossProd / lengthSquared();
 	}
 
@@ -136,12 +136,10 @@ public:
 };
 
 typedef Vec3Template<double>	Vec3;
-typedef Vec3Template<float>		Vec3F;
-typedef Vec3Template<long long>	Vec3L;
+typedef Vec3Template<float>		Vec3f;
+typedef Vec3Template<long long>	Vec3l;
 
-
-
-namespace Vec3Util{
+namespace Vec3Util {
 	const Vec3 ZERO(0.0, 0.0, 0.0);
 	const Vec3 UNITX(1.0, 0.0, 0.0);
 	const Vec3 UNITY(0.0, 1.0, 0.0);
