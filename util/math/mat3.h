@@ -7,7 +7,7 @@
 #include "vec3.h"
 
 template<typename N>
-class Mat3Template {
+struct Mat3Template {
 public:
 	union {
 		struct {
@@ -58,6 +58,10 @@ public:
 		N r22 = (m00 * m11 - m10 * m01) * invdet;
 		
 		return Mat3Template(m00, m01, m02, m10, m11, m12, m20, m21, m22)
+	}
+
+	Mat3Template operator~() const {
+		return inverse();
 	}
 
 	Mat3Template rotate(N angle, N x, N y, N z) {
@@ -168,7 +172,6 @@ public:
 
 		return ss.str();
 	}
-
 };
 
 typedef Mat3Template<double>	Mat3;
