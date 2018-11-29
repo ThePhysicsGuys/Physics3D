@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../util/math/vec3.h"
+#include "../math/vec3.h"
 
 struct Triangle {
 	unsigned int firstIndex, secondIndex, thirdIndex;

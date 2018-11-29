@@ -3,12 +3,6 @@
 #include "vec3.h"
 #include "mat3.h"
 
-/*struct RotMat3 {
-	Vec3 operator*(const Vec3& v) const { return Vec3(); };
-	RotMat3 operator*(const RotMat3& m) const { return RotMat3(); }
-	RotMat3 operator~() const { return RotMat3(); };
-};*/
-
 struct CFrame {
 public:
 	Vec3 position;
