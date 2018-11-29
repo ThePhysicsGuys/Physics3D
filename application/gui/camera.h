@@ -1,6 +1,7 @@
 #pragma once
-#include "../../util/math/vec3.h"
-#include "../../util/math/rot3.h"
+
+#include "../../engine/math/vec3.h"
+#include "../../engine/math/rot3.h"
 
 class Camera {
 public:

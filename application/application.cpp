@@ -37,6 +37,7 @@ int main(void) {
 	init();
 
 	/* Loop until the user closes the window */
+	Log::info("Started rendering");
 	while (!screen.shouldClose()) {
 		screen.refresh();
 	}
