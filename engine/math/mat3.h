@@ -174,7 +174,6 @@ public:
 	}
 };
 
-
 typedef Mat3Template<double>	Mat3;
 typedef Mat3Template<float>		Mat3f;
 typedef Mat3Template<long long>	Mat3l;
@@ -190,9 +189,7 @@ Mat3 fromEulerAngles(double alpha, double beta, double gamma) {
 	);
 }
 
-namespace Mat3TemplateUtil {
+namespace Mat3Util {
 	Mat3 ZERO = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	Mat3 IDENTITY = { 1, 0, 0, 0, 1, 0, 0, 0, 1 };
-
-	
 };

@@ -234,7 +234,7 @@ public:
 		return Mat4Template(r00, r01, r02, r03, r10, r11, r12, r13, r20, r21, r22, r23, r30, r31, r32, r33);
 	}
 
-	friend std::ostream& operator<<(std::ostream& os, const Mat4Template& matrix) const {
+	friend std::ostream& operator<<(std::ostream& os, const Mat4Template& matrix) {
 		os << "Mat4Template(";
 		for (int i = 0; i < 15; i++) {
 			os << matrix.m[i];
@@ -263,7 +263,7 @@ typedef Mat4Template<double>	Mat4;
 typedef Mat4Template<float>		Mat4f;
 typedef Mat4Template<long long>	Mat4l;
 
-namespace Mat4TemplateUtil {
+namespace Mat4Util {
 	Mat4 ZERO = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	Mat4 IDENTITY = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
 };
