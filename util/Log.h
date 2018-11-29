@@ -7,7 +7,6 @@ namespace Log {
 		ERROR = 2,
 		FATAL = 3
 	};
-	void init();
 	void debug(const char* format, ...);
 	void info(const char* format, ...);
 	void warn(const char* format, ...);

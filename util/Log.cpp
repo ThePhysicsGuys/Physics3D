@@ -7,6 +7,9 @@
 
 namespace Log {
 
+	void init();
+
+
 	enum class LevelColor {
 		DEBUG = 10,
 		INFO = 11,
@@ -15,14 +18,8 @@ namespace Log {
 		FATAL = 192
 	};
 
-	HANDLE console;
-	Level logLevel;
-
-	void init() {
-		console = GetStdHandle(STD_OUTPUT_HANDLE);
-		setLogLevel(Level::INFO);
-		info("Initialized log");
-	}
+	HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
+	Level logLevel = Level::INFO;
 
 	void setLogLevel(Level level) {
 		logLevel = level;
