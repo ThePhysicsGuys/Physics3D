@@ -29,6 +29,8 @@ public:
 		N m[16];
 	};
 
+	Mat4Template() : m00(1), m01(0), m02(0), m03(0), m10(0), m11(1), m12(0), m13(0), m20(0), m21(0), m22(1), m23(0), m30(0), m31(0), m32(0), m33(1) {};
+
 	Mat4Template(N m00, N m01, N m02, N m03, N m10, N m11, N m12, N m13, N m20, N m21, N m22, N m23, N m30, N m31, N m32, N m33) :
 		m00(m00), m01(m01), m02(m02), m03(m03), m10(m10), m11(m11), m12(m12), m13(m13), m20(m20), m21(m21), m22(m22), m23(m23), m30(m30), m31(m31), m32(m32), m33(m33) {};
 
@@ -138,7 +140,7 @@ public:
 		return Mat4Template(r00, r01, r02, r03, r10, r11, r12, r13, r20, r21, r22, r23, m30, m31, m32, m33);
 	}
 
-	Mat4Template perspective(float fov, float aspect, float zNear, float zFar) {
+	Mat4Template perspective(N fov, N aspect, N zNear, N zFar) {
 		N t = tan(fov / 2);
 		N t00 = 1 / (t * aspect);
 		N t11 = 1 / t;

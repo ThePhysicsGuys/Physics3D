@@ -4,6 +4,7 @@
 #include <string>
 #include <map>
 
+#include "../engine/math/vec2.h"
 #include "../engine/math/mat3.h"
 #include "../engine/math/mat4.h"
 
@@ -24,7 +25,8 @@ public:
 	void setUniform(std::string uniform, int value);
 	void setUniform(std::string uniform, float value);
 	void setUniform(std::string uniform, double value);
-	void setUniform(std::string uniform, Vec3 value);
+	void setUniform(std::string uniform, Vec2 value);
+	void setUniform(std::string unfiorm, Vec3 value);
 	void setUniform(std::string uniform, Mat4 value);
 	void bind();
 	void unbind();
