@@ -1,8 +1,8 @@
 #include "screen.h"
-#include "../../util/Log.h"
+#include "../../util/log.h"
 #include "shader.h"
 #include "indexedMesh.h"
-#include "Mesh.h"
+#include "mesh.h"
 #include "../engine/geometry/shape.h"
 
 #include <stdlib.h>

@@ -3,7 +3,7 @@
 #include <chrono>
 #include <thread>
 
-#include "../util/Log.h"
+#include "../util/log.h"
 
 using namespace std::chrono;
 

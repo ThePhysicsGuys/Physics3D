@@ -4,7 +4,6 @@
 #include <string>
 #include <map>
 
-#include "../engine/math/vec3.h"
 #include "../engine/math/mat3.h"
 #include "../engine/math/mat4.h"
 

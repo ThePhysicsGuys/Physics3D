@@ -9,7 +9,7 @@
 
 #include "gui/screen.h"
 
-#include "../util/Log.h"
+#include "../util/log.h"
 
 #include "tickerThread.h"
 

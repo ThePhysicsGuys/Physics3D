@@ -1,6 +1,6 @@
 #include "resourceManager.h"
 
-#include <Windows.h>
+#include <windows.h>
 #include "resource.h"
 
 struct ResourceStruct {

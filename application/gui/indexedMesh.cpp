@@ -1,6 +1,6 @@
 #include "indexedMesh.h"
 #include "../../engine/geometry/shape.h"
-#include "../util/Log.h"
+#include "../util/log.h"
 
 #include <vector>
 

@@ -1,8 +1,8 @@
 ﻿#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include "Shader.h"
-#include "../../util/Log.h"
+#include "shader.h"
+#include "../../util/log.h"
 
 #include <fstream>
 #include <sstream>

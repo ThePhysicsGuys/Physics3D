@@ -2,13 +2,9 @@
 #include <windows.h>
 #include <string>
 #undef ERROR
-#include "Log.h"
-
+#include "log.h"
 
 namespace Log {
-
-	void init();
-
 
 	enum class LevelColor {
 		DEBUG = 10,

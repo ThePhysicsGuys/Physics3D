@@ -263,7 +263,7 @@ typedef Mat4Template<double>	Mat4;
 typedef Mat4Template<float>		Mat4f;
 typedef Mat4Template<long long>	Mat4l;
 
-namespace Mat4Util {
-	Mat4 ZERO = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-	Mat4 IDENTITY = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
-};
+//namespace Mat4Util {
+//	Mat4 ZERO = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+//	Mat4 IDENTITY = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
+//};
