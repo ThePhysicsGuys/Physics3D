@@ -17,7 +17,7 @@ private:
 
 public:
 	Shape();
-	Shape::Shape(Vec3 * vertices, Triangle * triangles, int vertexCount, int triangleCount);
+	Shape(Vec3 * vertices, Triangle * triangles, int vertexCount, int triangleCount);
 
 	friend Vec3* getVertPointer(Shape& s) { return s.vertices; }
 	friend Triangle* getTriPointer(Shape& s) { return s.triangles; }
