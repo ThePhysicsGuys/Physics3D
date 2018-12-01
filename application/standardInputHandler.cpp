@@ -1,5 +1,4 @@
 #include "standardInputHandler.h"
-#include "../util/Log.h"
 
 StandardInputHandler::StandardInputHandler(GLFWwindow* window, Camera* camera) : InputHandler(window) {
 	this->camera = camera;
@@ -36,10 +35,6 @@ void StandardInputHandler::windowResize(int width, int height) {
 // void StandardInputHandler::mouseDown(int button, int mods) {};
 // void StandardInputHandler::mouseUp(int button, int mods) {};
 // void StandardInputHandler::mouseMove(double x, double y) {};
-void StandardInputHandler::mouseEnter() {
-	Log::debug("in");
-};
-void StandardInputHandler::mouseExit() {
-	Log::debug("out");
-};
+// void StandardInputHandler::mouseEnter() {};
+// void StandardInputHandler::mouseExit() {};
 // void StandardInputHandler::scroll(double xOffset, double yOffset) {};

@@ -17,7 +17,7 @@ public:
 	// void mouseDown(int button, int mods) override;
 	// void mouseUp(int button, int mods) override;
 	// void mouseMove(double x, double y) override;
-	void mouseEnter() override;
-	void mouseExit() override;
+	// void mouseEnter() override;
+	// void mouseExit() override;
 	// void scroll(double xOffset, double yOffset) override;
 };
