@@ -1,29 +1,28 @@
 #pragma once
+
+template<typename N>
+struct Mat4Template;
+
+typedef Mat4Template<double>	Mat4;
+typedef Mat4Template<float>		Mat4f;
+typedef Mat4Template<long long>	Mat4l;
+
 #include <cmath>
 #include <string>
 #include <sstream>
+
+#include "vec3.h"
+#include "cframe.h"
 
 template<typename N>
 struct Mat4Template {
 public:
 	union {
 		struct {
-			N m00;
-			N m01;
-			N m02;
-			N m03;
-			N m10;
-			N m11;
-			N m12;
-			N m13;
-			N m20;
-			N m21;
-			N m22;
-			N m23;
-			N m30;
-			N m31;
-			N m32;
-			N m33;
+			N m00, m01, m02, m03;
+			N m10, m11, m12, m13;
+			N m20, m21, m22, m23;
+			N m30, m31, m32, m33;
 		};
 
 		N m[16];
@@ -46,7 +45,7 @@ public:
 		}
 	}
 
-	N det() {
+	N det() const {
 		N a = m00 * m11 - m01 * m10;
 		N b = m00 * m12 - m02 * m10;
 		N c = m00 * m13 - m03 * m10;
@@ -64,7 +63,7 @@ public:
 		return det;
 	}
 
-	Mat4Template inverse() {
+	Mat4Template inverse() const {
 		N a = m00 * m11 - m01 * m10;
 		N b = m00 * m12 - m02 * m10;
 		N c = m00 * m13 - m03 * m10;
@@ -101,7 +100,7 @@ public:
 		return Mat4Template(r00, r01, r02, r03, r10, r11, r12, r13, r20, r21, r22, r23, r30, r31, r32, r33);
 	}
 
-	Mat4Template translate(N x, N y, N z) {
+	Mat4Template translate(N x, N y, N z) const {
 		N r30 = m00 * x +m10 * y + m20 * z + m30;
 		N r31 = m01 * x +m11 * y + m21 * z + m31;
 		N r32 = m02 * x +m12 * y + m22 * z + m32;
@@ -110,7 +109,7 @@ public:
 		return Mat4Template(m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, r30, r31, r32, r33);
 	}
 
-	Mat4Template rotate(N angle, N x, N y, N z) {
+	Mat4Template rotate(N angle, N x, N y, N z) const {
 		N s = sin(angle);
 		N c = cos(angle);
 		N C = (1.0 - c);
@@ -140,7 +139,7 @@ public:
 		return Mat4Template(r00, r01, r02, r03, r10, r11, r12, r13, r20, r21, r22, r23, m30, m31, m32, m33);
 	}
 
-	Mat4Template perspective(N fov, N aspect, N zNear, N zFar) {
+	Mat4Template perspective(N fov, N aspect, N zNear, N zFar) const {
 		N t = tan(fov / 2);
 		N t00 = 1 / (t * aspect);
 		N t11 = 1 / t;
@@ -167,48 +166,27 @@ public:
 
 	Mat4Template operator+(const Mat4Template& other) const {
 		return Mat4Template(
-			m00 + other.m00,
-			m01 + other.m01,
-			m02 + other.m02,
-			m03 + other.m03,
-			m10 + other.m10,
-			m11 + other.m11,
-			m12 + other.m12,
-			m13 + other.m13,
-			m20 + other.m20,
-			m21 + other.m21,
-			m22 + other.m22,
-			m23 + other.m23,
-			m30 + other.m30,
-			m31 + other.m31,
-			m32 + other.m32,
-			m33 + other.m33
+			m00 + other.m00, m01 + other.m01, m02 + other.m02, m03 + other.m03,
+			m10 + other.m10, m11 + other.m11, m12 + other.m12, m13 + other.m13,
+			m20 + other.m20, m21 + other.m21, m22 + other.m22, m23 + other.m23,
+			m30 + other.m30, m31 + other.m31, m32 + other.m32, m33 + other.m33
 		);
 	}
 
 	Mat4Template operator-(const Mat4Template& other) const {
 		return Mat4Template(
-			m00 - other.m00,
-			m01 - other.m01,
-			m02 - other.m02,
-			m03 - other.m03,
-			m10 - other.m10,
-			m11 - other.m11,
-			m12 - other.m12,
-			m13 - other.m13,
-			m20 - other.m20,
-			m21 - other.m21,
-			m22 - other.m22,
-			m23 - other.m23,
-			m30 - other.m30,
-			m31 - other.m31,
-			m32 - other.m32,
-			m33 - other.m33
+			m00 - other.m00, m01 - other.m01, m02 - other.m02, m03 - other.m03,
+			m10 - other.m10, m11 - other.m11, m12 - other.m12, m13 - other.m13,
+			m20 - other.m20, m21 - other.m21, m22 - other.m22, m23 - other.m23,
+			m30 - other.m30, m31 - other.m31, m32 - other.m32, m33 - other.m33
 		);
 	}
 
 	Mat4Template operator-() const {
-		return Mat4Template(-m00, -m01, -m02, -m03, -m10, -m11, -m12, -m13, -m20, -m21, -m22, -m23, -m30, -m31, -m32, -m33);
+		return Mat4Template(-m00, -m01, -m02, -m03, 
+							-m10, -m11, -m12, -m13, 
+							-m20, -m21, -m22, -m23, 
+							-m30, -m31, -m32, -m33);
 	}
 
 	Mat4Template operator~() const {
@@ -236,6 +214,26 @@ public:
 		return Mat4Template(r00, r01, r02, r03, r10, r11, r12, r13, r20, r21, r22, r23, r30, r31, r32, r33);
 	}
 
+	Vec3Template<N> operator*(const Vec3Template<N>& v) const {
+		N v0 = v.x * m00 + v.y * m01 + v.z * m02 + m03;
+		N v1 = v.x * m10 + v.y * m11 + v.z * m12 + m13;
+		N v2 = v.x * m20 + v.y * m21 + v.z * m22 + m23;
+
+		return Vec3Template<N>(v0, v1, v2);
+	}
+
+	Mat3Template<N> getRotation() const {
+		return Mat3Template<N>(m00, m01, m02,
+							   m10, m11, m12,
+							   m20, m21, m22);
+	}
+
+	Vec3Template<N> getTranslation() const {
+		return Vec3Template<N>(m30, m31, m32);
+	}
+
+	CFrame toCFrame() const;
+
 	friend std::ostream& operator<<(std::ostream& os, const Mat4Template& matrix) {
 		os << "Mat4Template(";
 		for (int i = 0; i < 15; i++) {
@@ -258,12 +256,7 @@ public:
 
 		return ss.str();
 	}
-
 };
-
-typedef Mat4Template<double>	Mat4;
-typedef Mat4Template<float>		Mat4f;
-typedef Mat4Template<long long>	Mat4l;
 
 namespace Mat4Util {
 	extern const Mat4 ZERO;

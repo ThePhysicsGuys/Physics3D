@@ -40,11 +40,11 @@ public:
 		}
 	}
 
-	N det() {
+	N det() const {
 		return m00 * (m11 * m22 - m12 * m21) - m01 * (m10 * m22 - m12 * m20) + m02 * (m10 * m21 - m11 * m20);
 	}
 
-	Mat3Template inverse() {
+	Mat3Template<N> inverse() const {
 		N normdet = det();
 		N invdet = 1 / normdet;
 		N r00 = (m11 * m22 - m21 * m12) * invdet;
@@ -60,11 +60,11 @@ public:
 		return Mat3Template(m00, m01, m02, m10, m11, m12, m20, m21, m22);
 	}
 
-	Mat3Template operator~() const {
+	Mat3Template<N> operator~() const {
 		return inverse();
 	}
 
-	Mat3Template rotate(N angle, N x, N y, N z) {
+	Mat3Template rotate(N angle, N x, N y, N z) const {
 		N s = sin(angle);
 		N c = cos(angle);
 		N C = 1 - c;
@@ -90,7 +90,7 @@ public:
 		return Mat3Template(r00, r01, r02, r10, r11, r12, r20, r21, r22);
 	}
 
-	Mat3Template transpose() {
+	Mat3Template transpose() const {
 		return Mat3Template(m00, m10, m20, m01, m11, m21, m02, m12, m22);
 	}
 
@@ -160,7 +160,7 @@ public:
 		return os;
 	}
 
-	std::string str() {
+	std::string str() const {
 		std::stringstream ss;
 		ss << std::string("Mat3Template(");
 
