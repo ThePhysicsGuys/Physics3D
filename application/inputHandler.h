@@ -10,6 +10,8 @@ private:
 	void cursorEnterCallback(int entered);
 	void scrollCallback(double xOffset, double yOffset);
 	void mouseButtonCallback(int button, int action, int mods);
+	void windowSizeCallback(int width, int height);
+
 public:
 	InputHandler(GLFWwindow* window);
 	virtual void keyDown(int key, int modifiers) {};
@@ -21,5 +23,6 @@ public:
 	virtual void mouseEnter() {};
 	virtual void mouseExit() {};
 	virtual void scroll(double xOffset, double yOffset) {};
+	virtual void windowResize(int width, int height) {};
 };
 

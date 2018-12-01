@@ -6,6 +6,7 @@
 #include "mesh.h"
 #include "../engine/geometry/shape.h"
 #include "camera.h"
+#include "../standardInputHandler.h"
 
 #include <stdlib.h>
 
@@ -69,44 +70,18 @@ double vertices[vertexCount] = {
 };
 
 Mesh* mesh = nullptr;
+StandardInputHandler* handler = nullptr;
 Camera camera;
-
-void windowResizeCallback(GLFWwindow* window, int width, int height) {
-	glViewport(0, 0, width, height);
-	screenWidth = width;
-	screenHeight = height;
-	shader.setUniform("vResolution", Vec2(width, height));
-}
-
-void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-	if (key == GLFW_KEY_Z) {
-		Log::debug("x: %f", camera.position.x);
-		camera.move(0.01, 0, 0);
-	}
-	if (key == GLFW_KEY_S) {
-		Log::debug("x: %f", camera.position.x);
-		camera.move(-0.01, 0, 0);
-	}
-	if (key == GLFW_KEY_D) {
-		Log::debug("y: %f", camera.position.y);
-		camera.move(0, 0.01, 0);
-	}
-	if (key == GLFW_KEY_Q) {
-		Log::debug("y: %f", camera.position.y);
-		camera.move(0, -0.01, 0);
-	}
-
-}
 
 void Screen::init() {
 	ShaderSource shaderSource = parseShader("../res/shaders/basic.shader");
 	shader = Shader(shaderSource);
 	shader.bind();
 
-	mesh = new Mesh(vertices, vertexCount);
-	glfwSetWindowSizeCallback(window, windowResizeCallback);
-	glfwSetKeyCallback(window, keyCallback);
+	handler = new StandardInputHandler(window, &camera);
 
+	mesh = new Mesh(vertices, vertexCount);
+	
 	shader.createUniform("vResolution");
 	shader.createUniform("projectionMatrix");
 	shader.createUniform("modelViewMatrix");
