@@ -28,7 +28,7 @@ void createVertexArray(unsigned int &vao) {
 
 }
 
-void createPositionBufferTest(unsigned int& vbo, int size, double* buffer) {
+void createPositionBufferTest(unsigned int& vbo, int size, double const * buffer) {
 	Log::debug("Generating position vbo");
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -38,7 +38,7 @@ void createPositionBufferTest(unsigned int& vbo, int size, double* buffer) {
 	Log::debug("Generated position vbo");
 }
 
-void createElementBuffer(unsigned int& vbo, int size, unsigned int buffer[]) {
+void createElementBuffer(unsigned int& vbo, int size, unsigned int const buffer[]) {
 	Log::debug("Generating index vbo");
 	Log::debug("%d", sizeof(buffer));
 	glGenBuffers(1, &vbo);
@@ -47,15 +47,15 @@ void createElementBuffer(unsigned int& vbo, int size, unsigned int buffer[]) {
 	Log::debug("Generated index vbo");
 }
 
-IndexedMesh::IndexedMesh(Shape shape) : vertexCount(shape.vertexCount), triangleCount(shape.triangleCount) {
+IndexedMesh::IndexedMesh(Shape shape) : vertexCount(shape.vertexCount()), triangleCount(shape.triangleCount()) {
 	// Mesh vao
 	createVertexArray(vao);
 
 	// Position VBO
-	createPositionBufferTest(posVbo, vertexCount, reinterpret_cast<double*>(shape.vertices));
+	createPositionBufferTest(posVbo, vertexCount, reinterpret_cast<double const *>(shape.getVertices()));
 
 	// Indices VBO
-	createElementBuffer(indVbo, triangleCount * 3, reinterpret_cast<unsigned int*>(shape.triangles));
+	createElementBuffer(indVbo, triangleCount * 3, reinterpret_cast<unsigned int const *>(shape.getTriangles()));
 }
 
 IndexedMesh::IndexedMesh(double* vertices, int vertexCount, unsigned int* triangles, int triangleCount) : vertexCount(vertexCount), triangleCount(triangleCount) {
