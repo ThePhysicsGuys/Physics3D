@@ -19,3 +19,5 @@ void World::tick(double deltaT) {
 	
 	Log::info("Dummy Load: %.9f", d);*/
 }
+
+void World::addObject(Part p) {}

@@ -14,15 +14,17 @@
 #include "tickerThread.h"
 
 #include "../engine/geometry/shape.h"
+#include "../engine/geometry/managedShape.h"
+#include "../engine/part.h"
 
 #define TICKS_PER_SECOND 500.0
 
 #define TICK_SKIP_TIME std::chrono::milliseconds(3000)
 
 // Test shape
-Vec3 testShapeVecs[]{ Vec3(0.0, 0.0, 0.0), Vec3(1.0, 0.0, 0.0), Vec3(0.0, 1.0, 0.0), Vec3(0.0, 0.0, 1.0) };
-Triangle testShapeTriangles[]{ {1,2,3}, {1,3,4}, {1, 4, 2}, {2, 3, 4} };
-Shape testShape(testShapeVecs, 4, testShapeTriangles, 4);
+Vec3 testShapeVecs[]{Vec3(0.0, 0.0, 0.0), Vec3(1.0, 0.0, 0.0), Vec3(0.0, 1.0, 0.0), Vec3(0.0, 0.0, 1.0)};
+Triangle testShapeTriangles[]{{1,2,3},{1,3,4},{1, 4, 2},{2, 3, 4}};
+Shape testShape(testShapeVecs, testShapeTriangles, 4, 4);
 
 Screen screen;
 World world;
@@ -31,7 +33,6 @@ TickerThread physicsThread;
 
 void init();
 void setupPhysics();
-
 
 int main(void) {
 	init();

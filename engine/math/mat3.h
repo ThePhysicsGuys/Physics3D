@@ -178,6 +178,8 @@ typedef Mat3Template<double>	Mat3;
 typedef Mat3Template<float>		Mat3f;
 typedef Mat3Template<long long>	Mat3l;
 
+typedef Mat3 RotMat3;
+
 Mat3 fromEulerAngles(double alpha, double beta, double gamma);
 
 namespace Mat3Util {

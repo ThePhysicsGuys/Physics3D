@@ -1,23 +1,32 @@
 #pragma once
 
 #include "../math/vec3.h"
+#include "../math/mat3.h"
 
 struct Triangle {
 	unsigned int firstIndex, secondIndex, thirdIndex;
 };
 
-class Shape {
-public:
-	Vec3 * const vertices;
-	Triangle * const triangles;
-	const int vertexCount;
-	const int triangleCount;
+struct Shape {
+	friend class ManagedShape;
 private:
-	int * const copyCount;
+	Vec3 * vertices;
+	Triangle * triangles;
+	int vCount;
+	int tCount;
 
 public:
-	Shape(Vec3* vertices, int vertexCount, Triangle* triangles, int triangleCount);
-	Shape(const Shape& s);
+	Shape();
+	Shape::Shape(Vec3 * vertices, Triangle * triangles, int vertexCount, int triangleCount);
 
-	~Shape();
+	friend Vec3* getVertPointer(Shape& s) { return s.vertices; }
+	friend Triangle* getTriPointer(Shape& s) { return s.triangles; }
+
+	const Vec3 * getVertices() { return vertices; }
+	const Triangle * getTriangles() { return triangles; }
+	int vertexCount() { return vCount; }
+	int triangleCount() { return tCount; }
+
+	Shape translated(Vec3 offset, Vec3* newVecBuf) const;
+	Shape rotated(RotMat3 rotation, Vec3* newVecBuf) const;
 };
