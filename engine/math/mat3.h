@@ -178,18 +178,9 @@ typedef Mat3Template<double>	Mat3;
 typedef Mat3Template<float>		Mat3f;
 typedef Mat3Template<long long>	Mat3l;
 
-//Mat3 fromEulerAngles(double alpha, double beta, double gamma) {
-//	double sinA = sin(alpha), cosA = cos(alpha);
-//	double sinB = sin(beta), cosB = cos(beta);
-//	double sinC = sin(gamma), cosC = cos(gamma);
-//	return Mat3(
-//		cosC*cosB - sinC*sinA*sinB, -sinC*cosA, cosC*sinB + sinC*sinA*cosB,
-//		sinC*cosB + cosC*sinA*sinB, cosC*cosA, sinC*sinB - cosC*sinA*cosB,
-//		-cosA*sinB, sinA, cosA*cosB
-//	);
-//}
-//
-//namespace Mat3Util {
-//	Mat3 ZERO = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-//	Mat3 IDENTITY = { 1, 0, 0, 0, 1, 0, 0, 0, 1 };
-//};
+Mat3 fromEulerAngles(double alpha, double beta, double gamma);
+
+namespace Mat3Util {
+	extern const Mat3 ZERO;
+	extern const Mat3 IDENTITY;
+};

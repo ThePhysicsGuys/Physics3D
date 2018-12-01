@@ -28,7 +28,7 @@ public:
 	Vec2Template operator*(const N& d) const {
 		return Vec2Template(x*d, y*d);
 	}
-
+	
 	Vec2Template operator/(const N& d) const {
 		return Vec2Template(x / d, y / d);
 	}
@@ -37,8 +37,8 @@ public:
 		return this->x*other.x + this->y*other.y;
 	}
 
-	Vec2Template operator%(const Vec2Template& other) const {
-		return Vec2Template(this->x*other.y - this->y*other.x);
+	N operator%(const Vec2Template& other) const {
+		return this->x*other.y - this->y*other.x;
 	}
 
 	N length() const {
@@ -55,9 +55,9 @@ typedef Vec2Template<float>		Vec2f;
 typedef Vec2Template<long long>	Vec2l;
 
 namespace Vec2Util {
-	const Vec2 ZERO(0.0, 0.0);
-	const Vec2 UNITX(1.0, 0.0);
-	const Vec2 UNITY(0.0, 1.0);
-	const Vec2 UNITNEGX(-1.0, 0.0);
-	const Vec2 UNITNEGY(0.0, -1.0);
+	extern const Vec2 ZERO;
+	extern const Vec2 UNITX;
+	extern const Vec2 UNITY;
+	extern const Vec2 UNITNEGX;
+	extern const Vec2 UNITNEGY;
 };

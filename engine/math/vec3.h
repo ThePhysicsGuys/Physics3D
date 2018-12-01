@@ -142,11 +142,11 @@ typedef Vec3Template<float>		Vec3f;
 typedef Vec3Template<long long>	Vec3l;
 
 namespace Vec3Util {
-	const Vec3 ZERO(0.0, 0.0, 0.0);
-	const Vec3 UNITX(1.0, 0.0, 0.0);
-	const Vec3 UNITY(0.0, 1.0, 0.0);
-	const Vec3 UNITZ(0.0, 0.0, 1.0);
-	const Vec3 UNITNEGX(-1.0, 0.0, 0.0);
-	const Vec3 UNITNEGY(0.0, -1.0, 0.0);
-	const Vec3 UNITNEGZ(0.0, 0.0, -1.0);
+	extern const Vec3 ZERO;
+	extern const Vec3 UNITX;
+	extern const Vec3 UNITY;
+	extern const Vec3 UNITZ;
+	extern const Vec3 UNITNEGX;
+	extern const Vec3 UNITNEGY;
+	extern const Vec3 UNITNEGZ;
 };

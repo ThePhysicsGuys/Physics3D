@@ -36,5 +36,5 @@ typedef Rot3Template<float>		Rot3f;
 typedef Rot3Template<long long>	Rot3l;
 
 namespace Rot3Util {
-	Rot3 ZERO = { 0, 0, 0 };
+	extern const Rot3 ZERO;
 };

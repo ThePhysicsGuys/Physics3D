@@ -143,5 +143,5 @@ void Screen::close() {
 }
 
 bool Screen::shouldClose() {
-	return glfwWindowShouldClose(window);
+	return glfwWindowShouldClose(window) != 0;
 }

@@ -24,7 +24,7 @@ namespace Log {
 	Level getLogLevel() {
 		return logLevel;
 	}
-
+	
 	void debug(const char* format, ...) {
 		std::string msg = "[DEBUG]: " + std::string(format) + "\n";
 		if (console == nullptr)
