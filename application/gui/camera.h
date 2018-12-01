@@ -30,7 +30,6 @@ public:
 
 	void move(double dx, double dy, double dz) {
 		double x = position.x, y = position.y, z = position.z;
-		double xNew, yNew, zNew;
 		x += sin(rotation.y) * -1.0 * dz + sin(rotation.y - 90) * -1.0 * dx;
 		z += cos(rotation.y) * dz + cos(rotation.y - 90) * dx;
 		y += dy;

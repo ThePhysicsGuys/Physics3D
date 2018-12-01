@@ -78,18 +78,23 @@ void windowResizeCallback(GLFWwindow* window, int width, int height) {
 	shader.setUniform("vResolution", Vec2(width, height));
 }
 
-void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	if (key == GLFW_KEY_Z) {
-		Log::debug("x");
+		Log::debug("x: %f", camera.position.x);
 		camera.move(0.01, 0, 0);
 	}
-	if (key == GLFW_KEY_S && action == GLFW_PRESS)
+	if (key == GLFW_KEY_S) {
+		Log::debug("x: %f", camera.position.x);
 		camera.move(-0.01, 0, 0);
-	if (key == GLFW_KEY_Q && action == GLFW_PRESS)
+	}
+	if (key == GLFW_KEY_D) {
+		Log::debug("y: %f", camera.position.y);
 		camera.move(0, 0.01, 0);
-	if (key == GLFW_KEY_D && action == GLFW_PRESS)
+	}
+	if (key == GLFW_KEY_Q) {
+		Log::debug("y: %f", camera.position.y);
 		camera.move(0, -0.01, 0);
+	}
 
 }
 
@@ -105,6 +110,11 @@ void Screen::init() {
 	shader.createUniform("vResolution");
 	shader.createUniform("projectionMatrix");
 	shader.createUniform("modelViewMatrix");
+
+	Mat4 projectionMatrix = Mat4();
+	projectionMatrix = projectionMatrix.perspective(60.0 / 180.0 * 3.1415, screenWidth / screenHeight, 0.1, 1000);
+	shader.setUniform("projectionMatrix", projectionMatrix);
+	Log::debug("%s", projectionMatrix.str().c_str());
 }
 
 void Screen::makeCurrent() {
@@ -119,11 +129,11 @@ void Screen::refresh() {
 	shader.bind();
 
 	Mat4 projectionMatrix = Mat4();
-	projectionMatrix = projectionMatrix.perspective(60 / 180 * 3.1415, screenWidth / screenHeight, 0.1, 1000);
+	projectionMatrix = projectionMatrix.perspective(60.0 / 180.0 * 3.1415, screenWidth / screenHeight, 0.1, 1000);
 	shader.setUniform("projectionMatrix", projectionMatrix);
 
 	Mat4 modelViewMatrix = Mat4();
-	modelViewMatrix.rotate(camera.rotation.x, 1, 0, 0).rotate(camera.rotation.y, 0, 1, 0).translate(camera.position.x, camera.position.y, camera.position.z);
+	modelViewMatrix = modelViewMatrix.rotate(camera.rotation.x, 1, 0, 0).rotate(camera.rotation.y, 0, 1, 0).translate(camera.position.x, camera.position.y, camera.position.z);
 	shader.setUniform("modelViewMatrix", modelViewMatrix);
 
 	/* Render the mesh */
