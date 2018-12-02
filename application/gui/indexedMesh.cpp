@@ -2,91 +2,29 @@
 #include "../../engine/geometry/shape.h"
 #include "../util/log.h"
 
-#include <vector>
-
-int* createElementBufferData(Triangle triangles[], int triangleCount) {
-	Log::debug("Creating element buffer");
-	std::vector<int> indices;
-	Log::debug("Reserving %d integers", triangleCount * 3);
-	indices.reserve(triangleCount * 3);
-	Log::debug("Reserved %d integers", triangleCount * 3);
-	for (int i = 0; i < triangleCount; i++) {
-		Log::debug("%d", i);
-		indices.push_back(triangles[i].firstIndex);
-		indices.push_back(triangles[i].secondIndex);
-		indices.push_back(triangles[i].thirdIndex);
-	}
-	Log::debug("Created element buffer");
-	return indices.data();
+IndexedMesh::IndexedMesh(Shape shape) : AbstractMesh(), vertexCount(shape.vCount), triangleCount(shape.tCount) {
+	vertexBuffer = new VertexBuffer(reinterpret_cast<double const *>(shape.vertices), vertexCount * 3);
+	indexBuffer = new IndexBuffer(reinterpret_cast<unsigned int const *>(shape.triangles), triangleCount * 3);
+	bufferLayout.push<double>(3);
+	vertexArray->addBuffer(*vertexBuffer, bufferLayout);
 }
 
-void createVertexArray(unsigned int &vao) {
-	Log::debug("Generating vao");
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
-	Log::debug("Generated vao");
-
-}
-
-void createPositionBufferTest(unsigned int& vbo, int size, double const * buffer) {
-	Log::debug("Generating position vbo");
-	glGenBuffers(1, &vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, size * sizeof(double), buffer, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 3 * sizeof(double), 0);
-	Log::debug("Generated position vbo");
-}
-
-void createElementBuffer(unsigned int& vbo, int size, unsigned int const * buffer) {
-	Log::debug("Generating index vbo");
-	glGenBuffers(1, &vbo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, size * sizeof(unsigned int), buffer, GL_STATIC_DRAW);
-	Log::debug("Generated index vbo");
-}
-
-IndexedMesh::IndexedMesh(Shape shape) : vertexCount(shape.vCount), triangleCount(shape.tCount) {
-	// Mesh vao
-	createVertexArray(vao);
-
-	// Position VBO
-	createPositionBufferTest(posVbo, vertexCount * 3, reinterpret_cast<double const *>(shape.vertices));
-
-	// Indices VBO
-	createElementBuffer(indVbo, triangleCount * 3, reinterpret_cast<unsigned int const *>(shape.triangles));
-}
-
-IndexedMesh::IndexedMesh(double* vertices, int vertexCount, unsigned int* triangles, int triangleCount) : vertexCount(vertexCount), triangleCount(triangleCount) {
-	// Mesh vao
-	createVertexArray(vao);
-
-	// Position VBO
-	createPositionBufferTest(posVbo, vertexCount * 3, vertices);
-
-	// Indices VBO
-	createElementBuffer(indVbo, triangleCount * 3, triangles);
+IndexedMesh::IndexedMesh(const double* vertices, const unsigned int* indices, const int vCount, const int tCount) : AbstractMesh(), vertexCount(vCount), triangleCount(tCount) {
+	vertexBuffer = new VertexBuffer(vertices, vertexCount * 3);
+	indexBuffer = new IndexBuffer(indices, triangleCount * 3);
+	bufferLayout.push<double>(3);
+	vertexArray->addBuffer(*vertexBuffer, bufferLayout);
 }
 
 void IndexedMesh::render()  {
-	Log::debug("Rendered from indexedMesh.cpp");
-	glDisable(GL_CULL_FACE);
-	glBindVertexArray(vao);
-	glEnableVertexAttribArray(0);
+	vertexArray->bind();
+	indexBuffer->bind();
 
-	glDrawElements((int)renderMode, triangleCount * 3, GL_UNSIGNED_INT, nullptr);
-
-	glDisableVertexAttribArray(0);
-	glBindVertexArray(0);
+	glDrawElements((int) renderMode, triangleCount * 3, GL_UNSIGNED_INT, nullptr);
 }
 
 void IndexedMesh::close() {
-	glDisableVertexAttribArray(0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-
-	glDeleteBuffers(vertexCount, &posVbo);
-	glDeleteBuffers(triangleCount * 3, &indVbo);
-	glDeleteVertexArrays(1, &vao);
+	vertexBuffer->close();
+	indexBuffer->close();
+	vertexArray->close();
 }

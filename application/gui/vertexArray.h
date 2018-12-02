@@ -4,6 +4,7 @@
 
 #include "vertexBuffer.h"
 #include "bufferLayout.h"
+#include "../../util/log.h"
 
 class VertexArray {
 public:
@@ -11,14 +12,18 @@ public:
 
 	VertexArray() {
 		glGenVertexArrays(1, &id);
+		glBindVertexArray(id);
+		Log::debug("Created vertex array with id %d", id);
 	}
 
 	~VertexArray() {
-		glDeleteVertexArrays(1, &id);
+		close();
+		Log::debug("Deleted vertex array with id %d", id);
 	}
 
 	void bind() const {
 		glBindVertexArray(id);
+		glEnableVertexAttribArray(0);
 	}
 
 	void unbind() const {
@@ -35,5 +40,10 @@ public:
 			glVertexAttribPointer(i, element.count, element.type, element.normalized, layout.stride, (const void*) offset);
 			offset += element.count * element.size;
 		}
+	}
+
+	void close() {
+		unbind();
+		glDeleteVertexArrays(1, &id);
 	}
 };

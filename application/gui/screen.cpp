@@ -59,22 +59,26 @@ Shader shader;
 const unsigned int vertexCount = 4;
 const unsigned int triangleCount = 2;
 
-Vec3 vertices[vertexCount] {
-	Vec3(-0.5, -0.5, 0),
-	Vec3( 0.5, -0.5, 0),
-	Vec3( 0.5,  0.5, 0),
-	Vec3(-0.5,  0.5, 0)
+const double vertices[vertexCount * 3] {
+	-0.5, -0.5, 0,
+	 0.5, -0.5, 0,
+	 0.5,  0.5, 0,
+	-0.5,  0.5, 0
 };
 
-Triangle triangles[triangleCount] = {
-	{ 0, 1, 2 },
-	{ 2, 3, 0 }
+const unsigned int triangles[triangleCount * 3] = {
+	0, 1, 2,
+	2, 3, 0 
 };
 
 IndexedMesh* mesh = nullptr;
 StandardInputHandler* handler = nullptr;
-Shape shape(vertices, triangles, vertexCount, triangleCount);
+//Shape shape(vertices, triangles, vertexCount, triangleCount);
 Camera camera;
+
+unsigned int vao;
+unsigned int vbo;
+unsigned int ibo;
 
 void Screen::init() {
 	ShaderSource shaderSource = parseShader("../res/shaders/basic.shader");
@@ -83,7 +87,7 @@ void Screen::init() {
 
 	handler = new StandardInputHandler(window, &camera);
 
-	mesh = new IndexedMesh(shape);
+	mesh = new IndexedMesh(vertices, triangles, vertexCount, triangleCount);
 }
 
 void Screen::makeCurrent() {
@@ -100,6 +104,11 @@ void Screen::refresh() {
 	/* Render the mesh */
 	mesh->render();
 
+	/*glDisable(GL_CULL_FACE);
+	glBindVertexArray(vao);
+	glEnableVertexAttribArray(0);
+	glDrawElements(GL_TRIANGLES, triangleCount * 3, GL_UNSIGNED_INT, nullptr);*/
+
 	/* Swap front and back buffers */
 	glfwSwapBuffers(this->window);
 
@@ -109,7 +118,7 @@ void Screen::refresh() {
 
 void Screen::close() {
 	shader.close();
-	mesh->close();
+	//mesh->close();
 	terminateGL();
 }
 
