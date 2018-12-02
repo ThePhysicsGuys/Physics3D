@@ -7,6 +7,7 @@
 #include "../engine/geometry/shape.h"
 #include "camera.h"
 #include "../standardInputHandler.h"
+#include "../engine/geometry/shape.h"
 
 #include <stdlib.h>
 
@@ -39,14 +40,8 @@ void terminateGL() {
 	glfwTerminate();
 }
 
-int screenWidth;
-int screenHeight;
-
 Screen::Screen(int width, int height, World* w) {
 	setWorld(w);
-
-	screenWidth = width;
-	screenHeight = height;
 
 	/* Create a windowed mode window and its OpenGL context */
 	this->window = glfwCreateWindow(width, height, "Physics3D", NULL, NULL);
@@ -61,16 +56,24 @@ Screen::Screen(int width, int height, World* w) {
 
 Shader shader;
 
-const unsigned int vertexCount = 9;
+const unsigned int vertexCount = 4;
+const unsigned int triangleCount = 2;
 
-double vertices[vertexCount] = {
-	-0.5, -0.5, 0,
-	-0.5,  0.5, 0,
-	0.5,  0.5, 0
+Vec3 vertices[vertexCount] {
+	Vec3(-0.5, -0.5, 0),
+	Vec3( 0.5, -0.5, 0),
+	Vec3( 0.5,  0.5, 0),
+	Vec3(-0.5,  0.5, 0)
 };
 
-Mesh* mesh = nullptr;
+Triangle triangles[triangleCount] = {
+	{ 0, 1, 2 },
+	{ 2, 3, 0 }
+};
+
+IndexedMesh* mesh = nullptr;
 StandardInputHandler* handler = nullptr;
+Shape shape(vertices, triangles, vertexCount, triangleCount);
 Camera camera;
 
 void Screen::init() {
@@ -80,16 +83,7 @@ void Screen::init() {
 
 	handler = new StandardInputHandler(window, &camera);
 
-	mesh = new Mesh(vertices, vertexCount);
-	
-	shader.createUniform("vResolution");
-	shader.createUniform("projectionMatrix");
-	shader.createUniform("modelViewMatrix");
-
-	Mat4 projectionMatrix = Mat4();
-	projectionMatrix = projectionMatrix.perspective(60.0 / 180.0 * 3.1415, screenWidth / screenHeight, 0.1, 1000);
-	shader.setUniform("projectionMatrix", projectionMatrix);
-	Log::debug("%s", projectionMatrix.str().c_str());
+	mesh = new IndexedMesh(shape);
 }
 
 void Screen::makeCurrent() {
@@ -102,14 +96,6 @@ void Screen::refresh() {
 
 	/* Use the default shader */
 	shader.bind();
-
-	Mat4 projectionMatrix = Mat4();
-	projectionMatrix = projectionMatrix.perspective(60.0 / 180.0 * 3.1415, screenWidth / screenHeight, 0.1, 1000);
-	shader.setUniform("projectionMatrix", projectionMatrix);
-
-	Mat4 modelViewMatrix = Mat4();
-	modelViewMatrix = modelViewMatrix.rotate(camera.rotation.x, 1, 0, 0).rotate(camera.rotation.y, 0, 1, 0).translate(camera.position.x, camera.position.y, camera.position.z);
-	shader.setUniform("modelViewMatrix", modelViewMatrix);
 
 	/* Render the mesh */
 	mesh->render();

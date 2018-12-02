@@ -32,18 +32,17 @@ void createPositionBufferTest(unsigned int& vbo, int size, double const * buffer
 	Log::debug("Generating position vbo");
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(buffer) * sizeof(double), buffer, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, size * sizeof(double), buffer, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_DOUBLE, GL_FALSE, size * sizeof(double), 0);
+	glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, 3 * sizeof(double), 0);
 	Log::debug("Generated position vbo");
 }
 
-void createElementBuffer(unsigned int& vbo, int size, unsigned int const buffer[]) {
+void createElementBuffer(unsigned int& vbo, int size, unsigned int const * buffer) {
 	Log::debug("Generating index vbo");
-	Log::debug("%d", sizeof(buffer));
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(buffer) * sizeof(int), buffer, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, size * sizeof(unsigned int), buffer, GL_STATIC_DRAW);
 	Log::debug("Generated index vbo");
 }
 
@@ -52,7 +51,7 @@ IndexedMesh::IndexedMesh(Shape shape) : vertexCount(shape.vertexCount()), triang
 	createVertexArray(vao);
 
 	// Position VBO
-	createPositionBufferTest(posVbo, vertexCount, reinterpret_cast<double const *>(shape.getVertices()));
+	createPositionBufferTest(posVbo, vertexCount * 3, reinterpret_cast<double const *>(shape.getVertices()));
 
 	// Indices VBO
 	createElementBuffer(indVbo, triangleCount * 3, reinterpret_cast<unsigned int const *>(shape.getTriangles()));
@@ -63,7 +62,7 @@ IndexedMesh::IndexedMesh(double* vertices, int vertexCount, unsigned int* triang
 	createVertexArray(vao);
 
 	// Position VBO
-	createPositionBufferTest(posVbo, vertexCount * 2, vertices);
+	createPositionBufferTest(posVbo, vertexCount * 3, vertices);
 
 	// Indices VBO
 	createElementBuffer(indVbo, triangleCount * 3, triangles);
@@ -75,7 +74,7 @@ void IndexedMesh::render()  {
 	glBindVertexArray(vao);
 	glEnableVertexAttribArray(0);
 
-	glDrawElements((int)renderMode, 2, GL_UNSIGNED_INT, 0);
+	glDrawElements((int)renderMode, triangleCount * 3, GL_UNSIGNED_INT, nullptr);
 
 	glDisableVertexAttribArray(0);
 	glBindVertexArray(0);
