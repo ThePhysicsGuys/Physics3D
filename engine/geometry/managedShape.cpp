@@ -8,9 +8,14 @@ ManagedShape::ManagedShape() : shape(), vCopyCount(new int(0)), tCopyCount(new i
 
 ManagedShape::ManagedShape(Shape s) : shape(shape), vCopyCount(new int(0)), tCopyCount(new int(0)) {}
 
-ManagedShape::ManagedShape(Vec3 * vertices, Triangle * triangles, int vertexCount, int triangleCount) : shape(new Vec3[vertexCount], new Triangle[triangleCount], vertexCount, triangleCount), vCopyCount(new int(0)), tCopyCount(new int(0)) {
-	std::memcpy(this->shape.vertices, vertices, vertexCount * sizeof(Vec3));
-	std::memcpy(this->shape.triangles, triangles, triangleCount * sizeof(Triangle));
+ManagedShape::ManagedShape(Vec3 * vertices, Triangle * triangles, int vertexCount, int triangleCount) : vCopyCount(new int(0)), tCopyCount(new int(0)) {
+	Vec3* verts = new Vec3[vertexCount];
+	Triangle* triangs = new Triangle[triangleCount];
+	
+	std::memcpy(verts, vertices, vertexCount * sizeof(Vec3));
+	std::memcpy(triangs, triangles, triangleCount * sizeof(Triangle));
+
+	shape = Shape(verts, triangs, vertexCount, triangleCount);
 }
 
 ManagedShape::ManagedShape(const ManagedShape & other) : shape(other.shape), vCopyCount(other.vCopyCount), tCopyCount(other.tCopyCount) {
@@ -53,17 +58,25 @@ ManagedShape::~ManagedShape() {
 
 ManagedShape ManagedShape::translated(Vec3 offset) const {
 	Vec3* newVecBuf = new Vec3[shape.vCount];
-
 	(*tCopyCount)++;
-
 	return ManagedShape(shape.translated(offset, newVecBuf), new int(0), tCopyCount);
 }
 
 ManagedShape ManagedShape::rotated(RotMat3 rotation) const {
 	Vec3* newVecBuf = new Vec3[shape.vCount];
-
 	(*tCopyCount)++;
-
 	return ManagedShape(shape.rotated(rotation, newVecBuf), new int(0), tCopyCount);
+}
+
+ManagedShape ManagedShape::localToGlobal(CFrame frame) const {
+	Vec3* newVecBuf = new Vec3[shape.vCount];
+	(*tCopyCount)++;
+	return ManagedShape(shape.localToGlobal(frame, newVecBuf), new int(0), tCopyCount);
+}
+
+ManagedShape ManagedShape::globalToLocal(CFrame frame) const {
+	Vec3* newVecBuf = new Vec3[shape.vCount];
+	(*tCopyCount)++;
+	return ManagedShape(shape.globalToLocal(frame, newVecBuf), new int(0), tCopyCount);
 }
 

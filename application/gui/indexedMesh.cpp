@@ -46,15 +46,15 @@ void createElementBuffer(unsigned int& vbo, int size, unsigned int const * buffe
 	Log::debug("Generated index vbo");
 }
 
-IndexedMesh::IndexedMesh(Shape shape) : vertexCount(shape.vertexCount()), triangleCount(shape.triangleCount()) {
+IndexedMesh::IndexedMesh(Shape shape) : vertexCount(shape.vCount), triangleCount(shape.tCount) {
 	// Mesh vao
 	createVertexArray(vao);
 
 	// Position VBO
-	createPositionBufferTest(posVbo, vertexCount * 3, reinterpret_cast<double const *>(shape.getVertices()));
+	createPositionBufferTest(posVbo, vertexCount * 3, reinterpret_cast<double const *>(shape.vertices));
 
 	// Indices VBO
-	createElementBuffer(indVbo, triangleCount * 3, reinterpret_cast<unsigned int const *>(shape.getTriangles()));
+	createElementBuffer(indVbo, triangleCount * 3, reinterpret_cast<unsigned int const *>(shape.triangles));
 }
 
 IndexedMesh::IndexedMesh(double* vertices, int vertexCount, unsigned int* triangles, int triangleCount) : vertexCount(vertexCount), triangleCount(triangleCount) {

@@ -1,7 +1,11 @@
 #pragma once
 
-#include "shape.h"
+class ManagedShape;
 
+#include "shape.h"
+#include "../math/vec3.h"
+#include "../math/mat3.h"
+#include "../math/cframe.h"
 
 class ManagedShape {
 private:
@@ -24,6 +28,8 @@ public:
 
 	ManagedShape translated(Vec3 offset) const;
 	ManagedShape rotated(RotMat3 rotation) const;
+	ManagedShape localToGlobal(CFrame frame) const;
+	ManagedShape globalToLocal(CFrame frame) const;
 
-	inline const Shape& getShape() const { return shape; };
+	inline Shape getShape() const { return shape; };
 };
