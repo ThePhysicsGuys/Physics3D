@@ -18,11 +18,11 @@ public:
 		glDeleteBuffers(1, &id);
 	}
 
-	void bind() {
+	void bind() const {
 		glBindBuffer(GL_ARRAY_BUFFER, id);
 	}
 
-	void unbind() {
+	void unbind() const {
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 };
