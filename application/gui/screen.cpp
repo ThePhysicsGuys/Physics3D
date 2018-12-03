@@ -56,14 +56,24 @@ Screen::Screen(int width, int height, World* w) {
 
 Shader shader;
 
-const unsigned int vertexCount = 4;
+const unsigned int vertexCount1 = 4;
+const unsigned int vertexCount2 = 6;
 const unsigned int triangleCount = 2;
 
-const double vertices[vertexCount * 3] {
+const double vertices1[vertexCount1 * 3] {
+	-0, -0, 0,
+	 1, -0, 0,
+	 1,  1, 0,
+	-0,  1, 0,
+};
+
+const double vertices2[vertexCount2 * 3]{
 	-0.5, -0.5, 0,
 	 0.5, -0.5, 0,
 	 0.5,  0.5, 0,
-	-0.5,  0.5, 0
+	 0.5,  0.5, 0,
+	-0.5,  0.5, 0,
+	-0.5, -0.5, 0,
 };
 
 const unsigned int triangles[triangleCount * 3] = {
@@ -71,14 +81,11 @@ const unsigned int triangles[triangleCount * 3] = {
 	2, 3, 0 
 };
 
-IndexedMesh* mesh = nullptr;
+IndexedMesh* mesh1 = nullptr;
+Mesh* mesh2 = nullptr;
 StandardInputHandler* handler = nullptr;
 //Shape shape(vertices, triangles, vertexCount, triangleCount);
 Camera camera;
-
-unsigned int vao;
-unsigned int vbo;
-unsigned int ibo;
 
 void Screen::init() {
 	ShaderSource shaderSource = parseShader("../res/shaders/basic.shader");
@@ -87,7 +94,8 @@ void Screen::init() {
 
 	handler = new StandardInputHandler(window, &camera);
 
-	mesh = new IndexedMesh(vertices, triangles, vertexCount, triangleCount);
+	mesh1 = new IndexedMesh(vertices1, triangles, vertexCount1, triangleCount);
+	mesh2 = new Mesh(vertices2, vertexCount2);
 }
 
 void Screen::makeCurrent() {
@@ -102,12 +110,8 @@ void Screen::refresh() {
 	shader.bind();
 
 	/* Render the mesh */
-	mesh->render();
-
-	/*glDisable(GL_CULL_FACE);
-	glBindVertexArray(vao);
-	glEnableVertexAttribArray(0);
-	glDrawElements(GL_TRIANGLES, triangleCount * 3, GL_UNSIGNED_INT, nullptr);*/
+	mesh1->render();
+	mesh2->render();
 
 	/* Swap front and back buffers */
 	glfwSwapBuffers(this->window);

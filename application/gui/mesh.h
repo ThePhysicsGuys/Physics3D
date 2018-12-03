@@ -1,12 +1,17 @@
 #pragma once
 
 #include "abstractMesh.h"
+#include "bufferLayout.h"
+#include "vertexBuffer.h"
 
 class Mesh : public AbstractMesh {
 public:
-	unsigned int vbo;
+	BufferLayout bufferLayout;
+	VertexBuffer* vertexBuffer = nullptr;
 
-	Mesh(double* positions, int size);
+	const int vertexCount;
+
+	Mesh(const double* positions, const int size);
 
 	void render() override;
 	void close() override;
