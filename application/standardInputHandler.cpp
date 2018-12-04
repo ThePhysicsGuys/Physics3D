@@ -5,7 +5,7 @@ StandardInputHandler::StandardInputHandler(GLFWwindow* window, Camera* camera) :
 }
 
 void StandardInputHandler::keyRepeat(int key, int modifiers)  {
-	if (key == GLFW_KEY_Z) {
+	if (key == GLFW_KEY_W) {
 		camera->move(1, 0, 0);
 	}
 	if (key == GLFW_KEY_S) {
@@ -14,7 +14,7 @@ void StandardInputHandler::keyRepeat(int key, int modifiers)  {
 	if (key == GLFW_KEY_D) {
 		camera->move(0, 1, 0);
 	}
-	if (key == GLFW_KEY_Q) {
+	if (key == GLFW_KEY_A) {
 		camera->move(0, -1, 0);
 	}
 	if (key == GLFW_KEY_SPACE) {

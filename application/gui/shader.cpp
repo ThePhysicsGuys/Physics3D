@@ -3,6 +3,7 @@
 
 #include "shader.h"
 #include "../../util/log.h"
+#include "../debug.h"
 
 #include <fstream>
 #include <sstream>
@@ -11,6 +12,8 @@ void Shader::createUniform(std::string uniform) {
 	int location = glGetUniformLocation(id, uniform.c_str());
 	if (location < 0)
 		Log::error("Could not find uniform (%s)", uniform.c_str());
+	else
+		Log::info("Created uniform [%s] with id %d", uniform.c_str(), location);
 	uniforms.insert(std::make_pair(uniform, location));
 }
 
@@ -34,8 +37,8 @@ void Shader::setUniform(std::string uniform, Vec3 value) {
 	glUniform3d(uniforms[uniform], value.x, value.y, value.z);
 }
 
-void Shader::setUniform(std::string uniform, Mat4 value) {
-	glUniformMatrix4dv(uniforms[uniform], 1, GL_FALSE, reinterpret_cast<double*>(&value));
+void Shader::setUniform(std::string uniform, Mat4f value) {
+	glCall(glUniformMatrix4fv(uniforms[uniform], 1, GL_FALSE, value.m));
 }
 
 unsigned int compileShader(const std::string& source, unsigned int type) {
@@ -75,14 +78,16 @@ unsigned int createShader(const std::string& vertexShader, const std::string& fr
 	unsigned int fs = compileShader(fragmentShader, GL_FRAGMENT_SHADER);
 	Log::info("Done compiling fragment shader");
 
-	glAttachShader(program, vs);
-	glAttachShader(program, fs);
+	glCall(glAttachShader(program, vs));
+	glCall(glAttachShader(program, fs));
 
-	glLinkProgram(program);
-	glValidateProgram(program);
+	glCall(glLinkProgram(program));
+	glCall(glValidateProgram(program));
 
-	glDeleteShader(vs);
-	glDeleteShader(fs);
+	glCall(glDeleteShader(vs));
+	glCall(glDeleteShader(fs));
+
+	Log::info("Created shader with id %d", program);
 
 	return program;
 }

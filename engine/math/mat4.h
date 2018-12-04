@@ -247,10 +247,10 @@ public:
 
 	std::string str() {
 		std::stringstream ss;
-		ss << std::string("Mat4Template(");
+		ss << std::string("Mat4Template(\n\t");
 		for (int i = 0; i < 15; i++) {
 			ss << m[i];
-			ss << (((i + 1) % 4 == 0) ? "; " : ", ");
+			ss << (((i + 1) % 4 == 0) ? ";\n\t" : ", ");
 		}
 		ss << m[15] << ")";
 

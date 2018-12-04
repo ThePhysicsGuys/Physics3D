@@ -1,6 +1,7 @@
 #include "screen.h"
 #include "../../util/log.h"
 #include "../engine/math/vec2.h"
+#include "../engine/math/mat4.h"
 #include "shader.h"
 #include "indexedMesh.h"
 #include "mesh.h"
@@ -60,31 +61,31 @@ const unsigned int vertexCount1 = 4;
 const unsigned int vertexCount2 = 6;
 const unsigned int triangleCount = 2;
 
-const double vertices1[vertexCount1 * 3] {
-	-0, -0, 0,
-	 1, -0, 0,
-	 1,  1, 0,
-	-0,  1, 0,
+const Vec3 vertices1[vertexCount1] {
+	Vec3(-0, -0, 0),
+	Vec3( 1, -0, 0),
+	Vec3( 1,  1, 0),
+	Vec3(-0,  1, 0)
 };
 
 const double vertices2[vertexCount2 * 3]{
-	-0.5, -0.5, 0,
-	 0.5, -0.5, 0,
-	 0.5,  0.5, 0,
-	 0.5,  0.5, 0,
-	-0.5,  0.5, 0,
-	-0.5, -0.5, 0,
+	-0.5, -0.5, -1,
+	 0.5, -0.5, -1,
+	 0.5,  0.5, -1,
+	 0.5,  0.5, -1,
+	-0.5,  0.5, -1,
+	-0.5, -0.5, -1,
 };
 
-const unsigned int triangles[triangleCount * 3] = {
-	0, 1, 2,
-	2, 3, 0 
+const Triangle triangles[triangleCount] = {
+	{ 0, 1, 2 },
+	{ 2, 3, 0 }
 };
 
 IndexedMesh* mesh1 = nullptr;
 Mesh* mesh2 = nullptr;
 StandardInputHandler* handler = nullptr;
-//Shape shape(vertices, triangles, vertexCount, triangleCount);
+Shape shape(vertices1, triangles, vertexCount1, triangleCount);
 Camera camera;
 
 void Screen::init() {
@@ -92,9 +93,11 @@ void Screen::init() {
 	shader = Shader(shaderSource);
 	shader.bind();
 
+	shader.createUniform("viewMatrix");
+
 	handler = new StandardInputHandler(window, &camera);
 
-	mesh1 = new IndexedMesh(vertices1, triangles, vertexCount1, triangleCount);
+	mesh1 = new IndexedMesh(shape);
 	mesh2 = new Mesh(vertices2, vertexCount2);
 }
 
@@ -109,8 +112,11 @@ void Screen::refresh() {
 	/* Use the default shader */
 	shader.bind();
 
+	Mat4f viewMatrix = Mat4f().translate(-camera.position.x, -camera.position.y, -camera.position.z);
+	shader.setUniform("viewMatrix", viewMatrix);
+
 	/* Render the mesh */
-	mesh1->render();
+	//mesh1->render();
 	mesh2->render();
 
 	/* Swap front and back buffers */

@@ -27,7 +27,7 @@ public:
 	void setUniform(std::string uniform, double value);
 	void setUniform(std::string uniform, Vec2 value);
 	void setUniform(std::string unfiorm, Vec3 value);
-	void setUniform(std::string uniform, Mat4 value);
+	void setUniform(std::string uniform, Mat4f value);
 	void bind();
 	void unbind();
 	void close();

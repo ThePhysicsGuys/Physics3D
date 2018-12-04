@@ -2,6 +2,7 @@
 
 #include "../../engine/math/vec3.h"
 #include "../../engine/math/rot3.h"
+#include "../util/log.h"
 
 class Camera {
 public:
@@ -33,10 +34,19 @@ public:
 	};
 
 	void move(double dx, double dy, double dz) {
+		// double factor = 57.2957795131;
+		double pi = 3.14159265359;
 		double x = position.x, y = position.y, z = position.z;
-		x += speed * (sin(rotation.y) * -1.0 * dz + sin(rotation.y - 90) * -1.0 * dx);
-		z += speed * (cos(rotation.y) * dz + cos(rotation.y - 90) * dx);
+		if (dz != 0) {
+			x += speed * sin(rotation.y) * -1.0f * dz;
+			z += speed * cos(rotation.y) * dz;
+		}
+		if (dx != 0) {
+			x += speed * sin(rotation.y - pi / 2) * -1.0f * dx;
+			z += speed * cos(rotation.y - pi / 2) * dx;
+		}
 		y += speed * dy;
+		Log::debug("Camera [%f, %f, %f]", x, y, z);
 		position = Vec3(x, y, z);
 	}
 };

@@ -2,7 +2,6 @@
 #include "../util/Log.h"
 
 Mesh::Mesh(const double* vertices, const int vCount) : vertexCount(vCount) {
-	//createPositionBuffer(vbo, size, positions);
 	vertexBuffer = new VertexBuffer(vertices, vCount * 3);
 	bufferLayout.push<double>(3);
 	vertexArray->addBuffer(*vertexBuffer, bufferLayout);

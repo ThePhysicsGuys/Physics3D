@@ -1,12 +1,20 @@
 #include "inputHandler.h"
 
 void InputHandler::keyCallback(int key, int action, int mods) {
-	if (action == GLFW_PRESS)
+	if (action == GLFW_PRESS) {
+		keys[key] = true;
 		keyDown(key, mods);
-	if (action == GLFW_RELEASE)
+	}
+	if (action == GLFW_RELEASE) {
+		keys[key] = false;
 		keyUp(key, mods);
+	}
 	if (action == GLFW_REPEAT)
 		keyRepeat(key, mods);
+}
+
+void InputHandler::getKey(int key) {
+	return keys[key];
 }
 
 void InputHandler::cursorCallback(double x, double y) {

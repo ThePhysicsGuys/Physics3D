@@ -34,6 +34,13 @@ TickerThread physicsThread;
 void init();
 void setupPhysics();
 
+/*void debugCallback(unsigned  source, unsigned int type, unsigned int id, unsigned int severity, int length, const char* message, const void* userParam) {
+	if (type == GL_DEBUG_TYPE_ERROR) 
+		Log::error("(type 0x%x) %s", type, message);
+	else
+		Log::warn("(type=0x%x) %s", type, message);
+}*/
+
 int main(void) {
 	init();
 
@@ -64,7 +71,7 @@ void init() {
 		std::cin.get();
 		stop(-1);
 	}
-	
+
 	setupPhysics();
 
 	Log::info("Initializing screen");
