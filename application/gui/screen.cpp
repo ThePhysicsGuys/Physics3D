@@ -94,10 +94,14 @@ Shape shape(vertices1, triangles, vertexCount1, triangleCount);
 Camera camera;
 
 void Screen::init() {
+	glEnable(GL_CULL_FACE);
+	glEnable(GL_DEPTH_TEST);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
 	ShaderSource shaderSource = parseShader("../res/shaders/basic.shader");
 	shader = Shader(shaderSource);
 	shader.bind();
-	camera.setPosition(0, 0, 4);
+	camera.setPosition(-1, 1, 4);
 
 	shader.createUniform("viewMatrix");
 	shader.createUniform("projectionMatrix");
@@ -147,7 +151,6 @@ void Screen::update() {
 			camera.rotate(1, 0, 0);
 		}
 	}
-	
 }
 
 int width;
@@ -155,12 +158,13 @@ int height;
 
 void Screen::refresh() {
 	/* Render here */
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 	/* Use the default shader */
 	shader.bind();
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINES);
+
 	glfwGetWindowSize(window, &width, &height);
-	Mat4f projectionMatrix = Mat4f().perspective(1.0, float(height) / width, 0.1, 1000.0);
+	Mat4f projectionMatrix = Mat4f().perspective(1.0, float(height) / width, 0.01, 1000.0);
 	shader.setUniform("projectionMatrix", projectionMatrix);
 
 	Mat4f viewMatrix = Mat4f().rotate(camera.rotation.x, 1, 0, 0).rotate(camera.rotation.y, 0, 1, 0).rotate(camera.rotation.z, 0, 0, 1).translate(-camera.position.x, -camera.position.y, -camera.position.z);
