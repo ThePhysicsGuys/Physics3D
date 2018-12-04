@@ -43,11 +43,11 @@ public:
 	bool operator~() const { if (!(arg)) throw AssertionError(line, errMsg(arg)); return true; }
 };
 
-struct AssertComparerFactory {
+struct AssertBuilder {
 	int line;
-	AssertComparerFactory(int line) : line(line) {};
+	AssertBuilder(int line) : line(line) {};
 	template<typename T>
 	AssertComparer<T> operator<(const T& other) const { return AssertComparer<T>(line, other); }
 };
 
-#define ASSERT(condition) ~(AssertComparerFactory(__LINE__) < condition)
+#define ASSERT(condition) ~(AssertBuilder(__LINE__) < condition)
