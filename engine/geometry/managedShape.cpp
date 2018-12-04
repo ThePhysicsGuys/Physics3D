@@ -4,6 +4,8 @@
 
 #include "../../util/Log.h"
 
+#include <cstring>
+
 ManagedShape::ManagedShape() : shape(), vCopyCount(new int(0)), tCopyCount(new int(0)) {}
 
 ManagedShape::ManagedShape(Shape s) : shape(shape), vCopyCount(new int(0)), tCopyCount(new int(0)) {}

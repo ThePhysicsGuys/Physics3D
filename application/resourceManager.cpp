@@ -47,7 +47,7 @@ public:
 };
 
 
-std::string getResourceAsString(Resource res) {
+std::string getResourceAsString(int res) {
 	ResourceStruct r = resources[res];
 	ResourceManager m(r.id, r.type);
 	return m.getResourceString();

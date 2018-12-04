@@ -1,7 +1,5 @@
 #pragma once
 
-#include <math.h>
-
 template<typename N>
 struct Vec2Template {
 public:
@@ -41,9 +39,7 @@ public:
 		return this->x*other.y - this->y*other.x;
 	}
 
-	N length() const {
-		return sqrt(lengthSquared());
-	}
+	N length() const;
 
 	N lengthSquared() const {
 		return x * x + y * y;
@@ -53,11 +49,3 @@ public:
 typedef Vec2Template<double>	Vec2;
 typedef Vec2Template<float>		Vec2f;
 typedef Vec2Template<long long>	Vec2l;
-
-namespace Vec2Util {
-	extern const Vec2 ZERO;
-	extern const Vec2 UNITX;
-	extern const Vec2 UNITY;
-	extern const Vec2 UNITNEGX;
-	extern const Vec2 UNITNEGY;
-};

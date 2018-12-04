@@ -1,7 +1,5 @@
 #pragma once
 
-#include <math.h>
-
 template<typename N>
 struct Vec3Template {
 public:
@@ -9,13 +7,11 @@ public:
 	N y;
 	N z;
 
-	
 	Vec3Template() : x(0), y(0), z(0) {}
 	Vec3Template(N x, N y, N z) : x(x), y(y), z(z) {};
 	Vec3Template(const Vec3Template& other) : x(other.x), y(other.y), z(other.z) {};
 	~Vec3Template() {};
-
-
+	
 	Vec3Template operator+(const Vec3Template& other) const {
 		return Vec3Template(x + other.x, y + other.y, z + other.z);
 	}
@@ -46,9 +42,7 @@ public:
 							this->x*other.y - this->y*other.x);
 	}
 
-	N length() const {
-		return sqrt(lengthSquared());
-	}
+	N length() const;
 
 	N lengthSquared() const {
 		return x*x + y*y + z*z;
@@ -101,9 +95,7 @@ public:
 		return *this * ((*this * other) / lengthSquared());
 	}
 
-	double angleBetween(const Vec3Template other) const {
-		return acos(this->normalize() * (other.normalize()));
-	}
+	N angleBetween(const Vec3Template other) const;
 
 	bool isLongerThan(N length) const {
 		return lengthSquared() > length*length;
@@ -140,13 +132,3 @@ public:
 typedef Vec3Template<double>	Vec3;
 typedef Vec3Template<float>		Vec3f;
 typedef Vec3Template<long long>	Vec3l;
-
-namespace Vec3Util {
-	extern const Vec3 ZERO;
-	extern const Vec3 UNITX;
-	extern const Vec3 UNITY;
-	extern const Vec3 UNITZ;
-	extern const Vec3 UNITNEGX;
-	extern const Vec3 UNITNEGY;
-	extern const Vec3 UNITNEGZ;
-};

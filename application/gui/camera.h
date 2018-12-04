@@ -4,6 +4,8 @@
 #include "../../engine/math/rot3.h"
 #include "../util/log.h"
 
+#include <cmath>
+
 class Camera {
 public:
 	Vec3 position;
@@ -12,7 +14,7 @@ public:
 	double rspeed;
 
 	Camera(Vec3 position, Rot3 rotation) : position(position), rotation(rotation), speed(0.008), rspeed(0.003) {};
-	Camera() : position(Vec3Util::ZERO), rotation(Rot3Util::ZERO), speed(0.008), rspeed(0.003) {};
+	Camera() : position(Vec3()), rotation(Rot3(0.0,0.0,0.0)), speed(0.008), rspeed(0.003) {};
 
 	void setSpeed(double speed) {
 		this->speed = speed;

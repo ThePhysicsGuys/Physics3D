@@ -11,7 +11,11 @@
 #include "../engine/geometry/shape.h"
 #include "../engine/geometry/boundingBox.h"
 
+#include "../resourceManager.h"
+
 #include <stdlib.h>
+#include <fstream>
+#include <sstream>
 
 World* curWorld = NULL;
 
@@ -98,7 +102,7 @@ void Screen::init() {
 	glEnable(GL_DEPTH_TEST);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-	ShaderSource shaderSource = parseShader("../res/shaders/basic.shader");
+	ShaderSource shaderSource = parseShader(std::istringstream(getResourceAsString(BASIC_SHADER1)), "basic.shader");
 	shader = Shader(shaderSource);
 	shader.bind();
 	camera.setPosition(-1, 1, 4);
