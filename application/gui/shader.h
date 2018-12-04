@@ -14,7 +14,7 @@ struct ShaderSource {
 	std::string geometrySource;
 };
 
-ShaderSource parseShader(const std::string& path);
+ShaderSource parseShader(std::istream& shaderTextStream, const char* shaderName);
 ShaderSource parseShader(const std::string& vertexPath, const std::string& fragmentPath);
 ShaderSource parseShader(const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath);
 

@@ -11,7 +11,11 @@
 #include "../engine/geometry/shape.h"
 #include "../engine/geometry/boundingBox.h"
 
+#include "../resourceManager.h"
+
 #include <stdlib.h>
+#include <fstream>
+#include <sstream>
 
 World* curWorld = NULL;
 
@@ -94,7 +98,7 @@ Shape shape(vertices1, triangles, vertexCount1, triangleCount);
 Camera camera;
 
 void Screen::init() {
-	ShaderSource shaderSource = parseShader("../res/shaders/basic.shader");
+	ShaderSource shaderSource = parseShader(std::istringstream(getResourceAsString(BASIC_SHADER1)), "basic.shader");
 	shader = Shader(shaderSource);
 	shader.bind();
 	camera.setPosition(0, 0, 4);

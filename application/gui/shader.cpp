@@ -139,8 +139,8 @@ ShaderSource parseShader(const std::string& vertexPath, const std::string& fragm
 	return { vertexFile , fragmentFile , ""};
 }
 
-ShaderSource parseShader(const std::string& path) {
-	Log::info("Started parsing fragment and vertex shader: (%s)", path.c_str());
+ShaderSource parseShader(std::istream& shaderTextStream, const char* shaderName) {
+	Log::info("Started parsing fragment and vertex shader: (%s)", shaderName);
 	enum class ShaderType {
 		NONE = -1,
 		VERTEX = 0,
@@ -150,16 +150,11 @@ ShaderSource parseShader(const std::string& path) {
 
 	ShaderType type = ShaderType::NONE;
 
-	std::ifstream fileStream(path);
 	std::string line;
 	std::stringstream stringStream[3];
 
-	if (fileStream.fail()) {
-		Log::fatal("File could not be opened: %s", path.c_str());
-	}
-
 	int lineNumber = 0;
-	while (getline(fileStream, line)) {
+	while (getline(shaderTextStream, line)) {
 		lineNumber++;
 		if (line.find("#shader vertex") != std::string::npos) {
 			type = ShaderType::VERTEX;
@@ -172,21 +167,19 @@ ShaderSource parseShader(const std::string& path) {
 		}
 		else {
 			if (type == ShaderType::NONE) {
-				Log::warn("(line %d): Code in (%s) before the first #shader instruction will be ignored", lineNumber, path.c_str());
+				Log::warn("(line %d): Code in (%s) before the first #shader instruction will be ignored", lineNumber, shaderName);
 				continue;
 			}
 			stringStream[(int)type] << line << "\n";
 		}
 	}
 
-	fileStream.close();
-
 	if (stringStream[(int)ShaderType::GEOMETRY].str().empty()) {
-		Log::info("Parsed vertex and fragment shader: (%s)", path.c_str());
+		Log::info("Parsed vertex and fragment shader: (%s)", shaderName);
 		return { stringStream[(int)ShaderType::VERTEX].str(), stringStream[(int)ShaderType::FRAGMENT].str(), "" };
 	}
 	else {
-		Log::info("Parsed vertex, fragment and geometry: (%s)", path.c_str());
+		Log::info("Parsed vertex, fragment and geometry shader: (%s)", shaderName);
 		return { stringStream[(int)ShaderType::VERTEX].str(), stringStream[(int)ShaderType::FRAGMENT].str(),  stringStream[(int)ShaderType::GEOMETRY].str() };
 	}
 }
