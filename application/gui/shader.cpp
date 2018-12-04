@@ -13,7 +13,7 @@ void Shader::createUniform(std::string uniform) {
 	if (location < 0)
 		Log::error("Could not find uniform (%s)", uniform.c_str());
 	else
-		Log::info("Created uniform [%s] with id %d", uniform.c_str(), location);
+		Log::debug("Created uniform [%s] with id %d", uniform.c_str(), location);
 	uniforms.insert(std::make_pair(uniform, location));
 }
 
@@ -87,7 +87,7 @@ unsigned int createShader(const std::string& vertexShader, const std::string& fr
 	glCall(glDeleteShader(vs));
 	glCall(glDeleteShader(fs));
 
-	Log::info("Created shader with id %d", program);
+	Log::debug("Created shader with id %d", program);
 
 	return program;
 }

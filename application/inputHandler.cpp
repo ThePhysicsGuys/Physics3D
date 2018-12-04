@@ -13,7 +13,7 @@ void InputHandler::keyCallback(int key, int action, int mods) {
 		keyRepeat(key, mods);
 }
 
-void InputHandler::getKey(int key) {
+bool InputHandler::getKey(int key) {
 	return keys[key];
 }
 
