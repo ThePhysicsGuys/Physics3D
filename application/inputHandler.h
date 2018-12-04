@@ -16,6 +16,7 @@ private:
 
 public:
 	InputHandler(GLFWwindow* window);
+	char anyKey = 0;
 	bool getKey(int key);
 	virtual void keyDown(int key, int modifiers) {};
 	virtual void keyUp(int key, int modifiers) {};

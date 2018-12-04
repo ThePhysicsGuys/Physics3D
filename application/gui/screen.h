@@ -20,6 +20,7 @@ public:
 
 	bool shouldClose();
 	void init();
+	void update();
 	void refresh();
 	void close();
 

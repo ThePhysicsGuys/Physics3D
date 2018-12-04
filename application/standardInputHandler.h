@@ -9,7 +9,6 @@ public:
 
 	StandardInputHandler(GLFWwindow* window, Camera* camera);
 
-	void keyRepeat(int key, int modifiers) override;
 	void windowResize(int width, int height) override;
 
 	// void keyDown(int key, int modifiers) override;

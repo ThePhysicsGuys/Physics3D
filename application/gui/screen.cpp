@@ -9,6 +9,7 @@
 #include "camera.h"
 #include "../standardInputHandler.h"
 #include "../engine/geometry/shape.h"
+#include "../engine/geometry/boundingBox.h"
 
 #include <stdlib.h>
 
@@ -84,6 +85,7 @@ const Triangle triangles[triangleCount] = {
 
 IndexedMesh* mesh1 = nullptr;
 Mesh* mesh2 = nullptr;
+BoundingBox* box = nullptr;
 StandardInputHandler* handler = nullptr;
 Shape shape(vertices1, triangles, vertexCount1, triangleCount);
 Camera camera;
@@ -92,12 +94,16 @@ void Screen::init() {
 	ShaderSource shaderSource = parseShader("../res/shaders/basic.shader");
 	shader = Shader(shaderSource);
 	shader.bind();
+	camera.setPosition(0, 0, 4);
 
 	shader.createUniform("viewMatrix");
+	shader.createUniform("projectionMatrix");
 
 	handler = new StandardInputHandler(window, &camera);
 
-	mesh1 = new IndexedMesh(shape);
+	box = new BoundingBox{-0.5, -0.5, -0.5, 0.5, 0.5, 0.5};
+	
+	mesh1 = new IndexedMesh(box->toShape(new Vec3[8]));
 	mesh2 = new Mesh(vertices2, vertexCount2);
 }
 
@@ -105,19 +111,61 @@ void Screen::makeCurrent() {
 	glfwMakeContextCurrent(this->window);
 }
 
+void Screen::update() {
+	if (handler->anyKey) {
+		if (handler->getKey(GLFW_KEY_W)) {
+			camera.move(0, 1, 0);
+		}
+		if (handler->getKey(GLFW_KEY_S)) {
+			camera.move(0, -1, 0);
+		}
+		if (handler->getKey(GLFW_KEY_D)) {
+			camera.move(1, 0, 0);
+		}
+		if (handler->getKey(GLFW_KEY_A)) {
+			camera.move(-1, 0, 0);
+		}
+		if (handler->getKey(GLFW_KEY_SPACE)) {
+			camera.move(0, 0, 1);
+		}
+		if (handler->getKey(GLFW_KEY_LEFT_SHIFT)) {
+			camera.move(0, 0, -1);
+		}
+		if (handler->getKey(GLFW_KEY_LEFT)) {
+			camera.rotate(0, 1, 0);
+		}
+		if (handler->getKey(GLFW_KEY_RIGHT)) {
+			camera.rotate(0, -1, 0);
+		}
+		if (handler->getKey(GLFW_KEY_UP)) {
+			camera.rotate(1, 0, 0);
+		}
+		if (handler->getKey(GLFW_KEY_DOWN)) {
+			camera.rotate(-1, 0, 0);
+		}
+	}
+	
+}
+
+int width;
+int height;
+
 void Screen::refresh() {
 	/* Render here */
 	glClear(GL_COLOR_BUFFER_BIT);
-
 	/* Use the default shader */
 	shader.bind();
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINES);
+	glfwGetWindowSize(window, &width, &height);
+	Mat4f projectionMatrix = Mat4f().perspective(1.0, float(height) / width, 0.1, 1000.0);
+	shader.setUniform("projectionMatrix", projectionMatrix);
 
-	Mat4f viewMatrix = Mat4f().translate(-camera.position.x, -camera.position.y, -camera.position.z);
+	Mat4f viewMatrix = Mat4f().rotate(camera.rotation.x, 1, 0, 0).rotate(camera.rotation.y, 0, 1, 0).rotate(camera.rotation.z, 0, 0, 1).translate(-camera.position.x, -camera.position.y, -camera.position.z);
 	shader.setUniform("viewMatrix", viewMatrix);
 
 	/* Render the mesh */
-	//mesh1->render();
-	mesh2->render();
+	mesh1->render();
+	//mesh2->render();
 
 	/* Swap front and back buffers */
 	glfwSwapBuffers(this->window);

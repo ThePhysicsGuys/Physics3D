@@ -4,27 +4,6 @@ StandardInputHandler::StandardInputHandler(GLFWwindow* window, Camera* camera) :
 	this->camera = camera;
 }
 
-void StandardInputHandler::keyRepeat(int key, int modifiers)  {
-	if (key == GLFW_KEY_W) {
-		camera->move(1, 0, 0);
-	}
-	if (key == GLFW_KEY_S) {
-		camera->move(-1, 0, 0);
-	}
-	if (key == GLFW_KEY_D) {
-		camera->move(0, 1, 0);
-	}
-	if (key == GLFW_KEY_A) {
-		camera->move(0, -1, 0);
-	}
-	if (key == GLFW_KEY_SPACE) {
-		camera->move(0, 0, 1);
-	}
-	if (key == GLFW_KEY_LEFT_SHIFT) {
-		camera->move(0, 0, -1);
-	}
-}
-
 void StandardInputHandler::windowResize(int width, int height) {
 	glViewport(0, 0, width, height);
 }

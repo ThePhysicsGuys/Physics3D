@@ -3,10 +3,12 @@
 void InputHandler::keyCallback(int key, int action, int mods) {
 	if (action == GLFW_PRESS) {
 		keys[key] = true;
+		anyKey++;
 		keyDown(key, mods);
 	}
 	if (action == GLFW_RELEASE) {
 		keys[key] = false;
+		anyKey--;
 		keyUp(key, mods);
 	}
 	if (action == GLFW_REPEAT)

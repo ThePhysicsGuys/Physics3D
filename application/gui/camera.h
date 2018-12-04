@@ -9,9 +9,10 @@ public:
 	Vec3 position;
 	Rot3 rotation;
 	double speed;
+	double rspeed;
 
-	Camera(Vec3 position, Rot3 rotation) : position(position), rotation(rotation), speed(0.05) {};
-	Camera() : position(Vec3Util::ZERO), rotation(Rot3Util::ZERO), speed(0.05) {};
+	Camera(Vec3 position, Rot3 rotation) : position(position), rotation(rotation), speed(0.002), rspeed(0.001) {};
+	Camera() : position(Vec3Util::ZERO), rotation(Rot3Util::ZERO), speed(0.002), rspeed(0.001) {};
 
 	void setSpeed(double speed) {
 		this->speed = speed;
@@ -33,6 +34,15 @@ public:
 		this->rotation = rotation;
 	};
 
+	void rotate(double dx, double dy, double dz) {
+		double x = rotation.x, y = rotation.y, z = rotation.z;
+		x += rspeed * dx;
+		y += rspeed * dy;
+		z += rspeed * dz;
+		Log::debug("Camera rotation [%f, %f, %f]", x, y, z);
+		rotation = Rot3(x, y, z);
+	}
+
 	void move(double dx, double dy, double dz) {
 		// double factor = 57.2957795131;
 		double pi = 3.14159265359;
@@ -46,7 +56,7 @@ public:
 			z += speed * cos(rotation.y - pi / 2) * dx;
 		}
 		y += speed * dy;
-		Log::debug("Camera [%f, %f, %f]", x, y, z);
+		Log::debug("Camera position [%f, %f, %f]", x, y, z);
 		position = Vec3(x, y, z);
 	}
 };
