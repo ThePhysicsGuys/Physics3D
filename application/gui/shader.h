@@ -11,16 +11,19 @@
 struct ShaderSource {
 	std::string vertexSource;
 	std::string fragmentSource;
+	std::string geometrySource;
 };
 
 ShaderSource parseShader(const std::string& path);
 ShaderSource parseShader(const std::string& vertexPath, const std::string& fragmentPath);
+ShaderSource parseShader(const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath);
 
 class Shader {
 public:
 	Shader() {};
 	Shader(const std::string& vertexShader, const std::string& fragmentShader);
-	Shader(ShaderSource shaderSource) : Shader(shaderSource.vertexSource, shaderSource.fragmentSource) {};
+	Shader(const std::string& vertexShader, const std::string& fragmentShader, const std::string& geometryShader);
+	Shader(ShaderSource shaderSource) : Shader(shaderSource.vertexSource, shaderSource.fragmentSource, shaderSource.geometrySource) {};
 	void createUniform(std::string uniform);
 	void setUniform(std::string uniform, int value);
 	void setUniform(std::string uniform, float value);

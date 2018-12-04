@@ -11,8 +11,8 @@ public:
 	double speed;
 	double rspeed;
 
-	Camera(Vec3 position, Rot3 rotation) : position(position), rotation(rotation), speed(0.002), rspeed(0.001) {};
-	Camera() : position(Vec3Util::ZERO), rotation(Rot3Util::ZERO), speed(0.002), rspeed(0.001) {};
+	Camera(Vec3 position, Rot3 rotation) : position(position), rotation(rotation), speed(0.008), rspeed(0.003) {};
+	Camera() : position(Vec3Util::ZERO), rotation(Rot3Util::ZERO), speed(0.008), rspeed(0.003) {};
 
 	void setSpeed(double speed) {
 		this->speed = speed;
@@ -44,7 +44,6 @@ public:
 	}
 
 	void move(double dx, double dy, double dz) {
-		// double factor = 57.2957795131;
 		double pi = 3.14159265359;
 		double x = position.x, y = position.y, z = position.z;
 		if (dz != 0) {

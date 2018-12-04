@@ -54,6 +54,9 @@ Screen::Screen(int width, int height, World* w) {
 
 	/* Make the window's context current */
 	makeCurrent();
+
+	/* Debug */
+	// glEnable(GL_DEPTH_TEST);
 }
 
 Shader shader;
@@ -114,10 +117,10 @@ void Screen::makeCurrent() {
 void Screen::update() {
 	if (handler->anyKey) {
 		if (handler->getKey(GLFW_KEY_W)) {
-			camera.move(0, 1, 0);
+			camera.move(0, 0, -1);
 		}
 		if (handler->getKey(GLFW_KEY_S)) {
-			camera.move(0, -1, 0);
+			camera.move(0, 0, 1);
 		}
 		if (handler->getKey(GLFW_KEY_D)) {
 			camera.move(1, 0, 0);
@@ -126,22 +129,22 @@ void Screen::update() {
 			camera.move(-1, 0, 0);
 		}
 		if (handler->getKey(GLFW_KEY_SPACE)) {
-			camera.move(0, 0, 1);
+			camera.move(0, 1, 0);
 		}
 		if (handler->getKey(GLFW_KEY_LEFT_SHIFT)) {
-			camera.move(0, 0, -1);
+			camera.move(0, -1, 0);
 		}
 		if (handler->getKey(GLFW_KEY_LEFT)) {
-			camera.rotate(0, 1, 0);
-		}
-		if (handler->getKey(GLFW_KEY_RIGHT)) {
 			camera.rotate(0, -1, 0);
 		}
+		if (handler->getKey(GLFW_KEY_RIGHT)) {
+			camera.rotate(0, 1, 0);
+		}
 		if (handler->getKey(GLFW_KEY_UP)) {
-			camera.rotate(1, 0, 0);
+			camera.rotate(-1, 0, 0);
 		}
 		if (handler->getKey(GLFW_KEY_DOWN)) {
-			camera.rotate(-1, 0, 0);
+			camera.rotate(1, 0, 0);
 		}
 	}
 	
