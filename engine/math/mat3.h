@@ -1,9 +1,5 @@
 #pragma once
 
-#include <cmath>
-#include <string>
-#include <sstream>
-
 #include "vec3.h"
 
 template<typename N>
@@ -64,31 +60,7 @@ public:
 		return inverse();
 	}
 
-	Mat3Template rotate(N angle, N x, N y, N z) const {
-		N s = sin(angle);
-		N c = cos(angle);
-		N C = 1 - c;
-		N rm00 = x * x * C + c;
-		N rm01 = x * y * C + z * s;
-		N rm02 = x * z * C - y * s;
-		N rm10 = x * y * C - z * s;
-		N rm11 = y * y * C + c;
-		N rm12 = y * z * C + x * s;
-		N rm20 = x * z * C + y * s;
-		N rm21 = y * z * C - x * s;
-		N rm22 = z * z * C + c;
-		N r00 = m00 * rm00 + m10 * rm01 + m20 * rm02;
-		N r01 = m01 * rm00 + m11 * rm01 + m21 * rm02;
-		N r02 = m02 * rm00 + m12 * rm01 + m22 * rm02;
-		N r10 = m00 * rm10 + m10 * rm11 + m20 * rm12;
-		N r11 = m01 * rm10 + m11 * rm11 + m21 * rm12;
-		N r12 = m02 * rm10 + m12 * rm11 + m22 * rm12;
-		N r20 = m00 * rm20 + m10 * rm21 + m20 * rm22;
-		N r21 = m01 * rm20 + m11 * rm21 + m21 * rm22;
-		N r22 = m02 * rm20 + m12 * rm21 + m22 * rm22;
-
-		return Mat3Template(r00, r01, r02, r10, r11, r12, r20, r21, r22);
-	}
+	Mat3Template rotate(N angle, N x, N y, N z) const;
 
 	Mat3Template transpose() const {
 		return Mat3Template(m00, m10, m20, m01, m11, m21, m02, m12, m22);
@@ -127,7 +99,7 @@ public:
 	}
 
 	Vec3Template<N> operator*(const Vec3Template<N>& other) const {
-		return Vec3(
+		return Vec3Template<N>(
 			m00 * other.x + m01 * other.y + m02 * other.z, 
 			m10 * other.x + m11 * other.y + m12 * other.z, 
 			m20 * other.x + m21 * other.y + m22 * other.z
@@ -147,31 +119,6 @@ public:
 
 		return Mat3Template(r00, r01, r02, r10, r11, r12, r20, r21, r22);
 	}
-
-	friend std::ostream& operator<<(std::ostream& os, const Mat3Template& matrix) {
-		os << "Mat3Template(";
-
-		for (int i = 0; i < 8; i++) {
-			os << matrix.m[i];
-			os << (((i + 1) % 3 == 0) ? "; " : ", ");
-		}
-		os << matrix.m[8] << ")";
-
-		return os;
-	}
-
-	std::string str() const {
-		std::stringstream ss;
-		ss << std::string("Mat3Template(");
-
-		for (int i = 0; i < 8; i++) {
-			ss << m[i];
-			ss << (((i + 1) % 3 == 0) ? "; " : ", ");
-		}
-		ss << m[8] << ")";
-
-		return ss.str();
-	}
 };
 
 typedef Mat3Template<double>	Mat3;
@@ -181,8 +128,3 @@ typedef Mat3Template<long long>	Mat3l;
 typedef Mat3 RotMat3;
 
 Mat3 fromEulerAngles(double alpha, double beta, double gamma);
-
-namespace Mat3Util {
-	extern const Mat3 ZERO;
-	extern const Mat3 IDENTITY;
-};

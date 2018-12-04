@@ -1,12 +1,16 @@
 #include "vec3.h"
 
+#include <cmath>
 
-namespace Vec3Util {
-	const Vec3 ZERO(0.0, 0.0, 0.0);
-	const Vec3 UNITX(1.0, 0.0, 0.0);
-	const Vec3 UNITY(0.0, 1.0, 0.0);
-	const Vec3 UNITZ(0.0, 0.0, 1.0);
-	const Vec3 UNITNEGX(-1.0, 0.0, 0.0);
-	const Vec3 UNITNEGY(0.0, -1.0, 0.0);
-	const Vec3 UNITNEGZ(0.0, 0.0, -1.0);
-};
+template<typename N>
+N Vec3Template<N>::length() const {
+	return sqrt(lengthSquared());
+}
+
+template<typename N>
+N Vec3Template<N>::angleBetween(const Vec3Template<N> other) const {
+	return acos(this->normalize() * (other.normalize()));
+}
+
+template class Vec3Template<double>;
+template class Vec3Template<float>;
