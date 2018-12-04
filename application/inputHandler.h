@@ -3,9 +3,12 @@
 #include "GL\glew.h"
 #include "GLFW\glfw3.h"
 
+#include "../engine/math/vec2.h"
+
 
 class InputHandler {
 private:
+	GLFWwindow* window;
 	bool keys[GLFW_KEY_LAST + 1];
 	void keyCallback(int key, int action, int mods);
 	void cursorCallback(double x, double y);
@@ -18,6 +21,8 @@ public:
 	InputHandler(GLFWwindow* window);
 	char anyKey = 0;
 	bool getKey(int key);
+	Vec2 getMousePos();
+
 	virtual void keyDown(int key, int modifiers) {};
 	virtual void keyUp(int key, int modifiers) {};
 	virtual void keyRepeat(int key, int modifiers) {};

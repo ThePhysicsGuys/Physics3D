@@ -45,7 +45,13 @@ void InputHandler::windowSizeCallback(int width, int height) {
 	windowResize(width, height);
 }
 
-InputHandler::InputHandler(GLFWwindow* window) {
+Vec2 InputHandler::getMousePos() {
+	double x, y;
+	glfwGetCursorPos(window, &x, &y);
+	return Vec2(x, y);
+}
+
+InputHandler::InputHandler(GLFWwindow* window) : window(window){
 	glfwSetWindowUserPointer(window, this);
 
 	glfwSetKeyCallback(window, [] (GLFWwindow* window, int key, int scancode, int action, int mods) {

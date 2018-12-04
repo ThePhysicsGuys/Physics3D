@@ -6,6 +6,8 @@
 class StandardInputHandler : public InputHandler {
 public:
 	Camera* camera;
+	Vec2 curPos;
+	bool dragging = false;
 
 	StandardInputHandler(GLFWwindow* window, Camera* camera);
 
@@ -13,10 +15,10 @@ public:
 
 	// void keyDown(int key, int modifiers) override;
 	// void keyUp(int key, int modifiers) override;
-	// void mouseDown(int button, int mods) override;
-	// void mouseUp(int button, int mods) override;
-	// void mouseMove(double x, double y) override;
-	// void mouseEnter() override;
-	// void mouseExit() override;
+	void mouseDown(int button, int mods) override;
+	void mouseUp(int button, int mods) override;
+	void mouseMove(double x, double y) override;
+	void mouseEnter() override;
+	void mouseExit() override;
 	// void scroll(double xOffset, double yOffset) override;
 };
