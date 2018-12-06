@@ -29,11 +29,11 @@ vec3 normal() {
 	vec3 a = vec3(gl_in[0].gl_Position) - vec3(gl_in[1].gl_Position);
 	vec3 b = vec3(gl_in[2].gl_Position) - vec3(gl_in[1].gl_Position);
 	vec3 norm = normalize(cross(a, b));
-	if (dot(fcenter, fnormal) > 0) {
-		return norm;
-	} else {
+	//if (dot(fcenter, fnormal) > 0) {
+	//	return norm;
+	// } else { 
 		return -norm;
-	}
+	// }
 }
 
 void main() {

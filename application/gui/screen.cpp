@@ -105,7 +105,7 @@ StandardInputHandler* handler = nullptr;
 Camera camera;
 
 void Screen::init() {
-	//glEnable(GL_CULL_FACE);
+	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 	int width, height;
 	glfwGetWindowSize(window, &width, &height);
@@ -182,18 +182,18 @@ void Screen::update() {
 
 void Screen::refresh() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-	Mat4f projectionMatrix = Mat4f().perspective(1.0, screenSize.y / screenSize.x, 0.01, 1000.0);
+	Mat4f projectionMatrix = Mat4f().perspective(1.0, screenSize.x / screenSize.y, 0.01, 100.0);
 	Mat4f viewMatrix = Mat4f().rotate(camera.rotation.x, 1, 0, 0).rotate(camera.rotation.y, 0, 1, 0).rotate(camera.rotation.z, 0, 0, 1).translate(-camera.position.x, -camera.position.y, -camera.position.z);
 
-	/*
+	
 	basicShader.bind();
 	basicShader.setUniform("projectionMatrix", projectionMatrix);
 	basicShader.setUniform("viewMatrix", viewMatrix);
 	basicShader.setUniform("viewPos", Vec3f(camera.position.x, camera.position.y, camera.position.z));
 	boxMesh->render();
-	*/
+	
 
 	vectorShader.bind();
 	vectorShader.setUniform("projectionMatrix", projectionMatrix);

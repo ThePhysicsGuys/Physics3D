@@ -1,4 +1,5 @@
 #include "standardInputHandler.h"
+#include "../engine/math/mathUtil.h"
 
 StandardInputHandler::StandardInputHandler(GLFWwindow* window, Screen* screen, Camera* camera) : InputHandler(window) {
 	this->screen = screen;
@@ -7,6 +8,7 @@ StandardInputHandler::StandardInputHandler(GLFWwindow* window, Screen* screen, C
 
 void StandardInputHandler::windowResize(int width, int height) {
 	glViewport(0, 0, width, height);
+	Log::debug("%s", str(screen->screenSize).c_str());
 	screen->screenSize = Vec2(width, height);
 }
 

@@ -35,9 +35,9 @@ Mat4Template<N> Mat4Template<N>::rotate(N angle, N x, N y, N z) const {
 
 template<typename N>
 Mat4Template<N> Mat4Template<N>::perspective(N fov, N aspect, N zNear, N zFar) const {
-	N t = tan(fov / 2);
-	N t00 = 1 / (t * aspect);
-	N t11 = 1 / t;
+	N t = tan(fov / 2.0);
+	N t00 = 1.0 / (t * aspect);
+	N t11 = 1.0 / t;
 	N t22 = (zFar + zNear) / (zNear - zFar);
 	N t32 = (zFar + zFar) * zNear / (zNear - zFar);
 	N r00 = m00 * t00;
