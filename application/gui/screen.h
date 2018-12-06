@@ -6,6 +6,8 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include "indexedMesh.h"
+
 bool initGLFW();
 bool initGLEW();
 
@@ -15,6 +17,7 @@ class Screen {
 private:
 	GLFWwindow* window;
 	World* w;
+	std::vector<IndexedMesh*> meshes;
 public:
 	Vec2 screenSize;
 
@@ -30,4 +33,6 @@ public:
 	void makeCurrent();
 
 	void setWorld(World* w) { this->w = w; };
+
+	int addMeshShape(Shape mesh);
 };

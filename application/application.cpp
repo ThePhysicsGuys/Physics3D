@@ -54,6 +54,10 @@ int main(void) {
 	world.addObject(triangleThing);
 	world.addObject(box);
 
+	triangleThing.part.drawMeshId = screen.addMeshShape(testShape);
+
+
+
 	physicsThread.start();
 
 	/* Loop until the user closes the window */

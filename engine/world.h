@@ -3,10 +3,12 @@
 #include "part.h"
 #include "physical.h"
 #include <vector>
+#include <mutex>
 
 class World {
 public:
 	std::vector<Physical> physicals;
+	std::mutex lock;
 
 	World();
 

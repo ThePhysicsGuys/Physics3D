@@ -15,6 +15,7 @@ void main() {
 layout(triangles) in;
 layout(triangle_strip, max_vertices = 3) out;
 
+uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 
@@ -40,13 +41,13 @@ void main() {
 	fcenter = center();
 	fnormal = normal();
 
-	gl_Position = projectionMatrix * viewMatrix * gl_in[0].gl_Position;
+	gl_Position = projectionMatrix * viewMatrix * transpose(modelMatrix) * gl_in[0].gl_Position;
 	EmitVertex();
 
-	gl_Position = projectionMatrix * viewMatrix * gl_in[1].gl_Position;
+	gl_Position = projectionMatrix * viewMatrix * transpose(modelMatrix) * gl_in[1].gl_Position;
 	EmitVertex();
 
-	gl_Position = projectionMatrix * viewMatrix * gl_in[2].gl_Position;
+	gl_Position = projectionMatrix * viewMatrix * transpose(modelMatrix) * gl_in[2].gl_Position;
 	EmitVertex();
 
 	EndPrimitive();
