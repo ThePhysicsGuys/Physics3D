@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../engine/world.h"
+#include "../../engine/math/vec2.h"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -15,6 +16,8 @@ private:
 	GLFWwindow* window;
 	World* w;
 public:
+	Vec2 screenSize;
+
 	Screen() {};
 	Screen(int width, int height, World* world);
 

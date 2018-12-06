@@ -12,7 +12,7 @@ public:
 	Rot3 rotation;
 	double speed;
 	double rspeed;
-
+	
 	Camera(Vec3 position, Rot3 rotation) : position(position), rotation(rotation), speed(0.008), rspeed(0.003) {};
 	Camera() : position(Vec3()), rotation(Rot3(0.0,0.0,0.0)), speed(0.008), rspeed(0.003) {};
 

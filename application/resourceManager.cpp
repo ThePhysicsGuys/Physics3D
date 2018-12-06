@@ -9,7 +9,8 @@ struct ResourceStruct {
 };
 
 ResourceStruct resources []{
-	{ IDR_SHADER1, "SHADER" }
+	{ IDR_SHADER1, "SHADER" },
+	{ IDR_SHADER2, "SHADER" }
 };
 
 class ResourceManager {

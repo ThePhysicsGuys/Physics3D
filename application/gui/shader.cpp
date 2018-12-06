@@ -9,6 +9,7 @@
 #include <sstream>
 
 void Shader::createUniform(std::string uniform) {
+	bind();
 	int location = glGetUniformLocation(id, uniform.c_str());
 	if (location < 0)
 		Log::error("Could not find uniform (%s)", uniform.c_str());
@@ -33,8 +34,8 @@ void Shader::setUniform(std::string uniform, Vec2 value) {
 	glUniform2d(uniforms[uniform], value.x, value.y);
 }
 
-void Shader::setUniform(std::string uniform, Vec3 value) {
-	glUniform3d(uniforms[uniform], value.x, value.y, value.z);
+void Shader::setUniform(std::string uniform, Vec3f value) {
+	glUniform3f(uniforms[uniform], value.x, value.y, value.z);
 }
 
 void Shader::setUniform(std::string uniform, Mat4f value) {

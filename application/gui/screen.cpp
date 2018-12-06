@@ -4,7 +4,7 @@
 #include "../engine/math/mat4.h"
 #include "shader.h"
 #include "indexedMesh.h"
-#include "mesh.h"
+#include "vectorMesh.h"
 #include "../engine/geometry/shape.h"
 #include "camera.h"
 #include "../standardInputHandler.h"
@@ -18,6 +18,7 @@
 #include <sstream>
 
 World* curWorld = NULL;
+Vec2 screenSize;
 
 bool initGLFW() {
 	/* Initialize the library */
@@ -58,64 +59,64 @@ Screen::Screen(int width, int height, World* w) {
 
 	/* Make the window's context current */
 	makeCurrent();
-
-	/* Debug */
-	// glEnable(GL_DEPTH_TEST);
 }
 
-Shader shader;
-
-const unsigned int vertexCount1 = 4;
-const unsigned int vertexCount2 = 6;
-const unsigned int triangleCount = 2;
-
-const Vec3 vertices1[vertexCount1] {
-	Vec3(-0, -0, 0),
-	Vec3( 1, -0, 0),
-	Vec3( 1,  1, 0),
-	Vec3(-0,  1, 0)
+const unsigned int vertexCount = 6;
+const double positions[vertexCount * 3]{
+	0, 0, 0,
+	0, 0, 0,
+	0, 0, 0,
+	0, 0, 0,
+	0, 0, 0,
+	0, 0, 0
 };
 
-const double vertices2[vertexCount2 * 3]{
-	-0.5, -0.5, -1,
-	 0.5, -0.5, -1,
-	 0.5,  0.5, -1,
-	 0.5,  0.5, -1,
-	-0.5,  0.5, -1,
-	-0.5, -0.5, -1,
+const double rotations[vertexCount * 3]{
+	 1,  0,  0,
+	-1,  0,  0,
+	 0,  1,  0,
+	 0, -1,  0,
+	 0,  0,  1,
+	 0,  0, -1
 };
 
-const Triangle triangles[triangleCount] = {
-	{ 0, 1, 2 },
-	{ 2, 3, 0 }
-};
+IndexedMesh* boxMesh = nullptr;
+VectorMesh* vectorMesh = nullptr;
 
-IndexedMesh* mesh1 = nullptr;
-Mesh* mesh2 = nullptr;
+Shader basicShader;
+Shader vectorShader;
 BoundingBox* box = nullptr;
 StandardInputHandler* handler = nullptr;
-Shape shape(vertices1, triangles, vertexCount1, triangleCount);
 Camera camera;
 
 void Screen::init() {
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	int width, height;
+	glfwGetWindowSize(window, &width, &height);
+	screenSize = Vec2(width, height);
 
-	ShaderSource shaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(BASIC_SHADER1)), "basic.shader");
-	shader = Shader(shaderSource);
-	shader.bind();
+	ShaderSource basicShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(BASIC_SHADER1)), "basic.shader");
+	ShaderSource vectorShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(VECTOR_SHADER1)), "vector.shader");
+
+	basicShader = Shader(basicShaderSource);
+	basicShader.createUniform("viewMatrix");
+	basicShader.createUniform("projectionMatrix");
+	basicShader.createUniform("viewPos");
+
+	vectorShader = Shader(vectorShaderSource);
+	vectorShader.createUniform("viewMatrix");
+	vectorShader.createUniform("projectionMatrix");
+
 	camera.setPosition(-1, 1, 4);
 
-	shader.createUniform("viewMatrix");
-	shader.createUniform("projectionMatrix");
-
-	handler = new StandardInputHandler(window, &camera);
+	handler = new StandardInputHandler(window, this, &camera);
 
 	box = new BoundingBox{-0.5, -0.5, -0.5, 0.5, 0.5, 0.5};
-	
-	mesh1 = new IndexedMesh(box->toShape(new Vec3[8]));
-	mesh2 = new Mesh(vertices2, vertexCount2);
+	Shape shape = box->toShape(new Vec3[8]).rotated(fromEulerAngles(0.5, 0.1, 0.2), new Vec3[8]);
+
+	boxMesh = new IndexedMesh(shape);
+	vectorMesh = new VectorMesh(positions, rotations, vertexCount);
 }
 
 void Screen::makeCurrent() {
@@ -157,37 +158,34 @@ void Screen::update() {
 	}
 }
 
-int width;
-int height;
-
 void Screen::refresh() {
-	/* Render here */
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-	/* Use the default shader */
-	shader.bind();
-
-	glfwGetWindowSize(window, &width, &height);
-	Mat4f projectionMatrix = Mat4f().perspective(1.0, float(height) / width, 0.01, 1000.0);
-	shader.setUniform("projectionMatrix", projectionMatrix);
-
+	Mat4f projectionMatrix = Mat4f().perspective(1.0, screenSize.y / screenSize.x, 0.01, 1000.0);
 	Mat4f viewMatrix = Mat4f().rotate(camera.rotation.x, 1, 0, 0).rotate(camera.rotation.y, 0, 1, 0).rotate(camera.rotation.z, 0, 0, 1).translate(-camera.position.x, -camera.position.y, -camera.position.z);
-	shader.setUniform("viewMatrix", viewMatrix);
 
-	/* Render the mesh */
-	mesh1->render();
-	//mesh2->render();
+	/*
+	basicShader.bind();
+	basicShader.setUniform("projectionMatrix", projectionMatrix);
+	basicShader.setUniform("viewMatrix", viewMatrix);
+	basicShader.setUniform("viewPos", Vec3f(camera.position.x, camera.position.y, camera.position.z));
+	boxMesh->render(AbstractMesh::RenderMode::TRIANGLES);
+	*/
 
-	/* Swap front and back buffers */
+	vectorShader.bind();
+	vectorShader.setUniform("projectionMatrix", projectionMatrix);
+	vectorShader.setUniform("viewMatrix", viewMatrix);
+	vectorMesh->render();
+
 	glfwSwapBuffers(this->window);
-
-	/* Poll for and process events */
 	glfwPollEvents();
 }
 
 void Screen::close() {
-	shader.close();
-	//mesh->close();
+	basicShader.close();
+	vectorShader.close();
+
 	terminateGL();
 }
 
