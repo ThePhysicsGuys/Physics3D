@@ -122,13 +122,14 @@ void Screen::init() {
 	vectorShader = Shader(vectorShaderSource);
 	vectorShader.createUniform("viewMatrix");
 	vectorShader.createUniform("projectionMatrix");
+	basicShader.createUniform("viewPosition");
 
 	camera.setPosition(-1, 1, 4);
 
 	handler = new StandardInputHandler(window, this, &camera);
 
 	box = new BoundingBox{-0.5, -0.5, -0.5, 0.5, 0.5, 0.5};
-	Shape shape = box->toShape(new Vec3[8]).rotated(fromEulerAngles(0.5, 0.1, 0.2), new Vec3[8]);
+	Shape shape = box->toShape(new Vec3[8]);// .rotated(fromEulerAngles(0.5, 0.1, 0.2), new Vec3[8]);
 
 	boxMesh = new IndexedMesh(shape);
 	
@@ -138,7 +139,8 @@ void Screen::init() {
 	
 	generateShape(vert, mi, mj);
 
-	vectorMesh = new VectorMesh(vert, mi * mj);
+	vectorMesh = new VectorMesh(vertices, vertexCount);
+	//vectorMesh = new VectorMesh(vert, mi * mj);
 }
 
 void Screen::makeCurrent() {
@@ -198,6 +200,7 @@ void Screen::refresh() {
 	vectorShader.bind();
 	vectorShader.setUniform("projectionMatrix", projectionMatrix);
 	vectorShader.setUniform("viewMatrix", viewMatrix);
+	vectorShader.setUniform("viewPosition", Vec3f(camera.position.x, camera.position.y, camera.position.z));
 	vectorMesh->render();
 
 	glfwSwapBuffers(this->window);

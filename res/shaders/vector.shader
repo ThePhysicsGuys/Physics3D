@@ -20,7 +20,7 @@ void main() {
 #version 330
 
 layout(points) in;
-layout(line_strip, max_vertices = 2) out;
+layout(line_strip, max_vertices = 6) out;
 
 in vec3 grotation[];
 in float gcolor[];
@@ -29,16 +29,37 @@ out float fcolor;
 
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
+uniform vec3 viewPosition;
 
 void main() {
+	float arrowLenght = 0.1;
+	float arrowWidth = 0.025;
 	vec4 origin = gl_in[0].gl_Position;
-	vec4 end = gl_in[0].gl_Position + vec4(grotation[0], 0);
+	vec4 arrowTop = gl_in[0].gl_Position + vec4(grotation[0], 0);
+	vec3 norm = normalize(cross(arrowTop.xyz - viewPosition, grotation[0]));
+	vec3 unitRotation = normalize(grotation[0]);
+	vec4 arrowLeft = arrowTop - vec4(arrowLenght * unitRotation - arrowWidth * norm, 0);
+	vec4 arrowRight = arrowTop - vec4(arrowLenght * unitRotation + arrowWidth * norm, 0);
+	vec4 arrowBase = arrowTop - arrowLenght * vec4(unitRotation, 0);
+
 	fcolor = gcolor[0];
 
 	gl_Position = projectionMatrix * viewMatrix * origin;
 	EmitVertex();
 
-	gl_Position = projectionMatrix * viewMatrix * end;
+	gl_Position = projectionMatrix * viewMatrix * arrowBase;
+	EmitVertex();
+
+	gl_Position = projectionMatrix * viewMatrix * arrowLeft;
+	EmitVertex();
+
+	gl_Position = projectionMatrix * viewMatrix * arrowTop;
+	EmitVertex();
+
+	gl_Position = projectionMatrix * viewMatrix * arrowRight;
+	EmitVertex();
+
+	gl_Position = projectionMatrix * viewMatrix * arrowBase;
 	EmitVertex();
 
 	EndPrimitive();
