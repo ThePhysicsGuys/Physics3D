@@ -19,7 +19,7 @@ void World::tick(double deltaT) {
 	
 	Log::info("Dummy Load: %.9f", d);*/
 
-	Log::info("Ticking!");
+	// Log::info("Ticking!");
 
 	for (Physical& p : physicals) {
 		p.update(deltaT);
