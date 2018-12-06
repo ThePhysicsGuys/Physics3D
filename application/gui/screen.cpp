@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <fstream>
 #include <sstream>
+#include <math.h>
 
 World* curWorld = NULL;
 Vec2 screenSize;
@@ -62,23 +63,37 @@ Screen::Screen(int width, int height, World* w) {
 }
 
 const unsigned int vertexCount = 6;
-const double positions[vertexCount * 3]{
-	0, 0, 0,
-	0, 0, 0,
-	0, 0, 0,
-	0, 0, 0,
-	0, 0, 0,
-	0, 0, 0
+const double vertices[vertexCount * 7]{
+	0, 0, 0,	  1,  0,  0,	0,
+	0, 0, 0,	 -1,  0,  0,	0.1,
+	0, 0, 0,	  0,  1,  0,	0.2,
+	0, 0, 0,	  0, -1,  0,	0.3,
+	0, 0, 0,	  0,  0,  1,	0.4,
+	0, 0, 0,	  0,  0, -1,	1
 };
 
-const double rotations[vertexCount * 3]{
-	 1,  0,  0,
-	-1,  0,  0,
-	 0,  1,  0,
-	 0, -1,  0,
-	 0,  0,  1,
-	 0,  0, -1
-};
+void generateShape(double* buffer, int mi, int mj) {
+	double twopi = 6.28318530718;
+	int ind = 0;
+	for (int i = 0; i < mi; i++) {
+		for (int j = 0; j < mj; j++) {
+			double ri = twopi / 2 / mi * i;
+			double rj = twopi / mj * j;
+
+			buffer[ind * 7 + 0] = 0;
+			buffer[ind * 7 + 1] = 0;
+			buffer[ind * 7 + 2] = 0;
+
+			buffer[ind * 7 + 3] = sin(ri) * cos(rj);
+			buffer[ind * 7 + 4] = sin(ri) * sin(rj);
+			buffer[ind * 7 + 5] = cos(ri);
+			
+			buffer[ind * 7 + 6] = 1.0 / mi / mj * ind;
+
+			ind++;
+		}
+	}
+}
 
 IndexedMesh* boxMesh = nullptr;
 VectorMesh* vectorMesh = nullptr;
@@ -90,7 +105,7 @@ StandardInputHandler* handler = nullptr;
 Camera camera;
 
 void Screen::init() {
-	glEnable(GL_CULL_FACE);
+	//glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 	int width, height;
 	glfwGetWindowSize(window, &width, &height);
@@ -116,7 +131,14 @@ void Screen::init() {
 	Shape shape = box->toShape(new Vec3[8]).rotated(fromEulerAngles(0.5, 0.1, 0.2), new Vec3[8]);
 
 	boxMesh = new IndexedMesh(shape);
-	vectorMesh = new VectorMesh(positions, rotations, vertexCount);
+	
+	const int mi = 50;
+	const int mj = 50;
+	double* vert = new double[mi * mj * 7];
+	
+	generateShape(vert, mi, mj);
+
+	vectorMesh = new VectorMesh(vert, mi * mj);
 }
 
 void Screen::makeCurrent() {
@@ -160,7 +182,7 @@ void Screen::update() {
 
 void Screen::refresh() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	Mat4f projectionMatrix = Mat4f().perspective(1.0, screenSize.y / screenSize.x, 0.01, 1000.0);
 	Mat4f viewMatrix = Mat4f().rotate(camera.rotation.x, 1, 0, 0).rotate(camera.rotation.y, 0, 1, 0).rotate(camera.rotation.z, 0, 0, 1).translate(-camera.position.x, -camera.position.y, -camera.position.z);
@@ -170,7 +192,7 @@ void Screen::refresh() {
 	basicShader.setUniform("projectionMatrix", projectionMatrix);
 	basicShader.setUniform("viewMatrix", viewMatrix);
 	basicShader.setUniform("viewPos", Vec3f(camera.position.x, camera.position.y, camera.position.z));
-	boxMesh->render(AbstractMesh::RenderMode::TRIANGLES);
+	boxMesh->render();
 	*/
 
 	vectorShader.bind();
