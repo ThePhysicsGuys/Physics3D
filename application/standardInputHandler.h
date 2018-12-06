@@ -1,15 +1,17 @@
 #pragma once
 
 #include "inputHandler.h"
+#include "gui\screen.h"
 #include "gui\camera.h"
 
 class StandardInputHandler : public InputHandler {
 public:
+	Screen* screen;
 	Camera* camera;
 	Vec2 curPos;
 	bool dragging = false;
 
-	StandardInputHandler(GLFWwindow* window, Camera* camera);
+	StandardInputHandler(GLFWwindow* window, Screen* screen, Camera* camera);
 
 	void windowResize(int width, int height) override;
 

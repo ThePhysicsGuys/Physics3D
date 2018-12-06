@@ -1,11 +1,13 @@
 #include "standardInputHandler.h"
 
-StandardInputHandler::StandardInputHandler(GLFWwindow* window, Camera* camera) : InputHandler(window) {
+StandardInputHandler::StandardInputHandler(GLFWwindow* window, Screen* screen, Camera* camera) : InputHandler(window) {
+	this->screen = screen;
 	this->camera = camera;
 }
 
 void StandardInputHandler::windowResize(int width, int height) {
 	glViewport(0, 0, width, height);
+	screen->screenSize = Vec2(width, height);
 }
 
 // void StandardInputHandler::keyDown(int key, int modifiers) {};
@@ -15,19 +17,23 @@ void StandardInputHandler::windowResize(int width, int height) {
 void StandardInputHandler::mouseDown(int button, int mods) {
 	if (button == 1) dragging = true;
 };
+
 void StandardInputHandler::mouseUp(int button, int mods) {
 	if (button == 1) dragging = false;
 };
+
 void StandardInputHandler::mouseMove(double x, double y) {
 	if (dragging) {
 		camera->rotate((y-curPos.y)*0.5, (x-curPos.x)*0.5, 0);
 	}
+
 	curPos = Vec2(x, y);
 };
 
 void StandardInputHandler::mouseEnter() {
 
 };
+
 void StandardInputHandler::mouseExit() {
 	dragging = false;
 };

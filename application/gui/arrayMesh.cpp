@@ -1,18 +1,18 @@
-#include "mesh.h"
+#include "arrayMesh.h"
 #include "../util/Log.h"
 
-Mesh::Mesh(const double* vertices, const int vCount) : vertexCount(vCount) {
+ArrayMesh::ArrayMesh(const double* vertices, const int vCount) : AbstractMesh(), vertexCount(vCount) {
 	vertexBuffer = new VertexBuffer(vertices, vCount * 3);
 	bufferLayout.push<double>(3);
 	vertexArray->addBuffer(*vertexBuffer, bufferLayout);
 }
 
-void Mesh::render() {
+void ArrayMesh::render() {
 	vertexArray->bind();
 	glDrawArrays((int) renderMode, 0, vertexCount);
 }
 
-void Mesh::close() {
+void ArrayMesh::close() {
 	vertexBuffer->close();
 	vertexArray->close();
 }
