@@ -10,6 +10,8 @@
 #include "../standardInputHandler.h"
 #include "../engine/geometry/shape.h"
 #include "../engine/geometry/boundingBox.h"
+#include "picker.h"
+#include "../../engine/math/mathUtil.h"
 
 #include "../resourceManager.h"
 
@@ -20,6 +22,7 @@
 
 World* curWorld = NULL;
 Vec2 screenSize;
+Vec3 ray;
 
 bool initGLFW() {
 	/* Initialize the library */
@@ -182,14 +185,53 @@ void Screen::update() {
 	}
 }
 
+Vec3 max(Vec3 a, Vec3 b) {
+	return Vec3(
+		(a.x > b.x) ? a.x : b.x,
+		(a.y > b.y) ? a.y : b.y,
+		(a.z > b.z) ? a.z : b.z
+	);
+}
+
+double SDF(Vec3 pos) {
+	return pos.length() - 1;
+	//return max(pos.abs() - Vec3(1, 1, 1), Vec3(0, 0, 0)).length();
+}
+
+
+float raymarch(Vec3 eye, Vec3 dir, float start, float end) {
+	double depth = 0.0;
+	for (int i = 0; i < 255; i++) {
+		double dist = SDF(eye + dir * depth);
+		if (dist < 0.0002) 
+			return depth;
+
+		depth += dist;
+
+		if (depth >= end) 
+			return end;
+	}
+	return end;
+}
+
+
 void Screen::refresh() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	Mat4f projectionMatrix = Mat4f().perspective(1.0, screenSize.x / screenSize.y, 0.01, 100.0);
 	Mat4f viewMatrix = Mat4f().rotate(camera.rotation.x, 1, 0, 0).rotate(camera.rotation.y, 0, 1, 0).rotate(camera.rotation.z, 0, 0, 1).translate(-camera.position.x, -camera.position.y, -camera.position.z);
-
 	
+	double min = 0;
+	double max = 100;
+	ray = calcRay(handler->getMousePos(), screenSize, &camera, viewMatrix, projectionMatrix);
+	double dist = raymarch(camera.position, ray, min, max);
+
+	Log::debug("%f", dist);
+	if (dist < 0.0002) {
+		Log::debug("Hovering over the object");
+	}
+
 	basicShader.bind();
 	basicShader.setUniform("projectionMatrix", projectionMatrix);
 	basicShader.setUniform("viewMatrix", viewMatrix);

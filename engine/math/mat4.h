@@ -7,8 +7,8 @@ typedef Mat4Template<double>	Mat4;
 typedef Mat4Template<float>		Mat4f;
 typedef Mat4Template<long long>	Mat4l;
 
-
 #include "vec3.h"
+#include "vec4.h"
 #include "cframe.h"
 
 template<typename N>
@@ -169,6 +169,15 @@ struct Mat4Template {
 		N v2 = v.x * m20 + v.y * m21 + v.z * m22 + m23;
 
 		return Vec3Template<N>(v0, v1, v2);
+	}
+
+	Vec4Template<N> operator*(const Vec4Template<N>& v) const {
+		N v0 = v.x * m00 + v.y * m01 + v.z * m02 + v.w * m03;
+		N v1 = v.x * m10 + v.y * m11 + v.z * m12 + v.w * m13;
+		N v2 = v.x * m20 + v.y * m21 + v.z * m22 + v.w * m23;
+		N v3 = v.x * m30 + v.y * m31 + v.z * m32 + v.w * m33;
+
+		return Vec4Template<N>(v0, v1, v2, v3);
 	}
 
 	Mat3Template<N> getRotation() const {
