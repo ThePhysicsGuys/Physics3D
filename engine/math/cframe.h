@@ -30,4 +30,12 @@ public:
 	CFrame globalToLocal(CFrame gFrame) const {
 		return CFrame(~rotation*(gFrame.position - position) , ~rotation * gFrame.rotation);
 	}
+	
+	CFrame& operator+=(const Vec3& delta);
+	CFrame& operator-=(const Vec3& delta);
 };
+
+CFrame operator+(const CFrame& frame, const Vec3& delta);
+CFrame operator+(const Vec3& delta, const CFrame& frame);
+CFrame operator-(const CFrame& frame, const Vec3& delta);
+CFrame operator-(const Vec3& delta, const CFrame& frame);

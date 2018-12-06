@@ -24,6 +24,34 @@ public:
 		return Vec3Template(-x, -y, -z);
 	}
 
+	Vec3Template& operator+=(const Vec3Template& other) {
+		this->x += other.x;
+		this->y += other.y;
+		this->z += other.z;
+		return *this;
+	}
+
+	Vec3Template& operator-=(const Vec3Template& other) {
+		this->x -= other.x;
+		this->y -= other.y;
+		this->z -= other.z;
+		return *this;
+	}
+
+	Vec3Template& operator*=(const N& factor) {
+		this->x *= factor;
+		this->y *= factor;
+		this->z *= factor;
+		return *this;
+	}
+
+	Vec3Template& operator/=(const N& factor) {
+		this->x /= factor;
+		this->y /= factor;
+		this->z /= factor;
+		return *this;
+	}
+
 	Vec3Template operator*(const N& d) const {
 		return Vec3Template(x*d, y*d, z*d);
 	}

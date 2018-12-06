@@ -43,6 +43,18 @@ void setupPhysics();
 
 int main(void) {
 	init();
+	
+	Vec3 vecBuf[8];
+
+	Physical triangleThing(Part(testShape, 10.0, 0.7), CFrame(Vec3(0.3, 0.7, 0.2), fromEulerAngles(0.3, 0.0, 0.0)));
+	Physical box(Part(BoundingBox{-0.1, -0.7, -0.3, 0.1, 0.7, 0.3}.toShape(vecBuf), 2.0, 0.7), CFrame(Vec3(-0.3, -0.7, 0.2), fromEulerAngles(0.0, 0.0, 0.0)));
+
+	triangleThing.velocity = Vec3(0.1, 0.0, 0.0);
+
+	world.addObject(triangleThing);
+	world.addObject(box);
+
+	physicsThread.start();
 
 	/* Loop until the user closes the window */
 	Log::info("Started rendering");

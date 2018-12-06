@@ -11,5 +11,5 @@ public:
 	} properties;
 
 	Part();
-	Part(const Shape& s, double density, double friction);
+	Part(Shape s, double density, double friction);
 };

@@ -8,3 +8,13 @@ Mat4 CFrame::asMat4() const {
 				r.m20, r.m21, r.m22, p.z,
 				0, 0, 0, 1);
 }
+
+
+CFrame& CFrame::operator+=(const Vec3& delta) { position += delta; return *this; }
+CFrame& CFrame::operator-=(const Vec3& delta) { position -= delta; return *this; }
+
+CFrame operator+(const CFrame& frame, const Vec3& delta) { return CFrame(frame.position + delta, frame.rotation); }
+CFrame operator+(const Vec3& delta, const CFrame& frame) { return CFrame(frame.position + delta, frame.rotation); }
+CFrame operator-(const CFrame& frame, const Vec3& delta) { return CFrame(frame.position - delta, frame.rotation); }
+CFrame operator-(const Vec3& delta, const CFrame& frame) { return CFrame(frame.position - delta, frame.rotation); }
+

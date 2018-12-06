@@ -2,4 +2,4 @@
 
 Part::Part() {}
 
-Part::Part(const Shape& s, double density, double friction) : hitbox(s), properties({density, friction}) {}
+Part::Part(Shape s, double density, double friction) : hitbox(s), properties({density, friction}) {}
