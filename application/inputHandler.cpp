@@ -1,3 +1,4 @@
+
 #include "inputHandler.h"
 
 void InputHandler::keyCallback(int key, int action, int mods) {
@@ -6,11 +7,13 @@ void InputHandler::keyCallback(int key, int action, int mods) {
 		anyKey++;
 		keyDown(key, mods);
 	}
+
 	if (action == GLFW_RELEASE) {
 		keys[key] = false;
 		anyKey--;
 		keyUp(key, mods);
 	}
+
 	if (action == GLFW_REPEAT)
 		keyRepeat(key, mods);
 }

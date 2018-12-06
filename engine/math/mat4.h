@@ -101,10 +101,10 @@ struct Mat4Template {
 	}
 
 	Mat4Template translate(N x, N y, N z) const {
-		N r30 = m00 * x +m10 * y + m20 * z + m30;
-		N r31 = m01 * x +m11 * y + m21 * z + m31;
-		N r32 = m02 * x +m12 * y + m22 * z + m32;
-		N r33 = m03 * x +m13 * y + m23 * z + m33;
+		N r30 = m00 * x + m10 * y + m20 * z + m30;
+		N r31 = m01 * x + m11 * y + m21 * z + m31;
+		N r32 = m02 * x + m12 * y + m22 * z + m32;
+		N r33 = m03 * x + m13 * y + m23 * z + m33;
 
 		return Mat4Template(m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, r30, r31, r32, r33);
 	}

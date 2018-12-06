@@ -9,7 +9,8 @@ public:
 	Screen* screen;
 	Camera* camera;
 	Vec2 curPos;
-	bool dragging = false;
+	bool rightDragging = false;
+	bool leftDragging = false;
 
 	StandardInputHandler(GLFWwindow* window, Screen* screen, Camera* camera);
 
@@ -17,10 +18,11 @@ public:
 
 	// void keyDown(int key, int modifiers) override;
 	// void keyUp(int key, int modifiers) override;
+	// void mouseEnter() override;
+	
 	void mouseDown(int button, int mods) override;
 	void mouseUp(int button, int mods) override;
 	void mouseMove(double x, double y) override;
-	void mouseEnter() override;
+	void scroll(double xOffset, double yOffset) override;
 	void mouseExit() override;
-	// void scroll(double xOffset, double yOffset) override;
 };
