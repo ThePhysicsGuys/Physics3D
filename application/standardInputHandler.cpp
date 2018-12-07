@@ -15,28 +15,35 @@ void StandardInputHandler::windowResize(int width, int height) {
 // void StandardInputHandler::keyDown(int key, int modifiers) {};
 // void StandardInputHandler::keyUp(int key, int modifiers) {};
 // void StandardInputHandler::keyRepeat(int key, int modifiers) {};
+// void StandardInputHandler::mouseEnter() {};
 
 void StandardInputHandler::mouseDown(int button, int mods) {
-	if (button == 1) dragging = true;
+	if (button == GLFW_MOUSE_BUTTON_RIGHT) rightDragging = true;
+	if (button == GLFW_MOUSE_BUTTON_LEFT) leftDragging = true;
 };
 
 void StandardInputHandler::mouseUp(int button, int mods) {
-	if (button == 1) dragging = false;
+	if (button == GLFW_MOUSE_BUTTON_RIGHT) rightDragging = false;
+	if (button == GLFW_MOUSE_BUTTON_LEFT) leftDragging = false;
 };
 
 void StandardInputHandler::mouseMove(double x, double y) {
-	if (dragging) {
-		camera->rotate((y-curPos.y)*0.5, (x-curPos.x)*0.5, 0);
+	if (rightDragging) {
+		camera->rotate((y - curPos.y) * 0.5, (x - curPos.x) * 0.5, 0);
+	}
+
+	if (leftDragging) {
+		camera->move((x - curPos.x) * -0.5, (y - curPos.y) * 0.5, 0);
 	}
 
 	curPos = Vec2(x, y);
 };
 
-void StandardInputHandler::mouseEnter() {
-
+void StandardInputHandler::scroll(double xOffset, double yOffset) {
+	camera->move(0, 0, -5 * yOffset);
 };
 
 void StandardInputHandler::mouseExit() {
-	dragging = false;
+	rightDragging = false;
+	leftDragging = false;
 };
-// void StandardInputHandler::scroll(double xOffset, double yOffset) {};

@@ -12,10 +12,17 @@ void main() {
 #shader geometry // geometry shader
 #version 330
 
+#define DEBUG 
+
 layout(triangles) in;
+#ifndef DEBUG
 layout(triangle_strip, max_vertices = 3) out;
+#else
+layout(line_strip, max_vertices = 9) out;
+#endif
 
 uniform mat4 modelMatrix;
+uniform vec3 viewPosition;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 
@@ -30,26 +37,36 @@ vec3 normal() {
 	vec3 a = vec3(gl_in[0].gl_Position) - vec3(gl_in[1].gl_Position);
 	vec3 b = vec3(gl_in[2].gl_Position) - vec3(gl_in[1].gl_Position);
 	vec3 norm = normalize(cross(a, b));
-	//if (dot(fcenter, fnormal) > 0) {
-	//	return norm;
-	// } else { 
-		return -norm;
-	// }
+	return -norm;
 }
 
 void main() {
 	fcenter = center();
 	fnormal = normal();
 
-	gl_Position = projectionMatrix * viewMatrix * transpose(modelMatrix) * gl_in[0].gl_Position;
-	EmitVertex();
+	mat4 transform = projectionMatrix * viewMatrix * transpose(modelMatrix);
 
-	gl_Position = projectionMatrix * viewMatrix * transpose(modelMatrix) * gl_in[1].gl_Position;
-	EmitVertex();
+#ifdef DEBUG
+	float arrowLength = 0.05;
+	float arrowWidth = 0.02;
+	vec4 arrowTop = vec4(fcenter + 0.3 * fnormal, 1);
+	vec3 norm = normalize(cross(arrowTop.xyz - viewPosition, fnormal));
+	vec4 arrowLeft = arrowTop - vec4(arrowLength * fnormal - arrowWidth * norm, 0);
+	vec4 arrowRight = arrowTop - vec4(arrowLength * fnormal + arrowWidth * norm, 0);
+	vec4 arrowBase = arrowTop - arrowLength * vec4(fnormal, 0);
 
-	gl_Position = projectionMatrix * viewMatrix * transpose(modelMatrix) * gl_in[2].gl_Position;
-	EmitVertex();
+	gl_Position = transform * vec4(fcenter, 1); EmitVertex();
+	gl_Position = transform * arrowBase; EmitVertex();
+	gl_Position = transform * arrowLeft; EmitVertex();
+	gl_Position = transform * arrowTop; EmitVertex();
+	gl_Position = transform * arrowRight; EmitVertex();
+	gl_Position = transform * arrowBase; EmitVertex();
+	EndPrimitive();
+#endif
 
+	gl_Position = transform * gl_in[0].gl_Position; EmitVertex();
+	gl_Position = transform * gl_in[1].gl_Position; EmitVertex();
+	gl_Position = transform * gl_in[2].gl_Position; EmitVertex();
 	EndPrimitive();
 }
 
@@ -61,27 +78,26 @@ void main() {
 layout(location = 0) out vec4 outColor;
 
 uniform vec3 viewPos;
+uniform vec3 color;
 
 in vec3 fcenter;
 in vec3 fnormal;
 
 void main() {
-	// vec3 objectColor = vec3(0.1, 0.8, 0.5);
 	float ambientStrength = 0.4;
 	float specularStrength = 1;
-	vec3 lightColor = vec3(0.5, 0.2, 0.6);
 	vec3 lightPos = vec3(-2, 3, 4);
 
-	vec3 ambient = ambientStrength * lightColor;
+	vec3 ambient = ambientStrength * color;
 	
 	vec3 lightDir = normalize(lightPos - fcenter);
 	float diff = max(dot(fnormal, lightDir), 0.0);
-	vec3 diffuse = diff * lightColor;
+	vec3 diffuse = diff * color;
 	
 	vec3 viewDir = normalize(viewPos - fcenter);
 	vec3 reflectDir = reflect(-lightDir, fnormal);
 	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
-	vec3 specular = specularStrength * spec * lightColor;
+	vec3 specular = specularStrength * spec * color;
 
 	vec3 result = (ambient + diffuse + specular) * 1;
 	outColor = vec4(result, 1.0);

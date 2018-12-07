@@ -10,6 +10,8 @@
 #include "../standardInputHandler.h"
 #include "../engine/geometry/shape.h"
 #include "../engine/geometry/boundingBox.h"
+#include "picker.h"
+#include "../../engine/math/mathUtil.h"
 
 #include "../resourceManager.h"
 
@@ -20,6 +22,7 @@
 
 World* curWorld = NULL;
 Vec2 screenSize;
+Vec3 ray;
 
 bool initGLFW() {
 	/* Initialize the library */
@@ -119,19 +122,21 @@ void Screen::init() {
 	basicShader = Shader(basicShaderSource);
 	basicShader.createUniform("modelMatrix");
 	basicShader.createUniform("viewMatrix");
+	basicShader.createUniform("color");
 	basicShader.createUniform("projectionMatrix");
-	basicShader.createUniform("viewPos");
+	basicShader.createUniform("viewPosition");
 
 	vectorShader = Shader(vectorShaderSource);
 	vectorShader.createUniform("viewMatrix");
 	vectorShader.createUniform("projectionMatrix");
+	basicShader.createUniform("viewPosition");
 
 	camera.setPosition(-1, 1, 4);
 
 	handler = new StandardInputHandler(window, this, &camera);
 
 	box = new BoundingBox{-0.5, -0.5, -0.5, 0.5, 0.5, 0.5};
-	Shape shape = box->toShape(new Vec3[8]).rotated(fromEulerAngles(0.5, 0.1, 0.2), new Vec3[8]);
+	Shape shape = box->toShape(new Vec3[8]);// .rotated(fromEulerAngles(0.5, 0.1, 0.2), new Vec3[8]);
 
 	boxMesh = new IndexedMesh(shape);
 
@@ -144,7 +149,8 @@ void Screen::init() {
 	
 	generateShape(vert, mi, mj);
 
-	vectorMesh = new VectorMesh(vert, mi * mj);
+	vectorMesh = new VectorMesh(vertices, vertexCount);
+	//vectorMesh = new VectorMesh(vert, mi * mj);
 }
 
 void Screen::makeCurrent() {
@@ -186,15 +192,65 @@ void Screen::update() {
 	}
 }
 
+bool intersect(Vec3 orig, Vec3 dir, Vec3 min, Vec3 max) {
+	float tmin = (min.x - orig.x) / dir.x;
+	float tmax = (max.x - orig.x) / dir.x;
+
+	if (tmin > tmax) {
+		double temp = tmin;
+		tmin = tmax;
+		tmax = temp;
+	};
+
+	float tymin = (min.y - orig.y) / dir.y;
+	float tymax = (max.y - orig.y) / dir.y;
+
+	if (tymin > tymax) {
+		double temp = tymin;
+		tymin = tymax;
+		tymax = temp;
+	}
+
+	if ((tmin > tymax) || (tymin > tmax))
+		return false;
+
+	if (tymin > tmin)
+		tmin = tymin;
+
+	if (tymax < tmax)
+		tmax = tymax;
+
+	float tzmin = (min.z - orig.z) / dir.z;
+	float tzmax = (max.z - orig.z) / dir.z;
+
+	if (tzmin > tzmax) {
+		double temp = tzmin;
+		tzmin = tzmax;
+		tzmax = temp;
+	}
+
+	if ((tmin > tzmax) || (tzmin > tmax))
+		return false;
+
+	if (tzmin > tmin)
+		tmin = tzmin;
+
+	if (tzmax < tmax)
+		tmax = tzmax;
+
+	return true;
+}
+
+
 void Screen::refresh() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	Mat4f projectionMatrix = Mat4f().perspective(1.0, screenSize.x / screenSize.y, 0.01, 100.0);
 	Mat4f viewMatrix = Mat4f().rotate(camera.rotation.x, 1, 0, 0).rotate(camera.rotation.y, 0, 1, 0).rotate(camera.rotation.z, 0, 0, 1).translate(-camera.position.x, -camera.position.y, -camera.position.z);
+	Vec3 realCameraVector = Mat4().rotate(camera.rotation.x, 1, 0, 0).rotate(camera.rotation.y, 0, 1, 0).rotate(camera.rotation.z, 0, 0, 1) * Vec3(0, 0, -1);
+	
 
-	
-	
 
 	basicShader.bind();
 	basicShader.setUniform("modelMatrix", Mat4f());
@@ -206,35 +262,53 @@ void Screen::refresh() {
 	for (Physical p : w->physicals) {
 		Log::debug("Processing part");
 		CFrame fra = p.cframe;
-		fra.rotation = Mat3(1, 0, 0, 0, 1, 0, 0, 0, 1);
-		Mat4f transf = Mat4f();
-		/*Mat4f transff = Mat4f();
+		Mat4 transf = fra.asMat4();
+		// fra.rotation = Mat3(1, 0, 0, 0, 1, 0, 0, 0, 1);
+		// Mat4f transf = Mat4f();
+		Mat4f transff = Mat4f();
 		for (int i = 0; i < 16; i++) {
 			transff.m[i] = transf.m[i];
-		}*/
+		}
 
-		transf.m03 = fra.position.x;
+		/*transf.m03 = fra.position.x;
 		transf.m13 = fra.position.y;
-		transf.m23 = fra.position.z;
+		transf.m23 = fra.position.z;*/
 		
 
 		int meshId = p.part.drawMeshId;
 
 		Log::debug("meshId: %d", meshId);
 
-		basicShader.setUniform("modelMatrix", transf);
+		basicShader.setUniform("modelMatrix", transff);
 		meshes[meshId]->render();
 	}
 	
 	basicShader.setUniform("modelMatrix", Mat4f());
 
+
+
+	double min = 0;
+	double max = 100;
+	ray = calcRay(handler->getMousePos(), screenSize, &camera, viewMatrix, projectionMatrix);
+
+	basicShader.bind();
+	if (intersect(camera.position, (realCameraVector.normalize() + ray.normalize()).normalize(), Vec3(-0.5, -0.5, -0.5), Vec3(0.5, 0.5, 0.5))) basicShader.setUniform("color", Vec3f(0.8, 0.8, 0.8));
+	else basicShader.setUniform("color", Vec3f(0.5, 0.1, 0.8));
+	basicShader.setUniform("projectionMatrix", projectionMatrix);
+	basicShader.setUniform("viewMatrix", viewMatrix);
+	basicShader.setUniform("viewPosition", Vec3f(camera.position.x, camera.position.y, camera.position.z));
+
+
 	boxMesh->render();
+
+	Log::debug("%s\t%s", str(realCameraVector).c_str(), str(ray).c_str());
 	
 	transMesh->render();
 
 	vectorShader.bind();
 	vectorShader.setUniform("projectionMatrix", projectionMatrix);
 	vectorShader.setUniform("viewMatrix", viewMatrix);
+	vectorShader.setUniform("viewPosition", Vec3f(camera.position.x, camera.position.y, camera.position.z));
 	vectorMesh->render();
 
 	glfwSwapBuffers(this->window);

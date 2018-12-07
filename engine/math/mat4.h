@@ -7,8 +7,8 @@ typedef Mat4Template<double>	Mat4;
 typedef Mat4Template<float>		Mat4f;
 typedef Mat4Template<long long>	Mat4l;
 
-
 #include "vec3.h"
+#include "vec4.h"
 #include "cframe.h"
 
 template<typename N>
@@ -59,6 +59,10 @@ struct Mat4Template {
 		return det;
 	}
 
+	Mat4Template scale(N x, N y, N z) {
+		return Mat4Template(x * m00, x * m01, x * m02, x * m03, y * m10, y * m11, y * m12, y * m13, z * m20, z * m21, z * m22, z * m23, m30, m31, m32, m33);
+	}
+
 	Mat4Template inverse() const {
 		N a = m00 * m11 - m01 * m10;
 		N b = m00 * m12 - m02 * m10;
@@ -97,10 +101,10 @@ struct Mat4Template {
 	}
 
 	Mat4Template translate(N x, N y, N z) const {
-		N r30 = m00 * x +m10 * y + m20 * z + m30;
-		N r31 = m01 * x +m11 * y + m21 * z + m31;
-		N r32 = m02 * x +m12 * y + m22 * z + m32;
-		N r33 = m03 * x +m13 * y + m23 * z + m33;
+		N r30 = m00 * x + m10 * y + m20 * z + m30;
+		N r31 = m01 * x + m11 * y + m21 * z + m31;
+		N r32 = m02 * x + m12 * y + m22 * z + m32;
+		N r33 = m03 * x + m13 * y + m23 * z + m33;
 
 		return Mat4Template(m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, r30, r31, r32, r33);
 	}
@@ -165,6 +169,15 @@ struct Mat4Template {
 		N v2 = v.x * m20 + v.y * m21 + v.z * m22 + m23;
 
 		return Vec3Template<N>(v0, v1, v2);
+	}
+
+	Vec4Template<N> operator*(const Vec4Template<N>& v) const {
+		N v0 = v.x * m00 + v.y * m01 + v.z * m02 + v.w * m03;
+		N v1 = v.x * m10 + v.y * m11 + v.z * m12 + v.w * m13;
+		N v2 = v.x * m20 + v.y * m21 + v.z * m22 + v.w * m23;
+		N v3 = v.x * m30 + v.y * m31 + v.z * m32 + v.w * m33;
+
+		return Vec4Template<N>(v0, v1, v2, v3);
 	}
 
 	Mat3Template<N> getRotation() const {

@@ -5,7 +5,7 @@
 #include <sstream>
 
 template<typename R, typename P>
-std::string errMsg(const R& first, const P& second, const char* sep) {
+const char* errMsg(const R& first, const P& second, const char* sep) {
 	std::stringstream s;
 	s << "(";
 	s << first;
@@ -14,16 +14,31 @@ std::string errMsg(const R& first, const P& second, const char* sep) {
 	s << ' ';
 	s << second;
 	s << ")";
-	return s.str();
+
+	std::string msg = s.str();
+
+	const char* data = msg.c_str();
+	char* dataBuf = new char[msg.size() + 1];
+	for (int i = 0; i < msg.size() + 1; i++)
+		dataBuf[i] = data[i];
+
+	return dataBuf;
 }
 
 template<typename R>
-std::string errMsg(const R& first) {
+const char* errMsg(const R& first) {
 	std::stringstream s;
 	s << "(";
 	s << first;
 	s << ")";
-	return s.str();
+	std::string msg = s.str();
+
+	const char* data = msg.c_str();
+	char* dataBuf = new char[msg.size() + 1];
+	for (int i = 0; i < msg.size() + 1; i++) 
+		dataBuf[i] = data[i];
+	
+	return dataBuf;
 }
 
 template<typename T>

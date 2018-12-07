@@ -9,12 +9,12 @@
 class Camera {
 public:
 	Vec3 position;
-	Rot3 rotation;
+	Vec3 rotation;
 	double speed;
 	double rspeed;
 	
-	Camera(Vec3 position, Rot3 rotation) : position(position), rotation(rotation), speed(0.008), rspeed(0.003) {};
-	Camera() : position(Vec3()), rotation(Rot3(0.0,0.0,0.0)), speed(0.008), rspeed(0.003) {};
+	Camera(Vec3 position, Vec3 rotation) : position(position), rotation(rotation), speed(0.008), rspeed(0.003) {};
+	Camera() : position(Vec3()), rotation(Vec3(0.0,0.0,0.0)), speed(0.008), rspeed(0.003) {};
 
 	void setSpeed(double speed) {
 		this->speed = speed;
@@ -29,10 +29,10 @@ public:
 	}
 
 	void setRotation(double x, double y, double z) {
-		rotation = Rot3(x, y, z);
+		rotation = Vec3(x, y, z);
 	}
 
-	void setRotation(Rot3 rotation) {
+	void setRotation(Vec3 rotation) {
 		this->rotation = rotation;
 	};
 
@@ -42,7 +42,7 @@ public:
 		y += rspeed * dy;
 		z += rspeed * dz;
 		Log::debug("Camera rotation [%f, %f, %f]", x, y, z);
-		rotation = Rot3(x, y, z);
+		rotation = Vec3(x, y, z);
 	}
 
 	void move(double dx, double dy, double dz) {

@@ -40,5 +40,6 @@ Mat3Template<N> Mat3Template<N>::rotate(N angle, N x, N y, N z) const {
 	return Mat3Template<N>(r00, r01, r02, r10, r11, r12, r20, r21, r22);
 }
 
+
 template class Mat3Template<double>;
 template class Mat3Template<float>;

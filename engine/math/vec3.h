@@ -70,6 +70,8 @@ public:
 							this->x*other.y - this->y*other.x);
 	}
 
+	Vec3Template abs() const;
+
 	N length() const;
 
 	N lengthSquared() const {
