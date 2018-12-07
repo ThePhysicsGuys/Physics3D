@@ -119,6 +119,7 @@ void Screen::init() {
 
 	basicShader = Shader(basicShaderSource);
 	basicShader.createUniform("viewMatrix");
+	basicShader.createUniform("color");
 	basicShader.createUniform("projectionMatrix");
 	basicShader.createUniform("viewPos");
 
@@ -185,33 +186,53 @@ void Screen::update() {
 	}
 }
 
-Vec3 max(Vec3 a, Vec3 b) {
-	return Vec3(
-		(a.x > b.x) ? a.x : b.x,
-		(a.y > b.y) ? a.y : b.y,
-		(a.z > b.z) ? a.z : b.z
-	);
-}
+bool intersect(Vec3 orig, Vec3 dir, Vec3 min, Vec3 max) {
+	float tmin = (min.x - orig.x) / dir.x;
+	float tmax = (max.x - orig.x) / dir.x;
 
-double SDF(Vec3 pos) {
-	return pos.length() - 1;
-	//return max(pos.abs() - Vec3(1, 1, 1), Vec3(0, 0, 0)).length();
-}
+	if (tmin > tmax) {
+		double temp = tmin;
+		tmin = tmax;
+		tmax = temp;
+	};
 
+	float tymin = (min.y - orig.y) / dir.y;
+	float tymax = (max.y - orig.y) / dir.y;
 
-float raymarch(Vec3 eye, Vec3 dir, float start, float end) {
-	double depth = 0.0;
-	for (int i = 0; i < 255; i++) {
-		double dist = SDF(eye + dir * depth);
-		if (dist < 0.0002) 
-			return depth;
-
-		depth += dist;
-
-		if (depth >= end) 
-			return end;
+	if (tymin > tymax) {
+		double temp = tymin;
+		tymin = tymax;
+		tymax = temp;
 	}
-	return end;
+
+	if ((tmin > tymax) || (tymin > tmax))
+		return false;
+
+	if (tymin > tmin)
+		tmin = tymin;
+
+	if (tymax < tmax)
+		tmax = tymax;
+
+	float tzmin = (min.z - orig.z) / dir.z;
+	float tzmax = (max.z - orig.z) / dir.z;
+
+	if (tzmin > tzmax) {
+		double temp = tzmin;
+		tzmin = tzmax;
+		tzmax = temp;
+	}
+
+	if ((tmin > tzmax) || (tzmin > tmax))
+		return false;
+
+	if (tzmin > tmin)
+		tmin = tzmin;
+
+	if (tzmax < tmax)
+		tmax = tzmax;
+
+	return true;
 }
 
 
@@ -225,14 +246,10 @@ void Screen::refresh() {
 	double min = 0;
 	double max = 100;
 	ray = calcRay(handler->getMousePos(), screenSize, &camera, viewMatrix, projectionMatrix);
-	double dist = raymarch(camera.position, ray, min, max);
-
-	Log::debug("%f", dist);
-	if (dist < 0.0002) {
-		Log::debug("Hovering over the object");
-	}
 
 	basicShader.bind();
+	if (intersect(camera.position, ray, Vec3(-0.5, -0.5, -0.5), Vec3(0.5, 0.5, 0.5))) basicShader.setUniform("color", Vec3f(0.8, 0.8, 0.8));
+	else basicShader.setUniform("color", Vec3f(0.5, 0.1, 0.8));
 	basicShader.setUniform("projectionMatrix", projectionMatrix);
 	basicShader.setUniform("viewMatrix", viewMatrix);
 	basicShader.setUniform("viewPos", Vec3f(camera.position.x, camera.position.y, camera.position.z));
