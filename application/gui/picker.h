@@ -14,12 +14,12 @@ Vec2 getNormalizedDeviceSpacePosition(Vec2 viewportSpacePosition, Vec2 screenSiz
 
 Vec3 calcRay(Vec2 mousePosition, Vec2 screenSize, Camera* camera, Mat4f viewMatrix, Mat4f projectionMatrix) {
 	Vec2 normalizedDeviceSpacePosition = getNormalizedDeviceSpacePosition(mousePosition, screenSize);
-	Vec4f clipSpacePosition = Vec4f(normalizedDeviceSpacePosition.x, normalizedDeviceSpacePosition.y, 1, 1);
+	Vec4f clipSpacePosition = Vec4f(normalizedDeviceSpacePosition.x, normalizedDeviceSpacePosition.y, -1, 1);
 	Mat4f invertedProjectionMatrix = projectionMatrix.inverse();
 	Vec4f eyeTempCoordinates = invertedProjectionMatrix * clipSpacePosition;
-	Vec4f eyeCoordinates = Vec4f(eyeTempCoordinates.x, eyeTempCoordinates.y, 1, 0);
+	Vec4f eyeCoordinates = Vec4f(eyeTempCoordinates.x, eyeTempCoordinates.y, -1, 0);
 	Mat4f inverseViewMatrix = viewMatrix.inverse();
 	Vec4f worldCoordinates = inverseViewMatrix * eyeCoordinates;
-	Vec3 ray = Vec3(worldCoordinates.x, worldCoordinates.y, -worldCoordinates.z).normalize();
+	Vec3 ray = Vec3(worldCoordinates.x, worldCoordinates.y, worldCoordinates.z).normalize();
 	return ray;
 }
