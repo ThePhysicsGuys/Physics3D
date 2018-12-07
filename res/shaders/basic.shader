@@ -12,9 +12,16 @@ void main() {
 #shader geometry // geometry shader
 #version 330
 
-layout(triangles) in;
-layout(triangle_strip, max_vertices = 3) out;
+#define DEBUG 
 
+layout(triangles) in;
+#ifndef DEBUG
+layout(triangle_strip, max_vertices = 3) out;
+#else
+layout(line_strip, max_vertices = 9) out;
+#endif
+
+uniform vec3 viewPosition;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 
@@ -29,26 +36,34 @@ vec3 normal() {
 	vec3 a = vec3(gl_in[0].gl_Position) - vec3(gl_in[1].gl_Position);
 	vec3 b = vec3(gl_in[2].gl_Position) - vec3(gl_in[1].gl_Position);
 	vec3 norm = normalize(cross(a, b));
-	//if (dot(fcenter, fnormal) > 0) {
-	//	return norm;
-	// } else { 
-		return -norm;
-	// }
+	return -norm;
 }
 
 void main() {
 	fcenter = center();
 	fnormal = normal();
 
-	gl_Position = projectionMatrix * viewMatrix * gl_in[0].gl_Position;
-	EmitVertex();
+#ifdef DEBUG
+	float arrowLength = 0.05;
+	float arrowWidth = 0.02;
+	vec4 arrowTop = vec4(fcenter + 0.3 * fnormal, 1);
+	vec3 norm = normalize(cross(arrowTop.xyz - viewPosition, fnormal));
+	vec4 arrowLeft = arrowTop - vec4(arrowLength * fnormal - arrowWidth * norm, 0);
+	vec4 arrowRight = arrowTop - vec4(arrowLength * fnormal + arrowWidth * norm, 0);
+	vec4 arrowBase = arrowTop - arrowLength * vec4(fnormal, 0);
 
-	gl_Position = projectionMatrix * viewMatrix * gl_in[1].gl_Position;
-	EmitVertex();
+	gl_Position = projectionMatrix * viewMatrix * vec4(fcenter, 1); EmitVertex();
+	gl_Position = projectionMatrix * viewMatrix * arrowBase; EmitVertex();
+	gl_Position = projectionMatrix * viewMatrix * arrowLeft; EmitVertex();
+	gl_Position = projectionMatrix * viewMatrix * arrowTop; EmitVertex();
+	gl_Position = projectionMatrix * viewMatrix * arrowRight; EmitVertex();
+	gl_Position = projectionMatrix * viewMatrix * arrowBase; EmitVertex();
+	EndPrimitive();
+#endif
 
-	gl_Position = projectionMatrix * viewMatrix * gl_in[2].gl_Position;
-	EmitVertex();
-
+	gl_Position = projectionMatrix * viewMatrix * gl_in[0].gl_Position; EmitVertex();
+	gl_Position = projectionMatrix * viewMatrix * gl_in[1].gl_Position; EmitVertex();
+	gl_Position = projectionMatrix * viewMatrix * gl_in[2].gl_Position; EmitVertex();
 	EndPrimitive();
 }
 
@@ -66,7 +81,6 @@ in vec3 fcenter;
 in vec3 fnormal;
 
 void main() {
-	// vec3 objectColor = vec3(0.1, 0.8, 0.5);
 	float ambientStrength = 0.4;
 	float specularStrength = 1;
 	vec3 lightPos = vec3(-2, 3, 4);

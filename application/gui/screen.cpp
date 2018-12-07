@@ -121,7 +121,7 @@ void Screen::init() {
 	basicShader.createUniform("viewMatrix");
 	basicShader.createUniform("color");
 	basicShader.createUniform("projectionMatrix");
-	basicShader.createUniform("viewPos");
+	basicShader.createUniform("viewPosition");
 
 	vectorShader = Shader(vectorShaderSource);
 	vectorShader.createUniform("viewMatrix");
@@ -242,18 +242,21 @@ void Screen::refresh() {
 
 	Mat4f projectionMatrix = Mat4f().perspective(1.0, screenSize.x / screenSize.y, 0.01, 100.0);
 	Mat4f viewMatrix = Mat4f().rotate(camera.rotation.x, 1, 0, 0).rotate(camera.rotation.y, 0, 1, 0).rotate(camera.rotation.z, 0, 0, 1).translate(-camera.position.x, -camera.position.y, -camera.position.z);
+	Vec3 realCameraVector = Mat4().rotate(camera.rotation.x, 1, 0, 0).rotate(camera.rotation.y, 0, 1, 0).rotate(camera.rotation.z, 0, 0, 1) * Vec3(0, 0, -1);
 	
 	double min = 0;
 	double max = 100;
 	ray = calcRay(handler->getMousePos(), screenSize, &camera, viewMatrix, projectionMatrix);
 
 	basicShader.bind();
-	if (intersect(camera.position, ray, Vec3(-0.5, -0.5, -0.5), Vec3(0.5, 0.5, 0.5))) basicShader.setUniform("color", Vec3f(0.8, 0.8, 0.8));
+	if (intersect(camera.position, (realCameraVector.normalize() + ray.normalize()).normalize(), Vec3(-0.5, -0.5, -0.5), Vec3(0.5, 0.5, 0.5))) basicShader.setUniform("color", Vec3f(0.8, 0.8, 0.8));
 	else basicShader.setUniform("color", Vec3f(0.5, 0.1, 0.8));
 	basicShader.setUniform("projectionMatrix", projectionMatrix);
 	basicShader.setUniform("viewMatrix", viewMatrix);
-	basicShader.setUniform("viewPos", Vec3f(camera.position.x, camera.position.y, camera.position.z));
+	basicShader.setUniform("viewPosition", Vec3f(camera.position.x, camera.position.y, camera.position.z));
 	boxMesh->render();
+
+	Log::debug("%s\t%s", str(realCameraVector).c_str(), str(ray).c_str());
 	
 
 	vectorShader.bind();

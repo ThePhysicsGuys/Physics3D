@@ -32,15 +32,15 @@ uniform mat4 projectionMatrix;
 uniform vec3 viewPosition;
 
 void main() {
-	float arrowLenght = 0.1;
+	float arrowLength = 0.1;
 	float arrowWidth = 0.025;
 	vec4 origin = gl_in[0].gl_Position;
 	vec4 arrowTop = gl_in[0].gl_Position + vec4(grotation[0], 0);
 	vec3 norm = normalize(cross(arrowTop.xyz - viewPosition, grotation[0]));
 	vec3 unitRotation = normalize(grotation[0]);
-	vec4 arrowLeft = arrowTop - vec4(arrowLenght * unitRotation - arrowWidth * norm, 0);
-	vec4 arrowRight = arrowTop - vec4(arrowLenght * unitRotation + arrowWidth * norm, 0);
-	vec4 arrowBase = arrowTop - arrowLenght * vec4(unitRotation, 0);
+	vec4 arrowLeft = arrowTop - vec4(arrowLength * unitRotation - arrowWidth * norm, 0);
+	vec4 arrowRight = arrowTop - vec4(arrowLength * unitRotation + arrowWidth * norm, 0);
+	vec4 arrowBase = arrowTop - arrowLength * vec4(unitRotation, 0);
 
 	fcolor = gcolor[0];
 
