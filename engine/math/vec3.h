@@ -1,6 +1,11 @@
 #pragma once
 
 template<typename N>
+struct Vec3Template;
+
+#include "mat3.h"
+
+template<typename N>
 struct Vec3Template {
 public:
 	N x;
@@ -68,6 +73,12 @@ public:
 		return Vec3Template(this->y*other.z - this->z*other.y, 
 							this->z*other.x - this->x*other.z, 
 							this->x*other.y - this->y*other.x);
+	}
+	
+	Mat3Template<N> outer(const Vec3Template<N>& other) const {
+		return Mat3Template<N>(x*other.x, x*other.y, x*other.z,
+							   y*other.x, y*other.y, y*other.z,
+							   z*other.x, z*other.y, z*other.z);
 	}
 
 	Vec3Template abs() const;

@@ -21,6 +21,7 @@ layout(triangle_strip, max_vertices = 3) out;
 layout(line_strip, max_vertices = 9) out;
 #endif
 
+uniform mat4 modelMatrix;
 uniform vec3 viewPosition;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
@@ -43,6 +44,8 @@ void main() {
 	fcenter = center();
 	fnormal = normal();
 
+	mat4 transform = projectionMatrix * viewMatrix * transpose(modelMatrix);
+
 #ifdef DEBUG
 	float arrowLength = 0.05;
 	float arrowWidth = 0.02;
@@ -52,18 +55,18 @@ void main() {
 	vec4 arrowRight = arrowTop - vec4(arrowLength * fnormal + arrowWidth * norm, 0);
 	vec4 arrowBase = arrowTop - arrowLength * vec4(fnormal, 0);
 
-	gl_Position = projectionMatrix * viewMatrix * vec4(fcenter, 1); EmitVertex();
-	gl_Position = projectionMatrix * viewMatrix * arrowBase; EmitVertex();
-	gl_Position = projectionMatrix * viewMatrix * arrowLeft; EmitVertex();
-	gl_Position = projectionMatrix * viewMatrix * arrowTop; EmitVertex();
-	gl_Position = projectionMatrix * viewMatrix * arrowRight; EmitVertex();
-	gl_Position = projectionMatrix * viewMatrix * arrowBase; EmitVertex();
+	gl_Position = transform * vec4(fcenter, 1); EmitVertex();
+	gl_Position = transform * arrowBase; EmitVertex();
+	gl_Position = transform * arrowLeft; EmitVertex();
+	gl_Position = transform * arrowTop; EmitVertex();
+	gl_Position = transform * arrowRight; EmitVertex();
+	gl_Position = transform * arrowBase; EmitVertex();
 	EndPrimitive();
 #endif
 
-	gl_Position = projectionMatrix * viewMatrix * gl_in[0].gl_Position; EmitVertex();
-	gl_Position = projectionMatrix * viewMatrix * gl_in[1].gl_Position; EmitVertex();
-	gl_Position = projectionMatrix * viewMatrix * gl_in[2].gl_Position; EmitVertex();
+	gl_Position = transform * gl_in[0].gl_Position; EmitVertex();
+	gl_Position = transform * gl_in[1].gl_Position; EmitVertex();
+	gl_Position = transform * gl_in[2].gl_Position; EmitVertex();
 	EndPrimitive();
 }
 

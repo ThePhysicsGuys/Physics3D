@@ -1,5 +1,8 @@
 #pragma once
 
+template<typename N>
+struct Mat3Template;
+
 #include "vec3.h"
 
 template<typename N>
@@ -7,15 +10,9 @@ struct Mat3Template {
 public:
 	union {
 		struct {
-			N m00;
-			N m01;
-			N m02;
-			N m10;
-			N m11;
-			N m12;
-			N m20;
-			N m21;
-			N m22;
+			N m00, m01, m02;
+			N m10, m11, m12;
+			N m20, m21, m22;
 		};
 
 		N m[9];
@@ -68,34 +65,36 @@ public:
 
 	Mat3Template operator+(const Mat3Template& other) const {
 		return Mat3Template(
-			m00 + other.m00,
-			m01 + other.m01,
-			m02 + other.m02,
-			m10 + other.m10,
-			m11 + other.m11,
-			m12 + other.m12,
-			m20 + other.m20,
-			m21 + other.m21,
-			m22 + other.m22
+			m00 + other.m00, m01 + other.m01, m02 + other.m02,
+			m10 + other.m10, m11 + other.m11, m12 + other.m12,
+			m20 + other.m20, m21 + other.m21, m22 + other.m22
 		);
 	}
 
 	Mat3Template operator-(const Mat3Template& other) const {
-		return Mat3Template (
-			m00 - other.m00,
-			m01 - other.m01,
-			m02 - other.m02,
-			m10 - other.m10,
-			m11 - other.m11,
-			m12 - other.m12,
-			m20 - other.m20,
-			m21 - other.m21,
-			m22 - other.m22
+		return Mat3Template(
+			m00 - other.m00, m01 - other.m01, m02 - other.m02,
+			m10 - other.m10, m11 - other.m11, m12 - other.m12,
+			m20 - other.m20, m21 - other.m21, m22 - other.m22
 		);
 	}
 
 	Mat3Template operator-() const {
 		return Mat3Template(-m00, -m01, -m02, -m10, -m11, -m12, -m20, -m21, -m22);
+	}
+
+	Mat3Template& operator+=(const Mat3Template& other) {
+		m00 += other.m00; m01 += other.m01; m02 += other.m02;
+		m10 += other.m10; m11 += other.m11; m12 += other.m12;
+		m20 += other.m20; m21 += other.m21; m22 += other.m22;
+		return *this;
+	}
+
+	Mat3Template& operator-=(const Mat3Template& other) {
+		m00 -= other.m00; m01 -= other.m01; m02 -= other.m02;
+		m10 -= other.m10; m11 -= other.m11; m12 -= other.m12;
+		m20 -= other.m20; m21 -= other.m21; m22 -= other.m22;
+		return *this;
 	}
 
 	Vec3Template<N> operator*(const Vec3Template<N>& other) const {
@@ -119,6 +118,19 @@ public:
 
 		return Mat3Template(r00, r01, r02, r10, r11, r12, r20, r21, r22);
 	}
+
+	Mat3Template operator*(const N& f) const {
+		return Mat3Template(m00*f, m01*f, m02*f, 
+							m10*f, m11*f, m12*f,
+							m20*f, m21*f, m22*f);
+	}
+	
+	Mat3Template& operator*=(const N& f) {
+		m00 *= f; m01 *= f; m02 *= f;
+		m10 *= f; m11 *= f; m12 *= f;
+		m20 *= f; m21 *= f; m22 *= f;
+		return *this;
+	}
 };
 
 typedef Mat3Template<double>	Mat3;
@@ -128,3 +140,4 @@ typedef Mat3Template<long long>	Mat3l;
 typedef Mat3 RotMat3;
 
 Mat3 fromEulerAngles(double alpha, double beta, double gamma);
+template<typename N> Mat3Template<N> fromRotationVec(Vec3Template<N> rotVec);

@@ -23,7 +23,7 @@
 
 // Test shape
 Vec3 testShapeVecs[]{Vec3(0.0, 0.0, 0.0), Vec3(1.0, 0.0, 0.0), Vec3(0.0, 1.0, 0.0), Vec3(0.0, 0.0, 1.0)};
-Triangle testShapeTriangles[]{{1,2,3},{1,3,4},{1, 4, 2},{2, 3, 4}};
+Triangle testShapeTriangles[]{{0,2,1},{0,3,2},{0,1,3},{1,2,3}};
 Shape testShape(testShapeVecs, testShapeTriangles, 4, 4);
 
 Screen screen;
@@ -53,6 +53,10 @@ int main(void) {
 
 	world.addObject(triangleThing);
 	world.addObject(box);
+
+	triangleThing.part.drawMeshId = screen.addMeshShape(testShape);
+
+
 
 	physicsThread.start();
 

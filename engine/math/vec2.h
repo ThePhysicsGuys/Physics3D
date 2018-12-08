@@ -23,6 +23,30 @@ public:
 		return Vec2Template(-x, -y);
 	}
 
+	Vec2Template& operator+=(const Vec2Template& other) {
+		this->x += other.x;
+		this->y += other.y;
+		return *this;
+	}
+
+	Vec2Template& operator-=(const Vec2Template& other) {
+		this->x -= other.x;
+		this->y -= other.y;
+		return *this;
+	}
+
+	Vec2Template& operator*=(const N& factor) {
+		this->x *= factor;
+		this->y *= factor;
+		return *this;
+	}
+
+	Vec2Template& operator/=(const N& factor) {
+		this->x /= factor;
+		this->y /= factor;
+		return *this;
+	}
+
 	Vec2Template operator*(const N& d) const {
 		return Vec2Template(x*d, y*d);
 	}

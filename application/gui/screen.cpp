@@ -101,6 +101,8 @@ void generateShape(double* buffer, int mi, int mj) {
 IndexedMesh* boxMesh = nullptr;
 VectorMesh* vectorMesh = nullptr;
 
+IndexedMesh* transMesh = nullptr;
+
 Shader basicShader;
 Shader vectorShader;
 BoundingBox* box = nullptr;
@@ -118,6 +120,7 @@ void Screen::init() {
 	ShaderSource vectorShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(VECTOR_SHADER1)), "vector.shader");
 
 	basicShader = Shader(basicShaderSource);
+	basicShader.createUniform("modelMatrix");
 	basicShader.createUniform("viewMatrix");
 	basicShader.createUniform("color");
 	basicShader.createUniform("projectionMatrix");
@@ -136,6 +139,9 @@ void Screen::init() {
 	Shape shape = box->toShape(new Vec3[8]);// .rotated(fromEulerAngles(0.5, 0.1, 0.2), new Vec3[8]);
 
 	boxMesh = new IndexedMesh(shape);
+
+	Shape trans = shape.translated(Vec3(1.0, -1.0, 1.0), new Vec3[8]);
+	transMesh = new IndexedMesh(trans);
 	
 	const int mi = 50;
 	const int mj = 50;
@@ -244,6 +250,43 @@ void Screen::refresh() {
 	Mat4f viewMatrix = Mat4f().rotate(camera.rotation.x, 1, 0, 0).rotate(camera.rotation.y, 0, 1, 0).rotate(camera.rotation.z, 0, 0, 1).translate(-camera.position.x, -camera.position.y, -camera.position.z);
 	Vec3 realCameraVector = Mat4().rotate(camera.rotation.x, 1, 0, 0).rotate(camera.rotation.y, 0, 1, 0).rotate(camera.rotation.z, 0, 0, 1) * Vec3(0, 0, -1);
 	
+
+
+	basicShader.bind();
+	basicShader.setUniform("modelMatrix", Mat4f());
+	basicShader.setUniform("projectionMatrix", projectionMatrix);
+	basicShader.setUniform("viewMatrix", viewMatrix);
+	basicShader.setUniform("viewPos", Vec3f(camera.position.x, camera.position.y, camera.position.z));
+	
+	Log::debug("rendering objects");
+	for (Physical p : w->physicals) {
+		Log::debug("Processing part");
+		CFrame fra = p.cframe;
+		Mat4 transf = fra.asMat4();
+		// fra.rotation = Mat3(1, 0, 0, 0, 1, 0, 0, 0, 1);
+		// Mat4f transf = Mat4f();
+		Mat4f transff = Mat4f();
+		for (int i = 0; i < 16; i++) {
+			transff.m[i] = transf.m[i];
+		}
+
+		/*transf.m03 = fra.position.x;
+		transf.m13 = fra.position.y;
+		transf.m23 = fra.position.z;*/
+		
+
+		int meshId = p.part.drawMeshId;
+
+		Log::debug("meshId: %d", meshId);
+
+		basicShader.setUniform("modelMatrix", transff);
+		meshes[meshId]->render();
+	}
+	
+	basicShader.setUniform("modelMatrix", Mat4f());
+
+
+
 	double min = 0;
 	double max = 100;
 	ray = calcRay(handler->getMousePos(), screenSize, &camera, viewMatrix, projectionMatrix);
@@ -254,10 +297,13 @@ void Screen::refresh() {
 	basicShader.setUniform("projectionMatrix", projectionMatrix);
 	basicShader.setUniform("viewMatrix", viewMatrix);
 	basicShader.setUniform("viewPosition", Vec3f(camera.position.x, camera.position.y, camera.position.z));
+
+
 	boxMesh->render();
 
 	Log::debug("%s\t%s", str(realCameraVector).c_str(), str(ray).c_str());
 	
+	transMesh->render();
 
 	vectorShader.bind();
 	vectorShader.setUniform("projectionMatrix", projectionMatrix);
@@ -278,4 +324,10 @@ void Screen::close() {
 
 bool Screen::shouldClose() {
 	return glfwWindowShouldClose(window) != 0;
+}
+
+int Screen::addMeshShape(Shape s) {
+	int size = meshes.size();
+	meshes.push_back(new IndexedMesh(s));
+	return size;
 }

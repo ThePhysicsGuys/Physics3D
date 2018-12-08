@@ -65,8 +65,8 @@ public:
 	}
 };
 
-AssertionError::AssertionError(int line, std::string info) : line(line), info(info) {}
-const char* AssertionError::what() const { return info.c_str(); }
+AssertionError::AssertionError(int line, const char* info) : line(line), info(info) {}
+const char* AssertionError::what() const { return info; }
 
 
 std::vector<Test>* tests = nullptr;

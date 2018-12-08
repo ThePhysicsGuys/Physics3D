@@ -5,6 +5,7 @@
 struct Part {
 public:
 	Shape hitbox;
+	int drawMeshId = 0;
 	struct {
 		double density;
 		double friction;
