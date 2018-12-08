@@ -25,6 +25,38 @@ public:
 		return Vec4Template(-x, -y, -z, -w);
 	}
 
+	Vec4Template& operator+=(const Vec4Template& other) {
+		this->x += other.x;
+		this->y += other.y;
+		this->z += other.z;
+		this->w += other.w;
+		return *this;
+	}
+
+	Vec4Template& operator-=(const Vec4Template& other) {
+		this->x -= other.x;
+		this->y -= other.y;
+		this->z -= other.z;
+		this->w -= other.w;
+		return *this;
+	}
+
+	Vec4Template& operator*=(const N& factor) {
+		this->x *= factor;
+		this->y *= factor;
+		this->z *= factor;
+		this->w *= factor;
+		return *this;
+	}
+
+	Vec4Template& operator/=(const N& factor) {
+		this->x /= factor;
+		this->y /= factor;
+		this->z /= factor;
+		this->w /= factor;
+		return *this;
+	}
+
 	Vec4Template operator*(const N& d) const {
 		return Vec4Template(x * d, y * d, z * d, w * d);
 	}

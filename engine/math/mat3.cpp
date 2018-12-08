@@ -40,6 +40,35 @@ Mat3Template<N> Mat3Template<N>::rotate(N angle, N x, N y, N z) const {
 	return Mat3Template<N>(r00, r01, r02, r10, r11, r12, r20, r21, r22);
 }
 
+template<typename N>
+Mat3Template<N> fromRotationVec(Vec3Template<N> rotVec) {
+	
+	N angle = rotVec.length();
+
+	if (!(angle != 0)) { // inverse is important! Catches weird values like Nan and Inf too
+		return Mat3Template<N>(1, 0, 0,
+							   0, 1, 0,
+							   0, 0, 1);
+	}
+
+	rotVec /= angle;
+	N x = rotVec.x;
+	N y = rotVec.y;
+	N z = rotVec.z;
+
+	N sinA = sin(angle);
+	N cosA = cos(angle);
+
+	Mat3Template<N> outer = rotVec.outer(rotVec);
+	Mat3Template<N> rotor = Mat3Template<N>(cosA,     z*sinA,   -y*sinA,
+											-z*sinA,  cosA,     x*sinA,
+											y*sinA,   -x*sinA,  cosA);
+
+	return outer * (1 - cosA) + rotor;
+}
 
 template class Mat3Template<double>;
 template class Mat3Template<float>;
+
+template Mat3Template<double> fromRotationVec(Vec3Template<double> v);
+template Mat3Template<float> fromRotationVec(Vec3Template<float> v);
