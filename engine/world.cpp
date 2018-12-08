@@ -11,7 +11,8 @@ World::World() {
 
 void World::tick(double deltaT) {
 	for (Physical& p : physicals) {
-		p.applyForce(Vec3(), p.cframe.position * -10.0);
+		double l = p.cframe.position.lengthSquared();
+		p.applyForce(Vec3(), p.cframe.position * (-10.0 / ((l > 0.01)? l:1.0)));
 	}
 	for (Physical& p : physicals) {
 		p.update(deltaT);

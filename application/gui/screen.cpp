@@ -275,7 +275,7 @@ void Screen::refresh() {
 	}
 	
 	basicShader.setUniform("modelMatrix", Mat4f());
-	boxMesh->render();	
+	// boxMesh->render();	
 	transMesh->render();
 
 	vectorShader.bind();

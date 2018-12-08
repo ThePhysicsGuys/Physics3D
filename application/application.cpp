@@ -13,6 +13,8 @@
 
 #include "tickerThread.h"
 
+#include "objectLibrary.h"
+
 #include "../engine/geometry/shape.h"
 #include "../engine/geometry/managedShape.h"
 #include "../engine/part.h"
@@ -47,17 +49,38 @@ int main(void) {
 
 	Part trianglePart = createVisiblePart(testShape, 10.0, 0.7);
 	Part boxPart = createVisiblePart(BoundingBox{-0.1, -0.7, -0.3, 0.1, 0.7, 0.3}.toShape(new Vec3[8]), 2.0, 0.7);
+	Part icosathingie = createVisiblePart(icosahedron, 10, 0.7);
 
-	Physical triangleThing(trianglePart, CFrame(Vec3(0.3, 0.7, 0.2), fromEulerAngles(0.3, 0.0, 0.0)), 10.0, Mat3(1.0, 0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 5.0));
+	Physical triangleThing(trianglePart, CFrame(Vec3(0.0, 2.0, 0.2), fromEulerAngles(0.3, 0.0, 0.0)), 10.0, Mat3(1.0, 0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 5.0));
 	Physical box(boxPart, CFrame(Vec3(-0.3, -0.7, 0.2), fromEulerAngles(0.0, 0.0, 0.0)), 10.0, Mat3(1.0, 0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 5.0));
+	Physical icosaPhysical(icosathingie, CFrame(Vec3(0.0, 0.0, 0.0), fromEulerAngles(0.0, 0.0, 0.0)), 10.0, Mat3(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0));
 
-	triangleThing.velocity = Vec3(0.1, 0.0, 0.0);
+	icosaPhysical.angularVelocity = Vec3(0.0, 1.5, 0.0);
+
+	
+	for (int x = 0; x < 10; x++) {
+		for (int y = 0; y < 10; y++) {
+			for (int z = 0; z < 10; z++) {
+				Physical phy(icosathingie, CFrame(Vec3(x, y, z), fromEulerAngles(0.0, 0.0, 0.0)), 10.0, Mat3(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0));
+
+				phy.angularVelocity = Vec3(0.0, 1.5, 0.0);
+				phy.velocity = Vec3(0.0, 0.0, 1.0);
+
+				world.addObject(phy);
+			}
+		}
+	}
+
+
+
+	triangleThing.velocity = Vec3(1.0, 0.0, 0.0);
 	triangleThing.angularVelocity = Vec3(0.1, 0.5, 0.3);
 
 	box.angularVelocity = Vec3(1.0, 1.0, 1.0);
 
-	world.addObject(triangleThing);
-	world.addObject(box);
+	// world.addObject(triangleThing);
+	// world.addObject(box);
+	world.addObject(icosaPhysical);
 
 	physicsThread.start();
 

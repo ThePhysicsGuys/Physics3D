@@ -34,5 +34,7 @@ struct Shape {
 
 	BoundingBox getBounds() const;
 
+	double getVolume() const;
+
 	bool isValid() const;
 };

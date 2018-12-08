@@ -115,3 +115,7 @@ bool isComplete(const Triangle* triangles, int tCount) {
 	}
 	return true;
 }
+
+double Shape::getVolume() const {
+	return 0.0;
+}

@@ -15,7 +15,7 @@ void main() {
 #shader geometry // geometry shader
 #version 330
 
-#define DEBUG 
+// #define DEBUG 
 
 layout(triangles) in;
 #ifndef DEBUG
@@ -100,11 +100,11 @@ struct Light {
 
 const int lightCount = 3;
 
-Light lights[lightCount] = {
-	{ vec3(-14, 17, 10), vec3(1, 0, 0) },
-	{ vec3(15, 13, -13), vec3(0, 1, 0) },
-	{ vec3(-15, -14, -13), vec3(0, 0, 1) }
-};
+Light lights[lightCount] = Light[](
+	Light(vec3(-14, 17, 10), vec3(1, 0, 0)),
+	Light(vec3(15, 13, -13), vec3(0, 1, 0)),
+	Light(vec3(-15, -14, -13), vec3(0, 0, 1))
+);
 
 void main() {
 	vec3 fragPosition = vec3(modelMatrix * vec4(fposition, 1));
