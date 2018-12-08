@@ -11,7 +11,7 @@ public:
 
 	const int vertexCount;
 
-	ArrayMesh(const double* positions, const int size);
+	ArrayMesh(const double* positions, const int size, const int dimensions);
 
 	void render() override;
 	void close() override;
