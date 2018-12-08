@@ -259,7 +259,7 @@ void Screen::refresh() {
 	basicShader.setUniform("modelMatrix", Mat4f());
 	basicShader.setUniform("projectionMatrix", projectionMatrix);
 	basicShader.setUniform("viewMatrix", viewMatrix);
-	basicShader.setUniform("viewPos", Vec3f(camera.position.x, camera.position.y, camera.position.z));
+	basicShader.setUniform("viewPosition", Vec3f(camera.position.x, camera.position.y, camera.position.z));
 	
 	// Render world objects
 	for (Physical p : w->physicals) {

@@ -1,10 +1,13 @@
 #shader vertex // vertex Shader
 #version 330 core 
 
-layout(location = 0) in vec3 position; 
+layout(location = 0) in vec3 vposition; 
+
+out vec3 gposition;
 
 void main() { 
-	gl_Position = vec4(position, 1);
+	gl_Position = vec4(vposition, 1);
+	gposition = vposition;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -12,7 +15,7 @@ void main() {
 #shader geometry // geometry shader
 #version 330
 
-#define DEBUG 
+//#define DEBUG 
 
 layout(triangles) in;
 #ifndef DEBUG
@@ -26,6 +29,9 @@ uniform vec3 viewPosition;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 
+in vec3 gposition[];
+
+out vec3 fposition;
 out vec3 fcenter;
 out vec3 fnormal;
 
@@ -63,9 +69,11 @@ void main() {
 	gl_Position = transform * arrowBase; EmitVertex();
 	EndPrimitive();
 #endif
-
+	fposition = gposition[0];
 	gl_Position = transform * gl_in[0].gl_Position; EmitVertex();
+	fposition = gposition[1];
 	gl_Position = transform * gl_in[1].gl_Position; EmitVertex();
+	fposition = gposition[2];
 	gl_Position = transform * gl_in[2].gl_Position; EmitVertex();
 	EndPrimitive();
 }
@@ -77,28 +85,50 @@ void main() {
 
 layout(location = 0) out vec4 outColor;
 
-uniform vec3 viewPos;
+uniform mat4 modelMatrix;
+uniform vec3 viewPosition;
 uniform vec3 color;
 
+in vec3 fposition;
 in vec3 fcenter;
 in vec3 fnormal;
 
-void main() {
-	float ambientStrength = 0.4;
-	float specularStrength = 1;
-	vec3 lightPos = vec3(-2, 3, 4);
+struct Light {
+	vec3 position;
+	vec3 color;
+};
 
+const int lightCount = 2;
+
+Light lights[lightCount] = {
+	{ vec3(-4, 7, 10), vec3(1) },
+	{ vec3(5, 7, -3), vec3(1) }
+};
+
+void main() {
+	vec3 fragPosition = vec3(modelMatrix * vec4(fposition, 1));
+	vec3 viewDirection = normalize(viewPosition - fragPosition);
+	
+	float ambientStrength = 1;
 	vec3 ambient = ambientStrength * color;
 	
-	vec3 lightDir = normalize(lightPos - fcenter);
-	float diff = max(dot(fnormal, lightDir), 0.0);
-	vec3 diffuse = diff * color;
-	
-	vec3 viewDir = normalize(viewPos - fcenter);
-	vec3 reflectDir = reflect(-lightDir, fnormal);
-	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
-	vec3 specular = specularStrength * spec * color;
+	vec3 lightColorBuffer;
+	for (int i = 0; i < lightCount; i++) {
+		Light currentLight = lights[i];
 
-	vec3 result = (ambient + diffuse + specular) * 1;
-	outColor = vec4(result, 1.0);
+		vec3 lightDirection = normalize(currentLight.position - fragPosition);
+		vec3 reflectDirection = reflect(-lightDirection, fnormal);
+
+		float diffuseStrength = 0.4;
+		float diffuseFactor = dot(fnormal, lightDirection);
+		vec3 diffuse = diffuseStrength * clamp(diffuseFactor, 0, 1) * color;
+
+		float specularStrength = 0.4;
+		float specularFactor = pow(max(dot(viewDirection, reflectDirection), 0.0), 32);
+		vec3 specular = specularStrength * specularFactor * currentLight.color;
+
+		lightColorBuffer += diffuse + specular;
+	}
+
+	outColor = vec4(ambient + lightColorBuffer, 1);
 }
