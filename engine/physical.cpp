@@ -4,16 +4,30 @@
 #include "../util/log.h"
 #include "math/mathUtil.h"
 
-Physical::Physical(Part p, CFrame cframe) : part(p), cframe(cframe) {}
+Physical::Physical(Part p, CFrame cframe, double mass, Mat3 inertia) : part(p), cframe(cframe), mass(mass), inertia(inertia) {}
 
 void Physical::update(double deltaT) {
+	Vec3 accel = totalForce * (deltaT/mass);
+	Vec3 rotAcc = ~inertia * totalMoment * deltaT;
+
+	totalForce = Vec3();
+	totalMoment = Vec3();
+
+	velocity += accel;
+	angularVelocity += rotAcc;
+
 	cframe = cframe + velocity * deltaT;
 	
 	Mat3 rotation = fromRotationVec(angularVelocity * deltaT);
 
-	Log::debug("Rotation: %s", str(rotation).c_str());
-
-	angularVelocity += Vec3(0.001, 0.0, 0.0);
-
 	cframe.rotation = rotation * cframe.rotation;
+}
+
+void Physical::applyForce(Vec3Relative origin, Vec3 force) {
+	totalForce += force;
+	totalMoment += origin % force;
+}
+
+Vec3 Physical::getCenterOfMass() {
+	return cframe.position;
 }

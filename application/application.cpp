@@ -33,6 +33,7 @@ TickerThread physicsThread;
 
 void init();
 void setupPhysics();
+Part createVisiblePart(Shape s, double density, double friction);
 
 /*void debugCallback(unsigned  source, unsigned int type, unsigned int id, unsigned int severity, int length, const char* message, const void* userParam) {
 	if (type == GL_DEBUG_TYPE_ERROR) 
@@ -43,20 +44,20 @@ void setupPhysics();
 
 int main(void) {
 	init();
-	
-	Vec3 vecBuf[8];
 
-	Physical triangleThing(Part(testShape, 10.0, 0.7), CFrame(Vec3(0.3, 0.7, 0.2), fromEulerAngles(0.3, 0.0, 0.0)));
-	Physical box(Part(BoundingBox{-0.1, -0.7, -0.3, 0.1, 0.7, 0.3}.toShape(vecBuf), 2.0, 0.7), CFrame(Vec3(-0.3, -0.7, 0.2), fromEulerAngles(0.0, 0.0, 0.0)));
+	Part trianglePart = createVisiblePart(testShape, 10.0, 0.7);
+	Part boxPart = createVisiblePart(BoundingBox{-0.1, -0.7, -0.3, 0.1, 0.7, 0.3}.toShape(new Vec3[8]), 2.0, 0.7);
+
+	Physical triangleThing(trianglePart, CFrame(Vec3(0.3, 0.7, 0.2), fromEulerAngles(0.3, 0.0, 0.0)), 10.0, Mat3(1.0, 0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 5.0));
+	Physical box(boxPart, CFrame(Vec3(-0.3, -0.7, 0.2), fromEulerAngles(0.0, 0.0, 0.0)), 10.0, Mat3(1.0, 0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 5.0));
 
 	triangleThing.velocity = Vec3(0.1, 0.0, 0.0);
+	triangleThing.angularVelocity = Vec3(0.1, 0.5, 0.3);
+
+	box.angularVelocity = Vec3(1.0, 1.0, 1.0);
 
 	world.addObject(triangleThing);
 	world.addObject(box);
-
-	triangleThing.part.drawMeshId = screen.addMeshShape(testShape);
-
-
 
 	physicsThread.start();
 
@@ -108,4 +109,12 @@ void setupPhysics() {
 	physicsThread = TickerThread(TICKS_PER_SECOND, TICK_SKIP_TIME, []() {
 		world.tick(1 / physicsThread.getTPS());
 	});
+}
+
+Part createVisiblePart(Shape s, double density, double friction) {
+	int id = screen.addMeshShape(s);
+
+	Part p(s, density, friction);
+	p.drawMeshId = id;
+	return p;
 }
