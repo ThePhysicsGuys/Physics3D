@@ -116,6 +116,9 @@ void Screen::init() {
 	glfwGetWindowSize(window, &width, &height);
 	screenSize = Vec2(width, height);
 
+	glfwWindowHint(GLFW_SAMPLES, 4);
+	glEnable(GL_MULTISAMPLE);
+
 	ShaderSource basicShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(BASIC_SHADER1)), "basic.shader");
 	ShaderSource vectorShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(VECTOR_SHADER1)), "vector.shader");
 
@@ -258,26 +261,17 @@ void Screen::refresh() {
 	basicShader.setUniform("viewMatrix", viewMatrix);
 	basicShader.setUniform("viewPos", Vec3f(camera.position.x, camera.position.y, camera.position.z));
 	
-	Log::debug("rendering objects");
+	// Render world objects
 	for (Physical p : w->physicals) {
-		Log::debug("Processing part");
 		CFrame fra = p.cframe;
 		Mat4 transf = fra.asMat4();
-		// fra.rotation = Mat3(1, 0, 0, 0, 1, 0, 0, 0, 1);
-		// Mat4f transf = Mat4f();
+
 		Mat4f transff = Mat4f();
 		for (int i = 0; i < 16; i++) {
 			transff.m[i] = transf.m[i];
 		}
 
-		/*transf.m03 = fra.position.x;
-		transf.m13 = fra.position.y;
-		transf.m23 = fra.position.z;*/
-		
-
 		int meshId = p.part.drawMeshId;
-
-		Log::debug("meshId: %d", meshId);
 
 		basicShader.setUniform("modelMatrix", transff);
 		meshes[meshId]->render();
