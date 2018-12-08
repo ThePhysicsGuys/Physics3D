@@ -63,6 +63,15 @@ struct Mat4Template {
 		return Mat4Template(x * m00, x * m01, x * m02, x * m03, y * m10, y * m11, y * m12, y * m13, z * m20, z * m21, z * m22, z * m23, m30, m31, m32, m33);
 	}
 
+	Mat4Template transpose() const {
+		return Mat4Template(
+			m00, m10, m20, m30,
+			m01, m11, m21, m31,
+			m02, m12, m22, m32,
+			m03, m13, m23, m33
+		);
+	}
+
 	Mat4Template inverse() const {
 		N a = m00 * m11 - m01 * m10;
 		N b = m00 * m12 - m02 * m10;
