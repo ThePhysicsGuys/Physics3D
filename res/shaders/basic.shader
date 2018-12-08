@@ -15,7 +15,7 @@ void main() {
 #shader geometry // geometry shader
 #version 330
 
-//#define DEBUG 
+#define DEBUG 
 
 layout(triangles) in;
 #ifndef DEBUG
@@ -98,18 +98,20 @@ struct Light {
 	vec3 color;
 };
 
-const int lightCount = 2;
+const int lightCount = 3;
 
 Light lights[lightCount] = {
-	{ vec3(-4, 7, 10), vec3(1) },
-	{ vec3(5, 7, -3), vec3(1) }
+	{ vec3(-14, 17, 10), vec3(1, 0, 0) },
+	{ vec3(15, 13, -13), vec3(0, 1, 0) },
+	{ vec3(-15, -14, -13), vec3(0, 0, 1) }
 };
 
 void main() {
 	vec3 fragPosition = vec3(modelMatrix * vec4(fposition, 1));
+	vec3 fragNormal = vec3(modelMatrix * vec4(fnormal, 1));
 	vec3 viewDirection = normalize(viewPosition - fragPosition);
 	
-	float ambientStrength = 1;
+	float ambientStrength = 0.4;
 	vec3 ambient = ambientStrength * color;
 	
 	vec3 lightColorBuffer;
@@ -117,11 +119,11 @@ void main() {
 		Light currentLight = lights[i];
 
 		vec3 lightDirection = normalize(currentLight.position - fragPosition);
-		vec3 reflectDirection = reflect(-lightDirection, fnormal);
+		vec3 reflectDirection = reflect(-lightDirection, fragNormal);
 
-		float diffuseStrength = 0.4;
-		float diffuseFactor = dot(fnormal, lightDirection);
-		vec3 diffuse = diffuseStrength * clamp(diffuseFactor, 0, 1) * color;
+		float diffuseStrength = 2.0f / lightCount;
+		float diffuseFactor = dot(fragNormal, lightDirection);
+		vec3 diffuse = diffuseStrength * clamp(diffuseFactor, 0, 1) * currentLight.color;
 
 		float specularStrength = 0.4;
 		float specularFactor = pow(max(dot(viewDirection, reflectDirection), 0.0), 32);

@@ -247,16 +247,13 @@ bool intersect(Vec3 orig, Vec3 dir, Vec3 min, Vec3 max) {
 
 void Screen::refresh() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	Mat4f projectionMatrix = Mat4f().perspective(1.0, screenSize.x / screenSize.y, 0.01, 100.0);
 	Mat4f viewMatrix = Mat4f().rotate(camera.rotation.x, 1, 0, 0).rotate(camera.rotation.y, 0, 1, 0).rotate(camera.rotation.z, 0, 0, 1).translate(-camera.position.x, -camera.position.y, -camera.position.z);
 	Vec3 realCameraVector = Mat4().rotate(camera.rotation.x, 1, 0, 0).rotate(camera.rotation.y, 0, 1, 0).rotate(camera.rotation.z, 0, 0, 1) * Vec3(0, 0, -1);
-	
-
 
 	basicShader.bind();
-	basicShader.setUniform("modelMatrix", Mat4f());
+	basicShader.setUniform("color", Vec3f(1, 1, 1));
 	basicShader.setUniform("projectionMatrix", projectionMatrix);
 	basicShader.setUniform("viewMatrix", viewMatrix);
 	basicShader.setUniform("viewPosition", Vec3f(camera.position.x, camera.position.y, camera.position.z));
@@ -278,25 +275,7 @@ void Screen::refresh() {
 	}
 	
 	basicShader.setUniform("modelMatrix", Mat4f());
-
-
-
-	double min = 0;
-	double max = 100;
-	ray = calcRay(handler->getMousePos(), screenSize, &camera, viewMatrix, projectionMatrix);
-
-	basicShader.bind();
-	if (intersect(camera.position, (realCameraVector.normalize() + ray.normalize()).normalize(), Vec3(-0.5, -0.5, -0.5), Vec3(0.5, 0.5, 0.5))) basicShader.setUniform("color", Vec3f(0.8, 0.8, 0.8));
-	else basicShader.setUniform("color", Vec3f(0.5, 0.1, 0.8));
-	basicShader.setUniform("projectionMatrix", projectionMatrix);
-	basicShader.setUniform("viewMatrix", viewMatrix);
-	basicShader.setUniform("viewPosition", Vec3f(camera.position.x, camera.position.y, camera.position.z));
-
-
-	boxMesh->render();
-
-	Log::debug("%s\t%s", str(realCameraVector).c_str(), str(ray).c_str());
-	
+	boxMesh->render();	
 	transMesh->render();
 
 	vectorShader.bind();
