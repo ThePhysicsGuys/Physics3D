@@ -117,5 +117,16 @@ bool isComplete(const Triangle* triangles, int tCount) {
 }
 
 double Shape::getVolume() const {
-	return 0.0;
+	double total = 0;
+	for (int i = 0; i < tCount; i++) {
+		Triangle cur = triangles[i];
+		Vec3 v0 = vertices[cur.firstIndex]; Vec3 v1 = vertices[cur.secondIndex]; Vec3 v2 = vertices[cur.thirdIndex];
+		Vec3 D1 = v1 - v0; Vec3 D2 = v2 - v0;
+		
+		double Tf = (D1.x*D2.y - D1.y*D2.x);
+
+		total += Tf * ((D1.z + D2.z) / 6 + v0.z / 2);
+	}
+
+	return total;
 }

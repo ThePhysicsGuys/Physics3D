@@ -20,7 +20,7 @@ struct Physical {
 	double mass;
 	Mat3 inertia;
 
-	Physical(Part p, CFrame cframe, double mass, Mat3 inertia);
+	Physical(Part p, CFrame cframe, Mat3 inertia);
 
 	void update(double deltaT);
 	void applyForce(Vec3Relative origin, Vec3 force);

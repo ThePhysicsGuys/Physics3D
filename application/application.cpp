@@ -23,10 +23,6 @@
 
 #define TICK_SKIP_TIME std::chrono::milliseconds(3000)
 
-// Test shape
-Vec3 testShapeVecs[]{Vec3(0.0, 0.0, 0.0), Vec3(1.0, 0.0, 0.0), Vec3(0.0, 1.0, 0.0), Vec3(0.0, 0.0, 1.0)};
-Triangle testShapeTriangles[]{{0,2,1},{0,3,2},{0,1,3},{1,2,3}};
-Shape testShape(testShapeVecs, testShapeTriangles, 4, 4);
 
 Screen screen;
 World world;
@@ -47,21 +43,29 @@ Part createVisiblePart(Shape s, double density, double friction);
 int main(void) {
 	init();
 
-	Part trianglePart = createVisiblePart(testShape, 10.0, 0.7);
-	Part boxPart = createVisiblePart(BoundingBox{-0.1, -0.7, -0.3, 0.1, 0.7, 0.3}.toShape(new Vec3[8]), 2.0, 0.7);
-	Part icosathingie = createVisiblePart(icosahedron, 10, 0.7);
 
-	Physical triangleThing(trianglePart, CFrame(Vec3(0.0, 2.0, 0.2), fromEulerAngles(0.3, 0.0, 0.0)), 10.0, Mat3(1.0, 0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 5.0));
-	Physical box(boxPart, CFrame(Vec3(-0.3, -0.7, 0.2), fromEulerAngles(0.0, 0.0, 0.0)), 10.0, Mat3(1.0, 0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 5.0));
-	Physical icosaPhysical(icosathingie, CFrame(Vec3(0.0, 0.0, 0.0), fromEulerAngles(0.0, 0.0, 0.0)), 10.0, Mat3(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0));
+	Vec3 newVerts[12];
+	for (int i = 0; i < 12; i++) {
+		newVerts[i] = icosahedron.vertices[i] * 2;
+	}
+
+	Part trianglePart = createVisiblePart(triangleShape, 10.0, 0.7);
+	Part boxPart = createVisiblePart(BoundingBox{-0.1, -0.7, -0.3, 0.1, 0.7, 0.3}.toShape(new Vec3[8]), 2.0, 0.7);
+	Part icosathingie = createVisiblePart(Shape(newVerts, icosahedron.triangles, 12, 20), 10, 0.7);
+
+
+	Physical triangleThing(trianglePart, CFrame(Vec3(0.0, 2.0, 0.2), fromEulerAngles(0.3, 0.0, 0.0)), Mat3(1.0, 0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 5.0));
+	Physical box(boxPart, CFrame(Vec3(-0.3, -0.7, 0.2), fromEulerAngles(0.0, 0.0, 0.0)), Mat3(1.0, 0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 5.0));
+	Physical icosaPhysical(icosathingie, CFrame(Vec3(0.0, 0.0, 0.0), fromEulerAngles(0.0, 0.0, 0.0)), Mat3(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0));
 
 	icosaPhysical.angularVelocity = Vec3(0.0, 1.5, 0.0);
 
 	
+	
 	for (int x = 0; x < 10; x++) {
 		for (int y = 0; y < 10; y++) {
 			for (int z = 0; z < 10; z++) {
-				Physical phy(icosathingie, CFrame(Vec3(x, y, z), fromEulerAngles(0.0, 0.0, 0.0)), 10.0, Mat3(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0));
+				Physical phy(icosathingie, CFrame(Vec3(x, y, z)*2, fromEulerAngles(0.0, 0.0, 0.0)), Mat3(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0));
 
 				phy.angularVelocity = Vec3(0.0, 1.5, 0.0);
 				phy.velocity = Vec3(0.0, 0.0, 1.0);

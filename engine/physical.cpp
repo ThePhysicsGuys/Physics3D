@@ -4,7 +4,7 @@
 #include "../util/log.h"
 #include "math/mathUtil.h"
 
-Physical::Physical(Part p, CFrame cframe, double mass, Mat3 inertia) : part(p), cframe(cframe), mass(mass), inertia(inertia) {}
+Physical::Physical(Part p, CFrame cframe, Mat3 inertia) : part(p), cframe(cframe), mass(p.hitbox.getVolume() * p.properties.density), inertia(inertia) {}
 
 void Physical::update(double deltaT) {
 	Vec3 accel = totalForce * (deltaT/mass);

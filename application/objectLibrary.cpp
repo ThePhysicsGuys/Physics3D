@@ -20,3 +20,9 @@ Triangle icosaTriangles[]{
 };
 
 Shape icosahedron(icosaVerts, icosaTriangles, 12, 20);
+
+
+// Test shape
+Vec3 triangleShapeVecs[]{Vec3(0.0, 0.0, 0.0), Vec3(1.0, 0.0, 0.0), Vec3(0.0, 1.0, 0.0), Vec3(0.0, 0.0, 1.0)};
+Triangle triangleShapeTriangles[]{{0,2,1},{0,3,2},{0,1,3},{1,2,3}};
+Shape triangleShape(triangleShapeVecs, triangleShapeTriangles, 4, 4);
