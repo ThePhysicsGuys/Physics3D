@@ -23,7 +23,9 @@ struct Physical {
 	Physical(Part p, CFrame cframe, Mat3 inertia);
 
 	void update(double deltaT);
+	void applyForceAtCenterOfMass(Vec3 force);
 	void applyForce(Vec3Relative origin, Vec3 force);
 
 	Vec3 getCenterOfMass();
+	Vec3 getVelocityOfPoint(Vec3Relative point);
 };

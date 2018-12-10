@@ -130,3 +130,12 @@ double Shape::getVolume() const {
 
 	return total;
 }
+
+Vec3 Shape::getCenterOfMass() const {
+
+
+
+
+
+	return Vec3();
+}

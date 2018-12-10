@@ -134,7 +134,8 @@ void Screen::init() {
 	vectorShader.createUniform("projectionMatrix");
 	basicShader.createUniform("viewPosition");
 
-	camera.setPosition(-1, 1, 4);
+	camera.setPosition(1, 1, -2);
+	camera.setRotation(0.3, 3.1415, 0.0);
 
 	handler = new StandardInputHandler(window, this, &camera);
 
@@ -163,34 +164,34 @@ void Screen::makeCurrent() {
 void Screen::update() {
 	if (handler->anyKey) {
 		if (handler->getKey(GLFW_KEY_W)) {
-			camera.move(0, 0, -1);
+			camera.move(0, 0, -10);
 		}
 		if (handler->getKey(GLFW_KEY_S)) {
-			camera.move(0, 0, 1);
+			camera.move(0, 0, 10);
 		}
 		if (handler->getKey(GLFW_KEY_D)) {
-			camera.move(1, 0, 0);
+			camera.move(10, 0, 0);
 		}
 		if (handler->getKey(GLFW_KEY_A)) {
-			camera.move(-1, 0, 0);
+			camera.move(-10, 0, 0);
 		}
 		if (handler->getKey(GLFW_KEY_SPACE)) {
-			camera.move(0, 1, 0);
+			camera.move(0, 10, 0);
 		}
 		if (handler->getKey(GLFW_KEY_LEFT_SHIFT)) {
-			camera.move(0, -1, 0);
+			camera.move(0, -10, 0);
 		}
 		if (handler->getKey(GLFW_KEY_LEFT)) {
-			camera.rotate(0, -1, 0);
+			camera.rotate(0, -10, 0);
 		}
 		if (handler->getKey(GLFW_KEY_RIGHT)) {
-			camera.rotate(0, 1, 0);
+			camera.rotate(0, 10, 0);
 		}
 		if (handler->getKey(GLFW_KEY_UP)) {
-			camera.rotate(-1, 0, 0);
+			camera.rotate(-10, 0, 0);
 		}
 		if (handler->getKey(GLFW_KEY_DOWN)) {
-			camera.rotate(1, 0, 0);
+			camera.rotate(10, 0, 0);
 		}
 	}
 }
@@ -276,7 +277,7 @@ void Screen::refresh() {
 	
 	basicShader.setUniform("modelMatrix", Mat4f());
 	// boxMesh->render();	
-	transMesh->render();
+	// transMesh->render();
 
 	vectorShader.bind();
 	vectorShader.setUniform("projectionMatrix", projectionMatrix);

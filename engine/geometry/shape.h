@@ -35,6 +35,7 @@ struct Shape {
 	BoundingBox getBounds() const;
 
 	double getVolume() const;
+	Vec3 getCenterOfMass() const;
 
 	bool isValid() const;
 };

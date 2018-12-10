@@ -23,11 +23,21 @@ void Physical::update(double deltaT) {
 	cframe.rotation = rotation * cframe.rotation;
 }
 
+void Physical::applyForceAtCenterOfMass(Vec3 force) {
+	totalForce += force;
+}
+
 void Physical::applyForce(Vec3Relative origin, Vec3 force) {
 	totalForce += force;
-	totalMoment += origin % force;
+	totalMoment += force % origin;
+
+	// Log::warn("Force applied: %s @ %s", str(force).c_str(), str(origin).c_str());
 }
 
 Vec3 Physical::getCenterOfMass() {
 	return cframe.position;
+}
+
+Vec3 Physical::getVelocityOfPoint(Vec3Relative point) {
+	return velocity + point % angularVelocity;
 }

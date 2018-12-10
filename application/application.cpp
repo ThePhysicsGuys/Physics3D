@@ -65,16 +65,20 @@ int main(void) {
 
 	box2Physical.angularVelocity = Vec3(0.0, 0.0, 1.0);
 	
-	for (int x = 0; x < 10; x++) {
+	/*for (int x = 0; x < 10; x++) {
 		// for (int y = 0; y < 10; y++) {
 			for (int z = 0; z < 10; z++) {
 				Physical phy(icosathingie, CFrame(Vec3(x, z, z) * 4, fromEulerAngles(0.0, 0.0, 0.0)), Mat3(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0) * 5);
 				world.addObject(phy);
 			}
 		// }
-	}
+	}*/
 
-	world.addObject(box2Physical);
+	Part cubePart = createVisiblePart(BoundingBox{-0.5, -0.5, -0.5, 0.5, 0.5, 0.5}.toShape(new Vec3[8]), 1.0, 0.0);
+	Physical cube(cubePart, CFrame(Vec3(0.5, 0.9, 0.5), fromEulerAngles(0.5, 0.2, 0.3)), Mat3());
+	world.addObject(cube);
+
+	// world.addObject(box2Physical);
 
 	triangleThing.velocity = Vec3(1.0, 0.0, 0.0);
 	triangleThing.angularVelocity = Vec3(0.1, 0.5, 0.3);
