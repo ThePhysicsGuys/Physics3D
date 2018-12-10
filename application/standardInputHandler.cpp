@@ -1,5 +1,6 @@
 #include "standardInputHandler.h"
 #include "../engine/math/mathUtil.h"
+#include "application.h"
 
 StandardInputHandler::StandardInputHandler(GLFWwindow* window, Screen* screen, Camera* camera) : InputHandler(window) {
 	this->screen = screen;
@@ -12,9 +13,29 @@ void StandardInputHandler::windowResize(int width, int height) {
 	screen->screenSize = Vec2(width, height);
 }
 
-// void StandardInputHandler::keyDown(int key, int modifiers) {};
-// void StandardInputHandler::keyUp(int key, int modifiers) {};
-// void StandardInputHandler::keyRepeat(int key, int modifiers) {};
+void StandardInputHandler::keyDownOrRepeat(int key, int modifiers) {
+	switch (key) {
+	case GLFW_KEY_PAGE_UP:
+		setSpeed(getSpeed() * 1.5);
+		Log::info("TPS is now: %f", getSpeed());
+		break;
+	case GLFW_KEY_PAGE_DOWN:
+		setSpeed(getSpeed() / 1.5);
+		Log::info("TPS is now: %f", getSpeed());
+		break;
+	case GLFW_KEY_T:
+		runTick();
+		break;
+	}
+}
+
+void StandardInputHandler::keyDown(int key, int modifiers) {
+	if (key == GLFW_KEY_P) {
+		togglePause();
+	}
+};
+void StandardInputHandler::keyUp(int key, int modifiers) {};
+void StandardInputHandler::keyRepeat(int key, int modifiers) {};
 // void StandardInputHandler::mouseEnter() {};
 
 void StandardInputHandler::mouseDown(int button, int mods) {

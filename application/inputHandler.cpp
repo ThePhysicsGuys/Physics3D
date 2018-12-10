@@ -6,6 +6,7 @@ void InputHandler::keyCallback(int key, int action, int mods) {
 		keys[key] = true;
 		anyKey++;
 		keyDown(key, mods);
+		keyDownOrRepeat(key, mods);
 	}
 
 	if (action == GLFW_RELEASE) {
@@ -14,8 +15,10 @@ void InputHandler::keyCallback(int key, int action, int mods) {
 		keyUp(key, mods);
 	}
 
-	if (action == GLFW_REPEAT)
+	if (action == GLFW_REPEAT) {
 		keyRepeat(key, mods);
+		keyDownOrRepeat(key, mods);
+	}
 }
 
 bool InputHandler::getKey(int key) {

@@ -27,6 +27,8 @@ public:
 		}
 	};
 
+	Mat3Template() : m00(1), m01(0), m02(0), m10(0), m11(1), m12(0), m20(0), m21(0), m22(1) {};
+
 	Mat3Template(const Mat3Template& other) {
 		for (int i = 0; i < 9; i++) {
 			m[i] = other.m[i];

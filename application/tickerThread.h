@@ -12,6 +12,7 @@ private:
 	std::thread thread;
 	bool stopped = false;
 	double TPS;
+	double speed = 1.0;
 	milliseconds tickSkipTimeout;
 	void(*tickAction)();
 public:
@@ -36,4 +37,9 @@ public:
 
 	void setTPS(double newTPS) {this->TPS = newTPS;}
 	double getTPS() const { return this->TPS; }
+
+	void setSpeed(double newSpeed) { this->speed = newSpeed; }
+	double getSpeed() { return this->speed; }
+
+	void runTick();
 };

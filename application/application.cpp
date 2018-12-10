@@ -53,6 +53,7 @@ int main(void) {
 	Part boxPart = createVisiblePart(BoundingBox{-0.1, -0.7, -0.3, 0.1, 0.7, 0.3}.toShape(new Vec3[8]), 2.0, 0.7);
 	Part icosathingie = createVisiblePart(Shape(newVerts, icosahedron.triangles, 12, 20), 10, 0.7);
 
+	Part box2Part = createVisiblePart(BoundingBox{-10, -0.3, -0.3, 10, 0.3, 0.3}.toShape(new Vec3[8]), 1.0, 0.0);
 
 	Physical triangleThing(trianglePart, CFrame(Vec3(0.0, 2.0, 0.2), fromEulerAngles(0.3, 0.0, 0.0)), Mat3(1.0, 0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 5.0));
 	Physical box(boxPart, CFrame(Vec3(-0.3, -0.7, 0.2), fromEulerAngles(0.0, 0.0, 0.0)), Mat3(1.0, 0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 5.0));
@@ -60,22 +61,20 @@ int main(void) {
 
 	icosaPhysical.angularVelocity = Vec3(0.0, 1.5, 0.0);
 
-	
+	Physical box2Physical = Physical(box2Part, CFrame(Vec3(0.0, 2.0, 0.0), Mat3()), Mat3(100.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0));
+
+	box2Physical.angularVelocity = Vec3(0.0, 0.0, 1.0);
 	
 	for (int x = 0; x < 10; x++) {
-		for (int y = 0; y < 10; y++) {
+		// for (int y = 0; y < 10; y++) {
 			for (int z = 0; z < 10; z++) {
-				Physical phy(icosathingie, CFrame(Vec3(x, y, z)*2, fromEulerAngles(0.0, 0.0, 0.0)), Mat3(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0));
-
-				phy.angularVelocity = Vec3(0.0, 1.5, 0.0);
-				phy.velocity = Vec3(0.0, 0.0, 1.0);
-
+				Physical phy(icosathingie, CFrame(Vec3(x, z, z) * 4, fromEulerAngles(0.0, 0.0, 0.0)), Mat3(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0) * 5);
 				world.addObject(phy);
 			}
-		}
+		// }
 	}
 
-
+	world.addObject(box2Physical);
 
 	triangleThing.velocity = Vec3(1.0, 0.0, 0.0);
 	triangleThing.angularVelocity = Vec3(0.1, 0.5, 0.3);
@@ -84,9 +83,9 @@ int main(void) {
 
 	// world.addObject(triangleThing);
 	// world.addObject(box);
-	world.addObject(icosaPhysical);
+	// world.addObject(icosaPhysical);
 
-	physicsThread.start();
+	// physicsThread.start();
 
 	/* Loop until the user closes the window */
 	Log::info("Started rendering");
@@ -130,6 +129,36 @@ void stop(int returnCode) {
 
 	glfwTerminate();
 	exit(returnCode);
+}
+
+bool paused = true;
+void togglePause() {
+	if (paused)
+		unpause();
+	else
+		pause();
+}
+
+void pause() {
+	physicsThread.stop();
+	paused = true;
+}
+
+void unpause() {
+	physicsThread.start();
+	paused = false;
+}
+
+void setSpeed(double newSpeed) {
+	physicsThread.setSpeed(newSpeed);
+}
+
+double getSpeed() {
+	return physicsThread.getSpeed();
+}
+
+void runTick() {
+	physicsThread.runTick();
 }
 
 void setupPhysics() {

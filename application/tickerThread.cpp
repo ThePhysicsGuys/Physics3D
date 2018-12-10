@@ -26,7 +26,7 @@ void TickerThread::start(){
 
 		while (!(this->stopped)) {
 
-			microseconds tickTime = microseconds((long long)(1000000 / this->TPS));
+			microseconds tickTime = microseconds((long long)(1000000 / (this->TPS * this->speed)));
 
 			this->tickAction();
 
@@ -44,6 +44,10 @@ void TickerThread::start(){
 			}
 		}
 	});
+}
+
+void TickerThread::runTick() {
+	this->tickAction();
 }
 
 void TickerThread::stop(){

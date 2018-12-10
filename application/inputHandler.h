@@ -7,8 +7,9 @@
 
 
 class InputHandler {
-private:
+protected:
 	GLFWwindow* window;
+private:
 	bool keys[GLFW_KEY_LAST + 1];
 	void keyCallback(int key, int action, int mods);
 	void cursorCallback(double x, double y);
@@ -26,6 +27,7 @@ public:
 	virtual void keyDown(int key, int modifiers) {};
 	virtual void keyUp(int key, int modifiers) {};
 	virtual void keyRepeat(int key, int modifiers) {};
+	virtual void keyDownOrRepeat(int key, int modifiers) {};
 	virtual void mouseDown(int button, int mods) {};
 	virtual void mouseUp(int button, int mods) {};
 	virtual void mouseMove(double x, double y) {};
