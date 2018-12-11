@@ -116,6 +116,21 @@ bool isComplete(const Triangle* triangles, int tCount) {
 	return true;
 }
 
+/*
+Checks that for every triangle, the outward-facing normal vector *dot* the vector from any of the points to the given point is negative
+If at least one of these values is positive, then the point must be on the outside of that triangle, and hence, outside of the shape
+only for convex shapes
+*/
+bool Shape::containsPoint(Vec3 point) const {
+	for (int i = 0; i < tCount; i++) {
+		Triangle t = triangles[i];
+		Vec3 v0 = vertices[t.firstIndex];
+		Vec3 normalVec = (vertices[t.secondIndex] - v0) % (vertices[t.thirdIndex] - v0);
+		if((point - v0) * normalVec > 0) return false;
+	}
+	return true;
+}
+
 double Shape::getVolume() const {
 	double total = 0;
 	for (int i = 0; i < tCount; i++) {
