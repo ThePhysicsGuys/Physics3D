@@ -9,6 +9,8 @@
 
 #include "gui/screen.h"
 
+#include "buffers.h"
+
 void clearError() {
 	while (glGetError() != GL_NO_ERROR);
 }
@@ -24,39 +26,49 @@ bool logCall(const char* func, const char* file, int line) {
 	return response;
 }
 
-size_t vecBufSize = 512;
-double * vecBuf = (double*) malloc(sizeof(double)*7);
-size_t vecBufIndex = 0;
+namespace AppDebug {
+	struct ColoredVec {
+		Vec3 origin, vec;
+		double color;
+		ColoredVec(Vec3 origin, Vec3 vec, double color) : origin(origin), vec(vec), color(color) {}
+	};
 
-namespace Logging {
-	void logVec(Vec3 origin, Vec3 vec) {
-		Log::debug("@%s: %s", str(origin).c_str(), str(vec).c_str());
-		
-		vecBuf[vecBufIndex++] = origin.x;
-		vecBuf[vecBufIndex++] = origin.y;
-		vecBuf[vecBufIndex++] = origin.z;
-		vecBuf[vecBufIndex++] = vec.x;
-		vecBuf[vecBufIndex++] = vec.y;
-		vecBuf[vecBufIndex++] = vec.z;
-		vecBuf[vecBufIndex++] = 0.3;
+	SwappableBuffer<ColoredVec> buf(16);
 
-		Log::warn("vecBufIndex: %d", vecBufIndex);
+	namespace Logging {
+		void logVec(Vec3 origin, Vec3 vec, Debug::VecType type) {
+			using namespace Debug;
+			double color;
+			switch (type) {
+			case INFO: color = 0.15; break;
+			case FORCE: color = 0.0; break;
+			case MOMENT: color = 0.1; break;
+			case IMPULSE: color = 0.7; break;
+			case POSITION: color = 0.5; break;
+			case VELOCITY: color = 0.3; break;
+			case ANGULAR_VELOCITY: color = 0.75; break;
+			}
 
-		if (vecBufIndex >= vecBufSize) {
-			double* newBuf = (double*) realloc(vecBuf, vecBufSize *= 2);
+			buf.add(ColoredVec(origin, vec, color));
 		}
 	}
-}
 
-void logTickStart() {
-	vecBufIndex = 0;
-}
+	void logTickStart() {
 
-void logTickEnd() {
-	getVectorMesh()->update(vecBuf, vecBufIndex);
-}
+	}
 
-void setupDebugHooks() {
-	Log::info("Set up debug hooks!");
-	setVecLogAction(Logging::logVec);
+	void logTickEnd() {
+		buf.swap();
+	}
+
+	void setupDebugHooks() {
+		Log::info("Set up debug hooks!");
+		Debug::setVecLogAction(Logging::logVec);
+	}
+
+	void updateVecMesh(VectorMesh* mesh) {
+		buf.lockRead();
+		mesh->update((double*)buf.readData, buf.readSize);
+		buf.unlockRead();
+	}
 }

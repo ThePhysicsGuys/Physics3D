@@ -1,20 +1,23 @@
 #include "screen.h"
-#include "../../util/log.h"
-#include "../engine/math/vec2.h"
-#include "../engine/math/mat4.h"
+
 #include "shader.h"
 #include "indexedMesh.h"
 #include "arrayMesh.h"
 #include "vectorMesh.h"
-#include "../engine/geometry/shape.h"
 #include "camera.h"
+#include "picker.h"
+#include "../debug.h"
 #include "../standardInputHandler.h"
+#include "../resourceManager.h"
+
+#include "../../util/log.h"
+
+#include "../engine/math/vec2.h"
+#include "../engine/math/mat4.h"
+#include "../engine/geometry/shape.h"
 #include "../engine/geometry/shape.h"
 #include "../engine/geometry/boundingBox.h"
-#include "picker.h"
-#include "../../engine/math/mathUtil.h"
-
-#include "../resourceManager.h"
+#include "../engine/math/mathUtil.h"
 
 #include <stdlib.h>
 #include <fstream>
@@ -69,7 +72,6 @@ Screen::Screen(int width, int height, World* w) {
 IndexedMesh* boxMesh = nullptr;
 VectorMesh* vectorMesh = nullptr;
 ArrayMesh* originMesh = nullptr;
-VectorMesh* getVectorMesh() { return vectorMesh; }
 IndexedMesh* transMesh = nullptr;
 
 Shader basicShader;
@@ -127,6 +129,20 @@ void Screen::init() {
 
 	double originVertices[3] = { 0, 0, 0 };
 	originMesh = new ArrayMesh(originVertices, 1, 3, RenderMode::POINTS);
+
+	double * vecs = new double[140];
+
+	vecs[0] = 0.2;
+	vecs[1] = 0.3;
+	vecs[2] = 0.7;
+	vecs[3] = 0.8;
+	vecs[4] = 0.6;
+	vecs[5] = 0.7;
+	vecs[6] = 0.5;
+
+	vectorMesh = new VectorMesh(vecs, 20);
+
+	
 }
 
 void Screen::makeCurrent() {
@@ -169,8 +185,11 @@ void Screen::update() {
 }
 
 void Screen::refresh() {
+	AppDebug::updateVecMesh(vectorMesh);
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_BUFFER);
+
 
 	Mat4f projectionMatrix = Mat4f().perspective(1.0, screenSize.x / screenSize.y, 0.01, 100.0);
 	Mat4f viewMatrix = Mat4f().rotate(camera.rotation.x, 1, 0, 0).rotate(camera.rotation.y, 0, 1, 0).rotate(camera.rotation.z, 0, 0, 1).translate(-camera.position.x, -camera.position.y, -camera.position.z);
@@ -202,11 +221,11 @@ void Screen::refresh() {
 	// boxMesh->render();	
 	// transMesh->render();
 
-	/*vectorShader.bind();
+	vectorShader.bind();
 	vectorShader.setUniform("projectionMatrix", projectionMatrix);
 	vectorShader.setUniform("viewMatrix", viewMatrix);
 	vectorShader.setUniform("viewPosition", Vec3f(camera.position.x, camera.position.y, camera.position.z));
-	vectorMesh->render();*/
+	vectorMesh->render();
 
  	originShader.bind();
 	originShader.setUniform("projectionMatrix", projectionMatrix);

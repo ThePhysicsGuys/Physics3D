@@ -108,7 +108,7 @@ int main(void) {
 }
 
 void init() {
-	setupDebugHooks();
+	AppDebug::setupDebugHooks();
 
 	if (!initGLFW()) {
 		Log::error("GLFW not initialised");
@@ -171,9 +171,9 @@ void runTick() {
 
 void setupPhysics() {
 	physicsThread = TickerThread(TICKS_PER_SECOND, TICK_SKIP_TIME, []() {
-		logTickStart();
+		AppDebug::logTickStart();
 		world.tick(1 / physicsThread.getTPS());
-		logTickEnd();
+		AppDebug::logTickEnd();
 	});
 }
 

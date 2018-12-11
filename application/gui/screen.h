@@ -7,13 +7,11 @@
 #include <GLFW/glfw3.h>
 
 #include "indexedMesh.h"
-#include "vectorMesh.h"
 
 bool initGLFW();
 bool initGLEW();
 
 void terminateGL();
-VectorMesh* getVectorMesh();
 
 class Screen {
 private:
