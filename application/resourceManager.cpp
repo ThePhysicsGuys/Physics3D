@@ -8,9 +8,10 @@ struct ResourceStruct {
 	const std::string type;
 };
 
-ResourceStruct resources []{
+ResourceStruct resources[]{
 	{ IDR_SHADER1, "SHADER" },
-	{ IDR_SHADER2, "SHADER" }
+	{ IDR_SHADER2, "SHADER" },
+	{ IDR_SHADER3, "SHADER" }
 };
 
 class ResourceManager {

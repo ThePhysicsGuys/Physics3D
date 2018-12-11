@@ -15,7 +15,7 @@ void main() {
 #shader geometry // geometry shader
 #version 330
 
-// #define DEBUG 
+#define DEBUG 
 
 layout(triangles) in;
 #ifndef DEBUG
