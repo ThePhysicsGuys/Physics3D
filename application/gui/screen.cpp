@@ -126,7 +126,7 @@ void Screen::init() {
 	transMesh = new IndexedMesh(trans);
 
 	double originVertices[3] = { 0, 0, 0 };
-	originMesh = new ArrayMesh(originVertices, 1, 3);
+	originMesh = new ArrayMesh(originVertices, 1, 3, RenderMode::POINTS);
 }
 
 void Screen::makeCurrent() {
