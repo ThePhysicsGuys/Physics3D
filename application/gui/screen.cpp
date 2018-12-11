@@ -69,6 +69,7 @@ Screen::Screen(int width, int height, World* w) {
 IndexedMesh* boxMesh = nullptr;
 VectorMesh* vectorMesh = nullptr;
 ArrayMesh* originMesh = nullptr;
+VectorMesh* getVectorMesh() { return vectorMesh; }
 IndexedMesh* transMesh = nullptr;
 
 Shader basicShader;
@@ -104,6 +105,7 @@ void Screen::init() {
 	vectorShader.createUniform("viewMatrix");
 	vectorShader.createUniform("projectionMatrix");
 	vectorShader.createUniform("viewPosition");
+
 
 	originShader = Shader(originShaderSource);
 	originShader.createUniform("viewMatrix");
@@ -168,6 +170,7 @@ void Screen::update() {
 
 void Screen::refresh() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_DEPTH_BUFFER);
 
 	Mat4f projectionMatrix = Mat4f().perspective(1.0, screenSize.x / screenSize.y, 0.01, 100.0);
 	Mat4f viewMatrix = Mat4f().rotate(camera.rotation.x, 1, 0, 0).rotate(camera.rotation.y, 0, 1, 0).rotate(camera.rotation.z, 0, 0, 1).translate(-camera.position.x, -camera.position.y, -camera.position.z);

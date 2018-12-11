@@ -36,3 +36,19 @@ TEST_CASE(shapeVolume) {
 
 	Log::debug("Icosahedron Volume: %.20f", icosahedron.getVolume());
 }
+
+TEST_CASE(cubeContainsPoint) {
+	Vec3 buf[8];
+	Shape cube = BoundingBox{0,0,0,1,1,1}.toShape(buf);
+
+	ASSERT(cube.containsPoint(Vec3(0.2, 0.2, 0.2)));
+	ASSERT(cube.containsPoint(Vec3(0.2, 0.2, 0.8)));
+	ASSERT(cube.containsPoint(Vec3(0.2, 0.9, 0.2)));
+	ASSERT(cube.containsPoint(Vec3(0.7, 0.2, 0.2)));
+
+	ASSERT(!cube.containsPoint(Vec3(1.2, 0.2, 0.2)));
+	ASSERT(!cube.containsPoint(Vec3(1.2, 1.2, 0.2)));
+	ASSERT(!cube.containsPoint(Vec3(1.2, 1.2, 1.2)));
+	ASSERT(!cube.containsPoint(Vec3(-0.2, -0.2, -0.2)));
+
+}

@@ -37,5 +37,7 @@ struct Shape {
 	double getVolume() const;
 	Vec3 getCenterOfMass() const;
 
+	bool containsPoint(Vec3 point) const;
+
 	bool isValid() const;
 };

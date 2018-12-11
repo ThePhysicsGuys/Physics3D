@@ -19,6 +19,8 @@
 #include "../engine/geometry/managedShape.h"
 #include "../engine/part.h"
 
+#include "debug.h"
+
 #define TICKS_PER_SECOND 500.0
 
 #define TICK_SKIP_TIME std::chrono::milliseconds(3000)
@@ -106,6 +108,8 @@ int main(void) {
 }
 
 void init() {
+	setupDebugHooks();
+
 	if (!initGLFW()) {
 		Log::error("GLFW not initialised");
 		std::cin.get();
@@ -167,7 +171,9 @@ void runTick() {
 
 void setupPhysics() {
 	physicsThread = TickerThread(TICKS_PER_SECOND, TICK_SKIP_TIME, []() {
+		logTickStart();
 		world.tick(1 / physicsThread.getTPS());
+		logTickEnd();
 	});
 }
 
