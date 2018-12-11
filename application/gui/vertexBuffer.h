@@ -13,12 +13,14 @@ public:
 		Log::debug("Created empty vertex buffer");
 	};
 
-	VertexBuffer(const double* data, unsigned int size) {
+	VertexBuffer(const double* data, unsigned int size, unsigned int mode) {
 		glGenBuffers(1, &id);
 		glBindBuffer(GL_ARRAY_BUFFER, id);
-		glBufferData(GL_ARRAY_BUFFER, size * sizeof(double), data, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, size * sizeof(double), data, mode);
 		Log::debug("Created vertex buffer width id %d, size %d, data %d", id, size, data);
 	}
+
+	VertexBuffer(const double* data, unsigned int size) : VertexBuffer(data, size, GL_STATIC_DRAW) {}
 
 	~VertexBuffer() {
 		close();

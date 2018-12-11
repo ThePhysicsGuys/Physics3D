@@ -5,11 +5,14 @@
 
 class VectorMesh : public AbstractMesh {
 public:
-	VertexBuffer* verticesBuffer = nullptr;
+	VertexBuffer* vertexBuffer = nullptr;
+	int vertexCount;
+	int capacity;
 
-	const int vertexCount;
+	VectorMesh(const double* vertices, const int size) : VectorMesh(vertices, size, size) {};
+	VectorMesh(const double* vertices, const int size, int capacity);
 
-	VectorMesh(const double* positions, const int size);
+	void update(const double* vertices, const int vertexCount);
 
 	void render() override;
 	void close() override;

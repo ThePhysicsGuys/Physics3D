@@ -147,14 +147,7 @@ void Screen::init() {
 	Shape trans = shape.translated(Vec3(1.0, -1.0, 1.0), new Vec3[8]);
 	transMesh = new IndexedMesh(trans);
 	
-	const int mi = 50;
-	const int mj = 50;
-	double* vert = new double[mi * mj * 7];
-	
-	generateShape(vert, mi, mj);
-
 	vectorMesh = new VectorMesh(vertices, vertexCount);
-	//vectorMesh = new VectorMesh(vert, mi * mj);
 }
 
 void Screen::makeCurrent() {
@@ -163,6 +156,16 @@ void Screen::makeCurrent() {
 
 void Screen::update() {
 	if (handler->anyKey) {
+		if (handler->getKey(GLFW_KEY_T)) {
+			const int mi = 50;
+			const int mj = 50;
+			double* vert = new double[mi * mj * 7];
+			generateShape(vert, mi, mj);
+			vectorMesh->update(vert, mi * mj);
+		}
+		if (handler->getKey(GLFW_KEY_R)) {
+			vectorMesh->update(vertices, vertexCount);
+		}
 		if (handler->getKey(GLFW_KEY_W)) {
 			camera.move(0, 0, -10);
 		}
