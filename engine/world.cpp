@@ -7,6 +7,8 @@
 
 #include "math\mathUtil.h"
 
+#include "debug.h"
+
 World::World() {
 
 }
@@ -29,7 +31,9 @@ void World::tick(double deltaT) {
 
 				double downwardSpeed = velocityOfPoint * Vec3(0.0, 1.0, 0.0);
 
-				// Log::debug("%s going at %s", str(p.part.hitbox.vertices[i]).c_str(), str(velocityOfPoint).c_str());
+				// logVec(transformed.vertices[i], velocityOfPoint);
+
+				logVec(Vec3(0.0, 2.0, 0.3), Vec3(1.0, 1.0, 1.0));
 
 				if(downwardSpeed < 0)
 					p.applyForce(v - p.getCenterOfMass(), Vec3(0.0, -10 * downwardSpeed, 0.0));

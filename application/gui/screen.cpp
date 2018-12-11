@@ -100,6 +100,7 @@ void generateShape(double* buffer, int mi, int mj) {
 
 IndexedMesh* boxMesh = nullptr;
 VectorMesh* vectorMesh = nullptr;
+VectorMesh* getVectorMesh() { return vectorMesh; }
 
 IndexedMesh* transMesh = nullptr;
 
@@ -132,7 +133,7 @@ void Screen::init() {
 	vectorShader = Shader(vectorShaderSource);
 	vectorShader.createUniform("viewMatrix");
 	vectorShader.createUniform("projectionMatrix");
-	basicShader.createUniform("viewPosition");
+	vectorShader.createUniform("viewPosition");
 
 	camera.setPosition(1, 1, -2);
 	camera.setRotation(0.3, 3.1415, 0.0);
@@ -156,13 +157,13 @@ void Screen::makeCurrent() {
 
 void Screen::update() {
 	if (handler->anyKey) {
-		if (handler->getKey(GLFW_KEY_T)) {
+		/*if (handler->getKey(GLFW_KEY_T)) {
 			const int mi = 50;
 			const int mj = 50;
 			double* vert = new double[mi * mj * 7];
 			generateShape(vert, mi, mj);
 			vectorMesh->update(vert, mi * mj);
-		}
+		}*/
 		if (handler->getKey(GLFW_KEY_R)) {
 			vectorMesh->update(vertices, vertexCount);
 		}
@@ -251,6 +252,7 @@ bool intersect(Vec3 orig, Vec3 dir, Vec3 min, Vec3 max) {
 
 void Screen::refresh() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	// glEnable(GL_DEPTH_BUFFER);
 
 	Mat4f projectionMatrix = Mat4f().perspective(1.0, screenSize.x / screenSize.y, 0.01, 100.0);
 	Mat4f viewMatrix = Mat4f().rotate(camera.rotation.x, 1, 0, 0).rotate(camera.rotation.y, 0, 1, 0).rotate(camera.rotation.z, 0, 0, 1).translate(-camera.position.x, -camera.position.y, -camera.position.z);
@@ -281,6 +283,8 @@ void Screen::refresh() {
 	basicShader.setUniform("modelMatrix", Mat4f());
 	// boxMesh->render();	
 	// transMesh->render();
+
+	// glDisable(GL_DEPTH_BUFFER);
 
 	vectorShader.bind();
 	vectorShader.setUniform("projectionMatrix", projectionMatrix);

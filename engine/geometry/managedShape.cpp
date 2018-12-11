@@ -8,7 +8,7 @@
 
 ManagedShape::ManagedShape() : shape(), vCopyCount(new int(0)), tCopyCount(new int(0)) {}
 
-ManagedShape::ManagedShape(Shape s) : shape(shape), vCopyCount(new int(0)), tCopyCount(new int(0)) {}
+ManagedShape::ManagedShape(Shape shape) : shape(shape), vCopyCount(new int(0)), tCopyCount(new int(0)) {}
 
 ManagedShape::ManagedShape(Vec3 * vertices, Triangle * triangles, int vertexCount, int triangleCount) : vCopyCount(new int(0)), tCopyCount(new int(0)) {
 	Vec3* verts = new Vec3[vertexCount];
