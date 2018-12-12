@@ -112,7 +112,6 @@ void Screen::init() {
 	originShader = Shader(originShaderSource);
 	originShader.createUniform("viewMatrix");
 	originShader.createUniform("projectionMatrix");
-	originShader.createUniform("viewPosition");
 
 	camera.setPosition(1, 1, -2);
 	camera.setRotation(0.3, 3.1415, 0.0);
@@ -127,7 +126,7 @@ void Screen::init() {
 	Shape trans = shape.translated(Vec3(1.0, -1.0, 1.0), new Vec3[8]);
 	transMesh = new IndexedMesh(trans);
 
-	double originVertices[3] = { 0, 0, 0 };
+	double originVertices[3] = { 0, 0, 5 };
 	originMesh = new ArrayMesh(originVertices, 1, 3, RenderMode::POINTS);
 
 	double * vecs = new double[140];
@@ -141,8 +140,6 @@ void Screen::init() {
 	vecs[6] = 0.5;
 
 	vectorMesh = new VectorMesh(vecs, 20);
-
-	
 }
 
 void Screen::makeCurrent() {
@@ -192,7 +189,9 @@ void Screen::refresh() {
 
 
 	Mat4f projectionMatrix = Mat4f().perspective(1.0, screenSize.x / screenSize.y, 0.01, 100.0);
-	Mat4f viewMatrix = Mat4f().rotate(camera.rotation.x, 1, 0, 0).rotate(camera.rotation.y, 0, 1, 0).rotate(camera.rotation.z, 0, 0, 1).translate(-camera.position.x, -camera.position.y, -camera.position.z);
+	Mat4f orthoMatrix = Mat4f().ortho(-1, 1, -1, 1, 0.1, 100);
+	Mat4f rotatedViewMatrix = Mat4f().rotate(camera.rotation.x, 1, 0, 0).rotate(camera.rotation.y, 0, 1, 0).rotate(camera.rotation.z, 0, 0, 1);
+	Mat4f viewMatrix = rotatedViewMatrix.translate(-camera.position.x, -camera.position.y, -camera.position.z);
 	Vec3 realCameraVector = Mat4().rotate(camera.rotation.x, 1, 0, 0).rotate(camera.rotation.y, 0, 1, 0).rotate(camera.rotation.z, 0, 0, 1) * Vec3(0, 0, -1);
 
 	basicShader.bind();
@@ -218,8 +217,6 @@ void Screen::refresh() {
 	}
 	
 	basicShader.setUniform("modelMatrix", Mat4f());
-	// boxMesh->render();	
-	// transMesh->render();
 
 	vectorShader.bind();
 	vectorShader.setUniform("projectionMatrix", projectionMatrix);
@@ -229,8 +226,8 @@ void Screen::refresh() {
 
  	originShader.bind();
 	originShader.setUniform("projectionMatrix", projectionMatrix);
-	originShader.setUniform("viewMatrix", viewMatrix);
-	originShader.setUniform("viewPosition", Vec3f(camera.position.x, camera.position.y, camera.position.z));
+	//originShader.setUniform("projectionMatrix", orthoMatrix);
+	originShader.setUniform("viewMatrix", rotatedViewMatrix);
 	originMesh->render();
 
 	glfwSwapBuffers(this->window);

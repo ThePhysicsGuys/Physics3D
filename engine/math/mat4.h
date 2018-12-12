@@ -123,7 +123,7 @@ struct Mat4Template {
 	Mat4Template ortho(N bottom, N top, N left, N right, N zNear, N zFar) {
 		N rm00 = 2 / (right - left);
 		N rm11 = 2 / (top - bottom);
-		N rm22 = 2 / (zFar - zNear);
+		N rm22 = -2 / (zFar - zNear);
 		N rm30 = (left + right) / (left - right);
 		N rm31 = (top + bottom) / (bottom - top);
 		N rm32 = (zFar + zNear) / (zNear - zFar);

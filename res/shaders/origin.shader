@@ -7,7 +7,7 @@ out vec3 grotation;
 
 void main() {
 	grotation = rotation;
-	gl_Position = vec4(0, 0, 0, 1);
+	gl_Position = vec4(0.8, -0.8, -1, 1);
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -24,42 +24,33 @@ out vec3 fcolor;
 
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
-uniform vec3 viewPosition;
 
 void main() {
 	vec3 unitVectors[3] = vec3[](vec3(1, 0, 0), vec3(0, 1, 0), vec3(0, 0, 1));
+	vec3 viewPosition = vec3(0, 0, 100);
+	float size = 0.1;
 	for (int i = 0; i < 3; i++) {
-		vec3 currentUnitVector = unitVectors[i];
+		vec3 rotatedUnitVector = (viewMatrix * vec4(unitVectors[i], 0)).xyz * size;
 
-		float arrowLength = 0.1;
-		float arrowWidth = 0.025;
-		vec4 origin = gl_in[0].gl_Position;
-		vec4 arrowTop = gl_in[0].gl_Position + vec4(currentUnitVector, 0);
-		vec3 norm = normalize(cross(arrowTop.xyz - viewPosition, currentUnitVector));
-		vec3 unitRotation = normalize(currentUnitVector);
+		float arrowLength = 0.025;
+		float arrowWidth = 0.00625;
+		vec4 origin = vec4(0, 0, gl_in[0].gl_Position.zw);
+		vec4 arrowTop = origin + vec4(rotatedUnitVector, 0);
+		vec3 norm = normalize(cross(arrowTop.xyz - viewPosition, rotatedUnitVector));
+		vec3 unitRotation = normalize(rotatedUnitVector);
 		vec4 arrowLeft = arrowTop - vec4(arrowLength * unitRotation - arrowWidth * norm, 0);
 		vec4 arrowRight = arrowTop - vec4(arrowLength * unitRotation + arrowWidth * norm, 0);
 		vec4 arrowBase = arrowTop - arrowLength * vec4(unitRotation, 0);
 
-		fcolor = currentUnitVector;
-
-		gl_Position = projectionMatrix * viewMatrix * origin;
-		EmitVertex();
-
-		gl_Position = projectionMatrix * viewMatrix * arrowBase;
-		EmitVertex();
-
-		gl_Position = projectionMatrix * viewMatrix * arrowLeft;
-		EmitVertex();
-
-		gl_Position = projectionMatrix * viewMatrix * arrowTop;
-		EmitVertex();
-
-		gl_Position = projectionMatrix * viewMatrix * arrowRight;
-		EmitVertex();
-
-		gl_Position = projectionMatrix * viewMatrix * arrowBase;
-		EmitVertex();
+		fcolor = unitVectors[i];
+		vec4 position = vec4(gl_in[0].gl_Position.xy, 0, 0);
+		gl_Position = position + projectionMatrix * origin; EmitVertex();
+		gl_Position = position + projectionMatrix * arrowBase; EmitVertex();
+		gl_Position = position + projectionMatrix * arrowLeft; EmitVertex();
+		gl_Position = position + projectionMatrix * arrowTop; EmitVertex();
+		gl_Position = position + projectionMatrix * arrowRight; EmitVertex();
+		gl_Position = position + projectionMatrix * arrowBase; EmitVertex();
+		
 
 		EndPrimitive();
 	}
@@ -75,5 +66,5 @@ layout(location = 0) out vec4 outColor;
 in vec3 fcolor;
 
 void main() {
-	outColor = vec4(1);
+	outColor = vec4(fcolor, 1);
 }
