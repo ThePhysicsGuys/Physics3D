@@ -16,7 +16,7 @@ void terminateGL();
 class Screen {
 private:
 	GLFWwindow* window;
-	World* w;
+	World* world;
 	std::vector<IndexedMesh*> meshes;
 public:
 	Vec2 screenSize;
@@ -32,7 +32,7 @@ public:
 
 	void makeCurrent();
 
-	void setWorld(World* w) { this->w = w; };
+	void setWorld(World* world) { this->world = world; };
 
 	int addMeshShape(Shape mesh);
 };

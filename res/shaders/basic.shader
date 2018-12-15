@@ -5,35 +5,36 @@ layout(location = 0) in vec3 vposition;
 
 out vec3 gposition;
 
+uniform mat4 modelMatrix;
+uniform mat4 viewMatrix;
+
 void main() { 
-	gl_Position = vec4(vposition, 1);
-	gposition = vposition;
+	gl_Position = viewMatrix * transpose(modelMatrix) * vec4(vposition, 1.0f);
+	gposition = gl_Position.xyz;
 }
 
 ///////////////////////////////////////////////////////////////////////////
 
 #shader geometry // geometry shader
-#version 330
-
-#define DEBUG 
+#version 330 
 
 layout(triangles) in;
+
+//#define DEBUG 
 #ifndef DEBUG
 layout(triangle_strip, max_vertices = 3) out;
 #else
 layout(line_strip, max_vertices = 9) out;
 #endif
 
-uniform mat4 modelMatrix;
-uniform vec3 viewPosition;
-uniform mat4 viewMatrix;
-uniform mat4 projectionMatrix;
-
 in vec3 gposition[];
 
+uniform vec3 viewPosition;
+uniform mat4 projectionMatrix;
+
 out vec3 fposition;
-out vec3 fcenter;
 out vec3 fnormal;
+out vec3 fcenter;
 
 vec3 center() {
 	return vec3(gl_in[0].gl_Position + gl_in[1].gl_Position + gl_in[2].gl_Position) / 3;
@@ -47,10 +48,10 @@ vec3 normal() {
 }
 
 void main() {
-	fcenter = center();
 	fnormal = normal();
+	fcenter = center();
 
-	mat4 transform = projectionMatrix * viewMatrix * transpose(modelMatrix);
+	mat4 transform = projectionMatrix;
 
 #ifdef DEBUG
 	float arrowLength = 0.05;
@@ -69,6 +70,7 @@ void main() {
 	gl_Position = transform * arrowBase; EmitVertex();
 	EndPrimitive();
 #endif
+
 	fposition = gposition[0];
 	gl_Position = transform * gl_in[0].gl_Position; EmitVertex();
 	fposition = gposition[1];
@@ -78,59 +80,85 @@ void main() {
 	EndPrimitive();
 }
 
-///////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
 
-#shader fragment // fragment shader
-#version 330 core
+#shader fragment
+#version 330
 
-layout(location = 0) out vec4 outColor;
-
-uniform mat4 modelMatrix;
-uniform vec3 viewPosition;
-uniform vec3 color;
+out vec4 outColor;
 
 in vec3 fposition;
-in vec3 fcenter;
 in vec3 fnormal;
+in vec3 fcenter;
 
-struct Light {
-	vec3 position;
-	vec3 color;
+uniform mat4 viewMatrix;
+uniform vec3 viewPosition;
+
+struct Attenuation {
+	float constant;
+	float linear;
+	float exponent;
 };
 
-const int lightCount = 3;
+struct Light {
+	vec3 color;
+	vec3 position;
+	float intensity;
+	Attenuation attenuation;
+};
 
-Light lights[lightCount] = Light[](
-	Light(vec3(-14, 17, 10), vec3(1, 0, 0)),
-	Light(vec3(15, 13, -13), vec3(0, 1, 0)),
-	Light(vec3(-15, -14, -13), vec3(0, 0, 1))
+struct Material {
+	vec4 ambient;
+	vec4 diffuse;
+	vec4 specular;
+	float reflectance;
+};
+
+// Uniforms
+Material material = Material(
+	vec4(0.3f, 0.4f, 0.2f, 1.0f),
+	vec4(0.3f, 0.2f, 0.6f, 1.0f),
+	vec4(0.2f, 0.1f, 0.9f, 1.0f),
+	0.5f
 );
 
+int lightCount = 3;
+Attenuation att = Attenuation(0.0f, 0.0f, 1.0f);
+Light lights[3] = Light[](
+	Light(vec3(1, 0, 0), vec3(5, 5, 5), 5, att),
+	Light(vec3(0, 1, 0), vec3(2, -5, 6), 5, att),
+	Light(vec3(0, 0, 1), vec3(-8, 5, -5), 5, att)
+);
+
+vec4 calcLightColor(Light light) {
+	vec4 diffuseColor = vec4(1.0, 0.0, 0.0, 1.0);
+	vec4 specularColor = vec4(0.0, 1.0, 0.0, 1.0);
+
+	// Diffuse light
+	vec3 lightDirection = (viewMatrix * vec4(light.position, 1.0)).xyz - fposition;
+	vec3 toLightSource = normalize(lightDirection);
+	float diffuseFactor = max(dot(fnormal, toLightSource), 0.0);
+	diffuseColor = material.diffuse * vec4(light.color, 1.0) * light.intensity * diffuseFactor;
+
+	// Specular light
+	float specularPower = 20.0f;
+	vec3 cameraDirection = normalize(-fposition);
+	vec3 fromLightSource = -toLightSource;
+	vec3 reflectedLight = normalize(reflect(fromLightSource, fnormal));
+	float specularFactor = max(dot(cameraDirection, reflectedLight), 0.0);
+	specularFactor = pow(specularFactor, specularPower);
+	specularColor = material.specular * specularFactor * material.reflectance * vec4(light.color, 1.0);
+
+	// Attenuation
+	float distance = length(lightDirection);
+	float attenuationInverse = light.attenuation.constant + light.attenuation.linear * distance + light.attenuation.exponent * distance * distance;
+	vec4 speculardiffuse = (diffuseColor + specularColor) / attenuationInverse;
+	return speculardiffuse;
+}
+
 void main() {
-	vec3 fragPosition = vec3(modelMatrix * vec4(fposition, 1));
-	vec3 fragNormal = vec3(modelMatrix * vec4(fnormal, 1));
-	vec3 viewDirection = normalize(viewPosition - fragPosition);
-	
-	float ambientStrength = 0.4;
-	vec3 ambient = ambientStrength * color;
-	
-	vec3 lightColorBuffer;
-	for (int i = 0; i < lightCount; i++) {
-		Light currentLight = lights[i];
-
-		vec3 lightDirection = normalize(currentLight.position - fragPosition);
-		vec3 reflectDirection = reflect(-lightDirection, fragNormal);
-
-		float diffuseStrength = 2.0f / lightCount;
-		float diffuseFactor = dot(fragNormal, lightDirection);
-		vec3 diffuse = diffuseStrength * clamp(diffuseFactor, 0, 1) * currentLight.color;
-
-		float specularStrength = 0.4;
-		float specularFactor = pow(max(dot(viewDirection, reflectDirection), 0.0), 32);
-		vec3 specular = specularStrength * specularFactor * currentLight.color;
-
-		lightColorBuffer += diffuse + specular;
-	}
-
-	outColor = vec4(ambient + lightColorBuffer, 1);
+	vec4 lightColors = vec4(0);
+	for (int i = 0; i < lightCount; i++)
+		lightColors += calcLightColor(lights[i]);
+	outColor = material.ambient + 10 * lightColors;
 }

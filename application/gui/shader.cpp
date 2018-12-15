@@ -49,7 +49,7 @@ unsigned int compileShader(const std::string& source, unsigned int type) {
 	
 	glShaderSource(id, 1, &src, nullptr);
 	
-	glCompileShader(id);
+	glCall(glCompileShader(id));
 
 	// Error handling
 	int result;

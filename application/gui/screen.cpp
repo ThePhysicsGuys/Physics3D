@@ -55,8 +55,8 @@ void terminateGL() {
 	glfwTerminate();
 }
 
-Screen::Screen(int width, int height, World* w) {
-	setWorld(w);
+Screen::Screen(int width, int height, World* world) {
+	setWorld(world);
 
 	/* Create a windowed mode window and its OpenGL context */
 	this->window = glfwCreateWindow(width, height, "Physics3D", NULL, NULL);
@@ -89,9 +89,6 @@ void Screen::init() {
 	glfwGetWindowSize(window, &width, &height);
 	screenSize = Vec2(width, height);
 
-	glfwWindowHint(GLFW_SAMPLES, 4);
-	glEnable(GL_MULTISAMPLE);
-
 	ShaderSource basicShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(BASIC_SHADER1)), "basic.shader");
 	ShaderSource vectorShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(VECTOR_SHADER1)), "vector.shader");
 	ShaderSource originShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(ORIGIN_SHADER1)), "origin.shader");
@@ -119,6 +116,7 @@ void Screen::init() {
 	handler = new StandardInputHandler(window, this, &camera);
 
 	box = new BoundingBox{-0.5, -0.5, -0.5, 0.5, 0.5, 0.5};
+
 	Shape shape = box->toShape(new Vec3[8]);// .rotated(fromEulerAngles(0.5, 0.1, 0.2), new Vec3[8]);
 
 	boxMesh = new IndexedMesh(shape);
@@ -147,36 +145,43 @@ void Screen::makeCurrent() {
 }
 
 void Screen::update() {
+	static int speed = 2;
 	if (handler->anyKey) {
+		if (handler->getKey(GLFW_KEY_1)) {
+			speed = 2;
+		}
+		if (handler->getKey(GLFW_KEY_2)) {
+			speed = 10;
+		}
 		if (handler->getKey(GLFW_KEY_W)) {
-			camera.move(0, 0, -10);
+			camera.move(0, 0, -speed);
 		}
 		if (handler->getKey(GLFW_KEY_S)) {
-			camera.move(0, 0, 10);
+			camera.move(0, 0, speed);
 		}
 		if (handler->getKey(GLFW_KEY_D)) {
-			camera.move(10, 0, 0);
+			camera.move(speed, 0, 0);
 		}
 		if (handler->getKey(GLFW_KEY_A)) {
-			camera.move(-10, 0, 0);
+			camera.move(-speed, 0, 0);
 		}
 		if (handler->getKey(GLFW_KEY_SPACE)) {
-			camera.move(0, 10, 0);
+			camera.move(0, speed, 0);
 		}
 		if (handler->getKey(GLFW_KEY_LEFT_SHIFT)) {
-			camera.move(0, -10, 0);
+			camera.move(0, -speed, 0);
 		}
 		if (handler->getKey(GLFW_KEY_LEFT)) {
-			camera.rotate(0, -10, 0);
+			camera.rotate(0, -speed, 0);
 		}
 		if (handler->getKey(GLFW_KEY_RIGHT)) {
-			camera.rotate(0, 10, 0);
+			camera.rotate(0, speed, 0);
 		}
 		if (handler->getKey(GLFW_KEY_UP)) {
-			camera.rotate(-10, 0, 0);
+			camera.rotate(-speed, 0, 0);
 		}
 		if (handler->getKey(GLFW_KEY_DOWN)) {
-			camera.rotate(10, 0, 0);
+			camera.rotate(speed, 0, 0);
 		}
 	}
 }
@@ -201,22 +206,17 @@ void Screen::refresh() {
 	basicShader.setUniform("viewPosition", Vec3f(camera.position.x, camera.position.y, camera.position.z));
 	
 	// Render world objects
-	for (Physical p : w->physicals) {
-		CFrame fra = p.cframe;
-		Mat4 transf = fra.asMat4();
+	for (Physical physical : world->physicals) {
+		Mat4f transformation = physical.cframe.asMat4f();
 
-		Mat4f transff = Mat4f();
-		for (int i = 0; i < 16; i++) {
-			transff.m[i] = transf.m[i];
-		}
+		int meshId = physical.part.drawMeshId;
 
-		int meshId = p.part.drawMeshId;
-
-		basicShader.setUniform("modelMatrix", transff);
+		basicShader.setUniform("modelMatrix", transformation);
 		meshes[meshId]->render();
 	}
 	
 	basicShader.setUniform("modelMatrix", Mat4f());
+	boxMesh->render();
 
 	vectorShader.bind();
 	vectorShader.setUniform("projectionMatrix", projectionMatrix);
@@ -225,8 +225,8 @@ void Screen::refresh() {
 	vectorMesh->render();
 
  	originShader.bind();
-	originShader.setUniform("projectionMatrix", projectionMatrix);
-	//originShader.setUniform("projectionMatrix", orthoMatrix);
+	//originShader.setUniform("projectionMatrix", projectionMatrix);
+	originShader.setUniform("projectionMatrix", orthoMatrix);
 	originShader.setUniform("viewMatrix", rotatedViewMatrix);
 	originMesh->render();
 
