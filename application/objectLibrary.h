@@ -4,3 +4,4 @@
 
 extern Shape icosahedron;
 extern Shape triangleShape;
+extern Shape house;
