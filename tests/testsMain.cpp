@@ -25,7 +25,7 @@ public:
 		try {
 			const char* fileName = strrchr(this->file, sepChar) ? strrchr(this->file, sepChar) + 1 : this->file;
 
-			Log::info("Running %s:%s()", fileName, func);
+			Log::info("Running %s:%s", fileName, func);
 			f();
 		} catch (AssertionError& e) {
 			Log::error("An assertion was incorrect at line %d:", e.line);

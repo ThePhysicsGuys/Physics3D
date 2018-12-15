@@ -3,6 +3,7 @@
 
 #include "../engine/math/mat3.h"
 #include "../engine/math/vec3.h"
+#include "../engine/math/mathUtil.h"
 
 #include "../engine/geometry/shape.h"
 #include "../engine/geometry/boundingBox.h"
@@ -35,6 +36,21 @@ TEST_CASE(shapeVolume) {
 	Log::debug("Triangle Volume: %.20f", triangleShape.getVolume());
 
 	Log::debug("Icosahedron Volume: %.20f", icosahedron.getVolume());
+}
+
+TEST_CASE(shapeCenterOfMass) {
+	BoundingBox b{-1, -1, -1, 1, 1, 1};
+	Vec3 vecBuf[8];
+	Vec3 vecBuf2[8];
+
+	Shape boxShape = b.toShape(vecBuf);
+
+	CFrame transform = CFrame(Vec3(0.3, 0.7, -3.5), fromEulerAngles(0.7, 0.2, 0.3));
+
+	Shape transformedShape = boxShape.localToGlobal(transform, vecBuf2);
+	
+	Log::debug("Center Of Mass Box: %s", str(boxShape.getCenterOfMass()).c_str());
+	Log::debug("Center Of Mass Transformed Box: %s", str(transformedShape.getCenterOfMass()).c_str());
 }
 
 TEST_CASE(cubeContainsPoint) {

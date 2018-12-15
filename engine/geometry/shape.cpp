@@ -116,6 +116,11 @@ bool isComplete(const Triangle* triangles, int tCount) {
 	return true;
 }
 
+Vec3 Shape::getNormalVecOfTriangle(Triangle t) const {
+	Vec3 v0 = vertices[t.firstIndex];
+	return (vertices[t.secondIndex] - v0) % (vertices[t.thirdIndex] - v0);
+}
+
 /*
 Checks that for every triangle, the outward-facing normal vector *dot* the vector from any of the points to the given point is negative
 If at least one of these values is positive, then the point must be on the outside of that triangle, and hence, outside of the shape
@@ -124,9 +129,8 @@ only for convex shapes
 bool Shape::containsPoint(Vec3 point) const {
 	for (int i = 0; i < tCount; i++) {
 		Triangle t = triangles[i];
-		Vec3 v0 = vertices[t.firstIndex];
-		Vec3 normalVec = (vertices[t.secondIndex] - v0) % (vertices[t.thirdIndex] - v0);
-		if((point - v0) * normalVec > 0) return false;
+		Vec3 normalVec = getNormalVecOfTriangle(t);
+		if((point - vertices[t.firstIndex]) * normalVec > 0) return false;
 	}
 	return true;
 }
@@ -147,10 +151,25 @@ double Shape::getVolume() const {
 }
 
 Vec3 Shape::getCenterOfMass() const {
+	Vec3 total = Vec3(0,0,0);
+	for (int i = 0; i < tCount; i++) {
+		Triangle t = triangles[i];
+		Vec3 v0 = vertices[t.firstIndex];
+		Vec3 v1 = vertices[t.secondIndex];
+		Vec3 v2 = vertices[t.thirdIndex];
 
+		Vec3 D1 = v1 - v0;
+		Vec3 D2 = v2 - v0;
 
+		Vec3 dFactor = D1 % D2;
+		Vec3 vFactor = v0.squared() + v1.squared() + v2.squared() + v0.mul(v1) + v1.mul(v2) + v2.mul(v0);
 
+		total += dFactor.mul(vFactor);
+	}
+	
+	return total / (24*getVolume());
+}
 
-
-	return Vec3();
+Mat3 Shape::getInertia() const {
+	return Mat3();
 }

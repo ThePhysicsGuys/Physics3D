@@ -168,6 +168,14 @@ public:
 	Vec3Template bisect(const Vec3Template other) const {
 		return *this * other.length() + other * (*this).length();
 	}
+
+	Vec3Template mul(Vec3Template other) const {
+		return Vec3Template(x*other.x, y*other.y, z*other.z);
+	}
+
+	Vec3Template squared() const {
+		return Vec3Template(x*x, y*y, z*z);
+	}
 };
 
 typedef Vec3Template<double>	Vec3;
