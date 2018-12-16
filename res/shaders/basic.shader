@@ -20,7 +20,7 @@ void main() {
 
 layout(triangles) in;
 
-//#define DEBUG 
+#define DEBUG 
 #ifndef DEBUG
 layout(triangle_strip, max_vertices = 3) out;
 #else

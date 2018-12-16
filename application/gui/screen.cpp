@@ -111,6 +111,7 @@ void Screen::init() {
 	originShader = Shader(originShaderSource);
 	originShader.createUniform("viewMatrix");
 	originShader.createUniform("projectionMatrix");
+	originShader.createUniform("orthoMatrix");
 
 	camera.setPosition(1, 1, -2);
 	camera.setRotation(0.3, 3.1415, 0.0);
@@ -232,9 +233,10 @@ void Screen::refresh() {
 	vectorMesh->render();
 
  	originShader.bind();
-	//originShader.setUniform("projectionMatrix", projectionMatrix);
-	originShader.setUniform("projectionMatrix", orthoMatrix);
-	originShader.setUniform("viewMatrix", rotatedViewMatrix);
+	originShader.setUniform("projectionMatrix", projectionMatrix);
+	originShader.setUniform("orthoMatrix", orthoMatrix);
+	originShader.setUniform("viewMatrix", viewMatrix);
+	originShader.setUniform("rotatedViewMatrix", rotatedViewMatrix);
 	originMesh->render();
 
 	glfwSwapBuffers(this->window);

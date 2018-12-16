@@ -16,21 +16,26 @@ void main() {
 #version 330 core
 
 layout(points) in;
-layout(line_strip, max_vertices = 18) out;
+layout(line_strip, max_vertices = 218) out;
 
 in vec3 grotation[];
 
 out vec3 fcolor;
 
+uniform mat4 rotatedViewMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
+uniform mat4 orthoMatrix;
+
+int gridWidth = 50;
+int gridLength = 50;
 
 void main() {
 	vec3 unitVectors[3] = vec3[](vec3(1, 0, 0), vec3(0, 1, 0), vec3(0, 0, 1));
 	vec3 viewPosition = vec3(0, 0, 100);
 	float size = 0.1;
 	for (int i = 0; i < 3; i++) {
-		vec3 rotatedUnitVector = (viewMatrix * vec4(unitVectors[i], 0)).xyz * size;
+		vec3 rotatedUnitVector = (rotatedViewMatrix * vec4(unitVectors[i], 0)).xyz * size;
 
 		float arrowLength = 0.025;
 		float arrowWidth = 0.00625;
@@ -44,14 +49,34 @@ void main() {
 
 		fcolor = unitVectors[i];
 		vec4 position = vec4(gl_in[0].gl_Position.xy, 0, 0);
-		gl_Position = position + projectionMatrix * origin; EmitVertex();
-		gl_Position = position + projectionMatrix * arrowBase; EmitVertex();
-		gl_Position = position + projectionMatrix * arrowLeft; EmitVertex();
-		gl_Position = position + projectionMatrix * arrowTop; EmitVertex();
-		gl_Position = position + projectionMatrix * arrowRight; EmitVertex();
-		gl_Position = position + projectionMatrix * arrowBase; EmitVertex();
-		
+		gl_Position = position + orthoMatrix * origin; EmitVertex();
+		gl_Position = position + orthoMatrix * arrowBase; EmitVertex();
+		gl_Position = position + orthoMatrix * arrowLeft; EmitVertex();
+		gl_Position = position + orthoMatrix * arrowTop; EmitVertex();
+		gl_Position = position + orthoMatrix * arrowRight; EmitVertex();
+		gl_Position = position + orthoMatrix * arrowBase; EmitVertex();
+		EndPrimitive();
+	}
 
+	fcolor = vec3(0.5);
+
+	for (int z = 0; z < gridLength / 2; z++) {	
+		gl_Position = projectionMatrix * viewMatrix * vec4(-gridWidth / 2, 0, z, 1); EmitVertex();
+		gl_Position = projectionMatrix * viewMatrix * vec4(gridWidth / 2, 0, z, 1); EmitVertex();
+		EndPrimitive();
+
+		gl_Position = projectionMatrix * viewMatrix * vec4(-gridWidth / 2, 0, -z, 1); EmitVertex();
+		gl_Position = projectionMatrix * viewMatrix * vec4(gridWidth / 2, 0, -z, 1); EmitVertex();
+		EndPrimitive();
+	}
+
+	for (int x = 0; x < gridWidth / 2; x++) {
+		gl_Position = projectionMatrix * viewMatrix * vec4(x, 0, -gridLength / 2, 1); EmitVertex();
+		gl_Position = projectionMatrix * viewMatrix * vec4(x, 0, gridLength / 2, 1); EmitVertex();
+		EndPrimitive();
+
+		gl_Position = projectionMatrix * viewMatrix * vec4(-x, 0, -gridLength / 2, 1); EmitVertex();
+		gl_Position = projectionMatrix * viewMatrix * vec4(-x, 0, gridLength / 2, 1); EmitVertex();
 		EndPrimitive();
 	}
 }
