@@ -16,13 +16,17 @@ struct IndexGroup {
 	}
 };
 
-std::vector<std::string> split(std::string &string, std::string regexString) {
+std::vector<std::string> split(std::string &string, char splitter) {
 	std::vector<std::string> elements;
-	std::regex regex(regexString);
-	std::sregex_token_iterator iterator(string.begin(), string.end(), regex, -1);
-	std::sregex_token_iterator end;
-	for (; iterator != end; ++iterator)
-		elements.push_back(*iterator);
+	int length = string.length();
+	int start = 0;
+	for (int i = 0; i < length; i++) {
+		if (string[i] == splitter) {
+			if (i != start) elements.push_back(string.substr(start, i - start));
+			start = i + 1;
+		}
+	}
+	if (start < length) elements.push_back(string.substr(start, length - start));
 	return elements;
 }
 
@@ -38,7 +42,7 @@ struct Face {
 	IndexGroup parseLine(std::string line) {
 		IndexGroup indexGroup = IndexGroup();
 
-		std::vector<std::string> tokens = split(line, "/");
+		std::vector<std::string> tokens = split(line, '/');
 		indexGroup.position = std::stoi(tokens[0]) - 1;
 		
 		return indexGroup;
@@ -76,7 +80,7 @@ IndexedMesh* loadMesh(std::istream& stream) {
 
 	std::string line;
 	while (getline(stream, line)) {
-		std::vector<std::string> tokens = split(line, "\\s+");
+		std::vector<std::string> tokens = split(line, ' ');
 		if (tokens[0] == "v") {
 			Vec3 vertex = Vec3(
 				stod(tokens[1]),
