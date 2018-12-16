@@ -160,5 +160,5 @@ void main() {
 	vec4 lightColors = vec4(0);
 	for (int i = 0; i < lightCount; i++)
 		lightColors += calcLightColor(lights[i]);
-	outColor = material.ambient + 10 * lightColors;
+	outColor = material.ambient + 30 * lightColors;
 }

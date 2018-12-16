@@ -11,7 +11,8 @@ struct ResourceStruct {
 ResourceStruct resources[]{
 	{ IDR_SHADER1, "SHADER" },
 	{ IDR_SHADER2, "SHADER" },
-	{ IDR_SHADER3, "SHADER" }
+	{ IDR_SHADER3, "SHADER" },
+	{ IDR_OBJ2, "OBJ" }
 };
 
 class ResourceManager {

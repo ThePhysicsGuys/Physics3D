@@ -11,6 +11,7 @@
 #include "../resourceManager.h"
 
 #include "../../util/log.h"
+#include "loader.h"
 
 #include "../engine/math/vec2.h"
 #include "../engine/math/mat4.h"
@@ -73,6 +74,7 @@ IndexedMesh* boxMesh = nullptr;
 VectorMesh* vectorMesh = nullptr;
 ArrayMesh* originMesh = nullptr;
 IndexedMesh* transMesh = nullptr;
+IndexedMesh* objMesh = nullptr;
 
 Shader basicShader;
 Shader vectorShader;
@@ -89,9 +91,9 @@ void Screen::init() {
 	glfwGetWindowSize(window, &width, &height);
 	screenSize = Vec2(width, height);
 
-	ShaderSource basicShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(BASIC_SHADER1)), "basic.shader");
-	ShaderSource vectorShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(VECTOR_SHADER1)), "vector.shader");
-	ShaderSource originShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(ORIGIN_SHADER1)), "origin.shader");
+	ShaderSource basicShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(BASIC_SHADER)), "basic.shader");
+	ShaderSource vectorShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(VECTOR_SHADER)), "vector.shader");
+	ShaderSource originShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(ORIGIN_SHADER)), "origin.shader");
 
 	basicShader = Shader(basicShaderSource);
 	basicShader.createUniform("modelMatrix");
@@ -138,6 +140,9 @@ void Screen::init() {
 	vecs[6] = 0.5;
 
 	vectorMesh = new VectorMesh(vecs, 20);
+
+	// TEST
+	objMesh = loadMesh((std::istream&) std::istringstream(getResourceAsString(STALL_MODEL)));
 }
 
 void Screen::makeCurrent() {
@@ -194,16 +199,17 @@ void Screen::refresh() {
 
 
 	Mat4f projectionMatrix = Mat4f().perspective(1.0, screenSize.x / screenSize.y, 0.01, 100.0);
-	Mat4f orthoMatrix = Mat4f().ortho(-1, 1, -1, 1, 0.1, 100);
+	Mat4f orthoMatrix = Mat4f().ortho(-1, 1, -screenSize.x / screenSize.y, screenSize.x / screenSize.y, 0.1, 100);
 	Mat4f rotatedViewMatrix = Mat4f().rotate(camera.rotation.x, 1, 0, 0).rotate(camera.rotation.y, 0, 1, 0).rotate(camera.rotation.z, 0, 0, 1);
 	Mat4f viewMatrix = rotatedViewMatrix.translate(-camera.position.x, -camera.position.y, -camera.position.z);
 	Vec3 realCameraVector = Mat4().rotate(camera.rotation.x, 1, 0, 0).rotate(camera.rotation.y, 0, 1, 0).rotate(camera.rotation.z, 0, 0, 1) * Vec3(0, 0, -1);
+	Vec3f viewPosition = Vec3f(camera.position.x, camera.position.y, camera.position.z);
 
 	basicShader.bind();
 	basicShader.setUniform("color", Vec3f(1, 1, 1));
 	basicShader.setUniform("projectionMatrix", projectionMatrix);
 	basicShader.setUniform("viewMatrix", viewMatrix);
-	basicShader.setUniform("viewPosition", Vec3f(camera.position.x, camera.position.y, camera.position.z));
+	basicShader.setUniform("viewPosition", viewPosition);
 	
 	// Render world objects
 	for (Physical physical : world->physicals) {
@@ -216,12 +222,13 @@ void Screen::refresh() {
 	}
 	
 	basicShader.setUniform("modelMatrix", Mat4f());
-	boxMesh->render();
+	//boxMesh->render();
+	objMesh->render();
 
 	vectorShader.bind();
 	vectorShader.setUniform("projectionMatrix", projectionMatrix);
 	vectorShader.setUniform("viewMatrix", viewMatrix);
-	vectorShader.setUniform("viewPosition", Vec3f(camera.position.x, camera.position.y, camera.position.z));
+	vectorShader.setUniform("viewPosition", viewPosition);
 	vectorMesh->render();
 
  	originShader.bind();
@@ -237,6 +244,7 @@ void Screen::refresh() {
 void Screen::close() {
 	basicShader.close();
 	vectorShader.close();
+	originShader.close();
 
 	terminateGL();
 }

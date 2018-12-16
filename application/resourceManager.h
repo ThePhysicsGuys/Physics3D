@@ -2,8 +2,9 @@
 
 #include <string>
 
-#define BASIC_SHADER1 0
-#define VECTOR_SHADER1 1
-#define ORIGIN_SHADER1 2
+#define BASIC_SHADER 0
+#define VECTOR_SHADER 1
+#define ORIGIN_SHADER 2
+#define STALL_MODEL 3
 
 std::string getResourceAsString(int res);

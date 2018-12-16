@@ -6,6 +6,8 @@
 #include <thread>
 #include <chrono>
 #include <iostream>
+#include <fstream>
+#include <sstream>
 
 #include "gui/screen.h"
 
@@ -14,7 +16,6 @@
 #include "tickerThread.h"
 
 #include "objectLibrary.h"
-
 #include "../engine/geometry/shape.h"
 #include "../engine/geometry/managedShape.h"
 #include "../engine/part.h"
@@ -92,6 +93,8 @@ int main(void) {
 	// world.addObject(icosaPhysical);
 
 	// physicsThread.start();
+
+	
 
 	/* Loop until the user closes the window */
 	Log::info("Started rendering");
