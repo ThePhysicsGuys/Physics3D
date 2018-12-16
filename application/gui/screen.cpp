@@ -107,9 +107,9 @@ void Screen::init() {
 	vectorShader.createUniform("projectionMatrix");
 	vectorShader.createUniform("viewPosition");
 
-
 	originShader = Shader(originShaderSource);
 	originShader.createUniform("viewMatrix");
+	originShader.createUniform("viewPosition");
 	originShader.createUniform("projectionMatrix");
 	originShader.createUniform("orthoMatrix");
 
@@ -223,7 +223,6 @@ void Screen::refresh() {
 	}
 	
 	basicShader.setUniform("modelMatrix", Mat4f());
-	//boxMesh->render();
 	objMesh->render();
 
 	vectorShader.bind();
@@ -234,6 +233,7 @@ void Screen::refresh() {
 
  	originShader.bind();
 	originShader.setUniform("projectionMatrix", projectionMatrix);
+	originShader.setUniform("viewPosition", viewPosition);
 	originShader.setUniform("orthoMatrix", orthoMatrix);
 	originShader.setUniform("viewMatrix", viewMatrix);
 	originShader.setUniform("rotatedViewMatrix", rotatedViewMatrix);

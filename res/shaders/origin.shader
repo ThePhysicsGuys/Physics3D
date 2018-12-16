@@ -26,13 +26,14 @@ uniform mat4 rotatedViewMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 uniform mat4 orthoMatrix;
+uniform vec3 viewPosition;
 
 int gridWidth = 50;
 int gridLength = 50;
 
 void main() {
 	vec3 unitVectors[3] = vec3[](vec3(1, 0, 0), vec3(0, 1, 0), vec3(0, 0, 1));
-	vec3 viewPosition = vec3(0, 0, 100);
+
 	float size = 0.1;
 	for (int i = 0; i < 3; i++) {
 		vec3 rotatedUnitVector = (rotatedViewMatrix * vec4(unitVectors[i], 0)).xyz * size;
@@ -41,7 +42,7 @@ void main() {
 		float arrowWidth = 0.00625;
 		vec4 origin = vec4(0, 0, gl_in[0].gl_Position.zw);
 		vec4 arrowTop = origin + vec4(rotatedUnitVector, 0);
-		vec3 norm = normalize(cross(arrowTop.xyz - viewPosition, rotatedUnitVector));
+		vec3 norm = normalize(cross(arrowTop.xyz, rotatedUnitVector));
 		vec3 unitRotation = normalize(rotatedUnitVector);
 		vec4 arrowLeft = arrowTop - vec4(arrowLength * unitRotation - arrowWidth * norm, 0);
 		vec4 arrowRight = arrowTop - vec4(arrowLength * unitRotation + arrowWidth * norm, 0);
@@ -58,25 +59,28 @@ void main() {
 		EndPrimitive();
 	}
 
-	fcolor = vec3(0.5);
-
-	for (int z = 0; z < gridLength / 2; z++) {	
-		gl_Position = projectionMatrix * viewMatrix * vec4(-gridWidth / 2, 0, z, 1); EmitVertex();
-		gl_Position = projectionMatrix * viewMatrix * vec4(gridWidth / 2, 0, z, 1); EmitVertex();
+	float camerax = floor(viewPosition.x);
+	float cameraz = floor(viewPosition.z);
+	
+	for (float z = 0.0; z < gridLength / 2; z++) {	
+		fcolor = vec3(0.5 - z / gridLength);
+		gl_Position = projectionMatrix * viewMatrix * vec4(camerax - gridWidth / 2, 0, cameraz + z, 1); EmitVertex();
+		gl_Position = projectionMatrix * viewMatrix * vec4(camerax + gridWidth / 2, 0, cameraz + z, 1); EmitVertex();
 		EndPrimitive();
 
-		gl_Position = projectionMatrix * viewMatrix * vec4(-gridWidth / 2, 0, -z, 1); EmitVertex();
-		gl_Position = projectionMatrix * viewMatrix * vec4(gridWidth / 2, 0, -z, 1); EmitVertex();
+		gl_Position = projectionMatrix * viewMatrix * vec4(camerax - gridWidth / 2, 0, cameraz - z, 1); EmitVertex();
+		gl_Position = projectionMatrix * viewMatrix * vec4(camerax + gridWidth / 2, 0, cameraz - z, 1); EmitVertex();
 		EndPrimitive();
 	}
 
-	for (int x = 0; x < gridWidth / 2; x++) {
-		gl_Position = projectionMatrix * viewMatrix * vec4(x, 0, -gridLength / 2, 1); EmitVertex();
-		gl_Position = projectionMatrix * viewMatrix * vec4(x, 0, gridLength / 2, 1); EmitVertex();
+	for (float x = 0.0; x < gridWidth / 2; x++) {
+		fcolor = vec3(0.5 - x / gridWidth);
+		gl_Position = projectionMatrix * viewMatrix * vec4(camerax + x, 0, cameraz - gridLength / 2, 1); EmitVertex();
+		gl_Position = projectionMatrix * viewMatrix * vec4(camerax + x, 0, cameraz + gridLength / 2, 1); EmitVertex();
 		EndPrimitive();
 
-		gl_Position = projectionMatrix * viewMatrix * vec4(-x, 0, -gridLength / 2, 1); EmitVertex();
-		gl_Position = projectionMatrix * viewMatrix * vec4(-x, 0, gridLength / 2, 1); EmitVertex();
+		gl_Position = projectionMatrix * viewMatrix * vec4(camerax - x, 0, cameraz - gridLength / 2, 1); EmitVertex();
+		gl_Position = projectionMatrix * viewMatrix * vec4(camerax - x, 0, cameraz + gridLength / 2, 1); EmitVertex();
 		EndPrimitive();
 	}
 }
