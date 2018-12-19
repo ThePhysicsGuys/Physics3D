@@ -19,6 +19,19 @@ struct Triangle {
 };
 
 struct Shape {
+	struct TriangleIter {
+		const Triangle* first;
+		const int size;
+		inline const Triangle* begin() const { return first; };
+		inline const Triangle* end() const { return first + size; };
+	};
+	struct VertexIter {
+		const Vec3* first;
+		const int size;
+		inline const Vec3* begin() const { return first; };
+		inline const Vec3* end() const { return first + size; };
+	};
+
 	const Vec3 * vertices;
 	const Triangle * triangles;
 	int vCount;
@@ -39,8 +52,10 @@ struct Shape {
 	Mat3 getInertia() const;
 
 	bool containsPoint(Vec3 point) const;
-	
 	Vec3 getNormalVecOfTriangle(Triangle t) const;
+
+	inline TriangleIter iterTriangles() const { return TriangleIter{triangles, tCount}; };
+	inline VertexIter iterVertices() const { return VertexIter{vertices, vCount}; };
 
 	bool isValid() const;
 };

@@ -58,13 +58,13 @@ int main(void) {
 
 	Part box2Part = createVisiblePart(BoundingBox{-10, -0.3, -0.3, 10, 0.3, 0.3}.toShape(new Vec3[8]), 1.0, 0.0);
 
-	Physical triangleThing(trianglePart, CFrame(Vec3(0.0, 2.0, 0.2), fromEulerAngles(0.3, 0.0, 0.0)), Mat3(1.0, 0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 5.0));
-	Physical box(boxPart, CFrame(Vec3(-0.3, -0.7, 0.2), fromEulerAngles(0.0, 0.0, 0.0)), Mat3(1.0, 0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 5.0));
-	Physical icosaPhysical(icosathingie, CFrame(Vec3(0.0, 0.0, 0.0), fromEulerAngles(0.0, 0.0, 0.0)), Mat3(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0));
+	Physical triangleThing(trianglePart, CFrame(Vec3(0.0, 2.0, 0.2), fromEulerAngles(0.3, 0.0, 0.0)));
+	Physical box(boxPart, CFrame(Vec3(-0.3, -0.7, 0.2), fromEulerAngles(0.0, 0.0, 0.0)));
+	Physical icosaPhysical(icosathingie, CFrame(Vec3(0.0, 0.0, 0.0), fromEulerAngles(0.0, 0.0, 0.0)));
 
 	icosaPhysical.angularVelocity = Vec3(0.0, 1.5, 0.0);
 
-	Physical box2Physical = Physical(box2Part, CFrame(Vec3(0.0, 2.0, 0.0), Mat3()), Mat3(100.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0));
+	Physical box2Physical = Physical(box2Part, CFrame(Vec3(0.0, 2.0, 0.0), Mat3()));
 
 	box2Physical.angularVelocity = Vec3(0.0, 0.0, 1.0);
 	
@@ -77,8 +77,8 @@ int main(void) {
 		// }
 	}*/
 
-	Part cubePart = createVisiblePart(BoundingBox{-0.5, -0.5, -0.5, 0.5, 0.5, 0.5}.toShape(new Vec3[8]), 1.0, 0.0);
-	Physical cube(cubePart, CFrame(Vec3(0.5, 0.9, 0.5), fromEulerAngles(0.5, 0.2, 0.3)), Mat3());
+	Part cubePart = createVisiblePart(BoundingBox{-0.2, -0.2, -0.2, 0.2, 0.2, 0.2}.toShape(new Vec3[8]), 1.0, 0.0);
+	Physical cube(cubePart, CFrame(Vec3(0.5, 0.9, 0.5), fromEulerAngles(0.5, 0.2, 0.3)));
 	world.addObject(cube);
 
 	// world.addObject(box2Physical);

@@ -137,9 +137,8 @@ bool Shape::containsPoint(Vec3 point) const {
 
 double Shape::getVolume() const {
 	double total = 0;
-	for (int i = 0; i < tCount; i++) {
-		Triangle cur = triangles[i];
-		Vec3 v0 = vertices[cur.firstIndex]; Vec3 v1 = vertices[cur.secondIndex]; Vec3 v2 = vertices[cur.thirdIndex];
+	for (Triangle t : iterTriangles()) {
+		Vec3 v0 = vertices[t.firstIndex]; Vec3 v1 = vertices[t.secondIndex]; Vec3 v2 = vertices[t.thirdIndex];
 		Vec3 D1 = v1 - v0; Vec3 D2 = v2 - v0;
 		
 		double Tf = (D1.x*D2.y - D1.y*D2.x);
@@ -152,8 +151,7 @@ double Shape::getVolume() const {
 
 Vec3 Shape::getCenterOfMass() const {
 	Vec3 total = Vec3(0,0,0);
-	for (int i = 0; i < tCount; i++) {
-		Triangle t = triangles[i];
+	for (Triangle t : iterTriangles()) {
 		Vec3 v0 = vertices[t.firstIndex];
 		Vec3 v1 = vertices[t.secondIndex];
 		Vec3 v2 = vertices[t.thirdIndex];
@@ -170,6 +168,52 @@ Vec3 Shape::getCenterOfMass() const {
 	return total / (24*getVolume());
 }
 
+/*
+	The total inertial matrix is given by the integral over the volume of the shape of the following matrix:
+	[[
+	[y^2+z^2,    xy,    xz],
+	[xy,    x^2+z^2,    yz],
+	[xz,    yz,    x^2+y^2]
+	]]
+
+	This has been reworked to a surface integral resulting in the given formulae
+*/
 Mat3 Shape::getInertia() const {
-	return Mat3();
+	Mat3 total = Mat3(0, 0, 0, 0, 0, 0, 0, 0, 0);
+	for (Triangle t: iterTriangles()) {
+		Vec3 v0 = vertices[t.firstIndex];
+		Vec3 v1 = vertices[t.secondIndex];
+		Vec3 v2 = vertices[t.thirdIndex];
+
+		Vec3 D1 = v1 - v0;
+		Vec3 D2 = v2 - v0;
+
+		Vec3 dFactor = D1 % D2;
+
+		// Diagonal Elements
+		Vec3 squaredIntegral = v0.cubed() + v1.cubed() + v2.cubed() + v0.squared().mul(v1 + v2) + v1.squared().mul(v0 + v2) + v2.squared().mul(v0 + v1) + v0.mul(v1).mul(v2);
+		Vec3 diagonalElementParts = dFactor.mul(squaredIntegral) / 60;
+
+		total.m00 += diagonalElementParts.y + diagonalElementParts.z;
+		total.m11 += diagonalElementParts.z + diagonalElementParts.x;
+		total.m22 += diagonalElementParts.x + diagonalElementParts.y;
+
+		// Other Elements
+		double selfProducts =	v0.x*v0.y*v0.z + v1.x*v1.y*v1.z + v2.x*v2.y*v2.z;
+		double twoSames =		v0.x*v0.y*v1.z + v0.x*v1.y*v0.z + v0.x*v1.y*v1.z + v0.x*v0.y*v2.z + v0.x*v2.y*v0.z + v0.x*v2.y*v2.z +
+								v1.x*v0.y*v0.z + v1.x*v1.y*v0.z + v1.x*v0.y*v1.z + v1.x*v1.y*v2.z + v1.x*v2.y*v1.z + v1.x*v2.y*v2.z +
+								v2.x*v0.y*v0.z + v2.x*v1.y*v2.z + v2.x*v0.y*v2.z + v2.x*v1.y*v1.z + v2.x*v2.y*v0.z + v2.x*v2.y*v1.z;
+		double allDifferents =	v0.x*v1.y*v2.z + v0.x*v2.y*v1.z + v1.x*v0.y*v2.z + v1.x*v2.y*v0.z + v2.x*v0.y*v1.z + v2.x*v1.y*v0.z;
+
+		double xyzIntegral = 3 * selfProducts + twoSames + allDifferents / 2;
+
+		total.m01 += dFactor.z * xyzIntegral;
+		total.m10 += dFactor.z * xyzIntegral;
+		total.m02 += dFactor.y * xyzIntegral;
+		total.m20 += dFactor.y * xyzIntegral;
+		total.m12 += dFactor.x * xyzIntegral;
+		total.m21 += dFactor.x * xyzIntegral;
+	}
+	
+	return total;
 }

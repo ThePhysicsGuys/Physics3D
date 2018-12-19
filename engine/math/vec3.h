@@ -176,7 +176,14 @@ public:
 	Vec3Template squared() const {
 		return Vec3Template(x*x, y*y, z*z);
 	}
+
+	Vec3Template cubed() const {
+		return Vec3Template(x*x*x, y*y*y, z*z*z);
+	}
 };
+
+template<typename P, typename N>
+Vec3Template<N> operator*(const P factor, const Vec3Template<N> vec) { return vec * factor; }
 
 typedef Vec3Template<double>	Vec3;
 typedef Vec3Template<float>		Vec3f;

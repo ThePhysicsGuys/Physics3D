@@ -18,15 +18,15 @@ void main() {
 layout(points) in;
 layout(line_strip, max_vertices = 218) out;
 
-in vec3 grotation[];
-
-out vec3 fcolor;
-
 uniform mat4 rotatedViewMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 uniform mat4 orthoMatrix;
 uniform vec3 viewPosition;
+
+in vec3 grotation[];
+
+out vec3 fcolor;
 
 int gridWidth = 50;
 int gridLength = 50;

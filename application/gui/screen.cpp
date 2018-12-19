@@ -117,6 +117,7 @@ void Screen::init() {
 	originShader.createUniform("viewPosition");
 	originShader.createUniform("projectionMatrix");
 	originShader.createUniform("orthoMatrix");
+	originShader.createUniform("rotatedViewMatrix");
 
 	camera.setPosition(1, 1, -2);
 	camera.setRotation(0.3, 3.1415, 0.0);
