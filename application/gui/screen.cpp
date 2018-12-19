@@ -79,7 +79,6 @@ IndexedMesh* boxMesh = nullptr;
 VectorMesh* vectorMesh = nullptr;
 ArrayMesh* originMesh = nullptr;
 IndexedMesh* transMesh = nullptr;
-IndexedMesh* objMesh = nullptr;
 
 Shader basicShader;
 Shader vectorShader;
@@ -147,9 +146,6 @@ void Screen::init() {
 	vecs[6] = 0.5;
 
 	vectorMesh = new VectorMesh(vecs, 20);
-
-	// TEST
-	objMesh = loadMesh((std::istream&) std::istringstream(getResourceAsString(STALL_MODEL)));
 }
 
 void Screen::makeCurrent() {
@@ -229,7 +225,6 @@ void Screen::refresh() {
 	}
 	
 	basicShader.setUniform("modelMatrix", Mat4f());
-	objMesh->render();
 
 	vectorShader.bind();
 	vectorShader.setUniform("projectionMatrix", projectionMatrix);

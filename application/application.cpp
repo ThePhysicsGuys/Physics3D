@@ -15,6 +15,8 @@
 
 #include "tickerThread.h"
 
+#include "gui\loader.h"
+#include "resourceManager.h"
 #include "objectLibrary.h"
 #include "../engine/geometry/shape.h"
 #include "../engine/geometry/managedShape.h"
@@ -52,12 +54,14 @@ int main(void) {
 		newVerts[i] = icosahedron.vertices[i] * 2;
 	}
 
+	Part stallPart = createVisiblePart(*loadMesh((std::istream&) std::istringstream(getResourceAsString(STALL_MODEL))), 1, 0.7);
 	Part trianglePart = createVisiblePart(triangleShape, 10.0, 0.7);
 	Part boxPart = createVisiblePart(BoundingBox{-0.1, -0.7, -0.3, 0.1, 0.7, 0.3}.toShape(new Vec3[8]), 2.0, 0.7);
 	Part icosathingie = createVisiblePart(Shape(newVerts, icosahedron.triangles, 12, 20), 10, 0.7);
 
 	Part box2Part = createVisiblePart(BoundingBox{-10, -0.3, -0.3, 10, 0.3, 0.3}.toShape(new Vec3[8]), 1.0, 0.0);
 
+	Physical stall(stallPart, CFrame(Vec3(0.0, 2.0, 0.2), fromEulerAngles(0.3, 0.0, 0.0)));
 	Physical triangleThing(trianglePart, CFrame(Vec3(0.0, 2.0, 0.2), fromEulerAngles(0.3, 0.0, 0.0)));
 	Physical box(boxPart, CFrame(Vec3(-0.3, -0.7, 0.2), fromEulerAngles(0.0, 0.0, 0.0)));
 	Physical icosaPhysical(icosathingie, CFrame(Vec3(0.0, 0.0, 0.0), fromEulerAngles(0.0, 0.0, 0.0)));
@@ -80,7 +84,7 @@ int main(void) {
 	Part cubePart = createVisiblePart(BoundingBox{-0.2, -0.2, -0.2, 0.2, 0.2, 0.2}.toShape(new Vec3[8]), 1.0, 0.0);
 	Physical cube(cubePart, CFrame(Vec3(0.5, 0.9, 0.5), fromEulerAngles(0.5, 0.2, 0.3)));
 	world.addObject(cube);
-
+	world.addObject(stall);
 	// world.addObject(box2Physical);
 
 	triangleThing.velocity = Vec3(1.0, 0.0, 0.0);

@@ -6,6 +6,7 @@
 #include <iostream>
 
 #include "../engine/math/vec3.h"
+#include "../engine/geometry/shape.h"
 
 struct IndexGroup {
 	int NO_VALUE = -1;
@@ -49,32 +50,21 @@ struct Face {
 	}
 };
 
-IndexedMesh* reorderLists(std::vector<Vec3> positionList, std::vector<Face> faceList) {
-
+Shape* reorderLists(std::vector<Vec3> positions, std::vector<Face> faces) {
 	std::vector<unsigned int> indicesVector;
 
-	double* positions = new double[positionList.size() * 3];
-
-	int i = 0;
-	for (Vec3 position : positionList) {
-		positions[i * 3] = position.x;
-		positions[i * 3 + 1] = position.y;
-		positions[i * 3 + 2] = position.z;
-		i++;
-	}
-
-	for (Face face : faceList) {
+	for (Face face : faces) {
 		for (IndexGroup group : face.indexGroups) {
 			indicesVector.push_back(group.position);
 		}
 	}
 
-	unsigned int* indices = &indicesVector[0];
-	IndexedMesh* mesh = new IndexedMesh(positions, indices, (int) positionList.size(), (int) faceList.size());
-	return mesh;
+	Shape* shape = new Shape(&positions[0], reinterpret_cast<Triangle*>(&indicesVector[0]), positions.size(), faces.size());
+
+	return shape;
 }
 
-IndexedMesh* loadMesh(std::istream& stream) {
+Shape* loadMesh(std::istream& stream) {
 	std::vector<Vec3> vertices;
 	std::vector<Face> faces;
 
