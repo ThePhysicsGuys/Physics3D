@@ -68,6 +68,11 @@ Screen::Screen(int width, int height, World* world) {
 
 	/* Make the window's context current */
 	makeCurrent();
+
+	Log::info("OpenGL vendor: (%s)", glGetString(GL_VENDOR));
+	Log::info("OpenGL renderer: (%s)", glGetString(GL_RENDERER));
+	Log::info("OpenGL version: (%s)", glGetString(GL_VERSION));
+	Log::info("OpenGL shader version: (%s)", glGetString(GL_SHADING_LANGUAGE_VERSION));
 }
 
 IndexedMesh* boxMesh = nullptr;

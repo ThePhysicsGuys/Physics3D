@@ -41,7 +41,7 @@ public:
 		x += rspeed * dx;
 		y += rspeed * dy;
 		z += rspeed * dz;
-		Log::debug("Camera rotation [%f, %f, %f]", x, y, z);
+		//Log::debug("Camera rotation (%f, %f, %f)", x, y, z);
 		rotation = Vec3(x, y, z);
 	}
 
@@ -57,7 +57,7 @@ public:
 			z += speed * cos(rotation.y - pi / 2) * dx;
 		}
 		y += speed * dy;
-		Log::debug("Camera position [%f, %f, %f]", x, y, z);
+		//Log::debug("Camera position (%f, %f, %f)", x, y, z);
 		position = Vec3(x, y, z);
 	}
 };

@@ -16,12 +16,12 @@ public:
 		glGenBuffers(1, &id);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, size * sizeof(unsigned int), data, GL_STATIC_DRAW);
-		Log::debug("Created index buffer width id, %d, size %d, data %d", id, size, data);
+		Log::debug("Created index buffer width id, (%d), size (%d) and datapointer (%d)", id, size, data);
 	}
 
 	~IndexBuffer() {
 		close();
-		Log::warn("Deleted index buffer with id %d", id);
+		Log::warn("Deleted index buffer with id (%d)", id);
 	}
 
 	void bind() {

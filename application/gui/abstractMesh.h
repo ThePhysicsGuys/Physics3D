@@ -18,12 +18,10 @@ public:
 	RenderMode renderMode;
 
 	AbstractMesh(RenderMode rendermode) : renderMode(renderMode) {
-		Log::debug("Created new AbstractMesh with renderMode %d", (int) renderMode);
 		vertexArray = new VertexArray();
 	};
 
 	AbstractMesh() : renderMode(RenderMode::TRIANGLES) {
-		Log::debug("Created new AbstractMesh with renderMode %d", (int) renderMode);
 		vertexArray = new VertexArray();
 	};
 

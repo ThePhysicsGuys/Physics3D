@@ -24,7 +24,7 @@ void VectorMesh::update(const double* vertices, const int vertexCount) {
 	this->vertexCount = vertexCount;
 	if (vertexCount > capacity) {
 		capacity = vertexCount;
-		Log::warn("Vector buffer overflow, creating new buffer with size [%d]", vertexCount);
+		Log::warn("Vector buffer overflow, creating new buffer with size (%d)", vertexCount);
 		glBufferData(GL_ARRAY_BUFFER, capacity * 7 * sizeof(double), vertices, GL_DYNAMIC_DRAW);
 	} else {
 		glBufferSubData(GL_ARRAY_BUFFER, 0, vertexCount * 7 * sizeof(double), vertices);

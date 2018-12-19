@@ -12,18 +12,20 @@ struct ShaderSource {
 	std::string vertexSource;
 	std::string fragmentSource;
 	std::string geometrySource;
+	std::string name;
 };
 
-ShaderSource parseShader(std::istream& shaderTextStream, const char* shaderName);
-ShaderSource parseShader(const std::string& vertexPath, const std::string& fragmentPath);
-ShaderSource parseShader(const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath);
+ShaderSource parseShader(std::istream& shaderTextStream, const std::string name);
+ShaderSource parseShader(const std::string& vertexPath, const std::string& fragmentPath, const std::string name);
+ShaderSource parseShader(const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath, const std::string name);
 
 class Shader {
 public:
+	std::string name;
 	Shader() {};
-	Shader(const std::string& vertexShader, const std::string& fragmentShader);
-	Shader(const std::string& vertexShader, const std::string& fragmentShader, const std::string& geometryShader);
-	Shader(ShaderSource shaderSource) : Shader(shaderSource.vertexSource, shaderSource.fragmentSource, shaderSource.geometrySource) {};
+	Shader(const std::string& vertexShader, const std::string& fragmentShader, const std::string name);
+	Shader(const std::string& vertexShader, const std::string& fragmentShader, const std::string& geometryShader, const std::string name);
+	Shader(ShaderSource shaderSource) : Shader(shaderSource.vertexSource, shaderSource.fragmentSource, shaderSource.geometrySource, shaderSource.name) {};
 	void createUniform(std::string uniform);
 	void setUniform(std::string uniform, int value);
 	void setUniform(std::string uniform, float value);

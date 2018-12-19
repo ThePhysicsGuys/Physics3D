@@ -13,12 +13,12 @@ public:
 	VertexArray() {
 		glGenVertexArrays(1, &id);
 		glBindVertexArray(id);
-		Log::debug("Created vertex array with id %d", id);
+		Log::debug("Created vertex array with id (%d)", id);
 	}
 
 	~VertexArray() {
 		close();
-		Log::debug("Deleted vertex array with id %d", id);
+		Log::debug("Deleted vertex array with id (%d)", id);
 	}
 
 	void bind() const {
