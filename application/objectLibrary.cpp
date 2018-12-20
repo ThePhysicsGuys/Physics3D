@@ -45,3 +45,11 @@ Triangle houseTriangles[]{
 };
 
 Shape house(houseVerts, houseTriangles, 10, 16);
+
+Shape createCube(double side) {
+	return createBox(side, side, side);
+}
+
+Shape createBox(double width, double height, double length) {
+	return BoundingBox{-width / 2, -height / 2, -length / 2, width / 2, height / 2, length / 2}.toShape(new Vec3[8]);
+}
