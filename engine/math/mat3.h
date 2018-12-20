@@ -40,19 +40,17 @@ public:
 	}
 
 	Mat3Template<N> inverse() const {
-		N normdet = det();
-		N invdet = 1 / normdet;
-		N r00 = (m11 * m22 - m21 * m12) * invdet;
-		N r01 = (m21 * m02 - m01 * m22) * invdet;
-		N r02 = (m01 * m12 - m11 * m02) * invdet;
-		N r10 = (m20 * m12 - m10 * m22) * invdet;
-		N r11 = (m00 * m22 - m20 * m02) * invdet;
-		N r12 = (m10 * m02 - m00 * m12) * invdet;
-		N r20 = (m10 * m21 - m20 * m11) * invdet;
-		N r21 = (m20 * m01 - m00 * m21) * invdet;
-		N r22 = (m00 * m11 - m10 * m01) * invdet;
+		N r00 = m11 * m22 - m21 * m12;
+		N r01 = m21 * m02 - m01 * m22;
+		N r02 = m01 * m12 - m11 * m02;
+		N r10 = m20 * m12 - m10 * m22;
+		N r11 = m00 * m22 - m20 * m02;
+		N r12 = m10 * m02 - m00 * m12;
+		N r20 = m10 * m21 - m20 * m11;
+		N r21 = m20 * m01 - m00 * m21;
+		N r22 = m00 * m11 - m10 * m01;
 		
-		return Mat3Template(m00, m01, m02, m10, m11, m12, m20, m21, m22);
+		return Mat3Template(r00, r01, r02, r10, r11, r12, r20, r21, r22) * (1/det());
 	}
 
 	Mat3Template<N> operator~() const {

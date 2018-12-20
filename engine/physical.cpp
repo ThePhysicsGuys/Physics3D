@@ -6,11 +6,16 @@
 #include "debug.h"
 
 Physical::Physical(Part p, CFrame cframe) : part(p), cframe(cframe), mass(p.hitbox.getVolume() * p.properties.density), 
-											inertia(p.hitbox.getInertia() * mass), com(p.hitbox.getCenterOfMass()) {}
+											inertia(p.hitbox.getInertia() * p.properties.density), com(p.hitbox.getCenterOfMass()) {}
 
 void Physical::update(double deltaT) {
 	Vec3 accel = totalForce * (deltaT/mass);
+	
+	//Vec3 localMoment = ~cframe.rotation * totalMoment;
 	Vec3 rotAcc = ~inertia * totalMoment * deltaT;
+	//Vec3 rotAcc = cframe.rotation * localRotAcc;
+
+	//Vec3 rotAcc = totalMoment;
 
 	totalForce = Vec3();
 	totalMoment = Vec3();
@@ -33,9 +38,15 @@ void Physical::applyForceAtCenterOfMass(Vec3 force) {
 
 void Physical::applyForce(Vec3Relative origin, Vec3 force) {
 	totalForce += force;
-	totalMoment += force % origin;
 
 	Debug::logVec(origin + getCenterOfMass(), force, Debug::FORCE);
+
+	applyMoment(force % origin);
+}
+
+void Physical::applyMoment(Vec3 moment) {
+	totalMoment += moment;
+	Debug::logVec(getCenterOfMass(), moment, Debug::MOMENT);
 }
 
 Vec3 Physical::getCenterOfMass() {

@@ -24,6 +24,8 @@
 
 #include "debug.h"
 
+#include "../engine/math/mathUtil.h"
+
 #define TICKS_PER_SECOND 500.0
 
 #define TICK_SKIP_TIME std::chrono::milliseconds(3000)
@@ -61,7 +63,7 @@ int main(void) {
 
 	Part box2Part = createVisiblePart(BoundingBox{-10, -0.3, -0.3, 10, 0.3, 0.3}.toShape(new Vec3[8]), 1.0, 0.0);
 
-	Physical stall(stallPart, CFrame(Vec3(0.0, 2.0, 0.2), fromEulerAngles(0.3, 0.0, 0.0)));
+	// Physical stall(stallPart, CFrame(Vec3(0.0, 2.0, 0.2), fromEulerAngles(0.3, 0.0, 0.0)));
 	Physical triangleThing(trianglePart, CFrame(Vec3(0.0, 2.0, 0.2), fromEulerAngles(0.3, 0.0, 0.0)));
 	Physical box(boxPart, CFrame(Vec3(-0.3, -0.7, 0.2), fromEulerAngles(0.0, 0.0, 0.0)));
 	Physical icosaPhysical(icosathingie, CFrame(Vec3(0.0, 0.0, 0.0), fromEulerAngles(0.0, 0.0, 0.0)));
@@ -81,10 +83,13 @@ int main(void) {
 		// }
 	}*/
 
-	Part cubePart = createVisiblePart(BoundingBox{-0.2, -0.2, -0.2, 0.2, 0.2, 0.2}.toShape(new Vec3[8]), 1.0, 0.0);
-	Physical cube(cubePart, CFrame(Vec3(0.5, 0.9, 0.5), fromEulerAngles(0.5, 0.2, 0.3)));
+	Part cubePart = createVisiblePart(createCube(1.0), 1.0, 0.0);
+	Physical cube(cubePart, CFrame(Vec3(0.5, 1.9, 0.5), fromEulerAngles(1.5, 0.2, 0.3)));
+
+	Log::debug("Cube Inertia: %s / %s", str(cube.inertia).c_str(), str(~cube.inertia).c_str());
+
 	world.addObject(cube);
-	world.addObject(stall);
+	//world.addObject(stall);
 	// world.addObject(box2Physical);
 
 	triangleThing.velocity = Vec3(1.0, 0.0, 0.0);
