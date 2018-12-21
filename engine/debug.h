@@ -1,6 +1,7 @@
 #pragma once
 
 #include "math/vec3.h"
+#include "math/cframe.h"
 
 namespace Debug {
 	
@@ -12,10 +13,15 @@ namespace Debug {
 		POSITION,
 		VELOCITY,
 		ANGULAR_VELOCITY,
+	};
 
+	enum CFrameType {
+		OBJECT_CFRAME
 	};
 
 	void logVec(Vec3 origin, Vec3 vec, VecType type);
+	void logCFrame(CFrame frame, CFrameType type);
 
 	void setVecLogAction(void(*logger)(Vec3 origin, Vec3 vec, VecType type));
+	void setCFrameLogAction(void(*logger)(CFrame frame, CFrameType type));
 }

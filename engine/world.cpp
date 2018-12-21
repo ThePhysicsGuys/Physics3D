@@ -46,15 +46,20 @@ void World::tick(double deltaT) {
 				double downwardSpeed = velocityOfPoint * Vec3(0.0, 1.0, 0.0);
 
 				if(downwardSpeed < 0)
-					p.applyForce(v - p.getCenterOfMass(), Vec3(0.0, -10 * downwardSpeed, 0.0));
+					p.applyForce(v - p.getCenterOfMass(), Vec3(0.0, -10 * downwardSpeed * p.mass, 0.0));
 
 				p.applyForce(v - p.getCenterOfMass(), Vec3(0, -100 * v.y * p.mass, 0));
 			}
+
+			// p.applyMoment(Vec3(1.0, 0.0, 0.0));
 		}
 	}
 
 	for (Physical& p : physicals) {
 		p.update(deltaT);
+
+		Debug::logVec(p.getCenterOfMass(), p.angularVelocity, Debug::ANGULAR_VELOCITY);
+		Debug::logCFrame(p.cframe, Debug::OBJECT_CFRAME);
 	}
 }
 

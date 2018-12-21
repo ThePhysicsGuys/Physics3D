@@ -36,8 +36,8 @@ namespace AppDebug {
 	SwappableBuffer<ColoredVec> buf(16);
 
 	namespace Logging {
-		void logVec(Vec3 origin, Vec3 vec, Debug::VecType type) {
-			using namespace Debug;
+		using namespace Debug;
+		void logVec(Vec3 origin, Vec3 vec, VecType type) {
 			double color;
 			switch (type) {
 			case INFO: color = 0.15; break;
@@ -50,6 +50,17 @@ namespace AppDebug {
 			}
 
 			buf.add(ColoredVec(origin, vec, color));
+		}
+
+		void logCFrame(CFrame frame, CFrameType type) {
+			switch (type) {
+			case OBJECT_CFRAME:
+				Vec3 pos = frame.position;
+				RotMat3 rot = frame.rotation;
+				buf.add(ColoredVec(frame.position, rot * Vec3(1.0, 0.0, 0.0), 0.0));
+				buf.add(ColoredVec(frame.position, rot * Vec3(0.0, 1.0, 0.0), 0.3));
+				buf.add(ColoredVec(frame.position, rot * Vec3(0.0, 0.0, 1.0), 0.6));
+			}
 		}
 	}
 
@@ -64,6 +75,7 @@ namespace AppDebug {
 	void setupDebugHooks() {
 		Log::info("Set up debug hooks!");
 		Debug::setVecLogAction(Logging::logVec);
+		Debug::setCFrameLogAction(Logging::logCFrame);
 	}
 
 	void updateVecMesh(VectorMesh* mesh) {
