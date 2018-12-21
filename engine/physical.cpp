@@ -11,11 +11,11 @@ Physical::Physical(Part p, CFrame cframe) : part(p), cframe(cframe), mass(p.hitb
 void Physical::update(double deltaT) {
 	Vec3 accel = totalForce * (deltaT/mass);
 	
-	//Vec3 localMoment = ~cframe.rotation * totalMoment;
-	Vec3 rotAcc = ~inertia * totalMoment * deltaT;
-	//Vec3 rotAcc = cframe.rotation * localRotAcc;
+	Vec3 localMoment = ~cframe.rotation * totalMoment;
+	Vec3 localRotAcc = ~inertia * localMoment * deltaT;
+	Vec3 rotAcc = cframe.rotation * localRotAcc;
 
-	//Vec3 rotAcc = totalMoment;
+	//Vec3 rotAcc = totalMoment * deltaT;
 
 	totalForce = Vec3();
 	totalMoment = Vec3();
@@ -27,7 +27,7 @@ void Physical::update(double deltaT) {
 	
 	Mat3 rotation = fromRotationVec(angularVelocity * deltaT);
 
-	cframe.rotation = rotation * cframe.rotation;
+	cframe.rotation = cframe.rotation * rotation;
 }
 
 void Physical::applyForceAtCenterOfMass(Vec3 force) {

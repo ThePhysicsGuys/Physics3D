@@ -59,51 +59,19 @@ int main(void) {
 	Part stallPart = createVisiblePart(*loadMesh((std::istream&) std::istringstream(getResourceAsString(STALL_MODEL))), 1, 0.7);
 	Part trianglePart = createVisiblePart(triangleShape, 10.0, 0.7);
 	Part boxPart = createVisiblePart(BoundingBox{-0.1, -0.7, -0.3, 0.1, 0.7, 0.3}.toShape(new Vec3[8]), 2.0, 0.7);
-	Part icosathingie = createVisiblePart(Shape(newVerts, icosahedron.triangles, 12, 20), 10, 0.7);
+	Part icosaPart = createVisiblePart(Shape(newVerts, icosahedron.triangles, 12, 20), 10, 0.7);
+	Part cubePart = createVisiblePart(createCube(1.0), 1000.0, 0.0);
+	Part housePart = createVisiblePart(house, 1000.0, 0.0);
 
-	Part box2Part = createVisiblePart(BoundingBox{-10, -0.3, -0.3, 10, 0.3, 0.3}.toShape(new Vec3[8]), 1.0, 0.0);
-
-	// Physical stall(stallPart, CFrame(Vec3(0.0, 2.0, 0.2), fromEulerAngles(0.3, 0.0, 0.0)));
-	Physical triangleThing(trianglePart, CFrame(Vec3(0.0, 2.0, 0.2), fromEulerAngles(0.3, 0.0, 0.0)));
-	Physical box(boxPart, CFrame(Vec3(-0.3, -0.7, 0.2), fromEulerAngles(0.0, 0.0, 0.0)));
-	Physical icosaPhysical(icosathingie, CFrame(Vec3(0.0, 0.0, 0.0), fromEulerAngles(0.0, 0.0, 0.0)));
-
-	icosaPhysical.angularVelocity = Vec3(0.0, 1.5, 0.0);
-
-	Physical box2Physical = Physical(box2Part, CFrame(Vec3(0.0, 2.0, 0.0), Mat3()));
-
-	box2Physical.angularVelocity = Vec3(0.0, 0.0, 1.0);
-	
-	/*for (int x = 0; x < 10; x++) {
-		// for (int y = 0; y < 10; y++) {
-			for (int z = 0; z < 10; z++) {
-				Physical phy(icosathingie, CFrame(Vec3(x, z, z) * 4, fromEulerAngles(0.0, 0.0, 0.0)), Mat3(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0) * 5);
-				world.addObject(phy);
-			}
-		// }
-	}*/
-
-	Part cubePart = createVisiblePart(createCube(1.0), 1.0, 0.0);
 	Physical cube(cubePart, CFrame(Vec3(0.5, 1.9, 0.5), fromEulerAngles(1.5, 0.2, 0.3)));
-
-	Log::debug("Cube Inertia: %s / %s", str(cube.inertia).c_str(), str(~cube.inertia).c_str());
+	Physical box(boxPart, CFrame(Vec3(1.5, 0.7, 0.3), fromEulerAngles(0.0, 0.2, 0.0)));
+	Physical housePhysical(housePart, CFrame(Vec3(-1.5, 0.0, 0.0), fromEulerAngles(0.7, 0.9, 0.7)));
+	Physical icosa(icosaPart, CFrame(Vec3(0.0, 2.0, 3.0), fromEulerAngles(0.1, 0.1, 0.1)));
 
 	world.addObject(cube);
-	//world.addObject(stall);
-	// world.addObject(box2Physical);
-
-	triangleThing.velocity = Vec3(1.0, 0.0, 0.0);
-	triangleThing.angularVelocity = Vec3(0.1, 0.5, 0.3);
-
-	box.angularVelocity = Vec3(1.0, 1.0, 1.0);
-
-	// world.addObject(triangleThing);
-	// world.addObject(box);
-	// world.addObject(icosaPhysical);
-
-	// physicsThread.start();
-
-	
+	world.addObject(box);
+	world.addObject(housePhysical);
+	world.addObject(icosa);
 
 	/* Loop until the user closes the window */
 	Log::info("Started rendering");
