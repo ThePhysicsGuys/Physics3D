@@ -34,6 +34,9 @@ public:
 	
 	CFrame& operator+=(const Vec3& delta);
 	CFrame& operator-=(const Vec3& delta);
+
+	void translate(Vec3 translation);
+	void rotate(RotMat3 rotation);
 };
 
 CFrame operator+(const CFrame& frame, const Vec3& delta);
