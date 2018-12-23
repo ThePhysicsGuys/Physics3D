@@ -47,6 +47,8 @@ struct Shape {
 
 	BoundingBox getBounds() const;
 
+	double getIntersectionDistance(Vec3 origin, Vec3 direction);
+
 	double getVolume() const;
 	Vec3 getCenterOfMass() const;
 	Mat3 getInertia() const;

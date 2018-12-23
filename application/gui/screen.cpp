@@ -19,6 +19,7 @@
 #include "../engine/geometry/shape.h"
 #include "../engine/geometry/boundingBox.h"
 #include "../engine/math/mathUtil.h"
+#include "../engine/debug.h"
 
 #include <stdlib.h>
 #include <fstream>
@@ -195,8 +196,6 @@ void Screen::update() {
 }
 
 void Screen::refresh() {
-	AppDebug::updateVecMesh(vectorMesh);
-
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_BUFFER);
 
@@ -205,9 +204,10 @@ void Screen::refresh() {
 	Mat4f orthoMatrix = Mat4f().ortho(-1, 1, -screenSize.x / screenSize.y, screenSize.x / screenSize.y, 0.1, 100);
 	Mat4f rotatedViewMatrix = Mat4f().rotate(camera.rotation.x, 1, 0, 0).rotate(camera.rotation.y, 0, 1, 0).rotate(camera.rotation.z, 0, 0, 1);
 	Mat4f viewMatrix = rotatedViewMatrix.translate(-camera.position.x, -camera.position.y, -camera.position.z);
-	Vec3 realCameraVector = Mat4().rotate(camera.rotation.x, 1, 0, 0).rotate(camera.rotation.y, 0, 1, 0).rotate(camera.rotation.z, 0, 0, 1) * Vec3(0, 0, -1);
+	Vec3 realCameraVector = Mat4().rotate(camera.rotation.x, 1, 0, 0).rotate(camera.rotation.y, 0, 1, 0).rotate(camera.rotation.z, 0, 0, 1) * Vec3(0, 0, 1);
 	Vec3f viewPosition = Vec3f(camera.position.x, camera.position.y, camera.position.z);
-
+	Vec3 ray = calcRay(handler->curPos, screenSize, &camera, viewMatrix, projectionMatrix);
+	
 	basicShader.bind();
 	basicShader.setUniform("color", Vec3f(1, 1, 1));
 	basicShader.setUniform("projectionMatrix", projectionMatrix);
@@ -220,10 +220,25 @@ void Screen::refresh() {
 
 		int meshId = physical.part.drawMeshId;
 
+
+		Vec3* buffer = new Vec3[physical.part.hitbox.vCount];
+		Shape transformed = physical.part.hitbox.localToGlobal(physical.cframe, buffer);
+		double distance = transformed.getIntersectionDistance(camera.position, (ray + realCameraVector).normalize());
+
+		if (distance < INFINITY && distance > 0)
+			basicShader.setUniform("color", Vec3f(0.6, 0.8, 0.4));
+		else
+			basicShader.setUniform("color", Vec3f(0.3, 0.4, 0.2));
+		delete[] buffer;
+
 		basicShader.setUniform("modelMatrix", transformation);
-		meshes[meshId]->render();
+		meshes[meshId]->render();    
 	}
-	
+	Log::debug("%s", str((ray + realCameraVector).normalize()).c_str());
+	Debug::logVec(camera.position, Vec3(0, 0, 1), Debug::INFO);
+	Debug::logVec(camera.position + realCameraVector, (ray + realCameraVector).normalize() * 10, Debug::INFO);
+	AppDebug::updateVecMesh(vectorMesh);
+
 	basicShader.setUniform("modelMatrix", Mat4f());
 
 	vectorShader.bind();

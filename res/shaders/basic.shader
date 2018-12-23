@@ -93,6 +93,7 @@ in vec3 fcenter;
 
 uniform mat4 viewMatrix;
 uniform vec3 viewPosition;
+uniform vec3 color;
 
 struct Attenuation {
 	float constant;
@@ -160,5 +161,5 @@ void main() {
 	vec4 lightColors = vec4(0);
 	for (int i = 0; i < lightCount; i++)
 		lightColors += calcLightColor(lights[i]);
-	outColor = material.ambient + 30 * lightColors;
+	outColor = vec4(color, 1) + 30 * lightColors;
 }

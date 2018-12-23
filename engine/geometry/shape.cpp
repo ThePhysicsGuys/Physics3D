@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <cstring>
+#include <math.h>
 
 #include "../../util/Log.h"
 
@@ -216,4 +217,46 @@ Mat3 Shape::getInertia() const {
 	}
 	
 	return total;
+}
+
+double Shape::getIntersectionDistance(Vec3 origin, Vec3 direction) {
+	const float EPSILON = 0.0000001;
+	double t = INFINITY;
+	for (Triangle triangle : iterTriangles()) {
+		Vec3 v0 = vertices[triangle.firstIndex];
+		Vec3 v1 = vertices[triangle.secondIndex];
+		Vec3 v2 = vertices[triangle.thirdIndex];
+
+		Vec3 edge1, edge2, h, s, q;
+		float a, f, u, v;
+
+		edge1 = v1 - v0;
+		edge2 = v2 - v0;
+
+		h = direction % edge2;
+		a = edge1 * h;
+
+		if (a > -EPSILON && a < EPSILON) continue;   
+		
+		f = 1.0 / a;
+		s = origin - v0;
+		u = f * (s * h);
+
+		if (u < 0.0 || u > 1.0) continue;
+		
+		q = s % edge1;
+		v = f * direction * q;
+
+		if (v < 0.0 || u + v > 1.0) continue;
+
+		double r = f * edge2 * q;
+		if (r > EPSILON) { 
+			if (r < t) t = r;
+		} else {
+			Log::debug("Line intersection but not a ray intersection");
+			continue;
+		}
+	}
+
+	return t;
 }
