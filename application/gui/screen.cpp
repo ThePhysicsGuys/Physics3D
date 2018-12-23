@@ -195,11 +195,14 @@ void Screen::update() {
 }
 
 void Screen::refresh() {
-	AppDebug::updateVecMesh(vectorMesh);
+	AddableBuffer<AppDebug::ColoredVec> vecLog = AppDebug::getVecBuffer();
 
+	// Test vector
+	vecLog.add(AppDebug::ColoredVec(Vec3(0.0, 0.0, 0.0), Vec3(1.0, 1.0, 1.0), 0.5));
+
+	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_BUFFER);
-
 
 	Mat4f projectionMatrix = Mat4f().perspective(1.0, screenSize.x / screenSize.y, 0.01, 100.0);
 	Mat4f orthoMatrix = Mat4f().ortho(-1, 1, -screenSize.x / screenSize.y, screenSize.x / screenSize.y, 0.1, 100);
@@ -225,6 +228,8 @@ void Screen::refresh() {
 	}
 	
 	basicShader.setUniform("modelMatrix", Mat4f());
+
+	vectorMesh->update((double*)vecLog.data, vecLog.index);
 
 	vectorShader.bind();
 	vectorShader.setUniform("projectionMatrix", projectionMatrix);

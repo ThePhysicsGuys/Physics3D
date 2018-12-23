@@ -27,11 +27,7 @@ bool logCall(const char* func, const char* file, int line) {
 }
 
 namespace AppDebug {
-	struct ColoredVec {
-		Vec3 origin, vec;
-		double color;
-		ColoredVec(Vec3 origin, Vec3 vec, double color) : origin(origin), vec(vec), color(color) {}
-	};
+	
 
 	SwappableBuffer<ColoredVec> buf(16);
 
@@ -78,9 +74,7 @@ namespace AppDebug {
 		Debug::setCFrameLogAction(Logging::logCFrame);
 	}
 
-	void updateVecMesh(VectorMesh* mesh) {
-		buf.lockRead();
-		mesh->update((double*)buf.readData, buf.readSize);
-		buf.unlockRead();
+	AddableBuffer<ColoredVec> getVecBuffer() {
+		return buf.getReadBuffer();
 	}
 }
