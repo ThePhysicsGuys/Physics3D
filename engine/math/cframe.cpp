@@ -26,3 +26,9 @@ CFrame operator+(const Vec3& delta, const CFrame& frame) { return CFrame(frame.p
 CFrame operator-(const CFrame& frame, const Vec3& delta) { return CFrame(frame.position - delta, frame.rotation); }
 CFrame operator-(const Vec3& delta, const CFrame& frame) { return CFrame(frame.position - delta, frame.rotation); }
 
+void CFrame::translate(Vec3 translation) {
+	position += translation;
+}
+void CFrame::rotate(RotMat3 rot) {
+	rotation = rotation*rot;
+}

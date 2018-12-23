@@ -23,11 +23,14 @@ void Physical::update(double deltaT) {
 	velocity += accel;
 	angularVelocity += rotAcc;
 
-	cframe = cframe + velocity * deltaT;
+	Vec3 movement = velocity * deltaT;
 	
 	Mat3 rotation = fromRotationVec(angularVelocity * deltaT);
 
-	cframe.rotation = cframe.rotation * rotation;
+	Vec3 relCOM = cframe.rotation * com;
+
+	cframe.translate(movement + (relCOM - rotation * relCOM));
+	cframe.rotate(rotation);
 }
 
 void Physical::applyForceAtCenterOfMass(Vec3 force) {
