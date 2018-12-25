@@ -153,9 +153,15 @@ void Screen::makeCurrent() {
 	glfwMakeContextCurrent(this->window);
 }
 
+bool updateLastVector = true;
+AppDebug::ColoredVec lastVector = {Vec3(), Vec3(), 0};
+
 void Screen::update() {
 	static int speed = 2;
 	if (handler->anyKey) {
+		if (handler->getKey(GLFW_KEY_V)) {
+			updateLastVector = false;
+		}
 		if (handler->getKey(GLFW_KEY_1)) {
 			speed = 2;
 		}
@@ -198,10 +204,7 @@ void Screen::update() {
 void Screen::refresh() {
 	AddableBuffer<AppDebug::ColoredVec> vecLog = AppDebug::getVecBuffer();
 
-	// Test vector
-	vecLog.add(AppDebug::ColoredVec(Vec3(0.0, 0.0, 0.0), Vec3(1.0, 1.0, 1.0), 0.5));
-
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_BUFFER);
 
 	Mat4f projectionMatrix = Mat4f().perspective(1.0, screenSize.x / screenSize.y, 0.01, 100.0);
@@ -238,10 +241,13 @@ void Screen::refresh() {
 		basicShader.setUniform("modelMatrix", transformation);
 		meshes[meshId]->render();    
 	}
-	Log::debug("%s", str((ray + realCameraVector).normalize()).c_str());
-	Debug::logVec(camera.position, Vec3(0, 0, 1), Debug::INFO);
-	Debug::logVec(camera.position + realCameraVector, (ray + realCameraVector).normalize() * 10, Debug::INFO);
-	AppDebug::updateVecMesh(vectorMesh);
+	//Log::debug("%s", str((ray + realCameraVector).normalize()).c_str());
+	if (!updateLastVector) {
+		lastVector = AppDebug::ColoredVec(camera.position, ray.normalize() * 10, 0.5);
+		updateLastVector = true;
+	}
+	vecLog.add(lastVector);
+	//vecLog.add(AppDebug::ColoredVec(camera.position, Vec3(0, 0, 1), 0.5));
 
 	basicShader.setUniform("modelMatrix", Mat4f());
 
