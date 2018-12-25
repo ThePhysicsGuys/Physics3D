@@ -1,5 +1,4 @@
 #include "testsMain.h"
-#include "testUtils.h"
 
 #include "../application/gui/loader.h"
 

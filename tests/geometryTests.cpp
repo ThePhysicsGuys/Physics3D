@@ -1,5 +1,4 @@
 #include "testsMain.h"
-#include "testUtils.h"
 
 #include "../engine/math/mat3.h"
 #include "../engine/math/vec3.h"
@@ -11,6 +10,8 @@
 #include "../util/log.h"
 
 #include "../application/objectLibrary.h"
+
+#define ASSERT(condition) ASSERT_TOLERANT(condition, 0.00000001)
 
 TEST_CASE(basicShapes) {
 	BoundingBox b{ -1, -1, -1, 1, 1, 1 };
@@ -81,13 +82,13 @@ TEST_CASE(cubeContainsPoint) {
 	Vec3 buf[8];
 	Shape cube = BoundingBox{0,0,0,1,1,1}.toShape(buf);
 
-	ASSERT(cube.containsPoint(Vec3(0.2, 0.2, 0.2)));
-	ASSERT(cube.containsPoint(Vec3(0.2, 0.2, 0.8)));
-	ASSERT(cube.containsPoint(Vec3(0.2, 0.9, 0.2)));
-	ASSERT(cube.containsPoint(Vec3(0.7, 0.2, 0.2)));
+	ASSERT_TRUE(cube.containsPoint(Vec3(0.2, 0.2, 0.2)));
+	ASSERT_TRUE(cube.containsPoint(Vec3(0.2, 0.2, 0.8)));
+	ASSERT_TRUE(cube.containsPoint(Vec3(0.2, 0.9, 0.2)));
+	ASSERT_TRUE(cube.containsPoint(Vec3(0.7, 0.2, 0.2)));
 
-	ASSERT(!cube.containsPoint(Vec3(1.2, 0.2, 0.2)));
-	ASSERT(!cube.containsPoint(Vec3(1.2, 1.2, 0.2)));
-	ASSERT(!cube.containsPoint(Vec3(1.2, 1.2, 1.2)));
-	ASSERT(!cube.containsPoint(Vec3(-0.2, -0.2, -0.2)));
+	ASSERT_FALSE(cube.containsPoint(Vec3(1.2, 0.2, 0.2)));
+	ASSERT_FALSE(cube.containsPoint(Vec3(1.2, 1.2, 0.2)));
+	ASSERT_FALSE(cube.containsPoint(Vec3(1.2, 1.2, 1.2)));
+	ASSERT_FALSE(cube.containsPoint(Vec3(-0.2, -0.2, -0.2)));
 }

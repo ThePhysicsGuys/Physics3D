@@ -91,3 +91,5 @@ TestAdder::TestAdder(const char* file, const char* name, void(*f)()) {
 
 	tests->push_back(Test(file, name, f));
 }
+
+

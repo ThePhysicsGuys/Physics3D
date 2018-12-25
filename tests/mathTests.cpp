@@ -1,5 +1,4 @@
 #include "testsMain.h"
-#include "testUtils.h"
 
 #include "../engine/math/mat3.h"
 #include "../engine/math/mathUtil.h"
@@ -7,28 +6,17 @@
 
 Mat3 IDENTITY = Mat3(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0);
 
-// tolerant assert
-//#define DELTA 0.00000001
-//#define TASSERT(condition) ASSERT(condition, DELTA);
-
-TEST_CASE(correctTest) {
-	float a = 3.7;
-	int b = 7;
-	ASSERT(a <= b);
-
-	ASSERT(1.0 == 1.000005, 0.0005);
-	// ASSERT(1.0 == 1.000005, 0.0000005);
-}
+#define ASSERT(condition) ASSERT_TOLERANT(condition, 0.00000001)
 
 TEST_CASE(matrixInv) {
 	Mat3 m(100.0, 0.0, 0.0, 0.0, 50.0, 0.0, 0.0, 0.0, 1.0);
 
 	// Log::debug("m=%s\n~m=%s\nm.inverse()=%s\nm.det()=%f", str(m).c_str(), str(~m).c_str(), str(m.inverse()).c_str(), m.det());
 
-	ASSERT(m.det() == 5000, 0.00000001);
+	ASSERT(m.det() == 5000.0);
 
-	ASSERT(m * ~m == IDENTITY, 0.00000001);
-	ASSERT(~m * m == IDENTITY, 0.00000001);
+	ASSERT(m * ~m == IDENTITY);
+	ASSERT(~m * m == IDENTITY);
 }
 
 TEST_CASE(testFromRotationVec) {
