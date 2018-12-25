@@ -17,7 +17,7 @@ private:
 	void scrollCallback(double xOffset, double yOffset);
 	void mouseButtonCallback(int button, int action, int mods);
 	void windowSizeCallback(int width, int height);
-
+	void framebufferSizeCallback(int width, int height);
 public:
 	InputHandler(GLFWwindow* window);
 	char anyKey = 0;
@@ -35,5 +35,6 @@ public:
 	virtual void mouseExit() {};
 	virtual void scroll(double xOffset, double yOffset) {};
 	virtual void windowResize(int width, int height) {};
+	virtual void framebufferResize(int width, int height) {};
 };
 

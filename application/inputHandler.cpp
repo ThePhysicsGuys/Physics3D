@@ -51,6 +51,10 @@ void InputHandler::windowSizeCallback(int width, int height) {
 	windowResize(width, height);
 }
 
+void InputHandler::framebufferSizeCallback(int width, int height) {
+	framebufferResize(width, height);
+}
+
 Vec2 InputHandler::getMousePos() {
 	double x, y;
 	glfwGetCursorPos(window, &x, &y);
@@ -82,5 +86,9 @@ InputHandler::InputHandler(GLFWwindow* window) : window(window){
 
 	glfwSetWindowSizeCallback(window, [] (GLFWwindow* window, int width, int height) {
 		static_cast<InputHandler*>(glfwGetWindowUserPointer(window))->windowSizeCallback(width, height);
+	});
+
+	glfwSetFramebufferSizeCallback(window, [] (GLFWwindow* window, int width, int height) {
+		static_cast<InputHandler*>(glfwGetWindowUserPointer(window))->framebufferSizeCallback(width, height);
 	});
 }
