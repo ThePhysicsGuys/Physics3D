@@ -100,13 +100,27 @@ public:
 
 	AddableBuffer(const AddableBuffer&) = delete;
 	AddableBuffer& operator=(const AddableBuffer&) = delete;
-	AddableBuffer(AddableBuffer&& buf) : capacity(buf.capacity), index(buf.index), data(buf.data) { buf.data = nullptr; }
-	AddableBuffer& operator=(AddableBuffer&& buf) {
-		this->data = buf.data;
-		this->index = buf.index;
+	AddableBuffer(AddableBuffer&& buf) {
+		size_t oldCapacity = capacity;
+		size_t oldIndex = index;
+		T* oldData = data;
 		this->capacity = buf.capacity;
-		buf.data = nullptr;
-		return *this;
+		this->index = buf.index;
+		this->data = buf.data;
+		buf.capacity = oldCapacity;
+		buf.index = oldIndex;
+		buf.data = oldData;
+	}
+	AddableBuffer& operator=(AddableBuffer&& buf) {
+		size_t oldCapacity = capacity;
+		size_t oldIndex = index;
+		T* oldData = data;
+		this->capacity = buf.capacity;
+		this->index = buf.index;
+		this->data = buf.data;
+		buf.capacity = oldCapacity;
+		buf.index = oldIndex;
+		buf.data = oldData;
 	}
 	
 	void add(const T& obj) {
