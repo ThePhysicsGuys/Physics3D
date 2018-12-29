@@ -5,8 +5,10 @@
 
 #include "debug.h"
 
+
+
 Physical::Physical(Part p, CFrame cframe) : part(p), cframe(cframe), mass(p.hitbox.getVolume() * p.properties.density), 
-											inertia(p.hitbox.getInertia() * p.properties.density), com(p.hitbox.getCenterOfMass()) {}
+											com(p.hitbox.getCenterOfMass()), inertia(p.hitbox.getInertia(com) * p.properties.density) {}
 
 void Physical::update(double deltaT) {
 	Vec3 accel = totalForce * (deltaT/mass);

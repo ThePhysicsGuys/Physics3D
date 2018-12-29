@@ -11,7 +11,10 @@ public:
 	Vec3 position;
 	Mat3 rotation;
 
-	CFrame(Vec3 position, Mat3 rotation) : position(position), rotation(rotation) {};
+	CFrame(Vec3 position, Mat3 rotation) : position(position), rotation(rotation) {}
+	CFrame(Vec3 position) : position(position), rotation(Mat3(1, 0, 0, 0, 1, 0, 0, 0, 1)) {}
+	CFrame(Mat3 rotation) : position(Vec3(0,0,0)), rotation(rotation) {}
+	CFrame() : position(Vec3(0, 0, 0)), rotation(Mat3(1, 0, 0, 0, 1, 0, 0, 0, 1)) {}
 
 	Mat4 asMat4() const;
 	Mat4f asMat4f() const;

@@ -52,6 +52,9 @@ struct Shape {
 	double getVolume() const;
 	Vec3 getCenterOfMass() const;
 	Mat3 getInertia() const;
+	Mat3 getInertia(Vec3 reference) const;
+	Mat3 getInertia(Mat3 reference) const;
+	Mat3 getInertia(CFrame reference) const;
 
 	bool containsPoint(Vec3 point) const;
 	Vec3 getNormalVecOfTriangle(Triangle t) const;

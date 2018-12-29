@@ -179,12 +179,12 @@ Vec3 Shape::getCenterOfMass() const {
 
 	This has been reworked to a surface integral resulting in the given formulae
 */
-Mat3 Shape::getInertia() const {
+Mat3 Shape::getInertia(CFrame reference) const {
 	Mat3 total = Mat3(0, 0, 0, 0, 0, 0, 0, 0, 0);
 	for (Triangle t: iterTriangles()) {
-		Vec3 v0 = vertices[t.firstIndex];
-		Vec3 v1 = vertices[t.secondIndex];
-		Vec3 v2 = vertices[t.thirdIndex];
+		Vec3 v0 = reference.globalToLocal(vertices[t.firstIndex]);
+		Vec3 v1 = reference.globalToLocal(vertices[t.secondIndex]);
+		Vec3 v2 = reference.globalToLocal(vertices[t.thirdIndex]);
 
 		Vec3 D1 = v1 - v0;
 		Vec3 D2 = v2 - v0;
@@ -217,6 +217,18 @@ Mat3 Shape::getInertia() const {
 	}
 	
 	return total;
+}
+
+Mat3 Shape::getInertia(Vec3 reference) const {
+	return this->getInertia(CFrame(reference));
+}
+
+Mat3 Shape::getInertia(Mat3 reference) const {
+	return this->getInertia(CFrame(reference));
+}
+
+Mat3 Shape::getInertia() const {
+	return this->getInertia(CFrame());
 }
 
 double Shape::getIntersectionDistance(Vec3 origin, Vec3 direction) {
