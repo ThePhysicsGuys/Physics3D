@@ -8,9 +8,10 @@ StandardInputHandler::StandardInputHandler(GLFWwindow* window, Screen* screen, C
 }
 
 void StandardInputHandler::framebufferResize(int width, int height) {
-	int left, top, right, bottom;
+	/*int left, top, right, bottom;
 	glfwGetWindowFrameSize(window, &left, &top, &right, &bottom);
-	glViewport(left, bottom, width - right, height - top);
+	glViewport(left, bottom, width - right, height - top);*/
+	glViewport(0, 0, width, height);
 	screen->screenSize = Vec2(width, height);
 }
 

@@ -10,7 +10,7 @@ TEST_CASE(volumeApproximation) {
 
 	BoundingBox b = s.getBounds();
 
-	int sampleCount = 100;
+	int sampleCount = 1;
 
 	double dx = (b.xmax - b.xmin) / sampleCount;
 	double dy = (b.ymax - b.ymin) / sampleCount;
@@ -42,7 +42,7 @@ TEST_CASE(centerOfMassApproximation) {
 
 	BoundingBox b = s.getBounds();
 
-	int sampleCount = 100;
+	int sampleCount = 1;
 
 	double dx = (b.xmax - b.xmin) / sampleCount;
 	double dy = (b.ymax - b.ymin) / sampleCount;
@@ -77,7 +77,7 @@ TEST_CASE(inertiaApproximation) {
 
 	BoundingBox b = s.getBounds();
 
-	int sampleCount = 100;
+	int sampleCount = 1;
 
 	double dx = (b.xmax - b.xmin) / sampleCount;
 	double dy = (b.ymax - b.ymin) / sampleCount;

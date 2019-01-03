@@ -2,6 +2,7 @@
 
 #include "mat3.h"
 #include "mat4.h"
+#include "vec4.h"
 #include "vec3.h"
 #include "vec2.h"
 
@@ -59,6 +60,20 @@ std::string str(const Mat3Template<N>& matrix) {
 
 	return ss.str();
 }
+
+template<typename N>
+std::ostream& operator<<(std::ostream& os, const Vec4Template<N>& vector) {
+	os << "Vec4Template(" << vector.x << ", " << vector.y << ", " << vector.z << ", " << vector.w << ")";
+	return os;
+}
+
+template<typename N>
+std::string str(const Vec4Template<N>& vector) {
+	std::stringstream ss;
+	ss << "Vec4Template(" << vector.x << ", " << vector.y << ", " << vector.z << ", " << vector.w << ")";
+	return ss.str();
+}
+
 
 template<typename N>
 std::ostream& operator<<(std::ostream& os, const Vec3Template<N>& vector) {

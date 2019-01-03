@@ -265,7 +265,7 @@ double Shape::getIntersectionDistance(Vec3 origin, Vec3 direction) {
 		if (r > EPSILON) { 
 			if (r < t) t = r;
 		} else {
-			Log::debug("Line intersection but not a ray intersection");
+			//Log::debug("Line intersection but not a ray intersection");
 			continue;
 		}
 	}

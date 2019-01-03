@@ -2,6 +2,13 @@
 
 #include "../engine/math/vec3.h"
 #include "buffers.h"
+#include "../util/log.h"
+
+#include <time.h>
+
+#ifndef speedtest__             
+#define speedtest__(data)   for (long blockTime = NULL; (blockTime == NULL ? (blockTime = clock()) != NULL : false); Log::info("%s %.9fs", data, (double) (clock() - blockTime) / CLOCKS_PER_SEC))
+#endif
 
 #define ASSERT(x) if (!(x)) __debugbreak();
 #define glCall(x) clearError(); x; ASSERT(logCall(#x, __FILE__, __LINE__));

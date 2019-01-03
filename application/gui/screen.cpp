@@ -202,6 +202,7 @@ void Screen::update() {
 }
 
 void Screen::refresh() {
+
 	AddableBuffer<AppDebug::ColoredVec> vecLog = AppDebug::getVecBuffer();
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -213,7 +214,7 @@ void Screen::refresh() {
 	Mat4f viewMatrix = rotatedViewMatrix.translate(-camera.position.x, -camera.position.y, -camera.position.z);
 	Vec3 realCameraVector = Mat4().rotate(camera.rotation.x, 1, 0, 0).rotate(camera.rotation.y, 0, 1, 0).rotate(camera.rotation.z, 0, 0, 1) * Vec3(0, 0, 1);
 	Vec3f viewPosition = Vec3f(camera.position.x, camera.position.y, camera.position.z);
-	Vec3 ray = calcRay(handler->curPos, screenSize, &camera, viewMatrix, projectionMatrix);
+	Vec3 ray = calcRay(handler->curPos, screenSize, &camera, rotatedViewMatrix, projectionMatrix);
 	
 	basicShader.bind();
 	basicShader.setUniform("color", Vec3f(1, 1, 1));
@@ -227,10 +228,9 @@ void Screen::refresh() {
 
 		int meshId = physical.part.drawMeshId;
 
-
 		Vec3* buffer = new Vec3[physical.part.hitbox.vCount];
 		Shape transformed = physical.part.hitbox.localToGlobal(physical.cframe, buffer);
-		double distance = transformed.getIntersectionDistance(camera.position, (ray + realCameraVector).normalize());
+		double distance = transformed.getIntersectionDistance(camera.position, ray);
 
 		if (distance < INFINITY && distance > 0)
 			basicShader.setUniform("color", Vec3f(0.6, 0.8, 0.4));
@@ -241,13 +241,12 @@ void Screen::refresh() {
 		basicShader.setUniform("modelMatrix", transformation);
 		meshes[meshId]->render();    
 	}
-	//Log::debug("%s", str((ray + realCameraVector).normalize()).c_str());
+
 	if (!updateLastVector) {
 		lastVector = AppDebug::ColoredVec(camera.position, ray.normalize() * 10, 0.5);
 		updateLastVector = true;
 	}
 	vecLog.add(lastVector);
-	//vecLog.add(AppDebug::ColoredVec(camera.position, Vec3(0, 0, 1), 0.5));
 
 	basicShader.setUniform("modelMatrix", Mat4f());
 
