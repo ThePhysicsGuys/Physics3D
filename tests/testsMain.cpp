@@ -28,12 +28,16 @@ public:
 			Log::info("Running %s:%s", fileName, func);
 			f();
 		} catch (AssertionError& e) {
+
+			// on my machine this crashes when inFile.good() is tested right after inFile is created,
+			// but when there's a little delay (the error print) it works. I've got no good explanation. 
+			// I've got no idea, but it works, so I'm leaving it at that
+
+			std::ifstream inFile(file);
 			Log::error("An assertion was incorrect at line %d:", e.line);
 
-			std::ifstream inFile;
-			inFile.open(file);
-			if (!inFile) {
-				Log::error("Could not open File %s for debugging:(");
+			if (!inFile.good()) {
+				Log::error("Could not open File %s for debugging :(", file);
 				return;
 			}
 
@@ -48,12 +52,15 @@ public:
 				printf("%d: %s", e.line - 2 + i, s.c_str());
 				if (i == 2) {
 					Log::setColor(14);
-					std::cout << "  >>>>  " << e.what();
+					std::cout << "  <<<<";
 					Log::setColor(15);
 				}
 				std::cout << std::endl;
 			}
 
+			Log::setColor(14);
+			std::cout << " >>>> " << e.what() << std::endl;
+			Log::setColor(15);
 
 		} catch (std::exception& e) {
 			Log::error("An general error was thrown: %s", e.what());
