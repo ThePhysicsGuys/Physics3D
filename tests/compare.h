@@ -107,3 +107,15 @@ bool tolerantNotEquals(const Vec4Template<Num1>& first, const Vec4Template<Num2>
 		tolerantNotEquals(first.z, second.z, tolerance) ||
 		tolerantNotEquals(first.w, second.w, tolerance);
 }
+
+template<typename Tol>
+bool tolerantEquals(const CFrame& first, const CFrame& second, Tol tolerance) {
+	return tolerantEquals(first.position, second.position, tolerance) &&
+		tolerantEquals(first.rotation, second.rotation, tolerance);
+}
+
+template<typename Tol>
+bool tolerantNotEquals(const CFrame& first, const CFrame& second, Tol tolerance) {
+	return tolerantNotEquals(first.position, second.position, tolerance) ||
+		tolerantNotEquals(first.rotation, second.rotation, tolerance);
+}

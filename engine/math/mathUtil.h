@@ -9,8 +9,8 @@
 #include <sstream>
 
 template<typename N>
-std::ostream& operator<<(std::ostream& os, const Mat4Template<N>& matrix) {
-	os << "Mat4Template(\n\t";
+inline std::ostream& operator<<(std::ostream& os, const Mat4Template<N>& matrix) {
+	os << "Mat4(\n\t";
 	for (int i = 0; i < 15; i++) {
 		os << matrix.m[i];
 		os << (((i + 1) % 4 == 0) ? ";\n\t" : ", ");
@@ -21,21 +21,15 @@ std::ostream& operator<<(std::ostream& os, const Mat4Template<N>& matrix) {
 }
 
 template<typename N>
-std::string str(const Mat4Template<N>& matrix) {
+inline std::string str(const Mat4Template<N>& matrix) {
 	std::stringstream ss;
-	ss << "Mat4Template(\n\t";
-	for (int i = 0; i < 15; i++) {
-		ss << matrix.m[i];
-		ss << (((i + 1) % 4 == 0) ? ";\n\t" : ", ");
-	}
-	ss << matrix.m[15] << ")";
-
+	ss << matrix;
 	return ss.str();
 }
 
 template<typename N>
-std::ostream& operator<<(std::ostream& os, const Mat3Template<N>& matrix) {
-	os << "Mat3Template(\n\t";
+inline std::ostream& operator<<(std::ostream& os, const Mat3Template<N>& matrix) {
+	os << "Mat3(\n\t";
 
 	for (int i = 0; i < 8; i++) {
 		os << matrix.m[i];
@@ -47,41 +41,38 @@ std::ostream& operator<<(std::ostream& os, const Mat3Template<N>& matrix) {
 }
 
 template<typename N>
-std::string str(const Mat3Template<N>& matrix) {
+inline std::string str(const Mat3Template<N>& matrix) {
 	std::stringstream ss;
-	ss << "Mat3Template(\n\t";
-
-	for (int i = 0; i < 8; i++) {
-		ss << matrix.m[i];
-		ss << (((i + 1) % 3 == 0) ? ";\n\t" : ", ");
-	}
-	ss << matrix.m[8] << ")";
-
+	ss << matrix;
 	return ss.str();
 }
 
 template<typename N>
-std::ostream& operator<<(std::ostream& os, const Vec3Template<N>& vector) {
-	os << "Vec3Template(" << vector.x << ", " << vector.y << ", " << vector.z << ")";
+inline std::ostream& operator<<(std::ostream& os, const Vec3Template<N>& vector) {
+	os << "Vec3(" << vector.x << ", " << vector.y << ", " << vector.z << ")";
 	return os;
 }
 
 template<typename N>
-std::string str(const Vec3Template<N>& vector) {
+inline std::string str(const Vec3Template<N>& vector) {
 	std::stringstream ss;
-	ss << "Vec3Template(" << vector.x << ", " << vector.y << ", " << vector.z << ")";
+	ss << vector;
 	return ss.str();
 }
 
 template<typename N>
-std::ostream& operator<<(std::ostream& os, const Vec2Template<N>& vector) {
-	os << "Vec2Template(" << vector.x << ", " << vector.y << ")";
+inline std::ostream& operator<<(std::ostream& os, const Vec2Template<N>& vector) {
+	os << "Vec2(" << vector.x << ", " << vector.y << ")";
 	return os;
 }
 
 template<typename N>
-std::string str(const Vec2Template<N>& vector) {
+inline std::string str(const Vec2Template<N>& vector) {
 	std::stringstream ss;
-	ss << "Vec2Template(" << vector.x << ", " << vector.y << ")";
+	ss << vector;
 	return ss.str();
 }
+
+
+std::ostream& operator<<(std::ostream& os, const CFrame& cframe);
+std::string str(const CFrame& cframe);
