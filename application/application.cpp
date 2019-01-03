@@ -21,6 +21,8 @@
 #include "../engine/geometry/shape.h"
 #include "../engine/geometry/managedShape.h"
 #include "../engine/part.h"
+#include "../engine/world.h"
+#include "worlds.h"
 
 #include "debug.h"
 
@@ -32,7 +34,7 @@
 
 
 Screen screen;
-World world;
+GravityFloorWorld world(Vec3(0.0, -10.0, 0.0));
 
 TickerThread physicsThread;
 

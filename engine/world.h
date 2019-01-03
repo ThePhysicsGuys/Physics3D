@@ -6,6 +6,9 @@
 #include <mutex>
 
 class World {
+private:
+	size_t getTotalVertexCount();
+
 public:
 	std::vector<Physical> physicals;
 	std::mutex lock;
@@ -20,5 +23,5 @@ public:
 	void tick(double deltaT);
 	void addObject(Physical p);
 
-
+	virtual void applyExternalForces(const Shape* transformedShapes);
 };
