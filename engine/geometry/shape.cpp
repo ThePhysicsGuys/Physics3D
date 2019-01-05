@@ -169,6 +169,13 @@ Vec3 Shape::getCenterOfMass() const {
 	return total / (24*getVolume());
 }
 
+Vec4 Shape::getCircumscribedSphere() const {
+	BoundingBox bounds = getBounds();
+	Vec3 center = Vec3(bounds.xmax - bounds.xmin, bounds.ymax - bounds.ymin, bounds.zmax - bounds.zmin) / 2.0;
+	double radius = (Vec3(bounds.xmax, bounds.ymax, bounds.zmax) - center).length();
+	return Vec4(center.x, center.y, center.z, radius);
+}
+
 /*
 	The total inertial matrix is given by the integral over the volume of the shape of the following matrix:
 	[[

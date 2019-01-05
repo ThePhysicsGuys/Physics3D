@@ -4,6 +4,7 @@ struct Triangle;
 struct Shape;
 
 #include "../math/vec3.h"
+#include "../math/vec4.h"
 #include "../math/mat3.h"
 #include "../math/cframe.h"
 #include "boundingBox.h"
@@ -55,6 +56,8 @@ struct Shape {
 	Mat3 getInertia(Vec3 reference) const;
 	Mat3 getInertia(Mat3 reference) const;
 	Mat3 getInertia(CFrame reference) const;
+
+	Vec4 getCircumscribedSphere() const;
 
 	bool containsPoint(Vec3 point) const;
 	Vec3 getNormalVecOfTriangle(Triangle t) const;

@@ -12,7 +12,7 @@ Vec2 getNormalizedDeviceSpacePosition(Vec2 viewportSpacePosition, Vec2 screenSiz
 	return Vec2(x, -y);
 }
 
-Vec3 calcRay(Vec2 mousePosition, Vec2 screenSize, Camera* camera, Mat4f viewMatrix, Mat4f projectionMatrix) {
+Vec3 calcRay(Vec2 mousePosition, Vec2 screenSize, Mat4f viewMatrix, Mat4f projectionMatrix) {
 	viewMatrix = viewMatrix.transpose();
 	Vec2 normalizedDeviceSpacePosition = getNormalizedDeviceSpacePosition(mousePosition, screenSize);
 	Vec4f clipSpacePosition = Vec4f(normalizedDeviceSpacePosition.x, normalizedDeviceSpacePosition.y, -1.0f, 1.0f);

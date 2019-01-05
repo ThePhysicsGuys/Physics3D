@@ -25,6 +25,7 @@
 #include <fstream>
 #include <sstream>
 #include <math.h>
+#include <map>
 
 World* curWorld = NULL;
 Vec2 screenSize;
@@ -156,7 +157,19 @@ void Screen::makeCurrent() {
 bool updateLastVector = true;
 AppDebug::ColoredVec lastVector = {Vec3(), Vec3(), 0};
 
+// To be moved elsewhere
+Mat4f projectionMatrix;
+Mat4f orthoMatrix;
+Mat4f rotatedViewMatrix;
+Mat4f viewMatrix;
+Vec3f viewPosition;
+
+// To be moved elsewhere
+Physical* closestIntersect = nullptr;
+
 void Screen::update() {
+
+	// IO events
 	static int speed = 2;
 	if (handler->anyKey) {
 		if (handler->getKey(GLFW_KEY_V)) {
@@ -199,6 +212,29 @@ void Screen::update() {
 			camera.rotate(speed, 0, 0);
 		}
 	}
+
+	// Matrix calculations
+	projectionMatrix = Mat4f().perspective(1.0, screenSize.x / screenSize.y, 0.01, 100000.0);
+	orthoMatrix = Mat4f().ortho(-1, 1, -screenSize.x / screenSize.y, screenSize.x / screenSize.y, 0.1, 100);
+	rotatedViewMatrix = Mat4f().rotate(camera.rotation.x, 1, 0, 0).rotate(camera.rotation.y, 0, 1, 0).rotate(camera.rotation.z, 0, 0, 1);
+	viewMatrix = rotatedViewMatrix.translate(-camera.position.x, -camera.position.y, -camera.position.z);
+	viewPosition = Vec3f(camera.position.x, camera.position.y, camera.position.z);
+
+	// Mouse picker update
+	double closestIntersectDistance = INFINITY;
+	Vec3 ray = calcRay(handler->curPos, screenSize, rotatedViewMatrix, projectionMatrix);
+	for (Physical& physical : world->physicals) {
+		Vec3* buffer = new Vec3[physical.part.hitbox.vCount];
+		Shape transformed = physical.part.hitbox.localToGlobal(physical.cframe, buffer);
+		double distance = transformed.getIntersectionDistance(camera.position, ray);
+		if (distance < closestIntersectDistance && distance > 0) {
+			closestIntersectDistance = distance;
+			closestIntersect = &physical;
+		}
+		delete[] buffer;
+	}
+	if (closestIntersectDistance == INFINITY)
+		closestIntersect = nullptr;
 }
 
 void Screen::refresh() {
@@ -208,14 +244,6 @@ void Screen::refresh() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_BUFFER);
 
-	Mat4f projectionMatrix = Mat4f().perspective(1.0, screenSize.x / screenSize.y, 0.01, 100000.0);
-	Mat4f orthoMatrix = Mat4f().ortho(-1, 1, -screenSize.x / screenSize.y, screenSize.x / screenSize.y, 0.1, 100);
-	Mat4f rotatedViewMatrix = Mat4f().rotate(camera.rotation.x, 1, 0, 0).rotate(camera.rotation.y, 0, 1, 0).rotate(camera.rotation.z, 0, 0, 1);
-	Mat4f viewMatrix = rotatedViewMatrix.translate(-camera.position.x, -camera.position.y, -camera.position.z);
-	Vec3 realCameraVector = Mat4().rotate(camera.rotation.x, 1, 0, 0).rotate(camera.rotation.y, 0, 1, 0).rotate(camera.rotation.z, 0, 0, 1) * Vec3(0, 0, 1);
-	Vec3f viewPosition = Vec3f(camera.position.x, camera.position.y, camera.position.z);
-	Vec3 ray = calcRay(handler->curPos, screenSize, &camera, rotatedViewMatrix, projectionMatrix);
-	
 	basicShader.bind();
 	basicShader.setUniform("color", Vec3f(1, 1, 1));
 	basicShader.setUniform("projectionMatrix", projectionMatrix);
@@ -223,20 +251,17 @@ void Screen::refresh() {
 	basicShader.setUniform("viewPosition", viewPosition);
 	
 	// Render world objects
-	for (Physical physical : world->physicals) {
+	for (Physical& physical : world->physicals) {
 		Mat4f transformation = physical.cframe.asMat4f();
+		
+		if (closestIntersect != nullptr)
+			Log::debug("%s", str(closestIntersect->com).c_str());
 
 		int meshId = physical.part.drawMeshId;
-
-		Vec3* buffer = new Vec3[physical.part.hitbox.vCount];
-		Shape transformed = physical.part.hitbox.localToGlobal(physical.cframe, buffer);
-		double distance = transformed.getIntersectionDistance(camera.position, ray);
-
-		if (distance < INFINITY && distance > 0)
+		if (&physical == closestIntersect)
 			basicShader.setUniform("color", Vec3f(0.6, 0.8, 0.4));
 		else
 			basicShader.setUniform("color", Vec3f(0.3, 0.4, 0.2));
-		delete[] buffer;
 
 		basicShader.setUniform("modelMatrix", transformation);
 		meshes[meshId]->render();    
