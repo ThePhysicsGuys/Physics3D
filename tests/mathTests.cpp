@@ -11,7 +11,7 @@ Mat3 IDENTITY = Mat3(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0);
 TEST_CASE(matrixInv) {
 	Mat3 m(100.0, 0.0, 0.0, 0.0, 50.0, 0.0, 0.0, 0.0, 1.0);
 
-	// Log::debug("m=%s\n~m=%s\nm.inverse()=%s\nm.det()=%f", str(m).c_str(), str(~m).c_str(), str(m.inverse()).c_str(), m.det());
+	logf("m=%s\n~m=%s\nm.inverse()=%s\nm.det()=%f", str(m).c_str(), str(~m).c_str(), str(m.inverse()).c_str(), m.det());
 
 	ASSERT(m.det() == 5000.0);
 
@@ -30,6 +30,6 @@ TEST_CASE(testFromRotationVec) {
 
 	Vec3 newPoint2 = fromRotV * pointToRotate;
 
-	Log::debug("rotVec: %s, rotMat: %s", str(rotationVec).c_str(), str(fromRotV).c_str());
-	Log::debug("\nnewPointRotVec: %s\nnewPointRotMat: %s", str(newPoint).c_str(), str(newPoint2).c_str());
+	logf("rotVec: %s, rotMat: %s", str(rotationVec).c_str(), str(fromRotV).c_str());
+	logf("\nnewPointRotVec: %s\nnewPointRotMat: %s", str(newPoint).c_str(), str(newPoint2).c_str());
 }

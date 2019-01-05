@@ -31,12 +31,12 @@ TEST_CASE(shapeVolume) {
 
 	Shape transformedShape = boxShape.localToGlobal(transform, vecBuf2);
 
-	Log::debug("Box Volume: %.20f", boxShape.getVolume());
-	Log::debug("Box Volume2: %.20f", transformedShape.getVolume());
+	logf("Box Volume: %.20f", boxShape.getVolume());
+	logf("Box Volume2: %.20f", transformedShape.getVolume());
 
-	Log::debug("Triangle Volume: %.20f", triangleShape.getVolume());
+	logf("Triangle Volume: %.20f", triangleShape.getVolume());
 
-	Log::debug("Icosahedron Volume: %.20f", icosahedron.getVolume());
+	logf("Icosahedron Volume: %.20f", icosahedron.getVolume());
 }
 
 TEST_CASE(shapeCenterOfMass) {
@@ -50,8 +50,8 @@ TEST_CASE(shapeCenterOfMass) {
 
 	Shape transformedShape = boxShape.localToGlobal(transform, vecBuf2);
 	
-	Log::debug("Center Of Mass Box: %s", str(boxShape.getCenterOfMass()).c_str());
-	Log::debug("Center Of Mass Transformed Box: %s", str(transformedShape.getCenterOfMass()).c_str());
+	logf("Center Of Mass Box: %s", str(boxShape.getCenterOfMass()).c_str());
+	logf("Center Of Mass Transformed Box: %s", str(transformedShape.getCenterOfMass()).c_str());
 }
 
 TEST_CASE(shapeInertiaMatrix) {
@@ -67,15 +67,15 @@ TEST_CASE(shapeInertiaMatrix) {
 	CFrame transform = CFrame(Vec3(0,0,0), fromEulerAngles(0.7, 0.2, 0.3));
 	Shape transformedShape = boxShape.localToGlobal(transform, vecBuf2);
 
-	Log::debug("Inertia of Box: %s", str(boxShape.getInertia()).c_str());
+	logf("Inertia of Box: %s", str(boxShape.getInertia()).c_str());
 
-	Log::debug("Inertia of transformed Box: %s", str(transformedShape.getInertia()).c_str());
+	logf("Inertia of transformed Box: %s", str(transformedShape.getInertia()).c_str());
 
 	Shape h = house;
 	Shape newHouse = house.translated(-house.getCenterOfMass(), houseVecBuf);
 	Shape rotatedHouse = newHouse.rotated(fromEulerAngles(0.0, 0.3, 0.0), houseVecBuf2);
-	Log::debug("Inertia of House: %s", str(newHouse.getInertia()).c_str());
-	Log::debug("Inertia of Rotated House: %s", str(rotatedHouse.getInertia()).c_str());
+	logf("Inertia of House: %s", str(newHouse.getInertia()).c_str());
+	logf("Inertia of Rotated House: %s", str(rotatedHouse.getInertia()).c_str());
 }
 
 TEST_CASE(cubeContainsPoint) {

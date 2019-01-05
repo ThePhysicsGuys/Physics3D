@@ -19,6 +19,8 @@ public:
 	const char* what() const throw();
 };
 
+extern std::stringstream logStream;
+void logf(const char* format, ...);
 
 // Testing utils:
 
@@ -114,7 +116,6 @@ struct TolerantAssertBuilder {
 #define ASSERT_TOLERANT(condition, tolerance) ~(TolerantAssertBuilder<decltype(tolerance)>(__LINE__, tolerance) < condition)
 #define ASSERT_TRUE(condition) if(!(condition)) throw AssertionError(__LINE__, "False")
 #define ASSERT_FALSE(condition) if(condition) throw AssertionError(__LINE__, "True")
-
 
 #define PREV_VAL_NAME __JOIN(____previousValue, __LINE__)
 #define ISFILLED_NAME __JOIN(____isFilled, __LINE__)

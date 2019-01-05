@@ -11,28 +11,6 @@
 #include <string>
 #include <vector>
 
-std::vector<std::string> split(std::string &string, char splitter) {
-	std::vector<std::string> elements;
-	int length = string.length();
-	int start = 0;
-	for (int i = 0; i < length; i++) {
-		if (string[i] == splitter) {
-			if (i != start) elements.push_back(string.substr(start, i - start));
-			start = i + 1;
-		}
-	}
-	if (start < length) elements.push_back(string.substr(start, length - start));
-	return elements;
-}
-
-TEST_CASE(splitTest) {
-	std::string testString = "/this is/a test /";
-	std::vector<std::string> testVector = split(testString, '/');
-	for (std::string s : testVector) {
-		Log::fatal("%s", s.c_str());
-	}
-}
-
 TEST_CASE(transformationTest) {
 	Mat4f viewMatrix = Mat4f();
 	Mat4f projectionMatrix = Mat4f().perspective(1, 2, 0.1, 100);
@@ -44,5 +22,5 @@ TEST_CASE(transformationTest) {
 	Vec4f transformedPoint = projectionMatrix * viewMatrix * point;
 	Vec4f transformedBack = inverseViewMatrix * inverseProjectionMatrix * transformedPoint;
 
-	ASSERT_TOLERANT(point == transformedBack, 0.00000001);
+	ASSERT_TOLERANT(point == transformedBack, 0.000001);
 }
