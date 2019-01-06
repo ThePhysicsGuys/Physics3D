@@ -88,7 +88,7 @@ unsigned int createShader(const std::string& vertexShader, const std::string& fr
 
 	glCall(glAttachShader(program, vs));
 	glCall(glAttachShader(program, fs));
-	if (!geometryShader.empty())
+	if (!geometryShader.empty()) 
 		glCall(glAttachShader(program, gs));
 
 	glCall(glLinkProgram(program));
@@ -141,7 +141,7 @@ ShaderSource parseShader(const std::string& vertexPath, const std::string& fragm
 }
 
 ShaderSource parseShader(std::istream& shaderTextStream, const std::string name) {
-	Log::info("Started parsing vertex, geometry and fragment shader for shader (%s)", name);
+	Log::info("Started parsing vertex, geometry and fragment shader for shader (%s)", name.c_str());
 	enum class ShaderType {
 		NONE = -1,
 		VERTEX = 0,
@@ -168,7 +168,7 @@ ShaderSource parseShader(std::istream& shaderTextStream, const std::string name)
 		}
 		else {
 			if (type == ShaderType::NONE) {
-				Log::warn("(line %d): Code in (%s) before the first #shader instruction will be ignored", lineNumber, name);
+				Log::warn("(line %d): Code in (%s) before the first #shader instruction will be ignored", lineNumber, name.c_str());
 				continue;
 			}
 			stringStream[(int)type] << line << "\n";
@@ -176,11 +176,11 @@ ShaderSource parseShader(std::istream& shaderTextStream, const std::string name)
 	}
 
 	if (stringStream[(int)ShaderType::GEOMETRY].str().empty()) {
-		Log::info("Parsed vertex and fragment shader for shader (%s)", name);
-		return { stringStream[(int)ShaderType::VERTEX].str(), stringStream[(int)ShaderType::FRAGMENT].str(), "", name };
+		Log::info("Parsed vertex and fragment shader for shader (%s)", name.c_str());
+		return { stringStream[(int)ShaderType::VERTEX].str(), stringStream[(int)ShaderType::FRAGMENT].str(), std::string(""), name };
 	}
 	else {
-		Log::info("Parsed vertex, fragment and geometry shader for shader (%s)", name);
+		Log::info("Parsed vertex, fragment and geometry shader for shader (%s)", name.c_str());
 		return { stringStream[(int)ShaderType::VERTEX].str(), stringStream[(int)ShaderType::FRAGMENT].str(),  stringStream[(int)ShaderType::GEOMETRY].str(), name };
 	}
 }
@@ -190,7 +190,7 @@ unsigned int Shader::getId() {
 }
 
 Shader::Shader(const std::string& vertexShader, const std::string& fragmentShader, const std::string name) {
-	id = createShader(vertexShader, fragmentShader, "", name);
+	id = createShader(vertexShader, fragmentShader, std::string(), name);
 	this->name = name;
 }
 

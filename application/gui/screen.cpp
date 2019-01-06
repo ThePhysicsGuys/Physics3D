@@ -85,6 +85,7 @@ IndexedMesh* transMesh = nullptr;
 Shader basicShader;
 Shader vectorShader;
 Shader originShader;
+Shader outlineShader;
 
 BoundingBox* box = nullptr;
 StandardInputHandler* handler = nullptr;
@@ -93,6 +94,8 @@ Camera camera;
 void Screen::init() {
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_STENCIL_TEST);
+
 	int width, height;
 	glfwGetWindowSize(window, &width, &height);
 	screenSize = Vec2(width, height);
@@ -100,6 +103,7 @@ void Screen::init() {
 	ShaderSource basicShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(BASIC_SHADER)), "basic.shader");
 	ShaderSource vectorShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(VECTOR_SHADER)), "vector.shader");
 	ShaderSource originShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(ORIGIN_SHADER)), "origin.shader");
+	ShaderSource outlineShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(OUTLINE_SHADER)), "outline.shader");
 
 	basicShader = Shader(basicShaderSource);
 	basicShader.createUniform("modelMatrix");
@@ -120,25 +124,26 @@ void Screen::init() {
 	originShader.createUniform("orthoMatrix");
 	originShader.createUniform("rotatedViewMatrix");
 
+	outlineShader = Shader(outlineShaderSource);
+	outlineShader.createUniform("modelMatrix");
+	outlineShader.createUniform("viewMatrix");
+	outlineShader.createUniform("color");
+	outlineShader.createUniform("projectionMatrix");
+	outlineShader.createUniform("viewPosition");
+
 	camera.setPosition(1, 1, -2);
 	camera.setRotation(0.3, 3.1415, 0.0);
 
 	handler = new StandardInputHandler(window, this, &camera);
 
 	box = new BoundingBox{-0.5, -0.5, -0.5, 0.5, 0.5, 0.5};
-
 	Shape shape = box->toShape(new Vec3[8]);// .rotated(fromEulerAngles(0.5, 0.1, 0.2), new Vec3[8]);
-
 	boxMesh = new IndexedMesh(shape);
-
 	Shape trans = shape.translated(Vec3(1.0, -1.0, 1.0), new Vec3[8]);
 	transMesh = new IndexedMesh(trans);
-
 	double originVertices[3] = { 0, 0, 5 };
 	originMesh = new ArrayMesh(originVertices, 1, 3, RenderMode::POINTS);
-
 	double * vecs = new double[140];
-
 	vecs[0] = 0.2;
 	vecs[1] = 0.3;
 	vecs[2] = 0.7;
@@ -146,16 +151,12 @@ void Screen::init() {
 	vecs[4] = 0.6;
 	vecs[5] = 0.7;
 	vecs[6] = 0.5;
-
 	vectorMesh = new VectorMesh(vecs, 20);
 }
 
 void Screen::makeCurrent() {
 	glfwMakeContextCurrent(this->window);
 }
-
-bool updateLastVector = true;
-AppDebug::ColoredVec lastVector = {Vec3(), Vec3(), 0};
 
 // To be moved elsewhere
 Mat4f projectionMatrix;
@@ -164,17 +165,11 @@ Mat4f rotatedViewMatrix;
 Mat4f viewMatrix;
 Vec3f viewPosition;
 
-// To be moved elsewhere
-Physical* closestIntersect = nullptr;
-
 void Screen::update() {
 
 	// IO events
 	static int speed = 2;
 	if (handler->anyKey) {
-		if (handler->getKey(GLFW_KEY_V)) {
-			updateLastVector = false;
-		}
 		if (handler->getKey(GLFW_KEY_1)) {
 			speed = 2;
 		}
@@ -220,30 +215,13 @@ void Screen::update() {
 	viewMatrix = rotatedViewMatrix.translate(-camera.position.x, -camera.position.y, -camera.position.z);
 	viewPosition = Vec3f(camera.position.x, camera.position.y, camera.position.z);
 
-	// Mouse picker update
-	double closestIntersectDistance = INFINITY;
-	Vec3 ray = calcRay(handler->curPos, screenSize, rotatedViewMatrix, projectionMatrix);
-	for (Physical& physical : world->physicals) {
-		Vec3* buffer = new Vec3[physical.part.hitbox.vCount];
-		Shape transformed = physical.part.hitbox.localToGlobal(physical.cframe, buffer);
-		double distance = transformed.getIntersectionDistance(camera.position, ray);
-		if (distance < closestIntersectDistance && distance > 0) {
-			closestIntersectDistance = distance;
-			closestIntersect = &physical;
-		}
-		delete[] buffer;
-	}
-	if (closestIntersectDistance == INFINITY)
-		closestIntersect = nullptr;
+	closestIntersect = getIntersectedPhysical(world->physicals, camera.position, handler->curPos, screenSize, viewMatrix, projectionMatrix);
 }
 
 void Screen::refresh() {
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-	AddableBuffer<AppDebug::ColoredVec> vecLog = AppDebug::getVecBuffer();
-
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glEnable(GL_DEPTH_BUFFER);
-
+	// Bind basic uniforms
 	basicShader.bind();
 	basicShader.setUniform("color", Vec3f(1, 1, 1));
 	basicShader.setUniform("projectionMatrix", projectionMatrix);
@@ -252,37 +230,37 @@ void Screen::refresh() {
 	
 	// Render world objects
 	for (Physical& physical : world->physicals) {
-		Mat4f transformation = physical.cframe.asMat4f();
-		
-		if (closestIntersect != nullptr)
-			Log::debug("%s", str(closestIntersect->com).c_str());
-
 		int meshId = physical.part.drawMeshId;
-		if (&physical == closestIntersect)
+
+		// Picker code
+		if (&physical == selectedPhysical)
 			basicShader.setUniform("color", Vec3f(0.6, 0.8, 0.4));
+		else if (&physical == closestIntersect)
+			basicShader.setUniform("color", Vec3f(0.5, 0.5, 0.5));
 		else
 			basicShader.setUniform("color", Vec3f(0.3, 0.4, 0.2));
 
+		// Render each physical
+		Mat4f transformation = physical.cframe.asMat4f();
 		basicShader.setUniform("modelMatrix", transformation);
 		meshes[meshId]->render();    
 	}
 
-	if (!updateLastVector) {
-		lastVector = AppDebug::ColoredVec(camera.position, ray.normalize() * 10, 0.5);
-		updateLastVector = true;
-	}
-	vecLog.add(lastVector);
+	// Update vector mesh
+	AddableBuffer<AppDebug::ColoredVec> vecLog = AppDebug::getVecBuffer();
+	vectorMesh->update((double*) vecLog.data, vecLog.index);
 
+	// Reset model matrix
 	basicShader.setUniform("modelMatrix", Mat4f());
 
-	vectorMesh->update((double*)vecLog.data, vecLog.index);
-
+	// Render vector mesh
 	vectorShader.bind();
 	vectorShader.setUniform("projectionMatrix", projectionMatrix);
 	vectorShader.setUniform("viewMatrix", viewMatrix);
 	vectorShader.setUniform("viewPosition", viewPosition);
 	vectorMesh->render();
 
+	// Render origin mesh
  	originShader.bind();
 	originShader.setUniform("projectionMatrix", projectionMatrix);
 	originShader.setUniform("viewPosition", viewPosition);

@@ -6,12 +6,12 @@
 
 #include <time.h>
 
-#ifndef speedtest__             
-#define speedtest__(data)   for (long blockTime = NULL; (blockTime == NULL ? (blockTime = clock()) != NULL : false); Log::info("%s %.9fs", data, (double) (clock() - blockTime) / CLOCKS_PER_SEC))
+#ifndef speedtest             
+#define speedtest(data)   for (long blockTime = NULL; (blockTime == NULL ? (blockTime = clock()) != NULL : false); Log::info("%s %.9fs", data, (double) (clock() - blockTime) / CLOCKS_PER_SEC))
 #endif
 
 #define ASSERT(x) if (!(x)) __debugbreak();
-#define glCall(x) clearError(); x; ASSERT(logCall(#x, __FILE__, __LINE__));
+#define glCall(x) {clearError(); x; ASSERT(logCall(#x, __FILE__, __LINE__));}
 
 void clearError();
 

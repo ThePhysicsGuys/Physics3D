@@ -48,6 +48,8 @@ void StandardInputHandler::mouseDown(int button, int mods) {
 void StandardInputHandler::mouseUp(int button, int mods) {
 	if (button == GLFW_MOUSE_BUTTON_RIGHT) rightDragging = false;
 	if (button == GLFW_MOUSE_BUTTON_LEFT) leftDragging = false;
+
+	screen->selectedPhysical = screen->closestIntersect;
 };
 
 void StandardInputHandler::mouseMove(double x, double y) {

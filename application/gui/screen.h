@@ -20,6 +20,8 @@ private:
 	std::vector<IndexedMesh*> meshes;
 public:
 	Vec2 screenSize;
+	Physical* closestIntersect = nullptr;
+	Physical* selectedPhysical = nullptr;
 
 	Screen() {};
 	Screen(int width, int height, World* world);
