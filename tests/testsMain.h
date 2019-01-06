@@ -8,7 +8,7 @@
 #define TEST_CASE(func) void func(); static TestAdder __JOIN(tAdder, __LINE__)(__FILE__, #func, func); void func()
 
 struct TestAdder {
-	TestAdder(const char* file, const char* name, void(*f)());
+	TestAdder(const char* filePath, const char* nameName, void(*testFunc)());
 };
 
 class AssertionError {
