@@ -5,7 +5,7 @@
 
 #include "../engine/math/mathUtil.h"
 
-TEST_CASE(volumeApproximation) {
+/*TEST_CASE(volumeApproximation) {
 	Shape s = house;
 
 	BoundingBox b = s.getBounds();
@@ -108,4 +108,4 @@ TEST_CASE(inertiaApproximation) {
 
 	double v = s.getVolume();
 	ASSERT_TOLERANT(totalInertia == s.getInertia(), v*v * 0.001);
-}
+}*/
