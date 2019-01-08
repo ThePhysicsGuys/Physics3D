@@ -59,6 +59,11 @@ Mat4Template<N> Mat4Template<N>::perspective(N fov, N aspect, N zNear, N zFar) c
 	return Mat4Template(r00, r01, r02, r03, r10, r11, r12, r13, r20, r21, r22, r23, r30, r31, r32, r33);
 }
 
+template<typename N>
+CFrame Mat4Template<N>::asCFrame() const {
+	return CFrame(Vec3(m30, m31, m32), Mat3(m00, m01, m02, m10, m11, m12, m20, m21, m22));
+};
+
 template struct Mat4Template<double>;
 template struct Mat4Template<float>;
 

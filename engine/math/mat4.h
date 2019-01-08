@@ -200,18 +200,18 @@ struct Mat4Template {
 	}
 
 	Vec3Template<N> operator*(const Vec3Template<N>& v) const {
-		N v0 = v.x * m00 + v.y * m01 + v.z * m02 + m03;
-		N v1 = v.x * m10 + v.y * m11 + v.z * m12 + m13;
-		N v2 = v.x * m20 + v.y * m21 + v.z * m22 + m23;
+		N v0 = v.x * m00 + v.y * m10 + v.z * m20 + m30;
+		N v1 = v.x * m01 + v.y * m11 + v.z * m21 + m31;
+		N v2 = v.x * m02 + v.y * m12 + v.z * m22 + m32;
 
 		return Vec3Template<N>(v0, v1, v2);
 	}
 
 	Vec4Template<N> operator*(const Vec4Template<N>& v) const {
-		N v0 = v.x * m00 + v.y * m01 + v.z * m02 + v.w * m03;
-		N v1 = v.x * m10 + v.y * m11 + v.z * m12 + v.w * m13;
-		N v2 = v.x * m20 + v.y * m21 + v.z * m22 + v.w * m23;
-		N v3 = v.x * m30 + v.y * m31 + v.z * m32 + v.w * m33;
+		N v0 = v.x * m00 + v.y * m10 + v.z * m20 + v.w * m30;
+		N v1 = v.x * m01 + v.y * m11 + v.z * m21 + v.w * m31;
+		N v2 = v.x * m02 + v.y * m12 + v.z * m22 + v.w * m32;
+		N v3 = v.x * m03 + v.y * m13 + v.z * m23 + v.w * m33;
 
 		return Vec4Template<N>(v0, v1, v2, v3);
 	}
@@ -226,6 +226,5 @@ struct Mat4Template {
 		return Vec3Template<N>(m30, m31, m32);
 	}
 
-	CFrame toCFrame() const;
-
+	CFrame asCFrame() const;
 };

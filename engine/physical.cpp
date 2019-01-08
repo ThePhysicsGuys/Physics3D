@@ -46,7 +46,7 @@ void Physical::applyForce(Vec3Relative origin, Vec3 force) {
 
 	Debug::logVec(origin + getCenterOfMass(), force, Debug::FORCE);
 
-	applyMoment(force % origin);
+	applyMoment(origin % force);
 }
 
 void Physical::applyMoment(Vec3 moment) {

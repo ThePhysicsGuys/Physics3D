@@ -99,9 +99,9 @@ public:
 
 	Vec3Template<N> operator*(const Vec3Template<N>& other) const {
 		return Vec3Template<N>(
-			m00 * other.x + m01 * other.y + m02 * other.z, 
-			m10 * other.x + m11 * other.y + m12 * other.z, 
-			m20 * other.x + m21 * other.y + m22 * other.z
+			m00 * other.x + m10 * other.y + m20 * other.z, 
+			m01 * other.x + m11 * other.y + m21 * other.z, 
+			m02 * other.x + m12 * other.y + m22 * other.z
 		);
 	}
 
@@ -138,6 +138,10 @@ typedef Mat3Template<float>		Mat3f;
 typedef Mat3Template<long long>	Mat3l;
 
 typedef Mat3 RotMat3;
+
+Mat3 rotX(double angle);
+Mat3 rotY(double angle);
+Mat3 rotZ(double angle);
 
 Mat3 fromEulerAngles(double alpha, double beta, double gamma);
 template<typename N> Mat3Template<N> fromRotationVec(Vec3Template<N> rotVec);

@@ -9,7 +9,7 @@ uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
 
 void main() { 
-	gl_Position = viewMatrix * transpose(modelMatrix) * vec4(vposition, 1.0f);
+	gl_Position = viewMatrix * modelMatrix * vec4(vposition, 1.0f);
 	gposition = gl_Position.xyz;
 }
 

@@ -2,15 +2,35 @@
 
 #include <cmath>
 
+
+Mat3 rotX(double angle) {
+	double sina = sin(angle);
+	double cosa = cos(angle);
+	return Mat3(1,  0,    0,
+				0, cosa, sina,
+				0,-sina, cosa);
+}
+Mat3 rotY(double angle) {
+	double sina = sin(angle);
+	double cosa = cos(angle);
+	return Mat3(cosa, 0,-sina,
+				 0,   1,  0,
+				sina, 0, cosa);
+}
+Mat3 rotZ(double angle) {
+	double sina = sin(angle);
+	double cosa = cos(angle);
+	return Mat3(cosa, sina, 0,
+			   -sina, cosa, 0,
+				0,     0,   1);
+}
+/*
+	Produces a rotation matrix from the provided euler angles
+
+	Equivalent to rotZ(gamma)*rotX(alpha)*rotY(beta)
+*/
 Mat3 fromEulerAngles(double alpha, double beta, double gamma) {
-	double sinA = sin(alpha), cosA = cos(alpha);
-	double sinB = sin(beta), cosB = cos(beta);
-	double sinC = sin(gamma), cosC = cos(gamma);
-	return Mat3(
-		cosC*cosB - sinC*sinA*sinB, -sinC*cosA, cosC*sinB + sinC*sinA*cosB,
-		sinC*cosB + cosC*sinA*sinB, cosC*cosA, sinC*sinB - cosC*sinA*cosB,
-		-cosA*sinB, sinA, cosA*cosB
-	);
+	return rotZ(gamma)*rotX(alpha)*rotY(beta);
 }
 
 template<typename N>
@@ -60,9 +80,9 @@ Mat3Template<N> fromRotationVec(Vec3Template<N> rotVec) {
 	N cosA = cos(angle);
 
 	Mat3Template<N> outer = rotVec.outer(rotVec);
-	Mat3Template<N> rotor = Mat3Template<N>(cosA,     z*sinA,   -y*sinA,
-											-z*sinA,  cosA,     x*sinA,
-											y*sinA,   -x*sinA,  cosA);
+	Mat3Template<N> rotor = Mat3Template<N>(cosA,     -z*sinA,   y*sinA,
+											z*sinA,  cosA,     -x*sinA,
+											-y*sinA,   x*sinA,  cosA);
 
 	return outer * (1 - cosA) + rotor;
 }
