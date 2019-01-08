@@ -19,22 +19,42 @@ public:
 	Mat4 asMat4() const;
 	Mat4f asMat4f() const;
 
-	Vec3 localToGlobal(Vec3 lVec) const {
+	inline Vec3 localToGlobal(Vec3 lVec) const {
 		return rotation * lVec + position;
 	}
 
-	Vec3 globalToLocal(Vec3 gVec) const {
+	inline Vec3 globalToLocal(Vec3 gVec) const {
 		return ~rotation * (gVec - position);
 	}
 
-	CFrame localToGlobal(CFrame lFrame) const {
+	inline Vec3 localToRelative(Vec3 lVec) const {
+		return rotation * lVec;
+	}
+
+	inline Vec3 relativeToLocal(Vec3 rVec) const {
+		return ~rotation * rVec;
+	}
+
+	inline CFrame localToGlobal(CFrame lFrame) const {
 		return CFrame(position + rotation * lFrame.position, rotation * lFrame.rotation);
 	}
 
-	CFrame globalToLocal(CFrame gFrame) const {
+	inline CFrame globalToLocal(CFrame gFrame) const {
 		return CFrame(~rotation*(gFrame.position - position) , ~rotation * gFrame.rotation);
 	}
 	
+	inline CFrame localToRelative(CFrame lFrame) const {
+		return CFrame(rotation * lFrame.position, rotation * lFrame.rotation);
+	}
+
+	inline CFrame relativeToLocal(CFrame rFrame) const {
+		return CFrame(~rotation*rFrame.position, ~rotation * rFrame.rotation);
+	}
+
+	inline CFrame CFrame::operator~() const {
+		return CFrame(~rotation * -position, ~rotation);
+	}
+
 	CFrame& operator+=(const Vec3& delta);
 	CFrame& operator-=(const Vec3& delta);
 

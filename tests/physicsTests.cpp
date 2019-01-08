@@ -6,8 +6,8 @@
 #include "../engine/math/mathUtil.h"
 
 
-#define REMAINS_CONSTANT(v) REMAINS_CONSTANT_TOLERANT(v, 0.00005)
-#define ASSERT(v) ASSERT_TOLERANT(v, 0.00005)
+#define REMAINS_CONSTANT(v) REMAINS_CONSTANT_TOLERANT(v, 0.0005)
+#define ASSERT(v) ASSERT_TOLERANT(v, 0.0005)
 
 double PI = 3.14159265359;
 
@@ -39,8 +39,8 @@ TEST_CASE(positionInvariance) {
 		for(int i = 0; i < TICKS; i++)
 			w.tick(DELTA_T);
 
-		REMAINS_CONSTANT_TOLERANT(origin.globalToLocal(w.physicals[0].cframe), 0.00001);
-		REMAINS_CONSTANT_TOLERANT(origin.globalToLocal(w.physicals[1].cframe), 0.00001);
+		REMAINS_CONSTANT(origin.globalToLocal(w.physicals[0].cframe));
+		REMAINS_CONSTANT(origin.globalToLocal(w.physicals[1].cframe));
 	}
 }
 
@@ -56,7 +56,7 @@ TEST_CASE(rotationInvariance) {
 	for(double rotation = -1.5; rotation < 1.500001; rotation += 0.1) {
 		logStream << rotation << '\n';
 
-		CFrame origin(Vec3(0,0,0), fromEulerAngles(0.0, rotation, 0.0));
+		CFrame origin(Vec3(0,0,0), rotY(rotation));
 
 		Physical housePhysical(housePart, origin.localToGlobal(houseRelative));
 		Physical icosaPhysical(icosaPart, origin.localToGlobal(icosaRelative));
@@ -69,8 +69,8 @@ TEST_CASE(rotationInvariance) {
 		for(int i = 0; i < TICKS; i++)
 			w.tick(DELTA_T);
 
-		REMAINS_CONSTANT_TOLERANT(origin.globalToLocal(w.physicals[0].cframe), 0.00001);
-		REMAINS_CONSTANT_TOLERANT(origin.globalToLocal(w.physicals[1].cframe), 0.00001);
+		REMAINS_CONSTANT(origin.globalToLocal(w.physicals[0].cframe));
+		REMAINS_CONSTANT(origin.globalToLocal(w.physicals[1].cframe));
 	}
 }
 

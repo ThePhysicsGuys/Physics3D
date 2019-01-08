@@ -30,5 +30,5 @@ void CFrame::translate(Vec3 translation) {
 	position += translation;
 }
 void CFrame::rotate(RotMat3 rot) {
-	rotation = rotation*rot;
+	rotation = rot*rotation;
 }
