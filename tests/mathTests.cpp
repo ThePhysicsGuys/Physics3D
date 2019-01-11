@@ -3,13 +3,12 @@
 #include "../engine/math/mat3.h"
 #include "../engine/math/mat4.h"
 #include "../engine/math/mathUtil.h"
-#include "../util/log.h"
 
 Mat3 IDENTITY = Mat3(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0);
 
 #define ASSERT(condition) ASSERT_TOLERANT(condition, 0.00000001)
 
-TEST_CASE(matrixInv) {
+TEST_CASE(matrixInverse) {
 	Mat3 m(100.0, 0.0, 0.0, 0.0, 50.0, 0.0, 0.0, 0.0, 1.0);
 
 	logf("m=%s\n~m=%s\nm.inverse()=%s\nm.det()=%f", str(m).c_str(), str(~m).c_str(), str(m.inverse()).c_str(), m.det());
@@ -20,19 +19,42 @@ TEST_CASE(matrixInv) {
 	ASSERT(~m * m == IDENTITY);
 }
 
+TEST_CASE(cframeInverse) {
+	CFrame A(Vec3(1.0, 0.8, 0.9), fromEulerAngles(0.3, 0.7, 0.9));
+	CFrame B(Vec3(8.2, -0.8, 3.4), fromEulerAngles(0.4, 0.4, 0.3));
+
+	ASSERT(A.localToGlobal(A.globalToLocal(B)) == B);
+	ASSERT(A.globalToLocal(A.localToGlobal(B)) == B);
+	ASSERT(A.globalToLocal(A) == CFrame());
+	ASSERT(A.localToGlobal(~A) == CFrame());
+	ASSERT((~A).localToGlobal(A) == CFrame());
+
+	ASSERT(A.localToRelative(B) + A.position == A.localToGlobal(B));
+}
+
 TEST_CASE(testFromRotationVec) {
-	double deltaT = 0.000001;
-	Vec3 rotationVec(0.0, 0.0, 1.0);
-	Vec3 pointToRotate = Vec3(1.0, 0.0, 0.0);
+	double deltaT = 0.0001;
 
-	Vec3 newPoint = pointToRotate + pointToRotate % (rotationVec*deltaT);
+	Vec3 rotations[]{Vec3(1,0,0), Vec3(0,1,0), Vec3(0,0,1), Vec3(-5.0, 3.0, 9.0), Vec3(3.8, -0.5, 0.4)};
+	for(Vec3 rot : rotations) {
+		Vec3 rotationVec = rot * deltaT;
+		Vec3 pointToRotate = Vec3(1.0, 0.0, 0.0);
 
-	Mat3 fromRotV = fromRotationVec(rotationVec * deltaT);
+		Mat3 rotMat = fromRotationVec(rotationVec);
 
-	Vec3 newPoint2 = fromRotV * pointToRotate;
+		Vec3 rotateByRotVec = pointToRotate;
+		Vec3 rotateByRotMat = pointToRotate;
 
-	logf("rotVec: %s, rotMat: %s", str(rotationVec).c_str(), str(fromRotV).c_str());
-	logf("\nnewPointRotVec: %s\nnewPointRotMat: %s", str(newPoint).c_str(), str(newPoint2).c_str());
+		for(int i = 0; i < 500; i++) {
+			rotateByRotVec = rotateByRotVec + rotationVec % rotateByRotVec;
+			rotateByRotMat = rotMat * rotateByRotMat;
+		}
+
+		logStream << "rotVec: " << rotationVec << ", rotMat: " << rotMat << '\n';
+		logStream << "newPointRotVec: " << rotateByRotVec << "\nnewPointRotMat: " << rotateByRotMat << '\n';
+
+		ASSERT_TOLERANT(rotateByRotVec == rotateByRotMat, 0.01);
+	}
 }
 
 TEST_CASE(matrixAssociativity) {
@@ -96,7 +118,7 @@ TEST_CASE(crossProduct) {
 	Vec3 u(-7.3, 1.8, 0.5);
 
 	ASSERT(v % u == -(u % v));
-	ASSERT((2 * v) % (3 * u) == 6 * (v%u));
+	ASSERT((2 * v) % (3 * u) == 6 * (v % u));
 
 	ASSERT(x % y == z);
 	ASSERT(y % x == -z);

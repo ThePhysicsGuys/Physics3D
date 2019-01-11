@@ -7,8 +7,6 @@
 #include "../engine/geometry/shape.h"
 #include "../engine/geometry/boundingBox.h"
 
-#include "../util/log.h"
-
 #include "../application/objectLibrary.h"
 
 #define ASSERT(condition) ASSERT_TOLERANT(condition, 0.00000001)

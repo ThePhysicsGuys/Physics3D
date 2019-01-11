@@ -86,9 +86,9 @@ Mat3Template<N> fromRotationVec(Vec3Template<N> rotVec) {
 	N cosA = cos(angle);
 
 	Mat3Template<N> outer = rotVec.outer(rotVec);
-	Mat3Template<N> rotor = Mat3Template<N>(cosA,     -z*sinA,   y*sinA,
-											z*sinA,  cosA,     -x*sinA,
-											-y*sinA,   x*sinA,  cosA);
+	Mat3Template<N> rotor = Mat3Template<N>(cosA,     z*sinA,   -y*sinA,
+											-z*sinA,  cosA,     x*sinA,
+											y*sinA,   -x*sinA,  cosA);
 
 	return outer * (1 - cosA) + rotor;
 }

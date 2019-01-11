@@ -10,12 +10,14 @@
 Physical::Physical(Part p, CFrame cframe) : part(p), cframe(cframe), mass(p.hitbox.getVolume() * p.properties.density), 
 											com(p.hitbox.getCenterOfMass()), inertia(p.hitbox.getInertia(com) * p.properties.density) {}
 
+Physical::Physical(Part p, CFrame cframe, double mass, Vec3 centerOfMass, Mat3 inertia) : part(p), cframe(cframe), mass(mass), com(centerOfMass), inertia(inertia) {}
+
 void Physical::update(double deltaT) {
 	Vec3 accel = totalForce * (deltaT/mass);
 	
-	Vec3 localMoment = ~cframe.rotation * totalMoment;
+	Vec3 localMoment = cframe.relativeToLocal(totalMoment);
 	Vec3 localRotAcc = ~inertia * localMoment * deltaT;
-	Vec3 rotAcc = cframe.rotation * localRotAcc;
+	Vec3 rotAcc = cframe.localToRelative(localRotAcc);
 
 	//Vec3 rotAcc = totalMoment * deltaT;
 
