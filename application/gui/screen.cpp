@@ -6,19 +6,19 @@
 #include "vectorMesh.h"
 #include "camera.h"
 #include "picker.h"
+
 #include "../debug.h"
 #include "../standardInputHandler.h"
 #include "../resourceManager.h"
 
 #include "../../util/log.h"
-#include "loader.h"
 
 #include "../engine/math/vec2.h"
 #include "../engine/math/mat4.h"
+#include "../engine/math/mathUtil.h"
 #include "../engine/geometry/shape.h"
 #include "../engine/geometry/shape.h"
 #include "../engine/geometry/boundingBox.h"
-#include "../engine/math/mathUtil.h"
 #include "../engine/debug.h"
 
 #include <stdlib.h>
@@ -152,6 +152,16 @@ void Screen::init() {
 	vecs[5] = 0.7;
 	vecs[6] = 0.5;
 	vectorMesh = new VectorMesh(vecs, 20);
+
+	eventHandler.setPhysicalRayIntersectCallback([] (Screen* screen, Physical* physical, Vec3 point) {
+		screen->intersectedPhysical = physical;
+		screen->intersectedPoint = point;
+	});
+
+	eventHandler.setPhysicalClickCallback([] (Screen* screen, Physical* physical, Vec3 point) {
+		screen->selectedPhysical = physical;
+		screen->selectedPoint = point;
+	});
 }
 
 void Screen::makeCurrent() {
@@ -215,7 +225,7 @@ void Screen::update() {
 	viewMatrix = rotatedViewMatrix.translate(-camera.position.x, -camera.position.y, -camera.position.z);
 	viewPosition = Vec3f(camera.position.x, camera.position.y, camera.position.z);
 
-	closestIntersect = getIntersectedPhysical(world->physicals, camera.position, handler->curPos, screenSize, viewMatrix, projectionMatrix);
+	updateIntersectedPhysical(this, world->physicals, camera.position, handler->curPos, screenSize, viewMatrix, projectionMatrix);
 }
 
 void Screen::refresh() {
@@ -235,7 +245,7 @@ void Screen::refresh() {
 		// Picker code
 		if (&physical == selectedPhysical)
 			basicShader.setUniform("color", Vec3f(0.6, 0.8, 0.4));
-		else if (&physical == closestIntersect)
+		else if (&physical == intersectedPhysical)
 			basicShader.setUniform("color", Vec3f(0.5, 0.5, 0.5));
 		else
 			basicShader.setUniform("color", Vec3f(0.3, 0.4, 0.2));
@@ -290,3 +300,4 @@ int Screen::addMeshShape(Shape s) {
 	meshes.push_back(new IndexedMesh(s));
 	return size;
 }
+

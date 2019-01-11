@@ -2,35 +2,41 @@
 
 #include <cmath>
 
-
-Mat3 rotX(double angle) {
+template<typename N>
+Mat3Template<N> rotX(N angle) {
 	double sina = sin(angle);
 	double cosa = cos(angle);
-	return Mat3(1,  0,    0,
+	return Mat3Template<N>
+			   (1,  0,    0,
 				0, cosa, sina,
 				0,-sina, cosa);
 }
-Mat3 rotY(double angle) {
+template<typename N>
+Mat3Template<N> rotY(N angle) {
 	double sina = sin(angle);
 	double cosa = cos(angle);
-	return Mat3(cosa, 0,-sina,
+	return Mat3Template<N>
+			   (cosa, 0,-sina,
 				 0,   1,  0,
 				sina, 0, cosa);
 }
-Mat3 rotZ(double angle) {
-	double sina = sin(angle);
-	double cosa = cos(angle);
-	return Mat3(cosa, sina, 0,
+template<typename N>
+Mat3Template<N> rotZ(N angle) {
+	N sina = sin(angle);
+	N cosa = cos(angle);
+	return Mat3Template<N>
+			   (cosa, sina, 0,
 			   -sina, cosa, 0,
 				0,     0,   1);
 }
 /*
 	Produces a rotation matrix from the provided euler angles
 
-	Equivalent to rotZ(gamma)*rotX(alpha)*rotY(beta)
+	Equivalent to rotZ(gamma) * rotX(alpha) * rotY(beta)
 */
-Mat3 fromEulerAngles(double alpha, double beta, double gamma) {
-	return rotZ(gamma)*rotX(alpha)*rotY(beta);
+template<typename N>
+Mat3Template<N> fromEulerAngles(N alpha, N beta, N gamma) {
+	return rotZ(gamma) * rotX(alpha) * rotY(beta);
 }
 
 template<typename N>
@@ -90,5 +96,10 @@ Mat3Template<N> fromRotationVec(Vec3Template<N> rotVec) {
 template class Mat3Template<double>;
 template class Mat3Template<float>;
 
+template Mat3Template<double> rotX(double);
+template Mat3Template<double> rotY(double);
+template Mat3Template<double> rotZ(double);
+template Mat3Template<double> fromEulerAngles(double, double, double);
+template Mat3Template<float> fromEulerAngles(float, float, float);
 template Mat3Template<double> fromRotationVec(Vec3Template<double> v);
 template Mat3Template<float> fromRotationVec(Vec3Template<float> v);

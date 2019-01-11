@@ -1,15 +1,18 @@
 #pragma once
 
 #include "inputHandler.h"
+#include "worlds.h"
 #include "gui\screen.h"
 #include "gui\camera.h"
 
 class StandardInputHandler : public InputHandler {
-public:
+public: 
 	Screen* screen;
+	GravityFloorWorld* world;
 	Camera* camera;
 	Vec2 curPos;
 	bool rightDragging = false;
+	bool middleDragging = false;
 	bool leftDragging = false;
 
 	StandardInputHandler(GLFWwindow* window, Screen* screen, Camera* camera);
