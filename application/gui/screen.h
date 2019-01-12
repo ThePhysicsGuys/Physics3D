@@ -23,6 +23,8 @@ public:
 	Vec2 screenSize;
 	EventHandler eventHandler;
 
+	// Picker
+	Vec3 ray;
 	Physical* intersectedPhysical = nullptr;
 	Vec3 intersectedPoint;
 	Physical* selectedPhysical = nullptr;

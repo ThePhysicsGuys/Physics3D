@@ -58,7 +58,7 @@ int main(void) {
 		newVerts[i] = icosahedron.vertices[i] * 2;
 	}
 
-	Part stallPart = createVisiblePart(*loadMesh((std::istream&) std::istringstream(getResourceAsString(STALL_MODEL))), 1, 0.7);
+	//Part stallPart = createVisiblePart(*loadMesh((std::istream&) std::istringstream(getResourceAsString(STALL_MODEL))), 1, 0.7);
 	Part trianglePart = createVisiblePart(triangleShape, 10.0, 0.7);
 	Part boxPart = createVisiblePart(BoundingBox{-0.1, -0.7, -0.3, 0.1, 0.7, 0.3}.toShape(new Vec3[8]), 2.0, 0.7);
 	Part icosaPart = createVisiblePart(Shape(newVerts, icosahedron.triangles, 12, 20), 10, 0.7);
@@ -67,6 +67,7 @@ int main(void) {
 
 	Physical cube(cubePart, CFrame(Vec3(0.5, 1.9, 0.5), fromEulerAngles(1.5, 0.2, 0.3)));
 	Physical box(boxPart, CFrame(Vec3(1.5, 0.7, 0.3), fromEulerAngles(0.0, 0.2, 0.0)));
+	box.inertia = Mat3(1, 0, 0, 0, 1, 0, 0, 0, 1) * 100000000;
 	Physical housePhysical(housePart, CFrame(Vec3(-1.5, 0.0, 0.0), fromEulerAngles(0.7, 0.9, 0.7)));
 	Physical icosa(icosaPart, CFrame(Vec3(0.0, 2.0, 3.0), fromEulerAngles(0.1, 0.1, 0.1)));
 
@@ -122,6 +123,11 @@ void stop(int returnCode) {
 }
 
 bool paused = true;
+
+bool isPaused() {
+	return paused;
+}
+
 void togglePause() {
 	if (paused)
 		unpause();

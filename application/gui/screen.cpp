@@ -28,8 +28,6 @@
 #include <map>
 
 World* curWorld = NULL;
-Vec2 screenSize;
-Vec3 ray;
 
 bool initGLFW() {
 	/* Initialize the library */
@@ -229,7 +227,11 @@ void Screen::update() {
 }
 
 void Screen::refresh() {
+	// Clear GL buffer bits
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+	// Initialize vector log buffer
+	AddableBuffer<AppDebug::ColoredVec> vecLog = AppDebug::getVecBuffer();
 
 	// Bind basic uniforms
 	basicShader.bind();
@@ -257,7 +259,6 @@ void Screen::refresh() {
 	}
 
 	// Update vector mesh
-	AddableBuffer<AppDebug::ColoredVec> vecLog = AppDebug::getVecBuffer();
 	vectorMesh->update((double*) vecLog.data, vecLog.index);
 
 	// Reset model matrix

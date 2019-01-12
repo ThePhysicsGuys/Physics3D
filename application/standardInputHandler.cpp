@@ -56,26 +56,40 @@ void StandardInputHandler::mouseUp(int button, int mods) {
 };
 
 void StandardInputHandler::mouseMove(double x, double y) {
+	// Camera rotating
 	if (rightDragging) {
 		camera->rotate((y - curPos.y) * 0.5, (x - curPos.x) * 0.5, 0);
 	}
 
 	if (leftDragging) {
+		double speed = 0.01;
+		double dmx = (x - curPos.x) * speed;
+		double dmy = (y - curPos.y) * -speed;
+		
+		// Phyiscal moving
 		if (screen->selectedPhysical != nullptr) {
-			double speed = 0.01;
-			double dmx = (x - curPos.x) * speed;
-			double dmy = (y - curPos.y) * -speed;
+			Mat3 cameraFrame = (rotX(camera->rotation.x) * rotY(camera->rotation.y) * rotZ(camera->rotation.z)).transpose();
+			Vec3 cameraDirection = cameraFrame * Vec3(0, 0, 1);
 
-			Vec3 translation = (rotX(camera->rotation.x) * rotY(camera->rotation.y) * rotZ(camera->rotation.z)).transpose() * Vec3(dmx, dmy, 0);
-			screen->selectedPhysical->cframe.translate(translation);
-			/*world->selectedPhysical = screen->selectedPhysical;
-			world->relativeAttachPoint = world->selectedPhysical->cframe.globalToLocal(screen->intersectedPoint);
-			world->magnetTarget = world->selectedPhysical->cframe.position + translation;*/
+			double distance = (screen->selectedPoint - camera->position) * cameraDirection / (screen->ray * cameraDirection);
+			Vec3 planeIntersection = camera->position + distance * screen->ray;
+			
+			if (isPaused()) {
+				Vec3 translation = planeIntersection - screen->selectedPoint;
+				screen->selectedPoint += translation;
+				screen->selectedPhysical->cframe.translate(translation);
+			} else {
+				world->selectedPhysical = screen->selectedPhysical;
+				world->relativeSelectedPoint = screen->selectedPhysical->cframe.globalToLocal(screen->selectedPoint);
+				world->absoluteSelectedPoint = screen->selectedPoint;
+				world->magnetPoint = planeIntersection;
+			}
 		}
 	} else {
-		/*world->selectedPhysical = nullptr;*/
+		world->selectedPhysical = nullptr;
 	}
 
+	// Camera moving
 	if (middleDragging) {
 		camera->move((x - curPos.x) * -0.5, (y - curPos.y) * 0.5, 0);
 	}
