@@ -47,6 +47,9 @@ void StandardInputHandler::mouseDown(int button, int mods) {
 	if (button == GLFW_MOUSE_BUTTON_LEFT) leftDragging = true;
 
 	(*screen->eventHandler.physicalClickHandler) (screen, screen->intersectedPhysical, screen->intersectedPoint);
+	if (screen->intersectedPhysical != nullptr) {
+		world->localSelectedPoint = screen->selectedPhysical->cframe.globalToLocal(screen->intersectedPoint);
+	}
 };
 
 void StandardInputHandler::mouseUp(int button, int mods) {
@@ -80,8 +83,6 @@ void StandardInputHandler::mouseMove(double x, double y) {
 				screen->selectedPhysical->cframe.translate(translation);
 			} else {
 				world->selectedPhysical = screen->selectedPhysical;
-				world->relativeSelectedPoint = screen->selectedPhysical->cframe.globalToLocal(screen->selectedPoint);
-				world->absoluteSelectedPoint = screen->selectedPoint;
 				world->magnetPoint = planeIntersection;
 			}
 		}
