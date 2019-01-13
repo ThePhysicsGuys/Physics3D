@@ -165,6 +165,10 @@ void unpause() {
 	paused = false;
 }
 
+bool isPaused() {
+	return paused;
+}
+
 void setSpeed(double newSpeed) {
 	physicsThread.setSpeed(newSpeed);
 }

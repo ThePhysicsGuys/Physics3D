@@ -8,3 +8,4 @@ void togglePause();
 void setSpeed(double newSpeed);
 double getSpeed();
 void runTick();
+bool isPaused();
