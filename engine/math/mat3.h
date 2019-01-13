@@ -5,6 +5,15 @@ struct Mat3Template;
 
 #include "vec3.h"
 
+
+
+template<typename N>
+struct EigenSet {
+	Vec3Template<N> eigenValues;
+	Mat3Template<N> eigenVectors;
+	EigenSet(Vec3Template<N> eigenValues, Mat3Template<N> eigenVectors) : eigenValues(eigenValues), eigenVectors(eigenVectors) {};
+};
+
 template<typename N>
 struct Mat3Template {
 public:
@@ -131,6 +140,8 @@ public:
 		m20 *= f; m21 *= f; m22 *= f;
 		return *this;
 	}
+
+	EigenSet<N> getEigenDecomposition() const;
 };
 
 typedef Mat3Template<double>	Mat3;

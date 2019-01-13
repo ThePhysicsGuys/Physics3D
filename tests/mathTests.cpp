@@ -127,3 +127,51 @@ TEST_CASE(crossProduct) {
 	ASSERT(z % x == y);
 	ASSERT(x % z == -y);
 }
+
+#include <iostream>
+#include <algorithm>
+
+TEST_CASE(eigenDecomposition) {
+	for(double x = -1.25; x < 1.5; x += 0.1) {
+		for(double y = -1.35; y < 1.5; y += 0.1) {
+			for(double z = -1.55; z < 1.5; z += 0.1) {
+
+				
+
+				Mat3 orthoPart = fromEulerAngles(0.21, 0.31, 0.41);
+				Mat3 eigenMat(x, 0, 0, 0, y, 0, 0, 0, z);
+				Mat3 testMat = orthoPart * eigenMat * ~orthoPart;
+
+				// std::cout << testMat;
+
+				// std::cout << "doing" << x << ',' << y << ',' << z << '\n';
+
+				EigenSet<double> v = testMat.getEigenDecomposition();
+
+				double reals[]{x,y,z};
+				double calcs[3]{v.eigenValues.v[0], v.eigenValues.v[1],v.eigenValues.v[2]};
+
+				std::sort(reals, reals + 3);
+				std::sort(calcs, calcs + 3);
+
+				ASSERT(reals[0] == calcs[0]);
+				ASSERT(reals[1] == calcs[1]);
+				ASSERT(reals[2] == calcs[2]);
+				ASSERT(v.eigenVectors * Mat3(v.eigenValues.x, 0, 0, 0, v.eigenValues.y, 0, 0, 0, v.eigenValues.z) * ~v.eigenVectors == testMat);
+
+
+				// ASSERT()
+
+				// std::cout << "Real: " << x << "," << y << ',' << z << " calculated: " << x << "," << y << ',' << z << '\n';
+
+				// Log::debug("D0: %f, D1: %f, CrightPart: %f", D0, D1, CrightPart);
+
+				//std::cout.precision(17);
+				// std::cout << std::scientific;
+
+				// if(v.eigenValues.v[0] > 0) std::cout <<std::fixed<< x << ','<<y<<','<<z<<'='<<std::scientific<<v.eigenValues.v[0] << '\n';
+			}
+		}
+	}
+	// ASSERT(false);
+}
