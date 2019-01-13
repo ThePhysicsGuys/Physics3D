@@ -2,6 +2,7 @@
 
 #include "../../engine/world.h"
 #include "../../engine/math/vec2.h"
+#include "../eventHandler.h"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -16,12 +17,18 @@ void terminateGL();
 class Screen {
 private:
 	GLFWwindow* window;
-	World* world;
 	std::vector<IndexedMesh*> meshes;
 public:
+	World* world;
 	Vec2 screenSize;
-	Physical* closestIntersect = nullptr;
+	EventHandler eventHandler;
+
+	// Picker
+	Vec3 ray;
+	Physical* intersectedPhysical = nullptr;
+	Vec3 intersectedPoint;
 	Physical* selectedPhysical = nullptr;
+	Vec3 selectedPoint;
 
 	Screen() {};
 	Screen(int width, int height, World* world);

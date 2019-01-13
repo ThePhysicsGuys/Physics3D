@@ -66,40 +66,40 @@ public:
 		return inverse();
 	}
 
-	Mat3Template rotate(N angle, N x, N y, N z) const;
+	Mat3Template<N> rotate(N angle, N x, N y, N z) const;
 
-	Mat3Template transpose() const {
-		return Mat3Template(m00, m10, m20, m01, m11, m21, m02, m12, m22);
+	Mat3Template<N> transpose() const {
+		return Mat3Template<N>(m00, m10, m20, m01, m11, m21, m02, m12, m22);
 	}
 
-	Mat3Template operator+(const Mat3Template& other) const {
-		return Mat3Template(
+	Mat3Template<N> operator+(const Mat3Template<N>& other) const {
+		return Mat3Template<N>(
 			m00 + other.m00, m01 + other.m01, m02 + other.m02,
 			m10 + other.m10, m11 + other.m11, m12 + other.m12,
 			m20 + other.m20, m21 + other.m21, m22 + other.m22
 		);
 	}
 
-	Mat3Template operator-(const Mat3Template& other) const {
-		return Mat3Template(
+	Mat3Template<N> operator-(const Mat3Template<N>& other) const {
+		return Mat3Template<N>(
 			m00 - other.m00, m01 - other.m01, m02 - other.m02,
 			m10 - other.m10, m11 - other.m11, m12 - other.m12,
 			m20 - other.m20, m21 - other.m21, m22 - other.m22
 		);
 	}
 
-	Mat3Template operator-() const {
-		return Mat3Template(-m00, -m01, -m02, -m10, -m11, -m12, -m20, -m21, -m22);
+	Mat3Template<N> operator-() const {
+		return Mat3Template<N>(-m00, -m01, -m02, -m10, -m11, -m12, -m20, -m21, -m22);
 	}
 
-	Mat3Template& operator+=(const Mat3Template& other) {
+	Mat3Template<N>& operator+=(const Mat3Template<N>& other) {
 		m00 += other.m00; m01 += other.m01; m02 += other.m02;
 		m10 += other.m10; m11 += other.m11; m12 += other.m12;
 		m20 += other.m20; m21 += other.m21; m22 += other.m22;
 		return *this;
 	}
 
-	Mat3Template& operator-=(const Mat3Template& other) {
+	Mat3Template<N>& operator-=(const Mat3Template<N>& other) {
 		m00 -= other.m00; m01 -= other.m01; m02 -= other.m02;
 		m10 -= other.m10; m11 -= other.m11; m12 -= other.m12;
 		m20 -= other.m20; m21 -= other.m21; m22 -= other.m22;
@@ -114,7 +114,7 @@ public:
 		);
 	}
 
-	Mat3Template operator*(const Mat3Template& other) const {
+	Mat3Template<N> operator*(const Mat3Template<N>& other) const {
 		N r00 = m00 * other.m00 + m10 * other.m01 + m20 * other.m02;
 		N r01 = m01 * other.m00 + m11 * other.m01 + m21 * other.m02;
 		N r02 = m02 * other.m00 + m12 * other.m01 + m22 * other.m02;
@@ -125,16 +125,17 @@ public:
 		N r21 = m01 * other.m20 + m11 * other.m21 + m21 * other.m22;
 		N r22 = m02 * other.m20 + m12 * other.m21 + m22 * other.m22;
 
-		return Mat3Template(r00, r01, r02, r10, r11, r12, r20, r21, r22);
+		return Mat3Template<N>(r00, r01, r02, r10, r11, r12, r20, r21, r22);
 	}
 
 	Mat3Template operator*(const N& f) const {
-		return Mat3Template(m00*f, m01*f, m02*f, 
-							m10*f, m11*f, m12*f,
-							m20*f, m21*f, m22*f);
+		return Mat3Template<N>
+				           (m00 * f, m01 * f, m02 * f,
+							m10 * f, m11 * f, m12 * f,
+							m20 * f, m21 * f, m22 * f);
 	}
 	
-	Mat3Template& operator*=(const N& f) {
+	Mat3Template<N>& operator*=(const N& f) {
 		m00 *= f; m01 *= f; m02 *= f;
 		m10 *= f; m11 *= f; m12 *= f;
 		m20 *= f; m21 *= f; m22 *= f;
@@ -147,12 +148,19 @@ public:
 typedef Mat3Template<double>	Mat3;
 typedef Mat3Template<float>		Mat3f;
 typedef Mat3Template<long long>	Mat3l;
+typedef Mat3Template<double>	RotMat3;
 
-typedef Mat3 RotMat3;
+template<typename N>
+Mat3Template<N> rotX(N angle);
 
-Mat3 rotX(double angle);
-Mat3 rotY(double angle);
-Mat3 rotZ(double angle);
+template<typename N>
+Mat3Template<N> rotY(N angle);
 
-Mat3 fromEulerAngles(double alpha, double beta, double gamma);
-template<typename N> Mat3Template<N> fromRotationVec(Vec3Template<N> rotVec);
+template<typename N>
+Mat3Template<N> rotZ(N angle);
+
+template<typename N>
+Mat3Template<N> fromEulerAngles(N alpha, N beta, N gamma);
+
+template<typename N> 
+Mat3Template<N> fromRotationVec(Vec3Template<N> rotVec);

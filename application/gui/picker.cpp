@@ -1,4 +1,5 @@
 #include "picker.h"
+
 #include "../util/log.h"
 #include "../engine/math/mathUtil.h"
 
@@ -9,7 +10,6 @@ Vec2 getNormalizedDeviceSpacePosition(Vec2 viewportSpacePosition, Vec2 screenSiz
 }
 
 Vec3 calcRay(Vec2 mousePosition, Vec2 screenSize, Mat4f viewMatrix, Mat4f projectionMatrix) {
-	viewMatrix = viewMatrix.transpose();
 	Vec2 normalizedDeviceSpacePosition = getNormalizedDeviceSpacePosition(mousePosition, screenSize);
 	Vec4f clipSpacePosition = Vec4f(normalizedDeviceSpacePosition.x, normalizedDeviceSpacePosition.y, -1.0f, 1.0f);
 	Mat4f invertedProjectionMatrix = projectionMatrix.inverse();
@@ -22,21 +22,30 @@ Vec3 calcRay(Vec2 mousePosition, Vec2 screenSize, Mat4f viewMatrix, Mat4f projec
 	return rayDirection;
 }
 
-Physical* getIntersectedPhysical(std::vector<Physical>& physicals, Vec3 cameraPosition, Vec2 mousePosition, Vec2 screenSize, Mat4f viewMatrix, Mat4f projectionMatrix) {
-	Physical* closestIntersect = nullptr;
+void updateIntersectedPhysical(Screen* screen, std::vector<Physical>& physicals, Vec3 cameraPosition, Vec2 mousePosition, Vec2 screenSize, Mat4f viewMatrix, Mat4f projectionMatrix) {
+	Physical* closestIntersectedPhysical = nullptr;
+	Vec3 closestIntersectedPoint = Vec3();
 	double closestIntersectDistance = INFINITY;
-	Vec3 ray = calcRay(mousePosition, screenSize, viewMatrix, projectionMatrix);
+
+	screen->ray = calcRay(mousePosition, screenSize, viewMatrix, projectionMatrix);
+
 	for (Physical& physical : physicals) {
 		Vec3* buffer = new Vec3[physical.part.hitbox.vCount];
 		Shape transformed = physical.part.hitbox.localToGlobal(physical.cframe, buffer);
-		double distance = transformed.getIntersectionDistance(cameraPosition, ray);
+		double distance = transformed.getIntersectionDistance(cameraPosition, screen->ray);
 		if (distance < closestIntersectDistance && distance > 0) {
 			closestIntersectDistance = distance;
-			closestIntersect = &physical;
+			closestIntersectedPhysical = &physical;
 		}
 		delete[] buffer;
 	}
-	if (closestIntersectDistance == INFINITY) closestIntersect = nullptr;
 
-	return closestIntersect;
+	if (closestIntersectDistance == INFINITY) {
+		closestIntersectedPhysical = nullptr;
+		closestIntersectedPoint = cameraPosition;
+	} else {
+		closestIntersectedPoint = cameraPosition + screen->ray * closestIntersectDistance;
+	}
+
+	(*screen->eventHandler.physicalRayIntersectHandler) (screen, closestIntersectedPhysical, closestIntersectedPoint);
 }

@@ -51,7 +51,7 @@ public:
 		return CFrame(~rotation*rFrame.position, ~rotation * rFrame.rotation);
 	}
 
-	inline CFrame CFrame::operator~() const {
+	inline CFrame operator~() const {
 		return CFrame(~rotation * -position, ~rotation);
 	}
 
