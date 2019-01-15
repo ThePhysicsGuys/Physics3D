@@ -8,14 +8,12 @@
 class StandardInputHandler : public InputHandler {
 public: 
 	Screen* screen;
-	GravityFloorWorld* world;
-	Camera* camera;
 	Vec2 curPos;
 	bool rightDragging = false;
 	bool middleDragging = false;
 	bool leftDragging = false;
 
-	StandardInputHandler(GLFWwindow* window, Screen* screen, Camera* camera);
+	StandardInputHandler(GLFWwindow* window, Screen* screen);
 
 	void framebufferResize(int width, int height) override;
 

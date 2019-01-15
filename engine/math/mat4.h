@@ -41,6 +41,28 @@ struct Mat4Template {
 		}
 	}
 
+	Mat4Template(const Mat3Template<N>& other) {
+		m00 = other.m00;
+		m01 = other.m01;
+		m02 = other.m02;
+		m03 = 0;
+
+		m10 = other.m10;
+		m11 = other.m11;
+		m12 = other.m12;
+		m13 = 0;
+
+		m20 = other.m20;
+		m21 = other.m21;
+		m22 = other.m22;
+		m23 = 0;
+
+		m30 = 0;
+		m31 = 0;
+		m32 = 0;
+		m33 = 1;
+	}
+
 	N det() const {
 		N a = m00 * m11 - m01 * m10;
 		N b = m00 * m12 - m02 * m10;
@@ -116,6 +138,10 @@ struct Mat4Template {
 		N r33 = m03 * x + m13 * y + m23 * z + m33;
 
 		return Mat4Template(m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, r30, r31, r32, r33);
+	}
+
+	Mat4Template translate(Vec3Template<N> dv) const {
+		return translate(dv.x, dv.y, dv.z);
 	}
 
 	Mat4Template rotate(N angle, N x, N y, N z) const;

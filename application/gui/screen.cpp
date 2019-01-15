@@ -4,7 +4,6 @@
 #include "indexedMesh.h"
 #include "arrayMesh.h"
 #include "vectorMesh.h"
-#include "camera.h"
 #include "picker.h"
 
 #include "../debug.h"
@@ -87,7 +86,6 @@ Shader outlineShader;
 
 BoundingBox* box = nullptr;
 StandardInputHandler* handler = nullptr;
-Camera camera;
 
 void Screen::init() {
 	glEnable(GL_CULL_FACE);
@@ -129,10 +127,10 @@ void Screen::init() {
 	outlineShader.createUniform("projectionMatrix");
 	outlineShader.createUniform("viewPosition");
 
-	camera.setPosition(1, 1, -2);
-	camera.setRotation(0.3, 3.1415, 0.0);
+	camera.setPosition(Vec3(1, 1, -2));
+	camera.setRotation(Vec3(0, 3.1415, 0.0));
 
-	handler = new StandardInputHandler(window, this, &camera);
+	handler = new StandardInputHandler(window, this);
 
 	box = new BoundingBox{-0.5, -0.5, -0.5, 0.5, 0.5, 0.5};
 	Shape shape = box->toShape(new Vec3[8]);// .rotated(fromEulerAngles(0.5, 0.1, 0.2), new Vec3[8]);
@@ -176,54 +174,74 @@ Vec3f viewPosition;
 void Screen::update() {
 
 	// IO events
-	static int speed = 2;
+	static double speed = 0.01;
 	if (handler->anyKey) {
 		if (handler->getKey(GLFW_KEY_1)) {
-			speed = 2;
+			speed = 0.01;
 		}
 		if (handler->getKey(GLFW_KEY_2)) {
-			speed = 10;
+			speed = 0.1;
 		}
 		if (handler->getKey(GLFW_KEY_W)) {
-			camera.move(0, 0, -speed);
+			camera.move(Vec3(0, 0, -speed));
+			if (handler->leftDragging) 
+				moveGrabbedPhysicalTransversal(this, speed * camera.speed);
 		}
 		if (handler->getKey(GLFW_KEY_S)) {
-			camera.move(0, 0, speed);
+			camera.move(Vec3(0, 0, speed));
+			if (handler->leftDragging) 
+				moveGrabbedPhysicalTransversal(this, -speed * camera.speed);
 		}
 		if (handler->getKey(GLFW_KEY_D)) {
-			camera.move(speed, 0, 0);
+			camera.move(Vec3(speed, 0, 0));
+			if (handler->leftDragging) 
+				moveGrabbedPhysicalLateral(this);
 		}
 		if (handler->getKey(GLFW_KEY_A)) {
-			camera.move(-speed, 0, 0);
+			camera.move(Vec3(-speed, 0, 0));
+			if (handler->leftDragging) 
+				moveGrabbedPhysicalLateral(this);
 		}
 		if (handler->getKey(GLFW_KEY_SPACE)) {
-			camera.move(0, speed, 0);
+			camera.move(Vec3(0, speed, 0));
+			if (handler->leftDragging) 
+				moveGrabbedPhysicalLateral(this);
 		}
 		if (handler->getKey(GLFW_KEY_LEFT_SHIFT)) {
-			camera.move(0, -speed, 0);
+			camera.move(Vec3(0, -speed, 0));
+			if (handler->leftDragging) 
+				moveGrabbedPhysicalLateral(this);
 		}
 		if (handler->getKey(GLFW_KEY_LEFT)) {
-			camera.rotate(0, -speed, 0);
+			camera.rotate(Vec3(0, -speed, 0));
+			if (handler->leftDragging) 
+				moveGrabbedPhysicalLateral(this);
 		}
 		if (handler->getKey(GLFW_KEY_RIGHT)) {
-			camera.rotate(0, speed, 0);
+			camera.rotate(Vec3(0, speed, 0));
+			if (handler->leftDragging) 
+				moveGrabbedPhysicalLateral(this);
 		}
 		if (handler->getKey(GLFW_KEY_UP)) {
-			camera.rotate(-speed, 0, 0);
+			camera.rotate(Vec3(-speed, 0, 0));
+			if (handler->leftDragging) 
+				moveGrabbedPhysicalLateral(this);
 		}
 		if (handler->getKey(GLFW_KEY_DOWN)) {
-			camera.rotate(speed, 0, 0);
+			camera.rotate(Vec3(speed, 0, 0));
+			if (handler->leftDragging) 
+				moveGrabbedPhysicalLateral(this);
 		}
 	}
 
 	// Matrix calculations
 	projectionMatrix = Mat4f().perspective(1.0, screenSize.x / screenSize.y, 0.01, 100000.0);
 	orthoMatrix = Mat4f().ortho(-1, 1, -screenSize.x / screenSize.y, screenSize.x / screenSize.y, 0.1, 100);
-	rotatedViewMatrix = Mat4f().rotate(camera.rotation.x, 1, 0, 0).rotate(camera.rotation.y, 0, 1, 0).rotate(camera.rotation.z, 0, 0, 1);
-	viewMatrix = rotatedViewMatrix.translate(-camera.position.x, -camera.position.y, -camera.position.z);
-	viewPosition = Vec3f(camera.position.x, camera.position.y, camera.position.z);
+	rotatedViewMatrix = camera.cframe.asMat4f().getRotation();
+	viewMatrix = rotatedViewMatrix.translate(-camera.cframe.position.x, -camera.cframe.position.y, -camera.cframe.position.z);
+	viewPosition = Vec3f(camera.cframe.position.x, camera.cframe.position.y, camera.cframe.position.z);
 
-	updateIntersectedPhysical(this, world->physicals, camera.position, handler->curPos, screenSize, viewMatrix, projectionMatrix);
+	updateIntersectedPhysical(this, world->physicals, handler->curPos, screenSize, viewMatrix, projectionMatrix);
 }
 
 void Screen::refresh() {

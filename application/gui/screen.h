@@ -3,6 +3,7 @@
 #include "../../engine/world.h"
 #include "../../engine/math/vec2.h"
 #include "../eventHandler.h"
+#include "camera.h"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -21,6 +22,7 @@ private:
 public:
 	World* world;
 	Vec2 screenSize;
+	Camera camera;
 	EventHandler eventHandler;
 
 	// Picker

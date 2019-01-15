@@ -13,6 +13,10 @@ public:
 	std::vector<Physical> physicals;
 	std::mutex lock;
 
+	Physical* selectedPhysical = nullptr;
+	Vec3 localSelectedPoint;
+	Vec3 magnetPoint;
+
 	World();
 
 	World(const World&) = delete;

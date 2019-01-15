@@ -17,8 +17,10 @@ void GravityFloorWorld::applyExternalForces(const Shape* transformedShapes) {
 			Vec3 absoluteSelectedPoint = physical.cframe.localToGlobal(localSelectedPoint);
 			Vec3 delta = magnetPoint - absoluteSelectedPoint;
 			Vec3 relativeSelectedPointSpeed = physical.getVelocityOfPoint(absoluteSelectedPoint - physical.getCenterOfMass());
-			Vec3 force = physical.mass * delta * 20 - relativeSelectedPointSpeed * 0.7;
+			Vec3 force = physical.mass * delta * 20 - relativeSelectedPointSpeed;
 			physical.applyForce(absoluteSelectedPoint - physical.getCenterOfMass(), force);
+			Vec3 angular = -physical.angularVelocity;// / (delta.length() + 1);
+			physical.applyMoment(angular);
 		}
 
 		// Floor force

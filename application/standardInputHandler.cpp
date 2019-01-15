@@ -1,11 +1,10 @@
 #include "standardInputHandler.h"
 #include "../engine/math/mathUtil.h"
 #include "application.h"
+#include "gui/picker.h"
 
-StandardInputHandler::StandardInputHandler(GLFWwindow* window, Screen* screen, Camera* camera) : InputHandler(window) {
+StandardInputHandler::StandardInputHandler(GLFWwindow* window, Screen* screen) : InputHandler(window) {
 	this->screen = screen;
-	this->camera = camera;
-	this->world = (GravityFloorWorld*) screen->world;
 }
 
 void StandardInputHandler::framebufferResize(int width, int height) {
@@ -48,7 +47,7 @@ void StandardInputHandler::mouseDown(int button, int mods) {
 
 	(*screen->eventHandler.physicalClickHandler) (screen, screen->intersectedPhysical, screen->intersectedPoint);
 	if (screen->intersectedPhysical != nullptr) {
-		world->localSelectedPoint = screen->selectedPhysical->cframe.globalToLocal(screen->intersectedPoint);
+		screen->world->localSelectedPoint = screen->selectedPhysical->cframe.globalToLocal(screen->intersectedPoint);
 	}
 };
 
@@ -61,7 +60,7 @@ void StandardInputHandler::mouseUp(int button, int mods) {
 void StandardInputHandler::mouseMove(double x, double y) {
 	// Camera rotating
 	if (rightDragging) {
-		camera->rotate((y - curPos.y) * 0.5, (x - curPos.x) * 0.5, 0);
+		screen->camera.rotate(Vec3((y - curPos.y) * 0.01, (x - curPos.x) * 0.01, 0));
 	}
 
 	if (leftDragging) {
@@ -71,35 +70,22 @@ void StandardInputHandler::mouseMove(double x, double y) {
 		
 		// Phyiscal moving
 		if (screen->selectedPhysical != nullptr) {
-			Mat3 cameraFrame = (rotX(camera->rotation.x) * rotY(camera->rotation.y) * rotZ(camera->rotation.z)).transpose();
-			Vec3 cameraDirection = cameraFrame * Vec3(0, 0, 1);
-
-			double distance = (screen->selectedPoint - camera->position) * cameraDirection / (screen->ray * cameraDirection);
-			Vec3 planeIntersection = camera->position + distance * screen->ray;
-			
-			if (isPaused()) {
-				Vec3 translation = planeIntersection - screen->selectedPoint;
-				screen->selectedPoint += translation;
-				screen->selectedPhysical->cframe.translate(translation);
-			} else {
-				world->selectedPhysical = screen->selectedPhysical;
-				world->magnetPoint = planeIntersection;
-			}
+			moveGrabbedPhysicalLateral(screen);
 		}
 	} else {
-		world->selectedPhysical = nullptr;
+		screen->world->selectedPhysical = nullptr;
 	}
 
 	// Camera moving
 	if (middleDragging) {
-		camera->move((x - curPos.x) * -0.5, (y - curPos.y) * 0.5, 0);
+		screen->camera.move(Vec3((x - curPos.x) * -0.5, (y - curPos.y) * 0.5, 0));
 	}
 
 	curPos = Vec2(x, y);
 };
 
 void StandardInputHandler::scroll(double xOffset, double yOffset) {
-	camera->move(0, 0, -5 * yOffset);
+	screen->camera.move(0, 0, -0.5 * yOffset);
 };
 
 void StandardInputHandler::mouseExit() {
