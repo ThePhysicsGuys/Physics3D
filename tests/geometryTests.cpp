@@ -15,7 +15,7 @@ TEST_CASE(basicShapes) {
 	BoundingBox b{ -1, -1, -1, 1, 1, 1 };
 	Vec3 vecBuf[8];
 
-	ASSERT(b.toShape(vecBuf).isValid());
+	ASSERT_TRUE(b.toShape(vecBuf).isValid());
 }
 
 TEST_CASE(shapeVolume) {

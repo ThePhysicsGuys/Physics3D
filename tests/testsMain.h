@@ -75,7 +75,6 @@ public:
 	template<typename P> bool operator>=(const P& other) const { if (!(arg >= other)) { throw AssertionError(line, errMsg(arg, other, ">=")); }; return true; }
 	template<typename P> bool operator==(const P& other) const { if (!(arg == other)) { throw AssertionError(line, errMsg(arg, other, "==")); }; return true; }
 	template<typename P> bool operator!=(const P& other) const { if (!(arg != other)) { throw AssertionError(line, errMsg(arg, other, "!=")); }; return true; }
-	bool operator~() const { if (!(arg)) throw AssertionError(line, errMsg(arg)); return true; }
 };
 
 template<typename T, typename Tol>
@@ -93,7 +92,6 @@ public:
 	template<typename P> bool operator>=(const P& other) const { if (!tolerantGreaterOrEqual(arg, other, tolerance)) { throw AssertionError(line, errMsg(arg, other, ">=")); }; return true; }
 	template<typename P> bool operator==(const P& other) const { if (!tolerantEquals(arg, other, tolerance)) { throw AssertionError(line, errMsg(arg, other, "==")); }; return true; }
 	template<typename P> bool operator!=(const P& other) const { if (!tolerantNotEquals(arg, other, tolerance)) { throw AssertionError(line, errMsg(arg, other, "!=")); }; return true; }
-	bool operator~() const { if (!(arg)) throw AssertionError(line, errMsg(arg)); return true; }
 };
 
 struct AssertBuilder {
@@ -112,8 +110,8 @@ struct TolerantAssertBuilder {
 	TolerantAssertComparer<T, Tol> operator<(const T& other) const { return TolerantAssertComparer<T, Tol>(line, other, tolerance); }
 };
 
-#define ASSERT_STRICT(condition) ~(AssertBuilder(__LINE__) < condition)
-#define ASSERT_TOLERANT(condition, tolerance) ~(TolerantAssertBuilder<decltype(tolerance)>(__LINE__, tolerance) < condition)
+#define ASSERT_STRICT(condition) (AssertBuilder(__LINE__) < condition)
+#define ASSERT_TOLERANT(condition, tolerance) (TolerantAssertBuilder<decltype(tolerance)>(__LINE__, tolerance) < condition)
 #define ASSERT_TRUE(condition) if(!(condition)) throw AssertionError(__LINE__, "False")
 #define ASSERT_FALSE(condition) if(condition) throw AssertionError(__LINE__, "True")
 

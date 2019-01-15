@@ -87,7 +87,7 @@ struct Mat4Template {
 		N l = m22 * m33 - m23 * m32;
 		N normdet = a * l - b * k + c * j + d * i - e * h + f * g;
 
-		N invdet = 1.0 / normdet;
+		N invdet = static_cast<N>(1.0) / normdet;
 
 		N r00 = ( m11 * l - m12 * k + m13 * j) * invdet;
 		N r01 = (-m01 * l + m02 * k - m03 * j) * invdet;
