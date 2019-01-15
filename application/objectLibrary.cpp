@@ -20,7 +20,7 @@ Triangle icosahedronTriangles[] {
 	{10, 7 , 1}, {10, 9, 7 }, {9, 10, 6}, {9, 6 , 3}, {3, 6, 5 },
 };
 
-Shape icosahedron(icosahedronVertices, icosahedronTriangles, 12, 20);
+const Shape icosahedron(icosahedronVertices, icosahedronTriangles, 12, 20);
 
 // Test shape
 Vec3 triangleShapeVecs[] {
@@ -34,7 +34,7 @@ Triangle triangleShapeTriangles[] {
 	{0, 2, 1}, {0, 3, 2}, {0, 1, 3}, {1, 2, 3}
 };
 
-Shape triangleShape(triangleShapeVecs, triangleShapeTriangles, 4, 4);
+const Shape triangleShape(triangleShapeVecs, triangleShapeTriangles, 4, 4);
 
 Vec3 houseVertices[] {
 	Vec3(-0.5, 0.0, -0.5), Vec3(-0.5, 0.0, 0.5), Vec3(0.5, 0.0, 0.5), Vec3(0.5, 0.0, -0.5),
@@ -52,7 +52,7 @@ Triangle houseTriangles[] {
 	{4, 5, 9}, {4, 9, 8}, {7, 8, 9}, {7, 9, 6} //roof2
 };
 
-Shape house(houseVertices, houseTriangles, 10, 16);
+const Shape house(houseVertices, houseTriangles, 10, 16);
 
 Shape createCube(double side) {
 	return createBox(side, side, side);

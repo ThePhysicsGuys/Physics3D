@@ -1,6 +1,6 @@
 #include "boundingBox.h"
 
-const Triangle triangles[12] = {
+Triangle triangles[12] = {
 	{1,0,2},{3,2,0}, // BOTTOM
 	{1,5,0},{4,0,5}, // FRONT
 	{1,2,5},{6,5,2}, // RIGHT
