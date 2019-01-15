@@ -19,32 +19,38 @@ struct Triangle {
 	Triangle leftShift() const;
 };
 
+struct NormalizedShape;
+
 struct Shape {
 	struct TriangleIter {
-		const Triangle* first;
-		const int size;
-		inline const Triangle* begin() const { return first; };
-		inline const Triangle* end() const { return first + size; };
+		Triangle* first;
+		int size;
+		inline Triangle* begin() const { return first; };
+		inline Triangle* end() const { return first + size; };
 	};
 	struct VertexIter {
-		const Vec3* first;
-		const int size;
-		inline const Vec3* begin() const { return first; };
-		inline const Vec3* end() const { return first + size; };
+		Vec3* first;
+		int size;
+		inline Vec3* begin() const { return first; };
+		inline Vec3* end() const { return first + size; };
 	};
 
-	const Vec3 * vertices;
-	const Triangle * triangles;
+	Vec3 * vertices;
+	Triangle * triangles;
 	int vCount;
 	int tCount;
 
 	Shape();
-	Shape(const Vec3 * vertices, const Triangle * triangles, int vertexCount, int triangleCount);
+	Shape(Vec3 * vertices, Triangle * triangles, int vertexCount, int triangleCount);
 
 	Shape translated(Vec3 offset, Vec3* newVecBuf) const;
 	Shape rotated(RotMat3 rotation, Vec3* newVecBuf) const;
 	Shape localToGlobal(CFrame frame, Vec3* newVecBuf) const;
 	Shape globalToLocal(CFrame frame, Vec3* newVecBuf) const;
+
+	CFrame normalize();
+
+	CFrame getInertialNormalAxes() const;
 
 	BoundingBox getBounds() const;
 
@@ -66,4 +72,10 @@ struct Shape {
 	inline VertexIter iterVertices() const { return VertexIter{vertices, vCount}; };
 
 	bool isValid() const;
+};
+
+struct NormalizedShape : public Shape {
+	friend struct Shape;
+private:
+	NormalizedShape(const Vec3 * vertices, const Triangle * triangles, int vertexCount, int triangleCount);
 };

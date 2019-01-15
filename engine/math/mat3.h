@@ -6,6 +6,29 @@ struct Mat3Template;
 #include "vec3.h"
 
 template<typename N>
+struct EigenValues {
+	N values[3];
+
+	EigenValues(N a, N b, N c) : values{a, b, c} {}
+
+	Mat3Template<N> asDiagonalMatrix() const {
+		return Mat3Template<N>(values[0], 0, 0,
+							   0, values[1], 0,
+							   0, 0, values[2]);
+	}
+
+	const N& operator[](int index) const { return values[index]; }
+	N& operator[](int index) { return values[index]; }
+};
+
+template<typename N>
+struct EigenSet {
+	EigenValues<N> eigenValues;
+	Mat3Template<N> eigenVectors;
+	EigenSet(EigenValues<N> eigenValues, Mat3Template<N> eigenVectors) : eigenValues(eigenValues), eigenVectors(eigenVectors) {};
+};
+
+template<typename N>
 struct Mat3Template {
 public:
 	union {
@@ -132,6 +155,8 @@ public:
 		m20 *= f; m21 *= f; m22 *= f;
 		return *this;
 	}
+
+	EigenSet<N> getEigenDecomposition() const;
 };
 
 typedef Mat3Template<double>	Mat3;

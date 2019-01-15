@@ -8,9 +8,14 @@ struct Vec3Template;
 template<typename N>
 struct Vec3Template {
 public:
-	N x;
-	N y;
-	N z;
+	union {
+		struct {
+			N x;
+			N y;
+			N z;
+		};
+		N v[3];
+	};
 
 	Vec3Template() : x(0), y(0), z(0) {}
 	Vec3Template(N x, N y, N z) : x(x), y(y), z(z) {};
@@ -79,6 +84,10 @@ public:
 		return Mat3Template<N>(x*other.x, x*other.y, x*other.z,
 							   y*other.x, y*other.y, y*other.z,
 							   z*other.x, z*other.y, z*other.z);
+	}
+
+	N& operator[](int index) {
+		return v[index];
 	}
 
 	Vec3Template abs() const;

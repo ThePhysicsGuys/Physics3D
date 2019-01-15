@@ -15,7 +15,7 @@ static const double DELTA_T = 0.01;
 static const int TICKS = 500;
 
 TEST_CASE(positionInvariance) {
-	Mat3 rotation = fromEulerAngles(0, 0, 0);
+	Mat3 rotation = fromEulerAngles(0.0, 0.0, 0.0);
 
 	Vec3 origins[]{Vec3(0,0,0), Vec3(0,0,1), Vec3(5.3,0,-2.4),Vec3(0.3,0,0.7),Vec3(0.0000001,0,0.00000001)};
 

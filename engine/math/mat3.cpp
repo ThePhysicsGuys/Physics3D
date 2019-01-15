@@ -93,8 +93,100 @@ Mat3Template<N> fromRotationVec(Vec3Template<N> rotVec) {
 	return outer * (1 - cosA) + rotor;
 }
 
-template class Mat3Template<double>;
-template class Mat3Template<float>;
+template<typename N>
+N get(Mat3Template<N>& copy, int row, int col) {
+	return copy.m[row * 3 + col];
+}
+template<typename N>
+void set(Mat3Template<N>& copy, int row, int col, N value) {
+	copy.m[row * 3 + col] = value;
+}
+template<typename N>
+void update(EigenValues<N>& e, bool* changed, int k, N t) {
+	N y = e[k];
+	e[k] = y + t;
+	changed[k] = !(y == e[k]);
+}
+template<typename N>
+void rotateEigen(Mat3Template<N>& copy, int k, int l, int i, int j, N c, N s) {
+	N SKL = get(copy, k, l);
+	N SIJ = get(copy, i, j);
+	set(copy, k, l, c*SKL - s*SIJ);
+	set(copy, i, j, s*SKL + c*SIJ);
+}
+
+/*
+	Calculates the eigenvalues and eigenvectors of a symmetric matrix using the Jacobi Eigenvalue Algorythm
+
+	It works by rotating the given matrix until it becomes a diagonal matrix
+*/
+
+template<typename N>
+EigenSet<N> Mat3Template<N>::getEigenDecomposition() const {
+	
+	Mat3Template<N> copy(*this);
+
+	EigenValues<N> eigenValues(m00, m11, m22);
+	Mat3Template<N> eigenVectors(1,0,0,0,1,0,0,0,1);
+	
+	bool changed[3]{true, true, true};
+
+
+	int tieBreaker = 0;
+	const int values[6]{
+		0,1,
+		0,2,
+		1,2
+	};
+	while(changed[0] || changed[1] || changed[2]) {
+		N top = abs(get(copy, 0, 1));
+		N topRight = abs(get(copy, 0, 2));
+		N right = abs(get(copy, 1, 2));
+		
+		int k, l;
+		
+		// find which of the three upper off-diagonal elements is the biggest
+		if(top > topRight && top > right) { k = 0; l = 1; }
+		else if(topRight > top && topRight > right) { k = 0; l = 2; }
+		else if(right > top && right > topRight) { k = 1; l = 2; }
+		else {
+			// TIEBREAKER
+			k = values[tieBreaker *2]; l = values[tieBreaker *2+1];
+			tieBreaker = (tieBreaker + 1) % 3;
+		}
+
+		N p = get(copy, k, l);
+
+		if(p == 0) {
+			return EigenSet<N>(eigenValues, eigenVectors.transpose());
+		}
+
+
+		N y = (eigenValues[l] - eigenValues[k]) / 2; N d = abs(y) + sqrt(p*p + y*y);
+		N r = sqrt(p*p + d*d); N c = d / r; N s = p / r; N t = p*p / d;
+
+		if(y < 0) { s = -s; t = -t; };
+
+		set(copy, k, l, (N) 0); update(eigenValues, changed, k, -t); update(eigenValues, changed, l, t);
+
+		for(int i = 0; i <= k - 1; i++) rotateEigen(copy, i, k, i, l, c, s);
+		for(int i = k + 1; i <= l - 1; i++) rotateEigen(copy, k, i, i, l, c, s);
+		for(int i = l + 1; i < 3; i++) rotateEigen(copy, k, i, l, i, c, s);
+
+		for(int i = 0; i < 3; i++) {
+			N EIK = get(eigenVectors, i, k);
+			N EIL = get(eigenVectors, i, l);
+			set(eigenVectors, i, k, c*EIK - s*EIL);
+			set(eigenVectors, i, l, s*EIK + c*EIL);
+		}
+	}
+	return EigenSet<N>(eigenValues, eigenVectors.transpose());
+}
+
+
+
+template struct Mat3Template<double>;
+template struct Mat3Template<float>;
 
 template Mat3Template<double> rotX(double);
 template Mat3Template<double> rotY(double);
