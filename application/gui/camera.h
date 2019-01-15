@@ -13,8 +13,8 @@ public:
 	double speed;
 	double rspeed;
 	
-	Camera(Vec3 position, Mat3 rotation) : cframe(CFrame(position, rotation)), speed(0.00008), rspeed(0.0000001) {};
-	Camera() : cframe(CFrame()), speed(0.00008), rspeed(0.0000001) {};
+	Camera(Vec3 position, Mat3 rotation) : cframe(CFrame(position, rotation)), speed(0.00008), rspeed(0.5) {};
+	Camera() : cframe(CFrame()), speed(0.00008), rspeed(0.5) {};
 
 	void setPosition(Vec3 position) {
 		cframe.position = position;
@@ -34,7 +34,7 @@ public:
 	}
 
 	void rotate(double dalpha, double dbeta, double dgamma) {
-		cframe.rotation = cframe.rotation * rotX(dalpha) * rotY(dbeta);
+		cframe.rotation = rotX(rspeed * dalpha) * cframe.rotation * rotY(rspeed * dbeta);
 	}
 
 	void rotate(Vec3 delta) {

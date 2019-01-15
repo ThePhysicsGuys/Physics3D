@@ -174,10 +174,10 @@ Vec3f viewPosition;
 void Screen::update() {
 
 	// IO events
-	static double speed = 0.01;
+	static double speed = 0.02;
 	if (handler->anyKey) {
 		if (handler->getKey(GLFW_KEY_1)) {
-			speed = 0.01;
+			speed = 0.02;
 		}
 		if (handler->getKey(GLFW_KEY_2)) {
 			speed = 0.1;
