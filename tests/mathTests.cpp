@@ -148,16 +148,8 @@ TEST_CASE(eigenDecomposition) {
 
 				EigenSet<double> v = testMat.getEigenDecomposition();
 
-				double reals[]{x,y,z};
-				double calcs[3]{v.eigenValues.v[0], v.eigenValues.v[1],v.eigenValues.v[2]};
-
-				std::sort(reals, reals + 3);
-				std::sort(calcs, calcs + 3);
-
-				ASSERT(reals[0] == calcs[0]);
-				ASSERT(reals[1] == calcs[1]);
-				ASSERT(reals[2] == calcs[2]);
-				ASSERT(v.eigenVectors * Mat3(v.eigenValues.x, 0, 0, 0, v.eigenValues.y, 0, 0, 0, v.eigenValues.z) * ~v.eigenVectors == testMat);
+				ASSERT(EigenValues<double>(x, y, z) == v.eigenValues);
+				ASSERT(v.eigenVectors * v.eigenValues.asDiagonalMatrix() * ~v.eigenVectors == testMat);
 
 
 				// ASSERT()

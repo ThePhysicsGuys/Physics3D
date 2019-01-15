@@ -119,3 +119,13 @@ bool tolerantNotEquals(const CFrame& first, const CFrame& second, Tol tolerance)
 	return tolerantNotEquals(first.position, second.position, tolerance) ||
 		tolerantNotEquals(first.rotation, second.rotation, tolerance);
 }
+
+template<typename Tol, typename N>
+bool tolerantEquals(const EigenValues<N>& a, const EigenValues<N>& b, Tol tolerance) {
+	return tolerantEquals(a[0], b[0], tolerance) && tolerantEquals(a[1], b[1], tolerance) && tolerantEquals(a[2], b[2], tolerance) ||
+		tolerantEquals(a[0], b[0], tolerance) && tolerantEquals(a[1], b[2], tolerance) && tolerantEquals(a[2], b[1], tolerance) ||
+		tolerantEquals(a[0], b[1], tolerance) && tolerantEquals(a[1], b[0], tolerance) && tolerantEquals(a[2], b[2], tolerance) ||
+		tolerantEquals(a[0], b[1], tolerance) && tolerantEquals(a[1], b[2], tolerance) && tolerantEquals(a[2], b[0], tolerance) ||
+		tolerantEquals(a[0], b[2], tolerance) && tolerantEquals(a[1], b[0], tolerance) && tolerantEquals(a[2], b[1], tolerance) ||
+		tolerantEquals(a[0], b[2], tolerance) && tolerantEquals(a[1], b[1], tolerance) && tolerantEquals(a[2], b[0], tolerance);
+}

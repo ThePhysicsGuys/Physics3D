@@ -87,6 +87,20 @@ inline std::string str(const Vec2Template<N>& vector) {
 	return ss.str();
 }
 
+template<typename N>
+inline std::ostream& operator<<(std::ostream& os, const EigenValues<N>& v) {
+	os << "EigenValues(" << v[0] << ", " << v[1] << ", " << v[2] << ")";
+	return os;
+}
+
+template<typename N>
+inline std::string str(const EigenValues<N>& v) {
+	std::stringstream ss;
+	ss << v;
+	return ss.str();
+}
 
 std::ostream& operator<<(std::ostream& os, const CFrame& cframe);
 std::string str(const CFrame& cframe);
+
+

@@ -102,7 +102,7 @@ void set(Mat3Template<N>& copy, int row, int col, N value) {
 	copy.m[row * 3 + col] = value;
 }
 template<typename N>
-void update(Vec3Template<N>& e, bool* changed, int k, N t) {
+void update(EigenValues<N>& e, bool* changed, int k, N t) {
 	N y = e[k];
 	e[k] = y + t;
 	changed[k] = !(y == e[k]);
@@ -126,7 +126,7 @@ EigenSet<N> Mat3Template<N>::getEigenDecomposition() const {
 	
 	Mat3Template<N> copy(*this);
 
-	Vec3Template<N> eigenValues(m00, m11, m22);
+	EigenValues<N> eigenValues(m00, m11, m22);
 	Mat3Template<N> eigenVectors(1,0,0,0,1,0,0,0,1);
 	
 	bool changed[3]{true, true, true};
