@@ -213,7 +213,7 @@ Mat3 Shape::getInertia(CFrame reference) const {
 								v2.x*v0.y*v0.z + v2.x*v1.y*v2.z + v2.x*v0.y*v2.z + v2.x*v1.y*v1.z + v2.x*v2.y*v0.z + v2.x*v2.y*v1.z;
 		double allDifferents =	v0.x*v1.y*v2.z + v0.x*v2.y*v1.z + v1.x*v0.y*v2.z + v1.x*v2.y*v0.z + v2.x*v0.y*v1.z + v2.x*v1.y*v0.z;
 
-		double xyzIntegral = 3 * selfProducts + twoSames + allDifferents / 2;
+		double xyzIntegral = -(3 * selfProducts + twoSames + allDifferents / 2) / 60;
 
 		total.m01 += dFactor.z * xyzIntegral;
 		total.m10 += dFactor.z * xyzIntegral;

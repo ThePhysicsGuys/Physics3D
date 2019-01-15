@@ -9,6 +9,8 @@
 
 #include "../application/objectLibrary.h"
 
+#include "testValues.h"
+
 #define ASSERT(condition) ASSERT_TOLERANT(condition, 0.00000001)
 
 TEST_CASE(basicShapes) {
@@ -74,6 +76,47 @@ TEST_CASE(shapeInertiaMatrix) {
 	Shape rotatedHouse = newHouse.rotated(fromEulerAngles(0.0, 0.3, 0.0), houseVecBuf2);
 	logf("Inertia of House: %s", str(newHouse.getInertia()).c_str());
 	logf("Inertia of Rotated House: %s", str(rotatedHouse.getInertia()).c_str());
+}
+
+TEST_CASE(shapeInertiaRotationInvariance) {
+	Vec3 buf1[10]; Vec3 buf2[10]; Shape testShape = house.translated(-house.getCenterOfMass(), buf1);
+
+	Vec3 testMoment = Vec3(0.3, -3.2, 4.8);
+	Vec3 momentResult = ~testShape.getInertia() * testMoment;
+
+	logStream << "reference inertia: " << testShape.getInertia() << "\n";
+
+	for(RotMat3 testRotation : rotMatrices) {
+		
+
+		Shape rotatedShape = testShape.rotated(testRotation, buf2);
+
+		Vec3 rotatedTestMoment = testRotation * testMoment;
+		
+		Mat3 inertia = rotatedShape.getInertia();
+
+		Vec3 rotatedMomentResult = ~inertia * rotatedTestMoment;
+
+
+		logStream << "testRotation: " << testRotation << "\ninertia: " << inertia << "\n";
+		ASSERT(rotatedMomentResult == testRotation * momentResult);
+	}
+}
+
+TEST_CASE(shapeInertiaEigenValueInvariance) {
+	Vec3 buf1[10]; Vec3 buf2[10]; Shape testShape = house.translated(-house.getCenterOfMass(), buf1);
+
+	EigenValues<double> initialEigenValues = testShape.getInertia().getEigenDecomposition().eigenValues;
+
+	for(RotMat3 testRotation : rotMatrices) {
+		logStream << testRotation << '\n';
+
+		Shape rotatedShape = testShape.rotated(testRotation, buf2);
+
+		EigenValues<double> newEigenValues = rotatedShape.getInertia().getEigenDecomposition().eigenValues;
+
+		ASSERT(initialEigenValues == newEigenValues);
+	}
 }
 
 TEST_CASE(cubeContainsPoint) {
