@@ -13,6 +13,16 @@
 
 #define ASSERT(condition) ASSERT_TOLERANT(condition, 0.00000001)
 
+template<typename N, typename Tol>
+bool isDiagonalTolerant(Mat3Template<N> m, Tol tolerance) {
+	return tolerantEquals(m.m01, 0, tolerance) && tolerantEquals(m.m10, 0, tolerance) &&
+		tolerantEquals(m.m02, 0, tolerance) && tolerantEquals(m.m20, 0, tolerance) &&
+		tolerantEquals(m.m21, 0, tolerance) && tolerantEquals(m.m12, 0, tolerance);
+}
+
+#define ASSERT_DIAGONAL_TOLERANT(matrix, tolerance) if(!isDiagonalTolerant(matrix, tolerance)) throw AssertionError(__LINE__, errMsg(matrix))
+#define ASSERT_DIAGONAL(matrix) ASSERT_DIAGONAL_TOLERANT(matrix, 0.00000001)
+
 TEST_CASE(basicShapes) {
 	BoundingBox b{ -1, -1, -1, 1, 1, 1 };
 	Vec3 vecBuf[8];
@@ -132,4 +142,16 @@ TEST_CASE(cubeContainsPoint) {
 	ASSERT_FALSE(cube.containsPoint(Vec3(1.2, 1.2, 0.2)));
 	ASSERT_FALSE(cube.containsPoint(Vec3(1.2, 1.2, 1.2)));
 	ASSERT_FALSE(cube.containsPoint(Vec3(-0.2, -0.2, -0.2)));
+}
+
+TEST_CASE(shapeNormalization) {
+	Vec3 buf1[10]; Shape transformedHouse = house.globalToLocal(CFrame(Vec3(0.3, 0.7, -2.8), fromEulerAngles(0.5, -0.1, 0.9)), buf1);
+
+	double beginVolume = transformedHouse.getVolume();
+
+	transformedHouse.normalize();
+
+	ASSERT(transformedHouse.getVolume() == beginVolume);
+	ASSERT(transformedHouse.getCenterOfMass() == Vec3());
+	ASSERT_DIAGONAL(transformedHouse.getInertia());
 }

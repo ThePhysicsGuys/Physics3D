@@ -35,7 +35,28 @@ Triangle Triangle::leftShift() const { return Triangle{secondIndex, thirdIndex, 
 
 Shape::Shape() : vertices(nullptr), triangles(nullptr), vCount(0), tCount(0) {}
 
-Shape::Shape(const Vec3 * vertices, const Triangle * triangles, int vCount, int tCount) : vertices(vertices), triangles(triangles), vCount(vCount), tCount(tCount) {}
+Shape::Shape(Vec3 * vertices, Triangle * triangles, int vCount, int tCount) : vertices(vertices), triangles(triangles), vCount(vCount), tCount(tCount) {}
+
+CFrame Shape::normalize() {
+	CFrame transformation = getInertialNormalAxes();
+
+	for(Vec3& vertex : iterVertices())
+		vertex = transformation.globalToLocal(vertex);
+	
+	return transformation;
+}
+
+CFrame Shape::getInertialNormalAxes() const {
+	Vec3 centerOfMass = getCenterOfMass();
+
+	Mat3 inertia = getInertia(centerOfMass);
+
+	Mat3 basis = inertia.getEigenDecomposition().eigenVectors;
+
+	return CFrame(centerOfMass, basis);
+}
+
+// NormalizedShape::NormalizedShape(const Vec3 * vertices, const Triangle * triangles, int vCount, int tCount) {}
 
 Shape Shape::translated(Vec3 offset, Vec3 * newVecBuf) const {
 	for (int i = 0; i < this->vCount; i++) {
