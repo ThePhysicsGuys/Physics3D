@@ -40,7 +40,8 @@ TickerThread physicsThread;
 
 void init();
 void setupPhysics();
-Part createVisiblePart(Shape s, double density, double friction);
+Part createVisiblePart(NormalizedShape s, CFrame position, double density, double friction);
+Part createVisiblePart(Shape s, CFrame position, double density, double friction);
 
 /*void debugCallback(unsigned  source, unsigned int type, unsigned int id, unsigned int severity, int length, const char* message, const void* userParam) {
 	if (type == GL_DEBUG_TYPE_ERROR) 
@@ -53,52 +54,53 @@ int main(void) {
 	init();
 
 
-	Vec3 newVerts[12];
+	/*Vec3 newVerts[12];
 	for(int i = 0; i < 12; i++) {
 		newVerts[i] = icosahedron.vertices[i] * 2;
-	}
+	}*/
 
-	// Part stallPart = createVisiblePart(*loadMesh((std::istream&) std::istringstream(getResourceAsString(STALL_MODEL))), 2, 0.7);
-	Part trianglePart = createVisiblePart(triangleShape, 10.0, 0.7);
-	Part boxPart = createVisiblePart(BoundingBox{-0.1, -0.7, -0.3, 0.1, 0.7, 0.3}.toShape(new Vec3[8]), 2.0, 0.7);
-	Part icosaPart = createVisiblePart(Shape(newVerts, icosahedron.triangles, 12, 20), 10, 0.7);
-	Part cubePart = createVisiblePart(createCube(1.0), 1.0, 0.0);
-	Part housePart = createVisiblePart(house, 1.0, 0.0);
+	Part cubePart = createVisiblePart(createCube(1.0), CFrame(Vec3(0.5, 1.9, 0.5), fromEulerAngles(1.5, 0.2, 0.3)), 1.0, 0.0);
+	Physical cube(cubePart);
+	world.addObject(cube);
 
-	
+	Part boxPart = createVisiblePart(BoundingBox{-0.1, -0.7, -0.3, 0.1, 0.7, 0.3}.toShape(new Vec3[8]), CFrame(Vec3(1.5, 0.7, 0.3), fromEulerAngles(0.0, 0.2, 0.0)), 2.0, 0.7);
+	Physical box(boxPart);
+	world.addObject(box);
 
-	// Log::fatal("Is the stall Valid? %s", (stallPart.hitbox.isValid())? "yes" : "No :(");
+	Part icosaPart = createVisiblePart(icosahedron, CFrame(Vec3(0.0, 2.0, 3.0), fromEulerAngles(0.1, 0.1, 0.1)), 10, 0.7);
+	Physical icosa(icosaPart);
+	world.addObject(icosa);
 
-	Part veryLongBoxPart = createVisiblePart(BoundingBox{-0.1, -10, -0.1, 0.1, 10, 0.1}.toShape(new Vec3[8]), 1.0, 1.0);
-	Physical veryLongBoxPhysical(veryLongBoxPart, CFrame(Vec3(0.0, 10.0, 0.0), rotX(0.001)));
+	Part veryLongBoxPart = createVisiblePart(BoundingBox{-0.1, -10, -0.1, 0.1, 10, 0.1}.toShape(new Vec3[8]), CFrame(Vec3(0.0, 10.0, 0.0), rotX(0.001)), 1.0, 1.0);
+	Physical veryLongBoxPhysical(veryLongBoxPart);
 	world.addObject(veryLongBoxPhysical);
 
-	Physical cube(cubePart, CFrame(Vec3(0.5, 1.9, 0.5), fromEulerAngles(1.5, 0.2, 0.3)));
-	Physical box(boxPart, CFrame(Vec3(1.5, 0.7, 0.3), fromEulerAngles(0.0, 0.2, 0.0)));
-	Physical housePhysical(housePart, CFrame(Vec3(-1.5, 1.0, 0.0), fromEulerAngles(0.7, 0.9, 0.7)));
-	Physical icosa(icosaPart, CFrame(Vec3(0.0, 2.0, 3.0), fromEulerAngles(0.1, 0.1, 0.1)));
-	// Physical stall(stallPart, CFrame(Vec3(-2.0, 2.0, -2.0), fromEulerAngles(0.0, 0.0, 0.0)));
-
-	world.addObject(cube);
-	world.addObject(box);
+	Part housePart = createVisiblePart(house, CFrame(Vec3(-1.5, 1.0, 0.0), fromEulerAngles(0.7, 0.9, 0.7)), 1.0, 0.0);
+	Physical housePhysical(housePart);
 	world.addObject(housePhysical);
-	world.addObject(icosa);
-	// world.addObject(stall);
 
-	CFrame rotation = CFrame(fromEulerAngles(0.0, 0.5, 0.0));
+	Shape stallShape = loadMesh(std::istringstream(getResourceAsString(STALL_MODEL)));
+	Part stallPart = createVisiblePart(stallShape, CFrame(Vec3(-2.0, 10.0, -2.0), fromEulerAngles(0.9, 0.1, 0.5)), 2, 0.7);
+	Physical stall(stallPart);
+	world.addObject(stall);
+	// Log::fatal("Is the stall Valid? %s", (stallPart.hitbox.isValid())? "yes" : "No :(");
 
+	Part trianglePart = createVisiblePart(triangleShape, CFrame(Vec3(-2.0, 1.0, -2.0)), 10.0, 0.7);
+	world.addObject(Physical(trianglePart));
 
-	Vec3 vertss[]{Vec3(0,0,0), Vec3(1,0,0), Vec3(0,1,0)};
+	/*Vec3 vertss[]{Vec3(0,0,0), Vec3(1,0,0), Vec3(0,1,0)};
 	Triangle triangless[]{Triangle{0,1,2}};
 
 	Shape singleTriangle(vertss, triangless, 3, 1);
 
 	Part specialTriangle = createVisiblePart(singleTriangle, 1.0, 1.0);
 	Physical t(specialTriangle, CFrame());
-	world.addObject(t);
+	world.addObject(t);*/
+
+	CFrame rotation = CFrame(fromEulerAngles(0.0, 0.5, 0.0));
 
 	for(Physical& p: world.physicals) {
-		p.cframe = rotation.localToGlobal(p.cframe);
+		p.part.cframe = rotation.localToGlobal(p.part.cframe);
 	}
 
 	/* Loop until the user closes the window */
@@ -189,10 +191,18 @@ void setupPhysics() {
 	});
 }
 
-Part createVisiblePart(Shape s, double density, double friction) {
+Part createVisiblePart(NormalizedShape s, CFrame position, double density, double friction) {
 	int id = screen.addMeshShape(s);
 
-	Part p(s, density, friction);
+	Part p(s, position, density, friction);
+	p.drawMeshId = id;
+	return p;
+}
+Part createVisiblePart(Shape s, CFrame position, double density, double friction) {
+	Part p(s, position, density, friction);
+
+	int id = screen.addMeshShape(p.hitbox);
+
 	p.drawMeshId = id;
 	return p;
 }

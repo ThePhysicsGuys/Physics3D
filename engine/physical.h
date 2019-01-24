@@ -10,20 +10,20 @@ typedef Vec3 Vec3Relative;
 
 struct Physical {
 	Part part;
-	CFrame cframe;
+	// CFrame cframe;
 	Vec3 velocity = Vec3();
 	Vec3 angularVelocity = Vec3();
 
 	Vec3 totalForce = Vec3();
 	Vec3 totalMoment = Vec3();
 
-	Vec3 com;
+	// Vec3 com;
 
 	double mass;
 	Mat3 inertia;
 
-	Physical(Part p, CFrame cframe);
-	Physical(Part p, CFrame cframe, double mass, Vec3 centerOfMass, Mat3 inertia);
+	Physical(Part p);
+	// Physical(Part p, CFrame partNormalization, CFrame cframe, double mass, Vec3 centerOfMass, Mat3 inertia);
 
 	void update(double deltaT);
 	void applyForceAtCenterOfMass(Vec3 force);

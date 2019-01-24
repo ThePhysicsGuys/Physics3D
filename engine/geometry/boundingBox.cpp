@@ -23,7 +23,7 @@ bool BoundingBox::containsPoint(Vec3 point) const {
 		point.z >= zmin && point.z <= zmax;
 }
 
-Shape BoundingBox::toShape(Vec3 vertBuf[8]) const {
+NormalizedShape BoundingBox::toShape(Vec3 vertBuf[8]) const {
 	vertBuf[0] = Vec3(xmin, ymin, zmin);
 	vertBuf[1] = Vec3(xmax, ymin, zmin);
 	vertBuf[2] = Vec3(xmax, ymax, zmin);
@@ -32,5 +32,5 @@ Shape BoundingBox::toShape(Vec3 vertBuf[8]) const {
 	vertBuf[5] = Vec3(xmax, ymin, zmax);
 	vertBuf[6] = Vec3(xmax, ymax, zmax);
 	vertBuf[7] = Vec3(xmin, ymax, zmax);
-	return Shape(vertBuf, triangles, 8, 12);
+	return NormalizedShape(vertBuf, triangles, 8, 12);
 }

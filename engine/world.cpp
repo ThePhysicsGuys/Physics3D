@@ -21,17 +21,19 @@ void World::tick(double deltaT) {
 	for(int i = 0; i < physicals.size(); i++) {
 		const Shape& curShape = physicals[i].part.hitbox;
 
-		transformedShapes[i] = curShape.localToGlobal(physicals[i].cframe, vecBufIndex);
+		transformedShapes[i] = curShape.localToGlobal(physicals[i].part.cframe, vecBufIndex);
 		vecBufIndex += curShape.vCount;
 	}
 
 	applyExternalForces(transformedShapes);
 
-	for (Physical& p : physicals) {
+	for (int i = 0; i < physicals.size(); i++) {
+		Physical& p = physicals[i];
 		p.update(deltaT);
 
 		Debug::logVec(p.getCenterOfMass(), p.angularVelocity, Debug::ANGULAR_VELOCITY);
-		Debug::logCFrame(p.cframe, Debug::OBJECT_CFRAME);
+		Debug::logCFrame(p.part.cframe, Debug::OBJECT_CFRAME);
+		// Debug::logCFrame(transformedShapes[i].getInertialEigenVectors(), Debug::INERTIAL_CFRAME);
 	}
 }
 
@@ -42,9 +44,19 @@ size_t World::getTotalVertexCount() {
 	return total;
 }
 
-void World::addObject(Physical p) {
+void World::addObject(Physical& p) {
 	physicals.push_back(p);
 }
+
+Physical& World::addObject(Shape s, CFrame location, double density, double friction) {
+	Part part(s, location, density, friction);
+
+	Physical newPhysical(part);
+
+	addObject(newPhysical);
+
+	return newPhysical;
+};
 
 void World::applyExternalForces(const Shape* transformedShapes) {}
 

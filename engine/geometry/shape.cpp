@@ -35,18 +35,18 @@ Triangle Triangle::leftShift() const { return Triangle{secondIndex, thirdIndex, 
 
 Shape::Shape() : vertices(nullptr), triangles(nullptr), vCount(0), tCount(0) {}
 
-Shape::Shape(Vec3 * vertices, Triangle * triangles, int vCount, int tCount) : vertices(vertices), triangles(triangles), vCount(vCount), tCount(tCount) {}
+Shape::Shape(Vec3 * vertices, const Triangle * triangles, int vCount, int tCount) : vertices(vertices), triangles(triangles), vCount(vCount), tCount(tCount) {}
 
-CFrame Shape::normalize() {
-	CFrame transformation = getInertialNormalAxes();
+NormalizedShape Shape::normalized(Vec3* vecBuf, CFrame& backTransformation) const {
+	backTransformation = getInertialEigenVectors();
 
-	for(Vec3& vertex : iterVertices())
-		vertex = transformation.globalToLocal(vertex);
+	for(int i = 0; i < vCount; i++)
+		vecBuf[i] = backTransformation.globalToLocal(vertices[i]);
 	
-	return transformation;
+	return NormalizedShape(vecBuf, triangles, vCount, tCount);
 }
 
-CFrame Shape::getInertialNormalAxes() const {
+CFrame Shape::getInertialEigenVectors() const {
 	Vec3 centerOfMass = getCenterOfMass();
 
 	Mat3 inertia = getInertia(centerOfMass);
@@ -56,7 +56,16 @@ CFrame Shape::getInertialNormalAxes() const {
 	return CFrame(centerOfMass, basis);
 }
 
-// NormalizedShape::NormalizedShape(const Vec3 * vertices, const Triangle * triangles, int vCount, int tCount) {}
+NormalizedShape::NormalizedShape(Vec3 * vertices, const Triangle * triangles, int vertexCount, int triangleCount) : Shape(vertices, triangles, vertexCount, triangleCount) {};
+
+/*
+	Creates a normalized shape
+
+	Modifies `vertices`
+*/
+NormalizedShape::NormalizedShape(Vec3 * vertices, const Triangle * triangles, int vCount, int tCount, CFrame& transformation) : Shape(vertices, triangles, vCount, tCount) {
+	this->normalized(vertices, transformation);
+}
 
 Shape Shape::translated(Vec3 offset, Vec3 * newVecBuf) const {
 	for (int i = 0; i < this->vCount; i++) {

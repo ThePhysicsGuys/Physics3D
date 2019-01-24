@@ -7,19 +7,21 @@
 
 
 
-Physical::Physical(Part p, CFrame cframe) : part(p), cframe(cframe), mass(p.hitbox.getVolume() * p.properties.density), 
-											com(p.hitbox.getCenterOfMass()), inertia(p.hitbox.getInertia(com) * p.properties.density) {}
+Physical::Physical(Part p) : part(p) {
+	this->mass = p.hitbox.getVolume() * p.properties.density;
+	this->inertia = p.hitbox.getInertia() * p.properties.density;
+}
 
-Physical::Physical(Part p, CFrame cframe, double mass, Vec3 centerOfMass, Mat3 inertia) : part(p), cframe(cframe), mass(mass), com(centerOfMass), inertia(inertia) {}
+// Physical::Physical(Part p, CFrame partNormalization, CFrame cframe, double mass, Vec3 centerOfMass, Mat3 inertia) : part(p), cframe(cframe), mass(mass), com(centerOfMass), inertia(inertia) {}
+
+// Physical::Physical(NormalizedShape s, CFrame cframe, double density) : part(s, density, 0.1) {}
 
 void Physical::update(double deltaT) {
 	Vec3 accel = totalForce * (deltaT/mass);
 	
-	Vec3 localMoment = cframe.relativeToLocal(totalMoment);
+	Vec3 localMoment = part.cframe.relativeToLocal(totalMoment);
 	Vec3 localRotAcc = ~inertia * localMoment * deltaT;
-	Vec3 rotAcc = cframe.localToRelative(localRotAcc);
-
-	//Vec3 rotAcc = totalMoment * deltaT;
+	Vec3 rotAcc = part.cframe.localToRelative(localRotAcc);
 
 	totalForce = Vec3();
 	totalMoment = Vec3();
@@ -28,13 +30,11 @@ void Physical::update(double deltaT) {
 	angularVelocity += rotAcc;
 
 	Vec3 movement = velocity * deltaT;
-	
+
 	Mat3 rotation = fromRotationVec(angularVelocity * deltaT);
 
-	Vec3 relCOM = cframe.rotation * com;
-
-	cframe.translate(movement + (relCOM - rotation * relCOM));
-	cframe.rotate(rotation);
+	part.cframe.translate(movement);
+	part.cframe.rotate(rotation);
 }
 
 void Physical::applyForceAtCenterOfMass(Vec3 force) {
@@ -57,9 +57,9 @@ void Physical::applyMoment(Vec3 moment) {
 }
 
 Vec3 Physical::getCenterOfMass() {
-	return cframe.localToGlobal(com);
+	return part.cframe.position;
 }
 
 Vec3 Physical::getVelocityOfPoint(Vec3Relative point) {
-	return velocity + point % angularVelocity;
+	return velocity + angularVelocity % point;
 }

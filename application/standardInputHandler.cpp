@@ -47,7 +47,7 @@ void StandardInputHandler::mouseDown(int button, int mods) {
 
 	(*screen->eventHandler.physicalClickHandler) (screen, screen->intersectedPhysical, screen->intersectedPoint);
 	if (screen->intersectedPhysical != nullptr) {
-		screen->world->localSelectedPoint = screen->selectedPhysical->cframe.globalToLocal(screen->intersectedPoint);
+		screen->world->localSelectedPoint = screen->selectedPhysical->part.cframe.globalToLocal(screen->intersectedPoint);
 	}
 };
 

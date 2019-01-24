@@ -271,7 +271,7 @@ void Screen::refresh() {
 			basicShader.setUniform("color", Vec3f(0.3, 0.4, 0.2));
 
 		// Render each physical
-		Mat4f transformation = physical.cframe.asMat4f();
+		Mat4f transformation = physical.part.cframe.asMat4f();
 		basicShader.setUniform("modelMatrix", transformation);
 		meshes[meshId]->render();    
 	}
