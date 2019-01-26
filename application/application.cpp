@@ -8,6 +8,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <istream>
 
 #include "gui/screen.h"
 
@@ -78,15 +79,16 @@ int main(void) {
 	Part housePart = createVisiblePart(house, CFrame(Vec3(-1.5, 1.0, 0.0), fromEulerAngles(0.7, 0.9, 0.7)), 1.0, 0.0);
 	Physical housePhysical(housePart);
 	world.addObject(housePhysical);
-
-	Shape stallShape = loadMesh(std::istringstream(getResourceAsString(STALL_MODEL)));
+	std::istringstream s = std::istringstream(getResourceAsString(STALL_MODEL));
+	Shape stallShape = loadMesh(s);
 	Part stallPart = createVisiblePart(stallShape, CFrame(Vec3(-2.0, 10.0, -2.0), fromEulerAngles(0.9, 0.1, 0.5)), 2, 0.7);
 	Physical stall(stallPart);
 	world.addObject(stall);
 	// Log::fatal("Is the stall Valid? %s", (stallPart.hitbox.isValid())? "yes" : "No :(");
 
 	Part trianglePart = createVisiblePart(triangleShape, CFrame(Vec3(-2.0, 1.0, -2.0)), 10.0, 0.7);
-	world.addObject(Physical(trianglePart));
+	Physical p = Physical(trianglePart);
+	world.addObject(p);
 
 	/*Vec3 vertss[]{Vec3(0,0,0), Vec3(1,0,0), Vec3(0,1,0)};
 	Triangle triangless[]{Triangle{0,1,2}};

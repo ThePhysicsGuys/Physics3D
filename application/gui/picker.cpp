@@ -63,7 +63,7 @@ void moveGrabbedPhysicalLateral(Screen* screen) {
 	if (isPaused()) {
 		Vec3 translation = planeIntersection - screen->selectedPoint;
 		screen->selectedPoint += translation;
-		screen->selectedPhysical->cframe.translate(translation);
+		screen->selectedPhysical->part.cframe.translate(translation);
 	} else {
 		screen->world->selectedPhysical = screen->selectedPhysical;
 		screen->world->magnetPoint = planeIntersection;
@@ -82,7 +82,7 @@ void moveGrabbedPhysicalTransversal(Screen* screen, double dz) {
 	Vec3 translation = -cameraYDirection * dz;
 	if (isPaused()) {
 		screen->selectedPoint += translation;
-		screen->selectedPhysical->cframe.translate(translation);
+		screen->selectedPhysical->part.cframe.translate(translation);
 	} else {
 		Log::debug("%s", str(planeIntersection).c_str());
 		screen->world->selectedPhysical = screen->selectedPhysical;
