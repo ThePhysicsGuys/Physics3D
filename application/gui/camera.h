@@ -42,8 +42,8 @@ public:
 	}
 
 	void move(double dx, double dy, double dz) {
-		Vec3 cameraRotationZ = cframe.rotation * Vec3(0, 0, 1);
-		Vec3 cameraRotationX = cframe.rotation * Vec3(1, 0, 0);
+		Vec3 cameraRotationZ = (cframe.rotation * Vec3(0, 0, 1)).normalize();
+		Vec3 cameraRotationX = (cframe.rotation * Vec3(1, 0, 0)).normalize();
 		Vec3 translation = Vec3(cameraRotationZ.z * dx + cameraRotationX.z * dz, dy, cameraRotationZ.x * dx + cameraRotationX.x * dz);
 		cframe.translate(translation);
 		/*Vec3 translationxz = cframe.rotation * Vec3(dx, 0, dz);

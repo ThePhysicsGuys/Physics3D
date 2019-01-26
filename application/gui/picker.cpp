@@ -52,7 +52,9 @@ void updateIntersectedPhysical(Screen* screen, std::vector<Physical>& physicals,
 }
 
 void moveGrabbedPhysicalLateral(Screen* screen) {
-	/*Mat3 cameraFrame = (rotX(screen->camera.rotation.x) * rotY(screen->camera.rotation.y) * rotZ(screen->camera.rotation.z)).transpose();
+	if (screen->selectedPhysical == nullptr) return;
+
+	Mat3 cameraFrame = (screen->camera.cframe.rotation).transpose();
 	Vec3 cameraDirection = cameraFrame * Vec3(0, 0, 1);
 
 	double distance = (screen->selectedPoint - screen->camera.cframe.position) * cameraDirection / (screen->ray * cameraDirection);
@@ -65,14 +67,14 @@ void moveGrabbedPhysicalLateral(Screen* screen) {
 	} else {
 		screen->world->selectedPhysical = screen->selectedPhysical;
 		screen->world->magnetPoint = planeIntersection;
-	}*/
+	}
 }
 
 void moveGrabbedPhysicalTransversal(Screen* screen, double dz) {
-	/*Mat3 cameraYFrame = rotY(screen->camera.rotation.y);
-	Vec3 cameraYDirection = cameraYFrame * Vec3(0, 0, 1);
-	Mat3 cameraFrame = (rotX(screen->camera.rotation.x) * rotY(screen->camera.rotation.y) * rotZ(screen->camera.rotation.z)).transpose();
+	//Mat3 cameraYFrame = rotY(screen->camera.rotation.y);
+	Mat3 cameraFrame = (screen->camera.cframe.rotation).transpose();
 	Vec3 cameraDirection = cameraFrame * Vec3(0, 0, 1);
+	Vec3 cameraYDirection = Vec3(cameraDirection.x, 0, cameraDirection.z);
 
 	double distance = (screen->selectedPoint - screen->camera.cframe.position) * cameraDirection / (screen->ray * cameraDirection);
 	Vec3 planeIntersection = screen->camera.cframe.position + distance * screen->ray;
@@ -87,5 +89,5 @@ void moveGrabbedPhysicalTransversal(Screen* screen, double dz) {
 		screen->world->magnetPoint = planeIntersection + translation;
 		Log::debug("%s", str(planeIntersection).c_str());
 
-	}*/
+	}
 }
