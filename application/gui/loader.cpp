@@ -8,8 +8,8 @@
 #include "../engine/math/vec3.h"
 #include "../engine/geometry/shape.h"
 
+const int NO_VALUE = -1;
 struct IndexGroup {
-	int NO_VALUE = -1;
 	int position;
 
 	IndexGroup() {
@@ -17,7 +17,7 @@ struct IndexGroup {
 	}
 };
 
-std::vector<std::string> split(std::string &string, char splitter) {
+std::vector<std::string> split(const std::string& string, char splitter) {
 	std::vector<std::string> elements;
 	int length = string.length();
 	int start = 0;
@@ -50,7 +50,7 @@ struct Face {
 	}
 };
 
-Shape* reorderLists(std::vector<Vec3> positions, std::vector<Face> faces) {
+Shape reorderLists(const std::vector<Vec3>& positions, const std::vector<Face>& faces) {
 	std::vector<unsigned int> indicesVector;
 
 	for (Face face : faces) {
@@ -59,12 +59,20 @@ Shape* reorderLists(std::vector<Vec3> positions, std::vector<Face> faces) {
 		}
 	}
 
-	Shape* shape = new Shape(&positions[0], reinterpret_cast<Triangle*>(&indicesVector[0]), positions.size(), faces.size());
+	Vec3* newPositions = new Vec3[positions.size()];
+	Triangle* newTriangles = new Triangle[faces.size()];
+	for(int i = 0; i < positions.size(); i++)
+		newPositions[i] = positions[i];
+	
+	for(int i = 0; i < faces.size(); i++) {
+		const IndexGroup* indexes = faces[i].indexGroups;
+		newTriangles[i] = Triangle{static_cast<unsigned int>(indexes[0].position), static_cast<unsigned int>(indexes[1].position), static_cast<unsigned int>(indexes[2].position)};
+	}
 
-	return shape;
+	return Shape(newPositions, newTriangles, positions.size(), faces.size());
 }
 
-Shape* loadMesh(std::istream& stream) {
+Shape loadMesh(std::istream& stream) {
 	std::vector<Vec3> vertices;
 	std::vector<Face> faces;
 

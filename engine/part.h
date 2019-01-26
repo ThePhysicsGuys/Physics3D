@@ -4,13 +4,15 @@
 
 struct Part {
 public:
-	Shape hitbox;
+	NormalizedShape hitbox;
+	CFrame cframe;
 	int drawMeshId = 0;
 	struct {
 		double density;
 		double friction;
 	} properties;
 
-	Part();
-	Part(Shape s, double density, double friction);
+	// Part();
+	Part(NormalizedShape s, CFrame position, double density, double friction);
+	Part(Shape s, CFrame position, double density, double friction);
 };

@@ -20,7 +20,7 @@ Triangle icosahedronTriangles[] {
 	{10, 7 , 1}, {10, 9, 7 }, {9, 10, 6}, {9, 6 , 3}, {3, 6, 5 },
 };
 
-const Shape icosahedron(icosahedronVertices, icosahedronTriangles, 12, 20);
+const NormalizedShape icosahedron(icosahedronVertices, icosahedronTriangles, 12, 20);
 
 // Test shape
 Vec3 triangleShapeVecs[] {
@@ -54,10 +54,10 @@ Triangle houseTriangles[] {
 
 const Shape house(houseVertices, houseTriangles, 10, 16);
 
-Shape createCube(double side) {
+NormalizedShape createCube(double side) {
 	return createBox(side, side, side);
 }
 
-Shape createBox(double width, double height, double length) {
+NormalizedShape createBox(double width, double height, double length) {
 	return BoundingBox{-width / 2, -height / 2, -length / 2, width / 2, height / 2, length / 2}.toShape(new Vec3[8]);
 }

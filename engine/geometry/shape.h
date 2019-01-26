@@ -2,6 +2,7 @@
 
 struct Triangle;
 struct Shape;
+struct NormalizedShape;
 
 #include "../math/vec3.h"
 #include "../math/vec4.h"
@@ -19,14 +20,12 @@ struct Triangle {
 	Triangle leftShift() const;
 };
 
-struct NormalizedShape;
-
 struct Shape {
 	struct TriangleIter {
-		Triangle* first;
+		const Triangle* first;
 		int size;
-		inline Triangle* begin() const { return first; };
-		inline Triangle* end() const { return first + size; };
+		inline const Triangle* begin() const { return first; };
+		inline const Triangle* end() const { return first + size; };
 	};
 	struct VertexIter {
 		Vec3* first;
@@ -36,21 +35,21 @@ struct Shape {
 	};
 
 	Vec3 * vertices;
-	Triangle * triangles;
+	const Triangle * triangles;
 	int vCount;
 	int tCount;
 
 	Shape();
-	Shape(Vec3 * vertices, Triangle * triangles, int vertexCount, int triangleCount);
+	Shape(Vec3 * vertices, const Triangle * triangles, int vertexCount, int triangleCount);
 
 	Shape translated(Vec3 offset, Vec3* newVecBuf) const;
 	Shape rotated(RotMat3 rotation, Vec3* newVecBuf) const;
 	Shape localToGlobal(CFrame frame, Vec3* newVecBuf) const;
 	Shape globalToLocal(CFrame frame, Vec3* newVecBuf) const;
 
-	CFrame normalize();
+	NormalizedShape normalized(Vec3* vecBuf, CFrame& backTransformation) const;
 
-	CFrame getInertialNormalAxes() const;
+	CFrame getInertialEigenVectors() const;
 
 	BoundingBox getBounds() const;
 
@@ -76,6 +75,8 @@ struct Shape {
 
 struct NormalizedShape : public Shape {
 	friend struct Shape;
+	NormalizedShape() : Shape() {}
+	NormalizedShape(Vec3 * vertices, const Triangle * triangles, int vertexCount, int triangleCount);
 private:
-	NormalizedShape(const Vec3 * vertices, const Triangle * triangles, int vertexCount, int triangleCount);
+	NormalizedShape(Vec3 * vertices, const Triangle * triangles, int vertexCount, int triangleCount, CFrame& transformation);
 };

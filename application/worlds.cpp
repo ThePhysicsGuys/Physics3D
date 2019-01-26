@@ -14,7 +14,7 @@ void GravityFloorWorld::applyExternalForces(const Shape* transformedShapes) {
 
 		// Magnet force
 		if (selectedPhysical == &physical) {
-			Vec3 absoluteSelectedPoint = physical.cframe.localToGlobal(localSelectedPoint);
+			Vec3 absoluteSelectedPoint = physical.part.cframe.localToGlobal(localSelectedPoint);
 			Vec3 delta = magnetPoint - absoluteSelectedPoint;
 			Vec3 relativeSelectedPointSpeed = physical.getVelocityOfPoint(absoluteSelectedPoint - physical.getCenterOfMass());
 			Vec3 force = physical.mass * delta * 20 - relativeSelectedPointSpeed;
@@ -36,7 +36,7 @@ void GravityFloorWorld::applyExternalForces(const Shape* transformedShapes) {
 
 				if (downwardSpeed < 0) {
 					Vec3 relativePos = vertex - physical.getCenterOfMass();
-					physical.applyForce(relativePos, gravity * (downwardSpeed * physical.mass * 0.001));
+					physical.applyForce(relativePos, gravity * (downwardSpeed * physical.mass * 1.0));
 
 					Debug::logVec(relativePos + physical.getCenterOfMass(), gravity * (downwardSpeed * physical.mass), Debug::INFO);
 				}

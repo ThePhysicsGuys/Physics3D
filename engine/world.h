@@ -25,7 +25,8 @@ public:
 	World& operator=(World&&) = delete;
 
 	void tick(double deltaT);
-	void addObject(Physical p);
+	void addObject(Physical& p);
+	Physical& addObject(Shape s, CFrame location, double density, double friction);
 
 	virtual void applyExternalForces(const Shape* transformedShapes);
 };

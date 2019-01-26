@@ -32,7 +32,7 @@ void updateIntersectedPhysical(Screen* screen, std::vector<Physical>& physicals,
 
 	for (Physical& physical : physicals) {
 		Vec3* buffer = new Vec3[physical.part.hitbox.vCount];
-		Shape transformed = physical.part.hitbox.localToGlobal(physical.cframe, buffer);
+		Shape transformed = physical.part.hitbox.localToGlobal(physical.part.cframe, buffer);
 		double distance = transformed.getIntersectionDistance(screen->camera.cframe.position, screen->ray);
 		if (distance < closestIntersectDistance && distance > 0) {
 			closestIntersectDistance = distance;
@@ -47,7 +47,7 @@ void updateIntersectedPhysical(Screen* screen, std::vector<Physical>& physicals,
 	} else {
 		closestIntersectedPoint = screen->camera.cframe.position + screen->ray * closestIntersectDistance;
 	}
-
+	
 	(*screen->eventHandler.physicalRayIntersectHandler) (screen, closestIntersectedPhysical, closestIntersectedPoint);
 }
 
