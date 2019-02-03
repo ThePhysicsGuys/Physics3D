@@ -269,7 +269,7 @@ Mat3 Shape::getInertia() const {
 }
 
 double Shape::getIntersectionDistance(Vec3 origin, Vec3 direction) {
-	const float EPSILON = 0.0000001;
+	const float EPSILON = 0.0000001f;
 	double t = INFINITY;
 	for (Triangle triangle : iterTriangles()) {
 		Vec3 v0 = vertices[triangle.firstIndex];

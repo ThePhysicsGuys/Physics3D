@@ -19,36 +19,32 @@ TEST_CASE(positionInvariance) {
 
 	Vec3 origins[]{Vec3(0,0,0), Vec3(0,0,1), Vec3(5.3,0,-2.4),Vec3(0.3,0,0.7),Vec3(0.0000001,0,0.00000001)};
 
-	Part housePart(house, 1.0, 1.0);
-	Part icosaPart(icosahedron, 10.0, 0.7);
-
 	CFrame houseRelative(Vec3(0.7, 0.6, 1.6), fromEulerAngles(0.3, 0.7, 0.9));
 	CFrame icosaRelative(Vec3(0.7, 3.0, 1.6), fromEulerAngles(0.1, 0.1, 0.1));
 
 	for(Vec3 o:origins) {
 		CFrame origin(o, rotation);
 
-		Physical housePhysical(housePart, origin.localToGlobal(houseRelative));
-		Physical icosaPhysical(icosaPart, origin.localToGlobal(icosaRelative));
+		Part housePart(house, origin.localToGlobal(houseRelative), 1.0, 1.0);
+		Part icosaPart(icosahedron, origin.localToGlobal(icosaRelative), 10.0, 0.7);
 
 		GravityFloorWorld w(Vec3(0.0, -10.0, 0.0));
 
-		w.addObject(housePhysical);
-		w.addObject(icosaPhysical);
+		w.addObject(Physical(housePart));
+		w.addObject(Physical(icosaPart));
 
 		for(int i = 0; i < TICKS; i++)
 			w.tick(DELTA_T);
 
-		REMAINS_CONSTANT(origin.globalToLocal(w.physicals[0].cframe));
-		REMAINS_CONSTANT(origin.globalToLocal(w.physicals[1].cframe));
+		REMAINS_CONSTANT(origin.globalToLocal(w.physicals[0].part.cframe));
+		REMAINS_CONSTANT(origin.globalToLocal(w.physicals[1].part.cframe));
 	}
 }
 
 TEST_CASE(rotationInvariance) {
 	//Mat3 origins[]{fromEulerAngles(0,0,0), fromEulerAngles(0,1,0), fromEulerAngles(0,0.5,0), fromEulerAngles(0,-0.5,0),};
 
-	Part housePart(house, 1.0, 1.0);
-	Part icosaPart(icosahedron, 10.0, 0.7);
+	
 
 	CFrame houseRelative(Vec3(0.7, 0.6, 1.6), fromEulerAngles(0.3, 0.7, 0.9));
 	CFrame icosaRelative(Vec3(0.7, 3.0, 1.6), fromEulerAngles(0.1, 0.1, 0.1));
@@ -58,24 +54,24 @@ TEST_CASE(rotationInvariance) {
 
 		CFrame origin(Vec3(0,0,0), rotY(rotation));
 
-		Physical housePhysical(housePart, origin.localToGlobal(houseRelative));
-		Physical icosaPhysical(icosaPart, origin.localToGlobal(icosaRelative));
+		Part housePart(house, origin.localToGlobal(houseRelative), 1.0, 1.0);
+		Part icosaPart(icosahedron, origin.localToGlobal(icosaRelative), 10.0, 0.7);
 
 		GravityFloorWorld w(Vec3(0.0, -10.0, 0.0));
 
-		w.addObject(housePhysical);
-		w.addObject(icosaPhysical);
+		w.addObject(Physical(housePart));
+		w.addObject(Physical(icosaPart));
 
 		for(int i = 0; i < TICKS; i++)
 			w.tick(DELTA_T);
 
-		REMAINS_CONSTANT(origin.globalToLocal(w.physicals[0].cframe));
-		REMAINS_CONSTANT(origin.globalToLocal(w.physicals[1].cframe));
+		REMAINS_CONSTANT(origin.globalToLocal(w.physicals[0].part.cframe));
+		REMAINS_CONSTANT(origin.globalToLocal(w.physicals[1].part.cframe));
 	}
 }
 
 TEST_CASE(applyForceToRotate) {
-	Physical p = Physical(Part(createCube(1.0), 1.0, 1.0), CFrame(fromEulerAngles(0.3, 0.7, 0.9)));
+	Physical p = Physical(Part(createCube(1.0), CFrame(fromEulerAngles(0.3, 0.7, 0.9)), 1.0, 1.0));
 
 	Vec3 relAttach = Vec3(1.0, 0.0, 0.0);
 	Vec3 force = Vec3(0.0, 1.0, 0.0);
@@ -86,7 +82,7 @@ TEST_CASE(applyForceToRotate) {
 }
 
 TEST_CASE(momentToAngularVelocity) {
-	Physical p = Physical(Part(createCube(1.0), 1.0, 1.0), CFrame(rotY(PI/2)));
+	Physical p = Physical(Part(createCube(1.0), CFrame(rotY(PI / 2)), 1.0, 1.0));
 
 	Vec3 moment(1.0, 0.0, 0.0);
 
@@ -96,4 +92,17 @@ TEST_CASE(momentToAngularVelocity) {
 	}
 
 	ASSERT(p.angularVelocity == moment * 50 * 0.05 / p.inertia.m00);
+}
+
+TEST_CASE(rotationImpulse) {
+	Physical veryLongBoxPhysical(Part(BoundingBox{-0.1, -10, -0.1, 0.1, 10, 0.1}.toShape(new Vec3[8]), CFrame(Vec3()), 1.0, 1.0));
+
+	Vec3 xMoment = Vec3(1.0, 0.0, 0.0);
+	Vec3 yMoment = Vec3(0.0, 1.0, 0.0);
+	Vec3 zMoment = Vec3(0.0, 0.0, 1.0);
+
+	{
+		veryLongBoxPhysical.totalForce = Vec3();
+		veryLongBoxPhysical.totalMoment = Vec3();
+	}
 }

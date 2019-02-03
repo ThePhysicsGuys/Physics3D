@@ -27,6 +27,7 @@ public:
 	void tick(double deltaT);
 	void addObject(Physical& p);
 	Physical& addObject(Shape s, CFrame location, double density, double friction);
+	Physical& addObject(Part& p);
 
 	virtual void applyExternalForces(const Shape* transformedShapes);
 };

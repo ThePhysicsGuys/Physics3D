@@ -145,13 +145,16 @@ TEST_CASE(cubeContainsPoint) {
 }
 
 TEST_CASE(shapeNormalization) {
-	Vec3 buf1[10]; Shape transformedHouse = house.globalToLocal(CFrame(Vec3(0.3, 0.7, -2.8), fromEulerAngles(0.5, -0.1, 0.9)), buf1);
+	Vec3 buf1[10]; Vec3 buf2[10]; Shape transformedHouse = house.globalToLocal(CFrame(Vec3(0.3, 0.7, -2.8), fromEulerAngles(0.5, -0.1, 0.9)), buf1);
 
 	double beginVolume = transformedHouse.getVolume();
 
-	transformedHouse.normalize();
+	CFrame normalizationFrame;
 
-	ASSERT(transformedHouse.getVolume() == beginVolume);
-	ASSERT(transformedHouse.getCenterOfMass() == Vec3());
-	ASSERT_DIAGONAL(transformedHouse.getInertia());
+	NormalizedShape newShape = transformedHouse.normalized(buf2, normalizationFrame);
+
+	ASSERT(newShape.getVolume() == beginVolume);
+	ASSERT(newShape.getCenterOfMass() == Vec3());
+	ASSERT_DIAGONAL(newShape.getInertia());
+	ASSERT(normalizationFrame.position == transformedHouse.getCenterOfMass());
 }

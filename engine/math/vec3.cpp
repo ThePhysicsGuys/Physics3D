@@ -17,5 +17,5 @@ Vec3Template<N> Vec3Template<N>::abs() const {
 	return Vec3Template(fabs(x), fabs(y), fabs(z));
 }
 
-template class Vec3Template<double>;
-template class Vec3Template<float>;
+template struct Vec3Template<double>;
+template struct Vec3Template<float>;

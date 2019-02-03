@@ -11,13 +11,18 @@ struct NormalizedShape;
 #include "boundingBox.h"
 
 struct Triangle {
-	unsigned int firstIndex, secondIndex, thirdIndex;
+	union {
+		struct { unsigned int firstIndex, secondIndex, thirdIndex; };
+		unsigned int indexes[3];
+	};
+	
 
 	bool sharesEdgeWith(Triangle other) const;
 	Triangle operator~() const;
 	bool operator==(const Triangle& other) const;
 	Triangle rightShift() const;
 	Triangle leftShift() const;
+	inline unsigned int operator[](int i) const { return indexes[i]; };
 };
 
 struct Shape {

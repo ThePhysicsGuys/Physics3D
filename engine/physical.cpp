@@ -56,10 +56,10 @@ void Physical::applyMoment(Vec3 moment) {
 	Debug::logVec(getCenterOfMass(), moment, Debug::MOMENT);
 }
 
-Vec3 Physical::getCenterOfMass() {
+Vec3 Physical::getCenterOfMass() const {
 	return part.cframe.position;
 }
 
-Vec3 Physical::getVelocityOfPoint(Vec3Relative point) {
+Vec3 Physical::getVelocityOfPoint(Vec3Relative point) const {
 	return velocity + angularVelocity % point;
 }

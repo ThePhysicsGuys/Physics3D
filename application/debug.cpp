@@ -34,6 +34,7 @@ namespace AppDebug {
 	namespace Logging {
 		using namespace Debug;
 		void logVec(Vec3 origin, Vec3 vec, VecType type) {
+			/*if(!debug_enabled[type]) return;
 			double color;
 			switch (type) {
 			case INFO: color = 0.15; break;
@@ -43,20 +44,28 @@ namespace AppDebug {
 			case POSITION: color = 0.5; break;
 			case VELOCITY: color = 0.3; break;
 			case ANGULAR_VELOCITY: color = 0.75; break;
-			}
+			}*/
 
-			buf.add(ColoredVec(origin, vec, color));
+			// Log::debug("Added vec %s, %s, %d", str(origin).c_str(), str(vec).c_str(), type);
+
+			buf.add(ColoredVec(origin, vec, type));
 		}
 
 		void logCFrame(CFrame frame, CFrameType type) {
-			switch (type) {
-			case OBJECT_CFRAME:
+			switch(type) {
+			case OBJECT_CFRAME:{
 				Vec3 pos = frame.position;
 				RotMat3 rot = frame.rotation;
-				buf.add(ColoredVec(frame.position, rot * Vec3(1.0, 0.0, 0.0), 0.0));
-				buf.add(ColoredVec(frame.position, rot * Vec3(0.0, 1.0, 0.0), 0.3));
-				buf.add(ColoredVec(frame.position, rot * Vec3(0.0, 0.0, 1.0), 0.6));
-			}
+				// buf.add(ColoredVec(frame.position, rot * Vec3(1.0, 0.0, 0.0), 0.0));
+				// buf.add(ColoredVec(frame.position, rot * Vec3(0.0, 1.0, 0.0), 0.3));
+				// buf.add(ColoredVec(frame.position, rot * Vec3(0.0, 0.0, 1.0), 0.6));
+			}case INERTIAL_CFRAME: {
+				Vec3 pos = frame.position;
+				RotMat3 rot = frame.rotation;
+				// buf.add(ColoredVec(frame.position, rot * Vec3(1.0, 0.0, 0.0), 0.1));
+				// buf.add(ColoredVec(frame.position, rot * Vec3(0.0, 1.0, 0.0), 0.4));
+				// buf.add(ColoredVec(frame.position, rot * Vec3(0.0, 0.0, 1.0), 0.7));
+			}}
 		}
 	}
 
@@ -74,6 +83,9 @@ namespace AppDebug {
 		Debug::setCFrameLogAction(Logging::logCFrame);
 	}
 
+	/*
+		Returns a copy of the current vec buffer
+	*/
 	AddableBuffer<ColoredVec> getVecBuffer() {
 		return buf.getReadBuffer();
 	}

@@ -33,7 +33,7 @@ public:
 	SwappableBuffer& operator=(const SwappableBuffer&) = delete;
 
 
-	void add(const T& obj) {
+	inline void add(const T& obj) {
 		if (writeIndex == writeCapacity) {
 			writeCapacity *= 2;
 			T* newPtr = (T*)realloc(writeBuf, sizeof(T) * writeCapacity);
@@ -48,7 +48,7 @@ public:
 		writeBuf[writeIndex++] = obj;
 	}
 
-	void swap() {
+	inline void swap() {
 		lockRead();
 
 		T* tmpPtr = readData;
@@ -65,15 +65,15 @@ public:
 		unlockRead();
 	}
 
-	AddableBuffer<T> getReadBuffer() {
+	inline AddableBuffer<T> getReadBuffer() {
 		lockRead();
 		AddableBuffer<T> b(readData, readSize, readCapacity);
 		unlockRead();
 		return b;
 	}
 
-	void lockRead() { readLock.lock(); }
-	void unlockRead() { readLock.unlock(); }
+	inline void lockRead() { readLock.lock(); }
+	inline void unlockRead() { readLock.unlock(); }
 };
 
 template<typename T>
@@ -123,7 +123,7 @@ public:
 		buf.data = oldData;
 	}
 	
-	void add(const T& obj) {
+	inline void add(const T& obj) {
 		if (index == capacity) {
 			capacity *= 2;
 			T* newPtr = (T*)realloc(data, sizeof(T) * capacity);
@@ -136,5 +136,9 @@ public:
 		}
 
 		data[index++] = obj;
+	}
+
+	inline void clear() {
+		this->index = 0;
 	}
 };

@@ -87,6 +87,21 @@ Shader outlineShader;
 BoundingBox* box = nullptr;
 StandardInputHandler* handler = nullptr;
 
+using namespace Debug;
+std::map<VecType, bool> debug_enabled{{INFO, true},{VELOCITY, true},{FORCE, true},{POSITION, true},{MOMENT, true},{IMPULSE, true},{ANGULAR_VELOCITY , true}};
+
+std::map<VecType, double> vecColors{{INFO, 0.15},{VELOCITY, 0.3},{FORCE, 0.0},{POSITION, 0.5},{MOMENT, 0.1},{IMPULSE, 0.7},{ANGULAR_VELOCITY , 0.75}};
+/*if(!debug_enabled[type]) return;
+double color;
+switch (type) {
+case INFO: color = 0.15; break;
+case FORCE: color = 0.0; break;
+case MOMENT: color = 0.1; break;
+case IMPULSE: color = 0.7; break;
+case POSITION: color = 0.5; break;
+case VELOCITY: color = 0.3; break;
+case ANGULAR_VELOCITY: color = 0.75; break;
+}*/
 void Screen::init() {
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
@@ -244,6 +259,27 @@ void Screen::update() {
 	updateIntersectedPhysical(this, world->physicals, handler->curPos, screenSize, viewMatrix, projectionMatrix);
 }
 
+AddableBuffer<double> visibleVecs(700);
+
+void updateVecMesh(AppDebug::ColoredVec* data, size_t size) {
+	visibleVecs.clear();
+
+	for(size_t i = 0; i < size; i++) {
+		const AppDebug::ColoredVec& v = data[i];
+		if(debug_enabled[v.type]) {
+			visibleVecs.add(v.origin.x);
+			visibleVecs.add(v.origin.y);
+			visibleVecs.add(v.origin.z);
+			visibleVecs.add(v.vec.x);
+			visibleVecs.add(v.vec.y);
+			visibleVecs.add(v.vec.z);
+			visibleVecs.add(vecColors[v.type]);
+		}
+	}
+
+	vectorMesh->update(visibleVecs.data, visibleVecs.index / 7);
+}
+
 void Screen::refresh() {
 	// Clear GL buffer bits
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -277,7 +313,8 @@ void Screen::refresh() {
 	}
 
 	// Update vector mesh
-	vectorMesh->update((double*) vecLog.data, vecLog.index);
+	
+	updateVecMesh(vecLog.data, vecLog.index);
 
 	// Reset model matrix
 	basicShader.setUniform("modelMatrix", Mat4f());
@@ -320,3 +357,6 @@ int Screen::addMeshShape(Shape s) {
 	return size;
 }
 
+void Screen::toggleDebugVecType(Debug::VecType t) {
+	debug_enabled[t] = !debug_enabled[t];
+}

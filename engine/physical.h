@@ -30,6 +30,6 @@ struct Physical {
 	void applyForce(Vec3Relative origin, Vec3 force);
 	void applyMoment(Vec3 moment);
 
-	Vec3 getCenterOfMass();
-	Vec3 getVelocityOfPoint(Vec3Relative point);
+	Vec3 getCenterOfMass() const;
+	Vec3 getVelocityOfPoint(Vec3Relative point) const;
 };

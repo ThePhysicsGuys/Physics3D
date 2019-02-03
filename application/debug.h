@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../engine/debug.h"
+
 #include "../engine/math/vec3.h"
 #include "buffers.h"
 #include "../util/log.h"
@@ -21,8 +23,8 @@ bool logCall(const char* func, const char* file, int line);
 namespace AppDebug {
 	struct ColoredVec {
 		Vec3 origin, vec;
-		double color;
-		ColoredVec(Vec3 origin, Vec3 vec, double color) : origin(origin), vec(vec), color(color) {}
+		Debug::VecType type;
+		ColoredVec(Vec3 origin, Vec3 vec, Debug::VecType type) : origin(origin), vec(vec), type(type) {}
 	};
 
 	void setupDebugHooks();

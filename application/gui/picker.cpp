@@ -71,6 +71,8 @@ void moveGrabbedPhysicalLateral(Screen* screen) {
 }
 
 void moveGrabbedPhysicalTransversal(Screen* screen, double dz) {
+	if(screen->selectedPhysical == nullptr) return;
+
 	//Mat3 cameraYFrame = rotY(screen->camera.rotation.y);
 	Mat3 cameraFrame = (screen->camera.cframe.rotation).transpose();
 	Vec3 cameraDirection = cameraFrame * Vec3(0, 0, 1);

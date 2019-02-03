@@ -16,7 +16,8 @@ namespace Debug {
 	};
 
 	enum CFrameType {
-		OBJECT_CFRAME
+		OBJECT_CFRAME,
+		INERTIAL_CFRAME
 	};
 
 	void logVec(Vec3 origin, Vec3 vec, VecType type);

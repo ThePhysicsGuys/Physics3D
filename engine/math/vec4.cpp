@@ -7,5 +7,5 @@ N Vec4Template<N>::length() const {
 	return sqrt(lengthSquared());
 }
 
-template class Vec4Template<double>;
-template class Vec4Template<float>;
+template struct Vec4Template<double>;
+template struct Vec4Template<float>;

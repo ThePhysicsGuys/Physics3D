@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../../engine/debug.h"
 #include "../../engine/world.h"
 #include "../../engine/math/vec2.h"
 #include "../eventHandler.h"
@@ -46,4 +47,6 @@ public:
 	void setWorld(World* world) { this->world = world; };
 
 	int addMeshShape(Shape mesh);
+
+	void toggleDebugVecType(Debug::VecType t);
 };

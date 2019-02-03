@@ -4,8 +4,8 @@
 
 template<typename N>
 Mat3Template<N> rotX(N angle) {
-	double sina = sin(angle);
-	double cosa = cos(angle);
+	N sina = sin(angle);
+	N cosa = cos(angle);
 	return Mat3Template<N>
 			   (1,  0,    0,
 				0, cosa, sina,
@@ -13,8 +13,8 @@ Mat3Template<N> rotX(N angle) {
 }
 template<typename N>
 Mat3Template<N> rotY(N angle) {
-	double sina = sin(angle);
-	double cosa = cos(angle);
+	N sina = sin(angle);
+	N cosa = cos(angle);
 	return Mat3Template<N>
 			   (cosa, 0,-sina,
 				 0,   1,  0,

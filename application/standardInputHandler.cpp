@@ -32,10 +32,17 @@ void StandardInputHandler::keyDownOrRepeat(int key, int modifiers) {
 }
 
 void StandardInputHandler::keyDown(int key, int modifiers) {
-	if (key == GLFW_KEY_P) {
+	switch (key) {
+	case GLFW_KEY_P:
 		togglePause();
+		break;
+	}
+
+	if(key >= GLFW_KEY_F1 && key <= GLFW_KEY_F7) {
+		screen->toggleDebugVecType(static_cast<Debug::VecType>(key - GLFW_KEY_F1));
 	}
 };
+
 void StandardInputHandler::keyUp(int key, int modifiers) {};
 void StandardInputHandler::keyRepeat(int key, int modifiers) {};
 // void StandardInputHandler::mouseEnter() {};

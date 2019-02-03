@@ -253,4 +253,12 @@ struct Mat4Template {
 	}
 
 	CFrame asCFrame() const;
+
+	/*template<typename N>
+	Mat4Template<M> Mat4Template<M>() const {
+		return Mat4Template<M>(static_cast<M>(m00), static_cast<M>(m01), static_cast<M>(m02), static_cast<M>(m03), 
+							   static_cast<M>(m10), static_cast<M>(m11), static_cast<M>(m12), static_cast<M>(m13), 
+							   static_cast<M>(m20), static_cast<M>(m21), static_cast<M>(m22), static_cast<M>(m23), 
+							   static_cast<M>(m30), static_cast<M>(m31), static_cast<M>(m32), static_cast<M>(m33));
+	}*/
 };

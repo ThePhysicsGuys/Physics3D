@@ -28,7 +28,7 @@ void GravityFloorWorld::applyExternalForces(const Shape* transformedShapes) {
 			Vec3 vertex = transformed.vertices[i];
 
 			Vec3 velocityOfPoint = physical.getVelocityOfPoint(vertex - physical.getCenterOfMass());
-			Debug::logVec(transformed.vertices[i], velocityOfPoint, Debug::VELOCITY);
+			// Debug::logVec(transformed.vertices[i], velocityOfPoint, Debug::VELOCITY);
 
 			if(vertex.y < 0) {
 

@@ -60,35 +60,35 @@ int main(void) {
 		newVerts[i] = icosahedron.vertices[i] * 2;
 	}*/
 
-	Part cubePart = createVisiblePart(createCube(1.0), CFrame(Vec3(0.5, 1.9, 0.5), fromEulerAngles(1.5, 0.2, 0.3)), 1.0, 0.0);
-	Physical cube(cubePart);
-	world.addObject(cube);
+	// world.addObject(createVisiblePart(createCube(1.0), CFrame(Vec3(0.5, 1.9, 0.5), fromEulerAngles(1.5, 0.2, 0.3)), 1.0, 0.0));
 
 	Part boxPart = createVisiblePart(BoundingBox{-0.1, -0.7, -0.3, 0.1, 0.7, 0.3}.toShape(new Vec3[8]), CFrame(Vec3(1.5, 0.7, 0.3), fromEulerAngles(0.0, 0.2, 0.0)), 2.0, 0.7);
-	Physical box(boxPart);
-	world.addObject(box);
+	world.addObject(boxPart);
+
+
+
+	world.addObject(createVisiblePart(createBox(0.7, 0.2, 0.7), CFrame(Vec3(0, 0.2, 0.0), fromEulerAngles(0.0, 0.0, 0.0)), 2.0, 0.7));
+	world.addObject(createVisiblePart(createBox(0.5, 0.15, 0.5), CFrame(Vec3(0, 0.4, 0.0), fromEulerAngles(0.0, 0.0, 0.0)), 2.0, 0.7));
+	world.addObject(createVisiblePart(createBox(0.3, 0.1, 0.3), CFrame(Vec3(0, 0.6, 0.0), fromEulerAngles(0.0, 0.0, 0.0)), 2.0, 0.7));
+
 
 	Part icosaPart = createVisiblePart(icosahedron, CFrame(Vec3(0.0, 2.0, 3.0), fromEulerAngles(0.1, 0.1, 0.1)), 10, 0.7);
-	Physical icosa(icosaPart);
-	world.addObject(icosa);
+	world.addObject(icosaPart);
 
-	Part veryLongBoxPart = createVisiblePart(BoundingBox{-0.1, -10, -0.1, 0.1, 10, 0.1}.toShape(new Vec3[8]), CFrame(Vec3(0.0, 10.0, 0.0), rotX(0.001)), 1.0, 1.0);
-	Physical veryLongBoxPhysical(veryLongBoxPart);
-	world.addObject(veryLongBoxPhysical);
+	/*Part veryLongBoxPart = createVisiblePart(BoundingBox{-0.1, -10, -0.1, 0.1, 10, 0.1}.toShape(new Vec3[8]), CFrame(Vec3(0.0, 10.0, 0.0), rotX(0.001)), 1.0, 1.0);
+	world.addObject(veryLongBoxPart);*/
 
 	Part housePart = createVisiblePart(house, CFrame(Vec3(-1.5, 1.0, 0.0), fromEulerAngles(0.7, 0.9, 0.7)), 1.0, 0.0);
-	Physical housePhysical(housePart);
-	world.addObject(housePhysical);
-	std::istringstream s = std::istringstream(getResourceAsString(STALL_MODEL));
+	world.addObject(housePart);
+
+	/*std::istringstream s = std::istringstream(getResourceAsString(STALL_MODEL));
 	Shape stallShape = loadMesh(s);
 	Part stallPart = createVisiblePart(stallShape, CFrame(Vec3(-2.0, 10.0, -2.0), fromEulerAngles(0.9, 0.1, 0.5)), 2, 0.7);
-	Physical stall(stallPart);
-	world.addObject(stall);
+	world.addObject(stallPart);*/
 	// Log::fatal("Is the stall Valid? %s", (stallPart.hitbox.isValid())? "yes" : "No :(");
 
 	Part trianglePart = createVisiblePart(triangleShape, CFrame(Vec3(-2.0, 1.0, -2.0)), 10.0, 0.7);
-	Physical p = Physical(trianglePart);
-	world.addObject(p);
+	world.addObject(trianglePart);
 
 	/*Vec3 vertss[]{Vec3(0,0,0), Vec3(1,0,0), Vec3(0,1,0)};
 	Triangle triangless[]{Triangle{0,1,2}};
