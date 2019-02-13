@@ -1,11 +1,17 @@
 #include "eventHandler.h"
 
+#include "gui\screen.h"
+
 void* EventHandler::getPtr() const {
 	return pointer;
 }
 
 void EventHandler::setPtr(void* ptr) {
 	pointer = ptr;
+}
+
+void EventHandler::setCameraMoveHandler(CameraMoveHandler handler) {
+	cameraMoveHandler = handler;
 }
 
 void EventHandler::setPhysicalRayIntersectCallback(PhysicalRayIntersectHandler handler) {

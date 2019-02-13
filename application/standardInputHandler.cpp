@@ -3,16 +3,11 @@
 #include "application.h"
 #include "gui/picker.h"
 
-StandardInputHandler::StandardInputHandler(GLFWwindow* window, Screen* screen) : InputHandler(window) {
-	this->screen = screen;
-}
+StandardInputHandler::StandardInputHandler(GLFWwindow* window, Screen& screen) : InputHandler(window), screen(screen) {}
 
 void StandardInputHandler::framebufferResize(int width, int height) {
-	/*int left, top, right, bottom;
-	glfwGetWindowFrameSize(window, &left, &top, &right, &bottom);
-	glViewport(left, bottom, width - right, height - top);*/
 	glViewport(0, 0, width, height);
-	screen->screenSize = Vec2(width, height);
+	screen.screenSize = Vec2(width, height);
 }
 
 void StandardInputHandler::keyDownOrRepeat(int key, int modifiers) {
@@ -39,7 +34,7 @@ void StandardInputHandler::keyDown(int key, int modifiers) {
 	}
 
 	if(key >= GLFW_KEY_F1 && key <= GLFW_KEY_F7) {
-		screen->toggleDebugVecType(static_cast<Debug::VecType>(key - GLFW_KEY_F1));
+		screen.toggleDebugVecType(static_cast<Debug::VecType>(key - GLFW_KEY_F1));
 	}
 };
 
@@ -52,9 +47,9 @@ void StandardInputHandler::mouseDown(int button, int mods) {
 	if (button == GLFW_MOUSE_BUTTON_MIDDLE) middleDragging = true;
 	if (button == GLFW_MOUSE_BUTTON_LEFT) leftDragging = true;
 
-	(*screen->eventHandler.physicalClickHandler) (screen, screen->intersectedPhysical, screen->intersectedPoint);
-	if (screen->intersectedPhysical != nullptr) {
-		screen->world->localSelectedPoint = screen->selectedPhysical->part.cframe.globalToLocal(screen->intersectedPoint);
+	(*screen.eventHandler.physicalClickHandler) (screen, screen.intersectedPhysical, screen.intersectedPoint);
+	if (screen.intersectedPhysical != nullptr) {
+		screen.world->localSelectedPoint = screen.selectedPhysical->part.cframe.globalToLocal(screen.intersectedPoint);
 	}
 };
 
@@ -67,7 +62,7 @@ void StandardInputHandler::mouseUp(int button, int mods) {
 void StandardInputHandler::mouseMove(double x, double y) {
 	// Camera rotating
 	if (rightDragging) {
-		screen->camera.rotate(Vec3((y - curPos.y) * 0.01, (x - curPos.x) * 0.01, 0));
+		screen.camera.rotate(screen, Vec3((y - curPos.y) * 0.01, (x - curPos.x) * 0.01, 0), leftDragging);
 	}
 
 	if (leftDragging) {
@@ -76,23 +71,23 @@ void StandardInputHandler::mouseMove(double x, double y) {
 		double dmy = (y - curPos.y) * -speed;
 		
 		// Phyiscal moving
-		if (screen->selectedPhysical != nullptr) {
+		if (screen.selectedPhysical != nullptr) {
 			moveGrabbedPhysicalLateral(screen);
 		}
 	} else {
-		screen->world->selectedPhysical = nullptr;
+		screen.world->selectedPhysical = nullptr;
 	}
 
 	// Camera moving
 	if (middleDragging) {
-		screen->camera.move(Vec3((x - curPos.x) * -0.5, (y - curPos.y) * 0.5, 0));
+		screen.camera.move(screen, Vec3((x - curPos.x) * -0.5, (y - curPos.y) * 0.5, 0), leftDragging);
 	}
 
 	curPos = Vec2(x, y);
 };
 
 void StandardInputHandler::scroll(double xOffset, double yOffset) {
-	screen->camera.move(0, 0, -0.5 * yOffset);
+	screen.camera.move(screen, 0, 0, -0.5 * yOffset, leftDragging);
 };
 
 void StandardInputHandler::mouseExit() {

@@ -7,13 +7,13 @@
 
 class StandardInputHandler : public InputHandler {
 public: 
-	Screen* screen;
+	Screen& screen;
 	Vec2 curPos;
 	bool rightDragging = false;
 	bool middleDragging = false;
 	bool leftDragging = false;
 
-	StandardInputHandler(GLFWwindow* window, Screen* screen);
+	StandardInputHandler(GLFWwindow* window, Screen& screen);
 
 	void framebufferResize(int width, int height) override;
 

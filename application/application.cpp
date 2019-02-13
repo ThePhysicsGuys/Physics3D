@@ -67,9 +67,9 @@ int main(void) {
 
 
 
-	world.addObject(createVisiblePart(createBox(0.7, 0.2, 0.7), CFrame(Vec3(0, 0.2, 0.0), fromEulerAngles(0.0, 0.0, 0.0)), 2.0, 0.7));
-	world.addObject(createVisiblePart(createBox(0.5, 0.15, 0.5), CFrame(Vec3(0, 0.4, 0.0), fromEulerAngles(0.0, 0.0, 0.0)), 2.0, 0.7));
-	world.addObject(createVisiblePart(createBox(0.3, 0.1, 0.3), CFrame(Vec3(0, 0.6, 0.0), fromEulerAngles(0.0, 0.0, 0.0)), 2.0, 0.7));
+	//world.addObject(Physical(createVisiblePart(createBox(0.7, 0.2, 0.7), CFrame(Vec3(0, 0.2, 0.0), fromEulerAngles(0.0, 0.0, 0.0)), 2.0, 0.7)));
+	//world.addObject(Physical(createVisiblePart(createBox(0.5, 0.15, 0.5), CFrame(Vec3(0, 0.4, 0.0), fromEulerAngles(0.0, 0.0, 0.0)), 2.0, 0.7)));
+	//world.addObject(Physical(createVisiblePart(createBox(0.3, 0.1, 0.3), CFrame(Vec3(0, 0.6, 0.0), fromEulerAngles(0.0, 0.0, 0.0)), 2.0, 0.7)));
 
 
 	Part icosaPart = createVisiblePart(icosahedron, CFrame(Vec3(0.0, 2.0, 3.0), fromEulerAngles(0.1, 0.1, 0.1)), 10, 0.7);

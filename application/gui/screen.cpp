@@ -88,20 +88,24 @@ BoundingBox* box = nullptr;
 StandardInputHandler* handler = nullptr;
 
 using namespace Debug;
-std::map<VecType, bool> debug_enabled{{INFO, true},{VELOCITY, true},{FORCE, true},{POSITION, true},{MOMENT, true},{IMPULSE, true},{ANGULAR_VELOCITY , true}};
+std::map<VecType, bool> debug_enabled{ {INFO, true}, {VELOCITY, true}, {FORCE, true}, {POSITION, true}, {MOMENT, true}, {IMPULSE, true}, {ANGULAR_VELOCITY , true} };
+std::map<VecType, double> vecColors{ {INFO, 0.15}, {VELOCITY, 0.3}, {FORCE, 0.0}, {POSITION, 0.5}, {MOMENT, 0.1}, {IMPULSE, 0.7}, {ANGULAR_VELOCITY , 0.75} };
 
-std::map<VecType, double> vecColors{{INFO, 0.15},{VELOCITY, 0.3},{FORCE, 0.0},{POSITION, 0.5},{MOMENT, 0.1},{IMPULSE, 0.7},{ANGULAR_VELOCITY , 0.75}};
-/*if(!debug_enabled[type]) return;
+/*
+if (!debug_enabled[type]) 
+	return;
 double color;
 switch (type) {
-case INFO: color = 0.15; break;
-case FORCE: color = 0.0; break;
-case MOMENT: color = 0.1; break;
-case IMPULSE: color = 0.7; break;
-case POSITION: color = 0.5; break;
-case VELOCITY: color = 0.3; break;
-case ANGULAR_VELOCITY: color = 0.75; break;
-}*/
+	case INFO: color = 0.15; break;
+	case FORCE: color = 0.0; break;
+	case MOMENT: color = 0.1; break;
+	case IMPULSE: color = 0.7; break;
+	case POSITION: color = 0.5; break;
+	case VELOCITY: color = 0.3; break;
+	case ANGULAR_VELOCITY: color = 0.75; break;
+}
+*/
+
 void Screen::init() {
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
@@ -145,7 +149,7 @@ void Screen::init() {
 	camera.setPosition(Vec3(1, 1, -2));
 	camera.setRotation(Vec3(0, 3.1415, 0.0));
 
-	handler = new StandardInputHandler(window, this);
+	handler = new StandardInputHandler(window, *this);
 
 	box = new BoundingBox{-0.5, -0.5, -0.5, 0.5, 0.5, 0.5};
 	Shape shape = box->toShape(new Vec3[8]);// .rotated(fromEulerAngles(0.5, 0.1, 0.2), new Vec3[8]);
@@ -164,14 +168,14 @@ void Screen::init() {
 	vecs[6] = 0.5;
 	vectorMesh = new VectorMesh(vecs, 20);
 
-	eventHandler.setPhysicalRayIntersectCallback([] (Screen* screen, Physical* physical, Vec3 point) {
-		screen->intersectedPhysical = physical;
-		screen->intersectedPoint = point;
+	eventHandler.setPhysicalRayIntersectCallback([] (Screen& screen, Physical* physical, Vec3 point) {
+		screen.intersectedPhysical = physical;
+		screen.intersectedPoint = point;
 	});
 
-	eventHandler.setPhysicalClickCallback([] (Screen* screen, Physical* physical, Vec3 point) {
-		screen->selectedPhysical = physical;
-		screen->selectedPoint = point;
+	eventHandler.setPhysicalClickCallback([] (Screen& screen, Physical* physical, Vec3 point) {
+		screen.selectedPhysical = physical;
+		screen.selectedPoint = point;
 	});
 }
 
@@ -191,6 +195,7 @@ void Screen::update() {
 	// IO events
 	static double speed = 0.02;
 	if (handler->anyKey) {
+		bool leftDragging = handler->leftDragging;
 		if (handler->getKey(GLFW_KEY_1)) {
 			speed = 0.02;
 		}
@@ -198,54 +203,34 @@ void Screen::update() {
 			speed = 0.1;
 		}
 		if (handler->getKey(GLFW_KEY_W)) {
-			camera.move(Vec3(0, 0, -speed));
-			if (handler->leftDragging) 
-				moveGrabbedPhysicalTransversal(this, speed * camera.speed);
+			camera.move(*this, 0, 0, -speed, leftDragging);
 		}
 		if (handler->getKey(GLFW_KEY_S)) {
-			camera.move(Vec3(0, 0, speed));
-			if (handler->leftDragging) 
-				moveGrabbedPhysicalTransversal(this, -speed * camera.speed);
+			camera.move(*this, 0, 0, speed, leftDragging);
 		}
 		if (handler->getKey(GLFW_KEY_D)) {
-			camera.move(Vec3(speed, 0, 0));
-			if (handler->leftDragging) 
-				moveGrabbedPhysicalLateral(this);
+			camera.move(*this, speed, 0, 0, leftDragging);
 		}
 		if (handler->getKey(GLFW_KEY_A)) {
-			camera.move(Vec3(-speed, 0, 0));
-			if (handler->leftDragging) 
-				moveGrabbedPhysicalLateral(this);
+			camera.move(*this, -speed, 0, 0, leftDragging);
 		}
 		if (handler->getKey(GLFW_KEY_SPACE)) {
-			camera.move(Vec3(0, speed, 0));
-			if (handler->leftDragging) 
-				moveGrabbedPhysicalLateral(this);
+			camera.move(*this, 0, speed, 0, leftDragging);
 		}
 		if (handler->getKey(GLFW_KEY_LEFT_SHIFT)) {
-			camera.move(Vec3(0, -speed, 0));
-			if (handler->leftDragging) 
-				moveGrabbedPhysicalLateral(this);
+			camera.move(*this, 0, -speed, 0, leftDragging);
 		}
 		if (handler->getKey(GLFW_KEY_LEFT)) {
-			camera.rotate(Vec3(0, -speed, 0));
-			if (handler->leftDragging) 
-				moveGrabbedPhysicalLateral(this);
+			camera.rotate(*this, 0, -speed, 0, leftDragging);
 		}
 		if (handler->getKey(GLFW_KEY_RIGHT)) {
-			camera.rotate(Vec3(0, speed, 0));
-			if (handler->leftDragging) 
-				moveGrabbedPhysicalLateral(this);
+			camera.rotate(*this, 0, speed, 0, leftDragging);
 		}
 		if (handler->getKey(GLFW_KEY_UP)) {
-			camera.rotate(Vec3(-speed, 0, 0));
-			if (handler->leftDragging) 
-				moveGrabbedPhysicalLateral(this);
+			camera.rotate(*this, -speed, 0, 0, leftDragging);
 		}
 		if (handler->getKey(GLFW_KEY_DOWN)) {
-			camera.rotate(Vec3(speed, 0, 0));
-			if (handler->leftDragging) 
-				moveGrabbedPhysicalLateral(this);
+			camera.rotate(*this, speed, 0, 0, leftDragging);
 		}
 	}
 
@@ -256,7 +241,7 @@ void Screen::update() {
 	viewMatrix = rotatedViewMatrix.translate(-camera.cframe.position.x, -camera.cframe.position.y, -camera.cframe.position.z);
 	viewPosition = Vec3f(camera.cframe.position.x, camera.cframe.position.y, camera.cframe.position.z);
 
-	updateIntersectedPhysical(this, world->physicals, handler->curPos, screenSize, viewMatrix, projectionMatrix);
+	updateIntersectedPhysical(*this, world->physicals, handler->curPos, screenSize, viewMatrix, projectionMatrix);
 }
 
 AddableBuffer<double> visibleVecs(700);
@@ -311,9 +296,8 @@ void Screen::refresh() {
 		basicShader.setUniform("modelMatrix", transformation);
 		meshes[meshId]->render();    
 	}
-
-	// Update vector mesh
 	
+	// Update vector mesh
 	updateVecMesh(vecLog.data, vecLog.index);
 
 	// Reset model matrix

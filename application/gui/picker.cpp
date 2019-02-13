@@ -1,5 +1,7 @@
 #include "picker.h"
 
+#include "screen.h"
+#include "../../engine/physical.h"
 #include "../util/log.h"
 #include "../engine/math/mathUtil.h"
 #include "../application.h"
@@ -23,17 +25,17 @@ Vec3 calcRay(Vec2 mousePosition, Vec2 screenSize, Mat4f viewMatrix, Mat4f projec
 	return rayDirection;
 }
 
-void updateIntersectedPhysical(Screen* screen, std::vector<Physical>& physicals, Vec2 mousePosition, Vec2 screenSize, Mat4f viewMatrix, Mat4f projectionMatrix) {
+void updateIntersectedPhysical(Screen& screen, std::vector<Physical>& physicals, Vec2 mousePosition, Vec2 screenSize, Mat4f viewMatrix, Mat4f projectionMatrix) {
 	Physical* closestIntersectedPhysical = nullptr;
 	Vec3 closestIntersectedPoint = Vec3();
 	double closestIntersectDistance = INFINITY;
 
-	screen->ray = calcRay(mousePosition, screenSize, viewMatrix, projectionMatrix);
+	screen.ray = calcRay(mousePosition, screenSize, viewMatrix, projectionMatrix);
 
 	for (Physical& physical : physicals) {
 		Vec3* buffer = new Vec3[physical.part.hitbox.vCount];
 		Shape transformed = physical.part.hitbox.localToGlobal(physical.part.cframe, buffer);
-		double distance = transformed.getIntersectionDistance(screen->camera.cframe.position, screen->ray);
+		double distance = transformed.getIntersectionDistance(screen.camera.cframe.position, screen.ray);
 		if (distance < closestIntersectDistance && distance > 0) {
 			closestIntersectDistance = distance;
 			closestIntersectedPhysical = &physical;
@@ -43,52 +45,51 @@ void updateIntersectedPhysical(Screen* screen, std::vector<Physical>& physicals,
 
 	if (closestIntersectDistance == INFINITY) {
 		closestIntersectedPhysical = nullptr;
-		closestIntersectedPoint = screen->camera.cframe.position;
+		closestIntersectedPoint = screen.camera.cframe.position;
 	} else {
-		closestIntersectedPoint = screen->camera.cframe.position + screen->ray * closestIntersectDistance;
+		closestIntersectedPoint = screen.camera.cframe.position + screen.ray * closestIntersectDistance;
 	}
 	
-	(*screen->eventHandler.physicalRayIntersectHandler) (screen, closestIntersectedPhysical, closestIntersectedPoint);
+	(*screen.eventHandler.physicalRayIntersectHandler) (screen, closestIntersectedPhysical, closestIntersectedPoint);
 }
 
-void moveGrabbedPhysicalLateral(Screen* screen) {
-	if (screen->selectedPhysical == nullptr) return;
+void moveGrabbedPhysicalLateral(Screen& screen) {
+	if (screen.selectedPhysical == nullptr) return;
 
-	Mat3 cameraFrame = (screen->camera.cframe.rotation).transpose();
+	Mat3 cameraFrame = (screen.camera.cframe.rotation).transpose();
 	Vec3 cameraDirection = cameraFrame * Vec3(0, 0, 1);
 
-	double distance = (screen->selectedPoint - screen->camera.cframe.position) * cameraDirection / (screen->ray * cameraDirection);
-	Vec3 planeIntersection = screen->camera.cframe.position + distance * screen->ray;
+	double distance = (screen.selectedPoint - screen.camera.cframe.position) * cameraDirection / (screen.ray * cameraDirection);
+	Vec3 planeIntersection = screen.camera.cframe.position + distance * screen.ray;
 
 	if (isPaused()) {
-		Vec3 translation = planeIntersection - screen->selectedPoint;
-		screen->selectedPoint += translation;
-		screen->selectedPhysical->part.cframe.translate(translation);
+		Vec3 translation = planeIntersection - screen.selectedPoint;
+		screen.selectedPoint += translation;
+		screen.selectedPhysical->part.cframe.translate(translation);
 	} else {
-		screen->world->selectedPhysical = screen->selectedPhysical;
-		screen->world->magnetPoint = planeIntersection;
+		screen.world->selectedPhysical = screen.selectedPhysical;
+		screen.world->magnetPoint = planeIntersection;
 	}
 }
 
-void moveGrabbedPhysicalTransversal(Screen* screen, double dz) {
-	if(screen->selectedPhysical == nullptr) return;
+void moveGrabbedPhysicalTransversal(Screen& screen, double dz) {
+	if(screen.selectedPhysical == nullptr) return;
 
-	//Mat3 cameraYFrame = rotY(screen->camera.rotation.y);
-	Mat3 cameraFrame = (screen->camera.cframe.rotation).transpose();
+	Mat3 cameraFrame = screen.camera.cframe.rotation.transpose();
 	Vec3 cameraDirection = cameraFrame * Vec3(0, 0, 1);
 	Vec3 cameraYDirection = Vec3(cameraDirection.x, 0, cameraDirection.z);
 
-	double distance = (screen->selectedPoint - screen->camera.cframe.position) * cameraDirection / (screen->ray * cameraDirection);
-	Vec3 planeIntersection = screen->camera.cframe.position + distance * screen->ray;
+	double distance = (screen.selectedPoint - screen.camera.cframe.position) * cameraDirection / (screen.ray * cameraDirection);
+	Vec3 planeIntersection = screen.camera.cframe.position + distance * screen.ray;
 
 	Vec3 translation = -cameraYDirection * dz;
 	if (isPaused()) {
-		screen->selectedPoint += translation;
-		screen->selectedPhysical->part.cframe.translate(translation);
+		screen.selectedPoint += translation;
+		screen.selectedPhysical->part.cframe.translate(translation);
 	} else {
 		Log::debug("%s", str(planeIntersection).c_str());
-		screen->world->selectedPhysical = screen->selectedPhysical;
-		screen->world->magnetPoint = planeIntersection + translation;
+		screen.world->selectedPhysical = screen.selectedPhysical;
+		screen.world->magnetPoint = planeIntersection + translation;
 		Log::debug("%s", str(planeIntersection).c_str());
 
 	}
