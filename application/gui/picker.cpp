@@ -77,7 +77,7 @@ void moveGrabbedPhysicalTransversal(Screen& screen, double dz) {
 
 	Mat3 cameraFrame = screen.camera.cframe.rotation.transpose();
 	Vec3 cameraDirection = cameraFrame * Vec3(0, 0, 1);
-	Vec3 cameraYDirection = Vec3(cameraDirection.x, 0, cameraDirection.z);
+	Vec3 cameraYDirection = Vec3(cameraDirection.x, 0, cameraDirection.z).normalize();
 
 	double distance = (screen.selectedPoint - screen.camera.cframe.position) * cameraDirection / (screen.ray * cameraDirection);
 	Vec3 planeIntersection = screen.camera.cframe.position + distance * screen.ray;
@@ -87,10 +87,7 @@ void moveGrabbedPhysicalTransversal(Screen& screen, double dz) {
 		screen.selectedPoint += translation;
 		screen.selectedPhysical->part.cframe.translate(translation);
 	} else {
-		Log::debug("%s", str(planeIntersection).c_str());
 		screen.world->selectedPhysical = screen.selectedPhysical;
-		screen.world->magnetPoint = planeIntersection + translation;
-		Log::debug("%s", str(planeIntersection).c_str());
-
+		screen.world->magnetPoint += translation;
 	}
 }
