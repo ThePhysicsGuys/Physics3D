@@ -1,6 +1,7 @@
 #pragma once
 
 #include "shader.h"
+#include "material.h"
 #include "../../util/log.h"
 
 #include <cstdarg>
@@ -41,7 +42,7 @@ public:
 
 struct BasicShader : public ShaderProgram {
 	BasicShader() : ShaderProgram() {}
-	BasicShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 5, "modelMatrix", "viewMatrix", "projectionMatrix", "viewPosition", "color") {}
+	BasicShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 9, "modelMatrix", "viewMatrix", "projectionMatrix", "viewPosition", "color", "material.ambient", "material.diffuse", "material.specular", "material.reflectance") {}
 
 	void update(Mat4f viewMatrix, Mat4f projectionMatrix, Vec3f viewPosition) {
 		shader.bind();
@@ -58,6 +59,13 @@ struct BasicShader : public ShaderProgram {
 	void updateModel(Mat4f modelMatrix) {
 		shader.bind();
 		shader.setUniform(uniforms[0].c_str(), modelMatrix);
+	}
+
+	void updateMaterial(Material material) {
+		shader.setUniform(uniforms[5], material.ambient);
+		shader.setUniform(uniforms[6], material.diffuse);
+		shader.setUniform(uniforms[7], material.specular);
+		shader.setUniform(uniforms[8], material.specular);
 	}
 };
 

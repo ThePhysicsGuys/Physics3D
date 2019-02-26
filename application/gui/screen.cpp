@@ -5,6 +5,7 @@
 #include "arrayMesh.h"
 #include "vectorMesh.h"
 #include "picker.h"
+#include "material.h"
 
 #include "shaderProgram.h"
 
@@ -106,6 +107,13 @@ switch (type) {
 BasicShader basicShader;
 VectorShader vectorShader;
 OriginShader originShader;
+
+Material material = Material (
+	Vec4f(0.3f, 0.4f, 0.2f, 1.0f),
+	Vec4f(0.3f, 0.2f, 0.6f, 1.0f),
+	Vec4f(0.2f, 0.1f, 0.9f, 1.0f),
+	0.5f
+);
 
 void Screen::init() {
 	glEnable(GL_CULL_FACE);
@@ -252,6 +260,7 @@ void Screen::refresh() {
 
 	// Bind basic uniforms
 	basicShader.update(viewMatrix, projectionMatrix, viewPosition);
+	basicShader.updateMaterial(material);
 	
 	// Render world objects
 	for (Physical& physical : world->physicals) {

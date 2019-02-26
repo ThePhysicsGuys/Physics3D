@@ -39,6 +39,10 @@ void Shader::setUniform(std::string uniform, Vec3f value) {
 	glUniform3f(uniforms[uniform], value.x, value.y, value.z);
 }
 
+void Shader::setUniform(std::string uniform, Vec4f value) {
+	glUniform4f(uniforms[uniform], value.x, value.y, value.z, value.w);
+}
+
 void Shader::setUniform(std::string uniform, Mat4f value) {
 	glUniformMatrix4fv(uniforms[uniform], 1, GL_FALSE, value.m);
 }
