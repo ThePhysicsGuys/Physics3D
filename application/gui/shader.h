@@ -23,6 +23,7 @@ class Shader {
 public:
 	std::string name;
 	Shader() {};
+	Shader(const Shader&) = delete;
 	Shader(const std::string& vertexShader, const std::string& fragmentShader, const std::string name);
 	Shader(const std::string& vertexShader, const std::string& fragmentShader, const std::string& geometryShader, const std::string name);
 	Shader(ShaderSource shaderSource) : Shader(shaderSource.vertexSource, shaderSource.fragmentSource, shaderSource.geometrySource, shaderSource.name) {};
@@ -30,7 +31,7 @@ public:
 	void setUniform(std::string uniform, int value);
 	void setUniform(std::string uniform, float value);
 	void setUniform(std::string uniform, double value);
-	void setUniform(std::string uniform, Vec2 value);
+	void setUniform(std::string uniform, Vec2f value);
 	void setUniform(std::string unfiorm, Vec3f value);
 	void setUniform(std::string uniform, Mat4f value);
 	void bind();

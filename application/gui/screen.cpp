@@ -6,6 +6,8 @@
 #include "vectorMesh.h"
 #include "picker.h"
 
+#include "shaderProgram.h"
+
 #include "../debug.h"
 #include "../standardInputHandler.h"
 #include "../resourceManager.h"
@@ -79,11 +81,6 @@ VectorMesh* vectorMesh = nullptr;
 ArrayMesh* originMesh = nullptr;
 IndexedMesh* transMesh = nullptr;
 
-Shader basicShader;
-Shader vectorShader;
-Shader originShader;
-Shader outlineShader;
-
 BoundingBox* box = nullptr;
 StandardInputHandler* handler = nullptr;
 
@@ -106,6 +103,10 @@ switch (type) {
 }
 */
 
+BasicShader basicShader;
+VectorShader vectorShader;
+OriginShader originShader;
+
 void Screen::init() {
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
@@ -117,34 +118,11 @@ void Screen::init() {
 
 	ShaderSource basicShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(BASIC_SHADER)), "basic.shader");
 	ShaderSource vectorShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(VECTOR_SHADER)), "vector.shader");
-	ShaderSource originShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(ORIGIN_SHADER)), "origin.shader");
-	ShaderSource outlineShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(OUTLINE_SHADER)), "outline.shader");
+	ShaderSource originShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(ORIGIN_SHADER)), "origin.shader");;
 
-	basicShader = Shader(basicShaderSource);
-	basicShader.createUniform("modelMatrix");
-	basicShader.createUniform("viewMatrix");
-	basicShader.createUniform("color");
-	basicShader.createUniform("projectionMatrix");
-	basicShader.createUniform("viewPosition");
-
-	vectorShader = Shader(vectorShaderSource);
-	vectorShader.createUniform("viewMatrix");
-	vectorShader.createUniform("projectionMatrix");
-	vectorShader.createUniform("viewPosition");
-
-	originShader = Shader(originShaderSource);
-	originShader.createUniform("viewMatrix");
-	originShader.createUniform("viewPosition");
-	originShader.createUniform("projectionMatrix");
-	originShader.createUniform("orthoMatrix");
-	originShader.createUniform("rotatedViewMatrix");
-
-	outlineShader = Shader(outlineShaderSource);
-	outlineShader.createUniform("modelMatrix");
-	outlineShader.createUniform("viewMatrix");
-	outlineShader.createUniform("color");
-	outlineShader.createUniform("projectionMatrix");
-	outlineShader.createUniform("viewPosition");
+	basicShader = * new BasicShader(basicShaderSource);
+	vectorShader = * new VectorShader(vectorShaderSource);
+	originShader = * new OriginShader(originShaderSource);
 
 	camera.setPosition(Vec3(1, 1, -2));
 	camera.setRotation(Vec3(0, 3.1415, 0.0));
@@ -273,11 +251,7 @@ void Screen::refresh() {
 	AddableBuffer<AppDebug::ColoredVec> vecLog = AppDebug::getVecBuffer();
 
 	// Bind basic uniforms
-	basicShader.bind();
-	basicShader.setUniform("color", Vec3f(1, 1, 1));
-	basicShader.setUniform("projectionMatrix", projectionMatrix);
-	basicShader.setUniform("viewMatrix", viewMatrix);
-	basicShader.setUniform("viewPosition", viewPosition);
+	basicShader.update(viewMatrix, projectionMatrix, viewPosition);
 	
 	// Render world objects
 	for (Physical& physical : world->physicals) {
@@ -285,15 +259,15 @@ void Screen::refresh() {
 
 		// Picker code
 		if (&physical == selectedPhysical)
-			basicShader.setUniform("color", Vec3f(0.6, 0.8, 0.4));
+			basicShader.updateColor(Vec3f(0.6, 0.8, 0.4));
 		else if (&physical == intersectedPhysical)
-			basicShader.setUniform("color", Vec3f(0.5, 0.5, 0.5));
+			basicShader.updateColor(Vec3f(0.5, 0.5, 0.5));
 		else
-			basicShader.setUniform("color", Vec3f(0.3, 0.4, 0.2));
+			basicShader.updateColor(Vec3f(0.3, 0.4, 0.2));
 
 		// Render each physical
 		Mat4f transformation = physical.part.cframe.asMat4f();
-		basicShader.setUniform("modelMatrix", transformation);
+		basicShader.updateModel(transformation);
 		meshes[meshId]->render();    
 	}
 	
@@ -301,22 +275,14 @@ void Screen::refresh() {
 	updateVecMesh(vecLog.data, vecLog.index);
 
 	// Reset model matrix
-	basicShader.setUniform("modelMatrix", Mat4f());
+	basicShader.updateModel(Mat4f());
 
 	// Render vector mesh
-	vectorShader.bind();
-	vectorShader.setUniform("projectionMatrix", projectionMatrix);
-	vectorShader.setUniform("viewMatrix", viewMatrix);
-	vectorShader.setUniform("viewPosition", viewPosition);
+	vectorShader.update(viewMatrix, projectionMatrix, viewPosition);
 	vectorMesh->render();
 
 	// Render origin mesh
- 	originShader.bind();
-	originShader.setUniform("projectionMatrix", projectionMatrix);
-	originShader.setUniform("viewPosition", viewPosition);
-	originShader.setUniform("orthoMatrix", orthoMatrix);
-	originShader.setUniform("viewMatrix", viewMatrix);
-	originShader.setUniform("rotatedViewMatrix", rotatedViewMatrix);
+	originShader.update(viewMatrix, rotatedViewMatrix, projectionMatrix, orthoMatrix, viewPosition);
 	originMesh->render();
 
 	glfwSwapBuffers(this->window);
