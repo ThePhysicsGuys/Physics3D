@@ -278,6 +278,9 @@ void Screen::refresh() {
 		Mat4f transformation = physical.part.cframe.asMat4f();
 		basicShader.updateModel(transformation);
 		meshes[meshId]->render();    
+		
+		for (int i = 0; i < physical.part.hitbox.vertexCount; i++)
+			vecLog.add(AppDebug::ColoredVec(physical.part.cframe.localToGlobal(physical.part.hitbox.vertices[i]), physical.part.cframe.rotation * physical.part.hitbox.normals[i], Debug::POSITION));
 	}
 	
 	// Update vector mesh

@@ -161,7 +161,7 @@ Vec3 Shape::getNormalVecOfTriangle(Triangle triangle) const {
 }
 
 Vec3* Shape::getNormals() const {
-	std::vector<Vec3> normals;
+	std::vector<Vec3>* normals = new std::vector<Vec3>();
 	for (int i = 0; i < vertexCount; i++) {
 		Vec3 vertex = vertices[i];
 		Vec3 vertexNormal;
@@ -170,7 +170,7 @@ Vec3* Shape::getNormals() const {
 			if (triangle.firstIndex == i || triangle.secondIndex == i || triangle.thirdIndex == i) {
 
 				while (triangle.firstIndex != i)
-					triangle = triangle.leftShift();
+					triangle = triangle.rightShift();
 
 				Vec3 v0 = vertices[triangle.firstIndex];
 				Vec3 v1 = vertices[triangle.secondIndex];
@@ -182,14 +182,14 @@ Vec3* Shape::getNormals() const {
 				Vec3 faceNormal = D1 % D2;
 
 				double sin = faceNormal.length() / (D1.length() * D2.length());
-
 				vertexNormal += faceNormal.normalize() * asin(sin);
 			}
 		}
 		vertexNormal = vertexNormal.normalize();
-		normals.push_back(vertexNormal);
+		normals->push_back(vertexNormal);
 	}
-	return &normals[0];
+
+	return &(*normals)[0];
 }
 
 /*
