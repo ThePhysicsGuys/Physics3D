@@ -186,25 +186,26 @@ void runTick() {
 }
 
 void setupPhysics() {
-	physicsThread = TickerThread(TICKS_PER_SECOND, TICK_SKIP_TIME, []() {
+	physicsThread = TickerThread(TICKS_PER_SECOND, TICK_SKIP_TIME, [](){
 		AppDebug::logTickStart();
 		world.tick(1 / physicsThread.getTPS());
 		AppDebug::logTickEnd();
 	});
 }
 
-Part createVisiblePart(NormalizedShape s, CFrame position, double density, double friction) {
-	int id = screen.addMeshShape(s);
+Part createVisiblePart(NormalizedShape shape, CFrame position, double density, double friction) {
+	int id = screen.addMeshShape(shape);
 
-	Part p(s, position, density, friction);
-	p.drawMeshId = id;
-	return p;
+	Part part(shape, position, density, friction);
+	part.drawMeshId = id;
+	return part;
 }
-Part createVisiblePart(Shape s, CFrame position, double density, double friction) {
-	Part p(s, position, density, friction);
 
-	int id = screen.addMeshShape(p.hitbox);
+Part createVisiblePart(Shape shape, CFrame position, double density, double friction) {
+	Part part(shape, position, density, friction);
 
-	p.drawMeshId = id;
-	return p;
+	int id = screen.addMeshShape(part.hitbox);
+
+	part.drawMeshId = id;
+	return part;
 }
