@@ -33,7 +33,7 @@ void updateIntersectedPhysical(Screen& screen, std::vector<Physical>& physicals,
 	screen.ray = calcRay(mousePosition, screenSize, viewMatrix, projectionMatrix);
 
 	for (Physical& physical : physicals) {
-		Vec3* buffer = new Vec3[physical.part.hitbox.vCount];
+		Vec3* buffer = new Vec3[physical.part.hitbox.vertexCount];
 		Shape transformed = physical.part.hitbox.localToGlobal(physical.part.cframe, buffer);
 		double distance = transformed.getIntersectionDistance(screen.camera.cframe.position, screen.ray);
 		if (distance < closestIntersectDistance && distance > 0) {

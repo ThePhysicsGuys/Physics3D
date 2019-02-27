@@ -59,25 +59,25 @@ ManagedShape::~ManagedShape() {
 }
 
 ManagedShape ManagedShape::translated(Vec3 offset) const {
-	Vec3* newVecBuf = new Vec3[shape.vCount];
+	Vec3* newVecBuf = new Vec3[shape.vertexCount];
 	(*tCopyCount)++;
 	return ManagedShape(shape.translated(offset, newVecBuf), new int(0), tCopyCount);
 }
 
 ManagedShape ManagedShape::rotated(RotMat3 rotation) const {
-	Vec3* newVecBuf = new Vec3[shape.vCount];
+	Vec3* newVecBuf = new Vec3[shape.vertexCount];
 	(*tCopyCount)++;
 	return ManagedShape(shape.rotated(rotation, newVecBuf), new int(0), tCopyCount);
 }
 
 ManagedShape ManagedShape::localToGlobal(CFrame frame) const {
-	Vec3* newVecBuf = new Vec3[shape.vCount];
+	Vec3* newVecBuf = new Vec3[shape.vertexCount];
 	(*tCopyCount)++;
 	return ManagedShape(shape.localToGlobal(frame, newVecBuf), new int(0), tCopyCount);
 }
 
 ManagedShape ManagedShape::globalToLocal(CFrame frame) const {
-	Vec3* newVecBuf = new Vec3[shape.vCount];
+	Vec3* newVecBuf = new Vec3[shape.vertexCount];
 	(*tCopyCount)++;
 	return ManagedShape(shape.globalToLocal(frame, newVecBuf), new int(0), tCopyCount);
 }

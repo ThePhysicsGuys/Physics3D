@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <cstring>
+#include <vector>
 #include <math.h>
 
 #include "../../util/Log.h"
@@ -38,18 +39,22 @@ Triangle Triangle::leftShift() const {
 	return Triangle { secondIndex, thirdIndex, firstIndex };
 }
 
-Shape::Shape() : vertices(nullptr), triangles(nullptr), vCount(0), tCount(0) {}
-Shape::Shape(Vec3* vertices, const Triangle* triangles, int vCount, int tCount) : vertices(vertices), normals(getNormals()), triangles(triangles), vCount(vCount), tCount(tCount) {}
-Shape::Shape(Vec3* vertices, Vec3* normals, const Triangle* triangles, int vCount, int tCount) : vertices(vertices), normals(normals), triangles(triangles), vCount(vCount), tCount(tCount) {}
+Shape::Shape() : vertices(nullptr), triangles(nullptr), vertexCount(0), triangleCount(0) {}
+
+Shape::Shape(Vec3* vertices, const Triangle* triangles, int vertexCount, int triangleCount) : vertices(vertices), triangles(triangles), vertexCount(vertexCount), triangleCount(triangleCount) {
+	normals = getNormals();
+}
+
+Shape::Shape(Vec3* vertices, Vec3* normals, const Triangle* triangles, int vertexCount, int triangleCount) : vertices(vertices), normals(normals), triangles(triangles), vertexCount(vertexCount), triangleCount(triangleCount) {}
 
 NormalizedShape Shape::normalized(Vec3* vecBuf, CFrame& backTransformation) const {
 	backTransformation = getInertialEigenVectors();
 
-	for (int i = 0; i < vCount; i++) {
+	for (int i = 0; i < vertexCount; i++) {
 		vecBuf[i] = backTransformation.globalToLocal(vertices[i]);
 	}
 	
-	return NormalizedShape(vecBuf, triangles, vCount, tCount);
+	return NormalizedShape(vecBuf, triangles, vertexCount, triangleCount);
 }
 
 CFrame Shape::getInertialEigenVectors() const {
@@ -67,40 +72,40 @@ NormalizedShape::NormalizedShape(Vec3* vertices, const Triangle* triangles, int 
 
 	Modifies `vertices`
 */
-NormalizedShape::NormalizedShape(Vec3* vertices, const Triangle* triangles, int vCount, int tCount, CFrame& transformation) : Shape(vertices, triangles, vCount, tCount) {
+NormalizedShape::NormalizedShape(Vec3* vertices, const Triangle* triangles, int vertexCount, int triangleCount, CFrame& transformation) : Shape(vertices, triangles, vertexCount, triangleCount) {
 	this->normalized(vertices, transformation);
 }
 
 Shape Shape::translated(Vec3 offset, Vec3* newVecBuf) const {
-	for (int i = 0; i < this->vCount; i++) {
+	for (int i = 0; i < this->vertexCount; i++) {
 		newVecBuf[i] = offset + vertices[i];
 	}
 
-	return Shape(newVecBuf, triangles, vCount, tCount);
+	return Shape(newVecBuf, triangles, vertexCount, triangleCount);
 }
 
 Shape Shape::rotated(RotMat3 rotation, Vec3* newVecBuf) const {
-	for (int i = 0; i < this->vCount; i++) {
+	for (int i = 0; i < this->vertexCount; i++) {
 		newVecBuf[i] = rotation * vertices[i];
 	}
 
-	return Shape(newVecBuf, triangles, vCount, tCount);
+	return Shape(newVecBuf, triangles, vertexCount, triangleCount);
 }
 
 Shape Shape::localToGlobal(CFrame frame, Vec3* newVecBuf) const {
-	for (int i = 0; i < this->vCount; i++) {
+	for (int i = 0; i < this->vertexCount; i++) {
 		newVecBuf[i] = frame.localToGlobal(vertices[i]);
 	}
 
-	return Shape(newVecBuf, triangles, vCount, tCount);
+	return Shape(newVecBuf, triangles, vertexCount, triangleCount);
 }
 
 Shape Shape::globalToLocal(CFrame frame, Vec3* newVecBuf) const {
-	for (int i = 0; i < this->vCount; i++) {
+	for (int i = 0; i < this->vertexCount; i++) {
 		newVecBuf[i] = frame.globalToLocal(vertices[i]);
 	}
 
-	return Shape(newVecBuf, triangles, vCount, tCount);
+	return Shape(newVecBuf, triangles, vertexCount, triangleCount);
 }
 
 BoundingBox Shape::getBounds() const {
@@ -108,7 +113,7 @@ BoundingBox Shape::getBounds() const {
 	double ymin = vertices[0].y, ymax = vertices[0].y;
 	double zmin = vertices[0].z, zmax = vertices[0].z;
 
-	for (int i = 1; i < vCount; i++) {
+	for (int i = 1; i < vertexCount; i++) {
 		const Vec3 current = vertices[i];
 
 		if (current.x < xmin) xmin = current.x;
@@ -123,11 +128,11 @@ BoundingBox Shape::getBounds() const {
 }
 
 // for every edge, of every triangle, check that it coincides with exactly one other triangle, in reverse order
-bool isComplete(const Triangle* triangles, int tCount) {
-	for (int i = 0; i < tCount; i++) {
+bool isComplete(const Triangle* triangles, int triangleCount) {
+	for (int i = 0; i < triangleCount; i++) {
 		Triangle a = triangles[i];
 		
-		for (int j = 0; j < tCount; j++) {
+		for (int j = 0; j < triangleCount; j++) {
 			if (j == i) continue;
 
 			Triangle b = triangles[j];
@@ -147,7 +152,7 @@ bool isComplete(const Triangle* triangles, int tCount) {
 }
 
 bool Shape::isValid() const {
-	return isComplete(triangles, tCount);
+	return isComplete(triangles, triangleCount);
 }
 
 Vec3 Shape::getNormalVecOfTriangle(Triangle triangle) const {
@@ -156,7 +161,35 @@ Vec3 Shape::getNormalVecOfTriangle(Triangle triangle) const {
 }
 
 Vec3* Shape::getNormals() const {
-	return nullptr;
+	std::vector<Vec3> normals;
+	for (int i = 0; i < vertexCount; i++) {
+		Vec3 vertex = vertices[i];
+		Vec3 vertexNormal;
+		for (int j = 0; j < triangleCount; j++) {
+			Triangle triangle = triangles[j];
+			if (triangle.firstIndex == i || triangle.secondIndex == i || triangle.thirdIndex == i) {
+
+				while (triangle.firstIndex != i)
+					triangle = triangle.leftShift();
+
+				Vec3 v0 = vertices[triangle.firstIndex];
+				Vec3 v1 = vertices[triangle.secondIndex];
+				Vec3 v2 = vertices[triangle.thirdIndex];
+
+				Vec3 D1 = v1 - v0;
+				Vec3 D2 = v2 - v0;
+
+				Vec3 faceNormal = D1 % D2;
+
+				double sin = faceNormal.length() / (D1.length() * D2.length());
+
+				vertexNormal += faceNormal.normalize() * asin(sin);
+			}
+		}
+		vertexNormal = vertexNormal.normalize();
+		normals.push_back(vertexNormal);
+	}
+	return &normals[0];
 }
 
 /*
@@ -165,7 +198,7 @@ If at least one of these values is positive, then the point must be on the outsi
 only for convex shapes
 */
 bool Shape::containsPoint(Vec3 point) const {
-	for (int i = 0; i < tCount; i++) {
+	for (int i = 0; i < triangleCount; i++) {
 		Triangle triangle = triangles[i];
 		Vec3 normalVec = getNormalVecOfTriangle(triangle);
 		if((point - vertices[triangle.firstIndex]) * normalVec > 0) return false;

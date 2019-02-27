@@ -54,8 +54,8 @@ struct Shape {
 	Vec3* vertices;
 	Vec3* normals;
 	const Triangle* triangles;
-	int vCount;
-	int tCount;
+	int vertexCount;
+	int triangleCount;
 
 	Shape();
 	Shape(Vec3* vertices, const Triangle* triangles, int vertexCount, int triangleCount);
@@ -83,10 +83,10 @@ struct Shape {
 	Vec3 getNormalVecOfTriangle(Triangle triangle) const;
 
 	inline TriangleIter iterTriangles() const { 
-		return TriangleIter { triangles, tCount };
+		return TriangleIter { triangles, triangleCount };
 	};
 	inline VertexIter iterVertices() const { 
-		return VertexIter { vertices, vCount }; 
+		return VertexIter { vertices, vertexCount };
 	};
 
 };

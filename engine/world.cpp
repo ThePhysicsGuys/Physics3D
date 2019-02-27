@@ -73,7 +73,7 @@ void World::tick(double deltaT) {
 		const Shape& curShape = physicals[i].part.hitbox;
 
 		transformedShapes[i] = curShape.localToGlobal(physicals[i].part.cframe, vecBufIndex);
-		vecBufIndex += curShape.vCount;
+		vecBufIndex += curShape.vertexCount;
 	}
 
 	applyExternalForces(transformedShapes);
@@ -112,7 +112,7 @@ void World::tick(double deltaT) {
 size_t World::getTotalVertexCount() {
 	size_t total = 0;
 	for(const Physical& physical : physicals)
-		total += physical.part.hitbox.vCount;
+		total += physical.part.hitbox.vertexCount;
 	return total;
 }
 

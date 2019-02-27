@@ -62,6 +62,7 @@ struct BasicShader : public ShaderProgram {
 	}
 
 	void updateMaterial(Material material) {
+		shader.bind();
 		shader.setUniform(uniforms[5], material.ambient);
 		shader.setUniform(uniforms[6], material.diffuse);
 		shader.setUniform(uniforms[7], material.specular);
