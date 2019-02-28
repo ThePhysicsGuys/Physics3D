@@ -13,10 +13,10 @@ public:
 
 	const int vertexCount;
 
-	ArrayMesh(const double* positions, const int size, const int dimensions, RenderMode renderMode);
-	ArrayMesh(const double* positions, const int size, const int dimensions) : ArrayMesh(positions, size, dimensions, RenderMode::TRIANGLES) {};
-	ArrayMesh(const Vec3* positions, const int size) : ArrayMesh((double *) positions, size * 3, 3) {};
-	ArrayMesh(const Vec2* positions, const int size) : ArrayMesh((double *) positions, size * 2, 2) {};
+	ArrayMesh(const double* positions, const int vertexCount, const int dimensions, RenderMode renderMode);
+	ArrayMesh(const double* positions, const int vertexCount, const int dimensions) : ArrayMesh(positions, vertexCount, dimensions, RenderMode::TRIANGLES) {};
+	ArrayMesh(const Vec3* positions, const int vertexCount) : ArrayMesh((double *) positions, vertexCount * 3, 3) {};
+	ArrayMesh(const Vec2* positions, const int vertexCount) : ArrayMesh((double *) positions, vertexCount * 2, 2) {};
 
 	void render() override;
 	void close() override;

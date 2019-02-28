@@ -1,8 +1,8 @@
 #include "arrayMesh.h"
 #include "../util/Log.h"
 
-ArrayMesh::ArrayMesh(const double* vertices, const int vCount, const int dimensions, RenderMode renderMode) : AbstractMesh(renderMode), vertexCount(vCount) {
-	vertexBuffer = new VertexBuffer(vertices, vCount * dimensions);
+ArrayMesh::ArrayMesh(const double* vertices, const int vertexCount, const int dimensions, RenderMode renderMode) : AbstractMesh(renderMode), vertexCount(vertexCount) {
+	vertexBuffer = new VertexBuffer(vertices, vertexCount * dimensions);
 	bufferLayout.push<double>(dimensions);
 	vertexArray->addBuffer(*vertexBuffer, bufferLayout);
 }

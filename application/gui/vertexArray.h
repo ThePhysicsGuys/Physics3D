@@ -9,8 +9,9 @@
 class VertexArray {
 public:
 	unsigned int id;
+	unsigned int attribArrayOffset;
 
-	VertexArray() {
+	VertexArray() : attribArrayOffset(0) {
 		glGenVertexArrays(1, &id);
 		glBindVertexArray(id);
 		Log::debug("Created vertex array with id (%d)", id);
@@ -23,7 +24,8 @@ public:
 
 	void bind() const {
 		glBindVertexArray(id);
-		glEnableVertexAttribArray(0);
+		for (int i = 0; i < attribArrayOffset; i++)
+			glEnableVertexAttribArray(i);
 	}
 
 	void unbind() const {
@@ -36,10 +38,11 @@ public:
 		unsigned int offset = 0;
 		for (int i = 0; i < layout.elements.size(); i++) {
 			auto& element = layout.elements[i];
-			glEnableVertexAttribArray(i);
-			glVertexAttribPointer(i, element.count, element.type, element.normalized, layout.stride, (const void*) offset);
+			glEnableVertexAttribArray(attribArrayOffset + i);
+			glVertexAttribPointer(attribArrayOffset + i, element.count, element.type, element.normalized, layout.stride, (const void*) offset);
 			offset += element.count * element.size;
 		}
+		attribArrayOffset += layout.elements.size();
 	}
 
 	void close() {
