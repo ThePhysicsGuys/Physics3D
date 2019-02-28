@@ -24,7 +24,7 @@ void GravityFloorWorld::applyExternalForces(const Shape* transformedShapes) {
 		}
 
 		// Floor force
-		for(int i = 0; i < transformed.vCount; i++) {
+		for(int i = 0; i < transformed.vertexCount; i++) {
 			Vec3 vertex = transformed.vertices[i];
 
 			Vec3 velocityOfPoint = physical.getVelocityOfPoint(vertex - physical.getCenterOfMass());

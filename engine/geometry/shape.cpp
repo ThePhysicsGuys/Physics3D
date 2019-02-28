@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <cstring>
+#include <vector>
 #include <math.h>
 
 #include "../math/utils.h"
@@ -23,7 +24,7 @@ bool Triangle::sharesEdgeWith(Triangle other) const {
 }
 
 Triangle Triangle::operator~() const {
-	return Triangle{firstIndex, thirdIndex, secondIndex};
+	return Triangle { firstIndex, thirdIndex, secondIndex };
 }
 
 bool Triangle::operator==(const Triangle & other) const {
@@ -32,37 +33,45 @@ bool Triangle::operator==(const Triangle & other) const {
 		firstIndex == other.thirdIndex && secondIndex == other.firstIndex && thirdIndex == other.secondIndex;
 }
 
-Triangle Triangle::rightShift() const {return Triangle{thirdIndex, firstIndex, secondIndex};}
-Triangle Triangle::leftShift() const { return Triangle{secondIndex, thirdIndex, firstIndex};}
+Triangle Triangle::rightShift() const { 
+	return Triangle { thirdIndex, firstIndex, secondIndex };
+}
 
-Shape::Shape() : vertices(nullptr), triangles(nullptr), vCount(0), tCount(0) {}
+Triangle Triangle::leftShift() const {
+	return Triangle { secondIndex, thirdIndex, firstIndex };
+}
 
-Shape::Shape(Vec3 * vertices, const Triangle * triangles, int vCount, int tCount) : vertices(vertices), triangles(triangles), vCount(vCount), tCount(tCount) {}
+Shape::Shape() : vertices(nullptr), triangles(nullptr), vertexCount(0), triangleCount(0) {}
+
+Shape::Shape(Vec3* vertices, const Triangle* triangles, int vertexCount, int triangleCount) : vertices(vertices), triangles(triangles), vertexCount(vertexCount), triangleCount(triangleCount) {
+	normals = getNormals();
+}
+
+Shape::Shape(Vec3* vertices, Vec3* normals, const Triangle* triangles, int vertexCount, int triangleCount) : vertices(vertices), normals(normals), triangles(triangles), vertexCount(vertexCount), triangleCount(triangleCount) {}
 
 NormalizedShape Shape::normalized(Vec3* vecBuf, CFrame& backTransformation) const {
 	backTransformation = getInertialEigenVectors();
 
-	for(int i = 0; i < vCount; i++)
+	for (int i = 0; i < vertexCount; i++) {
 		vecBuf[i] = backTransformation.globalToLocal(vertices[i]);
+	}
 	
-	return NormalizedShape(vecBuf, triangles, vCount, tCount);
+	return NormalizedShape(vecBuf, triangles, vertexCount, triangleCount);
 }
 
 CenteredShape Shape::centered(Vec3* vecBuf, Vec3& backOffset) const {
 	backOffset = getCenterOfMass();
 
-	for(int i = 0; i < vCount; i++) {
+	for(int i = 0; i < vertexCount; i++) {
 		vecBuf[i] = vertices[i] - backOffset;
 	}
 
-	return CenteredShape(vecBuf, triangles, vCount, tCount);
+	return CenteredShape(vecBuf, triangles, vertexCount, triangleCount);
 }
 
 CFrame Shape::getInertialEigenVectors() const {
 	Vec3 centerOfMass = getCenterOfMass();
-
 	Mat3 inertia = getInertia(centerOfMass);
-
 	Mat3 basis = inertia.getEigenDecomposition().eigenVectors;
 
 	return CFrame(centerOfMass, basis);
@@ -71,13 +80,12 @@ CFrame Shape::getInertialEigenVectors() const {
 NormalizedShape::NormalizedShape(Vec3 * vertices, const Triangle * triangles, int vertexCount, int triangleCount) : CenteredShape(vertices, triangles, vertexCount, triangleCount) {
 	// TODO add normalization verification
 };
-
 /*
 	Creates a normalized shape
 
 	Modifies `vertices`
 */
-NormalizedShape::NormalizedShape(Vec3 * vertices, const Triangle * triangles, int vCount, int tCount, CFrame& transformation) : CenteredShape(vertices, triangles, vCount, tCount) {
+NormalizedShape::NormalizedShape(Vec3 * vertices, const Triangle * triangles, int vertexCount, int triangleCount, CFrame& transformation) : CenteredShape(vertices, triangles, vertexCount, triangleCount) {
 	this->normalized(vertices, transformation);
 }
 
@@ -90,35 +98,35 @@ CenteredShape::CenteredShape(Vec3 * vertices, const Triangle * triangles, int ve
 }
 
 Shape Shape::translated(Vec3 offset, Vec3 * newVecBuf) const {
-	for (int i = 0; i < this->vCount; i++) {
+	for (int i = 0; i < this->vertexCount; i++) {
 		newVecBuf[i] = offset + vertices[i];
 	}
 
-	return Shape(newVecBuf, triangles, vCount, tCount);
+	return Shape(newVecBuf, triangles, vertexCount, triangleCount);
 }
 
-Shape Shape::rotated(RotMat3 rotation, Vec3 * newVecBuf) const {
-	for (int i = 0; i < this->vCount; i++) {
+Shape Shape::rotated(RotMat3 rotation, Vec3* newVecBuf) const {
+	for (int i = 0; i < this->vertexCount; i++) {
 		newVecBuf[i] = rotation * vertices[i];
 	}
 
-	return Shape(newVecBuf, triangles, vCount, tCount);
+	return Shape(newVecBuf, triangles, vertexCount, triangleCount);
 }
 
-Shape Shape::localToGlobal(CFrame frame, Vec3 * newVecBuf) const {
-	for (int i = 0; i < this->vCount; i++) {
+Shape Shape::localToGlobal(CFrame frame, Vec3* newVecBuf) const {
+	for (int i = 0; i < this->vertexCount; i++) {
 		newVecBuf[i] = frame.localToGlobal(vertices[i]);
 	}
 
-	return Shape(newVecBuf, triangles, vCount, tCount);
+	return Shape(newVecBuf, triangles, vertexCount, triangleCount);
 }
 
-Shape Shape::globalToLocal(CFrame frame, Vec3 * newVecBuf) const {
-	for (int i = 0; i < this->vCount; i++) {
+Shape Shape::globalToLocal(CFrame frame, Vec3* newVecBuf) const {
+	for (int i = 0; i < this->vertexCount; i++) {
 		newVecBuf[i] = frame.globalToLocal(vertices[i]);
 	}
 
-	return Shape(newVecBuf, triangles, vCount, tCount);
+	return Shape(newVecBuf, triangles, vertexCount, triangleCount);
 }
 
 BoundingBox Shape::getBounds() const {
@@ -126,31 +134,26 @@ BoundingBox Shape::getBounds() const {
 	double ymin = vertices[0].y, ymax = vertices[0].y;
 	double zmin = vertices[0].z, zmax = vertices[0].z;
 
-	for (int i = 1; i < vCount; i++) {
-		const Vec3 cur = vertices[i];
+	for (int i = 1; i < vertexCount; i++) {
+		const Vec3 current = vertices[i];
 
-		if (cur.x < xmin) xmin = cur.x;
-		if (cur.x > xmax) xmax = cur.x;
-		if (cur.y < ymin) ymin = cur.y;
-		if (cur.y > ymax) ymax = cur.y;
-		if (cur.z < zmin) zmin = cur.z;
-		if (cur.z > zmax) zmax = cur.z;
+		if (current.x < xmin) xmin = current.x;
+		if (current.x > xmax) xmax = current.x;
+		if (current.y < ymin) ymin = current.y;
+		if (current.y > ymax) ymax = current.y;
+		if (current.z < zmin) zmin = current.z;
+		if (current.z > zmax) zmax = current.z;
 	}
 
-	return BoundingBox{xmin, ymin, zmin, xmax, ymax, zmax};
-}
-
-bool isComplete(const Triangle* triangles, int tCount);
-bool Shape::isValid() const {
-	return isComplete(triangles, tCount);
+	return BoundingBox { xmin, ymin, zmin, xmax, ymax, zmax };
 }
 
 // for every edge, of every triangle, check that it coincides with exactly one other triangle, in reverse order
-bool isComplete(const Triangle* triangles, int tCount) {
-	for (int i = 0; i < tCount; i++) {
+bool isComplete(const Triangle* triangles, int triangleCount) {
+	for (int i = 0; i < triangleCount; i++) {
 		Triangle a = triangles[i];
 		
-		for (int j = 0; j < tCount; j++) {
+		for (int j = 0; j < triangleCount; j++) {
 			if (j == i) continue;
 
 			Triangle b = triangles[j];
@@ -169,9 +172,45 @@ bool isComplete(const Triangle* triangles, int tCount) {
 	return true;
 }
 
-Vec3 Shape::getNormalVecOfTriangle(Triangle t) const {
-	Vec3 v0 = vertices[t.firstIndex];
-	return (vertices[t.secondIndex] - v0) % (vertices[t.thirdIndex] - v0);
+bool Shape::isValid() const {
+	return isComplete(triangles, triangleCount);
+}
+
+Vec3 Shape::getNormalVecOfTriangle(Triangle triangle) const {
+	Vec3 v0 = vertices[triangle.firstIndex];
+	return (vertices[triangle.secondIndex] - v0) % (vertices[triangle.thirdIndex] - v0);
+}
+
+Vec3* Shape::getNormals() const {
+	std::vector<Vec3>* normals = new std::vector<Vec3>();
+	for (int i = 0; i < vertexCount; i++) {
+		Vec3 vertex = vertices[i];
+		Vec3 vertexNormal;
+		for (int j = 0; j < triangleCount; j++) {
+			Triangle triangle = triangles[j];
+			if (triangle.firstIndex == i || triangle.secondIndex == i || triangle.thirdIndex == i) {
+
+				while (triangle.firstIndex != i)
+					triangle = triangle.rightShift();
+
+				Vec3 v0 = vertices[triangle.firstIndex];
+				Vec3 v1 = vertices[triangle.secondIndex];
+				Vec3 v2 = vertices[triangle.thirdIndex];
+
+				Vec3 D1 = v1 - v0;
+				Vec3 D2 = v2 - v0;
+
+				Vec3 faceNormal = D1 % D2;
+
+				double sin = faceNormal.length() / (D1.length() * D2.length());
+				vertexNormal += faceNormal.normalize() * asin(sin);
+			}
+		}
+		vertexNormal = vertexNormal.normalize();
+		normals->push_back(vertexNormal);
+	}
+
+	return &(*normals)[0];
 }
 
 /*
@@ -180,10 +219,10 @@ If at least one of these values is positive, then the point must be on the outsi
 only for convex shapes
 */
 /*bool Shape::containsPoint(Vec3 point) const {
-	for (int i = 0; i < tCount; i++) {
-		Triangle t = triangles[i];
-		Vec3 normalVec = getNormalVecOfTriangle(t);
-		if((point - vertices[t.firstIndex]) * normalVec > 0) return false;
+	for (int i = 0; i < triangleCount; i++) {
+		Triangle triangle = triangles[i];
+		Vec3 normalVec = getNormalVecOfTriangle(triangle);
+		if((point - vertices[triangle.firstIndex]) * normalVec > 0) return false;
 	}
 	return true;
 }*/
@@ -220,11 +259,15 @@ bool Shape::containsPoint(Vec3 point) const {
 
 double Shape::getVolume() const {
 	double total = 0;
-	for (Triangle t : iterTriangles()) {
-		Vec3 v0 = vertices[t.firstIndex]; Vec3 v1 = vertices[t.secondIndex]; Vec3 v2 = vertices[t.thirdIndex];
-		Vec3 D1 = v1 - v0; Vec3 D2 = v2 - v0;
+	for (Triangle triangle : iterTriangles()) {
+		Vec3 v0 = vertices[triangle.firstIndex]; 
+		Vec3 v1 = vertices[triangle.secondIndex];
+		Vec3 v2 = vertices[triangle.thirdIndex];
+
+		Vec3 D1 = v1 - v0; 
+		Vec3 D2 = v2 - v0;
 		
-		double Tf = (D1.x*D2.y - D1.y*D2.x);
+		double Tf = (D1.x * D2.y - D1.y * D2.x);
 
 		total += Tf * ((D1.z + D2.z) / 6 + v0.z / 2);
 	}
@@ -234,10 +277,10 @@ double Shape::getVolume() const {
 
 Vec3 Shape::getCenterOfMass() const {
 	Vec3 total = Vec3(0,0,0);
-	for (Triangle t : iterTriangles()) {
-		Vec3 v0 = vertices[t.firstIndex];
-		Vec3 v1 = vertices[t.secondIndex];
-		Vec3 v2 = vertices[t.thirdIndex];
+	for (Triangle triangle : iterTriangles()) {
+		Vec3 v0 = vertices[triangle.firstIndex];
+		Vec3 v1 = vertices[triangle.secondIndex];
+		Vec3 v2 = vertices[triangle.thirdIndex];
 
 		Vec3 D1 = v1 - v0;
 		Vec3 D2 = v2 - v0;
@@ -248,13 +291,13 @@ Vec3 Shape::getCenterOfMass() const {
 		total += dFactor.mul(vFactor);
 	}
 	
-	return total / (24*getVolume());
+	return total / (24 * getVolume());
 }
 
 Vec3 Shape::furthestInDirection(Vec3 direction) const {
 	double bestDot = vertices[0] * direction;
 	Vec3 bestVertex = vertices[0];
-	for(int i = 1; i < vCount; i++) {
+	for(int i = 1; i < vertexCount; i++) {
 		double newD = vertices[i] * direction;
 		if(newD > bestDot) {
 			bestDot = newD;
@@ -449,10 +492,10 @@ Vec4 Shape::getCircumscribedSphere() const {
 */
 Mat3 Shape::getInertia(CFrame reference) const {
 	Mat3 total = Mat3(0, 0, 0, 0, 0, 0, 0, 0, 0);
-	for (Triangle t: iterTriangles()) {
-		Vec3 v0 = reference.globalToLocal(vertices[t.firstIndex]);
-		Vec3 v1 = reference.globalToLocal(vertices[t.secondIndex]);
-		Vec3 v2 = reference.globalToLocal(vertices[t.thirdIndex]);
+	for (Triangle triangle : iterTriangles()) {
+		Vec3 v0 = reference.globalToLocal(vertices[triangle.firstIndex]);
+		Vec3 v1 = reference.globalToLocal(vertices[triangle.secondIndex]);
+		Vec3 v2 = reference.globalToLocal(vertices[triangle.thirdIndex]);
 
 		Vec3 D1 = v1 - v0;
 		Vec3 D2 = v2 - v0;
@@ -468,8 +511,8 @@ Mat3 Shape::getInertia(CFrame reference) const {
 		total.m22 += diagonalElementParts.x + diagonalElementParts.y;
 
 		// Other Elements
-		double selfProducts =	v0.x*v0.y*v0.z + v1.x*v1.y*v1.z + v2.x*v2.y*v2.z;
-		double twoSames =		v0.x*v0.y*v1.z + v0.x*v1.y*v0.z + v0.x*v1.y*v1.z + v0.x*v0.y*v2.z + v0.x*v2.y*v0.z + v0.x*v2.y*v2.z +
+		double selfProducts  =	v0.x*v0.y*v0.z + v1.x*v1.y*v1.z + v2.x*v2.y*v2.z;
+		double twoSames      =	v0.x*v0.y*v1.z + v0.x*v1.y*v0.z + v0.x*v1.y*v1.z + v0.x*v0.y*v2.z + v0.x*v2.y*v0.z + v0.x*v2.y*v2.z +
 								v1.x*v0.y*v0.z + v1.x*v1.y*v0.z + v1.x*v0.y*v1.z + v1.x*v1.y*v2.z + v1.x*v2.y*v1.z + v1.x*v2.y*v2.z +
 								v2.x*v0.y*v0.z + v2.x*v1.y*v2.z + v2.x*v0.y*v2.z + v2.x*v1.y*v1.z + v2.x*v2.y*v0.z + v2.x*v2.y*v1.z;
 		double allDifferents =	v0.x*v1.y*v2.z + v0.x*v2.y*v1.z + v1.x*v0.y*v2.z + v1.x*v2.y*v0.z + v2.x*v0.y*v1.z + v2.x*v1.y*v0.z;

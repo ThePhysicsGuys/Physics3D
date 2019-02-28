@@ -2,14 +2,14 @@
 #include "../../engine/geometry/shape.h"
 #include "../util/log.h"
 
-IndexedMesh::IndexedMesh(Shape shape) : AbstractMesh(), vertexCount(shape.vCount), triangleCount(shape.tCount) {
+IndexedMesh::IndexedMesh(Shape shape) : AbstractMesh(), vertexCount(shape.vertexCount), triangleCount(shape.triangleCount) {
 	vertexBuffer = new VertexBuffer(reinterpret_cast<double const *>(shape.vertices), vertexCount * 3);
 	indexBuffer = new IndexBuffer(reinterpret_cast<unsigned int const *>(shape.triangles), triangleCount * 3);
 	bufferLayout.push<double>(3);
 	vertexArray->addBuffer(*vertexBuffer, bufferLayout);
 }
 
-IndexedMesh::IndexedMesh(const double* vertices, const unsigned int* indices, const int vCount, const int tCount) : AbstractMesh(), vertexCount(vCount), triangleCount(tCount) {
+IndexedMesh::IndexedMesh(const double* vertices, const unsigned int* indices, const int vertexCount, const int tCount) : AbstractMesh(), vertexCount(vertexCount), triangleCount(tCount) {
 	vertexBuffer = new VertexBuffer(vertices, vertexCount * 3);
 	indexBuffer = new IndexBuffer(indices, triangleCount * 3);
 	bufferLayout.push<double>(3);

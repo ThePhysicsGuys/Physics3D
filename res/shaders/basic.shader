@@ -91,9 +91,12 @@ in vec3 fposition;
 in vec3 fnormal;
 in vec3 fcenter;
 
-uniform mat4 viewMatrix;
-uniform vec3 viewPosition;
-uniform vec3 color;
+struct Material {
+	vec4 ambient;
+	vec4 diffuse;
+	vec4 specular;
+	float reflectance;
+};
 
 struct Attenuation {
 	float constant;
@@ -108,20 +111,10 @@ struct Light {
 	Attenuation attenuation;
 };
 
-struct Material {
-	vec4 ambient;
-	vec4 diffuse;
-	vec4 specular;
-	float reflectance;
-};
-
-// Uniforms
-Material material = Material(
-	vec4(0.3f, 0.4f, 0.2f, 1.0f),
-	vec4(0.3f, 0.2f, 0.6f, 1.0f),
-	vec4(0.2f, 0.1f, 0.9f, 1.0f),
-	0.5f
-);
+uniform mat4 viewMatrix;
+uniform vec3 viewPosition;
+uniform vec3 color;
+uniform Material material;
 
 int lightCount = 3;
 Attenuation att = Attenuation(0.0f, 0.0f, 1.0f);

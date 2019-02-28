@@ -6,7 +6,7 @@ class Screen;
 #include "../../engine/math/vec3.h"
 #include "../../engine/math/mat3.h"
 #include "../../engine/math/mathUtil.h"
-#include "../engine/math/cframe.h"
+#include "../../engine/math/cframe.h"
 
 #include <cmath>
 

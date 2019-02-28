@@ -13,9 +13,10 @@ void Shader::createUniform(std::string uniform) {
 	int location = glGetUniformLocation(id, uniform.c_str());
 	if (location < 0)
 		Log::error("Could not find uniform (%s) in shader (%s)", uniform.c_str(), name.c_str());
-	else
+	else {
 		Log::debug("Created uniform (%s) in shader (%s) with id (%d)", uniform.c_str(), name.c_str(), location);
-	uniforms.insert(std::make_pair(uniform, location));
+		uniforms.insert(std::make_pair(uniform, location));
+	}
 }
 
 void Shader::setUniform(std::string uniform, int value) {
@@ -30,7 +31,7 @@ void Shader::setUniform(std::string uniform, double value) {
 	glUniform1d(uniforms[uniform], value);
 }
 
-void Shader::setUniform(std::string uniform, Vec2 value) {
+void Shader::setUniform(std::string uniform, Vec2f value) {
 	glUniform2d(uniforms[uniform], value.x, value.y);
 }
 
@@ -38,8 +39,12 @@ void Shader::setUniform(std::string uniform, Vec3f value) {
 	glUniform3f(uniforms[uniform], value.x, value.y, value.z);
 }
 
+void Shader::setUniform(std::string uniform, Vec4f value) {
+	glUniform4f(uniforms[uniform], value.x, value.y, value.z, value.w);
+}
+
 void Shader::setUniform(std::string uniform, Mat4f value) {
-	glCall(glUniformMatrix4fv(uniforms[uniform], 1, GL_FALSE, value.m));
+	glUniformMatrix4fv(uniforms[uniform], 1, GL_FALSE, value.m);
 }
 
 unsigned int compileShader(const std::string& source, unsigned int type) {

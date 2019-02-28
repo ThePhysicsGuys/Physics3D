@@ -13,6 +13,6 @@ public:
 	} properties;
 
 	// Part();
-	Part(NormalizedShape s, CFrame position, double density, double friction);
-	Part(Shape s, CFrame position, double density, double friction);
+	Part(NormalizedShape shape, CFrame position, double density, double friction);
+	Part(Shape shape, CFrame position, double density, double friction);
 };

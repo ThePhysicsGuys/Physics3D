@@ -73,7 +73,7 @@ void World::tick(double deltaT) {
 		const Shape& curShape = physicals[i].part.hitbox;
 
 		transformedShapes[i] = curShape.localToGlobal(physicals[i].part.cframe, vecBufIndex);
-		vecBufIndex += curShape.vCount;
+		vecBufIndex += curShape.vertexCount;
 	}
 
 	applyExternalForces(transformedShapes);
@@ -97,13 +97,13 @@ void World::tick(double deltaT) {
 	}
 
 	for (int i = 0; i < physicals.size(); i++) {
-		Physical& p = physicals[i];
-		p.update(deltaT);
+		Physical& physical = physicals[i];
+		physical.update(deltaT);
 
-		Debug::logVec(p.getCenterOfMass(), p.angularVelocity, Debug::ANGULAR_VELOCITY);
-		Debug::logVec(p.getCenterOfMass(), p.part.cframe.localToRelative(Vec3(p.inertia.m00/p.mass, 0, 0)), Debug::INFO);
-		Debug::logVec(p.getCenterOfMass(), p.part.cframe.localToRelative(Vec3(0, p.inertia.m11 / p.mass, 0)), Debug::INFO);
-		Debug::logVec(p.getCenterOfMass(), p.part.cframe.localToRelative(Vec3(0, 0, p.inertia.m22 / p.mass)), Debug::INFO);
+		Debug::logVec(physical.getCenterOfMass(), physical.angularVelocity, Debug::ANGULAR_VELOCITY);
+		Debug::logVec(physical.getCenterOfMass(), physical.part.cframe.localToRelative(Vec3(physical.inertia.m00 / physical.mass, 0, 0)), Debug::INFO);
+		Debug::logVec(physical.getCenterOfMass(), physical.part.cframe.localToRelative(Vec3(0, physical.inertia.m11 / physical.mass, 0)), Debug::INFO);
+		Debug::logVec(physical.getCenterOfMass(), physical.part.cframe.localToRelative(Vec3(0, 0, physical.inertia.m22 / physical.mass)), Debug::INFO);
 
 
 	}
@@ -111,26 +111,24 @@ void World::tick(double deltaT) {
 
 size_t World::getTotalVertexCount() {
 	size_t total = 0;
-	for(const Physical& p : physicals)
-		total += p.part.hitbox.vCount;
+	for(const Physical& physical : physicals)
+		total += physical.part.hitbox.vertexCount;
 	return total;
 }
 
-void World::addObject(Physical& p) {
-	physicals.push_back(p);
+void World::addObject(Physical& part) {
+	physicals.push_back(part);
 }
 
-Physical& World::addObject(Part& p) {
-	Physical phys(p);
-	physicals.push_back(phys);
-	return phys;
+Physical& World::addObject(Part& part) {
+	Physical physical(part);
+	physicals.push_back(physical);
+	return physical;
 };
 
-Physical& World::addObject(Shape s, CFrame location, double density, double friction) {
-	Part part(s, location, density, friction);
-
+Physical& World::addObject(Shape shape, CFrame location, double density, double friction) {
+	Part part(shape, location, density, friction);
 	Physical newPhysical(part);
-
 	addObject(newPhysical);
 
 	return newPhysical;
