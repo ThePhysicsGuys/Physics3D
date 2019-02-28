@@ -11,5 +11,5 @@ struct BoundingBox {
 
 	bool intersects(BoundingBox other) const;
 	bool containsPoint(Vec3 point) const;
-	NormalizedShape toShape(Vec3 vecBuf[8]) const;
+	Shape toShape(Vec3 vecBuf[8]) const;
 };

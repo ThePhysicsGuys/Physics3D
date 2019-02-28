@@ -1,8 +1,9 @@
 #pragma once
 
 struct Triangle;
-struct Shape;
 struct NormalizedShape;
+struct CenteredShape;
+struct Shape;
 
 #include "../math/vec3.h"
 #include "../math/vec4.h"
@@ -53,6 +54,7 @@ struct Shape {
 	Shape globalToLocal(CFrame frame, Vec3* newVecBuf) const;
 
 	NormalizedShape normalized(Vec3* vecBuf, CFrame& backTransformation) const;
+	CenteredShape centered(Vec3* vecBuf, Vec3& backOffset) const;
 
 	CFrame getInertialEigenVectors() const;
 
@@ -69,6 +71,10 @@ struct Shape {
 
 	Vec4 getCircumscribedSphere() const;
 
+	bool intersects(const Shape& other, Vec3& intersection) const;
+
+	Vec3 furthestInDirection(Vec3 direction) const;
+
 	bool containsPoint(Vec3 point) const;
 	Vec3 getNormalVecOfTriangle(Triangle t) const;
 
@@ -78,10 +84,22 @@ struct Shape {
 	bool isValid() const;
 };
 
-struct NormalizedShape : public Shape {
+struct CenteredShape : public Shape {
 	friend struct Shape;
-	NormalizedShape() : Shape() {}
+	CenteredShape() : Shape() {}
+	CenteredShape(Vec3 * vertices, const Triangle * triangles, int vertexCount, int triangleCount);
+
+	// void getFutureIntersection(const CenteredShape& other, Vec3 offset, Vec3 relVel, Vec3 rotation1, Vec3 rotation2, Vec3& intersection, double& time) const;
+
+private:
+	CenteredShape(Vec3 * vertices, const Triangle * triangles, int vertexCount, int triangleCount, Vec3& offset);
+};
+
+struct NormalizedShape : public CenteredShape {
+	friend struct Shape;
+	NormalizedShape() : CenteredShape() {}
 	NormalizedShape(Vec3 * vertices, const Triangle * triangles, int vertexCount, int triangleCount);
+	
 private:
 	NormalizedShape(Vec3 * vertices, const Triangle * triangles, int vertexCount, int triangleCount, CFrame& transformation);
 };

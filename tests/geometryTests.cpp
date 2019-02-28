@@ -3,6 +3,7 @@
 #include "../engine/math/mat3.h"
 #include "../engine/math/vec3.h"
 #include "../engine/math/mathUtil.h"
+#include "../engine/math/utils.h"
 
 #include "../engine/geometry/shape.h"
 #include "../engine/geometry/boundingBox.h"
@@ -157,4 +158,48 @@ TEST_CASE(shapeNormalization) {
 	ASSERT(newShape.getCenterOfMass() == Vec3());
 	ASSERT_DIAGONAL(newShape.getInertia());
 	ASSERT(normalizationFrame.position == transformedHouse.getCenterOfMass());
+}
+
+TEST_CASE(testRayIntersection) {
+	ASSERT_TRUE(rayTriangleIntersection(Vec3(-1.0, 0.3, 0.3), Vec3(1.0, 0.0, 0.0), Vec3(), Vec3(0.0, 0.0, 1.0), Vec3(0.0, 1.0, 0.0)).rayIntersectsTriangle());
+	ASSERT_FALSE(rayTriangleIntersection(Vec3(-1.0, -0.3, 0.3), Vec3(1.0, 0.0, 0.0), Vec3(), Vec3(0.0, 0.0, 1.0), Vec3(0.0, 1.0, 0.0)).rayIntersectsTriangle());
+	ASSERT_FALSE(rayTriangleIntersection(Vec3(-1.0, 0.3, -0.3), Vec3(1.0, 0.0, 0.0), Vec3(), Vec3(0.0, 0.0, 1.0), Vec3(0.0, 1.0, 0.0)).rayIntersectsTriangle());
+	ASSERT_FALSE(rayTriangleIntersection(Vec3(-1.0, -0.3, -0.3), Vec3(1.0, 0.0, 0.0), Vec3(), Vec3(0.0, 0.0, 1.0), Vec3(0.0, 1.0, 0.0)).rayIntersectsTriangle());
+}
+
+TEST_CASE(testIntersection) {
+	Vec3 buf[12];
+	Vec3 buf2[8];
+	Vec3 buf3[12];
+	Shape a = BoundingBox{-0.3, -0.4, -0.5, 0.3, 0.4, 0.5}.toShape(buf2);
+	Shape b = icosahedron.translated(Vec3(0.8, 0.9, 0.8), buf);
+	Shape c = icosahedron.translated(Vec3(0.95, 0.0, 0.0), buf3);
+	
+
+	Vec3 i;
+
+	ASSERT_TRUE(a.intersects(b, i));
+
+	ASSERT_FALSE(a.intersects(c, i));
+
+	/*Vec3 buf1[8];
+	Vec3 buf2[8];
+
+	BoundingBox statBox{-0.33, -0.37, -0.73, 0.33, 0.37, 0.73};
+	Shape stationary = statBox.toShape(buf1);
+
+	Vec3 i;
+
+	for(double x = -2.0; x < 2.0; x += 0.1) {
+		for(double y = -2.0; y < 2.0; y += 0.1) {
+			for(double z = -2.0; z < 2.0; z += 0.1) {
+				printf("x=%f, y=%f, z=%f", x, y, z);
+
+				BoundingBox movBox{-0.17 + x, -0.57 + y, -0.71 + z, 0.17 + x, 0.57 + y, 0.71 + z};
+				Shape moving = movBox.toShape(buf1);
+
+				ASSERT(statBox.intersects(movBox) == stationary.intersects(moving, i));
+			}
+		}
+	}*/
 }
