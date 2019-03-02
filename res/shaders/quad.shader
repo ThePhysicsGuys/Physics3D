@@ -1,0 +1,60 @@
+#shader vertex
+#version 330 core
+
+layout(location = 0) in vec2 positions;
+layout(location = 1) in vec2 textureUV;
+
+out vec2 ftextureUV;
+
+void main() {
+	gl_Position = vec4(positions.x, positions.y, 0.0, 1.0);
+	ftextureUV = textureUV;
+}
+
+////////////////////////////////////////////////////////////
+
+#shader fragment
+#version 330 core
+
+in vec2 ftextureUV;
+out vec4 outColor;
+
+uniform sampler2D textureSampler;
+
+const float offset = 1.0 / 300.0;
+
+void main() {
+	vec2 offsets[9] = vec2[] (
+		vec2(-offset,  offset ), // top-left
+		vec2( 0.0f,    offset ), // top-center
+		vec2( offset,  offset ), // top-right
+		vec2(-offset,  0.0f   ),   // center-left
+		vec2( 0.0f,    0.0f   ),   // center-center
+		vec2( offset,  0.0f   ),   // center-right
+		vec2(-offset, -offset ), // bottom-left
+		vec2( 0.0f,   -offset ), // bottom-center
+		vec2( offset, -offset )  // bottom-right    
+	);
+
+	/*float kernel[9] = float[] (
+		-1, -1, -1,
+		-1, 9, -1,
+		-1, -1, -1
+	);*/
+
+	float kernel[9] = float[](
+		1,  1, 1,
+		1, -7, 1,
+		1,  1, 1
+	);
+
+	vec3 sampleTexture[9];
+	for (int i = 0; i < 9; i++) 
+		sampleTexture[i] = vec3(texture(textureSampler, ftextureUV.st + offsets[i]));
+	
+	vec3 color = vec3(0.0);
+	for (int i = 0; i < 9; i++)
+		color += sampleTexture[i] * kernel[i];
+
+	outColor = vec4(color, 1.0); // + texture(textureSampler, ftextureUV);
+}

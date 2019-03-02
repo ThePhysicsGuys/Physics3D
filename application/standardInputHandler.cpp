@@ -5,9 +5,12 @@
 
 StandardInputHandler::StandardInputHandler(GLFWwindow* window, Screen& screen) : InputHandler(window), screen(screen) {}
 
+
+
 void StandardInputHandler::framebufferResize(int width, int height) {
 	glViewport(0, 0, width, height);
 	screen.screenSize = Vec2(width, height);
+	(*screen.eventHandler.windowResizeHandler) (screen, width, height);
 }
 
 void StandardInputHandler::keyDownOrRepeat(int key, int modifiers) {

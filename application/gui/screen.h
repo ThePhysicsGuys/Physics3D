@@ -4,6 +4,8 @@
 #include "../../engine/world.h"
 #include "../../engine/math/vec2.h"
 #include "../eventHandler.h"
+
+#include "frameBuffer.h"
 #include "camera.h"
 
 #include <GL/glew.h>
@@ -25,6 +27,10 @@ public:
 	Vec2 screenSize;
 	Camera camera;
 	EventHandler eventHandler;
+
+	FrameBuffer* frameBuffer = nullptr;
+	Texture* texture = nullptr;
+	RenderBuffer* renderBuffer = nullptr;
 
 	// Picker
 	Vec3 ray;

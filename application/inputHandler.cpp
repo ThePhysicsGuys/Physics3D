@@ -1,5 +1,6 @@
 
 #include "inputHandler.h"
+#include "eventHandler.h"
 
 void InputHandler::keyCallback(int key, int action, int mods) {
 	if (action == GLFW_PRESS) {

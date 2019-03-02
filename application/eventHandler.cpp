@@ -10,8 +10,12 @@ void EventHandler::setPtr(void* ptr) {
 	pointer = ptr;
 }
 
-void EventHandler::setCameraMoveHandler(CameraMoveHandler handler) {
+void EventHandler::setCameraMoveCallback(CameraMoveHandler handler) {
 	cameraMoveHandler = handler;
+}
+
+void EventHandler::setWindowResizeCallback(WindowResizeHandler handler) {
+	windowResizeHandler = handler;
 }
 
 void EventHandler::setPhysicalRayIntersectCallback(PhysicalRayIntersectHandler handler) {
