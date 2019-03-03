@@ -21,7 +21,7 @@ public:
 		va_list args;
 		va_start(args, count);
 
-		Log::debug("Using shader (%s) with id (%d)", shader.name.c_str(), shader.getId());
+		Log::debug("Using shader (%s) with id (%d)", shader.name.c_str(), shader.id);
 		for (int i = 0; i < count; i++) {
 			std::string uniform = std::string(va_arg(args, const char *));
 			Log::debug("init '%s'", uniform.c_str());

@@ -4,6 +4,8 @@
 #include <string>
 #include <map>
 
+#include "bindable.h"
+
 #include "../engine/math/vec2.h"
 #include "../engine/math/mat3.h"
 #include "../engine/math/mat4.h"
@@ -19,7 +21,9 @@ ShaderSource parseShader(std::istream& shaderTextStream, const std::string name)
 ShaderSource parseShader(const std::string& vertexPath, const std::string& fragmentPath, const std::string name);
 ShaderSource parseShader(const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath, const std::string name);
 
-class Shader {
+class Shader : public Bindable {
+private:
+	std::map<std::string, int> uniforms;
 public:
 	std::string name;
 	Shader() {};
@@ -35,11 +39,8 @@ public:
 	void setUniform(std::string unfiorm, Vec3f value);
 	void setUniform(std::string unfiorm, Vec4f value);
 	void setUniform(std::string uniform, Mat4f value);
-	void bind();
-	void unbind();
-	void close();
-	unsigned int getId();
-private:
-	unsigned int id;
-	std::map<std::string, int> uniforms;
+
+	void bind() override;
+	void unbind() override;
+	void close() override;
 };

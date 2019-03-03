@@ -5,14 +5,13 @@
 
 class Quad {
 public:
-
-	Vec3 position;
-	Vec3 rotation;
 	ArrayMesh* quad = nullptr;
 	
 	Quad() {
-		const double vertices[8] = { -1, 1, -1, -1, 1, 1, 1, -1 };
-		quad = new ArrayMesh(vertices, 8, 3);
+		double quadVertices[] { -1,  1, -1, -1, 1, -1, -1,  1, 1, -1, 1,  1 };
+		double quadUV[] { 0,  1, 0,  0, 1,  0, 0,  1, 1,  0, 1,  1 };
+
+		quad = new ArrayMesh(quadVertices, quadUV, 6, 2);
 	}
 
 	void render() {

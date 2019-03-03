@@ -2,14 +2,15 @@
 
 #include "GL\glew.h"
 #include "GLFW\glfw3.h"
+
+#include "bindable.h"
+
 #include "../../util/log.h"
 
-class VertexBuffer {
-private:
-	unsigned int id;
-
+class VertexBuffer : public Bindable {
 public:
-	VertexBuffer() : id(0) {
+	VertexBuffer() {
+		id = 0;
 		Log::debug("Created empty vertex buffer");
 	};
 
@@ -27,15 +28,15 @@ public:
 		Log::warn("Deleted vertex buffer with id (%d)", id);
 	}
 
-	void bind() const {
+	void bind() override {
 		glBindBuffer(GL_ARRAY_BUFFER, id);
 	}
 
-	void unbind() const {
+	void unbind() override {
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
-	void close() {
+	void close() override {
 		unbind();
 		glDeleteBuffers(1, &id);
 	}

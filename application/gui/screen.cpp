@@ -6,6 +6,7 @@
 #include "vectorMesh.h"
 #include "picker.h"
 #include "material.h"
+#include "quad.h"
 
 #include "shaderProgram.h"
 
@@ -83,7 +84,7 @@ VectorMesh* vectorMesh = nullptr;
 ArrayMesh* originMesh = nullptr;
 IndexedMesh* transMesh = nullptr;
 
-ArrayMesh* quad = nullptr;
+Quad* quad = nullptr;
 
 BoundingBox* box = nullptr;
 StandardInputHandler* handler = nullptr;
@@ -120,14 +121,6 @@ Material material = Material (
 	0.5f
 );
 
-double quadVertices[] {
-	-1,  1, -1, -1, 1, -1, -1,  1, 1, -1, 1,  1
-};
-
-double quadUV[] {
-    0,  1, 0,  0, 1,  0, 0,  1, 1,  0, 1,  1
-};
-
 void Screen::init() {
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
@@ -155,7 +148,7 @@ void Screen::init() {
 
 	texture = new Texture(width, height);
 	renderBuffer = new RenderBuffer(width, height);
-	quad = new ArrayMesh(quadVertices, quadUV, 6, 2);
+	quad = new Quad();
 	frameBuffer = new FrameBuffer(*texture, *renderBuffer);
 	quadShader.update(*texture);
 

@@ -189,10 +189,6 @@ ShaderSource parseShader(std::istream& shaderTextStream, const std::string name)
 		return { stringStream[(int)ShaderType::VERTEX].str(), stringStream[(int)ShaderType::FRAGMENT].str(),  stringStream[(int)ShaderType::GEOMETRY].str(), name };
 	}
 }
-	
-unsigned int Shader::getId() {
-	return id;
-}
 
 Shader::Shader(const std::string& vertexShader, const std::string& fragmentShader, const std::string name) {
 	id = createShader(vertexShader, fragmentShader, std::string(), name);
