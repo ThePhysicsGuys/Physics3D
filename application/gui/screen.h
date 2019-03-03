@@ -28,9 +28,7 @@ public:
 	Camera camera;
 	EventHandler eventHandler;
 
-	FrameBuffer* frameBuffer = nullptr;
-	Texture* texture = nullptr;
-	RenderBuffer* renderBuffer = nullptr;
+	FrameBuffer* frameBuffer = nullptr;;
 
 	// Picker
 	Vec3 ray;

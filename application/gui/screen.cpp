@@ -146,11 +146,9 @@ void Screen::init() {
 
 	handler = new StandardInputHandler(window, *this);
 
-	texture = new Texture(width, height);
-	renderBuffer = new RenderBuffer(width, height);
 	quad = new Quad();
-	frameBuffer = new FrameBuffer(*texture, *renderBuffer);
-	quadShader.update(*texture);
+	frameBuffer = new FrameBuffer(width, height);
+	quadShader.update(*frameBuffer->texture);
 
 	box = new BoundingBox{-0.5, -0.5, -0.5, 0.5, 0.5, 0.5};
 	Shape shape = box->toShape(new Vec3[8]);// .rotated(fromEulerAngles(0.5, 0.1, 0.2), new Vec3[8]);
@@ -180,8 +178,8 @@ void Screen::init() {
 	});
 
 	eventHandler.setWindowResizeCallback([] (Screen& screen, unsigned int width, unsigned int height) {
-		screen.texture->resize(width, height);
-		screen.renderBuffer->resize(width, height);
+		screen.frameBuffer->texture->resize(width, height);
+		screen.frameBuffer->renderBuffer->resize(width, height);
 	});
 }
 
@@ -329,7 +327,7 @@ void Screen::refresh() {
 	glDisable(GL_DEPTH_TEST);
 
 	// Use frameBuffer texture
-	texture->bind();
+	frameBuffer->texture->bind();
 	quadShader.bind();
 	quad->render();
 

@@ -10,7 +10,19 @@ FrameBuffer::FrameBuffer() {
 	bind();
 }
 
-FrameBuffer::FrameBuffer(Texture colorAttachment, RenderBuffer depthStencilAttachment) : FrameBuffer() {
+FrameBuffer::FrameBuffer(unsigned int width, unsigned int height) : FrameBuffer() {
+	texture = new Texture(width, height);
+	renderBuffer = new RenderBuffer(width, height);
+	attach(texture);
+	attach(renderBuffer);
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		Log::error("FrameBuffer object with id (%d) not complete", id);
+
+	unbind();
+}
+
+FrameBuffer::FrameBuffer(Texture* colorAttachment, RenderBuffer* depthStencilAttachment) : FrameBuffer() {
 	attach(colorAttachment);
 	attach(depthStencilAttachment);
 
@@ -28,14 +40,16 @@ void FrameBuffer::unbind() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void FrameBuffer::attach(Texture texture) {
+void FrameBuffer::attach(Texture* texture) {
 	bind();
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture.id, 0);
+	this->texture = texture;
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture->id, 0);
 }
 
-void FrameBuffer::attach(RenderBuffer renderBuffer) {
+void FrameBuffer::attach(RenderBuffer* renderBuffer) {
 	bind();
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderBuffer.id);
+	this->renderBuffer = renderBuffer;
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderBuffer->id);
 }
 
 void FrameBuffer::close() {

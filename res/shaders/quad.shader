@@ -42,16 +42,25 @@ void main() {
 		-1, -1, -1
 	);*/
 
-	float kernel[9] = float[](
-		1,  1, 1,
-		1, -7, 1,
-		1,  1, 1
+	float kernel[9] = float[] (
+		1,  1,  1,
+		1, -8,  1,
+		1,  1,  1
 	);
 
+	/*float kernel[9] = float[](
+		0, 0, 0,
+		0, 1, 0,
+		0, 0, 0
+	);*/
+
+	vec2 tex = ftextureUV;
 	vec3 sampleTexture[9];
-	for (int i = 0; i < 9; i++) 
-		sampleTexture[i] = vec3(texture(textureSampler, ftextureUV.st + offsets[i]));
-	
+	for (int i = 0; i < 9; i++) {
+		//tex.x += sin(tex.y * 4 * 2 * 3.14159 + offsets[i].x) / 100;
+		sampleTexture[i] = vec3(texture(textureSampler, tex.st + offsets[i]));
+	}
+
 	vec3 color = vec3(0.0);
 	for (int i = 0; i < 9; i++)
 		color += sampleTexture[i] * kernel[i];

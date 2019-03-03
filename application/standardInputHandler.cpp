@@ -2,10 +2,10 @@
 #include "../engine/math/mathUtil.h"
 #include "application.h"
 #include "gui/picker.h"
+#include "objectLibrary.h"
+#include <algorithm>
 
 StandardInputHandler::StandardInputHandler(GLFWwindow* window, Screen& screen) : InputHandler(window), screen(screen) {}
-
-
 
 void StandardInputHandler::framebufferResize(int width, int height) {
 	glViewport(0, 0, width, height);
@@ -31,9 +31,24 @@ void StandardInputHandler::keyDownOrRepeat(int key, int modifiers) {
 
 void StandardInputHandler::keyDown(int key, int modifiers) {
 	switch (key) {
-	case GLFW_KEY_P:
-		togglePause();
-		break;
+		case GLFW_KEY_P:
+			togglePause();
+			break;
+		case GLFW_KEY_O:
+			screen.world->addObject(createCube(1), CFrame(), 5, 1);
+			break;
+		case GLFW_KEY_DELETE:
+			if (screen.selectedPhysical != nullptr) {
+				for (int i = 0; i < screen.world->physicals.size(); i++) {
+					if (&screen.world->physicals[i] == screen.selectedPhysical) {
+						screen.world->physicals.erase(screen.world->physicals.begin() + i);
+						screen.world->selectedPhysical = nullptr;
+						screen.selectedPhysical = nullptr;
+						break;
+					}
+				}
+			}
+			break;
 	}
 
 	if(key >= GLFW_KEY_F1 && key <= GLFW_KEY_F7) {
