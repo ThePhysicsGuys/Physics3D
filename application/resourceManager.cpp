@@ -10,11 +10,12 @@ struct ResourceStruct {
 
 ResourceStruct resources[]{
 	{ IDR_SHADER1, "SHADER" },
-	{ IDR_SHADER5, "SHADER" },
 	{ IDR_SHADER2, "SHADER" },
 	{ IDR_SHADER3, "SHADER" },
 	{ IDR_SHADER4, "SHADER" },
+	{ IDR_SHADER5, "SHADER" },
 	{ IDR_SHADER6, "SHADER" },
+	{ IDR_SHADER7, "SHADER" },
 	{ IDR_OBJ2, "OBJ" }
 };
 

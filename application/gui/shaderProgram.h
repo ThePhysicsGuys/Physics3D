@@ -103,6 +103,16 @@ struct QuadShader : public ShaderProgram {
 	}
 };
 
+struct PostProcessShader : public ShaderProgram {
+	PostProcessShader() : ShaderProgram() {}
+	PostProcessShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 1, "textureSampler") {}
+
+	void update(Texture texture) {
+		bind();
+		shader.setUniform(uniforms[0], 0);
+	}
+};
+
 struct OriginShader : public ShaderProgram {
 	OriginShader() : ShaderProgram() {}
 	OriginShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 5, "viewMatrix", "rotatedViewMatrix", "projectionMatrix", "orthoMatrix", "viewPosition") {}

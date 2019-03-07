@@ -21,49 +21,6 @@ out vec4 outColor;
 
 uniform sampler2D textureSampler;
 
-const float offset = 1.0 / 300.0;
-
 void main() {
-	vec2 offsets[9] = vec2[] (
-		vec2(-offset,  offset ), // top-left
-		vec2( 0.0f,    offset ), // top-center
-		vec2( offset,  offset ), // top-right
-		vec2(-offset,  0.0f   ),   // center-left
-		vec2( 0.0f,    0.0f   ),   // center-center
-		vec2( offset,  0.0f   ),   // center-right
-		vec2(-offset, -offset ), // bottom-left
-		vec2( 0.0f,   -offset ), // bottom-center
-		vec2( offset, -offset )  // bottom-right    
-	);
-
-	/*float kernel[9] = float[] (
-		-1, -1, -1,
-		-1, 9, -1,
-		-1, -1, -1
-	);*/
-
-	float kernel[9] = float[] (
-		1,  1,  1,
-		1, -8,  1,
-		1,  1,  1
-	);
-
-	/*float kernel[9] = float[](
-		0, 0, 0,
-		0, 1, 0,
-		0, 0, 0
-	);*/
-
-	vec2 tex = ftextureUV;
-	vec3 sampleTexture[9];
-	for (int i = 0; i < 9; i++) {
-		//tex.x += sin(tex.y * 4 * 2 * 3.14159 + offsets[i].x) / 100;
-		sampleTexture[i] = vec3(texture(textureSampler, tex.st + offsets[i]));
-	}
-
-	vec3 color = vec3(0.0);
-	for (int i = 0; i < 9; i++)
-		color += sampleTexture[i] * kernel[i];
-
-	outColor = vec4(color, 1.0); // + texture(textureSampler, ftextureUV);
+	outColor = texture(textureSampler, ftextureUV);
 }
