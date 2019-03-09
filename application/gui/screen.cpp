@@ -6,12 +6,14 @@
 #include "vectorMesh.h"
 #include "picker.h"
 #include "material.h"
+#include "quad.h"
 
 #include "shaderProgram.h"
 
 #include "../debug.h"
 #include "../standardInputHandler.h"
 #include "../resourceManager.h"
+#include "../objectLibrary.h"
 
 #include "../../util/log.h"
 
@@ -82,6 +84,8 @@ VectorMesh* vectorMesh = nullptr;
 ArrayMesh* originMesh = nullptr;
 IndexedMesh* transMesh = nullptr;
 
+Quad* quad = nullptr;
+
 BoundingBox* box = nullptr;
 StandardInputHandler* handler = nullptr;
 
@@ -105,8 +109,11 @@ switch (type) {
 */
 
 BasicShader basicShader;
+BasicNormalShader basicNormalShader;
 VectorShader vectorShader;
 OriginShader originShader;
+QuadShader quadShader;
+PostProcessShader postProcessShader;
 
 Material material = Material (
 	Vec4f(0.3f, 0.4f, 0.2f, 1.0f),
@@ -118,24 +125,35 @@ Material material = Material (
 void Screen::init() {
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_STENCIL_TEST);
 
 	int width, height;
 	glfwGetWindowSize(window, &width, &height);
 	screenSize = Vec2(width, height);
 
 	ShaderSource basicShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(BASIC_SHADER)), "basic.shader");
+	ShaderSource basicNormalShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(BASICNORMAL_SHADER)), "basicnormal.shader");
 	ShaderSource vectorShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(VECTOR_SHADER)), "vector.shader");
-	ShaderSource originShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(ORIGIN_SHADER)), "origin.shader");;
+	ShaderSource originShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(ORIGIN_SHADER)), "origin.shader");
+	ShaderSource quadShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(QUAD_SHADER)), "quad.shader");
+	ShaderSource postPorcessShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(POSTPROCESS_SHADER)), "postProcess.shader");
 
 	basicShader = * new BasicShader(basicShaderSource);
+	basicNormalShader = * new BasicNormalShader(basicNormalShaderSource);
 	vectorShader = * new VectorShader(vectorShaderSource);
 	originShader = * new OriginShader(originShaderSource);
+	quadShader = * new QuadShader(quadShaderSource);
+	postProcessShader = * new PostProcessShader(postPorcessShaderSource);
 
 	camera.setPosition(Vec3(1, 1, -2));
 	camera.setRotation(Vec3(0, 3.1415, 0.0));
 
 	handler = new StandardInputHandler(window, *this);
+
+	quad = new Quad();
+	modelFrameBuffer = new FrameBuffer(width, height);
+	screenFrameBuffer = new FrameBuffer(width, height);
+	quadShader.update(*modelFrameBuffer->texture);
+	postProcessShader.update(*modelFrameBuffer->texture);
 
 	box = new BoundingBox{-0.5, -0.5, -0.5, 0.5, 0.5, 0.5};
 	Shape shape = box->toShape(new Vec3[8]);// .rotated(fromEulerAngles(0.5, 0.1, 0.2), new Vec3[8]);
@@ -162,6 +180,11 @@ void Screen::init() {
 	eventHandler.setPhysicalClickCallback([] (Screen& screen, Physical* physical, Vec3 point) {
 		screen.selectedPhysical = physical;
 		screen.selectedPoint = point;
+	});
+
+	eventHandler.setWindowResizeCallback([] (Screen& screen, unsigned int width, unsigned int height) {
+		screen.modelFrameBuffer->texture->resize(width, height);
+		screen.modelFrameBuffer->renderBuffer->resize(width, height);
 	});
 }
 
@@ -218,6 +241,9 @@ void Screen::update() {
 		if (handler->getKey(GLFW_KEY_DOWN)) {
 			camera.rotate(*this, speed, 0, 0, leftDragging);
 		}
+		if (handler->getKey(GLFW_KEY_ESCAPE)) {
+			exit(0);
+		}
 	}
 
 	// Matrix calculations
@@ -252,8 +278,10 @@ void updateVecMesh(AppDebug::ColoredVec* data, size_t size) {
 }
 
 void Screen::refresh() {
-	// Clear GL buffer bits
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	// Render physicals to modelFrameBuffer
+	modelFrameBuffer->bind();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_DEPTH_TEST);
 
 	// Initialize vector log buffer
 	AddableBuffer<AppDebug::ColoredVec> vecLog = AppDebug::getVecBuffer();
@@ -279,15 +307,24 @@ void Screen::refresh() {
 		basicShader.updateModel(transformation);
 		meshes[meshId]->render();    
 		
-		for (int i = 0; i < physical.part.hitbox.vertexCount; i++)
-			vecLog.add(AppDebug::ColoredVec(physical.part.cframe.localToGlobal(physical.part.hitbox.vertices[i]), physical.part.cframe.rotation * physical.part.hitbox.normals[i], Debug::POSITION));
+		//for (int i = 0; i < physical.part.hitbox.vertexCount; i++)
+		//	vecLog.add(AppDebug::ColoredVec(physical.part.cframe.localToGlobal(physical.part.hitbox.vertices[i]), physical.part.cframe.rotation * physical.part.hitbox.normals[i], Debug::POSITION));
 	}
 	
+	// Postprocess to screenFrameBuffer
+	screenFrameBuffer->bind();
+
+	glDisable(GL_DEPTH_TEST);
+	postProcessShader.bind();
+	modelFrameBuffer->texture->bind();
+	quad->render();
+
+	// Render vectors with old depth buffer
+	glEnable(GL_DEPTH_TEST);
+	screenFrameBuffer->attach(modelFrameBuffer->renderBuffer);
+
 	// Update vector mesh
 	updateVecMesh(vecLog.data, vecLog.index);
-
-	// Reset model matrix
-	basicShader.updateModel(Mat4f());
 
 	// Render vector mesh
 	vectorShader.update(viewMatrix, projectionMatrix, viewPosition);
@@ -296,6 +333,15 @@ void Screen::refresh() {
 	// Render origin mesh
 	originShader.update(viewMatrix, rotatedViewMatrix, projectionMatrix, orthoMatrix, viewPosition);
 	originMesh->render();
+
+	// Render screenFrameBuffer texture to the screen
+	screenFrameBuffer->unbind();
+	glClear(GL_COLOR_BUFFER_BIT);
+	glDisable(GL_DEPTH_TEST);
+
+	quadShader.bind();
+	screenFrameBuffer->texture->bind();
+	quad->render();
 
 	glfwSwapBuffers(this->window);
 	glfwPollEvents();

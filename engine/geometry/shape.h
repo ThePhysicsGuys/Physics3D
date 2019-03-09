@@ -76,7 +76,7 @@ struct Shape {
 
 	CFrame getInertialEigenVectors() const;
 	BoundingBox getBounds() const;
-	Vec3* getNormals() const;
+	void computeNormals(Vec3* buffer) const;
 	Vec3 getCenterOfMass() const;
 	Mat3 getInertia() const;
 	Mat3 getInertia(Vec3 reference) const;

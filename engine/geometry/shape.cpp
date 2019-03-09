@@ -44,7 +44,8 @@ Triangle Triangle::leftShift() const {
 Shape::Shape() : vertices(nullptr), triangles(nullptr), vertexCount(0), triangleCount(0) {}
 
 Shape::Shape(Vec3* vertices, const Triangle* triangles, int vertexCount, int triangleCount) : vertices(vertices), triangles(triangles), vertexCount(vertexCount), triangleCount(triangleCount) {
-	normals = getNormals();
+	normals = new Vec3[vertexCount];
+	computeNormals(normals);
 }
 
 Shape::Shape(Vec3* vertices, Vec3* normals, const Triangle* triangles, int vertexCount, int triangleCount) : vertices(vertices), normals(normals), triangles(triangles), vertexCount(vertexCount), triangleCount(triangleCount) {}
@@ -181,8 +182,7 @@ Vec3 Shape::getNormalVecOfTriangle(Triangle triangle) const {
 	return (vertices[triangle.secondIndex] - v0) % (vertices[triangle.thirdIndex] - v0);
 }
 
-Vec3* Shape::getNormals() const {
-	std::vector<Vec3>* normals = new std::vector<Vec3>();
+void Shape::computeNormals(Vec3* buffer) const {
 	for (int i = 0; i < vertexCount; i++) {
 		Vec3 vertex = vertices[i];
 		Vec3 vertexNormal;
@@ -207,10 +207,8 @@ Vec3* Shape::getNormals() const {
 			}
 		}
 		vertexNormal = vertexNormal.normalize();
-		normals->push_back(vertexNormal);
+		buffer[i] = vertexNormal;
 	}
-
-	return &(*normals)[0];
 }
 
 /*

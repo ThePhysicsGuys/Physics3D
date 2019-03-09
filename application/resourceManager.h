@@ -6,6 +6,9 @@
 #define VECTOR_SHADER 1
 #define ORIGIN_SHADER 2
 #define OUTLINE_SHADER 3
-#define STALL_MODEL 4
+#define BASICNORMAL_SHADER 4
+#define QUAD_SHADER 5
+#define POSTPROCESS_SHADER 6
+#define STALL_MODEL 7
 
 std::string getResourceAsString(int res);

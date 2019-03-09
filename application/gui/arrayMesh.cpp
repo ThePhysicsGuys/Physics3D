@@ -1,10 +1,22 @@
 #include "arrayMesh.h"
 #include "../util/Log.h"
 
-ArrayMesh::ArrayMesh(const double* vertices, const int vCount, const int dimensions, RenderMode renderMode) : AbstractMesh(renderMode), vertexCount(vCount) {
-	vertexBuffer = new VertexBuffer(vertices, vCount * dimensions);
-	bufferLayout.push<double>(dimensions);
-	vertexArray->addBuffer(*vertexBuffer, bufferLayout);
+ArrayMesh::ArrayMesh(const double* vertices, const double* uv, const unsigned int vertexCount, const unsigned int dimensions) : AbstractMesh(), vertexCount(vertexCount) {
+	vertexBuffer = new VertexBuffer(vertices, vertexCount * dimensions);
+	uvBuffer = new VertexBuffer(uv, vertexCount * 2);
+
+	vertexBufferLayout.push<double>(dimensions);
+	uvBufferLayout.push<double>(2);
+
+	vertexArray->addBuffer(*vertexBuffer, vertexBufferLayout);
+	vertexArray->addBuffer(*uvBuffer, uvBufferLayout);
+}
+
+ArrayMesh::ArrayMesh(const double* vertices, const unsigned int vertexCount, const unsigned int dimensions, RenderMode renderMode) : AbstractMesh(renderMode), vertexCount(vertexCount) {
+	vertexBuffer = new VertexBuffer(vertices, vertexCount * dimensions);
+
+	vertexBufferLayout.push<double>(dimensions);
+	vertexArray->addBuffer(*vertexBuffer, vertexBufferLayout);
 }
 
 void ArrayMesh::render() {
