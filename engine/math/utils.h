@@ -57,3 +57,12 @@ inline RayIntersection rayTriangleIntersection(Vec3 point, Vec3 ray, Vec3 v0, Ve
 
 	return RayIntersection{d, s, t};
 }
+
+/*
+	computes the squared distance of a point at relativePoint to a plane going through the origin, with normal planeNormal
+	
+	(planeNormal * relativePoint)*(planeNormal * relativePoint) / planeNormal.lengthSquared();
+*/
+inline double pointToPlaneDistanceSquared(Vec3 planeNormal, Vec3 relativePoint) {
+	return (planeNormal * relativePoint)*(planeNormal * relativePoint) / planeNormal.lengthSquared();
+}
