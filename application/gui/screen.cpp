@@ -170,7 +170,7 @@ void Screen::init() {
 	vecs[4] = 0.6;
 	vecs[5] = 0.7;
 	vecs[6] = 0.5;
-	vectorMesh = new VectorMesh(vecs, 20);
+	vectorMesh = new VectorMesh(vecs, 128);
 
 	eventHandler.setPhysicalRayIntersectCallback([] (Screen& screen, Physical* physical, Vec3 point) {
 		screen.intersectedPhysical = physical;
@@ -184,7 +184,9 @@ void Screen::init() {
 
 	eventHandler.setWindowResizeCallback([] (Screen& screen, unsigned int width, unsigned int height) {
 		screen.modelFrameBuffer->texture->resize(width, height);
+		screen.screenFrameBuffer->texture->resize(width, height);
 		screen.modelFrameBuffer->renderBuffer->resize(width, height);
+		screen.screenFrameBuffer->renderBuffer->resize(width, height);
 	});
 }
 

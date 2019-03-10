@@ -29,7 +29,7 @@ bool logCall(const char* func, const char* file, int line) {
 namespace AppDebug {
 	
 
-	SwappableBuffer<ColoredVec> buf(16);
+	SwappableBuffer<ColoredVec> buf(64);
 
 	namespace Logging {
 		using namespace Debug;
