@@ -13,6 +13,7 @@ struct TriangleNeighbors {
 	bool hasNeighbor(int triangleIndex) const;
 	// replaces neighbor, returns index of replaced neighbor, throws BadNeighborException if not found
 	int replaceNeighbor(int oldNeighbor, int newNeighbor);
+	int getNeighborIndex(int neighbor);
 };
 
 /*struct TriangleIndex {

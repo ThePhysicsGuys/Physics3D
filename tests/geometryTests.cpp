@@ -176,11 +176,11 @@ TEST_CASE(testIntersection) {
 	Shape c = icosahedron.translated(Vec3(0.95, 0.0, 0.0), buf3);
 	
 
-	Vec3 i;
+	Vec3 intersect, exitVec;
 
-	ASSERT_TRUE(a.intersects(b, i));
+	ASSERT_TRUE(a.intersects(b, intersect, exitVec));
 
-	ASSERT_FALSE(a.intersects(c, i));
+	ASSERT_FALSE(a.intersects(c, intersect, exitVec));
 
 	/*Vec3 buf1[8];
 	Vec3 buf2[8];

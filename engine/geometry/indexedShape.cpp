@@ -17,7 +17,16 @@ int TriangleNeighbors::replaceNeighbor(int oldNeighbor, int newNeighbor) {
 			return i;
 		}
 	}
-	throw "Neighbor not found!";
+	throw "Neighbor not found in replaceNeighbor";
+}
+
+int TriangleNeighbors::getNeighborIndex(int neighbor) {
+	for(int i = 0; i < 3; i++) {
+		if(neighbors[i] == neighbor) {
+			return i;
+		}
+	}
+	throw "Neighbor not found in getNeighborIndex";
 }
 
 IndexedShape::IndexedShape(Vec3* vertices, const Triangle* triangles, int vertexCount, int triangleCount, TriangleNeighbors * neighborBuf) : Shape(vertices, triangles, vertexCount, triangleCount), neighbors(neighborBuf) {}
@@ -64,8 +73,19 @@ bool IndexedShape::isValid() const {
 				return false;
 	
 	// Assert that, every triangle's neighbors have it as one of their neighbors
-	for(int i = 0; i < triangleCount; i++)
-		for(int j = 0; j < 3; j++)
-			if(!neighbors[neighbors[i][j]].hasNeighbor(i))
+	for(int i = 0; i < triangleCount; i++) {
+		TriangleNeighbors thisNeighbors = neighbors[i];
+		for(int j = 0; j < 3; j++) {
+			int other = thisNeighbors[j];
+			if(!neighbors[other].hasNeighbor(i))
 				return false;
+
+			// check that if they ARE neighbors, then they must share vertices
+			int neighborsIndex = neighbors[other].getNeighborIndex(i);
+			Triangle t1 = triangles[i];
+			Triangle t2 = triangles[other];
+			if(!(t1[(j + 1) % 3] == t2[(neighborsIndex + 2) % 3] && t1[(j + 2) % 3] == t2[(neighborsIndex + 1) % 3]))
+				return false;
+		}
+	}
 }
