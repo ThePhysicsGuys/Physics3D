@@ -67,6 +67,15 @@ namespace AppDebug {
 				// buf.add(ColoredVec(frame.position, rot * Vec3(0.0, 0.0, 1.0), 0.7));
 			}}
 		}
+
+		void logShape(Shape shape) {
+			for(int i = 0; i < shape.triangleCount; i++) {
+				Triangle t = shape.triangles[i];
+				for(int j = 0; j < 3; j++) {
+					Debug::logVec(shape.vertices[t[j]], shape.vertices[t[(j + 1) % 3]] - shape.vertices[t[j]], Debug::INFO);
+				}
+			}
+		}
 	}
 
 	void logTickStart() {
@@ -81,6 +90,7 @@ namespace AppDebug {
 		Log::info("Set up debug hooks!");
 		Debug::setVecLogAction(Logging::logVec);
 		Debug::setCFrameLogAction(Logging::logCFrame);
+		Debug::setShapeLogAction(Logging::logShape);
 	}
 
 	/*
