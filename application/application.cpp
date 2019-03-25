@@ -29,6 +29,8 @@
 
 #include "../engine/math/mathUtil.h"
 
+#include "../engine/geometry/convexShapeBuilder.h"
+
 #define TICKS_PER_SECOND 500.0
 
 #define TICK_SKIP_TIME std::chrono::milliseconds(3000)
@@ -54,6 +56,8 @@ Part createVisiblePart(Shape s, CFrame position, double density, double friction
 int main(void) {
 	init();
 
+	int* builderRemovalBuffer = new int[1000];
+	EdgePiece* builderAddingBuffer = new EdgePiece[1000];
 
 	/*Vec3 newVerts[12];
 	for(int i = 0; i < 12; i++) {
@@ -65,6 +69,60 @@ int main(void) {
 	Part boxPart = createVisiblePart(BoundingBox{-0.1, -0.7, -0.3, 0.1, 0.7, 0.3}.toShape(new Vec3[8]), CFrame(Vec3(1.5, 0.7, 0.3), fromEulerAngles(0.0, 0.2, 0.0)), 2.0, 0.7);
 	world.addObject(boxPart);
 
+
+	
+
+	// Shape tetrahedronShape = 
+
+	Vec3 newIcosaVerts[30];
+	Triangle newIcosaTriangles[40];
+	TriangleNeighbors icosaNeighBuf[40];
+
+	ConvexShapeBuilder icosaBuilder(icosahedron, newIcosaVerts, newIcosaTriangles, icosaNeighBuf, builderRemovalBuffer, builderAddingBuffer);
+
+	if(!icosaBuilder.toIndexedShape().isValid()) {
+		throw "BAD";
+	}
+
+	icosaBuilder.addPoint(Vec3(0, 1.1, 0));
+	icosaBuilder.addPoint(Vec3(0, -1.1, 0));
+	icosaBuilder.addPoint(Vec3(1.1, 0, 0));
+	icosaBuilder.addPoint(Vec3(-1.1, 0, 0));
+	icosaBuilder.addPoint(Vec3(0, 0, 1.1));
+	icosaBuilder.addPoint(Vec3(0, 0, -1.1));
+
+	if(!icosaBuilder.toIndexedShape().isValid()) {
+		throw "BAD";
+	}
+
+	Shape newIcosa = icosaBuilder.toShape();
+	Part constructedIcosa = createVisiblePart(newIcosa, CFrame(Vec3(10, 0, 0)), 2.0, 0.7);
+	world.addObject(constructedIcosa);
+
+	Vec3 verts[10]{Vec3(0.0, 0.0, 0.0), Vec3(1.0, 0.0, 0.0), Vec3(0.0, 0.0, 1.0), Vec3(0.0, 1.0, 0.0)};
+	Triangle triangles[20]{{0,1,2},{0,3,1},{0,2,3},{1,3,2}};
+	TriangleNeighbors neighBuf[20];
+
+	ConvexShapeBuilder builder(verts, triangles, 4, 4, neighBuf, builderRemovalBuffer, builderAddingBuffer);
+
+	builder.addPoint(Vec3(0.4, 0.4, 0.4), 3);
+
+	builder.addPoint(Vec3(-0.4, 1, -0.4));
+
+	builder.addPoint(Vec3(-0.8, 0.5, -0.8));
+
+	builder.addPoint(Vec3(-0.9, 0.6, -0.9));
+
+	Shape constructedShape = builder.toShape();
+
+	Part constructedPart = createVisiblePart(constructedShape, CFrame(), 2.0, 0.7);
+	world.addObject(constructedPart);
+
+	
+
+	
+
+	
 
 
 	//world.addObject(Physical(createVisiblePart(createBox(0.7, 0.2, 0.7), CFrame(Vec3(0, 0.2, 0.0), fromEulerAngles(0.0, 0.0, 0.0)), 2.0, 0.7)));

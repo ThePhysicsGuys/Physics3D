@@ -63,7 +63,15 @@ void handleTriangleIntersect(Physical& p1, Physical& p2, const Shape& transfI, c
 }
 
 void handleCollision(Physical& p1, Physical& p2, Vec3 collisionPoint, Vec3 exitVector) {
-	Vec3 v1 = p1.getVelocityOfPoint(collisionPoint - p1.getCenterOfMass());
+
+	double multiplier = 1 / (1 / p1.mass + 1 / p2.mass);
+
+	Vec3 depthForce = 100 * multiplier * exitVector;
+
+	p1.applyForce(collisionPoint - p1.getCenterOfMass(), -depthForce);
+	p2.applyForce(collisionPoint - p2.getCenterOfMass(), depthForce);
+
+	/*Vec3 v1 = p1.getVelocityOfPoint(collisionPoint - p1.getCenterOfMass());
 	Vec3 v2 = p2.getVelocityOfPoint(collisionPoint - p2.getCenterOfMass());
 	Vec3 relativeVelocity = v2 - v1;
 
@@ -76,11 +84,11 @@ void handleCollision(Physical& p1, Physical& p2, Vec3 collisionPoint, Vec3 exitV
 	// Vec3 depthForceFactor = normalVec.normalize();
 	Vec3 depthForceFactor = exitVector;
 	// Vec3 relativeSpeedFactor = (normalVec * relativeVelocity > 0) ? relativeVelProjection : Vec3();
-	Vec3 force = (depthForceFactor * 50/* + relativeSpeedFactor*10*/) * 1 / (1 / p1.mass + 1 / p2.mass);
-	p1.applyForce(collisionPoint - p1.getCenterOfMass(), force);
+	Vec3 force = (depthForceFactor * 50/* + relativeSpeedFactor*10*///) * 1 / (1 / p1.mass + 1 / p2.mass);
+	/*p1.applyForce(collisionPoint - p1.getCenterOfMass(), force);
 	p2.applyForce(collisionPoint - p2.getCenterOfMass(), -force);
 
-	Debug::logVec(Vec3(), collisionPoint, Debug::INFO);
+	Debug::logVec(Vec3(), collisionPoint, Debug::INFO);*/
 }
 
 void World::tick(double deltaT) {
@@ -111,6 +119,7 @@ void World::tick(double deltaT) {
 			Vec3 intersection;
 			Vec3 exitVector;
 			if(transfI.intersects(transfJ, intersection, exitVector)) {
+				Debug::logVec(intersection, exitVector, Debug::POSITION);
 				Debug::logVec(p1.getCenterOfMass(), intersection - p1.getCenterOfMass(), Debug::INFO);
 				Debug::logVec(p2.getCenterOfMass(), intersection - p2.getCenterOfMass(), Debug::INFO);
 				Debug::logVec(intersection, intersection - p2.getCenterOfMass(), Debug::POSITION);
