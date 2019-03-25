@@ -66,3 +66,28 @@ inline RayIntersection rayTriangleIntersection(Vec3 point, Vec3 ray, Vec3 v0, Ve
 inline double pointToPlaneDistanceSquared(Vec3 planeNormal, Vec3 relativePoint) {
 	return (planeNormal * relativePoint)*(planeNormal * relativePoint) / planeNormal.lengthSquared();
 }
+
+struct CrossOverPoint {
+	double s;
+	double t;
+};
+
+/*
+	Get where the two lines are closest to eachother
+	P := P0+s*U
+	Q := Q0+t*V
+
+	With W0 = P0-Q0
+*/
+inline CrossOverPoint getNearestCrossoverOfRays(Vec3 U, Vec3 V, Vec3 W0) {
+	double a = U*U;
+	double b = U*V;
+	double c = V*V;
+	double d = U*W0;
+	double e = V*W0;
+
+	double s = (b*e - c*d) / (a*c - b*b);
+	double t = (a*e - b*d) / (a*c - b*b);
+
+	return CrossOverPoint{s, t};
+}

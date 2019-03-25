@@ -24,7 +24,7 @@ struct Triangle {
 	Triangle leftShift() const;
 	Triangle operator~() const;
 	bool operator==(const Triangle& other) const;
-	inline unsigned int operator[](int i) const { 
+	inline unsigned int operator[](int i) const {
 		return indexes[i]; 
 	};
 };
@@ -85,8 +85,8 @@ struct Shape {
 	Vec4 getCircumscribedSphere() const;
 	Vec3 getNormalVecOfTriangle(Triangle triangle) const;
 
-	bool intersects(const Shape& other, Vec3& intersection) const;
-
+	bool intersects(const Shape& other, Vec3& intersection, Vec3& exitVector) const;
+	int furthestIndexInDirection(Vec3 direction) const;
 	Vec3 furthestInDirection(Vec3 direction) const;
 
 	inline TriangleIter iterTriangles() const { 
