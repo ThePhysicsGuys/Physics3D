@@ -2,6 +2,7 @@
 
 #include "math/vec3.h"
 #include "math/cframe.h"
+#include "geometry/shape.h"
 
 namespace Debug {
 	
@@ -22,7 +23,9 @@ namespace Debug {
 
 	void logVec(Vec3 origin, Vec3 vec, VecType type);
 	void logCFrame(CFrame frame, CFrameType type);
+	void logShape(Shape shape);
 
 	void setVecLogAction(void(*logger)(Vec3 origin, Vec3 vec, VecType type));
 	void setCFrameLogAction(void(*logger)(CFrame frame, CFrameType type));
+	void setShapeLogAction(void(*logger)(Shape shape));
 }
