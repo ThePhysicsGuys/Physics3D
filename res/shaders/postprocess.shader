@@ -36,17 +36,17 @@ void main() {
 		vec2( offset, -offset )  
 	);
 
-	float kernel[9] = float[] (
+	/*float kernel[9] = float[] (
 		1,  1,  1,
 		1, -8,  1,
 		1,  1,  1
-	);
+	);*/
 
-	/*float kernel[9] = float[] (
+	float kernel[9] = float[] (
 		0, 0, 0,
 		0, 1, 0,
 		0, 0, 0
-	);*/
+	);
 
 	vec2 tex = ftextureUV;
 	vec3 sampleTexture[9];
@@ -58,5 +58,5 @@ void main() {
 	for (int i = 0; i < 9; i++)
 		color += sampleTexture[i] * kernel[i];
 
-	outColor = vec4(color, 1.0);// +texture(textureSampler, ftextureUV);
+	outColor = vec4(color, 1.0);
 }

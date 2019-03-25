@@ -51,19 +51,19 @@ struct BasicShader : public ShaderProgram {
 
 	void update(Mat4f viewMatrix, Mat4f projectionMatrix, Vec3f viewPosition) {
 		bind();
-		shader.setUniform(uniforms[1].c_str(), viewMatrix);
-		shader.setUniform(uniforms[2].c_str(), projectionMatrix);
-		shader.setUniform(uniforms[3].c_str(), viewPosition);
+		shader.setUniform(uniforms[1], viewMatrix);
+		shader.setUniform(uniforms[2], projectionMatrix);
+		shader.setUniform(uniforms[3], viewPosition);
 	}
 
 	void updateColor(Vec3f color) {
 		bind();
-		shader.setUniform(uniforms[4].c_str(), color);
+		shader.setUniform(uniforms[4], color);
 	}
 
 	void updateModel(Mat4f modelMatrix) {
 		bind();
-		shader.setUniform(uniforms[0].c_str(), modelMatrix);
+		shader.setUniform(uniforms[0], modelMatrix);
 	}
 
 	void updateMaterial(Material material) {
@@ -81,14 +81,14 @@ struct BasicNormalShader : public ShaderProgram {
 
 	void update(Mat4f viewMatrix, Mat4f projectionMatrix, Vec3f viewPosition) {
 		bind();
-		shader.setUniform(uniforms[1].c_str(), viewMatrix);
-		shader.setUniform(uniforms[2].c_str(), projectionMatrix);
-		shader.setUniform(uniforms[3].c_str(), viewPosition);
+		shader.setUniform(uniforms[1], viewMatrix);
+		shader.setUniform(uniforms[2], projectionMatrix);
+		shader.setUniform(uniforms[3], viewPosition);
 	}
 
 	void updateModel(Mat4f modelMatrix) {
 		bind();
-		shader.setUniform(uniforms[0].c_str(), modelMatrix);
+		shader.setUniform(uniforms[0], modelMatrix);
 	}
 };
 
@@ -119,11 +119,11 @@ struct OriginShader : public ShaderProgram {
 
 	void update(Mat4f viewMatrix, Mat4f rotatedViewMatrix, Mat4f projectionMatrix, Mat4f orthoMatrix, Vec3f viewPosition) {
 		bind();
-		shader.setUniform(uniforms[0].c_str(), viewMatrix);
-		shader.setUniform(uniforms[1].c_str(), rotatedViewMatrix);
-		shader.setUniform(uniforms[2].c_str(), projectionMatrix);
-		shader.setUniform(uniforms[3].c_str(), orthoMatrix);
-		shader.setUniform(uniforms[4].c_str(), viewPosition);
+		shader.setUniform(uniforms[0], viewMatrix);
+		shader.setUniform(uniforms[1], rotatedViewMatrix);
+		shader.setUniform(uniforms[2], projectionMatrix);
+		shader.setUniform(uniforms[3], orthoMatrix);
+		shader.setUniform(uniforms[4], viewPosition);
 	}
 };
 
@@ -133,9 +133,9 @@ struct VectorShader : public ShaderProgram {
 
 	void update(Mat4f viewMatrix, Mat4f projectionMatrix, Vec3f viewPosition) {
 		bind();
-		shader.setUniform(uniforms[0].c_str(), viewMatrix);
-		shader.setUniform(uniforms[1].c_str(), projectionMatrix);
-		shader.setUniform(uniforms[2].c_str(), viewPosition);
+		shader.setUniform(uniforms[0], viewMatrix);
+		shader.setUniform(uniforms[1], projectionMatrix);
+		shader.setUniform(uniforms[2], viewPosition);
 	}
 };
 

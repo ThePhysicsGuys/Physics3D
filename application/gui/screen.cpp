@@ -116,9 +116,9 @@ QuadShader quadShader;
 PostProcessShader postProcessShader;
 
 Material material = Material (
-	Vec4f(0.3f, 0.4f, 0.2f, 1.0f),
-	Vec4f(0.3f, 0.2f, 0.6f, 1.0f),
-	Vec4f(0.2f, 0.1f, 0.9f, 1.0f),
+	Vec3f(0.3f, 0.4f, 0.2f),
+	Vec3f(0.3f, 0.2f, 0.6f),
+	Vec3f(1.0f, 1.0f, 1.0f),
 	0.5f
 );
 
@@ -309,8 +309,8 @@ void Screen::refresh() {
 		basicShader.updateModel(transformation);
 		meshes[meshId]->render();    
 		
-		//for (int i = 0; i < physical.part.hitbox.vertexCount; i++)
-		//	vecLog.add(AppDebug::ColoredVec(physical.part.cframe.localToGlobal(physical.part.hitbox.vertices[i]), physical.part.cframe.rotation * physical.part.hitbox.normals[i], Debug::POSITION));
+		for (int i = 0; i < physical.part.hitbox.vertexCount; i++)
+			vecLog.add(AppDebug::ColoredVec(physical.part.cframe.localToGlobal(physical.part.hitbox.vertices[i]), physical.part.cframe.rotation * physical.part.hitbox.normals[i], Debug::POSITION));
 	}
 	
 	// Postprocess to screenFrameBuffer
