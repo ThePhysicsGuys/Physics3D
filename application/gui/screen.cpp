@@ -114,6 +114,7 @@ VectorShader vectorShader;
 OriginShader originShader;
 QuadShader quadShader;
 PostProcessShader postProcessShader;
+SkyboxShader skyboxShader;
 
 Material material = Material (
 	Vec3f(0.3f, 0.4f, 0.2f),
@@ -121,6 +122,8 @@ Material material = Material (
 	Vec3f(1.0f, 1.0f, 1.0f),
 	0.5f
 );
+
+CubeMap* cubeMap = nullptr;
 
 void Screen::init() {
 	glEnable(GL_CULL_FACE);
@@ -135,14 +138,16 @@ void Screen::init() {
 	ShaderSource vectorShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(VECTOR_SHADER)), "vector.shader");
 	ShaderSource originShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(ORIGIN_SHADER)), "origin.shader");
 	ShaderSource quadShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(QUAD_SHADER)), "quad.shader");
-	ShaderSource postPorcessShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(POSTPROCESS_SHADER)), "postProcess.shader");
+	ShaderSource postProcessShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(POSTPROCESS_SHADER)), "postProcess.shader");
+	ShaderSource skyboxShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(SKYBOX_SHADER)), "skybox.shader");
 
 	basicShader = * new BasicShader(basicShaderSource);
 	basicNormalShader = * new BasicNormalShader(basicNormalShaderSource);
 	vectorShader = * new VectorShader(vectorShaderSource);
 	originShader = * new OriginShader(originShaderSource);
 	quadShader = * new QuadShader(quadShaderSource);
-	postProcessShader = * new PostProcessShader(postPorcessShaderSource);
+	postProcessShader = * new PostProcessShader(postProcessShaderSource);
+	skyboxShader = * new SkyboxShader(skyboxShaderSource);
 
 	camera.setPosition(Vec3(1, 1, -2));
 	camera.setRotation(Vec3(0, 3.1415, 0.0));
@@ -155,7 +160,9 @@ void Screen::init() {
 	quadShader.update(*modelFrameBuffer->texture);
 	postProcessShader.update(*modelFrameBuffer->texture);
 
-	box = new BoundingBox{-0.5, -0.5, -0.5, 0.5, 0.5, 0.5};
+	cubeMap = new CubeMap("../res/skybox/right.jpg", "../res/skybox/left.jpg", "../res/skybox/top.jpg", "../res/skybox/bottom.jpg", "../res/skybox/front.jpg", "../res/skybox/back.jpg");
+
+	box = new BoundingBox{-1, -1, -1, 1, 1, 1};
 	Shape shape = box->toShape(new Vec3[8]);// .rotated(fromEulerAngles(0.5, 0.1, 0.2), new Vec3[8]);
 	boxMesh = new IndexedMesh(shape);
 	Shape trans = shape.translated(Vec3(1.0, -1.0, 1.0), new Vec3[8]);
@@ -280,9 +287,20 @@ void updateVecMesh(AppDebug::ColoredVec* data, size_t size) {
 }
 
 void Screen::refresh() {
+
 	// Render physicals to modelFrameBuffer
 	modelFrameBuffer->bind();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glDepthMask(GL_FALSE);
+	glDisable(GL_CULL_FACE);
+	skyboxShader.update(*cubeMap);
+	skyboxShader.update(viewMatrix, projectionMatrix);
+	cubeMap->bind();
+	boxMesh->render();
+	glDepthMask(GL_TRUE);
+	glEnable(GL_CULL_FACE);
+
 	glEnable(GL_DEPTH_TEST);
 
 	// Initialize vector log buffer
@@ -298,7 +316,7 @@ void Screen::refresh() {
 
 		// Picker code
 		if (&physical == selectedPhysical)
-			basicShader.updateColor(Vec3f(0.6, 0.8, 0.4));
+			basicShader.updateColor(Vec3f(0.5, 0.6, 0.3));
 		else if (&physical == intersectedPhysical)
 			basicShader.updateColor(Vec3f(0.5, 0.5, 0.5));
 		else
@@ -312,7 +330,7 @@ void Screen::refresh() {
 		for (int i = 0; i < physical.part.hitbox.vertexCount; i++)
 			vecLog.add(AppDebug::ColoredVec(physical.part.cframe.localToGlobal(physical.part.hitbox.vertices[i]), physical.part.cframe.rotation * physical.part.hitbox.normals[i], Debug::POSITION));
 	}
-	
+
 	// Postprocess to screenFrameBuffer
 	screenFrameBuffer->bind();
 

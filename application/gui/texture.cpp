@@ -3,6 +3,11 @@
 #include "GL\glew.h"
 #include "GLFW\glfw3.h"
 
+#include "../util/log.h"
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb\stb_image.h"
+
 Texture::Texture(unsigned int width, unsigned int height) : width(width), height(height) {
 	glGenTextures(1, &id);
 
@@ -55,5 +60,49 @@ void TextureMultisample::unbind() {
 }
 
 void TextureMultisample::close() {
+	glDeleteTextures(1, &id);
+}
+
+CubeMap::CubeMap(std::string right, std::string left, std::string top, std::string bottom, std::string front, std::string back) {
+	glGenTextures(1, &id);
+	bind();
+	
+	load(right, left, top, bottom, front, back);
+	
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	bind();
+}
+
+void CubeMap::bind() {
+	glBindTexture(GL_TEXTURE_CUBE_MAP, id);
+}
+
+void CubeMap::unbind() {
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+}
+
+void CubeMap::load(std::string right, std::string left, std::string top, std::string bottom, std::string front, std::string back) {
+	int width;
+	int height;
+	int channels;
+	unsigned char* data;
+	std::string faces[6] = { right, left, top, bottom, front, back };
+
+	for (int i = 0; i < 6; i++) {
+		data = stbi_load(faces[i].c_str(), &width, &height, &channels, 0);
+		if (data)
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		else
+			Log::error("Failed to load: %s", faces[i].c_str());
+		
+		stbi_image_free(data);	
+	}
+}
+
+void CubeMap::close() {
 	glDeleteTextures(1, &id);
 }

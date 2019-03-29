@@ -9,6 +9,7 @@
 #define BASICNORMAL_SHADER 4
 #define QUAD_SHADER 5
 #define POSTPROCESS_SHADER 6
-#define STALL_MODEL 7
+#define SKYBOX_SHADER 7
+#define STALL_MODEL 8
 
 std::string getResourceAsString(int res);

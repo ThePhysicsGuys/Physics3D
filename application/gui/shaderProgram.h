@@ -45,6 +45,21 @@ public:
 	}
 };
 
+struct SkyboxShader : public ShaderProgram {
+	SkyboxShader() : ShaderProgram() {}
+	SkyboxShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 3, "viewMatrix", "projectionMatrix", "skybox") {}
+
+	void update(Mat4f viewMatrix, Mat4f projectionMatrix) {
+		bind();
+		shader.setUniform(uniforms[0], viewMatrix);
+		shader.setUniform(uniforms[1], projectionMatrix);
+	}
+
+	void update(CubeMap skybox) {
+		shader.setUniform(uniforms[2], 0);
+	}
+};
+
 struct BasicShader : public ShaderProgram {
 	BasicShader() : ShaderProgram() {}
 	BasicShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 9, "modelMatrix", "viewMatrix", "projectionMatrix", "viewPosition", "color", "material.ambient", "material.diffuse", "material.specular", "material.reflectance") {}

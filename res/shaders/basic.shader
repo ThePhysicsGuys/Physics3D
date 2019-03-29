@@ -120,9 +120,9 @@ uniform Material material;
 const int lightCount = 4;
 Attenuation att = Attenuation(0.0f, 0.0f, 1.0f);
 Light lights[lightCount] = Light[](
-	Light(vec3(1, 0, 0), vec3(5, 0, 0), 5, att),
-	Light(vec3(0, 1, 0), vec3(0, 5, 0), 5, att),
-	Light(vec3(0, 0, 1), vec3(0, 0, 5), 5, att),
+	Light(vec3(1, 0, 0), vec3(5, 0, 0), 4, att),
+	Light(vec3(0, 1, 0), vec3(0, 5, 0), 4, att),
+	Light(vec3(0, 0, 1), vec3(0, 0, 5), 4, att),
 	Light(vec3(1, 1, 1), vec3(0, 0, 0), 1, att)
 );
 
@@ -140,6 +140,11 @@ vec3 calcLightColor(Light light) {
 	float diffuseFactor = max(dot(fnormal, toLightSource), 0.0);
 	vec3 diffuseColor = /*material.diffuse*/ diffuseFactor * light.color;
 
+	// Directional light
+	vec3 directionalLight = normalize(vec3(1, 1, 0));
+	float directionalFactor = 0.4 * max(dot((transpose(viewMatrix) * vec4(fnormal,1)).xyz, directionalLight), 0.0);
+	vec3 directional = directionalFactor * light.color;
+
 	// Specular light
 	float specularPower = 10.0f;
 	vec3 cameraDirection = normalize(-fposition);
@@ -152,9 +157,9 @@ vec3 calcLightColor(Light light) {
 	// Attenuation
 	float distance = length(lightDirection) / light.intensity;
 	float attenuationInverse = light.attenuation.constant + light.attenuation.linear * distance + light.attenuation.exponent * distance * distance;
-	vec3 speculardiffuse = (diffuseColor + specularColor) / attenuationInverse;
+	vec3 specularDiffuse = (diffuseColor + specularColor) / attenuationInverse;
 
-	return (ambient + speculardiffuse) * color;
+	return (ambient + directional + specularDiffuse) * color;
 }
 
 void main() {
