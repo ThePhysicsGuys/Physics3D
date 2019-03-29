@@ -8,7 +8,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb\stb_image.h"
 
-Texture::Texture(unsigned int width, unsigned int height) : width(width), height(height) {
+Texture::Texture(unsigned int width, unsigned int height) : width(width), height(height), unit(0) {
 	glGenTextures(1, &id);
 
 	bind();
@@ -24,8 +24,14 @@ void Texture::resize(unsigned int width, unsigned int height) {
 	unbind();
 }
 
-void Texture::bind() {
+void Texture::bind(int unit) {
+	this->unit = unit;
+	glActiveTexture(GL_TEXTURE0 + unit);
 	glBindTexture(GL_TEXTURE_2D, id);
+}
+
+void Texture::bind() {
+	bind(unit);
 }
 
 void Texture::unbind() {
@@ -36,7 +42,7 @@ void Texture::close() {
 	glDeleteTextures(1, &id);
 }
 
-TextureMultisample::TextureMultisample(unsigned int width, unsigned int height, unsigned int samples) : width(width), height(height), samples(samples) {
+TextureMultisample::TextureMultisample(unsigned int width, unsigned int height, unsigned int samples) : width(width), height(height), samples(samples), unit(0) {
 	glGenTextures(1, &id);
 	bind();
 	glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, GL_RGB, width, height, GL_TRUE);
@@ -52,6 +58,12 @@ void TextureMultisample::resize(unsigned int width, unsigned int height) {
 }
 
 void TextureMultisample::bind() {
+	bind(unit);
+}
+
+void TextureMultisample::bind(int unit) {
+	this->unit = unit;
+	glActiveTexture(GL_TEXTURE0 + unit);
 	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, id);
 }
 
@@ -63,7 +75,7 @@ void TextureMultisample::close() {
 	glDeleteTextures(1, &id);
 }
 
-CubeMap::CubeMap(std::string right, std::string left, std::string top, std::string bottom, std::string front, std::string back) {
+CubeMap::CubeMap(std::string right, std::string left, std::string top, std::string bottom, std::string front, std::string back) : unit(0) {
 	glGenTextures(1, &id);
 	bind();
 	
@@ -78,6 +90,12 @@ CubeMap::CubeMap(std::string right, std::string left, std::string top, std::stri
 }
 
 void CubeMap::bind() {
+	bind(unit);
+}
+
+void CubeMap::bind(int unit) {
+	this->unit = unit;
+	glActiveTexture(GL_TEXTURE0 + unit);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, id);
 }
 

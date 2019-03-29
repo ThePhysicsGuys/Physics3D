@@ -56,7 +56,7 @@ struct SkyboxShader : public ShaderProgram {
 	}
 
 	void update(CubeMap skybox) {
-		shader.setUniform(uniforms[2], 0);
+		shader.setUniform(uniforms[2], skybox.unit);
 	}
 };
 
@@ -113,7 +113,7 @@ struct QuadShader : public ShaderProgram {
 
 	void update(Texture texture) {
 		bind();
-		shader.setUniform(uniforms[0], 0);
+		shader.setUniform(uniforms[0], texture.unit);
 		//shader.setUniform(uniforms[0], (int) texture.id);
 	}
 };

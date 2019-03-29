@@ -5,11 +5,13 @@
 
 class Texture : public Bindable {
 public:
+	int unit;
 	unsigned int width;
 	unsigned int height;
 
 	Texture(unsigned int width, unsigned int height);
 
+	void bind(int unit);
 	void bind() override;
 	void unbind() override;
 	void close() override;
@@ -20,12 +22,14 @@ public:
 
 class TextureMultisample : public Bindable {
 public:
+	int unit;
 	unsigned int width;
 	unsigned int height;
 	unsigned int samples;
 
 	TextureMultisample(unsigned int width, unsigned int height, unsigned int samples);
 
+	void bind(int unit);
 	void bind() override;
 	void unbind() override;
 	void close() override;
@@ -35,10 +39,13 @@ public:
 
 class CubeMap : public Bindable {
 public:
+	int unit;
+
 	CubeMap(std::string right, std::string left, std::string top, std::string bottom, std::string front, std::string back);
 
 	void load(std::string right, std::string left, std::string top, std::string bottom, std::string front, std::string back);
 
+	void bind(int unit);
 	void bind() override;
 	void unbind() override;
 	void close() override;
