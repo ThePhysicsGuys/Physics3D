@@ -10,6 +10,7 @@ The graphics libraries are only necessary when building the application and the 
 ### Application
 - [GLFW](https://www.glfw.org/) Verified working with GLFW 3.2.1  
 - [GLEW](http://glew.sourceforge.net/) Verified with GLEW 2.1.0
+- [stb_image](https://github.com/nothings/stb) Verified with stb_image.h v2.22
 
 ## Setup Guide
 ### Visual Studio
