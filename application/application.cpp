@@ -30,6 +30,7 @@
 #include "../engine/math/mathUtil.h"
 
 #include "../engine/geometry/convexShapeBuilder.h"
+#include "../engine/engineException.h"
 
 #define TICKS_PER_SECOND 500.0
 
@@ -194,12 +195,11 @@ void init() {
 		stop(-1);
 	}
 
-	setupPhysics();
-
 	Log::info("Initializing screen");
 	screen.init();
 	Log::info("Initialized screen");
 
+	setupPhysics();
 }
 
 void stop(int returnCode) {
@@ -246,7 +246,15 @@ void runTick() {
 void setupPhysics() {
 	physicsThread = TickerThread(TICKS_PER_SECOND, TICK_SKIP_TIME, [](){
 		AppDebug::logTickStart();
-		world.tick(1 / physicsThread.getTPS());
+		try {
+			world.tick(1 / physicsThread.getTPS());
+		} catch(EngineException& ex) {
+			Log::error("EngineException: \n %s", ex.what());
+		} catch(std::exception& ex) {
+			Log::error("std::exception occurred! \n %s", ex.what());
+		} catch(const char* ex) {
+			Log::error("char* exception occurred! \n %s", ex);
+		}
 		AppDebug::logTickEnd();
 	});
 }

@@ -12,6 +12,11 @@
 
 #include "../../util/Log.h"
 
+#include "../engineException.h"
+
+#include "../debug.h"
+#include "../math/mathUtil.h"
+
 bool Triangle::sharesEdgeWith(Triangle other) const {
 	return firstIndex == other.secondIndex && secondIndex == other.firstIndex ||
 		firstIndex == other.thirdIndex && secondIndex == other.secondIndex ||
@@ -329,6 +334,10 @@ struct MinkowskiPointIndices {
 	int indices[2];
 
 	int& operator[](int i) { return indices[i]; }
+	bool operator==(const MinkowskiPointIndices& other) const {
+		return this->indices[0] == other.indices[0] &&
+			this->indices[1] == other.indices[1];
+	}
 };
 
 struct Simplex {
@@ -417,8 +426,12 @@ bool runEPA(const Shape& first, const Shape& second, Simplex s, Vec3& intersecti
 
 		double newPointDistSq = pow(delta * closestTriangleNormal, 2) / closestTriangleNormal.lengthSquared();
 
-		if(newPointDistSq > distSq * 1.001) {
-			knownVecs[builder.vertexCount] = MinkowskiPointIndices{furthest1, furthest2};
+		// if(newPointDistSq > distSq * 1.001) {
+		MinkowskiPointIndices curIndices{furthest1, furthest2};
+		//Log::debug("cur: (%d, %d) <-> (%d, %d), (%d, %d), (%d, %d)", curIndices[0], curIndices[1], knownVecs[closestTriangle[0]][0], knownVecs[closestTriangle[0]][1], knownVecs[closestTriangle[1]][0], knownVecs[closestTriangle[1]][1], knownVecs[closestTriangle[2]][0], knownVecs[closestTriangle[2]][1]);
+		//Log::debug("%f / %f = %.9f", newPointDistSq, distSq, newPointDistSq/distSq);
+		if(!(knownVecs[closestTriangle[0]] == curIndices || knownVecs[closestTriangle[1]] == curIndices || knownVecs[closestTriangle[2]] == curIndices || newPointDistSq <= distSq * 1.000001)) {
+			knownVecs[builder.vertexCount] = curIndices;
 			builder.addPoint(delta, closestTriangleIndex);
 		} else {
 			// closestTriangle is an edge triangle, so our best direction is towards this triangle.
@@ -473,7 +486,8 @@ bool runEPA(const Shape& first, const Shape& second, Simplex s, Vec3& intersecti
 							P0 = first.vertices[A[0]];
 							Q0 = second.vertices[A[1]];
 						} else {
-							throw "ERROR: neither point-face collission, nor edge edge collission!";
+							Log::warn("Neither point-face collission, nor edge edge collission! ");
+							return false;
 						}
 
 						CrossOverPoint cross = getNearestCrossoverOfRays(U, V, P0 - Q0);
@@ -497,7 +511,7 @@ bool runEPA(const Shape& first, const Shape& second, Simplex s, Vec3& intersecti
 		}
 	}
 
-	Log::warn("EPA Quit early!");
+	Log::warn("EPA iteration limit exceeded! ");
 	return false;
 }
 
