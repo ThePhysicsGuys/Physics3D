@@ -62,7 +62,13 @@ void handleTriangleIntersect(Physical& p1, Physical& p2, const Shape& transfI, c
 	}
 }
 
+/*
+	exitVector is the distance p2 must travel so that the shapes are no longer colliding
+*/
 void handleCollision(Physical& p1, Physical& p2, Vec3 collisionPoint, Vec3 exitVector) {
+
+	Vec3 collissionRelP1 = collisionPoint - p1.getCenterOfMass();
+	Vec3 collissionRelP2 = collisionPoint - p2.getCenterOfMass();
 
 	double multiplier = 1 / (1 / p1.mass + 1 / p2.mass);
 
@@ -94,7 +100,7 @@ void handleCollision(Physical& p1, Physical& p2, Vec3 collisionPoint, Vec3 exitV
 void World::tick(double deltaT) {
 
 	Vec3* vecBuf = (Vec3*) alloca(getTotalVertexCount() * sizeof(Vec3));
-	Shape* transformedShapes = (Shape*) alloca(physicals.size() * sizeof(Shape));
+	Shape* transformedShapes = new Shape[physicals.size()];
 
 	Vec3* vecBufIndex = vecBuf;
 
@@ -147,6 +153,8 @@ void World::tick(double deltaT) {
 
 		
 	}
+
+	delete[] transformedShapes;
 }
 
 size_t World::getTotalVertexCount() {

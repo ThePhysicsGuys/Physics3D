@@ -52,8 +52,8 @@ Triangle Triangle::leftShift() const {
 Shape::Shape() : vertices(nullptr), triangles(nullptr), vertexCount(0), triangleCount(0) {}
 
 Shape::Shape(Vec3* vertices, const Triangle* triangles, int vertexCount, int triangleCount) : vertices(vertices), triangles(triangles), vertexCount(vertexCount), triangleCount(triangleCount) {
-	normals = new Vec3[vertexCount];
-	computeNormals(normals);
+	normals = std::shared_ptr<Vec3>(new Vec3[vertexCount], std::default_delete<Vec3[]>());
+	// computeNormals(normals.get());
 }
 
 Shape::Shape(Vec3* vertices, Vec3* normals, const Triangle* triangles, int vertexCount, int triangleCount) : vertices(vertices), normals(normals), triangles(triangles), vertexCount(vertexCount), triangleCount(triangleCount) {}

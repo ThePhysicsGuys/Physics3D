@@ -10,6 +10,7 @@ struct Shape;
 #include "../math/mat3.h"
 #include "../math/cframe.h"
 #include "boundingBox.h"
+#include <memory>
 
 struct Triangle {
 	union {
@@ -53,7 +54,7 @@ struct Shape {
 	};
 
 	Vec3* vertices;
-	Vec3* normals;
+	std::shared_ptr<Vec3> normals;
 	const Triangle* triangles;
 	int vertexCount;
 	int triangleCount;
