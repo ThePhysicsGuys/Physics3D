@@ -72,29 +72,30 @@ void handleCollision(Physical& p1, Physical& p2, Vec3 collisionPoint, Vec3 exitV
 
 	double multiplier = 1 / (1 / p1.mass + 1 / p2.mass);
 
-	Vec3 depthForce = 100 * multiplier * exitVector;
+	Vec3 depthForce = 1000 * multiplier * exitVector;
 
-	p1.applyForce(collisionPoint - p1.getCenterOfMass(), -depthForce);
-	p2.applyForce(collisionPoint - p2.getCenterOfMass(), depthForce);
+	p1.applyForce(collissionRelP1, -depthForce);
+	p2.applyForce(collissionRelP2, depthForce);
 
-	/*Vec3 v1 = p1.getVelocityOfPoint(collisionPoint - p1.getCenterOfMass());
-	Vec3 v2 = p2.getVelocityOfPoint(collisionPoint - p2.getCenterOfMass());
-	Vec3 relativeVelocity = v2 - v1;
+
+	Vec3 relativeVelocity = p1.getVelocityOfPoint(collissionRelP1) - p2.getVelocityOfPoint(collissionRelP2);
+
+	Vec3 relVelNormalComponent = relativeVelocity * exitVector * exitVector / exitVector.lengthSquared();
+	Vec3 relVelSidewaysComponent = -relativeVelocity % exitVector % exitVector / exitVector.lengthSquared();
 
 	Debug::logVec(collisionPoint, relativeVelocity, Debug::VELOCITY);
+	Debug::logVec(collisionPoint, relVelNormalComponent, Debug::VELOCITY);
+	Debug::logVec(collisionPoint, relVelSidewaysComponent, Debug::VELOCITY);
 
-	Vec3 relativeVelProjection = (relativeVelocity * exitVector) * exitVector / exitVector.lengthSquared();
+	
 
-	Debug::logVec(collisionPoint, relativeVelProjection, Debug::IMPULSE);
+	if(relativeVelocity * exitVector > 0) { // moving towards the other object
+		Vec3 normalVelForce = -relVelNormalComponent * multiplier * 100;
+		p1.applyForce(collissionRelP1, normalVelForce);
+		p2.applyForce(collissionRelP2, -normalVelForce);
 
-	// Vec3 depthForceFactor = normalVec.normalize();
-	Vec3 depthForceFactor = exitVector;
-	// Vec3 relativeSpeedFactor = (normalVec * relativeVelocity > 0) ? relativeVelProjection : Vec3();
-	Vec3 force = (depthForceFactor * 50/* + relativeSpeedFactor*10*///) * 1 / (1 / p1.mass + 1 / p2.mass);
-	/*p1.applyForce(collisionPoint - p1.getCenterOfMass(), force);
-	p2.applyForce(collisionPoint - p2.getCenterOfMass(), -force);
-
-	Debug::logVec(Vec3(), collisionPoint, Debug::INFO);*/
+		Vec3 frictionForce = p1.part.properties.friction * p2.part.properties.friction * relVelSidewaysComponent;
+	}
 }
 
 void World::tick(double deltaT) {
