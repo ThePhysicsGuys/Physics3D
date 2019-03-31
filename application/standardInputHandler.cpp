@@ -26,6 +26,10 @@ void StandardInputHandler::keyDownOrRepeat(int key, int modifiers) {
 	case GLFW_KEY_T:
 		runTick();
 		break;
+	case GLFW_KEY_O:
+		createDominoAt(Vec3(0.0, 0.0, 0.0), Mat3());
+		Log::info("Created domino! There are %d objects in the world! ", screen.world->physicals.size());
+		break;
 	}
 }
 
@@ -33,10 +37,6 @@ void StandardInputHandler::keyDown(int key, int modifiers) {
 	switch (key) {
 		case GLFW_KEY_P:
 			togglePause();
-			break;
-		case GLFW_KEY_O:
-			createDominoAt(Vec3(0.0, 0.0, 0.0), Mat3());
-			Log::info("Created domino! There are %d objects in the world! ", screen.world->physicals.size());
 			break;
 		case GLFW_KEY_DELETE:
 			if (screen.selectedPhysical != nullptr) {

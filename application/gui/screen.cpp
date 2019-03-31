@@ -124,7 +124,7 @@ Material material = Material (
 );
 
 const int lightCount = 4;
-Attenuation attenuation = { 0, 0, 1 };
+Attenuation attenuation = { 0, 0, 0.2 };
 Light lights[lightCount] = {
 	Light(Vec3f(5, 0, 0), Vec3f(1, 0, 0), 4, attenuation),
 	Light(Vec3f(0, 5, 0), Vec3f(0, 1, 0), 4, attenuation),
@@ -266,6 +266,17 @@ void Screen::update() {
 		}
 	}
 
+	
+	static long long t = 0;
+	t++;
+	float d = 0.5 + 0.5 * sin(t * 0.02);
+
+	lights[0].color = Vec3f(d, 0.3, 1-d);
+	lights[1].color = Vec3f(1-d, 0.3, 1 - d);
+	lights[2].color = Vec3f(0.2, 0.3*d, 1 - d);
+	lights[3].color = Vec3f(1-d, 1-d, d);
+
+
 	// Matrix calculations
 	projectionMatrix = Mat4f().perspective(1.0, screenSize.x / screenSize.y, 0.01, 100000.0);
 	orthoMatrix = Mat4f().ortho(-1, 1, -screenSize.x / screenSize.y, screenSize.x / screenSize.y, 0.1, 100);
@@ -333,6 +344,7 @@ void Screen::renderPhysicals() {
 		basicShader.updateModel(transformation);
 
 		meshes[meshId]->render();
+	}
 }
 
 void Screen::refresh() {
