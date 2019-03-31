@@ -35,7 +35,8 @@ void StandardInputHandler::keyDown(int key, int modifiers) {
 			togglePause();
 			break;
 		case GLFW_KEY_O:
-			screen.world->addObject(createCube(1), CFrame(), 5, 1);
+			createDominoAt(Vec3(0.0, 0.0, 0.0), Mat3());
+			Log::info("Created domino! There are %d objects in the world! ", screen.world->physicals.size());
 			break;
 		case GLFW_KEY_DELETE:
 			if (screen.selectedPhysical != nullptr) {

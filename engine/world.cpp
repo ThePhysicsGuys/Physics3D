@@ -10,6 +10,8 @@
 
 #include "debug.h"
 
+#include "constants.h"
+
 World::World() {}
 
 void handleTriangleIntersect(Physical& p1, Physical& p2, const Shape& transfI, const Shape& transfJ, Triangle t1, Triangle t2) {
@@ -62,39 +64,49 @@ void handleTriangleIntersect(Physical& p1, Physical& p2, const Shape& transfI, c
 	}
 }
 
+/*
+	exitVector is the distance p2 must travel so that the shapes are no longer colliding
+*/
 void handleCollision(Physical& p1, Physical& p2, Vec3 collisionPoint, Vec3 exitVector) {
 
-	double multiplier = 1 / (1 / p1.mass + 1 / p2.mass);
+	Vec3 collissionRelP1 = collisionPoint - p1.getCenterOfMass();
+	Vec3 collissionRelP2 = collisionPoint - p2.getCenterOfMass();
 
-	Vec3 depthForce = 100 * multiplier * exitVector;
+	double combinedInertia = 1 / (1 / p1.mass + 1 / p2.mass);
 
-	p1.applyForce(collisionPoint - p1.getCenterOfMass(), -depthForce);
-	p2.applyForce(collisionPoint - p2.getCenterOfMass(), depthForce);
+	Vec3 depthForce = COLLISSION_DEPTH_FORCE_MULTIPLIER * combinedInertia * exitVector;
 
-	/*Vec3 v1 = p1.getVelocityOfPoint(collisionPoint - p1.getCenterOfMass());
-	Vec3 v2 = p2.getVelocityOfPoint(collisionPoint - p2.getCenterOfMass());
-	Vec3 relativeVelocity = v2 - v1;
+	p1.applyForce(collissionRelP1, -depthForce);
+	p2.applyForce(collissionRelP2, depthForce);
+
+
+	Vec3 relativeVelocity = p1.getVelocityOfPoint(collissionRelP1) - p2.getVelocityOfPoint(collissionRelP2);
+
+	Vec3 relVelNormalComponent = relativeVelocity * exitVector * exitVector / exitVector.lengthSquared();
+	Vec3 relVelSidewaysComponent = -relativeVelocity % exitVector % exitVector / exitVector.lengthSquared();
 
 	Debug::logVec(collisionPoint, relativeVelocity, Debug::VELOCITY);
+	Debug::logVec(collisionPoint, relVelNormalComponent, Debug::VELOCITY);
+	Debug::logVec(collisionPoint, relVelSidewaysComponent, Debug::VELOCITY);
 
-	Vec3 relativeVelProjection = (relativeVelocity * exitVector) * exitVector / exitVector.lengthSquared();
+	
 
-	Debug::logVec(collisionPoint, relativeVelProjection, Debug::IMPULSE);
+	if(relativeVelocity * exitVector > 0) { // moving towards the other object
+		Vec3 normalVelForce = -relVelNormalComponent * combinedInertia * COLLISSION_RELATIVE_VELOCITY_FORCE_MULTIPLIER;
+		p1.applyForce(collissionRelP1, normalVelForce);
+		p2.applyForce(collissionRelP2, -normalVelForce);
 
-	// Vec3 depthForceFactor = normalVec.normalize();
-	Vec3 depthForceFactor = exitVector;
-	// Vec3 relativeSpeedFactor = (normalVec * relativeVelocity > 0) ? relativeVelProjection : Vec3();
-	Vec3 force = (depthForceFactor * 50/* + relativeSpeedFactor*10*///) * 1 / (1 / p1.mass + 1 / p2.mass);
-	/*p1.applyForce(collisionPoint - p1.getCenterOfMass(), force);
-	p2.applyForce(collisionPoint - p2.getCenterOfMass(), -force);
-
-	Debug::logVec(Vec3(), collisionPoint, Debug::INFO);*/
+		Vec3 frictionForce = -(p1.part.properties.friction + p2.part.properties.friction)/2 * relVelSidewaysComponent * combinedInertia * COLLISSION_RELATIVE_VELOCITY_FORCE_MULTIPLIER;
+		p1.applyForce(collissionRelP1, frictionForce);
+		p2.applyForce(collissionRelP2, -frictionForce);
+	}
 }
 
 void World::tick(double deltaT) {
+	lock.lock();
 
 	Vec3* vecBuf = (Vec3*) alloca(getTotalVertexCount() * sizeof(Vec3));
-	Shape* transformedShapes = (Shape*) alloca(physicals.size() * sizeof(Shape));
+	Shape* transformedShapes = new Shape[physicals.size()];
 
 	Vec3* vecBufIndex = vecBuf;
 
@@ -114,8 +126,19 @@ void World::tick(double deltaT) {
 		Shape transfI = transformedShapes[i];
 		for(int j = i+1; j < physicals.size(); j++) {
 			Physical& p2 = physicals[j];
-			Shape transfJ = transformedShapes[j];
 			
+			double maxRadiusBetween = p1.circumscribedSphere.radius + p2.circumscribedSphere.radius;
+
+			Vec3 globalCenterOfPos1 = p1.part.cframe.localToGlobal(p1.circumscribedSphere.origin);
+			Vec3 globalCenterOfPos2 = p2.part.cframe.localToGlobal(p2.circumscribedSphere.origin);
+			double distanceSqBetween = (globalCenterOfPos1 - globalCenterOfPos2).lengthSquared();
+
+			if(distanceSqBetween > maxRadiusBetween*maxRadiusBetween) {
+				continue;
+			}
+
+			Shape transfJ = transformedShapes[j];
+
 			Vec3 intersection;
 			Vec3 exitVector;
 			if(transfI.intersects(transfJ, intersection, exitVector)) {
@@ -147,6 +170,10 @@ void World::tick(double deltaT) {
 
 		
 	}
+
+	delete[] transformedShapes;
+
+	lock.unlock();
 }
 
 size_t World::getTotalVertexCount() {
@@ -157,12 +184,17 @@ size_t World::getTotalVertexCount() {
 }
 
 void World::addObject(Physical& part) {
+	lock.lock();
 	physicals.push_back(part);
+	lock.unlock();
 }
 
 Physical& World::addObject(Part& part) {
+	lock.lock();
 	Physical physical(part);
 	physicals.push_back(physical);
+
+	lock.unlock();
 	return physical;
 };
 

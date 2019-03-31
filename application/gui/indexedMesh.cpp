@@ -4,7 +4,7 @@
 
 IndexedMesh::IndexedMesh(Shape shape) : AbstractMesh(), vertexCount(shape.vertexCount), triangleCount(shape.triangleCount) {
 	vertexBuffer = new VertexBuffer(reinterpret_cast<double const *>(shape.vertices), vertexCount * 3);
-	normalBuffer = new VertexBuffer(reinterpret_cast<double const *>(shape.normals), vertexCount * 3);
+	normalBuffer = new VertexBuffer(reinterpret_cast<double const *>(shape.normals.get()), vertexCount * 3);
 	indexBuffer = new IndexBuffer(reinterpret_cast<unsigned int const *>(shape.triangles), triangleCount * 3);
 
 	vertexBufferLayout.push<double>(3);

@@ -30,17 +30,18 @@ public:
 	}
 
 	SwappableBuffer(const SwappableBuffer&) = delete;
+	SwappableBuffer(const SwappableBuffer&&) = delete;
 	SwappableBuffer& operator=(const SwappableBuffer&) = delete;
-
+	SwappableBuffer& operator=(const SwappableBuffer&&) = delete;
 
 	inline void add(const T& obj) {
-		if (writeIndex == writeCapacity) {
-			writeCapacity *= 2;
-			T* newPtr = (T*)realloc(writeBuf, sizeof(T) * writeCapacity);
+		if (this->writeIndex >= this->writeCapacity) {
+			this->writeCapacity *= 2;
+			T* newPtr = (T*)realloc(writeBuf, sizeof(T) * this->writeCapacity);
 			if (newPtr == nullptr) {
-				Log::fatal("Could not extend write buffer to size: %d", writeCapacity);
+				Log::fatal("Could not extend write buffer to size: %d", this->writeCapacity);
 			} else {
-				Log::info("Extended write buffer to: %d", writeCapacity);
+				Log::info("Extended write buffer to: %d", this->writeCapacity);
 				writeBuf = newPtr;
 			}
 		}
@@ -100,6 +101,7 @@ public:
 
 	AddableBuffer(const AddableBuffer&) = delete;
 	AddableBuffer& operator=(const AddableBuffer&) = delete;
+
 	AddableBuffer(AddableBuffer&& buf) {
 		size_t oldCapacity = capacity;
 		size_t oldIndex = index;

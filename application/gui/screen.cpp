@@ -331,8 +331,8 @@ void Screen::renderPhysicals() {
 		// Render each physical
 		Mat4f transformation = physical.part.cframe.asMat4f();
 		basicShader.updateModel(transformation);
+
 		meshes[meshId]->render();
-	}
 }
 
 void Screen::refresh() {

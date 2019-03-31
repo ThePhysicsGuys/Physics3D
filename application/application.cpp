@@ -32,6 +32,9 @@
 #include "../engine/geometry/convexShapeBuilder.h"
 #include "../engine/engineException.h"
 
+#define _USE_MATH_DEFINES
+#include "math.h"
+
 #define TICKS_PER_SECOND 500.0
 
 #define TICK_SKIP_TIME std::chrono::milliseconds(3000)
@@ -54,6 +57,34 @@ Part createVisiblePart(Shape s, CFrame position, double density, double friction
 		Log::warn("(type=0x%x) %s", type, message);
 }*/
 
+Vec3 dominoBuf[8];
+Shape dominoShape = BoundingBox{-0.1, -0.7, -0.3, 0.1, 0.7, 0.3}.toShape(dominoBuf);
+int dominoID;
+
+void createDominoAt(Vec3 pos, Mat3 rotation) {
+	Part domino(dominoShape, CFrame(pos, rotation), 1.0, 0.1);
+	domino.drawMeshId = dominoID;
+	world.addObject(domino);
+}
+
+void makeDominoStrip(int dominoCount) {
+	for(int i = 0; i < dominoCount; i++) {
+		createDominoAt(Vec3(i*0.5, 0.7, 1.3), Mat3());
+	}
+}
+
+void makeDominoTower(int floors, int circumference, Vec3 origin) {
+	double radius = circumference / 4.4;
+	Mat3 sideways = fromEulerAngles(M_PI / 2, 0.0, 0.0);
+	for(int floor = 0; floor < floors; floor++) {
+		for(int j = 0; j < circumference; j++) {
+			double angle = (2 * M_PI * (j + (floor % 2) / 2.0)) / circumference;
+			Vec3 pos = Vec3(std::cos(angle)*radius, floor * 0.7 + 0.35, std::sin(angle) * radius);
+			createDominoAt(pos + origin, rotY(-angle) * sideways);
+		}
+	}
+}
+
 int main(void) {
 	init();
 
@@ -67,11 +98,13 @@ int main(void) {
 
 	// world.addObject(createVisiblePart(createCube(1.0), CFrame(Vec3(0.5, 1.9, 0.5), fromEulerAngles(1.5, 0.2, 0.3)), 1.0, 0.0));
 
-	Part boxPart = createVisiblePart(BoundingBox{-0.1, -0.7, -0.3, 0.1, 0.7, 0.3}.toShape(new Vec3[8]), CFrame(Vec3(1.5, 0.7, 0.3), fromEulerAngles(0.0, 0.2, 0.0)), 2.0, 0.7);
+	Part boxPart = createVisiblePart(dominoShape, CFrame(Vec3(1.5, 0.7, 0.3), fromEulerAngles(0.0, 0.2, 0.0)), 2.0, 0.7);
 	world.addObject(boxPart);
 
+	dominoID = boxPart.drawMeshId;
 
-	
+	makeDominoStrip(20);
+	makeDominoTower(9, 11, Vec3(-4.0, 0.0, -4.0));
 
 	// Shape tetrahedronShape = 
 
