@@ -10,7 +10,7 @@ void GravityFloorWorld::applyExternalForces(const Shape* transformedShapes) {
 		const Shape& transformed = transformedShapes[j];
 
 		// Gravity force
-		physical.applyForceAtCenterOfMass((gravity - physical.getCenterOfMass() * 0.1) * physical.mass);
+		physical.applyForceAtCenterOfMass((gravity/* - physical.getCenterOfMass() * 0.1*/) * physical.mass);
 
 		// Magnet force
 		if (selectedPhysical == &physical) {

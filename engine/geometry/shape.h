@@ -6,11 +6,16 @@ struct CenteredShape;
 struct Shape;
 
 #include "../math/vec3.h"
-#include "../math/vec4.h"
 #include "../math/mat3.h"
 #include "../math/cframe.h"
 #include "boundingBox.h"
 #include <memory>
+
+
+struct Sphere {
+	Vec3 origin;
+	double radius;
+};
 
 struct Triangle {
 	union {
@@ -83,7 +88,7 @@ struct Shape {
 	Mat3 getInertia(Vec3 reference) const;
 	Mat3 getInertia(Mat3 reference) const;
 	Mat3 getInertia(CFrame reference) const;
-	Vec4 getCircumscribedSphere() const;
+	Sphere getCircumscribedSphere() const;
 	Vec3 getNormalVecOfTriangle(Triangle triangle) const;
 
 	bool intersects(const Shape& other, Vec3& intersection, Vec3& exitVector) const;

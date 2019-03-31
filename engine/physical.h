@@ -17,6 +17,8 @@ struct Physical {
 	Vec3 totalForce = Vec3();
 	Vec3 totalMoment = Vec3();
 
+	Sphere circumscribedSphere;
+
 	// Vec3 com;
 
 	double mass;
