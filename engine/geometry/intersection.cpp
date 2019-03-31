@@ -178,14 +178,6 @@ Simplex runGJK(const Shape& first, const Shape& second, Vec3 initialSearchDirect
 
 }
 
-/*Vec3 vertBuf[1000];
-Triangle triangleBuf[2000];
-TriangleNeighbors neighborBuf[2000];
-EdgePiece edgeBuf[1000];
-int removalBuf[1000];
-
-MinkowskiPointIndices knownVecs[1000];*/
-
 void initializeBuffer(Simplex s, ComputationBuffers& b) {
 	b.vertBuf[0] = s.A;
 	b.vertBuf[1] = s.B;
@@ -307,7 +299,7 @@ bool runEPA(const Shape& first, const Shape& second, Simplex s, Vec3& intersecti
 					}
 				}
 			}
-			return true;
+			return false;
 		}
 	}
 

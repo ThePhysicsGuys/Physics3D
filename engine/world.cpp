@@ -99,6 +99,7 @@ void handleCollision(Physical& p1, Physical& p2, Vec3 collisionPoint, Vec3 exitV
 }
 
 void World::tick(double deltaT) {
+	lock.lock();
 
 	Vec3* vecBuf = (Vec3*) alloca(getTotalVertexCount() * sizeof(Vec3));
 	Shape* transformedShapes = new Shape[physicals.size()];
@@ -156,6 +157,8 @@ void World::tick(double deltaT) {
 	}
 
 	delete[] transformedShapes;
+
+	lock.unlock();
 }
 
 size_t World::getTotalVertexCount() {
@@ -166,12 +169,17 @@ size_t World::getTotalVertexCount() {
 }
 
 void World::addObject(Physical& part) {
+	lock.lock();
 	physicals.push_back(part);
+	lock.unlock();
 }
 
 Physical& World::addObject(Part& part) {
+	lock.lock();
 	Physical physical(part);
 	physicals.push_back(physical);
+
+	lock.unlock();
 	return physical;
 };
 
