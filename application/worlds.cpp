@@ -2,6 +2,8 @@
 
 #include "../engine/debug.h"
 
+#include "../engine/constants.h"
+
 GravityFloorWorld::GravityFloorWorld(Vec3 gravity) : gravity(gravity) {}
 
 void GravityFloorWorld::applyExternalForces(const Shape* transformedShapes) {
@@ -25,23 +27,38 @@ void GravityFloorWorld::applyExternalForces(const Shape* transformedShapes) {
 
 		// Floor force
 		for(int i = 0; i < transformed.vertexCount; i++) {
-			Vec3 vertex = transformed.vertices[i];
+			Vec3 collisionPoint = transformed.vertices[i];
+			if(collisionPoint.y >= 0) continue;
 
-			Vec3 velocityOfPoint = physical.getVelocityOfPoint(vertex - physical.getCenterOfMass());
-			// Debug::logVec(transformed.vertices[i], velocityOfPoint, Debug::VELOCITY);
+			Vec3 collissionRelP1 = collisionPoint - physical.getCenterOfMass();
 
-			if(vertex.y < 0) {
+			// double combinedInertia = 1 / (1 / physical.mass + 1 / p2.mass);
 
-				double downwardSpeed = velocityOfPoint * Vec3(0.0, 1.0, 0.0);
+			Vec3 exitVector = Vec3(0, collisionPoint.y, 0);
 
-				if (downwardSpeed < 0) {
-					Vec3 relativePos = vertex - physical.getCenterOfMass();
-					physical.applyForce(relativePos, gravity * (downwardSpeed * physical.mass * 1.0));
+			Vec3 depthForce = 100 * physical.mass * exitVector;
 
-					Debug::logVec(relativePos + physical.getCenterOfMass(), gravity * (downwardSpeed * physical.mass), Debug::INFO);
-				}
+			physical.applyForce(collissionRelP1, -depthForce);
+			// p2.applyForce(collissionRelP2, depthForce);
 
-				physical.applyForce(vertex - physical.getCenterOfMass(), gravity * (10 * vertex.y * physical.mass));
+			Vec3 relativeVelocity = physical.getVelocityOfPoint(collissionRelP1);
+
+			Vec3 relVelNormalComponent = relativeVelocity * exitVector * exitVector / exitVector.lengthSquared();
+			Vec3 relVelSidewaysComponent = -relativeVelocity % exitVector % exitVector / exitVector.lengthSquared();
+
+			Debug::logVec(collisionPoint, relativeVelocity, Debug::VELOCITY);
+			Debug::logVec(collisionPoint, relVelNormalComponent, Debug::VELOCITY);
+			Debug::logVec(collisionPoint, relVelSidewaysComponent, Debug::VELOCITY);
+
+
+			if(relativeVelocity * exitVector > 0) { // moving towards the other object
+				Vec3 normalVelForce = -relVelNormalComponent * physical.mass * 10;
+				physical.applyForce(collissionRelP1, normalVelForce);
+				// p2.applyForce(collissionRelP2, -normalVelForce);
+
+				Vec3 frictionForce = -physical.part.properties.friction * relVelSidewaysComponent * physical.mass * 10 * 0.2;
+				physical.applyForce(collissionRelP1, frictionForce);
+				// p2.applyForce(collissionRelP2, -frictionForce);
 			}
 		}
 	}
