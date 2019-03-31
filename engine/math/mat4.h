@@ -85,6 +85,11 @@ struct Mat4Template {
 		return Mat4Template(x * m00, x * m01, x * m02, x * m03, y * m10, y * m11, y * m12, y * m13, z * m20, z * m21, z * m22, z * m23, m30, m31, m32, m33);
 	}
 
+	Mat4Template scale(N v) {
+		return scale(v, v, v);
+	}
+
+
 	Mat4Template transpose() const {
 		return Mat4Template(
 			m00, m10, m20, m30,

@@ -31,15 +31,17 @@ namespace Log {
 	}
 
 	void debug(const char* format, ...) {
-		std::string msg = "[DEBUG]: " + std::string(format) + "\n";
-		if (console == nullptr)
-			std::cout << "[WARNING]: Log not initialized, colors will be unavailable" << std::endl;
-		setColor((int) LevelColor::DEBUG);
-		va_list args;
-		va_start(args, format);
-	    vprintf(msg.c_str(), args);
-		va_end(args);
-		setColor((int)LevelColor::NORMAL);
+		if (logLevel != Level::NONE) {
+			std::string msg = "[DEBUG]: " + std::string(format) + "\n";
+			if (console == nullptr)
+				std::cout << "[WARNING]: Log not initialized, colors will be unavailable" << std::endl;
+			setColor((int)LevelColor::DEBUG);
+			va_list args;
+			va_start(args, format);
+			vprintf(msg.c_str(), args);
+			va_end(args);
+			setColor((int)LevelColor::NORMAL);
+		}
 	}
 
 	void info(const char* format, ...) {

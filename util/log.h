@@ -5,7 +5,8 @@ namespace Log {
 		INFO = 0,
 		WARNING = 1,
 		ERROR = 2,
-		FATAL = 3
+		FATAL = 3,
+		NONE = 4
 	};
 	void setColor(int color);
 	void debug(const char* format, ...);

@@ -18,6 +18,7 @@ public:
 	};
 
 	Vec3Template() : x(0), y(0), z(0) {}
+	Vec3Template(N v) : x(v), y(v), z(v) {};
 	Vec3Template(N x, N y, N z) : x(x), y(y), z(z) {};
 	Vec3Template(const Vec3Template& other) : x(other.x), y(other.y), z(other.z) {};
 	~Vec3Template() {};

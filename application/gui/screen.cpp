@@ -135,6 +135,8 @@ Light lights[lightCount] = {
 CubeMap* skybox = nullptr;
 
 void Screen::init() {
+	//Log::setLogLevel(Log::Level::NONE);
+
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 
@@ -333,6 +335,7 @@ void Screen::renderPhysicals() {
 		basicShader.updateModel(transformation);
 
 		meshes[meshId]->render();
+	}
 }
 
 void Screen::refresh() {
@@ -363,6 +366,14 @@ void Screen::refresh() {
 
 	// Update vector mesh
 	updateVecMesh(vecLog.data, vecLog.index);
+
+	// Render lights
+	for (Light light : lights) {
+		Mat4f transformation = Mat4f().translate(light.position).scale(0.1);
+		basicShader.updateMaterial(Material(light.color, Vec3f(), Vec3f(), 10));
+		basicShader.updateModel(transformation);
+		boxMesh->render();
+	}
 
 	// Render vector mesh
 	vectorShader.update(viewMatrix, projectionMatrix, viewPosition);
