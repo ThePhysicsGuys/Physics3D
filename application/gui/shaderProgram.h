@@ -3,6 +3,10 @@
 #include "shader.h"
 #include "material.h"
 #include "texture.h"
+#include "light.h"
+
+#include "../debug.h"
+
 #include "../../util/log.h"
 
 #include <cstdarg>
@@ -62,7 +66,37 @@ struct SkyboxShader : public ShaderProgram {
 
 struct BasicShader : public ShaderProgram {
 	BasicShader() : ShaderProgram() {}
-	BasicShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 9, "modelMatrix", "viewMatrix", "projectionMatrix", "viewPosition", "color", "material.ambient", "material.diffuse", "material.specular", "material.reflectance") {}
+	BasicShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 8, "modelMatrix", "viewMatrix", "projectionMatrix", "viewPosition", "material.ambient", "material.diffuse", "material.specular", "material.reflectance") {}
+
+	void createLightArray(int size) {
+		bind();
+		for (int i = 0; i < size; i++) {
+			char buffer[64];
+			// position
+			snprintf(buffer, sizeof(buffer), "lights[%d].position", i);
+			shader.createUniform(buffer);
+
+			// color
+			snprintf(buffer, sizeof(buffer), "lights[%d].color", i);
+			shader.createUniform(buffer);
+
+			// intensity
+			snprintf(buffer, sizeof(buffer), "lights[%d].intensity", i);
+			shader.createUniform(buffer);
+
+			// attenuation.constant
+			snprintf(buffer, sizeof(buffer), "lights[%d].attenuation.constant", i);
+			shader.createUniform(buffer);
+
+			// attenuation.linear
+			snprintf(buffer, sizeof(buffer), "lights[%d].attenuation.linear", i);
+			shader.createUniform(buffer);
+
+			// attenuation.exponent
+			snprintf(buffer, sizeof(buffer), "lights[%d].attenuation.exponent", i);
+			shader.createUniform(buffer);
+		}
+	}
 
 	void update(Mat4f viewMatrix, Mat4f projectionMatrix, Vec3f viewPosition) {
 		bind();
@@ -71,9 +105,34 @@ struct BasicShader : public ShaderProgram {
 		shader.setUniform(uniforms[3], viewPosition);
 	}
 
-	void updateColor(Vec3f color) {
+	void updateLight(Light lights[], int size) {
 		bind();
-		shader.setUniform(uniforms[4], color);
+		for (int i = 0; i < size; i++) {
+			char buffer[64];
+			// position
+			snprintf(buffer, sizeof(buffer), "lights[%d].position", i);
+			glUniform3f(glGetUniformLocation(shader.id, buffer), lights[i].position.x, lights[i].position.y, lights[i].position.z);
+
+			// color
+			snprintf(buffer, sizeof(buffer), "lights[%d].color", i);
+			glUniform3f(glGetUniformLocation(shader.id, buffer), lights[i].color.x, lights[i].color.y, lights[i].color.z);
+
+			// intensity
+			snprintf(buffer, sizeof(buffer), "lights[%d].intensity", i);
+			glUniform1f(glGetUniformLocation(shader.id, buffer), lights[i].intensity);
+
+			// attenuation.constant
+			snprintf(buffer, sizeof(buffer), "lights[%d].attenuation.constant", i);
+			glUniform1f(glGetUniformLocation(shader.id, buffer), lights[i].attenuation.constant);
+
+			// attenuation.linear
+			snprintf(buffer, sizeof(buffer), "lights[%d].attenuation.linear", i);
+			glUniform1f(glGetUniformLocation(shader.id, buffer), lights[i].attenuation.linear);
+
+			// attenuation.exponent
+			snprintf(buffer, sizeof(buffer), "lights[%d].attenuation.exponent", i);
+			glUniform1f(glGetUniformLocation(shader.id, buffer), lights[i].attenuation.exponent);
+		}
 	}
 
 	void updateModel(Mat4f modelMatrix) {
@@ -83,10 +142,10 @@ struct BasicShader : public ShaderProgram {
 
 	void updateMaterial(Material material) {
 		bind();
-		shader.setUniform(uniforms[5], material.ambient);
-		shader.setUniform(uniforms[6], material.diffuse);
-		shader.setUniform(uniforms[7], material.specular);
-		shader.setUniform(uniforms[8], material.specular);
+		shader.setUniform(uniforms[4], material.ambient);
+		shader.setUniform(uniforms[5], material.diffuse);
+		shader.setUniform(uniforms[6], material.specular);
+		shader.setUniform(uniforms[7], material.reflectance);
 	}
 };
 
@@ -153,6 +212,3 @@ struct VectorShader : public ShaderProgram {
 		shader.setUniform(uniforms[2], viewPosition);
 	}
 };
-
- 
-

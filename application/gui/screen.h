@@ -22,6 +22,9 @@ class Screen {
 private:
 	GLFWwindow* window;
 	std::vector<IndexedMesh*> meshes;
+
+	void renderSkybox();
+	void renderPhysicals();
 public:
 	World* world;
 	Vec2 screenSize;

@@ -164,14 +164,11 @@ ShaderSource parseShader(std::istream& shaderTextStream, const std::string name)
 		lineNumber++;
 		if (line.find("#shader vertex") != std::string::npos) {
 			type = ShaderType::VERTEX;
-		}
-		else if (line.find("#shader fragment") != std::string::npos) {
+		} else if (line.find("#shader fragment") != std::string::npos) {
 			type = ShaderType::FRAGMENT;
-		}
-		else if (line.find("#shader geometry") != std::string::npos) {
+		} else if (line.find("#shader geometry") != std::string::npos) {
 			type = ShaderType::GEOMETRY;
-		}
-		else {
+		} else {
 			if (type == ShaderType::NONE) {
 				Log::warn("(line %d): Code in (%s) before the first #shader instruction will be ignored", lineNumber, name.c_str());
 				continue;

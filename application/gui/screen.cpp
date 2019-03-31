@@ -117,13 +117,22 @@ PostProcessShader postProcessShader;
 SkyboxShader skyboxShader;
 
 Material material = Material (
-	Vec3f(0.3f, 0.4f, 0.2f),
-	Vec3f(0.3f, 0.2f, 0.6f),
-	Vec3f(1.0f, 1.0f, 1.0f),
-	0.5f
+	Vec3f(1, 1, 1),
+	Vec3f(1, 1, 1),
+	Vec3f(1, 1, 1),
+	1
 );
 
-CubeMap* cubeMap = nullptr;
+const int lightCount = 4;
+Attenuation attenuation = { 0, 0, 1 };
+Light lights[lightCount] = {
+	Light(Vec3f(5, 0, 0), Vec3f(1, 0, 0), 4, attenuation),
+	Light(Vec3f(0, 5, 0), Vec3f(0, 1, 0), 4, attenuation),
+	Light(Vec3f(0, 0, 5), Vec3f(0, 0, 1), 4, attenuation),
+	Light(Vec3f(0, 0, 0), Vec3f(1, 1, 1), 1, attenuation)
+};
+
+CubeMap* skybox = nullptr;
 
 void Screen::init() {
 	glEnable(GL_CULL_FACE);
@@ -152,6 +161,8 @@ void Screen::init() {
 	camera.setPosition(Vec3(1, 1, -2));
 	camera.setRotation(Vec3(0, 3.1415, 0.0));
 
+	basicShader.createLightArray(lightCount);
+
 	handler = new StandardInputHandler(window, *this);
 
 	quad = new Quad();
@@ -160,7 +171,7 @@ void Screen::init() {
 	quadShader.update(*modelFrameBuffer->texture);
 	postProcessShader.update(*modelFrameBuffer->texture);
 
-	cubeMap = new CubeMap("../res/skybox/right.jpg", "../res/skybox/left.jpg", "../res/skybox/top.jpg", "../res/skybox/bottom.jpg", "../res/skybox/front.jpg", "../res/skybox/back.jpg");
+	skybox = new CubeMap("../res/skybox/right.jpg", "../res/skybox/left.jpg", "../res/skybox/top.jpg", "../res/skybox/bottom.jpg", "../res/skybox/front.jpg", "../res/skybox/back.jpg");
 
 	box = new BoundingBox{-1, -1, -1, 1, 1, 1};
 	Shape shape = box->toShape(new Vec3[8]);// .rotated(fromEulerAngles(0.5, 0.1, 0.2), new Vec3[8]);
@@ -286,54 +297,61 @@ void updateVecMesh(AppDebug::ColoredVec* data, size_t size) {
 	vectorMesh->update(visibleVecs.data, visibleVecs.index / 7);
 }
 
-void Screen::refresh() {
-
-	// Render physicals to modelFrameBuffer
-	modelFrameBuffer->bind();
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+void Screen::renderSkybox() {
 	glDepthMask(GL_FALSE);
 	glDisable(GL_CULL_FACE);
-	skyboxShader.update(*cubeMap);
+	skyboxShader.update(*skybox);
 	skyboxShader.update(viewMatrix, projectionMatrix);
-	cubeMap->bind();
+	skybox->bind();
 	boxMesh->render();
 	glDepthMask(GL_TRUE);
 	glEnable(GL_CULL_FACE);
+}
 
-	glEnable(GL_DEPTH_TEST);
-
-	// Initialize vector log buffer
-	AddableBuffer<AppDebug::ColoredVec> vecLog = AppDebug::getVecBuffer();
-
+void Screen::renderPhysicals() {
 	// Bind basic uniforms
+	basicShader.updateLight(lights, lightCount);
 	basicShader.update(viewMatrix, projectionMatrix, viewPosition);
 	basicShader.updateMaterial(material);
-	
+
 	// Render world objects
 	for (Physical& physical : world->physicals) {
 		int meshId = physical.part.drawMeshId;
 
 		// Picker code
 		if (&physical == selectedPhysical)
-			basicShader.updateColor(Vec3f(0.5, 0.6, 0.3));
+			material.ambient = Vec3f(0.5, 0.6, 0.3);
 		else if (&physical == intersectedPhysical)
-			basicShader.updateColor(Vec3f(0.5, 0.5, 0.5));
+			material.ambient = Vec3f(0.5, 0.5, 0.5);
 		else
-			basicShader.updateColor(Vec3f(0.3, 0.4, 0.2));
+			material.ambient = Vec3f(0.3, 0.4, 0.2);
+
+		basicShader.updateMaterial(material);
 
 		// Render each physical
 		Mat4f transformation = physical.part.cframe.asMat4f();
 		basicShader.updateModel(transformation);
-		meshes[meshId]->render();    
-		
-		for (int i = 0; i < physical.part.hitbox.vertexCount; i++)
-			vecLog.add(AppDebug::ColoredVec(physical.part.cframe.localToGlobal(physical.part.hitbox.vertices[i]), physical.part.cframe.rotation * physical.part.hitbox.normals[i], Debug::POSITION));
+		meshes[meshId]->render();
 	}
+}
+
+void Screen::refresh() {
+
+	// Render physicals to modelFrameBuffer
+	modelFrameBuffer->bind();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	renderSkybox();
+
+	glEnable(GL_DEPTH_TEST);
+
+	// Initialize vector log buffer
+	AddableBuffer<AppDebug::ColoredVec> vecLog = AppDebug::getVecBuffer();
+
+	renderPhysicals();
 
 	// Postprocess to screenFrameBuffer
 	screenFrameBuffer->bind();
-
 	glDisable(GL_DEPTH_TEST);
 	postProcessShader.bind();
 	modelFrameBuffer->texture->bind();
