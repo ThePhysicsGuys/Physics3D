@@ -6,9 +6,7 @@
 #include "../math/utils.h"
 #include "../../util/log.h"
 #include "../debug.h"
-
-#define GJK_MAX_ITER 200
-#define EPA_MAX_ITER 200
+#include "../constants.h"
 
 Vec3 getNormalVec(Triangle t, Vec3* vertices) {
 	Vec3 v0 = vertices[t[0]];

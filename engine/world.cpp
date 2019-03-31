@@ -10,6 +10,8 @@
 
 #include "debug.h"
 
+#include "constants.h"
+
 World::World() {}
 
 void handleTriangleIntersect(Physical& p1, Physical& p2, const Shape& transfI, const Shape& transfJ, Triangle t1, Triangle t2) {
@@ -70,9 +72,9 @@ void handleCollision(Physical& p1, Physical& p2, Vec3 collisionPoint, Vec3 exitV
 	Vec3 collissionRelP1 = collisionPoint - p1.getCenterOfMass();
 	Vec3 collissionRelP2 = collisionPoint - p2.getCenterOfMass();
 
-	double multiplier = 1 / (1 / p1.mass + 1 / p2.mass);
+	double combinedInertia = 1 / (1 / p1.mass + 1 / p2.mass);
 
-	Vec3 depthForce = 1000 * multiplier * exitVector;
+	Vec3 depthForce = COLLISSION_DEPTH_FORCE_MULTIPLIER * combinedInertia * exitVector;
 
 	p1.applyForce(collissionRelP1, -depthForce);
 	p2.applyForce(collissionRelP2, depthForce);
@@ -90,11 +92,13 @@ void handleCollision(Physical& p1, Physical& p2, Vec3 collisionPoint, Vec3 exitV
 	
 
 	if(relativeVelocity * exitVector > 0) { // moving towards the other object
-		Vec3 normalVelForce = -relVelNormalComponent * multiplier * 100;
+		Vec3 normalVelForce = -relVelNormalComponent * combinedInertia * COLLISSION_RELATIVE_VELOCITY_FORCE_MULTIPLIER;
 		p1.applyForce(collissionRelP1, normalVelForce);
 		p2.applyForce(collissionRelP2, -normalVelForce);
 
-		Vec3 frictionForce = p1.part.properties.friction * p2.part.properties.friction * relVelSidewaysComponent;
+		Vec3 frictionForce = -(p1.part.properties.friction + p2.part.properties.friction)/2 * relVelSidewaysComponent * combinedInertia * COLLISSION_RELATIVE_VELOCITY_FORCE_MULTIPLIER;
+		p1.applyForce(collissionRelP1, frictionForce);
+		p2.applyForce(collissionRelP2, -frictionForce);
 	}
 }
 
