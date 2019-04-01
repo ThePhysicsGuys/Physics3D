@@ -182,7 +182,7 @@ void Screen::init() {
 	transMesh = new IndexedMesh(trans);
 	double originVertices[3] = { 0, 0, 5 };
 	originMesh = new ArrayMesh(originVertices, 1, 3, RenderMode::POINTS);
-	double * vecs = new double[140];
+	double * vecs = new double[128 * 7];
 	vecs[0] = 0.2;
 	vecs[1] = 0.3;
 	vecs[2] = 0.7;
@@ -286,7 +286,9 @@ void Screen::update() {
 	viewMatrix = rotatedViewMatrix.translate(-camera.cframe.position.x, -camera.cframe.position.y, -camera.cframe.position.z);
 	viewPosition = Vec3f(camera.cframe.position.x, camera.cframe.position.y, camera.cframe.position.z);
 
+	world->lock.lock();
 	updateIntersectedPhysical(*this, world->physicals, handler->curPos, screenSize, viewMatrix, projectionMatrix);
+	world->lock.unlock();
 }
 
 AddableBuffer<double> visibleVecs(700);
@@ -327,6 +329,7 @@ void Screen::renderPhysicals() {
 	basicShader.update(viewMatrix, projectionMatrix, viewPosition);
 	basicShader.updateMaterial(material);
 
+	std::lock_guard<std::mutex> lg(world->lock);
 	// Render world objects
 	for (Physical& physical : world->physicals) {
 		int meshId = physical.part.drawMeshId;

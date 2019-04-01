@@ -3,15 +3,19 @@
 #include "part.h"
 #include "physical.h"
 #include <vector>
+#include <queue>
 #include <mutex>
 
 class World {
 private:
 	size_t getTotalVertexCount();
+	void processQueue();
 
 public:
 	std::vector<Physical> physicals;
+	std::queue<Physical> newPhysicalQueue;
 	std::mutex lock;
+	std::mutex queueLock;
 
 	Physical* selectedPhysical = nullptr;
 	Vec3 localSelectedPoint;
