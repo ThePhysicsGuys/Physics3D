@@ -2,7 +2,7 @@
 
 class Screen;
 class Camera;
-class Physical;
+struct Physical;
 
 #include "../engine/math/vec3.h"
 

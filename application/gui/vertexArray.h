@@ -25,7 +25,7 @@ public:
 
 	void bind() override {
 		glBindVertexArray(id);
-		for (int i = 0; i < attribArrayOffset; i++)
+		for (unsigned int i = 0; i < attribArrayOffset; i++)
 			glEnableVertexAttribArray(i);
 	}
 
@@ -36,14 +36,14 @@ public:
 	void addBuffer(VertexBuffer& buffer, const BufferLayout& layout) {
 		bind();
 		buffer.bind();
-		unsigned int offset = 0;
+		size_t offset = 0;
 		for (int i = 0; i < layout.elements.size(); i++) {
 			auto& element = layout.elements[i];
 			glEnableVertexAttribArray(attribArrayOffset + i);
 			glVertexAttribPointer(attribArrayOffset + i, element.count, element.type, element.normalized, layout.stride, (const void*) offset);
 			offset += element.count * element.size;
 		}
-		attribArrayOffset += layout.elements.size();
+		attribArrayOffset += (unsigned int) layout.elements.size();
 	}
 
 	void close() override {

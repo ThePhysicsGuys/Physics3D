@@ -104,7 +104,7 @@ int main(void) {
 	dominoID = boxPart.drawMeshId;
 
 	makeDominoStrip(20);
-	makeDominoTower(9, 11, Vec3(-4.0, 0.0, -4.0));
+	//makeDominoTower(25, 11, Vec3(-4.0, 0.0, -4.0));
 
 	// Shape tetrahedronShape = 
 
@@ -202,6 +202,8 @@ int main(void) {
 	while (!screen.shouldClose()) {
 		screen.update();
 		screen.refresh();
+		// test
+		glfwSetWindowTitle(screen.getWindow(), std::to_string(physicsThread.getTPS()).c_str());
 	}
 
 	Log::info("Closing screen");

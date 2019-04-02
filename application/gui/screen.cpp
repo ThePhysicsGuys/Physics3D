@@ -7,8 +7,8 @@
 #include "picker.h"
 #include "material.h"
 #include "quad.h"
-
 #include "shaderProgram.h"
+#include "font.h"
 
 #include "../debug.h"
 #include "../standardInputHandler.h"
@@ -65,6 +65,7 @@ Screen::Screen(int width, int height, World* world) {
 
 	/* Create a windowed mode window and its OpenGL context */
 	this->window = glfwCreateWindow(width, height, "Physics3D", NULL, NULL);
+	
 	if (!this->window) {
 		glfwTerminate();
 		exit(-1);
@@ -85,6 +86,7 @@ ArrayMesh* originMesh = nullptr;
 IndexedMesh* transMesh = nullptr;
 
 Quad* quad = nullptr;
+Font* font = nullptr;
 
 BoundingBox* box = nullptr;
 StandardInputHandler* handler = nullptr;
@@ -112,6 +114,7 @@ BasicShader basicShader;
 BasicNormalShader basicNormalShader;
 VectorShader vectorShader;
 OriginShader originShader;
+FontShader fontShader;
 QuadShader quadShader;
 PostProcessShader postProcessShader;
 SkyboxShader skyboxShader;
@@ -124,7 +127,7 @@ Material material = Material (
 );
 
 const int lightCount = 4;
-Attenuation attenuation = { 0, 0, 0.2 };
+Attenuation attenuation = { 0, 0, 0.5 };
 Light lights[lightCount] = {
 	Light(Vec3f(5, 0, 0), Vec3f(1, 0, 0), 4, attenuation),
 	Light(Vec3f(0, 5, 0), Vec3f(0, 1, 0), 4, attenuation),
@@ -147,6 +150,7 @@ void Screen::init() {
 	ShaderSource basicShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(BASIC_SHADER)), "basic.shader");
 	ShaderSource basicNormalShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(BASICNORMAL_SHADER)), "basicnormal.shader");
 	ShaderSource vectorShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(VECTOR_SHADER)), "vector.shader");
+	ShaderSource fontShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(FONT_SHADER)), "font.shader");
 	ShaderSource originShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(ORIGIN_SHADER)), "origin.shader");
 	ShaderSource quadShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(QUAD_SHADER)), "quad.shader");
 	ShaderSource postProcessShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(POSTPROCESS_SHADER)), "postProcess.shader");
@@ -155,6 +159,7 @@ void Screen::init() {
 	basicShader = * new BasicShader(basicShaderSource);
 	basicNormalShader = * new BasicNormalShader(basicNormalShaderSource);
 	vectorShader = * new VectorShader(vectorShaderSource);
+	fontShader = * new FontShader(fontShaderSource);
 	originShader = * new OriginShader(originShaderSource);
 	quadShader = * new QuadShader(quadShaderSource);
 	postProcessShader = * new PostProcessShader(postProcessShaderSource);
@@ -166,6 +171,8 @@ void Screen::init() {
 	basicShader.createLightArray(lightCount);
 
 	handler = new StandardInputHandler(window, *this);
+
+	font = new Font(fontShader, "../res/fonts/droid.ttf");
 
 	quad = new Quad();
 	modelFrameBuffer = new FrameBuffer(width, height);
@@ -267,11 +274,10 @@ void Screen::update() {
 			exit(0);
 		}
 	}
-
 	
 	static long long t = 0;
 	t++;
-	float d = 0.5 + 0.5 * sin(t * 0.02);
+	float d = 0.5 + 0.5 * sin(t * 0.005);
 
 	lights[0].color = Vec3f(d, 0.3, 1-d);
 	lights[1].color = Vec3f(1-d, 0.3, 1 - d);
@@ -385,7 +391,7 @@ void Screen::refresh() {
 		basicShader.updateModel(transformation);
 		boxMesh->render();
 	}
-
+	
 	// Render vector mesh
 	vectorShader.update(viewMatrix, projectionMatrix, viewPosition);
 	vectorMesh->render();
@@ -393,6 +399,12 @@ void Screen::refresh() {
 	// Render origin mesh
 	originShader.update(viewMatrix, rotatedViewMatrix, projectionMatrix, orthoMatrix, viewPosition);
 	originMesh->render();
+
+	// Render some text
+	static long long t = 0;
+	float d = 0.5 + 0.5 * sin(t++ * 0.02);
+	fontShader.update(orthoMatrix);
+	font->render("Surprise", Vec2(-screenSize.x / screenSize.y * 0.95, -1 * 0.95), Vec3f(1-d, d, sqrt(d)), 0.002);
 
 	// Render screenFrameBuffer texture to the screen
 	screenFrameBuffer->unbind();
@@ -409,8 +421,13 @@ void Screen::refresh() {
 
 void Screen::close() {
 	basicShader.close();
+	basicNormalShader.close();
 	vectorShader.close();
+	fontShader.close();
 	originShader.close();
+	skyboxShader.close();
+	quadShader.close();
+	postProcessShader.close();
 
 	terminateGL();
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-class Physical;
+struct Physical;
 
 #include "screen.h"
 

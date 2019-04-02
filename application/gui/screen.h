@@ -50,6 +50,8 @@ public:
 	void refresh();
 	void close();
 
+	GLFWwindow* getWindow() { return window; }
+
 	void makeCurrent();
 
 	void setWorld(World* world) { this->world = world; };

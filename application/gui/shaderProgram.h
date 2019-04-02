@@ -201,6 +201,26 @@ struct OriginShader : public ShaderProgram {
 	}
 };
 
+struct FontShader : public ShaderProgram {
+	FontShader() : ShaderProgram() {}
+	FontShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 3, "projectionMatrix", "color", "text") {}
+
+	void updateColor(Vec3f color) {
+		bind();
+		shader.setUniform(uniforms[1], color);
+	}
+
+	void update(Mat4f projectionMatrix) {
+		bind();
+		shader.setUniform(uniforms[0], projectionMatrix);
+	}
+
+	void updateTexture(Texture texture) {
+		bind();
+		shader.setUniform(uniforms[2], texture.unit);
+	}
+};
+
 struct VectorShader : public ShaderProgram {
 	VectorShader() : ShaderProgram() {}
 	VectorShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 3, "viewMatrix", "projectionMatrix", "viewPosition") {}
