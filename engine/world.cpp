@@ -102,14 +102,26 @@ void handleCollision(Physical& p1, Physical& p2, Vec3 collisionPoint, Vec3 exitV
 	}
 }
 
+void World::processQueue() {
+	std::lock_guard<std::mutex> mutLock(lock);
+	std::lock_guard<std::mutex> lg(queueLock);
+
+	while(!newPhysicalQueue.empty()) {
+		physicals.push_back(newPhysicalQueue.front());
+		newPhysicalQueue.pop();
+	}
+}
+
 void World::tick(double deltaT) {
-	lock.lock();
+	processQueue();
 
 	Vec3* vecBuf = (Vec3*) alloca(getTotalVertexCount() * sizeof(Vec3));
 	Shape* transformedShapes = new Shape[physicals.size()];
 
 	Vec3* vecBufIndex = vecBuf;
 
+
+	std::lock_guard<std::mutex> mutLock(lock);
 	for(int i = 0; i < physicals.size(); i++) {
 		const Shape& curShape = physicals[i].part.hitbox;
 
@@ -120,13 +132,13 @@ void World::tick(double deltaT) {
 	applyExternalForces(transformedShapes);
 
 	// Compute object collisions
-	
+
 	for(int i = 0; i < physicals.size(); i++) {
 		Physical& p1 = physicals[i];
 		Shape transfI = transformedShapes[i];
-		for(int j = i+1; j < physicals.size(); j++) {
+		for(int j = i + 1; j < physicals.size(); j++) {
 			Physical& p2 = physicals[j];
-			
+
 			double maxRadiusBetween = p1.circumscribedSphere.radius + p2.circumscribedSphere.radius;
 
 			Vec3 globalCenterOfPos1 = p1.part.cframe.localToGlobal(p1.circumscribedSphere.origin);
@@ -159,7 +171,7 @@ void World::tick(double deltaT) {
 		}
 	}
 
-	for (int i = 0; i < physicals.size(); i++) {
+	for(int i = 0; i < physicals.size(); i++) {
 		Physical& physical = physicals[i];
 		physical.update(deltaT);
 
@@ -168,12 +180,10 @@ void World::tick(double deltaT) {
 		Debug::logVec(physical.getCenterOfMass(), physical.part.cframe.localToRelative(Vec3(0, physical.inertia.m11 / physical.mass, 0)), Debug::INFO);
 		Debug::logVec(physical.getCenterOfMass(), physical.part.cframe.localToRelative(Vec3(0, 0, physical.inertia.m22 / physical.mass)), Debug::INFO);*/
 
-		
+
 	}
 
 	delete[] transformedShapes;
-
-	lock.unlock();
 }
 
 size_t World::getTotalVertexCount() {
@@ -184,17 +194,18 @@ size_t World::getTotalVertexCount() {
 }
 
 void World::addObject(Physical& part) {
-	lock.lock();
-	physicals.push_back(part);
-	lock.unlock();
+	if(lock.try_lock()) {
+		physicals.push_back(part);
+		lock.unlock();
+	} else {
+		std::lock_guard<std::mutex> lg(queueLock);
+		newPhysicalQueue.push(part);
+	}
 }
 
 Physical& World::addObject(Part& part) {
-	lock.lock();
 	Physical physical(part);
-	physicals.push_back(physical);
-
-	lock.unlock();
+	this->addObject(physical);
 	return physical;
 };
 

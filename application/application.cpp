@@ -285,10 +285,13 @@ void setupPhysics() {
 			world.tick(1 / physicsThread.getTPS());
 		} catch(EngineException& ex) {
 			Log::error("EngineException: \n %s", ex.what());
+			__debugbreak();
 		} catch(std::exception& ex) {
 			Log::error("std::exception occurred! \n %s", ex.what());
+			__debugbreak();
 		} catch(const char* ex) {
 			Log::error("char* exception occurred! \n %s", ex);
+			__debugbreak();
 		}
 		AppDebug::logTickEnd();
 	});
