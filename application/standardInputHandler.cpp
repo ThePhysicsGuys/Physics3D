@@ -4,6 +4,7 @@
 #include "gui/picker.h"
 #include "objectLibrary.h"
 #include <algorithm>
+#include <random>
 
 StandardInputHandler::StandardInputHandler(GLFWwindow* window, Screen& screen) : InputHandler(window), screen(screen) {}
 
@@ -27,7 +28,7 @@ void StandardInputHandler::keyDownOrRepeat(int key, int modifiers) {
 		runTick();
 		break;
 	case GLFW_KEY_O:
-		createDominoAt(Vec3(0.0, 0.0, 0.0), Mat3());
+		createDominoAt(Vec3(0.0 + (rand() % 100) * 0.001, 0.5 + (rand() % 100) * 0.001, 0.0 + (rand() % 100) * 0.001), fromEulerAngles(0.2, 0.3, 0.7));
 		Log::info("Created domino! There are %d objects in the world! ", screen.world->physicals.size());
 		break;
 	}

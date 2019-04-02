@@ -5,6 +5,7 @@
 #include <vector>
 #include <queue>
 #include <mutex>
+#include <shared_mutex>
 
 class World {
 private:
@@ -14,8 +15,8 @@ private:
 public:
 	std::vector<Physical> physicals;
 	std::queue<Physical> newPhysicalQueue;
-	std::mutex lock;
-	std::mutex queueLock;
+	mutable std::shared_mutex lock;
+	mutable std::mutex queueLock;
 
 	Physical* selectedPhysical = nullptr;
 	Vec3 localSelectedPoint;

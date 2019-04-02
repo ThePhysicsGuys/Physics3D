@@ -31,6 +31,8 @@
 #include <math.h>
 #include <map>
 
+#include "../engine/sharedLockGuard.h"
+
 World* curWorld = NULL;
 
 bool initGLFW() {
@@ -335,7 +337,7 @@ void Screen::renderPhysicals() {
 	basicShader.update(viewMatrix, projectionMatrix, viewPosition);
 	basicShader.updateMaterial(material);
 
-	std::lock_guard<std::mutex> lg(world->lock);
+	SharedLockGuard lg(world->lock);
 	// Render world objects
 	for (Physical& physical : world->physicals) {
 		int meshId = physical.part.drawMeshId;

@@ -12,6 +12,8 @@
 
 #include "constants.h"
 
+#include "sharedLockGuard.h"
+
 World::World() {}
 
 void handleTriangleIntersect(Physical& p1, Physical& p2, const Shape& transfI, const Shape& transfJ, Triangle t1, Triangle t2) {
@@ -103,7 +105,6 @@ void handleCollision(Physical& p1, Physical& p2, Vec3 collisionPoint, Vec3 exitV
 }
 
 void World::processQueue() {
-	std::lock_guard<std::mutex> mutLock(lock);
 	std::lock_guard<std::mutex> lg(queueLock);
 
 	while(!newPhysicalQueue.empty()) {
@@ -113,7 +114,7 @@ void World::processQueue() {
 }
 
 void World::tick(double deltaT) {
-	processQueue();
+	SharedLockGuard mutLock(lock);
 
 	Vec3* vecBuf = (Vec3*) alloca(getTotalVertexCount() * sizeof(Vec3));
 	Shape* transformedShapes = new Shape[physicals.size()];
@@ -121,11 +122,11 @@ void World::tick(double deltaT) {
 	Vec3* vecBufIndex = vecBuf;
 
 
-	std::lock_guard<std::mutex> mutLock(lock);
-	for(int i = 0; i < physicals.size(); i++) {
+	int t;
+	for(int i = 0; i < (t=physicals.size()); i++) {
 		const Shape& curShape = physicals[i].part.hitbox;
-
-		transformedShapes[i] = curShape.localToGlobal(physicals[i].part.cframe, vecBufIndex);
+		CFrame cframe = physicals[i].part.cframe;
+		transformedShapes[i] = curShape.localToGlobal(cframe, vecBufIndex);
 		vecBufIndex += curShape.vertexCount;
 	}
 
@@ -133,6 +134,7 @@ void World::tick(double deltaT) {
 
 	// Compute object collisions
 
+	
 	for(int i = 0; i < physicals.size(); i++) {
 		Physical& p1 = physicals[i];
 		Shape transfI = transformedShapes[i];
@@ -148,7 +150,6 @@ void World::tick(double deltaT) {
 			if(distanceSqBetween > maxRadiusBetween*maxRadiusBetween) {
 				continue;
 			}
-
 			Shape transfJ = transformedShapes[j];
 
 			Vec3 intersection;
@@ -171,6 +172,7 @@ void World::tick(double deltaT) {
 		}
 	}
 
+	mutLock.upgrade();
 	for(int i = 0; i < physicals.size(); i++) {
 		Physical& physical = physicals[i];
 		physical.update(deltaT);
@@ -182,8 +184,10 @@ void World::tick(double deltaT) {
 
 
 	}
-
+	
 	delete[] transformedShapes;
+
+	processQueue();
 }
 
 size_t World::getTotalVertexCount() {
