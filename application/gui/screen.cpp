@@ -255,10 +255,11 @@ void Screen::update() {
 			camera.move(*this, -speed, 0, 0, leftDragging);
 		}
 		if (handler->getKey(GLFW_KEY_SPACE)) {
-			camera.move(*this, 0, speed, 0, leftDragging);
+			if (camera.flying) camera.move(*this, 0, speed, 0, leftDragging);
+			else camera.jump(*this, leftDragging);
 		}
 		if (handler->getKey(GLFW_KEY_LEFT_SHIFT)) {
-			camera.move(*this, 0, -speed, 0, leftDragging);
+			if (camera.flying) camera.move(*this, 0, -speed, 0, leftDragging);
 		}
 		if (handler->getKey(GLFW_KEY_LEFT)) {
 			camera.rotate(*this, 0, -speed, 0, leftDragging);
@@ -276,6 +277,8 @@ void Screen::update() {
 			exit(0);
 		}
 	}
+
+	camera.update();
 	
 	static long long t = 0;
 	t++;
@@ -286,7 +289,6 @@ void Screen::update() {
 	lights[2].color = Vec3f(0.2, 0.3*d, 1 - d);
 	lights[3].color = Vec3f(1-d, 1-d, d);
 
-
 	// Matrix calculations
 	projectionMatrix = Mat4f().perspective(1.0, screenSize.x / screenSize.y, 0.01, 100000.0);
 	orthoMatrix = Mat4f().ortho(-1, 1, -screenSize.x / screenSize.y, screenSize.x / screenSize.y, 0.1, 100);
@@ -294,9 +296,7 @@ void Screen::update() {
 	viewMatrix = rotatedViewMatrix.translate(-camera.cframe.position.x, -camera.cframe.position.y, -camera.cframe.position.z);
 	viewPosition = Vec3f(camera.cframe.position.x, camera.cframe.position.y, camera.cframe.position.z);
 
-	world->lock.lock();
 	updateIntersectedPhysical(*this, world->physicals, handler->curPos, screenSize, viewMatrix, projectionMatrix);
-	world->lock.unlock();
 }
 
 AddableBuffer<double> visibleVecs(700);

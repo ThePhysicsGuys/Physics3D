@@ -31,14 +31,18 @@ void updateIntersectedPhysical(Screen& screen, std::vector<Physical>& physicals,
 	double closestIntersectDistance = INFINITY;
 
 	screen.ray = calcRay(mousePosition, screenSize, viewMatrix, projectionMatrix);
-
-	for (Physical& physical : physicals) {
-		Vec3* buffer = new Vec3[physical.part.hitbox.vertexCount];
+	std::vector<Physical> physicalsCopy = physicals;
+	for (int i = 0; i < physicalsCopy.size(); i++) {
+		Physical physical = physicalsCopy[i];
+		Vec3* buffer = new Vec3[physicalsCopy[i].part.hitbox.vertexCount];
 		Shape transformed = physical.part.hitbox.localToGlobal(physical.part.cframe, buffer);
 		double distance = transformed.getIntersectionDistance(screen.camera.cframe.position, screen.ray);
 		if (distance < closestIntersectDistance && distance > 0) {
-			closestIntersectDistance = distance;
-			closestIntersectedPhysical = &physical;
+			if (i >= physicals.size()) continue;
+			else {
+				closestIntersectDistance = distance;
+				closestIntersectedPhysical = &physicals[i];
+			}
 		}
 		delete[] buffer;
 	}

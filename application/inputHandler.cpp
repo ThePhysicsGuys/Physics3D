@@ -2,9 +2,15 @@
 #include "inputHandler.h"
 #include "eventHandler.h"
 
+#include "../util/log.h"
+
 void InputHandler::keyCallback(int key, int action, int mods) {
 	if (action == GLFW_PRESS) {
+		if (keys[key] == false && glfwGetTime() - timestamp[key] < keyInterval) {
+			doubleKeyDown(key, mods);
+		}
 		keys[key] = true;
+		timestamp[key] = glfwGetTime();
 		anyKey++;
 		keyDown(key, mods);
 		keyDownOrRepeat(key, mods);

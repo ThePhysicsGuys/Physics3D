@@ -58,6 +58,11 @@ void StandardInputHandler::keyDown(int key, int modifiers) {
 	}
 };
 
+void StandardInputHandler::doubleKeyDown(int key, int modifiers) {
+	if (key == GLFW_KEY_SPACE)
+		screen.camera.toggleFlying();
+}
+
 void StandardInputHandler::keyUp(int key, int modifiers) {};
 void StandardInputHandler::keyRepeat(int key, int modifiers) {};
 // void StandardInputHandler::mouseEnter() {};

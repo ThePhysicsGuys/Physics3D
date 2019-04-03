@@ -1,5 +1,8 @@
 #include "camera.h"
 
+#include "GL\glew.h"
+#include "GLFW\glfw3.h"
+
 #include "../gui/picker.h"
 #include "../gui/screen.h"
 
@@ -32,7 +35,7 @@ void Camera::rotate(Screen& screen, Vec3 delta, bool leftDragging) {
 
 void Camera::move(Screen& screen, double dx, double dy, double dz, bool leftDragging) {
 	(*screen.eventHandler.cameraMoveHandler) (screen, this, Vec3(dx, dy, dz));
-
+	
 	Vec3 translation = Vec3();
 
 	if (dx != 0) {
@@ -65,4 +68,50 @@ void Camera::move(Screen& screen, double dx, double dy, double dz, bool leftDrag
 
 void Camera::move(Screen& screen, Vec3 delta, bool leftDragging) {
 	move(screen, delta.x, delta.y, delta.z, leftDragging);
+}
+
+void Camera::update() {
+	if (!flying) {
+		double y = 0;
+		if (airborne) {
+			double y0 = cframe.position.y - height;
+			double t = glfwGetTime() - timestamp;
+			y = y0 + v0 * t - g * t * t;
+			if (y <= 0) {
+				y = 0;
+				airborne = false;
+				v0 = 0;
+			}
+		}
+		cframe.position.y = y + height;
+	}
+}
+
+void Camera::toggleFlying() {
+	if (!flying) {
+		flying = true;
+		airborne = true;
+		v0 = 0;
+	} else {
+		flying = false;
+		if (cframe.position.y > height) {
+			airborne = true;
+			timestamp = glfwGetTime();
+			y0 = cframe.position.y;
+			v0 = 0;
+		} else {
+			airborne = false;
+			cframe.position = height;
+			v0 = 0;
+		}
+	}
+}
+
+void Camera::jump(Screen& screen, bool leftDragging) {
+	if (!airborne) {
+		airborne = true;
+		timestamp = glfwGetTime();
+		y0 = cframe.position.y;
+		v0 = (y0 > height) ? 0 : 0.07;
+	}
 }

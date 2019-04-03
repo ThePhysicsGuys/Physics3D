@@ -21,7 +21,7 @@ public:
 	void keyUp(int key, int modifiers) override;
 	void keyRepeat(int key, int modifiers) override;
 	void keyDownOrRepeat(int key, int modifiers) override;
-	
+	void doubleKeyDown(int key, int modifiers) override;
 	void mouseDown(int button, int mods) override;
 	void mouseUp(int button, int mods) override;
 	void mouseMove(double x, double y) override;
