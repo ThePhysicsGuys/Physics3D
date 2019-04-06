@@ -55,8 +55,6 @@ public:
 
 	GLFWwindow* getWindow() { return window; }
 
-	void makeCurrent();
-
 	void setWorld(World* world) { this->world = world; };
 
 	int addMeshShape(Shape mesh);

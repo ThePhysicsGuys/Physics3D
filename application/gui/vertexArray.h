@@ -15,7 +15,6 @@ public:
 	VertexArray() : attribArrayOffset(0) {
 		glGenVertexArrays(1, &id);
 		glBindVertexArray(id);
-		Log::debug("Created vertex array with id (%d)", id);
 	}
 
 	~VertexArray() {

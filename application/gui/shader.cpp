@@ -10,6 +10,7 @@
 
 void Shader::createUniform(std::string uniform) {
 	bind();
+	Log::setSubject(name);
 	int location = glGetUniformLocation(id, uniform.c_str());
 	if (location < 0)
 		Log::error("Could not find uniform (%s) in shader (%s)", uniform.c_str(), name.c_str());
@@ -17,6 +18,7 @@ void Shader::createUniform(std::string uniform) {
 		Log::debug("Created uniform (%s) in shader (%s) with id (%d)", uniform.c_str(), name.c_str(), location);
 		uniforms.insert(std::make_pair(uniform, location));
 	}
+	Log::resetSubject();
 }
 
 void Shader::setUniform(std::string uniform, int value) {
@@ -76,6 +78,7 @@ unsigned int compileShader(const std::string& source, unsigned int type) {
 unsigned int createShader(const std::string& vertexShader, const std::string& fragmentShader, const std::string& geometryShader, const std::string name) {
 	unsigned int program = glCreateProgram();
 
+	Log::setSubject(name);
 	Log::info("Compiling vertex shader for shader (%s)", name.c_str());
 	unsigned int vs = compileShader(vertexShader, GL_VERTEX_SHADER);
 	Log::info("Done compiling vertex shader for shader (%s)", name.c_str());
@@ -106,6 +109,7 @@ unsigned int createShader(const std::string& vertexShader, const std::string& fr
 	
 
 	Log::debug("Created shader (%s) with id (%d)", name.c_str(), program);
+	Log::resetSubject();
 
 	return program;
 }
@@ -129,23 +133,28 @@ std::string parseFile(const std::string& path) {
 }
 
 ShaderSource parseShader(const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath, const std::string name) {
+	Log::setSubject(name);
 	Log::info("Started parsing vertex shader: (%s), fragment shader: (%s) and geometry shader: (%s) for shader (%s)", vertexPath.c_str(), fragmentPath.c_str(), geometryPath.c_str(), name.c_str());
 	std::string vertexFile = parseFile(vertexPath);
 	std::string fragmentFile = parseFile(fragmentPath);
 	std::string geometryFile = parseFile(geometryPath);
 	Log::info("Parsed vertex shader: (%s), fragment shader: (%s) and geometry shader: (%s) for shader (%s)", vertexPath.c_str(), fragmentPath.c_str(), geometryPath.c_str(), name.c_str());
+	Log::resetSubject();
 	return { vertexFile , fragmentFile , geometryPath, name };
 }
 
 ShaderSource parseShader(const std::string& vertexPath, const std::string& fragmentPath, const std::string name) {
+	Log::setSubject(name);
 	Log::info("Started parsing vertex shader: (%s), and fragment shader: (%s) for shader (%s)", vertexPath.c_str(), fragmentPath.c_str(), name.c_str());
 	std::string vertexFile = parseFile(vertexPath);
 	std::string fragmentFile = parseFile(fragmentPath);
 	Log::info("Parsed vertex shader: (%s), and fragment shader: (%s) for shader (%s)", vertexPath.c_str(), fragmentPath.c_str(), name.c_str());
+	Log::resetSubject();
 	return { vertexFile , fragmentFile , "", name };
 }
 
 ShaderSource parseShader(std::istream& shaderTextStream, const std::string name) {
+	Log::setSubject(name);
 	Log::info("Started parsing vertex, geometry and fragment shader for shader (%s)", name.c_str());
 	enum class ShaderType {
 		NONE = -1,
@@ -179,10 +188,12 @@ ShaderSource parseShader(std::istream& shaderTextStream, const std::string name)
 
 	if (stringStream[(int)ShaderType::GEOMETRY].str().empty()) {
 		Log::info("Parsed vertex and fragment shader for shader (%s)", name.c_str());
+		Log::resetSubject();
 		return { stringStream[(int)ShaderType::VERTEX].str(), stringStream[(int)ShaderType::FRAGMENT].str(), std::string(""), name };
 	}
 	else {
 		Log::info("Parsed vertex, fragment and geometry shader for shader (%s)", name.c_str());
+		Log::resetSubject();
 		return { stringStream[(int)ShaderType::VERTEX].str(), stringStream[(int)ShaderType::FRAGMENT].str(),  stringStream[(int)ShaderType::GEOMETRY].str(), name };
 	}
 }

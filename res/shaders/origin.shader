@@ -3,10 +3,7 @@
 
 layout(location = 0) in vec3 rotation;
 
-out vec3 grotation;
-
 void main() {
-	grotation = rotation;
 	gl_Position = vec4(0.8, -0.8, -1, 1);
 }
 
@@ -23,8 +20,6 @@ uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 uniform mat4 orthoMatrix;
 uniform vec3 viewPosition;
-
-in vec3 grotation[];
 
 out vec3 fcolor;
 

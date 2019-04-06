@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 namespace Log {
 	enum class Level : char {
 		INFO = 0,
@@ -8,12 +10,14 @@ namespace Log {
 		FATAL = 3,
 		NONE = 4
 	};
+	void setSubject(std::string subject);
+	void resetSubject();
 	void setColor(int color);
-	void debug(const char* format, ...);
-	void info(const char* format, ...);
-	void warn(const char* format, ...);
-	void error(const char* format, ...);
-	void fatal(const char* format, ...);
+	void debug(std::string format, ...);
+	void info(std::string format, ...);
+	void warn(std::string format, ...);
+	void error(std::string format, ...);
+	void fatal(std::string format, ...);
 	void setLogLevel(Log::Level logLevel);
 	Level getLogLevel();
 };

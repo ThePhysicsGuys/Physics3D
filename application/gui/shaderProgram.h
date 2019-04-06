@@ -24,15 +24,14 @@ public:
 
 		va_list args;
 		va_start(args, count);
-
+		Log::setSubject(shader.name);
 		Log::debug("Using shader (%s) with id (%d)", shader.name.c_str(), shader.id);
 		for (int i = 0; i < count; i++) {
 			std::string uniform = std::string(va_arg(args, const char *));
-			Log::debug("init '%s'", uniform.c_str());
 			shader.createUniform(uniform);
 			uniforms.push_back(uniform);
 		}
-
+		Log::resetSubject();
 		va_end(args);
 	}
 
@@ -173,7 +172,6 @@ struct QuadShader : public ShaderProgram {
 	void update(Texture texture) {
 		bind();
 		shader.setUniform(uniforms[0], texture.unit);
-		//shader.setUniform(uniforms[0], (int) texture.id);
 	}
 };
 
@@ -183,7 +181,7 @@ struct PostProcessShader : public ShaderProgram {
 
 	void update(Texture texture) {
 		bind();
-		shader.setUniform(uniforms[0], 0);
+		shader.setUniform(uniforms[0], texture.unit);
 	}
 };
 

@@ -1,8 +1,8 @@
+#include "log.h"
+
 #include <iostream>
 #include <windows.h>
-#include <string>
 #undef ERROR
-#include "log.h"
 
 namespace Log {
 
@@ -12,11 +12,26 @@ namespace Log {
 		WARNING = 14,
 		ERROR = 12,
 		FATAL = 192,
-		NORMAL = 15
+		NORMAL = 15,
+		SUBJECT = 13
 	};
 
 	HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
 	Level logLevel = Level::INFO;
+
+	bool newSubject = false;
+	std::string lastSubject = "";
+	std::string currentSubject = "";
+
+	void setSubject(std::string subject) {
+		currentSubject = subject;
+		newSubject = lastSubject != subject;
+	}
+
+	void resetSubject() {
+		lastSubject = currentSubject;
+		currentSubject = "";
+	}
 
 	void setLogLevel(Level level) {
 		logLevel = level;
@@ -30,73 +45,80 @@ namespace Log {
 		SetConsoleTextAttribute(console, color);
 	}
 
-	void debug(const char* format, ...) {
+	void subject(std::string subject) {
+		setColor((int) LevelColor::SUBJECT);
+		std::cout << subject;
+		setColor((int) LevelColor::NORMAL);
+		newSubject = false;
+	}
+
+	void debug(std::string format, ...) {
 		if (logLevel != Level::NONE) {
-			std::string msg = "[DEBUG]: " + std::string(format) + "\n";
-			if (console == nullptr)
-				std::cout << "[WARNING]: Log not initialized, colors will be unavailable" << std::endl;
-			setColor((int)LevelColor::DEBUG);
+			if (newSubject) subject("\n[" + currentSubject + "]:\n");
+			if (!currentSubject.empty()) subject("|\t");
+			std::string message = "[DEBUG]: " + format + "\n";
+			setColor((int) LevelColor::DEBUG);
 			va_list args;
 			va_start(args, format);
-			vprintf(msg.c_str(), args);
+			vprintf(message.c_str(), args);
 			va_end(args);
-			setColor((int)LevelColor::NORMAL);
+			setColor((int) LevelColor::NORMAL);
 		}
 	}
 
-	void info(const char* format, ...) {
+	void info(std::string format, ...) {
 		if (logLevel <= Level::INFO) {
-			std::string msg = "[INFO]: " + std::string(format) + "\n";
-			if (console == nullptr)
-				std::cout << "[WARNING]: Log not initialized, colors will be unavailable" << std::endl;
-			setColor((int)LevelColor::INFO);
+			if (newSubject) subject("\n[" + currentSubject + "]:\n");
+			if (!currentSubject.empty()) subject("|\t");
+			std::string message = "[INFO]: " + format + "\n";
+			setColor((int) LevelColor::INFO);
 			va_list args;
 			va_start(args, format);
-			vprintf(msg.c_str(), args);
+			vprintf(message.c_str(), args);
 			va_end(args);
-			setColor((int)LevelColor::NORMAL);
+			setColor((int) LevelColor::NORMAL);
 		}
 	}
 
-	void warn(const char* format, ...) {
+	void warn(std::string format, ...) {
 		if (logLevel <= Level::WARNING) {
-			std::string msg = "[WARNING]: " + std::string(format) + "\n";
-			if (console == nullptr)
-				std::cout << "[WARNING]: Log not initialized, colors will be unavailable" << std::endl;
-			setColor((int)LevelColor::WARNING);
+			if (newSubject) subject("\n[" + currentSubject + "]:\n");
+			if (!currentSubject.empty()) subject("|\t");
+			std::string message = "[WARN]: " + format + "\n";
+			setColor((int) LevelColor::WARNING);
 			va_list args;
 			va_start(args, format);
-			vprintf(msg.c_str(), args);
+			vprintf(message.c_str(), args);
 			va_end(args);
-			setColor((int)LevelColor::NORMAL);
+			setColor((int) LevelColor::NORMAL);
 		}
 	}
 
-	void error(const char* format, ...) {
+	void error(std::string format, ...) {
 		if (logLevel <= Level::ERROR) {
-			std::string msg = "[ERROR]: " + std::string(format) + "\n";
-			if (console == nullptr)
-				std::cout << "[WARNING]: Log not initialized, colors will be unavailable" << std::endl;
-			setColor((int)LevelColor::ERROR);
+			if (newSubject) subject("\n[" + currentSubject + "]:\n");
+			if (!currentSubject.empty()) subject("|\t");
+			std::string message = "[ERROR]: " + format + "\n";
+			setColor((int) LevelColor::ERROR);
 			va_list args;
 			va_start(args, format);
-			vprintf(msg.c_str(), args);
+			vprintf(message.c_str(), args);
 			va_end(args);
-			setColor((int)LevelColor::NORMAL);
+			setColor((int) LevelColor::NORMAL);
 		}
 	}
 
-	void fatal(const char* format, ...) {
+	void fatal(std::string format, ...) {
 		if (logLevel <= Level::FATAL) {
-			std::string msg = "[FATAL]: " + std::string(format) + "\n";
-			if (console == nullptr)
-				std::cout << "[WARNING]: Log not initialized, colors will be unavailable" << std::endl;
-			setColor((int)LevelColor::FATAL);
+			if (newSubject) subject("\n[" + currentSubject + "]:\n");
+			if (!currentSubject.empty()) subject("|\t");
+			std::string message = "[FATAL]: " + format + "\n";
+			setColor((int) LevelColor::FATAL);
 			va_list args;
 			va_start(args, format);
-			vprintf(msg.c_str(), args);
+			vprintf(message.c_str(), args);
 			va_end(args);
-			setColor((int)LevelColor::NORMAL);
+			setColor((int) LevelColor::NORMAL);
 		}
 	}
 }
