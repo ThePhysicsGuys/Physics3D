@@ -11,6 +11,7 @@
 #include "font.h"
 
 #include "../debug.h"
+#include "../profiling.h"
 #include "../standardInputHandler.h"
 #include "../resourceManager.h"
 #include "../objectLibrary.h"
@@ -360,7 +361,17 @@ void Screen::renderPhysicals() {
 	}
 }
 
+template<typename T>
+void Screen::renderDebugField(const char* varName, T value, const char* unit) {
+	std::stringstream ss;
+	ss.precision(4);
+	ss << varName << ": " << value << unit;
+	font->render(ss.str().c_str(), Vec2(-screenSize.x / screenSize.y * 0.99, (1 - fieldIndex * 0.05) * 0.95), Vec3f(1,1,1), 0.001);
+	fieldIndex++;
+}
+
 void Screen::refresh() {
+	fieldIndex = 0;
 
 	// Render physicals to modelFrameBuffer
 	modelFrameBuffer->bind();
@@ -407,9 +418,17 @@ void Screen::refresh() {
 
 	// Render some text
 	static long long t = 0;
-	float d = 0.5 + 0.5 * sin(t++ * 0.02);
+	// float d = 0.5 + 0.5 * sin(t++ * 0.02);
 	fontShader.update(orthoMatrix);
-	font->render("Surprise", Vec2(-screenSize.x / screenSize.y * 0.95, -1 * 0.95), Vec3f(1-d, d, sqrt(d)), 0.002);
+	// font->render("Surprise", Vec2(-screenSize.x / screenSize.y * 0.95, -1 * 0.95), Vec3f(1-d, d, sqrt(d)), 0.002);
+
+	renderDebugField("Tick Time", physicsMeasure.pastTickLengths.getAvg().count() * 0.000001, "ms");
+	renderDebugField("TPS", 1.0 / (physicsMeasure.pastBetweenTimes.getAvg().count() * 0.000000001), "/s");
+
+	renderDebugField("Frame Time", frameMeasure.pastTickLengths.getAvg().count() * 0.000001, "ms");
+	renderDebugField("FPS", 1.0 / (frameMeasure.pastBetweenTimes.getAvg().count() * 0.000000001), "/s");
+
+	renderDebugField("Objects", world->physicals.size(), "");
 
 	// Render screenFrameBuffer texture to the screen
 	screenFrameBuffer->unbind();

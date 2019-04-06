@@ -270,7 +270,7 @@ Vec3 Shape::furthestInDirection(Vec3 direction) const {
 	return bestVertex;
 }
 
-ComputationBuffers buffers(100, 200);
+ComputationBuffers buffers(1000, 2000);
 bool Shape::intersects(const Shape& other, Vec3& intersection, Vec3& exitVector) const {
 	Simplex result = runGJK(*this, other, Vec3(1.0, 0.0, 0.0));
 

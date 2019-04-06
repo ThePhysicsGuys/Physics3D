@@ -25,6 +25,9 @@ private:
 
 	void renderSkybox();
 	void renderPhysicals();
+	template<typename T>
+	void renderDebugField(const char* fieldName, T value, const char* unit);
+	int fieldIndex = 0;
 public:
 	World* world;
 	Vec2 screenSize;

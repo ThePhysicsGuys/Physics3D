@@ -32,5 +32,8 @@ namespace AppDebug {
 	void logTickStart();
 	void logTickEnd();
 
+	void logFrameStart();
+	void logFrameEnd();
+
 	AddableBuffer<ColoredVec> getVecBuffer();
 }

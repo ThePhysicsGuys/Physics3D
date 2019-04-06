@@ -5,6 +5,7 @@
 #include "../util/log.h"
 #include "../engine/math/mathUtil.h"
 #include "../application.h"
+#include "../engine/sharedLockGuard.h"
 
 Vec2 getNormalizedDeviceSpacePosition(Vec2 viewportSpacePosition, Vec2 screenSize) {
 	double x = 2 * viewportSpacePosition.x / screenSize.x - 1;
@@ -26,6 +27,8 @@ Vec3 calcRay(Vec2 mousePosition, Vec2 screenSize, Mat4f viewMatrix, Mat4f projec
 }
 
 void updateIntersectedPhysical(Screen& screen, std::vector<Physical>& physicals, Vec2 mousePosition, Vec2 screenSize, Mat4f viewMatrix, Mat4f projectionMatrix) {
+	SharedLockGuard guard(screen.world->lock);
+
 	Physical* closestIntersectedPhysical = nullptr;
 	Vec3 closestIntersectedPoint = Vec3();
 	double closestIntersectDistance = INFINITY;

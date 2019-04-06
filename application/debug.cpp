@@ -86,6 +86,14 @@ namespace AppDebug {
 		buf.swap();
 	}
 
+	void logFrameStart() {
+
+	}
+
+	void logFrameEnd() {
+
+	}
+
 	void setupDebugHooks() {
 		Log::info("Set up debug hooks!");
 		Debug::setVecLogAction(Logging::logVec);
