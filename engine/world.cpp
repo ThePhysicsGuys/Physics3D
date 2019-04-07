@@ -14,6 +14,8 @@
 
 #include "sharedLockGuard.h"
 
+#include "physicsProfiler.h"
+
 World::World() {}
 
 void handleTriangleIntersect(Physical& p1, Physical& p2, const Shape& transfI, const Shape& transfJ, Triangle t1, Triangle t2) {
@@ -121,7 +123,7 @@ void World::tick(double deltaT) {
 
 	Vec3* vecBufIndex = vecBuf;
 
-
+	physicsMeasure.mark(PhysicsProcess::TRANSFORMS);
 	int t;
 	for(int i = 0; i < (t=physicals.size()); i++) {
 		const Shape& curShape = physicals[i].part.hitbox;
@@ -129,12 +131,12 @@ void World::tick(double deltaT) {
 		transformedShapes[i] = curShape.localToGlobal(cframe, vecBufIndex);
 		vecBufIndex += curShape.vertexCount;
 	}
-
+	physicsMeasure.mark(PhysicsProcess::EXTERNALS);
 	applyExternalForces(transformedShapes);
 
 	// Compute object collisions
 
-	
+	physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
 	for(int i = 0; i < physicals.size(); i++) {
 		Physical& p1 = physicals[i];
 		Shape transfI = transformedShapes[i];
@@ -155,38 +157,28 @@ void World::tick(double deltaT) {
 			Vec3 intersection;
 			Vec3 exitVector;
 			if(transfI.intersects(transfJ, intersection, exitVector)) {
+				physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
 				Debug::logVec(intersection, exitVector, Debug::POSITION);
 				Debug::logVec(p1.getCenterOfMass(), intersection - p1.getCenterOfMass(), Debug::INFO);
 				Debug::logVec(p2.getCenterOfMass(), intersection - p2.getCenterOfMass(), Debug::INFO);
 				Debug::logVec(intersection, intersection - p2.getCenterOfMass(), Debug::POSITION);
 
 				handleCollision(p1, p2, intersection, exitVector);
+			} else {
+				physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
 			}
-
-			/*for(const Triangle& t1:transfI.iterTriangles()) {
-				for(const Triangle& t2 : transfJ.iterTriangles()) {
-					handleTriangleIntersect(p1, p2, transfI, transfJ, t1, t2);
-					handleTriangleIntersect(p2, p1, transfJ, transfI, t2, t1);
-				}
-			}*/
 		}
 	}
 
+	physicsMeasure.mark(PhysicsProcess::UPDATING);
 	mutLock.upgrade();
 	for(int i = 0; i < physicals.size(); i++) {
 		Physical& physical = physicals[i];
 		physical.update(deltaT);
-
-		/*Debug::logVec(physical.getCenterOfMass(), physical.angularVelocity, Debug::ANGULAR_VELOCITY);
-		Debug::logVec(physical.getCenterOfMass(), physical.part.cframe.localToRelative(Vec3(physical.inertia.m00 / physical.mass, 0, 0)), Debug::INFO);
-		Debug::logVec(physical.getCenterOfMass(), physical.part.cframe.localToRelative(Vec3(0, physical.inertia.m11 / physical.mass, 0)), Debug::INFO);
-		Debug::logVec(physical.getCenterOfMass(), physical.part.cframe.localToRelative(Vec3(0, 0, physical.inertia.m22 / physical.mass)), Debug::INFO);*/
-
-
 	}
-	
-	delete[] transformedShapes;
 
+	physicsMeasure.mark(PhysicsProcess::OTHER);
+	delete[] transformedShapes;
 	processQueue();
 }
 

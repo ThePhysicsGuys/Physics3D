@@ -3,7 +3,7 @@
 #include "../engine/debug.h"
 
 #include "../engine/constants.h"
-
+#include "../util/log.h"
 GravityFloorWorld::GravityFloorWorld(Vec3 gravity) : gravity(gravity) {}
 
 void GravityFloorWorld::applyExternalForces(const Shape* transformedShapes) {
@@ -36,7 +36,7 @@ void GravityFloorWorld::applyExternalForces(const Shape* transformedShapes) {
 
 			Vec3 exitVector = Vec3(0, collisionPoint.y, 0);
 
-			Vec3 depthForce = 100 * physical.mass * exitVector;
+			Vec3 depthForce = 5000 * physical.mass * exitVector;
 
 			physical.applyForce(collissionRelP1, -depthForce);
 			// p2.applyForce(collissionRelP2, depthForce);
@@ -56,7 +56,7 @@ void GravityFloorWorld::applyExternalForces(const Shape* transformedShapes) {
 				physical.applyForce(collissionRelP1, normalVelForce);
 				// p2.applyForce(collissionRelP2, -normalVelForce);
 
-				Vec3 frictionForce = -physical.part.properties.friction * relVelSidewaysComponent * physical.mass * 10 * 0.2;
+				Vec3 frictionForce = -physical.part.properties.friction * relVelSidewaysComponent * physical.mass * 10;
 				physical.applyForce(collissionRelP1, frictionForce);
 				// p2.applyForce(collissionRelP2, -frictionForce);
 			}

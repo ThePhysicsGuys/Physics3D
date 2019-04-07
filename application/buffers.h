@@ -144,21 +144,3 @@ public:
 		this->index = 0;
 	}
 };
-
-template<typename T, size_t N>
-struct CircularBuffer {
-	T buf[N];
-	size_t curI = 0;
-
-	inline void add(T& newObj) {
-		buf[curI] = newObj;
-		curI = (curI + 1) % N;
-	}
-	inline T getAvg() const {
-		T total = buf[0] - buf[0];
-		for(const T& element : buf) {
-			total = total + element;
-		}
-		return total / N;
-	}
-};

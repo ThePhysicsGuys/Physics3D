@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../engine/debug.h"
+#include "../../engine/profiling.h"
 #include "../../engine/world.h"
 #include "../../engine/math/vec2.h"
 #include "../eventHandler.h"
@@ -12,6 +13,21 @@
 #include <GLFW/glfw3.h>
 
 #include "indexedMesh.h"
+
+enum GraphicsProcess {
+	UPDATE,
+	SKYBOX,
+	VECTORS,
+	PHYSICALS,
+	LIGHTING,
+	ORIGIN,
+	PROFILER,
+	FINALIZE,
+	OTHER,
+	COUNT
+};
+
+
 
 bool initGLFW();
 bool initGLEW();
@@ -33,6 +49,7 @@ public:
 	Vec2 screenSize;
 	Camera camera;
 	EventHandler eventHandler;
+	BreakdownAverageProfiler<60, GraphicsProcess> graphicsMeasure;
 
 	FrameBuffer* modelFrameBuffer = nullptr;
 	FrameBuffer* screenFrameBuffer = nullptr;
@@ -44,7 +61,7 @@ public:
 	Physical* selectedPhysical = nullptr;
 	Vec3 selectedPoint;
 
-	Screen() {};
+	Screen();
 	Screen(int width, int height, World* world);
 
 	bool shouldClose();

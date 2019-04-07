@@ -9,9 +9,10 @@
 #include "quad.h"
 #include "shaderProgram.h"
 #include "font.h"
+#include "profilerUI.h"
 
 #include "../debug.h"
-#include "../profiling.h"
+#include "../../engine/physicsProfiler.h"
 #include "../standardInputHandler.h"
 #include "../resourceManager.h"
 #include "../objectLibrary.h"
@@ -63,7 +64,20 @@ void terminateGL() {
 	glfwTerminate();
 }
 
-Screen::Screen(int width, int height, World* world) {
+const char* const graphicsDebugLabels[]{
+	"Update",
+	"Skybox",
+	"Vectors",
+	"Physicals",
+	"Lighting",
+	"Origin",
+	"Profiler",
+	"Finalize",
+	"Other"
+};
+
+Screen::Screen() : graphicsMeasure(graphicsDebugLabels) {};
+Screen::Screen(int width, int height, World* world) : graphicsMeasure(graphicsDebugLabels) {
 	setWorld(world);
 
 	// Create a windowed mode window and its OpenGL context 
@@ -350,9 +364,24 @@ void Screen::renderDebugField(const char* varName, T value, const char* unit) {
 	fieldIndex++;
 }
 
+template<size_t N, typename EnumType>
+PieChart toPieChart(BreakdownAverageProfiler<N, EnumType> profiler, const char* title, const char* weightUnit, Vec2f piePosition, float pieSize) {
+	auto results = profiler.history.avg();
+	std::chrono::nanoseconds avgTotalTime = results.sum();
+
+	PieChart chart(title, weightUnit, piePosition, pieSize);
+	for(size_t i = 0; i < profiler.size(); i++) {
+		float time = results[i].count() * 0.000001f;
+		chart.add(PiePart(time, pieColors[i], profiler.labels[i]));
+	}
+
+	return chart;
+}
 
 void Screen::refresh() {
 	fieldIndex = 0;
+
+	graphicsMeasure.mark(GraphicsProcess::SKYBOX);
 
 	// Render physicals to modelFrameBuffer
 	modelFrameBuffer->bind();
@@ -362,9 +391,12 @@ void Screen::refresh() {
 
 	glEnable(GL_DEPTH_TEST);
 
+
+	graphicsMeasure.mark(GraphicsProcess::VECTORS);
 	// Initialize vector log buffer
 	AddableBuffer<AppDebug::ColoredVec> vecLog = AppDebug::getVecBuffer();
 
+	graphicsMeasure.mark(GraphicsProcess::PHYSICALS);
 	renderPhysicals();
 
 	// Postprocess to screenFrameBuffer
@@ -378,9 +410,12 @@ void Screen::refresh() {
 	glEnable(GL_DEPTH_TEST);
 	screenFrameBuffer->attach(modelFrameBuffer->renderBuffer);
 
+
+	graphicsMeasure.mark(GraphicsProcess::VECTORS);
 	// Update vector mesh
 	updateVecMesh(vecLog.data, vecLog.index);
 
+	graphicsMeasure.mark(GraphicsProcess::LIGHTING);
 	// Render lights
 	for (Light light : lights) {
 		Mat4f transformation = Mat4f().translate(light.position).scale(0.1);
@@ -389,23 +424,44 @@ void Screen::refresh() {
 		skyboxMesh->render();
 	}
 	
+
+	graphicsMeasure.mark(GraphicsProcess::VECTORS);
 	// Render vector mesh
 	vectorShader.update(viewMatrix, projectionMatrix, viewPosition);
 	vectorMesh->render();
 
+
+	graphicsMeasure.mark(GraphicsProcess::ORIGIN);
 	// Render origin mesh
 	originShader.update(viewMatrix, rotatedViewMatrix, projectionMatrix, orthoMatrix, viewPosition);
 	originMesh->render();
 
+	graphicsMeasure.mark(GraphicsProcess::OTHER);
 	// Render text
 	fontShader.update(orthoMatrix);
 
-	renderDebugField("Tick Time", physicsMeasure.pastTickLengths.getAvg().count() * 0.000001, "ms");
-	renderDebugField("TPS", 1.0 / (physicsMeasure.pastBetweenTimes.getAvg().count() * 0.000000001), "/s");
-	renderDebugField("Frame Time", frameMeasure.pastTickLengths.getAvg().count() * 0.000001, "ms");
-	renderDebugField("FPS", 1.0 / (frameMeasure.pastBetweenTimes.getAvg().count() * 0.000000001), "/s");
+
+	graphicsMeasure.mark(GraphicsProcess::PROFILER);
 	renderDebugField("Objects", world->physicals.size(), "");
 
+	float leftSide = screenSize.x / screenSize.y;
+
+	PieChart graphicsPie = toPieChart(graphicsMeasure, "Graphics", "ms", Vec2f(-leftSide + 1.5f, -0.7f), 0.2f);
+	PieChart physicsPie = toPieChart(physicsMeasure, "Physics", "ms", Vec2f(-leftSide + 0.3f, -0.7f), 0.2f);
+
+	
+	physicsPie.renderText(*this, font);
+	graphicsPie.renderText(*this, font);
+
+	startPieRendering(*this);
+
+	physicsPie.renderPie(*this);
+	graphicsPie.renderPie(*this);
+
+	endPieRendering(*this);
+
+
+	graphicsMeasure.mark(GraphicsProcess::FINALIZE);
 	// Render screenFrameBuffer texture to the screen
 	screenFrameBuffer->unbind();
 	glClear(GL_COLOR_BUFFER_BIT);

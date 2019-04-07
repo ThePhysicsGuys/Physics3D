@@ -6,7 +6,9 @@
 #include "../math/utils.h"
 #include "../../util/log.h"
 #include "../debug.h"
+#include "../physicsProfiler.h"
 #include "../constants.h"
+
 
 Vec3 getNormalVec(Triangle t, Vec3* vertices) {
 	Vec3 v0 = vertices[t[0]];
@@ -40,6 +42,8 @@ int getNearestSurface(ConvexShapeBuilder& builder, double& distanceSquared) {
 }
 
 Simplex runGJK(const Shape& first, const Shape& second, Vec3 initialSearchDirection) {
+	physicsMeasure.mark(PhysicsProcess::GJK);
+
 	// Log::debug("Shape::intersects");
 
 	int furthestIndex1 = first.furthestIndexInDirection(initialSearchDirection);
@@ -194,6 +198,7 @@ void initializeBuffer(Simplex s, ComputationBuffers& b) {
 }
 
 bool runEPA(const Shape& first, const Shape& second, Simplex s, Vec3& intersection, Vec3& exitVector, ComputationBuffers& bufs) {
+	physicsMeasure.mark(PhysicsProcess::EPA);
 	// s.order == 4
 
 	bufs.ensureCapacity(first.vertexCount + second.vertexCount, first.triangleCount + second.triangleCount);

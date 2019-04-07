@@ -32,7 +32,7 @@
 #include "../engine/geometry/convexShapeBuilder.h"
 #include "../engine/engineException.h"
 
-#include "profiling.h"
+#include "../engine/physicsProfiler.h"
 
 #define _USE_MATH_DEFINES
 #include "math.h"
@@ -202,10 +202,10 @@ int main(void) {
 	/* Loop until the user closes the window */
 	Log::info("Started rendering");
 	while (!screen.shouldClose()) {
-		frameMeasure.start();
+		screen.graphicsMeasure.mark(GraphicsProcess::UPDATE);
 		screen.update();
 		screen.refresh();
-		frameMeasure.end();
+		screen.graphicsMeasure.end();
 		// test
 		glfwSetWindowTitle(screen.getWindow(), std::to_string(physicsThread.getTPS()).c_str());
 	}
@@ -284,7 +284,7 @@ void runTick() {
 
 void setupPhysics() {
 	physicsThread = TickerThread(TICKS_PER_SECOND, TICK_SKIP_TIME, [](){
-		physicsMeasure.start();
+		physicsMeasure.mark(PhysicsProcess::OTHER);
 		AppDebug::logTickStart();
 		//try {
 			world.tick(1 / physicsThread.getTPS());
