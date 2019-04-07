@@ -201,7 +201,7 @@ bool runEPA(const Shape& first, const Shape& second, Simplex s, Vec3& intersecti
 	physicsMeasure.mark(PhysicsProcess::EPA);
 	// s.order == 4
 
-	bufs.ensureCapacity(first.vertexCount + second.vertexCount, first.triangleCount + second.triangleCount);
+	bufs.ensureCapacity(first.vertexCount + second.vertexCount + EPA_MAX_ITER, first.triangleCount + second.triangleCount + EPA_MAX_ITER*2);
 
 	initializeBuffer(s, bufs);
 

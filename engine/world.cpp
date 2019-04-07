@@ -143,15 +143,14 @@ void World::tick(double deltaT) {
 		for(int j = i + 1; j < physicals.size(); j++) {
 			Physical& p2 = physicals[j];
 
-			double maxRadiusBetween = p1.circumscribedSphere.radius + p2.circumscribedSphere.radius;
+			double maxRadiusBetween = p1.maxRadius + p2.maxRadius;
 
-			Vec3 globalCenterOfPos1 = p1.part.cframe.localToGlobal(p1.circumscribedSphere.origin);
-			Vec3 globalCenterOfPos2 = p2.part.cframe.localToGlobal(p2.circumscribedSphere.origin);
-			double distanceSqBetween = (globalCenterOfPos1 - globalCenterOfPos2).lengthSquared();
+			double distanceSqBetween = (p1.getCenterOfMass() - p2.getCenterOfMass()).lengthSquared();
 
 			if(distanceSqBetween > maxRadiusBetween*maxRadiusBetween) {
 				continue;
 			}
+
 			Shape transfJ = transformedShapes[j];
 
 			Vec3 intersection;

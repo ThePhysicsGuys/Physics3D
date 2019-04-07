@@ -89,6 +89,7 @@ struct Shape {
 	Mat3 getInertia(Mat3 reference) const;
 	Mat3 getInertia(CFrame reference) const;
 	Sphere getCircumscribedSphere() const;
+	double getMaxRadius() const;
 	Vec3 getNormalVecOfTriangle(Triangle triangle) const;
 
 	bool intersects(const Shape& other, Vec3& intersection, Vec3& exitVector) const;
