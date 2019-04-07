@@ -27,8 +27,6 @@ enum GraphicsProcess {
 	COUNT
 };
 
-
-
 bool initGLFW();
 bool initGLEW();
 

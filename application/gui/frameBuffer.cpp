@@ -55,3 +55,30 @@ void FrameBuffer::attach(RenderBuffer* renderBuffer) {
 void FrameBuffer::close() {
 	glDeleteFramebuffers(1, &id);
 }
+
+
+// DepthFrameBuffer
+
+DepthFrameBuffer::DepthFrameBuffer(unsigned int width, unsigned int height) {
+	texture = new DepthTexture(width, height);
+	glGenFramebuffers(1, &id);
+	glBindFramebuffer(GL_FRAMEBUFFER, id);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture->id, 0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void DepthFrameBuffer::bind() {
+	glViewport(0, 0, width, height);
+	glBindFramebuffer(GL_FRAMEBUFFER, id);
+}
+
+void DepthFrameBuffer::unbind() {
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void DepthFrameBuffer::close() {
+	glDeleteTextures(1, &texture->id);
+	glDeleteFramebuffers(1, &id);
+}

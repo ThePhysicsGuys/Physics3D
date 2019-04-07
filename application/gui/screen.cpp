@@ -372,7 +372,8 @@ PieChart toPieChart(BreakdownAverageProfiler<N, EnumType> profiler, const char* 
 	PieChart chart(title, weightUnit, piePosition, pieSize);
 	for(size_t i = 0; i < profiler.size(); i++) {
 		float time = results[i].count() * 0.000001f;
-		chart.add(PiePart(time, pieColors[i], profiler.labels[i]));
+		PiePart p = PiePart(time, pieColors[i], profiler.labels[i]);
+		chart.add(p);
 	}
 
 	return chart;
@@ -381,23 +382,24 @@ PieChart toPieChart(BreakdownAverageProfiler<N, EnumType> profiler, const char* 
 void Screen::refresh() {
 	fieldIndex = 0;
 
-	graphicsMeasure.mark(GraphicsProcess::SKYBOX);
-
 	// Render physicals to modelFrameBuffer
+	graphicsMeasure.mark(GraphicsProcess::SKYBOX);
 	modelFrameBuffer->bind();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 	renderSkybox();
 
 	glEnable(GL_DEPTH_TEST);
 
 
-	graphicsMeasure.mark(GraphicsProcess::VECTORS);
 	// Initialize vector log buffer
+	graphicsMeasure.mark(GraphicsProcess::VECTORS);
 	AddableBuffer<AppDebug::ColoredVec> vecLog = AppDebug::getVecBuffer();
 
+
+	// Render physicals
 	graphicsMeasure.mark(GraphicsProcess::PHYSICALS);
 	renderPhysicals();
+
 
 	// Postprocess to screenFrameBuffer
 	screenFrameBuffer->bind();
@@ -406,17 +408,19 @@ void Screen::refresh() {
 	modelFrameBuffer->texture->bind();
 	quad->render();
 
+
 	// Render vectors with old depth buffer
 	glEnable(GL_DEPTH_TEST);
 	screenFrameBuffer->attach(modelFrameBuffer->renderBuffer);
+	
 
-
-	graphicsMeasure.mark(GraphicsProcess::VECTORS);
 	// Update vector mesh
+	graphicsMeasure.mark(GraphicsProcess::VECTORS);
 	updateVecMesh(vecLog.data, vecLog.index);
 
-	graphicsMeasure.mark(GraphicsProcess::LIGHTING);
+
 	// Render lights
+	graphicsMeasure.mark(GraphicsProcess::LIGHTING);
 	for (Light light : lights) {
 		Mat4f transformation = Mat4f().translate(light.position).scale(0.1);
 		basicShader.updateMaterial(Material(light.color, Vec3f(), Vec3f(), 10));
@@ -425,52 +429,51 @@ void Screen::refresh() {
 	}
 	
 
-	graphicsMeasure.mark(GraphicsProcess::VECTORS);
 	// Render vector mesh
+	graphicsMeasure.mark(GraphicsProcess::VECTORS);
 	vectorShader.update(viewMatrix, projectionMatrix, viewPosition);
 	vectorMesh->render();
 
 
-	graphicsMeasure.mark(GraphicsProcess::ORIGIN);
 	// Render origin mesh
+	graphicsMeasure.mark(GraphicsProcess::ORIGIN);
 	originShader.update(viewMatrix, rotatedViewMatrix, projectionMatrix, orthoMatrix, viewPosition);
 	originMesh->render();
 
-	graphicsMeasure.mark(GraphicsProcess::OTHER);
+
 	// Render text
+	graphicsMeasure.mark(GraphicsProcess::OTHER);
 	fontShader.update(orthoMatrix);
 
 
+	// Pie rendering
 	graphicsMeasure.mark(GraphicsProcess::PROFILER);
 	renderDebugField("Objects", world->physicals.size(), "");
-
 	float leftSide = screenSize.x / screenSize.y;
-
 	PieChart graphicsPie = toPieChart(graphicsMeasure, "Graphics", "ms", Vec2f(-leftSide + 1.5f, -0.7f), 0.2f);
 	PieChart physicsPie = toPieChart(physicsMeasure, "Physics", "ms", Vec2f(-leftSide + 0.3f, -0.7f), 0.2f);
-
-	
 	physicsPie.renderText(*this, font);
 	graphicsPie.renderText(*this, font);
-
 	startPieRendering(*this);
-
 	physicsPie.renderPie(*this);
 	graphicsPie.renderPie(*this);
-
 	endPieRendering(*this);
 
 
-	graphicsMeasure.mark(GraphicsProcess::FINALIZE);
 	// Render screenFrameBuffer texture to the screen
+	graphicsMeasure.mark(GraphicsProcess::FINALIZE);
 	screenFrameBuffer->unbind();
 	glClear(GL_COLOR_BUFFER_BIT);
 	glDisable(GL_DEPTH_TEST);
 
+
+	// Render postprocessed image to screen
 	quadShader.bind();
 	screenFrameBuffer->texture->bind();
 	quad->render();
 
+
+	// Render stuff
 	glfwSwapBuffers(this->window);
 	glfwPollEvents();
 }

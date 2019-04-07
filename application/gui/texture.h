@@ -53,3 +53,17 @@ public:
 	void unbind() override;
 	void close() override;
 };
+
+class DepthTexture : public Bindable {
+public:
+	int unit;
+	unsigned int width;
+	unsigned int height;
+
+	DepthTexture(unsigned int width, unsigned int height);
+
+	void bind(int unit);
+	void bind() override;
+	void unbind() override;
+	void close() override;
+};

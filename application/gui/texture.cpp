@@ -8,6 +8,9 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb\stb_image.h"
 
+
+// Texture
+
 Texture::Texture(unsigned int width, unsigned int height, const void* buffer, int format) : width(width), height(height), unit(0) {
 	glGenTextures(1, &id);
 
@@ -48,6 +51,9 @@ void Texture::close() {
 	glDeleteTextures(1, &id);
 }
 
+
+// TextureMultisample
+
 TextureMultisample::TextureMultisample(unsigned int width, unsigned int height, unsigned int samples) : width(width), height(height), samples(samples), unit(0) {
 	glGenTextures(1, &id);
 	bind();
@@ -80,6 +86,9 @@ void TextureMultisample::unbind() {
 void TextureMultisample::close() {
 	glDeleteTextures(1, &id);
 }
+
+
+// CubeMap
 
 CubeMap::CubeMap(std::string right, std::string left, std::string top, std::string bottom, std::string front, std::string back) : unit(0) {
 	glGenTextures(1, &id);
@@ -128,5 +137,39 @@ void CubeMap::load(std::string right, std::string left, std::string top, std::st
 }
 
 void CubeMap::close() {
+	glDeleteTextures(1, &id);
+}
+
+
+// DepthTexture
+
+DepthTexture::DepthTexture(unsigned int width, unsigned int height): width(width), height(height), unit(0) {
+	glGenTextures(1, &id);
+
+	bind();
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	unbind();
+}
+
+void DepthTexture::bind() {
+	bind(unit);
+}
+
+void DepthTexture::bind(int unit) {
+	this->unit = unit;
+	glActiveTexture(GL_TEXTURE0 + unit);
+	glBindTexture(GL_TEXTURE_2D, id);
+}
+
+
+void DepthTexture::unbind() {
+	glBindTexture(GL_TEXTURE_2D, id);
+}
+
+void DepthTexture::close() {
 	glDeleteTextures(1, &id);
 }
