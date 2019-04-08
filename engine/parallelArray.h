@@ -84,7 +84,7 @@ struct ParallelArray {
 
 	T sum() const {
 		T total = values[0];
-		for(size_t i = 0; i < C; i++) {
+		for(size_t i = 1; i < C; i++) {
 			total += values[i];
 		}
 		return total;

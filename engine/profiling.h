@@ -24,34 +24,52 @@ public:
 	}
 };
 
-template<size_t N, typename ProcessType>
-class BreakdownAverageProfiler {
-	std::chrono::time_point<std::chrono::steady_clock> startTime = std::chrono::high_resolution_clock::now();
-	ProcessType currentProcess = static_cast<ProcessType>(-1);
-	ParallelArray<std::chrono::nanoseconds, static_cast<size_t>(ProcessType::COUNT)> currentTally;
+template<size_t N, typename Unit, typename Category>
+class HistoricTally {
+	ParallelArray<Unit, static_cast<size_t>(Category::COUNT)> currentTally;
+public:
+	char const * labels[static_cast<size_t>(Category::COUNT)];
+	CircularBuffer<ParallelArray<Unit, static_cast<size_t>(Category::COUNT)>, N> history;
+
+	inline void addToTally(Category category, Unit amount) {
+		currentTally[static_cast<size_t>(category)] += amount;
+	}
 
 	inline void clearCurrentTally() {
-		for(int i = 0; i < static_cast<size_t>(ProcessType::COUNT); i++) {
-			currentTally[i] = std::chrono::nanoseconds(0);
+		for(size_t i = 0; i < static_cast<size_t>(Category::COUNT); i++) {
+			currentTally[i] = Unit(0);
 		}
 	}
 
-public:
-	char const * labels[static_cast<size_t>(ProcessType::COUNT)];
-	CircularBuffer<ParallelArray<std::chrono::nanoseconds, static_cast<size_t>(ProcessType::COUNT)>, N> history;
+	inline void nextTally() {
+		history.add(currentTally);
+		clearCurrentTally();
+	}
 
-	inline BreakdownAverageProfiler(char const * const labels[static_cast<size_t>(ProcessType::COUNT)]) {
-		for(int i = 0; i < static_cast<size_t>(ProcessType::COUNT); i++) {
+	inline HistoricTally(char const * const labels[static_cast<size_t>(Category::COUNT)]) {
+		for(size_t i = 0; i < static_cast<size_t>(Category::COUNT); i++) {
 			this->labels[i] = labels[i];
 		}
 		clearCurrentTally();
 	}
 
+	inline size_t size() const {
+		return static_cast<size_t>(Category::COUNT);
+	}
+};
+
+template<size_t N, typename ProcessType>
+class BreakdownAverageProfiler : public HistoricTally<N, std::chrono::nanoseconds, ProcessType> {
+	std::chrono::time_point<std::chrono::steady_clock> startTime = std::chrono::high_resolution_clock::now();
+	ProcessType currentProcess = static_cast<ProcessType>(-1);
+
+public:
+	inline BreakdownAverageProfiler(char const * const labels[static_cast<size_t>(ProcessType::COUNT)]) : HistoricTally(labels) {}
+
 	inline void mark(ProcessType process) {
 		std::chrono::time_point<std::chrono::steady_clock> curTime = std::chrono::high_resolution_clock::now();
 		if(currentProcess != static_cast<ProcessType>(-1)) {
-			std::chrono::nanoseconds delta = curTime - startTime;
-			currentTally[static_cast<size_t>(currentProcess)] += delta;
+			addToTally(currentProcess, curTime - startTime);
 		}
 		startTime = curTime;
 		currentProcess = process;
@@ -59,16 +77,9 @@ public:
 
 	inline void end() {
 		std::chrono::time_point<std::chrono::steady_clock> curTime = std::chrono::high_resolution_clock::now();
-		std::chrono::nanoseconds delta = curTime - startTime;
-		currentTally[static_cast<size_t>(currentProcess)] += delta;
+		addToTally(currentProcess, curTime - startTime);
+
 		currentProcess = static_cast<ProcessType>(-1);
-
-		history.add(currentTally);
-
-		clearCurrentTally();
-	}
-
-	inline size_t size() const {
-		return static_cast<size_t>(ProcessType::COUNT);
+		nextTally();
 	}
 };

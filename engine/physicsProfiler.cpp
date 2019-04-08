@@ -1,12 +1,21 @@
 #include "physicsProfiler.h"
 
-const char * labels[]{
+const char * physicsLabels[]{
 	"Transforms",
 	"Externals",
 	"GJK",
 	"EPA",
 	"Collision",
+	"Col. Handling",
 	"Updates",
 	"Other"
 };
-BreakdownAverageProfiler<300, PhysicsProcess> physicsMeasure(labels);
+
+const char * intersectionLabels[]{
+	"Colission",
+	"GJK reject",
+	"Distance reject"
+};
+
+BreakdownAverageProfiler<300, PhysicsProcess> physicsMeasure(physicsLabels);
+HistoricTally<300, long long, IntersectionResult> intersectionStatistics(intersectionLabels);

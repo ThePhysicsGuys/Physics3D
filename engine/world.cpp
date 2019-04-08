@@ -148,6 +148,7 @@ void World::tick(double deltaT) {
 			double distanceSqBetween = (p1.getCenterOfMass() - p2.getCenterOfMass()).lengthSquared();
 
 			if(distanceSqBetween > maxRadiusBetween*maxRadiusBetween) {
+				intersectionStatistics.addToTally(IntersectionResult::DISTANCE_REJECT, 1);
 				continue;
 			}
 
@@ -156,14 +157,17 @@ void World::tick(double deltaT) {
 			Vec3 intersection;
 			Vec3 exitVector;
 			if(transfI.intersects(transfJ, intersection, exitVector)) {
-				physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
-
+				physicsMeasure.mark(PhysicsProcess::COLISSION_HANDLING);
+				intersectionStatistics.addToTally(IntersectionResult::COLISSION, 1);
 				handleCollision(p1, p2, intersection, exitVector);
 			} else {
 				physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
+				intersectionStatistics.addToTally(IntersectionResult::GJK_REJECT, 1);
 			}
 		}
 	}
+
+	intersectionStatistics.nextTally();
 
 	physicsMeasure.mark(PhysicsProcess::UPDATING);
 	mutLock.upgrade();
