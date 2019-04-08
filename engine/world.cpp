@@ -157,10 +157,6 @@ void World::tick(double deltaT) {
 			Vec3 exitVector;
 			if(transfI.intersects(transfJ, intersection, exitVector)) {
 				physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
-				Debug::logVec(intersection, exitVector, Debug::POSITION);
-				Debug::logVec(p1.getCenterOfMass(), intersection - p1.getCenterOfMass(), Debug::INFO);
-				Debug::logVec(p2.getCenterOfMass(), intersection - p2.getCenterOfMass(), Debug::INFO);
-				Debug::logVec(intersection, intersection - p2.getCenterOfMass(), Debug::POSITION);
 
 				handleCollision(p1, p2, intersection, exitVector);
 			} else {
