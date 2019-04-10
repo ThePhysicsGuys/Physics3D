@@ -201,7 +201,7 @@ bool runEPA(const Shape& first, const Shape& second, Simplex s, Vec3& intersecti
 	physicsMeasure.mark(PhysicsProcess::EPA);
 	// s.order == 4
 
-	bufs.ensureCapacity(first.vertexCount + second.vertexCount, first.triangleCount + second.triangleCount);
+	bufs.ensureCapacity(first.vertexCount + second.vertexCount + EPA_MAX_ITER, first.triangleCount + second.triangleCount + EPA_MAX_ITER*2);
 
 	initializeBuffer(s, bufs);
 
@@ -212,9 +212,9 @@ bool runEPA(const Shape& first, const Shape& second, Simplex s, Vec3& intersecti
 		double distSq;
 		int closestTriangleIndex = getNearestSurface(builder, distSq);
 		Triangle closestTriangle = builder.triangleBuf[closestTriangleIndex];
-		Vec3 v0 = builder.vertexBuf[closestTriangle[0]];
-		Vec3 v1 = builder.vertexBuf[closestTriangle[1]];
-		Vec3 v2 = builder.vertexBuf[closestTriangle[2]];
+		Vec3 a = builder.vertexBuf[closestTriangle[0]];
+		Vec3 b = builder.vertexBuf[closestTriangle[1]];
+		Vec3 c = builder.vertexBuf[closestTriangle[2]];
 		Vec3 closestTriangleNormal = getNormalVec(closestTriangle, builder.vertexBuf);
 
 		int furthest1 = first.furthestIndexInDirection(closestTriangleNormal);
@@ -225,84 +225,40 @@ bool runEPA(const Shape& first, const Shape& second, Simplex s, Vec3& intersecti
 
 		double newPointDistSq = pow(delta * closestTriangleNormal, 2) / closestTriangleNormal.lengthSquared();
 
-		// if(newPointDistSq > distSq * 1.001) {
 		MinkowskiPointIndices curIndices{furthest1, furthest2};
-		//Log::debug("cur: (%d, %d) <-> (%d, %d), (%d, %d), (%d, %d)", curIndices[0], curIndices[1], knownVecs[closestTriangle[0]][0], knownVecs[closestTriangle[0]][1], knownVecs[closestTriangle[1]][0], knownVecs[closestTriangle[1]][1], knownVecs[closestTriangle[2]][0], knownVecs[closestTriangle[2]][1]);
-		//Log::debug("%f / %f = %.9f", newPointDistSq, distSq, newPointDistSq/distSq);
-		if(!(bufs.knownVecs[closestTriangle[0]] == curIndices || bufs.knownVecs[closestTriangle[1]] == curIndices || bufs.knownVecs[closestTriangle[2]] == curIndices || newPointDistSq <= distSq * 1.000001)) {
+
+		if(!(newPointDistSq <= distSq * 1.01)) {
 			bufs.knownVecs[builder.vertexCount] = curIndices;
 			builder.addPoint(delta, closestTriangleIndex);
 		} else {
 			// closestTriangle is an edge triangle, so our best direction is towards this triangle.
 
-			RayIntersection ri = rayTriangleIntersection(Vec3(), closestTriangleNormal, v0, v1, v2);
+			RayIntersection ri = rayTriangleIntersection(Vec3(), closestTriangleNormal, a, b, c);
 
 			exitVector = ri.d * closestTriangleNormal;
 
 			MinkowskiPointIndices inds[3]{bufs.knownVecs[closestTriangle[0]], bufs.knownVecs[closestTriangle[1]], bufs.knownVecs[closestTriangle[2]]};
+			
+			Vec3 v0 = b - a, v1 = c - a, v2 = exitVector - a;
 
-			// Log::debug("EPA  %d:%d  %d:%d  %d:%d", inds[0][0], inds[0][1], inds[1][0], inds[1][1], inds[2][0], inds[2][1]);
+			double d00 = v0 * v0;
+			double d01 = v0 * v1;
+			double d11 = v1 * v1;
+			double d20 = v2 * v0;
+			double d21 = v2 * v1;
+			double denom = d00 * d11 - d01 * d01;
+			double v = (d11 * d20 - d01 * d21) / denom;
+			double w = (d00 * d21 - d01 * d20) / denom;
+			double u = 1.0 - v - w;
 
-			// Debug::logShape(builder.toShape());
+			Vec3 A0 = first.vertices[inds[0][0]], A1 = first.vertices[inds[1][0]], A2 = first.vertices[inds[2][0]];
+			Vec3 B0 = second.vertices[inds[0][1]], B1 = second.vertices[inds[1][1]], B2 = second.vertices[inds[2][1]];
 
-			if(inds[0][0] == inds[1][0] && inds[0][0] == inds[2][0]) {
-				// point-face intersection, with first shape providing the point
-				intersection = first.vertices[inds[0][0]] - exitVector / 3;
-				// Log::debug("EPA finished after %d iters POINT-FACE", i);
-				return true;
-			} else if(inds[0][1] == inds[1][1] && inds[0][1] == inds[2][1]) {
-				// point-face intersection, with second shape providing the point
-				intersection = second.vertices[inds[0][1]] + exitVector / 3;
-				// Log::debug("EPA finished after %d iters POINT-FACE", i);
-				return true;
-			} else {
-				for(int i = 0; i < 3; i++) {
-					MinkowskiPointIndices A = inds[i];
-					MinkowskiPointIndices B = inds[(i + 1) % 3];
-					MinkowskiPointIndices C = inds[(i + 2) % 3];
+			Vec3 avgFirst = A0 * u + A1 * v + A2 * w;
+			Vec3 avgSecond = B0 * u + B1 * v + B2 * w;
 
-					// if A <-> B is the same point, then check for other points
-					if(A[0] == B[0]) {
-						Vec3 P0, Q0, U, V;
-						if(B[1] == C[1]) {
-							// shared point is B
-							// B <-> C is edge on first polygon
-							// B <-> A is edge on second polygon
-
-							U = first.vertices[C[0]] - first.vertices[B[0]];
-							V = second.vertices[A[1]] - second.vertices[B[1]];
-
-							P0 = first.vertices[B[0]];
-							Q0 = second.vertices[B[1]];
-						} else if(C[1] == A[1]) {
-							// shared point is A
-							// A <-> C is edge on first polygon
-							// A <-> B is edge on second polygon
-
-							U = first.vertices[C[0]] - first.vertices[A[0]];
-							V = second.vertices[B[1]] - second.vertices[A[1]];
-
-							P0 = first.vertices[A[0]];
-							Q0 = second.vertices[A[1]];
-						} else {
-							Log::warn("Neither point-face collission, nor edge edge collission! ");
-							return false;
-						}
-
-						CrossOverPoint cross = getNearestCrossoverOfRays(U, V, P0 - Q0);
-
-						Debug::logVec(P0, U * cross.s, Debug::POSITION);
-						Debug::logVec(Q0, V * cross.t, Debug::POSITION);
-
-						intersection = (P0 + U*cross.s + Q0 + V*cross.t) / 2;
-
-						// Log::debug("EPA finished after %d iters EDGE-EDGE 1", i);
-
-						return true;
-					}
-				}
-			}
-			return false;
+			intersection = (avgFirst + avgSecond) / 2;
+			return true;
 		}
 	}
 

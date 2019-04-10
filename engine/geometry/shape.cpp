@@ -325,6 +325,17 @@ Sphere Shape::getCircumscribedSphere() const {
 	return Sphere{center, radius};
 }
 
+double Shape::getMaxRadius() const {
+	double bestDistSq = vertices[0].lengthSquared();
+	for(Vec3 vertex : iterVertices()) {
+		double distSq = vertex.lengthSquared();
+		if(bestDistSq > bestDistSq) {
+			bestDistSq = distSq;
+		}
+	}
+	return sqrt(bestDistSq);
+}
+
 /*
 	The total inertial matrix is given by the integral over the volume of the shape of the following matrix:
 	[[

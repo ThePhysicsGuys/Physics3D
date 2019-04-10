@@ -56,13 +56,13 @@ void PieChart::renderPie(Screen& screen) const {
 	}
 }
 
-void PieChart::renderValueUnit(Font* font, float value, const char* unit, Vec2 position, Vec3f color) const {
+/*void PieChart::renderValueUnit(Font* font, float value, const char* unit, Vec2 position, Vec3f color) const {
 	std::stringstream ss;
 	ss.precision(4);
 	ss << value;
 	ss << unit;
 	font->render(ss.str(), position, color, 0.0006);
-}
+}*/
 
 void PieChart::renderText(Screen& screen, Font* font) const {
 	// Title
@@ -74,27 +74,19 @@ void PieChart::renderText(Screen& screen, Font* font) const {
 
 	float totalWeight = getTotal();
 
-	renderValueUnit(font, totalWeight, "ms", textPos + Vec2(0.35, 0.035), Vec3f(1,1,1));
+	font->render(totalValue, textPos + Vec2(0.45, 0.035), Vec3f(1,1,1), 0.0006);
 
 	for(int i = 0; i < parts.size(); i++) {
+		const PiePart& p = parts[i];
 		Vec2 linePos = textPos + Vec2(0, -i*0.035);
-		font->render(parts[i].label, linePos, parts[i].color, 0.0006);
+		font->render(p.label, linePos, p.color, 0.0006);
 
-		/*std::stringstream percent;
+		std::stringstream percent;
 		percent.precision(4);
-		percent << parts[i].weight/totalWeight * 100;
+		percent << p.weight/totalWeight * 100;
 		percent << "%";
-		font->render(percent.str(), linePos + Vec2(0.2, 0), parts[i].color, 0.0006);*/
-
-		renderValueUnit(font, parts[i].weight / totalWeight * 100, "%", linePos + Vec2(0.2, 0), parts[i].color);
-
-		/*std::stringstream timeTaken;
-		timeTaken.precision(4);
-		timeTaken << parts[i].weight;
-		timeTaken << weightUnit;
-		font->render(timeTaken.str(), linePos + Vec2(0.35, 0), parts[i].color, 0.0006);*/
-
-		renderValueUnit(font, parts[i].weight, "ms", linePos + Vec2(0.35, 0), parts[i].color);
+		font->render(percent.str(), linePos + Vec2(0.25, 0), p.color, 0.0006);
+		font->render(p.value, linePos + Vec2(0.50, 0), p.color, 0.0006);
 	}
 }
 

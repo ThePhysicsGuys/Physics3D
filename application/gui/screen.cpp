@@ -145,9 +145,9 @@ const int lightCount = 4;
 Vec3f sunDirection;
 Attenuation attenuation = { 0, 0, 0.5 };
 Light lights[lightCount] = {
-	Light(Vec3f(5, 0, 0), Vec3f(1, 0, 0), 4, attenuation),
-	Light(Vec3f(0, 5, 0), Vec3f(0, 1, 0), 4, attenuation),
-	Light(Vec3f(0, 0, 5), Vec3f(0, 0, 1), 4, attenuation),
+	Light(Vec3f(5, 0, 0), Vec3f(1, 1, 1), 1, attenuation),
+	Light(Vec3f(0, 5, 0), Vec3f(1, 1, 1), 1, attenuation),
+	Light(Vec3f(0, 0, 5), Vec3f(1, 1, 1), 1, attenuation),
 	Light(Vec3f(0, 0, 0), Vec3f(1, 1, 1), 1, attenuation)
 };
 
@@ -279,13 +279,13 @@ void Screen::update() {
 	
 
 	// Update lights
-	static long long t = 0;
+	/*static long long t = 0;
 	float d = 0.5 + 0.5 * sin(t++ * 0.005);
 	sunDirection = Vec3f(0, cos(t * 0.005) , sin(t * 0.005));
 	lights[0].color = Vec3f(d, 0.3, 1-d);
 	lights[1].color = Vec3f(1-d, 0.3, 1 - d);
 	lights[2].color = Vec3f(0.2, 0.3*d, 1 - d);
-	lights[3].color = Vec3f(1-d, 1-d, d);
+	lights[3].color = Vec3f(1-d, 1-d, d);*/
 
 
 	// Update render uniforms
@@ -372,19 +372,57 @@ void Screen::renderDebugField(const char* varName, T value, const char* unit) {
 	fieldIndex++;
 }
 
+std::string toString(std::chrono::nanoseconds t) {
+	std::stringstream ss;
+	ss.precision(4);
+	ss << t.count() * 0.000001f;
+	ss << "ms";
+	return ss.str();
+}
+
+std::string toString(size_t v) {
+	std::stringstream ss;
+	ss << v;
+	return ss.str();
+}
+
 template<size_t N, typename EnumType>
-PieChart toPieChart(BreakdownAverageProfiler<N, EnumType> profiler, const char* title, const char* weightUnit, Vec2f piePosition, float pieSize) {
+PieChart toPieChart(BreakdownAverageProfiler<N, EnumType>& profiler, const char* title, Vec2f piePosition, float pieSize) {
 	auto results = profiler.history.avg();
 	std::chrono::nanoseconds avgTotalTime = results.sum();
 
-	PieChart chart(title, weightUnit, piePosition, pieSize);
+	PieChart chart(title, toString(avgTotalTime), piePosition, pieSize);
 	for(size_t i = 0; i < profiler.size(); i++) {
-		float time = results[i].count() * 0.000001f;
-		PiePart p = PiePart(time, pieColors[i], profiler.labels[i]);
+		float weight = static_cast<float>(results[i].count());
+		PiePart p = PiePart(weight, toString(results[i]), pieColors[i], profiler.labels[i]);
 		chart.add(p);
 	}
 
 	return chart;
+}
+
+template<size_t N, typename Unit, typename EnumType>
+PieChart toPieChart(HistoricTally<N, Unit, EnumType>& tally, const char* title, Vec2f piePosition, float pieSize) {
+	auto sum = 0;
+	for(auto entry : tally.history) {
+		sum += entry.sum();
+	}
+	auto results = tally.history.avg();
+	Unit avgTotal = (tally.history.size() != 0)? (sum / tally.history.size()) : 0;
+	//Unit avgTotal = results.sum();
+
+	PieChart chart(title, toString(avgTotal), piePosition, pieSize);
+	for(size_t i = 0; i < tally.size(); i++) {
+		float result = results[i] * 1.0f;
+		PiePart p = PiePart(result, toString(results[i]), pieColors[i], tally.labels[i]);
+		chart.add(p);
+	}
+
+	return chart;
+}
+
+size_t getTheoreticalNumberOfIntersections(size_t objCount) {
+	return (objCount-1)*objCount / 2;
 }
 
 void Screen::refresh() {
@@ -456,15 +494,20 @@ void Screen::refresh() {
 
 	// Pie rendering
 	graphicsMeasure.mark(GraphicsProcess::PROFILER);
-	renderDebugField("Objects", world->physicals.size(), "");
+	size_t objCount = world->physicals.size();
+	renderDebugField("Objects", objCount, "");
+	renderDebugField("Intersections", getTheoreticalNumberOfIntersections(objCount), "");
 	float leftSide = screenSize.x / screenSize.y;
-	PieChart graphicsPie = toPieChart(graphicsMeasure, "Graphics", "ms", Vec2f(-leftSide + 1.5f, -0.7f), 0.2f);
-	PieChart physicsPie = toPieChart(physicsMeasure, "Physics", "ms", Vec2f(-leftSide + 0.3f, -0.7f), 0.2f);
+	PieChart graphicsPie = toPieChart(graphicsMeasure, "Graphics", Vec2f(-leftSide + 1.5f, -0.7f), 0.2f);
+	PieChart physicsPie = toPieChart(physicsMeasure, "Physics", Vec2f(-leftSide + 0.3f, -0.7f), 0.2f);
+	PieChart intersectionPie = toPieChart(intersectionStatistics, "Intersection Statistics", Vec2f(-leftSide + 2.7f, -0.7f), 0.2f);
 	physicsPie.renderText(*this, font);
 	graphicsPie.renderText(*this, font);
+	intersectionPie.renderText(*this, font);
 	startPieRendering(*this);
 	physicsPie.renderPie(*this);
 	graphicsPie.renderPie(*this);
+	intersectionPie.renderPie(*this);
 	endPieRendering(*this);
 
 

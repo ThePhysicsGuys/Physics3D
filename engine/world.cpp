@@ -143,32 +143,31 @@ void World::tick(double deltaT) {
 		for(int j = i + 1; j < physicals.size(); j++) {
 			Physical& p2 = physicals[j];
 
-			double maxRadiusBetween = p1.circumscribedSphere.radius + p2.circumscribedSphere.radius;
+			double maxRadiusBetween = p1.maxRadius + p2.maxRadius;
 
-			Vec3 globalCenterOfPos1 = p1.part.cframe.localToGlobal(p1.circumscribedSphere.origin);
-			Vec3 globalCenterOfPos2 = p2.part.cframe.localToGlobal(p2.circumscribedSphere.origin);
-			double distanceSqBetween = (globalCenterOfPos1 - globalCenterOfPos2).lengthSquared();
+			double distanceSqBetween = (p1.getCenterOfMass() - p2.getCenterOfMass()).lengthSquared();
 
 			if(distanceSqBetween > maxRadiusBetween*maxRadiusBetween) {
+				intersectionStatistics.addToTally(IntersectionResult::DISTANCE_REJECT, 1);
 				continue;
 			}
+
 			Shape transfJ = transformedShapes[j];
 
 			Vec3 intersection;
 			Vec3 exitVector;
 			if(transfI.intersects(transfJ, intersection, exitVector)) {
-				physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
-				Debug::logVec(intersection, exitVector, Debug::POSITION);
-				Debug::logVec(p1.getCenterOfMass(), intersection - p1.getCenterOfMass(), Debug::INFO);
-				Debug::logVec(p2.getCenterOfMass(), intersection - p2.getCenterOfMass(), Debug::INFO);
-				Debug::logVec(intersection, intersection - p2.getCenterOfMass(), Debug::POSITION);
-
+				physicsMeasure.mark(PhysicsProcess::COLISSION_HANDLING);
+				intersectionStatistics.addToTally(IntersectionResult::COLISSION, 1);
 				handleCollision(p1, p2, intersection, exitVector);
 			} else {
 				physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
+				intersectionStatistics.addToTally(IntersectionResult::GJK_REJECT, 1);
 			}
 		}
 	}
+
+	intersectionStatistics.nextTally();
 
 	physicsMeasure.mark(PhysicsProcess::UPDATING);
 	mutLock.upgrade();
