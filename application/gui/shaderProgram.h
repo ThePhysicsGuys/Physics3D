@@ -50,7 +50,7 @@ public:
 
 struct SkyboxShader : public ShaderProgram {
 	SkyboxShader() : ShaderProgram() {}
-	SkyboxShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 3, "viewMatrix", "projectionMatrix", "skybox") {}
+	SkyboxShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 4, "viewMatrix", "projectionMatrix", "skyboxTexture", "lightDirection") {}
 
 	void update(Mat4f viewMatrix, Mat4f projectionMatrix) {
 		bind();
@@ -59,7 +59,13 @@ struct SkyboxShader : public ShaderProgram {
 	}
 
 	void update(CubeMap skybox) {
+		bind();
 		shader.setUniform(uniforms[2], skybox.unit);
+	}
+
+	void update(Vec3f lightDirection) {
+		bind();
+		shader.setUniform(uniforms[3], lightDirection);
 	}
 };
 

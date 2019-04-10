@@ -64,7 +64,7 @@ Shape dominoShape = BoundingBox{-0.1, -0.7, -0.3, 0.1, 0.7, 0.3}.toShape(dominoB
 int dominoID;
 
 void createDominoAt(Vec3 pos, Mat3 rotation) {
-	Part domino(dominoShape, CFrame(pos, rotation), 1.0, 0.1);
+	Part domino(dominoShape, CFrame(pos, rotation), 0.2, 0.1);
 	domino.drawMeshId = dominoID;
 	world.addObject(domino);
 }
@@ -81,7 +81,7 @@ void makeDominoTower(int floors, int circumference, Vec3 origin) {
 	for(int floor = 0; floor < floors; floor++) {
 		for(int j = 0; j < circumference; j++) {
 			double angle = (2 * M_PI * (j + (floor % 2) / 2.0)) / circumference;
-			Vec3 pos = Vec3(std::cos(angle)*radius, floor * 0.7 + 0.35, std::sin(angle) * radius);
+			Vec3 pos = Vec3(std::cos(angle)*radius, floor * 0.7 + 0.30, std::sin(angle) * radius);
 			createDominoAt(pos + origin, rotY(-angle) * sideways);
 		}
 	}
@@ -106,7 +106,7 @@ int main(void) {
 	dominoID = boxPart.drawMeshId;
 
 	makeDominoStrip(20);
-	//makeDominoTower(25, 11, Vec3(-4.0, 0.0, -4.0));
+	makeDominoTower(25, 20, Vec3(-4.0, 0.0, -4.0));
 
 	// Shape tetrahedronShape = 
 

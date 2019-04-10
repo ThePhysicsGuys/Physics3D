@@ -10,6 +10,7 @@
 #include "shaderProgram.h"
 #include "font.h"
 #include "profilerUI.h"
+#include "loader.h"
 
 #include "../debug.h"
 #include "../../engine/physicsProfiler.h"
@@ -109,6 +110,7 @@ Font* font = nullptr;
 StandardInputHandler* handler = nullptr;
 
 //Skybox
+IndexedMesh* sphere = nullptr;
 BoundingBox* skybox = nullptr;
 CubeMap* skyboxTexture = nullptr;
 IndexedMesh* skyboxMesh = nullptr;
@@ -140,6 +142,7 @@ Material material = Material (
 
 // Light uniforms
 const int lightCount = 4;
+Vec3f sunDirection;
 Attenuation attenuation = { 0, 0, 0.5 };
 Light lights[lightCount] = {
 	Light(Vec3f(5, 0, 0), Vec3f(1, 0, 0), 4, attenuation),
@@ -156,7 +159,7 @@ Quad* quad = nullptr;
 
 void Screen::init() {
 	// Log init
-	Log::setLogLevel(Log::Level::INFO);
+	Log::setLogLevel(Log::Level::NONE);
 
 
 	// Render mode init
@@ -195,6 +198,7 @@ void Screen::init() {
 
 
 	// Skybox init
+	sphere = new IndexedMesh(loadMesh((std::istream&) std::istringstream(getResourceAsString(SPHERE_MODEL))));
 	skybox = new BoundingBox{ -1, -1, -1, 1, 1, 1 };
 	skyboxMesh = new IndexedMesh(skybox->toShape(new Vec3[8]));
 	skyboxTexture = new CubeMap("../res/skybox/right.jpg", "../res/skybox/left.jpg", "../res/skybox/top.jpg", "../res/skybox/bottom.jpg", "../res/skybox/front.jpg", "../res/skybox/back.jpg");
@@ -277,6 +281,7 @@ void Screen::update() {
 	// Update lights
 	static long long t = 0;
 	float d = 0.5 + 0.5 * sin(t++ * 0.005);
+	sunDirection = Vec3f(0, cos(t * 0.005) , sin(t * 0.005));
 	lights[0].color = Vec3f(d, 0.3, 1-d);
 	lights[1].color = Vec3f(1-d, 0.3, 1 - d);
 	lights[2].color = Vec3f(0.2, 0.3*d, 1 - d);
@@ -319,9 +324,12 @@ void updateVecMesh(AppDebug::ColoredVec* data, size_t size) {
 void Screen::renderSkybox() {
 	glDepthMask(GL_FALSE);
 	glDisable(GL_CULL_FACE);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	skyboxShader.update(sunDirection);
 	skyboxShader.update(viewMatrix, projectionMatrix);
 	skyboxTexture->bind();
-	skyboxMesh->render();
+	sphere->render();
 	glDepthMask(GL_TRUE);
 	glEnable(GL_CULL_FACE);
 }
@@ -382,7 +390,7 @@ PieChart toPieChart(BreakdownAverageProfiler<N, EnumType> profiler, const char* 
 void Screen::refresh() {
 	fieldIndex = 0;
 
-	// Render physicals to modelFrameBuffer
+	// Render skybox
 	graphicsMeasure.mark(GraphicsProcess::SKYBOX);
 	modelFrameBuffer->bind();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

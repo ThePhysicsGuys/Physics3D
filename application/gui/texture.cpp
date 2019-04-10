@@ -128,7 +128,7 @@ void CubeMap::load(std::string right, std::string left, std::string top, std::st
 	for (int i = 0; i < 6; i++) {
 		data = stbi_load(faces[i].c_str(), &width, &height, &channels, 0);
 		if (data)
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, (channels == 4)? GL_RGBA : GL_RGB, width, height, 0, (channels == 4) ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, data);
 		else
 			Log::error("Failed to load: %s", faces[i].c_str());
 		
