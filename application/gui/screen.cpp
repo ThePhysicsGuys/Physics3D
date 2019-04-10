@@ -148,10 +148,10 @@ const int lightCount = 4;
 Vec3f sunDirection;
 Attenuation attenuation = { 0, 0, 0.5 };
 Light lights[lightCount] = {
-	Light(Vec3f(5, 0, 0), Vec3f(1, 1, 1), 1, attenuation),
-	Light(Vec3f(0, 5, 0), Vec3f(1, 1, 1), 1, attenuation),
-	Light(Vec3f(0, 0, 5), Vec3f(1, 1, 1), 1, attenuation),
-	Light(Vec3f(0, 0, 0), Vec3f(1, 1, 1), 1, attenuation)
+	Light(Vec3f(5, 0, 0), Vec3f(1, 1, 1), 2, attenuation),
+	Light(Vec3f(0, 5, 0), Vec3f(1, 1, 1), 2, attenuation),
+	Light(Vec3f(0, 0, 5), Vec3f(1, 1, 1), 2, attenuation),
+	Light(Vec3f(0, 0, 0), Vec3f(1, 1, 1), 2, attenuation)
 };
 
 // Render meshes
@@ -201,7 +201,7 @@ void Screen::init() {
 
 	// Texture init
 	floorTexture = load("../res/textures/floor/floor_color.jpg");
-
+	material.setTexture(floorTexture);
 
 	// Skybox init
 	sphere = new IndexedMesh(loadMesh((std::istream&) std::istringstream(getResourceAsString(SPHERE_MODEL))));
@@ -285,13 +285,13 @@ void Screen::update() {
 	
 
 	// Update lights
-	static long long t = 0;
+	/*static long long t = 0;
 	float d = 0.5 + 0.5 * sin(t++ * 0.005);
 	sunDirection = Vec3f(0, cos(t * 0.005) , sin(t * 0.005));
 	lights[0].color = Vec3f(d, 0.3, 1-d);
 	lights[1].color = Vec3f(1-d, 0.3, 1 - d);
 	lights[2].color = Vec3f(0.2, 0.3*d, 1 - d);
-	lights[3].color = Vec3f(1-d, 1-d, d);
+	lights[3].color = Vec3f(1-d, 1-d, d);*/
 
 
 	// Update render uniforms
@@ -359,6 +359,7 @@ void Screen::renderPhysicals() {
 		else
 			material.ambient = Vec3f(0.3, 0.4, 0.2);
 
+		
 		basicShader.updateMaterial(material);
 
 		// Render each physical
@@ -526,7 +527,6 @@ void Screen::refresh() {
 
 	// Render postprocessed image to screen
 	quadShader.bind();
-	material.setTexture(floorTexture);
 	screenFrameBuffer->texture->bind();
 	quad->render();
 

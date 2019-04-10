@@ -164,11 +164,18 @@ vec3 calcLightColor(Light light) {
 
 void main() {
 	vec3 lightColors = vec3(0);
-	for (int i = 0; i < maxLights; i++)
-		if (lights[i].intensity > 0)
+	int count = 0;
+	for (int i = 0; i < maxLights; i++) {
+		if (lights[i].intensity > 0) {
 			lightColors += calcLightColor(lights[i]);
-	vec4 sampleColor = (material.textured)? texture(textureSampler, ftextureUV) : vec4(material.ambient, 1);
-	outColor = vec4(lightColors, 1) * sampleColor;
+			count++;
+		}
+	}
+	if (material.textured) {
+		outColor = vec4(lightColors / count, 1) * texture(textureSampler, ftextureUV);
+	} else {
+		outColor = vec4(lightColors / count * material.ambient, 1);
+	}
 }
 
 //#shader vertex // vertex Shader

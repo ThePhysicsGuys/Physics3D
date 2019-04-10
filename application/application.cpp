@@ -64,7 +64,7 @@ Shape dominoShape = BoundingBox{-0.1, -0.7, -0.3, 0.1, 0.7, 0.3}.toShape(dominoB
 int dominoID;
 
 void createDominoAt(Vec3 pos, Mat3 rotation) {
-	Part domino(dominoShape, CFrame(pos, rotation), 0.2, 0.1);
+	Part domino(dominoShape, CFrame(pos, rotation), 1, 0.1);
 	domino.drawMeshId = dominoID;
 	world.addObject(domino);
 }
@@ -106,7 +106,7 @@ int main(void) {
 	dominoID = boxPart.drawMeshId;
 
 	makeDominoStrip(20);
-	makeDominoTower(25, 20, Vec3(-4.0, 0.0, -4.0));
+	//makeDominoTower(25, 20, Vec3(-4.0, 0.0, -4.0));
 
 	// Shape tetrahedronShape = 
 
