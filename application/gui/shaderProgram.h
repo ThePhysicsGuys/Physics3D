@@ -71,7 +71,7 @@ struct SkyboxShader : public ShaderProgram {
 
 struct BasicShader : public ShaderProgram {
 	BasicShader() : ShaderProgram() {}
-	BasicShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 8, "modelMatrix", "viewMatrix", "projectionMatrix", "viewPosition", "material.ambient", "material.diffuse", "material.specular", "material.reflectance") {}
+	BasicShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 10, "modelMatrix", "viewMatrix", "projectionMatrix", "viewPosition", "material.ambient", "material.diffuse", "material.specular", "material.reflectance", "material.textured", "textureSampler") {}
 
 	void createLightArray(int size) {
 		bind();
@@ -151,6 +151,15 @@ struct BasicShader : public ShaderProgram {
 		shader.setUniform(uniforms[5], material.diffuse);
 		shader.setUniform(uniforms[6], material.specular);
 		shader.setUniform(uniforms[7], material.reflectance);
+		if (material.texture) {
+			material.texture->bind();
+			shader.setUniform(uniforms[8], true);
+			shader.setUniform(uniforms[9], material.texture->unit);
+		} else {
+			shader.setUniform(uniforms[8], false);
+			shader.setUniform(uniforms[9], 0);
+		}
+		
 	}
 };
 

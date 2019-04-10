@@ -109,6 +109,9 @@ Font* font = nullptr;
 // Handler
 StandardInputHandler* handler = nullptr;
 
+// Textures
+Texture* floorTexture = nullptr;
+
 //Skybox
 IndexedMesh* sphere = nullptr;
 BoundingBox* skybox = nullptr;
@@ -159,7 +162,7 @@ Quad* quad = nullptr;
 
 void Screen::init() {
 	// Log init
-	Log::setLogLevel(Log::Level::NONE);
+	Log::setLogLevel(Log::Level::INFO);
 
 
 	// Render mode init
@@ -193,8 +196,11 @@ void Screen::init() {
 	quadShader = * new QuadShader(quadShaderSource);
 	postProcessShader = * new PostProcessShader(postProcessShaderSource);
 	skyboxShader = * new SkyboxShader(skyboxShaderSource);
-
 	basicShader.createLightArray(lightCount);
+
+
+	// Texture init
+	floorTexture = load("../res/textures/floor/floor_color.jpg");
 
 
 	// Skybox init
@@ -279,13 +285,13 @@ void Screen::update() {
 	
 
 	// Update lights
-	/*static long long t = 0;
+	static long long t = 0;
 	float d = 0.5 + 0.5 * sin(t++ * 0.005);
 	sunDirection = Vec3f(0, cos(t * 0.005) , sin(t * 0.005));
 	lights[0].color = Vec3f(d, 0.3, 1-d);
 	lights[1].color = Vec3f(1-d, 0.3, 1 - d);
 	lights[2].color = Vec3f(0.2, 0.3*d, 1 - d);
-	lights[3].color = Vec3f(1-d, 1-d, d);*/
+	lights[3].color = Vec3f(1-d, 1-d, d);
 
 
 	// Update render uniforms
@@ -520,6 +526,7 @@ void Screen::refresh() {
 
 	// Render postprocessed image to screen
 	quadShader.bind();
+	material.setTexture(floorTexture);
 	screenFrameBuffer->texture->bind();
 	quad->render();
 

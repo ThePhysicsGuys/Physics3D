@@ -3,10 +3,13 @@
 
 layout(location = 0) in vec3 vposition;
 
+out vec2 gtextureUV;
+
 uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
 
 void main() {
+	gtextureUV = vposition.xy;
 	gl_Position = modelMatrix * vec4(vposition, 1.0f);
 }
 
@@ -28,6 +31,9 @@ uniform vec3 viewPosition;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 
+in vec2 gtextureUV[];
+
+out vec2 ftextureUV;
 out vec3 fposition;
 out vec3 fnormal;
 out vec3 fcenter;
@@ -68,12 +74,15 @@ void main() {
 	#endif
 
 	fposition = gl_in[0].gl_Position.xyz;
+	ftextureUV = vec2(1, 1);//gtextureUV[0];
 	gl_Position = transform * gl_in[0].gl_Position; EmitVertex();
 
 	fposition = gl_in[1].gl_Position.xyz;
+	ftextureUV = vec2(0, 1);
 	gl_Position = transform * gl_in[1].gl_Position; EmitVertex();
 
 	fposition = gl_in[2].gl_Position.xyz;
+	ftextureUV = vec2(0, 0);
 	gl_Position = transform * gl_in[2].gl_Position; EmitVertex();
 	EndPrimitive();
 }
@@ -85,6 +94,7 @@ void main() {
 
 out vec4 outColor;
 
+in vec2 ftextureUV;
 in vec3 fposition;
 in vec3 fnormal;
 in vec3 fcenter;
@@ -94,6 +104,7 @@ struct Material {
 	vec3 diffuse;
 	vec3 specular;
 	float reflectance;
+	bool textured;
 };
 
 struct Attenuation {
@@ -112,6 +123,7 @@ struct Light {
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 uniform Material material;
+uniform sampler2D textureSampler;
 
 const int maxLights = 4;
 uniform Light lights[maxLights];
@@ -147,7 +159,7 @@ vec3 calcLightColor(Light light) {
 	float attenuationInverse = light.attenuation.constant + light.attenuation.linear * distance + light.attenuation.exponent * distance * distance;
 	vec3 specularDiffuse = (diffuse + specular) / attenuationInverse;
 
-	return (ambient + directional + specularDiffuse) * material.ambient;
+	return ambient + directional + specularDiffuse;
 }
 
 void main() {
@@ -155,7 +167,8 @@ void main() {
 	for (int i = 0; i < maxLights; i++)
 		if (lights[i].intensity > 0)
 			lightColors += calcLightColor(lights[i]);
-	outColor = vec4(lightColors, 1);
+	vec4 sampleColor = (material.textured)? texture(textureSampler, ftextureUV) : vec4(material.ambient, 1);
+	outColor = vec4(lightColors, 1) * sampleColor;
 }
 
 //#shader vertex // vertex Shader

@@ -11,6 +11,23 @@
 
 // Texture
 
+Texture* load(std::string name) {
+	int width;
+	int height;
+	int channels;
+	unsigned char* data = stbi_load(name.c_str(), &width, &height, &channels, 0);
+	Texture* texture = nullptr;
+	if (data)
+		texture = new Texture(width, height, data, (channels == 4) ? GL_RGBA : GL_RGB);
+	else {
+		Log::setSubject(name);
+		Log::error("Failed to load texture");
+		Log::resetSubject();
+	}
+	stbi_image_free(data);
+	return texture;
+}
+
 Texture::Texture(unsigned int width, unsigned int height, const void* buffer, int format) : width(width), height(height), unit(0) {
 	glGenTextures(1, &id);
 
@@ -129,9 +146,12 @@ void CubeMap::load(std::string right, std::string left, std::string top, std::st
 		data = stbi_load(faces[i].c_str(), &width, &height, &channels, 0);
 		if (data)
 			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, (channels == 4)? GL_RGBA : GL_RGB, width, height, 0, (channels == 4) ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, data);
-		else
-			Log::error("Failed to load: %s", faces[i].c_str());
-		
+		else {
+			Log::setSubject(faces[i]);
+			Log::error("Failed to load texture");
+			Log::resetSubject();
+		}
+
 		stbi_image_free(data);	
 	}
 }

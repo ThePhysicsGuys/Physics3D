@@ -64,12 +64,12 @@ class BreakdownAverageProfiler : public HistoricTally<N, std::chrono::nanosecond
 	ProcessType currentProcess = static_cast<ProcessType>(-1);
 
 public:
-	inline BreakdownAverageProfiler(char const * const labels[static_cast<size_t>(ProcessType::COUNT)]) : HistoricTally(labels) {}
+	inline BreakdownAverageProfiler(char const * const labels[static_cast<size_t>(ProcessType::COUNT)]) : HistoricTally<N, std::chrono::nanoseconds, ProcessType>(labels) {}
 
 	inline void mark(ProcessType process) {
 		std::chrono::time_point<std::chrono::steady_clock> curTime = std::chrono::high_resolution_clock::now();
 		if(currentProcess != static_cast<ProcessType>(-1)) {
-			addToTally(currentProcess, curTime - startTime);
+			HistoricTally<N, std::chrono::nanoseconds, ProcessType>::addToTally(currentProcess, curTime - startTime);
 		}
 		startTime = curTime;
 		currentProcess = process;
@@ -77,9 +77,9 @@ public:
 
 	inline void end() {
 		std::chrono::time_point<std::chrono::steady_clock> curTime = std::chrono::high_resolution_clock::now();
-		addToTally(currentProcess, curTime - startTime);
+		this->addToTally(currentProcess, curTime - startTime);
 
 		currentProcess = static_cast<ProcessType>(-1);
-		nextTally();
+		this->nextTally();
 	}
 };

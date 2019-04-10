@@ -23,6 +23,8 @@ public:
 
 };
 
+Texture* load(std::string name);
+
 class TextureMultisample : public Bindable {
 public:
 	int unit;
