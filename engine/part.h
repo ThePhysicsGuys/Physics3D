@@ -12,7 +12,7 @@ public:
 		double friction;
 	} properties;
 
-	// Part();
+	Part() = default;
 	Part(NormalizedShape shape, CFrame position, double density, double friction);
 	Part(Shape shape, CFrame position, double density, double friction);
 };

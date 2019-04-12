@@ -29,7 +29,7 @@ void StandardInputHandler::keyDownOrRepeat(int key, int modifiers) {
 		break;
 	case GLFW_KEY_O:
 		createDominoAt(Vec3(0.0 + (rand() % 100) * 0.001, 0.5 + (rand() % 100) * 0.001, 0.0 + (rand() % 100) * 0.001), fromEulerAngles(0.2, 0.3, 0.7));
-		Log::info("Created domino! There are %d objects in the world! ", screen.world->physicals.size());
+		Log::info("Created domino! There are %d objects in the world! ", screen.world->physicals.size);
 		break;
 	}
 }
@@ -41,9 +41,9 @@ void StandardInputHandler::keyDown(int key, int modifiers) {
 			break;
 		case GLFW_KEY_DELETE:
 			if (screen.selectedPhysical != nullptr) {
-				for (int i = 0; i < screen.world->physicals.size(); i++) {
+				for (size_t i = 0; i < screen.world->physicals.size; i++) {
 					if (&screen.world->physicals[i] == screen.selectedPhysical) {
-						screen.world->physicals.erase(screen.world->physicals.begin() + i);
+						screen.world->physicals.remove(i);
 						screen.world->selectedPhysical = nullptr;
 						screen.selectedPhysical = nullptr;
 						break;
