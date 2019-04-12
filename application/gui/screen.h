@@ -76,3 +76,5 @@ public:
 
 	void toggleDebugVecType(Debug::VecType t);
 };
+
+extern bool renderPies;

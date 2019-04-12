@@ -51,6 +51,9 @@ void StandardInputHandler::keyDown(int key, int modifiers) {
 				}
 			}
 			break;
+		case GLFW_KEY_F8:
+			renderPies = !renderPies;
+			break;
 	}
 
 	if(key >= GLFW_KEY_F1 && key <= GLFW_KEY_F7) {
