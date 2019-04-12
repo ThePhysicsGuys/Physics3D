@@ -13,6 +13,7 @@ private:
 	size_t capacity;
 	void movePhysical(size_t origin, size_t destination);
 	void swapPhysical(size_t first, size_t second);
+	void swapPhysical(Physical* first, Physical* second);
 public:
 	size_t physicalCount;
 	size_t freePhysicalsOffset;
@@ -24,8 +25,11 @@ public:
 	void addAnchored(Physical& p);
 	void remove(size_t index);
 	void anchor(size_t index);
+	void anchor(Physical* p);
 	void unanchor(size_t index);
+	void unanchor(Physical* p);
 	bool isAnchored(size_t index);
+	bool isAnchored(const Physical* index) const;
 
 	inline Physical& operator[](size_t index) {
 		return physicals[index];
@@ -69,6 +73,11 @@ public:
 	ConstIter<Physical> iterUnAnchoredPhysicals() const { return ConstIter<Physical>{physicals + freePhysicalsOffset, physicals + physicalCount}; }
 };
 
+struct QueuedPhysical {
+	Physical p;
+	bool anchored;
+};
+
 class World {
 private:
 	size_t getTotalVertexCount();
@@ -76,7 +85,7 @@ private:
 	void processColissions(const Shape* transformedShapes);
 public:
 	PhysicalContainer physicals;
-	std::queue<Physical> newPhysicalQueue;
+	std::queue<QueuedPhysical> newPhysicalQueue;
 	mutable std::shared_mutex lock;
 	mutable std::mutex queueLock;
 
@@ -92,8 +101,9 @@ public:
 	World& operator=(World&&) = delete;
 
 	void tick(double deltaT);
-	void addObject(Physical& p);
-	Physical& addObject(Shape s, CFrame location, double density, double friction);
+	void addObject(Physical& p, bool anchored);
+	Physical& addObject(Shape s, CFrame location, double density, double friction, bool anchored);
+	Physical& addObject(Part& p, bool anchored);
 	Physical& addObject(Part& p);
 
 	virtual void applyExternalForces(const Shape* transformedShapes);

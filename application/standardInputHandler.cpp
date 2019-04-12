@@ -29,7 +29,7 @@ void StandardInputHandler::keyDownOrRepeat(int key, int modifiers) {
 		break;
 	case GLFW_KEY_O:
 		createDominoAt(Vec3(0.0 + (rand() % 100) * 0.001, 0.5 + (rand() % 100) * 0.001, 0.0 + (rand() % 100) * 0.001), fromEulerAngles(0.2, 0.3, 0.7));
-		Log::info("Created domino! There are %d objects in the world! ", screen.world->physicals.size);
+		Log::info("Created domino! There are %d objects in the world! ", screen.world->physicals.physicalCount);
 		break;
 	}
 }
@@ -41,7 +41,7 @@ void StandardInputHandler::keyDown(int key, int modifiers) {
 			break;
 		case GLFW_KEY_DELETE:
 			if (screen.selectedPhysical != nullptr) {
-				for (size_t i = 0; i < screen.world->physicals.size; i++) {
+				for (size_t i = 0; i < screen.world->physicals.physicalCount; i++) {
 					if (&screen.world->physicals[i] == screen.selectedPhysical) {
 						screen.world->physicals.remove(i);
 						screen.world->selectedPhysical = nullptr;
@@ -53,6 +53,19 @@ void StandardInputHandler::keyDown(int key, int modifiers) {
 			break;
 		case GLFW_KEY_F8:
 			renderPies = !renderPies;
+			break;
+		case GLFW_KEY_F9:
+			if(screen.selectedPhysical != nullptr) {
+				if(screen.world->physicals.isAnchored(screen.selectedPhysical)) {
+					screen.world->physicals.unanchor(screen.selectedPhysical);
+				} else {
+					screen.selectedPhysical->velocity = Vec3();
+					screen.selectedPhysical->angularVelocity = Vec3();
+					screen.selectedPhysical->totalForce = Vec3();
+					screen.selectedPhysical->totalMoment = Vec3();
+					screen.world->physicals.anchor(screen.selectedPhysical);
+				}
+			}
 			break;
 	}
 

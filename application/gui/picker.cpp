@@ -34,13 +34,13 @@ void updateIntersectedPhysical(Screen& screen, PhysicalContainer& physicals, Vec
 	double closestIntersectDistance = INFINITY;
 
 	screen.ray = calcRay(mousePosition, screenSize, viewMatrix, projectionMatrix);
-	for (int i = 0; i < physicals.size; i++) {
+	for (int i = 0; i < physicals.physicalCount; i++) {
 		Physical& physical = physicals[i];
 		Vec3* buffer = new Vec3[physicals[i].part.hitbox.vertexCount];
 		Shape transformed = physical.part.hitbox.localToGlobal(physical.part.cframe, buffer);
 		double distance = transformed.getIntersectionDistance(screen.camera.cframe.position, screen.ray);
 		if (distance < closestIntersectDistance && distance > 0) {
-			if (i >= physicals.size) continue;
+			if (i >= physicals.physicalCount) continue;
 			else {
 				closestIntersectDistance = distance;
 				closestIntersectedPhysical = &physicals[i];
