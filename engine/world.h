@@ -33,8 +33,7 @@ public:
 
 	PhysicalContainer(size_t initialCapacity);
 	void ensureCapacity(size_t capacity);
-	void remove(size_t index);
-	void remove(Physical* p);
+	void remove(Part* p);
 	void anchor(size_t index);
 	void anchor(Physical* p);
 	void unanchor(size_t index);
@@ -173,8 +172,7 @@ public:
 
 	void tick(double deltaT);
 
-	void addObject(Part* p, bool anchored);
-	void addObject(Part* p);
+	void addObject(Part* p, bool anchored = false);
 	inline void addObject(Part p, bool anchored = false) { addObject(new Part(p), anchored); }
 
 	void removePart(Part* p);

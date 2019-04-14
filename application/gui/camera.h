@@ -7,6 +7,7 @@ class Screen;
 #include "../../engine/math/mat3.h"
 #include "../../engine/math/mathUtil.h"
 #include "../../engine/math/cframe.h"
+#include "../../engine/part.h"
 
 #include <cmath>
 
@@ -32,14 +33,15 @@ public:
 	void move(Screen& screen, double dx, double dy, double dz, bool leftDragging);
 	void move(Screen& screen, Vec3 delta, bool leftDragging);
 
-	bool airborne = false;
+	/*bool airborne = false;
 	double timestamp = 0;
 	double height = 1;
 	double g = 0.12;
 	double v0 = 0;
-	double y0;
+	double y0;*/
 
+	Part* attachment = nullptr;
 	void update();
-	void toggleFlying();
-	void jump(Screen& screen, bool leftDragging);
+	// void toggleFlying();
+	// void jump(Screen& screen, bool leftDragging);
 };

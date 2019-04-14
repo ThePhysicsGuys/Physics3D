@@ -47,6 +47,10 @@ GravityFloorWorld world(Vec3(0.0, -10.0, 0.0));
 
 TickerThread physicsThread;
 
+Part* player;
+bool flying = true;
+
+
 void init();
 void setupPhysics();
 Part createVisiblePart(NormalizedShape s, CFrame position, double density, double friction);
@@ -90,31 +94,31 @@ void makeDominoTower(int floors, int circumference, Vec3 origin) {
 int main(void) {
 	init();
 
+	// player = new Part(BoundingBox(0.2, 1.5, 0.2).toShape(new Vec3[8]), CFrame(Vec3(0.0, 1.0, 0.0)), 1.0, 0.000001);
+	
+
 	int* builderRemovalBuffer = new int[1000];
 	EdgePiece* builderAddingBuffer = new EdgePiece[1000];
-
-	/*Vec3 newVerts[12];
-	for(int i = 0; i < 12; i++) {
-		newVerts[i] = icosahedron.vertices[i] * 2;
-	}*/
-
-	// world.addObject(createVisiblePart(createCube(1.0), CFrame(Vec3(0.5, 1.9, 0.5), fromEulerAngles(1.5, 0.2, 0.3)), 1.0, 0.0));
 
 	Part boxPart = createVisiblePart(dominoShape, CFrame(Vec3(1.5, 0.7, 0.3), fromEulerAngles(0.0, 0.2, 0.0)), 2.0, 0.7);
 	world.addObject(boxPart);
 
 	dominoID = boxPart.drawMeshId;
 
-	Part floorPart = createVisiblePart(BoundingBox{-4.0, -0.3, -4.0, 4.0, 0.3, 4.0}.toShape(new Vec3[8]), CFrame(), 0.2, 1.0);
+	Vec2 floorSize(40.0, 80.0);
+	double wallHeight = 3.0;
+
+	Part floorPart = createVisiblePart(BoundingBox(floorSize.x, 0.3, floorSize.y).toShape(new Vec3[8]), CFrame(Vec3(0.0, -0.15, 0.0)), 0.2, 1.0);
 	world.addObject(floorPart, true);
 
-	Part wallTemplate = createVisiblePart(BoundingBox{-0.2, -3.0, -4.0, 0.2, 3.0, 4.0}.toShape(new Vec3[8]), CFrame(Vec3(4.0, 3.0, 0.0)), 0.2, 1.0);
-	world.addObject(wallTemplate, true);
-	wallTemplate.cframe = CFrame(Vec3(-4.0, 3.0, 0.0));
-	world.addObject(wallTemplate, true);
-	wallTemplate.cframe = CFrame(Vec3(0.0, 3.0, 4.0), Mat3(0,0,-1,0,1,0,1,0,0));
-	world.addObject(wallTemplate, true);
-
+	Part xWallTemplate = createVisiblePart(BoundingBox(0.2, wallHeight, floorSize.y).toShape(new Vec3[8]), CFrame(Vec3(floorSize.x/2, wallHeight/2, 0.0)), 0.2, 1.0);
+	Part zWallTemplate = createVisiblePart(BoundingBox(floorSize.x, wallHeight, 0.2).toShape(new Vec3[8]), CFrame(Vec3(0.0, wallHeight / 2, floorSize.y/2)), 0.2, 1.0);
+	world.addObject(xWallTemplate, true);
+	world.addObject(zWallTemplate, true);
+	xWallTemplate.cframe = CFrame(Vec3(-floorSize.x/2, wallHeight/2, 0.0));
+	world.addObject(xWallTemplate, true);
+	zWallTemplate.cframe = CFrame(Vec3(0.0, wallHeight/2, -floorSize.y/2));
+	world.addObject(zWallTemplate, true);
 
 
 	makeDominoStrip(20);
@@ -190,6 +194,11 @@ int main(void) {
 		spherePart.cframe = CFrame(Vec3(0.0, 10.0 + i, 0.0));
 		world.addObject(spherePart);
 	}
+
+	player = new Part(spherePart);
+	player->properties.friction = 0;
+	player->drawMeshId = -1;
+
 	Part trianglePart = createVisiblePart(triangleShape, CFrame(Vec3(-2.0, 1.0, -2.0)), 10.0, 0.7);
 	world.addObject(trianglePart);
 
@@ -312,4 +321,21 @@ Part createVisiblePart(Shape shape, CFrame position, double density, double fric
 
 	part.drawMeshId = id;
 	return part;
+}
+
+void toggleFlying() {
+	if(flying) {
+		player->cframe = screen.camera.cframe;
+		screen.camera.attachment = player;
+		screen.world->addObject(player);
+		flying = false;
+	} else {
+		screen.camera.attachment = nullptr;
+		screen.world->removePart(player);
+		flying = true;
+	}
+}
+
+Camera& getCamera() {
+	return screen.camera;
 }

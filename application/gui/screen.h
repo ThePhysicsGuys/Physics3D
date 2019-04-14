@@ -12,7 +12,10 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+class StandardInputHandler;
+
 #include "indexedMesh.h"
+#include "../standardInputHandler.h"
 
 enum GraphicsProcess {
 	UPDATE,
@@ -79,3 +82,4 @@ public:
 };
 
 extern bool renderPies;
+extern StandardInputHandler* handler;

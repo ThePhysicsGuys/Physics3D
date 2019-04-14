@@ -20,7 +20,7 @@ PhysicalContainer::PhysicalContainer(size_t initialCapacity) : physicalCount(0),
 }
 void PhysicalContainer::ensureCapacity(size_t targetCapacity) {
 	if(this->capacity < targetCapacity) {
-		size_t newCapacity = std::max(this->capacity * 2, static_cast<size_t>(2048));
+		size_t newCapacity = std::max(this->capacity * 2, static_cast<size_t>(512));
 		Physical* newPhysicals = new Physical[newCapacity];
 		Part** newParts = new Part*[newCapacity];
 
@@ -64,22 +64,28 @@ void PhysicalContainer::add(Part* part, bool anchored) {
 	partCount++;
 	physicalCount++;
 }
-void PhysicalContainer::remove(size_t index) {
+/*void PhysicalContainer::remove(size_t index) {
 	if(isAnchored(index)) {
 		movePhysical(--freePhysicalsOffset, index);
 		movePhysical(--physicalCount, freePhysicalsOffset);
 	} else {
 		movePhysical(--physicalCount, index);
 	}
-}
-void PhysicalContainer::remove(Physical* physical) {
+}*/
+void PhysicalContainer::remove(Part* part) {
 	physicalCount--;
-	if(isAnchored(physical)) {
+	partCount--;
+	if(isAnchored(part->parent)) {
 		freePhysicalsOffset--;
-		movePhysical(physicals + freePhysicalsOffset, physical);
+		anchoredPartsCount--;
+		movePhysical(physicals + freePhysicalsOffset, part->parent);
 		movePhysical(physicalCount, freePhysicalsOffset);
+
+		movePart(anchoredPartsCount, part->partIndex);
+		movePart(partCount, anchoredPartsCount);
 	} else {
-		movePhysical(physicals + physicalCount, physical);
+		movePhysical(physicals + physicalCount, part->parent);
+		movePart(partCount, part->partIndex);
 	}
 }
 void PhysicalContainer::anchor(size_t index) {
@@ -133,9 +139,11 @@ void PhysicalContainer::movePhysical(Physical* origin, Physical* destination) {
 }
 
 void PhysicalContainer::movePart(size_t origin, size_t destination) {
+	parts[origin]->partIndex = -1;
 	parts[destination] = parts[origin];
 	parts[destination]->partIndex = destination;
 }
+
 void PhysicalContainer::swapPart(size_t a, size_t b) {
 	Part* t = parts[a];
 	parts[a] = parts[b];
@@ -363,12 +371,9 @@ void World::addObject(Part* part, bool anchored) {
 	}
 };
 
-void World::addObject(Part* part) {
-	return this->addObject(part, false);
-};
-
 void World::removePart(Part* part) {
-	this->physicals.remove(part->parent);
+	this->physicals.remove(part);
+	
 }
 
 void World::applyExternalForces() {}

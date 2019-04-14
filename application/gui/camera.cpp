@@ -71,12 +71,15 @@ void Camera::move(Screen& screen, Vec3 delta, bool leftDragging) {
 }
 
 void Camera::update() {
-	if (!flying) {
+	if(attachment != nullptr) {
+		cframe.position = attachment->cframe.position;
+	}
+	/*if (!flying) {
 		double y = 0;
 		if (airborne) {
 			double y0 = cframe.position.y - height;
 			double t = glfwGetTime() - timestamp;
-			y = y0 + v0 * t - g * t * t;
+			y = y0 + v0 * t - g * t * t / 2;
 			if (y <= 0) {
 				y = 0;
 				airborne = false;
@@ -84,11 +87,11 @@ void Camera::update() {
 			}
 		}
 		cframe.position.y = y + height;
-	}
+	}*/
 }
 
-void Camera::toggleFlying() {
-	if (!flying) {
+/*void Camera::toggleFlying() {
+	/*if (!flying) {
 		flying = true;
 		airborne = true;
 		v0 = 0;
@@ -114,4 +117,4 @@ void Camera::jump(Screen& screen, bool leftDragging) {
 		y0 = cframe.position.y;
 		v0 = (y0 > height) ? 0 : 0.07;
 	}
-}
+}*/

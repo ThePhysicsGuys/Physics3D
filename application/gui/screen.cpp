@@ -299,7 +299,7 @@ void Screen::update() {
 		if (handler->getKey(GLFW_KEY_A))  camera.move(*this, -speed, 0, 0, leftDragging);
 		if (handler->getKey(GLFW_KEY_SPACE)) 
 			if (camera.flying) camera.move(*this, 0, speed, 0, leftDragging);
-			else camera.jump(*this, leftDragging);	
+			// else camera.jump(*this, leftDragging);	
 		if (handler->getKey(GLFW_KEY_LEFT_SHIFT)) 
 			if (camera.flying) camera.move(*this, 0, -speed, 0, leftDragging);
 		if (handler->getKey(GLFW_KEY_LEFT))  camera.rotate(*this, 0, -speed, 0, leftDragging);
@@ -326,7 +326,8 @@ void Screen::update() {
 
 	// Update render uniforms
 	float size = 10;
-	projectionMatrix = ortho(-size*aspect, size*aspect, -size, size, -1000, 1000); //perspective(1.0, aspect, 0.01, 1000000.0);
+	// projectionMatrix = ortho(-size*aspect, size*aspect, -size, size, -1000, 1000);
+	projectionMatrix = perspective(1.0, aspect, 0.01, 1000000.0);
 	orthoMatrix = ortho(-aspect, aspect, -1, 1, -1000, 1000);
 	//orthoMatrix = ortho(0, aspect, 0, 1, -1000, 1000);
 	rotatedViewMatrix = camera.cframe.asMat4f().getRotation();
@@ -398,6 +399,7 @@ void Screen::renderPhysicals() {
 		Mat4f transformation = part.cframe.asMat4f();
 		basicShader.updateModel(transformation);
 
+		if(meshId == -1) continue;
 		meshes[meshId]->render();
 	}
 }
@@ -531,7 +533,7 @@ void Screen::refresh() {
 	graphicsMeasure.mark(GraphicsProcess::OTHER);
 	fontShader.update(orthoMatrix);
 	GUI::update(orthoMatrix);
-	panel->render();
+	// panel->render();
 
 	// Pie rendering
 	graphicsMeasure.mark(GraphicsProcess::PROFILER);

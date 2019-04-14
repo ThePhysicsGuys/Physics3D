@@ -27,7 +27,7 @@ void StandardInputHandler::keyDownOrRepeat(int key, int modifiers) {
 		runTick();
 		break;
 	case GLFW_KEY_O:
-		createDominoAt(Vec3(0.0 + (rand() % 100) * 0.001, 0.5 + (rand() % 100) * 0.001, 0.0 + (rand() % 100) * 0.001), fromEulerAngles(0.2, 0.3, 0.7));
+		createDominoAt(Vec3(0.0 + (rand() % 100) * 0.001, 1.0 + (rand() % 100) * 0.001, 0.0 + (rand() % 100) * 0.001), fromEulerAngles(0.2, 0.3, 0.7));
 		Log::info("Created domino! There are %d objects in the world! ", screen.world->physicals.partCount);
 		break;
 	}
@@ -73,8 +73,9 @@ void StandardInputHandler::keyDown(int key, int modifiers) {
 };
 
 void StandardInputHandler::doubleKeyDown(int key, int modifiers) {
-	if (key == GLFW_KEY_SPACE)
-		screen.camera.toggleFlying();
+	if(key == GLFW_KEY_SPACE) {
+		toggleFlying();
+	}
 }
 
 void StandardInputHandler::keyUp(int key, int modifiers) {};
