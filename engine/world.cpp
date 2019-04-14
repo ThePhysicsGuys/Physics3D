@@ -15,19 +15,24 @@
 #include "physicsProfiler.h"
 #include "engineException.h"
 
-PhysicalContainer::PhysicalContainer(size_t initialCapacity) : physicalCount(0), freePhysicalsOffset(0), physicals(nullptr) {
+PhysicalContainer::PhysicalContainer(size_t initialCapacity) : physicalCount(0), freePhysicalsOffset(0), physicals(nullptr), parts(nullptr) {
 	ensureCapacity(initialCapacity);
 }
 void PhysicalContainer::ensureCapacity(size_t targetCapacity) {
 	if(this->capacity < targetCapacity) {
-		size_t newCapacity = std::max(static_cast<unsigned long long>(10), this->capacity * 2);
+		size_t newCapacity = std::max(this->capacity * 2, static_cast<size_t>(2048));
 		Physical* newPhysicals = new Physical[newCapacity];
+		Part** newParts = new Part*[newCapacity];
+
 		for(int i = 0; i < this->capacity; i++) {
 			newPhysicals[i] = this->physicals[i];
+			newParts[i] = this->parts[i];
 		}
 
 		delete[] this->physicals;
+		delete[] this->parts;
 		this->physicals = newPhysicals;
+		this->parts = newParts;
 		this->capacity = newCapacity;
 		Log::info("Extended physicals capacity to %d", newCapacity);
 	}
@@ -41,12 +46,33 @@ void PhysicalContainer::addAnchored(Physical& p) {
 	movePhysical(freePhysicalsOffset, physicalCount++);
 	physicals[freePhysicalsOffset++] = p;
 }
+void PhysicalContainer::add(Part* part, bool anchored) {
+	ensureCapacity(physicalCount+1);
+	if(anchored) {
+		movePhysical(freePhysicalsOffset, physicalCount++);
+		part->parent = physicals + freePhysicalsOffset;
+		physicals[freePhysicalsOffset++] = Physical(*part);
+	} else {
+		part->parent = physicals + physicalCount;
+		physicals[physicalCount++] = Physical(*part);
+	}
+}
 void PhysicalContainer::remove(size_t index) {
 	if(isAnchored(index)) {
 		movePhysical(--freePhysicalsOffset, index);
 		movePhysical(--physicalCount, freePhysicalsOffset);
 	} else {
 		movePhysical(--physicalCount, index);
+	}
+}
+void PhysicalContainer::remove(Physical* physical) {
+	physicalCount--;
+	if(isAnchored(physical)) {
+		freePhysicalsOffset--;
+		movePhysical(physicals + freePhysicalsOffset, physical);
+		movePhysical(physicalCount, freePhysicalsOffset);
+	} else {
+		movePhysical(physicals + physicalCount, physical);
 	}
 }
 void PhysicalContainer::anchor(size_t index) {
@@ -79,23 +105,34 @@ bool PhysicalContainer::isAnchored(const Physical* physical) const {
 }
 void PhysicalContainer::swapPhysical(Physical* first, Physical* second) {
 	std::swap(*first, *second);
+	first->part.parent = first;
+	second->part.parent = second;
 }
 void PhysicalContainer::swapPhysical(size_t first, size_t second) {
 	std::swap(physicals[first], physicals[second]);
+	physicals[first].part.parent = physicals + first;
+	physicals[second].part.parent = physicals + second;
 }
 void PhysicalContainer::movePhysical(size_t origin, size_t destination) {
 	physicals[destination] = physicals[origin];
+	physicals[destination].part.parent = &physicals[destination];
+}
+void PhysicalContainer::movePhysical(Physical* origin, Physical* destination) {
+	*destination = *origin;
+	destination->part.parent = destination;
 }
 
 World::World() : physicals(20) {}
 
 
-typedef Physical AnchoredPhysical;
+// typedef Part AnchoredPart;
 
 /*
 	exitVector is the distance p2 must travel so that the shapes are no longer colliding
 */
-void handleCollision(Physical& p1, Physical& p2, Vec3 collisionPoint, Vec3 exitVector) {
+void handleCollision(Part& part1, Part& part2, Vec3 collisionPoint, Vec3 exitVector) {
+	Physical& p1 = *part1.parent;
+	Physical& p2 = *part2.parent;
 
 	Vec3 collissionRelP1 = collisionPoint - p1.getCenterOfMass();
 	Vec3 collissionRelP2 = collisionPoint - p2.getCenterOfMass();
@@ -133,7 +170,9 @@ void handleCollision(Physical& p1, Physical& p2, Vec3 collisionPoint, Vec3 exitV
 /*
 exitVector is the distance the free physical must travel so that the shapes are no longer colliding
 */
-void handleAnchoredCollision(AnchoredPhysical& anchored, Physical& freePhys, Vec3 collisionPoint, Vec3 exitVector) {
+void handleAnchoredCollision(Part& anchoredPart, Part& freePart, Vec3 collisionPoint, Vec3 exitVector) {
+	Physical& anchored = *anchoredPart.parent;
+	Physical& freePhys = *freePart.parent;
 
 	Vec3 collissionRelP1 = collisionPoint - anchored.getCenterOfMass();
 	Vec3 collissionRelP2 = collisionPoint - freePhys.getCenterOfMass();
@@ -166,46 +205,30 @@ void handleAnchoredCollision(AnchoredPhysical& anchored, Physical& freePhys, Vec
 	}
 }
 
-void World::processQueue() {
-	std::lock_guard<std::mutex> lg(queueLock);
-
-	while(!newPhysicalQueue.empty()) {
-		QueuedPhysical& qp = newPhysicalQueue.front();
-		if(qp.anchored) {
-			physicals.addAnchored(qp.p);
-		} else {
-			physicals.add(qp.p);
-		}
-		newPhysicalQueue.pop();
-	}
-}
-
-void World::processColissions(const Shape* transformedShapes) {
+void World::processColissions() {
 	physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
 
-	for(int i = 0; i < physicals.freePhysicalsOffset; i++) {
-		AnchoredPhysical& anchoredPhys = physicals[i];
-		const Shape& transfAnchored = transformedShapes[i];
-		for(int j = physicals.freePhysicalsOffset; j < physicals.physicalCount; j++) {
-			Physical& freePhys = physicals[j];
+	for(Part& anchoredPart:iterAnchoredParts()) {
+		const Shape& transfAnchored = anchoredPart.transformed;
+		for(Part& freePart:iterFreeParts()) {
 
-			double maxRadiusBetween = anchoredPhys.maxRadius + freePhys.maxRadius;
+			double maxRadiusBetween = anchoredPart.maxRadius + freePart.maxRadius;
 
-			double distanceSqBetween = (anchoredPhys.getCenterOfMass() - freePhys.getCenterOfMass()).lengthSquared();
+			double distanceSqBetween = (anchoredPart.cframe.position - freePart.cframe.position).lengthSquared();
 
 			if(distanceSqBetween > maxRadiusBetween*maxRadiusBetween) {
 				intersectionStatistics.addToTally(IntersectionResult::DISTANCE_REJECT, 1);
 				continue;
 			}
 
-			const Shape& transfFree = transformedShapes[j];
+			const Shape& transfFree = freePart.transformed;
 
 			Vec3 intersection;
 			Vec3 exitVector;
 			if(transfAnchored.intersects(transfFree, intersection, exitVector)) {
 				physicsMeasure.mark(PhysicsProcess::COLISSION_HANDLING);
 				intersectionStatistics.addToTally(IntersectionResult::COLISSION, 1);
-				handleAnchoredCollision(anchoredPhys, freePhys, intersection, exitVector);
+				handleAnchoredCollision(anchoredPart, freePart, intersection, exitVector);
 			} else {
 				physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
 				intersectionStatistics.addToTally(IntersectionResult::GJK_REJECT, 1);
@@ -213,22 +236,24 @@ void World::processColissions(const Shape* transformedShapes) {
 		}
 	}
 
-	for(int i = physicals.freePhysicalsOffset; i < physicals.physicalCount; i++) {
-		Physical& p1 = physicals[i];
-		const Shape& transfI = transformedShapes[i];
-		for(int j = i + 1; j < physicals.physicalCount; j++) {
-			Physical& p2 = physicals[j];
+	PartIteratorFactory iter = iterFreeParts();
+	PartIterator finish = iter.end();
+	for(PartIterator mainIter = iter.begin(); mainIter != finish; ++mainIter) {
+		Part& p1 = *mainIter;
+		for(PartIterator secondIter = mainIter; ++secondIter != finish; ) {
+			Part& p2 = *secondIter;
 
 			double maxRadiusBetween = p1.maxRadius + p2.maxRadius;
 
-			double distanceSqBetween = (p1.getCenterOfMass() - p2.getCenterOfMass()).lengthSquared();
+			double distanceSqBetween = (p1.cframe.position - p2.cframe.position).lengthSquared();
 
 			if(distanceSqBetween > maxRadiusBetween*maxRadiusBetween) {
 				intersectionStatistics.addToTally(IntersectionResult::DISTANCE_REJECT, 1);
 				continue;
 			}
 
-			const Shape& transfJ = transformedShapes[j];
+			const Shape& transfI = p1.transformed;
+			const Shape& transfJ = p2.transformed;
 
 			Vec3 intersection;
 			Vec3 exitVector;
@@ -248,24 +273,21 @@ void World::tick(double deltaT) {
 	SharedLockGuard mutLock(lock);
 
 	Vec3* vecBuf = (Vec3*) alloca(getTotalVertexCount() * sizeof(Vec3));
-	Shape* transformedShapes = new Shape[physicals.physicalCount];
 
 	Vec3* vecBufIndex = vecBuf;
 
 	physicsMeasure.mark(PhysicsProcess::TRANSFORMS);
-	for(int i = 0; i < physicals.physicalCount; i++) {
-		const Shape& curShape = physicals[i].part.hitbox;
-		CFrame cframe = physicals[i].part.cframe;
-		transformedShapes[i] = curShape.localToGlobal(cframe, vecBufIndex);
+	for(Part& part : *this) {
+		const Shape& curShape = part.hitbox;
+		CFrame cframe = part.cframe;
+		part.transformed = curShape.localToGlobal(cframe, vecBufIndex);
 		vecBufIndex += curShape.vertexCount;
 	}
 
 	physicsMeasure.mark(PhysicsProcess::EXTERNALS);
-	applyExternalForces(transformedShapes);
+	applyExternalForces();
 
-	// Compute object collisions
-
-	processColissions(transformedShapes);
+	processColissions();
 
 	intersectionStatistics.nextTally();
 
@@ -277,7 +299,6 @@ void World::tick(double deltaT) {
 	}
 
 	physicsMeasure.mark(PhysicsProcess::OTHER);
-	delete[] transformedShapes;
 	processQueue();
 }
 
@@ -288,37 +309,36 @@ size_t World::getTotalVertexCount() {
 	return total;
 }
 
-void World::addObject(Physical& part, bool anchored) {
-	if(lock.try_lock()) {
-		if(anchored) {
-			physicals.addAnchored(part);
-		} else {
-			physicals.add(part);
-		}
-		lock.unlock();
-	} else {
-		std::lock_guard<std::mutex> lg(queueLock);
-		newPhysicalQueue.push(QueuedPhysical{part, anchored });
+void World::addPartUnsafe(Part* part, bool anchored) {
+	physicals.add(part, anchored);
+}
+
+void World::processQueue() {
+	std::lock_guard<std::mutex> lg(queueLock);
+
+	while(!newPartQueue.empty()) {
+		QueuedPart& qp = newPartQueue.front();
+		addPartUnsafe(qp.p, qp.anchored);
+		newPartQueue.pop();
 	}
 }
 
-Physical& World::addObject(Part& part, bool anchored) {
-	Physical physical(part);
-	this->addObject(physical, anchored);
-	return physical;
+void World::addObject(Part* part, bool anchored) {
+	if(lock.try_lock()) {
+		addPartUnsafe(part, anchored);
+		lock.unlock();
+	} else {
+		std::lock_guard<std::mutex> lg(queueLock);
+		newPartQueue.push(QueuedPart{part, anchored});
+	}
 };
 
-Physical& World::addObject(Part& part) {
+void World::addObject(Part* part) {
 	return this->addObject(part, false);
 };
 
-Physical& World::addObject(Shape shape, CFrame location, double density, double friction, bool anchored) {
-	Part part(shape, location, density, friction);
-	Physical newPhysical(part);
-	addObject(newPhysical, anchored);
+void World::removePart(Part* part) {
+	this->physicals.remove(part->parent);
+}
 
-	return newPhysical;
-};
-
-void World::applyExternalForces(const Shape* transformedShapes) {}
-
+void World::applyExternalForces() {}

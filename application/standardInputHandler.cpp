@@ -29,7 +29,7 @@ void StandardInputHandler::keyDownOrRepeat(int key, int modifiers) {
 		break;
 	case GLFW_KEY_O:
 		createDominoAt(Vec3(0.0 + (rand() % 100) * 0.001, 0.5 + (rand() % 100) * 0.001, 0.0 + (rand() % 100) * 0.001), fromEulerAngles(0.2, 0.3, 0.7));
-		Log::info("Created domino! There are %d objects in the world! ", screen.world->physicals.physicalCount);
+		Log::info("Created domino! There are %d objects in the world! ", screen.world->physicals.partCount);
 		break;
 	}
 }
@@ -40,30 +40,26 @@ void StandardInputHandler::keyDown(int key, int modifiers) {
 			togglePause();
 			break;
 		case GLFW_KEY_DELETE:
-			if (screen.selectedPhysical != nullptr) {
-				for (size_t i = 0; i < screen.world->physicals.physicalCount; i++) {
-					if (&screen.world->physicals[i] == screen.selectedPhysical) {
-						screen.world->physicals.remove(i);
-						screen.world->selectedPhysical = nullptr;
-						screen.selectedPhysical = nullptr;
-						break;
-					}
-				}
+			if (screen.selectedPart != nullptr) {
+				screen.world->removePart(screen.selectedPart);
+				screen.world->selectedPhysical = nullptr;
+				screen.selectedPart = nullptr;
 			}
 			break;
 		case GLFW_KEY_F8:
 			renderPies = !renderPies;
 			break;
 		case GLFW_KEY_F9:
-			if(screen.selectedPhysical != nullptr) {
-				if(screen.world->physicals.isAnchored(screen.selectedPhysical)) {
-					screen.world->physicals.unanchor(screen.selectedPhysical);
+			if(screen.selectedPart != nullptr) {
+				if(screen.world->physicals.isAnchored(screen.selectedPart->parent)) {
+					screen.world->physicals.unanchor(screen.selectedPart->parent);
 				} else {
-					screen.selectedPhysical->velocity = Vec3();
-					screen.selectedPhysical->angularVelocity = Vec3();
-					screen.selectedPhysical->totalForce = Vec3();
-					screen.selectedPhysical->totalMoment = Vec3();
-					screen.world->physicals.anchor(screen.selectedPhysical);
+					Physical* parent = screen.selectedPart->parent;
+					parent->velocity = Vec3();
+					parent->angularVelocity = Vec3();
+					parent->totalForce = Vec3();
+					parent->totalMoment = Vec3();
+					screen.world->physicals.anchor(screen.selectedPart->parent);
 				}
 			}
 			break;
@@ -88,9 +84,9 @@ void StandardInputHandler::mouseDown(int button, int mods) {
 	if (button == GLFW_MOUSE_BUTTON_MIDDLE) middleDragging = true;
 	if (button == GLFW_MOUSE_BUTTON_LEFT) leftDragging = true;
 
-	(*screen.eventHandler.physicalClickHandler) (screen, screen.intersectedPhysical, screen.intersectedPoint);
-	if (screen.intersectedPhysical != nullptr) {
-		screen.world->localSelectedPoint = screen.selectedPhysical->part.cframe.globalToLocal(screen.intersectedPoint);
+	(*screen.eventHandler.partClickHandler) (screen, screen.intersectedPart, screen.intersectedPoint);
+	if (screen.intersectedPart != nullptr) {
+		screen.world->localSelectedPoint = screen.selectedPart->cframe.globalToLocal(screen.intersectedPoint);
 	}
 };
 
@@ -112,7 +108,7 @@ void StandardInputHandler::mouseMove(double x, double y) {
 		double dmy = (y - curPos.y) * -speed;
 		
 		// Phyiscal moving
-		if (screen.selectedPhysical != nullptr) {
+		if (screen.selectedPart != nullptr) {
 			moveGrabbedPhysicalLateral(screen);
 		}
 	} else {

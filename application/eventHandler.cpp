@@ -18,22 +18,22 @@ void EventHandler::setWindowResizeCallback(WindowResizeHandler handler) {
 	windowResizeHandler = handler;
 }
 
-void EventHandler::setPhysicalRayIntersectCallback(PhysicalRayIntersectHandler handler) {
-	physicalRayIntersectHandler = handler;
+void EventHandler::setPartRayIntersectCallback(PartRayIntersectHandler handler) {
+	partRayIntersectHandler = handler;
 }
 
-void EventHandler::setPhysicalDragCallback(PhysicalDragHandler handler) {
-	physicalDragHandler = handler;
+void EventHandler::setPartDragCallback(PartDragHandler handler) {
+	partDragHandler = handler;
 }
 
-void EventHandler::setPhysicalClickCallback(PhysicalClickHandler handler) {
-	physicalClickHandler = handler;
+void EventHandler::setPartClickCallback(PartClickHandler handler) {
+	partClickHandler = handler;
 }
 
-void EventHandler::setPhysicalTouchCallback(PhysicalTouchHandler handler) {
-	physicalTouchHandler = handler;
+void EventHandler::setPartTouchCallback(PartTouchHandler handler) {
+	partTouchHandler = handler;
 }
 
-void EventHandler::setPhysicalReleaseCallback(PhysicalReleaseHandler handler) {
-	physicalReleaseHandler = handler;
+void EventHandler::setPartReleaseCallback(PartReleaseHandler handler) {
+	partReleaseHandler = handler;
 }

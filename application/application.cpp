@@ -64,8 +64,8 @@ Shape dominoShape = BoundingBox{-0.1, -0.7, -0.3, 0.1, 0.7, 0.3}.toShape(dominoB
 int dominoID;
 
 void createDominoAt(Vec3 pos, Mat3 rotation) {
-	Part domino(dominoShape, CFrame(pos, rotation), 1, 0.1);
-	domino.drawMeshId = dominoID;
+	Part* domino = new Part(dominoShape, CFrame(pos, rotation), 1, 0.1);
+	domino->drawMeshId = dominoID;
 	world.addObject(domino);
 }
 
@@ -178,25 +178,12 @@ int main(void) {
 		}
 	}
 	
-
-
-	//world.addObject(Physical(createVisiblePart(createBox(0.7, 0.2, 0.7), CFrame(Vec3(0, 0.2, 0.0), fromEulerAngles(0.0, 0.0, 0.0)), 2.0, 0.7)));
-	//world.addObject(Physical(createVisiblePart(createBox(0.5, 0.15, 0.5), CFrame(Vec3(0, 0.4, 0.0), fromEulerAngles(0.0, 0.0, 0.0)), 2.0, 0.7)));
-	//world.addObject(Physical(createVisiblePart(createBox(0.3, 0.1, 0.3), CFrame(Vec3(0, 0.6, 0.0), fromEulerAngles(0.0, 0.0, 0.0)), 2.0, 0.7)));
-
-
 	Part icosaPart = createVisiblePart(icosahedron, CFrame(Vec3(0.0, 2.0, 3.0), fromEulerAngles(0.1, 0.1, 0.1)), 10, 0.7);
 	world.addObject(icosaPart);
-
-	/*Part veryLongBoxPart = createVisiblePart(BoundingBox{-0.1, -10, -0.1, 0.1, 10, 0.1}.toShape(new Vec3[8]), CFrame(Vec3(0.0, 10.0, 0.0), rotX(0.001)), 1.0, 1.0);
-	world.addObject(veryLongBoxPart);*/
 
 	Part housePart = createVisiblePart(house, CFrame(Vec3(-1.5, 1.0, 0.0), fromEulerAngles(0.7, 0.9, 0.7)), 1.0, 0.0);
 	world.addObject(housePart);
 
-	// std::istringstream s = std::istringstream(getResourceAsString(STALL_MODEL));
-	// std::ifstream sphereFile("../res/sphere.obj");
-	
 	Shape stallShape = loadMesh((std::istream&) std::istringstream(getResourceAsString(SPHERE_MODEL)));
 	Log::error("SphereVol %.9f", stallShape.getVolume());
 	Part stallPart = createVisiblePart(stallShape, CFrame(Vec3(0.0, 10.0, 0.0), fromEulerAngles(0.9, 0.1, 0.5)), 2, 0.7);
@@ -204,25 +191,8 @@ int main(void) {
 		stallPart.cframe = CFrame(Vec3(0.0, 10.0 + i, 0.0));
 		world.addObject(stallPart);
 	}
-	// Log::fatal("Is the stall Valid? %s", (stallPart.hitbox.isValid())? "yes" : "No :(");
-
 	Part trianglePart = createVisiblePart(triangleShape, CFrame(Vec3(-2.0, 1.0, -2.0)), 10.0, 0.7);
 	world.addObject(trianglePart);
-
-	/*Vec3 vertss[]{Vec3(0,0,0), Vec3(1,0,0), Vec3(0,1,0)};
-	Triangle triangless[]{Triangle{0,1,2}};
-
-	Shape singleTriangle(vertss, triangless, 3, 1);
-
-	Part specialTriangle = createVisiblePart(singleTriangle, 1.0, 1.0);
-	Physical t(specialTriangle, CFrame());
-	world.addObject(t);*/
-
-	CFrame rotation = CFrame(fromEulerAngles(0.0, 0.5, 0.0));
-
-	for(Physical& p: world.physicals) {
-		p.part.cframe = rotation.localToGlobal(p.part.cframe);
-	}
 
 	/* Loop until the user closes the window */
 	Log::info("Started rendering");

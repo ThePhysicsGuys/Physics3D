@@ -2,7 +2,9 @@
 
 // Part::Part() {}
 
-Part::Part(NormalizedShape shape, CFrame position, double density, double friction) : hitbox(shape), cframe(position), properties({density, friction}) {}
+Part::Part(NormalizedShape shape, CFrame position, double density, double friction) : hitbox(shape), cframe(position), properties({density, friction}) {
+	this->maxRadius = hitbox.getMaxRadius();
+}
 
 Part::Part(Shape shape, CFrame position, double density, double friction) : properties({density, friction}) {
 	CFrame backTransform;
@@ -12,4 +14,5 @@ Part::Part(Shape shape, CFrame position, double density, double friction) : prop
 
 	this->hitbox = normalized;
 	this->cframe = realCFrame;
+	this->maxRadius = hitbox.getMaxRadius();
 }

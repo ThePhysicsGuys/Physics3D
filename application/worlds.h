@@ -8,5 +8,5 @@ private:
 public:
 	GravityFloorWorld(Vec3 gravity);
 
-	virtual void applyExternalForces(const Shape* transformedShapes) override;
+	virtual void applyExternalForces() override;
 };

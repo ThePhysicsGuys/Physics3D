@@ -10,7 +10,6 @@
 Physical::Physical(Part part) : part(part) {
 	this->mass = part.hitbox.getVolume() * part.properties.density;
 	this->inertia = part.hitbox.getInertia() * part.properties.density;
-	this->maxRadius = part.hitbox.getMaxRadius();
 }
 
 // Physical::Physical(Part p, CFrame partNormalization, CFrame cframe, double mass, Vec3 centerOfMass, Mat3 inertia) : part(p), cframe(cframe), mass(mass), com(centerOfMass), inertia(inertia) {}

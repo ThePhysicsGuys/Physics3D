@@ -100,7 +100,7 @@ Screen::Screen(int width, int height, World* world) : graphicsMeasure(graphicsDe
 
 // Debug
 using namespace Debug;
-std::map<VecType, bool> debug_enabled{ {INFO, true}, {VELOCITY, true}, {FORCE, true}, {POSITION, true}, {MOMENT, true}, {IMPULSE, true}, {ANGULAR_VELOCITY , true} };
+std::map<VecType, bool> debug_enabled{ {INFO, true}, {VELOCITY, false}, {FORCE, true}, {POSITION, true}, {MOMENT, false}, {IMPULSE, true}, {ANGULAR_VELOCITY , true} };
 std::map<VecType, double> vecColors{ {INFO, 0.15}, {VELOCITY, 0.3}, {FORCE, 0.0}, {POSITION, 0.5}, {MOMENT, 0.1}, {IMPULSE, 0.7}, {ANGULAR_VELOCITY , 0.75} };
 bool renderPies = false;
 
@@ -238,13 +238,16 @@ void Screen::init() {
 	// Handler init
 	handler = new StandardInputHandler(window, *this);
 
-	eventHandler.setPhysicalRayIntersectCallback([] (Screen& screen, Physical* physical, Vec3 point) {
-		screen.intersectedPhysical = physical;
+	eventHandler.setPartRayIntersectCallback([] (Screen& screen, Part* part, Vec3 point) {
+		if(part == nullptr)
+			screen.intersectedPart = nullptr;
+		else
+			screen.intersectedPart = part;
 		screen.intersectedPoint = point;
 	});
 
-	eventHandler.setPhysicalClickCallback([] (Screen& screen, Physical* physical, Vec3 point) {
-		screen.selectedPhysical = physical;
+	eventHandler.setPartClickCallback([] (Screen& screen, Part* part, Vec3 point) {
+		screen.selectedPart = part;
 		screen.selectedPoint = point;
 	});
 
@@ -304,7 +307,7 @@ void Screen::update() {
 
 
 	// Update picker
-	updateIntersectedPhysical(*this, world->physicals, handler->curPos, screenSize, viewMatrix, projectionMatrix);
+	updateIntersectedPhysical(*this, handler->curPos, screenSize, viewMatrix, projectionMatrix);
 }
 
 AddableBuffer<double> visibleVecs(700);
@@ -348,23 +351,23 @@ void Screen::renderPhysicals() {
 	basicShader.updateMaterial(material);
 
 	SharedLockGuard lg(world->lock);
+
 	// Render world objects
-	for (Physical& physical : world->physicals) {
-		int meshId = physical.part.drawMeshId;
+	for (Part& part : *world) {
+		int meshId = part.drawMeshId;
 
 		// Picker code
-		if (&physical == selectedPhysical)
+		if(&part == selectedPart)
 			material.ambient = Vec3f(0.5, 0.6, 0.3);
-		else if (&physical == intersectedPhysical)
+		else if (&part == intersectedPart)
 			material.ambient = Vec3f(0.5, 0.5, 0.5);
 		else
 			material.ambient = Vec3f(0.3, 0.4, 0.2);
 
-		
 		basicShader.updateMaterial(material);
 
 		// Render each physical
-		Mat4f transformation = physical.part.cframe.asMat4f();
+		Mat4f transformation = part.cframe.asMat4f();
 		basicShader.updateModel(transformation);
 
 		meshes[meshId]->render();
@@ -501,7 +504,7 @@ void Screen::refresh() {
 
 	// Pie rendering
 	graphicsMeasure.mark(GraphicsProcess::PROFILER);
-	size_t objCount = world->physicals.physicalCount;
+	size_t objCount = world->physicals.partCount;
 	renderDebugField("Objects", objCount, "");
 	renderDebugField("Intersections", getTheoreticalNumberOfIntersections(objCount), "");
 

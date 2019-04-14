@@ -4,9 +4,10 @@
 
 #include "../engine/constants.h"
 #include "../util/log.h"
+
 GravityFloorWorld::GravityFloorWorld(Vec3 gravity) : gravity(gravity) {}
 
-void GravityFloorWorld::applyExternalForces(const Shape* transformedShapes) {
+void GravityFloorWorld::applyExternalForces() {
 	if(selectedPhysical != nullptr && !physicals.isAnchored(selectedPhysical)) {
 		// Magnet force
 		Vec3 absoluteSelectedPoint = selectedPhysical->part.cframe.localToGlobal(localSelectedPoint);
@@ -17,13 +18,14 @@ void GravityFloorWorld::applyExternalForces(const Shape* transformedShapes) {
 		Vec3 angular = -selectedPhysical->angularVelocity;// / (delta.length() + 1);
 		selectedPhysical->applyMoment(angular);
 	}
-	for(int j = physicals.freePhysicalsOffset; j < physicals.physicalCount; j++) {
-		Physical& physical = physicals[j];
-		const Shape& transformed = transformedShapes[j];
-
-		// Gravity force
+	// Gravity force
+	for(Physical& physical : physicals.iterUnAnchoredPhysicals()) {
 		// physical.applyForceAtCenterOfMass((Vec3(0.0, 5.0, 0.0) - physical.getCenterOfMass() * 1.0) * physical.mass);
 		physical.applyForceAtCenterOfMass(gravity * physical.mass);
+	}
+	for(Part& part:iterFreeParts()) {
+		Physical& physical = *part.parent;
+		const Shape& transformed = part.transformed;
 
 		// Floor force
 		for(int i = 0; i < transformed.vertexCount; i++) {
@@ -56,7 +58,7 @@ void GravityFloorWorld::applyExternalForces(const Shape* transformedShapes) {
 				physical.applyForce(collissionRelP1, normalVelForce);
 				// p2.applyForce(collissionRelP2, -normalVelForce);
 
-				Vec3 frictionForce = -physical.part.properties.friction * relVelSidewaysComponent * physical.mass * 10;
+				Vec3 frictionForce = -part.properties.friction * relVelSidewaysComponent * physical.mass * 10;
 				physical.applyForce(collissionRelP1, frictionForce);
 				// p2.applyForce(collissionRelP2, -frictionForce);
 			}

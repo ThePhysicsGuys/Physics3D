@@ -54,9 +54,9 @@ public:
 
 	// Picker
 	Vec3 ray;
-	Physical* intersectedPhysical = nullptr;
+	Part* intersectedPart = nullptr;
 	Vec3 intersectedPoint;
-	Physical* selectedPhysical = nullptr;
+	Part* selectedPart = nullptr;
 	Vec3 selectedPoint;
 
 	Screen();
