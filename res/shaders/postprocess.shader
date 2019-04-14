@@ -1,14 +1,13 @@
 #shader vertex
 #version 330 core
 
-layout(location = 0) in vec2 positions;
-layout(location = 1) in vec2 textureUV;
+layout(location = 0) in vec4 positions;
 
 out vec2 ftextureUV;
 
 void main() {
-	gl_Position = vec4(positions.x, positions.y, 0.0, 1.0);
-	ftextureUV = textureUV;
+	gl_Position = vec4(positions.xy, 0.0, 1.0);
+	ftextureUV = positions.zw;
 }
 
 ////////////////////////////////////////////////////////////
