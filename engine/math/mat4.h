@@ -30,15 +30,20 @@ struct Mat4Template {
 		m00(m00), m01(m01), m02(m02), m03(m03), m10(m10), m11(m11), m12(m12), m13(m13), m20(m20), m21(m21), m22(m22), m23(m23), m30(m30), m31(m31), m32(m32), m33(m33) {};
 
 	Mat4Template(const N other[16]) {
-		for (int i = 0; i < 16; i++) {
-			m[i] = other[i];
-		}
+		for (int i = 0; i < 16; i++) m[i] = other[i];
 	};
 
-	Mat4Template(const Mat4Template& other) {
-		for (int i = 0; i < 16; i++) {
-			m[i] = other.m[i];
-		}
+	Mat4Template(const Mat4f& other) {
+		for (int i = 0; i < 16; i++) m[i] = (N) other.m[i];
+	
+	}
+
+	Mat4Template(const Mat4& other) {
+		for (int i = 0; i < 16; i++) m[i] = (N) other.m[i];
+	}
+
+	Mat4Template(const Mat4l& other) {
+		for (int i = 0; i < 16; i++) m[i] = (N) other.m[i];
 	}
 
 	Mat4Template(const Mat3Template<N>& other) {
@@ -151,35 +156,6 @@ struct Mat4Template {
 
 	Mat4Template rotate(N angle, N x, N y, N z) const;
 
-	Mat4Template ortho(N bottom, N top, N left, N right, N zNear, N zFar) {
-		N rm00 = 2 / (right - left);
-		N rm11 = 2 / (top - bottom);
-		N rm22 = -2 / (zFar - zNear);
-		N rm30 = (left + right) / (left - right);
-		N rm31 = (top + bottom) / (bottom - top);
-		N rm32 = (zFar + zNear) / (zNear - zFar);
-		N r30 = m00 * rm30 + m10 * rm31 + m20 * rm32 + m30;
-		N r31 = m01 * rm30 + m11 * rm31 + m21 * rm32 + m31;
-		N r32 = m02 * rm30 + m12 * rm31 + m22 * rm32 + m32;
-		N r33 = m03 * rm30 + m13 * rm31 + m23 * rm32 + m33;
-		N r00 = m00 * rm00;
-		N r01 = m01 * rm00;
-		N r02 = m02 * rm00;
-		N r03 = m03 * rm00;
-		N r10 = m10 * rm11;
-		N r11 = m11 * rm11;
-		N r12 = m12 * rm11;
-		N r13 = m13 * rm11;
-		N r20 = m20 * rm22;
-		N r21 = m21 * rm22;
-		N r22 = m22 * rm22;
-		N r23 = m23 * rm22;
-
-		return Mat4Template(r00, r01, r02, r03, r10, r11, r12, r13, r20, r21, r22, r23, r30, r31, r32, r33);
-	}
-
-	Mat4Template perspective(N fov, N aspect, N zNear, N zFar) const;
-
 	Mat4Template operator+(const Mat4Template& other) const {
 		return Mat4Template(
 			m00 + other.m00, m01 + other.m01, m02 + other.m02, m03 + other.m03,
@@ -267,3 +243,7 @@ struct Mat4Template {
 							   static_cast<M>(m30), static_cast<M>(m31), static_cast<M>(m32), static_cast<M>(m33));
 	}*/
 };
+
+Mat4f ortho(float left, float right, float bottom, float top, float zNear, float zFar);
+
+Mat4f perspective(float fov, float aspect, float zNear, float zFar);

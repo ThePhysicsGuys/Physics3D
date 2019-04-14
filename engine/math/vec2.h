@@ -8,6 +8,7 @@ public:
 	N y;
 
 	Vec2Template() : x(0), y(0) {}
+	Vec2Template(N v) : x(v), y(v) {};
 	Vec2Template(N x, N y) : x(x), y(y) {};
 	Vec2Template(const Vec2Template& other) : x(other.x), y(other.y) {};
 
