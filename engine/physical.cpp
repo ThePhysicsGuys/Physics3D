@@ -7,9 +7,9 @@
 
 
 
-Physical::Physical(Part part) : part(part) {
-	this->mass = part.hitbox.getVolume() * part.properties.density;
-	this->inertia = part.hitbox.getInertia() * part.properties.density;
+Physical::Physical(Part* part) : part(part) {
+	this->mass = part->hitbox.getVolume() * part->properties.density;
+	this->inertia = part->hitbox.getInertia() * part->properties.density;
 }
 
 // Physical::Physical(Part p, CFrame partNormalization, CFrame cframe, double mass, Vec3 centerOfMass, Mat3 inertia) : part(p), cframe(cframe), mass(mass), com(centerOfMass), inertia(inertia) {}
@@ -19,9 +19,9 @@ Physical::Physical(Part part) : part(part) {
 void Physical::update(double deltaT) {
 	Vec3 accel = totalForce * (deltaT/mass);
 	
-	Vec3 localMoment = part.cframe.relativeToLocal(totalMoment);
+	Vec3 localMoment = part->cframe.relativeToLocal(totalMoment);
 	Vec3 localRotAcc = ~inertia * localMoment * deltaT;
-	Vec3 rotAcc = part.cframe.localToRelative(localRotAcc);
+	Vec3 rotAcc = part->cframe.localToRelative(localRotAcc);
 
 	totalForce = Vec3();
 	totalMoment = Vec3();
@@ -33,8 +33,8 @@ void Physical::update(double deltaT) {
 
 	Mat3 rotation = fromRotationVec(angularVelocity * deltaT);
 
-	part.cframe.translate(movement);
-	part.cframe.rotate(rotation);
+	part->cframe.translate(movement);
+	part->cframe.rotate(rotation);
 }
 
 void Physical::applyForceAtCenterOfMass(Vec3 force) {
@@ -57,7 +57,7 @@ void Physical::applyMoment(Vec3 moment) {
 }
 
 Vec3 Physical::getCenterOfMass() const {
-	return part.cframe.position;
+	return part->cframe.position;
 }
 
 Vec3 Physical::getVelocityOfPoint(Vec3Relative point) const {

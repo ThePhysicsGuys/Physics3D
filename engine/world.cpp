@@ -37,25 +37,32 @@ void PhysicalContainer::ensureCapacity(size_t targetCapacity) {
 		Log::info("Extended physicals capacity to %d", newCapacity);
 	}
 }
-void PhysicalContainer::add(Physical& p) {
-	ensureCapacity(physicalCount+1);
-	physicals[physicalCount++] = p;
-}
-void PhysicalContainer::addAnchored(Physical& p) {
-	ensureCapacity(physicalCount+1);
-	movePhysical(freePhysicalsOffset, physicalCount++);
-	physicals[freePhysicalsOffset++] = p;
-}
 void PhysicalContainer::add(Part* part, bool anchored) {
 	ensureCapacity(physicalCount+1);
+	size_t partInsertLocation;
+	size_t physicalInsertLocation;
 	if(anchored) {
-		movePhysical(freePhysicalsOffset, physicalCount++);
-		part->parent = physicals + freePhysicalsOffset;
-		physicals[freePhysicalsOffset++] = Physical(*part);
+		movePart(anchoredPartsCount, partCount);
+		partInsertLocation = anchoredPartsCount;
+		
+		movePhysical(freePhysicalsOffset, physicalCount);
+		physicalInsertLocation = freePhysicalsOffset;
+
+		anchoredPartsCount++;
+		freePhysicalsOffset++;
 	} else {
-		part->parent = physicals + physicalCount;
-		physicals[physicalCount++] = Physical(*part);
+		partInsertLocation = partCount;
+		physicalInsertLocation = physicalCount;
 	}
+
+	parts[partInsertLocation] = part;
+	part->partIndex = partInsertLocation;
+
+	physicals[physicalInsertLocation] = Physical(part);
+	part->parent = physicals + physicalInsertLocation;
+
+	partCount++;
+	physicalCount++;
 }
 void PhysicalContainer::remove(size_t index) {
 	if(isAnchored(index)) {
@@ -76,50 +83,73 @@ void PhysicalContainer::remove(Physical* physical) {
 	}
 }
 void PhysicalContainer::anchor(size_t index) {
-	if(!isAnchored(index)) {
-		swapPhysical(index, freePhysicalsOffset++);
-	}
+	anchor(physicals + index);
 }
 void PhysicalContainer::anchor(Physical* p) {
 	if(!isAnchored(p)) {
 		swapPhysical(p, physicals + freePhysicalsOffset);
+		swapPart(p->part->partIndex, anchoredPartsCount);
+		anchoredPartsCount++;
 		freePhysicalsOffset++;
 	}
 }
 void PhysicalContainer::unanchor(size_t index) {
-	if(isAnchored(index)) {
-		swapPhysical(index, --freePhysicalsOffset);
-	}
+	unanchor(physicals + index);
 }
 void PhysicalContainer::unanchor(Physical* p) {
 	if(isAnchored(p)) {
+		anchoredPartsCount--;
 		freePhysicalsOffset--;
+		swapPart(p->part->partIndex, anchoredPartsCount);
 		swapPhysical(p, physicals + freePhysicalsOffset);
 	}
 }
-bool PhysicalContainer::isAnchored(size_t index) {
+bool PhysicalContainer::isAnchored(size_t index) const {
 	return index < freePhysicalsOffset;
 }
 bool PhysicalContainer::isAnchored(const Physical* physical) const {
 	return physical < physicals + freePhysicalsOffset;
 }
+bool PhysicalContainer::isAnchored(const Part* const * part) const {
+	return part < parts + anchoredPartsCount;
+}
 void PhysicalContainer::swapPhysical(Physical* first, Physical* second) {
 	std::swap(*first, *second);
-	first->part.parent = first;
-	second->part.parent = second;
+	first->part->parent = first;
+	second->part->parent = second;
 }
 void PhysicalContainer::swapPhysical(size_t first, size_t second) {
 	std::swap(physicals[first], physicals[second]);
-	physicals[first].part.parent = physicals + first;
-	physicals[second].part.parent = physicals + second;
+	physicals[first].part->parent = physicals + first;
+	physicals[second].part->parent = physicals + second;
 }
 void PhysicalContainer::movePhysical(size_t origin, size_t destination) {
 	physicals[destination] = physicals[origin];
-	physicals[destination].part.parent = &physicals[destination];
+	physicals[destination].part->parent = &physicals[destination];
 }
 void PhysicalContainer::movePhysical(Physical* origin, Physical* destination) {
 	*destination = *origin;
-	destination->part.parent = destination;
+	destination->part->parent = destination;
+}
+
+void PhysicalContainer::movePart(size_t origin, size_t destination) {
+	parts[destination] = parts[origin];
+	parts[destination]->partIndex = destination;
+}
+void PhysicalContainer::swapPart(size_t a, size_t b) {
+	Part* t = parts[a];
+	parts[a] = parts[b];
+	parts[b] = t;
+	parts[a]->partIndex = a;
+	parts[b]->partIndex = b;
+}
+void PhysicalContainer::swapPart(Part** a, Part** b) {
+	Part* t = *a;
+	size_t ti = (**a).partIndex;
+	(**a).partIndex = (**b).partIndex;
+	(**b).partIndex = ti;
+	*a = *b;
+	*b = t;
 }
 
 World::World() : physicals(20) {}
@@ -161,7 +191,7 @@ void handleCollision(Part& part1, Part& part2, Vec3 collisionPoint, Vec3 exitVec
 		p1.applyForce(collissionRelP1, normalVelForce);
 		p2.applyForce(collissionRelP2, -normalVelForce);
 
-		Vec3 frictionForce = -(p1.part.properties.friction + p2.part.properties.friction)/2 * relVelSidewaysComponent * combinedInertia * COLLISSION_RELATIVE_VELOCITY_FORCE_MULTIPLIER;
+		Vec3 frictionForce = -(part1.properties.friction + part2.properties.friction)/2 * relVelSidewaysComponent * combinedInertia * COLLISSION_RELATIVE_VELOCITY_FORCE_MULTIPLIER;
 		p1.applyForce(collissionRelP1, frictionForce);
 		p2.applyForce(collissionRelP2, -frictionForce);
 	}
@@ -199,7 +229,7 @@ void handleAnchoredCollision(Part& anchoredPart, Part& freePart, Vec3 collisionP
 		// anchored.applyForce(collissionRelP1, normalVelForce);
 		freePhys.applyForce(collissionRelP2, -normalVelForce);
 
-		Vec3 frictionForce = -(anchored.part.properties.friction + freePhys.part.properties.friction) / 2 * relVelSidewaysComponent * combinedInertia * COLLISSION_RELATIVE_VELOCITY_FORCE_MULTIPLIER;
+		Vec3 frictionForce = -(anchoredPart.properties.friction + freePart.properties.friction) / 2 * relVelSidewaysComponent * combinedInertia * COLLISSION_RELATIVE_VELOCITY_FORCE_MULTIPLIER;
 		// anchored.applyForce(collissionRelP1, frictionForce);
 		freePhys.applyForce(collissionRelP2, -frictionForce);
 	}
@@ -305,7 +335,7 @@ void World::tick(double deltaT) {
 size_t World::getTotalVertexCount() {
 	size_t total = 0;
 	for(const Physical& physical : physicals)
-		total += physical.part.hitbox.vertexCount;
+		total += physical.part->hitbox.vertexCount;
 	return total;
 }
 
@@ -342,3 +372,29 @@ void World::removePart(Part* part) {
 }
 
 void World::applyExternalForces() {}
+
+bool World::isValid() const {
+	for(size_t i = 0; i < physicals.partCount; i++) {
+		if(physicals.parts[i]->partIndex != i) {
+			Log::error("part's partIndex is not it's partIndex");
+			__debugbreak();
+		}
+	}
+
+	for(const Part& part : *this) {
+		if(part.parent->part != &part) {
+			Log::error("part's parent's child is not part");
+			__debugbreak();
+		}
+		if(!(part.parent >= physicals.physicals && part.parent < physicals.physicals + physicals.physicalCount)) {
+			Log::error("part with parent not in our physicals");
+			__debugbreak();
+		}
+		bool partIsAnchored = physicals.isAnchored(physicals.parts + part.partIndex);
+		bool physicalIsAnchored = physicals.isAnchored(part.parent);
+		if(partIsAnchored != physicalIsAnchored) {
+			Log::error("%s part with %s parent", partIsAnchored ? "anchored":"unanchored", physicalIsAnchored ? "anchored" : "unanchored");
+			__debugbreak();
+		}
+	}
+}

@@ -184,12 +184,11 @@ int main(void) {
 	Part housePart = createVisiblePart(house, CFrame(Vec3(-1.5, 1.0, 0.0), fromEulerAngles(0.7, 0.9, 0.7)), 1.0, 0.0);
 	world.addObject(housePart);
 
-	Shape stallShape = loadMesh((std::istream&) std::istringstream(getResourceAsString(SPHERE_MODEL)));
-	Log::error("SphereVol %.9f", stallShape.getVolume());
-	Part stallPart = createVisiblePart(stallShape, CFrame(Vec3(0.0, 10.0, 0.0), fromEulerAngles(0.9, 0.1, 0.5)), 2, 0.7);
+	Shape sphereShape = loadMesh((std::istream&) std::istringstream(getResourceAsString(SPHERE_MODEL)));
+	Part spherePart = createVisiblePart(sphereShape, CFrame(Vec3(0.0, 10.0, 0.0), fromEulerAngles(0.9, 0.1, 0.5)), 2, 0.7);
 	for(int i = 0; i < 10; i++) {
-		stallPart.cframe = CFrame(Vec3(0.0, 10.0 + i, 0.0));
-		world.addObject(stallPart);
+		spherePart.cframe = CFrame(Vec3(0.0, 10.0 + i, 0.0));
+		world.addObject(spherePart);
 	}
 	Part trianglePart = createVisiblePart(triangleShape, CFrame(Vec3(-2.0, 1.0, -2.0)), 10.0, 0.7);
 	world.addObject(trianglePart);

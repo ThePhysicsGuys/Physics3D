@@ -10,7 +10,7 @@ GravityFloorWorld::GravityFloorWorld(Vec3 gravity) : gravity(gravity) {}
 void GravityFloorWorld::applyExternalForces() {
 	if(selectedPhysical != nullptr && !physicals.isAnchored(selectedPhysical)) {
 		// Magnet force
-		Vec3 absoluteSelectedPoint = selectedPhysical->part.cframe.localToGlobal(localSelectedPoint);
+		Vec3 absoluteSelectedPoint = selectedPhysical->part->cframe.localToGlobal(localSelectedPoint);
 		Vec3 delta = magnetPoint - absoluteSelectedPoint;
 		Vec3 relativeSelectedPointSpeed = selectedPhysical->getVelocityOfPoint(absoluteSelectedPoint - selectedPhysical->getCenterOfMass());
 		Vec3 force = selectedPhysical->mass * delta * 20 - relativeSelectedPointSpeed;

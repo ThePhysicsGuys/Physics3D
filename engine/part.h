@@ -11,6 +11,7 @@ public:
 	Shape transformed;
 	double maxRadius;
 	CFrame cframe;
+	size_t partIndex = -1;
 	struct {
 		double density;
 		double friction;

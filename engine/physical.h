@@ -11,7 +11,7 @@ typedef Vec3 Vec3Local;
 typedef Vec3 Vec3Relative;
 
 struct Physical {
-	Part part;
+	Part* part = nullptr;
 	Vec3 velocity = Vec3();
 	Vec3 angularVelocity = Vec3();
 
@@ -22,7 +22,7 @@ struct Physical {
 	Mat3 inertia;
 
 	Physical() = default;
-	Physical(Part part);
+	Physical(Part* part);
 
 	void update(double deltaT);
 	void applyForceAtCenterOfMass(Vec3 force);

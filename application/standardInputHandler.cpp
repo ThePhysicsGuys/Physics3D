@@ -62,6 +62,9 @@ void StandardInputHandler::keyDown(int key, int modifiers) {
 				}
 			}
 			break;
+		case GLFW_KEY_V:
+			Log::debug("Checking World::isValid()");
+			screen.world->isValid();
 	}
 
 	if(key >= GLFW_KEY_F1 && key <= GLFW_KEY_F7) {

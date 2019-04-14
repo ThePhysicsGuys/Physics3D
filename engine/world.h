@@ -13,8 +13,16 @@ private:
 	size_t capacity;
 	void movePhysical(size_t origin, size_t destination);
 	void movePhysical(Physical* origin, Physical* destination);
+
 	void swapPhysical(size_t first, size_t second);
 	void swapPhysical(Physical* first, Physical* second);
+
+
+	void movePart(size_t origin, size_t destination);
+	//void movePart(Part** origin, Part** destination);
+
+	void swapPart(size_t first, size_t second);
+	void swapPart(Part** first, Part** second);
 public:
 	size_t physicalCount;
 	size_t freePhysicalsOffset;
@@ -25,16 +33,15 @@ public:
 
 	PhysicalContainer(size_t initialCapacity);
 	void ensureCapacity(size_t capacity);
-	void add(Physical& p);
-	void addAnchored(Physical& p);
 	void remove(size_t index);
 	void remove(Physical* p);
 	void anchor(size_t index);
 	void anchor(Physical* p);
 	void unanchor(size_t index);
 	void unanchor(Physical* p);
-	bool isAnchored(size_t index);
+	bool isAnchored(size_t index) const;
 	bool isAnchored(const Physical* index) const;
+	bool isAnchored(const Part* const * index) const;
 
 	void add(Part* part, bool anchored);
 
@@ -87,12 +94,12 @@ struct QueuedPart {
 };
 
 class ConstPartIterator {
-	const Physical* current;
+	const Part* const * current;
 
 public:
-	inline ConstPartIterator(const Physical* current) : current(current) {}
+	inline ConstPartIterator(const Part* const * current) : current(current) {}
 	inline const Part& operator*() const {
-		return current->part;
+		return **current;
 	}
 
 	inline ConstPartIterator& operator++() {
@@ -105,12 +112,12 @@ public:
 };
 
 class PartIterator {
-	Physical* current;
+	Part** current;
 
 public:
-	inline PartIterator(Physical* current) : current(current) {}
+	inline PartIterator(Part** current) : current(current) {}
 	inline Part& operator*() const {
-		return current->part;
+		return **current;
 	}
 
 	inline PartIterator& operator++() {
@@ -123,19 +130,19 @@ public:
 };
 
 class ConstPartIteratorFactory {
-	const Physical* start;
-	const Physical* finish;
+	const Part* const * start;
+	const Part* const * finish;
 public:
-	inline ConstPartIteratorFactory(const Physical* start, const Physical* finish) : start(start), finish(finish) {}
+	inline ConstPartIteratorFactory(const Part* const * start, const Part* const * finish) : start(start), finish(finish) {}
 	inline ConstPartIterator begin() const { return ConstPartIterator(start); }
 	inline ConstPartIterator end() const { return ConstPartIterator(finish); }
 };
 
 class PartIteratorFactory {
-	Physical* start;
-	Physical* finish;
+	Part** start;
+	Part** finish;
 public:
-	inline PartIteratorFactory(Physical* start, Physical* finish) : start(start), finish(finish) {}
+	inline PartIteratorFactory(Part** start, Part** finish) : start(start), finish(finish) {}
 	inline PartIterator begin() const { return PartIterator(start); }
 	inline PartIterator end() const { return PartIterator(finish); }
 };
@@ -172,17 +179,19 @@ public:
 
 	void removePart(Part* p);
 
-	inline PartIterator begin() {return PartIterator(physicals.physicals);}
-	inline PartIterator end() {return PartIterator(physicals.physicals + physicals.physicalCount);}
+	inline PartIterator begin() {return PartIterator(physicals.parts);}
+	inline PartIterator end() {return PartIterator(physicals.parts + physicals.partCount);}
 
-	inline ConstPartIterator begin() const { return ConstPartIterator(physicals.physicals); }
-	inline ConstPartIterator end() const { return ConstPartIterator(physicals.physicals + physicals.physicalCount); }
+	inline ConstPartIterator begin() const { return ConstPartIterator(physicals.parts); }
+	inline ConstPartIterator end() const { return ConstPartIterator(physicals.parts + physicals.partCount); }
 
-	inline PartIteratorFactory iterAnchoredParts() { return PartIteratorFactory(physicals.physicals, physicals.physicals + physicals.freePhysicalsOffset); }
-	inline ConstPartIteratorFactory iterAnchoredParts() const { return ConstPartIteratorFactory(physicals.physicals, physicals.physicals + physicals.freePhysicalsOffset); }
+	inline PartIteratorFactory iterAnchoredParts() { return PartIteratorFactory(physicals.parts, physicals.parts + physicals.anchoredPartsCount); }
+	inline ConstPartIteratorFactory iterAnchoredParts() const { return ConstPartIteratorFactory(physicals.parts, physicals.parts + physicals.anchoredPartsCount); }
 
-	inline PartIteratorFactory iterFreeParts() { return PartIteratorFactory(physicals.physicals + physicals.freePhysicalsOffset, physicals.physicals + physicals.physicalCount); }
-	inline ConstPartIteratorFactory iterFreeParts() const { return ConstPartIteratorFactory(physicals.physicals + physicals.freePhysicalsOffset, physicals.physicals + physicals.physicalCount); }
+	inline PartIteratorFactory iterFreeParts() { return PartIteratorFactory(physicals.parts + physicals.anchoredPartsCount, physicals.parts + physicals.partCount); }
+	inline ConstPartIteratorFactory iterFreeParts() const { return ConstPartIteratorFactory(physicals.parts + physicals.anchoredPartsCount, physicals.parts + physicals.partCount); }
 
 	virtual void applyExternalForces();
+
+	bool isValid() const;
 };
