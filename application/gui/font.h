@@ -33,5 +33,9 @@ private:
 public:
 	Font(FontShader& shader, std::string font);
 
-	void render(const std::string& text, Vec2 position, Vec3f color, double scale);
+	Vec2 size(const std::string& text, double scale);
+
+	void render(const std::string& text, Vec2 position, Vec3 color, double scale);
+	void render(const std::string& text, Vec2 position, Vec4 color, double scale);
+	void render(const std::string& text, double x, double y, Vec4 color, double scale);
 };

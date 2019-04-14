@@ -12,8 +12,11 @@
 #include "profilerUI.h"
 #include "loader.h"
 
+#include "form\panel.h"
+#include "form\label.h"
+#include "form\gui.h"
+
 #include "../debug.h"
-#include "../../engine/physicsProfiler.h"
 #include "../standardInputHandler.h"
 #include "../resourceManager.h"
 #include "../objectLibrary.h"
@@ -25,6 +28,7 @@
 #include "../engine/math/mathUtil.h"
 #include "../engine/geometry/shape.h"
 #include "../engine/geometry/shape.h"
+#include "../engine/physicsProfiler.h"
 #include "../engine/geometry/boundingBox.h"
 #include "../engine/debug.h"
 
@@ -133,6 +137,7 @@ VectorShader vectorShader;
 OriginShader originShader;
 FontShader fontShader;
 QuadShader quadShader;
+GUIShader guiShader;
 PostProcessShader postProcessShader;
 SkyboxShader skyboxShader;
 
@@ -160,6 +165,11 @@ VectorMesh* vectorMesh = nullptr;
 ArrayMesh* originMesh = nullptr;
 Quad* quad = nullptr;
 
+// GUI
+Panel* panel = nullptr;
+Label* label1 = nullptr;
+Label* label2 = nullptr;
+Label* label3 = nullptr;
 
 void Screen::init() {
 	// Log init
@@ -175,6 +185,7 @@ void Screen::init() {
 	int width, height;
 	glfwGetWindowSize(window, &width, &height);
 	screenSize = Vec2(width, height);
+	aspect = width / height;
 
 
 	// Shader source init
@@ -186,6 +197,7 @@ void Screen::init() {
 	ShaderSource quadShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(QUAD_SHADER)), "quad.shader");
 	ShaderSource postProcessShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(POSTPROCESS_SHADER)), "postProcess.shader");
 	ShaderSource skyboxShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(SKYBOX_SHADER)), "skybox.shader");
+	ShaderSource guiShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(GUI_SHADER)), "gui.shader");
 
 
 	// Shader init
@@ -197,6 +209,7 @@ void Screen::init() {
 	quadShader = * new QuadShader(quadShaderSource);
 	postProcessShader = * new PostProcessShader(postProcessShaderSource);
 	skyboxShader = * new SkyboxShader(skyboxShaderSource);
+	guiShader = * new GUIShader(guiShaderSource);
 	basicShader.createLightArray(lightCount);
 
 
@@ -224,6 +237,17 @@ void Screen::init() {
 
 	// Font init
 	font = new Font(fontShader, "../res/fonts/droid.ttf");
+
+
+	// GUI init
+	GUI::init(&guiShader, font);
+	panel = new Panel(0, 0, 0.4, 0.1);
+	label1 = new Label("First", 0, 0, GUI::defaultFontSize, Vec4(1, 0, 0, 1));
+	label2 = new Label("Second", 0, 0, GUI::defaultFontSize, Vec4(0, 1, 0, 1));
+	label3 = new Label("Third", 0, 0, GUI::defaultFontSize, Vec4(0, 0, 1, 1));
+	panel->add(label1);
+	panel->add(label2);
+	panel->add(label3);
 
 
 	// Origin init
@@ -256,6 +280,8 @@ void Screen::init() {
 		screen.screenFrameBuffer->texture->resize(width, height);
 		screen.modelFrameBuffer->renderBuffer->resize(width, height);
 		screen.screenFrameBuffer->renderBuffer->resize(width, height);
+		screen.screenSize = Vec2(width, height);
+		screen.aspect = ((double) width) / ((double) height);
 	});
 }
 
@@ -299,8 +325,10 @@ void Screen::update() {
 
 
 	// Update render uniforms
-	projectionMatrix = Mat4f().perspective(1.0, screenSize.x / screenSize.y, 0.01, 100000.0);
-	orthoMatrix = Mat4f().ortho(-1, 1, -screenSize.x / screenSize.y, screenSize.x / screenSize.y, 0.1, 100);
+	float size = 10;
+	projectionMatrix = ortho(-size*aspect, size*aspect, -size, size, -1000, 1000); //perspective(1.0, aspect, 0.01, 1000000.0);
+	orthoMatrix = ortho(-aspect, aspect, -1, 1, -1000, 1000);
+	//orthoMatrix = ortho(0, aspect, 0, 1, -1000, 1000);
 	rotatedViewMatrix = camera.cframe.asMat4f().getRotation();
 	viewMatrix = rotatedViewMatrix.translate(-camera.cframe.position.x, -camera.cframe.position.y, -camera.cframe.position.z);
 	viewPosition = Vec3f(camera.cframe.position.x, camera.cframe.position.y, camera.cframe.position.z);
@@ -498,9 +526,12 @@ void Screen::refresh() {
 	originMesh->render();
 
 
-	// Render text
+	// Render GUI
+	glDisable(GL_DEPTH_TEST);
 	graphicsMeasure.mark(GraphicsProcess::OTHER);
 	fontShader.update(orthoMatrix);
+	GUI::update(orthoMatrix);
+	panel->render();
 
 	// Pie rendering
 	graphicsMeasure.mark(GraphicsProcess::PROFILER);
@@ -510,9 +541,6 @@ void Screen::refresh() {
 
 	renderDebugField("TPS", physicsMeasure.getAvgTPS(), "");
 	renderDebugField("FPS", graphicsMeasure.getAvgTPS(), "");
-
-	
-
 
 	if(renderPies) {
 		float leftSide = screenSize.x / screenSize.y;

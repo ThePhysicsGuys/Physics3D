@@ -45,6 +45,7 @@ private:
 public:
 	World* world;
 	Vec2 screenSize;
+	double aspect;
 	Camera camera;
 	EventHandler eventHandler;
 	BreakdownAverageProfiler<60, GraphicsProcess> graphicsMeasure;

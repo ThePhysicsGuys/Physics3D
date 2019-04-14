@@ -190,6 +190,21 @@ struct QuadShader : public ShaderProgram {
 	}
 };
 
+struct GUIShader : public ShaderProgram {
+	GUIShader() : ShaderProgram() {}
+	GUIShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 2, "projectionMatrix", "color") {}
+
+	void update(Mat4 orthoMatrix) {
+		bind();
+		shader.setUniform(uniforms[0], orthoMatrix);
+	}
+
+	void update(Vec4 color) {
+		bind();
+		shader.setUniform(uniforms[1], color);
+	}
+};
+
 struct PostProcessShader : public ShaderProgram {
 	PostProcessShader() : ShaderProgram() {}
 	PostProcessShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 1, "textureSampler") {}
@@ -218,7 +233,7 @@ struct FontShader : public ShaderProgram {
 	FontShader() : ShaderProgram() {}
 	FontShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 3, "projectionMatrix", "color", "text") {}
 
-	void updateColor(Vec3f color) {
+	void updateColor(Vec4 color) {
 		bind();
 		shader.setUniform(uniforms[1], color);
 	}

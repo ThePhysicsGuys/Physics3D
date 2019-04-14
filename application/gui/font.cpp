@@ -12,6 +12,7 @@ Font::Font(FontShader& shader, std::string font) : shader(shader) {
 	FT_Face face;
 	FT_Error error;
 
+	Log::setSubject(font);
 	error = FT_Init_FreeType(&library);
 	if (error) 
 		Log::error("Error loading freetype library");
@@ -19,9 +20,9 @@ Font::Font(FontShader& shader, std::string font) : shader(shader) {
 	error = FT_New_Face(library, font.c_str(), 0, &face);
 
 	if (error == FT_Err_Unknown_File_Format) 
-		Log::error("the font file could be opened and read, but it appears that its font format is unsupported");
+		Log::error("FREETYTPE: Font format not supported");
 	else if (error)
-		Log::error("The font file could not be opened or read");
+		Log::error("FREETYTPE: Failed to read font");
 	
 	FT_Set_Pixel_Sizes(face, 0, 48);
 
@@ -48,6 +49,8 @@ Font::Font(FontShader& shader, std::string font) : shader(shader) {
 	FT_Done_Face(face);
 	FT_Done_FreeType(library);
 
+	Log::resetSubject();
+
 	glGenVertexArrays(1, &vao);
 	glGenBuffers(1, &vbo);
 
@@ -63,7 +66,34 @@ Font::Font(FontShader& shader, std::string font) : shader(shader) {
 	glBindVertexArray(0);
 }
 
-void Font::render(const std::string& text, Vec2 position, Vec3f color, double scale) {
+Vec2 Font::size(const std::string& text, double scale) {
+	std::string::const_iterator iterator;
+	double width = 0;
+	double height = 0;
+	for (iterator = text.begin(); iterator != text.end(); iterator++) {
+		Character character = characters[*iterator];
+		double advance = character.advance >> 6;
+		if (iterator == text.begin())
+			width += (advance - character.bearing.x) * scale;
+		else if (iterator == text.end() - 1)
+			width += (character.bearing.x + character.size.x) * scale;
+ 		else 
+			width += advance * scale;
+		
+		height = fmax(character.size.y * scale, height);
+	}
+	return Vec2(width, height);
+}
+
+void Font::render(const std::string& text, Vec2 position, Vec3 color, double scale) {
+	render(text, position.x, position.y, Vec4(color.x, color.y, color.z, 1), scale);
+}
+
+void Font::render(const std::string& text, Vec2 position, Vec4 color, double scale) {
+	render(text, position.x, position.y, color, scale);
+}
+
+void Font::render(const std::string& text, double x, double y, Vec4 color, double scale) {
 	shader.updateColor(color);
 
 	glEnable(GL_BLEND);
@@ -74,20 +104,20 @@ void Font::render(const std::string& text, Vec2 position, Vec3f color, double sc
 	std::string::const_iterator iterator;
 	for (iterator = text.begin(); iterator != text.end(); iterator++) {
 		Character character = characters[*iterator];
-		float xpos = position.x + character.bearing.x * scale;
-		float ypos = position.y - (character.size.y - character.bearing.y) * scale;
+		float xpos = x + character.bearing.x * scale;
+		float ypos = y - (character.size.y - character.bearing.y) * scale;
 
 		float w = character.size.x * scale;
 		float h = character.size.y * scale;
 		
 		float vertices[6][4] = {
-			{ xpos,     ypos + h,   0.0, 0.0 },
-			{ xpos,     ypos,       0.0, 1.0 },
-			{ xpos + w, ypos,       1.0, 1.0 },
+			{ xpos,     ypos + h,	0, 0 },
+			{ xpos,     ypos    ,	0, 1 },
+			{ xpos + w, ypos    ,	1, 1 },
 
-			{ xpos,     ypos + h,   0.0, 0.0 },
-			{ xpos + w, ypos,       1.0, 1.0 },
-			{ xpos + w, ypos + h,   1.0, 0.0 }
+			{ xpos,     ypos + h,	0, 0 },
+			{ xpos + w, ypos    ,   1, 1 },
+			{ xpos + w, ypos + h,   1, 0 }
 		};
 
 		character.texture->bind();
@@ -102,7 +132,7 @@ void Font::render(const std::string& text, Vec2 position, Vec3f color, double sc
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		
 		// Now advance cursors for next glyph (note that advance is number of 1/64 pixels)
-		position.x += (character.advance >> 6) * scale; // Bitshift by 6 to get value in pixels (2^6 = 64)
+		x += (character.advance >> 6) * scale; // Bitshift by 6 to get value in pixels (2^6 = 64)
 	}
 
 	glBindVertexArray(0);
