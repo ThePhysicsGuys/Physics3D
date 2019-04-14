@@ -241,13 +241,13 @@ void Screen::init() {
 
 	// GUI init
 	GUI::init(&guiShader, font);
-	panel = new Panel(0, 0, 0.2, 0.2);
-	label1 = new Label("First", 0.6, 0, GUI::defaultFontSize, Vec4(1, 0, 0, 1));
-	label2 = new Label("Second", 0, 0.2, GUI::defaultFontSize, Vec4(0, 1, 0, 1));
-	label3 = new Label("Third", 0, 0.4, GUI::defaultFontSize, Vec4(0, 0, 1, 1));
-	//panel->add(label1);
-	//panel->add(label2);
-	//panel->add(label3);
+	panel = new Panel(0, 0, 0.4, 0.1);
+	label1 = new Label("First", 0, 0, GUI::defaultFontSize, Vec4(1, 0, 0, 1));
+	label2 = new Label("Second", 0, 0, GUI::defaultFontSize, Vec4(0, 1, 0, 1));
+	label3 = new Label("Third", 0, 0, GUI::defaultFontSize, Vec4(0, 0, 1, 1));
+	panel->add(label1);
+	panel->add(label2);
+	panel->add(label3);
 
 
 	// Origin init
@@ -322,8 +322,10 @@ void Screen::update() {
 
 
 	// Update render uniforms
-	projectionMatrix = perspective(1.0, aspect, 0.01, 1000000.0);
-	orthoMatrix = ortho(0, aspect, 0, 1, -1000, 1000);
+	float size = 10;
+	projectionMatrix = ortho(-size*aspect, size*aspect, -size, size, -1000, 1000); //perspective(1.0, aspect, 0.01, 1000000.0);
+	orthoMatrix = ortho(-aspect, aspect, -1, 1, -1000, 1000);
+	//orthoMatrix = ortho(0, aspect, 0, 1, -1000, 1000);
 	rotatedViewMatrix = camera.cframe.asMat4f().getRotation();
 	viewMatrix = rotatedViewMatrix.translate(-camera.cframe.position.x, -camera.cframe.position.y, -camera.cframe.position.z);
 	viewPosition = Vec3f(camera.cframe.position.x, camera.cframe.position.y, camera.cframe.position.z);
@@ -526,8 +528,6 @@ void Screen::refresh() {
 	graphicsMeasure.mark(GraphicsProcess::OTHER);
 	fontShader.update(orthoMatrix);
 	GUI::update(orthoMatrix);
-	label1->text = "Objects: " + std::to_string(world->physicals.size());
-	panel->position = Vec2(0.1, 0.7);
 	panel->render();
 
 	// Pie rendering
@@ -538,9 +538,6 @@ void Screen::refresh() {
 
 	renderDebugField("TPS", physicsMeasure.getAvgTPS(), "");
 	renderDebugField("FPS", graphicsMeasure.getAvgTPS(), "");
-
-	
-
 
 	if(renderPies) {
 		float leftSide = screenSize.x / screenSize.y;

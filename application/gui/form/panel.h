@@ -14,11 +14,12 @@ public:
 	Vec4 titleBarColor;
 	Vec4 backgroundColor;
 	
-	std::vector<Component*> children;
+	std::vector<std::pair<Component*, Align>> children;
 
 	Panel(double x, double y);
 	Panel(double x, double y, double width, double height);
 
+	void add(Component* component, Align alignment);
 	void add(Component* component);
 	void remove(Component* component);
 

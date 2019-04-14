@@ -12,7 +12,6 @@
 class Label : public Component {
 public:
 	std::string text;
-	Vec2 position;
 	Vec4 backgroundColor;
 	Vec4 foregroundColor;
 	double offset;

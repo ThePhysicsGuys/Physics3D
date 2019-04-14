@@ -18,23 +18,9 @@ Label::Label(std::string text, double x, double y, double scale, Vec4 color, Fon
 };
 
 void Label::render() {
-	Vec2 labelPosition = Vec2(position.x - offset, position.y + offset);
-	Vec2 labelSize = dimension + 2 * offset;
-
-	// Background
-	//GUI::defaultShader->update(backgroundColor);
-	//GUI::defaultQuad->resize(labelPosition, labelSize);
-	//GUI::defaultQuad->render();
-
-	// Text
-	Vec2 textPosition = position;
-	if (layout == Layout::ABSOLUTE) {
-
-	}
-	if (layout == Layout::RELATIVE) {
-
-	}
-	font->render(text, interpolate(), foregroundColor, scale);
+	resize();
+	Vec2 correctTextPosition = position + Vec2(0, -dimension.y);
+	font->render(text, correctTextPosition, foregroundColor, scale);
 }
 
 Vec2 Label::resize() {

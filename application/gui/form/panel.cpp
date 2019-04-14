@@ -20,64 +20,127 @@ Panel::Panel(double x, double y, double width, double height) : Component(Vec2(x
 };
 
 void Panel::add(Component* component) {
+	add(component, Align::RELATIVE);
+}
+
+void Panel::add(Component* component, Align alignment) {
 	component->parent = this;
-	children.push_back(component);
+	children.push_back(std::make_pair(component, alignment));
 }
 
 void Panel::remove(Component* component) {
 	component->parent = nullptr;
-	for (std::vector<Component*>::iterator iterator = children.begin(); iterator != children.end(); iterator++) 
-		if (component == *iterator) {
+	for (auto iterator = children.begin(); iterator != children.end(); iterator++) 
+		if (component == iterator->first) {
 			children.erase(iterator);
 			return;
 		}
 	}
 
 void Panel::renderChildren() {
-	for (Component* component : children)
-		component->render();
+	for (auto component : children)
+		component.first->render();
 }
 
 Vec2 Panel::resize() {
-	if (resizing) {
-		double minX = 0;
-		double minY = 0;
-		double maxX = 0;
-		double maxY = 0;
+	if (layout == Layout::FLOW) {
+		Log::debug("flow");
+		// Resulting width of the container
+		double contentWidth = 0;
+		// Resulting height of the container
+		double contentHeight = 0;
+		// Width of the current row of components
+		double rowWidth = 0;
+		// Height of the current row of components
+		double rowHeight = 0;
 
-		for (Component* component : children) {
-			component->resize();
-			minX = fmin(minX, component->position.x);
-			minY = fmin(minY, component->position.y);
-			maxX = fmax(maxX, component->position.x + component->dimension.x);
-			maxY = fmax(maxY, component->position.y + component->dimension.y);
+		for (auto child : children) {
+			Component* component = child.first;
+			Align alignment = child.second;
+			Vec2 componentSize = component->resize();
+			
+			// NO HEIGHT CHECK YET
+			if (alignment == Align::FILL) {
+				Log::debug("fill %f, %f", componentSize.x, componentSize.y);
+				double newRowWidth = rowWidth + componentSize.x;
+				if (newRowWidth <= dimension.x || resizing) {
+					// Set component position relative to parent
+					component->position = position + Vec2(rowWidth, -contentHeight);
+					
+					// End of the current row, component keeps dimension
+					rowWidth = newRowWidth;
+					rowHeight = fmax(rowHeight, componentSize.y);
+
+					// Resize the container so the component fits in
+					contentWidth = fmax(contentWidth, rowWidth);
+
+					// Next line
+					contentHeight += rowHeight;
+
+					// Reset row size
+					rowWidth = 0;
+					rowHeight = 0;
+				} else {
+					// NO CHECK IF COMPONENT WIDTH IS GREATER THAN CONTENTWIDTH
+					// Component does not fit in the current row, advance to the next row
+					contentHeight += rowHeight;
+
+					// Set component position relative to parent
+					component->position = position + Vec2(0, -contentHeight);
+
+					// Advance position
+					contentHeight += componentSize.y;
+
+					// Reset row size
+					rowWidth = 0;
+					rowHeight = 0;
+				}
+			} else if (alignment == Align::RELATIVE) {
+				Log::debug("relative %f, %f", componentSize.x, componentSize.y);
+				double newRowWidth = rowWidth + componentSize.x;
+				if (newRowWidth <= dimension.x || resizing) {
+					// Set component position relative to parent
+					component->position = position + Vec2(rowWidth, -contentHeight);
+
+					// Add component to current row, resize row height
+					rowWidth = newRowWidth;
+					rowHeight = fmax(rowHeight, componentSize.y);
+
+					// Resize the container
+					contentWidth = fmax(contentWidth, rowWidth);
+				} else {
+					// Component does not fit in the current row, advance to the next row
+					contentHeight += rowHeight;
+
+					// Set component position relative to parent
+					component->position = position + Vec2(0, -contentHeight);
+
+					// Set new row size
+					rowWidth = componentSize.x;
+					rowHeight = componentSize.y;
+				}
+			}
+			Log::debug("\tplaced %f, %f", component->position.x, component->position.y);
 		}
-		dimension = Vec2(maxX - minX, maxY - minY);
+
+		
+		// Add height of last row
+		contentHeight += rowHeight;
+		
+		if (resizing) {
+			Log::debug("content: %f, %f", contentWidth, contentHeight);
+			dimension = Vec2(contentWidth, contentHeight);
+		}
 	}
+
 	return dimension;
 }
 
 void Panel::render() {
-	Vec2 contentSize = resize();
-	Vec2 contentPosition = position;
-	Vec2 panelSize = contentSize + 2 * offset;
-	Vec2 panelPosition = Vec2(contentPosition.x - offset, contentPosition.y + offset);
-	Vec2 titleBarPosition = Vec2(contentPosition.x - offset, contentPosition.y + titleBarHeight + offset);
-	Vec2 titleBarSize = Vec2(panelSize.x, titleBarHeight);
+	resize();
 
-	// TitleBar
-	GUI::defaultShader->update(titleBarColor);
-	GUI::defaultQuad->resize(titleBarPosition, titleBarSize);
-	GUI::defaultQuad->render();
-
-	// Background
-	GUI::defaultShader->update(backgroundColor - 0.1);
-	GUI::defaultQuad->resize(panelPosition, panelSize);
-	GUI::defaultQuad->render();
-
-	// Contentbackground
 	GUI::defaultShader->update(backgroundColor);
-	GUI::defaultQuad->resize(contentPosition, contentSize);
+	GUI::defaultQuad->resize(position, dimension);
 	GUI::defaultQuad->render();
 
 	renderChildren();
