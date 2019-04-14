@@ -105,6 +105,18 @@ int main(void) {
 
 	dominoID = boxPart.drawMeshId;
 
+	Part floorPart = createVisiblePart(BoundingBox{-4.0, -0.3, -4.0, 4.0, 0.3, 4.0}.toShape(new Vec3[8]), CFrame(), 0.2, 1.0);
+	world.addObject(floorPart, true);
+
+	Part wallTemplate = createVisiblePart(BoundingBox{-0.2, -3.0, -4.0, 0.2, 3.0, 4.0}.toShape(new Vec3[8]), CFrame(Vec3(4.0, 3.0, 0.0)), 0.2, 1.0);
+	world.addObject(wallTemplate, true);
+	wallTemplate.cframe = CFrame(Vec3(-4.0, 3.0, 0.0));
+	world.addObject(wallTemplate, true);
+	wallTemplate.cframe = CFrame(Vec3(0.0, 3.0, 4.0), Mat3(0,0,-1,0,1,0,1,0,0));
+	world.addObject(wallTemplate, true);
+
+
+
 	makeDominoStrip(20);
 	//makeDominoTower(25, 20, Vec3(-4.0, 0.0, -4.0));
 
@@ -156,8 +168,15 @@ int main(void) {
 
 	
 
-	
-
+	Part cube = createVisiblePart(BoundingBox{-0.49, -0.49, -0.49, 0.49, 0.49, 0.49}.toShape(new Vec3[8]), CFrame(), 1.0, 0.5);
+	for(int x = 0; x < 5; x++) {
+		for(int y = 0; y < 5; y++) {
+			for(int z = 0; z < 5; z++) {
+				cube.cframe.position = Vec3(x + 5, y + 1, z + 5);
+				world.addObject(cube);
+			}
+		}
+	}
 	
 
 
@@ -175,10 +194,16 @@ int main(void) {
 	Part housePart = createVisiblePart(house, CFrame(Vec3(-1.5, 1.0, 0.0), fromEulerAngles(0.7, 0.9, 0.7)), 1.0, 0.0);
 	world.addObject(housePart);
 
-	/*std::istringstream s = std::istringstream(getResourceAsString(STALL_MODEL));
-	Shape stallShape = loadMesh(s);
-	Part stallPart = createVisiblePart(stallShape, CFrame(Vec3(-2.0, 10.0, -2.0), fromEulerAngles(0.9, 0.1, 0.5)), 2, 0.7);
-	world.addObject(stallPart);*/
+	// std::istringstream s = std::istringstream(getResourceAsString(STALL_MODEL));
+	// std::ifstream sphereFile("../res/sphere.obj");
+	
+	Shape stallShape = loadMesh((std::istream&) std::istringstream(getResourceAsString(SPHERE_MODEL)));
+	Log::error("SphereVol %.9f", stallShape.getVolume());
+	Part stallPart = createVisiblePart(stallShape, CFrame(Vec3(0.0, 10.0, 0.0), fromEulerAngles(0.9, 0.1, 0.5)), 2, 0.7);
+	for(int i = 0; i < 10; i++) {
+		stallPart.cframe = CFrame(Vec3(0.0, 10.0 + i, 0.0));
+		world.addObject(stallPart);
+	}
 	// Log::fatal("Is the stall Valid? %s", (stallPart.hitbox.isValid())? "yes" : "No :(");
 
 	Part trianglePart = createVisiblePart(triangleShape, CFrame(Vec3(-2.0, 1.0, -2.0)), 10.0, 0.7);

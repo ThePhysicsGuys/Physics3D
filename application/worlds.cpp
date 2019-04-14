@@ -7,23 +7,23 @@
 GravityFloorWorld::GravityFloorWorld(Vec3 gravity) : gravity(gravity) {}
 
 void GravityFloorWorld::applyExternalForces(const Shape* transformedShapes) {
-	for(int j = 0; j < physicals.size(); j++) {
+	if(selectedPhysical != nullptr && !physicals.isAnchored(selectedPhysical)) {
+		// Magnet force
+		Vec3 absoluteSelectedPoint = selectedPhysical->part.cframe.localToGlobal(localSelectedPoint);
+		Vec3 delta = magnetPoint - absoluteSelectedPoint;
+		Vec3 relativeSelectedPointSpeed = selectedPhysical->getVelocityOfPoint(absoluteSelectedPoint - selectedPhysical->getCenterOfMass());
+		Vec3 force = selectedPhysical->mass * delta * 20 - relativeSelectedPointSpeed;
+		selectedPhysical->applyForce(absoluteSelectedPoint - selectedPhysical->getCenterOfMass(), force);
+		Vec3 angular = -selectedPhysical->angularVelocity;// / (delta.length() + 1);
+		selectedPhysical->applyMoment(angular);
+	}
+	for(int j = physicals.freePhysicalsOffset; j < physicals.physicalCount; j++) {
 		Physical& physical = physicals[j];
 		const Shape& transformed = transformedShapes[j];
 
 		// Gravity force
-		physical.applyForceAtCenterOfMass((gravity/* - physical.getCenterOfMass() * 0.1*/) * physical.mass);
-
-		// Magnet force
-		if (selectedPhysical == &physical) {
-			Vec3 absoluteSelectedPoint = physical.part.cframe.localToGlobal(localSelectedPoint);
-			Vec3 delta = magnetPoint - absoluteSelectedPoint;
-			Vec3 relativeSelectedPointSpeed = physical.getVelocityOfPoint(absoluteSelectedPoint - physical.getCenterOfMass());
-			Vec3 force = physical.mass * delta * 20 - relativeSelectedPointSpeed;
-			physical.applyForce(absoluteSelectedPoint - physical.getCenterOfMass(), force);
-			Vec3 angular = -physical.angularVelocity;// / (delta.length() + 1);
-			physical.applyMoment(angular);
-		}
+		// physical.applyForceAtCenterOfMass((Vec3(0.0, 5.0, 0.0) - physical.getCenterOfMass() * 1.0) * physical.mass);
+		physical.applyForceAtCenterOfMass(gravity * physical.mass);
 
 		// Floor force
 		for(int i = 0; i < transformed.vertexCount; i++) {

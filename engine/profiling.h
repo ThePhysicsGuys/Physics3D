@@ -63,7 +63,10 @@ class BreakdownAverageProfiler : public HistoricTally<N, std::chrono::nanosecond
 	std::chrono::time_point<std::chrono::steady_clock> startTime = std::chrono::high_resolution_clock::now();
 	ProcessType currentProcess = static_cast<ProcessType>(-1);
 
+
 public:
+	CircularBuffer<std::chrono::time_point<std::chrono::steady_clock>, N> tickHistory;
+
 	inline BreakdownAverageProfiler(char const * const labels[static_cast<size_t>(ProcessType::COUNT)]) : HistoricTally<N, std::chrono::nanoseconds, ProcessType>(labels) {}
 
 	inline void mark(ProcessType process) {
@@ -78,8 +81,25 @@ public:
 	inline void end() {
 		std::chrono::time_point<std::chrono::steady_clock> curTime = std::chrono::high_resolution_clock::now();
 		this->addToTally(currentProcess, curTime - startTime);
+		tickHistory.add(curTime);
 
 		currentProcess = static_cast<ProcessType>(-1);
 		this->nextTally();
+
+	}
+
+	inline double getAvgTPS() {
+		size_t numTicks = tickHistory.size();
+		if(numTicks != 0) {
+			size_t index = (tickHistory.curI + numTicks - 1) % numTicks;
+			size_t lastKnown = tickHistory.curI % numTicks;
+			std::chrono::time_point<std::chrono::steady_clock> firstTime = tickHistory.buf[lastKnown];
+			std::chrono::time_point<std::chrono::steady_clock> lastTime = tickHistory.buf[index];
+			std::chrono::nanoseconds delta = lastTime - firstTime;
+
+			double timeTaken = delta.count() * 1E-9;
+
+			return (numTicks-1) / timeTaken;
+		}
 	}
 };

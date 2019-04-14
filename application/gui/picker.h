@@ -10,9 +10,10 @@ struct Physical;
 #include "../../engine/math/vec2.h"
 
 #include <vector>
+#include "../../engine/world.h"
 
 Vec2 getNormalizedDeviceSpacePosition(Vec2 viewportSpacePosition, Vec2 screenSize);
 Vec3 calcRay(Vec2 mousePosition, Vec2 screenSize, Mat4f viewMatrix, Mat4f projectionMatrix);
-void updateIntersectedPhysical(Screen& screen, std::vector<Physical>& physicals, Vec2 mousePosition, Vec2 screenSize, Mat4f rotatedViewMatrix, Mat4f projectionMatrix);
+void updateIntersectedPhysical(Screen& screen, PhysicalContainer& physicals, Vec2 mousePosition, Vec2 screenSize, Mat4f rotatedViewMatrix, Mat4f projectionMatrix);
 void moveGrabbedPhysicalTransversal(Screen& screen, double dz);
 void moveGrabbedPhysicalLateral(Screen& screen);

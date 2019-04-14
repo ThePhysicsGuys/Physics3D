@@ -106,6 +106,7 @@ Screen::Screen(int width, int height, World* world) : graphicsMeasure(graphicsDe
 using namespace Debug;
 std::map<VecType, bool> debug_enabled{ {INFO, true}, {VELOCITY, true}, {FORCE, true}, {POSITION, true}, {MOMENT, true}, {IMPULSE, true}, {ANGULAR_VELOCITY , true} };
 std::map<VecType, double> vecColors{ {INFO, 0.15}, {VELOCITY, 0.3}, {FORCE, 0.0}, {POSITION, 0.5}, {MOMENT, 0.1}, {IMPULSE, 0.7}, {ANGULAR_VELOCITY , 0.75} };
+bool renderPies = false;
 
 // Font
 Font* font = nullptr;
@@ -529,25 +530,32 @@ void Screen::refresh() {
 	panel->position = Vec2(0.1, 0.7);
 	panel->render();
 
-
 	// Pie rendering
 	graphicsMeasure.mark(GraphicsProcess::PROFILER);
-	size_t objCount = world->physicals.size();
+	size_t objCount = world->physicals.physicalCount;
 	renderDebugField("Objects", objCount, "");
 	renderDebugField("Intersections", getTheoreticalNumberOfIntersections(objCount), "");
-	float leftSide = screenSize.x / screenSize.y;
-	PieChart graphicsPie = toPieChart(graphicsMeasure, "Graphics", Vec2f(-leftSide + 1.5f, -0.7f), 0.2f);
-	PieChart physicsPie = toPieChart(physicsMeasure, "Physics", Vec2f(-leftSide + 0.3f, -0.7f), 0.2f);
-	PieChart intersectionPie = toPieChart(intersectionStatistics, "Intersection Statistics", Vec2f(-leftSide + 2.7f, -0.7f), 0.2f);
-	physicsPie.renderText(*this, font);
-	graphicsPie.renderText(*this, font);
-	intersectionPie.renderText(*this, font);
-	startPieRendering(*this);
-	physicsPie.renderPie(*this);
-	graphicsPie.renderPie(*this);
-	intersectionPie.renderPie(*this);
-	endPieRendering(*this);
 
+	renderDebugField("TPS", physicsMeasure.getAvgTPS(), "");
+	renderDebugField("FPS", graphicsMeasure.getAvgTPS(), "");
+
+	
+
+
+	if(renderPies) {
+		float leftSide = screenSize.x / screenSize.y;
+		PieChart graphicsPie = toPieChart(graphicsMeasure, "Graphics", Vec2f(-leftSide + 1.5f, -0.7f), 0.2f);
+		PieChart physicsPie = toPieChart(physicsMeasure, "Physics", Vec2f(-leftSide + 0.3f, -0.7f), 0.2f);
+		PieChart intersectionPie = toPieChart(intersectionStatistics, "Intersection Statistics", Vec2f(-leftSide + 2.7f, -0.7f), 0.2f);
+		physicsPie.renderText(*this, font);
+		graphicsPie.renderText(*this, font);
+		intersectionPie.renderText(*this, font);
+		startPieRendering(*this);
+		physicsPie.renderPie(*this);
+		graphicsPie.renderPie(*this);
+		intersectionPie.renderPie(*this);
+		endPieRendering(*this);
+	}
 
 	// Render screenFrameBuffer texture to the screen
 	graphicsMeasure.mark(GraphicsProcess::FINALIZE);

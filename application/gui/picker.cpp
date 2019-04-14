@@ -26,7 +26,7 @@ Vec3 calcRay(Vec2 mousePosition, Vec2 screenSize, Mat4f viewMatrix, Mat4f projec
 	return rayDirection;
 }
 
-void updateIntersectedPhysical(Screen& screen, std::vector<Physical>& physicals, Vec2 mousePosition, Vec2 screenSize, Mat4f viewMatrix, Mat4f projectionMatrix) {
+void updateIntersectedPhysical(Screen& screen, PhysicalContainer& physicals, Vec2 mousePosition, Vec2 screenSize, Mat4f viewMatrix, Mat4f projectionMatrix) {
 	SharedLockGuard guard(screen.world->lock);
 
 	Physical* closestIntersectedPhysical = nullptr;
@@ -34,14 +34,13 @@ void updateIntersectedPhysical(Screen& screen, std::vector<Physical>& physicals,
 	double closestIntersectDistance = INFINITY;
 
 	screen.ray = calcRay(mousePosition, screenSize, viewMatrix, projectionMatrix);
-	std::vector<Physical> physicalsCopy = physicals;
-	for (int i = 0; i < physicalsCopy.size(); i++) {
-		Physical physical = physicalsCopy[i];
-		Vec3* buffer = new Vec3[physicalsCopy[i].part.hitbox.vertexCount];
+	for (int i = 0; i < physicals.physicalCount; i++) {
+		Physical& physical = physicals[i];
+		Vec3* buffer = new Vec3[physicals[i].part.hitbox.vertexCount];
 		Shape transformed = physical.part.hitbox.localToGlobal(physical.part.cframe, buffer);
 		double distance = transformed.getIntersectionDistance(screen.camera.cframe.position, screen.ray);
 		if (distance < closestIntersectDistance && distance > 0) {
-			if (i >= physicals.size()) continue;
+			if (i >= physicals.physicalCount) continue;
 			else {
 				closestIntersectDistance = distance;
 				closestIntersectedPhysical = &physicals[i];
