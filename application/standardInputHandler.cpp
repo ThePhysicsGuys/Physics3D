@@ -10,7 +10,6 @@ StandardInputHandler::StandardInputHandler(GLFWwindow* window, Screen& screen) :
 
 void StandardInputHandler::framebufferResize(int width, int height) {
 	glViewport(0, 0, width, height);
-	screen.screenSize = Vec2(width, height);
 	(*screen.eventHandler.windowResizeHandler) (screen, width, height);
 }
 
