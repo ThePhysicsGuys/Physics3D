@@ -58,7 +58,7 @@ struct SkyboxShader : public ShaderProgram {
 		shader.setUniform(uniforms[1], projectionMatrix);
 	}
 
-	void update(CubeMap skybox) {
+	void update(const CubeMap& skybox) {
 		bind();
 		shader.setUniform(uniforms[2], skybox.unit);
 	}
@@ -184,7 +184,7 @@ struct QuadShader : public ShaderProgram {
 	QuadShader() : ShaderProgram() {}
 	QuadShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 1, "textureSampler") {}
 
-	void update(Texture texture) {
+	void update(const Texture& texture) {
 		bind();
 		shader.setUniform(uniforms[0], texture.unit);
 	}
@@ -192,7 +192,7 @@ struct QuadShader : public ShaderProgram {
 
 struct GUIShader : public ShaderProgram {
 	GUIShader() : ShaderProgram() {}
-	GUIShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 2, "projectionMatrix", "color") {}
+	GUIShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 4, "projectionMatrix", "color", "textureSampler", "textured") {}
 
 	void update(Mat4 orthoMatrix) {
 		bind();
@@ -201,7 +201,15 @@ struct GUIShader : public ShaderProgram {
 
 	void update(Vec4 color) {
 		bind();
+		shader.setUniform(uniforms[3], false);
 		shader.setUniform(uniforms[1], color);
+	}
+
+	void update(Texture& texture) {
+		bind();
+		texture.bind();
+		shader.setUniform(uniforms[3], true);
+		shader.setUniform(uniforms[2], texture.unit);
 	}
 };
 
@@ -209,7 +217,7 @@ struct PostProcessShader : public ShaderProgram {
 	PostProcessShader() : ShaderProgram() {}
 	PostProcessShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 1, "textureSampler") {}
 
-	void update(Texture texture) {
+	void update(const Texture& texture) {
 		bind();
 		shader.setUniform(uniforms[0], texture.unit);
 	}
@@ -243,7 +251,7 @@ struct FontShader : public ShaderProgram {
 		shader.setUniform(uniforms[0], projectionMatrix);
 	}
 
-	void updateTexture(Texture texture) {
+	void updateTexture(const Texture& texture) {
 		bind();
 		shader.setUniform(uniforms[2], texture.unit);
 	}

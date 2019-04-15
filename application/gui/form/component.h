@@ -37,19 +37,28 @@ public:
 	bool resizing;
 
 	/* 
-		The topleft edge of the container, offsets not included
+		The topleft edge of the container, padding not included, margin included
 		This property can be altered by its parent
 	*/
 	Vec2 position;
 
 	/* 
-		The size of the container
+		The size of the container, padding not included, margin included
 		This property can be altered by its parent
 	*/
 	Vec2 dimension;
 
-	Component(Vec2 position) : position(position), dimension(Vec2(0)), layout(Layout::FLOW), resizing(true) {};
-	Component(Vec2 position, Vec2 dimension) : position(position), dimension(dimension), layout(Layout::FLOW), resizing(false) {};
+	/* Padding of this component */
+	double padding;
+
+	/* Margin of this component */
+	double margin;
+
+	/* Determines if this component and its content should be rendered */
+	bool visible;
+
+	Component(Vec2 position) : position(position), dimension(Vec2(0)), layout(Layout::FLOW), resizing(true), visible(true) {};
+	Component(Vec2 position, Vec2 dimension) : position(position), dimension(dimension), layout(Layout::FLOW), resizing(false), visible(true) {};
 	
 	/* Returns the minimal size of the container */
 	virtual Vec2 resize() = 0;

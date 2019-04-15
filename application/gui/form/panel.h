@@ -1,7 +1,7 @@
 #pragma once
 
 #include "component.h"
-
+#include "../texture.h"
 #include "../engine/math/vec2.h"
 #include "../engine/math/vec4.h"
 
@@ -9,11 +9,12 @@
 
 class Panel : public Component {
 public:
-	double offset;
 	double titleBarHeight;
 	Vec4 titleBarColor;
 	Vec4 backgroundColor;
-	
+	Texture* closeTexture;
+	double closeButtonOffset;
+
 	std::vector<std::pair<Component*, Align>> children;
 
 	Panel(double x, double y);

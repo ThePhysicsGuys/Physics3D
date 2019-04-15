@@ -12,19 +12,22 @@ Label::Label(std::string text, double x, double y, double scale, Vec4 color, Fon
 	this->text = text;
 	this->position = Vec2(x, y);
 	this->scale = scale;
-	this->offset = GUI::defaultLabelOffset;
+	this->padding = GUI::defaultLabelPadding;
+	this->margin = GUI::defaultLabelMargin;
 	this->foregroundColor = color;
 	this->backgroundColor = GUI::defaultLabelBackgroundColor;
 };
 
 void Label::render() {
-	resize();
-	Vec2 correctTextPosition = position + Vec2(0, -dimension.y);
-	font->render(text, correctTextPosition, foregroundColor, scale);
+	if (visible) {
+		resize();
+		Vec2 textPosition = position + Vec2(0, -dimension.y) + Vec2(margin);
+		font->render(text, textPosition, foregroundColor, scale);
+	}
 }
 
 Vec2 Label::resize() {
 	if (resizing)
-		dimension = font->size(text, scale);
+		dimension = font->size(text, scale) + Vec2(margin) * 2;
 	return dimension;
 }

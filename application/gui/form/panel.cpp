@@ -9,14 +9,20 @@ Panel::Panel(double x, double y) : Component(Vec2(x, y)) {
 	this->backgroundColor = GUI::defaultPanelBackgroundColor;
 	this->titleBarHeight = GUI::defaultPanelTitleBarHeight;
 	this->titleBarColor = GUI::defaultPanelTitleBarColor;
-	this->offset = GUI::defaultPanelOffset;
+	this->padding = GUI::defaultPanelPadding;
+	this->margin = GUI::defaultPanelMargin;
+	this->closeTexture = GUI::defaultPanelCloseTexture;
+	this->closeButtonOffset = GUI::defaultPanelCloseButtonOffset;
 };
 
 Panel::Panel(double x, double y, double width, double height) : Component(Vec2(x, y), Vec2(width, height)) {
 	this->backgroundColor = GUI::defaultPanelBackgroundColor;
 	this->titleBarHeight = GUI::defaultPanelTitleBarHeight;
 	this->titleBarColor = GUI::defaultPanelTitleBarColor;
-	this->offset = GUI::defaultPanelOffset;
+	this->padding = GUI::defaultPanelPadding;
+	this->margin = GUI::defaultPanelMargin;
+	this->closeTexture = GUI::defaultPanelCloseTexture;
+	this->closeButtonOffset = GUI::defaultPanelCloseButtonOffset;
 };
 
 void Panel::add(Component* component) {
@@ -44,7 +50,7 @@ void Panel::renderChildren() {
 
 Vec2 Panel::resize() {
 	if (layout == Layout::FLOW) {
-		Log::debug("flow");
+		//Log::debug("flow");
 		// Resulting width of the container
 		double contentWidth = 0;
 		// Resulting height of the container
@@ -54,14 +60,15 @@ Vec2 Panel::resize() {
 		// Height of the current row of components
 		double rowHeight = 0;
 
-		for (auto child : children) {
+		for (int i = 0; i < children.size(); i++) {
+			auto child = children[i];
 			Component* component = child.first;
 			Align alignment = child.second;
 			Vec2 componentSize = component->resize();
 			
 			// NO HEIGHT CHECK YET
 			if (alignment == Align::FILL) {
-				Log::debug("fill %f, %f", componentSize.x, componentSize.y);
+				//Log::debug("fill %f, %f", componentSize.x, componentSize.y);
 				double newRowWidth = rowWidth + componentSize.x;
 				if (newRowWidth <= dimension.x || resizing) {
 					// Set component position relative to parent
@@ -96,7 +103,7 @@ Vec2 Panel::resize() {
 					rowHeight = 0;
 				}
 			} else if (alignment == Align::RELATIVE) {
-				Log::debug("relative %f, %f", componentSize.x, componentSize.y);
+				//Log::debug("relative %f, %f", componentSize.x, componentSize.y);
 				double newRowWidth = rowWidth + componentSize.x;
 				if (newRowWidth <= dimension.x || resizing) {
 					// Set component position relative to parent
@@ -120,7 +127,7 @@ Vec2 Panel::resize() {
 					rowHeight = componentSize.y;
 				}
 			}
-			Log::debug("\tplaced %f, %f", component->position.x, component->position.y);
+			//Log::debug("\tplaced %f, %f", component->position.x, component->position.y);
 		}
 
 		
@@ -128,7 +135,6 @@ Vec2 Panel::resize() {
 		contentHeight += rowHeight;
 		
 		if (resizing) {
-			Log::debug("content: %f, %f", contentWidth, contentHeight);
 			dimension = Vec2(contentWidth, contentHeight);
 		}
 	}
@@ -137,11 +143,37 @@ Vec2 Panel::resize() {
 }
 
 void Panel::render() {
-	resize();
+	if (visible) {
+		resize();
 
-	GUI::defaultShader->update(backgroundColor);
-	GUI::defaultQuad->resize(position, dimension);
-	GUI::defaultQuad->render();
+		if (!parent) {
+			// TitleBar
+			Vec2 titleBarPosition = position + Vec2(-padding, padding + titleBarHeight);
+			Vec2 titleBarDimension = Vec2(dimension.x + 2 * padding, titleBarHeight);
+			GUI::defaultShader->update(titleBarColor);
+			GUI::defaultQuad->resize(titleBarPosition, titleBarDimension);
+			GUI::defaultQuad->render();
 
-	renderChildren();
+			// Padding
+			Vec2 offsetPosition = position + Vec2(-padding, padding);
+			Vec2 offsetDimension = dimension + Vec2(padding) * 2;
+			GUI::defaultShader->update(backgroundColor);
+			GUI::defaultQuad->resize(offsetPosition, offsetDimension);
+			GUI::defaultQuad->render();
+
+			// Close button
+			Vec2 closeButtonPosition = titleBarPosition + Vec2(titleBarDimension.x - titleBarHeight + closeButtonOffset, -closeButtonOffset);
+			Vec2 closeButtonDimension = Vec2(titleBarHeight - 2 * closeButtonOffset);
+			GUI::defaultShader->update(*closeTexture);
+			GUI::defaultQuad->resize(closeButtonPosition, closeButtonDimension);
+			GUI::defaultQuad->render();
+		}
+
+		// Content, no margin yet
+		GUI::defaultShader->update(backgroundColor);
+		GUI::defaultQuad->resize(position, dimension);
+		GUI::defaultQuad->render();
+
+		renderChildren();
+	}
 }

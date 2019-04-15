@@ -14,7 +14,6 @@ public:
 	std::string text;
 	Vec4 backgroundColor;
 	Vec4 foregroundColor;
-	double offset;
 	double scale;
 	Font* font;
 
