@@ -2,6 +2,7 @@
 #include "../engine/math/mathUtil.h"
 #include "application.h"
 #include "gui/picker.h"
+#include "gui/form/gui.h"
 #include "objectLibrary.h"
 #include <algorithm>
 #include <random>
@@ -9,6 +10,11 @@
 StandardInputHandler::StandardInputHandler(GLFWwindow* window, Screen& screen) : InputHandler(window), screen(screen) {}
 
 void StandardInputHandler::framebufferResize(int width, int height) {
+	if (screen.properties.get("include_titlebar_offset") == "true") {
+		int t, top;
+		glfwGetWindowFrameSize(window, &t, &top, &t, &t);
+		height = height - top;
+	}
 	glViewport(0, 0, width, height);
 	(*screen.eventHandler.windowResizeHandler) (screen, width, height);
 }
@@ -87,9 +93,13 @@ void StandardInputHandler::mouseDown(int button, int mods) {
 	if (button == GLFW_MOUSE_BUTTON_MIDDLE) middleDragging = true;
 	if (button == GLFW_MOUSE_BUTTON_LEFT) leftDragging = true;
 
-	(*screen.eventHandler.partClickHandler) (screen, screen.intersectedPart, screen.intersectedPoint);
-	if (screen.intersectedPart != nullptr) {
-		screen.world->localSelectedPoint = screen.selectedPart->cframe.globalToLocal(screen.intersectedPoint);
+	if (GUI::intersectedComponent) {
+		GUI::intersectedComponent->click(cursorPosition.x, cursorPosition.y);
+	} else {
+		(*screen.eventHandler.partClickHandler) (screen, screen.intersectedPart, screen.intersectedPoint);
+		if (screen.intersectedPart) {
+			screen.world->localSelectedPoint = screen.selectedPart->cframe.globalToLocal(screen.intersectedPoint);
+		}
 	}
 };
 
@@ -100,19 +110,27 @@ void StandardInputHandler::mouseUp(int button, int mods) {
 };
 
 void StandardInputHandler::mouseMove(double x, double y) {
+	if (GUI::intersectedComponent) {
+		GUI::intersectedComponent->hover(x, y);
+	}
+
 	// Camera rotating
 	if (rightDragging) {
-		screen.camera.rotate(screen, Vec3((y - curPos.y) * 0.01, (x - curPos.x) * 0.01, 0), leftDragging);
+		screen.camera.rotate(screen, Vec3((y - cursorPosition.y) * 0.01, (x - cursorPosition.x) * 0.01, 0), leftDragging);
 	}
 
 	if (leftDragging) {
 		double speed = 0.01;
-		double dmx = (x - curPos.x) * speed;
-		double dmy = (y - curPos.y) * -speed;
-		
-		// Phyiscal moving
-		if (screen.selectedPart != nullptr) {
-			moveGrabbedPhysicalLateral(screen);
+		double dmx = (x - cursorPosition.x) * speed;
+		double dmy = (y - cursorPosition.y) * -speed;
+
+		if (GUI::selectedComponent) {
+			GUI::selectedComponent->drag(dmx, dmy);
+		} else {
+			// Phyiscal moving
+			if (screen.selectedPart) {
+				moveGrabbedPhysicalLateral(screen);
+			}
 		}
 	} else {
 		screen.world->selectedPhysical = nullptr;
@@ -120,10 +138,10 @@ void StandardInputHandler::mouseMove(double x, double y) {
 
 	// Camera moving
 	if (middleDragging) {
-		screen.camera.move(screen, Vec3((x - curPos.x) * -0.5, (y - curPos.y) * 0.5, 0), leftDragging);
+		screen.camera.move(screen, Vec3((x - cursorPosition.x) * -0.5, (y - cursorPosition.y) * 0.5, 0), leftDragging);
 	}
 
-	curPos = Vec2(x, y);
+	cursorPosition = Vec2(x, y);
 };
 
 void StandardInputHandler::scroll(double xOffset, double yOffset) {

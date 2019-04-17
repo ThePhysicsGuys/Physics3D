@@ -8,7 +8,7 @@
 class StandardInputHandler : public InputHandler {
 public: 
 	Screen& screen;
-	Vec2 curPos;
+	Vec2 cursorPosition;
 	bool rightDragging = false;
 	bool middleDragging = false;
 	bool leftDragging = false;

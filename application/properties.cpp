@@ -1,4 +1,6 @@
 #include "properties.h"
+#include <fstream>
+#include <algorithm>
 
 std::string Properties::get(std::string property) {
 	auto iterator = properties.find(property);
@@ -55,6 +57,7 @@ Properties PropertiesParser::read(const std::string& file) {
 
 	if (!inputstream.is_open()) {
 		Log::error("Properties file can't be found");
+		return properties;
 	}
 
 	std::string line;
@@ -80,11 +83,13 @@ Properties PropertiesParser::read(const std::string& file) {
 void PropertiesParser::write(const std::string& file, Properties& properties) {
 	Log::setSubject(file);
 
+	Log::info("Writing %d porperties", properties.get().size());
+
 	std::ofstream outputstream;
 	outputstream.open(file.c_str(), std::ofstream::out | std::ofstream::trunc);
 
 	if (!outputstream.is_open()) {
-		Log::error("Properties file can't be found");
+		Log::error("Properties file can't be found, creating new one");
 	}
 
 	for (auto property : properties.get()) {
