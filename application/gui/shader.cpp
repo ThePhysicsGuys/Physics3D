@@ -217,9 +217,13 @@ void Shader::unbind() {
 }
 
 void Shader::close() {
+	Log::setSubject(name);
 	unbind();
+	Log::info("Closing shader");
 	if (id != 0) {
 		glDeleteProgram(id);
 	}
+	Log::info("Closed shader");
+	Log::resetSubject();
 }
 

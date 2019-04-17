@@ -12,6 +12,6 @@
 
 Vec2 getNormalizedDeviceSpacePosition(Vec2 viewportSpacePosition, Vec2 screenSize);
 Vec3 calcRay(Vec2 mousePosition, Vec2 screenSize, Mat4f viewMatrix, Mat4f projectionMatrix);
-void updateIntersectedPhysical(Screen& screen, Vec2 mousePosition, Vec2 screenSize, Mat4f rotatedViewMatrix, Mat4f projectionMatrix);
+void updateIntersectedPhysical(Screen& screen, Vec2 mousePosition, Mat4f rotatedViewMatrix, Mat4f projectionMatrix);
 void moveGrabbedPhysicalTransversal(Screen& screen, double dz);
 void moveGrabbedPhysicalLateral(Screen& screen);

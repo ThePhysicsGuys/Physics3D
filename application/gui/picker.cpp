@@ -26,15 +26,15 @@ Vec3 calcRay(Vec2 mousePosition, Vec2 screenSize, Mat4f viewMatrix, Mat4f projec
 	return rayDirection;
 }
 
-void updateIntersectedPhysical(Screen& screen, Vec2 mousePosition, Vec2 screenSize, Mat4f viewMatrix, Mat4f projectionMatrix) {
+void updateIntersectedPhysical(Screen& screen, Vec2 mousePosition, Mat4f viewMatrix, Mat4f projectionMatrix) {
 	SharedLockGuard guard(screen.world->lock);
-
+	
 	Part* closestIntersectedPart = nullptr;
 	Vec3 closestIntersectedPoint = Vec3();
 	double closestIntersectDistance = INFINITY;
 
-	screen.ray = calcRay(mousePosition, screenSize, viewMatrix, projectionMatrix);
-	for(Part& part:*screen.world){
+	screen.ray = calcRay(mousePosition, screen.screenSize, viewMatrix, projectionMatrix);
+	for(Part& part : *screen.world){
 		Vec3* buffer = new Vec3[part.hitbox.vertexCount];
 		Shape transformed = part.hitbox.localToGlobal(part.cframe, buffer);
 		double distance = transformed.getIntersectionDistance(screen.camera.cframe.position, screen.ray);

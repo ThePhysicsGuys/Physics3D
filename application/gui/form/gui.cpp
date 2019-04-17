@@ -1,7 +1,13 @@
 #include "gui.h"
 #include "component.h"
+#include "container.h"
 
 namespace GUI {
+	// Global
+	std::vector<Component*> components;
+	Component* intersectedComponent;
+	Component* selectedComponent;
+
 	// Shader
 	GUIShader* defaultShader = nullptr;
 	Quad* defaultQuad = nullptr;
@@ -32,8 +38,47 @@ namespace GUI {
 
 		GUI::defaultPanelCloseTexture = load("../res/textures/gui/close.png");
 	}
-
-	void update(Mat4 orthoMatrix) {
+	
+	void update(Mat4f orthoMatrix) {
 		GUI::defaultShader->update(orthoMatrix);
+	}
+
+	double map(double x, double in_min, double in_max, double out_min, double out_max) {
+		return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+	}
+
+	Vec2 map(Screen& screen, Vec2 point) {
+		return Vec2(map(point.x, 0, screen.screenSize.x, -screen.aspect, screen.aspect), map(screen.screenSize.y - point.y, 0, screen.screenSize.y, -1, 1));
+	}
+
+	void intersect(Screen& screen, Vec2 mouse) {
+		Vec2 point = map(screen, mouse);
+		for (Component* component : components) {
+			Component* intersected = component->intersect(point);
+			if (intersected) {
+				intersectedComponent = intersected;
+				return;
+			}
+		}
+		intersectedComponent = nullptr;
+	}
+
+	void add(Component* component) {
+		components.push_back(component);
+	}
+
+	void remove(Component* component) {
+		for (auto iterator = components.begin(); iterator != components.end(); iterator++) {
+			if (component == *iterator) {
+				components.erase(iterator);
+				return;
+			}
+		}
+	}
+
+	void render(Mat4f orthoMatrix) {
+		update(orthoMatrix);
+		for (Component* component : components)
+			component->render();
 	}
 }

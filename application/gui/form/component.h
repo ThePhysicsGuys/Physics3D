@@ -3,6 +3,7 @@
 #include "GL\glew.h"
 #include "GLFW\glfw3.h"
 
+#include <cmath>
 #include "../engine/math/vec2.h"
 
 class Component {
@@ -57,12 +58,31 @@ public:
 	/* Determines if this component and its content should be rendered */
 	bool visible;
 
+	/* Constructors */
 	Component(Vec2 position) : position(position), dimension(Vec2(0)), layout(Layout::FLOW), resizing(true), visible(true) {};
 	Component(Vec2 position, Vec2 dimension) : position(position), dimension(dimension), layout(Layout::FLOW), resizing(false), visible(true) {};
 	
+	/* Returns this if the component contains the point */
+	virtual Component* intersect(Vec2 point) {
+		Vec2 halfDimension = dimension / 2;
+		Vec2 center = position + Vec2(halfDimension.x, -halfDimension.y);
+		if (fabs(point.x - center.x) < halfDimension.x && fabs(point.y - center.y) < halfDimension.y)
+			return this;
+		return nullptr;
+	}
+
 	/* Returns the minimal size of the container */
 	virtual Vec2 resize() = 0;
 	
 	/* Renders the component without resizing it */
 	virtual void render() = 0;
+
+	/* Drag behaviour of this component */
+	virtual void drag(double dx, double dy) {};
+
+	/* Hover behaviour of this component */
+	virtual void hover(double mx, double my) {};
+
+	/* Click behaviour of this component */
+	virtual void click(double mx, double my) {};
 };

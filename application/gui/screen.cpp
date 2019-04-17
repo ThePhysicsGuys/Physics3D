@@ -13,6 +13,7 @@
 #include "loader.h"
 
 #include "form\panel.h"
+#include "form\frame.h"
 #include "form\label.h"
 #include "form\gui.h"
 
@@ -66,7 +67,9 @@ bool initGLEW() {
 }
 
 void terminateGL() {
+	Log::info("Closing GLFW");
 	glfwTerminate();
+	Log::info("Closed GLFW");
 }
 
 const char* const graphicsDebugLabels[]{
@@ -82,6 +85,7 @@ const char* const graphicsDebugLabels[]{
 };
 
 Screen::Screen() : graphicsMeasure(graphicsDebugLabels) {};
+
 Screen::Screen(int width, int height, World* world) : graphicsMeasure(graphicsDebugLabels) {
 	setWorld(world);
 
@@ -166,14 +170,20 @@ ArrayMesh* originMesh = nullptr;
 Quad* quad = nullptr;
 
 // GUI
-Panel* panel = nullptr;
+Frame* frame = nullptr;
 Label* label1 = nullptr;
 Label* label2 = nullptr;
 Label* label3 = nullptr;
 
+Panel* mouse = nullptr;
+
 void Screen::init() {
 	// Log init
 	Log::setLogLevel(Log::Level::INFO);
+
+
+	// Properties init
+	properties = PropertiesParser::read("../res/.properties");
 
 
 	// Render mode init
@@ -181,11 +191,14 @@ void Screen::init() {
 	glEnable(GL_DEPTH_TEST);
 
 
+	// InputHandler init
+	handler = new StandardInputHandler(window, *this);
+
+
 	// Screen size init
 	int width, height;
 	glfwGetWindowSize(window, &width, &height);
-	screenSize = Vec2(width, height);
-	aspect = width / height;
+	handler->framebufferResize(width, height);
 
 
 	// Shader source init
@@ -217,6 +230,7 @@ void Screen::init() {
 	floorTexture = load("../res/textures/floor/floor_color.jpg");
 	material.setTexture(floorTexture);
 
+
 	// Skybox init
 	sphere = new IndexedMesh(loadMesh((std::istream&) std::istringstream(getResourceAsString(SPHERE_MODEL))));
 	skybox = new BoundingBox{ -1, -1, -1, 1, 1, 1 };
@@ -241,14 +255,21 @@ void Screen::init() {
 
 	// GUI init
 	GUI::init(&guiShader, font);
-	panel = new Panel(0, 0, 0.4, 0.1);
+	frame = new Frame(0, 0);
 	label1 = new Label("First", 0, 0, GUI::defaultFontSize, Vec4(1, 0, 0, 1));
 	label2 = new Label("Second", 0, 0, GUI::defaultFontSize, Vec4(0, 1, 0, 1));
 	label3 = new Label("Third", 0, 0, GUI::defaultFontSize, Vec4(0, 0, 1, 1));
-	panel->add(label1);
-	panel->add(label2);
-	panel->add(label3);
+	frame->add(label1);
+	frame->add(label2);
+	frame->add(label3);
+	GUI::add(frame);
 
+
+	// Mouse init
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+	mouse = new Panel(0, 0, 0.03, 0.03);
+	mouse->backgroundColor = Vec4(1);
+	
 
 	// Origin init
 	double originVertices[3] = { 0, 0, 5 };
@@ -257,16 +278,12 @@ void Screen::init() {
 
 	// Vector init
 	vectorMesh = new VectorMesh(new double[128 * 7], 128);
+
+
+	// Eventhandler init
 	
-
-	// Handler init
-	handler = new StandardInputHandler(window, *this);
-
 	eventHandler.setPartRayIntersectCallback([] (Screen& screen, Part* part, Vec3 point) {
-		if(part == nullptr)
-			screen.intersectedPart = nullptr;
-		else
-			screen.intersectedPart = part;
+		screen.intersectedPart = part;
 		screen.intersectedPoint = point;
 	});
 
@@ -283,6 +300,9 @@ void Screen::init() {
 		screen.screenSize = Vec2(width, height);
 		screen.aspect = ((double) width) / ((double) height);
 	});
+
+	// Temp
+	handler->framebufferResize(width, height);
 }
 
 void Screen::update() {
@@ -306,7 +326,7 @@ void Screen::update() {
 		if (handler->getKey(GLFW_KEY_RIGHT)) camera.rotate(*this, 0, speed, 0, leftDragging);
 		if (handler->getKey(GLFW_KEY_UP))    camera.rotate(*this, -speed, 0, 0, leftDragging);
 		if (handler->getKey(GLFW_KEY_DOWN))  camera.rotate(*this, speed, 0, 0, leftDragging);
-		if (handler->getKey(GLFW_KEY_ESCAPE)) exit(0);
+		if (handler->getKey(GLFW_KEY_ESCAPE)) glfwSetWindowShouldClose(window, GLFW_TRUE);
 	}
 
 
@@ -336,7 +356,15 @@ void Screen::update() {
 
 
 	// Update picker
-	updateIntersectedPhysical(*this, handler->curPos, screenSize, viewMatrix, projectionMatrix);
+	updateIntersectedPhysical(*this, handler->cursorPosition, viewMatrix, projectionMatrix);
+
+
+	// Update gui
+	mouse->position = GUI::map(*this, handler->cursorPosition);
+	GUI::intersect(*this, handler->cursorPosition);
+	if (GUI::intersectedComponent) {
+		GUI::intersectedComponent->visible = false;
+	}
 }
 
 AddableBuffer<double> visibleVecs(700);
@@ -532,8 +560,8 @@ void Screen::refresh() {
 	glDisable(GL_DEPTH_TEST);
 	graphicsMeasure.mark(GraphicsProcess::OTHER);
 	fontShader.update(orthoMatrix);
-	GUI::update(orthoMatrix);
-	// panel->render();
+	GUI::render(orthoMatrix);
+	mouse->render();
 
 	// Pie rendering
 	graphicsMeasure.mark(GraphicsProcess::PROFILER);
@@ -585,7 +613,10 @@ void Screen::close() {
 	originShader.close();
 	skyboxShader.close();
 	quadShader.close();
+	guiShader.close();
 	postProcessShader.close();
+
+	PropertiesParser::write("../res/.properties", properties);
 
 	terminateGL();
 }

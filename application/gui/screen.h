@@ -5,6 +5,7 @@
 #include "../../engine/world.h"
 #include "../../engine/math/vec2.h"
 #include "../eventHandler.h"
+#include "../properties.h"
 
 #include "frameBuffer.h"
 #include "camera.h"
@@ -51,6 +52,8 @@ public:
 	double aspect;
 	Camera camera;
 	EventHandler eventHandler;
+	Properties properties;
+
 	BreakdownAverageProfiler<60, GraphicsProcess> graphicsMeasure;
 
 	FrameBuffer* modelFrameBuffer = nullptr;

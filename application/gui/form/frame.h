@@ -1,4 +1,3 @@
-#pragma once
 
 #include "component.h"
 #include "container.h"
@@ -8,12 +7,16 @@
 
 #include <vector>
 
-class Panel : public Container {
+class Frame : public Container {
 public:
+	double titleBarHeight;
+	Vec4 titleBarColor;
 	Vec4 backgroundColor;
+	Texture* closeTexture;
+	double closeButtonOffset;
 
-	Panel(double x, double y);
-	Panel(double x, double y, double width, double height);
+	Frame(double x, double y);
+	Frame(double x, double y, double width, double height);
 
 	Vec2 resize() override;
 	void render() override;

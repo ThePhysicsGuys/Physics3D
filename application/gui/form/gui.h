@@ -3,12 +3,17 @@
 #include "../quad.h"
 #include "../font.h"
 #include "../shaderProgram.h"
+#include "../screen.h"
+#include "component.h"
 #include "../texture.h"
 #include "../../../engine/math/vec3.h"
 #include "../../../engine/math/mat4.h"
 
-
 namespace GUI {
+	// Events
+	extern Component* intersectedComponent;
+	extern Component* selectedComponent;
+
 	// Shader
 	extern Quad* defaultQuad;
 	extern GUIShader* defaultShader;
@@ -32,6 +37,13 @@ namespace GUI {
 	extern Vec4 defaultFontColor;
 	extern double defaultFontSize;
 
+	void add(Component* component);
+	void remove(Component* component);
+
+	Vec2 map(Screen& screen, Vec2 point);
+	void intersect(Screen& screen, Vec2 mouse);
+
 	void init(GUIShader* shader, Font* font);
-	void update(Mat4 orthoMatrix);
+	void update(Mat4f orthoMatrix);
+	void render(Mat4f orthoMatrix);
 };
