@@ -22,7 +22,7 @@
 #include "../resourceManager.h"
 #include "../objectLibrary.h"
 
-#include "../../util/log.h"
+#include "../util/log.h"
 
 #include "../engine/math/vec2.h"
 #include "../engine/math/mat4.h"

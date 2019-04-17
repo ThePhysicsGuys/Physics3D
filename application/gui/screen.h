@@ -5,7 +5,7 @@
 #include "../../engine/world.h"
 #include "../../engine/math/vec2.h"
 #include "../eventHandler.h"
-#include "../properties.h"
+#include "../util/properties.h"
 
 #include "frameBuffer.h"
 #include "camera.h"

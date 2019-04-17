@@ -3,7 +3,7 @@
 #include <string>
 #include <map>	
 
-#include "../util/log.h"
+#include "log.h"
 
 class Properties {
 private:
@@ -18,7 +18,7 @@ public:
 
 };
 
-namespace PropertiesParser{
+namespace PropertiesParser {
 	std::string ltrim(std::string string);
 	std::string rtrim(std::string string);
 	std::string trim(std::string string);
