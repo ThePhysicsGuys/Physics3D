@@ -121,7 +121,7 @@ void Font::render(const std::string& text, double x, double y, Vec4 color, doubl
 		};
 
 		character.texture->bind();
-		shader.updateTexture(*character.texture);
+		shader.updateTexture(character.texture);
 		
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 

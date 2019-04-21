@@ -94,7 +94,7 @@ void StandardInputHandler::mouseDown(int button, int mods) {
 	if (button == GLFW_MOUSE_BUTTON_LEFT) leftDragging = true;
 
 	if (GUI::intersectedComponent) {
-		GUI::intersectedComponent->click(cursorPosition.x, cursorPosition.y);
+		GUI::intersectedComponent->click(GUI::map(screen, cursorPosition));
 	} else {
 		(*screen.eventHandler.partClickHandler) (screen, screen.intersectedPart, screen.intersectedPoint);
 		if (screen.intersectedPart) {
@@ -111,7 +111,7 @@ void StandardInputHandler::mouseUp(int button, int mods) {
 
 void StandardInputHandler::mouseMove(double x, double y) {
 	if (GUI::intersectedComponent) {
-		GUI::intersectedComponent->hover(x, y);
+		GUI::intersectedComponent->hover(GUI::map(screen, cursorPosition));
 	}
 
 	// Camera rotating
@@ -125,7 +125,7 @@ void StandardInputHandler::mouseMove(double x, double y) {
 		double dmy = (y - cursorPosition.y) * -speed;
 
 		if (GUI::selectedComponent) {
-			GUI::selectedComponent->drag(dmx, dmy);
+			GUI::selectedComponent->drag(Vec2(dmx, dmy));
 		} else {
 			// Phyiscal moving
 			if (screen.selectedPart) {

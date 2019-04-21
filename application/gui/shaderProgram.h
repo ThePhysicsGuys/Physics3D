@@ -14,7 +14,6 @@
 
 struct ShaderProgram {
 public:
-	std::vector<std::string> uniforms;
 	Shader shader;
 	ShaderSource shaderSource;
 
@@ -29,7 +28,6 @@ public:
 		for (int i = 0; i < count; i++) {
 			std::string uniform = std::string(va_arg(args, const char *));
 			shader.createUniform(uniform);
-			uniforms.push_back(uniform);
 		}
 		Log::resetSubject();
 		va_end(args);
@@ -54,24 +52,24 @@ struct SkyboxShader : public ShaderProgram {
 
 	void update(Mat4f viewMatrix, Mat4f projectionMatrix) {
 		bind();
-		shader.setUniform(uniforms[0], viewMatrix);
-		shader.setUniform(uniforms[1], projectionMatrix);
+		shader.setUniform("viewMatrix", viewMatrix);
+		shader.setUniform("projectionMatrix", projectionMatrix);
 	}
 
 	void update(const CubeMap& skybox) {
 		bind();
-		shader.setUniform(uniforms[2], skybox.unit);
+		shader.setUniform("skyboxTexture", skybox.unit);
 	}
 
 	void update(Vec3f lightDirection) {
 		bind();
-		shader.setUniform(uniforms[3], lightDirection);
+		shader.setUniform("lightDirection", lightDirection);
 	}
 };
 
 struct BasicShader : public ShaderProgram {
 	BasicShader() : ShaderProgram() {}
-	BasicShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 10, "modelMatrix", "viewMatrix", "projectionMatrix", "viewPosition", "material.ambient", "material.diffuse", "material.specular", "material.reflectance", "material.textured", "textureSampler") {}
+	BasicShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 12, "modelMatrix", "viewMatrix", "projectionMatrix", "viewPosition", "material.ambient", "material.diffuse", "material.specular", "material.reflectance", "material.textured", "material.normalmapped", "textureSampler", "normalSampler") {}
 
 	void createLightArray(int size) {
 		bind();
@@ -105,9 +103,9 @@ struct BasicShader : public ShaderProgram {
 
 	void update(Mat4f viewMatrix, Mat4f projectionMatrix, Vec3f viewPosition) {
 		bind();
-		shader.setUniform(uniforms[1], viewMatrix);
-		shader.setUniform(uniforms[2], projectionMatrix);
-		shader.setUniform(uniforms[3], viewPosition);
+		shader.setUniform("viewMatrix", viewMatrix);
+		shader.setUniform("projectionMatrix", projectionMatrix);
+		shader.setUniform("viewPosition", viewPosition);
 	}
 
 	void updateLight(Light lights[], int size) {
@@ -142,24 +140,34 @@ struct BasicShader : public ShaderProgram {
 
 	void updateModel(Mat4f modelMatrix) {
 		bind();
-		shader.setUniform(uniforms[0], modelMatrix);
+		shader.setUniform("modelMatrix", modelMatrix);
 	}
 
 	void updateMaterial(Material material) {
 		bind();
-		shader.setUniform(uniforms[4], material.ambient);
-		shader.setUniform(uniforms[5], material.diffuse);
-		shader.setUniform(uniforms[6], material.specular);
-		shader.setUniform(uniforms[7], material.reflectance);
+		shader.setUniform("material.ambient", material.ambient);
+		shader.setUniform("material.diffuse", material.diffuse);
+		shader.setUniform("material.specular", material.specular);
+		shader.setUniform("material.reflectance", material.reflectance);
+
 		if (material.texture) {
 			material.texture->bind();
-			shader.setUniform(uniforms[8], true);
-			shader.setUniform(uniforms[9], material.texture->unit);
+			shader.setUniform("material.textured", true);
+			shader.setUniform("textureSampler", material.texture->unit);
 		} else {
-			shader.setUniform(uniforms[8], false);
-			shader.setUniform(uniforms[9], 0);
+			shader.setUniform("material.textured", false);
+			shader.setUniform("textureSampler", 0);
 		}
 		
+		if (material.normalMap) {
+			material.normalMap->bind();
+			shader.setUniform("material.normalmapped", true);
+			shader.setUniform("normalSampler", material.normalMap->unit);
+		} else {
+			shader.setUniform("material.normalmapped", false);
+			shader.setUniform("normalSampler", 0);
+		}
+
 	}
 };
 
@@ -169,14 +177,14 @@ struct BasicNormalShader : public ShaderProgram {
 
 	void update(Mat4f viewMatrix, Mat4f projectionMatrix, Vec3f viewPosition) {
 		bind();
-		shader.setUniform(uniforms[1], viewMatrix);
-		shader.setUniform(uniforms[2], projectionMatrix);
-		shader.setUniform(uniforms[3], viewPosition);
+		shader.setUniform("viewMatrix", viewMatrix);
+		shader.setUniform("projectionMatrix", projectionMatrix);
+		shader.setUniform("viewPosition", viewPosition);
 	}
 
 	void updateModel(Mat4f modelMatrix) {
 		bind();
-		shader.setUniform(uniforms[0], modelMatrix);
+		shader.setUniform("modelMatrix", modelMatrix);
 	}
 };
 
@@ -184,9 +192,10 @@ struct QuadShader : public ShaderProgram {
 	QuadShader() : ShaderProgram() {}
 	QuadShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 1, "textureSampler") {}
 
-	void update(const Texture& texture) {
+	void update(Texture* texture) {
 		bind();
-		shader.setUniform(uniforms[0], texture.unit);
+		texture->bind();
+		shader.setUniform("textureSampler", texture->unit);
 	}
 };
 
@@ -196,20 +205,20 @@ struct GUIShader : public ShaderProgram {
 
 	void update(Mat4 orthoMatrix) {
 		bind();
-		shader.setUniform(uniforms[0], orthoMatrix);
+		shader.setUniform("projectionMatrix", orthoMatrix);
 	}
 
 	void update(Vec4 color) {
 		bind();
-		shader.setUniform(uniforms[3], false);
-		shader.setUniform(uniforms[1], color);
+		shader.setUniform("textured", false);
+		shader.setUniform("color", color);
 	}
 
-	void update(Texture& texture) {
+	void update(Texture* texture) {
 		bind();
-		texture.bind();
-		shader.setUniform(uniforms[3], true);
-		shader.setUniform(uniforms[2], texture.unit);
+		texture->bind();
+		shader.setUniform("textured", true);
+		shader.setUniform("textureSampler", texture->unit);
 	}
 };
 
@@ -217,9 +226,10 @@ struct PostProcessShader : public ShaderProgram {
 	PostProcessShader() : ShaderProgram() {}
 	PostProcessShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 1, "textureSampler") {}
 
-	void update(const Texture& texture) {
+	void update(Texture* texture) {
 		bind();
-		shader.setUniform(uniforms[0], texture.unit);
+		texture->bind();
+		shader.setUniform("textureSampler", texture->unit);
 	}
 };
 
@@ -229,11 +239,11 @@ struct OriginShader : public ShaderProgram {
 
 	void update(Mat4f viewMatrix, Mat4f rotatedViewMatrix, Mat4f projectionMatrix, Mat4f orthoMatrix, Vec3f viewPosition) {
 		bind();
-		shader.setUniform(uniforms[0], viewMatrix);
-		shader.setUniform(uniforms[1], rotatedViewMatrix);
-		shader.setUniform(uniforms[2], projectionMatrix);
-		shader.setUniform(uniforms[3], orthoMatrix);
-		shader.setUniform(uniforms[4], viewPosition);
+		shader.setUniform("viewMatrix", viewMatrix);
+		shader.setUniform("rotatedViewMatrix", rotatedViewMatrix);
+		shader.setUniform("projectionMatrix", projectionMatrix);
+		shader.setUniform("orthoMatrix", orthoMatrix);
+		shader.setUniform("viewPosition", viewPosition);
 	}
 };
 
@@ -243,17 +253,18 @@ struct FontShader : public ShaderProgram {
 
 	void updateColor(Vec4 color) {
 		bind();
-		shader.setUniform(uniforms[1], color);
+		shader.setUniform("color", color);
 	}
 
 	void update(Mat4f projectionMatrix) {
 		bind();
-		shader.setUniform(uniforms[0], projectionMatrix);
+		shader.setUniform("projectionMatrix", projectionMatrix);
 	}
 
-	void updateTexture(const Texture& texture) {
+	void updateTexture(Texture* texture) {
 		bind();
-		shader.setUniform(uniforms[2], texture.unit);
+		texture->bind();
+		shader.setUniform("text", texture->unit);
 	}
 };
 
@@ -263,8 +274,8 @@ struct VectorShader : public ShaderProgram {
 
 	void update(Mat4f viewMatrix, Mat4f projectionMatrix, Vec3f viewPosition) {
 		bind();
-		shader.setUniform(uniforms[0], viewMatrix);
-		shader.setUniform(uniforms[1], projectionMatrix);
-		shader.setUniform(uniforms[2], viewPosition);
+		shader.setUniform("viewMatrix", viewMatrix);
+		shader.setUniform("projectionMatrix", projectionMatrix);
+		shader.setUniform("viewPosition", viewPosition);
 	}
 };

@@ -120,6 +120,7 @@ StandardInputHandler* handler = nullptr;
 
 // Textures
 Texture* floorTexture = nullptr;
+Texture* floorNormal = nullptr;
 
 //Skybox
 IndexedMesh* sphere = nullptr;
@@ -170,7 +171,8 @@ ArrayMesh* originMesh = nullptr;
 Quad* quad = nullptr;
 
 // GUI
-Frame* frame = nullptr;
+Frame* frame1 = nullptr;
+Frame* frame2 = nullptr;
 Label* label1 = nullptr;
 Label* label2 = nullptr;
 Label* label3 = nullptr;
@@ -228,7 +230,9 @@ void Screen::init() {
 
 	// Texture init
 	floorTexture = load("../res/textures/floor/floor_color.jpg");
+	floorNormal = load("../res/textures/metal/metal_normal.jpg");
 	material.setTexture(floorTexture);
+	material.setNormalMap(floorNormal);
 
 
 	// Skybox init
@@ -255,19 +259,21 @@ void Screen::init() {
 
 	// GUI init
 	GUI::init(&guiShader, font);
-	frame = new Frame(0, 0);
+	frame1 = new Frame(0, 0);
+	frame2 = new Frame(0.2, 0.2);
 	label1 = new Label("First", 0, 0, GUI::defaultFontSize, Vec4(1, 0, 0, 1));
 	label2 = new Label("Second", 0, 0, GUI::defaultFontSize, Vec4(0, 1, 0, 1));
 	label3 = new Label("Third", 0, 0, GUI::defaultFontSize, Vec4(0, 0, 1, 1));
-	frame->add(label1);
-	frame->add(label2);
-	frame->add(label3);
-	GUI::add(frame);
+	frame1->add(label1);
+	frame1->add(label2);
+	frame1->add(frame2);
+	frame2->add(label3);
+	GUI::add(frame1);
 
 
 	// Mouse init
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-	mouse = new Panel(0, 0, 0.03, 0.03);
+	mouse = new Panel(0, 0, 0.02, 0.02);
 	mouse->backgroundColor = Vec4(1);
 	
 
@@ -360,11 +366,8 @@ void Screen::update() {
 
 
 	// Update gui
-	mouse->position = GUI::map(*this, handler->cursorPosition);
-	GUI::intersect(*this, handler->cursorPosition);
-	if (GUI::intersectedComponent) {
-		GUI::intersectedComponent->visible = false;
-	}
+	mouse->position = GUI::map(*this, handler->cursorPosition + Vec2(-mouse->dimension.x, mouse->dimension.y));
+	GUI::intersect(GUI::map(*this, handler->cursorPosition));
 }
 
 AddableBuffer<double> visibleVecs(700);
@@ -595,8 +598,7 @@ void Screen::refresh() {
 
 
 	// Render postprocessed image to screen
-	quadShader.bind();
-	screenFrameBuffer->texture->bind();
+	quadShader.update(screenFrameBuffer->texture);
 	quad->render();
 
 
