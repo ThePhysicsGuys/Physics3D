@@ -7,7 +7,7 @@ struct CircularBuffer {
 	size_t curI = 0;
 	bool hasComeAround = false;
 
-	inline void add(T& newObj) {
+	inline void add(const T& newObj) {
 		buf[curI] = newObj;
 		curI++;
 		if(curI >= N) {

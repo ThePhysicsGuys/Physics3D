@@ -34,7 +34,7 @@ void StandardInputHandler::keyDownOrRepeat(int key, int modifiers) {
 		break;
 	case GLFW_KEY_O:
 		createDominoAt(Vec3(0.0 + (rand() % 100) * 0.001, 1.0 + (rand() % 100) * 0.001, 0.0 + (rand() % 100) * 0.001), fromEulerAngles(0.2, 0.3, 0.7));
-		Log::info("Created domino! There are %d objects in the world! ", screen.world->physicals.partCount);
+		Log::info("Created domino! There are %d objects in the world! ", screen.world->partCount);
 		break;
 	}
 }
@@ -56,15 +56,15 @@ void StandardInputHandler::keyDown(int key, int modifiers) {
 			break;
 		case GLFW_KEY_F9:
 			if(screen.selectedPart != nullptr) {
-				if(screen.world->physicals.isAnchored(screen.selectedPart->parent)) {
-					screen.world->physicals.unanchor(screen.selectedPart->parent);
+				if(screen.world->isAnchored(screen.selectedPart->parent)) {
+					screen.world->unanchor(screen.selectedPart->parent);
 				} else {
 					Physical* parent = screen.selectedPart->parent;
 					parent->velocity = Vec3();
 					parent->angularVelocity = Vec3();
 					parent->totalForce = Vec3();
 					parent->totalMoment = Vec3();
-					screen.world->physicals.anchor(screen.selectedPart->parent);
+					screen.world->anchor(screen.selectedPart->parent);
 				}
 			}
 			break;
