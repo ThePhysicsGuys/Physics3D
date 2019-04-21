@@ -15,152 +15,9 @@
 #include "physicsProfiler.h"
 #include "engineException.h"
 
-PhysicalContainer::PhysicalContainer(size_t initialCapacity) : physicalCount(0), freePhysicalsOffset(0), physicals(nullptr), parts(nullptr) {
-	ensureCapacity(initialCapacity);
-}
-void PhysicalContainer::ensureCapacity(size_t targetCapacity) {
-	if(this->capacity < targetCapacity) {
-		size_t newCapacity = std::max(this->capacity * 2, static_cast<size_t>(512));
-		Physical* newPhysicals = new Physical[newCapacity];
-		Part** newParts = new Part*[newCapacity];
 
-		for(int i = 0; i < this->capacity; i++) {
-			newPhysicals[i] = this->physicals[i];
-			newParts[i] = this->parts[i];
-		}
 
-		delete[] this->physicals;
-		delete[] this->parts;
-		this->physicals = newPhysicals;
-		this->parts = newParts;
-		this->capacity = newCapacity;
-		Log::info("Extended physicals capacity to %d", newCapacity);
-	}
-}
-void PhysicalContainer::add(Part* part, bool anchored) {
-	ensureCapacity(physicalCount+1);
-	size_t partInsertLocation;
-	size_t physicalInsertLocation;
-	if(anchored) {
-		movePart(anchoredPartsCount, partCount);
-		partInsertLocation = anchoredPartsCount;
-		
-		movePhysical(freePhysicalsOffset, physicalCount);
-		physicalInsertLocation = freePhysicalsOffset;
-
-		anchoredPartsCount++;
-		freePhysicalsOffset++;
-	} else {
-		partInsertLocation = partCount;
-		physicalInsertLocation = physicalCount;
-	}
-
-	parts[partInsertLocation] = part;
-	part->partIndex = partInsertLocation;
-
-	physicals[physicalInsertLocation] = Physical(part);
-	part->parent = physicals + physicalInsertLocation;
-
-	partCount++;
-	physicalCount++;
-}
-/*void PhysicalContainer::remove(size_t index) {
-	if(isAnchored(index)) {
-		movePhysical(--freePhysicalsOffset, index);
-		movePhysical(--physicalCount, freePhysicalsOffset);
-	} else {
-		movePhysical(--physicalCount, index);
-	}
-}*/
-void PhysicalContainer::remove(Part* part) {
-	physicalCount--;
-	partCount--;
-	if(isAnchored(part->parent)) {
-		freePhysicalsOffset--;
-		anchoredPartsCount--;
-		movePhysical(physicals + freePhysicalsOffset, part->parent);
-		movePhysical(physicalCount, freePhysicalsOffset);
-
-		movePart(anchoredPartsCount, part->partIndex);
-		movePart(partCount, anchoredPartsCount);
-	} else {
-		movePhysical(physicals + physicalCount, part->parent);
-		movePart(partCount, part->partIndex);
-	}
-}
-void PhysicalContainer::anchor(size_t index) {
-	anchor(physicals + index);
-}
-void PhysicalContainer::anchor(Physical* p) {
-	if(!isAnchored(p)) {
-		swapPhysical(p, physicals + freePhysicalsOffset);
-		swapPart(p->part->partIndex, anchoredPartsCount);
-		anchoredPartsCount++;
-		freePhysicalsOffset++;
-	}
-}
-void PhysicalContainer::unanchor(size_t index) {
-	unanchor(physicals + index);
-}
-void PhysicalContainer::unanchor(Physical* p) {
-	if(isAnchored(p)) {
-		anchoredPartsCount--;
-		freePhysicalsOffset--;
-		swapPart(p->part->partIndex, anchoredPartsCount);
-		swapPhysical(p, physicals + freePhysicalsOffset);
-	}
-}
-bool PhysicalContainer::isAnchored(size_t index) const {
-	return index < freePhysicalsOffset;
-}
-bool PhysicalContainer::isAnchored(const Physical* physical) const {
-	return physical < physicals + freePhysicalsOffset;
-}
-bool PhysicalContainer::isAnchored(const Part* const * part) const {
-	return part < parts + anchoredPartsCount;
-}
-void PhysicalContainer::swapPhysical(Physical* first, Physical* second) {
-	std::swap(*first, *second);
-	first->part->parent = first;
-	second->part->parent = second;
-}
-void PhysicalContainer::swapPhysical(size_t first, size_t second) {
-	std::swap(physicals[first], physicals[second]);
-	physicals[first].part->parent = physicals + first;
-	physicals[second].part->parent = physicals + second;
-}
-void PhysicalContainer::movePhysical(size_t origin, size_t destination) {
-	physicals[destination] = physicals[origin];
-	physicals[destination].part->parent = &physicals[destination];
-}
-void PhysicalContainer::movePhysical(Physical* origin, Physical* destination) {
-	*destination = *origin;
-	destination->part->parent = destination;
-}
-
-void PhysicalContainer::movePart(size_t origin, size_t destination) {
-	parts[origin]->partIndex = -1;
-	parts[destination] = parts[origin];
-	parts[destination]->partIndex = destination;
-}
-
-void PhysicalContainer::swapPart(size_t a, size_t b) {
-	Part* t = parts[a];
-	parts[a] = parts[b];
-	parts[b] = t;
-	parts[a]->partIndex = a;
-	parts[b]->partIndex = b;
-}
-void PhysicalContainer::swapPart(Part** a, Part** b) {
-	Part* t = *a;
-	size_t ti = (**a).partIndex;
-	(**a).partIndex = (**b).partIndex;
-	(**b).partIndex = ti;
-	*a = *b;
-	*b = t;
-}
-
-World::World() : physicals(20) {}
+World::World() : PartContainer(20) {}
 
 
 // typedef Part AnchoredPart;
@@ -252,7 +109,8 @@ void World::processColissions() {
 
 			double maxRadiusBetween = anchoredPart.maxRadius + freePart.maxRadius;
 
-			double distanceSqBetween = (anchoredPart.cframe.position - freePart.cframe.position).lengthSquared();
+			Vec3 deltaPosition = anchoredPart.cframe.position - freePart.cframe.position;
+			double distanceSqBetween = deltaPosition.lengthSquared();
 
 			if(distanceSqBetween > maxRadiusBetween*maxRadiusBetween) {
 				intersectionStatistics.addToTally(IntersectionResult::DISTANCE_REJECT, 1);
@@ -263,7 +121,7 @@ void World::processColissions() {
 
 			Vec3 intersection;
 			Vec3 exitVector;
-			if(transfAnchored.intersects(transfFree, intersection, exitVector)) {
+			if(transfAnchored.intersects(transfFree, intersection, exitVector, deltaPosition)) {
 				physicsMeasure.mark(PhysicsProcess::COLISSION_HANDLING);
 				intersectionStatistics.addToTally(IntersectionResult::COLISSION, 1);
 				handleAnchoredCollision(anchoredPart, freePart, intersection, exitVector);
@@ -283,7 +141,8 @@ void World::processColissions() {
 
 			double maxRadiusBetween = p1.maxRadius + p2.maxRadius;
 
-			double distanceSqBetween = (p1.cframe.position - p2.cframe.position).lengthSquared();
+			Vec3 deltaPosition = p1.cframe.position - p2.cframe.position;
+			double distanceSqBetween = deltaPosition.lengthSquared();
 
 			if(distanceSqBetween > maxRadiusBetween*maxRadiusBetween) {
 				intersectionStatistics.addToTally(IntersectionResult::DISTANCE_REJECT, 1);
@@ -295,7 +154,7 @@ void World::processColissions() {
 
 			Vec3 intersection;
 			Vec3 exitVector;
-			if(transfI.intersects(transfJ, intersection, exitVector)) {
+			if(transfI.intersects(transfJ, intersection, exitVector, deltaPosition)) {
 				physicsMeasure.mark(PhysicsProcess::COLISSION_HANDLING);
 				intersectionStatistics.addToTally(IntersectionResult::COLISSION, 1);
 				handleCollision(p1, p2, intersection, exitVector);
@@ -310,7 +169,7 @@ void World::processColissions() {
 void World::tick(double deltaT) {
 	SharedLockGuard mutLock(lock);
 
-	Vec3* vecBuf = (Vec3*) alloca(getTotalVertexCount() * sizeof(Vec3));
+	Vec3* vecBuf = new Vec3[getTotalVertexCount()];
 
 	Vec3* vecBufIndex = vecBuf;
 
@@ -331,24 +190,25 @@ void World::tick(double deltaT) {
 
 	physicsMeasure.mark(PhysicsProcess::UPDATING);
 	mutLock.upgrade();
-	for(int i = 0; i < physicals.physicalCount; i++) {
-		Physical& physical = physicals[i];
+	for(Physical& physical : iterPhysicals()) {
 		physical.update(deltaT);
 	}
 
 	physicsMeasure.mark(PhysicsProcess::OTHER);
 	processQueue();
+
+	delete[] vecBuf;
 }
 
 size_t World::getTotalVertexCount() {
 	size_t total = 0;
-	for(const Physical& physical : physicals)
-		total += physical.part->hitbox.vertexCount;
+	for(const Part& part : *this)
+		total += part.hitbox.vertexCount;
 	return total;
 }
 
 void World::addPartUnsafe(Part* part, bool anchored) {
-	physicals.add(part, anchored);
+	add(part, anchored);
 }
 
 void World::processQueue() {
@@ -372,15 +232,15 @@ void World::addObject(Part* part, bool anchored) {
 };
 
 void World::removePart(Part* part) {
-	this->physicals.remove(part);
+	this->remove(part);
 	
 }
 
 void World::applyExternalForces() {}
 
 bool World::isValid() const {
-	for(size_t i = 0; i < physicals.partCount; i++) {
-		if(physicals.parts[i]->partIndex != i) {
+	for(size_t i = 0; i < partCount; i++) {
+		if(parts[i]->partIndex != i) {
 			Log::error("part's partIndex is not it's partIndex");
 			__debugbreak();
 		}
@@ -391,15 +251,16 @@ bool World::isValid() const {
 			Log::error("part's parent's child is not part");
 			__debugbreak();
 		}
-		if(!(part.parent >= physicals.physicals && part.parent < physicals.physicals + physicals.physicalCount)) {
+		if(!(part.parent >= physicals && part.parent < physicals + physicalCount)) {
 			Log::error("part with parent not in our physicals");
 			__debugbreak();
 		}
-		bool partIsAnchored = physicals.isAnchored(physicals.parts + part.partIndex);
-		bool physicalIsAnchored = physicals.isAnchored(part.parent);
+		bool partIsAnchored = isAnchored(parts + part.partIndex);
+		bool physicalIsAnchored = isAnchored(part.parent);
 		if(partIsAnchored != physicalIsAnchored) {
 			Log::error("%s part with %s parent", partIsAnchored ? "anchored":"unanchored", physicalIsAnchored ? "anchored" : "unanchored");
 			__debugbreak();
 		}
 	}
+	return true;
 }

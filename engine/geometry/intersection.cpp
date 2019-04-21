@@ -41,163 +41,168 @@ int getNearestSurface(ConvexShapeBuilder& builder, double& distanceSquared) {
 	return best;
 }
 
-Simplex runGJK(const Shape& first, const Shape& second, Vec3 initialSearchDirection) {
-	physicsMeasure.mark(PhysicsProcess::GJK);
-
-	// Log::debug("Shape::intersects");
-
-	int furthestIndex1 = first.furthestIndexInDirection(initialSearchDirection);
-	int furthestIndex2 = second.furthestIndexInDirection(-initialSearchDirection);
-	// Vec3 furthest1 = vertices[furthestIndex1];
-
-	// first point
-	Simplex s(first.vertices[furthestIndex1] - second.vertices[furthestIndex2], MinkowskiPointIndices{furthestIndex1, furthestIndex2});
-
-	// set new searchdirection to be straight at the origin
-	Vec3 searchDirection = -s.A;
-
-	for(int iteration = 0; iteration < GJK_MAX_ITER; iteration++) {
-		int furthestIndex1 = first.furthestIndexInDirection(searchDirection);
-		int furthestIndex2 = second.furthestIndexInDirection(-searchDirection);
-
-		// Vec3 furthest = this->furthestInDirection(searchDirection);
-		Vec3 newPoint = first.vertices[furthestIndex1] - second.vertices[furthestIndex2];// furthest - second.furthestInDirection(-searchDirection);
-		if(newPoint * searchDirection < 0) {
-			return s; // the best point in the direction does not go past the origin, therefore the entire difference must be on this side of the origin, not containing it, thus no collision
-		}
-
-		//simplex[simplexLength] = newPoint;
-		//simplexLength++;
-
-		s.insert(newPoint, MinkowskiPointIndices{furthestIndex1, furthestIndex2});
-
-		Vec3 AO = -s.A;
-		switch(s.order) {
-		case 4: {
-			// A is new point, at the top of the tetrahedron
-			Vec3 AB = s.B - s.A;
-			Vec3 AC = s.C - s.A;
-			Vec3 AD = s.D - s.A;
-			Vec3 nABC = AB % AC;
-			Vec3 nACD = AC % AD;
-			Vec3 nADB = AD % AB;
-
-			if(nACD * AO > 0) {
-				// remove B and continue with triangle
-				s = Simplex(s.A, s.C, s.D, s.At, s.Ct, s.Dt);
-			} else {
-				if(nABC * AO > 0) {
-					// remove D and continue with triangle
-					s = Simplex(s.A, s.B, s.C, s.At, s.Bt, s.Ct);
-				} else {
-					if(nADB * AO > 0) {
-						// remove C and continue with triangle
-						s = Simplex(s.A, s.D, s.B, s.At, s.Dt, s.Bt);
-					} else {
-						// GOTCHA! TETRAHEDRON COVERS THE ORIGIN!
-
-						/*
-						Will represent our convex polyhedron
-						*/
-
-						return s;
-
-					}
-				}
-			}
-		}
-
-
-		case 3: { // triangle, check if closest to one of the edges, point, or face
-			Vec3 AB = s.B - s.A;
-			Vec3 AC = s.C - s.A;
-			Vec3 normal = AB % AC;
-			Vec3 nAB = AB % normal;
-			Vec3 nAC = normal % AC;
-
-			if(AO * nAB > 0) {
-				if(AO*AB > 0) {
-					// edge of AB is closest, searchDirection perpendicular to AB towards O
-					s = Simplex(s.A, s.B, s.At, s.Bt);
-					searchDirection = (AO % AB) % AB;
-				} else {
-					if(AO*AC > 0) {
-						// edge AC is closest, searchDirection perpendicular to AC towards O
-						s = Simplex(s.A, s.C, s.At, s.Ct);
-						searchDirection = (AO % AC) % AC;
-					} else {
-						// Point A is closest, searchDirection is straight towards O
-						s = Simplex(s.A, s.At);
-						searchDirection = AO;
-					}
-				}
-			} else {
-				if(AO*nAC > 0) {
-					if(AO*AC > 0) {
-						// edge AC is closest, searchDirection perpendicular to AC towards O
-						s = Simplex(s.A, s.C, s.At, s.Ct);
-						searchDirection = (AO % AC) % AC;
-					} else {
-						// Point A is closest, searchDirection is straight towards O
-						s = Simplex(s.A, s.At);
-						searchDirection = AO;
-					}
-				} else {
-					// hurray! best shape is tetrahedron
-					// just find which direction to look in
-					if(normal * AO > 0) {
-						searchDirection = normal;
-					} else {
-						searchDirection = -normal;
-						s = Simplex(s.A, s.C, s.B, s.At, s.Ct, s.Bt); // invert triangle
-					}
-				}
-			}
-			break;
-		}
-
-		case 2: { // line segment, check if line, or either point closer
-					// B can't be closer since we picked a point towards the origin
-					// Just one test, to see if the line segment or A is closer
-			Vec3 BA = s.A - s.B;
-			if(AO*BA > 0) { // AO*BA > 0 means that BA and AO are in the same-ish direction, so O must be closest to A and not the line
-				s = Simplex(s.A, s.At);
-				searchDirection = AO;
-			} else {
-				// simplex remains the same
-				// new searchdirection perpendicular to the line, towards O as much as possible
-				searchDirection = (AO % BA) % BA;
-			}
-			break;
-		}
-		case 1: // single point, just go towards the origin
-			searchDirection = AO;
-			break;
+inline int furthestIndexInDirection(Vec3* vertices, int vertexCount, Vec3 direction) {
+	double bestDot = vertices[0] * direction;
+	int bestVertexIndex = 0;
+	for(int i = 1; i < vertexCount; i++) {
+		double newD = vertices[i] * direction;
+		if(newD > bestDot) {
+			bestDot = newD;
+			bestVertexIndex = i;
 		}
 	}
-	return s;
 
-
+	return bestVertexIndex;
 }
 
-void initializeBuffer(Simplex s, ComputationBuffers& b) {
-	b.vertBuf[0] = s.A;
-	b.vertBuf[1] = s.B;
-	b.vertBuf[2] = s.C;
-	b.vertBuf[3] = s.D;
+inline MinkPoint getSupport(const Shape& first, const Shape& second, Vec3 searchDirection) {
+	int furthestIndex1 = first.furthestIndexInDirection(searchDirection);
+	int furthestIndex2 = second.furthestIndexInDirection(-searchDirection);
+	return MinkPoint{first.vertices[furthestIndex1] - second.vertices[furthestIndex2], furthestIndex1, furthestIndex2 };
+	/*if(newPoint * searchDirection < 0)
+		return false;
+	if(--iteration == 0) {
+		Log::warn("GJK iteration limit reached!");
+		return false;
+	}*/
+}
+
+bool runGJKBool(const Shape& first, const Shape& second, Vec3 initialSearchDirection, Tetrahedron& simplex) {
+	physicsMeasure.mark(PhysicsProcess::GJK);
+
+	MinkPoint A(getSupport(first, second, initialSearchDirection));
+	MinkPoint B, C, D;
+
+	// set new searchdirection to be straight at the origin
+	Vec3 searchDirection = -A.p;
+	Vec3 newPoint;
+
+	// GJK 2
+	// s.A is B.p
+	// s.B is A.p
+	// line segment, check if line, or either point closer
+	// B can't be closer since we picked a point towards the origin
+	// Just one test, to see if the line segment or A is closer
+	B = getSupport(first, second, searchDirection); 
+	if(B.p * searchDirection < 0)
+		return false;
+
+	Vec3 AO = -B.p;
+	Vec3 AB = A.p - B.p;
+	searchDirection = -(AO % AB) % AB;
+	
+	C = getSupport(first, second, searchDirection);
+	if(C.p * searchDirection < 0)
+		return false;
+	// s.A is C.p  newest
+	// s.B is B.p
+	// s.C is A.p
+	// triangle, check if closest to one of the edges, point, or face
+	for(int iter = 0; iter < GJK_MAX_ITER; iter++){
+		Vec3 AO = -C.p;
+		Vec3 AB = B.p - C.p;
+		Vec3 AC = A.p - C.p;
+		Vec3 normal = AB % AC;
+		Vec3 nAB = AB % normal;
+		Vec3 nAC = normal % AC;
+
+		if(AO * nAB > 0) {
+			// edge of AB is closest, searchDirection perpendicular to AB towards O
+			A = B;
+			B = C;
+			searchDirection = -(AO % AB) % AB;
+			C = getSupport(first, second, searchDirection);
+			if(C.p * searchDirection < 0)
+				return false;
+		} else {
+			if(AO*nAC > 0) {
+				// edge of AC is closest, searchDirection perpendicular to AC towards O
+				B = C;
+				searchDirection = -(AO % AC) % AC;
+				C = getSupport(first, second, searchDirection);
+				if(C.p * searchDirection < 0)
+					return false;
+			} else {
+				// hurray! best shape is tetrahedron
+				// just find which direction to look in
+				if(normal * AO > 0) {
+					searchDirection = normal;
+				} else {
+					searchDirection = -normal;
+					// invert triangle
+					MinkPoint tmp(A);
+					A = B;
+					B = tmp;
+				}
+
+				// GJK 4
+				// s.A is D.p
+				// s.B is C.p
+				// s.C is B.p
+				// s.D is A.p
+				D = getSupport(first, second, searchDirection);
+				if(D.p * searchDirection < 0)
+					return false;
+				Vec3 AO = -D.p;
+				// A is new point, at the top of the tetrahedron
+				Vec3 AB = C.p - D.p;
+				Vec3 AC = B.p - D.p;
+				Vec3 AD = A.p - D.p;
+				Vec3 nABC = AB % AC;
+				Vec3 nACD = AC % AD;
+				Vec3 nADB = AD % AB;
+
+				if(nACD * AO > 0) {
+					// remove B and continue with triangle
+					// s = Simplex(s.A, s.C, s.D, s.At, s.Ct, s.Dt);
+					C = D;
+				} else {
+					if(nABC * AO > 0) {
+						// remove D and continue with triangle
+						// s = Simplex(s.A, s.B, s.C, s.At, s.Bt, s.Ct);
+						A = B;
+						B = C;
+						C = D;
+					} else {
+						if(nADB * AO > 0) {
+							// remove C and continue with triangle
+							//s = Simplex(s.A, s.D, s.B, s.At, s.Dt, s.Bt);
+							B = C;
+							C = D;
+						} else {
+							// GOTCHA! TETRAHEDRON COVERS THE ORIGIN!
+
+							simplex = Tetrahedron{D, C, B, A};
+							return true;
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	Log::warn("GJK iteration limit reached!");
+	return false;
+}
+
+void initializeBuffer(Tetrahedron& s, ComputationBuffers& b) {
+	b.vertBuf[0] = s.A.p;
+	b.vertBuf[1] = s.B.p;
+	b.vertBuf[2] = s.C.p;
+	b.vertBuf[3] = s.D.p;
 
 	b.triangleBuf[0] = {0,1,2};
 	b.triangleBuf[1] = {0,2,3};
 	b.triangleBuf[2] = {0,3,1};
 	b.triangleBuf[3] = {3,2,1};
 
-	b.knownVecs[0] = s.At;
-	b.knownVecs[1] = s.Bt;
-	b.knownVecs[2] = s.Ct;
-	b.knownVecs[3] = s.Dt;
+	b.knownVecs[0] = MinkowskiPointIndices{s.A.originFirst, s.A.originSecond};
+	b.knownVecs[1] = MinkowskiPointIndices{s.B.originFirst, s.B.originSecond};
+	b.knownVecs[2] = MinkowskiPointIndices{s.C.originFirst, s.C.originSecond};
+	b.knownVecs[3] = MinkowskiPointIndices{s.D.originFirst, s.D.originSecond};
 }
 
-bool runEPA(const Shape& first, const Shape& second, Simplex s, Vec3& intersection, Vec3& exitVector, ComputationBuffers& bufs) {
+bool runEPA(const Shape& first, const Shape& second, Tetrahedron& s, Vec3& intersection, Vec3& exitVector, ComputationBuffers& bufs) {
 	physicsMeasure.mark(PhysicsProcess::EPA);
 	// s.order == 4
 

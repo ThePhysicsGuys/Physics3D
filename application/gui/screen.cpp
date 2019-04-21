@@ -568,9 +568,10 @@ void Screen::refresh() {
 
 	// Pie rendering
 	graphicsMeasure.mark(GraphicsProcess::PROFILER);
-	size_t objCount = world->physicals.partCount;
+	size_t objCount = world->partCount;
 	renderDebugField("Objects", objCount, "");
 	renderDebugField("Intersections", getTheoreticalNumberOfIntersections(objCount), "");
+	renderDebugField("AVG GJK Iterations", gjkIterStats.avg(), "");
 
 	renderDebugField("TPS", physicsMeasure.getAvgTPS(), "");
 	renderDebugField("FPS", graphicsMeasure.getAvgTPS(), "");

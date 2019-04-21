@@ -271,10 +271,13 @@ Vec3 Shape::furthestInDirection(Vec3 direction) const {
 }
 
 ComputationBuffers buffers(1000, 2000);
-bool Shape::intersects(const Shape& other, Vec3& intersection, Vec3& exitVector) const {
-	Simplex result = runGJK(*this, other, Vec3(1.0, 0.0, 0.0));
+bool Shape::intersects(const Shape& other, Vec3& intersection, Vec3& exitVector, Vec3 centerConnection) const {
+	Tetrahedron result;
+	bool collides = runGJKBool(*this, other, centerConnection, result);
+	//Simplex result = runGJK(*this, other, centerConnection);
+	//bool collides = result.order == 4;
 
-	if(result.order == 4) {
+	if(collides) {
 		return runEPA(*this, other, result, intersection, exitVector, buffers);
 	} else {
 		return false;

@@ -19,3 +19,4 @@ const char * intersectionLabels[]{
 
 BreakdownAverageProfiler<300, PhysicsProcess> physicsMeasure(physicsLabels);
 HistoricTally<300, long long, IntersectionResult> intersectionStatistics(intersectionLabels);
+CircularBuffer<int, 100> gjkIterStats;

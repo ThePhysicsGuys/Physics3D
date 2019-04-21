@@ -14,7 +14,7 @@
 GravityFloorWorld::GravityFloorWorld(Vec3 gravity) : gravity(gravity) {}
 
 void GravityFloorWorld::applyExternalForces() {
-	if(selectedPhysical != nullptr && !physicals.isAnchored(selectedPhysical)) {
+	if(selectedPhysical != nullptr && !isAnchored(selectedPhysical)) {
 		// Magnet force
 		Vec3 absoluteSelectedPoint = selectedPhysical->part->cframe.localToGlobal(localSelectedPoint);
 		Vec3 delta = magnetPoint - absoluteSelectedPoint;
@@ -25,7 +25,7 @@ void GravityFloorWorld::applyExternalForces() {
 		selectedPhysical->applyMoment(angular);
 	}
 	// Gravity force
-	for(Physical& physical : physicals.iterUnAnchoredPhysicals()) {
+	for(Physical& physical : iterUnAnchoredPhysicals()) {
 		// physical.applyForceAtCenterOfMass((Vec3(0.0, 5.0, 0.0) - physical.getCenterOfMass() * 1.0) * physical.mass);
 		physical.applyForceAtCenterOfMass(gravity * physical.mass);
 	}
@@ -39,8 +39,8 @@ void GravityFloorWorld::applyExternalForces() {
 		player->parent->velocity *= 0.999;*/
 
 		Camera& camera = getCamera();
-		Vec3 playerX = camera.cframe.rotation.inverse() * Vec3(1, 0, 0);
-		Vec3 playerZ = camera.cframe.rotation.inverse() * Vec3(0, 0, 1);
+		Vec3 playerX = camera.cframe.rotation.transpose() * Vec3(1, 0, 0);
+		Vec3 playerZ = camera.cframe.rotation.transpose() * Vec3(0, 0, 1);
 		Debug::logVec(camera.cframe.position - playerZ, playerX, Debug::INFO);
 		if(handler->anyKey) {
 			Vec3 forward = -(playerZ - playerZ * Vec3(0, 1, 0)).normalize();
