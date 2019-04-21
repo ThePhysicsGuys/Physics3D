@@ -51,16 +51,21 @@ namespace GUI {
 		return Vec2(map(point.x, 0, screen.screenSize.x, -screen.aspect, screen.aspect), map(screen.screenSize.y - point.y, 0, screen.screenSize.y, -1, 1));
 	}
 
-	void intersect(Screen& screen, Vec2 mouse) {
-		Vec2 point = map(screen, mouse);
+	void intersect(Vec2 mouse) {
 		for (Component* component : components) {
-			Component* intersected = component->intersect(point);
+			Component* intersected = component->intersect(mouse);
 			if (intersected) {
 				intersectedComponent = intersected;
 				return;
 			}
 		}
 		intersectedComponent = nullptr;
+	}
+
+	bool intersectsSquare(Vec2 point, Vec2 topleft, Vec2 dimension) {
+		Vec2 halfDimension = dimension / 2;
+		Vec2 center = topleft + Vec2(halfDimension.x, -halfDimension.y);
+		return fabs(point.x - center.x) < halfDimension.x && fabs(point.y - center.y) < halfDimension.y;
 	}
 
 	void add(Component* component) {

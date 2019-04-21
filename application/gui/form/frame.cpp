@@ -28,97 +28,37 @@ Frame::Frame(double x, double y, double width, double height) : Container(Vec2(x
 };
 
 Vec2 Frame::resize() {
-	if (layout == Layout::FLOW) {
-		//Log::debug("flow");
-		// Resulting width of the container
-		double contentWidth = 0;
-		// Resulting height of the container
-		double contentHeight = 0;
-		// Width of the current row of components
-		double rowWidth = 0;
-		// Height of the current row of components
-		double rowHeight = 0;
+	dimension = layout->resize(this);
+	return dimension;
+}
 
-		for (int i = 0; i < children.size(); i++) {
-			auto child = children[i];
-			Component* component = child.first;
-			Align alignment = child.second;
-			Vec2 componentSize = component->resize();
-
-			// NO HEIGHT CHECK YET
-			if (alignment == Align::FILL) {
-				//Log::debug("fill %f, %f", componentSize.x, componentSize.y);
-				double newRowWidth = rowWidth + componentSize.x;
-				if (newRowWidth <= dimension.x || resizing) {
-					// Set component position relative to parent
-					component->position = position + Vec2(rowWidth, -contentHeight);
-
-					// End of the current row, component keeps dimension
-					rowWidth = newRowWidth;
-					rowHeight = fmax(rowHeight, componentSize.y);
-
-					// Resize the container so the component fits in
-					contentWidth = fmax(contentWidth, rowWidth);
-
-					// Next line
-					contentHeight += rowHeight;
-
-					// Reset row size
-					rowWidth = 0;
-					rowHeight = 0;
-				} else {
-					// NO CHECK IF COMPONENT WIDTH IS GREATER THAN CONTENTWIDTH
-					// Component does not fit in the current row, advance to the next row
-					contentHeight += rowHeight;
-
-					// Set component position relative to parent
-					component->position = position + Vec2(0, -contentHeight);
-
-					// Advance position
-					contentHeight += componentSize.y;
-
-					// Reset row size
-					rowWidth = 0;
-					rowHeight = 0;
-				}
-			} else if (alignment == Align::RELATIVE) {
-				//Log::debug("relative %f, %f", componentSize.x, componentSize.y);
-				double newRowWidth = rowWidth + componentSize.x;
-				if (newRowWidth <= dimension.x || resizing) {
-					// Set component position relative to parent
-					component->position = position + Vec2(rowWidth, -contentHeight);
-
-					// Add component to current row, resize row height
-					rowWidth = newRowWidth;
-					rowHeight = fmax(rowHeight, componentSize.y);
-
-					// Resize the container
-					contentWidth = fmax(contentWidth, rowWidth);
-				} else {
-					// Component does not fit in the current row, advance to the next row
-					contentHeight += rowHeight;
-
-					// Set component position relative to parent
-					component->position = position + Vec2(0, -contentHeight);
-
-					// Set new row size
-					rowWidth = componentSize.x;
-					rowHeight = componentSize.y;
-				}
-			}
-			//Log::debug("\tplaced %f, %f", component->position.x, component->position.y);
-		}
-
-
-		// Add height of last row
-		contentHeight += rowHeight;
-
-		if (resizing) {
-			dimension = Vec2(contentWidth, contentHeight);
-		}
+Component* Frame::intersect(Vec2 point) {
+	for (auto iterator = children.begin(); iterator != children.end(); iterator++) {
+		if (iterator->first->intersect(point))
+			return iterator->first;
 	}
 
-	return dimension;
+	Vec2 titleBarDimension = Vec2(dimension.x + 2 * padding, titleBarHeight);
+	Vec2 topleft = position + Vec2(-padding, padding + titleBarHeight);
+	if (GUI::intersectsSquare(point, topleft, titleBarDimension)) {
+		return this;
+	}
+
+	return nullptr;
+}
+
+void Frame::hover(Vec2 point) {
+	// Closebutton
+	Vec2 titleBarPosition = position + Vec2(-padding, padding + titleBarHeight);
+	Vec2 titleBarDimension = Vec2(dimension.x + 2 * padding, titleBarHeight);
+	Vec2 closeButtonPosition = titleBarPosition + Vec2(titleBarDimension.x - titleBarHeight + closeButtonOffset, -closeButtonOffset);
+	Vec2 closeButtonDimension = Vec2(titleBarHeight - 2 * closeButtonOffset);
+
+	if (GUI::intersectsSquare(point, closeButtonPosition, closeButtonDimension)) {
+		closeButtonOffset = 0.007;
+	} else {
+		closeButtonOffset = GUI::defaultPanelCloseButtonOffset;
+	}
 }
 
 void Frame::render() {
@@ -142,7 +82,7 @@ void Frame::render() {
 		// Close button
 		Vec2 closeButtonPosition = titleBarPosition + Vec2(titleBarDimension.x - titleBarHeight + closeButtonOffset, -closeButtonOffset);
 		Vec2 closeButtonDimension = Vec2(titleBarHeight - 2 * closeButtonOffset);
-		GUI::defaultShader->update(*closeTexture);
+		GUI::defaultShader->update(closeTexture);
 		GUI::defaultQuad->resize(closeButtonPosition, closeButtonDimension);
 		GUI::defaultQuad->render();
 

@@ -6,33 +6,19 @@
 #include <cmath>
 #include "../engine/math/vec2.h"
 
+#include "layout.h"
+
 class Component {
 public:
-
-	/*
-		Layout of the component's children
-		FLOW:	The children are placed next to eachother until they fill the width of the container,
-				much like lines of text in a paragraph
-	*/
-	enum class Layout {
-		FLOW = 0,
-	};
-
 	/* 
 		Alignment of the component within its current layout
 		FLOW:
 			FILL:	The component fills up the remaining width of the parent container
 	*/
-	enum class Align {
-		FILL = 0,
-		RELATIVE = 1
-	};
+	Align align;
 
 	/* Parent of this component */
 	Component* parent;
-
-	/* Layout of this component, this determines the positioning and dimensioning of the component */
-	Layout layout;
 
 	/* Determines if the component has a fixed size */
 	bool resizing;
@@ -59,8 +45,9 @@ public:
 	bool visible;
 
 	/* Constructors */
-	Component(Vec2 position) : position(position), dimension(Vec2(0)), layout(Layout::FLOW), resizing(true), visible(true) {};
-	Component(Vec2 position, Vec2 dimension) : position(position), dimension(dimension), layout(Layout::FLOW), resizing(false), visible(true) {};
+	Component(Vec2 position) : position(position), dimension(Vec2(0)), resizing(true), visible(true) {};
+	
+	Component(Vec2 position, Vec2 dimension) : position(position), dimension(dimension), resizing(false), visible(true) {};
 	
 	/* Returns this if the component contains the point */
 	virtual Component* intersect(Vec2 point) {
@@ -78,11 +65,11 @@ public:
 	virtual void render() = 0;
 
 	/* Drag behaviour of this component */
-	virtual void drag(double dx, double dy) {};
+	virtual void drag(Vec2 dmxy) {};
 
 	/* Hover behaviour of this component */
-	virtual void hover(double mx, double my) {};
+	virtual void hover(Vec2 mxy) {};
 
 	/* Click behaviour of this component */
-	virtual void click(double mx, double my) {};
+	virtual void click(Vec2 mxy) {};
 };

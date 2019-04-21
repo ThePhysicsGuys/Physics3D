@@ -4,13 +4,21 @@
 
 #include "../engine/math/vec2.h"
 #include "component.h"
+#include "layout.h"
 
 class Container : public Component {
 public:
+	/*
+		Layout of the container's children
+		FLOW:	The children are placed next to eachother until they fill the width of the container,
+				much like lines of text in a paragraph
+	*/
+	Layout* layout;
+
 	std::vector<std::pair<Component*, Align>> children;
 
-	Container(Vec2 position) : Component(position) {};
-	Container(Vec2 position, Vec2 dimension) : Component(position, dimension) {};
+	Container(Vec2 position) : Component(position), layout(new FlowLayout()) {};
+	Container(Vec2 position, Vec2 dimension) : Component(position, dimension), layout(new FlowLayout()) {};
 
 	void add(Component* child) {
 		add(child, Align::RELATIVE);

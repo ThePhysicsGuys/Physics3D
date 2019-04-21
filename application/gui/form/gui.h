@@ -41,7 +41,8 @@ namespace GUI {
 	void remove(Component* component);
 
 	Vec2 map(Screen& screen, Vec2 point);
-	void intersect(Screen& screen, Vec2 mouse);
+	void intersect(Vec2 mouse);
+	bool intersectsSquare(Vec2 point, Vec2 center, Vec2 dimension);
 
 	void init(GUIShader* shader, Font* font);
 	void update(Mat4f orthoMatrix);

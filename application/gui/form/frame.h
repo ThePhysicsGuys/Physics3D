@@ -20,4 +20,7 @@ public:
 
 	Vec2 resize() override;
 	void render() override;
+
+	Component* intersect(Vec2 point) override;
+	void hover(Vec2 mouse) override;
 };
