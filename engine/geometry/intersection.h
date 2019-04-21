@@ -23,6 +23,7 @@ struct Simplex {
 	Vec3 A, B, C, D;
 	MinkowskiPointIndices At, Bt, Ct, Dt;
 	int order;
+	Simplex() {}
 	Simplex(Vec3 A, MinkowskiPointIndices At) : A(A), At(At), order(1) {}
 	Simplex(Vec3 A, Vec3 B, MinkowskiPointIndices At, MinkowskiPointIndices Bt) : A(A), B(B), At(At), Bt(Bt), order(2) {}
 	Simplex(Vec3 A, Vec3 B, Vec3 C, MinkowskiPointIndices At, MinkowskiPointIndices Bt, MinkowskiPointIndices Ct) : A(A), B(B), C(C), At(At), Bt(Bt), Ct(Ct), order(3) {}
@@ -40,5 +41,16 @@ struct Simplex {
 	}
 };
 
+struct MinkPoint {
+	Vec3 p;
+	int originFirst;
+	int originSecond;
+};
+
+struct Tetrahedron {
+	MinkPoint A, B, C, D;
+};
+
 Simplex runGJK(const Shape& first, const Shape& second, Vec3 initialSearchDirection);
-bool runEPA(const Shape& first, const Shape& second, Simplex s, Vec3& intersection, Vec3& exitVector, ComputationBuffers& bufs);
+bool runGJKBool(const Shape& first, const Shape& second, Vec3 initialSearchDirection, Tetrahedron& simp);
+bool runEPA(const Shape& first, const Shape& second, Tetrahedron& s, Vec3& intersection, Vec3& exitVector, ComputationBuffers& bufs);

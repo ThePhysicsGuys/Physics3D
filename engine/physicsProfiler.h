@@ -23,3 +23,4 @@ enum class IntersectionResult {
 
 extern BreakdownAverageProfiler<300, PhysicsProcess> physicsMeasure;
 extern HistoricTally<300, long long, IntersectionResult> intersectionStatistics;
+extern CircularBuffer<int, 100> gjkIterStats;
