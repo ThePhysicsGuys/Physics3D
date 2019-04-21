@@ -3,13 +3,13 @@
 
 layout(location = 0) in vec3 vposition;
 
-out vec2 gtextureUV;
+out vec3 gposition;
 
 uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
 
 void main() {
-	gtextureUV = vposition.xy;
+	gposition = vposition;
 	gl_Position = modelMatrix * vec4(vposition, 1.0f);
 }
 
@@ -31,27 +31,44 @@ uniform vec3 viewPosition;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 
-in vec2 gtextureUV[];
+in vec3 gposition[];
 
 out vec2 ftextureUV;
 out vec3 fposition;
 out vec3 fnormal;
 out vec3 fcenter;
 
-vec3 center() {
-	return vec3(gl_in[0].gl_Position + gl_in[1].gl_Position + gl_in[2].gl_Position) / 3;
+vec3 center(bool transform) {
+	if (transform)
+		return vec3(gl_in[0].gl_Position + gl_in[1].gl_Position + gl_in[2].gl_Position) / 3;
+	else
+		return (gposition[0] + gposition[1] + gposition[2]) / 3;
 }
 
-vec3 normal() {
-	vec3 a = vec3(gl_in[0].gl_Position) - vec3(gl_in[1].gl_Position);
-	vec3 b = vec3(gl_in[2].gl_Position) - vec3(gl_in[1].gl_Position);
+vec3 normal(bool transform) {
+	vec3 a; 
+	vec3 b;
+	if (transform) {
+		a = vec3(gl_in[0].gl_Position) - vec3(gl_in[1].gl_Position);
+		b = vec3(gl_in[2].gl_Position) - vec3(gl_in[1].gl_Position);
+	} else {
+		a = gposition[0] - gposition[1];
+		b = gposition[2] - gposition[0];
+	}
 	vec3 norm = normalize(cross(a, b));
 	return -norm;
 }
 
+vec2 uv(vec3 p, vec3 n, vec3 u, vec3 v) {
+	u = normalize(u);
+	v = normalize(v);
+	p = p - dot(p, n) * n;
+	return vec2(dot(p, u), dot(p, v));
+}
+
 void main() {
-	fnormal = normal();
-	fcenter = center();
+	fnormal = normal(true);
+	fcenter = center(true);
 
 	mat4 transform = projectionMatrix * viewMatrix;
 
@@ -73,16 +90,26 @@ void main() {
 	EndPrimitive();
 	#endif
 
+	vec3 u = gposition[2] - gposition[0];
+	vec3 n = normal(false);
+	vec3 v = cross(n, u);
+	vec3 c = center(false);
+	if (dot(c-dot(c, n) * n, u) < 0) {
+		vec3 t = v;
+		v = u;
+		u = -t;
+	}
+
 	fposition = gl_in[0].gl_Position.xyz;
-	ftextureUV = vec2(1, 1);//gtextureUV[0];
+	ftextureUV = uv(gposition[0], n, u, v);
 	gl_Position = transform * gl_in[0].gl_Position; EmitVertex();
 
 	fposition = gl_in[1].gl_Position.xyz;
-	ftextureUV = vec2(0, 1);
+	ftextureUV = uv(gposition[1], n, u,v);
 	gl_Position = transform * gl_in[1].gl_Position; EmitVertex();
 
 	fposition = gl_in[2].gl_Position.xyz;
-	ftextureUV = vec2(0, 0);
+	ftextureUV = uv(gposition[2], n, u,v);
 	gl_Position = transform * gl_in[2].gl_Position; EmitVertex();
 	EndPrimitive();
 }
@@ -99,12 +126,15 @@ in vec3 fposition;
 in vec3 fnormal;
 in vec3 fcenter;
 
+vec3 normal;
+
 struct Material {
 	vec3 ambient;
 	vec3 diffuse;
 	vec3 specular;
 	float reflectance;
 	bool textured;
+	bool normalmapped;
 };
 
 struct Attenuation {
@@ -120,10 +150,12 @@ struct Light {
 	Attenuation attenuation;
 };
 
+uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 uniform Material material;
 uniform sampler2D textureSampler;
+uniform sampler2D normalSampler;
 
 const int maxLights = 4;
 uniform Light lights[maxLights];
@@ -137,19 +169,19 @@ vec3 calcLightColor(Light light) {
 	// Diffuse light
 	vec3 lightDirection = light.position - fposition;
 	vec3 toLightSource = normalize(lightDirection);
-	float diffuseFactor = max(dot(fnormal, toLightSource), 0.0);
+	float diffuseFactor = max(dot(normal, toLightSource), 0.0);
 	vec3 diffuse = material.diffuse * diffuseFactor * light.color;
 
 	// Directional light
 	vec3 directionalLight = normalize(vec3(1, 1, 0));
-	float directionalFactor = 0.4 * max(dot(fnormal, directionalLight), 0.0);
+	float directionalFactor = 0.4 * max(dot(normal, directionalLight), 0.0);
 	vec3 directional = directionalFactor * light.color;
 
 	// Specular light
 	float specularPower = 10.0f;
 	vec3 cameraDirection = normalize(-(viewMatrix * vec4(fposition, 1)).xyz);
 	vec3 fromLightSource = -toLightSource;
-	vec3 reflectedLight = normalize(reflect(fromLightSource, fnormal));
+	vec3 reflectedLight = normalize(reflect(fromLightSource, normal));
 	float specularFactor = max(dot(cameraDirection, (viewMatrix * vec4(reflectedLight, 0)).xyz), 0.0);
 	specularFactor = pow(specularFactor, specularPower);
 	vec3 specular = material.specular * material.reflectance * specularFactor * light.color;
@@ -162,7 +194,25 @@ vec3 calcLightColor(Light light) {
 	return ambient + directional + specularDiffuse;
 }
 
+mat3 rodrigues() {
+	vec3 z = vec3(0, 0, 1);
+	vec3 v = normalize(cross(z, fnormal));
+	float a = acos(dot(z, fnormal));
+	mat3 W = mat3(0, v.z, -v.y, -v.z, 0, v.x, v.y, -v.x, 0);
+	mat3 R = mat3(1) + sin(a) * W + (1 - cos(a)) * W * W;
+	return R;
+}
+
 void main() {
+	if (material.normalmapped) {
+		normal = texture(normalSampler, ftextureUV).rgb;
+		normal = normalize(normal * 2 - 1);
+		normal = normalize(modelMatrix * vec4(normal, 0)).xyz;
+		normal = rodrigues() * normal;
+	} else {
+		normal = fnormal;
+	}
+
 	vec3 lightColors = vec3(0);
 	int count = 0;
 	for (int i = 0; i < maxLights; i++) {
@@ -171,6 +221,7 @@ void main() {
 			count++;
 		}
 	}
+
 	if (material.textured) {
 		outColor = vec4(lightColors / count, 1) * texture(textureSampler, ftextureUV);
 	} else {
