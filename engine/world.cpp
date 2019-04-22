@@ -104,7 +104,6 @@ void World::processColissions() {
 	physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
 
 	for(Part& anchoredPart:iterAnchoredParts()) {
-		const Shape& transfAnchored = anchoredPart.transformed;
 		for(Part& freePart:iterFreeParts()) {
 
 			double maxRadiusBetween = anchoredPart.maxRadius + freePart.maxRadius;
@@ -117,11 +116,9 @@ void World::processColissions() {
 				continue;
 			}
 
-			const Shape& transfFree = freePart.transformed;
-
 			Vec3 intersection;
 			Vec3 exitVector;
-			if(transfAnchored.intersects(transfFree, intersection, exitVector, deltaPosition)) {
+			if(anchoredPart.intersects(freePart, intersection, exitVector)) {
 				physicsMeasure.mark(PhysicsProcess::COLISSION_HANDLING);
 				intersectionStatistics.addToTally(IntersectionResult::COLISSION, 1);
 				handleAnchoredCollision(anchoredPart, freePart, intersection, exitVector);
@@ -149,12 +146,9 @@ void World::processColissions() {
 				continue;
 			}
 
-			const Shape& transfI = p1.transformed;
-			const Shape& transfJ = p2.transformed;
-
 			Vec3 intersection;
 			Vec3 exitVector;
-			if(transfI.intersects(transfJ, intersection, exitVector, deltaPosition)) {
+			if(p1.intersects(p2, intersection, exitVector)) {
 				physicsMeasure.mark(PhysicsProcess::COLISSION_HANDLING);
 				intersectionStatistics.addToTally(IntersectionResult::COLISSION, 1);
 				handleCollision(p1, p2, intersection, exitVector);
@@ -168,19 +162,17 @@ void World::processColissions() {
 
 void World::tick(double deltaT) {
 	SharedLockGuard mutLock(lock);
-
-	Vec3* vecBuf = new Vec3[getTotalVertexCount()];
-
-	Vec3* vecBufIndex = vecBuf;
-
+#ifdef USE_TRANSFORMATIONS
 	physicsMeasure.mark(PhysicsProcess::TRANSFORMS);
+	std::shared_ptr<Vec3> vecBuf(new Vec3[getTotalVertexCount()], std::default_delete<Vec3[]>());
+	Vec3* vecBufIndex = vecBuf.get();
 	for(Part& part : *this) {
 		const Shape& curShape = part.hitbox;
 		CFrame cframe = part.cframe;
 		part.transformed = curShape.localToGlobal(cframe, vecBufIndex);
 		vecBufIndex += curShape.vertexCount;
 	}
-
+#endif
 	physicsMeasure.mark(PhysicsProcess::EXTERNALS);
 	applyExternalForces();
 
@@ -188,16 +180,15 @@ void World::tick(double deltaT) {
 
 	intersectionStatistics.nextTally();
 
+	physicsMeasure.mark(PhysicsProcess::WAIT_FOR_LOCk);
+	// mutLock.upgrade();
 	physicsMeasure.mark(PhysicsProcess::UPDATING);
-	mutLock.upgrade();
 	for(Physical& physical : iterPhysicals()) {
 		physical.update(deltaT);
 	}
 
 	physicsMeasure.mark(PhysicsProcess::OTHER);
 	processQueue();
-
-	delete[] vecBuf;
 }
 
 size_t World::getTotalVertexCount() {

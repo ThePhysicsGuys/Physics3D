@@ -9,6 +9,7 @@ enum class PhysicsProcess {
 	EPA,
 	COLISSION_OTHER,
 	COLISSION_HANDLING,
+	WAIT_FOR_LOCk,
 	UPDATING,
 	OTHER,
 	COUNT
@@ -23,4 +24,5 @@ enum class IntersectionResult {
 
 extern BreakdownAverageProfiler<300, PhysicsProcess> physicsMeasure;
 extern HistoricTally<300, long long, IntersectionResult> intersectionStatistics;
-extern CircularBuffer<int, 100> gjkIterStats;
+extern CircularBuffer<int, 100> gjkCollideIterStats;
+extern CircularBuffer<int, 100> gjkNoCollideIterStats;

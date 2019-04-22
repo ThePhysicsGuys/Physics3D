@@ -7,6 +7,7 @@ const char * physicsLabels[]{
 	"EPA",
 	"Collision",
 	"Col. Handling",
+	"Wait for lock",
 	"Updates",
 	"Other"
 };
@@ -19,4 +20,5 @@ const char * intersectionLabels[]{
 
 BreakdownAverageProfiler<300, PhysicsProcess> physicsMeasure(physicsLabels);
 HistoricTally<300, long long, IntersectionResult> intersectionStatistics(intersectionLabels);
-CircularBuffer<int, 100> gjkIterStats;
+CircularBuffer<int, 100> gjkCollideIterStats;
+CircularBuffer<int, 100> gjkNoCollideIterStats;

@@ -8,8 +8,10 @@ struct Part {
 public:
 	Physical* parent;
 	NormalizedShape hitbox;
-	Shape transformed;
 	double maxRadius;
+#ifdef USE_TRANSFORMATIONS
+	Shape transformed;
+#endif
 	CFrame cframe;
 	size_t partIndex = -1;
 	struct {
@@ -21,6 +23,7 @@ public:
 	Part() = default;
 	Part(NormalizedShape shape, CFrame position, double density, double friction);
 	Part(Shape shape, CFrame position, double density, double friction);
+	bool intersects(const Part& other, Vec3& intersection, Vec3& exitVector) const;
 };
 
 #include "physical.h"

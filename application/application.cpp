@@ -41,7 +41,7 @@
 
 #define TICK_SKIP_TIME std::chrono::milliseconds(3000)
 
-#define PROFILING_MAIN
+// #define PROFILING_MAIN
 
 Screen screen;
 GravityFloorWorld world(Vec3(0.0, -10.0, 0.0));
@@ -234,15 +234,15 @@ int main(void) {
 	Shape sphereShape = loadMesh((std::istream&) std::istringstream(getResourceAsString(SPHERE_MODEL)));
 	Part spherePart = createVisiblePart(sphereShape, CFrame(Vec3(0.0, 10.0, 0.0), fromEulerAngles(0.9, 0.1, 0.5)), 2, 0.7);
 	Part trianglePart = createVisiblePart(triangleShape, CFrame(Vec3(-2.0, 1.0, -2.0)), 10.0, 0.7);
-	for(int x = 0; x < 6; x++) {
-		for(int y = 0; y < 6; y++) {
-			for(int z = 0; z < 6; z++) {
+	for(int x = 0; x < 4; x++) {
+		for(int y = 0; y < 4; y++) {
+			for(int z = 0; z < 4; z++) {
 				cube.cframe.position = Vec3(x + 5, y + 1, z);
 				world.addObject(cube);
 				spherePart.cframe.position = Vec3(x - 5, y + 1, z);
-				//world.addObject(spherePart);
+				world.addObject(spherePart);
 				trianglePart.cframe.position = Vec3(x, y + 1, z);
-				//world.addObject(trianglePart);
+				world.addObject(trianglePart);
 			}
 		}
 	}

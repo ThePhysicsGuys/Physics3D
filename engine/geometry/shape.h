@@ -93,6 +93,7 @@ struct Shape {
 	Vec3 getNormalVecOfTriangle(Triangle triangle) const;
 
 	bool intersects(const Shape& other, Vec3& intersection, Vec3& exitVector, Vec3 centerConnection) const;
+	bool intersectsTransformed(const Shape& other, const CFrame& relativeCFrame, Vec3& intersection, Vec3& exitVector) const;
 	int furthestIndexInDirection(Vec3 direction) const;
 	Vec3 furthestInDirection(Vec3 direction) const;
 

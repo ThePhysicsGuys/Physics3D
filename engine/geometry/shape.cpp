@@ -273,12 +273,24 @@ Vec3 Shape::furthestInDirection(Vec3 direction) const {
 ComputationBuffers buffers(1000, 2000);
 bool Shape::intersects(const Shape& other, Vec3& intersection, Vec3& exitVector, Vec3 centerConnection) const {
 	Tetrahedron result;
-	bool collides = runGJKBool(*this, other, centerConnection, result);
-	//Simplex result = runGJK(*this, other, centerConnection);
-	//bool collides = result.order == 4;
-
+	bool collides = runGJK(*this, other, centerConnection, result);
+	
 	if(collides) {
-		return runEPA(*this, other, result, intersection, exitVector, buffers);
+		bool epaResult = runEPA(*this, other, result, intersection, exitVector, buffers);
+		return epaResult;
+	} else {
+		return false;
+	}
+}
+
+#include "../physicsProfiler.h"
+
+bool Shape::intersectsTransformed(const Shape& other, const CFrame& relativeCFrame, Vec3& intersection, Vec3& exitVector) const {
+	Tetrahedron result;
+	bool collides = runGJKTransformed(*this, other, relativeCFrame, relativeCFrame.position, result);
+	
+	if(collides) {
+		return runEPATransformed(*this, other, result, relativeCFrame, intersection, exitVector, buffers);
 	} else {
 		return false;
 	}

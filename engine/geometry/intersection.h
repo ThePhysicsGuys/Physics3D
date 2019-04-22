@@ -51,6 +51,7 @@ struct Tetrahedron {
 	MinkPoint A, B, C, D;
 };
 
-Simplex runGJK(const Shape& first, const Shape& second, Vec3 initialSearchDirection);
-bool runGJKBool(const Shape& first, const Shape& second, Vec3 initialSearchDirection, Tetrahedron& simp);
-bool runEPA(const Shape& first, const Shape& second, Tetrahedron& s, Vec3& intersection, Vec3& exitVector, ComputationBuffers& bufs);
+bool runGJK(const Shape& first, const Shape& second, const Vec3& initialSearchDirection, Tetrahedron& simp);
+bool runGJKTransformed(const Shape& first, const Shape& second, const CFrame& relativeCFrame, const Vec3& initialSearchDirection, Tetrahedron& simp);
+bool runEPA(const Shape& first, const Shape& second, const Tetrahedron& s, Vec3& intersection, Vec3& exitVector, ComputationBuffers& bufs);
+bool runEPATransformed(const Shape& first, const Shape& second, const Tetrahedron& s, const CFrame& relativeCFrame, Vec3& intersection, Vec3& exitVector, ComputationBuffers& bufs);
