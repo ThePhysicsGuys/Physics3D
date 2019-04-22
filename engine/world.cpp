@@ -17,7 +17,7 @@
 
 
 
-World::World() : PartContainer(20) {}
+WorldPrototype::WorldPrototype() : PartContainer(20) {}
 
 
 // typedef Part AnchoredPart;
@@ -100,9 +100,7 @@ void handleAnchoredCollision(Part& anchoredPart, Part& freePart, Vec3 collisionP
 	}
 }
 
-void World::processColissions() {
-	physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
-
+void WorldPrototype::processColissions() {
 	for(Part& anchoredPart:iterAnchoredParts()) {
 		for(Part& freePart:iterFreeParts()) {
 
@@ -160,7 +158,7 @@ void World::processColissions() {
 	}
 }
 
-void World::tick(double deltaT) {
+void WorldPrototype::tick(double deltaT) {
 	SharedLockGuard mutLock(lock);
 #ifdef USE_TRANSFORMATIONS
 	physicsMeasure.mark(PhysicsProcess::TRANSFORMS);
@@ -176,6 +174,7 @@ void World::tick(double deltaT) {
 	physicsMeasure.mark(PhysicsProcess::EXTERNALS);
 	applyExternalForces();
 
+	physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
 	processColissions();
 
 	intersectionStatistics.nextTally();
@@ -191,18 +190,18 @@ void World::tick(double deltaT) {
 	processQueue();
 }
 
-size_t World::getTotalVertexCount() {
+size_t WorldPrototype::getTotalVertexCount() {
 	size_t total = 0;
 	for(const Part& part : *this)
 		total += part.hitbox.vertexCount;
 	return total;
 }
 
-void World::addPartUnsafe(Part* part, bool anchored) {
+void WorldPrototype::addPartUnsafe(Part* part, bool anchored) {
 	add(part, anchored);
 }
 
-void World::processQueue() {
+void WorldPrototype::processQueue() {
 	std::lock_guard<std::mutex> lg(queueLock);
 
 	while(!newPartQueue.empty()) {
@@ -212,7 +211,7 @@ void World::processQueue() {
 	}
 }
 
-void World::addObject(Part* part, bool anchored) {
+void WorldPrototype::addObject(Part* part, bool anchored) {
 	if(lock.try_lock()) {
 		addPartUnsafe(part, anchored);
 		lock.unlock();
@@ -222,14 +221,14 @@ void World::addObject(Part* part, bool anchored) {
 	}
 };
 
-void World::removePart(Part* part) {
+void WorldPrototype::removePart(Part* part) {
 	this->remove(part);
 	
 }
 
-void World::applyExternalForces() {}
+void WorldPrototype::applyExternalForces() {}
 
-bool World::isValid() const {
+bool WorldPrototype::isValid() const {
 	for(size_t i = 0; i < partCount; i++) {
 		if(parts[i]->partIndex != i) {
 			Log::error("part's partIndex is not it's partIndex");

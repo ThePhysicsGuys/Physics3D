@@ -11,9 +11,9 @@
 #define PICKER_STRENGTH 50
 #define PICKER_SPEED_STRENGTH 10
 
-GravityFloorWorld::GravityFloorWorld(Vec3 gravity) : gravity(gravity) {}
+GravityWorld::GravityWorld(Vec3 gravity) : gravity(gravity) {}
 
-void GravityFloorWorld::applyExternalForces() {
+void GravityWorld::applyExternalForces() {
 	if(selectedPhysical != nullptr && !isAnchored(selectedPhysical)) {
 		// Magnet force
 		Vec3 absoluteSelectedPoint = selectedPhysical->part->cframe.localToGlobal(localSelectedPoint);
@@ -54,47 +54,4 @@ void GravityFloorWorld::applyExternalForces() {
 				player->parent->applyForceAtCenterOfMass(Vec3(0.0, 50.0 * player->parent->mass, 0.0));
 		}
 	}
-
-	// Floor force
-	/*for(Part& part:iterFreeParts()) {
-		Physical& physical = *part.parent;
-		const Shape& transformed = part.transformed;
-
-		// Floor force
-		for(int i = 0; i < transformed.vertexCount; i++) {
-			Vec3 collisionPoint = transformed.vertices[i];
-			if(collisionPoint.y >= 0) continue;
-
-			Vec3 collissionRelP1 = collisionPoint - physical.getCenterOfMass();
-
-			// double combinedInertia = 1 / (1 / physical.mass + 1 / p2.mass);
-
-			Vec3 exitVector = Vec3(0, collisionPoint.y, 0);
-
-			Vec3 depthForce = 5000 * physical.mass * exitVector;
-
-			physical.applyForce(collissionRelP1, -depthForce);
-			// p2.applyForce(collissionRelP2, depthForce);
-
-			Vec3 relativeVelocity = physical.getVelocityOfPoint(collissionRelP1);
-
-			Vec3 relVelNormalComponent = relativeVelocity * exitVector * exitVector / exitVector.lengthSquared();
-			Vec3 relVelSidewaysComponent = -relativeVelocity % exitVector % exitVector / exitVector.lengthSquared();
-
-			Debug::logVec(collisionPoint, relativeVelocity, Debug::VELOCITY);
-			Debug::logVec(collisionPoint, relVelNormalComponent, Debug::VELOCITY);
-			Debug::logVec(collisionPoint, relVelSidewaysComponent, Debug::VELOCITY);
-
-
-			if(relativeVelocity * exitVector > 0) { // moving towards the other object
-				Vec3 normalVelForce = -relVelNormalComponent * physical.mass * 10;
-				physical.applyForce(collissionRelP1, normalVelForce);
-				// p2.applyForce(collissionRelP2, -normalVelForce);
-
-				Vec3 frictionForce = -part.properties.friction * relVelSidewaysComponent * physical.mass * 10;
-				physical.applyForce(collissionRelP1, frictionForce);
-				// p2.applyForce(collissionRelP2, -frictionForce);
-			}
-		}
-	}*/
 }

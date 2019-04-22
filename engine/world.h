@@ -14,7 +14,7 @@ struct QueuedPart {
 	bool anchored;
 };
 
-class World : public PartContainer {
+class WorldPrototype : public PartContainer {
 private:
 	std::queue<QueuedPart> newPartQueue;
 	size_t getTotalVertexCount();
@@ -30,24 +30,42 @@ public:
 	Vec3 localSelectedPoint;
 	Vec3 magnetPoint;
 
-	World();
+	WorldPrototype();
 
-	World(const World&) = delete;
-	World(World&&) = delete;
-	World& operator=(const World&) = delete;
-	World& operator=(World&&) = delete;
+	WorldPrototype(const WorldPrototype&) = delete;
+	WorldPrototype(WorldPrototype&&) = delete;
+	WorldPrototype& operator=(const WorldPrototype&) = delete;
+	WorldPrototype& operator=(WorldPrototype&&) = delete;
 
 	void tick(double deltaT);
 
 	void addObject(Part* p, bool anchored = false);
-	inline void addObject(Part p, bool anchored = false) { addObject(new Part(p), anchored); }
 	void removePart(Part* p);
 	virtual void applyExternalForces();
 	bool isValid() const;
 };
 
-template<typename T = Part>
-class ManagedWorld : public World {
+template<typename T>
+class CustomPartIter {
+	PartIterator iterator;
 public:
-	
+	inline CustomPartIter(Part** current) : iterator(current) {}
+	inline T& operator*() const {
+		return static_cast<T&>(*iterator);
+	}
+
+	inline CustomPartIter& operator++() {
+		++iterator;
+		return *this;
+	}
+
+	inline bool operator!=(CustomPartIter& other) { return this->iterator != other.iterator; }
+	inline bool operator==(CustomPartIter& other) { return this->iterator == other.iterator; }
+};
+
+template<typename T = Part>
+class World : public WorldPrototype {
+public:
+	inline CustomPartIter<T> begin() { return CustomPartIter<T>(parts); }
+	inline CustomPartIter<T> end() { return CustomPartIter<T>(parts + partCount); }
 };

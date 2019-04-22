@@ -12,7 +12,6 @@
 
 #include "gui/screen.h"
 
-#include "../util/log.h"
 
 #include "tickerThread.h"
 
@@ -24,15 +23,17 @@
 #include "../engine/part.h"
 #include "../engine/world.h"
 #include "worlds.h"
+#include "extendedPart.h"
+#include "partFactory.h"
 
 #include "debug.h"
-
+#include "../util/log.h"
+#include "../engine/physicsProfiler.h"
+#include "../engine/engineException.h"
 #include "../engine/math/mathUtil.h"
 
 #include "../engine/geometry/convexShapeBuilder.h"
-#include "../engine/engineException.h"
 
-#include "../engine/physicsProfiler.h"
 
 #define _USE_MATH_DEFINES
 #include "math.h"
@@ -41,36 +42,24 @@
 
 #define TICK_SKIP_TIME std::chrono::milliseconds(3000)
 
-// #define PROFILING_MAIN
-
 Screen screen;
-GravityFloorWorld world(Vec3(0.0, -10.0, 0.0));
+GravityWorld world(Vec3(0.0, -10.0, 0.0));
 
 TickerThread physicsThread;
 
-Part* player;
+ExtendedPart* player;
 bool flying = true;
 
 
 void init();
 void setupPhysics();
-Part createVisiblePart(NormalizedShape s, CFrame position, double density, double friction);
-Part createVisiblePart(Shape s, CFrame position, double density, double friction);
-
-/*void debugCallback(unsigned  source, unsigned int type, unsigned int id, unsigned int severity, int length, const char* message, const void* userParam) {
-	if (type == GL_DEBUG_TYPE_ERROR) 
-		Log::error("(type 0x%x) %s", type, message);
-	else
-		Log::warn("(type=0x%x) %s", type, message);
-}*/
 
 Vec3 dominoBuf[8];
 Shape dominoShape = BoundingBox{-0.1, -0.7, -0.3, 0.1, 0.7, 0.3}.toShape(dominoBuf);
-int dominoID;
+PartFactory dominoFactory;
 
 void createDominoAt(Vec3 pos, Mat3 rotation) {
-	Part* domino = new Part(dominoShape, CFrame(pos, rotation), 1, 0.1);
-	domino->drawMeshId = dominoID;
+	ExtendedPart* domino = dominoFactory.produce(CFrame(pos, rotation), 1, 0.1);
 	world.addObject(domino);
 }
 
@@ -106,83 +95,46 @@ inline int furthestIndexInDirection(Vec3* vertices, int vertexCount, Vec3 direct
 	return bestVertexIndex;
 }
 
-void profiling() {
-	std::chrono::time_point<std::chrono::steady_clock> startTime = std::chrono::high_resolution_clock::now();
-	for(int i = 0; i < 10000; i++) {
-		world.tick(0.002);
-	}
-	std::chrono::time_point<std::chrono::steady_clock> endTime = std::chrono::high_resolution_clock::now();
-	std::chrono::nanoseconds delta = endTime - startTime;
-	Log::debug("Finished profiling, 10000 laps, %.9f seconds", delta * 1.0E-9);
-
-	std::cin.get();
-}
-
-
 
 
 int main(void) {
-#ifndef PROFILING_MAIN
 	init();
-#endif
-	// player = new Part(BoundingBox(0.2, 1.5, 0.2).toShape(new Vec3[8]), CFrame(Vec3(0.0, 1.0, 0.0)), 1.0, 0.000001);
+
+	dominoFactory = PartFactory(dominoShape, screen);
 	
 	int* builderRemovalBuffer = new int[1000];
 	EdgePiece* builderAddingBuffer = new EdgePiece[1000];
 
-	Part boxPart = createVisiblePart(dominoShape, CFrame(Vec3(1.5, 0.7, 0.3), fromEulerAngles(0.0, 0.2, 0.0)), 2.0, 0.7);
-	//world.addObject(boxPart);
-
-	dominoID = boxPart.drawMeshId;
+	world.addObject(createUniquePart(screen, dominoShape, CFrame(Vec3(1.5, 0.7, -7.3), fromEulerAngles(0.0, 0.2, 0.0)), 2.0, 0.7));
 
 	Vec2 floorSize(40.0, 80.0);
 	double wallHeight = 3.0;
 
-	Part floorPart = createVisiblePart(BoundingBox(floorSize.x, 0.3, floorSize.y).toShape(new Vec3[8]), CFrame(Vec3(0.0, -0.15, 0.0)), 0.2, 1.0);
-	world.addObject(floorPart, true);
+	ExtendedPart* floorExtendedPart = createUniquePart(screen, BoundingBox(floorSize.x, 0.3, floorSize.y).toShape(new Vec3[8]), CFrame(Vec3(0.0, -0.15, 0.0)), 0.2, 1.0);
+	world.addObject(floorExtendedPart, true);
 
-	Part xWallTemplate = createVisiblePart(BoundingBox(0.2, wallHeight, floorSize.y).toShape(new Vec3[8]), CFrame(Vec3(floorSize.x/2, wallHeight/2, 0.0)), 0.2, 1.0);
-	Part zWallTemplate = createVisiblePart(BoundingBox(floorSize.x, wallHeight, 0.2).toShape(new Vec3[8]), CFrame(Vec3(0.0, wallHeight / 2, floorSize.y/2)), 0.2, 1.0);
-	world.addObject(xWallTemplate, true);
-	world.addObject(zWallTemplate, true);
-	xWallTemplate.cframe = CFrame(Vec3(-floorSize.x/2, wallHeight/2, 0.0));
-	world.addObject(xWallTemplate, true);
-	zWallTemplate.cframe = CFrame(Vec3(0.0, wallHeight/2, -floorSize.y/2));
-	world.addObject(zWallTemplate, true);
+	PartFactory xWallFactory(BoundingBox(0.2, wallHeight, floorSize.y).toShape(new Vec3[8]), screen);
+	PartFactory zWallFactory(BoundingBox(floorSize.x, wallHeight, 0.2).toShape(new Vec3[8]), screen);
 
-	Part ramp = createVisiblePart(BoundingBox(10.0, 0.17, 3.0).toShape(new Vec3[8]), CFrame(Vec3(12.0, 1.5, 0.0), fromEulerAngles(M_PI / 2 * 0.2, M_PI/2, 0.0)), 0.2, 1.0);
+	world.addObject(xWallFactory.produce(CFrame(Vec3(floorSize.x / 2, wallHeight / 2, 0.0)), 0.2, 1.0), true);
+	world.addObject(zWallFactory.produce(CFrame(Vec3(0.0, wallHeight / 2, floorSize.y / 2)), 0.2, 1.0), true);
+	world.addObject(xWallFactory.produce(CFrame(Vec3(-floorSize.x / 2, wallHeight / 2, 0.0)), 0.2, 1.0), true);
+	world.addObject(zWallFactory.produce(CFrame(Vec3(0.0, wallHeight / 2, -floorSize.y / 2)), 0.2, 1.0), true);
+
+	ExtendedPart* ramp = createUniquePart(screen, BoundingBox(10.0, 0.17, 3.0).toShape(new Vec3[8]), CFrame(Vec3(12.0, 1.5, 0.0), fromEulerAngles(M_PI / 2 * 0.2, M_PI/2, 0.0)), 0.2, 1.0);
 	world.addObject(ramp, true);
 
-	/*Shape plate = BoundingBox(1.0, 0.03, 1.0).toShape(new Vec3[8]);
-	Part platePart = createVisiblePart(plate, CFrame(), 1.0, 0.3);
+	PartFactory rotatingWallFactory(BoundingBox(5.0, 3.0, 0.5).toShape(new Vec3[8]), screen);
+	ExtendedPart* rotatingWall = rotatingWallFactory.produce(CFrame(Vec3(-12, 1.5, 0.0)), 0.2, 1.0);
+	world.add(rotatingWall, true);
+	rotatingWall->parent->angularVelocity = Vec3(0, -0.7, 0);
 
-	Vec3 center(-10, 10.0, 10);
-	long long seed = 1368734354L;
+	ExtendedPart* rotatingWall2 = rotatingWallFactory.produce(CFrame(Vec3(-12, 1.5, 5.0)), 0.2, 1.0);
+	world.add(rotatingWall2, true);
+	rotatingWall2->parent->angularVelocity = Vec3(0, 0.7, 0);
 
-	for(int i = 0; i < 1000; i++) {
-		seed = (seed * seed + 3638738438487L) * seed + 387464576768764353L + seed >> 9;
-		double x = ((seed & 0xFFFF) * (1.0 / (2 << 16)) - 0.5) * 10;
-		seed = (seed * seed + 3638738438487L) * seed + 387464576768764353L + seed >> 9;
-		double y = ((seed & 0xFFFF) * (1.0 / (2 << 16)) - 0.5) * 10;
-		seed = (seed * seed + 3638738438487L) * seed + 387464576768764353L + seed >> 9;
-		double z = ((seed & 0xFFFF) * (1.0 / (2 << 16)) - 0.5) * 10;
-
-		seed = (seed * seed + 3638738438487L) * seed + 387464576768764353L + seed >> 9;
-		double rx = ((seed & 0xFFFF) * (1.0 / (2 << 16)) - 0.5) * 10;
-		seed = (seed * seed + 3638738438487L) * seed + 387464576768764353L + seed >> 9;
-		double ry = ((seed & 0xFFFF) * (1.0 / (2 << 16)) - 0.5) * 10;
-		seed = (seed * seed + 3638738438487L) * seed + 387464576768764353L + seed >> 9;
-		double rz = ((seed & 0xFFFF) * (1.0 / (2 << 16)) - 0.5) * 10;
-
-		platePart.cframe = CFrame(center + Vec3(x, y, z), fromEulerAngles(rx, ry, rz));
-		world.addObject(platePart, true);
-	}*/
-
-
-	//makeDominoStrip(20);
-	//makeDominoTower(25, 20, Vec3(-4.0, 0.0, -4.0));
-
-	// Shape tetrahedronShape = 
+	// makeDominoStrip(20);
+	// makeDominoTower(20, 10, Vec3(-4.0, 0.0, -4.0));
 
 	Vec3 newIcosaVerts[30];
 	Triangle newIcosaTriangles[40];
@@ -206,8 +158,7 @@ int main(void) {
 	}
 
 	Shape newIcosa = icosaBuilder.toShape();
-	Part constructedIcosa = createVisiblePart(newIcosa, CFrame(Vec3(10, 0, 0)), 2.0, 0.7);
-	//world.addObject(constructedIcosa);
+	ExtendedPart* constructedIcosa = createUniquePart(screen, newIcosa, CFrame(Vec3(10, 0, -10)), 2.0, 0.7);
 
 	Vec3 verts[10]{Vec3(0.0, 0.0, 0.0), Vec3(1.0, 0.0, 0.0), Vec3(0.0, 0.0, 1.0), Vec3(0.0, 1.0, 0.0)};
 	Triangle triangles[20]{{0,1,2},{0,3,1},{0,2,3},{1,3,2}};
@@ -225,52 +176,35 @@ int main(void) {
 
 	Shape constructedShape = builder.toShape();
 
-	Part constructedPart = createVisiblePart(constructedShape, CFrame(), 2.0, 0.7);
-	//world.addObject(constructedPart);
+	ExtendedPart* constructedExtendedPart = createUniquePart(screen, constructedShape, CFrame(Vec3(0.0, 2.0, -5.0)), 2.0, 0.7);
+	world.addObject(constructedExtendedPart);
 
-	
 
-	Part cube = createVisiblePart(BoundingBox{-0.49, -0.49, -0.49, 0.49, 0.49, 0.49}.toShape(new Vec3[8]), CFrame(), 1.0, 0.5);
 	Shape sphereShape = loadMesh((std::istream&) std::istringstream(getResourceAsString(SPHERE_MODEL)));
-	Part spherePart = createVisiblePart(sphereShape, CFrame(Vec3(0.0, 10.0, 0.0), fromEulerAngles(0.9, 0.1, 0.5)), 2, 0.7);
-	Part trianglePart = createVisiblePart(triangleShape, CFrame(Vec3(-2.0, 1.0, -2.0)), 10.0, 0.7);
+
+	PartFactory cubeFactory(BoundingBox{-0.49, -0.49, -0.49, 0.49, 0.49, 0.49}.toShape(new Vec3[8]), screen);
+	PartFactory sphereFactory(sphereShape, screen);
+	PartFactory triangleFactory(triangleShape, screen);
 	for(int x = 0; x < 4; x++) {
 		for(int y = 0; y < 4; y++) {
 			for(int z = 0; z < 4; z++) {
-				cube.cframe.position = Vec3(x + 5, y + 1, z);
-				world.addObject(cube);
-				spherePart.cframe.position = Vec3(x - 5, y + 1, z);
-				world.addObject(spherePart);
-				trianglePart.cframe.position = Vec3(x, y + 1, z);
-				world.addObject(trianglePart);
+				world.addObject(cubeFactory.produce(CFrame(Vec3(x + 5, y + 1, z)), 1.0, 0.2));
+				world.addObject(sphereFactory.produce(CFrame(Vec3(x - 5, y + 1, z)), 1.0, 0.2));
+				world.addObject(triangleFactory.produce(CFrame(Vec3(x, y + 1, z)), 1.0, 0.2));
 			}
 		}
 	}
 	
-	/*Part icosaPart = createVisiblePart(icosahedron, CFrame(Vec3(0.0, 2.0, 3.0), fromEulerAngles(0.1, 0.1, 0.1)), 10, 0.7);
-	world.addObject(icosaPart);
+	ExtendedPart* icosaExtendedPart = createUniquePart(screen, icosahedron, CFrame(Vec3(7.0, 2.0, -7.0), fromEulerAngles(0.1, 0.1, 0.1)), 10, 0.7);
+	world.addObject(icosaExtendedPart);
 
-	Part housePart = createVisiblePart(house, CFrame(Vec3(-1.5, 1.0, 0.0), fromEulerAngles(0.7, 0.9, 0.7)), 1.0, 0.0);
-	world.addObject(housePart);*/
+	ExtendedPart* houseExtendedPart = createUniquePart(screen, house, CFrame(Vec3(-9.5, 1.0, -5.0), fromEulerAngles(0.7, 0.9, 0.7)), 1.0, 0.0);
+	world.addObject(houseExtendedPart);
 
-	/*Shape sphereShape = loadMesh((std::istream&) std::istringstream(getResourceAsString(SPHERE_MODEL)));
-	Part spherePart = createVisiblePart(sphereShape, CFrame(Vec3(0.0, 10.0, 0.0), fromEulerAngles(0.9, 0.1, 0.5)), 2, 0.7);
-	for(int i = 0; i < 10; i++) {
-		spherePart.cframe = CFrame(Vec3(0.0, 10.0 + i, 0.0));
-		world.addObject(spherePart);
-	}*/
-
-	player = new Part(spherePart);
+	player = sphereFactory.produce(CFrame(), 1.0, 0.2);
 	player->properties.friction = 0;
 	player->drawMeshId = -1;
 
-	//Part trianglePart = createVisiblePart(triangleShape, CFrame(Vec3(-2.0, 1.0, -2.0)), 10.0, 0.7);
-	//world.addObject(trianglePart);
-	
-#ifdef PROFILING_MAIN
-	profiling();
-	return 0;
-#endif
 
 	/* Loop until the user closes the window */
 	Log::info("Started rendering");
@@ -280,7 +214,7 @@ int main(void) {
 		screen.refresh();
 		screen.graphicsMeasure.end();
 		// test
-		glfwSetWindowTitle(screen.getWindow(), std::to_string(physicsThread.getTPS()).c_str());
+		glfwSetWindowTitle(screen.getWindow(), std::to_string(physicsMeasure.getAvgTPS()).c_str());
 	}
 
 	Log::info("Closing screen");
@@ -374,28 +308,6 @@ void setupPhysics() {
 		AppDebug::logTickEnd();
 		physicsMeasure.end();
 	});
-}
-
-Part createVisiblePart(NormalizedShape shape, CFrame position, double density, double friction) {
-#ifndef PROFILING_MAIN
-	int id = screen.addMeshShape(shape);
-#else
-	int id = 0;
-#endif
-	Part part(shape, position, density, friction);
-	part.drawMeshId = id;
-	return part;
-}
-
-Part createVisiblePart(Shape shape, CFrame position, double density, double friction) {
-	Part part(shape, position, density, friction);
-#ifndef PROFILING_MAIN
-	int id = screen.addMeshShape(part.hitbox);
-#else
-	int id = 0;
-#endif
-	part.drawMeshId = id;
-	return part;
 }
 
 void toggleFlying() {

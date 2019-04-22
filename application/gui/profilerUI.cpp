@@ -37,7 +37,7 @@ void PieChart::renderPie(Screen& screen) const {
 	Vec2f curPos = Vec2f(pieSize, 0);
 
 	float totalWeight = getTotal();
-	for(PiePart p : parts) {
+	for(DataPoint p : parts) {
 		float angle = M_PI * 2 * p.weight / totalWeight;
 
 		int subdivisions = angle / MAX_ANGLE + 1;
@@ -77,7 +77,7 @@ void PieChart::renderText(Screen& screen, Font* font) const {
 	font->render(totalValue, textPos + Vec2(0.45, 0.035), Vec3f(1,1,1), 0.0006);
 
 	for(int i = 0; i < parts.size(); i++) {
-		const PiePart& p = parts[i];
+		const DataPoint& p = parts[i];
 		Vec2 linePos = textPos + Vec2(0, -i*0.035);
 		font->render(p.label, linePos, p.color, 0.0006);
 
@@ -90,7 +90,7 @@ void PieChart::renderText(Screen& screen, Font* font) const {
 	}
 }
 
-void PieChart::add(PiePart& p) {
+void PieChart::add(DataPoint& p) {
 	this->parts.push_back(p);
 }
 
@@ -107,7 +107,7 @@ void endPieRendering(Screen& screen) {
 
 float PieChart::getTotal() const {
 	float totalWeight = 0;
-	for(PiePart p : parts)
+	for(DataPoint p : parts)
 		totalWeight += p.weight;
 	return totalWeight;
 }

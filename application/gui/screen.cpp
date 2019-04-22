@@ -86,7 +86,7 @@ const char* const graphicsDebugLabels[]{
 
 Screen::Screen() : graphicsMeasure(graphicsDebugLabels) {};
 
-Screen::Screen(int width, int height, World* world) : graphicsMeasure(graphicsDebugLabels) {
+Screen::Screen(int width, int height, World<ExtendedPart>* world) : graphicsMeasure(graphicsDebugLabels) {
 	setWorld(world);
 
 	// Create a windowed mode window and its OpenGL context 
@@ -108,7 +108,7 @@ Screen::Screen(int width, int height, World* world) : graphicsMeasure(graphicsDe
 
 // Debug
 using namespace Debug;
-std::map<VecType, bool> debug_enabled{ {INFO, true}, {VELOCITY, false}, {FORCE, true}, {POSITION, true}, {MOMENT, false}, {IMPULSE, true}, {ANGULAR_VELOCITY , true} };
+std::map<VecType, bool> debug_enabled{ {INFO, false}, {VELOCITY, false}, {FORCE, false}, {POSITION, false}, {MOMENT, false}, {IMPULSE, false}, {ANGULAR_VELOCITY , false} };
 std::map<VecType, double> vecColors{ {INFO, 0.15}, {VELOCITY, 0.3}, {FORCE, 0.0}, {POSITION, 0.5}, {MOMENT, 0.1}, {IMPULSE, 0.7}, {ANGULAR_VELOCITY , 0.75} };
 bool renderPies = false;
 
@@ -230,9 +230,12 @@ void Screen::init() {
 
 	// Texture init
 	floorTexture = load("../res/textures/floor/floor_color.jpg");
-	floorNormal = load("../res/textures/metal/metal_normal.jpg");
-	material.setTexture(floorTexture);
-	material.setNormalMap(floorNormal);
+	//floorNormal = load("../res/textures/metal/metal_normal.jpg");
+	floorNormal = load("../res/textures/floor/floor_normal.jpg");
+	if(floorTexture != nullptr)
+		material.setTexture(floorTexture);
+	if(floorNormal != nullptr)
+		material.setNormalMap(floorNormal);
 
 
 	// Skybox init
@@ -288,12 +291,12 @@ void Screen::init() {
 
 	// Eventhandler init
 	
-	eventHandler.setPartRayIntersectCallback([] (Screen& screen, Part* part, Vec3 point) {
+	eventHandler.setPartRayIntersectCallback([] (Screen& screen, ExtendedPart* part, Vec3 point) {
 		screen.intersectedPart = part;
 		screen.intersectedPoint = point;
 	});
 
-	eventHandler.setPartClickCallback([] (Screen& screen, Part* part, Vec3 point) {
+	eventHandler.setPartClickCallback([] (Screen& screen, ExtendedPart* part, Vec3 point) {
 		screen.selectedPart = part;
 		screen.selectedPoint = point;
 	});
@@ -413,7 +416,7 @@ void Screen::renderPhysicals() {
 	SharedLockGuard lg(world->lock);
 
 	// Render world objects
-	for (Part& part : *world) {
+	for (ExtendedPart& part : *world) {
 		int meshId = part.drawMeshId;
 
 		// Picker code
@@ -466,7 +469,7 @@ PieChart toPieChart(BreakdownAverageProfiler<N, EnumType>& profiler, const char*
 	PieChart chart(title, toString(avgTotalTime), piePosition, pieSize);
 	for(size_t i = 0; i < profiler.size(); i++) {
 		float weight = static_cast<float>(results[i].count());
-		PiePart p = PiePart(weight, toString(results[i]), pieColors[i], profiler.labels[i]);
+		DataPoint p = DataPoint(weight, toString(results[i]), pieColors[i], profiler.labels[i]);
 		chart.add(p);
 	}
 
@@ -486,7 +489,7 @@ PieChart toPieChart(HistoricTally<N, Unit, EnumType>& tally, const char* title, 
 	PieChart chart(title, toString(avgTotal), piePosition, pieSize);
 	for(size_t i = 0; i < tally.size(); i++) {
 		float result = results[i] * 1.0f;
-		PiePart p = PiePart(result, toString(results[i]), pieColors[i], tally.labels[i]);
+		DataPoint p = DataPoint(result, toString(results[i]), pieColors[i], tally.labels[i]);
 		chart.add(p);
 	}
 
@@ -571,7 +574,8 @@ void Screen::refresh() {
 	size_t objCount = world->partCount;
 	renderDebugField("Objects", objCount, "");
 	renderDebugField("Intersections", getTheoreticalNumberOfIntersections(objCount), "");
-	renderDebugField("AVG GJK Iterations", gjkIterStats.avg(), "");
+	renderDebugField("AVG Collide GJK Iterations", gjkCollideIterStats.avg(), "");
+	renderDebugField("AVG No Collide GJK Iterations", gjkNoCollideIterStats.avg(), "");
 
 	renderDebugField("TPS", physicsMeasure.getAvgTPS(), "");
 	renderDebugField("FPS", graphicsMeasure.getAvgTPS(), "");

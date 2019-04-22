@@ -18,7 +18,6 @@ public:
 		double density;
 		double friction;
 	} properties;
-	int drawMeshId = 0;
 
 	Part() = default;
 	Part(NormalizedShape shape, CFrame position, double density, double friction);

@@ -1,12 +1,13 @@
 #pragma once
 
 #include "../engine/world.h"
+#include "extendedPart.h"
 
-class GravityFloorWorld : public World {
+class GravityWorld : public World<ExtendedPart> {
 private:
 	Vec3 gravity;
 public:
-	GravityFloorWorld(Vec3 gravity);
+	GravityWorld(Vec3 gravity);
 
 	virtual void applyExternalForces() override;
 };

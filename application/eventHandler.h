@@ -3,16 +3,16 @@
 class Screen;
 class Camera;
 
-#include "../engine/part.h"
+#include "extendedPart.h"
 #include "../engine/math/vec3.h"
 
 typedef void (*CameraMoveHandler) (Screen&, Camera*, Vec3);
 typedef void (*WindowResizeHandler) (Screen&, unsigned int, unsigned int);
-typedef void (*PartRayIntersectHandler) (Screen&, Part*, Vec3);
-typedef void (*PartDragHandler) (Screen&, Part*, Vec3);
-typedef void (*PartClickHandler) (Screen&, Part*, Vec3);
-typedef void (*PartTouchHandler) (Part*, Part*, Vec3);
-typedef void (*PartReleaseHandler) (Part*, Part*);
+typedef void (*PartRayIntersectHandler) (Screen&, ExtendedPart*, Vec3);
+typedef void (*PartDragHandler) (Screen&, ExtendedPart*, Vec3);
+typedef void (*PartClickHandler) (Screen&, ExtendedPart*, Vec3);
+typedef void (*PartTouchHandler) (ExtendedPart*, ExtendedPart*, Vec3);
+typedef void (*PartReleaseHandler) (ExtendedPart*, ExtendedPart*);
 
 class EventHandler {
 private:
@@ -21,11 +21,11 @@ private:
 public:
 	CameraMoveHandler cameraMoveHandler = [] (Screen&, Camera*, Vec3) {};
 	WindowResizeHandler windowResizeHandler = [] (Screen&, unsigned int, unsigned int) {};
-	PartRayIntersectHandler partRayIntersectHandler = [] (Screen&, Part*, Vec3) {};
-	PartDragHandler partDragHandler = [] (Screen&, Part*, Vec3) {};
-	PartClickHandler partClickHandler = [] (Screen&, Part*, Vec3) {};
-	PartTouchHandler partTouchHandler = [] (Part*, Part*, Vec3) {};
-	PartReleaseHandler partReleaseHandler = [] (Part*, Part*) {};
+	PartRayIntersectHandler partRayIntersectHandler = [] (Screen&, ExtendedPart*, Vec3) {};
+	PartDragHandler partDragHandler = [] (Screen&, ExtendedPart*, Vec3) {};
+	PartClickHandler partClickHandler = [] (Screen&, ExtendedPart*, Vec3) {};
+	PartTouchHandler partTouchHandler = [] (ExtendedPart*, ExtendedPart*, Vec3) {};
+	PartReleaseHandler partReleaseHandler = [] (ExtendedPart*, ExtendedPart*) {};
 	
 	void* getPtr() const;
 	void setPtr(void* ptr);

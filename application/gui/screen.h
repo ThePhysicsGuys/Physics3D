@@ -47,7 +47,7 @@ private:
 	void renderDebugField(const char* fieldName, T value, const char* unit);
 	int fieldIndex = 0;
 public:
-	World* world;
+	World<ExtendedPart>* world;
 	Vec2 screenSize;
 	double aspect;
 	Camera camera;
@@ -61,13 +61,13 @@ public:
 
 	// Picker
 	Vec3 ray;
-	Part* intersectedPart = nullptr;
+	ExtendedPart* intersectedPart = nullptr;
 	Vec3 intersectedPoint;
-	Part* selectedPart = nullptr;
+	ExtendedPart* selectedPart = nullptr;
 	Vec3 selectedPoint;
 
 	Screen();
-	Screen(int width, int height, World* world);
+	Screen(int width, int height, World<ExtendedPart>* world);
 
 	bool shouldClose();
 	void init();
@@ -77,7 +77,7 @@ public:
 
 	GLFWwindow* getWindow() { return window; }
 
-	void setWorld(World* world) { this->world = world; };
+	void setWorld(World<ExtendedPart>* world) { this->world = world; };
 
 	int addMeshShape(Shape mesh);
 

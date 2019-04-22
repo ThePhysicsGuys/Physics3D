@@ -8,6 +8,7 @@ class Screen;
 #include "../../engine/math/mathUtil.h"
 #include "../../engine/math/cframe.h"
 #include "../../engine/part.h"
+#include "../extendedPart.h"
 
 #include <cmath>
 
@@ -40,7 +41,7 @@ public:
 	double v0 = 0;
 	double y0;*/
 
-	Part* attachment = nullptr;
+	ExtendedPart* attachment = nullptr;
 	void update();
 	// void toggleFlying();
 	// void jump(Screen& screen, bool leftDragging);

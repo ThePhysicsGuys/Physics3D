@@ -4,6 +4,7 @@
 #include "../engine/math/mat3.h"
 #include "../engine/part.h"
 #include "gui/camera.h"
+#include "extendedPart.h"
 
 void stop(int returnCode);
 void pause();
@@ -15,7 +16,7 @@ double getSpeed();
 void runTick();
 bool isPaused();
 void createDominoAt(Vec3 pos, Mat3 rotation);
-extern Part* player;
+extern ExtendedPart* player;
 extern bool flying;
 void toggleFlying();
 Camera& getCamera();

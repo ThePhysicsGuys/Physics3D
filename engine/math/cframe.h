@@ -24,7 +24,7 @@ public:
 	}
 
 	inline Vec3 globalToLocal(Vec3 gVec) const {
-		return ~rotation * (gVec - position);
+		return rotation.transpose() * (gVec - position);
 	}
 
 	inline Vec3 localToRelative(Vec3 lVec) const {
@@ -32,7 +32,7 @@ public:
 	}
 
 	inline Vec3 relativeToLocal(Vec3 rVec) const {
-		return ~rotation * rVec;
+		return rotation.transpose() * rVec;
 	}
 
 	inline CFrame localToGlobal(CFrame lFrame) const {
@@ -40,7 +40,7 @@ public:
 	}
 
 	inline CFrame globalToLocal(CFrame gFrame) const {
-		return CFrame(~rotation*(gFrame.position - position) , ~rotation * gFrame.rotation);
+		return CFrame(rotation.transpose()*(gFrame.position - position) , rotation.transpose() * gFrame.rotation);
 	}
 	
 	inline CFrame localToRelative(CFrame lFrame) const {
@@ -48,11 +48,11 @@ public:
 	}
 
 	inline CFrame relativeToLocal(CFrame rFrame) const {
-		return CFrame(~rotation*rFrame.position, ~rotation * rFrame.rotation);
+		return CFrame(rotation.transpose()*rFrame.position, rotation.transpose() * rFrame.rotation);
 	}
 
 	inline CFrame operator~() const {
-		return CFrame(~rotation * -position, ~rotation);
+		return CFrame(rotation.transpose() * -position, rotation.transpose());
 	}
 
 	CFrame& operator+=(const Vec3& delta);
