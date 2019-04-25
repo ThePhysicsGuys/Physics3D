@@ -33,7 +33,7 @@ void updateIntersectedPhysical(Screen& screen, Vec2 mousePosition, Mat4f viewMat
 	Vec3 closestIntersectedPoint = Vec3();
 	double closestIntersectDistance = INFINITY;
 
-	screen.ray = calcRay(mousePosition, screen.screenSize, viewMatrix, projectionMatrix);
+	screen.ray = calcRay(mousePosition, screen.dimension, viewMatrix, projectionMatrix);
 	for(ExtendedPart& part : *screen.world){
 		Vec3* buffer = new Vec3[part.hitbox.vertexCount];
 		Shape transformed = part.hitbox.localToGlobal(part.cframe, buffer);

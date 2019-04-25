@@ -17,39 +17,66 @@ public:
 	*/
 	Align align;
 
-	/* Parent of this component */
+	/* 
+		Parent of this component 
+	*/
 	Component* parent;
 
-	/* Determines if the component has a fixed size */
+	/* 
+		Determines if the component has a fixed size 
+	*/
 	bool resizing;
 
 	/* 
 		The topleft edge of the container, padding not included, margin included
 		This property can be altered by its parent
 	*/
-	Vec2 position;
-
+	union {
+		struct { 
+			double x; 
+			double y;
+		};
+		Vec2 position;
+	};
 	/* 
 		The size of the container, padding not included, margin included
 		This property can be altered by its parent
 	*/
-	Vec2 dimension;
+	union {
+		struct { 
+			double width;
+			double height; 
+		};
+		Vec2 dimension;
+	};
 
-	/* Padding of this component */
+	/* 
+		Padding of this component 
+	*/
 	double padding;
 
-	/* Margin of this component */
+	/* 
+		Margin of this component
+	*/
 	double margin;
 
-	/* Determines if this component and its content should be rendered */
+	/* 
+		Determines if this component and its content should be rendered 
+	*/
 	bool visible;
 
-	/* Constructors */
-	Component(Vec2 position) : position(position), dimension(Vec2(0)), resizing(true), visible(true) {};
-	
+	/* 
+		Constructors
+	*/
 	Component(Vec2 position, Vec2 dimension) : position(position), dimension(dimension), resizing(false), visible(true) {};
+	Component(Vec2 position) : position(position), dimension(Vec2()), resizing(true), visible(true) {};
+	Component(double x, double y, double width, double height) : Component(Vec2(x, y), Vec2(width, height)) {};
+	Component(double x, double y) : Component(Vec2(x, y)) {};
 	
-	/* Returns this if the component contains the point */
+	
+	/* 
+		Returns this if the component contains the point 
+	*/
 	virtual Component* intersect(Vec2 point) {
 		Vec2 halfDimension = dimension / 2;
 		Vec2 center = position + Vec2(halfDimension.x, -halfDimension.y);
@@ -58,24 +85,38 @@ public:
 		return nullptr;
 	}
 
-	/* Returns the minimal size of the container */
+	/* 
+		Returns the minimal size of the container 
+	*/
 	virtual Vec2 resize() = 0;
 	
-	/* Renders the component without resizing it */
+	/* 
+		Renders the component without resizing it 
+	*/
 	virtual void render() = 0;
 
-	/* Drag behaviour of this component */
+	/* 
+		Drag behaviour of this component 
+	*/
 	virtual void drag(Vec2 dmxy) {};
 
-	/* Hover behaviour of this component */
+	/* 
+		Hover behaviour of this component 
+	*/
 	virtual void hover(Vec2 mxy) {};
 
-	/* Click behaviour of this component */
+	/* 
+		Click behaviour of this component 
+	*/
 	virtual void click(Vec2 mxy) {};
 
-	/* Enter behaviour of this component */
+	/* 
+		Enter behaviour of this component 
+	*/
 	virtual void enter() {};
 
-	/* Exit behaviour of this component */
+	/* 
+		Exit behaviour of this component 
+	*/
 	virtual void exit() {};
 };

@@ -47,7 +47,7 @@ namespace GUI {
 
 	// Shader
 	extern Quad* defaultQuad;
-	extern GUIShader* defaultShader;
+	extern QuadShader* defaultShader;
 	
 	// Label
 	extern double defaultLabelPadding;
@@ -80,7 +80,7 @@ namespace GUI {
 	void intersect(Vec2 mouse);
 	bool intersectsSquare(Vec2 point, Vec2 topleft, Vec2 dimension);
 
-	void init(GUIShader* shader, Font* font);
+	void init(QuadShader* shader, Font* font);
 	void update(Mat4f orthoMatrix);
 	void render(Mat4f orthoMatrix);
 };

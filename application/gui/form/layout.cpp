@@ -2,8 +2,6 @@
 #include "container.h"
 
 Vec2 FlowLayout::resize(Container* container) {
-	Vec2 dimension = container->dimension;
-
 	// Resulting width of the container
 	double contentWidth = 0;
 	// Resulting height of the container
@@ -23,7 +21,7 @@ Vec2 FlowLayout::resize(Container* container) {
 		if (alignment == Align::FILL) {
 			//Log::debug("fill %f, %f", componentSize.x, componentSize.y);
 			double newRowWidth = rowWidth + componentSize.x;
-			if (newRowWidth <= dimension.x || container->resizing) {
+			if (newRowWidth <= container->width || container->resizing) {
 				// Set component position relative to parent
 				component->position = container->position + Vec2(rowWidth, -contentHeight);
 
@@ -58,7 +56,7 @@ Vec2 FlowLayout::resize(Container* container) {
 		} else if (alignment == Align::RELATIVE) {
 			//Log::debug("relative %f, %f", componentSize.x, componentSize.y);
 			double newRowWidth = rowWidth + componentSize.x;
-			if (newRowWidth <= dimension.x || container->resizing) {
+			if (newRowWidth <= container->width || container->resizing) {
 				// Set component position relative to parent
 				component->position = container->position + Vec2(rowWidth, -contentHeight);
 
@@ -86,8 +84,8 @@ Vec2 FlowLayout::resize(Container* container) {
 	contentHeight += rowHeight;
 
 	if (container->resizing) {
-		dimension = Vec2(contentWidth, contentHeight);
+		container->dimension = Vec2(contentWidth, contentHeight);
 	}
 
-	return dimension;
+	return container->dimension;
 }

@@ -45,7 +45,7 @@ namespace GUI {
 	Component* selectedComponent;
 
 	// Shader
-	GUIShader* defaultShader = nullptr;
+	QuadShader* defaultShader = nullptr;
 	Quad* defaultQuad = nullptr;
 
 	// Label
@@ -72,7 +72,7 @@ namespace GUI {
 	Vec4 defaultFontColor = Vec4(0, 0, 0, 1);
 	double defaultFontSize = 0.001;
 
-	void init(GUIShader* shader, Font* font) {
+	void init(QuadShader* shader, Font* font) {
 		GUI::defaultFont = font;
 		GUI::defaultShader = shader;
 		GUI::defaultQuad = new Quad();
@@ -89,7 +89,7 @@ namespace GUI {
 	}
 
 	Vec2 map(Screen& screen, Vec2 point) {
-		return Vec2(map(point.x, 0, screen.screenSize.x, -screen.aspect, screen.aspect), map(screen.screenSize.y - point.y, 0, screen.screenSize.y, -1, 1));
+		return Vec2(map(point.x, 0, screen.dimension.x, -screen.aspect, screen.aspect), map(screen.dimension.y - point.y, 0, screen.dimension.y, -1, 1));
 	}
 
 	void intersect(Vec2 mouse) {

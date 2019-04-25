@@ -19,8 +19,8 @@ public:
 	double rspeed;
 	bool flying;
 
-	Camera(Vec3 position, Mat3 rotation) : cframe(CFrame(position, rotation)), speed(0.5), rspeed(0.5), flying(true) {};
-	Camera() : cframe(CFrame()), speed(0.5), rspeed(0.5), flying(true) {};
+	Camera(Vec3 position, Mat3 rotation) : cframe(CFrame(position, rotation)), speed(0.35), rspeed(0.04), flying(true) {};
+	Camera() : cframe(CFrame()), speed(0.35), rspeed(0.04), flying(true) {};
 
 	void setPosition(Vec3 position);
 	void setPosition(double x, double y, double z);
@@ -34,15 +34,7 @@ public:
 	void move(Screen& screen, double dx, double dy, double dz, bool leftDragging);
 	void move(Screen& screen, Vec3 delta, bool leftDragging);
 
-	/*bool airborne = false;
-	double timestamp = 0;
-	double height = 1;
-	double g = 0.12;
-	double v0 = 0;
-	double y0;*/
-
 	ExtendedPart* attachment = nullptr;
 	void update();
-	// void toggleFlying();
-	// void jump(Screen& screen, bool leftDragging);
+
 };

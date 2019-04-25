@@ -6,13 +6,13 @@
 #include "../util/log.h"
 #include "../engine/math/mathUtil.h"
 
-Panel::Panel(double x, double y) : Container(Vec2(x, y)) {
+Panel::Panel(double x, double y) : Container(x, y) {
 	this->backgroundColor = GUI::defaultPanelBackgroundColor;
 	this->padding = GUI::defaultPanelPadding;
 	this->margin = GUI::defaultPanelMargin;
 };
 
-Panel::Panel(double x, double y, double width, double height) : Container(Vec2(x, y), Vec2(width, height)) {
+Panel::Panel(double x, double y, double width, double height) : Container(x, y, width, height) {
 	this->backgroundColor = GUI::defaultPanelBackgroundColor;
 	this->padding = GUI::defaultPanelPadding;
 	this->margin = GUI::defaultPanelMargin;

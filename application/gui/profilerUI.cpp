@@ -96,7 +96,7 @@ void PieChart::add(DataPoint& p) {
 
 void startPieRendering(Screen& screen) {
 	glUseProgram(0);
-	Vec2 size = screen.screenSize;
+	Vec2 size = screen.dimension;
 	glPushMatrix();
 	glScalef(size.y / size.x, 1.0f, 1.0f);
 }

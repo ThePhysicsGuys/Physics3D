@@ -7,10 +7,9 @@ Label::Label(std::string text, double x, double y, double size) : Label(text, x,
 
 Label::Label(std::string text, double x, double y, double size, Vec4 color) : Label(text, x, y, size, color, GUI::defaultFont) {};
 
-Label::Label(std::string text, double x, double y, double scale, Vec4 color, Font* font) : Component(Vec2(x, y)) {
+Label::Label(std::string text, double x, double y, double scale, Vec4 color, Font* font) : Component(x, y) {
 	this->font = font;
 	this->text = text;
-	this->position = Vec2(x, y);
 	this->scale = scale;
 	this->padding = GUI::defaultLabelPadding;
 	this->margin = GUI::defaultLabelMargin;

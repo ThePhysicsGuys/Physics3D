@@ -3,10 +3,12 @@
 
 layout(location = 0) in vec4 positions;
 
+uniform mat4 projectionMatrix;
+
 out vec2 ftextureUV;
 
 void main() {
-	gl_Position = vec4(positions.xy, 0.0, 1.0);
+	gl_Position = projectionMatrix * vec4(positions.x, positions.y, 0.0, 1.0);
 	ftextureUV = positions.zw;
 }
 
@@ -15,11 +17,14 @@ void main() {
 #shader fragment
 #version 330 core
 
-in vec2 ftextureUV;
 out vec4 outColor;
 
+in vec2 ftextureUV;
+
+uniform bool textured;
 uniform sampler2D textureSampler;
+uniform vec4 color;
 
 void main() {
-	outColor = texture(textureSampler, ftextureUV);
+	outColor = (textured) ? texture(textureSampler, ftextureUV) : color;
 }

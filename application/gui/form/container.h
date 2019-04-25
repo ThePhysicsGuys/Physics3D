@@ -17,20 +17,37 @@ public:
 	*/
 	Layout* layout;
 
+	/*
+		Children of this container, ordered by z-index
+	*/
 	OrderedVector<std::pair<Component*, Align>> children;
 
+	/*
+		Constructors
+	*/
 	Container(Vec2 position) : Component(position), layout(new FlowLayout()) {};
 	Container(Vec2 position, Vec2 dimension) : Component(position, dimension), layout(new FlowLayout()) {};
+	Container(double x, double y, double width, double height) : Container(Vec2(x, y), Vec2(width, height)) {};
+	Container(double x, double y) : Container(Vec2(x, y)) {};
 
+	/*
+		Adds the child to the end of the container
+	*/
 	void add(Component* child) {
 		add(child, Align::RELATIVE);
 	}
 
+	/*
+		Adds the child to the end of the container with a given alignment
+	*/
 	void add(Component* child, Align alignment) {
 		child->parent = this;
 		children.add(std::make_pair(child, alignment));
 	}
 
+	/*
+		Returns the child with its alignment 
+	*/
 	std::pair<Component*, Align> get(Component* child) {
 		for (auto iterator = children.begin(); iterator != children.end(); ++iterator) {
 			if (child == iterator->first)

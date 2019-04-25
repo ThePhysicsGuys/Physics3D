@@ -74,47 +74,4 @@ void Camera::update() {
 	if(attachment != nullptr) {
 		cframe.position = attachment->cframe.position;
 	}
-	/*if (!flying) {
-		double y = 0;
-		if (airborne) {
-			double y0 = cframe.position.y - height;
-			double t = glfwGetTime() - timestamp;
-			y = y0 + v0 * t - g * t * t / 2;
-			if (y <= 0) {
-				y = 0;
-				airborne = false;
-				v0 = 0;
-			}
-		}
-		cframe.position.y = y + height;
-	}*/
 }
-
-/*void Camera::toggleFlying() {
-	/*if (!flying) {
-		flying = true;
-		airborne = true;
-		v0 = 0;
-	} else {
-		flying = false;
-		if (cframe.position.y > height) {
-			airborne = true;
-			timestamp = glfwGetTime();
-			y0 = cframe.position.y;
-			v0 = 0;
-		} else {
-			airborne = false;
-			cframe.position = height;
-			v0 = 0;
-		}
-	}
-}
-
-void Camera::jump(Screen& screen, bool leftDragging) {
-	if (!airborne) {
-		airborne = true;
-		timestamp = glfwGetTime();
-		y0 = cframe.position.y;
-		v0 = (y0 > height) ? 0 : 0.07;
-	}
-}*/

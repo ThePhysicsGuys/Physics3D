@@ -190,18 +190,7 @@ struct BasicNormalShader : public ShaderProgram {
 
 struct QuadShader : public ShaderProgram {
 	QuadShader() : ShaderProgram() {}
-	QuadShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 1, "textureSampler") {}
-
-	void update(Texture* texture) {
-		bind();
-		texture->bind();
-		shader.setUniform("textureSampler", texture->unit);
-	}
-};
-
-struct GUIShader : public ShaderProgram {
-	GUIShader() : ShaderProgram() {}
-	GUIShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 4, "projectionMatrix", "color", "textureSampler", "textured") {}
+	QuadShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 4, "projectionMatrix", "color", "textureSampler", "textured") {}
 
 	void update(Mat4 orthoMatrix) {
 		bind();

@@ -4,8 +4,13 @@ template<typename N>
 struct Vec2Template {
 public:
 
-	N x;
-	N y;
+	union {
+		struct {
+			N x;
+			N y;
+		};
+		N v[2];
+	};
 
 	Vec2Template() : x(0), y(0) {}
 	Vec2Template(N v) : x(v), y(v) {};

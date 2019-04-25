@@ -4,10 +4,15 @@ template<typename N>
 struct Vec4Template {
 public:
 
-	N x;
-	N y;
-	N z;
-	N w;
+	union {
+		struct {
+			N x;
+			N y;
+			N z;
+			N w;
+		};
+		N v[4];
+	};
 
 	Vec4Template() : x(0), y(0), z(0), w(0) {};
 	Vec4Template(N v) : x(v), y(v), z(v), w(v) {};
