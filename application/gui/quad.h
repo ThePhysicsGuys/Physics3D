@@ -10,14 +10,11 @@ private:
 
 public:
 	void resize(Vec2 position, Vec2 dimension) {
-		float vertices[6][4] = {
+		float vertices[4][4] = {
 			{ position.x,				position.y				, 0, 1},
 			{ position.x,				position.y - dimension.y, 0, 0},
 			{ position.x + dimension.x, position.y - dimension.y, 1, 0},
-
-			{ position.x,				position.y				, 0, 1},
-			{ position.x + dimension.x,	position.y - dimension.y, 1, 0},
-			{ position.x + dimension.x, position.y				, 1, 1}
+			{ position.x + dimension.x, position.y				, 1, 1} 
 		};
 
 		glBindVertexArray(vao);
@@ -34,7 +31,7 @@ public:
 		glBindVertexArray(vao);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 4 * 4, NULL, GL_DYNAMIC_DRAW);
 
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
@@ -45,9 +42,17 @@ public:
 		resize(Vec2(-1, 1), Vec2(2));
 	}
 
-	void render() {
+	void render(int mode) {
+		glPolygonMode(GL_FRONT_AND_BACK, mode);
+
 		glBindVertexArray(vao);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glDrawArrays(GL_QUADS, 0, 4);
 		glBindVertexArray(0);
+
+		glPolygonMode(GL_FRONT_AND_BACK, mode);
+	}
+
+	void render() {
+		render(GL_FILL);
 	}
 };
