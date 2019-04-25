@@ -173,9 +173,10 @@ Quad* quad = nullptr;
 // GUI
 Frame* frame1 = nullptr;
 Frame* frame2 = nullptr;
-Label* label1 = nullptr;
-Label* label2 = nullptr;
-Label* label3 = nullptr;
+Panel* panel1 = nullptr;
+Panel* panel2 = nullptr;
+Panel* panel3 = nullptr;
+Panel* panel4 = nullptr;
 
 Panel* mouse = nullptr;
 
@@ -262,15 +263,21 @@ void Screen::init() {
 
 	// GUI init
 	GUI::init(&guiShader, font);
-	frame1 = new Frame(0, 0);
-	frame2 = new Frame(0.2, 0.2);
-	label1 = new Label("First", 0, 0, GUI::defaultFontSize, Vec4(1, 0, 0, 1));
-	label2 = new Label("Second", 0, 0, GUI::defaultFontSize, Vec4(0, 1, 0, 1));
-	label3 = new Label("Third", 0, 0, GUI::defaultFontSize, Vec4(0, 0, 1, 1));
-	frame1->add(label1);
-	frame1->add(label2);
+	frame1 = new Frame(0.7, 0.7);
+	frame2 = new Frame();
+	panel1 = new Panel(0, 0, 0.15, 0.15);
+	panel2 = new Panel(0, 0, 0.15, 0.15);
+	panel3 = new Panel(0, 0, 0.15, 0.15);
+	panel4 = new Panel(0, 0, 0.15, 0.15);
+	panel1->backgroundColor = GUI::COLOR::OLIVE;
+	panel2->backgroundColor = GUI::COLOR::YELLOW;
+	panel3->backgroundColor = GUI::COLOR::RED;
+	panel4->backgroundColor = GUI::COLOR::AQUA;
+	frame2->add(panel1);
 	frame1->add(frame2);
-	frame2->add(label3);
+	frame1->add(panel2, Align::FILL);
+	frame1->add(panel3);
+	frame1->add(panel4, Align::FILL);
 	GUI::add(frame1);
 
 

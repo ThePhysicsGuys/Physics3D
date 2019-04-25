@@ -5,30 +5,42 @@
 #include "../util/log.h"
 #include "../engine/math/mathUtil.h"
 
-Frame::Frame(double x, double y) : Container(Vec2(x, y)) {
-	this->backgroundColor = GUI::defaultPanelBackgroundColor;
-	this->padding = GUI::defaultPanelPadding;
-	this->margin = GUI::defaultPanelMargin;
+Frame::Frame() : Frame(0, 0) {};
 
-	this->titleBarColor = GUI::defaultPanelTitleBarColor;
-	this->titleBarHeight = GUI::defaultPanelTitleBarHeight;
-	this->closeTexture = GUI::defaultPanelCloseTexture;
-	this->closeButtonOffset = GUI::defaultPanelCloseButtonOffset;
+Frame::Frame(double x, double y) : Container(Vec2(x, y)) {
+	this->backgroundColor = GUI::defaultFrameBackgroundColor;
+	this->padding = GUI::defaultFramePadding;
+	this->margin = GUI::defaultFrameMargin;
+
+	this->titleBarColor = GUI::defaultFrameTitleBarColor;
+	this->titleBarHeight = GUI::defaultFrameTitleBarHeight;
+	this->closeTexture = GUI::defaultFrameCloseTexture;
+	this->closeButtonOffset = GUI::defaultFrameCloseButtonOffset;
 };
 
 Frame::Frame(double x, double y, double width, double height) : Container(Vec2(x, y), Vec2(width, height)) {
-	this->backgroundColor = GUI::defaultPanelBackgroundColor;
-	this->padding = GUI::defaultPanelPadding;
-	this->margin = GUI::defaultPanelMargin;
+	this->backgroundColor = GUI::defaultFrameBackgroundColor;
+	this->padding = GUI::defaultFramePadding;
+	this->margin = GUI::defaultFrameMargin;
 
-	this->titleBarHeight = GUI::defaultPanelTitleBarHeight;
-	this->titleBarColor = GUI::defaultPanelTitleBarColor;
-	this->closeTexture = GUI::defaultPanelCloseTexture;
-	this->closeButtonOffset = GUI::defaultPanelCloseButtonOffset;
+	this->titleBarHeight = GUI::defaultFrameTitleBarHeight;
+	this->titleBarColor = GUI::defaultFrameTitleBarColor;
+	this->closeTexture = GUI::defaultFrameCloseTexture;
+	this->closeButtonOffset = GUI::defaultFrameCloseButtonOffset;
 };
 
 Vec2 Frame::resize() {
+	Vec2 positionOffset = Vec2(padding, -padding - titleBarHeight);
+	Vec2 dimensionOffset = Vec2(2 * padding, 2 * padding + titleBarHeight);
+	
+	position += positionOffset;
+	dimension -= dimensionOffset;
+	
 	dimension = layout->resize(this);
+	
+	position -= positionOffset;
+	dimension += dimensionOffset;
+	
 	return dimension;
 }
 
@@ -38,9 +50,7 @@ Component* Frame::intersect(Vec2 point) {
 			return iterator->first;
 	}
 
-	Vec2 titleBarDimension = Vec2(dimension.x + 2 * padding, titleBarHeight);
-	Vec2 topleft = position + Vec2(-padding, padding + titleBarHeight);
-	if (GUI::intersectsSquare(point, topleft, titleBarDimension)) {
+	if (GUI::intersectsSquare(point, position, dimension)) {
 		return this;
 	}
 
@@ -49,16 +59,22 @@ Component* Frame::intersect(Vec2 point) {
 
 void Frame::hover(Vec2 point) {
 	// Closebutton
-	Vec2 titleBarPosition = position + Vec2(-padding, padding + titleBarHeight);
-	Vec2 titleBarDimension = Vec2(dimension.x + 2 * padding, titleBarHeight);
+	Vec2 titleBarPosition = position;
+	Vec2 titleBarDimension = Vec2(dimension.x, titleBarHeight);
 	Vec2 closeButtonPosition = titleBarPosition + Vec2(titleBarDimension.x - titleBarHeight + closeButtonOffset, -closeButtonOffset);
 	Vec2 closeButtonDimension = Vec2(titleBarHeight - 2 * closeButtonOffset);
 
 	if (GUI::intersectsSquare(point, closeButtonPosition, closeButtonDimension)) {
-		closeButtonOffset = 0.007;
-	} else {
-		closeButtonOffset = GUI::defaultPanelCloseButtonOffset;
-	}
+		children.select(get(this));
+	} 
+}
+
+void Frame::enter() {
+	Log::debug("Enter frame");
+}
+
+void Frame::exit() {
+	Log::debug("Exit frame");
 }
 
 void Frame::render() {
@@ -66,15 +82,15 @@ void Frame::render() {
 		resize();
 
 		// TitleBar
-		Vec2 titleBarPosition = position + Vec2(-padding, padding + titleBarHeight);
-		Vec2 titleBarDimension = Vec2(dimension.x + 2 * padding, titleBarHeight);
+		Vec2 titleBarPosition = position;
+		Vec2 titleBarDimension = Vec2(dimension.x, titleBarHeight);
 		GUI::defaultShader->update(titleBarColor);
 		GUI::defaultQuad->resize(titleBarPosition, titleBarDimension);
 		GUI::defaultQuad->render();
 
 		// Padding
-		Vec2 offsetPosition = position + Vec2(-padding, padding);
-		Vec2 offsetDimension = dimension + Vec2(padding) * 2;
+		Vec2 offsetPosition = titleBarPosition + Vec2(0, -titleBarHeight);
+		Vec2 offsetDimension = dimension + Vec2(0, -titleBarHeight);
 		GUI::defaultShader->update(backgroundColor);
 		GUI::defaultQuad->resize(offsetPosition, offsetDimension);
 		GUI::defaultQuad->render();
@@ -87,9 +103,18 @@ void Frame::render() {
 		GUI::defaultQuad->render();
 
 		// Content, no margin yet
+		Vec2 contentPosition = position + Vec2(padding, -padding - titleBarHeight);
+		Vec2 contentDimension = dimension - Vec2(2 * padding, 2 * padding + titleBarHeight);
 		GUI::defaultShader->update(backgroundColor);
-		GUI::defaultQuad->resize(position, dimension);
+		GUI::defaultQuad->resize(contentPosition, contentDimension);
 		GUI::defaultQuad->render();
+
+		// Outline
+		Vec2 outlinePosition = titleBarPosition;
+		Vec2 outlineDimension = dimension;
+		GUI::defaultShader->update(GUI::COLOR::NAVY);
+		GUI::defaultQuad->resize(outlinePosition, outlineDimension);
+		GUI::defaultQuad->render(GL_LINE);
 
 		renderChildren();
 	}

@@ -204,14 +204,14 @@ mat3 rodrigues() {
 }
 
 void main() {
-	if (material.normalmapped) {
+	/*if (material.normalmapped) {
 		normal = texture(normalSampler, ftextureUV).rgb;
 		normal = normalize(normal * 2 - 1);
 		normal = normalize(modelMatrix * vec4(normal, 0)).xyz;
 		normal = rodrigues() * normal;
-	} else {
+	} else {*/
 		normal = fnormal;
-	}
+	/*}*/
 
 	vec3 lightColors = vec3(0);
 	int count = 0;

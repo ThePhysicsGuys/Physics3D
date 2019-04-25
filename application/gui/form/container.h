@@ -3,6 +3,8 @@
 #include <vector>
 
 #include "../engine/math/vec2.h"
+
+#include "orderedVector.h"
 #include "component.h"
 #include "layout.h"
 
@@ -15,7 +17,7 @@ public:
 	*/
 	Layout* layout;
 
-	std::vector<std::pair<Component*, Align>> children;
+	OrderedVector<std::pair<Component*, Align>> children;
 
 	Container(Vec2 position) : Component(position), layout(new FlowLayout()) {};
 	Container(Vec2 position, Vec2 dimension) : Component(position, dimension), layout(new FlowLayout()) {};
@@ -26,20 +28,28 @@ public:
 
 	void add(Component* child, Align alignment) {
 		child->parent = this;
-		children.push_back(std::make_pair(child, alignment));
+		children.add(std::make_pair(child, alignment));
 	}
 
+	std::pair<Component*, Align> get(Component* child) {
+		for (auto iterator = children.begin(); iterator != children.end(); ++iterator) {
+			if (child == iterator->first)
+				return *iterator;
+		}
+	}
+
+	// Needs to be optimized
 	void remove(Component* child) {
-		for (auto iterator = children.begin(); iterator != children.end(); iterator++) {
+		for (auto iterator = children.begin(); iterator != children.end(); ++iterator) {
 			if (child == iterator->first) {
-				children.erase(iterator);
+				children.remove(iterator);
 				return;
 			}
 		}
 	}
 
 	virtual Component* intersect(Vec2 point) {
-		for (auto iterator = children.begin(); iterator != children.end(); iterator++) {
+		for (auto iterator = children.begin(); iterator != children.end(); ++iterator) {
 			if (iterator->first->intersect(point))
 				return iterator->first;
 		}

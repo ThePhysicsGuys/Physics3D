@@ -15,6 +15,7 @@ public:
 	Texture* closeTexture;
 	double closeButtonOffset;
 
+	Frame();
 	Frame(double x, double y);
 	Frame(double x, double y, double width, double height);
 
@@ -22,5 +23,8 @@ public:
 	void render() override;
 
 	Component* intersect(Vec2 point) override;
+
 	void hover(Vec2 mouse) override;
+	void enter() override;
+	void exit() override;
 };

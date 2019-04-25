@@ -72,4 +72,10 @@ public:
 
 	/* Click behaviour of this component */
 	virtual void click(Vec2 mxy) {};
+
+	/* Enter behaviour of this component */
+	virtual void enter() {};
+
+	/* Exit behaviour of this component */
+	virtual void exit() {};
 };
