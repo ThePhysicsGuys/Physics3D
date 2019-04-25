@@ -18,19 +18,6 @@ class StandardInputHandler;
 #include "indexedMesh.h"
 #include "../standardInputHandler.h"
 
-enum GraphicsProcess {
-	UPDATE,
-	SKYBOX,
-	VECTORS,
-	PHYSICALS,
-	LIGHTING,
-	ORIGIN,
-	PROFILER,
-	FINALIZE,
-	OTHER,
-	COUNT
-};
-
 bool initGLFW();
 bool initGLEW();
 
@@ -43,18 +30,13 @@ private:
 
 	void renderSkybox();
 	void renderPhysicals();
-	template<typename T>
-	void renderDebugField(const char* fieldName, T value, const char* unit);
-	int fieldIndex = 0;
 public:
 	World<ExtendedPart>* world;
-	Vec2 screenSize;
+	Vec2 dimension;
 	double aspect;
 	Camera camera;
 	EventHandler eventHandler;
 	Properties properties;
-
-	BreakdownAverageProfiler<60, GraphicsProcess> graphicsMeasure;
 
 	FrameBuffer* modelFrameBuffer = nullptr;
 	FrameBuffer* screenFrameBuffer = nullptr;
@@ -77,12 +59,11 @@ public:
 
 	GLFWwindow* getWindow() { return window; }
 
-	void setWorld(World<ExtendedPart>* world) { this->world = world; };
+	void setWorld(World<ExtendedPart>* world) { 
+		this->world = world;
+	};
 
 	int addMeshShape(Shape mesh);
-
-	void toggleDebugVecType(Debug::VecType t);
 };
 
-extern bool renderPies;
 extern StandardInputHandler* handler;

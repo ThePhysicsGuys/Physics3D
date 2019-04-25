@@ -4,6 +4,7 @@
 #include "gui/picker.h"
 #include "gui/form/gui.h"
 #include "objectLibrary.h"
+#include "gui/visualDebug.h"
 #include <algorithm>
 #include <random>
 
@@ -74,7 +75,7 @@ void StandardInputHandler::keyDown(int key, int modifiers) {
 	}
 
 	if(key >= GLFW_KEY_F1 && key <= GLFW_KEY_F7) {
-		screen.toggleDebugVecType(static_cast<Debug::VecType>(key - GLFW_KEY_F1));
+		toggleDebugVecType(static_cast<Debug::VecType>(key - GLFW_KEY_F1));
 	}
 };
 
@@ -83,10 +84,6 @@ void StandardInputHandler::doubleKeyDown(int key, int modifiers) {
 		toggleFlying();
 	}
 }
-
-void StandardInputHandler::keyUp(int key, int modifiers) {};
-void StandardInputHandler::keyRepeat(int key, int modifiers) {};
-// void StandardInputHandler::mouseEnter() {};
 
 void StandardInputHandler::mouseDown(int button, int mods) {
 	if (button == GLFW_MOUSE_BUTTON_RIGHT) rightDragging = true;
@@ -116,7 +113,7 @@ void StandardInputHandler::mouseMove(double x, double y) {
 
 	// Camera rotating
 	if (rightDragging) {
-		screen.camera.rotate(screen, Vec3((y - cursorPosition.y) * 0.01, (x - cursorPosition.x) * 0.01, 0), leftDragging);
+		screen.camera.rotate(screen, Vec3((y - cursorPosition.y) * 0.1, (x - cursorPosition.x) * 0.1, 0), leftDragging);
 	}
 
 	if (leftDragging) {
@@ -145,7 +142,7 @@ void StandardInputHandler::mouseMove(double x, double y) {
 };
 
 void StandardInputHandler::scroll(double xOffset, double yOffset) {
-	screen.camera.move(screen, 0, 0, -0.5 * yOffset, leftDragging);
+	screen.camera.speed = fmin(fmax(screen.camera.speed * (1 + 0.2 * yOffset), 0.001), 100);
 };
 
 void StandardInputHandler::mouseExit() {

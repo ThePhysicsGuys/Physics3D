@@ -9,12 +9,13 @@
 #include "quad.h"
 #include "shaderProgram.h"
 #include "font.h"
-#include "profilerUI.h"
+#include "visualDebug.h"
 #include "loader.h"
 
 #include "form\panel.h"
 #include "form\frame.h"
 #include "form\label.h"
+#include "form\image.h"
 #include "form\gui.h"
 
 #include "../debug.h"
@@ -72,21 +73,9 @@ void terminateGL() {
 	Log::info("Closed GLFW");
 }
 
-const char* const graphicsDebugLabels[]{
-	"Update",
-	"Skybox",
-	"Vectors",
-	"Physicals",
-	"Lighting",
-	"Origin",
-	"Profiler",
-	"Finalize",
-	"Other"
-};
+Screen::Screen() {};
 
-Screen::Screen() : graphicsMeasure(graphicsDebugLabels) {};
-
-Screen::Screen(int width, int height, World<ExtendedPart>* world) : graphicsMeasure(graphicsDebugLabels) {
+Screen::Screen(int width, int height, World<ExtendedPart>* world) {
 	setWorld(world);
 
 	// Create a windowed mode window and its OpenGL context 
@@ -105,12 +94,6 @@ Screen::Screen(int width, int height, World<ExtendedPart>* world) : graphicsMeas
 	Log::info("OpenGL version: (%s)", glGetString(GL_VERSION));
 	Log::info("OpenGL shader version: (%s)", glGetString(GL_SHADING_LANGUAGE_VERSION));
 }
-
-// Debug
-using namespace Debug;
-std::map<VecType, bool> debug_enabled{ {INFO, false}, {VELOCITY, false}, {FORCE, false}, {POSITION, false}, {MOMENT, false}, {IMPULSE, false}, {ANGULAR_VELOCITY , false} };
-std::map<VecType, double> vecColors{ {INFO, 0.15}, {VELOCITY, 0.3}, {FORCE, 0.0}, {POSITION, 0.5}, {MOMENT, 0.1}, {IMPULSE, 0.7}, {ANGULAR_VELOCITY , 0.75} };
-bool renderPies = false;
 
 // Font
 Font* font = nullptr;
@@ -142,7 +125,6 @@ VectorShader vectorShader;
 OriginShader originShader;
 FontShader fontShader;
 QuadShader quadShader;
-GUIShader guiShader;
 PostProcessShader postProcessShader;
 SkyboxShader skyboxShader;
 
@@ -176,7 +158,7 @@ Frame* frame2 = nullptr;
 Panel* panel1 = nullptr;
 Panel* panel2 = nullptr;
 Panel* panel3 = nullptr;
-Panel* panel4 = nullptr;
+Image* image = nullptr;
 
 Panel* mouse = nullptr;
 
@@ -213,7 +195,6 @@ void Screen::init() {
 	ShaderSource quadShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(QUAD_SHADER)), "quad.shader");
 	ShaderSource postProcessShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(POSTPROCESS_SHADER)), "postProcess.shader");
 	ShaderSource skyboxShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(SKYBOX_SHADER)), "skybox.shader");
-	ShaderSource guiShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(GUI_SHADER)), "gui.shader");
 
 
 	// Shader init
@@ -225,7 +206,6 @@ void Screen::init() {
 	quadShader = * new QuadShader(quadShaderSource);
 	postProcessShader = * new PostProcessShader(postProcessShaderSource);
 	skyboxShader = * new SkyboxShader(skyboxShaderSource);
-	guiShader = * new GUIShader(guiShaderSource);
 	basicShader.createLightArray(lightCount);
 
 
@@ -262,22 +242,21 @@ void Screen::init() {
 
 
 	// GUI init
-	GUI::init(&guiShader, font);
+	GUI::init(&quadShader, font);
 	frame1 = new Frame(0.7, 0.7);
 	frame2 = new Frame();
 	panel1 = new Panel(0, 0, 0.15, 0.15);
 	panel2 = new Panel(0, 0, 0.15, 0.15);
 	panel3 = new Panel(0, 0, 0.15, 0.15);
-	panel4 = new Panel(0, 0, 0.15, 0.15);
+	image = new Image(0, 0, 0.15, 0.15, floorTexture);
 	panel1->backgroundColor = GUI::COLOR::OLIVE;
 	panel2->backgroundColor = GUI::COLOR::YELLOW;
 	panel3->backgroundColor = GUI::COLOR::RED;
-	panel4->backgroundColor = GUI::COLOR::AQUA;
 	frame2->add(panel1);
 	frame1->add(frame2);
 	frame1->add(panel2, Align::FILL);
 	frame1->add(panel3);
-	frame1->add(panel4, Align::FILL);
+	frame1->add(image, Align::FILL);
 	GUI::add(frame1);
 
 
@@ -297,7 +276,6 @@ void Screen::init() {
 
 
 	// Eventhandler init
-	
 	eventHandler.setPartRayIntersectCallback([] (Screen& screen, ExtendedPart* part, Vec3 point) {
 		screen.intersectedPart = part;
 		screen.intersectedPoint = point;
@@ -313,7 +291,7 @@ void Screen::init() {
 		screen.screenFrameBuffer->texture->resize(width, height);
 		screen.modelFrameBuffer->renderBuffer->resize(width, height);
 		screen.screenFrameBuffer->renderBuffer->resize(width, height);
-		screen.screenSize = Vec2(width, height);
+		screen.dimension = Vec2(width, height);
 		screen.aspect = ((double) width) / ((double) height);
 	});
 
@@ -324,24 +302,21 @@ void Screen::init() {
 void Screen::update() {
 
 	// IO events
-	static double speed = 0.02;
 	if (handler->anyKey) {
 		bool leftDragging = handler->leftDragging;
-		if (handler->getKey(GLFW_KEY_1))  speed = 0.02;
-		if (handler->getKey(GLFW_KEY_2))  speed = 0.1;		
-		if (handler->getKey(GLFW_KEY_W))  camera.move(*this, 0, 0, -speed, leftDragging);
-		if (handler->getKey(GLFW_KEY_S))  camera.move(*this, 0, 0, speed, leftDragging);	
-		if (handler->getKey(GLFW_KEY_D))  camera.move(*this, speed, 0, 0, leftDragging);
-		if (handler->getKey(GLFW_KEY_A))  camera.move(*this, -speed, 0, 0, leftDragging);
+		if (handler->getKey(GLFW_KEY_W))  camera.move(*this, 0, 0, -1, leftDragging);
+		if (handler->getKey(GLFW_KEY_S))  camera.move(*this, 0, 0, 1, leftDragging);	
+		if (handler->getKey(GLFW_KEY_D))  camera.move(*this, 1, 0, 0, leftDragging);
+		if (handler->getKey(GLFW_KEY_A))  camera.move(*this, -1, 0, 0, leftDragging);
 		if (handler->getKey(GLFW_KEY_SPACE)) 
-			if (camera.flying) camera.move(*this, 0, speed, 0, leftDragging);
+			if (camera.flying) camera.move(*this, 0, 1, 0, leftDragging);
 			// else camera.jump(*this, leftDragging);	
 		if (handler->getKey(GLFW_KEY_LEFT_SHIFT)) 
-			if (camera.flying) camera.move(*this, 0, -speed, 0, leftDragging);
-		if (handler->getKey(GLFW_KEY_LEFT))  camera.rotate(*this, 0, -speed, 0, leftDragging);
-		if (handler->getKey(GLFW_KEY_RIGHT)) camera.rotate(*this, 0, speed, 0, leftDragging);
-		if (handler->getKey(GLFW_KEY_UP))    camera.rotate(*this, -speed, 0, 0, leftDragging);
-		if (handler->getKey(GLFW_KEY_DOWN))  camera.rotate(*this, speed, 0, 0, leftDragging);
+			if (camera.flying) camera.move(*this, 0, -1, 0, leftDragging);
+		if (handler->getKey(GLFW_KEY_LEFT))  camera.rotate(*this, 0, -1, 0, leftDragging);
+		if (handler->getKey(GLFW_KEY_RIGHT)) camera.rotate(*this, 0, 1, 0, leftDragging);
+		if (handler->getKey(GLFW_KEY_UP))    camera.rotate(*this, -1, 0, 0, leftDragging);
+		if (handler->getKey(GLFW_KEY_DOWN))  camera.rotate(*this, 1, 0, 0, leftDragging);
 		if (handler->getKey(GLFW_KEY_ESCAPE)) glfwSetWindowShouldClose(window, GLFW_TRUE);
 	}
 
@@ -378,27 +353,6 @@ void Screen::update() {
 	// Update gui
 	mouse->position = GUI::map(*this, handler->cursorPosition + Vec2(-mouse->dimension.x, mouse->dimension.y));
 	GUI::intersect(GUI::map(*this, handler->cursorPosition));
-}
-
-AddableBuffer<double> visibleVecs(700);
-
-void updateVecMesh(AppDebug::ColoredVec* data, size_t size) {
-	visibleVecs.clear();
-
-	for(size_t i = 0; i < size; i++) {
-		const AppDebug::ColoredVec& v = data[i];
-		if(debug_enabled[v.type]) {
-			visibleVecs.add(v.origin.x);
-			visibleVecs.add(v.origin.y);
-			visibleVecs.add(v.origin.z);
-			visibleVecs.add(v.vec.x);
-			visibleVecs.add(v.vec.y);
-			visibleVecs.add(v.vec.z);
-			visibleVecs.add(vecColors[v.type]);
-		}
-	}
-
-	vectorMesh->update(visibleVecs.data, visibleVecs.index / 7);
 }
 
 void Screen::renderSkybox() {
@@ -445,68 +399,6 @@ void Screen::renderPhysicals() {
 	}
 }
 
-template<typename T>
-void Screen::renderDebugField(const char* varName, T value, const char* unit) {
-	std::stringstream ss;
-	ss.precision(4);
-	ss << varName << ": " << value << unit;
-	font->render(ss.str().c_str(), Vec2(-screenSize.x / screenSize.y * 0.99, (1 - fieldIndex * 0.05) * 0.95), Vec3f(1,1,1), 0.001);
-	fieldIndex++;
-}
-
-std::string toString(std::chrono::nanoseconds t) {
-	std::stringstream ss;
-	ss.precision(4);
-	ss << t.count() * 0.000001f;
-	ss << "ms";
-	return ss.str();
-}
-
-std::string toString(size_t v) {
-	std::stringstream ss;
-	ss << v;
-	return ss.str();
-}
-
-template<size_t N, typename EnumType>
-PieChart toPieChart(BreakdownAverageProfiler<N, EnumType>& profiler, const char* title, Vec2f piePosition, float pieSize) {
-	auto results = profiler.history.avg();
-	std::chrono::nanoseconds avgTotalTime = results.sum();
-
-	PieChart chart(title, toString(avgTotalTime), piePosition, pieSize);
-	for(size_t i = 0; i < profiler.size(); i++) {
-		float weight = static_cast<float>(results[i].count());
-		DataPoint p = DataPoint(weight, toString(results[i]), pieColors[i], profiler.labels[i]);
-		chart.add(p);
-	}
-
-	return chart;
-}
-
-template<size_t N, typename Unit, typename EnumType>
-PieChart toPieChart(HistoricTally<N, Unit, EnumType>& tally, const char* title, Vec2f piePosition, float pieSize) {
-	auto sum = 0;
-	for(auto entry : tally.history) {
-		sum += entry.sum();
-	}
-	auto results = tally.history.avg();
-	Unit avgTotal = (tally.history.size() != 0)? (sum / tally.history.size()) : 0;
-	//Unit avgTotal = results.sum();
-
-	PieChart chart(title, toString(avgTotal), piePosition, pieSize);
-	for(size_t i = 0; i < tally.size(); i++) {
-		float result = results[i] * 1.0f;
-		DataPoint p = DataPoint(result, toString(results[i]), pieColors[i], tally.labels[i]);
-		chart.add(p);
-	}
-
-	return chart;
-}
-
-size_t getTheoreticalNumberOfIntersections(size_t objCount) {
-	return (objCount-1)*objCount / 2;
-}
-
 void Screen::refresh() {
 	fieldIndex = 0;
 
@@ -532,8 +424,7 @@ void Screen::refresh() {
 	// Postprocess to screenFrameBuffer
 	screenFrameBuffer->bind();
 	glDisable(GL_DEPTH_TEST);
-	postProcessShader.bind();
-	modelFrameBuffer->texture->bind();
+	postProcessShader.update(modelFrameBuffer->texture);
 	quad->render();
 
 
@@ -544,7 +435,7 @@ void Screen::refresh() {
 
 	// Update vector mesh
 	graphicsMeasure.mark(GraphicsProcess::VECTORS);
-	updateVecMesh(vecLog.data, vecLog.index);
+	updateVecMesh(vectorMesh, vecLog.data, vecLog.index);
 
 
 	// Render lights
@@ -569,26 +460,42 @@ void Screen::refresh() {
 	originMesh->render();
 
 
+	// Render screenFrameBuffer texture to the screen
+	graphicsMeasure.mark(GraphicsProcess::FINALIZE);
+	screenFrameBuffer->unbind();
+	glClear(GL_COLOR_BUFFER_BIT);
+	glDisable(GL_DEPTH_TEST);
+
+
+	// Render postprocessed image to screen
+	quadShader.update(Mat4f());
+	quadShader.update(screenFrameBuffer->texture);
+	quad->render();
+	image->texture = screenFrameBuffer->texture;
+
+
 	// Render GUI
 	glDisable(GL_DEPTH_TEST);
 	graphicsMeasure.mark(GraphicsProcess::OTHER);
+	image->width = aspect * image->height;
 	fontShader.update(orthoMatrix);
 	GUI::render(orthoMatrix);
 	mouse->render();
 
+
 	// Pie rendering
 	graphicsMeasure.mark(GraphicsProcess::PROFILER);
 	size_t objCount = world->partCount;
-	renderDebugField("Objects", objCount, "");
-	renderDebugField("Intersections", getTheoreticalNumberOfIntersections(objCount), "");
-	renderDebugField("AVG Collide GJK Iterations", gjkCollideIterStats.avg(), "");
-	renderDebugField("AVG No Collide GJK Iterations", gjkNoCollideIterStats.avg(), "");
+	renderDebugField(dimension, font, "Position", str(camera.cframe.position), "");
+	renderDebugField(dimension, font, "Objects", objCount, "");
+	renderDebugField(dimension, font, "Intersections", getTheoreticalNumberOfIntersections(objCount), "");
+	renderDebugField(dimension, font, "AVG Collide GJK Iterations", gjkCollideIterStats.avg(), "");
+	renderDebugField(dimension, font, "AVG No Collide GJK Iterations", gjkNoCollideIterStats.avg(), "");
+	renderDebugField(dimension, font, "TPS", physicsMeasure.getAvgTPS(), "");
+	renderDebugField(dimension, font, "FPS", graphicsMeasure.getAvgTPS(), "");
 
-	renderDebugField("TPS", physicsMeasure.getAvgTPS(), "");
-	renderDebugField("FPS", graphicsMeasure.getAvgTPS(), "");
-
-	if(renderPies) {
-		float leftSide = screenSize.x / screenSize.y;
+	if (renderPies) {
+		float leftSide = dimension.x / dimension.y;
 		PieChart graphicsPie = toPieChart(graphicsMeasure, "Graphics", Vec2f(-leftSide + 1.5f, -0.7f), 0.2f);
 		PieChart physicsPie = toPieChart(physicsMeasure, "Physics", Vec2f(-leftSide + 0.3f, -0.7f), 0.2f);
 		PieChart intersectionPie = toPieChart(intersectionStatistics, "Intersection Statistics", Vec2f(-leftSide + 2.7f, -0.7f), 0.2f);
@@ -601,17 +508,6 @@ void Screen::refresh() {
 		intersectionPie.renderPie(*this);
 		endPieRendering(*this);
 	}
-
-	// Render screenFrameBuffer texture to the screen
-	graphicsMeasure.mark(GraphicsProcess::FINALIZE);
-	screenFrameBuffer->unbind();
-	glClear(GL_COLOR_BUFFER_BIT);
-	glDisable(GL_DEPTH_TEST);
-
-
-	// Render postprocessed image to screen
-	quadShader.update(screenFrameBuffer->texture);
-	quad->render();
 
 
 	// Render stuff
@@ -627,7 +523,6 @@ void Screen::close() {
 	originShader.close();
 	skyboxShader.close();
 	quadShader.close();
-	guiShader.close();
 	postProcessShader.close();
 
 	PropertiesParser::write("../res/.properties", properties);
@@ -643,8 +538,4 @@ int Screen::addMeshShape(Shape s) {
 	int size = meshes.size();
 	meshes.push_back(new IndexedMesh(s));
 	return size;
-}
-
-void Screen::toggleDebugVecType(Debug::VecType t) {
-	debug_enabled[t] = !debug_enabled[t];
 }

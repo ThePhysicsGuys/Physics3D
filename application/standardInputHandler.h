@@ -18,8 +18,6 @@ public:
 	void framebufferResize(int width, int height) override;
 
 	void keyDown(int key, int modifiers) override;
-	void keyUp(int key, int modifiers) override;
-	void keyRepeat(int key, int modifiers) override;
 	void keyDownOrRepeat(int key, int modifiers) override;
 	void doubleKeyDown(int key, int modifiers) override;
 	void mouseDown(int button, int mods) override;

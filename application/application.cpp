@@ -11,7 +11,7 @@
 #include <istream>
 
 #include "gui/screen.h"
-
+#include "gui/visualDebug.h"
 
 #include "tickerThread.h"
 
@@ -209,12 +209,10 @@ int main(void) {
 	/* Loop until the user closes the window */
 	Log::info("Started rendering");
 	while (!screen.shouldClose()) {
-		screen.graphicsMeasure.mark(GraphicsProcess::UPDATE);
+		graphicsMeasure.mark(GraphicsProcess::UPDATE);
 		screen.update();
 		screen.refresh();
-		screen.graphicsMeasure.end();
-		// test
-		glfwSetWindowTitle(screen.getWindow(), std::to_string(physicsMeasure.getAvgTPS()).c_str());
+		graphicsMeasure.end();
 	}
 
 	Log::info("Closing screen");
