@@ -40,9 +40,11 @@ namespace GUI {
 	};
 
 	// Global
+	Screen* screen;
 	OrderedVector<Component*> components;
 	Component* intersectedComponent;
 	Component* selectedComponent;
+	Vec2 intersectedPoint;
 
 	// Shader
 	QuadShader* defaultShader = nullptr;
@@ -58,9 +60,13 @@ namespace GUI {
 	double defaultPanelMargin = 0.01;
 	Vec4 defaultPanelBackgroundColor = Vec4(0.3, 0.3, 0.3, 1);
 
+	// Button
+	Texture* defaultButtonHoverTexture;
+	Texture* defaultButtonIdleTexture;
+	Texture* defaultButtonPressTexture;
+
 	// Frame
-	Texture* defaultFrameCloseTexture;
-	double defaultFrameCloseButtonOffset = 0.01;
+	double defaultFrameCloseButtonOffset = 0.003;
 	double defaultFrameTitleBarHeight = 0.06;
 	double defaultFramePadding = 0.01;
 	double defaultFrameMargin = 0.01;
@@ -72,24 +78,31 @@ namespace GUI {
 	Vec4 defaultFontColor = Vec4(0, 0, 0, 1);
 	double defaultFontSize = 0.001;
 
-	void init(QuadShader* shader, Font* font) {
+	void init(Screen* screen, QuadShader* shader, Font* font) {
+		GUI::screen = screen;
 		GUI::defaultFont = font;
 		GUI::defaultShader = shader;
 		GUI::defaultQuad = new Quad();
 
-		GUI::defaultFrameCloseTexture = load("../res/textures/gui/close.png");
+		GUI::defaultButtonIdleTexture = load("../res/textures/gui/close_idle.png");
+		GUI::defaultButtonHoverTexture = load("../res/textures/gui/close_hover.png");
+		GUI::defaultButtonPressTexture = load("../res/textures/gui/close_press.png");
 	}
 	
 	void update(Mat4f orthoMatrix) {
 		GUI::defaultShader->update(orthoMatrix);
 	}
 
-	double map(double x, double in_min, double in_max, double out_min, double out_max) {
-		return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+	double map(double x, double minIn, double maxIn, double minOut, double maxOut) {
+		return (x - minIn) * (maxOut - minOut) / (maxIn - minIn) + minOut;
 	}
 
-	Vec2 map(Screen& screen, Vec2 point) {
-		return Vec2(map(point.x, 0, screen.dimension.x, -screen.aspect, screen.aspect), map(screen.dimension.y - point.y, 0, screen.dimension.y, -1, 1));
+	Vec2 map(Vec2 point) {
+		return Vec2(map(point.x, 0, screen->dimension.x, -screen->aspect, screen->aspect), map(screen->dimension.y - point.y, 0, screen->dimension.y, -1, 1));
+	}
+	
+	Vec2 unmap(Vec2 point) {
+		return Vec2(map(point.x, -screen->aspect, screen->aspect, 0, screen->dimension.x), screen->dimension.y - map(point.y, -1, 1, 0, screen->dimension.y));
 	}
 
 	void intersect(Vec2 mouse) {

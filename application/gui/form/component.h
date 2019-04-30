@@ -4,9 +4,11 @@
 #include "GLFW\glfw3.h"
 
 #include <cmath>
-#include "../engine/math/vec2.h"
 
 #include "layout.h"
+
+#include "gui.h"
+#include "../engine/math/vec2.h"
 
 class Component {
 public:
@@ -38,6 +40,7 @@ public:
 		};
 		Vec2 position;
 	};
+
 	/* 
 		The size of the container, padding not included, margin included
 		This property can be altered by its parent
@@ -106,9 +109,16 @@ public:
 	virtual void hover(Vec2 mxy) {};
 
 	/* 
-		Click behaviour of this component 
+		Press behaviour of this component 
 	*/
-	virtual void click(Vec2 mxy) {};
+	virtual void press(Vec2 mxy) {
+		GUI::intersectedPoint = mxy - position;
+	};
+
+	/*
+		Release behaviour of this component
+	*/
+	virtual void release(Vec2 mxy) {}
 
 	/* 
 		Enter behaviour of this component 

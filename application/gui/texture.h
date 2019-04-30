@@ -21,6 +21,7 @@ public:
 	void resize(unsigned int width, unsigned int height);
 	void resize(unsigned int width, unsigned int height, const void* buffer);
 
+	void loadFrameBufferTexture(unsigned int width, unsigned int height);
 };
 
 Texture* load(std::string name);

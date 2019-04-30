@@ -1,6 +1,8 @@
 
 #include "component.h"
 #include "container.h"
+#include "button.h"
+
 #include "../texture.h"
 #include "../engine/math/vec2.h"
 #include "../engine/math/vec4.h"
@@ -9,11 +11,13 @@
 
 class Frame : public Container {
 public:
+	Button* closeButton;
+	double closeButtonOffset;
+
 	double titleBarHeight;
 	Vec4 titleBarColor;
+
 	Vec4 backgroundColor;
-	Texture* closeTexture;
-	double closeButtonOffset;
 
 	Frame();
 	Frame(double x, double y);

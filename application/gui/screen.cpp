@@ -154,13 +154,13 @@ Quad* quad = nullptr;
 
 // GUI
 Frame* frame1 = nullptr;
-Frame* frame2 = nullptr;
-Panel* panel1 = nullptr;
-Panel* panel2 = nullptr;
-Panel* panel3 = nullptr;
-Image* image = nullptr;
+Image* image1 = nullptr;
+Image* image2 = nullptr;
+Image* image3 = nullptr;
+Image* image4 = nullptr;
 
-Panel* mouse = nullptr;
+Panel* mouseVertical = nullptr;
+Panel* mouseHorizontal = nullptr;
 
 void Screen::init() {
 	// Log init
@@ -242,28 +242,25 @@ void Screen::init() {
 
 
 	// GUI init
-	GUI::init(&quadShader, font);
+	GUI::init(this, &quadShader, font);
 	frame1 = new Frame(0.7, 0.7);
-	frame2 = new Frame();
-	panel1 = new Panel(0, 0, 0.15, 0.15);
-	panel2 = new Panel(0, 0, 0.15, 0.15);
-	panel3 = new Panel(0, 0, 0.15, 0.15);
-	image = new Image(0, 0, 0.15, 0.15, floorTexture);
-	panel1->backgroundColor = GUI::COLOR::OLIVE;
-	panel2->backgroundColor = GUI::COLOR::YELLOW;
-	panel3->backgroundColor = GUI::COLOR::RED;
-	frame2->add(panel1);
-	frame1->add(frame2);
-	frame1->add(panel2, Align::FILL);
-	frame1->add(panel3);
-	frame1->add(image, Align::FILL);
+	image1 = new Image(0, 0, 0.3, 0.3, floorTexture);
+	image2 = new Image(0, 0, 0.3, 0.3);
+	image3 = new Image(0, 0, 0.3, 0.3);
+	image4 = new Image(0, 0, 0.3, 0.3);
+	frame1->add(image1);
+	frame1->add(image2, Align::FILL);
+	frame1->add(image3);
+	frame1->add(image4, Align::FILL);
 	GUI::add(frame1);
 
 
 	// Mouse init
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-	mouse = new Panel(0, 0, 0.02, 0.02);
-	mouse->backgroundColor = Vec4(1);
+	mouseVertical = new Panel(0, 0, 0.04, 0.01);
+	mouseHorizontal = new Panel(0, 0, 0.01, 0.04);
+	mouseVertical->backgroundColor = Vec4(1);
+	mouseHorizontal->backgroundColor = Vec4(1);
 	
 
 	// Origin init
@@ -318,6 +315,10 @@ void Screen::update() {
 		if (handler->getKey(GLFW_KEY_UP))    camera.rotate(*this, -1, 0, 0, leftDragging);
 		if (handler->getKey(GLFW_KEY_DOWN))  camera.rotate(*this, 1, 0, 0, leftDragging);
 		if (handler->getKey(GLFW_KEY_ESCAPE)) glfwSetWindowShouldClose(window, GLFW_TRUE);
+		if (handler->getKey(GLFW_KEY_I)) {
+			modelFrameBuffer->bind();
+			image1->texture->loadFrameBufferTexture(modelFrameBuffer->texture->width, modelFrameBuffer->texture->height);
+		}
 	}
 
 
@@ -351,8 +352,10 @@ void Screen::update() {
 
 
 	// Update gui
-	mouse->position = GUI::map(*this, handler->cursorPosition + Vec2(-mouse->dimension.x, mouse->dimension.y));
-	GUI::intersect(GUI::map(*this, handler->cursorPosition));
+	mouseVertical->position = GUI::map(handler->cursorPosition) + Vec2(-mouseVertical->dimension.x / 2, mouseVertical->dimension.y / 2);
+	mouseHorizontal->position = GUI::map(handler->cursorPosition) + Vec2(-mouseHorizontal->dimension.x / 2, mouseHorizontal->dimension.y / 2);
+
+	GUI::intersect(GUI::map(handler->cursorPosition));
 }
 
 void Screen::renderSkybox() {
@@ -371,7 +374,6 @@ void Screen::renderSkybox() {
 void Screen::renderPhysicals() {
 	// Bind basic uniforms
 	basicShader.updateLight(lights, lightCount);
-	basicShader.update(viewMatrix, projectionMatrix, viewPosition);
 	basicShader.updateMaterial(material);
 
 	SharedLockGuard lg(world->lock);
@@ -418,6 +420,7 @@ void Screen::refresh() {
 
 	// Render physicals
 	graphicsMeasure.mark(GraphicsProcess::PHYSICALS);
+	basicShader.update(viewMatrix, projectionMatrix, viewPosition);
 	renderPhysicals();
 
 
@@ -471,16 +474,15 @@ void Screen::refresh() {
 	quadShader.update(Mat4f());
 	quadShader.update(screenFrameBuffer->texture);
 	quad->render();
-	image->texture = screenFrameBuffer->texture;
 
 
 	// Render GUI
 	glDisable(GL_DEPTH_TEST);
 	graphicsMeasure.mark(GraphicsProcess::OTHER);
-	image->width = aspect * image->height;
 	fontShader.update(orthoMatrix);
 	GUI::render(orthoMatrix);
-	mouse->render();
+	mouseVertical->render();
+	mouseHorizontal->render();
 
 
 	// Pie rendering

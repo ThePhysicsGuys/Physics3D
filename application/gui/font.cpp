@@ -66,7 +66,7 @@ Font::Font(FontShader& shader, std::string font) : shader(shader) {
 	glBindVertexArray(0);
 }
 
-Vec2 Font::size(const std::string& text, double scale) {
+Vec2 Font::size(const std::string& text, double size) {
 	std::string::const_iterator iterator;
 	double width = 0;
 	double height = 0;
@@ -74,26 +74,26 @@ Vec2 Font::size(const std::string& text, double scale) {
 		Character character = characters[*iterator];
 		double advance = character.advance >> 6;
 		if (iterator == text.begin())
-			width += (advance - character.bearing.x) * scale;
+			width += (advance - character.bearing.x) * size;
 		else if (iterator == text.end() - 1)
-			width += (character.bearing.x + character.size.x) * scale;
+			width += (character.bearing.x + character.size.x) * size;
  		else 
-			width += advance * scale;
+			width += advance * size;
 		
-		height = fmax(character.size.y * scale, height);
+		height = fmax(character.size.y * size, height);
 	}
 	return Vec2(width, height);
 }
 
-void Font::render(const std::string& text, Vec2 position, Vec3 color, double scale) {
-	render(text, position.x, position.y, Vec4(color.x, color.y, color.z, 1), scale);
+void Font::render(const std::string& text, Vec2 position, Vec3 color, double size) {
+	render(text, position.x, position.y, Vec4(color.x, color.y, color.z, 1), size);
 }
 
-void Font::render(const std::string& text, Vec2 position, Vec4 color, double scale) {
-	render(text, position.x, position.y, color, scale);
+void Font::render(const std::string& text, Vec2 position, Vec4 color, double size) {
+	render(text, position.x, position.y, color, size);
 }
 
-void Font::render(const std::string& text, double x, double y, Vec4 color, double scale) {
+void Font::render(const std::string& text, double x, double y, Vec4 color, double size) {
 	shader.updateColor(color);
 
 	glEnable(GL_BLEND);
@@ -104,11 +104,11 @@ void Font::render(const std::string& text, double x, double y, Vec4 color, doubl
 	std::string::const_iterator iterator;
 	for (iterator = text.begin(); iterator != text.end(); iterator++) {
 		Character character = characters[*iterator];
-		float xpos = x + character.bearing.x * scale;
-		float ypos = y - (character.size.y - character.bearing.y) * scale;
+		float xpos = x + character.bearing.x * size;
+		float ypos = y - (character.size.y - character.bearing.y) * size;
 
-		float w = character.size.x * scale;
-		float h = character.size.y * scale;
+		float w = character.size.x * size;
+		float h = character.size.y * size;
 		
 		float vertices[6][4] = {
 			{ xpos,     ypos + h,	0, 0 },
@@ -132,7 +132,7 @@ void Font::render(const std::string& text, double x, double y, Vec4 color, doubl
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		
 		// Now advance cursors for next glyph (note that advance is number of 1/64 pixels)
-		x += (character.advance >> 6) * scale; // Bitshift by 6 to get value in pixels (2^6 = 64)
+		x += (character.advance >> 6) * size; // Bitshift by 6 to get value in pixels (2^6 = 64)
 	}
 
 	glBindVertexArray(0);

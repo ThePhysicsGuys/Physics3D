@@ -6,12 +6,13 @@
 #include "../screen.h"
 #include "../texture.h"
 
-#include "component.h"
 
 #include "../engine/math/vec3.h"
 #include "../engine/math/mat4.h"
 
 #include <string>
+
+class Component;
 
 namespace GUI {
 
@@ -41,9 +42,11 @@ namespace GUI {
 		Vec4 get(int hex);
 	};
 
-	// Events
+	// Global
+	extern Screen* screen;
 	extern Component* intersectedComponent;
 	extern Component* selectedComponent;
+	extern Vec2 intersectedPoint;
 
 	// Shader
 	extern Quad* defaultQuad;
@@ -59,8 +62,12 @@ namespace GUI {
 	extern double defaultPanelMargin;
 	extern Vec4 defaultPanelBackgroundColor;
 
+	// Button
+	extern Texture* defaultButtonHoverTexture;
+	extern Texture* defaultButtonIdleTexture;
+	extern Texture* defaultButtonPressTexture;
+
 	// Frame
-	extern Texture* defaultFrameCloseTexture;
 	extern double defaultFrameTitleBarHeight;
 	extern double defaultFrameCloseButtonOffset;
 	extern double defaultFramePadding;
@@ -76,11 +83,14 @@ namespace GUI {
 	void add(Component* component);
 	void remove(Component* component);
 
-	Vec2 map(Screen& screen, Vec2 point);
+	Vec2 map(Vec2 point);
+	Vec2 unmap(Vec2 point);
 	void intersect(Vec2 mouse);
 	bool intersectsSquare(Vec2 point, Vec2 topleft, Vec2 dimension);
 
-	void init(QuadShader* shader, Font* font);
+	void init(Screen* screen, QuadShader* shader, Font* font);
 	void update(Mat4f orthoMatrix);
 	void render(Mat4f orthoMatrix);
 };
+
+#include "component.h"

@@ -9,6 +9,7 @@ class Image : public Component {
 public:
 	Texture* texture;
 
+	Image(double x, double y, double width, double height);
 	Image(double x, double y, Texture* texture);
 	Image(double x, double y, double width, double height, Texture* texture);
 	

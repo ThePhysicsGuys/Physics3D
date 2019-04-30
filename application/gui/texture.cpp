@@ -40,9 +40,15 @@ Texture::Texture(unsigned int width, unsigned int height, const void* buffer, in
 	unbind();
 }
 
+void Texture::loadFrameBufferTexture(unsigned int width, unsigned int height) {
+	bind();
+	glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, width, height, 0);
+	unbind();
+}
+
 void Texture::resize(unsigned int width, unsigned int height, const void* buffer) {
 	bind();
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
 	unbind();
 }
 
