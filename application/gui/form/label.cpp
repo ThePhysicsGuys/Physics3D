@@ -20,13 +20,13 @@ Label::Label(std::string text, double x, double y, double scale, Vec4 color, Fon
 void Label::render() {
 	if (visible) {
 		resize();
-		Vec2 textPosition = position + Vec2(0, -dimension.y) + Vec2(margin);
+		Vec2 textPosition = position + Vec2(0, -dimension.y);
 		font->render(text, textPosition, foregroundColor, scale);
 	}
 }
 
 Vec2 Label::resize() {
 	if (resizing)
-		dimension = font->size(text, scale) + Vec2(margin) * 2;
+		dimension = font->size(text, scale);
 	return dimension;
 }

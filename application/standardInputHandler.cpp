@@ -90,8 +90,11 @@ void StandardInputHandler::mouseDown(int button, int mods) {
 	if (button == GLFW_MOUSE_BUTTON_MIDDLE) middleDragging = true;
 	if (button == GLFW_MOUSE_BUTTON_LEFT) leftDragging = true;
 
+	GUI::selectedComponent = GUI::intersectedComponent;
+
 	if (GUI::intersectedComponent) {
 		GUI::intersectedComponent->press(GUI::map(cursorPosition));
+		GUI::intersectedPoint = GUI::map(cursorPosition) - GUI::intersectedComponent->position;
 	} else {
 		(*screen.eventHandler.partClickHandler) (screen, screen.intersectedPart, screen.intersectedPoint);
 		if (screen.intersectedPart) {
@@ -125,7 +128,7 @@ void StandardInputHandler::mouseMove(double x, double y) {
 		double dmy = (y - cursorPosition.y) * -speed;
 
 		if (GUI::selectedComponent) {
-			GUI::selectedComponent->drag(Vec2(dmx, dmy));
+			GUI::selectedComponent->drag(GUI::map(cursorPosition));
 		} else {
 			// Phyiscal moving
 			if (screen.selectedPart) {

@@ -244,6 +244,7 @@ void Screen::init() {
 	// GUI init
 	GUI::init(this, &quadShader, font);
 	frame1 = new Frame(0.7, 0.7);
+	frame1->name = "Test";
 	image1 = new Image(0, 0, 0.3, 0.3, floorTexture);
 	image2 = new Image(0, 0, 0.3, 0.3);
 	image3 = new Image(0, 0, 0.3, 0.3);

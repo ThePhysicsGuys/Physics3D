@@ -63,13 +63,16 @@ namespace GUI {
 	extern Vec4 defaultPanelBackgroundColor;
 
 	// Button
-	extern Texture* defaultButtonHoverTexture;
-	extern Texture* defaultButtonIdleTexture;
-	extern Texture* defaultButtonPressTexture;
+	extern Texture* defaultCloseButtonHoverTexture;
+	extern Texture* defaultCloseButtonIdleTexture;
+	extern Texture* defaultCloseButtonPressTexture;
+	extern Texture* defaultMinimizeButtonHoverTexture;
+	extern Texture* defaultMinimizeButtonIdleTexture;
+	extern Texture* defaultMinimizeButtonPressTexture;
 
 	// Frame
 	extern double defaultFrameTitleBarHeight;
-	extern double defaultFrameCloseButtonOffset;
+	extern double defaultFrameButtonOffset;
 	extern double defaultFramePadding;
 	extern double defaultFrameMargin;
 	extern Vec4 defaultFrameTitleBarColor;

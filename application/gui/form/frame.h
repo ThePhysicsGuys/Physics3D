@@ -2,6 +2,7 @@
 #include "component.h"
 #include "container.h"
 #include "button.h"
+#include "label.h"
 
 #include "../texture.h"
 #include "../engine/math/vec2.h"
@@ -12,12 +13,17 @@
 class Frame : public Container {
 public:
 	Button* closeButton;
-	double closeButtonOffset;
+	Button* minimizeButton;
+	double buttonOffset;
+
+	Label* title;
 
 	double titleBarHeight;
 	Vec4 titleBarColor;
 
 	Vec4 backgroundColor;
+
+	bool minimized;
 
 	Frame();
 	Frame(double x, double y);
@@ -29,6 +35,7 @@ public:
 	Component* intersect(Vec2 point) override;
 
 	void hover(Vec2 mouse) override;
+	void drag(Vec2 mouse) override;
 	void enter() override;
 	void exit() override;
 };

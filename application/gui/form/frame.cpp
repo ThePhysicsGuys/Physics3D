@@ -15,16 +15,28 @@ Frame::Frame(double x, double y) : Container(x, y) {
 	this->titleBarColor = GUI::defaultFrameTitleBarColor;
 	this->titleBarHeight = GUI::defaultFrameTitleBarHeight;
 
-	this->closeButtonOffset = GUI::defaultFrameCloseButtonOffset;
-	this->closeButton = new Button(position.x, position.y, titleBarHeight - 2 * closeButtonOffset, titleBarHeight - 2 * closeButtonOffset, true);
-	this->closeButton->parent = this;
-	this->closeButton->idleTexture = GUI::defaultButtonIdleTexture;
-	this->closeButton->hoverTexture = GUI::defaultButtonHoverTexture;
-	this->closeButton->pressTexture = GUI::defaultButtonPressTexture;
+	this->buttonOffset = GUI::defaultFrameButtonOffset;
 
+	this->closeButton = new Button(position.x, position.y, titleBarHeight - 2 * buttonOffset, titleBarHeight - 2 * buttonOffset, true);
+	this->closeButton->parent = this;
+	this->closeButton->idleTexture = GUI::defaultCloseButtonIdleTexture;
+	this->closeButton->hoverTexture = GUI::defaultCloseButtonHoverTexture;
+	this->closeButton->pressTexture = GUI::defaultCloseButtonPressTexture;
 	this->closeButton->action = [] (Button* button) {
 		button->parent->visible = false;
 	};
+
+	this->minimizeButton = new Button(position.x, position.y, titleBarHeight - 2 * buttonOffset, titleBarHeight - 2 * buttonOffset, true);
+	this->minimizeButton->parent = this;
+	this->minimizeButton->idleTexture = GUI:: defaultMinimizeButtonIdleTexture;
+	this->minimizeButton->hoverTexture = GUI::defaultMinimizeButtonHoverTexture;
+	this->minimizeButton->pressTexture = GUI::defaultMinimizeButtonPressTexture;
+	this->minimizeButton->action = [] (Button* button) {
+		Frame* frame = (Frame*)button->parent;
+		frame->minimized = !frame->minimized;
+	};
+
+	title = new Label(name, position.x, position.y);
 };
 
 Frame::Frame(double x, double y, double width, double height) : Container(x, y, width, height) {
@@ -32,37 +44,61 @@ Frame::Frame(double x, double y, double width, double height) : Container(x, y, 
 	this->margin = GUI::defaultFrameMargin;
 
 	this->backgroundColor = GUI::defaultFrameBackgroundColor;
-	this->titleBarHeight = GUI::defaultFrameTitleBarHeight;
 	this->titleBarColor = GUI::defaultFrameTitleBarColor;
+	this->titleBarHeight = GUI::defaultFrameTitleBarHeight;
 
-	this->closeButtonOffset = GUI::defaultFrameCloseButtonOffset;
-	this->closeButton = new Button(0, 0, titleBarHeight - 2 * closeButtonOffset, titleBarHeight - 2 * closeButtonOffset, true);
+	this->buttonOffset = GUI::defaultFrameButtonOffset;
+
+	this->closeButton = new Button(position.x, position.y, titleBarHeight - 2 * buttonOffset, titleBarHeight - 2 * buttonOffset, true);
 	this->closeButton->parent = this;
-	this->closeButton->idleTexture = GUI::defaultButtonIdleTexture;
-	this->closeButton->hoverTexture = GUI::defaultButtonHoverTexture;
-	this->closeButton->pressTexture = GUI::defaultButtonPressTexture;
-
+	this->closeButton->idleTexture = GUI::defaultCloseButtonIdleTexture;
+	this->closeButton->hoverTexture = GUI::defaultCloseButtonHoverTexture;
+	this->closeButton->pressTexture = GUI::defaultCloseButtonPressTexture;
 	this->closeButton->action = [] (Button* button) {
 		button->parent->visible = false;
 	};
+
+	this->minimizeButton = new Button(position.x, position.y, titleBarHeight - 2 * buttonOffset, titleBarHeight - 2 * buttonOffset, true);
+	this->minimizeButton->parent = this;
+	this->minimizeButton->idleTexture = GUI::defaultMinimizeButtonIdleTexture;
+	this->minimizeButton->hoverTexture = GUI::defaultMinimizeButtonHoverTexture;
+	this->minimizeButton->pressTexture = GUI::defaultMinimizeButtonPressTexture;
+	this->minimizeButton->action = [](Button* button) {
+		Frame* frame = (Frame*) button->parent;
+		frame->minimized = !frame->minimized;
+	};
+
+	title = new Label(name, position.x, position.y);
 };
 
 Vec2 Frame::resize() {
 	// Button
-	closeButton->position = position + Vec2(width - titleBarHeight + closeButtonOffset, -closeButtonOffset);
+	closeButton->position = position + Vec2(width - titleBarHeight + buttonOffset, -buttonOffset);
+	minimizeButton->position = position + Vec2(width - 2 * titleBarHeight + buttonOffset, -buttonOffset);
+
+	// Title
+	if (!name.empty()) {
+		title->text = name;
+		title->resize();
+		title->position = position + Vec2(2 * buttonOffset, -titleBarHeight / 2 + title->height / 2);
+	}
 
 	// Content
-	Vec2 positionOffset = Vec2(padding, -padding - titleBarHeight);
-	Vec2 dimensionOffset = Vec2(2 * padding, 2 * padding + titleBarHeight);
-	
-	position += positionOffset;
-	dimension -= dimensionOffset;
-	
-	dimension = layout->resize(this);
-	
-	position -= positionOffset;
-	dimension += dimensionOffset;
-	
+	if (!minimized) {
+		Vec2 positionOffset = Vec2(padding, -padding - titleBarHeight);
+		Vec2 dimensionOffset = Vec2(2 * padding, 2 * padding + titleBarHeight);
+
+		position += positionOffset;
+		dimension -= dimensionOffset;
+
+		dimension = layout->resize(this);
+
+		position -= positionOffset;
+		dimension += dimensionOffset;
+	} else {
+		dimension = Vec2(dimension.x, titleBarHeight);
+	}
+
 	return dimension;
 }
 
@@ -70,9 +106,14 @@ Component* Frame::intersect(Vec2 point) {
 	if (closeButton->intersect(point))
 		return closeButton;
 
-	for (auto iterator = children.begin(); iterator != children.end(); iterator++) {
-		if (iterator->first->intersect(point))
-			return iterator->first;
+	if (minimizeButton->intersect(point))
+		return minimizeButton;
+
+	if (!minimized) {
+		for (auto iterator = children.begin(); iterator != children.end(); iterator++) {
+			if (iterator->first->intersect(point))
+				return iterator->first;
+		}
 	}
 
 	if (GUI::intersectsSquare(point, position, dimension)) {
@@ -82,16 +123,14 @@ Component* Frame::intersect(Vec2 point) {
 	return nullptr;
 }
 
-void Frame::hover(Vec2 point) {
+void Frame::hover(Vec2 point) {}
 
-}
+void Frame::enter() {}
 
-void Frame::enter() {
-	Log::debug("Enter frame");
-}
+void Frame::exit() {}
 
-void Frame::exit() {
-	Log::debug("Exit frame");
+void Frame::drag(Vec2 mouse) {
+	position = mouse - GUI::intersectedPoint;
 }
 
 void Frame::render() {
@@ -105,22 +144,31 @@ void Frame::render() {
 		GUI::defaultQuad->resize(titleBarPosition, titleBarDimension);
 		GUI::defaultQuad->render();
 
-		// Padding
-		Vec2 offsetPosition = titleBarPosition + Vec2(0, -titleBarHeight);
-		Vec2 offsetDimension = dimension + Vec2(0, -titleBarHeight);
-		GUI::defaultShader->update(backgroundColor);
-		GUI::defaultQuad->resize(offsetPosition, offsetDimension);
-		GUI::defaultQuad->render();
-
-		// Close button
+		// Buttons
 		closeButton->render();
+		minimizeButton->render();
 
-		// Content
-		Vec2 contentPosition = position + Vec2(padding, -padding - titleBarHeight);
-		Vec2 contentDimension = dimension - Vec2(2 * padding, 2 * padding + titleBarHeight);
-		GUI::defaultShader->update(backgroundColor);
-		GUI::defaultQuad->resize(contentPosition, contentDimension);
-		GUI::defaultQuad->render();
+		// Title
+		if (!name.empty())
+			title->render();
+
+		if (!minimized) {
+			// Padding
+			Vec2 offsetPosition = titleBarPosition + Vec2(0, -titleBarHeight);
+			Vec2 offsetDimension = dimension + Vec2(0, -titleBarHeight);
+			GUI::defaultShader->update(backgroundColor);
+			GUI::defaultQuad->resize(offsetPosition, offsetDimension);
+			GUI::defaultQuad->render();
+
+			// Content
+			Vec2 contentPosition = position + Vec2(padding, -padding - titleBarHeight);
+			Vec2 contentDimension = dimension - Vec2(2 * padding, 2 * padding + titleBarHeight);
+			GUI::defaultShader->update(backgroundColor);
+			GUI::defaultQuad->resize(contentPosition, contentDimension);
+			GUI::defaultQuad->render();
+
+			renderChildren();
+		}
 
 		// Outline
 		Vec2 outlinePosition = titleBarPosition;
@@ -128,7 +176,5 @@ void Frame::render() {
 		GUI::defaultShader->update(GUI::COLOR::NAVY);
 		GUI::defaultQuad->resize(outlinePosition, outlineDimension);
 		GUI::defaultQuad->render(GL_LINE);
-
-		renderChildren();
 	}
 }

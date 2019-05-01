@@ -61,12 +61,15 @@ namespace GUI {
 	Vec4 defaultPanelBackgroundColor = Vec4(0.3, 0.3, 0.3, 1);
 
 	// Button
-	Texture* defaultButtonHoverTexture;
-	Texture* defaultButtonIdleTexture;
-	Texture* defaultButtonPressTexture;
+	Texture* defaultCloseButtonHoverTexture;
+	Texture* defaultCloseButtonIdleTexture;
+	Texture* defaultCloseButtonPressTexture;
+	Texture* defaultMinimizeButtonHoverTexture;
+	Texture* defaultMinimizeButtonIdleTexture;
+	Texture* defaultMinimizeButtonPressTexture;
 
 	// Frame
-	double defaultFrameCloseButtonOffset = 0.003;
+	double defaultFrameButtonOffset = 0.003;
 	double defaultFrameTitleBarHeight = 0.06;
 	double defaultFramePadding = 0.01;
 	double defaultFrameMargin = 0.01;
@@ -84,9 +87,13 @@ namespace GUI {
 		GUI::defaultShader = shader;
 		GUI::defaultQuad = new Quad();
 
-		GUI::defaultButtonIdleTexture = load("../res/textures/gui/close_idle.png");
-		GUI::defaultButtonHoverTexture = load("../res/textures/gui/close_hover.png");
-		GUI::defaultButtonPressTexture = load("../res/textures/gui/close_press.png");
+		GUI::defaultCloseButtonIdleTexture = load("../res/textures/gui/close_idle.png");
+		GUI::defaultCloseButtonHoverTexture = load("../res/textures/gui/close_hover.png");
+		GUI::defaultCloseButtonPressTexture = load("../res/textures/gui/close_press.png");
+
+		GUI::defaultMinimizeButtonIdleTexture = load("../res/textures/gui/minimize_idle.png");
+		GUI::defaultMinimizeButtonHoverTexture = load("../res/textures/gui/minimize_hover.png");
+		GUI::defaultMinimizeButtonPressTexture = load("../res/textures/gui/minimize_press.png");
 	}
 	
 	void update(Mat4f orthoMatrix) {
@@ -108,6 +115,10 @@ namespace GUI {
 	void intersect(Vec2 mouse) {
 		Component* intersected = nullptr;
 		for (Component* component : components) {
+			// Skip hidden components
+			if (!component->visible) 
+				continue;
+
 			intersected = component->intersect(mouse);
 
 			// Only update if intersection is found

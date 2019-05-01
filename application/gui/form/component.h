@@ -4,6 +4,7 @@
 #include "GLFW\glfw3.h"
 
 #include <cmath>
+#include <string>
 
 #include "layout.h"
 
@@ -12,6 +13,11 @@
 
 class Component {
 public:
+	/*
+		Name of this component
+	*/
+	std::string name;
+
 	/* 
 		Alignment of the component within its current layout
 		FLOW:
