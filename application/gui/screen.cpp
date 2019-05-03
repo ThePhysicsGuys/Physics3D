@@ -210,7 +210,7 @@ void Screen::init() {
 
 
 	// Texture init
-	floorTexture = load("../res/textures/floor/floor_color.jpg");
+	floorTexture = load("../res/textures/stall/stall.png");
 	//floorNormal = load("../res/textures/metal/metal_normal.jpg");
 	floorNormal = load("../res/textures/floor/floor_normal.jpg");
 	if(floorTexture != nullptr)
@@ -258,8 +258,8 @@ void Screen::init() {
 
 	// Mouse init
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-	mouseVertical = new Panel(0, 0, 0.04, 0.01);
-	mouseHorizontal = new Panel(0, 0, 0.01, 0.04);
+	mouseVertical = new Panel(0, 0, 0.04, 0.007);
+	mouseHorizontal = new Panel(0, 0, 0.007, 0.04);
 	mouseVertical->backgroundColor = Vec4(1);
 	mouseHorizontal->backgroundColor = Vec4(1);
 	
@@ -308,7 +308,6 @@ void Screen::update() {
 		if (handler->getKey(GLFW_KEY_A))  camera.move(*this, -1, 0, 0, leftDragging);
 		if (handler->getKey(GLFW_KEY_SPACE)) 
 			if (camera.flying) camera.move(*this, 0, 1, 0, leftDragging);
-			// else camera.jump(*this, leftDragging);	
 		if (handler->getKey(GLFW_KEY_LEFT_SHIFT)) 
 			if (camera.flying) camera.move(*this, 0, -1, 0, leftDragging);
 		if (handler->getKey(GLFW_KEY_LEFT))  camera.rotate(*this, 0, -1, 0, leftDragging);
@@ -390,12 +389,11 @@ void Screen::renderPhysicals() {
 			material.ambient = Vec3f(0.5, 0.5, 0.5);
 		else
 			material.ambient = Vec3f(0.3, 0.4, 0.2);
-
+		
 		basicShader.updateMaterial(material);
 
 		// Render each physical
-		Mat4f transformation = part.cframe.asMat4f();
-		basicShader.updateModel(transformation);
+		basicShader.updatePart(part);
 
 		if(meshId == -1) continue;
 		meshes[meshId]->render();
@@ -447,7 +445,7 @@ void Screen::refresh() {
 	for (Light light : lights) {
 		Mat4f transformation = Mat4f().translate(light.position).scale(0.1);
 		basicShader.updateMaterial(Material(light.color, Vec3f(), Vec3f(), 10));
-		basicShader.updateModel(transformation);
+		basicShader.updateModelMatrix(transformation);
 		skyboxMesh->render();
 	}
 	

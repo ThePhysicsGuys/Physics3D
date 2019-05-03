@@ -2,15 +2,21 @@
 #version 330 core
 
 layout(location = 0) in vec3 vposition;
+layout(location = 1) in vec3 vnormal;
+layout(location = 2) in vec2 vuv;
 
 out vec3 gposition;
+out vec3 gnormal;
+out vec2 guv;
 
 uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
 
 void main() {
+	guv = vuv;
 	gposition = vposition;
-	gl_Position = modelMatrix * vec4(vposition, 1.0f);
+	gnormal = (modelMatrix * vec4(vnormal, 0.0)).xyz;
+	gl_Position = modelMatrix * vec4(vposition, 1.0);
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -27,13 +33,18 @@ layout(triangle_strip, max_vertices = 3) out;
 layout(line_strip, max_vertices = 9) out;
 #endif
 
+uniform bool includeUvs;
+uniform bool includeNormals;
+
 uniform vec3 viewPosition;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 
 in vec3 gposition[];
+in vec3 gnormal[];
+in vec2 guv[];
 
-out vec2 ftextureUV;
+out vec2 fuv;
 out vec3 fposition;
 out vec3 fnormal;
 out vec3 fcenter;
@@ -100,16 +111,36 @@ void main() {
 		u = -t;
 	}
 
+	// Vertex 1
 	fposition = gl_in[0].gl_Position.xyz;
-	ftextureUV = uv(gposition[0], n, u, v);
+
+	if (includeUvs) fuv = guv[0];
+	else fuv = uv(gposition[0], n, u, v);
+
+	if (includeNormals) fnormal = gnormal[0];
+
 	gl_Position = transform * gl_in[0].gl_Position; EmitVertex();
 
+
+	// Vertex 2
 	fposition = gl_in[1].gl_Position.xyz;
-	ftextureUV = uv(gposition[1], n, u,v);
+
+	if (includeUvs) fuv = guv[1];
+	else fuv = uv(gposition[1], n, u, v);
+
+	if (includeNormals) fnormal = gnormal[1];
+
 	gl_Position = transform * gl_in[1].gl_Position; EmitVertex();
 
+
+	// Vertex 3
 	fposition = gl_in[2].gl_Position.xyz;
-	ftextureUV = uv(gposition[2], n, u,v);
+
+	if (includeUvs) fuv = guv[2];
+	else fuv = uv(gposition[2], n, u, v);
+
+	if (includeNormals) fnormal = gnormal[2];
+
 	gl_Position = transform * gl_in[2].gl_Position; EmitVertex();
 	EndPrimitive();
 }
@@ -121,7 +152,7 @@ void main() {
 
 out vec4 outColor;
 
-in vec2 ftextureUV;
+in vec2 fuv;
 in vec3 fposition;
 in vec3 fnormal;
 in vec3 fcenter;
@@ -205,7 +236,7 @@ mat3 rodrigues() {
 
 void main() {
 	/*if (material.normalmapped) {
-		normal = texture(normalSampler, ftextureUV).rgb;
+		normal = texture(normalSampler, fuv).rgb;
 		normal = normalize(normal * 2 - 1);
 		normal = normalize(modelMatrix * vec4(normal, 0)).xyz;
 		normal = rodrigues() * normal;
@@ -223,7 +254,7 @@ void main() {
 	}
 
 	if (material.textured) {
-		outColor = vec4(lightColors / count, 1) * texture(textureSampler, ftextureUV);
+		outColor = vec4(lightColors / count, 1) * texture(textureSampler, fuv);
 	} else {
 		outColor = vec4(lightColors / count * material.ambient, 1);
 	}

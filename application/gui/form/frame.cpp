@@ -32,7 +32,7 @@ Frame::Frame(double x, double y) : Container(x, y) {
 	this->minimizeButton->hoverTexture = GUI::defaultMinimizeButtonHoverTexture;
 	this->minimizeButton->pressTexture = GUI::defaultMinimizeButtonPressTexture;
 	this->minimizeButton->action = [] (Button* button) {
-		Frame* frame = (Frame*)button->parent;
+		Frame* frame = (Frame*) button->parent;
 		frame->minimized = !frame->minimized;
 	};
 
@@ -63,7 +63,7 @@ Frame::Frame(double x, double y, double width, double height) : Container(x, y, 
 	this->minimizeButton->idleTexture = GUI::defaultMinimizeButtonIdleTexture;
 	this->minimizeButton->hoverTexture = GUI::defaultMinimizeButtonHoverTexture;
 	this->minimizeButton->pressTexture = GUI::defaultMinimizeButtonPressTexture;
-	this->minimizeButton->action = [](Button* button) {
+	this->minimizeButton->action = [] (Button* button) {
 		Frame* frame = (Frame*) button->parent;
 		frame->minimized = !frame->minimized;
 	};
@@ -122,12 +122,6 @@ Component* Frame::intersect(Vec2 point) {
 
 	return nullptr;
 }
-
-void Frame::hover(Vec2 point) {}
-
-void Frame::enter() {}
-
-void Frame::exit() {}
 
 void Frame::drag(Vec2 mouse) {
 	position = mouse - GUI::intersectedPoint;

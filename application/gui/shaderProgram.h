@@ -6,8 +6,9 @@
 #include "light.h"
 
 #include "../debug.h"
+#include "../util/log.h"
 
-#include "../../util/log.h"
+#include "../extendedPart.h"
 
 #include <cstdarg>
 #include <vector>
@@ -24,7 +25,6 @@ public:
 		va_list args;
 		va_start(args, count);
 		Log::setSubject(shader.name);
-		Log::debug("Using shader (%s) with id (%d)", shader.name.c_str(), shader.id);
 		for (int i = 0; i < count; i++) {
 			std::string uniform = std::string(va_arg(args, const char *));
 			shader.createUniform(uniform);
@@ -69,7 +69,7 @@ struct SkyboxShader : public ShaderProgram {
 
 struct BasicShader : public ShaderProgram {
 	BasicShader() : ShaderProgram() {}
-	BasicShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 12, "modelMatrix", "viewMatrix", "projectionMatrix", "viewPosition", "material.ambient", "material.diffuse", "material.specular", "material.reflectance", "material.textured", "material.normalmapped", "textureSampler", "normalSampler") {}
+	BasicShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 14, "modelMatrix", "viewMatrix", "projectionMatrix", "viewPosition", "includeNormals", "includeUvs", "material.ambient", "material.diffuse", "material.specular", "material.reflectance", "material.textured", "material.normalmapped", "textureSampler", "normalSampler") {}
 
 	void createLightArray(int size) {
 		bind();
@@ -138,7 +138,14 @@ struct BasicShader : public ShaderProgram {
 		}
 	}
 
-	void updateModel(Mat4f modelMatrix) {
+	void updatePart(ExtendedPart& part) {
+		bind();
+		shader.setUniform("includeNormals", part.hitbox.normals != nullptr);
+		shader.setUniform("includeUvs", part.hitbox.uvs != nullptr);
+		shader.setUniform("modelMatrix", part.cframe.asMat4f());
+	}
+
+	void updateModelMatrix(Mat4f modelMatrix) {
 		bind();
 		shader.setUniform("modelMatrix", modelMatrix);
 	}

@@ -50,7 +50,6 @@ TickerThread physicsThread;
 ExtendedPart* player;
 bool flying = true;
 
-
 void init();
 void setupPhysics();
 
@@ -179,15 +178,14 @@ int main(void) {
 	ExtendedPart* constructedExtendedPart = createUniquePart(screen, constructedShape, CFrame(Vec3(0.0, 2.0, -5.0)), 2.0, 0.7);
 	world.addObject(constructedExtendedPart);
 
-
-	Shape sphereShape = loadMesh((std::istream&) std::istringstream(getResourceAsString(SPHERE_MODEL)));
+	Shape sphereShape = loadMesh((std::istream&) std::istringstream(getResourceAsString(STALL_MODEL)));
 
 	PartFactory cubeFactory(BoundingBox{-0.49, -0.49, -0.49, 0.49, 0.49, 0.49}.toShape(new Vec3[8]), screen);
 	PartFactory sphereFactory(sphereShape, screen);
 	PartFactory triangleFactory(triangleShape, screen);
-	for(int x = 0; x < 4; x++) {
-		for(int y = 0; y < 4; y++) {
-			for(int z = 0; z < 4; z++) {
+	for(int x = 0; x < 1; x++) {
+		for(int y = 0; y < 1; y++) {
+			for(int z = 0; z < 1; z++) {
 				world.addObject(cubeFactory.produce(CFrame(Vec3(x + 5, y + 1, z)), 1.0, 0.2));
 				world.addObject(sphereFactory.produce(CFrame(Vec3(x - 5, y + 1, z)), 1.0, 0.2));
 				world.addObject(triangleFactory.produce(CFrame(Vec3(x, y + 1, z)), 1.0, 0.2));
