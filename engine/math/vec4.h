@@ -17,9 +17,8 @@ public:
 	Vec4Template() : x(0), y(0), z(0), w(0) {};
 	Vec4Template(N v) : x(v), y(v), z(v), w(v) {};
 	Vec4Template(N x, N y, N z, N w) : x(x), y(y), z(z), w(w) {};
-	Vec4Template(const Vec4Template<float>& other) : x(other.x), y(other.y), z(other.z), w(other.w) {};
-	Vec4Template(const Vec4Template<double>& other) : x(other.x), y(other.y), z(other.z), w(other.w) {};
-	Vec4Template(const Vec4Template<long long>& other) : x(other.x), y(other.y), z(other.z), w(other.w) {};
+	template<typename OtherN>
+	Vec4Template(const Vec4Template<OtherN>& other) : x(static_cast<N>(other.x)), y(static_cast<N>(other.y)), z(static_cast<N>(other.z)), w(static_cast<N>(other.w)) {};
 
 	Vec4Template operator+(const Vec4Template& other) const {
 		return Vec4Template(x + other.x, y + other.y, z + other.z, w + other.w);

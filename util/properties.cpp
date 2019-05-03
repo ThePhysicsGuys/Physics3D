@@ -68,7 +68,7 @@ namespace PropertiesParser {
 			if (line.empty() || line.at(0) == '#') {
 				// next line
 			} else {
-				int pos = line.find("=");
+				size_t pos = line.find("=");
 				std::string property = rtrim(line.substr(0, pos));
 				std::string value = ltrim(line.substr(pos + 1, line.length()));
 				properties.add(property, value);

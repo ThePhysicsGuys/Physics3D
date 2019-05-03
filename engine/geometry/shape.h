@@ -84,15 +84,15 @@ struct Shape {
 	BoundingBox getBounds() const;
 	void computeNormals(Vec3* buffer) const;
 	Vec3 getCenterOfMass() const;
-	Mat3 getInertia() const;
-	Mat3 getInertia(Vec3 reference) const;
-	Mat3 getInertia(Mat3 reference) const;
-	Mat3 getInertia(CFrame reference) const;
+	SymmetricMat3 getInertia() const;
+	SymmetricMat3 getInertia(Vec3 reference) const;
+	SymmetricMat3 getInertia(Mat3 reference) const;
+	SymmetricMat3 getInertia(CFrame reference) const;
 	Sphere getCircumscribedSphere() const;
 	double getMaxRadius() const;
 	Vec3 getNormalVecOfTriangle(Triangle triangle) const;
 
-	bool intersects(const Shape& other, Vec3& intersection, Vec3& exitVector, Vec3 centerConnection) const;
+	bool intersects(const Shape& other, Vec3& intersection, Vec3& exitVector, const Vec3& centerConnection) const;
 	bool intersectsTransformed(const Shape& other, const CFrame& relativeCFrame, Vec3& intersection, Vec3& exitVector) const;
 	int furthestIndexInDirection(Vec3 direction) const;
 	Vec3 furthestInDirection(Vec3 direction) const;

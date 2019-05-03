@@ -33,17 +33,9 @@ struct Mat4Template {
 		for (int i = 0; i < 16; i++) m[i] = other[i];
 	};
 
-	Mat4Template(const Mat4f& other) {
-		for (int i = 0; i < 16; i++) m[i] = (N) other.m[i];
-	
-	}
-
-	Mat4Template(const Mat4& other) {
-		for (int i = 0; i < 16; i++) m[i] = (N) other.m[i];
-	}
-
-	Mat4Template(const Mat4l& other) {
-		for (int i = 0; i < 16; i++) m[i] = (N) other.m[i];
+	template<typename OtherN>
+	Mat4Template(const Mat4Template<OtherN>& other) {
+		for (int i = 0; i < 16; i++) m[i] = static_cast<N>(other.m[i]);
 	}
 
 	Mat4Template(const Mat3Template<N>& other) {

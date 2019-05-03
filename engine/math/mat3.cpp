@@ -2,6 +2,8 @@
 
 #include <cmath>
 
+
+
 template<typename N>
 Mat3Template<N> rotX(N angle) {
 	N sina = sin(angle);
@@ -85,12 +87,12 @@ Mat3Template<N> fromRotationVec(Vec3Template<N> rotVec) {
 	N sinA = sin(angle);
 	N cosA = cos(angle);
 
-	Mat3Template<N> outer = rotVec.outer(rotVec);
+	Mat3Template<N> outerProd = outer(rotVec, rotVec);
 	Mat3Template<N> rotor = Mat3Template<N>(cosA,     z*sinA,   -y*sinA,
 											-z*sinA,  cosA,     x*sinA,
 											y*sinA,   -x*sinA,  cosA);
 
-	return outer * (1 - cosA) + rotor;
+	return outerProd * (1 - cosA) + rotor;
 }
 
 template<typename N>
@@ -122,9 +124,9 @@ void rotateEigen(Mat3Template<N>& copy, int k, int l, int i, int j, N c, N s) {
 */
 
 template<typename N>
-EigenSet<N> Mat3Template<N>::getEigenDecomposition() const {
+EigenSet<N> SymmetricMat3Template<N>::getEigenDecomposition() const {
 	
-	Mat3Template<N> copy(*this);
+	Mat3Template<N> copy(m00, m01, m02, m10, m11, m12, m20, m21, m22);
 
 	EigenValues<N> eigenValues(m00, m11, m22);
 	Mat3Template<N> eigenVectors(1,0,0,0,1,0,0,0,1);
@@ -183,10 +185,17 @@ EigenSet<N> Mat3Template<N>::getEigenDecomposition() const {
 	return EigenSet<N>(eigenValues, eigenVectors.transpose());
 }
 
-
+template<typename N>
+EigenSet<N> DiagonalMat3Template<N>::getEigenDecomposition() const {
+	return EigenSet<N>(EigenValues<N>(m00, m11, m22), Mat3Template<N>());
+}
 
 template struct Mat3Template<double>;
 template struct Mat3Template<float>;
+template struct SymmetricMat3Template<double>;
+template struct SymmetricMat3Template<float>;
+template struct DiagonalMat3Template<double>;
+template struct DiagonalMat3Template<float>;
 
 template Mat3Template<double> rotX(double);
 template Mat3Template<double> rotY(double);

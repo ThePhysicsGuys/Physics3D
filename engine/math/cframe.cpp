@@ -11,8 +11,8 @@ Mat4 CFrame::asMat4() const {
 }
 
 Mat4f CFrame::asMat4f() const {
-	const Mat3& r = static_cast<Mat3>(rotation);
-	const Vec3& p = static_cast<Vec3>(position);
+	const Mat3f r = static_cast<Mat3f>(rotation);
+	const Vec3f p = static_cast<Vec3f>(position);
 	return Mat4f(
 		r.m00, r.m01, r.m02, 0,
 		r.m10, r.m11, r.m12, 0,

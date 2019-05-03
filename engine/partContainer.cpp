@@ -4,8 +4,10 @@
 #include <algorithm>
 #include "sharedLockGuard.h"
 
-PartContainer::PartContainer(size_t initialCapacity) : physicalCount(0), freePhysicalsOffset(0), physicals(nullptr), parts(nullptr) {
-	ensureCapacity(initialCapacity);
+PartContainer::PartContainer(size_t initialCapacity) : physicalCount(0), freePhysicalsOffset(0) {
+	physicals = new Physical[initialCapacity];
+	parts = new Part*[initialCapacity];
+	this->capacity = initialCapacity;
 }
 void PartContainer::ensureCapacity(size_t targetCapacity) {
 	if(this->capacity < targetCapacity) {

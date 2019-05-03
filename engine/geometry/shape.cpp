@@ -84,7 +84,7 @@ CenteredShape Shape::centered(Vec3* vecBuf, Vec3& backOffset) const {
 
 CFrame Shape::getInertialEigenVectors() const {
 	Vec3 centerOfMass = getCenterOfMass();
-	Mat3 inertia = getInertia(centerOfMass);
+	SymmetricMat3 inertia = getInertia(centerOfMass);
 	Mat3 basis = inertia.getEigenDecomposition().eigenVectors;
 
 	return CFrame(centerOfMass, basis);
@@ -271,7 +271,7 @@ Vec3 Shape::furthestInDirection(Vec3 direction) const {
 }
 
 ComputationBuffers buffers(1000, 2000);
-bool Shape::intersects(const Shape& other, Vec3& intersection, Vec3& exitVector, Vec3 centerConnection) const {
+bool Shape::intersects(const Shape& other, Vec3& intersection, Vec3& exitVector, const Vec3& centerConnection) const {
 	Tetrahedron result;
 	bool collides = runGJK(*this, other, centerConnection, result);
 	
@@ -361,8 +361,8 @@ double Shape::getMaxRadius() const {
 
 	This has been reworked to a surface integral resulting in the given formulae
 */
-Mat3 Shape::getInertia(CFrame reference) const {
-	Mat3 total = Mat3(0, 0, 0, 0, 0, 0, 0, 0, 0);
+SymmetricMat3 Shape::getInertia(CFrame reference) const {
+	SymmetricMat3 total(0, 0, 0, 0, 0, 0);
 	for (Triangle triangle : iterTriangles()) {
 		Vec3 v0 = reference.globalToLocal(vertices[triangle.firstIndex]);
 		Vec3 v1 = reference.globalToLocal(vertices[triangle.secondIndex]);
@@ -391,30 +391,27 @@ Mat3 Shape::getInertia(CFrame reference) const {
 		double xyzIntegral = -(3 * selfProducts + twoSames + allDifferents / 2) / 60;
 
 		total.m01 += dFactor.z * xyzIntegral;
-		total.m10 += dFactor.z * xyzIntegral;
 		total.m02 += dFactor.y * xyzIntegral;
-		total.m20 += dFactor.y * xyzIntegral;
 		total.m12 += dFactor.x * xyzIntegral;
-		total.m21 += dFactor.x * xyzIntegral;
 	}
 	
 	return total;
 }
 
-Mat3 Shape::getInertia(Vec3 reference) const {
+SymmetricMat3 Shape::getInertia(Vec3 reference) const {
 	return this->getInertia(CFrame(reference));
 }
 
-Mat3 Shape::getInertia(Mat3 reference) const {
+SymmetricMat3 Shape::getInertia(Mat3 reference) const {
 	return this->getInertia(CFrame(reference));
 }
 
-Mat3 Shape::getInertia() const {
+SymmetricMat3 Shape::getInertia() const {
 	return this->getInertia(CFrame());
 }
 
 double Shape::getIntersectionDistance(Vec3 origin, Vec3 direction) {
-	const float EPSILON = 0.0000001f;
+	const double EPSILON = 0.0000001f;
 	double t = INFINITY;
 	for (Triangle triangle : iterTriangles()) {
 		Vec3 v0 = vertices[triangle.firstIndex];
@@ -422,7 +419,7 @@ double Shape::getIntersectionDistance(Vec3 origin, Vec3 direction) {
 		Vec3 v2 = vertices[triangle.thirdIndex];
 
 		Vec3 edge1, edge2, h, s, q;
-		float a, f, u, v;
+		double a, f, u, v;
 
 		edge1 = v1 - v0;
 		edge2 = v2 - v0;

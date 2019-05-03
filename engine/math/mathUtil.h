@@ -1,10 +1,11 @@
 #pragma once
 
+#include "mat2.h"
+#include "vec2.h"
 #include "mat3.h"
+#include "vec3.h"
 #include "mat4.h"
 #include "vec4.h"
-#include "vec3.h"
-#include "vec2.h"
 
 #include <string>
 #include <sstream>
@@ -29,7 +30,21 @@ inline std::string str(const Mat4Template<N>& matrix) {
 }
 
 template<typename N>
-inline std::ostream& operator<<(std::ostream& os, const Mat3Template<N>& matrix) {
+inline std::ostream& operator<<(std::ostream& os, const Vec4Template<N>& vector) {
+	os << "Vec4(" << vector.x << ", " << vector.y << ", " << vector.z << ", " << vector.w << ")";
+	return os;
+}
+
+template<typename N>
+inline std::string str(const Vec4Template<N>& vector) {
+	std::stringstream ss;
+	ss << vector;
+	return ss.str();
+}
+
+
+template<template<typename> typename Mat, typename N, typename std::enable_if<std::is_base_of<M33Type, Mat<N>>::value>::type* = nullptr>
+inline std::ostream& operator<<(std::ostream& os, const Mat<N>& matrix) {
 	os << "Mat3(\n\t";
 
 	for (int i = 0; i < 8; i++) {
@@ -41,23 +56,11 @@ inline std::ostream& operator<<(std::ostream& os, const Mat3Template<N>& matrix)
 	return os;
 }
 
-template<typename N>
-inline std::string str(const Mat3Template<N>& matrix) {
+
+template<template<typename> typename Mat, typename N, typename std::enable_if<std::is_base_of<M33Type, Mat<N>>::value>::type* = nullptr>
+inline std::string str(const Mat<N>& matrix) {
 	std::stringstream ss;
 	ss << matrix;
-	return ss.str();
-}
-
-template<typename N>
-inline std::ostream& operator<<(std::ostream& os, const Vec4Template<N>& vector) {
-	os << "Vec4(" << vector.x << ", " << vector.y << ", " << vector.z << ", " << vector.w << ")";
-	return os;
-}
-
-template<typename N>
-inline std::string str(const Vec4Template<N>& vector) {
-	std::stringstream ss;
-	ss << vector;
 	return ss.str();
 }
 
@@ -71,6 +74,23 @@ template<typename N>
 inline std::string str(const Vec3Template<N>& vector) {
 	std::stringstream ss;
 	ss << vector;
+	return ss.str();
+}
+
+template<typename N>
+inline std::ostream& operator<<(std::ostream& os, const Mat2Template<N>& matrix) {
+	os << "Mat2(\n\t";
+
+	os << matrix.m[0] << ", " << matrix.m[1] << ";\n\t";
+	os << matrix.m[2] << ", " << matrix.m[3] << ")";
+
+	return os;
+}
+
+template<typename N>
+inline std::string str(const Mat2Template<N>& matrix) {
+	std::stringstream ss;
+	ss << matrix;
 	return ss.str();
 }
 

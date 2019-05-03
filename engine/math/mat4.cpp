@@ -47,13 +47,13 @@ CFrame Mat4Template<N>::toCFrame() const {
 }*/
 
 Mat4f ortho(float left, float right, float bottom, float top, float zNear, float zFar) {
-	float r00 = 2.0 / (right - left);
-	float r11 = 2.0 / (top - bottom);
-	float r22 = -2.0 / (zFar - zNear);
+	float r00 = 2.0f / (right - left);
+	float r11 = 2.0f / (top - bottom);
+	float r22 = -2.0f / (zFar - zNear);
 	float r30 = (left + right) / (left - right);
 	float r31 = (top + bottom) / (bottom - top);
 	float r32 = (zFar + zNear) / (zNear - zFar);
-	float r33 = 1.0;
+	float r33 = 1.0f;
 
 	return Mat4f(r00, 0, 0, 0, 0, r11, 0, 0, 0, 0, r22, 0, r30, r31, r32, r33);
 }

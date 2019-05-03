@@ -1,11 +1,6 @@
 #pragma once
 
 template<typename N>
-struct Vec3Template;
-
-#include "mat3.h"
-
-template<typename N>
 struct Vec3Template {
 public:
 	union {
@@ -20,9 +15,8 @@ public:
 	Vec3Template() : x(0), y(0), z(0) {}
 	Vec3Template(N v) : x(v), y(v), z(v) {};
 	Vec3Template(N x, N y, N z) : x(x), y(y), z(z) {};
-	Vec3Template(const Vec3Template<float>& other) : x(other.x), y(other.y), z(other.z) {};
-	Vec3Template(const Vec3Template<long long>& other) : x(other.x), y(other.y), z(other.z) {};
-	Vec3Template(const Vec3Template<double>& other) : x(other.x), y(other.y), z(other.z) {};
+	template<typename OtherN>
+	Vec3Template(const Vec3Template<OtherN>& other) : x(static_cast<N>(other.x)), y(static_cast<N>(other.y)), z(static_cast<N>(other.z)) {};
 	~Vec3Template() {};
 	
 	Vec3Template operator+(const Vec3Template& other) const {
@@ -82,12 +76,6 @@ public:
 							this->z*other.x - this->x*other.z, 
 							this->x*other.y - this->y*other.x);
 	}
-	
-	Mat3Template<N> outer(const Vec3Template<N>& other) const {
-		return Mat3Template<N>(x*other.x, x*other.y, x*other.z,
-							   y*other.x, y*other.y, y*other.z,
-							   z*other.x, z*other.y, z*other.z);
-	}
 
 	N& operator[](int index) {
 		return v[index];
@@ -116,10 +104,10 @@ public:
 			return *this;
 	}
 
-	Vec3Template minLength(N maxLength) const {
+	Vec3Template minLength(N minLength) const {
 		N lengthSquared = this->lengthSquared();
-		if (maxLength*maxLength > lengthSquared) {
-			N f = maxLength / length();
+		if (minLength*minLength > lengthSquared) {
+			N f = minLength / length();
 			return Vec3Template(x*f, y*f, z*f);
 		}
 		else
@@ -195,7 +183,7 @@ public:
 };
 
 template<typename P, typename N>
-Vec3Template<N> operator*(const P factor, const Vec3Template<N> vec) { return vec * factor; }
+Vec3Template<N> operator*(const P& factor, const Vec3Template<N>& vec) { return vec * factor; }
 
 typedef Vec3Template<double>	Vec3;
 typedef Vec3Template<float>		Vec3f;

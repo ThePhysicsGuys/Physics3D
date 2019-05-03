@@ -19,7 +19,7 @@ struct Physical {
 	Vec3 totalMoment = Vec3();
 
 	double mass;
-	Mat3 inertia;
+	SymmetricMat3 inertia;
 
 	Physical() = default;
 	Physical(Part* part);

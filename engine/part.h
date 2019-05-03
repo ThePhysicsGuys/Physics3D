@@ -3,6 +3,7 @@
 struct Part;
 struct Physical;
 #include "geometry/shape.h"
+#include "math/mat3.h"
 
 struct Part {
 public:
@@ -23,6 +24,7 @@ public:
 	Part(NormalizedShape shape, CFrame position, double density, double friction);
 	Part(Shape shape, CFrame position, double density, double friction);
 	bool intersects(const Part& other, Vec3& intersection, Vec3& exitVector) const;
+	
 };
 
 #include "physical.h"
