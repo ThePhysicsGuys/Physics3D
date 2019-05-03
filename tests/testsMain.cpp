@@ -159,10 +159,14 @@ public:
 			printDeltaTime(startTime, ERROR_COLOR);
 			dumpLog();
 			color(RED); printf("An general error was thrown: %s\n", e.what());
-		} catch (string& e) {
+		} catch(string& e) {
 			printDeltaTime(startTime, ERROR_COLOR);
 			dumpLog();
 			color(RED); printf("An string exception was thrown: %s\n", e.c_str());
+		} catch(const char* ex){
+			printDeltaTime(startTime, ERROR_COLOR);
+			dumpLog();
+			color(RED); printf("A char* exception was thrown: %s\n", ex);
 		} catch (...) {
 			printDeltaTime(startTime, ERROR_COLOR);
 			dumpLog();

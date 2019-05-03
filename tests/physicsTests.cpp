@@ -2,7 +2,6 @@
 
 #include "../engine/world.h"
 #include "../application/objectLibrary.h"
-#include "../application/worlds.h"
 #include "../engine/math/mathUtil.h"
 
 
@@ -28,16 +27,16 @@ TEST_CASE(positionInvariance) {
 		Part housePart(house, origin.localToGlobal(houseRelative), 1.0, 1.0);
 		Part icosaPart(icosahedron, origin.localToGlobal(icosaRelative), 10.0, 0.7);
 
-		GravityFloorWorld w(Vec3(0.0, -10.0, 0.0));
+		World<> w;
 
-		w.addObject(Physical(housePart));
-		w.addObject(Physical(icosaPart));
+		w.addObject(&housePart);
+		w.addObject(&icosaPart);
 
 		for(int i = 0; i < TICKS; i++)
 			w.tick(DELTA_T);
 
-		REMAINS_CONSTANT(origin.globalToLocal(w.physicals[0].part.cframe));
-		REMAINS_CONSTANT(origin.globalToLocal(w.physicals[1].part.cframe));
+		REMAINS_CONSTANT(origin.globalToLocal(w.parts[0]->cframe));
+		REMAINS_CONSTANT(origin.globalToLocal(w.parts[1]->cframe));
 	}
 }
 
@@ -57,21 +56,22 @@ TEST_CASE(rotationInvariance) {
 		Part housePart(house, origin.localToGlobal(houseRelative), 1.0, 1.0);
 		Part icosaPart(icosahedron, origin.localToGlobal(icosaRelative), 10.0, 0.7);
 
-		GravityFloorWorld w(Vec3(0.0, -10.0, 0.0));
+		World<> w;
 
-		w.addObject(Physical(housePart));
-		w.addObject(Physical(icosaPart));
+		w.addObject(&housePart);
+		w.addObject(&icosaPart);
 
 		for(int i = 0; i < TICKS; i++)
 			w.tick(DELTA_T);
 
-		REMAINS_CONSTANT(origin.globalToLocal(w.physicals[0].part.cframe));
-		REMAINS_CONSTANT(origin.globalToLocal(w.physicals[1].part.cframe));
+		REMAINS_CONSTANT(origin.globalToLocal(w.parts[0]->cframe));
+		REMAINS_CONSTANT(origin.globalToLocal(w.parts[1]->cframe));
 	}
 }
 
 TEST_CASE(applyForceToRotate) {
-	Physical p = Physical(Part(createCube(1.0), CFrame(fromEulerAngles(0.3, 0.7, 0.9)), 1.0, 1.0));
+	Part part(createCube(1.0), CFrame(fromEulerAngles(0.3, 0.7, 0.9)), 1.0, 1.0);
+	Physical p(&part);
 
 	Vec3 relAttach = Vec3(1.0, 0.0, 0.0);
 	Vec3 force = Vec3(0.0, 1.0, 0.0);
@@ -82,7 +82,8 @@ TEST_CASE(applyForceToRotate) {
 }
 
 TEST_CASE(momentToAngularVelocity) {
-	Physical p = Physical(Part(createCube(1.0), CFrame(rotY(PI / 2)), 1.0, 1.0));
+	Part part(createCube(1.0), CFrame(rotY(PI / 2)), 1.0, 1.0);
+	Physical p(&part);
 
 	Vec3 moment(1.0, 0.0, 0.0);
 
@@ -95,7 +96,8 @@ TEST_CASE(momentToAngularVelocity) {
 }
 
 TEST_CASE(rotationImpulse) {
-	Physical veryLongBoxPhysical(Part(BoundingBox{-0.1, -10, -0.1, 0.1, 10, 0.1}.toShape(new Vec3[8]), CFrame(Vec3()), 1.0, 1.0));
+	Part part(BoundingBox{-0.1, -10, -0.1, 0.1, 10, 0.1}.toShape(new Vec3[8]), CFrame(Vec3()), 1.0, 1.0);
+	Physical veryLongBoxPhysical(&part);
 
 	Vec3 xMoment = Vec3(1.0, 0.0, 0.0);
 	Vec3 yMoment = Vec3(0.0, 1.0, 0.0);

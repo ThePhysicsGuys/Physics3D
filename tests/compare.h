@@ -5,53 +5,54 @@
 #include "../engine/math/vec2.h"
 #include "../engine/math/vec3.h"
 #include "../engine/math/vec4.h"
+#include "../engine/templateUtils.h"
 
-template<typename Num1, typename Num2, typename Tol>
+template<typename Num1, typename Num2, typename Tol, IS_ARITHMETIC(Num1), IS_ARITHMETIC(Num2)>
 bool tolerantEquals(const Num1& first, const Num2& second, Tol tolerance) {
 	auto diff = first - second;
 	return diff <= tolerance && -diff <= tolerance;
 }
 
-template<typename Num1, typename Num2, typename Tol>
+template<typename Num1, typename Num2, typename Tol, IS_ARITHMETIC(Num1), IS_ARITHMETIC(Num2)>
 bool tolerantNotEquals(const Num1& first, const Num2& second, Tol tolerance) {
 	auto diff = first - second;
 	return diff > tolerance && -diff > tolerance;
 }
 
-template<typename Num1, typename Num2, typename Tol>
+template<typename Num1, typename Num2, typename Tol, IS_ARITHMETIC(Num1), IS_ARITHMETIC(Num2)>
 bool tolerantLessThan(const Num1& first, const Num2& second, Tol tolerance) {
 	return first < second + tolerance;
 }
 
-template<typename Num1, typename Num2, typename Tol>
+template<typename Num1, typename Num2, typename Tol, IS_ARITHMETIC(Num1), IS_ARITHMETIC(Num2)>
 bool tolerantGreaterThan(const Num1& first, const Num2& second, Tol tolerance) {
 	return first + tolerance > second;
 }
 
-template<typename Num1, typename Num2, typename Tol>
+template<typename Num1, typename Num2, typename Tol, IS_ARITHMETIC(Num1), IS_ARITHMETIC(Num2)>
 bool tolerantLessOrEqual(const Num1& first, const Num2& second, Tol tolerance) {
 	return first <= second + tolerance;
 }
 
-template<typename Num1, typename Num2, typename Tol>
+template<typename Num1, typename Num2, typename Tol, IS_ARITHMETIC(Num1), IS_ARITHMETIC(Num2)>
 bool tolerantGreaterOrEqual(const Num1& first, const Num2& second, Tol tolerance) {
 	return first + tolerance >= second;
 }
 
 
-template<typename Num1, typename Num2, typename Tol>
-bool tolerantEquals(const Mat3Template<Num1>& first, const Mat3Template<Num2>& second, Tol tolerance) {
-	for (int i = 0; i < 9; i++)
-		if (!tolerantEquals(first.m[i], second.m[i], tolerance))
-			return false;
-	return true;
+template<template<typename> typename Mat, template<typename> typename MatMat, typename Num1, typename Num2, typename Tol, IS_SUBCLASS_OF(Mat<Num1>, M33Type), IS_SUBCLASS_OF(MatMat<Num2>, M33Type)>
+bool tolerantEquals(const Mat<Num1>& first, const MatMat<Num2>& second, Tol tolerance) {
+	return
+		tolerantEquals(first.m00, second.m00, tolerance) && tolerantEquals(first.m01, second.m01, tolerance) && tolerantEquals(first.m02, second.m02, tolerance) &&
+		tolerantEquals(first.m10, second.m10, tolerance) && tolerantEquals(first.m11, second.m11, tolerance) && tolerantEquals(first.m12, second.m12, tolerance) &&
+		tolerantEquals(first.m20, second.m20, tolerance) && tolerantEquals(first.m21, second.m21, tolerance) && tolerantEquals(first.m22, second.m22, tolerance);
 }
-template<typename Num1, typename Num2, typename Tol>
-bool tolerantNotEquals(const Mat3Template<Num1>& first, const Mat3Template<Num2>& second, Tol tolerance) {
-	for (int i = 0; i < 9; i++)
-		if (tolerantNotEquals(first.m[i], second.m[i], tolerance))
-			return true;
-	return false;
+template<template<typename> typename Mat, template<typename> typename MatMat, typename Num1, typename Num2, typename Tol, IS_SUBCLASS_OF(Mat<Num1>, M33Type), IS_SUBCLASS_OF(MatMat<Num2>, M33Type)>
+bool tolerantNotEquals(const Mat<Num1>& first, const MatMat<Num2>& second, Tol tolerance) {
+	return
+		tolerantNotEquals(first.m00, second.m00, tolerance) || tolerantNotEquals(first.m01, second.m01, tolerance) || tolerantNotEquals(first.m02, second.m02, tolerance) ||
+		tolerantNotEquals(first.m10, second.m10, tolerance) || tolerantNotEquals(first.m11, second.m11, tolerance) || tolerantNotEquals(first.m12, second.m12, tolerance) ||
+		tolerantNotEquals(first.m20, second.m20, tolerance) || tolerantNotEquals(first.m21, second.m21, tolerance) || tolerantNotEquals(first.m22, second.m22, tolerance);
 }
 
 template<typename Num1, typename Num2, typename Tol>

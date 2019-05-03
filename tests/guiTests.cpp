@@ -13,7 +13,7 @@
 
 TEST_CASE(transformationTest) {
 	Mat4f viewMatrix = Mat4f();
-	Mat4f projectionMatrix = Mat4f().perspective(1, 2, 0.1f, 100);
+	Mat4f projectionMatrix = perspective(1, 2, 0.1f, 100);
 
 	Mat4f inverseViewMatrix = viewMatrix.inverse();
 	Mat4f inverseProjectionMatrix = projectionMatrix.inverse();

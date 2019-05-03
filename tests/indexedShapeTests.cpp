@@ -73,12 +73,12 @@ TEST_CASE(buildConvexShape) {
 
 	ASSERT_TRUE(icosaBuilder.toIndexedShape().isValid());
 
-	icosaBuilder.addPoint(Vec3(0, 1.5, 0));
-	icosaBuilder.addPoint(Vec3(0, -1.5, 0));
-	icosaBuilder.addPoint(Vec3(1.5, 0, 0));
-	icosaBuilder.addPoint(Vec3(-1.5, 0, 0));
-	icosaBuilder.addPoint(Vec3(0, 0, 1.5));
-	icosaBuilder.addPoint(Vec3(0, 0, -1.5));
+	icosaBuilder.addPoint(Vec3(0, 1.1, 0));
+	icosaBuilder.addPoint(Vec3(0, -1.1, 0));
+	icosaBuilder.addPoint(Vec3(1.1, 0, 0));
+	icosaBuilder.addPoint(Vec3(-1.1, 0, 0));
+	icosaBuilder.addPoint(Vec3(0, 0, 1.1));
+	icosaBuilder.addPoint(Vec3(0, 0, -1.1));
 
 	ASSERT_TRUE(icosaBuilder.toIndexedShape().isValid());
 }

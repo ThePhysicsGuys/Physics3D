@@ -128,6 +128,22 @@ TEST_CASE(crossProduct) {
 	ASSERT(x % z == -y);
 }
 
+TEST_CASE(matrixTypes) {
+	Mat3 a(1, 2, 3, 4, 5, 6, 7, 8, 9);
+	SymmetricMat3 sym(2, 2, 2, 7, 8, 9);
+	DiagonalMat3 dia(1,2,5);
+
+	Mat3 asym = a*sym;
+	Mat3 syma = sym*a;
+
+	SymmetricMat3 symdia = sym*dia;
+	SymmetricMat3 diasym = dia*sym;
+
+	SymmetricMat3 symsym = sym*sym;
+
+	DiagonalMat3 diadia = dia*dia;
+}
+
 #include <iostream>
 #include <algorithm>
 
@@ -140,7 +156,9 @@ TEST_CASE(eigenDecomposition) {
 
 				Mat3 orthoPart = fromEulerAngles(0.21, 0.31, 0.41);
 				Mat3 eigenMat(x, 0, 0, 0, y, 0, 0, 0, z);
-				Mat3 testMat = orthoPart * eigenMat * ~orthoPart;
+				Mat3 testMatTmp = orthoPart * eigenMat * ~orthoPart;
+
+				SymmetricMat3 testMat(testMatTmp.m00, testMatTmp.m11, testMatTmp.m22, testMatTmp.m01, testMatTmp.m02, testMatTmp.m12);
 
 				// std::cout << testMat;
 

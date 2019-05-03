@@ -20,6 +20,12 @@ bool isDiagonalTolerant(Mat3Template<N> m, Tol tolerance) {
 		tolerantEquals(m.m02, 0, tolerance) && tolerantEquals(m.m20, 0, tolerance) &&
 		tolerantEquals(m.m21, 0, tolerance) && tolerantEquals(m.m12, 0, tolerance);
 }
+template<typename N, typename Tol>
+bool isDiagonalTolerant(SymmetricMat3Template<N> m, Tol tolerance) {
+	return tolerantEquals(m.m01, 0, tolerance) && 
+		tolerantEquals(m.m02, 0, tolerance) && 
+		tolerantEquals(m.m12, 0, tolerance);
+}
 
 #define ASSERT_DIAGONAL_TOLERANT(matrix, tolerance) if(!isDiagonalTolerant(matrix, tolerance)) throw AssertionError(__LINE__, errMsg(matrix))
 #define ASSERT_DIAGONAL(matrix) ASSERT_DIAGONAL_TOLERANT(matrix, 0.00000001)
@@ -104,7 +110,7 @@ TEST_CASE(shapeInertiaRotationInvariance) {
 
 		Vec3 rotatedTestMoment = testRotation * testMoment;
 		
-		Mat3 inertia = rotatedShape.getInertia();
+		SymmetricMat3 inertia = rotatedShape.getInertia();
 
 		Vec3 rotatedMomentResult = ~inertia * rotatedTestMoment;
 
@@ -167,6 +173,8 @@ TEST_CASE(testRayIntersection) {
 	ASSERT_FALSE(rayTriangleIntersection(Vec3(-1.0, -0.3, -0.3), Vec3(1.0, 0.0, 0.0), Vec3(), Vec3(0.0, 0.0, 1.0), Vec3(0.0, 1.0, 0.0)).rayIntersectsTriangle());
 }
 
+#include "../util/log.h"
+
 TEST_CASE(testIntersection) {
 	Vec3 buf[12];
 	Vec3 buf2[8];
@@ -178,10 +186,11 @@ TEST_CASE(testIntersection) {
 
 	Vec3 intersect, exitVec;
 
-	ASSERT_TRUE(a.intersects(b, intersect, exitVec));
 
-	ASSERT_FALSE(a.intersects(c, intersect, exitVec));
+	Vec3 startingVec(1, 0, 0);
 
+	ASSERT_TRUE(a.intersects(b, intersect, exitVec, startingVec));
+	ASSERT_FALSE(a.intersects(c, intersect, exitVec, startingVec));
 	/*Vec3 buf1[8];
 	Vec3 buf2[8];
 
@@ -202,4 +211,22 @@ TEST_CASE(testIntersection) {
 			}
 		}
 	}*/
+}
+
+TEST_CASE(badCollissions) {
+	Triangle triangles[12] = {
+		{1,0,2},{3,2,0}, // BOTTOM
+		{1,5,0},{4,0,5}, // FRONT
+		{1,2,5},{6,5,2}, // RIGHT
+		{6,2,7},{3,7,2}, // BACK
+		{3,0,7},{4,7,0}, // LEFT
+		{4,5,7},{6,7,5}, // TOP
+	};
+
+	Shape dominoI(badVerticesI, triangles, 8, 12);
+	Shape dominoJ(badVerticesJ, triangles, 8, 12);
+
+	Vec3 intersection;
+	Vec3 exitVec;
+	dominoI.intersects(dominoJ, intersection, exitVec, Vec3(1, 0, 0));
 }
