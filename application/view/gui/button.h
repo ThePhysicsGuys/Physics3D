@@ -8,7 +8,7 @@
 
 class Button;
 
-typedef void(*ButtonAction) (Button*);
+typedef void (*ButtonAction) (Button*);
 
 class Button : public Component {
 private:

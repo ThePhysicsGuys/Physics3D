@@ -10,29 +10,33 @@
 #include <sstream>
 #include <istream>
 
-#include "gui/screen.h"
-#include "gui/visualDebug.h"
+#include "view/screen.h"
+#include "view/visualDebug.h"
+#include "view/material.h"
+#include "view/loader.h"
 
-#include "tickerThread.h"
+#include "../engine/math/mathUtil.h"
 
-#include "gui\loader.h"
-#include "resourceManager.h"
-#include "objectLibrary.h"
 #include "../engine/geometry/shape.h"
 #include "../engine/geometry/managedShape.h"
+#include "../engine/geometry/convexShapeBuilder.h"
+
 #include "../engine/part.h"
 #include "../engine/world.h"
+#include "../engine/physicsProfiler.h"
+#include "../engine/engineException.h"
+
+#include "../util/log.h"
+
+#include "debug.h"
 #include "worlds.h"
+#include "tickerThread.h"
+#include "resourceManager.h"
+#include "objectLibrary.h"
 #include "extendedPart.h"
 #include "partFactory.h"
 
-#include "debug.h"
-#include "../util/log.h"
-#include "../engine/physicsProfiler.h"
-#include "../engine/engineException.h"
-#include "../engine/math/mathUtil.h"
 
-#include "../engine/geometry/convexShapeBuilder.h"
 
 
 #define _USE_MATH_DEFINES
@@ -109,7 +113,10 @@ int main(void) {
 	Vec2 floorSize(40.0, 80.0);
 	double wallHeight = 3.0;
 
+	Material* floorMaterial = new Material(load("../res/textures/floor/floor_color.jpg"));
+
 	ExtendedPart* floorExtendedPart = createUniquePart(screen, BoundingBox(floorSize.x, 0.3, floorSize.y).toShape(new Vec3[8]), CFrame(Vec3(0.0, -0.15, 0.0)), 0.2, 1.0);
+	floorExtendedPart->material = floorMaterial;
 	world.addObject(floorExtendedPart, true);
 
 	PartFactory xWallFactory(BoundingBox(0.2, wallHeight, floorSize.y).toShape(new Vec3[8]), screen);
@@ -178,7 +185,7 @@ int main(void) {
 	ExtendedPart* constructedExtendedPart = createUniquePart(screen, constructedShape, CFrame(Vec3(0.0, 2.0, -5.0)), 2.0, 0.7);
 	world.addObject(constructedExtendedPart);
 
-	Shape sphereShape = loadMesh((std::istream&) std::istringstream(getResourceAsString(STALL_MODEL)));
+	Shape sphereShape = loadMesh((std::istream&) std::istringstream(getResourceAsString(SPHERE_MODEL)));
 
 	PartFactory cubeFactory(BoundingBox{-0.49, -0.49, -0.49, 0.49, 0.49, 0.49}.toShape(new Vec3[8]), screen);
 	PartFactory sphereFactory(sphereShape, screen);
@@ -192,6 +199,11 @@ int main(void) {
 			}
 		}
 	}
+
+	Shape stallShape = loadMesh((std::istream&) std::istringstream(getResourceAsString(STALL_MODEL)));
+	ExtendedPart* stallExtendedPart = createUniquePart(screen, stallShape, CFrame(Vec3(10.0, 2.0, -10.0), fromEulerAngles(0.1, 0.1, 0.1)), 10, 0.7);
+	stallExtendedPart->material = new Material(load("../res/textures/stall/stall.png"));
+	world.addObject(stallExtendedPart);
 	
 	ExtendedPart* icosaExtendedPart = createUniquePart(screen, icosahedron, CFrame(Vec3(7.0, 2.0, -7.0), fromEulerAngles(0.1, 0.1, 0.1)), 10, 0.7);
 	world.addObject(icosaExtendedPart);

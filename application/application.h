@@ -3,7 +3,7 @@
 #include "../engine/math/vec3.h"
 #include "../engine/math/mat3.h"
 #include "../engine/part.h"
-#include "gui/camera.h"
+#include "view/camera.h"
 #include "extendedPart.h"
 
 void stop(int returnCode);

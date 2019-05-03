@@ -12,11 +12,11 @@
 #include "visualDebug.h"
 #include "loader.h"
 
-#include "form\panel.h"
-#include "form\frame.h"
-#include "form\label.h"
-#include "form\image.h"
-#include "form\gui.h"
+#include "gui\panel.h"
+#include "gui\frame.h"
+#include "gui\label.h"
+#include "gui\image.h"
+#include "gui\gui.h"
 
 #include "../debug.h"
 #include "../standardInputHandler.h"
@@ -129,7 +129,7 @@ PostProcessShader postProcessShader;
 SkyboxShader skyboxShader;
 
 // Object uniforms
-Material material = Material (
+Material defaultMaterial = Material (
 	Vec3f(1, 1, 1),
 	Vec3f(1, 1, 1),
 	Vec3f(1, 1, 1),
@@ -210,13 +210,13 @@ void Screen::init() {
 
 
 	// Texture init
-	floorTexture = load("../res/textures/stall/stall.png");
+	/*floorTexture = load("../res/textures/floor/floor.jpg");
 	//floorNormal = load("../res/textures/metal/metal_normal.jpg");
 	floorNormal = load("../res/textures/floor/floor_normal.jpg");
 	if(floorTexture != nullptr)
-		material.setTexture(floorTexture);
+		defaultMaterial.setTexture(floorTexture);
 	if(floorNormal != nullptr)
-		material.setNormalMap(floorNormal);
+		defaultMaterial.setNormalMap(floorNormal);*/
 
 
 	// Skybox init
@@ -374,13 +374,14 @@ void Screen::renderSkybox() {
 void Screen::renderPhysicals() {
 	// Bind basic uniforms
 	basicShader.updateLight(lights, lightCount);
-	basicShader.updateMaterial(material);
 
 	SharedLockGuard lg(world->lock);
 
 	// Render world objects
 	for (ExtendedPart& part : *world) {
 		int meshId = part.drawMeshId;
+
+		Material& material = (part.material)? *part.material : defaultMaterial;
 
 		// Picker code
 		if(&part == selectedPart)
@@ -394,7 +395,7 @@ void Screen::renderPhysicals() {
 
 		// Render each physical
 		basicShader.updatePart(part);
-
+		glDisable(GL_CULL_FACE);
 		if(meshId == -1) continue;
 		meshes[meshId]->render();
 	}

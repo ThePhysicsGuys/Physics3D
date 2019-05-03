@@ -1,8 +1,11 @@
 #pragma once
 
+#include "view\material.h"
 #include "../engine/part.h"
 
 struct ExtendedPart : public Part {
+	
+	Material* material = nullptr;
 	int drawMeshId;
 
 	ExtendedPart() = default;

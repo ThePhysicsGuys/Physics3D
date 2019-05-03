@@ -146,7 +146,18 @@ Shape loadMesh(std::istream& stream) {
 				tokens[2], 
 				tokens[3]
 			);
+
 			faces.push_back(face);
+
+			if (tokens.size() > 4) {
+				Face face = Face(
+					tokens[1],
+					tokens[3],
+					tokens[4]
+				);
+
+				faces.push_back(face);
+			}
 		} else if (tokens[0] == "vt") {
 			flags.uvs = true;
 			Vec2 uv = Vec2 (
