@@ -12,11 +12,11 @@
 #include "visualDebug.h"
 #include "loader.h"
 
-#include "form\panel.h"
-#include "form\frame.h"
-#include "form\label.h"
-#include "form\image.h"
-#include "form\gui.h"
+#include "gui\panel.h"
+#include "gui\frame.h"
+#include "gui\label.h"
+#include "gui\image.h"
+#include "gui\gui.h"
 
 #include "../debug.h"
 #include "../standardInputHandler.h"
@@ -129,7 +129,7 @@ PostProcessShader postProcessShader;
 SkyboxShader skyboxShader;
 
 // Object uniforms
-Material material = Material (
+Material defaultMaterial = Material (
 	Vec3f(1, 1, 1),
 	Vec3f(1, 1, 1),
 	Vec3f(1, 1, 1),
@@ -210,13 +210,13 @@ void Screen::init() {
 
 
 	// Texture init
-	floorTexture = load("../res/textures/floor/floor_color.jpg");
+	/*floorTexture = load("../res/textures/floor/floor.jpg");
 	//floorNormal = load("../res/textures/metal/metal_normal.jpg");
 	floorNormal = load("../res/textures/floor/floor_normal.jpg");
 	if(floorTexture != nullptr)
-		material.setTexture(floorTexture);
+		defaultMaterial.setTexture(floorTexture);
 	if(floorNormal != nullptr)
-		material.setNormalMap(floorNormal);
+		defaultMaterial.setNormalMap(floorNormal);*/
 
 
 	// Skybox init
@@ -258,8 +258,8 @@ void Screen::init() {
 
 	// Mouse init
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-	mouseVertical = new Panel(0, 0, 0.04, 0.01);
-	mouseHorizontal = new Panel(0, 0, 0.01, 0.04);
+	mouseVertical = new Panel(0, 0, 0.04, 0.007);
+	mouseHorizontal = new Panel(0, 0, 0.007, 0.04);
 	mouseVertical->backgroundColor = Vec4(1);
 	mouseHorizontal->backgroundColor = Vec4(1);
 	
@@ -308,7 +308,6 @@ void Screen::update() {
 		if (handler->getKey(GLFW_KEY_A))  camera.move(*this, -1, 0, 0, leftDragging);
 		if (handler->getKey(GLFW_KEY_SPACE)) 
 			if (camera.flying) camera.move(*this, 0, 1, 0, leftDragging);
-			// else camera.jump(*this, leftDragging);	
 		if (handler->getKey(GLFW_KEY_LEFT_SHIFT)) 
 			if (camera.flying) camera.move(*this, 0, -1, 0, leftDragging);
 		if (handler->getKey(GLFW_KEY_LEFT))  camera.rotate(*this, 0, -1, 0, leftDragging);
@@ -375,13 +374,14 @@ void Screen::renderSkybox() {
 void Screen::renderPhysicals() {
 	// Bind basic uniforms
 	basicShader.updateLight(lights, lightCount);
-	basicShader.updateMaterial(material);
 
 	SharedLockGuard lg(world->lock);
 
 	// Render world objects
 	for (ExtendedPart& part : *world) {
 		int meshId = part.drawMeshId;
+
+		Material& material = (part.material)? *part.material : defaultMaterial;
 
 		// Picker code
 		if(&part == selectedPart)
@@ -390,13 +390,12 @@ void Screen::renderPhysicals() {
 			material.ambient = Vec3f(0.5, 0.5, 0.5);
 		else
 			material.ambient = Vec3f(0.3, 0.4, 0.2);
-
+		
 		basicShader.updateMaterial(material);
 
 		// Render each physical
-		Mat4f transformation = part.cframe.asMat4f();
-		basicShader.updateModel(transformation);
-
+		basicShader.updatePart(part);
+		glDisable(GL_CULL_FACE);
 		if(meshId == -1) continue;
 		meshes[meshId]->render();
 	}
@@ -447,7 +446,7 @@ void Screen::refresh() {
 	for (Light light : lights) {
 		Mat4f transformation = Mat4f().translate(light.position).scale(0.1);
 		basicShader.updateMaterial(Material(light.color, Vec3f(), Vec3f(), 10));
-		basicShader.updateModel(transformation);
+		basicShader.updateModelMatrix(transformation);
 		skyboxMesh->render();
 	}
 	

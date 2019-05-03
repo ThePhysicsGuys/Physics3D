@@ -1,7 +1,7 @@
 #pragma once
 
 #include "extendedPart.h"
-#include "gui/screen.h"
+#include "view/screen.h"
 
 class PartFactory {
 	NormalizedShape normalizedShape;

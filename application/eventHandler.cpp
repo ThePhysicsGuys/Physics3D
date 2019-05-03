@@ -1,6 +1,6 @@
 #include "eventHandler.h"
 
-#include "gui\screen.h"
+#include "view\screen.h"
 
 void* EventHandler::getPtr() const {
 	return pointer;

@@ -1,10 +1,10 @@
 #include "standardInputHandler.h"
 #include "../engine/math/mathUtil.h"
 #include "application.h"
-#include "gui/picker.h"
-#include "gui/form/gui.h"
+#include "view/picker.h"
+#include "view/gui/gui.h"
+#include "view/visualDebug.h"
 #include "objectLibrary.h"
-#include "gui/visualDebug.h"
 #include <algorithm>
 #include <random>
 

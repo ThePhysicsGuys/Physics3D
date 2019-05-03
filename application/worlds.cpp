@@ -6,7 +6,7 @@
 #include "../util/log.h"
 #include "application.h"
 #include "standardInputHandler.h"
-#include "gui/screen.h"
+#include "view/screen.h"
 
 #define PICKER_STRENGTH 50
 #define PICKER_SPEED_STRENGTH 10

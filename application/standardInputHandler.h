@@ -2,8 +2,8 @@
 
 #include "inputHandler.h"
 #include "worlds.h"
-#include "gui\screen.h"
-#include "gui\camera.h"
+#include "view\screen.h"
+#include "view\camera.h"
 
 class StandardInputHandler : public InputHandler {
 public: 

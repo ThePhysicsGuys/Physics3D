@@ -53,14 +53,40 @@ Triangle Triangle::leftShift() const {
 	return Triangle { secondIndex, thirdIndex, firstIndex };
 }
 
-Shape::Shape() : vertices(nullptr), triangles(nullptr), vertexCount(0), triangleCount(0) {}
+Shape::Shape() : vertices(nullptr), 
+				 triangles(nullptr), 
+	 			 normals(nullptr),
+				 uvs(nullptr),
+				 vertexCount(0), 
+				 triangleCount(0) {}
 
-Shape::Shape(Vec3* vertices, const Triangle* triangles, int vertexCount, int triangleCount) : vertices(vertices), triangles(triangles), vertexCount(vertexCount), triangleCount(triangleCount) {
-	normals = std::shared_ptr<Vec3>(new Vec3[vertexCount], std::default_delete<Vec3[]>());
-	// computeNormals(normals.get());
-}
+Shape::Shape(Vec3* vertices, const Triangle* triangles, int vertexCount, int triangleCount) : vertices(vertices), 
+																							  triangles(triangles), 
+																							  vertexCount(vertexCount), 
+																							  triangleCount(triangleCount),
+																							  normals(nullptr),
+																							  uvs(nullptr) {}
 
-Shape::Shape(Vec3* vertices, Vec3* normals, const Triangle* triangles, int vertexCount, int triangleCount) : vertices(vertices), normals(normals), triangles(triangles), vertexCount(vertexCount), triangleCount(triangleCount) {}
+Shape::Shape(Vec3* vertices, Vec3* normals, Vec2* uvs, const Triangle* triangles, int vertexCount, int triangleCount) :	vertices(vertices), 
+																														normals(normals), 
+																														uvs(uvs), 
+																														triangles(triangles), 
+																														vertexCount(vertexCount), 
+																														triangleCount(triangleCount) {}
+
+Shape::Shape(Vec3* vertices, Vec2* uvs, const Triangle* triangles, int vertexCount, int triangleCount) : vertices(vertices),
+																										 uvs(uvs), 
+																										 triangles(triangles),
+																										 vertexCount(vertexCount), 
+																										 triangleCount(triangleCount),
+																										 normals(nullptr) {}
+
+Shape::Shape(Vec3* vertices, Vec3* normals, const Triangle* triangles, int vertexCount, int triangleCount) : vertices(vertices), 
+																											 normals(normals), 
+																											 triangles(triangles), 
+																											 vertexCount(vertexCount), 
+																											 triangleCount(triangleCount),
+																											 uvs(nullptr) {}
 
 NormalizedShape Shape::normalized(Vec3* vecBuf, CFrame& backTransformation) const {
 	backTransformation = getInertialEigenVectors();
@@ -69,7 +95,7 @@ NormalizedShape Shape::normalized(Vec3* vecBuf, CFrame& backTransformation) cons
 		vecBuf[i] = backTransformation.globalToLocal(vertices[i]);
 	}
 	
-	return NormalizedShape(vecBuf, triangles, vertexCount, triangleCount);
+	return NormalizedShape(vecBuf, normals.get(), uvs.get(), triangles, vertexCount, triangleCount);
 }
 
 CenteredShape Shape::centered(Vec3* vecBuf, Vec3& backOffset) const {
@@ -90,6 +116,11 @@ CFrame Shape::getInertialEigenVectors() const {
 	return CFrame(centerOfMass, basis);
 }
 
+/* Test */
+NormalizedShape::NormalizedShape(Vec3 * vertices, Vec3 * normals, Vec2 * uvs, const Triangle * triangles, int vertexCount, int triangleCount) : CenteredShape(vertices, normals, uvs, triangles, vertexCount, triangleCount) {
+	// TODO add normalization verification
+};
+
 NormalizedShape::NormalizedShape(Vec3 * vertices, const Triangle * triangles, int vertexCount, int triangleCount) : CenteredShape(vertices, triangles, vertexCount, triangleCount) {
 	// TODO add normalization verification
 };
@@ -101,6 +132,11 @@ NormalizedShape::NormalizedShape(Vec3 * vertices, const Triangle * triangles, in
 NormalizedShape::NormalizedShape(Vec3 * vertices, const Triangle * triangles, int vertexCount, int triangleCount, CFrame& transformation) : CenteredShape(vertices, triangles, vertexCount, triangleCount) {
 	this->normalized(vertices, transformation);
 }
+
+
+CenteredShape::CenteredShape(Vec3 * vertices, Vec3 * normals, Vec2 * uvs, const Triangle * triangles, int vertexCount, int triangleCount) : Shape(vertices, normals, uvs, triangles, vertexCount, triangleCount) {
+
+};
 
 CenteredShape::CenteredShape(Vec3 * vertices, const Triangle * triangles, int vertexCount, int triangleCount) : Shape(vertices, triangles, vertexCount, triangleCount) {
 	// TODO add centering verification

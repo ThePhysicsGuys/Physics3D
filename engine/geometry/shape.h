@@ -5,6 +5,7 @@ struct NormalizedShape;
 struct CenteredShape;
 struct Shape;
 
+#include "../math/vec2.h"
 #include "../math/vec3.h"
 #include "../math/mat3.h"
 #include "../math/cframe.h"
@@ -60,6 +61,7 @@ struct Shape {
 
 	Vec3* vertices;
 	std::shared_ptr<Vec3> normals;
+	std::shared_ptr<Vec2> uvs;
 	const Triangle* triangles;
 	int vertexCount;
 	int triangleCount;
@@ -67,6 +69,8 @@ struct Shape {
 	Shape();
 	Shape(Vec3* vertices, const Triangle* triangles, int vertexCount, int triangleCount);
 	Shape(Vec3* vertices, Vec3* normals, const Triangle* triangles, int vertexCount, int triangleCount);
+	Shape(Vec3* vertices, Vec3* normals, Vec2* uvs, const Triangle* triangles, int vertexCount, int triangleCount);
+	Shape(Vec3* vertices, Vec2* uvs, const Triangle* triangles, int vertexCount, int triangleCount);
 
 	Shape translated(Vec3 offset, Vec3* newVecBuf) const;
 	Shape rotated(RotMat3 rotation, Vec3* newVecBuf) const;
@@ -109,6 +113,7 @@ struct CenteredShape : public Shape {
 	friend struct Shape;
 	CenteredShape() : Shape() {}
 	CenteredShape(Vec3 * vertices, const Triangle * triangles, int vertexCount, int triangleCount);
+	CenteredShape(Vec3 * vertices, Vec3 * normals, Vec2 * uvs, const Triangle * triangles, int vertexCount, int triangleCount);
 private:
 	CenteredShape(Vec3 * vertices, const Triangle * triangles, int vertexCount, int triangleCount, Vec3& offset);
 };
@@ -117,6 +122,7 @@ struct NormalizedShape : public CenteredShape {
 	friend struct Shape;
 	NormalizedShape() : CenteredShape() {}
 	NormalizedShape(Vec3 * vertices, const Triangle * triangles, int vertexCount, int triangleCount);
+	NormalizedShape(Vec3 * vertices, Vec3 * normals, Vec2 * uvs, const Triangle * triangles, int vertexCount, int triangleCount);
 private:
 	NormalizedShape(Vec3* vertices, const Triangle* triangles, int vertexCount, int triangleCount, CFrame& transformation);
 };

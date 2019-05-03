@@ -1,6 +1,7 @@
 #pragma once
 
-#include "../engine/math/vec4.h"
+#include "../engine/math/vec3.h"
+
 #include "texture.h"
 
 struct Material {
@@ -14,7 +15,10 @@ struct Material {
 
 	Material(Vec3f ambient, Vec3f diffuse, Vec3f specular, float reflectance) : ambient(ambient), diffuse(diffuse), specular(specular), reflectance(reflectance) {};
 
+
 	Material(Vec3f ambient, Vec3f diffuse, Vec3f specular, float reflectance, Texture* texture) : ambient(ambient), diffuse(diffuse), specular(specular), reflectance(reflectance), texture(texture) {};
+
+	Material(Texture* texture) : Material(Vec3f(1), Vec3f(1), Vec3f(1), 1, texture) {};
 
 	Material(Vec3f ambient, Vec3f diffuse, Vec3f specular, float reflectance, Texture* texture, Texture* normalMap) : ambient(ambient), diffuse(diffuse), specular(specular), reflectance(reflectance), texture(texture), normalMap(normalMap) {};
 

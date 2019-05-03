@@ -7,7 +7,7 @@
 
 #include "GL\glew.h"
 
-#include "gui/screen.h"
+#include "view/screen.h"
 
 #include "buffers.h"
 

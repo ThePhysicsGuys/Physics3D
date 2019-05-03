@@ -34,8 +34,5 @@ public:
 
 	Component* intersect(Vec2 point) override;
 
-	void hover(Vec2 mouse) override;
 	void drag(Vec2 mouse) override;
-	void enter() override;
-	void exit() override;
 };
