@@ -403,10 +403,10 @@ Sphere Shape::getCircumscribedSphere() const {
 }
 
 double Shape::getMaxRadius() const {
-	double bestDistSq = vertices[0].lengthSquared();
+	double bestDistSq = 0;
 	for(Vec3 vertex : iterVertices()) {
 		double distSq = vertex.lengthSquared();
-		if(bestDistSq > bestDistSq) {
+		if(distSq > bestDistSq) {
 			bestDistSq = distSq;
 		}
 	}

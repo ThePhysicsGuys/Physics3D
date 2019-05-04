@@ -13,7 +13,7 @@ public:
 	};
 
 	Vec2Template() : x(0), y(0) {}
-	Vec2Template(N v) : x(v), y(v) {};
+	explicit Vec2Template(N v) : x(v), y(v) {};
 	Vec2Template(N x, N y) : x(x), y(y) {};
 	template<typename OtherN>
 	Vec2Template(const Vec2Template<OtherN>& other) : x(static_cast<N>(other.x)), y(static_cast<N>(other.y)) {};

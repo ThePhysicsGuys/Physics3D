@@ -43,8 +43,9 @@ void GravityWorld::applyExternalForces() {
 		Vec3 playerZ = camera.cframe.rotation.transpose() * Vec3(0, 0, 1);
 		Debug::logVec(camera.cframe.position - playerZ, playerX, Debug::INFO);
 		if(handler->anyKey) {
-			Vec3 forward = -(playerZ - playerZ * Vec3(0, 1, 0)).normalize();
-			Vec3 right = (playerX - playerX * Vec3(0, 1, 0)).normalize();
+			Vec3 UP(0, 1, 0);
+			Vec3 forward = (playerZ % UP % UP).normalize();
+			Vec3 right = -(playerX % UP % UP).normalize();
 			bool leftDragging = handler->leftDragging;
 			if(handler->getKey(GLFW_KEY_W)) player->parent->applyForceAtCenterOfMass(forward * player->parent->mass * 20.0);
 			if(handler->getKey(GLFW_KEY_S)) player->parent->applyForceAtCenterOfMass(-forward * player->parent->mass * 20.0);
