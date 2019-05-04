@@ -11,13 +11,14 @@ PartContainer::PartContainer(size_t initialCapacity) : physicalCount(0), freePhy
 }
 void PartContainer::ensureCapacity(size_t targetCapacity) {
 	if(this->capacity < targetCapacity) {
-		size_t newCapacity = std::max(this->capacity * 2, static_cast<size_t>(51200));
+		size_t newCapacity = std::max(this->capacity * 2, static_cast<size_t>(32));
 		Physical* newPhysicals = new Physical[newCapacity];
 		Part** newParts = new Part*[newCapacity];
 
 		for(int i = 0; i < this->capacity; i++) {
 			newPhysicals[i] = this->physicals[i];
 			newParts[i] = this->parts[i];
+			newParts[i]->parent = newPhysicals + i;
 		}
 
 		delete[] this->physicals;

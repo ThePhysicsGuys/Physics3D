@@ -13,7 +13,7 @@ public:
 	};
 
 	Vec3Template() : x(0), y(0), z(0) {}
-	Vec3Template(N v) : x(v), y(v), z(v) {};
+	explicit Vec3Template(N v) : x(v), y(v), z(v) {};
 	Vec3Template(N x, N y, N z) : x(x), y(y), z(z) {};
 	template<typename OtherN>
 	Vec3Template(const Vec3Template<OtherN>& other) : x(static_cast<N>(other.x)), y(static_cast<N>(other.y)), z(static_cast<N>(other.z)) {};

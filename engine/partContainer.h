@@ -62,6 +62,16 @@ public:
 class PartContainer {
 private:
 	size_t capacity;
+public:
+	size_t physicalCount = 0;
+	size_t freePhysicalsOffset = 0;
+	size_t partCount = 0;
+	size_t anchoredPartsCount = 0;
+	Physical* physicals;
+	Part** parts;
+
+private:
+
 	void movePhysical(size_t origin, size_t destination);
 	void movePhysical(Physical* origin, Physical* destination);
 
@@ -73,15 +83,8 @@ private:
 
 	void swapPart(size_t first, size_t second);
 	void swapPart(Part** first, Part** second);
+
 public:
-	size_t physicalCount;
-	size_t freePhysicalsOffset;
-	size_t partCount;
-	size_t anchoredPartsCount;
-	Physical* physicals;
-	Part** parts;
-
-
 	PartContainer(size_t initialCapacity);
 	void ensureCapacity(size_t capacity);
 	void remove(Part* p);
