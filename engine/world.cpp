@@ -19,8 +19,23 @@
 
 WorldPrototype::WorldPrototype() : PartContainer(20) {}
 
+/*
+	Compute combined inertia between to objects in a direction
+*/
+double computeCombinedInertiaBetween(const Physical& first, const Physical& second, const Vec3& localColissionFirst, const Vec3& localColissionSecond, const Vec3& colissionNormal) {
+	SymmetricMat3 accMat1 = first.getPointAccelerationMatrix(localColissionFirst);
+	SymmetricMat3 accMat2 = second.getPointAccelerationMatrix(localColissionSecond);
 
-// typedef Part AnchoredPart;
+	SymmetricMat3 accelToForceMat = ~(accMat1 + accMat2);
+	Vec3 imaginaryForceForAcceleration = accelToForceMat * colissionNormal;
+	double forcePerAccelRatio = imaginaryForceForAcceleration * colissionNormal / colissionNormal.lengthSquared();
+
+	if(forcePerAccelRatio != forcePerAccelRatio) {
+		Log::error("ForcePerAccelRatio is bad! %f", forcePerAccelRatio);
+		__debugbreak();
+	}
+	return forcePerAccelRatio;
+}
 
 /*
 	exitVector is the distance p2 must travel so that the shapes are no longer colliding
@@ -29,10 +44,15 @@ void handleCollision(Part& part1, Part& part2, Vec3 collisionPoint, Vec3 exitVec
 	Physical& p1 = *part1.parent;
 	Physical& p2 = *part2.parent;
 
+	double sizeOrder = std::min(p1.part->maxRadius, p2.part->maxRadius);
+	if(exitVector.lengthSquared() <= 1E-8 * sizeOrder*sizeOrder) {
+		return; // don't do anything for very small colissions
+	}
+
 	Vec3 collissionRelP1 = collisionPoint - p1.getCenterOfMass();
 	Vec3 collissionRelP2 = collisionPoint - p2.getCenterOfMass();
 
-	double combinedInertia = 1 / (1 / p1.mass + 1 / p2.mass);
+	double combinedInertia = computeCombinedInertiaBetween(p1, p2, p1.part->cframe.relativeToLocal(collissionRelP1), p2.part->cframe.relativeToLocal(collissionRelP2), exitVector);
 
 	Vec3 depthForce = COLLISSION_DEPTH_FORCE_MULTIPLIER * combinedInertia * exitVector;
 
@@ -69,18 +89,22 @@ void handleAnchoredCollision(Part& anchoredPart, Part& freePart, Vec3 collisionP
 	Physical& anchored = *anchoredPart.parent;
 	Physical& freePhys = *freePart.parent;
 
-	Vec3 collissionRelP1 = collisionPoint - anchored.getCenterOfMass();
-	Vec3 collissionRelP2 = collisionPoint - freePhys.getCenterOfMass();
+	double sizeOrder = std::min(anchored.part->maxRadius, freePhys.part->maxRadius);
+	if(exitVector.lengthSquared() <= 1E-20 * sizeOrder*sizeOrder) {
+		return; // don't do anything for very small colissions
+	}
 
-	double combinedInertia = freePhys.mass;
+	Vec3 collissionRelAnchored = collisionPoint - anchored.getCenterOfMass();
+	Vec3 collissionRelFree = collisionPoint - freePhys.getCenterOfMass();
+
+	double combinedInertia = freePhys.getInertiaOfPointInDirection(freePhys.part->cframe.relativeToLocal(collissionRelFree), exitVector);
 
 	Vec3 depthForce = COLLISSION_DEPTH_FORCE_MULTIPLIER * combinedInertia * exitVector;
 
-	// anchored.applyForce(collissionRelP1, -depthForce);
-	freePhys.applyForce(collissionRelP2, depthForce);
+	freePhys.applyForce(collissionRelFree, depthForce);
+	
 
-
-	Vec3 relativeVelocity = anchored.getVelocityOfPoint(collissionRelP1) - freePhys.getVelocityOfPoint(collissionRelP2);
+	Vec3 relativeVelocity = anchored.getVelocityOfPoint(collissionRelAnchored) - freePhys.getVelocityOfPoint(collissionRelFree);
 
 	Vec3 relVelNormalComponent = relativeVelocity * exitVector * exitVector / exitVector.lengthSquared();
 	Vec3 relVelSidewaysComponent = -relativeVelocity % exitVector % exitVector / exitVector.lengthSquared();
@@ -91,12 +115,12 @@ void handleAnchoredCollision(Part& anchoredPart, Part& freePart, Vec3 collisionP
 
 	if(relativeVelocity * exitVector > 0) { // moving towards the other object
 		Vec3 normalVelForce = -relVelNormalComponent * combinedInertia * COLLISSION_RELATIVE_VELOCITY_FORCE_MULTIPLIER;
-		// anchored.applyForce(collissionRelP1, normalVelForce);
-		freePhys.applyForce(collissionRelP2, -normalVelForce);
+		// anchored.applyForce(collissionRelAnchored, normalVelForce);
+		freePhys.applyForce(collissionRelFree, -normalVelForce);
 
 		Vec3 frictionForce = -(anchoredPart.properties.friction + freePart.properties.friction) / 2 * relVelSidewaysComponent * combinedInertia * COLLISSION_RELATIVE_VELOCITY_FORCE_MULTIPLIER;
-		// anchored.applyForce(collissionRelP1, frictionForce);
-		freePhys.applyForce(collissionRelP2, -frictionForce);
+		// anchored.applyForce(collissionRelAnchored, frictionForce);
+		freePhys.applyForce(collissionRelFree, -frictionForce);
 	}
 }
 

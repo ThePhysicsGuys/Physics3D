@@ -19,10 +19,11 @@ struct Physical {
 	Vec3 totalMoment = Vec3();
 
 	double mass;
-	SymmetricMat3 inertia;
+	DiagonalMat3 inertia;
 
 	Physical() = default;
 	Physical(Part* part);
+	inline Physical(Part* part, double mass, DiagonalMat3 inertia) : part(part), mass(mass), inertia(inertia) {};
 
 	void update(double deltaT);
 	void applyForceAtCenterOfMass(Vec3 force);
@@ -30,5 +31,10 @@ struct Physical {
 	void applyMoment(Vec3 moment);
 
 	Vec3 getCenterOfMass() const;
-	Vec3 getVelocityOfPoint(Vec3Relative point) const;
+	Vec3 getAcceleration() const;
+	Vec3 getAngularAcceleration() const;
+	Vec3 getVelocityOfPoint(const Vec3Relative& point) const;
+	Vec3 getAccelerationOfPoint(const Vec3Relative& point) const;
+	SymmetricMat3 getPointAccelerationMatrix(const Vec3Local& localPoint) const;
+	double getInertiaOfPointInDirection(const Vec3Local& localPoint, const Vec3Local& direction) const;
 };

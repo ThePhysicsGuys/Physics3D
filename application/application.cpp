@@ -188,9 +188,9 @@ int main(void) {
 	PartFactory cubeFactory(BoundingBox{-0.49, -0.49, -0.49, 0.49, 0.49, 0.49}.toShape(new Vec3[8]), screen);
 	PartFactory sphereFactory(sphereShape, screen);
 	PartFactory triangleFactory(triangleShape, screen);
-	for(int x = 0; x < 1; x++) {
-		for(int y = 0; y < 1; y++) {
-			for(int z = 0; z < 1; z++) {
+	for(double x = 0; x < 4; x+=1.01) {
+		for(double y = 0; y < 4; y += 1.01) {
+			for(double z = 0; z < 4; z += 1.01) {
 				world.addObject(cubeFactory.produce(CFrame(Vec3(x + 5, y + 1, z)), 1.0, 0.2));
 				world.addObject(sphereFactory.produce(CFrame(Vec3(x - 5, y + 1, z)), 1.0, 0.2));
 				world.addObject(triangleFactory.produce(CFrame(Vec3(x, y + 1, z)), 1.0, 0.2));

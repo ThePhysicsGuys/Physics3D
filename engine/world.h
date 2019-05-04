@@ -69,3 +69,5 @@ public:
 	inline CustomPartIter<T> begin() { return CustomPartIter<T>(parts); }
 	inline CustomPartIter<T> end() { return CustomPartIter<T>(parts + partCount); }
 };
+
+double computeCombinedInertiaBetween(const Physical& first, const Physical& second, const Vec3& localColissionFirst, const Vec3& localColissionSecond, const Vec3& colissionNormal);

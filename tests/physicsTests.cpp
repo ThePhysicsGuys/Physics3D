@@ -108,3 +108,68 @@ TEST_CASE(rotationImpulse) {
 		veryLongBoxPhysical.totalMoment = Vec3();
 	}
 }
+
+TEST_CASE(testPointAcceleration) {
+	Part testPart(NormalizedShape(), CFrame(), 1.0, 1.0);
+	Physical testPhys(&testPart, 5.0, DiagonalMat3(1, 2, 3));
+	Vec3 localPoint(3, 5, 7);
+	Vec3 force(-4, -3, 0.5);
+	double deltaT = 0.00001;
+
+	testPhys.applyForce(localPoint, force);
+
+	Vec3 acceleration = testPhys.getAcceleration();
+	Vec3 angularAcceleration = testPhys.getAngularAcceleration();
+	Vec3 pointAcceleration = testPhys.getAccelerationOfPoint(localPoint);
+
+	testPhys.update(deltaT);
+
+	Vec3 actualAcceleration = testPhys.velocity / deltaT;
+	Vec3 actualAngularAcceleration = testPhys.angularVelocity / deltaT;
+	Vec3 actualPointAcceleration = testPhys.getVelocityOfPoint(testPhys.part->cframe.localToRelative(localPoint)) / deltaT;
+
+	ASSERT(acceleration == actualAcceleration);
+	ASSERT(angularAcceleration == actualAngularAcceleration);
+	ASSERT(pointAcceleration == actualPointAcceleration);
+}
+
+TEST_CASE(testGetPointAccelerationMatrix) {
+	Part testPart(NormalizedShape(), CFrame(), 1.0, 1.0);
+	Physical testPhys(&testPart, 5.0, DiagonalMat3(1, 2, 3));
+	Vec3 localPoint(3, 5, 7);
+	Vec3 force(-4, -3, 0.5);
+
+	testPhys.applyForce(localPoint, force);
+
+	SymmetricMat3 accelMatrix = testPhys.getPointAccelerationMatrix(localPoint);
+
+	logStream << accelMatrix;
+
+	Vec3 actualAcceleration = testPhys.getAccelerationOfPoint(localPoint);
+
+	ASSERT(actualAcceleration == accelMatrix * force);
+}
+TEST_CASE(testComputeCombinedInertiaBetween) {
+	Part testPart1(NormalizedShape(), CFrame(), 1.0, 1.0);
+	Physical testPhys1(&testPart1, 5.0, DiagonalMat3(100, 200, 300));
+	Part testPart2(NormalizedShape(), CFrame(Vec3(1.0, 0.0, 0.0)), 1.0, 1.0);
+	Physical testPhys2(&testPart2, 5.0, DiagonalMat3(100, 200, 300));
+	
+	Vec3 direction(2.0, 0.0, 0.0);
+	Vec3 colissionPos(0.5, 0.0, 0.0);
+
+	double realInertiaBetweenNormalToCOM = 1 / (1 / testPhys1.mass + 1 / testPhys2.mass);
+	double combinedInertiaBetweenNormalToCOM = computeCombinedInertiaBetween(testPhys1, testPhys2, colissionPos - testPhys1.getCenterOfMass(), colissionPos - testPhys2.getCenterOfMass(), direction);
+
+	ASSERT(realInertiaBetweenNormalToCOM == combinedInertiaBetweenNormalToCOM);
+
+	for(double x = -1.0; x <= 1.0; x += 0.25) {
+		for(double y = -1.0; y <= 1.0; y += 0.25) {
+			for(double z = -1.0; z <= 1.0; z += 0.25) {
+				Vec3 colissionPos(x, y, z);
+				double combinedInertiaBetweenNormal = computeCombinedInertiaBetween(testPhys1, testPhys2, colissionPos - testPhys1.getCenterOfMass(), colissionPos - testPhys2.getCenterOfMass(), direction);
+				ASSERT(realInertiaBetweenNormalToCOM >= combinedInertiaBetweenNormalToCOM);
+			}
+		}
+	}
+}

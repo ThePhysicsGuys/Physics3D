@@ -99,7 +99,7 @@ void printFileSlice(const char* fileName, int line) {
 
 		string s;
 		for(int i = 0; i < 5; i++) {
-			getline(inFile, s);
+			if(!getline(inFile, s)) break;
 			printf("%d: %s", line - 2 + i, s.c_str());
 			if(i == 2) {
 				color(YELLOW);
