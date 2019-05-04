@@ -61,5 +61,5 @@ NormalizedShape createCube(double side) {
 NormalizedShape createBox(double width, double height, double length) {
 	Vec3* newVecBuf = new Vec3[8];
 	CFrame cf; // unused
-	return BoundingBox{-width / 2, -height / 2, -length / 2, width / 2, height / 2, length / 2}.toShape(newVecBuf).normalized(newVecBuf, cf);
+	return BoundingBox{ -width / 2, -height / 2, -length / 2, width / 2, height / 2, length / 2 }.toShape(newVecBuf).normalized(newVecBuf, nullptr, cf);
 }

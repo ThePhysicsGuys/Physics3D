@@ -40,12 +40,6 @@ std::string toString(std::chrono::nanoseconds t) {
 	return ss.str();
 }
 
-std::string toString(size_t v) {
-	std::stringstream ss;
-	ss << v;
-	return ss.str();
-}
-
 size_t getTheoreticalNumberOfIntersections(size_t objCount) {
 	return (objCount-1)*objCount / 2;
 }

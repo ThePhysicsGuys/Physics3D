@@ -88,14 +88,22 @@ Shape::Shape(Vec3* vertices, Vec3* normals, const Triangle* triangles, int verte
 																											 triangleCount(triangleCount),
 																											 uvs(nullptr) {}
 
-NormalizedShape Shape::normalized(Vec3* vecBuf, CFrame& backTransformation) const {
+NormalizedShape Shape::normalized(Vec3* vecBuf, Vec3* normalBuf, CFrame& backTransformation) const {
 	backTransformation = getInertialEigenVectors();
 
 	for (int i = 0; i < vertexCount; i++) {
 		vecBuf[i] = backTransformation.globalToLocal(vertices[i]);
 	}
-	
-	return NormalizedShape(vecBuf, normals.get(), uvs.get(), triangles, vertexCount, triangleCount);
+
+	if (normals) {
+		for (int i = 0; i < vertexCount; i++) {
+			normalBuf[i] = backTransformation.relativeToLocal(normals.get()[i]);
+		}
+		return NormalizedShape(vecBuf, normalBuf, uvs.get(), triangles, vertexCount, triangleCount);
+	} else {
+		return NormalizedShape(vecBuf, nullptr, uvs.get(), triangles, vertexCount, triangleCount);
+	}
+
 }
 
 CenteredShape Shape::centered(Vec3* vecBuf, Vec3& backOffset) const {
@@ -130,7 +138,7 @@ NormalizedShape::NormalizedShape(Vec3 * vertices, const Triangle * triangles, in
 	Modifies `vertices`
 */
 NormalizedShape::NormalizedShape(Vec3 * vertices, const Triangle * triangles, int vertexCount, int triangleCount, CFrame& transformation) : CenteredShape(vertices, triangles, vertexCount, triangleCount) {
-	this->normalized(vertices, transformation);
+	this->normalized(vertices, nullptr, transformation);
 }
 
 
@@ -231,9 +239,28 @@ Vec3 Shape::getNormalVecOfTriangle(Triangle triangle) const {
 }
 
 void Shape::computeNormals(Vec3* buffer) const {
+	for (int i = 0; i < triangleCount; i++) {
+		Triangle triangle = triangles[i];
+		Vec3 v0 = vertices[triangle.firstIndex];
+		Vec3 v1 = vertices[triangle.secondIndex];
+		Vec3 v2 = vertices[triangle.thirdIndex];
+
+		Vec3 D1 = v1 - v0;
+		Vec3 D2 = v2 - v0;
+
+		Vec3 faceNormal = (D1 % D2).normalize();
+
+		buffer[triangle.firstIndex] += faceNormal;
+		buffer[triangle.secondIndex] += faceNormal;
+		buffer[triangle.thirdIndex] += faceNormal;
+	}
+
 	for (int i = 0; i < vertexCount; i++) {
-		Vec3 vertex = vertices[i];
-		Vec3 vertexNormal;
+		buffer[i] = buffer[i].normalize();
+	}
+
+	/*for (int i = 0; i < vertexCount; i++) {
+ 		Vec3 vertexNormal;
 		for (int j = 0; j < triangleCount; j++) {
 			Triangle triangle = triangles[j];
 			if (triangle.firstIndex == i || triangle.secondIndex == i || triangle.thirdIndex == i) {
@@ -250,13 +277,12 @@ void Shape::computeNormals(Vec3* buffer) const {
 
 				Vec3 faceNormal = D1 % D2;
 
-				double sin = faceNormal.length() / (D1.length() * D2.length());
-				vertexNormal += faceNormal.normalize() * asin(sin);
+				vertexNormal += faceNormal.normalize(); 
 			}
 		}
 		vertexNormal = vertexNormal.normalize();
 		buffer[i] = vertexNormal;
-	}
+	}*/
 }
 
 bool Shape::containsPoint(Vec3 point) const {

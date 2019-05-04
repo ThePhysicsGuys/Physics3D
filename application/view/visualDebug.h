@@ -43,7 +43,6 @@ void renderDebugField(Vec2 dimension, Font* font, const char* varName, T value, 
 }
 
 std::string toString(std::chrono::nanoseconds t);
-std::string toString(size_t v);
 
 template<size_t N, typename EnumType>
 PieChart toPieChart(BreakdownAverageProfiler<N, EnumType>& profiler, const char* title, Vec2f piePosition, float pieSize) {
@@ -70,10 +69,10 @@ PieChart toPieChart(HistoricTally<N, Unit, EnumType>& tally, const char* title, 
 	Unit avgTotal = (tally.history.size() != 0) ? (sum / tally.history.size()) : 0;
 	//Unit avgTotal = results.sum();
 
-	PieChart chart(title, toString(avgTotal), piePosition, pieSize);
+	PieChart chart(title, std::to_string(avgTotal), piePosition, pieSize);
 	for (size_t i = 0; i < tally.size(); i++) {
 		float result = results[i] * 1.0f;
-		DataPoint p = DataPoint(result, toString(results[i]), pieColors[i], tally.labels[i]);
+		DataPoint p = DataPoint(result, std::to_string(results[i]), pieColors[i], tally.labels[i]);
 		chart.add(p);
 	}
 

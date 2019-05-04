@@ -6,8 +6,11 @@ layout(location = 1) in vec3 vnormal;
 layout(location = 2) in vec2 vuv;
 
 out vec3 gposition;
-out vec3 gnormal;
 out vec2 guv;
+
+out VS_OUT {
+	vec3 value;
+} gnormal;
 
 uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
@@ -15,7 +18,7 @@ uniform mat4 viewMatrix;
 void main() {
 	guv = vuv;
 	gposition = vposition;
-	gnormal = (modelMatrix * vec4(vnormal, 0.0)).xyz;
+	gnormal.value = (modelMatrix * vec4(vnormal, 0.0)).xyz;
 	gl_Position = modelMatrix * vec4(vposition, 1.0);
 }
 
@@ -41,8 +44,11 @@ uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 
 in vec3 gposition[];
-in vec3 gnormal[];
 in vec2 guv[];
+
+in VS_OUT {
+	vec3 value;
+} gnormal[];
 
 out vec2 fuv;
 out vec3 fposition;
@@ -117,7 +123,7 @@ void main() {
 	if (includeUvs) fuv = guv[0];
 	else fuv = uv(gposition[0], n, u, v);
 
-	if (includeNormals) fnormal = gnormal[0];
+	if (includeNormals) fnormal = gnormal[0].value;
 
 	gl_Position = transform * gl_in[0].gl_Position; EmitVertex();
 
@@ -128,7 +134,7 @@ void main() {
 	if (includeUvs) fuv = guv[1];
 	else fuv = uv(gposition[1], n, u, v);
 
-	if (includeNormals) fnormal = gnormal[1];
+	if (includeNormals) fnormal = gnormal[1].value;
 
 	gl_Position = transform * gl_in[1].gl_Position; EmitVertex();
 
@@ -139,7 +145,7 @@ void main() {
 	if (includeUvs) fuv = guv[2];
 	else fuv = uv(gposition[2], n, u, v);
 
-	if (includeNormals) fnormal = gnormal[2];
+	if (includeNormals) fnormal = gnormal[2].value;
 
 	gl_Position = transform * gl_in[2].gl_Position; EmitVertex();
 	EndPrimitive();
@@ -241,7 +247,7 @@ void main() {
 		normal = normalize(modelMatrix * vec4(normal, 0)).xyz;
 		normal = rodrigues() * normal;
 	} else {*/
-		normal = fnormal;
+	normal = fnormal;
 	/*}*/
 
 	vec3 lightColors = vec3(0);

@@ -328,7 +328,7 @@ SymmetricMat3Template<N> operator+(const DiagonalMat3Template<N>& self, const Sy
 template<typename N>
 DiagonalMat3Template<N> operator+(const DiagonalMat3Template<N>& self, const DiagonalMat3Template<N>& other) {
 	return DiagonalMat3Template<N>(
-		self.m00 + other.m00, self.m11 + other.m11, self.m22 + other.m22, 
+		self.m00 + other.m00, self.m11 + other.m11, self.m22 + other.m22
 		);
 }
 
@@ -365,8 +365,8 @@ SymmetricMat3Template<N> operator-(const DiagonalMat3Template<N>& self, const Sy
 template<typename N>
 DiagonalMat3Template<N> operator-(const DiagonalMat3Template<N>& self, const DiagonalMat3Template<N>& other) {
 	return DiagonalMat3Template<N>(
-		self.m00 - other.m00, self.m11 - other.m11, self.m22 - other.m22,
-		);
+		self.m00 - other.m00, self.m11 - other.m11, self.m22 - other.m22
+	);
 }
 
 

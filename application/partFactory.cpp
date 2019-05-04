@@ -1,7 +1,8 @@
 #include "partFactory.h"
 
 PartFactory::PartFactory(const Shape& shape, Screen& screen) {
-	normalizedShape = shape.normalized(new Vec3[shape.vertexCount], backTransform);
+	Vec3* normalBuf = (shape.normals) ? new Vec3[shape.vertexCount] : nullptr;
+	normalizedShape = shape.normalized(new Vec3[shape.vertexCount], normalBuf, backTransform);
 	drawMeshID = screen.addMeshShape(normalizedShape);
 }
 

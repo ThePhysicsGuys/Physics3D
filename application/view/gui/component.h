@@ -7,8 +7,8 @@
 #include <string>
 
 #include "layout.h"
-
 #include "gui.h"
+
 #include "../engine/math/vec2.h"
 
 class Component {
@@ -117,9 +117,7 @@ public:
 	/* 
 		Press behaviour of this component 
 	*/
-	virtual void press(Vec2 mxy) {
-		GUI::intersectedPoint = mxy - position;
-	};
+	virtual void press(Vec2 mxy) {};
 
 	/*
 		Release behaviour of this component

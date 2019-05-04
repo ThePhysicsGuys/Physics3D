@@ -37,8 +37,6 @@
 #include "partFactory.h"
 
 
-
-
 #define _USE_MATH_DEFINES
 #include "math.h"
 
@@ -97,8 +95,6 @@ inline int furthestIndexInDirection(Vec3* vertices, int vertexCount, Vec3 direct
 
 	return bestVertexIndex;
 }
-
-
 
 int main(void) {
 	init();
@@ -186,6 +182,8 @@ int main(void) {
 	world.addObject(constructedExtendedPart);
 
 	Shape sphereShape = loadMesh((std::istream&) std::istringstream(getResourceAsString(SPHERE_MODEL)));
+	sphereShape.normals = std::shared_ptr<Vec3>(new Vec3[sphereShape.vertexCount], std::default_delete<Vec3[]>());
+	sphereShape.computeNormals(sphereShape.normals.get());
 
 	PartFactory cubeFactory(BoundingBox{-0.49, -0.49, -0.49, 0.49, 0.49, 0.49}.toShape(new Vec3[8]), screen);
 	PartFactory sphereFactory(sphereShape, screen);
@@ -201,6 +199,8 @@ int main(void) {
 	}
 
 	Shape stallShape = loadMesh((std::istream&) std::istringstream(getResourceAsString(STALL_MODEL)));
+	//stallShape.normals = std::shared_ptr<Vec3>(new Vec3[stallShape.vertexCount]);
+	//stallShape.computeNormals(stallShape.normals.get());
 	ExtendedPart* stallExtendedPart = createUniquePart(screen, stallShape, CFrame(Vec3(10.0, 2.0, -10.0), fromEulerAngles(0.1, 0.1, 0.1)), 10, 0.7);
 	stallExtendedPart->material = new Material(load("../res/textures/stall/stall.png"));
 	world.addObject(stallExtendedPart);

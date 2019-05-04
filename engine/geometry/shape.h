@@ -81,7 +81,7 @@ struct Shape {
 	bool containsPoint(Vec3 point) const;
 	double getIntersectionDistance(Vec3 origin, Vec3 direction);
 	double getVolume() const;
-	NormalizedShape normalized(Vec3* vecBuf, CFrame& backTransformation) const;
+	NormalizedShape normalized(Vec3* vecBuf, Vec3* normalBuf, CFrame& backTransformation) const;
 	CenteredShape centered(Vec3* vecBuf, Vec3& backOffset) const;
 
 	CFrame getInertialEigenVectors() const;

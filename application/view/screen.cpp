@@ -164,7 +164,7 @@ Panel* mouseHorizontal = nullptr;
 
 void Screen::init() {
 	// Log init
-	Log::setLogLevel(Log::Level::INFO);
+	Log::setLogLevel(Log::Level::FATAL);
 
 
 	// Properties init
@@ -395,7 +395,7 @@ void Screen::renderPhysicals() {
 
 		// Render each physical
 		basicShader.updatePart(part);
-		glDisable(GL_CULL_FACE);
+
 		if(meshId == -1) continue;
 		meshes[meshId]->render();
 	}
@@ -435,6 +435,11 @@ void Screen::refresh() {
 	glEnable(GL_DEPTH_TEST);
 	screenFrameBuffer->attach(modelFrameBuffer->renderBuffer);
 	
+	for (ExtendedPart& part : *world) {
+		if (part.hitbox.normals)
+			for (int i = 0; i < part.hitbox.vertexCount; i++)
+				vecLog.add(AppDebug::ColoredVec(part.cframe.localToGlobal(part.hitbox.vertices[i]), part.cframe.localToRelative(part.hitbox.normals.get()[i]), Debug::POSITION));
+	}
 
 	// Update vector mesh
 	graphicsMeasure.mark(GraphicsProcess::VECTORS);
