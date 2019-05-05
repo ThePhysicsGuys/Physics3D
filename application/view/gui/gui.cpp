@@ -20,6 +20,9 @@ namespace GUI {
 			return get(hex, false);
 		}
 
+		Vec4 ACCENT = get(0x1F6678);
+		Vec4 BACK = get(0x4D4D4D);
+
 		Vec4 NAVY = get(0x001F3F);
 		Vec4 BLUE = get(0x0074D9);
 		Vec4 AQUA = get(0x7FDBFF);
@@ -53,12 +56,12 @@ namespace GUI {
 	// Label
 	double defaultLabelPadding = 0.01;
 	double defaultLabelMargin = 0.01;
-	Vec4 defaultLabelBackgroundColor = Vec4(0,1,0,1);
+	Vec4 defaultLabelBackgroundColor = COLOR::WHITE;
 
 	// Panel
 	double defaultPanelPadding = 0.01;
 	double defaultPanelMargin = 0.01;
-	Vec4 defaultPanelBackgroundColor = Vec4(0.3, 0.3, 0.3, 1);
+	Vec4 defaultPanelBackgroundColor = COLOR::BACK;
 
 	// Button
 	Texture* defaultCloseButtonHoverTexture;
@@ -68,17 +71,27 @@ namespace GUI {
 	Texture* defaultMinimizeButtonIdleTexture;
 	Texture* defaultMinimizeButtonPressTexture;
 
+	// CheckBox
+	Texture* defaultCheckBoxUncheckedTexture;
+	Texture* defaultCheckBoxCheckedTexture;
+	Texture* defaultCheckBoxPressCheckedTexture;
+	Texture* defaultCheckBoxPressUncheckedTexture;
+	Texture* defaultCheckBoxHoverCheckedTexture;
+	Texture* defaultCheckBoxHoverUncheckedTexture;
+	double defaultCheckBoxOffset = 0.006;
+	double defaultCheckBoxSize = 0.08;
+
 	// Frame
 	double defaultFrameButtonOffset = 0.003;
 	double defaultFrameTitleBarHeight = 0.06;
 	double defaultFramePadding = 0.01;
 	double defaultFrameMargin = 0.01;
-	Vec4 defaultFrameTitleBarColor = Vec4(0.12, 0.4, 0.47, 1);
-	Vec4 defaultFrameBackgroundColor = Vec4(0.3, 0.3, 0.3, 1);
+	Vec4 defaultFrameTitleBarColor = COLOR::ACCENT;
+	Vec4 defaultFrameBackgroundColor = COLOR::BACK;
 
 	// Font
 	Font* defaultFont = nullptr;
-	Vec4 defaultFontColor = Vec4(0, 0, 0, 1);
+	Vec4 defaultFontColor = COLOR::BLACK;
 	double defaultFontSize = 0.001;
 
 	void init(Screen* screen, QuadShader* shader, Font* font) {
@@ -94,6 +107,13 @@ namespace GUI {
 		GUI::defaultMinimizeButtonIdleTexture = load("../res/textures/gui/minimize_idle.png");
 		GUI::defaultMinimizeButtonHoverTexture = load("../res/textures/gui/minimize_hover.png");
 		GUI::defaultMinimizeButtonPressTexture = load("../res/textures/gui/minimize_press.png");
+
+		GUI::defaultCheckBoxUncheckedTexture = load("../res/textures/gui/unchecked.png");
+		GUI::defaultCheckBoxCheckedTexture = load("../res/textures/gui/checked.png");
+		GUI::defaultCheckBoxPressCheckedTexture = GUI::defaultCheckBoxCheckedTexture->colored(Vec3(1.3));
+		GUI::defaultCheckBoxPressUncheckedTexture = GUI::defaultCheckBoxUncheckedTexture->colored(Vec3(1.3));
+		GUI::defaultCheckBoxHoverCheckedTexture = GUI::defaultCheckBoxCheckedTexture->colored(Vec3(0.999));
+		GUI::defaultCheckBoxHoverUncheckedTexture = GUI::defaultCheckBoxUncheckedTexture->colored(Vec3(0.999));
 	}
 	
 	void update(Mat4f orthoMatrix) {

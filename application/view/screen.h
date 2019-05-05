@@ -26,11 +26,11 @@ void terminateGL();
 class Screen {
 private:
 	GLFWwindow* window;
-	std::vector<IndexedMesh*> meshes;
 
 	void renderSkybox();
 	void renderPhysicals();
 public:
+	std::vector<IndexedMesh*> meshes;
 	World<ExtendedPart>* world;
 	Vec2 dimension;
 	double aspect;

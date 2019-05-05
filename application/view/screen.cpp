@@ -16,6 +16,7 @@
 #include "gui\frame.h"
 #include "gui\label.h"
 #include "gui\image.h"
+#include "gui\checkBox.h"
 #include "gui\gui.h"
 
 #include "../debug.h"
@@ -32,6 +33,7 @@
 #include "../engine/geometry/shape.h"
 #include "../engine/physicsProfiler.h"
 #include "../engine/geometry/boundingBox.h"
+#include "../engine/sharedLockGuard.h"
 #include "../engine/debug.h"
 
 #include <stdlib.h>
@@ -40,7 +42,6 @@
 #include <math.h>
 #include <map>
 
-#include "../engine/sharedLockGuard.h"
 
 bool initGLFW() {
 	/* Initialize GLFW */
@@ -154,6 +155,7 @@ Quad* quad = nullptr;
 
 // GUI
 Frame* frame1 = nullptr;
+CheckBox* checkBox1 = nullptr;
 Image* image1 = nullptr;
 Image* image2 = nullptr;
 Image* image3 = nullptr;
@@ -164,7 +166,7 @@ Panel* mouseHorizontal = nullptr;
 
 void Screen::init() {
 	// Log init
-	Log::setLogLevel(Log::Level::FATAL);
+	Log::setLogLevel(Log::Level::INFO);
 
 
 	// Properties init
@@ -245,14 +247,19 @@ void Screen::init() {
 	GUI::init(this, &quadShader, font);
 	frame1 = new Frame(0.7, 0.7);
 	frame1->name = "Test";
-	image1 = new Image(0, 0, 0.3, 0.3, floorTexture);
-	image2 = new Image(0, 0, 0.3, 0.3);
-	image3 = new Image(0, 0, 0.3, 0.3);
-	image4 = new Image(0, 0, 0.3, 0.3);
+	checkBox1 = new CheckBox(0, 0, true);
+	checkBox1->action = [] (CheckBox* c) {
+		GUI::screen->meshes[GUI::screen->selectedPart->drawMeshId]->renderMode = RenderMode::LINES;
+	};
+	image1 = new Image(0, 0, 0.3, 0.3, GUI::defaultCloseButtonHoverTexture->colored(Vec3(0.9)));
+	image2 = new Image(0, 0, 0.3, 0.3, GUI::defaultCloseButtonHoverTexture->colored(Vec3(0.7)));
+	image3 = new Image(0, 0, 0.3, 0.3, GUI::defaultCloseButtonHoverTexture->colored(Vec3(1)));
+	image4 = new Image(0, 0, 0.3, 0.3, GUI::defaultCloseButtonHoverTexture->colored(Vec3(1.4)));
 	frame1->add(image1);
 	frame1->add(image2, Align::FILL);
 	frame1->add(image3);
 	frame1->add(image4, Align::FILL);
+	frame1->add(checkBox1);
 	GUI::add(frame1);
 
 
@@ -435,11 +442,11 @@ void Screen::refresh() {
 	glEnable(GL_DEPTH_TEST);
 	screenFrameBuffer->attach(modelFrameBuffer->renderBuffer);
 	
-	for (ExtendedPart& part : *world) {
+	/*for (ExtendedPart& part : *world) {
 		if (part.hitbox.normals)
 			for (int i = 0; i < part.hitbox.vertexCount; i++)
 				vecLog.add(AppDebug::ColoredVec(part.cframe.localToGlobal(part.hitbox.vertices[i]), part.cframe.localToRelative(part.hitbox.normals.get()[i]), Debug::POSITION));
-	}
+	}*/
 
 	// Update vector mesh
 	graphicsMeasure.mark(GraphicsProcess::VECTORS);

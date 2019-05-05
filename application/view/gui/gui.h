@@ -8,6 +8,7 @@
 
 
 #include "../engine/math/vec3.h"
+#include "../engine/math/vec4.h"
 #include "../engine/math/mat4.h"
 
 #include <string>
@@ -18,7 +19,6 @@ namespace GUI {
 
 	// Colors
 	namespace COLOR {
-		
 		extern Vec4 NAVY;
 		extern Vec4 BLUE;
 		extern Vec4 AQUA;
@@ -69,6 +69,16 @@ namespace GUI {
 	extern Texture* defaultMinimizeButtonHoverTexture;
 	extern Texture* defaultMinimizeButtonIdleTexture;
 	extern Texture* defaultMinimizeButtonPressTexture;
+
+	// CheckBox
+	extern Texture* defaultCheckBoxUncheckedTexture;
+	extern Texture* defaultCheckBoxCheckedTexture;
+	extern Texture* defaultCheckBoxPressCheckedTexture;
+	extern Texture* defaultCheckBoxPressUncheckedTexture;
+	extern Texture* defaultCheckBoxHoverCheckedTexture;
+	extern Texture* defaultCheckBoxHoverUncheckedTexture;
+	extern double defaultCheckBoxOffset;
+	extern double defaultCheckBoxSize;
 
 	// Frame
 	extern double defaultFrameTitleBarHeight;

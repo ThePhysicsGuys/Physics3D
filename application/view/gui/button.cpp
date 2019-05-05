@@ -17,6 +17,8 @@ void Button::renderPressed() {
 	} else {
 		GUI::defaultShader->update(pressColor);
 	}
+
+	GUI::defaultQuad->render();
 }
 
 void Button::renderHovering() {
@@ -25,6 +27,8 @@ void Button::renderHovering() {
 	} else {
 		GUI::defaultShader->update(hoverColor);
 	}
+
+	GUI::defaultQuad->render();
 }
 
 void Button::renderIdle() {
@@ -33,6 +37,8 @@ void Button::renderIdle() {
 	} else {
 		GUI::defaultShader->update(idleColor);
 	}
+
+	GUI::defaultQuad->render();
 }
 
 void Button::render() {
@@ -46,8 +52,6 @@ void Button::render() {
 		renderHovering();
 	else 
 		renderIdle();
-
-	GUI::defaultQuad->render();
 
 	if (!text.empty())
 		GUI::defaultFont->render(text, position, textColor, size);

@@ -5,9 +5,12 @@
 
 #include "../util/log.h"
 
+#include <iostream>
+
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb\stb_image.h"
 
+#include "../debug.h"
 
 // Texture
 
@@ -16,7 +19,9 @@ Texture* load(std::string name) {
 	int height;
 	int channels;
 	unsigned char* data = stbi_load(name.c_str(), &width, &height, &channels, 0);
+
 	Texture* texture = nullptr;
+
 	if (data)
 		texture = new Texture(width, height, data, (channels == 4) ? GL_RGBA : GL_RGB);
 	else {
@@ -24,12 +29,29 @@ Texture* load(std::string name) {
 		Log::error("Failed to load texture");
 		Log::resetSubject();
 	}
+
 	stbi_image_free(data);
 	return texture;
 }
 
-Texture::Texture(unsigned int width, unsigned int height, const void* buffer, int format) : width(width), height(height), unit(0) {
+Texture::Texture(unsigned int width, unsigned int height, const void* buffer, int format) : width(width), height(height), unit(0), format(format) {
 	glGenTextures(1, &id);
+
+	switch (format) {
+		case GL_RED:
+		case GL_GREEN:
+		case GL_BLUE:
+		case GL_ALPHA:
+			channels = 1;
+			break;
+		case GL_RGB:
+			channels = 3;
+			break;
+		case GL_RGBA:
+			channels = 4;
+		default:
+			channels = 4;
+	}
 
 	bind();
 	glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, buffer);
@@ -48,8 +70,34 @@ void Texture::loadFrameBufferTexture(unsigned int width, unsigned int height) {
 
 void Texture::resize(unsigned int width, unsigned int height, const void* buffer) {
 	bind();
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+	glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, buffer);
 	unbind();
+}
+
+Texture* Texture::colored(Vec3 color) {
+	return colored(Vec4(color.x, color.y, color.z, 1));
+}
+
+Texture* Texture::colored(Vec4 color) {
+	bind();
+	char* buffer = (char*) malloc(width * height * channels);
+
+	glGetTexImage(GL_TEXTURE_2D, 0, format, GL_UNSIGNED_BYTE, buffer);
+
+	for (int i = 0; i < width; i++) {
+		for (int j = 0; j < height; j++) {
+			for (int k = 0; k < channels; k++) {
+				int index = (i + height * j) * channels + k;
+				buffer[index] = buffer[index] * color.v[k];
+			}
+		}
+	}
+
+	Texture* texture = new Texture(width, height, buffer, format);
+
+	free(buffer);
+
+	return texture;
 }
 
 void Texture::resize(unsigned int width, unsigned int height) {
