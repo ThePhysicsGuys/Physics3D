@@ -158,7 +158,7 @@ TEST_CASE(shapeNormalization) {
 
 	CFrame normalizationFrame;
 
-	NormalizedShape newShape = transformedHouse.normalized(buf2, normalizationFrame);
+	NormalizedShape newShape = transformedHouse.normalized(buf2, nullptr, normalizationFrame);
 
 	ASSERT(newShape.getVolume() == beginVolume);
 	ASSERT(newShape.getCenterOfMass() == Vec3());

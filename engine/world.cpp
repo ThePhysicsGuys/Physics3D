@@ -15,7 +15,7 @@
 #include "physicsProfiler.h"
 #include "engineException.h"
 
-
+#include <vector>
 
 WorldPrototype::WorldPrototype() : PartContainer(20) {}
 
@@ -124,9 +124,17 @@ void handleAnchoredCollision(Part& anchoredPart, Part& freePart, Vec3 collisionP
 	}
 }
 
-void WorldPrototype::processColissions() {
-	for(Part& anchoredPart:iterAnchoredParts()) {
-		for(Part& freePart:iterFreeParts()) {
+struct Colission {
+	Part* p1;
+	Part* p2;
+	Vec3 intersection;
+	Vec3 exitVector;
+};
+
+// returns anchoredColissions offset
+size_t findColissions(WorldPrototype& world, std::vector<Colission>& colissions) {
+	for(Part& anchoredPart: world.iterAnchoredParts()) {
+		for(Part& freePart: world.iterFreeParts()) {
 
 			double maxRadiusBetween = anchoredPart.maxRadius + freePart.maxRadius;
 
@@ -141,17 +149,18 @@ void WorldPrototype::processColissions() {
 			Vec3 intersection;
 			Vec3 exitVector;
 			if(anchoredPart.intersects(freePart, intersection, exitVector)) {
-				physicsMeasure.mark(PhysicsProcess::COLISSION_HANDLING);
 				intersectionStatistics.addToTally(IntersectionResult::COLISSION, 1);
-				handleAnchoredCollision(anchoredPart, freePart, intersection, exitVector);
+				colissions.push_back(Colission{&anchoredPart, &freePart, intersection, exitVector});
 			} else {
-				physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
 				intersectionStatistics.addToTally(IntersectionResult::GJK_REJECT, 1);
 			}
+			physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
 		}
 	}
 
-	PartIteratorFactory iter = iterFreeParts();
+	size_t anchoredOffset = colissions.size();
+
+	PartIteratorFactory iter = world.iterFreeParts();
 	PartIterator finish = iter.end();
 	for(PartIterator mainIter = iter.begin(); mainIter != finish; ++mainIter) {
 		Part& p1 = *mainIter;
@@ -171,16 +180,18 @@ void WorldPrototype::processColissions() {
 			Vec3 intersection;
 			Vec3 exitVector;
 			if(p1.intersects(p2, intersection, exitVector)) {
-				physicsMeasure.mark(PhysicsProcess::COLISSION_HANDLING);
 				intersectionStatistics.addToTally(IntersectionResult::COLISSION, 1);
-				handleCollision(p1, p2, intersection, exitVector);
+				colissions.push_back(Colission{&p1, &p2, intersection, exitVector});
 			} else {
-				physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
 				intersectionStatistics.addToTally(IntersectionResult::GJK_REJECT, 1);
 			}
+			physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
 		}
 	}
+
+	return anchoredOffset;
 }
+
 
 void WorldPrototype::tick(double deltaT) {
 	SharedLockGuard mutLock(lock);
@@ -199,7 +210,18 @@ void WorldPrototype::tick(double deltaT) {
 	applyExternalForces();
 
 	physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
-	processColissions();
+	std::vector<Colission> colissions;
+	size_t anchoredOffset = findColissions(*this, colissions);
+
+	physicsMeasure.mark(PhysicsProcess::COLISSION_HANDLING);
+	for(int i = 0; i < anchoredOffset; i++) {
+		Colission c = colissions[i];
+		handleAnchoredCollision(*c.p1, *c.p2, c.intersection, c.exitVector);
+	}
+	for(int i = anchoredOffset; i < colissions.size(); i++) {
+		Colission c = colissions[i];
+		handleCollision(*c.p1, *c.p2, c.intersection, c.exitVector);
+	}
 
 	intersectionStatistics.nextTally();
 

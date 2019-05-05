@@ -19,7 +19,6 @@ private:
 	std::queue<QueuedPart> newPartQueue;
 	size_t getTotalVertexCount();
 	void processQueue();
-	void processColissions();
 
 	void addPartUnsafe(Part* p, bool anchored);
 public:
