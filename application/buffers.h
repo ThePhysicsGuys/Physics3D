@@ -85,7 +85,7 @@ public:
 private:
 	size_t capacity;
 public:
-
+	AddableBuffer() : capacity(10), data((T*) malloc(10 * sizeof(T))), index(0) {}
 	AddableBuffer(int initialCapacity) : capacity(initialCapacity), data((T*)malloc(initialCapacity * sizeof(T))), index(0) {
 		if (data == nullptr) Log::fatal("Could not create AddableBuffer of size: %d", initialCapacity);
 	}
