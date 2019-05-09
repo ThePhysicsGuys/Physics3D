@@ -23,6 +23,8 @@ public:
 	IndexedMesh(Shape shape);
 	IndexedMesh(const double* vertices, const double* normals, const double* uvs, const unsigned int* indices, const int vertexCount, const int triangleCount);
 
+	void render(int mode);
+
 	void render() override;
 	void close() override;
 };

@@ -13,11 +13,6 @@
 
 class Component {
 public:
-	/*
-		Name of this component
-	*/
-	std::string name;
-
 	/* 
 		Alignment of the component within its current layout
 		FLOW:

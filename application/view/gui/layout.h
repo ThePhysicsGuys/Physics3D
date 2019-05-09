@@ -11,10 +11,10 @@ enum class Align {
 
 class Layout {
 public:
-	virtual Vec2 resize(Container* container) = 0;
+	virtual Vec2 resize(Container* container, Vec2 minDimension = Vec2()) = 0;
 };
 
 class FlowLayout : public Layout {
 public:
-	Vec2 resize(Container* container) override;
+	Vec2 resize(Container* container, Vec2 minDimension = Vec2()) override;
 };

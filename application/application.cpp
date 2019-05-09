@@ -99,7 +99,7 @@ inline int furthestIndexInDirection(Vec3* vertices, int vertexCount, Vec3 direct
 int main(void) {
 	init();
 
-	dominoFactory = PartFactory(dominoShape, screen);
+	dominoFactory = PartFactory(dominoShape, screen, "domino");
 	
 	int* builderRemovalBuffer = new int[1000];
 	EdgePiece* builderAddingBuffer = new EdgePiece[1000];
@@ -109,14 +109,14 @@ int main(void) {
 	Vec2 floorSize(40.0, 80.0);
 	double wallHeight = 3.0;
 
-	Material* floorMaterial = new Material(load("../res/textures/floor/floor_color.jpg"));
+	Material floorMaterial = Material(load("../res/textures/floor/floor_color.jpg"));
 
 	ExtendedPart* floorExtendedPart = createUniquePart(screen, BoundingBox(floorSize.x, 0.3, floorSize.y).toShape(new Vec3[8]), CFrame(Vec3(0.0, -0.15, 0.0)), 0.2, 1.0);
 	floorExtendedPart->material = floorMaterial;
 	world.addObject(floorExtendedPart, true);
 
-	PartFactory xWallFactory(BoundingBox(0.2, wallHeight, floorSize.y).toShape(new Vec3[8]), screen);
-	PartFactory zWallFactory(BoundingBox(floorSize.x, wallHeight, 0.2).toShape(new Vec3[8]), screen);
+	PartFactory xWallFactory(BoundingBox(0.2, wallHeight, floorSize.y).toShape(new Vec3[8]), screen, "xWall");
+	PartFactory zWallFactory(BoundingBox(floorSize.x, wallHeight, 0.2).toShape(new Vec3[8]), screen, "yWall");
 
 	world.addObject(xWallFactory.produce(CFrame(Vec3(floorSize.x / 2, wallHeight / 2, 0.0)), 0.2, 1.0), true);
 	world.addObject(zWallFactory.produce(CFrame(Vec3(0.0, wallHeight / 2, floorSize.y / 2)), 0.2, 1.0), true);
@@ -126,7 +126,7 @@ int main(void) {
 	ExtendedPart* ramp = createUniquePart(screen, BoundingBox(10.0, 0.17, 3.0).toShape(new Vec3[8]), CFrame(Vec3(12.0, 1.5, 0.0), fromEulerAngles(M_PI / 2 * 0.2, M_PI/2, 0.0)), 0.2, 1.0);
 	world.addObject(ramp, true);
 
-	PartFactory rotatingWallFactory(BoundingBox(5.0, 3.0, 0.5).toShape(new Vec3[8]), screen);
+	PartFactory rotatingWallFactory(BoundingBox(5.0, 3.0, 0.5).toShape(new Vec3[8]), screen, "rotatingWall");
 	ExtendedPart* rotatingWall = rotatingWallFactory.produce(CFrame(Vec3(-12, 1.5, 0.0)), 0.2, 1.0);
 	world.add(rotatingWall, true);
 	rotatingWall->parent->angularVelocity = Vec3(0, -0.7, 0);
@@ -185,9 +185,9 @@ int main(void) {
 	sphereShape.normals = std::shared_ptr<Vec3>(new Vec3[sphereShape.vertexCount], std::default_delete<Vec3[]>());
 	sphereShape.computeNormals(sphereShape.normals.get());
 
-	PartFactory cubeFactory(BoundingBox{-0.49, -0.49, -0.49, 0.49, 0.49, 0.49}.toShape(new Vec3[8]), screen);
-	PartFactory sphereFactory(sphereShape, screen);
-	PartFactory triangleFactory(triangleShape, screen);
+	PartFactory cubeFactory(BoundingBox{-0.49, -0.49, -0.49, 0.49, 0.49, 0.49}.toShape(new Vec3[8]), screen, "Cube");
+	PartFactory sphereFactory(sphereShape, screen, "Sphere");
+	PartFactory triangleFactory(triangleShape, screen, "Triangle");
 	for(double x = 0; x < 4; x+=1.01) {
 		for(double y = 0; y < 4; y += 1.01) {
 			for(double z = 0; z < 4; z += 1.01) {
@@ -202,7 +202,7 @@ int main(void) {
 	//stallShape.normals = std::shared_ptr<Vec3>(new Vec3[stallShape.vertexCount]);
 	//stallShape.computeNormals(stallShape.normals.get());
 	ExtendedPart* stallExtendedPart = createUniquePart(screen, stallShape, CFrame(Vec3(10.0, 2.0, -10.0), fromEulerAngles(0.1, 0.1, 0.1)), 10, 0.7);
-	stallExtendedPart->material = new Material(load("../res/textures/stall/stall.png"));
+	stallExtendedPart->material = Material(load("../res/textures/stall/stall.png"));
 	world.addObject(stallExtendedPart);
 	
 	ExtendedPart* icosaExtendedPart = createUniquePart(screen, icosahedron, CFrame(Vec3(7.0, 2.0, -7.0), fromEulerAngles(0.1, 0.1, 0.1)), 10, 0.7);

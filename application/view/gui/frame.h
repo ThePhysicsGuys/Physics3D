@@ -1,8 +1,10 @@
+#include <string>
 
 #include "component.h"
 #include "container.h"
 #include "button.h"
 #include "label.h"
+
 
 #include "../texture.h"
 #include "../engine/math/vec2.h"
@@ -26,8 +28,8 @@ public:
 	bool minimized;
 
 	Frame();
-	Frame(double x, double y);
-	Frame(double x, double y, double width, double height);
+	Frame(double x, double y, std::string title = "");
+	Frame(double x, double y, double width, double height, std::string title = "");
 
 	Vec2 resize() override;
 	void render() override;

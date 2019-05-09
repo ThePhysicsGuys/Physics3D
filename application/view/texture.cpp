@@ -80,15 +80,17 @@ Texture* Texture::colored(Vec3 color) {
 
 Texture* Texture::colored(Vec4 color) {
 	bind();
-	char* buffer = (char*) malloc(width * height * channels);
+	unsigned char* buffer = (unsigned char*) malloc(width * height * channels);
 
 	glGetTexImage(GL_TEXTURE_2D, 0, format, GL_UNSIGNED_BYTE, buffer);
-
-	for (int i = 0; i < width; i++) {
-		for (int j = 0; j < height; j++) {
+	
+	for (int j = 0; j < height; j++) {
+		for (int i = 0; i < width; i++) {
 			for (int k = 0; k < channels; k++) {
+
 				int index = (i + height * j) * channels + k;
-				buffer[index] = buffer[index] * color.v[k];
+				unsigned char value = buffer[index] * color.v[k];
+				buffer[index] = value;
 			}
 		}
 	}

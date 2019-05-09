@@ -49,7 +49,7 @@ public:
 		glDrawArrays(GL_QUADS, 0, 4);
 		glBindVertexArray(0);
 
-		glPolygonMode(GL_FRONT_AND_BACK, mode);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 
 	void render() {

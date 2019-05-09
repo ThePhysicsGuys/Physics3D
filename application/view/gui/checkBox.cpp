@@ -1,6 +1,8 @@
 #include "CheckBox.h"
 
-CheckBox::CheckBox(double x, double y, double width, double height, bool textured) : Component(x, y, width, height) {
+CheckBox::CheckBox(std::string text, double x, double y, double width, double height, bool textured) : Component(x, y, width, height) {
+	this->label = new Label(text, x, y);
+	this->checkBoxLabelOffset = GUI::defaultCheckBoxLabelOffset;
 	this->textured = textured;
 
 	if (textured) {
@@ -15,7 +17,12 @@ CheckBox::CheckBox(double x, double y, double width, double height, bool texture
 	}
 }
 
-CheckBox::CheckBox(double x, double y, bool textured) : CheckBox(x, y, GUI::defaultCheckBoxSize, GUI::defaultCheckBoxSize, textured) {}
+CheckBox::CheckBox(std::string text, double x, double y, bool textured) : CheckBox(text, x, y, GUI::defaultCheckBoxSize, GUI::defaultCheckBoxSize, textured) {}
+
+CheckBox::CheckBox(double x, double y, bool textured) : CheckBox("", x, y, GUI::defaultCheckBoxSize, GUI::defaultCheckBoxSize, textured) {}
+
+CheckBox::CheckBox(double x, double y, double width, double height, bool textured) : CheckBox("", x, y, width, height, textured) {}
+
 
 void CheckBox::renderPressed() {
 	if (textured) {
@@ -71,37 +78,44 @@ void CheckBox::renderIdle() {
 	GUI::defaultQuad->render();
 }
 
-void CheckBox::renderCheck() {
-	if (textured) {
-		GUI::defaultShader->update(checkedColor);
-	} else {
-		GUI::defaultShader->update(checkedTexture);
-	}
-
-	Vec2 checkPosition = position + Vec2(checkOffset, -checkOffset);
-	Vec2 checkDimension = dimension - Vec2(checkOffset) * 2;
-
-	GUI::defaultQuad->resize(checkPosition, checkDimension);
-	GUI::defaultQuad->render();
-}
-
 void CheckBox::render() {
-	resize();
+	if (visible) {
+		resize();
 
-	GUI::defaultQuad->resize(position, dimension);
+		if (!label->text.empty())
+			GUI::defaultQuad->resize(position + Vec2(label->padding, -label->padding), Vec2(dimension.y - 2 * label->padding));
+		else
+			GUI::defaultQuad->resize(position, dimension);
 
-	if (pressed)
-		renderPressed();
-	else if (hovering)
-		renderHovering();
-	else
-		renderIdle();
+		if (pressed)
+			renderPressed();
+		else if (hovering)
+			renderHovering();
+		else
+			renderIdle();
 
-	if (checked)
-		renderCheck();
+		if (!label->text.empty()) {
+			Vec2 labelPosition = position + Vec2(dimension.y + checkBoxLabelOffset, 0);
+			label->position = labelPosition;
+			label->render();
+		}
+
+		GUI::defaultQuad->resize(position, dimension);
+		GUI::defaultShader->update(GUI::COLOR::RED);
+		GUI::defaultQuad->render(GL_LINE);
+
+		GUI::defaultQuad->resize(position + Vec2(label->padding, -label->padding), dimension - Vec2(label->padding) * 2);
+		GUI::defaultShader->update(GUI::COLOR::GREEN);
+		GUI::defaultQuad->render(GL_LINE);
+	}
 }
 
 Vec2 CheckBox::resize() {
+	if (!label->text.empty()) {
+		Vec2 labelDimension = label->resize();
+		dimension = labelDimension + Vec2(labelDimension.y + checkBoxLabelOffset, 0);
+	}
+
 	return dimension;
 }
 

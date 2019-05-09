@@ -7,9 +7,9 @@
 
 Frame::Frame() : Frame(0, 0) {};
 
-Frame::Frame(double x, double y) : Container(x, y) {
-	this->padding = GUI::defaultFramePadding;
-	this->margin = GUI::defaultFrameMargin;
+Frame::Frame(double x, double y, std::string name) : Container(x, y) {
+	this->padding = GUI::defaultPadding;
+	this->margin = GUI::defaultMargin;
 
 	this->backgroundColor = GUI::defaultFrameBackgroundColor;
 	this->titleBarColor = GUI::defaultFrameTitleBarColor;
@@ -39,9 +39,9 @@ Frame::Frame(double x, double y) : Container(x, y) {
 	title = new Label(name, position.x, position.y);
 };
 
-Frame::Frame(double x, double y, double width, double height) : Container(x, y, width, height) {
-	this->padding = GUI::defaultFramePadding;
-	this->margin = GUI::defaultFrameMargin;
+Frame::Frame(double x, double y, double width, double height, std::string name) : Container(x, y, width, height) {
+	this->padding = GUI::defaultPadding;
+	this->margin = GUI::defaultMargin;
 
 	this->backgroundColor = GUI::defaultFrameBackgroundColor;
 	this->titleBarColor = GUI::defaultFrameTitleBarColor;
@@ -77,10 +77,10 @@ Vec2 Frame::resize() {
 	minimizeButton->position = position + Vec2(width - 2 * titleBarHeight + buttonOffset, -buttonOffset);
 
 	// Title
-	if (!name.empty()) {
-		title->text = name;
+	if (!title->text.empty()) {
 		title->resize();
-		title->position = position + Vec2(2 * buttonOffset, -titleBarHeight / 2 + title->height / 2);
+		double yOffset = (titleBarHeight - title->height) / 2;
+		title->position = position + Vec2(yOffset, -yOffset);
 	}
 
 	// Content
@@ -91,7 +91,11 @@ Vec2 Frame::resize() {
 		position += positionOffset;
 		dimension -= dimensionOffset;
 
-		dimension = layout->resize(this);
+		if (title->text.empty())
+			dimension = layout->resize(this);
+		else
+			dimension = layout->resize(this, Vec2(title->dimension.x + (titleBarHeight - title->height) / 2 + 2 * titleBarHeight, 0));
+
 
 		position -= positionOffset;
 		dimension += dimensionOffset;
@@ -143,7 +147,7 @@ void Frame::render() {
 		minimizeButton->render();
 
 		// Title
-		if (!name.empty())
+		if (!title->text.empty())
 			title->render();
 
 		if (!minimized) {

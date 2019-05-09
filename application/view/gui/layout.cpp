@@ -1,11 +1,11 @@
 #include "layout.h"
 #include "container.h"
 
-Vec2 FlowLayout::resize(Container* container) {
+Vec2 FlowLayout::resize(Container* container, Vec2 minDimension) {
 	// Resulting width of the container
-	double contentWidth = 0;
+	double contentWidth = minDimension.x;
 	// Resulting height of the container
-	double contentHeight = 0;
+	double contentHeight = minDimension.y;
 	// Width of the current row of components
 	double rowWidth = 0;
 	// Height of the current row of components

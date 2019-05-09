@@ -34,11 +34,17 @@ IndexedMesh::IndexedMesh(const double* vertices, const double* normals, const do
 	vertexArray->addBuffer(*uvBuffer, uvBufferLayout);
 }
 
-void IndexedMesh::render()  {
+void IndexedMesh::render() {
+	render(GL_FILL);
+}
+
+void IndexedMesh::render(int mode)  {
 	vertexArray->bind();
 	indexBuffer->bind();
 
+	glPolygonMode(GL_FRONT_AND_BACK, mode);
 	glDrawElements((int) renderMode, triangleCount * 3, GL_UNSIGNED_INT, nullptr);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 void IndexedMesh::close() {

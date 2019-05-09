@@ -260,7 +260,7 @@ void main() {
 	}
 
 	if (material.textured) {
-		outColor = vec4(lightColors / count, 1) * texture(textureSampler, fuv);
+		outColor = vec4(lightColors / count * material.ambient, 1) * texture(textureSampler, fuv);
 	} else {
 		outColor = vec4(lightColors / count * material.ambient, 1);
 	}

@@ -15,7 +15,7 @@
 #include "gui\panel.h"
 #include "gui\frame.h"
 #include "gui\label.h"
-#include "gui\image.h"
+#include "gui\slider.h"
 #include "gui\checkBox.h"
 #include "gui\gui.h"
 
@@ -129,14 +129,6 @@ QuadShader quadShader;
 PostProcessShader postProcessShader;
 SkyboxShader skyboxShader;
 
-// Object uniforms
-Material defaultMaterial = Material (
-	Vec3f(1, 1, 1),
-	Vec3f(1, 1, 1),
-	Vec3f(1, 1, 1),
-	1
-);
-
 // Light uniforms
 const int lightCount = 4;
 Vec3f sunDirection;
@@ -154,12 +146,12 @@ ArrayMesh* originMesh = nullptr;
 Quad* quad = nullptr;
 
 // GUI
-Frame* frame1 = nullptr;
-CheckBox* checkBox1 = nullptr;
-Image* image1 = nullptr;
-Image* image2 = nullptr;
-Image* image3 = nullptr;
-Image* image4 = nullptr;
+Frame* propertiesFrame = nullptr;
+Label* partNameLabel = nullptr;
+Label* partPositionLabel = nullptr;
+Label* partMeshIDLabel = nullptr;
+Slider* partAmbientSlider = nullptr;
+CheckBox* renderModeCheckBox = nullptr;
 
 Panel* mouseVertical = nullptr;
 Panel* mouseHorizontal = nullptr;
@@ -245,22 +237,32 @@ void Screen::init() {
 
 	// GUI init
 	GUI::init(this, &quadShader, font);
-	frame1 = new Frame(0.7, 0.7);
-	frame1->name = "Test";
-	checkBox1 = new CheckBox(0, 0, true);
-	checkBox1->action = [] (CheckBox* c) {
-		GUI::screen->meshes[GUI::screen->selectedPart->drawMeshId]->renderMode = RenderMode::LINES;
+	propertiesFrame = new Frame(0.7, 0.7, "Properties");
+	partNameLabel = new Label("", 0, 0);
+	partPositionLabel = new Label("", 0, 0);
+	partMeshIDLabel = new Label("", 0, 0);
+	partAmbientSlider = new Slider(0, 0, 0, 1, 0.5);
+	partAmbientSlider->action = [] (Slider* s) {
+		if (GUI::screen->selectedPart) {
+			GUI::screen->selectedPart->material.ambient = GUI::COLOR::hsvToRgb(Vec3(s->value, 1, 1));
+		}
 	};
-	image1 = new Image(0, 0, 0.3, 0.3, GUI::defaultCloseButtonHoverTexture->colored(Vec3(0.9)));
-	image2 = new Image(0, 0, 0.3, 0.3, GUI::defaultCloseButtonHoverTexture->colored(Vec3(0.7)));
-	image3 = new Image(0, 0, 0.3, 0.3, GUI::defaultCloseButtonHoverTexture->colored(Vec3(1)));
-	image4 = new Image(0, 0, 0.3, 0.3, GUI::defaultCloseButtonHoverTexture->colored(Vec3(1.4)));
-	frame1->add(image1);
-	frame1->add(image2, Align::FILL);
-	frame1->add(image3);
-	frame1->add(image4, Align::FILL);
-	frame1->add(checkBox1);
-	GUI::add(frame1);
+	renderModeCheckBox = new CheckBox("Filled", 0, 0, true);
+	renderModeCheckBox->action = [] (CheckBox* c) {
+		if (GUI::screen->selectedPart) {
+			if (GUI::screen->selectedPart->renderMode == GL_FILL) {
+				GUI::screen->selectedPart->renderMode = GL_LINE;
+			} else {
+				GUI::screen->selectedPart->renderMode = GL_FILL;
+			}
+		}
+	};
+	propertiesFrame->add(partNameLabel, Align::FILL);
+	propertiesFrame->add(partPositionLabel, Align::FILL);
+	propertiesFrame->add(partMeshIDLabel, Align::FILL);
+	propertiesFrame->add(renderModeCheckBox, Align::FILL);
+	propertiesFrame->add(partAmbientSlider, Align::FILL);
+	GUI::add(propertiesFrame);
 
 
 	// Mouse init
@@ -322,10 +324,6 @@ void Screen::update() {
 		if (handler->getKey(GLFW_KEY_UP))    camera.rotate(*this, -1, 0, 0, leftDragging);
 		if (handler->getKey(GLFW_KEY_DOWN))  camera.rotate(*this, 1, 0, 0, leftDragging);
 		if (handler->getKey(GLFW_KEY_ESCAPE)) glfwSetWindowShouldClose(window, GLFW_TRUE);
-		if (handler->getKey(GLFW_KEY_I)) {
-			modelFrameBuffer->bind();
-			image1->texture->loadFrameBufferTexture(modelFrameBuffer->texture->width, modelFrameBuffer->texture->height);
-		}
 	}
 
 
@@ -363,6 +361,23 @@ void Screen::update() {
 	mouseHorizontal->position = GUI::map(handler->cursorPosition) + Vec2(-mouseHorizontal->dimension.x / 2, mouseHorizontal->dimension.y / 2);
 
 	GUI::intersect(GUI::map(handler->cursorPosition));
+
+	if (selectedPart) {
+		partMeshIDLabel->text = "MeshID: " + std::to_string(selectedPart->drawMeshId);
+		renderModeCheckBox->checked = selectedPart->renderMode == GL_FILL;
+		partPositionLabel->text = "Position: " + str(selectedPart->cframe.position);
+		partNameLabel->text = "Name: " + selectedPart->name;
+		Vec3 color = GUI::COLOR::rgbToHsv(selectedPart->material.ambient);
+		partAmbientSlider->handleColor = Vec4(selectedPart->material.ambient.x, selectedPart->material.ambient.y, selectedPart->material.ambient.z, 1);
+		partAmbientSlider->value = partAmbientSlider->min + (partAmbientSlider->max - partAmbientSlider->min) * color.x;
+	} else {
+		partMeshIDLabel->text = "MeshID: -";
+		renderModeCheckBox->checked = false;
+		partPositionLabel->text = "Position: -";
+		partNameLabel->text = "Name: -";
+		partAmbientSlider->handleColor = GUI::COLOR::BACK;
+		partAmbientSlider->value = (partAmbientSlider->max + partAmbientSlider->min) / 2.0;
+	}
 }
 
 void Screen::renderSkybox() {
@@ -383,20 +398,20 @@ void Screen::renderPhysicals() {
 	basicShader.updateLight(lights, lightCount);
 
 	SharedLockGuard lg(world->lock);
-
+	
 	// Render world objects
 	for (ExtendedPart& part : *world) {
 		int meshId = part.drawMeshId;
 
-		Material& material = (part.material)? *part.material : defaultMaterial;
+		Material material = part.material;
 
 		// Picker code
 		if(&part == selectedPart)
-			material.ambient = Vec3f(0.5, 0.6, 0.3);
+			material.ambient = part.material.ambient + Vec3(0.1);
 		else if (&part == intersectedPart)
-			material.ambient = Vec3f(0.5, 0.5, 0.5);
+			material.ambient = part.material.ambient + Vec3(-0.1);
 		else
-			material.ambient = Vec3f(0.3, 0.4, 0.2);
+			material.ambient = part.material.ambient;
 		
 		basicShader.updateMaterial(material);
 
@@ -404,7 +419,8 @@ void Screen::renderPhysicals() {
 		basicShader.updatePart(part);
 
 		if(meshId == -1) continue;
-		meshes[meshId]->render();
+
+		meshes[meshId]->render(part.renderMode);
 	}
 }
 

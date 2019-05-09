@@ -19,6 +19,10 @@ namespace GUI {
 
 	// Colors
 	namespace COLOR {
+		extern Vec4 ACCENT;
+		extern Vec4 BACK;
+		extern Vec4 ALPHA;
+
 		extern Vec4 NAVY;
 		extern Vec4 BLUE;
 		extern Vec4 AQUA;
@@ -40,6 +44,10 @@ namespace GUI {
 		// format: 0xRRGGBBAA
 		Vec4 get(int hex, bool alpha);
 		Vec4 get(int hex);
+		Vec3 hsvToRgb(Vec3 hsv);
+		Vec3 rgbToHsv(Vec3 rgb);
+		Vec4 hsvaToRgba(Vec4 hsva);
+		Vec4 rgbaToHsva(Vec4 rgba);
 	};
 
 	// Global
@@ -52,9 +60,11 @@ namespace GUI {
 	extern Quad* defaultQuad;
 	extern QuadShader* defaultShader;
 	
+	// Default
+	extern double defaultPadding;
+	extern double defaultMargin;
+
 	// Label
-	extern double defaultLabelPadding;
-	extern double defaultLabelMargin;
 	extern Vec4 defaultLabelBackgroundColor;
 
 	// Panel
@@ -70,6 +80,16 @@ namespace GUI {
 	extern Texture* defaultMinimizeButtonIdleTexture;
 	extern Texture* defaultMinimizeButtonPressTexture;
 
+	// Slider
+	extern double defaultSliderWidth;
+	extern double defaultSliderHandleWidth;
+	extern double defaultSliderHeight;
+	extern double defaultSliderHandleHeight;
+	extern Vec4 defaultSliderHandleColor;
+	extern Vec4 defaultSliderBackgroundColor;
+	extern Vec4 defaultSliderForegroundFilledColor;
+	extern Vec4 defaultSliderForegroundEmptyColor;
+
 	// CheckBox
 	extern Texture* defaultCheckBoxUncheckedTexture;
 	extern Texture* defaultCheckBoxCheckedTexture;
@@ -79,12 +99,11 @@ namespace GUI {
 	extern Texture* defaultCheckBoxHoverUncheckedTexture;
 	extern double defaultCheckBoxOffset;
 	extern double defaultCheckBoxSize;
+	extern double defaultCheckBoxLabelOffset;
 
 	// Frame
 	extern double defaultFrameTitleBarHeight;
 	extern double defaultFrameButtonOffset;
-	extern double defaultFramePadding;
-	extern double defaultFrameMargin;
 	extern Vec4 defaultFrameTitleBarColor;
 	extern Vec4 defaultFrameBackgroundColor;
 

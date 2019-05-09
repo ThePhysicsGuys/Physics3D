@@ -5,8 +5,8 @@ Button::Button(double x, double y, double width, double height, bool textured) :
 }
 
 Button::Button(std::string text, double x, double y, bool textured) : Component(x, y) {
-	this->textColor = GUI::defaultFontColor;
-	this->size = GUI::defaultFontSize;
+	this->fontColor = GUI::defaultFontColor;
+	this->fontSize = GUI::defaultFontSize;
 	this->textured = textured;
 	this->text = text;
 }
@@ -54,12 +54,12 @@ void Button::render() {
 		renderIdle();
 
 	if (!text.empty())
-		GUI::defaultFont->render(text, position, textColor, size);
+		GUI::defaultFont->render(text, position, fontColor, fontSize);
 }
 
 Vec2 Button::resize() {
 	if (resizing) {
-		dimension = GUI::defaultFont->size(text, size);
+		dimension = GUI::defaultFont->size(text, fontSize);
 	} 
 
 	return dimension;

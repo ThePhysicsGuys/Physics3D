@@ -22,9 +22,9 @@ public:
 	Texture* idleTexture = nullptr;
 	Texture* pressTexture = nullptr;
 
-	double size;
-	Vec4 textColor;
 	std::string text;
+	Vec4 fontColor;
+	double fontSize;
 
 	bool textured = false;
 	bool hovering = false;

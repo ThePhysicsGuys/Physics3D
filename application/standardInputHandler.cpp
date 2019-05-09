@@ -90,15 +90,17 @@ void StandardInputHandler::mouseDown(int button, int mods) {
 	if (button == GLFW_MOUSE_BUTTON_MIDDLE) middleDragging = true;
 	if (button == GLFW_MOUSE_BUTTON_LEFT) leftDragging = true;
 
-	GUI::selectedComponent = GUI::intersectedComponent;
+	if (button == GLFW_MOUSE_BUTTON_LEFT) {
+		GUI::selectedComponent = GUI::intersectedComponent;
 
-	if (GUI::intersectedComponent) {
-		GUI::intersectedComponent->press(GUI::map(cursorPosition));
-		GUI::intersectedPoint = GUI::map(cursorPosition) - GUI::intersectedComponent->position;
-	} else {
-		(*screen.eventHandler.partClickHandler) (screen, screen.intersectedPart, screen.intersectedPoint);
-		if (screen.intersectedPart) {
-			screen.world->localSelectedPoint = screen.selectedPart->cframe.globalToLocal(screen.intersectedPoint);
+		if (GUI::intersectedComponent) {
+			GUI::intersectedComponent->press(GUI::map(cursorPosition));
+			GUI::intersectedPoint = GUI::map(cursorPosition) - GUI::intersectedComponent->position;
+		} else {
+			(*screen.eventHandler.partClickHandler) (screen, screen.intersectedPart, screen.intersectedPoint);
+			if (screen.intersectedPart) {
+				screen.world->localSelectedPoint = screen.selectedPart->cframe.globalToLocal(screen.intersectedPoint);
+			}
 		}
 	}
 };
@@ -108,8 +110,9 @@ void StandardInputHandler::mouseUp(int button, int mods) {
 	if (button == GLFW_MOUSE_BUTTON_MIDDLE) middleDragging = false;
 	if (button == GLFW_MOUSE_BUTTON_LEFT) leftDragging = false;
 
-	if (GUI::intersectedComponent)
-		GUI::intersectedComponent->release(GUI::map(cursorPosition));
+	if (button == GLFW_MOUSE_BUTTON_LEFT)
+		if (GUI::selectedComponent)
+			GUI::selectedComponent->release(GUI::map(cursorPosition));
 };
 
 void StandardInputHandler::mouseMove(double x, double y) {

@@ -1,8 +1,11 @@
 #pragma once
 
+#include <string>
+
 #include "../engine/math/vec2.h"
 #include "../texture.h"
 #include "component.h"
+#include "label.h"
 
 class CheckBox;
 
@@ -12,17 +15,14 @@ class CheckBox : public Component {
 private:
 	void renderHovering();
 	void renderPressed();
-	void renderCheck();
 	void renderIdle();
 public:
 	CheckBoxAction action = [] (CheckBox*) {};
 
 	Texture* pressUncheckedTexture = nullptr;
 	Texture* pressCheckedTexture = nullptr;
-
 	Texture* hoverUncheckedTexture = nullptr;
 	Texture* hoverCheckedTexture = nullptr;
-	
 	Texture* uncheckedTexture = nullptr;
 	Texture* checkedTexture = nullptr;
 	
@@ -33,17 +33,20 @@ public:
 
 	Vec4 pressUncheckedColor;
 	Vec4 pressCheckedColor;
-	
 	Vec4 hoverUncheckedColor;
 	Vec4 hoverCheckedColor;
-	
 	Vec4 uncheckedColor;
 	Vec4 checkedColor;
 
 	double checkOffset;
+	double checkBoxLabelOffset;
 
-	CheckBox(double x, double y, double width, double height, bool textured);
+	Label* label;
+
 	CheckBox(double x, double y, bool textured);
+	CheckBox(std::string text, double x, double y, bool textured);
+	CheckBox(double x, double y, double width, double height, bool textured);
+	CheckBox(std::string text, double x, double y, double width, double height, bool textured);
 
 	void render() override;
 	Vec2 resize() override;

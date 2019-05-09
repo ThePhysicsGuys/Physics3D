@@ -20,8 +20,99 @@ namespace GUI {
 			return get(hex, false);
 		}
 
+		Vec3 hsvToRgb(Vec3 hsv) {
+			double h = hsv.x * 360.0;
+			double s = hsv.y;
+			double v = hsv.z;
+
+			if (s == 0.0)
+				return Vec3(v, v, v);
+				
+			int hi = (int)(h / 60.0) % 6;
+			float f = (h / 60.0) - hi;
+			float p = v * (1.0 - s);
+			float q = v * (1.0 - s * f);
+			float t = v * (1.0 - s * (1.0 - f));
+			
+			switch (hi) {
+				case 0:
+					return Vec3(v, t, p);
+					break;
+				case 1:
+					return Vec3(q, v, p);
+					break;
+				case 2:
+					return Vec3(p, v, t);
+					break;
+				case 3:
+					return Vec3(p, q, v);
+					break;
+				case 4:
+					return Vec3(t, p, v);
+					break;
+				case 5:
+					return Vec3(v, p, q);
+					break;
+			}
+
+			return Vec3();
+		}
+
+		Vec4 hsvaToRgba(Vec4 hsva) {
+			Vec3 color = hsvToRgb(Vec3(hsva.x, hsva.y, hsva.z));
+			return Vec4(color.x, color.y, color.z, hsva.w);
+		}
+
+		Vec4 rgbaToHsva(Vec4 rgba) {
+			Vec3 color = rgbToHsv(Vec3(rgba.x, rgba.y, rgba.z));
+			return Vec4(color.x, color.y, color.z, rgba.w);
+		}
+
+		Vec3 rgbToHsv(Vec3 rgb) {
+			double r = rgb.x;
+			double g = rgb.y;
+			double b = rgb.z;
+
+			double h = 0;
+			double s = 0;
+			double v = 0;
+
+			double min = fmin(fmin(r, g), b);
+			double max = fmax(fmax(r, g), b);
+
+			double d = max - min;
+			v = max;
+
+			if (d == 0) {
+				h = 0;
+				s = 0;
+			} else {
+				s = d / max;
+
+				double dr = (((max - r) / 6.0) + (max / 2.0)) / d;
+				double dg = (((max - g) / 6.0) + (max / 2.0)) / d;
+				double db = (((max - b) / 6.0) + (max / 2.0)) / d;
+
+				if (r == max)
+					h = db - dg;
+				else if (g == max)
+					h = 1.0 / 3.0 + dr - db;
+				else if (b == max)
+					h = 2.0 / 3.0 + dg - dr;
+
+				if (h < 0)
+					h += 1;
+				if (h > 1)
+					h -= 1;
+			
+			}
+
+			return Vec3(h, s, v);
+		}
+
 		Vec4 ACCENT = get(0x1F6678);
 		Vec4 BACK = get(0x4D4D4D);
+		Vec4 ALPHA = get(0x0, true);
 
 		Vec4 NAVY = get(0x001F3F);
 		Vec4 BLUE = get(0x0074D9);
@@ -49,13 +140,15 @@ namespace GUI {
 	Component* selectedComponent;
 	Vec2 intersectedPoint;
 
+	// Defaults
+	double defaultMargin = 0.01;
+	double defaultPadding = 0.01;
+
 	// Shader
 	QuadShader* defaultShader = nullptr;
 	Quad* defaultQuad = nullptr;
 
 	// Label
-	double defaultLabelPadding = 0.01;
-	double defaultLabelMargin = 0.01;
 	Vec4 defaultLabelBackgroundColor = COLOR::WHITE;
 
 	// Panel
@@ -71,6 +164,16 @@ namespace GUI {
 	Texture* defaultMinimizeButtonIdleTexture;
 	Texture* defaultMinimizeButtonPressTexture;
 
+	// Slider
+	double defaultSliderWidth = 0.4;
+	double defaultSliderHandleWidth = 0.02;
+	double defaultSliderHeight = 0.004;
+	double defaultSliderHandleHeight = 0.04;
+	Vec4 defaultSliderHandleColor = COLOR::BACK;
+	Vec4 defaultSliderBackgroundColor = COLOR::ALPHA;
+	Vec4 defaultSliderForegroundFilledColor = COLOR::ACCENT;
+	Vec4 defaultSliderForegroundEmptyColor = COLOR::GRAY;
+	
 	// CheckBox
 	Texture* defaultCheckBoxUncheckedTexture;
 	Texture* defaultCheckBoxCheckedTexture;
@@ -80,12 +183,11 @@ namespace GUI {
 	Texture* defaultCheckBoxHoverUncheckedTexture;
 	double defaultCheckBoxOffset = 0.006;
 	double defaultCheckBoxSize = 0.08;
+	double defaultCheckBoxLabelOffset = 0.02;
 
 	// Frame
 	double defaultFrameButtonOffset = 0.003;
 	double defaultFrameTitleBarHeight = 0.06;
-	double defaultFramePadding = 0.01;
-	double defaultFrameMargin = 0.01;
 	Vec4 defaultFrameTitleBarColor = COLOR::ACCENT;
 	Vec4 defaultFrameBackgroundColor = COLOR::BACK;
 

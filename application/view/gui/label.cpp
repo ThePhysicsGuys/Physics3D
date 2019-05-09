@@ -11,8 +11,8 @@ Label::Label(std::string text, double x, double y, double scale, Vec4 color, Fon
 	this->font = font;
 	this->text = text;
 	this->scale = scale;
-	this->padding = GUI::defaultLabelPadding;
-	this->margin = GUI::defaultLabelMargin;
+	this->padding = GUI::defaultPadding;
+	this->margin = GUI::defaultMargin;
 	this->foregroundColor = color;
 	this->backgroundColor = GUI::defaultLabelBackgroundColor;
 };
@@ -20,13 +20,25 @@ Label::Label(std::string text, double x, double y, double scale, Vec4 color, Fon
 void Label::render() {
 	if (visible) {
 		resize();
-		Vec2 textPosition = position + Vec2(0, -dimension.y);
-		font->render(text, textPosition, foregroundColor, scale);
+
+		Vec2 fontPosition = position + Vec2(padding, -dimension.y+ padding);
+		font->render(text, fontPosition, foregroundColor, scale);
+
+		GUI::defaultQuad->resize(position, dimension);
+		GUI::defaultShader->update(GUI::COLOR::RED);
+		GUI::defaultQuad->render(GL_LINE);
+
+		GUI::defaultQuad->resize(position + Vec2(padding, -padding), dimension - Vec2(padding) * 2);
+		GUI::defaultShader->update(GUI::COLOR::GREEN);
+		GUI::defaultQuad->render(GL_LINE);
 	}
 }
 
 Vec2 Label::resize() {
-	if (resizing)
-		dimension = font->size(text, scale);
+	if (resizing) {
+		Vec2 fontDimension = font->size(text, scale);
+		dimension = fontDimension + Vec2(padding) * 2;
+	}
+
 	return dimension;
 }
