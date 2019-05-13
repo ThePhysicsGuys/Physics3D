@@ -1,6 +1,7 @@
 #include "objectLibrary.h"
 
-#include <cmath>
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 double g = (1.0 + sqrt(5.0)) / 2.0;
 
@@ -61,5 +62,74 @@ NormalizedShape createCube(double side) {
 NormalizedShape createBox(double width, double height, double length) {
 	Vec3* newVecBuf = new Vec3[8];
 	CFrame cf; // unused
-	return BoundingBox{ -width / 2, -height / 2, -length / 2, width / 2, height / 2, length / 2 }.toShape(newVecBuf).normalized(newVecBuf, nullptr, cf);
+	return BoundingBox(width, height, length).toShape(newVecBuf).normalized(newVecBuf, nullptr, cf);
+}
+
+NormalizedShape createPrism(unsigned int sides, double radius, double height) {
+	unsigned int vertexCount = sides * 2;
+	unsigned int triangleCount = sides * 2 + (sides - 2) * 2;
+	Vec3* vecBuf = new Vec3[vertexCount];
+	Triangle* triangleBuf = new Triangle[triangleCount];
+
+	// vertices
+	for(unsigned int i = 0; i < sides; i++) {
+		double angle = i * 2 * M_PI / sides;
+		vecBuf[i*2] = Vec3(cos(angle) * radius, -height / 2, sin(angle) * radius);
+		vecBuf[i*2+1] = Vec3(cos(angle) * radius, height / 2, sin(angle) * radius);
+	}
+
+	// sides
+	for(unsigned int i = 0; i < sides; i++) {
+		unsigned int botLeft = i * 2;
+		unsigned int botRight = ((i+1)%sides) * 2;
+		triangleBuf[i*2] = Triangle{botLeft, botLeft + 1, botRight}; // botLeft, botRight, topLeft
+		triangleBuf[i*2 + 1] = Triangle{botRight + 1, botRight, botLeft + 1}; // topRight, topLeft, botRight
+	}
+
+	Triangle* capOffset = triangleBuf + sides * 2;
+	// top and bottom
+	for(unsigned int i = 0; i < sides - 2; i++) { // common corner is i=0
+		capOffset[i] = Triangle{0, (i + 1) * 2, (i + 2) * 2};
+		capOffset[i + (sides-2)] = Triangle{1, (i + 2) * 2+1, (i + 1) * 2+1};
+	}
+
+	return NormalizedShape(vecBuf, triangleBuf, vertexCount, triangleCount);
+}
+
+NormalizedShape createPointyPrism(unsigned int sides, double radius, double height, double topOffset, double bottomOffset) {
+	unsigned int vertexCount = sides * 2 + 2;
+	unsigned int triangleCount = sides * 4;
+	Vec3* vecBuf = new Vec3[vertexCount];
+	Triangle* triangleBuf = new Triangle[triangleCount];
+
+	// vertices
+	for(unsigned int i = 0; i < sides; i++) {
+		double angle = i * 2 * M_PI / sides;
+		vecBuf[i * 2] = Vec3(cos(angle) * radius, -height / 2, sin(angle) * radius);
+		vecBuf[i * 2 + 1] = Vec3(cos(angle) * radius, height / 2, sin(angle) * radius);
+	}
+
+	unsigned int bottomIndex = sides * 2;
+	unsigned int topIndex = sides * 2 + 1;
+
+	vecBuf[bottomIndex] = Vec3(0, -height / 2 - bottomOffset, 0);
+	vecBuf[topIndex] = Vec3(0, height / 2 + topOffset, 0);
+
+
+	// sides
+	for(unsigned int i = 0; i < sides; i++) {
+		unsigned int botLeft = i * 2;
+		unsigned int botRight = ((i + 1) % sides) * 2;
+		triangleBuf[i * 2] = Triangle{botLeft, botLeft + 1, botRight}; // botLeft, botRight, topLeft
+		triangleBuf[i * 2 + 1] = Triangle{botRight + 1, botRight, botLeft + 1}; // topRight, topLeft, botRight
+	}
+
+	Triangle* capOffset = triangleBuf + sides * 2;
+	// top and bottom
+	for(unsigned int i = 0; i < sides; i++) { // common corner is i=0
+		capOffset[i] = Triangle{bottomIndex, i * 2, ((i+1) % sides) * 2};
+		capOffset[i + sides] = Triangle{topIndex, ((i + 1) % sides) * 2 + 1, i * 2 + 1};
+	}
+
+	return NormalizedShape(vecBuf, triangleBuf, vertexCount, triangleCount);
 }
