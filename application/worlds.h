@@ -10,4 +10,6 @@ public:
 	GravityWorld(Vec3 gravity);
 
 	virtual void applyExternalForces() override;
+	virtual double getTotalPotentialEnergy() const override;
+	virtual double getPotentialEnergyOfPhysical(const Physical& p) const override;
 };

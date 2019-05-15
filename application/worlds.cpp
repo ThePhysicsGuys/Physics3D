@@ -56,3 +56,14 @@ void GravityWorld::applyExternalForces() {
 		}
 	}
 }
+
+double GravityWorld::getTotalPotentialEnergy() const {
+	double total = 0.0;
+	for(const Physical& p : iterUnAnchoredPhysicals()) {
+		total += -p.getCenterOfMass() * gravity * p.mass;
+	}
+	return total;
+}
+double GravityWorld::getPotentialEnergyOfPhysical(const Physical& p) const {
+	return -p.getCenterOfMass() * gravity * p.mass;
+}

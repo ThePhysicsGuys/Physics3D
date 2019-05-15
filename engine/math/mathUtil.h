@@ -47,11 +47,9 @@ template<template<typename> typename Mat, typename N, typename std::enable_if<st
 inline std::ostream& operator<<(std::ostream& os, const Mat<N>& matrix) {
 	os << "Mat3(\n\t";
 
-	for (int i = 0; i < 8; i++) {
-		os << matrix.m[i];
-		os << (((i + 1) % 3 == 0) ? ";\n\t" : ", ");
-	}
-	os << matrix.m[8] << ")";
+	os << matrix.m00 << ", " << matrix.m01 << ", " << matrix.m02 << ";\n\t";
+	os << matrix.m10 << ", " << matrix.m11 << ", " << matrix.m12 << ";\n\t";
+	os << matrix.m20 << ", " << matrix.m21 << ", " << matrix.m22 << ";\n)";
 
 	return os;
 }

@@ -60,8 +60,14 @@ public:
 
 	Mat3Template() : Mat3Template(1,0,0,0,1,0,0,0,1) {};
 
-	template<template<typename> typename Mat, typename OtherN, IS_SUBCLASS_OF(Mat<N>, M33Type)>
-	Mat3Template(const Mat<OtherN>& o) : Mat3Template(o.m00, o.m01, o.m02, o.m10, o.m11, o.m12, o.m20, o.m21, o.m22) {}
+	template<typename OtherN>
+	Mat3Template(const Mat3Template<OtherN>& o) : Mat3Template(o.m00, o.m01, o.m02, o.m10, o.m11, o.m12, o.m20, o.m21, o.m22) {}
+
+	template<typename OtherN>
+	Mat3Template(const SymmetricMat3Template<OtherN>& o) : Mat3Template(o.m00, o.m01, o.m02, o.m10, o.m11, o.m12, o.m20, o.m21, o.m22) {}
+
+	template<typename OtherN>
+	Mat3Template(const DiagonalMat3Template<OtherN>& o) : Mat3Template(o.m00, o.m01, o.m02, o.m10, o.m11, o.m12, o.m20, o.m21, o.m22) {}
 
 	N det() const {
 		return m00 * (m11 * m22 - m12 * m21) - m01 * (m10 * m22 - m12 * m20) + m02 * (m10 * m21 - m11 * m20);

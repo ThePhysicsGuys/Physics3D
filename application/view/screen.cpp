@@ -150,6 +150,12 @@ Frame* propertiesFrame = nullptr;
 Label* partNameLabel = nullptr;
 Label* partPositionLabel = nullptr;
 Label* partMeshIDLabel = nullptr;
+Label* partVelocity = nullptr;
+Label* partAngularVelocity = nullptr;
+Label* partKineticEnergy = nullptr;
+Label* partPotentialEnergy = nullptr;
+Label* partEnergy = nullptr;
+
 Slider* partAmbientSlider = nullptr;
 CheckBox* renderModeCheckBox = nullptr;
 
@@ -241,6 +247,12 @@ void Screen::init() {
 	partNameLabel = new Label("", 0, 0);
 	partPositionLabel = new Label("", 0, 0);
 	partMeshIDLabel = new Label("", 0, 0);
+	partVelocity = new Label("", 0, 0);
+	partAngularVelocity = new Label("", 0, 0);
+	partKineticEnergy = new Label("", 0, 0);
+	partPotentialEnergy = new Label("", 0, 0);
+	partEnergy = new Label("", 0, 0);
+
 	partAmbientSlider = new Slider(0, 0, 0, 1, 0.5);
 	partAmbientSlider->action = [] (Slider* s) {
 		if (GUI::screen->selectedPart) {
@@ -262,6 +274,11 @@ void Screen::init() {
 	propertiesFrame->add(partMeshIDLabel, Align::FILL);
 	propertiesFrame->add(renderModeCheckBox, Align::FILL);
 	propertiesFrame->add(partAmbientSlider, Align::FILL);
+	propertiesFrame->add(partVelocity, Align::FILL);
+	propertiesFrame->add(partAngularVelocity, Align::FILL);
+	propertiesFrame->add(partKineticEnergy, Align::FILL);
+	propertiesFrame->add(partPotentialEnergy, Align::FILL);
+	propertiesFrame->add(partEnergy, Align::FILL);
 	GUI::add(propertiesFrame);
 
 
@@ -367,6 +384,14 @@ void Screen::update() {
 		renderModeCheckBox->checked = selectedPart->renderMode == GL_FILL;
 		partPositionLabel->text = "Position: " + str(selectedPart->cframe.position);
 		partNameLabel->text = "Name: " + selectedPart->name;
+		partVelocity->text = "Velocity: " + str(selectedPart->parent->velocity);
+		partAngularVelocity->text = "Angular Velocity: " + str(selectedPart->parent->angularVelocity);
+		double kineticEnergy = selectedPart->parent->getKineticEnergy();
+		double potentialEnergy = world->getPotentialEnergyOfPhysical(*(selectedPart->parent));
+		partKineticEnergy->text = "Kinetic Energy: " + std::to_string(kineticEnergy);
+		partPotentialEnergy->text = "Potential Energy: " + std::to_string(potentialEnergy);
+		partEnergy->text = "Energy: " + std::to_string(kineticEnergy + potentialEnergy);
+
 		Vec3 color = GUI::COLOR::rgbToHsv(selectedPart->material.ambient);
 		partAmbientSlider->handleColor = Vec4(selectedPart->material.ambient.x, selectedPart->material.ambient.y, selectedPart->material.ambient.z, 1);
 		partAmbientSlider->value = partAmbientSlider->min + (partAmbientSlider->max - partAmbientSlider->min) * color.x;
@@ -375,6 +400,12 @@ void Screen::update() {
 		renderModeCheckBox->checked = false;
 		partPositionLabel->text = "Position: -";
 		partNameLabel->text = "Name: -";
+		partVelocity->text = "Velocity: -";
+		partAngularVelocity->text = "Angular Velocity: -";
+		partKineticEnergy->text = "Kinetic Energy: -";
+		partPotentialEnergy->text = "Potential Energy: -";
+		partEnergy->text = "Energy: -";
+
 		partAmbientSlider->handleColor = GUI::COLOR::BACK;
 		partAmbientSlider->value = (partAmbientSlider->max + partAmbientSlider->min) / 2.0;
 	}
@@ -446,8 +477,12 @@ void Screen::refresh() {
 	basicShader.update(viewMatrix, projectionMatrix, viewPosition);
 	renderPhysicals();
 
-
-	// Postprocess to screenFrameBuffer
+	if(selectedPart != nullptr) {
+		for(const Vec3& corner : selectedPart->hitbox.iterVertices()) {
+			vecLog.add(AppDebug::ColoredVec(selectedPart->cframe.localToGlobal(corner), selectedPart->parent->getVelocityOfPoint(selectedPart->cframe.localToRelative(corner)), Debug::VELOCITY));
+		}
+	}
+		// Postprocess to screenFrameBuffer
 	screenFrameBuffer->bind();
 	glDisable(GL_DEPTH_TEST);
 	postProcessShader.update(modelFrameBuffer->texture);
@@ -523,6 +558,9 @@ void Screen::refresh() {
 	renderDebugField(dimension, font, "AVG No Collide GJK Iterations", gjkNoCollideIterStats.avg(), "");
 	renderDebugField(dimension, font, "TPS", physicsMeasure.getAvgTPS(), "");
 	renderDebugField(dimension, font, "FPS", graphicsMeasure.getAvgTPS(), "");
+	renderDebugField(dimension, font, "World Kinetic Energy", world->getTotalKineticEnergy(), "");
+	renderDebugField(dimension, font, "World Potential Energy", world->getTotalPotentialEnergy(), "");
+	renderDebugField(dimension, font, "World Energy", world->getTotalEnergy(), "");
 
 	if (renderPies) {
 		float leftSide = dimension.x / dimension.y;
