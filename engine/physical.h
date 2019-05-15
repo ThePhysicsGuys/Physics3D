@@ -29,6 +29,10 @@ struct Physical {
 	void applyForceAtCenterOfMass(Vec3 force);
 	void applyForce(Vec3Relative origin, Vec3 force);
 	void applyMoment(Vec3 moment);
+	void applyImpulseAtCenterOfMass(Vec3 impulse);
+	void applyImpulse(Vec3Relative origin, Vec3Relative impulse);
+	void applyAngularImpulse(Vec3 angularImpulse);
+	
 
 	Vec3 getCenterOfMass() const;
 	Vec3 getAcceleration() const;
@@ -37,4 +41,7 @@ struct Physical {
 	Vec3 getAccelerationOfPoint(const Vec3Relative& point) const;
 	SymmetricMat3 getPointAccelerationMatrix(const Vec3Local& localPoint) const;
 	double getInertiaOfPointInDirection(const Vec3Local& localPoint, const Vec3Local& direction) const;
+	double getVelocityKineticEnergy() const;
+	double getAngularKineticEnergy() const;
+	double getKineticEnergy() const;
 };

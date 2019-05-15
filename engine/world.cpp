@@ -17,6 +17,8 @@
 
 #include <vector>
 
+#define ELASTICITY 0.3
+
 WorldPrototype::WorldPrototype() : PartContainer(20) {}
 
 /*
@@ -40,7 +42,7 @@ double computeCombinedInertiaBetween(const Physical& first, const Physical& seco
 /*
 	exitVector is the distance p2 must travel so that the shapes are no longer colliding
 */
-void handleCollision(Part& part1, Part& part2, Vec3 collisionPoint, Vec3 exitVector) {
+void handleCollision(Part& part1, Part& part2, Vec3 collisionPoint, Vec3 exitVector, bool anchoredColission) {
 	Physical& p1 = *part1.parent;
 	Physical& p2 = *part2.parent;
 
@@ -52,75 +54,33 @@ void handleCollision(Part& part1, Part& part2, Vec3 collisionPoint, Vec3 exitVec
 	Vec3 collissionRelP1 = collisionPoint - p1.getCenterOfMass();
 	Vec3 collissionRelP2 = collisionPoint - p2.getCenterOfMass();
 
-	double combinedInertia = computeCombinedInertiaBetween(p1, p2, p1.part->cframe.relativeToLocal(collissionRelP1), p2.part->cframe.relativeToLocal(collissionRelP2), exitVector);
-
+	double combinedInertia;
+	if(anchoredColission)
+		combinedInertia = p2.getInertiaOfPointInDirection(p2.part->cframe.relativeToLocal(collissionRelP2), p2.part->cframe.relativeToLocal(exitVector));
+	else {
+		double inertia1 = p1.getInertiaOfPointInDirection(p1.part->cframe.relativeToLocal(collissionRelP1), p1.part->cframe.relativeToLocal(exitVector));
+		double inertia2 = p2.getInertiaOfPointInDirection(p2.part->cframe.relativeToLocal(collissionRelP2), p2.part->cframe.relativeToLocal(exitVector));
+		combinedInertia = 1 / (1 / inertia1 + 1 / inertia2);
+	}
+	
 	Vec3 depthForce = COLLISSION_DEPTH_FORCE_MULTIPLIER * combinedInertia * exitVector;
 
-	p1.applyForce(collissionRelP1, -depthForce);
+	if(!anchoredColission) p1.applyForce(collissionRelP1, -depthForce);
 	p2.applyForce(collissionRelP2, depthForce);
 
 
 	Vec3 relativeVelocity = p1.getVelocityOfPoint(collissionRelP1) - p2.getVelocityOfPoint(collissionRelP2);
 
-	Vec3 relVelNormalComponent = relativeVelocity * exitVector * exitVector / exitVector.lengthSquared();
-	Vec3 relVelSidewaysComponent = -relativeVelocity % exitVector % exitVector / exitVector.lengthSquared();
-
-	Debug::logVec(collisionPoint, relativeVelocity, Debug::VELOCITY);
-	Debug::logVec(collisionPoint, relVelNormalComponent, Debug::VELOCITY);
-	Debug::logVec(collisionPoint, relVelSidewaysComponent, Debug::VELOCITY);
-
-	
-
 	if(relativeVelocity * exitVector > 0) { // moving towards the other object
-		Vec3 normalVelForce = -relVelNormalComponent * combinedInertia * COLLISSION_RELATIVE_VELOCITY_FORCE_MULTIPLIER;
-		p1.applyForce(collissionRelP1, normalVelForce);
-		p2.applyForce(collissionRelP2, -normalVelForce);
+		Vec3 desiredAccel = -relativeVelocity * exitVector * exitVector / exitVector.lengthSquared();
+		Vec3 zeroRelVelImpulse = combinedInertia * desiredAccel;
+		Vec3 impulse = zeroRelVelImpulse * (1.0+ELASTICITY);
+		if(!anchoredColission) p1.applyImpulse(collissionRelP1, impulse);
+		p2.applyImpulse(collissionRelP2, -impulse);
+		Vec3 relativeVelocityAfter = p1.getVelocityOfPoint(collissionRelP1) - p2.getVelocityOfPoint(collissionRelP2);
+		double normalVelAfter = exitVector.normalize() * relativeVelocityAfter;
 
-		Vec3 frictionForce = -(part1.properties.friction + part2.properties.friction)/2 * relVelSidewaysComponent * combinedInertia * COLLISSION_RELATIVE_VELOCITY_FORCE_MULTIPLIER;
-		p1.applyForce(collissionRelP1, frictionForce);
-		p2.applyForce(collissionRelP2, -frictionForce);
-	}
-}
-
-/*
-exitVector is the distance the free physical must travel so that the shapes are no longer colliding
-*/
-void handleAnchoredCollision(Part& anchoredPart, Part& freePart, Vec3 collisionPoint, Vec3 exitVector) {
-	Physical& anchored = *anchoredPart.parent;
-	Physical& freePhys = *freePart.parent;
-
-	double sizeOrder = std::min(anchored.part->maxRadius, freePhys.part->maxRadius);
-	if(exitVector.lengthSquared() <= 1E-20 * sizeOrder*sizeOrder) {
-		return; // don't do anything for very small colissions
-	}
-
-	Vec3 collissionRelAnchored = collisionPoint - anchored.getCenterOfMass();
-	Vec3 collissionRelFree = collisionPoint - freePhys.getCenterOfMass();
-
-	double combinedInertia = freePhys.getInertiaOfPointInDirection(freePhys.part->cframe.relativeToLocal(collissionRelFree), exitVector);
-
-	Vec3 depthForce = COLLISSION_DEPTH_FORCE_MULTIPLIER * combinedInertia * exitVector;
-
-	freePhys.applyForce(collissionRelFree, depthForce);
-	
-
-	Vec3 relativeVelocity = anchored.getVelocityOfPoint(collissionRelAnchored) - freePhys.getVelocityOfPoint(collissionRelFree);
-
-	Vec3 relVelNormalComponent = relativeVelocity * exitVector * exitVector / exitVector.lengthSquared();
-	Vec3 relVelSidewaysComponent = -relativeVelocity % exitVector % exitVector / exitVector.lengthSquared();
-
-	Debug::logVec(collisionPoint, relativeVelocity, Debug::VELOCITY);
-	Debug::logVec(collisionPoint, relVelNormalComponent, Debug::VELOCITY);
-	Debug::logVec(collisionPoint, relVelSidewaysComponent, Debug::VELOCITY);
-
-	if(relativeVelocity * exitVector > 0) { // moving towards the other object
-		Vec3 normalVelForce = -relVelNormalComponent * combinedInertia * COLLISSION_RELATIVE_VELOCITY_FORCE_MULTIPLIER;
-		// anchored.applyForce(collissionRelAnchored, normalVelForce);
-		freePhys.applyForce(collissionRelFree, -normalVelForce);
-
-		Vec3 frictionForce = -(anchoredPart.properties.friction + freePart.properties.friction) / 2 * relVelSidewaysComponent * combinedInertia * COLLISSION_RELATIVE_VELOCITY_FORCE_MULTIPLIER;
-		// anchored.applyForce(collissionRelAnchored, frictionForce);
-		freePhys.applyForce(collissionRelFree, -frictionForce);
+		// TODO friction again
 	}
 }
 
@@ -216,11 +176,30 @@ void WorldPrototype::tick(double deltaT) {
 	physicsMeasure.mark(PhysicsProcess::COLISSION_HANDLING);
 	for(int i = 0; i < anchoredOffset; i++) {
 		Colission c = colissions[i];
-		handleAnchoredCollision(*c.p1, *c.p2, c.intersection, c.exitVector);
+#ifdef CHECK_SANITY
+		double beforeTotalEnergy = c.p2->parent->getKineticEnergy();
+#endif
+		handleCollision(*c.p1, *c.p2, c.intersection, c.exitVector, true);
+#ifdef CHECK_SANITY
+		double afterTotalEnergy = c.p2->parent->getKineticEnergy();
+
+		if(afterTotalEnergy > beforeTotalEnergy) {
+			Log::warn("Energy of blocks after anchored colission is greater than before! %f > %f", afterTotalEnergy, beforeTotalEnergy);
+		}
+#endif
 	}
 	for(int i = anchoredOffset; i < colissions.size(); i++) {
 		Colission c = colissions[i];
-		handleCollision(*c.p1, *c.p2, c.intersection, c.exitVector);
+#ifdef CHECK_SANITY
+		double beforeTotalEnergy = c.p1->parent->getKineticEnergy() + c.p2->parent->getKineticEnergy();
+#endif
+		handleCollision(*c.p1, *c.p2, c.intersection, c.exitVector, false);
+#ifdef CHECK_SANITY
+		double afterTotalEnergy = c.p1->parent->getKineticEnergy() + c.p2->parent->getKineticEnergy();
+		if(afterTotalEnergy > beforeTotalEnergy) {
+			Log::warn("Energy of blocks after colission is greater than before! %f > %f", afterTotalEnergy, beforeTotalEnergy);
+		}
+#endif
 	}
 
 	intersectionStatistics.nextTally();
@@ -299,4 +278,25 @@ bool WorldPrototype::isValid() const {
 		}
 	}
 	return true;
+}
+
+double WorldPrototype::getTotalKineticEnergy() const {
+	double total = 0.0;
+	for(const Physical& p : iterUnAnchoredPhysicals()) {
+		total += p.getKineticEnergy();
+	}
+	return total;
+}
+double WorldPrototype::getTotalPotentialEnergy() const {
+	double total = 0.0;
+	for(const Physical& p : iterUnAnchoredPhysicals()) {
+		total += getPotentialEnergyOfPhysical(p);
+	}
+	return total;
+}
+double WorldPrototype::getPotentialEnergyOfPhysical(const Physical& p) const {
+	return 0.0;
+}
+double WorldPrototype::getTotalEnergy() const {
+	return getTotalKineticEnergy() + getTotalPotentialEnergy();
 }

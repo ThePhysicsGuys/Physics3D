@@ -3,6 +3,7 @@
 #include "../engine/world.h"
 #include "../application/objectLibrary.h"
 #include "../engine/math/mathUtil.h"
+#include "../util/log.h"
 
 
 #define REMAINS_CONSTANT(v) REMAINS_CONSTANT_TOLERANT(v, 0.0005)
@@ -172,4 +173,141 @@ TEST_CASE(testComputeCombinedInertiaBetween) {
 			}
 		}
 	}
+}
+TEST_CASE(impulseTest) {
+	Part part(NormalizedShape(), CFrame(), 1.0, 1.0);
+	Physical p(&part, 5.0, DiagonalMat3(5, 5, 5));
+
+	p.applyImpulseAtCenterOfMass(Vec3(15, 0, 0));
+	ASSERT(p.velocity == Vec3(3,0,0));
+	ASSERT(p.angularVelocity == Vec3(0, 0, 0));
+
+	p.applyImpulse(Vec3(0, 2, 0), Vec3(-15, 0, 0));
+	ASSERT(p.velocity == Vec3(0, 0, 0));
+	ASSERT(p.angularVelocity == Vec3(0, 0, 6));
+
+	p.velocity = Vec3();
+	p.angularVelocity = Vec3();
+
+
+}
+
+TEST_CASE(testPointAccelMatrixImpulse) {
+	Part part(NormalizedShape(), CFrame(Vec3(7.6, 3.4, 3.9), fromEulerAngles(1.1, 0.7, 0.9)), 1.0, 1.0);
+	Physical p(&part, 5.0, DiagonalMat3(2, 7, 5));
+
+	Vec3 localPoint(0.8, 0.6, 0.9);
+	Vec3 localImpulse(0.3, -0.7, 0.6);
+
+	Vec3 estimatedAccel = p.getPointAccelerationMatrix(localPoint) * localImpulse;
+
+	p.applyImpulse(part.cframe.localToRelative(localPoint), part.cframe.localToRelative(localImpulse));
+
+	Vec3 realAccel = part.cframe.relativeToLocal(p.getVelocityOfPoint(part.cframe.localToRelative(localPoint)));
+
+	ASSERT(estimatedAccel == realAccel);
+}
+
+TEST_CASE(inelasticColission) {
+	Part part(NormalizedShape(), CFrame(Vec3(7.6, 3.4, 3.9), fromEulerAngles(1.1, 0.7, 0.9)), 1.0, 1.0);
+	Physical p(&part, 5.0, DiagonalMat3(2, 7, 5));
+
+	Vec3 localPoint(0.8, 0.6, 0.9);
+	Vec3 relativePoint = p.part->cframe.localToRelative(localPoint);
+
+	p.velocity = Vec3(0.3, -1.3, 1.2);
+	p.angularVelocity = Vec3(0.7, 0.5, -0.9);
+
+	Vec3 velOfPoint = p.getVelocityOfPoint(relativePoint);
+
+	ASSERT(velOfPoint.y < 0);
+
+	Log::warn("totalVelocity: " + str(velOfPoint));
+
+	Vec3 direction(0.0, 170.0, 0.0);
+
+	//double inertia = p.getInertiaOfPointInDirection(localPoint, p.part->cframe.relativeToLocal(direction));
+
+	//Log::warn("inertia: %f", inertia);
+
+	Log::warn("velInDirection: %f", velOfPoint * direction.normalize());
+
+	//Vec3 relativeImpulse = -velOfPoint * direction.normalize() * direction.normalize() * inertia;
+
+	Vec3 desiredAccel = -velOfPoint * direction * direction / direction.lengthSquared();
+	Vec3 relativeImpulse = p.part->cframe.localToRelative(~p.getPointAccelerationMatrix(localPoint) * p.part->cframe.relativeToLocal(desiredAccel));
+	Vec3 estimatedAccelLocal = p.getPointAccelerationMatrix(localPoint) * p.part->cframe.relativeToLocal(relativeImpulse);
+
+	Vec3 estimatedAccelRelative = p.part->cframe.localToRelative(estimatedAccelLocal);
+	
+
+	p.applyImpulse(relativePoint, relativeImpulse);
+	
+
+	Vec3 velOfPointAfter = p.getVelocityOfPoint(relativePoint);
+	Log::warn("New velocity: " + str(velOfPointAfter));
+	Log::warn("velInDirection After: %f", velOfPointAfter * direction.normalize());
+	Log::warn("estimatedAccelRelative: " + str(estimatedAccelRelative));
+	Log::warn("Actual accel:           " + str(velOfPointAfter - velOfPoint));
+
+	ASSERT(estimatedAccelRelative == velOfPointAfter - velOfPoint);
+	ASSERT(velOfPointAfter.y == 0);
+}
+
+TEST_CASE(inelasticColission2) {
+	Part part(NormalizedShape(), CFrame(/*Vec3(7.6, 3.4, 3.9), fromEulerAngles(1.1, 0.7, 0.9)*/), 1.0, 1.0);
+	Physical p(&part, 5.0, DiagonalMat3(2, 7, 5));
+
+	Vec3 localPoint(0.8, 0.6, 0.9);
+	Vec3 relativePoint = p.part->cframe.localToRelative(localPoint);
+	Vec3 normal(0.0, 170.0, 0.0);
+
+	p.velocity = Vec3(0.3, -1.3, 1.2);
+	p.angularVelocity = Vec3(0.7, 0.5, -0.9);
+
+	Vec3 velOfPoint = p.getVelocityOfPoint(relativePoint);
+
+	ASSERT(velOfPoint.y < 0);
+
+	double inertia = p.getInertiaOfPointInDirection(localPoint, part.cframe.relativeToLocal(normal));
+
+	double normalVelocity = velOfPoint * normal.normalize();
+
+	double desiredAccel = -normalVelocity;
+
+	Vec3 impulse = normal.normalize() * desiredAccel * inertia;
+
+
+
+	p.applyImpulse(relativePoint, impulse);
+
+
+	Vec3 velOfPointAfter = p.getVelocityOfPoint(relativePoint);
+	Log::warn("New velocity: " + str(velOfPointAfter));
+	Log::warn("velInDirection After: %f", velOfPointAfter * normal.normalize());
+	//Log::warn("estimatedAccelRelative: " + str(estimatedAccelRelative));
+	Log::warn("Actual accel:           " + str(velOfPointAfter - velOfPoint));
+
+	//ASSERT(estimatedAccelRelative == velOfPointAfter - velOfPoint);
+	ASSERT(velOfPointAfter.y == 0);
+}
+
+/*TEST_CASE(testPointAccelMatrixAndInertiaInDirection) {
+	Part part(NormalizedShape(), CFrame(Vec3(7.6, 3.4, 3.9), fromEulerAngles(1.1, 0.7, 0.9)), 1.0, 1.0);
+	Physical p(&part, 5.0, DiagonalMat3(2, 7, 5));
+
+	Vec3 localPoint(0.8, 0.6, 0.9);
+	Vec3 localImpulse(0.3, -0.7, 0.6);
+
+	Vec3 estimatedAccel = p.getPointAccelerationMatrix(localPoint) * localImpulse;
+
+	p.applyImpulse(part.cframe.localToRelative(localPoint), part.cframe.localToRelative(localImpulse));
+
+	Vec3 realAccel = part.cframe.relativeToLocal(p.getVelocityOfPoint(part.cframe.localToRelative(localPoint)));
+
+	ASSERT(estimatedAccel == realAccel);
+}*/
+
+TEST_CASE(testWorldImpulseProduction) {
+
 }

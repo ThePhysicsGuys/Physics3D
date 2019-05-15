@@ -32,7 +32,7 @@ void Physical::update(double deltaT) {
 	velocity += accel;
 	angularVelocity += rotAcc;
 
-	Vec3 movement = velocity * deltaT;
+	Vec3 movement = velocity * deltaT + accel * deltaT * deltaT / 2;
 
 	Mat3 rotation = fromRotationVec(angularVelocity * deltaT);
 
@@ -57,6 +57,24 @@ void Physical::applyForce(Vec3Relative origin, Vec3 force) {
 void Physical::applyMoment(Vec3 moment) {
 	totalMoment += moment;
 	Debug::logVec(getCenterOfMass(), moment, Debug::MOMENT);
+}
+
+void Physical::applyImpulseAtCenterOfMass(Vec3 impulse) {
+	Debug::logVec(getCenterOfMass(), impulse, Debug::IMPULSE);
+	velocity += impulse / mass;
+}
+void Physical::applyImpulse(Vec3Relative origin, Vec3Relative impulse) {
+	Debug::logVec(origin + getCenterOfMass(), impulse, Debug::IMPULSE);
+	velocity += impulse / mass;
+	Vec3 angularImpulse = origin % impulse;
+	applyAngularImpulse(angularImpulse);
+}
+void Physical::applyAngularImpulse(Vec3 angularImpulse) {
+	Debug::logVec(getCenterOfMass(), angularImpulse, Debug::ANGULAR_IMPULSE);
+	Vec3 localAngularImpulse = part->cframe.relativeToLocal(angularImpulse);
+	Vec3 localRotAcc = ~inertia * localAngularImpulse;
+	Vec3 rotAcc = part->cframe.localToRelative(localRotAcc);
+	angularVelocity += rotAcc;
 }
 
 Vec3 Physical::getCenterOfMass() const {
@@ -98,10 +116,27 @@ SymmetricMat3 Physical::getPointAccelerationMatrix(const Vec3Local& r) const {
 	return rotationFactor + movementFactor;
 }
 double Physical::getInertiaOfPointInDirection(const Vec3Local& localPoint, const Vec3Local& direction) const {
-	SymmetricMat3 accMat1 = getPointAccelerationMatrix(localPoint);
+	SymmetricMat3 accMat = getPointAccelerationMatrix(localPoint);
 
-	SymmetricMat3 accelToForceMat = ~accMat1;
+	Vec3 force = direction;
+	Vec3 accel = accMat * force;
+	double accelInForceDir = accel * direction / direction.lengthSquared();
+
+	return 1 / accelInForceDir;
+
+	/*SymmetricMat3 accelToForceMat = ~accMat;
 	Vec3 imaginaryForceForAcceleration = accelToForceMat * direction;
 	double forcePerAccelRatio = imaginaryForceForAcceleration * direction / direction.lengthSquared();
-	return forcePerAccelRatio;
+	return forcePerAccelRatio;*/
+}
+
+double Physical::getVelocityKineticEnergy() const {
+	return mass * velocity.lengthSquared() / 2;
+}
+double Physical::getAngularKineticEnergy() const {
+	Vec3 localAngularVel = part->cframe.relativeToLocal(angularVelocity);
+	return (inertia * localAngularVel) * localAngularVel / 2;
+}
+double Physical::getKineticEnergy() const {
+	return getVelocityKineticEnergy() + getAngularKineticEnergy();
 }
