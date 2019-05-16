@@ -151,6 +151,7 @@ Label* partNameLabel = nullptr;
 Label* partPositionLabel = nullptr;
 Label* partMeshIDLabel = nullptr;
 Slider* partAmbientSlider = nullptr;
+Slider* testSlider = nullptr;
 CheckBox* renderModeCheckBox = nullptr;
 
 Panel* mouseVertical = nullptr;
@@ -214,7 +215,7 @@ void Screen::init() {
 
 
 	// Skybox init
-	sphere = new IndexedMesh(loadMesh((std::istream&) std::istringstream(getResourceAsString(SPHERE_MODEL))));
+	sphere = new IndexedMesh(loadObj((std::istream&) std::istringstream(getResourceAsString(SPHERE_MODEL))));
 	skybox = new BoundingBox{ -1, -1, -1, 1, 1, 1 };
 	skyboxMesh = new IndexedMesh(skybox->toShape(new Vec3[8]));
 	skyboxTexture = new CubeMap("../res/skybox/right.jpg", "../res/skybox/left.jpg", "../res/skybox/top.jpg", "../res/skybox/bottom.jpg", "../res/skybox/front.jpg", "../res/skybox/back.jpg");
@@ -241,13 +242,18 @@ void Screen::init() {
 	partNameLabel = new Label("", 0, 0);
 	partPositionLabel = new Label("", 0, 0);
 	partMeshIDLabel = new Label("", 0, 0);
-	partAmbientSlider = new Slider(0, 0, 0, 1, 0.5);
+	partAmbientSlider = new Slider(0, 0, 0, 0.999999, 0.5);
+	testSlider = new Slider(0, 0, 500, 3000, 600);
+
 	partAmbientSlider->action = [] (Slider* s) {
 		if (GUI::screen->selectedPart) {
+
+			Log::debug("%f, %s", s->value, str(GUI::COLOR::hsvToRgb(Vec3(s->value, 1, 1))).c_str());
+
 			GUI::screen->selectedPart->material.ambient = GUI::COLOR::hsvToRgb(Vec3(s->value, 1, 1));
 		}
 	};
-	renderModeCheckBox = new CheckBox("Filled", 0, 0, true);
+	renderModeCheckBox = new CheckBox("Properties", 0, 0, true);
 	renderModeCheckBox->action = [] (CheckBox* c) {
 		if (GUI::screen->selectedPart) {
 			if (GUI::screen->selectedPart->renderMode == GL_FILL) {
@@ -262,6 +268,7 @@ void Screen::init() {
 	propertiesFrame->add(partMeshIDLabel, Align::FILL);
 	propertiesFrame->add(renderModeCheckBox, Align::FILL);
 	propertiesFrame->add(partAmbientSlider, Align::FILL);
+	propertiesFrame->add(testSlider, Align::FILL);
 	GUI::add(propertiesFrame);
 
 
@@ -376,7 +383,7 @@ void Screen::update() {
 		partPositionLabel->text = "Position: -";
 		partNameLabel->text = "Name: -";
 		partAmbientSlider->handleColor = GUI::COLOR::BACK;
-		partAmbientSlider->value = (partAmbientSlider->max + partAmbientSlider->min) / 2.0;
+		partAmbientSlider->value = (partAmbientSlider->min + partAmbientSlider->max) / 2.0;
 	}
 }
 

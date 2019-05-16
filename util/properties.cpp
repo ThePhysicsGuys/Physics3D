@@ -1,7 +1,8 @@
 #include "properties.h"
 
 #include <fstream>
-#include <algorithm>
+
+#include "stringUtil.h"
 
 std::string Properties::get(std::string property) {
 	auto iterator = properties.find(property);
@@ -31,24 +32,6 @@ void Properties::remove(const std::string& property) {
 }
 
 namespace PropertiesParser {
-	std::string ltrim(std::string string) {
-		string.erase(string.begin(), std::find_if(string.begin(), string.end(), [](int ch) {
-			return ch != ' ';
-			}));
-		return string;
-	}
-
-	std::string rtrim(std::string string) {
-		string.erase(std::find_if(string.rbegin(), string.rend(), [](int ch) {
-			return ch != ' ';
-			}).base(), string.end());
-		return string;
-	}
-
-	std::string trim(std::string string) {
-		return ltrim(rtrim(string));
-	}
-
 	Properties read(const std::string& file) {
 		Properties properties;
 

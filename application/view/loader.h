@@ -1,6 +1,10 @@
 #pragma once
 
 #include <istream>
+#include <string>
+
 #include "indexedMesh.h"
 
-Shape loadMesh(std::istream& filename);
+Shape loadObj(std::string filename);
+Shape loadObj(std::istream& filename);
+void saveObj(std::string filename, Shape shape);

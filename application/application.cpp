@@ -181,7 +181,7 @@ int main(void) {
 	ExtendedPart* constructedExtendedPart = createUniquePart(screen, constructedShape, CFrame(Vec3(0.0, 2.0, -5.0)), 2.0, 0.7);
 	world.addObject(constructedExtendedPart);
 
-	Shape sphereShape = loadMesh((std::istream&) std::istringstream(getResourceAsString(SPHERE_MODEL)));
+	Shape sphereShape = loadObj((std::istream&) std::istringstream(getResourceAsString(SPHERE_MODEL)));
 	sphereShape.normals = std::shared_ptr<Vec3>(new Vec3[sphereShape.vertexCount], std::default_delete<Vec3[]>());
 	sphereShape.computeNormals(sphereShape.normals.get());
 
@@ -198,7 +198,7 @@ int main(void) {
 		}
 	}
 
-	Shape stallShape = loadMesh((std::istream&) std::istringstream(getResourceAsString(STALL_MODEL)));
+	Shape stallShape = loadObj((std::istream&) std::istringstream(getResourceAsString(STALL_MODEL)));
 	//stallShape.normals = std::shared_ptr<Vec3>(new Vec3[stallShape.vertexCount]);
 	//stallShape.computeNormals(stallShape.normals.get());
 	ExtendedPart* stallExtendedPart = createUniquePart(screen, stallShape, CFrame(Vec3(10.0, 2.0, -10.0), fromEulerAngles(0.1, 0.1, 0.1)), 10, 0.7);

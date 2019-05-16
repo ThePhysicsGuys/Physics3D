@@ -166,10 +166,10 @@ struct BasicShader : public ShaderProgram {
 			shader.setUniform("textureSampler", 0);
 		}
 		
-		if (material.normalMap) {
-			material.normalMap->bind();
+		if (material.normal) {
+			material.normal->bind();
 			shader.setUniform("material.normalmapped", true);
-			shader.setUniform("normalSampler", material.normalMap->unit);
+			shader.setUniform("normalSampler", material.normal->unit);
 		} else {
 			shader.setUniform("material.normalmapped", false);
 			shader.setUniform("normalSampler", 0);

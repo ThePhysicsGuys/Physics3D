@@ -3,7 +3,10 @@
 #include <vector>
 #include <string>
 #include <regex>
-#include <iostream>
+#include <fstream>
+#include <sys/stat.h>
+
+#include "../util/stringUtil.h"
 
 #include "../engine/math/vec3.h"
 #include "../engine/math/vec2.h"
@@ -26,25 +29,6 @@ struct Flags {
 	bool normals;
 	bool uvs;
 };
-
-std::vector<std::string> split(const std::string& string, char splitter) {
-	std::vector<std::string> elements;
-	int length = string.size();
-	int start = 0;
-
-	for (int i = 0; i < length; i++) {
-		if (string[i] == splitter) {
-			if (i != start) 
-				elements.push_back(string.substr(start, i - start));
-			start = i + 1;
-		}
-	}
-
-	if (start < length) 
-		elements.push_back(string.substr(start, length - start));
-
-	return elements;
-}
 
 struct Face {
 	Group groups[3];
@@ -122,7 +106,18 @@ Shape reorderLists(const std::vector<Vec3>& positions, const std::vector<Vec3>& 
 	return Shape(positionArray, normalArray, uvArray, triangleArray, positions.size(), faces.size());
 }
 
-Shape loadMesh(std::istream& stream) {
+Shape loadObj(std::string filename) {
+	std::ifstream input;
+	input.open(filename);
+
+	Shape shape = loadObj(input);
+
+	input.close();
+
+	return shape;
+}
+
+Shape loadObj(std::istream& stream) {
 	std::vector<Vec3> vertices;
 	std::vector<Vec3> normals;
 	std::vector<Vec2> uvs;
@@ -179,3 +174,53 @@ Shape loadMesh(std::istream& stream) {
 	return reorderLists(vertices, normals, uvs, faces, flags);
 }
 
+void saveObj(std::string filename, Shape shape) {
+	struct stat buffer;
+
+	if (stat(filename.c_str(), &buffer) != -1) {
+		Log::warn("File already exists: %s", filename.c_str());
+	}
+
+	std::ofstream output;
+
+	output.open(filename);
+
+	for (Vec3 vertex : shape.iterVertices()) {
+		output << "v " << vertex.x << " " << vertex.y << " " << vertex.z << std::endl;
+	}
+
+	if (shape.normals) {
+		for (int i = 0; i < shape.vertexCount; i++) {
+			Vec3 normal = shape.normals.get()[i];
+			output << "vn " << normal.x << " " << normal.y << " " << normal.z << std::endl;
+		}
+	}
+
+	if (shape.uvs) {
+		for (int i = 0; i < shape.vertexCount; i++) {
+			Vec2 uv = shape.uvs.get()[i];
+			output << "vt " << uv.x << " " << uv.y << std::endl;
+		}
+	}
+
+	for (Triangle triangle : shape.iterTriangles()) {
+		output << "f";
+		
+		for (int index : triangle.indexes) {
+			index++;
+			if (shape.normals && shape.uvs) {
+				output << " " << index << "/" << index << "/" << index;
+			} else if (shape.uvs) {
+				output << " " << index << "//" << index;
+			} else if (shape.normals) {
+				output << " " << index << "/" << index;
+			} else {
+				output << " " << index;
+			}
+		}
+		
+		output << std::endl;
+	}
+
+	output.close();
+}

@@ -19,10 +19,6 @@ public:
 };
 
 namespace PropertiesParser {
-	std::string ltrim(std::string string);
-	std::string rtrim(std::string string);
-	std::string trim(std::string string);
-
 	Properties read(const std::string& file);
 	void write(const std::string& file, Properties& properties);
 };
