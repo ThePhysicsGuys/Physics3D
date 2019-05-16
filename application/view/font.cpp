@@ -70,6 +70,8 @@ Vec2 Font::size(const std::string& text, double size) {
 	std::string::const_iterator iterator;
 	double width = 0;
 	double height = 0;
+	//double ymax = 0;
+	//double ymin = 0;
 	for (iterator = text.begin(); iterator != text.end(); iterator++) {
 		Character character = characters[*iterator];
 		double advance = character.advance >> 6;
@@ -81,7 +83,10 @@ Vec2 Font::size(const std::string& text, double size) {
 			width += advance * size;
 		
 		height = fmax(character.size.y * size, height);
+		//ymax = fmax(character.bearing.y * size, ymax);
+		//ymin = fmin((character.bearing.y - character.size.y) * size, ymin);
 	}
+	
 	return Vec2(width, height);
 }
 
@@ -104,8 +109,9 @@ void Font::render(const std::string& text, double x, double y, Vec4 color, doubl
 	std::string::const_iterator iterator;
 	for (iterator = text.begin(); iterator != text.end(); iterator++) {
 		Character character = characters[*iterator];
+		float descend = character.size.y - character.bearing.y;
 		float xpos = x + character.bearing.x * size;
-		float ypos = y - (character.size.y - character.bearing.y) * size;
+		float ypos = y - descend * size;
 
 		float w = character.size.x * size;
 		float h = character.size.y * size;

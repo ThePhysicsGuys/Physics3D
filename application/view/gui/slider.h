@@ -19,8 +19,8 @@ public:
 	Vec4 foregroundEmptyColor;
 
 	double handleWidth;
-	double sliderWidth;
-	double sliderHeight;
+	double barWidth;
+	double barHeight;
 	double handleHeight;
 
 	double min = 0.0;

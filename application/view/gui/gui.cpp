@@ -165,9 +165,9 @@ namespace GUI {
 	Texture* defaultMinimizeButtonPressTexture;
 
 	// Slider
-	double defaultSliderWidth = 0.4;
+	double defaultSliderBarWidth = 0.4;
 	double defaultSliderHandleWidth = 0.02;
-	double defaultSliderHeight = 0.004;
+	double defaultSliderBarHeight = 0.004;
 	double defaultSliderHandleHeight = 0.04;
 	Vec4 defaultSliderHandleColor = COLOR::BACK;
 	Vec4 defaultSliderBackgroundColor = COLOR::ALPHA;
@@ -194,7 +194,7 @@ namespace GUI {
 	// Font
 	Font* defaultFont = nullptr;
 	Vec4 defaultFontColor = COLOR::BLACK;
-	double defaultFontSize = 0.001;
+	double defaultFontSize = 0.0009;
 
 	void init(Screen* screen, QuadShader* shader, Font* font) {
 		GUI::screen = screen;

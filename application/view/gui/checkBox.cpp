@@ -100,13 +100,15 @@ void CheckBox::render() {
 			label->render();
 		}
 
-		GUI::defaultQuad->resize(position, dimension);
-		GUI::defaultShader->update(GUI::COLOR::RED);
-		GUI::defaultQuad->render(GL_LINE);
+		if (debug) {
+			GUI::defaultQuad->resize(position, dimension);
+			GUI::defaultShader->update(GUI::COLOR::RED);
+			GUI::defaultQuad->render(GL_LINE);
 
-		GUI::defaultQuad->resize(position + Vec2(label->padding, -label->padding), dimension - Vec2(label->padding) * 2);
-		GUI::defaultShader->update(GUI::COLOR::GREEN);
-		GUI::defaultQuad->render(GL_LINE);
+			GUI::defaultQuad->resize(position + Vec2(label->padding, -label->padding), dimension - Vec2(label->padding) * 2);
+			GUI::defaultShader->update(GUI::COLOR::GREEN); 
+			GUI::defaultQuad->render(GL_LINE);
+		}
 	}
 }
 

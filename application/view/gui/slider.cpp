@@ -18,8 +18,8 @@ Slider::Slider(double x, double y, double min, double max, double value) : Compo
 
 	handleWidth = GUI::defaultSliderHandleWidth;
 	handleHeight = GUI::defaultSliderHandleHeight;
-	sliderWidth = GUI::defaultSliderWidth;
-	sliderHeight = GUI::defaultSliderHeight;
+	barWidth = GUI::defaultSliderBarWidth;
+	barHeight = GUI::defaultSliderBarHeight;
 }
 
 
@@ -35,64 +35,76 @@ Slider::Slider(double x, double y, double width, double height, double min, doub
 
 	handleWidth = GUI::defaultSliderHandleWidth;
 	handleHeight = height - 2 * padding;
-	sliderWidth = width - 2 * padding;
-	sliderHeight = GUI::defaultSliderHeight;
+	barWidth = width - 2 * padding - handleWidth;
+	barHeight = GUI::defaultSliderBarHeight;
 }
 
 void Slider::render() {
 	if (visible) {
+		resize();
+
 		GUI::defaultQuad->resize(position, dimension);
 		GUI::defaultShader->update(backgroundColor);
 		GUI::defaultQuad->render();
 		
-		double progress = value / (max - min);
-		Vec2 sliderFilledPosition = position + Vec2(padding + handleWidth / 2, -height / 2 + sliderHeight / 2);
-		Vec2 sliderFilledDimension = Vec2((width - 2 * padding - handleWidth) * progress, sliderHeight);
+		double progress = (value - min) / (max - min);
+		Vec2 sliderFilledPosition = position + Vec2(padding + handleWidth / 2, -height / 2 + barHeight / 2);
+		Vec2 sliderFilledDimension = Vec2(barWidth * progress, barHeight);
 		GUI::defaultQuad->resize(sliderFilledPosition, sliderFilledDimension);
 		GUI::defaultShader->update(foregroundFilledColor);
 		GUI::defaultQuad->render();
 
 		Vec2 sliderEmptyPosition = sliderFilledPosition + Vec2(sliderFilledDimension.x, 0);
-		Vec2 sliderEmptyDimension = Vec2((width - 2 * padding - handleWidth) * (1.0 - progress), sliderHeight);
+		Vec2 sliderEmptyDimension = Vec2(barWidth * (1.0 - progress), barHeight);
 		GUI::defaultQuad->resize(sliderEmptyPosition, sliderEmptyDimension);
 		GUI::defaultShader->update(foregroundEmptyColor);
 		GUI::defaultQuad->render();
 
-		Vec2 handlePosition = Vec2(sliderFilledPosition.x + sliderFilledDimension.x - handleWidth / 2, position.y - height / 2 + handleHeight / 2);
+		Vec2 handlePosition = Vec2(sliderEmptyPosition.x - handleWidth / 2, position.y - height / 2 + handleHeight / 2);
 		Vec2 handleDimension = Vec2(handleWidth, handleHeight);
 		GUI::defaultQuad->resize(handlePosition, handleDimension);
 		GUI::defaultShader->update(handleColor);
 		GUI::defaultQuad->render();
+		
 		GUI::defaultShader->update(GUI::COLOR::ACCENT);
 		GUI::defaultQuad->render(GL_LINE);
 
-		GUI::defaultQuad->resize(position, dimension);
-		GUI::defaultShader->update(GUI::COLOR::RED);
-		GUI::defaultQuad->render(GL_LINE);
+		if (debug) {
+			GUI::defaultQuad->resize(position, dimension);
+			GUI::defaultShader->update(GUI::COLOR::RED);
+			GUI::defaultQuad->render(GL_LINE);
+		}
 	}
 }
 
 Vec2 Slider::resize() {
-	if (resizing)
-		dimension = Vec2(GUI::defaultSliderWidth + 2 * padding, GUI::defaultSliderHandleHeight + 2 * padding);
+	if (resizing) {
+		dimension = Vec2(GUI::defaultSliderBarWidth + GUI::defaultSliderHandleWidth, GUI::defaultSliderHandleHeight) + Vec2(padding) * 2;
+	}
 	return dimension;
 }
 
 void Slider::drag(Vec2 point) {
+	double x = position.x + padding + handleWidth / 2;
+	double w = dimension.x - 2 * padding - handleWidth;
 
-	Log::debug("%f, %f, %f", min, max, value);
-
-	if (point.x < position.x)
+	if (point.x < x)
 		value = min;
-	else if (point.x > (position.x + dimension.x))
+	else if (point.x > x + w)
 		value = max;
 	else
-		value = min + (max - min) * (point.x - position.x) / dimension.x;
-
+		value = min + (max - min) * (point.x - x) / w;
+	
 	(*action)(this);
 }
 
 void Slider::press(Vec2 point) {
-	value = min + (max - min) * (point.x - position.x) / dimension.x;
+	double x = position.x + padding + handleWidth / 2;
+	double w = dimension.x - 2 * padding - handleWidth;
+
+	if (point.x < x || point.x > x + w)
+		return;
+
+	value = min + (max - min) * (point.x - x) / w;
 	(*action)(this);
 }

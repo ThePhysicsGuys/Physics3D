@@ -21,16 +21,18 @@ void Label::render() {
 	if (visible) {
 		resize();
 
-		Vec2 fontPosition = position + Vec2(padding, -dimension.y+ padding);
+		Vec2 fontPosition = position + Vec2(padding, -dimension.y + padding);
 		font->render(text, fontPosition, foregroundColor, scale);
 
-		GUI::defaultQuad->resize(position, dimension);
-		GUI::defaultShader->update(GUI::COLOR::RED);
-		GUI::defaultQuad->render(GL_LINE);
+		if (debug) {
+			GUI::defaultQuad->resize(position, dimension);
+			GUI::defaultShader->update(GUI::COLOR::RED);
+			GUI::defaultQuad->render(GL_LINE);
 
-		GUI::defaultQuad->resize(position + Vec2(padding, -padding), dimension - Vec2(padding) * 2);
-		GUI::defaultShader->update(GUI::COLOR::GREEN);
-		GUI::defaultQuad->render(GL_LINE);
+			GUI::defaultQuad->resize(position + Vec2(padding, -padding), dimension - Vec2(padding) * 2);
+			GUI::defaultShader->update(GUI::COLOR::GREEN);
+			GUI::defaultQuad->render(GL_LINE);
+		}
 	}
 }
 

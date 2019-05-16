@@ -69,6 +69,11 @@ public:
 	*/
 	bool visible;
 
+	/*
+		Debug
+	*/
+	bool debug = false;
+
 	/* 
 		Constructors
 	*/

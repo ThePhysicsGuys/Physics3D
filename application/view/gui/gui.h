@@ -81,9 +81,9 @@ namespace GUI {
 	extern Texture* defaultMinimizeButtonPressTexture;
 
 	// Slider
-	extern double defaultSliderWidth;
+	extern double defaultSliderBarWidth;
 	extern double defaultSliderHandleWidth;
-	extern double defaultSliderHeight;
+	extern double defaultSliderBarHeight;
 	extern double defaultSliderHandleHeight;
 	extern Vec4 defaultSliderHandleColor;
 	extern Vec4 defaultSliderBackgroundColor;
