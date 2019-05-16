@@ -52,10 +52,10 @@ void StandardInputHandler::keyDown(int key, int modifiers) {
 				screen.selectedPart = nullptr;
 			}
 			break;
-		case GLFW_KEY_F8:
+		case GLFW_KEY_F:
 			renderPies = !renderPies;
 			break;
-		case GLFW_KEY_F9:
+		case GLFW_KEY_Q:
 			if(screen.selectedPart != nullptr) {
 				if(screen.world->isAnchored(screen.selectedPart->parent)) {
 					screen.world->unanchor(screen.selectedPart->parent);
@@ -74,7 +74,7 @@ void StandardInputHandler::keyDown(int key, int modifiers) {
 			screen.world->isValid();
 	}
 
-	if(key >= GLFW_KEY_F1 && key <= GLFW_KEY_F7) {
+	if(key >= GLFW_KEY_F1 && key <= GLFW_KEY_F9) {
 		toggleDebugVecType(static_cast<Debug::VecType>(key - GLFW_KEY_F1));
 	}
 };

@@ -22,8 +22,8 @@ BreakdownAverageProfiler<60, GraphicsProcess> graphicsMeasure = BreakdownAverage
 
 // Debug
 using namespace Debug;
-std::map<VecType, bool> debug_enabled{ {INFO, false}, {VELOCITY, false}, {FORCE, false}, {POSITION, false}, {MOMENT, false}, {IMPULSE, false}, {ANGULAR_VELOCITY , false} };
-std::map<VecType, double> vecColors{ {INFO, 0.15}, {VELOCITY, 0.3}, {FORCE, 0.0}, {POSITION, 0.5}, {MOMENT, 0.1}, {IMPULSE, 0.7}, {ANGULAR_VELOCITY , 0.75} };
+std::map<VecType, bool> debug_enabled{{INFO, false}, {VELOCITY, false}, {ACCELERATION, false}, {FORCE, false}, {ANGULAR_IMPULSE, false}, {POSITION, false}, {MOMENT, false}, {IMPULSE, false}, {ANGULAR_VELOCITY , false}};
+std::map<VecType, double> vecColors{ {INFO, 0.15}, {VELOCITY, 0.3},{ACCELERATION, 0.35},{FORCE, 0.0}, {POSITION, 0.5}, {MOMENT, 0.1}, {IMPULSE, 0.7}, {ANGULAR_VELOCITY , 0.75} ,{ANGULAR_IMPULSE, 0.8}};
 bool renderPies = false;
 
 int fieldIndex = 0;

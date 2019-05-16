@@ -48,8 +48,8 @@ TEST_CASE(profileAddableBuffer) {
 	t = total;
 }*/
 
-#define VECTOR_COUNT 2000000
-#define ITER_MAX 10000
+#define VECTOR_COUNT 20000
+#define ITER_MAX 1000
 #define VECTOR_SIZE 3
 
 TEST_CASE(profileVectorOfVectors) {

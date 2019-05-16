@@ -9,14 +9,18 @@ Mat3 IDENTITY = Mat3(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0);
 #define ASSERT(condition) ASSERT_TOLERANT(condition, 0.00000001)
 
 TEST_CASE(matrixInverse) {
-	Mat3 m(100.0, 0.0, 0.0, 0.0, 50.0, 0.0, 0.0, 0.0, 1.0);
+	Mat3 m(1,3,4,7,6,9,5,3,2);
+	SymmetricMat3 s(1, 4, 7, 6, 9, 8);
+	DiagonalMat3 d(7, 5, 3);
 
 	logf("m=%s\n~m=%s\nm.inverse()=%s\nm.det()=%f", str(m).c_str(), str(~m).c_str(), str(m.inverse()).c_str(), m.det());
 
-	ASSERT(m.det() == 5000.0);
-
 	ASSERT(m * ~m == IDENTITY);
 	ASSERT(~m * m == IDENTITY);
+	ASSERT(s * ~s == IDENTITY);
+	ASSERT(~s * s == IDENTITY);
+	ASSERT(d * ~d == IDENTITY);
+	ASSERT(~d * d == IDENTITY);
 }
 
 TEST_CASE(cframeInverse) {

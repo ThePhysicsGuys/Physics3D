@@ -29,25 +29,11 @@ bool logCall(const char* func, const char* file, int line) {
 namespace AppDebug {
 	
 
-	SwappableBuffer<ColoredVec> buf(64);
+	SwappableBuffer<ColoredVec> buf(2048);
 
 	namespace Logging {
 		using namespace Debug;
 		void logVec(Vec3 origin, Vec3 vec, VecType type) {
-			/*if(!debug_enabled[type]) return;
-			double color;
-			switch (type) {
-			case INFO: color = 0.15; break;
-			case FORCE: color = 0.0; break;
-			case MOMENT: color = 0.1; break;
-			case IMPULSE: color = 0.7; break;
-			case POSITION: color = 0.5; break;
-			case VELOCITY: color = 0.3; break;
-			case ANGULAR_VELOCITY: color = 0.75; break;
-			}*/
-
-			// Log::debug("Added vec %s, %s, %d", str(origin).c_str(), str(vec).c_str(), type);
-
 			buf.add(ColoredVec(origin, vec, type));
 		}
 
