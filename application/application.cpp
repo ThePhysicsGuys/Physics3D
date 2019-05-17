@@ -40,7 +40,7 @@
 #define _USE_MATH_DEFINES
 #include "math.h"
 
-#define TICKS_PER_SECOND 500.0
+#define TICKS_PER_SECOND 100.0
 
 #define TICK_SKIP_TIME std::chrono::milliseconds(3000)
 
@@ -107,16 +107,16 @@ int main(void) {
 	world.addObject(createUniquePart(screen, dominoShape, CFrame(Vec3(1.5, 0.7, -7.3), fromEulerAngles(0.0, 0.2, 0.0)), 2.0, 0.7));
 
 	Vec2 floorSize(40.0, 80.0);
-	double wallHeight = 3.0;
+	double wallHeight = 7.0;
 
 	Material floorMaterial = Material(load("../res/textures/floor/floor_color.jpg"));
 
-	ExtendedPart* floorExtendedPart = createUniquePart(screen, BoundingBox(floorSize.x, 0.3, floorSize.y).toShape(new Vec3[8]), CFrame(Vec3(0.0, -0.15, 0.0)), 0.2, 1.0);
+	ExtendedPart* floorExtendedPart = createUniquePart(screen, BoundingBox(floorSize.x, 1.0, floorSize.y).toShape(new Vec3[8]), CFrame(Vec3(0.0, -0.15, 0.0)), 0.2, 1.0);
 	floorExtendedPart->material = floorMaterial;
 	world.addObject(floorExtendedPart, true);
 
-	PartFactory xWallFactory(BoundingBox(0.2, wallHeight, floorSize.y).toShape(new Vec3[8]), screen, "xWall");
-	PartFactory zWallFactory(BoundingBox(floorSize.x, wallHeight, 0.2).toShape(new Vec3[8]), screen, "yWall");
+	PartFactory xWallFactory(BoundingBox(0.7, wallHeight, floorSize.y).toShape(new Vec3[8]), screen, "xWall");
+	PartFactory zWallFactory(BoundingBox(floorSize.x, wallHeight, 0.7).toShape(new Vec3[8]), screen, "yWall");
 
 	world.addObject(xWallFactory.produce(CFrame(Vec3(floorSize.x / 2, wallHeight / 2, 0.0)), 0.2, 1.0), true);
 	world.addObject(zWallFactory.produce(CFrame(Vec3(0.0, wallHeight / 2, floorSize.y / 2)), 0.2, 1.0), true);
@@ -189,10 +189,10 @@ int main(void) {
 	PartFactory sphereFactory(sphereShape, screen, "Sphere");
 	PartFactory triangleFactory(triangleShape, screen, "Triangle");
 	for(double x = 0; x < 4; x+=1.01) {
-		for(double y = 0; y < 4; y += 1.01) {
+		for(double y = 0; y < 40; y += 1.01) {
 			for(double z = 0; z < 4; z += 1.01) {
-				world.addObject(cubeFactory.produce(CFrame(Vec3(x + 5, y + 1, z)), 1.0, 0.2));
-				world.addObject(sphereFactory.produce(CFrame(Vec3(x - 5, y + 1, z)), 1.0, 0.2));
+				world.addObject(cubeFactory.produce(CFrame(Vec3(x, y + 1, z + 5)), 1.0, 0.2));
+				//world.addObject(sphereFactory.produce(CFrame(Vec3(x, y + 1, z - 5)), 1.0, 0.2));
 				world.addObject(triangleFactory.produce(CFrame(Vec3(x, y + 1, z)), 1.0, 0.2));
 			}
 		}

@@ -98,8 +98,8 @@ struct Shape {
 
 	bool intersects(const Shape& other, Vec3& intersection, Vec3& exitVector, const Vec3& centerConnection) const;
 	bool intersectsTransformed(const Shape& other, const CFrame& relativeCFrame, Vec3& intersection, Vec3& exitVector) const;
-	int furthestIndexInDirection(Vec3 direction) const;
-	Vec3 furthestInDirection(Vec3 direction) const;
+	int furthestIndexInDirection(const Vec3& direction) const;
+	Vec3 furthestInDirection(const Vec3& direction) const;
 
 	inline TriangleIter iterTriangles() const { 
 		return TriangleIter { triangles, triangleCount };

@@ -304,7 +304,7 @@ bool Shape::containsPoint(Vec3 point) const {
 	return isExiting;
 }
 
-int Shape::furthestIndexInDirection(Vec3 direction) const {
+int Shape::furthestIndexInDirection(const Vec3& direction) const {
 	double bestDot = vertices[0] * direction;
 	int bestVertexIndex = 0;
 	for(int i = 1; i < vertexCount; i++) {
@@ -318,7 +318,7 @@ int Shape::furthestIndexInDirection(Vec3 direction) const {
 	return bestVertexIndex;
 }
 
-Vec3 Shape::furthestInDirection(Vec3 direction) const {
+Vec3 Shape::furthestInDirection(const Vec3& direction) const {
 	double bestDot = vertices[0] * direction;
 	Vec3 bestVertex = vertices[0];
 	for(int i = 1; i < vertexCount; i++) {

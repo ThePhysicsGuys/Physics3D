@@ -56,10 +56,10 @@ void handleCollision(Part& part1, Part& part2, Vec3 collisionPoint, Vec3 exitVec
 
 	double combinedInertia;
 	if(anchoredColission)
-		combinedInertia = p2.getInertiaOfPointInDirection(p2.part->cframe.relativeToLocal(collissionRelP2), p2.part->cframe.relativeToLocal(exitVector));
+		combinedInertia = p2.getInertiaOfPointInDirection(p2.getCFrame().relativeToLocal(collissionRelP2), p2.getCFrame().relativeToLocal(exitVector));
 	else {
-		double inertia1 = p1.getInertiaOfPointInDirection(p1.part->cframe.relativeToLocal(collissionRelP1), p1.part->cframe.relativeToLocal(exitVector));
-		double inertia2 = p2.getInertiaOfPointInDirection(p2.part->cframe.relativeToLocal(collissionRelP2), p2.part->cframe.relativeToLocal(exitVector));
+		double inertia1 = p1.getInertiaOfPointInDirection(p1.getCFrame().relativeToLocal(collissionRelP1), p1.getCFrame().relativeToLocal(exitVector));
+		double inertia2 = p2.getInertiaOfPointInDirection(p2.getCFrame().relativeToLocal(collissionRelP2), p2.getCFrame().relativeToLocal(exitVector));
 		combinedInertia = 1 / (1 / inertia1 + 1 / inertia2);
 	}
 	
@@ -183,7 +183,7 @@ void WorldPrototype::tick(double deltaT) {
 #ifdef CHECK_SANITY
 		double afterTotalEnergy = c.p2->parent->getKineticEnergy();
 
-		if(afterTotalEnergy > beforeTotalEnergy) {
+		if(c.p1->parent->getKineticEnergy() == 0.0 && afterTotalEnergy > beforeTotalEnergy) {
 			Log::warn("Energy of blocks after anchored colission is greater than before! %f > %f", afterTotalEnergy, beforeTotalEnergy);
 		}
 #endif

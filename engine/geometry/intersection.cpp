@@ -55,13 +55,13 @@ inline int furthestIndexInDirection(Vec3* vertices, int vertexCount, Vec3 direct
 	return bestVertexIndex;
 }
 
-inline MinkPoint getSupport(const Shape& first, const Shape& second, Vec3 searchDirection) {
+inline MinkPoint getSupport(const Shape& first, const Shape& second, const Vec3& searchDirection) {
 	int furthestIndex1 = first.furthestIndexInDirection(searchDirection);
 	int furthestIndex2 = second.furthestIndexInDirection(-searchDirection);
 	return MinkPoint{first.vertices[furthestIndex1] - second.vertices[furthestIndex2], furthestIndex1, furthestIndex2 };
 }
 
-inline MinkPoint getSupport(const Shape& first, const Shape& second, const CFrame& transform, Vec3 searchDirection) {
+inline MinkPoint getSupport(const Shape& first, const Shape& second, const CFrame& transform, const Vec3& searchDirection) {
 	int furthestIndex1 = first.furthestIndexInDirection(searchDirection);
 	Vec3 transformedSearchDirection = transform.relativeToLocal(searchDirection);
 	int furthestIndex2 = second.furthestIndexInDirection(-transformedSearchDirection);
