@@ -10,7 +10,10 @@ ConvexShapeBuilder::ConvexShapeBuilder(Vec3 * vertBuf, Triangle* triangleBuf, in
 ConvexShapeBuilder::ConvexShapeBuilder(const Shape s, Vec3 * vertBuf, Triangle* triangleBuf, TriangleNeighbors* neighborBuf, int* removalBuffer, EdgePiece* newTriangleBuffer)
 	: vertexBuf(vertBuf), triangleBuf(triangleBuf), vertexCount(s.vertexCount), triangleCount(s.triangleCount), neighborBuf(neighborBuf), removalBuffer(removalBuffer), newTriangleBuffer(newTriangleBuffer) {
 
-	memcpy(vertBuf, s.vertices, s.vertexCount * sizeof(Vec3));
+	for(int i = 0; i < s.vertexCount; i++) {
+		vertBuf[i] = s[i];
+	}
+
 	memcpy(triangleBuf, s.triangles, s.triangleCount * sizeof(Triangle));
 
 	fillNeighborBuf(triangleBuf, triangleCount, neighborBuf);

@@ -188,7 +188,7 @@ void WorldPrototype::tick(double deltaT) {
 		}
 #endif
 	}
-	for(int i = anchoredOffset; i < colissions.size(); i++) {
+	for(size_t i = anchoredOffset; i < colissions.size(); i++) {
 		Colission c = colissions[i];
 #ifdef CHECK_SANITY
 		double beforeTotalEnergy = c.p1->parent->getKineticEnergy() + c.p2->parent->getKineticEnergy();

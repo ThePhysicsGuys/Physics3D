@@ -18,7 +18,6 @@
 #include "../engine/math/mathUtil.h"
 
 #include "../engine/geometry/shape.h"
-#include "../engine/geometry/managedShape.h"
 #include "../engine/geometry/convexShapeBuilder.h"
 
 #include "../engine/part.h"

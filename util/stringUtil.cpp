@@ -4,7 +4,7 @@
 
 std::vector<std::string> split(const std::string& string, char splitter) {
 	std::vector<std::string> elements;
-	int length = string.size();
+	size_t length = string.size();
 	int start = 0;
 
 	for (int i = 0; i < length; i++) {

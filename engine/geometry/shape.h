@@ -58,8 +58,9 @@ struct Shape {
 			return first + size;
 		};
 	};
-
+private:
 	Vec3* vertices;
+public:
 	std::shared_ptr<Vec3> normals;
 	std::shared_ptr<Vec2> uvs;
 	const Triangle* triangles;
@@ -100,6 +101,9 @@ struct Shape {
 	bool intersectsTransformed(const Shape& other, const CFrame& relativeCFrame, Vec3& intersection, Vec3& exitVector) const;
 	int furthestIndexInDirection(const Vec3& direction) const;
 	Vec3 furthestInDirection(const Vec3& direction) const;
+
+	inline const Vec3& operator[](int index) const { return vertices[index]; }
+	inline Vec3& operator[](int index) { return vertices[index]; }
 
 	inline TriangleIter iterTriangles() const { 
 		return TriangleIter { triangles, triangleCount };

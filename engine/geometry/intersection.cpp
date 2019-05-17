@@ -58,15 +58,15 @@ inline int furthestIndexInDirection(Vec3* vertices, int vertexCount, Vec3 direct
 inline MinkPoint getSupport(const Shape& first, const Shape& second, const Vec3& searchDirection) {
 	int furthestIndex1 = first.furthestIndexInDirection(searchDirection);
 	int furthestIndex2 = second.furthestIndexInDirection(-searchDirection);
-	return MinkPoint{first.vertices[furthestIndex1] - second.vertices[furthestIndex2], furthestIndex1, furthestIndex2 };
+	return MinkPoint{first[furthestIndex1] - second[furthestIndex2], furthestIndex1, furthestIndex2 };
 }
 
 inline MinkPoint getSupport(const Shape& first, const Shape& second, const CFrame& transform, const Vec3& searchDirection) {
 	int furthestIndex1 = first.furthestIndexInDirection(searchDirection);
 	Vec3 transformedSearchDirection = transform.relativeToLocal(searchDirection);
 	int furthestIndex2 = second.furthestIndexInDirection(-transformedSearchDirection);
-	Vec3 secondVertex = transform.localToGlobal(second.vertices[furthestIndex2]);
-	return MinkPoint{first.vertices[furthestIndex1] - secondVertex, furthestIndex1, furthestIndex2};
+	Vec3 secondVertex = transform.localToGlobal(second[furthestIndex2]);
+	return MinkPoint{first[furthestIndex1] - secondVertex, furthestIndex1, furthestIndex2};
 }
 
 bool runGJK(const Shape& first, const Shape& second, const Vec3& initialSearchDirection, Tetrahedron& simplex) {
@@ -372,8 +372,8 @@ bool runEPA(const Shape& first, const Shape& second, const Tetrahedron& s, Vec3&
 			double w = (d00 * d21 - d01 * d20) / denom;
 			double u = 1.0 - v - w;
 
-			Vec3 A0 = first.vertices[inds[0][0]], A1 = first.vertices[inds[1][0]], A2 = first.vertices[inds[2][0]];
-			Vec3 B0 = second.vertices[inds[0][1]], B1 = second.vertices[inds[1][1]], B2 = second.vertices[inds[2][1]];
+			Vec3 A0 = first[inds[0][0]], A1 = first[inds[1][0]], A2 = first[inds[2][0]];
+			Vec3 B0 = second[inds[0][1]], B1 = second[inds[1][1]], B2 = second[inds[2][1]];
 
 			Vec3 avgFirst = A0 * u + A1 * v + A2 * w;
 			Vec3 avgSecond = B0 * u + B1 * v + B2 * w;
@@ -437,8 +437,8 @@ bool runEPATransformed(const Shape& first, const Shape& second, const Tetrahedro
 			double w = (d00 * d21 - d01 * d20) / denom;
 			double u = 1.0 - v - w;
 
-			Vec3 A0 = first.vertices[inds[0][0]], A1 = first.vertices[inds[1][0]], A2 = first.vertices[inds[2][0]];
-			Vec3 B0 = second.vertices[inds[0][1]], B1 = second.vertices[inds[1][1]], B2 = second.vertices[inds[2][1]];
+			Vec3 A0 = first[inds[0][0]], A1 = first[inds[1][0]], A2 = first[inds[2][0]];
+			Vec3 B0 = second[inds[0][1]], B1 = second[inds[1][1]], B2 = second[inds[2][1]];
 			
 			Vec3 avgFirst = A0 * u + A1 * v + A2 * w;
 			Vec3 avgSecond = B0 * u + B1 * v + B2 * w;

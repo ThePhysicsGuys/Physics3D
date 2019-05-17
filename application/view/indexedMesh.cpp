@@ -2,8 +2,16 @@
 #include "../../engine/geometry/shape.h"
 #include "../util/log.h"
 
-IndexedMesh::IndexedMesh(Shape shape) : AbstractMesh(), vertexCount(shape.vertexCount), triangleCount(shape.triangleCount) {
-	vertexBuffer = new VertexBuffer(reinterpret_cast<double const *>(shape.vertices), vertexCount * 3);
+IndexedMesh::IndexedMesh(const Shape& shape) : AbstractMesh(), vertexCount(shape.vertexCount), triangleCount(shape.triangleCount) {
+	double* vertices = new double[shape.vertexCount * 3];
+	for(int i = 0; i < vertexCount; i++) {
+		Vec3 vertex = shape[i];
+		vertices[i * 3] = vertex.x;
+		vertices[i * 3 + 1] = vertex.y;
+		vertices[i * 3 + 2] = vertex.z;
+	}
+
+	vertexBuffer = new VertexBuffer(vertices, vertexCount * 3);
 	normalBuffer = new VertexBuffer(reinterpret_cast<double const *>(shape.normals.get()), vertexCount * 3);
 	uvBuffer = new VertexBuffer(reinterpret_cast<double const *>(shape.uvs.get()), vertexCount * 2);
 

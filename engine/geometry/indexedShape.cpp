@@ -88,4 +88,5 @@ bool IndexedShape::isValid() const {
 				return false;
 		}
 	}
+	return true;
 }
