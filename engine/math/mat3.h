@@ -471,6 +471,8 @@ typedef DiagonalMat3Template<float>			DiagonalMat3f;
 typedef DiagonalMat3Template<long long>		DiagonalMat3l;
 
 typedef Mat3Template<double>	RotMat3;
+typedef Mat3Template<float>		RotMat3f;
+typedef Mat3Template<long long>	RotMat3l;
 
 
 template<typename N>

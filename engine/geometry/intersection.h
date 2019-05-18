@@ -42,7 +42,7 @@ struct Simplex {
 };
 
 struct MinkPoint {
-	Vec3 p;
+	Vec3f p;
 	int originFirst;
 	int originSecond;
 };
@@ -51,7 +51,7 @@ struct Tetrahedron {
 	MinkPoint A, B, C, D;
 };
 
-bool runGJK(const Shape& first, const Shape& second, const Vec3& initialSearchDirection, Tetrahedron& simp);
-bool runGJKTransformed(const Shape& first, const Shape& second, const CFrame& relativeCFrame, const Vec3& initialSearchDirection, Tetrahedron& simp);
-bool runEPA(const Shape& first, const Shape& second, const Tetrahedron& s, Vec3& intersection, Vec3& exitVector, ComputationBuffers& bufs);
-bool runEPATransformed(const Shape& first, const Shape& second, const Tetrahedron& s, const CFrame& relativeCFrame, Vec3& intersection, Vec3& exitVector, ComputationBuffers& bufs);
+bool runGJK(const Shape& first, const Shape& second, const Vec3f& initialSearchDirection, Tetrahedron& simp);
+bool runGJKTransformed(const Shape& first, const Shape& second, const CFramef& relativeCFrame, const Vec3f& initialSearchDirection, Tetrahedron& simp);
+bool runEPA(const Shape& first, const Shape& second, const Tetrahedron& s, Vec3f& intersection, Vec3f& exitVector, ComputationBuffers& bufs);
+bool runEPATransformed(const Shape& first, const Shape& second, const Tetrahedron& s, const CFramef& relativeCFrame, Vec3f& intersection, Vec3f& exitVector, ComputationBuffers& bufs);

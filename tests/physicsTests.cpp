@@ -97,7 +97,7 @@ TEST_CASE(momentToAngularVelocity) {
 }
 
 TEST_CASE(rotationImpulse) {
-	Part part(BoundingBox{-0.1, -10, -0.1, 0.1, 10, 0.1}.toShape(new Vec3[8]), CFrame(Vec3()), 1.0, 1.0);
+	Part part(BoundingBox{-0.1, -10, -0.1, 0.1, 10, 0.1}.toShape(new Vec3f[8]), CFrame(Vec3()), 1.0, 1.0);
 	Physical veryLongBoxPhysical(&part);
 
 	Vec3 xMoment = Vec3(1.0, 0.0, 0.0);

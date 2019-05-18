@@ -5,11 +5,11 @@ Part::Part(NormalizedShape shape, CFrame position, double density, double fricti
 }
 
 Part::Part(Shape shape, CFrame position, double density, double friction) : properties({density, friction}) {
-	CFrame backTransform;
+	CFramef backTransform;
 	Vec3* normalBuf = (shape.normals) ? new Vec3[shape.vertexCount] : nullptr;
-	NormalizedShape normalized = shape.normalized(new Vec3[shape.vertexCount], normalBuf, backTransform);
+	NormalizedShape normalized = shape.normalized(new Vec3f[shape.vertexCount], normalBuf, backTransform);
 
-	CFrame realCFrame = position.localToGlobal(backTransform);
+	CFrame realCFrame = position.localToGlobal(CFrame(backTransform));
 
 	this->hitbox = normalized;
 	this->cframe = realCFrame;
@@ -20,10 +20,11 @@ bool Part::intersects(const Part& other, Vec3& intersection, Vec3& exitVector) c
 #ifdef USE_TRANSFORMATIONS
 	return this->transformed.intersects(other.transformed, intersection, exitVector, other.cframe.position - this->cframe.position);
 #else
-	const CFrame relativeCFrame(this->cframe.globalToLocal(other.cframe));
-	if(this->hitbox.intersectsTransformed(other.hitbox, relativeCFrame, intersection, exitVector)) {
-		intersection = this->cframe.localToGlobal(intersection);
-		exitVector = this->cframe.localToRelative(exitVector);
+	const CFramef relativeCFrame(this->cframe.globalToLocal(other.cframe));
+	Vec3f localIntersection, localExitVector;
+	if(this->hitbox.intersectsTransformed(other.hitbox, relativeCFrame, localIntersection, localExitVector)) {
+		intersection = this->cframe.localToGlobal(Vec3(localIntersection));
+		exitVector = this->cframe.localToRelative(Vec3(localExitVector));
 		return true;
 	}
 	return false;

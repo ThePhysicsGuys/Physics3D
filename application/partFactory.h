@@ -11,7 +11,7 @@ class PartFactory {
 	std::string name;
 	NormalizedShape normalizedShape;
 	int drawMeshID;
-	CFrame backTransform;
+	CFramef backTransform;
 public:
 	PartFactory() = default;
 	PartFactory(const Shape& shape, Screen& screen, std::string name = "Part");

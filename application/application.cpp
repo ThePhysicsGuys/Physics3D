@@ -54,7 +54,7 @@ bool flying = true;
 void init();
 void setupPhysics();
 
-Vec3 dominoBuf[8];
+Vec3f dominoBuf[8];
 Shape dominoShape = BoundingBox{-0.1, -0.7, -0.3, 0.1, 0.7, 0.3}.toShape(dominoBuf);
 PartFactory dominoFactory;
 
@@ -105,27 +105,27 @@ int main(void) {
 
 	world.addObject(createUniquePart(screen, dominoShape, CFrame(Vec3(1.5, 0.7, -7.3), fromEulerAngles(0.0, 0.2, 0.0)), 2.0, 0.7));
 
-	Vec2 floorSize(40.0, 80.0);
+	Vec2 floorSize(15.0, 15.0);
 	double wallHeight = 7.0;
 
 	Material floorMaterial = Material(load("../res/textures/floor/floor_color.jpg"));
 
-	ExtendedPart* floorExtendedPart = createUniquePart(screen, BoundingBox(floorSize.x, 1.0, floorSize.y).toShape(new Vec3[8]), CFrame(Vec3(0.0, -0.15, 0.0)), 0.2, 1.0);
+	ExtendedPart* floorExtendedPart = createUniquePart(screen, BoundingBox(floorSize.x, 1.0, floorSize.y).toShape(new Vec3f[8]), CFrame(Vec3(0.0, -0.15, 0.0)), 0.2, 1.0);
 	floorExtendedPart->material = floorMaterial;
 	world.addObject(floorExtendedPart, true);
 
-	PartFactory xWallFactory(BoundingBox(0.7, wallHeight, floorSize.y).toShape(new Vec3[8]), screen, "xWall");
-	PartFactory zWallFactory(BoundingBox(floorSize.x, wallHeight, 0.7).toShape(new Vec3[8]), screen, "yWall");
+	PartFactory xWallFactory(BoundingBox(0.7, wallHeight, floorSize.y).toShape(new Vec3f[8]), screen, "xWall");
+	PartFactory zWallFactory(BoundingBox(floorSize.x, wallHeight, 0.7).toShape(new Vec3f[8]), screen, "yWall");
 
 	world.addObject(xWallFactory.produce(CFrame(Vec3(floorSize.x / 2, wallHeight / 2, 0.0)), 0.2, 1.0), true);
 	world.addObject(zWallFactory.produce(CFrame(Vec3(0.0, wallHeight / 2, floorSize.y / 2)), 0.2, 1.0), true);
 	world.addObject(xWallFactory.produce(CFrame(Vec3(-floorSize.x / 2, wallHeight / 2, 0.0)), 0.2, 1.0), true);
 	world.addObject(zWallFactory.produce(CFrame(Vec3(0.0, wallHeight / 2, -floorSize.y / 2)), 0.2, 1.0), true);
 
-	ExtendedPart* ramp = createUniquePart(screen, BoundingBox(10.0, 0.17, 3.0).toShape(new Vec3[8]), CFrame(Vec3(12.0, 1.5, 0.0), fromEulerAngles(M_PI / 2 * 0.2, M_PI/2, 0.0)), 0.2, 1.0);
+	ExtendedPart* ramp = createUniquePart(screen, BoundingBox(10.0, 0.17, 3.0).toShape(new Vec3f[8]), CFrame(Vec3(12.0, 1.5, 0.0), fromEulerAngles(M_PI / 2 * 0.2, M_PI/2, 0.0)), 0.2, 1.0);
 	world.addObject(ramp, true);
 
-	PartFactory rotatingWallFactory(BoundingBox(5.0, 3.0, 0.5).toShape(new Vec3[8]), screen, "rotatingWall");
+	PartFactory rotatingWallFactory(BoundingBox(5.0, 3.0, 0.5).toShape(new Vec3f[8]), screen, "rotatingWall");
 	ExtendedPart* rotatingWall = rotatingWallFactory.produce(CFrame(Vec3(-12, 1.5, 0.0)), 0.2, 1.0);
 	world.add(rotatingWall, true);
 	rotatingWall->parent->angularVelocity = Vec3(0, -0.7, 0);
@@ -137,7 +137,7 @@ int main(void) {
 	// makeDominoStrip(20);
 	// makeDominoTower(20, 10, Vec3(-4.0, 0.0, -4.0));
 
-	Vec3 newIcosaVerts[30];
+	Vec3f newIcosaVerts[30];
 	Triangle newIcosaTriangles[40];
 	TriangleNeighbors icosaNeighBuf[40];
 
@@ -147,12 +147,12 @@ int main(void) {
 		throw "BAD";
 	}
 
-	icosaBuilder.addPoint(Vec3(0, 1.1, 0));
-	icosaBuilder.addPoint(Vec3(0, -1.1, 0));
-	icosaBuilder.addPoint(Vec3(1.1, 0, 0));
-	icosaBuilder.addPoint(Vec3(-1.1, 0, 0));
-	icosaBuilder.addPoint(Vec3(0, 0, 1.1));
-	icosaBuilder.addPoint(Vec3(0, 0, -1.1));
+	icosaBuilder.addPoint(Vec3f(0, 1.1, 0));
+	icosaBuilder.addPoint(Vec3f(0, -1.1, 0));
+	icosaBuilder.addPoint(Vec3f(1.1, 0, 0));
+	icosaBuilder.addPoint(Vec3f(-1.1, 0, 0));
+	icosaBuilder.addPoint(Vec3f(0, 0, 1.1));
+	icosaBuilder.addPoint(Vec3f(0, 0, -1.1));
 
 	if(!icosaBuilder.toIndexedShape().isValid()) {
 		throw "BAD";
@@ -161,19 +161,19 @@ int main(void) {
 	Shape newIcosa = icosaBuilder.toShape();
 	ExtendedPart* constructedIcosa = createUniquePart(screen, newIcosa, CFrame(Vec3(10, 0, -10)), 2.0, 0.7);
 
-	Vec3 verts[10]{Vec3(0.0, 0.0, 0.0), Vec3(1.0, 0.0, 0.0), Vec3(0.0, 0.0, 1.0), Vec3(0.0, 1.0, 0.0)};
+	Vec3f verts[10]{Vec3f(0.0, 0.0, 0.0), Vec3f(1.0, 0.0, 0.0), Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 1.0, 0.0)};
 	Triangle triangles[20]{{0,1,2},{0,3,1},{0,2,3},{1,3,2}};
 	TriangleNeighbors neighBuf[20];
 
 	ConvexShapeBuilder builder(verts, triangles, 4, 4, neighBuf, builderRemovalBuffer, builderAddingBuffer);
 
-	builder.addPoint(Vec3(0.4, 0.4, 0.4), 3);
+	builder.addPoint(Vec3f(0.4, 0.4, 0.4), 3);
 
-	builder.addPoint(Vec3(-0.4, 1, -0.4));
+	builder.addPoint(Vec3f(-0.4, 1, -0.4));
 
-	builder.addPoint(Vec3(-0.8, 0.5, -0.8));
+	builder.addPoint(Vec3f(-0.8, 0.5, -0.8));
 
-	builder.addPoint(Vec3(-0.9, 0.6, -0.9));
+	builder.addPoint(Vec3f(-0.9, 0.6, -0.9));
 
 	Shape constructedShape = builder.toShape();
 
@@ -184,15 +184,15 @@ int main(void) {
 	sphereShape.normals = std::shared_ptr<Vec3>(new Vec3[sphereShape.vertexCount], std::default_delete<Vec3[]>());
 	sphereShape.computeNormals(sphereShape.normals.get());
 
-	PartFactory cubeFactory(BoundingBox{-0.49, -0.49, -0.49, 0.49, 0.49, 0.49}.toShape(new Vec3[8]), screen, "Cube");
+	PartFactory cubeFactory(BoundingBox{-0.49, -0.49, -0.49, 0.49, 0.49, 0.49}.toShape(new Vec3f[8]), screen, "Cube");
 	PartFactory sphereFactory(sphereShape, screen, "Sphere");
 	PartFactory triangleFactory(triangleShape, screen, "Triangle");
 	for(double x = 0; x < 4; x+=1.01) {
 		for(double y = 0; y < 40; y += 1.01) {
 			for(double z = 0; z < 4; z += 1.01) {
-				world.addObject(cubeFactory.produce(CFrame(Vec3(x, y + 1, z + 5)), 1.0, 0.2));
-				//world.addObject(sphereFactory.produce(CFrame(Vec3(x, y + 1, z - 5)), 1.0, 0.2));
-				world.addObject(triangleFactory.produce(CFrame(Vec3(x, y + 1, z)), 1.0, 0.2));
+				//world.addObject(cubeFactory.produce(CFrame(Vec3(x, y + 1, z + 5)), 1.0, 0.2));
+				world.addObject(sphereFactory.produce(CFrame(Vec3(x, y + 1, z - 5)), 1.0, 0.2));
+				//world.addObject(triangleFactory.produce(CFrame(Vec3(x, y + 1, z)), 1.0, 0.2));
 			}
 		}
 	}

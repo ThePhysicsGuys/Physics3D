@@ -14,7 +14,7 @@ struct EdgePiece {
 */
 class ConvexShapeBuilder {
 public:
-	Vec3* vertexBuf;
+	Vec3f* vertexBuf;
 	Triangle* triangleBuf;
 	int vertexCount;
 	int triangleCount;
@@ -24,15 +24,15 @@ public:
 	int* removalBuffer;
 	EdgePiece* newTriangleBuffer;
 
-	ConvexShapeBuilder(Vec3 * vertBuf, Triangle* triangleBuf, int vertexCount, int triangleCount, TriangleNeighbors* neighborBuf, int* removalBuffer, EdgePiece* newTriangleBuffer);
-	ConvexShapeBuilder(const Shape s, Vec3 * newVertBuf, Triangle* newTriangleBuf, TriangleNeighbors* neighborBuf, int* removalBuffer, EdgePiece* newTriangleBuffer);
+	ConvexShapeBuilder(Vec3f * vertBuf, Triangle* triangleBuf, int vertexCount, int triangleCount, TriangleNeighbors* neighborBuf, int* removalBuffer, EdgePiece* newTriangleBuffer);
+	ConvexShapeBuilder(const Shape& s, Vec3f * newVertBuf, Triangle* newTriangleBuf, TriangleNeighbors* neighborBuf, int* removalBuffer, EdgePiece* newTriangleBuffer);
 
-	void addPoint(Vec3 point, int oldTriangleIndex);
+	void addPoint(const Vec3f& point, int oldTriangleIndex);
 	// returns true if successful
-	bool addPoint(Vec3 point);
+	bool addPoint(const Vec3f& point);
 
 	void removeTriangle(int triangleIndex);
-	bool isAbove(Vec3 point, Triangle t);
+	bool isAbove(const Vec3f& point, Triangle t);
 
 	Shape toShape() const;
 	IndexedShape toIndexedShape() const;

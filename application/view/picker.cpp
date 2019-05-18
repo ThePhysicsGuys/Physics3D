@@ -31,13 +31,13 @@ void updateIntersectedPhysical(Screen& screen, Vec2 mousePosition, Mat4f viewMat
 	
 	ExtendedPart* closestIntersectedPart = nullptr;
 	Vec3 closestIntersectedPoint = Vec3();
-	double closestIntersectDistance = INFINITY;
+	float closestIntersectDistance = INFINITY;
 
 	screen.ray = calcRay(mousePosition, screen.dimension, viewMatrix, projectionMatrix);
 	for(ExtendedPart& part : *screen.world){
-		Vec3* buffer = new Vec3[part.hitbox.vertexCount];
-		Shape transformed = part.hitbox.localToGlobal(part.cframe, buffer);
-		double distance = transformed.getIntersectionDistance(screen.camera.cframe.position, screen.ray);
+		Vec3f* buffer = new Vec3f[part.hitbox.vertexCount];
+		Shape transformed = part.hitbox.localToGlobal(CFramef(part.cframe), buffer);
+		float distance = transformed.getIntersectionDistance(Vec3f(screen.camera.cframe.position), Vec3f(screen.ray));
 		if (distance < closestIntersectDistance && distance > 0) {
 			closestIntersectDistance = distance;
 			closestIntersectedPart = &part;

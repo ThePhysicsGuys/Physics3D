@@ -49,17 +49,17 @@ struct Shape {
 	};
 
 	struct VertexIter {
-		Vec3* first;
+		Vec3f* first;
 		int size;
-		inline Vec3* begin() const {
+		inline Vec3f* begin() const {
 			return first; 
 		};
-		inline Vec3* end() const { 
+		inline Vec3f* end() const { 
 			return first + size;
 		};
 	};
 private:
-	Vec3* vertices;
+	Vec3f* vertices;
 public:
 	std::shared_ptr<Vec3> normals;
 	std::shared_ptr<Vec2> uvs;
@@ -68,24 +68,24 @@ public:
 	int triangleCount;
 
 	Shape();
-	Shape(Vec3* vertices, const Triangle* triangles, int vertexCount, int triangleCount);
-	Shape(Vec3* vertices, Vec3* normals, const Triangle* triangles, int vertexCount, int triangleCount);
-	Shape(Vec3* vertices, Vec3* normals, Vec2* uvs, const Triangle* triangles, int vertexCount, int triangleCount);
-	Shape(Vec3* vertices, Vec2* uvs, const Triangle* triangles, int vertexCount, int triangleCount);
+	Shape(Vec3f* vertices, const Triangle* triangles, int vertexCount, int triangleCount);
+	Shape(Vec3f* vertices, Vec3* normals, const Triangle* triangles, int vertexCount, int triangleCount);
+	Shape(Vec3f* vertices, Vec3* normals, Vec2* uvs, const Triangle* triangles, int vertexCount, int triangleCount);
+	Shape(Vec3f* vertices, Vec2* uvs, const Triangle* triangles, int vertexCount, int triangleCount);
 
-	Shape translated(Vec3 offset, Vec3* newVecBuf) const;
-	Shape rotated(RotMat3 rotation, Vec3* newVecBuf) const;
-	Shape localToGlobal(CFrame frame, Vec3* newVecBuf) const;
-	Shape globalToLocal(CFrame frame, Vec3* newVecBuf) const;
+	Shape translated(Vec3f offset, Vec3f* newVecBuf) const;
+	Shape rotated(RotMat3f rotation, Vec3f* newVecBuf) const;
+	Shape localToGlobal(CFramef frame, Vec3f* newVecBuf) const;
+	Shape globalToLocal(CFramef frame, Vec3f* newVecBuf) const;
 
 	bool isValid() const;
-	bool containsPoint(Vec3 point) const;
-	double getIntersectionDistance(Vec3 origin, Vec3 direction);
+	bool containsPoint(Vec3f point) const;
+	float getIntersectionDistance(Vec3f origin, Vec3f direction);
 	double getVolume() const;
-	NormalizedShape normalized(Vec3* vecBuf, Vec3* normalBuf, CFrame& backTransformation) const;
-	CenteredShape centered(Vec3* vecBuf, Vec3& backOffset) const;
+	NormalizedShape normalized(Vec3f* vecBuf, Vec3* normalBuf, CFramef& backTransformation) const;
+	CenteredShape centered(Vec3f* vecBuf, Vec3& backOffset) const;
 
-	CFrame getInertialEigenVectors() const;
+	CFramef getInertialEigenVectors() const;
 	BoundingBox getBounds() const;
 	void computeNormals(Vec3* buffer) const;
 	Vec3 getCenterOfMass() const;
@@ -95,15 +95,15 @@ public:
 	SymmetricMat3 getInertia(CFrame reference) const;
 	Sphere getCircumscribedSphere() const;
 	double getMaxRadius() const;
-	Vec3 getNormalVecOfTriangle(Triangle triangle) const;
+	Vec3f getNormalVecOfTriangle(Triangle triangle) const;
 
-	bool intersects(const Shape& other, Vec3& intersection, Vec3& exitVector, const Vec3& centerConnection) const;
-	bool intersectsTransformed(const Shape& other, const CFrame& relativeCFrame, Vec3& intersection, Vec3& exitVector) const;
-	int furthestIndexInDirection(const Vec3& direction) const;
-	Vec3 furthestInDirection(const Vec3& direction) const;
+	bool intersects(const Shape& other, Vec3f& intersection, Vec3f& exitVector, const Vec3& centerConnection) const;
+	bool intersectsTransformed(const Shape& other, const CFramef& relativeCFrame, Vec3f& intersection, Vec3f& exitVector) const;
+	int furthestIndexInDirection(const Vec3f& direction) const;
+	Vec3f furthestInDirection(const Vec3f& direction) const;
 
-	inline const Vec3& operator[](int index) const { return vertices[index]; }
-	inline Vec3& operator[](int index) { return vertices[index]; }
+	inline const Vec3f& operator[](int index) const { return vertices[index]; }
+	inline Vec3f& operator[](int index) { return vertices[index]; }
 
 	inline TriangleIter iterTriangles() const { 
 		return TriangleIter { triangles, triangleCount };
@@ -116,17 +116,17 @@ public:
 struct CenteredShape : public Shape {
 	friend struct Shape;
 	CenteredShape() : Shape() {}
-	CenteredShape(Vec3 * vertices, const Triangle * triangles, int vertexCount, int triangleCount);
-	CenteredShape(Vec3 * vertices, Vec3 * normals, Vec2 * uvs, const Triangle * triangles, int vertexCount, int triangleCount);
+	CenteredShape(Vec3f * vertices, const Triangle * triangles, int vertexCount, int triangleCount);
+	CenteredShape(Vec3f * vertices, Vec3 * normals, Vec2 * uvs, const Triangle * triangles, int vertexCount, int triangleCount);
 private:
-	CenteredShape(Vec3 * vertices, const Triangle * triangles, int vertexCount, int triangleCount, Vec3& offset);
+	CenteredShape(Vec3f * vertices, const Triangle * triangles, int vertexCount, int triangleCount, Vec3& offset);
 };
 
 struct NormalizedShape : public CenteredShape {
 	friend struct Shape;
 	NormalizedShape() : CenteredShape() {}
-	NormalizedShape(Vec3 * vertices, const Triangle * triangles, int vertexCount, int triangleCount);
-	NormalizedShape(Vec3 * vertices, Vec3 * normals, Vec2 * uvs, const Triangle * triangles, int vertexCount, int triangleCount);
+	NormalizedShape(Vec3f * vertices, const Triangle * triangles, int vertexCount, int triangleCount);
+	NormalizedShape(Vec3f * vertices, Vec3 * normals, Vec2 * uvs, const Triangle * triangles, int vertexCount, int triangleCount);
 private:
-	NormalizedShape(Vec3* vertices, const Triangle* triangles, int vertexCount, int triangleCount, CFrame& transformation);
+	NormalizedShape(Vec3f* vertices, const Triangle* triangles, int vertexCount, int triangleCount, CFramef& transformation);
 };

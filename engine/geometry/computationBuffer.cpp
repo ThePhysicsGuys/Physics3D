@@ -25,7 +25,7 @@ ComputationBuffers::~ComputationBuffers() {
 }
 
 void ComputationBuffers::createVertexBuffersUnsafe(int newVertexCapacity) {
-	vertBuf = new Vec3[newVertexCapacity];
+	vertBuf = new Vec3f[newVertexCapacity];
 	knownVecs = new MinkowskiPointIndices[newVertexCapacity];
 	this->vertexCapacity = newVertexCapacity;
 }

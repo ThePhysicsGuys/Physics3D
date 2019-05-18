@@ -2,7 +2,7 @@
 
 PartFactory::PartFactory(const Shape& shape, Screen& screen, std::string name) {
 	Vec3* normalBuf = (shape.normals) ? new Vec3[shape.vertexCount] : nullptr;
-	this->normalizedShape = shape.normalized(new Vec3[shape.vertexCount], normalBuf, backTransform);
+	this->normalizedShape = shape.normalized(new Vec3f[shape.vertexCount], normalBuf, backTransform);
 	this->drawMeshID = screen.addMeshShape(normalizedShape);
 	this->name = name;
 	this->count = 0;
@@ -16,7 +16,7 @@ PartFactory::PartFactory(const NormalizedShape& shape, Screen& screen, std::stri
 
 ExtendedPart* PartFactory::produce(const CFrame& cframe, double density, double friction, std::string name) const {
 	count++;
-	CFrame realCFrame = cframe.localToGlobal(backTransform);
+	CFrame realCFrame = cframe.localToGlobal(CFrame(backTransform));
 	return new ExtendedPart(normalizedShape, realCFrame, density, friction, drawMeshID, (name.empty()) ? this->name + " " + std::to_string(count) : name);
 } 
 

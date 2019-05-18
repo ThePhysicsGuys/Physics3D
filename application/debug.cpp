@@ -36,6 +36,9 @@ namespace AppDebug {
 		void logVec(Vec3 origin, Vec3 vec, VecType type) {
 			buf.add(ColoredVec(origin, vec, type));
 		}
+		void logVec(Vec3f origin, Vec3f vec, VecType type) {
+			buf.add(ColoredVec(Vec3(origin), Vec3(vec), type));
+		}
 
 		void logCFrame(CFrame frame, CFrameType type) {
 			switch(type) {

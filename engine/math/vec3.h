@@ -182,8 +182,10 @@ public:
 	}
 };
 
-template<typename P, typename N>
-Vec3Template<N> operator*(const P& factor, const Vec3Template<N>& vec) { return vec * factor; }
+template<typename N>
+Vec3Template<N> operator*(const double& factor, const Vec3Template<N>& vec) { return vec * factor; }
+template<typename N>
+Vec3Template<N> operator*(const float& factor, const Vec3Template<N>& vec) { return vec * factor; }
 
 typedef Vec3Template<double>	Vec3;
 typedef Vec3Template<float>		Vec3f;

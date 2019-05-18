@@ -29,7 +29,7 @@ int TriangleNeighbors::getNeighborIndex(int neighbor) {
 	throw "Neighbor not found in getNeighborIndex";
 }
 
-IndexedShape::IndexedShape(Vec3* vertices, const Triangle* triangles, int vertexCount, int triangleCount, TriangleNeighbors * neighborBuf) : Shape(vertices, triangles, vertexCount, triangleCount), neighbors(neighborBuf) {}
+IndexedShape::IndexedShape(Vec3f* vertices, const Triangle* triangles, int vertexCount, int triangleCount, TriangleNeighbors * neighborBuf) : Shape(vertices, triangles, vertexCount, triangleCount), neighbors(neighborBuf) {}
 
 void fillNeighborBuf(const Triangle* triangles, int triangleCount, TriangleNeighbors* neighborBuf) {
 	for(int i = 0; i < triangleCount; i++) {

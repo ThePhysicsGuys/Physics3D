@@ -1,12 +1,12 @@
 #include "shapeBuilder.h"
 
-ShapeBuilder::ShapeBuilder(Vec3 * vertBuf, Triangle* triangleBuf, int vertexCount, int triangleCount, TriangleNeighbors* neighborBuf)
+ShapeBuilder::ShapeBuilder(Vec3f * vertBuf, Triangle* triangleBuf, int vertexCount, int triangleCount, TriangleNeighbors* neighborBuf)
 	: vertexBuf(vertBuf), triangleBuf(triangleBuf), vertexCount(vertexCount), triangleCount(triangleCount), neighborBuf(neighborBuf) {
 	fillNeighborBuf(triangleBuf, triangleCount, neighborBuf);
 }
 
 
-void ShapeBuilder::addPoint(Vec3 point, int oldTriangleIndex) {
+void ShapeBuilder::addPoint(Vec3f point, int oldTriangleIndex) {
 	/* To add point:
 	Add point to vertex buffer
 	Remove triangle that point replaces
@@ -57,5 +57,5 @@ Shape ShapeBuilder::toShape() const {
 }
 
 IndexedShape ShapeBuilder::toIndexedShape() const {
-	return IndexedShape{vertexBuf, triangleBuf, vertexCount, triangleCount, neighborBuf};
+	return IndexedShape(vertexBuf, triangleBuf, vertexCount, triangleCount, neighborBuf);
 }

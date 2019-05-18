@@ -65,14 +65,14 @@ struct Face {
 
 Shape reorderLists(const std::vector<Vec3>& positions, const std::vector<Vec3>& normals, const std::vector<Vec2>& uvs, const std::vector<Face>& faces, Flags flags)	{
 	Triangle* triangleArray = nullptr;
-	Vec3* positionArray = nullptr;
+	Vec3f* positionArray = nullptr;
 	Vec3* normalArray = nullptr;
 	Vec2* uvArray = nullptr;
 
 	// Positions
-	positionArray = new Vec3[positions.size()];
+	positionArray = new Vec3f[positions.size()];
 	for (int i = 0; i < positions.size(); i++) {
-		positionArray[i] = positions[i];
+		positionArray[i] = Vec3f(positions[i]);
 	}
 
 	triangleArray = new Triangle[faces.size()];
@@ -185,7 +185,7 @@ void saveObj(std::string filename, Shape shape) {
 
 	output.open(filename);
 
-	for (Vec3 vertex : shape.iterVertices()) {
+	for (Vec3f vertex : shape.iterVertices()) {
 		output << "v " << vertex.x << " " << vertex.y << " " << vertex.z << std::endl;
 	}
 

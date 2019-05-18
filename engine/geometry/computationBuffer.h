@@ -7,7 +7,7 @@ struct ComputationBuffers;
 #include "intersection.h"
 
 struct ComputationBuffers {
-	Vec3* vertBuf;
+	Vec3f* vertBuf;
 	Triangle* triangleBuf;
 	TriangleNeighbors* neighborBuf;
 	EdgePiece* edgeBuf;

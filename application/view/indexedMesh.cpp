@@ -5,7 +5,7 @@
 IndexedMesh::IndexedMesh(const Shape& shape) : AbstractMesh(), vertexCount(shape.vertexCount), triangleCount(shape.triangleCount) {
 	double* vertices = new double[shape.vertexCount * 3];
 	for(int i = 0; i < vertexCount; i++) {
-		Vec3 vertex = shape[i];
+		Vec3f vertex = shape[i];
 		vertices[i * 3] = vertex.x;
 		vertices[i * 3 + 1] = vertex.y;
 		vertices[i * 3 + 2] = vertex.z;

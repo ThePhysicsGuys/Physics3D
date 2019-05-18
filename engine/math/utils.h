@@ -22,8 +22,9 @@ inline N lineSurfaceIntersection(Vec3Template<N> relativePos, Vec3Template<N> r,
 /*
 	see rayTriangleIntersection
 */
+template<typename T>
 struct RayIntersection {
-	double d, s, t;
+	T d, s, t;
 	inline bool lineIntersectsTriangle() { return s >= 0 && t >= 0 && s + t <= 1; }
 	inline bool rayIntersectsTriangle() { return d >= 0 && lineIntersectsTriangle(); }
 };
@@ -42,20 +43,21 @@ d = -R0 * u%v / n*P
 s = -P * R0%u / n*P
 t =  P * R0%v / n*P
 */
-inline RayIntersection rayTriangleIntersection(Vec3 point, Vec3 ray, Vec3 v0, Vec3 v1, Vec3 v2) {
-	Vec3 u = v1 - v0;
-	Vec3 v = v2 - v0;
+template<typename T>
+inline RayIntersection<T> rayTriangleIntersection(Vec3Template<T> point, Vec3Template<T> ray, Vec3Template<T> v0, Vec3Template<T> v1, Vec3Template<T> v2) {
+	Vec3Template<T> u = v1 - v0;
+	Vec3Template<T> v = v2 - v0;
 
-	Vec3 n = u%v;
-	Vec3 surfacePos = v0;
+	Vec3Template<T> n = u%v;
+	Vec3Template<T> surfacePos = v0;
 
-	Vec3 relPoint = point - v0;
+	Vec3Template<T> relPoint = point - v0;
 
-	double d = -relPoint * n / (n*ray); // lineSurfaceIntersection(relPoint, P, n);
-	double s = -ray * (relPoint%u) / (n*ray);
-	double t = ray * (relPoint%v) / (n*ray);
+	T d = -relPoint * n / (n*ray); // lineSurfaceIntersection(relPoint, P, n);
+	T s = -ray * (relPoint%u) / (n*ray);
+	T t = ray * (relPoint%v) / (n*ray);
 
-	return RayIntersection{d, s, t};
+	return RayIntersection<T>{d, s, t};
 }
 
 /*
@@ -64,6 +66,10 @@ inline RayIntersection rayTriangleIntersection(Vec3 point, Vec3 ray, Vec3 v0, Ve
 	(planeNormal * relativePoint)*(planeNormal * relativePoint) / planeNormal.lengthSquared();
 */
 inline double pointToPlaneDistanceSquared(Vec3 planeNormal, Vec3 relativePoint) {
+	return (planeNormal * relativePoint)*(planeNormal * relativePoint) / planeNormal.lengthSquared();
+}
+
+inline float pointToPlaneDistanceSquared(Vec3f planeNormal, Vec3f relativePoint) {
 	return (planeNormal * relativePoint)*(planeNormal * relativePoint) / planeNormal.lengthSquared();
 }
 

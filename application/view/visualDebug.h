@@ -38,7 +38,7 @@ void renderDebugField(Vec2 dimension, Font* font, const char* varName, T value, 
 	std::stringstream ss;
 	ss.precision(4);
 	ss << varName << ": " << value << unit;
-	font->render(ss.str().c_str(), Vec2(-dimension.x / dimension.y * 0.99, (1 - fieldIndex * 0.05) * 0.95), Vec3f(1, 1, 1), 0.001);
+	font->render(ss.str().c_str(), Vec2(-dimension.x / dimension.y * 0.99, (1 - fieldIndex * 0.05) * 0.95), Vec3(1, 1, 1), 0.001);
 	fieldIndex++;
 }
 

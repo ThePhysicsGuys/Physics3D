@@ -6,6 +6,7 @@
 #include "../engine/math/vec3.h"
 #include "../engine/math/vec4.h"
 #include "../engine/templateUtils.h"
+#include "../engine/math/cframe.h"
 
 template<typename Num1, typename Num2, typename Tol, IS_ARITHMETIC(Num1), IS_ARITHMETIC(Num2)>
 bool tolerantEquals(const Num1& first, const Num2& second, Tol tolerance) {

@@ -9,7 +9,7 @@ typedef Mat4Template<long long>	Mat4l;
 
 #include "vec3.h"
 #include "vec4.h"
-#include "cframe.h"
+#include "mat3.h"
 
 template<typename N>
 struct Mat4Template {
@@ -224,8 +224,6 @@ struct Mat4Template {
 	Vec3Template<N> getTranslation() const {
 		return Vec3Template<N>(m30, m31, m32);
 	}
-
-	CFrame asCFrame() const;
 
 	/*template<typename N>
 	Mat4Template<M> Mat4Template<M>() const {
