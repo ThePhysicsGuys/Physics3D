@@ -58,15 +58,21 @@ inline int furthestIndexInDirection(Vec3* vertices, int vertexCount, Vec3 direct
 inline MinkPoint getSupport(const Shape& first, const Shape& second, const Vec3f& searchDirection) {
 	int furthestIndex1 = first.furthestIndexInDirection(searchDirection);
 	int furthestIndex2 = second.furthestIndexInDirection(-searchDirection);
-	return MinkPoint{first[furthestIndex1] - second[furthestIndex2], furthestIndex1, furthestIndex2 };
+	return MinkPoint{first[furthestIndex1] - second[furthestIndex2], first[furthestIndex1], second[furthestIndex2] };
 }
 
 inline MinkPoint getSupport(const Shape& first, const Shape& second, const CFramef& transform, const Vec3f& searchDirection) {
-	int furthestIndex1 = first.furthestIndexInDirection(searchDirection);
+	/*int furthestIndex1 = first.furthestIndexInDirection(searchDirection);
 	Vec3f transformedSearchDirection = transform.relativeToLocal(searchDirection);
 	int furthestIndex2 = second.furthestIndexInDirection(-transformedSearchDirection);
 	Vec3f secondVertex = transform.localToGlobal(second[furthestIndex2]);
-	return MinkPoint{first[furthestIndex1] - secondVertex, furthestIndex1, furthestIndex2};
+	return MinkPoint{first[furthestIndex1] - secondVertex, first[furthestIndex1], secondVertex};*/
+
+	Vec3f furthest1 = first.furthestInDirection(searchDirection);
+	Vec3f transformedSearchDirection = transform.relativeToLocal(searchDirection);
+	Vec3f furthest2 = second.furthestInDirection(-transformedSearchDirection);
+	Vec3f secondVertex = transform.localToGlobal(furthest2);
+	return MinkPoint{ furthest1 - secondVertex, furthest1, secondVertex };
 }
 
 bool runGJK(const Shape& first, const Shape& second, const Vec3f& initialSearchDirection, Tetrahedron& simplex) {
@@ -370,8 +376,8 @@ bool runEPA(const Shape& first, const Shape& second, const Tetrahedron& s, Vec3f
 			float w = (d00 * d21 - d01 * d20) / denom;
 			float u = 1.0 - v - w;
 
-			Vec3f A0 = first[inds[0][0]], A1 = first[inds[1][0]], A2 = first[inds[2][0]];
-			Vec3f B0 = second[inds[0][1]], B1 = second[inds[1][1]], B2 = second[inds[2][1]];
+			Vec3f A0 = inds[0][0], A1 = inds[1][0], A2 = inds[2][0];
+			Vec3f B0 = inds[0][1], B1 = inds[1][1], B2 = inds[2][1];
 
 			Vec3f avgFirst = A0 * u + A1 * v + A2 * w;
 			Vec3f avgSecond = B0 * u + B1 * v + B2 * w;
@@ -435,13 +441,14 @@ bool runEPATransformed(const Shape& first, const Shape& second, const Tetrahedro
 			float w = (d00 * d21 - d01 * d20) / denom;
 			float u = 1.0 - v - w;
 
-			Vec3f A0 = first[inds[0][0]], A1 = first[inds[1][0]], A2 = first[inds[2][0]];
-			Vec3f B0 = second[inds[0][1]], B1 = second[inds[1][1]], B2 = second[inds[2][1]];
+			Vec3f A0 = inds[0][0], A1 = inds[1][0], A2 = inds[2][0];
+			Vec3f B0 = inds[0][1], B1 = inds[1][1], B2 = inds[2][1];
 			
 			Vec3f avgFirst = A0 * u + A1 * v + A2 * w;
 			Vec3f avgSecond = B0 * u + B1 * v + B2 * w;
 
-			intersection = (avgFirst + relativeCFrame.localToGlobal(avgSecond)) / 2;
+			// intersection = (avgFirst + relativeCFrame.localToGlobal(avgSecond)) / 2;
+			intersection = (avgFirst + avgSecond) / 2;
 			return true;
 		}
 	}

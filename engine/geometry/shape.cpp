@@ -53,40 +53,29 @@ Triangle Triangle::leftShift() const {
 	return Triangle { secondIndex, thirdIndex, firstIndex };
 }
 
-Shape::Shape() : vertices(nullptr), 
-				 triangles(nullptr), 
-	 			 normals(nullptr),
-				 uvs(nullptr),
-				 vertexCount(0), 
-				 triangleCount(0) {}
+Shape::Shape() :
+	Shape(nullptr, nullptr, nullptr, nullptr, 0, 0) {}
 
-Shape::Shape(Vec3f* vertices, const Triangle* triangles, int vertexCount, int triangleCount) : vertices(vertices), 
-																							  triangles(triangles), 
-																							  vertexCount(vertexCount), 
-																							  triangleCount(triangleCount),
-																							  normals(nullptr),
-																							  uvs(nullptr) {}
+Shape::Shape(Vec3f* vertices, const Triangle* triangles, int vertexCount, int triangleCount) :
+	Shape(vertices, nullptr, nullptr, triangles, vertexCount, triangleCount) {}
 
-Shape::Shape(Vec3f* vertices, Vec3* normals, Vec2* uvs, const Triangle* triangles, int vertexCount, int triangleCount) :	vertices(vertices), 
-																														normals(normals), 
-																														uvs(uvs), 
-																														triangles(triangles), 
-																														vertexCount(vertexCount), 
-																														triangleCount(triangleCount) {}
+Shape::Shape(Vec3f* vertices, Vec3* normals, Vec2* uvs, const Triangle* triangles, int vertexCount, int triangleCount) :
+#ifdef __AVX__
+	vertices(vertices, vertexCount),
+#else
+	vertices(vertices),
+#endif
+	normals(normals), 
+	uvs(uvs), 
+	triangles(triangles), 
+	vertexCount(vertexCount), 
+	triangleCount(triangleCount) {}
 
-Shape::Shape(Vec3f* vertices, Vec2* uvs, const Triangle* triangles, int vertexCount, int triangleCount) : vertices(vertices),
-																										 uvs(uvs), 
-																										 triangles(triangles),
-																										 vertexCount(vertexCount), 
-																										 triangleCount(triangleCount),
-																										 normals(nullptr) {}
+Shape::Shape(Vec3f* vertices, Vec2* uvs, const Triangle* triangles, int vertexCount, int triangleCount) :
+	Shape(vertices, nullptr, uvs, triangles, vertexCount, triangleCount) {}
 
-Shape::Shape(Vec3f* vertices, Vec3* normals, const Triangle* triangles, int vertexCount, int triangleCount) : vertices(vertices), 
-																											 normals(normals), 
-																											 triangles(triangles), 
-																											 vertexCount(vertexCount), 
-																											 triangleCount(triangleCount),
-																											 uvs(nullptr) {}
+Shape::Shape(Vec3f* vertices, Vec3* normals, const Triangle* triangles, int vertexCount, int triangleCount) : 
+	Shape(vertices, normals, nullptr, triangles, vertexCount, triangleCount) {}
 
 NormalizedShape Shape::normalized(Vec3f* vecBuf, Vec3* normalBuf, CFramef& backTransformation) const {
 	backTransformation = getInertialEigenVectors();
@@ -304,6 +293,149 @@ bool Shape::containsPoint(Vec3f point) const {
 	return isExiting;
 }
 
+
+
+#ifdef __AVX__
+#include <immintrin.h> // I know I don't have to include it, but I'm sending a message!
+#ifdef _MSC_VER
+inline uint32_t __builtin_ctz(uint32_t x) {
+	unsigned long ret;
+	_BitScanForward(&ret, x);
+	return (int)ret;
+}
+#endif
+inline __m256i _mm256_blendv_epi32(__m256i a, __m256i b, __m256 mask) {
+	return _mm256_castps_si256(
+		_mm256_blendv_ps(
+			_mm256_castsi256_ps(a),
+			_mm256_castsi256_ps(b),
+			mask
+		)
+	);
+}
+
+inline uint32_t mm256_extract_epi32_var_indx(__m256i vec, int i)
+{
+	__m128i indx = _mm_cvtsi32_si128(i);
+	__m256i val = _mm256_permutevar8x32_epi32(vec, _mm256_castsi128_si256(indx));
+	return         _mm_cvtsi128_si32(_mm256_castsi256_si128(val));
+}
+
+int Shape::furthestIndexInDirection(const Vec3f& direction) const {
+	/*float bestDot = vertices[0] * direction;
+	int bestVertexIndex = 0;
+	for(int i = 1; i < vertexCount; i++) {
+		float newD = vertices[i] * direction;
+		if(newD > bestDot) {
+			bestDot = newD;
+			bestVertexIndex = i;
+		}
+	}
+
+	return bestVertexIndex;*/
+
+	__m256 dx = _mm256_set1_ps(direction.x);
+	__m256 dy = _mm256_set1_ps(direction.y);
+	__m256 dz = _mm256_set1_ps(direction.z);
+
+	const ParallelVec3& firstBlock = vertices.vecs[0];
+	__m256 xTxd = _mm256_mul_ps(dx, firstBlock.xvalues);
+	__m256 yTyd = _mm256_mul_ps(dy, firstBlock.yvalues);
+	__m256 zTzd = _mm256_mul_ps(dz, firstBlock.zvalues);
+
+	__m256 bestDot = _mm256_add_ps(_mm256_add_ps(xTxd, yTyd), zTzd);
+	__m256i bestIndices = _mm256_set1_epi32(0);
+
+	for(int blockI = 1; blockI < vertices.blockCount(); blockI++) {
+		const ParallelVec3& block = vertices.vecs[blockI];
+		__m256i indices = _mm256_set1_epi32(blockI);
+
+		__m256 xTxd = _mm256_mul_ps(dx, block.xvalues);
+		__m256 yTyd = _mm256_mul_ps(dy, block.yvalues);
+		__m256 zTzd = _mm256_mul_ps(dz, block.zvalues);
+		__m256 dot = _mm256_add_ps(_mm256_add_ps(xTxd, yTyd), zTzd);
+
+		__m256 whichAreMax = _mm256_cmp_ps(dot, bestDot, _CMP_GT_OQ); // Greater than, false if dot == NaN
+		bestDot = _mm256_blendv_ps(bestDot, dot, whichAreMax);
+		bestIndices = _mm256_blendv_epi32(bestIndices, indices, whichAreMax);
+	}
+	// find max of our 8 left candidates
+	__m256 swap4x4 = _mm256_permute2f128_ps(bestDot, bestDot, 1);
+	__m256 bestDotInternalMax = _mm256_max_ps(bestDot, swap4x4);
+	__m256 swap2x2 = _mm256_permute_ps(bestDotInternalMax, 0b01001110);
+	bestDotInternalMax = _mm256_max_ps(bestDotInternalMax, swap2x2);
+	__m256 swap1x1 = _mm256_permute_ps(bestDotInternalMax, 0b10110001);
+	bestDotInternalMax = _mm256_max_ps(bestDotInternalMax, swap1x1);
+
+	__m256 compare = _mm256_cmp_ps(bestDotInternalMax, bestDot, _CMP_EQ_OQ);
+	uint32_t mask = _mm256_movemask_ps(compare);
+	uint32_t index = __builtin_ctz(mask);
+	uint32_t block = mm256_extract_epi32_var_indx(bestIndices, index);
+	return block * 8 + index;
+}
+
+Vec3f Shape::furthestInDirection(const Vec3f& direction) const {
+	__m256 dx = _mm256_set1_ps(direction.x);
+	__m256 dy = _mm256_set1_ps(direction.y);
+	__m256 dz = _mm256_set1_ps(direction.z);
+
+	const ParallelVec3& firstBlock = vertices.vecs[0];
+
+	__m256 bestX = firstBlock.xvalues;
+	__m256 bestY = firstBlock.yvalues;
+	__m256 bestZ = firstBlock.zvalues;
+
+	__m256 xTxd = _mm256_mul_ps(dx, bestX);
+	__m256 yTyd = _mm256_mul_ps(dy, bestY);
+	__m256 zTzd = _mm256_mul_ps(dz, bestZ);
+
+	__m256 bestDot = _mm256_add_ps(_mm256_add_ps(xTxd, yTyd), zTzd);
+
+	for (int blockI = 1; blockI < vertices.blockCount(); blockI++) {
+		const ParallelVec3& block = vertices.vecs[blockI];
+		__m256i indices = _mm256_set1_epi32(blockI);
+
+		__m256 xVal = block.xvalues;
+		__m256 yVal = block.yvalues;
+		__m256 zVal = block.zvalues;
+
+		__m256 xTxd = _mm256_mul_ps(dx, xVal);
+		__m256 yTyd = _mm256_mul_ps(dy, yVal);
+		__m256 zTzd = _mm256_mul_ps(dz, zVal);
+		__m256 dot = _mm256_add_ps(_mm256_add_ps(xTxd, yTyd), zTzd);
+
+		__m256 whichAreMax = _mm256_cmp_ps(dot, bestDot, _CMP_GT_OQ); // Greater than, false if dot == NaN
+		bestDot = _mm256_blendv_ps(bestDot, dot, whichAreMax);
+		bestX = _mm256_blendv_ps(bestX, xVal, whichAreMax);
+		bestY = _mm256_blendv_ps(bestY, yVal, whichAreMax);
+		bestZ = _mm256_blendv_ps(bestZ, zVal, whichAreMax);
+	}
+
+	// now we find the max of the remaining 8 elements
+	__m256 swap4x4 = _mm256_permute2f128_ps(bestDot, bestDot, 1);
+	__m256 bestDotInternalMax = _mm256_max_ps(bestDot, swap4x4);
+	__m256 swap2x2 = _mm256_permute_ps(bestDotInternalMax, 0b01001110);
+	bestDotInternalMax = _mm256_max_ps(bestDotInternalMax, swap2x2);
+	__m256 swap1x1 = _mm256_permute_ps(bestDotInternalMax, 0b10110001);
+	bestDotInternalMax = _mm256_max_ps(bestDotInternalMax, swap1x1);
+
+	__m256 compare = _mm256_cmp_ps(bestDotInternalMax, bestDot, _CMP_EQ_OQ);
+	uint32_t mask = _mm256_movemask_ps(compare);
+	uint32_t index = __builtin_ctz(mask);
+	__m256i indxVec = _mm256_castsi128_si256(_mm_cvtsi32_si128(index));
+
+	bestX = _mm256_permutevar8x32_ps(bestX, indxVec);
+	bestY = _mm256_permutevar8x32_ps(bestY, indxVec);
+	bestZ = _mm256_permutevar8x32_ps(bestZ, indxVec);
+
+	float furthestX = _mm_cvtss_f32(_mm256_castps256_ps128(bestX));
+	float furthestY = _mm_cvtss_f32(_mm256_castps256_ps128(bestY));
+	float furthestZ = _mm_cvtss_f32(_mm256_castps256_ps128(bestZ));
+
+	return Vec3f(furthestX, furthestY, furthestZ);
+}
+
+#else
 int Shape::furthestIndexInDirection(const Vec3f& direction) const {
 	float bestDot = vertices[0] * direction;
 	int bestVertexIndex = 0;
@@ -321,9 +453,9 @@ int Shape::furthestIndexInDirection(const Vec3f& direction) const {
 Vec3f Shape::furthestInDirection(const Vec3f& direction) const {
 	float bestDot = vertices[0] * direction;
 	Vec3f bestVertex = vertices[0];
-	for(int i = 1; i < vertexCount; i++) {
+	for (int i = 1; i < vertexCount; i++) {
 		float newD = vertices[i] * direction;
-		if(newD > bestDot) {
+		if (newD > bestDot) {
 			bestDot = newD;
 			bestVertex = vertices[i];
 		}
@@ -331,6 +463,10 @@ Vec3f Shape::furthestInDirection(const Vec3f& direction) const {
 
 	return bestVertex;
 }
+#endif
+
+
+
 
 ComputationBuffers buffers(1000, 2000);
 bool Shape::intersects(const Shape& other, Vec3f& intersection, Vec3f& exitVector, const Vec3& centerConnection) const {

@@ -230,3 +230,9 @@ TEST_CASE(badCollissions) {
 	Vec3f exitVec;
 	dominoI.intersects(dominoJ, intersection, exitVec, Vec3(1, 0, 0));
 }
+
+TEST_CASE(testGetFurthestPointInDirection) {
+	for (Vec3f vertex : icosahedron.iterVertices()) {
+		ASSERT(icosahedron.furthestInDirection(vertex) == vertex);
+	}
+}

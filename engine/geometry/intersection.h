@@ -1,18 +1,20 @@
 #pragma once
 
+
+#include "../math/vec3.h"
+
 struct Simplex;
 
 struct MinkowskiPointIndices {
-	int indices[2];
+	Vec3f indices[2];
 
-	int& operator[](int i) { return indices[i]; }
-	bool operator==(const MinkowskiPointIndices& other) const {
+	Vec3f& operator[](int i) { return indices[i]; }
+	/*bool operator==(const MinkowskiPointIndices& other) const {
 		return this->indices[0] == other.indices[0] &&
 			this->indices[1] == other.indices[1];
-	}
+	}*/
 };
 
-#include "../math/vec3.h"
 #include "convexShapeBuilder.h"
 #include "computationBuffer.h"
 #include "../math/utils.h"
@@ -43,8 +45,10 @@ struct Simplex {
 
 struct MinkPoint {
 	Vec3f p;
-	int originFirst;
-	int originSecond;
+	Vec3f originFirst;
+	Vec3f originSecond;
+	/*int originFirst;
+	int originSecond;*/
 };
 
 struct Tetrahedron {

@@ -12,6 +12,9 @@ struct Shape;
 #include "boundingBox.h"
 #include <memory>
 
+#ifdef __AVX__
+#include "../datastructures/parallelVector.h"
+#endif
 
 struct Sphere {
 	Vec3 origin;
@@ -36,6 +39,18 @@ struct Triangle {
 	};
 };
 
+
+struct VertexIterFactory {
+	const Vec3f* verts;
+	int size;
+	inline const Vec3f* begin() const {
+		return verts;
+	};
+	inline const Vec3f* end() const {
+		return verts + size;
+	};
+};
+
 struct Shape {
 	struct TriangleIter {
 		const Triangle* first;
@@ -48,18 +63,13 @@ struct Shape {
 		};
 	};
 
-	struct VertexIter {
-		Vec3f* first;
-		int size;
-		inline Vec3f* begin() const {
-			return first; 
-		};
-		inline Vec3f* end() const { 
-			return first + size;
-		};
-	};
+	
 private:
+#ifdef __AVX__
+	AOSOAVec3fBuf vertices;
+#else
 	Vec3f* vertices;
+#endif
 public:
 	std::shared_ptr<Vec3> normals;
 	std::shared_ptr<Vec2> uvs;
@@ -108,9 +118,15 @@ public:
 	inline TriangleIter iterTriangles() const { 
 		return TriangleIter { triangles, triangleCount };
 	};
-	inline VertexIter iterVertices() const { 
-		return VertexIter { vertices, vertexCount };
+#ifdef __AVX__
+	inline ParallelVecIterFactory iterVertices() const {
+		return ParallelVecIterFactory{vertices, vertexCount};
 	};
+#else
+	inline VertexIterFactory iterVertices() const {
+		return VertexIterFactory{ vertices, vertexCount };
+	};
+#endif
 };
 
 struct CenteredShape : public Shape {
