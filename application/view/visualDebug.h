@@ -63,7 +63,7 @@ template<size_t N, typename Unit, typename EnumType>
 PieChart toPieChart(HistoricTally<N, Unit, EnumType>& tally, const char* title, Vec2f piePosition, float pieSize) {
 	auto sum = 0;
 	for (auto entry : tally.history) {
-		sum += entry.sum();
+		sum += int(entry.sum());
 	}
 	auto results = tally.history.avg();
 	Unit avgTotal = (tally.history.size() != 0) ? (sum / tally.history.size()) : 0;

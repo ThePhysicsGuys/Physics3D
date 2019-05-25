@@ -33,7 +33,7 @@ public:
 	std::vector<IndexedMesh*> meshes;
 	World<ExtendedPart>* world;
 	Vec2 dimension;
-	double aspect;
+	float aspect;
 	Camera camera;
 	EventHandler eventHandler;
 	Properties properties;

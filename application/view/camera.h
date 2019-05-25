@@ -1,6 +1,6 @@
 #pragma once
 
-class Camera;
+struct Camera;
 class Screen;
 
 #include "../../engine/math/vec3.h"
@@ -12,7 +12,7 @@ class Screen;
 
 #include <cmath>
 
-class Camera {
+struct Camera {
 public:
 	CFrame cframe;
 	double speed;
@@ -36,5 +36,4 @@ public:
 
 	ExtendedPart* attachment = nullptr;
 	void update();
-
 };

@@ -38,9 +38,9 @@ Font::Font(FontShader& shader, std::string font) : shader(shader) {
 
 		Character character = {
 			texture,
-			Vec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
-			Vec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
-			face->glyph->advance.x
+			Vec2(double(face->glyph->bitmap.width), double(face->glyph->bitmap.rows)),
+			Vec2(double(face->glyph->bitmap_left),  double(face->glyph->bitmap_top)),
+			unsigned int(face->glyph->advance.x)
 		};
 
 		characters.insert(std::pair<char, Character>(c, character));
@@ -109,21 +109,21 @@ void Font::render(const std::string& text, double x, double y, Vec4 color, doubl
 	std::string::const_iterator iterator;
 	for (iterator = text.begin(); iterator != text.end(); iterator++) {
 		Character character = characters[*iterator];
-		float descend = character.size.y - character.bearing.y;
-		float xpos = x + character.bearing.x * size;
-		float ypos = y - descend * size;
-
-		float w = character.size.x * size;
-		float h = character.size.y * size;
+		double descend = character.size.y - character.bearing.y;
+		double xpos = x + character.bearing.x * size;
+		double ypos = y - descend * size;
+		
+		double w = character.size.x * size;
+		double h = character.size.y * size;
 		
 		float vertices[6][4] = {
-			{ xpos,     ypos + h,	0, 0 },
-			{ xpos,     ypos    ,	0, 1 },
-			{ xpos + w, ypos    ,	1, 1 },
-
-			{ xpos,     ypos + h,	0, 0 },
-			{ xpos + w, ypos    ,   1, 1 },
-			{ xpos + w, ypos + h,   1, 0 }
+			{ float(xpos	), float(ypos + h),	0.0f, 0.0f },
+			{ float(xpos	), float(ypos    ),	0.0f, 1.0f },
+			{ float(xpos + w), float(ypos    ),	1.0f, 1.0f },
+												
+			{ float(xpos	), float(ypos + h),	0.0f, 0.0f },
+			{ float(xpos + w), float(ypos    ), 1.0f, 1.0f },
+			{ float(xpos + w), float(ypos + h), 1.0f, 0.0f }
 		};
 
 		character.texture->bind();

@@ -1,4 +1,4 @@
-#include "loader.h"
+/*#include "loader.h"
 
 #include <vector>
 #include <string>
@@ -43,7 +43,7 @@ struct Face {
 		Group group = Group();
 
 		std::vector<std::string> tokens = split(line, '/');
-		int length = tokens.size();
+		size_t length = tokens.size();
 
 		// Positions
 		group.position = std::stoi(tokens[0]) - 1;
@@ -103,7 +103,7 @@ Shape reorderLists(const std::vector<Vec3>& positions, const std::vector<Vec3>& 
 		}
 	}
 
-	return Shape(positionArray, normalArray, uvArray, triangleArray, positions.size(), faces.size());
+	return Shape(positionArray, normalArray, uvArray, triangleArray, (int) positions.size(), (int) faces.size());
 }
 
 Shape loadObj(std::string filename) {
@@ -129,7 +129,7 @@ Shape loadObj(std::istream& stream) {
 		std::vector<std::string> tokens = split(line, ' ');
 
 		if (tokens[0] == "v") {
-			Vec3 vertex = Vec3 (
+			Vec3 vertex = Vec3(
 				stod(tokens[1]),
 				stod(tokens[2]),
 				stod(tokens[3])
@@ -145,7 +145,7 @@ Shape loadObj(std::istream& stream) {
 			faces.push_back(face);
 
 			if (tokens.size() > 4) {
-				Face face = Face(
+				Face face = Face (
 					tokens[1],
 					tokens[3],
 					tokens[4]
@@ -174,7 +174,7 @@ Shape loadObj(std::istream& stream) {
 	return reorderLists(vertices, normals, uvs, faces, flags);
 }
 
-void saveObj(std::string filename, Shape shape) {
+void saveObj(std::string filename, const Shape& shape) {
 	struct stat buffer;
 
 	if (stat(filename.c_str(), &buffer) != -1) {
@@ -182,7 +182,6 @@ void saveObj(std::string filename, Shape shape) {
 	}
 
 	std::ofstream output;
-
 	output.open(filename);
 
 	for (Vec3 vertex : shape.iterVertices()) {
@@ -224,3 +223,135 @@ void saveObj(std::string filename, Shape shape) {
 
 	output.close();
 }
+
+void writeCharBuffer(std::ostream& output, char const * buffer, int size) {
+	for (int i = 0; i < size; i++) {
+		output.write((char*)(buffer + i), 1);
+	}
+}
+
+template<typename T>
+void write(std::ostream& output, T& value) {
+	char const * v = reinterpret_cast<char const *>(&value);
+	writeCharBuffer(output, v, sizeof(T));
+}
+
+template<typename T>
+T read(std::istream& input) {
+	char* buffer = (char*) alloca(sizeof(T));
+	input.read(buffer, sizeof(T));
+	return *reinterpret_cast<T*>(buffer);
+}
+
+Shape loadBinaryObj(std::istream& input) {
+	char flag = read<char>(input);
+	int vertexCount = read<int>(input);
+	int triangleCount = read<int>(input);
+
+	char V = 0;
+	char VN = 1;
+	char VT = 2;
+	char VNT = 3;
+
+	Vec3* vertices = new Vec3[vertexCount];
+	for (int i = 0; i < vertexCount; i++) {
+		vertices[i] = read<Vec3>(input);
+	}
+
+	Vec3* normals = nullptr;
+	if (flag == VN || flag == VNT) {
+		normals = new Vec3[vertexCount];
+		for (int i = 0; i < vertexCount; i++) {
+			normals[i] = read<Vec3>(input);
+		}
+	}
+
+	Vec2* uvs = nullptr;
+	if (flag == VT || flag == VNT) {
+		uvs = new Vec2[vertexCount];
+		for (int i = 0; i < vertexCount; i++) {
+			uvs[i] = read<Vec2>(input);
+		}
+	}
+
+	Triangle* triangles = new Triangle[triangleCount];
+	for (int i = 0; i < triangleCount; i++) {
+		triangles[i] = read<Triangle>(input);
+	}
+
+	return Shape(vertices, normals, uvs, triangles, vertexCount, triangleCount);
+}
+
+Shape loadBinaryObj(std::string filename) {
+	std::ifstream input;
+	input.open(filename);
+
+	Shape shape = loadBinaryObj(input);
+
+	input.close();
+
+	return shape;
+}
+
+
+void saveBinaryObj(std::string filename, const Shape& shape) {
+	struct stat buffer;
+
+	if (stat(filename.c_str(), &buffer) != -1) {
+		Log::warn("File already exists: %s", filename.c_str());
+	}
+
+	std::ofstream output;
+
+	output.open(filename, std::ios::binary | std::ios::out);
+
+	char V = 0;
+	char VN = 1;
+	char VT = 2;
+	char VNT = 3;
+
+	char flag = V;
+
+	if (shape.uvs && shape.normals) {
+		flag = VNT;
+	} else if (shape.uvs) {
+		flag = VT;
+	} else if (shape.normals) {
+		flag = VN;
+	}
+	
+	write<char>(output, flag);
+	write<const int>(output, shape.vertexCount);
+	write<const int>(output, shape.triangleCount);
+
+	for (Vec3f vertex : shape.iterVertices()) {
+		write<float>(output, vertex.x);
+		write<float>(output, vertex.y);
+		write<float>(output, vertex.z);
+	}
+	
+	if (shape.normals) {
+		for (int i = 0; i < shape.vertexCount; i++) {
+			Vec3f normal = shape.normals.get()[i];
+			write<float>(output, normal.x);
+			write<float>(output, normal.y);
+			write<float>(output, normal.z);
+		}
+	}
+
+	if (shape.uvs) {
+		for (int i = 0; i < shape.vertexCount; i++) {
+			Vec2f uv = shape.uvs.get()[i];
+			write<float>(output, uv.x);
+			write<float>(output, uv.y);
+		}
+	}
+
+	for (Triangle triangle : shape.iterTriangles()) {
+		for (int index : triangle.indexes) {
+			write<int>(output, index);
+		}
+	}
+
+	output.close();
+}*/

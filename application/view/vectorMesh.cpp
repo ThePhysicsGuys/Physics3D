@@ -1,7 +1,7 @@
 #include "vectorMesh.h"
 #include "../util/Log.h"
 
-VectorMesh::VectorMesh(const double* vertices, const int vertexCount, int capacity) : AbstractMesh(RenderMode::POINTS), vertexCount(vertexCount), capacity(capacity) {
+VectorMesh::VectorMesh(const double* vertices, const size_t vertexCount, size_t capacity) : AbstractMesh(RenderMode::POINTS), vertexCount(vertexCount), capacity(capacity) {
 	vertexBuffer = new VertexBuffer(vertices, capacity * 7, GL_DYNAMIC_DRAW);
 	bufferLayout.push<double>(3);
 	bufferLayout.push<double>(3);
@@ -19,7 +19,7 @@ void VectorMesh::close() {
 	vertexArray->close();
 }
 
-void VectorMesh::update(const double* vertices, const int vertexCount) {
+void VectorMesh::update(const double* vertices, const size_t vertexCount) {
 	vertexBuffer->bind();
 	this->vertexCount = vertexCount;
 	if (vertexCount > capacity) {

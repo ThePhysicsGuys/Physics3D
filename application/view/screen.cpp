@@ -1,5 +1,6 @@
 #include "screen.h"
 
+#include "../import.h"
 #include "shader.h"
 #include "indexedMesh.h"
 #include "arrayMesh.h"
@@ -221,7 +222,7 @@ void Screen::init() {
 
 
 	// Skybox init
-	sphere = new IndexedMesh(loadObj((std::istream&) std::istringstream(getResourceAsString(SPHERE_MODEL))));
+	sphere = new IndexedMesh(OBJImport::load((std::istream&) std::istringstream(getResourceAsString(SPHERE_MODEL))));
 	skybox = new BoundingBox{ -1, -1, -1, 1, 1, 1 };
 	skyboxMesh = new IndexedMesh(skybox->toShape(new Vec3[8]));
 	skyboxTexture = new CubeMap("../res/skybox/right.jpg", "../res/skybox/left.jpg", "../res/skybox/top.jpg", "../res/skybox/bottom.jpg", "../res/skybox/front.jpg", "../res/skybox/back.jpg");
@@ -250,7 +251,7 @@ void Screen::init() {
 	partMeshIDLabel = new Label("", 0, 0);
 
 	partAmbientSlider = new Slider(0, 0, 0, 0.999999, 0.5);
-	testSlider = new Slider(0, 0, 500, 3000, 600);
+	testSlider = new Slider(0, 0, 500, 3000, 500);
 	partVelocity = new Label("", 0, 0);
 	partAngularVelocity = new Label("", 0, 0);
 	partKineticEnergy = new Label("", 0, 0);
@@ -325,7 +326,7 @@ void Screen::init() {
 		screen.modelFrameBuffer->renderBuffer->resize(width, height);
 		screen.screenFrameBuffer->renderBuffer->resize(width, height);
 		screen.dimension = Vec2(width, height);
-		screen.aspect = ((double) width) / ((double) height);
+		screen.aspect = ((float) width) / ((float) height);
 	});
 
 	// Temp
@@ -370,12 +371,12 @@ void Screen::update() {
 	// Update render uniforms
 	float size = 10;
 	// projectionMatrix = ortho(-size*aspect, size*aspect, -size, size, -1000, 1000);
-	projectionMatrix = perspective(1.0, aspect, 0.01, 1000000.0);
-	orthoMatrix = ortho(-aspect, aspect, -1, 1, -1000, 1000);
+	projectionMatrix = perspective(1.0f, aspect, 0.01f, 1000000.0f);
+	orthoMatrix = ortho(-aspect, aspect, -1.0f, 1.0f, -1000.0f, 1000.0f);
 	//orthoMatrix = ortho(0, aspect, 0, 1, -1000, 1000);
 	rotatedViewMatrix = camera.cframe.asMat4f().getRotation();
-	viewMatrix = rotatedViewMatrix.translate(-camera.cframe.position.x, -camera.cframe.position.y, -camera.cframe.position.z);
-	viewPosition = Vec3f(camera.cframe.position.x, camera.cframe.position.y, camera.cframe.position.z);
+	viewMatrix = rotatedViewMatrix.translate(float(-camera.cframe.position.x), float(-camera.cframe.position.y), float(-camera.cframe.position.z));
+	viewPosition = Vec3f(float(camera.cframe.position.x), float(camera.cframe.position.y), float(camera.cframe.position.z));
 
 
 	// Update picker
@@ -491,7 +492,8 @@ void Screen::refresh() {
 			vecLog.add(AppDebug::ColoredVec(selectedPart->cframe.localToGlobal(corner), selectedPart->parent->getVelocityOfPoint(selectedPart->cframe.localToRelative(corner)), Debug::VELOCITY));
 		}
 	}
-		// Postprocess to screenFrameBuffer
+		
+	// Postprocess to screenFrameBuffer
 	screenFrameBuffer->bind();
 	glDisable(GL_DEPTH_TEST);
 	postProcessShader.update(modelFrameBuffer->texture);
@@ -516,7 +518,7 @@ void Screen::refresh() {
 	// Render lights
 	graphicsMeasure.mark(GraphicsProcess::LIGHTING);
 	for (Light light : lights) {
-		Mat4f transformation = Mat4f().translate(light.position).scale(0.1);
+		Mat4f transformation = Mat4f().translate(light.position).scale(0.1f);
 		basicShader.updateMaterial(Material(light.color, Vec3f(), Vec3f(), 10));
 		basicShader.updateModelMatrix(transformation);
 		skyboxMesh->render();
@@ -572,7 +574,7 @@ void Screen::refresh() {
 	renderDebugField(dimension, font, "World Energy", world->getTotalEnergy(), "");
 
 	if (renderPies) {
-		float leftSide = dimension.x / dimension.y;
+		float leftSide = float(dimension.x / dimension.y);
 		PieChart graphicsPie = toPieChart(graphicsMeasure, "Graphics", Vec2f(-leftSide + 1.5f, -0.7f), 0.2f);
 		PieChart physicsPie = toPieChart(physicsMeasure, "Physics", Vec2f(-leftSide + 0.3f, -0.7f), 0.2f);
 		PieChart intersectionPie = toPieChart(intersectionStatistics, "Intersection Statistics", Vec2f(-leftSide + 2.7f, -0.7f), 0.2f);
@@ -612,7 +614,7 @@ bool Screen::shouldClose() {
 }
 
 int Screen::addMeshShape(Shape s) {
-	int size = meshes.size();
+	int size = (int) meshes.size();
 	meshes.push_back(new IndexedMesh(s));
 	return size;
 }

@@ -38,9 +38,9 @@ void PieChart::renderPie(Screen& screen) const {
 
 	float totalWeight = getTotal();
 	for(DataPoint p : parts) {
-		float angle = M_PI * 2 * p.weight / totalWeight;
+		float angle = float(M_PI * 2 * p.weight / totalWeight);
 
-		int subdivisions = angle / MAX_ANGLE + 1;
+		int subdivisions = int(angle / MAX_ANGLE + 1);
 		
 		Mat2f rotation = fromAngle(angle / subdivisions);
 
@@ -98,7 +98,7 @@ void startPieRendering(Screen& screen) {
 	glUseProgram(0);
 	Vec2 size = screen.dimension;
 	glPushMatrix();
-	glScalef(size.y / size.x, 1.0f, 1.0f);
+	glScalef(float(size.y / size.x), 1.0f, 1.0f);
 }
 
 void endPieRendering(Screen& screen) {

@@ -9,7 +9,7 @@ private:
 	unsigned int vbo;
 
 public:
-	void resize(Vec2 position, Vec2 dimension) {
+	void resize(Vec2f position, Vec2f dimension) {
 		float vertices[4][4] = {
 			{ position.x,				position.y				, 0, 1},
 			{ position.x,				position.y - dimension.y, 0, 0},

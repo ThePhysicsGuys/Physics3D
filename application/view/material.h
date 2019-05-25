@@ -16,9 +16,9 @@ struct Material {
 	Material(Vec3f ambient, Vec3f diffuse, Vec3f specular, float reflectance, Texture* texture, Texture* normalMap) : ambient(ambient), diffuse(diffuse), specular(specular), reflectance(reflectance), texture(texture), normal(normalMap) {};
 	Material(Vec3f ambient, Vec3f diffuse, Vec3f specular, float reflectance, Texture* texture) : ambient(ambient), diffuse(diffuse), specular(specular), reflectance(reflectance), texture(texture) {};
 	Material(Vec3f ambient, Vec3f diffuse, Vec3f specular, float reflectance) : ambient(ambient), diffuse(diffuse), specular(specular), reflectance(reflectance) {};
-	Material(Vec3f ambient) : Material(ambient, Vec3f(1), Vec3f(1), 1, texture) {};
-	Material(Texture* texture) : Material(Vec3f(1), Vec3f(1), Vec3f(1), 1, texture) {};
-	Material() : Material(Vec3f(0.8), Vec3f(1), Vec3f(1), 1) {};
+	Material(Vec3f ambient) : Material(ambient, Vec3f(1.0f), Vec3f(1.0f), 1.0f, texture) {};
+	Material(Texture* texture) : Material(Vec3f(1.0), Vec3f(1.0), Vec3f(1.0f), 1.0f, texture) {};
+	Material() : Material(Vec3f(0.8f), Vec3f(1.0f), Vec3f(1.0f), 1.0f) {};
 
 	void setTexture(Texture* texture) {
 		texture->unit = 0;

@@ -7,14 +7,14 @@
 #include "../application.h"
 #include "../engine/sharedLockGuard.h"
 
-Vec2 getNormalizedDeviceSpacePosition(Vec2 viewportSpacePosition, Vec2 screenSize) {
-	double x = 2 * viewportSpacePosition.x / screenSize.x - 1;
-	double y = 2 * viewportSpacePosition.y / screenSize.y - 1;
-	return Vec2(x, -y);
+Vec2f getNormalizedDeviceSpacePosition(Vec2f viewportSpacePosition, Vec2f screenSize) {
+	float x = 2 * viewportSpacePosition.x / screenSize.x - 1;
+	float y = 2 * viewportSpacePosition.y / screenSize.y - 1;
+	return Vec2f(x, -y);
 }
 
-Vec3 calcRay(Vec2 mousePosition, Vec2 screenSize, Mat4f viewMatrix, Mat4f projectionMatrix) {
-	Vec2 normalizedDeviceSpacePosition = getNormalizedDeviceSpacePosition(mousePosition, screenSize);
+Vec3f calcRay(Vec2f mousePosition, Vec2f screenSize, Mat4f viewMatrix, Mat4f projectionMatrix) {
+	Vec2f normalizedDeviceSpacePosition = getNormalizedDeviceSpacePosition(mousePosition, screenSize);
 	Vec4f clipSpacePosition = Vec4f(normalizedDeviceSpacePosition.x, normalizedDeviceSpacePosition.y, -1.0f, 1.0f);
 	Mat4f invertedProjectionMatrix = projectionMatrix.inverse();
 	Vec4f eyeCoordinates = invertedProjectionMatrix * clipSpacePosition;

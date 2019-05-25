@@ -36,6 +36,8 @@
 #include "extendedPart.h"
 #include "partFactory.h"
 
+#include "export.h"
+#include "import.h"
 
 #define _USE_MATH_DEFINES
 #include "math.h"
@@ -129,11 +131,11 @@ int main(void) {
 	PartFactory rotatingWallFactory(BoundingBox(5.0, 3.0, 0.5).toShape(new Vec3[8]), screen, "rotatingWall");
 	ExtendedPart* rotatingWall = rotatingWallFactory.produce(CFrame(Vec3(-12, 1.5, 0.0)), 0.2, 1.0);
 	world.add(rotatingWall, true);
-	rotatingWall->parent->angularVelocity = Vec3(0, -0.7, 0);
+	//rotatingWall->parent->angularVelocity = Vec3(0, -0.7, 0);
 
 	ExtendedPart* rotatingWall2 = rotatingWallFactory.produce(CFrame(Vec3(-12, 1.5, 5.0)), 0.2, 1.0);
 	world.add(rotatingWall2, true);
-	rotatingWall2->parent->angularVelocity = Vec3(0, 0.7, 0);
+	//rotatingWall2->parent->angularVelocity = Vec3(0, 0.7, 0);
 
 	// makeDominoStrip(20);
 	// makeDominoTower(20, 10, Vec3(-4.0, 0.0, -4.0));
@@ -169,11 +171,8 @@ int main(void) {
 	ConvexShapeBuilder builder(verts, triangles, 4, 4, neighBuf, builderRemovalBuffer, builderAddingBuffer);
 
 	builder.addPoint(Vec3(0.4, 0.4, 0.4), 3);
-
 	builder.addPoint(Vec3(-0.4, 1, -0.4));
-
 	builder.addPoint(Vec3(-0.8, 0.5, -0.8));
-
 	builder.addPoint(Vec3(-0.9, 0.6, -0.9));
 
 	Shape constructedShape = builder.toShape();
@@ -181,9 +180,13 @@ int main(void) {
 	ExtendedPart* constructedExtendedPart = createUniquePart(screen, constructedShape, CFrame(Vec3(0.0, 2.0, -5.0)), 2.0, 0.7);
 	world.addObject(constructedExtendedPart);
 
-	Shape sphereShape = loadObj((std::istream&) std::istringstream(getResourceAsString(SPHERE_MODEL)));
+	Shape sphereShape = OBJImport::load((std::istream&) std::istringstream(getResourceAsString(SPHERE_MODEL)));
 	sphereShape.normals = std::shared_ptr<Vec3>(new Vec3[sphereShape.vertexCount], std::default_delete<Vec3[]>());
 	sphereShape.computeNormals(sphereShape.normals.get());
+
+
+	OBJExport::save("shapebin.obj", sphereShape, true);
+	OBJImport::load("shapebin.obj", true);
 
 	PartFactory cubeFactory(BoundingBox{-0.49, -0.49, -0.49, 0.49, 0.49, 0.49}.toShape(new Vec3[8]), screen, "Cube");
 	PartFactory sphereFactory(sphereShape, screen, "Sphere");
@@ -198,7 +201,7 @@ int main(void) {
 		}
 	}
 
-	Shape stallShape = loadObj((std::istream&) std::istringstream(getResourceAsString(STALL_MODEL)));
+	Shape stallShape = OBJImport::load((std::istream&) std::istringstream(getResourceAsString(STALL_MODEL)));
 	//stallShape.normals = std::shared_ptr<Vec3>(new Vec3[stallShape.vertexCount]);
 	//stallShape.computeNormals(stallShape.normals.get());
 	ExtendedPart* stallExtendedPart = createUniquePart(screen, stallShape, CFrame(Vec3(10.0, 2.0, -10.0), fromEulerAngles(0.1, 0.1, 0.1)), 10, 0.7);
@@ -215,6 +218,8 @@ int main(void) {
 	player->properties.friction = 0;
 	player->drawMeshId = -1;
 
+	//saveWorld("testWorld", world);
+	//loadWorld("testWorld", world, getCamera());
 
 	/* Loop until the user closes the window */
 	Log::info("Started rendering");

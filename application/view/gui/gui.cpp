@@ -29,10 +29,10 @@ namespace GUI {
 				return Vec3(v, v, v);
 				
 			int hi = (int)(h / 60.0) % 6;
-			float f = (h / 60.0) - hi;
-			float p = v * (1.0 - s);
-			float q = v * (1.0 - s * f);
-			float t = v * (1.0 - s * (1.0 - f));
+			double f = (h / 60.0) - hi;
+			double p = v * (1.0 - s);
+			double q = v * (1.0 - s * f);
+			double t = v * (1.0 - s * (1.0 - f));
 			
 			switch (hi) {
 				case 0:

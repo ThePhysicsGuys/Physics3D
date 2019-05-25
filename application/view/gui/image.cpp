@@ -4,7 +4,7 @@
 
 Image::Image(double x, double y, double width, double height) : Component(x, y, width, height) {
 	Vec2 dimension = GUI::unmap(Vec2(width, height));
-	this->texture = new Texture(dimension.x, dimension.y);
+	this->texture = new Texture((unsigned int) dimension.x, (unsigned int) dimension.y);
 }
 
 Image::Image(double x, double y, Texture* texture) : Component(x, y) {
