@@ -5,10 +5,10 @@
 
 double g = (1.0 + sqrt(5.0)) / 2.0;
 
-Vec3 icosahedronVertices[] {	
-	Vec3(0, 0.5, g/2), Vec3(0, 0.5, -g/2), Vec3(0, -0.5, -g/2), Vec3(0, -0.5, g/2),
-	Vec3(0.5, g/2, 0), Vec3(0.5, -g/2, 0), Vec3(-0.5, -g/2, 0), Vec3(-0.5, g/2, 0),
-	Vec3(g/2, 0, 0.5), Vec3(-g/2, 0, 0.5), Vec3(-g/2, 0, -0.5), Vec3(g/2, 0, -0.5),
+Vec3f icosahedronVertices[] {	
+	Vec3f(0, 0.5, g/2), Vec3f(0, 0.5, -g/2), Vec3f(0, -0.5, -g/2), Vec3f(0, -0.5, g/2),
+	Vec3f(0.5, g/2, 0), Vec3f(0.5, -g/2, 0), Vec3f(-0.5, -g/2, 0), Vec3f(-0.5, g/2, 0),
+	Vec3f(g/2, 0, 0.5), Vec3f(-g/2, 0, 0.5), Vec3f(-g/2, 0, -0.5), Vec3f(g/2, 0, -0.5),
 };
 
 // TOP: 0  -  3 8 4 7 9
@@ -24,11 +24,11 @@ Triangle icosahedronTriangles[] {
 const NormalizedShape icosahedron(icosahedronVertices, icosahedronTriangles, 12, 20);
 
 // Test shape
-Vec3 triangleShapeVecs[] {
-	Vec3(0.0, 0.0, 0.0), 
-	Vec3(1.0, 0.0, 0.0), 
-	Vec3(0.0, 1.0, 0.0), 
-	Vec3(0.0, 0.0, 1.0)
+Vec3f triangleShapeVecs[] {
+	Vec3f(0.0, 0.0, 0.0), 
+	Vec3f(1.0, 0.0, 0.0), 
+	Vec3f(0.0, 1.0, 0.0), 
+	Vec3f(0.0, 0.0, 1.0)
 };
 
 Triangle triangleShapeTriangles[] {
@@ -37,10 +37,10 @@ Triangle triangleShapeTriangles[] {
 
 const Shape triangleShape(triangleShapeVecs, triangleShapeTriangles, 4, 4);
 
-Vec3 houseVertices[] {
-	Vec3(-0.5, 0.0, -0.5), Vec3(-0.5, 0.0, 0.5), Vec3(0.5, 0.0, 0.5), Vec3(0.5, 0.0, -0.5),
-	Vec3(-0.5, 1.0, -0.5), Vec3(-0.5, 1.0, 0.5), Vec3(0.5, 1.0, 0.5), Vec3(0.5, 1.0, -0.5),
-	Vec3(0.0, 1.5, -0.5), Vec3(0.0, 1.5, 0.5)
+Vec3f houseVertices[] {
+	Vec3f(-0.5, 0.0, -0.5), Vec3f(-0.5, 0.0, 0.5), Vec3f(0.5, 0.0, 0.5), Vec3f(0.5, 0.0, -0.5),
+	Vec3f(-0.5, 1.0, -0.5), Vec3f(-0.5, 1.0, 0.5), Vec3f(0.5, 1.0, 0.5), Vec3f(0.5, 1.0, -0.5),
+	Vec3f(0.0, 1.5, -0.5), Vec3f(0.0, 1.5, 0.5)
 };
 
 Triangle houseTriangles[] {
@@ -60,22 +60,22 @@ NormalizedShape createCube(double side) {
 }
 
 NormalizedShape createBox(double width, double height, double length) {
-	Vec3* newVecBuf = new Vec3[8];
-	CFrame cf; // unused
+	Vec3f* newVecBuf = new Vec3f[8];
+	CFramef cf; // unused
 	return BoundingBox(width, height, length).toShape(newVecBuf).normalized(newVecBuf, nullptr, cf);
 }
 
 NormalizedShape createPrism(unsigned int sides, double radius, double height) {
 	unsigned int vertexCount = sides * 2;
 	unsigned int triangleCount = sides * 2 + (sides - 2) * 2;
-	Vec3* vecBuf = new Vec3[vertexCount];
+	Vec3f* vecBuf = new Vec3f[vertexCount];
 	Triangle* triangleBuf = new Triangle[triangleCount];
 
 	// vertices
 	for(unsigned int i = 0; i < sides; i++) {
 		double angle = i * 2 * M_PI / sides;
-		vecBuf[i*2] = Vec3(cos(angle) * radius, -height / 2, sin(angle) * radius);
-		vecBuf[i*2+1] = Vec3(cos(angle) * radius, height / 2, sin(angle) * radius);
+		vecBuf[i*2] = Vec3f(cos(angle) * radius, -height / 2, sin(angle) * radius);
+		vecBuf[i*2+1] = Vec3f(cos(angle) * radius, height / 2, sin(angle) * radius);
 	}
 
 	// sides
@@ -99,21 +99,21 @@ NormalizedShape createPrism(unsigned int sides, double radius, double height) {
 NormalizedShape createPointyPrism(unsigned int sides, double radius, double height, double topOffset, double bottomOffset) {
 	unsigned int vertexCount = sides * 2 + 2;
 	unsigned int triangleCount = sides * 4;
-	Vec3* vecBuf = new Vec3[vertexCount];
+	Vec3f* vecBuf = new Vec3f[vertexCount];
 	Triangle* triangleBuf = new Triangle[triangleCount];
 
 	// vertices
 	for(unsigned int i = 0; i < sides; i++) {
 		double angle = i * 2 * M_PI / sides;
-		vecBuf[i * 2] = Vec3(cos(angle) * radius, -height / 2, sin(angle) * radius);
-		vecBuf[i * 2 + 1] = Vec3(cos(angle) * radius, height / 2, sin(angle) * radius);
+		vecBuf[i * 2] = Vec3f(cos(angle) * radius, -height / 2, sin(angle) * radius);
+		vecBuf[i * 2 + 1] = Vec3f(cos(angle) * radius, height / 2, sin(angle) * radius);
 	}
 
 	unsigned int bottomIndex = sides * 2;
 	unsigned int topIndex = sides * 2 + 1;
 
-	vecBuf[bottomIndex] = Vec3(0, -height / 2 - bottomOffset, 0);
-	vecBuf[topIndex] = Vec3(0, height / 2 + topOffset, 0);
+	vecBuf[bottomIndex] = Vec3f(0, -height / 2 - bottomOffset, 0);
+	vecBuf[topIndex] = Vec3f(0, height / 2 + topOffset, 0);
 
 
 	// sides

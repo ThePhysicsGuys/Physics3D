@@ -33,11 +33,6 @@ Mat4Template<N> Mat4Template<N>::rotate(N angle, N x, N y, N z) const {
 	return Mat4Template<N>(r00, r01, r02, r03, r10, r11, r12, r13, r20, r21, r22, r23, m30, m31, m32, m33);
 }
 
-template<typename N>
-CFrame Mat4Template<N>::asCFrame() const {
-	return CFrame(Vec3(m30, m31, m32), Mat3(m00, m01, m02, m10, m11, m12, m20, m21, m22));
-};
-
 template struct Mat4Template<double>;
 template struct Mat4Template<float>;
 

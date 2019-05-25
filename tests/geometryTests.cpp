@@ -12,7 +12,7 @@
 
 #include "testValues.h"
 
-#define ASSERT(condition) ASSERT_TOLERANT(condition, 0.00000001)
+#define ASSERT(condition) ASSERT_TOLERANT(condition, 0.00001)
 
 template<typename N, typename Tol>
 bool isDiagonalTolerant(Mat3Template<N> m, Tol tolerance) {
@@ -32,19 +32,19 @@ bool isDiagonalTolerant(SymmetricMat3Template<N> m, Tol tolerance) {
 
 TEST_CASE(basicShapes) {
 	BoundingBox b{ -1, -1, -1, 1, 1, 1 };
-	Vec3 vecBuf[8];
+	Vec3f vecBuf[8];
 
 	ASSERT_TRUE(b.toShape(vecBuf).isValid());
 }
 
 TEST_CASE(shapeVolume) {
 	BoundingBox b{-1, -1, -1, 1, 1, 1};
-	Vec3 vecBuf[8];
-	Vec3 vecBuf2[8];
+	Vec3f vecBuf[8];
+	Vec3f vecBuf2[8];
 
 	Shape boxShape = b.toShape(vecBuf);
 
-	CFrame transform = CFrame(Vec3(0.3, 0.7, -3.5), fromEulerAngles(0.7, 0.2, 0.3));
+	CFramef transform(Vec3f(0.3f, 0.7f, -3.5f), fromEulerAngles(0.7f, 0.2f, 0.3f));
 
 	Shape transformedShape = boxShape.localToGlobal(transform, vecBuf2);
 
@@ -58,12 +58,12 @@ TEST_CASE(shapeVolume) {
 
 TEST_CASE(shapeCenterOfMass) {
 	BoundingBox b{-1, -1, -1, 1, 1, 1};
-	Vec3 vecBuf[8];
-	Vec3 vecBuf2[8];
+	Vec3f vecBuf[8];
+	Vec3f vecBuf2[8];
 
 	Shape boxShape = b.toShape(vecBuf);
 
-	CFrame transform = CFrame(Vec3(0.3, 0.7, -3.5), fromEulerAngles(0.7, 0.2, 0.3));
+	CFramef transform(Vec3f(0.3f, 0.7f, -3.5f), fromEulerAngles(0.7f, 0.2f, 0.3f));
 
 	Shape transformedShape = boxShape.localToGlobal(transform, vecBuf2);
 	
@@ -73,15 +73,15 @@ TEST_CASE(shapeCenterOfMass) {
 
 TEST_CASE(shapeInertiaMatrix) {
 	BoundingBox b{-1, -1, -1, 1, 1, 1};
-	Vec3 vecBuf[8];
-	Vec3 vecBuf2[8];
-	Vec3 houseVecBuf[10];
-	Vec3 houseVecBuf2[10];
+	Vec3f vecBuf[8];
+	Vec3f vecBuf2[8];
+	Vec3f houseVecBuf[10];
+	Vec3f houseVecBuf2[10];
 
 
 	Shape boxShape = b.toShape(vecBuf);
 
-	CFrame transform = CFrame(Vec3(0,0,0), fromEulerAngles(0.7, 0.2, 0.3));
+	CFramef transform(Vec3f(0,0,0), fromEulerAngles(0.7f, 0.2f, 0.3f));
 	Shape transformedShape = boxShape.localToGlobal(transform, vecBuf2);
 
 	logf("Inertia of Box: %s", str(boxShape.getInertia()).c_str());
@@ -89,14 +89,14 @@ TEST_CASE(shapeInertiaMatrix) {
 	logf("Inertia of transformed Box: %s", str(transformedShape.getInertia()).c_str());
 
 	Shape h = house;
-	Shape newHouse = house.translated(-house.getCenterOfMass(), houseVecBuf);
+	Shape newHouse = house.translated(-Vec3f(house.getCenterOfMass()), houseVecBuf);
 	Shape rotatedHouse = newHouse.rotated(fromEulerAngles(0.0, 0.3, 0.0), houseVecBuf2);
 	logf("Inertia of House: %s", str(newHouse.getInertia()).c_str());
 	logf("Inertia of Rotated House: %s", str(rotatedHouse.getInertia()).c_str());
 }
 
 TEST_CASE(shapeInertiaRotationInvariance) {
-	Vec3 buf1[10]; Vec3 buf2[10]; Shape testShape = house.translated(-house.getCenterOfMass(), buf1);
+	Vec3f buf1[10]; Vec3f buf2[10]; Shape testShape = house.translated(-Vec3f(house.getCenterOfMass()), buf1);
 
 	Vec3 testMoment = Vec3(0.3, -3.2, 4.8);
 	Vec3 momentResult = ~testShape.getInertia() * testMoment;
@@ -121,7 +121,7 @@ TEST_CASE(shapeInertiaRotationInvariance) {
 }
 
 TEST_CASE(shapeInertiaEigenValueInvariance) {
-	Vec3 buf1[10]; Vec3 buf2[10]; Shape testShape = house.translated(-house.getCenterOfMass(), buf1);
+	Vec3f buf1[10]; Vec3f buf2[10]; Shape testShape = house.translated(-Vec3f(house.getCenterOfMass()), buf1);
 
 	EigenValues<double> initialEigenValues = testShape.getInertia().getEigenDecomposition().eigenValues;
 
@@ -137,26 +137,26 @@ TEST_CASE(shapeInertiaEigenValueInvariance) {
 }
 
 TEST_CASE(cubeContainsPoint) {
-	Vec3 buf[8];
+	Vec3f buf[8];
 	Shape cube = BoundingBox{0,0,0,1,1,1}.toShape(buf);
 
-	ASSERT_TRUE(cube.containsPoint(Vec3(0.2, 0.2, 0.2)));
-	ASSERT_TRUE(cube.containsPoint(Vec3(0.2, 0.2, 0.8)));
-	ASSERT_TRUE(cube.containsPoint(Vec3(0.2, 0.9, 0.2)));
-	ASSERT_TRUE(cube.containsPoint(Vec3(0.7, 0.2, 0.2)));
+	ASSERT_TRUE(cube.containsPoint(Vec3f(0.2, 0.2, 0.2)));
+	ASSERT_TRUE(cube.containsPoint(Vec3f(0.2, 0.2, 0.8)));
+	ASSERT_TRUE(cube.containsPoint(Vec3f(0.2, 0.9, 0.2)));
+	ASSERT_TRUE(cube.containsPoint(Vec3f(0.7, 0.2, 0.2)));
 
-	ASSERT_FALSE(cube.containsPoint(Vec3(1.2, 0.2, 0.2)));
-	ASSERT_FALSE(cube.containsPoint(Vec3(1.2, 1.2, 0.2)));
-	ASSERT_FALSE(cube.containsPoint(Vec3(1.2, 1.2, 1.2)));
-	ASSERT_FALSE(cube.containsPoint(Vec3(-0.2, -0.2, -0.2)));
+	ASSERT_FALSE(cube.containsPoint(Vec3f(1.2, 0.2, 0.2)));
+	ASSERT_FALSE(cube.containsPoint(Vec3f(1.2, 1.2, 0.2)));
+	ASSERT_FALSE(cube.containsPoint(Vec3f(1.2, 1.2, 1.2)));
+	ASSERT_FALSE(cube.containsPoint(Vec3f(-0.2, -0.2, -0.2)));
 }
 
 TEST_CASE(shapeNormalization) {
-	Vec3 buf1[10]; Vec3 buf2[10]; Shape transformedHouse = house.globalToLocal(CFrame(Vec3(0.3, 0.7, -2.8), fromEulerAngles(0.5, -0.1, 0.9)), buf1);
+	Vec3f buf1[10]; Vec3f buf2[10]; Shape transformedHouse = house.globalToLocal(CFramef(Vec3f(0.3, 0.7, -2.8), fromEulerAngles(0.5, -0.1, 0.9)), buf1);
 
 	double beginVolume = transformedHouse.getVolume();
 
-	CFrame normalizationFrame;
+	CFramef normalizationFrame;
 
 	NormalizedShape newShape = transformedHouse.normalized(buf2, nullptr, normalizationFrame);
 
@@ -176,15 +176,15 @@ TEST_CASE(testRayIntersection) {
 #include "../util/log.h"
 
 TEST_CASE(testIntersection) {
-	Vec3 buf[12];
-	Vec3 buf2[8];
-	Vec3 buf3[12];
+	Vec3f buf[12];
+	Vec3f buf2[8];
+	Vec3f buf3[12];
 	Shape a = BoundingBox{-0.3, -0.4, -0.5, 0.3, 0.4, 0.5}.toShape(buf2);
-	Shape b = icosahedron.translated(Vec3(0.8, 0.9, 0.8), buf);
-	Shape c = icosahedron.translated(Vec3(0.95, 0.0, 0.0), buf3);
+	Shape b = icosahedron.translated(Vec3f(0.8, 0.9, 0.8), buf);
+	Shape c = icosahedron.translated(Vec3f(0.95, 0.0, 0.0), buf3);
 	
 
-	Vec3 intersect, exitVec;
+	Vec3f intersect, exitVec;
 
 
 	Vec3 startingVec(1, 0, 0);
@@ -226,7 +226,13 @@ TEST_CASE(badCollissions) {
 	Shape dominoI(badVerticesI, triangles, 8, 12);
 	Shape dominoJ(badVerticesJ, triangles, 8, 12);
 
-	Vec3 intersection;
-	Vec3 exitVec;
+	Vec3f intersection;
+	Vec3f exitVec;
 	dominoI.intersects(dominoJ, intersection, exitVec, Vec3(1, 0, 0));
+}
+
+TEST_CASE(testGetFurthestPointInDirection) {
+	for (Vec3f vertex : icosahedron.iterVertices()) {
+		ASSERT(icosahedron.furthestInDirection(vertex) == vertex);
+	}
 }

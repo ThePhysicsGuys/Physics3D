@@ -224,7 +224,7 @@ void Screen::init() {
 	// Skybox init
 	sphere = new IndexedMesh(OBJImport::load((std::istream&) std::istringstream(getResourceAsString(SPHERE_MODEL))));
 	skybox = new BoundingBox{ -1, -1, -1, 1, 1, 1 };
-	skyboxMesh = new IndexedMesh(skybox->toShape(new Vec3[8]));
+	skyboxMesh = new IndexedMesh(skybox->toShape(new Vec3f[8]));
 	skyboxTexture = new CubeMap("../res/skybox/right.jpg", "../res/skybox/left.jpg", "../res/skybox/top.jpg", "../res/skybox/bottom.jpg", "../res/skybox/front.jpg", "../res/skybox/back.jpg");
 
 
@@ -263,7 +263,7 @@ void Screen::init() {
 
 			Log::debug("%f, %s", s->value, str(GUI::COLOR::hsvToRgb(Vec3(s->value, 1, 1))).c_str());
 
-			GUI::screen->selectedPart->material.ambient = GUI::COLOR::hsvToRgb(Vec3(s->value, 1, 1));
+			GUI::screen->selectedPart->material.ambient = Vec3f(GUI::COLOR::hsvToRgb(Vec3(s->value, 1, 1)));
 		}
 	};
 
@@ -374,9 +374,9 @@ void Screen::update() {
 	projectionMatrix = perspective(1.0f, aspect, 0.01f, 1000000.0f);
 	orthoMatrix = ortho(-aspect, aspect, -1.0f, 1.0f, -1000.0f, 1000.0f);
 	//orthoMatrix = ortho(0, aspect, 0, 1, -1000, 1000);
-	rotatedViewMatrix = camera.cframe.asMat4f().getRotation();
-	viewMatrix = rotatedViewMatrix.translate(float(-camera.cframe.position.x), float(-camera.cframe.position.y), float(-camera.cframe.position.z));
-	viewPosition = Vec3f(float(camera.cframe.position.x), float(camera.cframe.position.y), float(camera.cframe.position.z));
+	rotatedViewMatrix = CFrameToMat4(CFramef(camera.cframe)).getRotation();
+	viewMatrix = rotatedViewMatrix.translate(-camera.cframe.position.x, -camera.cframe.position.y, -camera.cframe.position.z);
+	viewPosition = Vec3f(camera.cframe.position.x, camera.cframe.position.y, camera.cframe.position.z);
 
 
 	// Update picker
@@ -402,7 +402,7 @@ void Screen::update() {
 		partPotentialEnergy->text = "Potential Energy: " + std::to_string(potentialEnergy);
 		partEnergy->text = "Energy: " + std::to_string(kineticEnergy + potentialEnergy);
 
-		Vec3 color = GUI::COLOR::rgbToHsv(selectedPart->material.ambient);
+		Vec3 color = GUI::COLOR::rgbToHsv(Vec3(selectedPart->material.ambient));
 		partAmbientSlider->handleColor = Vec4(selectedPart->material.ambient.x, selectedPart->material.ambient.y, selectedPart->material.ambient.z, 1);
 		partAmbientSlider->value = partAmbientSlider->min + (partAmbientSlider->max - partAmbientSlider->min) * color.x;
 	} else {
@@ -448,9 +448,9 @@ void Screen::renderPhysicals() {
 
 		// Picker code
 		if(&part == selectedPart)
-			material.ambient = part.material.ambient + Vec3(0.1);
+			material.ambient = part.material.ambient + Vec3f(0.1, 0.1, 0.1);
 		else if (&part == intersectedPart)
-			material.ambient = part.material.ambient + Vec3(-0.1);
+			material.ambient = part.material.ambient + Vec3f(-0.1, -0.1, -0.1);
 		else
 			material.ambient = part.material.ambient;
 		
@@ -488,8 +488,9 @@ void Screen::refresh() {
 	renderPhysicals();
 
 	if(selectedPart != nullptr) {
-		for(const Vec3& corner : selectedPart->hitbox.iterVertices()) {
-			vecLog.add(AppDebug::ColoredVec(selectedPart->cframe.localToGlobal(corner), selectedPart->parent->getVelocityOfPoint(selectedPart->cframe.localToRelative(corner)), Debug::VELOCITY));
+		CFramef selectedCFrame(selectedPart->cframe);
+		for(const Vec3f& corner : selectedPart->hitbox.iterVertices()) {
+			vecLog.add(AppDebug::ColoredVec(Vec3(selectedCFrame.localToGlobal(corner)), selectedPart->parent->getVelocityOfPoint(Vec3(selectedCFrame.localToRelative(corner))), Debug::VELOCITY));
 		}
 	}
 		

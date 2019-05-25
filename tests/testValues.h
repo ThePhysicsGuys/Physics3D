@@ -9,5 +9,5 @@ extern const Mat3 matrices[9];
 extern const RotMat3 rotMatrices[9];
 
 // test for bad vertices
-extern Vec3 badVerticesI[8];
-extern Vec3 badVerticesJ[8];
+extern Vec3f badVerticesI[8];
+extern Vec3f badVerticesJ[8];

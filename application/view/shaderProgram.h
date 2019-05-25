@@ -142,7 +142,7 @@ struct BasicShader : public ShaderProgram {
 		bind();
 		shader.setUniform("includeNormals", part.hitbox.normals != nullptr);
 		shader.setUniform("includeUvs", part.hitbox.uvs != nullptr);
-		shader.setUniform("modelMatrix", part.cframe.asMat4f());
+		shader.setUniform("modelMatrix", CFrameToMat4(CFramef(part.cframe)));
 	}
 
 	void updateModelMatrix(Mat4f modelMatrix) {

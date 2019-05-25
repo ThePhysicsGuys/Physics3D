@@ -67,26 +67,26 @@ void PieChart::renderPie(Screen& screen) const {
 void PieChart::renderText(Screen& screen, Font* font) const {
 	// Title
 	Vec2f titlePosition = piePosition + Vec2f(pieSize * 1.3f, pieSize * 1.1f);
-	font->render(title, Vec2(titlePosition.x, titlePosition.y), Vec3f(1, 1, 1), 0.001);
+	font->render(title, Vec2(titlePosition.x, titlePosition.y), Vec3(1, 1, 1), 0.001);
 
 	Vec2f textPosition = piePosition + Vec2f(pieSize * 1.3f, pieSize * 1.1f - 0.05f);
 	Vec2 textPos = Vec2(textPosition.x, textPosition.y);
 
 	float totalWeight = getTotal();
 
-	font->render(totalValue, textPos + Vec2(0.45, 0.035), Vec3f(1,1,1), 0.0006);
+	font->render(totalValue, textPos + Vec2(0.45, 0.035), Vec3(1,1,1), 0.0006);
 
 	for(int i = 0; i < parts.size(); i++) {
 		const DataPoint& p = parts[i];
 		Vec2 linePos = textPos + Vec2(0, -i*0.035);
-		font->render(p.label, linePos, p.color, 0.0006);
+		font->render(p.label, linePos, Vec3(p.color), 0.0006);
 
 		std::stringstream percent;
 		percent.precision(4);
 		percent << p.weight/totalWeight * 100;
 		percent << "%";
-		font->render(percent.str(), linePos + Vec2(0.25, 0), p.color, 0.0006);
-		font->render(p.value, linePos + Vec2(0.50, 0), p.color, 0.0006);
+		font->render(percent.str(), linePos + Vec2(0.25, 0), Vec3(p.color), 0.0006);
+		font->render(p.value, linePos + Vec2(0.50, 0), Vec3(p.color), 0.0006);
 	}
 }
 

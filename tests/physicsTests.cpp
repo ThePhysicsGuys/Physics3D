@@ -97,7 +97,7 @@ TEST_CASE(momentToAngularVelocity) {
 }
 
 TEST_CASE(rotationImpulse) {
-	Part part(BoundingBox{-0.1, -10, -0.1, 0.1, 10, 0.1}.toShape(new Vec3[8]), CFrame(Vec3()), 1.0, 1.0);
+	Part part(BoundingBox{-0.1, -10, -0.1, 0.1, 10, 0.1}.toShape(new Vec3f[8]), CFrame(Vec3()), 1.0, 1.0);
 	Physical veryLongBoxPhysical(&part);
 
 	Vec3 xMoment = Vec3(1.0, 0.0, 0.0);
@@ -127,7 +127,7 @@ TEST_CASE(testPointAcceleration) {
 
 	Vec3 actualAcceleration = testPhys.velocity / deltaT;
 	Vec3 actualAngularAcceleration = testPhys.angularVelocity / deltaT;
-	Vec3 actualPointAcceleration = testPhys.getVelocityOfPoint(testPhys.part->cframe.localToRelative(localPoint)) / deltaT;
+	Vec3 actualPointAcceleration = testPhys.getVelocityOfPoint(testPhys.getCFrame().localToRelative(localPoint)) / deltaT;
 
 	ASSERT(acceleration == actualAcceleration);
 	ASSERT(angularAcceleration == actualAngularAcceleration);
@@ -213,7 +213,7 @@ TEST_CASE(inelasticColission) {
 	Physical p(&part, 5.0, DiagonalMat3(2, 7, 5));
 
 	Vec3 localPoint(0.8, 0.6, 0.9);
-	Vec3 relativePoint = p.part->cframe.localToRelative(localPoint);
+	Vec3 relativePoint = p.getCFrame().localToRelative(localPoint);
 
 	p.velocity = Vec3(0.3, -1.3, 1.2);
 	p.angularVelocity = Vec3(0.7, 0.5, -0.9);
@@ -226,7 +226,7 @@ TEST_CASE(inelasticColission) {
 
 	Vec3 direction(0.0, 170.0, 0.0);
 
-	//double inertia = p.getInertiaOfPointInDirection(localPoint, p.part->cframe.relativeToLocal(direction));
+	//double inertia = p.getInertiaOfPointInDirection(localPoint, p.getCFrame().relativeToLocal(direction));
 
 	//Log::warn("inertia: %f", inertia);
 
@@ -235,10 +235,10 @@ TEST_CASE(inelasticColission) {
 	//Vec3 relativeImpulse = -velOfPoint * direction.normalize() * direction.normalize() * inertia;
 
 	Vec3 desiredAccel = -velOfPoint * direction * direction / direction.lengthSquared();
-	Vec3 relativeImpulse = p.part->cframe.localToRelative(~p.getPointAccelerationMatrix(localPoint) * p.part->cframe.relativeToLocal(desiredAccel));
-	Vec3 estimatedAccelLocal = p.getPointAccelerationMatrix(localPoint) * p.part->cframe.relativeToLocal(relativeImpulse);
+	Vec3 relativeImpulse = p.getCFrame().localToRelative(~p.getPointAccelerationMatrix(localPoint) * p.getCFrame().relativeToLocal(desiredAccel));
+	Vec3 estimatedAccelLocal = p.getPointAccelerationMatrix(localPoint) * p.getCFrame().relativeToLocal(relativeImpulse);
 
-	Vec3 estimatedAccelRelative = p.part->cframe.localToRelative(estimatedAccelLocal);
+	Vec3 estimatedAccelRelative = p.getCFrame().localToRelative(estimatedAccelLocal);
 	
 
 	p.applyImpulse(relativePoint, relativeImpulse);
@@ -259,7 +259,7 @@ TEST_CASE(inelasticColission2) {
 	Physical p(&part, 5.0, DiagonalMat3(2, 7, 5));
 
 	Vec3 localPoint(0.8, 0.6, 0.9);
-	Vec3 relativePoint = p.part->cframe.localToRelative(localPoint);
+	Vec3 relativePoint = p.getCFrame().localToRelative(localPoint);
 	Vec3 normal(0.0, 170.0, 0.0);
 
 	p.velocity = Vec3(0.3, -1.3, 1.2);

@@ -56,14 +56,14 @@ void handleCollision(Part& part1, Part& part2, Vec3 collisionPoint, Vec3 exitVec
 
 	double combinedInertia;
 	if(anchoredColission)
-		combinedInertia = p2.getInertiaOfPointInDirection(p2.part->cframe.relativeToLocal(collissionRelP2), p2.part->cframe.relativeToLocal(exitVector));
+		combinedInertia = p2.getInertiaOfPointInDirection(p2.getCFrame().relativeToLocal(collissionRelP2), p2.getCFrame().relativeToLocal(exitVector));
 	else {
-		double inertia1 = p1.getInertiaOfPointInDirection(p1.part->cframe.relativeToLocal(collissionRelP1), p1.part->cframe.relativeToLocal(exitVector));
-		double inertia2 = p2.getInertiaOfPointInDirection(p2.part->cframe.relativeToLocal(collissionRelP2), p2.part->cframe.relativeToLocal(exitVector));
+		double inertia1 = p1.getInertiaOfPointInDirection(p1.getCFrame().relativeToLocal(collissionRelP1), p1.getCFrame().relativeToLocal(exitVector));
+		double inertia2 = p2.getInertiaOfPointInDirection(p2.getCFrame().relativeToLocal(collissionRelP2), p2.getCFrame().relativeToLocal(exitVector));
 		combinedInertia = 1 / (1 / inertia1 + 1 / inertia2);
 	}
 	
-	Vec3 depthForce = COLLISSION_DEPTH_FORCE_MULTIPLIER * combinedInertia * exitVector;
+	Vec3 depthForce = exitVector * (COLLISSION_DEPTH_FORCE_MULTIPLIER * combinedInertia);
 
 	if(!anchoredColission) p1.applyForce(collissionRelP1, -depthForce);
 	p2.applyForce(collissionRelP2, depthForce);
@@ -72,8 +72,8 @@ void handleCollision(Part& part1, Part& part2, Vec3 collisionPoint, Vec3 exitVec
 	Vec3 relativeVelocity = p1.getVelocityOfPoint(collissionRelP1) - p2.getVelocityOfPoint(collissionRelP2);
 
 	if(relativeVelocity * exitVector > 0) { // moving towards the other object
-		Vec3 desiredAccel = -relativeVelocity * exitVector * exitVector / exitVector.lengthSquared();
-		Vec3 zeroRelVelImpulse = combinedInertia * desiredAccel;
+		Vec3 desiredAccel = -exitVector * (relativeVelocity * exitVector) / exitVector.lengthSquared();
+		Vec3 zeroRelVelImpulse = desiredAccel * combinedInertia;
 		Vec3 impulse = zeroRelVelImpulse * (1.0+ELASTICITY);
 		if(!anchoredColission) p1.applyImpulse(collissionRelP1, impulse);
 		p2.applyImpulse(collissionRelP2, -impulse);
@@ -183,7 +183,7 @@ void WorldPrototype::tick(double deltaT) {
 #ifdef CHECK_SANITY
 		double afterTotalEnergy = c.p2->parent->getKineticEnergy();
 
-		if(afterTotalEnergy > beforeTotalEnergy) {
+		if(c.p1->parent->getKineticEnergy() == 0.0 && afterTotalEnergy > beforeTotalEnergy) {
 			Log::warn("Energy of blocks after anchored colission is greater than before! %f > %f", afterTotalEnergy, beforeTotalEnergy);
 		}
 #endif

@@ -10,15 +10,15 @@
 #include "../constants.h"
 
 
-Vec3 getNormalVec(Triangle t, Vec3* vertices) {
-	Vec3 v0 = vertices[t[0]];
-	Vec3 v1 = vertices[t[1]];
-	Vec3 v2 = vertices[t[2]];
+Vec3f getNormalVec(Triangle t, Vec3f* vertices) {
+	Vec3f v0 = vertices[t[0]];
+	Vec3f v1 = vertices[t[1]];
+	Vec3f v2 = vertices[t[2]];
 
 	return (v1 - v0) % (v2 - v0);
 }
 
-double getDistanceOfTriangleToOriginSquared(Triangle t, Vec3* vertices) {
+double getDistanceOfTriangleToOriginSquared(Triangle t, Vec3f* vertices) {
 	return pointToPlaneDistanceSquared(getNormalVec(t, vertices), vertices[t[0]]);
 }
 
@@ -55,29 +55,34 @@ inline int furthestIndexInDirection(Vec3* vertices, int vertexCount, Vec3 direct
 	return bestVertexIndex;
 }
 
-inline MinkPoint getSupport(const Shape& first, const Shape& second, Vec3 searchDirection) {
+inline MinkPoint getSupport(const Shape& first, const Shape& second, const Vec3f& searchDirection) {
 	int furthestIndex1 = first.furthestIndexInDirection(searchDirection);
 	int furthestIndex2 = second.furthestIndexInDirection(-searchDirection);
-	return MinkPoint{first.vertices[furthestIndex1] - second.vertices[furthestIndex2], furthestIndex1, furthestIndex2 };
+	return MinkPoint{first[furthestIndex1] - second[furthestIndex2], first[furthestIndex1], second[furthestIndex2] };
 }
 
-inline MinkPoint getSupport(const Shape& first, const Shape& second, const CFrame& transform, Vec3 searchDirection) {
-	int furthestIndex1 = first.furthestIndexInDirection(searchDirection);
-	Vec3 transformedSearchDirection = transform.relativeToLocal(searchDirection);
+inline MinkPoint getSupport(const Shape& first, const Shape& second, const CFramef& transform, const Vec3f& searchDirection) {
+	/*int furthestIndex1 = first.furthestIndexInDirection(searchDirection);
+	Vec3f transformedSearchDirection = transform.relativeToLocal(searchDirection);
 	int furthestIndex2 = second.furthestIndexInDirection(-transformedSearchDirection);
-	Vec3 secondVertex = transform.localToGlobal(second.vertices[furthestIndex2]);
-	return MinkPoint{first.vertices[furthestIndex1] - secondVertex, furthestIndex1, furthestIndex2};
+	Vec3f secondVertex = transform.localToGlobal(second[furthestIndex2]);
+	return MinkPoint{first[furthestIndex1] - secondVertex, first[furthestIndex1], secondVertex};*/
+
+	Vec3f furthest1 = first.furthestInDirection(searchDirection);
+	Vec3f transformedSearchDirection = transform.relativeToLocal(searchDirection);
+	Vec3f furthest2 = second.furthestInDirection(-transformedSearchDirection);
+	Vec3f secondVertex = transform.localToGlobal(furthest2);
+	return MinkPoint{ furthest1 - secondVertex, furthest1, secondVertex };
 }
 
-bool runGJK(const Shape& first, const Shape& second, const Vec3& initialSearchDirection, Tetrahedron& simplex) {
+bool runGJK(const Shape& first, const Shape& second, const Vec3f& initialSearchDirection, Tetrahedron& simplex) {
 	physicsMeasure.mark(PhysicsProcess::GJK);
 
 	MinkPoint A(getSupport(first, second, initialSearchDirection));
 	MinkPoint B, C, D;
 
 	// set new searchdirection to be straight at the origin
-	Vec3 searchDirection = -A.p;
-	Vec3 newPoint;
+	Vec3f searchDirection = -A.p;
 
 	// GJK 2
 	// s.A is B.p
@@ -89,8 +94,8 @@ bool runGJK(const Shape& first, const Shape& second, const Vec3& initialSearchDi
 	if(B.p * searchDirection < 0)
 		return false;
 
-	Vec3 AO = -B.p;
-	Vec3 AB = A.p - B.p;
+	Vec3f AO = -B.p;
+	Vec3f AB = A.p - B.p;
 	searchDirection = -(AO % AB) % AB;
 	
 	C = getSupport(first, second, searchDirection);
@@ -101,12 +106,12 @@ bool runGJK(const Shape& first, const Shape& second, const Vec3& initialSearchDi
 	// s.C is A.p
 	// triangle, check if closest to one of the edges, point, or face
 	for(int iter = 0; iter < GJK_MAX_ITER; iter++){
-		Vec3 AO = -C.p;
-		Vec3 AB = B.p - C.p;
-		Vec3 AC = A.p - C.p;
-		Vec3 normal = AB % AC;
-		Vec3 nAB = AB % normal;
-		Vec3 nAC = normal % AC;
+		Vec3f AO = -C.p;
+		Vec3f AB = B.p - C.p;
+		Vec3f AC = A.p - C.p;
+		Vec3f normal = AB % AC;
+		Vec3f nAB = AB % normal;
+		Vec3f nAC = normal % AC;
 
 		if(AO * nAB > 0) {
 			// edge of AB is closest, searchDirection perpendicular to AB towards O
@@ -145,14 +150,14 @@ bool runGJK(const Shape& first, const Shape& second, const Vec3& initialSearchDi
 				D = getSupport(first, second, searchDirection);
 				if(D.p * searchDirection < 0)
 					return false;
-				Vec3 AO = -D.p;
+				Vec3f AO = -D.p;
 				// A is new point, at the top of the tetrahedron
-				Vec3 AB = C.p - D.p;
-				Vec3 AC = B.p - D.p;
-				Vec3 AD = A.p - D.p;
-				Vec3 nABC = AB % AC;
-				Vec3 nACD = AC % AD;
-				Vec3 nADB = AD % AB;
+				Vec3f AB = C.p - D.p;
+				Vec3f AC = B.p - D.p;
+				Vec3f AD = A.p - D.p;
+				Vec3f nABC = AB % AC;
+				Vec3f nACD = AC % AD;
+				Vec3f nADB = AD % AB;
 
 				if(nACD * AO > 0) {
 					// remove B and continue with triangle
@@ -187,15 +192,14 @@ bool runGJK(const Shape& first, const Shape& second, const Vec3& initialSearchDi
 	return false;
 }
 
-bool runGJKTransformed(const Shape& first, const Shape& second, const CFrame& transform, const Vec3& initialSearchDirection, Tetrahedron& simplex) {
+bool runGJKTransformed(const Shape& first, const Shape& second, const CFramef& transform, const Vec3f& initialSearchDirection, Tetrahedron& simplex) {
 	physicsMeasure.mark(PhysicsProcess::GJK);
 
 	MinkPoint A(getSupport(first, second, transform, initialSearchDirection));
 	MinkPoint B, C, D;
 
 	// set new searchdirection to be straight at the origin
-	Vec3 searchDirection = -A.p;
-	Vec3 newPoint;
+	Vec3f searchDirection = -A.p;
 
 	// GJK 2
 	// s.A is B.p
@@ -207,8 +211,8 @@ bool runGJKTransformed(const Shape& first, const Shape& second, const CFrame& tr
 	if(B.p * searchDirection < 0)
 		return false;
 
-	Vec3 AO = -B.p;
-	Vec3 AB = A.p - B.p;
+	Vec3f AO = -B.p;
+	Vec3f AB = A.p - B.p;
 	searchDirection = -(AO % AB) % AB;
 
 	C = getSupport(first, second, transform, searchDirection);
@@ -219,12 +223,12 @@ bool runGJKTransformed(const Shape& first, const Shape& second, const CFrame& tr
 	// s.C is A.p
 	// triangle, check if closest to one of the edges, point, or face
 	for(int iter = 0; iter < GJK_MAX_ITER; iter++) {
-		Vec3 AO = -C.p;
-		Vec3 AB = B.p - C.p;
-		Vec3 AC = A.p - C.p;
-		Vec3 normal = AB % AC;
-		Vec3 nAB = AB % normal;
-		Vec3 nAC = normal % AC;
+		Vec3f AO = -C.p;
+		Vec3f AB = B.p - C.p;
+		Vec3f AC = A.p - C.p;
+		Vec3f normal = AB % AC;
+		Vec3f nAB = AB % normal;
+		Vec3f nAC = normal % AC;
 
 		if(AO * nAB > 0) {
 			// edge of AB is closest, searchDirection perpendicular to AB towards O
@@ -263,14 +267,14 @@ bool runGJKTransformed(const Shape& first, const Shape& second, const CFrame& tr
 				D = getSupport(first, second, transform, searchDirection);
 				if(D.p * searchDirection < 0)
 					return false;
-				Vec3 AO = -D.p;
+				Vec3f AO = -D.p;
 				// A is new point, at the top of the tetrahedron
-				Vec3 AB = C.p - D.p;
-				Vec3 AC = B.p - D.p;
-				Vec3 AD = A.p - D.p;
-				Vec3 nABC = AB % AC;
-				Vec3 nACD = AC % AD;
-				Vec3 nADB = AD % AB;
+				Vec3f AB = C.p - D.p;
+				Vec3f AC = B.p - D.p;
+				Vec3f AD = A.p - D.p;
+				Vec3f nABC = AB % AC;
+				Vec3f nACD = AC % AD;
+				Vec3f nADB = AD % AB;
 
 				if(nACD * AO > 0) {
 					// remove B and continue with triangle
@@ -322,7 +326,7 @@ void initializeBuffer(const Tetrahedron& s, ComputationBuffers& b) {
 	b.knownVecs[3] = MinkowskiPointIndices{s.D.originFirst, s.D.originSecond};
 }
 
-bool runEPA(const Shape& first, const Shape& second, const Tetrahedron& s, Vec3& intersection, Vec3& exitVector, ComputationBuffers& bufs) {
+bool runEPA(const Shape& first, const Shape& second, const Tetrahedron& s, Vec3f& intersection, Vec3f& exitVector, ComputationBuffers& bufs) {
 	physicsMeasure.mark(PhysicsProcess::EPA);
 
 	bufs.ensureCapacity(first.vertexCount + second.vertexCount + EPA_MAX_ITER, first.triangleCount + second.triangleCount + EPA_MAX_ITER*2);
@@ -336,10 +340,10 @@ bool runEPA(const Shape& first, const Shape& second, const Tetrahedron& s, Vec3&
 		double distSq;
 		int closestTriangleIndex = getNearestSurface(builder, distSq);
 		Triangle closestTriangle = builder.triangleBuf[closestTriangleIndex];
-		Vec3 a = builder.vertexBuf[closestTriangle[0]];
-		Vec3 b = builder.vertexBuf[closestTriangle[1]];
-		Vec3 c = builder.vertexBuf[closestTriangle[2]];
-		Vec3 closestTriangleNormal = getNormalVec(closestTriangle, builder.vertexBuf);
+		Vec3f a = builder.vertexBuf[closestTriangle[0]];
+		Vec3f b = builder.vertexBuf[closestTriangle[1]];
+		Vec3f c = builder.vertexBuf[closestTriangle[2]];
+		Vec3f closestTriangleNormal = getNormalVec(closestTriangle, builder.vertexBuf);
 
 		MinkPoint point(getSupport(first, second, closestTriangleNormal));
 
@@ -354,29 +358,29 @@ bool runEPA(const Shape& first, const Shape& second, const Tetrahedron& s, Vec3&
 		} else {
 			// closestTriangle is an edge triangle, so our best direction is towards this triangle.
 
-			RayIntersection ri = rayTriangleIntersection(Vec3(), closestTriangleNormal, a, b, c);
+			RayIntersection<float> ri = rayTriangleIntersection(Vec3f(), closestTriangleNormal, a, b, c);
 
 			exitVector = ri.d * closestTriangleNormal;
 
 			MinkowskiPointIndices inds[3]{bufs.knownVecs[closestTriangle[0]], bufs.knownVecs[closestTriangle[1]], bufs.knownVecs[closestTriangle[2]]};
 			
-			Vec3 v0 = b - a, v1 = c - a, v2 = exitVector - a;
+			Vec3f v0 = b - a, v1 = c - a, v2 = exitVector - a;
 
-			double d00 = v0 * v0;
-			double d01 = v0 * v1;
-			double d11 = v1 * v1;
-			double d20 = v2 * v0;
-			double d21 = v2 * v1;
-			double denom = d00 * d11 - d01 * d01;
-			double v = (d11 * d20 - d01 * d21) / denom;
-			double w = (d00 * d21 - d01 * d20) / denom;
-			double u = 1.0 - v - w;
+			float d00 = v0 * v0;
+			float d01 = v0 * v1;
+			float d11 = v1 * v1;
+			float d20 = v2 * v0;
+			float d21 = v2 * v1;
+			float denom = d00 * d11 - d01 * d01;
+			float v = (d11 * d20 - d01 * d21) / denom;
+			float w = (d00 * d21 - d01 * d20) / denom;
+			float u = 1.0 - v - w;
 
-			Vec3 A0 = first.vertices[inds[0][0]], A1 = first.vertices[inds[1][0]], A2 = first.vertices[inds[2][0]];
-			Vec3 B0 = second.vertices[inds[0][1]], B1 = second.vertices[inds[1][1]], B2 = second.vertices[inds[2][1]];
+			Vec3f A0 = inds[0][0], A1 = inds[1][0], A2 = inds[2][0];
+			Vec3f B0 = inds[0][1], B1 = inds[1][1], B2 = inds[2][1];
 
-			Vec3 avgFirst = A0 * u + A1 * v + A2 * w;
-			Vec3 avgSecond = B0 * u + B1 * v + B2 * w;
+			Vec3f avgFirst = A0 * u + A1 * v + A2 * w;
+			Vec3f avgSecond = B0 * u + B1 * v + B2 * w;
 
 			intersection = (avgFirst + avgSecond) / 2;
 			return true;
@@ -387,7 +391,7 @@ bool runEPA(const Shape& first, const Shape& second, const Tetrahedron& s, Vec3&
 	return false;
 }
 
-bool runEPATransformed(const Shape& first, const Shape& second, const Tetrahedron& s, const CFrame& relativeCFrame, Vec3& intersection, Vec3& exitVector, ComputationBuffers& bufs) {
+bool runEPATransformed(const Shape& first, const Shape& second, const Tetrahedron& s, const CFramef& relativeCFrame, Vec3f& intersection, Vec3f& exitVector, ComputationBuffers& bufs) {
 	physicsMeasure.mark(PhysicsProcess::EPA);
 
 	bufs.ensureCapacity(first.vertexCount + second.vertexCount + EPA_MAX_ITER, first.triangleCount + second.triangleCount + EPA_MAX_ITER * 2);
@@ -401,10 +405,10 @@ bool runEPATransformed(const Shape& first, const Shape& second, const Tetrahedro
 		double distSq;
 		int closestTriangleIndex = getNearestSurface(builder, distSq);
 		Triangle closestTriangle = builder.triangleBuf[closestTriangleIndex];
-		Vec3 a = builder.vertexBuf[closestTriangle[0]];
-		Vec3 b = builder.vertexBuf[closestTriangle[1]];
-		Vec3 c = builder.vertexBuf[closestTriangle[2]];
-		Vec3 closestTriangleNormal = getNormalVec(closestTriangle, builder.vertexBuf);
+		Vec3f a = builder.vertexBuf[closestTriangle[0]];
+		Vec3f b = builder.vertexBuf[closestTriangle[1]];
+		Vec3f c = builder.vertexBuf[closestTriangle[2]];
+		Vec3f closestTriangleNormal = getNormalVec(closestTriangle, builder.vertexBuf);
 
 		MinkPoint point(getSupport(first, second, relativeCFrame, closestTriangleNormal));
 
@@ -419,31 +423,32 @@ bool runEPATransformed(const Shape& first, const Shape& second, const Tetrahedro
 		} else {
 			// closestTriangle is an edge triangle, so our best direction is towards this triangle.
 
-			RayIntersection ri = rayTriangleIntersection(Vec3(), closestTriangleNormal, a, b, c);
+			RayIntersection<float> ri = rayTriangleIntersection(Vec3f(), closestTriangleNormal, a, b, c);
 
 			exitVector = ri.d * closestTriangleNormal;
 
 			MinkowskiPointIndices inds[3]{bufs.knownVecs[closestTriangle[0]], bufs.knownVecs[closestTriangle[1]], bufs.knownVecs[closestTriangle[2]]};
 
-			Vec3 v0 = b - a, v1 = c - a, v2 = exitVector - a;
+			Vec3f v0 = b - a, v1 = c - a, v2 = exitVector - a;
 
-			double d00 = v0 * v0;
-			double d01 = v0 * v1;
-			double d11 = v1 * v1;
-			double d20 = v2 * v0;
-			double d21 = v2 * v1;
-			double denom = d00 * d11 - d01 * d01;
-			double v = (d11 * d20 - d01 * d21) / denom;
-			double w = (d00 * d21 - d01 * d20) / denom;
-			double u = 1.0 - v - w;
+			float d00 = v0 * v0;
+			float d01 = v0 * v1;
+			float d11 = v1 * v1;
+			float d20 = v2 * v0;
+			float d21 = v2 * v1;
+			float denom = d00 * d11 - d01 * d01;
+			float v = (d11 * d20 - d01 * d21) / denom;
+			float w = (d00 * d21 - d01 * d20) / denom;
+			float u = 1.0 - v - w;
 
-			Vec3 A0 = first.vertices[inds[0][0]], A1 = first.vertices[inds[1][0]], A2 = first.vertices[inds[2][0]];
-			Vec3 B0 = second.vertices[inds[0][1]], B1 = second.vertices[inds[1][1]], B2 = second.vertices[inds[2][1]];
+			Vec3f A0 = inds[0][0], A1 = inds[1][0], A2 = inds[2][0];
+			Vec3f B0 = inds[0][1], B1 = inds[1][1], B2 = inds[2][1];
 			
-			Vec3 avgFirst = A0 * u + A1 * v + A2 * w;
-			Vec3 avgSecond = B0 * u + B1 * v + B2 * w;
+			Vec3f avgFirst = A0 * u + A1 * v + A2 * w;
+			Vec3f avgSecond = B0 * u + B1 * v + B2 * w;
 
-			intersection = (avgFirst + relativeCFrame.localToGlobal(avgSecond)) / 2;
+			// intersection = (avgFirst + relativeCFrame.localToGlobal(avgSecond)) / 2;
+			intersection = (avgFirst + avgSecond) / 2;
 			return true;
 		}
 	}

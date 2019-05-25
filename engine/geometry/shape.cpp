@@ -53,42 +53,31 @@ Triangle Triangle::leftShift() const {
 	return Triangle { secondIndex, thirdIndex, firstIndex };
 }
 
-Shape::Shape() : vertices(nullptr), 
-				 triangles(nullptr), 
-	 			 normals(nullptr),
-				 uvs(nullptr),
-				 vertexCount(0), 
-				 triangleCount(0) {}
+Shape::Shape() :
+	Shape(nullptr, nullptr, nullptr, nullptr, 0, 0) {}
 
-Shape::Shape(Vec3* vertices, const Triangle* triangles, int vertexCount, int triangleCount) : vertices(vertices), 
-																							  triangles(triangles), 
-																							  vertexCount(vertexCount), 
-																							  triangleCount(triangleCount),
-																							  normals(nullptr),
-																							  uvs(nullptr) {}
+Shape::Shape(Vec3f* vertices, const Triangle* triangles, int vertexCount, int triangleCount) :
+	Shape(vertices, nullptr, nullptr, triangles, vertexCount, triangleCount) {}
 
-Shape::Shape(Vec3* vertices, Vec3* normals, Vec2* uvs, const Triangle* triangles, int vertexCount, int triangleCount) :	vertices(vertices), 
-																														normals(normals), 
-																														uvs(uvs), 
-																														triangles(triangles), 
-																														vertexCount(vertexCount), 
-																														triangleCount(triangleCount) {}
+Shape::Shape(Vec3f* vertices, Vec3* normals, Vec2* uvs, const Triangle* triangles, int vertexCount, int triangleCount) :
+#ifdef __AVX__
+	vertices(vertices, vertexCount),
+#else
+	vertices(vertices),
+#endif
+	normals(normals), 
+	uvs(uvs), 
+	triangles(triangles), 
+	vertexCount(vertexCount), 
+	triangleCount(triangleCount) {}
 
-Shape::Shape(Vec3* vertices, Vec2* uvs, const Triangle* triangles, int vertexCount, int triangleCount) : vertices(vertices),
-																										 uvs(uvs), 
-																										 triangles(triangles),
-																										 vertexCount(vertexCount), 
-																										 triangleCount(triangleCount),
-																										 normals(nullptr) {}
+Shape::Shape(Vec3f* vertices, Vec2* uvs, const Triangle* triangles, int vertexCount, int triangleCount) :
+	Shape(vertices, nullptr, uvs, triangles, vertexCount, triangleCount) {}
 
-Shape::Shape(Vec3* vertices, Vec3* normals, const Triangle* triangles, int vertexCount, int triangleCount) : vertices(vertices), 
-																											 normals(normals), 
-																											 triangles(triangles), 
-																											 vertexCount(vertexCount), 
-																											 triangleCount(triangleCount),
-																											 uvs(nullptr) {}
+Shape::Shape(Vec3f* vertices, Vec3* normals, const Triangle* triangles, int vertexCount, int triangleCount) : 
+	Shape(vertices, normals, nullptr, triangles, vertexCount, triangleCount) {}
 
-NormalizedShape Shape::normalized(Vec3* vecBuf, Vec3* normalBuf, CFrame& backTransformation) const {
+NormalizedShape Shape::normalized(Vec3f* vecBuf, Vec3* normalBuf, CFramef& backTransformation) const {
 	backTransformation = getInertialEigenVectors();
 
 	for (int i = 0; i < vertexCount; i++) {
@@ -97,7 +86,7 @@ NormalizedShape Shape::normalized(Vec3* vecBuf, Vec3* normalBuf, CFrame& backTra
 
 	if (normals) {
 		for (int i = 0; i < vertexCount; i++) {
-			normalBuf[i] = backTransformation.relativeToLocal(normals.get()[i]);
+			normalBuf[i] = CFrame(backTransformation).relativeToLocal(normals.get()[i]);
 		}
 		return NormalizedShape(vecBuf, normalBuf, uvs.get(), triangles, vertexCount, triangleCount);
 	} else {
@@ -106,30 +95,30 @@ NormalizedShape Shape::normalized(Vec3* vecBuf, Vec3* normalBuf, CFrame& backTra
 
 }
 
-CenteredShape Shape::centered(Vec3* vecBuf, Vec3& backOffset) const {
+CenteredShape Shape::centered(Vec3f* vecBuf, Vec3& backOffset) const {
 	backOffset = getCenterOfMass();
 
 	for(int i = 0; i < vertexCount; i++) {
-		vecBuf[i] = vertices[i] - backOffset;
+		vecBuf[i] = vertices[i] - Vec3f(backOffset);
 	}
 
 	return CenteredShape(vecBuf, triangles, vertexCount, triangleCount);
 }
 
-CFrame Shape::getInertialEigenVectors() const {
+CFramef Shape::getInertialEigenVectors() const {
 	Vec3 centerOfMass = getCenterOfMass();
 	SymmetricMat3 inertia = getInertia(centerOfMass);
 	Mat3 basis = inertia.getEigenDecomposition().eigenVectors;
 
-	return CFrame(centerOfMass, basis);
+	return CFramef(Vec3f(centerOfMass), Mat3f(basis));
 }
 
 /* Test */
-NormalizedShape::NormalizedShape(Vec3 * vertices, Vec3 * normals, Vec2 * uvs, const Triangle * triangles, int vertexCount, int triangleCount) : CenteredShape(vertices, normals, uvs, triangles, vertexCount, triangleCount) {
+NormalizedShape::NormalizedShape(Vec3f * vertices, Vec3 * normals, Vec2 * uvs, const Triangle * triangles, int vertexCount, int triangleCount) : CenteredShape(vertices, normals, uvs, triangles, vertexCount, triangleCount) {
 	// TODO add normalization verification
 };
 
-NormalizedShape::NormalizedShape(Vec3 * vertices, const Triangle * triangles, int vertexCount, int triangleCount) : CenteredShape(vertices, triangles, vertexCount, triangleCount) {
+NormalizedShape::NormalizedShape(Vec3f * vertices, const Triangle * triangles, int vertexCount, int triangleCount) : CenteredShape(vertices, triangles, vertexCount, triangleCount) {
 	// TODO add normalization verification
 };
 /*
@@ -137,24 +126,24 @@ NormalizedShape::NormalizedShape(Vec3 * vertices, const Triangle * triangles, in
 
 	Modifies `vertices`
 */
-NormalizedShape::NormalizedShape(Vec3 * vertices, const Triangle * triangles, int vertexCount, int triangleCount, CFrame& transformation) : CenteredShape(vertices, triangles, vertexCount, triangleCount) {
+NormalizedShape::NormalizedShape(Vec3f * vertices, const Triangle * triangles, int vertexCount, int triangleCount, CFramef& transformation) : CenteredShape(vertices, triangles, vertexCount, triangleCount) {
 	this->normalized(vertices, nullptr, transformation);
 }
 
 
-CenteredShape::CenteredShape(Vec3 * vertices, Vec3 * normals, Vec2 * uvs, const Triangle * triangles, int vertexCount, int triangleCount) : Shape(vertices, normals, uvs, triangles, vertexCount, triangleCount) {
+CenteredShape::CenteredShape(Vec3f * vertices, Vec3 * normals, Vec2 * uvs, const Triangle * triangles, int vertexCount, int triangleCount) : Shape(vertices, normals, uvs, triangles, vertexCount, triangleCount) {
 
 };
 
-CenteredShape::CenteredShape(Vec3 * vertices, const Triangle * triangles, int vertexCount, int triangleCount) : Shape(vertices, triangles, vertexCount, triangleCount) {
+CenteredShape::CenteredShape(Vec3f * vertices, const Triangle * triangles, int vertexCount, int triangleCount) : Shape(vertices, triangles, vertexCount, triangleCount) {
 	// TODO add centering verification
 };
 
-CenteredShape::CenteredShape(Vec3 * vertices, const Triangle * triangles, int vertexCount, int triangleCount, Vec3& offset) : Shape(vertices, triangles, vertexCount, triangleCount) {
+CenteredShape::CenteredShape(Vec3f * vertices, const Triangle * triangles, int vertexCount, int triangleCount, Vec3& offset) : Shape(vertices, triangles, vertexCount, triangleCount) {
 	this->centered(vertices, offset);
 }
 
-Shape Shape::translated(Vec3 offset, Vec3 * newVecBuf) const {
+Shape Shape::translated(Vec3f offset, Vec3f * newVecBuf) const {
 	for (int i = 0; i < this->vertexCount; i++) {
 		newVecBuf[i] = offset + vertices[i];
 	}
@@ -162,7 +151,7 @@ Shape Shape::translated(Vec3 offset, Vec3 * newVecBuf) const {
 	return Shape(newVecBuf, triangles, vertexCount, triangleCount);
 }
 
-Shape Shape::rotated(RotMat3 rotation, Vec3* newVecBuf) const {
+Shape Shape::rotated(RotMat3f rotation, Vec3f* newVecBuf) const {
 	for (int i = 0; i < this->vertexCount; i++) {
 		newVecBuf[i] = rotation * vertices[i];
 	}
@@ -170,7 +159,7 @@ Shape Shape::rotated(RotMat3 rotation, Vec3* newVecBuf) const {
 	return Shape(newVecBuf, triangles, vertexCount, triangleCount);
 }
 
-Shape Shape::localToGlobal(CFrame frame, Vec3* newVecBuf) const {
+Shape Shape::localToGlobal(CFramef frame, Vec3f* newVecBuf) const {
 	for (int i = 0; i < this->vertexCount; i++) {
 		newVecBuf[i] = frame.localToGlobal(vertices[i]);
 	}
@@ -178,7 +167,7 @@ Shape Shape::localToGlobal(CFrame frame, Vec3* newVecBuf) const {
 	return Shape(newVecBuf, triangles, vertexCount, triangleCount);
 }
 
-Shape Shape::globalToLocal(CFrame frame, Vec3* newVecBuf) const {
+Shape Shape::globalToLocal(CFramef frame, Vec3f* newVecBuf) const {
 	for (int i = 0; i < this->vertexCount; i++) {
 		newVecBuf[i] = frame.globalToLocal(vertices[i]);
 	}
@@ -192,7 +181,7 @@ BoundingBox Shape::getBounds() const {
 	double zmin = vertices[0].z, zmax = vertices[0].z;
 
 	for (int i = 1; i < vertexCount; i++) {
-		const Vec3 current = vertices[i];
+		const Vec3f current = vertices[i];
 
 		if (current.x < xmin) xmin = current.x;
 		if (current.x > xmax) xmax = current.x;
@@ -233,22 +222,22 @@ bool Shape::isValid() const {
 	return isComplete(triangles, triangleCount) && getVolume() >= 0;
 }
 
-Vec3 Shape::getNormalVecOfTriangle(Triangle triangle) const {
-	Vec3 v0 = vertices[triangle.firstIndex];
+Vec3f Shape::getNormalVecOfTriangle(Triangle triangle) const {
+	Vec3f v0 = vertices[triangle.firstIndex];
 	return (vertices[triangle.secondIndex] - v0) % (vertices[triangle.thirdIndex] - v0);
 }
 
 void Shape::computeNormals(Vec3* buffer) const {
 	for (int i = 0; i < triangleCount; i++) {
 		Triangle triangle = triangles[i];
-		Vec3 v0 = vertices[triangle.firstIndex];
-		Vec3 v1 = vertices[triangle.secondIndex];
-		Vec3 v2 = vertices[triangle.thirdIndex];
+		Vec3f v0 = vertices[triangle.firstIndex];
+		Vec3f v1 = vertices[triangle.secondIndex];
+		Vec3f v2 = vertices[triangle.thirdIndex];
 
-		Vec3 D1 = v1 - v0;
-		Vec3 D2 = v2 - v0;
+		Vec3f D1 = v1 - v0;
+		Vec3f D2 = v2 - v0;
 
-		Vec3 faceNormal = (D1 % D2).normalize();
+		Vec3 faceNormal = Vec3((D1 % D2).normalize());
 
 		buffer[triangle.firstIndex] += faceNormal;
 		buffer[triangle.secondIndex] += faceNormal;
@@ -285,14 +274,14 @@ void Shape::computeNormals(Vec3* buffer) const {
 	}*/
 }
 
-bool Shape::containsPoint(Vec3 point) const {
-	Vec3 ray = Vec3(1, 0, 0);
+bool Shape::containsPoint(Vec3f point) const {
+	Vec3f ray(1, 0, 0);
 
 	bool isExiting = false;
 	double bestD = static_cast<double>(INFINITY);
 
 	for(const Triangle& tri : iterTriangles()) {
-		RayIntersection r = rayTriangleIntersection(point, ray, vertices[tri.firstIndex], vertices[tri.secondIndex], vertices[tri.thirdIndex]);
+		RayIntersection<float> r = rayTriangleIntersection(point, ray, vertices[tri.firstIndex], vertices[tri.secondIndex], vertices[tri.thirdIndex]);
 		if(r.d >= 0 && r.lineIntersectsTriangle()) {
 			if(r.d < bestD) {
 				bestD = r.d;
@@ -304,11 +293,154 @@ bool Shape::containsPoint(Vec3 point) const {
 	return isExiting;
 }
 
-int Shape::furthestIndexInDirection(Vec3 direction) const {
-	double bestDot = vertices[0] * direction;
+
+
+#ifdef __AVX__
+#include <immintrin.h> // I know I don't have to include it, but I'm sending a message!
+#ifdef _MSC_VER
+inline uint32_t __builtin_ctz(uint32_t x) {
+	unsigned long ret;
+	_BitScanForward(&ret, x);
+	return (int)ret;
+}
+#endif
+inline __m256i _mm256_blendv_epi32(__m256i a, __m256i b, __m256 mask) {
+	return _mm256_castps_si256(
+		_mm256_blendv_ps(
+			_mm256_castsi256_ps(a),
+			_mm256_castsi256_ps(b),
+			mask
+		)
+	);
+}
+
+inline uint32_t mm256_extract_epi32_var_indx(__m256i vec, int i)
+{
+	__m128i indx = _mm_cvtsi32_si128(i);
+	__m256i val = _mm256_permutevar8x32_epi32(vec, _mm256_castsi128_si256(indx));
+	return         _mm_cvtsi128_si32(_mm256_castsi256_si128(val));
+}
+
+int Shape::furthestIndexInDirection(const Vec3f& direction) const {
+	/*float bestDot = vertices[0] * direction;
 	int bestVertexIndex = 0;
 	for(int i = 1; i < vertexCount; i++) {
-		double newD = vertices[i] * direction;
+		float newD = vertices[i] * direction;
+		if(newD > bestDot) {
+			bestDot = newD;
+			bestVertexIndex = i;
+		}
+	}
+
+	return bestVertexIndex;*/
+
+	__m256 dx = _mm256_set1_ps(direction.x);
+	__m256 dy = _mm256_set1_ps(direction.y);
+	__m256 dz = _mm256_set1_ps(direction.z);
+
+	const ParallelVec3& firstBlock = vertices.vecs[0];
+	__m256 xTxd = _mm256_mul_ps(dx, firstBlock.xvalues);
+	__m256 yTyd = _mm256_mul_ps(dy, firstBlock.yvalues);
+	__m256 zTzd = _mm256_mul_ps(dz, firstBlock.zvalues);
+
+	__m256 bestDot = _mm256_add_ps(_mm256_add_ps(xTxd, yTyd), zTzd);
+	__m256i bestIndices = _mm256_set1_epi32(0);
+
+	for(int blockI = 1; blockI < vertices.blockCount(); blockI++) {
+		const ParallelVec3& block = vertices.vecs[blockI];
+		__m256i indices = _mm256_set1_epi32(blockI);
+
+		__m256 xTxd = _mm256_mul_ps(dx, block.xvalues);
+		__m256 yTyd = _mm256_mul_ps(dy, block.yvalues);
+		__m256 zTzd = _mm256_mul_ps(dz, block.zvalues);
+		__m256 dot = _mm256_add_ps(_mm256_add_ps(xTxd, yTyd), zTzd);
+
+		__m256 whichAreMax = _mm256_cmp_ps(dot, bestDot, _CMP_GT_OQ); // Greater than, false if dot == NaN
+		bestDot = _mm256_blendv_ps(bestDot, dot, whichAreMax);
+		bestIndices = _mm256_blendv_epi32(bestIndices, indices, whichAreMax);
+	}
+	// find max of our 8 left candidates
+	__m256 swap4x4 = _mm256_permute2f128_ps(bestDot, bestDot, 1);
+	__m256 bestDotInternalMax = _mm256_max_ps(bestDot, swap4x4);
+	__m256 swap2x2 = _mm256_permute_ps(bestDotInternalMax, 0b01001110);
+	bestDotInternalMax = _mm256_max_ps(bestDotInternalMax, swap2x2);
+	__m256 swap1x1 = _mm256_permute_ps(bestDotInternalMax, 0b10110001);
+	bestDotInternalMax = _mm256_max_ps(bestDotInternalMax, swap1x1);
+
+	__m256 compare = _mm256_cmp_ps(bestDotInternalMax, bestDot, _CMP_EQ_OQ);
+	uint32_t mask = _mm256_movemask_ps(compare);
+	uint32_t index = __builtin_ctz(mask);
+	uint32_t block = mm256_extract_epi32_var_indx(bestIndices, index);
+	return block * 8 + index;
+}
+
+Vec3f Shape::furthestInDirection(const Vec3f& direction) const {
+	__m256 dx = _mm256_set1_ps(direction.x);
+	__m256 dy = _mm256_set1_ps(direction.y);
+	__m256 dz = _mm256_set1_ps(direction.z);
+
+	const ParallelVec3& firstBlock = vertices.vecs[0];
+
+	__m256 bestX = firstBlock.xvalues;
+	__m256 bestY = firstBlock.yvalues;
+	__m256 bestZ = firstBlock.zvalues;
+
+	__m256 xTxd = _mm256_mul_ps(dx, bestX);
+	__m256 yTyd = _mm256_mul_ps(dy, bestY);
+	__m256 zTzd = _mm256_mul_ps(dz, bestZ);
+
+	__m256 bestDot = _mm256_add_ps(_mm256_add_ps(xTxd, yTyd), zTzd);
+
+	for (int blockI = 1; blockI < vertices.blockCount(); blockI++) {
+		const ParallelVec3& block = vertices.vecs[blockI];
+		__m256i indices = _mm256_set1_epi32(blockI);
+
+		__m256 xVal = block.xvalues;
+		__m256 yVal = block.yvalues;
+		__m256 zVal = block.zvalues;
+
+		__m256 xTxd = _mm256_mul_ps(dx, xVal);
+		__m256 yTyd = _mm256_mul_ps(dy, yVal);
+		__m256 zTzd = _mm256_mul_ps(dz, zVal);
+		__m256 dot = _mm256_add_ps(_mm256_add_ps(xTxd, yTyd), zTzd);
+
+		__m256 whichAreMax = _mm256_cmp_ps(dot, bestDot, _CMP_GT_OQ); // Greater than, false if dot == NaN
+		bestDot = _mm256_blendv_ps(bestDot, dot, whichAreMax);
+		bestX = _mm256_blendv_ps(bestX, xVal, whichAreMax);
+		bestY = _mm256_blendv_ps(bestY, yVal, whichAreMax);
+		bestZ = _mm256_blendv_ps(bestZ, zVal, whichAreMax);
+	}
+
+	// now we find the max of the remaining 8 elements
+	__m256 swap4x4 = _mm256_permute2f128_ps(bestDot, bestDot, 1);
+	__m256 bestDotInternalMax = _mm256_max_ps(bestDot, swap4x4);
+	__m256 swap2x2 = _mm256_permute_ps(bestDotInternalMax, 0b01001110);
+	bestDotInternalMax = _mm256_max_ps(bestDotInternalMax, swap2x2);
+	__m256 swap1x1 = _mm256_permute_ps(bestDotInternalMax, 0b10110001);
+	bestDotInternalMax = _mm256_max_ps(bestDotInternalMax, swap1x1);
+
+	__m256 compare = _mm256_cmp_ps(bestDotInternalMax, bestDot, _CMP_EQ_OQ);
+	uint32_t mask = _mm256_movemask_ps(compare);
+	uint32_t index = __builtin_ctz(mask);
+	__m256i indxVec = _mm256_castsi128_si256(_mm_cvtsi32_si128(index));
+
+	bestX = _mm256_permutevar8x32_ps(bestX, indxVec);
+	bestY = _mm256_permutevar8x32_ps(bestY, indxVec);
+	bestZ = _mm256_permutevar8x32_ps(bestZ, indxVec);
+
+	float furthestX = _mm_cvtss_f32(_mm256_castps256_ps128(bestX));
+	float furthestY = _mm_cvtss_f32(_mm256_castps256_ps128(bestY));
+	float furthestZ = _mm_cvtss_f32(_mm256_castps256_ps128(bestZ));
+
+	return Vec3f(furthestX, furthestY, furthestZ);
+}
+
+#else
+int Shape::furthestIndexInDirection(const Vec3f& direction) const {
+	float bestDot = vertices[0] * direction;
+	int bestVertexIndex = 0;
+	for(int i = 1; i < vertexCount; i++) {
+		float newD = vertices[i] * direction;
 		if(newD > bestDot) {
 			bestDot = newD;
 			bestVertexIndex = i;
@@ -318,12 +450,12 @@ int Shape::furthestIndexInDirection(Vec3 direction) const {
 	return bestVertexIndex;
 }
 
-Vec3 Shape::furthestInDirection(Vec3 direction) const {
-	double bestDot = vertices[0] * direction;
-	Vec3 bestVertex = vertices[0];
-	for(int i = 1; i < vertexCount; i++) {
-		double newD = vertices[i] * direction;
-		if(newD > bestDot) {
+Vec3f Shape::furthestInDirection(const Vec3f& direction) const {
+	float bestDot = vertices[0] * direction;
+	Vec3f bestVertex = vertices[0];
+	for (int i = 1; i < vertexCount; i++) {
+		float newD = vertices[i] * direction;
+		if (newD > bestDot) {
 			bestDot = newD;
 			bestVertex = vertices[i];
 		}
@@ -331,11 +463,15 @@ Vec3 Shape::furthestInDirection(Vec3 direction) const {
 
 	return bestVertex;
 }
+#endif
+
+
+
 
 ComputationBuffers buffers(1000, 2000);
-bool Shape::intersects(const Shape& other, Vec3& intersection, Vec3& exitVector, const Vec3& centerConnection) const {
+bool Shape::intersects(const Shape& other, Vec3f& intersection, Vec3f& exitVector, const Vec3& centerConnection) const {
 	Tetrahedron result;
-	bool collides = runGJK(*this, other, centerConnection, result);
+	bool collides = runGJK(*this, other, Vec3f(centerConnection), result);
 	
 	if(collides) {
 		bool epaResult = runEPA(*this, other, result, intersection, exitVector, buffers);
@@ -347,12 +483,12 @@ bool Shape::intersects(const Shape& other, Vec3& intersection, Vec3& exitVector,
 
 #include "../physicsProfiler.h"
 
-bool Shape::intersectsTransformed(const Shape& other, const CFrame& relativeCFrame, Vec3& intersection, Vec3& exitVector) const {
+bool Shape::intersectsTransformed(const Shape& other, const CFramef& relativeCFramef, Vec3f& intersection, Vec3f& exitVector) const {
 	Tetrahedron result;
-	bool collides = runGJKTransformed(*this, other, relativeCFrame, relativeCFrame.position, result);
+	bool collides = runGJKTransformed(*this, other, relativeCFramef, relativeCFramef.position, result);
 	
 	if(collides) {
-		return runEPATransformed(*this, other, result, relativeCFrame, intersection, exitVector, buffers);
+		return runEPATransformed(*this, other, result, relativeCFramef, intersection, exitVector, buffers);
 	} else {
 		return false;
 	}
@@ -361,12 +497,12 @@ bool Shape::intersectsTransformed(const Shape& other, const CFrame& relativeCFra
 double Shape::getVolume() const {
 	double total = 0;
 	for (Triangle triangle : iterTriangles()) {
-		Vec3 v0 = vertices[triangle.firstIndex]; 
-		Vec3 v1 = vertices[triangle.secondIndex];
-		Vec3 v2 = vertices[triangle.thirdIndex];
+		Vec3f v0 = vertices[triangle.firstIndex]; 
+		Vec3f v1 = vertices[triangle.secondIndex];
+		Vec3f v2 = vertices[triangle.thirdIndex];
 
-		Vec3 D1 = v1 - v0; 
-		Vec3 D2 = v2 - v0;
+		Vec3f D1 = v1 - v0; 
+		Vec3f D2 = v2 - v0;
 		
 		double Tf = (D1.x * D2.y - D1.y * D2.x);
 
@@ -377,19 +513,19 @@ double Shape::getVolume() const {
 }
 
 Vec3 Shape::getCenterOfMass() const {
-	Vec3 total = Vec3(0,0,0);
+	Vec3 total(0,0,0);
 	for (Triangle triangle : iterTriangles()) {
-		Vec3 v0 = vertices[triangle.firstIndex];
-		Vec3 v1 = vertices[triangle.secondIndex];
-		Vec3 v2 = vertices[triangle.thirdIndex];
+		Vec3f v0 = vertices[triangle.firstIndex];
+		Vec3f v1 = vertices[triangle.secondIndex];
+		Vec3f v2 = vertices[triangle.thirdIndex];
 
-		Vec3 D1 = v1 - v0;
-		Vec3 D2 = v2 - v0;
+		Vec3f D1 = v1 - v0;
+		Vec3f D2 = v2 - v0;
 
-		Vec3 dFactor = D1 % D2;
-		Vec3 vFactor = v0.squared() + v1.squared() + v2.squared() + v0.mul(v1) + v1.mul(v2) + v2.mul(v0);
+		Vec3f dFactor = D1 % D2;
+		Vec3f vFactor = v0.squared() + v1.squared() + v2.squared() + v0.mul(v1) + v1.mul(v2) + v2.mul(v0);
 
-		total += dFactor.mul(vFactor);
+		total += Vec3(dFactor.mul(vFactor));
 	}
 	
 	return total / (24 * getVolume());
@@ -404,7 +540,7 @@ Sphere Shape::getCircumscribedSphere() const {
 
 double Shape::getMaxRadius() const {
 	double bestDistSq = 0;
-	for(Vec3 vertex : iterVertices()) {
+	for(Vec3f vertex : iterVertices()) {
 		double distSq = vertex.lengthSquared();
 		if(distSq > bestDistSq) {
 			bestDistSq = distSq;
@@ -426,9 +562,9 @@ double Shape::getMaxRadius() const {
 SymmetricMat3 Shape::getInertia(CFrame reference) const {
 	SymmetricMat3 total(0, 0, 0, 0, 0, 0);
 	for (Triangle triangle : iterTriangles()) {
-		Vec3 v0 = reference.globalToLocal(vertices[triangle.firstIndex]);
-		Vec3 v1 = reference.globalToLocal(vertices[triangle.secondIndex]);
-		Vec3 v2 = reference.globalToLocal(vertices[triangle.thirdIndex]);
+		Vec3 v0 = reference.globalToLocal(Vec3(vertices[triangle.firstIndex]));
+		Vec3 v1 = reference.globalToLocal(Vec3(vertices[triangle.secondIndex]));
+		Vec3 v2 = reference.globalToLocal(Vec3(vertices[triangle.thirdIndex]));
 
 		Vec3 D1 = v1 - v0;
 		Vec3 D2 = v2 - v0;
@@ -472,16 +608,16 @@ SymmetricMat3 Shape::getInertia() const {
 	return this->getInertia(CFrame());
 }
 
-double Shape::getIntersectionDistance(Vec3 origin, Vec3 direction) {
-	const double EPSILON = 0.0000001f;
-	double t = INFINITY;
+float Shape::getIntersectionDistance(Vec3f origin, Vec3f direction) {
+	const float EPSILON = 0.0000001f;
+	float t = INFINITY;
 	for (Triangle triangle : iterTriangles()) {
-		Vec3 v0 = vertices[triangle.firstIndex];
-		Vec3 v1 = vertices[triangle.secondIndex];
-		Vec3 v2 = vertices[triangle.thirdIndex];
+		Vec3f v0 = vertices[triangle.firstIndex];
+		Vec3f v1 = vertices[triangle.secondIndex];
+		Vec3f v2 = vertices[triangle.thirdIndex];
 
-		Vec3 edge1, edge2, h, s, q;
-		double a, f, u, v;
+		Vec3f edge1, edge2, h, s, q;
+		float a, f, u, v;
 
 		edge1 = v1 - v0;
 		edge2 = v2 - v0;
@@ -498,11 +634,11 @@ double Shape::getIntersectionDistance(Vec3 origin, Vec3 direction) {
 		if (u < 0.0 || u > 1.0) continue;
 		
 		q = s % edge1;
-		v = f * direction * q;
+		v = direction * f * q;
 
 		if (v < 0.0 || u + v > 1.0) continue;
 
-		double r = f * edge2 * q;
+		float r = edge2 * f * q;
 		if (r > EPSILON) { 
 			if (r < t) t = r;
 		} else {

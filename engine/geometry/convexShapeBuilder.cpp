@@ -2,15 +2,18 @@
 
 #include <algorithm>
 
-ConvexShapeBuilder::ConvexShapeBuilder(Vec3 * vertBuf, Triangle* triangleBuf, int vertexCount, int triangleCount, TriangleNeighbors* neighborBuf, int* removalBuffer, EdgePiece* newTriangleBuffer)
+ConvexShapeBuilder::ConvexShapeBuilder(Vec3f * vertBuf, Triangle* triangleBuf, int vertexCount, int triangleCount, TriangleNeighbors* neighborBuf, int* removalBuffer, EdgePiece* newTriangleBuffer)
 	: vertexBuf(vertBuf), triangleBuf(triangleBuf), vertexCount(vertexCount), triangleCount(triangleCount), neighborBuf(neighborBuf), removalBuffer(removalBuffer), newTriangleBuffer(newTriangleBuffer) {
 	fillNeighborBuf(triangleBuf, triangleCount, neighborBuf);
 }
 
-ConvexShapeBuilder::ConvexShapeBuilder(const Shape s, Vec3 * vertBuf, Triangle* triangleBuf, TriangleNeighbors* neighborBuf, int* removalBuffer, EdgePiece* newTriangleBuffer)
+ConvexShapeBuilder::ConvexShapeBuilder(const Shape& s, Vec3f * vertBuf, Triangle* triangleBuf, TriangleNeighbors* neighborBuf, int* removalBuffer, EdgePiece* newTriangleBuffer)
 	: vertexBuf(vertBuf), triangleBuf(triangleBuf), vertexCount(s.vertexCount), triangleCount(s.triangleCount), neighborBuf(neighborBuf), removalBuffer(removalBuffer), newTriangleBuffer(newTriangleBuffer) {
 
-	memcpy(vertBuf, s.vertices, s.vertexCount * sizeof(Vec3));
+	for(int i = 0; i < s.vertexCount; i++) {
+		vertBuf[i] = s[i];
+	}
+
 	memcpy(triangleBuf, s.triangles, s.triangleCount * sizeof(Triangle));
 
 	fillNeighborBuf(triangleBuf, triangleCount, neighborBuf);
@@ -41,12 +44,12 @@ void ConvexShapeBuilder::removeTriangle(int triangleIndex) {
 	moveTriangle(triangleBuf, neighborBuf, triangleCount, triangleIndex);
 }
 
-bool ConvexShapeBuilder::isAbove(Vec3 point, Triangle t) {
-	Vec3* verts = vertexBuf;
-	Vec3 v0 = verts[t[0]];
-	Vec3 v1 = verts[t[1]];
-	Vec3 v2 = verts[t[2]];
-	Vec3 normalVec = (v1 - v0) % (v2 - v0);
+bool ConvexShapeBuilder::isAbove(const Vec3f& point, Triangle t) {
+	Vec3f* verts = vertexBuf;
+	Vec3f v0 = verts[t[0]];
+	Vec3f v1 = verts[t[1]];
+	Vec3f v2 = verts[t[2]];
+	Vec3f normalVec = (v1 - v0) % (v2 - v0);
 
 	return (point - v0) * normalVec > 0;
 }
@@ -59,10 +62,10 @@ struct ConvexTriangleIterator {
 	int newTriangleCount = 0;
 	int removalCount = 0;
 
-	Vec3 point;
+	Vec3f point;
 	ConvexShapeBuilder& shapeBuilder;
 
-	ConvexTriangleIterator(Vec3 point, ConvexShapeBuilder& shapeBuilder, int* removalBuffer, EdgePiece* newTrianglesBuffer) : point(point), shapeBuilder(shapeBuilder), removalList(removalBuffer), newTrianglesList(newTrianglesBuffer) {}
+	ConvexTriangleIterator(const Vec3f& point, ConvexShapeBuilder& shapeBuilder, int* removalBuffer, EdgePiece* newTrianglesBuffer) : point(point), shapeBuilder(shapeBuilder), removalList(removalBuffer), newTrianglesList(newTrianglesBuffer) {}
 
 	void markTriangleRemoved(int triangle) {
 		shapeBuilder.neighborBuf[triangle].AB_Neighbor = -1;
@@ -74,11 +77,11 @@ struct ConvexTriangleIterator {
 	}
 
 	bool isAbove(Triangle t) {
-		Vec3* verts = shapeBuilder.vertexBuf;
-		Vec3 v0 = verts[t[0]];
-		Vec3 v1 = verts[t[1]];
-		Vec3 v2 = verts[t[2]];
-		Vec3 normalVec = (v1 - v0) % (v2 - v0);
+		Vec3f* verts = shapeBuilder.vertexBuf;
+		Vec3f v0 = verts[t[0]];
+		Vec3f v1 = verts[t[1]];
+		Vec3f v2 = verts[t[2]];
+		Vec3f normalVec = (v1 - v0) % (v2 - v0);
 
 		return (point - v0) * normalVec > 0;
 	}
@@ -208,7 +211,7 @@ struct ConvexTriangleIterator {
 	}
 };
 
-void ConvexShapeBuilder::addPoint(Vec3 point, int oldTriangleIndex) {
+void ConvexShapeBuilder::addPoint(const Vec3f& point, int oldTriangleIndex) {
 	ConvexTriangleIterator iter(point, *this, this->removalBuffer, this->newTriangleBuffer);
 
 	TriangleNeighbors neighbors = neighborBuf[oldTriangleIndex];
@@ -223,7 +226,7 @@ void ConvexShapeBuilder::addPoint(Vec3 point, int oldTriangleIndex) {
 	iter.applyUpdates(vertexCount-1);
 }
 
-bool ConvexShapeBuilder::addPoint(Vec3 point) {
+bool ConvexShapeBuilder::addPoint(const Vec3f& point) {
 	for(int i = 0; i < triangleCount; i++) {
 		if(isAbove(point, triangleBuf[i])) {
 			addPoint(point, i);

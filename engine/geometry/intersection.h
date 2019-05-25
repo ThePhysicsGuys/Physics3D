@@ -1,18 +1,20 @@
 #pragma once
 
+
+#include "../math/vec3.h"
+
 struct Simplex;
 
 struct MinkowskiPointIndices {
-	int indices[2];
+	Vec3f indices[2];
 
-	int& operator[](int i) { return indices[i]; }
-	bool operator==(const MinkowskiPointIndices& other) const {
+	Vec3f& operator[](int i) { return indices[i]; }
+	/*bool operator==(const MinkowskiPointIndices& other) const {
 		return this->indices[0] == other.indices[0] &&
 			this->indices[1] == other.indices[1];
-	}
+	}*/
 };
 
-#include "../math/vec3.h"
 #include "convexShapeBuilder.h"
 #include "computationBuffer.h"
 #include "../math/utils.h"
@@ -42,16 +44,18 @@ struct Simplex {
 };
 
 struct MinkPoint {
-	Vec3 p;
-	int originFirst;
-	int originSecond;
+	Vec3f p;
+	Vec3f originFirst;
+	Vec3f originSecond;
+	/*int originFirst;
+	int originSecond;*/
 };
 
 struct Tetrahedron {
 	MinkPoint A, B, C, D;
 };
 
-bool runGJK(const Shape& first, const Shape& second, const Vec3& initialSearchDirection, Tetrahedron& simp);
-bool runGJKTransformed(const Shape& first, const Shape& second, const CFrame& relativeCFrame, const Vec3& initialSearchDirection, Tetrahedron& simp);
-bool runEPA(const Shape& first, const Shape& second, const Tetrahedron& s, Vec3& intersection, Vec3& exitVector, ComputationBuffers& bufs);
-bool runEPATransformed(const Shape& first, const Shape& second, const Tetrahedron& s, const CFrame& relativeCFrame, Vec3& intersection, Vec3& exitVector, ComputationBuffers& bufs);
+bool runGJK(const Shape& first, const Shape& second, const Vec3f& initialSearchDirection, Tetrahedron& simp);
+bool runGJKTransformed(const Shape& first, const Shape& second, const CFramef& relativeCFrame, const Vec3f& initialSearchDirection, Tetrahedron& simp);
+bool runEPA(const Shape& first, const Shape& second, const Tetrahedron& s, Vec3f& intersection, Vec3f& exitVector, ComputationBuffers& bufs);
+bool runEPATransformed(const Shape& first, const Shape& second, const Tetrahedron& s, const CFramef& relativeCFrame, Vec3f& intersection, Vec3f& exitVector, ComputationBuffers& bufs);

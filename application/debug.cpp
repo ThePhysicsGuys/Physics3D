@@ -36,6 +36,9 @@ namespace AppDebug {
 		void logVec(Vec3 origin, Vec3 vec, VecType type) {
 			buf.add(ColoredVec(origin, vec, type));
 		}
+		void logVec(Vec3f origin, Vec3f vec, VecType type) {
+			buf.add(ColoredVec(Vec3(origin), Vec3(vec), type));
+		}
 
 		void logCFrame(CFrame frame, CFrameType type) {
 			switch(type) {
@@ -58,7 +61,7 @@ namespace AppDebug {
 			for(int i = 0; i < shape.triangleCount; i++) {
 				Triangle t = shape.triangles[i];
 				for(int j = 0; j < 3; j++) {
-					Debug::logVec(shape.vertices[t[j]], shape.vertices[t[(j + 1) % 3]] - shape.vertices[t[j]], Debug::INFO);
+					Debug::logVec(shape[t[j]], shape[t[(j + 1) % 3]] - shape[t[j]], Debug::INFO);
 				}
 			}
 		}

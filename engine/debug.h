@@ -24,6 +24,7 @@ namespace Debug {
 	};
 
 	void logVec(Vec3 origin, Vec3 vec, VecType type);
+	inline void logVec(Vec3f origin, Vec3f vec, VecType type) { logVec(Vec3(origin), Vec3(vec), type); };
 	void logCFrame(CFrame frame, CFrameType type);
 	void logShape(Shape shape);
 

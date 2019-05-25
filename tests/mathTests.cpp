@@ -99,15 +99,15 @@ TEST_CASE(cframeAssociativity) {
 
 TEST_CASE(cframeMat4Equivalence) {
 	CFrame A(Vec3(0.7, 1.02, 0.9), fromEulerAngles(0.7, 0.9, 0.3));
-	Mat4 A4 = A.asMat4();
+	Mat4 A4 = CFrameToMat4(A);
 
 	Vec3 v(17, -0.7, 9.4);
 
-	ASSERT(A.asMat4().asCFrame() == A);
-	ASSERT(A.localToGlobal(v) == A.asMat4() * v);
-	ASSERT(A.globalToLocal(v) == A.asMat4().inverse() * v);
-	ASSERT(A4 * v == A4.asCFrame().localToGlobal(v));
-	ASSERT(A4.inverse() * v == A4.asCFrame().globalToLocal(v));
+	ASSERT(Mat4ToCFrame(CFrameToMat4(A)) == A);
+	ASSERT(A.localToGlobal(v) == CFrameToMat4(A) * v);
+	ASSERT(A.globalToLocal(v) == CFrameToMat4(A).inverse() * v);
+	ASSERT(A4 * v == Mat4ToCFrame(A4).localToGlobal(v));
+	ASSERT(A4.inverse() * v == Mat4ToCFrame(A4).globalToLocal(v));
 }
 
 TEST_CASE(fromEuler) {
@@ -122,7 +122,7 @@ TEST_CASE(crossProduct) {
 	Vec3 u(-7.3, 1.8, 0.5);
 
 	ASSERT(v % u == -(u % v));
-	ASSERT((2 * v) % (3 * u) == 6 * (v % u));
+	ASSERT((2.0f * v) % (3.0f * u) == 6.0f * (v % u));
 
 	ASSERT(x % y == z);
 	ASSERT(y % x == -z);

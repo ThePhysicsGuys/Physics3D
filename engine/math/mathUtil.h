@@ -6,6 +6,7 @@
 #include "vec3.h"
 #include "mat4.h"
 #include "vec4.h"
+#include "cframe.h"
 
 #include <string>
 #include <sstream>

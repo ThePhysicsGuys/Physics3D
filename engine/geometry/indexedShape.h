@@ -25,7 +25,7 @@ struct TriangleNeighbors {
 struct IndexedShape : Shape {
 	TriangleNeighbors * neighbors;
 	
-	IndexedShape(Vec3* vertices, const Triangle* triangles, int vertexCount, int triangleCount, TriangleNeighbors * neighborBuf);
+	IndexedShape(Vec3f* vertices, const Triangle* triangles, int vertexCount, int triangleCount, TriangleNeighbors * neighborBuf);
 
 	bool isValid() const;
 };

@@ -48,7 +48,7 @@ TEST_CASE(profileAddableBuffer) {
 	t = total;
 }*/
 
-#define VECTOR_COUNT 20000
+#define VECTOR_COUNT 200
 #define ITER_MAX 1000
 #define VECTOR_SIZE 3
 
@@ -145,3 +145,40 @@ TEST_CASE(profileSmallVectorOfVectorsJustRight) {
 
 	Log::debug("Total %d", sum);
 }*/
+
+TEST_CASE(unpackNShit) {
+	__m256 a = _mm256_set_ps(1,2,3,4,5,6,7,8);
+	__m256 b = _mm256_set_ps(10,20,30,40,50,60,70,80);
+	//__m256 a = _mm256_set_ps(1,1,1,1,2,2,2,2);
+	//__m256 b = _mm256_set_ps(3,3,3,3,4,4,4,4);
+
+	//__m256 ta = _mm256_permute2f128_ps(a, a, 1);
+	//__m256 tb = _mm256_permute2f128_ps(b, b, 1);
+
+	__m256 xzxzydyd = _mm256_unpackhi_ps(a, b);
+	__m256 XZXZYDYD = _mm256_unpacklo_ps(a, b);
+
+	__m256 xzxzXZXZ = _mm256_permute2f128_ps(xzxzydyd, XZXZYDYD, 0b00000010);
+	__m256 YDYDydyd = _mm256_permute2f128_ps(xzxzydyd, XZXZYDYD, 0b00010011);
+
+	__m256 e = _mm256_castpd_ps(_mm256_unpackhi_pd(_mm256_castps_pd(xzxzXZXZ), _mm256_castps_pd(YDYDydyd)));
+	__m256 f = _mm256_castpd_ps(_mm256_unpacklo_pd(_mm256_castps_pd(xzxzXZXZ), _mm256_castps_pd(YDYDydyd)));
+
+	/*__m256 c = _mm256_castpd_ps(_mm256_unpackhi_pd(_mm256_castps_pd(a), _mm256_castps_pd(a)));
+	__m256 c2 = _mm256_castpd_ps(_mm256_unpacklo_pd(_mm256_castps_pd(a), _mm256_castps_pd(a)));
+	__m256 d = _mm256_castpd_ps(_mm256_unpacklo_pd(_mm256_castps_pd(b), _mm256_castps_pd(b)));
+	__m256 d2 = _mm256_castpd_ps(_mm256_unpackhi_pd(_mm256_castps_pd(b), _mm256_castps_pd(b)));*/
+
+	/*__m256 e = _mm256_blend_ps(c, d, 0b00110011);
+	__m256 f = _mm256_blend_ps(c, d, 0b11001100);*/
+
+	/*__m256 c = _mm256_unpackhi_ps(a, b);
+	__m256 d = _mm256_unpacklo_ps(a, b);
+
+	d = _mm256_permute2f128_ps(d, d, 1);
+
+
+
+	__m256 e = _mm256_castpd_ps(_mm256_unpackhi_pd(_mm256_castps_pd(c), _mm256_castps_pd(d)));
+	__m256 f = _mm256_castpd_ps(_mm256_unpacklo_pd(_mm256_castps_pd(d), _mm256_castps_pd(c)));*/
+}
