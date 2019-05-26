@@ -59,7 +59,7 @@ Shape::Shape() :
 Shape::Shape(Vec3f* vertices, const Triangle* triangles, int vertexCount, int triangleCount) :
 	Shape(vertices, nullptr, nullptr, triangles, vertexCount, triangleCount) {}
 
-Shape::Shape(Vec3f* vertices, Vec3* normals, Vec2* uvs, const Triangle* triangles, int vertexCount, int triangleCount) :
+Shape::Shape(Vec3f* vertices, Vec3f* normals, Vec2f* uvs, const Triangle* triangles, int vertexCount, int triangleCount) :
 #ifdef __AVX__
 	vertices(vertices, vertexCount),
 #else
@@ -71,13 +71,13 @@ Shape::Shape(Vec3f* vertices, Vec3* normals, Vec2* uvs, const Triangle* triangle
 	vertexCount(vertexCount), 
 	triangleCount(triangleCount) {}
 
-Shape::Shape(Vec3f* vertices, Vec2* uvs, const Triangle* triangles, int vertexCount, int triangleCount) :
+Shape::Shape(Vec3f* vertices, Vec2f* uvs, const Triangle* triangles, int vertexCount, int triangleCount) :
 	Shape(vertices, nullptr, uvs, triangles, vertexCount, triangleCount) {}
 
-Shape::Shape(Vec3f* vertices, Vec3* normals, const Triangle* triangles, int vertexCount, int triangleCount) : 
+Shape::Shape(Vec3f* vertices, Vec3f* normals, const Triangle* triangles, int vertexCount, int triangleCount) : 
 	Shape(vertices, normals, nullptr, triangles, vertexCount, triangleCount) {}
 
-NormalizedShape Shape::normalized(Vec3f* vecBuf, Vec3* normalBuf, CFramef& backTransformation) const {
+NormalizedShape Shape::normalized(Vec3f* vecBuf, Vec3f* normalBuf, CFramef& backTransformation) const {
 	backTransformation = getInertialEigenVectors();
 
 	for (int i = 0; i < vertexCount; i++) {
@@ -114,7 +114,7 @@ CFramef Shape::getInertialEigenVectors() const {
 }
 
 /* Test */
-NormalizedShape::NormalizedShape(Vec3f * vertices, Vec3 * normals, Vec2 * uvs, const Triangle * triangles, int vertexCount, int triangleCount) : CenteredShape(vertices, normals, uvs, triangles, vertexCount, triangleCount) {
+NormalizedShape::NormalizedShape(Vec3f * vertices, Vec3f * normals, Vec2f * uvs, const Triangle * triangles, int vertexCount, int triangleCount) : CenteredShape(vertices, normals, uvs, triangles, vertexCount, triangleCount) {
 	// TODO add normalization verification
 };
 
@@ -131,7 +131,7 @@ NormalizedShape::NormalizedShape(Vec3f * vertices, const Triangle * triangles, i
 }
 
 
-CenteredShape::CenteredShape(Vec3f * vertices, Vec3 * normals, Vec2 * uvs, const Triangle * triangles, int vertexCount, int triangleCount) : Shape(vertices, normals, uvs, triangles, vertexCount, triangleCount) {
+CenteredShape::CenteredShape(Vec3f * vertices, Vec3f * normals, Vec2f * uvs, const Triangle * triangles, int vertexCount, int triangleCount) : Shape(vertices, normals, uvs, triangles, vertexCount, triangleCount) {
 
 };
 
@@ -227,7 +227,7 @@ Vec3f Shape::getNormalVecOfTriangle(Triangle triangle) const {
 	return (vertices[triangle.secondIndex] - v0) % (vertices[triangle.thirdIndex] - v0);
 }
 
-void Shape::computeNormals(Vec3* buffer) const {
+void Shape::computeNormals(Vec3f* buffer) const {
 	for (int i = 0; i < triangleCount; i++) {
 		Triangle triangle = triangles[i];
 		Vec3f v0 = vertices[triangle.firstIndex];
@@ -237,7 +237,7 @@ void Shape::computeNormals(Vec3* buffer) const {
 		Vec3f D1 = v1 - v0;
 		Vec3f D2 = v2 - v0;
 
-		Vec3 faceNormal = Vec3((D1 % D2).normalize());
+		Vec3f faceNormal = (D1 % D2).normalize();
 
 		buffer[triangle.firstIndex] += faceNormal;
 		buffer[triangle.secondIndex] += faceNormal;
@@ -247,31 +247,6 @@ void Shape::computeNormals(Vec3* buffer) const {
 	for (int i = 0; i < vertexCount; i++) {
 		buffer[i] = buffer[i].normalize();
 	}
-
-	/*for (int i = 0; i < vertexCount; i++) {
- 		Vec3 vertexNormal;
-		for (int j = 0; j < triangleCount; j++) {
-			Triangle triangle = triangles[j];
-			if (triangle.firstIndex == i || triangle.secondIndex == i || triangle.thirdIndex == i) {
-
-				while (triangle.firstIndex != i)
-					triangle = triangle.rightShift();
-
-				Vec3 v0 = vertices[triangle.firstIndex];
-				Vec3 v1 = vertices[triangle.secondIndex];
-				Vec3 v2 = vertices[triangle.thirdIndex];
-
-				Vec3 D1 = v1 - v0;
-				Vec3 D2 = v2 - v0;
-
-				Vec3 faceNormal = D1 % D2;
-
-				vertexNormal += faceNormal.normalize(); 
-			}
-		}
-		vertexNormal = vertexNormal.normalize();
-		buffer[i] = vertexNormal;
-	}*/
 }
 
 bool Shape::containsPoint(Vec3f point) const {

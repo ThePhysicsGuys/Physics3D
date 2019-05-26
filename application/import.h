@@ -18,6 +18,7 @@ namespace Import {
 	float parseFloat(std::string num);
 	double parseDouble(std::string num);
 	Vec3 parseVec3(std::string vec);
+	Vec3f parseVec3f(std::string vec);
 	DiagonalMat3 parseDiagonalMat3(std::string mat);
 	Mat3 parseMat3(std::string mat);
 

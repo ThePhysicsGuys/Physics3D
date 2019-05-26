@@ -260,9 +260,6 @@ void Screen::init() {
 
 	partAmbientSlider->action = [] (Slider* s) {
 		if (GUI::screen->selectedPart) {
-
-			Log::debug("%f, %s", s->value, str(GUI::COLOR::hsvToRgb(Vec3(s->value, 1, 1))).c_str());
-
 			GUI::screen->selectedPart->material.ambient = Vec3f(GUI::COLOR::hsvToRgb(Vec3(s->value, 1, 1)));
 		}
 	};
@@ -301,12 +298,12 @@ void Screen::init() {
 	
 
 	// Origin init
-	double originVertices[3] = { 0, 0, 5 };
+	float originVertices[3] = { 0, 0, 5 };
 	originMesh = new ArrayMesh(originVertices, 1, 3, RenderMode::POINTS);
 
 
 	// Vector init
-	vectorMesh = new VectorMesh(new double[128 * 7], 128);
+	vectorMesh = new VectorMesh(new float[128 * 7], 128);
 
 
 	// Eventhandler init
@@ -508,7 +505,7 @@ void Screen::refresh() {
 	/*for (ExtendedPart& part : *world) {
 		if (part.hitbox.normals)
 			for (int i = 0; i < part.hitbox.vertexCount; i++)
-				vecLog.add(AppDebug::ColoredVec(part.cframe.localToGlobal(part.hitbox.vertices[i]), part.cframe.localToRelative(part.hitbox.normals.get()[i]), Debug::POSITION));
+				vecLog.add(AppDebug::ColoredVec(part.cframe.localToGlobal(part.hitbox[i]), part.cframe.localToRelative(part.hitbox.normals.get()[i]), Debug::POSITION));
 	}*/
 
 	// Update vector mesh

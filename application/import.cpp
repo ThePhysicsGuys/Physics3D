@@ -31,7 +31,16 @@ Vec3 Import::parseVec3(std::string vec) {
 	std::vector<std::string> tokens = split(vec, ' ');
 	Vec3 vector = Vec3();
 	for (int i = 0; i < 3; i++) {
-		vector.v[i] = parseDouble(tokens[i]);
+		vector.v[i] = Import::parseDouble(tokens[i]);
+	}
+	return vector;
+}
+
+Vec3f Import::parseVec3f(std::string vec) {
+	std::vector<std::string> tokens = split(vec, ' ');
+	Vec3f vector = Vec3f();
+	for (int i = 0; i < 3; i++) {
+		vector.v[i] = Import::parseFloat(tokens[i]);
 	}
 	return vector;
 }
@@ -121,22 +130,22 @@ struct Face {
 	}
 };
 
-Shape reorder(const std::vector<Vec3>& positions, const std::vector<Vec3>& normals, const std::vector<Vec2>& uvs, const std::vector<Face>& faces, Flags flags) {
+Shape reorder(const std::vector<Vec3f>& positions, const std::vector<Vec3f>& normals, const std::vector<Vec2f>& uvs, const std::vector<Face>& faces, Flags flags) {
 	Triangle* triangleArray = nullptr;
-	Vec3* positionArray = nullptr;
-	Vec3* normalArray = nullptr;
-	Vec2* uvArray = nullptr;
+	Vec3f * positionArray = nullptr;
+	Vec3f * normalArray = nullptr;
+	Vec2f * uvArray = nullptr;
 
 	// Positions
-	positionArray = new Vec3[positions.size()];
+	positionArray = new Vec3f[positions.size()];
 	for (int i = 0; i < positions.size(); i++) {
 		positionArray[i] = positions[i];
 	}
 
 	triangleArray = new Triangle[faces.size()];
 
-	if (flags.normals) normalArray = new Vec3[positions.size()];
-	if (flags.uvs) uvArray = new Vec2[positions.size()];
+	if (flags.normals) normalArray = new Vec3f[positions.size()];
+	if (flags.uvs) uvArray = new Vec2f[positions.size()];
 
 	for (int i = 0; i < faces.size(); i++) {
 		const Group* indices = faces[i].groups;
@@ -169,24 +178,24 @@ Shape loadBinaryObj(std::istream& input) {
 	char VT = 2;
 	char VNT = 3;
 
-	Vec3* vertices = new Vec3[vertexCount];
+	Vec3f* vertices = new Vec3f[vertexCount];
 	for (int i = 0; i < vertexCount; i++) {
 		Vec3 t = Import::read<Vec3f>(input);
 
 		vertices[i] = t;
 	}
 
-	Vec3* normals = nullptr;
+	Vec3f* normals = nullptr;
 	if (flag == VN || flag == VNT) {
-		normals = new Vec3[vertexCount];
+		normals = new Vec3f[vertexCount];
 		for (int i = 0; i < vertexCount; i++) {
 			normals[i] = Import::read<Vec3f>(input);
 		}
 	}
 
-	Vec2* uvs = nullptr;
+	Vec2f* uvs = nullptr;
 	if (flag == VT || flag == VNT) {
-		uvs = new Vec2[vertexCount];
+		uvs = new Vec2f[vertexCount];
 		for (int i = 0; i < vertexCount; i++) {
 			uvs[i] = Import::read<Vec2f>(input);
 		}
@@ -201,9 +210,9 @@ Shape loadBinaryObj(std::istream& input) {
 }
 
 Shape loadNonBinaryObj(std::istream& input) {
-	std::vector<Vec3> vertices;
-	std::vector<Vec3> normals;
-	std::vector<Vec2> uvs;
+	std::vector<Vec3f> vertices;
+	std::vector<Vec3f> normals;
+	std::vector<Vec2f> uvs;
 	std::vector<Face> faces;
 	Flags flags = { false, false };
 
@@ -212,7 +221,7 @@ Shape loadNonBinaryObj(std::istream& input) {
 		std::vector<std::string> tokens = split(line, ' ');
 
 		if (tokens[0] == "v") {
-			Vec3 vertex = Vec3(stod(tokens[1]), stod(tokens[2]), stod(tokens[3]));
+			Vec3f vertex = Vec3f(stof(tokens[1]), stof(tokens[2]), stof(tokens[3]));
 			vertices.push_back(vertex);
 		} else if (tokens[0] == "f") {
 			Face face = Face(tokens[1], tokens[2], tokens[3]);
@@ -224,11 +233,11 @@ Shape loadNonBinaryObj(std::istream& input) {
 			}
 		} else if (tokens[0] == "vt") {
 			flags.uvs = true;
-			Vec2 uv = Vec2(stod(tokens[1]), stod(tokens[2]));
+			Vec2f uv = Vec2f(stof(tokens[1]), stof(tokens[2]));
 			uvs.push_back(uv);
 		} else if (tokens[0] == "vn") {
 			flags.normals = true;
-			Vec3 normal = Vec3(stod(tokens[1]), stod(tokens[2]), stod(tokens[3]));
+			Vec3f normal = Vec3f(stof(tokens[1]), stof(tokens[2]), stof(tokens[3]));
 			normals.push_back(normal);
 		}
 	}

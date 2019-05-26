@@ -44,7 +44,7 @@ size_t getTheoreticalNumberOfIntersections(size_t objCount) {
 	return (objCount-1)*objCount / 2;
 }
 
-AddableBuffer<double> visibleVecs(700);
+AddableBuffer<float> visibleVecs(700);
 
 void updateVecMesh(VectorMesh* vectorMesh, AppDebug::ColoredVec* data, size_t size) {
 	visibleVecs.clear();

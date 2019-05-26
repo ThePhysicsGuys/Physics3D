@@ -71,17 +71,17 @@ private:
 	Vec3f* vertices;
 #endif
 public:
-	std::shared_ptr<Vec3> normals;
-	std::shared_ptr<Vec2> uvs;
+	std::shared_ptr<Vec3f> normals;
+	std::shared_ptr<Vec2f> uvs;
 	const Triangle* triangles;
 	int vertexCount;
 	int triangleCount;
 
 	Shape();
 	Shape(Vec3f* vertices, const Triangle* triangles, int vertexCount, int triangleCount);
-	Shape(Vec3f* vertices, Vec3* normals, const Triangle* triangles, int vertexCount, int triangleCount);
-	Shape(Vec3f* vertices, Vec3* normals, Vec2* uvs, const Triangle* triangles, int vertexCount, int triangleCount);
-	Shape(Vec3f* vertices, Vec2* uvs, const Triangle* triangles, int vertexCount, int triangleCount);
+	Shape(Vec3f* vertices, Vec3f* normals, const Triangle* triangles, int vertexCount, int triangleCount);
+	Shape(Vec3f* vertices, Vec3f* normals, Vec2f* uvs, const Triangle* triangles, int vertexCount, int triangleCount);
+	Shape(Vec3f* vertices, Vec2f* uvs, const Triangle* triangles, int vertexCount, int triangleCount);
 
 	Shape translated(Vec3f offset, Vec3f* newVecBuf) const;
 	Shape rotated(RotMat3f rotation, Vec3f* newVecBuf) const;
@@ -92,12 +92,12 @@ public:
 	bool containsPoint(Vec3f point) const;
 	float getIntersectionDistance(Vec3f origin, Vec3f direction);
 	double getVolume() const;
-	NormalizedShape normalized(Vec3f* vecBuf, Vec3* normalBuf, CFramef& backTransformation) const;
+	NormalizedShape normalized(Vec3f* vecBuf, Vec3f* normalBuf, CFramef& backTransformation) const;
 	CenteredShape centered(Vec3f* vecBuf, Vec3& backOffset) const;
 
 	CFramef getInertialEigenVectors() const;
 	BoundingBox getBounds() const;
-	void computeNormals(Vec3* buffer) const;
+	void computeNormals(Vec3f* buffer) const;
 	Vec3 getCenterOfMass() const;
 	SymmetricMat3 getInertia() const;
 	SymmetricMat3 getInertia(Vec3 reference) const;
@@ -133,7 +133,7 @@ struct CenteredShape : public Shape {
 	friend struct Shape;
 	CenteredShape() : Shape() {}
 	CenteredShape(Vec3f * vertices, const Triangle * triangles, int vertexCount, int triangleCount);
-	CenteredShape(Vec3f * vertices, Vec3 * normals, Vec2 * uvs, const Triangle * triangles, int vertexCount, int triangleCount);
+	CenteredShape(Vec3f * vertices, Vec3f * normals, Vec2f * uvs, const Triangle * triangles, int vertexCount, int triangleCount);
 private:
 	CenteredShape(Vec3f * vertices, const Triangle * triangles, int vertexCount, int triangleCount, Vec3& offset);
 };
@@ -142,7 +142,7 @@ struct NormalizedShape : public CenteredShape {
 	friend struct Shape;
 	NormalizedShape() : CenteredShape() {}
 	NormalizedShape(Vec3f * vertices, const Triangle * triangles, int vertexCount, int triangleCount);
-	NormalizedShape(Vec3f * vertices, Vec3 * normals, Vec2 * uvs, const Triangle * triangles, int vertexCount, int triangleCount);
+	NormalizedShape(Vec3f * vertices, Vec3f * normals, Vec2f * uvs, const Triangle * triangles, int vertexCount, int triangleCount);
 private:
-	NormalizedShape(Vec3f* vertices, const Triangle* triangles, int vertexCount, int triangleCount, CFramef& transformation);
+	NormalizedShape(Vec3f * vertices, const Triangle* triangles, int vertexCount, int triangleCount, CFramef& transformation);
 };

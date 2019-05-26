@@ -81,6 +81,6 @@ PieChart toPieChart(HistoricTally<N, Unit, EnumType>& tally, const char* title, 
 
 size_t getTheoreticalNumberOfIntersections(size_t objCount);
 
-extern AddableBuffer<double> visibleVecs;
+extern AddableBuffer<float> visibleVecs;
 
 void updateVecMesh(VectorMesh* vectorMesh, AppDebug::ColoredVec* data, size_t size);

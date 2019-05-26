@@ -58,14 +58,17 @@ public:
 		position += delta;
 		return *this;
 	}
+
 	inline CFrameTemplate<T>& operator-=(const Vec3Template<T>& delta) {
 		position -= delta;
 		return *this;
 	}
-	void CFrameTemplate::translate(Vec3Template<T> translation) {
+
+	void translate(Vec3Template<T> translation) {
 		position += translation;
 	}
-	void CFrameTemplate::rotate(Mat3Template<T> rot) {
+
+	void rotate(Mat3Template<T> rot) {
 		rotation = rot * rotation;
 	}
 };

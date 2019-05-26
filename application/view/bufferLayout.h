@@ -26,9 +26,9 @@ public:
 	void push(unsigned int count) {};
 
 	template<>
-	void push<double>(unsigned int count) {
-		elements.push_back({ GL_DOUBLE, count, GL_FALSE , sizeof(double) });
-		stride += sizeof(double) * count;
+	void push<float>(unsigned int count) {
+		elements.push_back({ GL_FLOAT, count, GL_FALSE , sizeof(float) });
+		stride += sizeof(float) * count;
 	}
 
 	template<>
