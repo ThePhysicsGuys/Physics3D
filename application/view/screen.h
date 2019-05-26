@@ -1,5 +1,8 @@
 #pragma once
 
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+
 #include "../../engine/debug.h"
 #include "../../engine/profiling.h"
 #include "../../engine/world.h"
@@ -10,8 +13,6 @@
 #include "frameBuffer.h"
 #include "camera.h"
 
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
 
 class StandardInputHandler;
 

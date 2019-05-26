@@ -46,7 +46,7 @@ void handleCollision(Part& part1, Part& part2, Vec3 collisionPoint, Vec3 exitVec
 	Physical& p1 = *part1.parent;
 	Physical& p2 = *part2.parent;
 
-	double sizeOrder = std::min(p1.part->maxRadius, p2.part->maxRadius);
+	double sizeOrder = std::min(part1.maxRadius, part2.maxRadius);
 	if(exitVector.lengthSquared() <= 1E-8 * sizeOrder*sizeOrder) {
 		return; // don't do anything for very small colissions
 	}
@@ -262,10 +262,14 @@ bool WorldPrototype::isValid() const {
 	}
 
 	for(const Part& part : *this) {
-		if(part.parent->part != &part) {
-			Log::error("part's parent's child is not part");
-			__debugbreak();
+		for (AttachedPart& attach : part.parent->parts) {
+			if (attach.part == &part) {
+				goto partFount;
+			}
 		}
+		Log::error("part's parent's child is not part");
+		__debugbreak();
+		partFount:
 		if(!(part.parent >= physicals && part.parent < physicals + physicalCount)) {
 			Log::error("part with parent not in our physicals");
 			__debugbreak();

@@ -33,11 +33,18 @@ void updateIntersectedPhysical(Screen& screen, Vec2 mousePosition, Mat4f viewMat
 	Vec3 closestIntersectedPoint = Vec3();
 	float closestIntersectDistance = INFINITY;
 
-	screen.ray = calcRay(mousePosition, screen.dimension, viewMatrix, projectionMatrix);
+	Vec3 ray = calcRay(mousePosition, screen.dimension, viewMatrix, projectionMatrix);
+	Vec3 rayStart = screen.camera.cframe.position;
+	screen.ray = ray;
+
 	for(ExtendedPart& part : *screen.world){
+		Vec3 relPos = part.cframe.position - rayStart;
+		if (ray.pointToLineDistanceSquared(relPos) > part.maxRadius * part.maxRadius)
+			continue;
+
 		Vec3f* buffer = new Vec3f[part.hitbox.vertexCount];
 		Shape transformed = part.hitbox.localToGlobal(CFramef(part.cframe), buffer);
-		float distance = transformed.getIntersectionDistance(Vec3f(screen.camera.cframe.position), Vec3f(screen.ray));
+		float distance = transformed.getIntersectionDistance(Vec3f(rayStart), Vec3f(ray));
 		if (distance < closestIntersectDistance && distance > 0) {
 			closestIntersectDistance = distance;
 			closestIntersectedPart = &part;
@@ -69,7 +76,7 @@ void moveGrabbedPhysicalLateral(Screen& screen) {
 		screen.selectedPoint += translation;
 		screen.selectedPart->cframe.translate(translation);
 	} else {
-		screen.world->selectedPhysical = screen.selectedPart->parent;
+		screen.world->selectedPart = screen.selectedPart;
 		screen.world->magnetPoint = planeIntersection;
 	}
 }
@@ -89,7 +96,7 @@ void moveGrabbedPhysicalTransversal(Screen& screen, double dz) {
 		screen.selectedPoint += translation;
 		screen.selectedPart->cframe.translate(translation);
 	} else {
-		screen.world->selectedPhysical = screen.selectedPart->parent;
+		screen.world->selectedPart = screen.selectedPart;
 		screen.world->magnetPoint += translation;
 	}
 }

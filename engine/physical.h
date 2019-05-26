@@ -7,11 +7,20 @@ struct Physical;
 #include "math/cframe.h"
 #include "part.h"
 
+#include <vector>
+
 typedef Vec3 Vec3Local;
 typedef Vec3 Vec3Relative;
 
+struct AttachedPart {
+	CFrame attachment;
+	Part* part;
+};
+
 struct Physical {
-	Part* part = nullptr;
+	CFrame cframe;
+	double maxRadius;
+	std::vector<AttachedPart> parts;
 	Vec3 velocity = Vec3();
 	Vec3 angularVelocity = Vec3();
 
@@ -23,7 +32,7 @@ struct Physical {
 
 	Physical() = default;
 	Physical(Part* part);
-	inline Physical(Part* part, double mass, DiagonalMat3 inertia) : part(part), mass(mass), inertia(inertia) {};
+	inline Physical(Part* part, double mass, DiagonalMat3 inertia) : cframe(part->cframe), mass(mass), inertia(inertia) { parts.push_back(AttachedPart{ CFrame(), part }); };
 
 	void update(double deltaT);
 	void applyForceAtCenterOfMass(Vec3 force);
@@ -33,7 +42,7 @@ struct Physical {
 	void applyImpulse(Vec3Relative origin, Vec3Relative impulse);
 	void applyAngularImpulse(Vec3 angularImpulse);
 	
-	inline CFrame& getCFrame() { return part->cframe; }
+	inline CFrame& getCFrame() { return cframe; }
 
 	Vec3 getCenterOfMass() const;
 	Vec3 getAcceleration() const;

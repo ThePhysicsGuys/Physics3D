@@ -14,9 +14,10 @@
 GravityWorld::GravityWorld(Vec3 gravity) : gravity(gravity) {}
 
 void GravityWorld::applyExternalForces() {
-	if(selectedPhysical != nullptr && !isAnchored(selectedPhysical)) {
+	if(selectedPart != nullptr && !isAnchored(selectedPart->parent)) {
+		Physical* selectedPhysical = selectedPart->parent;
 		// Magnet force
-		Vec3 absoluteSelectedPoint = selectedPhysical->part->cframe.localToGlobal(localSelectedPoint);
+		Vec3 absoluteSelectedPoint = selectedPart->cframe.localToGlobal(localSelectedPoint);
 		Vec3 delta = magnetPoint - absoluteSelectedPoint;
 		Vec3 relativeSelectedPointSpeed = selectedPhysical->getVelocityOfPoint(absoluteSelectedPoint - selectedPhysical->getCenterOfMass());
 		Vec3 force = selectedPhysical->mass * delta * PICKER_STRENGTH - relativeSelectedPointSpeed * PICKER_SPEED_STRENGTH;

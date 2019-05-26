@@ -25,7 +25,7 @@ public:
 	mutable std::shared_mutex lock;
 	mutable std::mutex queueLock;
 
-	Physical* selectedPhysical = nullptr;
+	Part* selectedPart = nullptr;
 	Vec3 localSelectedPoint;
 	Vec3 magnetPoint;
 

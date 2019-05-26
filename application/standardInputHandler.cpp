@@ -48,7 +48,7 @@ void StandardInputHandler::keyDown(int key, int modifiers) {
 		case GLFW_KEY_DELETE:
 			if (screen.selectedPart != nullptr) {
 				screen.world->removePart(screen.selectedPart);
-				screen.world->selectedPhysical = nullptr;
+				screen.world->selectedPart = nullptr;
 				screen.selectedPart = nullptr;
 			}
 			break;
@@ -139,7 +139,7 @@ void StandardInputHandler::mouseMove(double x, double y) {
 			}
 		}
 	} else {
-		screen.world->selectedPhysical = nullptr;
+		screen.world->selectedPart = nullptr;
 	}
 
 	// Camera moving

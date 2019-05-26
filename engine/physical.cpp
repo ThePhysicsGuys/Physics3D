@@ -7,12 +7,13 @@
 
 
 
-Physical::Physical(Part* part) : part(part) {
+Physical::Physical(Part* part) : cframe(part->cframe) {
 	this->mass = part->hitbox.getVolume() * part->properties.density;
 	SymmetricMat3 iner = part->hitbox.getInertia();
 	if(abs(iner.m01) > 1E-10 || abs(iner.m02) > 1E-10 || abs(iner.m12) > 1E-10) Log::error("inertia of normalized hitbox is not diagonal!");
 	DiagonalMat3 diagIner = DiagonalMat3(iner.m00, iner.m11, iner.m22);
 	this->inertia = diagIner * part->properties.density;
+	parts.push_back(AttachedPart{ CFrame(), part });
 }
 
 // Physical::Physical(Part p, CFrame partNormalization, CFrame cframe, double mass, Vec3 centerOfMass, Mat3 inertia) : part(p), cframe(cframe), mass(mass), com(centerOfMass), inertia(inertia) {}
@@ -22,9 +23,9 @@ Physical::Physical(Part* part) : part(part) {
 void Physical::update(double deltaT) {
 	Vec3 accel = totalForce * (deltaT/mass);
 	
-	Vec3 localMoment = part->cframe.relativeToLocal(totalMoment);
+	Vec3 localMoment = cframe.relativeToLocal(totalMoment);
 	Vec3 localRotAcc = ~inertia * localMoment * deltaT;
-	Vec3 rotAcc = part->cframe.localToRelative(localRotAcc);
+	Vec3 rotAcc = cframe.localToRelative(localRotAcc);
 
 	totalForce = Vec3();
 	totalMoment = Vec3();
@@ -36,8 +37,12 @@ void Physical::update(double deltaT) {
 
 	Mat3 rotation = fromRotationVec(angularVelocity * deltaT);
 
-	part->cframe.translate(movement);
-	part->cframe.rotate(rotation);
+	cframe.translate(movement);
+	cframe.rotate(rotation);
+
+	for (AttachedPart& attachment : parts) {
+		attachment.part->cframe = cframe.localToGlobal(attachment.attachment);
+	}
 }
 
 void Physical::applyForceAtCenterOfMass(Vec3 force) {
@@ -71,14 +76,14 @@ void Physical::applyImpulse(Vec3Relative origin, Vec3Relative impulse) {
 }
 void Physical::applyAngularImpulse(Vec3 angularImpulse) {
 	Debug::logVec(getCenterOfMass(), angularImpulse, Debug::ANGULAR_IMPULSE);
-	Vec3 localAngularImpulse = part->cframe.relativeToLocal(angularImpulse);
+	Vec3 localAngularImpulse = cframe.relativeToLocal(angularImpulse);
 	Vec3 localRotAcc = ~inertia * localAngularImpulse;
-	Vec3 rotAcc = part->cframe.localToRelative(localRotAcc);
+	Vec3 rotAcc = cframe.localToRelative(localRotAcc);
 	angularVelocity += rotAcc;
 }
 
 Vec3 Physical::getCenterOfMass() const {
-	return part->cframe.position;
+	return cframe.position;
 }
 
 Vec3 Physical::getVelocityOfPoint(const Vec3Relative& point) const {
@@ -90,7 +95,7 @@ Vec3 Physical::getAcceleration() const {
 }
 
 Vec3 Physical::getAngularAcceleration() const {
-	return ~inertia * part->cframe.relativeToLocal(totalMoment);
+	return ~inertia * cframe.relativeToLocal(totalMoment);
 }
 
 Vec3 Physical::getAccelerationOfPoint(const Vec3Relative& point) const {
@@ -134,7 +139,7 @@ double Physical::getVelocityKineticEnergy() const {
 	return mass * velocity.lengthSquared() / 2;
 }
 double Physical::getAngularKineticEnergy() const {
-	Vec3 localAngularVel = part->cframe.relativeToLocal(angularVelocity);
+	Vec3 localAngularVel = cframe.relativeToLocal(angularVelocity);
 	return (inertia * localAngularVel) * localAngularVel / 2;
 }
 double Physical::getKineticEnergy() const {

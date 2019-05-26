@@ -79,9 +79,12 @@ void PartContainer::anchor(size_t index) {
 void PartContainer::anchor(Physical* p) {
 	if(!isAnchored(p)) {
 		swapPhysical(p, physicals + freePhysicalsOffset);
-		swapPart(p->part->partIndex, anchoredPartsCount);
-		anchoredPartsCount++;
 		freePhysicalsOffset++;
+
+		for (AttachedPart& attach : p->parts) {
+			swapPart(attach.part->partIndex, anchoredPartsCount);
+			anchoredPartsCount++;
+		}
 	}
 }
 void PartContainer::unanchor(size_t index) {
@@ -89,10 +92,13 @@ void PartContainer::unanchor(size_t index) {
 }
 void PartContainer::unanchor(Physical* p) {
 	if(isAnchored(p)) {
-		anchoredPartsCount--;
 		freePhysicalsOffset--;
-		swapPart(p->part->partIndex, anchoredPartsCount);
 		swapPhysical(p, physicals + freePhysicalsOffset);
+
+		for (AttachedPart& attach : p->parts) {
+			anchoredPartsCount--;
+			swapPart(attach.part->partIndex, anchoredPartsCount);
+		}
 	}
 }
 bool PartContainer::isAnchored(size_t index) const {
@@ -106,22 +112,25 @@ bool PartContainer::isAnchored(const Part* const * part) const {
 }
 void PartContainer::swapPhysical(Physical* first, Physical* second) {
 	std::swap(*first, *second);
-	first->part->parent = first;
-	second->part->parent = second;
+	for (AttachedPart& attach : first->parts)
+		attach.part->parent = first;
+	
+	for (AttachedPart& attach : second->parts)
+		attach.part->parent = second;
+	
 }
 void PartContainer::swapPhysical(size_t first, size_t second) {
-	std::swap(physicals[first], physicals[second]);
-	physicals[first].part->parent = physicals + first;
-	physicals[second].part->parent = physicals + second;
-}
-void PartContainer::movePhysical(size_t origin, size_t destination) {
-	physicals[destination] = physicals[origin];
-	physicals[destination].part->parent = &physicals[destination];
+	swapPhysical(physicals + first, physicals + second);
 }
 void PartContainer::movePhysical(Physical* origin, Physical* destination) {
 	*destination = *origin;
-	destination->part->parent = destination;
+	for (AttachedPart& attach : destination->parts)
+		attach.part->parent = destination;
 }
+void PartContainer::movePhysical(size_t origin, size_t destination) {
+	movePhysical(physicals + origin, physicals + destination);
+}
+
 
 void PartContainer::movePart(size_t origin, size_t destination) {
 	parts[origin]->partIndex = -1;

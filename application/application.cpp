@@ -191,8 +191,8 @@ int main(void) {
 		for(double y = 0; y < 20; y += 1.01) {
 			for(double z = -5; z < 5; z += 1.01) {
 				//world.addObject(cubeFactory.produce(CFrame(Vec3(x, y + 1, z)), 1.0, 0.2));
-				world.addObject(sphereFactory.produce(CFrame(Vec3(x, y + 1, z - 5)), 1.0, 0.2));
-				//world.addObject(triangleFactory.produce(CFrame(Vec3(x, y + 1, z)), 1.0, 0.2));
+				//world.addObject(sphereFactory.produce(CFrame(Vec3(x, y + 1, z - 5)), 1.0, 0.2));
+				world.addObject(triangleFactory.produce(CFrame(Vec3(x, y + 1, z)), 1.0, 0.2));
 			}
 		}
 	}
