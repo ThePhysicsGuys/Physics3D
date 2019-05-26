@@ -18,6 +18,7 @@ ResourceStruct resources[]{
 	{ IDR_SHADER7, "SHADER" },
 	{ IDR_SHADER8, "SHADER" },
 	{ IDR_SHADER9, "SHADER" },
+	{ IDR_SHADER10, "SHADER" },
 	{ IDR_OBJ1, "OBJ" },
 	{ IDR_OBJ2, "OBJ" }
 };

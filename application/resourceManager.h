@@ -11,7 +11,8 @@
 #define POSTPROCESS_SHADER 6
 #define SKYBOX_SHADER 7
 #define GUI_SHADER 8
-#define SPHERE_MODEL 9
-#define STALL_MODEL 10
+#define POINT_SHADER 9
+#define SPHERE_MODEL 10
+#define STALL_MODEL 11
 
 std::string getResourceAsString(int res);

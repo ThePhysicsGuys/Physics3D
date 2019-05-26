@@ -5,6 +5,7 @@
 #include "indexedMesh.h"
 #include "arrayMesh.h"
 #include "vectorMesh.h"
+#include "pointMesh.h"
 #include "picker.h"
 #include "material.h"
 #include "quad.h"
@@ -125,6 +126,7 @@ FontShader fontShader;
 QuadShader quadShader;
 PostProcessShader postProcessShader;
 SkyboxShader skyboxShader;
+PointShader pointShader;
 
 // Light uniforms
 const int lightCount = 4;
@@ -139,6 +141,7 @@ Light lights[lightCount] = {
 
 // Render meshes
 VectorMesh* vectorMesh = nullptr;
+PointMesh* pointMesh = nullptr;
 ArrayMesh* originMesh = nullptr;
 Quad* quad = nullptr;
 
@@ -193,6 +196,7 @@ void Screen::init() {
 	ShaderSource quadShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(QUAD_SHADER)), "quad.shader");
 	ShaderSource postProcessShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(POSTPROCESS_SHADER)), "postProcess.shader");
 	ShaderSource skyboxShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(SKYBOX_SHADER)), "skybox.shader");
+	ShaderSource pointShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(POINT_SHADER)), "point.shader");
 
 
 	// Shader init
@@ -204,6 +208,7 @@ void Screen::init() {
 	quadShader = * new QuadShader(quadShaderSource);
 	postProcessShader = * new PostProcessShader(postProcessShaderSource);
 	skyboxShader = * new SkyboxShader(skyboxShaderSource);
+	pointShader = * new PointShader(pointShaderSource);
 	basicShader.createLightArray(lightCount);
 
 
@@ -297,10 +302,32 @@ void Screen::init() {
 	// Origin init
 	float originVertices[3] = { 0, 0, 5 };
 	originMesh = new ArrayMesh(originVertices, 1, 3, RenderMode::POINTS);
-
+	
 
 	// Vector init
 	vectorMesh = new VectorMesh(new float[128 * 7], 128);
+	
+	
+	// Point init
+	float* buf = new float[5 * 10];
+	for (int i = 0; i < 5; i++) {
+		buf[i * 10 + 0] = 0.5f + i;
+		buf[i * 10 + 1] = 1.0f; // position
+		buf[i * 10 + 2] = 0.5f;
+
+		buf[i * 10 + 3] = 0.02f * i; // size
+
+		buf[i * 10 + 4] = 1.0f;
+		buf[i * 10 + 5] = 1.0f; // color 1 orange
+		buf[i * 10 + 6] = 0.0f;
+
+		buf[i * 10 + 7] = 0.0f;
+		buf[i * 10 + 8] = 0.0f; // color 2 blue
+		buf[i * 10 + 9] = 0.0f;
+
+	}
+
+	pointMesh = new PointMesh(buf, 5);
 
 
 	// Eventhandler init
@@ -500,7 +527,7 @@ void Screen::refresh() {
 	// Update vector mesh
 	graphicsMeasure.mark(GraphicsProcess::VECTORS);
 	updateVecMesh(vectorMesh, vecLog.data, vecLog.index);
-
+	//updatePointMesh(pointMesh, vecLog.data, vecLog.index);
 
 	// Render lights
 	graphicsMeasure.mark(GraphicsProcess::LIGHTING);
@@ -516,6 +543,12 @@ void Screen::refresh() {
 	graphicsMeasure.mark(GraphicsProcess::VECTORS);
 	vectorShader.update(camera.viewMatrix, camera.projectionMatrix, camera.cframe.position);
 	vectorMesh->render();
+
+
+	// Render point mesh
+	graphicsMeasure.mark(GraphicsProcess::VECTORS);
+	pointShader.update(camera.viewMatrix, camera.projectionMatrix, camera.cframe.position);
+	pointMesh->render();
 
 
 	// Render origin mesh

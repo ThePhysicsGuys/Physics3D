@@ -275,3 +275,15 @@ struct VectorShader : public ShaderProgram {
 		shader.setUniform("viewPosition", viewPosition);
 	}
 };
+
+struct PointShader : public ShaderProgram {
+	PointShader() : ShaderProgram() {}
+	PointShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 3, "viewMatrix", "projectionMatrix", "viewPosition") {}
+
+	void update(Mat4f viewMatrix, Mat4f projectionMatrix, Vec3f viewPosition) {
+		bind();
+		shader.setUniform("viewMatrix", viewMatrix);
+		shader.setUniform("projectionMatrix", projectionMatrix);
+		shader.setUniform("viewPosition", viewPosition);
+	}
+};

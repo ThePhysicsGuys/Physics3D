@@ -102,6 +102,11 @@ void Camera::update(float aspect) {
 }
 
 void Camera::update() {
+	if (attachment != nullptr) {
+		cframe.position = attachment->cframe.position;
+		viewDirty = true;
+	}
+
 	if (projectionDirty) {
 		projectionDirty = false;
 		
@@ -114,9 +119,5 @@ void Camera::update() {
 
 		viewMatrix = Mat4f(cframe.rotation).translate(-cframe.position);
 		invertedViewMatrix = viewMatrix.inverse();
-	}
-
-	if(attachment != nullptr) {
-		cframe.position = attachment->cframe.position;
 	}
 }
