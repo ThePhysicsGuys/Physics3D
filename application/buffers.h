@@ -16,7 +16,7 @@ public:
 	T* readData;
 	size_t readSize;
 
-	SwappableBuffer(int initialCapacity) : writeCapacity(initialCapacity), writeBuf((T*)malloc(initialCapacity * sizeof(T))),
+	SwappableBuffer(size_t initialCapacity) : writeCapacity(initialCapacity), writeBuf((T*)malloc(initialCapacity * sizeof(T))),
 		readCapacity(initialCapacity), readData((T*)malloc(initialCapacity * sizeof(T))) {
 		if (readData == nullptr || writeBuf == nullptr)
 			Log::fatal("Could not create SwappableBuffer of size: %d", initialCapacity);
@@ -86,11 +86,11 @@ private:
 	size_t capacity;
 public:
 	AddableBuffer() : capacity(10), data((T*) malloc(10 * sizeof(T))), index(0) {}
-	AddableBuffer(int initialCapacity) : capacity(initialCapacity), data((T*)malloc(initialCapacity * sizeof(T))), index(0) {
+	AddableBuffer(size_t initialCapacity) : capacity(initialCapacity), data((T*)malloc(initialCapacity * sizeof(T))), index(0) {
 		if (data == nullptr) Log::fatal("Could not create AddableBuffer of size: %d", initialCapacity);
 	}
 
-	AddableBuffer(T* data, int dataSize, int initialCapacity) : capacity(initialCapacity), data((T*)malloc(initialCapacity * sizeof(T))), index(dataSize) {
+	AddableBuffer(T* data, size_t dataSize, size_t initialCapacity) : capacity(initialCapacity), data((T*)malloc(initialCapacity * sizeof(T))), index(dataSize) {
 		if (data == nullptr) Log::fatal("Could not create AddableBuffer of size: %d", initialCapacity);
 		memcpy(this->data, data, dataSize * sizeof(T));
 	}

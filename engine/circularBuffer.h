@@ -30,7 +30,7 @@ struct CircularBuffer {
 		if(limit == 0)
 			return T();
 		T total = sum();
-		return total / limit;
+		return T(total / limit);
 	}
 	inline size_t size() const {
 		if(hasComeAround) {

@@ -101,5 +101,6 @@ public:
 
 			return (numTicks-1) / timeTaken;
 		}
+		return 0.0;
 	}
 };

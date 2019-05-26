@@ -1,7 +1,7 @@
 #include "partFactory.h"
 
 PartFactory::PartFactory(const Shape& shape, Screen& screen, std::string name) {
-	Vec3* normalBuf = (shape.normals) ? new Vec3[shape.vertexCount] : nullptr;
+	Vec3f* normalBuf = (shape.normals) ? new Vec3f[shape.vertexCount] : nullptr;
 	this->normalizedShape = shape.normalized(new Vec3f[shape.vertexCount], normalBuf, backTransform);
 	this->drawMeshID = screen.addMeshShape(normalizedShape);
 	this->name = name;

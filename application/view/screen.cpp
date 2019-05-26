@@ -1,5 +1,6 @@
 #include "screen.h"
 
+#include "../import.h"
 #include "shader.h"
 #include "indexedMesh.h"
 #include "arrayMesh.h"
@@ -113,11 +114,7 @@ CubeMap* skyboxTexture = nullptr;
 IndexedMesh* skyboxMesh = nullptr;
 
 // Render uniforms
-Mat4f projectionMatrix;
 Mat4f orthoMatrix;
-Mat4f rotatedViewMatrix;
-Mat4f viewMatrix;
-Vec3f viewPosition;
 
 // Shaders
 BasicShader basicShader;
@@ -221,7 +218,7 @@ void Screen::init() {
 
 
 	// Skybox init
-	sphere = new IndexedMesh(loadObj((std::istream&) std::istringstream(getResourceAsString(SPHERE_MODEL))));
+	sphere = new IndexedMesh(OBJImport::load((std::istream&) std::istringstream(getResourceAsString(SPHERE_MODEL))));
 	skybox = new BoundingBox{ -1, -1, -1, 1, 1, 1 };
 	skyboxMesh = new IndexedMesh(skybox->toShape(new Vec3f[8]));
 	skyboxTexture = new CubeMap("../res/skybox/right.jpg", "../res/skybox/left.jpg", "../res/skybox/top.jpg", "../res/skybox/bottom.jpg", "../res/skybox/front.jpg", "../res/skybox/back.jpg");
@@ -230,6 +227,7 @@ void Screen::init() {
 	// Camera init
 	camera.setPosition(Vec3(1, 1, -2));
 	camera.setRotation(Vec3(0, 3.1415, 0.0));
+	camera.update(1.0, 1, 0.01, 10000.0);
 
 
 	// Framebuffer init
@@ -250,7 +248,7 @@ void Screen::init() {
 	partMeshIDLabel = new Label("", 0, 0);
 
 	partAmbientSlider = new Slider(0, 0, 0, 0.999999, 0.5);
-	testSlider = new Slider(0, 0, 500, 3000, 600);
+	testSlider = new Slider(0, 0, 500, 3000, 500);
 	partVelocity = new Label("", 0, 0);
 	partAngularVelocity = new Label("", 0, 0);
 	partKineticEnergy = new Label("", 0, 0);
@@ -259,9 +257,6 @@ void Screen::init() {
 
 	partAmbientSlider->action = [] (Slider* s) {
 		if (GUI::screen->selectedPart) {
-
-			Log::debug("%f, %s", s->value, str(GUI::COLOR::hsvToRgb(Vec3(s->value, 1, 1))).c_str());
-
 			GUI::screen->selectedPart->material.ambient = Vec3f(GUI::COLOR::hsvToRgb(Vec3(s->value, 1, 1)));
 		}
 	};
@@ -300,12 +295,12 @@ void Screen::init() {
 	
 
 	// Origin init
-	double originVertices[3] = { 0, 0, 5 };
+	float originVertices[3] = { 0, 0, 5 };
 	originMesh = new ArrayMesh(originVertices, 1, 3, RenderMode::POINTS);
 
 
 	// Vector init
-	vectorMesh = new VectorMesh(new double[128 * 7], 128);
+	vectorMesh = new VectorMesh(new float[128 * 7], 128);
 
 
 	// Eventhandler init
@@ -325,7 +320,7 @@ void Screen::init() {
 		screen.modelFrameBuffer->renderBuffer->resize(width, height);
 		screen.screenFrameBuffer->renderBuffer->resize(width, height);
 		screen.dimension = Vec2(width, height);
-		screen.aspect = ((double) width) / ((double) height);
+		screen.camera.update(((float)width) / ((float)height));
 	});
 
 	// Temp
@@ -355,7 +350,7 @@ void Screen::update() {
 
 	// Update camera
 	camera.update();
-	
+
 
 	// Update lights
 	/*static long long t = 0;
@@ -368,18 +363,10 @@ void Screen::update() {
 
 
 	// Update render uniforms
-	float size = 10;
-	// projectionMatrix = ortho(-size*aspect, size*aspect, -size, size, -1000, 1000);
-	projectionMatrix = perspective(1.0, aspect, 0.01, 1000000.0);
-	orthoMatrix = ortho(-aspect, aspect, -1, 1, -1000, 1000);
-	//orthoMatrix = ortho(0, aspect, 0, 1, -1000, 1000);
-	rotatedViewMatrix = CFrameToMat4(CFramef(camera.cframe)).getRotation();
-	viewMatrix = rotatedViewMatrix.translate(-camera.cframe.position.x, -camera.cframe.position.y, -camera.cframe.position.z);
-	viewPosition = Vec3f(camera.cframe.position.x, camera.cframe.position.y, camera.cframe.position.z);
-
+	orthoMatrix = ortho(-camera.aspect, camera.aspect, -1.0f, 1.0f, -1000.0f, 1000.0f);
 
 	// Update picker
-	updateIntersectedPhysical(*this, handler->cursorPosition, viewMatrix, projectionMatrix);
+	updateIntersectedPhysical(*this, handler->cursorPosition);
 
 
 	// Update gui
@@ -426,7 +413,7 @@ void Screen::renderSkybox() {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	skyboxShader.update(sunDirection);
-	skyboxShader.update(viewMatrix, projectionMatrix);
+	skyboxShader.update(camera.viewMatrix, camera.projectionMatrix);
 	skyboxTexture->bind();
 	sphere->render();
 	glDepthMask(GL_TRUE);
@@ -483,7 +470,7 @@ void Screen::refresh() {
 
 	// Render physicals
 	graphicsMeasure.mark(GraphicsProcess::PHYSICALS);
-	basicShader.update(viewMatrix, projectionMatrix, viewPosition);
+	basicShader.update(camera.viewMatrix, camera.projectionMatrix, camera.cframe.position);
 	renderPhysicals();
 
 	if(selectedPart != nullptr) {
@@ -492,7 +479,8 @@ void Screen::refresh() {
 			vecLog.add(AppDebug::ColoredVec(Vec3(selectedCFrame.localToGlobal(corner)), selectedPart->parent->getVelocityOfPoint(Vec3(selectedCFrame.localToRelative(corner))), Debug::VELOCITY));
 		}
 	}
-		// Postprocess to screenFrameBuffer
+		
+	// Postprocess to screenFrameBuffer
 	screenFrameBuffer->bind();
 	glDisable(GL_DEPTH_TEST);
 	postProcessShader.update(modelFrameBuffer->texture);
@@ -506,7 +494,7 @@ void Screen::refresh() {
 	/*for (ExtendedPart& part : *world) {
 		if (part.hitbox.normals)
 			for (int i = 0; i < part.hitbox.vertexCount; i++)
-				vecLog.add(AppDebug::ColoredVec(part.cframe.localToGlobal(part.hitbox.vertices[i]), part.cframe.localToRelative(part.hitbox.normals.get()[i]), Debug::POSITION));
+				vecLog.add(AppDebug::ColoredVec(part.cframe.localToGlobal(part.hitbox[i]), part.cframe.localToRelative(part.hitbox.normals.get()[i]), Debug::POSITION));
 	}*/
 
 	// Update vector mesh
@@ -517,7 +505,7 @@ void Screen::refresh() {
 	// Render lights
 	graphicsMeasure.mark(GraphicsProcess::LIGHTING);
 	for (Light light : lights) {
-		Mat4f transformation = Mat4f().translate(light.position).scale(0.1);
+		Mat4f transformation = Mat4f().translate(light.position).scale(0.1f);
 		basicShader.updateMaterial(Material(light.color, Vec3f(), Vec3f(), 10));
 		basicShader.updateModelMatrix(transformation);
 		skyboxMesh->render();
@@ -526,13 +514,13 @@ void Screen::refresh() {
 
 	// Render vector mesh
 	graphicsMeasure.mark(GraphicsProcess::VECTORS);
-	vectorShader.update(viewMatrix, projectionMatrix, viewPosition);
+	vectorShader.update(camera.viewMatrix, camera.projectionMatrix, camera.cframe.position);
 	vectorMesh->render();
 
 
 	// Render origin mesh
 	graphicsMeasure.mark(GraphicsProcess::ORIGIN);
-	originShader.update(viewMatrix, rotatedViewMatrix, projectionMatrix, orthoMatrix, viewPosition);
+	originShader.update(camera.viewMatrix, camera.cframe.rotation, camera.projectionMatrix, orthoMatrix, camera.cframe.position);
 	originMesh->render();
 
 
@@ -573,7 +561,7 @@ void Screen::refresh() {
 	renderDebugField(dimension, font, "World Energy", world->getTotalEnergy(), "");
 
 	if (renderPies) {
-		float leftSide = dimension.x / dimension.y;
+		float leftSide = float(dimension.x / dimension.y);
 		PieChart graphicsPie = toPieChart(graphicsMeasure, "Graphics", Vec2f(-leftSide + 1.5f, -0.7f), 0.2f);
 		PieChart physicsPie = toPieChart(physicsMeasure, "Physics", Vec2f(-leftSide + 0.3f, -0.7f), 0.2f);
 		PieChart intersectionPie = toPieChart(intersectionStatistics, "Intersection Statistics", Vec2f(-leftSide + 2.7f, -0.7f), 0.2f);
@@ -613,7 +601,7 @@ bool Screen::shouldClose() {
 }
 
 int Screen::addMeshShape(Shape s) {
-	int size = meshes.size();
+	int size = (int) meshes.size();
 	meshes.push_back(new IndexedMesh(s));
 	return size;
 }

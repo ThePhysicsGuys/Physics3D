@@ -14,13 +14,13 @@ public:
 		Log::debug("Created empty vertex buffer");
 	};
 
-	VertexBuffer(const double* data, unsigned int size, unsigned int mode) : Bindable() {
+	VertexBuffer(const float* data, size_t size, unsigned int mode) : Bindable() {
 		glGenBuffers(1, &id);
 		glBindBuffer(GL_ARRAY_BUFFER, id);
-		glBufferData(GL_ARRAY_BUFFER, size * sizeof(double), data, mode);
+		glBufferData(GL_ARRAY_BUFFER, size * sizeof(float), data, mode);
 	}
 	
-	VertexBuffer(const double* data, unsigned int size) : VertexBuffer(data, size, GL_STATIC_DRAW) {}
+	VertexBuffer(const float* data, size_t size) : VertexBuffer(data, size, GL_STATIC_DRAW) {}
 
 	~VertexBuffer() {
 		close();

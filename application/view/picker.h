@@ -10,8 +10,8 @@
 #include <vector>
 #include "../../engine/world.h"
 
-Vec2 getNormalizedDeviceSpacePosition(Vec2 viewportSpacePosition, Vec2 screenSize);
-Vec3 calcRay(Vec2 mousePosition, Vec2 screenSize, Mat4f viewMatrix, Mat4f projectionMatrix);
-void updateIntersectedPhysical(Screen& screen, Vec2 mousePosition, Mat4f rotatedViewMatrix, Mat4f projectionMatrix);
+Vec2f getNormalizedDeviceSpacePosition(Vec2f viewportSpacePosition, Vec2f screenSize);
+Vec3f calcRay(Screen& screen, Vec2f mousePosition);
+void updateIntersectedPhysical(Screen& screen, Vec2 mousePosition);
 void moveGrabbedPhysicalTransversal(Screen& screen, double dz);
 void moveGrabbedPhysicalLateral(Screen& screen);

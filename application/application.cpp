@@ -35,6 +35,8 @@
 #include "extendedPart.h"
 #include "partFactory.h"
 
+#include "export.h"
+#include "import.h"
 
 #define _USE_MATH_DEFINES
 #include "math.h"
@@ -167,21 +169,21 @@ int main(void) {
 
 	ConvexShapeBuilder builder(verts, triangles, 4, 4, neighBuf, builderRemovalBuffer, builderAddingBuffer);
 
-	builder.addPoint(Vec3f(0.4, 0.4, 0.4), 3);
+	builder.addPoint(Vec3(0.4, 0.4, 0.4), 3);
 
-	builder.addPoint(Vec3f(-0.4, 1, -0.4));
+	builder.addPoint(Vec3(-0.4, 1, -0.4));
 
-	builder.addPoint(Vec3f(-0.8, 0.5, -0.8));
+	builder.addPoint(Vec3(-0.8, 0.5, -0.8));
 
-	builder.addPoint(Vec3f(-0.9, 0.6, -0.9));
+	builder.addPoint(Vec3(-0.9, 0.6, -0.9));
 
 	Shape constructedShape = builder.toShape();
 
 	ExtendedPart* constructedExtendedPart = createUniquePart(screen, constructedShape, CFrame(Vec3(0.0, 2.0, -5.0)), 2.0, 0.7);
-	//world.addObject(constructedExtendedPart);
-	
-	Shape sphereShape = loadObj((std::istream&) std::istringstream(getResourceAsString(SPHERE_MODEL)));
-	sphereShape.normals = std::shared_ptr<Vec3>(new Vec3[sphereShape.vertexCount], std::default_delete<Vec3[]>());
+	world.addObject(constructedExtendedPart);
+
+	Shape sphereShape = OBJImport::load((std::istream&) std::istringstream(getResourceAsString(SPHERE_MODEL)));
+	sphereShape.normals = std::shared_ptr<Vec3f>(new Vec3f[sphereShape.vertexCount], std::default_delete<Vec3f[]>());
 	sphereShape.computeNormals(sphereShape.normals.get());
 
 	PartFactory cubeFactory(BoundingBox{-0.49, -0.49, -0.49, 0.49, 0.49, 0.49}.toShape(new Vec3f[8]), screen, "Cube");
@@ -197,11 +199,9 @@ int main(void) {
 		}
 	}
 
-	//world.addObject(cubeFactory.produce(CFrame(Vec3(0, 0 + 1, 0), fromEulerAngles(0.3, 0.7, 0.3)), 1.0, 0.2));
+	Shape stallShape = OBJImport::load((std::istream&) std::istringstream(getResourceAsString(STALL_MODEL)));
 
-	Shape stallShape = loadObj((std::istream&) std::istringstream(getResourceAsString(STALL_MODEL)));
-	//stallShape.normals = std::shared_ptr<Vec3>(new Vec3[stallShape.vertexCount]);
-	//stallShape.computeNormals(stallShape.normals.get());
+
 	ExtendedPart* stallExtendedPart = createUniquePart(screen, stallShape, CFrame(Vec3(10.0, 2.0, -10.0), fromEulerAngles(0.1, 0.1, 0.1)), 10, 0.7);
 	stallExtendedPart->material = Material(load("../res/textures/stall/stall.png"));
 	//world.addObject(stallExtendedPart);
@@ -216,6 +216,8 @@ int main(void) {
 	player->properties.friction = 0;
 	player->drawMeshId = -1;
 
+	//saveWorld("testWorld", world);
+	//loadWorld("testWorld", world, getCamera());
 
 	/* Loop until the user closes the window */
 	Log::info("Started rendering");

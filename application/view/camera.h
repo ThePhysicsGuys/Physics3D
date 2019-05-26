@@ -1,10 +1,11 @@
 #pragma once
 
-class Camera;
+struct Camera;
 class Screen;
 
 #include "../../engine/math/vec3.h"
 #include "../../engine/math/mat3.h"
+#include "../../engine/math/mat4.h"
 #include "../../engine/math/mathUtil.h"
 #include "../../engine/math/cframe.h"
 #include "../../engine/part.h"
@@ -12,15 +13,42 @@ class Screen;
 
 #include <cmath>
 
-class Camera {
+struct Camera {
+private:
+	bool viewDirty = true;
+	bool projectionDirty = true;
+
+	float fov;
+	float znear;
+	float zfar;
+
 public:
-	CFrame cframe;
+	CFramef cframe;
 	double speed;
 	double rspeed;
 	bool flying;
 
-	Camera(Vec3 position, Mat3 rotation) : cframe(CFrame(position, rotation)), speed(0.35), rspeed(0.04), flying(true) {};
-	Camera() : cframe(CFrame()), speed(0.35), rspeed(0.04), flying(true) {};
+	float aspect;
+	
+	Mat4f viewMatrix;
+	Mat4f invertedViewMatrix;
+
+	Mat4f projectionMatrix;
+	Mat4f invertedProjectionMatrix;
+
+	ExtendedPart* attachment = nullptr;
+
+	void update();
+	void update(float fov, float aspect, float znear, float zfar);
+	void update(float aspect);
+
+	Camera(Vec3 position, Mat3 rotation) : cframe(CFramef(position, rotation)), speed(0.35), rspeed(0.04), flying(true) {
+		update();
+	};
+
+	Camera() : cframe(CFramef()), speed(0.35), rspeed(0.04), flying(true) {
+		update();
+	};
 
 	void setPosition(Vec3 position);
 	void setPosition(double x, double y, double z);
@@ -33,8 +61,4 @@ public:
 
 	void move(Screen& screen, double dx, double dy, double dz, bool leftDragging);
 	void move(Screen& screen, Vec3 delta, bool leftDragging);
-
-	ExtendedPart* attachment = nullptr;
-	void update();
-
 };

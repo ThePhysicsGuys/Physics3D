@@ -16,11 +16,11 @@ public:
 
 	const int vertexCount;
 
-	ArrayMesh(const double* positions, const double* uv, const unsigned int vertexCount, const unsigned int dimensions);
-	ArrayMesh(const double* positions, const unsigned int vertexCount, const unsigned int dimensions, RenderMode renderMode);
-	ArrayMesh(const double* positions, const unsigned int vertexCount, const unsigned int dimensions) : ArrayMesh(positions, vertexCount, dimensions, RenderMode::TRIANGLES) {};
-	ArrayMesh(const Vec3* positions, const unsigned int vertexCount) : ArrayMesh((double *) positions, vertexCount * 3, 3) {};
-	ArrayMesh(const Vec2* positions, const unsigned int vertexCount) : ArrayMesh((double *) positions, vertexCount * 2, 2) {};
+	ArrayMesh(const float* positions, const float* uv, const unsigned int vertexCount, const unsigned int dimensions);
+	ArrayMesh(const float* positions, const unsigned int vertexCount, const unsigned int dimensions, RenderMode renderMode);
+	ArrayMesh(const float* positions, const unsigned int vertexCount, const unsigned int dimensions) : ArrayMesh(positions, vertexCount, dimensions, RenderMode::TRIANGLES) {};
+	ArrayMesh(Vec3f* positions, const unsigned int vertexCount) : ArrayMesh(reinterpret_cast<float const *>(positions), vertexCount * 3, 3) {};
+	ArrayMesh(Vec2f* positions, const unsigned int vertexCount) : ArrayMesh(reinterpret_cast<float const *>(positions), vertexCount * 2, 2) {};
 
 	void render() override;
 	void close() override;

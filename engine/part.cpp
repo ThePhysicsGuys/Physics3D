@@ -6,7 +6,7 @@ Part::Part(NormalizedShape shape, CFrame position, double density, double fricti
 
 Part::Part(Shape shape, CFrame position, double density, double friction) : properties({density, friction}) {
 	CFramef backTransform;
-	Vec3* normalBuf = (shape.normals) ? new Vec3[shape.vertexCount] : nullptr;
+	Vec3f* normalBuf = (shape.normals) ? new Vec3f[shape.vertexCount] : nullptr;
 	NormalizedShape normalized = shape.normalized(new Vec3f[shape.vertexCount], normalBuf, backTransform);
 
 	CFrame realCFrame = position.localToGlobal(CFrame(backTransform));

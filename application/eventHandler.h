@@ -1,7 +1,7 @@
 #pragma once
 
 class Screen;
-class Camera;
+struct Camera;
 
 #include "extendedPart.h"
 #include "../engine/math/vec3.h"
