@@ -114,11 +114,7 @@ CubeMap* skyboxTexture = nullptr;
 IndexedMesh* skyboxMesh = nullptr;
 
 // Render uniforms
-Mat4f projectionMatrix;
 Mat4f orthoMatrix;
-Mat4f rotatedViewMatrix;
-Mat4f viewMatrix;
-Vec3f viewPosition;
 
 // Shaders
 BasicShader basicShader;
@@ -231,6 +227,7 @@ void Screen::init() {
 	// Camera init
 	camera.setPosition(Vec3(1, 1, -2));
 	camera.setRotation(Vec3(0, 3.1415, 0.0));
+	camera.update(1.0, 1, 0.01, 10000.0);
 
 
 	// Framebuffer init
@@ -323,7 +320,7 @@ void Screen::init() {
 		screen.modelFrameBuffer->renderBuffer->resize(width, height);
 		screen.screenFrameBuffer->renderBuffer->resize(width, height);
 		screen.dimension = Vec2(width, height);
-		screen.aspect = ((float) width) / ((float) height);
+		screen.camera.update(((float)width) / ((float)height));
 	});
 
 	// Temp
@@ -353,7 +350,7 @@ void Screen::update() {
 
 	// Update camera
 	camera.update();
-	
+
 
 	// Update lights
 	/*static long long t = 0;
@@ -366,18 +363,10 @@ void Screen::update() {
 
 
 	// Update render uniforms
-	float size = 10;
-	// projectionMatrix = ortho(-size*aspect, size*aspect, -size, size, -1000, 1000);
-	projectionMatrix = perspective(1.0f, aspect, 0.01f, 1000000.0f);
-	orthoMatrix = ortho(-aspect, aspect, -1.0f, 1.0f, -1000.0f, 1000.0f);
-	//orthoMatrix = ortho(0, aspect, 0, 1, -1000, 1000);
-	rotatedViewMatrix = CFrameToMat4(CFramef(camera.cframe)).getRotation();
-	viewMatrix = rotatedViewMatrix.translate(-camera.cframe.position.x, -camera.cframe.position.y, -camera.cframe.position.z);
-	viewPosition = Vec3f(camera.cframe.position.x, camera.cframe.position.y, camera.cframe.position.z);
-
+	orthoMatrix = ortho(-camera.aspect, camera.aspect, -1.0f, 1.0f, -1000.0f, 1000.0f);
 
 	// Update picker
-	updateIntersectedPhysical(*this, handler->cursorPosition, viewMatrix, projectionMatrix);
+	updateIntersectedPhysical(*this, handler->cursorPosition);
 
 
 	// Update gui
@@ -424,7 +413,7 @@ void Screen::renderSkybox() {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	skyboxShader.update(sunDirection);
-	skyboxShader.update(viewMatrix, projectionMatrix);
+	skyboxShader.update(camera.viewMatrix, camera.projectionMatrix);
 	skyboxTexture->bind();
 	sphere->render();
 	glDepthMask(GL_TRUE);
@@ -481,7 +470,7 @@ void Screen::refresh() {
 
 	// Render physicals
 	graphicsMeasure.mark(GraphicsProcess::PHYSICALS);
-	basicShader.update(viewMatrix, projectionMatrix, viewPosition);
+	basicShader.update(camera.viewMatrix, camera.projectionMatrix, camera.cframe.position);
 	renderPhysicals();
 
 	if(selectedPart != nullptr) {
@@ -525,13 +514,13 @@ void Screen::refresh() {
 
 	// Render vector mesh
 	graphicsMeasure.mark(GraphicsProcess::VECTORS);
-	vectorShader.update(viewMatrix, projectionMatrix, viewPosition);
+	vectorShader.update(camera.viewMatrix, camera.projectionMatrix, camera.cframe.position);
 	vectorMesh->render();
 
 
 	// Render origin mesh
 	graphicsMeasure.mark(GraphicsProcess::ORIGIN);
-	originShader.update(viewMatrix, rotatedViewMatrix, projectionMatrix, orthoMatrix, viewPosition);
+	originShader.update(camera.viewMatrix, camera.cframe.rotation, camera.projectionMatrix, orthoMatrix, camera.cframe.position);
 	originMesh->render();
 
 

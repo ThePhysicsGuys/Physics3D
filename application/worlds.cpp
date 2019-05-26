@@ -39,8 +39,8 @@ void GravityWorld::applyExternalForces() {
 		player->parent->velocity *= 0.999;*/
 
 		Camera& camera = getCamera();
-		Vec3 playerX = camera.cframe.rotation.transpose() * Vec3(1, 0, 0);
-		Vec3 playerZ = camera.cframe.rotation.transpose() * Vec3(0, 0, 1);
+		Vec3f playerX = camera.cframe.rotation.transpose() * Vec3f(1, 0, 0);
+		Vec3f playerZ = camera.cframe.rotation.transpose() * Vec3f(0, 0, 1);
 		Debug::logVec(camera.cframe.position - playerZ, playerX, Debug::INFO);
 		if(handler->anyKey) {
 			Vec3 UP(0, 1, 0);

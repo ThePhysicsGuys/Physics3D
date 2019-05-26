@@ -227,11 +227,11 @@ namespace GUI {
 	}
 
 	Vec2 map(Vec2 point) {
-		return Vec2(map(point.x, 0, screen->dimension.x, -screen->aspect, screen->aspect), map(screen->dimension.y - point.y, 0, screen->dimension.y, -1, 1));
+		return Vec2(map(point.x, 0, screen->dimension.x, -screen->camera.aspect, screen->camera.aspect), map(screen->dimension.y - point.y, 0, screen->dimension.y, -1, 1));
 	}
 	
 	Vec2 unmap(Vec2 point) {
-		return Vec2(map(point.x, -screen->aspect, screen->aspect, 0, screen->dimension.x), screen->dimension.y - map(point.y, -1, 1, 0, screen->dimension.y));
+		return Vec2(map(point.x, -screen->camera.aspect, screen->camera.aspect, 0, screen->dimension.x), screen->dimension.y - map(point.y, -1, 1, 0, screen->dimension.y));
 	}
 
 	void intersect(Vec2 mouse) {

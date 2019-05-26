@@ -33,8 +33,9 @@ public:
 	std::vector<IndexedMesh*> meshes;
 	World<ExtendedPart>* world;
 	Vec2 dimension;
-	float aspect;
+
 	Camera camera;
+
 	EventHandler eventHandler;
 	Properties properties;
 
@@ -42,11 +43,11 @@ public:
 	FrameBuffer* screenFrameBuffer = nullptr;
 
 	// Picker
-	Vec3 ray;
+	Vec3f ray;
 	ExtendedPart* intersectedPart = nullptr;
-	Vec3 intersectedPoint;
+	Vec3f intersectedPoint;
 	ExtendedPart* selectedPart = nullptr;
-	Vec3 selectedPoint;
+	Vec3f selectedPoint;
 
 	Screen();
 	Screen(int width, int height, World<ExtendedPart>* world);

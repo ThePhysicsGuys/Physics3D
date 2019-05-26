@@ -13,31 +13,29 @@ Vec2f getNormalizedDeviceSpacePosition(Vec2f viewportSpacePosition, Vec2f screen
 	return Vec2f(x, -y);
 }
 
-Vec3f calcRay(Vec2f mousePosition, Vec2f screenSize, Mat4f viewMatrix, Mat4f projectionMatrix) {
-	Vec2f normalizedDeviceSpacePosition = getNormalizedDeviceSpacePosition(mousePosition, screenSize);
+Vec3f calcRay(Screen& screen, Vec2f mousePosition) {
+	Vec2f normalizedDeviceSpacePosition = getNormalizedDeviceSpacePosition(mousePosition, screen.dimension);
 	Vec4f clipSpacePosition = Vec4f(normalizedDeviceSpacePosition.x, normalizedDeviceSpacePosition.y, -1.0f, 1.0f);
-	Mat4f invertedProjectionMatrix = projectionMatrix.inverse();
-	Vec4f eyeCoordinates = invertedProjectionMatrix * clipSpacePosition;
+	Vec4f eyeCoordinates = screen.camera.invertedProjectionMatrix * clipSpacePosition;
 	eyeCoordinates = Vec4f(eyeCoordinates.x, eyeCoordinates.y, -1.0f, 0.0f);
-	Mat4f inverseViewMatrix = viewMatrix.inverse();
-	Vec4f rayWorld = inverseViewMatrix * eyeCoordinates;
+	Vec4f rayWorld = screen.camera.invertedViewMatrix * eyeCoordinates;
 	Vec3 rayDirection = Vec3(rayWorld.x, rayWorld.y, rayWorld.z).normalize();
 
 	return rayDirection;
 }
 
-void updateIntersectedPhysical(Screen& screen, Vec2 mousePosition, Mat4f viewMatrix, Mat4f projectionMatrix) {
+void updateIntersectedPhysical(Screen& screen, Vec2 mousePosition) {
 	SharedLockGuard guard(screen.world->lock);
 	
 	ExtendedPart* closestIntersectedPart = nullptr;
-	Vec3 closestIntersectedPoint = Vec3();
+	Vec3f closestIntersectedPoint = Vec3();
 	float closestIntersectDistance = INFINITY;
 
-	screen.ray = calcRay(mousePosition, screen.dimension, viewMatrix, projectionMatrix);
+	screen.ray = calcRay(screen, mousePosition);
 	for(ExtendedPart& part : *screen.world){
 		Vec3f* buffer = new Vec3f[part.hitbox.vertexCount];
 		Shape transformed = part.hitbox.localToGlobal(CFramef(part.cframe), buffer);
-		float distance = transformed.getIntersectionDistance(Vec3f(screen.camera.cframe.position), Vec3f(screen.ray));
+		float distance = transformed.getIntersectionDistance(screen.camera.cframe.position, screen.ray);
 		if (distance < closestIntersectDistance && distance > 0) {
 			closestIntersectDistance = distance;
 			closestIntersectedPart = &part;
