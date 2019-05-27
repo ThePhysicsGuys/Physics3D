@@ -26,9 +26,9 @@ void PointMesh::update(const float* vertices, const size_t vertexCount) {
 	if (vertexCount > capacity) {
 		capacity = vertexCount;
 		Log::warn("Point buffer overflow, creating new buffer with size (%d)", vertexCount);
-		glBufferData(GL_ARRAY_BUFFER, capacity * 10 * sizeof(float), vertices, GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, capacity * bufferLayout.stride, vertices, GL_DYNAMIC_DRAW);
 	}
 	else {
-		glBufferSubData(GL_ARRAY_BUFFER, 0, vertexCount * 10 * sizeof(float), vertices);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, vertexCount * bufferLayout.stride, vertices);
 	}
 }

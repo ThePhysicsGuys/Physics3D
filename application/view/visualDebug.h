@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../debug.h"
+#include "../engine/math/mat3.h"
 #include "../buffers.h"
 #include "vectorMesh.h"
 #include "profilerUI.h"
@@ -26,7 +27,7 @@ extern BreakdownAverageProfiler<60, GraphicsProcess> graphicsMeasure;
 // Debug
 using namespace Debug;
 extern std::map<VecType, bool> debug_enabled;
-extern std::map<VecType, double> vecColors;
+extern std::map<VecType, Vec3f> vecColors;
 
 extern bool renderPies;
 extern int fieldIndex;

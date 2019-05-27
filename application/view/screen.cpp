@@ -305,7 +305,7 @@ void Screen::init() {
 	
 
 	// Vector init
-	vectorMesh = new VectorMesh(new float[128 * 7], 128);
+	vectorMesh = new VectorMesh(new float[128 * 9], 128);
 	
 	
 	// Point init
