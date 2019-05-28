@@ -73,7 +73,7 @@ void moveGrabbedPhysicalLateral(Screen& screen) {
 	if (isPaused()) {
 		Vec3 translation = planeIntersection - screen.selectedPoint;
 		screen.selectedPoint += translation;
-		screen.selectedPart->cframe.translate(translation);
+		screen.selectedPart->parent->setCFrame(screen.selectedPart->parent->cframe + translation);
 	} else {
 		screen.world->selectedPart = screen.selectedPart;
 		screen.world->magnetPoint = planeIntersection;

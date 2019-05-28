@@ -492,13 +492,17 @@ void Screen::refresh() {
 
 	// Initialize vector log buffer
 	graphicsMeasure.mark(GraphicsProcess::VECTORS);
-	AddableBuffer<AppDebug::ColoredVec> vecLog = AppDebug::getVecBuffer();
-
+	AddableBuffer<AppDebug::ColoredVec>& vecLog = AppDebug::getVecBuffer();
+	AddableBuffer<AppDebug::ColoredPoint>& pointLog = AppDebug::getPointBuffer();
 
 	// Render physicals
 	graphicsMeasure.mark(GraphicsProcess::PHYSICALS);
 	basicShader.update(camera.viewMatrix, camera.projectionMatrix, camera.cframe.position);
 	renderPhysicals();
+
+	for (const Physical& p : world->iterPhysicals()) {
+		pointLog.add(AppDebug::ColoredPoint(p.getCenterOfMass(), Debug::CENTER_OF_MASS));
+	}
 
 	if(selectedPart != nullptr) {
 		CFramef selectedCFrame(selectedPart->cframe);
@@ -506,7 +510,7 @@ void Screen::refresh() {
 			vecLog.add(AppDebug::ColoredVec(Vec3(selectedCFrame.localToGlobal(corner)), selectedPart->parent->getVelocityOfPoint(Vec3(selectedCFrame.localToRelative(corner))), Debug::VELOCITY));
 		}
 	}
-		
+	
 	// Postprocess to screenFrameBuffer
 	screenFrameBuffer->bind();
 	glDisable(GL_DEPTH_TEST);
@@ -524,10 +528,10 @@ void Screen::refresh() {
 				vecLog.add(AppDebug::ColoredVec(part.cframe.localToGlobal(part.hitbox[i]), part.cframe.localToRelative(part.hitbox.normals.get()[i]), Debug::POSITION));
 	}*/
 
-	// Update vector mesh
+	// Update debug meshes
 	graphicsMeasure.mark(GraphicsProcess::VECTORS);
 	updateVecMesh(vectorMesh, vecLog.data, vecLog.index);
-	//updatePointMesh(pointMesh, vecLog.data, vecLog.index);
+	updatePointMesh(pointMesh, pointLog.data, pointLog.index);
 
 	// Render lights
 	graphicsMeasure.mark(GraphicsProcess::LIGHTING);

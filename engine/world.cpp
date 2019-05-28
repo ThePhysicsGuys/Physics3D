@@ -43,6 +43,7 @@ double computeCombinedInertiaBetween(const Physical& first, const Physical& seco
 	exitVector is the distance p2 must travel so that the shapes are no longer colliding
 */
 void handleCollision(Part& part1, Part& part2, Vec3 collisionPoint, Vec3 exitVector, bool anchoredColission) {
+	Debug::logPoint(collisionPoint, Debug::INTERSECTION);
 	Physical& p1 = *part1.parent;
 	Physical& p2 = *part2.parent;
 

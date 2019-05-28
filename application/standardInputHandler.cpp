@@ -77,6 +77,9 @@ void StandardInputHandler::keyDown(int key, int modifiers) {
 	if(key >= GLFW_KEY_F1 && key <= GLFW_KEY_F9) {
 		toggleDebugVecType(static_cast<Debug::VecType>(key - GLFW_KEY_F1));
 	}
+	if (key >= GLFW_KEY_1 && key <= GLFW_KEY_9) {
+		toggleDebugPointType(static_cast<Debug::PointType>(key - GLFW_KEY_1));
+	}
 };
 
 void StandardInputHandler::doubleKeyDown(int key, int modifiers) {
