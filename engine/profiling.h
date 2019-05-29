@@ -78,6 +78,15 @@ public:
 		currentProcess = process;
 	}
 
+	inline void mark(ProcessType process, ProcessType overrideOldProcess) {
+		std::chrono::time_point<std::chrono::steady_clock> curTime = std::chrono::high_resolution_clock::now();
+		if (currentProcess != static_cast<ProcessType>(-1)) {
+			HistoricTally<N, std::chrono::nanoseconds, ProcessType>::addToTally(overrideOldProcess, curTime - startTime);
+		}
+		startTime = curTime;
+		currentProcess = process;
+	}
+
 	inline void end() {
 		std::chrono::time_point<std::chrono::steady_clock> curTime = std::chrono::high_resolution_clock::now();
 		this->addToTally(currentProcess, curTime - startTime);
@@ -85,7 +94,6 @@ public:
 
 		currentProcess = static_cast<ProcessType>(-1);
 		this->nextTally();
-
 	}
 
 	inline double getAvgTPS() {

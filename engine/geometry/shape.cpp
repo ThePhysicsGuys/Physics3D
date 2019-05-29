@@ -17,6 +17,8 @@
 #include "../debug.h"
 #include "../math/mathUtil.h"
 
+#include "../physicsProfiler.h"
+
 #include "computationBuffer.h"
 
 #include "intersection.h"
@@ -441,17 +443,32 @@ Vec3f Shape::furthestInDirection(const Vec3f& direction) const {
 #endif
 
 
-
+void incDebugTally(HistoricTally<100, long long, IterationTime>& tally, int iterTime) {
+	if (iterTime >= 200) {
+		tally.addToTally(IterationTime::LIMIT_REACHED, 1);
+	} else if (iterTime >= 15) {
+		tally.addToTally(IterationTime::TOOMANY, 1);
+	} else {
+		tally.addToTally(static_cast<IterationTime>(iterTime), 1);
+	}
+}
 
 ComputationBuffers buffers(1000, 2000);
 bool Shape::intersects(const Shape& other, Vec3f& intersection, Vec3f& exitVector, const Vec3& centerConnection) const {
 	Tetrahedron result;
-	bool collides = runGJK(*this, other, Vec3f(centerConnection), result);
+	int iter;
+	physicsMeasure.mark(PhysicsProcess::GJK_COL);
+	bool collides = runGJK(*this, other, Vec3f(centerConnection), result, iter);
 	
 	if(collides) {
-		bool epaResult = runEPA(*this, other, result, intersection, exitVector, buffers);
+		incDebugTally(GJKCollidesIterationStatistics, iter + 2);
+		physicsMeasure.mark(PhysicsProcess::EPA);
+		bool epaResult = runEPA(*this, other, result, intersection, exitVector, buffers, iter);
+		incDebugTally(EPAIterationStatistics, iter);
 		return epaResult;
 	} else {
+		incDebugTally(GJKNoCollidesIterationStatistics, iter + 2);
+		physicsMeasure.mark(PhysicsProcess::OTHER, PhysicsProcess::GJK_NO_COL);
 		return false;
 	}
 }
@@ -460,11 +477,19 @@ bool Shape::intersects(const Shape& other, Vec3f& intersection, Vec3f& exitVecto
 
 bool Shape::intersectsTransformed(const Shape& other, const CFramef& relativeCFramef, Vec3f& intersection, Vec3f& exitVector) const {
 	Tetrahedron result;
-	bool collides = runGJKTransformed(*this, other, relativeCFramef, relativeCFramef.position, result);
+	int iter;
+	physicsMeasure.mark(PhysicsProcess::GJK_COL);
+	bool collides = runGJKTransformed(*this, other, relativeCFramef, relativeCFramef.position, result, iter);
 	
 	if(collides) {
-		return runEPATransformed(*this, other, result, relativeCFramef, intersection, exitVector, buffers);
+		incDebugTally(GJKCollidesIterationStatistics, iter + 2);
+		physicsMeasure.mark(PhysicsProcess::EPA);
+		bool epaResult = runEPATransformed(*this, other, result, relativeCFramef, intersection, exitVector, buffers, iter);
+		incDebugTally(EPAIterationStatistics, iter);
+		return epaResult;
 	} else {
+		incDebugTally(GJKNoCollidesIterationStatistics, iter + 2);
+		physicsMeasure.mark(PhysicsProcess::OTHER, PhysicsProcess::GJK_NO_COL);
 		return false;
 	}
 }

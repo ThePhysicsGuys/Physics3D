@@ -610,6 +610,21 @@ void Screen::refresh() {
 		graphicsPie.renderPie(*this);
 		intersectionPie.renderPie(*this);
 		endPieRendering(*this);
+
+		BarChartClassInformation classes[]{ {"GJK Collide", Vec3f(0.2f,0.2f,1)},{"GJK No Collide", Vec3f(1.0f, 0.5f, 0.0f)},{"EPA", Vec3f(1.0f, 1.0f, 0.0f)}};
+		BarChart iterationChart("Iteration Statistics", "", GJKCollidesIterationStatistics.labels, classes, Vec2f(-leftSide+0.1f, -0.3), Vec2f(0.8, 0.6), 3, 17);
+
+		ParallelArray<long long, 17> gjkColIter = GJKCollidesIterationStatistics.history.avg();
+		ParallelArray<long long, 17> gjkNoColIter = GJKNoCollidesIterationStatistics.history.avg();
+		ParallelArray<long long, 17> epaIter = EPAIterationStatistics.history.avg();
+
+		for (size_t i = 0; i < GJKCollidesIterationStatistics.size(); i++) {
+			iterationChart.data[0][i] = WeightValue{ (float)gjkColIter[i], std::to_string(gjkColIter[i]) };
+			iterationChart.data[1][i] = WeightValue{ (float)gjkNoColIter[i], std::to_string(gjkNoColIter[i]) };
+			iterationChart.data[2][i] = WeightValue{ (float)epaIter[i], std::to_string(epaIter[i]) };
+		}
+
+		iterationChart.render();
 	}
 
 

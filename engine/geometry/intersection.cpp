@@ -6,7 +6,6 @@
 #include "../math/utils.h"
 #include "../../util/log.h"
 #include "../debug.h"
-#include "../physicsProfiler.h"
 #include "../constants.h"
 
 
@@ -75,9 +74,7 @@ inline MinkPoint getSupport(const Shape& first, const Shape& second, const CFram
 	return MinkPoint{ furthest1 - secondVertex, furthest1, secondVertex };
 }
 
-bool runGJK(const Shape& first, const Shape& second, const Vec3f& initialSearchDirection, Tetrahedron& simplex) {
-	physicsMeasure.mark(PhysicsProcess::GJK);
-
+bool runGJK(const Shape& first, const Shape& second, const Vec3f& initialSearchDirection, Tetrahedron& simplex, int& iter) {
 	MinkPoint A(getSupport(first, second, initialSearchDirection));
 	MinkPoint B, C, D;
 
@@ -91,21 +88,25 @@ bool runGJK(const Shape& first, const Shape& second, const Vec3f& initialSearchD
 	// B can't be closer since we picked a point towards the origin
 	// Just one test, to see if the line segment or A is closer
 	B = getSupport(first, second, searchDirection); 
-	if(B.p * searchDirection < 0)
+	if (B.p * searchDirection < 0) {
+		iter = -2;
 		return false;
+	}
 
 	Vec3f AO = -B.p;
 	Vec3f AB = A.p - B.p;
 	searchDirection = -(AO % AB) % AB;
 	
 	C = getSupport(first, second, searchDirection);
-	if(C.p * searchDirection < 0)
+	if (C.p * searchDirection < 0) {
+		iter = -1;
 		return false;
+	}
 	// s.A is C.p  newest
 	// s.B is B.p
 	// s.C is A.p
 	// triangle, check if closest to one of the edges, point, or face
-	for(int iter = 0; iter < GJK_MAX_ITER; iter++){
+	for(iter = 0; iter < GJK_MAX_ITER; iter++){
 		Vec3f AO = -C.p;
 		Vec3f AB = B.p - C.p;
 		Vec3f AC = A.p - C.p;
@@ -192,9 +193,7 @@ bool runGJK(const Shape& first, const Shape& second, const Vec3f& initialSearchD
 	return false;
 }
 
-bool runGJKTransformed(const Shape& first, const Shape& second, const CFramef& transform, const Vec3f& initialSearchDirection, Tetrahedron& simplex) {
-	physicsMeasure.mark(PhysicsProcess::GJK);
-
+bool runGJKTransformed(const Shape& first, const Shape& second, const CFramef& transform, const Vec3f& initialSearchDirection, Tetrahedron& simplex, int& iter) {
 	MinkPoint A(getSupport(first, second, transform, initialSearchDirection));
 	MinkPoint B, C, D;
 
@@ -208,21 +207,25 @@ bool runGJKTransformed(const Shape& first, const Shape& second, const CFramef& t
 	// B can't be closer since we picked a point towards the origin
 	// Just one test, to see if the line segment or A is closer
 	B = getSupport(first, second, transform, searchDirection);
-	if(B.p * searchDirection < 0)
+	if (B.p * searchDirection < 0) {
+		iter = -2;
 		return false;
+	}
 
 	Vec3f AO = -B.p;
 	Vec3f AB = A.p - B.p;
 	searchDirection = -(AO % AB) % AB;
 
 	C = getSupport(first, second, transform, searchDirection);
-	if(C.p * searchDirection < 0)
+	if (C.p * searchDirection < 0) {
+		iter = -1;
 		return false;
+	}
 	// s.A is C.p  newest
 	// s.B is B.p
 	// s.C is A.p
 	// triangle, check if closest to one of the edges, point, or face
-	for(int iter = 0; iter < GJK_MAX_ITER; iter++) {
+	for(iter = 0; iter < GJK_MAX_ITER; iter++) {
 		Vec3f AO = -C.p;
 		Vec3f AB = B.p - C.p;
 		Vec3f AC = A.p - C.p;
@@ -326,16 +329,14 @@ void initializeBuffer(const Tetrahedron& s, ComputationBuffers& b) {
 	b.knownVecs[3] = MinkowskiPointIndices{s.D.originFirst, s.D.originSecond};
 }
 
-bool runEPA(const Shape& first, const Shape& second, const Tetrahedron& s, Vec3f& intersection, Vec3f& exitVector, ComputationBuffers& bufs) {
-	physicsMeasure.mark(PhysicsProcess::EPA);
-
+bool runEPA(const Shape& first, const Shape& second, const Tetrahedron& s, Vec3f& intersection, Vec3f& exitVector, ComputationBuffers& bufs, int& iter) {
 	bufs.ensureCapacity(first.vertexCount + second.vertexCount + EPA_MAX_ITER, first.triangleCount + second.triangleCount + EPA_MAX_ITER*2);
 
 	initializeBuffer(s, bufs);
 
 	ConvexShapeBuilder builder(bufs.vertBuf, bufs.triangleBuf, 4, 4, bufs.neighborBuf, bufs.removalBuf, bufs.edgeBuf);
 
-	for(int i = 0; i < EPA_MAX_ITER; i++) {
+	for(iter = 0; iter < EPA_MAX_ITER; iter++) {
 
 		double distSq;
 		int closestTriangleIndex = getNearestSurface(builder, distSq);
@@ -391,16 +392,14 @@ bool runEPA(const Shape& first, const Shape& second, const Tetrahedron& s, Vec3f
 	return false;
 }
 
-bool runEPATransformed(const Shape& first, const Shape& second, const Tetrahedron& s, const CFramef& relativeCFrame, Vec3f& intersection, Vec3f& exitVector, ComputationBuffers& bufs) {
-	physicsMeasure.mark(PhysicsProcess::EPA);
-
+bool runEPATransformed(const Shape& first, const Shape& second, const Tetrahedron& s, const CFramef& relativeCFrame, Vec3f& intersection, Vec3f& exitVector, ComputationBuffers& bufs, int& iter) {
 	bufs.ensureCapacity(first.vertexCount + second.vertexCount + EPA_MAX_ITER, first.triangleCount + second.triangleCount + EPA_MAX_ITER * 2);
 
 	initializeBuffer(s, bufs);
 
 	ConvexShapeBuilder builder(bufs.vertBuf, bufs.triangleBuf, 4, 4, bufs.neighborBuf, bufs.removalBuf, bufs.edgeBuf);
 
-	for(int i = 0; i < EPA_MAX_ITER; i++) {
+	for(iter = 0; iter < EPA_MAX_ITER; iter++) {
 
 		double distSq;
 		int closestTriangleIndex = getNearestSurface(builder, distSq);

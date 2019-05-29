@@ -1,8 +1,9 @@
 
-#include "GL\glew.h"
+#include <GL/glew.h>
 #include "profilerUI.h"
 #include "../engine/math/mat2.h"
 #include "../engine/math/vec2.h"
+#include "gui/gui.h"
 
 #define _USE_MATH_DEFINES
 #include "math.h"
@@ -13,6 +14,7 @@ const Vec3f pieColors[30]{
 	Vec3f(1,0,0),
 	Vec3f(0,1,0),
 	Vec3f(0.2f,0.2f,1),
+	Vec3f(1,0.5f,0),
 	Vec3f(1,1,0),
 	Vec3f(1,0,1),
 	Vec3f(0,1,1),
@@ -110,4 +112,96 @@ float PieChart::getTotal() const {
 	for(DataPoint p : parts)
 		totalWeight += p.weight;
 	return totalWeight;
+}
+
+void BarChart::render() const {
+	glUseProgram(0);
+
+	float titleHeight = 0.045;
+
+	float marginLeft = size.x * 0.0;
+	float marginBottom = size.y * 0.045;
+	float marginTop = titleHeight + 0.05;
+
+	Vec2f drawingPosition = position + Vec2f(marginLeft, marginBottom);
+
+	Vec2f drawingSize = size - Vec2f(marginLeft, marginBottom+marginTop);
+
+	float categoryWidth = drawingSize.x / data.width;
+	float barWidth = drawingSize.x / ((data.height+0.5) * data.width);
+
+	float max = getMaxWeight();
+
+	glPushMatrix();
+	glScaled(GUI::screen->dimension.y / GUI::screen->dimension.x, 1, 1);
+
+
+
+	glBegin(GL_QUADS);
+	/*color(Vec3f(0.7, 0.7, 0.7));
+	vertex(position);
+	vertex(position + Vec2f(size.x, 0));
+	vertex(position + size);
+	vertex(position + Vec2f(0, size.y));*/
+	for (int cl = 0; cl < data.height; cl++) {
+		const BarChartClassInformation& info = classes[cl];
+		color(info.color);
+		for (int i = 0; i < data.width; i++) {
+			const WeightValue& dataPoint = data[cl][i];
+
+			Vec2f botLeft = drawingPosition + Vec2f(categoryWidth * i + barWidth*cl, 0);
+
+			float height = drawingSize.y * dataPoint.weight / max;
+
+			//GUI::defaultQuad->resize(botLeft, Vec2f(barWidth, height));
+			//GUI::defaultQuad->render();
+
+			vertex(botLeft);
+			vertex(botLeft + Vec2f(barWidth, 0));
+			vertex(botLeft + Vec2f(barWidth, height));
+			vertex(botLeft + Vec2f(0, height));
+		}
+	}
+	glEnd();
+	glPopMatrix();
+
+	GUI::defaultFont->render(title, position + Vec2f(0, size.y - titleHeight), GUI::COLOR::WHITE, 0.001);
+
+	for (int cl = 0; cl < data.height; cl++) {
+		const BarChartClassInformation& info = classes[cl];
+		color(info.color);
+		for (int i = 0; i < data.width; i++) {
+			const WeightValue& dataPoint = data[cl][i];
+
+			Vec2f botLeft = drawingPosition + Vec2f(categoryWidth * i + barWidth * cl, 0);
+
+			float height = drawingSize.y * dataPoint.weight / max;
+
+			Vec2f topTextPosition = botLeft + Vec2(0, height+drawingSize.y * 0.02);
+			//topTextPosition.x *= GUI::screen->dimension.x / GUI::screen->dimension.y;
+
+			GUI::defaultFont->render(dataPoint.value, topTextPosition, info.color, 0.0005);
+		}
+	}
+
+	for (int i = 0; i < data.width; i++) {
+		Vec2f botLeft = position + Vec2f(marginLeft, 0) + Vec2f(categoryWidth * i, 0);
+		//botLeft.x *= GUI::screen->dimension.x / GUI::screen->dimension.y;
+		GUI::defaultFont->render(labels[i], botLeft, GUI::COLOR::WHITE, 0.0005);
+	}
+
+	for (int cl = 0; cl < data.height; cl++) {
+		GUI::defaultFont->render(classes[cl].name, drawingPosition + Vec2f(size.x - 0.3, drawingSize.y - 0.035 * cl), classes[cl].color, 0.0007);
+	}
+}
+
+float BarChart::getMaxWeight() const {
+	float best = 0;
+	for (const WeightValue& wv:data){
+		float w = wv.weight;
+		if (w > best) {
+			best = w;
+		}
+	}
+	return best;
 }
