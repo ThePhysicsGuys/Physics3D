@@ -98,21 +98,26 @@ Screen::Screen(int width, int height, World<ExtendedPart>* world) {
 	Log::info("OpenGL shader version: (%s)", glGetString(GL_SHADING_LANGUAGE_VERSION));
 }
 
+
 // Font
 Font* font = nullptr;
+
 
 // Handler
 StandardInputHandler* handler = nullptr;
 
+
 // Textures
 Texture* floorTexture = nullptr;
 Texture* floorNormal = nullptr;
+
 
 //Skybox
 IndexedMesh* sphere = nullptr;
 BoundingBox* skybox = nullptr;
 CubeMap* skyboxTexture = nullptr;
 IndexedMesh* skyboxMesh = nullptr;
+
 
 // Render uniforms
 Mat4f orthoMatrix;
@@ -128,6 +133,7 @@ PostProcessShader postProcessShader;
 SkyboxShader skyboxShader;
 PointShader pointShader;
 
+
 // Light uniforms
 const int lightCount = 4;
 Vec3f sunDirection;
@@ -139,11 +145,13 @@ Light lights[lightCount] = {
 	Light(Vec3f(0, 0, 0), Vec3f(1, 1, 1), 2, attenuation)
 };
 
+
 // Render meshes
 VectorMesh* vectorMesh = nullptr;
 PointMesh* pointMesh = nullptr;
 ArrayMesh* originMesh = nullptr;
 Quad* quad = nullptr;
+
 
 // GUI
 Frame* propertiesFrame = nullptr;
@@ -253,7 +261,7 @@ void Screen::init() {
 	partMeshIDLabel = new Label("", 0, 0);
 
 	partAmbientSlider = new Slider(0, 0, 0, 0.999999, 0.5);
-	testSlider = new Slider(0, 0, 500, 3000, 500);
+	testSlider = new Slider(0, 0, 0, 1, 0);
 	partVelocity = new Label("", 0, 0);
 	partAngularVelocity = new Label("", 0, 0);
 	partKineticEnergy = new Label("", 0, 0);
@@ -262,7 +270,7 @@ void Screen::init() {
 
 	partAmbientSlider->action = [] (Slider* s) {
 		if (GUI::screen->selectedPart) {
-			GUI::screen->selectedPart->material.ambient = Vec3f(GUI::COLOR::hsvToRgb(Vec3(s->value, 1, 1)));
+			GUI::screen->selectedPart->material.ambient = Vec4f(GUI::COLOR::hsvToRgb(Vec3(s->value, 1, 1)), 1);
 		}
 	};
 
@@ -299,6 +307,10 @@ void Screen::init() {
 	mouseHorizontal->backgroundColor = Vec4(1);
 	
 
+	// Picker init
+	Picker::init();
+
+
 	// Origin init
 	float originVertices[3] = { 0, 0, 5 };
 	originMesh = new ArrayMesh(originVertices, 1, 3, RenderMode::POINTS);
@@ -322,7 +334,7 @@ void Screen::init() {
 		buf[i * 10 + 6] = 0.0f;
 
 		buf[i * 10 + 7] = 0.0f;
-		buf[i * 10 + 8] = 0.0f; // color 2 blue
+		buf[i * 10 + 8] = 0.0f; // color 2 white
 		buf[i * 10 + 9] = 0.0f;
 
 	}
@@ -391,9 +403,10 @@ void Screen::update() {
 
 	// Update render uniforms
 	orthoMatrix = ortho(-camera.aspect, camera.aspect, -1.0f, 1.0f, -1000.0f, 1000.0f);
+	
 
 	// Update picker
-	updateIntersectedPhysical(*this, handler->cursorPosition);
+	Picker::update(*this, handler->cursorPosition);
 
 
 	// Update gui
@@ -448,6 +461,8 @@ void Screen::renderSkybox() {
 }
 
 void Screen::renderPhysicals() {
+	std::map<double, ExtendedPart*> transparentMeshes;
+
 	// Bind basic uniforms
 	basicShader.updateLight(lights, lightCount);
 
@@ -461,12 +476,17 @@ void Screen::renderPhysicals() {
 
 		// Picker code
 		if(&part == selectedPart)
-			material.ambient = part.material.ambient + Vec3f(0.1, 0.1, 0.1);
+			material.ambient = part.material.ambient + Vec4f(0.1, 0.1, 0.1, -0.5);
 		else if (&part == intersectedPart)
-			material.ambient = part.material.ambient + Vec3f(-0.1, -0.1, -0.1);
+			material.ambient = part.material.ambient + Vec4f(-0.1, -0.1, -0.1, 0);
 		else
 			material.ambient = part.material.ambient;
 		
+		if (material.ambient.w < 1) {
+			transparentMeshes[(camera.cframe.position - part.cframe.position).lengthSquared()] = &part;
+			continue;
+		}
+
 		basicShader.updateMaterial(material);
 
 		// Render each physical
@@ -475,6 +495,28 @@ void Screen::renderPhysicals() {
 		if(meshId == -1) continue;
 
 		meshes[meshId]->render(part.renderMode);
+	}
+
+	for (auto iterator = transparentMeshes.rbegin(); iterator != transparentMeshes.rend(); ++iterator) {
+		ExtendedPart* part = (*iterator).second;
+		
+		Material material = part->material;
+
+		if (part == selectedPart)
+			material.ambient = part->material.ambient + Vec4f(0.1, 0.1, 0.1, -0.5);
+		else if (part == intersectedPart)
+			material.ambient = part->material.ambient + Vec4f(-0.1, -0.1, -0.1, 0);
+		else
+			material.ambient = part->material.ambient;
+		
+		basicShader.updateMaterial(material);
+	   
+		// Render each physical
+		basicShader.updatePart(*part);
+
+		if (part->drawMeshId == -1) continue;
+
+		meshes[part->drawMeshId]->render(part->renderMode);
 	}
 }
 
@@ -533,15 +575,15 @@ void Screen::refresh() {
 	updateVecMesh(vectorMesh, vecLog.data, vecLog.index);
 	updatePointMesh(pointMesh, pointLog.data, pointLog.index);
 
+
 	// Render lights
 	graphicsMeasure.mark(GraphicsProcess::LIGHTING);
 	for (Light light : lights) {
 		Mat4f transformation = Mat4f().translate(light.position).scale(0.1f);
-		basicShader.updateMaterial(Material(light.color, Vec3f(), Vec3f(), 10));
+		basicShader.updateMaterial(Material(Vec4f(light.color, 1), Vec3f(), Vec3f(), 10));
 		basicShader.updateModelMatrix(transformation);
 		skyboxMesh->render();
 	}
-	
 
 	// Render vector mesh
 	graphicsMeasure.mark(GraphicsProcess::VECTORS);
@@ -564,6 +606,7 @@ void Screen::refresh() {
 	// Render screenFrameBuffer texture to the screen
 	graphicsMeasure.mark(GraphicsProcess::FINALIZE);
 	screenFrameBuffer->unbind();
+
 	glClear(GL_COLOR_BUFFER_BIT);
 	glDisable(GL_DEPTH_TEST);
 
@@ -572,6 +615,10 @@ void Screen::refresh() {
 	quadShader.update(Mat4f());
 	quadShader.update(screenFrameBuffer->texture);
 	quad->render();
+
+
+	// Render edit tools
+	Picker::render(*this, basicShader);
 
 
 	// Render GUI

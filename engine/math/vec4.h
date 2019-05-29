@@ -1,5 +1,7 @@
 #pragma once
 
+#include "vec3.h"
+
 template<typename N>
 struct Vec4Template {
 public:
@@ -19,6 +21,13 @@ public:
 	Vec4Template(N x, N y, N z, N w) : x(x), y(y), z(z), w(w) {};
 	template<typename OtherN>
 	Vec4Template(const Vec4Template<OtherN>& other) : x(static_cast<N>(other.x)), y(static_cast<N>(other.y)), z(static_cast<N>(other.z)), w(static_cast<N>(other.w)) {};
+	template<typename OtherN>
+	Vec4Template(const Vec3Template<OtherN>& other, N w) : x(static_cast<N>(other.x)), y(static_cast<N>(other.y)), z(static_cast<N>(other.z)), w(static_cast<N>(w)) {};
+
+	template<typename N>
+	explicit operator Vec3Template<N>() const {
+		return Vec3Template<N>(x, y, z);
+	}
 
 	Vec4Template operator+(const Vec4Template& other) const {
 		return Vec4Template(x + other.x, y + other.y, z + other.z, w + other.w);

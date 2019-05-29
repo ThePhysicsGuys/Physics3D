@@ -166,7 +166,7 @@ in vec3 fcenter;
 vec3 normal;
 
 struct Material {
-	vec3 ambient;
+	vec4 ambient;
 	vec3 diffuse;
 	vec3 specular;
 	float reflectance;
@@ -260,9 +260,9 @@ void main() {
 	}
 
 	if (material.textured) {
-		outColor = vec4(lightColors / count * material.ambient, 1) * texture(textureSampler, fuv);
+		outColor = vec4(lightColors / count * material.ambient.rgb, material.ambient.a) * texture(textureSampler, fuv);
 	} else {
-		outColor = vec4(lightColors / count * material.ambient, 1);
+		outColor = vec4(lightColors / count * material.ambient.rgb, material.ambient.a);
 	}
 }
 

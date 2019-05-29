@@ -7,8 +7,9 @@
 
 #include "../engine/math/mat3.h"
 #include "../engine/math/vec3.h"
+#include "../engine/math/vec4.h"
 
-#include "view\camera.h"
+#include "view\screen.h"
 
 #include "extendedPart.h"
 #include "worlds.h"
@@ -19,6 +20,8 @@ namespace Import {
 	double parseDouble(std::string num);
 	Vec3 parseVec3(std::string vec);
 	Vec3f parseVec3f(std::string vec);
+	Vec4 parseVec4(std::string vec);
+	Vec4f parseVec4f(std::string vec);
 	DiagonalMat3 parseDiagonalMat3(std::string mat);
 	Mat3 parseMat3(std::string mat);
 
@@ -32,5 +35,5 @@ namespace OBJImport {
 };
 
 namespace WorldImport {
-	void load(std::string name, World<ExtendedPart>& world, Camera& camera, bool binary = false);
+	void load(std::string name, World<ExtendedPart>& world, Screen& screen, bool binary = false);
 };

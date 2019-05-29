@@ -2,6 +2,7 @@
 
 #include "../util/log.h"
 
+#include "../engine/math/vec4.h"
 #include "../engine/math/vec3.h"
 #include "../engine/math/mat3.h"
 
@@ -30,6 +31,12 @@ void Export::write(std::ostream& output, const T& value) {
 std::string Export::str(Vec3 vector) {
 	std::stringstream ss;
 	ss << vector.x << " " << vector.y << " " << vector.z;
+	return ss.str();
+}
+
+std::string Export::str(Vec4 vector) {
+	std::stringstream ss;
+	ss << vector.x << " " << vector.y << " " << vector.z << " " << vector.w;
 	return ss.str();
 }
 
@@ -99,8 +106,6 @@ void saveBinaryObj(std::string filename, const Shape& shape) {
 	for (Vec3f vertex : shape.iterVertices()) {
 
 		Export::write<Vec3f>(output, vertex);
-
-		Log::debug("out[%d] %f, %f, %f", i, vertex.x, vertex.y, vertex.z);
 		i += 1;
 	}
 
@@ -236,6 +241,8 @@ void saveBinaryWorld(const std::string& name, World<ExtendedPart>& world, Camera
 }
 
 void saveNonBinaryWorld(const std::string& name, World<ExtendedPart>& world, Camera& camera) {
+	Log::setSubject(name);
+	Log::info("Exporting world...");
 
 	std::string folder = std::string("./") + name;
 	std::string file = folder + "/world.txt";
@@ -246,7 +253,10 @@ void saveNonBinaryWorld(const std::string& name, World<ExtendedPart>& world, Cam
 
 	output.open(file, std::ofstream::out | std::ofstream::trunc);
 
+	Log::info("Exporting globals");
 	saveGlobals(output, world);
+
+	Log::info("Exporting camera");
 	saveCamera(output, camera);
 
 	std::map<int, std::string> shapes;
@@ -260,6 +270,8 @@ void saveNonBinaryWorld(const std::string& name, World<ExtendedPart>& world, Cam
 		} else {
 			shape = "part_" + Export::str(extendedPart.drawMeshId);
 			shapes[extendedPart.drawMeshId] = shape;
+			
+			Log::info("Exporting %s", shape.c_str());
 			OBJExport::save(folder + "/" + shape + ".obj", extendedPart.hitbox);
 		}
 
@@ -275,11 +287,16 @@ void saveNonBinaryWorld(const std::string& name, World<ExtendedPart>& world, Cam
 		} else {
 			shape = "part_" + Export::str(extendedPart.drawMeshId);
 			shapes[extendedPart.drawMeshId] = shape;
+
+			Log::info("Exporting %s", shape.c_str());
 			OBJExport::save(folder + "/" + shape + ".obj", extendedPart.hitbox);
 		}
 
 		savePart(output, extendedPart, shape, false);
 	}
+
+	Log::info("World exported");
+	Log::resetSubject();
 
 	output.close();
 }

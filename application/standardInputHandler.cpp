@@ -72,6 +72,16 @@ void StandardInputHandler::keyDown(int key, int modifiers) {
 		case GLFW_KEY_V:
 			Log::debug("Checking World::isValid()");
 			screen.world->isValid();
+			break;
+		case GLFW_KEY_R:
+			Picker::editMode = Picker::EditMode::ROTATE;
+			break;
+		case GLFW_KEY_T:
+			Picker::editMode = Picker::EditMode::TRANSLATE;
+			break;
+		case GLFW_KEY_C:
+			Picker::editMode = Picker::EditMode::SCALE;
+			break;
 	}
 
 	if(key >= GLFW_KEY_F1 && key <= GLFW_KEY_F9) {
@@ -127,7 +137,7 @@ void StandardInputHandler::mouseMove(double x, double y) {
 	if (rightDragging) {
 		screen.camera.rotate(screen, Vec3((y - cursorPosition.y) * 0.1, (x - cursorPosition.x) * 0.1, 0), leftDragging);
 	}
-
+	
 	if (leftDragging) {
 		double speed = 0.01;
 		double dmx = (x - cursorPosition.x) * speed;
@@ -138,7 +148,7 @@ void StandardInputHandler::mouseMove(double x, double y) {
 		} else {
 			// Phyiscal moving
 			if (screen.selectedPart) {
-				moveGrabbedPhysicalLateral(screen);
+				Picker::moveGrabbedPhysicalLateral(screen);
 			}
 		}
 	} else {

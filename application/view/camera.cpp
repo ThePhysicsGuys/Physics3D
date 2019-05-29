@@ -33,7 +33,7 @@ void Camera::rotate(Screen& screen, double dalpha, double dbeta, double dgamma, 
 	cframe.rotation = Mat3f(rotX(rspeed * dalpha)) * cframe.rotation * Mat3f(rotY(rspeed * dbeta));
 
 	if (leftDragging) 
-		moveGrabbedPhysicalLateral(screen);
+		Picker::moveGrabbedPhysicalLateral(screen);
 }
 
 void Camera::rotate(Screen& screen, Vec3 delta, bool leftDragging) {
@@ -53,7 +53,7 @@ void Camera::move(Screen& screen, double dx, double dy, double dz, bool leftDrag
 		translation += translationX;
 
 		if (leftDragging) 
-			moveGrabbedPhysicalLateral(screen);
+			Picker::moveGrabbedPhysicalLateral(screen);
 	}
 
 	if (dy != 0) {
@@ -61,7 +61,7 @@ void Camera::move(Screen& screen, double dx, double dy, double dz, bool leftDrag
 		translation += translationY;
 
 		if (leftDragging) 
-			moveGrabbedPhysicalLateral(screen);
+			Picker::moveGrabbedPhysicalLateral(screen);
 	}
 
 	if (dz != 0) {
@@ -70,7 +70,7 @@ void Camera::move(Screen& screen, double dx, double dy, double dz, bool leftDrag
 		translation += translationZ;
 
 		if (leftDragging) 
-			moveGrabbedPhysicalTransversal(screen, -speed * dz);
+			Picker::moveGrabbedPhysicalTransversal(screen, -speed * dz);
 	}
 
 	translation *= speed;
