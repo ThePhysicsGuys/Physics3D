@@ -3,144 +3,148 @@
 #include <mutex>
 
 template<typename T>
-class AddableBuffer;
+struct BufferWithCapacity;
 
 template<typename T>
-class SwappableBuffer {
-	T* writeBuf;
-	size_t writeIndex = 0;
-	size_t writeCapacity;
-	size_t readCapacity;
-	std::mutex readLock;
-public:
-	T* readData;
-	size_t readSize;
+struct AddableBuffer;
 
-	SwappableBuffer(size_t initialCapacity) : writeCapacity(initialCapacity), writeBuf((T*)malloc(initialCapacity * sizeof(T))),
-		readCapacity(initialCapacity), readData((T*)malloc(initialCapacity * sizeof(T))) {
-		if (readData == nullptr || writeBuf == nullptr)
-			Log::fatal("Could not create SwappableBuffer of size: %d", initialCapacity);
+template<typename T>
+void swapBuffers(BufferWithCapacity<T>& first, BufferWithCapacity<T>& second);
+
+inline unsigned long nextPowerOf2(unsigned long v) {
+	v--;
+	v |= v >> 1;
+	v |= v >> 2;
+	v |= v >> 4;
+	v |= v >> 8;
+	v |= v >> 16;
+	v |= v >> 32;
+	return v+1;
+}
+
+template<typename T>
+struct BufferWithCapacity {
+	T* data;
+	size_t capacity;
+
+	BufferWithCapacity() : BufferWithCapacity(10) {};
+	BufferWithCapacity(size_t initialCapacity) : data(new T[initialCapacity]), capacity(initialCapacity) {}
+	~BufferWithCapacity() {
+		delete[] data;
 	}
-
-	~SwappableBuffer() {
-		lockRead();
-		free(writeBuf);
-		free(readData);
-		unlockRead();
+	BufferWithCapacity(const BufferWithCapacity& other) = delete;
+	void operator=(const BufferWithCapacity& other) = delete;
+	BufferWithCapacity(const BufferWithCapacity&& other) {
+		swapBuffers(*this, other);
 	}
-
-	SwappableBuffer(const SwappableBuffer&) = delete;
-	SwappableBuffer(const SwappableBuffer&&) = delete;
-	SwappableBuffer& operator=(const SwappableBuffer&) = delete;
-	SwappableBuffer& operator=(const SwappableBuffer&&) = delete;
-
-	inline void add(const T& obj) {
-		if (this->writeIndex >= this->writeCapacity) {
-			this->writeCapacity *= 2;
-			T* newPtr = (T*)realloc(writeBuf, sizeof(T) * this->writeCapacity);
-			if (newPtr == nullptr) {
-				Log::fatal("Could not extend write buffer to size: %d", this->writeCapacity);
-			} else {
-				Log::info("Extended write buffer to: %d", this->writeCapacity);
-				writeBuf = newPtr;
+	void operator=(const BufferWithCapacity&& other) {
+		swapBuffers(*this, other);
+	}
+	void ensureCapacity(size_t newCapacity) {
+		if (newCapacity > capacity) {
+			newCapacity = nextPowerOf2(newCapacity);
+			//Log::debug("Extending %s buffer capacity to %d", typeid(T).name(), newCapacity);
+			T* newBuf = new T[newCapacity];
+			for (int i = 0; i < capacity; i++) {
+				newBuf[i] = data[i];
 			}
+			delete[] data;
+			data = newBuf;
+			capacity = newCapacity;
 		}
-
-		writeBuf[writeIndex++] = obj;
 	}
-
-	inline void swap() {
-		lockRead();
-
-		T* tmpPtr = readData;
-		size_t tmpSize = readCapacity;
-
-		readData = writeBuf;
-		readCapacity = writeCapacity;
-		readSize = writeIndex;
-
-		writeBuf = tmpPtr;
-		writeCapacity = tmpSize;
-		writeIndex = 0;
-
-		unlockRead();
-	}
-
-	inline AddableBuffer<T> getReadBuffer() {
-		lockRead();
-		AddableBuffer<T> b(readData, readSize, readCapacity);
-		unlockRead();
-		return b;
-	}
-
-	inline void lockRead() { readLock.lock(); }
-	inline void unlockRead() { readLock.unlock(); }
 };
 
 template<typename T>
-class AddableBuffer {
-public:
-	T* data;
-	size_t index;
-private:
-	size_t capacity;
-public:
-	AddableBuffer() : capacity(10), data((T*) malloc(10 * sizeof(T))), index(0) {}
-	AddableBuffer(size_t initialCapacity) : capacity(initialCapacity), data((T*)malloc(initialCapacity * sizeof(T))), index(0) {
-		if (data == nullptr) Log::fatal("Could not create AddableBuffer of size: %d", initialCapacity);
-	}
+void swapBuffers(BufferWithCapacity<T>& first, BufferWithCapacity<T>& second) {
+	T* tmpBuf = first.data;
+	size_t tmpSize = first.capacity;
+	first.data = second.data;
+	first.capacity = second.capacity;
+	second.data = tmpBuf;
+	second.capacity = tmpSize;
+}
 
-	AddableBuffer(T* data, size_t dataSize, size_t initialCapacity) : capacity(initialCapacity), data((T*)malloc(initialCapacity * sizeof(T))), index(dataSize) {
+template<typename T>
+struct AddableBuffer : public BufferWithCapacity<T> {
+	size_t index = 0;
+
+	AddableBuffer() : BufferWithCapacity(10) {}
+	AddableBuffer(size_t initialCapacity) : BufferWithCapacity(initialCapacity) {}
+
+	AddableBuffer(T * data, size_t dataSize, size_t initialCapacity) : BufferWithCapacity(initialCapacity), index(dataSize) {
 		if (data == nullptr) Log::fatal("Could not create AddableBuffer of size: %d", initialCapacity);
 		memcpy(this->data, data, dataSize * sizeof(T));
 	}
 
 	~AddableBuffer() {
-		free(data);
 	}
 
 	AddableBuffer(const AddableBuffer&) = delete;
 	AddableBuffer& operator=(const AddableBuffer&) = delete;
 
-	AddableBuffer(AddableBuffer&& buf) {
-		size_t oldCapacity = capacity;
-		size_t oldIndex = index;
-		T* oldData = data;
-		this->capacity = buf.capacity;
-		this->index = buf.index;
-		this->data = buf.data;
-		buf.capacity = oldCapacity;
-		buf.index = oldIndex;
-		buf.data = oldData;
+	AddableBuffer(AddableBuffer && other) {
+		swapBuffers(*this, other);
 	}
-	AddableBuffer& operator=(AddableBuffer&& buf) {
-		size_t oldCapacity = capacity;
-		size_t oldIndex = index;
-		T* oldData = data;
-		this->capacity = buf.capacity;
-		this->index = buf.index;
-		this->data = buf.data;
-		buf.capacity = oldCapacity;
-		buf.index = oldIndex;
-		buf.data = oldData;
+	AddableBuffer& operator=(AddableBuffer && other) {
+		swapBuffers(*this, other);
 	}
-	
-	inline void add(const T& obj) {
-		if (index == capacity) {
-			capacity *= 2;
-			T* newPtr = (T*)realloc(data, sizeof(T) * capacity);
-			if (newPtr == nullptr) {
-				Log::fatal("Could not extend write buffer to size: %d", capacity);
-			} else {
-				Log::info("Extended write buffer to: %d", capacity);
-				data = newPtr;
-			}
-		}
+
+	inline void add(const T & obj) {
+		ensureCapacity(index+1);
 
 		data[index++] = obj;
 	}
 
 	inline void clear() {
 		this->index = 0;
+	}
+};
+
+template<typename T>
+class ThreePhaseBuffer {
+	AddableBuffer<T> writeBuf;
+	BufferWithCapacity<T> readyBuf;
+	size_t readySize = 0;
+	bool newDataAvailable = false;
+public:
+	AddableBuffer<T> outputBuf;
+	std::mutex swapLock;
+
+	ThreePhaseBuffer(size_t initialCapacity) : writeBuf(initialCapacity), readyBuf(initialCapacity), outputBuf(initialCapacity) {}
+
+	~ThreePhaseBuffer() {}
+
+	ThreePhaseBuffer(const ThreePhaseBuffer&) = delete;
+	ThreePhaseBuffer(const ThreePhaseBuffer&&) = delete;
+	ThreePhaseBuffer& operator=(const ThreePhaseBuffer&) = delete;
+	ThreePhaseBuffer& operator=(const ThreePhaseBuffer&&) = delete;
+
+	inline void add(const T & obj) {
+		writeBuf.add(obj);
+	}
+
+	inline void pushWriteBuffer() {
+		std::lock_guard<std::mutex> lg(swapLock);
+
+		readySize = writeBuf.index;
+		swapBuffers(writeBuf, readyBuf);
+		writeBuf.clear();
+
+		newDataAvailable = true;
+	}
+
+	inline AddableBuffer<T>& pullOutputBuffer() {
+		std::lock_guard<std::mutex> lg(swapLock);
+
+		if (newDataAvailable) {
+			swapBuffers(readyBuf, outputBuf);
+
+			newDataAvailable = false;
+		}
+
+		outputBuf.index = readySize;
+
+		return outputBuf;
 	}
 };

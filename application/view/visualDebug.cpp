@@ -25,7 +25,7 @@ BreakdownAverageProfiler<60, GraphicsProcess> graphicsMeasure = BreakdownAverage
 using namespace Debug;
 
 std::map<VecType, bool> debug_enabled {
-	{ INFO, false }, 
+	{ INFO_VEC, false }, 
 	{ VELOCITY, false }, 
 	{ ACCELERATION, false }, 
 	{ FORCE, false }, 
@@ -36,8 +36,14 @@ std::map<VecType, bool> debug_enabled {
 	{ ANGULAR_VELOCITY , false }
 };
 
+std::map<PointType, bool> point_debug_enabled{
+	{INFO_POINT, false},
+	{CENTER_OF_MASS, false},
+	{INTERSECTION, false},
+};
+
 std::map<VecType, Vec3f> vecColors {
-	{ INFO, Vec3f(0,1,0) },
+	{ INFO_VEC, Vec3f(0,1,0) },
 	{ VELOCITY, Vec3f(0,0,1) },
 	{ ACCELERATION, Vec3f(0,1,1) },
 	{ FORCE, Vec3f(1, 0, 0) },
@@ -48,12 +54,26 @@ std::map<VecType, Vec3f> vecColors {
 	{ ANGULAR_IMPULSE, Vec3f(0.8,0.1,0.4) }
 };
 
+struct PointColorPair {
+	Vec3f color1;
+	Vec3f color2;
+};
+
+std::map<PointType, PointColorPair> pointColors{
+	{ INFO_POINT, PointColorPair{Vec3f(1.0f,0.5f,0.0f), Vec3f(1.0f,0.2f,0.0f)}},
+	{ CENTER_OF_MASS, PointColorPair{Vec3f(1.0f,1.0f,0.0f), Vec3f(0.0f,0.0f,0.0f)} },
+	{ INTERSECTION, PointColorPair{Vec3f(0.0f,0.0f,1.0f), Vec3f(0.0f,1.0f,0.0f)} },
+};
+
 bool renderPies = false;
 
 int fieldIndex = 0;
 
 void toggleDebugVecType(Debug::VecType t) {
 	debug_enabled[t] = !debug_enabled[t];
+}
+void toggleDebugPointType(Debug::PointType t) {
+	point_debug_enabled[t] = !point_debug_enabled[t];
 }
 
 std::string toString(std::chrono::nanoseconds t) {
@@ -69,6 +89,7 @@ size_t getTheoreticalNumberOfIntersections(size_t objCount) {
 }
 
 AddableBuffer<float> visibleVecs(900);
+AddableBuffer<float> visiblePoints(1000);
 
 void updateVecMesh(VectorMesh* vectorMesh, AppDebug::ColoredVec* data, size_t size) {
 	visibleVecs.clear();
@@ -89,4 +110,29 @@ void updateVecMesh(VectorMesh* vectorMesh, AppDebug::ColoredVec* data, size_t si
 	}
 
 	vectorMesh->update(visibleVecs.data, visibleVecs.index / 9);
+}
+
+void updatePointMesh(PointMesh* pointMesh, AppDebug::ColoredPoint* data, size_t size) {
+	visiblePoints.clear();
+
+	for (size_t i = 0; i < size; i++) {
+		const AppDebug::ColoredPoint& p = data[i];
+		if (point_debug_enabled[p.type]) {
+			Vec3f color1 = pointColors[p.type].color1;
+			Vec3f color2 = pointColors[p.type].color2;
+
+			visiblePoints.add(p.point.x);
+			visiblePoints.add(p.point.y);
+			visiblePoints.add(p.point.z);
+			visiblePoints.add(0.025);
+			visiblePoints.add(color1.x);
+			visiblePoints.add(color1.y);
+			visiblePoints.add(color1.z);
+			visiblePoints.add(color2.x);
+			visiblePoints.add(color2.y);
+			visiblePoints.add(color2.z);
+		}
+	}
+
+	pointMesh->update(visiblePoints.data, visiblePoints.index / 10);
 }

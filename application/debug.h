@@ -24,7 +24,14 @@ namespace AppDebug {
 	struct ColoredVec {
 		Vec3 origin, vec;
 		Debug::VecType type;
+		ColoredVec() = default;
 		ColoredVec(Vec3 origin, Vec3 vec, Debug::VecType type) : origin(origin), vec(vec), type(type) {}
+	};
+	struct ColoredPoint {
+		Vec3 point;
+		Debug::PointType type;
+		ColoredPoint() = default;
+		ColoredPoint(Vec3 point, Debug::PointType type) : point(point), type(type) {}
 	};
 
 	void setupDebugHooks();
@@ -35,5 +42,6 @@ namespace AppDebug {
 	void logFrameStart();
 	void logFrameEnd();
 
-	AddableBuffer<ColoredVec> getVecBuffer();
+	AddableBuffer<ColoredVec>& getVecBuffer();
+	AddableBuffer<ColoredPoint>& getPointBuffer();
 }

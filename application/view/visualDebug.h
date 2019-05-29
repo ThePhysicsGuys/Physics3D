@@ -4,6 +4,7 @@
 #include "../engine/math/mat3.h"
 #include "../buffers.h"
 #include "vectorMesh.h"
+#include "pointMesh.h"
 #include "profilerUI.h"
 #include "font.h"
 
@@ -33,6 +34,7 @@ extern bool renderPies;
 extern int fieldIndex;
 
 void toggleDebugVecType(Debug::VecType t);
+void toggleDebugPointType(Debug::PointType t);
 
 template<typename T>
 void renderDebugField(Vec2 dimension, Font* font, const char* varName, T value, const char* unit) {
@@ -85,3 +87,4 @@ size_t getTheoreticalNumberOfIntersections(size_t objCount);
 extern AddableBuffer<float> visibleVecs;
 
 void updateVecMesh(VectorMesh* vectorMesh, AppDebug::ColoredVec* data, size_t size);
+void updatePointMesh(PointMesh* pointMesh, AppDebug::ColoredPoint* data, size_t size);

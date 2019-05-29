@@ -179,15 +179,15 @@ namespace Picker {
 		double distance = (screen.selectedPoint - screen.camera.cframe.position) * cameraDirection / (screen.ray * cameraDirection);
 		Vec3 planeIntersection = screen.camera.cframe.position + distance * screen.ray;
 
-		if (isPaused()) {
-			Vec3 translation = planeIntersection - screen.selectedPoint;
-			screen.selectedPoint += translation;
-			screen.selectedPart->cframe.translate(translation);
-		} else {
-			screen.world->selectedPart = screen.selectedPart;
-			screen.world->magnetPoint = planeIntersection;
-		}
+	if (isPaused()) {
+		Vec3 translation = planeIntersection - screen.selectedPoint;
+		screen.selectedPoint += translation;
+		screen.selectedPart->parent->setCFrame(screen.selectedPart->parent->cframe + translation);
+	} else {
+		screen.world->selectedPart = screen.selectedPart;
+		screen.world->magnetPoint = planeIntersection;
 	}
+}
 
 	void moveGrabbedPhysicalTransversal(Screen& screen, double dz) {
 		if (screen.selectedPart == nullptr) return;

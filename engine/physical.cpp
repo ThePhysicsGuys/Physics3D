@@ -102,6 +102,13 @@ Vec3 Physical::getAccelerationOfPoint(const Vec3Relative& point) const {
 	return getAcceleration() + getAngularAcceleration() % point;
 }
 
+void Physical::setCFrame(const CFrame& newCFrame) {
+	this->cframe = newCFrame;
+	for (const AttachedPart& p : parts) {
+		p.part->cframe = newCFrame.localToGlobal(p.attachment);
+	}
+}
+
 /*
 	Computes the force->acceleration transformation matrix
 	Such that:

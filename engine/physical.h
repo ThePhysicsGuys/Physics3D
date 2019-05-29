@@ -41,6 +41,8 @@ struct Physical {
 	void applyImpulseAtCenterOfMass(Vec3 impulse);
 	void applyImpulse(Vec3Relative origin, Vec3Relative impulse);
 	void applyAngularImpulse(Vec3 angularImpulse);
+
+	void setCFrame(const CFrame& newCFrame);
 	
 	inline CFrame& getCFrame() { return cframe; }
 
