@@ -1,6 +1,9 @@
 # Physics3D
 A 3D physics engine, written in C++
 
+![Cool Shapes](https://i.imgur.com/neeHoJh.png)
+![Many Shapes](https://i.imgur.com/h62AI58.jpg)
+
 ## Project structure
 The engine can be compiled separately and is found in [engine](/engine)  
 There is an example application for debugging and testing included in [application](/application) and [tests](/tests)  
@@ -11,6 +14,7 @@ The graphics libraries are only necessary when building the application and the 
 - [GLFW](https://www.glfw.org/) Verified working with GLFW 3.2.1  
 - [GLEW](http://glew.sourceforge.net/) Verified with GLEW 2.1.0
 - [stb_image](https://github.com/nothings/stb) Verified with stb_image.h v2.22
+- [FreeType](https://www.freetype.org/) Verified with FreeType v2.9.0
 
 ## Setup Guide
 ### Visual Studio
