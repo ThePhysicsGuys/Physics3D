@@ -16,6 +16,7 @@ namespace Export {
 	template<typename T>
 	void write(std::ostream& output, const T& value);
 
+	std::string str(Vec4 vector);
 	std::string str(Vec3 vector);
 	std::string str(Mat3 matrix);
 	std::string str(DiagonalMat3 matrix);

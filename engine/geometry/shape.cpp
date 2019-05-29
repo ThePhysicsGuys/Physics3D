@@ -583,6 +583,10 @@ SymmetricMat3 Shape::getInertia() const {
 	return this->getInertia(CFrame());
 }
 
+void Shape::getCircumscribedEllipsoid() const {
+
+}
+
 float Shape::getIntersectionDistance(Vec3f origin, Vec3f direction) {
 	const float EPSILON = 0.0000001f;
 	float t = INFINITY;

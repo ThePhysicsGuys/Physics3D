@@ -104,6 +104,7 @@ public:
 	SymmetricMat3 getInertia(Mat3 reference) const;
 	SymmetricMat3 getInertia(CFrame reference) const;
 	Sphere getCircumscribedSphere() const;
+	void getCircumscribedEllipsoid() const;
 	double getMaxRadius() const;
 	Vec3f getNormalVecOfTriangle(Triangle triangle) const;
 

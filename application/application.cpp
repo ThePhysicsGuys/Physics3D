@@ -194,17 +194,18 @@ int main(void) {
 			for(double z = -5; z < 5; z += 1.01) {
 				//world.addObject(cubeFactory.produce(CFrame(Vec3(x, y + 1, z)), 1.0, 0.2));
 				//world.addObject(sphereFactory.produce(CFrame(Vec3(x, y + 1, z - 5)), 1.0, 0.2));
-				world.addObject(triangleFactory.produce(CFrame(Vec3(x, y + 1, z)), 1.0, 0.2));
+				//world.addObject(triangleFactory.produce(CFrame(Vec3(x, y + 1, z)), 1.0, 0.2));
 			}
 		}
 	}
 
-	Shape stallShape = OBJImport::load((std::istream&) std::istringstream(getResourceAsString(STALL_MODEL)));
+	//Shape stallShape = OBJImport::load((std::istream&) std::istringstream(getResourceAsString(STALL_MODEL)));
+	Shape stallShape = OBJImport::load("../res/models/gui/rotate.obj");
 
 
 	ExtendedPart* stallExtendedPart = createUniquePart(screen, stallShape, CFrame(Vec3(10.0, 2.0, -10.0), fromEulerAngles(0.1, 0.1, 0.1)), 10, 0.7);
 	stallExtendedPart->material = Material(load("../res/textures/stall/stall.png"));
-	//world.addObject(stallExtendedPart);
+	world.addObject(stallExtendedPart);
 	
 	ExtendedPart* icosaExtendedPart = createUniquePart(screen, icosahedron, CFrame(Vec3(7.0, 2.0, -7.0), fromEulerAngles(0.1, 0.1, 0.1)), 10, 0.7);
 	//world.addObject(icosaExtendedPart);
@@ -216,8 +217,8 @@ int main(void) {
 	player->properties.friction = 0;
 	player->drawMeshId = -1;
 
-	//saveWorld("testWorld", world);
-	//loadWorld("testWorld", world, getCamera());
+	//WorldExport::save("testWorld", world, getCamera());
+	//WorldImport::load("testWorld", world, screen);
 
 	/* Loop until the user closes the window */
 	Log::info("Started rendering");

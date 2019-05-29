@@ -1,17 +1,39 @@
 #pragma once
 
 #include "screen.h"
+#include "indexedMesh.h"
+#include "shaderProgram.h"
 
-#include "../../engine/math/mat4.h"
-#include "../../engine/math/vec4.h"
-#include "../../engine/math/vec3.h"
-#include "../../engine/math/vec2.h"
+#include "../engine/math/vec2.h"
 
-#include <vector>
-#include "../../engine/world.h"
+namespace Picker {
 
-Vec2f getNormalizedDeviceSpacePosition(Vec2f viewportSpacePosition, Vec2f screenSize);
-Vec3f calcRay(Screen& screen, Vec2f mousePosition);
-void updateIntersectedPhysical(Screen& screen, Vec2 mousePosition);
-void moveGrabbedPhysicalTransversal(Screen& screen, double dz);
-void moveGrabbedPhysicalLateral(Screen& screen);
+	enum class EditMode {
+		TRANSLATE,
+		ROTATE,
+		SCALE
+	};
+
+	extern EditMode editMode;
+
+	extern IndexedMesh* rotateX;
+	extern IndexedMesh* rotateY;
+	extern IndexedMesh* rotateZ;
+	 
+	extern IndexedMesh* translateCenter;
+	extern IndexedMesh* translateX;
+	extern IndexedMesh* translateY;
+	extern IndexedMesh* translateZ;
+	 
+	extern IndexedMesh* scaleCenter;
+	extern IndexedMesh* scaleX;
+	extern IndexedMesh* scaleY;
+	extern IndexedMesh* scaleZ;
+
+	void init();
+	void update(Screen& screen, Vec2 mousePosition);
+	void render(Screen& screen, BasicShader& shader);
+
+	void moveGrabbedPhysicalTransversal(Screen& screen, double dz);
+	void moveGrabbedPhysicalLateral(Screen& screen);
+}

@@ -7,9 +7,11 @@
 #include "../util/stringUtil.h"
 #include "../util/log.h"
 
-#include "view\material.h"
+#include "view/material.h"
 
 #include "../engine/physical.h"
+
+#include "partFactory.h"
 
 /*
 	Import
@@ -32,6 +34,24 @@ Vec3 Import::parseVec3(std::string vec) {
 	Vec3 vector = Vec3();
 	for (int i = 0; i < 3; i++) {
 		vector.v[i] = Import::parseDouble(tokens[i]);
+	}
+	return vector;
+}
+
+Vec4 Import::parseVec4(std::string vec) {
+	std::vector<std::string> tokens = split(vec, ' ');
+	Vec4 vector = Vec4();
+	for (int i = 0; i < 4; i++) {
+		vector.v[i] = Import::parseDouble(tokens[i]);
+	}
+	return vector;
+}
+
+Vec4f Import::parseVec4f(std::string vec) {
+	std::vector<std::string> tokens = split(vec, ' ');
+	Vec4f vector = Vec4f();
+	for (int i = 0; i < 4; i++) {
+		vector.v[i] = Import::parseFloat(tokens[i]);
 	}
 	return vector;
 }
@@ -253,6 +273,15 @@ Shape OBJImport::load(std::istream& file, bool binary) {
 }
 
 Shape OBJImport::load(std::string file, bool binary) {
+	struct stat buffer;
+
+	if (stat(file.c_str(), &buffer) == -1) {
+		Log::setSubject(file.c_str());
+		Log::error("File not found: %s", file.c_str());
+		Log::resetSubject();
+		return Shape();
+	}
+
 	std::ifstream input;
 
 	if (binary)
@@ -284,10 +313,10 @@ enum class Subject {
 	NONE = -1
 };
 
-void parseSubject(Subject subject, std::string path, std::map<std::string, std::string>& fields, World<ExtendedPart>& world, Camera& camera) {
+void parseSubject(Subject subject, std::string path, std::map<std::string, std::string>& fields, std::map<std::string, PartFactory>& factories , World<ExtendedPart>& world, Screen& screen) {
 	if (subject == Subject::PART) {
 		Material material = Material();
-		material.ambient = Import::parseVec3(fields.at("ambient"));
+		material.ambient = Import::parseVec4(fields.at("ambient"));
 		material.diffuse = Import::parseVec3(fields.at("diffuse"));
 		material.specular = Import::parseVec3(fields.at("specular"));
 		material.reflectance = Import::parseFloat(fields.at("reflectance"));
@@ -316,19 +345,25 @@ void parseSubject(Subject subject, std::string path, std::map<std::string, std::
 
 		std::string shapeReference = fields.at("shape");
 
-		Shape shape = OBJImport::load(path + shapeReference);
 		CFrame cframe = CFrame(pos, rot);
-		ExtendedPart part = ExtendedPart(shape, cframe, density, friction, 0, name);
 
-		Physical physical = Physical(&part, mass, inertia);
+		if (!factories.count(shapeReference)) {
+			Log::info("Loading part %s in factory", (path + shapeReference).c_str());
+			Shape shape = OBJImport::load(path + shapeReference);
+			factories[shapeReference] = PartFactory(shape, screen, name);
+		}
+
+		ExtendedPart* part = factories.at(shapeReference).produce(cframe, density, friction, name);
+
+		Physical physical = Physical(part, mass, inertia);
 		physical.angularVelocity = angularvelocity;
 		physical.velocity = velocity;
 
-		part.parent = &physical;
-		part.material = material;
-		part.renderMode = mode;
+		part->parent = &physical;
+		part->material = material;
+		part->renderMode = mode;
 
-		world.addObject(&part, anchored);
+		world.addObject(part, anchored);
 	} else if (subject == Subject::CAMERA) {
 		Vec3 pos = Import::parseVec3(fields.at("position"));
 		Mat3 rot = Import::parseMat3(fields.at("rotation"));
@@ -336,10 +371,10 @@ void parseSubject(Subject subject, std::string path, std::map<std::string, std::
 		double rspeed = Import::parseDouble(fields.at("rspeed"));
 		bool fly = Import::parseInt(fields.at("flying"));
 
-		camera.cframe = CFrame(pos, rot);
-		camera.speed = speed;
-		camera.rspeed = rspeed;
-		camera.flying = fly;
+		screen.camera.cframe = CFrame(pos, rot);
+		screen.camera.speed = speed;
+		screen.camera.rspeed = rspeed;
+		screen.camera.flying = fly;
 	} else if (subject == Subject::GLOBAL) {
 
 	}
@@ -347,13 +382,16 @@ void parseSubject(Subject subject, std::string path, std::map<std::string, std::
 	fields.clear();
 }
 
-void loadBinaryWorld(std::string name, World<ExtendedPart>& world, Camera& camera) {
+void loadBinaryWorld(std::string name, World<ExtendedPart>& world, Screen& screen) {
 
 }
 
-void loadNonBinaryWorld(std::string name, World<ExtendedPart>& world, Camera& camera) {
+void loadNonBinaryWorld(std::string name, World<ExtendedPart>& world, Screen& screen) {
+	Log::setSubject(name);
+
 	Subject subject = Subject::NONE;
 	std::map<std::string, std::string> fields;
+	std::map<std::string, PartFactory> factories;
 	
 	std::string path = std::string("./") + name + "/";
 	std::string filename = path + "world.txt";
@@ -366,19 +404,19 @@ void loadNonBinaryWorld(std::string name, World<ExtendedPart>& world, Camera& ca
 			// next line
 		} else {
 			if (startWith(line, "part:")) {
-				parseSubject(subject, path, fields, world, camera);
+				parseSubject(subject, path, fields, factories, world, screen);
 				subject = Subject::PART;
 				continue;
 			}
 
 			if (startWith(line, "camera:")) {
-				parseSubject(subject, path, fields, world, camera);
+				parseSubject(subject, path, fields, factories, world, screen);
 				subject = Subject::CAMERA;
 				continue;
 			}
 
 			if (startWith(line, "global:")) {
-				parseSubject(subject, path, fields, world, camera);
+				parseSubject(subject, path, fields, factories, world, screen);
 				subject = Subject::GLOBAL;
 				continue;
 			}
@@ -391,14 +429,16 @@ void loadNonBinaryWorld(std::string name, World<ExtendedPart>& world, Camera& ca
 		}
 	}
 
-	parseSubject(subject, path, fields, world, camera);
+	parseSubject(subject, path, fields, factories, world, screen);
+
+	Log::resetSubject();
 }
 
-void WorldImport::load(std::string name, World<ExtendedPart>& world, Camera& camera, bool binary) {
+void WorldImport::load(std::string name, World<ExtendedPart>& world, Screen& screen, bool binary) {
 	if (binary)
-		loadBinaryWorld(name, world, camera);
+		loadBinaryWorld(name, world, screen);
 	else
-		loadNonBinaryWorld(name, world, camera);
+		loadNonBinaryWorld(name, world, screen);
 }
 
 /*
