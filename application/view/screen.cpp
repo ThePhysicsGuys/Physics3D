@@ -164,8 +164,11 @@ Label* partKineticEnergy = nullptr;
 Label* partPotentialEnergy = nullptr;
 Label* partEnergy = nullptr;
 
-Slider* partAmbientSlider = nullptr;
-Slider* testSlider = nullptr;
+Slider* partRSlider = nullptr;
+Slider* partGSlider = nullptr;
+Slider* partBSlider = nullptr;
+Slider* partASlider = nullptr;
+
 CheckBox* renderModeCheckBox = nullptr;
 
 Panel* mouseVertical = nullptr;
@@ -260,17 +263,37 @@ void Screen::init() {
 	partPositionLabel = new Label("", 0, 0);
 	partMeshIDLabel = new Label("", 0, 0);
 
-	partAmbientSlider = new Slider(0, 0, 0, 0.999999, 0.5);
-	testSlider = new Slider(0, 0, 0, 1, 0);
+	partRSlider = new Slider(0, 0, 0, 1, 1);
+	partGSlider = new Slider(0, 0, 0, 1, 1);
+	partBSlider = new Slider(0, 0, 0, 1, 1);
+	partASlider = new Slider(0, 0, 0, 1, 1);
 	partVelocity = new Label("", 0, 0);
 	partAngularVelocity = new Label("", 0, 0);
 	partKineticEnergy = new Label("", 0, 0);
 	partPotentialEnergy = new Label("", 0, 0);
 	partEnergy = new Label("", 0, 0);
 
-	partAmbientSlider->action = [] (Slider* s) {
+	partRSlider->action = [] (Slider* s) {
 		if (GUI::screen->selectedPart) {
-			GUI::screen->selectedPart->material.ambient = Vec4f(GUI::COLOR::hsvToRgb(Vec3(s->value, 1, 1)), 1);
+			GUI::screen->selectedPart->material.ambient.x = s->value;
+		}
+	};
+
+	partGSlider->action = [] (Slider* s) {
+		if (GUI::screen->selectedPart) {
+			GUI::screen->selectedPart->material.ambient.y = s->value;
+		}
+	}; 
+	
+	partBSlider->action = [] (Slider* s) {
+		if (GUI::screen->selectedPart) {
+			GUI::screen->selectedPart->material.ambient.z = s->value;
+		}
+	};
+
+	partASlider->action = [](Slider* s) {
+		if (GUI::screen->selectedPart) {
+			GUI::screen->selectedPart->material.ambient.w = s->value;
 		}
 	};
 
@@ -289,8 +312,10 @@ void Screen::init() {
 	propertiesFrame->add(partPositionLabel, Align::FILL);
 	propertiesFrame->add(partMeshIDLabel, Align::FILL);
 	propertiesFrame->add(renderModeCheckBox, Align::FILL);
-	propertiesFrame->add(partAmbientSlider, Align::FILL);
-	propertiesFrame->add(testSlider, Align::FILL);
+	propertiesFrame->add(partRSlider, Align::FILL);
+	propertiesFrame->add(partGSlider, Align::FILL);
+	propertiesFrame->add(partBSlider, Align::FILL);
+	propertiesFrame->add(partASlider, Align::FILL);
 	propertiesFrame->add(partVelocity, Align::FILL);
 	propertiesFrame->add(partAngularVelocity, Align::FILL);
 	propertiesFrame->add(partKineticEnergy, Align::FILL);
@@ -428,9 +453,15 @@ void Screen::update() {
 		partPotentialEnergy->text = "Potential Energy: " + std::to_string(potentialEnergy);
 		partEnergy->text = "Energy: " + std::to_string(kineticEnergy + potentialEnergy);
 
-		Vec3 color = GUI::COLOR::rgbToHsv(Vec3(selectedPart->material.ambient));
-		partAmbientSlider->handleColor = Vec4(selectedPart->material.ambient.x, selectedPart->material.ambient.y, selectedPart->material.ambient.z, 1);
-		partAmbientSlider->value = partAmbientSlider->min + (partAmbientSlider->max - partAmbientSlider->min) * color.x;
+		Vec4 color = selectedPart->material.ambient;
+		partRSlider->handleColor = Vec4(color.x, 0, 0, 1);
+		partRSlider->value = color.x;
+		partGSlider->handleColor = Vec4(0, color.y, 0, 1);
+		partGSlider->value = color.y;
+		partBSlider->handleColor = Vec4(0, 0, color.z, 1);
+		partBSlider->value = color.z;
+		partASlider->handleColor = Vec4(color.w, color.w, color.w, 1);
+		partASlider->value = color.w;
 	} else {
 		partMeshIDLabel->text = "MeshID: -";
 		renderModeCheckBox->checked = false;
@@ -442,8 +473,14 @@ void Screen::update() {
 		partPotentialEnergy->text = "Potential Energy: -";
 		partEnergy->text = "Energy: -";
 
-		partAmbientSlider->handleColor = GUI::COLOR::BACK;
-		partAmbientSlider->value = (partAmbientSlider->min + partAmbientSlider->max) / 2.0;
+		partRSlider->handleColor = GUI::COLOR::BACK;
+		partRSlider->value = 1;
+		partGSlider->handleColor = GUI::COLOR::BACK;
+		partGSlider->value = 1;
+		partBSlider->handleColor = GUI::COLOR::BACK;
+		partBSlider->value = 1;
+		partASlider->handleColor = GUI::COLOR::BACK;
+		partASlider->value = 1;
 	}
 }
 
@@ -476,7 +513,7 @@ void Screen::renderPhysicals() {
 
 		// Picker code
 		if(&part == selectedPart)
-			material.ambient = part.material.ambient + Vec4f(0.1, 0.1, 0.1, -0.5);
+			material.ambient = part.material.ambient + Vec4f(0.1, 0.1, 0.1, -0.2);
 		else if (&part == intersectedPart)
 			material.ambient = part.material.ambient + Vec4f(-0.1, -0.1, -0.1, 0);
 		else
@@ -503,7 +540,7 @@ void Screen::renderPhysicals() {
 		Material material = part->material;
 
 		if (part == selectedPart)
-			material.ambient = part->material.ambient + Vec4f(0.1, 0.1, 0.1, -0.5);
+			material.ambient = part->material.ambient + Vec4f(0.1, 0.1, 0.1, -0.2);
 		else if (part == intersectedPart)
 			material.ambient = part->material.ambient + Vec4f(-0.1, -0.1, -0.1, 0);
 		else

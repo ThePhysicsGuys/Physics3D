@@ -32,13 +32,13 @@ public:
 	Shader(const std::string& vertexShader, const std::string& fragmentShader, const std::string& geometryShader, const std::string name);
 	Shader(ShaderSource shaderSource) : Shader(shaderSource.vertexSource, shaderSource.fragmentSource, shaderSource.geometrySource, shaderSource.name) {};
 	void createUniform(std::string uniform);
-	void setUniform(std::string uniform, int value);
-	void setUniform(std::string uniform, float value);
-	void setUniform(std::string uniform, double value);
-	void setUniform(std::string uniform, Vec2f value);
-	void setUniform(std::string unfiorm, Vec3f value);
-	void setUniform(std::string unfiorm, Vec4f value);
-	void setUniform(std::string uniform, Mat4f value);
+	void setUniform(std::string uniform, int value) const;
+	void setUniform(std::string uniform, float value) const;
+	void setUniform(std::string uniform, double value) const;
+	void setUniform(std::string uniform, Vec2f value) const;
+	void setUniform(std::string unfiorm, Vec3f value) const;
+	void setUniform(std::string unfiorm, Vec4f value) const;
+	void setUniform(std::string uniform, Mat4f value) const;
 
 	void bind() override;
 	void unbind() override;

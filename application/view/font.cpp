@@ -118,13 +118,10 @@ void Font::render(const std::string& text, double x, double y, Vec4 color, doubl
 		double w = character.size.x * size;
 		double h = character.size.y * size;
 		
-		float vertices[6][4] = {
+		float vertices[4][4] = {
 			{ float(xpos	), float(ypos + h),	0.0f, 0.0f },
 			{ float(xpos	), float(ypos    ),	0.0f, 1.0f },
 			{ float(xpos + w), float(ypos    ),	1.0f, 1.0f },
-												
-			{ float(xpos	), float(ypos + h),	0.0f, 0.0f },
-			{ float(xpos + w), float(ypos    ), 1.0f, 1.0f },
 			{ float(xpos + w), float(ypos + h), 1.0f, 0.0f }
 		};
 
@@ -137,7 +134,7 @@ void Font::render(const std::string& text, double x, double y, Vec4 color, doubl
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glDrawArrays(GL_QUADS, 0, 4);
 		
 		// Now advance cursors for next glyph (note that advance is number of 1/64 pixels)
 		x += (character.advance >> 6) * size; // Bitshift by 6 to get value in pixels (2^6 = 64)

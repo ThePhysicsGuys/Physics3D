@@ -70,7 +70,7 @@ struct AddableBuffer : public BufferWithCapacity<T> {
 	size_t index = 0;
 
 	AddableBuffer() : BufferWithCapacity(10) {}
-	AddableBuffer(size_t initialCapacity) : BufferWithCapacity(initialCapacity) {}
+	AddableBuffer(size_t initialCapacity) : BufferWithCapacity<T>(initialCapacity) {}
 
 	AddableBuffer(T * data, size_t dataSize, size_t initialCapacity) : BufferWithCapacity(initialCapacity), index(dataSize) {
 		if (data == nullptr) Log::fatal("Could not create AddableBuffer of size: %d", initialCapacity);
@@ -91,9 +91,9 @@ struct AddableBuffer : public BufferWithCapacity<T> {
 	}
 
 	inline void add(const T & obj) {
-		ensureCapacity(index+1);
+		BufferWithCapacity<T>::ensureCapacity(index+1);
 
-		data[index++] = obj;
+		BufferWithCapacity<T>::data[index++] = obj;
 	}
 
 	inline void clear() {

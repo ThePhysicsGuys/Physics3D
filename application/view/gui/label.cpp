@@ -26,11 +26,11 @@ void Label::render() {
 
 		if (debug) {
 			GUI::defaultQuad->resize(position, dimension);
-			GUI::defaultShader->update(GUI::COLOR::RED);
+			GUI::defaultShader->update(GUI::COLOR::R);
 			GUI::defaultQuad->render(GL_LINE);
 
 			GUI::defaultQuad->resize(position + Vec2(padding, -padding), dimension - Vec2(padding) * 2);
-			GUI::defaultShader->update(GUI::COLOR::GREEN);
+			GUI::defaultShader->update(GUI::COLOR::G);
 			GUI::defaultQuad->render(GL_LINE);
 		}
 	}

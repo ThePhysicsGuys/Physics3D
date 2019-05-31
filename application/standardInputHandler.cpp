@@ -110,10 +110,7 @@ void StandardInputHandler::mouseDown(int button, int mods) {
 			GUI::intersectedComponent->press(GUI::map(cursorPosition));
 			GUI::intersectedPoint = GUI::map(cursorPosition) - GUI::intersectedComponent->position;
 		} else {
-			(*screen.eventHandler.partClickHandler) (screen, screen.intersectedPart, screen.intersectedPoint);
-			if (screen.intersectedPart) {
-				screen.world->localSelectedPoint = screen.selectedPart->cframe.globalToLocal(screen.intersectedPoint);
-			}
+			Picker::press(screen);
 		}
 	}
 };

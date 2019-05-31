@@ -16,37 +16,37 @@ void Shader::createUniform(std::string uniform) {
 		Log::error("Could not find uniform (%s) in shader (%s)", uniform.c_str(), name.c_str());
 	else {
 		Log::debug("Created uniform (%s) in shader (%s) with id (%d)", uniform.c_str(), name.c_str(), location);
-		uniforms.insert(std::make_pair(uniform, location));
 	}
+	uniforms.insert(std::make_pair(uniform, location));
 	Log::resetSubject();
 }
 
-void Shader::setUniform(std::string uniform, int value) {
-	glUniform1i(uniforms[uniform], value);
+void Shader::setUniform(std::string uniform, int value) const {
+	glUniform1i(uniforms.at(uniform), value);
 }
 
-void Shader::setUniform(std::string uniform, float value) {
-	glUniform1f(uniforms[uniform], value);
+void Shader::setUniform(std::string uniform, float value) const {
+	glUniform1f(uniforms.at(uniform), value);
 }
 
-void Shader::setUniform(std::string uniform, double value) {
-	glUniform1d(uniforms[uniform], value);
+void Shader::setUniform(std::string uniform, double value) const {
+	glUniform1d(uniforms.at(uniform), value);
 }
 
-void Shader::setUniform(std::string uniform, Vec2f value) {
-	glUniform2d(uniforms[uniform], value.x, value.y);
+void Shader::setUniform(std::string uniform, Vec2f value) const {
+	glUniform2d(uniforms.at(uniform), value.x, value.y);
 }
 
-void Shader::setUniform(std::string uniform, Vec3f value) {
-	glUniform3f(uniforms[uniform], value.x, value.y, value.z);
+void Shader::setUniform(std::string uniform, Vec3f value) const {
+	glUniform3f(uniforms.at(uniform), value.x, value.y, value.z);
 }
 
-void Shader::setUniform(std::string uniform, Vec4f value) {
-	glUniform4f(uniforms[uniform], value.x, value.y, value.z, value.w);
+void Shader::setUniform(std::string uniform, Vec4f value) const {
+	glUniform4f(uniforms.at(uniform), value.x, value.y, value.z, value.w);
 }
 
-void Shader::setUniform(std::string uniform, Mat4f value) {
-	glUniformMatrix4fv(uniforms[uniform], 1, GL_FALSE, value.m);
+void Shader::setUniform(std::string uniform, Mat4f value) const {
+	glUniformMatrix4fv(uniforms.at(uniform), 1, GL_FALSE, value.m);
 }
 
 unsigned int compileShader(const std::string& source, unsigned int type) {

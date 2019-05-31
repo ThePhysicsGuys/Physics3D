@@ -114,6 +114,11 @@ namespace GUI {
 		Vec4 BACK = get(0x4D4D4D);
 		Vec4 ALPHA = get(0x0, true);
 
+		Vec4 R = get(0xFF0000);
+		Vec4 G = get(0x00FF00);
+		Vec4 B = get(0x0000FF);
+		Vec4 A = get(0x0, true);
+
 		Vec4 NAVY = get(0x001F3F);
 		Vec4 BLUE = get(0x0074D9);
 		Vec4 AQUA = get(0x7FDBFF);

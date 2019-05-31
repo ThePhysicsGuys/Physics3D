@@ -23,6 +23,11 @@ namespace GUI {
 		extern Vec4 BACK;
 		extern Vec4 ALPHA;
 
+		extern Vec4 R;
+		extern Vec4 G;
+		extern Vec4 B;
+		extern Vec4 A;
+
 		extern Vec4 NAVY;
 		extern Vec4 BLUE;
 		extern Vec4 AQUA;

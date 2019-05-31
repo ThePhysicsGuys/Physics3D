@@ -90,7 +90,7 @@ public:
 
 	bool isValid() const;
 	bool containsPoint(Vec3f point) const;
-	float getIntersectionDistance(Vec3f origin, Vec3f direction);
+	float getIntersectionDistance(Vec3f origin, Vec3f direction) const;
 	double getVolume() const;
 	NormalizedShape normalized(Vec3f* vecBuf, Vec3f* normalBuf, CFramef& backTransformation) const;
 	CenteredShape centered(Vec3f* vecBuf, Vec3& backOffset) const;

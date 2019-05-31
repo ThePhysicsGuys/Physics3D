@@ -612,7 +612,7 @@ void Shape::getCircumscribedEllipsoid() const {
 
 }
 
-float Shape::getIntersectionDistance(Vec3f origin, Vec3f direction) {
+float Shape::getIntersectionDistance(Vec3f origin, Vec3f direction) const {
 	const float EPSILON = 0.0000001f;
 	float t = INFINITY;
 	for (Triangle triangle : iterTriangles()) {
