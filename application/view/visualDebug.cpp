@@ -3,7 +3,7 @@
 #include "visualDebug.h"
 #include "gui\gui.h"
 #include "../debug.h"
-#include "../buffers.h"
+#include "../threePhaseBuffer.h"
 #include "profilerUI.h"
 #include "font.h"
 
@@ -109,7 +109,7 @@ void updateVecMesh(VectorMesh* vectorMesh, AppDebug::ColoredVec* data, size_t si
 		}
 	}
 
-	vectorMesh->update(visibleVecs.data, visibleVecs.index / 9);
+	vectorMesh->update(visibleVecs.data, visibleVecs.size / 9);
 }
 
 void updatePointMesh(PointMesh* pointMesh, AppDebug::ColoredPoint* data, size_t size) {
@@ -134,5 +134,5 @@ void updatePointMesh(PointMesh* pointMesh, AppDebug::ColoredPoint* data, size_t 
 		}
 	}
 
-	pointMesh->update(visiblePoints.data, visiblePoints.index / 10);
+	pointMesh->update(visiblePoints.data, visiblePoints.size / 10);
 }

@@ -612,8 +612,8 @@ void Screen::refresh() {
 
 	// Update debug meshes
 	graphicsMeasure.mark(GraphicsProcess::VECTORS);
-	updateVecMesh(vectorMesh, vecLog.data, vecLog.index);
-	updatePointMesh(pointMesh, pointLog.data, pointLog.index);
+	updateVecMesh(vectorMesh, vecLog.data, vecLog.size);
+	updatePointMesh(pointMesh, pointLog.data, pointLog.size);
 
 
 	// Render lights

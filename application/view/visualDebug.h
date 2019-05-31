@@ -2,7 +2,7 @@
 
 #include "../debug.h"
 #include "../engine/math/mat3.h"
-#include "../buffers.h"
+#include "../engine/datastructures/buffers.h"
 #include "vectorMesh.h"
 #include "pointMesh.h"
 #include "profilerUI.h"

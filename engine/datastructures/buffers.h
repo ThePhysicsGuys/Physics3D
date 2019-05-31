@@ -1,16 +1,5 @@
 #pragma once
 
-#include <mutex>
-
-template<typename T>
-struct BufferWithCapacity;
-
-template<typename T>
-struct AddableBuffer;
-
-template<typename T>
-void swapBuffers(BufferWithCapacity<T>& first, BufferWithCapacity<T>& second);
-
 inline unsigned long nextPowerOf2(unsigned long v) {
 	v--;
 	v |= v >> 1;
@@ -19,15 +8,36 @@ inline unsigned long nextPowerOf2(unsigned long v) {
 	v |= v >> 8;
 	v |= v >> 16;
 	v |= v >> 32;
-	return v+1;
+	return v + 1;
 }
+
+template<typename T>
+struct ListIter {
+	T* start;
+	T* fin;
+	T* begin() { return start; }
+	T* end() { return fin; }
+};
+template<typename T>
+struct ConstListIter {
+	const T* start;
+	const T* fin;
+	const T* begin() const { return start; }
+	const T* end() const { return fin; }
+};
+
+template<typename T>
+struct BufferWithCapacity;
+
+template<typename T>
+void swapBuffers(BufferWithCapacity<T>& first, BufferWithCapacity<T>& second);
 
 template<typename T>
 struct BufferWithCapacity {
 	T* data;
 	size_t capacity;
 
-	BufferWithCapacity() : BufferWithCapacity(10) {};
+	BufferWithCapacity() : BufferWithCapacity(16) {};
 	BufferWithCapacity(size_t initialCapacity) : data(new T[initialCapacity]), capacity(initialCapacity) {}
 	~BufferWithCapacity() {
 		delete[] data;
@@ -67,12 +77,12 @@ void swapBuffers(BufferWithCapacity<T>& first, BufferWithCapacity<T>& second) {
 
 template<typename T>
 struct AddableBuffer : public BufferWithCapacity<T> {
-	size_t index = 0;
+	size_t size = 0;
 
-	AddableBuffer() : BufferWithCapacity(10) {}
+	AddableBuffer() : BufferWithCapacity<T>(16) {}
 	AddableBuffer(size_t initialCapacity) : BufferWithCapacity<T>(initialCapacity) {}
 
-	AddableBuffer(T * data, size_t dataSize, size_t initialCapacity) : BufferWithCapacity(initialCapacity), index(dataSize) {
+	AddableBuffer(T* data, size_t dataSize, size_t initialCapacity) : BufferWithCapacity<T>(initialCapacity), size(dataSize) {
 		if (data == nullptr) Log::fatal("Could not create AddableBuffer of size: %d", initialCapacity);
 		memcpy(this->data, data, dataSize * sizeof(T));
 	}
@@ -91,60 +101,17 @@ struct AddableBuffer : public BufferWithCapacity<T> {
 	}
 
 	inline void add(const T & obj) {
-		BufferWithCapacity<T>::ensureCapacity(index+1);
-
-		BufferWithCapacity<T>::data[index++] = obj;
+		BufferWithCapacity<T>::ensureCapacity(size + 1);
+		BufferWithCapacity<T>::data[size++] = obj;
 	}
 
 	inline void clear() {
-		this->index = 0;
-	}
-};
-
-template<typename T>
-class ThreePhaseBuffer {
-	AddableBuffer<T> writeBuf;
-	BufferWithCapacity<T> readyBuf;
-	size_t readySize = 0;
-	bool newDataAvailable = false;
-public:
-	AddableBuffer<T> outputBuf;
-	std::mutex swapLock;
-
-	ThreePhaseBuffer(size_t initialCapacity) : writeBuf(initialCapacity), readyBuf(initialCapacity), outputBuf(initialCapacity) {}
-
-	~ThreePhaseBuffer() {}
-
-	ThreePhaseBuffer(const ThreePhaseBuffer&) = delete;
-	ThreePhaseBuffer(const ThreePhaseBuffer&&) = delete;
-	ThreePhaseBuffer& operator=(const ThreePhaseBuffer&) = delete;
-	ThreePhaseBuffer& operator=(const ThreePhaseBuffer&&) = delete;
-
-	inline void add(const T & obj) {
-		writeBuf.add(obj);
+		this->size = 0;
 	}
 
-	inline void pushWriteBuffer() {
-		std::lock_guard<std::mutex> lg(swapLock);
+	inline T* begin() { return data; }
+	inline const T* begin() const { return data; }
 
-		readySize = writeBuf.index;
-		swapBuffers(writeBuf, readyBuf);
-		writeBuf.clear();
-
-		newDataAvailable = true;
-	}
-
-	inline AddableBuffer<T>& pullOutputBuffer() {
-		std::lock_guard<std::mutex> lg(swapLock);
-
-		if (newDataAvailable) {
-			swapBuffers(readyBuf, outputBuf);
-
-			newDataAvailable = false;
-		}
-
-		outputBuf.index = readySize;
-
-		return outputBuf;
-	}
+	inline T* end() { return data + size; }
+	inline const T* end() const { return data + size; }
 };
