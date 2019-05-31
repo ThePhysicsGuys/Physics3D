@@ -133,6 +133,9 @@ PostProcessShader postProcessShader;
 SkyboxShader skyboxShader;
 PointShader pointShader;
 
+BarChartClassInformation iterChartClasses[]{ {"GJK Collide", Vec3f(0.2f,0.2f,1)},{"GJK No Collide", Vec3f(1.0f, 0.5f, 0.0f)},{"EPA", Vec3f(1.0f, 1.0f, 0.0f)} };
+BarChart iterationChart("Iteration Statistics", "", GJKCollidesIterationStatistics.labels, iterChartClasses, Vec2f(-1 + 0.1f, -0.3), Vec2f(0.8, 0.6), 3, 17);
+
 
 // Light uniforms
 const int lightCount = 4;
@@ -695,9 +698,6 @@ void Screen::refresh() {
 		intersectionPie.renderPie(*this);
 		endPieRendering(*this);
 
-		BarChartClassInformation classes[]{ {"GJK Collide", Vec3f(0.2f,0.2f,1)},{"GJK No Collide", Vec3f(1.0f, 0.5f, 0.0f)},{"EPA", Vec3f(1.0f, 1.0f, 0.0f)}};
-		BarChart iterationChart("Iteration Statistics", "", GJKCollidesIterationStatistics.labels, classes, Vec2f(-leftSide+0.1f, -0.3), Vec2f(0.8, 0.6), 3, 17);
-
 		ParallelArray<long long, 17> gjkColIter = GJKCollidesIterationStatistics.history.avg();
 		ParallelArray<long long, 17> gjkNoColIter = GJKNoCollidesIterationStatistics.history.avg();
 		ParallelArray<long long, 17> epaIter = EPAIterationStatistics.history.avg();
@@ -708,6 +708,7 @@ void Screen::refresh() {
 			iterationChart.data[2][i] = WeightValue{ (float)epaIter[i], std::to_string(epaIter[i]) };
 		}
 
+		iterationChart.position = Vec2f(-leftSide + 0.1f, -0.3);
 		iterationChart.render();
 	}
 
