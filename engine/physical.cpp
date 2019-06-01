@@ -8,17 +8,55 @@
 
 
 Physical::Physical(Part* part) : cframe(part->cframe) {
-	this->mass = part->hitbox.getVolume() * part->properties.density;
+	/*this->mass = part->hitbox.getVolume() * part->properties.density;
 	SymmetricMat3 iner = part->hitbox.getInertia();
-	if(abs(iner.m01) > 1E-10 || abs(iner.m02) > 1E-10 || abs(iner.m12) > 1E-10) Log::error("inertia of normalized hitbox is not diagonal!");
-	DiagonalMat3 diagIner = DiagonalMat3(iner.m00, iner.m11, iner.m22);
-	this->inertia = diagIner * part->properties.density;
+	//if(abs(iner.m01) > 1E-10 || abs(iner.m02) > 1E-10 || abs(iner.m12) > 1E-10) Log::error("inertia of normalized hitbox is not diagonal!");
+	//DiagonalMat3 diagIner = DiagonalMat3(iner.m00, iner.m11, iner.m22);
+	this->inertia = iner * part->properties.density;*/
+
+	this->mass = part->mass;
+	this->inertia = part->inertia;
+	this->centerOfMass = Vec3(0, 0, 0);
 	parts.push_back(AttachedPart{ CFrame(), part });
 }
 
-// Physical::Physical(Part p, CFrame partNormalization, CFrame cframe, double mass, Vec3 centerOfMass, Mat3 inertia) : part(p), cframe(cframe), mass(mass), com(centerOfMass), inertia(inertia) {}
+void Physical::attachPart(Part* part, CFrame attachment) {
+	parts.push_back(AttachedPart{attachment, part});
+	partCount++;
 
-// Physical::Physical(NormalizedShape s, CFrame cframe, double density) : part(s, density, 0.1) {}
+	refreshWithNewParts();
+}
+void Physical::detachPart(Part* part) {
+	for (auto iter = parts.begin(); iter++ != parts.end();) {
+		AttachedPart& at = *iter;
+		if (at.part == part) {
+			at.part->parent = nullptr;
+			parts.erase(iter);
+			partCount--;
+			refreshWithNewParts();
+			return;
+		}
+	}
+
+	throw "Error: could not find part to remove!";
+}
+
+void Physical::refreshWithNewParts() {
+	double totalMass = 0;
+	SymmetricMat3 totalInertia(0, 0, 0, 0, 0, 0);
+	Vec3 totalCenterOfMass(0, 0, 0);
+	for (const AttachedPart& p : parts) {
+		totalMass += p.part->mass;
+		totalCenterOfMass += p.attachment.getPosition() * p.part->mass;
+	}
+	totalCenterOfMass /= totalMass;
+	for (const AttachedPart& p : parts) {
+		totalInertia += transformBasis(p.part->inertia, p.attachment.getRotation()) + skewSymmetricSquared(p.attachment.getPosition() - totalCenterOfMass) * p.part->mass;
+	}
+	this->mass = totalMass;
+	this->centerOfMass = totalCenterOfMass;
+	this->inertia = totalInertia;
+}
 
 void Physical::update(double deltaT) {
 	Vec3 accel = totalForce * (deltaT/mass);

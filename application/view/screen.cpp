@@ -672,7 +672,7 @@ void Screen::refresh() {
 
 	// Pie rendering
 	graphicsMeasure.mark(GraphicsProcess::PROFILER);
-	size_t objCount = world->partCount;
+	size_t objCount = world->getPartCount();
 	renderDebugField(dimension, font, "Position", str(camera.cframe.position), "");
 	renderDebugField(dimension, font, "Objects", objCount, "");
 	renderDebugField(dimension, font, "Intersections", getTheoreticalNumberOfIntersections(objCount), "");

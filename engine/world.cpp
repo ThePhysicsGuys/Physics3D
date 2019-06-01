@@ -19,7 +19,10 @@
 
 #define ELASTICITY 0.3
 
-WorldPrototype::WorldPrototype() : PartContainer(20) {}
+WorldPrototype::WorldPrototype() : WorldPrototype(5000) {}
+WorldPrototype::WorldPrototype(size_t initialPartCapacity) : physicals(initialPartCapacity) {
+	
+}
 
 /*
 	Compute combined inertia between to objects in a direction
@@ -94,59 +97,68 @@ struct Colission {
 
 // returns anchoredColissions offset
 size_t findColissions(WorldPrototype& world, std::vector<Colission>& colissions) {
-	for(Part& anchoredPart: world.iterAnchoredParts()) {
-		for(Part& freePart: world.iterFreeParts()) {
+	for(Physical& anchoredPhys: world.iterAnchoredPhysicals()) {
+		for(Physical& freePhys: world.iterFreePhysicals()) {
+			for (Part& anchoredPart : anchoredPhys) {
+				for (Part& freePart : freePhys) {
+					double maxRadiusBetween = anchoredPart.maxRadius + freePart.maxRadius;
 
-			double maxRadiusBetween = anchoredPart.maxRadius + freePart.maxRadius;
+					Vec3 deltaPosition = anchoredPart.cframe.position - freePart.cframe.position;
+					double distanceSqBetween = deltaPosition.lengthSquared();
 
-			Vec3 deltaPosition = anchoredPart.cframe.position - freePart.cframe.position;
-			double distanceSqBetween = deltaPosition.lengthSquared();
+					if (distanceSqBetween > maxRadiusBetween * maxRadiusBetween) {
+						intersectionStatistics.addToTally(IntersectionResult::DISTANCE_REJECT, 1);
+						continue;
+					}
 
-			if(distanceSqBetween > maxRadiusBetween*maxRadiusBetween) {
-				intersectionStatistics.addToTally(IntersectionResult::DISTANCE_REJECT, 1);
-				continue;
+					Vec3 intersection;
+					Vec3 exitVector;
+					if (anchoredPart.intersects(freePart, intersection, exitVector)) {
+						intersectionStatistics.addToTally(IntersectionResult::COLISSION, 1);
+						colissions.push_back(Colission{ &anchoredPart, &freePart, intersection, exitVector });
+					}
+					else {
+						intersectionStatistics.addToTally(IntersectionResult::GJK_REJECT, 1);
+					}
+					physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
+				}
 			}
-
-			Vec3 intersection;
-			Vec3 exitVector;
-			if(anchoredPart.intersects(freePart, intersection, exitVector)) {
-				intersectionStatistics.addToTally(IntersectionResult::COLISSION, 1);
-				colissions.push_back(Colission{&anchoredPart, &freePart, intersection, exitVector});
-			} else {
-				intersectionStatistics.addToTally(IntersectionResult::GJK_REJECT, 1);
-			}
-			physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
+			
 		}
 	}
 
 	size_t anchoredOffset = colissions.size();
 
-	PartIteratorFactory iter = world.iterFreeParts();
-	PartIterator finish = iter.end();
-	for(PartIterator mainIter = iter.begin(); mainIter != finish; ++mainIter) {
-		Part& p1 = *mainIter;
-		for(PartIterator secondIter = mainIter; ++secondIter != finish; ) {
-			Part& p2 = *secondIter;
+	auto iter = world.iterFreePhysicals();
+	auto finish = iter.end();
+	for(auto mainIter = iter.begin(); mainIter != finish; ++mainIter) {
+		Physical& phys1 = *mainIter;
+		for(auto secondIter = mainIter; ++secondIter != finish; ) {
+			Physical& phys2 = *secondIter;
+			for (Part& p1 : phys1) {
+				for (Part& p2 : phys2) {
+					double maxRadiusBetween = p1.maxRadius + p2.maxRadius;
 
-			double maxRadiusBetween = p1.maxRadius + p2.maxRadius;
+					Vec3 deltaPosition = p1.cframe.position - p2.cframe.position;
+					double distanceSqBetween = deltaPosition.lengthSquared();
 
-			Vec3 deltaPosition = p1.cframe.position - p2.cframe.position;
-			double distanceSqBetween = deltaPosition.lengthSquared();
+					if (distanceSqBetween > maxRadiusBetween * maxRadiusBetween) {
+						intersectionStatistics.addToTally(IntersectionResult::DISTANCE_REJECT, 1);
+						continue;
+					}
 
-			if(distanceSqBetween > maxRadiusBetween*maxRadiusBetween) {
-				intersectionStatistics.addToTally(IntersectionResult::DISTANCE_REJECT, 1);
-				continue;
+					Vec3 intersection;
+					Vec3 exitVector;
+					if (p1.intersects(p2, intersection, exitVector)) {
+						intersectionStatistics.addToTally(IntersectionResult::COLISSION, 1);
+						colissions.push_back(Colission{ &p1, &p2, intersection, exitVector });
+					}
+					else {
+						intersectionStatistics.addToTally(IntersectionResult::GJK_REJECT, 1);
+					}
+					physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
+				}
 			}
-
-			Vec3 intersection;
-			Vec3 exitVector;
-			if(p1.intersects(p2, intersection, exitVector)) {
-				intersectionStatistics.addToTally(IntersectionResult::COLISSION, 1);
-				colissions.push_back(Colission{&p1, &p2, intersection, exitVector});
-			} else {
-				intersectionStatistics.addToTally(IntersectionResult::GJK_REJECT, 1);
-			}
-			physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
 		}
 	}
 
@@ -218,13 +230,20 @@ void WorldPrototype::tick(double deltaT) {
 
 size_t WorldPrototype::getTotalVertexCount() {
 	size_t total = 0;
-	for(const Part& part : *this)
-		total += part.hitbox.vertexCount;
+	for(const Physical& phys : iterPhysicals())
+		for (const Part& part : phys)
+			total += part.hitbox.vertexCount;
 	return total;
 }
 
 void WorldPrototype::addPartUnsafe(Part* part, bool anchored) {
-	add(part, anchored);
+	Physical* parent;
+	if (anchored) {
+		parent = physicals.addLeftSide(Physical(part));
+	} else {
+		parent = physicals.add(Physical(part));
+	}
+	part->parent = parent;
 }
 
 void WorldPrototype::processQueue() {
@@ -245,56 +264,50 @@ void WorldPrototype::addObject(Part* part, bool anchored) {
 		std::lock_guard<std::mutex> lg(queueLock);
 		newPartQueue.push(QueuedPart{part, anchored});
 	}
-};
+}
+void WorldPrototype::attachPart(Part* p, Physical& phys, CFrame attachment) {
+	if (p->parent != nullptr) {
+		removePart(p);
+	}
+	phys.attachPart(p, attachment);
+	addPartUnsafe(p, false);
+}
 
 void WorldPrototype::removePart(Part* part) {
-	this->remove(part);
-	
+	if (part->parent->partCount == 1) {
+		physicals.remove(part->parent);
+	}
+	else {
+		part->parent->detachPart(part);
+	}
 }
 
 void WorldPrototype::applyExternalForces() {}
 
 bool WorldPrototype::isValid() const {
-	for(size_t i = 0; i < partCount; i++) {
-		if(parts[i]->partIndex != i) {
-			Log::error("part's partIndex is not it's partIndex");
-			__debugbreak();
-		}
-	}
-
-	for(const Part& part : *this) {
-		for (AttachedPart& attach : part.parent->parts) {
-			if (attach.part == &part) {
-				goto partFount;
+	for (const Physical& phys : iterPhysicals()) {
+		for (const Part& part : phys) {
+			if (part.parent != &phys) {
+				Log::error("part's parent's child is not part");
+				__debugbreak();
+				return false;
 			}
 		}
-		Log::error("part's parent's child is not part");
-		__debugbreak();
-		partFount:
-		if(!(part.parent >= physicals && part.parent < physicals + physicalCount)) {
-			Log::error("part with parent not in our physicals");
-			__debugbreak();
-		}
-		bool partIsAnchored = isAnchored(parts + part.partIndex);
-		bool physicalIsAnchored = isAnchored(part.parent);
-		if(partIsAnchored != physicalIsAnchored) {
-			Log::error("%s part with %s parent", partIsAnchored ? "anchored":"unanchored", physicalIsAnchored ? "anchored" : "unanchored");
-			__debugbreak();
-		}
 	}
+	
 	return true;
 }
 
 double WorldPrototype::getTotalKineticEnergy() const {
 	double total = 0.0;
-	for(const Physical& p : iterUnAnchoredPhysicals()) {
+	for(const Physical& p : iterFreePhysicals()) {
 		total += p.getKineticEnergy();
 	}
 	return total;
 }
 double WorldPrototype::getTotalPotentialEnergy() const {
 	double total = 0.0;
-	for(const Physical& p : iterUnAnchoredPhysicals()) {
+	for(const Physical& p : iterFreePhysicals()) {
 		total += getPotentialEnergyOfPhysical(p);
 	}
 	return total;

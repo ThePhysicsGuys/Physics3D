@@ -2,6 +2,8 @@
 
 Part::Part(NormalizedShape shape, CFrame position, double density, double friction) : hitbox(shape), cframe(position), properties({density, friction}) {
 	this->maxRadius = hitbox.getMaxRadius();
+	this->mass = this->hitbox.getVolume() * this->properties.density;
+	this->inertia = this->hitbox.getInertia() * this->properties.density;
 }
 
 Part::Part(Shape shape, CFrame position, double density, double friction) : properties({density, friction}) {
@@ -14,6 +16,9 @@ Part::Part(Shape shape, CFrame position, double density, double friction) : prop
 	this->hitbox = normalized;
 	this->cframe = realCFrame;
 	this->maxRadius = hitbox.getMaxRadius();
+
+	this->mass = this->hitbox.getVolume() * this->properties.density;
+	this->inertia = this->hitbox.getInertia() * this->properties.density;
 }
 
 bool Part::intersects(const Part& other, Vec3& intersection, Vec3& exitVector) const {

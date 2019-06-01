@@ -7,18 +7,20 @@ struct Physical;
 
 struct Part {
 public:
-	Physical* parent;
+	Physical* parent = nullptr;
 	NormalizedShape hitbox;
 	double maxRadius;
 #ifdef USE_TRANSFORMATIONS
 	Shape transformed;
 #endif
 	CFrame cframe;
-	size_t partIndex = -1;
 	struct {
 		double density;
 		double friction;
 	} properties;
+
+	double mass;
+	SymmetricMat3 inertia;
 
 	Part() = default;
 	Part(NormalizedShape shape, CFrame position, double density, double friction);
@@ -26,5 +28,3 @@ public:
 	bool intersects(const Part& other, Vec3& intersection, Vec3& exitVector) const;
 	
 };
-
-#include "physical.h"

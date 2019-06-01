@@ -5,14 +5,16 @@
 #include <immintrin.h>
 #include "../util/log.h"
 
+#define MAX_ITER 100
+
 Vec3f vecs[]{{0,1,2},{1,4,3},{7,5,9},{1,2,4},
              {7,9,6},{0.1f, 0.3f, -2.3f},{1,8,6}};
 ParallelVec3 parallelV(vecs);
 
-TEST_CASE(nonParallelDot) {
+/*TEST_CASE(nonParallelDot) {
 	float curDot[8] = {0,0,0,0,0,0,0,0};
 
-	for(int iter = 0; iter < 1000; iter++)
+	for(int iter = 0; iter < MAX_ITER; iter++)
 	for(float x = 0; x < 1.5; x += 0.014) {
 		for(float y = 0; y < 1.5; y += 0.014) {
 			for(float z = 0; z < 1.5; z += 0.014) {
@@ -36,7 +38,7 @@ TEST_CASE(nonParallelDot) {
 TEST_CASE(customParallelDot) {
 	__m256 curDot = _mm256_set1_ps(0);
 
-	for(int iter = 0; iter < 1000; iter++)
+	for(int iter = 0; iter < MAX_ITER; iter++)
 	for(float x = 0; x < 1.5; x += 0.014) {
 		for(float y = 0; y < 1.5; y += 0.014) {
 			for(float z = 0; z < 1.5; z += 0.014) {
@@ -65,7 +67,7 @@ TEST_CASE(customParallelDot) {
 TEST_CASE(generatedParallelDot) {
 	float curDot[8] = {0,0,0,0,0,0,0,0};
 
-	for(int iter = 0; iter < 1000; iter++)
+	for(int iter = 0; iter < MAX_ITER; iter++)
 		for(float x = 0; x < 1.5; x += 0.014) {
 			for(float y = 0; y < 1.5; y += 0.014) {
 				for(float z = 0; z < 1.5; z += 0.014) {
@@ -84,4 +86,4 @@ TEST_CASE(generatedParallelDot) {
 	}
 
 	Log::debug("%f", sum);
-}
+}*/

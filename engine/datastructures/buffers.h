@@ -15,8 +15,8 @@ template<typename T>
 struct ListIter {
 	T* start;
 	T* fin;
-	T* begin() { return start; }
-	T* end() { return fin; }
+	T* begin() const { return start; }
+	T* end() const { return fin; }
 };
 template<typename T>
 struct ConstListIter {
@@ -63,6 +63,8 @@ struct BufferWithCapacity {
 			capacity = newCapacity;
 		}
 	}
+	T& operator[](size_t index) { return data[index]; }
+	const T& operator[](size_t index) const { return data[index]; }
 };
 
 template<typename T>
@@ -100,13 +102,16 @@ struct AddableBuffer : public BufferWithCapacity<T> {
 		swapBuffers(*this, other);
 	}
 
-	inline void add(const T & obj) {
+	inline T* add(const T& obj) {
 		BufferWithCapacity<T>::ensureCapacity(size + 1);
-		BufferWithCapacity<T>::data[size++] = obj;
+		T* newLocation = BufferWithCapacity<T>::data + size;
+		*newLocation = obj;
+		size++;
+		return newLocation;
 	}
 
 	inline void clear() {
-		this->size = 0;
+		size = 0;
 	}
 
 	inline T* begin() { return data; }
@@ -114,4 +119,8 @@ struct AddableBuffer : public BufferWithCapacity<T> {
 
 	inline T* end() { return data + size; }
 	inline const T* end() const { return data + size; }
+
+	inline bool liesInList(const T* obj) const {
+		return obj >= data && obj < data + size;
+	}
 };

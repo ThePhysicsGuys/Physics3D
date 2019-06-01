@@ -6,17 +6,20 @@
 #include <queue>
 #include <mutex>
 #include <shared_mutex>
+#include "datastructures/splitUnorderedList.h"
+#include "worldIterator.h"
 
-#include "partContainer.h"
+//#include "partContainer.h"
 
 struct QueuedPart {
 	Part* p;
 	bool anchored;
 };
 
-class WorldPrototype : public PartContainer {
+class WorldPrototype {
 private:
 	std::queue<QueuedPart> newPartQueue;
+	SplitUnorderedList<Physical> physicals;
 	size_t getTotalVertexCount();
 	void processQueue();
 
@@ -30,6 +33,7 @@ public:
 	Vec3 magnetPoint;
 
 	WorldPrototype();
+	WorldPrototype(size_t initialPartCapacity);
 
 	WorldPrototype(const WorldPrototype&) = delete;
 	WorldPrototype(WorldPrototype&&) = delete;
@@ -39,7 +43,47 @@ public:
 	void tick(double deltaT);
 
 	void addObject(Part* p, bool anchored = false);
+	void attachPart(Part* p, Physical& phys, CFrame attachment);
 	void removePart(Part* p);
+
+	inline bool isAnchored(Physical* p) const {
+		return physicals.isLeftSide(p);
+	}
+
+	inline void anchor(Physical* p) {
+		if (!isAnchored(p))
+			physicals.moveRightToLeft(p);
+	}
+
+	inline void unanchor(Physical* p) {
+		if (isAnchored(p))
+			physicals.moveLeftToRight(p);
+	}
+
+	inline size_t getPartCount() const {
+		size_t total = 0;
+		for (const Physical& p : iterPhysicals()) {
+			total += p.parts.size();
+		}
+		return total;
+	}
+
+	inline size_t getAnchoredPartCount() const {
+		size_t total = 0;
+		for (const Physical& p : iterAnchoredPhysicals()) {
+			total += p.parts.size();
+		}
+		return total;
+	}
+
+	inline size_t getFreePartCount() const {
+		size_t total = 0;
+		for (const Physical& p : iterFreePhysicals()) {
+			total += p.parts.size();
+		}
+		return total;
+	}
+
 	virtual void applyExternalForces();
 	bool isValid() const;
 
@@ -47,74 +91,30 @@ public:
 	virtual double getTotalPotentialEnergy() const;
 	virtual double getPotentialEnergyOfPhysical(const Physical& p) const;
 	double getTotalEnergy() const;
-};
 
-template<typename T>
-class CustomPartIter {
-	PartIterator iterator;
-public:
-	inline CustomPartIter(Part** current) : iterator(current) {}
-	inline T& operator*() const {
-		return static_cast<T&>(*iterator);
-	}
 
-	inline CustomPartIter& operator++() {
-		++iterator;
-		return *this;
-	}
 
-	inline bool operator!=(CustomPartIter& other) { return this->iterator != other.iterator; }
-	inline bool operator==(CustomPartIter& other) { return this->iterator == other.iterator; }
-};
-template<typename T>
-class ConstCustomPartIter {
-	ConstPartIterator iterator;
-public:
-	inline ConstCustomPartIter(const Part * const * current) : iterator(current) {}
-	inline const T& operator*() const {
-		return static_cast<const T&>(*iterator);
-	}
+	ListIter<Physical> iterPhysicals() { return ListIter<Physical>{ physicals.begin(), physicals.end() }; }
+	ConstListIter<Physical> iterPhysicals() const { return ConstListIter<Physical>{ physicals.begin(), physicals.end() }; }
 
-	inline ConstCustomPartIter& operator++() {
-		++iterator;
-		return *this;
-	}
+	ListIter<Physical> iterAnchoredPhysicals() { return physicals.iterLeft(); }
+	ConstListIter<Physical> iterAnchoredPhysicals() const { return physicals.iterLeft(); }
 
-	inline bool operator!=(ConstCustomPartIter& other) { return this->iterator != other.iterator; }
-	inline bool operator==(ConstCustomPartIter& other) { return this->iterator == other.iterator; }
-};
-
-template<typename T>
-class CustomPartIteratorFactory {
-	Part** start;
-	Part** finish;
-public:
-	inline CustomPartIteratorFactory(Part** start, Part** finish) : start(start), finish(finish) {}
-	inline CustomPartIter<T> begin() const { return CustomPartIter<T>(start); }
-	inline CustomPartIter<T> end() const { return CustomPartIter<T>(finish); }
-};
-
-template<typename T>
-class ConstCustomPartIteratorFactory {
-	const Part* const * start;
-	const Part* const * finish;
-public:
-	inline ConstCustomPartIteratorFactory(const Part* const * start, const Part* const * finish) : start(start), finish(finish) {}
-	inline ConstCustomPartIter<T> begin() const { return ConstCustomPartIter<T>(start); }
-	inline ConstCustomPartIter<T> end() const { return ConstCustomPartIter<T>(finish); }
+	ListIter<Physical> iterFreePhysicals() { return physicals.iterRight(); }
+	ConstListIter<Physical> iterFreePhysicals() const { return physicals.iterRight(); }
 };
 
 template<typename T = Part>
 class World : public WorldPrototype {
 public:
-	inline CustomPartIter<T> begin() { return CustomPartIter<T>(parts); }
-	inline CustomPartIter<T> end() { return CustomPartIter<T>(parts + partCount); }
+	inline CustomPartIter<T> begin() { return CustomPartIter<T>(iterPhysicals().begin(), iterPhysicals().begin()->begin()); }
+	inline CustomPartIter<T> end() { return CustomPartIter<T>(iterPhysicals().end(), iterPhysicals().end()->end()); }
 
-	inline CustomPartIteratorFactory<T> iterAnchoredParts() { return CustomPartIteratorFactory<T>(parts, parts + anchoredPartsCount); }
-	inline ConstCustomPartIteratorFactory<T> iterAnchoredParts() const { return ConstCustomPartIteratorFactory<T>(parts, parts + anchoredPartsCount); }
+	inline CustomPartIteratorFactory<T> iterAnchoredParts() { return CustomPartIteratorFactory<T>(iterAnchoredPhysicals()); }
+	inline ConstCustomPartIteratorFactory<T> iterAnchoredParts() const { return ConstCustomPartIteratorFactory<T>(iterAnchoredPhysicals()); }
 
-	inline CustomPartIteratorFactory<T> iterFreeParts() { return CustomPartIteratorFactory<T>(parts + anchoredPartsCount, parts + partCount); }
-	inline ConstCustomPartIteratorFactory<T> iterFreeParts() const { return ConstCustomPartIteratorFactory<T>(parts + anchoredPartsCount, parts + partCount); }
+	inline CustomPartIteratorFactory<T> iterFreeParts() { return CustomPartIteratorFactory<T>(iterFreeParts()); }
+	inline ConstCustomPartIteratorFactory<T> iterFreeParts() const { return ConstCustomPartIteratorFactory<T>(iterFreeParts()); }
 };
 
 double computeCombinedInertiaBetween(const Physical& first, const Physical& second, const Vec3& localColissionFirst, const Vec3& localColissionSecond, const Vec3& colissionNormal);
