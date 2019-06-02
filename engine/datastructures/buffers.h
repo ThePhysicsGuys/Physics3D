@@ -27,12 +27,6 @@ struct ConstListIter {
 };
 
 template<typename T>
-struct BufferWithCapacity;
-
-template<typename T>
-void swapBuffers(BufferWithCapacity<T>& first, BufferWithCapacity<T>& second);
-
-template<typename T>
 struct BufferWithCapacity {
 	T* data;
 	size_t capacity;
@@ -44,38 +38,35 @@ struct BufferWithCapacity {
 	}
 	BufferWithCapacity(const BufferWithCapacity& other) = delete;
 	void operator=(const BufferWithCapacity& other) = delete;
-	BufferWithCapacity(const BufferWithCapacity&& other) {
-		swapBuffers(*this, other);
+	BufferWithCapacity(BufferWithCapacity&& other) noexcept {
+		this->data = other.data;
+		this->capacity = other.capacity;
+		other.data = nullptr;
+		other.capacity = 0;
 	}
-	void operator=(const BufferWithCapacity&& other) {
-		swapBuffers(*this, other);
+	BufferWithCapacity& operator=(BufferWithCapacity&& other) noexcept {
+		std::swap(this->data, other.data);
+		std::swap(this->capacity, other.capacity);
+		return *this;
 	}
-	void ensureCapacity(size_t newCapacity) {
+	void resize(size_t newCapacity, size_t sizeToCopy) {
+		//Log::debug("Extending %s buffer capacity to %d", typeid(T).name(), newCapacity);
+		T* newBuf = new T[newCapacity];
+		for (int i = 0; i < sizeToCopy; i++) {
+			newBuf[i] = std::move(data[i]);
+		}
+		delete[] data;
+		data = newBuf;
+		capacity = newCapacity;
+	}
+	void ensureCapacity(size_t newCapacity, size_t sizeToCopy) {
 		if (newCapacity > capacity) {
-			newCapacity = nextPowerOf2(newCapacity);
-			//Log::debug("Extending %s buffer capacity to %d", typeid(T).name(), newCapacity);
-			T* newBuf = new T[newCapacity];
-			for (int i = 0; i < capacity; i++) {
-				newBuf[i] = data[i];
-			}
-			delete[] data;
-			data = newBuf;
-			capacity = newCapacity;
+			resize(nextPowerOf2(newCapacity), sizeToCopy);
 		}
 	}
 	T& operator[](size_t index) { return data[index]; }
 	const T& operator[](size_t index) const { return data[index]; }
 };
-
-template<typename T>
-void swapBuffers(BufferWithCapacity<T>& first, BufferWithCapacity<T>& second) {
-	T* tmpBuf = first.data;
-	size_t tmpSize = first.capacity;
-	first.data = second.data;
-	first.capacity = second.capacity;
-	second.data = tmpBuf;
-	second.capacity = tmpSize;
-}
 
 template<typename T>
 struct AddableBuffer : public BufferWithCapacity<T> {
@@ -86,7 +77,9 @@ struct AddableBuffer : public BufferWithCapacity<T> {
 
 	AddableBuffer(T* data, size_t dataSize, size_t initialCapacity) : BufferWithCapacity<T>(initialCapacity), size(dataSize) {
 		if (data == nullptr) Log::fatal("Could not create AddableBuffer of size: %d", initialCapacity);
-		memcpy(this->data, data, dataSize * sizeof(T));
+		for (size_t i = 0; i < dataSize; i++) {
+			this->data[i] = data[i];
+		}
 	}
 
 	~AddableBuffer() {
@@ -96,18 +89,22 @@ struct AddableBuffer : public BufferWithCapacity<T> {
 	AddableBuffer& operator=(const AddableBuffer&) = delete;
 
 	AddableBuffer(AddableBuffer && other) {
-		swapBuffers(*this, other);
+		std::swap(*this, other);
 	}
 	AddableBuffer& operator=(AddableBuffer && other) {
-		swapBuffers(*this, other);
+		std::swap(*this, other);
 	}
 
 	inline T* add(const T& obj) {
-		BufferWithCapacity<T>::ensureCapacity(size + 1);
-		T* newLocation = BufferWithCapacity<T>::data + size;
-		*newLocation = obj;
-		size++;
-		return newLocation;
+		this->ensureCapacity(this->size + 1, this->size);
+		this->data[this->size] = obj;
+		return &this->data[this->size++];
+	}
+
+	inline T* add(T&& obj) {
+		this->ensureCapacity(this->size + 1, this->size);
+		this->data[this->size] = std::move(obj);
+		return &this->data[this->size++];
 	}
 
 	inline void clear() {

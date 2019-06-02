@@ -31,7 +31,7 @@ public:
 		std::lock_guard<std::mutex> lg(swapLock);
 
 		readySize = writeBuf.size;
-		swapBuffers(writeBuf, readyBuf);
+		std::swap(static_cast<BufferWithCapacity<T>&>(writeBuf), readyBuf);
 		writeBuf.clear();
 
 		newDataAvailable = true;
@@ -41,7 +41,7 @@ public:
 		std::lock_guard<std::mutex> lg(swapLock);
 
 		if (newDataAvailable) {
-			swapBuffers(readyBuf, outputBuf);
+			std::swap(static_cast<BufferWithCapacity<T>&>(readyBuf), static_cast<BufferWithCapacity<T>&>(outputBuf));
 
 			newDataAvailable = false;
 		}

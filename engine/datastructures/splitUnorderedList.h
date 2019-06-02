@@ -6,59 +6,69 @@ template<typename T>
 class SplitUnorderedList : public AddableBuffer<T> {
 	
 private:
-	inline void pushToEnd(const T& newItem, T& oldItem) {
-		add(oldItem);
+	inline void pushToEnd(const T& newItem, T&& oldItem) {
+		add(std::move(oldItem));
 		oldItem = newItem;
 	}
+	inline void pushToEnd(T&& newItem, T&& oldItem) {
+		add(std::move(oldItem));
+		oldItem = std::move(newItem);
+	}
 public:
-	T* splitOffset;
+
+	size_t splitOffset;
 	
 	SplitUnorderedList() : SplitUnorderedList<T>(16) {}
-	SplitUnorderedList(size_t initialCapacity) : AddableBuffer<T>(initialCapacity), splitOffset(data) {}
+	SplitUnorderedList(size_t initialCapacity) : AddableBuffer<T>(initialCapacity), splitOffset(0) {}
 
 	inline T* addLeftSide(const T& newObj) {
-		if (splitOffset != data + size) {
-			pushToEnd(newObj, *splitOffset);
+		if (splitOffset != size) {
+			pushToEnd(newObj, std::move(data[splitOffset]));
 		} else {
 			add(newObj);
 		}
-		return splitOffset++;
+		return data + splitOffset++;
+	}
+
+	inline T* addLeftSide(T&& newObj) {
+		if (splitOffset != size) {
+			pushToEnd(std::move(newObj), std::move(data[splitOffset]));
+		} else {
+			add(std::move(newObj));
+		}
+		return data + splitOffset++;
 	}
 
 	inline void remove(T* item) {
-		if (item < splitOffset) {
-			*item = *splitOffset;
-			*splitOffset = data[--size];
+		if (item < data + splitOffset) {
+			*item = std::move(data[splitOffset]);
+			data[splitOffset] = std::move(data[--size]);
 			splitOffset--;
 		} else {
-			*item = data[--size];
+			*item = std::move(data[--size]);
 		}
 	}
 
 	inline void moveLeftToRight(T* obj) {
 		splitOffset--;
-		T tmp = *obj;
-		*obj = *splitOffset;
-		*splitOffset = tmp;
+		std::swap(*obj, data[splitOffset]);
 	}
 
 	inline void moveRightToLeft(T* obj) {
-		T tmp = *obj;
-		*obj = *splitOffset;
-		*splitOffset = tmp;
+		std::swap(*obj, data[splitOffset]);
 		splitOffset++;
 	}
 
 	inline bool isLeftSide(const T* obj) const {
-		return obj < splitOffset;
+		return obj < data + splitOffset;
 	}
 
 	inline bool isRightSide(const T* obj) const {
-		return obj >= splitOffset;
+		return obj >= data + splitOffset;
 	}
 
-	inline ListIter<T> iterLeft() { return ListIter<T>{ data, splitOffset }; }
-	inline ConstListIter<T> iterLeft() const { return ConstListIter<T>{ data, splitOffset }; }
-	inline ListIter<T> iterRight() { return ListIter<T>{ splitOffset, data+size }; }
-	inline ConstListIter<T> iterRight() const { return ConstListIter<T>{ splitOffset, data + size }; }
+	inline ListIter<T> iterLeft() { return ListIter<T>{ data, data + splitOffset }; }
+	inline ConstListIter<T> iterLeft() const { return ConstListIter<T>{ data, data + splitOffset }; }
+	inline ListIter<T> iterRight() { return ListIter<T>{ data + splitOffset, data+size }; }
+	inline ConstListIter<T> iterRight() const { return ConstListIter<T>{ data + splitOffset, data + size }; }
 };

@@ -19,7 +19,7 @@
 
 #define ELASTICITY 0.3
 
-WorldPrototype::WorldPrototype() : WorldPrototype(5000) {}
+WorldPrototype::WorldPrototype() : WorldPrototype(16) {}
 WorldPrototype::WorldPrototype(size_t initialPartCapacity) : physicals(initialPartCapacity) {
 	
 }
@@ -215,6 +215,7 @@ void WorldPrototype::tick(double deltaT) {
 #endif
 	}
 
+
 	intersectionStatistics.nextTally();
 
 	physicsMeasure.mark(PhysicsProcess::WAIT_FOR_LOCk);
@@ -237,13 +238,15 @@ size_t WorldPrototype::getTotalVertexCount() {
 }
 
 void WorldPrototype::addPartUnsafe(Part* part, bool anchored) {
-	Physical* parent;
 	if (anchored) {
-		parent = physicals.addLeftSide(Physical(part));
+		physicals.addLeftSide(Physical(part));
 	} else {
-		parent = physicals.add(Physical(part));
+		physicals.add(Physical(part));
 	}
-	part->parent = parent;
+
+	if (!isValid()) {
+		throw "World not valid!";
+	}
 }
 
 void WorldPrototype::processQueue() {
@@ -274,7 +277,7 @@ void WorldPrototype::attachPart(Part* p, Physical& phys, CFrame attachment) {
 }
 
 void WorldPrototype::removePart(Part* part) {
-	if (part->parent->partCount == 1) {
+	if (part->parent->getPartCount() == 1) {
 		physicals.remove(part->parent);
 	}
 	else {
@@ -285,9 +288,9 @@ void WorldPrototype::removePart(Part* part) {
 void WorldPrototype::applyExternalForces() {}
 
 bool WorldPrototype::isValid() const {
-	for (const Physical& phys : iterPhysicals()) {
-		for (const Part& part : phys) {
-			if (part.parent != &phys) {
+	for (const Physical* phys = this->iterPhysicals().begin(); phys != this->iterPhysicals().end(); phys++) {
+		for (const Part& part : *phys) {
+			if (part.parent != phys) {
 				Log::error("part's parent's child is not part");
 				__debugbreak();
 				return false;

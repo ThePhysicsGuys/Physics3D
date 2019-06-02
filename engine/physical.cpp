@@ -14,15 +14,19 @@ Physical::Physical(Part* part) : cframe(part->cframe) {
 	//DiagonalMat3 diagIner = DiagonalMat3(iner.m00, iner.m11, iner.m22);
 	this->inertia = iner * part->properties.density;*/
 
+	if (part->parent != nullptr) {
+		throw "Attempting to re-add part to different physical!";
+	}
+
 	this->mass = part->mass;
 	this->inertia = part->inertia;
 	this->centerOfMass = Vec3(0, 0, 0);
 	parts.push_back(AttachedPart{ CFrame(), part });
+	part->parent = this;
 }
 
 void Physical::attachPart(Part* part, CFrame attachment) {
 	parts.push_back(AttachedPart{attachment, part});
-	partCount++;
 
 	refreshWithNewParts();
 }
@@ -32,7 +36,6 @@ void Physical::detachPart(Part* part) {
 		if (at.part == part) {
 			at.part->parent = nullptr;
 			parts.erase(iter);
-			partCount--;
 			refreshWithNewParts();
 			return;
 		}

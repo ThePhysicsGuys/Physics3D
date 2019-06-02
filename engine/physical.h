@@ -51,11 +51,47 @@ struct Physical {
 	Vec3 centerOfMass;
 	SymmetricMat3 inertia;
 
-	int partCount = 1;
-
 	Physical() = default;
 	Physical(Part* part);
 	inline Physical(Part* part, double mass, SymmetricMat3 inertia) : cframe(part->cframe), mass(mass), inertia(inertia) { parts.push_back(AttachedPart{ CFrame(), part }); };
+
+	Physical(Physical&& other) noexcept {
+		this->cframe = other.cframe;
+		this->maxRadius = other.maxRadius;
+		this->parts = std::move(other.parts);
+		this->velocity = other.velocity;
+		this->angularVelocity = other.angularVelocity;
+		this->totalForce = other.totalForce;
+		this->totalMoment = other.totalMoment;
+		this->mass = other.mass;
+		this->centerOfMass = other.centerOfMass;
+		this->inertia = other.inertia;
+
+		for (AttachedPart& p : parts) {
+			p.part->parent = this;
+		}
+	}
+
+	Physical& operator=(Physical&& other) noexcept {
+		this->cframe = other.cframe;
+		this->maxRadius = other.maxRadius;
+		this->parts = std::move(other.parts);
+		this->velocity = other.velocity;
+		this->angularVelocity = other.angularVelocity;
+		this->totalForce = other.totalForce;
+		this->totalMoment = other.totalMoment;
+		this->mass = other.mass;
+		this->centerOfMass = other.centerOfMass;
+		this->inertia = other.inertia;
+
+		for (AttachedPart& p : parts) {
+			p.part->parent = this;
+		}
+		return *this;
+	}
+
+	Physical(const Physical&) = delete;
+	void operator=(const Physical&) = delete;
 
 	void attachPart(Part* part, CFrame attachment);
 	void detachPart(Part* part);
@@ -83,6 +119,7 @@ struct Physical {
 	double getVelocityKineticEnergy() const;
 	double getAngularKineticEnergy() const;
 	double getKineticEnergy() const;
+	size_t getPartCount() const { return parts.size(); }
 
 	PartIter begin() { return PartIter{ parts.begin() }; }
 	ConstPartIter begin() const { return ConstPartIter{ parts.begin() }; }
