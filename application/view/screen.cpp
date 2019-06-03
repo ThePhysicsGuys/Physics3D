@@ -17,8 +17,10 @@
 #include "gui\panel.h"
 #include "gui\frame.h"
 #include "gui\label.h"
+#include "gui\image.h"
 #include "gui\slider.h"
 #include "gui\checkBox.h"
+#include "gui\colorPicker.h"
 #include "gui\gui.h"
 
 #include "../debug.h"
@@ -122,9 +124,10 @@ IndexedMesh* skyboxMesh = nullptr;
 // Render uniforms
 Mat4f orthoMatrix;
 
+
 // Shaders
 BasicShader basicShader;
-BasicNormalShader basicNormalShader;
+DepthShader depthShader;
 VectorShader vectorShader;
 OriginShader originShader;
 FontShader fontShader;
@@ -132,6 +135,9 @@ QuadShader quadShader;
 PostProcessShader postProcessShader;
 SkyboxShader skyboxShader;
 PointShader pointShader;
+TestShader testShader;
+BlurShader blurShader;
+ColorWheelShader colorWheelShader;
 
 
 // Light uniforms
@@ -146,6 +152,10 @@ Light lights[lightCount] = {
 };
 
 
+// Shadow
+DepthFrameBuffer* depthBuffer;
+
+
 // Render meshes
 VectorMesh* vectorMesh = nullptr;
 PointMesh* pointMesh = nullptr;
@@ -154,6 +164,7 @@ Quad* quad = nullptr;
 
 
 // GUI
+Frame* imageFrame = nullptr;
 Frame* propertiesFrame = nullptr;
 Label* partNameLabel = nullptr;
 Label* partPositionLabel = nullptr;
@@ -164,6 +175,8 @@ Label* partKineticEnergy = nullptr;
 Label* partPotentialEnergy = nullptr;
 Label* partEnergy = nullptr;
 
+Image* image = nullptr;
+
 Slider* partRSlider = nullptr;
 Slider* partGSlider = nullptr;
 Slider* partBSlider = nullptr;
@@ -173,6 +186,8 @@ CheckBox* renderModeCheckBox = nullptr;
 
 Panel* mouseVertical = nullptr;
 Panel* mouseHorizontal = nullptr;
+
+ColorPicker* colorPicker = nullptr;
 
 void Screen::init() {
 	// Log init
@@ -200,7 +215,7 @@ void Screen::init() {
 
 	// Shader source init
 	ShaderSource basicShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(BASIC_SHADER)), "basic.shader");
-	ShaderSource basicNormalShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(BASICNORMAL_SHADER)), "basicnormal.shader");
+	ShaderSource depthShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(DEPTH_SHADER)), "depth.shader");
 	ShaderSource vectorShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(VECTOR_SHADER)), "vector.shader");
 	ShaderSource fontShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(FONT_SHADER)), "font.shader");
 	ShaderSource originShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(ORIGIN_SHADER)), "origin.shader");
@@ -208,11 +223,14 @@ void Screen::init() {
 	ShaderSource postProcessShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(POSTPROCESS_SHADER)), "postProcess.shader");
 	ShaderSource skyboxShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(SKYBOX_SHADER)), "skybox.shader");
 	ShaderSource pointShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(POINT_SHADER)), "point.shader");
+	ShaderSource testShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(TEST_SHADER)), "test.shader");
+	ShaderSource blurShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(BLUR_SHADER)), "blur.shader");
+	ShaderSource colorWheelShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(COLORWHEEL_SHADER)), "colorwheel.shader");
 
 
 	// Shader init
 	basicShader = * new BasicShader(basicShaderSource);
-	basicNormalShader = * new BasicNormalShader(basicNormalShaderSource);
+	depthShader = * new DepthShader(depthShaderSource);
 	vectorShader = * new VectorShader(vectorShaderSource);
 	fontShader = * new FontShader(fontShaderSource);
 	originShader = * new OriginShader(originShaderSource);
@@ -220,6 +238,9 @@ void Screen::init() {
 	postProcessShader = * new PostProcessShader(postProcessShaderSource);
 	skyboxShader = * new SkyboxShader(skyboxShaderSource);
 	pointShader = * new PointShader(pointShaderSource);
+	testShader = * new TestShader(testShaderSource);
+	blurShader = * new BlurShader(blurShaderSource);
+	colorWheelShader = * new ColorWheelShader(colorWheelShaderSource);
 	basicShader.createLightArray(lightCount);
 
 
@@ -250,6 +271,7 @@ void Screen::init() {
 	quad = new Quad();
 	modelFrameBuffer = new FrameBuffer(width, height);
 	screenFrameBuffer = new FrameBuffer(width, height);
+	depthBuffer = new DepthFrameBuffer(1024, 1024);
 
 
 	// Font init
@@ -262,6 +284,8 @@ void Screen::init() {
 	partNameLabel = new Label("", 0, 0);
 	partPositionLabel = new Label("", 0, 0);
 	partMeshIDLabel = new Label("", 0, 0);
+
+	colorPicker = new ColorPicker(0, 0, 0.5);
 
 	partRSlider = new Slider(0, 0, 0, 1, 1);
 	partGSlider = new Slider(0, 0, 0, 1, 1);
@@ -316,6 +340,7 @@ void Screen::init() {
 	propertiesFrame->add(partGSlider, Align::FILL);
 	propertiesFrame->add(partBSlider, Align::FILL);
 	propertiesFrame->add(partASlider, Align::FILL);
+	propertiesFrame->add(colorPicker, Align::FILL);
 	propertiesFrame->add(partVelocity, Align::FILL);
 	propertiesFrame->add(partAngularVelocity, Align::FILL);
 	propertiesFrame->add(partKineticEnergy, Align::FILL);
@@ -560,6 +585,25 @@ void Screen::renderPhysicals() {
 void Screen::refresh() {
 	fieldIndex = 0;
 
+	//Mat4f f = CFrameToMat4(camera.cframe);
+	//camera.cframe = Mat4ToCFrame(lookAt(f, camera.cframe.position, Vec3f()));
+
+	// Shadow setup
+	/*Mat4f lightProjection = ortho(-camera.aspect, camera.aspect, -1.0f, 1.0f, 0.1f, 1000.0f);
+	Mat4f ligthView = lookAt(camera.cframe.position, camera.cframe.rotation * Vec3f(0, 0, 1), Vec3f(0.0f, 1.0f, 0.0f));
+	Mat4f lightMatrix = lightProjection * ligthView;
+	depthShader.updateLight(lightMatrix);
+	glEnable(GL_DEPTH_TEST);
+	depthBuffer->bind();
+	//glClear(GL_DEPTH_BUFFER_BIT);
+	for (ExtendedPart& part : *world) {
+		int meshId = part.drawMeshId;
+		depthShader.updateModel(CFrameToMat4(CFramef(part.cframe)));
+		meshes[meshId]->render();
+	}
+	glViewport(0, 0, dimension.x, dimension.y);*/
+
+
 	// Render skybox
 	graphicsMeasure.mark(GraphicsProcess::SKYBOX);
 	modelFrameBuffer->bind();
@@ -573,6 +617,7 @@ void Screen::refresh() {
 	graphicsMeasure.mark(GraphicsProcess::VECTORS);
 	AddableBuffer<AppDebug::ColoredVec>& vecLog = AppDebug::getVecBuffer();
 	AddableBuffer<AppDebug::ColoredPoint>& pointLog = AppDebug::getPointBuffer();
+
 
 	// Render physicals
 	graphicsMeasure.mark(GraphicsProcess::PHYSICALS);
@@ -595,7 +640,12 @@ void Screen::refresh() {
 	glDisable(GL_DEPTH_TEST);
 	postProcessShader.update(modelFrameBuffer->texture);
 	quad->render();
-
+	/*blurShader.update(modelFrameBuffer->texture);
+	blurShader.update(BlurShader::BlurType::HORIZONTAL);
+	quad->render();
+	blurShader.update(modelFrameBuffer->texture);
+	blurShader.update(BlurShader::BlurType::VERTICAL);
+	quad->render();*/
 
 	// Render vectors with old depth buffer
 	glEnable(GL_DEPTH_TEST);
@@ -663,8 +713,15 @@ void Screen::refresh() {
 	graphicsMeasure.mark(GraphicsProcess::OTHER);
 	fontShader.update(orthoMatrix);
 	GUI::render(orthoMatrix);
+
 	mouseVertical->render();
 	mouseHorizontal->render();
+
+
+	/*GUI::defaultQuad->resize(Vec2f(0), Vec2f(0.5));
+	testShader.update(orthoMatrix);
+	testShader.update(depthBuffer->texture);
+	GUI::defaultQuad->render();*/
 
 
 	// Pie rendering
@@ -719,13 +776,14 @@ void Screen::refresh() {
 
 void Screen::close() {
 	basicShader.close();
-	basicNormalShader.close();
+	depthShader.close();
 	vectorShader.close();
 	fontShader.close();
 	originShader.close();
 	skyboxShader.close();
 	quadShader.close();
 	postProcessShader.close();
+	depthShader.close();
 
 	PropertiesParser::write("../res/.properties", properties);
 

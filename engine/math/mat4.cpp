@@ -62,3 +62,38 @@ Mat4f perspective(float fov, float aspect, float zNear, float zFar) {
 	float r23 = -1;
 	return Mat4f(r00, 0, 0, 0, 0, r11, 0, 0, 0, 0, r22, r23, 0, 0, r32, 0);
 }
+
+
+Mat4f lookAt(Vec3f from, Vec3f to, Vec3f up) {
+	
+	Vec3f z = -(from - to).normalize();
+	Vec3f x = (up.normalize() % z);
+	Vec3f y = z % x;
+
+	return Mat4f (
+		x.x, x.y, x.z, 0.0f,
+		y.x, y.y, y.z, 0.0f,
+		z.x, z.y, z.z, 0.0f,
+		from.x, from.y, from.z, 1.0f
+	);
+}
+
+/*Mat4f lookAt(Vec3f from, Vec3f to, Vec3f up) {
+	Vec3f z = -(to - from).normalize();
+	Vec3f x = (up.normalize() % z);
+	Vec3f y = z % x;
+
+	return Mat4f(
+		x.x, y.x, z.x, 0.0f,
+		x.y, y.y, z.y, 0.0f,
+		z.x, z.y, z.z, 0.0f,
+		from.x, from.y, from.z, 1.0f
+	).transpose();
+}*/
+
+/*	return Mat4f(
+		x.x, y.x, z.x, 0.0f,
+		x.y, y.y, z.y, 0.0f,
+		z.x, z.y, z.z, 0.0f,
+		from.x, from.y, from.z, .0f
+	);*/

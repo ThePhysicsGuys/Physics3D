@@ -237,3 +237,5 @@ struct Mat4Template {
 Mat4f ortho(float left, float right, float bottom, float top, float zNear, float zFar);
 
 Mat4f perspective(float fov, float aspect, float zNear, float zFar);
+
+Mat4f lookAt(Mat4f m, Vec3f from, Vec3f to, Vec3f up = Vec3f(0, 1, 0));
