@@ -146,85 +146,98 @@ namespace GUI {
 	Vec2 intersectedPoint;
 
 	// Defaults
-	double defaultMargin = 0.01;
-	double defaultPadding = 0.01;
+	double margin = 0.01;
+	double padding = 0.01;
 
 	// Shader
-	QuadShader* defaultShader = nullptr;
-	Quad* defaultQuad = nullptr;
+	QuadShader* shader = nullptr;
+	Quad* quad = nullptr;
 
 	// Label
-	Vec4 defaultLabelBackgroundColor = COLOR::WHITE;
+	Vec4 labelBackgroundColor = COLOR::WHITE;
 
 	// Panel
-	double defaultPanelPadding = 0.01;
-	double defaultPanelMargin = 0.01;
-	Vec4 defaultPanelBackgroundColor = COLOR::BACK;
+	double panelPadding = 0.01;
+	double panelMargin = 0.01;
+	Vec4 panelBackgroundColor = COLOR::BACK;
 
 	// Button
-	Texture* defaultCloseButtonHoverTexture;
-	Texture* defaultCloseButtonIdleTexture;
-	Texture* defaultCloseButtonPressTexture;
-	Texture* defaultMinimizeButtonHoverTexture;
-	Texture* defaultMinimizeButtonIdleTexture;
-	Texture* defaultMinimizeButtonPressTexture;
+	Texture* closeButtonHoverTexture;
+	Texture* closeButtonIdleTexture;
+	Texture* closeButtonPressTexture;
+	Texture* minimizeButtonHoverTexture;
+	Texture* minimizeButtonIdleTexture;
+	Texture* minimizeButtonPressTexture;
 
 	// Slider
-	double defaultSliderBarWidth = 0.4;
-	double defaultSliderHandleWidth = 0.02;
-	double defaultSliderBarHeight = 0.004;
-	double defaultSliderHandleHeight = 0.04;
-	Vec4 defaultSliderHandleColor = COLOR::BACK;
-	Vec4 defaultSliderBackgroundColor = COLOR::ALPHA;
-	Vec4 defaultSliderForegroundFilledColor = COLOR::ACCENT;
-	Vec4 defaultSliderForegroundEmptyColor = COLOR::GRAY;
+	double sliderBarWidth = 0.4;
+	double sliderHandleWidth = 0.02;
+	double sliderBarHeight = 0.004;
+	double sliderHandleHeight = 0.04;
+	Vec4 sliderHandleColor = COLOR::BACK;
+	Vec4 sliderBackgroundColor = COLOR::ALPHA;
+	Vec4 sliderForegroundFilledColor = COLOR::ACCENT;
+	Vec4 sliderForegroundEmptyColor = COLOR::GRAY;
 	
+	// ColorPicker
+	Texture* colorPickerCrosshairTexture;
+	Texture* colorPickerHueTexture;
+	Texture* colorPickerBrightnessTexture;
+	double colorPickerBrightnessWidth = 0.05;
+	double colorPickerHueSize = 0.4;
+	double colorPickerPointerCrosshairSize = 0.03;
+	double colorPickerSpacing = 0.06;
+
 	// CheckBox
-	Texture* defaultCheckBoxUncheckedTexture;
-	Texture* defaultCheckBoxCheckedTexture;
-	Texture* defaultCheckBoxPressCheckedTexture;
-	Texture* defaultCheckBoxPressUncheckedTexture;
-	Texture* defaultCheckBoxHoverCheckedTexture;
-	Texture* defaultCheckBoxHoverUncheckedTexture;
-	double defaultCheckBoxOffset = 0.006;
-	double defaultCheckBoxSize = 0.08;
-	double defaultCheckBoxLabelOffset = 0.02;
+	Texture* checkBoxUncheckedTexture;
+	Texture* checkBoxCheckedTexture;
+	Texture* checkBoxPressCheckedTexture;
+	Texture* checkBoxPressUncheckedTexture;
+	Texture* checkBoxHoverCheckedTexture;
+	Texture* checkBoxHoverUncheckedTexture;
+	double checkBoxOffset = 0.006;
+	double checkBoxSize = 0.08;
+	double checkBoxLabelOffset = 0.02;
 
 	// Frame
-	double defaultFrameButtonOffset = 0.003;
-	double defaultFrameTitleBarHeight = 0.06;
-	Vec4 defaultFrameTitleBarColor = COLOR::ACCENT;
-	Vec4 defaultFrameBackgroundColor = COLOR::BACK;
+	double frameButtonOffset = 0.003;
+	double frameTitleBarHeight = 0.06;
+	Vec4 frameTitleBarColor = COLOR::ACCENT;
+	Vec4 frameBackgroundColor = COLOR::BACK;
 
 	// Font
-	Font* defaultFont = nullptr;
-	Vec4 defaultFontColor = COLOR::BLACK;
-	double defaultFontSize = 0.0009;
+	Font* font = nullptr;
+	Vec4 fontColor = COLOR::BLACK;
+	double fontSize = 0.0009;
 
 	void init(Screen* screen, QuadShader* shader, Font* font) {
 		GUI::screen = screen;
-		GUI::defaultFont = font;
-		GUI::defaultShader = shader;
-		GUI::defaultQuad = new Quad();
+		GUI::font = font;
+		GUI::shader = shader;
+		GUI::quad = new Quad();
 
-		GUI::defaultCloseButtonIdleTexture = load("../res/textures/gui/close_idle.png");
-		GUI::defaultCloseButtonHoverTexture = load("../res/textures/gui/close_hover.png");
-		GUI::defaultCloseButtonPressTexture = load("../res/textures/gui/close_press.png");
+		GUI::closeButtonIdleTexture = load("../res/textures/gui/close_idle.png");
+		GUI::closeButtonHoverTexture = load("../res/textures/gui/close_hover.png");
+		GUI::closeButtonPressTexture = load("../res/textures/gui/close_press.png");
 
-		GUI::defaultMinimizeButtonIdleTexture = load("../res/textures/gui/minimize_idle.png");
-		GUI::defaultMinimizeButtonHoverTexture = load("../res/textures/gui/minimize_hover.png");
-		GUI::defaultMinimizeButtonPressTexture = load("../res/textures/gui/minimize_press.png");
+		GUI::minimizeButtonIdleTexture = load("../res/textures/gui/minimize_idle.png");
+		GUI::minimizeButtonHoverTexture = load("../res/textures/gui/minimize_hover.png");
+		GUI::minimizeButtonPressTexture = load("../res/textures/gui/minimize_press.png");
 
-		GUI::defaultCheckBoxUncheckedTexture = load("../res/textures/gui/unchecked.png");
-		GUI::defaultCheckBoxCheckedTexture = load("../res/textures/gui/checked.png");
-		GUI::defaultCheckBoxPressCheckedTexture = GUI::defaultCheckBoxCheckedTexture->colored(Vec3(1.3));
-		GUI::defaultCheckBoxPressUncheckedTexture = GUI::defaultCheckBoxUncheckedTexture->colored(Vec3(1.3));
-		GUI::defaultCheckBoxHoverCheckedTexture = GUI::defaultCheckBoxCheckedTexture->colored(Vec3(0.999));
-		GUI::defaultCheckBoxHoverUncheckedTexture = GUI::defaultCheckBoxUncheckedTexture->colored(Vec3(0.999));
+		GUI::checkBoxUncheckedTexture = load("../res/textures/gui/unchecked.png");
+		GUI::checkBoxCheckedTexture = load("../res/textures/gui/checked.png");
+		GUI::checkBoxPressCheckedTexture = GUI::checkBoxCheckedTexture->colored(Vec3(1.3));
+		GUI::checkBoxPressUncheckedTexture = GUI::checkBoxUncheckedTexture->colored(Vec3(1.3));
+		GUI::checkBoxHoverCheckedTexture = GUI::checkBoxCheckedTexture->colored(Vec3(0.999));
+		GUI::checkBoxHoverUncheckedTexture = GUI::checkBoxUncheckedTexture->colored(Vec3(0.999));
+
+		GUI::colorPickerHueTexture = load("../res/textures/gui/hue.png");
+		GUI::colorPickerBrightnessTexture = load("../res/textures/gui/brightness.png");
+		GUI::colorPickerCrosshairTexture = load("../res/textures/gui/crosshair.png");
 	}
 	
 	void update(Mat4f orthoMatrix) {
-		GUI::defaultShader->update(orthoMatrix);
+		GUI::shader->update(orthoMatrix);
 	}
 
 	double map(double x, double minIn, double maxIn, double minOut, double maxOut) {

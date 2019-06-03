@@ -9,17 +9,17 @@ Slider::Slider(double x, double y, double min, double max, double value) : Compo
 	this->max = max;
 	this->value = value;
 
-	handleColor = GUI::defaultSliderHandleColor;
-	backgroundColor = GUI::defaultSliderBackgroundColor;
-	foregroundFilledColor = GUI::defaultSliderForegroundFilledColor;
-	foregroundEmptyColor = GUI::defaultSliderForegroundEmptyColor;
+	handleColor = GUI::sliderHandleColor;
+	backgroundColor = GUI::sliderBackgroundColor;
+	foregroundFilledColor = GUI::sliderForegroundFilledColor;
+	foregroundEmptyColor = GUI::sliderForegroundEmptyColor;
 
-	padding = GUI::defaultPadding;
+	padding = GUI::padding;
 
-	handleWidth = GUI::defaultSliderHandleWidth;
-	handleHeight = GUI::defaultSliderHandleHeight;
-	barWidth = GUI::defaultSliderBarWidth;
-	barHeight = GUI::defaultSliderBarHeight;
+	handleWidth = GUI::sliderHandleWidth;
+	handleHeight = GUI::sliderHandleHeight;
+	barWidth = GUI::sliderBarWidth;
+	barHeight = GUI::sliderBarHeight;
 }
 
 
@@ -28,58 +28,58 @@ Slider::Slider(double x, double y, double width, double height, double min, doub
 	this->max = max;
 	this->value = value;
 
-	handleColor = GUI::defaultSliderHandleColor;
-	backgroundColor = GUI::defaultSliderBackgroundColor;
-	foregroundFilledColor = GUI::defaultSliderForegroundFilledColor;
-	foregroundEmptyColor = GUI::defaultSliderForegroundEmptyColor;
+	handleColor = GUI::sliderHandleColor;
+	backgroundColor = GUI::sliderBackgroundColor;
+	foregroundFilledColor = GUI::sliderForegroundFilledColor;
+	foregroundEmptyColor = GUI::sliderForegroundEmptyColor;
 
-	handleWidth = GUI::defaultSliderHandleWidth;
+	handleWidth = GUI::sliderHandleWidth;
 	handleHeight = height - 2 * padding;
 	barWidth = width - 2 * padding - handleWidth;
-	barHeight = GUI::defaultSliderBarHeight;
+	barHeight = GUI::sliderBarHeight;
 }
 
 void Slider::render() {
 	if (visible) {
 		resize();
 
-		GUI::defaultQuad->resize(position, dimension);
-		GUI::defaultShader->update(backgroundColor);
-		GUI::defaultQuad->render();
+		GUI::quad->resize(position, dimension);
+		GUI::shader->update(backgroundColor);
+		GUI::quad->render();
 		
 		double progress = (value - min) / (max - min);
 		Vec2 sliderFilledPosition = position + Vec2(padding + handleWidth / 2, -height / 2 + barHeight / 2);
 		Vec2 sliderFilledDimension = Vec2(barWidth * progress, barHeight);
-		GUI::defaultQuad->resize(sliderFilledPosition, sliderFilledDimension);
-		GUI::defaultShader->update(foregroundFilledColor);
-		GUI::defaultQuad->render();
+		GUI::quad->resize(sliderFilledPosition, sliderFilledDimension);
+		GUI::shader->update(foregroundFilledColor);
+		GUI::quad->render();
 
 		Vec2 sliderEmptyPosition = sliderFilledPosition + Vec2(sliderFilledDimension.x, 0);
 		Vec2 sliderEmptyDimension = Vec2(barWidth * (1.0 - progress), barHeight);
-		GUI::defaultQuad->resize(sliderEmptyPosition, sliderEmptyDimension);
-		GUI::defaultShader->update(foregroundEmptyColor);
-		GUI::defaultQuad->render();
+		GUI::quad->resize(sliderEmptyPosition, sliderEmptyDimension);
+		GUI::shader->update(foregroundEmptyColor);
+		GUI::quad->render();
 
 		Vec2 handlePosition = Vec2(sliderEmptyPosition.x - handleWidth / 2, position.y - height / 2 + handleHeight / 2);
 		Vec2 handleDimension = Vec2(handleWidth, handleHeight);
-		GUI::defaultQuad->resize(handlePosition, handleDimension);
-		GUI::defaultShader->update(handleColor);
-		GUI::defaultQuad->render();
+		GUI::quad->resize(handlePosition, handleDimension);
+		GUI::shader->update(handleColor);
+		GUI::quad->render();
 		
-		GUI::defaultShader->update(GUI::COLOR::ACCENT);
-		GUI::defaultQuad->render(GL_LINE);
+		GUI::shader->update(GUI::COLOR::ACCENT);
+		GUI::quad->render(GL_LINE);
 
 		if (debug) {
-			GUI::defaultQuad->resize(position, dimension);
-			GUI::defaultShader->update(GUI::COLOR::RED);
-			GUI::defaultQuad->render(GL_LINE);
+			GUI::quad->resize(position, dimension);
+			GUI::shader->update(GUI::COLOR::RED);
+			GUI::quad->render(GL_LINE);
 		}
 	}
 }
 
 Vec2 Slider::resize() {
 	if (resizing) {
-		dimension = Vec2(GUI::defaultSliderBarWidth + GUI::defaultSliderHandleWidth, GUI::defaultSliderHandleHeight) + Vec2(padding) * 2;
+		dimension = Vec2(GUI::sliderBarWidth + GUI::sliderHandleWidth, GUI::sliderHandleHeight) + Vec2(padding) * 2;
 	}
 	return dimension;
 }

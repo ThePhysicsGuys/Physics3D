@@ -8,29 +8,29 @@
 Frame::Frame() : Frame(0, 0) {};
 
 Frame::Frame(double x, double y, std::string name) : Container(x, y) {
-	this->padding = GUI::defaultPadding;
-	this->margin = GUI::defaultMargin;
+	this->padding = GUI::padding;
+	this->margin = GUI::margin;
 
-	this->backgroundColor = GUI::defaultFrameBackgroundColor;
-	this->titleBarColor = GUI::defaultFrameTitleBarColor;
-	this->titleBarHeight = GUI::defaultFrameTitleBarHeight;
+	this->backgroundColor = GUI::frameBackgroundColor;
+	this->titleBarColor = GUI::frameTitleBarColor;
+	this->titleBarHeight = GUI::frameTitleBarHeight;
 
-	this->buttonOffset = GUI::defaultFrameButtonOffset;
+	this->buttonOffset = GUI::frameButtonOffset;
 
 	this->closeButton = new Button(position.x, position.y, titleBarHeight - 2 * buttonOffset, titleBarHeight - 2 * buttonOffset, true);
 	this->closeButton->parent = this;
-	this->closeButton->idleTexture = GUI::defaultCloseButtonIdleTexture;
-	this->closeButton->hoverTexture = GUI::defaultCloseButtonHoverTexture;
-	this->closeButton->pressTexture = GUI::defaultCloseButtonPressTexture;
+	this->closeButton->idleTexture = GUI::closeButtonIdleTexture;
+	this->closeButton->hoverTexture = GUI::closeButtonHoverTexture;
+	this->closeButton->pressTexture = GUI::closeButtonPressTexture;
 	this->closeButton->action = [] (Button* button) {
 		button->parent->visible = false;
 	};
 
 	this->minimizeButton = new Button(position.x, position.y, titleBarHeight - 2 * buttonOffset, titleBarHeight - 2 * buttonOffset, true);
 	this->minimizeButton->parent = this;
-	this->minimizeButton->idleTexture = GUI:: defaultMinimizeButtonIdleTexture;
-	this->minimizeButton->hoverTexture = GUI::defaultMinimizeButtonHoverTexture;
-	this->minimizeButton->pressTexture = GUI::defaultMinimizeButtonPressTexture;
+	this->minimizeButton->idleTexture = GUI:: minimizeButtonIdleTexture;
+	this->minimizeButton->hoverTexture = GUI::minimizeButtonHoverTexture;
+	this->minimizeButton->pressTexture = GUI::minimizeButtonPressTexture;
 	this->minimizeButton->action = [] (Button* button) {
 		Frame* frame = (Frame*) button->parent;
 		frame->minimized = !frame->minimized;
@@ -40,29 +40,29 @@ Frame::Frame(double x, double y, std::string name) : Container(x, y) {
 };
 
 Frame::Frame(double x, double y, double width, double height, std::string name) : Container(x, y, width, height) {
-	this->padding = GUI::defaultPadding;
-	this->margin = GUI::defaultMargin;
+	this->padding = GUI::padding;
+	this->margin = GUI::margin;
 
-	this->backgroundColor = GUI::defaultFrameBackgroundColor;
-	this->titleBarColor = GUI::defaultFrameTitleBarColor;
-	this->titleBarHeight = GUI::defaultFrameTitleBarHeight;
+	this->backgroundColor = GUI::frameBackgroundColor;
+	this->titleBarColor = GUI::frameTitleBarColor;
+	this->titleBarHeight = GUI::frameTitleBarHeight;
 
-	this->buttonOffset = GUI::defaultFrameButtonOffset;
+	this->buttonOffset = GUI::frameButtonOffset;
 
 	this->closeButton = new Button(position.x, position.y, titleBarHeight - 2 * buttonOffset, titleBarHeight - 2 * buttonOffset, true);
 	this->closeButton->parent = this;
-	this->closeButton->idleTexture = GUI::defaultCloseButtonIdleTexture;
-	this->closeButton->hoverTexture = GUI::defaultCloseButtonHoverTexture;
-	this->closeButton->pressTexture = GUI::defaultCloseButtonPressTexture;
+	this->closeButton->idleTexture = GUI::closeButtonIdleTexture;
+	this->closeButton->hoverTexture = GUI::closeButtonHoverTexture;
+	this->closeButton->pressTexture = GUI::closeButtonPressTexture;
 	this->closeButton->action = [] (Button* button) {
 		button->parent->visible = false;
 	};
 
 	this->minimizeButton = new Button(position.x, position.y, titleBarHeight - 2 * buttonOffset, titleBarHeight - 2 * buttonOffset, true);
 	this->minimizeButton->parent = this;
-	this->minimizeButton->idleTexture = GUI::defaultMinimizeButtonIdleTexture;
-	this->minimizeButton->hoverTexture = GUI::defaultMinimizeButtonHoverTexture;
-	this->minimizeButton->pressTexture = GUI::defaultMinimizeButtonPressTexture;
+	this->minimizeButton->idleTexture = GUI::minimizeButtonIdleTexture;
+	this->minimizeButton->hoverTexture = GUI::minimizeButtonHoverTexture;
+	this->minimizeButton->pressTexture = GUI::minimizeButtonPressTexture;
 	this->minimizeButton->action = [] (Button* button) {
 		Frame* frame = (Frame*) button->parent;
 		frame->minimized = !frame->minimized;
@@ -138,9 +138,9 @@ void Frame::render() {
 		// TitleBar
 		Vec2 titleBarPosition = position;
 		Vec2 titleBarDimension = Vec2(width, titleBarHeight);
-		GUI::defaultShader->update(titleBarColor);
-		GUI::defaultQuad->resize(titleBarPosition, titleBarDimension);
-		GUI::defaultQuad->render();
+		GUI::shader->update(titleBarColor);
+		GUI::quad->resize(titleBarPosition, titleBarDimension);
+		GUI::quad->render();
 
 		// Buttons
 		closeButton->render();
@@ -154,16 +154,16 @@ void Frame::render() {
 			// Padding
 			Vec2 offsetPosition = titleBarPosition + Vec2(0, -titleBarHeight);
 			Vec2 offsetDimension = dimension + Vec2(0, -titleBarHeight);
-			GUI::defaultShader->update(backgroundColor);
-			GUI::defaultQuad->resize(offsetPosition, offsetDimension);
-			GUI::defaultQuad->render();
+			GUI::shader->update(backgroundColor);
+			GUI::quad->resize(offsetPosition, offsetDimension);
+			GUI::quad->render();
 
 			// Content
 			Vec2 contentPosition = position + Vec2(padding, -padding - titleBarHeight);
 			Vec2 contentDimension = dimension - Vec2(2 * padding, 2 * padding + titleBarHeight);
-			GUI::defaultShader->update(backgroundColor);
-			GUI::defaultQuad->resize(contentPosition, contentDimension);
-			GUI::defaultQuad->render();
+			GUI::shader->update(backgroundColor);
+			GUI::quad->resize(contentPosition, contentDimension);
+			GUI::quad->render();
 
 			renderChildren();
 		}
@@ -171,8 +171,8 @@ void Frame::render() {
 		// Outline
 		Vec2 outlinePosition = titleBarPosition;
 		Vec2 outlineDimension = dimension;
-		GUI::defaultShader->update(GUI::COLOR::NAVY);
-		GUI::defaultQuad->resize(outlinePosition, outlineDimension);
-		GUI::defaultQuad->render(GL_LINE);
+		GUI::shader->update(GUI::COLOR::NAVY);
+		GUI::quad->resize(outlinePosition, outlineDimension);
+		GUI::quad->render(GL_LINE);
 	}
 }

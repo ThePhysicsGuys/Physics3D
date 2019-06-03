@@ -2,24 +2,24 @@
 
 CheckBox::CheckBox(std::string text, double x, double y, double width, double height, bool textured) : Component(x, y, width, height) {
 	this->label = new Label(text, x, y);
-	this->checkBoxLabelOffset = GUI::defaultCheckBoxLabelOffset;
+	this->checkBoxLabelOffset = GUI::checkBoxLabelOffset;
 	this->textured = textured;
 
 	if (textured) {
-		this->checkedTexture = GUI::defaultCheckBoxCheckedTexture;
-		this->uncheckedTexture = GUI::defaultCheckBoxUncheckedTexture;
-		this->hoverCheckedTexture = GUI::defaultCheckBoxHoverCheckedTexture;
-		this->hoverUncheckedTexture = GUI::defaultCheckBoxHoverUncheckedTexture;
-		this->pressCheckedTexture = GUI::defaultCheckBoxPressCheckedTexture;
-		this->pressUncheckedTexture = GUI::defaultCheckBoxPressUncheckedTexture;
+		this->checkedTexture = GUI::checkBoxCheckedTexture;
+		this->uncheckedTexture = GUI::checkBoxUncheckedTexture;
+		this->hoverCheckedTexture = GUI::checkBoxHoverCheckedTexture;
+		this->hoverUncheckedTexture = GUI::checkBoxHoverUncheckedTexture;
+		this->pressCheckedTexture = GUI::checkBoxPressCheckedTexture;
+		this->pressUncheckedTexture = GUI::checkBoxPressUncheckedTexture;
 	} else {
 		// TODO colors
 	}
 }
 
-CheckBox::CheckBox(std::string text, double x, double y, bool textured) : CheckBox(text, x, y, GUI::defaultCheckBoxSize, GUI::defaultCheckBoxSize, textured) {}
+CheckBox::CheckBox(std::string text, double x, double y, bool textured) : CheckBox(text, x, y, GUI::checkBoxSize, GUI::checkBoxSize, textured) {}
 
-CheckBox::CheckBox(double x, double y, bool textured) : CheckBox("", x, y, GUI::defaultCheckBoxSize, GUI::defaultCheckBoxSize, textured) {}
+CheckBox::CheckBox(double x, double y, bool textured) : CheckBox("", x, y, GUI::checkBoxSize, GUI::checkBoxSize, textured) {}
 
 CheckBox::CheckBox(double x, double y, double width, double height, bool textured) : CheckBox("", x, y, width, height, textured) {}
 
@@ -27,55 +27,55 @@ CheckBox::CheckBox(double x, double y, double width, double height, bool texture
 void CheckBox::renderPressed() {
 	if (textured) {
 		if (checked) {
-			GUI::defaultShader->update(pressCheckedTexture);
+			GUI::shader->update(pressCheckedTexture);
 		} else {
-			GUI::defaultShader->update(pressUncheckedTexture);
+			GUI::shader->update(pressUncheckedTexture);
 		}
 	} else {
 		if (checked) {
-			GUI::defaultShader->update(pressCheckedColor);
+			GUI::shader->update(pressCheckedColor);
 		} else {
-			GUI::defaultShader->update(pressUncheckedColor);
+			GUI::shader->update(pressUncheckedColor);
 		}
 	}
 
-	GUI::defaultQuad->render();
+	GUI::quad->render();
 }
 
 void CheckBox::renderHovering() {
 	if (textured) {
 		if (checked) {
-			GUI::defaultShader->update(hoverCheckedTexture);
+			GUI::shader->update(hoverCheckedTexture);
 		} else {
-			GUI::defaultShader->update(hoverUncheckedTexture);
+			GUI::shader->update(hoverUncheckedTexture);
 		}
 	} else {
 		if (checked) {
-			GUI::defaultShader->update(hoverCheckedColor);
+			GUI::shader->update(hoverCheckedColor);
 		} else {
-			GUI::defaultShader->update(hoverUncheckedColor);
+			GUI::shader->update(hoverUncheckedColor);
 		}
 	}
 
-	GUI::defaultQuad->render();
+	GUI::quad->render();
 }
 
 void CheckBox::renderIdle() {
 	if (textured) {
 		if (checked) {
-			GUI::defaultShader->update(checkedTexture);
+			GUI::shader->update(checkedTexture);
 		} else {
-			GUI::defaultShader->update(uncheckedTexture);
+			GUI::shader->update(uncheckedTexture);
 		}
 	} else {
 		if (checked) {
-			GUI::defaultShader->update(checkedColor);
+			GUI::shader->update(checkedColor);
 		} else {
-			GUI::defaultShader->update(uncheckedColor);
+			GUI::shader->update(uncheckedColor);
 		}
 	}
 
-	GUI::defaultQuad->render();
+	GUI::quad->render();
 }
 
 void CheckBox::render() {
@@ -83,9 +83,9 @@ void CheckBox::render() {
 		resize();
 
 		if (!label->text.empty())
-			GUI::defaultQuad->resize(position + Vec2(label->padding, -label->padding), Vec2(dimension.y - 2 * label->padding));
+			GUI::quad->resize(position + Vec2(label->padding, -label->padding), Vec2(dimension.y - 2 * label->padding));
 		else
-			GUI::defaultQuad->resize(position, dimension);
+			GUI::quad->resize(position, dimension);
 
 		if (pressed)
 			renderPressed();
@@ -101,13 +101,13 @@ void CheckBox::render() {
 		}
 
 		if (debug) {
-			GUI::defaultQuad->resize(position, dimension);
-			GUI::defaultShader->update(GUI::COLOR::RED);
-			GUI::defaultQuad->render(GL_LINE);
+			GUI::quad->resize(position, dimension);
+			GUI::shader->update(GUI::COLOR::RED);
+			GUI::quad->render(GL_LINE);
 
-			GUI::defaultQuad->resize(position + Vec2(label->padding, -label->padding), dimension - Vec2(label->padding) * 2);
-			GUI::defaultShader->update(GUI::COLOR::GREEN); 
-			GUI::defaultQuad->render(GL_LINE);
+			GUI::quad->resize(position + Vec2(label->padding, -label->padding), dimension - Vec2(label->padding) * 2);
+			GUI::shader->update(GUI::COLOR::GREEN); 
+			GUI::quad->render(GL_LINE);
 		}
 	}
 }

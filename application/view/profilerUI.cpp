@@ -165,7 +165,7 @@ void BarChart::render() const {
 	glEnd();
 	glPopMatrix();
 
-	GUI::defaultFont->render(title, position + Vec2f(0, size.y - titleHeight), GUI::COLOR::WHITE, 0.001);
+	GUI::font->render(title, position + Vec2f(0, size.y - titleHeight), GUI::COLOR::WHITE, 0.001);
 
 	for (int cl = 0; cl < data.height; cl++) {
 		const BarChartClassInformation& info = classes[cl];
@@ -180,18 +180,18 @@ void BarChart::render() const {
 			Vec2f topTextPosition = botLeft + Vec2(0, height+drawingSize.y * 0.02);
 			//topTextPosition.x *= GUI::screen->dimension.x / GUI::screen->dimension.y;
 
-			GUI::defaultFont->render(dataPoint.value, topTextPosition, info.color, 0.0005);
+			GUI::font->render(dataPoint.value, topTextPosition, info.color, 0.0005);
 		}
 	}
 
 	for (int i = 0; i < data.width; i++) {
 		Vec2f botLeft = position + Vec2f(marginLeft, 0) + Vec2f(categoryWidth * i, 0);
 		//botLeft.x *= GUI::screen->dimension.x / GUI::screen->dimension.y;
-		GUI::defaultFont->render(labels[i], botLeft, GUI::COLOR::WHITE, 0.0005);
+		GUI::font->render(labels[i], botLeft, GUI::COLOR::WHITE, 0.0005);
 	}
 
 	for (int cl = 0; cl < data.height; cl++) {
-		GUI::defaultFont->render(classes[cl].name, drawingPosition + Vec2f(size.x - 0.3, drawingSize.y - 0.035 * cl), classes[cl].color, 0.0007);
+		GUI::font->render(classes[cl].name, drawingPosition + Vec2f(size.x - 0.3, drawingSize.y - 0.035 * cl), classes[cl].color, 0.0007);
 	}
 }
 

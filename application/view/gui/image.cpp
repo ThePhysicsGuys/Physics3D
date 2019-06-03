@@ -17,10 +17,10 @@ Image::Image(double x, double y, double width, double height, Texture* texture) 
 
 void Image::render() {
 	if (visible) {
-		if (texture) GUI::defaultShader->update(texture);
-		else GUI::defaultShader->update(GUI::COLOR::BLACK);
-		GUI::defaultQuad->resize(position, dimension);
-		GUI::defaultQuad->render();
+		if (texture) GUI::shader->update(texture);
+		else GUI::shader->update(GUI::COLOR::BLACK);
+		GUI::quad->resize(position, dimension);
+		GUI::quad->render();
 	}
 }
 

@@ -1,20 +1,20 @@
 #include "label.h"
 #include "gui.h"
 
-Label::Label(std::string text, double x, double y) : Label(text, x, y, GUI::defaultFontSize, GUI::defaultFontColor) {};
+Label::Label(std::string text, double x, double y) : Label(text, x, y, GUI::fontSize, GUI::fontColor) {};
 
-Label::Label(std::string text, double x, double y, double size) : Label(text, x, y, size, GUI::defaultFontColor) {};
+Label::Label(std::string text, double x, double y, double size) : Label(text, x, y, size, GUI::fontColor) {};
 
-Label::Label(std::string text, double x, double y, double size, Vec4 color) : Label(text, x, y, size, color, GUI::defaultFont) {};
+Label::Label(std::string text, double x, double y, double size, Vec4 color) : Label(text, x, y, size, color, GUI::font) {};
 
 Label::Label(std::string text, double x, double y, double scale, Vec4 color, Font* font) : Component(x, y) {
 	this->font = font;
 	this->text = text;
 	this->scale = scale;
-	this->padding = GUI::defaultPadding;
-	this->margin = GUI::defaultMargin;
+	this->padding = GUI::padding;
+	this->margin = GUI::margin;
 	this->foregroundColor = color;
-	this->backgroundColor = GUI::defaultLabelBackgroundColor;
+	this->backgroundColor = GUI::labelBackgroundColor;
 };
 
 void Label::render() {
@@ -25,13 +25,13 @@ void Label::render() {
 		font->render(text, fontPosition, foregroundColor, scale);
 
 		if (debug) {
-			GUI::defaultQuad->resize(position, dimension);
-			GUI::defaultShader->update(GUI::COLOR::R);
-			GUI::defaultQuad->render(GL_LINE);
+			GUI::quad->resize(position, dimension);
+			GUI::shader->update(GUI::COLOR::R);
+			GUI::quad->render(GL_LINE);
 
-			GUI::defaultQuad->resize(position + Vec2(padding, -padding), dimension - Vec2(padding) * 2);
-			GUI::defaultShader->update(GUI::COLOR::G);
-			GUI::defaultQuad->render(GL_LINE);
+			GUI::quad->resize(position + Vec2(padding, -padding), dimension - Vec2(padding) * 2);
+			GUI::shader->update(GUI::COLOR::G);
+			GUI::quad->render(GL_LINE);
 		}
 	}
 }

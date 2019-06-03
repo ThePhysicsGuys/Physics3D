@@ -7,15 +7,15 @@
 #include "../engine/math/mathUtil.h"
 
 Panel::Panel(double x, double y) : Container(x, y) {
-	this->backgroundColor = GUI::defaultPanelBackgroundColor;
-	this->padding = GUI::defaultPanelPadding;
-	this->margin = GUI::defaultPanelMargin;
+	this->backgroundColor = GUI::panelBackgroundColor;
+	this->padding = GUI::panelPadding;
+	this->margin = GUI::panelMargin;
 };
 
 Panel::Panel(double x, double y, double width, double height) : Container(x, y, width, height) {
-	this->backgroundColor = GUI::defaultPanelBackgroundColor;
-	this->padding = GUI::defaultPanelPadding;
-	this->margin = GUI::defaultPanelMargin;
+	this->backgroundColor = GUI::panelBackgroundColor;
+	this->padding = GUI::panelPadding;
+	this->margin = GUI::panelMargin;
 };
 
 Vec2 Panel::resize() {
@@ -28,9 +28,9 @@ void Panel::render() {
 		resize();
 
 		// padding and margin to be added
-		GUI::defaultShader->update(backgroundColor);
-		GUI::defaultQuad->resize(position, dimension);
-		GUI::defaultQuad->render();
+		GUI::shader->update(backgroundColor);
+		GUI::quad->resize(position, dimension);
+		GUI::quad->render();
 
 		renderChildren();
 	}

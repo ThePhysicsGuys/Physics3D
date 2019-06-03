@@ -5,46 +5,46 @@ Button::Button(double x, double y, double width, double height, bool textured) :
 }
 
 Button::Button(std::string text, double x, double y, bool textured) : Component(x, y) {
-	this->fontColor = GUI::defaultFontColor;
-	this->fontSize = GUI::defaultFontSize;
+	this->fontColor = GUI::fontColor;
+	this->fontSize = GUI::fontSize;
 	this->textured = textured;
 	this->text = text;
 }
 
 void Button::renderPressed() {
 	if (textured) {
-		GUI::defaultShader->update(pressTexture);
+		GUI::shader->update(pressTexture);
 	} else {
-		GUI::defaultShader->update(pressColor);
+		GUI::shader->update(pressColor);
 	}
 
-	GUI::defaultQuad->render();
+	GUI::quad->render();
 }
 
 void Button::renderHovering() {
 	if (textured) {
-		GUI::defaultShader->update(hoverTexture);
+		GUI::shader->update(hoverTexture);
 	} else {
-		GUI::defaultShader->update(hoverColor);
+		GUI::shader->update(hoverColor);
 	}
 
-	GUI::defaultQuad->render();
+	GUI::quad->render();
 }
 
 void Button::renderIdle() {
 	if (textured) {
-		GUI::defaultShader->update(idleTexture);
+		GUI::shader->update(idleTexture);
 	} else {
-		GUI::defaultShader->update(idleColor);
+		GUI::shader->update(idleColor);
 	}
 
-	GUI::defaultQuad->render();
+	GUI::quad->render();
 }
 
 void Button::render() {
 	resize();
 
-	GUI::defaultQuad->resize(position, dimension);
+	GUI::quad->resize(position, dimension);
 
 	if (pressed)
 		renderPressed();
@@ -54,12 +54,12 @@ void Button::render() {
 		renderIdle();
 
 	if (!text.empty())
-		GUI::defaultFont->render(text, position, fontColor, fontSize);
+		GUI::font->render(text, position, fontColor, fontSize);
 }
 
 Vec2 Button::resize() {
 	if (resizing) {
-		dimension = GUI::defaultFont->size(text, fontSize);
+		dimension = GUI::font->size(text, fontSize);
 	} 
 
 	return dimension;

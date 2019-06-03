@@ -62,60 +62,69 @@ namespace GUI {
 	extern Vec2 intersectedPoint;
 
 	// Shader
-	extern Quad* defaultQuad;
-	extern QuadShader* defaultShader;
+	extern Quad* quad;
+	extern QuadShader* shader;
 	
 	// Default
-	extern double defaultPadding;
-	extern double defaultMargin;
+	extern double padding;
+	extern double margin;
 
 	// Label
-	extern Vec4 defaultLabelBackgroundColor;
+	extern Vec4 labelBackgroundColor;
 
 	// Panel
-	extern double defaultPanelPadding;
-	extern double defaultPanelMargin;
-	extern Vec4 defaultPanelBackgroundColor;
+	extern double panelPadding;
+	extern double panelMargin;
+	extern Vec4 panelBackgroundColor;
 
 	// Button
-	extern Texture* defaultCloseButtonHoverTexture;
-	extern Texture* defaultCloseButtonIdleTexture;
-	extern Texture* defaultCloseButtonPressTexture;
-	extern Texture* defaultMinimizeButtonHoverTexture;
-	extern Texture* defaultMinimizeButtonIdleTexture;
-	extern Texture* defaultMinimizeButtonPressTexture;
+	extern Texture* closeButtonHoverTexture;
+	extern Texture* closeButtonIdleTexture;
+	extern Texture* closeButtonPressTexture;
+	extern Texture* minimizeButtonHoverTexture;
+	extern Texture* minimizeButtonIdleTexture;
+	extern Texture* minimizeButtonPressTexture;
 
 	// Slider
-	extern double defaultSliderBarWidth;
-	extern double defaultSliderHandleWidth;
-	extern double defaultSliderBarHeight;
-	extern double defaultSliderHandleHeight;
-	extern Vec4 defaultSliderHandleColor;
-	extern Vec4 defaultSliderBackgroundColor;
-	extern Vec4 defaultSliderForegroundFilledColor;
-	extern Vec4 defaultSliderForegroundEmptyColor;
+	extern double sliderBarWidth;
+	extern double sliderHandleWidth;
+	extern double sliderBarHeight;
+	extern double sliderHandleHeight;
+	extern Vec4 sliderHandleColor;
+	extern Vec4 sliderBackgroundColor;
+	extern Vec4 sliderForegroundFilledColor;
+	extern Vec4 sliderForegroundEmptyColor;
+
+	// ColorPicker
+	extern Texture* colorPickerCrosshairTexture;
+	extern Texture* colorPickerHueTexture;
+	extern Texture* colorPickerBrightnessTexture;
+	extern double colorPickerBrightnessWidth;
+	extern double colorPickerHueSize;
+	extern double colorPickerSpacing;
+	extern double colorPickerPointerCrosshairSize;
 
 	// CheckBox
-	extern Texture* defaultCheckBoxUncheckedTexture;
-	extern Texture* defaultCheckBoxCheckedTexture;
-	extern Texture* defaultCheckBoxPressCheckedTexture;
-	extern Texture* defaultCheckBoxPressUncheckedTexture;
-	extern Texture* defaultCheckBoxHoverCheckedTexture;
-	extern Texture* defaultCheckBoxHoverUncheckedTexture;
-	extern double defaultCheckBoxOffset;
-	extern double defaultCheckBoxSize;
-	extern double defaultCheckBoxLabelOffset;
+	extern Texture* checkBoxUncheckedTexture;
+	extern Texture* checkBoxCheckedTexture;
+	extern Texture* checkBoxPressCheckedTexture;
+	extern Texture* checkBoxPressUncheckedTexture;
+	extern Texture* checkBoxHoverCheckedTexture;
+	extern Texture* checkBoxHoverUncheckedTexture;
+	extern double checkBoxOffset;
+	extern double checkBoxSize;
+	extern double checkBoxLabelOffset;
 
 	// Frame
-	extern double defaultFrameTitleBarHeight;
-	extern double defaultFrameButtonOffset;
-	extern Vec4 defaultFrameTitleBarColor;
-	extern Vec4 defaultFrameBackgroundColor;
+	extern double frameTitleBarHeight;
+	extern double frameButtonOffset;
+	extern Vec4 frameTitleBarColor;
+	extern Vec4 frameBackgroundColor;
 
 	// Font
-	extern Font* defaultFont;
-	extern Vec4 defaultFontColor;
-	extern double defaultFontSize;
+	extern Font* font;
+	extern Vec4 fontColor;
+	extern double fontSize;
 
 	void add(Component* component);
 	void remove(Component* component);

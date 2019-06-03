@@ -50,7 +50,7 @@ struct SkyboxShader : public ShaderProgram {
 	SkyboxShader() : ShaderProgram() {}
 	SkyboxShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 4, "viewMatrix", "projectionMatrix", "skyboxTexture", "lightDirection") {}
 
-	void update(Mat4f viewMatrix, Mat4f projectionMatrix) {
+	void update(const Mat4f& viewMatrix, const Mat4f& projectionMatrix) {
 		bind();
 		shader.setUniform("viewMatrix", viewMatrix);
 		shader.setUniform("projectionMatrix", projectionMatrix);
@@ -61,7 +61,7 @@ struct SkyboxShader : public ShaderProgram {
 		shader.setUniform("skyboxTexture", skybox.unit);
 	}
 
-	void update(Vec3f lightDirection) {
+	void update(const Vec3f& lightDirection) {
 		bind();
 		shader.setUniform("lightDirection", lightDirection);
 	}
@@ -101,7 +101,7 @@ struct BasicShader : public ShaderProgram {
 		}
 	}
 
-	void update(Mat4f viewMatrix, Mat4f projectionMatrix, Vec3f viewPosition) {
+	void update(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Vec3f& viewPosition) {
 		bind();
 		shader.setUniform("viewMatrix", viewMatrix);
 		shader.setUniform("projectionMatrix", projectionMatrix);
@@ -138,19 +138,19 @@ struct BasicShader : public ShaderProgram {
 		}
 	}
 
-	void updatePart(ExtendedPart& part) {
+	void updatePart(const ExtendedPart& part) {
 		bind();
 		shader.setUniform("includeNormals", part.hitbox.normals != nullptr);
 		shader.setUniform("includeUvs", part.hitbox.uvs != nullptr);
 		shader.setUniform("modelMatrix", CFrameToMat4(CFramef(part.cframe)));
 	}
 
-	void updateModelMatrix(Mat4f modelMatrix) {
+	void updateModelMatrix(const Mat4f& modelMatrix) {
 		bind();
 		shader.setUniform("modelMatrix", modelMatrix);
 	}
 
-	void updateMaterial(Material material) {
+	void updateMaterial(const Material& material) {
 		bind();
 		shader.setUniform("material.ambient", material.ambient);
 		shader.setUniform("material.diffuse", material.diffuse);
@@ -178,18 +178,16 @@ struct BasicShader : public ShaderProgram {
 	}
 };
 
-struct BasicNormalShader : public ShaderProgram {
-	BasicNormalShader() : ShaderProgram() {}
-	BasicNormalShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 4, "modelMatrix", "viewMatrix", "projectionMatrix", "viewPosition") {}
+struct DepthShader : public ShaderProgram {
+	DepthShader() : ShaderProgram() {}
+	DepthShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 4, "modelMatrix", "lightMatrix") {}
 
-	void update(Mat4f viewMatrix, Mat4f projectionMatrix, Vec3f viewPosition) {
+	void updateLight(const Mat4f& lightMatrix) {
 		bind();
-		shader.setUniform("viewMatrix", viewMatrix);
-		shader.setUniform("projectionMatrix", projectionMatrix);
-		shader.setUniform("viewPosition", viewPosition);
+		shader.setUniform("lightMatrix", lightMatrix);
 	}
 
-	void updateModel(Mat4f modelMatrix) {
+	void updateModel(const Mat4f& modelMatrix) {
 		bind();
 		shader.setUniform("modelMatrix", modelMatrix);
 	}
@@ -199,22 +197,48 @@ struct QuadShader : public ShaderProgram {
 	QuadShader() : ShaderProgram() {}
 	QuadShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 4, "projectionMatrix", "color", "textureSampler", "textured") {}
 
-	void update(Mat4 orthoMatrix) {
+	void update(const Mat4f& orthoMatrix) {
 		bind();
 		shader.setUniform("projectionMatrix", orthoMatrix);
 	}
 
-	void update(Vec4 color) {
+	void update(const Vec4f& color) {
 		bind();
 		shader.setUniform("textured", false);
 		shader.setUniform("color", color);
 	}
 
 	void update(Texture* texture) {
+		update(texture, Vec4f(1));
+	}
+
+	void update(Texture* texture, const Vec4f& color) {
 		bind();
 		texture->bind();
 		shader.setUniform("textured", true);
 		shader.setUniform("textureSampler", texture->unit);
+		shader.setUniform("color", color);
+	}
+};
+
+struct BlurShader : public ShaderProgram {
+	BlurShader() : ShaderProgram() {}
+	BlurShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 2, "image", "horizontal") {}
+
+	enum class BlurType {
+		HORIZONTAL = 0,
+		VERTICAL = 1
+	};
+
+	void update(BlurType type) {
+		bind();
+		shader.setUniform("horizontal", (int) type);
+	}
+
+	void update(Texture* texture) {
+		bind();
+		texture->bind();
+		shader.setUniform("image", texture->unit);
 	}
 };
 
@@ -233,7 +257,7 @@ struct OriginShader : public ShaderProgram {
 	OriginShader() : ShaderProgram() {}
 	OriginShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 5, "viewMatrix", "rotatedViewMatrix", "projectionMatrix", "orthoMatrix", "viewPosition") {}
 
-	void update(Mat4f viewMatrix, Mat4f rotatedViewMatrix, Mat4f projectionMatrix, Mat4f orthoMatrix, Vec3f viewPosition) {
+	void update(const Mat4f& viewMatrix, const Mat4f& rotatedViewMatrix, const Mat4f& projectionMatrix, const Mat4f& orthoMatrix, const Vec3f& viewPosition) {
 		bind();
 		shader.setUniform("viewMatrix", viewMatrix);
 		shader.setUniform("rotatedViewMatrix", rotatedViewMatrix);
@@ -247,12 +271,12 @@ struct FontShader : public ShaderProgram {
 	FontShader() : ShaderProgram() {}
 	FontShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 3, "projectionMatrix", "color", "text") {}
 
-	void updateColor(Vec4 color) {
+	void updateColor(const Vec4f& color) {
 		bind();
 		shader.setUniform("color", color);
 	}
 
-	void update(Mat4f projectionMatrix) {
+	void update(const Mat4f& projectionMatrix) {
 		bind();
 		shader.setUniform("projectionMatrix", projectionMatrix);
 	}
@@ -268,7 +292,7 @@ struct VectorShader : public ShaderProgram {
 	VectorShader() : ShaderProgram() {}
 	VectorShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 3, "viewMatrix", "projectionMatrix", "viewPosition") {}
 
-	void update(Mat4f viewMatrix, Mat4f projectionMatrix, Vec3f viewPosition) {
+	void update(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Vec3f& viewPosition) {
 		bind();
 		shader.setUniform("viewMatrix", viewMatrix);
 		shader.setUniform("projectionMatrix", projectionMatrix);
@@ -280,10 +304,36 @@ struct PointShader : public ShaderProgram {
 	PointShader() : ShaderProgram() {}
 	PointShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 3, "viewMatrix", "projectionMatrix", "viewPosition") {}
 
-	void update(Mat4f viewMatrix, Mat4f projectionMatrix, Vec3f viewPosition) {
+	void update(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Vec3f& viewPosition) {
 		bind();
 		shader.setUniform("viewMatrix", viewMatrix);
 		shader.setUniform("projectionMatrix", projectionMatrix);
 		shader.setUniform("viewPosition", viewPosition);
+	}
+};
+
+struct TestShader : public ShaderProgram {
+	TestShader() : ShaderProgram() {}
+	TestShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 2, "depthMap", "projectionMatrix") {}
+
+	void update(const Mat4f& projectionMatrix) {
+		bind();
+		shader.setUniform("projectionMatrix", projectionMatrix);
+	}
+
+	void update(DepthTexture* texture) {
+		bind();
+		texture->bind();
+		shader.setUniform("depthMap", texture->unit);
+	}
+};
+
+struct ColorWheelShader : public ShaderProgram {
+	ColorWheelShader() : ShaderProgram() {}
+	ColorWheelShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 1, "projectionMatrix") {}
+
+	void update(Mat4f projectionMatrix) {
+		bind();
+		shader.setUniform("projectionMatrix", projectionMatrix);
 	}
 };
