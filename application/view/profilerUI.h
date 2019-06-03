@@ -43,25 +43,17 @@ struct BarChartClassInformation {
 	Vec3f color;
 };
 
-/*struct BarChartDataPoint {
-	std::vector<WeightValue> values;
-	const char* label;
-	BarChartDataPoint() {}
-	BarChartDataPoint(std::vector<WeightValue> values, const char* label) : values(values), label(label) {}
-};*/
-
-struct BarChart {
+struct BarChart : public Component {
 	const char* title;
 	const char** labels;
 	BarChartClassInformation* classes;
 	LargeMatrix<WeightValue> data;
 	std::string totalValue;
-	Vec2f size;
-	Vec2f position;
 
 	inline BarChart(const char* title, std::string totalValue, const char** labels, BarChartClassInformation* classes, Vec2f chartPosition, Vec2f chartSize, int classCount, int barCount) : 
-		title(title), totalValue(totalValue), size(chartSize), position(chartPosition), classes(classes), labels(labels), data(barCount, classCount) {}
-	void render() const;
+		title(title), totalValue(totalValue), classes(classes), labels(labels), data(barCount, classCount), Component(chartPosition, chartSize) {}
+	void render() override;
+	inline Vec2 resize() override { return dimension; };
 
 	float getMaxWeight() const;
 };

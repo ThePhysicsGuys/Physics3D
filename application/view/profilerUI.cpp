@@ -114,18 +114,18 @@ float PieChart::getTotal() const {
 	return totalWeight;
 }
 
-void BarChart::render() const {
+void BarChart::render() {
 	glUseProgram(0);
 
 	float titleHeight = 0.045;
 
-	float marginLeft = size.x * 0.0;
-	float marginBottom = size.y * 0.045;
+	float marginLeft = this->dimension.x * 0.0;
+	float marginBottom = this->dimension.y * 0.045;
 	float marginTop = titleHeight + 0.05;
 
 	Vec2f drawingPosition = position + Vec2f(marginLeft, marginBottom);
 
-	Vec2f drawingSize = size - Vec2f(marginLeft, marginBottom+marginTop);
+	Vec2f drawingSize = this->dimension - Vec2f(marginLeft, marginBottom+marginTop);
 
 	float categoryWidth = drawingSize.x / data.width;
 	float barWidth = drawingSize.x / ((data.height+0.5) * data.width);
@@ -153,9 +153,6 @@ void BarChart::render() const {
 
 			float height = drawingSize.y * dataPoint.weight / max;
 
-			//GUI::defaultQuad->resize(botLeft, Vec2f(barWidth, height));
-			//GUI::defaultQuad->render();
-
 			vertex(botLeft);
 			vertex(botLeft + Vec2f(barWidth, 0));
 			vertex(botLeft + Vec2f(barWidth, height));
@@ -165,7 +162,7 @@ void BarChart::render() const {
 	glEnd();
 	glPopMatrix();
 
-	GUI::font->render(title, position + Vec2f(0, size.y - titleHeight), GUI::COLOR::WHITE, 0.001);
+	GUI::font->render(title, position + Vec2f(0, this->dimension.y - titleHeight), GUI::COLOR::WHITE, 0.001);
 
 	for (int cl = 0; cl < data.height; cl++) {
 		const BarChartClassInformation& info = classes[cl];
@@ -191,7 +188,7 @@ void BarChart::render() const {
 	}
 
 	for (int cl = 0; cl < data.height; cl++) {
-		GUI::font->render(classes[cl].name, drawingPosition + Vec2f(size.x - 0.3, drawingSize.y - 0.035 * cl), classes[cl].color, 0.0007);
+		GUI::font->render(classes[cl].name, drawingPosition + Vec2f(this->dimension.x - 0.3, drawingSize.y - 0.035 * cl), classes[cl].color, 0.0007);
 	}
 }
 

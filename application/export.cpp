@@ -232,8 +232,8 @@ void saveCamera(std::ofstream& output, Camera& camera) {
 
 void saveGlobals(std::ofstream& output, World<ExtendedPart>& world) {
 	output << "global:" << std::endl;
-	output << "\tfreeparts = " << world.partCount << std::endl;
-	output << "\tanchoredparts = " << world.anchoredPartsCount << std::endl;
+	output << "\tfreeparts = " << world.getPartCount() << std::endl;
+	output << "\tanchoredparts = " << world.getAnchoredPartCount() << std::endl;
 }
 
 void saveBinaryWorld(const std::string& name, World<ExtendedPart>& world, Camera& camera) {

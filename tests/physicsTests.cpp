@@ -308,6 +308,58 @@ TEST_CASE(inelasticColission2) {
 	ASSERT(estimatedAccel == realAccel);
 }*/
 
-TEST_CASE(testWorldImpulseProduction) {
+TEST_CASE(testChangeInertialBasis) {
+	Vec3 back;
+	Vec3f buf1[8];
+	Vec3f buf2[8];
+	RotMat3 rotation = fromEulerAngles(0.6, 0.3, 0.7);
+	Shape centeredTriangle = triangleShape.centered(buf1, back);
+	Shape rotatedTriangle = centeredTriangle.rotated(rotation, buf2);
+	SymmetricMat3 triangleInertia = centeredTriangle.getInertia();
+	SymmetricMat3 rotatedTriangleInertia = rotatedTriangle.getInertia();
+	ASSERT(transformBasis(triangleInertia, rotation) == rotatedTriangleInertia);
+}
 
+TEST_CASE(testMultiPartPhysicalSimple) {
+	Vec3f buf1[8];
+	Vec3f buf2[8];
+	Vec3f buf3[8];
+	Shape box(BoundingBox(1.0, 0.5, 0.5).toShape(buf1));
+	Shape box2(BoundingBox(1.0, 0.5, 0.5).toShape(buf2));
+	Shape doubleBox(BoundingBox(2.0, 0.5, 0.5).toShape(buf3));
+	Part* p1 = new Part(box, CFrame(), 10.0, 0.0);
+	Part* p2 = new Part(box2, CFrame(), 10.0, 0.0);
+	Part* doubleP = new Part(doubleBox, CFrame(), 10.0, 0);
+
+	Physical phys(p1);
+	phys.attachPart(p2, CFrame(Vec3(1.0, 0.0, 0.0)));
+
+	Physical phys2(doubleP);
+
+	ASSERT(phys.mass == p1->mass + p2->mass);
+	ASSERT(phys.centerOfMass == Vec3(0.5, 0, 0));
+	ASSERT(phys.inertia == phys2.inertia);
+
+	
+}
+
+TEST_CASE(testMultiPartPhysicalRotated) {
+	Vec3f buf1[8];
+	Vec3f buf2[8];
+	Vec3f buf3[8];
+	Shape box(BoundingBox(1.0, 0.5, 0.5).toShape(buf1));
+	Shape box2(BoundingBox(0.5, 0.5, 1.0).toShape(buf2));
+	Shape doubleBox(BoundingBox(2.0, 0.5, 0.5).toShape(buf3));
+	Part* p1 = new Part(box, CFrame(), 10.0, 0.0);
+	Part* p2 = new Part(box2, CFrame(), 10.0, 0.0);
+	Part* doubleP = new Part(doubleBox, CFrame(), 10.0, 0);
+
+	Physical phys(p1);
+	phys.attachPart(p2, CFrame(Vec3(1.0, 0.0, 0.0), Mat3(0, 0, 1, 0, 1, 0, -1, 0, 0)));
+
+	Physical phys2(doubleP);
+
+	ASSERT(phys.mass == p1->mass + p2->mass);
+	ASSERT(phys.centerOfMass == Vec3(0.5, 0, 0));
+	ASSERT(phys.inertia == phys2.inertia);
 }

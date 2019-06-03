@@ -26,7 +26,7 @@ void GravityWorld::applyExternalForces() {
 		selectedPhysical->applyMoment(angular);
 	}
 	// Gravity force
-	for(Physical& physical : iterUnAnchoredPhysicals()) {
+	for(Physical& physical : iterFreePhysicals()) {
 		// physical.applyForceAtCenterOfMass((Vec3(0.0, 5.0, 0.0) - physical.getCenterOfMass() * 1.0) * physical.mass);
 		physical.applyForceAtCenterOfMass(gravity * physical.mass);
 	}
@@ -60,7 +60,7 @@ void GravityWorld::applyExternalForces() {
 
 double GravityWorld::getTotalPotentialEnergy() const {
 	double total = 0.0;
-	for(const Physical& p : iterUnAnchoredPhysicals()) {
+	for(const Physical& p : iterFreePhysicals()) {
 		total += -p.getCenterOfMass() * gravity * p.mass;
 	}
 	return total;

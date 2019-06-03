@@ -3,7 +3,7 @@
 #include "../engine/debug.h"
 
 #include "../engine/math/vec3.h"
-#include "buffers.h"
+#include "threePhaseBuffer.h"
 #include "../util/log.h"
 
 #include <time.h>

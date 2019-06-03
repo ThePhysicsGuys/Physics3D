@@ -54,7 +54,8 @@ public:
 		return CFrameTemplate<T>(rotation.transpose() * -position, rotation.transpose());
 	}
 
-
+	inline Vec3Template<T> getPosition() const {return position;}
+	inline Mat3Template<T> getRotation() const {return rotation;}
 
 	inline CFrameTemplate<T>& operator+=(const Vec3Template<T>& delta) {
 		position += delta;

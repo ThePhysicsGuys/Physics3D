@@ -458,6 +458,27 @@ Mat3Template<N> outer(const Vec3Template<N>& self, const Vec3Template<N>& other)
 						   self.z*other.x, self.z*other.y, self.z*other.z);
 }
 
+template<typename N>
+SymmetricMat3Template<N> selfOuter(const Vec3Template<N>& v) {
+	return SymmetricMat3Template<N>(
+		v.x * v.x, v.y* v.y, v.z* v.z,
+		v.x * v.y, v.x * v.z, v.y* v.z);
+}
+
+template<typename N>
+SymmetricMat3Template<N> skewSymmetricSquared(const Vec3Template<N>& v) {
+	N x = v.x, y = v.y, z = v.z;
+	return SymmetricMat3Template<N>(
+		y*y+z*z, x*x+z*z, x*x+y*y, 
+		-x*y, -x*z, -y*z);
+}
+
+template<typename N>
+SymmetricMat3Template<N> transformBasis(SymmetricMat3Template<N> sm, Mat3Template<N> rotation) {
+	Mat3Template<N> r = rotation * sm * ~rotation;
+	return SymmetricMat3Template<N>(r.m00, r.m11, r.m22, r.m01, r.m02, r.m12);
+}
+
 typedef Mat3Template<double>	Mat3;
 typedef Mat3Template<float>		Mat3f;
 typedef Mat3Template<long long>	Mat3l;

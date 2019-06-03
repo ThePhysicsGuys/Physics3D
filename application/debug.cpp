@@ -1,15 +1,15 @@
 #include "debug.h"
 
+#include <GL/glew.h>
+
 #include "../util/log.h"
+
 #include "../engine/debug.h"
-
 #include "../engine/math/mathUtil.h"
-
-#include "GL\glew.h"
+#include "threePhaseBuffer.h"
 
 #include "view/screen.h"
 
-#include "buffers.h"
 
 void clearError() {
 	while (glGetError() != GL_NO_ERROR);
