@@ -60,10 +60,10 @@ void handleCollision(Part& part1, Part& part2, Vec3 collisionPoint, Vec3 exitVec
 
 	double combinedInertia;
 	if(anchoredColission)
-		combinedInertia = p2.getInertiaOfPointInDirection(p2.getCFrame().relativeToLocal(collissionRelP2), p2.getCFrame().relativeToLocal(exitVector));
+		combinedInertia = p2.getInertiaOfPointInDirectionRelative(collissionRelP2, exitVector);
 	else {
-		double inertia1 = p1.getInertiaOfPointInDirection(p1.getCFrame().relativeToLocal(collissionRelP1), p1.getCFrame().relativeToLocal(exitVector));
-		double inertia2 = p2.getInertiaOfPointInDirection(p2.getCFrame().relativeToLocal(collissionRelP2), p2.getCFrame().relativeToLocal(exitVector));
+		double inertia1 = p1.getInertiaOfPointInDirectionRelative(collissionRelP1, exitVector);
+		double inertia2 = p2.getInertiaOfPointInDirectionRelative(collissionRelP2, exitVector);
 		combinedInertia = 1 / (1 / inertia1 + 1 / inertia2);
 	}
 	
@@ -273,15 +273,14 @@ void WorldPrototype::attachPart(Part* p, Physical& phys, CFrame attachment) {
 		removePart(p);
 	}
 	phys.attachPart(p, attachment);
-	addPartUnsafe(p, false);
+	// addPartUnsafe(p, false);
 }
 
 void WorldPrototype::removePart(Part* part) {
-	if (part->parent->getPartCount() == 1) {
-		physicals.remove(part->parent);
-	}
-	else {
-		part->parent->detachPart(part);
+	Physical* parent = part->parent;
+	parent->detachPart(part);
+	if (parent->getPartCount() == 0) {
+		physicals.remove(parent);
 	}
 }
 

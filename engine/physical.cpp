@@ -20,7 +20,7 @@ Physical::Physical(Part* part) : cframe(part->cframe) {
 
 	this->mass = part->mass;
 	this->inertia = part->inertia;
-	this->centerOfMass = Vec3(0, 0, 0);
+	this->localCenterOfMass = Vec3(0, 0, 0);
 	parts.push_back(AttachedPart{ CFrame(), part });
 	part->parent = this;
 }
@@ -28,10 +28,14 @@ Physical::Physical(Part* part) : cframe(part->cframe) {
 void Physical::attachPart(Part* part, CFrame attachment) {
 	parts.push_back(AttachedPart{attachment, part});
 
+	part->parent = this;
+
+	part->cframe = getCFrame().localToGlobal(attachment);
+
 	refreshWithNewParts();
 }
 void Physical::detachPart(Part* part) {
-	for (auto iter = parts.begin(); iter++ != parts.end();) {
+	for (auto iter = parts.begin(); iter != parts.end(); ++iter) {
 		AttachedPart& at = *iter;
 		if (at.part == part) {
 			at.part->parent = nullptr;
@@ -57,8 +61,15 @@ void Physical::refreshWithNewParts() {
 		totalInertia += transformBasis(p.part->inertia, p.attachment.getRotation()) + skewSymmetricSquared(p.attachment.getPosition() - totalCenterOfMass) * p.part->mass;
 	}
 	this->mass = totalMass;
-	this->centerOfMass = totalCenterOfMass;
+	this->localCenterOfMass = totalCenterOfMass;
 	this->inertia = totalInertia;
+}
+
+void Physical::rotateAroundCenterOfMass(const RotMat3& rotation) {
+	Vec3 relCenterOfMass = getCFrame().localToRelative(localCenterOfMass);
+	Vec3 relativeRotationOffset = rotation * relCenterOfMass - relCenterOfMass;
+	getCFrame().rotate(rotation);
+	getCFrame().translate(-relativeRotationOffset);
 }
 
 void Physical::update(double deltaT) {
@@ -78,8 +89,8 @@ void Physical::update(double deltaT) {
 
 	Mat3 rotation = fromRotationVec(angularVelocity * deltaT);
 
+	rotateAroundCenterOfMass(rotation);
 	cframe.translate(movement);
-	cframe.rotate(rotation);
 
 	for (AttachedPart& attachment : parts) {
 		attachment.part->cframe = cframe.localToGlobal(attachment.attachment);
@@ -124,7 +135,7 @@ void Physical::applyAngularImpulse(Vec3 angularImpulse) {
 }
 
 Vec3 Physical::getCenterOfMass() const {
-	return cframe.position;
+	return cframe.localToGlobal(localCenterOfMass);
 }
 
 Vec3 Physical::getVelocityOfPoint(const Vec3Relative& point) const {
@@ -156,24 +167,22 @@ void Physical::setCFrame(const CFrame& newCFrame) {
 	a = M*F
 */
 SymmetricMat3 Physical::getPointAccelerationMatrix(const Vec3Local& r) const {
-	double Ix = this->inertia.m00;
-	double Iy = this->inertia.m11;
-	double Iz = this->inertia.m22;
-
-	Vec3 rSq = r.squared();
-	
-	SymmetricMat3 rotationFactor(rSq.z / Iy + rSq.y / Iz, rSq.x / Iz + rSq.z / Ix, rSq.y / Ix + rSq.x / Iy,
-								 -r.x*r.y / Iz, -r.x*r.z / Iy, -r.y*r.z / Ix);
 	DiagonalMat3 movementFactor(1 / mass, 1 / mass, 1 / mass);
 
-	return rotationFactor + movementFactor;
+	Mat3 crossMat = createCrossProductEquivalent(r);
+
+	SymmetricMat3 invInertia = ~inertia;
+
+	SymmetricMat3 rotationFactor = multiplyLeftRight(invInertia , crossMat);
+
+	return movementFactor + rotationFactor;
 }
-double Physical::getInertiaOfPointInDirection(const Vec3Local& localPoint, const Vec3Local& direction) const {
+double Physical::getInertiaOfPointInDirectionLocal(const Vec3Local& localPoint, const Vec3Local& localDirection) const {
 	SymmetricMat3 accMat = getPointAccelerationMatrix(localPoint);
 
-	Vec3 force = direction;
+	Vec3 force = localDirection;
 	Vec3 accel = accMat * force;
-	double accelInForceDir = accel * direction / direction.lengthSquared();
+	double accelInForceDir = accel * localDirection / localDirection.lengthSquared();
 
 	return 1 / accelInForceDir;
 
@@ -181,6 +190,10 @@ double Physical::getInertiaOfPointInDirection(const Vec3Local& localPoint, const
 	Vec3 imaginaryForceForAcceleration = accelToForceMat * direction;
 	double forcePerAccelRatio = imaginaryForceForAcceleration * direction / direction.lengthSquared();
 	return forcePerAccelRatio;*/
+}
+
+double Physical::getInertiaOfPointInDirectionRelative(const Vec3Relative& relPoint, const Vec3Relative& relDirection) const {
+	return getInertiaOfPointInDirectionLocal(getCFrame().relativeToLocal(relPoint), getCFrame().relativeToLocal(relDirection));
 }
 
 double Physical::getVelocityKineticEnergy() const {

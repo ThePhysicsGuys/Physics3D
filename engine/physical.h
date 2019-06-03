@@ -48,7 +48,7 @@ struct Physical {
 	Vec3 totalMoment = Vec3();
 
 	double mass;
-	Vec3 centerOfMass;
+	Vec3 localCenterOfMass;
 	SymmetricMat3 inertia;
 
 	Physical() = default;
@@ -64,7 +64,7 @@ struct Physical {
 		this->totalForce = other.totalForce;
 		this->totalMoment = other.totalMoment;
 		this->mass = other.mass;
-		this->centerOfMass = other.centerOfMass;
+		this->localCenterOfMass = other.localCenterOfMass;
 		this->inertia = other.inertia;
 
 		for (AttachedPart& p : parts) {
@@ -81,7 +81,7 @@ struct Physical {
 		this->totalForce = other.totalForce;
 		this->totalMoment = other.totalMoment;
 		this->mass = other.mass;
-		this->centerOfMass = other.centerOfMass;
+		this->localCenterOfMass = other.localCenterOfMass;
 		this->inertia = other.inertia;
 
 		for (AttachedPart& p : parts) {
@@ -105,9 +105,12 @@ struct Physical {
 	void applyImpulse(Vec3Relative origin, Vec3Relative impulse);
 	void applyAngularImpulse(Vec3 angularImpulse);
 
+	void rotateAroundCenterOfMass(const RotMat3& rotation);
+
 	void setCFrame(const CFrame& newCFrame);
-	
+
 	inline CFrame& getCFrame() { return cframe; }
+	inline const CFrame& getCFrame() const { return cframe; }
 
 	Vec3 getCenterOfMass() const;
 	Vec3 getAcceleration() const;
@@ -115,11 +118,13 @@ struct Physical {
 	Vec3 getVelocityOfPoint(const Vec3Relative& point) const;
 	Vec3 getAccelerationOfPoint(const Vec3Relative& point) const;
 	SymmetricMat3 getPointAccelerationMatrix(const Vec3Local& localPoint) const;
-	double getInertiaOfPointInDirection(const Vec3Local& localPoint, const Vec3Local& direction) const;
+	double getInertiaOfPointInDirectionLocal(const Vec3Local& localPoint, const Vec3Local& localDirection) const;
+	double getInertiaOfPointInDirectionRelative(const Vec3Relative& relativePoint, const Vec3Relative& relativeDirection) const;
 	double getVelocityKineticEnergy() const;
 	double getAngularKineticEnergy() const;
 	double getKineticEnergy() const;
 	size_t getPartCount() const { return parts.size(); }
+	
 
 	PartIter begin() { return PartIter{ parts.begin() }; }
 	ConstPartIter begin() const { return ConstPartIter{ parts.begin() }; }
