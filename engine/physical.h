@@ -131,4 +131,7 @@ struct Physical {
 
 	PartIter end() { return PartIter{ parts.end() }; }
 	ConstPartIter end() const { return ConstPartIter{ parts.end() }; }
+
+	const Part& operator[](size_t index) const { return *parts[index].part; }
+	Part& operator[](size_t index) { return *parts[index].part; }
 };

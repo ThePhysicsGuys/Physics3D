@@ -1,13 +1,13 @@
 #pragma once
 
-#include "../engine/geometry/shape.h"
+#include "visualShape.h"
 
-extern const NormalizedShape icosahedron;
+extern const Shape icosahedron;
 extern const Shape triangleShape;
 extern const Shape house;
 
-NormalizedShape createCube(double side);
-NormalizedShape createBox(double width, double height, double length);
+Shape createCube(double side);
+Shape createBox(double width, double height, double length);
 
 /*
 Creates a prism with the given number of sides
@@ -19,7 +19,7 @@ result.triangles will contain all the triangles:
 
 sides must be >= 3
 */
-NormalizedShape createPrism(unsigned int sides, double radius, double height);
+Shape createPrism(unsigned int sides, double radius, double height);
 
 /*
 Creates a pointed prism with the given number of sides
@@ -35,4 +35,4 @@ result.triangles will contain all the triangles:
 
 sides must be >= 3
 */
-NormalizedShape createPointyPrism(unsigned int sides, double radius, double height, double topOffset, double bottomOffset);
+Shape createPointyPrism(unsigned int sides, double radius, double height, double topOffset, double bottomOffset);

@@ -4,7 +4,7 @@
 #include "indexBuffer.h"
 #include "vertexBuffer.h"
 #include "bufferLayout.h"
-#include "../engine/geometry/shape.h"
+#include "../visualShape.h"
 
 class IndexedMesh : public AbstractMesh {
 public:
@@ -20,7 +20,7 @@ public:
 	const int vertexCount;
 	const int triangleCount;
 
-	IndexedMesh(const Shape&  shape);
+	IndexedMesh(const VisualShape& shape);
 	IndexedMesh(const float* vertices, const float* normals, const float* uvs, const unsigned int* indices, const int vertexCount, const int triangleCount);
 
 	void render(int mode);

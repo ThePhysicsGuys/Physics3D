@@ -20,7 +20,7 @@ Physical::Physical(Part* part) : cframe(part->cframe) {
 
 	this->mass = part->mass;
 	this->inertia = part->inertia;
-	this->localCenterOfMass = Vec3(0, 0, 0);
+	this->localCenterOfMass = part->localCenterOfMass;
 	parts.push_back(AttachedPart{ CFrame(), part });
 	part->parent = this;
 }
@@ -54,7 +54,7 @@ void Physical::refreshWithNewParts() {
 	Vec3 totalCenterOfMass(0, 0, 0);
 	for (const AttachedPart& p : parts) {
 		totalMass += p.part->mass;
-		totalCenterOfMass += p.attachment.getPosition() * p.part->mass;
+		totalCenterOfMass += p.attachment.localToGlobal(p.part->localCenterOfMass) * p.part->mass;
 	}
 	totalCenterOfMass /= totalMass;
 	for (const AttachedPart& p : parts) {

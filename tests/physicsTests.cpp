@@ -36,8 +36,8 @@ TEST_CASE(positionInvariance) {
 		for(int i = 0; i < TICKS; i++)
 			w.tick(DELTA_T);
 
-		REMAINS_CONSTANT(origin.globalToLocal(w.parts[0]->cframe));
-		REMAINS_CONSTANT(origin.globalToLocal(w.parts[1]->cframe));
+		REMAINS_CONSTANT(origin.globalToLocal(housePart.cframe));
+		REMAINS_CONSTANT(origin.globalToLocal(icosaPart.cframe));
 	}
 }
 
@@ -65,8 +65,8 @@ TEST_CASE(rotationInvariance) {
 		for(int i = 0; i < TICKS; i++)
 			w.tick(DELTA_T);
 
-		REMAINS_CONSTANT(origin.globalToLocal(w.parts[0]->cframe));
-		REMAINS_CONSTANT(origin.globalToLocal(w.parts[1]->cframe));
+		REMAINS_CONSTANT(origin.globalToLocal(housePart.cframe));
+		REMAINS_CONSTANT(origin.globalToLocal(icosaPart.cframe));
 	}
 }
 
@@ -111,7 +111,7 @@ TEST_CASE(rotationImpulse) {
 }
 
 TEST_CASE(testPointAcceleration) {
-	Part testPart(NormalizedShape(), CFrame(), 1.0, 1.0);
+	Part testPart(Shape(), CFrame(), 1.0, 1.0);
 	Physical testPhys(&testPart, 5.0, DiagonalMat3(1, 2, 3));
 	Vec3 localPoint(3, 5, 7);
 	Vec3 force(-4, -3, 0.5);
@@ -135,7 +135,7 @@ TEST_CASE(testPointAcceleration) {
 }
 
 TEST_CASE(testGetPointAccelerationMatrix) {
-	Part testPart(NormalizedShape(), CFrame(), 1.0, 1.0);
+	Part testPart(Shape(), CFrame(), 1.0, 1.0);
 	Physical testPhys(&testPart, 5.0, DiagonalMat3(1, 2, 3));
 	Vec3 localPoint(3, 5, 7);
 	Vec3 force(-4, -3, 0.5);
@@ -151,9 +151,9 @@ TEST_CASE(testGetPointAccelerationMatrix) {
 	ASSERT(actualAcceleration == accelMatrix * force);
 }
 TEST_CASE(testComputeCombinedInertiaBetween) {
-	Part testPart1(NormalizedShape(), CFrame(), 1.0, 1.0);
+	Part testPart1(Shape(), CFrame(), 1.0, 1.0);
 	Physical testPhys1(&testPart1, 5.0, DiagonalMat3(100, 200, 300));
-	Part testPart2(NormalizedShape(), CFrame(Vec3(1.0, 0.0, 0.0)), 1.0, 1.0);
+	Part testPart2(Shape(), CFrame(Vec3(1.0, 0.0, 0.0)), 1.0, 1.0);
 	Physical testPhys2(&testPart2, 5.0, DiagonalMat3(100, 200, 300));
 	
 	Vec3 direction(2.0, 0.0, 0.0);
@@ -175,7 +175,7 @@ TEST_CASE(testComputeCombinedInertiaBetween) {
 	}
 }
 TEST_CASE(impulseTest) {
-	Part part(NormalizedShape(), CFrame(), 1.0, 1.0);
+	Part part(Shape(), CFrame(), 1.0, 1.0);
 	Physical p(&part, 5.0, DiagonalMat3(5, 5, 5));
 
 	p.applyImpulseAtCenterOfMass(Vec3(15, 0, 0));
@@ -193,7 +193,7 @@ TEST_CASE(impulseTest) {
 }
 
 TEST_CASE(testPointAccelMatrixImpulse) {
-	Part part(NormalizedShape(), CFrame(Vec3(7.6, 3.4, 3.9), fromEulerAngles(1.1, 0.7, 0.9)), 1.0, 1.0);
+	Part part(Shape(), CFrame(Vec3(7.6, 3.4, 3.9), fromEulerAngles(1.1, 0.7, 0.9)), 1.0, 1.0);
 	Physical p(&part, 5.0, DiagonalMat3(2, 7, 5));
 
 	Vec3 localPoint(0.8, 0.6, 0.9);
@@ -209,7 +209,7 @@ TEST_CASE(testPointAccelMatrixImpulse) {
 }
 
 TEST_CASE(inelasticColission) {
-	Part part(NormalizedShape(), CFrame(Vec3(7.6, 3.4, 3.9), fromEulerAngles(1.1, 0.7, 0.9)), 1.0, 1.0);
+	Part part(Shape(), CFrame(Vec3(7.6, 3.4, 3.9), fromEulerAngles(1.1, 0.7, 0.9)), 1.0, 1.0);
 	Physical p(&part, 5.0, DiagonalMat3(2, 7, 5));
 
 	Vec3 localPoint(0.8, 0.6, 0.9);
@@ -255,7 +255,7 @@ TEST_CASE(inelasticColission) {
 }
 
 TEST_CASE(inelasticColission2) {
-	Part part(NormalizedShape(), CFrame(/*Vec3(7.6, 3.4, 3.9), fromEulerAngles(1.1, 0.7, 0.9)*/), 1.0, 1.0);
+	Part part(Shape(), CFrame(/*Vec3(7.6, 3.4, 3.9), fromEulerAngles(1.1, 0.7, 0.9)*/), 1.0, 1.0);
 	Physical p(&part, 5.0, DiagonalMat3(2, 7, 5));
 
 	Vec3 localPoint(0.8, 0.6, 0.9);
@@ -269,7 +269,7 @@ TEST_CASE(inelasticColission2) {
 
 	ASSERT(velOfPoint.y < 0);
 
-	double inertia = p.getInertiaOfPointInDirection(localPoint, part.cframe.relativeToLocal(normal));
+	double inertia = p.getInertiaOfPointInDirectionRelative(localPoint, normal);
 
 	double normalVelocity = velOfPoint * normal.normalize();
 
@@ -293,7 +293,7 @@ TEST_CASE(inelasticColission2) {
 }
 
 /*TEST_CASE(testPointAccelMatrixAndInertiaInDirection) {
-	Part part(NormalizedShape(), CFrame(Vec3(7.6, 3.4, 3.9), fromEulerAngles(1.1, 0.7, 0.9)), 1.0, 1.0);
+	Part part(Shape(), CFrame(Vec3(7.6, 3.4, 3.9), fromEulerAngles(1.1, 0.7, 0.9)), 1.0, 1.0);
 	Physical p(&part, 5.0, DiagonalMat3(2, 7, 5));
 
 	Vec3 localPoint(0.8, 0.6, 0.9);
@@ -313,9 +313,8 @@ TEST_CASE(testChangeInertialBasis) {
 	Vec3f buf1[8];
 	Vec3f buf2[8];
 	RotMat3 rotation = fromEulerAngles(0.6, 0.3, 0.7);
-	Shape centeredTriangle = triangleShape.centered(buf1, back);
-	Shape rotatedTriangle = centeredTriangle.rotated(rotation, buf2);
-	SymmetricMat3 triangleInertia = centeredTriangle.getInertia();
+	Shape rotatedTriangle = triangleShape.rotated(rotation, buf2);
+	SymmetricMat3 triangleInertia = triangleShape.getInertia();
 	SymmetricMat3 rotatedTriangleInertia = rotatedTriangle.getInertia();
 	ASSERT(transformBasis(triangleInertia, rotation) == rotatedTriangleInertia);
 }
@@ -337,7 +336,7 @@ TEST_CASE(testMultiPartPhysicalSimple) {
 	Physical phys2(doubleP);
 
 	ASSERT(phys.mass == p1->mass + p2->mass);
-	ASSERT(phys.centerOfMass == Vec3(0.5, 0, 0));
+	ASSERT(phys.localCenterOfMass == Vec3(0.5, 0, 0));
 	ASSERT(phys.inertia == phys2.inertia);
 
 	
@@ -360,6 +359,6 @@ TEST_CASE(testMultiPartPhysicalRotated) {
 	Physical phys2(doubleP);
 
 	ASSERT(phys.mass == p1->mass + p2->mass);
-	ASSERT(phys.centerOfMass == Vec3(0.5, 0, 0));
+	ASSERT(phys.localCenterOfMass == Vec3(0.5, 0, 0));
 	ASSERT(phys.inertia == phys2.inertia);
 }

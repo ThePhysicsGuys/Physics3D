@@ -151,21 +151,6 @@ TEST_CASE(cubeContainsPoint) {
 	ASSERT_FALSE(cube.containsPoint(Vec3f(-0.2, -0.2, -0.2)));
 }
 
-TEST_CASE(shapeNormalization) {
-	Vec3f buf1[10]; Vec3f buf2[10]; Shape transformedHouse = house.globalToLocal(CFramef(Vec3f(0.3, 0.7, -2.8), fromEulerAngles(0.5, -0.1, 0.9)), buf1);
-
-	double beginVolume = transformedHouse.getVolume();
-
-	CFramef normalizationFrame;
-
-	NormalizedShape newShape = transformedHouse.normalized(buf2, nullptr, normalizationFrame);
-
-	ASSERT(newShape.getVolume() == beginVolume);
-	ASSERT(newShape.getCenterOfMass() == Vec3());
-	ASSERT_DIAGONAL(newShape.getInertia());
-	ASSERT(normalizationFrame.position == transformedHouse.getCenterOfMass());
-}
-
 TEST_CASE(testRayIntersection) {
 	ASSERT_TRUE(rayTriangleIntersection(Vec3(-1.0, 0.3, 0.3), Vec3(1.0, 0.0, 0.0), Vec3(), Vec3(0.0, 0.0, 1.0), Vec3(0.0, 1.0, 0.0)).rayIntersectsTriangle());
 	ASSERT_FALSE(rayTriangleIntersection(Vec3(-1.0, -0.3, 0.3), Vec3(1.0, 0.0, 0.0), Vec3(), Vec3(0.0, 0.0, 1.0), Vec3(0.0, 1.0, 0.0)).rayIntersectsTriangle());

@@ -28,17 +28,17 @@ namespace Picker {
 	IndexedMesh* lineMesh = nullptr;
 
 	IndexedMesh* rotateMesh = nullptr;
-	Shape rotateShape;
+	VisualShape rotateShape;
 
 	IndexedMesh* translateCenterMesh = nullptr;
-	Shape translateCenterShape;
+	VisualShape translateCenterShape;
 	IndexedMesh* translateMesh = nullptr;
-	Shape translateShape;
+	VisualShape translateShape;
 
 	IndexedMesh* scaleCenterMesh = nullptr;
-	Shape scaleCenterShape;
+	VisualShape scaleCenterShape;
 	IndexedMesh* scaleMesh = nullptr;
-	Shape scaleShape;
+	VisualShape scaleShape;
 
 	int intersectedToolDirection;
 	Vec3f intersectedToolPoint;
@@ -132,7 +132,7 @@ namespace Picker {
 		}
 	}
 
-	float intersect(const Ray& ray, const Shape& shape, const CFramef& cframe) {
+	float intersect(const Ray& ray, const VisualShape& shape, const CFramef& cframe) {
 		return shape.getIntersectionDistance(cframe.globalToLocal(ray.start), cframe.relativeToLocal(ray.direction));
 	}
 
@@ -144,7 +144,7 @@ namespace Picker {
 
 		// Intersect edit tools
 		if (screen.selectedPart) {
-			Shape* tool[2];
+			VisualShape* tool[2];
 	
 			switch (editMode) {
 				case Picker::EditMode::TRANSLATE:
@@ -199,7 +199,7 @@ namespace Picker {
 			if (ray.direction.pointToLineDistanceSquared(relPos) > part.maxRadius * part.maxRadius)
 				continue;
 
-			float distance = intersect(ray, part.hitbox, part.cframe);
+			float distance = intersect(ray, part.visualShape, part.cframe);
 
 			if (distance < closestIntersectDistance && distance > 0) {
 				closestIntersectDistance = distance;

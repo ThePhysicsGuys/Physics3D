@@ -2,7 +2,7 @@
 #include "../../engine/geometry/shape.h"
 #include "../util/log.h"
 
-IndexedMesh::IndexedMesh(const Shape& shape) : AbstractMesh(), vertexCount(shape.vertexCount), triangleCount(shape.triangleCount) {
+IndexedMesh::IndexedMesh(const VisualShape& shape) : AbstractMesh(), vertexCount(shape.vertexCount), triangleCount(shape.triangleCount) {
 	float* vertices = new float[shape.vertexCount * 3];
 	for(int i = 0; i < vertexCount; i++) {
 		Vec3f vertex = shape[i];

@@ -13,6 +13,8 @@
 
 #include "partFactory.h"
 
+#include "visualShape.h"
+
 /*
 	Import
 */
@@ -150,7 +152,7 @@ struct Face {
 	}
 };
 
-Shape reorder(const std::vector<Vec3f>& positions, const std::vector<Vec3f>& normals, const std::vector<Vec2f>& uvs, const std::vector<Face>& faces, Flags flags) {
+VisualShape reorder(const std::vector<Vec3f>& positions, const std::vector<Vec3f>& normals, const std::vector<Vec2f>& uvs, const std::vector<Face>& faces, Flags flags) {
 	Triangle* triangleArray = nullptr;
 	Vec3f * positionArray = nullptr;
 	Vec3f * normalArray = nullptr;
@@ -185,10 +187,10 @@ Shape reorder(const std::vector<Vec3f>& positions, const std::vector<Vec3f>& nor
 		}
 	}
 
-	return Shape(positionArray, normalArray, uvArray, triangleArray, (int)positions.size(), (int)faces.size());
+	return VisualShape(positionArray, normalArray, uvArray, triangleArray, (int)positions.size(), (int)faces.size());
 }
 
-Shape loadBinaryObj(std::istream& input) {
+VisualShape loadBinaryObj(std::istream& input) {
 	char flag = Import::read<char>(input);
 	int vertexCount = Import::read<int>(input);
 	int triangleCount = Import::read<int>(input);
@@ -226,10 +228,10 @@ Shape loadBinaryObj(std::istream& input) {
 		triangles[i] = Import::read<Triangle>(input);
 	}
 
-	return Shape(vertices, normals, uvs, triangles, vertexCount, triangleCount);
+	return VisualShape(vertices, normals, uvs, triangles, vertexCount, triangleCount);
 }
 
-Shape loadNonBinaryObj(std::istream& input) {
+VisualShape loadNonBinaryObj(std::istream& input) {
 	std::vector<Vec3f> vertices;
 	std::vector<Vec3f> normals;
 	std::vector<Vec2f> uvs;
@@ -265,21 +267,21 @@ Shape loadNonBinaryObj(std::istream& input) {
 	return reorder(vertices, normals, uvs, faces, flags);
 }
 
-Shape OBJImport::load(std::istream& file, bool binary) {
+VisualShape OBJImport::load(std::istream& file, bool binary) {
 	if (binary)
 		return loadBinaryObj(file);
 	else
 		return loadNonBinaryObj(file);
 }
 
-Shape OBJImport::load(std::string file, bool binary) {
+VisualShape OBJImport::load(std::string file, bool binary) {
 	struct stat buffer;
 
 	if (stat(file.c_str(), &buffer) == -1) {
 		Log::setSubject(file.c_str());
 		Log::error("File not found: %s", file.c_str());
 		Log::resetSubject();
-		return Shape();
+		return VisualShape();
 	}
 
 	std::ifstream input;
@@ -289,7 +291,7 @@ Shape OBJImport::load(std::string file, bool binary) {
 	else
 		input.open(file);
 
-	Shape shape = load(input, binary);
+	VisualShape shape = load(input, binary);
 
 	input.close();
 
@@ -349,7 +351,7 @@ void parseSubject(Subject subject, std::string path, std::map<std::string, std::
 
 		if (!factories.count(shapeReference)) {
 			Log::info("Loading part %s in factory", (path + shapeReference).c_str());
-			Shape shape = OBJImport::load(path + shapeReference);
+			VisualShape shape = OBJImport::load(path + shapeReference);
 			factories[shapeReference] = PartFactory(shape, screen, name);
 		}
 

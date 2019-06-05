@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "../engine/geometry/shape.h"
+#include "visualShape.h"
 
 #include "view/camera.h"
 
@@ -25,7 +25,7 @@ namespace Export {
 };
 
 namespace OBJExport {
-	void save(const std::string& file, const Shape&, bool binary = false);
+	void save(const std::string& file, const VisualShape&, bool binary = false);
 };
 
 namespace WorldExport {

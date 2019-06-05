@@ -170,13 +170,15 @@ void WorldPrototype::tick(double deltaT) {
 	SharedLockGuard mutLock(lock);
 #ifdef USE_TRANSFORMATIONS
 	physicsMeasure.mark(PhysicsProcess::TRANSFORMS);
-	std::shared_ptr<Vec3> vecBuf(new Vec3[getTotalVertexCount()], std::default_delete<Vec3[]>());
-	Vec3* vecBufIndex = vecBuf.get();
-	for(Part& part : *this) {
-		const Shape& curShape = part.hitbox;
-		CFrame cframe = part.cframe;
-		part.transformed = curShape.localToGlobal(cframe, vecBufIndex);
-		vecBufIndex += curShape.vertexCount;
+	std::shared_ptr<Vec3f> vecBuf(new Vec3f[getTotalVertexCount()], std::default_delete<Vec3f[]>());
+	Vec3f* vecBufIndex = vecBuf.get();
+	for(Physical& phys : iterPhysicals()) {
+		for (Part& part : phys) {
+			const Shape& curShape = part.hitbox;
+			CFrame cframe = part.cframe;
+			part.transformed = curShape.localToGlobal(cframe, vecBufIndex);
+			vecBufIndex += curShape.vertexCount;
+		}
 	}
 #endif
 	physicsMeasure.mark(PhysicsProcess::EXTERNALS);

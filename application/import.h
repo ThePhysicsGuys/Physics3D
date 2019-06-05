@@ -30,8 +30,8 @@ namespace Import {
 };
 
 namespace OBJImport {
-	Shape load(std::istream& file, bool binary = false);
-	Shape load(std::string file, bool binary = false);
+	VisualShape load(std::istream& file, bool binary = false);
+	VisualShape load(std::string file, bool binary = false);
 };
 
 namespace WorldImport {
