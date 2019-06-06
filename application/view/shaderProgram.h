@@ -202,7 +202,7 @@ struct QuadShader : public ShaderProgram {
 		shader.setUniform("projectionMatrix", orthoMatrix);
 	}
 
-	void update(const Vec4f& color) {
+	void update(const Vec4& color) {
 		bind();
 		shader.setUniform("textured", false);
 		shader.setUniform("color", color);

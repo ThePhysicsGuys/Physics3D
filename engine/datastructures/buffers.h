@@ -111,13 +111,13 @@ struct AddableBuffer : public BufferWithCapacity<T> {
 		size = 0;
 	}
 
-	inline T* begin() { return data; }
-	inline const T* begin() const { return data; }
+	inline T* begin() { return this->data; }
+	inline const T* begin() const { return this->data; }
 
-	inline T* end() { return data + size; }
-	inline const T* end() const { return data + size; }
+	inline T* end() { return this->data + size; }
+	inline const T* end() const { return this->data + this->size; }
 
 	inline bool liesInList(const T* obj) const {
-		return obj >= data && obj < data + size;
+		return obj >= this->data && obj < this->data + this->size;
 	}
 };

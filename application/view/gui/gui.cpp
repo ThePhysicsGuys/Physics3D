@@ -183,10 +183,15 @@ namespace GUI {
 	Texture* colorPickerCrosshairTexture;
 	Texture* colorPickerHueTexture;
 	Texture* colorPickerBrightnessTexture;
+	Vec4 colorPickerBrightnessBorderColor = COLOR::SILVER;
 	double colorPickerBrightnessWidth = 0.05;
 	double colorPickerHueSize = 0.4;
 	double colorPickerPointerCrosshairSize = 0.03;
 	double colorPickerSpacing = 0.06;
+	double colorPickerBrightnessBorderWidth = 0.005;
+	double colorPickerBrightnessSelectorWidth = 0.08;
+	double colorPickerBrightnessSelectorHeight = 0.004;
+	Vec4 colorPickerBrightnessSelectorColor = COLOR::SILVER;
 
 	// CheckBox
 	Texture* checkBoxUncheckedTexture;
@@ -238,6 +243,14 @@ namespace GUI {
 	
 	void update(Mat4f orthoMatrix) {
 		GUI::shader->update(orthoMatrix);
+	}
+
+	double clamp(double value, double min, double max) {
+		if (value < min)
+			return min;
+		if (value > max)
+			return max;
+		return value;
 	}
 
 	double map(double x, double minIn, double maxIn, double minOut, double maxOut) {

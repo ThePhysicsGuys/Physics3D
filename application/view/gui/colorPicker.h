@@ -8,6 +8,10 @@
 class ColorPicker : public Component {
 private:
 	Vec2 crosshair;
+	double brightness;
+
+	bool colorPicking;
+	bool brightnessPicking;
 public:
 	Vec4 color;
 
@@ -23,4 +27,5 @@ public:
 
 	void press(Vec2 point) override;
 	void drag(Vec2 point) override;
+	void release(Vec2 point) override;
 };

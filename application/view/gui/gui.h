@@ -99,10 +99,15 @@ namespace GUI {
 	extern Texture* colorPickerCrosshairTexture;
 	extern Texture* colorPickerHueTexture;
 	extern Texture* colorPickerBrightnessTexture;
+	extern Vec4 colorPickerBrightnessBorderColor;
 	extern double colorPickerBrightnessWidth;
 	extern double colorPickerHueSize;
 	extern double colorPickerSpacing;
 	extern double colorPickerPointerCrosshairSize;
+	extern double colorPickerBrightnessBorderWidth;
+	extern double colorPickerBrightnessSelectorWidth;
+	extern double colorPickerBrightnessSelectorHeight;
+	extern Vec4 colorPickerBrightnessSelectorColor;
 
 	// CheckBox
 	extern Texture* checkBoxUncheckedTexture;
@@ -129,6 +134,8 @@ namespace GUI {
 	void add(Component* component);
 	void remove(Component* component);
 
+	double clamp(double value, double min, double max);
+	double map(double x, double minIn, double maxIn, double minOut, double maxOut);
 	Vec2 map(Vec2 point);
 	Vec2 unmap(Vec2 point);
 	void intersect(Vec2 mouse);

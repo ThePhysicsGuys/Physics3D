@@ -142,9 +142,6 @@ ColorWheelShader colorWheelShader;
 BarChartClassInformation iterChartClasses[]{ {"GJK Collide", Vec3f(0.2f,0.2f,1)},{"GJK No Collide", Vec3f(1.0f, 0.5f, 0.0f)},{"EPA", Vec3f(1.0f, 1.0f, 0.0f)} };
 BarChart iterationChart("Iteration Statistics", "", GJKCollidesIterationStatistics.labels, iterChartClasses, Vec2f(-1 + 0.1f, -0.3), Vec2f(0.8, 0.6), 3, 17);
 
-BarChartClassInformation iterChartClasses[]{ {"GJK Collide", Vec3f(0.2f,0.2f,1)},{"GJK No Collide", Vec3f(1.0f, 0.5f, 0.0f)},{"EPA", Vec3f(1.0f, 1.0f, 0.0f)} };
-BarChart iterationChart("Iteration Statistics", "", GJKCollidesIterationStatistics.labels, iterChartClasses, Vec2f(-1 + 0.1f, -0.3), Vec2f(0.8, 0.6), 3, 17);
-
 
 // Light uniforms
 const int lightCount = 4;
