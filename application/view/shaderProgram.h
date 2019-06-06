@@ -140,8 +140,8 @@ struct BasicShader : public ShaderProgram {
 
 	void updatePart(const ExtendedPart& part) {
 		bind();
-		shader.setUniform("includeNormals", part.hitbox.normals != nullptr);
-		shader.setUniform("includeUvs", part.hitbox.uvs != nullptr);
+		shader.setUniform("includeNormals", part.visualShape.normals != nullptr);
+		shader.setUniform("includeUvs", part.visualShape.uvs != nullptr);
 		shader.setUniform("modelMatrix", CFrameToMat4(CFramef(part.cframe)));
 	}
 
@@ -180,7 +180,7 @@ struct BasicShader : public ShaderProgram {
 
 struct DepthShader : public ShaderProgram {
 	DepthShader() : ShaderProgram() {}
-	DepthShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 4, "modelMatrix", "lightMatrix") {}
+	DepthShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 2, "modelMatrix", "lightMatrix") {}
 
 	void updateLight(const Mat4f& lightMatrix) {
 		bind();

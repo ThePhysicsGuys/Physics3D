@@ -1,20 +1,16 @@
 #pragma once
 
-struct Triangle;
-struct NormalizedShape;
-struct CenteredShape;
-struct Shape;
-
-#include "../math/vec2.h"
 #include "../math/vec3.h"
 #include "../math/mat3.h"
 #include "../math/cframe.h"
-#include "boundingBox.h"
 #include <memory>
 
-#ifdef __AVX__
-#include "../datastructures/parallelVector.h"
-#endif
+struct Triangle;
+struct Shape;
+struct ShapeVecIter;
+struct ShapeVecIterFactory;
+
+#include "boundingBox.h"
 
 struct Sphere {
 	Vec3 origin;
@@ -51,6 +47,9 @@ struct VertexIterFactory {
 	};
 };
 
+
+
+struct ParallelVec3;
 struct Shape {
 	struct TriangleIter {
 		const Triangle* first;
@@ -65,23 +64,14 @@ struct Shape {
 
 	
 private:
-#ifdef __AVX__
-	AOSOAVec3fBuf vertices;
-#else
-	Vec3f* vertices;
-#endif
+	ParallelVec3* vertices;
 public:
-	std::shared_ptr<Vec3f> normals;
-	std::shared_ptr<Vec2f> uvs;
 	const Triangle* triangles;
 	int vertexCount;
 	int triangleCount;
 
-	Shape();
+	Shape() : vertices(nullptr), triangles(nullptr), vertexCount(0), triangleCount(0) {};
 	Shape(Vec3f* vertices, const Triangle* triangles, int vertexCount, int triangleCount);
-	Shape(Vec3f* vertices, Vec3f* normals, const Triangle* triangles, int vertexCount, int triangleCount);
-	Shape(Vec3f* vertices, Vec3f* normals, Vec2f* uvs, const Triangle* triangles, int vertexCount, int triangleCount);
-	Shape(Vec3f* vertices, Vec2f* uvs, const Triangle* triangles, int vertexCount, int triangleCount);
 
 	Shape translated(Vec3f offset, Vec3f* newVecBuf) const;
 	Shape rotated(RotMat3f rotation, Vec3f* newVecBuf) const;
@@ -92,8 +82,6 @@ public:
 	bool containsPoint(Vec3f point) const;
 	float getIntersectionDistance(Vec3f origin, Vec3f direction) const;
 	double getVolume() const;
-	NormalizedShape normalized(Vec3f* vecBuf, Vec3f* normalBuf, CFramef& backTransformation) const;
-	CenteredShape centered(Vec3f* vecBuf, Vec3& backOffset) const;
 
 	CFramef getInertialEigenVectors() const;
 	BoundingBox getBounds() const;
@@ -113,37 +101,37 @@ public:
 	int furthestIndexInDirection(const Vec3f& direction) const;
 	Vec3f furthestInDirection(const Vec3f& direction) const;
 
-	inline const Vec3f& operator[](int index) const { return vertices[index]; }
-	inline Vec3f& operator[](int index) { return vertices[index]; }
+	Vec3f operator[](int index) const;
 
 	inline TriangleIter iterTriangles() const { 
 		return TriangleIter { triangles, triangleCount };
 	};
-#ifdef __AVX__
-	inline ParallelVecIterFactory iterVertices() const {
-		return ParallelVecIterFactory{vertices, vertexCount};
-	};
-#else
-	inline VertexIterFactory iterVertices() const {
-		return VertexIterFactory{ vertices, vertexCount };
-	};
-#endif
+	inline ShapeVecIterFactory iterVertices() const;
 };
 
-struct CenteredShape : public Shape {
-	friend struct Shape;
-	CenteredShape() : Shape() {}
-	CenteredShape(Vec3f * vertices, const Triangle * triangles, int vertexCount, int triangleCount);
-	CenteredShape(Vec3f * vertices, Vec3f * normals, Vec2f * uvs, const Triangle * triangles, int vertexCount, int triangleCount);
-private:
-	CenteredShape(Vec3f * vertices, const Triangle * triangles, int vertexCount, int triangleCount, Vec3& offset);
+struct ShapeVecIter {
+	const Shape& shape;
+	int index;
+	Vec3f operator*() const {
+		return shape.operator[](index);
+	}
+	int operator++() {
+		return ++index;
+	}
+	bool operator!=(const ShapeVecIter& other) const {
+		return index != other.index;
+	}
 };
-
-struct NormalizedShape : public CenteredShape {
-	friend struct Shape;
-	NormalizedShape() : CenteredShape() {}
-	NormalizedShape(Vec3f * vertices, const Triangle * triangles, int vertexCount, int triangleCount);
-	NormalizedShape(Vec3f * vertices, Vec3f * normals, Vec2f * uvs, const Triangle * triangles, int vertexCount, int triangleCount);
-private:
-	NormalizedShape(Vec3f * vertices, const Triangle* triangles, int vertexCount, int triangleCount, CFramef& transformation);
+struct ShapeVecIterFactory {
+	const Shape& shape;
+	int size;
+	inline ShapeVecIter begin() const {
+		return ShapeVecIter{ shape, 0 };
+	};
+	inline ShapeVecIter end() const {
+		return ShapeVecIter{ shape, size };
+	};
+};
+inline ShapeVecIterFactory Shape::iterVertices() const {
+	return ShapeVecIterFactory{ *this, vertexCount };
 };

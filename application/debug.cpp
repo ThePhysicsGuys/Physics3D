@@ -62,7 +62,7 @@ namespace AppDebug {
 			}}
 		}
 
-		void logShape(Shape shape) {
+		void logShape(const Shape& shape) {
 			for(int i = 0; i < shape.triangleCount; i++) {
 				Triangle t = shape.triangles[i];
 				for(int j = 0; j < 3; j++) {

@@ -76,7 +76,7 @@ void PieChart::renderText(Screen& screen, Font* font) const {
 
 	float totalWeight = getTotal();
 
-	font->render(totalValue, textPos + Vec2(0.45, 0.035), Vec3(1,1,1), 0.0006);
+	font->render(totalValue, textPos + Vec2(0.50, 0.035), Vec3(1,1,1), 0.0006);
 
 	for(int i = 0; i < parts.size(); i++) {
 		const DataPoint& p = parts[i];

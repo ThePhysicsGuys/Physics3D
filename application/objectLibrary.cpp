@@ -21,7 +21,7 @@ Triangle icosahedronTriangles[] {
 	{10, 7 , 1}, {10, 9, 7 }, {9, 10, 6}, {9, 6 , 3}, {3, 6, 5 },
 };
 
-const NormalizedShape icosahedron(icosahedronVertices, icosahedronTriangles, 12, 20);
+const Shape icosahedron(icosahedronVertices, icosahedronTriangles, 12, 20);
 
 // Test shape
 Vec3f triangleShapeVecs[] {
@@ -55,17 +55,16 @@ Triangle houseTriangles[] {
 
 const Shape house(houseVertices, houseTriangles, 10, 16);
 
-NormalizedShape createCube(double side) {
+Shape createCube(double side) {
 	return createBox(side, side, side);
 }
 
-NormalizedShape createBox(double width, double height, double length) {
+Shape createBox(double width, double height, double length) {
 	Vec3f* newVecBuf = new Vec3f[8];
-	CFramef cf; // unused
-	return BoundingBox(width, height, length).toShape(newVecBuf).normalized(newVecBuf, nullptr, cf);
+	return BoundingBox(width, height, length).toShape(newVecBuf);
 }
 
-NormalizedShape createPrism(unsigned int sides, double radius, double height) {
+Shape createPrism(unsigned int sides, double radius, double height) {
 	unsigned int vertexCount = sides * 2;
 	unsigned int triangleCount = sides * 2 + (sides - 2) * 2;
 	Vec3f* vecBuf = new Vec3f[vertexCount];
@@ -93,10 +92,10 @@ NormalizedShape createPrism(unsigned int sides, double radius, double height) {
 		capOffset[i + (sides-2)] = Triangle{1, (i + 2) * 2+1, (i + 1) * 2+1};
 	}
 
-	return NormalizedShape(vecBuf, triangleBuf, vertexCount, triangleCount);
+	return Shape(vecBuf, triangleBuf, vertexCount, triangleCount);
 }
 
-NormalizedShape createPointyPrism(unsigned int sides, double radius, double height, double topOffset, double bottomOffset) {
+Shape createPointyPrism(unsigned int sides, double radius, double height, double topOffset, double bottomOffset) {
 	unsigned int vertexCount = sides * 2 + 2;
 	unsigned int triangleCount = sides * 4;
 	Vec3f* vecBuf = new Vec3f[vertexCount];
@@ -131,5 +130,5 @@ NormalizedShape createPointyPrism(unsigned int sides, double radius, double heig
 		capOffset[i + sides] = Triangle{topIndex, ((i + 1) % sides) * 2 + 1, i * 2 + 1};
 	}
 
-	return NormalizedShape(vecBuf, triangleBuf, vertexCount, triangleCount);
+	return Shape(vecBuf, triangleBuf, vertexCount, triangleCount);
 }

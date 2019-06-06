@@ -258,9 +258,10 @@ void Screen::init() {
 
 
 	// Skybox init
-	sphere = new IndexedMesh(OBJImport::load((std::istream&) std::istringstream(getResourceAsString(SPHERE_MODEL))));
+	VisualShape sphereShape(OBJImport::load((std::istream&) std::istringstream(getResourceAsString(SPHERE_MODEL))));
+	sphere = new IndexedMesh(sphereShape);
 	skybox = new BoundingBox{ -1, -1, -1, 1, 1, 1 };
-	skyboxMesh = new IndexedMesh(skybox->toShape(new Vec3f[8]));
+	skyboxMesh = new IndexedMesh(VisualShape(skybox->toShape(new Vec3f[8])));
 	skyboxTexture = new CubeMap("../res/skybox/right.jpg", "../res/skybox/left.jpg", "../res/skybox/top.jpg", "../res/skybox/bottom.jpg", "../res/skybox/front.jpg", "../res/skybox/back.jpg");
 
 
@@ -675,6 +676,8 @@ void Screen::refresh() {
 		skyboxMesh->render();
 	}
 
+	glDisable(GL_DEPTH_TEST);
+
 	// Render vector mesh
 	graphicsMeasure.mark(GraphicsProcess::VECTORS);
 	vectorShader.update(camera.viewMatrix, camera.projectionMatrix, camera.cframe.position);
@@ -686,6 +689,7 @@ void Screen::refresh() {
 	pointShader.update(camera.viewMatrix, camera.projectionMatrix, camera.cframe.position);
 	pointMesh->render();
 
+	glEnable(GL_DEPTH_TEST);
 
 	// Render origin mesh
 	graphicsMeasure.mark(GraphicsProcess::ORIGIN);
@@ -795,7 +799,7 @@ bool Screen::shouldClose() {
 	return glfwWindowShouldClose(window) != 0;
 }
 
-int Screen::addMeshShape(Shape s) {
+int Screen::addMeshShape(const VisualShape& s) {
 	int size = (int) meshes.size();
 	meshes.push_back(new IndexedMesh(s));
 	return size;

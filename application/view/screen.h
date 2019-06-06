@@ -65,7 +65,7 @@ public:
 		this->world = world;
 	};
 
-	int addMeshShape(Shape mesh);
+	int addMeshShape(const VisualShape& mesh);
 };
 
 extern StandardInputHandler* handler;

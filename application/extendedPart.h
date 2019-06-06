@@ -6,6 +6,8 @@
 
 #include "../engine/part.h"
 
+#include "visualShape.h"
+
 struct ExtendedPart : public Part {
 	
 	Material material;
@@ -16,7 +18,10 @@ struct ExtendedPart : public Part {
 
 	int drawMeshId;
 
+	VisualShape visualShape;
+
 	ExtendedPart() = default;
-	ExtendedPart(NormalizedShape shape, CFrame position, double density, double friction, int drawMeshId, std::string name = "Part");
-	ExtendedPart(Shape shape, CFrame position, double density, double friction, int drawMeshId, std::string name = "Part");
+	ExtendedPart(const Shape& hitbox, const CFrame& position, double density, double friction, int drawMeshId, std::string name = "Part");
+	ExtendedPart(const VisualShape& shape, const CFrame& position, double density, double friction, int drawMeshId, std::string name = "Part");
+	ExtendedPart(const Shape& hitbox, const VisualShape& shape, const CFrame& position, double density, double friction, int drawMeshId, std::string name = "Part");
 };

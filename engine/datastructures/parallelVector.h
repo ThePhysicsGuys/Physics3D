@@ -3,136 +3,140 @@
 #include "../math/vec3.h"
 
 #include <immintrin.h>
-// #include <cstdlib>
-
-
-struct alignas(32) AlignedList {
-	float v[8];
-
-	float& operator[](int index) { return v[index]; }
-	const float& operator[](int index) const { return v[index]; }
-};
 
 struct alignas(32) ParallelVec3 {
-	union {
-		__m256 xvalues;
-		float x[8];
-	};
-	union {
-		__m256 yvalues;
-		float y[8];
-	};
-	union {
-		__m256 zvalues;
-		float z[8];
-	};
-
-	//AlignedList x, y, z;
+	__m256 xvalues;
+	__m256 yvalues;
+	__m256 zvalues;
 
 	ParallelVec3() = default;
 	inline ParallelVec3(Vec3f data[8]) {
-		for(int i = 0; i < 8; i++) {
-			x[i] = data[i].x;
-			y[i] = data[i].y;
-			z[i] = data[i].z;
+		this->load(data);
+	}
+
+	inline void load(Vec3f data[8]) {
+		for (int i = 0; i < 8; i++) {
+			xvalues.m256_f32[i] = data[i].x;
+			yvalues.m256_f32[i] = data[i].y;
+			zvalues.m256_f32[i] = data[i].z;
 		}
 	}
 
 	inline Vec3f operator[](unsigned int i) const {
-		return Vec3f(x[i], y[i], z[i]);
-	}
-
-	inline __m256 dot(const Vec3f& vec) const {
-		__m256 xt = _mm256_set1_ps(vec.x);
-		__m256 yt = _mm256_set1_ps(vec.y);
-		__m256 zt = _mm256_set1_ps(vec.z);
-		
-		__m256 xtt = _mm256_mul_ps(xt, xvalues);
-		__m256 ytt = _mm256_mul_ps(yt, yvalues);
-		__m256 ztt = _mm256_mul_ps(zt, zvalues);
-		__m256 xy = _mm256_add_ps(xtt, ytt);
-		return _mm256_add_ps(xy, ztt);
+		return Vec3f(xvalues.m256_f32[i], yvalues.m256_f32[i], zvalues.m256_f32[i]);
 	}
 };
 
+inline ParallelVec3* createParallelVecBuf(size_t blockCount) {
+	ParallelVec3* vecs = new ParallelVec3[blockCount];
+	if (reinterpret_cast<size_t>(vecs) & 0b00011111 != 0) {
+		throw "Error, did not align ParallelVec3 storage!";
+	}
+	return vecs;
+}
+
+inline ParallelVec3* createAndFillParallelVecBuf(Vec3f* data, size_t size) {
+	size_t blockCount = (size+7) / 8;
+	ParallelVec3* vecs = createParallelVecBuf(blockCount);
+
+	unsigned int alignedSize = size & 0xFFFFFFF8;
+
+	// fill all the easly fillable blocks with their data
+	for (int i = 0; i < size / 8; i++) {
+		vecs[i].load(data + i * 8);
+	}
+
+	// fill the remainder of the last block with the last vector, just to have filler data there
+	// this makes it that for example getFurthestInDirection does not have to include a special case for the last block of vecs
+	unsigned int remaining = size & 7;
+	if (remaining != 0) { // not perfectly aligned to block count
+		Vec3f lastBlock[8];
+		Vec3f lastVec = data[alignedSize + remaining - 1];
+		unsigned int lastBlockIndex = size / 8;
+		for (int i = 0; i < remaining; i++)
+			lastBlock[i] = data[alignedSize + i];
+
+		for (int i = remaining; i < 8; i++)
+			lastBlock[i] = lastVec;
+
+		vecs[lastBlockIndex].load(lastBlock);
+	}
+	return vecs;
+}
 
 struct AOSOAVec3fBuf {
 	ParallelVec3* vecs;
 	int size;
 
-	AOSOAVec3fBuf(Vec3f* data, unsigned int size) : size(size) {
+	inline AOSOAVec3fBuf() : vecs(nullptr), size(0) {}
+
+	inline AOSOAVec3fBuf(Vec3f* data, unsigned int size) : size(size) {
 		unsigned int blockCount = (size + 7) / 8;
-		// vecs = (ParallelVec3*) std::aligned_alloc(32, blockCount*sizeof(ParallelVec3),);
-		vecs = new ParallelVec3[blockCount];
+		vecs = createParallelVecBuf(blockCount);
 
-#ifdef CHECK_SANITY
-		if (reinterpret_cast<size_t>(vecs) & 0b00011111 != 0) { throw "Error, did not align ParallelVec3 storage!"; }
-#endif
+		unsigned int alignedSize = size & 0xFFFFFFF8;
 
+		// fill all the easly fillable blocks with their data
 		for(int i = 0; i < size / 8; i++) {
-			for(int j = 0; j < 8; j++) {
-				vecs[i].x[j] = data[i * 8 + j].x;
-				vecs[i].y[j] = data[i * 8 + j].y;
-				vecs[i].z[j] = data[i * 8 + j].z;
-			}
+			vecs[i].load(data + i * 8);
 		}
-		if (size % 8 != 0) { // not perfectly aligned to block count
-			int fillUntil = size & 7;
-			for (int j = 0; j < fillUntil; j++) {
-				vecs[size / 8].x[j] = data[size / 8 * 8 + j].x;
-				vecs[size / 8].y[j] = data[size / 8 * 8 + j].y;
-				vecs[size / 8].z[j] = data[size / 8 * 8 + j].z;
-			}
-			Vec3f lastVec = data[size / 8 * 8 + fillUntil - 1];
-			for (int j = fillUntil; j < 8; j++) {
-				vecs[size / 8].x[j] = lastVec.x;
-				vecs[size / 8].y[j] = lastVec.y;
-				vecs[size / 8].z[j] = lastVec.z;
-			}
+
+		// fill the remainder of the last block with the last vector, just to have filler data there
+		// this makes it that for example getFurthestInDirection does not have to include a special case for the last block of vecs
+		unsigned int remaining = size & 7;
+		if (remaining != 0) { // not perfectly aligned to block count
+			Vec3f lastBlock[8];
+			Vec3f lastVec = data[alignedSize + remaining - 1];
+			unsigned int lastBlockIndex = size / 8;
+			for (int i = 0; i < remaining; i++)
+				lastBlock[i] = data[alignedSize + i];
+
+			for (int i = remaining; i < 8; i++)
+				lastBlock[i] = lastVec;
+			
+			vecs[lastBlockIndex].load(lastBlock);
 		}
 	}
 
-	AOSOAVec3fBuf(const AOSOAVec3fBuf& other) : size(other.size) {
-		vecs = new ParallelVec3[(size + 7) / 8];
-		/*for(int i = 0; i < (size + 7) / 8; i++) {
-		vecs[i] = other.vecs[i];
-		}*/
-		this->vecs = other.vecs;
+	inline AOSOAVec3fBuf(const AOSOAVec3fBuf& other) : size(other.size) {
+		vecs = createParallelVecBuf(other.blockCount());
+		for (unsigned int i = 0; i < other.blockCount(); i++) {
+			vecs[i] = other.vecs[i];
+		}
 	}
 
-	AOSOAVec3fBuf(AOSOAVec3fBuf&& other) : size(other.size), vecs(other.vecs) {
+	inline AOSOAVec3fBuf& operator=(const AOSOAVec3fBuf& other) {
+		delete[] this->vecs;
+		vecs = createParallelVecBuf(other.blockCount());
+		for (unsigned int i = 0; i < other.blockCount(); i++) {
+			vecs[i] = other.vecs[i];
+		}
+		this->size = other.size;
+	}
+
+	inline AOSOAVec3fBuf(AOSOAVec3fBuf&& other) : size(other.size), vecs(other.vecs) {
 		other.vecs = nullptr;
+		other.size = 0;
 	}
 
-	AOSOAVec3fBuf& operator=(const AOSOAVec3fBuf& other) {
-		size = other.size;
-		/*vecs = new ParallelVec3[(size + 7) / 8];
-		for(int i = 0; i < (size + 7) / 8; i++) {
-		vecs[i] = other.vecs[i];
-		}*/
-		this->vecs = other.vecs;
+	inline AOSOAVec3fBuf& operator=(AOSOAVec3fBuf&& other) {
+		std::swap(this->vecs, other.vecs);
+		std::swap(this->size, other.size);
 		return *this;
 	}
 
-	AOSOAVec3fBuf& operator=(AOSOAVec3fBuf&& other) {
-		size = other.size;
-		vecs = other.vecs;
-		other.vecs = nullptr;
-		return *this;
+	inline ~AOSOAVec3fBuf() {
+		delete[] vecs;
 	}
 
-	~AOSOAVec3fBuf() {
-		//delete[] vecs;
-	}
+	inline Vec3f operator[](unsigned int index) const { return vecs[index / 8][index & 7]; }
 
-	Vec3f operator[](unsigned int index) const { return vecs[index / 8][index & 7]; }
+	inline const ParallelVec3* begin() const {return vecs;}
+	inline ParallelVec3* begin() { return vecs; }
+	inline const ParallelVec3* end() const {return vecs + blockCount();}
+	inline ParallelVec3* end() { return vecs + blockCount(); }
 
-	const ParallelVec3* begin() const {return vecs;}
-	ParallelVec3* begin() { return vecs; }
-	const ParallelVec3* end() const {return vecs + blockCount();}
-	ParallelVec3* end() { return vecs + blockCount(); }
-
-	unsigned int blockCount() const { return (size + 7) / 8; }
+	inline unsigned int blockCount() const { return (size + 7) / 8; }
 };
 
 

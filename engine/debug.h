@@ -38,5 +38,5 @@ namespace Debug {
 	void setVecLogAction(void(*logger)(Vec3 origin, Vec3 vec, VecType type));
 	void setPointLogAction(void(*logger)(Vec3 point, PointType type));
 	void setCFrameLogAction(void(*logger)(CFrame frame, CFrameType type));
-	void setShapeLogAction(void(*logger)(Shape shape));
+	void setShapeLogAction(void(*logger)(const Shape& shape));
 }

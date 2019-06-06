@@ -1,5 +1,7 @@
 #include "export.h"
 
+#include "visualShape.h"
+
 #include "../util/log.h"
 
 #include "../engine/math/vec4.h"
@@ -72,7 +74,7 @@ std::string Export::str(double num) {
 	OBJExport
 */
 
-void saveBinaryObj(std::string filename, const Shape& shape) {
+void saveBinaryObj(std::string filename, const VisualShape& shape) {
 	struct stat buffer;
 
 	if (stat(filename.c_str(), &buffer) != -1) {
@@ -132,7 +134,7 @@ void saveBinaryObj(std::string filename, const Shape& shape) {
 	output.close();
 }
 
-void saveNonBinaryObj(const std::string& filename, const Shape& shape) {
+void saveNonBinaryObj(const std::string& filename, const VisualShape& shape) {
 	struct stat buffer;
 
 	if (stat(filename.c_str(), &buffer) != -1) {
@@ -142,7 +144,7 @@ void saveNonBinaryObj(const std::string& filename, const Shape& shape) {
 	std::ofstream output;
 	output.open(filename);
 
-	for (Vec3 vertex : shape.iterVertices()) {
+	for (Vec3f vertex : shape.iterVertices()) {
 		output << "v " << vertex.x << " " << vertex.y << " " << vertex.z << std::endl;
 	}
 
@@ -182,7 +184,7 @@ void saveNonBinaryObj(const std::string& filename, const Shape& shape) {
 	output.close();
 }
 
-void OBJExport::save(const std::string& filename, const Shape& shape, bool binary) {
+void OBJExport::save(const std::string& filename, const VisualShape& shape, bool binary) {
 	if (binary)
 		saveBinaryObj(filename, shape);
 	else
@@ -272,7 +274,7 @@ void saveNonBinaryWorld(const std::string& name, World<ExtendedPart>& world, Cam
 			shapes[extendedPart.drawMeshId] = shape;
 			
 			Log::info("Exporting %s", shape.c_str());
-			OBJExport::save(folder + "/" + shape + ".obj", extendedPart.hitbox);
+			OBJExport::save(folder + "/" + shape + ".obj", extendedPart.visualShape);
 		}
 
 		savePart(output, extendedPart, shape, true);
@@ -289,7 +291,7 @@ void saveNonBinaryWorld(const std::string& name, World<ExtendedPart>& world, Cam
 			shapes[extendedPart.drawMeshId] = shape;
 
 			Log::info("Exporting %s", shape.c_str());
-			OBJExport::save(folder + "/" + shape + ".obj", extendedPart.hitbox);
+			OBJExport::save(folder + "/" + shape + ".obj", extendedPart.visualShape);
 		}
 
 		savePart(output, extendedPart, shape, false);

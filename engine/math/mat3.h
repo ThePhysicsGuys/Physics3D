@@ -479,6 +479,24 @@ SymmetricMat3Template<N> transformBasis(SymmetricMat3Template<N> sm, Mat3Templat
 	return SymmetricMat3Template<N>(r.m00, r.m11, r.m22, r.m01, r.m02, r.m12);
 }
 
+template<typename N>
+SymmetricMat3Template<N> multiplyLeftRight(SymmetricMat3Template<N> sm, Mat3Template<N> otherMat) {
+	Mat3Template<N> r = otherMat * sm * otherMat.transpose();
+	return SymmetricMat3Template<N>(r.m00, r.m11, r.m22, r.m01, r.m02, r.m12);
+}
+
+/*
+	Returns the cross product equivalent matrix
+	
+	vec % x == createCrossProductEquivalent(vec) * x
+*/
+template<typename N>
+Mat3Template<N> createCrossProductEquivalent(Vec3Template<N> vec) {
+	return Mat3Template<N>( 0, -vec.z, vec.y,
+							vec.z, 0, -vec.x,
+							-vec.y, vec.x, 0);
+}
+
 typedef Mat3Template<double>	Mat3;
 typedef Mat3Template<float>		Mat3f;
 typedef Mat3Template<long long>	Mat3l;
