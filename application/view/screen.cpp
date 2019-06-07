@@ -180,11 +180,6 @@ Label* partEnergy = nullptr;
 
 Image* image = nullptr;
 
-Slider* partRSlider = nullptr;
-Slider* partGSlider = nullptr;
-Slider* partBSlider = nullptr;
-Slider* partASlider = nullptr;
-
 CheckBox* renderModeCheckBox = nullptr;
 
 Panel* mouseVertical = nullptr;
@@ -291,37 +286,15 @@ void Screen::init() {
 
 	colorPicker = new ColorPicker(0, 0, 0.5);
 
-	partRSlider = new Slider(0, 0, 0, 1, 1);
-	partGSlider = new Slider(0, 0, 0, 1, 1);
-	partBSlider = new Slider(0, 0, 0, 1, 1);
-	partASlider = new Slider(0, 0, 0, 1, 1);
 	partVelocity = new Label("", 0, 0);
 	partAngularVelocity = new Label("", 0, 0);
 	partKineticEnergy = new Label("", 0, 0);
 	partPotentialEnergy = new Label("", 0, 0);
 	partEnergy = new Label("", 0, 0);
 
-	partRSlider->action = [] (Slider* s) {
+	colorPicker->action = [] (ColorPicker* c) {
 		if (GUI::screen->selectedPart) {
-			GUI::screen->selectedPart->material.ambient.x = s->value;
-		}
-	};
-
-	partGSlider->action = [] (Slider* s) {
-		if (GUI::screen->selectedPart) {
-			GUI::screen->selectedPart->material.ambient.y = s->value;
-		}
-	}; 
-	
-	partBSlider->action = [] (Slider* s) {
-		if (GUI::screen->selectedPart) {
-			GUI::screen->selectedPart->material.ambient.z = s->value;
-		}
-	};
-
-	partASlider->action = [](Slider* s) {
-		if (GUI::screen->selectedPart) {
-			GUI::screen->selectedPart->material.ambient.w = s->value;
+			GUI::screen->selectedPart->material.ambient = GUI::COLOR::hsvaToRgba(c->hsva);
 		}
 	};
 
@@ -340,10 +313,6 @@ void Screen::init() {
 	propertiesFrame->add(partPositionLabel, Align::FILL);
 	propertiesFrame->add(partMeshIDLabel, Align::FILL);
 	propertiesFrame->add(renderModeCheckBox, Align::FILL);
-	propertiesFrame->add(partRSlider, Align::FILL);
-	propertiesFrame->add(partGSlider, Align::FILL);
-	propertiesFrame->add(partBSlider, Align::FILL);
-	propertiesFrame->add(partASlider, Align::FILL);
 	propertiesFrame->add(colorPicker, Align::FILL);
 	propertiesFrame->add(partVelocity, Align::FILL);
 	propertiesFrame->add(partAngularVelocity, Align::FILL);
@@ -483,14 +452,7 @@ void Screen::update() {
 		partEnergy->text = "Energy: " + std::to_string(kineticEnergy + potentialEnergy);
 
 		Vec4 color = selectedPart->material.ambient;
-		partRSlider->handleColor = Vec4(color.x, 0, 0, 1);
-		partRSlider->value = color.x;
-		partGSlider->handleColor = Vec4(0, color.y, 0, 1);
-		partGSlider->value = color.y;
-		partBSlider->handleColor = Vec4(0, 0, color.z, 1);
-		partBSlider->value = color.z;
-		partASlider->handleColor = Vec4(color.w, color.w, color.w, 1);
-		partASlider->value = color.w;
+		colorPicker->setRgba(color);
 	} else {
 		partMeshIDLabel->text = "MeshID: -";
 		renderModeCheckBox->checked = false;
@@ -501,15 +463,6 @@ void Screen::update() {
 		partKineticEnergy->text = "Kinetic Energy: -";
 		partPotentialEnergy->text = "Potential Energy: -";
 		partEnergy->text = "Energy: -";
-
-		partRSlider->handleColor = GUI::COLOR::BACK;
-		partRSlider->value = 1;
-		partGSlider->handleColor = GUI::COLOR::BACK;
-		partGSlider->value = 1;
-		partBSlider->handleColor = GUI::COLOR::BACK;
-		partBSlider->value = 1;
-		partASlider->handleColor = GUI::COLOR::BACK;
-		partASlider->value = 1;
 	}
 }
 

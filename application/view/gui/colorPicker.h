@@ -5,22 +5,29 @@
 
 #include "../engine/math/vec2.h"
 
+class ColorPicker;
+
+typedef void (*ColorPickerAction) (ColorPicker*);
+
 class ColorPicker : public Component {
 private:
 	Vec2 crosshair;
-	double brightness;
 
 	bool colorPicking;
 	bool brightnessPicking;
+	bool alphaPicking;
 public:
-	Vec4 color;
+	ColorPickerAction action = [] (ColorPicker*) {};
+
+	Vec4 hsva;
 
 	Vec4 background;
 
 	ColorPicker(double x, double y, double size);
 	ColorPicker(double x, double y);
 
-	void setColor(Vec4 rgba);
+	void setRgba(Vec4 rgba);
+	Vec4 getRgba();
 
 	Vec2 resize() override;
 	void render() override;

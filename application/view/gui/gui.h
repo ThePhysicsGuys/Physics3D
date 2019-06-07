@@ -99,15 +99,17 @@ namespace GUI {
 	extern Texture* colorPickerCrosshairTexture;
 	extern Texture* colorPickerHueTexture;
 	extern Texture* colorPickerBrightnessTexture;
-	extern Vec4 colorPickerBrightnessBorderColor;
-	extern double colorPickerBrightnessWidth;
+	extern Texture* colorPickerAlphaBrightnessTexture;
+	extern Texture* colorPickerAlphaPatternTexture;
+	extern Vec4 colorPickerBarBorderColor;
+	extern double colorPickerBarWidth;
 	extern double colorPickerHueSize;
 	extern double colorPickerSpacing;
-	extern double colorPickerPointerCrosshairSize;
-	extern double colorPickerBrightnessBorderWidth;
-	extern double colorPickerBrightnessSelectorWidth;
-	extern double colorPickerBrightnessSelectorHeight;
-	extern Vec4 colorPickerBrightnessSelectorColor;
+	extern double colorPickerCrosshairSize;
+	extern double colorPickerBarBorderWidth;
+	extern double colorPickerSelectorWidth;
+	extern double colorPickerSelectorHeight;
+	extern Vec4 colorPickerSelectorColor;
 
 	// CheckBox
 	extern Texture* checkBoxUncheckedTexture;

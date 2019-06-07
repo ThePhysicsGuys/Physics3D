@@ -183,15 +183,17 @@ namespace GUI {
 	Texture* colorPickerCrosshairTexture;
 	Texture* colorPickerHueTexture;
 	Texture* colorPickerBrightnessTexture;
-	Vec4 colorPickerBrightnessBorderColor = COLOR::SILVER;
-	double colorPickerBrightnessWidth = 0.05;
+	Texture* colorPickerAlphaBrightnessTexture;
+	Texture* colorPickerAlphaPatternTexture;
+	Vec4 colorPickerBarBorderColor = COLOR::SILVER;
+	double colorPickerBarWidth = 0.05;
 	double colorPickerHueSize = 0.4;
-	double colorPickerPointerCrosshairSize = 0.03;
+	double colorPickerCrosshairSize = 0.03;	
 	double colorPickerSpacing = 0.06;
-	double colorPickerBrightnessBorderWidth = 0.005;
-	double colorPickerBrightnessSelectorWidth = 0.08;
-	double colorPickerBrightnessSelectorHeight = 0.004;
-	Vec4 colorPickerBrightnessSelectorColor = COLOR::SILVER;
+	double colorPickerBarBorderWidth = 0.005;
+	double colorPickerSelectorWidth = 0.08;
+	double colorPickerSelectorHeight = 0.004;
+	Vec4 colorPickerSelectorColor = COLOR::SILVER;
 
 	// CheckBox
 	Texture* checkBoxUncheckedTexture;
@@ -237,6 +239,8 @@ namespace GUI {
 		GUI::checkBoxHoverUncheckedTexture = GUI::checkBoxUncheckedTexture->colored(Vec3(0.999));
 
 		GUI::colorPickerHueTexture = load("../res/textures/gui/hue.png");
+		GUI::colorPickerAlphaBrightnessTexture = load("../res/textures/gui/alphaBrightness.png");
+		GUI::colorPickerAlphaPatternTexture = load("../res/textures/gui/alphaPattern.png");
 		GUI::colorPickerBrightnessTexture = load("../res/textures/gui/brightness.png");
 		GUI::colorPickerCrosshairTexture = load("../res/textures/gui/crosshair.png");
 	}
