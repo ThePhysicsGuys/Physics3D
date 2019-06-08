@@ -34,6 +34,9 @@ public:
 	Vec4 idleColor;
 	Vec4 pressColor;
 
+	Vec4 borderColor;
+	double borderWidth;
+
 	Button(double x, double y, double width, double height, bool textured);
 	Button(std::string text, double x, double y, bool textured);
 

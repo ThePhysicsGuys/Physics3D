@@ -107,6 +107,7 @@ void StandardInputHandler::mouseDown(int button, int mods) {
 		GUI::selectedComponent = GUI::intersectedComponent;
 
 		if (GUI::intersectedComponent) {
+			GUI::select(GUI::superParent(GUI::intersectedComponent));
 			GUI::intersectedComponent->press(GUI::map(cursorPosition));
 			GUI::intersectedPoint = GUI::map(cursorPosition) - GUI::intersectedComponent->position;
 		} else {

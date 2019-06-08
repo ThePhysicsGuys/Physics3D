@@ -168,6 +168,8 @@ namespace GUI {
 	Texture* minimizeButtonHoverTexture;
 	Texture* minimizeButtonIdleTexture;
 	Texture* minimizeButtonPressTexture;
+	Vec4 borderColor = COLOR::SILVER;
+	double borderWidth = 0.004;
 
 	// Slider
 	double sliderBarWidth = 0.4;
@@ -291,6 +293,7 @@ namespace GUI {
 				// Update intersected
 				GUI::intersectedComponent = intersected;
 				GUI::intersectedComponent->enter();
+
 				return;
 			}
 		}
@@ -302,6 +305,20 @@ namespace GUI {
 		
 		// Reset intersected
 		GUI::intersectedComponent = nullptr;
+	}
+
+	void select(Component* component) {
+		components.select(component);
+	}
+
+	Component* superParent(Component* child) {
+		Component* superParent = child;
+		
+		while (Component* newSuperParent = superParent->parent) {
+			superParent = newSuperParent;
+		}
+
+		return superParent;
 	}
 
 	bool intersectsSquare(Vec2 point, Vec2 topleft, Vec2 dimension) {
@@ -326,7 +343,8 @@ namespace GUI {
 
 	void render(Mat4f orthoMatrix) {
 		update(orthoMatrix);
-		for (Component* component : components)
-			component->render();
+		for (auto iterator = components.rbegin(); iterator != components.rend(); ++iterator) {
+			(*iterator)->render();
+		}
 	}
 }

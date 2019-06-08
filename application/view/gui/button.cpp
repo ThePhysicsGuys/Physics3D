@@ -2,6 +2,11 @@
 
 Button::Button(double x, double y, double width, double height, bool textured) : Component(x, y, width, height) {
 	this->textured = textured;
+	this->borderColor = GUI::borderColor;
+	if (textured)
+		this->borderWidth = 0;
+	else
+		this->borderWidth = GUI::borderWidth;
 }
 
 Button::Button(std::string text, double x, double y, bool textured) : Component(x, y) {
@@ -9,6 +14,11 @@ Button::Button(std::string text, double x, double y, bool textured) : Component(
 	this->fontSize = GUI::fontSize;
 	this->textured = textured;
 	this->text = text;
+	this->borderColor = GUI::borderColor;
+	if (textured)
+		this->borderWidth = 0;
+	else
+		this->borderWidth = GUI::borderWidth;
 }
 
 void Button::renderPressed() {
@@ -46,6 +56,12 @@ void Button::render() {
 
 	GUI::quad->resize(position, dimension);
 
+	if (borderWidth > 0) {
+		GUI::shader->update(borderColor);
+		GUI::quad->render();
+		GUI::quad->resize(position + Vec2(borderWidth, -borderWidth), dimension - Vec2(borderWidth) * 2);
+	}
+
 	if (pressed)
 		renderPressed();
 	else if (hovering)
@@ -54,12 +70,12 @@ void Button::render() {
 		renderIdle();
 
 	if (!text.empty())
-		GUI::font->render(text, position, fontColor, fontSize);
+		GUI::font->render(text, position + Vec2(borderWidth, -borderWidth), fontColor, fontSize);
 }
 
 Vec2 Button::resize() {
 	if (resizing) {
-		dimension = GUI::font->size(text, fontSize);
+		dimension = GUI::font->size(text, fontSize) + Vec2(borderWidth) * 2;
 	} 
 
 	return dimension;

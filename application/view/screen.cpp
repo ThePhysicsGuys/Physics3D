@@ -167,7 +167,6 @@ Quad* quad = nullptr;
 
 
 // GUI
-Frame* imageFrame = nullptr;
 Frame* propertiesFrame = nullptr;
 Label* partNameLabel = nullptr;
 Label* partPositionLabel = nullptr;
@@ -177,6 +176,7 @@ Label* partAngularVelocity = nullptr;
 Label* partKineticEnergy = nullptr;
 Label* partPotentialEnergy = nullptr;
 Label* partEnergy = nullptr;
+Button* colorButton;
 
 Image* image = nullptr;
 
@@ -185,6 +185,7 @@ CheckBox* renderModeCheckBox = nullptr;
 Panel* mouseVertical = nullptr;
 Panel* mouseHorizontal = nullptr;
 
+Frame* colorPickerFrame = nullptr;
 ColorPicker* colorPicker = nullptr;
 
 void Screen::init() {
@@ -283,14 +284,23 @@ void Screen::init() {
 	partNameLabel = new Label("", 0, 0);
 	partPositionLabel = new Label("", 0, 0);
 	partMeshIDLabel = new Label("", 0, 0);
-
-	colorPicker = new ColorPicker(0, 0, 0.5);
-
+	colorButton = new Button(0, 0, GUI::sliderBarWidth, GUI::sliderHandleHeight, false);
 	partVelocity = new Label("", 0, 0);
 	partAngularVelocity = new Label("", 0, 0);
 	partKineticEnergy = new Label("", 0, 0);
 	partPotentialEnergy = new Label("", 0, 0);
 	partEnergy = new Label("", 0, 0);
+
+	colorPickerFrame = new Frame(0, 0, "Color");
+	colorPickerFrame->visible = false;
+	colorPicker = new ColorPicker(0, 0, 0.5);
+
+	colorButton->action = [] (Button* c) {
+		if (GUI::screen->selectedPart && !colorPickerFrame->visible) {
+			colorPickerFrame->position = propertiesFrame->position + Vec2(propertiesFrame->dimension.x + GUI::padding * 2, 0);
+			colorPickerFrame->visible = true;
+		}
+	};
 
 	colorPicker->action = [] (ColorPicker* c) {
 		if (GUI::screen->selectedPart) {
@@ -313,13 +323,17 @@ void Screen::init() {
 	propertiesFrame->add(partPositionLabel, Align::FILL);
 	propertiesFrame->add(partMeshIDLabel, Align::FILL);
 	propertiesFrame->add(renderModeCheckBox, Align::FILL);
-	propertiesFrame->add(colorPicker, Align::FILL);
+	propertiesFrame->add(colorButton, Align::FILL);
 	propertiesFrame->add(partVelocity, Align::FILL);
 	propertiesFrame->add(partAngularVelocity, Align::FILL);
 	propertiesFrame->add(partKineticEnergy, Align::FILL);
 	propertiesFrame->add(partPotentialEnergy, Align::FILL);
 	propertiesFrame->add(partEnergy, Align::FILL);
+
+	colorPickerFrame->add(colorPicker, Align::FILL);
+
 	GUI::add(propertiesFrame);
+	GUI::add(colorPickerFrame);
 
 
 	// Mouse init
@@ -452,8 +466,14 @@ void Screen::update() {
 		partEnergy->text = "Energy: " + std::to_string(kineticEnergy + potentialEnergy);
 
 		Vec4 color = selectedPart->material.ambient;
+		colorButton->idleColor = color;
+		colorButton->hoverColor = color;
+		colorButton->pressColor = color;
 		colorPicker->setRgba(color);
 	} else {
+		colorButton->idleColor = Vec4(1);
+		colorButton->hoverColor = Vec4(1);
+		colorButton->pressColor = Vec4(1);
 		partMeshIDLabel->text = "MeshID: -";
 		renderModeCheckBox->checked = false;
 		partPositionLabel->text = "Position: -";

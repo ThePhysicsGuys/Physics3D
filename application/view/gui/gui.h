@@ -84,6 +84,8 @@ namespace GUI {
 	extern Texture* minimizeButtonHoverTexture;
 	extern Texture* minimizeButtonIdleTexture;
 	extern Texture* minimizeButtonPressTexture;
+	extern Vec4 borderColor;
+	extern double borderWidth;
 
 	// Slider
 	extern double sliderBarWidth;
@@ -135,6 +137,9 @@ namespace GUI {
 
 	void add(Component* component);
 	void remove(Component* component);
+	void select(Component* component);
+
+	Component* superParent(Component* child);
 
 	double clamp(double value, double min, double max);
 	double map(double x, double minIn, double maxIn, double minOut, double maxOut);

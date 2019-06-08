@@ -17,6 +17,14 @@ public:
 		return elements.end();
 	}
 
+	inline typename std::vector<T>::const_reverse_iterator rbegin() const {
+		return elements.rbegin();
+	}
+
+	inline typename std::vector<T>::const_reverse_iterator rend() const {
+		return elements.rend();
+	}
+
 	inline void insert(const T& element) {
 		elements.insert(begin(), element);
 	}
@@ -37,9 +45,8 @@ public:
 	}
 
 	inline void select(const T& element) {
-		auto iterator = begin();
-		for (; iterator != end(); ++iterator) {
-			if (&element == &*iterator) {
+		for (auto iterator = begin(); iterator != end(); ++iterator) {
+			if (element == *iterator) {
 				auto resultValue = *iterator;
 				elements.erase(iterator);
 				elements.insert(begin(), resultValue);
