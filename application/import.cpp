@@ -363,7 +363,7 @@ void parseSubject(Subject subject, std::string path, std::map<std::string, std::
 		part->material = material;
 		part->renderMode = mode;
 
-		world.addObject(part, anchored);
+		world.addPart(part, anchored);
 	} else if (subject == Subject::CAMERA) {
 		Vec3 pos = Import::parseVec3(fields.at("position"));
 		Mat3 rot = Import::parseMat3(fields.at("rotation"));
