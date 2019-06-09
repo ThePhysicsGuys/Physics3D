@@ -7,25 +7,15 @@
 #include <math.h>
 
 #include "convexShapeBuilder.h"
-
 #include "../math/utils.h"
-
 #include "../../util/Log.h"
-
 #include "../engineException.h"
-
 #include "../debug.h"
 #include "../math/mathUtil.h"
-
 #include "../physicsProfiler.h"
-
 #include "computationBuffer.h"
-
 #include "intersection.h"
-
 #include "../datastructures/parallelVector.h"
-
-#include <immintrin.h>
 
 bool Triangle::sharesEdgeWith(Triangle other) const {
 	return firstIndex == other.secondIndex && secondIndex == other.firstIndex ||
@@ -203,7 +193,7 @@ bool Shape::containsPoint(Vec3f point) const {
 
 
 #ifdef __AVX__
-#include <immintrin.h> // I know I don't have to include it, but I'm sending a message!
+#include <immintrin.h>
 #ifdef _MSC_VER
 inline uint32_t __builtin_ctz(uint32_t x) {
 	unsigned long ret;

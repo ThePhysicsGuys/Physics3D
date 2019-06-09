@@ -99,6 +99,12 @@ struct Colission {
 size_t findColissions(WorldPrototype& world, std::vector<Colission>& colissions) {
 	for(Physical& anchoredPhys: world.iterAnchoredPhysicals()) {
 		for(Physical& freePhys: world.iterFreePhysicals()) {
+			Vec3 deltaPosition = freePhys.getCFrame().getPosition() - anchoredPhys.getCFrame().getPosition();
+			double maxDistanceBetween = freePhys.maxRadius + anchoredPhys.maxRadius;
+			if (deltaPosition.lengthSquared() > maxDistanceBetween * maxDistanceBetween) {
+				intersectionStatistics.addToTally(IntersectionResult::PHYSICAL_DISTANCE_REJECT, freePhys.getPartCount() * anchoredPhys.getPartCount());
+				continue;
+			}
 			for (Part& anchoredPart : anchoredPhys) {
 				for (Part& freePart : freePhys) {
 					double maxRadiusBetween = anchoredPart.maxRadius + freePart.maxRadius;
@@ -107,7 +113,7 @@ size_t findColissions(WorldPrototype& world, std::vector<Colission>& colissions)
 					double distanceSqBetween = deltaPosition.lengthSquared();
 
 					if (distanceSqBetween > maxRadiusBetween * maxRadiusBetween) {
-						intersectionStatistics.addToTally(IntersectionResult::DISTANCE_REJECT, 1);
+						intersectionStatistics.addToTally(IntersectionResult::PART_DISTANCE_REJECT, 1);
 						continue;
 					}
 
@@ -135,6 +141,12 @@ size_t findColissions(WorldPrototype& world, std::vector<Colission>& colissions)
 		Physical& phys1 = *mainIter;
 		for(auto secondIter = mainIter; ++secondIter != finish; ) {
 			Physical& phys2 = *secondIter;
+			Vec3 deltaPosition = phys1.getCFrame().getPosition() - phys2.getCFrame().getPosition();
+			double maxDistanceBetween = phys1.maxRadius + phys2.maxRadius;
+			if (deltaPosition.lengthSquared() > maxDistanceBetween * maxDistanceBetween) {
+				intersectionStatistics.addToTally(IntersectionResult::PHYSICAL_DISTANCE_REJECT, phys1.getPartCount()*phys2.getPartCount());
+				continue;
+			}
 			for (Part& p1 : phys1) {
 				for (Part& p2 : phys2) {
 					double maxRadiusBetween = p1.maxRadius + p2.maxRadius;
@@ -143,7 +155,7 @@ size_t findColissions(WorldPrototype& world, std::vector<Colission>& colissions)
 					double distanceSqBetween = deltaPosition.lengthSquared();
 
 					if (distanceSqBetween > maxRadiusBetween * maxRadiusBetween) {
-						intersectionStatistics.addToTally(IntersectionResult::DISTANCE_REJECT, 1);
+						intersectionStatistics.addToTally(IntersectionResult::PART_DISTANCE_REJECT, 1);
 						continue;
 					}
 

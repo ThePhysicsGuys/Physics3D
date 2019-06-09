@@ -19,7 +19,8 @@ enum class PhysicsProcess {
 enum class IntersectionResult {
 	COLISSION,
 	GJK_REJECT,
-	DISTANCE_REJECT,
+	PHYSICAL_DISTANCE_REJECT,
+	PART_DISTANCE_REJECT,
 	COUNT
 };
 

@@ -257,7 +257,7 @@ void Screen::init() {
 	VisualShape sphereShape(OBJImport::load((std::istream&) std::istringstream(getResourceAsString(SPHERE_MODEL))));
 	sphere = new IndexedMesh(sphereShape);
 	skybox = new BoundingBox{ -1, -1, -1, 1, 1, 1 };
-	skyboxMesh = new IndexedMesh(VisualShape(skybox->toShape(new Vec3f[8])));
+	skyboxMesh = new IndexedMesh(VisualShape(skybox->toShape()));
 	skyboxTexture = new CubeMap("../res/skybox/right.jpg", "../res/skybox/left.jpg", "../res/skybox/top.jpg", "../res/skybox/bottom.jpg", "../res/skybox/front.jpg", "../res/skybox/back.jpg");
 
 

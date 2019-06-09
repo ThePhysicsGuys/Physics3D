@@ -4,16 +4,10 @@
 #include "math/mathUtil.h"
 
 #include "debug.h"
-
+#include <algorithm>
 
 
 Physical::Physical(Part* part) : cframe(part->cframe) {
-	/*this->mass = part->hitbox.getVolume() * part->properties.density;
-	SymmetricMat3 iner = part->hitbox.getInertia();
-	//if(abs(iner.m01) > 1E-10 || abs(iner.m02) > 1E-10 || abs(iner.m12) > 1E-10) Log::error("inertia of normalized hitbox is not diagonal!");
-	//DiagonalMat3 diagIner = DiagonalMat3(iner.m00, iner.m11, iner.m22);
-	this->inertia = iner * part->properties.density;*/
-
 	if (part->parent != nullptr) {
 		throw "Attempting to re-add part to different physical!";
 	}
@@ -23,6 +17,7 @@ Physical::Physical(Part* part) : cframe(part->cframe) {
 	this->localCenterOfMass = part->localCenterOfMass;
 	parts.push_back(AttachedPart{ CFrame(), part });
 	part->parent = this;
+	this->maxRadius = part->maxRadius;
 }
 
 void Physical::attachPart(Part* part, CFrame attachment) {
@@ -50,11 +45,13 @@ void Physical::detachPart(Part* part) {
 
 void Physical::refreshWithNewParts() {
 	double totalMass = 0;
+	this->maxRadius = 0;
 	SymmetricMat3 totalInertia(0, 0, 0, 0, 0, 0);
 	Vec3 totalCenterOfMass(0, 0, 0);
 	for (const AttachedPart& p : parts) {
 		totalMass += p.part->mass;
 		totalCenterOfMass += p.attachment.localToGlobal(p.part->localCenterOfMass) * p.part->mass;
+		this->maxRadius = std::max(this->maxRadius, p.attachment.getPosition().length() + p.part->maxRadius);
 	}
 	totalCenterOfMass /= totalMass;
 	for (const AttachedPart& p : parts) {

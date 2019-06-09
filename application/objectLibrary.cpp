@@ -60,8 +60,7 @@ Shape createCube(double side) {
 }
 
 Shape createBox(double width, double height, double length) {
-	Vec3f* newVecBuf = new Vec3f[8];
-	return BoundingBox(width, height, length).toShape(newVecBuf);
+	return BoundingBox(width, height, length).toShape();
 }
 
 Shape createPrism(unsigned int sides, double radius, double height) {
