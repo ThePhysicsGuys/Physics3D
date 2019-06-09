@@ -39,5 +39,5 @@ Shape BoundingBox::toShape(Vec3f vertBuf[8]) const {
 	vertBuf[5] = Vec3f(xmaxf, yminf, zmaxf);
 	vertBuf[6] = Vec3f(xmaxf, ymaxf, zmaxf);
 	vertBuf[7] = Vec3f(xminf, ymaxf, zmaxf);
-	return Shape(vertBuf, triangles, 8, 12);
+	return Shape(vertBuf, SharedArrayPtr<const Triangle>::staticSharedArrayPtr(triangles), 8, 12);
 }

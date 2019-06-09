@@ -3,7 +3,8 @@
 #include "../math/vec3.h"
 #include "../math/mat3.h"
 #include "../math/cframe.h"
-#include <memory>
+#include "../datastructures/parallelVector.h"
+#include "../datastructures/sharedArray.h"
 
 struct Triangle;
 struct Shape;
@@ -48,8 +49,6 @@ struct VertexIterFactory {
 };
 
 
-
-struct ParallelVec3;
 struct Shape {
 	struct TriangleIter {
 		const Triangle* first;
@@ -64,15 +63,14 @@ struct Shape {
 
 	
 private:
-	ParallelVec3* vertices;
+	SharedArrayPtr<const ParallelVec3> vertices;
 public:
-	const Triangle* triangles;
+	SharedArrayPtr<const Triangle> triangles;
 	int vertexCount;
 	int triangleCount;
 
-	Shape() : vertices(nullptr), triangles(nullptr), vertexCount(0), triangleCount(0) {};
-	Shape(Vec3f* vertices, const Triangle* triangles, int vertexCount, int triangleCount);
-
+	Shape() : vertices(nullptr), triangles(SharedArrayPtr<const Triangle>::staticSharedArrayPtr(nullptr)), vertexCount(0), triangleCount(0) {};
+	Shape(const Vec3f* vertices, SharedArrayPtr<const Triangle> triangles, int vertexCount, int triangleCount);
 	Shape translated(Vec3f offset, Vec3f* newVecBuf) const;
 	Shape rotated(RotMat3f rotation, Vec3f* newVecBuf) const;
 	Shape localToGlobal(CFramef frame, Vec3f* newVecBuf) const;
@@ -101,10 +99,12 @@ public:
 	int furthestIndexInDirection(const Vec3f& direction) const;
 	Vec3f furthestInDirection(const Vec3f& direction) const;
 
-	Vec3f operator[](int index) const;
+	inline Vec3f operator[](int index) const {
+		return this->vertices[index >> 3][index & 7];
+	}
 
 	inline TriangleIter iterTriangles() const { 
-		return TriangleIter { triangles, triangleCount };
+		return TriangleIter { triangles.get(), triangleCount };
 	};
 	inline ShapeVecIterFactory iterVertices() const;
 };

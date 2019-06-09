@@ -210,8 +210,9 @@ int main(void) {
 	//world.addObject(constructedExtendedPart);
 
 	VisualShape sphereShape = OBJImport::load((std::istream&) std::istringstream(getResourceAsString(SPHERE_MODEL)));
-	sphereShape.normals = std::shared_ptr<Vec3f>(new Vec3f[sphereShape.vertexCount], std::default_delete<Vec3f[]>());
-	sphereShape.computeNormals(sphereShape.normals.get());
+	Vec3f* normalBuf = new Vec3f[sphereShape.vertexCount];
+	sphereShape.computeNormals(normalBuf);
+	sphereShape.normals = SharedArrayPtr<const Vec3f>(normalBuf);
 
 	int minX = -3;
 	int maxX = 3;

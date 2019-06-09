@@ -14,7 +14,7 @@ ConvexShapeBuilder::ConvexShapeBuilder(const Shape& s, Vec3f * vertBuf, Triangle
 		vertBuf[i] = s[i];
 	}
 
-	memcpy(triangleBuf, s.triangles, s.triangleCount * sizeof(Triangle));
+	memcpy(triangleBuf, s.triangles.get(), s.triangleCount * sizeof(Triangle));
 
 	fillNeighborBuf(triangleBuf, triangleCount, neighborBuf);
 }
@@ -237,8 +237,8 @@ bool ConvexShapeBuilder::addPoint(const Vec3f& point) {
 }
 
 Shape ConvexShapeBuilder::toShape() const {
-	return Shape(vertexBuf, triangleBuf, vertexCount, triangleCount);
+	return Shape(vertexBuf, SharedArrayPtr<const Triangle>::staticSharedArrayPtr(triangleBuf), vertexCount, triangleCount);
 }
 IndexedShape ConvexShapeBuilder::toIndexedShape() const {
-	return IndexedShape{vertexBuf, triangleBuf, vertexCount, triangleCount, neighborBuf};
+	return IndexedShape{vertexBuf, SharedArrayPtr<const Triangle>::staticSharedArrayPtr(triangleBuf), vertexCount, triangleCount, neighborBuf};
 }

@@ -2,6 +2,7 @@
 
 #include "indexedShape.h"
 #include "shapeBuilder.h"
+#include "../datastructures/sharedArray.h"
 
 // used in building shape
 struct EdgePiece {

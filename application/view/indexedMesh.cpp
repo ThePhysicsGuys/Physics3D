@@ -15,7 +15,7 @@ IndexedMesh::IndexedMesh(const VisualShape& shape) : AbstractMesh(), vertexCount
 	normalBuffer = new VertexBuffer(reinterpret_cast<float const *>(shape.normals.get()), vertexCount * 3);
 	uvBuffer = new VertexBuffer(reinterpret_cast<float const *>(shape.uvs.get()), vertexCount * 2);
 
-	indexBuffer = new IndexBuffer(reinterpret_cast<unsigned int const *>(shape.triangles), triangleCount * 3);
+	indexBuffer = new IndexBuffer(reinterpret_cast<unsigned int const *>(shape.triangles.get()), triangleCount * 3);
 
 	vertexBufferLayout.push<float>(3);
 	normalBufferLayout.push<float>(3);

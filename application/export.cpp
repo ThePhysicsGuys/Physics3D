@@ -92,11 +92,11 @@ void saveBinaryObj(std::string filename, const VisualShape& shape) {
 
 	char flag = V;
 
-	if (shape.uvs && shape.normals) {
+	if (shape.uvs != nullptr && shape.normals != nullptr) {
 		flag = VNT;
-	} else if (shape.uvs) {
+	} else if (shape.uvs != nullptr) {
 		flag = VT;
-	} else if (shape.normals) {
+	} else if (shape.normals != nullptr) {
 		flag = VN;
 	}
 
@@ -111,14 +111,14 @@ void saveBinaryObj(std::string filename, const VisualShape& shape) {
 		i += 1;
 	}
 
-	if (shape.normals) {
+	if (shape.normals != nullptr) {
 		for (int i = 0; i < shape.vertexCount; i++) {
 			Vec3f normal = shape.normals.get()[i];
 			Export::write<Vec3f>(output, normal);
 		}
 	}
 
-	if (shape.uvs) {
+	if (shape.uvs != nullptr) {
 		for (int i = 0; i < shape.vertexCount; i++) {
 			Vec2f uv = shape.uvs.get()[i];
 			Export::write<Vec2f>(output, uv);
@@ -148,14 +148,14 @@ void saveNonBinaryObj(const std::string& filename, const VisualShape& shape) {
 		output << "v " << vertex.x << " " << vertex.y << " " << vertex.z << std::endl;
 	}
 
-	if (shape.normals) {
+	if (shape.normals != nullptr) {
 		for (int i = 0; i < shape.vertexCount; i++) {
 			Vec3 normal = shape.normals.get()[i];
 			output << "vn " << normal.x << " " << normal.y << " " << normal.z << std::endl;
 		}
 	}
 
-	if (shape.uvs) {
+	if (shape.uvs != nullptr) {
 		for (int i = 0; i < shape.vertexCount; i++) {
 			Vec2 uv = shape.uvs.get()[i];
 			output << "vt " << uv.x << " " << uv.y << std::endl;
@@ -167,11 +167,11 @@ void saveNonBinaryObj(const std::string& filename, const VisualShape& shape) {
 
 		for (int index : triangle.indexes) {
 			index++;
-			if (shape.normals && shape.uvs) {
+			if (shape.normals != nullptr && shape.uvs != nullptr) {
 				output << " " << index << "/" << index << "/" << index;
-			} else if (shape.uvs) {
+			} else if (shape.uvs != nullptr) {
 				output << " " << index << "//" << index;
-			} else if (shape.normals) {
+			} else if (shape.normals != nullptr) {
 				output << " " << index << "/" << index;
 			} else {
 				output << " " << index;
