@@ -66,6 +66,7 @@ std::map<PointType, PointColorPair> pointColors{
 };
 
 bool renderPies = false;
+bool renderColissionSpheres = false;
 
 int fieldIndex = 0;
 

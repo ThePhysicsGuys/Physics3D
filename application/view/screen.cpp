@@ -559,6 +559,14 @@ void Screen::renderPhysicals() {
 	}
 }
 
+void renderSphere(double radius, Vec3 position, Vec4f color) {
+	basicShader.updateMaterial(Material(color));
+
+	basicShader.updateModelMatrix(CFrameToMat4(CFrame(position, DiagonalMat3(1,1,1)*radius)));
+
+	sphere->render();
+}
+
 void Screen::refresh() {
 	fieldIndex = 0;
 
@@ -610,8 +618,28 @@ void Screen::refresh() {
 		for(const Vec3f& corner : selectedPart->hitbox.iterVertices()) {
 			vecLog.add(AppDebug::ColoredVec(Vec3(selectedCFrame.localToGlobal(corner)), selectedPart->parent->getVelocityOfPoint(Vec3(selectedCFrame.localToRelative(corner))), Debug::VELOCITY));
 		}
+		Vec4f blue = GUI::COLOR::BLUE;
+		blue.w = 0.5;
+		renderSphere(selectedPart->parent->maxRadius * 2, selectedPart->parent->getCFrame().getPosition(), blue);
+		Vec4f green = GUI::COLOR::GREEN;
+		green.w = 0.5;
+		renderSphere(selectedPart->maxRadius * 2, selectedCFrame.getPosition(), green);
 	}
-	
+
+	if (renderColissionSpheres) {
+		for (Physical& phys : world->iterPhysicals()) {
+			for (Part& part : phys) {
+				Vec4f green = GUI::COLOR::GREEN;
+				green.w = 0.5;
+				renderSphere(part.maxRadius * 2, part.cframe.getPosition(), green);
+			}
+		}
+		for (Physical& phys : world->iterPhysicals()) {
+			Vec4f blue = GUI::COLOR::BLUE;
+			blue.w = 0.5;
+			renderSphere(phys.maxRadius * 2, phys.getCFrame().getPosition(), blue);
+		}
+	}
 	// Postprocess to screenFrameBuffer
 	screenFrameBuffer->bind();
 	glDisable(GL_DEPTH_TEST);
