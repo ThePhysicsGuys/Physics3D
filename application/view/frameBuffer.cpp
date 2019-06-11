@@ -40,6 +40,14 @@ void FrameBuffer::unbind() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
+void FrameBuffer::resize(Vec2i dimension) {
+	if (texture)
+		texture->resize(dimension.x, dimension.y);
+	if (renderBuffer)
+		renderBuffer->resize(dimension.x, dimension.y);
+
+}
+
 void FrameBuffer::attach(Texture* texture) {
 	bind();
 	this->texture = texture;

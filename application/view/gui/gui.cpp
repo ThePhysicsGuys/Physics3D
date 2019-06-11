@@ -151,6 +151,7 @@ namespace GUI {
 
 	// Shader
 	QuadShader* shader = nullptr;
+	BlurShader* blurShader = nullptr;
 	Quad* quad = nullptr;
 
 	// Label
@@ -216,13 +217,14 @@ namespace GUI {
 
 	// Font
 	Font* font = nullptr;
-	Vec4 fontColor = COLOR::BLACK;
-	double fontSize = 0.0009;
+	Vec4 fontColor = COLOR::SILVER;
+	double fontSize = 0.0007;
 
-	void init(Screen* screen, QuadShader* shader, Font* font) {
+	void init(Screen* screen, QuadShader* shader, BlurShader* blurShader, Font* font) {
 		GUI::screen = screen;
 		GUI::font = font;
 		GUI::shader = shader;
+		GUI::blurShader = blurShader;
 		GUI::quad = new Quad();
 
 		GUI::closeButtonIdleTexture = load("../res/textures/gui/close_idle.png");
@@ -343,6 +345,18 @@ namespace GUI {
 
 	void render(Mat4f orthoMatrix) {
 		update(orthoMatrix);
+
+		screen->blurFrameBuffer->bind();
+		shader->update(screen->screenFrameBuffer->texture);
+		screen->quad->render();
+		blurShader->update(screen->blurFrameBuffer->texture);
+		blurShader->update(BlurShader::BlurType::HORIZONTAL);
+		screen->quad->render();
+		blurShader->update(screen->blurFrameBuffer->texture);
+		blurShader->update(BlurShader::BlurType::VERTICAL);
+		screen->quad->render();
+		screen->blurFrameBuffer->unbind();
+
 		for (auto iterator = components.rbegin(); iterator != components.rend(); ++iterator) {
 			(*iterator)->render();
 		}

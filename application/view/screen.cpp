@@ -8,7 +8,6 @@
 #include "pointMesh.h"
 #include "picker.h"
 #include "material.h"
-#include "quad.h"
 #include "shaderProgram.h"
 #include "font.h"
 #include "visualDebug.h"
@@ -163,7 +162,6 @@ DepthFrameBuffer* depthBuffer;
 VectorMesh* vectorMesh = nullptr;
 PointMesh* pointMesh = nullptr;
 ArrayMesh* originMesh = nullptr;
-Quad* quad = nullptr;
 
 
 // GUI
@@ -271,6 +269,7 @@ void Screen::init() {
 	quad = new Quad();
 	modelFrameBuffer = new FrameBuffer(width, height);
 	screenFrameBuffer = new FrameBuffer(width, height);
+	blurFrameBuffer = new FrameBuffer(width, height);
 	depthBuffer = new DepthFrameBuffer(1024, 1024);
 
 
@@ -279,7 +278,7 @@ void Screen::init() {
 
 
 	// GUI init
-	GUI::init(this, &quadShader, font);
+	GUI::init(this, &quadShader, &blurShader, font);
 	propertiesFrame = new Frame(0.7, 0.7, "Properties");
 	partNameLabel = new Label("", 0, 0);
 	partPositionLabel = new Label("", 0, 0);
@@ -294,11 +293,12 @@ void Screen::init() {
 	colorPickerFrame = new Frame(0, 0, "Color");
 	colorPickerFrame->visible = false;
 	colorPicker = new ColorPicker(0, 0, 0.5);
+	colorPickerFrame->anchor = propertiesFrame;
 
 	colorButton->action = [] (Button* c) {
 		if (GUI::screen->selectedPart && !colorPickerFrame->visible) {
-			colorPickerFrame->position = propertiesFrame->position + Vec2(propertiesFrame->dimension.x + GUI::padding * 2, 0);
 			colorPickerFrame->visible = true;
+			colorPickerFrame->anchor = propertiesFrame;
 		}
 	};
 
@@ -308,7 +308,7 @@ void Screen::init() {
 		}
 	};
 
-	renderModeCheckBox = new CheckBox("Properties", 0, 0, true);
+	renderModeCheckBox = new CheckBox("Wireframe", 0, 0, true);
 	renderModeCheckBox->action = [] (CheckBox* c) {
 		if (GUI::screen->selectedPart) {
 			if (GUI::screen->selectedPart->renderMode == GL_FILL) {
@@ -391,11 +391,11 @@ void Screen::init() {
 	});
 
 	eventHandler.setWindowResizeCallback([] (Screen& screen, unsigned int width, unsigned int height) {
-		screen.modelFrameBuffer->texture->resize(width, height);
-		screen.screenFrameBuffer->texture->resize(width, height);
-		screen.modelFrameBuffer->renderBuffer->resize(width, height);
-		screen.screenFrameBuffer->renderBuffer->resize(width, height);
-		screen.dimension = Vec2(width, height);
+		screen.dimension = Vec2i(width, height);
+		screen.screenFrameBuffer->resize(screen.dimension);
+		screen.modelFrameBuffer->resize(screen.dimension);
+		screen.blurFrameBuffer->resize(screen.dimension);
+
 		screen.camera.update(((float)width) / ((float)height));
 	});
 
@@ -617,12 +617,6 @@ void Screen::refresh() {
 	glDisable(GL_DEPTH_TEST);
 	postProcessShader.update(modelFrameBuffer->texture);
 	quad->render();
-	/*blurShader.update(modelFrameBuffer->texture);
-	blurShader.update(BlurShader::BlurType::HORIZONTAL);
-	quad->render();
-	blurShader.update(modelFrameBuffer->texture);
-	blurShader.update(BlurShader::BlurType::VERTICAL);
-	quad->render();*/
 
 	// Render vectors with old depth buffer
 	glEnable(GL_DEPTH_TEST);
@@ -707,6 +701,7 @@ void Screen::refresh() {
 	// Pie rendering
 	graphicsMeasure.mark(GraphicsProcess::PROFILER);
 	size_t objCount = world->getPartCount();
+	renderDebugField(dimension, font, "Screen", str(dimension) + ", [" + std::to_string(camera.aspect) + ":1]", "");
 	renderDebugField(dimension, font, "Position", str(camera.cframe.position), "");
 	renderDebugField(dimension, font, "Objects", objCount, "");
 	renderDebugField(dimension, font, "Intersections", getTheoreticalNumberOfIntersections(objCount), "");

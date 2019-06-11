@@ -80,3 +80,4 @@ public:
 typedef Vec2Template<double>	Vec2;
 typedef Vec2Template<float>		Vec2f;
 typedef Vec2Template<long long>	Vec2l;
+typedef Vec2Template<int>		Vec2i;

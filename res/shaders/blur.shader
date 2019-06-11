@@ -25,7 +25,7 @@ uniform bool horizontal;
 uniform float weight[5] = { 0.227027f, 0.1945946f, 0.1216216f, 0.054054f, 0.016216f };
 
 void main() {
-	vec2 offset = 3.0 / textureSize(image, 0);
+	vec2 offset = 4.0 / textureSize(image, 0);
 	vec3 result = texture(image, fUV).rgb * weight[0];
 
 	if (horizontal) {

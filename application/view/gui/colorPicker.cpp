@@ -28,9 +28,9 @@ void ColorPicker::render() {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-		GUI::shader->update(background);
+		/*GUI::shader->update(background);
 		GUI::quad->resize(position, dimension);
-		GUI::quad->render();
+		GUI::quad->render();*/
 
 		// Brightness
 		Vec2 brightnessBorderPosition = position + Vec2(padding, -padding);

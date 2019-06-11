@@ -37,6 +37,8 @@ Frame::Frame(double x, double y, std::string name) : Container(x, y) {
 	};
 
 	title = new Label(name, position.x, position.y);
+
+	anchor = nullptr;
 };
 
 Frame::Frame(double x, double y, double width, double height, std::string name) : Container(x, y, width, height) {
@@ -69,9 +71,14 @@ Frame::Frame(double x, double y, double width, double height, std::string name) 
 	};
 
 	title = new Label(name, position.x, position.y);
+
+	anchor = nullptr;
 };
 
 Vec2 Frame::resize() {
+	if (anchor)
+		position = Vec2(anchor->position.x + anchor->dimension.x + 2 * GUI::padding, anchor->position.y);
+
 	// Button
 	closeButton->position = position + Vec2(width - titleBarHeight + buttonOffset, -buttonOffset);
 	minimizeButton->position = position + Vec2(width - 2 * titleBarHeight + buttonOffset, -buttonOffset);
@@ -129,10 +136,12 @@ Component* Frame::intersect(Vec2 point) {
 
 void Frame::drag(Vec2 mouse) {
 	position = mouse - GUI::intersectedPoint;
+	anchor = nullptr;
 }
 
 void Frame::render() {
 	if (visible) {
+
 		resize();
 
 		// TitleBar
@@ -154,16 +163,17 @@ void Frame::render() {
 			// Padding
 			Vec2 offsetPosition = titleBarPosition + Vec2(0, -titleBarHeight);
 			Vec2 offsetDimension = dimension + Vec2(0, -titleBarHeight);
-			GUI::shader->update(backgroundColor);
-			GUI::quad->resize(offsetPosition, offsetDimension);
+			
+			GUI::shader->update(GUI::screen->blurFrameBuffer->texture, Vec4f(0.4, 0.4, 0.4, 1));
+			GUI::quad->resize(offsetPosition, offsetDimension, Vec2(-GUI::screen->camera.aspect, GUI::screen->camera.aspect) * 2, Vec2(-1, 1));
 			GUI::quad->render();
 
 			// Content
-			Vec2 contentPosition = position + Vec2(padding, -padding - titleBarHeight);
+			/*Vec2 contentPosition = position + Vec2(padding, -padding - titleBarHeight);
 			Vec2 contentDimension = dimension - Vec2(2 * padding, 2 * padding + titleBarHeight);
 			GUI::shader->update(backgroundColor);
 			GUI::quad->resize(contentPosition, contentDimension);
-			GUI::quad->render();
+			GUI::quad->render();*/
 
 			renderChildren();
 		}

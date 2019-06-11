@@ -12,6 +12,7 @@
 
 #include "frameBuffer.h"
 #include "camera.h"
+#include "quad.h"
 
 
 class StandardInputHandler;
@@ -33,7 +34,7 @@ private:
 public:
 	std::vector<IndexedMesh*> meshes;
 	World<ExtendedPart>* world;
-	Vec2 dimension;
+	Vec2i dimension;
 
 	Camera camera;
 
@@ -42,6 +43,8 @@ public:
 
 	FrameBuffer* modelFrameBuffer = nullptr;
 	FrameBuffer* screenFrameBuffer = nullptr;
+	FrameBuffer* blurFrameBuffer = nullptr;
+	Quad* quad = nullptr;
 
 	// Picker
 	Vec3f ray;

@@ -14,6 +14,8 @@
 
 class Frame : public Container {
 public:
+	Component* anchor;
+
 	Button* closeButton;
 	Button* minimizeButton;
 	double buttonOffset;
