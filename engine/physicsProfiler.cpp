@@ -16,7 +16,8 @@ const char * physicsLabels[]{
 const char * intersectionLabels[]{
 	"Colission",
 	"GJK reject",
-	"Distance reject"
+	"Physical Distance reject",
+	"Part Distance reject"
 };
 
 const char* iterationLabels[]{

@@ -23,13 +23,15 @@ bool BoundingBox::containsPoint(Vec3 point) const {
 		point.z >= zmin && point.z <= zmax;
 }
 
-Shape BoundingBox::toShape(Vec3f vertBuf[8]) const {
+Shape BoundingBox::toShape() const {
 	float xminf = static_cast<float>(xmin);
 	float xmaxf = static_cast<float>(xmax);
 	float yminf = static_cast<float>(ymin);
 	float ymaxf = static_cast<float>(ymax);
 	float zminf = static_cast<float>(zmin);
 	float zmaxf = static_cast<float>(zmax);
+
+	Vec3f vertBuf[8];
 
 	vertBuf[0] = Vec3f(xminf, yminf, zminf);
 	vertBuf[1] = Vec3f(xmaxf, yminf, zminf);
@@ -39,5 +41,5 @@ Shape BoundingBox::toShape(Vec3f vertBuf[8]) const {
 	vertBuf[5] = Vec3f(xmaxf, yminf, zmaxf);
 	vertBuf[6] = Vec3f(xmaxf, ymaxf, zmaxf);
 	vertBuf[7] = Vec3f(xminf, ymaxf, zmaxf);
-	return Shape(vertBuf, triangles, 8, 12);
+	return Shape(vertBuf, SharedArrayPtr<const Triangle>::staticSharedArrayPtr(triangles), 8, 12);
 }

@@ -7,22 +7,14 @@
 #include <math.h>
 
 #include "convexShapeBuilder.h"
-
 #include "../math/utils.h"
-
 #include "../../util/Log.h"
-
 #include "../engineException.h"
-
 #include "../debug.h"
 #include "../math/mathUtil.h"
-
 #include "../physicsProfiler.h"
-
 #include "computationBuffer.h"
-
 #include "intersection.h"
-
 #include "../datastructures/parallelVector.h"
 
 bool Triangle::sharesEdgeWith(Triangle other) const {
@@ -57,7 +49,7 @@ Triangle Triangle::leftShift() const {
 	return Triangle { secondIndex, thirdIndex, firstIndex };
 }
 
-Shape::Shape(Vec3f* vertices, const Triangle* triangles, int vertexCount, int triangleCount) :
+Shape::Shape(const Vec3f* vertices, SharedArrayPtr<const Triangle> triangles, int vertexCount, int triangleCount) :
 	vertices(createAndFillParallelVecBuf(vertices, vertexCount)),
 	triangles(triangles), 
 	vertexCount(vertexCount), 
@@ -147,7 +139,7 @@ bool isComplete(const Triangle* triangles, int triangleCount) {
 }
 
 bool Shape::isValid() const {
-	return isComplete(triangles, triangleCount) && getVolume() >= 0;
+	return isComplete(triangles.get(), triangleCount) && getVolume() >= 0;
 }
 
 Vec3f Shape::getNormalVecOfTriangle(Triangle triangle) const {
@@ -155,9 +147,7 @@ Vec3f Shape::getNormalVecOfTriangle(Triangle triangle) const {
 	return ((*this)[triangle.secondIndex] - v0) % ((*this)[triangle.thirdIndex] - v0);
 }
 
-Vec3f Shape::operator[](int index) const {
-	return this->vertices[index >> 3][index & 7];
-}
+
 
 void Shape::computeNormals(Vec3f* buffer) const {
 	for (int i = 0; i < triangleCount; i++) {
@@ -203,7 +193,7 @@ bool Shape::containsPoint(Vec3f point) const {
 
 
 #ifdef __AVX__
-#include <immintrin.h> // I know I don't have to include it, but I'm sending a message!
+#include <immintrin.h>
 #ifdef _MSC_VER
 inline uint32_t __builtin_ctz(uint32_t x) {
 	unsigned long ret;
@@ -234,9 +224,9 @@ int Shape::furthestIndexInDirection(const Vec3f& direction) const {
 	__m256 dz = _mm256_set1_ps(direction.z);
 
 	const ParallelVec3& firstBlock = vertices[0];
-	__m256 xTxd = _mm256_mul_ps(dx, firstBlock.xvalues);
-	__m256 yTyd = _mm256_mul_ps(dy, firstBlock.yvalues);
-	__m256 zTzd = _mm256_mul_ps(dz, firstBlock.zvalues);
+	__m256 xTxd = _mm256_mul_ps(dx, _mm256_load_ps(firstBlock.xvalues));
+	__m256 yTyd = _mm256_mul_ps(dy, _mm256_load_ps(firstBlock.yvalues));
+	__m256 zTzd = _mm256_mul_ps(dz, _mm256_load_ps(firstBlock.zvalues));
 
 	__m256 bestDot = _mm256_add_ps(_mm256_add_ps(xTxd, yTyd), zTzd);
 	__m256i bestIndices = _mm256_set1_epi32(0);
@@ -245,14 +235,14 @@ int Shape::furthestIndexInDirection(const Vec3f& direction) const {
 		const ParallelVec3& block = vertices[blockI];
 		__m256i indices = _mm256_set1_epi32(blockI);
 
-		__m256 xTxd = _mm256_mul_ps(dx, block.xvalues);
-		__m256 yTyd = _mm256_mul_ps(dy, block.yvalues);
-		__m256 zTzd = _mm256_mul_ps(dz, block.zvalues);
+		__m256 xTxd = _mm256_mul_ps(dx, _mm256_load_ps(block.xvalues));
+		__m256 yTyd = _mm256_mul_ps(dy, _mm256_load_ps(block.yvalues));
+		__m256 zTzd = _mm256_mul_ps(dz, _mm256_load_ps(block.zvalues));
 		__m256 dot = _mm256_add_ps(_mm256_add_ps(xTxd, yTyd), zTzd);
 
 		__m256 whichAreMax = _mm256_cmp_ps(dot, bestDot, _CMP_GT_OQ); // Greater than, false if dot == NaN
 		bestDot = _mm256_blendv_ps(bestDot, dot, whichAreMax);
-		bestIndices = _mm256_blendv_epi32(bestIndices, indices, whichAreMax);
+		bestIndices = _mm256_blendv_epi32(bestIndices, indices, whichAreMax); // TODO convert to _mm256_blendv_epi8
 	}
 	// find max of our 8 left candidates
 	__m256 swap4x4 = _mm256_permute2f128_ps(bestDot, bestDot, 1);
@@ -276,9 +266,9 @@ Vec3f Shape::furthestInDirection(const Vec3f& direction) const {
 
 	const ParallelVec3& firstBlock = vertices[0];
 
-	__m256 bestX = firstBlock.xvalues;
-	__m256 bestY = firstBlock.yvalues;
-	__m256 bestZ = firstBlock.zvalues;
+	__m256 bestX = _mm256_load_ps(firstBlock.xvalues);
+	__m256 bestY = _mm256_load_ps(firstBlock.yvalues);
+	__m256 bestZ = _mm256_load_ps(firstBlock.zvalues);
 
 	__m256 xTxd = _mm256_mul_ps(dx, bestX);
 	__m256 yTyd = _mm256_mul_ps(dy, bestY);
@@ -290,9 +280,9 @@ Vec3f Shape::furthestInDirection(const Vec3f& direction) const {
 		const ParallelVec3& block = vertices[blockI];
 		__m256i indices = _mm256_set1_epi32(blockI);
 
-		__m256 xVal = block.xvalues;
-		__m256 yVal = block.yvalues;
-		__m256 zVal = block.zvalues;
+		__m256 xVal = _mm256_load_ps(block.xvalues);
+		__m256 yVal = _mm256_load_ps(block.yvalues);
+		__m256 zVal = _mm256_load_ps(block.zvalues);
 
 		__m256 xTxd = _mm256_mul_ps(dx, xVal);
 		__m256 yTyd = _mm256_mul_ps(dy, yVal);

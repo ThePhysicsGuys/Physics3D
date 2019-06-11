@@ -19,6 +19,12 @@
 
 #define ELASTICITY 0.3
 
+#ifdef CHECK_SANITY
+#define ASSERT_VALID if (!isValid()) {throw "World not valid!";}
+#else
+#define ASSERT_VALID
+#endif
+
 WorldPrototype::WorldPrototype() : WorldPrototype(16) {}
 WorldPrototype::WorldPrototype(size_t initialPartCapacity) : physicals(initialPartCapacity) {
 	
@@ -99,6 +105,12 @@ struct Colission {
 size_t findColissions(WorldPrototype& world, std::vector<Colission>& colissions) {
 	for(Physical& anchoredPhys: world.iterAnchoredPhysicals()) {
 		for(Physical& freePhys: world.iterFreePhysicals()) {
+			Vec3 deltaPosition = freePhys.getCFrame().getPosition() - anchoredPhys.getCFrame().getPosition();
+			double maxDistanceBetween = freePhys.maxRadius + anchoredPhys.maxRadius;
+			if (deltaPosition.lengthSquared() > maxDistanceBetween * maxDistanceBetween) {
+				intersectionStatistics.addToTally(IntersectionResult::PHYSICAL_DISTANCE_REJECT, freePhys.getPartCount() * anchoredPhys.getPartCount());
+				continue;
+			}
 			for (Part& anchoredPart : anchoredPhys) {
 				for (Part& freePart : freePhys) {
 					double maxRadiusBetween = anchoredPart.maxRadius + freePart.maxRadius;
@@ -107,7 +119,7 @@ size_t findColissions(WorldPrototype& world, std::vector<Colission>& colissions)
 					double distanceSqBetween = deltaPosition.lengthSquared();
 
 					if (distanceSqBetween > maxRadiusBetween * maxRadiusBetween) {
-						intersectionStatistics.addToTally(IntersectionResult::DISTANCE_REJECT, 1);
+						intersectionStatistics.addToTally(IntersectionResult::PART_DISTANCE_REJECT, 1);
 						continue;
 					}
 
@@ -135,6 +147,12 @@ size_t findColissions(WorldPrototype& world, std::vector<Colission>& colissions)
 		Physical& phys1 = *mainIter;
 		for(auto secondIter = mainIter; ++secondIter != finish; ) {
 			Physical& phys2 = *secondIter;
+			Vec3 deltaPosition = phys1.getCFrame().getPosition() - phys2.getCFrame().getPosition();
+			double maxDistanceBetween = phys1.maxRadius + phys2.maxRadius;
+			if (deltaPosition.lengthSquared() > maxDistanceBetween * maxDistanceBetween) {
+				intersectionStatistics.addToTally(IntersectionResult::PHYSICAL_DISTANCE_REJECT, phys1.getPartCount()*phys2.getPartCount());
+				continue;
+			}
 			for (Part& p1 : phys1) {
 				for (Part& p2 : phys2) {
 					double maxRadiusBetween = p1.maxRadius + p2.maxRadius;
@@ -143,7 +161,7 @@ size_t findColissions(WorldPrototype& world, std::vector<Colission>& colissions)
 					double distanceSqBetween = deltaPosition.lengthSquared();
 
 					if (distanceSqBetween > maxRadiusBetween * maxRadiusBetween) {
-						intersectionStatistics.addToTally(IntersectionResult::DISTANCE_REJECT, 1);
+						intersectionStatistics.addToTally(IntersectionResult::PART_DISTANCE_REJECT, 1);
 						continue;
 					}
 
@@ -239,52 +257,85 @@ size_t WorldPrototype::getTotalVertexCount() {
 	return total;
 }
 
+void WorldPrototype::pushOperation(const std::function<void(WorldPrototype*)>& func) {
+	std::lock_guard<std::mutex> lg(queueLock);
+	waitingOperations.push(func);
+}
+
 void WorldPrototype::addPartUnsafe(Part* part, bool anchored) {
 	if (anchored) {
 		physicals.addLeftSide(Physical(part));
 	} else {
 		physicals.add(Physical(part));
 	}
-
-	if (!isValid()) {
-		throw "World not valid!";
-	}
+	ASSERT_VALID;
 }
-
-void WorldPrototype::processQueue() {
-	std::lock_guard<std::mutex> lg(queueLock);
-
-	while(!newPartQueue.empty()) {
-		QueuedPart& qp = newPartQueue.front();
-		addPartUnsafe(qp.p, qp.anchored);
-		newPartQueue.pop();
-	}
-}
-
-void WorldPrototype::addObject(Part* part, bool anchored) {
-	if(lock.try_lock()) {
-		addPartUnsafe(part, anchored);
-		lock.unlock();
-	} else {
-		std::lock_guard<std::mutex> lg(queueLock);
-		newPartQueue.push(QueuedPart{part, anchored});
-	}
-}
-void WorldPrototype::attachPart(Part* p, Physical& phys, CFrame attachment) {
-	if (p->parent != nullptr) {
-		removePart(p);
-	}
-	phys.attachPart(p, attachment);
-	// addPartUnsafe(p, false);
-}
-
-void WorldPrototype::removePart(Part* part) {
+void WorldPrototype::removePartUnsafe(Part* part) {
 	Physical* parent = part->parent;
 	parent->detachPart(part);
 	if (parent->getPartCount() == 0) {
 		physicals.remove(parent);
 	}
+	ASSERT_VALID;
 }
+void WorldPrototype::attachPartUnsafe(Part* part, Physical& phys, CFrame attachment) {
+	if (part->parent != nullptr) {
+		removePartUnsafe(part);
+	}
+	phys.attachPart(part, attachment);
+	ASSERT_VALID;
+}
+
+void WorldPrototype::detachPartUnsafe(Part* part) {
+	removePartUnsafe(part);
+	addPartUnsafe(part, false);
+	ASSERT_VALID;
+}
+
+void WorldPrototype::processQueue() {
+	std::lock_guard<std::mutex> lg(queueLock);
+
+	while(!waitingOperations.empty()) {
+		std::function<void(WorldPrototype*)>& operation = waitingOperations.front();
+		operation(this);
+		waitingOperations.pop();
+	}
+}
+
+
+void WorldPrototype::addPart(Part* part, bool anchored) {
+	if(lock.try_lock()) {
+		addPartUnsafe(part, anchored);
+		lock.unlock();
+	} else {
+		pushOperation([part, anchored](WorldPrototype * world) {world->addPartUnsafe(part, anchored); });
+	}
+}
+void WorldPrototype::removePart(Part* part) {
+	if (lock.try_lock()) {
+		removePartUnsafe(part);
+		lock.unlock();
+	} else {
+		pushOperation([part](WorldPrototype * world) {world->removePartUnsafe(part); });
+	}
+}
+void WorldPrototype::attachPart(Part* part, Physical& phys, CFrame attachment) {
+	if (lock.try_lock()) {
+		attachPartUnsafe(part, phys, attachment);
+		lock.unlock();
+	} else {
+		pushOperation([part, &phys, attachment](WorldPrototype * world) {world->attachPartUnsafe(part, phys, attachment); });
+	}
+}
+void WorldPrototype::detachPart(Part* part) {
+	if (lock.try_lock()) {
+		detachPartUnsafe(part);
+		lock.unlock();
+	} else {
+		pushOperation([part](WorldPrototype * world) {world->detachPartUnsafe(part); });
+	}
+}
+
 
 void WorldPrototype::applyExternalForces() {}
 

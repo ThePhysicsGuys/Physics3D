@@ -31,6 +31,7 @@ extern std::map<VecType, bool> debug_enabled;
 extern std::map<VecType, Vec3f> vecColors;
 
 extern bool renderPies;
+extern bool renderColissionSpheres;
 extern int fieldIndex;
 
 void toggleDebugVecType(Debug::VecType t);

@@ -21,7 +21,7 @@ Triangle icosahedronTriangles[] {
 	{10, 7 , 1}, {10, 9, 7 }, {9, 10, 6}, {9, 6 , 3}, {3, 6, 5 },
 };
 
-const Shape icosahedron(icosahedronVertices, icosahedronTriangles, 12, 20);
+const Shape icosahedron(icosahedronVertices, SharedArrayPtr<const Triangle>::staticSharedArrayPtr(icosahedronTriangles), 12, 20);
 
 // Test shape
 Vec3f triangleShapeVecs[] {
@@ -35,7 +35,7 @@ Triangle triangleShapeTriangles[] {
 	{0, 2, 1}, {0, 3, 2}, {0, 1, 3}, {1, 2, 3}
 };
 
-const Shape triangleShape(triangleShapeVecs, triangleShapeTriangles, 4, 4);
+const Shape triangleShape(triangleShapeVecs, SharedArrayPtr<const Triangle>::staticSharedArrayPtr(triangleShapeTriangles), 4, 4);
 
 Vec3f houseVertices[] {
 	Vec3f(-0.5, 0.0, -0.5), Vec3f(-0.5, 0.0, 0.5), Vec3f(0.5, 0.0, 0.5), Vec3f(0.5, 0.0, -0.5),
@@ -53,15 +53,14 @@ Triangle houseTriangles[] {
 	{4, 5, 9}, {4, 9, 8}, {7, 8, 9}, {7, 9, 6} //roof2
 };
 
-const Shape house(houseVertices, houseTriangles, 10, 16);
+const Shape house(houseVertices, SharedArrayPtr<const Triangle>::staticSharedArrayPtr(houseTriangles), 10, 16);
 
 Shape createCube(double side) {
 	return createBox(side, side, side);
 }
 
 Shape createBox(double width, double height, double length) {
-	Vec3f* newVecBuf = new Vec3f[8];
-	return BoundingBox(width, height, length).toShape(newVecBuf);
+	return BoundingBox(width, height, length).toShape();
 }
 
 Shape createPrism(unsigned int sides, double radius, double height) {
@@ -92,7 +91,7 @@ Shape createPrism(unsigned int sides, double radius, double height) {
 		capOffset[i + (sides-2)] = Triangle{1, (i + 2) * 2+1, (i + 1) * 2+1};
 	}
 
-	return Shape(vecBuf, triangleBuf, vertexCount, triangleCount);
+	return Shape(vecBuf, SharedArrayPtr<const Triangle>(triangleBuf), vertexCount, triangleCount);
 }
 
 Shape createPointyPrism(unsigned int sides, double radius, double height, double topOffset, double bottomOffset) {
@@ -130,5 +129,5 @@ Shape createPointyPrism(unsigned int sides, double radius, double height, double
 		capOffset[i + sides] = Triangle{topIndex, ((i + 1) % sides) * 2 + 1, i * 2 + 1};
 	}
 
-	return Shape(vecBuf, triangleBuf, vertexCount, triangleCount);
+	return Shape(vecBuf, SharedArrayPtr<const Triangle>(triangleBuf), vertexCount, triangleCount);
 }

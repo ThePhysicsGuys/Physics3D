@@ -9,21 +9,18 @@
 #include "datastructures/splitUnorderedList.h"
 #include "worldIterator.h"
 
-//#include "partContainer.h"
-
-struct QueuedPart {
-	Part* p;
-	bool anchored;
-};
-
 class WorldPrototype {
 private:
-	std::queue<QueuedPart> newPartQueue;
+	std::queue<std::function<void(WorldPrototype*)>> waitingOperations;
 	SplitUnorderedList<Physical> physicals;
 	size_t getTotalVertexCount();
 	void processQueue();
 
 	void addPartUnsafe(Part* p, bool anchored);
+	void removePartUnsafe(Part* p);
+	void attachPartUnsafe(Part* part, Physical& phys, CFrame attachment);
+	void detachPartUnsafe(Part* part);
+	void pushOperation(const std::function<void(WorldPrototype*)>& operation);
 public:
 	mutable std::shared_mutex lock;
 	mutable std::mutex queueLock;
@@ -42,8 +39,9 @@ public:
 
 	void tick(double deltaT);
 
-	void addObject(Part* p, bool anchored = false);
+	void addPart(Part* p, bool anchored = false);
 	void attachPart(Part* p, Physical& phys, CFrame attachment);
+	void detachPart(Part* p);
 	void removePart(Part* p);
 
 	inline bool isAnchored(Physical* p) const {

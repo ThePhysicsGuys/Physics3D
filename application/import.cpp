@@ -153,19 +153,17 @@ struct Face {
 };
 
 VisualShape reorder(const std::vector<Vec3f>& positions, const std::vector<Vec3f>& normals, const std::vector<Vec2f>& uvs, const std::vector<Face>& faces, Flags flags) {
-	Triangle* triangleArray = nullptr;
-	Vec3f * positionArray = nullptr;
-	Vec3f * normalArray = nullptr;
-	Vec2f * uvArray = nullptr;
-
+	
 	// Positions
-	positionArray = new Vec3f[positions.size()];
+	Vec3f* positionArray = new Vec3f[positions.size()];
 	for (int i = 0; i < positions.size(); i++) {
 		positionArray[i] = positions[i];
 	}
 
-	triangleArray = new Triangle[faces.size()];
+	Triangle* triangleArray = new Triangle[faces.size()];
 
+	Vec3f* normalArray = nullptr;
+	Vec2f* uvArray = nullptr;
 	if (flags.normals) normalArray = new Vec3f[positions.size()];
 	if (flags.uvs) uvArray = new Vec2f[positions.size()];
 
@@ -187,7 +185,7 @@ VisualShape reorder(const std::vector<Vec3f>& positions, const std::vector<Vec3f
 		}
 	}
 
-	return VisualShape(positionArray, normalArray, uvArray, triangleArray, (int)positions.size(), (int)faces.size());
+	return VisualShape(positionArray, SharedArrayPtr<const Vec3f>(normalArray), SharedArrayPtr<const Vec2f>(uvArray), SharedArrayPtr<const Triangle>(triangleArray), (int)positions.size(), (int)faces.size());
 }
 
 VisualShape loadBinaryObj(std::istream& input) {
@@ -228,7 +226,7 @@ VisualShape loadBinaryObj(std::istream& input) {
 		triangles[i] = Import::read<Triangle>(input);
 	}
 
-	return VisualShape(vertices, normals, uvs, triangles, vertexCount, triangleCount);
+	return VisualShape(vertices, SharedArrayPtr<const Vec3f>(normals), SharedArrayPtr<const Vec2f>(uvs), SharedArrayPtr<const Triangle>(triangles), vertexCount, triangleCount);
 }
 
 VisualShape loadNonBinaryObj(std::istream& input) {
@@ -365,7 +363,7 @@ void parseSubject(Subject subject, std::string path, std::map<std::string, std::
 		part->material = material;
 		part->renderMode = mode;
 
-		world.addObject(part, anchored);
+		world.addPart(part, anchored);
 	} else if (subject == Subject::CAMERA) {
 		Vec3 pos = Import::parseVec3(fields.at("position"));
 		Mat3 rot = Import::parseMat3(fields.at("rotation"));

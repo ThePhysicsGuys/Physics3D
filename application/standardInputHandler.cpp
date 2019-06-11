@@ -82,6 +82,9 @@ void StandardInputHandler::keyDown(int key, int modifiers) {
 		case GLFW_KEY_C:
 			Picker::editMode = Picker::EditMode::SCALE;
 			break;
+		case GLFW_KEY_4:
+			renderColissionSpheres = !renderColissionSpheres;
+			break;
 	}
 
 	if(key >= GLFW_KEY_F1 && key <= GLFW_KEY_F9) {

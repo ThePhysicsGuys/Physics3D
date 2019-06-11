@@ -2,28 +2,26 @@
 
 #include "../math/vec3.h"
 
-#include <immintrin.h>
-
 struct alignas(32) ParallelVec3 {
-	__m256 xvalues;
-	__m256 yvalues;
-	__m256 zvalues;
+	float xvalues[8];
+	float yvalues[8];
+	float zvalues[8];
 
 	ParallelVec3() = default;
-	inline ParallelVec3(Vec3f data[8]) {
+	inline ParallelVec3(const Vec3f data[8]) {
 		this->load(data);
 	}
 
-	inline void load(Vec3f data[8]) {
+	inline void load(const Vec3f data[8]) {
 		for (int i = 0; i < 8; i++) {
-			xvalues.m256_f32[i] = data[i].x;
-			yvalues.m256_f32[i] = data[i].y;
-			zvalues.m256_f32[i] = data[i].z;
+			xvalues[i] = data[i].x;
+			yvalues[i] = data[i].y;
+			zvalues[i] = data[i].z;
 		}
 	}
 
 	inline Vec3f operator[](unsigned int i) const {
-		return Vec3f(xvalues.m256_f32[i], yvalues.m256_f32[i], zvalues.m256_f32[i]);
+		return Vec3f(xvalues[i], yvalues[i], zvalues[i]);
 	}
 };
 
@@ -35,7 +33,7 @@ inline ParallelVec3* createParallelVecBuf(size_t blockCount) {
 	return vecs;
 }
 
-inline ParallelVec3* createAndFillParallelVecBuf(Vec3f* data, size_t size) {
+inline ParallelVec3* createAndFillParallelVecBuf(const Vec3f* data, size_t size) {
 	size_t blockCount = (size+7) / 8;
 	ParallelVec3* vecs = createParallelVecBuf(blockCount);
 
@@ -63,14 +61,14 @@ inline ParallelVec3* createAndFillParallelVecBuf(Vec3f* data, size_t size) {
 	}
 	return vecs;
 }
-
+/*
 struct AOSOAVec3fBuf {
 	ParallelVec3* vecs;
 	int size;
 
 	inline AOSOAVec3fBuf() : vecs(nullptr), size(0) {}
 
-	inline AOSOAVec3fBuf(Vec3f* data, unsigned int size) : size(size) {
+	inline AOSOAVec3fBuf(const Vec3f* data, unsigned int size) : size(size) {
 		unsigned int blockCount = (size + 7) / 8;
 		vecs = createParallelVecBuf(blockCount);
 
@@ -166,3 +164,4 @@ struct ParallelVecIterFactory {
 		return ParallelVecIter{buf, size};
 	};
 };
+*/
