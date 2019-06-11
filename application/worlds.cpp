@@ -8,22 +8,27 @@
 #include "standardInputHandler.h"
 #include "view/screen.h"
 
-#define PICKER_STRENGTH 50
-#define PICKER_SPEED_STRENGTH 10
+#define PICKER_STRENGTH 100
+#define PICKER_SPEED_STRENGTH 12
+#define PICKER_ANGULAR_REDUCE_STRENGTH 50
 
 GravityWorld::GravityWorld(Vec3 gravity) : gravity(gravity) {}
 
 void GravityWorld::applyExternalForces() {
 	if(selectedPart != nullptr && !isAnchored(selectedPart->parent)) {
 		Physical* selectedPhysical = selectedPart->parent;
+		CFrame cframe = selectedPhysical->getCFrame();
 		// Magnet force
 		Vec3 absoluteSelectedPoint = selectedPart->cframe.localToGlobal(localSelectedPoint);
 		Vec3 delta = magnetPoint - absoluteSelectedPoint;
+
 		Vec3 relativeSelectedPointSpeed = selectedPhysical->getVelocityOfPoint(absoluteSelectedPoint - selectedPhysical->getCenterOfMass());
-		Vec3 force = selectedPhysical->mass * delta * PICKER_STRENGTH - relativeSelectedPointSpeed * PICKER_SPEED_STRENGTH;
+		Vec3 force = selectedPhysical->mass * (delta * PICKER_STRENGTH - relativeSelectedPointSpeed * PICKER_SPEED_STRENGTH);
 		selectedPhysical->applyForce(absoluteSelectedPoint - selectedPhysical->getCenterOfMass(), force);
-		Vec3 angular = -selectedPhysical->angularVelocity;// / (delta.length() + 1);
+		Vec3 angular = -cframe.localToRelative(selectedPhysical->inertia * cframe.relativeToLocal(selectedPhysical->angularVelocity)) * PICKER_ANGULAR_REDUCE_STRENGTH;// / (delta.length() + 1);
 		selectedPhysical->applyMoment(angular);
+
+
 	}
 	// Gravity force
 	for(Physical& physical : iterFreePhysicals()) {

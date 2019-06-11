@@ -98,9 +98,9 @@ void PieChart::add(DataPoint& p) {
 
 void startPieRendering(Screen& screen) {
 	glUseProgram(0);
-	Vec2 size = screen.dimension;
+	Vec2i size = screen.dimension;
 	glPushMatrix();
-	glScalef(float(size.y / size.x), 1.0f, 1.0f);
+	glScalef(float(size.y) / size.x, 1.0f, 1.0f);
 }
 
 void endPieRendering(Screen& screen) {
@@ -133,9 +133,9 @@ void BarChart::render() {
 	float max = getMaxWeight();
 
 	glPushMatrix();
-	glScaled(GUI::screen->dimension.y / GUI::screen->dimension.x, 1, 1);
+	glScaled(float(GUI::screen->dimension.y) / GUI::screen->dimension.x, 1, 1);
 
-
+	//Log::debug("Screenres: x=%d, y=%d", GUI::screen->dimension.x, GUI::screen->dimension.y);
 
 	glBegin(GL_QUADS);
 	/*color(Vec3f(0.7, 0.7, 0.7));

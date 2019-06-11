@@ -72,26 +72,68 @@ void handleCollision(Part& part1, Part& part2, Vec3 collisionPoint, Vec3 exitVec
 		double inertia2 = p2.getInertiaOfPointInDirectionRelative(collissionRelP2, exitVector);
 		combinedInertia = 1 / (1 / inertia1 + 1 / inertia2);
 	}
-	
-	Vec3 depthForce = exitVector * (COLLISSION_DEPTH_FORCE_MULTIPLIER * combinedInertia);
 
-	if(!anchoredColission) p1.applyForce(collissionRelP1, -depthForce);
-	p2.applyForce(collissionRelP2, depthForce);
+	// Friction
+	double staticFriction = part1.properties.friction * part2.properties.friction;
+	double dynamicFriction = part1.properties.friction * part2.properties.friction;
+
+	
+	Vec3 depthForce = -exitVector * (COLLISSION_DEPTH_FORCE_MULTIPLIER * combinedInertia);
+
+	if(!anchoredColission) p1.applyForce(collissionRelP1, depthForce);
+	p2.applyForce(collissionRelP2, -depthForce);
 
 
 	Vec3 relativeVelocity = p1.getVelocityOfPoint(collissionRelP1) - p2.getVelocityOfPoint(collissionRelP2);
 
-	if(relativeVelocity * exitVector > 0) { // moving towards the other object
+	bool isImpulseColission = relativeVelocity * exitVector > 0;
+
+	Vec3 impulse;
+
+	if(isImpulseColission) { // moving towards the other object
 		Vec3 desiredAccel = -exitVector * (relativeVelocity * exitVector) / exitVector.lengthSquared();
 		Vec3 zeroRelVelImpulse = desiredAccel * combinedInertia;
-		Vec3 impulse = zeroRelVelImpulse * (1.0+ELASTICITY);
+		impulse = zeroRelVelImpulse * (1.0+ELASTICITY);
 		if(!anchoredColission) p1.applyImpulse(collissionRelP1, impulse);
 		p2.applyImpulse(collissionRelP2, -impulse);
-		Vec3 relativeVelocityAfter = p1.getVelocityOfPoint(collissionRelP1) - p2.getVelocityOfPoint(collissionRelP2);
-		double normalVelAfter = exitVector.normalize() * relativeVelocityAfter;
-
-		// TODO friction again
+		relativeVelocity = p1.getVelocityOfPoint(collissionRelP1) - p2.getVelocityOfPoint(collissionRelP2); // set new relativeVelocity
 	}
+
+	Vec3 slidingVelocity = exitVector % relativeVelocity % exitVector / exitVector.lengthSquared();
+
+	// Compute combined inertia in the horizontal direction
+	double combinedHorizontalInertia;
+	if (anchoredColission)
+		combinedHorizontalInertia = p2.getInertiaOfPointInDirectionRelative(collissionRelP2, slidingVelocity);
+	else {
+		double inertia1 = p1.getInertiaOfPointInDirectionRelative(collissionRelP1, slidingVelocity);
+		double inertia2 = p2.getInertiaOfPointInDirectionRelative(collissionRelP2, slidingVelocity);
+		combinedHorizontalInertia = 1 / (1 / inertia1 + 1 / inertia2);
+	}
+
+	if (isImpulseColission) {
+		Vec3 maxFrictionImpulse = -exitVector % impulse % exitVector / exitVector.lengthSquared() * staticFriction;
+		Vec3 stopFricImpulse = -slidingVelocity * combinedHorizontalInertia;
+
+		Vec3 fricImpulse = (stopFricImpulse.lengthSquared() < maxFrictionImpulse.lengthSquared()) ? stopFricImpulse : maxFrictionImpulse;
+
+		if (!anchoredColission) p1.applyImpulse(collissionRelP1, fricImpulse);
+		p2.applyImpulse(collissionRelP2, -fricImpulse);
+	}
+
+	double normalForce = depthForce.length();
+	double frictionForce = normalForce * dynamicFriction;
+	double slidingSpeed = slidingVelocity.length() + 1E-100;
+	Vec3 dynamicFricForce;
+	double dynamicSaturationSpeed = sizeOrder * 0.01;
+	if (slidingSpeed > dynamicSaturationSpeed) {
+		dynamicFricForce = -slidingVelocity / slidingSpeed * frictionForce;
+	} else {
+		double effectFactor = slidingSpeed / (dynamicSaturationSpeed);
+		dynamicFricForce = -slidingVelocity / slidingSpeed * frictionForce * effectFactor;
+	}
+	if (!anchoredColission) p1.applyForce(collissionRelP1, dynamicFricForce);
+	p2.applyForce(collissionRelP2, -dynamicFricForce);
 }
 
 struct Colission {
@@ -239,7 +281,7 @@ void WorldPrototype::tick(double deltaT) {
 	intersectionStatistics.nextTally();
 
 	physicsMeasure.mark(PhysicsProcess::WAIT_FOR_LOCk);
-	// mutLock.upgrade();
+	mutLock.upgrade();
 	physicsMeasure.mark(PhysicsProcess::UPDATING);
 	for(Physical& physical : iterPhysicals()) {
 		physical.update(deltaT);

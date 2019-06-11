@@ -618,12 +618,12 @@ void Screen::refresh() {
 		for(const Vec3f& corner : selectedPart->hitbox.iterVertices()) {
 			vecLog.add(AppDebug::ColoredVec(Vec3(selectedCFrame.localToGlobal(corner)), selectedPart->parent->getVelocityOfPoint(Vec3(selectedCFrame.localToRelative(corner))), Debug::VELOCITY));
 		}
-		Vec4f blue = GUI::COLOR::BLUE;
-		blue.w = 0.5;
-		renderSphere(selectedPart->parent->maxRadius * 2, selectedPart->parent->getCFrame().getPosition(), blue);
 		Vec4f green = GUI::COLOR::GREEN;
 		green.w = 0.5;
 		renderSphere(selectedPart->maxRadius * 2, selectedCFrame.getPosition(), green);
+		Vec4f blue = GUI::COLOR::BLUE;
+		blue.w = 0.5;
+		renderSphere(selectedPart->parent->maxRadius * 2, selectedPart->parent->getCFrame().getPosition(), blue);
 	}
 
 	if (renderColissionSpheres) {
@@ -742,7 +742,7 @@ void Screen::refresh() {
 	renderDebugField(dimension, font, "World Energy", world->getTotalEnergy(), "");
 
 	if (renderPies) {
-		float leftSide = float(dimension.x / dimension.y);
+		float leftSide = float(dimension.x) / float(dimension.y);
 		PieChart graphicsPie = toPieChart(graphicsMeasure, "Graphics", Vec2f(-leftSide + 1.5f, -0.7f), 0.2f);
 		PieChart physicsPie = toPieChart(physicsMeasure, "Physics", Vec2f(-leftSide + 0.3f, -0.7f), 0.2f);
 		PieChart intersectionPie = toPieChart(intersectionStatistics, "Intersection Statistics", Vec2f(-leftSide + 2.7f, -0.7f), 0.2f);

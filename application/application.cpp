@@ -106,7 +106,7 @@ struct SpiderFactory {
 
 	void buildSpider(CFrame spiderPosition) {
 		//ExtendedPart* spiderBody = createUniquePart(screen, createPointyPrism(legCount, 0.5, 0.2, 0.1, 0.1), spiderPosition, 1.0, 0.0, "SpiderBody");
-		ExtendedPart* spiderBody = bodyFactory.produce(spiderPosition, 1.0, 0.0);
+		ExtendedPart* spiderBody = bodyFactory.produce(spiderPosition, 1.0, 0.5);
 		spiderBody->material.ambient = Vec4f(0.6f, 0.6f, 0.6f, 1.0f);
 
 		//PartFactory legFactory(BoundingBox(0.05, 0.5, 0.05).toShape(), screen, "SpiderLeg");
@@ -118,7 +118,7 @@ struct SpiderFactory {
 		Physical* spider = spiderBody->parent;
 
 		for (int i = 0; i < legCount; i++) {
-			ExtendedPart* leg = legFactory.produce(CFrame(), 1.0, 0.2, std::string("LegPart ") + std::to_string(i));
+			ExtendedPart* leg = legFactory.produce(CFrame(), 1.0, 0.5, std::string("LegPart ") + std::to_string(i));
 			leg->material.ambient = Vec4f(0.4f, 0.4f, 0.4f, 1.0f);
 
 			double angle = i * M_PI * 2 / legCount;
@@ -227,7 +227,7 @@ int main(void) {
 	int minX = -3;
 	int maxX = 3;
 	int minY = 0;
-	int maxY = 20;
+	int maxY = 10;
 	int minZ = -3;
 	int maxZ = 3;
 
@@ -305,7 +305,7 @@ int main(void) {
 	}
 	
 	player = sphereFactory.produce(CFrame(), 1.0, 0.2);
-	player->properties.friction = 0;
+	player->properties.friction = 0.5;
 	player->drawMeshId = -1;
 
 	//saveWorld("testWorld", world);
