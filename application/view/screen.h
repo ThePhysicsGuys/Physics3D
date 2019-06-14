@@ -13,7 +13,7 @@
 #include "frameBuffer.h"
 #include "camera.h"
 #include "quad.h"
-
+#include "../worlds.h"
 
 class StandardInputHandler;
 
@@ -33,7 +33,7 @@ private:
 	void renderPhysicals();
 public:
 	std::vector<IndexedMesh*> meshes;
-	World<ExtendedPart>* world;
+	MagnetWorld* world;
 	Vec2i dimension;
 
 	Camera camera;
@@ -54,7 +54,7 @@ public:
 	Vec3f selectedPoint;
 
 	Screen();
-	Screen(int width, int height, World<ExtendedPart>* world);
+	Screen(int width, int height, MagnetWorld* world);
 
 	bool shouldClose();
 	void init();
@@ -64,7 +64,7 @@ public:
 
 	GLFWwindow* getWindow() { return window; }
 
-	void setWorld(World<ExtendedPart>* world) { 
+	void setWorld(MagnetWorld* world) {
 		this->world = world;
 	};
 

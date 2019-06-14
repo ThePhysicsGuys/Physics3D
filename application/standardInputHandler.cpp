@@ -116,6 +116,10 @@ void StandardInputHandler::mouseDown(int button, int mods) {
 		} else {
 			Picker::press(screen);
 		}
+
+		if (screen.selectedPart) {
+			Picker::moveGrabbedPhysicalLateral(screen);
+		}
 	}
 };
 
@@ -124,9 +128,12 @@ void StandardInputHandler::mouseUp(int button, int mods) {
 	if (button == GLFW_MOUSE_BUTTON_MIDDLE) middleDragging = false;
 	if (button == GLFW_MOUSE_BUTTON_LEFT) leftDragging = false;
 
-	if (button == GLFW_MOUSE_BUTTON_LEFT)
-		if (GUI::selectedComponent)
+	if (button == GLFW_MOUSE_BUTTON_LEFT) {
+		if (GUI::selectedComponent){
 			GUI::selectedComponent->release(GUI::map(cursorPosition));
+		}
+		screen.world->selectedPart = nullptr;
+	}
 };
 
 void StandardInputHandler::mouseMove(double x, double y) {
@@ -152,8 +159,6 @@ void StandardInputHandler::mouseMove(double x, double y) {
 				Picker::moveGrabbedPhysicalLateral(screen);
 			}
 		}
-	} else {
-		screen.world->selectedPart = nullptr;
 	}
 
 	// Camera moving

@@ -79,7 +79,7 @@ void terminateGL() {
 
 Screen::Screen() {};
 
-Screen::Screen(int width, int height, World<ExtendedPart>* world) {
+Screen::Screen(int width, int height, MagnetWorld* world) {
 	setWorld(world);
 
 	// Create a windowed mode window and its OpenGL context 

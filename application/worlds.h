@@ -3,7 +3,14 @@
 #include "../engine/world.h"
 #include "extendedPart.h"
 
-class GravityWorld : public World<ExtendedPart> {
+class MagnetWorld : public World<ExtendedPart> {
+public:
+	Vec3 localSelectedPoint;
+	Vec3 magnetPoint;
+	virtual void applyExternalForces() override;
+};
+
+class GravityWorld : public MagnetWorld {
 private:
 	Vec3 gravity;
 public:

@@ -131,7 +131,41 @@ struct SpiderFactory {
 	}
 };
 
+struct HollowBoxParts {
+	ExtendedPart* bottom;
+	ExtendedPart* top;
+	ExtendedPart* left;
+	ExtendedPart* right;
+	ExtendedPart* front;
+	ExtendedPart* back;
+};
 
+HollowBoxParts buildHollowBox(BoundingBox box, double wallThickness) {
+	Shape YPlateShape = createBox(box.getWidth(), wallThickness, box.getDepth());
+	Shape ZPlateShape = createBox(box.getWidth() - wallThickness * 2, box.getHeight() - wallThickness * 2, wallThickness);
+	Shape XPlateShape = createBox(wallThickness, box.getHeight() - wallThickness * 2, box.getDepth());
+	
+	PartFactory xpf(XPlateShape, screen);
+	PartFactory ypf(YPlateShape, screen);
+	PartFactory zpf(ZPlateShape, screen);
+
+	ExtendedPart* bottom = ypf.produce(CFrame(Vec3(box.getCenter() - Vec3(0, box.getHeight()/2 - wallThickness/2, 0))), 1.0, 0.2, "BottomPlate");
+	ExtendedPart* top = ypf.produce(CFrame(), 1.0, 0.2, "TopPlate");
+	ExtendedPart* left = xpf.produce(CFrame(), 1.0, 0.2, "LeftPlate");
+	ExtendedPart* right = xpf.produce(CFrame(), 1.0, 0.2, "RightPlate");
+	ExtendedPart* front = zpf.produce(CFrame(), 1.0, 0.2, "FrontPlate");
+	ExtendedPart* back = zpf.produce(CFrame(), 1.0, 0.2, "BackPlate");
+
+	world.addPart(bottom);
+	Physical& parent = *bottom->parent;
+	world.attachPart(top, parent, CFrame(Vec3(0, box.getHeight() - wallThickness, 0)));
+	world.attachPart(left, parent, CFrame(Vec3(box.getWidth()/2 - wallThickness / 2, box.getHeight()/2 - wallThickness / 2, 0)));
+	world.attachPart(right, parent, CFrame(Vec3(-box.getWidth() / 2 + wallThickness / 2, box.getHeight() / 2 - wallThickness / 2, 0)));
+	world.attachPart(front, parent, CFrame(Vec3(0, box.getHeight() / 2 - wallThickness / 2, box.getDepth() / 2 - wallThickness / 2)));
+	world.attachPart(back, parent, CFrame(Vec3(0, box.getHeight() / 2 - wallThickness / 2, -box.getDepth() / 2 + wallThickness / 2)));
+
+	return HollowBoxParts{bottom, top, left, right, front, back};
+}
 
 int main(void) {
 	init();
@@ -185,6 +219,13 @@ int main(void) {
 	if(!icosaBuilder.toIndexedShape().isValid()) {
 		throw "BAD";
 	}
+
+	HollowBoxParts hollowBox = buildHollowBox(BoundingBox(3.0, 3.0, 4.0, 7.0, 6.0, 7.0), 0.2);
+	
+	hollowBox.front->material.ambient = Vec4f(0.5, 0.7, 1.0, 0.5);
+	hollowBox.back->material.ambient = Vec4f(0.5, 0.7, 1.0, 0.5);
+	hollowBox.bottom->material.ambient = Vec4f(0.9, 0.9, 0.9, 1.0);
+	hollowBox.top->material.ambient = Vec4f(0.9, 0.9, 0.9, 1.0);
 
 	icosaBuilder.addPoint(Vec3f(0, 1.1, 0));
 	icosaBuilder.addPoint(Vec3f(0, -1.1, 0));
