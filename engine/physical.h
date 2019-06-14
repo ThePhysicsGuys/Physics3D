@@ -39,7 +39,6 @@ struct ConstPartIter {
 
 struct Physical {
 	CFrame cframe;
-	double maxRadius;
 	std::vector<AttachedPart> parts;
 	Vec3 velocity = Vec3();
 	Vec3 angularVelocity = Vec3();
@@ -51,13 +50,22 @@ struct Physical {
 	Vec3 localCenterOfMass;
 	SymmetricMat3 inertia;
 
+	Vec3 localCentroid;
+	Sphere circumscribingSphere;
+
 	Physical() = default;
 	Physical(Part* part);
-	inline Physical(Part* part, double mass, SymmetricMat3 inertia) : cframe(part->cframe), mass(mass), inertia(inertia) { parts.push_back(AttachedPart{ CFrame(), part }); };
+	inline Physical(Part* part, double mass, SymmetricMat3 inertia) : cframe(part->cframe), mass(mass), inertia(inertia) {
+		parts.push_back(AttachedPart{ CFrame(), part });
+		Sphere smallestSphere = part->hitbox.getCircumscribingSphere();
+		Sphere s = getLocalCircumscribingSphere();
+		this->localCentroid = s.origin;
+		this->circumscribingSphere.radius = s.radius;
+		this->circumscribingSphere.origin = getCFrame().localToGlobal(localCentroid);
+	}
 
 	Physical(Physical&& other) noexcept {
 		this->cframe = other.cframe;
-		this->maxRadius = other.maxRadius;
 		this->parts = std::move(other.parts);
 		this->velocity = other.velocity;
 		this->angularVelocity = other.angularVelocity;
@@ -66,6 +74,8 @@ struct Physical {
 		this->mass = other.mass;
 		this->localCenterOfMass = other.localCenterOfMass;
 		this->inertia = other.inertia;
+		this->localCentroid = other.localCentroid;
+		this->circumscribingSphere = other.circumscribingSphere;
 
 		for (AttachedPart& p : parts) {
 			p.part->parent = this;
@@ -74,7 +84,6 @@ struct Physical {
 
 	Physical& operator=(Physical&& other) noexcept {
 		this->cframe = other.cframe;
-		this->maxRadius = other.maxRadius;
 		this->parts = std::move(other.parts);
 		this->velocity = other.velocity;
 		this->angularVelocity = other.angularVelocity;
@@ -83,6 +92,8 @@ struct Physical {
 		this->mass = other.mass;
 		this->localCenterOfMass = other.localCenterOfMass;
 		this->inertia = other.inertia;
+		this->localCentroid = other.localCentroid;
+		this->circumscribingSphere = other.circumscribingSphere;
 
 		for (AttachedPart& p : parts) {
 			p.part->parent = this;
@@ -96,6 +107,7 @@ struct Physical {
 	void attachPart(Part* part, CFrame attachment);
 	void detachPart(Part* part);
 	void refreshWithNewParts();
+
 
 	void update(double deltaT);
 	void applyForceAtCenterOfMass(Vec3 force);
@@ -124,7 +136,8 @@ struct Physical {
 	double getAngularKineticEnergy() const;
 	double getKineticEnergy() const;
 	size_t getPartCount() const { return parts.size(); }
-	
+	BoundingBox getLocalBounds() const;
+	Sphere getLocalCircumscribingSphere() const;
 
 	PartIter begin() { return PartIter{ parts.begin() }; }
 	ConstPartIter begin() const { return ConstPartIter{ parts.begin() }; }

@@ -89,9 +89,12 @@ public:
 	SymmetricMat3 getInertia(Vec3 reference) const;
 	SymmetricMat3 getInertia(Mat3 reference) const;
 	SymmetricMat3 getInertia(CFrame reference) const;
-	Sphere getCircumscribedSphere() const;
+	Sphere getCircumscribingSphere() const;
 	void getCircumscribedEllipsoid() const;
 	double getMaxRadius() const;
+	double getMaxRadius(Vec3f reference) const;
+	double getMaxRadiusSq() const;
+	double getMaxRadiusSq(Vec3f reference) const;
 	Vec3f getNormalVecOfTriangle(Triangle triangle) const;
 
 	bool intersects(const Shape& other, Vec3f& intersection, Vec3f& exitVector, const Vec3& centerConnection) const;

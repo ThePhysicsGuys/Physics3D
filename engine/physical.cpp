@@ -5,6 +5,7 @@
 
 #include "debug.h"
 #include <algorithm>
+#include <limits>
 
 
 Physical::Physical(Part* part) : cframe(part->cframe) {
@@ -17,7 +18,10 @@ Physical::Physical(Part* part) : cframe(part->cframe) {
 	this->localCenterOfMass = part->localCenterOfMass;
 	parts.push_back(AttachedPart{ CFrame(), part });
 	part->parent = this;
-	this->maxRadius = part->maxRadius;
+	Sphere s = part->hitbox.getCircumscribingSphere();
+	this->localCentroid = s.origin;
+	this->circumscribingSphere.radius = s.radius;
+	this->circumscribingSphere.origin = getCFrame().localToGlobal(localCentroid);
 }
 
 void Physical::attachPart(Part* part, CFrame attachment) {
@@ -45,13 +49,13 @@ void Physical::detachPart(Part* part) {
 
 void Physical::refreshWithNewParts() {
 	double totalMass = 0;
-	this->maxRadius = 0;
+	//this->maxRadius = 0;
 	SymmetricMat3 totalInertia(0, 0, 0, 0, 0, 0);
 	Vec3 totalCenterOfMass(0, 0, 0);
 	for (const AttachedPart& p : parts) {
 		totalMass += p.part->mass;
 		totalCenterOfMass += p.attachment.localToGlobal(p.part->localCenterOfMass) * p.part->mass;
-		this->maxRadius = std::max(this->maxRadius, p.attachment.getPosition().length() + p.part->maxRadius);
+		//this->maxRadius = std::max(this->maxRadius, p.attachment.getPosition().length() + p.part->maxRadius);
 	}
 	totalCenterOfMass /= totalMass;
 	for (const AttachedPart& p : parts) {
@@ -60,6 +64,46 @@ void Physical::refreshWithNewParts() {
 	this->mass = totalMass;
 	this->localCenterOfMass = totalCenterOfMass;
 	this->inertia = totalInertia;
+
+	Sphere s = getLocalCircumscribingSphere();
+	this->localCentroid = s.origin;
+	this->circumscribingSphere.radius = s.radius;
+	this->circumscribingSphere.origin = getCFrame().localToGlobal(localCentroid);
+}
+
+BoundingBox Physical::getLocalBounds() const {
+	const double inf = std::numeric_limits<double>::infinity();
+
+	BoundingBox best(inf, inf, inf, -inf, -inf, -inf);
+
+
+	for (const AttachedPart& p : parts) {
+		double xmax = p.attachment.localToGlobal(p.part->hitbox.furthestInDirection(p.attachment.relativeToLocal(Vec3(1, 0, 0)))).x;
+		double xmin = p.attachment.localToGlobal(p.part->hitbox.furthestInDirection(p.attachment.relativeToLocal(Vec3(-1, 0, 0)))).x;
+		double ymax = p.attachment.localToGlobal(p.part->hitbox.furthestInDirection(p.attachment.relativeToLocal(Vec3(1, 0, 0)))).y;
+		double ymin = p.attachment.localToGlobal(p.part->hitbox.furthestInDirection(p.attachment.relativeToLocal(Vec3(-1, 0, 0)))).y;
+		double zmax = p.attachment.localToGlobal(p.part->hitbox.furthestInDirection(p.attachment.relativeToLocal(Vec3(1, 0, 0)))).z;
+		double zmin = p.attachment.localToGlobal(p.part->hitbox.furthestInDirection(p.attachment.relativeToLocal(Vec3(-1, 0, 0)))).z;
+
+		best.xmax = std::max(best.xmax, xmax);
+		best.xmin = std::min(best.xmin, xmin);
+		best.ymax = std::max(best.ymax, ymax);
+		best.ymin = std::min(best.ymin, ymin);
+		best.zmax = std::max(best.zmax, zmax);
+		best.zmin = std::min(best.zmin, zmin);
+	}
+
+	return best;
+}
+Sphere Physical::getLocalCircumscribingSphere() const {
+	BoundingBox b = getLocalBounds();
+	Vec3 localCentroid = b.getCenter();
+	double maxRadiusSq = 0;
+	for (const AttachedPart& p : parts) {
+		double radiusSq = p.part->hitbox.getMaxRadiusSq(p.attachment.globalToLocal(localCentroid));
+		maxRadiusSq = std::max(maxRadiusSq, radiusSq);
+	}
+	return Sphere{ localCentroid, sqrt(maxRadiusSq) };
 }
 
 void Physical::rotateAroundCenterOfMass(const RotMat3& rotation) {
@@ -92,6 +136,8 @@ void Physical::update(double deltaT) {
 	for (AttachedPart& attachment : parts) {
 		attachment.part->cframe = cframe.localToGlobal(attachment.attachment);
 	}
+
+	this->circumscribingSphere.origin = getCFrame().localToGlobal(localCentroid);
 }
 
 void Physical::applyForceAtCenterOfMass(Vec3 force) {
@@ -156,6 +202,8 @@ void Physical::setCFrame(const CFrame& newCFrame) {
 	for (const AttachedPart& p : parts) {
 		p.part->cframe = newCFrame.localToGlobal(p.attachment);
 	}
+
+	this->circumscribingSphere.origin = getCFrame().localToGlobal(localCentroid);
 }
 
 /*
