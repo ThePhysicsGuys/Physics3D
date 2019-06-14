@@ -4,6 +4,8 @@ CheckBox::CheckBox(std::string text, double x, double y, double width, double he
 	this->label = new Label(text, x, y);
 	this->checkBoxLabelOffset = GUI::checkBoxLabelOffset;
 	this->textured = textured;
+	this->padding = GUI::padding;
+	this->margin = GUI::margin;
 
 	if (textured) {
 		this->checkedTexture = GUI::checkBoxCheckedTexture;
@@ -17,9 +19,9 @@ CheckBox::CheckBox(std::string text, double x, double y, double width, double he
 	}
 }
 
-CheckBox::CheckBox(std::string text, double x, double y, bool textured) : CheckBox(text, x, y, GUI::checkBoxSize, GUI::checkBoxSize, textured) {}
+CheckBox::CheckBox(std::string text, double x, double y, bool textured) : CheckBox(text, x, y, GUI::checkBoxSize + 2 * padding, GUI::checkBoxSize + 2 * padding, textured) {}
 
-CheckBox::CheckBox(double x, double y, bool textured) : CheckBox("", x, y, GUI::checkBoxSize, GUI::checkBoxSize, textured) {}
+CheckBox::CheckBox(double x, double y, bool textured) : CheckBox("", x, y, GUI::checkBoxSize + 2 * padding, GUI::checkBoxSize + 2 * padding, textured) {}
 
 CheckBox::CheckBox(double x, double y, double width, double height, bool textured) : CheckBox("", x, y, width, height, textured) {}
 
@@ -82,10 +84,26 @@ void CheckBox::render() {
 	if (visible) {
 		resize();
 
-		if (!label->text.empty())
-			GUI::quad->resize(position + Vec2(label->padding, -label->padding), Vec2(dimension.y - 2 * label->padding));
-		else
-			GUI::quad->resize(position, dimension);
+		Vec2 checkBoxPosition;
+		Vec2 checkBoxDimension;
+		
+		if (label->text.empty()) {
+			// No text, resizing using default width
+			checkBoxPosition = position + Vec2(padding, -padding);
+			checkBoxDimension = Vec2(GUI::checkBoxSize);
+		} else {
+			if (label->dimension.y > GUI::checkBoxSize) {
+				// Label defines component size, checkbox is centered vertically
+				checkBoxPosition = position + Vec2(padding, -padding - (label->dimension.y - GUI::checkBoxSize) / 2);
+				checkBoxDimension = Vec2(GUI::checkBoxSize);
+			} else {
+				// Checkbox defines component size
+				checkBoxPosition = position + Vec2(padding, -padding);
+				checkBoxDimension = Vec2(GUI::checkBoxSize);
+			}
+		}
+
+		GUI::quad->resize(checkBoxPosition, checkBoxDimension);
 
 		if (pressed)
 			renderPressed();
@@ -95,7 +113,14 @@ void CheckBox::render() {
 			renderIdle();
 
 		if (!label->text.empty()) {
-			Vec2 labelPosition = position + Vec2(dimension.y + checkBoxLabelOffset, 0);
+			Vec2 labelPosition;
+			if (label->dimension.y > GUI::checkBoxSize) {
+				// Label defines the size of the component
+				labelPosition = position + Vec2(padding + checkBoxDimension.x + checkBoxLabelOffset, -padding);
+			} else {
+				// Label is centered vertically
+				labelPosition = position + Vec2(padding + checkBoxDimension.x + checkBoxLabelOffset, -padding - (GUI::checkBoxSize - label->dimension.y) / 2);
+			}
 			label->position = labelPosition;
 			label->render();
 		}
@@ -105,7 +130,7 @@ void CheckBox::render() {
 			GUI::shader->update(GUI::COLOR::RED);
 			GUI::quad->render(GL_LINE);
 
-			GUI::quad->resize(position + Vec2(label->padding, -label->padding), dimension - Vec2(label->padding) * 2);
+			GUI::quad->resize(checkBoxPosition, checkBoxDimension);
 			GUI::shader->update(GUI::COLOR::GREEN); 
 			GUI::quad->render(GL_LINE);
 		}
@@ -114,8 +139,14 @@ void CheckBox::render() {
 
 Vec2 CheckBox::resize() {
 	if (!label->text.empty()) {
-		Vec2 labelDimension = label->resize();
-		dimension = labelDimension + Vec2(labelDimension.y + checkBoxLabelOffset, 0);
+		label->resize();
+		if (label->dimension.y > GUI::checkBoxSize) {
+			// Label defines dimension
+			dimension = label->dimension + Vec2(GUI::checkBoxSize + checkBoxLabelOffset, 0) + Vec2(padding) * 2;
+		} else {
+			// Checkbox defines dimension
+			dimension = Vec2(GUI::checkBoxSize + checkBoxLabelOffset + label->width, GUI::checkBoxSize) + Vec2(padding) * 2;
+		}
 	}
 
 	return dimension;

@@ -31,7 +31,7 @@ public:
 	bool resizing;
 
 	/* 
-		The topleft edge of the container, padding not included, margin included
+		The topleft edge of the container, margin not included, padding included
 		This property can be altered by its parent
 	*/
 	union {
@@ -43,7 +43,7 @@ public:
 	};
 
 	/* 
-		The size of the container, padding not included, margin included
+		The size of the container, margin not included, padding included
 		This property can be altered by its parent
 	*/
 	union {
@@ -95,12 +95,12 @@ public:
 	}
 
 	/* 
-		Returns the minimal size of the container 
+		Returns the minimal size of the container, margin not included, padding included
 	*/
 	virtual Vec2 resize() = 0;
 	
 	/* 
-		Renders the component without resizing it 
+		Renders the component, resizing may happen
 	*/
 	virtual void render() = 0;
 

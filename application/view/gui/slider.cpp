@@ -9,17 +9,16 @@ Slider::Slider(double x, double y, double min, double max, double value) : Compo
 	this->max = max;
 	this->value = value;
 
-	handleColor = GUI::sliderHandleColor;
-	backgroundColor = GUI::sliderBackgroundColor;
-	foregroundFilledColor = GUI::sliderForegroundFilledColor;
-	foregroundEmptyColor = GUI::sliderForegroundEmptyColor;
+	this->handleColor = GUI::sliderHandleColor;
+	this->backgroundColor = GUI::sliderBackgroundColor;
+	this->foregroundFilledColor = GUI::sliderForegroundFilledColor;
+	this->foregroundEmptyColor = GUI::sliderForegroundEmptyColor;
 
-	padding = GUI::padding;
 
-	handleWidth = GUI::sliderHandleWidth;
-	handleHeight = GUI::sliderHandleHeight;
-	barWidth = GUI::sliderBarWidth;
-	barHeight = GUI::sliderBarHeight;
+	this->handleWidth = GUI::sliderHandleWidth;
+	this->handleHeight = GUI::sliderHandleHeight;
+	this->barWidth = GUI::sliderBarWidth;
+	this->barHeight = GUI::sliderBarHeight;
 }
 
 
@@ -32,6 +31,9 @@ Slider::Slider(double x, double y, double width, double height, double min, doub
 	backgroundColor = GUI::sliderBackgroundColor;
 	foregroundFilledColor = GUI::sliderForegroundFilledColor;
 	foregroundEmptyColor = GUI::sliderForegroundEmptyColor;
+
+	this->padding = GUI::padding;
+	this->margin = GUI::margin;
 
 	handleWidth = GUI::sliderHandleWidth;
 	handleHeight = height - 2 * padding;

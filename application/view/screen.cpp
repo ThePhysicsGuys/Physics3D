@@ -319,6 +319,9 @@ void Screen::init() {
 		}
 	};
 
+	//propertiesFrame->debug = true;
+	//colorPickerFrame->debug = true;
+
 	propertiesFrame->add(partNameLabel, Align::FILL);
 	propertiesFrame->add(partPositionLabel, Align::FILL);
 	propertiesFrame->add(partMeshIDLabel, Align::FILL);
@@ -340,8 +343,8 @@ void Screen::init() {
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 	mouseVertical = new Panel(0, 0, 0.04, 0.007);
 	mouseHorizontal = new Panel(0, 0, 0.007, 0.04);
-	mouseVertical->backgroundColor = Vec4(1);
-	mouseHorizontal->backgroundColor = Vec4(1);
+	mouseVertical->background = Vec4(1);
+	mouseHorizontal->background = Vec4(1);
 	
 
 	// Picker init
@@ -454,7 +457,7 @@ void Screen::update() {
 
 	if (selectedPart) {
 		partMeshIDLabel->text = "MeshID: " + std::to_string(selectedPart->drawMeshId);
-		renderModeCheckBox->checked = selectedPart->renderMode == GL_FILL;
+		renderModeCheckBox->checked = selectedPart->renderMode == GL_LINE;
 		partPositionLabel->text = "Position: " + str(selectedPart->cframe.position);
 		partNameLabel->text = "Name: " + selectedPart->name;
 		partVelocity->text = "Velocity: " + str(selectedPart->parent->velocity);

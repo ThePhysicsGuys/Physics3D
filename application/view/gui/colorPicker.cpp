@@ -3,6 +3,10 @@
 #include "gui.h"
 
 ColorPicker::ColorPicker(double x, double y, double size) : Component(x, y, size, size) {
+	this->padding = GUI::padding;
+	this->margin = GUI::margin;
+	this->background = GUI::COLOR::BACK;
+
 	dimension = Vec2(
 		padding + 
 		GUI::colorPickerBarWidth + 2 * GUI::colorPickerBarBorderWidth + 
@@ -12,14 +16,27 @@ ColorPicker::ColorPicker(double x, double y, double size) : Component(x, y, size
 		GUI::colorPickerBarWidth + 2 * GUI::colorPickerBarBorderWidth + 
 		padding, 
 		
-		padding + size + padding);
-	background = GUI::COLOR::BACK;
+		padding + size + padding
+	);
+
 	setRgba(Vec4(1));
 }
 
 ColorPicker::ColorPicker(double x, double y) : Component(x, y) {
-	dimension = Vec2(padding + 2 * GUI::colorPickerBarWidth + 4 * GUI::colorPickerBarBorderWidth + 2 * GUI::colorPickerSpacing + GUI::colorPickerHueSize + GUI::colorPickerSpacing + GUI::colorPickerBarWidth + 2 * GUI::colorPickerBarBorderWidth + padding, padding + GUI::colorPickerHueSize + padding);
-	background = GUI::COLOR::BACK;
+	this->background = GUI::COLOR::BACK;
+	this->padding = GUI::padding;
+	this->margin = GUI::margin;
+
+	dimension = Vec2(
+		padding + 
+		GUI::colorPickerBarWidth + 2 * GUI::colorPickerBarBorderWidth + 
+		GUI::colorPickerSpacing + GUI::colorPickerHueSize + GUI::colorPickerSpacing + 
+		GUI::colorPickerBarWidth + 2 * GUI::colorPickerBarBorderWidth + 
+		padding,
+		
+		padding + GUI::colorPickerHueSize + padding
+	);
+
 	setRgba(Vec4(1));
 };
 
@@ -73,8 +90,8 @@ void ColorPicker::render() {
 		GUI::quad->render();
 
 		// Hue
-		Vec2 huePosition = Vec2(alphaBorderPosition.x + alphaBorderDimension.x + GUI::colorPickerSpacing, position.y - padding);
-		Vec2 hueDimension = Vec2(height - 2 * padding);
+		Vec2 huePosition = Vec2(alphaBorderPosition.x + alphaBorderDimension.x + GUI::colorPickerSpacing, alphaBorderPosition.y);
+		Vec2 hueDimension = Vec2(alphaBorderDimension.y);
 		GUI::shader->update(GUI::colorPickerHueTexture);
 		GUI::quad->resize(huePosition, hueDimension);
 		GUI::quad->render();
@@ -92,9 +109,9 @@ void ColorPicker::render() {
 		GUI::quad->resize(colorBorderPosition, colorBorderDimension);
 		GUI::quad->render();
 
-		Vec2 colorPosition2 = colorBorderPosition + Vec2(GUI::colorPickerBarBorderWidth, -GUI::colorPickerBarBorderWidth);
-		Vec2 colorDimension2 = brightnessDimension;
-		GUI::quad->resize(colorPosition2, colorDimension2);
+		Vec2 colorPosition = colorBorderPosition + Vec2(GUI::colorPickerBarBorderWidth, -GUI::colorPickerBarBorderWidth);
+		Vec2 colorDimension = brightnessDimension;
+		GUI::quad->resize(colorPosition, colorDimension);
 		GUI::shader->update(GUI::colorPickerAlphaPatternTexture);
 		GUI::quad->render();
 		GUI::shader->update(GUI::COLOR::hsvaToRgba(hsva));

@@ -19,15 +19,17 @@ Vec2 FlowLayout::resize(Container* container, Vec2 minDimension) {
 
 		// NO HEIGHT CHECK YET
 		if (alignment == Align::FILL) {
-			//Log::debug("fill %f, %f", componentSize.x, componentSize.y);
-			double newRowWidth = rowWidth + componentSize.x;
+			// Calculate new row width, component margin included
+			double newRowWidth = rowWidth + component->margin + componentSize.x + component->margin;
 			if (newRowWidth <= container->width || container->resizing) {
-				// Set component position relative to parent
-				component->position = container->position + Vec2(rowWidth, -contentHeight);
+				// Set component position relative to parent with old rowWidth and contentHeight, component margin included
+				component->position = container->position + Vec2(rowWidth, -contentHeight) + Vec2(component->margin, -component->margin);
 
 				// End of the current row, component keeps dimension
+				// Update row width with calculated value
 				rowWidth = newRowWidth;
-				rowHeight = fmax(rowHeight, componentSize.y);
+				// Update row height, component margin included
+				rowHeight = fmax(rowHeight, component->margin + componentSize.y + component->margin);
 
 				// Resize the container so the component fits in
 				contentWidth = fmax(contentWidth, rowWidth);
@@ -43,26 +45,27 @@ Vec2 FlowLayout::resize(Container* container, Vec2 minDimension) {
 				// Component does not fit in the current row, advance to the next row
 				contentHeight += rowHeight;
 
-				// Set component position relative to parent
-				component->position = container->position + Vec2(0, -contentHeight);
+				// Set component position relative to parent, component margin included
+				component->position = container->position + Vec2(0, -contentHeight) + Vec2(component->margin, -component->margin);
 
-				// Advance position
-				contentHeight += componentSize.y;
+				// Advance content height, component margin included
+				contentHeight += component->margin + componentSize.y + component->margin;
 
 				// Reset row size
 				rowWidth = 0;
 				rowHeight = 0;
 			}
 		} else if (alignment == Align::RELATIVE) {
-			//Log::debug("relative %f, %f", componentSize.x, componentSize.y);
-			double newRowWidth = rowWidth + componentSize.x;
+			// Calculate new row width, component margin included
+			double newRowWidth = rowWidth + component->margin + componentSize.x + component->margin;
 			if (newRowWidth <= container->width || container->resizing) {
 				// Set component position relative to parent
-				component->position = container->position + Vec2(rowWidth, -contentHeight);
+				component->position = container->position + Vec2(rowWidth, -contentHeight) + Vec2(component->margin, -component->margin);
 
-				// Add component to current row, resize row height
+				// Update row width with calculated value
 				rowWidth = newRowWidth;
-				rowHeight = fmax(rowHeight, componentSize.y);
+				// Update row height, component margin included
+				rowHeight = fmax(rowHeight, component->margin + componentSize.y + component->margin);
 
 				// Resize the container
 				contentWidth = fmax(contentWidth, rowWidth);
@@ -71,11 +74,11 @@ Vec2 FlowLayout::resize(Container* container, Vec2 minDimension) {
 				contentHeight += rowHeight;
 
 				// Set component position relative to parent
-				component->position = container->position + Vec2(0, -contentHeight);
+				component->position = container->position + Vec2(0, -contentHeight) + Vec2(component->margin, -component->margin);
 
 				// Set new row size
-				rowWidth = componentSize.x;
-				rowHeight = componentSize.y;
+				rowWidth = component->margin + componentSize.x + component->margin;
+				rowHeight = component->margin + componentSize.y + component->margin;
 			}
 		}
 	}

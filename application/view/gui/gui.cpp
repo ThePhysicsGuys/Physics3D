@@ -157,11 +157,6 @@ namespace GUI {
 	// Label
 	Vec4 labelBackgroundColor = COLOR::WHITE;
 
-	// Panel
-	double panelPadding = 0.01;
-	double panelMargin = 0.01;
-	Vec4 panelBackgroundColor = COLOR::BACK;
-
 	// Button
 	Texture* closeButtonHoverTexture;
 	Texture* closeButtonIdleTexture;
@@ -206,7 +201,7 @@ namespace GUI {
 	Texture* checkBoxHoverCheckedTexture;
 	Texture* checkBoxHoverUncheckedTexture;
 	double checkBoxOffset = 0.006;
-	double checkBoxSize = 0.08;
+	double checkBoxSize = 0.03;
 	double checkBoxLabelOffset = 0.02;
 
 	// Frame

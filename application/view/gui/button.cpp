@@ -3,6 +3,10 @@
 Button::Button(double x, double y, double width, double height, bool textured) : Component(x, y, width, height) {
 	this->textured = textured;
 	this->borderColor = GUI::borderColor;
+
+	this->padding = GUI::padding;
+	this->margin = GUI::margin;
+	
 	if (textured)
 		this->borderWidth = 0;
 	else
@@ -13,6 +17,10 @@ Button::Button(std::string text, double x, double y, bool textured) : Component(
 	this->fontColor = GUI::fontColor;
 	this->fontSize = GUI::fontSize;
 	this->textured = textured;
+
+	this->padding = GUI::padding;
+	this->margin = GUI::margin;
+
 	this->text = text;
 	this->borderColor = GUI::borderColor;
 	if (textured)

@@ -10,7 +10,7 @@
 
 class Panel : public Container {
 public:
-	Vec4 backgroundColor;
+	Vec4 background;
 
 	Panel(double x, double y);
 	Panel(double x, double y, double width, double height);

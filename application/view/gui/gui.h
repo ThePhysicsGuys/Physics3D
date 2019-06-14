@@ -73,11 +73,6 @@ namespace GUI {
 	// Label
 	extern Vec4 labelBackgroundColor;
 
-	// Panel
-	extern double panelPadding;
-	extern double panelMargin;
-	extern Vec4 panelBackgroundColor;
-
 	// Button
 	extern Texture* closeButtonHoverTexture;
 	extern Texture* closeButtonIdleTexture;
