@@ -7,21 +7,6 @@ Part::Part(const Shape& shape, const CFrame& position, double density, double fr
 	this->localCenterOfMass = this->hitbox.getCenterOfMass();
 }
 
-/*Part::Part(VisualShape shape, CFrame position, double density, double friction) : properties({density, friction}) {
-	CFramef backTransform;
-	Vec3f* normalBuf = (shape.normals) ? new Vec3f[shape.vertexCount] : nullptr;
-	NormalizedShape normalized = shape.normalized(new Vec3f[shape.vertexCount], normalBuf, backTransform);
-
-	CFrame realCFrame = position.localToGlobal(CFrame(backTransform));
-
-	this->hitbox = normalized;
-	this->cframe = realCFrame;
-	this->maxRadius = hitbox.getMaxRadius();
-
-	this->mass = this->hitbox.getVolume() * this->properties.density;
-	this->inertia = this->hitbox.getInertia() * this->properties.density;
-}*/
-
 bool Part::intersects(const Part& other, Vec3& intersection, Vec3& exitVector) const {
 #ifdef USE_TRANSFORMATIONS
 	Vec3f intersectionF, exitVectorF;

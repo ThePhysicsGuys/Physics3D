@@ -15,4 +15,8 @@ struct BoundingBox {
 	bool intersects(BoundingBox other) const;
 	bool containsPoint(Vec3 point) const;
 	Shape toShape() const;
+	inline double getWidth() const { return xmax - xmin; }
+	inline double getHeight() const { return ymax - ymin; }
+	inline double getDepth() const { return zmax - zmin; }
+	inline Vec3 getCenter() const { return Vec3(xmin + xmax, ymin + ymax, zmin + zmax) / 2; }
 };

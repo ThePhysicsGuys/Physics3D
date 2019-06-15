@@ -26,8 +26,6 @@ public:
 	mutable std::mutex queueLock;
 
 	Part* selectedPart = nullptr;
-	Vec3 localSelectedPoint;
-	Vec3 magnetPoint;
 
 	WorldPrototype();
 	WorldPrototype(size_t initialPartCapacity);

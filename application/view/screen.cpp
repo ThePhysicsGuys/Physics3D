@@ -79,7 +79,7 @@ void terminateGL() {
 
 Screen::Screen() {};
 
-Screen::Screen(int width, int height, World<ExtendedPart>* world) {
+Screen::Screen(int width, int height, MagnetWorld* world) {
 	setWorld(world);
 
 	// Create a windowed mode window and its OpenGL context 
@@ -703,7 +703,7 @@ void Screen::refresh() {
 		renderSphere(selectedPart->maxRadius * 2, selectedCFrame.getPosition(), green);
 		Vec4f blue = GUI::COLOR::BLUE;
 		blue.w = 0.5;
-		renderSphere(selectedPart->parent->maxRadius * 2, selectedPart->parent->getCFrame().getPosition(), blue);
+		renderSphere(selectedPart->parent->circumscribingSphere.radius * 2, selectedPart->parent->circumscribingSphere.origin, blue);
 	}
 
 	if (renderColissionSpheres) {
@@ -717,7 +717,7 @@ void Screen::refresh() {
 		for (Physical& phys : world->iterPhysicals()) {
 			Vec4f blue = GUI::COLOR::BLUE;
 			blue.w = 0.5;
-			renderSphere(phys.maxRadius * 2, phys.getCFrame().getPosition(), blue);
+			renderSphere(phys.circumscribingSphere.radius * 2, phys.circumscribingSphere.origin, blue);
 		}
 	}
 	// Postprocess to screenFrameBuffer

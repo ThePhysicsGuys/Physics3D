@@ -147,9 +147,9 @@ struct Colission {
 size_t findColissions(WorldPrototype& world, std::vector<Colission>& colissions) {
 	for(Physical& anchoredPhys: world.iterAnchoredPhysicals()) {
 		for(Physical& freePhys: world.iterFreePhysicals()) {
-			Vec3 deltaPosition = freePhys.getCFrame().getPosition() - anchoredPhys.getCFrame().getPosition();
-			double maxDistanceBetween = freePhys.maxRadius + anchoredPhys.maxRadius;
-			if (deltaPosition.lengthSquared() > maxDistanceBetween * maxDistanceBetween) {
+			Vec3 deltaCentroid = freePhys.circumscribingSphere.origin - anchoredPhys.circumscribingSphere.origin;
+			double maxDistanceBetween = freePhys.circumscribingSphere.radius + anchoredPhys.circumscribingSphere.radius;
+			if (deltaCentroid.lengthSquared() > maxDistanceBetween * maxDistanceBetween) {
 				intersectionStatistics.addToTally(IntersectionResult::PHYSICAL_DISTANCE_REJECT, freePhys.getPartCount() * anchoredPhys.getPartCount());
 				continue;
 			}
@@ -189,9 +189,9 @@ size_t findColissions(WorldPrototype& world, std::vector<Colission>& colissions)
 		Physical& phys1 = *mainIter;
 		for(auto secondIter = mainIter; ++secondIter != finish; ) {
 			Physical& phys2 = *secondIter;
-			Vec3 deltaPosition = phys1.getCFrame().getPosition() - phys2.getCFrame().getPosition();
-			double maxDistanceBetween = phys1.maxRadius + phys2.maxRadius;
-			if (deltaPosition.lengthSquared() > maxDistanceBetween * maxDistanceBetween) {
+			Vec3 deltaCentroid = phys1.circumscribingSphere.origin - phys2.circumscribingSphere.origin;
+			double maxDistanceBetween = phys1.circumscribingSphere.radius + phys2.circumscribingSphere.radius;
+			if (deltaCentroid.lengthSquared() > maxDistanceBetween * maxDistanceBetween) {
 				intersectionStatistics.addToTally(IntersectionResult::PHYSICAL_DISTANCE_REJECT, phys1.getPartCount()*phys2.getPartCount());
 				continue;
 			}

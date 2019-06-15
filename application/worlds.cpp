@@ -12,10 +12,8 @@
 #define PICKER_SPEED_STRENGTH 12
 #define PICKER_ANGULAR_REDUCE_STRENGTH 50
 
-GravityWorld::GravityWorld(Vec3 gravity) : gravity(gravity) {}
-
-void GravityWorld::applyExternalForces() {
-	if(selectedPart != nullptr && !isAnchored(selectedPart->parent)) {
+void MagnetWorld::applyExternalForces() {
+	if (selectedPart != nullptr && !isAnchored(selectedPart->parent)) {
 		Physical* selectedPhysical = selectedPart->parent;
 		CFrame cframe = selectedPhysical->getCFrame();
 		// Magnet force
@@ -27,9 +25,13 @@ void GravityWorld::applyExternalForces() {
 		selectedPhysical->applyForce(absoluteSelectedPoint - selectedPhysical->getCenterOfMass(), force);
 		Vec3 angular = -cframe.localToRelative(selectedPhysical->inertia * cframe.relativeToLocal(selectedPhysical->angularVelocity)) * PICKER_ANGULAR_REDUCE_STRENGTH;// / (delta.length() + 1);
 		selectedPhysical->applyMoment(angular);
-
-
 	}
+}
+
+GravityWorld::GravityWorld(Vec3 gravity) : gravity(gravity) {}
+
+void GravityWorld::applyExternalForces() {
+	MagnetWorld::applyExternalForces();
 	// Gravity force
 	for(Physical& physical : iterFreePhysicals()) {
 		// physical.applyForceAtCenterOfMass((Vec3(0.0, 5.0, 0.0) - physical.getCenterOfMass() * 1.0) * physical.mass);

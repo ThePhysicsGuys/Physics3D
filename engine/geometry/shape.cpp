@@ -430,14 +430,14 @@ Vec3 Shape::getCenterOfMass() const {
 	return total / (24 * getVolume());
 }
 
-Sphere Shape::getCircumscribedSphere() const {
+Sphere Shape::getCircumscribingSphere() const {
 	BoundingBox bounds = getBounds();
 	Vec3 center = Vec3(bounds.xmax + bounds.xmin, bounds.ymax + bounds.ymin, bounds.zmax + bounds.zmin) / 2.0;
-	double radius = (Vec3(bounds.xmax, bounds.ymax, bounds.zmax) - center).length();
+	double radius = getMaxRadius(center);
 	return Sphere{center, radius};
 }
 
-double Shape::getMaxRadius() const {
+double Shape::getMaxRadiusSq() const {
 	double bestDistSq = 0;
 	for(Vec3f vertex : iterVertices()) {
 		double distSq = vertex.lengthSquared();
@@ -445,7 +445,26 @@ double Shape::getMaxRadius() const {
 			bestDistSq = distSq;
 		}
 	}
-	return sqrt(bestDistSq);
+	return bestDistSq;
+}
+
+double Shape::getMaxRadiusSq(Vec3f reference) const {
+	double bestDistSq = 0;
+	for (Vec3f vertex : iterVertices()) {
+		double distSq = (vertex-reference).lengthSquared();
+		if (distSq > bestDistSq) {
+			bestDistSq = distSq;
+		}
+	}
+	return bestDistSq;
+}
+
+double Shape::getMaxRadius() const {
+	return sqrt(getMaxRadiusSq());
+}
+
+double Shape::getMaxRadius(Vec3f reference) const {
+	return sqrt(getMaxRadiusSq(reference));
 }
 
 /*
