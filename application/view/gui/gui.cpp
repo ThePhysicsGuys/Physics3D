@@ -213,7 +213,7 @@ namespace GUI {
 	// Font
 	Font* font = nullptr;
 	Vec4 fontColor = COLOR::SILVER;
-	double fontSize = 0.0007;
+	double fontSize = 0.0009;
 
 	void init(Screen* screen, QuadShader* shader, BlurShader* blurShader, Font* font) {
 		GUI::screen = screen;

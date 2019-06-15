@@ -47,7 +47,7 @@
 
 
 bool initGLFW() {
-	/* Initialize GLFW */
+	// Initialize GLFW
 	if (!glfwInit()) {
 		Log::error("GLFW failed to initialize");
 		return false;
@@ -164,7 +164,7 @@ PointMesh* pointMesh = nullptr;
 ArrayMesh* originMesh = nullptr;
 
 
-// GUI
+// Properties GUI
 Frame* propertiesFrame = nullptr;
 Label* partNameLabel = nullptr;
 Label* partPositionLabel = nullptr;
@@ -175,16 +175,39 @@ Label* partKineticEnergy = nullptr;
 Label* partPotentialEnergy = nullptr;
 Label* partEnergy = nullptr;
 Button* colorButton;
-
-Image* image = nullptr;
-
 CheckBox* renderModeCheckBox = nullptr;
 
+
+// Mouse GUI
 Panel* mouseVertical = nullptr;
 Panel* mouseHorizontal = nullptr;
 
+
+// Colorpicker GUI
 Frame* colorPickerFrame = nullptr;
 ColorPicker* colorPicker = nullptr;
+
+
+// Debug GUI
+Frame* debugFrame = nullptr;
+Label* debugVectorLabel = nullptr;
+CheckBox* debugInfoVectorCheckBox = nullptr;
+CheckBox* debugPositionCheckBox = nullptr;
+CheckBox* debugVelocityCheckBox = nullptr;
+CheckBox* debugMomentCheckBox = nullptr;
+CheckBox* debugForceCheckBox = nullptr;
+CheckBox* debugAccelerationCheckBox = nullptr;
+CheckBox* debugAngularImpulseCheckBox = nullptr;
+CheckBox* debugImpulseCheckBox = nullptr;
+CheckBox* debugAngularVelocityCheckBox = nullptr;
+Label* debugPointLabel = nullptr;
+CheckBox* debugInfoPointCheckBox = nullptr;
+CheckBox* debugCenterOfMassCheckBox = nullptr;
+CheckBox* debugIntersectionCheckBox = nullptr;
+Label* debugRenderLabel = nullptr;
+CheckBox* debugRenderPiesCheckBox = nullptr;
+CheckBox* debugRenderSpheresCheckBox = nullptr;
+
 
 void Screen::init() {
 	// Log init
@@ -279,6 +302,9 @@ void Screen::init() {
 
 	// GUI init
 	GUI::init(this, &quadShader, &blurShader, font);
+
+
+	// Properties GUI
 	propertiesFrame = new Frame(0.7, 0.7, "Properties");
 	partNameLabel = new Label("", 0, 0);
 	partPositionLabel = new Label("", 0, 0);
@@ -289,27 +315,8 @@ void Screen::init() {
 	partKineticEnergy = new Label("", 0, 0);
 	partPotentialEnergy = new Label("", 0, 0);
 	partEnergy = new Label("", 0, 0);
-
-	colorPickerFrame = new Frame(0, 0, "Color");
-	colorPickerFrame->visible = false;
-	colorPicker = new ColorPicker(0, 0, 0.5);
-	colorPickerFrame->anchor = propertiesFrame;
-
-	colorButton->action = [] (Button* c) {
-		if (GUI::screen->selectedPart && !colorPickerFrame->visible) {
-			colorPickerFrame->visible = true;
-			colorPickerFrame->anchor = propertiesFrame;
-		}
-	};
-
-	colorPicker->action = [] (ColorPicker* c) {
-		if (GUI::screen->selectedPart) {
-			GUI::screen->selectedPart->material.ambient = GUI::COLOR::hsvaToRgba(c->hsva);
-		}
-	};
-
 	renderModeCheckBox = new CheckBox("Wireframe", 0, 0, true);
-	renderModeCheckBox->action = [] (CheckBox* c) {
+	renderModeCheckBox->action = [](CheckBox* c) {
 		if (GUI::screen->selectedPart) {
 			if (GUI::screen->selectedPart->renderMode == GL_FILL) {
 				GUI::screen->selectedPart->renderMode = GL_LINE;
@@ -318,9 +325,6 @@ void Screen::init() {
 			}
 		}
 	};
-
-	//propertiesFrame->debug = true;
-	//colorPickerFrame->debug = true;
 
 	propertiesFrame->add(partNameLabel, Align::FILL);
 	propertiesFrame->add(partPositionLabel, Align::FILL);
@@ -333,10 +337,83 @@ void Screen::init() {
 	propertiesFrame->add(partPotentialEnergy, Align::FILL);
 	propertiesFrame->add(partEnergy, Align::FILL);
 
+
+	// Colorpicker GUI
+	colorPickerFrame = new Frame(0, 0, "Color");
+	colorPickerFrame->visible = false;
+	colorPicker = new ColorPicker(0, 0, 0.5);
+	colorPickerFrame->anchor = propertiesFrame;
+	colorButton->action = [] (Button* c) {
+		if (GUI::screen->selectedPart && !colorPickerFrame->visible) {
+			colorPickerFrame->visible = true;
+			colorPickerFrame->anchor = propertiesFrame;
+		}
+	};
+	colorPicker->action = [] (ColorPicker* c) {
+		if (GUI::screen->selectedPart) {
+			GUI::screen->selectedPart->material.ambient = GUI::COLOR::hsvaToRgba(c->hsva);
+		}
+	};
+
 	colorPickerFrame->add(colorPicker, Align::FILL);
 
+
+	// Debug GUI
+	debugFrame = new Frame(0.9, 0.9, "Debug");
+	debugVectorLabel = new Label("Vectors", 0, 0);
+	debugInfoVectorCheckBox = new CheckBox("Info", 0, 0, true);
+	debugPositionCheckBox = new CheckBox("Position", 0, 0, true);
+	debugVelocityCheckBox = new CheckBox("Velocity", 0, 0, true);
+	debugAccelerationCheckBox = new CheckBox("Acceleration", 0, 0, true);
+	debugForceCheckBox = new CheckBox("Force", 0, 0, true);
+	debugMomentCheckBox = new CheckBox("Moment", 0, 0, true);
+	debugImpulseCheckBox = new CheckBox("Impulse", 0, 0, true);
+	debugAngularVelocityCheckBox = new CheckBox("Angular velocity", 0, 0, true);
+	debugAngularImpulseCheckBox = new CheckBox("Angular impulse", 0, 0, true);
+	debugPointLabel = new Label("Points", 0, 0);
+	debugInfoPointCheckBox = new CheckBox("Info", 0, 0, true);
+	debugCenterOfMassCheckBox = new CheckBox("Center of mass", 0, 0, true);
+	debugIntersectionCheckBox = new CheckBox("Intersections", 0, 0, true);
+	debugRenderLabel = new Label("Render", 0, 0);
+	debugRenderPiesCheckBox = new CheckBox("Statistics", 0, 0, true);
+	debugRenderSpheresCheckBox = new CheckBox("Collision spheres", 0, 0, true);
+	debugInfoVectorCheckBox->action = [] (CheckBox* c) { toggleDebugVecType(Debug::INFO_VEC); };
+	debugVelocityCheckBox->action = [] (CheckBox* c) { toggleDebugVecType(Debug::VELOCITY); };
+	debugAccelerationCheckBox->action = [] (CheckBox* c) { toggleDebugVecType(Debug::ACCELERATION); };
+	debugForceCheckBox->action = [] (CheckBox* c) { toggleDebugVecType(Debug::FORCE); };
+	debugAngularImpulseCheckBox->action = [] (CheckBox* c) { toggleDebugVecType(Debug::ANGULAR_IMPULSE); };
+	debugPositionCheckBox->action = [] (CheckBox* c) { toggleDebugVecType(Debug::POSITION); };
+	debugMomentCheckBox->action = [] (CheckBox* c) { toggleDebugVecType(Debug::MOMENT); };
+	debugImpulseCheckBox->action = [] (CheckBox* c) { toggleDebugVecType(Debug::IMPULSE); };
+	debugAngularVelocityCheckBox->action = [] (CheckBox* c) { toggleDebugVecType(Debug::ANGULAR_VELOCITY); };
+	debugInfoPointCheckBox->action = [] (CheckBox* c) { toggleDebugPointType(Debug::INFO_POINT); };
+	debugCenterOfMassCheckBox->action = [] (CheckBox* c) { toggleDebugPointType(Debug::CENTER_OF_MASS); };
+	debugIntersectionCheckBox->action = [] (CheckBox* c) { toggleDebugPointType(Debug::INTERSECTION); };
+	debugRenderPiesCheckBox->action = [] (CheckBox* c) { renderPies = !renderPies; };
+	debugRenderSpheresCheckBox->action = [] (CheckBox* c) { renderColissionSpheres = !renderColissionSpheres; };
+
+	debugFrame->add(debugVectorLabel, Align::FILL);
+	debugFrame->add(debugInfoVectorCheckBox, Align::FILL);
+	debugFrame->add(debugPositionCheckBox, Align::FILL);
+	debugFrame->add(debugVelocityCheckBox, Align::FILL);
+	debugFrame->add(debugAccelerationCheckBox, Align::FILL);
+	debugFrame->add(debugForceCheckBox, Align::FILL);
+	debugFrame->add(debugMomentCheckBox, Align::FILL);
+	debugFrame->add(debugImpulseCheckBox, Align::FILL);
+	debugFrame->add(debugAngularVelocityCheckBox, Align::FILL);
+	debugFrame->add(debugAngularImpulseCheckBox, Align::FILL);
+	debugFrame->add(debugPointLabel, Align::FILL);
+	debugFrame->add(debugInfoPointCheckBox, Align::FILL);
+	debugFrame->add(debugCenterOfMassCheckBox, Align::FILL);
+	debugFrame->add(debugIntersectionCheckBox, Align::FILL);
+	debugFrame->add(debugRenderLabel, Align::FILL);
+	debugFrame->add(debugRenderPiesCheckBox, Align::FILL);
+	debugFrame->add(debugRenderSpheresCheckBox, Align::FILL);
+	
+	// Add frames to GUI
 	GUI::add(propertiesFrame);
 	GUI::add(colorPickerFrame);
+	GUI::add(debugFrame);
 
 
 	// Mouse init
@@ -688,6 +765,7 @@ void Screen::refresh() {
 	pointMesh->render();
 
 	glEnable(GL_DEPTH_TEST);
+
 
 	// Render origin mesh
 	graphicsMeasure.mark(GraphicsProcess::ORIGIN);
