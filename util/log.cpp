@@ -6,22 +6,15 @@
 
 namespace Log {
 
-	enum class LevelColor {
-		DEBUG = 10,
-		INFO = 11,
-		WARNING = 14,
-		ERROR = 12,
-		FATAL = 192,
-		NORMAL = 15,
-		SUBJECT = 13
-	};
-
 	HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
 	Level logLevel = Level::INFO;
 
 	bool newSubject = false;
 	std::string lastSubject = "";
 	std::string currentSubject = "";
+
+	std::string delimiter = "\n";
+
 
 	void setSubject(std::string subject) {
 		currentSubject = subject;
@@ -46,23 +39,27 @@ namespace Log {
 	}
 
 	void subject(std::string subject) {
-		setColor((int) LevelColor::SUBJECT);
+		setColor((int) Color::SUBJECT);
 		std::cout << subject;
-		setColor((int) LevelColor::NORMAL);
+		setColor((int) Color::NORMAL);
 		newSubject = false;
+	}
+
+	void setDelimiter(std::string delimiter) {
+		Log::delimiter = delimiter;
 	}
 
 	void debug(std::string format, ...) {
 		if (logLevel != Level::NONE) {
 			if (newSubject) subject("\n[" + currentSubject + "]:\n");
 			if (!currentSubject.empty()) subject("|\t");
-			std::string message = "[DEBUG]: " + format + "\n";
-			setColor((int) LevelColor::DEBUG);
+			std::string message = "[DEBUG]: " + format + delimiter;
+			setColor((int) Color::DEBUG);
 			va_list args;
 			va_start(args, format);
 			vprintf(message.c_str(), args);
 			va_end(args);
-			setColor((int) LevelColor::NORMAL);
+			setColor((int) Color::NORMAL);
 		}
 	}
 
@@ -70,13 +67,13 @@ namespace Log {
 		if (logLevel <= Level::INFO) {
 			if (newSubject) subject("\n[" + currentSubject + "]:\n");
 			if (!currentSubject.empty()) subject("|\t");
-			std::string message = "[INFO]: " + format + "\n";
-			setColor((int) LevelColor::INFO);
+			std::string message = "[INFO]: " + format + delimiter;
+			setColor((int) Color::INFO);
 			va_list args;
 			va_start(args, format);
 			vprintf(message.c_str(), args);
 			va_end(args);
-			setColor((int) LevelColor::NORMAL);
+			setColor((int) Color::NORMAL);
 		}
 	}
 
@@ -84,13 +81,13 @@ namespace Log {
 		if (logLevel <= Level::WARNING) {
 			if (newSubject) subject("\n[" + currentSubject + "]:\n");
 			if (!currentSubject.empty()) subject("|\t");
-			std::string message = "[WARN]: " + format + "\n";
-			setColor((int) LevelColor::WARNING);
+			std::string message = "[WARN]: " + format + delimiter;
+			setColor((int) Color::WARNING);
 			va_list args;
 			va_start(args, format);
 			vprintf(message.c_str(), args);
 			va_end(args);
-			setColor((int) LevelColor::NORMAL);
+			setColor((int) Color::NORMAL);
 		}
 	}
 
@@ -98,13 +95,13 @@ namespace Log {
 		if (logLevel <= Level::ERROR) {
 			if (newSubject) subject("\n[" + currentSubject + "]:\n");
 			if (!currentSubject.empty()) subject("|\t");
-			std::string message = "[ERROR]: " + format + "\n";
-			setColor((int) LevelColor::ERROR);
+			std::string message = "[ERROR]: " + format + delimiter;
+			setColor((int) Color::ERROR);
 			va_list args;
 			va_start(args, format);
 			vprintf(message.c_str(), args);
 			va_end(args);
-			setColor((int) LevelColor::NORMAL);
+			setColor((int) Color::NORMAL);
 		}
 	}
 
@@ -112,13 +109,29 @@ namespace Log {
 		if (logLevel <= Level::FATAL) {
 			if (newSubject) subject("\n[" + currentSubject + "]:\n");
 			if (!currentSubject.empty()) subject("|\t");
-			std::string message = "[FATAL]: " + format + "\n";
-			setColor((int) LevelColor::FATAL);
+			std::string message = "[FATAL]: " + format + delimiter;
+			setColor((int) Color::FATAL);
 			va_list args;
 			va_start(args, format);
 			vprintf(message.c_str(), args);
 			va_end(args);
-			setColor((int) LevelColor::NORMAL);
+			setColor((int) Color::NORMAL);
 		}
+	}
+
+	void print(std::string format,  ...) {
+		setColor((int) Color::NORMAL);
+		va_list args;
+		va_start(args, format);
+		vprintf(format.c_str(), args);
+		va_end(args);
+	}
+
+	void print(std::string format, Color color, ...) {
+		setColor((int) color);
+		va_list args;
+		va_start(args, format);
+		vprintf(format.c_str(), args);
+		va_end(args);
 	}
 }

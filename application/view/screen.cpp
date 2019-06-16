@@ -534,7 +534,7 @@ void Screen::update() {
 
 	// Update GUI intersection
 	GUI::intersect(GUI::map(handler->cursorPosition));
-
+	
 	// Update debug frame
 	debugInfoVectorCheckBox->checked = debug_enabled[Debug::INFO_VEC];
 	debugPositionCheckBox->checked = debug_enabled[Debug::POSITION];
@@ -866,6 +866,7 @@ void Screen::refresh() {
 
 
 	// Render stuff
+	glfwSwapInterval(0);
 	glfwSwapBuffers(this->window);
 	glfwPollEvents();
 }
