@@ -1,4 +1,7 @@
 #include "layout.h"
+
+#include <vector>
+
 #include "container.h"
 
 Vec2 FlowLayout::resize(Container* container, Vec2 minDimension) {
@@ -11,6 +14,9 @@ Vec2 FlowLayout::resize(Container* container, Vec2 minDimension) {
 	// Height of the current row of components
 	double rowHeight = 0;
 
+	// Components to be centered
+	std::vector<Component*> centeredComponents;
+
 	for (int i = 0; i < container->children.size(); i++) {
 		auto child = container->children[i];
 		Component* component = child.first;
@@ -18,7 +24,7 @@ Vec2 FlowLayout::resize(Container* container, Vec2 minDimension) {
 		Vec2 componentSize = component->resize();
 
 		// NO HEIGHT CHECK YET
-		if (alignment == Align::FILL) {
+		if (alignment == Align::FILL || alignment == Align::CENTER) {
 			// Calculate new row width, component margin included
 			double newRowWidth = rowWidth + component->margin + componentSize.x + component->margin;
 			if (newRowWidth <= container->width || container->resizing) {
@@ -40,6 +46,10 @@ Vec2 FlowLayout::resize(Container* container, Vec2 minDimension) {
 				// Reset row size
 				rowWidth = 0;
 				rowHeight = 0;
+
+				if (alignment == Align::CENTER) {
+					centeredComponents.push_back(component);
+				}
 			} else {
 				// NO CHECK IF COMPONENT WIDTH IS GREATER THAN CONTENTWIDTH
 				// Component does not fit in the current row, advance to the next row
@@ -81,6 +91,17 @@ Vec2 FlowLayout::resize(Container* container, Vec2 minDimension) {
 				rowHeight = component->margin + componentSize.y + component->margin;
 			}
 		}
+	}
+
+	// Center remaining components
+	for (Component* component : centeredComponents) {
+		// Distance from component position to the end of the container minus the component margin
+		double remainingWidth = container->x + contentWidth - component->x - component->margin;
+		// Component width
+		double componentWidth = component->width;
+
+		// Move component to the center
+		component->x += (remainingWidth - componentWidth) / 2;
 	}
 
 	// Add height of last row

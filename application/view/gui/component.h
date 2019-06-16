@@ -17,6 +17,8 @@ public:
 		Alignment of the component within its current layout
 		FLOW:
 			FILL:	The component fills up the remaining width of the parent container
+			RELATIVE: The components are placed next to eachother, filling up the container
+			CENTER: The same as fill but the filled components are centered
 	*/
 	Align align;
 

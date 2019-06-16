@@ -76,7 +76,7 @@ void StandardInputHandler::keyDown(int key, int modifiers) {
 		case GLFW_KEY_R:
 			Picker::editMode = Picker::EditMode::ROTATE;
 			break;
-		case GLFW_KEY_T:
+		case GLFW_KEY_E:
 			Picker::editMode = Picker::EditMode::TRANSLATE;
 			break;
 		case GLFW_KEY_C:

@@ -6,11 +6,13 @@ class Container;
 
 enum class Align {
 	FILL,
-	RELATIVE
+	RELATIVE,
+	CENTER
 };
 
 class Layout {
 public:
+	// Positions the components of the given container (not including the padding of the container)
 	virtual Vec2 resize(Container* container, Vec2 minDimension = Vec2()) = 0;
 };
 

@@ -28,7 +28,7 @@ extern BreakdownAverageProfiler<60, GraphicsProcess> graphicsMeasure;
 // Debug
 using namespace Debug;
 extern std::map<VecType, bool> debug_enabled;
-extern std::map<VecType, Vec3f> vecColors;
+extern std::map<PointType, bool> point_debug_enabled;
 
 extern bool renderPies;
 extern bool renderColissionSpheres;

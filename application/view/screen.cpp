@@ -392,7 +392,7 @@ void Screen::init() {
 	debugRenderPiesCheckBox->action = [] (CheckBox* c) { renderPies = !renderPies; };
 	debugRenderSpheresCheckBox->action = [] (CheckBox* c) { renderColissionSpheres = !renderColissionSpheres; };
 
-	debugFrame->add(debugVectorLabel, Align::FILL);
+	debugFrame->add(debugVectorLabel, Align::CENTER);
 	debugFrame->add(debugInfoVectorCheckBox, Align::FILL);
 	debugFrame->add(debugPositionCheckBox, Align::FILL);
 	debugFrame->add(debugVelocityCheckBox, Align::FILL);
@@ -402,11 +402,11 @@ void Screen::init() {
 	debugFrame->add(debugImpulseCheckBox, Align::FILL);
 	debugFrame->add(debugAngularVelocityCheckBox, Align::FILL);
 	debugFrame->add(debugAngularImpulseCheckBox, Align::FILL);
-	debugFrame->add(debugPointLabel, Align::FILL);
+	debugFrame->add(debugPointLabel, Align::CENTER);
 	debugFrame->add(debugInfoPointCheckBox, Align::FILL);
 	debugFrame->add(debugCenterOfMassCheckBox, Align::FILL);
 	debugFrame->add(debugIntersectionCheckBox, Align::FILL);
-	debugFrame->add(debugRenderLabel, Align::FILL);
+	debugFrame->add(debugRenderLabel, Align::CENTER);
 	debugFrame->add(debugRenderPiesCheckBox, Align::FILL);
 	debugFrame->add(debugRenderSpheresCheckBox, Align::FILL);
 	
@@ -501,6 +501,7 @@ void Screen::update() {
 		if (handler->getKey(GLFW_KEY_UP))    camera.rotate(*this, -1, 0, 0, leftDragging);
 		if (handler->getKey(GLFW_KEY_DOWN))  camera.rotate(*this, 1, 0, 0, leftDragging);
 		if (handler->getKey(GLFW_KEY_ESCAPE)) glfwSetWindowShouldClose(window, GLFW_TRUE);
+		if (handler->getKey(GLFW_KEY_B)) { debugFrame->visible = true; debugFrame->position = Vec2(0.8); GUI::select(debugFrame); }
 	}
 
 
@@ -527,11 +528,30 @@ void Screen::update() {
 
 
 	// Update gui
+	// Update mouse
 	mouseVertical->position = GUI::map(handler->cursorPosition) + Vec2(-mouseVertical->dimension.x / 2, mouseVertical->dimension.y / 2);
 	mouseHorizontal->position = GUI::map(handler->cursorPosition) + Vec2(-mouseHorizontal->dimension.x / 2, mouseHorizontal->dimension.y / 2);
 
+	// Update GUI intersection
 	GUI::intersect(GUI::map(handler->cursorPosition));
 
+	// Update debug frame
+	debugInfoVectorCheckBox->checked = debug_enabled[Debug::INFO_VEC];
+	debugPositionCheckBox->checked = debug_enabled[Debug::POSITION];
+	debugVelocityCheckBox->checked = debug_enabled[Debug::VELOCITY];
+	debugMomentCheckBox->checked = debug_enabled[Debug::MOMENT];
+	debugForceCheckBox->checked = debug_enabled[Debug::FORCE];
+	debugAccelerationCheckBox->checked = debug_enabled[Debug::ACCELERATION];
+	debugAngularImpulseCheckBox->checked = debug_enabled[Debug::ANGULAR_IMPULSE];
+	debugImpulseCheckBox->checked = debug_enabled[Debug::IMPULSE];
+	debugAngularVelocityCheckBox->checked = debug_enabled[Debug::ANGULAR_VELOCITY];
+	debugInfoPointCheckBox->checked = point_debug_enabled[Debug::INFO_POINT];
+	debugCenterOfMassCheckBox->checked = point_debug_enabled[Debug::CENTER_OF_MASS];
+	debugIntersectionCheckBox->checked = point_debug_enabled[Debug::INTERSECTION];
+	debugRenderPiesCheckBox->checked = renderPies;
+	debugRenderSpheresCheckBox->checked = renderColissionSpheres;
+
+	// Update properties frame
 	if (selectedPart) {
 		partMeshIDLabel->text = "MeshID: " + std::to_string(selectedPart->drawMeshId);
 		renderModeCheckBox->checked = selectedPart->renderMode == GL_LINE;
@@ -698,12 +718,6 @@ void Screen::refresh() {
 		for(const Vec3f& corner : selectedPart->hitbox.iterVertices()) {
 			vecLog.add(AppDebug::ColoredVec(Vec3(selectedCFrame.localToGlobal(corner)), selectedPart->parent->getVelocityOfPoint(Vec3(selectedCFrame.localToRelative(corner))), Debug::VELOCITY));
 		}
-		Vec4f green = GUI::COLOR::GREEN;
-		green.w = 0.5;
-		renderSphere(selectedPart->maxRadius * 2, selectedCFrame.getPosition(), green);
-		Vec4f blue = GUI::COLOR::BLUE;
-		blue.w = 0.5;
-		renderSphere(selectedPart->parent->circumscribingSphere.radius * 2, selectedPart->parent->circumscribingSphere.origin, blue);
 	}
 
 	if (renderColissionSpheres) {
