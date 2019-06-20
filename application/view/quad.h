@@ -3,12 +3,56 @@
 #include "arrayMesh.h"
 #include "../../engine/math/vec2.h"
 
-class Quad {
-private:
+struct Primitive {
 	unsigned int vao;
 	unsigned int vbo;
+	int M;
+	int N;
 
-public:
+	template<int M, int N>
+	void resize(float (&vertices)[M][N]) {
+		glBindVertexArray(vao);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, M * N * sizeof(float), vertices);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
+	}
+
+	virtual void render() = 0;
+
+protected:
+	// M is size of vertex, N is amount of vertices
+	Primitive(int M, int N) {
+		this->M = M;
+		this->N = N;
+
+		glGenVertexArrays(1, &vao);
+		glGenBuffers(1, &vbo);
+
+		glBindVertexArray(vao);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * M * N, NULL, GL_DYNAMIC_DRAW);
+
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, M, GL_FLOAT, GL_FALSE, N * sizeof(float), 0);
+
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
+	};
+};
+
+
+// Quad
+
+struct Quad : public Primitive {
+
+	bool patched;
+
+	Quad(bool patched = false) : Primitive(4, 4) {
+		this->patched = patched;
+		resize(Vec2f(-1, 1), Vec2f(2));
+	}
 
 	void resize(Vec2f position, Vec2f dimension, Vec2f xRange, Vec2f yRange) {
 		float dx = xRange.y - xRange.x;
@@ -26,11 +70,7 @@ public:
 			{ position.x + dimension.x, position.y				, u + du, v + dv}
 		};
 
-		glBindVertexArray(vao);
-		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
+		Primitive::resize(vertices);
 	}
 
 	void resize(Vec2f position, Vec2f dimension) {
@@ -42,42 +82,111 @@ public:
 			{ position.x + dimension.x, position.y				, 1, 1}
 		};
 
-		glBindVertexArray(vao);
-		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
-	}
-
-	Quad() {
-		glGenVertexArrays(1, &vao);
-		glGenBuffers(1, &vbo);
-
-		glBindVertexArray(vao);
-		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 4 * 4, NULL, GL_DYNAMIC_DRAW);
-
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
-
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
-
-		resize(Vec2(-1, 1), Vec2(2));
+		Primitive::resize(vertices);
 	}
 
 	void render(int mode) {
 		glPolygonMode(GL_FRONT_AND_BACK, mode);
 
 		glBindVertexArray(vao);
-		glDrawArrays(GL_QUADS, 0, 4);
+		glDrawArrays((patched)? GL_PATCHES : GL_QUADS, 0, 4);
 		glBindVertexArray(0);
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 
-	void render() {
+	void render() override {
+		render(GL_FILL);
+	}
+};
+
+
+// Line
+
+struct Line : public Primitive {
+
+	Line() : Primitive(3, 2) {
+		resize(Vec3f(-1), Vec3f(1));
+	}
+
+	void resize(Vec3f p1, Vec3f p2) {
+		float vertices[2][3] = {
+			{ p1.x,	p1.y, p1.z },
+			{ p2.x,	p2.y, p2.z }
+		};
+
+		Primitive::resize(vertices);
+	}
+
+	void resize(Vec2f p1, Vec2f p2) {
+
+		float vertices[2][3] = {
+			{ p1.x,	p1.y, 0 },
+			{ p2.x,	p2.y, 0 }
+		};
+
+		Primitive::resize(vertices);
+	}
+
+	void render(int mode) {
+		glPolygonMode(GL_FRONT_AND_BACK, mode);
+
+		glBindVertexArray(vao);
+		glDrawArrays(GL_LINES, 0, 2);
+		glBindVertexArray(0);
+
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
+
+	void render() override {
+		render(GL_FILL);
+	}
+};
+
+
+// Triangle
+
+struct TrianglePrimitive : public Primitive {
+
+	bool patched;
+
+	TrianglePrimitive(bool patched = false) : Primitive(3, 3) {
+		this->patched = patched;
+		resize(Vec3f(-1), Vec3f(1), Vec3f(0, 1, -1));
+	}
+
+	void resize(Vec3f p1, Vec3f p2, Vec3f p3) {
+		float vertices[3][3] = {
+			{ p1.x,	p1.y, p1.z },
+			{ p2.x,	p2.y, p2.z },
+			{ p3.x,	p3.y, p3.z }
+		};
+
+		Primitive::resize(vertices);
+	}
+
+	void resize(Vec2f p1, Vec2f p2, Vec2f p3) {
+
+		float vertices[3][3] = {
+			{ p1.x,	p1.y, 0 },
+			{ p2.x,	p2.y, 0 },
+			{ p3.x,	p3.y, 0 }
+		};
+
+		Primitive::resize(vertices);
+	}
+
+	void render(int mode) {
+		glPolygonMode(GL_FRONT_AND_BACK, mode);
+
+		glBindVertexArray(vao);
+		glDrawArrays((patched)? GL_PATCHES : GL_TRIANGLES, 0, 3);
+		glBindVertexArray(0);
+
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
+
+	void render() override {
 		render(GL_FILL);
 	}
 };

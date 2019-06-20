@@ -115,10 +115,9 @@ void StandardInputHandler::mouseDown(int button, int mods) {
 			GUI::intersectedPoint = GUI::map(cursorPosition) - GUI::intersectedComponent->position;
 		} else {
 			Picker::press(screen);
-		}
-
-		if (screen.selectedPart) {
-			Picker::moveGrabbedPhysicalLateral(screen);
+			if (screen.selectedPart) {
+				Picker::moveGrabbedPhysicalLateral(screen);
+			}
 		}
 	}
 };

@@ -6,6 +6,7 @@
 #include "../../util/log.h"
 
 enum class RenderMode {
+	PATCHES = GL_PATCHES,
 	QUADS = GL_QUADS,
 	TRIANGLES = GL_TRIANGLES,
 	LINES = GL_LINES,

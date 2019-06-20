@@ -66,12 +66,13 @@ unsigned int compileShader(const std::string& source, unsigned int type) {
 		glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
 		char* message = (char*) alloca(length * sizeof(char));
 		glGetShaderInfoLog(id, length, &length, message);
-
+		Log::print("fail\n", Log::Color::ERROR);
 		Log::error(message);
 		
 		glDeleteShader(id);
 		return 0;
 	}
+
 	return id;
 }
 
@@ -82,8 +83,6 @@ unsigned int compileShaderWithDebug(std::string name, const std::string& source,
 	unsigned int id = compileShader(source, type);
 	if (id > 0) {
 		Log::print("done\n", Log::Color::DEBUG);
-	} else {
-		Log::print("fail\n", Log::Color::ERROR);
 	}
 
 	Log::setDelimiter("\n");

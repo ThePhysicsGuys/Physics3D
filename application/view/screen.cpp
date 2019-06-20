@@ -113,7 +113,7 @@ Texture* floorTexture = nullptr;
 Texture* floorNormal = nullptr;
 
 
-//Skybox
+// Skybox
 IndexedMesh* sphere = nullptr;
 BoundingBox* skybox = nullptr;
 CubeMap* skyboxTexture = nullptr;
@@ -208,6 +208,10 @@ Label* debugRenderLabel = nullptr;
 CheckBox* debugRenderPiesCheckBox = nullptr;
 CheckBox* debugRenderSpheresCheckBox = nullptr;
 
+
+// Test
+IndexedMesh* mesh = nullptr;
+Texture* texture = nullptr;
 
 void Screen::init() {
 	// Log init
@@ -481,6 +485,15 @@ void Screen::init() {
 
 	// Temp
 	handler->framebufferResize(width, height);
+
+	// Test
+	texture = load("../res/textures/test/disp.jpg");
+	BoundingBox box = BoundingBox{ -1,-1,-1,1,1,1 };
+	VisualShape shape = VisualShape(box.toShape());
+	Vec3f* buffer = new Vec3f[shape.vertexCount];
+	shape.computeNormals(buffer);
+	shape.normals = SharedArrayPtr<const Vec3f>(buffer);
+	mesh = new IndexedMesh(shape);
 }
 
 void Screen::update() {
@@ -709,6 +722,17 @@ void Screen::refresh() {
 	basicShader.update(camera.viewMatrix, camera.projectionMatrix, camera.cframe.position);
 	renderPhysicals();
 
+	glDisable(GL_CULL_FACE);
+	testShader.updateModel(Mat4f().translate(0, 4, 0));
+	testShader.updateView(camera.viewMatrix);
+	testShader.update(camera.cframe.position);
+	testShader.updateProjection(camera.projectionMatrix);
+	testShader.update(texture);
+	mesh->renderMode = RenderMode::PATCHES;
+	mesh->render(GL_LINE);
+	mesh->renderMode = RenderMode::TRIANGLES;
+	glEnable(GL_CULL_FACE);
+
 	for (const Physical& p : world->iterPhysicals()) {
 		pointLog.add(AppDebug::ColoredPoint(p.getCenterOfMass(), Debug::CENTER_OF_MASS));
 	}
@@ -734,6 +758,8 @@ void Screen::refresh() {
 			renderSphere(phys.circumscribingSphere.radius * 2, phys.circumscribingSphere.origin, blue);
 		}
 	}
+
+
 	// Postprocess to screenFrameBuffer
 	screenFrameBuffer->bind();
 	glDisable(GL_DEPTH_TEST);
@@ -814,13 +840,7 @@ void Screen::refresh() {
 	mouseVertical->render();
 	mouseHorizontal->render();
 
-
-	/*GUI::defaultQuad->resize(Vec2f(0), Vec2f(0.5));
-	testShader.update(orthoMatrix);
-	testShader.update(depthBuffer->texture);
-	GUI::defaultQuad->render();*/
-
-
+	
 	// Pie rendering
 	graphicsMeasure.mark(GraphicsProcess::PROFILER);
 	size_t objCount = world->getPartCount();
