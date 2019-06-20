@@ -258,7 +258,7 @@ namespace Picker {
 		Vec3 translation = -cameraYDirection * dz;
 		if (isPaused()) {
 			screen.selectedPoint += translation;
-			screen.selectedPart->cframe.translate(translation);
+			screen.selectedPart->parent->setCFrame(screen.selectedPart->parent->cframe + translation);
 		} else {
 			screen.world->selectedPart = screen.selectedPart;
 			screen.world->magnetPoint += translation;

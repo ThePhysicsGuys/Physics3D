@@ -314,17 +314,32 @@ struct PointShader : public ShaderProgram {
 
 struct TestShader : public ShaderProgram {
 	TestShader() : ShaderProgram() {}
-	TestShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 2, "depthMap", "projectionMatrix") {}
+	TestShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 5, "displacementMap", "viewMatrix", "modelMatrix", "projectionMatrix", "viewPosition") {}
 
-	void update(const Mat4f& projectionMatrix) {
+	void updateProjection(const Mat4f& projectionMatrix) {
 		bind();
 		shader.setUniform("projectionMatrix", projectionMatrix);
 	}
 
-	void update(DepthTexture* texture) {
+	void updateView(const Mat4f& viewMatrix){
 		bind();
-		texture->bind();
-		shader.setUniform("depthMap", texture->unit);
+		shader.setUniform("viewMatrix", viewMatrix);
+	}
+
+	void updateModel(const Mat4f& modelMatrix) {
+		bind();
+		shader.setUniform("modelMatrix", modelMatrix);
+	}
+
+	void update(const Vec3f& viewPosition) {
+		bind();
+		shader.setUniform("viewPosition", viewPosition);
+	}
+
+	void update(Texture* displacementMap) {
+		bind();
+		displacementMap->bind();
+		shader.setUniform("displacementMap", displacementMap->unit);
 	}
 };
 
