@@ -8,39 +8,81 @@
 #include <limits>
 
 
-Physical::Physical(Part* part) : cframe(part->cframe) {
+Physical::Physical(Part* part) : mainPart(part) {
 	if (part->parent != nullptr) {
 		throw "Attempting to re-add part to different physical!";
 	}
-
-	this->mass = part->mass;
-	this->inertia = part->inertia;
-	this->localCenterOfMass = part->localCenterOfMass;
-	parts.push_back(AttachedPart{ CFrame(), part });
 	part->parent = this;
-	Sphere s = part->hitbox.getCircumscribingSphere();
-	this->localCentroid = s.origin;
-	this->circumscribingSphere.radius = s.radius;
-	this->circumscribingSphere.origin = getCFrame().localToGlobal(localCentroid);
+	//parts.push_back(AttachedPart{ CFrame(), part });
+
+	refreshWithNewParts();
+	//this->mass = part->mass;
+	//this->inertia = part->inertia;
+	//this->localCenterOfMass = part->localCenterOfMass;
+	//Sphere s = part->hitbox.getCircumscribingSphere();
+	//this->localCentroid = s.origin;
+	//this->circumscribingSphere.radius = s.radius;
+	//this->circumscribingSphere.origin = getCFrame().localToGlobal(localCentroid);
+}
+
+void Physical::makeMainPart(Part* newMainPart) {
+	if (newMainPart == mainPart) {
+		Log::debug("Attempted to replace mainPart with mainPart");
+		return;
+	}
+	for (AttachedPart& atPart : parts) {
+		if (atPart.part == newMainPart) {
+			makeMainPart(atPart);
+			return;
+		}
+	}
+
+	throw "Attempting to make a part not in this physical the mainPart!";
+}
+
+void Physical::makeMainPart(AttachedPart& newMainPart) {
+	if (parts.liesInList(&newMainPart)) {
+		CFrame& newCenterCFrame = newMainPart.attachment;
+		std::swap(mainPart, newMainPart.part);
+		for (AttachedPart& atPart : parts) {
+			if (&atPart != &newMainPart) {
+				atPart.attachment = newCenterCFrame.globalToLocal(atPart.attachment);
+			}
+		}
+		newCenterCFrame = ~newCenterCFrame;
+	} else {
+		throw "Attempting to make a part not in this physical the mainPart!";
+	}
 }
 
 void Physical::attachPart(Part* part, CFrame attachment) {
-	parts.push_back(AttachedPart{attachment, part});
-
 	part->parent = this;
+
+	parts.add(AttachedPart{attachment, part});
 
 	part->cframe = getCFrame().localToGlobal(attachment);
 
 	refreshWithNewParts();
 }
 void Physical::detachPart(Part* part) {
-	for (auto iter = parts.begin(); iter != parts.end(); ++iter) {
-		AttachedPart& at = *iter;
-		if (at.part == part) {
-			at.part->parent = nullptr;
-			parts.erase(iter);
+	if (part == mainPart) {
+		part->parent = nullptr;
+		if (parts.size >= 1) {
+			makeMainPart(parts[parts.size - 1]);
 			refreshWithNewParts();
 			return;
+		} else {
+			this->~Physical();
+		}
+	} else {
+		for (auto iter = parts.begin(); iter != parts.end(); ++iter) {
+			AttachedPart& at = *iter;
+			if (at.part == part) {
+				part->parent = nullptr;
+				parts.remove(iter);
+				refreshWithNewParts();
+				return;
+			}
 		}
 	}
 
@@ -48,14 +90,12 @@ void Physical::detachPart(Part* part) {
 }
 
 void Physical::refreshWithNewParts() {
-	double totalMass = 0;
-	//this->maxRadius = 0;
-	SymmetricMat3 totalInertia(0, 0, 0, 0, 0, 0);
-	Vec3 totalCenterOfMass(0, 0, 0);
+	double totalMass = mainPart->mass;
+	SymmetricMat3 totalInertia = mainPart->inertia;
+	Vec3 totalCenterOfMass = mainPart->localCenterOfMass;
 	for (const AttachedPart& p : parts) {
 		totalMass += p.part->mass;
 		totalCenterOfMass += p.attachment.localToGlobal(p.part->localCenterOfMass) * p.part->mass;
-		//this->maxRadius = std::max(this->maxRadius, p.attachment.getPosition().length() + p.part->maxRadius);
 	}
 	totalCenterOfMass /= totalMass;
 	for (const AttachedPart& p : parts) {
@@ -109,16 +149,19 @@ Sphere Physical::getLocalCircumscribingSphere() const {
 void Physical::rotateAroundCenterOfMass(const RotMat3& rotation) {
 	Vec3 relCenterOfMass = getCFrame().localToRelative(localCenterOfMass);
 	Vec3 relativeRotationOffset = rotation * relCenterOfMass - relCenterOfMass;
-	getCFrame().rotate(rotation);
-	getCFrame().translate(-relativeRotationOffset);
+	mainPart->cframe.rotate(rotation);
+	translate(-relativeRotationOffset);
+}
+void Physical::translate(const Vec3& translation) {
+	mainPart->cframe.translate(translation);
 }
 
 void Physical::update(double deltaT) {
 	Vec3 accel = totalForce * (deltaT/mass);
 	
-	Vec3 localMoment = cframe.relativeToLocal(totalMoment);
+	Vec3 localMoment = getCFrame().relativeToLocal(totalMoment);
 	Vec3 localRotAcc = ~inertia * localMoment * deltaT;
-	Vec3 rotAcc = cframe.localToRelative(localRotAcc);
+	Vec3 rotAcc = getCFrame().localToRelative(localRotAcc);
 
 	totalForce = Vec3();
 	totalMoment = Vec3();
@@ -131,10 +174,10 @@ void Physical::update(double deltaT) {
 	Mat3 rotation = fromRotationVec(angularVelocity * deltaT);
 
 	rotateAroundCenterOfMass(rotation);
-	cframe.translate(movement);
+	translate(movement);
 
 	for (AttachedPart& attachment : parts) {
-		attachment.part->cframe = cframe.localToGlobal(attachment.attachment);
+		attachment.part->cframe = getCFrame().localToGlobal(attachment.attachment);
 	}
 
 	this->circumscribingSphere.origin = getCFrame().localToGlobal(localCentroid);
@@ -171,14 +214,14 @@ void Physical::applyImpulse(Vec3Relative origin, Vec3Relative impulse) {
 }
 void Physical::applyAngularImpulse(Vec3 angularImpulse) {
 	Debug::logVec(getCenterOfMass(), angularImpulse, Debug::ANGULAR_IMPULSE);
-	Vec3 localAngularImpulse = cframe.relativeToLocal(angularImpulse);
+	Vec3 localAngularImpulse = getCFrame().relativeToLocal(angularImpulse);
 	Vec3 localRotAcc = ~inertia * localAngularImpulse;
-	Vec3 rotAcc = cframe.localToRelative(localRotAcc);
+	Vec3 rotAcc = getCFrame().localToRelative(localRotAcc);
 	angularVelocity += rotAcc;
 }
 
 Vec3 Physical::getCenterOfMass() const {
-	return cframe.localToGlobal(localCenterOfMass);
+	return getCFrame().localToGlobal(localCenterOfMass);
 }
 
 Vec3 Physical::getVelocityOfPoint(const Vec3Relative& point) const {
@@ -190,7 +233,7 @@ Vec3 Physical::getAcceleration() const {
 }
 
 Vec3 Physical::getAngularAcceleration() const {
-	return ~inertia * cframe.relativeToLocal(totalMoment);
+	return ~inertia * getCFrame().relativeToLocal(totalMoment);
 }
 
 Vec3 Physical::getAccelerationOfPoint(const Vec3Relative& point) const {
@@ -198,7 +241,7 @@ Vec3 Physical::getAccelerationOfPoint(const Vec3Relative& point) const {
 }
 
 void Physical::setCFrame(const CFrame& newCFrame) {
-	this->cframe = newCFrame;
+	this->mainPart->cframe = newCFrame;
 	for (const AttachedPart& p : parts) {
 		p.part->cframe = newCFrame.localToGlobal(p.attachment);
 	}
@@ -245,7 +288,7 @@ double Physical::getVelocityKineticEnergy() const {
 	return mass * velocity.lengthSquared() / 2;
 }
 double Physical::getAngularKineticEnergy() const {
-	Vec3 localAngularVel = cframe.relativeToLocal(angularVelocity);
+	Vec3 localAngularVel = getCFrame().relativeToLocal(angularVelocity);
 	return (inertia * localAngularVel) * localAngularVel / 2;
 }
 double Physical::getKineticEnergy() const {

@@ -59,7 +59,7 @@ public:
 	inline size_t getPartCount() const {
 		size_t total = 0;
 		for (const Physical& p : iterPhysicals()) {
-			total += p.parts.size();
+			total += p.getPartCount();
 		}
 		return total;
 	}
@@ -67,7 +67,7 @@ public:
 	inline size_t getAnchoredPartCount() const {
 		size_t total = 0;
 		for (const Physical& p : iterAnchoredPhysicals()) {
-			total += p.parts.size();
+			total += p.getPartCount();
 		}
 		return total;
 	}
@@ -75,7 +75,7 @@ public:
 	inline size_t getFreePartCount() const {
 		size_t total = 0;
 		for (const Physical& p : iterFreePhysicals()) {
-			total += p.parts.size();
+			total += p.getPartCount();
 		}
 		return total;
 	}

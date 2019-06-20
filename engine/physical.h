@@ -8,6 +8,7 @@ struct Physical;
 #include "part.h"
 
 #include <vector>
+#include "datastructures/splitUnorderedList.h"
 
 typedef Vec3 Vec3Local;
 typedef Vec3 Vec3Relative;
@@ -18,28 +19,43 @@ struct AttachedPart {
 };
 
 struct PartIter {
-	std::_Vector_iterator<std::_Vector_val<std::_Simple_types<AttachedPart>>> iter;
+	AttachedPart* iter;
+	Part* first;
+
+	PartIter(AttachedPart* iter, Part* first) : iter(iter), first(first) {}
 
 	inline Part& operator*() const {
-		AttachedPart& atPart = *iter;
-		return *(atPart.part);
+		return (first != nullptr)? *first : *iter->part;
 	}
-	inline void operator++() {iter++;}
-	inline bool operator!=(const PartIter& other) const {return this->iter != other.iter;}
+	inline void operator++() {
+		++iter;
+		first = nullptr;
+	}
+	inline bool operator!=(const PartIter& other) const { return this->iter != other.iter; }
 	inline bool operator==(const PartIter& other) const { return this->iter == other.iter; }
 };
 struct ConstPartIter {
-	std::_Vector_const_iterator<std::_Vector_val<std::_Simple_types<AttachedPart>>> iter;
+	const AttachedPart* iter;
+	const Part* first;
 
-	inline const Part& operator*() const { return *(*iter).part; }
-	inline void operator++() { iter++; }
+	ConstPartIter(const AttachedPart* iter, Part* first) : iter(iter), first(first) {}
+
+	inline const Part& operator*() const {
+		return (first != nullptr) ? *first : *iter->part;
+	}
+	inline void operator++() {
+		++iter;
+		first = nullptr;
+	}
 	inline bool operator!=(const ConstPartIter& other) const { return this->iter != other.iter; }
 	inline bool operator==(const ConstPartIter& other) const { return this->iter == other.iter; }
 };
 
-struct Physical {
-	CFrame cframe;
-	std::vector<AttachedPart> parts;
+class Physical {
+public:
+	// CFrame cframe;
+	Part* mainPart;
+	SplitUnorderedList<AttachedPart> parts;
 	Vec3 velocity = Vec3();
 	Vec3 angularVelocity = Vec3();
 
@@ -55,8 +71,9 @@ struct Physical {
 
 	Physical() = default;
 	Physical(Part* part);
-	inline Physical(Part* part, double mass, SymmetricMat3 inertia) : cframe(part->cframe), mass(mass), inertia(inertia) {
-		parts.push_back(AttachedPart{ CFrame(), part });
+	inline Physical(Part* part, double mass, SymmetricMat3 inertia) : mass(mass), inertia(inertia), mainPart(part) {
+		//parts.push_back(AttachedPart{ CFrame(), part });
+		
 		Sphere smallestSphere = part->hitbox.getCircumscribingSphere();
 		Sphere s = getLocalCircumscribingSphere();
 		this->localCentroid = s.origin;
@@ -64,9 +81,9 @@ struct Physical {
 		this->circumscribingSphere.origin = getCFrame().localToGlobal(localCentroid);
 	}
 
-	Physical(Physical&& other) noexcept {
-		this->cframe = other.cframe;
-		this->parts = std::move(other.parts);
+	Physical(Physical&& other) noexcept : parts(std::move(other.parts)) {
+		//this->cframe = other.cframe;
+		this->mainPart = other.mainPart;
 		this->velocity = other.velocity;
 		this->angularVelocity = other.angularVelocity;
 		this->totalForce = other.totalForce;
@@ -77,13 +94,15 @@ struct Physical {
 		this->localCentroid = other.localCentroid;
 		this->circumscribingSphere = other.circumscribingSphere;
 
+		mainPart->parent = this;
 		for (AttachedPart& p : parts) {
 			p.part->parent = this;
 		}
 	}
 
 	Physical& operator=(Physical&& other) noexcept {
-		this->cframe = other.cframe;
+		//this->cframe = other.cframe;
+		this->mainPart = other.mainPart;
 		this->parts = std::move(other.parts);
 		this->velocity = other.velocity;
 		this->angularVelocity = other.angularVelocity;
@@ -95,6 +114,7 @@ struct Physical {
 		this->localCentroid = other.localCentroid;
 		this->circumscribingSphere = other.circumscribingSphere;
 
+		mainPart->parent = this;
 		for (AttachedPart& p : parts) {
 			p.part->parent = this;
 		}
@@ -104,6 +124,17 @@ struct Physical {
 	Physical(const Physical&) = delete;
 	void operator=(const Physical&) = delete;
 
+	// bad constructor
+	/*~Physical() {
+		mainPart->parent = nullptr;
+		mainPart = nullptr;
+		for (AttachedPart& atPart:parts) {
+			atPart.part->parent = nullptr;
+		}
+	}*/
+
+	void makeMainPart(AttachedPart& newMainPart);
+	void makeMainPart(Part* newMainPart);
 	void attachPart(Part* part, CFrame attachment);
 	void detachPart(Part* part);
 	void refreshWithNewParts();
@@ -118,11 +149,10 @@ struct Physical {
 	void applyAngularImpulse(Vec3 angularImpulse);
 
 	void rotateAroundCenterOfMass(const RotMat3& rotation);
+	void translate(const Vec3& translation);
 
 	void setCFrame(const CFrame& newCFrame);
-
-	inline CFrame& getCFrame() { return cframe; }
-	inline const CFrame& getCFrame() const { return cframe; }
+	inline const CFrame& getCFrame() const { return mainPart->cframe; }
 
 	Vec3 getCenterOfMass() const;
 	Vec3 getAcceleration() const;
@@ -135,16 +165,16 @@ struct Physical {
 	double getVelocityKineticEnergy() const;
 	double getAngularKineticEnergy() const;
 	double getKineticEnergy() const;
-	size_t getPartCount() const { return parts.size(); }
+	inline size_t getPartCount() const { return parts.size + 1; }
 	BoundingBox getLocalBounds() const;
 	Sphere getLocalCircumscribingSphere() const;
 
-	PartIter begin() { return PartIter{ parts.begin() }; }
-	ConstPartIter begin() const { return ConstPartIter{ parts.begin() }; }
+	PartIter begin() { return PartIter(parts.begin()-1, mainPart); }
+	ConstPartIter begin() const { return ConstPartIter(parts.begin()-1, mainPart);}
 
-	PartIter end() { return PartIter{ parts.end() }; }
-	ConstPartIter end() const { return ConstPartIter{ parts.end() }; }
+	PartIter end() { return PartIter(parts.end(), mainPart); }
+	ConstPartIter end() const { return ConstPartIter(parts.end(), mainPart);}
 
-	const Part& operator[](size_t index) const { return *parts[index].part; }
-	Part& operator[](size_t index) { return *parts[index].part; }
+	const Part& operator[](size_t index) const { return (index == 0) ? *mainPart : *parts[index - 1].part; }
+	Part& operator[](size_t index) { return (index == 0) ? *mainPart : *parts[index - 1].part; }
 };

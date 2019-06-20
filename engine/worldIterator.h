@@ -22,7 +22,8 @@ public:
 		return *this;
 	}
 
-	inline bool operator!=(ConstPartIterator& other) { return this->currentPhys != other.currentPhys; }
+	inline bool operator!=(const ConstPartIterator& other) const { return this->currentPhys != other.currentPhys; }
+	inline bool operator==(const ConstPartIterator& other) const { return this->currentPhys == other.currentPhys; }
 };
 
 class PartIterator {
@@ -44,7 +45,10 @@ public:
 		return *this;
 	}
 
-	inline bool operator!=(PartIterator& other) { return this->currentPhys != other.currentPhys; }
+	inline bool operator!=(const PartIterator& other) const {
+		return this->currentPhys != other.currentPhys;
+	}
+	inline bool operator==(const PartIterator& other) const { return this->currentPhys == other.currentPhys; }
 };
 
 class ConstPartIteratorFactory {
@@ -81,8 +85,8 @@ public:
 		return *this;
 	}
 
-	inline bool operator!=(CustomPartIter& other) { return this->iterator != other.iterator; }
-	inline bool operator==(CustomPartIter& other) { return this->iterator == other.iterator; }
+	inline bool operator!=(const CustomPartIter& other) const { return this->iterator != other.iterator; }
+	inline bool operator==(const CustomPartIter& other) const { return this->iterator == other.iterator; }
 };
 template<typename T>
 class ConstCustomPartIter {
@@ -99,8 +103,8 @@ public:
 		return *this;
 	}
 
-	inline bool operator!=(ConstCustomPartIter& other) { return this->iterator != other.iterator; }
-	inline bool operator==(ConstCustomPartIter& other) { return this->iterator == other.iterator; }
+	inline bool operator!=(const ConstCustomPartIter& other) const { return this->iterator != other.iterator; }
+	inline bool operator==(const ConstCustomPartIter& other) const { return this->iterator == other.iterator; }
 };
 
 template<typename T>

@@ -31,7 +31,7 @@ struct BufferWithCapacity {
 	T* data;
 	size_t capacity;
 
-	BufferWithCapacity() : BufferWithCapacity(16) {};
+	BufferWithCapacity() : data(nullptr), capacity(0) {};
 	BufferWithCapacity(size_t initialCapacity) : data(new T[initialCapacity]), capacity(initialCapacity) {}
 	~BufferWithCapacity() {
 		delete[] data;
@@ -72,7 +72,7 @@ template<typename T>
 struct AddableBuffer : public BufferWithCapacity<T> {
 	size_t size = 0;
 
-	AddableBuffer() : BufferWithCapacity<T>(16) {}
+	AddableBuffer() : BufferWithCapacity<T>() {}
 	AddableBuffer(size_t initialCapacity) : BufferWithCapacity<T>(initialCapacity) {}
 
 	AddableBuffer(T* data, size_t dataSize, size_t initialCapacity) : BufferWithCapacity<T>(initialCapacity), size(dataSize) {
@@ -88,11 +88,15 @@ struct AddableBuffer : public BufferWithCapacity<T> {
 	AddableBuffer(const AddableBuffer&) = delete;
 	AddableBuffer& operator=(const AddableBuffer&) = delete;
 
-	AddableBuffer(AddableBuffer && other) {
-		std::swap(*this, other);
+	AddableBuffer(AddableBuffer && other) noexcept : BufferWithCapacity(std::move(other)), size(other.size) {
+		other.size = 0;
 	}
-	AddableBuffer& operator=(AddableBuffer && other) {
-		std::swap(*this, other);
+	AddableBuffer& operator=(AddableBuffer && other) noexcept {
+		BufferWithCapacity<T>::operator=(std::move(other));
+		size_t tmpSize = this->size;
+		this->size = other.size;
+		other.size = tmpSize;
+		return *this;
 	}
 
 	inline T* add(const T& obj) {
