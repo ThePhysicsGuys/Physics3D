@@ -52,6 +52,9 @@ struct ConstPartIter {
 };
 
 class Physical {
+	void updateAttachedPartCFrames();
+	void translateUnsafe(const Vec3& translation);
+	void rotateAroundCenterOfMassUnsafe(const RotMat3& rotation);
 public:
 	// CFrame cframe;
 	Part* mainPart;

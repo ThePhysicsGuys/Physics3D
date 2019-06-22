@@ -99,6 +99,9 @@ Screen::Screen(int width, int height, MagnetWorld* world) {
 	Log::info("OpenGL shader version: (%s)", glGetString(GL_SHADING_LANGUAGE_VERSION));
 }
 
+// Generic Shapes
+IndexedMesh* sphere = nullptr;
+IndexedMesh* cube = nullptr;
 
 // Font
 Font* font = nullptr;
@@ -113,8 +116,7 @@ Texture* floorTexture = nullptr;
 Texture* floorNormal = nullptr;
 
 
-// Skybox
-IndexedMesh* sphere = nullptr;
+// Skybox 
 BoundingBox* skybox = nullptr;
 CubeMap* skyboxTexture = nullptr;
 IndexedMesh* skyboxMesh = nullptr;
@@ -281,6 +283,7 @@ void Screen::init() {
 	// Skybox init
 	VisualShape sphereShape(OBJImport::load((std::istream&) std::istringstream(getResourceAsString(SPHERE_MODEL))));
 	sphere = new IndexedMesh(sphereShape);
+	cube = new IndexedMesh(VisualShape(createCube(2.0)));
 	skybox = new BoundingBox{ -1, -1, -1, 1, 1, 1 };
 	skyboxMesh = new IndexedMesh(VisualShape(skybox->toShape()));
 	skyboxTexture = new CubeMap("../res/skybox/right.jpg", "../res/skybox/left.jpg", "../res/skybox/top.jpg", "../res/skybox/bottom.jpg", "../res/skybox/front.jpg", "../res/skybox/back.jpg");
@@ -394,7 +397,7 @@ void Screen::init() {
 	debugCenterOfMassCheckBox->action = [] (CheckBox* c) { toggleDebugPointType(Debug::CENTER_OF_MASS); };
 	debugIntersectionCheckBox->action = [] (CheckBox* c) { toggleDebugPointType(Debug::INTERSECTION); };
 	debugRenderPiesCheckBox->action = [] (CheckBox* c) { renderPies = !renderPies; };
-	debugRenderSpheresCheckBox->action = [] (CheckBox* c) { renderColissionSpheres = !renderColissionSpheres; };
+	debugRenderSpheresCheckBox->action = [] (CheckBox* c) { colissionSpheresMode = static_cast<SphereColissionRenderMode>((static_cast<int>(colissionSpheresMode) + 1) % 3); };
 
 	debugFrame->add(debugVectorLabel, Align::CENTER);
 	debugFrame->add(debugInfoVectorCheckBox, Align::FILL);
@@ -562,7 +565,7 @@ void Screen::update() {
 	debugCenterOfMassCheckBox->checked = point_debug_enabled[Debug::CENTER_OF_MASS];
 	debugIntersectionCheckBox->checked = point_debug_enabled[Debug::INTERSECTION];
 	debugRenderPiesCheckBox->checked = renderPies;
-	debugRenderSpheresCheckBox->checked = renderColissionSpheres;
+	debugRenderSpheresCheckBox->checked = colissionSpheresMode!=SphereColissionRenderMode::NONE;
 
 	// Update properties frame
 	if (selectedPart) {
@@ -680,6 +683,14 @@ void renderSphere(double radius, Vec3 position, Vec4f color) {
 	sphere->render();
 }
 
+void renderBox(const CFrame& cframe, double dx, double dy, double dz, Vec4f color) {
+	basicShader.updateMaterial(Material(color));
+
+	basicShader.updateModelMatrix(CFrameToMat4(CFrame(cframe.getPosition(), cframe.getRotation() * DiagonalMat3(dx, dy, dz))));
+
+	cube->render();
+}
+
 void Screen::refresh() {
 	fieldIndex = 0;
 
@@ -742,9 +753,21 @@ void Screen::refresh() {
 		for(const Vec3f& corner : selectedPart->hitbox.iterVertices()) {
 			vecLog.add(AppDebug::ColoredVec(Vec3(selectedCFrame.localToGlobal(corner)), selectedPart->parent->getVelocityOfPoint(Vec3(selectedCFrame.localToRelative(corner))), Debug::VELOCITY));
 		}
+
+		if (colissionSpheresMode == SphereColissionRenderMode::SELECTED) {
+			Physical& selectedPhys = *selectedPart->parent;
+			for (Part& part : selectedPhys) {
+				Vec4f green = GUI::COLOR::GREEN;
+				green.w = 0.5;
+				renderSphere(part.maxRadius * 2, part.cframe.getPosition(), green);
+			}
+			Vec4f blue = GUI::COLOR::BLUE;
+			blue.w = 0.5;
+			renderSphere(selectedPhys.circumscribingSphere.radius * 2, selectedPhys.circumscribingSphere.origin, blue);
+		}
 	}
 
-	if (renderColissionSpheres) {
+	if (colissionSpheresMode == SphereColissionRenderMode::ALL) {
 		for (Physical& phys : world->iterPhysicals()) {
 			for (Part& part : phys) {
 				Vec4f green = GUI::COLOR::GREEN;
@@ -758,6 +781,9 @@ void Screen::refresh() {
 			renderSphere(phys.circumscribingSphere.radius * 2, phys.circumscribingSphere.origin, blue);
 		}
 	}
+	Vec4f red = GUI::COLOR::RED;
+	red.w = 0.5;
+	renderBox(CFrame(Vec3(1.0, 2.0, 3.0), fromEulerAngles(0.2, 0.2, 0.2)), 1.0, 2.0, 3.0, red);
 
 
 	// Postprocess to screenFrameBuffer

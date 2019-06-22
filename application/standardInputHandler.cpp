@@ -83,7 +83,7 @@ void StandardInputHandler::keyDown(int key, int modifiers) {
 			Picker::editMode = Picker::EditMode::SCALE;
 			break;
 		case GLFW_KEY_4:
-			renderColissionSpheres = !renderColissionSpheres;
+			colissionSpheresMode = static_cast<SphereColissionRenderMode>((static_cast<int>(colissionSpheresMode) + 1) % 3);
 			break;
 	}
 

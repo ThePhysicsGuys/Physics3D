@@ -23,6 +23,12 @@ enum GraphicsProcess {
 	COUNT
 };
 
+enum class SphereColissionRenderMode : int {
+	NONE,
+	SELECTED,
+	ALL
+};
+
 extern BreakdownAverageProfiler<60, GraphicsProcess> graphicsMeasure;
 
 // Debug
@@ -31,7 +37,7 @@ extern std::map<VecType, bool> debug_enabled;
 extern std::map<PointType, bool> point_debug_enabled;
 
 extern bool renderPies;
-extern bool renderColissionSpheres;
+extern SphereColissionRenderMode colissionSpheresMode;
 extern int fieldIndex;
 
 void toggleDebugVecType(Debug::VecType t);

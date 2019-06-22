@@ -238,7 +238,7 @@ namespace Picker {
 	if (isPaused()) {
 		Vec3 translation = planeIntersection - screen.selectedPoint;
 		screen.selectedPoint += translation;
-		screen.selectedPart->parent->setCFrame(screen.selectedPart->parent->cframe + translation);
+		screen.selectedPart->parent->translate(translation);
 	} else {
 		screen.world->selectedPart = screen.selectedPart;
 		screen.world->magnetPoint = planeIntersection;
@@ -258,7 +258,7 @@ namespace Picker {
 		Vec3 translation = -cameraYDirection * dz;
 		if (isPaused()) {
 			screen.selectedPoint += translation;
-			screen.selectedPart->parent->setCFrame(screen.selectedPart->parent->cframe + translation);
+			screen.selectedPart->parent->translate(translation);
 		} else {
 			screen.world->selectedPart = screen.selectedPart;
 			screen.world->magnetPoint += translation;

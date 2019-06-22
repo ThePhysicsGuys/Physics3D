@@ -8,6 +8,7 @@
 #include <limits>
 
 
+
 Physical::Physical(Part* part) : mainPart(part) {
 	if (part->parent != nullptr) {
 		throw "Attempting to re-add part to different physical!";
@@ -146,14 +147,29 @@ Sphere Physical::getLocalCircumscribingSphere() const {
 	return Sphere{ localCentroid, sqrt(maxRadiusSq) };
 }
 
-void Physical::rotateAroundCenterOfMass(const RotMat3& rotation) {
+void Physical::rotateAroundCenterOfMassUnsafe(const RotMat3& rotation) {
 	Vec3 relCenterOfMass = getCFrame().localToRelative(localCenterOfMass);
 	Vec3 relativeRotationOffset = rotation * relCenterOfMass - relCenterOfMass;
 	mainPart->cframe.rotate(rotation);
-	translate(-relativeRotationOffset);
+	translateUnsafe(-relativeRotationOffset);
+}
+void Physical::translateUnsafe(const Vec3& translation) {
+	mainPart->cframe.translate(translation);
+}
+void Physical::updateAttachedPartCFrames() {
+	for (AttachedPart& attachment : parts) {
+		attachment.part->cframe = getCFrame().localToGlobal(attachment.attachment);
+	}
+
+	this->circumscribingSphere.origin = getCFrame().localToGlobal(localCentroid);
+}
+void Physical::rotateAroundCenterOfMass(const RotMat3& rotation) {
+	rotateAroundCenterOfMassUnsafe(rotation);
+	updateAttachedPartCFrames();
 }
 void Physical::translate(const Vec3& translation) {
-	mainPart->cframe.translate(translation);
+	translateUnsafe(translation);
+	updateAttachedPartCFrames();
 }
 
 void Physical::update(double deltaT) {
@@ -173,14 +189,10 @@ void Physical::update(double deltaT) {
 
 	Mat3 rotation = fromRotationVec(angularVelocity * deltaT);
 
-	rotateAroundCenterOfMass(rotation);
-	translate(movement);
+	rotateAroundCenterOfMassUnsafe(rotation);
+	translateUnsafe(movement);
 
-	for (AttachedPart& attachment : parts) {
-		attachment.part->cframe = getCFrame().localToGlobal(attachment.attachment);
-	}
-
-	this->circumscribingSphere.origin = getCFrame().localToGlobal(localCentroid);
+	updateAttachedPartCFrames();
 }
 
 void Physical::applyForceAtCenterOfMass(Vec3 force) {
