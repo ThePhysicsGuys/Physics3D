@@ -115,7 +115,8 @@ void Physical::refreshWithNewParts() {
 BoundingBox Physical::getLocalBounds() const {
 	const double inf = std::numeric_limits<double>::infinity();
 
-	BoundingBox best(inf, inf, inf, -inf, -inf, -inf);
+	BoundingBox best(mainPart->hitbox.getBounds());
+	//BoundingBox best(inf, inf, inf, -inf, -inf, -inf);
 
 
 	for (const AttachedPart& p : parts) {
@@ -139,7 +140,7 @@ BoundingBox Physical::getLocalBounds() const {
 Sphere Physical::getLocalCircumscribingSphere() const {
 	BoundingBox b = getLocalBounds();
 	Vec3 localCentroid = b.getCenter();
-	double maxRadiusSq = 0;
+	double maxRadiusSq = mainPart->hitbox.getMaxRadiusSq(localCentroid);
 	for (const AttachedPart& p : parts) {
 		double radiusSq = p.part->hitbox.getMaxRadiusSq(p.attachment.globalToLocal(localCentroid));
 		maxRadiusSq = std::max(maxRadiusSq, radiusSq);

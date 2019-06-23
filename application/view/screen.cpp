@@ -283,7 +283,7 @@ void Screen::init() {
 	// Skybox init
 	VisualShape sphereShape(OBJImport::load((std::istream&) std::istringstream(getResourceAsString(SPHERE_MODEL))));
 	sphere = new IndexedMesh(sphereShape);
-	cube = new IndexedMesh(VisualShape(createCube(2.0)));
+	cube = new IndexedMesh(VisualShape(createCube(1.0)));
 	skybox = new BoundingBox{ -1, -1, -1, 1, 1, 1 };
 	skyboxMesh = new IndexedMesh(VisualShape(skybox->toShape()));
 	skyboxTexture = new CubeMap("../res/skybox/right.jpg", "../res/skybox/left.jpg", "../res/skybox/top.jpg", "../res/skybox/bottom.jpg", "../res/skybox/front.jpg", "../res/skybox/back.jpg");
@@ -683,10 +683,10 @@ void renderSphere(double radius, Vec3 position, Vec4f color) {
 	sphere->render();
 }
 
-void renderBox(const CFrame& cframe, double dx, double dy, double dz, Vec4f color) {
+void renderBox(const CFrame& cframe, double width, double height, double depth, Vec4f color) {
 	basicShader.updateMaterial(Material(color));
 
-	basicShader.updateModelMatrix(CFrameToMat4(CFrame(cframe.getPosition(), cframe.getRotation() * DiagonalMat3(dx, dy, dz))));
+	basicShader.updateModelMatrix(CFrameToMat4(CFrame(cframe.getPosition(), cframe.getRotation() * DiagonalMat3(width, height, depth))));
 
 	cube->render();
 }
@@ -761,6 +761,11 @@ void Screen::refresh() {
 				green.w = 0.5;
 				renderSphere(part.maxRadius * 2, part.cframe.getPosition(), green);
 			}
+			Vec4f red = GUI::COLOR::RED;
+			red.w = 0.5;
+			BoundingBox localBounds = selectedPhys.getLocalBounds();
+			renderBox(selectedPhys.getCFrame().localToGlobal(CFrame(localBounds.getCenter())), localBounds.getWidth(), localBounds.getHeight(), localBounds.getDepth(), red);
+
 			Vec4f blue = GUI::COLOR::BLUE;
 			blue.w = 0.5;
 			renderSphere(selectedPhys.circumscribingSphere.radius * 2, selectedPhys.circumscribingSphere.origin, blue);
@@ -776,14 +781,16 @@ void Screen::refresh() {
 			}
 		}
 		for (Physical& phys : world->iterPhysicals()) {
+			Vec4f red = GUI::COLOR::RED;
+			red.w = 0.5;
+			BoundingBox localBounds = phys.getLocalBounds();
+			renderBox(phys.getCFrame().localToGlobal(CFrame(localBounds.getCenter())), localBounds.getWidth(), localBounds.getHeight(), localBounds.getDepth(), red);
+
 			Vec4f blue = GUI::COLOR::BLUE;
 			blue.w = 0.5;
 			renderSphere(phys.circumscribingSphere.radius * 2, phys.circumscribingSphere.origin, blue);
 		}
 	}
-	Vec4f red = GUI::COLOR::RED;
-	red.w = 0.5;
-	renderBox(CFrame(Vec3(1.0, 2.0, 3.0), fromEulerAngles(0.2, 0.2, 0.2)), 1.0, 2.0, 3.0, red);
 
 
 	// Postprocess to screenFrameBuffer
