@@ -1,4 +1,5 @@
 #include "standardInputHandler.h"
+#include "view/renderUtils.h"
 #include "../engine/math/mathUtil.h"
 #include "application.h"
 #include "view/picker.h"
@@ -11,13 +12,15 @@
 StandardInputHandler::StandardInputHandler(GLFWwindow* window, Screen& screen) : InputHandler(window), screen(screen) {}
 
 void StandardInputHandler::framebufferResize(int width, int height) {
+	Vec2i dimension = Vec2i(width, height);
 	if (screen.properties.get("include_titlebar_offset") == "true") {
-		int t, top;
-		glfwGetWindowFrameSize(window, &t, &top, &t, &t);
-		height = height - top;
+		Vec4i size = Renderer::frameSize();
+		dimension.y -= size.y;
 	}
-	glViewport(0, 0, width, height);
-	(*screen.eventHandler.windowResizeHandler) (screen, width, height);
+
+	Renderer::viewport(Vec2i(), dimension);
+
+	(*screen.eventHandler.windowResizeHandler) (screen, dimension.x, dimension.y);
 }
 
 void StandardInputHandler::keyDownOrRepeat(int key, int modifiers) {

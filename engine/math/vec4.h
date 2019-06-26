@@ -95,3 +95,4 @@ public:
 typedef Vec4Template<double>	Vec4;
 typedef Vec4Template<float>		Vec4f;
 typedef Vec4Template<long long>	Vec4l;
+typedef Vec4Template<int>		Vec4i;

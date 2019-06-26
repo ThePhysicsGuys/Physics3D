@@ -1,6 +1,6 @@
 #include "screen.h"
 
-#include "../import.h"
+#include "renderUtils.h"
 #include "shader.h"
 #include "indexedMesh.h"
 #include "arrayMesh.h"
@@ -26,7 +26,7 @@
 #include "../standardInputHandler.h"
 #include "../resourceManager.h"
 #include "../objectLibrary.h"
-
+#include "../import.h"
 #include "../util/log.h"
 
 #include "../engine/math/vec2.h"
@@ -48,7 +48,7 @@
 
 bool initGLFW() {
 	// Initialize GLFW
-	if (!glfwInit()) {
+	if (!Renderer::initGLFW()) {
 		Log::error("GLFW failed to initialize");
 		return false;
 	}
@@ -59,8 +59,8 @@ bool initGLFW() {
 
 bool initGLEW() {
 	// Init GLEW after creating a valid rendering context
-	if (glewInit() != GLEW_OK) {
-		glfwTerminate();
+	if (!Renderer::initGLEW()) {
+		Renderer::terminateGLFW();
 
 		Log::error("GLEW Failed to initialize!");
 
@@ -71,9 +71,9 @@ bool initGLEW() {
 	return true;
 }
 
-void terminateGL() {
+void terminateGLFW() {
 	Log::info("Closing GLFW");
-	glfwTerminate();
+	Renderer::terminateGLFW();
 	Log::info("Closed GLFW");
 }
 
@@ -83,20 +83,21 @@ Screen::Screen(int width, int height, MagnetWorld* world) {
 	setWorld(world);
 
 	// Create a windowed mode window and its OpenGL context 
-	this->window = glfwCreateWindow(width, height, "Physics3D", NULL, NULL);
+	Renderer::createContext(width, height, "Physics3D");
 	
-	if (!this->window) {
-		glfwTerminate();
+	if (!Renderer::validContext()) {
+		terminateGLFW();
 		exit(-1);
 	}
 
 	// Make the window's context current 
-	glfwMakeContextCurrent(this->window);
+	Renderer::makeContextCurrent();
+	window = Renderer::getContext();
 
-	Log::info("OpenGL vendor: (%s)", glGetString(GL_VENDOR));
-	Log::info("OpenGL renderer: (%s)", glGetString(GL_RENDERER));
-	Log::info("OpenGL version: (%s)", glGetString(GL_VERSION));
-	Log::info("OpenGL shader version: (%s)", glGetString(GL_SHADING_LANGUAGE_VERSION));
+	Log::info("OpenGL vendor: (%s)", Renderer::getVendor());
+	Log::info("OpenGL renderer: (%s)", Renderer::getRenderer());
+	Log::info("OpenGL version: (%s)", Renderer::getVersion());
+	Log::info("OpenGL shader version: (%s)", Renderer::getShaderVersion());
 }
 
 // Generic Shapes
@@ -225,8 +226,8 @@ void Screen::init() {
 
 
 	// Render mode init
-	glEnable(GL_CULL_FACE);
-	glEnable(GL_DEPTH_TEST);
+	Renderer::enableCulling();
+	Renderer::enableDepthTest();
 
 
 	// InputHandler init
@@ -234,8 +235,9 @@ void Screen::init() {
 
 
 	// Screen size init
-	int width, height;
-	glfwGetWindowSize(window, &width, &height);
+	Vec2 size = Renderer::windowSize();
+	int width = size.x;
+	int height = size.y;
 	handler->framebufferResize(width, height);
 
 
@@ -325,10 +327,10 @@ void Screen::init() {
 	renderModeCheckBox = new CheckBox("Wireframe", 0, 0, true);
 	renderModeCheckBox->action = [](CheckBox* c) {
 		if (GUI::screen->selectedPart) {
-			if (GUI::screen->selectedPart->renderMode == GL_FILL) {
-				GUI::screen->selectedPart->renderMode = GL_LINE;
+			if (GUI::screen->selectedPart->renderMode == Renderer::FILLED) {
+				GUI::screen->selectedPart->renderMode = Renderer::WIREFRAME;
 			} else {
-				GUI::screen->selectedPart->renderMode = GL_FILL;
+				GUI::screen->selectedPart->renderMode = Renderer::FILLED;
 			}
 		}
 	};
@@ -424,7 +426,7 @@ void Screen::init() {
 
 
 	// Mouse init
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+	Renderer::disableCursor();
 	mouseVertical = new Panel(0, 0, 0.04, 0.007);
 	mouseHorizontal = new Panel(0, 0, 0.007, 0.04);
 	mouseVertical->background = Vec4(1);
@@ -516,7 +518,7 @@ void Screen::update() {
 		if (handler->getKey(GLFW_KEY_RIGHT)) camera.rotate(*this, 0, 1, 0, leftDragging);
 		if (handler->getKey(GLFW_KEY_UP))    camera.rotate(*this, -1, 0, 0, leftDragging);
 		if (handler->getKey(GLFW_KEY_DOWN))  camera.rotate(*this, 1, 0, 0, leftDragging);
-		if (handler->getKey(GLFW_KEY_ESCAPE)) glfwSetWindowShouldClose(window, GLFW_TRUE);
+		if (handler->getKey(GLFW_KEY_ESCAPE)) Renderer::closeWindow();
 		if (handler->getKey(GLFW_KEY_B)) { debugFrame->visible = true; debugFrame->position = Vec2(0.8); GUI::select(debugFrame); }
 	}
 
@@ -570,7 +572,7 @@ void Screen::update() {
 	// Update properties frame
 	if (selectedPart) {
 		partMeshIDLabel->text = "MeshID: " + std::to_string(selectedPart->drawMeshId);
-		renderModeCheckBox->checked = selectedPart->renderMode == GL_LINE;
+		renderModeCheckBox->checked = selectedPart->renderMode == Renderer::WIREFRAME;
 		partPositionLabel->text = "Position: " + str(selectedPart->cframe.position);
 		partNameLabel->text = "Name: " + selectedPart->name;
 		partVelocity->text = "Velocity: " + str(selectedPart->parent->velocity);
@@ -603,16 +605,16 @@ void Screen::update() {
 }
 
 void Screen::renderSkybox() {
-	glDepthMask(GL_FALSE);
-	glDisable(GL_CULL_FACE);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	Renderer::disableDepthMask();
+	Renderer::disableCulling();
+	Renderer::enableBlending();
+	Renderer::standardBlendFunction();
 	skyboxShader.update(sunDirection);
 	skyboxShader.update(camera.viewMatrix, camera.projectionMatrix);
 	skyboxTexture->bind();
 	sphere->render();
-	glDepthMask(GL_TRUE);
-	glEnable(GL_CULL_FACE);
+	Renderer::enableDepthMask();
+	Renderer::enableCulling();
 }
 
 void Screen::renderPhysicals() {
@@ -702,24 +704,24 @@ void Screen::refresh() {
 	Mat4f ligthView = lookAt(camera.cframe.position, camera.cframe.rotation * Vec3f(0, 0, 1), Vec3f(0.0f, 1.0f, 0.0f));
 	Mat4f lightMatrix = lightProjection * ligthView;
 	depthShader.updateLight(lightMatrix);
-	glEnable(GL_DEPTH_TEST);
+	Renderer::enableDepthTest();
 	depthBuffer->bind();
-	//glClear(GL_DEPTH_BUFFER_BIT);
+	//Renderer::clearDepth();
 	for (ExtendedPart& part : *world) {
 		int meshId = part.drawMeshId;
 		depthShader.updateModel(CFrameToMat4(CFramef(part.cframe)));
 		meshes[meshId]->render();
 	}
-	glViewport(0, 0, dimension.x, dimension.y);*/
+	Renderer::viewport(Vec2i(), dimension);*/
 
 
 	// Render skybox
 	graphicsMeasure.mark(GraphicsProcess::SKYBOX);
 	modelFrameBuffer->bind();
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	Renderer::clearColor();
+	Renderer::clearDepth();
 	renderSkybox();
-
-	glEnable(GL_DEPTH_TEST);
+	Renderer::enableDepthTest();
 
 
 	// Initialize vector log buffer
@@ -733,16 +735,16 @@ void Screen::refresh() {
 	basicShader.update(camera.viewMatrix, camera.projectionMatrix, camera.cframe.position);
 	renderPhysicals();
 
-	glDisable(GL_CULL_FACE);
+	Renderer::disableCulling();
 	testShader.updateModel(Mat4f().translate(0, 4, 0));
 	testShader.updateView(camera.viewMatrix);
 	testShader.update(camera.cframe.position);
 	testShader.updateProjection(camera.projectionMatrix);
 	testShader.update(texture);
 	mesh->renderMode = RenderMode::PATCHES;
-	mesh->render(GL_LINE);
+	mesh->render(Renderer::WIREFRAME);
 	mesh->renderMode = RenderMode::TRIANGLES;
-	glEnable(GL_CULL_FACE);
+	Renderer::enableCulling();
 
 	for (const Physical& p : world->iterPhysicals()) {
 		pointLog.add(AppDebug::ColoredPoint(p.getCenterOfMass(), Debug::CENTER_OF_MASS));
@@ -795,12 +797,12 @@ void Screen::refresh() {
 
 	// Postprocess to screenFrameBuffer
 	screenFrameBuffer->bind();
-	glDisable(GL_DEPTH_TEST);
+	Renderer::disableDepthTest();
 	postProcessShader.update(modelFrameBuffer->texture);
 	quad->render();
 
 	// Render vectors with old depth buffer
-	glEnable(GL_DEPTH_TEST);
+	Renderer::enableDepthTest();
 	screenFrameBuffer->attach(modelFrameBuffer->renderBuffer);
 	
 	/*for (ExtendedPart& part : *world) {
@@ -824,7 +826,7 @@ void Screen::refresh() {
 		skyboxMesh->render();
 	}
 
-	glDisable(GL_DEPTH_TEST);
+	Renderer::disableDepthTest();
 
 	// Render vector mesh
 	graphicsMeasure.mark(GraphicsProcess::VECTORS);
@@ -837,7 +839,7 @@ void Screen::refresh() {
 	pointShader.update(camera.viewMatrix, camera.projectionMatrix, camera.cframe.position);
 	pointMesh->render();
 
-	glEnable(GL_DEPTH_TEST);
+	Renderer::enableDepthTest();
 
 
 	// Render origin mesh
@@ -850,8 +852,8 @@ void Screen::refresh() {
 	graphicsMeasure.mark(GraphicsProcess::FINALIZE);
 	screenFrameBuffer->unbind();
 
-	glClear(GL_COLOR_BUFFER_BIT);
-	glDisable(GL_DEPTH_TEST);
+	Renderer::clearColor();
+	Renderer::disableDepthTest();
 
 
 	// Render postprocessed image to screen
@@ -865,7 +867,7 @@ void Screen::refresh() {
 
 
 	// Render GUI
-	glDisable(GL_DEPTH_TEST);
+	Renderer::disableDepthTest();
 	graphicsMeasure.mark(GraphicsProcess::OTHER);
 	fontShader.update(orthoMatrix);
 	GUI::render(orthoMatrix);
@@ -919,9 +921,9 @@ void Screen::refresh() {
 
 
 	// Render stuff
-	glfwSwapInterval(0);
-	glfwSwapBuffers(this->window);
-	glfwPollEvents();
+	Renderer::swapInterval(0);
+	Renderer::swapBuffers();
+	Renderer::pollEvents();
 }
 
 void Screen::close() {
@@ -937,11 +939,11 @@ void Screen::close() {
 
 	PropertiesParser::write("../res/.properties", properties);
 
-	terminateGL();
+	terminateGLFW();
 }
 
 bool Screen::shouldClose() {
-	return glfwWindowShouldClose(window) != 0;
+	return Renderer::windowClosed();
 }
 
 int Screen::addMeshShape(const VisualShape& s) {

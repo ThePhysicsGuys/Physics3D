@@ -23,7 +23,7 @@ class StandardInputHandler;
 bool initGLFW();
 bool initGLEW();
 
-void terminateGL();
+void terminateGLFW();
 
 class Screen {
 private:

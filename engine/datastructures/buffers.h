@@ -85,13 +85,13 @@ struct AddableBuffer : public BufferWithCapacity<T> {
 	~AddableBuffer() {
 	}
 
-	AddableBuffer(const AddableBuffer&) = delete;
-	AddableBuffer& operator=(const AddableBuffer&) = delete;
+	AddableBuffer(const AddableBuffer<T>&) = delete;
+	AddableBuffer& operator=(const AddableBuffer<T>&) = delete;
 
-	AddableBuffer(AddableBuffer && other) noexcept : BufferWithCapacity(std::move(other)), size(other.size) {
+	AddableBuffer(AddableBuffer<T> && other) noexcept : BufferWithCapacity<T>(std::move(other)), size(other.size) {
 		other.size = 0;
 	}
-	AddableBuffer& operator=(AddableBuffer && other) noexcept {
+	AddableBuffer<T>& operator=(AddableBuffer<T> && other) noexcept {
 		BufferWithCapacity<T>::operator=(std::move(other));
 		size_t tmpSize = this->size;
 		this->size = other.size;
