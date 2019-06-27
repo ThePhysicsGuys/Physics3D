@@ -87,7 +87,7 @@ void PieChart::renderText(Screen& screen, Font* font) const {
 		percent.precision(4);
 		percent << p.weight/totalWeight * 100;
 		percent << "%";
-		font->render(percent.str(), linePos + Vec2(0.25, 0), Vec3(p.color), 0.0006);
+		font->render(percent.str(), linePos + Vec2(0.35, 0), Vec3(p.color), 0.0006);
 		font->render(p.value, linePos + Vec2(0.50, 0), Vec3(p.color), 0.0006);
 	}
 }

@@ -106,18 +106,15 @@ void Physical::refreshWithNewParts() {
 	this->localCenterOfMass = totalCenterOfMass;
 	this->inertia = totalInertia;
 
-	Sphere s = getLocalCircumscribingSphere();
+	this->localBounds = computeLocalBounds();
+	Sphere s = computeLocalCircumscribingSphere();
 	this->localCentroid = s.origin;
 	this->circumscribingSphere.radius = s.radius;
 	this->circumscribingSphere.origin = getCFrame().localToGlobal(localCentroid);
 }
 
-BoundingBox Physical::getLocalBounds() const {
-	const double inf = std::numeric_limits<double>::infinity();
-
+BoundingBox Physical::computeLocalBounds() const {
 	BoundingBox best(mainPart->hitbox.getBounds());
-	//BoundingBox best(inf, inf, inf, -inf, -inf, -inf);
-
 
 	for (const AttachedPart& p : parts) {
 		double xmax = p.attachment.localToGlobal(p.part->hitbox.furthestInDirection(p.attachment.relativeToLocal(Vec3(1, 0, 0)))).x;
@@ -137,8 +134,8 @@ BoundingBox Physical::getLocalBounds() const {
 
 	return best;
 }
-Sphere Physical::getLocalCircumscribingSphere() const {
-	BoundingBox b = getLocalBounds();
+Sphere Physical::computeLocalCircumscribingSphere() const {
+	BoundingBox b = computeLocalBounds();
 	Vec3 localCentroid = b.getCenter();
 	double maxRadiusSq = mainPart->hitbox.getMaxRadiusSq(localCentroid);
 	for (const AttachedPart& p : parts) {
@@ -235,6 +232,9 @@ void Physical::applyAngularImpulse(Vec3 angularImpulse) {
 
 Vec3 Physical::getCenterOfMass() const {
 	return getCFrame().localToGlobal(localCenterOfMass);
+}
+Vec3 Physical::getCentroid() const {
+	return getCFrame().localToGlobal(localCentroid);
 }
 
 Vec3 Physical::getVelocityOfPoint(const Vec3Relative& point) const {

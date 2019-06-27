@@ -143,41 +143,71 @@ struct Colission {
 	Vec3 exitVector;
 };
 
+bool boundsSphereEarlyEnd(const BoundingBox& bounds, const Vec3& localSphereCenter, double sphereRadius) {
+	const Vec3& sphere = localSphereCenter;
+
+	BoundingBox expandedBounds = bounds.expanded(sphereRadius);
+
+	if (expandedBounds.containsPoint(localSphereCenter)) {
+		return false;
+	} else {
+		return true;
+	}
+}
+
+inline void runColissionTests(Physical& phys1, Physical& phys2, WorldPrototype& world, std::vector<Colission>& colissions) {
+	Vec3 deltaCentroid = phys1.circumscribingSphere.origin - phys2.circumscribingSphere.origin;
+	double maxDistanceBetween = phys1.circumscribingSphere.radius + phys2.circumscribingSphere.radius;
+	if (deltaCentroid.lengthSquared() > maxDistanceBetween * maxDistanceBetween) {
+		intersectionStatistics.addToTally(IntersectionResult::PHYSICAL_DISTANCE_REJECT, phys1.getPartCount() * phys2.getPartCount());
+		return;
+	}
+	if (boundsSphereEarlyEnd(phys1.localBounds, phys1.getCFrame().globalToLocal(phys2.circumscribingSphere.origin), phys2.circumscribingSphere.radius)) {
+		intersectionStatistics.addToTally(IntersectionResult::PHYSICAL_BOUNDS_REJECT, phys2.getPartCount() * phys1.getPartCount());
+		return;
+	}
+	if (boundsSphereEarlyEnd(phys2.localBounds, phys2.getCFrame().globalToLocal(phys1.circumscribingSphere.origin), phys1.circumscribingSphere.radius)) {
+		intersectionStatistics.addToTally(IntersectionResult::PHYSICAL_BOUNDS_REJECT, phys2.getPartCount() * phys1.getPartCount());
+		return;
+	}
+	for (Part& p1 : phys1) {
+		for (Part& p2 : phys2) {
+			double maxRadiusBetween = p1.maxRadius + p2.maxRadius;
+
+			Vec3 deltaPosition = p1.cframe.position - p2.cframe.position;
+			double distanceSqBetween = deltaPosition.lengthSquared();
+
+			if (distanceSqBetween > maxRadiusBetween * maxRadiusBetween) {
+				intersectionStatistics.addToTally(IntersectionResult::PART_DISTANCE_REJECT, 1);
+				continue;
+			}
+			if (boundsSphereEarlyEnd(p1.localBounds, p1.cframe.globalToLocal(p2.cframe.getPosition()), p2.maxRadius)) {
+				intersectionStatistics.addToTally(IntersectionResult::PART_BOUNDS_REJECT, 1);
+				continue;
+			}
+			if (boundsSphereEarlyEnd(p2.localBounds, p2.cframe.globalToLocal(p1.cframe.getPosition()), p1.maxRadius)) {
+				intersectionStatistics.addToTally(IntersectionResult::PART_BOUNDS_REJECT, 1);
+				continue;
+			}
+
+			Vec3 intersection;
+			Vec3 exitVector;
+			if (p1.intersects(p2, intersection, exitVector)) {
+				intersectionStatistics.addToTally(IntersectionResult::COLISSION, 1);
+				colissions.push_back(Colission{ &p1, &p2, intersection, exitVector });
+			} else {
+				intersectionStatistics.addToTally(IntersectionResult::GJK_REJECT, 1);
+			}
+			physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
+		}
+	}
+}
+
 // returns anchoredColissions offset
 size_t findColissions(WorldPrototype& world, std::vector<Colission>& colissions) {
 	for(Physical& anchoredPhys: world.iterAnchoredPhysicals()) {
 		for(Physical& freePhys: world.iterFreePhysicals()) {
-			Vec3 deltaCentroid = freePhys.circumscribingSphere.origin - anchoredPhys.circumscribingSphere.origin;
-			double maxDistanceBetween = freePhys.circumscribingSphere.radius + anchoredPhys.circumscribingSphere.radius;
-			if (deltaCentroid.lengthSquared() > maxDistanceBetween * maxDistanceBetween) {
-				intersectionStatistics.addToTally(IntersectionResult::PHYSICAL_DISTANCE_REJECT, freePhys.getPartCount() * anchoredPhys.getPartCount());
-				continue;
-			}
-			for (Part& anchoredPart : anchoredPhys) {
-				for (Part& freePart : freePhys) {
-					double maxRadiusBetween = anchoredPart.maxRadius + freePart.maxRadius;
-
-					Vec3 deltaPosition = anchoredPart.cframe.position - freePart.cframe.position;
-					double distanceSqBetween = deltaPosition.lengthSquared();
-
-					if (distanceSqBetween > maxRadiusBetween * maxRadiusBetween) {
-						intersectionStatistics.addToTally(IntersectionResult::PART_DISTANCE_REJECT, 1);
-						continue;
-					}
-
-					Vec3 intersection;
-					Vec3 exitVector;
-					if (anchoredPart.intersects(freePart, intersection, exitVector)) {
-						intersectionStatistics.addToTally(IntersectionResult::COLISSION, 1);
-						colissions.push_back(Colission{ &anchoredPart, &freePart, intersection, exitVector });
-					}
-					else {
-						intersectionStatistics.addToTally(IntersectionResult::GJK_REJECT, 1);
-					}
-					physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
-				}
-			}
-			
+			runColissionTests(anchoredPhys, freePhys, world, colissions);
 		}
 	}
 
@@ -188,37 +218,7 @@ size_t findColissions(WorldPrototype& world, std::vector<Colission>& colissions)
 	for(auto mainIter = iter.begin(); mainIter != finish; ++mainIter) {
 		Physical& phys1 = *mainIter;
 		for(auto secondIter = mainIter; ++secondIter != finish; ) {
-			Physical& phys2 = *secondIter;
-			Vec3 deltaCentroid = phys1.circumscribingSphere.origin - phys2.circumscribingSphere.origin;
-			double maxDistanceBetween = phys1.circumscribingSphere.radius + phys2.circumscribingSphere.radius;
-			if (deltaCentroid.lengthSquared() > maxDistanceBetween * maxDistanceBetween) {
-				intersectionStatistics.addToTally(IntersectionResult::PHYSICAL_DISTANCE_REJECT, phys1.getPartCount()*phys2.getPartCount());
-				continue;
-			}
-			for (Part& p1 : phys1) {
-				for (Part& p2 : phys2) {
-					double maxRadiusBetween = p1.maxRadius + p2.maxRadius;
-
-					Vec3 deltaPosition = p1.cframe.position - p2.cframe.position;
-					double distanceSqBetween = deltaPosition.lengthSquared();
-
-					if (distanceSqBetween > maxRadiusBetween * maxRadiusBetween) {
-						intersectionStatistics.addToTally(IntersectionResult::PART_DISTANCE_REJECT, 1);
-						continue;
-					}
-
-					Vec3 intersection;
-					Vec3 exitVector;
-					if (p1.intersects(p2, intersection, exitVector)) {
-						intersectionStatistics.addToTally(IntersectionResult::COLISSION, 1);
-						colissions.push_back(Colission{ &p1, &p2, intersection, exitVector });
-					}
-					else {
-						intersectionStatistics.addToTally(IntersectionResult::GJK_REJECT, 1);
-					}
-					physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
-				}
-			}
+			runColissionTests(phys1, *secondIter, world, colissions);
 		}
 	}
 

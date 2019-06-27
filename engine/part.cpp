@@ -2,6 +2,7 @@
 
 Part::Part(const Shape& shape, const CFrame& position, double density, double friction) : hitbox(shape), cframe(position), properties({density, friction}) {
 	this->maxRadius = hitbox.getMaxRadius();
+	this->localBounds = hitbox.getBounds();
 	this->mass = this->hitbox.getVolume() * this->properties.density;
 	this->inertia = this->hitbox.getInertia() * this->properties.density;
 	this->localCenterOfMass = this->hitbox.getCenterOfMass();
