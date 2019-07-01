@@ -33,6 +33,8 @@ public:
 	SymmetricMat3 inertia;
 	Vec3 localCenterOfMass;
 
+	BoundingBox localBounds;
+
 	Part() = default;
 	Part(const Shape& shape, const CFrame& position, double density, double friction);
 	bool intersects(const Part& other, Vec3& intersection, Vec3& exitVector) const;

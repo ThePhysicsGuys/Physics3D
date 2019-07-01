@@ -700,6 +700,11 @@ void Screen::renderDebug() {
 			Physical& selectedPhys = *selectedPart->parent;
 
 			for (Part& part : selectedPhys) {
+				Vec4f yellow = GUI::COLOR::YELLOW;
+				yellow.w = 0.5;
+				BoundingBox localBounds = selectedPart->localBounds;
+				renderBox(selectedPart->cframe.localToGlobal(CFrame(localBounds.getCenter())), localBounds.getWidth(), localBounds.getHeight(), localBounds.getDepth(), yellow);
+
 				Vec4f green = GUI::COLOR::GREEN;
 				green.w = 0.5;
 				renderSphere(part.maxRadius * 2, part.cframe.getPosition(), green);
@@ -707,7 +712,7 @@ void Screen::renderDebug() {
 
 			Vec4f red = GUI::COLOR::RED;
 			red.w = 0.5;
-			BoundingBox localBounds = selectedPhys.getLocalBounds();
+			BoundingBox localBounds = selectedPhys.localBounds;
 			renderBox(selectedPhys.getCFrame().localToGlobal(CFrame(localBounds.getCenter())), localBounds.getWidth(), localBounds.getHeight(), localBounds.getDepth(), red);
 
 			Vec4f blue = GUI::COLOR::BLUE;
@@ -719,6 +724,11 @@ void Screen::renderDebug() {
 	if (colissionSpheresMode == SphereColissionRenderMode::ALL) {
 		for (Physical& phys : world->iterPhysicals()) {
 			for (Part& part : phys) {
+				Vec4f yellow = GUI::COLOR::YELLOW;
+				yellow.w = 0.5;
+				BoundingBox localBounds = part.localBounds;
+				renderBox(part.cframe.localToGlobal(CFrame(localBounds.getCenter())), localBounds.getWidth(), localBounds.getHeight(), localBounds.getDepth(), yellow);
+
 				Vec4f green = GUI::COLOR::GREEN;
 				green.w = 0.5;
 				renderSphere(part.maxRadius * 2, part.cframe.getPosition(), green);
@@ -728,7 +738,7 @@ void Screen::renderDebug() {
 		for (Physical& phys : world->iterPhysicals()) {
 			Vec4f red = GUI::COLOR::RED;
 			red.w = 0.5;
-			BoundingBox localBounds = phys.getLocalBounds();
+			BoundingBox localBounds = phys.localBounds;
 			renderBox(phys.getCFrame().localToGlobal(CFrame(localBounds.getCenter())), localBounds.getWidth(), localBounds.getHeight(), localBounds.getDepth(), red);
 
 			Vec4f blue = GUI::COLOR::BLUE;

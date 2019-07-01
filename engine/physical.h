@@ -72,13 +72,16 @@ public:
 	Vec3 localCentroid;
 	Sphere circumscribingSphere;
 
+	BoundingBox localBounds;
+
 	Physical() = default;
 	Physical(Part* part);
 	inline Physical(Part* part, double mass, SymmetricMat3 inertia) : mass(mass), inertia(inertia), mainPart(part) {
 		//parts.push_back(AttachedPart{ CFrame(), part });
 		
 		Sphere smallestSphere = part->hitbox.getCircumscribingSphere();
-		Sphere s = getLocalCircumscribingSphere();
+		this->localBounds = computeLocalBounds();
+		Sphere s = computeLocalCircumscribingSphere();
 		this->localCentroid = s.origin;
 		this->circumscribingSphere.radius = s.radius;
 		this->circumscribingSphere.origin = getCFrame().localToGlobal(localCentroid);
@@ -96,6 +99,7 @@ public:
 		this->inertia = other.inertia;
 		this->localCentroid = other.localCentroid;
 		this->circumscribingSphere = other.circumscribingSphere;
+		this->localBounds = other.localBounds;
 
 		mainPart->parent = this;
 		for (AttachedPart& p : parts) {
@@ -116,6 +120,7 @@ public:
 		this->inertia = other.inertia;
 		this->localCentroid = other.localCentroid;
 		this->circumscribingSphere = other.circumscribingSphere;
+		this->localBounds = other.localBounds;
 
 		mainPart->parent = this;
 		for (AttachedPart& p : parts) {
@@ -158,6 +163,7 @@ public:
 	inline const CFrame& getCFrame() const { return mainPart->cframe; }
 
 	Vec3 getCenterOfMass() const;
+	Vec3 getCentroid() const;
 	Vec3 getAcceleration() const;
 	Vec3 getAngularAcceleration() const;
 	Vec3 getVelocityOfPoint(const Vec3Relative& point) const;
@@ -169,9 +175,10 @@ public:
 	double getAngularKineticEnergy() const;
 	double getKineticEnergy() const;
 	inline size_t getPartCount() const { return parts.size + 1; }
-	BoundingBox getLocalBounds() const;
-	Sphere getLocalCircumscribingSphere() const;
-
+	//BoundingBox getLocalBounds() const;
+	BoundingBox computeLocalBounds() const;
+	Sphere computeLocalCircumscribingSphere() const;
+	
 	PartIter begin() { return PartIter(parts.begin()-1, mainPart); }
 	ConstPartIter begin() const { return ConstPartIter(parts.begin()-1, mainPart);}
 
