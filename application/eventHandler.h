@@ -7,7 +7,7 @@ struct Camera;
 #include "../engine/math/vec3.h"
 
 typedef void (*CameraMoveHandler) (Screen&, Camera*, Vec3);
-typedef void (*WindowResizeHandler) (Screen&, unsigned int, unsigned int);
+typedef void (*WindowResizeHandler) (Screen&, Vec2i);
 typedef void (*PartRayIntersectHandler) (Screen&, ExtendedPart*, Vec3);
 typedef void (*PartDragHandler) (Screen&, ExtendedPart*, Vec3);
 typedef void (*PartClickHandler) (Screen&, ExtendedPart*, Vec3);
@@ -20,7 +20,7 @@ private:
 
 public:
 	CameraMoveHandler cameraMoveHandler = [] (Screen&, Camera*, Vec3) {};
-	WindowResizeHandler windowResizeHandler = [] (Screen&, unsigned int, unsigned int) {};
+	WindowResizeHandler windowResizeHandler = [] (Screen&, Vec2i) {};
 	PartRayIntersectHandler partRayIntersectHandler = [] (Screen&, ExtendedPart*, Vec3) {};
 	PartDragHandler partDragHandler = [] (Screen&, ExtendedPart*, Vec3) {};
 	PartClickHandler partClickHandler = [] (Screen&, ExtendedPart*, Vec3) {};

@@ -24,7 +24,7 @@ BreakdownAverageProfiler<60, GraphicsProcess> graphicsMeasure = BreakdownAverage
 // Debug
 using namespace Debug;
 
-std::map<VecType, bool> debug_enabled {
+std::map<VectorType, bool> debug_enabled {
 	{ INFO_VEC, false }, 
 	{ VELOCITY, false }, 
 	{ ACCELERATION, false }, 
@@ -42,7 +42,7 @@ std::map<PointType, bool> point_debug_enabled{
 	{INTERSECTION, false},
 };
 
-std::map<VecType, Vec3f> vecColors {
+std::map<VectorType, Vec3f> vecColors {
 	{ INFO_VEC, Vec3f(0,1,0) },
 	{ VELOCITY, Vec3f(0,0,1) },
 	{ ACCELERATION, Vec3f(0,1,1) },
@@ -59,18 +59,18 @@ struct PointColorPair {
 	Vec3f color2;
 };
 
-std::map<PointType, PointColorPair> pointColors{
-	{ INFO_POINT, PointColorPair{Vec3f(1.0f,0.5f,0.0f), Vec3f(1.0f,0.2f,0.0f)}},
-	{ CENTER_OF_MASS, PointColorPair{Vec3f(1.0f,1.0f,0.0f), Vec3f(0.0f,0.0f,0.0f)} },
-	{ INTERSECTION, PointColorPair{Vec3f(0.0f,0.0f,1.0f), Vec3f(0.0f,1.0f,0.0f)} },
+std::map<PointType, PointColorPair> pointColors {
+	{ INFO_POINT, PointColorPair { Vec3f(1.0f, 0.5f, 0.0f), Vec3f(1.0f, 0.2f, 0.0f) }},
+	{ CENTER_OF_MASS, PointColorPair { Vec3f(1.0f, 1.0f, 0.0f), Vec3f(0.0f, 0.0f, 0.0f) }},
+	{ INTERSECTION, PointColorPair { Vec3f(0.0f, 0.0f, 1.0f), Vec3f(0.0f, 1.0f, 0.0f) }},
 };
 
-bool renderPies = false;
+bool renderPiesEnabled = false;
 SphereColissionRenderMode colissionSpheresMode;
 
 int fieldIndex = 0;
 
-void toggleDebugVecType(Debug::VecType t) {
+void toggleDebugVecType(Debug::VectorType t) {
 	debug_enabled[t] = !debug_enabled[t];
 }
 void toggleDebugPointType(Debug::PointType t) {
@@ -86,24 +86,24 @@ std::string toString(std::chrono::nanoseconds t) {
 }
 
 size_t getTheoreticalNumberOfIntersections(size_t objCount) {
-	return (objCount-1)*objCount / 2;
+	return (objCount - 1) * objCount / 2;
 }
 
 AddableBuffer<float> visibleVecs(900);
 AddableBuffer<float> visiblePoints(1000);
 
-void updateVecMesh(VectorMesh* vectorMesh, AppDebug::ColoredVec* data, size_t size) {
+void updateVecMesh(VectorMesh* vectorMesh, AppDebug::ColoredVector* data, size_t size) {
 	visibleVecs.clear();
 
 	for (size_t i = 0; i < size; i++) {
-		const AppDebug::ColoredVec& v = data[i];
+		const AppDebug::ColoredVector& v = data[i];
 		if (debug_enabled[v.type]) {
 			visibleVecs.add(v.origin.x);
 			visibleVecs.add(v.origin.y);
 			visibleVecs.add(v.origin.z);
-			visibleVecs.add(v.vec.x);
-			visibleVecs.add(v.vec.y);
-			visibleVecs.add(v.vec.z);
+			visibleVecs.add(v.vector.x);
+			visibleVecs.add(v.vector.y);
+			visibleVecs.add(v.vector.z);
 			visibleVecs.add(vecColors[v.type].x);
 			visibleVecs.add(vecColors[v.type].y);
 			visibleVecs.add(vecColors[v.type].z);

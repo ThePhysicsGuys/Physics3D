@@ -21,11 +21,11 @@ bool logCall(const char* func, const char* file, int line);
 
 
 namespace AppDebug {
-	struct ColoredVec {
-		Vec3 origin, vec;
-		Debug::VecType type;
-		ColoredVec() = default;
-		ColoredVec(Vec3 origin, Vec3 vec, Debug::VecType type) : origin(origin), vec(vec), type(type) {}
+	struct ColoredVector {
+		Vec3 origin, vector;
+		Debug::VectorType type;
+		ColoredVector() = default;
+		ColoredVector(Vec3 origin, Vec3 vector, Debug::VectorType type) : origin(origin), vector(vector), type(type) {}
 	};
 	struct ColoredPoint {
 		Vec3 point;
@@ -42,6 +42,6 @@ namespace AppDebug {
 	void logFrameStart();
 	void logFrameEnd();
 
-	AddableBuffer<ColoredVec>& getVecBuffer();
+	AddableBuffer<ColoredVector>& getVectorBuffer();
 	AddableBuffer<ColoredPoint>& getPointBuffer();
 }

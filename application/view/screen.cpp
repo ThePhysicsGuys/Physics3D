@@ -37,7 +37,6 @@
 #include "../engine/physicsProfiler.h"
 #include "../engine/geometry/boundingBox.h"
 #include "../engine/sharedLockGuard.h"
-#include "../engine/debug.h"
 
 #include <stdlib.h>
 #include <fstream>
@@ -60,7 +59,7 @@ bool initGLFW() {
 bool initGLEW() {
 	// Init GLEW after creating a valid rendering context
 	if (!Renderer::initGLEW()) {
-		Renderer::terminateGLFW();
+		terminateGLFW();
 
 		Log::error("GLEW Failed to initialize!");
 
@@ -83,16 +82,15 @@ Screen::Screen(int width, int height, MagnetWorld* world) {
 	setWorld(world);
 
 	// Create a windowed mode window and its OpenGL context 
-	Renderer::createContext(width, height, "Physics3D");
+	Renderer::createGLFWContext(width, height, "Physics3D");
 	
-	if (!Renderer::validContext()) {
+	if (!Renderer::validGLFWContext()) {
 		terminateGLFW();
 		exit(-1);
 	}
 
 	// Make the window's context current 
-	Renderer::makeContextCurrent();
-	window = Renderer::getContext();
+	Renderer::makeGLFWContextCurrent();
 
 	Log::info("OpenGL vendor: (%s)", Renderer::getVendor());
 	Log::info("OpenGL renderer: (%s)", Renderer::getRenderer());
@@ -231,14 +229,12 @@ void Screen::init() {
 
 
 	// InputHandler init
-	handler = new StandardInputHandler(window, *this);
+	handler = new StandardInputHandler(Renderer::getGLFWContext(), *this);
 
 
 	// Screen size init
-	Vec2 size = Renderer::windowSize();
-	int width = size.x;
-	int height = size.y;
-	handler->framebufferResize(width, height);
+	Vec2 size = Renderer::getGLFWWindowSize();
+	handler->framebufferResize(size);
 
 
 	// Shader source init
@@ -259,7 +255,7 @@ void Screen::init() {
 	// Shader init
 	basicShader = * new BasicShader(basicShaderSource);
 	depthShader = * new DepthShader(depthShaderSource);
-	vectorShader = * new VectorShader(vectorShaderSource);
+	vectorShader = * new VectorShader(vectorShaderSource);  
 	fontShader = * new FontShader(fontShaderSource);
 	originShader = * new OriginShader(originShaderSource);
 	quadShader = * new QuadShader(quadShaderSource);
@@ -299,9 +295,9 @@ void Screen::init() {
 
 	// Framebuffer init
 	quad = new Quad();
-	modelFrameBuffer = new FrameBuffer(width, height);
-	screenFrameBuffer = new FrameBuffer(width, height);
-	blurFrameBuffer = new FrameBuffer(width, height);
+	modelFrameBuffer = new FrameBuffer(size.x, size.y);
+	screenFrameBuffer = new FrameBuffer(size.x, size.y);
+	blurFrameBuffer = new FrameBuffer(size.x, size.y);
 	depthBuffer = new DepthFrameBuffer(1024, 1024);
 
 
@@ -398,7 +394,7 @@ void Screen::init() {
 	debugInfoPointCheckBox->action = [] (CheckBox* c) { toggleDebugPointType(Debug::INFO_POINT); };
 	debugCenterOfMassCheckBox->action = [] (CheckBox* c) { toggleDebugPointType(Debug::CENTER_OF_MASS); };
 	debugIntersectionCheckBox->action = [] (CheckBox* c) { toggleDebugPointType(Debug::INTERSECTION); };
-	debugRenderPiesCheckBox->action = [] (CheckBox* c) { renderPies = !renderPies; };
+	debugRenderPiesCheckBox->action = [] (CheckBox* c) { renderPiesEnabled = !renderPiesEnabled; };
 	debugRenderSpheresCheckBox->action = [] (CheckBox* c) { colissionSpheresMode = static_cast<SphereColissionRenderMode>((static_cast<int>(colissionSpheresMode) + 1) % 3); };
 
 	debugFrame->add(debugVectorLabel, Align::CENTER);
@@ -426,7 +422,7 @@ void Screen::init() {
 
 
 	// Mouse init
-	Renderer::disableCursor();
+	Renderer::disableGLFWCursor();
 	mouseVertical = new Panel(0, 0, 0.04, 0.007);
 	mouseHorizontal = new Panel(0, 0, 0.007, 0.04);
 	mouseVertical->background = Vec4(1);
@@ -469,27 +465,18 @@ void Screen::init() {
 
 
 	// Eventhandler init
-	eventHandler.setPartRayIntersectCallback([] (Screen& screen, ExtendedPart* part, Vec3 point) {
-		screen.intersectedPart = part;
-		screen.intersectedPoint = point;
-	});
 
-	eventHandler.setPartClickCallback([] (Screen& screen, ExtendedPart* part, Vec3 point) {
-		screen.selectedPart = part;
-		screen.selectedPoint = point;
-	});
+	eventHandler.setWindowResizeCallback([] (Screen& screen, Vec2i dimension) {
+		screen.screenFrameBuffer->resize(dimension);
+		screen.modelFrameBuffer->resize(dimension);
+		screen.blurFrameBuffer->resize(dimension);
 
-	eventHandler.setWindowResizeCallback([] (Screen& screen, unsigned int width, unsigned int height) {
-		screen.dimension = Vec2i(width, height);
-		screen.screenFrameBuffer->resize(screen.dimension);
-		screen.modelFrameBuffer->resize(screen.dimension);
-		screen.blurFrameBuffer->resize(screen.dimension);
-
-		screen.camera.update(((float)width) / ((float)height));
+		screen.camera.update(((float)dimension.x) / ((float)dimension.y));
+		screen.dimension = dimension;
 	});
 
 	// Temp
-	handler->framebufferResize(width, height);
+	handler->framebufferResize(size);
 
 	// Test
 	texture = load("../res/textures/test/disp.jpg");
@@ -518,7 +505,7 @@ void Screen::update() {
 		if (handler->getKey(GLFW_KEY_RIGHT)) camera.rotate(*this, 0, 1, 0, leftDragging);
 		if (handler->getKey(GLFW_KEY_UP))    camera.rotate(*this, -1, 0, 0, leftDragging);
 		if (handler->getKey(GLFW_KEY_DOWN))  camera.rotate(*this, 1, 0, 0, leftDragging);
-		if (handler->getKey(GLFW_KEY_ESCAPE)) Renderer::closeWindow();
+		if (handler->getKey(GLFW_KEY_ESCAPE)) Renderer::closeGLFWWindow();
 		if (handler->getKey(GLFW_KEY_B)) { debugFrame->visible = true; debugFrame->position = Vec2(0.8); GUI::select(debugFrame); }
 	}
 
@@ -566,7 +553,7 @@ void Screen::update() {
 	debugInfoPointCheckBox->checked = point_debug_enabled[Debug::INFO_POINT];
 	debugCenterOfMassCheckBox->checked = point_debug_enabled[Debug::CENTER_OF_MASS];
 	debugIntersectionCheckBox->checked = point_debug_enabled[Debug::INTERSECTION];
-	debugRenderPiesCheckBox->checked = renderPies;
+	debugRenderPiesCheckBox->checked = renderPiesEnabled;
 	debugRenderSpheresCheckBox->checked = colissionSpheresMode!=SphereColissionRenderMode::NONE;
 
 	// Update properties frame
@@ -578,7 +565,7 @@ void Screen::update() {
 		partVelocity->text = "Velocity: " + str(selectedPart->parent->velocity);
 		partAngularVelocity->text = "Angular Velocity: " + str(selectedPart->parent->angularVelocity);
 		double kineticEnergy = selectedPart->parent->getKineticEnergy();
-		double potentialEnergy = world->getPotentialEnergyOfPhysical(*(selectedPart->parent));
+		double potentialEnergy = world->getPotentialEnergyOfPhysical(*selectedPart->parent);
 		partKineticEnergy->text = "Kinetic Energy: " + std::to_string(kineticEnergy);
 		partPotentialEnergy->text = "Potential Energy: " + std::to_string(potentialEnergy);
 		partEnergy->text = "Energy: " + std::to_string(kineticEnergy + potentialEnergy);
@@ -693,6 +680,115 @@ void renderBox(const CFrame& cframe, double width, double height, double depth, 
 	cube->render();
 }
 
+void Screen::renderDebug() {
+	// Initialize vector log buffer
+	graphicsMeasure.mark(GraphicsProcess::VECTORS);
+	AddableBuffer<AppDebug::ColoredVector>& vecLog = AppDebug::getVectorBuffer();
+	AddableBuffer<AppDebug::ColoredPoint>& pointLog = AppDebug::getPointBuffer();
+
+	for (const Physical& p : world->iterPhysicals()) {
+		pointLog.add(AppDebug::ColoredPoint(p.getCenterOfMass(), Debug::CENTER_OF_MASS));
+	}
+
+	if (selectedPart != nullptr) {
+		CFramef selectedCFrame(selectedPart->cframe);
+		for (const Vec3f& corner : selectedPart->hitbox.iterVertices()) {
+			vecLog.add(AppDebug::ColoredVector(Vec3(selectedCFrame.localToGlobal(corner)), selectedPart->parent->getVelocityOfPoint(Vec3(selectedCFrame.localToRelative(corner))), Debug::VELOCITY));
+		}
+
+		if (colissionSpheresMode == SphereColissionRenderMode::SELECTED) {
+			Physical& selectedPhys = *selectedPart->parent;
+
+			for (Part& part : selectedPhys) {
+				Vec4f green = GUI::COLOR::GREEN;
+				green.w = 0.5;
+				renderSphere(part.maxRadius * 2, part.cframe.getPosition(), green);
+			}
+
+			Vec4f red = GUI::COLOR::RED;
+			red.w = 0.5;
+			BoundingBox localBounds = selectedPhys.getLocalBounds();
+			renderBox(selectedPhys.getCFrame().localToGlobal(CFrame(localBounds.getCenter())), localBounds.getWidth(), localBounds.getHeight(), localBounds.getDepth(), red);
+
+			Vec4f blue = GUI::COLOR::BLUE;
+			blue.w = 0.5;
+			renderSphere(selectedPhys.circumscribingSphere.radius * 2, selectedPhys.circumscribingSphere.origin, blue);
+		}
+	}
+
+	if (colissionSpheresMode == SphereColissionRenderMode::ALL) {
+		for (Physical& phys : world->iterPhysicals()) {
+			for (Part& part : phys) {
+				Vec4f green = GUI::COLOR::GREEN;
+				green.w = 0.5;
+				renderSphere(part.maxRadius * 2, part.cframe.getPosition(), green);
+			}
+		}
+
+		for (Physical& phys : world->iterPhysicals()) {
+			Vec4f red = GUI::COLOR::RED;
+			red.w = 0.5;
+			BoundingBox localBounds = phys.getLocalBounds();
+			renderBox(phys.getCFrame().localToGlobal(CFrame(localBounds.getCenter())), localBounds.getWidth(), localBounds.getHeight(), localBounds.getDepth(), red);
+
+			Vec4f blue = GUI::COLOR::BLUE;
+			blue.w = 0.5;
+			renderSphere(phys.circumscribingSphere.radius * 2, phys.circumscribingSphere.origin, blue);
+		}
+	}
+
+
+	// Update debug meshes
+	graphicsMeasure.mark(GraphicsProcess::VECTORS);
+	updateVecMesh(vectorMesh, vecLog.data, vecLog.size);
+	updatePointMesh(pointMesh, pointLog.data, pointLog.size);
+}
+
+void Screen::renderPies() {
+	graphicsMeasure.mark(GraphicsProcess::PROFILER);
+	size_t objCount = world->getPartCount();
+	renderDebugField(dimension, font, "Screen", str(dimension) + ", [" + std::to_string(camera.aspect) + ":1]", "");
+	renderDebugField(dimension, font, "Position", str(camera.cframe.position), "");
+	renderDebugField(dimension, font, "Objects", objCount, "");
+	renderDebugField(dimension, font, "Intersections", getTheoreticalNumberOfIntersections(objCount), "");
+	renderDebugField(dimension, font, "AVG Collide GJK Iterations", gjkCollideIterStats.avg(), "");
+	renderDebugField(dimension, font, "AVG No Collide GJK Iterations", gjkNoCollideIterStats.avg(), "");
+	renderDebugField(dimension, font, "TPS", physicsMeasure.getAvgTPS(), "");
+	renderDebugField(dimension, font, "FPS", graphicsMeasure.getAvgTPS(), "");
+	renderDebugField(dimension, font, "World Kinetic Energy", world->getTotalKineticEnergy(), "");
+	renderDebugField(dimension, font, "World Potential Energy", world->getTotalPotentialEnergy(), "");
+	renderDebugField(dimension, font, "World Energy", world->getTotalEnergy(), "");
+
+	if (renderPiesEnabled) {
+		float leftSide = float(dimension.x) / float(dimension.y);
+		PieChart graphicsPie = toPieChart(graphicsMeasure, "Graphics", Vec2f(-leftSide + 1.5f, -0.7f), 0.2f);
+		PieChart physicsPie = toPieChart(physicsMeasure, "Physics", Vec2f(-leftSide + 0.3f, -0.7f), 0.2f);
+		PieChart intersectionPie = toPieChart(intersectionStatistics, "Intersection Statistics", Vec2f(-leftSide + 2.7f, -0.7f), 0.2f);
+		physicsPie.renderText(*this, font);
+		graphicsPie.renderText(*this, font);
+		intersectionPie.renderText(*this, font);
+		startPieRendering(*this);
+		physicsPie.renderPie(*this);
+		graphicsPie.renderPie(*this);
+		intersectionPie.renderPie(*this);
+		endPieRendering(*this);
+
+		ParallelArray<long long, 17> gjkColIter = GJKCollidesIterationStatistics.history.avg();
+		ParallelArray<long long, 17> gjkNoColIter = GJKNoCollidesIterationStatistics.history.avg();
+		ParallelArray<long long, 17> epaIter = EPAIterationStatistics.history.avg();
+
+		for (size_t i = 0; i < GJKCollidesIterationStatistics.size(); i++) {
+			iterationChart.data[0][i] = WeightValue{ (float)gjkColIter[i], std::to_string(gjkColIter[i]) };
+			iterationChart.data[1][i] = WeightValue{ (float)gjkNoColIter[i], std::to_string(gjkNoColIter[i]) };
+			iterationChart.data[2][i] = WeightValue{ (float)epaIter[i], std::to_string(epaIter[i]) };
+		}
+
+		iterationChart.position = Vec2f(-leftSide + 0.1f, -0.3);
+		iterationChart.render();
+	}
+}
+
+
 void Screen::refresh() {
 	fieldIndex = 0;
 
@@ -723,18 +819,14 @@ void Screen::refresh() {
 	renderSkybox();
 	Renderer::enableDepthTest();
 
-
-	// Initialize vector log buffer
-	graphicsMeasure.mark(GraphicsProcess::VECTORS);
-	AddableBuffer<AppDebug::ColoredVec>& vecLog = AppDebug::getVecBuffer();
-	AddableBuffer<AppDebug::ColoredPoint>& pointLog = AppDebug::getPointBuffer();
-
-
+	
 	// Render physicals
 	graphicsMeasure.mark(GraphicsProcess::PHYSICALS);
 	basicShader.update(camera.viewMatrix, camera.projectionMatrix, camera.cframe.position);
 	renderPhysicals();
 
+
+	// Test
 	Renderer::disableCulling();
 	testShader.updateModel(Mat4f().translate(0, 4, 0));
 	testShader.updateView(camera.viewMatrix);
@@ -746,53 +838,9 @@ void Screen::refresh() {
 	mesh->renderMode = RenderMode::TRIANGLES;
 	Renderer::enableCulling();
 
-	for (const Physical& p : world->iterPhysicals()) {
-		pointLog.add(AppDebug::ColoredPoint(p.getCenterOfMass(), Debug::CENTER_OF_MASS));
-	}
 
-	if(selectedPart != nullptr) {
-		CFramef selectedCFrame(selectedPart->cframe);
-		for(const Vec3f& corner : selectedPart->hitbox.iterVertices()) {
-			vecLog.add(AppDebug::ColoredVec(Vec3(selectedCFrame.localToGlobal(corner)), selectedPart->parent->getVelocityOfPoint(Vec3(selectedCFrame.localToRelative(corner))), Debug::VELOCITY));
-		}
-
-		if (colissionSpheresMode == SphereColissionRenderMode::SELECTED) {
-			Physical& selectedPhys = *selectedPart->parent;
-			for (Part& part : selectedPhys) {
-				Vec4f green = GUI::COLOR::GREEN;
-				green.w = 0.5;
-				renderSphere(part.maxRadius * 2, part.cframe.getPosition(), green);
-			}
-			Vec4f red = GUI::COLOR::RED;
-			red.w = 0.5;
-			BoundingBox localBounds = selectedPhys.getLocalBounds();
-			renderBox(selectedPhys.getCFrame().localToGlobal(CFrame(localBounds.getCenter())), localBounds.getWidth(), localBounds.getHeight(), localBounds.getDepth(), red);
-
-			Vec4f blue = GUI::COLOR::BLUE;
-			blue.w = 0.5;
-			renderSphere(selectedPhys.circumscribingSphere.radius * 2, selectedPhys.circumscribingSphere.origin, blue);
-		}
-	}
-
-	if (colissionSpheresMode == SphereColissionRenderMode::ALL) {
-		for (Physical& phys : world->iterPhysicals()) {
-			for (Part& part : phys) {
-				Vec4f green = GUI::COLOR::GREEN;
-				green.w = 0.5;
-				renderSphere(part.maxRadius * 2, part.cframe.getPosition(), green);
-			}
-		}
-		for (Physical& phys : world->iterPhysicals()) {
-			Vec4f red = GUI::COLOR::RED;
-			red.w = 0.5;
-			BoundingBox localBounds = phys.getLocalBounds();
-			renderBox(phys.getCFrame().localToGlobal(CFrame(localBounds.getCenter())), localBounds.getWidth(), localBounds.getHeight(), localBounds.getDepth(), red);
-
-			Vec4f blue = GUI::COLOR::BLUE;
-			blue.w = 0.5;
-			renderSphere(phys.circumscribingSphere.radius * 2, phys.circumscribingSphere.origin, blue);
-		}
-	}
+	// Debug 
+	renderDebug();
 
 
 	// Postprocess to screenFrameBuffer
@@ -801,21 +849,11 @@ void Screen::refresh() {
 	postProcessShader.update(modelFrameBuffer->texture);
 	quad->render();
 
+
 	// Render vectors with old depth buffer
 	Renderer::enableDepthTest();
 	screenFrameBuffer->attach(modelFrameBuffer->renderBuffer);
 	
-	/*for (ExtendedPart& part : *world) {
-		if (part.hitbox.normals)
-			for (int i = 0; i < part.hitbox.vertexCount; i++)
-				vecLog.add(AppDebug::ColoredVec(part.cframe.localToGlobal(part.hitbox[i]), part.cframe.localToRelative(part.hitbox.normals.get()[i]), Debug::POSITION));
-	}*/
-
-	// Update debug meshes
-	graphicsMeasure.mark(GraphicsProcess::VECTORS);
-	updateVecMesh(vectorMesh, vecLog.data, vecLog.size);
-	updatePointMesh(pointMesh, pointLog.data, pointLog.size);
-
 
 	// Render lights
 	graphicsMeasure.mark(GraphicsProcess::LIGHTING);
@@ -825,8 +863,8 @@ void Screen::refresh() {
 		basicShader.updateModelMatrix(transformation);
 		skyboxMesh->render();
 	}
-
 	Renderer::disableDepthTest();
+
 
 	// Render vector mesh
 	graphicsMeasure.mark(GraphicsProcess::VECTORS);
@@ -877,53 +915,13 @@ void Screen::refresh() {
 
 	
 	// Pie rendering
-	graphicsMeasure.mark(GraphicsProcess::PROFILER);
-	size_t objCount = world->getPartCount();
-	renderDebugField(dimension, font, "Screen", str(dimension) + ", [" + std::to_string(camera.aspect) + ":1]", "");
-	renderDebugField(dimension, font, "Position", str(camera.cframe.position), "");
-	renderDebugField(dimension, font, "Objects", objCount, "");
-	renderDebugField(dimension, font, "Intersections", getTheoreticalNumberOfIntersections(objCount), "");
-	renderDebugField(dimension, font, "AVG Collide GJK Iterations", gjkCollideIterStats.avg(), "");
-	renderDebugField(dimension, font, "AVG No Collide GJK Iterations", gjkNoCollideIterStats.avg(), "");
-	renderDebugField(dimension, font, "TPS", physicsMeasure.getAvgTPS(), "");
-	renderDebugField(dimension, font, "FPS", graphicsMeasure.getAvgTPS(), "");
-	renderDebugField(dimension, font, "World Kinetic Energy", world->getTotalKineticEnergy(), "");
-	renderDebugField(dimension, font, "World Potential Energy", world->getTotalPotentialEnergy(), "");
-	renderDebugField(dimension, font, "World Energy", world->getTotalEnergy(), "");
-
-	if (renderPies) {
-		float leftSide = float(dimension.x) / float(dimension.y);
-		PieChart graphicsPie = toPieChart(graphicsMeasure, "Graphics", Vec2f(-leftSide + 1.5f, -0.7f), 0.2f);
-		PieChart physicsPie = toPieChart(physicsMeasure, "Physics", Vec2f(-leftSide + 0.3f, -0.7f), 0.2f);
-		PieChart intersectionPie = toPieChart(intersectionStatistics, "Intersection Statistics", Vec2f(-leftSide + 2.7f, -0.7f), 0.2f);
-		physicsPie.renderText(*this, font);
-		graphicsPie.renderText(*this, font);
-		intersectionPie.renderText(*this, font);
-		startPieRendering(*this);
-		physicsPie.renderPie(*this);
-		graphicsPie.renderPie(*this);
-		intersectionPie.renderPie(*this);
-		endPieRendering(*this);
-
-		ParallelArray<long long, 17> gjkColIter = GJKCollidesIterationStatistics.history.avg();
-		ParallelArray<long long, 17> gjkNoColIter = GJKNoCollidesIterationStatistics.history.avg();
-		ParallelArray<long long, 17> epaIter = EPAIterationStatistics.history.avg();
-
-		for (size_t i = 0; i < GJKCollidesIterationStatistics.size(); i++) {
-			iterationChart.data[0][i] = WeightValue{ (float)gjkColIter[i], std::to_string(gjkColIter[i]) };
-			iterationChart.data[1][i] = WeightValue{ (float)gjkNoColIter[i], std::to_string(gjkNoColIter[i]) };
-			iterationChart.data[2][i] = WeightValue{ (float)epaIter[i], std::to_string(epaIter[i]) };
-		}
-
-		iterationChart.position = Vec2f(-leftSide + 0.1f, -0.3);
-		iterationChart.render();
-	}
+	renderPies();
 
 
 	// Render stuff
-	Renderer::swapInterval(0);
-	Renderer::swapBuffers();
-	Renderer::pollEvents();
+	Renderer::swapGLFWInterval(0);
+	Renderer::swapGLFWBuffers();
+	Renderer::pollGLFWEvents();
 }
 
 void Screen::close() {
@@ -943,7 +941,7 @@ void Screen::close() {
 }
 
 bool Screen::shouldClose() {
-	return Renderer::windowClosed();
+	return Renderer::isGLFWWindowClosed();
 }
 
 int Screen::addMeshShape(const VisualShape& s) {

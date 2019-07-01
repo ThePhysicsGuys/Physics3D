@@ -28,19 +28,20 @@ bool logCall(const char* func, const char* file, int line) {
 
 namespace AppDebug {
 	
-
-	ThreePhaseBuffer<ColoredVec> vecBuf(256);
+	ThreePhaseBuffer<ColoredVector> vecBuf(256);
 	ThreePhaseBuffer<ColoredPoint> pointBuf(256);
-
 
 	namespace Logging {
 		using namespace Debug;
-		void logVec(Vec3 origin, Vec3 vec, VecType type) {
-			vecBuf.add(ColoredVec(origin, vec, type));
+
+		void logVec(Vec3 origin, Vec3 vec, VectorType type) {
+			vecBuf.add(ColoredVector(origin, vec, type));
 		}
-		void logVec(Vec3f origin, Vec3f vec, VecType type) {
-			vecBuf.add(ColoredVec(Vec3(origin), Vec3(vec), type));
+
+		void logVec(Vec3f origin, Vec3f vec, VectorType type) {
+			vecBuf.add(ColoredVector(Vec3(origin), Vec3(vec), type));
 		}
+
 		void logPoint(Vec3 point, PointType type) {
 			pointBuf.add(ColoredPoint(point, type));
 		}
@@ -100,7 +101,7 @@ namespace AppDebug {
 	/*
 		Returns a copy of the current vec buffer
 	*/
-	AddableBuffer<ColoredVec>& getVecBuffer() {
+	AddableBuffer<ColoredVector>& getVectorBuffer() {
 		return vecBuf.pullOutputBuffer();
 	}
 

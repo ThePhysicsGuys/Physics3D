@@ -22,6 +22,7 @@ namespace Picker {
 
 	void press(Screen& screen);
 	void release(Screen& screen);
+	void drag(Screen& screen);
 
 	void moveGrabbedPhysicalTransversal(Screen& screen, double dz);
 	void moveGrabbedPhysicalLateral(Screen& screen);

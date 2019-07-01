@@ -6,7 +6,7 @@
 
 namespace Debug {
 	
-	enum VecType {
+	enum VectorType {
 		INFO_VEC,
 		FORCE,
 		MOMENT,
@@ -29,13 +29,13 @@ namespace Debug {
 		INERTIAL_CFRAME
 	};
 
-	void logVec(Vec3 origin, Vec3 vec, VecType type);
-	inline void logVec(Vec3f origin, Vec3f vec, VecType type) { logVec(Vec3(origin), Vec3(vec), type); };
+	void logVec(Vec3 origin, Vec3 vec, VectorType type);
+	inline void logVec(Vec3f origin, Vec3f vec, VectorType type) { logVec(Vec3(origin), Vec3(vec), type); };
 	void logPoint(Vec3 point, PointType type);
 	void logCFrame(CFrame frame, CFrameType type);
 	void logShape(Shape shape);
 
-	void setVecLogAction(void(*logger)(Vec3 origin, Vec3 vec, VecType type));
+	void setVecLogAction(void(*logger)(Vec3 origin, Vec3 vec, VectorType type));
 	void setPointLogAction(void(*logger)(Vec3 point, PointType type));
 	void setCFrameLogAction(void(*logger)(CFrame frame, CFrameType type));
 	void setShapeLogAction(void(*logger)(const Shape& shape));

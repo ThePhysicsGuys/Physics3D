@@ -7,33 +7,41 @@
 
 namespace Renderer {
 
+	// GL constants
 	extern unsigned int WIREFRAME;
 	extern unsigned int FILLED;
 	extern unsigned int POINTS;
 
-	extern bool initGLEW();
-	extern bool initGLFW();
-	extern void terminateGLFW();
-	extern void createContext(int width, int height, const char* title);
-	extern void makeContextCurrent();
-	extern bool validContext();
+	// GLFW binding
+	extern inline bool initGLFW();
+	extern inline void terminateGLFW();
 
-	extern void swapInterval(int interval);
-	extern void swapBuffers();
-	extern void pollEvents();
+	extern inline GLFWwindow* getGLFWContext();
+	extern inline void createGLFWContext(int width, int height, const char* title);
+	extern inline void makeGLFWContextCurrent();
+	extern inline bool validGLFWContext();
+
+	extern inline void swapGLFWInterval(int interval);
+	extern inline void swapGLFWBuffers();
+	extern inline void pollGLFWEvents();
+
+	extern inline void closeGLFWWindow();
+	extern inline bool isGLFWWindowClosed();
+
+	extern inline Vec2i getGLFWWindowSize();
+	extern inline Vec4i getGLFWFrameSize();
+	
+	extern inline void enableGLFWCursor();
+	extern inline void disableGLFWCursor();
+
+
+	// GLEW binding
+	extern bool initGLEW();
 
 	extern void clearDepth();
 	extern void clearColor();
 	extern void clearStencil();
 
-	// To remove
-	extern GLFWwindow* getContext();
-
-	extern inline void closeWindow();
-	extern inline bool windowClosed();
-
-	extern inline Vec2i windowSize();
-	extern inline Vec4i frameSize();
 	extern inline void viewport(Vec2i origin, Vec2i dimension);
 
 	extern inline void enableDepthMask();
@@ -47,9 +55,6 @@ namespace Renderer {
 	extern inline void enableBlending();
 	extern inline void disableBlending();
 	extern inline void standardBlendFunction();
-
-	extern inline void enableCursor();
-	extern inline void disableCursor();
 
 	extern const unsigned char* getVendor();
 	extern const unsigned char* getVersion();

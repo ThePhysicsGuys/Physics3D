@@ -3,12 +3,13 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include "../../engine/debug.h"
-#include "../../engine/profiling.h"
-#include "../../engine/world.h"
-#include "../../engine/math/vec2.h"
+#include "../engine/profiling.h"
+#include "../engine/world.h"
+#include "../engine/math/vec2.h"
 #include "../eventHandler.h"
 #include "../util/properties.h"
+#include "../engine/debug.h"
+#include "../engine/datastructures/buffers.h"
 
 #include "frameBuffer.h"
 #include "camera.h"
@@ -27,10 +28,10 @@ void terminateGLFW();
 
 class Screen {
 private:
-	GLFWwindow* window;
-
 	void renderSkybox();
 	void renderPhysicals();
+	void renderDebug();
+	void renderPies();
 public:
 	std::vector<IndexedMesh*> meshes;
 	MagnetWorld* world;
@@ -61,8 +62,6 @@ public:
 	void update();
 	void refresh();
 	void close();
-
-	GLFWwindow* getWindow() { return window; }
 
 	void setWorld(MagnetWorld* world) {
 		this->world = world;

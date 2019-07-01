@@ -11,16 +11,15 @@
 
 StandardInputHandler::StandardInputHandler(GLFWwindow* window, Screen& screen) : InputHandler(window), screen(screen) {}
 
-void StandardInputHandler::framebufferResize(int width, int height) {
-	Vec2i dimension = Vec2i(width, height);
+void StandardInputHandler::framebufferResize(Vec2i dimension) {
 	if (screen.properties.get("include_titlebar_offset") == "true") {
-		Vec4i size = Renderer::frameSize();
+		Vec4i size = Renderer::getGLFWFrameSize();
 		dimension.y -= size.y;
 	}
 
 	Renderer::viewport(Vec2i(), dimension);
 
-	(*screen.eventHandler.windowResizeHandler) (screen, dimension.x, dimension.y);
+	(*screen.eventHandler.windowResizeHandler) (screen, dimension);
 }
 
 void StandardInputHandler::keyDownOrRepeat(int key, int modifiers) {
@@ -44,6 +43,7 @@ void StandardInputHandler::keyDownOrRepeat(int key, int modifiers) {
 }
 
 void StandardInputHandler::keyDown(int key, int modifiers) {
+
 	switch (key) {
 		case GLFW_KEY_P:
 			togglePause();
@@ -56,7 +56,7 @@ void StandardInputHandler::keyDown(int key, int modifiers) {
 			}
 			break;
 		case GLFW_KEY_F:
-			renderPies = !renderPies;
+			renderPiesEnabled = !renderPiesEnabled;
 			break;
 		case GLFW_KEY_Q:
 			if(screen.selectedPart != nullptr) {
@@ -91,7 +91,7 @@ void StandardInputHandler::keyDown(int key, int modifiers) {
 	}
 
 	if(key >= GLFW_KEY_F1 && key <= GLFW_KEY_F9) {
-		toggleDebugVecType(static_cast<Debug::VecType>(key - GLFW_KEY_F1));
+		toggleDebugVecType(static_cast<Debug::VectorType>(key - GLFW_KEY_F1));
 	}
 	if (key >= GLFW_KEY_1 && key <= GLFW_KEY_9) {
 		toggleDebugPointType(static_cast<Debug::PointType>(key - GLFW_KEY_1));
@@ -118,9 +118,6 @@ void StandardInputHandler::mouseDown(int button, int mods) {
 			GUI::intersectedPoint = GUI::map(cursorPosition) - GUI::intersectedComponent->position;
 		} else {
 			Picker::press(screen);
-			if (screen.selectedPart) {
-				Picker::moveGrabbedPhysicalLateral(screen);
-			}
 		}
 	}
 };
@@ -134,7 +131,8 @@ void StandardInputHandler::mouseUp(int button, int mods) {
 		if (GUI::selectedComponent){
 			GUI::selectedComponent->release(GUI::map(cursorPosition));
 		}
-		screen.world->selectedPart = nullptr;
+		
+		Picker::release(screen);
 	}
 };
 
@@ -157,9 +155,7 @@ void StandardInputHandler::mouseMove(double x, double y) {
 			GUI::selectedComponent->drag(GUI::map(cursorPosition));
 		} else {
 			// Phyiscal moving
-			if (screen.selectedPart) {
-				Picker::moveGrabbedPhysicalLateral(screen);
-			}
+			Picker::drag(screen);
 		}
 	}
 

@@ -37,7 +37,7 @@ public:
 	virtual void mouseEnter() {};
 	virtual void mouseExit() {};
 	virtual void scroll(double xOffset, double yOffset) {};
-	virtual void windowResize(int width, int height) {};
-	virtual void framebufferResize(int width, int height) {};
+	virtual void windowResize(Vec2i dimension) {};
+	virtual void framebufferResize(Vec2i dimension) {};
 };
 
