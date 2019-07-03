@@ -78,13 +78,13 @@ public:
 			child.first->render();
 			if (debug) {
 				GUI::quad->resize(child.first->position + Vec2(-margin, margin), child.first->dimension + Vec2(margin * 2));
-				GUI::shader->update(GUI::COLOR::R);
+				GUI::shader->updateColor(GUI::COLOR::R);
 				GUI::quad->render(GL_LINE);
 				GUI::quad->resize(child.first->position, child.first->dimension);
-				GUI::shader->update(GUI::COLOR::G);
+				GUI::shader->updateColor(GUI::COLOR::G);
 				GUI::quad->render(GL_LINE);
 				GUI::quad->resize(child.first->position + Vec2(padding, -padding), child.first->dimension + Vec2(-padding * 2));
-				GUI::shader->update(GUI::COLOR::B);
+				GUI::shader->updateColor(GUI::COLOR::B);
 				GUI::quad->render(GL_LINE);
 			}
 		}

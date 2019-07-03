@@ -18,7 +18,7 @@ namespace Picker {
 
 	void init();
 	void update(Screen& screen, Vec2 mousePosition);
-	void render(Screen& screen, BasicShader& shader);
+	void render(Screen& screen, BasicShader& basicShader, LineShader& lineShader);
 
 	void press(Screen& screen);
 	void release(Screen& screen);

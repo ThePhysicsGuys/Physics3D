@@ -1,7 +1,11 @@
 #pragma once
 
+#include "GL\glew.h"
+#include "GLFW\glfw3.h"
+
 #include "arrayMesh.h"
-#include "../../engine/math/vec2.h"
+#include "../engine/math/vec2.h"
+#include "../engine/math/mathUtil.h"
 
 struct Primitive {
 	unsigned int vao;
@@ -35,7 +39,7 @@ protected:
 		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * M * N, NULL, GL_DYNAMIC_DRAW);
 
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, M, GL_FLOAT, GL_FALSE, N * sizeof(float), 0);
+		glVertexAttribPointer(0, M, GL_FLOAT, GL_FALSE, 0, 0);
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
@@ -115,12 +119,11 @@ struct Line : public Primitive {
 	}
 
 	void resize(Vec2f p1, Vec2f p2) {
-
 		float vertices[2][3] = {
 			{ p1.x,	p1.y, 0 },
 			{ p2.x,	p2.y, 0 }
 		};
-
+		
 		Primitive::resize(vertices);
 	}
 
@@ -132,7 +135,7 @@ struct Line : public Primitive {
 		glPolygonMode(GL_FRONT_AND_BACK, mode);
 
 		glBindVertexArray(vao);
-		glDrawArrays(GL_LINES, 0, 2);
+		glDrawArrays(GL_LINE_STRIP, 0, 2);
 		glBindVertexArray(0);
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

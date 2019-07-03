@@ -245,7 +245,7 @@ namespace GUI {
 	}
 	
 	void update(Mat4f orthoMatrix) {
-		GUI::shader->update(orthoMatrix);
+		GUI::shader->updateProjection(orthoMatrix);
 	}
 
 	double clamp(double value, double min, double max) {
@@ -342,13 +342,13 @@ namespace GUI {
 		update(orthoMatrix);
 
 		screen->blurFrameBuffer->bind();
-		shader->update(screen->screenFrameBuffer->texture);
+		shader->updateTexture(screen->screenFrameBuffer->texture);
 		screen->quad->render();
-		blurShader->update(screen->blurFrameBuffer->texture);
-		blurShader->update(BlurShader::BlurType::HORIZONTAL);
+		blurShader->updateTexture(screen->blurFrameBuffer->texture);
+		blurShader->updateType(BlurShader::BlurType::HORIZONTAL);
 		screen->quad->render();
-		blurShader->update(screen->blurFrameBuffer->texture);
-		blurShader->update(BlurShader::BlurType::VERTICAL);
+		blurShader->updateTexture(screen->blurFrameBuffer->texture);
+		blurShader->updateType(BlurShader::BlurType::VERTICAL);
 		screen->quad->render();
 		screen->blurFrameBuffer->unbind();
 

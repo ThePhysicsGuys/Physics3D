@@ -23,8 +23,8 @@ Image::Image(double x, double y, double width, double height, Texture* texture) 
 
 void Image::render() {
 	if (visible) {
-		if (texture) GUI::shader->update(texture);
-		else GUI::shader->update(GUI::COLOR::BLACK);
+		if (texture) GUI::shader->updateTexture(texture);
+		else GUI::shader->updateColor(GUI::COLOR::BLACK);
 		GUI::quad->resize(position, dimension);
 		GUI::quad->render();
 	}

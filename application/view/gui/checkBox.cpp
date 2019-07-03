@@ -29,15 +29,15 @@ CheckBox::CheckBox(double x, double y, double width, double height, bool texture
 void CheckBox::renderPressed() {
 	if (textured) {
 		if (checked) {
-			GUI::shader->update(pressCheckedTexture);
+			GUI::shader->updateTexture(pressCheckedTexture);
 		} else {
-			GUI::shader->update(pressUncheckedTexture);
+			GUI::shader->updateTexture(pressUncheckedTexture);
 		}
 	} else {
 		if (checked) {
-			GUI::shader->update(pressCheckedColor);
+			GUI::shader->updateColor(pressCheckedColor);
 		} else {
-			GUI::shader->update(pressUncheckedColor);
+			GUI::shader->updateColor(pressUncheckedColor);
 		}
 	}
 
@@ -47,15 +47,15 @@ void CheckBox::renderPressed() {
 void CheckBox::renderHovering() {
 	if (textured) {
 		if (checked) {
-			GUI::shader->update(hoverCheckedTexture);
+			GUI::shader->updateTexture(hoverCheckedTexture);
 		} else {
-			GUI::shader->update(hoverUncheckedTexture);
+			GUI::shader->updateTexture(hoverUncheckedTexture);
 		}
 	} else {
 		if (checked) {
-			GUI::shader->update(hoverCheckedColor);
+			GUI::shader->updateColor(hoverCheckedColor);
 		} else {
-			GUI::shader->update(hoverUncheckedColor);
+			GUI::shader->updateColor(hoverUncheckedColor);
 		}
 	}
 
@@ -65,15 +65,15 @@ void CheckBox::renderHovering() {
 void CheckBox::renderIdle() {
 	if (textured) {
 		if (checked) {
-			GUI::shader->update(checkedTexture);
+			GUI::shader->updateTexture(checkedTexture);
 		} else {
-			GUI::shader->update(uncheckedTexture);
+			GUI::shader->updateTexture(uncheckedTexture);
 		}
 	} else {
 		if (checked) {
-			GUI::shader->update(checkedColor);
+			GUI::shader->updateColor(checkedColor);
 		} else {
-			GUI::shader->update(uncheckedColor);
+			GUI::shader->updateColor(uncheckedColor);
 		}
 	}
 
@@ -127,11 +127,11 @@ void CheckBox::render() {
 
 		if (debug) {
 			GUI::quad->resize(position, dimension);
-			GUI::shader->update(GUI::COLOR::RED);
+			GUI::shader->updateColor(GUI::COLOR::RED);
 			GUI::quad->render(GL_LINE);
 
 			GUI::quad->resize(checkBoxPosition, checkBoxDimension);
-			GUI::shader->update(GUI::COLOR::GREEN); 
+			GUI::shader->updateColor(GUI::COLOR::GREEN); 
 			GUI::quad->render(GL_LINE);
 		}
 	}

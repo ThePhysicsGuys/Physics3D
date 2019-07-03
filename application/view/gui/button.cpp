@@ -31,9 +31,9 @@ Button::Button(std::string text, double x, double y, bool textured) : Component(
 
 void Button::renderPressed() {
 	if (textured) {
-		GUI::shader->update(pressTexture);
+		GUI::shader->updateTexture(pressTexture);
 	} else {
-		GUI::shader->update(pressColor);
+		GUI::shader->updateColor(pressColor);
 	}
 
 	GUI::quad->render();
@@ -41,9 +41,9 @@ void Button::renderPressed() {
 
 void Button::renderHovering() {
 	if (textured) {
-		GUI::shader->update(hoverTexture);
+		GUI::shader->updateTexture(hoverTexture);
 	} else {
-		GUI::shader->update(hoverColor);
+		GUI::shader->updateColor(hoverColor);
 	}
 
 	GUI::quad->render();
@@ -51,9 +51,9 @@ void Button::renderHovering() {
 
 void Button::renderIdle() {
 	if (textured) {
-		GUI::shader->update(idleTexture);
+		GUI::shader->updateTexture(idleTexture);
 	} else {
-		GUI::shader->update(idleColor);
+		GUI::shader->updateColor(idleColor);
 	}
 
 	GUI::quad->render();
@@ -65,7 +65,7 @@ void Button::render() {
 	GUI::quad->resize(position, dimension);
 
 	if (borderWidth > 0) {
-		GUI::shader->update(borderColor);
+		GUI::shader->updateColor(borderColor);
 		GUI::quad->render();
 		GUI::quad->resize(position + Vec2(borderWidth, -borderWidth), dimension - Vec2(borderWidth) * 2);
 	}

@@ -1,15 +1,15 @@
 #shader vertex
 #version 330 core
 
-layout(location = 0) in vec4 positions;
+layout(location = 0) in vec4 vposition;
 
 uniform mat4 projectionMatrix;
 
 out vec2 fUV;
 
 void main() {
-	gl_Position = projectionMatrix * vec4(positions.xy, 0.0, 1.0);
-	fUV = positions.zw;
+	gl_Position = projectionMatrix * vec4(vposition.xy, 0.0, 1.0);
+	fUV = vposition.zw;
 }
 
 ////////////////////////////////////////////////////////////

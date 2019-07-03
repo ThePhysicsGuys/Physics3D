@@ -93,6 +93,10 @@ public:
 		return Mat3Template(r00, r01, r02, r10, r11, r12, r20, r21, r22) * (1/det());
 	}
 
+	Mat3Template scale(N x, N y, N z) {
+		return Mat3Template(x * m00, x * m01, x * m02, y * m10, y * m11, y * m12, z * m20, z * m21, z * m22);
+	}
+
 	Mat3Template<N> rotate(N angle, N x, N y, N z) const;
 
 	Mat3Template<N> transpose() const {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../quad.h"
+#include "../primitive.h"
 #include "../font.h"
 #include "../shaderProgram.h"
 #include "../screen.h"

@@ -138,6 +138,7 @@ PointShader pointShader;
 TestShader testShader;
 BlurShader blurShader;
 ColorWheelShader colorWheelShader;
+LineShader lineShader;
 
 BarChartClassInformation iterChartClasses[]{ {"GJK Collide", Vec3f(0.2f,0.2f,1)},{"GJK No Collide", Vec3f(1.0f, 0.5f, 0.0f)},{"EPA", Vec3f(1.0f, 1.0f, 0.0f)} };
 BarChart iterationChart("Iteration Statistics", "", GJKCollidesIterationStatistics.labels, iterChartClasses, Vec2f(-1 + 0.1f, -0.3), Vec2f(0.8, 0.6), 3, 17);
@@ -250,6 +251,7 @@ void Screen::init() {
 	ShaderSource testShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(TEST_SHADER)), "test.shader");
 	ShaderSource blurShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(BLUR_SHADER)), "blur.shader");
 	ShaderSource colorWheelShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(COLORWHEEL_SHADER)), "colorwheel.shader");
+	ShaderSource lineShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(LINE_SHADER)), "line.shader");
 
 
 	// Shader init
@@ -265,6 +267,7 @@ void Screen::init() {
 	testShader = * new TestShader(testShaderSource);
 	blurShader = * new BlurShader(blurShaderSource);
 	colorWheelShader = * new ColorWheelShader(colorWheelShaderSource);
+	lineShader = * new LineShader(lineShaderSource);
 	basicShader.createLightArray(lightCount);
 
 
@@ -465,7 +468,6 @@ void Screen::init() {
 
 
 	// Eventhandler init
-
 	eventHandler.setWindowResizeCallback([] (Screen& screen, Vec2i dimension) {
 		screen.screenFrameBuffer->resize(dimension);
 		screen.modelFrameBuffer->resize(dimension);
@@ -475,8 +477,10 @@ void Screen::init() {
 		screen.dimension = dimension;
 	});
 
+
 	// Temp
 	handler->framebufferResize(size);
+
 
 	// Test
 	texture = load("../res/textures/test/disp.jpg");
@@ -596,8 +600,8 @@ void Screen::renderSkybox() {
 	Renderer::disableCulling();
 	Renderer::enableBlending();
 	Renderer::standardBlendFunction();
-	skyboxShader.update(sunDirection);
-	skyboxShader.update(camera.viewMatrix, camera.projectionMatrix);
+	skyboxShader.updateLightDirection(sunDirection);
+	skyboxShader.updateProjection(camera.viewMatrix, camera.projectionMatrix);
 	skyboxTexture->bind();
 	sphere->render();
 	Renderer::enableDepthMask();
@@ -667,7 +671,7 @@ void Screen::renderPhysicals() {
 void renderSphere(double radius, Vec3 position, Vec4f color) {
 	basicShader.updateMaterial(Material(color));
 
-	basicShader.updateModelMatrix(CFrameToMat4(CFrame(position, DiagonalMat3(1,1,1)*radius)));
+	basicShader.updateModel(CFrameToMat4(CFrame(position, DiagonalMat3(1,1,1)*radius)));
 
 	sphere->render();
 }
@@ -675,7 +679,7 @@ void renderSphere(double radius, Vec3 position, Vec4f color) {
 void renderBox(const CFrame& cframe, double width, double height, double depth, Vec4f color) {
 	basicShader.updateMaterial(Material(color));
 
-	basicShader.updateModelMatrix(CFrameToMat4(CFrame(cframe.getPosition(), cframe.getRotation() * DiagonalMat3(width, height, depth))));
+	basicShader.updateModel(CFrameToMat4(CFrame(cframe.getPosition(), cframe.getRotation() * DiagonalMat3(width, height, depth))));
 
 	cube->render();
 }
@@ -798,7 +802,6 @@ void Screen::renderPies() {
 	}
 }
 
-
 void Screen::refresh() {
 	fieldIndex = 0;
 
@@ -832,7 +835,7 @@ void Screen::refresh() {
 	
 	// Render physicals
 	graphicsMeasure.mark(GraphicsProcess::PHYSICALS);
-	basicShader.update(camera.viewMatrix, camera.projectionMatrix, camera.cframe.position);
+	basicShader.updateProjection(camera.viewMatrix, camera.projectionMatrix, camera.cframe.position);
 	renderPhysicals();
 
 
@@ -840,9 +843,9 @@ void Screen::refresh() {
 	Renderer::disableCulling();
 	testShader.updateModel(Mat4f().translate(0, 4, 0));
 	testShader.updateView(camera.viewMatrix);
-	testShader.update(camera.cframe.position);
+	testShader.updateViewPosition(camera.cframe.position);
 	testShader.updateProjection(camera.projectionMatrix);
-	testShader.update(texture);
+	testShader.updateDisplacement(texture);
 	mesh->renderMode = RenderMode::PATCHES;
 	mesh->render(Renderer::WIREFRAME);
 	mesh->renderMode = RenderMode::TRIANGLES;
@@ -856,7 +859,7 @@ void Screen::refresh() {
 	// Postprocess to screenFrameBuffer
 	screenFrameBuffer->bind();
 	Renderer::disableDepthTest();
-	postProcessShader.update(modelFrameBuffer->texture);
+	postProcessShader.updateTexture(modelFrameBuffer->texture);
 	quad->render();
 
 
@@ -870,7 +873,7 @@ void Screen::refresh() {
 	for (Light light : lights) {
 		Mat4f transformation = Mat4f().translate(light.position).scale(0.1f);
 		basicShader.updateMaterial(Material(Vec4f(light.color, 1), Vec3f(), Vec3f(), 10));
-		basicShader.updateModelMatrix(transformation);
+		basicShader.updateModel(transformation);
 		skyboxMesh->render();
 	}
 	Renderer::disableDepthTest();
@@ -878,13 +881,13 @@ void Screen::refresh() {
 
 	// Render vector mesh
 	graphicsMeasure.mark(GraphicsProcess::VECTORS);
-	vectorShader.update(camera.viewMatrix, camera.projectionMatrix, camera.cframe.position);
+	vectorShader.updateProjection(camera.viewMatrix, camera.projectionMatrix, camera.cframe.position);
 	vectorMesh->render();
 
 
 	// Render point mesh
 	graphicsMeasure.mark(GraphicsProcess::VECTORS);
-	pointShader.update(camera.viewMatrix, camera.projectionMatrix, camera.cframe.position);
+	pointShader.updateProjection(camera.viewMatrix, camera.projectionMatrix, camera.cframe.position);
 	pointMesh->render();
 
 	Renderer::enableDepthTest();
@@ -892,7 +895,7 @@ void Screen::refresh() {
 
 	// Render origin mesh
 	graphicsMeasure.mark(GraphicsProcess::ORIGIN);
-	originShader.update(camera.viewMatrix, camera.cframe.rotation, camera.projectionMatrix, orthoMatrix, camera.cframe.position);
+	originShader.updateProjection(camera.viewMatrix, camera.cframe.rotation, camera.projectionMatrix, orthoMatrix, camera.cframe.position);
 	originMesh->render();
 
 
@@ -905,19 +908,20 @@ void Screen::refresh() {
 
 
 	// Render postprocessed image to screen
-	quadShader.update(Mat4f());
-	quadShader.update(screenFrameBuffer->texture);
+	quadShader.updateProjection(Mat4f());
+	quadShader.updateTexture(screenFrameBuffer->texture);
 	quad->render();
 
 
 	// Render edit tools
-	Picker::render(*this, basicShader);
+	lineShader.updateProjection(camera.viewMatrix, camera.projectionMatrix);
+	Picker::render(*this, basicShader, lineShader);
 
 
 	// Render GUI
 	Renderer::disableDepthTest();
 	graphicsMeasure.mark(GraphicsProcess::OTHER);
-	fontShader.update(orthoMatrix);
+	fontShader.updateProjection(orthoMatrix);
 	GUI::render(orthoMatrix);
 
 	mouseVertical->render();

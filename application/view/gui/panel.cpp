@@ -37,7 +37,7 @@ void Panel::render() {
 	if (visible) {
 		resize();
 
-		GUI::shader->update(background);
+		GUI::shader->updateColor(background);
 		GUI::quad->resize(position, dimension);
 		GUI::quad->render();
 

@@ -13,7 +13,7 @@
 
 #include "frameBuffer.h"
 #include "camera.h"
-#include "quad.h"
+#include "primitive.h"
 #include "../worlds.h"
 
 class StandardInputHandler;
@@ -21,9 +21,8 @@ class StandardInputHandler;
 #include "indexedMesh.h"
 #include "../standardInputHandler.h"
 
-bool initGLFW();
 bool initGLEW();
-
+bool initGLFW();
 void terminateGLFW();
 
 class Screen {

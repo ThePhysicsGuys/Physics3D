@@ -46,34 +46,34 @@ void Slider::render() {
 		resize();
 
 		GUI::quad->resize(position, dimension);
-		GUI::shader->update(backgroundColor);
+		GUI::shader->updateColor(backgroundColor);
 		GUI::quad->render();
 		
 		double progress = (value - min) / (max - min);
 		Vec2 sliderFilledPosition = position + Vec2(padding + handleWidth / 2, -height / 2 + barHeight / 2);
 		Vec2 sliderFilledDimension = Vec2(barWidth * progress, barHeight);
 		GUI::quad->resize(sliderFilledPosition, sliderFilledDimension);
-		GUI::shader->update(foregroundFilledColor);
+		GUI::shader->updateColor(foregroundFilledColor);
 		GUI::quad->render();
 
 		Vec2 sliderEmptyPosition = sliderFilledPosition + Vec2(sliderFilledDimension.x, 0);
 		Vec2 sliderEmptyDimension = Vec2(barWidth * (1.0 - progress), barHeight);
 		GUI::quad->resize(sliderEmptyPosition, sliderEmptyDimension);
-		GUI::shader->update(foregroundEmptyColor);
+		GUI::shader->updateColor(foregroundEmptyColor);
 		GUI::quad->render();
 
 		Vec2 handlePosition = Vec2(sliderEmptyPosition.x - handleWidth / 2, position.y - height / 2 + handleHeight / 2);
 		Vec2 handleDimension = Vec2(handleWidth, handleHeight);
 		GUI::quad->resize(handlePosition, handleDimension);
-		GUI::shader->update(handleColor);
+		GUI::shader->updateColor(handleColor);
 		GUI::quad->render();
 		
-		GUI::shader->update(GUI::COLOR::ACCENT);
+		GUI::shader->updateColor(GUI::COLOR::ACCENT);
 		GUI::quad->render(GL_LINE);
 
 		if (debug) {
 			GUI::quad->resize(position, dimension);
-			GUI::shader->update(GUI::COLOR::RED);
+			GUI::shader->updateColor(GUI::COLOR::RED);
 			GUI::quad->render(GL_LINE);
 		}
 	}
