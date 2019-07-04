@@ -8,8 +8,10 @@
 
 #include "../application.h"
 #include "../import.h"
+#include "indexedMesh.h"
 
 #include "../engine/physical.h"
+#include "../engine/math/mat3.h"
 #include "../engine/math/vec2.h"
 #include "../engine/math/vec3.h";
 #include "../engine/math/vec4.h"
@@ -104,7 +106,7 @@ namespace Picker {
 
 
 	// Render
-
+	// Rendering of edit tools
 	void renderEditTools(Screen& screen, BasicShader& basicShader, LineShader& lineShader) {
 		IndexedMesh* shaft = nullptr;
 		IndexedMesh* center = nullptr;
@@ -132,27 +134,27 @@ namespace Picker {
 
 		// Center, only rendered if editMode != EditMode::ROTATE
 		if (center) {
-			if (selectedTool.editDirection != EditDirection::NONE) {
-				switch (selectedTool.editDirection) {
-				case EditDirection::Y:
-					lineShader.updateModel(modelMatrix);
-					lineShader.updateColor(GUI::COLOR::G);
-					break;
-				case EditDirection::X:
-					lineShader.updateModel(modelMatrix * transformations[1]);
-					lineShader.updateColor(GUI::COLOR::R);
-					break;
-				case EditDirection::Z:
-					lineShader.updateModel(modelMatrix * transformations[2]);
-					lineShader.updateColor(GUI::COLOR::B);
-					break;
-				}
-				line->render();
-			}
-
 			basicShader.updateModel(modelMatrix);
 			basicShader.updateMaterial(Material(GUI::COLOR::WHITE));
 			center->render();
+		}
+
+		if (selectedTool.editDirection != EditDirection::NONE) {
+			switch (selectedTool.editDirection) {
+			case EditDirection::Y:
+				lineShader.updateModel(modelMatrix);
+				lineShader.updateColor(GUI::COLOR::G);
+				break;
+			case EditDirection::X:
+				lineShader.updateModel(modelMatrix * transformations[1]);
+				lineShader.updateColor(GUI::COLOR::R);
+				break;
+			case EditDirection::Z:
+				lineShader.updateModel(modelMatrix * transformations[2]);
+				lineShader.updateColor(GUI::COLOR::B);
+				break;
+			}
+			line->render();
 		}
 
 		// Y
@@ -173,6 +175,7 @@ namespace Picker {
 		Renderer::disableDepthTest();
 	}
 
+	// Picker render function
 	void render(Screen& screen, BasicShader& basicShader, LineShader& lineShader) {
 		if (screen.selectedPart) {
 			renderEditTools(screen, basicShader, lineShader);
@@ -181,28 +184,29 @@ namespace Picker {
 
 
 	// Intersections
-
+	// Intersection distance of the given ray with the given shape, transformed with the given cframe. 
 	float intersect(const Ray& ray, const VisualShape& shape, const CFramef& cframe) {
 		return shape.getIntersectionDistance(cframe.globalToLocal(ray.start), cframe.relativeToLocal(ray.direction));
 	}
 
+	// Calculates intersections of the given ray with the edit tools, tranformed with the cframe of the current selected part
 	void intersectTools(Screen& screen, const Ray& ray) {
 		VisualShape* tool[2];
 
 		// Select correct tools
 		switch (editMode) {
-		case Picker::EditMode::TRANSLATE:
-			tool[0] = &translateShape;
-			tool[1] = &translateCenterShape;
-			break;
-		case Picker::EditMode::ROTATE:
-			tool[0] = &rotateShape;
-			tool[1] = nullptr;
-			break;
-		case Picker::EditMode::SCALE:
-			tool[0] = &scaleShape;
-			tool[1] = &scaleCenterShape;
-			break;
+			case Picker::EditMode::TRANSLATE:
+				tool[0] = &translateShape;
+				tool[1] = &translateCenterShape;
+				break;
+			case Picker::EditMode::ROTATE:
+				tool[0] = &rotateShape;
+				tool[1] = nullptr;
+				break;
+			case Picker::EditMode::SCALE:
+				tool[0] = &scaleShape;
+				tool[1] = &scaleCenterShape;
+				break;
 		}
 
 		float closestToolDistance = INFINITY;
@@ -225,7 +229,7 @@ namespace Picker {
 		// Update intersected tool
 		if (closestToolDistance != INFINITY) {
 			intersectedTool.editDirection = closestToolDirection;
-			intersectedTool.relativeIntersectedPoint = ray.start + ray.direction * closestToolDistance - screen.selectedPart->cframe.position;
+			intersectedTool.relativeIntersectedPoint = (ray.start + ray.direction * closestToolDistance) - screen.selectedPart->cframe.position;
 			return;
 		} else {
 			intersectedTool.editDirection = EditDirection::NONE;
@@ -233,6 +237,7 @@ namespace Picker {
 		}
 	}
 
+	// Calculates the closest intersection of the given ray with the physicals in the world
 	void intersectPhysicals(Screen& screen, const Ray& ray) {
 		SharedLockGuard guard(screen.world->lock);
 
@@ -270,7 +275,7 @@ namespace Picker {
 
 
 	// Update
-
+	// Calculates the mouse ray and the tool & physical intersections
 	void update(Screen& screen, Vec2 mousePosition) {
 		// Calculate ray
 		Vec3f direction = calcRay(screen, mousePosition);
@@ -283,6 +288,9 @@ namespace Picker {
 		// Intersect edit tools
 		if (screen.selectedPart) {
 			intersectTools(screen, ray);
+			// No physical intersection check needed if tool is being intersected
+			if (intersectedTool.editDirection != EditDirection::NONE)
+				return;
 		}
 
 		// Intersect physcials
@@ -291,7 +299,7 @@ namespace Picker {
 
 
 	// Events
-
+	// Mouse press behaviour
 	void press(Screen& screen) {
 		// Check if users pressed on tool
 		if (intersectedTool.editDirection != EditDirection::NONE) {
@@ -309,6 +317,7 @@ namespace Picker {
 		}
 	}
 
+	// Mouse release behaviour
 	void release(Screen& screen) {
 		// Reset selectedpart
 		screen.world->selectedPart = nullptr;
@@ -317,6 +326,7 @@ namespace Picker {
 		selectedTool.editDirection = EditDirection::NONE;
 	}
 
+	// Drag behaviour of translate tool
 	void dragTranslateTool(Screen& screen) {
 		if (selectedTool.editDirection == EditDirection::CENTER) {
 			screen.selectedPoint = screen.selectedPart->cframe.position + selectedTool.relativeIntersectedPoint;
@@ -357,10 +367,67 @@ namespace Picker {
 		}
 	}
 
+	// Drag behaviour of rotate tool
 	void dragRotateTool(Screen& screen) {
-		// TODO
+		// Plane of edit tool, which can be expressed as all points p where (p - p0) * n = 0. Where n is the edit direction and p0 the center of the selected part
+		Vec3 n;
+		Vec3 p0 = screen.selectedPart->cframe.position;
+		switch (selectedTool.editDirection) {
+			case EditDirection::X:
+				n = Vec3(1, 0, 0);
+				break;
+			case EditDirection::Y:
+				n = Vec3(0, 1, 0);
+				break;
+			case EditDirection::Z:
+				n = Vec3(0, 0, 1);
+				break;
+		}
+
+		// Apply model matrix
+		n = screen.selectedPart->cframe.localToRelative(n);
+
+		// Mouse ray, can be expressed as alls points p where p = l0 + d * l, where l0 is the camera position and l is the mouse ray.
+		Vec3 l0 = screen.camera.cframe.position;
+		Vec3 l = screen.ray;
+
+		// Calculate intersection of mouse ray and edit plane
+		double ln = l * n;
+		if (ln == 0)
+			return; // No rotation if plane is perpendicular to mouse ray
+		Vec3 intersection = l0 + ((p0 - l0) * n) / (l * n) * l;
+
+		// Vector from part center to intersection
+		Vec3 intersectionVector = intersection - p0;
+
+		// Length check
+		double length1sq = intersectionVector.lengthSquared();
+		double length2sq = selectedTool.relativeIntersectedPoint.lengthSquared();
+		if (length1sq == 0 || length2sq == 0)
+			return; // Prevent errors when vector is the zero vector
+
+		// Triple product to find angle sign
+		double triple = selectedTool.relativeIntersectedPoint * (intersectionVector % n);
+		double sign = (triple > 0) ? 1 : -1;
+
+		// Get angle between last intersectionVector and new one
+		double cosa = (selectedTool.relativeIntersectedPoint * intersectionVector) / sqrt(length1sq * length2sq);
+		double a;
+
+		if (abs(cosa) < 1)
+			a = sign * acos(cosa);
+		else
+			return; // No rotation when vectors coincide
+
+		// Update last intersectionVector
+		selectedTool.relativeIntersectedPoint = intersectionVector;
+
+		// Apply rotation
+		Mat3 rotation = rotateAround(a, n);
+		screen.selectedPart->cframe.rotate(rotation);
 	}
 
+	// Drag behaviour of scale tool
 	void dragScaleTool(Screen& screen) {
 		// Not yet supported by physics engine
 		/*Vec3 a;
@@ -395,6 +462,7 @@ namespace Picker {
 		screen.selectedPart->cframe.rotation = screen.selectedPart->cframe.rotation.scale(scale.x / scaleX, scale.y / scaleY, scale.z / scaleZ);*/
 	}
 
+	// Mouse drag behaviour
 	void drag(Screen& screen) {
 		if (selectedTool.editDirection != EditDirection::NONE) {
 			switch (editMode) {
@@ -424,15 +492,15 @@ namespace Picker {
 		double distance = (screen.selectedPoint - screen.camera.cframe.position) * cameraDirection / (screen.ray * cameraDirection);
 		Vec3 planeIntersection = screen.camera.cframe.position + distance * screen.ray;
 
-	if (isPaused()) {
-		Vec3 translation = planeIntersection - screen.selectedPoint;
-		screen.selectedPoint += translation;
-		screen.selectedPart->parent->translate(translation);
-	} else {
-		screen.world->selectedPart = screen.selectedPart;
-		screen.world->magnetPoint = planeIntersection;
+		if (isPaused()) {
+			Vec3 translation = planeIntersection - screen.selectedPoint;
+			screen.selectedPoint += translation;
+			screen.selectedPart->parent->translate(translation);
+		} else {
+			screen.world->selectedPart = screen.selectedPart;
+			screen.world->magnetPoint = planeIntersection;
+		}
 	}
-}
 
 	void moveGrabbedPhysicalTransversal(Screen& screen, double dz) {
 		if (screen.selectedPart == nullptr) return;

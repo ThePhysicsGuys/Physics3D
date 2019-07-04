@@ -532,3 +532,6 @@ Mat3Template<N> fromEulerAngles(N alpha, N beta, N gamma);
 
 template<typename N> 
 Mat3Template<N> fromRotationVec(Vec3Template<N> rotVec);
+
+template<typename N>
+Mat3Template<N> rotateAround(N angle, Vec3Template<N> normal);

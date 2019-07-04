@@ -1,7 +1,7 @@
 #pragma once
 
 #include "screen.h"
-#include "indexedMesh.h"
+
 #include "shaderProgram.h"
 
 #include "../engine/math/vec2.h"
