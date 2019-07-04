@@ -240,6 +240,9 @@ VisualShape loadNonBinaryObj(std::istream& input) {
 	while (getline(input, line)) {
 		std::vector<std::string> tokens = split(line, ' ');
 
+		if (tokens.size() == 0)
+			continue;
+
 		if (tokens[0] == "v") {
 			Vec3f vertex = Vec3f(stof(tokens[1]), stof(tokens[2]), stof(tokens[3]));
 			vertices.push_back(vertex);

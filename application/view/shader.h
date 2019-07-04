@@ -7,7 +7,8 @@
 #include "bindable.h"
 
 #include "../engine/math/vec2.h"
-#include "../engine/math/mat3.h"
+#include "../engine/math/vec3.h"
+#include "../engine/math/vec4.h"
 #include "../engine/math/mat4.h"
 
 struct ShaderSource {
@@ -19,10 +20,10 @@ struct ShaderSource {
 	std::string name;
 };
 
-ShaderSource parseShader(std::istream& shaderTextStream, const std::string name);
-ShaderSource parseShader(const std::string& vertexPath, const std::string& fragmentPath, const std::string name);
-ShaderSource parseShader(const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath, const std::string name);
-ShaderSource parseShader(const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath, const std::string& tesselationControlPath, const std::string& tesselationEvaluatePath, const std::string name);
+ShaderSource parseShader(std::istream& shaderTextStream, const std::string& name);
+ShaderSource parseShader(const std::string& vertexPath, const std::string& fragmentPath, const std::string& name);
+ShaderSource parseShader(const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath, const std::string& name);
+ShaderSource parseShader(const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath, const std::string& tesselationControlPath, const std::string& tesselationEvaluatePath, const std::string& name);
 
 class Shader : public Bindable {
 private:
@@ -31,19 +32,19 @@ public:
 	std::string name;
 	Shader() {};
 	Shader(const Shader&) = delete;
-	Shader(const std::string& vertexShader, const std::string& fragmentShader, const std::string name);
-	Shader(const std::string& vertexShader, const std::string& fragmentShader, const std::string& geometryShader, const std::string name);
-	Shader(const std::string& vertexShader, const std::string& fragmentShader, const std::string& geometryShader, const std::string& tesselationControlSource, const std::string& tesselationEvaluateSource, const std::string name);
-	Shader(ShaderSource shaderSource) : Shader(shaderSource.vertexSource, shaderSource.fragmentSource, shaderSource.geometrySource, shaderSource.tesselationControlSource, shaderSource.tesselationEvaluateSource, shaderSource.name) {};
+	Shader(const std::string& vertexShader, const std::string& fragmentShader, const std::string& name);
+	Shader(const std::string& vertexShader, const std::string& fragmentShader, const std::string& geometryShader, const std::string& name);
+	Shader(const std::string& vertexShader, const std::string& fragmentShader, const std::string& geometryShader, const std::string& tesselationControlSource, const std::string& tesselationEvaluateSource, const std::string& name);
+	Shader(const ShaderSource& shaderSource) : Shader(shaderSource.vertexSource, shaderSource.fragmentSource, shaderSource.geometrySource, shaderSource.tesselationControlSource, shaderSource.tesselationEvaluateSource, shaderSource.name) {};
 
-	void createUniform(std::string uniform);
-	void setUniform(std::string uniform, int value) const;
-	void setUniform(std::string uniform, float value) const;
-	void setUniform(std::string uniform, double value) const;
-	void setUniform(std::string uniform, Vec2f value) const;
-	void setUniform(std::string unfiorm, Vec3f value) const;
-	void setUniform(std::string unfiorm, Vec4f value) const;
-	void setUniform(std::string uniform, Mat4f value) const;
+	void createUniform(const std::string& uniform);
+	void setUniform(const std::string& uniform, int value) const;
+	void setUniform(const std::string& uniform, float value) const;
+	void setUniform(const std::string& uniform, double value) const;
+	void setUniform(const std::string& uniform, const Vec2f& value) const;
+	void setUniform(const std::string& unfiorm, const Vec3f& value) const;
+	void setUniform(const std::string& unfiorm, const Vec4f& value) const;
+	void setUniform(const std::string& uniform, const Mat4f& value) const;
 
 	void bind() override;
 	void unbind() override;

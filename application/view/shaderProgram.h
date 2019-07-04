@@ -90,7 +90,7 @@ struct LineShader : public ShaderProgram {
 
 struct BasicShader : public ShaderProgram {
 	BasicShader() : ShaderProgram() {}
-	BasicShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 14, "modelMatrix", "viewMatrix", "projectionMatrix", "viewPosition", "includeNormals", "includeUvs", "material.ambient", "material.diffuse", "material.specular", "material.reflectance", "material.textured", "material.normalmapped", "textureSampler", "normalSampler") {}
+	BasicShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 15, "modelMatrix", "viewMatrix", "projectionMatrix", "viewPosition", "includeNormals", "includeUvs", "material.ambient", "material.diffuse", "material.specular", "material.reflectance", "material.textured", "material.normalmapped", "textureSampler", "normalSampler", "sunDirection") {}
 
 	void createLightArray(int size) {
 		bind();
@@ -120,6 +120,11 @@ struct BasicShader : public ShaderProgram {
 			snprintf(buffer, sizeof(buffer), "lights[%d].attenuation.exponent", i);
 			shader.createUniform(buffer);
 		}
+	}
+
+	void updateSunDirection(const Vec3f& sunDirection) {
+		bind();
+		shader.setUniform("sunDirection", sunDirection);
 	}
 
 	void updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Vec3f& viewPosition) {

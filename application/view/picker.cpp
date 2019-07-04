@@ -127,7 +127,7 @@ namespace Picker {
 		}
 
 		CFrame cframe = screen.selectedPart->cframe;
-		Mat4 modelMatrix = CFrameToMat4(cframe);
+		Mat4 modelMatrix = normalizedCFrameToMat4(cframe);
 
 		Renderer::clearDepth();
 		Renderer::enableDepthTest();
@@ -216,7 +216,7 @@ namespace Picker {
 		for (int i = 0; i < (tool[1] ? 4 : 3); i++) {
 			CFrame frame = screen.selectedPart->cframe;
 
-			frame.rotation = frame.rotation * transformations[i];
+			frame.rotation = frame.getRotation() * transformations[i];
 
 			float distance = intersect(ray, *tool[i / 3], frame);
 
@@ -429,8 +429,8 @@ namespace Picker {
 
 	// Drag behaviour of scale tool
 	void dragScaleTool(Screen& screen) {
-		// Not yet supported by physics engine
-		/*Vec3 a;
+		// Not completely supported by physics engine
+		Vec3 a;
 		switch (selectedTool.editDirection) {
 			case EditDirection::X:
 				a = Vec3(1, 0, 0);
@@ -454,12 +454,13 @@ namespace Picker {
 		double distance = (AB - (AB * b) * b).length();
 		Vec3 scale = distance * a / selectedTool.relativeIntersectedPoint.length();
 
-		Mat3 rotation = screen.selectedPart->cframe.rotation;
-		double scaleX = Vec3(rotation.m00, rotation.m01, rotation.m02).length();
-		double scaleY = Vec3(rotation.m10, rotation.m11, rotation.m12).length();
-		double scaleZ = Vec3(rotation.m20, rotation.m21, rotation.m22).length();
+		Mat3 scaledRotation = screen.selectedPart->cframe.rotation;
 
-		screen.selectedPart->cframe.rotation = screen.selectedPart->cframe.rotation.scale(scale.x / scaleX, scale.y / scaleY, scale.z / scaleZ);*/
+		double sx = (scale.x == 0) ? 1 : scale.x / Vec3(scaledRotation.m00, scaledRotation.m01, scaledRotation.m02).length();
+		double sy = (scale.y == 0) ? 1 : scale.y / Vec3(scaledRotation.m10, scaledRotation.m11, scaledRotation.m12).length();
+		double sz = (scale.z == 0) ? 1 : scale.z / Vec3(scaledRotation.m20, scaledRotation.m21, scaledRotation.m22).length();
+		
+		screen.selectedPart->cframe.rotation = scaledRotation.scale(sx, sy, sz);
 	}
 
 	// Mouse drag behaviour
