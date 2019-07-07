@@ -1,5 +1,9 @@
 #include "label.h"
+
 #include "gui.h"
+
+#include "../shaderProgram.h"
+#include "../renderUtils.h"
 
 Label::Label(std::string text, double x, double y) : Label(text, x, y, GUI::fontSize, GUI::fontColor) {};
 
@@ -26,12 +30,12 @@ void Label::render() {
 
 		if (debug) {
 			GUI::quad->resize(position, dimension);
-			GUI::shader->updateColor(GUI::COLOR::R);
-			GUI::quad->render(GL_LINE);
+			Shaders::quadShader.updateColor(GUI::COLOR::R);
+			GUI::quad->render(Renderer::WIREFRAME);
 
 			GUI::quad->resize(position + Vec2(padding, -padding), dimension - Vec2(padding) * 2);
-			GUI::shader->updateColor(GUI::COLOR::G);
-			GUI::quad->render(GL_LINE);
+			Shaders::quadShader.updateColor(GUI::COLOR::G);
+			GUI::quad->render(Renderer::WIREFRAME);
 		}
 	}
 }

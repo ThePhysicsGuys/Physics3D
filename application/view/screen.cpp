@@ -13,14 +13,15 @@
 #include "visualDebug.h"
 #include "loader.h"
 
-#include "gui\panel.h"
-#include "gui\frame.h"
-#include "gui\label.h"
-#include "gui\image.h"
-#include "gui\slider.h"
-#include "gui\checkBox.h"
-#include "gui\colorPicker.h"
-#include "gui\gui.h"
+#include "gui/panel.h"
+#include "gui/frame.h"
+#include "gui/label.h"
+#include "gui/image.h"
+#include "gui/slider.h"
+#include "gui/checkBox.h"
+#include "gui/colorPicker.h"
+#include "gui/directionEditor.h"
+#include "gui/gui.h"
 
 #include "../debug.h"
 #include "../standardInputHandler.h"
@@ -101,6 +102,8 @@ Screen::Screen(int width, int height, MagnetWorld* world) {
 // Generic Shapes
 IndexedMesh* sphere = nullptr;
 IndexedMesh* cube = nullptr;
+IndexedMesh* plane = nullptr;
+
 
 // Font
 Font* font = nullptr;
@@ -125,21 +128,7 @@ IndexedMesh* skyboxMesh = nullptr;
 Mat4f orthoMatrix;
 
 
-// Shaders
-BasicShader basicShader;
-DepthShader depthShader;
-VectorShader vectorShader;
-OriginShader originShader;
-FontShader fontShader;
-QuadShader quadShader;
-PostProcessShader postProcessShader;
-SkyboxShader skyboxShader;
-PointShader pointShader;
-TestShader testShader;
-BlurShader blurShader;
-ColorWheelShader colorWheelShader;
-LineShader lineShader;
-
+// Debug
 BarChartClassInformation iterChartClasses[]{ {"GJK Collide", Vec3f(0.2f,0.2f,1)},{"GJK No Collide", Vec3f(1.0f, 0.5f, 0.0f)},{"EPA", Vec3f(1.0f, 1.0f, 0.0f)} };
 BarChart iterationChart("Iteration Statistics", "", GJKCollidesIterationStatistics.labels, iterChartClasses, Vec2f(-1 + 0.1f, -0.3), Vec2f(0.8, 0.6), 3, 17);
 
@@ -212,6 +201,7 @@ CheckBox* debugRenderSpheresCheckBox = nullptr;
 
 
 // Test
+DirectionEditor* directionEditor = nullptr;
 IndexedMesh* mesh = nullptr;
 Texture* texture = nullptr;
 
@@ -238,37 +228,8 @@ void Screen::init() {
 	handler->framebufferResize(size);
 
 
-	// Shader source init
-	ShaderSource basicShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(BASIC_SHADER)), "basic.shader");
-	ShaderSource depthShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(DEPTH_SHADER)), "depth.shader");
-	ShaderSource vectorShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(VECTOR_SHADER)), "vector.shader");
-	ShaderSource fontShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(FONT_SHADER)), "font.shader");
-	ShaderSource originShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(ORIGIN_SHADER)), "origin.shader");
-	ShaderSource quadShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(QUAD_SHADER)), "quad.shader");
-	ShaderSource postProcessShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(POSTPROCESS_SHADER)), "postProcess.shader");
-	ShaderSource skyboxShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(SKYBOX_SHADER)), "skybox.shader");
-	ShaderSource pointShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(POINT_SHADER)), "point.shader");
-	ShaderSource testShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(TEST_SHADER)), "test.shader");
-	ShaderSource blurShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(BLUR_SHADER)), "blur.shader");
-	ShaderSource colorWheelShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(COLORWHEEL_SHADER)), "colorwheel.shader");
-	ShaderSource lineShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(LINE_SHADER)), "line.shader");
-
-
 	// Shader init
-	basicShader = * new BasicShader(basicShaderSource);
-	depthShader = * new DepthShader(depthShaderSource);
-	vectorShader = * new VectorShader(vectorShaderSource);  
-	fontShader = * new FontShader(fontShaderSource);
-	originShader = * new OriginShader(originShaderSource);
-	quadShader = * new QuadShader(quadShaderSource);
-	postProcessShader = * new PostProcessShader(postProcessShaderSource);
-	skyboxShader = * new SkyboxShader(skyboxShaderSource);
-	pointShader = * new PointShader(pointShaderSource);
-	testShader = * new TestShader(testShaderSource);
-	blurShader = * new BlurShader(blurShaderSource);
-	colorWheelShader = * new ColorWheelShader(colorWheelShaderSource);
-	lineShader = * new LineShader(lineShaderSource);
-	basicShader.createLightArray(lightCount);
+	Shaders::init();
 
 
 	// Texture init
@@ -305,11 +266,11 @@ void Screen::init() {
 
 
 	// Font init
-	font = new Font(fontShader, "../res/fonts/droid.ttf");
+	font = new Font("../res/fonts/droid.ttf");
 
 
 	// GUI init
-	GUI::init(this, &quadShader, &blurShader, font);
+	GUI::init(this, font);
 
 
 	// Properties GUI
@@ -483,6 +444,9 @@ void Screen::init() {
 
 
 	// Test
+	VisualShape planeShape(OBJImport::load("../res/models/plane.obj"));
+	plane = new IndexedMesh(planeShape);
+	directionEditor = new DirectionEditor(0, 0, 1, 1);
 	texture = load("../res/textures/test/disp.jpg");
 	BoundingBox box = BoundingBox{ -1,-1,-1,1,1,1 };
 	VisualShape shape = VisualShape(box.toShape());
@@ -600,8 +564,8 @@ void Screen::renderSkybox() {
 	Renderer::disableCulling();
 	Renderer::enableBlending();
 	Renderer::standardBlendFunction();
-	skyboxShader.updateLightDirection(sunDirection);
-	skyboxShader.updateProjection(camera.viewMatrix, camera.projectionMatrix);
+	Shaders::skyboxShader.updateLightDirection(sunDirection);
+	Shaders::skyboxShader.updateProjection(camera.viewMatrix, camera.projectionMatrix);
 	skyboxTexture->bind();
 	sphere->render();
 	Renderer::enableDepthMask();
@@ -612,7 +576,7 @@ void Screen::renderPhysicals() {
 	std::map<double, ExtendedPart*> transparentMeshes;
 
 	// Bind basic uniforms
-	basicShader.updateLight(lights, lightCount);
+	Shaders::basicShader.updateLight(lights, lightCount);
 
 	SharedLockGuard lg(world->lock);
 	
@@ -635,10 +599,10 @@ void Screen::renderPhysicals() {
 			continue;
 		}
 
-		basicShader.updateMaterial(material);
+		Shaders::basicShader.updateMaterial(material);
 
 		// Render each physical
-		basicShader.updatePart(part);
+		Shaders::basicShader.updatePart(part);
 
 		if(meshId == -1) continue;
 
@@ -657,10 +621,10 @@ void Screen::renderPhysicals() {
 		else
 			material.ambient = part->material.ambient;
 		
-		basicShader.updateMaterial(material);
+		Shaders::basicShader.updateMaterial(material);
 	   
 		// Render each physical
-		basicShader.updatePart(*part);
+		Shaders::basicShader.updatePart(*part);
 
 		if (part->drawMeshId == -1) continue;
 
@@ -669,17 +633,17 @@ void Screen::renderPhysicals() {
 }
 
 void renderSphere(double radius, Vec3 position, Vec4f color) {
-	basicShader.updateMaterial(Material(color));
+	Shaders::basicShader.updateMaterial(Material(color));
 
-	basicShader.updateModel(CFrameToMat4(CFrame(position, DiagonalMat3(1,1,1)*radius)));
+	Shaders::basicShader.updateModel(CFrameToMat4(CFrame(position, DiagonalMat3(1,1,1)*radius)));
 
 	sphere->render();
 }
 
 void renderBox(const CFrame& cframe, double width, double height, double depth, Vec4f color) {
-	basicShader.updateMaterial(Material(color));
+	Shaders::basicShader.updateMaterial(Material(color));
 
-	basicShader.updateModel(CFrameToMat4(CFrame(cframe.getPosition(), cframe.getRotation() * DiagonalMat3(width, height, depth))));
+	Shaders::basicShader.updateModel(CFrameToMat4(CFrame(cframe.getPosition(), cframe.getRotation() * DiagonalMat3(width, height, depth))));
 
 	cube->render();
 }
@@ -812,13 +776,13 @@ void Screen::refresh() {
 	/*Mat4f lightProjection = ortho(-camera.aspect, camera.aspect, -1.0f, 1.0f, 0.1f, 1000.0f);
 	Mat4f ligthView = lookAt(camera.cframe.position, camera.cframe.rotation * Vec3f(0, 0, 1), Vec3f(0.0f, 1.0f, 0.0f));
 	Mat4f lightMatrix = lightProjection * ligthView;
-	depthShader.updateLight(lightMatrix);
+	Shaders::depthShader.updateLight(lightMatrix);
 	Renderer::enableDepthTest();
 	depthBuffer->bind();
 	//Renderer::clearDepth();
 	for (ExtendedPart& part : *world) {
 		int meshId = part.drawMeshId;
-		depthShader.updateModel(CFrameToMat4(CFramef(part.cframe)));
+		Shaders::depthShader.updateModel(CFrameToMat4(CFramef(part.cframe)));
 		meshes[meshId]->render();
 	}
 	Renderer::viewport(Vec2i(), dimension);*/
@@ -835,20 +799,20 @@ void Screen::refresh() {
 	
 	// Render physicals
 	graphicsMeasure.mark(GraphicsProcess::PHYSICALS);
-	basicShader.updateProjection(camera.viewMatrix, camera.projectionMatrix, camera.cframe.position);
+	Shaders::basicShader.updateProjection(camera.viewMatrix, camera.projectionMatrix, camera.cframe.position);
 	renderPhysicals();
 
 
 	// Test
 	Renderer::disableCulling();
-	testShader.updateModel(Mat4f().translate(0, 4, 0));
-	testShader.updateView(camera.viewMatrix);
-	testShader.updateViewPosition(camera.cframe.position);
-	testShader.updateProjection(camera.projectionMatrix);
-	testShader.updateDisplacement(texture);
-	mesh->renderMode = RenderMode::PATCHES;
-	mesh->render(Renderer::WIREFRAME);
-	mesh->renderMode = RenderMode::TRIANGLES;
+	Shaders::testShader.updateModel(Mat4f().translate(0, 2, 0));
+	Shaders::testShader.updateView(camera.viewMatrix);
+	Shaders::testShader.updateViewPosition(camera.cframe.position);
+	Shaders::testShader.updateProjection(camera.projectionMatrix);
+	Shaders::testShader.updateDisplacement(texture);
+	plane->renderMode = RenderMode::PATCHES;
+	plane->render(Renderer::WIREFRAME);
+	plane->renderMode = RenderMode::QUADS;
 	Renderer::enableCulling();
 
 
@@ -859,7 +823,7 @@ void Screen::refresh() {
 	// Postprocess to screenFrameBuffer
 	screenFrameBuffer->bind();
 	Renderer::disableDepthTest();
-	postProcessShader.updateTexture(modelFrameBuffer->texture);
+	Shaders::postProcessShader.updateTexture(modelFrameBuffer->texture);
 	quad->render();
 
 
@@ -872,8 +836,8 @@ void Screen::refresh() {
 	graphicsMeasure.mark(GraphicsProcess::LIGHTING);
 	for (Light light : lights) {
 		Mat4f transformation = Mat4f().translate(light.position).scale(0.1f);
-		basicShader.updateMaterial(Material(Vec4f(light.color, 1), Vec3f(), Vec3f(), 10));
-		basicShader.updateModel(transformation);
+		Shaders::basicShader.updateMaterial(Material(Vec4f(light.color, 1), Vec3f(), Vec3f(), 10));
+		Shaders::basicShader.updateModel(transformation);
 		skyboxMesh->render();
 	}
 	Renderer::disableDepthTest();
@@ -881,13 +845,13 @@ void Screen::refresh() {
 
 	// Render vector mesh
 	graphicsMeasure.mark(GraphicsProcess::VECTORS);
-	vectorShader.updateProjection(camera.viewMatrix, camera.projectionMatrix, camera.cframe.position);
+	Shaders::vectorShader.updateProjection(camera.viewMatrix, camera.projectionMatrix, camera.cframe.position);
 	vectorMesh->render();
 
 
 	// Render point mesh
 	graphicsMeasure.mark(GraphicsProcess::VECTORS);
-	pointShader.updateProjection(camera.viewMatrix, camera.projectionMatrix, camera.cframe.position);
+	Shaders::pointShader.updateProjection(camera.viewMatrix, camera.projectionMatrix, camera.cframe.position);
 	pointMesh->render();
 
 	Renderer::enableDepthTest();
@@ -895,7 +859,7 @@ void Screen::refresh() {
 
 	// Render origin mesh
 	graphicsMeasure.mark(GraphicsProcess::ORIGIN);
-	originShader.updateProjection(camera.viewMatrix, camera.cframe.rotation, camera.projectionMatrix, orthoMatrix, camera.cframe.position);
+	Shaders::originShader.updateProjection(camera.viewMatrix, camera.cframe.rotation, camera.projectionMatrix, orthoMatrix, camera.cframe.position);
 	originMesh->render();
 
 
@@ -908,25 +872,26 @@ void Screen::refresh() {
 
 
 	// Render postprocessed image to screen
-	quadShader.updateProjection(Mat4f());
-	quadShader.updateTexture(screenFrameBuffer->texture);
+	Shaders::quadShader.updateProjection(Mat4f());
+	Shaders::quadShader.updateTexture(screenFrameBuffer->texture);
 	quad->render();
 
 
 	// Render edit tools
-	lineShader.updateProjection(camera.viewMatrix, camera.projectionMatrix);
-	Picker::render(*this, basicShader, lineShader);
+	Shaders::lineShader.updateProjection(camera.viewMatrix, camera.projectionMatrix);
+	Picker::render(*this, Shaders::basicShader, Shaders::lineShader);
 
 
 	// Render GUI
 	Renderer::disableDepthTest();
 	graphicsMeasure.mark(GraphicsProcess::OTHER);
-	fontShader.updateProjection(orthoMatrix);
+	Shaders::fontShader.updateProjection(orthoMatrix);
 	GUI::render(orthoMatrix);
 
 	mouseVertical->render();
 	mouseHorizontal->render();
 
+	directionEditor->render();
 	
 	// Pie rendering
 	renderPies();
@@ -939,15 +904,7 @@ void Screen::refresh() {
 }
 
 void Screen::close() {
-	basicShader.close();
-	depthShader.close();
-	vectorShader.close();
-	fontShader.close();
-	originShader.close();
-	skyboxShader.close();
-	quadShader.close();
-	postProcessShader.close();
-	depthShader.close();
+	Shaders::close();
 
 	PropertiesParser::write("../res/.properties", properties);
 

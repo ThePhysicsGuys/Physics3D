@@ -51,10 +51,7 @@ protected:
 
 struct Quad : public Primitive {
 
-	bool patched;
-
-	Quad(bool patched = false) : Primitive(4, 4) {
-		this->patched = patched;
+	Quad() : Primitive(4, 4) {
 		resize(Vec2f(-1, 1), Vec2f(2));
 	}
 
@@ -93,7 +90,7 @@ struct Quad : public Primitive {
 		glPolygonMode(GL_FRONT_AND_BACK, mode);
 
 		glBindVertexArray(vao);
-		glDrawArrays((patched)? GL_PATCHES : GL_QUADS, 0, 4);
+		glDrawArrays(GL_QUADS, 0, 4);
 		glBindVertexArray(0);
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

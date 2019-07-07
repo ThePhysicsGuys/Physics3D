@@ -1,5 +1,8 @@
 #include "slider.h"
 
+#include "../shaderProgram.h"
+#include "../renderUtils.h"
+
 Slider::Slider(double x, double y) : Slider(x, y, 0, 1, 0) {}
 
 Slider::Slider(double x, double y, double width, double height) : Slider(x, y, width, height, 0, 1, 0) {}
@@ -46,35 +49,35 @@ void Slider::render() {
 		resize();
 
 		GUI::quad->resize(position, dimension);
-		GUI::shader->updateColor(backgroundColor);
+		Shaders::quadShader.updateColor(backgroundColor);
 		GUI::quad->render();
 		
 		double progress = (value - min) / (max - min);
 		Vec2 sliderFilledPosition = position + Vec2(padding + handleWidth / 2, -height / 2 + barHeight / 2);
 		Vec2 sliderFilledDimension = Vec2(barWidth * progress, barHeight);
 		GUI::quad->resize(sliderFilledPosition, sliderFilledDimension);
-		GUI::shader->updateColor(foregroundFilledColor);
+		Shaders::quadShader.updateColor(foregroundFilledColor);
 		GUI::quad->render();
 
 		Vec2 sliderEmptyPosition = sliderFilledPosition + Vec2(sliderFilledDimension.x, 0);
 		Vec2 sliderEmptyDimension = Vec2(barWidth * (1.0 - progress), barHeight);
 		GUI::quad->resize(sliderEmptyPosition, sliderEmptyDimension);
-		GUI::shader->updateColor(foregroundEmptyColor);
+		Shaders::quadShader.updateColor(foregroundEmptyColor);
 		GUI::quad->render();
 
 		Vec2 handlePosition = Vec2(sliderEmptyPosition.x - handleWidth / 2, position.y - height / 2 + handleHeight / 2);
 		Vec2 handleDimension = Vec2(handleWidth, handleHeight);
 		GUI::quad->resize(handlePosition, handleDimension);
-		GUI::shader->updateColor(handleColor);
+		Shaders::quadShader.updateColor(handleColor);
 		GUI::quad->render();
 		
-		GUI::shader->updateColor(GUI::COLOR::ACCENT);
-		GUI::quad->render(GL_LINE);
+		Shaders::quadShader.updateColor(GUI::COLOR::ACCENT);
+		GUI::quad->render(Renderer::WIREFRAME);
 
 		if (debug) {
 			GUI::quad->resize(position, dimension);
-			GUI::shader->updateColor(GUI::COLOR::RED);
-			GUI::quad->render(GL_LINE);
+			Shaders::quadShader.updateColor(GUI::COLOR::RED);
+			GUI::quad->render(Renderer::WIREFRAME);
 		}
 	}
 }

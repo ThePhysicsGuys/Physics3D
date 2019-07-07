@@ -1,5 +1,8 @@
 #include "CheckBox.h"
 
+#include "../shaderProgram.h"
+#include "../renderUtils.h"
+
 CheckBox::CheckBox(std::string text, double x, double y, double width, double height, bool textured) : Component(x, y, width, height) {
 	this->label = new Label(text, x, y);
 	this->checkBoxLabelOffset = GUI::checkBoxLabelOffset;
@@ -29,15 +32,15 @@ CheckBox::CheckBox(double x, double y, double width, double height, bool texture
 void CheckBox::renderPressed() {
 	if (textured) {
 		if (checked) {
-			GUI::shader->updateTexture(pressCheckedTexture);
+			Shaders::quadShader.updateTexture(pressCheckedTexture);
 		} else {
-			GUI::shader->updateTexture(pressUncheckedTexture);
+			Shaders::quadShader.updateTexture(pressUncheckedTexture);
 		}
 	} else {
 		if (checked) {
-			GUI::shader->updateColor(pressCheckedColor);
+			Shaders::quadShader.updateColor(pressCheckedColor);
 		} else {
-			GUI::shader->updateColor(pressUncheckedColor);
+			Shaders::quadShader.updateColor(pressUncheckedColor);
 		}
 	}
 
@@ -47,15 +50,15 @@ void CheckBox::renderPressed() {
 void CheckBox::renderHovering() {
 	if (textured) {
 		if (checked) {
-			GUI::shader->updateTexture(hoverCheckedTexture);
+			Shaders::quadShader.updateTexture(hoverCheckedTexture);
 		} else {
-			GUI::shader->updateTexture(hoverUncheckedTexture);
+			Shaders::quadShader.updateTexture(hoverUncheckedTexture);
 		}
 	} else {
 		if (checked) {
-			GUI::shader->updateColor(hoverCheckedColor);
+			Shaders::quadShader.updateColor(hoverCheckedColor);
 		} else {
-			GUI::shader->updateColor(hoverUncheckedColor);
+			Shaders::quadShader.updateColor(hoverUncheckedColor);
 		}
 	}
 
@@ -65,15 +68,15 @@ void CheckBox::renderHovering() {
 void CheckBox::renderIdle() {
 	if (textured) {
 		if (checked) {
-			GUI::shader->updateTexture(checkedTexture);
+			Shaders::quadShader.updateTexture(checkedTexture);
 		} else {
-			GUI::shader->updateTexture(uncheckedTexture);
+			Shaders::quadShader.updateTexture(uncheckedTexture);
 		}
 	} else {
 		if (checked) {
-			GUI::shader->updateColor(checkedColor);
+			Shaders::quadShader.updateColor(checkedColor);
 		} else {
-			GUI::shader->updateColor(uncheckedColor);
+			Shaders::quadShader.updateColor(uncheckedColor);
 		}
 	}
 
@@ -127,12 +130,12 @@ void CheckBox::render() {
 
 		if (debug) {
 			GUI::quad->resize(position, dimension);
-			GUI::shader->updateColor(GUI::COLOR::RED);
-			GUI::quad->render(GL_LINE);
+			Shaders::quadShader.updateColor(GUI::COLOR::RED);
+			GUI::quad->render(Renderer::WIREFRAME);
 
 			GUI::quad->resize(checkBoxPosition, checkBoxDimension);
-			GUI::shader->updateColor(GUI::COLOR::GREEN); 
-			GUI::quad->render(GL_LINE);
+			Shaders::quadShader.updateColor(GUI::COLOR::GREEN);
+			GUI::quad->render(Renderer::WIREFRAME);
 		}
 	}
 }

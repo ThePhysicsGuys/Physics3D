@@ -1,5 +1,8 @@
 #pragma once
 
+#include "GL\glew.h"
+#include "GLFW\glfw3.h"
+
 #include "shader.h"
 #include "material.h"
 #include "texture.h"
@@ -12,6 +15,7 @@
 
 #include <cstdarg>
 #include <vector>
+
 
 struct ShaderProgram {
 public:
@@ -378,3 +382,22 @@ struct ColorWheelShader : public ShaderProgram {
 		shader.setUniform("projectionMatrix", projectionMatrix);
 	}
 };
+
+namespace Shaders {
+	extern BasicShader basicShader;
+	extern DepthShader depthShader;
+	extern VectorShader vectorShader;
+	extern OriginShader originShader;
+	extern FontShader fontShader;
+	extern QuadShader quadShader;
+	extern PostProcessShader postProcessShader;
+	extern SkyboxShader skyboxShader;
+	extern PointShader pointShader;
+	extern TestShader testShader;
+	extern BlurShader blurShader;
+	extern ColorWheelShader colorWheelShader;
+	extern LineShader lineShader;
+
+	void init();
+	void close();
+}

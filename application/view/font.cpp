@@ -1,13 +1,12 @@
 #include "font.h"
 
-#include <map>
+#include "GL\glew.h"
+#include "GLFW\glfw3.h"
 
-#include "texture.h"
-#include "shader.h"
+#include "shaderProgram.h"
 
-#include "../engine/math/vec2.h"
 
-Font::Font(FontShader& shader, std::string font) : shader(shader) {
+Font::Font(std::string font) {
 	FT_Library  library;
 	FT_Face face;
 	FT_Error error;
@@ -99,7 +98,7 @@ void Font::render(const std::string& text, Vec2 position, Vec4 color, double siz
 }
 
 void Font::render(const std::string& text, double x, double y, Vec4 color, double size) {
-	shader.updateColor(color);
+	Shaders::fontShader.updateColor(color);
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -126,7 +125,7 @@ void Font::render(const std::string& text, double x, double y, Vec4 color, doubl
 		};
 
 		character.texture->bind();
-		shader.updateTexture(character.texture);
+		Shaders::fontShader.updateTexture(character.texture);
 		
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 

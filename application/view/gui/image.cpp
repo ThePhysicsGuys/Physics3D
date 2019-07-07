@@ -1,6 +1,7 @@
 #include "image.h"
 
 #include "gui.h"
+#include "../shaderProgram.h"
 
 Image::Image(double x, double y, double width, double height) : Component(x, y, width, height) {
 	Vec2 dimension = GUI::unmap(Vec2(width, height));
@@ -23,8 +24,8 @@ Image::Image(double x, double y, double width, double height, Texture* texture) 
 
 void Image::render() {
 	if (visible) {
-		if (texture) GUI::shader->updateTexture(texture);
-		else GUI::shader->updateColor(GUI::COLOR::BLACK);
+		if (texture) Shaders::quadShader.updateTexture(texture);
+		else Shaders::quadShader.updateColor(GUI::COLOR::BLACK);
 		GUI::quad->resize(position, dimension);
 		GUI::quad->render();
 	}

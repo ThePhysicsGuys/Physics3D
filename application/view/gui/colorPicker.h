@@ -1,7 +1,8 @@
 #pragma once
 
-#include "../texture.h"
 #include "component.h"
+
+#include "../texture.h"
 
 #include "../engine/math/vec2.h"
 

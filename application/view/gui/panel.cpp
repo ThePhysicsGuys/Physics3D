@@ -2,6 +2,8 @@
 
 #include "gui.h"
 
+#include "../shaderProgram.h"
+
 #include "layout.h"
 #include "../util/log.h"
 #include "../engine/math/mathUtil.h"
@@ -37,7 +39,7 @@ void Panel::render() {
 	if (visible) {
 		resize();
 
-		GUI::shader->updateColor(background);
+		Shaders::quadShader.updateColor(background);
 		GUI::quad->resize(position, dimension);
 		GUI::quad->render();
 

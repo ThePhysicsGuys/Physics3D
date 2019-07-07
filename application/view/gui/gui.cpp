@@ -2,6 +2,11 @@
 #include "component.h"
 #include "container.h"
 #include "orderedVector.h"
+#include "../shaderProgram.h"
+
+#include "../../visualShape.h"
+
+#include "../../import.h"
 
 namespace GUI {
 
@@ -141,21 +146,23 @@ namespace GUI {
 	// Global
 	Screen* screen;
 	OrderedVector<Component*> components;
-	Component* intersectedComponent;
-	Component* selectedComponent;
+	FrameBuffer* guiFrameBuffer = nullptr;
+	Component* intersectedComponent = nullptr;
+	Component* selectedComponent = nullptr;
 	Vec2 intersectedPoint;
 
 	// Defaults
 	double margin = 0.01;
 	double padding = 0.01;
 
-	// Shader
-	QuadShader* shader = nullptr;
-	BlurShader* blurShader = nullptr;
+	// Quad
 	Quad* quad = nullptr;
 
 	// Label
 	Vec4 labelBackgroundColor = COLOR::WHITE;
+
+	// DirectionEditor
+	IndexedMesh* vectorMesh = nullptr;
 
 	// Button
 	Texture* closeButtonHoverTexture;
@@ -215,11 +222,10 @@ namespace GUI {
 	Vec4 fontColor = COLOR::SILVER;
 	double fontSize = 0.0009;
 
-	void init(Screen* screen, QuadShader* shader, BlurShader* blurShader, Font* font) {
+	void init(Screen* screen, Font* font) {
 		GUI::screen = screen;
 		GUI::font = font;
-		GUI::shader = shader;
-		GUI::blurShader = blurShader;
+		GUI::guiFrameBuffer = new FrameBuffer(1, 1);
 		GUI::quad = new Quad();
 
 		GUI::closeButtonIdleTexture = load("../res/textures/gui/close_idle.png");
@@ -242,10 +248,13 @@ namespace GUI {
 		GUI::colorPickerAlphaPatternTexture = load("../res/textures/gui/alphaPattern.png");
 		GUI::colorPickerBrightnessTexture = load("../res/textures/gui/brightness.png");
 		GUI::colorPickerCrosshairTexture = load("../res/textures/gui/crosshair.png");
+
+		VisualShape vectorShape = OBJImport::load("../res/models/gui/translate_shaft.obj");
+		GUI::vectorMesh = new IndexedMesh(vectorShape);
 	}
 	
 	void update(Mat4f orthoMatrix) {
-		GUI::shader->updateProjection(orthoMatrix);
+		Shaders::quadShader.updateProjection(orthoMatrix);
 	}
 
 	double clamp(double value, double min, double max) {
@@ -342,13 +351,13 @@ namespace GUI {
 		update(orthoMatrix);
 
 		screen->blurFrameBuffer->bind();
-		shader->updateTexture(screen->screenFrameBuffer->texture);
+		Shaders::quadShader.updateTexture(screen->screenFrameBuffer->texture);
 		screen->quad->render();
-		blurShader->updateTexture(screen->blurFrameBuffer->texture);
-		blurShader->updateType(BlurShader::BlurType::HORIZONTAL);
+		Shaders::blurShader.updateTexture(screen->blurFrameBuffer->texture);
+		Shaders::blurShader.updateType(BlurShader::BlurType::HORIZONTAL);
 		screen->quad->render();
-		blurShader->updateTexture(screen->blurFrameBuffer->texture);
-		blurShader->updateType(BlurShader::BlurType::VERTICAL);
+		Shaders::blurShader.updateTexture(screen->blurFrameBuffer->texture);
+		Shaders::blurShader.updateType(BlurShader::BlurType::VERTICAL);
 		screen->quad->render();
 		screen->blurFrameBuffer->unbind();
 
