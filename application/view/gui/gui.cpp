@@ -225,7 +225,7 @@ namespace GUI {
 	void init(Screen* screen, Font* font) {
 		GUI::screen = screen;
 		GUI::font = font;
-		GUI::guiFrameBuffer = new FrameBuffer(1, 1);
+		GUI::guiFrameBuffer = new FrameBuffer(screen->dimension.x, screen->dimension.y);
 		GUI::quad = new Quad();
 
 		GUI::closeButtonIdleTexture = load("../res/textures/gui/close_idle.png");
@@ -269,12 +269,24 @@ namespace GUI {
 		return (x - minIn) * (maxOut - minOut) / (maxIn - minIn) + minOut;
 	}
 
+	// Maps a point from screen space to view space
 	Vec2 map(Vec2 point) {
 		return Vec2(map(point.x, 0, screen->dimension.x, -screen->camera.aspect, screen->camera.aspect), map(screen->dimension.y - point.y, 0, screen->dimension.y, -1, 1));
 	}
 	
+	// Maps a point from view space to screen space
 	Vec2 unmap(Vec2 point) {
 		return Vec2(map(point.x, -screen->camera.aspect, screen->camera.aspect, 0, screen->dimension.x), screen->dimension.y - map(point.y, -1, 1, 0, screen->dimension.y));
+	}
+
+	// Maps a dimension from screen space to view space
+	Vec2 mapDimension(Vec2 dimension) {
+		return Vec2(map(dimension.x, 0, screen->dimension.x, 0, 2 * screen->camera.aspect), map(dimension.y, 0, screen->dimension.y, 0, 2));
+	}
+
+	// Maps a dimension from view space to screen space
+	Vec2 unmapDimension(Vec2 dimension) {
+		return Vec2(map(dimension.x, 0, 2 * screen->camera.aspect, 0, screen->dimension.x), map(dimension.y, 0, 2, 0, screen->dimension.y));
 	}
 
 	void intersect(Vec2 mouse) {

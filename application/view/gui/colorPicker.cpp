@@ -154,7 +154,7 @@ void ColorPicker::press(Vec2 point) {
 	}
 
 	// AlphaPicker
-	Vec2 alphaPosition = brightnessPosition + Vec2(brightnessDimension.x + GUI::colorPickerSpacing + GUI::colorPickerBarBorderWidth, -GUI::colorPickerBarBorderWidth - padding);
+	Vec2 alphaPosition = brightnessPosition + Vec2(brightnessDimension.x + GUI::colorPickerSpacing + GUI::colorPickerBarBorderWidth, 0);
 	Vec2 alphaDimension = brightnessDimension;
 
 	if (!colorPicking && !brightnessPicking && !alphaPicking) {
@@ -194,8 +194,8 @@ void ColorPicker::press(Vec2 point) {
 	}
 }
 
-void ColorPicker::drag(Vec2 point) {
-	press(point);
+void ColorPicker::drag(Vec2 newPoint, Vec2 oldPoint) {
+	press(newPoint);
 }
 
 void ColorPicker::release(Vec2 point) {

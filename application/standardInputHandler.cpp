@@ -137,22 +137,27 @@ void StandardInputHandler::mouseUp(int button, int mods) {
 };
 
 void StandardInputHandler::mouseMove(double x, double y) {
+	double dmx = (x - cursorPosition.x);
+	double dmy = (y - cursorPosition.y);
+	Vec2 newCursorPosition = Vec2(x, y);
+	Vec2 guiCursorPosition = GUI::map(cursorPosition);
+	Vec2 newGuiCursorPosition = GUI::map(newCursorPosition);
+
 	if (GUI::intersectedComponent) {
-		GUI::intersectedComponent->hover(GUI::map(cursorPosition));
+		GUI::intersectedComponent->hover(guiCursorPosition);
 	}
 
 	// Camera rotating
 	if (rightDragging) {
-		screen.camera.rotate(screen, Vec3((y - cursorPosition.y) * 0.1, (x - cursorPosition.x) * 0.1, 0), leftDragging);
+
+		screen.camera.rotate(screen, Vec3(dmy * 0.1, dmx * 0.1, 0), leftDragging);
 	}
 	
 	if (leftDragging) {
-		double speed = 0.01;
-		double dmx = (x - cursorPosition.x) * speed;
-		double dmy = (y - cursorPosition.y) * -speed;
+
 
 		if (GUI::selectedComponent) {
-			GUI::selectedComponent->drag(GUI::map(cursorPosition));
+			GUI::selectedComponent->drag(newGuiCursorPosition, guiCursorPosition);
 		} else {
 			// Phyiscal moving
 			Picker::drag(screen);
@@ -161,10 +166,10 @@ void StandardInputHandler::mouseMove(double x, double y) {
 
 	// Camera moving
 	if (middleDragging) {
-		screen.camera.move(screen, Vec3((x - cursorPosition.x) * -0.5, (y - cursorPosition.y) * 0.5, 0), leftDragging);
+		screen.camera.move(screen, Vec3(dmx * -0.5, dmy * 0.5, 0), leftDragging);
 	}
 
-	cursorPosition = Vec2(x, y);
+	cursorPosition = newCursorPosition;
 };
 
 void StandardInputHandler::scroll(double xOffset, double yOffset) {

@@ -137,8 +137,8 @@ Component* Frame::intersect(Vec2 point) {
 	return nullptr;
 }
 
-void Frame::drag(Vec2 mouse) {
-	position = mouse - GUI::intersectedPoint;
+void Frame::drag(Vec2 newPoint, Vec2 oldPoint) {
+	position += newPoint - oldPoint;
 	anchor = nullptr;
 }
 

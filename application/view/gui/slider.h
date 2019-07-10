@@ -35,6 +35,6 @@ public:
 	void render() override;
 	Vec2 resize() override;
 
-	void drag(Vec2 point) override;
+	void drag(Vec2 newPoint, Vec2 oldPoint) override;
 	void press(Vec2 point) override;
 };

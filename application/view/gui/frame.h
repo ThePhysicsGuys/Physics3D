@@ -37,5 +37,5 @@ public:
 
 	Component* intersect(Vec2 point) override;
 
-	void drag(Vec2 mouse) override;
+	void drag(Vec2 newPoint, Vec2 oldPoint) override;
 };

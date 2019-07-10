@@ -13,6 +13,8 @@ RenderBuffer::RenderBuffer(unsigned int width, unsigned int height) : width(widt
 
 void RenderBuffer::resize(unsigned int width, unsigned int height) {
 	bind();
+	this->width = width;
+	this->height = height;
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
 	unbind();
 }

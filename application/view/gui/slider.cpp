@@ -89,16 +89,16 @@ Vec2 Slider::resize() {
 	return dimension;
 }
 
-void Slider::drag(Vec2 point) {
+void Slider::drag(Vec2 newPoint, Vec2 oldPoint) {
 	double x = position.x + padding + handleWidth / 2;
 	double w = dimension.x - 2 * padding - handleWidth;
 
-	if (point.x < x)
+	if (newPoint.x < x)
 		value = min;
-	else if (point.x > x + w)
+	else if (newPoint.x > x + w)
 		value = max;
 	else
-		value = min + (max - min) * (point.x - x) / w;
+		value = min + (max - min) * (newPoint.x - x) / w;
 	
 	(*action)(this);
 }

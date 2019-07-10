@@ -143,6 +143,8 @@ namespace GUI {
 	double map(double x, double minIn, double maxIn, double minOut, double maxOut);
 	Vec2 map(Vec2 point);
 	Vec2 unmap(Vec2 point);
+	Vec2 mapDimension(Vec2 dimension);
+	Vec2 unmapDimension(Vec2 dimension);
 	void intersect(Vec2 mouse);
 	bool intersectsSquare(Vec2 point, Vec2 topleft, Vec2 dimension);
 

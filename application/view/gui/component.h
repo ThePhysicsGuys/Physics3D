@@ -109,7 +109,7 @@ public:
 	/* 
 		Drag behaviour of this component 
 	*/
-	virtual void drag(Vec2 dmxy) {};
+	virtual void drag(Vec2 mxyNew, Vec2 mxyOld) {};
 
 	/* 
 		Hover behaviour of this component 
