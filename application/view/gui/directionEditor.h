@@ -18,5 +18,5 @@ public:
 
 	void press(Vec2 point) override;
 	void release(Vec2 point) override;
-	void drag(Vec2 dxy) override;
+	void drag(Vec2 mxyNew, Vec2 mxyOld) override;
 };

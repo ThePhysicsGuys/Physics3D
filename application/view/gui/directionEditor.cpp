@@ -49,6 +49,6 @@ void DirectionEditor::release(Vec2 point) {
 
 }
 
-void DirectionEditor::drag(Vec2 dxy) {
+void DirectionEditor::drag(Vec2 mxyNew, Vec2 mxyOld) {
 
 }
