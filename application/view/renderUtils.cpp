@@ -7,11 +7,9 @@ namespace Renderer {
 	unsigned int FILLED = GL_FILL;
 	unsigned int POINTS = GL_POINT;
 
-	GLFWwindow* context;
+	// GLFW binding
 
-	bool initGLEW() {
-		return glewInit() == GLEW_OK;
-	}
+	GLFWwindow* GLFWContext;
 
 	bool initGLFW() {
 		return glfwInit();
@@ -21,28 +19,69 @@ namespace Renderer {
 		glfwTerminate();
 	}
 	
-	void makeContextCurrent() {
-		glfwMakeContextCurrent(context);
+	void makeGLFWContextCurrent() {
+		glfwMakeContextCurrent(GLFWContext);
 	}
 
-	void createContext(int width, int height, const char* title) {
-		context = glfwCreateWindow(width, height, title, nullptr, nullptr);
+	void createGLFWContext(int width, int height, const char* title) {
+		GLFWContext = glfwCreateWindow(width, height, title, nullptr, nullptr);
 	}
 
-	bool validContext() {
-		return context;
+	bool validGLFWContext() {
+		return GLFWContext;
 	}
 
-	void swapInterval(int interval) {
+	GLFWwindow* getGLFWContext() {
+		return GLFWContext;
+	}
+
+	void swapGLFWInterval(int interval) {
 		glfwSwapInterval(interval);
 	}
 
-	void swapBuffers() {
-		glfwSwapBuffers(context);
+	void swapGLFWBuffers() {
+		glfwSwapBuffers(GLFWContext);
 	}
 
-	void pollEvents() {
+	void pollGLFWEvents() {
 		glfwPollEvents();
+	}
+
+	void closeGLFWWindow() {
+		glfwSetWindowShouldClose(GLFWContext, GLFW_TRUE);
+	}
+
+	bool isGLFWWindowClosed() {
+		return glfwWindowShouldClose(GLFWContext);
+	}
+
+	Vec2i getGLFWWindowSize() {
+		int width;
+		int height;
+		glfwGetWindowSize(GLFWContext, &width, &height);
+		return Vec2i(width, height);
+	}
+
+	Vec4i getGLFWFrameSize() {
+		int left;
+		int top;
+		int right;
+		int bottom;
+		glfwGetWindowFrameSize(GLFWContext, &left, &top, &right, &bottom);
+		return Vec4i(left, top, right, bottom);
+	}
+
+	void enableGLFWCursor() {
+		glfwSetInputMode(GLFWContext, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	}
+
+	void disableGLFWCursor() {
+		glfwSetInputMode(GLFWContext, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+	}
+
+	// GLEW binding
+	bool initGLEW() {
+		return glewInit() == GLEW_OK;
 	}
 
 	void clearDepth() {
@@ -55,34 +94,6 @@ namespace Renderer {
 
 	void clearStencil() {
 		glClear(GL_STENCIL_BUFFER_BIT);
-	}
-
-	GLFWwindow* getContext() {
-		return context;
-	}
-
-	void closeWindow() {
-		glfwSetWindowShouldClose(context, GLFW_TRUE);
-	}
-
-	bool windowClosed() {
-		return glfwWindowShouldClose(context);
-	}
-
-	Vec2i windowSize() {
-		int width;
-		int height;
-		glfwGetWindowSize(context, &width, &height);
-		return Vec2i(width, height);
-	}
-
-	Vec4i frameSize() {
-		int left;
-		int top;
-		int right;
-		int bottom;
-		glfwGetWindowFrameSize(context, &left, &top, &right, &bottom);
-		return Vec4i(left, top, right, bottom);
 	}
 
 	void viewport(Vec2i origin, Vec2i dimension) {
@@ -123,14 +134,6 @@ namespace Renderer {
 
 	inline void standardBlendFunction() {
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	}
-
-	void enableCursor() {
-		glfwSetInputMode(context, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-	}
-
-	void disableCursor() {
-		glfwSetInputMode(context, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 	}
 
 	const unsigned char* getVendor() {

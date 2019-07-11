@@ -2,6 +2,9 @@
 
 #include "gui.h"
 
+#include "../shaderProgram.h"
+#include "../renderUtils.h"
+
 #include "../util/log.h"
 #include "../engine/math/mathUtil.h"
 
@@ -134,8 +137,8 @@ Component* Frame::intersect(Vec2 point) {
 	return nullptr;
 }
 
-void Frame::drag(Vec2 mouse) {
-	position = mouse - GUI::intersectedPoint;
+void Frame::drag(Vec2 newPoint, Vec2 oldPoint) {
+	position += newPoint - oldPoint;
 	anchor = nullptr;
 }
 
@@ -147,7 +150,7 @@ void Frame::render() {
 		// TitleBar
 		Vec2 titleBarPosition = position;
 		Vec2 titleBarDimension = Vec2(width, titleBarHeight);
-		GUI::shader->update(titleBarColor);
+		Shaders::quadShader.updateColor(titleBarColor);
 		GUI::quad->resize(titleBarPosition, titleBarDimension);
 		GUI::quad->render();
 
@@ -164,7 +167,7 @@ void Frame::render() {
 			Vec2 offsetPosition = titleBarPosition + Vec2(0, -titleBarHeight);
 			Vec2 offsetDimension = dimension + Vec2(0, -titleBarHeight);
 			
-			GUI::shader->update(GUI::screen->blurFrameBuffer->texture, Vec4f(0.4, 0.4, 0.4, 1));
+			Shaders::quadShader.updateTexture(GUI::screen->blurFrameBuffer->texture, Vec4f(0.4, 0.4, 0.4, 1));
 			GUI::quad->resize(offsetPosition, offsetDimension, Vec2(-GUI::screen->camera.aspect, GUI::screen->camera.aspect) * 2, Vec2(-1, 1));
 			GUI::quad->render();
 
@@ -181,8 +184,8 @@ void Frame::render() {
 		// Outline
 		Vec2 outlinePosition = titleBarPosition;
 		Vec2 outlineDimension = dimension;
-		GUI::shader->update(GUI::COLOR::NAVY);
+		Shaders::quadShader.updateColor(GUI::COLOR::NAVY);
 		GUI::quad->resize(outlinePosition, outlineDimension);
-		GUI::quad->render(GL_LINE);
+		GUI::quad->render(Renderer::WIREFRAME);
 	}
 }

@@ -13,14 +13,15 @@
 #include "visualDebug.h"
 #include "loader.h"
 
-#include "gui\panel.h"
-#include "gui\frame.h"
-#include "gui\label.h"
-#include "gui\image.h"
-#include "gui\slider.h"
-#include "gui\checkBox.h"
-#include "gui\colorPicker.h"
-#include "gui\gui.h"
+#include "gui/panel.h"
+#include "gui/frame.h"
+#include "gui/label.h"
+#include "gui/image.h"
+#include "gui/slider.h"
+#include "gui/checkBox.h"
+#include "gui/colorPicker.h"
+#include "gui/directionEditor.h"
+#include "gui/gui.h"
 
 #include "../debug.h"
 #include "../standardInputHandler.h"
@@ -37,7 +38,6 @@
 #include "../engine/physicsProfiler.h"
 #include "../engine/geometry/boundingBox.h"
 #include "../engine/sharedLockGuard.h"
-#include "../engine/debug.h"
 
 #include <stdlib.h>
 #include <fstream>
@@ -60,7 +60,7 @@ bool initGLFW() {
 bool initGLEW() {
 	// Init GLEW after creating a valid rendering context
 	if (!Renderer::initGLEW()) {
-		Renderer::terminateGLFW();
+		terminateGLFW();
 
 		Log::error("GLEW Failed to initialize!");
 
@@ -83,16 +83,15 @@ Screen::Screen(int width, int height, MagnetWorld* world) {
 	setWorld(world);
 
 	// Create a windowed mode window and its OpenGL context 
-	Renderer::createContext(width, height, "Physics3D");
+	Renderer::createGLFWContext(width, height, "Physics3D");
 	
-	if (!Renderer::validContext()) {
+	if (!Renderer::validGLFWContext()) {
 		terminateGLFW();
 		exit(-1);
 	}
 
 	// Make the window's context current 
-	Renderer::makeContextCurrent();
-	window = Renderer::getContext();
+	Renderer::makeGLFWContextCurrent();
 
 	Log::info("OpenGL vendor: (%s)", Renderer::getVendor());
 	Log::info("OpenGL renderer: (%s)", Renderer::getRenderer());
@@ -103,6 +102,8 @@ Screen::Screen(int width, int height, MagnetWorld* world) {
 // Generic Shapes
 IndexedMesh* sphere = nullptr;
 IndexedMesh* cube = nullptr;
+IndexedMesh* plane = nullptr;
+
 
 // Font
 Font* font = nullptr;
@@ -127,20 +128,7 @@ IndexedMesh* skyboxMesh = nullptr;
 Mat4f orthoMatrix;
 
 
-// Shaders
-BasicShader basicShader;
-DepthShader depthShader;
-VectorShader vectorShader;
-OriginShader originShader;
-FontShader fontShader;
-QuadShader quadShader;
-PostProcessShader postProcessShader;
-SkyboxShader skyboxShader;
-PointShader pointShader;
-TestShader testShader;
-BlurShader blurShader;
-ColorWheelShader colorWheelShader;
-
+// Debug
 BarChartClassInformation iterChartClasses[]{ {"GJK Collide", Vec3f(0.2f,0.2f,1)},{"GJK No Collide", Vec3f(1.0f, 0.5f, 0.0f)},{"EPA", Vec3f(1.0f, 1.0f, 0.0f)} };
 BarChart iterationChart("Iteration Statistics", "", GJKCollidesIterationStatistics.labels, iterChartClasses, Vec2f(-1 + 0.1f, -0.3), Vec2f(0.8, 0.6), 3, 17);
 
@@ -210,10 +198,10 @@ CheckBox* debugIntersectionCheckBox = nullptr;
 Label* debugRenderLabel = nullptr;
 CheckBox* debugRenderPiesCheckBox = nullptr;
 CheckBox* debugRenderSpheresCheckBox = nullptr;
-CheckBox* debugRenderColTreeCheckBox = nullptr;
 
 
 // Test
+DirectionEditor* directionEditor = nullptr;
 IndexedMesh* mesh = nullptr;
 Texture* texture = nullptr;
 
@@ -232,45 +220,16 @@ void Screen::init() {
 
 
 	// InputHandler init
-	handler = new StandardInputHandler(window, *this);
+	handler = new StandardInputHandler(Renderer::getGLFWContext(), *this);
 
 
 	// Screen size init
-	Vec2 size = Renderer::windowSize();
-	int width = size.x;
-	int height = size.y;
-	handler->framebufferResize(width, height);
-
-
-	// Shader source init
-	ShaderSource basicShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(BASIC_SHADER)), "basic.shader");
-	ShaderSource depthShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(DEPTH_SHADER)), "depth.shader");
-	ShaderSource vectorShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(VECTOR_SHADER)), "vector.shader");
-	ShaderSource fontShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(FONT_SHADER)), "font.shader");
-	ShaderSource originShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(ORIGIN_SHADER)), "origin.shader");
-	ShaderSource quadShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(QUAD_SHADER)), "quad.shader");
-	ShaderSource postProcessShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(POSTPROCESS_SHADER)), "postProcess.shader");
-	ShaderSource skyboxShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(SKYBOX_SHADER)), "skybox.shader");
-	ShaderSource pointShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(POINT_SHADER)), "point.shader");
-	ShaderSource testShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(TEST_SHADER)), "test.shader");
-	ShaderSource blurShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(BLUR_SHADER)), "blur.shader");
-	ShaderSource colorWheelShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(COLORWHEEL_SHADER)), "colorwheel.shader");
+	Vec2 size = Renderer::getGLFWWindowSize();
+	handler->framebufferResize(size);
 
 
 	// Shader init
-	basicShader = * new BasicShader(basicShaderSource);
-	depthShader = * new DepthShader(depthShaderSource);
-	vectorShader = * new VectorShader(vectorShaderSource);
-	fontShader = * new FontShader(fontShaderSource);
-	originShader = * new OriginShader(originShaderSource);
-	quadShader = * new QuadShader(quadShaderSource);
-	postProcessShader = * new PostProcessShader(postProcessShaderSource);
-	skyboxShader = * new SkyboxShader(skyboxShaderSource);
-	pointShader = * new PointShader(pointShaderSource);
-	testShader = * new TestShader(testShaderSource);
-	blurShader = * new BlurShader(blurShaderSource);
-	colorWheelShader = * new ColorWheelShader(colorWheelShaderSource);
-	basicShader.createLightArray(lightCount);
+	Shaders::init();
 
 
 	// Texture init
@@ -300,18 +259,18 @@ void Screen::init() {
 
 	// Framebuffer init
 	quad = new Quad();
-	modelFrameBuffer = new FrameBuffer(width, height);
-	screenFrameBuffer = new FrameBuffer(width, height);
-	blurFrameBuffer = new FrameBuffer(width, height);
+	modelFrameBuffer = new FrameBuffer(size.x, size.y);
+	screenFrameBuffer = new FrameBuffer(size.x, size.y);
+	blurFrameBuffer = new FrameBuffer(size.x, size.y);
 	depthBuffer = new DepthFrameBuffer(1024, 1024);
 
 
 	// Font init
-	font = new Font(fontShader, "../res/fonts/droid.ttf");
+	font = new Font("../res/fonts/droid.ttf");
 
 
 	// GUI init
-	GUI::init(this, &quadShader, &blurShader, font);
+	GUI::init(this, font);
 
 
 	// Properties GUI
@@ -387,7 +346,6 @@ void Screen::init() {
 	debugRenderLabel = new Label("Render", 0, 0);
 	debugRenderPiesCheckBox = new CheckBox("Statistics", 0, 0, true);
 	debugRenderSpheresCheckBox = new CheckBox("Collision spheres", 0, 0, true);
-	debugRenderColTreeCheckBox = new CheckBox("Collision tree", 0, 0, true);
 	debugInfoVectorCheckBox->action = [] (CheckBox* c) { toggleDebugVecType(Debug::INFO_VEC); };
 	debugVelocityCheckBox->action = [] (CheckBox* c) { toggleDebugVecType(Debug::VELOCITY); };
 	debugAccelerationCheckBox->action = [] (CheckBox* c) { toggleDebugVecType(Debug::ACCELERATION); };
@@ -400,9 +358,8 @@ void Screen::init() {
 	debugInfoPointCheckBox->action = [] (CheckBox* c) { toggleDebugPointType(Debug::INFO_POINT); };
 	debugCenterOfMassCheckBox->action = [] (CheckBox* c) { toggleDebugPointType(Debug::CENTER_OF_MASS); };
 	debugIntersectionCheckBox->action = [] (CheckBox* c) { toggleDebugPointType(Debug::INTERSECTION); };
-	debugRenderPiesCheckBox->action = [] (CheckBox* c) { renderPies = !renderPies; };
+	debugRenderPiesCheckBox->action = [] (CheckBox* c) { renderPiesEnabled = !renderPiesEnabled; };
 	debugRenderSpheresCheckBox->action = [] (CheckBox* c) { colissionSpheresMode = static_cast<SphereColissionRenderMode>((static_cast<int>(colissionSpheresMode) + 1) % 3); };
-	debugRenderColTreeCheckBox->action = [](CheckBox * c) {renderColTree = static_cast<ColTreeRenderMode>((static_cast<int>(renderColTree) + 1) % 3); };
 
 	debugFrame->add(debugVectorLabel, Align::CENTER);
 	debugFrame->add(debugInfoVectorCheckBox, Align::FILL);
@@ -421,7 +378,6 @@ void Screen::init() {
 	debugFrame->add(debugRenderLabel, Align::CENTER);
 	debugFrame->add(debugRenderPiesCheckBox, Align::FILL);
 	debugFrame->add(debugRenderSpheresCheckBox, Align::FILL);
-	debugFrame->add(debugRenderColTreeCheckBox, Align::FILL);
 	
 	// Add frames to GUI
 	GUI::add(propertiesFrame);
@@ -430,7 +386,7 @@ void Screen::init() {
 
 
 	// Mouse init
-	Renderer::disableCursor();
+	Renderer::disableGLFWCursor();
 	mouseVertical = new Panel(0, 0, 0.04, 0.007);
 	mouseHorizontal = new Panel(0, 0, 0.007, 0.04);
 	mouseVertical->background = Vec4(1);
@@ -473,29 +429,24 @@ void Screen::init() {
 
 
 	// Eventhandler init
-	eventHandler.setPartRayIntersectCallback([] (Screen& screen, ExtendedPart* part, Vec3 point) {
-		screen.intersectedPart = part;
-		screen.intersectedPoint = point;
+	eventHandler.setWindowResizeCallback([] (Screen& screen, Vec2i dimension) {
+		screen.screenFrameBuffer->resize(dimension);
+		screen.modelFrameBuffer->resize(dimension);
+		screen.blurFrameBuffer->resize(dimension);
+
+		screen.camera.update(((float)dimension.x) / ((float)dimension.y));
+		screen.dimension = dimension;
 	});
 
-	eventHandler.setPartClickCallback([] (Screen& screen, ExtendedPart* part, Vec3 point) {
-		screen.selectedPart = part;
-		screen.selectedPoint = point;
-	});
-
-	eventHandler.setWindowResizeCallback([] (Screen& screen, unsigned int width, unsigned int height) {
-		screen.dimension = Vec2i(width, height);
-		screen.screenFrameBuffer->resize(screen.dimension);
-		screen.modelFrameBuffer->resize(screen.dimension);
-		screen.blurFrameBuffer->resize(screen.dimension);
-
-		screen.camera.update(((float)width) / ((float)height));
-	});
 
 	// Temp
-	handler->framebufferResize(width, height);
+	handler->framebufferResize(size);
+
 
 	// Test
+	VisualShape planeShape(OBJImport::load("../res/models/plane.obj"));
+	plane = new IndexedMesh(planeShape);
+	directionEditor = new DirectionEditor(0, 0, 1, 1);
 	texture = load("../res/textures/test/disp.jpg");
 	BoundingBox box = BoundingBox{ -1,-1,-1,1,1,1 };
 	VisualShape shape = VisualShape(box.toShape());
@@ -522,7 +473,7 @@ void Screen::update() {
 		if (handler->getKey(GLFW_KEY_RIGHT)) camera.rotate(*this, 0, 1, 0, leftDragging);
 		if (handler->getKey(GLFW_KEY_UP))    camera.rotate(*this, -1, 0, 0, leftDragging);
 		if (handler->getKey(GLFW_KEY_DOWN))  camera.rotate(*this, 1, 0, 0, leftDragging);
-		if (handler->getKey(GLFW_KEY_ESCAPE)) Renderer::closeWindow();
+		if (handler->getKey(GLFW_KEY_ESCAPE)) Renderer::closeGLFWWindow();
 		if (handler->getKey(GLFW_KEY_B)) { debugFrame->visible = true; debugFrame->position = Vec2(0.8); GUI::select(debugFrame); }
 	}
 
@@ -570,9 +521,8 @@ void Screen::update() {
 	debugInfoPointCheckBox->checked = point_debug_enabled[Debug::INFO_POINT];
 	debugCenterOfMassCheckBox->checked = point_debug_enabled[Debug::CENTER_OF_MASS];
 	debugIntersectionCheckBox->checked = point_debug_enabled[Debug::INTERSECTION];
-	debugRenderPiesCheckBox->checked = renderPies;
-	debugRenderSpheresCheckBox->checked = colissionSpheresMode != SphereColissionRenderMode::NONE;
-	debugRenderColTreeCheckBox->checked = renderColTree != ColTreeRenderMode::NONE;
+	debugRenderPiesCheckBox->checked = renderPiesEnabled;
+	debugRenderSpheresCheckBox->checked = colissionSpheresMode!=SphereColissionRenderMode::NONE;
 
 	// Update properties frame
 	if (selectedPart) {
@@ -583,7 +533,7 @@ void Screen::update() {
 		partVelocity->text = "Velocity: " + str(selectedPart->parent->velocity);
 		partAngularVelocity->text = "Angular Velocity: " + str(selectedPart->parent->angularVelocity);
 		double kineticEnergy = selectedPart->parent->getKineticEnergy();
-		double potentialEnergy = world->getPotentialEnergyOfPhysical(*(selectedPart->parent));
+		double potentialEnergy = world->getPotentialEnergyOfPhysical(*selectedPart->parent);
 		partKineticEnergy->text = "Kinetic Energy: " + std::to_string(kineticEnergy);
 		partPotentialEnergy->text = "Potential Energy: " + std::to_string(potentialEnergy);
 		partEnergy->text = "Energy: " + std::to_string(kineticEnergy + potentialEnergy);
@@ -614,8 +564,8 @@ void Screen::renderSkybox() {
 	Renderer::disableCulling();
 	Renderer::enableBlending();
 	Renderer::standardBlendFunction();
-	skyboxShader.update(sunDirection);
-	skyboxShader.update(camera.viewMatrix, camera.projectionMatrix);
+	Shaders::skyboxShader.updateLightDirection(sunDirection);
+	Shaders::skyboxShader.updateProjection(camera.viewMatrix, camera.projectionMatrix);
 	skyboxTexture->bind();
 	sphere->render();
 	Renderer::enableDepthMask();
@@ -626,7 +576,7 @@ void Screen::renderPhysicals() {
 	std::map<double, ExtendedPart*> transparentMeshes;
 
 	// Bind basic uniforms
-	basicShader.updateLight(lights, lightCount);
+	Shaders::basicShader.updateLight(lights, lightCount);
 
 	SharedLockGuard lg(world->lock);
 	
@@ -649,10 +599,10 @@ void Screen::renderPhysicals() {
 			continue;
 		}
 
-		basicShader.updateMaterial(material);
+		Shaders::basicShader.updateMaterial(material);
 
-		// Render each object
-		basicShader.updatePart(part);
+		// Render each physical
+		Shaders::basicShader.updatePart(part);
 
 		if(meshId == -1) continue;
 
@@ -671,10 +621,10 @@ void Screen::renderPhysicals() {
 		else
 			material.ambient = part->material.ambient;
 		
-		basicShader.updateMaterial(material);
+		Shaders::basicShader.updateMaterial(material);
 	   
-		// Render each object
-		basicShader.updatePart(*part);
+		// Render each physical
+		Shaders::basicShader.updatePart(*part);
 
 		if (part->drawMeshId == -1) continue;
 
@@ -683,143 +633,40 @@ void Screen::renderPhysicals() {
 }
 
 void renderSphere(double radius, Vec3 position, Vec4f color) {
-	basicShader.updateMaterial(Material(color));
+	Shaders::basicShader.updateMaterial(Material(color));
 
-	basicShader.updateModelMatrix(CFrameToMat4(CFrame(position, DiagonalMat3(1,1,1)*radius)));
+	Shaders::basicShader.updateModel(CFrameToMat4(CFrame(position, DiagonalMat3(1,1,1)*radius)));
 
 	sphere->render();
 }
 
 void renderBox(const CFrame& cframe, double width, double height, double depth, Vec4f color) {
-	basicShader.updateMaterial(Material(color));
+	Shaders::basicShader.updateMaterial(Material(color));
 
-	basicShader.updateModelMatrix(CFrameToMat4(CFrame(cframe.getPosition(), cframe.getRotation() * DiagonalMat3(width, height, depth))));
+	Shaders::basicShader.updateModel(CFrameToMat4(CFrame(cframe.getPosition(), cframe.getRotation() * DiagonalMat3(width, height, depth))));
 
-	//cube->render(Renderer::WIREFRAME);
 	cube->render();
 }
 
-void renderBounds(const Bounds& bounds, const Vec4f& color) {
-	Vec3Fix diagonal = bounds.getDiagonal();
-	Position p = bounds.getCenter();
-	renderBox(CFrame(Vec3(p.x, p.y, p.z)), diagonal.x, diagonal.y, diagonal.z, color);
-}
-
-Vec4f colors[]{
-	GUI::COLOR::BLUE,
-	GUI::COLOR::GREEN,
-	GUI::COLOR::YELLOW,
-	GUI::COLOR::ORANGE,
-	GUI::COLOR::RED,
-	GUI::COLOR::PURPLE
-};
-
-void recursiveRenderColTree(const TreeNode& node, int depth) {
-	if (node.isLeafNode) {
-		for (const BoundedPhysical& phys : *node.physicals) {
-			//renderBounds(phys.bounds, GUI::COLOR::AQUA);
-		}
-
-	} else {
-		for (const TreeNode& node : *node.subTrees) {
-			recursiveRenderColTree(node, depth+1);
-		}
-	}
-
-	Vec4f color = colors[depth % 6];
-	color.w = 0.3;
-
-	renderBounds(node.bounds.expanded((30-depth) * 0.0002), color);
-}
-
-bool recursiveColTreeForOneObject(const TreeNode& node, const Physical* obj, const Bounds& bounds) {
-	if (node.isLeafNode) {
-		for (const BoundedPhysical& p : *node.physicals) {
-			if (p.object == obj) {
-				return true;
-			}
-		}
-	} else {
-		//if (!intersects(node.bounds, bounds)) return false;
-		for (const TreeNode& subNode : *node.subTrees) {
-			if (recursiveColTreeForOneObject(subNode, obj, bounds)) {
-				Vec4f orange = GUI::COLOR::GREEN;
-				orange.w = 0.3;
-
-				renderBounds(node.bounds, orange);
-				return true;
-			}
-		}
-	}
-	return false;
-}
-
-void Screen::refresh() {
-	fieldIndex = 0;
-	//glLineWidth(10);
-
-	//Mat4f f = CFrameToMat4(camera.cframe);
-	//camera.cframe = Mat4ToCFrame(lookAt(f, camera.cframe.position, Vec3f()));
-
-	// Shadow setup
-	/*Mat4f lightProjection = ortho(-camera.aspect, camera.aspect, -1.0f, 1.0f, 0.1f, 1000.0f);
-	Mat4f ligthView = lookAt(camera.cframe.position, camera.cframe.rotation * Vec3f(0, 0, 1), Vec3f(0.0f, 1.0f, 0.0f));
-	Mat4f lightMatrix = lightProjection * ligthView;
-	depthShader.updateLight(lightMatrix);
-	Renderer::enableDepthTest();
-	depthBuffer->bind();
-	//Renderer::clearDepth();
-	for (ExtendedPart& part : *world) {
-		int meshId = part.drawMeshId;
-		depthShader.updateModel(CFrameToMat4(CFramef(part.cframe)));
-		meshes[meshId]->render();
-	}
-	Renderer::viewport(Vec2i(), dimension);*/
-
-
-	// Render skybox
-	graphicsMeasure.mark(GraphicsProcess::SKYBOX);
-	modelFrameBuffer->bind();
-	Renderer::clearColor();
-	Renderer::clearDepth();
-	renderSkybox();
-	Renderer::enableDepthTest();
-
-
+void Screen::renderDebug() {
 	// Initialize vector log buffer
 	graphicsMeasure.mark(GraphicsProcess::VECTORS);
-	AddableBuffer<AppDebug::ColoredVec>& vecLog = AppDebug::getVecBuffer();
+	AddableBuffer<AppDebug::ColoredVector>& vecLog = AppDebug::getVectorBuffer();
 	AddableBuffer<AppDebug::ColoredPoint>& pointLog = AppDebug::getPointBuffer();
-
-
-	// Render physicals
-	graphicsMeasure.mark(GraphicsProcess::PHYSICALS);
-	basicShader.update(camera.viewMatrix, camera.projectionMatrix, camera.cframe.position);
-	renderPhysicals();
-
-	/*Renderer::disableCulling();
-	testShader.updateModel(Mat4f().translate(0, 4, 0));
-	testShader.updateView(camera.viewMatrix);
-	testShader.update(camera.cframe.position);
-	testShader.updateProjection(camera.projectionMatrix);
-	testShader.update(texture);
-	mesh->renderMode = RenderMode::PATCHES;
-	mesh->render(Renderer::WIREFRAME);
-	mesh->renderMode = RenderMode::TRIANGLES;
-	Renderer::enableCulling();*/
 
 	for (const Physical& p : world->iterPhysicals()) {
 		pointLog.add(AppDebug::ColoredPoint(p.getCenterOfMass(), Debug::CENTER_OF_MASS));
 	}
 
-	if(selectedPart != nullptr) {
+	if (selectedPart != nullptr) {
 		CFramef selectedCFrame(selectedPart->cframe);
-		for(const Vec3f& corner : selectedPart->hitbox.iterVertices()) {
-			vecLog.add(AppDebug::ColoredVec(Vec3(selectedCFrame.localToGlobal(corner)), selectedPart->parent->getVelocityOfPoint(Vec3(selectedCFrame.localToRelative(corner))), Debug::VELOCITY));
+		for (const Vec3f& corner : selectedPart->hitbox.iterVertices()) {
+			vecLog.add(AppDebug::ColoredVector(Vec3(selectedCFrame.localToGlobal(corner)), selectedPart->parent->getVelocityOfPoint(Vec3(selectedCFrame.localToRelative(corner))), Debug::VELOCITY));
 		}
 
 		if (colissionSpheresMode == SphereColissionRenderMode::SELECTED) {
 			Physical& selectedPhys = *selectedPart->parent;
+
 			for (Part& part : selectedPhys) {
 				Vec4f yellow = GUI::COLOR::YELLOW;
 				yellow.w = 0.5;
@@ -830,6 +677,7 @@ void Screen::refresh() {
 				green.w = 0.5;
 				renderSphere(part.maxRadius * 2, part.cframe.getPosition(), green);
 			}
+
 			Vec4f red = GUI::COLOR::RED;
 			red.w = 0.5;
 			BoundingBox localBounds = selectedPhys.localBounds;
@@ -854,6 +702,7 @@ void Screen::refresh() {
 				renderSphere(part.maxRadius * 2, part.cframe.getPosition(), green);
 			}
 		}
+
 		for (Physical& phys : world->iterPhysicals()) {
 			Vec4f red = GUI::COLOR::RED;
 			red.w = 0.5;
@@ -865,98 +714,15 @@ void Screen::refresh() {
 			renderSphere(phys.circumscribingSphere.radius * 2, phys.circumscribingSphere.origin, blue);
 		}
 	}
-	switch (renderColTree) {
-	case ColTreeRenderMode::ALL:
-		recursiveRenderColTree(world->objectTree.rootNode, 0);
-		break;
-	case ColTreeRenderMode::SELECTED:
-		if(selectedPart != nullptr)
-			recursiveColTreeForOneObject(world->objectTree.rootNode, selectedPart->parent, selectedPart->parent->getStrictBounds());
-		break;
-	}
 
-	// Postprocess to screenFrameBuffer
-	screenFrameBuffer->bind();
-	Renderer::disableDepthTest();
-	postProcessShader.update(modelFrameBuffer->texture);
-	quad->render();
-
-	// Render vectors with old depth buffer
-	Renderer::enableDepthTest();
-	screenFrameBuffer->attach(modelFrameBuffer->renderBuffer);
-	
-	/*for (ExtendedPart& part : *world) {
-		if (part.hitbox.normals)
-			for (int i = 0; i < part.hitbox.vertexCount; i++)
-				vecLog.add(AppDebug::ColoredVec(part.cframe.localToGlobal(part.hitbox[i]), part.cframe.localToRelative(part.hitbox.normals.get()[i]), Debug::POSITION));
-	}*/
 
 	// Update debug meshes
 	graphicsMeasure.mark(GraphicsProcess::VECTORS);
 	updateVecMesh(vectorMesh, vecLog.data, vecLog.size);
 	updatePointMesh(pointMesh, pointLog.data, pointLog.size);
+}
 
-
-	// Render lights
-	graphicsMeasure.mark(GraphicsProcess::LIGHTING);
-	for (Light light : lights) {
-		Mat4f transformation = Mat4f().translate(light.position).scale(0.1f);
-		basicShader.updateMaterial(Material(Vec4f(light.color, 1), Vec3f(), Vec3f(), 10));
-		basicShader.updateModelMatrix(transformation);
-		skyboxMesh->render();
-	}
-
-	Renderer::disableDepthTest();
-
-	// Render vector mesh
-	graphicsMeasure.mark(GraphicsProcess::VECTORS);
-	vectorShader.update(camera.viewMatrix, camera.projectionMatrix, camera.cframe.position);
-	vectorMesh->render();
-
-
-	// Render point mesh
-	graphicsMeasure.mark(GraphicsProcess::VECTORS);
-	pointShader.update(camera.viewMatrix, camera.projectionMatrix, camera.cframe.position);
-	pointMesh->render();
-
-	Renderer::enableDepthTest();
-
-
-	// Render origin mesh
-	graphicsMeasure.mark(GraphicsProcess::ORIGIN);
-	originShader.update(camera.viewMatrix, camera.cframe.rotation, camera.projectionMatrix, orthoMatrix, camera.cframe.position);
-	originMesh->render();
-
-
-	// Render screenFrameBuffer texture to the screen
-	graphicsMeasure.mark(GraphicsProcess::FINALIZE);
-	screenFrameBuffer->unbind();
-
-	Renderer::clearColor();
-	Renderer::disableDepthTest();
-
-
-	// Render postprocessed image to screen
-	quadShader.update(Mat4f());
-	quadShader.update(screenFrameBuffer->texture);
-	quad->render();
-
-
-	// Render edit tools
-	Picker::render(*this, basicShader);
-
-
-	// Render GUI
-	Renderer::disableDepthTest();
-	graphicsMeasure.mark(GraphicsProcess::OTHER);
-	fontShader.update(orthoMatrix);
-	GUI::render(orthoMatrix);
-
-	mouseVertical->render();
-	mouseHorizontal->render();
-
-	
-	// Pie rendering
+void Screen::renderPies() {
 	graphicsMeasure.mark(GraphicsProcess::PROFILER);
 	size_t objCount = world->getPartCount();
 	renderDebugField(dimension, font, "Screen", str(dimension) + ", [" + std::to_string(camera.aspect) + ":1]", "");
@@ -971,7 +737,7 @@ void Screen::refresh() {
 	renderDebugField(dimension, font, "World Potential Energy", world->getTotalPotentialEnergy(), "");
 	renderDebugField(dimension, font, "World Energy", world->getTotalEnergy(), "");
 
-	if (renderPies) {
+	if (renderPiesEnabled) {
 		float leftSide = float(dimension.x) / float(dimension.y);
 		PieChart graphicsPie = toPieChart(graphicsMeasure, "Graphics", Vec2f(-leftSide + 1.5f, -0.7f), 0.2f);
 		PieChart physicsPie = toPieChart(physicsMeasure, "Physics", Vec2f(-leftSide + 0.3f, -0.7f), 0.2f);
@@ -998,24 +764,147 @@ void Screen::refresh() {
 		iterationChart.position = Vec2f(-leftSide + 0.1f, -0.3);
 		iterationChart.render();
 	}
+}
+
+void Screen::refresh() {
+	fieldIndex = 0;
+
+	//Mat4f f = CFrameToMat4(camera.cframe);
+	//camera.cframe = Mat4ToCFrame(lookAt(f, camera.cframe.position, Vec3f()));
+
+	// Shadow setup
+	/*Mat4f lightProjection = ortho(-camera.aspect, camera.aspect, -1.0f, 1.0f, 0.1f, 1000.0f);
+	Mat4f ligthView = lookAt(camera.cframe.position, camera.cframe.rotation * Vec3f(0, 0, 1), Vec3f(0.0f, 1.0f, 0.0f));
+	Mat4f lightMatrix = lightProjection * ligthView;
+	Shaders::depthShader.updateLight(lightMatrix);
+	Renderer::enableDepthTest();
+	depthBuffer->bind();
+	//Renderer::clearDepth();
+	for (ExtendedPart& part : *world) {
+		int meshId = part.drawMeshId;
+		Shaders::depthShader.updateModel(CFrameToMat4(CFramef(part.cframe)));
+		meshes[meshId]->render();
+	}
+	Renderer::viewport(Vec2i(), dimension);*/
+
+
+	// Render skybox
+	graphicsMeasure.mark(GraphicsProcess::SKYBOX);
+	modelFrameBuffer->bind();
+	Renderer::clearColor();
+	Renderer::clearDepth();
+	renderSkybox();
+	Renderer::enableDepthTest();
+
+	
+	// Render physicals
+	graphicsMeasure.mark(GraphicsProcess::PHYSICALS);
+	Shaders::basicShader.updateProjection(camera.viewMatrix, camera.projectionMatrix, camera.cframe.position);
+	renderPhysicals();
+
+
+	// Test
+	Renderer::disableCulling();
+	Shaders::testShader.updateModel(Mat4f().translate(0, 2, 0));
+	Shaders::testShader.updateView(camera.viewMatrix);
+	Shaders::testShader.updateViewPosition(camera.cframe.position);
+	Shaders::testShader.updateProjection(camera.projectionMatrix);
+	Shaders::testShader.updateDisplacement(texture);
+	plane->renderMode = RenderMode::PATCHES;
+	plane->render(Renderer::WIREFRAME);
+	plane->renderMode = RenderMode::QUADS;
+	Renderer::enableCulling();
+
+
+	// Debug 
+	renderDebug();
+
+
+	// Postprocess to screenFrameBuffer
+	screenFrameBuffer->bind();
+	Renderer::disableDepthTest();
+	Shaders::postProcessShader.updateTexture(modelFrameBuffer->texture);
+	quad->render();
+
+
+	// Render vectors with old depth buffer
+	Renderer::enableDepthTest();
+	screenFrameBuffer->attach(modelFrameBuffer->renderBuffer);
+	
+
+	// Render lights
+	graphicsMeasure.mark(GraphicsProcess::LIGHTING);
+	for (Light light : lights) {
+		Mat4f transformation = Mat4f().translate(light.position).scale(0.1f);
+		Shaders::basicShader.updateMaterial(Material(Vec4f(light.color, 1), Vec3f(), Vec3f(), 10));
+		Shaders::basicShader.updateModel(transformation);
+		skyboxMesh->render();
+	}
+	Renderer::disableDepthTest();
+
+
+	// Render vector mesh
+	graphicsMeasure.mark(GraphicsProcess::VECTORS);
+	Shaders::vectorShader.updateProjection(camera.viewMatrix, camera.projectionMatrix, camera.cframe.position);
+	vectorMesh->render();
+
+
+	// Render point mesh
+	graphicsMeasure.mark(GraphicsProcess::VECTORS);
+	Shaders::pointShader.updateProjection(camera.viewMatrix, camera.projectionMatrix, camera.cframe.position);
+	pointMesh->render();
+
+	Renderer::enableDepthTest();
+
+
+	// Render origin mesh
+	graphicsMeasure.mark(GraphicsProcess::ORIGIN);
+	Shaders::originShader.updateProjection(camera.viewMatrix, camera.cframe.rotation, camera.projectionMatrix, orthoMatrix, camera.cframe.position);
+	originMesh->render();
+
+
+	// Render screenFrameBuffer texture to the screen
+	graphicsMeasure.mark(GraphicsProcess::FINALIZE);
+	screenFrameBuffer->unbind();
+
+	Renderer::clearColor();
+	Renderer::disableDepthTest();
+
+
+	// Render postprocessed image to screen
+	Shaders::quadShader.updateProjection(Mat4f());
+	Shaders::quadShader.updateTexture(screenFrameBuffer->texture);
+	quad->render();
+
+
+	// Render edit tools
+	Shaders::lineShader.updateProjection(camera.viewMatrix, camera.projectionMatrix);
+	Picker::render(*this, Shaders::basicShader, Shaders::lineShader);
+
+
+	// Render GUI
+	Renderer::disableDepthTest();
+	graphicsMeasure.mark(GraphicsProcess::OTHER);
+	Shaders::fontShader.updateProjection(orthoMatrix);
+	GUI::render(orthoMatrix);
+
+	mouseVertical->render();
+	mouseHorizontal->render();
+
+	directionEditor->render();
+	
+	// Pie rendering
+	renderPies();
 
 
 	// Render stuff
-	Renderer::swapInterval(0);
-	Renderer::swapBuffers();
-	Renderer::pollEvents();
+	Renderer::swapGLFWInterval(0);
+	Renderer::swapGLFWBuffers();
+	Renderer::pollGLFWEvents();
 }
 
 void Screen::close() {
-	basicShader.close();
-	depthShader.close();
-	vectorShader.close();
-	fontShader.close();
-	originShader.close();
-	skyboxShader.close();
-	quadShader.close();
-	postProcessShader.close();
-	depthShader.close();
+	Shaders::close();
 
 	PropertiesParser::write("../res/.properties", properties);
 
@@ -1023,7 +912,7 @@ void Screen::close() {
 }
 
 bool Screen::shouldClose() {
-	return Renderer::windowClosed();
+	return Renderer::isGLFWWindowClosed();
 }
 
 int Screen::addMeshShape(const VisualShape& s) {

@@ -23,7 +23,7 @@ void main() {
 #version 410 core
 
 // define the number of CPs in the output patch                                                 
-layout(vertices = 3) out;
+layout(vertices = 4) out;
 
 uniform vec3 viewPosition;
 
@@ -37,45 +37,21 @@ out vec3 teposition[];
 out vec3 tenormal[];
 out vec2 teUV[];
 
-
-float getTesselationLevel(float d1, float d2) {
-	float avg = (d1 + d2) / 8.0;
-
-	/*if (avg <= 1.0) {
-		return 15.0;
-	} else if (avg <= 2.0) {
-		return 10.0;
-	} else if (avg <= 3.0) {
-		return 8.0;
-	} else if (avg <= 4.0) {
-		return 7.0;
-	} else if (avg <= 5.0) {
-		return 4.0;
-	} else if (avg <= 6.0) {
-		return 2.0;
-	} else {
-		return 1.0;
-	}*/
-
-	return clamp(15*(1 - avg / 4), 0, 30);
-}
-
 void main() {
 	// Set the control points of the output patch                                               
 	teposition[gl_InvocationID] = tcposition[gl_InvocationID];
 	tenormal[gl_InvocationID] = tcnormal[gl_InvocationID];
 	teUV[gl_InvocationID] = tcUV[gl_InvocationID];
 
-	// Calculate the distance from the camera to the three control points                       
-	float d0 = distance(viewPosition, teposition[0]);
-	float d1 = distance(viewPosition, teposition[1]);
-	float d2 = distance(viewPosition, teposition[2]);
-
-	// Calculate the tessellation levels                                                        
-	gl_TessLevelOuter[0] = getTesselationLevel(d1, d2);
-	gl_TessLevelOuter[1] = getTesselationLevel(d2, d0);
-	gl_TessLevelOuter[2] = getTesselationLevel(d0, d1);
-	gl_TessLevelInner[0] = gl_TessLevelOuter[2];
+	// Calculate the distance from the camera to the three control points 
+	if (gl_InvocationID == 0) {
+		gl_TessLevelInner[0] = 5.0;
+		gl_TessLevelInner[1] = 5.0;
+		gl_TessLevelOuter[0] = 5.0;
+		gl_TessLevelOuter[1] = 5.0;
+		gl_TessLevelOuter[2] = 5.0;
+		gl_TessLevelOuter[3] = 5.0;
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -83,7 +59,7 @@ void main() {
 #shader tesselation evaluate
 #version 410 core
 
-layout(triangles, fractional_even_spacing, ccw) in;
+layout(quads, equal_spacing, ccw) in;
 
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
@@ -99,22 +75,38 @@ out vec3 fposition;
 out vec3 fnormal;
 out vec2 fUV;
 
-vec2 interpolate2D(vec2 v0, vec2 v1, vec2 v2) {
-	return vec2(gl_TessCoord.x) * v0 + vec2(gl_TessCoord.y) * v1 + vec2(gl_TessCoord.z) * v2;
+vec2 interpolate(vec2 v0, vec2 v1, vec2 v2, vec2 v3) {
+	// interpolate in horizontal direction between vert. 0 and 3
+	vec2 p0 = mix(v0, v3, gl_TessCoord.x);
+	// interpolate in horizontal direction between vert. 1 and 2
+	vec2 p1 = mix(v1, v2, gl_TessCoord.x);
+
+	// interpolate in vertical direction
+	vec2 p = mix(p0, p1, gl_TessCoord.y);
+
+	return p;
 }
 
-vec3 interpolate3D(vec3 v0, vec3 v1, vec3 v2) {
-	return vec3(gl_TessCoord.x) * v0 + vec3(gl_TessCoord.y) * v1 + vec3(gl_TessCoord.z) * v2;
+vec3 interpolate(vec3 v0, vec3 v1, vec3 v2, vec3 v3) {
+	// interpolate in horizontal direction between vert. 0 and 3
+	vec3 p0 = mix(v3, v0, gl_TessCoord.x);
+	// interpolate in horizontal direction between vert. 1 and 2
+	vec3 p1 = mix(v2, v1, gl_TessCoord.x);
+
+	// interpolate in vertical direction
+	vec3 p = mix(p0, p1, gl_TessCoord.y);
+
+	return p;
 }
 
 void main() {
 	// Interpolate the attributes of the output vertex using the barycentric coordinates        
-	fposition = interpolate3D(teposition[0], teposition[1], teposition[2]);
-	fnormal = normalize(interpolate3D(tenormal[0], tenormal[1], tenormal[2]));
-	fUV = interpolate2D(teUV[0], teUV[1], teUV[2]);
+	fposition = (interpolate(teposition[0], teposition[1], teposition[2], teposition[3]));
+	fnormal = normalize(interpolate(tenormal[0], tenormal[1], tenormal[2], tenormal[3]));
+	fUV = interpolate(teUV[0], teUV[1], teUV[2], teUV[3]);
 
-	float displacement = texture(displacementMap, fUV).x;
-	fposition += fnormal * displacement * 2;
+	//fposition += fnormal * length(gl_TessCoord.xy);
+
 	gl_Position = projectionMatrix * viewMatrix * vec4(fposition, 1.0);
 }
 

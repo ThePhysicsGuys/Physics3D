@@ -278,17 +278,17 @@ int main(void) {
 	PartFactory cubeFactory(BoundingBox{-0.49, -0.49, -0.49, 0.49, 0.49, 0.49}.toShape(), screen, "Cube");
 	PartFactory sphereFactory(sphereShape, screen, "Sphere");
 	PartFactory triangleFactory(triangleShape, screen, "Triangle");
-	for(double x = minX; x < maxX; x+=1.01) {
+	for(double x = minX; x < maxX; x += 1.01) {
 		for(double y = minY; y < maxY; y += 1.01) {
 			for(double z = minZ; z < maxZ; z += 1.01) {
-				ExtendedPart* newCube = cubeFactory.produce(CFrame(Vec3(x, y + 1, z)), 1.0, 0.2);
-				newCube->material.ambient = Vec4f((x-minX)/(maxX-minX), (y-minY)/(maxY-minY), (z-minZ)/(maxZ-minZ), 1.0f);
+				//ExtendedPart* newCube = cubeFactory.produce(CFrame(Vec3(x, y + 1, z)), 1.0, 0.2);
+				//ewCube->material.ambient = Vec4f((x-minX)/(maxX-minX), (y-minY)/(maxY-minY), (z-minZ)/(maxZ-minZ), 1.0f);
 				//world.addPart(newCube);
 				//world.addPart(sphereFactory.produce(CFrame(Vec3(x, y + 1, z - 5)), 1.0, 0.2));
 				//world.addPart(triangleFactory.produce(CFrame(Vec3(x, y + 1, z + 5)), 1.0, 0.2));
 
 
-				spiderFactories[rand() & 0x00000003].buildSpider(CFrame(Vec3(x+y*0.1, y+1, z)));
+				//spiderFactories[rand() & 0x00000003].buildSpider(CFrame(Vec3(x+y*0.1, y+1, z)));
 			}
 		}
 	}

@@ -1,7 +1,8 @@
 #pragma once
 
-#include "../texture.h"
 #include "component.h"
+
+#include "../texture.h"
 
 #include "../engine/math/vec2.h"
 
@@ -33,6 +34,6 @@ public:
 	void render() override;
 
 	void press(Vec2 point) override;
-	void drag(Vec2 point) override;
+	void drag(Vec2 newPoint, Vec2 oldPoint) override;
 	void release(Vec2 point) override;
 };

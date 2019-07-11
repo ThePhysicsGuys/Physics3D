@@ -2,13 +2,13 @@
 #include <GLFW/glfw3.h>
 
 #include "shader.h"
-#include "../../util/log.h"
+#include "../util/log.h"
 #include "../debug.h"
 
 #include <fstream>
 #include <sstream>
 
-void Shader::createUniform(std::string uniform) {
+void Shader::createUniform(const std::string& uniform) {
 	bind();
 	Log::setSubject(name);
 	int location = glGetUniformLocation(id, uniform.c_str());
@@ -21,31 +21,31 @@ void Shader::createUniform(std::string uniform) {
 	Log::resetSubject();
 }
 
-void Shader::setUniform(std::string uniform, int value) const {
+void Shader::setUniform(const std::string& uniform, int value) const {
 	glUniform1i(uniforms.at(uniform), value);
 }
 
-void Shader::setUniform(std::string uniform, float value) const {
+void Shader::setUniform(const std::string& uniform, float value) const {
 	glUniform1f(uniforms.at(uniform), value);
 }
 
-void Shader::setUniform(std::string uniform, double value) const {
+void Shader::setUniform(const std::string& uniform, double value) const {
 	glUniform1d(uniforms.at(uniform), value);
 }
 
-void Shader::setUniform(std::string uniform, Vec2f value) const {
+void Shader::setUniform(const std::string& uniform, const Vec2f& value) const {
 	glUniform2d(uniforms.at(uniform), value.x, value.y);
 }
 
-void Shader::setUniform(std::string uniform, Vec3f value) const {
+void Shader::setUniform(const std::string& uniform, const Vec3f& value) const {
 	glUniform3f(uniforms.at(uniform), value.x, value.y, value.z);
 }
 
-void Shader::setUniform(std::string uniform, Vec4f value) const {
+void Shader::setUniform(const std::string& uniform, const Vec4f& value) const {
 	glUniform4f(uniforms.at(uniform), value.x, value.y, value.z, value.w);
 }
 
-void Shader::setUniform(std::string uniform, Mat4f value) const {
+void Shader::setUniform(const std::string& uniform, const Mat4f& value) const {
 	glUniformMatrix4fv(uniforms.at(uniform), 1, GL_FALSE, value.m);
 }
 
@@ -76,7 +76,7 @@ unsigned int compileShader(const std::string& source, unsigned int type) {
 	return id;
 }
 
-unsigned int compileShaderWithDebug(std::string name, const std::string& source, unsigned int type) {
+unsigned int compileShaderWithDebug(const std::string& name, const std::string& source, unsigned int type) {
 	Log::setDelimiter("");
 	Log::info("%s: ", name.c_str());
 	
@@ -90,7 +90,7 @@ unsigned int compileShaderWithDebug(std::string name, const std::string& source,
 	return id;
 }
 
-unsigned int createShader(const std::string& vertexShader, const std::string& fragmentShader, const std::string& geometryShader, const std::string& tesselationControlShader, const std::string& tesselationEvaluateShader, const std::string name) {
+unsigned int createShader(const std::string& vertexShader, const std::string& fragmentShader, const std::string& geometryShader, const std::string& tesselationControlShader, const std::string& tesselationEvaluateShader, const std::string& name) {
 	unsigned int program = glCreateProgram();
 
 	Log::setSubject(name);
@@ -168,7 +168,7 @@ std::string parseFile(const std::string& path) {
 	return stringStream.str();
 }
 
-ShaderSource parseShader(const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath, const std::string& tesselationControlPath, const std::string& tesselationEvaluatePath, const std::string name) {
+ShaderSource parseShader(const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath, const std::string& tesselationControlPath, const std::string& tesselationEvaluatePath, const std::string& name) {
 	Log::setSubject(name);
 	std::string vertexFile = parseFile(vertexPath);
 	std::string fragmentFile = parseFile(fragmentPath);
@@ -179,7 +179,7 @@ ShaderSource parseShader(const std::string& vertexPath, const std::string& fragm
 	return { vertexFile , fragmentFile , geometryFile, tesselationControlFile, tesselationEvaluateFile, name };
 }
 
-ShaderSource parseShader(const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath, const std::string name) {
+ShaderSource parseShader(const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath, const std::string& name) {
 	Log::setSubject(name);
 	std::string vertexFile = parseFile(vertexPath);
 	std::string fragmentFile = parseFile(fragmentPath);
@@ -188,7 +188,7 @@ ShaderSource parseShader(const std::string& vertexPath, const std::string& fragm
 	return { vertexFile , fragmentFile , geometryFile, "", "", name };
 }
 
-ShaderSource parseShader(const std::string& vertexPath, const std::string& fragmentPath, const std::string name) {
+ShaderSource parseShader(const std::string& vertexPath, const std::string& fragmentPath, const std::string& name) {
 	Log::setSubject(name);
 	std::string vertexFile = parseFile(vertexPath);
 	std::string fragmentFile = parseFile(fragmentPath);
@@ -196,7 +196,7 @@ ShaderSource parseShader(const std::string& vertexPath, const std::string& fragm
 	return { vertexFile , fragmentFile , "", "", "", name };
 }
 
-ShaderSource parseShader(std::istream& shaderTextStream, const std::string name) {
+ShaderSource parseShader(std::istream& shaderTextStream, const std::string& name) {
 	Log::setSubject(name);
 
 	Log::info("Reading (%s)", name.c_str());
@@ -276,17 +276,17 @@ ShaderSource parseShader(std::istream& shaderTextStream, const std::string name)
 	return { vertexFile , fragmentFile , geometryFile, tesselationControlFile, tesselationEvaluateFile, name };
 }
 
-Shader::Shader(const std::string& vertexShader, const std::string& fragmentShader, const std::string name) {
+Shader::Shader(const std::string& vertexShader, const std::string& fragmentShader, const std::string& name) {
 	id = createShader(vertexShader, fragmentShader, "", "", "", name);
 	this->name = name;
 }
 
-Shader::Shader(const std::string& vertexShader, const std::string& fragmentShader, const std::string& geometryShader, const std::string name) {
+Shader::Shader(const std::string& vertexShader, const std::string& fragmentShader, const std::string& geometryShader, const std::string& name) {
 	id = createShader(vertexShader, fragmentShader, geometryShader, "", "", name);
 	this->name = name;
 }
 
-Shader::Shader(const std::string& vertexShader, const std::string& fragmentShader, const std::string& geometryShader, const std::string& tesselationControlSource, const std::string& tesselationEvaluateSource, const std::string name) {
+Shader::Shader(const std::string& vertexShader, const std::string& fragmentShader, const std::string& geometryShader, const std::string& tesselationControlSource, const std::string& tesselationEvaluateSource, const std::string& name) {
 	id = createShader(vertexShader, fragmentShader, geometryShader, tesselationControlSource, tesselationEvaluateSource, name);
 	this->name = name;
 }

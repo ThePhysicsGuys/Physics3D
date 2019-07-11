@@ -10,7 +10,7 @@
 #define QUAD_SHADER 5
 #define POSTPROCESS_SHADER 6
 #define SKYBOX_SHADER 7
-#define TEST1_SHADER 8
+#define LINE_SHADER 8
 #define POINT_SHADER 9
 #define TEST_SHADER 10
 #define BLUR_SHADER 11

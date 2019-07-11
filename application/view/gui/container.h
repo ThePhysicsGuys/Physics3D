@@ -3,6 +3,8 @@
 #include <vector>
 
 #include "../engine/math/vec2.h"
+#include "../shaderProgram.h"
+#include "../renderUtils.h"
 
 #include "orderedVector.h"
 #include "component.h"
@@ -78,14 +80,14 @@ public:
 			child.first->render();
 			if (debug) {
 				GUI::quad->resize(child.first->position + Vec2(-margin, margin), child.first->dimension + Vec2(margin * 2));
-				GUI::shader->update(GUI::COLOR::R);
-				GUI::quad->render(GL_LINE);
+				Shaders::quadShader.updateColor(GUI::COLOR::R);
+				GUI::quad->render(Renderer::WIREFRAME);
 				GUI::quad->resize(child.first->position, child.first->dimension);
-				GUI::shader->update(GUI::COLOR::G);
-				GUI::quad->render(GL_LINE);
+				Shaders::quadShader.updateColor(GUI::COLOR::G);
+				GUI::quad->render(Renderer::WIREFRAME);
 				GUI::quad->resize(child.first->position + Vec2(padding, -padding), child.first->dimension + Vec2(-padding * 2));
-				GUI::shader->update(GUI::COLOR::B);
-				GUI::quad->render(GL_LINE);
+				Shaders::quadShader.updateColor(GUI::COLOR::B);
+				GUI::quad->render(Renderer::WIREFRAME);
 			}
 		}
 	}

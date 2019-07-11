@@ -2,8 +2,6 @@
 
 #include <cmath>
 
-
-
 template<typename N>
 Mat3Template<N> rotX(N angle) {
 	N sina = sin(angle);
@@ -96,6 +94,25 @@ Mat3Template<N> fromRotationVec(Vec3Template<N> rotVec) {
 }
 
 template<typename N>
+Mat3Template<N> rotateAround(N angle, Vec3Template<N> normal) {
+	// Using Rodrigues rotation formula;
+	normal = normal.normalize();
+	Mat3Template<N> W = Mat3Template<N> (
+		 0,			normal.z, -normal.y,
+		-normal.z,  0,		   normal.x,
+		 normal.y, -normal.x,  0
+	);
+
+	Mat3Template<N> W2 = W * W;
+	N s = sin(angle);
+	N s2 = sin(angle / 2);
+
+	Mat3Template<N> R = Mat3Template<N>() + W * s + W2 * (2 * s2 * s2);
+
+	return R;
+}
+
+template<typename N>
 N get(Mat3Template<N>& copy, int row, int col) {
 	return copy.m[row * 3 + col];
 }
@@ -135,7 +152,7 @@ EigenSet<N> SymmetricMat3Template<N>::getEigenDecomposition() const {
 
 
 	int tieBreaker = 0;
-	const int values[6]{
+	const int values[6] {
 		0,1,
 		0,2,
 		1,2
@@ -148,9 +165,9 @@ EigenSet<N> SymmetricMat3Template<N>::getEigenDecomposition() const {
 		int k, l;
 		
 		// find which of the three upper off-diagonal elements is the biggest
-		if(top > topRight && top > right) { k = 0; l = 1; }
-		else if(topRight > top && topRight > right) { k = 0; l = 2; }
-		else if(right > top && right > topRight) { k = 1; l = 2; }
+		if (top > topRight && top > right) { k = 0; l = 1; }
+		else if (topRight > top && topRight > right) { k = 0; l = 2; }
+		else if (right > top && right > topRight) { k = 1; l = 2; }
 		else {
 			// TIEBREAKER
 			k = values[tieBreaker *2]; l = values[tieBreaker *2+1];
@@ -204,3 +221,5 @@ template Mat3Template<double> fromEulerAngles(double, double, double);
 template Mat3Template<float> fromEulerAngles(float, float, float);
 template Mat3Template<double> fromRotationVec(Vec3Template<double> v);
 template Mat3Template<float> fromRotationVec(Vec3Template<float> v);
+template Mat3Template<double> rotateAround(double angle, Vec3Template<double> normal);
+template Mat3Template<float> rotateAround(float angle, Vec3Template<float> normal);

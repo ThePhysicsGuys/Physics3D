@@ -30,7 +30,7 @@ void Camera::setRotation(Vec3 rotation) {
 void Camera::rotate(Screen& screen, double dalpha, double dbeta, double dgamma, bool leftDragging) {
 	viewDirty = true;
 
-	cframe.rotation = Mat3f(rotX(rspeed * dalpha)) * cframe.rotation * Mat3f(rotY(rspeed * dbeta));
+	cframe.rotation = rotX(float(rspeed * dalpha)) * cframe.rotation * rotY(float(rspeed * dbeta));
 
 	if (leftDragging) 
 		Picker::moveGrabbedPhysicalLateral(screen);

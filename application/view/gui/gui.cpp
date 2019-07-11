@@ -2,6 +2,11 @@
 #include "component.h"
 #include "container.h"
 #include "orderedVector.h"
+#include "../shaderProgram.h"
+
+#include "../../visualShape.h"
+
+#include "../../import.h"
 
 namespace GUI {
 
@@ -141,21 +146,23 @@ namespace GUI {
 	// Global
 	Screen* screen;
 	OrderedVector<Component*> components;
-	Component* intersectedComponent;
-	Component* selectedComponent;
+	FrameBuffer* guiFrameBuffer = nullptr;
+	Component* intersectedComponent = nullptr;
+	Component* selectedComponent = nullptr;
 	Vec2 intersectedPoint;
 
 	// Defaults
 	double margin = 0.01;
 	double padding = 0.01;
 
-	// Shader
-	QuadShader* shader = nullptr;
-	BlurShader* blurShader = nullptr;
+	// Quad
 	Quad* quad = nullptr;
 
 	// Label
 	Vec4 labelBackgroundColor = COLOR::WHITE;
+
+	// DirectionEditor
+	IndexedMesh* vectorMesh = nullptr;
 
 	// Button
 	Texture* closeButtonHoverTexture;
@@ -215,11 +222,10 @@ namespace GUI {
 	Vec4 fontColor = COLOR::SILVER;
 	double fontSize = 0.0009;
 
-	void init(Screen* screen, QuadShader* shader, BlurShader* blurShader, Font* font) {
+	void init(Screen* screen, Font* font) {
 		GUI::screen = screen;
 		GUI::font = font;
-		GUI::shader = shader;
-		GUI::blurShader = blurShader;
+		GUI::guiFrameBuffer = new FrameBuffer(screen->dimension.x, screen->dimension.y);
 		GUI::quad = new Quad();
 
 		GUI::closeButtonIdleTexture = load("../res/textures/gui/close_idle.png");
@@ -242,10 +248,13 @@ namespace GUI {
 		GUI::colorPickerAlphaPatternTexture = load("../res/textures/gui/alphaPattern.png");
 		GUI::colorPickerBrightnessTexture = load("../res/textures/gui/brightness.png");
 		GUI::colorPickerCrosshairTexture = load("../res/textures/gui/crosshair.png");
+
+		VisualShape vectorShape = OBJImport::load("../res/models/gui/translate_shaft.obj");
+		GUI::vectorMesh = new IndexedMesh(vectorShape);
 	}
 	
 	void update(Mat4f orthoMatrix) {
-		GUI::shader->update(orthoMatrix);
+		Shaders::quadShader.updateProjection(orthoMatrix);
 	}
 
 	double clamp(double value, double min, double max) {
@@ -260,12 +269,24 @@ namespace GUI {
 		return (x - minIn) * (maxOut - minOut) / (maxIn - minIn) + minOut;
 	}
 
+	// Maps a point from screen space to view space
 	Vec2 map(Vec2 point) {
 		return Vec2(map(point.x, 0, screen->dimension.x, -screen->camera.aspect, screen->camera.aspect), map(screen->dimension.y - point.y, 0, screen->dimension.y, -1, 1));
 	}
 	
+	// Maps a point from view space to screen space
 	Vec2 unmap(Vec2 point) {
 		return Vec2(map(point.x, -screen->camera.aspect, screen->camera.aspect, 0, screen->dimension.x), screen->dimension.y - map(point.y, -1, 1, 0, screen->dimension.y));
+	}
+
+	// Maps a dimension from screen space to view space
+	Vec2 mapDimension(Vec2 dimension) {
+		return Vec2(map(dimension.x, 0, screen->dimension.x, 0, 2 * screen->camera.aspect), map(dimension.y, 0, screen->dimension.y, 0, 2));
+	}
+
+	// Maps a dimension from view space to screen space
+	Vec2 unmapDimension(Vec2 dimension) {
+		return Vec2(map(dimension.x, 0, 2 * screen->camera.aspect, 0, screen->dimension.x), map(dimension.y, 0, 2, 0, screen->dimension.y));
 	}
 
 	void intersect(Vec2 mouse) {
@@ -342,13 +363,13 @@ namespace GUI {
 		update(orthoMatrix);
 
 		screen->blurFrameBuffer->bind();
-		shader->update(screen->screenFrameBuffer->texture);
+		Shaders::quadShader.updateTexture(screen->screenFrameBuffer->texture);
 		screen->quad->render();
-		blurShader->update(screen->blurFrameBuffer->texture);
-		blurShader->update(BlurShader::BlurType::HORIZONTAL);
+		Shaders::blurShader.updateTexture(screen->blurFrameBuffer->texture);
+		Shaders::blurShader.updateType(BlurShader::BlurType::HORIZONTAL);
 		screen->quad->render();
-		blurShader->update(screen->blurFrameBuffer->texture);
-		blurShader->update(BlurShader::BlurType::VERTICAL);
+		Shaders::blurShader.updateTexture(screen->blurFrameBuffer->texture);
+		Shaders::blurShader.updateType(BlurShader::BlurType::VERTICAL);
 		screen->quad->render();
 		screen->blurFrameBuffer->unbind();
 

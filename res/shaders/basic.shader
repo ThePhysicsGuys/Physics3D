@@ -193,9 +193,24 @@ uniform mat4 projectionMatrix;
 uniform Material material;
 uniform sampler2D textureSampler;
 uniform sampler2D normalSampler;
-
 const int maxLights = 4;
 uniform Light lights[maxLights];
+
+uniform vec3 sunDirection = vec3(1, 1, 0);
+
+vec4 fog(vec4 color) {
+	vec3 cameraDirection = -(viewMatrix * vec4(fposition, 1)).xyz;
+
+	float b = 0.01;
+	float fogAmount = 1.0 - exp(-length(cameraDirection) * b);
+	float sunAmount = max(dot(normalize(cameraDirection), sunDirection), 0.0);
+	vec3 fogColor = mix(
+		vec3(0.5, 0.6, 0.7), // bluish
+		vec3(1.0, 0.9, 0.7), // yellowish
+		pow(sunAmount, 8.0)
+	);
+	return vec4(mix(color.rgb, fogColor, fogAmount), color.a);
+}
 
 vec3 calcLightColor(Light light) {
 
@@ -210,7 +225,7 @@ vec3 calcLightColor(Light light) {
 	vec3 diffuse = material.diffuse * diffuseFactor * light.color;
 
 	// Directional light
-	vec3 directionalLight = normalize(vec3(1, 1, 0));
+	vec3 directionalLight = normalize(sunDirection);
 	float directionalFactor = 0.4 * max(dot(normal, directionalLight), 0.0);
 	vec3 directional = directionalFactor * light.color;
 
@@ -248,7 +263,7 @@ void main() {
 		normal = rodrigues() * normal;
 	} else {*/
 	normal = fnormal;
-	/*}*/
+
 
 	vec3 lightColors = vec3(0);
 	int count = 0;
@@ -264,5 +279,7 @@ void main() {
 	} else {
 		outColor = vec4(lightColors / count * material.ambient.rgb, material.ambient.a);
 	}
+
+	//outColor = fog(outColor);
 }
 

@@ -1,7 +1,11 @@
 #pragma once
 
+#include "GL\glew.h"
+#include "GLFW\glfw3.h"
+
 #include "arrayMesh.h"
-#include "../../engine/math/vec2.h"
+#include "../engine/math/vec2.h"
+#include "../engine/math/mathUtil.h"
 
 struct Primitive {
 	unsigned int vao;
@@ -35,7 +39,7 @@ protected:
 		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * M * N, NULL, GL_DYNAMIC_DRAW);
 
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, M, GL_FLOAT, GL_FALSE, N * sizeof(float), 0);
+		glVertexAttribPointer(0, M, GL_FLOAT, GL_FALSE, 0, 0);
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
@@ -47,10 +51,7 @@ protected:
 
 struct Quad : public Primitive {
 
-	bool patched;
-
-	Quad(bool patched = false) : Primitive(4, 4) {
-		this->patched = patched;
+	Quad() : Primitive(4, 4) {
 		resize(Vec2f(-1, 1), Vec2f(2));
 	}
 
@@ -89,7 +90,7 @@ struct Quad : public Primitive {
 		glPolygonMode(GL_FRONT_AND_BACK, mode);
 
 		glBindVertexArray(vao);
-		glDrawArrays((patched)? GL_PATCHES : GL_QUADS, 0, 4);
+		glDrawArrays(GL_QUADS, 0, 4);
 		glBindVertexArray(0);
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -105,10 +106,6 @@ struct Quad : public Primitive {
 
 struct Line : public Primitive {
 
-	Line() : Primitive(3, 2) {
-		resize(Vec3f(-1), Vec3f(1));
-	}
-
 	void resize(Vec3f p1, Vec3f p2) {
 		float vertices[2][3] = {
 			{ p1.x,	p1.y, p1.z },
@@ -119,20 +116,23 @@ struct Line : public Primitive {
 	}
 
 	void resize(Vec2f p1, Vec2f p2) {
-
 		float vertices[2][3] = {
 			{ p1.x,	p1.y, 0 },
 			{ p2.x,	p2.y, 0 }
 		};
-
+		
 		Primitive::resize(vertices);
+	}
+
+	Line() : Primitive(3, 2) {
+		resize(Vec3f(-1), Vec3f(1));
 	}
 
 	void render(int mode) {
 		glPolygonMode(GL_FRONT_AND_BACK, mode);
 
 		glBindVertexArray(vao);
-		glDrawArrays(GL_LINES, 0, 2);
+		glDrawArrays(GL_LINE_STRIP, 0, 2);
 		glBindVertexArray(0);
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

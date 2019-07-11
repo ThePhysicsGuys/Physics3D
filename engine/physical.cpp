@@ -228,34 +228,34 @@ void Physical::update(double deltaT) {
 void Physical::applyForceAtCenterOfMass(Vec3 force) {
 	totalForce += force;
 
-	Debug::logVec(getCenterOfMass(), force, Debug::FORCE);
+	Debug::logVector(getCenterOfMass(), force, Debug::FORCE);
 }
 
 void Physical::applyForce(Vec3Relative origin, Vec3 force) {
 	totalForce += force;
 
-	Debug::logVec(origin + getCenterOfMass(), force, Debug::FORCE);
+	Debug::logVector(origin + getCenterOfMass(), force, Debug::FORCE);
 
 	applyMoment(origin % force);
 }
 
 void Physical::applyMoment(Vec3 moment) {
 	totalMoment += moment;
-	Debug::logVec(getCenterOfMass(), moment, Debug::MOMENT);
+	Debug::logVector(getCenterOfMass(), moment, Debug::MOMENT);
 }
 
 void Physical::applyImpulseAtCenterOfMass(Vec3 impulse) {
-	Debug::logVec(getCenterOfMass(), impulse, Debug::IMPULSE);
+	Debug::logVector(getCenterOfMass(), impulse, Debug::IMPULSE);
 	velocity += impulse / mass;
 }
 void Physical::applyImpulse(Vec3Relative origin, Vec3Relative impulse) {
-	Debug::logVec(origin + getCenterOfMass(), impulse, Debug::IMPULSE);
+	Debug::logVector(origin + getCenterOfMass(), impulse, Debug::IMPULSE);
 	velocity += impulse / mass;
 	Vec3 angularImpulse = origin % impulse;
 	applyAngularImpulse(angularImpulse);
 }
 void Physical::applyAngularImpulse(Vec3 angularImpulse) {
-	Debug::logVec(getCenterOfMass(), angularImpulse, Debug::ANGULAR_IMPULSE);
+	Debug::logVector(getCenterOfMass(), angularImpulse, Debug::ANGULAR_IMPULSE);
 	Vec3 localAngularImpulse = getCFrame().relativeToLocal(angularImpulse);
 	Vec3 localRotAcc = ~inertia * localAngularImpulse;
 	Vec3 rotAcc = getCFrame().localToRelative(localRotAcc);

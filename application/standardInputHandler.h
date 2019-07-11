@@ -15,7 +15,7 @@ public:
 
 	StandardInputHandler(GLFWwindow* window, Screen& screen);
 
-	void framebufferResize(int width, int height) override;
+	void framebufferResize(Vec2i dimension) override;
 
 	void keyDown(int key, int modifiers) override;
 	void keyDownOrRepeat(int key, int modifiers) override;

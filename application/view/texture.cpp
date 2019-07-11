@@ -23,9 +23,28 @@ Texture* load(std::string name) {
 
 	Texture* texture = nullptr;
 
-	if (data)
-		texture = new Texture(width, height, data, (channels == 4) ? GL_RGBA : GL_RGB);
-	else {
+	if (data) {
+		int format;
+
+		switch (channels) {
+			case 1:
+				format = GL_RED;
+				break;
+			case 3:
+				format = GL_RGB;
+				break;
+			case 4:
+				format = GL_RGBA;
+				break;
+			default:
+				Log::setSubject(name);
+				Log::warn("Unknown amount of channels: %d, choosing RGB", channels);
+				Log::resetSubject();
+				format = GL_RGB;
+		}
+
+		texture = new Texture(width, height, data, format);
+	} else {
 		Log::setSubject(name);
 		Log::error("Failed to load texture");
 		Log::resetSubject();
@@ -50,6 +69,7 @@ Texture::Texture(unsigned int width, unsigned int height, const void* buffer, in
 			break;
 		case GL_RGBA:
 			channels = 4;
+			break;
 		default:
 			channels = 4;
 	}

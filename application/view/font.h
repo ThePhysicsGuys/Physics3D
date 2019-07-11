@@ -1,18 +1,17 @@
 #pragma once
 
-#include "GL\glew.h"
-#include "GLFW\glfw3.h"
-
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-#include "shaderProgram.h"
-
+#include "../engine/math/vec2.h"
 #include "../engine/math/vec3.h"
 #include "../engine/math/vec4.h"
-#include "../../util/log.h"
+#include "../util/log.h"
 
-#include <string>   
+#include "texture.h"
+
+#include <string> 
+#include <map>
 
 class Font {
 private:
@@ -28,10 +27,8 @@ private:
 
 	std::map<char, Character> characters;
 
-	FontShader& shader;
-
 public:
-	Font(FontShader& shader, std::string font);
+	Font(std::string font);
 
 	Vec2 size(const std::string& text, double scale);
 

@@ -39,15 +39,15 @@ extern BreakdownAverageProfiler<60, GraphicsProcess> graphicsMeasure;
 
 // Debug
 using namespace Debug;
-extern std::map<VecType, bool> debug_enabled;
+extern std::map<VectorType, bool> debug_enabled;
 extern std::map<PointType, bool> point_debug_enabled;
 
-extern bool renderPies;
+extern bool renderPiesEnabled;
 extern SphereColissionRenderMode colissionSpheresMode;
 extern int fieldIndex;
 extern ColTreeRenderMode renderColTree;
 
-void toggleDebugVecType(Debug::VecType t);
+void toggleDebugVecType(Debug::VectorType t);
 void toggleDebugPointType(Debug::PointType t);
 
 template<typename T>
@@ -100,5 +100,5 @@ size_t getTheoreticalNumberOfIntersections(size_t objCount);
 
 extern AddableBuffer<float> visibleVecs;
 
-void updateVecMesh(VectorMesh* vectorMesh, AppDebug::ColoredVec* data, size_t size);
+void updateVecMesh(VectorMesh* vectorMesh, AppDebug::ColoredVector* data, size_t size);
 void updatePointMesh(PointMesh* pointMesh, AppDebug::ColoredPoint* data, size_t size);

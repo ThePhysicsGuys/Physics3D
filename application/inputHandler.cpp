@@ -55,11 +55,11 @@ void InputHandler::mouseButtonCallback(int button, int action, int mods) {
 }
 
 void InputHandler::windowSizeCallback(int width, int height) {
-	windowResize(width, height);
+	windowResize(Vec2i(width, height));
 }
 
 void InputHandler::framebufferSizeCallback(int width, int height) {
-	framebufferResize(width, height);
+	framebufferResize(Vec2i(width, height));
 }
 
 Vec2 InputHandler::getMousePos() {

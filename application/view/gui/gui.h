@@ -1,11 +1,11 @@
 #pragma once
 
-#include "../quad.h"
+#include "../primitive.h"
 #include "../font.h"
-#include "../shaderProgram.h"
 #include "../screen.h"
 #include "../texture.h"
-
+#include "../indexedMesh.h"
+#include "../frameBuffer.h"
 
 #include "../engine/math/vec3.h"
 #include "../engine/math/vec4.h"
@@ -60,11 +60,10 @@ namespace GUI {
 	extern Component* intersectedComponent;
 	extern Component* selectedComponent;
 	extern Vec2 intersectedPoint;
+	extern FrameBuffer* guiFrameBuffer;
 
-	// Shader
+	// Quad
 	extern Quad* quad;
-	extern QuadShader* shader;
-	extern BlurShader* blurShader;
 	
 	// Default
 	extern double padding;
@@ -72,6 +71,9 @@ namespace GUI {
 
 	// Label
 	extern Vec4 labelBackgroundColor;
+
+	// DirectionEditor
+	extern IndexedMesh* vectorMesh;
 
 	// Button
 	extern Texture* closeButtonHoverTexture;
@@ -141,10 +143,12 @@ namespace GUI {
 	double map(double x, double minIn, double maxIn, double minOut, double maxOut);
 	Vec2 map(Vec2 point);
 	Vec2 unmap(Vec2 point);
+	Vec2 mapDimension(Vec2 dimension);
+	Vec2 unmapDimension(Vec2 dimension);
 	void intersect(Vec2 mouse);
 	bool intersectsSquare(Vec2 point, Vec2 topleft, Vec2 dimension);
 
-	void init(Screen* screen, QuadShader* shader, BlurShader* blurShader, Font* font);
+	void init(Screen* screen, Font* font);
 	void update(Mat4f orthoMatrix);
 	void render(Mat4f orthoMatrix);
 };

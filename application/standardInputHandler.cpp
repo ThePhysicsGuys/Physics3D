@@ -11,16 +11,15 @@
 
 StandardInputHandler::StandardInputHandler(GLFWwindow* window, Screen& screen) : InputHandler(window), screen(screen) {}
 
-void StandardInputHandler::framebufferResize(int width, int height) {
-	Vec2i dimension = Vec2i(width, height);
+void StandardInputHandler::framebufferResize(Vec2i dimension) {
 	if (screen.properties.get("include_titlebar_offset") == "true") {
-		Vec4i size = Renderer::frameSize();
+		Vec4i size = Renderer::getGLFWFrameSize();
 		dimension.y -= size.y;
 	}
 
 	Renderer::viewport(Vec2i(), dimension);
 
-	(*screen.eventHandler.windowResizeHandler) (screen, dimension.x, dimension.y);
+	(*screen.eventHandler.windowResizeHandler) (screen, dimension);
 }
 
 void StandardInputHandler::keyDownOrRepeat(int key, int modifiers) {
@@ -44,6 +43,7 @@ void StandardInputHandler::keyDownOrRepeat(int key, int modifiers) {
 }
 
 void StandardInputHandler::keyDown(int key, int modifiers) {
+
 	switch (key) {
 		case GLFW_KEY_P:
 			togglePause();
@@ -56,7 +56,7 @@ void StandardInputHandler::keyDown(int key, int modifiers) {
 			}
 			break;
 		case GLFW_KEY_F:
-			renderPies = !renderPies;
+			renderPiesEnabled = !renderPiesEnabled;
 			break;
 		case GLFW_KEY_Q:
 			if(screen.selectedPart != nullptr) {
@@ -94,7 +94,7 @@ void StandardInputHandler::keyDown(int key, int modifiers) {
 	}
 
 	if(key >= GLFW_KEY_F1 && key <= GLFW_KEY_F9) {
-		toggleDebugVecType(static_cast<Debug::VecType>(key - GLFW_KEY_F1));
+		toggleDebugVecType(static_cast<Debug::VectorType>(key - GLFW_KEY_F1));
 	}
 	if (key >= GLFW_KEY_1 && key <= GLFW_KEY_3) {
 		toggleDebugPointType(static_cast<Debug::PointType>(key - GLFW_KEY_1));
@@ -121,9 +121,6 @@ void StandardInputHandler::mouseDown(int button, int mods) {
 			GUI::intersectedPoint = GUI::map(cursorPosition) - GUI::intersectedComponent->position;
 		} else {
 			Picker::press(screen);
-			if (screen.selectedPart) {
-				Picker::moveGrabbedPhysicalLateral(screen);
-			}
 		}
 	}
 };
@@ -137,41 +134,45 @@ void StandardInputHandler::mouseUp(int button, int mods) {
 		if (GUI::selectedComponent){
 			GUI::selectedComponent->release(GUI::map(cursorPosition));
 		}
-		screen.world->selectedPart = nullptr;
+		
+		Picker::release(screen);
 	}
 };
 
 void StandardInputHandler::mouseMove(double x, double y) {
+	double dmx = (x - cursorPosition.x);
+	double dmy = (y - cursorPosition.y);
+	Vec2 newCursorPosition = Vec2(x, y);
+	Vec2 guiCursorPosition = GUI::map(cursorPosition);
+	Vec2 newGuiCursorPosition = GUI::map(newCursorPosition);
+
 	if (GUI::intersectedComponent) {
-		GUI::intersectedComponent->hover(GUI::map(cursorPosition));
+		GUI::intersectedComponent->hover(guiCursorPosition);
 	}
 
 	// Camera rotating
 	if (rightDragging) {
-		screen.camera.rotate(screen, Vec3((y - cursorPosition.y) * 0.1, (x - cursorPosition.x) * 0.1, 0), leftDragging);
+
+		screen.camera.rotate(screen, Vec3(dmy * 0.1, dmx * 0.1, 0), leftDragging);
 	}
 	
 	if (leftDragging) {
-		double speed = 0.01;
-		double dmx = (x - cursorPosition.x) * speed;
-		double dmy = (y - cursorPosition.y) * -speed;
+
 
 		if (GUI::selectedComponent) {
-			GUI::selectedComponent->drag(GUI::map(cursorPosition));
+			GUI::selectedComponent->drag(newGuiCursorPosition, guiCursorPosition);
 		} else {
 			// Phyiscal moving
-			if (screen.selectedPart) {
-				Picker::moveGrabbedPhysicalLateral(screen);
-			}
+			Picker::drag(screen);
 		}
 	}
 
 	// Camera moving
 	if (middleDragging) {
-		screen.camera.move(screen, Vec3((x - cursorPosition.x) * -0.5, (y - cursorPosition.y) * 0.5, 0), leftDragging);
+		screen.camera.move(screen, Vec3(dmx * -0.5, dmy * 0.5, 0), leftDragging);
 	}
 
-	cursorPosition = Vec2(x, y);
+	cursorPosition = newCursorPosition;
 };
 
 void StandardInputHandler::scroll(double xOffset, double yOffset) {
