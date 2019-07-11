@@ -6,9 +6,12 @@ struct Physical;
 #include "math/vec3.h"
 #include "math/cframe.h"
 #include "part.h"
+#include "math/bounds.h"
 
 #include <vector>
 #include "datastructures/splitUnorderedList.h"
+
+#include "../util/log.h"
 
 typedef Vec3 Vec3Local;
 typedef Vec3 Vec3Relative;
@@ -22,6 +25,7 @@ struct PartIter {
 	AttachedPart* iter;
 	Part* first;
 
+	PartIter() = default;
 	PartIter(AttachedPart* iter, Part* first) : iter(iter), first(first) {}
 
 	inline Part& operator*() const {
@@ -38,6 +42,7 @@ struct ConstPartIter {
 	const AttachedPart* iter;
 	const Part* first;
 
+	ConstPartIter() = default;
 	ConstPartIter(const AttachedPart* iter, Part* first) : iter(iter), first(first) {}
 
 	inline const Part& operator*() const {
@@ -162,6 +167,20 @@ public:
 	void setCFrame(const CFrame& newCFrame);
 	inline const CFrame& getCFrame() const { return mainPart->cframe; }
 
+	inline Position getPosition() const {
+		Vec3 pos = getCentroid();
+		return Position(pos.x, pos.y, pos.z);
+	}
+
+	Bounds getStrictBounds() const;
+
+	inline Bounds getLooseBounds() const {
+		Position pos = getPosition();
+		Fix<32> offset(circumscribingSphere.radius);
+		Vec3Fix offsetVec(offset, offset, offset);
+		return Bounds(pos - offsetVec, pos + offsetVec);
+	}
+
 	Vec3 getCenterOfMass() const;
 	Vec3 getCentroid() const;
 	Vec3 getAcceleration() const;
@@ -175,7 +194,6 @@ public:
 	double getAngularKineticEnergy() const;
 	double getKineticEnergy() const;
 	inline size_t getPartCount() const { return parts.size + 1; }
-	//BoundingBox getLocalBounds() const;
 	BoundingBox computeLocalBounds() const;
 	Sphere computeLocalCircumscribingSphere() const;
 	

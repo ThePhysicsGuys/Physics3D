@@ -341,8 +341,8 @@ Vec3f Shape::furthestInDirection(const Vec3f& direction) const {
 }
 #endif
 
-
-void incDebugTally(HistoricTally<100, long long, IterationTime>& tally, int iterTime) {
+template<int N>
+void incDebugTally(HistoricTally<N, long long, IterationTime>& tally, int iterTime) {
 	if (iterTime >= 200) {
 		tally.addToTally(IterationTime::LIMIT_REACHED, 1);
 	} else if (iterTime >= 15) {

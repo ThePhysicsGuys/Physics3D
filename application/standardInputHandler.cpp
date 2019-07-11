@@ -88,12 +88,15 @@ void StandardInputHandler::keyDown(int key, int modifiers) {
 		case GLFW_KEY_4:
 			colissionSpheresMode = static_cast<SphereColissionRenderMode>((static_cast<int>(colissionSpheresMode) + 1) % 3);
 			break;
+		case GLFW_KEY_5:
+			renderColTree = static_cast<ColTreeRenderMode>((static_cast<int>(renderColTree) + 1) % 3);
+			break;
 	}
 
 	if(key >= GLFW_KEY_F1 && key <= GLFW_KEY_F9) {
 		toggleDebugVecType(static_cast<Debug::VecType>(key - GLFW_KEY_F1));
 	}
-	if (key >= GLFW_KEY_1 && key <= GLFW_KEY_9) {
+	if (key >= GLFW_KEY_1 && key <= GLFW_KEY_3) {
 		toggleDebugPointType(static_cast<Debug::PointType>(key - GLFW_KEY_1));
 	}
 };

@@ -29,6 +29,12 @@ enum class SphereColissionRenderMode : int {
 	ALL
 };
 
+enum class ColTreeRenderMode : int {
+	NONE,
+	SELECTED,
+	ALL
+};
+
 extern BreakdownAverageProfiler<60, GraphicsProcess> graphicsMeasure;
 
 // Debug
@@ -39,6 +45,7 @@ extern std::map<PointType, bool> point_debug_enabled;
 extern bool renderPies;
 extern SphereColissionRenderMode colissionSpheresMode;
 extern int fieldIndex;
+extern ColTreeRenderMode renderColTree;
 
 void toggleDebugVecType(Debug::VecType t);
 void toggleDebugPointType(Debug::PointType t);

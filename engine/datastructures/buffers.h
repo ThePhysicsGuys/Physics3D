@@ -18,12 +18,54 @@ struct ListIter {
 	T* begin() const { return start; }
 	T* end() const { return fin; }
 };
-template<typename T>
+/*template<typename T>
 struct ConstListIter {
 	const T* start;
 	const T* fin;
 	const T* begin() const { return start; }
 	const T* end() const { return fin; }
+};*/
+
+template<typename T>
+struct ListOfPtrIter {
+	T* const * cur;
+	T& operator*() const {
+		return **cur;
+	}
+	ListOfPtrIter& operator++() {
+		cur++;
+		return *this;
+	}
+	ListOfPtrIter operator++(int) {
+		ListOfPtrIter prevSelf = *this;
+		cur++;
+		return prevSelf;
+	}
+	bool operator==(const ListOfPtrIter& other) const {
+		return this->cur == other.cur;
+	}
+	bool operator!=(const ListOfPtrIter& other) const {
+		return this->cur != other.cur;
+	}
+	T* operator->() const {
+		return *cur;
+	}
+	operator T* () const {
+		return *cur;
+	}
+};
+
+template<typename T>
+struct ListOfPtrIterFactory {
+	T* const * start;
+	T* const * fin;
+	ListOfPtrIterFactory() {}
+	ListOfPtrIterFactory(T* const * start, T* const * fin) : start(start), fin(fin) {}
+	ListOfPtrIterFactory(const ListIter<T * const>& iter) : start(iter.start), fin(iter.fin) {}
+	ListOfPtrIterFactory(const ListIter<T *>& iter) : start(iter.start), fin(iter.fin) {}
+
+	ListOfPtrIter<T> begin() const { return ListOfPtrIter<T>{start}; }
+	ListOfPtrIter<T> end() const { return ListOfPtrIter<T>{fin}; }
 };
 
 template<typename T>

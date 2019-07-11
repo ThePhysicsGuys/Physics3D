@@ -34,7 +34,7 @@ void GravityWorld::applyExternalForces() {
 	MagnetWorld::applyExternalForces();
 	// Gravity force
 	for(Physical& physical : iterFreePhysicals()) {
-		// physical.applyForceAtCenterOfMass((Vec3(0.0, 5.0, 0.0) - physical.getCenterOfMass() * 1.0) * physical.mass);
+		// object.applyForceAtCenterOfMass((Vec3(0.0, 5.0, 0.0) - object.getCenterOfMass() * 1.0) * object.mass);
 		physical.applyForceAtCenterOfMass(gravity * physical.mass);
 	}
 

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <Type Name="Fix&lt;*&gt;">
+    <DisplayString>{{{double(value) / (1ULL &lt;&lt; $T1),g}}}</DisplayString>
+  </Type>
+  <Type Name="BoundedPhysical">
+    <DisplayString>{object}</DisplayString>
+  </Type>
+  <Type Name="BoundedPhysicalGroup">
+    <Expand>
+      <Item Name="physicalCount" ExcludeView="simple">physicalCount</Item>
+      <ArrayItems>
+        <Size>physicalCount</Size>
+        <ValuePointer>physicals</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+  <Type Name="NodeGroup">
+    <Expand>
+      <Item Name="nodeCount" ExcludeView="simple">nodeCount</Item>
+      <ArrayItems>
+        <Size>nodeCount</Size>
+        <ValuePointer>subNodes</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+  <Type Name="TreeNode">
+    <DisplayString Condition="!isLeafNode">{{TrunkNode Size={subTrees->nodeCount}}}</DisplayString>
+    <DisplayString Condition="isLeafNode">{{LeafNode Size={physicals->physicalCount}}}</DisplayString>
+    <Expand>
+      <Item Name="bounds" ExcludeView="simple">bounds</Item>
+      <ArrayItems Condition="!isLeafNode">
+        <Size>subTrees->nodeCount</Size>
+        <ValuePointer>subTrees->subNodes</ValuePointer>
+      </ArrayItems>
+      <ArrayItems Condition="isLeafNode">
+        <Size>physicals->physicalCount</Size>
+        <ValuePointer>physicals->physicals</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+</AutoVisualizer>

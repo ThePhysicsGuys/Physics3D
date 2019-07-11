@@ -210,6 +210,7 @@ CheckBox* debugIntersectionCheckBox = nullptr;
 Label* debugRenderLabel = nullptr;
 CheckBox* debugRenderPiesCheckBox = nullptr;
 CheckBox* debugRenderSpheresCheckBox = nullptr;
+CheckBox* debugRenderColTreeCheckBox = nullptr;
 
 
 // Test
@@ -386,6 +387,7 @@ void Screen::init() {
 	debugRenderLabel = new Label("Render", 0, 0);
 	debugRenderPiesCheckBox = new CheckBox("Statistics", 0, 0, true);
 	debugRenderSpheresCheckBox = new CheckBox("Collision spheres", 0, 0, true);
+	debugRenderColTreeCheckBox = new CheckBox("Collision tree", 0, 0, true);
 	debugInfoVectorCheckBox->action = [] (CheckBox* c) { toggleDebugVecType(Debug::INFO_VEC); };
 	debugVelocityCheckBox->action = [] (CheckBox* c) { toggleDebugVecType(Debug::VELOCITY); };
 	debugAccelerationCheckBox->action = [] (CheckBox* c) { toggleDebugVecType(Debug::ACCELERATION); };
@@ -400,6 +402,7 @@ void Screen::init() {
 	debugIntersectionCheckBox->action = [] (CheckBox* c) { toggleDebugPointType(Debug::INTERSECTION); };
 	debugRenderPiesCheckBox->action = [] (CheckBox* c) { renderPies = !renderPies; };
 	debugRenderSpheresCheckBox->action = [] (CheckBox* c) { colissionSpheresMode = static_cast<SphereColissionRenderMode>((static_cast<int>(colissionSpheresMode) + 1) % 3); };
+	debugRenderColTreeCheckBox->action = [](CheckBox * c) {renderColTree = static_cast<ColTreeRenderMode>((static_cast<int>(renderColTree) + 1) % 3); };
 
 	debugFrame->add(debugVectorLabel, Align::CENTER);
 	debugFrame->add(debugInfoVectorCheckBox, Align::FILL);
@@ -418,6 +421,7 @@ void Screen::init() {
 	debugFrame->add(debugRenderLabel, Align::CENTER);
 	debugFrame->add(debugRenderPiesCheckBox, Align::FILL);
 	debugFrame->add(debugRenderSpheresCheckBox, Align::FILL);
+	debugFrame->add(debugRenderColTreeCheckBox, Align::FILL);
 	
 	// Add frames to GUI
 	GUI::add(propertiesFrame);
@@ -567,7 +571,8 @@ void Screen::update() {
 	debugCenterOfMassCheckBox->checked = point_debug_enabled[Debug::CENTER_OF_MASS];
 	debugIntersectionCheckBox->checked = point_debug_enabled[Debug::INTERSECTION];
 	debugRenderPiesCheckBox->checked = renderPies;
-	debugRenderSpheresCheckBox->checked = colissionSpheresMode!=SphereColissionRenderMode::NONE;
+	debugRenderSpheresCheckBox->checked = colissionSpheresMode != SphereColissionRenderMode::NONE;
+	debugRenderColTreeCheckBox->checked = renderColTree != ColTreeRenderMode::NONE;
 
 	// Update properties frame
 	if (selectedPart) {
@@ -646,7 +651,7 @@ void Screen::renderPhysicals() {
 
 		basicShader.updateMaterial(material);
 
-		// Render each physical
+		// Render each object
 		basicShader.updatePart(part);
 
 		if(meshId == -1) continue;
@@ -668,7 +673,7 @@ void Screen::renderPhysicals() {
 		
 		basicShader.updateMaterial(material);
 	   
-		// Render each physical
+		// Render each object
 		basicShader.updatePart(*part);
 
 		if (part->drawMeshId == -1) continue;
@@ -690,11 +695,68 @@ void renderBox(const CFrame& cframe, double width, double height, double depth, 
 
 	basicShader.updateModelMatrix(CFrameToMat4(CFrame(cframe.getPosition(), cframe.getRotation() * DiagonalMat3(width, height, depth))));
 
+	//cube->render(Renderer::WIREFRAME);
 	cube->render();
+}
+
+void renderBounds(const Bounds& bounds, const Vec4f& color) {
+	Vec3Fix diagonal = bounds.getDiagonal();
+	Position p = bounds.getCenter();
+	renderBox(CFrame(Vec3(p.x, p.y, p.z)), diagonal.x, diagonal.y, diagonal.z, color);
+}
+
+Vec4f colors[]{
+	GUI::COLOR::BLUE,
+	GUI::COLOR::GREEN,
+	GUI::COLOR::YELLOW,
+	GUI::COLOR::ORANGE,
+	GUI::COLOR::RED,
+	GUI::COLOR::PURPLE
+};
+
+void recursiveRenderColTree(const TreeNode& node, int depth) {
+	if (node.isLeafNode) {
+		for (const BoundedPhysical& phys : *node.physicals) {
+			//renderBounds(phys.bounds, GUI::COLOR::AQUA);
+		}
+
+	} else {
+		for (const TreeNode& node : *node.subTrees) {
+			recursiveRenderColTree(node, depth+1);
+		}
+	}
+
+	Vec4f color = colors[depth % 6];
+	color.w = 0.3;
+
+	renderBounds(node.bounds.expanded((30-depth) * 0.0002), color);
+}
+
+bool recursiveColTreeForOneObject(const TreeNode& node, const Physical* obj, const Bounds& bounds) {
+	if (node.isLeafNode) {
+		for (const BoundedPhysical& p : *node.physicals) {
+			if (p.object == obj) {
+				return true;
+			}
+		}
+	} else {
+		//if (!intersects(node.bounds, bounds)) return false;
+		for (const TreeNode& subNode : *node.subTrees) {
+			if (recursiveColTreeForOneObject(subNode, obj, bounds)) {
+				Vec4f orange = GUI::COLOR::GREEN;
+				orange.w = 0.3;
+
+				renderBounds(node.bounds, orange);
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 void Screen::refresh() {
 	fieldIndex = 0;
+	//glLineWidth(10);
 
 	//Mat4f f = CFrameToMat4(camera.cframe);
 	//camera.cframe = Mat4ToCFrame(lookAt(f, camera.cframe.position, Vec3f()));
@@ -735,7 +797,7 @@ void Screen::refresh() {
 	basicShader.update(camera.viewMatrix, camera.projectionMatrix, camera.cframe.position);
 	renderPhysicals();
 
-	Renderer::disableCulling();
+	/*Renderer::disableCulling();
 	testShader.updateModel(Mat4f().translate(0, 4, 0));
 	testShader.updateView(camera.viewMatrix);
 	testShader.update(camera.cframe.position);
@@ -744,7 +806,7 @@ void Screen::refresh() {
 	mesh->renderMode = RenderMode::PATCHES;
 	mesh->render(Renderer::WIREFRAME);
 	mesh->renderMode = RenderMode::TRIANGLES;
-	Renderer::enableCulling();
+	Renderer::enableCulling();*/
 
 	for (const Physical& p : world->iterPhysicals()) {
 		pointLog.add(AppDebug::ColoredPoint(p.getCenterOfMass(), Debug::CENTER_OF_MASS));
@@ -803,7 +865,15 @@ void Screen::refresh() {
 			renderSphere(phys.circumscribingSphere.radius * 2, phys.circumscribingSphere.origin, blue);
 		}
 	}
-
+	switch (renderColTree) {
+	case ColTreeRenderMode::ALL:
+		recursiveRenderColTree(world->objectTree.rootNode, 0);
+		break;
+	case ColTreeRenderMode::SELECTED:
+		if(selectedPart != nullptr)
+			recursiveColTreeForOneObject(world->objectTree.rootNode, selectedPart->parent, selectedPart->parent->getStrictBounds());
+		break;
+	}
 
 	// Postprocess to screenFrameBuffer
 	screenFrameBuffer->bind();
