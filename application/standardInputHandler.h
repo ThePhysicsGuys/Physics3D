@@ -1,9 +1,9 @@
 #pragma once
 
+#include "../engine/math/vec2.h"
 #include "inputHandler.h"
-#include "worlds.h"
-#include "view\screen.h"
-#include "view\camera.h"
+
+class Screen;
 
 class StandardInputHandler : public InputHandler {
 public: 

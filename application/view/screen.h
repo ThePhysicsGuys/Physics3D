@@ -4,7 +4,6 @@
 #include <GLFW/glfw3.h>
 
 #include "../engine/profiling.h"
-#include "../engine/world.h"
 #include "../engine/math/vec2.h"
 #include "../eventHandler.h"
 #include "../util/properties.h"
@@ -14,9 +13,9 @@
 #include "frameBuffer.h"
 #include "camera.h"
 #include "primitive.h"
-#include "../worlds.h"
 
 class StandardInputHandler;
+class MagnetWorld;
 
 #include "indexedMesh.h"
 #include "../standardInputHandler.h"

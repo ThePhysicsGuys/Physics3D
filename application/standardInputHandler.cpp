@@ -9,6 +9,10 @@
 #include <algorithm>
 #include <random>
 
+#include "worlds.h"
+#include "view\screen.h"
+#include "view\camera.h"
+
 StandardInputHandler::StandardInputHandler(GLFWwindow* window, Screen& screen) : InputHandler(window), screen(screen) {}
 
 void StandardInputHandler::framebufferResize(Vec2i dimension) {

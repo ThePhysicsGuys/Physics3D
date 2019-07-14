@@ -6,12 +6,9 @@ class Screen;
 #include "../../engine/math/vec3.h"
 #include "../../engine/math/mat3.h"
 #include "../../engine/math/mat4.h"
-#include "../../engine/math/mathUtil.h"
 #include "../../engine/math/cframe.h"
-#include "../../engine/part.h"
-#include "../extendedPart.h"
 
-#include <cmath>
+struct ExtendedPart;
 
 struct Camera {
 private:

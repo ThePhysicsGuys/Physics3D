@@ -45,6 +45,7 @@
 #include <math.h>
 #include <map>
 
+#include "../worlds.h"
 
 bool initGLFW() {
 	// Initialize GLFW
