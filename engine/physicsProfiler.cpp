@@ -8,6 +8,7 @@ const char * physicsLabels[]{
 	"EPA",
 	"Collision",
 	"Col. Handling",
+	"Update Tree",
 	"Wait for lock",
 	"Updates",
 	"Other"
@@ -42,11 +43,11 @@ const char* iterationLabels[]{
 	"MAX",
 };
 
-BreakdownAverageProfiler<300, PhysicsProcess> physicsMeasure(physicsLabels);
-HistoricTally<300, long long, IntersectionResult> intersectionStatistics(intersectionLabels);
-CircularBuffer<int, 100> gjkCollideIterStats;
-CircularBuffer<int, 100> gjkNoCollideIterStats;
+BreakdownAverageProfiler<100, PhysicsProcess> physicsMeasure(physicsLabels);
+HistoricTally<1, long long, IntersectionResult> intersectionStatistics(intersectionLabels);
+CircularBuffer<int, 1> gjkCollideIterStats;
+CircularBuffer<int, 1> gjkNoCollideIterStats;
 
-HistoricTally<100, long long, IterationTime> GJKCollidesIterationStatistics(iterationLabels);
-HistoricTally<100, long long, IterationTime> GJKNoCollidesIterationStatistics(iterationLabels);
-HistoricTally<100, long long, IterationTime> EPAIterationStatistics(iterationLabels);
+HistoricTally<1, long long, IterationTime> GJKCollidesIterationStatistics(iterationLabels);
+HistoricTally<1, long long, IterationTime> GJKNoCollidesIterationStatistics(iterationLabels);
+HistoricTally<1, long long, IterationTime> EPAIterationStatistics(iterationLabels);

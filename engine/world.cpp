@@ -51,7 +51,8 @@ double computeCombinedInertiaBetween(const Physical& first, const Physical& seco
 /*
 	exitVector is the distance p2 must travel so that the shapes are no longer colliding
 */
-void handleCollision(Part& part1, Part& part2, Vec3 collisionPoint, Vec3 exitVector, bool anchoredColission) {
+template<bool anchoredColission>
+void handleCollision(Part& part1, Part& part2, Vec3 collisionPoint, Vec3 exitVector) {
 	Debug::logPoint(collisionPoint, Debug::INTERSECTION);
 	Physical& p1 = *part1.parent;
 	Physical& p2 = *part2.parent;
@@ -254,7 +255,7 @@ void WorldPrototype::tick(double deltaT) {
 #ifdef CHECK_SANITY
 		double beforeTotalEnergy = c.p2->parent->getKineticEnergy();
 #endif
-		handleCollision(*c.p1, *c.p2, c.intersection, c.exitVector, true);
+		handleCollision<true>(*c.p1, *c.p2, c.intersection, c.exitVector);
 #ifdef CHECK_SANITY
 		double afterTotalEnergy = c.p2->parent->getKineticEnergy();
 
@@ -268,7 +269,7 @@ void WorldPrototype::tick(double deltaT) {
 #ifdef CHECK_SANITY
 		double beforeTotalEnergy = c.p1->parent->getKineticEnergy() + c.p2->parent->getKineticEnergy();
 #endif
-		handleCollision(*c.p1, *c.p2, c.intersection, c.exitVector, false);
+		handleCollision<false>(*c.p1, *c.p2, c.intersection, c.exitVector);
 #ifdef CHECK_SANITY
 		double afterTotalEnergy = c.p1->parent->getKineticEnergy() + c.p2->parent->getKineticEnergy();
 		if(afterTotalEnergy > beforeTotalEnergy) {
@@ -276,6 +277,9 @@ void WorldPrototype::tick(double deltaT) {
 		}
 #endif
 	}
+
+	physicsMeasure.mark(PhysicsProcess::UPDATE_TREE);
+	objectTree.update(true);
 
 
 	intersectionStatistics.nextTally();
@@ -305,18 +309,21 @@ void WorldPrototype::pushOperation(const std::function<void(WorldPrototype*)>& f
 }
 
 void WorldPrototype::addPartUnsafe(Part* part, bool anchored) {
+	Physical* phys = new Physical(part);
 	if (anchored) {
-		physicals.addLeftSide(Physical(part));
+		physicals.addLeftSide(phys);
 	} else {
-		physicals.add(Physical(part));
+		physicals.add(phys);
 	}
+	objectTree.add(phys, true);
 	ASSERT_VALID;
 }
 void WorldPrototype::removePartUnsafe(Part* part) {
 	Physical* parent = part->parent;
 	parent->detachPart(part);
 	if (parent->getPartCount() == 0) {
-		physicals.remove(parent);
+		throw "TODO fix";
+		//physicals.remove(parent);
 	}
 	ASSERT_VALID;
 }
@@ -382,9 +389,9 @@ void WorldPrototype::detachPart(Part* part) {
 void WorldPrototype::applyExternalForces() {}
 
 bool WorldPrototype::isValid() const {
-	for (const Physical* phys = this->iterPhysicals().begin(); phys != this->iterPhysicals().end(); phys++) {
-		for (const Part& part : *phys) {
-			if (part.parent != phys) {
+	for (const Physical*const * phys = this->iterPhysicals().start; phys != this->iterPhysicals().fin; phys++) {
+		for (const Part& part : **phys) {
+			if (part.parent != *phys) {
 				Log::error("part's parent's child is not part");
 				__debugbreak();
 				return false;

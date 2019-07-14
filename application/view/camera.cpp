@@ -3,8 +3,10 @@
 #include "GL\glew.h"
 #include "GLFW\glfw3.h"
 
+#include "../../engine/math/mathUtil.h"
 #include "picker.h"
 #include "screen.h"
+#include <cmath>
 
 void Camera::setPosition(Vec3 position) {
 	viewDirty = true;

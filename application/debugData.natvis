@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <Type Name="Fix&lt;*&gt;">
+    <DisplayString>{{{double(value) / (1ULL &lt;&lt; $T1),g}}}</DisplayString>
+  </Type>
+  <Type Name="TreeNode">
+    <DisplayString Condition="nodeCount != 0xFFFFFFFFFFFFFFFF">{{TrunkNode Size={nodeCount}}}</DisplayString>
+    <DisplayString Condition="nodeCount == 0xFFFFFFFFFFFFFFFF">{{LeafNode}}</DisplayString>
+    <Expand>
+      <Item Name="bounds" ExcludeView="simple">bounds</Item>
+      <ArrayItems Condition="nodeCount != 0xFFFFFFFFFFFFFFFF">
+        <Size>nodeCount</Size>
+        <ValuePointer>subTrees</ValuePointer>
+      </ArrayItems>
+      <Item Name="object" ExcludeView="simple" Condition="nodeCount == 0xFFFFFFFFFFFFFFFF">object</Item>
+    </Expand>
+  </Type>
+</AutoVisualizer>

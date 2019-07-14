@@ -119,10 +119,10 @@ BoundingBox Physical::computeLocalBounds() const {
 	for (const AttachedPart& p : parts) {
 		double xmax = p.attachment.localToGlobal(p.part->hitbox.furthestInDirection(p.attachment.relativeToLocal(Vec3(1, 0, 0)))).x;
 		double xmin = p.attachment.localToGlobal(p.part->hitbox.furthestInDirection(p.attachment.relativeToLocal(Vec3(-1, 0, 0)))).x;
-		double ymax = p.attachment.localToGlobal(p.part->hitbox.furthestInDirection(p.attachment.relativeToLocal(Vec3(1, 0, 0)))).y;
-		double ymin = p.attachment.localToGlobal(p.part->hitbox.furthestInDirection(p.attachment.relativeToLocal(Vec3(-1, 0, 0)))).y;
-		double zmax = p.attachment.localToGlobal(p.part->hitbox.furthestInDirection(p.attachment.relativeToLocal(Vec3(1, 0, 0)))).z;
-		double zmin = p.attachment.localToGlobal(p.part->hitbox.furthestInDirection(p.attachment.relativeToLocal(Vec3(-1, 0, 0)))).z;
+		double ymax = p.attachment.localToGlobal(p.part->hitbox.furthestInDirection(p.attachment.relativeToLocal(Vec3(0, 1, 0)))).y;
+		double ymin = p.attachment.localToGlobal(p.part->hitbox.furthestInDirection(p.attachment.relativeToLocal(Vec3(0, -1, 0)))).y;
+		double zmax = p.attachment.localToGlobal(p.part->hitbox.furthestInDirection(p.attachment.relativeToLocal(Vec3(0, 0, 1)))).z;
+		double zmin = p.attachment.localToGlobal(p.part->hitbox.furthestInDirection(p.attachment.relativeToLocal(Vec3(0, 0, -1)))).z;
 
 		best.xmax = std::max(best.xmax, xmax);
 		best.xmin = std::min(best.xmin, xmin);
@@ -134,6 +134,38 @@ BoundingBox Physical::computeLocalBounds() const {
 
 	return best;
 }
+
+Bounds Physical::getStrictBounds() const {
+	double xmaxBest = mainPart->cframe.localToGlobal(mainPart->hitbox.furthestInDirection(mainPart->cframe.relativeToLocal(Vec3(1, 0, 0)))).x;
+	double xminBest = mainPart->cframe.localToGlobal(mainPart->hitbox.furthestInDirection(mainPart->cframe.relativeToLocal(Vec3(-1, 0, 0)))).x;
+	double ymaxBest = mainPart->cframe.localToGlobal(mainPart->hitbox.furthestInDirection(mainPart->cframe.relativeToLocal(Vec3(0, 1, 0)))).y;
+	double yminBest = mainPart->cframe.localToGlobal(mainPart->hitbox.furthestInDirection(mainPart->cframe.relativeToLocal(Vec3(0, -1, 0)))).y;
+	double zmaxBest = mainPart->cframe.localToGlobal(mainPart->hitbox.furthestInDirection(mainPart->cframe.relativeToLocal(Vec3(0, 0, 1)))).z;
+	double zminBest = mainPart->cframe.localToGlobal(mainPart->hitbox.furthestInDirection(mainPart->cframe.relativeToLocal(Vec3(0, 0, -1)))).z;
+
+	for (const AttachedPart& p : parts) {
+		
+		double xmax = p.part->cframe.localToGlobal(p.part->hitbox.furthestInDirection(p.part->cframe.relativeToLocal(Vec3(1, 0, 0)))).x;
+		double xmin = p.part->cframe.localToGlobal(p.part->hitbox.furthestInDirection(p.part->cframe.relativeToLocal(Vec3(-1, 0, 0)))).x;
+		double ymax = p.part->cframe.localToGlobal(p.part->hitbox.furthestInDirection(p.part->cframe.relativeToLocal(Vec3(0, 1, 0)))).y;
+		double ymin = p.part->cframe.localToGlobal(p.part->hitbox.furthestInDirection(p.part->cframe.relativeToLocal(Vec3(0, -1, 0)))).y;
+		double zmax = p.part->cframe.localToGlobal(p.part->hitbox.furthestInDirection(p.part->cframe.relativeToLocal(Vec3(0, 0, 1)))).z;
+		double zmin = p.part->cframe.localToGlobal(p.part->hitbox.furthestInDirection(p.part->cframe.relativeToLocal(Vec3(0, 0, -1)))).z;
+		
+		xmaxBest = std::max(xmaxBest, xmax);
+		xminBest = std::min(xminBest, xmin);
+		ymaxBest = std::max(ymaxBest, ymax);
+		yminBest = std::min(yminBest, ymin);
+		zmaxBest = std::max(zmaxBest, zmax);
+		zminBest = std::min(zminBest, zmin);
+	}
+
+	Position min(xminBest, yminBest, zminBest);
+	Position max(xmaxBest, ymaxBest, zmaxBest);
+
+	return Bounds(min, max);
+}
+
 Sphere Physical::computeLocalCircumscribingSphere() const {
 	BoundingBox b = computeLocalBounds();
 	Vec3 localCentroid = b.getCenter();

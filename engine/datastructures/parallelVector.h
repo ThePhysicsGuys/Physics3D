@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../math/vec3.h"
+#include "../../util/log.h"
 
 struct alignas(32) ParallelVec3 {
 	float xvalues[8];
@@ -27,8 +28,11 @@ struct alignas(32) ParallelVec3 {
 
 inline ParallelVec3* createParallelVecBuf(size_t blockCount) {
 	ParallelVec3* vecs = new ParallelVec3[blockCount];
+	// TODO fix alignment bug
 	if (reinterpret_cast<size_t>(vecs) & 0b00011111 != 0) {
-		throw "Error, did not align ParallelVec3 storage!";
+		//delete[] vecs;
+		//throw "Error, did not align ParallelVec3 storage!";
+		Log::error("VecBuf Not aligned!");
 	}
 	return vecs;
 }
@@ -46,15 +50,15 @@ inline ParallelVec3* createAndFillParallelVecBuf(const Vec3f* data, size_t size)
 
 	// fill the remainder of the last block with the last vector, just to have filler data there
 	// this makes it that for example getFurthestInDirection does not have to include a special case for the last block of vecs
-	unsigned int remaining = size & 7;
+	size_t remaining = size & 7;
 	if (remaining != 0) { // not perfectly aligned to block count
 		Vec3f lastBlock[8];
 		Vec3f lastVec = data[alignedSize + remaining - 1];
-		unsigned int lastBlockIndex = size / 8;
-		for (int i = 0; i < remaining; i++)
+		size_t lastBlockIndex = size / 8;
+		for (size_t i = 0; i < remaining; i++)
 			lastBlock[i] = data[alignedSize + i];
 
-		for (int i = remaining; i < 8; i++)
+		for (size_t i = remaining; i < 8; i++)
 			lastBlock[i] = lastVec;
 
 		vecs[lastBlockIndex].load(lastBlock);

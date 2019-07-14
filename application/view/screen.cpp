@@ -45,6 +45,7 @@
 #include <math.h>
 #include <map>
 
+#include "../worlds.h"
 
 bool initGLFW() {
 	// Initialize GLFW
@@ -720,6 +721,61 @@ void renderBox(const CFrame& cframe, double width, double height, double depth, 
 	cube->render();
 }
 
+void renderBounds(const Bounds& bounds, const Vec4f& color) {
+	Vec3Fix diagonal = bounds.getDiagonal();
+	Position p = bounds.getCenter();
+	renderBox(CFrame(Vec3(p.x, p.y, p.z)), diagonal.x, diagonal.y, diagonal.z, color);
+}
+
+Vec4f colors[]{
+	GUI::COLOR::BLUE,
+	GUI::COLOR::GREEN,
+	GUI::COLOR::YELLOW,
+	GUI::COLOR::ORANGE,
+	GUI::COLOR::RED,
+	GUI::COLOR::PURPLE
+};
+
+void recursiveRenderColTree(const TreeNode& node, int depth) {
+	if (node.isLeafNode()) {
+		renderBounds(node.bounds, GUI::COLOR::AQUA);
+
+	} else {
+		for (const TreeNode& node : node) {
+			recursiveRenderColTree(node, depth + 1);
+		}
+	}
+
+	Vec4f color = colors[depth % 6];
+	color.w = 0.3;
+
+	renderBounds(node.bounds.expanded((30 - depth) * 0.0002), color);
+}
+
+bool recursiveColTreeForOneObject(const TreeNode & node, const Physical * obj, const Bounds & bounds) {
+	if (node.isLeafNode()) {
+		if (node.object == obj)
+			return true;
+		/*for (const BoundedPhysical& p : *node.physicals) {
+			if (p.object == obj) {
+				return true;
+			}
+		}*/
+	} else {
+		//if (!intersects(node.bounds, bounds)) return false;
+		for (const TreeNode& subNode : node) {
+			if (recursiveColTreeForOneObject(subNode, obj, bounds)) {
+				Vec4f orange = GUI::COLOR::GREEN;
+				orange.w = 0.3;
+
+				renderBounds(node.bounds, orange);
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 void Screen::renderDebug() {
 	// Initialize vector log buffer
 	graphicsMeasure.mark(GraphicsProcess::VECTORS);
@@ -786,7 +842,15 @@ void Screen::renderDebug() {
 			renderSphere(phys.circumscribingSphere.radius * 2, phys.circumscribingSphere.origin, blue);
 		}
 	}
-
+	switch (renderColTree) {
+	case ColTreeRenderMode::ALL:
+		recursiveRenderColTree(world->objectTree.rootNode, 0);
+		break;
+	case ColTreeRenderMode::SELECTED:
+		if (selectedPart != nullptr)
+			recursiveColTreeForOneObject(world->objectTree.rootNode, selectedPart->parent, selectedPart->parent->getStrictBounds());
+		break;
+	}
 
 	// Update debug meshes
 	graphicsMeasure.mark(GraphicsProcess::VECTORS);

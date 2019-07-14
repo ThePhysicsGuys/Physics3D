@@ -2,7 +2,8 @@
 
 #include "math/vec3.h"
 #include "math/cframe.h"
-#include "geometry/shape.h"
+
+struct Shape;
 
 namespace Debug {
 	
@@ -33,7 +34,7 @@ namespace Debug {
 	inline void logVector(Vec3f origin, Vec3f vec, VectorType type) { logVector(Vec3(origin), Vec3(vec), type); };
 	void logPoint(Vec3 point, PointType type);
 	void logCFrame(CFrame frame, CFrameType type);
-	void logShape(Shape shape);
+	void logShape(const Shape& shape);
 
 	void setVectorLogAction(void(*logger)(Vec3 origin, Vec3 vec, VectorType type));
 	void setPointLogAction(void(*logger)(Vec3 point, PointType type));

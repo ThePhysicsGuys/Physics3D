@@ -67,6 +67,7 @@ std::map<PointType, PointColorPair> pointColors {
 
 bool renderPiesEnabled = false;
 SphereColissionRenderMode colissionSpheresMode;
+ColTreeRenderMode renderColTree;
 
 int fieldIndex = 0;
 

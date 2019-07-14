@@ -8,11 +8,13 @@
 #include <shared_mutex>
 #include "datastructures/splitUnorderedList.h"
 #include "worldIterator.h"
+#include "datastructures/boundsTree.h"
 
 class WorldPrototype {
 private:
 	std::queue<std::function<void(WorldPrototype*)>> waitingOperations;
-	SplitUnorderedList<Physical> physicals;
+	SplitUnorderedList<Physical*> physicals;
+
 	size_t getTotalVertexCount();
 	void processQueue();
 
@@ -24,6 +26,7 @@ private:
 public:
 	mutable std::shared_mutex lock;
 	mutable std::mutex queueLock;
+	BoundsTree objectTree;
 
 	Part* selectedPart = nullptr;
 
@@ -43,17 +46,16 @@ public:
 	void removePart(Part* p);
 
 	inline bool isAnchored(Physical* p) const {
-		return physicals.isLeftSide(p);
+		// return physicals.isLeftSide(p);
+		return false;
 	}
 
 	inline void anchor(Physical* p) {
-		if (!isAnchored(p))
-			physicals.moveRightToLeft(p);
+		// if (!isAnchored(p)) physicals.moveRightToLeft(p);
 	}
 
 	inline void unanchor(Physical* p) {
-		if (isAnchored(p))
-			physicals.moveLeftToRight(p);
+		// if (isAnchored(p)) physicals.moveLeftToRight(p);
 	}
 
 	inline size_t getPartCount() const {
@@ -90,21 +92,21 @@ public:
 
 
 
-	ListIter<Physical> iterPhysicals() { return ListIter<Physical>{ physicals.begin(), physicals.end() }; }
-	ConstListIter<Physical> iterPhysicals() const { return ConstListIter<Physical>{ physicals.begin(), physicals.end() }; }
+	ListOfPtrIterFactory<Physical> iterPhysicals() { return ListOfPtrIterFactory<Physical>{ physicals.begin(), physicals.end() }; }
+	ListOfPtrIterFactory<const Physical> iterPhysicals() const { return ListOfPtrIterFactory<const Physical>{ physicals.begin(), physicals.end() }; }
 
-	ListIter<Physical> iterAnchoredPhysicals() { return physicals.iterLeft(); }
-	ConstListIter<Physical> iterAnchoredPhysicals() const { return physicals.iterLeft(); }
+	ListOfPtrIterFactory<Physical> iterAnchoredPhysicals() { return ListOfPtrIterFactory<Physical>(physicals.begin(), physicals.getSplitOffset()); }
+	ListOfPtrIterFactory<const Physical> iterAnchoredPhysicals() const { return ListOfPtrIterFactory<const Physical>(physicals.begin(), physicals.getSplitOffset()); }
 
-	ListIter<Physical> iterFreePhysicals() { return physicals.iterRight(); }
-	ConstListIter<Physical> iterFreePhysicals() const { return physicals.iterRight(); }
+	ListOfPtrIterFactory<Physical> iterFreePhysicals() { return ListOfPtrIterFactory<Physical>(physicals.getSplitOffset(), physicals.end()); }
+	ListOfPtrIterFactory<const Physical> iterFreePhysicals() const { return ListOfPtrIterFactory<const Physical>(physicals.getSplitOffset(), physicals.end()); }
 };
 
 template<typename T = Part>
 class World : public WorldPrototype {
 public:
-	inline CustomPartIter<T> begin() { return CustomPartIter<T>(iterPhysicals().begin(), iterPhysicals().begin()->begin()); }
-	inline CustomPartIter<T> end() { return CustomPartIter<T>(iterPhysicals().end(), iterPhysicals().end()->end()); }
+	inline CustomPartIter<T> begin() { return CustomPartIter<T>(PartIterator(iterPhysicals().begin())); }
+	inline CustomPartIter<T> end() { return CustomPartIter<T>(PartIterator(iterPhysicals().end(), PartIter())); }
 
 	inline CustomPartIteratorFactory<T> iterAnchoredParts() { return CustomPartIteratorFactory<T>(iterAnchoredPhysicals()); }
 	inline ConstCustomPartIteratorFactory<T> iterAnchoredParts() const { return ConstCustomPartIteratorFactory<T>(iterAnchoredPhysicals()); }

@@ -26,5 +26,4 @@ public:
 	Vec2 resize() override;
 
 	void drag(Vec2 newPoint, Vec2 oldPoint) override;
-
 };

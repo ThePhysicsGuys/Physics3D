@@ -1,5 +1,6 @@
 #include "debug.h"
 
+#include "geometry/shape.h"
 
 namespace Debug {
 	void(*logVecAction)(Vec3, Vec3, VectorType) = [](Vec3, Vec3, VectorType) {};
@@ -10,7 +11,7 @@ namespace Debug {
 	void logVector(Vec3 origin, Vec3 vec, VectorType type) { logVecAction(origin, vec, type); };
 	void logPoint(Vec3 point, PointType type) { logPointAction(point, type); }
 	void logCFrame(CFrame frame, CFrameType type) { logCFrameAction(frame, type); };
-	void logShape(Shape shape) { logShapeAction(shape); };
+	void logShape(const Shape& shape) { logShapeAction(shape); };
 
 	void setVectorLogAction(void(*logger)(Vec3 origin, Vec3 vec, VectorType type)) { logVecAction = logger; };
 	void setPointLogAction(void(*logger)(Vec3 point, PointType type)) { logPointAction = logger; }

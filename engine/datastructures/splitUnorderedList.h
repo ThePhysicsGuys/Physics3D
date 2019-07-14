@@ -67,8 +67,12 @@ public:
 		return obj >= this->data + splitOffset;
 	}
 
+	inline T* getSplitOffset() const {
+		return data + splitOffset;
+	}
+
 	inline ListIter<T> iterLeft() { return ListIter<T>{ this->data, this->data + splitOffset }; }
-	inline ConstListIter<T> iterLeft() const { return ConstListIter<T>{ this->data, this->data + splitOffset }; }
+	inline ListIter<const T> iterLeft() const { return ListIter<const T>{ this->data, this->data + splitOffset }; }
 	inline ListIter<T> iterRight() { return ListIter<T>{ this->data + splitOffset, this->data + this->size }; }
-	inline ConstListIter<T> iterRight() const { return ConstListIter<T>{ this->data + splitOffset, this->data + this->size }; }
+	inline ListIter<const T> iterRight() const { return ListIter<const T>{ this->data + splitOffset, this->data + this->size }; }
 };
