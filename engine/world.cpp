@@ -278,6 +278,9 @@ void WorldPrototype::tick(double deltaT) {
 #endif
 	}
 
+	physicsMeasure.mark(PhysicsProcess::UPDATE_TREE);
+	objectTree.update(true);
+
 
 	intersectionStatistics.nextTally();
 
@@ -312,7 +315,7 @@ void WorldPrototype::addPartUnsafe(Part* part, bool anchored) {
 	} else {
 		physicals.add(phys);
 	}
-	objectTree.add(phys);
+	objectTree.add(phys, true);
 	ASSERT_VALID;
 }
 void WorldPrototype::removePartUnsafe(Part* part) {

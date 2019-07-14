@@ -664,13 +664,11 @@ Vec4f colors[]{
 };
 
 void recursiveRenderColTree(const TreeNode& node, int depth) {
-	if (node.isLeafNode) {
-		for (const BoundedPhysical& phys : *node.physicals) {
-			//renderBounds(phys.bounds, GUI::COLOR::AQUA);
-		}
+	if (node.isLeafNode()) {
+		renderBounds(node.bounds, GUI::COLOR::AQUA);
 
 	} else {
-		for (const TreeNode& node : *node.subTrees) {
+		for (const TreeNode& node : node) {
 			recursiveRenderColTree(node, depth + 1);
 		}
 	}
@@ -682,15 +680,17 @@ void recursiveRenderColTree(const TreeNode& node, int depth) {
 }
 
 bool recursiveColTreeForOneObject(const TreeNode & node, const Physical * obj, const Bounds & bounds) {
-	if (node.isLeafNode) {
-		for (const BoundedPhysical& p : *node.physicals) {
+	if (node.isLeafNode()) {
+		if (node.object == obj)
+			return true;
+		/*for (const BoundedPhysical& p : *node.physicals) {
 			if (p.object == obj) {
 				return true;
 			}
-		}
+		}*/
 	} else {
 		//if (!intersects(node.bounds, bounds)) return false;
-		for (const TreeNode& subNode : *node.subTrees) {
+		for (const TreeNode& subNode : node) {
 			if (recursiveColTreeForOneObject(subNode, obj, bounds)) {
 				Vec4f orange = GUI::COLOR::GREEN;
 				orange.w = 0.3;
