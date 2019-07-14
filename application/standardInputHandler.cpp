@@ -150,7 +150,7 @@ void StandardInputHandler::mouseMove(double x, double y) {
 	// Camera rotating
 	if (rightDragging) {
 
-		screen.camera.rotate(screen, Vec3(dmy * 0.1, dmx * 0.1, 0), leftDragging);
+		screen.camera.rotate(screen, dmy * 0.1, dmx * 0.1, 0, leftDragging);
 	}
 	
 	if (leftDragging) {
@@ -166,14 +166,14 @@ void StandardInputHandler::mouseMove(double x, double y) {
 
 	// Camera moving
 	if (middleDragging) {
-		screen.camera.move(screen, Vec3(dmx * -0.5, dmy * 0.5, 0), leftDragging);
+		screen.camera.move(screen, dmx * -0.5, dmy * 0.5, 0, leftDragging);
 	}
 
 	cursorPosition = newCursorPosition;
 };
 
 void StandardInputHandler::scroll(double xOffset, double yOffset) {
-	screen.camera.speed = fmin(fmax(screen.camera.speed * (1 + 0.2 * yOffset), 0.001), 100);
+	screen.camera.speed = GUI::clamp(screen.camera.speed * (1 + 0.2 * yOffset), 0.001, 100);
 };
 
 void StandardInputHandler::mouseExit() {

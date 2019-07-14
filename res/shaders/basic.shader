@@ -196,7 +196,12 @@ uniform sampler2D normalSampler;
 const int maxLights = 4;
 uniform Light lights[maxLights];
 
+// Environment
 uniform vec3 sunDirection = vec3(1, 1, 0);
+uniform vec3 sunColor = vec3(1, 1, 1);
+uniform float exposure = 1.0;
+uniform float gamma = 1.0;
+uniform bool hdr;
 
 vec4 fog(vec4 color) {
 	vec3 cameraDirection = -(viewMatrix * vec4(fposition, 1)).xyz;
@@ -212,6 +217,14 @@ vec4 fog(vec4 color) {
 	return vec4(mix(color.rgb, fogColor, fogAmount), color.a);
 }
 
+vec3 calcDirectionalLight() {
+	// Directional light
+	vec3 directionalLight = normalize(sunDirection);
+	float directionalFactor = 0.4 * max(dot(normal, directionalLight), 0.0);
+	vec3 directional = directionalFactor * sunColor;
+	return directional;
+}
+
 vec3 calcLightColor(Light light) {
 
 	// Ambient
@@ -223,11 +236,6 @@ vec3 calcLightColor(Light light) {
 	vec3 toLightSource = normalize(lightDirection);
 	float diffuseFactor = max(dot(normal, toLightSource), 0.0);
 	vec3 diffuse = material.diffuse * diffuseFactor * light.color;
-
-	// Directional light
-	vec3 directionalLight = normalize(sunDirection);
-	float directionalFactor = 0.4 * max(dot(normal, directionalLight), 0.0);
-	vec3 directional = directionalFactor * light.color;
 
 	// Specular light
 	float specularPower = 10.0f;
@@ -243,7 +251,7 @@ vec3 calcLightColor(Light light) {
 	float attenuationInverse = light.attenuation.constant + light.attenuation.linear * distance + light.attenuation.exponent * distance * distance;
 	vec3 specularDiffuse = (diffuse + specular) / attenuationInverse;
 
-	return ambient + directional + specularDiffuse;
+	return ambient + specularDiffuse;
 }
 
 mat3 rodrigues() {
@@ -261,10 +269,10 @@ void main() {
 		normal = normalize(normal * 2 - 1);
 		normal = normalize(modelMatrix * vec4(normal, 0)).xyz;
 		normal = rodrigues() * normal;
-	} else {*/
+	}*/
 	normal = fnormal;
 
-
+	// Light calculations
 	vec3 lightColors = vec3(0);
 	int count = 0;
 	for (int i = 0; i < maxLights; i++) {
@@ -274,12 +282,25 @@ void main() {
 		}
 	}
 
-	if (material.textured) {
-		outColor = vec4(lightColors / count * material.ambient.rgb, material.ambient.a) * texture(textureSampler, fuv);
-	} else {
-		outColor = vec4(lightColors / count * material.ambient.rgb, material.ambient.a);
-	}
+	// Take average of colors
+	outColor = vec4(lightColors / count * material.ambient.rgb, material.ambient.a);
 
-	//outColor = fog(outColor);
+	// Directional light
+	outColor = outColor + vec4(calcDirectionalLight(), 0);
+
+	// Apply texture if present
+	if (material.textured)
+		outColor = outColor * texture(textureSampler, fuv);
+
+	// HDR correction
+	//outColor = vec4(outColor.rgb / (outColor.rgb + vec3(1.0)), outColor.a);
+	if (hdr)
+		outColor = vec4(vec3(1.0) - exp(-outColor.rgb * exposure), outColor.a);
+
+	// Gamma correction
+	outColor = vec4(pow(outColor.rgb, vec3(1.0 / gamma)), outColor.a);
+
+	// Fog
+	// outColor = fog(outColor);
 }
 

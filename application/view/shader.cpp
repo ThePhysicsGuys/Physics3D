@@ -29,10 +29,6 @@ void Shader::setUniform(const std::string& uniform, float value) const {
 	glUniform1f(uniforms.at(uniform), value);
 }
 
-void Shader::setUniform(const std::string& uniform, double value) const {
-	glUniform1d(uniforms.at(uniform), value);
-}
-
 void Shader::setUniform(const std::string& uniform, const Vec2f& value) const {
 	glUniform2d(uniforms.at(uniform), value.x, value.y);
 }

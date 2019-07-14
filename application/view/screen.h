@@ -41,7 +41,7 @@ public:
 	EventHandler eventHandler;
 	Properties properties;
 
-	FrameBuffer* modelFrameBuffer = nullptr;
+	HDRFrameBuffer* modelFrameBuffer = nullptr;
 	FrameBuffer* screenFrameBuffer = nullptr;
 	FrameBuffer* blurFrameBuffer = nullptr;
 	Quad* quad = nullptr;

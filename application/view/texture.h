@@ -18,8 +18,7 @@ public:
 	int channels;
 
 	Texture(unsigned int width, unsigned int height, const void* buffer, int format);
-	Texture(unsigned int width, unsigned int height) : Texture(width, height, nullptr,
-		0x1908) {};
+	Texture(unsigned int width, unsigned int height);
 
 	void bind(int unit);
 	void bind() override;
@@ -36,6 +35,24 @@ public:
 };
 
 Texture* load(std::string name);
+
+class HDRTexture : public Bindable {
+public:
+	int unit;
+	unsigned int width;
+	unsigned int height;
+
+	HDRTexture(unsigned int width, unsigned int height, const void* buffer);
+	HDRTexture(unsigned int width, unsigned int height);
+
+	void bind(int unit);
+	void bind() override;
+	void unbind() override;
+	void close() override;
+
+	void resize(unsigned int width, unsigned int height);
+	void resize(unsigned int width, unsigned int height, const void* buffer);
+};
 
 class TextureMultisample : public Bindable {
 public:

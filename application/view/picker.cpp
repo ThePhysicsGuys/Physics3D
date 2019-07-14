@@ -3,6 +3,7 @@
 #include "material.h"
 #include "renderUtils.h"
 #include "primitive.h"
+#include "shaderProgram.h"
 
 #include "gui\gui.h"
 
@@ -107,7 +108,7 @@ namespace Picker {
 
 	// Render
 	// Rendering of edit tools
-	void renderEditTools(Screen& screen, BasicShader& basicShader, LineShader& lineShader) {
+	void renderEditTools(Screen& screen) {
 		IndexedMesh* shaft = nullptr;
 		IndexedMesh* center = nullptr;
 
@@ -134,51 +135,51 @@ namespace Picker {
 
 		// Center, only rendered if editMode != EditMode::ROTATE
 		if (center) {
-			basicShader.updateModel(modelMatrix);
-			basicShader.updateMaterial(Material(GUI::COLOR::WHITE));
+			Shaders::basicShader.updateModel(modelMatrix);
+			Shaders::basicShader.updateMaterial(Material(GUI::COLOR::WHITE));
 			center->render();
 		}
 
 		if (selectedTool.editDirection != EditDirection::NONE) {
 			switch (selectedTool.editDirection) {
 			case EditDirection::Y:
-				lineShader.updateModel(modelMatrix);
-				lineShader.updateColor(GUI::COLOR::G);
+				Shaders::lineShader.updateModel(modelMatrix);
+				Shaders::lineShader.updateColor(GUI::COLOR::G);
 				break;
 			case EditDirection::X:
-				lineShader.updateModel(modelMatrix * transformations[1]);
-				lineShader.updateColor(GUI::COLOR::R);
+				Shaders::lineShader.updateModel(modelMatrix * transformations[1]);
+				Shaders::lineShader.updateColor(GUI::COLOR::R);
 				break;
 			case EditDirection::Z:
-				lineShader.updateModel(modelMatrix * transformations[2]);
-				lineShader.updateColor(GUI::COLOR::B);
+				Shaders::lineShader.updateModel(modelMatrix * transformations[2]);
+				Shaders::lineShader.updateColor(GUI::COLOR::B);
 				break;
 			}
 			line->render();
 		}
 
 		// Y
-		basicShader.updateModel(modelMatrix);
-		basicShader.updateMaterial(Material(GUI::COLOR::G));
+		Shaders::basicShader.updateModel(modelMatrix);
+		Shaders::basicShader.updateMaterial(Material(GUI::COLOR::G));
 		shaft->render();
 
 		// X
-		basicShader.updateMaterial(Material(GUI::COLOR::R));
-		basicShader.updateModel(modelMatrix * transformations[1]);
+		Shaders::basicShader.updateMaterial(Material(GUI::COLOR::R));
+		Shaders::basicShader.updateModel(modelMatrix * transformations[1]);
 		shaft->render();
 
 		// Z
-		basicShader.updateMaterial(Material(GUI::COLOR::B));
-		basicShader.updateModel(modelMatrix * transformations[2]);
+		Shaders::basicShader.updateMaterial(Material(GUI::COLOR::B));
+		Shaders::basicShader.updateModel(modelMatrix * transformations[2]);
 		shaft->render();
 
 		Renderer::disableDepthTest();
 	}
 
 	// Picker render function
-	void render(Screen& screen, BasicShader& basicShader, LineShader& lineShader) {
+	void render(Screen& screen) {
 		if (screen.selectedPart) {
-			renderEditTools(screen, basicShader, lineShader);
+			renderEditTools(screen);
 		}
 	}
 

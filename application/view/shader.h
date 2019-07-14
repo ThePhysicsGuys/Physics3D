@@ -40,7 +40,6 @@ public:
 	void createUniform(const std::string& uniform);
 	void setUniform(const std::string& uniform, int value) const;
 	void setUniform(const std::string& uniform, float value) const;
-	void setUniform(const std::string& uniform, double value) const;
 	void setUniform(const std::string& uniform, const Vec2f& value) const;
 	void setUniform(const std::string& unfiorm, const Vec3f& value) const;
 	void setUniform(const std::string& unfiorm, const Vec4f& value) const;

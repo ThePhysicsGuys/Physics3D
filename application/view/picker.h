@@ -2,8 +2,6 @@
 
 #include "screen.h"
 
-#include "shaderProgram.h"
-
 #include "../engine/math/vec2.h"
 
 namespace Picker {
@@ -18,7 +16,7 @@ namespace Picker {
 
 	void init();
 	void update(Screen& screen, Vec2 mousePosition);
-	void render(Screen& screen, BasicShader& basicShader, LineShader& lineShader);
+	void render(Screen& screen);
 
 	void press(Screen& screen);
 	void release(Screen& screen);

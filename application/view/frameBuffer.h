@@ -26,6 +26,24 @@ public:
 	void attach(RenderBuffer* renderBuffer);
 };
 
+class HDRFrameBuffer : public Bindable {
+public:
+	Vec2i dimension;
+
+	HDRTexture* texture = nullptr;
+	RenderBuffer* renderBuffer = nullptr;
+
+	HDRFrameBuffer();
+	HDRFrameBuffer(unsigned int width, unsigned int height);
+
+	void resize(Vec2i dimension);
+
+	void bind() override;
+	void unbind() override;
+	void close() override;
+};
+
+
 class DepthFrameBuffer : public Bindable {
 public:
 	unsigned int width;

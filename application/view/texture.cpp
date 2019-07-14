@@ -54,6 +54,8 @@ Texture* load(std::string name) {
 	return texture;
 }
 
+Texture::Texture(unsigned int width, unsigned int height) : Texture(width, height, nullptr, GL_RGBA) {};
+
 Texture::Texture(unsigned int width, unsigned int height, const void* buffer, int format) : width(width), height(height), unit(0), format(format) {
 	glGenTextures(1, &id);
 
@@ -142,6 +144,51 @@ void Texture::unbind() {
 }
 
 void Texture::close() {
+	glDeleteTextures(1, &id);
+}
+
+
+// HDRTexture
+
+HDRTexture::HDRTexture(unsigned int width, unsigned int height) : HDRTexture(width, height, nullptr) {};
+
+HDRTexture::HDRTexture(unsigned int width, unsigned int height, const void* buffer) : width(width), height(height), unit(0) {
+	glGenTextures(1, &id);
+
+	bind();
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, buffer);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	unbind();
+}
+
+void HDRTexture::resize(unsigned int width, unsigned int height, const void* buffer) {
+	bind();
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, buffer);
+	unbind();
+}
+
+void HDRTexture::resize(unsigned int width, unsigned int height) {
+	resize(width, height, nullptr);
+}
+
+void HDRTexture::bind(int unit) {
+	this->unit = unit;
+	glActiveTexture(GL_TEXTURE0 + unit);
+	glBindTexture(GL_TEXTURE_2D, id);
+}
+
+void HDRTexture::bind() {
+	bind(unit);
+}
+
+void HDRTexture::unbind() {
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void HDRTexture::close() {
 	glDeleteTextures(1, &id);
 }
 

@@ -99,6 +99,7 @@ Screen::Screen(int width, int height, MagnetWorld* world) {
 	Log::info("OpenGL shader version: (%s)", Renderer::getShaderVersion());
 }
 
+
 // Generic Shapes
 IndexedMesh* sphere = nullptr;
 IndexedMesh* cube = nullptr;
@@ -136,6 +137,7 @@ BarChart iterationChart("Iteration Statistics", "", GJKCollidesIterationStatisti
 // Light uniforms
 const int lightCount = 4;
 Vec3f sunDirection;
+Vec3f sunColor;
 Attenuation attenuation = { 0, 0, 0.5 };
 Light lights[lightCount] = {
 	Light(Vec3f(5, 0, 0), Vec3f(1, 1, 1), 2, attenuation),
@@ -177,7 +179,8 @@ Panel* mouseHorizontal = nullptr;
 // Colorpicker GUI
 Frame* colorPickerFrame = nullptr;
 ColorPicker* colorPicker = nullptr;
-
+Frame* colorPickerFrame2 = nullptr; // FOR NOW
+ColorPicker* colorPicker2 = nullptr;
 
 // Debug GUI
 Frame* debugFrame = nullptr;
@@ -200,8 +203,19 @@ CheckBox* debugRenderPiesCheckBox = nullptr;
 CheckBox* debugRenderSpheresCheckBox = nullptr;
 
 
+// Environment frame
+Frame* environmentFrame = nullptr;
+Label* gammaLabel = nullptr;
+Slider* gammaSlider = nullptr;
+Label* exposureLabel = nullptr;
+CheckBox* hdrCheckBox = nullptr;
+Slider* exposureSlider = nullptr;
+Label* sunLabel = nullptr;
+Button* sunColorButton;
+DirectionEditor* sunDirectionEditor = nullptr;
+
+
 // Test
-DirectionEditor* directionEditor = nullptr;
 IndexedMesh* mesh = nullptr;
 Texture* texture = nullptr;
 
@@ -224,8 +238,27 @@ void Screen::init() {
 
 
 	// Screen size init
-	Vec2 size = Renderer::getGLFWWindowSize();
-	handler->framebufferResize(size);
+	dimension = Renderer::getGLFWWindowSize();
+
+
+	// Framebuffer init
+	quad = new Quad();
+	modelFrameBuffer = new HDRFrameBuffer(dimension.x, dimension.y);
+	screenFrameBuffer = new FrameBuffer(dimension.x, dimension.y);
+	blurFrameBuffer = new FrameBuffer(dimension.x, dimension.y);
+	depthBuffer = new DepthFrameBuffer(1024, 1024);
+
+
+	// Eventhandler init
+	eventHandler.setWindowResizeCallback([](Screen& screen, Vec2i dimension) {
+		screen.screenFrameBuffer->resize(dimension);
+		screen.modelFrameBuffer->resize(dimension);
+		screen.blurFrameBuffer->resize(dimension);
+		GUI::guiFrameBuffer->resize(dimension);
+
+		screen.camera.update(((float)dimension.x) / ((float)dimension.y));
+		screen.dimension = dimension;
+	});
 
 
 	// Shader init
@@ -254,15 +287,7 @@ void Screen::init() {
 	// Camera init
 	camera.setPosition(Vec3(1, 1, -2));
 	camera.setRotation(Vec3(0, 3.1415, 0.0));
-	camera.update(1.0, 1, 0.01, 10000.0);
-
-
-	// Framebuffer init
-	quad = new Quad();
-	modelFrameBuffer = new FrameBuffer(size.x, size.y);
-	screenFrameBuffer = new FrameBuffer(size.x, size.y);
-	blurFrameBuffer = new FrameBuffer(size.x, size.y);
-	depthBuffer = new DepthFrameBuffer(1024, 1024);
+	camera.update(1.0, camera.aspect, 0.01, 10000.0);
 
 
 	// Font init
@@ -271,6 +296,10 @@ void Screen::init() {
 
 	// GUI init
 	GUI::init(this, font);
+
+
+	// Resize
+	handler->framebufferResize(dimension);
 
 
 	// Properties GUI
@@ -285,7 +314,7 @@ void Screen::init() {
 	partPotentialEnergy = new Label("", 0, 0);
 	partEnergy = new Label("", 0, 0);
 	renderModeCheckBox = new CheckBox("Wireframe", 0, 0, true);
-	renderModeCheckBox->action = [](CheckBox* c) {
+	renderModeCheckBox->action = [] (CheckBox* c) {
 		if (GUI::screen->selectedPart) {
 			if (GUI::screen->selectedPart->renderMode == Renderer::FILLED) {
 				GUI::screen->selectedPart->renderMode = Renderer::WIREFRAME;
@@ -305,7 +334,6 @@ void Screen::init() {
 	propertiesFrame->add(partKineticEnergy, Align::FILL);
 	propertiesFrame->add(partPotentialEnergy, Align::FILL);
 	propertiesFrame->add(partEnergy, Align::FILL);
-
 
 	// Colorpicker GUI
 	colorPickerFrame = new Frame(0, 0, "Color");
@@ -329,6 +357,7 @@ void Screen::init() {
 
 	// Debug GUI
 	debugFrame = new Frame(0.9, 0.9, "Debug");
+	debugFrame->visible = false;
 	debugVectorLabel = new Label("Vectors", 0, 0);
 	debugInfoVectorCheckBox = new CheckBox("Info", 0, 0, true);
 	debugPositionCheckBox = new CheckBox("Position", 0, 0, true);
@@ -379,10 +408,63 @@ void Screen::init() {
 	debugFrame->add(debugRenderPiesCheckBox, Align::FILL);
 	debugFrame->add(debugRenderSpheresCheckBox, Align::FILL);
 	
+	// Environment frame
+	environmentFrame = new Frame(0.8, 0.8, "Environment");
+	gammaLabel = new Label("Gamma", 0, 0);
+	gammaSlider = new Slider(0, 0, 0, 3, 1);
+	gammaSlider->action = [] (Slider* s) {
+		Shaders::basicShader.updateGamma(s->value);
+	};
+	exposureLabel = new Label("Exposure", 0, 0);
+	hdrCheckBox = new CheckBox("HDR", 0, 0, true);
+	hdrCheckBox->checked = true;
+	hdrCheckBox->action = [](CheckBox* c) {
+		Shaders::basicShader.updateHDR(c->checked);
+	};
+	exposureSlider = new Slider(0, 0, 0, 2, 1);
+	exposureSlider->action = [] (Slider* s) {
+		Shaders::basicShader.updateExposure(s->value);
+	};
+	sunLabel = new Label("Sun", 0, 0);
+	sunColorButton = new Button(0, 0, GUI::sliderBarWidth, GUI::sliderHandleHeight, false);
+	sunDirectionEditor = new DirectionEditor(0, 0, GUI::sliderBarWidth, GUI::sliderBarWidth);
+	sunDirectionEditor->action = [] (DirectionEditor* d) {
+		Shaders::basicShader.updateSunDirection(d->modelMatrix * Vec3(0, 1, 0));
+	};
+
+	// Colorpicker GUI 2
+	colorPickerFrame2 = new Frame(0, 0, "Color");
+	colorPickerFrame2->visible = false;
+	colorPicker2 = new ColorPicker(0, 0, 0.5);
+	colorPickerFrame2->anchor = environmentFrame;
+	sunColorButton->action = [](Button* c) {
+		if (!colorPickerFrame2->visible) {
+			colorPickerFrame2->visible = true;
+			colorPickerFrame2->anchor = environmentFrame;
+		}
+	};
+	colorPicker2->action = [](ColorPicker* c) {
+		Shaders::basicShader.updateSunColor(Vec3(c->getRgba()));
+	};
+
+	colorPickerFrame2->add(colorPicker2, Align::FILL);
+
+	environmentFrame->add(gammaLabel, Align::CENTER);
+	environmentFrame->add(gammaSlider, Align::FILL);
+	environmentFrame->add(exposureLabel, Align::CENTER);
+	environmentFrame->add(exposureSlider, Align::FILL);
+	environmentFrame->add(hdrCheckBox, Align::FILL);
+	environmentFrame->add(sunLabel, Align::CENTER);
+	environmentFrame->add(sunColorButton, Align::FILL);
+	environmentFrame->add(sunDirectionEditor, Align::CENTER);
+
+
 	// Add frames to GUI
 	GUI::add(propertiesFrame);
 	GUI::add(colorPickerFrame);
 	GUI::add(debugFrame);
+	GUI::add(environmentFrame);
+	GUI::add(colorPickerFrame2);
 
 
 	// Mouse init
@@ -428,25 +510,9 @@ void Screen::init() {
 	pointMesh = new PointMesh(buf, 5);
 
 
-	// Eventhandler init
-	eventHandler.setWindowResizeCallback([] (Screen& screen, Vec2i dimension) {
-		screen.screenFrameBuffer->resize(dimension);
-		screen.modelFrameBuffer->resize(dimension);
-		screen.blurFrameBuffer->resize(dimension);
-
-		screen.camera.update(((float)dimension.x) / ((float)dimension.y));
-		screen.dimension = dimension;
-	});
-
-
-	// Temp
-	handler->framebufferResize(size);
-
-
 	// Test
 	VisualShape planeShape(OBJImport::load("../res/models/plane.obj"));
 	plane = new IndexedMesh(planeShape);
-	directionEditor = new DirectionEditor(0, 0, 1, 1);
 	texture = load("../res/textures/test/disp.jpg");
 	BoundingBox box = BoundingBox{ -1,-1,-1,1,1,1 };
 	VisualShape shape = VisualShape(box.toShape());
@@ -483,13 +549,13 @@ void Screen::update() {
 
 
 	// Update lights
-	/*static long long t = 0;
+	static long long t = 0;
 	float d = 0.5 + 0.5 * sin(t++ * 0.005);
 	sunDirection = Vec3f(0, cos(t * 0.005) , sin(t * 0.005));
 	lights[0].color = Vec3f(d, 0.3, 1-d);
 	lights[1].color = Vec3f(1-d, 0.3, 1 - d);
 	lights[2].color = Vec3f(0.2, 0.3*d, 1 - d);
-	lights[3].color = Vec3f(1-d, 1-d, d);*/
+	lights[3].color = Vec3f(1-d, 1-d, d);
 
 
 	// Update render uniforms
@@ -523,6 +589,11 @@ void Screen::update() {
 	debugIntersectionCheckBox->checked = point_debug_enabled[Debug::INTERSECTION];
 	debugRenderPiesCheckBox->checked = renderPiesEnabled;
 	debugRenderSpheresCheckBox->checked = colissionSpheresMode!=SphereColissionRenderMode::NONE;
+
+	Vec4 color = colorPicker2->getRgba();
+	sunColorButton->idleColor = color;
+	sunColorButton->hoverColor = color;
+	sunColorButton->pressColor = color;
 
 	// Update properties frame
 	if (selectedPart) {
@@ -576,6 +647,7 @@ void Screen::renderPhysicals() {
 	std::map<double, ExtendedPart*> transparentMeshes;
 
 	// Bind basic uniforms
+	Shaders::basicShader.updateProjection(camera.viewMatrix, camera.projectionMatrix, camera.cframe.position);
 	Shaders::basicShader.updateLight(lights, lightCount);
 
 	SharedLockGuard lg(world->lock);
@@ -879,7 +951,7 @@ void Screen::refresh() {
 
 	// Render edit tools
 	Shaders::lineShader.updateProjection(camera.viewMatrix, camera.projectionMatrix);
-	Picker::render(*this, Shaders::basicShader, Shaders::lineShader);
+	Picker::render(*this);
 
 
 	// Render GUI
@@ -890,9 +962,8 @@ void Screen::refresh() {
 
 	mouseVertical->render();
 	mouseHorizontal->render();
-
-	directionEditor->render();
 	
+
 	// Pie rendering
 	renderPies();
 

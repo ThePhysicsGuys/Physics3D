@@ -138,6 +138,8 @@ public:
 
 	N angleBetween(const Vec3Template other) const;
 
+	Vec3Template rotateAround(const Vec3Template other, N angle) const;
+
 	bool isLongerThan(N length) const {
 		return lengthSquared() > length*length;
 	}

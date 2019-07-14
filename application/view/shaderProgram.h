@@ -94,7 +94,7 @@ struct LineShader : public ShaderProgram {
 
 struct BasicShader : public ShaderProgram {
 	BasicShader() : ShaderProgram() {}
-	BasicShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 15, "modelMatrix", "viewMatrix", "projectionMatrix", "viewPosition", "includeNormals", "includeUvs", "material.ambient", "material.diffuse", "material.specular", "material.reflectance", "material.textured", "material.normalmapped", "textureSampler", "normalSampler", "sunDirection") {}
+	BasicShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 19, "modelMatrix", "viewMatrix", "projectionMatrix", "viewPosition", "includeNormals", "includeUvs", "material.ambient", "material.diffuse", "material.specular", "material.reflectance", "material.textured", "material.normalmapped", "textureSampler", "normalSampler", "sunDirection", "sunColor", "gamma", "hdr", "exposure") {}
 
 	void createLightArray(int size) {
 		bind();
@@ -129,6 +129,26 @@ struct BasicShader : public ShaderProgram {
 	void updateSunDirection(const Vec3f& sunDirection) {
 		bind();
 		shader.setUniform("sunDirection", sunDirection);
+	}
+
+	void updateSunColor(const Vec3f& sunColor) {
+		bind();
+		shader.setUniform("sunColor", sunColor);
+	}
+
+	void updateGamma(float gamma) {
+		bind();
+		shader.setUniform("gamma", gamma);
+	}
+
+	void updateHDR(bool hdr) {
+		bind();
+		shader.setUniform("hdr", hdr);
+	}
+
+	void updateExposure(float exposure) {
+		bind();
+		shader.setUniform("exposure", exposure);
 	}
 
 	void updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Vec3f& viewPosition) {
@@ -277,6 +297,12 @@ struct PostProcessShader : public ShaderProgram {
 	PostProcessShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, 1, "textureSampler") {}
 
 	void updateTexture(Texture* texture) {
+		bind();
+		texture->bind();
+		shader.setUniform("textureSampler", texture->unit);
+	}
+
+	void updateTexture(HDRTexture* texture) {
 		bind();
 		texture->bind();
 		shader.setUniform("textureSampler", texture->unit);
