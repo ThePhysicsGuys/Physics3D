@@ -68,7 +68,7 @@ public:
 	}
 
 	inline T* getSplitOffset() const {
-		return data + splitOffset;
+		return this->data + splitOffset;
 	}
 
 	inline ListIter<T> iterLeft() { return ListIter<T>{ this->data, this->data + splitOffset }; }

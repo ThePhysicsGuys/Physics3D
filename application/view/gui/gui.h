@@ -19,6 +19,7 @@ namespace GUI {
 
 	// Colors
 	namespace COLOR {
+		extern Vec4 DISABLED;
 		extern Vec4 ACCENT;
 		extern Vec4 BACK;
 		extern Vec4 ALPHA;
@@ -49,10 +50,13 @@ namespace GUI {
 		// format: 0xRRGGBBAA
 		Vec4 get(int hex, bool alpha);
 		Vec4 get(int hex);
+		
 		Vec3 hsvToRgb(Vec3 hsv);
 		Vec3 rgbToHsv(Vec3 rgb);
 		Vec4 hsvaToRgba(Vec4 hsva);
 		Vec4 rgbaToHsva(Vec4 rgba);
+
+		Vec4 blend(Vec4 color1, Vec4 color2);
 	};
 
 	// Global
@@ -145,6 +149,7 @@ namespace GUI {
 	Vec2 unmap(Vec2 point);
 	Vec2 mapDimension(Vec2 dimension);
 	Vec2 unmapDimension(Vec2 dimension);
+
 	void intersect(Vec2 mouse);
 	bool intersectsSquare(Vec2 point, Vec2 topleft, Vec2 dimension);
 

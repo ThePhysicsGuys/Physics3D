@@ -1,3 +1,5 @@
+#pragma once
+
 #include <string>
 
 #include "component.h"
@@ -38,4 +40,7 @@ public:
 	Component* intersect(Vec2 point) override;
 
 	void drag(Vec2 newPoint, Vec2 oldPoint) override;
+	void disable() override;
+	void enable() override;
 };
+

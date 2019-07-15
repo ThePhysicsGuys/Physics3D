@@ -46,32 +46,35 @@ Slider::Slider(double x, double y, double width, double height, double min, doub
 
 void Slider::render() {
 	if (visible) {
+
+		Vec4 blendColor = (disabled) ? GUI::COLOR::DISABLED : GUI::COLOR::WHITE;
+
 		resize();
 
 		GUI::quad->resize(position, dimension);
-		Shaders::quadShader.updateColor(backgroundColor);
+		Shaders::quadShader.updateColor(GUI::COLOR::blend(backgroundColor, blendColor));
 		GUI::quad->render();
 		
 		double progress = (value - min) / (max - min);
 		Vec2 sliderFilledPosition = position + Vec2(padding + handleWidth / 2, -height / 2 + barHeight / 2);
 		Vec2 sliderFilledDimension = Vec2(barWidth * progress, barHeight);
 		GUI::quad->resize(sliderFilledPosition, sliderFilledDimension);
-		Shaders::quadShader.updateColor(foregroundFilledColor);
+		Shaders::quadShader.updateColor(GUI::COLOR::blend(foregroundFilledColor, blendColor));
 		GUI::quad->render();
 
 		Vec2 sliderEmptyPosition = sliderFilledPosition + Vec2(sliderFilledDimension.x, 0);
 		Vec2 sliderEmptyDimension = Vec2(barWidth * (1.0 - progress), barHeight);
 		GUI::quad->resize(sliderEmptyPosition, sliderEmptyDimension);
-		Shaders::quadShader.updateColor(foregroundEmptyColor);
+		Shaders::quadShader.updateColor(GUI::COLOR::blend(foregroundEmptyColor, blendColor));
 		GUI::quad->render();
 
 		Vec2 handlePosition = Vec2(sliderEmptyPosition.x - handleWidth / 2, position.y - height / 2 + handleHeight / 2);
 		Vec2 handleDimension = Vec2(handleWidth, handleHeight);
 		GUI::quad->resize(handlePosition, handleDimension);
-		Shaders::quadShader.updateColor(handleColor);
+		Shaders::quadShader.updateColor(GUI::COLOR::blend(handleColor, blendColor));
 		GUI::quad->render();
 		
-		Shaders::quadShader.updateColor(GUI::COLOR::ACCENT);
+		Shaders::quadShader.updateColor(GUI::COLOR::blend(GUI::COLOR::ACCENT, blendColor));
 		GUI::quad->render(Renderer::WIREFRAME);
 
 		if (debug) {
@@ -90,20 +93,16 @@ Vec2 Slider::resize() {
 }
 
 void Slider::drag(Vec2 newPoint, Vec2 oldPoint) {
-	double x = position.x + padding + handleWidth / 2;
-	double w = dimension.x - 2 * padding - handleWidth;
+	if (disabled)
+		return;
 
-	if (newPoint.x < x)
-		value = min;
-	else if (newPoint.x > x + w)
-		value = max;
-	else
-		value = min + (max - min) * (newPoint.x - x) / w;
-	
-	(*action)(this);
+	press(newPoint);
 }
 
 void Slider::press(Vec2 point) {
+	if (disabled)
+		return;
+
 	double x = position.x + padding + handleWidth / 2;
 	double w = dimension.x - 2 * padding - handleWidth;
 

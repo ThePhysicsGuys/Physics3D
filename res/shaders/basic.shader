@@ -193,7 +193,7 @@ uniform mat4 projectionMatrix;
 uniform Material material;
 uniform sampler2D textureSampler;
 uniform sampler2D normalSampler;
-const int maxLights = 4;
+const int maxLights = 5;
 uniform Light lights[maxLights];
 
 // Environment
@@ -201,7 +201,7 @@ uniform vec3 sunDirection = vec3(1, 1, 0);
 uniform vec3 sunColor = vec3(1, 1, 1);
 uniform float exposure = 1.0;
 uniform float gamma = 1.0;
-uniform bool hdr;
+uniform bool hdr = true;
 
 vec4 fog(vec4 color) {
 	vec3 cameraDirection = -(viewMatrix * vec4(fposition, 1)).xyz;

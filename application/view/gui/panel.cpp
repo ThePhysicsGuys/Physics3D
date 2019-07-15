@@ -37,9 +37,12 @@ Vec2 Panel::resize() {
 
 void Panel::render() {
 	if (visible) {
+
+		Vec4 blendColor = (disabled) ? GUI::COLOR::DISABLED : GUI::COLOR::WHITE;
+
 		resize();
 
-		Shaders::quadShader.updateColor(background);
+		Shaders::quadShader.updateColor(GUI::COLOR::blend(background, blendColor));
 		GUI::quad->resize(position, dimension);
 		GUI::quad->render();
 

@@ -24,8 +24,11 @@ Image::Image(double x, double y, double width, double height, Texture* texture) 
 
 void Image::render() {
 	if (visible) {
-		if (texture) Shaders::quadShader.updateTexture(texture);
-		else Shaders::quadShader.updateColor(GUI::COLOR::BLACK);
+
+		Vec4 blendColor = (disabled) ? GUI::COLOR::DISABLED : GUI::COLOR::WHITE;
+
+		if (texture) Shaders::quadShader.updateTexture(texture, blendColor);
+		else Shaders::quadShader.updateColor(GUI::COLOR::blend(GUI::COLOR::BLACK, blendColor));
 		GUI::quad->resize(position, dimension);
 		GUI::quad->render();
 	}

@@ -35,7 +35,7 @@ Frame::Frame(double x, double y, std::string name) : Container(x, y) {
 	this->minimizeButton->hoverTexture = GUI::minimizeButtonHoverTexture;
 	this->minimizeButton->pressTexture = GUI::minimizeButtonPressTexture;
 	this->minimizeButton->action = [] (Button* button) {
-		Frame* frame = (Frame*) button->parent;
+		Frame* frame = static_cast<Frame*>(button->parent);
 		frame->minimized = !frame->minimized;
 	};
 
@@ -124,9 +124,9 @@ Component* Frame::intersect(Vec2 point) {
 		return minimizeButton;
 
 	if (!minimized) {
-		for (auto iterator = children.begin(); iterator != children.end(); iterator++) {
-			if (iterator->first->intersect(point))
-				return iterator->first;
+		for (auto component : children) {
+			if (component.first->intersect(point))
+				return component.first;
 		}
 	}
 
@@ -137,7 +137,32 @@ Component* Frame::intersect(Vec2 point) {
 	return nullptr;
 }
 
+void Frame::disable() {
+	disabled = true;
+
+	minimizeButton->disable();
+	closeButton->disable();
+	title->disable();
+
+	for (auto component : children)
+		component.first->disable();
+}
+
+void Frame::enable() {
+	disabled = false;
+
+	minimizeButton->enable();
+	closeButton->enable();
+	title->enable();
+
+	for (auto component : children)
+		component.first->enable();
+}
+
 void Frame::drag(Vec2 newPoint, Vec2 oldPoint) {
+	if (disabled)
+		return;
+
 	position += newPoint - oldPoint;
 	anchor = nullptr;
 }
@@ -145,12 +170,14 @@ void Frame::drag(Vec2 newPoint, Vec2 oldPoint) {
 void Frame::render() {
 	if (visible) {
 
+		Vec4 blendColor = (disabled) ? GUI::COLOR::DISABLED : GUI::COLOR::WHITE;
+
 		resize();
 
 		// TitleBar
 		Vec2 titleBarPosition = position;
 		Vec2 titleBarDimension = Vec2(width, titleBarHeight);
-		Shaders::quadShader.updateColor(titleBarColor);
+		Shaders::quadShader.updateColor(GUI::COLOR::blend(titleBarColor, blendColor));
 		GUI::quad->resize(titleBarPosition, titleBarDimension);
 		GUI::quad->render();
 
@@ -167,7 +194,7 @@ void Frame::render() {
 			Vec2 offsetPosition = titleBarPosition + Vec2(0, -titleBarHeight);
 			Vec2 offsetDimension = dimension + Vec2(0, -titleBarHeight);
 			
-			Shaders::quadShader.updateTexture(GUI::screen->blurFrameBuffer->texture, Vec4f(0.4, 0.4, 0.4, 1));
+			Shaders::quadShader.updateTexture(GUI::screen->blurFrameBuffer->texture, GUI::COLOR::blend(Vec4f(0.4, 0.4, 0.4, 1), blendColor));
 			GUI::quad->resize(offsetPosition, offsetDimension, Vec2(-GUI::screen->camera.aspect, GUI::screen->camera.aspect) * 2, Vec2(-1, 1));
 			GUI::quad->render();
 
@@ -184,7 +211,7 @@ void Frame::render() {
 		// Outline
 		Vec2 outlinePosition = titleBarPosition;
 		Vec2 outlineDimension = dimension;
-		Shaders::quadShader.updateColor(GUI::COLOR::NAVY);
+		Shaders::quadShader.updateColor(GUI::COLOR::blend(GUI::COLOR::NAVY, blendColor));
 		GUI::quad->resize(outlinePosition, outlineDimension);
 		GUI::quad->render(Renderer::WIREFRAME);
 	}

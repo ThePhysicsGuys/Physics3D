@@ -22,6 +22,7 @@
 #include "gui/colorPicker.h"
 #include "gui/directionEditor.h"
 #include "gui/gui.h"
+#include "gui/frames.h"
 
 #include "../debug.h"
 #include "../standardInputHandler.h"
@@ -48,11 +49,17 @@
 #include "../worlds.h"
 
 bool initGLFW() {
+
+	// Set window hints
+	//Renderer::setGLFWMultisampleSamples(4);
+
 	// Initialize GLFW
 	if (!Renderer::initGLFW()) {
 		Log::error("GLFW failed to initialize");
 		return false;
 	}
+
+	//Renderer::enableMultisampling();
 
 	Log::info("GLFW initialized");
 	return true;
@@ -136,20 +143,21 @@ BarChart iterationChart("Iteration Statistics", "", GJKCollidesIterationStatisti
 
 
 // Light uniforms
-const int lightCount = 4;
+const int lightCount = 5;
 Vec3f sunDirection;
 Vec3f sunColor;
 Attenuation attenuation = { 0, 0, 0.5 };
 Light lights[lightCount] = {
-	Light(Vec3f(5, 0, 0), Vec3f(1, 1, 1), 2, attenuation),
-	Light(Vec3f(0, 5, 0), Vec3f(1, 1, 1), 2, attenuation),
-	Light(Vec3f(0, 0, 5), Vec3f(1, 1, 1), 2, attenuation),
-	Light(Vec3f(0, 0, 0), Vec3f(1, 1, 1), 2, attenuation)
+	Light(Vec3f(10, 5, -10), Vec3f(1, 0.84, 0.69), 6, attenuation),
+	Light(Vec3f(10, 5, 10), Vec3f(1, 0.84, 0.69), 6, attenuation),
+	Light(Vec3f(-10, 5, -10), Vec3f(1, 0.84, 0.69), 6, attenuation),
+	Light(Vec3f(-10, 5, 10), Vec3f(1, 0.84, 0.69), 6, attenuation),
+	Light(Vec3f(0, 10, 0), Vec3f(1, 0.90, 0.75), 10, attenuation)
 };
 
 
 // Shadow
-DepthFrameBuffer* depthBuffer;
+DepthFrameBuffer* depthBuffer = nullptr;
 
 
 // Render meshes
@@ -158,62 +166,15 @@ PointMesh* pointMesh = nullptr;
 ArrayMesh* originMesh = nullptr;
 
 
-// Properties GUI
-Frame* propertiesFrame = nullptr;
-Label* partNameLabel = nullptr;
-Label* partPositionLabel = nullptr;
-Label* partMeshIDLabel = nullptr;
-Label* partVelocity = nullptr;
-Label* partAngularVelocity = nullptr;
-Label* partKineticEnergy = nullptr;
-Label* partPotentialEnergy = nullptr;
-Label* partEnergy = nullptr;
-Button* colorButton;
-CheckBox* renderModeCheckBox = nullptr;
-
-
 // Mouse GUI
 Panel* mouseVertical = nullptr;
 Panel* mouseHorizontal = nullptr;
 
 
-// Colorpicker GUI
-Frame* colorPickerFrame = nullptr;
-ColorPicker* colorPicker = nullptr;
-Frame* colorPickerFrame2 = nullptr; // FOR NOW
-ColorPicker* colorPicker2 = nullptr;
-
-// Debug GUI
-Frame* debugFrame = nullptr;
-Label* debugVectorLabel = nullptr;
-CheckBox* debugInfoVectorCheckBox = nullptr;
-CheckBox* debugPositionCheckBox = nullptr;
-CheckBox* debugVelocityCheckBox = nullptr;
-CheckBox* debugMomentCheckBox = nullptr;
-CheckBox* debugForceCheckBox = nullptr;
-CheckBox* debugAccelerationCheckBox = nullptr;
-CheckBox* debugAngularImpulseCheckBox = nullptr;
-CheckBox* debugImpulseCheckBox = nullptr;
-CheckBox* debugAngularVelocityCheckBox = nullptr;
-Label* debugPointLabel = nullptr;
-CheckBox* debugInfoPointCheckBox = nullptr;
-CheckBox* debugCenterOfMassCheckBox = nullptr;
-CheckBox* debugIntersectionCheckBox = nullptr;
-Label* debugRenderLabel = nullptr;
-CheckBox* debugRenderPiesCheckBox = nullptr;
-CheckBox* debugRenderSpheresCheckBox = nullptr;
-
-
-// Environment frame
-Frame* environmentFrame = nullptr;
-Label* gammaLabel = nullptr;
-Slider* gammaSlider = nullptr;
-Label* exposureLabel = nullptr;
-CheckBox* hdrCheckBox = nullptr;
-Slider* exposureSlider = nullptr;
-Label* sunLabel = nullptr;
-Button* sunColorButton;
-DirectionEditor* sunDirectionEditor = nullptr;
+// Frames
+PropertiesFrame* propertiesFrame = nullptr;
+DebugFrame* debugFrame = nullptr;
+EnvironmentFrame* environmentFrame = nullptr;
 
 
 // Test
@@ -303,169 +264,10 @@ void Screen::init() {
 	handler->framebufferResize(dimension);
 
 
-	// Properties GUI
-	propertiesFrame = new Frame(0.7, 0.7, "Properties");
-	partNameLabel = new Label("", 0, 0);
-	partPositionLabel = new Label("", 0, 0);
-	partMeshIDLabel = new Label("", 0, 0);
-	colorButton = new Button(0, 0, GUI::sliderBarWidth, GUI::sliderHandleHeight, false);
-	partVelocity = new Label("", 0, 0);
-	partAngularVelocity = new Label("", 0, 0);
-	partKineticEnergy = new Label("", 0, 0);
-	partPotentialEnergy = new Label("", 0, 0);
-	partEnergy = new Label("", 0, 0);
-	renderModeCheckBox = new CheckBox("Wireframe", 0, 0, true);
-	renderModeCheckBox->action = [] (CheckBox* c) {
-		if (GUI::screen->selectedPart) {
-			if (GUI::screen->selectedPart->renderMode == Renderer::FILLED) {
-				GUI::screen->selectedPart->renderMode = Renderer::WIREFRAME;
-			} else {
-				GUI::screen->selectedPart->renderMode = Renderer::FILLED;
-			}
-		}
-	};
-
-	propertiesFrame->add(partNameLabel, Align::FILL);
-	propertiesFrame->add(partPositionLabel, Align::FILL);
-	propertiesFrame->add(partMeshIDLabel, Align::FILL);
-	propertiesFrame->add(renderModeCheckBox, Align::FILL);
-	propertiesFrame->add(colorButton, Align::FILL);
-	propertiesFrame->add(partVelocity, Align::FILL);
-	propertiesFrame->add(partAngularVelocity, Align::FILL);
-	propertiesFrame->add(partKineticEnergy, Align::FILL);
-	propertiesFrame->add(partPotentialEnergy, Align::FILL);
-	propertiesFrame->add(partEnergy, Align::FILL);
-
-	// Colorpicker GUI
-	colorPickerFrame = new Frame(0, 0, "Color");
-	colorPickerFrame->visible = false;
-	colorPicker = new ColorPicker(0, 0, 0.5);
-	colorPickerFrame->anchor = propertiesFrame;
-	colorButton->action = [] (Button* c) {
-		if (GUI::screen->selectedPart && !colorPickerFrame->visible) {
-			colorPickerFrame->visible = true;
-			colorPickerFrame->anchor = propertiesFrame;
-		}
-	};
-	colorPicker->action = [] (ColorPicker* c) {
-		if (GUI::screen->selectedPart) {
-			GUI::screen->selectedPart->material.ambient = GUI::COLOR::hsvaToRgba(c->hsva);
-		}
-	};
-
-	colorPickerFrame->add(colorPicker, Align::FILL);
-
-
-	// Debug GUI
-	debugFrame = new Frame(0.9, 0.9, "Debug");
-	debugFrame->visible = false;
-	debugVectorLabel = new Label("Vectors", 0, 0);
-	debugInfoVectorCheckBox = new CheckBox("Info", 0, 0, true);
-	debugPositionCheckBox = new CheckBox("Position", 0, 0, true);
-	debugVelocityCheckBox = new CheckBox("Velocity", 0, 0, true);
-	debugAccelerationCheckBox = new CheckBox("Acceleration", 0, 0, true);
-	debugForceCheckBox = new CheckBox("Force", 0, 0, true);
-	debugMomentCheckBox = new CheckBox("Moment", 0, 0, true);
-	debugImpulseCheckBox = new CheckBox("Impulse", 0, 0, true);
-	debugAngularVelocityCheckBox = new CheckBox("Angular velocity", 0, 0, true);
-	debugAngularImpulseCheckBox = new CheckBox("Angular impulse", 0, 0, true);
-	debugPointLabel = new Label("Points", 0, 0);
-	debugInfoPointCheckBox = new CheckBox("Info", 0, 0, true);
-	debugCenterOfMassCheckBox = new CheckBox("Center of mass", 0, 0, true);
-	debugIntersectionCheckBox = new CheckBox("Intersections", 0, 0, true);
-	debugRenderLabel = new Label("Render", 0, 0);
-	debugRenderPiesCheckBox = new CheckBox("Statistics", 0, 0, true);
-	debugRenderSpheresCheckBox = new CheckBox("Collision spheres", 0, 0, true);
-	debugInfoVectorCheckBox->action = [] (CheckBox* c) { toggleDebugVecType(Debug::INFO_VEC); };
-	debugVelocityCheckBox->action = [] (CheckBox* c) { toggleDebugVecType(Debug::VELOCITY); };
-	debugAccelerationCheckBox->action = [] (CheckBox* c) { toggleDebugVecType(Debug::ACCELERATION); };
-	debugForceCheckBox->action = [] (CheckBox* c) { toggleDebugVecType(Debug::FORCE); };
-	debugAngularImpulseCheckBox->action = [] (CheckBox* c) { toggleDebugVecType(Debug::ANGULAR_IMPULSE); };
-	debugPositionCheckBox->action = [] (CheckBox* c) { toggleDebugVecType(Debug::POSITION); };
-	debugMomentCheckBox->action = [] (CheckBox* c) { toggleDebugVecType(Debug::MOMENT); };
-	debugImpulseCheckBox->action = [] (CheckBox* c) { toggleDebugVecType(Debug::IMPULSE); };
-	debugAngularVelocityCheckBox->action = [] (CheckBox* c) { toggleDebugVecType(Debug::ANGULAR_VELOCITY); };
-	debugInfoPointCheckBox->action = [] (CheckBox* c) { toggleDebugPointType(Debug::INFO_POINT); };
-	debugCenterOfMassCheckBox->action = [] (CheckBox* c) { toggleDebugPointType(Debug::CENTER_OF_MASS); };
-	debugIntersectionCheckBox->action = [] (CheckBox* c) { toggleDebugPointType(Debug::INTERSECTION); };
-	debugRenderPiesCheckBox->action = [] (CheckBox* c) { renderPiesEnabled = !renderPiesEnabled; };
-	debugRenderSpheresCheckBox->action = [] (CheckBox* c) { colissionSpheresMode = static_cast<SphereColissionRenderMode>((static_cast<int>(colissionSpheresMode) + 1) % 3); };
-
-	debugFrame->add(debugVectorLabel, Align::CENTER);
-	debugFrame->add(debugInfoVectorCheckBox, Align::FILL);
-	debugFrame->add(debugPositionCheckBox, Align::FILL);
-	debugFrame->add(debugVelocityCheckBox, Align::FILL);
-	debugFrame->add(debugAccelerationCheckBox, Align::FILL);
-	debugFrame->add(debugForceCheckBox, Align::FILL);
-	debugFrame->add(debugMomentCheckBox, Align::FILL);
-	debugFrame->add(debugImpulseCheckBox, Align::FILL);
-	debugFrame->add(debugAngularVelocityCheckBox, Align::FILL);
-	debugFrame->add(debugAngularImpulseCheckBox, Align::FILL);
-	debugFrame->add(debugPointLabel, Align::CENTER);
-	debugFrame->add(debugInfoPointCheckBox, Align::FILL);
-	debugFrame->add(debugCenterOfMassCheckBox, Align::FILL);
-	debugFrame->add(debugIntersectionCheckBox, Align::FILL);
-	debugFrame->add(debugRenderLabel, Align::CENTER);
-	debugFrame->add(debugRenderPiesCheckBox, Align::FILL);
-	debugFrame->add(debugRenderSpheresCheckBox, Align::FILL);
-	
-	// Environment frame
-	environmentFrame = new Frame(0.8, 0.8, "Environment");
-	gammaLabel = new Label("Gamma", 0, 0);
-	gammaSlider = new Slider(0, 0, 0, 3, 1);
-	gammaSlider->action = [] (Slider* s) {
-		Shaders::basicShader.updateGamma(s->value);
-	};
-	exposureLabel = new Label("Exposure", 0, 0);
-	hdrCheckBox = new CheckBox("HDR", 0, 0, true);
-	hdrCheckBox->checked = true;
-	hdrCheckBox->action = [](CheckBox* c) {
-		Shaders::basicShader.updateHDR(c->checked);
-	};
-	exposureSlider = new Slider(0, 0, 0, 2, 1);
-	exposureSlider->action = [] (Slider* s) {
-		Shaders::basicShader.updateExposure(s->value);
-	};
-	sunLabel = new Label("Sun", 0, 0);
-	sunColorButton = new Button(0, 0, GUI::sliderBarWidth, GUI::sliderHandleHeight, false);
-	sunDirectionEditor = new DirectionEditor(0, 0, GUI::sliderBarWidth, GUI::sliderBarWidth);
-	sunDirectionEditor->action = [] (DirectionEditor* d) {
-		Shaders::basicShader.updateSunDirection(d->modelMatrix * Vec3(0, 1, 0));
-	};
-
-	// Colorpicker GUI 2
-	colorPickerFrame2 = new Frame(0, 0, "Color");
-	colorPickerFrame2->visible = false;
-	colorPicker2 = new ColorPicker(0, 0, 0.5);
-	colorPickerFrame2->anchor = environmentFrame;
-	sunColorButton->action = [](Button* c) {
-		if (!colorPickerFrame2->visible) {
-			colorPickerFrame2->visible = true;
-			colorPickerFrame2->anchor = environmentFrame;
-		}
-	};
-	colorPicker2->action = [](ColorPicker* c) {
-		Shaders::basicShader.updateSunColor(Vec3(c->getRgba()));
-	};
-
-	colorPickerFrame2->add(colorPicker2, Align::FILL);
-
-	environmentFrame->add(gammaLabel, Align::CENTER);
-	environmentFrame->add(gammaSlider, Align::FILL);
-	environmentFrame->add(exposureLabel, Align::CENTER);
-	environmentFrame->add(exposureSlider, Align::FILL);
-	environmentFrame->add(hdrCheckBox, Align::FILL);
-	environmentFrame->add(sunLabel, Align::CENTER);
-	environmentFrame->add(sunColorButton, Align::FILL);
-	environmentFrame->add(sunDirectionEditor, Align::CENTER);
-
-
-	// Add frames to GUI
-	GUI::add(propertiesFrame);
-	GUI::add(colorPickerFrame);
-	GUI::add(debugFrame);
-	GUI::add(environmentFrame);
-	GUI::add(colorPickerFrame2);
+	// Frames init
+	propertiesFrame = new PropertiesFrame(0.75, 0.75);
+	environmentFrame = new EnvironmentFrame(0.8, 0.8);
+	debugFrame = new DebugFrame(0.7, 0.7);
 
 
 	// Mouse init
@@ -541,7 +343,7 @@ void Screen::update() {
 		if (handler->getKey(GLFW_KEY_UP))    camera.rotate(*this, -1, 0, 0, leftDragging);
 		if (handler->getKey(GLFW_KEY_DOWN))  camera.rotate(*this, 1, 0, 0, leftDragging);
 		if (handler->getKey(GLFW_KEY_ESCAPE)) Renderer::closeGLFWWindow();
-		if (handler->getKey(GLFW_KEY_B)) { debugFrame->visible = true; debugFrame->position = Vec2(0.8); GUI::select(debugFrame); }
+		if (handler->getKey(GLFW_KEY_B)) { debugFrame->frame->visible = true; debugFrame->frame->position = Vec2(0.8); GUI::select(debugFrame->frame); }
 	}
 
 
@@ -549,14 +351,14 @@ void Screen::update() {
 	camera.update();
 
 
-	// Update lights
+	/*// Update lights
 	static long long t = 0;
 	float d = 0.5 + 0.5 * sin(t++ * 0.005);
 	sunDirection = Vec3f(0, cos(t * 0.005) , sin(t * 0.005));
 	lights[0].color = Vec3f(d, 0.3, 1-d);
 	lights[1].color = Vec3f(1-d, 0.3, 1 - d);
 	lights[2].color = Vec3f(0.2, 0.3*d, 1 - d);
-	lights[3].color = Vec3f(1-d, 1-d, d);
+	lights[3].color = Vec3f(1-d, 1-d, d);*/
 
 
 	// Update render uniforms
@@ -575,60 +377,11 @@ void Screen::update() {
 	// Update GUI intersection
 	GUI::intersect(GUI::map(handler->cursorPosition));
 	
-	// Update debug frame
-	debugInfoVectorCheckBox->checked = debug_enabled[Debug::INFO_VEC];
-	debugPositionCheckBox->checked = debug_enabled[Debug::POSITION];
-	debugVelocityCheckBox->checked = debug_enabled[Debug::VELOCITY];
-	debugMomentCheckBox->checked = debug_enabled[Debug::MOMENT];
-	debugForceCheckBox->checked = debug_enabled[Debug::FORCE];
-	debugAccelerationCheckBox->checked = debug_enabled[Debug::ACCELERATION];
-	debugAngularImpulseCheckBox->checked = debug_enabled[Debug::ANGULAR_IMPULSE];
-	debugImpulseCheckBox->checked = debug_enabled[Debug::IMPULSE];
-	debugAngularVelocityCheckBox->checked = debug_enabled[Debug::ANGULAR_VELOCITY];
-	debugInfoPointCheckBox->checked = point_debug_enabled[Debug::INFO_POINT];
-	debugCenterOfMassCheckBox->checked = point_debug_enabled[Debug::CENTER_OF_MASS];
-	debugIntersectionCheckBox->checked = point_debug_enabled[Debug::INTERSECTION];
-	debugRenderPiesCheckBox->checked = renderPiesEnabled;
-	debugRenderSpheresCheckBox->checked = colissionSpheresMode!=SphereColissionRenderMode::NONE;
+	// Update frames
+	propertiesFrame->update();
+	debugFrame->update();
+	environmentFrame->update();
 
-	Vec4 color = colorPicker2->getRgba();
-	sunColorButton->idleColor = color;
-	sunColorButton->hoverColor = color;
-	sunColorButton->pressColor = color;
-
-	// Update properties frame
-	if (selectedPart) {
-		partMeshIDLabel->text = "MeshID: " + std::to_string(selectedPart->drawMeshId);
-		renderModeCheckBox->checked = selectedPart->renderMode == Renderer::WIREFRAME;
-		partPositionLabel->text = "Position: " + str(selectedPart->cframe.position);
-		partNameLabel->text = "Name: " + selectedPart->name;
-		partVelocity->text = "Velocity: " + str(selectedPart->parent->velocity);
-		partAngularVelocity->text = "Angular Velocity: " + str(selectedPart->parent->angularVelocity);
-		double kineticEnergy = selectedPart->parent->getKineticEnergy();
-		double potentialEnergy = world->getPotentialEnergyOfPhysical(*selectedPart->parent);
-		partKineticEnergy->text = "Kinetic Energy: " + std::to_string(kineticEnergy);
-		partPotentialEnergy->text = "Potential Energy: " + std::to_string(potentialEnergy);
-		partEnergy->text = "Energy: " + std::to_string(kineticEnergy + potentialEnergy);
-
-		Vec4 color = selectedPart->material.ambient;
-		colorButton->idleColor = color;
-		colorButton->hoverColor = color;
-		colorButton->pressColor = color;
-		colorPicker->setRgba(color);
-	} else {
-		colorButton->idleColor = Vec4(1);
-		colorButton->hoverColor = Vec4(1);
-		colorButton->pressColor = Vec4(1);
-		partMeshIDLabel->text = "MeshID: -";
-		renderModeCheckBox->checked = false;
-		partPositionLabel->text = "Position: -";
-		partNameLabel->text = "Name: -";
-		partVelocity->text = "Velocity: -";
-		partAngularVelocity->text = "Angular Velocity: -";
-		partKineticEnergy->text = "Kinetic Energy: -";
-		partPotentialEnergy->text = "Potential Energy: -";
-		partEnergy->text = "Energy: -";
-	}
 }
 
 void Screen::renderSkybox() {
@@ -727,7 +480,7 @@ void renderBounds(const Bounds& bounds, const Vec4f& color) {
 	renderBox(CFrame(Vec3(p.x, p.y, p.z)), diagonal.x, diagonal.y, diagonal.z, color);
 }
 
-Vec4f colors[]{
+Vec4f colors[] {
 	GUI::COLOR::BLUE,
 	GUI::COLOR::GREEN,
 	GUI::COLOR::YELLOW,

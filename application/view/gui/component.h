@@ -32,6 +32,12 @@ public:
 	*/
 	bool resizing;
 
+	/*
+		Determines if the component is disabled, the component will still be
+		rendered, but will not be interactable.
+	*/
+	bool disabled;
+
 	/* 
 		The topleft edge of the container, margin not included, padding included
 		This property can be altered by its parent
@@ -79,8 +85,8 @@ public:
 	/* 
 		Constructors
 	*/
-	Component(Vec2 position, Vec2 dimension) : position(position), dimension(dimension), resizing(false), visible(true) {};
-	Component(Vec2 position) : position(position), dimension(Vec2()), resizing(true), visible(true) {};
+	Component(Vec2 position, Vec2 dimension) : position(position), dimension(dimension), resizing(false), visible(true), disabled(false) {};
+	Component(Vec2 position) : position(position), dimension(Vec2()), resizing(true), visible(true), disabled(false) {};
 	Component(double x, double y, double width, double height) : Component(Vec2(x, y), Vec2(width, height)) {};
 	Component(double x, double y) : Component(Vec2(x, y)) {};
 	
@@ -105,6 +111,20 @@ public:
 		Renders the component, resizing may happen
 	*/
 	virtual void render() = 0;
+
+	/*
+		Disables the component and all its children
+	*/
+	virtual void disable() {
+		disabled = true;
+	};
+
+	/*
+		Enables the component and all its children
+	*/
+	virtual void enable() {
+		disabled = false;
+	};
 
 	/* 
 		Drag behaviour of this component 

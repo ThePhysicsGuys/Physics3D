@@ -29,54 +29,54 @@ CheckBox::CheckBox(double x, double y, bool textured) : CheckBox("", x, y, GUI::
 CheckBox::CheckBox(double x, double y, double width, double height, bool textured) : CheckBox("", x, y, width, height, textured) {}
 
 
-void CheckBox::renderPressed() {
+void CheckBox::renderPressed(Vec4 blendColor) {
 	if (textured) {
 		if (checked) {
-			Shaders::quadShader.updateTexture(pressCheckedTexture);
+			Shaders::quadShader.updateTexture(pressCheckedTexture, blendColor);
 		} else {
-			Shaders::quadShader.updateTexture(pressUncheckedTexture);
+			Shaders::quadShader.updateTexture(pressUncheckedTexture, blendColor);
 		}
 	} else {
 		if (checked) {
-			Shaders::quadShader.updateColor(pressCheckedColor);
+			Shaders::quadShader.updateColor(GUI::COLOR::blend(pressCheckedColor, blendColor));
 		} else {
-			Shaders::quadShader.updateColor(pressUncheckedColor);
+			Shaders::quadShader.updateColor(GUI::COLOR::blend(pressUncheckedColor, blendColor));
 		}
 	}
 
 	GUI::quad->render();
 }
 
-void CheckBox::renderHovering() {
+void CheckBox::renderHovering(Vec4 blendColor) {
 	if (textured) {
 		if (checked) {
-			Shaders::quadShader.updateTexture(hoverCheckedTexture);
+			Shaders::quadShader.updateTexture(hoverCheckedTexture, blendColor);
 		} else {
-			Shaders::quadShader.updateTexture(hoverUncheckedTexture);
+			Shaders::quadShader.updateTexture(hoverUncheckedTexture, blendColor);
 		}
 	} else {
 		if (checked) {
-			Shaders::quadShader.updateColor(hoverCheckedColor);
+			Shaders::quadShader.updateColor(GUI::COLOR::blend(hoverCheckedColor, blendColor));
 		} else {
-			Shaders::quadShader.updateColor(hoverUncheckedColor);
+			Shaders::quadShader.updateColor(GUI::COLOR::blend(hoverUncheckedColor, blendColor));
 		}
 	}
 
 	GUI::quad->render();
 }
 
-void CheckBox::renderIdle() {
+void CheckBox::renderIdle(Vec4 blendColor) {
 	if (textured) {
 		if (checked) {
-			Shaders::quadShader.updateTexture(checkedTexture);
+			Shaders::quadShader.updateTexture(checkedTexture, blendColor);
 		} else {
-			Shaders::quadShader.updateTexture(uncheckedTexture);
+			Shaders::quadShader.updateTexture(uncheckedTexture, blendColor);
 		}
 	} else {
 		if (checked) {
-			Shaders::quadShader.updateColor(checkedColor);
+			Shaders::quadShader.updateColor(GUI::COLOR::blend(checkedColor, blendColor));
 		} else {
-			Shaders::quadShader.updateColor(uncheckedColor);
+			Shaders::quadShader.updateColor(GUI::COLOR::blend(uncheckedColor, blendColor));
 		}
 	}
 
@@ -86,6 +86,8 @@ void CheckBox::renderIdle() {
 void CheckBox::render() {
 	if (visible) {
 		resize();
+
+		Vec4 blendColor = (disabled) ? GUI::COLOR::DISABLED : GUI::COLOR::WHITE;
 
 		Vec2 checkBoxPosition;
 		Vec2 checkBoxDimension;
@@ -109,11 +111,11 @@ void CheckBox::render() {
 		GUI::quad->resize(checkBoxPosition, checkBoxDimension);
 
 		if (pressed)
-			renderPressed();
+			renderPressed(blendColor);
 		else if (hovering)
-			renderHovering();
+			renderHovering(blendColor);
 		else
-			renderIdle();
+			renderIdle(blendColor);
 
 		if (!label->text.empty()) {
 			Vec2 labelPosition;
@@ -155,20 +157,42 @@ Vec2 CheckBox::resize() {
 	return dimension;
 }
 
+void CheckBox::disable() {
+	disabled = true;
+	label->disable();
+}
+
+void CheckBox::enable() {
+	disabled = false;
+	label->enable();
+}
+
 void CheckBox::enter() {
+	if (disabled)
+		return;
+
 	hovering = true;
 }
 
 void CheckBox::exit() {
+	if (disabled)
+		return;
+
 	hovering = false;
 	pressed = false;
 }
 
 void CheckBox::press(Vec2 point) {
+	if (disabled)
+		return;
+
 	pressed = true;
 }
 
 void CheckBox::release(Vec2 point) {
+	if (disabled)
+		return;
+
 	pressed = false;
 	checked = !checked;
 	(*action)(this);

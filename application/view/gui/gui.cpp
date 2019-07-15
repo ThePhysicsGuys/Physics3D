@@ -115,6 +115,11 @@ namespace GUI {
 			return Vec3(h, s, v);
 		}
 
+		Vec4 blend(Vec4 color1, Vec4 color2) {
+			return Vec4(color1.x * color2.x, color1.y * color2.y, color1.z * color2.z, color1.w * color2.w);
+		}
+
+		Vec4 DISABLED = get(0xA0A0A0);
 		Vec4 ACCENT = get(0x1F6678);
 		Vec4 BACK = get(0x4D4D4D);
 		Vec4 ALPHA = get(0x0, true);

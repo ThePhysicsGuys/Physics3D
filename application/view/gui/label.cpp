@@ -23,10 +23,13 @@ Label::Label(std::string text, double x, double y, double scale, Vec4 color, Fon
 
 void Label::render() {
 	if (visible) {
-		resize();
 
+		Vec4 blendColor = (disabled) ? GUI::COLOR::DISABLED : GUI::COLOR::WHITE;
+
+		resize();
+		
 		Vec2 fontPosition = position + Vec2(padding, -dimension.y + padding);
-		font->render(text, fontPosition, foregroundColor, scale);
+		font->render(text, fontPosition, GUI::COLOR::blend(foregroundColor, blendColor), scale);
 
 		if (debug) {
 			GUI::quad->resize(position, dimension);

@@ -3,7 +3,9 @@
 #include <string>
 
 #include "../engine/math/vec2.h"
+#include "../engine/math/vec4.h"
 #include "../texture.h"
+
 #include "component.h"
 
 class Button;
@@ -12,9 +14,9 @@ typedef void (*ButtonAction) (Button*);
 
 class Button : public Component {
 private:
-	void renderPressed();
-	void renderHovering();
-	void renderIdle();
+	void renderPressed(Vec4 blendColor);
+	void renderHovering(Vec4 blendColor);
+	void renderIdle(Vec4 blendColor);
 public:
 	ButtonAction action = [] (Button*) {};
 

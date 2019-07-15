@@ -1,10 +1,12 @@
 #include "directionEditor.h"
 
+#include "gui.h"
+
 #include "../shaderProgram.h"
 #include "../renderUtils.h"
 
 #include "../engine/math/cframe.h"
-
+#include "../engine/math/vec4.h"
 #include "../engine/math/mathUtil.h"
 
 DirectionEditor::DirectionEditor(double x, double y, double width, double height) : Component(x, y, width, height) {
@@ -15,29 +17,34 @@ DirectionEditor::DirectionEditor(double x, double y, double width, double height
 }
 
 void DirectionEditor::render() {
-	// Draw onto gui framebuffer
-	GUI::guiFrameBuffer->bind();
-	Renderer::enableDepthTest();
-	Renderer::clearColor();
-	Renderer::clearDepth();
+	if (visible) {
 
-	Shaders::basicShader.updateMaterial(Material(GUI::COLOR::G));
-	Shaders::basicShader.updateModel(modelMatrix);
-	Shaders::basicShader.updateProjection(viewMatrix, GUI::screen->camera.projectionMatrix, viewPosition);
-	GUI::vectorMesh->render();
+		Vec4 blendColor = (disabled) ? GUI::COLOR::DISABLED : GUI::COLOR::WHITE;
 
-	GUI::guiFrameBuffer->unbind();
-	Renderer::disableDepthTest();
-	
-	GUI::quad->resize(position, dimension);
-	Shaders::quadShader.updateColor(GUI::COLOR::BACK);
-	GUI::quad->render(Renderer::WIREFRAME);
+		// Draw onto gui framebuffer
+		GUI::guiFrameBuffer->bind();
+		Renderer::enableDepthTest();
+		Renderer::clearColor();
+		Renderer::clearDepth();
 
-	Vec2 contentPosition = position + Vec2(GUI::padding, -GUI::padding);
-	Vec2 contentDimension = dimension - Vec2(GUI::padding) * 2;
-	GUI::quad->resize(contentPosition, contentDimension);
-	Shaders::quadShader.updateTexture(GUI::guiFrameBuffer->texture);
-	GUI::quad->render();
+		Shaders::basicShader.updateMaterial(Material(GUI::COLOR::blend(GUI::COLOR::G, blendColor)));
+		Shaders::basicShader.updateModel(modelMatrix);
+		Shaders::basicShader.updateProjection(viewMatrix, GUI::screen->camera.projectionMatrix, viewPosition);
+		GUI::vectorMesh->render();
+
+		GUI::guiFrameBuffer->unbind();
+		Renderer::disableDepthTest();
+
+		GUI::quad->resize(position, dimension);
+		Shaders::quadShader.updateColor(GUI::COLOR::blend(GUI::COLOR::BACK, blendColor));
+		GUI::quad->render(Renderer::WIREFRAME);
+
+		Vec2 contentPosition = position + Vec2(GUI::padding, -GUI::padding);
+		Vec2 contentDimension = dimension - Vec2(GUI::padding) * 2;
+		GUI::quad->resize(contentPosition, contentDimension);
+		Shaders::quadShader.updateTexture(GUI::guiFrameBuffer->texture, blendColor);
+		GUI::quad->render();
+	}
 }
 
 void DirectionEditor::rotate(double dalpha, double dbeta, double dgamma) {
@@ -50,6 +57,9 @@ Vec2 DirectionEditor::resize() {
 }
 
 void DirectionEditor::drag(Vec2 newPoint, Vec2 oldPoint) {
+	if (disabled)
+		return;
+
 	Vec2 dmxy = newPoint - oldPoint;
 	rotate(dmxy.y * rspeed, dmxy.x * rspeed, 0);
 }
