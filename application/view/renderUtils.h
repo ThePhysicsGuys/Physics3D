@@ -8,11 +8,14 @@
 namespace Renderer {
 
 	// GL constants
+
 	extern unsigned int WIREFRAME;
 	extern unsigned int FILLED;
 	extern unsigned int POINTS;
 
+
 	// GLFW binding
+
 	extern inline bool initGLFW();
 	extern inline void terminateGLFW();
 
@@ -34,8 +37,11 @@ namespace Renderer {
 	extern inline void enableGLFWCursor();
 	extern inline void disableGLFWCursor();
 
+	extern inline void setGLFWMultisampleSamples(int samples);
+
 
 	// GLEW binding
+
 	extern bool initGLEW();
 
 	extern void clearDepth();
@@ -55,6 +61,8 @@ namespace Renderer {
 	extern inline void enableBlending();
 	extern inline void disableBlending();
 	extern inline void standardBlendFunction();
+
+	extern inline void enableMultisampling();
 
 	extern const unsigned char* getVendor();
 	extern const unsigned char* getVersion();

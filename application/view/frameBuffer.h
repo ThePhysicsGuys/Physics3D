@@ -43,6 +43,22 @@ public:
 	void close() override;
 };
 
+class MultisampleFrameBuffer : public Bindable {
+public:
+	Vec2i dimension;
+
+	MultisampleTexture* texture = nullptr;
+	MultisampleRenderBuffer* renderBuffer = nullptr;
+
+	MultisampleFrameBuffer();
+	MultisampleFrameBuffer(unsigned int width, unsigned int height, int samples);
+
+	void resize(Vec2i dimension);
+
+	void bind() override;
+	void unbind() override;
+	void close() override;
+};
 
 class DepthFrameBuffer : public Bindable {
 public:

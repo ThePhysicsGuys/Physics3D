@@ -195,36 +195,38 @@ void HDRTexture::close() {
 
 // TextureMultisample
 
-TextureMultisample::TextureMultisample(unsigned int width, unsigned int height, unsigned int samples) : width(width), height(height), samples(samples), unit(0) {
+MultisampleTexture::MultisampleTexture(unsigned int width, unsigned int height, unsigned int samples) : width(width), height(height), samples(samples), unit(0) {
 	glGenTextures(1, &id);
 	bind();
-	glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, GL_RGB, width, height, GL_TRUE);
-	glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, GL_RGBA, width, height, GL_TRUE);
+	glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	unbind();
 }
 
-void TextureMultisample::resize(unsigned int width, unsigned int height) {
+void MultisampleTexture::resize(unsigned int width, unsigned int height) {
 	bind();
 	glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, GL_RGB, width, height, GL_TRUE);
 	unbind();
 }
 
-void TextureMultisample::bind() {
+void MultisampleTexture::bind() {
 	bind(unit);
 }
 
-void TextureMultisample::bind(int unit) {
+void MultisampleTexture::bind(int unit) {
 	this->unit = unit;
 	glActiveTexture(GL_TEXTURE0 + unit);
 	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, id);
 }
 
-void TextureMultisample::unbind() {
+void MultisampleTexture::unbind() {
 	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
 }
 
-void TextureMultisample::close() {
+void MultisampleTexture::close() {
 	glDeleteTextures(1, &id);
 }
 

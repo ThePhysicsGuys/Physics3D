@@ -54,14 +54,14 @@ public:
 	void resize(unsigned int width, unsigned int height, const void* buffer);
 };
 
-class TextureMultisample : public Bindable {
+class MultisampleTexture : public Bindable {
 public:
 	int unit;
 	unsigned int width;
 	unsigned int height;
 	unsigned int samples;
 
-	TextureMultisample(unsigned int width, unsigned int height, unsigned int samples);
+	MultisampleTexture(unsigned int width, unsigned int height, unsigned int samples);
 
 	void bind(int unit);
 	void bind() override;

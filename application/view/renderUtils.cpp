@@ -55,6 +55,10 @@ namespace Renderer {
 		return glfwWindowShouldClose(GLFWContext);
 	}
 
+	void setGLFWMultisampleSamples(int samples) {
+		glfwWindowHint(GLFW_SAMPLES, samples);
+	};
+
 	Vec2i getGLFWWindowSize() {
 		int width;
 		int height;
@@ -134,6 +138,10 @@ namespace Renderer {
 
 	inline void standardBlendFunction() {
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	}
+
+	inline void enableMultisampling() {
+		glEnable(GL_MULTISAMPLE);
 	}
 
 	const unsigned char* getVendor() {

@@ -41,6 +41,8 @@ void FrameBuffer::unbind() {
 }
 
 void FrameBuffer::resize(Vec2i dimension) {
+	this->dimension = dimension;
+
 	if (texture)
 		texture->resize(dimension.x, dimension.y);
 	if (renderBuffer)
@@ -103,6 +105,45 @@ void HDRFrameBuffer::close() {
 	glDeleteFramebuffers(1, &id);
 };
 
+
+// MutisampleFrameBuffer
+
+MultisampleFrameBuffer::MultisampleFrameBuffer() {
+	glGenFramebuffers(1, &id);
+	bind();
+}
+
+MultisampleFrameBuffer::MultisampleFrameBuffer(unsigned int width, unsigned int height, int samples) : MultisampleFrameBuffer() {
+	texture = new MultisampleTexture(width, height, samples);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, texture->id, 0);
+
+	renderBuffer = new MultisampleRenderBuffer(width, height, samples);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderBuffer->id);
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		Log::error("FrameBuffer object with id (%d) not complete", id);
+
+	unbind();
+};
+
+void MultisampleFrameBuffer::resize(Vec2i dimension) {
+	if (texture)
+		texture->resize(dimension.x, dimension.y);
+	if (renderBuffer)
+		renderBuffer->resize(dimension.x, dimension.y);
+};
+
+void MultisampleFrameBuffer::bind() {
+	glBindFramebuffer(GL_FRAMEBUFFER, id);
+};
+
+void MultisampleFrameBuffer::unbind() {
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+};
+
+void MultisampleFrameBuffer::close() {
+	glDeleteFramebuffers(1, &id);
+};
 
 
 // DepthFrameBuffer
