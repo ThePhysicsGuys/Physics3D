@@ -2,9 +2,9 @@
 #include "view/renderUtils.h"
 #include "../engine/math/mathUtil.h"
 #include "application.h"
-#include "view/picker.h"
+#include "view/picker/picker.h"
 #include "view/gui/gui.h"
-#include "view/visualDebug.h"
+#include "view/debug/visualDebug.h"
 #include "objectLibrary.h"
 #include <algorithm>
 #include <random>
@@ -81,13 +81,13 @@ void StandardInputHandler::keyDown(int key, int modifiers) {
 			screen.world->isValid();
 			break;
 		case GLFW_KEY_R:
-			Picker::editMode = Picker::EditMode::ROTATE;
+			Picker::editTools.editMode = EditTools::EditMode::ROTATE;
 			break;
 		case GLFW_KEY_E:
-			Picker::editMode = Picker::EditMode::TRANSLATE;
+			Picker::editTools.editMode = EditTools::EditMode::TRANSLATE;
 			break;
 		case GLFW_KEY_C:
-			Picker::editMode = Picker::EditMode::SCALE;
+			Picker::editTools.editMode = EditTools::EditMode::SCALE;
 			break;
 		case GLFW_KEY_4:
 			colissionSpheresMode = static_cast<SphereColissionRenderMode>((static_cast<int>(colissionSpheresMode) + 1) % 3);

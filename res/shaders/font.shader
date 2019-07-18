@@ -1,5 +1,5 @@
 #shader vertex 
-#version 330
+#version 330 core
 
 layout (location = 0) in vec4 vertex;
 
@@ -15,7 +15,7 @@ void main() {
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 #shader fragment
-#version 330
+#version 330 core
 
 in vec2 fUVTexture;
 out vec4 outColor;

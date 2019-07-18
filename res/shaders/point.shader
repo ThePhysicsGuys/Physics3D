@@ -20,7 +20,7 @@ void main() {
 ///////////////////////////////////////////////////////////////////////////
 
 #shader geometry // geometry shader
-#version 330
+#version 330 core
 
 layout(points) in;
 layout(triangle_strip, max_vertices = 24) out;

@@ -39,6 +39,8 @@ public:
 	Vec4 borderColor;
 	double borderWidth;
 
+	void setColor(Vec4 color);
+
 	Button(double x, double y, double width, double height, bool textured);
 	Button(std::string text, double x, double y, bool textured);
 

@@ -1,5 +1,5 @@
 #shader vertex
-#version 330
+#version 330 core
 layout (location = 0) in vec3 vposition;
 
 varying vec3 scattering;
@@ -65,7 +65,7 @@ void main() {
 //////////////////////////////////////////////////////////////
 
 #shader fragment
-#version 330
+#version 330  core
 
 out vec4 outColor;
 

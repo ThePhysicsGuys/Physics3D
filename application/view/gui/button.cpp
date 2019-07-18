@@ -127,3 +127,9 @@ void Button::release(Vec2 point) {
 	pressed = false;
 	(*action)(this);
 }
+
+void Button::setColor(Vec4 color) {
+	idleColor = color;
+	pressColor = color;
+	hoverColor = color;
+}

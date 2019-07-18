@@ -25,7 +25,7 @@ void main() {
 ///////////////////////////////////////////////////////////////////////////
 
 #shader geometry // geometry shader
-#version 330
+#version 330 core
 
 layout(triangles) in;
 
@@ -154,7 +154,7 @@ void main() {
 //////////////////////////////////////////////////////////////////////////
 
 #shader fragment
-#version 330
+#version 330 core
 
 out vec4 outColor;
 

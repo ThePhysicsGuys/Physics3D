@@ -7,7 +7,7 @@
 #include "directionEditor.h"
 #include "colorPicker.h"
 
-#include "../visualDebug.h"
+#include "../debug/visualDebug.h"
 #include "../../extendedPart.h"
 #include "../../worlds.h"
 
@@ -119,20 +119,17 @@ struct EnvironmentFrame : public FrameBlueprint {
 		if (!frame->visible)
 			return;
 
-		Vec4 color = colorPicker->getRgba();
-		sunColorButton->idleColor = color;
-		sunColorButton->hoverColor = color;
-		sunColorButton->pressColor = color;
+		sunColorButton->setColor(colorPicker->getRgba());
 
 		if (hdrCheckBox->checked) {
-			exposureSlider->disabled = false;
-			exposureValueLabel->disabled = false;
-			exposureLabel->disabled = false;
+			exposureSlider->enable();
+			exposureValueLabel->enable();
+			exposureLabel->enable();
 			exposureValueLabel->text = std::to_string(exposureSlider->value);
 		} else {
-			exposureSlider->disabled = true;
-			exposureValueLabel->disabled = true;
-			exposureLabel->disabled = true;
+			exposureSlider->disable();
+			exposureValueLabel->disable();
+			exposureLabel->disable();
 		}
 
 		gammaValueLabel->text = std::to_string(gammaSlider->value);
@@ -356,9 +353,7 @@ struct PropertiesFrame : public FrameBlueprint {
 			partEnergy->text = "Energy: " + std::to_string(kineticEnergy + potentialEnergy);
 
 			Vec4 color = selectedPart->material.ambient;
-			colorButton->idleColor = color;
-			colorButton->hoverColor = color;
-			colorButton->pressColor = color;
+			colorButton->setColor(color);
 			colorPicker->setRgba(color);
 		} else {
 			colorButton->idleColor = Vec4(1);
