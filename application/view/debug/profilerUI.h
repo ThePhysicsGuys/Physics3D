@@ -1,12 +1,13 @@
 #pragma once
 
 #include <string>
-#include "../../engine/profiling.h"
-#include "../../engine/math/largeMatrix.h"
-#include "screen.h"
-#include "bindable.h"
-#include "font.h"
-#include "gui/component.h"
+
+#include "../engine/profiling.h"
+#include "../engine/math/largeMatrix.h"
+#include "../screen.h"
+#include "../bindable.h"
+#include "../font.h"
+#include "../gui/component.h"
 
 extern const Vec3f pieColors[30];
 

@@ -1,9 +1,11 @@
+#include "profilerUI.h"
 
 #include <GL/glew.h>
-#include "profilerUI.h"
+
 #include "../engine/math/mat2.h"
 #include "../engine/math/vec2.h"
-#include "gui/gui.h"
+
+#include "../gui/gui.h"
 
 #define _USE_MATH_DEFINES
 #include "math.h"

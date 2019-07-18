@@ -1,11 +1,13 @@
 #pragma once
 
 #include "visualDebug.h"
-#include "gui\gui.h"
-#include "../debug.h"
-#include "../threePhaseBuffer.h"
 #include "profilerUI.h"
-#include "font.h"
+
+#include "../font.h"
+#include "../gui/gui.h"
+
+#include "../../debug.h"
+#include "../../threePhaseBuffer.h"
 
 const char* const graphicsDebugLabels[]{
 	"Update",

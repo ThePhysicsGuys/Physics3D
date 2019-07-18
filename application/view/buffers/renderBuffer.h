@@ -1,6 +1,6 @@
 #pragma once
 
-#include "bindable.h"
+#include "../bindable.h"
 
 class RenderBuffer : public Bindable {
 public:

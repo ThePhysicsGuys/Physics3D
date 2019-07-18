@@ -1,7 +1,7 @@
 #pragma once
 
 #include "abstractMesh.h"
-#include "vertexBuffer.h"
+#include "../buffers/vertexBuffer.h"
 
 class PointMesh : public AbstractMesh {
 public:

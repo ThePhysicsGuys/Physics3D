@@ -1,10 +1,10 @@
 #pragma once
 
 #include "abstractMesh.h"
-#include "bufferLayout.h"
-#include "vertexBuffer.h"
-#include "../../engine/math/vec3.h"
-#include "../../engine/math/vec2.h"
+#include "../buffers/bufferLayout.h"
+#include "../buffers/vertexBuffer.h"
+#include "../engine/math/vec3.h"
+#include "../engine/math/vec2.h"
 
 class ArrayMesh : public AbstractMesh {
 public:

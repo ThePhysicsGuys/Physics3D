@@ -1,8 +1,10 @@
 #pragma once
 
-#include <vector>
 #include "GL\glew.h"
-#include "../../util/log.h"
+
+#include "../util/log.h"
+
+#include <vector>
 
 struct BufferElement {
 	unsigned int type;

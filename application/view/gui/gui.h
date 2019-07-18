@@ -1,11 +1,13 @@
 #pragma once
 
-#include "../primitive.h"
 #include "../font.h"
 #include "../screen.h"
 #include "../texture.h"
-#include "../indexedMesh.h"
-#include "../frameBuffer.h"
+
+#include "../mesh/primitive.h"
+#include "../mesh/indexedMesh.h"
+
+#include "../buffers/frameBuffer.h"
 
 #include "../engine/math/vec3.h"
 #include "../engine/math/vec4.h"

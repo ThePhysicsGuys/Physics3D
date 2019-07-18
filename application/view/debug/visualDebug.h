@@ -1,12 +1,16 @@
 #pragma once
 
-#include "../debug.h"
+#include "profilerUI.h"
+
 #include "../engine/math/mat3.h"
 #include "../engine/datastructures/buffers.h"
-#include "vectorMesh.h"
-#include "pointMesh.h"
-#include "profilerUI.h"
-#include "font.h"
+
+#include "../mesh/vectorMesh.h"
+#include "../mesh/pointMesh.h"
+
+#include "../font.h"
+
+#include "../../debug.h"
 
 extern const char* const graphicsDebugLabels[];
 

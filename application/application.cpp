@@ -11,9 +11,8 @@
 #include <istream>
 
 #include "view/screen.h"
-#include "view/visualDebug.h"
+#include "view/debug/visualDebug.h"
 #include "view/material.h"
-#include "view/loader.h"
 
 #include "../engine/math/mathUtil.h"
 
@@ -282,7 +281,7 @@ int main(void) {
 		for(double y = minY; y < maxY; y += 1.01) {
 			for(double z = minZ; z < maxZ; z += 1.01) {
 				//ExtendedPart* newCube = cubeFactory.produce(CFrame(Vec3(x, y + 1, z)), 1.0, 0.2);
-				//ewCube->material.ambient = Vec4f((x-minX)/(maxX-minX), (y-minY)/(maxY-minY), (z-minZ)/(maxZ-minZ), 1.0f);
+				//newCube->material.ambient = Vec4f((x-minX)/(maxX-minX), (y-minY)/(maxY-minY), (z-minZ)/(maxZ-minZ), 1.0f);
 				//world.addPart(newCube);
 				//world.addPart(sphereFactory.produce(CFrame(Vec3(x, y + 1, z - 5)), 1.0, 0.2));
 				//world.addPart(triangleFactory.produce(CFrame(Vec3(x, y + 1, z + 5)), 1.0, 0.2));
@@ -292,6 +291,10 @@ int main(void) {
 			}
 		}
 	}
+
+	/*VisualShape terrain = OBJImport::load("../res/models/mountains.obj");
+	ExtendedPart* terrainPart = createUniquePart(screen, terrain, CFrame(Vec3(), Mat3(30, 0, 0, 0, 20, 0, 0, 0, 30)), 1, 1, "terrain");
+	world.addPart(terrainPart);*/
 
 	//Shape stallShape = OBJImport::load((std::istream&) std::istringstream(getResourceAsString(STALL_MODEL)));
 	//Shape stallShape = OBJImport::load("../res/models/gui/stall.obj");

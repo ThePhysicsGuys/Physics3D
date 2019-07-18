@@ -1,4 +1,5 @@
 #include "vectorMesh.h"
+
 #include "../util/Log.h"
 
 VectorMesh::VectorMesh(const float* vertices, const size_t vertexCount, size_t capacity) : AbstractMesh(RenderMode::POINTS), vertexCount(vertexCount), capacity(capacity) {

@@ -1,4 +1,5 @@
 #include "arrayMesh.h"
+
 #include "../util/Log.h"
 
 ArrayMesh::ArrayMesh(const float* vertices, const float* uv, const unsigned int vertexCount, const unsigned int dimensions) : AbstractMesh(), vertexCount(vertexCount) {

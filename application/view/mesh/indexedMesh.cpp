@@ -1,5 +1,6 @@
 #include "indexedMesh.h"
-#include "../../engine/geometry/shape.h"
+
+#include "../engine/geometry/shape.h"
 #include "../util/log.h"
 
 IndexedMesh::IndexedMesh(const VisualShape& shape) : AbstractMesh(), vertexCount(shape.vertexCount), triangleCount(shape.triangleCount) {

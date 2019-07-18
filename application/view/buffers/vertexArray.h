@@ -4,9 +4,10 @@
 
 #include "vertexBuffer.h"
 #include "bufferLayout.h"
-#include "bindable.h"
 
-#include "../../util/log.h"
+#include "../bindable.h"
+
+#include "../util/log.h"
 
 class VertexArray : public Bindable {
 public:

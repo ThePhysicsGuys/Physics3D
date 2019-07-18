@@ -1,18 +1,14 @@
 #pragma once
 
-#include "screen.h"
+#include "editTools.h"
+
+#include "../screen.h"
 
 #include "../engine/math/vec2.h"
 
 namespace Picker {
-
-	enum class EditMode {
-		TRANSLATE,
-		ROTATE,
-		SCALE
-	};
-
-	extern EditMode editMode;
+	
+	extern EditTools editTools;
 
 	void init();
 	void update(Screen& screen, Vec2 mousePosition);

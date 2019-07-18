@@ -10,14 +10,14 @@
 #include "../engine/debug.h"
 #include "../engine/datastructures/buffers.h"
 
-#include "frameBuffer.h"
+#include "buffers/frameBuffer.h"
 #include "camera.h"
-#include "primitive.h"
+#include "mesh/primitive.h"
 
 class StandardInputHandler;
 class MagnetWorld;
 
-#include "indexedMesh.h"
+#include "mesh/indexedMesh.h"
 #include "../standardInputHandler.h"
 
 bool initGLEW();

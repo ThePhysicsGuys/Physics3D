@@ -3,9 +3,9 @@
 #include "GL\glew.h"
 #include "GLFW\glfw3.h"
 
-#include "bindable.h"
+#include "../bindable.h"
 
-#include "../../util/log.h"
+#include "../util/log.h"
 
 class VertexBuffer : public Bindable {
 public:

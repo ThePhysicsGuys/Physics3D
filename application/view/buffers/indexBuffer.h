@@ -3,7 +3,9 @@
 #include "GL\glew.h"
 #include "GLFW\glfw3.h"
 
-#include "bindable.h"
+#include "../util/log.h"
+
+#include "../bindable.h"
 
 class IndexBuffer : public Bindable {
 public:

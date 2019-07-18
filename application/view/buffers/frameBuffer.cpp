@@ -3,7 +3,7 @@
 #include "GL\glew.h"
 #include "GLFW\glfw3.h"
 
-#include "../../util/log.h"
+#include "../util/log.h"
 
 FrameBuffer::FrameBuffer() {
 	glGenFramebuffers(1, &id);

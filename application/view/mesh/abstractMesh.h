@@ -1,9 +1,9 @@
 #pragma once
 
 #include "GL\glew.h"
-#include "vertexArray.h"
-#include "bufferLayout.h"
-#include "../../util/log.h"
+#include "../buffers/vertexArray.h"
+#include "../buffers/bufferLayout.h"
+#include "../util/log.h"
 
 enum class RenderMode {
 	PATCHES = GL_PATCHES,

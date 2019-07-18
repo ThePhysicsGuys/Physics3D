@@ -1,8 +1,8 @@
 #pragma once
 
-#include "texture.h"
+#include "../texture.h"
 #include "renderBuffer.h"
-#include "bindable.h"
+#include "../bindable.h"
 #include "../engine/math/vec2.h"
 
 class FrameBuffer : public Bindable {

@@ -6,7 +6,7 @@
 #include "../engine/math/mathUtil.h"
 #include "../extendedPart.h"
 
-#include "picker.h"
+#include "picker/picker.h"
 #include "screen.h"
 
 #include <cmath>
