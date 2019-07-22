@@ -4,18 +4,20 @@
 
 #include "stringUtil.h"
 
-std::string Properties::get(std::string property) {
-	auto iterator = properties.find(property);
-	if (iterator != properties.end())
-		return iterator->second;
-	return nullptr;
+std::string Properties::get(std::string property) const {
+	try {
+		std::string value = properties.at(property);
+		return value;
+	} catch (std::out_of_range& const e) {
+		return NOT_FOUND;
+	}
 }
 
 std::map<std::string, std::string> Properties::get() {
 	return properties;
 }
 
-void Properties::add(const std::string& property, const std::string& value) {
+void Properties::set(const std::string& property, const std::string& value) {
 	if (properties.find(property) == properties.end())
 		properties.insert(std::make_pair(property, value));
 	else
@@ -49,12 +51,18 @@ namespace PropertiesParser {
 		while (getline(inputstream, line)) {
 			line = trim(line);
 			if (line.empty() || line.at(0) == '#') {
-				// next line
+				continue;
 			} else {
-				size_t pos = line.find("=");
+				size_t pos = line.find(":");
+				
+				if (pos == std::string::npos) {
+					Log::warn("Invalid property syntax: %s", line.c_str());
+					continue;
+				}
+
 				std::string property = rtrim(line.substr(0, pos));
 				std::string value = ltrim(line.substr(pos + 1, line.length()));
-				properties.add(property, value);
+				properties.set(property, value);
 			}
 		}
 
@@ -78,7 +86,7 @@ namespace PropertiesParser {
 		}
 
 		for (auto property : properties.get()) {
-			outputstream << property.first << " = " << property.second << std::endl;
+			outputstream << property.first << ": " << property.second << std::endl;
 		}
 
 		Log::resetSubject();

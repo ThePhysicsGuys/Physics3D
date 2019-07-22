@@ -1,6 +1,6 @@
 #include "export.h"
 
-#include "visualShape.h"
+#include "../visualShape.h"
 
 #include "../util/log.h"
 

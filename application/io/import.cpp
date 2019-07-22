@@ -7,13 +7,13 @@
 #include "../util/stringUtil.h"
 #include "../util/log.h"
 
-#include "view/material.h"
+#include "../view/material.h"
 
 #include "../engine/physical.h"
 
-#include "partFactory.h"
+#include "../partFactory.h"
 
-#include "visualShape.h"
+#include "../visualShape.h"
 
 /*
 	Import

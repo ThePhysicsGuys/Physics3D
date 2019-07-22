@@ -1,112 +1,94 @@
 #include "standardInputHandler.h"
-#include "view/renderUtils.h"
+
+#include "keyboard.h"
+#include "../options/keyboardOptions.h"
+#include "../view/renderUtils.h"
 #include "../engine/math/mathUtil.h"
-#include "application.h"
-#include "view/picker/picker.h"
-#include "view/gui/gui.h"
-#include "view/debug/visualDebug.h"
-#include "objectLibrary.h"
+#include "../application.h"
+#include "../view/picker/picker.h"
+#include "../view/gui/gui.h"
+#include "../view/debug/visualDebug.h"
+#include "../objectLibrary.h"
 #include <algorithm>
 #include <random>
 
-#include "worlds.h"
-#include "view\screen.h"
-#include "view\camera.h"
+#include "../worlds.h"
+#include "../view/screen.h"
+#include "../view/camera.h"
 
 StandardInputHandler::StandardInputHandler(GLFWwindow* window, Screen& screen) : InputHandler(window), screen(screen) {}
 
 void StandardInputHandler::framebufferResize(Vec2i dimension) {
-	if (screen.properties.get("include_titlebar_offset") == "true") {
-		Vec4i size = Renderer::getGLFWFrameSize();
-		dimension.y -= size.y;
-	}
-
 	Renderer::viewport(Vec2i(), dimension);
 
 	(*screen.eventHandler.windowResizeHandler) (screen, dimension);
 }
 
 void StandardInputHandler::keyDownOrRepeat(int key, int modifiers) {
-	switch (key) {
-	case GLFW_KEY_PAGE_UP:
+	if (KeyboardOptions::Tick::Speed::up == key) {
 		setSpeed(getSpeed() * 1.5);
 		Log::info("TPS is now: %f", getSpeed());
-		break;
-	case GLFW_KEY_PAGE_DOWN:
+	} else if (KeyboardOptions::Tick::Speed::down == key) {
 		setSpeed(getSpeed() / 1.5);
 		Log::info("TPS is now: %f", getSpeed());
-		break;
-	case GLFW_KEY_T:
+	} else if (KeyboardOptions::Tick::run == key) {
 		runTick();
-		break;
-	case GLFW_KEY_O:
+	} else if (Keyboard::O == key) {
 		createDominoAt(Vec3(0.0 + (rand() % 100) * 0.001, 1.0 + (rand() % 100) * 0.001, 0.0 + (rand() % 100) * 0.001), fromEulerAngles(0.2, 0.3, 0.7));
 		Log::info("Created domino! There are %d objects in the world! ", screen.world->getPartCount());
-		break;
 	}
 }
 
 void StandardInputHandler::keyDown(int key, int modifiers) {
-
-	switch (key) {
-		case GLFW_KEY_P:
-			togglePause();
-			break;
-		case GLFW_KEY_DELETE:
-			if (screen.selectedPart != nullptr) {
-				screen.world->removePart(screen.selectedPart);
-				screen.world->selectedPart = nullptr;
-				screen.selectedPart = nullptr;
+	if (KeyboardOptions::Tick::pause == key) {
+		togglePause();
+	} else if (KeyboardOptions::Part::remove == key) {
+		if (screen.selectedPart != nullptr) {
+			screen.world->removePart(screen.selectedPart);
+			screen.world->selectedPart = nullptr;
+			screen.selectedPart = nullptr;
+		}
+	} else if (KeyboardOptions::Debug::pies == key) {
+		renderPiesEnabled = !renderPiesEnabled;
+	} else if (KeyboardOptions::Part::anchor == key) {
+		if (screen.selectedPart != nullptr) {
+			if (screen.world->isAnchored(screen.selectedPart->parent)) {
+				screen.world->unanchor(screen.selectedPart->parent);
+			} else {
+				Physical* parent = screen.selectedPart->parent;
+				parent->velocity = Vec3();
+				parent->angularVelocity = Vec3();
+				parent->totalForce = Vec3();
+				parent->totalMoment = Vec3();
+				screen.world->anchor(screen.selectedPart->parent);
 			}
-			break;
-		case GLFW_KEY_F:
-			renderPiesEnabled = !renderPiesEnabled;
-			break;
-		case GLFW_KEY_Q:
-			if(screen.selectedPart != nullptr) {
-				if(screen.world->isAnchored(screen.selectedPart->parent)) {
-					screen.world->unanchor(screen.selectedPart->parent);
-				} else {
-					Physical* parent = screen.selectedPart->parent;
-					parent->velocity = Vec3();
-					parent->angularVelocity = Vec3();
-					parent->totalForce = Vec3();
-					parent->totalMoment = Vec3();
-					screen.world->anchor(screen.selectedPart->parent);
-				}
-			}
-			break;
-		case GLFW_KEY_V:
-			Log::debug("Checking World::isValid()");
-			screen.world->isValid();
-			break;
-		case GLFW_KEY_R:
-			Picker::editTools.editMode = EditTools::EditMode::ROTATE;
-			break;
-		case GLFW_KEY_E:
+		}
+	} else if (KeyboardOptions::World::valid == key) {
+		Log::debug("Checking World::isValid()");
+		screen.world->isValid();
+	} else if (KeyboardOptions::Edit::rotate == key) {
+		Picker::editTools.editMode = EditTools::EditMode::ROTATE;
+	} else if (KeyboardOptions::Edit::translate == key) {
 			Picker::editTools.editMode = EditTools::EditMode::TRANSLATE;
-			break;
-		case GLFW_KEY_C:
+	} else if (KeyboardOptions::Edit::scale == key) {
 			Picker::editTools.editMode = EditTools::EditMode::SCALE;
-			break;
-		case GLFW_KEY_4:
+	} else if (KeyboardOptions::Debug::spheres == key) {
 			colissionSpheresMode = static_cast<SphereColissionRenderMode>((static_cast<int>(colissionSpheresMode) + 1) % 3);
-			break;
-		case GLFW_KEY_5:
-			renderColTree = static_cast<ColTreeRenderMode>((static_cast<int>(renderColTree) + 1) % 3);
-			break;
+	} else if (KeyboardOptions::Debug::tree == key) {
+		renderColTree = static_cast<ColTreeRenderMode>((static_cast<int>(renderColTree) + 1) % 3);
 	}
+	
 
-	if(key >= GLFW_KEY_F1 && key <= GLFW_KEY_F9) {
-		toggleDebugVecType(static_cast<Debug::VectorType>(key - GLFW_KEY_F1));
+	if(Keyboard::F1 <= key && Keyboard::F9 >= key) {
+		toggleDebugVecType(static_cast<Debug::VectorType>(key - Keyboard::F1.code));
 	}
-	if (key >= GLFW_KEY_1 && key <= GLFW_KEY_3) {
-		toggleDebugPointType(static_cast<Debug::PointType>(key - GLFW_KEY_1));
+	if (Keyboard::NUMBER_1 <= key && Keyboard::NUMBER_3 >= key) {
+		toggleDebugPointType(static_cast<Debug::PointType>(key - Keyboard::NUMBER_1.code));
 	}
 };
 
 void StandardInputHandler::doubleKeyDown(int key, int modifiers) {
-	if(key == GLFW_KEY_SPACE) {
+	if(KeyboardOptions::Move::fly == key) {
 		toggleFlying();
 	}
 }

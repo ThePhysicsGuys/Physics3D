@@ -1,15 +1,16 @@
 #include "screen.h"
 
 #include "renderUtils.h"
+#include "material.h"
 #include "shader.h"
+#include "shaderProgram.h"
+#include "font.h"
+
 #include "mesh/indexedMesh.h"
 #include "mesh/arrayMesh.h"
 #include "mesh/vectorMesh.h"
 #include "mesh/pointMesh.h"
 #include "picker/picker.h"
-#include "material.h"
-#include "shaderProgram.h"
-#include "font.h"
 #include "debug/visualDebug.h"
 
 #include "gui/panel.h"
@@ -24,10 +25,11 @@
 #include "gui/frames.h"
 
 #include "../debug.h"
-#include "../standardInputHandler.h"
+#include "../options/keyboardOptions.h"
+#include "../input/standardInputHandler.h"
 #include "../resourceManager.h"
 #include "../objectLibrary.h"
-#include "../import.h"
+#include "../io/import.h"
 #include "../util/log.h"
 
 #include "../engine/math/vec2.h"
@@ -188,6 +190,9 @@ void Screen::init() {
 	// Properties init
 	properties = PropertiesParser::read("../res/.properties");
 
+	// load options from properties
+	KeyboardOptions::load(properties);
+
 
 	// Render mode init
 	Renderer::enableCulling();
@@ -329,20 +334,20 @@ void Screen::update() {
 	// IO events
 	if (handler->anyKey) {
 		bool leftDragging = handler->leftDragging;
-		if (handler->getKey(GLFW_KEY_W))  camera.move(*this, 0, 0, -1, leftDragging);
-		if (handler->getKey(GLFW_KEY_S))  camera.move(*this, 0, 0, 1, leftDragging);	
-		if (handler->getKey(GLFW_KEY_D))  camera.move(*this, 1, 0, 0, leftDragging);
-		if (handler->getKey(GLFW_KEY_A))  camera.move(*this, -1, 0, 0, leftDragging);
-		if (handler->getKey(GLFW_KEY_SPACE)) 
+		if (handler->getKey(KeyboardOptions::Move::forward))  camera.move(*this, 0, 0, -1, leftDragging);
+		if (handler->getKey(KeyboardOptions::Move::backward))  camera.move(*this, 0, 0, 1, leftDragging);
+		if (handler->getKey(KeyboardOptions::Move::right))  camera.move(*this, 1, 0, 0, leftDragging);
+		if (handler->getKey(KeyboardOptions::Move::left))  camera.move(*this, -1, 0, 0, leftDragging);
+		if (handler->getKey(KeyboardOptions::Move::ascend))
 			if (camera.flying) camera.move(*this, 0, 1, 0, leftDragging);
-		if (handler->getKey(GLFW_KEY_LEFT_SHIFT)) 
+		if (handler->getKey(KeyboardOptions::Move::descend))
 			if (camera.flying) camera.move(*this, 0, -1, 0, leftDragging);
-		if (handler->getKey(GLFW_KEY_LEFT))  camera.rotate(*this, 0, -1, 0, leftDragging);
-		if (handler->getKey(GLFW_KEY_RIGHT)) camera.rotate(*this, 0, 1, 0, leftDragging);
-		if (handler->getKey(GLFW_KEY_UP))    camera.rotate(*this, -1, 0, 0, leftDragging);
-		if (handler->getKey(GLFW_KEY_DOWN))  camera.rotate(*this, 1, 0, 0, leftDragging);
-		if (handler->getKey(GLFW_KEY_ESCAPE)) Renderer::closeGLFWWindow();
-		if (handler->getKey(GLFW_KEY_B)) { debugFrame->frame->visible = true; debugFrame->frame->position = Vec2(0.8); GUI::select(debugFrame->frame); }
+		if (handler->getKey(KeyboardOptions::Rotate::left))  camera.rotate(*this, 0, -1, 0, leftDragging);
+		if (handler->getKey(KeyboardOptions::Rotate::right)) camera.rotate(*this, 0, 1, 0, leftDragging);
+		if (handler->getKey(KeyboardOptions::Rotate::up))    camera.rotate(*this, -1, 0, 0, leftDragging);
+		if (handler->getKey(KeyboardOptions::Rotate::down))  camera.rotate(*this, 1, 0, 0, leftDragging);
+		if (handler->getKey(KeyboardOptions::Application::close)) Renderer::closeGLFWWindow();
+		if (handler->getKey(KeyboardOptions::Debug::frame)) { debugFrame->frame->visible = true; debugFrame->frame->position = Vec2(0.8); GUI::select(debugFrame->frame); }
 	}
 
 
@@ -792,6 +797,8 @@ void Screen::refresh() {
 
 void Screen::close() {
 	Shaders::close();
+
+	KeyboardOptions::save(properties);
 
 	PropertiesParser::write("../res/.properties", properties);
 

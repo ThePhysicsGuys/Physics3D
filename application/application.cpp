@@ -34,8 +34,8 @@
 #include "extendedPart.h"
 #include "partFactory.h"
 
-#include "export.h"
-#include "import.h"
+#include "io/export.h"
+#include "io/import.h"
 
 #define _USE_MATH_DEFINES
 #include "math.h"

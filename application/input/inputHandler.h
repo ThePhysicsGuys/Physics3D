@@ -5,6 +5,10 @@
 
 #include "../engine/math/vec2.h"
 
+#include "keyboard.h"
+
+#include <string>
+
 
 class InputHandler {
 protected:
@@ -23,7 +27,7 @@ public:
 	InputHandler(GLFWwindow* window);
 	double keyInterval = 0.2;
 	char anyKey = 0;
-	bool getKey(int key);
+	bool getKey(Key key);
 	Vec2 getMousePos();
 
 	virtual void keyDown(int key, int modifiers) {};

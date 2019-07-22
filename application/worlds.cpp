@@ -5,8 +5,9 @@
 #include "../engine/constants.h"
 #include "../util/log.h"
 #include "application.h"
-#include "standardInputHandler.h"
+#include "input/standardInputHandler.h"
 #include "view/screen.h"
+#include "options/keyboardOptions.h"
 
 #define PICKER_STRENGTH 100
 #define PICKER_SPEED_STRENGTH 12
@@ -55,11 +56,11 @@ void GravityWorld::applyExternalForces() {
 			Vec3 forward = (playerZ % UP % UP).normalize();
 			Vec3 right = -(playerX % UP % UP).normalize();
 			bool leftDragging = handler->leftDragging;
-			if(handler->getKey(GLFW_KEY_W)) player->parent->applyForceAtCenterOfMass(forward * player->parent->mass * 20.0);
-			if(handler->getKey(GLFW_KEY_S)) player->parent->applyForceAtCenterOfMass(-forward * player->parent->mass * 20.0);
-			if(handler->getKey(GLFW_KEY_D)) player->parent->applyForceAtCenterOfMass(right * player->parent->mass * 20.0);
-			if(handler->getKey(GLFW_KEY_A)) player->parent->applyForceAtCenterOfMass(-right * player->parent->mass * 20.0);
-			if(handler->getKey(GLFW_KEY_SPACE))
+			if(handler->getKey(KeyboardOptions::Move::forward)) player->parent->applyForceAtCenterOfMass(forward * player->parent->mass * 20.0);
+			if(handler->getKey(KeyboardOptions::Move::backward)) player->parent->applyForceAtCenterOfMass(-forward * player->parent->mass * 20.0);
+			if(handler->getKey(KeyboardOptions::Move::right)) player->parent->applyForceAtCenterOfMass(right * player->parent->mass * 20.0);
+			if(handler->getKey(KeyboardOptions::Move::left)) player->parent->applyForceAtCenterOfMass(-right * player->parent->mass * 20.0);
+			if(handler->getKey(KeyboardOptions::Move::jump))
 				player->parent->applyForceAtCenterOfMass(Vec3(0.0, 50.0 * player->parent->mass, 0.0));
 		}
 	}

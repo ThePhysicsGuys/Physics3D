@@ -9,10 +9,10 @@
 #include "../engine/math/vec3.h"
 #include "../engine/math/vec4.h"
 
-#include "view\screen.h"
+#include "../view/screen.h"
 
-#include "extendedPart.h"
-#include "worlds.h"
+#include "../extendedPart.h"
+#include "../worlds.h"
 
 namespace Import {
 	int parseInt(std::string num);

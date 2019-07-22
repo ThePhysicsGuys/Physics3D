@@ -2,12 +2,11 @@
 
 #include <string>
 
-#include "visualShape.h"
+#include "../view/camera.h"
 
-#include "view/camera.h"
-
-#include "extendedPart.h"
-#include "worlds.h"
+#include "../visualShape.h"
+#include "../extendedPart.h"
+#include "../worlds.h"
 
 namespace Export {
 	template<typename T>

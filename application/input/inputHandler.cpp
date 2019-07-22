@@ -1,8 +1,9 @@
 
 #include "inputHandler.h"
-#include "eventHandler.h"
+#include "../eventHandler.h"
 
 #include "../util/log.h"
+
 
 void InputHandler::keyCallback(int key, int action, int mods) {
 	if (action == GLFW_PRESS) {
@@ -28,8 +29,11 @@ void InputHandler::keyCallback(int key, int action, int mods) {
 	}
 }
 
-bool InputHandler::getKey(int key) {
-	return keys[key];
+bool InputHandler::getKey(Key key) {
+	if (key.code < Keyboard::FIRST_KEY || key.code > Keyboard::LAST_KEY)
+		return false;
+
+	return keys[key.code];
 }
 
 void InputHandler::cursorCallback(double x, double y) {
@@ -68,7 +72,7 @@ Vec2 InputHandler::getMousePos() {
 	return Vec2(x, y);
 }
 
-InputHandler::InputHandler(GLFWwindow* window) : window(window){
+InputHandler::InputHandler(GLFWwindow* window) : window(window) {
 	glfwSetWindowUserPointer(window, this);
 
 	glfwSetKeyCallback(window, [] (GLFWwindow* window, int key, int scancode, int action, int mods) {

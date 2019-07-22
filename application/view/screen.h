@@ -18,7 +18,7 @@ class StandardInputHandler;
 class MagnetWorld;
 
 #include "mesh/indexedMesh.h"
-#include "../standardInputHandler.h"
+#include "../input/standardInputHandler.h"
 
 bool initGLEW();
 bool initGLFW();
