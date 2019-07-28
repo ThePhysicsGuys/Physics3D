@@ -6,12 +6,18 @@
 typedef Vec3Template<Fix<32>> Vec3Fix;
 
 struct Position {
-	Fix<32> x;
-	Fix<32> y;
-	Fix<32> z;
-
+	union {
+		struct {
+			Fix<32> x;
+			Fix<32> y;
+			Fix<32> z;
+		};
+		Fix<32> v[3];
+	};
 	inline constexpr Position() : x(), y(), z() {}
 	inline constexpr Position(Fix<32> x, Fix<32> y, Fix<32> z) : x(x), y(y), z(z) {}
+	inline constexpr const Fix<32>& operator[](size_t index) const { return v[index]; }
+	inline Fix<32>& operator[](size_t index) { return v[index]; }
 };
 
 inline Vec3Fix operator-(const Position& a, const Position& b) {

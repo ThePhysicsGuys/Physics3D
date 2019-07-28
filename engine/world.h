@@ -13,10 +13,10 @@
 class WorldPrototype {
 private:
 	std::queue<std::function<void(WorldPrototype*)>> waitingOperations;
-	SplitUnorderedList<Physical*> physicals;
 
 	size_t getTotalVertexCount();
 	void processQueue();
+
 
 	void addPartUnsafe(Part* p, bool anchored);
 	void removePartUnsafe(Part* p);
@@ -27,6 +27,10 @@ public:
 	mutable std::shared_mutex lock;
 	mutable std::mutex queueLock;
 	BoundsTree objectTree;
+
+	size_t age = 0;
+
+	SplitUnorderedList<Physical*> physicals;
 
 	Part* selectedPart = nullptr;
 

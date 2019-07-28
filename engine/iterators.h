@@ -29,7 +29,9 @@ public:
 
 	// A bit awkward but this was the only way I could come up with so that it wouldn't run off the end of the group list
 	inline bool operator!=(const CompositeIterator<GroupIterator>& other) {
-		if (currentItem == (*currentGroup).end()) {
+		if (currentItem != (*currentGroup).end()) {
+			return true;
+		} else {
 			++currentGroup;
 			if (currentGroup != other.currentGroup) {
 				currentItem = (*currentGroup).begin();
@@ -37,8 +39,6 @@ public:
 			} else {
 				return false;
 			}
-		} else {
-			return true;
 		}
 	}
 };

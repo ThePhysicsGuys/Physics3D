@@ -408,7 +408,6 @@ void Screen::renderPhysicals() {
 	Shaders::basicShader.updateProjection(camera.viewMatrix, camera.projectionMatrix, camera.cframe.position);
 	Shaders::basicShader.updateLight(lights, lightCount);
 
-	SharedLockGuard lg(world->lock);
 	
 	// Render world objects
 	for (ExtendedPart& part : *world) {
@@ -495,7 +494,7 @@ Vec4f colors[] {
 
 void recursiveRenderColTree(const TreeNode& node, int depth) {
 	if (node.isLeafNode()) {
-		renderBounds(node.bounds, GUI::COLOR::AQUA);
+		//renderBounds(node.bounds, GUI::COLOR::AQUA);
 
 	} else {
 		for (const TreeNode& node : node) {
@@ -506,7 +505,7 @@ void recursiveRenderColTree(const TreeNode& node, int depth) {
 	Vec4f color = colors[depth % 6];
 	color.w = 0.3;
 
-	renderBounds(node.bounds.expanded((30 - depth) * 0.0002), color);
+	renderBounds(node.bounds.expanded((5 - depth) * 0.002), color);
 }
 
 bool recursiveColTreeForOneObject(const TreeNode & node, const Physical * obj, const Bounds & bounds) {
@@ -629,6 +628,7 @@ void Screen::renderPies() {
 	renderDebugField(dimension, font, "World Kinetic Energy", world->getTotalKineticEnergy(), "");
 	renderDebugField(dimension, font, "World Potential Energy", world->getTotalPotentialEnergy(), "");
 	renderDebugField(dimension, font, "World Energy", world->getTotalEnergy(), "");
+	renderDebugField(dimension, font, "World Age", world->age, " ticks");
 
 	if (renderPiesEnabled) {
 		float leftSide = float(dimension.x) / float(dimension.y);
@@ -689,12 +689,17 @@ void Screen::refresh() {
 	renderSkybox();
 	Renderer::enableDepthTest();
 
-	
-	// Render physicals
-	graphicsMeasure.mark(GraphicsProcess::PHYSICALS);
-	Shaders::basicShader.updateProjection(camera.viewMatrix, camera.projectionMatrix, camera.cframe.position);
-	renderPhysicals();
+	{
+		SharedLockGuard lg(world->lock);
+		// Render physicals
+		graphicsMeasure.mark(GraphicsProcess::PHYSICALS);
+		Shaders::basicShader.updateProjection(camera.viewMatrix, camera.projectionMatrix, camera.cframe.position);
+		renderPhysicals();
 
+
+		// Debug 
+		renderDebug();
+	}
 
 	// Test
 	Renderer::disableCulling();
@@ -707,10 +712,6 @@ void Screen::refresh() {
 	plane->render(Renderer::WIREFRAME);
 	plane->renderMode = RenderMode::QUADS;
 	Renderer::enableCulling();
-
-
-	// Debug 
-	renderDebug();
 
 
 	// Postprocess to screenFrameBuffer

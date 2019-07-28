@@ -14,7 +14,7 @@ typedef Physical Boundable;
 
 struct TreeNode {
 private:
-	void addToSubTrees(Boundable* obj, const Bounds& bounds);
+	void addToSubTrees(TreeNode&& newNode);
 public:
 	Bounds bounds;
 	union {
@@ -34,6 +34,7 @@ public:
 
 	inline TreeNode(TreeNode&& other) : nodeCount(other.nodeCount), subTrees(other.subTrees), bounds(other.bounds) {
 		other.subTrees = nullptr;
+		other.nodeCount = LEAF_NODE_SIGNIFIER;
 	}
 	inline TreeNode& operator=(TreeNode&& other) {
 		std::swap(this->nodeCount, other.nodeCount);
@@ -47,9 +48,10 @@ public:
 
 	inline ~TreeNode();
 
-	void add(Boundable* obj, const Bounds& bounds);
+	void add(TreeNode&& obj);
 
 	void recalculateBounds(bool strictBounds);
+	void recalculateBoundsFromSubBounds();
 	void recalculateBoundsRecursive(bool strictBounds);
 
 	void improveStructure();
@@ -70,8 +72,11 @@ struct BoundsTree {
 	}
 
 	void add(Boundable* obj, bool strictBounds) {
-		rootNode.add(obj, strictBounds?obj->getStrictBounds():obj->getLooseBounds());
+		rootNode.add(TreeNode(obj, strictBounds?obj->getStrictBounds():obj->getLooseBounds()));
 	}
 
-	void update(bool strictBounds);
+	inline void recalculateBounds(bool strictBounds) { rootNode.recalculateBoundsRecursive(strictBounds); }
+	inline void improveStructure() { rootNode.improveStructure(); }
+	
+	//unsigned long long computeTreeScore() const;
 };

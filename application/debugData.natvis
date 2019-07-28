@@ -5,7 +5,7 @@
   </Type>
   <Type Name="TreeNode">
     <DisplayString Condition="nodeCount != 0xFFFFFFFFFFFFFFFF">{{TrunkNode Size={nodeCount}}}</DisplayString>
-    <DisplayString Condition="nodeCount == 0xFFFFFFFFFFFFFFFF">{{LeafNode}}</DisplayString>
+    <DisplayString Condition="nodeCount == 0xFFFFFFFFFFFFFFFF">{{LeafNode {object}}}</DisplayString>
     <Expand>
       <Item Name="bounds" ExcludeView="simple">bounds</Item>
       <ArrayItems Condition="nodeCount != 0xFFFFFFFFFFFFFFFF">

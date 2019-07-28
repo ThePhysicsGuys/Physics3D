@@ -278,21 +278,27 @@ void WorldPrototype::tick(double deltaT) {
 #endif
 	}
 
-	physicsMeasure.mark(PhysicsProcess::UPDATE_TREE);
-	objectTree.update(true);
+
 
 
 	intersectionStatistics.nextTally();
 
-	physicsMeasure.mark(PhysicsProcess::WAIT_FOR_LOCk);
+	physicsMeasure.mark(PhysicsProcess::WAIT_FOR_LOCK);
 	mutLock.upgrade();
 	physicsMeasure.mark(PhysicsProcess::UPDATING);
 	for(Physical& physical : iterPhysicals()) {
 		physical.update(deltaT);
 	}
 
+	physicsMeasure.mark(PhysicsProcess::UPDATE_TREE_BOUNDS);
+	objectTree.recalculateBounds(true);
+	physicsMeasure.mark(PhysicsProcess::UPDATE_TREE_STRUCTURE);
+	objectTree.improveStructure();
+
 	physicsMeasure.mark(PhysicsProcess::OTHER);
 	processQueue();
+
+	age++;
 }
 
 size_t WorldPrototype::getTotalVertexCount() {

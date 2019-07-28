@@ -167,3 +167,21 @@ struct AddableBuffer : public BufferWithCapacity<T> {
 		return obj >= this->data && obj < this->data + this->size;
 	}
 };
+
+template<typename T, size_t N>
+struct FixedLocalBuffer {
+	T buf[N];
+	size_t size = 0;
+
+	T& operator[](size_t index) { return buf[index]; }
+	const T& operator[](size_t index) const { return buf[index]; }
+
+	const T* begin() const { return &buf; }
+	T* begin() { return &buf; }
+	const T* end() const { return buf + size; }
+	T* end() { return buf + size; }
+
+	void add(const T& obj) {
+		buf[size++] = obj;
+	}
+};
