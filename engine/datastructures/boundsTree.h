@@ -45,6 +45,8 @@ public:
 
 	inline TreeNode* begin() const { return subTrees; }
 	inline TreeNode* end() const { return subTrees+nodeCount; }
+	inline TreeNode& operator[](size_t index) { return subTrees[index]; }
+	inline const TreeNode& operator[](size_t index) const { return subTrees[index]; }
 
 	inline ~TreeNode();
 
@@ -56,6 +58,8 @@ public:
 
 	void improveStructure();
 };
+
+long long computeCost(const Bounds& bounds);
 
 struct BoundsTree {
 	TreeNode rootNode;

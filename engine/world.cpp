@@ -226,6 +226,55 @@ size_t findColissions(WorldPrototype& world, std::vector<Colission>& colissions)
 	return anchoredOffset;
 }
 
+void recursiveFindColissionsInternal(WorldPrototype& world, std::vector<Colission>& colissions, TreeNode& trunkNode);
+void recursiveFindColissionsBetween(WorldPrototype& world, std::vector<Colission>& colissions, TreeNode& first, TreeNode& second);
+
+void findColissions2(WorldPrototype& world, std::vector<Colission>& colissions) {
+	TreeNode& node = world.objectTree.rootNode;
+	
+	// two kinds of collissions: intra-node, and inter-node
+
+	recursiveFindColissionsInternal(world, colissions, node);
+}
+
+void recursiveFindColissionsInternal(WorldPrototype& world, std::vector<Colission>& colissions, TreeNode& trunkNode) {
+	// within the same node
+	if (trunkNode.isLeafNode())
+		return;
+
+	for (int i = 0; i < trunkNode.nodeCount; i++) {
+		TreeNode& A = trunkNode[i];
+		recursiveFindColissionsInternal(world, colissions, A);
+		for (int j = i + 1; j < trunkNode.nodeCount; j++) {
+			TreeNode& B = trunkNode[j];
+			recursiveFindColissionsBetween(world, colissions, A, B);
+		}
+	}
+}
+
+void recursiveFindColissionsBetween(WorldPrototype& world, std::vector<Colission>& colissions, TreeNode& first, TreeNode& second) {
+	if (!intersects(first.bounds, second.bounds)) return;
+	
+	if (first.isLeafNode() && second.isLeafNode()) {
+		runColissionTests(*first.object, *second.object, world, colissions);
+	} else {
+		bool preferFirst = computeCost(first.bounds) <= computeCost(second.bounds);
+		if (preferFirst && !first.isLeafNode() || second.isLeafNode()) {
+			// split first
+
+			for (TreeNode& node : first) {
+				recursiveFindColissionsBetween(world, colissions, node, second);
+			}
+		} else {
+			// split second
+
+			for (TreeNode& node : second) {
+				recursiveFindColissionsBetween(world, colissions, first, node);
+			}
+		}
+	}
+}
+
 
 void WorldPrototype::tick(double deltaT) {
 	SharedLockGuard mutLock(lock);
@@ -247,8 +296,8 @@ void WorldPrototype::tick(double deltaT) {
 
 	physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
 	std::vector<Colission> colissions;
-	size_t anchoredOffset = findColissions(*this, colissions);
 
+	/*size_t anchoredOffset = findColissions(*this, colissions);
 	physicsMeasure.mark(PhysicsProcess::COLISSION_HANDLING);
 	for(int i = 0; i < anchoredOffset; i++) {
 		Colission c = colissions[i];
@@ -276,10 +325,15 @@ void WorldPrototype::tick(double deltaT) {
 			Log::warn("Energy of blocks after colission is greater than before! %f > %f", afterTotalEnergy, beforeTotalEnergy);
 		}
 #endif
+	}*/
+	
+
+	findColissions2(*this, colissions);
+	physicsMeasure.mark(PhysicsProcess::COLISSION_HANDLING);
+	for (int i = 0; i < colissions.size(); i++) {
+		Colission c = colissions[i];
+		handleCollision<false>(*c.p1, *c.p2, c.intersection, c.exitVector);
 	}
-
-
-
 
 	intersectionStatistics.nextTally();
 
