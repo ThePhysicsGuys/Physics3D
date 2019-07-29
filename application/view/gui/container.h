@@ -1,14 +1,11 @@
 #pragma once
 
-#include <vector>
-
-#include "../engine/math/vec2.h"
-#include "../shaderProgram.h"
-#include "../renderUtils.h"
-
 #include "orderedVector.h"
 #include "component.h"
-#include "layout.h"
+
+#include "../engine/math/vec2.h"
+
+class Layout;
 
 class Container : public Component {
 public:
@@ -27,70 +24,40 @@ public:
 	/*
 		Constructors
 	*/
-	Container(Vec2 position) : Component(position), layout(new FlowLayout()) {};
-	Container(Vec2 position, Vec2 dimension) : Component(position, dimension), layout(new FlowLayout()) {};
-	Container(double x, double y, double width, double height) : Container(Vec2(x, y), Vec2(width, height)) {};
-	Container(double x, double y) : Container(Vec2(x, y)) {};
+	Container(Vec2 position);
+	Container(Vec2 position, Vec2 dimension);
+	Container(double x, double y, double width, double height);
+	Container(double x, double y);
 
 	/*
 		Adds the child to the end of the container
 	*/
-	void add(Component* child) {
-		add(child, Align::RELATIVE);
-	}
+	void add(Component* child);
 
 	/*
 		Adds the child to the end of the container with a given alignment
 	*/
-	void add(Component* child, Align alignment) {
-		child->parent = this;
-		children.add(std::make_pair(child, alignment));
-	}
+	void add(Component* child, Align alignment);
 
 	/*
 		Returns the child with its alignment 
 	*/
-	std::pair<Component*, Align> get(Component* child) {
-		for (auto iterator = children.begin(); iterator != children.end(); ++iterator) {
-			if (child == iterator->first)
-				return *iterator;
-		}
-	}
+	std::pair<Component*, Align> get(Component* child);
 
-	// Needs to be optimized
-	void remove(Component* child) {
-		for (auto iterator = children.begin(); iterator != children.end(); ++iterator) {
-			if (child == iterator->first) {
-				children.remove(iterator);
-				return;
-			}
-		}
-	}
+	/*
+		Removes the given child from the children
+	*/
+	void remove(Component* child);
 
-	virtual Component* intersect(Vec2 point) {
-		for (auto iterator = children.begin(); iterator != children.end(); ++iterator) {
-			if (iterator->first->intersect(point))
-				return iterator->first;
-		}
-		return this->Component::intersect(point);
-	}
+	/*
+		Returns the intersected component at the given point.
+	*/
+	virtual Component* intersect(Vec2 point);
 
-	virtual void renderChildren() {
-		for (auto child : children) {
-			child.first->render();
-			if (debug) {
-				GUI::quad->resize(child.first->position + Vec2(-margin, margin), child.first->dimension + Vec2(margin * 2));
-				Shaders::quadShader.updateColor(GUI::COLOR::R);
-				GUI::quad->render(Renderer::WIREFRAME);
-				GUI::quad->resize(child.first->position, child.first->dimension);
-				Shaders::quadShader.updateColor(GUI::COLOR::G);
-				GUI::quad->render(Renderer::WIREFRAME);
-				GUI::quad->resize(child.first->position + Vec2(padding, -padding), child.first->dimension + Vec2(-padding * 2));
-				Shaders::quadShader.updateColor(GUI::COLOR::B);
-				GUI::quad->render(Renderer::WIREFRAME);
-			}
-		}
-	}
+	/*
+		Renders the children of the container
+	*/
+	virtual void renderChildren();
 
 	virtual void render() = 0;
 	virtual Vec2 resize() = 0;

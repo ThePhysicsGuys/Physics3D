@@ -1,14 +1,13 @@
 #pragma once
 
-struct Camera;
-class Screen;
-
 #include "../../engine/math/vec3.h"
 #include "../../engine/math/mat3.h"
 #include "../../engine/math/mat4.h"
 #include "../../engine/math/cframe.h"
 
 struct ExtendedPart;
+struct Camera;
+class Screen;
 
 struct Camera {
 private:

@@ -1,15 +1,22 @@
 #include "gui.h"
+
 #include "component.h"
 #include "container.h"
 #include "orderedVector.h"
-#include "../shaderProgram.h"
 
 #include "../../visualShape.h"
-
 #include "../../io/import.h"
 
-namespace GUI {
+#include "../font.h"
+#include "../texture.h"
+#include "../screen.h"
+#include "../shaderProgram.h"
 
+#include "../buffers/frameBuffer.h"
+#include "../mesh/indexedMesh.h"
+#include "../mesh/primitive.h"
+
+namespace GUI {
 	namespace COLOR {
 		Vec4 get(int hex, bool alpha) {
 			Vec4 color;

@@ -3,8 +3,6 @@
 #include <string>
 #include <map>	
 
-#include "log.h"
-
 class Properties {
 private:
 	std::map<std::string, std::string> properties;

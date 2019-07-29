@@ -1,6 +1,11 @@
 #include "indexedMesh.h"
 
+#include "../buffers/indexBuffer.h"
+#include "../buffers/vertexBuffer.h"
+#include "../buffers/vertexArray.h"
+
 #include "../engine/geometry/shape.h"
+#include "../../visualShape.h"
 #include "../util/log.h"
 
 IndexedMesh::IndexedMesh(const VisualShape& shape) : AbstractMesh(), vertexCount(shape.vertexCount), triangleCount(shape.triangleCount) {
@@ -18,9 +23,9 @@ IndexedMesh::IndexedMesh(const VisualShape& shape) : AbstractMesh(), vertexCount
 
 	indexBuffer = new IndexBuffer(reinterpret_cast<unsigned int const *>(shape.triangles.get()), triangleCount * 3);
 
-	vertexBufferLayout.push<float>(3);
-	normalBufferLayout.push<float>(3);
-	uvBufferLayout.push<float>(2);
+	vertexBufferLayout.pushFloat(3);
+	normalBufferLayout.pushFloat(3);
+	uvBufferLayout.pushFloat(2);
 
 	vertexArray->addBuffer(*vertexBuffer, vertexBufferLayout);
 	vertexArray->addBuffer(*normalBuffer, normalBufferLayout);
@@ -34,9 +39,9 @@ IndexedMesh::IndexedMesh(const float* vertices, const float* normals, const floa
 
 	indexBuffer = new IndexBuffer(indices, triangleCount * 3);
 
-	vertexBufferLayout.push<float>(3);
-	normalBufferLayout.push<float>(3);
-	uvBufferLayout.push<float>(2);
+	vertexBufferLayout.pushFloat(3);
+	normalBufferLayout.pushFloat(3);
+	uvBufferLayout.pushFloat(2);
 
 	vertexArray->addBuffer(*vertexBuffer, vertexBufferLayout);
 	vertexArray->addBuffer(*normalBuffer, normalBufferLayout);

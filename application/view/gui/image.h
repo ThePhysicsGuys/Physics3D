@@ -1,9 +1,10 @@
 #pragma once
 
-#include "../texture.h"
 #include "component.h"
 
 #include "../engine/math/vec2.h"
+
+class Texture;
 
 class Image : public Component {
 public:

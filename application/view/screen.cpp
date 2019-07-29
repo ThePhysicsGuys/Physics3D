@@ -1,7 +1,9 @@
 #include "screen.h"
 
 #include "renderUtils.h"
+#include "texture.h"
 #include "material.h"
+#include "light.h"
 #include "shader.h"
 #include "shaderProgram.h"
 #include "font.h"
@@ -9,9 +11,11 @@
 #include "mesh/indexedMesh.h"
 #include "mesh/arrayMesh.h"
 #include "mesh/vectorMesh.h"
+#include "mesh/primitive.h"
 #include "mesh/pointMesh.h"
 #include "picker/picker.h"
 #include "debug/visualDebug.h"
+#include "buffers/frameBuffer.h"
 
 #include "gui/panel.h"
 #include "gui/frame.h"
@@ -29,17 +33,21 @@
 #include "../input/standardInputHandler.h"
 #include "../resourceManager.h"
 #include "../objectLibrary.h"
+#include "../visualShape.h"
 #include "../io/import.h"
 #include "../util/log.h"
 
+#include "../engine/debug.h"
+#include "../engine/profiling.h"
 #include "../engine/math/vec2.h"
 #include "../engine/math/mat4.h"
 #include "../engine/math/mathUtil.h"
 #include "../engine/geometry/shape.h"
 #include "../engine/geometry/shape.h"
+#include "../engine/sharedLockGuard.h"
 #include "../engine/physicsProfiler.h"
 #include "../engine/geometry/boundingBox.h"
-#include "../engine/sharedLockGuard.h"
+#include "../engine/datastructures/buffers.h"
 
 #include <stdlib.h>
 #include <fstream>
@@ -95,6 +103,7 @@ Screen::Screen(int width, int height, MagnetWorld* world) {
 	Renderer::createGLFWContext(width, height, "Physics3D");
 	
 	if (!Renderer::validGLFWContext()) {
+		Log::fatal("Invalid rendering context");
 		terminateGLFW();
 		exit(-1);
 	}
@@ -144,10 +153,10 @@ BarChart iterationChart("Iteration Statistics", "", GJKCollidesIterationStatisti
 
 
 // Light uniforms
-const int lightCount = 5;
 Vec3f sunDirection;
 Vec3f sunColor;
 Attenuation attenuation = { 0, 0, 0.5 };
+const int lightCount = 5;
 Light lights[lightCount] = {
 	Light(Vec3f(10, 5, -10), Vec3f(1, 0.84, 0.69), 6, attenuation),
 	Light(Vec3f(10, 5, 10), Vec3f(1, 0.84, 0.69), 6, attenuation),
@@ -229,6 +238,10 @@ void Screen::init() {
 
 	// Shader init
 	Shaders::init();
+
+
+	// Light init
+	Shaders::basicShader.createLightArray(lightCount);
 
 
 	// Texture init

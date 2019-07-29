@@ -6,6 +6,8 @@
 #include "../engine/math/vec2.h"
 
 #include "../gui/gui.h"
+#include "../screen.h"
+#include "../font.h"
 
 #define _USE_MATH_DEFINES
 #include "math.h"

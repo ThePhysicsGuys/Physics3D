@@ -1,9 +1,16 @@
 #include "frame.h"
 
-#include "gui.h"
+#include "button.h"
+#include "label.h"
 
+#include "../screen.h"
+#include "../texture.h"
 #include "../shaderProgram.h"
 #include "../renderUtils.h"
+
+#include "../mesh/primitive.h"
+
+#include "../buffers/frameBuffer.h"
 
 #include "../util/log.h"
 #include "../engine/math/mathUtil.h"

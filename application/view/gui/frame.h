@@ -4,14 +4,12 @@
 
 #include "component.h"
 #include "container.h"
-#include "button.h"
-#include "label.h"
 
-#include "../texture.h"
 #include "../engine/math/vec2.h"
 #include "../engine/math/vec4.h"
 
-#include <vector>
+class Button;
+class Label;
 
 class Frame : public Container {
 public:

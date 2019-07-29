@@ -1,10 +1,12 @@
 #pragma once
 
 #include "abstractMesh.h"
-#include "../buffers/indexBuffer.h"
-#include "../buffers/vertexBuffer.h"
+
 #include "../buffers/bufferLayout.h"
-#include "../../visualShape.h"
+
+class IndexBuffer;
+class VertexBuffer;
+struct VisualShape;
 
 class IndexedMesh : public AbstractMesh {
 public:

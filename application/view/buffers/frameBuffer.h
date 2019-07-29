@@ -1,9 +1,11 @@
 #pragma once
 
-#include "../texture.h"
-#include "renderBuffer.h"
 #include "../bindable.h"
+
 #include "../engine/math/vec2.h"
+
+class Texture;
+class RenderBuffer;
 
 class FrameBuffer : public Bindable {
 public:
@@ -26,6 +28,9 @@ public:
 	void attach(RenderBuffer* renderBuffer);
 };
 
+
+class HDRTexture;
+
 class HDRFrameBuffer : public Bindable {
 public:
 	Vec2i dimension;
@@ -43,6 +48,10 @@ public:
 	void close() override;
 };
 
+
+class MultisampleTexture;
+class MultisampleRenderBuffer;
+
 class MultisampleFrameBuffer : public Bindable {
 public:
 	Vec2i dimension;
@@ -59,6 +68,9 @@ public:
 	void unbind() override;
 	void close() override;
 };
+
+
+class DepthTexture;
 
 class DepthFrameBuffer : public Bindable {
 public:

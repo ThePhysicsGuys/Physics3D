@@ -11,6 +11,7 @@
 #include <istream>
 
 #include "view/screen.h"
+#include "view/texture.h"
 #include "view/debug/visualDebug.h"
 #include "view/material.h"
 
@@ -398,7 +399,6 @@ void init() {
 void stop(int returnCode) {
 	physicsThread.stop();
 
-	glfwTerminate();
 	exit(returnCode);
 }
 

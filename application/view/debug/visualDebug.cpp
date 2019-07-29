@@ -1,13 +1,16 @@
 #pragma once
 
 #include "visualDebug.h"
-#include "profilerUI.h"
+
+#include "../mesh/vectorMesh.h"
+#include "../mesh/pointMesh.h"
 
 #include "../font.h"
 #include "../gui/gui.h"
 
-#include "../../debug.h"
 #include "../../threePhaseBuffer.h"
+
+#include <sstream>
 
 const char* const graphicsDebugLabels[]{
 	"Update",
@@ -139,4 +142,12 @@ void updatePointMesh(PointMesh* pointMesh, AppDebug::ColoredPoint* data, size_t 
 	}
 
 	pointMesh->update(visiblePoints.data, visiblePoints.size / 10);
+}
+
+void renderDebugField(Vec2 dimension, Font* font, const char* varName, std::string value, const char* unit) {
+	std::stringstream ss;
+	ss.precision(4);
+	ss << varName << ": " << value << unit;
+	font->render(ss.str().c_str(), Vec2(-dimension.x / dimension.y * 0.99, (1 - fieldIndex * 0.05) * 0.95), Vec3(1, 1, 1), 0.001);
+	fieldIndex++;
 }

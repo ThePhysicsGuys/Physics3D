@@ -3,6 +3,8 @@
 #include "../shaderProgram.h"
 #include "../renderUtils.h"
 
+#include "../mesh/primitive.h"
+
 Slider::Slider(double x, double y) : Slider(x, y, 0, 1, 0) {}
 
 Slider::Slider(double x, double y, double width, double height) : Slider(x, y, width, height, 0, 1, 0) {}

@@ -1,8 +1,9 @@
 #pragma once
 
 #include "../engine/math/vec3.h"
+#include "../engine/math/vec4.h"
 
-#include "texture.h"
+class Texture;
 
 struct Material {
 	Texture* texture = nullptr;
@@ -20,13 +21,6 @@ struct Material {
 	Material(Texture* texture) : Material(Vec4f(1.0), Vec3f(1.0), Vec3f(1.0f), 1.0f, texture) {};
 	Material() : Material(Vec4f(1.0f), Vec3f(1.0f), Vec3f(1.0f), 1.0f) {};
 
-	void setTexture(Texture* texture) {
-		texture->unit = 0;
-		this->texture = texture;
-	}
-
-	void setNormalMap(Texture* normalMap) {
-		normalMap->unit = 1;
-		this->normal = normalMap;
-	}
+	void setTexture(Texture* texture);
+	void setNormalMap(Texture* normalMap);
 };

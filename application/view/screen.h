@@ -3,22 +3,22 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include "../engine/profiling.h"
+#include <vector>
+
 #include "../engine/math/vec2.h"
+#include "../engine/math/vec3.h"
+
 #include "../eventHandler.h"
 #include "../util/properties.h"
-#include "../engine/debug.h"
-#include "../engine/datastructures/buffers.h"
-
-#include "buffers/frameBuffer.h"
+#include "../visualShape.h"
 #include "camera.h"
-#include "mesh/primitive.h"
 
+struct Quad;
+class FrameBuffer;
+class HDRFrameBuffer;
 class StandardInputHandler;
+class IndexedMesh;
 class MagnetWorld;
-
-#include "mesh/indexedMesh.h"
-#include "../input/standardInputHandler.h"
 
 bool initGLEW();
 bool initGLFW();

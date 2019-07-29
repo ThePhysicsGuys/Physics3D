@@ -1,9 +1,5 @@
 #include "camera.h"
 
-#include "GL\glew.h"
-#include "GLFW\glfw3.h"
-
-#include "../engine/math/mathUtil.h"
 #include "../extendedPart.h"
 
 #include "picker/picker.h"

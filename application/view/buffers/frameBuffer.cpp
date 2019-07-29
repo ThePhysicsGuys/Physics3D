@@ -3,6 +3,8 @@
 #include "GL\glew.h"
 #include "GLFW\glfw3.h"
 
+#include "renderBuffer.h"
+#include "../texture.h"
 #include "../util/log.h"
 
 FrameBuffer::FrameBuffer() {

@@ -4,6 +4,7 @@
 #include "label.h"
 #include "slider.h"
 #include "checkBox.h"
+#include "button.h"
 #include "directionEditor.h"
 #include "colorPicker.h"
 

@@ -2,6 +2,7 @@
 
 #include <string>
 
+#include "visualShape.h"
 #include "extendedPart.h"
 #include "view/screen.h"
 

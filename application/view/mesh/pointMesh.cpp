@@ -1,12 +1,16 @@
 #include "pointMesh.h"
+
+#include "../buffers/vertexArray.h"
+#include "../buffers/vertexBuffer.h"
+
 #include "../util/Log.h"
 
 PointMesh::PointMesh(const float* vertices, const size_t vertexCount, size_t capacity) : AbstractMesh(RenderMode::POINTS), vertexCount(vertexCount), capacity(capacity) {
 	vertexBuffer = new VertexBuffer(vertices, capacity * 10, GL_DYNAMIC_DRAW);
-	bufferLayout.push<float>(3); // position
-	bufferLayout.push<float>(1); // size
-	bufferLayout.push<float>(3); // color1
-	bufferLayout.push<float>(3); // color2
+	bufferLayout.pushFloat(3); // position
+	bufferLayout.pushFloat(1); // size
+	bufferLayout.pushFloat(3); // color1
+	bufferLayout.pushFloat(3); // color2
 	vertexArray->addBuffer(*vertexBuffer, bufferLayout);
 }
 

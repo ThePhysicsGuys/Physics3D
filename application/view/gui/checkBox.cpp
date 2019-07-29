@@ -1,7 +1,13 @@
 #include "CheckBox.h"
 
+#include "label.h"
+
+#include "../texture.h"
 #include "../shaderProgram.h"
 #include "../renderUtils.h"
+
+#include "../mesh/primitive.h"
+
 
 CheckBox::CheckBox(std::string text, double x, double y, double width, double height, bool textured) : Component(x, y, width, height) {
 	this->label = new Label(text, x, y);

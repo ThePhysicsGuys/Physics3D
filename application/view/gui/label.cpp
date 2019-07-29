@@ -4,6 +4,10 @@
 
 #include "../shaderProgram.h"
 #include "../renderUtils.h"
+#include "../font.h"
+
+#include "../mesh/primitive.h"
+
 
 Label::Label(std::string text, double x, double y) : Label(text, x, y, GUI::fontSize, GUI::fontColor) {};
 

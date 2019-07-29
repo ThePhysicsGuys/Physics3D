@@ -3,6 +3,8 @@
 #include <fstream>
 
 #include "stringUtil.h"
+#include "log.h"
+
 
 std::string Properties::get(std::string property) const {
 	try {
@@ -76,7 +78,7 @@ namespace PropertiesParser {
 	void write(const std::string& file, Properties& properties) {
 		Log::setSubject(file);
 
-		Log::info("Writing %d porperties", properties.get().size());
+		Log::info("Writing %d properties", properties.get().size());
 
 		std::ofstream outputstream;
 		outputstream.open(file.c_str(), std::ofstream::out | std::ofstream::trunc);

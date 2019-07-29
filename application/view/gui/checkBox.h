@@ -4,12 +4,12 @@
 
 #include "../engine/math/vec2.h"
 #include "../engine/math/vec4.h"
-#include "../texture.h"
 
 #include "component.h"
-#include "label.h"
 
 class CheckBox;
+class Texture;
+class Label;
 
 typedef void (*CheckBoxAction) (CheckBox*);
 

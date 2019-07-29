@@ -4,11 +4,11 @@
 
 #include "../engine/math/vec2.h"
 #include "../engine/math/vec4.h"
-#include "../texture.h"
 
 #include "component.h"
 
 class Button;
+class Texture;
 
 typedef void (*ButtonAction) (Button*);
 

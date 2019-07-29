@@ -1,6 +1,11 @@
 #include "button.h"
 
+#include "../texture.h"
 #include "../shaderProgram.h"
+#include "../font.h"
+
+#include "../mesh/primitive.h"
+
 
 Button::Button(double x, double y, double width, double height, bool textured) : Component(x, y, width, height) {
 	this->textured = textured;

@@ -5,6 +5,7 @@
 #include "../mesh/indexedMesh.h"
 #include "../mesh/primitive.h"
 
+#include "../screen.h"
 #include "../renderUtils.h"
 #include "../shaderProgram.h"
 
@@ -13,6 +14,10 @@
 #include "../../visualShape.h"
 
 #include "../gui/gui.h"
+
+#include "../engine/math/mat3.h"
+#include "../engine/math/vec3.h"
+#include "../engine/math/vec4.h"
 
 Mat3 transformations[] = {
 	Mat3(),

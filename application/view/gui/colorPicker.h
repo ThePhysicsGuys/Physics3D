@@ -2,11 +2,11 @@
 
 #include "component.h"
 
-#include "../texture.h"
-
 #include "../engine/math/vec2.h"
+#include "../engine/math/vec4.h"
 
 class ColorPicker;
+class Texture;
 
 typedef void (*ColorPickerAction) (ColorPicker*);
 

@@ -3,7 +3,7 @@
 #include <GL/glew.h>
 
 #include "../util/log.h"
-
+#include "../engine/geometry/shape.h"
 #include "../engine/debug.h"
 #include "../engine/math/mathUtil.h"
 #include "threePhaseBuffer.h"

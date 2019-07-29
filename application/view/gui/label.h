@@ -4,10 +4,10 @@
 
 #include "component.h"
 
-#include "../font.h"
-
 #include "../engine/math/vec3.h"
 #include "../engine/math/vec2.h"
+
+class Font;
 
 class Label : public Component {
 public:

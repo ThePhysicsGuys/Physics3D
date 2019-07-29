@@ -2,7 +2,7 @@
 
 #include "ray.h"
 
-#include "../screen.h"
+class Screen;
 
 struct Pickable {
 	virtual void init() {};

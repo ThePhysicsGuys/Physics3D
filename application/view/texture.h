@@ -6,7 +6,7 @@
 #include "../engine/math/vec3.h"
 #include "../engine/math/vec2.h"
 
-#include <vector>
+#include <string>
 
 class Texture : public Bindable {
 public:
@@ -34,7 +34,7 @@ public:
 	Texture* colored(Vec4 color);
 };
 
-Texture* load(std::string name);
+Texture* load(const std::string& name);
 
 class HDRTexture : public Bindable {
 public:
@@ -75,9 +75,9 @@ class CubeMap : public Bindable {
 public:
 	int unit;
 
-	CubeMap(std::string right, std::string left, std::string top, std::string bottom, std::string front, std::string back);
+	CubeMap(const std::string& right, const std::string& left, const std::string& top, const std::string& bottom, const std::string& front, const std::string& back);
 
-	void load(std::string right, std::string left, std::string top, std::string bottom, std::string front, std::string back);
+	void load(const std::string& right, const std::string& left, const std::string& top, const std::string& bottom, const std::string& front, const std::string& back);
 
 	void bind(int unit);
 	void bind() override;

@@ -2,8 +2,15 @@
 
 #include "gui.h"
 
+#include "../material.h"
 #include "../shaderProgram.h"
 #include "../renderUtils.h"
+#include "../screen.h"
+
+#include "../buffers/frameBuffer.h"
+
+#include "../mesh/indexedMesh.h"
+#include "../mesh/primitive.h"
 
 #include "../engine/math/cframe.h"
 #include "../engine/math/vec4.h"

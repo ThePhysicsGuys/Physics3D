@@ -5,12 +5,11 @@
 #include "../engine/math/mat3.h"
 #include "../engine/datastructures/buffers.h"
 
-#include "../mesh/vectorMesh.h"
-#include "../mesh/pointMesh.h"
-
-#include "../font.h"
-
 #include "../../debug.h"
+
+class PointMesh;
+class VectorMesh;
+class Font;
 
 extern const char* const graphicsDebugLabels[];
 
@@ -54,13 +53,11 @@ extern ColTreeRenderMode renderColTree;
 void toggleDebugVecType(Debug::VectorType t);
 void toggleDebugPointType(Debug::PointType t);
 
+void renderDebugField(Vec2 dimension, Font* font, const char* varName, std::string value, const char* unit);
+
 template<typename T>
 void renderDebugField(Vec2 dimension, Font* font, const char* varName, T value, const char* unit) {
-	std::stringstream ss;
-	ss.precision(4);
-	ss << varName << ": " << value << unit;
-	font->render(ss.str().c_str(), Vec2(-dimension.x / dimension.y * 0.99, (1 - fieldIndex * 0.05) * 0.95), Vec3(1, 1, 1), 0.001);
-	fieldIndex++;
+	renderDebugField(dimension, font, varName, std::to_string(value), unit);
 }
 
 std::string toString(std::chrono::nanoseconds t);

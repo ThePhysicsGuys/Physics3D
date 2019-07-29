@@ -8,6 +8,9 @@
 #include "../util/log.h"
 #include "../engine/math/mathUtil.h"
 
+#include "../mesh/primitive.h"
+
+
 Panel::Panel(double x, double y) : Container(x, y) {
 	this->background = GUI::COLOR::BACK;
 	this->padding = GUI::padding;

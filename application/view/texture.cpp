@@ -3,18 +3,15 @@
 #include "GL\glew.h"
 #include "GLFW\glfw3.h"
 
-#include "../util/log.h"
-
-#include <iostream>
-
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb\stb_image.h"
 
+#include "../util/log.h"
 #include "../debug.h"
 
 // Texture
 
-Texture* load(std::string name) {
+Texture* load(const std::string& name) {
 	int width;
 	int height;
 	int channels;
@@ -233,7 +230,7 @@ void MultisampleTexture::close() {
 
 // CubeMap
 
-CubeMap::CubeMap(std::string right, std::string left, std::string top, std::string bottom, std::string front, std::string back) : unit(0) {
+CubeMap::CubeMap(const std::string& right, const std::string& left, const std::string& top, const std::string& bottom, const std::string& front, const std::string& back) : unit(0) {
 	glGenTextures(1, &id);
 	bind();
 	
@@ -261,7 +258,7 @@ void CubeMap::unbind() {
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
 
-void CubeMap::load(std::string right, std::string left, std::string top, std::string bottom, std::string front, std::string back) {
+void CubeMap::load(const std::string& right, const std::string& left, const std::string& top, const std::string& bottom, const std::string& front, const std::string& back) {
 	int width;
 	int height;
 	int channels;

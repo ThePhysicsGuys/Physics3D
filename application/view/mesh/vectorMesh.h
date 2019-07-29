@@ -1,7 +1,8 @@
 #pragma once
 
 #include "abstractMesh.h"
-#include "../buffers/vertexBuffer.h"
+
+class VertexBuffer;
 
 class VectorMesh : public AbstractMesh {
 public:

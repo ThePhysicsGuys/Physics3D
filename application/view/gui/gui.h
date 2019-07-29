@@ -1,14 +1,6 @@
 #pragma once
 
-#include "../font.h"
-#include "../screen.h"
-#include "../texture.h"
-
-#include "../mesh/primitive.h"
-#include "../mesh/indexedMesh.h"
-
-#include "../buffers/frameBuffer.h"
-
+#include "../engine/math/vec2.h"
 #include "../engine/math/vec3.h"
 #include "../engine/math/vec4.h"
 #include "../engine/math/mat4.h"
@@ -16,6 +8,12 @@
 #include <string>
 
 class Component;
+class Texture;
+class Screen;
+class Font;
+class FrameBuffer;
+class IndexedMesh;
+struct Quad;
 
 namespace GUI {
 

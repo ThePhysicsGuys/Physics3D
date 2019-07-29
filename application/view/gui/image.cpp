@@ -1,7 +1,12 @@
 #include "image.h"
 
 #include "gui.h"
+
 #include "../shaderProgram.h"
+#include "../texture.h"
+
+#include "../mesh/primitive.h"
+
 
 Image::Image(double x, double y, double width, double height) : Component(x, y, width, height) {
 	Vec2 dimension = GUI::unmap(Vec2(width, height));

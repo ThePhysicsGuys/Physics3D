@@ -2,11 +2,14 @@
 
 #include "../util/Log.h"
 
+#include "../buffers/vertexBuffer.h"
+#include "../buffers/vertexArray.h"
+
 VectorMesh::VectorMesh(const float* vertices, const size_t vertexCount, size_t capacity) : AbstractMesh(RenderMode::POINTS), vertexCount(vertexCount), capacity(capacity) {
 	vertexBuffer = new VertexBuffer(vertices, capacity * 9, GL_DYNAMIC_DRAW);
-	bufferLayout.push<float>(3);
-	bufferLayout.push<float>(3);
-	bufferLayout.push<float>(3);
+	bufferLayout.pushFloat(3);
+	bufferLayout.pushFloat(3);
+	bufferLayout.pushFloat(3);
 	vertexArray->addBuffer(*vertexBuffer, bufferLayout);
 }
 

@@ -2,9 +2,9 @@
 
 #include "editTools.h"
 
-#include "../screen.h"
-
 #include "../engine/math/vec2.h"
+
+class Screen;
 
 namespace Picker {
 	

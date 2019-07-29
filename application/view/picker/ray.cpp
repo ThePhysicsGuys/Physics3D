@@ -1,5 +1,7 @@
 #include "ray.h"
 
+#include "../screen.h"
+
 #include "../engine/math/vec4.h"
 #include "../engine/math/mat4.h"
 

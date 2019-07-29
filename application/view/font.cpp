@@ -3,7 +3,10 @@
 #include "GL\glew.h"
 #include "GLFW\glfw3.h"
 
+#include "texture.h"
 #include "shaderProgram.h"
+
+#include "../util/log.h"
 
 
 Font::Font(std::string font) {

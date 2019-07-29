@@ -1,7 +1,5 @@
 #pragma once
-#include "../util/log.h"
 
-#include <algorithm>
 #include <vector>
 
 template<typename T>
