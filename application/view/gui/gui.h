@@ -8,6 +8,8 @@
 #include <string>
 
 class Component;
+class ColorPicker;
+class Frame;
 class Texture;
 class Screen;
 class Font;
@@ -65,6 +67,10 @@ namespace GUI {
 	extern Component* selectedComponent;
 	extern Vec2 intersectedPoint;
 	extern FrameBuffer* guiFrameBuffer;
+
+	// ColorPicker
+	extern Frame* colorPickerFrame;
+	extern ColorPicker* colorPicker;
 
 	// Quad
 	extern Quad* quad;

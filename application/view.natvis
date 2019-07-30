@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <Type Name="Camera">
+    <DisplayString>position={cframe.position}, rotation={cframe.rotation}</DisplayString>
+    <Expand>
+      <Item Name="position">cframe.position</Item>
+      <Item Name="rotation">cframe.rotation</Item>
+      <Item Name="field of view">fov</Item>
+      <Item Name="znear">znear</Item>
+      <Item Name="zfar">zfar</Item>
+      <Item Name="movement speed">speed</Item>
+      <Item Name="rotation speed">rspeed</Item>
+      <Item Name="flying">flying</Item>
+      <Item Name="attachement">attachment</Item>
+    </Expand>
+  </Type>
+
+  <Type Name="Texture">
+    <DisplayString>dimension=({width}, {height}), unit={unit}, channels={channels}</DisplayString>
+    <Expand>
+      <Item Name="unit">unit</Item>
+      <Item Name="width">width</Item>
+      <Item Name="height">height</Item>
+      <Item Name="format">format</Item>
+      <Item Name="channels">channels</Item>
+    </Expand>
+  </Type>
+
+  <Type Name="Attenuation">
+    <DisplayString>{constant, g}, {linear, g}, {exponent,g}</DisplayString>
+  </Type>
+
+  <Type Name="Light">
+    <DisplayString>position={position}, color={color}, intensity={intensity,g}, attenuation={attenuation}</DisplayString>
+  </Type>
+
+  <Type Name="Material">
+    <DisplayString>amb={ambient}, dif={diffuse}, spec={specular}, refl={reflectance,g}}}</DisplayString>
+  </Type>
+</AutoVisualizer>

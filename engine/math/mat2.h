@@ -12,6 +12,8 @@ struct Mat2Template {
 		T m[4];
 	};
 
+
+	Mat2Template() : m00(1), m01(0), m10(0), m11(1) {};
 	Mat2Template<T>(T m00, T m01, T m10, T m11) : m00(m00), m01(m01), m10(m10), m11(m11) {}
 	template<typename OtherT>
 	Mat2Template<T>(const Mat2Template<OtherT>& other) : m00(static_cast<T>(other.m00)), m01(static_cast<T>(other.m01)), m10(static_cast<T>(other.m10)), m11(static_cast<T>(other.m11)) {}

@@ -190,7 +190,7 @@ EnvironmentFrame* environmentFrame = nullptr;
 // Test
 IndexedMesh* mesh = nullptr;
 Texture* texture = nullptr;
-
+#include "../engine/math/mat2.h"
 void Screen::init() {
 	// Log init
 	Log::setLogLevel(Log::Level::INFO);
@@ -360,7 +360,7 @@ void Screen::update() {
 		if (handler->getKey(KeyboardOptions::Rotate::up))    camera.rotate(*this, -1, 0, 0, leftDragging);
 		if (handler->getKey(KeyboardOptions::Rotate::down))  camera.rotate(*this, 1, 0, 0, leftDragging);
 		if (handler->getKey(KeyboardOptions::Application::close)) Renderer::closeGLFWWindow();
-		if (handler->getKey(KeyboardOptions::Debug::frame)) { debugFrame->frame->visible = true; debugFrame->frame->position = Vec2(0.8); GUI::select(debugFrame->frame); }
+		if (handler->getKey(KeyboardOptions::Debug::frame)) { debugFrame->visible = true; debugFrame->position = Vec2(0.8); GUI::select(debugFrame); }
 	}
 
 

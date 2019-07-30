@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <Type Name="Component">
+    <DisplayString Condition="parent != 0xFFFFFFFFFFFFFFFF">pos={position}, dim={dimension}, parent=yes, visible={visible}, disabled={disabled}, resizing={resizing}, align={align,en}</DisplayString>
+    <DisplayString Condition="parent == 0xFFFFFFFFFFFFFFFF">pos={position}, dim={dimension}, parent=no, visible={visible}, disabled={disabled}, resizing={resizing}, align={align,en}</DisplayString>
+  </Type>
+
+  <Type Name="Container">
+    <DisplayString Condition="parent != 0xFFFFFFFFFFFFFFFF">size={children.elements.size()}, pos={position}, dim={dimension}, parent=yes, visible={visible}, disabled={disabled}, resizing={resizing}, align={align,en}</DisplayString>
+    <DisplayString Condition="parent == 0xFFFFFFFFFFFFFFFF">size={children.elements.size()}, pos={position}, dim={dimension}, parent=no, visible={visible}, disabled={disabled}, resizing={resizing}, align={align,en}</DisplayString>
+  </Type>
+
+  <Type Name="Button">
+    <DisplayString Condition="text.size()==0">textured={textured}, pos={position}, dim={dimension}, parent={parent}</DisplayString>
+    <DisplayString Condition="text.size()!=0">text={text}, textured={textured}, pos={position}, dim={dimension}, parent={parent}</DisplayString>
+    <Expand>
+      <Item Name="Component">*(Component*)this,nd</Item>
+      <Item Name="text">text</Item>
+      <Item Name="textured">textured</Item>
+    </Expand>
+  </Type>
+
+  <Type Name="Image">
+    <DisplayString Condition="texture != 0xFFFFFFFFFFFFFFFF">texture={texture}, pos={position}, dim={dimension}, parent=yes, visible={visible}, disabled={disabled}, resizing={resizing}, align={align,en}</DisplayString>
+    <DisplayString Condition="texture == 0xFFFFFFFFFFFFFFFF">texture=none, pos={position}, dim={dimension}, parent=no, visible={visible}, disabled={disabled}, resizing={resizing}, align={align,en}</DisplayString>
+    <Expand>
+      <Item Name="Component">*(Component*)this,nd</Item>
+      <Item Name="texture">texture</Item>
+    </Expand>
+  </Type>
+  
+  <Type Name="Label">
+    <DisplayString>text={text}, pos={position}, dim={dimension}, parent={parent}</DisplayString>
+    <Expand>
+      <Item Name="Component">*(Component*)this,nd</Item>
+      <Item Name="text">text</Item>
+      <Item Name="scale">scale</Item>
+      <Item Name="foreground">foregroundColor</Item>
+      <Item Name="background">backgroundColor</Item>
+    </Expand>
+  </Type>
+
+  <Type Name="CheckBox">
+    <DisplayString Condition="label->text.size()!=0">text={label->text}, checked={checked}, pos={position}, dim={dimension}, parent={parent}</DisplayString>
+    <DisplayString Condition="label->text.size()==0">checked={checked}, pos={position}, dim={dimension}, parent={parent}</DisplayString>
+    <Expand>
+      <Item Name="Component">*(Component*)this,nd</Item>
+      <Item Name="label">label</Item>
+      <Item Name="textured">textured</Item>
+    </Expand>
+  </Type>
+
+  <Type Name="Slider">
+    <DisplayString>value={value,g}, range=({min,g} ... {max,g}), pos={position}, dim={dimension}, parent={parent}</DisplayString>
+    <Expand>
+      <Item Name="Component">*(Component*)this,nd</Item>
+      <Item Name="value">value</Item>
+      <Item Name="min">min</Item>
+      <Item Name="max">max</Item>
+    </Expand>
+  </Type>
+
+  <Type Name="Frame">
+    <DisplayString >title={title->text}, pos={position}, dim={dimension}, anchor={parent, g}</DisplayString>
+    <Expand>
+      <Item Name="Container">*(Container*)this,nd</Item>
+      <Item Name="title">title</Item>
+      <Item Name="minimized">minimized</Item>
+      <Item Name="anchor">anchor</Item>
+    </Expand>
+  </Type>
+
+  <Type Name="OrderedVector&lt;*&gt;">
+    <DisplayString>size={elements.size()}</DisplayString>
+  </Type>
+</AutoVisualizer>

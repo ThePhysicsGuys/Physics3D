@@ -16,23 +16,23 @@ public:
 			RELATIVE: The components are placed next to eachother, filling up the container
 			CENTER: The same as fill but the filled components are centered
 	*/
-	Align align;
+	Align align = Align::RELATIVE;
 
 	/* 
 		Parent of this component 
 	*/
-	Component* parent;
+	Component* parent = nullptr;
 
 	/* 
 		Determines if the component has a fixed size 
 	*/
-	bool resizing;
+	bool resizing = true;
 
 	/*
 		Determines if the component is disabled, the component will still be
 		rendered, but will not be interactable.
 	*/
-	bool disabled;
+	bool disabled = false;
 
 	/* 
 		The topleft edge of the container, margin not included, padding included
@@ -61,17 +61,17 @@ public:
 	/* 
 		Padding of this component 
 	*/
-	double padding;
+	double padding = GUI::padding;
 
 	/* 
 		Margin of this component
 	*/
-	double margin;
+	double margin = GUI::margin;
 
 	/* 
 		Determines if this component and its content should be rendered 
 	*/
-	bool visible;
+	bool visible = true;
 
 	/*
 		Debug
@@ -81,8 +81,8 @@ public:
 	/* 
 		Constructors
 	*/
-	Component(Vec2 position, Vec2 dimension) : position(position), dimension(dimension), resizing(false), visible(true), disabled(false) {};
-	Component(Vec2 position) : position(position), dimension(Vec2()), resizing(true), visible(true), disabled(false) {};
+	Component(Vec2 position, Vec2 dimension) : position(position), dimension(dimension), resizing(false) {};
+	Component(Vec2 position) : position(position), dimension(Vec2()), resizing(true) {};
 	Component(double x, double y, double width, double height) : Component(Vec2(x, y), Vec2(width, height)) {};
 	Component(double x, double y) : Component(Vec2(x, y)) {};
 	

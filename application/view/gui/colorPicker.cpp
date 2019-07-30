@@ -32,6 +32,8 @@ ColorPicker::ColorPicker(double x, double y) : Component(x, y) {
 
 	dimension = Vec2(
 		padding + 
+		GUI::colorPickerBarWidth + 2 * GUI::colorPickerBarBorderWidth +
+		GUI::colorPickerSpacing +
 		GUI::colorPickerBarWidth + 2 * GUI::colorPickerBarBorderWidth + 
 		GUI::colorPickerSpacing + GUI::colorPickerHueSize + GUI::colorPickerSpacing + 
 		GUI::colorPickerBarWidth + 2 * GUI::colorPickerBarBorderWidth + 

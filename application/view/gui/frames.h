@@ -15,15 +15,13 @@
 // Frame blueprint
 
 struct FrameBlueprint {
-	Frame* frame = nullptr;
-
 	virtual void init() = 0;
 	virtual void update() = 0;
 };
 
 // Environment frame
 
-struct EnvironmentFrame : public FrameBlueprint {
+struct EnvironmentFrame : public FrameBlueprint, public Frame {
 
 	Label* gammaLabel = nullptr;
 	Slider* gammaSlider = nullptr;
@@ -38,29 +36,23 @@ struct EnvironmentFrame : public FrameBlueprint {
 	Button* sunColorButton = nullptr;
 	DirectionEditor* sunDirectionEditor = nullptr;
 
-	Frame* colorPickerFrame = nullptr;
-	ColorPicker* colorPicker = nullptr;
-
-	EnvironmentFrame(double x, double y)  {
-		frame = new Frame(x, y, "Environment");
+	EnvironmentFrame(double x, double y) : Frame(x, y, "Environment")  {
+		// frame = new Frame(x, y, "Environment");
 
 		init();
 
-		frame->add(hdrCheckBox, Align::FILL);
-		frame->add(gammaLabel, Align::CENTER);
-		frame->add(gammaSlider, Align::RELATIVE);
-		frame->add(gammaValueLabel, Align::FILL);
-		frame->add(exposureLabel, Align::CENTER);
-		frame->add(exposureSlider, Align::RELATIVE);
-		frame->add(exposureValueLabel, Align::FILL);
-		frame->add(sunLabel, Align::CENTER);
-		frame->add(sunColorButton, Align::CENTER);
-		frame->add(sunDirectionEditor, Align::CENTER);
+		add(hdrCheckBox, Align::FILL);
+		add(gammaLabel, Align::CENTER);
+		add(gammaSlider, Align::RELATIVE);
+		add(gammaValueLabel, Align::FILL);
+		add(exposureLabel, Align::CENTER);
+		add(exposureSlider, Align::RELATIVE);
+		add(exposureValueLabel, Align::FILL);
+		add(sunLabel, Align::CENTER);
+		add(sunColorButton, Align::CENTER);
+		add(sunDirectionEditor, Align::CENTER);
 		
-		colorPickerFrame->add(colorPicker, Align::FILL);
-
-		GUI::add(colorPickerFrame);
-		GUI::add(frame);
+		GUI::add(this);
 	}
 
 	void init() override {
@@ -91,36 +83,25 @@ struct EnvironmentFrame : public FrameBlueprint {
 			Shaders::basicShader.updateSunDirection(d->modelMatrix * Vec3(0, 1, 0));
 		};
 
+		sunColorButton->setColor(Vec4(1));
+		sunColorButton->action = [] (Button* button) {
+			EnvironmentFrame* environmentFrame = static_cast<EnvironmentFrame*>(button->parent);
 
-		// Colorpicker GUI
-		colorPickerFrame = new Frame(0, 0, "Color");
-		colorPickerFrame->visible = false;
+			GUI::colorPickerFrame->visible = true;
+			GUI::colorPickerFrame->anchor = environmentFrame;
+			GUI::select(GUI::colorPickerFrame);
 
-		colorPicker = new ColorPicker(0, 0, 0.5);
-		colorPickerFrame->anchor = frame;
-
-		sunColorButton->action = [] (Button* c) {
-			Frame* colorPickerFrame = static_cast<Frame*>(c->parent);
-			if (!colorPickerFrame->visible) {
-				colorPickerFrame->visible = true;
-				colorPickerFrame->position = Vec2(0);
-				GUI::select(colorPickerFrame);
-
-				// TODO fix anchoring
-				// colorPickerFrame->anchor = frame;
-			}
-		};
-
-		colorPicker->action = [] (ColorPicker* c) {
-			Shaders::basicShader.updateSunColor(Vec3(c->getRgba()));
+			GUI::colorPicker->setRgba(button->idleColor);
+			GUI::colorPicker->focus = button;
+			GUI::colorPicker->action = [] (ColorPicker* p) {
+				Shaders::basicShader.updateSunColor(Vec3(p->getRgba()));
+			};
 		};
 	}
 
 	void update() override {
-		if (!frame->visible)
+		if (!visible)
 			return;
-
-		sunColorButton->setColor(colorPicker->getRgba());
 
 		if (hdrCheckBox->checked) {
 			exposureSlider->enable();
@@ -133,6 +114,10 @@ struct EnvironmentFrame : public FrameBlueprint {
 			exposureLabel->disable();
 		}
 
+		if (GUI::colorPicker->focus == sunColorButton) {
+			sunColorButton->setColor(GUI::colorPicker->getRgba());
+		}
+
 		gammaValueLabel->text = std::to_string(gammaSlider->value);
 	}
 };
@@ -140,7 +125,7 @@ struct EnvironmentFrame : public FrameBlueprint {
 
 // Debug frame
 
-struct DebugFrame : public FrameBlueprint {
+struct DebugFrame : public FrameBlueprint, public Frame {
 
 	Label* vectorLabel = nullptr;
 	CheckBox* infoVectorCheckBox = nullptr;
@@ -160,34 +145,33 @@ struct DebugFrame : public FrameBlueprint {
 	CheckBox* renderPiesCheckBox = nullptr;
 	CheckBox* renderSpheresCheckBox = nullptr;
 
-	DebugFrame(double x, double y) {
-		frame = new Frame(x, y, "Debug");
+	DebugFrame(double x, double y) : Frame(x, y, "Debug") {
 
 		init();
 
-		frame->add(vectorLabel, Align::CENTER);
-		frame->add(infoVectorCheckBox, Align::FILL);
-		frame->add(positionCheckBox, Align::FILL);
-		frame->add(velocityCheckBox, Align::FILL);
-		frame->add(accelerationCheckBox, Align::FILL);
-		frame->add(forceCheckBox, Align::FILL);
-		frame->add(momentCheckBox, Align::FILL);
-		frame->add(impulseCheckBox, Align::FILL);
-		frame->add(angularVelocityCheckBox, Align::FILL);
-		frame->add(angularImpulseCheckBox, Align::FILL);
-		frame->add(pointLabel, Align::CENTER);
-		frame->add(infoPointCheckBox, Align::FILL);
-		frame->add(centerOfMassCheckBox, Align::FILL);
-		frame->add(intersectionCheckBox, Align::FILL);
-		frame->add(renderLabel, Align::CENTER);
-		frame->add(renderPiesCheckBox, Align::FILL);
-		frame->add(renderSpheresCheckBox, Align::FILL);
+		add(vectorLabel, Align::CENTER);
+		add(infoVectorCheckBox, Align::FILL);
+		add(positionCheckBox, Align::FILL);
+		add(velocityCheckBox, Align::FILL);
+		add(accelerationCheckBox, Align::FILL);
+		add(forceCheckBox, Align::FILL);
+		add(momentCheckBox, Align::FILL);
+		add(impulseCheckBox, Align::FILL);
+		add(angularVelocityCheckBox, Align::FILL);
+		add(angularImpulseCheckBox, Align::FILL);
+		add(pointLabel, Align::CENTER);
+		add(infoPointCheckBox, Align::FILL);
+		add(centerOfMassCheckBox, Align::FILL);
+		add(intersectionCheckBox, Align::FILL);
+		add(renderLabel, Align::CENTER);
+		add(renderPiesCheckBox, Align::FILL);
+		add(renderSpheresCheckBox, Align::FILL);
 
-		GUI::add(frame);
+		GUI::add(this);
 	}
 
 	void init() override {
-		frame->visible = false;
+		visible = false;
 
 		vectorLabel = new Label("Vectors", 0, 0);
 		infoVectorCheckBox = new CheckBox("Info", 0, 0, true);
@@ -223,7 +207,7 @@ struct DebugFrame : public FrameBlueprint {
 	}
 
 	void update() override {
-		if (!frame->visible)
+		if (!visible)
 			return;
 
 		infoVectorCheckBox->checked = debug_enabled[Debug::INFO_VEC];
@@ -247,7 +231,7 @@ struct DebugFrame : public FrameBlueprint {
 
 // Properties frame
 
-struct PropertiesFrame : public FrameBlueprint {
+struct PropertiesFrame : public FrameBlueprint, public Frame {
 
 	Label* partNameLabel = nullptr;
 	Label* partPositionLabel = nullptr;
@@ -260,29 +244,21 @@ struct PropertiesFrame : public FrameBlueprint {
 	Button* colorButton;
 	CheckBox* renderModeCheckBox = nullptr;
 
-	Frame* colorPickerFrame = nullptr;
-	ColorPicker* colorPicker = nullptr;
-
-	PropertiesFrame(double x, double y) {
-		frame = new Frame(x, y, "Properties");
-
+	PropertiesFrame(double x, double y) : Frame(x, y, "Properties") {
 		init();
 	
-		frame->add(partNameLabel, Align::FILL);
-		frame->add(partPositionLabel, Align::FILL);
-		frame->add(partMeshIDLabel, Align::FILL);
-		frame->add(renderModeCheckBox, Align::FILL);
-		frame->add(colorButton, Align::FILL);
-		frame->add(partVelocity, Align::FILL);
-		frame->add(partAngularVelocity, Align::FILL);
-		frame->add(partKineticEnergy, Align::FILL);
-		frame->add(partPotentialEnergy, Align::FILL);
-		frame->add(partEnergy, Align::FILL);
+		add(partNameLabel, Align::FILL);
+		add(partPositionLabel, Align::FILL);
+		add(partMeshIDLabel, Align::FILL);
+		add(renderModeCheckBox, Align::FILL);
+		add(colorButton, Align::FILL);
+		add(partVelocity, Align::FILL);
+		add(partAngularVelocity, Align::FILL);
+		add(partKineticEnergy, Align::FILL);
+		add(partPotentialEnergy, Align::FILL);
+		add(partEnergy, Align::FILL);
 
-		colorPickerFrame->add(colorPicker, Align::FILL);
-
-		GUI::add(colorPickerFrame);
-		GUI::add(frame);
+		GUI::add(this);
 	}
 
 	void init() override {
@@ -307,34 +283,26 @@ struct PropertiesFrame : public FrameBlueprint {
 		};
 
 		// Colorpicker GUI
-		colorPickerFrame = new Frame(0, 0, "Color");
-		colorPickerFrame->visible = false;
 
-		colorPicker = new ColorPicker(0, 0, 0.5);
-		colorPickerFrame->anchor = frame;
+		colorButton->action = [] (Button* button) {
+			PropertiesFrame* propertiesFrame = static_cast<PropertiesFrame*>(button->parent);
 
-		colorButton->action = [] (Button* c) {
-			Frame* colorPickerFrame = static_cast<Frame*>(c->parent);
-
-			if (GUI::screen->selectedPart && !colorPickerFrame->visible) {
-				colorPickerFrame->visible = true;
-				colorPickerFrame->position = Vec2(0);
-				//GUI::select(colorPickerFrame);
+			if (GUI::screen->selectedPart) {
+				GUI::colorPickerFrame->visible = true;
+				GUI::select(GUI::colorPickerFrame);
 
 				// TODO fix anchoring
-				//colorPickerFrame->anchor = propertiesFrame->frame;
-			}
-		};
-
-		colorPicker->action = [] (ColorPicker* c) {
-			if (GUI::screen->selectedPart) {
-				GUI::screen->selectedPart->material.ambient = GUI::COLOR::hsvaToRgba(c->hsva);
+				GUI::colorPicker->action = [] (ColorPicker* colorPicker) {
+					GUI::screen->selectedPart->material.ambient = colorPicker->getRgba();
+				};
+				GUI::colorPickerFrame->anchor = propertiesFrame;
+				GUI::colorPicker->focus = button;
 			}
 		};
 	}
 
 	void update() override {
-		if (!frame->visible)
+		if (!visible)
 			return;
 
 		ExtendedPart* selectedPart = GUI::screen->selectedPart;
@@ -354,12 +322,14 @@ struct PropertiesFrame : public FrameBlueprint {
 			partEnergy->text = "Energy: " + std::to_string(kineticEnergy + potentialEnergy);
 
 			Vec4 color = selectedPart->material.ambient;
+			colorButton->disabled = false;
 			colorButton->setColor(color);
-			colorPicker->setRgba(color);
+			if (GUI::colorPicker->focus == colorButton) {
+				GUI::colorPicker->setRgba(color);
+			}
 		} else {
-			colorButton->idleColor = Vec4(1);
-			colorButton->hoverColor = Vec4(1);
-			colorButton->pressColor = Vec4(1);
+			colorButton->disabled = true;
+			colorButton->setColor(Vec4(1));
 			partMeshIDLabel->text = "MeshID: -";
 			renderModeCheckBox->checked = false;
 			partPositionLabel->text = "Position: -";

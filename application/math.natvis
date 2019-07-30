@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <Type Name="Vec2Template&lt;*&gt;">
+    <DisplayString>{{{x, g}, {y, g}}}</DisplayString>
+  </Type>
+  <Type Name="Vec3Template&lt;*&gt;">
+    <DisplayString>{{{x, g}, {y, g}, {z, g}}}</DisplayString>
+  </Type>
+  <Type Name="Vec4Template&lt;*&gt;">
+    <DisplayString>{{{x, g}, {y, g}, {z, g}, {w, g}}}</DisplayString>
+  </Type>
+
+  <Type Name="Mat2Template&lt;*&gt;">
+    <DisplayString>{{ ({m00, g}, {m01, g})  ({m10, g}, {m11, g}) }}</DisplayString>
+  </Type>
+  
+  <Type Name="Mat3Template&lt;*&gt;">
+    <DisplayString>{{ ({m00, g}, {m01, g}, {m02, g})  ({m10, g}, {m11, g}, {m12, g})  ({m20, g}, {m21, g}, {m22, g}) }}</DisplayString>
+  </Type>
+  
+  <Type Name="Mat4Template&lt;*&gt;">
+    <DisplayString>{{ ({m00, g}, {m01, g}, {m02, g}, {m03, g})  ({m10, g}, {m11, g}, {m12, g}, {m13, g})  ({m20, g}, {m21, g}, {m22, g}, {m23, g})  ({m30, g}, {m31, g}, {m32, g}, {m33, g}) }}</DisplayString>
+  </Type>
+
+  <Type Name="Position">
+    <DisplayString>{{{x, g}, {y, g}, {z, g}}}</DisplayString>
+  </Type>
+</AutoVisualizer>

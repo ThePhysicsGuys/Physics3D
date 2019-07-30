@@ -3,6 +3,8 @@
 #include "component.h"
 #include "container.h"
 #include "orderedVector.h"
+#include "colorPicker.h"
+#include "frame.h"
 
 #include "../../visualShape.h"
 #include "../../io/import.h"
@@ -167,6 +169,10 @@ namespace GUI {
 	double margin = 0.01;
 	double padding = 0.01;
 
+	// ColorPicker
+	Frame* colorPickerFrame = nullptr;
+	ColorPicker* colorPicker = nullptr;
+
 	// Quad
 	Quad* quad = nullptr;
 
@@ -263,6 +269,13 @@ namespace GUI {
 
 		VisualShape vectorShape = OBJImport::load("../res/models/gui/translate_shaft.obj");
 		GUI::vectorMesh = new IndexedMesh(vectorShape);
+
+		// ColorPicker
+		colorPicker = new ColorPicker(0, 0);
+		colorPickerFrame = new Frame(0, 0, "Color");
+		colorPickerFrame->add(colorPicker);
+		colorPickerFrame->visible = false;
+		add(colorPickerFrame);
 	}
 	
 	void update(Mat4f orthoMatrix) {

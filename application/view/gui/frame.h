@@ -26,7 +26,7 @@ public:
 
 	Vec4 backgroundColor;
 
-	bool minimized;
+	bool minimized = false;
 
 	Frame();
 	Frame(double x, double y, std::string title = "");

@@ -19,6 +19,7 @@ void main() {
 
 #define PI 3.14159265359
 #define TWOPI 6.28318530718
+
 in vec2 fUV;
 
 out vec4 outColor;
