@@ -2,7 +2,6 @@
 
 #include "testsMain.h"
 
-#include "../application/view/loader.h"
 #include "../engine/math/mat4.h"
 #include "../engine/math/vec4.h"
 #include "../engine/math/vec3.h"

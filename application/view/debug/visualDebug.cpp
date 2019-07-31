@@ -17,6 +17,7 @@ const char* const graphicsDebugLabels[]{
 	"Skybox",
 	"Vectors",
 	"Lighting",
+	"Wait For Lock",
 	"Physicals",
 	"Origin",
 	"Profiler",

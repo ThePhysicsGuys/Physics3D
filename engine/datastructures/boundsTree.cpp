@@ -1,5 +1,13 @@
 #include "boundsTree.h"
 
+#include <utility>
+#include <new>
+#include <limits>
+
+static constexpr Fix<32> MIN_FIX(std::numeric_limits<long long>::lowest());
+static constexpr Fix<32> MAX_FIX(std::numeric_limits<long long>::max());
+TreeNode dummy_TreeNode(Bounds(Position(MIN_FIX, MIN_FIX, MIN_FIX), Position(MAX_FIX, MAX_FIX, MAX_FIX)), nullptr, 2);
+
 long long computeCost(const Bounds & bounds) {
 	Vec3Fix d = bounds.getDiagonal();
 	return (d.x + d.y + d.z).value;
@@ -29,7 +37,6 @@ void TreeNode::addToSubTrees(TreeNode&& newNode) {
 			bestIndex = i;
 		}
 	}
-	Log::debug("bestIndex: %d", bestIndex);
 	subTrees[bestIndex].add(std::move(newNode));
 }
 
@@ -40,7 +47,7 @@ void TreeNode::add(TreeNode&& newNode) {
 		newNodes[0].object = this->object;
 		newNodes[0].bounds = this->bounds;
 
-		new(&newNodes[1]) TreeNode(std::move(newNode));
+		new(newNodes + 1) TreeNode(std::move(newNode));
 
 		this->nodeCount = 2;
 		this->subTrees = newNodes;
@@ -61,22 +68,20 @@ void TreeNode::recalculateBoundsFromSubBounds() {
 	}
 }
 
-void TreeNode::recalculateBounds(bool strictBounds) {
-	if (isLeafNode()) {
-		this->bounds = strictBounds ? object->getStrictBounds() : object->getLooseBounds();
-	} else {
+void TreeNode::recalculateBounds() {
+	if (!isLeafNode()) {
 		recalculateBoundsFromSubBounds();
 	}
 }
 
-void TreeNode::recalculateBoundsRecursive(bool strictBounds) {
+void TreeNode::recalculateBoundsRecursive() {
 	if (!isLeafNode()) {
 		for (size_t i = 0; i < nodeCount; i++) {
-			subTrees[i].recalculateBoundsRecursive(strictBounds);
+			subTrees[i].recalculateBoundsRecursive();
 		}
 	}
 
-	recalculateBounds(strictBounds);
+	recalculateBounds();
 }
 
 void transferObject(TreeNode& from, TreeNode& to, size_t index){
@@ -272,7 +277,7 @@ void fillNodePairWithPermutation(TreeNode& first, TreeNode& second, NodePermutat
 	int groupsNeeded = 1 + (bestPermutation.countB != 1);
 
 	if (existingGroups < groupsNeeded) {// tops one extra group to be made
-		availableGroups[existingGroups++] = new TreeNode[MAX_BRANCHES];
+		availableGroups[1] = new TreeNode[MAX_BRANCHES];
 	} else if (existingGroups > groupsNeeded) {
 		delete[] availableGroups[--existingGroups];
 	}
@@ -296,7 +301,7 @@ void fillNodePairWithPermutation(TreeNode& first, TreeNode& second, NodePermutat
 /*
 	This function tries all permutations of the subnodes of first and second, and finds which arrangement results in the smallest bounds
 */
-void optimizeNodePair(TreeNode& first, TreeNode& second) {
+void optimizeNodePairHorizontal(TreeNode& first, TreeNode& second) {
 	if (first.isLeafNode() && second.isLeafNode())
 		return;
 
@@ -311,12 +316,16 @@ void optimizeNodePair(TreeNode& first, TreeNode& second) {
 void TreeNode::improveStructure() {
 	if (!isLeafNode()) {
 		for (int i = 0; i < nodeCount; i++) subTrees[i].improveStructure();
+		// horizontal structure improvement
 		for (int i = 0; i < nodeCount - 1; i++) {
 			TreeNode& A = subTrees[i];
 			for (int j = i + 1; j < nodeCount; j++) {
 				TreeNode& B = subTrees[j];
 				if (intersects(A.bounds, B.bounds)) {
-					optimizeNodePair(A, B);
+					optimizeNodePairHorizontal(A, B);
+				}
+			}
+		}
 				}
 			}
 		}

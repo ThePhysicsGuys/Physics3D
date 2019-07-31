@@ -30,8 +30,8 @@ TEST_CASE(positionInvariance) {
 
 		World<> w;
 
-		w.addObject(&housePart);
-		w.addObject(&icosaPart);
+		w.addPart(&housePart);
+		w.addPart(&icosaPart);
 
 		for(int i = 0; i < TICKS; i++)
 			w.tick(DELTA_T);
@@ -59,8 +59,8 @@ TEST_CASE(rotationInvariance) {
 
 		World<> w;
 
-		w.addObject(&housePart);
-		w.addObject(&icosaPart);
+		w.addPart(&housePart);
+		w.addPart(&icosaPart);
 
 		for(int i = 0; i < TICKS; i++)
 			w.tick(DELTA_T);
@@ -97,7 +97,7 @@ TEST_CASE(momentToAngularVelocity) {
 }
 
 TEST_CASE(rotationImpulse) {
-	Part part(BoundingBox{-0.1, -10, -0.1, 0.1, 10, 0.1}.toShape(new Vec3f[8]), CFrame(Vec3()), 1.0, 1.0);
+	Part part(BoundingBox{-0.1, -10, -0.1, 0.1, 10, 0.1}.toShape(), CFrame(Vec3()), 1.0, 1.0);
 	Physical veryLongBoxPhysical(&part);
 
 	Vec3 xMoment = Vec3(1.0, 0.0, 0.0);
@@ -320,12 +320,9 @@ TEST_CASE(testChangeInertialBasis) {
 }
 
 TEST_CASE(testMultiPartPhysicalSimple) {
-	Vec3f buf1[8];
-	Vec3f buf2[8];
-	Vec3f buf3[8];
-	Shape box(BoundingBox(1.0, 0.5, 0.5).toShape(buf1));
-	Shape box2(BoundingBox(1.0, 0.5, 0.5).toShape(buf2));
-	Shape doubleBox(BoundingBox(2.0, 0.5, 0.5).toShape(buf3));
+	Shape box(BoundingBox(1.0, 0.5, 0.5).toShape());
+	Shape box2(BoundingBox(1.0, 0.5, 0.5).toShape());
+	Shape doubleBox(BoundingBox(2.0, 0.5, 0.5).toShape());
 	Part* p1 = new Part(box, CFrame(), 10.0, 0.0);
 	Part* p2 = new Part(box2, CFrame(), 10.0, 0.0);
 	Part* doubleP = new Part(doubleBox, CFrame(), 10.0, 0);
@@ -343,12 +340,9 @@ TEST_CASE(testMultiPartPhysicalSimple) {
 }
 
 TEST_CASE(testMultiPartPhysicalRotated) {
-	Vec3f buf1[8];
-	Vec3f buf2[8];
-	Vec3f buf3[8];
-	Shape box(BoundingBox(1.0, 0.5, 0.5).toShape(buf1));
-	Shape box2(BoundingBox(0.5, 0.5, 1.0).toShape(buf2));
-	Shape doubleBox(BoundingBox(2.0, 0.5, 0.5).toShape(buf3));
+	Shape box(BoundingBox(1.0, 0.5, 0.5).toShape());
+	Shape box2(BoundingBox(0.5, 0.5, 1.0).toShape());
+	Shape doubleBox(BoundingBox(2.0, 0.5, 0.5).toShape());
 	Part* p1 = new Part(box, CFrame(), 10.0, 0.0);
 	Part* p2 = new Part(box2, CFrame(), 10.0, 0.0);
 	Part* doubleP = new Part(doubleBox, CFrame(), 10.0, 0);

@@ -65,15 +65,15 @@ void Physical::attachPart(Part* part, CFrame attachment) {
 
 	refreshWithNewParts();
 }
-void Physical::detachPart(Part* part) {
+bool Physical::detachPart(Part* part) {
 	if (part == mainPart) {
 		part->parent = nullptr;
 		if (parts.size >= 1) {
 			makeMainPart(parts[parts.size - 1]);
 			refreshWithNewParts();
-			return;
+			return false;
 		} else {
-			this->~Physical();
+			return true;
 		}
 	} else {
 		for (auto iter = parts.begin(); iter != parts.end(); ++iter) {
@@ -82,7 +82,7 @@ void Physical::detachPart(Part* part) {
 				part->parent = nullptr;
 				parts.remove(iter);
 				refreshWithNewParts();
-				return;
+				return false;
 			}
 		}
 	}

@@ -18,6 +18,7 @@ enum GraphicsProcess {
 	SKYBOX,
 	VECTORS,
 	LIGHTING,
+	WAIT_FOR_LOCK,
 	PHYSICALS,
 	ORIGIN,
 	PROFILER,

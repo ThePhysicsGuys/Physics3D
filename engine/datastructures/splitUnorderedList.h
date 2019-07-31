@@ -49,6 +49,16 @@ public:
 		}
 	}
 
+	inline void remove(T& item) {
+		for (size_t i = 0; i < this->size; i++) {
+			if (this->data[i] == item) {
+				remove(this->data + i);
+				return;
+			}
+		}
+		throw "Could not remove item not in list!";
+	}
+
 	inline void moveLeftToRight(T* obj) {
 		splitOffset--;
 		std::swap(*obj, this->data[splitOffset]);

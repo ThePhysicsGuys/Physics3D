@@ -1,6 +1,8 @@
 #include "stringUtil.h"
 
 #include <algorithm>
+#include <vector>
+#include <string>
 
 std::vector<std::string> split(const std::string& string, char splitter) {
 	std::vector<std::string> elements;

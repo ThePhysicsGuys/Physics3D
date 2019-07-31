@@ -1,18 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?> 
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
   <Type Name="Fix&lt;*&gt;">
-    <DisplayString>{{{double(value) / (1ULL &lt;&lt; $T1),g}}}</DisplayString>
+    <DisplayString>{double(value) / (1ULL &lt;&lt; $T1),g}</DisplayString>
   </Type>
   <Type Name="TreeNode">
-    <DisplayString Condition="nodeCount != 0xFFFFFFFFFFFFFFFF">{{TrunkNode Size={nodeCount}}}</DisplayString>
-    <DisplayString Condition="nodeCount == 0xFFFFFFFFFFFFFFFF">{{LeafNode {object}}}</DisplayString>
+    <DisplayString Condition="nodeCount != 0x7FFFFFFF">{{TrunkNode Size={nodeCount}}}</DisplayString>
+    <DisplayString Condition="nodeCount == 0x7FFFFFFF">{{LeafNode {object}}}</DisplayString>
     <Expand>
       <Item Name="bounds" ExcludeView="simple">bounds</Item>
-      <ArrayItems Condition="nodeCount != 0xFFFFFFFFFFFFFFFF">
+      <ArrayItems Condition="nodeCount != 0x7FFFFFFF">
         <Size>nodeCount</Size>
         <ValuePointer>subTrees</ValuePointer>
       </ArrayItems>
-      <Item Name="object" ExcludeView="simple" Condition="nodeCount == 0xFFFFFFFFFFFFFFFF">object</Item>
+      <Item Name="object" ExcludeView="simple" Condition="nodeCount == 0x7FFFFFFF">object</Item>
     </Expand>
+  </Type>
+  <Type Name="TreeIterBase">
+    <DisplayString>Size={top - stack + 1} Top={top->node->bounds}</DisplayString>
+    <Expand>
+      <ArrayItems Condition="top >= stack">
+        <Size>top - stack + 1</Size>
+        <ValuePointer>stack</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+  <Type Name="TreeStackElement">
+    <DisplayString Condition="node->nodeCount != 0x7FFFFFFF">index={index}/{node->nodeCount} bounds={node->bounds}</DisplayString>
+    <DisplayString Condition="node->nodeCount == 0x7FFFFFFF">leafNode bounds={node->bounds}</DisplayString>
   </Type>
 </AutoVisualizer>

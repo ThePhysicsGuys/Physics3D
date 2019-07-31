@@ -11,8 +11,10 @@ TEST_CASE(testIndexedShape) {
 	TriangleNeighbors neighBuf[4];
 
 	fillNeighborBuf(triangles, 4, neighBuf);
+	
+	auto triPtr = SharedArrayPtr<const Triangle>::staticSharedArrayPtr(triangles);
 
-	IndexedShape s(verts, triangles, 4, 4, neighBuf);
+	IndexedShape s(verts, triPtr, 4, 4, neighBuf);
 
 	ASSERT_TRUE(s.isValid());
 }
@@ -37,7 +39,9 @@ TEST_CASE(buildConvexShape) {
 	Triangle triangles[20]{{0,1,2},{0,3,1},{0,2,3},{1,3,2}};
 	TriangleNeighbors neighBuf[20];
 
-	Shape simpleTetrahedron(verts, triangles, 4, 4);
+	auto triPtr = SharedArrayPtr<const Triangle>::staticSharedArrayPtr(triangles);
+
+	Shape simpleTetrahedron(verts, triPtr, 4, 4);
 
 	ASSERT_TRUE(simpleTetrahedron.isValid());
 
@@ -51,7 +55,10 @@ TEST_CASE(buildConvexShape) {
 	Triangle triangles2[20]{{0,1,2},{0,3,1},{0,2,3},{1,3,2}};
 	TriangleNeighbors neighBuf2[20];
 
-	Shape simpleTetrahedron2(verts2, triangles2, 4, 4);
+
+	auto triPtr2 = SharedArrayPtr<const Triangle>::staticSharedArrayPtr(triangles2);
+
+	Shape simpleTetrahedron2(verts2, triPtr2, 4, 4);
 
 	ASSERT_TRUE(simpleTetrahedron2.isValid());
 

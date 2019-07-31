@@ -6,6 +6,7 @@
 #include <queue>
 #include <mutex>
 #include <shared_mutex>
+#include <functional>
 #include "datastructures/splitUnorderedList.h"
 #include "worldIterator.h"
 #include "datastructures/boundsTree.h"
@@ -26,7 +27,7 @@ private:
 public:
 	mutable std::shared_mutex lock;
 	mutable std::mutex queueLock;
-	BoundsTree objectTree;
+	BoundsTree<Physical> objectTree;
 
 	size_t age = 0;
 

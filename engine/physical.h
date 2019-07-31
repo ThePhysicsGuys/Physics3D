@@ -149,7 +149,11 @@ public:
 	void makeMainPart(AttachedPart& newMainPart);
 	void makeMainPart(Part* newMainPart);
 	void attachPart(Part* part, CFrame attachment);
-	void detachPart(Part* part);
+	/* 
+		returns whether the part that's been removed is the last part in the physical, 
+		meaning it should be destroyed
+	*/
+	bool detachPart(Part* part);
 	void refreshWithNewParts();
 
 

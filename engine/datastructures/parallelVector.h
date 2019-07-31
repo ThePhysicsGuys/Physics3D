@@ -29,7 +29,7 @@ struct alignas(32) ParallelVec3 {
 inline ParallelVec3* createParallelVecBuf(size_t blockCount) {
 	ParallelVec3* vecs = new ParallelVec3[blockCount];
 	// TODO fix alignment bug
-	if (reinterpret_cast<size_t>(vecs) & 0b00011111 != 0) {
+	if ((reinterpret_cast<size_t>(vecs) & 0b00011111) != 0) {
 		//delete[] vecs;
 		//throw "Error, did not align ParallelVec3 storage!";
 		Log::error("VecBuf Not aligned!");

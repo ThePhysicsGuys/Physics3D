@@ -256,7 +256,7 @@ void recursiveFindColissionsBetween(WorldPrototype& world, std::vector<Colission
 	if (!intersects(first.bounds, second.bounds)) return;
 	
 	if (first.isLeafNode() && second.isLeafNode()) {
-		runColissionTests(*first.object, *second.object, world, colissions);
+		runColissionTests(*static_cast<Physical*>(first.object), *static_cast<Physical*>(second.object), world, colissions);
 	} else {
 		bool preferFirst = computeCost(first.bounds) <= computeCost(second.bounds);
 		if (preferFirst && !first.isLeafNode() || second.isLeafNode()) {
@@ -345,7 +345,7 @@ void WorldPrototype::tick(double deltaT) {
 	}
 
 	physicsMeasure.mark(PhysicsProcess::UPDATE_TREE_BOUNDS);
-	objectTree.recalculateBounds(true);
+	objectTree.recalculateBounds(false);
 	physicsMeasure.mark(PhysicsProcess::UPDATE_TREE_STRUCTURE);
 	objectTree.improveStructure();
 
@@ -380,10 +380,9 @@ void WorldPrototype::addPartUnsafe(Part* part, bool anchored) {
 }
 void WorldPrototype::removePartUnsafe(Part* part) {
 	Physical* parent = part->parent;
-	parent->detachPart(part);
-	if (parent->getPartCount() == 0) {
-		throw "TODO fix";
-		//physicals.remove(parent);
+	if (parent->detachPart(part)) {
+		//throw "TODO fix";
+		physicals.remove(parent);
 	}
 	ASSERT_VALID;
 }

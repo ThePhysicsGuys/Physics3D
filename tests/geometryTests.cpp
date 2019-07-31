@@ -32,17 +32,15 @@ bool isDiagonalTolerant(SymmetricMat3Template<N> m, Tol tolerance) {
 
 TEST_CASE(basicShapes) {
 	BoundingBox b{ -1, -1, -1, 1, 1, 1 };
-	Vec3f vecBuf[8];
 
-	ASSERT_TRUE(b.toShape(vecBuf).isValid());
+	ASSERT_TRUE(b.toShape().isValid());
 }
 
 TEST_CASE(shapeVolume) {
 	BoundingBox b{-1, -1, -1, 1, 1, 1};
-	Vec3f vecBuf[8];
 	Vec3f vecBuf2[8];
 
-	Shape boxShape = b.toShape(vecBuf);
+	Shape boxShape = b.toShape();
 
 	CFramef transform(Vec3f(0.3f, 0.7f, -3.5f), fromEulerAngles(0.7f, 0.2f, 0.3f));
 
@@ -58,10 +56,9 @@ TEST_CASE(shapeVolume) {
 
 TEST_CASE(shapeCenterOfMass) {
 	BoundingBox b{-1, -1, -1, 1, 1, 1};
-	Vec3f vecBuf[8];
 	Vec3f vecBuf2[8];
 
-	Shape boxShape = b.toShape(vecBuf);
+	Shape boxShape = b.toShape();
 
 	CFramef transform(Vec3f(0.3f, 0.7f, -3.5f), fromEulerAngles(0.7f, 0.2f, 0.3f));
 
@@ -73,13 +70,12 @@ TEST_CASE(shapeCenterOfMass) {
 
 TEST_CASE(shapeInertiaMatrix) {
 	BoundingBox b{-1, -1, -1, 1, 1, 1};
-	Vec3f vecBuf[8];
 	Vec3f vecBuf2[8];
 	Vec3f houseVecBuf[10];
 	Vec3f houseVecBuf2[10];
 
 
-	Shape boxShape = b.toShape(vecBuf);
+	Shape boxShape = b.toShape();
 
 	CFramef transform(Vec3f(0,0,0), fromEulerAngles(0.7f, 0.2f, 0.3f));
 	Shape transformedShape = boxShape.localToGlobal(transform, vecBuf2);
@@ -137,8 +133,7 @@ TEST_CASE(shapeInertiaEigenValueInvariance) {
 }
 
 TEST_CASE(cubeContainsPoint) {
-	Vec3f buf[8];
-	Shape cube = BoundingBox{0,0,0,1,1,1}.toShape(buf);
+	Shape cube = BoundingBox{0,0,0,1,1,1}.toShape();
 
 	ASSERT_TRUE(cube.containsPoint(Vec3f(0.2, 0.2, 0.2)));
 	ASSERT_TRUE(cube.containsPoint(Vec3f(0.2, 0.2, 0.8)));
@@ -162,9 +157,8 @@ TEST_CASE(testRayIntersection) {
 
 TEST_CASE(testIntersection) {
 	Vec3f buf[12];
-	Vec3f buf2[8];
 	Vec3f buf3[12];
-	Shape a = BoundingBox{-0.3, -0.4, -0.5, 0.3, 0.4, 0.5}.toShape(buf2);
+	Shape a = BoundingBox{-0.3, -0.4, -0.5, 0.3, 0.4, 0.5}.toShape();
 	Shape b = icosahedron.translated(Vec3f(0.8, 0.9, 0.8), buf);
 	Shape c = icosahedron.translated(Vec3f(0.95, 0.0, 0.0), buf3);
 	
@@ -208,8 +202,10 @@ TEST_CASE(badCollissions) {
 		{4,5,7},{6,7,5}, // TOP
 	};
 
-	Shape dominoI(badVerticesI, triangles, 8, 12);
-	Shape dominoJ(badVerticesJ, triangles, 8, 12);
+	auto triPtr = SharedArrayPtr<const Triangle>::staticSharedArrayPtr(triangles);
+
+	Shape dominoI(badVerticesI, triPtr, 8, 12);
+	Shape dominoJ(badVerticesJ, triPtr, 8, 12);
 
 	Vec3f intersection;
 	Vec3f exitVec;

@@ -1,6 +1,7 @@
 
 #include "keyboard.h"
 #include <map>
+#include <stdexcept>
 
 #include "GLFW\glfw3.h"
 
