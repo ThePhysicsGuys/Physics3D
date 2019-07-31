@@ -112,16 +112,16 @@ void EditTools::render(Screen& screen) {
 	if (selectedEditDirection != EditDirection::NONE) {
 		switch (selectedEditDirection) {
 		case EditDirection::Y:
-			Shaders::lineShader.updateModel(modelMatrix);
-			Shaders::lineShader.updateColor(GUI::COLOR::G);
+			Shaders::maskShader.updateModel(modelMatrix);
+			Shaders::maskShader.updateColor(GUI::COLOR::G);
 			break;
 		case EditDirection::X:
-			Shaders::lineShader.updateModel(modelMatrix * transformations[1]);
-			Shaders::lineShader.updateColor(GUI::COLOR::R);
+			Shaders::maskShader.updateModel(modelMatrix * transformations[1]);
+			Shaders::maskShader.updateColor(GUI::COLOR::R);
 			break;
 		case EditDirection::Z:
-			Shaders::lineShader.updateModel(modelMatrix * transformations[2]);
-			Shaders::lineShader.updateColor(GUI::COLOR::B);
+			Shaders::maskShader.updateModel(modelMatrix * transformations[2]);
+			Shaders::maskShader.updateColor(GUI::COLOR::B);
 			break;
 		}
 		line->render();

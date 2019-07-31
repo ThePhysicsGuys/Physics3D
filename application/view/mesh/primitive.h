@@ -77,10 +77,10 @@ struct Quad : public Primitive {
 	void resize(Vec2f position, Vec2f dimension) {
 
 		float vertices[4][4] = {
-			{ position.x,				position.y				, 0, 1},
-			{ position.x,				position.y - dimension.y, 0, 0},
-			{ position.x + dimension.x, position.y - dimension.y, 1, 0},
-			{ position.x + dimension.x, position.y				, 1, 1}
+			{ position.x,				position.y				, 0.0f, 1.0f},
+			{ position.x,				position.y - dimension.y, 0.0f, 0.0f},
+			{ position.x + dimension.x, position.y - dimension.y, 1.0f, 0.0f},
+			{ position.x + dimension.x, position.y				, 1.0f, 1.0f}
 		};
 
 		Primitive::resize(vertices);

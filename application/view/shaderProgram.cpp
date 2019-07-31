@@ -23,7 +23,8 @@ namespace Shaders {
 	TestShader testShader;
 	BlurShader blurShader;
 	ColorWheelShader colorWheelShader;
-	LineShader lineShader;
+	MaskShader maskShader;
+	EdgeShader edgeShader;
 
 	void init() {
 		// Shader source init
@@ -39,7 +40,8 @@ namespace Shaders {
 		ShaderSource testShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(TEST_SHADER)), "test.shader");
 		ShaderSource blurShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(BLUR_SHADER)), "blur.shader");
 		ShaderSource colorWheelShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(COLORWHEEL_SHADER)), "colorwheel.shader");
-		ShaderSource lineShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(LINE_SHADER)), "line.shader");
+		ShaderSource maskShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(MASK_SHADER)), "mask.shader");
+		ShaderSource edgeShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(EDGE_SHADER)), "edge.shader");
 
 		// Shader init
 		new(&basicShader) BasicShader(basicShaderSource);
@@ -54,8 +56,8 @@ namespace Shaders {
 		new(&testShader) TestShader(testShaderSource);
 		new(&blurShader) BlurShader(blurShaderSource);
 		new(&colorWheelShader) ColorWheelShader(colorWheelShaderSource);
-		new(&lineShader) LineShader(lineShaderSource);
-
+		new(&maskShader) MaskShader(maskShaderSource);
+		new(&edgeShader) EdgeShader(edgeShaderSource);
 	}
 
 	void close() {
@@ -67,13 +69,12 @@ namespace Shaders {
 		skyboxShader.close();
 		quadShader.close();
 		postProcessShader.close();
-		depthShader.close();
-		skyboxShader.close();
 		pointShader.close();
 		testShader.close();
 		blurShader.close();
 		colorWheelShader.close();
-		lineShader.close();
+		maskShader.close();
+		edgeShader.close();
 	}
 }
 
@@ -110,7 +111,7 @@ void BasicShader::updatePart(const ExtendedPart& part) {
 	bind();
 	shader.setUniform("includeNormals", part.visualShape.normals != nullptr);
 	shader.setUniform("includeUvs", part.visualShape.uvs != nullptr);
-	shader.setUniform("modelMatrix", CFrameToMat4(CFrame(part.cframe)));
+	shader.setUniform("modelMatrix", CFrameToMat4(part.cframe));
 }
 
 void BasicShader::updateMaterial(const Material& material) {
@@ -260,20 +261,20 @@ void SkyboxShader::updateLightDirection(const Vec3f& lightDirection) {
 }
 
 
-// LineShader
+// MeskShader
 
-void LineShader::updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix) {
+void MaskShader::updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix) {
 	bind();
 	shader.setUniform("viewMatrix", viewMatrix);
 	shader.setUniform("projectionMatrix", projectionMatrix);
 }
 
-void LineShader::updateModel(const Mat4f& modelMatrix) {
+void MaskShader::updateModel(const Mat4f& modelMatrix) {
 	bind();
 	shader.setUniform("modelMatrix", modelMatrix);
 }
 
-void LineShader::updateColor(const Vec4f& color) {
+void MaskShader::updateColor(const Vec4f& color) {
 	bind();
 	shader.setUniform("color", color);
 }
@@ -432,4 +433,20 @@ void TestShader::updateDisplacement(Texture* displacementMap) {
 void ColorWheelShader::updateProjection(Mat4f projectionMatrix) {
 	bind();
 	shader.setUniform("projectionMatrix", projectionMatrix);
+}
+
+
+
+// EdgeShader
+
+void EdgeShader::updateTexture(Texture* texture) {
+	bind();
+	texture->bind();
+	shader.setUniform("textureSampler", texture->unit);
+}
+
+void EdgeShader::updateTexture(HDRTexture* texture) {
+	bind();
+	texture->bind();
+	shader.setUniform("textureSampler", texture->unit);
 }

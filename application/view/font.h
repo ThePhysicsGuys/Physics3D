@@ -8,9 +8,10 @@
 #include "../engine/math/vec4.h"
 
 #include <string> 
-#include <map>
 
 class Texture;
+
+#define GLYPHCOUNT 128
 
 class Font {
 private:
@@ -18,14 +19,42 @@ private:
 	unsigned int vbo;
 
 	struct Character {
-		Texture* texture;
-		Vec2 size;
-		Vec2 bearing;
+		union {
+			struct {
+				int x;
+				int y;
+			};
+			Vec2i origin;
+		};
+
+		union {
+			struct {
+				int width;
+				int height;
+			};
+			Vec2i size;
+		};
+		
+		union {
+			struct {
+				int bx;
+				int by;
+			};
+
+			Vec2i bearing;
+		};
+		
 		unsigned int advance;
-	};
 
-	std::map<char, Character> characters;
+		Character() {};
+		Character(int x, int y, int width, int height, int bx, int by, int advance) : x(x), y(y), width(width), height(height), bx(bx), by(by), advance(advance) {};
 
+	} characters[GLYPHCOUNT];
+	
+	void initFontBuffers();
+	void initFontAtlas(std::string font);
+
+	Texture* atlas = nullptr;
 public:
 	Font(std::string font);
 

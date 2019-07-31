@@ -1,5 +1,8 @@
 #include "screen.h"
 
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+
 #include "renderUtils.h"
 #include "texture.h"
 #include "material.h"
@@ -176,11 +179,6 @@ PointMesh* pointMesh = nullptr;
 ArrayMesh* originMesh = nullptr;
 
 
-// Mouse GUI
-Panel* mouseVertical = nullptr;
-Panel* mouseHorizontal = nullptr;
-
-
 // Frames
 PropertiesFrame* propertiesFrame = nullptr;
 DebugFrame* debugFrame = nullptr;
@@ -188,9 +186,11 @@ EnvironmentFrame* environmentFrame = nullptr;
 
 
 // Test
+Frame* imageFrame = nullptr;
+Image* image = nullptr;
 IndexedMesh* mesh = nullptr;
 Texture* texture = nullptr;
-#include "../engine/math/mat2.h"
+
 void Screen::init() {
 	// Log init
 	Log::setLogLevel(Log::Level::INFO);
@@ -220,6 +220,7 @@ void Screen::init() {
 	quad = new Quad();
 	modelFrameBuffer = new HDRFrameBuffer(dimension.x, dimension.y);
 	screenFrameBuffer = new FrameBuffer(dimension.x, dimension.y);
+	maskFrameBuffer = new FrameBuffer(dimension.x, dimension.y);
 	blurFrameBuffer = new FrameBuffer(dimension.x, dimension.y);
 	depthBuffer = new DepthFrameBuffer(1024, 1024);
 
@@ -227,6 +228,7 @@ void Screen::init() {
 	// Eventhandler init
 	eventHandler.setWindowResizeCallback([](Screen& screen, Vec2i dimension) {
 		screen.screenFrameBuffer->resize(dimension);
+		screen.maskFrameBuffer->resize(dimension);
 		screen.modelFrameBuffer->resize(dimension);
 		screen.blurFrameBuffer->resize(dimension);
 		GUI::guiFrameBuffer->resize(dimension);
@@ -285,14 +287,6 @@ void Screen::init() {
 	propertiesFrame = new PropertiesFrame(0.75, 0.75);
 	environmentFrame = new EnvironmentFrame(0.8, 0.8);
 	debugFrame = new DebugFrame(0.7, 0.7);
-
-
-	// Mouse init
-	Renderer::disableGLFWCursor();
-	mouseVertical = new Panel(0, 0, 0.04, 0.007);
-	mouseHorizontal = new Panel(0, 0, 0.007, 0.04);
-	mouseVertical->background = Vec4(1);
-	mouseHorizontal->background = Vec4(1);
 	
 
 	// Picker init
@@ -340,6 +334,11 @@ void Screen::init() {
 	shape.computeNormals(buffer);
 	shape.normals = SharedArrayPtr<const Vec3f>(buffer);
 	mesh = new IndexedMesh(shape);
+	image = new Image(0, 0, 1, 1);
+	imageFrame = new Frame(0, 0, "Image");
+	imageFrame->add(image);
+	GUI::add(imageFrame);
+	//image->texture = font->atlas;
 }
 
 void Screen::update() {
@@ -387,10 +386,6 @@ void Screen::update() {
 
 
 	// Update gui
-	// Update mouse
-	mouseVertical->position = GUI::map(handler->cursorPosition) + Vec2(-mouseVertical->dimension.x / 2, mouseVertical->dimension.y / 2);
-	mouseHorizontal->position = GUI::map(handler->cursorPosition) + Vec2(-mouseHorizontal->dimension.x / 2, mouseHorizontal->dimension.y / 2);
-
 	// Update GUI intersection
 	GUI::intersect(GUI::map(handler->cursorPosition));
 	
@@ -420,7 +415,7 @@ void Screen::renderPhysicals() {
 	// Bind basic uniforms
 	Shaders::basicShader.updateProjection(camera.viewMatrix, camera.projectionMatrix, camera.cframe.position);
 	Shaders::basicShader.updateLight(lights, lightCount);
-
+	Shaders::maskShader.updateProjection(camera.viewMatrix, camera.projectionMatrix);
 	
 	// Render world objects
 	for (ExtendedPart& part : *world) {
@@ -429,9 +424,7 @@ void Screen::renderPhysicals() {
 		Material material = part.material;
 
 		// Picker code
-		if(&part == selectedPart)
-			material.ambient = part.material.ambient + Vec4f(0.1, 0.1, 0.1, -0.2);
-		else if (&part == intersectedPart)
+		if (&part == intersectedPart)
 			material.ambient = part.material.ambient + Vec4f(-0.1, -0.1, -0.1, 0);
 		else
 			material.ambient = part.material.ambient;
@@ -448,7 +441,19 @@ void Screen::renderPhysicals() {
 
 		if(meshId == -1) continue;
 
-		meshes[meshId]->render(part.renderMode);
+		/*if (&part == selectedPart) {
+			maskFrameBuffer->bind();
+			Renderer::clearDepth();
+			Renderer::clearColor();
+			Shaders::maskShader.updateModel(CFrameToMat4(part.cframe));
+			meshes[meshId]->render();
+			Shaders::edgeShader.updateTexture(maskFrameBuffer->texture);
+			quad->render();
+			image->texture = maskFrameBuffer->texture;
+			modelFrameBuffer->bind();
+		} else {*/
+			meshes[meshId]->render(part.renderMode);
+		//}
 	}
 
 	for (auto iterator = transparentMeshes.rbegin(); iterator != transparentMeshes.rend(); ++iterator) {
@@ -612,13 +617,13 @@ void Screen::renderDebug() {
 		}
 	}
 	switch (renderColTree) {
-	case ColTreeRenderMode::ALL:
-		recursiveRenderColTree(world->objectTree.rootNode, 0);
-		break;
-	case ColTreeRenderMode::SELECTED:
-		if (selectedPart != nullptr)
-			recursiveColTreeForOneObject(world->objectTree.rootNode, selectedPart->parent, selectedPart->parent->getStrictBounds());
-		break;
+		case ColTreeRenderMode::ALL:
+			recursiveRenderColTree(world->objectTree.rootNode, 0);
+			break;
+		case ColTreeRenderMode::SELECTED:
+			if (selectedPart != nullptr)
+				recursiveColTreeForOneObject(world->objectTree.rootNode, selectedPart->parent, selectedPart->parent->getStrictBounds());
+			break;
 	}
 
 	// Update debug meshes
@@ -785,7 +790,7 @@ void Screen::refresh() {
 
 
 	// Render edit tools
-	Shaders::lineShader.updateProjection(camera.viewMatrix, camera.projectionMatrix);
+	Shaders::maskShader.updateProjection(camera.viewMatrix, camera.projectionMatrix);
 	Picker::render(*this);
 
 
@@ -795,9 +800,6 @@ void Screen::refresh() {
 	Shaders::fontShader.updateProjection(orthoMatrix);
 	GUI::render(orthoMatrix);
 
-	mouseVertical->render();
-	mouseHorizontal->render();
-	
 
 	// Pie rendering
 	renderPies();

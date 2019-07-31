@@ -49,6 +49,9 @@ namespace Renderer {
 	extern void clearColor();
 	extern void clearStencil();
 
+	extern void lineStipple(int factor, short pattern);
+	extern void lineWidth(float size);
+
 	extern inline void viewport(Vec2i origin, Vec2i dimension);
 
 	extern inline void enableDepthMask();

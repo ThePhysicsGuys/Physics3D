@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?> 
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
   <Type Name="Camera">
-    <DisplayString>position={cframe.position}, rotation={cframe.rotation}</DisplayString>
+    <DisplayString>position={cframe.position}, rotation={cframe.rotation}, aspect={aspect, g}</DisplayString>
     <Expand>
       <Item Name="position">cframe.position</Item>
       <Item Name="rotation">cframe.rotation</Item>
+      <Item Name="aspect">aspect</Item>
       <Item Name="field of view">fov</Item>
       <Item Name="znear">znear</Item>
       <Item Name="zfar">zfar</Item>

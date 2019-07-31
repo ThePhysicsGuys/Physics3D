@@ -61,7 +61,7 @@ void main() {
 		0, 0, 0
 	);
 
-	vec3 sampleGrayTexture[9];
+	/*vec3 sampleGrayTexture[9];
 	vec3 sampleColorTexture[9];
 	for (int i = 0; i < 9; i++) {
 		vec3 rgb = vec3(texture(textureSampler, ftextureUV.st + offsets[i]));
@@ -80,7 +80,8 @@ void main() {
 		//sx += sampleGrayTexture[i] * gx[i];
 		//sy += sampleGrayTexture[i] * gy[i];
 	}
-	//vec3 s = vec3(1.0) - sqrt(sx*sx + sy*sy);
+	//vec3 s = vec3(1.0) - sqrt(sx*sx + sy*sy);*/
 
-	outColor = vec4(color, 1.0);
+	//outColor = vec4(color, 1.0);
+	outColor = texture(textureSampler, ftextureUV.st);
 }

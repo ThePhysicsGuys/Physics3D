@@ -233,44 +233,73 @@ struct DebugFrame : public FrameBlueprint, public Frame {
 
 struct PropertiesFrame : public FrameBlueprint, public Frame {
 
+	Label* generalLabel = nullptr;
 	Label* partNameLabel = nullptr;
-	Label* partPositionLabel = nullptr;
 	Label* partMeshIDLabel = nullptr;
-	Label* partVelocity = nullptr;
-	Label* partAngularVelocity = nullptr;
-	Label* partKineticEnergy = nullptr;
-	Label* partPotentialEnergy = nullptr;
-	Label* partEnergy = nullptr;
-	Button* colorButton;
+
+	Label* physicalLabel = nullptr;
+	Label* positionLabel = nullptr;
+	Label* velocityLabel = nullptr;
+	Label* angularVelocityLabel = nullptr;
+	Label* kineticEnergyLabel = nullptr;
+	Label* potentialEnergyLabel = nullptr;
+	Label* energyLabel = nullptr;
+	Label* massLabel = nullptr;
+	Label* frictionLabel = nullptr;
+	Label* densityLabel = nullptr;
+
+	Label* materialLabel = nullptr;
+	Button* ambientColorButton = nullptr;
+	Button* diffuseColorButton = nullptr;
+	Button* specularColorButton = nullptr;
+	Slider* reflectanceSlider = nullptr;
 	CheckBox* renderModeCheckBox = nullptr;
 
 	PropertiesFrame(double x, double y) : Frame(x, y, "Properties") {
 		init();
 	
+		add(generalLabel, Align::CENTER);
 		add(partNameLabel, Align::FILL);
-		add(partPositionLabel, Align::FILL);
 		add(partMeshIDLabel, Align::FILL);
+
+		add(physicalLabel, Align::CENTER);
+		add(positionLabel, Align::FILL);
+		add(velocityLabel, Align::FILL);
+		add(angularVelocityLabel, Align::FILL);
+		add(kineticEnergyLabel, Align::FILL);
+		add(potentialEnergyLabel, Align::FILL);
+		add(energyLabel, Align::FILL);
+		add(massLabel, Align::FILL);
+		add(frictionLabel, Align::FILL);
+		add(densityLabel, Align::FILL);
+
+		add(materialLabel, Align::CENTER);
+		add(ambientColorButton, Align::FILL);
+		add(diffuseColorButton, Align::FILL);
+		add(specularColorButton, Align::FILL);
+		add(reflectanceSlider, Align::FILL);
 		add(renderModeCheckBox, Align::FILL);
-		add(colorButton, Align::FILL);
-		add(partVelocity, Align::FILL);
-		add(partAngularVelocity, Align::FILL);
-		add(partKineticEnergy, Align::FILL);
-		add(partPotentialEnergy, Align::FILL);
-		add(partEnergy, Align::FILL);
 
 		GUI::add(this);
 	}
 
 	void init() override {
+		generalLabel = new Label("General", 0, 0);
 		partNameLabel = new Label("", 0, 0);
-		partPositionLabel = new Label("", 0, 0);
 		partMeshIDLabel = new Label("", 0, 0);
-		colorButton = new Button(0, 0, GUI::sliderBarWidth, GUI::sliderHandleHeight, false);
-		partVelocity = new Label("", 0, 0);
-		partAngularVelocity = new Label("", 0, 0);
-		partKineticEnergy = new Label("", 0, 0);
-		partPotentialEnergy = new Label("", 0, 0);
-		partEnergy = new Label("", 0, 0);
+
+		physicalLabel = new Label("Physical", 0, 0);
+		positionLabel = new Label("", 0, 0);
+		velocityLabel = new Label("", 0, 0);
+		angularVelocityLabel = new Label("", 0, 0);
+		kineticEnergyLabel = new Label("", 0, 0);
+		potentialEnergyLabel = new Label("", 0, 0);
+		energyLabel = new Label("", 0, 0);
+		massLabel = new Label("", 0, 0);
+		frictionLabel = new Label("", 0, 0);
+		densityLabel = new Label("", 0, 0);
+
+		materialLabel = new Label("Material", 0, 0);
 		renderModeCheckBox = new CheckBox("Wireframe", 0, 0, true);
 		renderModeCheckBox->action = [] (CheckBox* c) {
 			if (GUI::screen->selectedPart) {
@@ -282,21 +311,54 @@ struct PropertiesFrame : public FrameBlueprint, public Frame {
 			}
 		};
 
-		// Colorpicker GUI
-
-		colorButton->action = [] (Button* button) {
+		ambientColorButton = new Button(0, 0, GUI::sliderBarWidth, GUI::sliderHandleHeight, false);
+		ambientColorButton->action = [] (Button* button) {
 			PropertiesFrame* propertiesFrame = static_cast<PropertiesFrame*>(button->parent);
 
 			if (GUI::screen->selectedPart) {
-				GUI::colorPickerFrame->visible = true;
+				GUI::colorPicker->focus = button;
 				GUI::select(GUI::colorPickerFrame);
-
-				// TODO fix anchoring
+				GUI::colorPickerFrame->visible = true;
+				GUI::colorPickerFrame->anchor = propertiesFrame;
 				GUI::colorPicker->action = [] (ColorPicker* colorPicker) {
 					GUI::screen->selectedPart->material.ambient = colorPicker->getRgba();
 				};
-				GUI::colorPickerFrame->anchor = propertiesFrame;
+
+			}
+		};
+
+		diffuseColorButton = new Button(0, 0, GUI::sliderBarWidth, GUI::sliderHandleHeight, false);
+		diffuseColorButton->action = [] (Button* button) {
+			PropertiesFrame* propertiesFrame = static_cast<PropertiesFrame*>(button->parent);
+			if (GUI::screen->selectedPart) {
 				GUI::colorPicker->focus = button;
+				GUI::select(GUI::colorPickerFrame);
+				GUI::colorPickerFrame->visible = true;
+				GUI::colorPickerFrame->anchor = propertiesFrame;
+				GUI::colorPicker->action = [] (ColorPicker* colorPicker) {
+					GUI::screen->selectedPart->material.diffuse = Vec3(colorPicker->getRgba());
+				};
+			}
+		};
+
+		specularColorButton = new Button(0, 0, GUI::sliderBarWidth, GUI::sliderHandleHeight, false);
+		specularColorButton->action = [] (Button* button) {
+			PropertiesFrame* propertiesFrame = static_cast<PropertiesFrame*>(button->parent);
+			if (GUI::screen->selectedPart) {
+				GUI::colorPicker->focus = button;
+				GUI::select(GUI::colorPickerFrame);
+				GUI::colorPickerFrame->visible = true;
+				GUI::colorPickerFrame->anchor = propertiesFrame;
+				GUI::colorPicker->action = [] (ColorPicker* colorPicker) {
+					GUI::screen->selectedPart->material.specular = Vec3(colorPicker->getRgba());
+				};
+			}
+		};
+
+		reflectanceSlider = new Slider(0, 0, 0, 5, 1);
+		reflectanceSlider->action = [] (Slider* slider) {
+			if (GUI::screen->selectedPart) {
+				GUI::screen->selectedPart->material.reflectance = slider->value;
 			}
 		};
 	}
@@ -308,37 +370,71 @@ struct PropertiesFrame : public FrameBlueprint, public Frame {
 		ExtendedPart* selectedPart = GUI::screen->selectedPart;
 		MagnetWorld* world = GUI::screen->world;
 
-		if (GUI::screen->selectedPart) {
+		if (selectedPart) {
 			partMeshIDLabel->text = "MeshID: " + std::to_string(selectedPart->drawMeshId);
-			renderModeCheckBox->checked = selectedPart->renderMode == Renderer::WIREFRAME;
-			partPositionLabel->text = "Position: " + str(selectedPart->cframe.position);
+
+			positionLabel->text = "Position: " + str(selectedPart->cframe.position);
 			partNameLabel->text = "Name: " + selectedPart->name;
-			partVelocity->text = "Velocity: " + str(selectedPart->parent->velocity);
-			partAngularVelocity->text = "Angular Velocity: " + str(selectedPart->parent->angularVelocity);
+			velocityLabel->text = "Velocity: " + str(selectedPart->parent->velocity);
+			angularVelocityLabel->text = "Angular Velocity: " + str(selectedPart->parent->angularVelocity);
 			double kineticEnergy = selectedPart->parent->getKineticEnergy();
 			double potentialEnergy = world->getPotentialEnergyOfPhysical(*selectedPart->parent);
-			partKineticEnergy->text = "Kinetic Energy: " + std::to_string(kineticEnergy);
-			partPotentialEnergy->text = "Potential Energy: " + std::to_string(potentialEnergy);
-			partEnergy->text = "Energy: " + std::to_string(kineticEnergy + potentialEnergy);
+			kineticEnergyLabel->text = "Kinetic Energy: " + std::to_string(kineticEnergy);
+			potentialEnergyLabel->text = "Potential Energy: " + std::to_string(potentialEnergy);
+			energyLabel->text = "Energy: " + std::to_string(kineticEnergy + potentialEnergy);
+			massLabel->text = "Mass: " + std::to_string(selectedPart->mass);
+			frictionLabel->text = "Friction: " + std::to_string(selectedPart->properties.friction);
+			densityLabel->text = "Density: " + std::to_string(selectedPart->properties.density);
 
-			Vec4 color = selectedPart->material.ambient;
-			colorButton->disabled = false;
-			colorButton->setColor(color);
-			if (GUI::colorPicker->focus == colorButton) {
-				GUI::colorPicker->setRgba(color);
+			renderModeCheckBox->checked = selectedPart->renderMode == Renderer::WIREFRAME;
+
+			ambientColorButton->disabled = false;
+			ambientColorButton->setColor(selectedPart->material.ambient);
+			if (GUI::colorPicker->focus == ambientColorButton) {
+				GUI::colorPicker->setRgba(selectedPart->material.ambient);
 			}
+
+			diffuseColorButton->disabled = false;
+			diffuseColorButton->setColor(Vec4(selectedPart->material.diffuse, 1));
+			if (GUI::colorPicker->focus == diffuseColorButton) {
+				GUI::colorPicker->setRgba(Vec4(selectedPart->material.diffuse, 1));
+			}
+
+			specularColorButton->disabled = false;
+			specularColorButton->setColor(Vec4(selectedPart->material.specular, 1));
+			if (GUI::colorPicker->focus == specularColorButton) {
+				GUI::colorPicker->setRgba(Vec4(selectedPart->material.specular, 1));
+			}
+
+			reflectanceSlider->disabled = false;
+			reflectanceSlider->value = selectedPart->material.reflectance;
 		} else {
-			colorButton->disabled = true;
-			colorButton->setColor(Vec4(1));
 			partMeshIDLabel->text = "MeshID: -";
-			renderModeCheckBox->checked = false;
-			partPositionLabel->text = "Position: -";
+
+			positionLabel->text = "Position: -";
 			partNameLabel->text = "Name: -";
-			partVelocity->text = "Velocity: -";
-			partAngularVelocity->text = "Angular Velocity: -";
-			partKineticEnergy->text = "Kinetic Energy: -";
-			partPotentialEnergy->text = "Potential Energy: -";
-			partEnergy->text = "Energy: -";
+			velocityLabel->text = "Velocity: -";
+			angularVelocityLabel->text = "Angular Velocity: -";
+			kineticEnergyLabel->text = "Kinetic Energy: -";
+			potentialEnergyLabel->text = "Potential Energy: -";
+			energyLabel->text = "Energy: -";
+			massLabel->text = "Mass: -";
+			frictionLabel->text = "Friction: -";
+			densityLabel->text = "Density: -";
+
+			ambientColorButton->disabled = true;
+			ambientColorButton->setColor(Vec4(1));
+
+			diffuseColorButton->disabled = true;
+			diffuseColorButton->setColor(Vec4(1));
+
+			specularColorButton->disabled = true;
+			specularColorButton->setColor(Vec4(1));
+
+			reflectanceSlider->disabled = true;
+			reflectanceSlider->value = (reflectanceSlider->max + reflectanceSlider->min) / 2;
+
+			renderModeCheckBox->checked = false;
 		}
 	}
 

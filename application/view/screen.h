@@ -1,8 +1,5 @@
 #pragma once
 
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-
 #include <vector>
 
 #include "../engine/math/vec2.h"
@@ -42,6 +39,7 @@ public:
 
 	HDRFrameBuffer* modelFrameBuffer = nullptr;
 	FrameBuffer* screenFrameBuffer = nullptr;
+	FrameBuffer* maskFrameBuffer = nullptr;
 	FrameBuffer* blurFrameBuffer = nullptr;
 	Quad* quad = nullptr;
 

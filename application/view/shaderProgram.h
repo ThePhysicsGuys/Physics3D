@@ -35,9 +35,9 @@ struct SkyboxShader : public ShaderProgram {
 	void updateLightDirection(const Vec3f& lightDirection);
 };
 
-struct LineShader : public ShaderProgram {
-	LineShader() : ShaderProgram() {}
-	LineShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, "viewMatrix", "projectionMatrix", "modelMatrix", "color") {}
+struct MaskShader : public ShaderProgram {
+	MaskShader() : ShaderProgram() {}
+	MaskShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, "viewMatrix", "projectionMatrix", "modelMatrix", "color") {}
 
 	void updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix);
 	void updateModel(const Mat4f& modelMatrix);
@@ -149,6 +149,14 @@ struct ColorWheelShader : public ShaderProgram {
 	void updateProjection(Mat4f projectionMatrix);
 };
 
+struct EdgeShader : public ShaderProgram {
+	EdgeShader() : ShaderProgram() {}
+	EdgeShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, "textureSampler") {}
+
+	void updateTexture(Texture* texture);
+	void updateTexture(HDRTexture* texture);
+};
+
 namespace Shaders {
 	extern BasicShader basicShader;
 	extern DepthShader depthShader;
@@ -162,7 +170,8 @@ namespace Shaders {
 	extern TestShader testShader;
 	extern BlurShader blurShader;
 	extern ColorWheelShader colorWheelShader;
-	extern LineShader lineShader;
+	extern EdgeShader edgeShader;
+	extern MaskShader maskShader;
 
 	void init();
 	void close();

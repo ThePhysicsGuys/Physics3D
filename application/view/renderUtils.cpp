@@ -100,6 +100,14 @@ namespace Renderer {
 		glClear(GL_STENCIL_BUFFER_BIT);
 	}
 
+	void lineStipple(int factor, short pattern) {
+		glLineStipple(factor, pattern);
+	}
+
+	void lineWidth(float size) {
+		glLineWidth(size);
+	}
+
 	void viewport(Vec2i origin, Vec2i dimension) {
 		glViewport(origin.x, origin.y, dimension.x, dimension.y);
 	}

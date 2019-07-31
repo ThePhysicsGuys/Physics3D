@@ -18,9 +18,6 @@
 Frame::Frame() : Frame(0, 0) {};
 
 Frame::Frame(double x, double y, std::string name) : Container(x, y) {
-	this->padding = GUI::padding;
-	this->margin = GUI::margin;
-
 	this->backgroundColor = GUI::frameBackgroundColor;
 	this->titleBarColor = GUI::frameTitleBarColor;
 	this->titleBarHeight = GUI::frameTitleBarHeight;
