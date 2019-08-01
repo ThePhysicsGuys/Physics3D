@@ -717,6 +717,9 @@ void Screen::refresh() {
 
 		// Debug 
 		renderDebug();
+
+		float rightSide = float(dimension.x) / float(dimension.y);
+		if(renderPiesEnabled) renderTreeStructure(*this, world->objectTree.rootNode, Vec3f(0,1,0), Vec2f(rightSide, 0.95), 2.0);
 	}
 
 	// Test

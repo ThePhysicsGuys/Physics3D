@@ -9,6 +9,8 @@
 #include "../screen.h"
 #include "../font.h"
 
+#include "../engine/datastructures/boundsTree.h"
+
 #define _USE_MATH_DEFINES
 #include "math.h"
 
@@ -205,4 +207,35 @@ float BarChart::getMaxWeight() const {
 		}
 	}
 	return best;
+}
+
+long long computeCost(const Bounds& bounds); // defined in boundsTree.cpp
+
+void recursiveRenderTree(const TreeNode& tree, const Vec3f& treeColor, Vec2f origin, float allottedWidth, long long maxCost) {
+	if (tree.isLeafNode()) {
+		return;
+	}
+	for (int i = 0; i < tree.nodeCount; i++) {
+		Vec2f nextStep = origin + Vec2f(-allottedWidth / 2 + allottedWidth * ((tree.nodeCount != 1)?(float(i) / (tree.nodeCount-1)):0.5f), -0.04f);
+		float colorDarkning = pow(1.0f * computeCost(tree[i].bounds) / maxCost, 0.25f);
+		color(treeColor * colorDarkning);
+		vertex(origin);
+		vertex(nextStep);
+		recursiveRenderTree(tree[i], treeColor, nextStep, allottedWidth / tree.nodeCount, maxCost);
+	}
+}
+
+void renderTreeStructure(Screen& screen, const TreeNode& tree, const Vec3f& treeColor, Vec2f origin, float allottedWidth) {
+	glUseProgram(0);
+
+	Vec2i size = screen.dimension;
+	glPushMatrix();
+	glScalef(float(size.y) / size.x, 1.0f, 1.0f);
+
+	//glLineWidth(2.0f);
+	glScaled(float(GUI::screen->dimension.y) / GUI::screen->dimension.x, 1, 1);
+	glBegin(GL_LINES);
+	recursiveRenderTree(tree, treeColor, origin, allottedWidth, computeCost(tree.bounds));
+	glEnd();
+	glPopMatrix();
 }
