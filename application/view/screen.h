@@ -2,6 +2,8 @@
 
 #include <vector>
 
+#include "layer/layer.h"
+
 #include "../engine/math/vec2.h"
 #include "../engine/math/vec3.h"
 
@@ -21,7 +23,7 @@ bool initGLEW();
 bool initGLFW();
 void terminateGLFW();
 
-class Screen {
+class Screen : public Layer {
 private:
 	void renderSkybox();
 	void renderPhysicals();
@@ -53,16 +55,12 @@ public:
 	Screen();
 	Screen(int width, int height, MagnetWorld* world);
 
+	void init() override;
+	void update() override;
+	void render() override;
+	void close() override;
+
 	bool shouldClose();
-	void init();
-	void update();
-	void refresh();
-	void close();
-
-	void setWorld(MagnetWorld* world) {
-		this->world = world;
-	};
-
 	int addMeshShape(const VisualShape& mesh);
 };
 

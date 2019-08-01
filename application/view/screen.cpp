@@ -100,7 +100,7 @@ void terminateGLFW() {
 Screen::Screen() {};
 
 Screen::Screen(int width, int height, MagnetWorld* world) {
-	setWorld(world);
+	this->world = world;
 
 	// Create a windowed mode window and its OpenGL context 
 	Renderer::createGLFWContext(width, height, "Physics3D");
@@ -186,8 +186,6 @@ EnvironmentFrame* environmentFrame = nullptr;
 
 
 // Test
-Frame* imageFrame = nullptr;
-Image* image = nullptr;
 IndexedMesh* mesh = nullptr;
 Texture* texture = nullptr;
 
@@ -334,11 +332,6 @@ void Screen::init() {
 	shape.computeNormals(buffer);
 	shape.normals = SharedArrayPtr<const Vec3f>(buffer);
 	mesh = new IndexedMesh(shape);
-	image = new Image(0, 0, 1, 1);
-	imageFrame = new Frame(0, 0, "Image");
-	imageFrame->add(image);
-	GUI::add(imageFrame);
-	//image->texture = font->atlas;
 }
 
 void Screen::update() {
@@ -677,7 +670,7 @@ void Screen::renderPies() {
 	}
 }
 
-void Screen::refresh() {
+void Screen::render() {
 	fieldIndex = 0;
 
 	//Mat4f f = CFrameToMat4(camera.cframe);

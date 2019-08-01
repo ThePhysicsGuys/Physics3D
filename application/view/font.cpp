@@ -5,6 +5,10 @@
 
 #include "texture.h"
 #include "shaderProgram.h"
+#include "renderUtils.h"
+#include "../engine/math/vec4.h"
+#include "gui\gui.h"
+#include "mesh\primitive.h"
 
 #include "../util/log.h"
 
@@ -21,10 +25,10 @@ void Font::initFontBuffers() {
 	glBindVertexArray(vao);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, BUFFERSIZE * sizeof(CharacterData), NULL, GL_DYNAMIC_DRAW);
 
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
@@ -53,8 +57,8 @@ void Font::initFontAtlas(std::string font) {
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	// Calculate atlas dimension
-	int maxCharacterHeight = (face->size->metrics.height >> 6) + 1;
-	int maxDimension = maxCharacterHeight * ceil(sqrt(GLYPHCOUNT));
+	int maxCharacterHeight = (face->size->metrics.height >> 6);
+	int maxDimension = maxCharacterHeight * ceil(sqrt(CHARACTERCOUNT));
 	int atlasDimension = 1;
 
 	// Resize atlas to maxDimension with powers of 2
@@ -67,7 +71,7 @@ void Font::initFontAtlas(std::string font) {
 	char* pixels = (char*)calloc(atlasDimension * atlasDimension, 1);
 
 	// Render glyphs to atlas
-	for (unsigned char c = 0; c < GLYPHCOUNT; c++) {
+	for (unsigned char c = 0; c < CHARACTERCOUNT; c++) {
 		if (FT_Load_Char(face, c, FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT | FT_LOAD_TARGET_LIGHT)) {
 			Log::error("FREETYTPE: Failed to load Glyph");
 			continue;
@@ -113,8 +117,6 @@ Vec2 Font::size(const std::string& text, double size) {
 	std::string::const_iterator iterator;
 	double width = 0;
 	double height = 0;
-	//double ymax = 0;
-	//double ymin = 0;
 
 	for (iterator = text.begin(); iterator != text.end(); iterator++) {
 		Character character = characters[*iterator];
@@ -127,11 +129,73 @@ Vec2 Font::size(const std::string& text, double size) {
 			width += advance * size;
 		
 		height = fmax(character.size.y * size, height);
-		//ymax = fmax(character.bearing.y * size, ymax);
-		//ymin = fmin((character.bearing.y - character.size.y) * size, ymin);
 	}
 	
 	return Vec2(width, height);
+}
+
+void Font::bufferCharacter(int index, double x, double y, double size) {
+	const Character& character = characters[index];
+	float descend = character.height - character.by;
+	float xpos = x + character.bx * size;
+	float ypos = y - descend * size;
+	
+	float w = character.width * size;
+	float h = character.height * size;
+	
+	float s = float(character.x) / atlas->width;
+	float t = float(character.y) / atlas->height;
+	float ds = float(character.width) / atlas->width;
+	float dt = float(character.height) / atlas->height;
+
+	characterBuffer[bufferIndex] = {
+		xpos	, ypos + h, s 	  , t,
+		xpos	, ypos    , s 	  , t + dt,
+		xpos + w, ypos    , s + ds, t + dt,
+		xpos + w, ypos + h, s + ds, t
+	};
+}
+
+void Font::renderBuffer(int count) {
+	// Fill GPU buffer
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(CharacterData) * count, &characterBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	// Draw GPU buffer
+	glDrawArrays(GL_QUADS, 0, 4 * count);
+}
+
+void Font::render(const std::string& text, double x, double y, Vec4 color, double size) {
+
+	glBindVertexArray(vao);
+
+	Shaders::fontShader.updateColor(color);
+	Shaders::fontShader.updateTexture(atlas);
+	
+	for (int index = 0; index < text.size(); index++, bufferIndex++) {
+		char character = text.at(index);
+
+		if (bufferIndex == BUFFERSIZE) {
+			renderBuffer(BUFFERSIZE);
+			bufferIndex = 0;
+		}
+
+		if (index == text.size() - 1) {
+			bufferCharacter(character, x, y, size);
+			renderBuffer(bufferIndex + 1);
+			bufferIndex = 0;
+			break;
+		}	
+			   
+		bufferCharacter(character, x, y, size);
+
+		x += (characters[character].advance >> 6) * size;
+	}
+
+	glBindVertexArray(0);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void Font::render(const std::string& text, Vec2 position, Vec3 color, double size) {
@@ -140,55 +204,4 @@ void Font::render(const std::string& text, Vec2 position, Vec3 color, double siz
 
 void Font::render(const std::string& text, Vec2 position, Vec4 color, double size) {
 	render(text, position.x, position.y, color, size);
-}
-
-void Font::render(const std::string& text, double x, double y, Vec4 color, double size) {
-	Shaders::fontShader.updateColor(color);
-
-	glEnable(GL_BLEND);
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	
-	glBindVertexArray(vao);
-
-	Shaders::fontShader.updateTexture(atlas);
-
-	std::string::const_iterator iterator;
-	for (iterator = text.begin(); iterator != text.end(); iterator++) {
-		Character character = characters[*iterator];
-		double descend = character.height - character.by;
-		double xpos = x + character.bx * size;
-		double ypos = y - descend * size;
-		
-		double w = character.width * size;
-		double h = character.height * size;
-		
-		double s = double(character.x) / atlas->width;
-		double t = double(character.y) / atlas->height;
-		double ds = double(character.width) / atlas->width;
-		double dt = double(character.height) / atlas->height;
-
-
-		float vertices[4][4] = {
-			{ float(xpos	), float(ypos + h), s,		t	   },
-			{ float(xpos	), float(ypos    ),	s,		t + dt },
-			{ float(xpos + w), float(ypos    ),	s + ds, t + dt },
-			{ float(xpos + w), float(ypos + h), s + ds, t      }
-		};
-	
-		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-		glDrawArrays(GL_QUADS, 0, 4);
-		
-		// Now advance cursors for next glyph (note that advance is number of 1/64 pixels)
-		x += (character.advance >> 6) * size; // Bitshift by 6 to get value in pixels (2^6 = 64)
-	}
-
-	glBindVertexArray(0);
-	glBindTexture(GL_TEXTURE_2D, 0);
 }

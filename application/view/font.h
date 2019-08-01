@@ -11,12 +11,34 @@
 
 class Texture;
 
-#define GLYPHCOUNT 128
+#define CHARACTERCOUNT 128
+constexpr auto BUFFERSIZE = 30;
 
 class Font {
 private:
-	unsigned int vao;
-	unsigned int vbo;
+	Texture* atlas = nullptr;
+
+	struct CharacterData {
+		float x0;
+		float y0;
+		float s0;
+		float t0;
+
+		float x1;
+		float y1;
+		float s1;
+		float t1;
+
+		float x2;
+		float y2;
+		float s2;
+		float t2;
+
+		float x3;
+		float y3;
+		float s3;
+		float t3;
+	};
 
 	struct Character {
 		union {
@@ -49,12 +71,18 @@ private:
 		Character() {};
 		Character(int x, int y, int width, int height, int bx, int by, int advance) : x(x), y(y), width(width), height(height), bx(bx), by(by), advance(advance) {};
 
-	} characters[GLYPHCOUNT];
+	} characters[CHARACTERCOUNT];
 	
+	unsigned int vao;
+	unsigned int vbo;
+	int bufferIndex = 0;
+	CharacterData characterBuffer[BUFFERSIZE];
+
 	void initFontBuffers();
 	void initFontAtlas(std::string font);
+	void bufferCharacter(int index, double x, double y, double size);
+	void renderBuffer(int count);
 
-	Texture* atlas = nullptr;
 public:
 	Font(std::string font);
 
