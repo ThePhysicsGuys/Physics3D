@@ -11,6 +11,13 @@
 #include <string>
 #include <sstream>
 
+#define PI 3.14159265358979323846   // this is pi
+
+inline double fRand(double fMin, double fMax) {
+	double f = (double) rand() / RAND_MAX;
+	return fMin + f * (fMax - fMin);
+}
+
 template<typename N>
 inline std::ostream& operator<<(std::ostream& os, const Mat4Template<N>& matrix) {
 	os << "(\n\t";
