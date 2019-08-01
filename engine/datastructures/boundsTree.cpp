@@ -313,6 +313,37 @@ void optimizeNodePairHorizontal(TreeNode& first, TreeNode& second) {
 		fillNodePairWithPermutation(first, second, bestPermutation);
 }
 
+void optimizeNodePairVertical(TreeNode& node, TreeNode& group) {
+	// given: group is not a leafnode
+
+	long long originalCost = /*computeCost(node.bounds) + */computeCost(group.bounds);
+	long long bestCost = originalCost;
+	int bestIndex = -1;
+
+	// try exchanging the given node with each node in the group, see which is best
+	for (int i = 0; i < group.nodeCount; i++) {
+		Bounds thisObjBounds = group[i].bounds;
+		Bounds resultingGroupBounds = node.bounds;
+
+		for (int j = 0; j < group.nodeCount; j++) {
+			if (i == j) continue;
+			resultingGroupBounds = unionOfBounds(resultingGroupBounds, group[j].bounds);
+		}
+		long long cost = /*computeCost(thisObjBounds) + */computeCost(resultingGroupBounds);
+		if (cost < bestCost) {
+			bestCost = cost;
+			bestIndex = i;
+		}
+	}
+
+	if (bestIndex == -1) { // no change
+		return;
+	} else {
+		std::swap(node, group[bestIndex]);
+		group.recalculateBoundsFromSubBounds();
+	}
+}
+
 void TreeNode::improveStructure() {
 	if (!isLeafNode()) {
 		for (int i = 0; i < nodeCount; i++) subTrees[i].improveStructure();
@@ -326,6 +357,15 @@ void TreeNode::improveStructure() {
 				}
 			}
 		}
+		// vertical structure improvement
+		for (int i = 0; i < nodeCount; i++) {
+			TreeNode& A = subTrees[i];
+			if (A.isLeafNode()) continue;
+			for (int j = 0; j < nodeCount; j++) {
+				if (i == j) continue;
+				TreeNode& B = subTrees[j];
+				if (intersects(A.bounds, B.bounds)) {
+					optimizeNodePairVertical(B, A);
 				}
 			}
 		}

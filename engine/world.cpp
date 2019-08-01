@@ -345,7 +345,7 @@ void WorldPrototype::tick(double deltaT) {
 	}
 
 	physicsMeasure.mark(PhysicsProcess::UPDATE_TREE_BOUNDS);
-	objectTree.recalculateBounds(false);
+	objectTree.recalculateBounds(true);
 	physicsMeasure.mark(PhysicsProcess::UPDATE_TREE_STRUCTURE);
 	objectTree.improveStructure();
 

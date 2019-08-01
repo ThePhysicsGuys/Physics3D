@@ -63,3 +63,6 @@ struct BarChart : public Component {
 
 void startPieRendering(Screen& screen);
 void endPieRendering(Screen& screen);
+
+struct TreeNode;
+void renderTreeStructure(Screen& screen, const TreeNode& tree, const Vec3f& treeColor, Vec2f origin, float allottedWidth);

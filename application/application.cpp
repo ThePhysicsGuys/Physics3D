@@ -31,9 +31,8 @@
 #include "worlds.h"
 #include "tickerThread.h"
 #include "resourceManager.h"
-#include "objectLibrary.h"
-#include "extendedPart.h"
-#include "partFactory.h"
+
+#include "worldBuilder.h"
 
 #include "io/export.h"
 #include "io/import.h"
@@ -56,144 +55,50 @@ bool flying = true;
 void init();
 void setupPhysics();
 
-Shape dominoShape = BoundingBox{-0.1, -0.7, -0.3, 0.1, 0.7, 0.3}.toShape();
-PartFactory dominoFactory;
-PartFactory legFactory;
-
-void createDominoAt(Vec3 pos, Mat3 rotation) {
-	ExtendedPart* domino = dominoFactory.produce(CFrame(pos, rotation), 1, 0.1);
-	world.addPart(domino);
-}
-
-void makeDominoStrip(int dominoCount) {
-	for(int i = 0; i < dominoCount; i++) {
-		createDominoAt(Vec3(i*0.5, 0.7, 1.3), Mat3());
-	}
-}
-
-void makeDominoTower(int floors, int circumference, Vec3 origin) {
-	double radius = circumference / 4.4;
-	Mat3 sideways = fromEulerAngles(M_PI / 2, 0.0, 0.0);
-	for(int floor = 0; floor < floors; floor++) {
-		for(int j = 0; j < circumference; j++) {
-			double angle = (2 * M_PI * (j + (floor % 2) / 2.0)) / circumference;
-			Vec3 pos = Vec3(std::cos(angle)*radius, floor * 0.7 + 0.30, std::sin(angle) * radius);
-			createDominoAt(pos + origin, rotY(-angle) * sideways);
-		}
-	}
-}
-
-inline int furthestIndexInDirection(Vec3* vertices, int vertexCount, Vec3 direction) {
-	double bestDot = vertices[0] * direction;
-	int bestVertexIndex = 0;
-	for(int i = 1; i < vertexCount; i++) {
-		double newD = vertices[i] * direction;
-		if(newD > bestDot) {
-			bestDot = newD;
-			bestVertexIndex = i;
-		}
-	}
-
-	return bestVertexIndex;
-}
-
-struct SpiderFactory {
-	PartFactory bodyFactory;
-	double spiderSize;
-	int legCount;
-
-	SpiderFactory(double spiderSize, int legCount) : spiderSize(spiderSize), legCount(legCount), bodyFactory(createPointyPrism(legCount, 0.5, 0.2, 0.1, 0.1), screen, "SpiderBody") {}
-
-	void buildSpider(CFrame spiderPosition) {
-		//ExtendedPart* spiderBody = createUniquePart(screen, createPointyPrism(legCount, 0.5, 0.2, 0.1, 0.1), spiderPosition, 1.0, 0.0, "SpiderBody");
-		ExtendedPart* spiderBody = bodyFactory.produce(spiderPosition, 1.0, 0.5);
-		spiderBody->material.ambient = Vec4f(0.6f, 0.6f, 0.6f, 1.0f);
-
-		//PartFactory legFactory(BoundingBox(0.05, 0.5, 0.05).toShape(), screen, "SpiderLeg");
-
-		CFrame topOfLeg(Vec3(0.0, 0.25, 0.0), fromEulerAngles(0.2, 0.0, 0.0));
-
-		world.addPart(spiderBody);
-
-		Physical* spider = spiderBody->parent;
-
-		for (int i = 0; i < legCount; i++) {
-			ExtendedPart* leg = legFactory.produce(CFrame(), 1.0, 0.5, std::string("LegPart ") + std::to_string(i));
-			leg->material.ambient = Vec4f(0.4f, 0.4f, 0.4f, 1.0f);
-
-			double angle = i * M_PI * 2 / legCount;
-
-			CFrame attachPointOnBody(rotY(angle) * Vec3(0.5, 0.0, 0.0), rotY(angle + M_PI / 2));
-			CFrame attach = attachPointOnBody.localToGlobal(~topOfLeg);
-
-			spider->attachPart(leg, attach);
-		}
-	}
-};
-
-struct HollowBoxParts {
-	ExtendedPart* bottom;
-	ExtendedPart* top;
-	ExtendedPart* left;
-	ExtendedPart* right;
-	ExtendedPart* front;
-	ExtendedPart* back;
-};
-
-HollowBoxParts buildHollowBox(BoundingBox box, double wallThickness) {
-	Shape YPlateShape = createBox(box.getWidth(), wallThickness, box.getDepth());
-	Shape ZPlateShape = createBox(box.getWidth() - wallThickness * 2, box.getHeight() - wallThickness * 2, wallThickness);
-	Shape XPlateShape = createBox(wallThickness, box.getHeight() - wallThickness * 2, box.getDepth());
-	
-	PartFactory xpf(XPlateShape, screen);
-	PartFactory ypf(YPlateShape, screen);
-	PartFactory zpf(ZPlateShape, screen);
-
-	ExtendedPart* bottom = ypf.produce(CFrame(Vec3(box.getCenter() - Vec3(0, box.getHeight()/2 - wallThickness/2, 0))), 1.0, 0.2, "BottomPlate");
-	ExtendedPart* top = ypf.produce(CFrame(), 1.0, 0.2, "TopPlate");
-	ExtendedPart* left = xpf.produce(CFrame(), 1.0, 0.2, "LeftPlate");
-	ExtendedPart* right = xpf.produce(CFrame(), 1.0, 0.2, "RightPlate");
-	ExtendedPart* front = zpf.produce(CFrame(), 1.0, 0.2, "FrontPlate");
-	ExtendedPart* back = zpf.produce(CFrame(), 1.0, 0.2, "BackPlate");
-
-	world.addPart(bottom);
-	Physical& parent = *bottom->parent;
-	world.attachPart(top, parent, CFrame(Vec3(0, box.getHeight() - wallThickness, 0)));
-	world.attachPart(left, parent, CFrame(Vec3(box.getWidth()/2 - wallThickness / 2, box.getHeight()/2 - wallThickness / 2, 0)));
-	world.attachPart(right, parent, CFrame(Vec3(-box.getWidth() / 2 + wallThickness / 2, box.getHeight() / 2 - wallThickness / 2, 0)));
-	world.attachPart(front, parent, CFrame(Vec3(0, box.getHeight() / 2 - wallThickness / 2, box.getDepth() / 2 - wallThickness / 2)));
-	world.attachPart(back, parent, CFrame(Vec3(0, box.getHeight() / 2 - wallThickness / 2, -box.getDepth() / 2 + wallThickness / 2)));
-
-	return HollowBoxParts{bottom, top, left, right, front, back};
+double fRand(double fMin, double fMax) {
+	double f = (double)rand() / RAND_MAX;
+	return fMin + f * (fMax - fMin);
 }
 
 int main(void) {
 	init();
 
+	VisualShape sphereShape = OBJImport::load((std::istream&) std::istringstream(getResourceAsString(SPHERE_MODEL)));
+	Vec3f* normalBuf = new Vec3f[sphereShape.vertexCount];
+	sphereShape.computeNormals(normalBuf);
+	sphereShape.normals = SharedArrayPtr<const Vec3f>(normalBuf);
+
 	dominoFactory = PartFactory(dominoShape, screen, "domino");
 	legFactory = PartFactory(BoundingBox(0.05, 0.5, 0.05).toShape(), screen, "SpiderLeg");
+
+	SpiderFactory spiderFactories[]{ {0.5, 3},{0.5, 4},{0.5, 5},{0.5, 6} };
+	PartFactory cubeFactory(createCube(0.2), screen, "Cube");
+	PartFactory sphereFactory(sphereShape, screen, "Sphere");
+	PartFactory triangleFactory(triangleShape, screen, "Triangle");
+
 
 	int* builderRemovalBuffer = new int[1000];
 	EdgePiece* builderAddingBuffer = new EdgePiece[1000];
 
-	//world.addPart(createUniquePart(screen, dominoShape, CFrame(Vec3(1.5, 0.7, -7.3), fromEulerAngles(0.0, 0.2, 0.0)), 2.0, 0.7));
+
+	//world.addPart(dominoFactory.produce(CFrame(Vec3(1.5, 0.7, -7.3), fromEulerAngles(0.0, 0.2, 0.0)), 2.0, 0.7));
 
 	Vec2 floorSize(30.0, 30.0);
 	double wallHeight = 7.0;
 
 	Material floorMaterial = Material(load("../res/textures/floor/floor_color.jpg"));
 
-	ExtendedPart* floorExtendedPart = createUniquePart(screen, BoundingBox(floorSize.x, 1.0, floorSize.y).toShape(), CFrame(Vec3(0.0, -0.15, 0.0)), 0.2, 1.0);
+	ExtendedPart* floorExtendedPart = createUniquePart(screen, BoundingBox(floorSize.x, 1.0, floorSize.y).toShape(), CFrame(Vec3(0.0, -0.15, 0.0)), 2.0, 1.0);
 	floorExtendedPart->material = floorMaterial;
 	world.addPart(floorExtendedPart, true);
 
 	PartFactory xWallFactory(BoundingBox(0.7, wallHeight, floorSize.y).toShape(), screen, "xWall");
 	PartFactory zWallFactory(BoundingBox(floorSize.x, wallHeight, 0.7).toShape(), screen, "zWall");
 
-	world.addPart(xWallFactory.produce(CFrame(Vec3(floorSize.x / 2, wallHeight / 2, 0.0)), 0.2, 1.0), true);
+	/*world.addPart(xWallFactory.produce(CFrame(Vec3(floorSize.x / 2, wallHeight / 2, 0.0)), 0.2, 1.0), true);
 	world.addPart(zWallFactory.produce(CFrame(Vec3(0.0, wallHeight / 2, floorSize.y / 2)), 0.2, 1.0), true);
 	world.addPart(xWallFactory.produce(CFrame(Vec3(-floorSize.x / 2, wallHeight / 2, 0.0)), 0.2, 1.0), true);
-	world.addPart(zWallFactory.produce(CFrame(Vec3(0.0, wallHeight / 2, -floorSize.y / 2)), 0.2, 1.0), true);
+	world.addPart(zWallFactory.produce(CFrame(Vec3(0.0, wallHeight / 2, -floorSize.y / 2)), 0.2, 1.0), true);*/
 
 	ExtendedPart* ramp = createUniquePart(screen, BoundingBox(10.0, 0.17, 3.0).toShape(), CFrame(Vec3(12.0, 1.5, 0.0), fromEulerAngles(M_PI / 2 * 0.2, M_PI/2, 0.0)), 0.2, 1.0);
 	//world.addPart(ramp, true);
@@ -220,12 +125,12 @@ int main(void) {
 		throw "BAD";
 	}
 
-	HollowBoxParts hollowBox = buildHollowBox(BoundingBox(3.0, 3.0, 4.0, 7.0, 6.0, 7.0), 0.2);
+	/*HollowBoxParts hollowBox = buildHollowBox(BoundingBox(3.0, 3.0, 4.0, 7.0, 6.0, 7.0), 0.2);
 	
 	hollowBox.front->material.ambient = Vec4f(0.5, 0.7, 1.0, 0.5);
 	hollowBox.back->material.ambient = Vec4f(0.5, 0.7, 1.0, 0.5);
 	hollowBox.bottom->material.ambient = Vec4f(0.9, 0.9, 0.9, 1.0);
-	hollowBox.top->material.ambient = Vec4f(0.9, 0.9, 0.9, 1.0);
+	hollowBox.top->material.ambient = Vec4f(0.9, 0.9, 0.9, 1.0);*/
 
 	icosaBuilder.addPoint(Vec3f(0, 1.1, 0));
 	icosaBuilder.addPoint(Vec3f(0, -1.1, 0));
@@ -260,32 +165,63 @@ int main(void) {
 	ExtendedPart* constructedExtendedPart = createUniquePart(screen, constructedShape, CFrame(Vec3(-10.0, 2.0, -10.0)), 2.0, 0.7);
 	//world.addPart(constructedExtendedPart);
 
-	VisualShape sphereShape = OBJImport::load((std::istream&) std::istringstream(getResourceAsString(SPHERE_MODEL)));
-	Vec3f* normalBuf = new Vec3f[sphereShape.vertexCount];
-	sphereShape.computeNormals(normalBuf);
-	sphereShape.normals = SharedArrayPtr<const Vec3f>(normalBuf);
 
-	int minX = -3;
-	int maxX = 3;
+	/*for (int i = 0; i < 10000; i++) {
+		ExtendedPart* newCube = cubeFactory.produce(CFrame(Vec3(fRand(-10.0, 10.0), fRand(0.0, 20.0), fRand(-10.0, 10.0))), 1.0, 0.2);
+		world.addPart(newCube);
+	}*/
+
+	//Physical* alonePhysical = new Physical(cubeFactory.produce(CFrame(Vec3(0, 0, 0)), 1.0, 1.0, "P1"));
+
+	/*ExtendedPart* alonePart = cubeFactory.produce(CFrame(Vec3(0, 0, 0)), 1.0, 1.0, "P1");
+
+	world.addPart(alonePart);
+
+	alonePart->parent->velocity = Vec3(10, 0, 0);
+
+	world.addPart(cubeFactory.produce(CFrame(Vec3(10, 0, 0)), 1.0, 1.0, "P1"));
+	world.addPart(cubeFactory.produce(CFrame(Vec3(10, 0, 1)), 1.0, 1.0, "P1"));
+	world.addPart(cubeFactory.produce(CFrame(Vec3(10, 0, -1)), 1.0, 1.0, "P1"));
+	world.addPart(cubeFactory.produce(CFrame(Vec3(10, 1, 0)), 1.0, 1.0, "P1"));
+	world.addPart(cubeFactory.produce(CFrame(Vec3(10, 1, 1)), 1.0, 1.0, "P1"));
+	world.addPart(cubeFactory.produce(CFrame(Vec3(10, 1, -1)), 1.0, 1.0, "P1"));*/
+
+	// Tree test
+	/*Physical* a = new Physical(cubeFactory.produce(CFrame(Vec3(0, 0, -1)), 1.0, 1.0, "A"));
+	Physical* b = new Physical(cubeFactory.produce(CFrame(Vec3(0, 0, 1)), 1.0, 1.0, "B"));
+	Physical* c = new Physical(cubeFactory.produce(CFrame(Vec3(0.5, 0, -1)), 1.0, 1.0, "C"));
+	Physical* d = new Physical(cubeFactory.produce(CFrame(Vec3(0.5, 0, 1)), 1.0, 1.0, "D"));
+
+	TreeNode nodeAB(new TreeNode[4]{TreeNode(a, a->getStrictBounds()), TreeNode(b, b->getStrictBounds()) }, 2);
+	TreeNode nodeCD(new TreeNode[4]{ TreeNode(c, c->getStrictBounds()), TreeNode(d, d->getStrictBounds()) }, 2);
+
+	world.objectTree.rootNode.add(std::move(nodeAB));
+	world.objectTree.rootNode.add(std::move(nodeCD));
+
+	world.physicals.add(a);
+	world.physicals.add(b);
+	world.physicals.add(c);
+	world.physicals.add(d);
+
+	world.objectTree.rootNode.recalculateBoundsRecursive(true);*/
+
+	//world.objectTree.add(TreeNode())
+
+	int minX = -5;
+	int maxX = 5;
 	int minY = 0;
-	int maxY = 10;
-	int minZ = -3;
-	int maxZ = 3;
+	int maxY = 5;
+	int minZ = -5;
+	int maxZ = 5;
 
-	SpiderFactory spiderFactories[]{ {0.5, 3},{0.5, 4},{0.5, 5},{0.5, 6} };
-	
-
-	PartFactory cubeFactory(BoundingBox{-0.49, -0.49, -0.49, 0.49, 0.49, 0.49}.toShape(), screen, "Cube");
-	PartFactory sphereFactory(sphereShape, screen, "Sphere");
-	PartFactory triangleFactory(triangleShape, screen, "Triangle");
-	for(double x = minX; x < maxX; x += 1.01) {
+	for(double x = minX; x < maxX; x+=1.01) {
 		for(double y = minY; y < maxY; y += 1.01) {
 			for(double z = minZ; z < maxZ; z += 1.01) {
-				//ExtendedPart* newCube = cubeFactory.produce(CFrame(Vec3(x, y + 1, z)), 1.0, 0.2);
-				//newCube->material.ambient = Vec4f((x-minX)/(maxX-minX), (y-minY)/(maxY-minY), (z-minZ)/(maxZ-minZ), 1.0f);
+				ExtendedPart* newCube = cubeFactory.produce(CFrame(Vec3(x, y + 1, z)), 1.0, 0.2);
+				newCube->material.ambient = Vec4f((x-minX)/(maxX-minX), (y-minY)/(maxY-minY), (z-minZ)/(maxZ-minZ), 1.0f);
 				//world.addPart(newCube);
 				//world.addPart(sphereFactory.produce(CFrame(Vec3(x, y + 1, z - 5)), 1.0, 0.2));
-				//world.addPart(triangleFactory.produce(CFrame(Vec3(x, y + 1, z + 5)), 1.0, 0.2));
+				world.addPart(triangleFactory.produce(CFrame(Vec3(x, y + 1, z + 5)), 1.0, 0.2));
 
 
 				//spiderFactories[rand() & 0x00000003].buildSpider(CFrame(Vec3(x+y*0.1, y+1, z)));
@@ -293,9 +229,7 @@ int main(void) {
 		}
 	}
 
-	/*VisualShape terrain = OBJImport::load("../res/models/mountains.obj");
-	ExtendedPart* terrainPart = createUniquePart(screen, terrain, CFrame(Vec3(), Mat3(30, 0, 0, 0, 20, 0, 0, 0, 30)), 1, 1, "terrain");
-	world.addPart(terrainPart);*/
+
 
 	//Shape stallShape = OBJImport::load((std::istream&) std::istringstream(getResourceAsString(STALL_MODEL)));
 	//Shape stallShape = OBJImport::load("../res/models/gui/stall.obj");
@@ -320,7 +254,7 @@ int main(void) {
 	p1->material.ambient = Vec4f(1, 0, 0, 1);
 	p2->material.ambient = Vec4f(0, 1, 0, 1);
 
-	world.addPart(p1);
+	//world.addPart(p1);
 	//world.addPart(p2);
 	//p1->parent->attachPart(p2, CFrame(Vec3(1.0, 0.0, 0.0), Mat3(0, 0, 1, 0, 1, 0, -1, 0, 0)));
 
@@ -328,9 +262,9 @@ int main(void) {
 
 	//world.addPart(doubleP);
 
-	world.attachPart(p2, *(p1->parent), CFrame(Vec3(1.0, 0.0, 0.0), Mat3(0, 0, 1, 0, 1, 0, -1, 0, 0)));
+	//world.attachPart(p2, *(p1->parent), CFrame(Vec3(1.0, 0.0, 0.0), Mat3(0, 0, 1, 0, 1, 0, -1, 0, 0)));
 
-	p1->parent->angularVelocity = Vec3(0, 4, 4);
+	//p1->parent->angularVelocity = Vec3(0, 4, 4);
 
 	
 
@@ -344,6 +278,12 @@ int main(void) {
 	ASSERT(phys.centerOfMass == Vec3(0.5, 0, 0));
 	ASSERT(phys.inertia == phys2.inertia);*/
 
+	TreeIteratorIntersectingBounds iter(world.objectTree.rootNode, Bounds(Position(10.0, 10.0, 10.0), Position(11.0, 11.0, 11.0)));
+	for (; iter != TreeIteratorEnd(); ++iter) {
+		TreeNode* p = *iter;
+
+		static_cast<ExtendedPart*>(static_cast<Physical*>(p->object)->mainPart)->material.ambient = Vec4f(1.0, 1.0, 0.0, 1.0);
+	}
 
 	if (!world.isValid()) {
 		throw "World not valid!";
@@ -399,6 +339,7 @@ void init() {
 void stop(int returnCode) {
 	physicsThread.stop();
 
+	glfwTerminate();
 	exit(returnCode);
 }
 

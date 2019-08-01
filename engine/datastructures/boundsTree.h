@@ -178,13 +178,6 @@ struct BoundsTree {
 
 	}
 
-	TreeNode* findLeafNodeFor(const Bounds& bounds) const {
-		const TreeNode* currentNode = &rootNode;
-		while (!currentNode->isLeafNode()) {
-
-		}
-	}
-
 	void add(Boundable* obj, bool strictBounds) {
 		rootNode.add(TreeNode(obj, strictBounds?obj->getStrictBounds():obj->getLooseBounds()));
 	}
