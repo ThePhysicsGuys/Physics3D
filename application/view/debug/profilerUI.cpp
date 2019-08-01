@@ -2,6 +2,8 @@
 
 #include <GL/glew.h>
 
+#include <algorithm>
+
 #include "../engine/math/mat2.h"
 #include "../engine/math/vec2.h"
 
@@ -218,6 +220,7 @@ void recursiveRenderTree(const TreeNode& tree, const Vec3f& treeColor, Vec2f ori
 	for (int i = 0; i < tree.nodeCount; i++) {
 		Vec2f nextStep = origin + Vec2f(-allottedWidth / 2 + allottedWidth * ((tree.nodeCount != 1)?(float(i) / (tree.nodeCount-1)):0.5f), -0.04f);
 		float colorDarkning = pow(1.0f * computeCost(tree[i].bounds) / maxCost, 0.25f);
+
 		color(treeColor * colorDarkning);
 		vertex(origin);
 		vertex(nextStep);
@@ -232,10 +235,15 @@ void renderTreeStructure(Screen& screen, const TreeNode& tree, const Vec3f& tree
 	glPushMatrix();
 	glScalef(float(size.y) / size.x, 1.0f, 1.0f);
 
-	//glLineWidth(2.0f);
+	long long maxCost = computeCost(tree[0].bounds);
+	for (int i = 1; i < tree.nodeCount; i++) {
+		maxCost = std::max(maxCost, computeCost(tree[1].bounds));
+	}
+
+	//
 	glScaled(float(GUI::screen->dimension.y) / GUI::screen->dimension.x, 1, 1);
 	glBegin(GL_LINES);
-	recursiveRenderTree(tree, treeColor, origin, allottedWidth, computeCost(tree.bounds));
+	recursiveRenderTree(tree, treeColor, origin, allottedWidth, maxCost);
 	glEnd();
 	glPopMatrix();
 }
