@@ -64,22 +64,3 @@ public:
 		return iter != other;
 	}
 };
-
-template<typename IteratorType>
-class IteratorFactory {
-	IteratorType start;
-	IteratorType fin;
-
-public:
-	IteratorType begin() const { return start; }
-	IteratorType end() const { return fin; }
-};
-
-template<typename BaseIteratorFactoryType, typename NewIteratorType>
-class CastingIteratorFactory {
-	BaseIteratorFactoryType factory;
-
-public:
-	NewIteratorType begin() const { return static_cast<NewIteratorType>(factory.begin()); }
-	NewIteratorType end() const { return static_cast<NewIteratorType>(factory.end()); }
-};

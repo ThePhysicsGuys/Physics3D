@@ -1,10 +1,15 @@
 #pragma once
 
 #include "buffers.h"
+#include "iteratorFactory.h"
 
 #include "../math/position.h"
 #include "../math/fix.h"
 #include "../math/bounds.h"
+
+#include <utility>
+#include <new>
+
 
 #define MAX_BRANCHES 4
 #define MAX_HEIGHT 64
@@ -50,6 +55,19 @@ public:
 	inline ~TreeNode();
 
 	void add(TreeNode&& obj);
+	inline void remove(int index) {
+		--nodeCount;
+		if (index != nodeCount)
+			subTrees[index] = std::move(subTrees[nodeCount]);
+
+		subTrees[nodeCount].~TreeNode();
+
+		if (nodeCount == 1) {
+			TreeNode* buf = subTrees;
+			new(this) TreeNode(std::move(buf[0]));
+			delete[] buf;
+		}
+	}
 
 	void recalculateBounds();
 	void recalculateBoundsFromSubBounds();
@@ -83,6 +101,32 @@ struct TreeIterBase {
 	inline TreeNode* operator*() const {
 		return top->node;
 	}
+	inline void riseUntilAvailableWhile() {
+		while (top->index == top->node->nodeCount) {
+			top--;
+			if (top < stack) return;
+			top->index++;
+		}
+	}
+	inline void riseUntilAvailableDoWhile() {
+		do {
+			top--;
+			if (top < stack) return;
+			top->index++;
+		} while (top->index == top->node->nodeCount);
+	}
+	// removes the object currently pointed to
+	inline void remove() {
+		do {
+			top--;
+			top->node->remove(top->index);
+		} while (top->node->nodeCount == 0);
+		if (top->node->isLeafNode()) {
+			top--;
+			top->index++;
+		}
+		riseUntilAvailableWhile();
+	}
 };
 
 struct TreeIterator : public TreeIterBase {
@@ -98,6 +142,14 @@ struct TreeIterator : public TreeIterBase {
 			top->index = 0;
 		} 
 	}
+	inline void delveDown() {
+		do {
+			TreeNode* nextNode = &top->node->subTrees[top->index];
+			top++;
+			top->node = nextNode;
+			top->index = 0;
+		} while (!top->node->isLeafNode());
+	}
 	inline void operator++() {
 		// go back up until a new available node is found
 		do {
@@ -106,12 +158,12 @@ struct TreeIterator : public TreeIterBase {
 			top->index++;
 		} while (top->index == top->node->nodeCount);
 		// delve down until a feasible leaf node is found
-		do {
-			TreeNode* nextNode = &top->node->subTrees[top->index];
-			top++;
-			top->node = nextNode;
-			top->index = 0;
-		} while (!top->node->isLeafNode());
+		delveDown();
+	}
+	inline void remove() {
+		TreeIterBase::remove();
+		if (top < stack) return;
+		delveDown();
 	}
 };
 
@@ -161,6 +213,11 @@ struct FilteredTreeIterator : public TreeIterBase {
 
 		delveDownFiltered();
 	}
+	inline void remove() {
+		TreeIterBase::remove();
+		if (top < stack) return;
+		delveDownFiltered();
+	}
 };
 
 inline bool containsFilterBounds(const Bounds& nodeBounds, const Bounds& filterBounds) { return nodeBounds.contains(filterBounds); }
@@ -169,6 +226,9 @@ inline bool containsFilterPoint(const Bounds& nodeBounds, const Position& filter
 typedef FilteredTreeIterator<Bounds, intersects> TreeIteratorIntersectingBounds;
 typedef FilteredTreeIterator<Bounds, containsFilterBounds> TreeIteratorContainingBounds;
 typedef FilteredTreeIterator<Position, containsFilterPoint> TreeIteratorContainingPoint;
+
+template<typename Iter>
+using TreeIterFactory = IteratorFactory<Iter, TreeIteratorEnd>;
 
 template<typename Boundable>
 struct BoundsTree {
@@ -183,7 +243,16 @@ struct BoundsTree {
 	}
 
 	void remove(Boundable* obj, const Bounds& strictBounds) {
-
+		for (TreeIteratorContainingBounds iter(rootNode, strictBounds); iter != TreeIteratorEnd(); iter) {
+			if ((*iter)->object == obj) {
+				iter.remove();
+				return;
+			}
+		}
+		throw "Object to remove not found!";
+	}
+	void remove(Boundable* obj) {
+		this->remove(obj, obj->getStrictBounds());
 	}
 
 	inline void recalculateBounds(bool strictBounds) {
@@ -200,4 +269,14 @@ struct BoundsTree {
 
 	inline TreeIterator begin() { return TreeIterator(rootNode); };
 	inline TreeIteratorEnd end() { return TreeIteratorEnd(); };
+
+	inline TreeIterFactory<TreeIteratorIntersectingBounds> iterObjectsIntersectingBounds(const Bounds& bounds) {
+		return TreeIterFactory<TreeIteratorIntersectingBounds>{TreeIteratorIntersectingBounds(*this, bounds)};
+	}
+	inline TreeIterFactory<TreeIteratorContainingBounds> iterObjectsContainingBounds(const Bounds& bounds) {
+		return TreeIterFactory<TreeIteratorContainingBounds>{TreeIteratorContainingBounds(*this, bounds)};
+	}
+	inline TreeIterFactory<TreeIteratorContainingPoint> iterObjectsContainingPoint(const Position& point) {
+		return TreeIterFactory<TreeIteratorContainingPoint>{TreeIteratorContainingPoint(*this, point)};
+	}
 };

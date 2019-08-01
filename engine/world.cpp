@@ -384,6 +384,7 @@ void WorldPrototype::removePartUnsafe(Part* part) {
 		//throw "TODO fix";
 		physicals.remove(parent);
 	}
+	objectTree.remove(parent);
 	ASSERT_VALID;
 }
 void WorldPrototype::attachPartUnsafe(Part* part, Physical& phys, CFrame attachment) {

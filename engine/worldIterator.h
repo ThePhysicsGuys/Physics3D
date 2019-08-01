@@ -2,7 +2,7 @@
 
 #include "part.h"
 #include "physical.h"
-#include "iterators.h"
+#include "datastructures/iterators.h"
 
 class ConstPartIterator {
 	ListOfPtrIter<const Physical> currentPhys;
