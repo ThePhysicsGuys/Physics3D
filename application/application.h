@@ -6,6 +6,9 @@
 #include "view/camera.h"
 #include "extendedPart.h"
 
+class Screen;
+class GravityWorld;
+
 void stop(int returnCode);
 void pause();
 void unpause();
@@ -17,6 +20,8 @@ void runTick();
 bool isPaused();
 void createDominoAt(Vec3 pos, Mat3 rotation);
 extern ExtendedPart* player;
+extern Screen screen;
+extern GravityWorld world;
 extern bool flying;
 void toggleFlying();
 Camera& getCamera();
