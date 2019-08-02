@@ -23,9 +23,17 @@ IndexedMesh::IndexedMesh(const VisualShape& shape) : AbstractMesh(), vertexCount
 
 	indexBuffer = new IndexBuffer(reinterpret_cast<unsigned int const *>(shape.triangles.get()), triangleCount * 3);
 
-	vertexBufferLayout.pushFloat(3);
-	normalBufferLayout.pushFloat(3);
-	uvBufferLayout.pushFloat(2);
+	vertexBufferLayout = {
+		{{ "vposition", BufferDataType::FLOAT3 }}
+	};
+
+	normalBufferLayout = {
+		{{ "vnormal", BufferDataType::FLOAT3 }}
+	};
+
+	uvBufferLayout = {
+		{{ "vUV", BufferDataType::FLOAT2 }}
+	};
 
 	vertexArray->addBuffer(*vertexBuffer, vertexBufferLayout);
 	vertexArray->addBuffer(*normalBuffer, normalBufferLayout);
@@ -39,9 +47,18 @@ IndexedMesh::IndexedMesh(const float* vertices, const float* normals, const floa
 
 	indexBuffer = new IndexBuffer(indices, triangleCount * 3);
 
-	vertexBufferLayout.pushFloat(3);
-	normalBufferLayout.pushFloat(3);
-	uvBufferLayout.pushFloat(2);
+	vertexBufferLayout = {
+		{{ "vposition", BufferDataType::FLOAT3 }}
+	};
+
+	normalBufferLayout = {
+		{{ "vnormal", BufferDataType::FLOAT3 }}
+	};
+
+	uvBufferLayout = {
+		{{ "vUV", BufferDataType::FLOAT2 }}
+	};
+
 
 	vertexArray->addBuffer(*vertexBuffer, vertexBufferLayout);
 	vertexArray->addBuffer(*normalBuffer, normalBufferLayout);

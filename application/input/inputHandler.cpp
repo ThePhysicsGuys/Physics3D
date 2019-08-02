@@ -1,36 +1,42 @@
-
 #include "inputHandler.h"
+
+#include "keyboard.h"
+#include "mouse.h"
+
 #include "../eventHandler.h"
 
 #include "../util/log.h"
 
 
 void InputHandler::keyCallback(int key, int action, int mods) {
-	if (action == GLFW_PRESS) {
+	if (action == Keyboard::PRESS) {
 		if (keys[key] == false && glfwGetTime() - timestamp[key] < keyInterval) {
 			doubleKeyDown(key, mods);
 		}
+
 		keys[key] = true;
 		timestamp[key] = glfwGetTime();
 		anyKey++;
+
 		keyDown(key, mods);
 		keyDownOrRepeat(key, mods);
 	}
 
-	if (action == GLFW_RELEASE) {
+	if (action == Keyboard::RELEASE) {
 		keys[key] = false;
 		anyKey--;
+
 		keyUp(key, mods);
 	}
 
-	if (action == GLFW_REPEAT) {
+	if (action == Keyboard::REPEAT) {
 		keyRepeat(key, mods);
 		keyDownOrRepeat(key, mods);
 	}
 }
 
-bool InputHandler::getKey(Key key) {
-	if (key.code < Keyboard::FIRST_KEY || key.code > Keyboard::LAST_KEY)
+bool InputHandler::getKey(Keyboard::Key key) {
+	if (key.code < Keyboard::KEY_FIRST || key.code > Keyboard::KEY_LAST)
 		return false;
 
 	return keys[key.code];
@@ -52,9 +58,9 @@ void InputHandler::scrollCallback(double xOffset, double yOffset) {
 }
 
 void InputHandler::mouseButtonCallback(int button, int action, int mods) {
-	if (action == GLFW_PRESS)
+	if (action == Mouse::PRESS)
 		mouseDown(button, mods);
-	if (action == GLFW_RELEASE)
+	if (action == Mouse::RELEASE)
 		mouseUp(button, mods);
 }
 

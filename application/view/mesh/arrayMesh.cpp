@@ -7,8 +7,13 @@ ArrayMesh::ArrayMesh(const float* vertices, const float* uv, const unsigned int 
 	vertexBuffer = new VertexBuffer(vertices, vertexCount * dimensions);
 	uvBuffer = new VertexBuffer(uv, vertexCount * 2);
 
-	vertexBufferLayout.pushFloat(dimensions);
-	uvBufferLayout.pushFloat(2);
+	vertexBufferLayout = { 
+		{{ "vposition", (dimensions == 2) ? BufferDataType::FLOAT2 : BufferDataType::FLOAT3 }} 
+	};
+
+	uvBufferLayout = {
+		{{ "vUV", BufferDataType::FLOAT2 }}
+	};
 
 	vertexArray->addBuffer(*vertexBuffer, vertexBufferLayout);
 	vertexArray->addBuffer(*uvBuffer, uvBufferLayout);
@@ -17,7 +22,10 @@ ArrayMesh::ArrayMesh(const float* vertices, const float* uv, const unsigned int 
 ArrayMesh::ArrayMesh(const float* vertices, const unsigned int vertexCount, const unsigned int dimensions, int renderMode) : AbstractMesh(renderMode), vertexCount(vertexCount) {
 	vertexBuffer = new VertexBuffer(vertices, vertexCount * dimensions);
 
-	vertexBufferLayout.pushFloat(dimensions);
+	vertexBufferLayout = {
+		{{ "vposition", (dimensions == 2) ? BufferDataType::FLOAT2 : BufferDataType::FLOAT3 }}
+	};
+
 	vertexArray->addBuffer(*vertexBuffer, vertexBufferLayout);
 }
 

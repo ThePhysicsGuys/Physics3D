@@ -7,7 +7,7 @@
 
 #include "../util/log.h"
 
-VertexArray::VertexArray() : attribArrayOffset(0) {
+VertexArray::VertexArray() : attributeArrayOffset(0) {
 	glGenVertexArrays(1, &id);
 	glBindVertexArray(id);
 }
@@ -19,7 +19,7 @@ VertexArray::~VertexArray() {
 
 void VertexArray::bind() {
 	glBindVertexArray(id);
-	for (unsigned int i = 0; i < attribArrayOffset; i++)
+	for (unsigned int i = 0; i < attributeArrayOffset; i++)
 		glEnableVertexAttribArray(i);
 }
 
@@ -30,14 +30,26 @@ void VertexArray::unbind() {
 void VertexArray::addBuffer(VertexBuffer& buffer, const BufferLayout& layout) {
 	bind();
 	buffer.bind();
+
 	size_t offset = 0;
-	for (int i = 0; i < layout.elements.size(); i++) {
+	size_t stride = layout.getStride();
+	for (size_t i = 0; i < layout.elements.size(); i++) {
 		auto& element = layout.elements[i];
-		glEnableVertexAttribArray(attribArrayOffset + i);
-		glVertexAttribPointer(attribArrayOffset + i, element.count, element.type, element.normalized, layout.stride, (const void*)offset);
-		offset += element.count * element.size;
+
+		int iterations = (element.info == BufferDataType::MAT2 || element.info == BufferDataType::MAT3 || element.info == BufferDataType::MAT4)? element.info.count : 1;
+
+		for (size_t j = 0; j < iterations; j++) {
+			glEnableVertexAttribArray(attributeArrayOffset + i + j);
+			glVertexAttribPointer(attributeArrayOffset + i + j, element.info.count, element.info.type, element.normalized, stride, (const void*) offset);
+			
+			offset += element.info.size;
+
+			if (j > 0) 
+				attributeArrayOffset++;
+		}
 	}
-	attribArrayOffset += (unsigned int)layout.elements.size();
+
+	attributeArrayOffset += layout.elements.size();
 }
 
 void VertexArray::close() {

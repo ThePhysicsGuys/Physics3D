@@ -27,7 +27,7 @@ public:
 	InputHandler(GLFWwindow* window);
 	double keyInterval = 0.2;
 	char anyKey = 0;
-	bool getKey(Key key);
+	bool getKey(Keyboard::Key key);
 	Vec2 getMousePos();
 
 	virtual void keyDown(int key, int modifiers) {};

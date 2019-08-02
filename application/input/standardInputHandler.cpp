@@ -1,6 +1,8 @@
 #include "standardInputHandler.h"
 
 #include "keyboard.h"
+#include "mouse.h"
+
 #include "../application/worldBuilder.h"
 #include "../options/keyboardOptions.h"
 #include "../view/renderUtils.h"
@@ -10,6 +12,7 @@
 #include "../view/gui/gui.h"
 #include "../view/debug/visualDebug.h"
 #include "../objectLibrary.h"
+
 #include <algorithm>
 #include <random>
 
@@ -95,11 +98,11 @@ void StandardInputHandler::doubleKeyDown(int key, int modifiers) {
 }
 
 void StandardInputHandler::mouseDown(int button, int mods) {
-	if (button == GLFW_MOUSE_BUTTON_RIGHT) rightDragging = true;
-	if (button == GLFW_MOUSE_BUTTON_MIDDLE) middleDragging = true;
-	if (button == GLFW_MOUSE_BUTTON_LEFT) leftDragging = true;
+	if (Mouse::RIGHT == button) rightDragging = true;
+	if (Mouse::MIDDLE == button) middleDragging = true;
+	if (Mouse::LEFT == button) leftDragging = true;
 
-	if (button == GLFW_MOUSE_BUTTON_LEFT) {
+	if (Mouse::LEFT == button) {
 		GUI::selectedComponent = GUI::intersectedComponent;
 
 		if (GUI::intersectedComponent) {
@@ -113,11 +116,11 @@ void StandardInputHandler::mouseDown(int button, int mods) {
 };
 
 void StandardInputHandler::mouseUp(int button, int mods) {
-	if (button == GLFW_MOUSE_BUTTON_RIGHT) rightDragging = false;
-	if (button == GLFW_MOUSE_BUTTON_MIDDLE) middleDragging = false;
-	if (button == GLFW_MOUSE_BUTTON_LEFT) leftDragging = false;
+	if (Mouse::RIGHT == button) rightDragging = false;
+	if (Mouse::MIDDLE == button) middleDragging = false;
+	if (Mouse::LEFT == button) leftDragging = false;
 
-	if (button == GLFW_MOUSE_BUTTON_LEFT) {
+	if (Mouse::LEFT == button) {
 		if (GUI::selectedComponent){
 			GUI::selectedComponent->release(GUI::map(cursorPosition));
 		}
@@ -139,13 +142,10 @@ void StandardInputHandler::mouseMove(double x, double y) {
 
 	// Camera rotating
 	if (rightDragging) {
-
 		screen.camera.rotate(screen, dmy * 0.1, dmx * 0.1, 0, leftDragging);
 	}
 	
 	if (leftDragging) {
-
-
 		if (GUI::selectedComponent) {
 			GUI::selectedComponent->drag(newGuiCursorPosition, guiCursorPosition);
 		} else {

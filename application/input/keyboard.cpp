@@ -1,7 +1,8 @@
 
 #include "keyboard.h"
-#include <map>
+
 #include <stdexcept>
+#include <map>
 
 #include "GLFW\glfw3.h"
 
@@ -129,8 +130,12 @@ namespace Keyboard {
 	const Key RIGHT_SUPER = { "right_super", GLFW_KEY_RIGHT_SUPER };
 	const Key MENU = { "menu", GLFW_KEY_MENU };
 
-	int LAST_KEY = GLFW_KEY_LAST;
-	int FIRST_KEY = GLFW_KEY_SPACE;
+	const int KEY_FIRST = GLFW_KEY_SPACE;
+	const int KEY_LAST = GLFW_KEY_LAST;
+
+	const int PRESS = GLFW_PRESS;
+	const int RELEASE = GLFW_RELEASE;
+	const int REPEAT = GLFW_REPEAT;
 
 	std::map<std::string, Key> keymap = {
 		{ UNKNOWN.name, UNKNOWN },
@@ -257,7 +262,7 @@ namespace Keyboard {
 
 	Key getKey(std::string name) {
 		try {
-			Key key = keymap.at(name);
+			Key& key = keymap.at(name);
 			return key;
 		} catch (std::out_of_range& const e) {
 			return UNKNOWN;
@@ -269,5 +274,7 @@ namespace Keyboard {
 			if (key.second.code == code)
 				return key.second;
 		}
+
+		return UNKNOWN;
 	}
 }

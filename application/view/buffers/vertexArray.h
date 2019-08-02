@@ -7,7 +7,7 @@ struct BufferLayout;
 
 class VertexArray : public Bindable {
 public:
-	unsigned int attribArrayOffset;
+	size_t attributeArrayOffset;
 
 	VertexArray();
 	~VertexArray();

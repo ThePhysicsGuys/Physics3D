@@ -2,59 +2,59 @@
 
 #include <string>
 
-struct Key {
-	std::string name;
-	int code;
-
-	// Key <-> Key
-	bool operator==(const Key& other) const {
-		return other.code == code;
-	}
-
-	bool operator>=(const Key& other) const {
-		return other.code >= code;
-	}
-
-	bool operator>(const Key& other) const {
-		return other.code > code;
-	}
-
-	bool operator<=(const Key& other) const {
-		return other.code <= code;
-	}
-
-	bool operator<(const Key& other) const {
-		return other.code < code;
-	}
-
-	// Key <-> int
-	bool operator==(int other) const {
-		return other == code;
-	}
-
-	bool operator>=(int other) const {
-		return other >= code;
-	}
-
-	bool operator>(int other) const {
-		return other > code;
-	}
-
-	bool operator<=(int other) const {
-		return other <= code;
-	}
-
-	bool operator<(int other) const {
-		return other < code;
-	}
-
-	// Key <-> string
-	bool operator==(const std::string& other) const {
-		return other == name;
-	}
-};
-
 namespace Keyboard {
+
+	struct Key {
+		std::string name;
+		int code;
+
+		// Key <-> Key
+		bool operator==(const Key& other) const {
+			return other.code == code;
+		}
+
+		bool operator>=(const Key& other) const {
+			return other.code >= code;
+		}
+
+		bool operator>(const Key& other) const {
+			return other.code > code;
+		}
+
+		bool operator<=(const Key& other) const {
+			return other.code <= code;
+		}
+
+		bool operator<(const Key& other) const {
+			return other.code < code;
+		}
+
+		// Key <-> int
+		bool operator==(int other) const {
+			return other == code;
+		}
+
+		bool operator>=(int other) const {
+			return other >= code;
+		}
+
+		bool operator>(int other) const {
+			return other > code;
+		}
+
+		bool operator<=(int other) const {
+			return other <= code;
+		}
+
+		bool operator<(int other) const {
+			return other < code;
+		}
+
+		// Key <-> string
+		bool operator==(const std::string& other) const {
+			return other == name;
+		}
+	};
 
 	extern const Key UNKNOWN;
 	extern const Key SPACE;
@@ -178,9 +178,13 @@ namespace Keyboard {
 	extern const Key RIGHT_SUPER;
 	extern const Key MENU;
 
-	extern int LAST_KEY;
-	extern int FIRST_KEY;
+	extern const int KEY_FIRST;
+	extern const int KEY_LAST;
+
+	extern const int PRESS;
+	extern const int RELEASE;
+	extern const int REPEAT;
 
 	Key getKey(std::string name);
-	Key getKey(std::string code);
+	Key getKey(int code);
 }

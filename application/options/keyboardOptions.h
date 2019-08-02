@@ -5,6 +5,8 @@
 
 namespace KeyboardOptions {
 
+	using namespace Keyboard;
+
 	namespace Move {
 		extern Key forward;
 		extern Key backward;
