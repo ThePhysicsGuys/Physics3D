@@ -16,6 +16,7 @@
 
 #include "../visualShape.h"
 
+#include "../engine/math/tempUnsafeCasts.h"
 /*
 	Import
 */
@@ -375,7 +376,7 @@ void parseSubject(Subject subject, std::string path, std::map<std::string, std::
 		double rspeed = Import::parseDouble(fields.at("rspeed"));
 		bool fly = Import::parseInt(fields.at("flying"));
 
-		screen.camera.cframe = CFrame(pos, rot);
+		screen.camera.cframe = TEMP_CAST_CFRAME_TO_GLOBALCFRAME(CFrame(pos, rot));
 		screen.camera.speed = speed;
 		screen.camera.rspeed = rspeed;
 		screen.camera.flying = fly;

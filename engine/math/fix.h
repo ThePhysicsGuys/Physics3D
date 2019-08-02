@@ -23,13 +23,18 @@ struct Fix {
 		value(static_cast<__int64>(f * ONE)) {}
 	constexpr explicit Fix(__int64 l) : value(l) {}
 
-	inline constexpr operator double() { return static_cast<double>(value) / ONE; }
-	inline constexpr operator float() { return static_cast<float>(value) / ONE; }
+	inline constexpr operator double() const { return static_cast<double>(value) / ONE; }
+	inline constexpr operator float() const { return static_cast<float>(value) / ONE; }
 
 	inline Fix<N>& operator++() { value += 1 << N; return *this; }
 	inline Fix<N>& operator++(int) { Fix<N> old = *this; value += ONE; return old; }
 	inline Fix<N>& operator--() { value -= 1 << N; return *this; }
 	inline Fix<N>& operator--(int) { Fix<N> old = *this; value -= ONE; return old; }
+
+	inline Fix<N>& operator+=(const Fix<N>& b) { this->value += b.value; return *this; }
+	inline Fix<N>& operator-=(const Fix<N>& b) { this->value -= b.value; return *this; }
+	inline Fix<N>& operator+=(__int64 b) { this->value += (b << N); return *this; }
+	inline Fix<N>& operator-=(__int64 b) { this->value -= (b << N); return *this; }
 
 	static inline constexpr Fix<N> maxValue() {return Fix<N>(0x7FFFFFFF_FFFFFFFF); }
 };

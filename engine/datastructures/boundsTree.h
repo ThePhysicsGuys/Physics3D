@@ -6,6 +6,7 @@
 #include "../math/position.h"
 #include "../math/fix.h"
 #include "../math/bounds.h"
+#include "../math/ray.h"
 
 #include <utility>
 #include <new>

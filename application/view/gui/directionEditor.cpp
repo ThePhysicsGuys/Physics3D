@@ -1,5 +1,7 @@
 #include "directionEditor.h"
 
+#include "../engine/math/tempUnsafeCasts.h"
+
 #include "gui.h"
 
 #include "../material.h"
@@ -16,9 +18,10 @@
 #include "../engine/math/vec4.h"
 #include "../engine/math/mathUtil.h"
 
+
 DirectionEditor::DirectionEditor(double x, double y, double width, double height) : Component(x, y, width, height) {
-	viewPosition = Vec3f(0, 0, -3);
-	viewMatrix = Mat4f().translate(viewPosition);
+	viewPosition = Position(0.0, 0., -3.0);
+	viewMatrix = Mat4f().translate(TEMP_CAST_POSITION_TO_VEC(viewPosition));
 	modelMatrix = Mat4f(); //.scale(4, 0.5, 4);
 	rspeed = 10;
 }

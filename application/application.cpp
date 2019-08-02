@@ -37,6 +37,8 @@
 #include "io/export.h"
 #include "io/import.h"
 
+#include "../engine/math/tempUnsafeCasts.h"
+
 #define _USE_MATH_DEFINES
 #include "math.h"
 
@@ -88,7 +90,7 @@ int main(void) {
 
 	Material floorMaterial = Material(load("../res/textures/floor/floor_color.jpg"));
 
-	ExtendedPart* floorExtendedPart = createUniquePart(screen, BoundingBox(floorSize.x, 1.0, floorSize.y).toShape(), CFrame(Vec3(0.0, -0.15, 0.0)), 2.0, 1.0);
+	ExtendedPart* floorExtendedPart = createUniquePart(screen, BoundingBox(floorSize.x, 1.0, floorSize.y).toShape(), CFrame(Vec3(0.0, -0.15, 0.0)), 200000.0, 1.0);
 	floorExtendedPart->material = floorMaterial;
 	world.addPart(floorExtendedPart, true);
 
@@ -166,10 +168,10 @@ int main(void) {
 	//world.addPart(constructedExtendedPart);
 
 
-	/*for (int i = 0; i < 10000; i++) {
+	for (int i = 0; i < 30000; i++) {
 		ExtendedPart* newCube = cubeFactory.produce(CFrame(Vec3(fRand(-10.0, 10.0), fRand(0.0, 20.0), fRand(-10.0, 10.0))), 1.0, 0.2);
 		world.addPart(newCube);
-	}*/
+	}
 
 	//Physical* alonePhysical = new Physical(cubeFactory.produce(CFrame(Vec3(0, 0, 0)), 1.0, 1.0, "P1"));
 
@@ -207,12 +209,12 @@ int main(void) {
 
 	//world.objectTree.add(TreeNode())
 
-	int minX = -5;
-	int maxX = 5;
+	int minX = -2;
+	int maxX = 2;
 	int minY = 0;
-	int maxY = 5;
-	int minZ = -5;
-	int maxZ = 5;
+	int maxY = 1;
+	int minZ = -2;
+	int maxZ = 2;
 
 	for(double x = minX; x < maxX; x+=1.01) {
 		for(double y = minY; y < maxY; y += 1.01) {
@@ -301,7 +303,7 @@ int main(void) {
 	while (!screen.shouldClose()) {
 		graphicsMeasure.mark(GraphicsProcess::UPDATE);
 		screen.update();
-		screen.refresh();
+		screen.render();
 		graphicsMeasure.end();
 	}
 
@@ -403,7 +405,7 @@ void setupPhysics() {
 
 void toggleFlying() {
 	if(flying) {
-		player->cframe = screen.camera.cframe;
+		player->cframe = TEMP_CAST_GLOBALCFRAME_TO_CFRAME(screen.camera.cframe);
 		screen.camera.attachment = player;
 		screen.world->addPart(player);
 		flying = false;

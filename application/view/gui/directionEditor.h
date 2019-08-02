@@ -4,6 +4,7 @@
 
 #include "../engine/math/mat4.h"
 #include "../engine/math/vec3.h"
+#include "../engine/math/position.h"
 
 class DirectionEditor;
 
@@ -12,7 +13,7 @@ typedef void (*DirectionEditorAction) (DirectionEditor*);
 class DirectionEditor : public Component {
 private:
 	Mat4f viewMatrix;
-	Vec3f viewPosition;
+	Position viewPosition;
 	
 	double rspeed;
 	void rotate(double dalpha, double dbeta, double dgamma);

@@ -60,6 +60,8 @@
 
 #include "../worlds.h"
 
+#include "../engine/math/tempUnsafeCasts.h"
+
 bool initGLFW() {
 
 	// Set window hints
@@ -264,7 +266,7 @@ void Screen::init() {
 
 
 	// Camera init
-	camera.setPosition(Vec3(1, 1, -2));
+	camera.setPosition(Position(1.0, 1.0, -2.0));
 	camera.setRotation(Vec3(0, 3.1415, 0.0));
 	camera.update(1.0, camera.aspect, 0.01, 10000.0);
 
@@ -423,7 +425,7 @@ void Screen::renderPhysicals() {
 			material.ambient = part.material.ambient;
 		
 		if (material.ambient.w < 1) {
-			transparentMeshes[(camera.cframe.position - part.cframe.position).lengthSquared()] = &part;
+			transparentMeshes[Vec3(camera.cframe.position - TEMP_CAST_VEC_TO_POSITION(part.cframe.position)).lengthSquared()] = &part;
 			continue;
 		}
 
@@ -767,7 +769,7 @@ void Screen::render() {
 
 	// Render origin mesh
 	graphicsMeasure.mark(GraphicsProcess::ORIGIN);
-	Shaders::originShader.updateProjection(camera.viewMatrix, camera.cframe.rotation, camera.projectionMatrix, orthoMatrix, camera.cframe.position);
+	Shaders::originShader.updateProjection(camera.viewMatrix, Mat3f(camera.cframe.rotation), camera.projectionMatrix, orthoMatrix, camera.cframe.position);
 	originMesh->render();
 
 

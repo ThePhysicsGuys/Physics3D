@@ -5,9 +5,9 @@
 #include "cframe.h"
 
 class GlobalCFrame {
+public:
 	Position position;
 	Mat3 rotation;
-public:
 	GlobalCFrame() : position(), rotation(1,0,0,0,1,0,0,0,1) {}
 	GlobalCFrame(const Position& position) : position(position), rotation(1,0,0,0,1,0,0,0,1) {}
 	GlobalCFrame(const Mat3& rotation) : position(), rotation(rotation) {}
@@ -46,6 +46,10 @@ public:
 
 	inline CFrame relativeToLocal(const CFrame& rFrame) const {
 		return CFrame(rotation.transpose() * rFrame.position, rotation.transpose() * rFrame.rotation);
+	}
+
+	inline void translate(const Vec3& offset) {
+		this->position += Vec3Fix(offset);
 	}
 };
 

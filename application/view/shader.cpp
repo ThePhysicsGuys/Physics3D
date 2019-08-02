@@ -37,6 +37,10 @@ void Shader::setUniform(const std::string& uniform, const Vec3f& value) const {
 	glUniform3f(uniforms.at(uniform), value.x, value.y, value.z);
 }
 
+void Shader::setUniform(const std::string& uniform, const Position& value) const {
+	glUniform3f(uniforms.at(uniform), float(value.x), float(value.y), float(value.z));
+}
+
 void Shader::setUniform(const std::string& uniform, const Vec4f& value) const {
 	glUniform4f(uniforms.at(uniform), value.x, value.y, value.z, value.w);
 }

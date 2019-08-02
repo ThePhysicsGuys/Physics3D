@@ -6,10 +6,11 @@ struct ExtendedPart;
 
 #include "../engine/math/vec2.h"
 #include "../engine/math/vec3.h"
+#include "../engine/math/position.h"
 
 typedef void (*CameraMoveHandler) (Screen&, Camera*, Vec3);
 typedef void (*WindowResizeHandler) (Screen&, Vec2i);
-typedef void (*PartRayIntersectHandler) (Screen&, ExtendedPart*, Vec3);
+typedef void (*PartRayIntersectHandler) (Screen&, ExtendedPart*, Position);
 typedef void (*PartDragHandler) (Screen&, ExtendedPart*, Vec3);
 typedef void (*PartClickHandler) (Screen&, ExtendedPart*, Vec3);
 typedef void (*PartTouchHandler) (ExtendedPart*, ExtendedPart*, Vec3);
@@ -22,7 +23,7 @@ private:
 public:
 	CameraMoveHandler cameraMoveHandler = [] (Screen&, Camera*, Vec3) {};
 	WindowResizeHandler windowResizeHandler = [] (Screen&, Vec2i) {};
-	PartRayIntersectHandler partRayIntersectHandler = [] (Screen&, ExtendedPart*, Vec3) {};
+	PartRayIntersectHandler partRayIntersectHandler = [] (Screen&, ExtendedPart*, Position) {};
 	PartDragHandler partDragHandler = [] (Screen&, ExtendedPart*, Vec3) {};
 	PartClickHandler partClickHandler = [] (Screen&, ExtendedPart*, Vec3) {};
 	PartTouchHandler partTouchHandler = [] (ExtendedPart*, ExtendedPart*, Vec3) {};

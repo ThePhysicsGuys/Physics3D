@@ -7,6 +7,7 @@
 #include "mat4.h"
 #include "vec4.h"
 #include "cframe.h"
+#include "position.h"
 
 #include <string>
 #include <sstream>
@@ -73,6 +74,17 @@ template<typename N>
 inline std::string str(const Vec3Template<N>& vector) {
 	std::stringstream ss;
 	ss << vector;
+	return ss.str();
+}
+
+inline std::ostream& operator<<(std::ostream& os, const Position& position) {
+	os << "(" << double(position.x) << ", " << double(position.y) << ", " << double(position.z) << ")";
+	return os;
+}
+
+inline std::string str(const Position& position) {
+	std::stringstream ss;
+	ss << position;
 	return ss.str();
 }
 

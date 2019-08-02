@@ -9,6 +9,7 @@
 #include "../engine/math/vec3.h"
 #include "../engine/math/vec4.h"
 #include "../engine/math/mat4.h"
+#include "../engine/math/position.h"
 
 struct ShaderSource {
 	std::string vertexSource;
@@ -43,6 +44,7 @@ public:
 	void setUniform(const std::string& unfiorm, const Vec3f& value) const;
 	void setUniform(const std::string& unfiorm, const Vec4f& value) const;
 	void setUniform(const std::string& uniform, const Mat4f& value) const;
+	void setUniform(const std::string& uniform, const Position& value) const;
 
 	void bind() override;
 	void unbind() override;

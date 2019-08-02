@@ -6,7 +6,7 @@
 class MagnetWorld : public World<ExtendedPart> {
 public:
 	Vec3 localSelectedPoint;
-	Vec3 magnetPoint;
+	Position magnetPoint;
 	virtual void applyExternalForces() override;
 };
 

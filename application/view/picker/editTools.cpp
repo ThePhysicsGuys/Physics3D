@@ -19,6 +19,8 @@
 #include "../engine/math/vec3.h"
 #include "../engine/math/vec4.h"
 
+#include "../engine/math/tempUnsafeCasts.h"
+
 Mat3 transformations[] = {
 	Mat3(),
 	Mat3().rotate(-3.14159265359/2.0, 0, 0, 1),
@@ -170,11 +172,14 @@ float EditTools::intersect(Screen& screen, const Ray& ray) {
 
 	// Check intersections of selected tool
 	for (int i = 0; i < (tool[1] ? 4 : 3); i++) {
-		CFrame frame = screen.selectedPart->cframe;
+		GlobalCFrame frame = TEMP_CAST_CFRAME_TO_GLOBALCFRAME(screen.selectedPart->cframe);
 
 		frame.rotation = frame.getRotation() * transformations[i];
 
 		VisualShape& shape = *tool[i / 3];
+
+		Position rayStart = ray.start;
+
 		float distance = shape.getIntersectionDistance(frame.globalToLocal(ray.start), frame.relativeToLocal(ray.direction));
 
 		if (distance < closestToolDistance && distance > 0) {
@@ -186,7 +191,7 @@ float EditTools::intersect(Screen& screen, const Ray& ray) {
 	// Update intersected tool
 	if (closestToolDistance != INFINITY) {
 		intersectedEditDirection = closestToolDirection;
-		intersectedPoint = (ray.start + ray.direction * closestToolDistance) - screen.selectedPart->cframe.position;
+		intersectedPoint = (ray.start + ray.direction * closestToolDistance) - TEMP_CAST_VEC_TO_POSITION(screen.selectedPart->cframe.position);
 		return closestToolDistance;
 	} else {
 		intersectedEditDirection = EditDirection::NONE;
@@ -226,7 +231,7 @@ void EditTools::drag(Screen& screen) {
 void EditTools::dragRotateTool(Screen& screen) {
 	// Plane of edit tool, which can be expressed as all points p where (p - p0) * n = 0. Where n is the edit direction and p0 the center of the selected part
 	Vec3 n;
-	Vec3 p0 = screen.selectedPart->cframe.position;
+	Position p0 = TEMP_CAST_VEC_TO_POSITION(screen.selectedPart->cframe.position);
 	switch (selectedEditDirection) {
 	case EditDirection::X:
 		n = Vec3(1, 0, 0);
@@ -243,14 +248,14 @@ void EditTools::dragRotateTool(Screen& screen) {
 	n = screen.selectedPart->cframe.localToRelative(n);
 
 	// Mouse ray, can be expressed as alls points p where p = l0 + d * l, where l0 is the camera position and l is the mouse ray.
-	Vec3 l0 = screen.camera.cframe.position;
+	Position l0 = screen.camera.cframe.position;
 	Vec3 l = screen.ray;
 
 	// Calculate intersection of mouse ray and edit plane
 	double ln = l * n;
 	if (ln == 0)
 		return; // No rotation if plane is perpendicular to mouse ray
-	Vec3 intersection = l0 + ((p0 - l0) * n) / (l * n) * l;
+	Position intersection = l0 + (Vec3(p0 - l0) * n) / (l * n) * l;
 
 	// Vector from part center to intersection
 	Vec3 intersectionVector = intersection - p0;
@@ -301,8 +306,8 @@ void EditTools::dragScaleTool(Screen& screen) {
 		break;
 	}
 
-	Vec3 A = screen.selectedPart->cframe.position;
-	Vec3 B = screen.camera.cframe.position;
+	Position A = TEMP_CAST_VEC_TO_POSITION(screen.selectedPart->cframe.position);
+	Position B = screen.camera.cframe.position;
 	Vec3 b = screen.ray;
 	Vec3 AB = B - A;
 
@@ -322,13 +327,13 @@ void EditTools::dragScaleTool(Screen& screen) {
 // Drag behaviour of translate tool
 void EditTools::dragTranslateTool(Screen& screen) {
 	if (selectedEditDirection == EditDirection::CENTER) {
-		screen.selectedPoint = screen.selectedPart->cframe.position + selectedPoint;
+		screen.selectedPoint = TEMP_CAST_VEC_TO_POSITION(screen.selectedPart->cframe.position) + selectedPoint;
 		Picker::moveGrabbedPhysicalLateral(screen);
 	} else {
 		// Closest point on ray1 (A + s * a) from ray2 (B + t * b). Ray1 is the ray from the parts' center in the direction of the edit tool, ray2 is the mouse ray. Directions a and b are normalized. Only s is calculated.
-		Vec3 B = screen.camera.cframe.position;
+		Position B = screen.camera.cframe.position;
 		Vec3 b = screen.ray.normalize();
-		Vec3 A = screen.selectedPart->cframe.position;
+		Position A = TEMP_CAST_VEC_TO_POSITION(screen.selectedPart->cframe.position);
 		Vec3 a;
 		switch (selectedEditDirection) {
 		case EditDirection::X:

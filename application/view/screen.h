@@ -48,9 +48,9 @@ public:
 	// Picker
 	Vec3f ray;
 	ExtendedPart* intersectedPart = nullptr;
-	Vec3f intersectedPoint;
+	Position intersectedPoint;
 	ExtendedPart* selectedPart = nullptr;
-	Vec3f selectedPoint;
+	Position selectedPoint;
 
 	Screen();
 	Screen(int width, int height, MagnetWorld* world);

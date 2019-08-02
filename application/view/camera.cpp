@@ -5,16 +5,18 @@
 #include "picker/picker.h"
 #include "screen.h"
 
+#include "../engine/math/tempUnsafeCasts.h"
+
 #include <cmath>
 
-void Camera::setPosition(Vec3 position) {
+void Camera::setPosition(Position position) {
 	viewDirty = true;
 
 	cframe.position = position;
 }
 
-void Camera::setPosition(double x, double y, double z) {
-	setPosition(Vec3(x, y, z));
+void Camera::setPosition(Fix<32> x, Fix<32> y, Fix<32> z) {
+	setPosition(Position(x, y, z));
 }
 
 void Camera::setRotation(double alpha, double beta, double gamma) {
@@ -31,7 +33,7 @@ void Camera::setRotation(Vec3 rotation) {
 void Camera::rotate(Screen& screen, double dalpha, double dbeta, double dgamma, bool leftDragging) {
 	viewDirty = true;
 
-	cframe.rotation = rotX(float(rspeed * dalpha)) * cframe.rotation * rotY(float(rspeed * dbeta));
+	cframe.rotation = rotX(float(rspeed * dalpha)) * Mat3f(cframe.rotation) * rotY(float(rspeed * dbeta));
 
 	if (leftDragging) 
 		Picker::moveGrabbedPhysicalLateral(screen);
@@ -49,7 +51,7 @@ void Camera::move(Screen& screen, double dx, double dy, double dz, bool leftDrag
 	Vec3 translation = Vec3();
 
 	if (dx != 0) {
-		Vec3 cameraRotationX = cframe.rotation.transpose() * Vec3f(1, 0, 0);
+		Vec3 cameraRotationX = cframe.rotation.transpose() * Vec3(1, 0, 0);
 		Vec3 translationX = Vec3(cameraRotationX.x, 0, cameraRotationX.z).normalize() * dx;
 		translation += translationX;
 
@@ -66,7 +68,7 @@ void Camera::move(Screen& screen, double dx, double dy, double dz, bool leftDrag
 	}
 
 	if (dz != 0) {
-		Vec3 cameraRotationZ = cframe.rotation.transpose() * Vec3f(0, 0, 1);
+		Vec3 cameraRotationZ = cframe.rotation.transpose() * Vec3(0, 0, 1);
 		Vec3 translationZ = Vec3(cameraRotationZ.x, 0, cameraRotationZ.z).normalize() * dz;
 		translation += translationZ;
 
@@ -103,8 +105,8 @@ void Camera::update(float aspect) {
 }
 
 void Camera::update() {
-	if (attachment != nullptr) {
-		cframe.position = attachment->cframe.position;
+	if (!flying && attachment != nullptr) {
+		cframe.position = TEMP_CAST_VEC_TO_POSITION(attachment->cframe.position);
 		viewDirty = true;
 	}
 
@@ -118,7 +120,7 @@ void Camera::update() {
 	if (viewDirty) {
 		viewDirty = false;
 
-		viewMatrix = Mat4f(cframe.rotation).translate(-cframe.position);
+		viewMatrix = Mat4f(cframe.rotation).translate(-Vec3f(float(cframe.position.x), float(cframe.position.y), float(cframe.position.z)));
 		invertedViewMatrix = viewMatrix.inverse();
 	}
 }

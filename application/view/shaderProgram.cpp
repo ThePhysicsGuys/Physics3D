@@ -10,6 +10,8 @@
 #include <sstream>
 #include <vector>
 
+#include "../engine/math/tempUnsafeCasts.h"
+
 namespace Shaders {
 	BasicShader basicShader;
 	DepthShader depthShader;
@@ -229,7 +231,7 @@ void BasicShader::updateExposure(float exposure) {
 	shader.setUniform("exposure", exposure);
 }
 
-void BasicShader::updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Vec3f& viewPosition) {
+void BasicShader::updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Position& viewPosition) {
 	bind();
 	shader.setUniform("viewMatrix", viewMatrix);
 	shader.setUniform("projectionMatrix", projectionMatrix);
@@ -350,7 +352,7 @@ void PostProcessShader::updateTexture(HDRTexture* texture) {
 
 // OriginShader
 
-void OriginShader::updateProjection(const Mat4f& viewMatrix, const Mat4f& rotatedViewMatrix, const Mat4f& projectionMatrix, const Mat4f& orthoMatrix, const Vec3f& viewPosition) {
+void OriginShader::updateProjection(const Mat4f& viewMatrix, const Mat4f& rotatedViewMatrix, const Mat4f& projectionMatrix, const Mat4f& orthoMatrix, const Position& viewPosition) {
 	bind();
 	shader.setUniform("viewMatrix", viewMatrix);
 	shader.setUniform("rotatedViewMatrix", rotatedViewMatrix);
@@ -381,7 +383,7 @@ void FontShader::updateTexture(Texture* texture) {
 
 // VectorShader
 
-void VectorShader::updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Vec3f& viewPosition) {
+void VectorShader::updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Position& viewPosition) {
 	bind();
 	shader.setUniform("viewMatrix", viewMatrix);
 	shader.setUniform("projectionMatrix", projectionMatrix);
@@ -391,7 +393,7 @@ void VectorShader::updateProjection(const Mat4f& viewMatrix, const Mat4f& projec
 
 // PointShader
 
-void PointShader::updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Vec3f& viewPosition) {
+void PointShader::updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Position& viewPosition) {
 	bind();
 	shader.setUniform("viewMatrix", viewMatrix);
 	shader.setUniform("projectionMatrix", projectionMatrix);
@@ -416,7 +418,7 @@ void TestShader::updateModel(const Mat4f& modelMatrix) {
 	shader.setUniform("modelMatrix", modelMatrix);
 }
 
-void TestShader::updateViewPosition(const Vec3f& viewPosition) {
+void TestShader::updateViewPosition(const Position& viewPosition) {
 	bind();
 	shader.setUniform("viewPosition", viewPosition);
 }

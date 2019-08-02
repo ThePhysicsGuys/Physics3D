@@ -23,8 +23,8 @@ Vec3f calcRay(Screen& screen, Vec2f mouse) {
 }
 
 Ray getMouseRay(Screen& screen, Vec2f mouse) {
-	Vec3f start = screen.camera.cframe.getPosition();
+	Position start = screen.camera.cframe.getPosition();
 	Vec3f direction = calcRay(screen, mouse);
 
-	return { start, direction };
+	return { start, Vec3(direction) };
 }

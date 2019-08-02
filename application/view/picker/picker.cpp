@@ -23,6 +23,8 @@
 
 #include "../util/log.h"
 
+#include "../engine/math/tempUnsafeCasts.h"
+
 namespace Picker {
 
 	EditTools editTools = EditTools();
@@ -41,7 +43,7 @@ namespace Picker {
 
 	// Intersections
 	// Intersection distance of the given ray with the given shape, transformed with the given cframe. 
-	float intersect(const Ray& ray, const VisualShape& shape, const CFramef& cframe) {
+	float intersect(const Ray& ray, const VisualShape& shape, const GlobalCFrame& cframe) {
 		return shape.getIntersectionDistance(cframe.globalToLocal(ray.start), cframe.relativeToLocal(ray.direction));
 	}
 
@@ -50,15 +52,15 @@ namespace Picker {
 		SharedLockGuard guard(screen.world->lock);
 
 		ExtendedPart* closestIntersectedPart = nullptr;
-		Vec3f closestIntersectedPoint = Vec3f();
+		Position closestIntersectedPoint = Position();
 		float closestIntersectDistance = INFINITY;
 
 		for (ExtendedPart& part : *screen.world) {
-			Vec3 relPos = part.cframe.position - ray.start;
+			Vec3 relPos = TEMP_CAST_VEC_TO_POSITION(part.cframe.position) - ray.start;
 			if (ray.direction.pointToLineDistanceSquared(relPos) > part.maxRadius * part.maxRadius)
 				continue;
 
-			float distance = intersect(ray, part.visualShape, part.cframe);
+			float distance = intersect(ray, part.visualShape, TEMP_CAST_CFRAME_TO_GLOBALCFRAME(part.cframe));
 
 			if (distance < closestIntersectDistance && distance > 0) {
 				closestIntersectDistance = distance;
@@ -117,7 +119,7 @@ namespace Picker {
 
 			// Update intersected point if a physical has been intersected and move physical
 			if (screen.intersectedPart) {
-				screen.world->localSelectedPoint = screen.selectedPart->cframe.globalToLocal(screen.intersectedPoint);
+				screen.world->localSelectedPoint = TEMP_CAST_CFRAME_TO_GLOBALCFRAME(screen.selectedPart->cframe).globalToLocal(screen.intersectedPoint);
 				moveGrabbedPhysicalLateral(screen);
 			}
 		}
@@ -150,8 +152,8 @@ namespace Picker {
 		Mat3 cameraFrame = (screen.camera.cframe.rotation).transpose();
 		Vec3 cameraDirection = cameraFrame * Vec3(0, 0, 1);
 
-		double distance = (screen.selectedPoint - screen.camera.cframe.position) * cameraDirection / (screen.ray * cameraDirection);
-		Vec3 planeIntersection = screen.camera.cframe.position + distance * screen.ray;
+		double distance = Vec3(screen.selectedPoint - screen.camera.cframe.position) * cameraDirection / (screen.ray * cameraDirection);
+		Position planeIntersection = screen.camera.cframe.position + distance * screen.ray;
 
 		if (isPaused()) {
 			Vec3 translation = planeIntersection - screen.selectedPoint;
@@ -170,8 +172,8 @@ namespace Picker {
 		Vec3 cameraDirection = cameraFrame * Vec3(0, 0, 1);
 		Vec3 cameraYDirection = Vec3(cameraDirection.x, 0, cameraDirection.z).normalize();
 
-		double distance = (screen.selectedPoint - screen.camera.cframe.position) * cameraDirection / (screen.ray * cameraDirection);
-		Vec3 planeIntersection = screen.camera.cframe.position + distance * screen.ray;
+		double distance = Vec3(screen.selectedPoint - screen.camera.cframe.position) * cameraDirection / (screen.ray * cameraDirection);
+		Position planeIntersection = screen.camera.cframe.position + distance * screen.ray;
 
 		Vec3 translation = -cameraYDirection * dz;
 		if (isPaused()) {

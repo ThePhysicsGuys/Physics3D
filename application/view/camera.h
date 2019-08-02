@@ -3,7 +3,7 @@
 #include "../../engine/math/vec3.h"
 #include "../../engine/math/mat3.h"
 #include "../../engine/math/mat4.h"
-#include "../../engine/math/cframe.h"
+#include "../../engine/math/globalCFrame.h"
 
 struct ExtendedPart;
 struct Camera;
@@ -17,9 +17,9 @@ private:
 	float fov;
 	float znear;
 	float zfar;
-
+	
 public:
-	CFramef cframe;
+	GlobalCFrame cframe;
 	double speed;
 	double rspeed;
 	bool flying;
@@ -38,16 +38,16 @@ public:
 	void update(float fov, float aspect, float znear, float zfar);
 	void update(float aspect);
 
-	Camera(Vec3 position, Mat3 rotation) : cframe(CFramef(position, rotation)), speed(0.35), rspeed(0.04), flying(true) {
+	Camera(Position position, Mat3 rotation) : cframe(GlobalCFrame(position, rotation)), speed(0.35), rspeed(0.04), flying(true) {
 		update();
 	};
 
-	Camera() : cframe(CFramef()), speed(0.35), rspeed(0.04), flying(true) {
+	Camera() : cframe(GlobalCFrame()), speed(0.35), rspeed(0.04), flying(true) {
 		update();
 	};
 
-	void setPosition(Vec3 position);
-	void setPosition(double x, double y, double z);
+	void setPosition(Position position);
+	void setPosition(Fix<32> x, Fix<32> y, Fix<32> z);
 
 	void setRotation(double alpha, double beta, double gamma);
 	void setRotation(Vec3 rotation);

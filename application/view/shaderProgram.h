@@ -54,7 +54,7 @@ struct BasicShader : public ShaderProgram {
 	void updateGamma(float gamma);
 	void updateHDR(bool hdr);
 	void updateExposure(float exposure);
-	void updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Vec3f& viewPosition);
+	void updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Position& viewPosition);
 	void updateLight(Light lights[], int size);
 	void updatePart(const ExtendedPart& part);
 	void updateMaterial(const Material& material);
@@ -105,7 +105,7 @@ struct OriginShader : public ShaderProgram {
 	OriginShader() : ShaderProgram() {}
 	OriginShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, "viewMatrix", "rotatedViewMatrix", "projectionMatrix", "orthoMatrix", "viewPosition") {}
 
-	void updateProjection(const Mat4f& viewMatrix, const Mat4f& rotatedViewMatrix, const Mat4f& projectionMatrix, const Mat4f& orthoMatrix, const Vec3f& viewPosition);
+	void updateProjection(const Mat4f& viewMatrix, const Mat4f& rotatedViewMatrix, const Mat4f& projectionMatrix, const Mat4f& orthoMatrix, const Position& viewPosition);
 };
 
 struct FontShader : public ShaderProgram {
@@ -121,14 +121,14 @@ struct VectorShader : public ShaderProgram {
 	VectorShader() : ShaderProgram() {}
 	VectorShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, "viewMatrix", "projectionMatrix", "viewPosition") {}
 
-	void updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Vec3f& viewPosition);
+	void updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Position& viewPosition);
 };
 
 struct PointShader : public ShaderProgram {
 	PointShader() : ShaderProgram() {}
 	PointShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, "viewMatrix", "projectionMatrix", "viewPosition") {}
 
-	void updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Vec3f& viewPosition);
+	void updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Position& viewPosition);
 };
 
 struct TestShader : public ShaderProgram {
@@ -138,7 +138,7 @@ struct TestShader : public ShaderProgram {
 	void updateProjection(const Mat4f& projectionMatrix);
 	void updateView(const Mat4f& viewMatrix);
 	void updateModel(const Mat4f& modelMatrix);
-	void updateViewPosition(const Vec3f& viewPosition);
+	void updateViewPosition(const Position& viewPosition);
 	void updateDisplacement(Texture* displacementMap);
 };
 
