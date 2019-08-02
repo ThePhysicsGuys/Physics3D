@@ -44,18 +44,18 @@ void GravityWorld::applyExternalForces() {
 	}
 
 	// Player movement
-	if(!flying) {
+	if(!screen.camera.flying) {
+		ExtendedPart* player = screen.camera.attachment;
 		/*Vec3 upOrientation = player->cframe.localToRelative(Vec3(0.0, 1.0, 0.0));
 		Vec3 moment = -Vec3(0.0, 1.0, 0.0) % upOrientation * 700;
 		player->parent->applyMoment(moment * player->parent->mass);
 		player->parent->angularVelocity *= 0.98;
 		player->parent->velocity *= 0.999;*/
 
-		Camera& camera = getCamera();
-		Vec3 playerX = camera.cframe.rotation.transpose() * Vec3(1, 0, 0);
-		Vec3 playerZ = camera.cframe.rotation.transpose() * Vec3(0, 0, 1);
-		Vec3 newPos = TEMP_CAST_POSITION_TO_VEC(camera.cframe.position);
-		Debug::logVector(newPos - playerZ, playerX, Debug::INFO_VEC);
+		Vec3f playerX = screen.camera.cframe.rotation.transpose() * Vec3(1, 0, 0);
+		Vec3f playerZ = screen.camera.cframe.rotation.transpose() * Vec3(0, 0, 1);
+		Debug::logVector(screen.camera.cframe.position - playerZ, playerX, Debug::INFO_VEC);
+
 		if(handler->anyKey) {
 			Vec3 UP(0, 1, 0);
 			Vec3 forward = (playerZ % UP % UP).normalize();

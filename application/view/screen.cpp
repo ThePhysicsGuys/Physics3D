@@ -75,7 +75,8 @@ bool initGLFW() {
 
 	//Renderer::enableMultisampling();
 
-	Log::info("GLFW initialized");
+	Log::info("Initialized GLFW");
+
 	return true;
 }
 
@@ -89,7 +90,7 @@ bool initGLEW() {
 		return false;
 	}
 
-	Log::info("GLEW initialized");
+	Log::info("Initialized GLEW");
 	return true;
 }
 
@@ -702,7 +703,8 @@ void Screen::render() {
 	renderSkybox();
 	Renderer::enableDepthTest();
 
-	{
+	// This curly bracket is very important - Lord Von Tum 02/08/2019 00:45 AM
+	{ 
 		SharedLockGuard lg(world->lock);
 		// Render physicals
 		graphicsMeasure.mark(GraphicsProcess::PHYSICALS);
