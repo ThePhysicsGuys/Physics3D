@@ -24,22 +24,24 @@ struct alignas(32) ParallelVec3 {
 	inline Vec3f operator[](unsigned int i) const {
 		return Vec3f(xvalues[i], yvalues[i], zvalues[i]);
 	}
+
+	static void* operator new(size_t count);
+	static void* operator new[](size_t count);
+
+
+	static void operator delete(void* obj);
+	static void operator delete[](void* obj);
 };
 
-inline ParallelVec3* createParallelVecBuf(size_t blockCount) {
+inline ParallelVec3* createAndFillParallelVecBuf(const Vec3f* data, size_t size) {
+	size_t blockCount = (size+7) / 8;
 	ParallelVec3* vecs = new ParallelVec3[blockCount];
-	// TODO fix alignment bug
+
 	if ((reinterpret_cast<size_t>(vecs) & 0b00011111) != 0) {
 		//delete[] vecs;
 		//throw "Error, did not align ParallelVec3 storage!";
 		Log::error("VecBuf Not aligned!");
 	}
-	return vecs;
-}
-
-inline ParallelVec3* createAndFillParallelVecBuf(const Vec3f* data, size_t size) {
-	size_t blockCount = (size+7) / 8;
-	ParallelVec3* vecs = createParallelVecBuf(blockCount);
 
 	unsigned int alignedSize = size & 0xFFFFFFF8;
 
