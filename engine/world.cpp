@@ -163,6 +163,7 @@ inline void runColissionTests(Physical& phys1, Physical& phys2, WorldPrototype& 
 		intersectionStatistics.addToTally(IntersectionResult::PHYSICAL_DISTANCE_REJECT, phys1.getPartCount() * phys2.getPartCount());
 		return;
 	}
+	if (phys1.anchored && phys2.anchored) return;
 	if (boundsSphereEarlyEnd(phys1.localBounds, phys1.getCFrame().globalToLocal(phys2.circumscribingSphere.origin), phys2.circumscribingSphere.radius)) {
 		intersectionStatistics.addToTally(IntersectionResult::PHYSICAL_BOUNDS_REJECT, phys2.getPartCount() * phys1.getPartCount());
 		return;
@@ -370,6 +371,7 @@ void WorldPrototype::pushOperation(const std::function<void(WorldPrototype*)>& f
 
 void WorldPrototype::addPartUnsafe(Part* part, bool anchored) {
 	Physical* phys = new Physical(part);
+	phys->setAnchored(anchored);
 	if (anchored) {
 		physicals.addLeftSide(phys);
 	} else {

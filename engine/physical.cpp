@@ -111,6 +111,14 @@ void Physical::refreshWithNewParts() {
 	this->localCentroid = s.origin;
 	this->circumscribingSphere.radius = s.radius;
 	this->circumscribingSphere.origin = getCFrame().localToGlobal(localCentroid);
+
+	if (this->anchored) {
+		this->forceResponse = SymmetricMat3(0, 0, 0, 0, 0, 0);
+		this->momentResponse = SymmetricMat3(0, 0, 0, 0, 0, 0);
+	} else {
+		this->forceResponse = SymmetricMat3(1 / mass, 1 / mass, 1 / mass, 0, 0, 0);
+		this->momentResponse = ~inertia;
+	}
 }
 
 BoundingBox Physical::computeLocalBounds() const {
@@ -203,10 +211,10 @@ void Physical::translate(const Vec3& translation) {
 }
 
 void Physical::update(double deltaT) {
-	Vec3 accel = totalForce * (deltaT/mass);
+	Vec3 accel = forceResponse * totalForce * deltaT;
 	
 	Vec3 localMoment = getCFrame().relativeToLocal(totalMoment);
-	Vec3 localRotAcc = ~inertia * localMoment * deltaT;
+	Vec3 localRotAcc = momentResponse * localMoment * deltaT;
 	Vec3 rotAcc = getCFrame().localToRelative(localRotAcc);
 
 	totalForce = Vec3();
@@ -246,18 +254,18 @@ void Physical::applyMoment(Vec3 moment) {
 
 void Physical::applyImpulseAtCenterOfMass(Vec3 impulse) {
 	Debug::logVector(getCenterOfMass(), impulse, Debug::IMPULSE);
-	velocity += impulse / mass;
+	velocity += forceResponse * impulse;
 }
 void Physical::applyImpulse(Vec3Relative origin, Vec3Relative impulse) {
 	Debug::logVector(getCenterOfMass() + origin, impulse, Debug::IMPULSE);
-	velocity += impulse / mass;
+	velocity += forceResponse * impulse;
 	Vec3 angularImpulse = origin % impulse;
 	applyAngularImpulse(angularImpulse);
 }
 void Physical::applyAngularImpulse(Vec3 angularImpulse) {
 	Debug::logVector(getCenterOfMass(), angularImpulse, Debug::ANGULAR_IMPULSE);
 	Vec3 localAngularImpulse = getCFrame().relativeToLocal(angularImpulse);
-	Vec3 localRotAcc = ~inertia * localAngularImpulse;
+	Vec3 localRotAcc = momentResponse * localAngularImpulse;
 	Vec3 rotAcc = getCFrame().localToRelative(localRotAcc);
 	angularVelocity += rotAcc;
 }
@@ -274,11 +282,11 @@ Vec3 Physical::getVelocityOfPoint(const Vec3Relative& point) const {
 }
 
 Vec3 Physical::getAcceleration() const {
-	return totalForce / mass;
+	return forceResponse * totalForce;
 }
 
 Vec3 Physical::getAngularAcceleration() const {
-	return ~inertia * getCFrame().relativeToLocal(totalMoment);
+	return momentResponse * getCFrame().relativeToLocal(totalMoment);
 }
 
 Vec3 Physical::getAccelerationOfPoint(const Vec3Relative& point) const {
@@ -300,15 +308,11 @@ void Physical::setCFrame(const GlobalCFrame& newCFrame) {
 	a = M*F
 */
 SymmetricMat3 Physical::getPointAccelerationMatrix(const Vec3Local& r) const {
-	DiagonalMat3 movementFactor(1 / mass, 1 / mass, 1 / mass);
-
 	Mat3 crossMat = createCrossProductEquivalent(r);
 
-	SymmetricMat3 invInertia = ~inertia;
+	SymmetricMat3 rotationFactor = multiplyLeftRight(momentResponse , crossMat);
 
-	SymmetricMat3 rotationFactor = multiplyLeftRight(invInertia , crossMat);
-
-	return movementFactor + rotationFactor;
+	return forceResponse + rotationFactor;
 }
 double Physical::getInertiaOfPointInDirectionLocal(const Vec3Local& localPoint, const Vec3Local& localDirection) const {
 	SymmetricMat3 accMat = getPointAccelerationMatrix(localPoint);

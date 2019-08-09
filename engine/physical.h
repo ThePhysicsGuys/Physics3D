@@ -77,6 +77,11 @@ public:
 	Vec3 localCenterOfMass;
 	SymmetricMat3 inertia;
 
+	SymmetricMat3 forceResponse;
+	SymmetricMat3 momentResponse;
+
+	bool anchored = false;
+
 	Vec3 localCentroid;
 	GlobalSphere circumscribingSphere;
 
@@ -202,6 +207,8 @@ public:
 	inline size_t getPartCount() const { return parts.size + 1; }
 	BoundingBox computeLocalBounds() const;
 	Sphere computeLocalCircumscribingSphere() const;
+
+	inline void setAnchored(bool anchored) { this->anchored = anchored; refreshWithNewParts(); }
 	
 	PartIter begin() { return PartIter(parts.begin()-1, mainPart); }
 	ConstPartIter begin() const { return ConstPartIter(parts.begin()-1, mainPart);}

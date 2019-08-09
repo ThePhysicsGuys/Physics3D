@@ -54,6 +54,7 @@ namespace Picker {
 		float closestIntersectDistance = INFINITY;
 
 		for (ExtendedPart& part : *screen.world) {
+			if (&part == screen.camera.attachment) continue;
 			Vec3 relPos = part.cframe.position - ray.start;
 			if (ray.direction.pointToLineDistanceSquared(relPos) > part.maxRadius * part.maxRadius)
 				continue;
