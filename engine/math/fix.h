@@ -80,6 +80,8 @@ CREATE_COMPARISONS(Fix<N>, float, a, Fix<N>(b));
 CREATE_COMPARISONS(float, Fix<N>, Fix<N>(a), b);
 CREATE_COMPARISONS(Fix<N>, __int64, a.value, b << N);
 CREATE_COMPARISONS(__int64, Fix<N>, a << N, b.value);
+CREATE_COMPARISONS(Fix<N>, int, a.value, __int64(b) << N);
+CREATE_COMPARISONS(int, Fix<N>, __int64(a) << N, b.value);
 #undef CREATE_COMPARISONS
 
 template<int N>

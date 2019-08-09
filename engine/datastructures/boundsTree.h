@@ -2,6 +2,7 @@
 
 #include "buffers.h"
 #include "iteratorFactory.h"
+#include "iteratorEnd.h"
 
 #include "../math/position.h"
 #include "../math/fix.h"
@@ -85,7 +86,6 @@ struct TreeStackElement {
 };
 
 extern TreeNode dummy_TreeNode;
-struct TreeIteratorEnd {};
 
 struct TreeIterBase {
 	TreeStackElement stack[MAX_HEIGHT];
@@ -96,7 +96,31 @@ struct TreeIterBase {
 			top--;
 		}
 	}
-	inline bool operator!=(TreeIteratorEnd) const {
+	TreeIterBase(const TreeIterBase& other) : stack{}, top(this->stack + (other.top - other.stack)) {
+		for (int i = 0; i < top - stack + 1; i++) {
+			this->stack[i] = other.stack[i];
+		}
+	}
+	TreeIterBase(TreeIterBase&& other) noexcept : stack{}, top(this->stack + (other.top - other.stack)) {
+		for (int i = 0; i < top - stack + 1; i++) {
+			this->stack[i] = other.stack[i];
+		}
+	}
+	TreeIterBase& operator=(const TreeIterBase& other) {
+		this->top = this->stack + (other.top - other.stack);
+		for (int i = 0; i < top - stack + 1; i++) {
+			this->stack[i] = other.stack[i];
+		}
+		return *this;
+	}
+	TreeIterBase& operator=(TreeIterBase&& other) noexcept {
+		this->top = this->stack + (other.top - other.stack);
+		for (int i = 0; i < top - stack + 1; i++) {
+			this->stack[i] = other.stack[i];
+		}
+		return *this;
+	}
+	inline bool operator!=(IteratorEnd) const {
 		return top + 1 != stack;
 	}
 	inline TreeNode* operator*() const {
@@ -225,11 +249,33 @@ inline bool containsFilterBounds(const Bounds& nodeBounds, const Bounds& filterB
 inline bool containsFilterPoint(const Bounds& nodeBounds, const Position& filterPos) { return nodeBounds.contains(filterPos); }
 
 typedef FilteredTreeIterator<Bounds, intersects> TreeIteratorIntersectingBounds;
+typedef FilteredTreeIterator<Ray, doRayAndBoundsIntersect> TreeIteratorIntersectingRay;
 typedef FilteredTreeIterator<Bounds, containsFilterBounds> TreeIteratorContainingBounds;
 typedef FilteredTreeIterator<Position, containsFilterPoint> TreeIteratorContainingPoint;
 
+
+
+
+template<typename Iter, typename Boundable>
+struct BoundsTreeIter {
+	Iter iter;
+	BoundsTreeIter(const Iter& iter) : iter(iter) {}
+	void operator++() {
+		++iter;
+	}
+	Boundable& operator*() const {
+		return *static_cast<Boundable*>((*iter)->object);
+	}
+	bool operator!=(IteratorEnd) const {
+		return iter != IteratorEnd();
+	}
+};
+
 template<typename Iter>
-using TreeIterFactory = IteratorFactory<Iter, TreeIteratorEnd>;
+struct TreeIterFactory : IteratorFactory<Iter, IteratorEnd> {
+	TreeIterFactory(const Iter& iter) : IteratorFactory<Iter, IteratorEnd>(iter, IteratorEnd()) {}
+	TreeIterFactory(Iter&& iter) : IteratorFactory<Iter, IteratorEnd>(std::move(iter), IteratorEnd()) {}
+};
 
 template<typename Boundable>
 struct BoundsTree {
@@ -244,7 +290,7 @@ struct BoundsTree {
 	}
 
 	void remove(Boundable* obj, const Bounds& strictBounds) {
-		for (TreeIteratorContainingBounds iter(rootNode, strictBounds); iter != TreeIteratorEnd(); iter) {
+		for (TreeIteratorContainingBounds iter(rootNode, strictBounds); iter != IteratorEnd(); iter) {
 			if ((*iter)->object == obj) {
 				iter.remove();
 				return;
@@ -266,18 +312,19 @@ struct BoundsTree {
 	}
 	inline void improveStructure() { rootNode.improveStructure(); }
 	
-	//unsigned long long computeTreeScore() const;
-
 	inline TreeIterator begin() { return TreeIterator(rootNode); };
-	inline TreeIteratorEnd end() { return TreeIteratorEnd(); };
+	inline IteratorEnd end() { return IteratorEnd(); };
 
-	inline TreeIterFactory<TreeIteratorIntersectingBounds> iterObjectsIntersectingBounds(const Bounds& bounds) {
-		return TreeIterFactory<TreeIteratorIntersectingBounds>{TreeIteratorIntersectingBounds(*this, bounds)};
+	inline TreeIterFactory<BoundsTreeIter<TreeIteratorIntersectingBounds, Boundable>> iterObjectsIntersectingBounds(const Bounds& bounds) {
+		return TreeIterFactory<BoundsTreeIter<TreeIteratorIntersectingBounds, Boundable>>(BoundsTreeIter<TreeIteratorIntersectingBounds, Boundable>(TreeIteratorIntersectingBounds(this->rootNode, bounds)));
 	}
-	inline TreeIterFactory<TreeIteratorContainingBounds> iterObjectsContainingBounds(const Bounds& bounds) {
-		return TreeIterFactory<TreeIteratorContainingBounds>{TreeIteratorContainingBounds(*this, bounds)};
+	inline TreeIterFactory<BoundsTreeIter<TreeIteratorIntersectingRay, Boundable>> iterObjectsIntersectingRay(const Ray& ray) {
+		return TreeIterFactory<BoundsTreeIter<TreeIteratorIntersectingRay, Boundable>>(BoundsTreeIter<TreeIteratorIntersectingRay, Boundable>(TreeIteratorIntersectingRay(this->rootNode, ray)));
 	}
-	inline TreeIterFactory<TreeIteratorContainingPoint> iterObjectsContainingPoint(const Position& point) {
-		return TreeIterFactory<TreeIteratorContainingPoint>{TreeIteratorContainingPoint(*this, point)};
+	inline TreeIterFactory<BoundsTreeIter<TreeIteratorContainingBounds, Boundable>> iterObjectsContainingBounds(const Bounds& bounds) {
+		return TreeIterFactory<BoundsTreeIter<TreeIteratorContainingBounds, Boundable>>(BoundsTreeIter<TreeIteratorContainingBounds, Boundable>(TreeIteratorContainingBounds(this->rootNode, bounds)));
+	}
+	inline TreeIterFactory<BoundsTreeIter<TreeIteratorContainingPoint, Boundable>> iterObjectsContainingPoint(const Position& point) {
+		return TreeIterFactory<BoundsTreeIter<TreeIteratorContainingPoint, Boundable>>(BoundsTreeIter<TreeIteratorContainingPoint, Boundable>(TreeIteratorContainingPoint(this->rootNode, point)));
 	}
 };

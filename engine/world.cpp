@@ -381,7 +381,6 @@ void WorldPrototype::addPartUnsafe(Part* part, bool anchored) {
 void WorldPrototype::removePartUnsafe(Part* part) {
 	Physical* parent = part->parent;
 	if (parent->detachPart(part)) {
-		//throw "TODO fix";
 		physicals.remove(parent);
 	}
 	objectTree.remove(parent);
