@@ -93,7 +93,7 @@ bool Physical::detachPart(Part* part) {
 void Physical::refreshWithNewParts() {
 	double totalMass = mainPart->mass;
 	SymmetricMat3 totalInertia = mainPart->inertia;
-	Vec3 totalCenterOfMass = mainPart->localCenterOfMass;
+	Vec3 totalCenterOfMass = mainPart->localCenterOfMass * mainPart->mass;
 	for (const AttachedPart& p : parts) {
 		totalMass += p.part->mass;
 		totalCenterOfMass += p.attachment.localToGlobal(p.part->localCenterOfMass) * p.part->mass;
