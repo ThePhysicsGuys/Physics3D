@@ -234,7 +234,7 @@ void Physical::applyForceAtCenterOfMass(Vec3 force) {
 void Physical::applyForce(Vec3Relative origin, Vec3 force) {
 	totalForce += force;
 
-	Debug::logVector(origin + getCenterOfMass(), force, Debug::FORCE);
+	Debug::logVector(getCenterOfMass() + origin, force, Debug::FORCE);
 
 	applyMoment(origin % force);
 }
@@ -249,7 +249,7 @@ void Physical::applyImpulseAtCenterOfMass(Vec3 impulse) {
 	velocity += impulse / mass;
 }
 void Physical::applyImpulse(Vec3Relative origin, Vec3Relative impulse) {
-	Debug::logVector(origin + getCenterOfMass(), impulse, Debug::IMPULSE);
+	Debug::logVector(getCenterOfMass() + origin, impulse, Debug::IMPULSE);
 	velocity += impulse / mass;
 	Vec3 angularImpulse = origin % impulse;
 	applyAngularImpulse(angularImpulse);
@@ -262,10 +262,10 @@ void Physical::applyAngularImpulse(Vec3 angularImpulse) {
 	angularVelocity += rotAcc;
 }
 
-Vec3 Physical::getCenterOfMass() const {
+Position Physical::getCenterOfMass() const {
 	return getCFrame().localToGlobal(localCenterOfMass);
 }
-Vec3 Physical::getCentroid() const {
+Position Physical::getCentroid() const {
 	return getCFrame().localToGlobal(localCentroid);
 }
 
@@ -285,7 +285,7 @@ Vec3 Physical::getAccelerationOfPoint(const Vec3Relative& point) const {
 	return getAcceleration() + getAngularAcceleration() % point;
 }
 
-void Physical::setCFrame(const CFrame& newCFrame) {
+void Physical::setCFrame(const GlobalCFrame& newCFrame) {
 	this->mainPart->cframe = newCFrame;
 	for (const AttachedPart& p : parts) {
 		p.part->cframe = newCFrame.localToGlobal(p.attachment);

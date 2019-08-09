@@ -37,7 +37,10 @@ struct Fix {
 	inline Fix<N>& operator-=(__int64 b) { this->value -= (b << N); return *this; }
 
 	static inline constexpr Fix<N> maxValue() {return Fix<N>(0x7FFFFFFF_FFFFFFFF); }
+
+	inline constexpr Fix<N> operator-() const { return Fix<N>(-this->value); }
 };
+
 
 template<__int64 N> inline constexpr Fix<N> operator+(Fix<N> a, Fix<N> b) { return Fix<N>(a.value + b.value); }
 template<__int64 N> inline constexpr Fix<N> operator-(Fix<N> a, Fix<N> b) { return Fix<N>(a.value - b.value); }
@@ -45,6 +48,11 @@ template<__int64 N> inline constexpr Fix<N> operator+(Fix<N> a, __int64 b) { ret
 template<__int64 N> inline constexpr Fix<N> operator-(Fix<N> a, __int64 b) { return Fix<N>(a.value - (b << N)); }
 template<__int64 N> inline constexpr Fix<N> operator+(__int64 a, Fix<N> b) { return Fix<N>((a << N) + b.value); }
 template<__int64 N> inline constexpr Fix<N> operator-(__int64 a, Fix<N> b) {return Fix<N>((a << N) - b.value);}
+
+template<__int64 N> inline constexpr Fix<N> operator+(Fix<N> a, double b) { return a + Fix<N>(b); }
+template<__int64 N> inline constexpr Fix<N> operator+(double a, Fix<N> b) { return Fix<N>(a) + b; }
+template<__int64 N> inline constexpr Fix<N> operator-(Fix<N> a, double b) { return a - Fix<N>(b); }
+template<__int64 N> inline constexpr Fix<N> operator-(double a, Fix<N> b) { return Fix<N>(a) - b; }
 
 template<__int64 N> inline constexpr Fix<N> operator*(Fix<N> a, double b) {return Fix<N>(static_cast<__int64>(a.value * b));}
 template<__int64 N> inline constexpr Fix<N> operator*(Fix<N> a, float b) {return Fix<N>(static_cast<__int64>(a.value * b));}
@@ -55,6 +63,8 @@ template<__int64 N> inline constexpr Fix<N> operator/(Fix<N> a, double b) { retu
 template<__int64 N> inline constexpr Fix<N> operator/(Fix<N> a, float b) { return Fix<N>(static_cast<__int64>(a.value / b)); }
 template<__int64 N> inline constexpr Fix<N> operator/(double a, Fix<N> b) { return Fix<N>(static_cast<__int64>(a / b.value)); }
 template<__int64 N> inline constexpr Fix<N> operator/(float a, Fix<N> b) { return Fix<N>(static_cast<__int64>(a / b.value)); }
+
+template<__int64 N> inline constexpr Fix<N> operator/(Fix<N> a, int b) { return Fix<N>(a.value / b); }
 
 template<__int64 N> inline constexpr Fix<N> operator*(Fix<N> a, __int64 b) { return Fix<N>(a.value * b); }
 template<__int64 N> inline constexpr Fix<N> operator*(__int64 a, Fix<N> b) { return Fix<N>(a * b.value); }

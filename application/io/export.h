@@ -17,6 +17,7 @@ namespace Export {
 
 	std::string str(Vec4 vector);
 	std::string str(Vec3 vector);
+	std::string str(Position pos);
 	std::string str(Mat3 matrix);
 	std::string str(DiagonalMat3 matrix);
 	std::string str(int num);

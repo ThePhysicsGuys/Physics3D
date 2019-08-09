@@ -3,6 +3,7 @@
 #include "math/vec3.h"
 #include "math/position.h"
 #include "math/cframe.h"
+#include "math/globalCFrame.h"
 
 struct Shape;
 
@@ -31,15 +32,13 @@ namespace Debug {
 		INERTIAL_CFRAME
 	};
 
-	void logVector(Vec3 origin, Vec3 vec, VectorType type);
-	inline void logVector(Position origin, Vec3 vec, VectorType type) { logVector(Vec3(double(origin.x), double(origin.y), double(origin.z)), vec, type); };
-	inline void logVector(Vec3f origin, Vec3f vec, VectorType type) { logVector(Vec3(origin), Vec3(vec), type); };
-	void logPoint(Vec3 point, PointType type);
+	void logVector(Position origin, Vec3 vec, VectorType type);
+	void logPoint(Position point, PointType type);
 	void logCFrame(CFrame frame, CFrameType type);
 	void logShape(const Shape& shape);
 
-	void setVectorLogAction(void(*logger)(Vec3 origin, Vec3 vec, VectorType type));
-	void setPointLogAction(void(*logger)(Vec3 point, PointType type));
+	void setVectorLogAction(void(*logger)(Position origin, Vec3 vec, VectorType type));
+	void setPointLogAction(void(*logger)(Position point, PointType type));
 	void setCFrameLogAction(void(*logger)(CFrame frame, CFrameType type));
-	void setShapeLogAction(void(*logger)(const Shape& shape));
+	void setShapeLogAction(void(*logger)(const Shape& shape, const GlobalCFrame& location));
 }

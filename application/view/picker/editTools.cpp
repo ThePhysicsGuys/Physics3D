@@ -19,8 +19,6 @@
 #include "../engine/math/vec3.h"
 #include "../engine/math/vec4.h"
 
-#include "../engine/math/tempUnsafeCasts.h"
-
 Mat3 transformations[] = {
 	Mat3(),
 	Mat3().rotate(-3.14159265359/2.0, 0, 0, 1),
@@ -98,8 +96,8 @@ void EditTools::render(Screen& screen) {
 		break;
 	}
 
-	CFrame cframe = screen.selectedPart->cframe;
-	Mat4 modelMatrix = normalizedCFrameToMat4(cframe);
+	GlobalCFrame cframe = screen.selectedPart->cframe;
+	Mat4 modelMatrix = CFrameToMat4(cframe);
 
 	Renderer::clearDepth();
 	Renderer::enableDepthTest();
@@ -172,7 +170,7 @@ float EditTools::intersect(Screen& screen, const Ray& ray) {
 
 	// Check intersections of selected tool
 	for (int i = 0; i < (tool[1] ? 4 : 3); i++) {
-		GlobalCFrame frame = TEMP_CAST_CFRAME_TO_GLOBALCFRAME(screen.selectedPart->cframe);
+		GlobalCFrame frame = screen.selectedPart->cframe;
 
 		frame.rotation = frame.getRotation() * transformations[i];
 
@@ -191,7 +189,7 @@ float EditTools::intersect(Screen& screen, const Ray& ray) {
 	// Update intersected tool
 	if (closestToolDistance != INFINITY) {
 		intersectedEditDirection = closestToolDirection;
-		intersectedPoint = (ray.start + ray.direction * closestToolDistance) - TEMP_CAST_VEC_TO_POSITION(screen.selectedPart->cframe.position);
+		intersectedPoint = (ray.start + ray.direction * closestToolDistance) - screen.selectedPart->cframe.position;
 		return closestToolDistance;
 	} else {
 		intersectedEditDirection = EditDirection::NONE;
@@ -231,7 +229,7 @@ void EditTools::drag(Screen& screen) {
 void EditTools::dragRotateTool(Screen& screen) {
 	// Plane of edit tool, which can be expressed as all points p where (p - p0) * n = 0. Where n is the edit direction and p0 the center of the selected part
 	Vec3 n;
-	Position p0 = TEMP_CAST_VEC_TO_POSITION(screen.selectedPart->cframe.position);
+	Position p0 = screen.selectedPart->cframe.position;
 	switch (selectedEditDirection) {
 	case EditDirection::X:
 		n = Vec3(1, 0, 0);
@@ -306,7 +304,7 @@ void EditTools::dragScaleTool(Screen& screen) {
 		break;
 	}
 
-	Position A = TEMP_CAST_VEC_TO_POSITION(screen.selectedPart->cframe.position);
+	Position A = screen.selectedPart->cframe.position;
 	Position B = screen.camera.cframe.position;
 	Vec3 b = screen.ray;
 	Vec3 AB = B - A;
@@ -327,13 +325,13 @@ void EditTools::dragScaleTool(Screen& screen) {
 // Drag behaviour of translate tool
 void EditTools::dragTranslateTool(Screen& screen) {
 	if (selectedEditDirection == EditDirection::CENTER) {
-		screen.selectedPoint = TEMP_CAST_VEC_TO_POSITION(screen.selectedPart->cframe.position) + selectedPoint;
+		screen.selectedPoint = screen.selectedPart->cframe.position + selectedPoint;
 		Picker::moveGrabbedPhysicalLateral(screen);
 	} else {
 		// Closest point on ray1 (A + s * a) from ray2 (B + t * b). Ray1 is the ray from the parts' center in the direction of the edit tool, ray2 is the mouse ray. Directions a and b are normalized. Only s is calculated.
 		Position B = screen.camera.cframe.position;
 		Vec3 b = screen.ray.normalize();
-		Position A = TEMP_CAST_VEC_TO_POSITION(screen.selectedPart->cframe.position);
+		Position A = screen.selectedPart->cframe.position;
 		Vec3 a;
 		switch (selectedEditDirection) {
 		case EditDirection::X:
