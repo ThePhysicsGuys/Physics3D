@@ -5,6 +5,12 @@ class IteratorFactory {
 	BeginType start;
 	EndType fin;
 public:
+	IteratorFactory(const BeginType& start, const EndType& fin) : start(start), fin(fin) {}
+	IteratorFactory(BeginType&& start, EndType&& fin) : 
+		start(std::move(start)), fin(std::move(fin)) {
+	
+	}
+
 	BeginType begin() const { return start; }
 	EndType end() const { return fin; }
 };

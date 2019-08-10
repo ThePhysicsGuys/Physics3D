@@ -12,9 +12,15 @@ struct ShapeVecIter;
 struct ShapeVecIterFactory;
 
 #include "boundingBox.h"
+#include "../math/position.h"
 
 struct Sphere {
 	Vec3 origin;
+	double radius;
+};
+
+struct GlobalSphere {
+	Position origin;
 	double radius;
 };
 

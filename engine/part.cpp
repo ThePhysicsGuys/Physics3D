@@ -1,6 +1,6 @@
 #include "part.h"
 
-Part::Part(const Shape& shape, const CFrame& position, double density, double friction) : hitbox(shape), cframe(position), properties({density, friction}) {
+Part::Part(const Shape& shape, const GlobalCFrame& position, double density, double friction) : hitbox(shape), cframe(position), properties({density, friction}) {
 	this->maxRadius = hitbox.getMaxRadius();
 	this->localBounds = hitbox.getBounds();
 	this->mass = this->hitbox.getVolume() * this->properties.density;
@@ -8,7 +8,7 @@ Part::Part(const Shape& shape, const CFrame& position, double density, double fr
 	this->localCenterOfMass = this->hitbox.getCenterOfMass();
 }
 
-bool Part::intersects(const Part& other, Vec3& intersection, Vec3& exitVector) const {
+bool Part::intersects(const Part& other, Position& intersection, Vec3& exitVector) const {
 #ifdef USE_TRANSFORMATIONS
 	Vec3f intersectionF, exitVectorF;
 	if(this->transformed.intersects(other.transformed, intersectionF, exitVectorF, other.cframe.position - this->cframe.position)){

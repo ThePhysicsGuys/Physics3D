@@ -29,38 +29,6 @@ public:
 
 typedef CompositeIterator<ListOfPtrIter<Physical>> PartIterator;
 
-
-/*class PartIterator {
-	ListOfPtrIter<Physical> currentPhys;
-	PartIter currentPartInPhys;
-public:
-	inline PartIterator(const ListOfPtrIter<Physical>& startPhys) : currentPhys(startPhys), currentPartInPhys{ startPhys->begin() } {}
-	inline PartIterator(const ListOfPtrIter<Physical>& startPhys, const PartIter& partInPhys) : currentPhys(startPhys), currentPartInPhys(partInPhys) {}
-
-	inline Part& operator*() const {
-		return *currentPartInPhys;
-	}
-
-	inline PartIterator& operator++() {
-		++currentPartInPhys;
-		return *this;
-	}
-
-	inline bool operator!=(const PartIterator& other) {
-		if (currentPartInPhys == currentPhys->end()) {
-			++currentPhys;
-			if (currentPhys != other.currentPhys) {
-				currentPartInPhys = currentPhys->begin();
-				return true;
-			} else {
-				return false;
-			}
-		} else {
-			return true;
-		}
-	}
-};*/
-
 class ConstPartIteratorFactory {
 	ListOfPtrIter<const Physical> start;
 	ListOfPtrIter<const Physical> finish;
@@ -83,23 +51,6 @@ public:
 template<typename T> 
 using CustomPartIter = CastingIterator<PartIterator, T&>;
 
-/*template<typename T>
-class CustomPartIter {
-	PartIterator iterator;
-public:
-	inline CustomPartIter(const PartIterator& iter) : iterator(iter) {}
-	inline CustomPartIter(const ListOfPtrIter<Physical>& start, const PartIter& partInPhys) : iterator(start, partInPhys) {}
-	inline T& operator*() const {
-		return static_cast<T&>(*iterator);
-	}
-
-	inline CustomPartIter& operator++() {
-		++iterator;
-		return *this;
-	}
-
-	inline bool operator!=(const CustomPartIter& other) { return this->iterator != other.iterator; }
-};*/
 template<typename T>
 class ConstCustomPartIter {
 	ConstPartIterator iterator;
@@ -117,9 +68,6 @@ public:
 
 	inline bool operator!=(const ConstCustomPartIter& other) const { return this->iterator != other.iterator; }
 };
-
-/*template<typename T>
-using CustomPartIteratorFactory = IteratorFactory<CustomPartIter<T>>*/
 
 template<typename T>
 class CustomPartIteratorFactory {

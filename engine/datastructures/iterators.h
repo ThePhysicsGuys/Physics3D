@@ -1,5 +1,7 @@
 #pragma once
 
+#include "iteratorEnd.h"
+
 /*
 	An iterator that can iterator over a group of iterables
 	For example, to iterate over all parts in all the physicals would be
@@ -62,5 +64,30 @@ public:
 	}
 	bool operator!=(BaseIterator& other) {
 		return iter != other;
+	}
+};
+
+template<typename Iter, typename IterEnd, typename Filter, bool (*filterFunc)(const decltype(*std::declval<Iter>())& obj, const Filter& filter)>
+class FilteredIterator {
+	Iter iter;
+	IterEnd iterEnd;
+	Filter filter;
+	
+public:
+	FilteredIterator(const Iter& iter, const IterEnd& iterEnd, const Filter& filter) : iter(iter), filter(filter) {
+		while (!filter(*iter, filter) && !(iter != iterEnd)) {
+			++iter;
+		}
+	}
+	void operator++() {
+		do {
+			++iter;
+		} while (!filter(*iter, filter) && !(iter != iterEnd));
+	}
+	decltype(*std::declval<Iter>()) operator*() const {
+		return *iter;
+	}
+	bool operator!=(IteratorEnd) const {
+		return iter != iterEnd;
 	}
 };

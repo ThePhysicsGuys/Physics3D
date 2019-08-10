@@ -3,18 +3,18 @@
 #include "geometry/shape.h"
 
 namespace Debug {
-	void(*logVecAction)(Vec3, Vec3, VectorType) = [](Vec3, Vec3, VectorType) {};
-	void(*logPointAction)(Vec3, PointType) = [](Vec3, PointType) {};
+	void(*logVecAction)(Position, Vec3, VectorType) = [](Position, Vec3, VectorType) {};
+	void(*logPointAction)(Position, PointType) = [](Position, PointType) {};
 	void(*logCFrameAction)(CFrame, CFrameType) = [](CFrame, CFrameType) {};
-	void(*logShapeAction)(const Shape&) = [](const Shape&) {};
+	void(*logShapeAction)(const Shape&, const GlobalCFrame&) = [](const Shape&, const GlobalCFrame&) {};
 	
-	void logVector(Vec3 origin, Vec3 vec, VectorType type) { logVecAction(origin, vec, type); };
-	void logPoint(Vec3 point, PointType type) { logPointAction(point, type); }
+	void logVector(Position origin, Vec3 vec, VectorType type) { logVecAction(origin, vec, type); };
+	void logPoint(Position point, PointType type) { logPointAction(point, type); }
 	void logCFrame(CFrame frame, CFrameType type) { logCFrameAction(frame, type); };
-	void logShape(const Shape& shape) { logShapeAction(shape); };
+	void logShape(const Shape& shape, const GlobalCFrame& location) { logShapeAction(shape, location); };
 
-	void setVectorLogAction(void(*logger)(Vec3 origin, Vec3 vec, VectorType type)) { logVecAction = logger; };
-	void setPointLogAction(void(*logger)(Vec3 point, PointType type)) { logPointAction = logger; }
+	void setVectorLogAction(void(*logger)(Position origin, Vec3 vec, VectorType type)) { logVecAction = logger; };
+	void setPointLogAction(void(*logger)(Position point, PointType type)) { logPointAction = logger; }
 	void setCFrameLogAction(void(*logger)(CFrame frame, CFrameType type)) { logCFrameAction = logger; };
-	void setShapeLogAction(void(*logger)(const Shape& shape)) { logShapeAction = logger; }
+	void setShapeLogAction(void(*logger)(const Shape& shape, const GlobalCFrame& location)) { logShapeAction = logger; }
 }

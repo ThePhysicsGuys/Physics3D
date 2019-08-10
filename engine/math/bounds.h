@@ -32,6 +32,10 @@ struct Bounds {
 	inline Bounds expanded(Vec3Fix amount) const {
 		return Bounds(min - amount, max + amount);
 	}
+
+	inline Fix<32> getWidth() const { return max.x - min.x; }
+	inline Fix<32> getHeight() const { return max.y - min.y; }
+	inline Fix<32> getDepth() const { return max.z - min.z; }
 };
 
 inline bool intersects(const Bounds& first, const Bounds& second) {

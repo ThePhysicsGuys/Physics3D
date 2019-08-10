@@ -9,8 +9,6 @@
 #include "view/screen.h"
 #include "options/keyboardOptions.h"
 
-#include "../engine/math/tempUnsafeCasts.h"
-
 #define PICKER_STRENGTH 100
 #define PICKER_SPEED_STRENGTH 12
 #define PICKER_ANGULAR_REDUCE_STRENGTH 50
@@ -18,12 +16,12 @@
 void MagnetWorld::applyExternalForces() {
 	if (selectedPart != nullptr && !isAnchored(selectedPart->parent)) {
 		Physical* selectedPhysical = selectedPart->parent;
-		CFrame cframe = selectedPhysical->getCFrame();
+		GlobalCFrame cframe = selectedPhysical->getCFrame();
 		// Magnet force
-		Position absoluteSelectedPoint = TEMP_CAST_CFRAME_TO_GLOBALCFRAME(selectedPart->cframe).localToGlobal(localSelectedPoint);
+		Position absoluteSelectedPoint = selectedPart->cframe.localToGlobal(localSelectedPoint);
 		Vec3 delta = magnetPoint - absoluteSelectedPoint;
 
-		Position centerOfmass = TEMP_CAST_VEC_TO_POSITION(selectedPhysical->getCenterOfMass());
+		Position centerOfmass = selectedPhysical->getCenterOfMass();
 
 		Vec3 relativeSelectedPointSpeed = selectedPhysical->getVelocityOfPoint(absoluteSelectedPoint - centerOfmass);
 		Vec3 force = selectedPhysical->mass * (delta * PICKER_STRENGTH - relativeSelectedPointSpeed * PICKER_SPEED_STRENGTH);
@@ -74,10 +72,10 @@ void GravityWorld::applyExternalForces() {
 double GravityWorld::getTotalPotentialEnergy() const {
 	double total = 0.0;
 	for(const Physical& p : iterFreePhysicals()) {
-		total += -p.getCenterOfMass() * gravity * p.mass;
+		total += Vec3(Position() - p.getCenterOfMass()) * gravity * p.mass;
 	}
 	return total;
 }
 double GravityWorld::getPotentialEnergyOfPhysical(const Physical& p) const {
-	return -p.getCenterOfMass() * gravity * p.mass;
+	return Vec3(Position() - p.getCenterOfMass()) * gravity * p.mass;
 }

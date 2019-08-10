@@ -12,7 +12,7 @@
 namespace WorldBuilder {
 	void init();
 
-	void createDominoAt(Vec3 pos, Mat3 rotation);
+	void createDominoAt(Position pos, Mat3 rotation);
 	void makeDominoStrip(int dominoCount);
 	void makeDominoTower(int floors, int circumference, Vec3 origin);
 
@@ -34,7 +34,7 @@ namespace WorldBuilder {
 
 		SpiderFactory(double spiderSize, int legCount);
 
-		void buildSpider(CFrame spiderPosition);
+		void buildSpider(const GlobalCFrame& spiderPosition);
 	};
 
 	void buildPerformanceWorld();

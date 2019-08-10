@@ -38,7 +38,7 @@ void StandardInputHandler::keyDownOrRepeat(int key, int modifiers) {
 	} else if (KeyboardOptions::Tick::run == key) {
 		runTick();
 	} else if (Keyboard::O == key) {
-		WorldBuilder::createDominoAt(Vec3(0.0 + (rand() % 100) * 0.001, 1.0 + (rand() % 100) * 0.001, 0.0 + (rand() % 100) * 0.001), fromEulerAngles(0.2, 0.3, 0.7));
+		WorldBuilder::createDominoAt(Position(0.0 + (rand() % 100) * 0.001, 1.0 + (rand() % 100) * 0.001, 0.0 + (rand() % 100) * 0.001), fromEulerAngles(0.2, 0.3, 0.7));
 		Log::info("Created domino! There are %d objects in the world! ", screen.world->getPartCount());
 	}
 }

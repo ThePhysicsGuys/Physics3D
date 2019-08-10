@@ -21,7 +21,7 @@ struct ExtendedPart : public Part {
 	VisualShape visualShape;
 
 	ExtendedPart() = default;
-	ExtendedPart(const Shape& hitbox, const CFrame& position, double density, double friction, int drawMeshId, std::string name = "Part");
-	ExtendedPart(const VisualShape& shape, const CFrame& position, double density, double friction, int drawMeshId, std::string name = "Part");
-	ExtendedPart(const Shape& hitbox, const VisualShape& shape, const CFrame& position, double density, double friction, int drawMeshId, std::string name = "Part");
+	ExtendedPart(const Shape& hitbox, const GlobalCFrame& position, double density, double friction, int drawMeshId, std::string name = "Part");
+	ExtendedPart(const VisualShape& shape, const GlobalCFrame& position, double density, double friction, int drawMeshId, std::string name = "Part");
+	ExtendedPart(const Shape& hitbox, const VisualShape& shape, const GlobalCFrame& position, double density, double friction, int drawMeshId, std::string name = "Part");
 };

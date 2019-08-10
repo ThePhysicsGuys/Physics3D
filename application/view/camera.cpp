@@ -5,8 +5,6 @@
 #include "picker/picker.h"
 #include "screen.h"
 
-#include "../engine/math/tempUnsafeCasts.h"
-
 #include <cmath>
 
 Camera::Camera(Position position, Mat3 rotation) : cframe(GlobalCFrame(position, rotation)), speed(0.35), rspeed(0.04), flying(true) {
@@ -116,7 +114,7 @@ void Camera::update(float aspect) {
 
 void Camera::update() {
 	if (!flying && attachment != nullptr) {
-		cframe.position = TEMP_CAST_VEC_TO_POSITION(attachment->cframe.position);
+		cframe.position = attachment->cframe.position;
 		viewDirty = true;
 	}
 

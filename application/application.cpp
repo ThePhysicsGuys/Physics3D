@@ -28,8 +28,6 @@
 #include "io/export.h"
 #include "io/import.h"
 
-#include "../engine/math/tempUnsafeCasts.h"
-
 #define TICKS_PER_SECOND 120.0
 #define TICK_SKIP_TIME std::chrono::milliseconds(3000)
 
@@ -101,60 +99,59 @@ void setupWorld() {
 	PartFactory triangleFactory(Library::trianglePyramid, screen, "Triangle");
 
 	// Floor
-	Vec2 floorSize(30.0, 30.0);
+	Vec2 floorSize(50.0, 50.0);
 	double wallHeight = 7.0;
 	Material floorMaterial = Material(load("../res/textures/floor/floor_color.jpg"));
-	ExtendedPart* floorExtendedPart = createUniquePart(screen, BoundingBox(floorSize.x, 1.0, floorSize.y).toShape(), CFrame(Vec3(0.0, -0.15, 0.0)), 2.0, 1.0);
+	ExtendedPart* floorExtendedPart = createUniquePart(screen, BoundingBox(floorSize.x, 1.0, floorSize.y).toShape(), GlobalCFrame(0.0, 0.0, 0.0), 2.0, 1.0);
 	floorExtendedPart->material = floorMaterial;
 	world.addPart(floorExtendedPart, true);
 
 	// Walls
-	/*PartFactory xWallFactory(BoundingBox(0.7, wallHeight, floorSize.y).toShape(), screen, "xWall");
+	PartFactory xWallFactory(BoundingBox(0.7, wallHeight, floorSize.y - 0.7).toShape(), screen, "xWall");
 	PartFactory zWallFactory(BoundingBox(floorSize.x, wallHeight, 0.7).toShape(), screen, "zWall");
-	world.addPart(xWallFactory.produce(CFrame(Vec3(floorSize.x / 2, wallHeight / 2, 0.0)), 0.2, 1.0), true);
-	world.addPart(zWallFactory.produce(CFrame(Vec3(0.0, wallHeight / 2, floorSize.y / 2)), 0.2, 1.0), true);
-	world.addPart(xWallFactory.produce(CFrame(Vec3(-floorSize.x / 2, wallHeight / 2, 0.0)), 0.2, 1.0), true);
-	world.addPart(zWallFactory.produce(CFrame(Vec3(0.0, wallHeight / 2, -floorSize.y / 2)), 0.2, 1.0), true);*/
+	world.addPart(xWallFactory.produce(GlobalCFrame(Position(floorSize.x / 2, wallHeight / 2, 0.0)), 20000000.0, 1.0), true);
+	world.addPart(zWallFactory.produce(GlobalCFrame(Position(0.0, wallHeight / 2, floorSize.y / 2)), 20000000.0, 1.0), true);
+	world.addPart(xWallFactory.produce(GlobalCFrame(Position(-floorSize.x / 2, wallHeight / 2, 0.0)), 20000000.0, 1.0), true);
+	world.addPart(zWallFactory.produce(GlobalCFrame(Position(0.0, wallHeight / 2, -floorSize.y / 2)), 20000000.0, 1.0), true);
 
 	// Rotating walls
 	PartFactory rotatingWallFactory(BoundingBox(5.0, 3.0, 0.5).toShape(), screen, "rotatingWall");
-	ExtendedPart* rotatingWall = rotatingWallFactory.produce(CFrame(Vec3(-12, 1.5, 0.0)), 0.2, 1.0);
-	ExtendedPart* rotatingWall2 = rotatingWallFactory.produce(CFrame(Vec3(-12, 1.5, 5.0)), 0.2, 1.0);
-	//rotatingWall->parent->angularVelocity = Vec3(0, -0.7, 0);
-	//rotatingWall2->parent->angularVelocity = Vec3(0, 0.7, 0);
-	//world.add(rotatingWall, true);
-	//world.add(rotatingWall2, true);
+	ExtendedPart* rotatingWall = rotatingWallFactory.produce(GlobalCFrame(Position(-12.0, 1.7, 0.0)), 20000000.0, 1.0);
+	ExtendedPart* rotatingWall2 = rotatingWallFactory.produce(GlobalCFrame(Position(-12.0, 1.7, 5.0)), 20000000.0, 1.0);
+	world.addPart(rotatingWall, true);
+	world.addPart(rotatingWall2, true);
+	rotatingWall->parent->angularVelocity = Vec3(0, -0.7, 0);
+	rotatingWall2->parent->angularVelocity = Vec3(0, 0.7, 0);
 
 	// Many many parts
-	/*for (int i = 0; i < 10000; i++) {
-		ExtendedPart* newCube = cubeFactory.produce(CFrame(Vec3(fRand(-10.0, 10.0), fRand(0.0, 20.0), fRand(-10.0, 10.0))), 1.0, 0.2);
+	for (int i = 0; i < 300; i++) {
+		ExtendedPart* newCube = cubeFactory.produce(GlobalCFrame(fRand(-10.0, 10.0), fRand(0.0, 20.0), fRand(-10.0, 10.0)), 1.0, 0.2);
 		world.addPart(newCube);
-	}*/
+	}
 
 
-	int minX = -5;
-	int maxX = 5;
+	int minX = -2;
+	int maxX = 2;
 	int minY = 0;
 	int maxY = 5;
-	int minZ = -5;
-	int maxZ = 5;
+	int minZ = -2;
+	int maxZ = 2;
 
 	for (double x = minX; x < maxX; x += 1.01) {
 		for (double y = minY; y < maxY; y += 1.01) {
 			for (double z = minZ; z < maxZ; z += 1.01) {
-				//ExtendedPart* newCube = cubeFactory.produce(CFrame(Vec3(x, y + 1, z)), 1.0, 0.2);
-				//newCube->material.ambient = Vec4f((x-minX)/(maxX-minX), (y-minY)/(maxY-minY), (z-minZ)/(maxZ-minZ), 1.0f);
-				//world.addPart(newCube);
-				//world.addPart(sphereFactory.produce(CFrame(Vec3(x, y + 1, z - 5)), 1.0, 0.2));
-				//spiderFactories[rand() & 0x00000003].buildSpider(CFrame(Vec3(x+y*0.1, y+1, z)));
-				world.addPart(triangleFactory.produce(CFrame(Vec3(x, y + 1, z + 5)), 1.0, 0.2));
+				ExtendedPart* newCube = cubeFactory.produce(GlobalCFrame(x - 5, y + 1, z - 5), 1.0, 0.2);
+				newCube->material.ambient = Vec4f((x-minX)/(maxX-minX), (y-minY)/(maxY-minY), (z-minZ)/(maxZ-minZ), 1.0f);
+				world.addPart(newCube);
+				world.addPart(sphereFactory.produce(GlobalCFrame(Position(x + 5, y + 1, z - 5)), 1.0, 0.2));
+				spiderFactories[rand() & 0x00000003].buildSpider(GlobalCFrame(Position(x+y*0.1, y+1, z)));
+				world.addPart(triangleFactory.produce(GlobalCFrame(Position(x - 20, y + 1, z + 20)), 1.0, 0.2));
 			}
 		}
 	}
 
-
 	// Player
-	screen.camera.attachment = sphereFactory.produce(CFrame(), 1.0, 0.2);
+	screen.camera.attachment = sphereFactory.produce(GlobalCFrame(), 1.0, 0.2);
 	screen.camera.attachment->properties.friction = 0.5;
 	screen.camera.attachment->drawMeshId = -1;
 
@@ -176,7 +173,7 @@ void setupPhysics() {
 		GJKCollidesIterationStatistics.nextTally();
 		GJKNoCollidesIterationStatistics.nextTally();
 		EPAIterationStatistics.nextTally();
-		});
+	});
 }
 
 void setupDebug() {
@@ -236,7 +233,7 @@ void runTick() {
 
 void toggleFlying() {
 	if (screen.camera.flying) {
-		screen.camera.attachment->cframe = TEMP_CAST_GLOBALCFRAME_TO_CFRAME(screen.camera.cframe);
+		screen.camera.attachment->cframe = screen.camera.cframe;
 		screen.world->addPart(screen.camera.attachment);
 		screen.camera.flying = false;
 	} else {

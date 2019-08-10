@@ -10,8 +10,6 @@
 #include <sstream>
 #include <vector>
 
-#include "../engine/math/tempUnsafeCasts.h"
-
 namespace Shaders {
 	BasicShader basicShader;
 	DepthShader depthShader;

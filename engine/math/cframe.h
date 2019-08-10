@@ -54,18 +54,6 @@ public:
 		return CFrameTemplate<T>(rotation.transpose() * -position, rotation.transpose());
 	}
 
-	// Temporary, till we figure out how to handle scale
-	inline Mat3Template<T> getNormalizedRotation() const {
-		Vec3Template<T> r0 = Vec3Template<T>(rotation.m00, rotation.m01, rotation.m02).normalize();
-		Vec3Template<T> r1 = Vec3Template<T>(rotation.m10, rotation.m11, rotation.m12).normalize();
-		Vec3Template<T> r2 = Vec3Template<T>(rotation.m20, rotation.m21, rotation.m22).normalize();
-		return Mat3Template<T> (
-			r0.x, r0.y, r0.z,
-			r1.x, r1.y, r1.z,
-			r2.x, r2.y, r2.z
-		);
-	}
-
 	inline Vec3Template<T> getPosition() const {
 		return position;
 	}
@@ -101,19 +89,6 @@ CFrameTemplate<T> Mat4ToCFrame(const Mat4Template<T>& mat) {
 template<typename T>
 Mat4Template<T> CFrameToMat4(const CFrameTemplate<T>& cframe) {
 	const Mat3Template<T>& r = cframe.rotation;
-	const Vec3Template<T>& p = cframe.position;
-	return Mat4Template<T> (
-		r.m00, r.m01, r.m02, 0,
-		r.m10, r.m11, r.m12, 0,
-		r.m20, r.m21, r.m22, 0,
-		p.x,   p.y,   p.z,   1
-	);
-}
-
-// Temporary
-template<typename T>
-Mat4Template<T> normalizedCFrameToMat4(const CFrameTemplate<T>& cframe) {
-	const Mat3Template<T> r = cframe.getNormalizedRotation();
 	const Vec3Template<T>& p = cframe.position;
 	return Mat4Template<T> (
 		r.m00, r.m01, r.m02, 0,

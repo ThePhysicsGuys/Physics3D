@@ -13,8 +13,6 @@
 #include <map>
 #include <direct.h>
 
-#include "../engine/math/tempUnsafeCasts.h"
-
 /*
 	Export
 */
@@ -51,6 +49,12 @@ std::string Export::str(Mat3 matrix) {
 	ss << matrix.m10 << " " << matrix.m11 << " " << matrix.m12 << " ";
 	ss << matrix.m20 << " " << matrix.m21 << " " << matrix.m22;
 
+	return ss.str();
+}
+
+std::string Export::str(Position pos) {
+	std::stringstream ss;
+	ss << pos.x.value << " " << pos.y.value << " " << pos.z.value;
 	return ss.str();
 }
 
@@ -227,7 +231,7 @@ void savePart(std::ofstream& output, const ExtendedPart& part, std::string shape
 
 void saveCamera(std::ofstream& output, Camera& camera) {
 	output << "camera:" << std::endl;
-	output << "\tposition = " << Export::str(TEMP_CAST_POSITION_TO_VEC(camera.cframe.position)) << std::endl;
+	output << "\tposition = " << Export::str(camera.cframe.position) << std::endl;
 	output << "\trotation = " << Export::str(camera.cframe.rotation) << std::endl;
 	output << "\tspeed = " << Export::str(camera.speed) << std::endl;
 	output << "\trspeed = " << Export::str(camera.rspeed) << std::endl;

@@ -10,7 +10,6 @@
 
 #include "view/screen.h"
 
-
 void clearError() {
 	while (glGetError() != GL_NO_ERROR);
 }
@@ -34,15 +33,11 @@ namespace AppDebug {
 	namespace Logging {
 		using namespace Debug;
 
-		void logVector(Vec3 origin, Vec3 vec, VectorType type) {
+		void logVector(Position origin, Vec3 vec, VectorType type) {
 			vecBuf.add(ColoredVector(origin, vec, type));
 		}
 
-		void logVector(Vec3f origin, Vec3f vec, VectorType type) {
-			vecBuf.add(ColoredVector(Vec3(origin), Vec3(vec), type));
-		}
-
-		void logPoint(Vec3 point, PointType type) {
+		void logPoint(Position point, PointType type) {
 			pointBuf.add(ColoredPoint(point, type));
 		}
 
@@ -63,11 +58,11 @@ namespace AppDebug {
 			}}
 		}
 
-		void logShape(const Shape& shape) {
+		void logShape(const Shape& shape, const GlobalCFrame& location) {
 			for(int i = 0; i < shape.triangleCount; i++) {
 				Triangle t = shape.triangles[i];
 				for(int j = 0; j < 3; j++) {
-					Debug::logVector(shape[t[j]], shape[t[(j + 1) % 3]] - shape[t[j]], Debug::INFO_VEC);
+					Debug::logVector(location.localToGlobal(shape[t[j]]), location.localToRelative(shape[t[(j + 1) % 3]] - shape[t[j]]), Debug::INFO_VEC);
 				}
 			}
 		}

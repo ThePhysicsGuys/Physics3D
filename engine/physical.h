@@ -8,6 +8,9 @@ struct Physical;
 #include "part.h"
 #include "math/bounds.h"
 
+#include "math/position.h"
+#include "math/globalCFrame.h"
+
 #include <vector>
 #include "datastructures/splitUnorderedList.h"
 
@@ -74,8 +77,13 @@ public:
 	Vec3 localCenterOfMass;
 	SymmetricMat3 inertia;
 
+	SymmetricMat3 forceResponse;
+	SymmetricMat3 momentResponse;
+
+	bool anchored = false;
+
 	Vec3 localCentroid;
-	Sphere circumscribingSphere;
+	GlobalSphere circumscribingSphere;
 
 	BoundingBox localBounds;
 
@@ -168,12 +176,11 @@ public:
 	void rotateAroundCenterOfMass(const RotMat3& rotation);
 	void translate(const Vec3& translation);
 
-	void setCFrame(const CFrame& newCFrame);
-	inline const CFrame& getCFrame() const { return mainPart->cframe; }
+	void setCFrame(const GlobalCFrame& newCFrame);
+	inline const GlobalCFrame& getCFrame() const { return mainPart->cframe; }
 
 	inline Position getPosition() const {
-		Vec3 pos = getCentroid();
-		return Position(pos.x, pos.y, pos.z);
+		return getCentroid();
 	}
 
 	Bounds getStrictBounds() const;
@@ -185,8 +192,8 @@ public:
 		return Bounds(pos - offsetVec, pos + offsetVec);
 	}
 
-	Vec3 getCenterOfMass() const;
-	Vec3 getCentroid() const;
+	Position getCenterOfMass() const;
+	Position getCentroid() const;
 	Vec3 getAcceleration() const;
 	Vec3 getAngularAcceleration() const;
 	Vec3 getVelocityOfPoint(const Vec3Relative& point) const;
@@ -200,6 +207,8 @@ public:
 	inline size_t getPartCount() const { return parts.size + 1; }
 	BoundingBox computeLocalBounds() const;
 	Sphere computeLocalCircumscribingSphere() const;
+
+	inline void setAnchored(bool anchored) { this->anchored = anchored; refreshWithNewParts(); }
 	
 	PartIter begin() { return PartIter(parts.begin()-1, mainPart); }
 	ConstPartIter begin() const { return ConstPartIter(parts.begin()-1, mainPart);}

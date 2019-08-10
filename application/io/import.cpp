@@ -15,14 +15,16 @@
 #include "../partFactory.h"
 
 #include "../visualShape.h"
-
-#include "../engine/math/tempUnsafeCasts.h"
 /*
 	Import
 */
 
 int Import::parseInt(std::string num) {
 	return std::stoi(num);
+}
+
+long long Import::parseLong(std::string num) {
+	return std::stoll(num);
 }
 
 double Import::parseDouble(std::string num) {
@@ -38,6 +40,15 @@ Vec3 Import::parseVec3(std::string vec) {
 	Vec3 vector = Vec3();
 	for (int i = 0; i < 3; i++) {
 		vector.v[i] = Import::parseDouble(tokens[i]);
+	}
+	return vector;
+}
+
+Position Import::parsePosition(std::string vec) {
+	std::vector<std::string> tokens = split(vec, ' ');
+	Position vector;
+	for (int i = 0; i < 3; i++) {
+		vector.v[i] = Fix<32>(Import::parseLong(tokens[i]));
 	}
 	return vector;
 }
@@ -336,7 +347,7 @@ void parseSubject(Subject subject, std::string path, std::map<std::string, std::
 		double friction = Import::parseDouble(fields.at("friction"));
 		double mass = Import::parseDouble(fields.at("mass"));
 
-		Vec3 pos = Import::parseVec3(fields.at("position"));
+		Position pos = Import::parsePosition(fields.at("position"));
 		Mat3 rot = Import::parseMat3(fields.at("rotation"));
 
 		std::string name = fields.at("name");
@@ -350,7 +361,7 @@ void parseSubject(Subject subject, std::string path, std::map<std::string, std::
 
 		std::string shapeReference = fields.at("shape");
 
-		CFrame cframe = CFrame(pos, rot);
+		GlobalCFrame cframe(pos, rot);
 
 		if (!factories.count(shapeReference)) {
 			Log::info("Loading part %s in factory", (path + shapeReference).c_str());
@@ -370,13 +381,13 @@ void parseSubject(Subject subject, std::string path, std::map<std::string, std::
 
 		world.addPart(part, anchored);
 	} else if (subject == Subject::CAMERA) {
-		Vec3 pos = Import::parseVec3(fields.at("position"));
+		Position pos = Import::parsePosition(fields.at("position"));
 		Mat3 rot = Import::parseMat3(fields.at("rotation"));
 		double speed = Import::parseDouble(fields.at("speed"));
 		double rspeed = Import::parseDouble(fields.at("rspeed"));
 		bool fly = Import::parseInt(fields.at("flying"));
 
-		screen.camera.cframe = TEMP_CAST_CFRAME_TO_GLOBALCFRAME(CFrame(pos, rot));
+		screen.camera.cframe = GlobalCFrame(pos, rot);
 		screen.camera.speed = speed;
 		screen.camera.rspeed = rspeed;
 		screen.camera.flying = fly;

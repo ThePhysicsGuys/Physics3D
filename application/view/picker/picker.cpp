@@ -23,8 +23,6 @@
 
 #include "../util/log.h"
 
-#include "../engine/math/tempUnsafeCasts.h"
-
 namespace Picker {
 
 	EditTools editTools = EditTools();
@@ -58,11 +56,12 @@ namespace Picker {
 		float closestIntersectDistance = INFINITY;
 
 		for (ExtendedPart& part : *screen.world) {
-			Vec3 relPos = TEMP_CAST_VEC_TO_POSITION(part.cframe.position) - ray.start;
+			if (&part == screen.camera.attachment) continue;
+			Vec3 relPos = part.cframe.position - ray.start;
 			if (ray.direction.pointToLineDistanceSquared(relPos) > part.maxRadius * part.maxRadius)
 				continue;
 
-			float distance = intersect(ray, part.visualShape, TEMP_CAST_CFRAME_TO_GLOBALCFRAME(part.cframe));
+			float distance = intersect(ray, part.visualShape, part.cframe);
 
 			if (distance < closestIntersectDistance && distance > 0) {
 				closestIntersectDistance = distance;
@@ -121,7 +120,7 @@ namespace Picker {
 
 			// Update intersected point if a physical has been intersected and move physical
 			if (screen.intersectedPart) {
-				screen.world->localSelectedPoint = TEMP_CAST_CFRAME_TO_GLOBALCFRAME(screen.selectedPart->cframe).globalToLocal(screen.intersectedPoint);
+				screen.world->localSelectedPoint = screen.selectedPart->cframe.globalToLocal(screen.intersectedPoint);
 				moveGrabbedPhysicalLateral(screen);
 			}
 		}

@@ -52,7 +52,7 @@ double computeCombinedInertiaBetween(const Physical& first, const Physical& seco
 	exitVector is the distance p2 must travel so that the shapes are no longer colliding
 */
 template<bool anchoredColission>
-void handleCollision(Part& part1, Part& part2, Vec3 collisionPoint, Vec3 exitVector) {
+void handleCollision(Part& part1, Part& part2, Position collisionPoint, Vec3 exitVector) {
 	Debug::logPoint(collisionPoint, Debug::INTERSECTION);
 	Physical& p1 = *part1.parent;
 	Physical& p2 = *part2.parent;
@@ -140,7 +140,7 @@ void handleCollision(Part& part1, Part& part2, Vec3 collisionPoint, Vec3 exitVec
 struct Colission {
 	Part* p1;
 	Part* p2;
-	Vec3 intersection;
+	Position intersection;
 	Vec3 exitVector;
 };
 
@@ -163,6 +163,7 @@ inline void runColissionTests(Physical& phys1, Physical& phys2, WorldPrototype& 
 		intersectionStatistics.addToTally(IntersectionResult::PHYSICAL_DISTANCE_REJECT, phys1.getPartCount() * phys2.getPartCount());
 		return;
 	}
+	if (phys1.anchored && phys2.anchored) return;
 	if (boundsSphereEarlyEnd(phys1.localBounds, phys1.getCFrame().globalToLocal(phys2.circumscribingSphere.origin), phys2.circumscribingSphere.radius)) {
 		intersectionStatistics.addToTally(IntersectionResult::PHYSICAL_BOUNDS_REJECT, phys2.getPartCount() * phys1.getPartCount());
 		return;
@@ -191,7 +192,7 @@ inline void runColissionTests(Physical& phys1, Physical& phys2, WorldPrototype& 
 				continue;
 			}
 
-			Vec3 intersection;
+			Position intersection;
 			Vec3 exitVector;
 			if (p1.intersects(p2, intersection, exitVector)) {
 				intersectionStatistics.addToTally(IntersectionResult::COLISSION, 1);
@@ -370,6 +371,7 @@ void WorldPrototype::pushOperation(const std::function<void(WorldPrototype*)>& f
 
 void WorldPrototype::addPartUnsafe(Part* part, bool anchored) {
 	Physical* phys = new Physical(part);
+	phys->setAnchored(anchored);
 	if (anchored) {
 		physicals.addLeftSide(phys);
 	} else {
@@ -381,7 +383,6 @@ void WorldPrototype::addPartUnsafe(Part* part, bool anchored) {
 void WorldPrototype::removePartUnsafe(Part* part) {
 	Physical* parent = part->parent;
 	if (parent->detachPart(part)) {
-		//throw "TODO fix";
 		physicals.remove(parent);
 	}
 	objectTree.remove(parent);
