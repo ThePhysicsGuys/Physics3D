@@ -5,6 +5,7 @@
 class IndexBuffer : public Bindable {
 public:
 	IndexBuffer();
+	IndexBuffer(const unsigned int* data, unsigned int size, unsigned int mode);
 	IndexBuffer(const unsigned int* data, unsigned int size);
 	~IndexBuffer();
 

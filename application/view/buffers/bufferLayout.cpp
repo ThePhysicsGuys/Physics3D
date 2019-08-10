@@ -19,8 +19,10 @@ namespace BufferDataType {
 	const BufferDataTypeInfo MAT4   = { "mat4" , GL_FLOAT, 4, 16 }; // per row
 }
 
-size_t BufferLayout::getStride() const {
-	size_t stride = 0;
+BufferLayout::BufferLayout() : stride(0) {};
+
+BufferLayout::BufferLayout(std::vector<BufferElement> elements) : elements(elements), stride(0) {
+	stride = 0;
 
 	for (size_t i = 0; i < elements.size(); i++) {
 		auto& element = elements[i];
@@ -29,8 +31,6 @@ size_t BufferLayout::getStride() const {
 
 		stride += element.info.size * multiplier;
 	}
-
-	return stride;
 }
 
 BufferLayout::~BufferLayout() {

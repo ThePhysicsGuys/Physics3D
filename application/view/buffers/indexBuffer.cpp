@@ -10,11 +10,13 @@ IndexBuffer::IndexBuffer() {
 	Log::debug("Created empty index buffer");
 };
 
-IndexBuffer::IndexBuffer(const unsigned int* data, unsigned int size) {
+IndexBuffer::IndexBuffer(const unsigned int* data, unsigned int size, unsigned int mode) {
 	glGenBuffers(1, &id);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, size * sizeof(unsigned int), data, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, size * sizeof(unsigned int), data, mode);
 }
+
+IndexBuffer::IndexBuffer(const unsigned int* data, unsigned int size) : IndexBuffer(data, size, GL_STATIC_DRAW) {}
 
 IndexBuffer::~IndexBuffer() {
 	close();

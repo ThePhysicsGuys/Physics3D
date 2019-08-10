@@ -46,8 +46,9 @@ struct BufferElement {
 
 struct BufferLayout {
 	std::vector<BufferElement> elements;
+	int stride;
 
+	BufferLayout();
+	BufferLayout(std::vector<BufferElement> elements);
 	~BufferLayout();
-
-	size_t getStride() const;
 };

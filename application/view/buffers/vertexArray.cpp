@@ -1,6 +1,7 @@
 #include "vertexArray.h"
 
 #include "GL\glew.h"
+#include "GLFW\glfw3.h"
 
 #include "vertexBuffer.h"
 #include "bufferLayout.h"
@@ -32,7 +33,6 @@ void VertexArray::addBuffer(VertexBuffer& buffer, const BufferLayout& layout) {
 	buffer.bind();
 
 	size_t offset = 0;
-	size_t stride = layout.getStride();
 	for (size_t i = 0; i < layout.elements.size(); i++) {
 		auto& element = layout.elements[i];
 
@@ -40,7 +40,7 @@ void VertexArray::addBuffer(VertexBuffer& buffer, const BufferLayout& layout) {
 
 		for (size_t j = 0; j < iterations; j++) {
 			glEnableVertexAttribArray(attributeArrayOffset + i + j);
-			glVertexAttribPointer(attributeArrayOffset + i + j, element.info.count, element.info.type, element.normalized, stride, (const void*) offset);
+			glVertexAttribPointer(attributeArrayOffset + i + j, element.info.count, element.info.type, element.normalized, layout.stride, (const void*) offset);
 			
 			offset += element.info.size;
 

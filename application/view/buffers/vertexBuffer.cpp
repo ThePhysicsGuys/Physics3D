@@ -11,9 +11,8 @@ VertexBuffer::VertexBuffer(const float* data, size_t size, unsigned int mode) : 
 	glBufferData(GL_ARRAY_BUFFER, size * sizeof(float), data, mode);
 }
 
-VertexBuffer::VertexBuffer(const float* data, size_t size) : VertexBuffer(data, size, GL_STATIC_DRAW) {
+VertexBuffer::VertexBuffer(const float* data, size_t size) : VertexBuffer(data, size, GL_STATIC_DRAW) {}
 
-}
 
 VertexBuffer::~VertexBuffer() {
 	close();
