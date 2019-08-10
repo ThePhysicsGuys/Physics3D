@@ -8,9 +8,13 @@
 #include "directionEditor.h"
 #include "colorPicker.h"
 
+#include "../engine/math/mathUtil.h"
 #include "../debug/visualDebug.h"
 #include "../../extendedPart.h"
+#include "../shaderProgram.h"
+#include "../renderUtils.h"
 #include "../../worlds.h"
+#include "../screen.h"
 
 // Frame blueprint
 

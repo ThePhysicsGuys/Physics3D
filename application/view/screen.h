@@ -2,8 +2,6 @@
 
 #include <vector>
 
-#include "layer/layer.h"
-
 #include "../engine/math/vec2.h"
 #include "../engine/math/vec3.h"
 
@@ -23,12 +21,7 @@ bool initGLEW();
 bool initGLFW();
 void terminateGLFW();
 
-class Screen : public Layer {
-private:
-	void renderSkybox();
-	void renderPhysicals();
-	void renderDebug();
-	void renderPies();
+class Screen {
 public:
 	std::vector<IndexedMesh*> meshes;
 	MagnetWorld* world;
@@ -39,9 +32,7 @@ public:
 	EventHandler eventHandler;
 	Properties properties;
 
-	HDRFrameBuffer* modelFrameBuffer = nullptr;
 	FrameBuffer* screenFrameBuffer = nullptr;
-	FrameBuffer* maskFrameBuffer = nullptr;
 	FrameBuffer* blurFrameBuffer = nullptr;
 	Quad* quad = nullptr;
 
@@ -55,10 +46,10 @@ public:
 	Screen();
 	Screen(int width, int height, MagnetWorld* world);
 
-	void init() override;
-	void update() override;
-	void render() override;
-	void close() override;
+	void init();
+	void update();
+	void render();
+	void close();
 
 	bool shouldClose();
 	int addMeshShape(const VisualShape& mesh);

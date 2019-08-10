@@ -36,6 +36,8 @@ namespace Picker {
 
 	// Render
 	void render(Screen& screen) {
+		Shaders::maskShader.updateProjection(screen.camera.viewMatrix, screen.camera.projectionMatrix);
+
 		if (screen.selectedPart) {
 			editTools.render(screen);
 		}

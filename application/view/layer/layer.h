@@ -2,11 +2,15 @@
 
 #include <string>
 
+class Screen;
+
 class Layer {
 public:
+	Screen* screen = nullptr;
 	std::string name;
 
-	Layer(const std::string& name = "Layer") { this->name = name; };
+	Layer() {};
+	Layer(const std::string& name, Screen* screen) : name(name), screen(screen) {};
 	~Layer() {}
 
 	virtual void attach() {}
