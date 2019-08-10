@@ -9,6 +9,7 @@
 #include "../engine/math/mathUtil.h"
 
 #include "../../worlds.h"
+#include "../../../engine/sharedLockGuard.h"
 
 // Pies
 BarChartClassInformation iterChartClasses[] {{ "GJK Collide", Vec3f(0.2f, 0.2f, 1.0f) }, { "GJK No Collide", Vec3f(1.0f, 0.5f, 0.0f) }, { "EPA", Vec3f(1.0f, 1.0f, 0.0f) }};
@@ -75,6 +76,7 @@ void DebugOverlay::render() {
 		iterationChart.position = Vec2f(-leftSide + 0.1f, -0.3);
 		iterationChart.render();
 
+		SharedLockGuard lg(screen->world->lock);
 		renderTreeStructure(*screen, screen->world->objectTree.rootNode, Vec3f(0, 1, 0), Vec2f(screen->camera.aspect, 0.95), 2.0);
 	}
 }

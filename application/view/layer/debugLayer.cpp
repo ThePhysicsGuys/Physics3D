@@ -33,16 +33,18 @@ Vec4f colors[] {
 };
 
 
-void renderSphere(double radius, Vec3 position, Vec4f color) {
+void renderSphere(double radius, Position position, Vec4f color) {
 	Shaders::basicShader.updateMaterial(Material(color));
-	Shaders::basicShader.updateModel(CFrameToMat4(CFrame(position, DiagonalMat3(1, 1, 1) * radius)));
+
+	Shaders::basicShader.updateModel(CFrameToMat4(GlobalCFrame(position, DiagonalMat3(1, 1, 1) * radius)));
 
 	Library::sphere->render();
 }
 
-void renderBox(const CFrame& cframe, double width, double height, double depth, Vec4f color) {
+void renderBox(const GlobalCFrame& cframe, double width, double height, double depth, Vec4f color) {
 	Shaders::basicShader.updateMaterial(Material(color));
-	Shaders::basicShader.updateModel(CFrameToMat4(CFrame(cframe.getPosition(), cframe.getRotation() * DiagonalMat3(width, height, depth))));
+
+	Shaders::basicShader.updateModel(CFrameToMat4(GlobalCFrame(cframe.getPosition(), cframe.getRotation() * DiagonalMat3(width, height, depth))));
 
 	Library::cube->render();
 }
@@ -50,7 +52,7 @@ void renderBox(const CFrame& cframe, double width, double height, double depth, 
 void renderBounds(const Bounds& bounds, const Vec4f& color) {
 	Vec3Fix diagonal = bounds.getDiagonal();
 	Position p = bounds.getCenter();
-	renderBox(CFrame(Vec3(p.x, p.y, p.z)), diagonal.x, diagonal.y, diagonal.z, color);
+	renderBox(GlobalCFrame(p), diagonal.x, diagonal.y, diagonal.z, color);
 }
 
 void recursiveRenderColTree(const TreeNode& node, int depth) {
@@ -150,9 +152,9 @@ void DebugLayer::render() {
 	}
 
 	if (screen->selectedPart != nullptr) {
-		CFramef selectedCFrame(screen->selectedPart->cframe);
+		GlobalCFrame selectedCFrame(screen->selectedPart->cframe);
 		for (const Vec3f& corner : screen->selectedPart->hitbox.iterVertices()) {
-			vecLog.add(AppDebug::ColoredVector(Vec3(selectedCFrame.localToGlobal(corner)), screen->selectedPart->parent->getVelocityOfPoint(Vec3(selectedCFrame.localToRelative(corner))), Debug::VELOCITY));
+			vecLog.add(AppDebug::ColoredVector(selectedCFrame.localToGlobal(corner), screen->selectedPart->parent->getVelocityOfPoint(Vec3(selectedCFrame.localToRelative(corner))), Debug::VELOCITY));
 		}
 
 		if (colissionSpheresMode == SphereColissionRenderMode::SELECTED) {

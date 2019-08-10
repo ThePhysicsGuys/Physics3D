@@ -15,8 +15,6 @@
 #include "../debug/visualDebug.h"
 
 #include "../../meshLibrary.h"
-
-#include "../engine/math/tempUnsafeCasts.h"
 #include "../engine/sharedLockGuard.h"
 
 
@@ -84,7 +82,7 @@ void ModelLayer::render() {
 			material.ambient = part.material.ambient;
 
 		if (material.ambient.w < 1) {
-			transparentMeshes[Vec3(screen->camera.cframe.position - TEMP_CAST_VEC_TO_POSITION(part.cframe.position)).lengthSquared()] = &part;
+			transparentMeshes[Vec3(screen->camera.cframe.position - part.cframe.position).lengthSquared()] = &part;
 			continue;
 		}
 

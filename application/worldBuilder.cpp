@@ -69,7 +69,7 @@ namespace WorldBuilder {
 	}
 
 
-	HollowBoxParts buildHollowBox(BoundingBox box, double wallThickness) {
+	HollowBoxParts buildHollowBox(Bounds box, double wallThickness) {
 		Shape YPlateShape = Library::createBox(box.getWidth(), wallThickness, box.getDepth());
 		Shape ZPlateShape = Library::createBox(box.getWidth() - wallThickness * 2, box.getHeight() - wallThickness * 2, wallThickness);
 		Shape XPlateShape = Library::createBox(wallThickness, box.getHeight() - wallThickness * 2, box.getDepth());
