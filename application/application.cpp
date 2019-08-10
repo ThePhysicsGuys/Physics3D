@@ -96,9 +96,9 @@ void setupWorld() {
 	// Part factories
 	WorldBuilder::SpiderFactory spiderFactories[]{ {0.5, 3},{0.5, 4},{0.5, 5},{0.5, 6} };
 	PartFactory legFactory = PartFactory(BoundingBox(0.05, 0.5, 0.05).toShape(), screen, "SpiderLeg");
-	PartFactory cubeFactory(createCube(0.2), screen, "Cube");
+	PartFactory cubeFactory(Library::createCube(0.2), screen, "Cube");
 	PartFactory sphereFactory(sphereShape, screen, "Sphere");
-	PartFactory triangleFactory(triangleShape, screen, "Triangle");
+	PartFactory triangleFactory(Library::trianglePyramid, screen, "Triangle");
 
 	// Floor
 	Vec2 floorSize(30.0, 30.0);

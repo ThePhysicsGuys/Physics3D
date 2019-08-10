@@ -11,7 +11,7 @@
 #include "../view/picker/picker.h"
 #include "../view/gui/gui.h"
 #include "../view/debug/visualDebug.h"
-#include "../objectLibrary.h"
+#include "../shapeLibrary.h"
 
 #include <algorithm>
 #include <random>

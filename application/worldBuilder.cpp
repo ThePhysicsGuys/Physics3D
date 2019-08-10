@@ -40,7 +40,7 @@ namespace WorldBuilder {
 		}
 	}
 
-	SpiderFactory::SpiderFactory(double spiderSize, int legCount) : spiderSize(spiderSize), legCount(legCount), bodyFactory(createPointyPrism(legCount, 0.5, 0.2, 0.1, 0.1), screen, "SpiderBody") {}
+	SpiderFactory::SpiderFactory(double spiderSize, int legCount) : spiderSize(spiderSize), legCount(legCount), bodyFactory(Library::createPointyPrism(legCount, 0.5, 0.2, 0.1, 0.1), screen, "SpiderBody") {}
 
 	void SpiderFactory::buildSpider(CFrame spiderPosition) {
 		//ExtendedPart* spiderBody = createUniquePart(screen, createPointyPrism(legCount, 0.5, 0.2, 0.1, 0.1), spiderPosition, 1.0, 0.0, "SpiderBody");
@@ -70,9 +70,9 @@ namespace WorldBuilder {
 
 
 	HollowBoxParts buildHollowBox(BoundingBox box, double wallThickness) {
-		Shape YPlateShape = createBox(box.getWidth(), wallThickness, box.getDepth());
-		Shape ZPlateShape = createBox(box.getWidth() - wallThickness * 2, box.getHeight() - wallThickness * 2, wallThickness);
-		Shape XPlateShape = createBox(wallThickness, box.getHeight() - wallThickness * 2, box.getDepth());
+		Shape YPlateShape = Library::createBox(box.getWidth(), wallThickness, box.getDepth());
+		Shape ZPlateShape = Library::createBox(box.getWidth() - wallThickness * 2, box.getHeight() - wallThickness * 2, wallThickness);
+		Shape XPlateShape = Library::createBox(wallThickness, box.getHeight() - wallThickness * 2, box.getDepth());
 
 		PartFactory xpf(XPlateShape, screen);
 		PartFactory ypf(YPlateShape, screen);

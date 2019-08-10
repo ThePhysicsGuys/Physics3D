@@ -2,7 +2,7 @@
 
 #include "debug.h"
 #include "worlds.h"
-#include "objectLibrary.h"
+#include "shapeLibrary.h"
 #include "extendedPart.h"
 #include "partFactory.h"
 
