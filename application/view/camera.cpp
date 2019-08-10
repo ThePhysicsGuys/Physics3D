@@ -9,6 +9,14 @@
 
 #include <cmath>
 
+Camera::Camera(Position position, Mat3 rotation) : cframe(GlobalCFrame(position, rotation)), speed(0.35), rspeed(0.04), flying(true) {
+	update();
+};
+
+Camera::Camera() : cframe(GlobalCFrame()), speed(0.35), rspeed(0.04), flying(true) {
+	update();
+};
+
 void Camera::setPosition(Position position) {
 	viewDirty = true;
 
@@ -100,7 +108,9 @@ void Camera::update(float aspect) {
 	this->aspect = aspect;
 
 	projectionDirty = true;
-	
+
+	orthoMatrix = ortho(-aspect, aspect, -1.0f, 1.0f, -1000.0f, 1000.0f);
+
 	update();
 }
 

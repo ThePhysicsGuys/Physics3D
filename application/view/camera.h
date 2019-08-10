@@ -32,19 +32,16 @@ public:
 	Mat4f projectionMatrix;
 	Mat4f invertedProjectionMatrix;
 
+	Mat4f orthoMatrix;
+
 	ExtendedPart* attachment = nullptr;
 
 	void update();
 	void update(float fov, float aspect, float znear, float zfar);
 	void update(float aspect);
 
-	Camera(Position position, Mat3 rotation) : cframe(GlobalCFrame(position, rotation)), speed(0.35), rspeed(0.04), flying(true) {
-		update();
-	};
-
-	Camera() : cframe(GlobalCFrame()), speed(0.35), rspeed(0.04), flying(true) {
-		update();
-	};
+	Camera(Position position, Mat3 rotation);
+	Camera();
 
 	void setPosition(Position position);
 	void setPosition(Fix<32> x, Fix<32> y, Fix<32> z);
