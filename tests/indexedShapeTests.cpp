@@ -2,7 +2,7 @@
 #include "../engine/geometry/indexedShape.h"
 #include "../engine/geometry/shapeBuilder.h"
 #include "../engine/geometry/convexShapeBuilder.h"
-#include "../application/objectLibrary.h"
+#include "../application/shapeLibrary.h"
 
 TEST_CASE(testIndexedShape) {
 	Vec3f verts[]{Vec3f(0.0, 0.0, 0.0), Vec3f(1.0, 0.0, 0.0), Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 1.0, 0.0)};
@@ -76,7 +76,7 @@ TEST_CASE(buildConvexShape) {
 	Triangle newIcosaTriangles[40];
 	TriangleNeighbors icosaNeighBuf[40];
 
-	ConvexShapeBuilder icosaBuilder(icosahedron, newIcosaVerts, newIcosaTriangles, icosaNeighBuf, builderRemovalBuffer, builderAddingBuffer);
+	ConvexShapeBuilder icosaBuilder(Library::icosahedron, newIcosaVerts, newIcosaTriangles, icosaNeighBuf, builderRemovalBuffer, builderAddingBuffer);
 
 	ASSERT_TRUE(icosaBuilder.toIndexedShape().isValid());
 

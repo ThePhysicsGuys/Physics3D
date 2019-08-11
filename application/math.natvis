@@ -25,4 +25,26 @@
   <Type Name="Position">
     <DisplayString>{{{x, g}, {y, g}, {z, g}}}</DisplayString>
   </Type>
+
+  <Type Name="LargeMatrix&lt;*&gt;">
+    <DisplayString>Width = {width}, Height = {height}</DisplayString>
+    <Expand>
+      <Item Name="width">width</Item>
+      <Item Name="height">height</Item>
+      <ArrayItems>
+        <Size>width * height</Size>
+        <ValuePointer>data</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+  <Type Name="LargeVector&lt;*&gt;">
+    <DisplayString>Size = {size}</DisplayString>
+    <Expand>
+      <Item Name="size">size</Item>
+      <ArrayItems>
+        <Size>size</Size>
+        <ValuePointer>data</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
 </AutoVisualizer>

@@ -8,7 +8,7 @@
 #include "../engine/geometry/shape.h"
 #include "../engine/geometry/boundingBox.h"
 
-#include "../application/objectLibrary.h"
+#include "../application/shapeLibrary.h"
 
 #include "testValues.h"
 
@@ -49,9 +49,9 @@ TEST_CASE(shapeVolume) {
 	logf("Box Volume: %.20f", boxShape.getVolume());
 	logf("Box Volume2: %.20f", transformedShape.getVolume());
 
-	logf("Triangle Volume: %.20f", triangleShape.getVolume());
+	//logf("Triangle Volume: %.20f", Library::triangleShape.getVolume());
 
-	logf("Icosahedron Volume: %.20f", icosahedron.getVolume());
+	logf("Icosahedron Volume: %.20f", Library::icosahedron.getVolume());
 }
 
 TEST_CASE(shapeCenterOfMass) {
@@ -84,15 +84,15 @@ TEST_CASE(shapeInertiaMatrix) {
 
 	logf("Inertia of transformed Box: %s", str(transformedShape.getInertia()).c_str());
 
-	Shape h = house;
-	Shape newHouse = house.translated(-Vec3f(house.getCenterOfMass()), houseVecBuf);
+	Shape h = Library::house;
+	Shape newHouse = Library::house.translated(-Vec3f(Library::house.getCenterOfMass()), houseVecBuf);
 	Shape rotatedHouse = newHouse.rotated(fromEulerAngles(0.0, 0.3, 0.0), houseVecBuf2);
 	logf("Inertia of House: %s", str(newHouse.getInertia()).c_str());
 	logf("Inertia of Rotated House: %s", str(rotatedHouse.getInertia()).c_str());
 }
 
 TEST_CASE(shapeInertiaRotationInvariance) {
-	Vec3f buf1[10]; Vec3f buf2[10]; Shape testShape = house.translated(-Vec3f(house.getCenterOfMass()), buf1);
+	Vec3f buf1[10]; Vec3f buf2[10]; Shape testShape = Library::house.translated(-Vec3f(Library::house.getCenterOfMass()), buf1);
 
 	Vec3 testMoment = Vec3(0.3, -3.2, 4.8);
 	Vec3 momentResult = ~testShape.getInertia() * testMoment;
@@ -117,7 +117,7 @@ TEST_CASE(shapeInertiaRotationInvariance) {
 }
 
 TEST_CASE(shapeInertiaEigenValueInvariance) {
-	Vec3f buf1[10]; Vec3f buf2[10]; Shape testShape = house.translated(-Vec3f(house.getCenterOfMass()), buf1);
+	Vec3f buf1[10]; Vec3f buf2[10]; Shape testShape = Library::house.translated(-Vec3f(Library::house.getCenterOfMass()), buf1);
 
 	EigenValues<double> initialEigenValues = testShape.getInertia().getEigenDecomposition().eigenValues;
 
@@ -159,8 +159,8 @@ TEST_CASE(testIntersection) {
 	Vec3f buf[12];
 	Vec3f buf3[12];
 	Shape a = BoundingBox{-0.3, -0.4, -0.5, 0.3, 0.4, 0.5}.toShape();
-	Shape b = icosahedron.translated(Vec3f(0.8, 0.9, 0.8), buf);
-	Shape c = icosahedron.translated(Vec3f(0.95, 0.0, 0.0), buf3);
+	Shape b = Library::icosahedron.translated(Vec3f(0.8, 0.9, 0.8), buf);
+	Shape c = Library::icosahedron.translated(Vec3f(0.95, 0.0, 0.0), buf3);
 	
 
 	Vec3f intersect, exitVec;
@@ -213,7 +213,7 @@ TEST_CASE(badCollissions) {
 }
 
 TEST_CASE(testGetFurthestPointInDirection) {
-	for (Vec3f vertex : icosahedron.iterVertices()) {
-		ASSERT(icosahedron.furthestInDirection(vertex) == vertex);
+	for (Vec3f vertex : Library::icosahedron.iterVertices()) {
+		ASSERT(Library::icosahedron.furthestInDirection(vertex) == vertex);
 	}
 }

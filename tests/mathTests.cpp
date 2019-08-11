@@ -2,6 +2,7 @@
 
 #include "../engine/math/mat3.h"
 #include "../engine/math/mat4.h"
+#include "../engine/math/largeMatrix.h"
 #include "../engine/math/mathUtil.h"
 
 Mat3 IDENTITY = Mat3(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0);
@@ -188,4 +189,46 @@ TEST_CASE(eigenDecomposition) {
 		}
 	}
 	// ASSERT(false);
+}
+
+TEST_CASE(largeMatrixVectorProduct) {
+	LargeMatrix<double> mat(5, 5);
+	LargeVector<double> vec(5);
+
+	for (int i = 0; i < 5; i++) {
+		vec[i] = i + 2;
+	}
+
+	for (int i = 0; i < 5; i++) {
+		for (int j = 0; j < 5; j++) {
+			mat[i][j] = 0;
+		}
+		mat[i][0] = i * 2;
+		mat[0][i] = i * 2;
+	}
+
+	LargeVector<double> newVector = mat * vec;
+}
+
+TEST_CASE(largeMatrixVectorSolve) {
+	LargeMatrix<double> mat(5, 5);
+	LargeVector<double> vec(5);
+
+	for (int i = 0; i < 5; i++) {
+		vec[i] = fRand(-1.0, 1.0);
+	}
+
+	for (int i = 0; i < 5; i++) {
+		for (int j = 0; j < 5; j++) {
+			mat[i][j] = fRand(-1.0, 1.0);
+		}
+	}
+
+	mat[0][0] = 0;
+
+	LargeVector<double> newVector = mat * vec;
+
+	LargeVector<double> solutionVector = newVector;
+
+	destructiveSolve(mat, solutionVector);
 }

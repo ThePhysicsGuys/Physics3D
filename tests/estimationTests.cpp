@@ -1,7 +1,7 @@
 #include "testsMain.h"
 
 #include "../engine/geometry/shape.h"
-#include "../application/objectLibrary.h"
+#include "../application/shapeLibrary.h"
 
 #include "../engine/math/mathUtil.h"
 
