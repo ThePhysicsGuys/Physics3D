@@ -265,6 +265,8 @@ void CubeMap::load(const std::string& right, const std::string& left, const std:
 	unsigned char* data;
 	std::string faces[6] = { right, left, top, bottom, front, back };
 
+	stbi_set_flip_vertically_on_load(false);
+
 	for (int i = 0; i < 6; i++) {
 		data = stbi_load(faces[i].c_str(), &width, &height, &channels, 0);
 		if (data)

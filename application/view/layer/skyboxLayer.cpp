@@ -20,7 +20,7 @@ SkyboxLayer::SkyboxLayer() : Layer() {
 
 };
 
-SkyboxLayer::SkyboxLayer(Screen* screen) : Layer("Skybox", screen) {
+SkyboxLayer::SkyboxLayer(Screen* screen) : Layer("Skybox", screen, noUpdate | noEvents) {
 
 }
 

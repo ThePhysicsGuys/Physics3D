@@ -20,7 +20,7 @@ DebugOverlay::DebugOverlay() {
 
 }
 
-DebugOverlay::DebugOverlay(Screen* screen) : Layer("Debug overlay", screen) {
+DebugOverlay::DebugOverlay(Screen* screen) : Layer("Debug overlay", screen, noEvents) {
 
 }
 

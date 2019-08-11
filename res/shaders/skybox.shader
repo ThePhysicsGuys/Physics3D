@@ -52,11 +52,11 @@ void main() {
 	vec3 light = lightDirection;
 	vec3 normal = vposition;
 
-	float distance = (1.05 - pow(normal.y, 0.2)) * 150000;
+	/*float distance = (1.05 - pow(normal.y, 0.2)) * 150000;
 	float cosphi = dot(normal, light) / length(light) / length(normal);
 	float h = position.y;
 	scattering = scatter(h, distance, cosphi);
-	extinction = Fex(h, distance);
+	extinction = Fex(h, distance);*/
 
 	ftextureUV = vposition;
 	gl_Position = position;
@@ -76,8 +76,8 @@ in vec3 ftextureUV;
 uniform samplerCube skyboxTexture;
 
 void main() {    
-	vec4 surface = vec4(0.0, 0.0, 0.0, 1.0);
-	vec4 sky = (surface * vec4(extinction, 1.0)) + vec4(scattering, 1.0);
+	//vec4 surface = vec4(0.0, 0.0, 0.0, 1.0);
+	//vec4 sky = (surface * vec4(extinction, 1.0)) + vec4(scattering, 1.0);
 	vec4 skybox = texture(skyboxTexture, ftextureUV);
-	outColor = (skybox.a > 0) ? skybox : sky;
+	outColor = skybox;
 }

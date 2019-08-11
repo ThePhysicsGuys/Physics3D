@@ -11,7 +11,6 @@
 
 #include "mesh/indexedMesh.h"
 #include "mesh/primitive.h"
-#include "picker/picker.h"
 #include "debug/visualDebug.h"
 #include "buffers/frameBuffer.h"
 
@@ -22,8 +21,11 @@
 #include "../util/log.h"
 #include "../worlds.h"
 
+#include "layer/layerStack.h"
 #include "layer/skyboxLayer.h"
 #include "layer/modelLayer.h"
+#include "layer/pickerLayer.h"
+#include "layer/postprocessLayer.h"
 #include "layer/guiLayer.h"
 #include "layer/debugLayer.h"
 #include "layer/debugOverlay.h"
@@ -97,8 +99,11 @@ StandardInputHandler* handler = nullptr;
 
 
 // Layers
+LayerStack layerStack;
 SkyboxLayer skyboxLayer;
 ModelLayer modelLayer;
+PickerLayer pickerLayer;
+PostprocessLayer postprocessLayer;
 GuiLayer guiLayer;
 DebugLayer debugLayer;
 DebugOverlay debugOverlay;
@@ -148,16 +153,22 @@ void Screen::init() {
 	skyboxLayer = SkyboxLayer(this);
 	modelLayer = ModelLayer(this);
 	debugLayer = DebugLayer(this);
+	pickerLayer = PickerLayer(this);
+	postprocessLayer = PostprocessLayer(this);
 	guiLayer = GuiLayer(this);
 	debugOverlay = DebugOverlay(this);
 
+	layerStack.pushLayer(&skyboxLayer);
+	layerStack.pushLayer(&modelLayer);
+	layerStack.pushLayer(&debugLayer);
+	layerStack.pushLayer(&pickerLayer);
+	layerStack.pushLayer(&postprocessLayer);
+	layerStack.pushLayer(&guiLayer);
+	layerStack.pushOverlay(&debugOverlay);
+
 
 	// Layer init
-	skyboxLayer.init();
-	modelLayer.init();
-	debugLayer.init();
-	guiLayer.init();
-	debugOverlay.init();
+	layerStack.init();
 
 
 	// Eventhandler init
@@ -179,11 +190,6 @@ void Screen::init() {
 
 	// Resize
 	handler->framebufferResize(dimension);
-	
-
-	// Picker init
-	Picker::init();
-
 }
 
 void Screen::update() {
@@ -205,6 +211,7 @@ void Screen::update() {
 		if (handler->getKey(KeyboardOptions::Rotate::down))  camera.rotate(*this, 1, 0, 0, leftDragging);
 		if (handler->getKey(KeyboardOptions::Application::close)) Renderer::closeGLFWWindow();
 		if (handler->getKey(KeyboardOptions::Debug::frame)) { guiLayer.debugFrame->visible = true; guiLayer.debugFrame->position = Vec2(0.8); GUI::select(guiLayer.debugFrame); }
+		if (handler->getKey(Keyboard::TAB)) { modelLayer.flags ^= Layer::disabled; }
 	}
 
 
@@ -213,15 +220,7 @@ void Screen::update() {
 
 
 	// Update layers
-	skyboxLayer.update();
-	modelLayer.update();
-	debugLayer.update();
-	guiLayer.update();
-	debugOverlay.update();
-
-
-	// Update picker
-	Picker::update(*this, handler->cursorPosition);
+	layerStack.update();
 }
 
 void Screen::render() {
@@ -230,36 +229,9 @@ void Screen::render() {
 	Renderer::clearColor();
 	Renderer::clearDepth();
 
-
-	// Render skybox
-	skyboxLayer.render();
-
-	// Render physicals
-	modelLayer.render();
-
-
-	// Debug 
-	debugLayer.render();
-
-
-	// Render edit tools
-	Picker::render(*this);
-
-
-	// Render to screen
-	screenFrameBuffer->unbind();
-	Renderer::disableDepthTest();
-	Shaders::quadShader.updateProjection(Mat4f());
-	Shaders::quadShader.updateTexture(screenFrameBuffer->texture);
-	quad->render();
-
-
-	// Render gui
-	guiLayer.render();
-
-
-	// Pie rendering
-	debugOverlay.render();
+	
+	// Render layers
+	layerStack.render();
 
 
 	// Finalize
