@@ -51,6 +51,7 @@ void Physical::makeMainPart(AttachedPart& newMainPart) {
 			}
 		}
 		newCenterCFrame = ~newCenterCFrame;
+		parts.size--;
 	} else {
 		throw "Attempting to make a part not in this physical the mainPart!";
 	}
@@ -69,7 +70,7 @@ bool Physical::detachPart(Part* part) {
 	if (part == mainPart) {
 		part->parent = nullptr;
 		if (parts.size >= 1) {
-			makeMainPart(parts[parts.size - 1]);
+			makeMainPart(parts[parts.size-1]);
 			refreshWithNewParts();
 			return false;
 		} else {

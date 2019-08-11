@@ -25,7 +25,7 @@ namespace WorldBuilder {
 		ExtendedPart* back;
 	};
 
-	HollowBoxParts buildHollowBox(BoundingBox box, double wallThickness);
+	HollowBoxParts buildHollowBox(Bounds box, double wallThickness);
 
 	struct SpiderFactory {
 		PartFactory bodyFactory;

@@ -51,16 +51,15 @@ public:
 	void removePart(Part* p);
 
 	inline bool isAnchored(Physical* p) const {
-		// return physicals.isLeftSide(p);
-		return false;
+		return p->anchored;
 	}
 
 	inline void anchor(Physical* p) {
-		// if (!isAnchored(p)) physicals.moveRightToLeft(p);
+		p->setAnchored(true);
 	}
 
 	inline void unanchor(Physical* p) {
-		// if (isAnchored(p)) physicals.moveLeftToRight(p);
+		p->setAnchored(false);
 	}
 
 	inline size_t getPartCount() const {

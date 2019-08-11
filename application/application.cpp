@@ -114,6 +114,12 @@ void setupWorld() {
 	world.addPart(xWallFactory.produce(GlobalCFrame(Position(-floorSize.x / 2, wallHeight / 2, 0.0)), 20000000.0, 1.0), true);
 	world.addPart(zWallFactory.produce(GlobalCFrame(Position(0.0, wallHeight / 2, -floorSize.y / 2)), 20000000.0, 1.0), true);
 
+	// hollow box
+	WorldBuilder::HollowBoxParts parts = WorldBuilder::buildHollowBox(Bounds(Position(12.0, 3.0, 14.0), Position(20.0, 8.0, 20.0)), 0.3);
+
+	parts.front->material.ambient = Vec4f(0.4, 0.6, 1.0, 0.3);
+	parts.back->material.ambient = Vec4f(0.4, 0.6, 1.0, 0.3);
+
 	// Rotating walls
 	PartFactory rotatingWallFactory(BoundingBox(5.0, 3.0, 0.5).toShape(), screen, "rotatingWall");
 	ExtendedPart* rotatingWall = rotatingWallFactory.produce(GlobalCFrame(Position(-12.0, 1.7, 0.0)), 20000000.0, 1.0);
@@ -125,7 +131,7 @@ void setupWorld() {
 
 	// Many many parts
 	for (int i = 0; i < 300; i++) {
-		ExtendedPart* newCube = cubeFactory.produce(GlobalCFrame(fRand(-10.0, 10.0), fRand(0.0, 20.0), fRand(-10.0, 10.0)), 1.0, 0.2);
+		ExtendedPart* newCube = cubeFactory.produce(GlobalCFrame(fRand(-10.0, 0.0), fRand(0.0, 10.0), fRand(-10.0, 0.0)), 1.0, 0.2);
 		world.addPart(newCube);
 	}
 
