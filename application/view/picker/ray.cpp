@@ -1,9 +1,10 @@
 #include "ray.h"
 
+#include "../engine/math/vec.h"
+#include "../engine/math/mat4.h"
+
 #include "../screen.h"
 
-#include "../engine/math/vec4.h"
-#include "../engine/math/mat4.h"
 
 Vec2f getNormalizedDeviceSpacePosition(Vec2f viewportSpacePosition, Vec2f screenSize) {
 	float x = 2 * viewportSpacePosition.x / screenSize.x - 1;
@@ -17,7 +18,7 @@ Vec3f calcRay(Screen& screen, Vec2f mouse) {
 	Vec4f eyeCoordinates = screen.camera.invertedProjectionMatrix * clipSpacePosition;
 	eyeCoordinates = Vec4f(eyeCoordinates.x, eyeCoordinates.y, -1.0f, 0.0f);
 	Vec4f rayWorld = screen.camera.invertedViewMatrix * eyeCoordinates;
-	Vec3f rayDirection = Vec3f(rayWorld.x, rayWorld.y, rayWorld.z).normalize();
+	Vec3f rayDirection = normalize(Vec3f(rayWorld.x, rayWorld.y, rayWorld.z));
 
 	return rayDirection;
 }

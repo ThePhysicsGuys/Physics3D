@@ -1,6 +1,6 @@
 #pragma once
 
-#include "vec3.h"
+#include "vec.h"
 
 /*
 	Computes the intersection of a line along <r> starting at r0
@@ -66,11 +66,11 @@ inline RayIntersection<T> rayTriangleIntersection(Vec3Template<T> point, Vec3Tem
 	(planeNormal * relativePoint)*(planeNormal * relativePoint) / planeNormal.lengthSquared();
 */
 inline double pointToPlaneDistanceSquared(Vec3 planeNormal, Vec3 relativePoint) {
-	return (planeNormal * relativePoint)*(planeNormal * relativePoint) / planeNormal.lengthSquared();
+	return (planeNormal * relativePoint)*(planeNormal * relativePoint) / lengthSquared(planeNormal);
 }
 
 inline float pointToPlaneDistanceSquared(Vec3f planeNormal, Vec3f relativePoint) {
-	return (planeNormal * relativePoint)*(planeNormal * relativePoint) / planeNormal.lengthSquared();
+	return (planeNormal * relativePoint)*(planeNormal * relativePoint) / lengthSquared(planeNormal);
 }
 
 struct CrossOverPoint {

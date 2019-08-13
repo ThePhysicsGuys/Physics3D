@@ -11,6 +11,13 @@
 #include "worldIterator.h"
 #include "datastructures/boundsTree.h"
 
+#include "datastructures/iteratorEnd.h"
+
+template<typename Iter>
+using TreePartIter = CompositeIterator<BoundsTreeIter<Iter, Physical>>;
+
+inline bool doesRayIntersectPart(Part& part, const Ray& ray);
+
 class WorldPrototype {
 private:
 	std::queue<std::function<void(WorldPrototype*)>> waitingOperations;
@@ -104,6 +111,22 @@ public:
 
 	ListOfPtrIterFactory<Physical> iterFreePhysicals() { return ListOfPtrIterFactory<Physical>(physicals.getSplitOffset(), physicals.end()); }
 	ListOfPtrIterFactory<const Physical> iterFreePhysicals() const { return ListOfPtrIterFactory<const Physical>(physicals.getSplitOffset(), physicals.end()); }
+
+
+	/*IteratorFactory<TreePartIter<TreeIteratorIntersectingBounds>, IteratorEnd> iterPartsIntersectingBounds(const Bounds& bounds) {
+		auto iter = objectTree.iterObjectsIntersectingBounds(bounds);
+		return IteratorFactory<TreePartIter<TreeIteratorIntersectingBounds>, IteratorEnd>(TreePartIter<TreeIteratorIntersectingBounds>(iter.begin()), IteratorEnd());
+	}
+	IteratorFactory<FilteredIterator<TreePartIter<TreeIteratorIntersectingRay>, IteratorEnd, Ray, doesRayIntersectPart>, IteratorEnd> iterPartsIntersectingRay(const Ray& ray) {
+		auto iter = objectTree.iterObjectsIntersectingRay(ray);
+		TreePartIter<TreeIteratorIntersectingRay> treeIter(iter.begin());
+		FilteredIterator<TreePartIter<TreeIteratorIntersectingRay>, IteratorEnd, Ray, doesRayIntersectPart> filteredIter(
+			treeIter, IteratorEnd(), ray
+		);
+		return IteratorFactory<FilteredIterator<TreePartIter<TreeIteratorIntersectingRay>, IteratorEnd, Ray, doesRayIntersectPart>, IteratorEnd>(
+			filteredIter, IteratorEnd()
+		);
+	}*/
 };
 
 template<typename T = Part>
@@ -117,6 +140,8 @@ public:
 
 	inline CustomPartIteratorFactory<T> iterFreeParts() { return CustomPartIteratorFactory<T>(iterFreeParts()); }
 	inline ConstCustomPartIteratorFactory<T> iterFreeParts() const { return ConstCustomPartIteratorFactory<T>(iterFreeParts()); }
+
+	
 };
 
 double computeCombinedInertiaBetween(const Physical& first, const Physical& second, const Vec3& localColissionFirst, const Vec3& localColissionSecond, const Vec3& colissionNormal);

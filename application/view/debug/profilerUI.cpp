@@ -4,8 +4,8 @@
 
 #include <algorithm>
 
+#include "../engine/math/vec.h"
 #include "../engine/math/mat2.h"
-#include "../engine/math/vec2.h"
 
 #include "../gui/gui.h"
 #include "../screen.h"

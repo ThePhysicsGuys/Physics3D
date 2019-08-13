@@ -58,7 +58,7 @@ void Camera::move(Screen& screen, double dx, double dy, double dz, bool leftDrag
 
 	if (dx != 0) {
 		Vec3 cameraRotationX = cframe.rotation.transpose() * Vec3(1, 0, 0);
-		Vec3 translationX = Vec3(cameraRotationX.x, 0, cameraRotationX.z).normalize() * dx;
+		Vec3 translationX = normalize(Vec3(cameraRotationX.x, 0, cameraRotationX.z)) * dx;
 		translation += translationX;
 
 		if (leftDragging) 
@@ -75,7 +75,7 @@ void Camera::move(Screen& screen, double dx, double dy, double dz, bool leftDrag
 
 	if (dz != 0) {
 		Vec3 cameraRotationZ = cframe.rotation.transpose() * Vec3(0, 0, 1);
-		Vec3 translationZ = Vec3(cameraRotationZ.x, 0, cameraRotationZ.z).normalize() * dz;
+		Vec3 translationZ = normalize(Vec3(cameraRotationZ.x, 0, cameraRotationZ.z)) * dz;
 		translation += translationZ;
 
 		if (leftDragging) 

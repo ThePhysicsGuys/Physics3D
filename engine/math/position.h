@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fix.h"
-#include "vec3.h"
+#include "vec.h"
 
 typedef Vec3Template<Fix<32>> Vec3Fix;
 

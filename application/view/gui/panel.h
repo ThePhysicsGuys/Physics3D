@@ -3,8 +3,7 @@
 #include "component.h"
 #include "container.h"
 
-#include "../engine/math/vec2.h"
-#include "../engine/math/vec4.h"
+#include "../engine/math/vec.h"
 
 #include <vector>
 

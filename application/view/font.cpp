@@ -1,14 +1,15 @@
 #include "font.h"
 
+#include "../engine/math/vec.h"
+
 #include "GL\glew.h"
 #include "GLFW\glfw3.h"
 
 #include "texture.h"
 #include "shaderProgram.h"
 #include "renderUtils.h"
-#include "../engine/math/vec4.h"
-#include "gui\gui.h"
-#include "mesh\primitive.h"
+#include "gui/gui.h"
+#include "mesh/primitive.h"
 
 #include "../util/log.h"
 

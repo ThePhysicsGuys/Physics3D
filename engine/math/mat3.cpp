@@ -69,7 +69,7 @@ Mat3Template<N> Mat3Template<N>::rotate(N angle, N x, N y, N z) const {
 template<typename N>
 Mat3Template<N> fromRotationVec(Vec3Template<N> rotVec) {
 	
-	N angle = rotVec.length();
+	N angle = length(rotVec);
 
 	if (!(angle != 0)) { // inverse is important! Catches weird values like Nan and Inf too
 		return Mat3Template<N>(1, 0, 0,
@@ -96,7 +96,7 @@ Mat3Template<N> fromRotationVec(Vec3Template<N> rotVec) {
 template<typename N>
 Mat3Template<N> rotateAround(N angle, Vec3Template<N> normal) {
 	// Using Rodrigues rotation formula;
-	normal = normal.normalize();
+	normal = normalize(normal);
 	Mat3Template<N> W = Mat3Template<N> (
 		 0,			normal.z, -normal.y,
 		-normal.z,  0,		   normal.x,

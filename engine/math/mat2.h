@@ -1,6 +1,6 @@
 #pragma once
 
-#include "vec2.h"
+#include "vec.h"
 
 template<typename T>
 struct Mat2Template {

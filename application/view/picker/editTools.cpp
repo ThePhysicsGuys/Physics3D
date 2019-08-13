@@ -1,5 +1,8 @@
 #include "editTools.h"
 
+#include "../engine/math/vec.h"
+#include "../engine/math/mat3.h"
+
 #include "picker.h"
 
 #include "../mesh/indexedMesh.h"
@@ -15,9 +18,6 @@
 
 #include "../gui/gui.h"
 
-#include "../engine/math/mat3.h"
-#include "../engine/math/vec3.h"
-#include "../engine/math/vec4.h"
 
 Mat3 transformations[] = {
 	Mat3(),
@@ -259,8 +259,8 @@ void EditTools::dragRotateTool(Screen& screen) {
 	Vec3 intersectionVector = intersection - p0;
 
 	// Length check
-	double length1sq = intersectionVector.lengthSquared();
-	double length2sq = selectedPoint.lengthSquared();
+	double length1sq = lengthSquared(intersectionVector);
+	double length2sq = lengthSquared(selectedPoint);
 	if (length1sq == 0 || length2sq == 0)
 		return; // Prevent errors when vector is the zero vector
 
@@ -309,14 +309,14 @@ void EditTools::dragScaleTool(Screen& screen) {
 	Vec3 b = screen.ray;
 	Vec3 AB = B - A;
 
-	double distance = (AB - (AB * b) * b).length();
-	Vec3 scale = distance * a / selectedPoint.length();
+	double distance = length(AB - (AB * b) * b);
+	Vec3 scale = distance * a / length(selectedPoint);
 
 	Mat3 scaledRotation = screen.selectedPart->cframe.rotation;
 
-	double sx = (scale.x == 0) ? 1 : scale.x / Vec3(scaledRotation.m00, scaledRotation.m01, scaledRotation.m02).length();
-	double sy = (scale.y == 0) ? 1 : scale.y / Vec3(scaledRotation.m10, scaledRotation.m11, scaledRotation.m12).length();
-	double sz = (scale.z == 0) ? 1 : scale.z / Vec3(scaledRotation.m20, scaledRotation.m21, scaledRotation.m22).length();
+	double sx = (scale.x == 0) ? 1 : scale.x / length(Vec3(scaledRotation.m00, scaledRotation.m01, scaledRotation.m02));
+	double sy = (scale.y == 0) ? 1 : scale.y / length(Vec3(scaledRotation.m10, scaledRotation.m11, scaledRotation.m12));
+	double sz = (scale.z == 0) ? 1 : scale.z / length(Vec3(scaledRotation.m20, scaledRotation.m21, scaledRotation.m22));
 
 	screen.selectedPart->cframe.rotation = scaledRotation.scale(sx, sy, sz);
 }
@@ -330,7 +330,7 @@ void EditTools::dragTranslateTool(Screen& screen) {
 	} else {
 		// Closest point on ray1 (A + s * a) from ray2 (B + t * b). Ray1 is the ray from the parts' center in the direction of the edit tool, ray2 is the mouse ray. Directions a and b are normalized. Only s is calculated.
 		Position B = screen.camera.cframe.position;
-		Vec3 b = screen.ray.normalize();
+		Vec3 b = normalize(screen.ray);
 		Position A = screen.selectedPart->cframe.position;
 		Vec3 a;
 		switch (selectedEditDirection) {

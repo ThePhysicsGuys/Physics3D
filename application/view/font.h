@@ -3,9 +3,7 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-#include "../engine/math/vec2.h"
-#include "../engine/math/vec3.h"
-#include "../engine/math/vec4.h"
+#include "../engine/math/vec.h"
 
 #include <string> 
 

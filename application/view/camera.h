@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../engine/math/vec3.h"
+#include "../../engine/math/vec.h"
 #include "../../engine/math/mat3.h"
 #include "../../engine/math/mat4.h"
 #include "../../engine/math/globalCFrame.h"

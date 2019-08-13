@@ -2,8 +2,8 @@
 
 struct Physical;
 
+#include "math/vec.h"
 #include "math/mat3.h"
-#include "math/vec3.h"
 #include "math/cframe.h"
 #include "part.h"
 #include "math/bounds.h"

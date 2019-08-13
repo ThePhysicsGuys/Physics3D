@@ -1,8 +1,6 @@
 #pragma once
 
-#include "../engine/math/vec2.h"
-#include "../engine/math/vec3.h"
-#include "../engine/math/vec4.h"
+#include "../engine/math/vec.h"
 #include "../engine/math/mat4.h"
 
 #include <string>

@@ -1,7 +1,6 @@
 #pragma once
 
-#include "../math/vec3.h"
-#include "../math/mat3.h"
+#include "../math/vec.h"
 #include "../math/cframe.h"
 #include "../datastructures/parallelVector.h"
 #include "../datastructures/sharedArray.h"

@@ -56,8 +56,8 @@ void GravityWorld::applyExternalForces() {
 
 		if(handler->anyKey) {
 			Vec3 UP(0, 1, 0);
-			Vec3 forward = (playerZ % UP % UP).normalize();
-			Vec3 right = -(playerX % UP % UP).normalize();
+			Vec3 forward = normalize(playerZ % UP % UP);
+			Vec3 right = -normalize(playerX % UP % UP);
 			bool leftDragging = handler->leftDragging;
 			if(handler->getKey(KeyboardOptions::Move::forward)) player->parent->applyForceAtCenterOfMass(forward * player->parent->mass * 20.0);
 			if(handler->getKey(KeyboardOptions::Move::backward)) player->parent->applyForceAtCenterOfMass(-forward * player->parent->mass * 20.0);

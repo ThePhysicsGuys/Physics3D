@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../engine/math/vec2.h"
+#include "../engine/math/vec.h"
 #include "inputHandler.h"
 
 class Screen;

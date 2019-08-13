@@ -2,7 +2,7 @@
 
 struct ComputationBuffers;
 
-#include "../math/vec3.h"
+#include "../math/vec.h"
 #include "convexShapeBuilder.h"
 #include "intersection.h"
 

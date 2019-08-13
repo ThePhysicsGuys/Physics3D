@@ -1,5 +1,10 @@
 #include "picker.h"
 
+
+#include "../engine/math/vec.h"
+#include "../engine/math/mat3.h"
+#include "../engine/math/mathUtil.h"
+
 #include "ray.h"
 
 #include "../screen.h"
@@ -15,9 +20,6 @@
 #include "../../io/import.h"
 
 #include "../engine/physical.h"
-#include "../engine/math/mat3.h"
-#include "../engine/math/vec4.h"
-#include "../engine/math/mathUtil.h"
 #include "../engine/sharedLockGuard.h"
 #include "../engine/geometry/shape.h"
 
@@ -58,7 +60,7 @@ namespace Picker {
 		for (ExtendedPart& part : *screen.world) {
 			if (&part == screen.camera.attachment) continue;
 			Vec3 relPos = part.cframe.position - ray.start;
-			if (ray.direction.pointToLineDistanceSquared(relPos) > part.maxRadius * part.maxRadius)
+			if (pointToLineDistanceSquared(ray.direction, relPos) > part.maxRadius * part.maxRadius)
 				continue;
 
 			float distance = intersect(ray, part.visualShape, part.cframe);
@@ -171,7 +173,7 @@ namespace Picker {
 
 		Mat3 cameraFrame = screen.camera.cframe.rotation.transpose();
 		Vec3 cameraDirection = cameraFrame * Vec3(0, 0, 1);
-		Vec3 cameraYDirection = Vec3(cameraDirection.x, 0, cameraDirection.z).normalize();
+		Vec3 cameraYDirection = normalize(Vec3(cameraDirection.x, 0, cameraDirection.z));
 
 		double distance = Vec3(screen.selectedPoint - screen.camera.cframe.position) * cameraDirection / (screen.ray * cameraDirection);
 		Position planeIntersection = screen.camera.cframe.position + distance * screen.ray;

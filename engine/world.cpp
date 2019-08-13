@@ -39,7 +39,7 @@ double computeCombinedInertiaBetween(const Physical& first, const Physical& seco
 
 	SymmetricMat3 accelToForceMat = ~(accMat1 + accMat2);
 	Vec3 imaginaryForceForAcceleration = accelToForceMat * colissionNormal;
-	double forcePerAccelRatio = imaginaryForceForAcceleration * colissionNormal / colissionNormal.lengthSquared();
+	double forcePerAccelRatio = imaginaryForceForAcceleration * colissionNormal / lengthSquared(colissionNormal);
 
 	if(forcePerAccelRatio != forcePerAccelRatio) {
 		Log::error("ForcePerAccelRatio is bad! %f", forcePerAccelRatio);
@@ -58,7 +58,7 @@ void handleCollision(Part& part1, Part& part2, Position collisionPoint, Vec3 exi
 	Physical& p2 = *part2.parent;
 
 	double sizeOrder = std::min(part1.maxRadius, part2.maxRadius);
-	if(exitVector.lengthSquared() <= 1E-8 * sizeOrder*sizeOrder) {
+	if(lengthSquared(exitVector) <= 1E-8 * sizeOrder*sizeOrder) {
 		return; // don't do anything for very small colissions
 	}
 
@@ -92,7 +92,7 @@ void handleCollision(Part& part1, Part& part2, Position collisionPoint, Vec3 exi
 	Vec3 impulse;
 
 	if(isImpulseColission) { // moving towards the other object
-		Vec3 desiredAccel = -exitVector * (relativeVelocity * exitVector) / exitVector.lengthSquared();
+		Vec3 desiredAccel = -exitVector * (relativeVelocity * exitVector) / lengthSquared(exitVector);
 		Vec3 zeroRelVelImpulse = desiredAccel * combinedInertia;
 		impulse = zeroRelVelImpulse * (1.0+ELASTICITY);
 		if(!anchoredColission) p1.applyImpulse(collissionRelP1, impulse);
@@ -100,7 +100,7 @@ void handleCollision(Part& part1, Part& part2, Position collisionPoint, Vec3 exi
 		relativeVelocity = p1.getVelocityOfPoint(collissionRelP1) - p2.getVelocityOfPoint(collissionRelP2); // set new relativeVelocity
 	}
 
-	Vec3 slidingVelocity = exitVector % relativeVelocity % exitVector / exitVector.lengthSquared();
+	Vec3 slidingVelocity = exitVector % relativeVelocity % exitVector / lengthSquared(exitVector);
 
 	// Compute combined inertia in the horizontal direction
 	double combinedHorizontalInertia;
@@ -113,18 +113,18 @@ void handleCollision(Part& part1, Part& part2, Position collisionPoint, Vec3 exi
 	}
 
 	if (isImpulseColission) {
-		Vec3 maxFrictionImpulse = -exitVector % impulse % exitVector / exitVector.lengthSquared() * staticFriction;
+		Vec3 maxFrictionImpulse = -exitVector % impulse % exitVector / lengthSquared(exitVector) * staticFriction;
 		Vec3 stopFricImpulse = -slidingVelocity * combinedHorizontalInertia;
 
-		Vec3 fricImpulse = (stopFricImpulse.lengthSquared() < maxFrictionImpulse.lengthSquared()) ? stopFricImpulse : maxFrictionImpulse;
+		Vec3 fricImpulse = (lengthSquared(stopFricImpulse) < lengthSquared(maxFrictionImpulse)) ? stopFricImpulse : maxFrictionImpulse;
 
 		if (!anchoredColission) p1.applyImpulse(collissionRelP1, fricImpulse);
 		p2.applyImpulse(collissionRelP2, -fricImpulse);
 	}
 
-	double normalForce = depthForce.length();
+	double normalForce = length(depthForce);
 	double frictionForce = normalForce * dynamicFriction;
-	double slidingSpeed = slidingVelocity.length() + 1E-100;
+	double slidingSpeed = length(slidingVelocity) + 1E-100;
 	Vec3 dynamicFricForce;
 	double dynamicSaturationSpeed = sizeOrder * 0.01;
 	if (slidingSpeed > dynamicSaturationSpeed) {
@@ -159,7 +159,7 @@ bool boundsSphereEarlyEnd(const BoundingBox& bounds, const Vec3& localSphereCent
 inline void runColissionTests(Physical& phys1, Physical& phys2, WorldPrototype& world, std::vector<Colission>& colissions) {
 	Vec3 deltaCentroid = phys1.circumscribingSphere.origin - phys2.circumscribingSphere.origin;
 	double maxDistanceBetween = phys1.circumscribingSphere.radius + phys2.circumscribingSphere.radius;
-	if (deltaCentroid.lengthSquared() > maxDistanceBetween * maxDistanceBetween) {
+	if (lengthSquared(deltaCentroid) > maxDistanceBetween * maxDistanceBetween) {
 		intersectionStatistics.addToTally(IntersectionResult::PHYSICAL_DISTANCE_REJECT, phys1.getPartCount() * phys2.getPartCount());
 		return;
 	}
@@ -177,7 +177,7 @@ inline void runColissionTests(Physical& phys1, Physical& phys2, WorldPrototype& 
 			double maxRadiusBetween = p1.maxRadius + p2.maxRadius;
 
 			Vec3 deltaPosition = p1.cframe.position - p2.cframe.position;
-			double distanceSqBetween = deltaPosition.lengthSquared();
+			double distanceSqBetween = lengthSquared(deltaPosition);
 
 			if (distanceSqBetween > maxRadiusBetween * maxRadiusBetween) {
 				intersectionStatistics.addToTally(IntersectionResult::PART_DISTANCE_REJECT, 1);

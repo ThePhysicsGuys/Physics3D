@@ -4,8 +4,7 @@
 
 #include "../util/log.h"
 
-#include "../engine/math/vec4.h"
-#include "../engine/math/vec3.h"
+#include "../engine/math/vec.h"
 #include "../engine/math/mat3.h"
 
 #include <fstream>

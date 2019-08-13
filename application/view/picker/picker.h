@@ -2,7 +2,7 @@
 
 #include "editTools.h"
 
-#include "../engine/math/vec2.h"
+#include "../engine/math/vec.h"
 
 class Screen;
 

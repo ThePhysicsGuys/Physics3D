@@ -1,6 +1,6 @@
 #include "intersection.h"
 
-#include "../math/vec3.h"
+#include "../math/vec.h"
 #include "convexShapeBuilder.h"
 #include "computationBuffer.h"
 #include "../math/utils.h"
@@ -349,7 +349,7 @@ bool runEPA(const Shape& first, const Shape& second, const Tetrahedron& s, Vec3f
 		MinkPoint point(getSupport(first, second, closestTriangleNormal));
 
 		// point is the new point to be added, check if it's past the current triangle
-		double newPointDistSq = pow(point.p * closestTriangleNormal, 2) / closestTriangleNormal.lengthSquared();
+		double newPointDistSq = pow(point.p * closestTriangleNormal, 2) / lengthSquared(closestTriangleNormal);
 
 		MinkowskiPointIndices curIndices{point.originFirst, point.originSecond};
 
@@ -412,7 +412,7 @@ bool runEPATransformed(const Shape& first, const Shape& second, const Tetrahedro
 		MinkPoint point(getSupport(first, second, relativeCFrame, closestTriangleNormal));
 
 		// point is the new point to be added, check if it's past the current triangle
-		double newPointDistSq = pow(point.p * closestTriangleNormal, 2) / closestTriangleNormal.lengthSquared();
+		double newPointDistSq = pow(point.p * closestTriangleNormal, 2) / lengthSquared(closestTriangleNormal);
 
 		MinkowskiPointIndices curIndices{point.originFirst, point.originSecond};
 

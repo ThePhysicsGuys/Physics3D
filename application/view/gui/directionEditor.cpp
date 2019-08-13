@@ -1,5 +1,9 @@
 #include "directionEditor.h"
 
+#include "../engine/math/vec.h"
+#include "../engine/math/cframe.h"
+#include "../engine/math/mathUtil.h"
+
 #include "gui.h"
 
 #include "../material.h"
@@ -12,9 +16,6 @@
 #include "../mesh/indexedMesh.h"
 #include "../mesh/primitive.h"
 
-#include "../engine/math/cframe.h"
-#include "../engine/math/vec4.h"
-#include "../engine/math/mathUtil.h"
 
 
 DirectionEditor::DirectionEditor(double x, double y, double width, double height) : Component(x, y, width, height) {

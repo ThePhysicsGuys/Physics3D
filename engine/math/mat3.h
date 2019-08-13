@@ -7,7 +7,7 @@ struct SymmetricMat3Template;
 template<typename N>
 struct DiagonalMat3Template;
 
-#include "vec3.h"
+#include "vec.h"
 #include "../templateUtils.h"
 
 template<typename N>

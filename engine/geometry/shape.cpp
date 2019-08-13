@@ -159,7 +159,7 @@ void Shape::computeNormals(Vec3f* buffer) const {
 		Vec3f D1 = v1 - v0;
 		Vec3f D2 = v2 - v0;
 
-		Vec3f faceNormal = (D1 % D2).normalize();
+		Vec3f faceNormal = normalize(D1 % D2);
 
 		buffer[triangle.firstIndex] += faceNormal;
 		buffer[triangle.secondIndex] += faceNormal;
@@ -167,7 +167,7 @@ void Shape::computeNormals(Vec3f* buffer) const {
 	}
 
 	for (int i = 0; i < vertexCount; i++) {
-		buffer[i] = buffer[i].normalize();
+		buffer[i] = normalize(buffer[i]);
 	}
 }
 
@@ -422,9 +422,9 @@ Vec3 Shape::getCenterOfMass() const {
 		Vec3f D2 = v2 - v0;
 
 		Vec3f dFactor = D1 % D2;
-		Vec3f vFactor = v0.squared() + v1.squared() + v2.squared() + v0.mul(v1) + v1.mul(v2) + v2.mul(v0);
+		Vec3f vFactor = elementWiseSquare(v0) + elementWiseSquare(v1) + elementWiseSquare(v2) + elementWiseMul(v0, v1) + elementWiseMul(v1, v2) + elementWiseMul(v2, v0);
 
-		total += Vec3(dFactor.mul(vFactor));
+		total += Vec3(elementWiseMul(dFactor, vFactor));
 	}
 	
 	return total / (24 * getVolume());
@@ -440,7 +440,7 @@ Sphere Shape::getCircumscribingSphere() const {
 double Shape::getMaxRadiusSq() const {
 	double bestDistSq = 0;
 	for(Vec3f vertex : iterVertices()) {
-		double distSq = vertex.lengthSquared();
+		double distSq = lengthSquared(vertex);
 		if(distSq > bestDistSq) {
 			bestDistSq = distSq;
 		}
@@ -451,7 +451,7 @@ double Shape::getMaxRadiusSq() const {
 double Shape::getMaxRadiusSq(Vec3f reference) const {
 	double bestDistSq = 0;
 	for (Vec3f vertex : iterVertices()) {
-		double distSq = (vertex-reference).lengthSquared();
+		double distSq = lengthSquared(vertex-reference);
 		if (distSq > bestDistSq) {
 			bestDistSq = distSq;
 		}
@@ -490,8 +490,8 @@ SymmetricMat3 Shape::getInertia(CFrame reference) const {
 		Vec3 dFactor = D1 % D2;
 
 		// Diagonal Elements
-		Vec3 squaredIntegral = v0.cubed() + v1.cubed() + v2.cubed() + v0.squared().mul(v1 + v2) + v1.squared().mul(v0 + v2) + v2.squared().mul(v0 + v1) + v0.mul(v1).mul(v2);
-		Vec3 diagonalElementParts = dFactor.mul(squaredIntegral) / 60;
+		Vec3 squaredIntegral = elementWiseCube(v0) + elementWiseCube(v1) + elementWiseCube(v2) + elementWiseMul(elementWiseSquare(v0), v1 + v2) + elementWiseMul(elementWiseSquare(v1), v0 + v2) + elementWiseMul(elementWiseSquare(v2), v0 + v1) + elementWiseMul(elementWiseMul(v0, v1), v2);
+		Vec3 diagonalElementParts = elementWiseMul(dFactor, squaredIntegral) / 60;
 
 		total.m00 += diagonalElementParts.y + diagonalElementParts.z;
 		total.m11 += diagonalElementParts.z + diagonalElementParts.x;

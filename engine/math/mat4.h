@@ -7,8 +7,7 @@ typedef Mat4Template<double>	Mat4;
 typedef Mat4Template<float>		Mat4f;
 typedef Mat4Template<long long>	Mat4l;
 
-#include "vec3.h"
-#include "vec4.h"
+#include "vec.h"
 #include "mat3.h"
 
 template<typename N>

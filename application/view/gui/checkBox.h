@@ -2,8 +2,7 @@
 
 #include <string>
 
-#include "../engine/math/vec2.h"
-#include "../engine/math/vec4.h"
+#include "../engine/math/vec.h"
 
 #include "component.h"
 

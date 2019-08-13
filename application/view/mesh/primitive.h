@@ -4,7 +4,7 @@
 #include "GLFW\glfw3.h"
 
 #include "arrayMesh.h"
-#include "../engine/math/vec2.h"
+#include "../engine/math/vec.h"
 #include "../engine/math/mathUtil.h"
 
 struct Primitive {

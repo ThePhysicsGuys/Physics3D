@@ -239,9 +239,9 @@ void runTick() {
 
 void toggleFlying() {
 	if (screen.camera.flying) {
+		screen.camera.flying = false;
 		screen.camera.attachment->cframe = screen.camera.cframe;
 		screen.world->addPart(screen.camera.attachment);
-		screen.camera.flying = false;
 	} else {
 		screen.world->removePart(screen.camera.attachment);
 		screen.camera.flying = true;

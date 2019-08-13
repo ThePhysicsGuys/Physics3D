@@ -3,7 +3,7 @@
 #include "orderedVector.h"
 #include "component.h"
 
-#include "../engine/math/vec2.h"
+#include "../engine/math/vec.h"
 
 class Layout;
 

@@ -109,7 +109,7 @@ Texture* Texture::colored(Vec4 color) {
 			for (int k = 0; k < channels; k++) {
 
 				int index = (i + height * j) * channels + k;
-				unsigned char value = unsigned char (buffer[index] * color.v[k]);
+				unsigned char value = unsigned char (buffer[index] * color[k]);
 				buffer[index] = value;
 			}
 		}

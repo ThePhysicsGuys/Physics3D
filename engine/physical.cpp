@@ -320,7 +320,7 @@ double Physical::getInertiaOfPointInDirectionLocal(const Vec3Local& localPoint, 
 
 	Vec3 force = localDirection;
 	Vec3 accel = accMat * force;
-	double accelInForceDir = accel * localDirection / localDirection.lengthSquared();
+	double accelInForceDir = accel * localDirection / lengthSquared(localDirection);
 
 	return 1 / accelInForceDir;
 
@@ -335,7 +335,7 @@ double Physical::getInertiaOfPointInDirectionRelative(const Vec3Relative& relPoi
 }
 
 double Physical::getVelocityKineticEnergy() const {
-	return mass * velocity.lengthSquared() / 2;
+	return mass * lengthSquared(velocity) / 2;
 }
 double Physical::getAngularKineticEnergy() const {
 	Vec3 localAngularVel = getCFrame().relativeToLocal(angularVelocity);

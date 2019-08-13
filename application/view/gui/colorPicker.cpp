@@ -181,23 +181,23 @@ void ColorPicker::press(Vec2 point) {
 	double radius = height / 2 - padding;
 	Vec2 center = position + Vec2(padding + 2 * GUI::colorPickerBarWidth + 2 * GUI::colorPickerSpacing + 2 * 2 * GUI::colorPickerBarBorderWidth + radius, -height / 2);
 	Vec2 pointer = (point - center);
-	double length = pointer.length();
+	double l = length(pointer);
 
 	if (!colorPicking && !brightnessPicking && !alphaPicking) {
-		colorPicking = length <= radius;
+		colorPicking = l <= radius;
 	} 
 
 	if (colorPicking) {
-		if (length > radius) {
-			pointer = pointer / length * radius;
+		if (l > radius) {
+			pointer = pointer / l * radius;
 			point = center + pointer;
-			length = radius;
+			l = radius;
 		}
 
 		crosshair = point - position;
 
 		double hue = fmod(atan2(-pointer.y, pointer.x) / (2 * 3.14159265359) + 1.25, 1);
-		double saturation = length / radius;
+		double saturation = l / radius;
 		hsva = Vec4(hue, saturation, hsva.z, hsva.w);
 		(*action)(this);
 	}

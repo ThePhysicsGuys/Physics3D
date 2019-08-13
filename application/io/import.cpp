@@ -39,7 +39,7 @@ Vec3 Import::parseVec3(std::string vec) {
 	std::vector<std::string> tokens = split(vec, ' ');
 	Vec3 vector = Vec3();
 	for (int i = 0; i < 3; i++) {
-		vector.v[i] = Import::parseDouble(tokens[i]);
+		vector[i] = Import::parseDouble(tokens[i]);
 	}
 	return vector;
 }
@@ -48,7 +48,7 @@ Position Import::parsePosition(std::string vec) {
 	std::vector<std::string> tokens = split(vec, ' ');
 	Position vector;
 	for (int i = 0; i < 3; i++) {
-		vector.v[i] = Fix<32>(Import::parseLong(tokens[i]));
+		vector[i] = Fix<32>(Import::parseLong(tokens[i]));
 	}
 	return vector;
 }
@@ -57,7 +57,7 @@ Vec4 Import::parseVec4(std::string vec) {
 	std::vector<std::string> tokens = split(vec, ' ');
 	Vec4 vector = Vec4();
 	for (int i = 0; i < 4; i++) {
-		vector.v[i] = Import::parseDouble(tokens[i]);
+		vector[i] = Import::parseDouble(tokens[i]);
 	}
 	return vector;
 }
@@ -66,7 +66,7 @@ Vec4f Import::parseVec4f(std::string vec) {
 	std::vector<std::string> tokens = split(vec, ' ');
 	Vec4f vector = Vec4f();
 	for (int i = 0; i < 4; i++) {
-		vector.v[i] = Import::parseFloat(tokens[i]);
+		vector[i] = Import::parseFloat(tokens[i]);
 	}
 	return vector;
 }
@@ -75,7 +75,7 @@ Vec3f Import::parseVec3f(std::string vec) {
 	std::vector<std::string> tokens = split(vec, ' ');
 	Vec3f vector = Vec3f();
 	for (int i = 0; i < 3; i++) {
-		vector.v[i] = Import::parseFloat(tokens[i]);
+		vector[i] = Import::parseFloat(tokens[i]);
 	}
 	return vector;
 }

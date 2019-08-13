@@ -3,8 +3,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include "../engine/math/vec2.h"
-#include "../engine/math/vec4.h"
+#include "../engine/math/vec.h"
 
 namespace Renderer {
 
