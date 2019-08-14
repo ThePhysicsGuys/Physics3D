@@ -38,8 +38,8 @@ auto operator*(const VectorBasis<T, Size>& vec, const T2& factor) -> VectorBasis
 	return result;
 }
 
-template<template<typename, size_t> typename VectorBasis, typename T, typename T2, size_t Size>
-auto operator*(const T2& factor, const VectorBasis<T, Size>& vec) -> VectorBasis<decltype(factor * vec[0]), Size> {
+template<template<typename, size_t> typename VectorBasis, typename T, size_t Size>
+auto operator*(const T& factor, const VectorBasis<T, Size>& vec) -> VectorBasis<decltype(factor * vec[0]), Size> {
 	VectorBasis<decltype(factor * vec[0]), Size> result;
 	for (size_t i = 0; i < Size; i++) {
 		result[i] = factor * vec[i];
