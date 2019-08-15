@@ -43,6 +43,14 @@ public:
 		return CFrame(rotation.transpose() * Vec3(globalFrame.position - position), rotation.transpose() * globalFrame.rotation);
 	}
 
+	inline Mat3 localToGlobal(const Mat3& localRot) const {
+		return rotation * localRot;
+	}
+
+	inline Mat3 globalToLocal(const Mat3& globalRot) const {
+		return rotation.transpose() * globalRot;
+	}
+
 	inline CFrame localToRelative(const CFrame& lFrame) const {
 		return CFrame(rotation * lFrame.position, rotation * lFrame.rotation);
 	}

@@ -338,6 +338,11 @@ void WorldPrototype::tick(double deltaT) {
 
 	intersectionStatistics.nextTally();
 
+	physicsMeasure.mark(PhysicsProcess::CONSTRAINTS);
+	for (const ConstraintGroup& group : constraints) {
+		group.apply();
+	}
+
 	physicsMeasure.mark(PhysicsProcess::WAIT_FOR_LOCK);
 	mutLock.upgrade();
 	physicsMeasure.mark(PhysicsProcess::UPDATING);

@@ -151,6 +151,13 @@ void DebugLayer::render() {
 		pointLog.add(AppDebug::ColoredPoint(p.getCenterOfMass(), Debug::CENTER_OF_MASS));
 	}
 
+	for (const ConstraintGroup& c : screen->world->constraints) {
+		for (const BallConstraint& bc : c.ballConstraints) {
+			vecLog.add(AppDebug::ColoredVector(bc.a->getCFrame().getPosition(), bc.a->getCFrame().localToRelative(bc.attachA), Debug::INFO_VEC));
+			vecLog.add(AppDebug::ColoredVector(bc.b->getCFrame().getPosition(), bc.b->getCFrame().localToRelative(bc.attachB), Debug::INFO_VEC));
+		}
+	}
+
 	if (screen->selectedPart != nullptr) {
 		GlobalCFrame selectedCFrame(screen->selectedPart->cframe);
 		for (const Vec3f& corner : screen->selectedPart->hitbox.iterVertices()) {
@@ -222,8 +229,8 @@ void DebugLayer::render() {
 
 	// Update debug meshes
 	graphicsMeasure.mark(GraphicsProcess::VECTORS);
-	updateVecMesh(vectorMesh, AppDebug::getVectorBuffer().data, AppDebug::getVectorBuffer().size);
-	updatePointMesh(pointMesh, AppDebug::getPointBuffer().data, AppDebug::getPointBuffer().size);
+	updateVecMesh(vectorMesh, vecLog.data, vecLog.size);
+	updatePointMesh(pointMesh, pointLog.data, pointLog.size);
 
 
 	// Render vector mesh

@@ -8,6 +8,7 @@ const char * physicsLabels[]{
 	"EPA",
 	"Collision",
 	"Col. Handling",
+	"Constraints",
 	"Update Tree Bounds",
 	"Update Tree Structure",
 	"Wait for lock",

@@ -1,5 +1,8 @@
 #pragma once
 
+#include "mat2.h"
+#include "mat3.h"
+#include "mat4.h"
 
 template<typename T>
 class LargeVector {
@@ -40,6 +43,22 @@ public:
 		std::swap(this->data, other.data);
 		std::swap(this->size, other.size);
 		return *this;
+	}
+
+	template<template<typename, size_t> typename VectorBasis, size_t Size>
+	inline void setSubVector(size_t offset, const VectorBasis<T, Size>& vec) {
+		for (int i = 0; i < Size; i++) {
+			this->data[i + offset] = vec[i];
+		}
+	}
+
+	template<template<typename, size_t> typename VectorBasis, size_t Size>
+	inline VectorBasis<T, Size> getSubVector(size_t offset) {
+		VectorBasis<T, Size> result;
+		for (int i = 0; i < Size; i++) {
+			result[i] = this->data[i + offset];
+		}
+		return result;
 	}
 
 	~LargeVector() { delete[] data; }
@@ -95,6 +114,22 @@ public:
 		return data + width * index;
 	}
 
+	void setSubMatrix(size_t topLeftRow, size_t topLeftCol, const Mat3Template<T>& matrix) {
+		for (size_t row = 0; row < 3; row++) {
+			for (size_t col = 0; col < 3; col++) {
+				(*this)[row + topLeftRow][col + topLeftCol] = matrix[row][col];
+			}
+		}
+	}
+
+	void setSubMatrix(size_t topLeftRow, size_t topLeftCol, const LargeMatrix& matrix) {
+		for (size_t row = 0; row < matrix.height; row++) {
+			for (size_t col = 0; col < matrix.width; col++) {
+				(*this)[row + topLeftRow][col + topLeftCol] = matrix[row][col];
+			}
+		}
+	}
+
 	const T* begin() const { return data; }
 	const T* end() const { return data + width * height; }
 	T* begin() { return data; }
@@ -121,3 +156,5 @@ LargeVector<T> operator*(const LargeMatrix<T>& m, const LargeVector<T>& v) {
 
 template<typename T>
 void destructiveSolve(LargeMatrix<T>& m, LargeVector<T>& v);
+
+

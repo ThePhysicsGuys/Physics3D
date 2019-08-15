@@ -13,6 +13,8 @@
 
 #include "datastructures/iteratorEnd.h"
 
+#include "constraintGroup.h"
+
 template<typename Iter>
 using TreePartIter = CompositeIterator<BoundsTreeIter<Iter, Physical>>;
 
@@ -35,6 +37,7 @@ public:
 	mutable std::shared_mutex lock;
 	mutable std::mutex queueLock;
 	BoundsTree<Physical> objectTree;
+	std::vector<ConstraintGroup> constraints;
 
 	size_t age = 0;
 

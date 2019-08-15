@@ -152,8 +152,8 @@ void Screen::init() {
 
 	// Layer creation
 	skyboxLayer = SkyboxLayer(this);
-	modelLayer = ModelLayer(this, Layer::noRender);
-	debugLayer = DebugLayer(this, Layer::noRender);
+	modelLayer = ModelLayer(this);
+	debugLayer = DebugLayer(this);
 	pickerLayer = PickerLayer(this, Layer::noRender);
 	postprocessLayer = PostprocessLayer(this);
 	guiLayer = GuiLayer(this);

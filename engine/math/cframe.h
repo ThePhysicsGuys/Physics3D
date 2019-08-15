@@ -50,6 +50,14 @@ public:
 		return CFrameTemplate<T>(rotation.transpose()*rFrame.position, rotation.transpose() * rFrame.rotation);
 	}
 
+	inline Mat3Template<T> localToGlobal(const Mat3Template<T>& localRot) const {
+		return rotation * localRot;
+	}
+
+	inline Mat3Template<T> globalToLocal(const Mat3Template<T>& globalRot) const {
+		return rotation.transpose() * globalRot;
+	}
+
 	inline CFrameTemplate<T> operator~() const {
 		return CFrameTemplate<T>(rotation.transpose() * -position, rotation.transpose());
 	}

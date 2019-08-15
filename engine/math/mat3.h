@@ -9,6 +9,7 @@ struct DiagonalMat3Template;
 
 #include "vec.h"
 #include "../templateUtils.h"
+#include "matBase.h"
 
 template<typename N>
 struct EigenValues {
@@ -140,6 +141,9 @@ public:
 		m20 *= f; m21 *= f; m22 *= f;
 		return *this;
 	}
+
+	ArrayWithStride<N, 3> operator[](int index) { return ArrayWithStride<N, 3>{m + index}; }
+	ArrayWithStrideConst<N, 3> operator[](int index) const { return ArrayWithStrideConst<N, 3>{m + index}; }
 
 	// EigenSet<N> getEigenDecomposition() const;
 };

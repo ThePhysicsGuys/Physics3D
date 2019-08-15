@@ -95,6 +95,7 @@ void setupWorld() {
 	WorldBuilder::SpiderFactory spiderFactories[]{ {0.5, 3},{0.5, 4},{0.5, 5},{0.5, 6} };
 	PartFactory legFactory = PartFactory(BoundingBox(0.05, 0.5, 0.05).toShape(), screen, "SpiderLeg");
 	PartFactory cubeFactory(Library::createCube(0.2), screen, "Cube");
+	PartFactory bigCubeFactory(Library::createCube(2.0), screen, "Cube");
 	PartFactory sphereFactory(sphereShape, screen, "Sphere");
 	PartFactory triangleFactory(Library::trianglePyramid, screen, "Triangle");
 
@@ -130,10 +131,21 @@ void setupWorld() {
 	rotatingWall2->parent->angularVelocity = Vec3(0, 0.7, 0);
 
 	// Many many parts
-	for (int i = 0; i < 300; i++) {
+	/*for (int i = 0; i < 300; i++) {
 		ExtendedPart* newCube = cubeFactory.produce(GlobalCFrame(fRand(-10.0, 0.0), fRand(0.0, 10.0), fRand(-10.0, 0.0)), 1.0, 0.2);
 		world.addPart(newCube);
-	}
+	}*/
+
+
+	ExtendedPart* bigCube1 = bigCubeFactory.produce(GlobalCFrame(-20.0, 2.0, -10.0), 1.0, 0.2, "BigCube1");
+	ExtendedPart* bigCube2 = bigCubeFactory.produce(GlobalCFrame(-20.0, 2.0, -6.0), 1.0, 0.2, "BigCube2");
+
+	world.addPart(bigCube1);
+	world.addPart(bigCube2);
+
+	ConstraintGroup group;
+	group.ballConstraints.push_back(BallConstraint{ Vec3(0,0,2.0), bigCube1->parent, Vec3(0,0,-2.0), bigCube2->parent });
+	world.constraints.push_back(std::move(group));
 
 
 	int minX = -2;
@@ -143,7 +155,7 @@ void setupWorld() {
 	int minZ = -2;
 	int maxZ = 2;
 
-	for (double x = minX; x < maxX; x += 1.01) {
+	/*for (double x = minX; x < maxX; x += 1.01) {
 		for (double y = minY; y < maxY; y += 1.01) {
 			for (double z = minZ; z < maxZ; z += 1.01) {
 				ExtendedPart* newCube = cubeFactory.produce(GlobalCFrame(x - 5, y + 1, z - 5), 1.0, 0.2);
@@ -155,7 +167,7 @@ void setupWorld() {
 			}
 		}
 	}
-
+	*/
 	// Player
 	screen.camera.attachment = sphereFactory.produce(GlobalCFrame(), 1.0, 0.2);
 	screen.camera.attachment->properties.friction = 0.5;
