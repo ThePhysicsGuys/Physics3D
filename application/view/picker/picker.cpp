@@ -156,7 +156,7 @@ namespace Picker {
 		Vec3 cameraDirection = cameraFrame * Vec3(0, 0, 1);
 
 		double distance = Vec3(screen.selectedPoint - screen.camera.cframe.position) * cameraDirection / (screen.ray * cameraDirection);
-		Position planeIntersection = screen.camera.cframe.position + distance * screen.ray;
+		Position planeIntersection = screen.camera.cframe.position + screen.ray * distance;
 
 		if (isPaused()) {
 			Vec3 translation = planeIntersection - screen.selectedPoint;
@@ -176,7 +176,7 @@ namespace Picker {
 		Vec3 cameraYDirection = normalize(Vec3(cameraDirection.x, 0, cameraDirection.z));
 
 		double distance = Vec3(screen.selectedPoint - screen.camera.cframe.position) * cameraDirection / (screen.ray * cameraDirection);
-		Position planeIntersection = screen.camera.cframe.position + distance * screen.ray;
+		Position planeIntersection = screen.camera.cframe.position + screen.ray * distance;
 
 		Vec3 translation = -cameraYDirection * dz;
 		if (isPaused()) {
