@@ -7,7 +7,7 @@ class Screen;
 class PickerLayer : public Layer {
 public:
 	PickerLayer();
-	PickerLayer(Screen* screen);
+	PickerLayer(Screen* screen, char flags = none);
 
 	void init() override;
 	void update() override;

@@ -3,7 +3,11 @@
 #include "../engine/math/vec.h"
 #include "../engine/math/mat4.h"
 
+#include "../batch.h"
+#include "../batchConfig.h"
+
 #include <string>
+#include <vector>
 
 class Component;
 class ColorPicker;
@@ -141,12 +145,13 @@ namespace GUI {
 	extern Vec4 fontColor;
 	extern double fontSize;
 
+	// Container functions
 	void add(Component* component);
 	void remove(Component* component);
 	void select(Component* component);
-
 	Component* superParent(Component* child);
 
+	// Map functions
 	double clamp(double value, double min, double max);
 	double map(double x, double minIn, double maxIn, double minOut, double maxOut);
 	Vec2 map(Vec2 point);
@@ -154,12 +159,17 @@ namespace GUI {
 	Vec2 mapDimension(Vec2 dimension);
 	Vec2 unmapDimension(Vec2 dimension);
 
+	// Event functions
 	void intersect(Vec2 mouse);
 	bool intersectsSquare(Vec2 point, Vec2 topleft, Vec2 dimension);
 
+	// State function
 	void init(Screen* screen, Font* font);
 	void update(Mat4f orthoMatrix);
 	void render(Mat4f orthoMatrix);
+
+	// Draw functions
+	void line(Vec2f a, Vec2f b);
 };
 
 #include "component.h"

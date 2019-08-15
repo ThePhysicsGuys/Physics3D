@@ -1,7 +1,7 @@
 #include "testsMain.h"
 
 #include "../engine/math/mat3.h"
-#include "../engine/math/vec3.h"
+#include "../engine/math/vec.h"
 #include "../engine/math/mathUtil.h"
 #include "../engine/math/utils.h"
 

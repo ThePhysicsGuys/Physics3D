@@ -2,8 +2,9 @@
 
 #include "layer.h"
 
-// Temp
-#include "../gui/frames.h"
+struct PropertiesFrame;
+struct DebugFrame;
+struct EnvironmentFrame;
 
 class GuiLayer : public Layer {
 public:
@@ -11,9 +12,8 @@ public:
 	DebugFrame* debugFrame;
 	EnvironmentFrame* environmentFrame;
 
-
 	GuiLayer();
-	GuiLayer(Screen* screen);
+	GuiLayer(Screen* screen, char flags = none);
 
 	void init() override;
 	void update() override;

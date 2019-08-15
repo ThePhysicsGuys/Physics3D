@@ -157,6 +157,14 @@ struct EdgeShader : public ShaderProgram {
 	void updateTexture(HDRTexture* texture);
 };
 
+struct GuiShader : public ShaderProgram {
+	GuiShader() : ShaderProgram() {}
+	GuiShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, "projectionMatrix", "textureSampler", "textured") {}
+
+	void updateProjection(const Mat4f& orthoMatrix);
+	void updateTexture(Texture* texture);
+};
+
 namespace Shaders {
 	extern BasicShader basicShader;
 	extern DepthShader depthShader;
@@ -172,6 +180,7 @@ namespace Shaders {
 	extern ColorWheelShader colorWheelShader;
 	extern EdgeShader edgeShader;
 	extern MaskShader maskShader;
+	extern GuiShader guiShader;
 
 	void init();
 	void close();

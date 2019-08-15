@@ -9,7 +9,6 @@ LayerStack::LayerStack() {
 
 void LayerStack::pushLayer(Layer* layer) {
 	stack.insert(stack.begin() + insert++, layer);
-	Log::debug("push %s", layer->name.c_str());
 	layer->attach();
 }
 
@@ -42,7 +41,6 @@ void LayerStack::popOverlay(Layer * layer) {
 void LayerStack::init() {
 	for (auto i = begin(); i != end(); ++i) {
 		(*i)->init();
-		Log::debug("init %s",(*i)->name.c_str());
 	}
 }
 

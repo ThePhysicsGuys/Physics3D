@@ -19,7 +19,7 @@ GuiLayer::GuiLayer() {
 
 };
 
-GuiLayer::GuiLayer(Screen* screen) : Layer("Gui", screen) {
+GuiLayer::GuiLayer(Screen* screen, char flags) : Layer("Gui", screen, flags) {
 
 }
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../engine/math/vec3.h"
+#include "../engine/math/vec.h"
 #include "../engine/math/mat3.h"
 
 extern const Vec3 vectors[13];

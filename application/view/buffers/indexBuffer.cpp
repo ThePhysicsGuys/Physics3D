@@ -13,7 +13,8 @@ IndexBuffer::IndexBuffer() {
 IndexBuffer::IndexBuffer(const unsigned int* data, unsigned int size, unsigned int mode) {
 	glGenBuffers(1, &id);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, size * sizeof(unsigned int), data, mode);
+	if (size != 0)
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, size * sizeof(unsigned int), data, mode);
 }
 
 IndexBuffer::IndexBuffer(const unsigned int* data, unsigned int size) : IndexBuffer(data, size, GL_STATIC_DRAW) {}

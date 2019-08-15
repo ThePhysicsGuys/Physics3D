@@ -1,6 +1,8 @@
 #include "debugOverlay.h"
 
 #include "../screen.h"
+#include "../renderUtils.h"
+#include "../shaderProgram.h"
 
 #include "../debug/profilerUI.h"
 #include "../debug/visualDebug.h"
@@ -20,7 +22,7 @@ DebugOverlay::DebugOverlay() {
 
 }
 
-DebugOverlay::DebugOverlay(Screen* screen) : Layer("Debug overlay", screen, noEvents) {
+DebugOverlay::DebugOverlay(Screen* screen, char flags) : Layer("Debug overlay", screen, flags) {
 
 }
 
@@ -33,6 +35,10 @@ void DebugOverlay::update() {
 }
 
 void DebugOverlay::render() {
+
+	Renderer::disableDepthTest();
+	Shaders::fontShader.updateProjection(screen->camera.orthoMatrix);
+
 	graphicsMeasure.mark(GraphicsProcess::PROFILER);
 
 	size_t objCount = screen->world->getPartCount();

@@ -13,6 +13,7 @@
 #include "../texture.h"
 #include "../screen.h"
 #include "../shaderProgram.h"
+#include "../renderUtils.h"
 
 #include "../buffers/frameBuffer.h"
 #include "../mesh/indexedMesh.h"
@@ -240,7 +241,26 @@ namespace GUI {
 	Vec4 fontColor = COLOR::SILVER;
 	double fontSize = 0.0009;
 
+	// Batch
+	BufferLayout bufferLayout({ 
+		{ "pos", BufferDataType::FLOAT2 },
+		{ "uv", BufferDataType::FLOAT2 },
+		{ "col", BufferDataType::FLOAT4 }
+	});
+
+	struct GUIVertex {
+		Vec2f pos;
+		Vec2f uv;
+		Vec4f col;
+	};
+
+	BatchConfig batchConfig(bufferLayout);
+	Batch<GUIVertex>* batch;
+
 	void init(Screen* screen, Font* font) {
+
+		batch = new Batch<GUIVertex>(batchConfig);
+
 		GUI::screen = screen;
 		GUI::font = font;
 		GUI::guiFrameBuffer = new FrameBuffer(screen->dimension.x, screen->dimension.y);
@@ -401,5 +421,33 @@ namespace GUI {
 		for (auto iterator = components.rbegin(); iterator != components.rend(); ++iterator) {
 			(*iterator)->render();
 		}
+
+		line(Vec2f(-0.5, -0.5), Vec2f(-0.5, 0.5));
+		line(Vec2f(0.5, 0.3), Vec2f(-0.5, 0.5));
+		line(Vec2f(0.5, 0.3), Vec2f(0.1, -0.3));
+		line(Vec2f(-0.5, -0.5), Vec2f(0.1, -0.3));
+
+		Renderer::disableCulling();
+		Shaders::guiShader.updateProjection(screen->camera.orthoMatrix);
+		batch->submit();
+	}
+
+	void line(Vec2f a, Vec2f b) {
+		Vec2f dxy = normalize(Vec2f(b.y - a.y, a.x - b.x)) / screen->dimension.y * 2;
+
+		batch->reserve(4, 6);
+
+		batch->pushVertex({ Vec2f(a + dxy), Vec2f(1), COLOR::R });
+		batch->pushVertex({ Vec2f(a - dxy), Vec2f(1), COLOR::R });
+		batch->pushVertex({ Vec2f(b + dxy), Vec2f(1), COLOR::B });
+		batch->pushVertex({ Vec2f(b - dxy), Vec2f(1), COLOR::B });
+
+		batch->pushIndex(0);
+		batch->pushIndex(1);
+		batch->pushIndex(2);
+		batch->pushIndex(2);
+		batch->pushIndex(1);
+		batch->pushIndex(3);
+		batch->endIndex();
 	}
 }

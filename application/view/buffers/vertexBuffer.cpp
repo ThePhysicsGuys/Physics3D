@@ -8,7 +8,8 @@ VertexBuffer::VertexBuffer() {
 VertexBuffer::VertexBuffer(const float* data, size_t size, unsigned int mode) : Bindable() {
 	glGenBuffers(1, &id);
 	glBindBuffer(GL_ARRAY_BUFFER, id);
-	glBufferData(GL_ARRAY_BUFFER, size * sizeof(float), data, mode);
+	if (size != 0)
+		glBufferData(GL_ARRAY_BUFFER, size * sizeof(float), data, mode);
 }
 
 VertexBuffer::VertexBuffer(const float* data, size_t size) : VertexBuffer(data, size, GL_STATIC_DRAW) {}

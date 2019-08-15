@@ -99,7 +99,7 @@ DebugLayer::DebugLayer() {
 
 }
 
-DebugLayer::DebugLayer(Screen* screen) : Layer("Debug layer", screen, noUpdate | noEvents) {
+DebugLayer::DebugLayer(Screen* screen, char flags) : Layer("Debug layer", screen, flags) {
 
 }
 

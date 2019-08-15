@@ -13,7 +13,6 @@
 #include "mesh/primitive.h"
 #include "debug/visualDebug.h"
 #include "buffers/frameBuffer.h"
-
 #include "../options/keyboardOptions.h"
 #include "../input/standardInputHandler.h"
 #include "../meshLibrary.h"
@@ -30,6 +29,7 @@
 #include "layer/debugLayer.h"
 #include "layer/debugOverlay.h"
 
+#include "gui\frames.h"
 
 bool initGLFW() {
 	// Set window hints
@@ -110,6 +110,7 @@ DebugOverlay debugOverlay;
 
 
 void Screen::init() {
+
 	// Log init
 	Log::setLogLevel(Log::Level::INFO);
 
@@ -151,9 +152,9 @@ void Screen::init() {
 
 	// Layer creation
 	skyboxLayer = SkyboxLayer(this);
-	modelLayer = ModelLayer(this);
-	debugLayer = DebugLayer(this);
-	pickerLayer = PickerLayer(this);
+	modelLayer = ModelLayer(this, Layer::noRender);
+	debugLayer = DebugLayer(this, Layer::noRender);
+	pickerLayer = PickerLayer(this, Layer::noRender);
 	postprocessLayer = PostprocessLayer(this);
 	guiLayer = GuiLayer(this);
 	debugOverlay = DebugOverlay(this);
@@ -211,7 +212,6 @@ void Screen::update() {
 		if (handler->getKey(KeyboardOptions::Rotate::down))  camera.rotate(*this, 1, 0, 0, leftDragging);
 		if (handler->getKey(KeyboardOptions::Application::close)) Renderer::closeGLFWWindow();
 		if (handler->getKey(KeyboardOptions::Debug::frame)) { guiLayer.debugFrame->visible = true; guiLayer.debugFrame->position = Vec2(0.8); GUI::select(guiLayer.debugFrame); }
-		if (handler->getKey(Keyboard::TAB)) { modelLayer.flags ^= Layer::disabled; }
 	}
 
 
@@ -222,6 +222,7 @@ void Screen::update() {
 	// Update layers
 	layerStack.update();
 }
+
 
 void Screen::render() {
 	// Render to screen Framebuffer

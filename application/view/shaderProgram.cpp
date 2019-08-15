@@ -25,6 +25,7 @@ namespace Shaders {
 	ColorWheelShader colorWheelShader;
 	MaskShader maskShader;
 	EdgeShader edgeShader;
+	GuiShader guiShader;
 
 	void init() {
 		// Shader source init
@@ -42,6 +43,7 @@ namespace Shaders {
 		ShaderSource colorWheelShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(COLORWHEEL_SHADER)), "colorwheel.shader");
 		ShaderSource maskShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(MASK_SHADER)), "mask.shader");
 		ShaderSource edgeShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(EDGE_SHADER)), "edge.shader");
+		ShaderSource guiShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(GUI_SHADER)), "gui.shader");
 
 		// Shader init
 		new(&basicShader) BasicShader(basicShaderSource);
@@ -58,6 +60,7 @@ namespace Shaders {
 		new(&colorWheelShader) ColorWheelShader(colorWheelShaderSource);
 		new(&maskShader) MaskShader(maskShaderSource);
 		new(&edgeShader) EdgeShader(edgeShaderSource);
+		new(&guiShader) GuiShader(guiShaderSource);
 	}
 
 	void close() {
@@ -75,6 +78,7 @@ namespace Shaders {
 		colorWheelShader.close();
 		maskShader.close();
 		edgeShader.close();
+		guiShader.close();
 	}
 }
 
@@ -448,5 +452,19 @@ void EdgeShader::updateTexture(Texture* texture) {
 void EdgeShader::updateTexture(HDRTexture* texture) {
 	bind();
 	texture->bind();
+	shader.setUniform("textureSampler", texture->unit);
+}
+
+// GuiShader
+
+void GuiShader::updateProjection(const Mat4f& orthoMatrix) {
+	bind();
+	shader.setUniform("projectionMatrix", orthoMatrix);
+}
+
+void GuiShader::updateTexture(Texture* texture) {
+	bind();
+	texture->bind();
+	shader.setUniform("textured", true);
 	shader.setUniform("textureSampler", texture->unit);
 }

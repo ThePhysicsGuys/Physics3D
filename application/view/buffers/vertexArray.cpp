@@ -25,6 +25,8 @@ void VertexArray::bind() {
 }
 
 void VertexArray::unbind() {
+	for (unsigned int i = 0; i < attributeArrayOffset; i++)
+		glDisableVertexAttribArray(i);
 	glBindVertexArray(0);
 }
 

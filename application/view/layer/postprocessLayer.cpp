@@ -13,7 +13,7 @@ PostprocessLayer::PostprocessLayer() : Layer() {
 
 }
 
-PostprocessLayer::PostprocessLayer(Screen * screen) : Layer("Postprocess", screen, noUpdate | noEvents) {
+PostprocessLayer::PostprocessLayer(Screen * screen, char flags) : Layer("Postprocess", screen, flags) {
 
 }
 

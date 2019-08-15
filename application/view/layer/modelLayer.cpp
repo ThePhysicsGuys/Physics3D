@@ -36,7 +36,7 @@ ModelLayer::ModelLayer() : Layer() {
 
 }
 
-ModelLayer::ModelLayer(Screen* screen) : Layer("Model", screen) {
+ModelLayer::ModelLayer(Screen* screen, char flags) : Layer("Model", screen, flags) {
 
 }
 

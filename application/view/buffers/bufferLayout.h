@@ -18,6 +18,8 @@ namespace BufferDataType {
 		// size of type in bytes
 		int size;  
 
+		BufferDataTypeInfo(std::string name, int type, int count, int size) : name(name), type(type), count(count), size(size) {};
+
 		bool operator==(const BufferDataTypeInfo& other) const {
 			return other.name == name;
 		}
@@ -41,7 +43,9 @@ namespace BufferDataType {
 struct BufferElement {
 	std::string name;
 	BufferDataType::BufferDataTypeInfo info;
-	bool normalized = false;
+	bool normalized;
+
+	BufferElement(std::string name, BufferDataType::BufferDataTypeInfo info, bool normalized = false);
 };
 
 struct BufferLayout {

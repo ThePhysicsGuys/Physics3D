@@ -7,7 +7,7 @@ class Screen;
 class PostprocessLayer : public Layer {
 public:
 	PostprocessLayer();
-	PostprocessLayer(Screen* screen);
+	PostprocessLayer(Screen* screen, char flags = noUpdate | noEvents);
 
 	void init() override;
 	void update() override;

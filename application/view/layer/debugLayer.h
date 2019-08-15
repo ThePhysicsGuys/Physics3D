@@ -14,7 +14,7 @@ private:
 
 public:
 	DebugLayer();
-	DebugLayer(Screen* screen);
+	DebugLayer(Screen* screen, char flags = noUpdate | noEvents);
 
 	void init() override;
 	void update() override;

@@ -139,6 +139,14 @@ VectorBasis<T, Size> normalize(const VectorBasis<T, Size>& vec) {
 }
 
 template<template<typename, size_t> typename VectorBasis, typename T, size_t Size>
+VectorBasis<T, Size> abs(const VectorBasis<T, Size>& vec) {
+	VectorBasis<T, Size> result;
+	for (size_t i = 0; i < Size; i++)
+		result[i] = fabs(vec[i]);
+	return result;
+}
+
+template<template<typename, size_t> typename VectorBasis, typename T, size_t Size>
 bool isLongerThan(const VectorBasis<T, Size>& vec, const T& length) {
 	return lengthSquared(vec) > length * length;
 }

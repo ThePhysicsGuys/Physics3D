@@ -10,7 +10,7 @@ PickerLayer::PickerLayer() : Layer() {
 
 }
 
-PickerLayer::PickerLayer(Screen * screen) : Layer("Picker", screen) {
+PickerLayer::PickerLayer(Screen * screen, char flags) : Layer("Picker", screen, flags) {
 
 }
 
