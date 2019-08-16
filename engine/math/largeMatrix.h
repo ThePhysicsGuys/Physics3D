@@ -75,8 +75,8 @@ public:
 	LargeMatrix(size_t N, size_t M) : width(N), height(M), data(new T[N*M]) {}
 	~LargeMatrix() { delete[] data; }
 
-	LargeMatrix(const LargeMatrix& other) : width(other.width), height(other.height), data(new T[width * height]) {
-		for (int i = 0; i < width * height; i++) {
+	LargeMatrix(const LargeMatrix& other) : width(other.width), height(other.height), data(new T[other.width * other.height]) {
+		for (int i = 0; i < other.width * other.height; i++) {
 			this->data[i] = other.data[i];
 		}
 	}

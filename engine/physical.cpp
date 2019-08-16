@@ -271,6 +271,24 @@ void Physical::applyAngularImpulse(Vec3 angularImpulse) {
 	angularVelocity += rotAcc;
 }
 
+void Physical::applyDragAtCenterOfMass(Vec3 drag) {
+	Debug::logVector(getCenterOfMass(), drag, Debug::POSITION);
+	translate(forceResponse * drag);
+}
+void Physical::applyDrag(Vec3Relative origin, Vec3Relative drag) {
+	Debug::logVector(getCenterOfMass() + origin, drag, Debug::POSITION);
+	translate(forceResponse * drag);
+	Vec3 angularDrag = origin % drag;
+	applyAngularDrag(angularDrag);
+}
+void Physical::applyAngularDrag(Vec3 angularDrag) {
+	Debug::logVector(getCenterOfMass(), angularDrag, Debug::INFO_VEC);
+	Vec3 localAngularDrag = getCFrame().relativeToLocal(angularDrag);
+	Vec3 localRotAcc = momentResponse * localAngularDrag;
+	Vec3 rotAcc = getCFrame().localToRelative(localRotAcc);
+	rotateAroundCenterOfMass(fromRotationVec(rotAcc));
+}
+
 Position Physical::getCenterOfMass() const {
 	return getCFrame().localToGlobal(localCenterOfMass);
 }
@@ -291,7 +309,7 @@ Vec3 Physical::getAngularAcceleration() const {
 }
 
 Vec3 Physical::getAccelerationOfPoint(const Vec3Relative& point) const {
-	return getAcceleration() + getAngularAcceleration() % point;
+	return getAcceleration() + getAngularAcceleration() % point + angularVelocity % (angularVelocity % point);
 }
 
 void Physical::setCFrame(const GlobalCFrame& newCFrame) {

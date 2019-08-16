@@ -172,6 +172,9 @@ public:
 	void applyImpulseAtCenterOfMass(Vec3 impulse);
 	void applyImpulse(Vec3Relative origin, Vec3Relative impulse);
 	void applyAngularImpulse(Vec3 angularImpulse);
+	void applyDragAtCenterOfMass(Vec3 drag);
+	void applyDrag(Vec3Relative origin, Vec3Relative drag);
+	void applyAngularDrag(Vec3 angularDrag);
 
 	void rotateAroundCenterOfMass(const RotMat3& rotation);
 	void translate(const Vec3& translation);
