@@ -13,6 +13,7 @@
 namespace Library {
 	IndexedMesh* cube = nullptr;
 	IndexedMesh* sphere = nullptr;
+	IndexedMesh* vector = nullptr;
 
 	void init() {
 		// Cube
@@ -21,6 +22,9 @@ namespace Library {
 		// Sphere
 		VisualShape sphereShape(OBJImport::load((std::istream&) std::istringstream(getResourceAsString(SPHERE_MODEL))));
 		sphere = new IndexedMesh(sphereShape);
+
+		VisualShape vectorShape = OBJImport::load("../res/models/gui/translate_shaft.obj");
+		vector = new IndexedMesh(vectorShape);
 	}
 
 	void close() {

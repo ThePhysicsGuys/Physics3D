@@ -10,6 +10,7 @@
 #include "../application.h"
 #include "../view/picker/picker.h"
 #include "../view/gui/gui.h"
+#include "../view/gui/guiUtils.h"
 #include "../view/debug/visualDebug.h"
 #include "../shapeLibrary.h"
 

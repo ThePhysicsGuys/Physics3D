@@ -45,26 +45,12 @@ public:
 	};
 
 	inline void pushVertex(Vertex vertex) {
-		vertexPointer++[0] = vertex;
+		*vertexPointer++ = vertex;
 		indexCounter++;
 	}
 
 	inline void pushIndex(unsigned int index) {
-		indexPointer++[0] = currentIndex + index;
-	}
-
-	template<class... Vertex>
-	inline void pushVertices(Vertex... vertices) {
-		for (Vertex vertex : vertices) {
-			pushVertex(vertex);
-		}
-	}
-
-	template<class... Index>
-	inline void pushIndices(Index... indices) {
-		for (unsigned int index : indices) {
-			pushIndex(index);
-		}
+		*indexPointer++ = currentIndex + index;
 	}
 
 	void reserve(int vertexCount, int indexCount) {

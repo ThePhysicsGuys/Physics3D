@@ -151,14 +151,6 @@ namespace GUI {
 	void select(Component* component);
 	Component* superParent(Component* child);
 
-	// Map functions
-	double clamp(double value, double min, double max);
-	double map(double x, double minIn, double maxIn, double minOut, double maxOut);
-	Vec2 map(Vec2 point);
-	Vec2 unmap(Vec2 point);
-	Vec2 mapDimension(Vec2 dimension);
-	Vec2 unmapDimension(Vec2 dimension);
-
 	// Event functions
 	void intersect(Vec2 mouse);
 	bool intersectsSquare(Vec2 point, Vec2 topleft, Vec2 dimension);
@@ -168,8 +160,14 @@ namespace GUI {
 	void update(Mat4f orthoMatrix);
 	void render(Mat4f orthoMatrix);
 
-	// Draw functions
-	void line(Vec2f a, Vec2f b);
+	// Batch
+	struct Vertex {
+		Vec2f pos;
+		Vec2f uv;
+		Vec4f col;
+	};
+
+	extern Batch<Vertex>* batch;
 };
 
 #include "component.h"

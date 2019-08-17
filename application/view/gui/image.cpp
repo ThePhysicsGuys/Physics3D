@@ -1,6 +1,6 @@
 #include "image.h"
 
-#include "gui.h"
+#include "guiUtils.h"
 
 #include "../shaderProgram.h"
 #include "../texture.h"

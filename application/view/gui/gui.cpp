@@ -5,6 +5,7 @@
 #include "orderedVector.h"
 #include "colorPicker.h"
 #include "frame.h"
+#include "path.h"
 
 #include "../../visualShape.h"
 #include "../../io/import.h"
@@ -180,9 +181,6 @@ namespace GUI {
 	// Label
 	Vec4 labelBackgroundColor = COLOR::WHITE;
 
-	// DirectionEditor
-	IndexedMesh* vectorMesh = nullptr;
-
 	// Button
 	Texture* closeButtonHoverTexture;
 	Texture* closeButtonIdleTexture;
@@ -248,32 +246,29 @@ namespace GUI {
 		{ "col", BufferDataType::FLOAT4 }
 	});
 
-	struct GUIVertex {
-		Vec2f pos;
-		Vec2f uv;
-		Vec4f col;
-	};
-
 	BatchConfig batchConfig(bufferLayout);
-	Batch<GUIVertex>* batch;
+	Batch<Vertex>* batch;
 
 	void init(Screen* screen, Font* font) {
 
-		batch = new Batch<GUIVertex>(batchConfig);
+		GUI::batch = new Batch<Vertex>(batchConfig);
 
 		GUI::screen = screen;
 		GUI::font = font;
 		GUI::guiFrameBuffer = new FrameBuffer(screen->dimension.x, screen->dimension.y);
 		GUI::quad = new Quad();
 
+		// closeButton
 		GUI::closeButtonIdleTexture = load("../res/textures/gui/close_idle.png");
 		GUI::closeButtonHoverTexture = load("../res/textures/gui/close_hover.png");
 		GUI::closeButtonPressTexture = load("../res/textures/gui/close_press.png");
 
+		// minimizeButton
 		GUI::minimizeButtonIdleTexture = load("../res/textures/gui/minimize_idle.png");
 		GUI::minimizeButtonHoverTexture = load("../res/textures/gui/minimize_hover.png");
 		GUI::minimizeButtonPressTexture = load("../res/textures/gui/minimize_press.png");
 
+		// Checkbox
 		GUI::checkBoxUncheckedTexture = load("../res/textures/gui/unchecked.png");
 		GUI::checkBoxCheckedTexture = load("../res/textures/gui/checked.png");
 		GUI::checkBoxPressCheckedTexture = GUI::checkBoxCheckedTexture->colored(Vec3(1.3));
@@ -281,59 +276,20 @@ namespace GUI {
 		GUI::checkBoxHoverCheckedTexture = GUI::checkBoxCheckedTexture->colored(Vec3(0.999));
 		GUI::checkBoxHoverUncheckedTexture = GUI::checkBoxUncheckedTexture->colored(Vec3(0.999));
 
+		// ColorPicker
 		GUI::colorPickerHueTexture = load("../res/textures/gui/hue.png");
 		GUI::colorPickerAlphaBrightnessTexture = load("../res/textures/gui/alphaBrightness.png");
 		GUI::colorPickerAlphaPatternTexture = load("../res/textures/gui/alphaPattern.png");
 		GUI::colorPickerBrightnessTexture = load("../res/textures/gui/brightness.png");
 		GUI::colorPickerCrosshairTexture = load("../res/textures/gui/crosshair.png");
 
-		VisualShape vectorShape = OBJImport::load("../res/models/gui/translate_shaft.obj");
-		GUI::vectorMesh = new IndexedMesh(vectorShape);
-
-		// ColorPicker
-		colorPicker = new ColorPicker(0, 0);
-		colorPickerFrame = new Frame(0, 0, "Color");
-		colorPickerFrame->add(colorPicker);
-		colorPickerFrame->visible = false;
-		add(colorPickerFrame);
+		GUI::colorPicker = new ColorPicker(0, 0);
+		GUI::colorPickerFrame = new Frame(0, 0, "Color");
+		GUI::colorPickerFrame->add(colorPicker);
+		GUI::colorPickerFrame->visible = false;
+		GUI::add(colorPickerFrame);
 	}
 	
-	void update(Mat4f orthoMatrix) {
-		Shaders::quadShader.updateProjection(orthoMatrix);
-	}
-
-	double clamp(double value, double min, double max) {
-		if (value < min)
-			return min;
-		if (value > max)
-			return max;
-		return value;
-	}
-
-	double map(double x, double minIn, double maxIn, double minOut, double maxOut) {
-		return (x - minIn) * (maxOut - minOut) / (maxIn - minIn) + minOut;
-	}
-
-	// Maps a point from screen space to view space
-	Vec2 map(Vec2 point) {
-		return Vec2(map(point.x, 0, screen->dimension.x, -screen->camera.aspect, screen->camera.aspect), map(screen->dimension.y - point.y, 0, screen->dimension.y, -1, 1));
-	}
-	
-	// Maps a point from view space to screen space
-	Vec2 unmap(Vec2 point) {
-		return Vec2(map(point.x, -screen->camera.aspect, screen->camera.aspect, 0, screen->dimension.x), screen->dimension.y - map(point.y, -1, 1, 0, screen->dimension.y));
-	}
-
-	// Maps a dimension from screen space to view space
-	Vec2 mapDimension(Vec2 dimension) {
-		return Vec2(map(dimension.x, 0, screen->dimension.x, 0, 2 * screen->camera.aspect), map(dimension.y, 0, screen->dimension.y, 0, 2));
-	}
-
-	// Maps a dimension from view space to screen space
-	Vec2 unmapDimension(Vec2 dimension) {
-		return Vec2(map(dimension.x, 0, 2 * screen->camera.aspect, 0, screen->dimension.x), map(dimension.y, 0, 2, 0, screen->dimension.y));
-	}
-
 	void intersect(Vec2 mouse) {
 		Component* intersected = nullptr;
 		for (Component* component : components) {
@@ -404,6 +360,10 @@ namespace GUI {
 		}
 	}
 
+	void update(Mat4f orthoMatrix) {
+		Shaders::quadShader.updateProjection(orthoMatrix);
+	}
+
 	void render(Mat4f orthoMatrix) {
 		update(orthoMatrix);
 
@@ -422,32 +382,5 @@ namespace GUI {
 			(*iterator)->render();
 		}
 
-		line(Vec2f(-0.5, -0.5), Vec2f(-0.5, 0.5));
-		line(Vec2f(0.5, 0.3), Vec2f(-0.5, 0.5));
-		line(Vec2f(0.5, 0.3), Vec2f(0.1, -0.3));
-		line(Vec2f(-0.5, -0.5), Vec2f(0.1, -0.3));
-
-		Renderer::disableCulling();
-		Shaders::guiShader.updateProjection(screen->camera.orthoMatrix);
-		batch->submit();
-	}
-
-	void line(Vec2f a, Vec2f b) {
-		Vec2f dxy = normalize(Vec2f(b.y - a.y, a.x - b.x)) / screen->dimension.y * 2;
-
-		batch->reserve(4, 6);
-
-		batch->pushVertex({ Vec2f(a + dxy), Vec2f(1), COLOR::R });
-		batch->pushVertex({ Vec2f(a - dxy), Vec2f(1), COLOR::R });
-		batch->pushVertex({ Vec2f(b + dxy), Vec2f(1), COLOR::B });
-		batch->pushVertex({ Vec2f(b - dxy), Vec2f(1), COLOR::B });
-
-		batch->pushIndex(0);
-		batch->pushIndex(1);
-		batch->pushIndex(2);
-		batch->pushIndex(2);
-		batch->pushIndex(1);
-		batch->pushIndex(3);
-		batch->endIndex();
 	}
 }

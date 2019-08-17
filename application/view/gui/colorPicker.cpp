@@ -1,5 +1,6 @@
 #include "colorPicker.h"
 
+#include "guiUtils.h"
 #include "../shaderProgram.h"
 #include "../texture.h"
 

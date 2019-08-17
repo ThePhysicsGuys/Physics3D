@@ -16,7 +16,7 @@
 #include "../mesh/indexedMesh.h"
 #include "../mesh/primitive.h"
 
-
+#include "../../meshLibrary.h"
 
 DirectionEditor::DirectionEditor(double x, double y, double width, double height) : Component(x, y, width, height) {
 	viewPosition = Position(0.0, 0.0, -3.0);
@@ -39,7 +39,7 @@ void DirectionEditor::render() {
 		Shaders::basicShader.updateMaterial(Material(GUI::COLOR::blend(GUI::COLOR::G, blendColor)));
 		Shaders::basicShader.updateModel(modelMatrix);
 		Shaders::basicShader.updateProjection(viewMatrix, GUI::screen->camera.projectionMatrix, viewPosition);
-		GUI::vectorMesh->render();
+		Library::vector->render();
 
 		GUI::guiFrameBuffer->unbind();
 		Renderer::disableDepthTest();
