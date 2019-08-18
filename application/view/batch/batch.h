@@ -2,16 +2,15 @@
 
 #include "batchConfig.h"
 
-#include "GL\glew.h"
-#include "GLFW\glfw3.h"
-
 #include <vector>
 
 #include "../engine/math/vec.h"
 
-#include "buffers\vertexArray.h"
-#include "buffers\vertexBuffer.h"
-#include "buffers\indexBuffer.h"
+#include "../buffers/vertexArray.h"
+#include "../buffers/vertexBuffer.h"
+#include "../buffers/indexBuffer.h"
+
+#include "../renderUtils.h"
 
 template<typename Vertex>
 class Batch {
@@ -63,28 +62,24 @@ public:
 		indexPointer = indexBuffer.data() + oldIndexBufferSize;
 	}
 
-	void submit() {
-		vao->bind();
-
-		vbo->bind();
-		glBufferData(GL_ARRAY_BUFFER, vertexBuffer.size() * sizeof(Vertex), (const void*) vertexBuffer.data(), GL_STREAM_DRAW);
-
-		ibo->bind();
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBuffer.size() * sizeof(unsigned int), (const void *) indexBuffer.data(), GL_STREAM_DRAW);
-
-		glDrawElements(GL_TRIANGLES, indexBuffer.size(), GL_UNSIGNED_INT, nullptr);
-
-		vbo->unbind();
-		ibo->unbind();
-
-		vao->unbind();
-
-		clear();
-	}
-
 	void endIndex() {
 		currentIndex += indexCounter;
 		indexCounter = 0;
+	}
+
+	void submit() {
+		vao->bind();
+
+		vbo->fill((const void *) vertexBuffer.data(), vertexBuffer.size() * sizeof(Vertex), Renderer::STREAM_DRAW);
+		ibo->fill((const void *) indexBuffer.data(), indexBuffer.size(), Renderer::STREAM_DRAW);
+
+		Renderer::drawElements(Renderer::TRIANGLES, indexBuffer.size(), Renderer::UINT, nullptr);
+
+		vbo->unbind();
+		ibo->unbind();
+		vao->unbind();
+
+		clear();
 	}
 
 	void clear() {
@@ -98,3 +93,4 @@ public:
 		indexCounter = 0;
 	}
 };
+

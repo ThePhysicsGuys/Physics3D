@@ -3,7 +3,7 @@
 #include "../buffers/indexBuffer.h"
 #include "../buffers/vertexBuffer.h"
 #include "../buffers/vertexArray.h"
-
+#include "../renderUtils.h"
 #include "../engine/geometry/shape.h"
 #include "../../visualShape.h"
 #include "../util/log.h"
@@ -17,11 +17,11 @@ IndexedMesh::IndexedMesh(const VisualShape& shape) : AbstractMesh(), vertexCount
 		vertices[i * 3 + 2] = vertex.z;
 	}
 
-	vertexBuffer = new VertexBuffer(vertices, vertexCount * 3);
-	normalBuffer = new VertexBuffer(reinterpret_cast<float const *>(shape.normals.get()), vertexCount * 3);
-	uvBuffer = new VertexBuffer(reinterpret_cast<float const *>(shape.uvs.get()), vertexCount * 2);
+	vertexBuffer = new VertexBuffer(vertices, 3 * vertexCount * sizeof(float));
+	normalBuffer = new VertexBuffer(reinterpret_cast<float const *>(shape.normals.get()), 3 * vertexCount * sizeof(float));
+	uvBuffer = new VertexBuffer(reinterpret_cast<float const *>(shape.uvs.get()), 2 * vertexCount * sizeof(float));
 
-	indexBuffer = new IndexBuffer(reinterpret_cast<unsigned int const *>(shape.triangles.get()), triangleCount * 3);
+	indexBuffer = new IndexBuffer(reinterpret_cast<unsigned int const *>(shape.triangles.get()), 3 * triangleCount);
 
 	vertexBufferLayout = {
 		{{ "vposition", BufferDataType::FLOAT3 }}
@@ -41,11 +41,11 @@ IndexedMesh::IndexedMesh(const VisualShape& shape) : AbstractMesh(), vertexCount
 }
 
 IndexedMesh::IndexedMesh(const float* vertices, const float* normals, const float* uvs, const unsigned int* indices, const int vertexCount, const int triangleCount) : AbstractMesh(), vertexCount(vertexCount), triangleCount(triangleCount) {
-	vertexBuffer = new VertexBuffer(vertices, vertexCount * 3);
-	normalBuffer = new VertexBuffer(normals, vertexCount * 3);
-	uvBuffer = new VertexBuffer(uvs, vertexCount * 2);
+	vertexBuffer = new VertexBuffer(vertices, 3 * vertexCount * sizeof(float));
+	normalBuffer = new VertexBuffer(normals, 3 * vertexCount * sizeof(float));
+	uvBuffer = new VertexBuffer(uvs, 2 * vertexCount * sizeof(float));
 
-	indexBuffer = new IndexBuffer(indices, triangleCount * 3);
+	indexBuffer = new IndexBuffer(indices, 3 * triangleCount);
 
 	vertexBufferLayout = {
 		{{ "vposition", BufferDataType::FLOAT3 }}
@@ -66,15 +66,15 @@ IndexedMesh::IndexedMesh(const float* vertices, const float* normals, const floa
 }
 
 void IndexedMesh::render() {
-	render(GL_FILL);
+	render(Renderer::FILL);
 }
 
-void IndexedMesh::render(int mode)  {
+void IndexedMesh::render(unsigned int mode)  {
 	vertexArray->bind();
 	indexBuffer->bind();
 
 	glPolygonMode(GL_FRONT_AND_BACK, mode);
-	glDrawElements((int) renderMode, triangleCount * 3, GL_UNSIGNED_INT, nullptr);
+	Renderer::drawElements(renderMode, triangleCount * 3, Renderer::UINT, nullptr);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 

@@ -25,7 +25,7 @@ public:
 	IndexedMesh(const VisualShape& shape);
 	IndexedMesh(const float* vertices, const float* normals, const float* uvs, const unsigned int* indices, const int vertexCount, const int triangleCount);
 
-	void render(int mode);
+	void render(unsigned int mode);
 
 	void render() override;
 	void close() override;

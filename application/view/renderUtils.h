@@ -10,9 +10,20 @@ namespace Renderer {
 	// GL constants
 
 	extern unsigned int WIREFRAME;
-	extern unsigned int FILLED;
+	extern unsigned int FILL;
+	extern unsigned int POINT;
+
+	extern unsigned int STATIC_DRAW;
+	extern unsigned int DYNAMIC_DRAW;
+	extern unsigned int STREAM_DRAW;
+
+	extern unsigned int TRIANGLES;
+	extern unsigned int PATCHES;
+	extern unsigned int QUADS;
+	extern unsigned int LINES;
 	extern unsigned int POINTS;
 
+	extern unsigned int UINT;
 
 	// GLFW binding
 
@@ -71,4 +82,7 @@ namespace Renderer {
 	extern const unsigned char* getVersion();
 	extern const unsigned char* getRenderer();
 	extern const unsigned char* getShaderVersion();
+
+	extern inline void drawElements(unsigned int mode, size_t count, unsigned int type, const void * offset);
+	extern inline void drawArrays(unsigned int mode, int first, size_t count);
 }

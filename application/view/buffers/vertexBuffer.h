@@ -1,8 +1,5 @@
 #pragma once
 
-#include "GL\glew.h"
-#include "GLFW\glfw3.h"
-
 #include "../bindable.h"
 
 #include "../util/log.h"
@@ -10,9 +7,12 @@
 class VertexBuffer : public Bindable {
 public:
 	VertexBuffer();
-	VertexBuffer(const float* data, size_t size, unsigned int mode);
-	VertexBuffer(const float* data, size_t size);
+	VertexBuffer(const void * data, size_t sizeInBytes, unsigned int mode);
+	VertexBuffer(const void * data, size_t sizeInBytes);
 	~VertexBuffer();
+
+	void fill(const void * data, size_t sizeInBytes, unsigned int mode);
+	void update(const void * data, size_t sizeInBytes, int offset);
 
 	void bind() override;
 	void unbind() override;

@@ -1,21 +1,12 @@
 #include "abstractMesh.h"
 
-#include "GL\glew.h"
-
 #include "../buffers/vertexArray.h"
+#include "../renderUtils.h"
 
-namespace RenderMode {
-	int PATCHES = GL_PATCHES;
-	int QUADS = GL_QUADS;
-	int TRIANGLES = GL_TRIANGLES;
-	int LINES = GL_LINES;
-	int POINTS = GL_POINTS;
-}
-
-AbstractMesh::AbstractMesh(int rendermode) : renderMode(renderMode) {
+AbstractMesh::AbstractMesh(unsigned int rendermode) : renderMode(renderMode) {
 	vertexArray = new VertexArray();
 };
 
-AbstractMesh::AbstractMesh() : renderMode(RenderMode::TRIANGLES) {
+AbstractMesh::AbstractMesh() : renderMode(Renderer::TRIANGLES) {
 	vertexArray = new VertexArray();
 };

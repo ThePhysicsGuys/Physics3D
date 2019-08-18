@@ -154,7 +154,7 @@ void Screen::init() {
 	skyboxLayer = SkyboxLayer(this);
 	modelLayer = ModelLayer(this);
 	debugLayer = DebugLayer(this);
-	pickerLayer = PickerLayer(this, Layer::noRender);
+	pickerLayer = PickerLayer(this);
 	postprocessLayer = PostprocessLayer(this);
 	guiLayer = GuiLayer(this);
 	debugOverlay = DebugOverlay(this);

@@ -307,10 +307,10 @@ struct PropertiesFrame : public FrameBlueprint, public Frame {
 		renderModeCheckBox = new CheckBox("Wireframe", 0, 0, true);
 		renderModeCheckBox->action = [] (CheckBox* c) {
 			if (GUI::screen->selectedPart) {
-				if (GUI::screen->selectedPart->renderMode == Renderer::FILLED) {
+				if (GUI::screen->selectedPart->renderMode == Renderer::FILL) {
 					GUI::screen->selectedPart->renderMode = Renderer::WIREFRAME;
 				} else {
-					GUI::screen->selectedPart->renderMode = Renderer::FILLED;
+					GUI::screen->selectedPart->renderMode = Renderer::FILL;
 				}
 			}
 		};

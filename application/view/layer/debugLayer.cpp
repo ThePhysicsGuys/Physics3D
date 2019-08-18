@@ -107,7 +107,7 @@ void DebugLayer::init() {
 
 	// Origin init
 	float originVertices[3] = { 0, 0, 5 };
-	originMesh = new ArrayMesh(originVertices, 1, 3, RenderMode::POINTS);
+	originMesh = new ArrayMesh(originVertices, 1, 3, Renderer::POINT);
 
 
 	// Vector init

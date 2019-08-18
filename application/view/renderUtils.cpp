@@ -4,8 +4,20 @@
 namespace Renderer {
 
 	unsigned int WIREFRAME = GL_LINE;
-	unsigned int FILLED = GL_FILL;
-	unsigned int POINTS = GL_POINT;
+	unsigned int FILL = GL_FILL;
+	unsigned int POINT = GL_POINT;
+
+	unsigned int STATIC_DRAW = GL_STATIC_DRAW;
+	unsigned int STREAM_DRAW = GL_STREAM_DRAW;
+	unsigned int DYNAMIC_DRAW = GL_DYNAMIC_DRAW;
+
+	unsigned int PATCHES = GL_PATCHES;
+	unsigned int QUADS = GL_QUADS;
+	unsigned int TRIANGLES = GL_TRIANGLES;
+	unsigned int LINES = GL_LINES;
+	unsigned int POINTS = GL_POINTS;
+
+	unsigned int UINT = GL_UNSIGNED_INT;
 
 	// GLFW binding
 
@@ -84,6 +96,7 @@ namespace Renderer {
 	}
 
 	// GLEW binding
+
 	bool initGLEW() {
 		return glewInit() == GLEW_OK;
 	}
@@ -166,5 +179,13 @@ namespace Renderer {
 
 	const unsigned char* getShaderVersion() {
 		return glGetString(GL_SHADING_LANGUAGE_VERSION);
+	}
+
+	inline void drawElements(unsigned int mode, size_t count, unsigned int type, const void * offset) {
+		glDrawElements(mode, count, type, offset);
+	}
+
+	inline void drawArrays(unsigned int mode, int first, size_t count) {
+		glDrawArrays(mode, first, count);
 	}
 }

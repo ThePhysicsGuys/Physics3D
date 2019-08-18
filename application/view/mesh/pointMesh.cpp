@@ -3,10 +3,12 @@
 #include "../buffers/vertexArray.h"
 #include "../buffers/vertexBuffer.h"
 
+#include "../renderUtils.h"
+
 #include "../util/Log.h"
 
-PointMesh::PointMesh(const float* vertices, const size_t vertexCount, size_t capacity) : AbstractMesh(RenderMode::POINTS), vertexCount(vertexCount), capacity(capacity) {
-	vertexBuffer = new VertexBuffer(vertices, capacity * 10, GL_DYNAMIC_DRAW);
+PointMesh::PointMesh(const float* vertices, const size_t vertexCount, size_t capacity) : AbstractMesh(Renderer::POINT), vertexCount(vertexCount), capacity(capacity) {
+	vertexBuffer = new VertexBuffer(vertices, 10 * capacity * sizeof(float), Renderer::DYNAMIC_DRAW);
 
 	bufferLayout = {
 		{
@@ -36,8 +38,8 @@ void PointMesh::update(const float* vertices, const size_t vertexCount) {
 	if (vertexCount > capacity) {
 		capacity = vertexCount;
 		Log::warn("Point buffer overflow, creating new buffer with size (%d)", vertexCount);
-		glBufferData(GL_ARRAY_BUFFER, capacity * bufferLayout.stride, vertices, GL_DYNAMIC_DRAW);
+		vertexBuffer->fill(vertices, capacity * bufferLayout.stride * sizeof(float), Renderer::DYNAMIC_DRAW);
 	} else {
-		glBufferSubData(GL_ARRAY_BUFFER, 0, vertexCount * bufferLayout.stride, vertices);
+		vertexBuffer->update(vertices, vertexCount * bufferLayout.stride * sizeof(float), 0);
 	}
 }

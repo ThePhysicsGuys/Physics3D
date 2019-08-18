@@ -3,8 +3,8 @@
 #include "../engine/math/vec.h"
 #include "../engine/math/mat4.h"
 
-#include "../batch.h"
-#include "../batchConfig.h"
+#include "../batch/batch.h"
+#include "../batch/batchConfig.h"
 
 #include <string>
 #include <vector>
