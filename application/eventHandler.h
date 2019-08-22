@@ -17,7 +17,7 @@ typedef void (*PartReleaseHandler) (ExtendedPart*, ExtendedPart*);
 
 class EventHandler {
 private:
-	void* pointer;
+	void* pointer = nullptr;
 
 public:
 	CameraMoveHandler cameraMoveHandler = [] (Screen&, Camera*, Vec3) {};

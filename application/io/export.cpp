@@ -254,7 +254,7 @@ void saveNonBinaryWorld(const std::string& name, World<ExtendedPart>& world, Cam
 	std::string folder = std::string("./") + name;
 	std::string file = folder + "/world.txt";
 
-	_mkdir(folder.c_str());
+	int result = _mkdir(folder.c_str());
 
 	std::ofstream output;
 

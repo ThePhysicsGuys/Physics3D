@@ -151,13 +151,13 @@ void Screen::init() {
 
 
 	// Layer creation
-	skyboxLayer = SkyboxLayer(this);
-	modelLayer = ModelLayer(this);
-	debugLayer = DebugLayer(this);
-	pickerLayer = PickerLayer(this);
-	postprocessLayer = PostprocessLayer(this);
-	guiLayer = GuiLayer(this);
-	debugOverlay = DebugOverlay(this);
+	skyboxLayer 	 = SkyboxLayer		(this);
+	modelLayer 		 = ModelLayer		(this);
+	debugLayer 		 = DebugLayer		(this);
+	pickerLayer 	 = PickerLayer		(this);
+	postprocessLayer = PostprocessLayer	(this);
+	guiLayer		 = GuiLayer			(this);
+	debugOverlay 	 = DebugOverlay		(this);
 
 	layerStack.pushLayer(&skyboxLayer);
 	layerStack.pushLayer(&modelLayer);
@@ -193,6 +193,7 @@ void Screen::init() {
 	handler->framebufferResize(dimension);
 }
 
+
 void Screen::update() {
 
 	// IO events
@@ -221,6 +222,7 @@ void Screen::update() {
 
 	// Update layers
 	layerStack.update();
+
 }
 
 

@@ -83,6 +83,8 @@ namespace Renderer {
 	extern const unsigned char* getRenderer();
 	extern const unsigned char* getShaderVersion();
 
+	extern inline void bindTexture2D(int id);
+	extern inline void scissor(int x, int y, int width, int height);
 	extern inline void drawElements(unsigned int mode, size_t count, unsigned int type, const void * offset);
 	extern inline void drawArrays(unsigned int mode, int first, size_t count);
 }

@@ -181,6 +181,14 @@ namespace Renderer {
 		return glGetString(GL_SHADING_LANGUAGE_VERSION);
 	}
 
+	void bindTexture2D(int id) {
+		glBindTexture(GL_TEXTURE_2D, id);
+	}
+
+	void scissor(int x, int y, int width, int height) {
+		glScissor(x, y, width, height);
+	}
+
 	inline void drawElements(unsigned int mode, size_t count, unsigned int type, const void * offset) {
 		glDrawElements(mode, count, type, offset);
 	}

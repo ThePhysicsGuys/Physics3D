@@ -14,7 +14,7 @@
 
 template<typename Vertex>
 class Batch {
-private:
+protected:
 	VertexArray* vao = nullptr;
 	VertexBuffer* vbo = nullptr;
 	IndexBuffer* ibo = nullptr;
@@ -67,11 +67,11 @@ public:
 		indexCounter = 0;
 	}
 
-	void submit() {
+	virtual void submit() {
 		vao->bind();
 
 		vbo->fill((const void *) vertexBuffer.data(), vertexBuffer.size() * sizeof(Vertex), Renderer::STREAM_DRAW);
-		ibo->fill((const void *) indexBuffer.data(), indexBuffer.size(), Renderer::STREAM_DRAW);
+		ibo->fill((const unsigned int *) indexBuffer.data(), indexBuffer.size(), Renderer::STREAM_DRAW);
 
 		Renderer::drawElements(Renderer::TRIANGLES, indexBuffer.size(), Renderer::UINT, nullptr);
 
@@ -82,7 +82,7 @@ public:
 		clear();
 	}
 
-	void clear() {
+	virtual void clear() {
 		vertexBuffer.clear();
 		indexBuffer.clear();
 
