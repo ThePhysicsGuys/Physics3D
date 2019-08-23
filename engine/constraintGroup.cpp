@@ -20,6 +20,8 @@ void ConstraintGroup::apply() const {
 		/*Global?*/ Mat3 selfResponse = cfA.rotation * responseA * cfA.rotation.inverse() + cfB.rotation * responseB * cfB.rotation.inverse();
 
 		systemToSolve.setSubMatrix(matrixIndex, matrixIndex, selfResponse);
+
+		matrixIndex += 3;
 	}
 	LargeMatrix<double> systemCopy(systemToSolve);
 	LargeMatrix<double> systemCopyCopy(systemToSolve);

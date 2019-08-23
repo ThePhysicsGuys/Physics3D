@@ -9,16 +9,16 @@
 	These can be stacked, for example, to iterate over all the parts in all the physicals of all the worlds use
 	CompositeIterator<CompositeIterator<Iterator<World>>>
 */
-template<typename GroupIterator>
+template<typename GroupIterator, typename GroupIteratorEnd = GroupIterator>
 class CompositeIterator {
 public:
 	GroupIterator currentGroup;
-	//decltype(*std::declval<GroupIterator>()) testItem;
+	GroupIteratorEnd groupIterEnd;
 	decltype((*std::declval<GroupIterator>()).begin()) currentItem;
 
 	CompositeIterator() = default;
-	CompositeIterator(const GroupIterator& groupIter) : currentGroup(groupIter), currentItem((*this->currentGroup).begin()) {}
-	CompositeIterator(const GroupIterator& groupIter, const decltype((*std::declval<GroupIterator>()).begin()) currentItem) : currentGroup(groupIter), currentItem(currentItem) {}
+	CompositeIterator(const GroupIterator& groupIter, const GroupIteratorEnd& groupIterEnd) : currentGroup(groupIter), currentItem((*this->currentGroup).begin()), groupIterEnd(groupIterEnd) {}
+	CompositeIterator(const GroupIterator& groupIter, const decltype((*std::declval<GroupIterator>()).begin()) currentItem, const GroupIteratorEnd& groupIterEnd) : currentGroup(groupIter), currentItem(currentItem), groupIterEnd(groupIterEnd) {}
 
 	decltype(*currentItem)& operator*() const {
 		return *currentItem;
@@ -26,22 +26,17 @@ public:
 
 	inline CompositeIterator<GroupIterator>& operator++() {
 		++currentItem;
+		if (currentItem == (*currentGroup).end()) {
+			++currentGroup;
+			if (currentGroup != groupIterEnd) {
+				currentItem = (*currentGroup).begin();
+			}
+		}
 		return *this;
 	}
 
-	// A bit awkward but this was the only way I could come up with so that it wouldn't run off the end of the group list
-	inline bool operator!=(const CompositeIterator<GroupIterator>& other) {
-		if (currentItem != (*currentGroup).end()) {
-			return true;
-		} else {
-			++currentGroup;
-			if (currentGroup != other.currentGroup) {
-				currentItem = (*currentGroup).begin();
-				return true;
-			} else {
-				return false;
-			}
-		}
+	inline bool operator!=(IteratorEnd) const {
+		return currentGroup != groupIterEnd;
 	}
 };
 
@@ -51,6 +46,8 @@ class CastingIterator {
 public:
 	CastingIterator() = default;
 	CastingIterator(const BaseIterator& iter) : iter(iter) {}
+	/*template<typename BaseIteratorConstructor>
+	CastingIterator(const BaseIteratorConstructor& iter) : iter(iter) {}*/
 
 	OutputType operator*() const {
 		return static_cast<OutputType>(*iter);
@@ -59,12 +56,35 @@ public:
 		++iter;
 		return *this;
 	}
-	bool operator!=(CastingIterator<BaseIterator, OutputType>& other) {
+	bool operator!=(const CastingIterator<BaseIterator, OutputType>& other) const {
 		return iter != other.iter;
 	}
-	bool operator!=(BaseIterator& other) {
+	template<typename OtherIter>
+	bool operator!=(const OtherIter& other) const {
 		return iter != other;
 	}
+};
+
+template<typename BaseIteratorFactoryType, typename NewType>
+class CastingIteratorFactoryWithEnd {
+	BaseIteratorFactoryType factory;
+public:
+	CastingIteratorFactoryWithEnd() = default;
+	CastingIteratorFactoryWithEnd(const BaseIteratorFactoryType& factory) : factory(factory) {}
+
+	CastingIterator<decltype(factory.begin()), NewType> begin() const { return CastingIterator<decltype(factory.begin()), NewType>(factory.begin()); }
+	IteratorEnd end() const { return IteratorEnd(); }
+};
+
+template<typename BaseIteratorFactoryType, typename NewType, typename NewType2 = NewType>
+class CastingIteratorFactory {
+	BaseIteratorFactoryType factory;
+public:
+	CastingIteratorFactory() = default;
+	CastingIteratorFactory(const BaseIteratorFactoryType& factory) : factory(factory) {}
+
+	CastingIterator<decltype(factory.begin()), NewType> begin() const { return CastingIterator<decltype(factory.begin()), NewType>(factory.begin()); }
+	CastingIterator<decltype(factory.end()), NewType2> end() const { return CastingIterator<decltype(factory.end()), NewType2>(factory.end()); }
 };
 
 template<typename Iter, typename IterEnd, typename Filter, bool (*filterFunc)(const decltype(*std::declval<Iter>())& obj, const Filter& filter)>

@@ -150,30 +150,6 @@ TEST_CASE(testGetPointAccelerationMatrix) {
 
 	ASSERT(actualAcceleration == accelMatrix * force);
 }
-TEST_CASE(testComputeCombinedInertiaBetween) {
-	Part testPart1(Shape(), CFrame(), 1.0, 1.0);
-	Physical testPhys1(&testPart1, 5.0, DiagonalMat3(100, 200, 300));
-	Part testPart2(Shape(), CFrame(Vec3(1.0, 0.0, 0.0)), 1.0, 1.0);
-	Physical testPhys2(&testPart2, 5.0, DiagonalMat3(100, 200, 300));
-	
-	Vec3 direction(2.0, 0.0, 0.0);
-	Vec3 colissionPos(0.5, 0.0, 0.0);
-
-	double realInertiaBetweenNormalToCOM = 1 / (1 / testPhys1.mass + 1 / testPhys2.mass);
-	double combinedInertiaBetweenNormalToCOM = computeCombinedInertiaBetween(testPhys1, testPhys2, colissionPos - testPhys1.getCenterOfMass(), colissionPos - testPhys2.getCenterOfMass(), direction);
-
-	ASSERT(realInertiaBetweenNormalToCOM == combinedInertiaBetweenNormalToCOM);
-
-	for(double x = -1.0; x <= 1.0; x += 0.25) {
-		for(double y = -1.0; y <= 1.0; y += 0.25) {
-			for(double z = -1.0; z <= 1.0; z += 0.25) {
-				Vec3 colissionPos(x, y, z);
-				double combinedInertiaBetweenNormal = computeCombinedInertiaBetween(testPhys1, testPhys2, colissionPos - testPhys1.getCenterOfMass(), colissionPos - testPhys2.getCenterOfMass(), direction);
-				ASSERT(realInertiaBetweenNormalToCOM >= combinedInertiaBetweenNormalToCOM);
-			}
-		}
-	}
-}
 TEST_CASE(impulseTest) {
 	Part part(Shape(), CFrame(), 1.0, 1.0);
 	Physical p(&part, 5.0, DiagonalMat3(5, 5, 5));

@@ -8,17 +8,29 @@
 #include <shared_mutex>
 #include <functional>
 #include "datastructures/splitUnorderedList.h"
-#include "worldIterator.h"
 #include "datastructures/boundsTree.h"
 
+#include "datastructures/iterators.h"
 #include "datastructures/iteratorEnd.h"
 
 #include "constraintGroup.h"
 
-template<typename Iter>
-using TreePartIter = CompositeIterator<BoundsTreeIter<Iter, Physical>>;
+typedef ListOfPtrIter<Physical> PhysicalIter;
+typedef ListOfPtrIter<const Physical> ConstPhysicalIter;
 
-inline bool doesRayIntersectPart(Part& part, const Ray& ray);
+typedef IteratorFactory<PhysicalIter> PhysicalIterFactory;
+typedef IteratorFactory<ConstPhysicalIter> ConstPhysicalIterFactory;
+
+typedef CompositeIterator<PhysicalIter, PhysicalIter> BasicPartIter;
+typedef CompositeIterator<ConstPhysicalIter, ConstPhysicalIter> ConstBasicPartIter;
+
+typedef IteratorFactoryWithEnd<BasicPartIter> BasicPartIterFactory;
+typedef IteratorFactoryWithEnd<ConstBasicPartIter> ConstBasicPartIterFactory;
+
+template<typename ExtendedPart>
+using BasicExtendedPartIterFactory = CastingIteratorFactoryWithEnd<BasicPartIterFactory, ExtendedPart&>;
+template<typename ExtendedPart>
+using ConstBasicExtendedPartIterFactory = CastingIteratorFactoryWithEnd<ConstBasicPartIterFactory, const ExtendedPart&>;
 
 class WorldPrototype {
 private:
@@ -105,46 +117,38 @@ public:
 	double getTotalEnergy() const;
 
 
+	PhysicalIterFactory iterPhysicals() { return PhysicalIterFactory(physicals.begin(), physicals.end()); }
+	ConstPhysicalIterFactory iterPhysicals() const { return ConstPhysicalIterFactory(physicals.begin(), physicals.end()); }
 
-	ListOfPtrIterFactory<Physical> iterPhysicals() { return ListOfPtrIterFactory<Physical>{ physicals.begin(), physicals.end() }; }
-	ListOfPtrIterFactory<const Physical> iterPhysicals() const { return ListOfPtrIterFactory<const Physical>{ physicals.begin(), physicals.end() }; }
+	PhysicalIterFactory iterAnchoredPhysicals() { return PhysicalIterFactory(physicals.begin(), physicals.getSplitOffset()); }
+	ConstPhysicalIterFactory iterAnchoredPhysicals() const { return ConstPhysicalIterFactory(physicals.begin(), physicals.getSplitOffset()); }
 
-	ListOfPtrIterFactory<Physical> iterAnchoredPhysicals() { return ListOfPtrIterFactory<Physical>(physicals.begin(), physicals.getSplitOffset()); }
-	ListOfPtrIterFactory<const Physical> iterAnchoredPhysicals() const { return ListOfPtrIterFactory<const Physical>(physicals.begin(), physicals.getSplitOffset()); }
+	PhysicalIterFactory iterFreePhysicals() { return PhysicalIterFactory(physicals.getSplitOffset(), physicals.end()); }
+	ConstPhysicalIterFactory iterFreePhysicals() const { return ConstPhysicalIterFactory(physicals.getSplitOffset(), physicals.end()); }
 
-	ListOfPtrIterFactory<Physical> iterFreePhysicals() { return ListOfPtrIterFactory<Physical>(physicals.getSplitOffset(), physicals.end()); }
-	ListOfPtrIterFactory<const Physical> iterFreePhysicals() const { return ListOfPtrIterFactory<const Physical>(physicals.getSplitOffset(), physicals.end()); }
+	BasicPartIter begin() { return BasicPartIter(iterPhysicals().begin(), iterPhysicals().end()); }
+	ConstBasicPartIter begin() const { return ConstBasicPartIter(iterPhysicals().begin(), iterPhysicals().end()); }
+	IteratorEnd end() const { return IteratorEnd(); }
 
+	BasicPartIterFactory iterAnchoredParts() { return BasicPartIterFactory(BasicPartIter(iterAnchoredPhysicals().begin(), iterAnchoredPhysicals().end())); }
+	ConstBasicPartIterFactory iterAnchoredParts() const { return ConstBasicPartIterFactory(ConstBasicPartIter(iterAnchoredPhysicals().begin(), iterAnchoredPhysicals().end())); }
 
-	/*IteratorFactory<TreePartIter<TreeIteratorIntersectingBounds>, IteratorEnd> iterPartsIntersectingBounds(const Bounds& bounds) {
-		auto iter = objectTree.iterObjectsIntersectingBounds(bounds);
-		return IteratorFactory<TreePartIter<TreeIteratorIntersectingBounds>, IteratorEnd>(TreePartIter<TreeIteratorIntersectingBounds>(iter.begin()), IteratorEnd());
-	}
-	IteratorFactory<FilteredIterator<TreePartIter<TreeIteratorIntersectingRay>, IteratorEnd, Ray, doesRayIntersectPart>, IteratorEnd> iterPartsIntersectingRay(const Ray& ray) {
-		auto iter = objectTree.iterObjectsIntersectingRay(ray);
-		TreePartIter<TreeIteratorIntersectingRay> treeIter(iter.begin());
-		FilteredIterator<TreePartIter<TreeIteratorIntersectingRay>, IteratorEnd, Ray, doesRayIntersectPart> filteredIter(
-			treeIter, IteratorEnd(), ray
-		);
-		return IteratorFactory<FilteredIterator<TreePartIter<TreeIteratorIntersectingRay>, IteratorEnd, Ray, doesRayIntersectPart>, IteratorEnd>(
-			filteredIter, IteratorEnd()
-		);
-	}*/
+	BasicPartIterFactory iterFreeParts() { return BasicPartIterFactory(BasicPartIter(iterFreePhysicals().begin(), iterFreePhysicals().end())); }
+	ConstBasicPartIterFactory iterFreeParts() const { return ConstBasicPartIterFactory(ConstBasicPartIter(iterFreePhysicals().begin(), iterFreePhysicals().end())); }
 };
 
 template<typename T = Part>
 class World : public WorldPrototype {
 public:
-	inline CustomPartIter<T> begin() { return CustomPartIter<T>(PartIterator(iterPhysicals().begin())); }
-	inline CustomPartIter<T> end() { return CustomPartIter<T>(PartIterator(iterPhysicals().end(), PartIter())); }
+	inline CastingIterator<BasicPartIter, T&> begin() { return CastingIterator<BasicPartIter, T&>(WorldPrototype::begin()); }
+	inline CastingIterator<ConstBasicPartIter, const T&> begin() const { return CastingIterator<ConstBasicPartIter, const T&>(WorldPrototype::begin()); }
+	inline IteratorEnd end() const { return IteratorEnd(); }
 
-	inline CustomPartIteratorFactory<T> iterAnchoredParts() { return CustomPartIteratorFactory<T>(iterAnchoredPhysicals()); }
-	inline ConstCustomPartIteratorFactory<T> iterAnchoredParts() const { return ConstCustomPartIteratorFactory<T>(iterAnchoredPhysicals()); }
+	inline BasicExtendedPartIterFactory<T> iterAnchoredParts() { return BasicExtendedPartIterFactory<T>(WorldPrototype::iterAnchoredParts()); }
+	inline ConstBasicExtendedPartIterFactory<T> iterAnchoredParts() const { return ConstBasicExtendedPartIterFactory<T>(WorldPrototype::iterAnchoredParts()); }
 
-	inline CustomPartIteratorFactory<T> iterFreeParts() { return CustomPartIteratorFactory<T>(iterFreeParts()); }
-	inline ConstCustomPartIteratorFactory<T> iterFreeParts() const { return ConstCustomPartIteratorFactory<T>(iterFreeParts()); }
+	inline BasicExtendedPartIterFactory<T> iterFreeParts() { return BasicExtendedPartIterFactory<T>(WorldPrototype::iterFreeParts()); }
+	inline ConstBasicExtendedPartIterFactory<T> iterFreeParts() const { return ConstBasicExtendedPartIterFactory<T>(WorldPrototype::iterFreeParts()); }
 
 	
 };
-
-double computeCombinedInertiaBetween(const Physical& first, const Physical& second, const Vec3& localColissionFirst, const Vec3& localColissionSecond, const Vec3& colissionNormal);

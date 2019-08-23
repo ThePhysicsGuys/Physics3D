@@ -154,8 +154,8 @@ struct TreeIterBase {
 	}
 };
 
-struct TreeIterator : public TreeIterBase {
-	TreeIterator(TreeNode& rootNode) : TreeIterBase(rootNode) {
+struct ConstTreeIterator : public TreeIterBase {
+	ConstTreeIterator(TreeNode& rootNode) : TreeIterBase(rootNode) {
 		// the very first element is a dummy, in order to detect when the tree is done
 		
 		if (rootNode.nodeCount == 0) return;
@@ -185,6 +185,14 @@ struct TreeIterator : public TreeIterBase {
 		// delve down until a feasible leaf node is found
 		delveDown();
 	}
+};
+
+struct TreeIterator : public ConstTreeIterator {
+	TreeIterator(TreeNode& rootNode) : ConstTreeIterator(rootNode) {
+		// the very first element is a dummy, in order to detect when the tree is done
+
+		if (rootNode.nodeCount == 0) return;
+	}
 	inline void remove() {
 		TreeIterBase::remove();
 		if (top < stack) return;
@@ -192,7 +200,26 @@ struct TreeIterator : public TreeIterBase {
 	}
 };
 
-template<typename Filter, bool (*filterFunc)(const Bounds& nodeBounds, const Filter& filter)>
+/*
+	Iterates through the tree, applying Filter at every level to cull branches that should not be searched
+
+	Filter must define an operator(Bounds) returning true if the filter passes for this bound, and false if it does not.
+
+	For correct operation, it must abide by the following:
+	- If the filter returns true for some bound, then it must also return true for any bound fully encompassing the first bound. 
+	- If the filter returns false for some bound, then it must return false for all bounds it encompasses. 
+
+	Correct filter:
+	- BoundIntersectsRay
+	    If the bound intersects a ray, then this ray must also intersect it's parent
+		If the bound does not intersect the ray, then it's children cannot
+	
+	Incorrect filter:
+	- BoundsContainedIn
+		If a given bound is contained in another bound2, that does not mean that it's parent must also be contained in this bound2
+		However, BoundsNotContainedIn IS a correct filter
+*/
+template<typename Filter>
 struct FilteredTreeIterator : public TreeIterBase {
 	Filter filter;
 	FilteredTreeIterator(TreeNode& rootNode, const Filter& filter) : TreeIterBase(rootNode), filter(filter) {
@@ -210,7 +237,7 @@ struct FilteredTreeIterator : public TreeIterBase {
 			top++;
 			top->node = nextNode;
 
-			if (filterFunc(nextNode->bounds, filter)) {
+			if (filter(nextNode->bounds)) {
 				if (nextNode->isLeafNode()) {
 					return;
 				} else {
@@ -244,7 +271,7 @@ struct FilteredTreeIterator : public TreeIterBase {
 		delveDownFiltered();
 	}
 };
-
+/*
 inline bool containsFilterBounds(const Bounds& nodeBounds, const Bounds& filterBounds) { return nodeBounds.contains(filterBounds); }
 inline bool containsFilterPoint(const Bounds& nodeBounds, const Position& filterPos) { return nodeBounds.contains(filterPos); }
 
@@ -252,7 +279,7 @@ typedef FilteredTreeIterator<Bounds, intersects> TreeIteratorIntersectingBounds;
 typedef FilteredTreeIterator<Ray, doRayAndBoundsIntersect> TreeIteratorIntersectingRay;
 typedef FilteredTreeIterator<Bounds, containsFilterBounds> TreeIteratorContainingBounds;
 typedef FilteredTreeIterator<Position, containsFilterPoint> TreeIteratorContainingPoint;
-
+*/
 
 
 
@@ -271,10 +298,22 @@ struct BoundsTreeIter {
 	}
 };
 
+template<typename Filter, typename Boundable>
+using FilteredBoundsTreeIter = BoundsTreeIter<FilteredTreeIterator<Filter>, Boundable>;
+
 template<typename Iter>
 struct TreeIterFactory : IteratorFactory<Iter, IteratorEnd> {
 	TreeIterFactory(const Iter& iter) : IteratorFactory<Iter, IteratorEnd>(iter, IteratorEnd()) {}
 	TreeIterFactory(Iter&& iter) : IteratorFactory<Iter, IteratorEnd>(std::move(iter), IteratorEnd()) {}
+};
+
+struct ContainsBoundsFilter {
+	Bounds filterBounds;
+
+	ContainsBoundsFilter() = default;
+	ContainsBoundsFilter(const Bounds& filterBounds) : filterBounds(filterBounds) {}
+
+	bool operator()(const Bounds& b) const { return b.contains(filterBounds); }
 };
 
 template<typename Boundable>
@@ -290,7 +329,7 @@ struct BoundsTree {
 	}
 
 	void remove(Boundable* obj, const Bounds& strictBounds) {
-		for (TreeIteratorContainingBounds iter(rootNode, strictBounds); iter != IteratorEnd(); iter) {
+		for (FilteredTreeIterator<ContainsBoundsFilter> iter(rootNode, strictBounds); iter != IteratorEnd(); iter) {
 			if ((*iter)->object == obj) {
 				iter.remove();
 				return;
@@ -313,18 +352,11 @@ struct BoundsTree {
 	inline void improveStructure() { rootNode.improveStructure(); }
 	
 	inline TreeIterator begin() { return TreeIterator(rootNode); };
-	inline IteratorEnd end() { return IteratorEnd(); };
+	inline ConstTreeIterator begin() const { return ConstTreeIterator(const_cast<TreeNode&>(rootNode)); };
+	inline IteratorEnd end() const { return IteratorEnd(); };
 
-	inline TreeIterFactory<BoundsTreeIter<TreeIteratorIntersectingBounds, Boundable>> iterObjectsIntersectingBounds(const Bounds& bounds) {
-		return TreeIterFactory<BoundsTreeIter<TreeIteratorIntersectingBounds, Boundable>>(BoundsTreeIter<TreeIteratorIntersectingBounds, Boundable>(TreeIteratorIntersectingBounds(this->rootNode, bounds)));
-	}
-	inline TreeIterFactory<BoundsTreeIter<TreeIteratorIntersectingRay, Boundable>> iterObjectsIntersectingRay(const Ray& ray) {
-		return TreeIterFactory<BoundsTreeIter<TreeIteratorIntersectingRay, Boundable>>(BoundsTreeIter<TreeIteratorIntersectingRay, Boundable>(TreeIteratorIntersectingRay(this->rootNode, ray)));
-	}
-	inline TreeIterFactory<BoundsTreeIter<TreeIteratorContainingBounds, Boundable>> iterObjectsContainingBounds(const Bounds& bounds) {
-		return TreeIterFactory<BoundsTreeIter<TreeIteratorContainingBounds, Boundable>>(BoundsTreeIter<TreeIteratorContainingBounds, Boundable>(TreeIteratorContainingBounds(this->rootNode, bounds)));
-	}
-	inline TreeIterFactory<BoundsTreeIter<TreeIteratorContainingPoint, Boundable>> iterObjectsContainingPoint(const Position& point) {
-		return TreeIterFactory<BoundsTreeIter<TreeIteratorContainingPoint, Boundable>>(BoundsTreeIter<TreeIteratorContainingPoint, Boundable>(TreeIteratorContainingPoint(this->rootNode, point)));
+	template<typename Filter>
+	inline TreeIterFactory<FilteredBoundsTreeIter<Filter, Boundable>> iterFiltered(const Filter& filter) {
+		return TreeIterFactory<FilteredBoundsTreeIter<Filter, Boundable>>(FilteredBoundsTreeIter<Filter, Boundable>(FilteredTreeIterator<Filter>(this->rootNode, filter)));
 	}
 };

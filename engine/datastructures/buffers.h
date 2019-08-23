@@ -28,7 +28,9 @@ struct ConstListIter {
 
 template<typename T>
 struct ListOfPtrIter {
-	T* const * cur;
+	T* const* cur;
+	ListOfPtrIter() = default;
+	ListOfPtrIter(T* const* cur) : cur(cur) {}
 	T& operator*() const {
 		return **cur;
 	}

@@ -31,24 +31,6 @@ WorldPrototype::WorldPrototype(size_t initialPartCapacity) : physicals(initialPa
 }
 
 /*
-	Compute combined inertia between to objects in a direction
-*/
-double computeCombinedInertiaBetween(const Physical& first, const Physical& second, const Vec3& localColissionFirst, const Vec3& localColissionSecond, const Vec3& colissionNormal) {
-	SymmetricMat3 accMat1 = first.getPointAccelerationMatrix(localColissionFirst);
-	SymmetricMat3 accMat2 = second.getPointAccelerationMatrix(localColissionSecond);
-
-	SymmetricMat3 accelToForceMat = ~(accMat1 + accMat2);
-	Vec3 imaginaryForceForAcceleration = accelToForceMat * colissionNormal;
-	double forcePerAccelRatio = imaginaryForceForAcceleration * colissionNormal / lengthSquared(colissionNormal);
-
-	if(forcePerAccelRatio != forcePerAccelRatio) {
-		Log::error("ForcePerAccelRatio is bad! %f", forcePerAccelRatio);
-		__debugbreak();
-	}
-	return forcePerAccelRatio;
-}
-
-/*
 	exitVector is the distance p2 must travel so that the shapes are no longer colliding
 */
 template<bool anchoredColission>
@@ -203,28 +185,6 @@ inline void runColissionTests(Physical& phys1, Physical& phys2, WorldPrototype& 
 			physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
 		}
 	}
-}
-
-// returns anchoredColissions offset
-size_t findColissions(WorldPrototype& world, std::vector<Colission>& colissions) {
-	for(Physical& anchoredPhys: world.iterAnchoredPhysicals()) {
-		for(Physical& freePhys: world.iterFreePhysicals()) {
-			runColissionTests(anchoredPhys, freePhys, world, colissions);
-		}
-	}
-
-	size_t anchoredOffset = colissions.size();
-
-	auto iter = world.iterFreePhysicals();
-	auto finish = iter.end();
-	for(auto mainIter = iter.begin(); mainIter != finish; ++mainIter) {
-		Physical& phys1 = *mainIter;
-		for(auto secondIter = mainIter; ++secondIter != finish; ) {
-			runColissionTests(phys1, *secondIter, world, colissions);
-		}
-	}
-
-	return anchoredOffset;
 }
 
 void recursiveFindColissionsInternal(WorldPrototype& world, std::vector<Colission>& colissions, TreeNode& trunkNode);
@@ -455,9 +415,9 @@ void WorldPrototype::detachPart(Part* part) {
 void WorldPrototype::applyExternalForces() {}
 
 bool WorldPrototype::isValid() const {
-	for (const Physical*const * phys = this->iterPhysicals().start; phys != this->iterPhysicals().fin; phys++) {
-		for (const Part& part : **phys) {
-			if (part.parent != *phys) {
+	for (const Physical& phys: iterPhysicals()) {
+		for (const Part& part : phys) {
+			if (part.parent != &phys) {
 				Log::error("part's parent's child is not part");
 				__debugbreak();
 				return false;
