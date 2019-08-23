@@ -287,38 +287,26 @@ void EditTools::dragRotateTool(Screen& screen) {
 
 // Drag behaviour of scale tool
 void EditTools::dragScaleTool(Screen& screen) {
-	// Not completely supported by physics engine
+	Vec3 ray = screen.ray;
+	Vec3 deltaPos = screen.camera.cframe.position - screen.selectedPart->cframe.position;
+	double distance = length(deltaPos - (deltaPos * ray) * ray) / length(selectedPoint);
+
 	Vec3 a;
 	switch (selectedEditDirection) {
 	case EditDirection::X:
-		a = Vec3(1, 0, 0);
+		screen.selectedPart->scale(distance / screen.selectedPart->localBounds.getWidth() * 2, 1, 1);
 		break;
 	case EditDirection::Y:
-		a = Vec3(0, 1, 0);
+		screen.selectedPart->scale(1, distance / screen.selectedPart->localBounds.getHeight() * 2, 1);
 		break;
 	case EditDirection::Z:
-		a = Vec3(0, 0, 1);
+		screen.selectedPart->scale(1, 1, distance / screen.selectedPart->localBounds.getDepth() * 2);
 		break;
 	case EditDirection::CENTER:
-		a = Vec3(1.0/1.73205, 1.0/1.73205, 1/1.73205);
+		double amount = distance / screen.selectedPart->maxRadius / sqrt(3.0);
+		screen.selectedPart->scale(amount, amount, amount);
 		break;
 	}
-
-	Position A = screen.selectedPart->cframe.position;
-	Position B = screen.camera.cframe.position;
-	Vec3 b = screen.ray;
-	Vec3 AB = B - A;
-
-	double distance = length(AB - (AB * b) * b);
-	Vec3 scale = distance * a / length(selectedPoint);
-
-	Mat3 scaledRotation = screen.selectedPart->cframe.rotation;
-
-	double sx = (scale.x == 0) ? 1 : scale.x / length(Vec3(scaledRotation.m00, scaledRotation.m01, scaledRotation.m02));
-	double sy = (scale.y == 0) ? 1 : scale.y / length(Vec3(scaledRotation.m10, scaledRotation.m11, scaledRotation.m12));
-	double sz = (scale.z == 0) ? 1 : scale.z / length(Vec3(scaledRotation.m20, scaledRotation.m21, scaledRotation.m22));
-
-	screen.selectedPart->cframe.rotation = scaledRotation.scale(sx, sy, sz);
 }
 
 

@@ -14,13 +14,13 @@ struct ShapeVecIterFactory;
 #include "../math/position.h"
 
 struct Sphere {
-	Vec3 origin;
-	double radius;
+	Vec3 origin = Vec3();
+	double radius = 0;
 };
 
 struct GlobalSphere {
-	Position origin;
-	double radius;
+	Position origin = Position();
+	double radius = 0;
 };
 
 struct Triangle {
@@ -69,17 +69,20 @@ struct Shape {
 	
 private:
 	SharedArrayPtr<const ParallelVec3> vertices;
+	Shape(const ParallelVec3* vertices, const SharedArrayPtr<const Triangle>& triangles, int vertexCount, int triangleCount);
+	Shape(const SharedArrayPtr<const ParallelVec3>& vertices, const SharedArrayPtr<const Triangle>& triangles, int vertexCount, int triangleCount) : vertices(vertices), triangles(triangles), vertexCount(vertexCount), triangleCount(triangleCount) {};
 public:
 	SharedArrayPtr<const Triangle> triangles;
 	int vertexCount;
 	int triangleCount;
 
 	Shape() : vertices(nullptr), triangles(SharedArrayPtr<const Triangle>::staticSharedArrayPtr(nullptr)), vertexCount(0), triangleCount(0) {};
-	Shape(const Vec3f* vertices, SharedArrayPtr<const Triangle> triangles, int vertexCount, int triangleCount);
-	Shape translated(Vec3f offset, Vec3f* newVecBuf) const;
-	Shape rotated(RotMat3f rotation, Vec3f* newVecBuf) const;
-	Shape localToGlobal(CFramef frame, Vec3f* newVecBuf) const;
-	Shape globalToLocal(CFramef frame, Vec3f* newVecBuf) const;
+	Shape(const Vec3f* vertices, const SharedArrayPtr<const Triangle>& triangles, int vertexCount, int triangleCount);
+	Shape translated(Vec3f offset) const;
+	Shape rotated(RotMat3f rotation) const;
+	Shape localToGlobal(CFramef frame) const;
+	Shape globalToLocal(CFramef frame) const;
+	Shape scaled(float scaleX, float scaleY, float scaleZ) const;
 
 	bool isValid() const;
 	bool containsPoint(Vec3f point) const;

@@ -49,7 +49,12 @@ Triangle Triangle::leftShift() const {
 	return Triangle { secondIndex, thirdIndex, firstIndex };
 }
 
-Shape::Shape(const Vec3f* vertices, SharedArrayPtr<const Triangle> triangles, int vertexCount, int triangleCount) :
+inline Shape::Shape(const ParallelVec3* vertices, const SharedArrayPtr<const Triangle>& triangles, int vertexCount, int triangleCount) : 
+	vertices(SharedArrayPtr<const ParallelVec3>(vertices)), triangles(triangles), vertexCount(vertexCount), triangleCount(triangleCount) {
+	
+}
+
+Shape::Shape(const Vec3f* vertices, const SharedArrayPtr<const Triangle>& triangles, int vertexCount, int triangleCount) :
 	vertices(createAndFillParallelVecBuf(vertices, vertexCount)),
 	triangles(triangles), 
 	vertexCount(vertexCount), 
@@ -63,36 +68,54 @@ CFramef Shape::getInertialEigenVectors() const {
 	return CFramef(Vec3f(centerOfMass), Mat3f(basis));
 }
 
-Shape Shape::translated(Vec3f offset, Vec3f * newVecBuf) const {
-	for (int i = 0; i < this->vertexCount; i++) {
-		newVecBuf[i] = offset + (*this)[i];
+Shape Shape::translated(Vec3f offset) const {
+	ParallelVec3* newBuf = createParallelVecBuf(this->vertexCount);
+	for (unsigned int i = 0; i < this->vertexCount; i++) {
+		newBuf[i >> 3].setVec(i & 0x7, offset + (*this)[i]);
 	}
 
-	return Shape(newVecBuf, triangles, vertexCount, triangleCount);
+	fixFinalBlock(newBuf, this->vertexCount, newBuf[this->vertexCount >> 3][this->vertexCount & 0x7]);
+	return Shape(newBuf, triangles, vertexCount, triangleCount);
 }
 
-Shape Shape::rotated(RotMat3f rotation, Vec3f* newVecBuf) const {
+Shape Shape::rotated(RotMat3f rotation) const {
+	ParallelVec3* newBuf = createParallelVecBuf(this->vertexCount);
 	for (int i = 0; i < this->vertexCount; i++) {
-		newVecBuf[i] = rotation * (*this)[i];
+		newBuf[i >> 3].setVec(i & 0x7, rotation * (*this)[i]);
 	}
 
-	return Shape(newVecBuf, triangles, vertexCount, triangleCount);
+	fixFinalBlock(newBuf, this->vertexCount, newBuf[this->vertexCount >> 3][this->vertexCount & 0x7]);
+	return Shape(newBuf, triangles, vertexCount, triangleCount);
 }
 
-Shape Shape::localToGlobal(CFramef frame, Vec3f* newVecBuf) const {
+Shape Shape::localToGlobal(CFramef frame) const {
+	ParallelVec3* newBuf = createParallelVecBuf(this->vertexCount);
 	for (int i = 0; i < this->vertexCount; i++) {
-		newVecBuf[i] = frame.localToGlobal((*this)[i]);
+		newBuf[i >> 3].setVec(i & 0x7, frame.localToGlobal((*this)[i]));
 	}
 
-	return Shape(newVecBuf, triangles, vertexCount, triangleCount);
+	fixFinalBlock(newBuf, this->vertexCount, newBuf[this->vertexCount >> 3][this->vertexCount & 0x7]);
+	return Shape(newBuf, triangles, vertexCount, triangleCount);
 }
 
-Shape Shape::globalToLocal(CFramef frame, Vec3f* newVecBuf) const {
+Shape Shape::globalToLocal(CFramef frame) const {
+	ParallelVec3* newBuf = createParallelVecBuf(this->vertexCount);
 	for (int i = 0; i < this->vertexCount; i++) {
-		newVecBuf[i] = frame.globalToLocal((*this)[i]);
+		newBuf[i >> 3].setVec(i & 0x7, frame.globalToLocal((*this)[i]));
 	}
 
-	return Shape(newVecBuf, triangles, vertexCount, triangleCount);
+	fixFinalBlock(newBuf, this->vertexCount, newBuf[this->vertexCount >> 3][this->vertexCount & 0x7]);
+	return Shape(newBuf, triangles, vertexCount, triangleCount);
+}
+Shape Shape::scaled(float scaleX, float scaleY, float scaleZ) const {
+	ParallelVec3* newBuf = createParallelVecBuf(this->vertexCount);
+	for (int i = 0; i < this->vertexCount; i++) {
+		Vec3f curVec = (*this)[i];
+		newBuf[i >> 3].setVec(i & 0x7, scaleX * curVec.x, scaleY * curVec.y, scaleZ * curVec.z);
+	}
+
+	fixFinalBlock(newBuf, this->vertexCount, newBuf[this->vertexCount >> 3][this->vertexCount & 0x7]);
+	return Shape(newBuf, triangles, vertexCount, triangleCount);
 }
 
 BoundingBox Shape::getBounds() const {
@@ -400,8 +423,8 @@ double Shape::getVolume() const {
 		Vec3f v1 = (*this)[triangle.secondIndex];
 		Vec3f v2 = (*this)[triangle.thirdIndex];
 
-		Vec3f D1 = v1 - v0; 
-		Vec3f D2 = v2 - v0;
+		Vec3 D1 = v1 - v0; 
+		Vec3 D2 = v2 - v0;
 		
 		double Tf = (D1.x * D2.y - D1.y * D2.x);
 
@@ -558,7 +581,7 @@ float Shape::getIntersectionDistance(Vec3f origin, Vec3f direction) const {
 		q = s % edge1;
 		v = direction * f * q;
 
-		if (v < 0.0 || u + v > 1.0) continue;
+		if (v < 0.0f || u + v > 1.0f) continue;
 
 		float r = edge2 * f * q;
 		if (r > EPSILON) { 

@@ -190,7 +190,7 @@ inline void runColissionTests(Physical& phys1, Physical& phys2, WorldPrototype& 
 void recursiveFindColissionsInternal(WorldPrototype& world, std::vector<Colission>& colissions, TreeNode& trunkNode);
 void recursiveFindColissionsBetween(WorldPrototype& world, std::vector<Colission>& colissions, TreeNode& first, TreeNode& second);
 
-void findColissions2(WorldPrototype& world, std::vector<Colission>& colissions) {
+void findColissions(WorldPrototype& world, std::vector<Colission>& colissions) {
 	TreeNode& node = world.objectTree.rootNode;
 	
 	// two kinds of collissions: intra-node, and inter-node
@@ -239,57 +239,14 @@ void recursiveFindColissionsBetween(WorldPrototype& world, std::vector<Colission
 
 void WorldPrototype::tick(double deltaT) {
 	SharedLockGuard mutLock(lock);
-#ifdef USE_TRANSFORMATIONS
-	physicsMeasure.mark(PhysicsProcess::TRANSFORMS);
-	std::shared_ptr<Vec3f> vecBuf(new Vec3f[getTotalVertexCount()], std::default_delete<Vec3f[]>());
-	Vec3f* vecBufIndex = vecBuf.get();
-	for(Physical& phys : iterPhysicals()) {
-		for (Part& part : phys) {
-			const Shape& curShape = part.hitbox;
-			CFrame cframe = part.cframe;
-			part.transformed = curShape.localToGlobal(cframe, vecBufIndex);
-			vecBufIndex += curShape.vertexCount;
-		}
-	}
-#endif
+
 	physicsMeasure.mark(PhysicsProcess::EXTERNALS);
 	applyExternalForces();
 
 	physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
 	std::vector<Colission> colissions;
 
-	/*size_t anchoredOffset = findColissions(*this, colissions);
-	physicsMeasure.mark(PhysicsProcess::COLISSION_HANDLING);
-	for(int i = 0; i < anchoredOffset; i++) {
-		Colission c = colissions[i];
-#ifdef CHECK_SANITY
-		double beforeTotalEnergy = c.p2->parent->getKineticEnergy();
-#endif
-		handleCollision<true>(*c.p1, *c.p2, c.intersection, c.exitVector);
-#ifdef CHECK_SANITY
-		double afterTotalEnergy = c.p2->parent->getKineticEnergy();
-
-		if(c.p1->parent->getKineticEnergy() == 0.0 && afterTotalEnergy > beforeTotalEnergy) {
-			Log::warn("Energy of blocks after anchored colission is greater than before! %f > %f", afterTotalEnergy, beforeTotalEnergy);
-		}
-#endif
-	}
-	for(size_t i = anchoredOffset; i < colissions.size(); i++) {
-		Colission c = colissions[i];
-#ifdef CHECK_SANITY
-		double beforeTotalEnergy = c.p1->parent->getKineticEnergy() + c.p2->parent->getKineticEnergy();
-#endif
-		handleCollision<false>(*c.p1, *c.p2, c.intersection, c.exitVector);
-#ifdef CHECK_SANITY
-		double afterTotalEnergy = c.p1->parent->getKineticEnergy() + c.p2->parent->getKineticEnergy();
-		if(afterTotalEnergy > beforeTotalEnergy) {
-			Log::warn("Energy of blocks after colission is greater than before! %f > %f", afterTotalEnergy, beforeTotalEnergy);
-		}
-#endif
-	}*/
-	
-
-	findColissions2(*this, colissions);
+	findColissions(*this, colissions);
 	physicsMeasure.mark(PhysicsProcess::COLISSION_HANDLING);
 	for (int i = 0; i < colissions.size(); i++) {
 		Colission c = colissions[i];

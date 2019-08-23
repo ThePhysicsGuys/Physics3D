@@ -25,7 +25,7 @@ struct Simplex {
 	Vec3 A, B, C, D;
 	MinkowskiPointIndices At, Bt, Ct, Dt;
 	int order;
-	Simplex() {}
+	Simplex() = default;
 	Simplex(Vec3 A, MinkowskiPointIndices At) : A(A), At(At), order(1) {}
 	Simplex(Vec3 A, Vec3 B, MinkowskiPointIndices At, MinkowskiPointIndices Bt) : A(A), B(B), At(At), Bt(Bt), order(2) {}
 	Simplex(Vec3 A, Vec3 B, Vec3 C, MinkowskiPointIndices At, MinkowskiPointIndices Bt, MinkowskiPointIndices Ct) : A(A), B(B), C(C), At(At), Bt(Bt), Ct(Ct), order(3) {}

@@ -15,3 +15,9 @@ ExtendedPart::ExtendedPart(const Shape& hitbox, const VisualShape& shape, const 
 	this->name = name;
 	this->drawMeshId = drawMeshId;
 }
+
+void ExtendedPart::scale(double scaleX, double scaleY, double scaleZ) {
+	Part::scale(scaleX, scaleY, scaleZ);
+
+	visualScale = DiagonalMat3f(scaleX, scaleY, scaleZ) * visualScale;
+}

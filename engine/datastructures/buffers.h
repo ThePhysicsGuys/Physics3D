@@ -96,7 +96,7 @@ struct BufferWithCapacity {
 	void resize(size_t newCapacity, size_t sizeToCopy) {
 		//Log::debug("Extending %s buffer capacity to %d", typeid(T).name(), newCapacity);
 		T* newBuf = new T[newCapacity];
-		for (int i = 0; i < sizeToCopy; i++) {
+		for (size_t i = 0; i < sizeToCopy; i++) {
 			newBuf[i] = std::move(data[i]);
 		}
 		delete[] data;

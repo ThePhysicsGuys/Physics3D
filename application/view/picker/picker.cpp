@@ -45,7 +45,7 @@ namespace Picker {
 
 	// Intersections
 	// Intersection distance of the given ray with the given shape, transformed with the given cframe. 
-	float intersect(const Ray& ray, const VisualShape& shape, const GlobalCFrame& cframe) {
+	float intersect(const Ray& ray, const Shape& shape, const GlobalCFrame& cframe) {
 		return shape.getIntersectionDistance(cframe.globalToLocal(ray.start), cframe.relativeToLocal(ray.direction));
 	}
 
@@ -63,7 +63,7 @@ namespace Picker {
 			if (pointToLineDistanceSquared(ray.direction, relPos) > part.maxRadius * part.maxRadius)
 				continue;
 
-			float distance = intersect(ray, part.visualShape, part.cframe);
+			float distance = intersect(ray, part.hitbox, part.cframe);
 
 			if (distance < closestIntersectDistance && distance > 0) {
 				closestIntersectDistance = distance;
