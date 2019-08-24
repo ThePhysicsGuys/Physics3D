@@ -2,29 +2,88 @@
 
 #include "math/largeMatrix.h"
 #include "physical.h"
+#include "math/mat3.h"
 
-void ConstraintGroup::apply() const {
+#include "math/mathUtil.h"
+#include <fstream>
+
+LargeMatrix<double> computeInteractionMatrix(const ConstraintGroup& group) {
+	const std::vector<BallConstraint>& ballConstraints = group.ballConstraints;
+
 	size_t dimension = ballConstraints.size() * 3;
 	LargeMatrix<double> systemToSolve(dimension, dimension);
-	LargeVector<double> dragVector(dimension);
-	LargeVector<double> velocityVector(dimension);
-	LargeVector<double> accelerationVector(dimension);
+	for (size_t i = 0; i < dimension; i++) {
+		for (size_t j = 0; j < dimension; j++) {
+			systemToSolve[i][j] = 0.0;
+		}
+	}
 
 	size_t matrixIndex = 0;
-
 	for (const BallConstraint& bc : ballConstraints) {
-		/*Local to A*/ Mat3 responseA = bc.a->getPointAccelerationMatrix(bc.attachA);
-		/*Local to B*/ Mat3 responseB = bc.b->getPointAccelerationMatrix(bc.attachB);
+		/*Local to A*/ Mat3 responseA = bc.a->getResponseMatrix(bc.attachA);
+		/*Local to B*/ Mat3 responseB = bc.b->getResponseMatrix(bc.attachB);
 		GlobalCFrame cfA = bc.a->getCFrame();
 		GlobalCFrame cfB = bc.b->getCFrame();
-		/*Global?*/ Mat3 selfResponse = cfA.rotation * responseA * cfA.rotation.inverse() + cfB.rotation * responseB * cfB.rotation.inverse();
+		/*Global?*/ Mat3 selfResponse = cfA.rotation * responseA * cfA.rotation.transpose() + cfB.rotation * responseB * cfB.rotation.transpose();
 
 		systemToSolve.setSubMatrix(matrixIndex, matrixIndex, selfResponse);
 
 		matrixIndex += 3;
 	}
+
+	for (size_t i = 0; i < ballConstraints.size(); i++) {
+		const BallConstraint& y = ballConstraints[i];
+
+		for (size_t j = 0; j < ballConstraints.size(); j++) {
+			if (i == j) continue;
+			const BallConstraint& x = ballConstraints[j];
+
+			// find effect of y constraint on velocities of x;
+
+			bool isPositive;
+			Physical* sharedBody;
+			Vec3 actorOffset;
+			Vec3 responseOffset;
+
+				 if (x.a == y.a) { 
+					 isPositive = true;  sharedBody = x.a; actorOffset = x.attachA; responseOffset = y.attachA; }
+			else if (x.a == y.b) { 
+					 isPositive = false; sharedBody = x.a; actorOffset = x.attachA; responseOffset = y.attachB; }
+			else if (x.b == y.a) { 
+					 isPositive = false; sharedBody = x.b; actorOffset = x.attachB; responseOffset = y.attachA; }
+			else if (x.b == y.b) { 
+					 isPositive = true;  sharedBody = x.b; actorOffset = x.attachB; responseOffset = y.attachB; }
+			else {continue;}
+			
+			Mat3 response = sharedBody->getResponseMatrix(actorOffset, responseOffset);
+
+			const Mat3& rot = sharedBody->getCFrame().getRotation();
+
+			Mat3 globalResponse = rot * response * rot.transpose();
+
+			systemToSolve.setSubMatrix(i * 3, j * 3, isPositive ? globalResponse : -globalResponse);
+		}
+	}
+
+	return systemToSolve;
+}
+
+
+void ConstraintGroup::apply() const {
+	size_t dimension = ballConstraints.size() * 3;
+	LargeMatrix<double> systemToSolve = computeInteractionMatrix(*this);
+	LargeVector<double> dragVector(dimension);
+	LargeVector<double> velocityVector(dimension);
+	LargeVector<double> accelerationVector(dimension);
+
+	
+
+
+
 	LargeMatrix<double> systemCopy(systemToSolve);
 	LargeMatrix<double> systemCopyCopy(systemToSolve);
+
+	size_t matrixIndex;
 
 	// solve for position
 	matrixIndex = 0;

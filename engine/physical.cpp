@@ -326,15 +326,24 @@ void Physical::setCFrame(const GlobalCFrame& newCFrame) {
 	Such that:
 	a = M*F
 */
-SymmetricMat3 Physical::getPointAccelerationMatrix(const Vec3Local& r) const {
+SymmetricMat3 Physical::getResponseMatrix(const Vec3Local& r) const {
 	Mat3 crossMat = createCrossProductEquivalent(r);
 
 	SymmetricMat3 rotationFactor = multiplyLeftRight(momentResponse , crossMat);
 
 	return forceResponse + rotationFactor;
 }
+
+Mat3 Physical::getResponseMatrix(const Vec3Local& actionPoint, const Vec3Local& responsePoint) const {
+	Mat3 actionCross = createCrossProductEquivalent(actionPoint);
+	Mat3 responseCross = createCrossProductEquivalent(responsePoint);
+
+	Mat3 rotationFactor = responseCross * momentResponse * actionCross;
+
+	return forceResponse - rotationFactor;
+}
 double Physical::getInertiaOfPointInDirectionLocal(const Vec3Local& localPoint, const Vec3Local& localDirection) const {
-	SymmetricMat3 accMat = getPointAccelerationMatrix(localPoint);
+	SymmetricMat3 accMat = getResponseMatrix(localPoint);
 
 	Vec3 force = localDirection;
 	Vec3 accel = accMat * force;

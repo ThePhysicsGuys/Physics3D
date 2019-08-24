@@ -108,7 +108,6 @@ public:
 		return inverse();
 	}
 
-	template<typename N>
 	Mat3Template<N> operator-() const {
 		return Mat3Template<N>(-m00, -m01, -m02, -m10, -m11, -m12, -m20, -m21, -m22);
 	}

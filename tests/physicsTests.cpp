@@ -142,7 +142,7 @@ TEST_CASE(testGetPointAccelerationMatrix) {
 
 	testPhys.applyForce(localPoint, force);
 
-	SymmetricMat3 accelMatrix = testPhys.getPointAccelerationMatrix(localPoint);
+	SymmetricMat3 accelMatrix = testPhys.getResponseMatrix(localPoint);
 
 	logStream << accelMatrix;
 
@@ -175,7 +175,7 @@ TEST_CASE(testPointAccelMatrixImpulse) {
 	Vec3 localPoint(0.8, 0.6, 0.9);
 	Vec3 localImpulse(0.3, -0.7, 0.6);
 
-	Vec3 estimatedAccel = p.getPointAccelerationMatrix(localPoint) * localImpulse;
+	Vec3 estimatedAccel = p.getResponseMatrix(localPoint) * localImpulse;
 
 	p.applyImpulse(part.cframe.localToRelative(localPoint), part.cframe.localToRelative(localImpulse));
 
@@ -211,8 +211,8 @@ TEST_CASE(inelasticColission) {
 	//Vec3 relativeImpulse = -velOfPoint * direction.normalize() * direction.normalize() * inertia;
 
 	Vec3 desiredAccel = -velOfPoint * direction * direction / direction.lengthSquared();
-	Vec3 relativeImpulse = p.getCFrame().localToRelative(~p.getPointAccelerationMatrix(localPoint) * p.getCFrame().relativeToLocal(desiredAccel));
-	Vec3 estimatedAccelLocal = p.getPointAccelerationMatrix(localPoint) * p.getCFrame().relativeToLocal(relativeImpulse);
+	Vec3 relativeImpulse = p.getCFrame().localToRelative(~p.getResponseMatrix(localPoint) * p.getCFrame().relativeToLocal(desiredAccel));
+	Vec3 estimatedAccelLocal = p.getResponseMatrix(localPoint) * p.getCFrame().relativeToLocal(relativeImpulse);
 
 	Vec3 estimatedAccelRelative = p.getCFrame().localToRelative(estimatedAccelLocal);
 	
@@ -275,7 +275,7 @@ TEST_CASE(inelasticColission2) {
 	Vec3 localPoint(0.8, 0.6, 0.9);
 	Vec3 localImpulse(0.3, -0.7, 0.6);
 
-	Vec3 estimatedAccel = p.getPointAccelerationMatrix(localPoint) * localImpulse;
+	Vec3 estimatedAccel = p.getResponseMatrix(localPoint) * localImpulse;
 
 	p.applyImpulse(part.cframe.localToRelative(localPoint), part.cframe.localToRelative(localImpulse));
 

@@ -4,6 +4,7 @@
 #include "mat2.h"
 #include "mat3.h"
 #include "mat4.h"
+#include "largeMatrix.h"
 #include "cframe.h"
 #include "position.h"
 
@@ -33,6 +34,41 @@ template<typename N>
 inline std::string str(const Mat4Template<N>& matrix) {
 	std::stringstream ss;
 	ss << matrix;
+	return ss.str();
+}
+
+template<typename T>
+inline std::ostream& operator<<(std::ostream& os, const LargeMatrix<T>& matrix) {
+	for (int i = 0; i < matrix.height; i++) {
+		for (int j = 0; j < matrix.width; j++) {
+			os << matrix[i][j] << '\t';
+		}
+		os << '\n';
+	}
+
+	return os;
+}
+
+template<typename T>
+inline std::string str(const LargeMatrix<T>& matrix) {
+	std::stringstream ss;
+	ss << matrix;
+	return ss.str();
+}
+
+template<typename T>
+inline std::ostream& operator<<(std::ostream& os, const LargeVector<T>& vector) {
+	for (int i = 0; i < vector.size; i++) {
+		os << vector[i] << ',';
+	}
+
+	return os;
+}
+
+template<typename T>
+inline std::string str(const LargeVector<T>& vector) {
+	std::stringstream ss;
+	ss << vector;
 	return ss.str();
 }
 

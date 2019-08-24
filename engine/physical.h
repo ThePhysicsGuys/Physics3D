@@ -59,13 +59,15 @@ struct ConstPartIter {
 	inline bool operator==(const ConstPartIter& other) const { return this->iter == other.iter; }
 };
 
+class WorldPrototype;
+
 class Physical {
 	void updateAttachedPartCFrames();
 	void translateUnsafe(const Vec3& translation);
 	void rotateAroundCenterOfMassUnsafe(const RotMat3& rotation);
 public:
-	// CFrame cframe;
 	Part* mainPart;
+	WorldPrototype* world;
 	SplitUnorderedList<AttachedPart> parts;
 	Vec3 velocity = Vec3();
 	Vec3 angularVelocity = Vec3();
@@ -145,14 +147,14 @@ public:
 	Physical(const Physical&) = delete;
 	void operator=(const Physical&) = delete;
 
-	// bad constructor
-	/*~Physical() {
+	~Physical() {
 		mainPart->parent = nullptr;
 		mainPart = nullptr;
 		for (AttachedPart& atPart:parts) {
 			atPart.part->parent = nullptr;
 		}
-	}*/
+		parts.clear();
+	}
 
 	void makeMainPart(AttachedPart& newMainPart);
 	void makeMainPart(Part* newMainPart);
@@ -201,7 +203,8 @@ public:
 	Vec3 getAngularAcceleration() const;
 	Vec3 getVelocityOfPoint(const Vec3Relative& point) const;
 	Vec3 getAccelerationOfPoint(const Vec3Relative& point) const;
-	SymmetricMat3 getPointAccelerationMatrix(const Vec3Local& localPoint) const;
+	SymmetricMat3 getResponseMatrix(const Vec3Local& localPoint) const;
+	Mat3 getResponseMatrix(const Vec3Local& actionPoint, const Vec3Local& responsePoint) const;
 	double getInertiaOfPointInDirectionLocal(const Vec3Local& localPoint, const Vec3Local& localDirection) const;
 	double getInertiaOfPointInDirectionRelative(const Vec3Relative& relativePoint, const Vec3Relative& relativeDirection) const;
 	double getVelocityKineticEnergy() const;
