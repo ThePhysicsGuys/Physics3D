@@ -4,13 +4,13 @@
 namespace Library {
 	double g = (1.0 + sqrt(5.0)) / 2.0;
 
-	Vec3f icosahedronVertices[] {
-		Vec3f(0, 0.5, g/2), Vec3f(0, 0.5, -g/2), Vec3f(0, -0.5, -g/2), Vec3f(0, -0.5, g/2),
-		Vec3f(0.5, g/2, 0), Vec3f(0.5, -g/2, 0), Vec3f(-0.5, -g/2, 0), Vec3f(-0.5, g/2, 0),
-		Vec3f(g/2, 0, 0.5), Vec3f(-g/2, 0, 0.5), Vec3f(-g/2, 0, -0.5), Vec3f(g/2, 0, -0.5),
+	Vec3f icosahedronVertices[]{
+		Vec3f(0, 0.5, g / 2), Vec3f(0, 0.5, -g / 2), Vec3f(0, -0.5, -g / 2), Vec3f(0, -0.5, g / 2),
+		Vec3f(0.5, g / 2, 0), Vec3f(0.5, -g / 2, 0), Vec3f(-0.5, -g / 2, 0), Vec3f(-0.5, g / 2, 0),
+		Vec3f(g / 2, 0, 0.5), Vec3f(-g / 2, 0, 0.5), Vec3f(-g / 2, 0, -0.5), Vec3f(g / 2, 0, -0.5),
 	};
 
-	Triangle icosahedronTriangles[] {
+	Triangle icosahedronTriangles[]{
 		{0 , 3 , 8}, {0 , 8, 4 }, {0, 4 , 7}, {0, 7 , 9}, {0, 9, 3 },
 		{2 , 10, 1}, {2 , 1, 11}, {2, 11, 5}, {2, 5 , 6}, {2, 6, 10},
 		{8 , 3 , 5}, {8 , 5, 11}, {8, 11, 4}, {4, 11, 1}, {4, 1, 7 },
@@ -44,9 +44,23 @@ namespace Library {
 		{4, 5, 9}, {4, 9, 8}, {7, 8, 9}, {7, 9, 6} //roof2
 	};
 
+	Vec3f wedgeVertices[]{
+		Vec3f(-0.5, -0.5, -0.5), Vec3f(-0.5, -0.5, 0.5),Vec3f(0.5, -0.5, 0.5),Vec3f(0.5, -0.5, -0.5),
+		Vec3f(-0.5, 0.5, -0.5), Vec3f(-0.5, 0.5, 0.5)
+	};
+
+	Triangle wedgeTriangles[]{
+		{0, 2, 1}, {0, 3, 2}, // bottom
+		{0, 5, 4}, {0, 1, 5}, // back
+		{0, 4, 3}, // left side 
+		{1, 2, 5}, // right side
+		{2, 3, 4}, {2, 4, 5} // diagonalSide
+	};
+
 	const Shape icosahedron(icosahedronVertices, SharedArrayPtr<const Triangle>::staticSharedArrayPtr(icosahedronTriangles), 12, 20);
 	const Shape trianglePyramid(trianglePyramidVertices, SharedArrayPtr<const Triangle>::staticSharedArrayPtr(trianglePyramidTriangles), 4, 4);
 	const Shape house(houseVertices, SharedArrayPtr<const Triangle>::staticSharedArrayPtr(houseTriangles), 10, 16);
+	const Shape wedge(wedgeVertices, SharedArrayPtr<const Triangle>::staticSharedArrayPtr(wedgeTriangles), 6, 8);
 
 	Shape createCube(double side) {
 		return createBox(side, side, side);

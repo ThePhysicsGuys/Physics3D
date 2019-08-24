@@ -6,6 +6,7 @@ namespace Library {
 	extern const Shape icosahedron;
 	extern const Shape trianglePyramid;
 	extern const Shape house;
+	extern const Shape wedge;
 
 	Shape createCube(double side);
 	Shape createBox(double width, double height, double length);

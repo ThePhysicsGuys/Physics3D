@@ -20,6 +20,7 @@ public:
 	PartFactory(const Shape& shape, Screen& screen, std::string name = "Part") : PartFactory(shape, VisualShape(shape), screen, name) {}
 	PartFactory(const VisualShape& shape, Screen& screen, std::string name) : PartFactory(static_cast<const Shape&>(shape), shape, screen, name) {}
 	ExtendedPart* produce(const GlobalCFrame& cframe, double density, double friction, std::string name = "") const;
+	ExtendedPart* produceScaled(const GlobalCFrame& cframe, double density, double friction, double scaleX, double scaleY, double scaleZ, std::string name = "") const;
 };
 
 ExtendedPart* createUniquePart(Screen& screen, const Shape& hitbox, const VisualShape& visualShape, const GlobalCFrame& position, double density, double friction, std::string name = "Part");

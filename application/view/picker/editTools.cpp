@@ -209,8 +209,8 @@ void EditTools::release(Screen& screen) {
 	selectedEditDirection = EditDirection::NONE;
 }
 
-
 void EditTools::drag(Screen& screen) {
+	if (screen.selectedPart == nullptr) return;
 	switch (editMode) {
 		case EditMode::TRANSLATE:
 			dragTranslateTool(screen);
