@@ -67,7 +67,7 @@ class Physical {
 	void rotateAroundCenterOfMassUnsafe(const RotMat3& rotation);
 public:
 	Part* mainPart;
-	WorldPrototype* world;
+	WorldPrototype* world = nullptr;
 	SplitUnorderedList<AttachedPart> parts;
 	Vec3 velocity = Vec3();
 	Vec3 angularVelocity = Vec3();
@@ -90,7 +90,7 @@ public:
 	BoundingBox localBounds;
 
 	Physical() = default;
-	Physical(Part* part);
+	explicit Physical(Part* part);
 	inline Physical(Part* part, double mass, SymmetricMat3 inertia) : mass(mass), inertia(inertia), mainPart(part) {
 		//parts.push_back(AttachedPart{ CFrame(), part });
 		

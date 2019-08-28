@@ -6,6 +6,7 @@ struct Physical;
 #include "math/mat3.h"
 #include "math/position.h"
 #include "math/globalCFrame.h"
+#include "math/bounds.h"
 
 struct PartPhysicalData {
 	GlobalCFrame cframe;
@@ -34,6 +35,9 @@ public:
 
 	Part() = default;
 	Part(const Shape& shape, const GlobalCFrame& position, double density, double friction);
+	~Part();
 	bool intersects(const Part& other, Position& intersection, Vec3& exitVector) const;
 	void scale(double scaleX, double scaleY, double scaleZ);
+
+	Bounds getStrictBounds() const;
 };

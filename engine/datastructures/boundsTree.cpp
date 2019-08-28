@@ -13,6 +13,24 @@ long long computeCost(const Bounds & bounds) {
 	return (d.x + d.y + d.z).value;
 }
 
+Bounds computeBoundsOfList(const TreeNode* const* list, size_t count) {
+	Bounds bounds = list[0]->bounds;
+
+	for (size_t i = 1; i < count; i++) {
+		bounds = unionOfBounds(bounds, list[i]->bounds);
+	}
+	return bounds;
+}
+
+Bounds computeBoundsOfList(const TreeNode* list, size_t count) {
+	Bounds bounds = list[0].bounds;
+
+	for (size_t i = 1; i < count; i++) {
+		bounds = unionOfBounds(bounds, list[i].bounds);
+	}
+	return bounds;
+}
+
 /*
 Computes a metric to show the cost of combining two boundingboxes
 */
@@ -21,41 +39,57 @@ inline long long computeCombinationCost(const Bounds& newBox, const Bounds& expa
 	return computeCost(combinedBounds);
 }
 
+inline TreeNode::TreeNode(TreeNode* subTrees, int nodeCount) : subTrees(subTrees), nodeCount(nodeCount), divisible(true), bounds(computeBoundsOfList(subTrees, nodeCount)) {}
+
 TreeNode::~TreeNode() {
 	if (!isLeafNode()) {
 		delete[] subTrees;
 	}
 }
 
-void TreeNode::addToSubTrees(TreeNode&& newNode) {
-	long long bestCost = computeCombinationCost(newNode.bounds, subTrees[0].bounds);
+void addToSubTrees(TreeNode& node, TreeNode&& newNode) {
+	long long bestCost = computeCombinationCost(newNode.bounds, node.subTrees[0].bounds);
 	int bestIndex = 0;
-	for (int i = 1; i < this->nodeCount; i++) {
-		long long newCost = computeCombinationCost(newNode.bounds, subTrees[i].bounds);
+	for (int i = 1; i < node.nodeCount; i++) {
+		long long newCost = computeCombinationCost(newNode.bounds, node.subTrees[i].bounds);
 		if (newCost < bestCost) {
 			bestCost = newCost;
 			bestIndex = i;
 		}
 	}
-	subTrees[bestIndex].add(std::move(newNode));
+	if (node.divisible) {
+		node.subTrees[bestIndex].add(std::move(newNode));
+	} else {
+		// push the whole group down, make a new node containing it and the new node
+		TreeNode* newNodes = new TreeNode[MAX_BRANCHES];
+		new(newNodes) TreeNode(std::move(node));
+		new(newNodes + 1) TreeNode(std::move(newNode));
+
+		new(&node) TreeNode(newNodes, 2);
+	}
 }
 
 void TreeNode::add(TreeNode&& newNode) {
+	// if top node is a group, then it adds the new node to the group
 	if (isLeafNode()) {
 		TreeNode* newNodes = new TreeNode[MAX_BRANCHES];
 
-		newNodes[0].object = this->object;
 		newNodes[0].bounds = this->bounds;
+		newNodes[0].nodeCount = this->nodeCount;
+		newNodes[0].object = this->object;
+		newNodes[0].divisible = true;
 
 		new(newNodes + 1) TreeNode(std::move(newNode));
 
+		// only the top node of a group is undivisible, restructuring within a group is still allowed
+
 		this->nodeCount = 2;
 		this->subTrees = newNodes;
-	}else{
+	} else {
 		if (nodeCount != MAX_BRANCHES) {
 			new(&subTrees[nodeCount++]) TreeNode(std::move(newNode));
 		} else {
-			addToSubTrees(std::move(newNode));
+			addToSubTrees(*this, std::move(newNode));
 		}
 	}
 	this->bounds = unionOfBounds(this->bounds, newNode.bounds);
@@ -125,23 +159,7 @@ void exchangeObjects(TreeNode& first, TreeNode& second) {
 	}
 }
 
-Bounds computeBoundsOfList(const TreeNode* const * list, size_t count) {
-	Bounds bounds = list[0]->bounds;
 
-	for (size_t i = 1; i < count; i++) {
-		bounds = unionOfBounds(bounds, list[i]->bounds);
-	}
-	return bounds;
-}
-
-Bounds computeBoundsOfList(const TreeNode* list, size_t count) {
-	Bounds bounds = list[0].bounds;
-
-	for (size_t i = 1; i < count; i++) {
-		bounds = unionOfBounds(bounds, list[i].bounds);
-	}
-	return bounds;
-}
 
 struct NodePermutation {
 	TreeNode* permutationA[MAX_BRANCHES];
@@ -350,8 +368,10 @@ void TreeNode::improveStructure() {
 		// horizontal structure improvement
 		for (int i = 0; i < nodeCount - 1; i++) {
 			TreeNode& A = subTrees[i];
+			if (!A.divisible) continue;
 			for (int j = i + 1; j < nodeCount; j++) {
 				TreeNode& B = subTrees[j];
+				if (!B.divisible) continue;
 				if (intersects(A.bounds, B.bounds)) {
 					optimizeNodePairHorizontal(A, B);
 				}
@@ -361,6 +381,7 @@ void TreeNode::improveStructure() {
 		for (int i = 0; i < nodeCount; i++) {
 			TreeNode& A = subTrees[i];
 			if (A.isLeafNode()) continue;
+			if (!A.divisible) continue;
 			for (int j = 0; j < nodeCount; j++) {
 				if (i == j) continue;
 				TreeNode& B = subTrees[j];

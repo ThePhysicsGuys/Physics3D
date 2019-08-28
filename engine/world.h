@@ -48,7 +48,7 @@ private:
 public:
 	mutable std::shared_mutex lock;
 	mutable std::mutex queueLock;
-	BoundsTree<Physical> objectTree;
+	BoundsTree<Part> objectTree;
 	std::vector<ConstraintGroup> constraints;
 
 	size_t age = 0;

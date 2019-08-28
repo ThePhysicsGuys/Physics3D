@@ -18,37 +18,40 @@
 #define LEAF_NODE_SIGNIFIER 0x7FFFFFFF
 
 struct TreeNode {
-private:
-	void addToSubTrees(TreeNode&& newNode);
-public:
 	Bounds bounds;
 	union {
 		TreeNode* subTrees;
 		void* object;
 	};
 	int nodeCount;
+	/* means that the nodes within this node belong to a specific group, if true, the tree will not separate the elements below this one. 
+	New elements will not be added to this group unless specifically specified
+	If false, then no subnodes are allowed to be exchanged with the rest of the tree. This node must be viewed as a black box. 
+	*/
+	bool divisible;
 
 	inline bool isLeafNode() const { return nodeCount == LEAF_NODE_SIGNIFIER; }
 
 	inline TreeNode() : nodeCount(LEAF_NODE_SIGNIFIER), object(nullptr) {};
-	inline TreeNode(TreeNode* subTrees, int nodeCount) : subTrees(subTrees), nodeCount(nodeCount) {}
-	inline TreeNode(void* object, const Bounds& bounds) : nodeCount(LEAF_NODE_SIGNIFIER), object(object), bounds(bounds) {}
-	inline TreeNode(const Bounds& bounds, TreeNode* subTrees, int nodeCount) : bounds(bounds), subTrees(subTrees), nodeCount(nodeCount) {}
+	inline TreeNode(TreeNode* subTrees, int nodeCount);
+	inline TreeNode(void* object, const Bounds& bounds) : nodeCount(LEAF_NODE_SIGNIFIER), object(object), bounds(bounds), divisible(false) {}
+	inline TreeNode(const Bounds& bounds, TreeNode* subTrees, int nodeCount) : bounds(bounds), subTrees(subTrees), nodeCount(nodeCount), divisible(true) {}
 
 	inline TreeNode(const TreeNode&) = delete;
 	inline void operator=(const TreeNode&) = delete;
 
-	inline TreeNode(TreeNode&& other) noexcept : nodeCount(other.nodeCount), subTrees(other.subTrees), bounds(other.bounds) {
+	inline TreeNode(TreeNode&& other) noexcept : nodeCount(other.nodeCount), subTrees(other.subTrees), bounds(other.bounds), divisible(other.divisible) {
 		other.subTrees = nullptr;
 		other.nodeCount = LEAF_NODE_SIGNIFIER;
 	}
 	inline TreeNode& operator=(TreeNode&& other) noexcept {
-		int nc = this->nodeCount; this->nodeCount = other.nodeCount; other.nodeCount = nc;
-		TreeNode* n = this->subTrees; this->subTrees = other.subTrees; other.subTrees = n;
-		Bounds b = this->bounds; this->bounds = other.bounds; other.bounds = b;
+		std::swap(this->nodeCount, other.nodeCount);
+		std::swap(this->subTrees, other.subTrees);
+		std::swap(this->bounds, other.bounds);
+		std::swap(this->divisible, other.divisible);
 		return *this;
 	}
-
+	
 	inline TreeNode* begin() const { return subTrees; }
 	inline TreeNode* end() const { return subTrees+nodeCount; }
 	inline TreeNode& operator[](int index) { return subTrees[index]; }
@@ -56,7 +59,7 @@ public:
 
 	inline ~TreeNode();
 
-	void add(TreeNode&& obj);
+	void add(TreeNode&& newNode);
 	inline void remove(int index) {
 		--nodeCount;
 		if (index != nodeCount)
@@ -324,8 +327,28 @@ struct BoundsTree {
 
 	}
 
-	void add(Boundable* obj, bool strictBounds) {
-		rootNode.add(TreeNode(obj, strictBounds?obj->getStrictBounds():obj->getLooseBounds()));
+	void add(Boundable* obj, const Bounds& bounds) {
+		rootNode.add(TreeNode(obj, bounds));
+	}
+
+	void addToExistingGroup(Boundable* obj, const Bounds& bounds, TreeNode& groupNode) {
+		groupNode.add(TreeNode(obj, bounds));
+	}
+
+	void addToExistingGroup(Boundable* obj, const Bounds& bounds, Boundable* objInGroup, const Bounds& objInGroupBounds) {
+		for (FilteredTreeIterator<ContainsBoundsFilter> iter(this->rootNode, ContainsBoundsFilter(objInGroupBounds)); iter != IteratorEnd(); ++iter) {
+			TreeNode* curNode = *iter;
+			if (curNode->object == objInGroup) {
+				while (curNode->divisible) {
+					iter.top--;
+					curNode = *iter;
+				}
+				addToExistingGroup(obj, bounds, *curNode);
+				return;
+			}
+		}
+
+		throw "objInGroup was not found in this boundsTree, might objInGroupBounds be incorrect?";
 	}
 
 	void remove(Boundable* obj, const Bounds& strictBounds) {
@@ -341,10 +364,10 @@ struct BoundsTree {
 		this->remove(obj, obj->getStrictBounds());
 	}
 
-	inline void recalculateBounds(bool strictBounds) {
+	inline void recalculateBounds() {
 		for (TreeNode* currentNode : *this) {
 			Boundable* obj = static_cast<Boundable*>(currentNode->object);
-			currentNode->bounds = strictBounds ? obj->getStrictBounds() : obj->getLooseBounds();
+			currentNode->bounds = obj->getStrictBounds();
 		}
 
 		rootNode.recalculateBoundsRecursive();
