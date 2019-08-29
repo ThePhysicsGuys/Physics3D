@@ -87,7 +87,7 @@ public:
 	CastingIterator<decltype(factory.end()), NewType2> end() const { return CastingIterator<decltype(factory.end()), NewType2>(factory.end()); }
 };
 
-template<typename Iter, typename IterEnd, typename Filter, bool (*filterFunc)(const decltype(*std::declval<Iter>())& obj, const Filter& filter)>
+template<typename Iter, typename IterEnd, typename Filter>
 class FilteredIterator {
 	Iter iter;
 	IterEnd iterEnd;
@@ -95,16 +95,16 @@ class FilteredIterator {
 	
 public:
 	FilteredIterator(const Iter& iter, const IterEnd& iterEnd, const Filter& filter) : iter(iter), filter(filter) {
-		while (!filter(*iter, filter) && !(iter != iterEnd)) {
-			++iter;
+		while (!(this->iter != this->iterEnd) && !this->filter(*this->iter)) {
+			++this->iter;
 		}
 	}
 	void operator++() {
 		do {
 			++iter;
-		} while (!filter(*iter, filter) && !(iter != iterEnd));
+		} while (!(iter != iterEnd) && !filter(*iter));
 	}
-	decltype(*std::declval<Iter>()) operator*() const {
+	decltype(*std::declval<Iter>())& operator*() const {
 		return *iter;
 	}
 	bool operator!=(IteratorEnd) const {

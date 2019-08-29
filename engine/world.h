@@ -32,6 +32,9 @@ using BasicExtendedPartIterFactory = CastingIteratorFactoryWithEnd<BasicPartIter
 template<typename ExtendedPart>
 using ConstBasicExtendedPartIterFactory = CastingIteratorFactoryWithEnd<ConstBasicPartIterFactory, const ExtendedPart&>;
 
+template<typename Filter>
+using DoubleFilterIter = FilteredIterator<FilteredBoundsTreeIter<Filter, Part>, IteratorEnd, Filter>;
+
 class WorldPrototype {
 private:
 	std::queue<std::function<void(WorldPrototype*)>> waitingOperations;
@@ -135,6 +138,16 @@ public:
 
 	BasicPartIterFactory iterFreeParts() { return BasicPartIterFactory(BasicPartIter(iterFreePhysicals().begin(), iterFreePhysicals().end())); }
 	ConstBasicPartIterFactory iterFreeParts() const { return ConstBasicPartIterFactory(ConstBasicPartIter(iterFreePhysicals().begin(), iterFreePhysicals().end())); }
+
+	template<typename Filter>
+	IteratorFactory<CastingIterator<DoubleFilterIter<Filter>, Part&>, IteratorEnd> iterPartsFiltered(const Filter& filter) {
+		return IteratorFactory<CastingIterator<DoubleFilterIter<Filter>, Part&>, IteratorEnd>(
+			CastingIterator<DoubleFilterIter<Filter>, Part&>(
+				DoubleFilterIter<Filter>(objectTree.iterFiltered(filter).begin(), IteratorEnd(), filter)
+				),
+			IteratorEnd()
+		);
+	}
 };
 
 template<typename T = Part>
@@ -150,5 +163,13 @@ public:
 	inline BasicExtendedPartIterFactory<T> iterFreeParts() { return BasicExtendedPartIterFactory<T>(WorldPrototype::iterFreeParts()); }
 	inline ConstBasicExtendedPartIterFactory<T> iterFreeParts() const { return ConstBasicExtendedPartIterFactory<T>(WorldPrototype::iterFreeParts()); }
 
-	
+	template<typename Filter>
+	IteratorFactory<CastingIterator<DoubleFilterIter<Filter>, T&>, IteratorEnd> iterPartsFiltered(const Filter& filter) {
+		return IteratorFactory<CastingIterator<DoubleFilterIter<Filter>, T&>, IteratorEnd>(
+			CastingIterator<DoubleFilterIter<Filter>, T&>(
+				DoubleFilterIter<Filter>(objectTree.iterFiltered(filter).begin(), IteratorEnd(), filter)
+			), 
+			IteratorEnd()
+		);
+	}
 };

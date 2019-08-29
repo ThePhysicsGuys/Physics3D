@@ -258,7 +258,7 @@ struct FilteredTreeIterator : public TreeIterBase {
 			top++;
 			top->node = nextNode;
 
-			if (filter(nextNode->bounds)) {
+			if (filter(*nextNode)) {
 				if (nextNode->isLeafNode()) {
 					return;
 				} else {
@@ -328,13 +328,13 @@ struct TreeIterFactory : IteratorFactory<Iter, IteratorEnd> {
 	TreeIterFactory(Iter&& iter) : IteratorFactory<Iter, IteratorEnd>(std::move(iter), IteratorEnd()) {}
 };
 
-struct ContainsBoundsFilter {
+struct FinderFilter {
 	Bounds filterBounds;
 
-	ContainsBoundsFilter() = default;
-	ContainsBoundsFilter(const Bounds& filterBounds) : filterBounds(filterBounds) {}
+	FinderFilter() = default;
+	FinderFilter(const Bounds& filterBounds) : filterBounds(filterBounds) {}
 
-	bool operator()(const Bounds& b) const { return b.contains(filterBounds); }
+	bool operator()(const TreeNode& b) const { return b.bounds.contains(filterBounds); }
 };
 
 template<typename Boundable>
@@ -354,7 +354,7 @@ struct BoundsTree {
 	}
 
 	void addToExistingGroup(Boundable* obj, const Bounds& bounds, Boundable* objInGroup, const Bounds& objInGroupBounds) {
-		for (FilteredTreeIterator<ContainsBoundsFilter> iter(this->rootNode, ContainsBoundsFilter(objInGroupBounds)); iter != IteratorEnd(); ++iter) {
+		for (FilteredTreeIterator<FinderFilter> iter(this->rootNode, FinderFilter(objInGroupBounds)); iter != IteratorEnd(); ++iter) {
 			TreeNode* curNode = *iter;
 			if (curNode->object == objInGroup) {
 				while (curNode->divisible) {
@@ -363,6 +363,12 @@ struct BoundsTree {
 				}
 				addToExistingGroup(obj, bounds, *curNode);
 				iter.updateBoundsAllTheWayToTop();
+				TreeStackElement* newTop = iter.top;
+				while (newTop + 1 != iter.stack) {
+					TreeNode* n = newTop->node;
+					n->bounds = unionOfBounds(n->bounds, bounds);
+					newTop--;
+				}
 				return;
 			}
 		}
@@ -371,7 +377,7 @@ struct BoundsTree {
 	}
 
 	void remove(Boundable* obj, const Bounds& strictBounds) {
-		for (FilteredTreeIterator<ContainsBoundsFilter> iter(rootNode, strictBounds); iter != IteratorEnd(); iter) {
+		for (FilteredTreeIterator<FinderFilter> iter(rootNode, strictBounds); iter != IteratorEnd(); ++iter) {
 			if ((*iter)->object == obj) {
 				iter.remove();
 				return;

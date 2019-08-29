@@ -22,8 +22,10 @@
 #include "../engine/physical.h"
 #include "../engine/sharedLockGuard.h"
 #include "../engine/geometry/shape.h"
+#include "../engine/filters.h"
 
 #include "../util/log.h"
+
 
 namespace Picker {
 
@@ -57,7 +59,7 @@ namespace Picker {
 		Position closestIntersectedPoint = Position();
 		float closestIntersectDistance = INFINITY;
 
-		for (ExtendedPart& part : *screen.world) {
+		for (ExtendedPart& part : screen.world->iterPartsFiltered(RayIntersectBoundsFilter(ray))) {
 			if (&part == screen.camera.attachment) continue;
 			Vec3 relPos = part.cframe.position - ray.start;
 			if (pointToLineDistanceSquared(ray.direction, relPos) > part.maxRadius * part.maxRadius)

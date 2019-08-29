@@ -55,9 +55,3 @@ inline bool doRayAndBoundsIntersect(const Bounds& bounds, const Ray& ray, Positi
 	}
 	return false;
 }
-
-inline bool doRayAndBoundsIntersect(const Bounds& bounds, const Ray& ray) {
-	Position p;
-	double d;
-	return doRayAndBoundsIntersect(bounds, ray, p, d);
-}

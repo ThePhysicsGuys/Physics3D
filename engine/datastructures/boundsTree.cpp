@@ -167,8 +167,8 @@ void exchangeObjects(TreeNode& first, TreeNode& second) {
 struct NodePermutation {
 	TreeNode* permutationA[MAX_BRANCHES];
 	TreeNode* permutationB[MAX_BRANCHES];
-	size_t countA = 0;
-	size_t countB = 0;
+	int countA = 0;
+	int countB = 0;
 
 	inline void pushA(TreeNode* newNode) { permutationA[countA++] = newNode; }
 	inline void pushB(TreeNode* newNode) { permutationB[countB++] = newNode; }
@@ -223,7 +223,7 @@ void updateBestPermutationIfNeeded(long long& bestCost, NodePermutation& bestPer
 	}
 }
 
-void recursiveFindBestCombination(long long& bestCost, NodePermutation& bestPermutation, NodePermutation& currentPermutation, TreeNode*const* candidates, size_t size) {
+void recursiveFindBestCombination(long long& bestCost, NodePermutation& bestPermutation, NodePermutation& currentPermutation, TreeNode*const* candidates, int size) {
 	if (size == 0) { // all nodes have been placed
 		updateBestPermutationIfNeeded(bestCost, bestPermutation, currentPermutation);
 	} else { // some nodes still left to place
