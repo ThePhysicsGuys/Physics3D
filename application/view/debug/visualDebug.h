@@ -54,12 +54,14 @@ extern ColTreeRenderMode renderColTree;
 void toggleDebugVecType(Debug::VectorType t);
 void toggleDebugPointType(Debug::PointType t);
 
-void renderDebugField(Vec2 dimension, Font* font, const char* varName, std::string value, const char* unit);
+void addDebugField(Vec2 dimension, Font* font, const char* varName, std::string value, const char* unit);
 
 template<typename T>
-void renderDebugField(Vec2 dimension, Font* font, const char* varName, T value, const char* unit) {
-	renderDebugField(dimension, font, varName, std::to_string(value), unit);
+void addDebugField(Vec2 dimension, Font* font, const char* varName, T value, const char* unit) {
+	addDebugField(dimension, font, varName, std::to_string(value), unit);
 }
+
+void renderDebugFields();
 
 std::string toString(std::chrono::nanoseconds t);
 

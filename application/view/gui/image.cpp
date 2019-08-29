@@ -2,6 +2,7 @@
 
 #include "guiUtils.h"
 
+#include "path.h"
 #include "../shaderProgram.h"
 #include "../texture.h"
 
@@ -29,13 +30,12 @@ Image::Image(double x, double y, double width, double height, Texture* texture) 
 
 void Image::render() {
 	if (visible) {
-
 		Vec4 blendColor = (disabled) ? GUI::COLOR::DISABLED : GUI::COLOR::WHITE;
 
-		if (texture) Shaders::quadShader.updateTexture(texture, blendColor);
-		else Shaders::quadShader.updateColor(GUI::COLOR::blend(GUI::COLOR::BLACK, blendColor));
-		GUI::quad->resize(position, dimension);
-		GUI::quad->render();
+		if (texture)
+			Path::rectUV(texture->id, position, dimension);
+		else 
+			Path::rectFilled(position, dimension, 0, GUI::COLOR::blend(GUI::COLOR::BLACK, blendColor));
 	}
 }
 

@@ -216,7 +216,7 @@ namespace GUI {
 	double colorPickerSelectorWidth = 0.08;
 	double colorPickerSelectorHeight = 0.004;
 	Vec4 colorPickerSelectorColor = COLOR::SILVER;
-
+	
 	// CheckBox
 	Texture* checkBoxUncheckedTexture;
 	Texture* checkBoxCheckedTexture;
@@ -247,11 +247,11 @@ namespace GUI {
 	});
 
 	BatchConfig batchConfig(bufferLayout);
-	Batch<Vertex>* batch;
+	CommandBatch<Vertex>* batch;
 
 	void init(Screen* screen, Font* font) {
 
-		GUI::batch = new Batch<Vertex>(batchConfig);
+		GUI::batch = new CommandBatch<Vertex>(batchConfig);
 
 		GUI::screen = screen;
 		GUI::font = font;
@@ -350,7 +350,6 @@ namespace GUI {
 		components.add(component);
 	}
 
-	// Needs to be optimized
 	void remove(Component* component) {
 		for (auto iterator = components.begin(); iterator != components.end(); iterator++) {
 			if (component == *iterator) {
@@ -378,9 +377,14 @@ namespace GUI {
 		screen->quad->render();
 		screen->blurFrameBuffer->unbind();
 
+		Path::bind(GUI::batch);
 		for (auto iterator = components.rbegin(); iterator != components.rend(); ++iterator) {
 			(*iterator)->render();
 		}
 
+		Renderer::disableCulling();
+		Renderer::disableDepthTest();
+		Shaders::guiShader.init(screen->camera.orthoMatrix);
+		GUI::batch->submit();
 	}
 }

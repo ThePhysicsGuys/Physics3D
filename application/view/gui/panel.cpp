@@ -2,6 +2,8 @@
 
 #include "gui.h"
 
+#include "path.h"
+
 #include "../shaderProgram.h"
 
 #include "layout.h"
@@ -45,9 +47,10 @@ void Panel::render() {
 
 		resize();
 
-		Shaders::quadShader.updateColor(GUI::COLOR::blend(background, blendColor));
-		GUI::quad->resize(position, dimension);
-		GUI::quad->render();
+		Path::rectFilled(position, dimension, 0, GUI::COLOR::blend(background, blendColor));
+		//Shaders::quadShader.updateColor(GUI::COLOR::blend(background, blendColor));
+		//GUI::quad->resize(position, dimension);
+		//GUI::quad->render();
 
 		renderChildren();
 	}

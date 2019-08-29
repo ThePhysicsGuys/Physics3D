@@ -215,7 +215,6 @@ void Screen::update() {
 		if (handler->getKey(KeyboardOptions::Debug::frame)) { guiLayer.debugFrame->visible = true; guiLayer.debugFrame->position = Vec2(0.8); GUI::select(guiLayer.debugFrame); }
 	}
 
-
 	// Update camera
 	camera.update();
 

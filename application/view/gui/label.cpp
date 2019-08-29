@@ -1,6 +1,7 @@
 #include "label.h"
 
 #include "gui.h"
+#include "path.h"
 
 #include "../shaderProgram.h"
 #include "../renderUtils.h"
@@ -32,17 +33,20 @@ void Label::render() {
 
 		resize();
 		
-		Vec2 fontPosition = position + Vec2(padding, -dimension.y + padding);
-		font->render(text, fontPosition, GUI::COLOR::blend(foregroundColor, blendColor), scale);
+		Vec2 textPosition = position + Vec2(padding, -dimension.y + padding);
+		Path::text(font, text, textPosition, GUI::COLOR::blend(foregroundColor, blendColor), scale);
+		//font->render(text, fontPosition, GUI::COLOR::blend(foregroundColor, blendColor), scale);
 
 		if (debug) {
-			GUI::quad->resize(position, dimension);
-			Shaders::quadShader.updateColor(GUI::COLOR::R);
-			GUI::quad->render(Renderer::WIREFRAME);
+			Path::rect(position, dimension, 0.0f, GUI::COLOR::R);
+			//GUI::quad->resize(position, dimension);
+			//Shaders::quadShader.updateColor(GUI::COLOR::R);
+			//GUI::quad->render(Renderer::WIREFRAME);
 
-			GUI::quad->resize(position + Vec2(padding, -padding), dimension - Vec2(padding) * 2);
-			Shaders::quadShader.updateColor(GUI::COLOR::G);
-			GUI::quad->render(Renderer::WIREFRAME);
+			Path::rect(position + Vec2f(padding, -padding), dimension - Vec2f(padding) * 2, 0.0f, GUI::COLOR::G);
+			//GUI::quad->resize(position + Vec2(padding, -padding), dimension - Vec2(padding) * 2);
+			//Shaders::quadShader.updateColor(GUI::COLOR::G);
+			//GUI::quad->render(Renderer::WIREFRAME);
 		}
 	}
 }

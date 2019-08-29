@@ -1,4 +1,5 @@
 #include "slider.h"
+#include "path.h"
 
 #include "../shaderProgram.h"
 #include "../renderUtils.h"
@@ -53,36 +54,42 @@ void Slider::render() {
 
 		resize();
 
-		GUI::quad->resize(position, dimension);
-		Shaders::quadShader.updateColor(GUI::COLOR::blend(backgroundColor, blendColor));
-		GUI::quad->render();
+		Path::rectFilled(position, dimension, 0.0f, GUI::COLOR::blend(backgroundColor, blendColor));
+		//GUI::quad->resize(position, dimension);
+		//Shaders::quadShader.updateColor(GUI::COLOR::blend(backgroundColor, blendColor));
+		//GUI::quad->render();
 		
 		double progress = (value - min) / (max - min);
 		Vec2 sliderFilledPosition = position + Vec2(padding + handleWidth / 2, -height / 2 + barHeight / 2);
 		Vec2 sliderFilledDimension = Vec2(barWidth * progress, barHeight);
-		GUI::quad->resize(sliderFilledPosition, sliderFilledDimension);
-		Shaders::quadShader.updateColor(GUI::COLOR::blend(foregroundFilledColor, blendColor));
-		GUI::quad->render();
+		Path::rectFilled(sliderFilledPosition, sliderFilledDimension, 0.0f, GUI::COLOR::blend(foregroundFilledColor, blendColor));
+		//GUI::quad->resize(sliderFilledPosition, sliderFilledDimension);
+		//Shaders::quadShader.updateColor(GUI::COLOR::blend(foregroundFilledColor, blendColor));
+		//GUI::quad->render();
 
 		Vec2 sliderEmptyPosition = sliderFilledPosition + Vec2(sliderFilledDimension.x, 0);
 		Vec2 sliderEmptyDimension = Vec2(barWidth * (1.0 - progress), barHeight);
-		GUI::quad->resize(sliderEmptyPosition, sliderEmptyDimension);
-		Shaders::quadShader.updateColor(GUI::COLOR::blend(foregroundEmptyColor, blendColor));
-		GUI::quad->render();
+		Path::rectFilled(sliderEmptyPosition, sliderEmptyDimension, 0.0f, GUI::COLOR::blend(foregroundEmptyColor, blendColor));
+		//GUI::quad->resize(sliderEmptyPosition, sliderEmptyDimension);
+		//Shaders::quadShader.updateColor(GUI::COLOR::blend(foregroundEmptyColor, blendColor));
+		//GUI::quad->render();
 
 		Vec2 handlePosition = Vec2(sliderEmptyPosition.x - handleWidth / 2, position.y - height / 2 + handleHeight / 2);
 		Vec2 handleDimension = Vec2(handleWidth, handleHeight);
-		GUI::quad->resize(handlePosition, handleDimension);
-		Shaders::quadShader.updateColor(GUI::COLOR::blend(handleColor, blendColor));
-		GUI::quad->render();
+		Path::rectFilled(handlePosition, handleDimension, 0.0f, GUI::COLOR::blend(handleColor, blendColor));
+		//GUI::quad->resize(handlePosition, handleDimension);
+		//Shaders::quadShader.updateColor(GUI::COLOR::blend(handleColor, blendColor));
+		//GUI::quad->render();
 		
-		Shaders::quadShader.updateColor(GUI::COLOR::blend(GUI::COLOR::ACCENT, blendColor));
-		GUI::quad->render(Renderer::WIREFRAME);
+		Path::rect(handlePosition, handleDimension, 0.0f, GUI::COLOR::blend(GUI::COLOR::ACCENT, blendColor));
+		//Shaders::quadShader.updateColor(GUI::COLOR::blend(GUI::COLOR::ACCENT, blendColor));
+		//GUI::quad->render(Renderer::WIREFRAME);
 
 		if (debug) {
-			GUI::quad->resize(position, dimension);
-			Shaders::quadShader.updateColor(GUI::COLOR::RED);
-			GUI::quad->render(Renderer::WIREFRAME);
+			Path::rect(position, dimension, 0.0f, GUI::COLOR::RED);
+			//GUI::quad->resize(position, dimension);
+			//Shaders::quadShader.updateColor(GUI::COLOR::RED);
+			//GUI::quad->render(Renderer::WIREFRAME);
 		}
 	}
 }

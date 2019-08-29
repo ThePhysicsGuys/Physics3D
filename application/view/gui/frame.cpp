@@ -1,5 +1,6 @@
 #include "frame.h"
 
+#include "path.h"
 #include "button.h"
 #include "label.h"
 
@@ -15,7 +16,9 @@
 #include "../util/log.h"
 #include "../engine/math/mathUtil.h"
 
-Frame::Frame() : Frame(0, 0) {};
+Frame::Frame() : Frame(0, 0) {
+
+};
 
 Frame::Frame(double x, double y, std::string name) : Container(x, y) {
 	this->backgroundColor = GUI::frameBackgroundColor;
@@ -179,11 +182,12 @@ void Frame::render() {
 		resize();
 
 		// TitleBar
-		Vec2 titleBarPosition = position;
-		Vec2 titleBarDimension = Vec2(width, titleBarHeight);
-		Shaders::quadShader.updateColor(GUI::COLOR::blend(titleBarColor, blendColor));
-		GUI::quad->resize(titleBarPosition, titleBarDimension);
-		GUI::quad->render();
+		Vec2f titleBarPosition = position;
+		Vec2f titleBarDimension = Vec2f(width, titleBarHeight);
+		Path::rectFilled(titleBarPosition, titleBarDimension, 0, GUI::COLOR::blend(titleBarColor, blendColor));
+		//Shaders::quadShader.updateColor(GUI::COLOR::blend(titleBarColor, blendColor));
+		//GUI::quad->resize(titleBarPosition, titleBarDimension);
+		//GUI::quad->render();
 
 		// Buttons
 		closeButton->render();
@@ -195,12 +199,17 @@ void Frame::render() {
 
 		if (!minimized) {
 			// Padding
-			Vec2 offsetPosition = titleBarPosition + Vec2(0, -titleBarHeight);
-			Vec2 offsetDimension = dimension + Vec2(0, -titleBarHeight);
-			
-			Shaders::quadShader.updateTexture(GUI::screen->blurFrameBuffer->texture, GUI::COLOR::blend(Vec4f(0.4, 0.4, 0.4, 1), blendColor));
-			GUI::quad->resize(offsetPosition, offsetDimension, Vec2(-GUI::screen->camera.aspect, GUI::screen->camera.aspect) * 2, Vec2(-1, 1));
-			GUI::quad->render();
+			Vec2f offsetPosition = titleBarPosition + Vec2f(0, -titleBarHeight);
+			Vec2f offsetDimension = dimension + Vec2f(0, -titleBarHeight);
+			Vec2f xRange = Vec2f(-GUI::screen->camera.aspect, GUI::screen->camera.aspect) * 2;
+			Vec2f yRange = Vec2(-1, 1);
+			Vec4f color = GUI::COLOR::blend(Vec4f(0.4, 0.4, 0.4, 1), blendColor);
+
+			Path::rectFilled(offsetPosition, offsetDimension, 0.0, color);
+			//Path::rectUVRange(GUI::screen->blurFrameBuffer->texture->id, offsetPosition, offsetDimension, xRange, yRange, color);
+			//Shaders::quadShader.updateTexture(GUI::screen->blurFrameBuffer->texture, GUI::COLOR::blend(Vec4f(0.4, 0.4, 0.4, 1), blendColor));
+			//GUI::quad->resize(offsetPosition, offsetDimension, xRange, yRange);
+			//GUI::quad->render();
 
 			// Content
 			/*Vec2 contentPosition = position + Vec2(padding, -padding - titleBarHeight);
@@ -213,10 +222,11 @@ void Frame::render() {
 		}
 
 		// Outline
-		Vec2 outlinePosition = titleBarPosition;
-		Vec2 outlineDimension = dimension;
-		Shaders::quadShader.updateColor(GUI::COLOR::blend(GUI::COLOR::NAVY, blendColor));
-		GUI::quad->resize(outlinePosition, outlineDimension);
-		GUI::quad->render(Renderer::WIREFRAME);
+		Vec2f outlinePosition = titleBarPosition;
+		Vec2f outlineDimension = dimension;
+		Path::rect(outlinePosition, outlineDimension, 0, GUI::COLOR::blend(GUI::COLOR::NAVY, blendColor));
+		//Shaders::quadShader.updateColor(GUI::COLOR::blend(GUI::COLOR::NAVY, blendColor));
+		//GUI::quad->resize(outlinePosition, outlineDimension);
+		//GUI::quad->render(Renderer::WIREFRAME);
 	}
 }

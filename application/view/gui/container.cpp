@@ -1,16 +1,26 @@
 #include "container.h"
 
 #include "layout.h"
+#include "path.h"
 
 #include "../shaderProgram.h"
 #include "../renderUtils.h"
 
 #include "../mesh/primitive.h"
 
-Container::Container(Vec2 position) : Component(position), layout(new FlowLayout()) {};
-Container::Container(Vec2 position, Vec2 dimension) : Component(position, dimension), layout(new FlowLayout()) {};
-Container::Container(double x, double y, double width, double height) : Container(Vec2(x, y), Vec2(width, height)) {};
-Container::Container(double x, double y) : Container(Vec2(x, y)) {};
+Container::Container(Vec2 position) : Component(position), layout(new FlowLayout()) {
+};
+
+Container::Container(Vec2 position, Vec2 dimension) : Component(position, dimension), layout(new FlowLayout()) {
+
+};
+
+Container::Container(double x, double y, double width, double height) : Container(Vec2(x, y), Vec2(width, height)) {
+};
+
+Container::Container(double x, double y) : Container(Vec2(x, y)) {
+
+};
 
 void Container::add(Component* child) {
 	add(child, Align::RELATIVE);
@@ -49,15 +59,18 @@ void Container::renderChildren() {
 	for (auto child : children) {
 		child.first->render();
 		if (debug) {
-			GUI::quad->resize(child.first->position + Vec2(-margin, margin), child.first->dimension + Vec2(margin * 2));
-			Shaders::quadShader.updateColor(GUI::COLOR::R);
-			GUI::quad->render(Renderer::WIREFRAME);
-			GUI::quad->resize(child.first->position, child.first->dimension);
-			Shaders::quadShader.updateColor(GUI::COLOR::G);
-			GUI::quad->render(Renderer::WIREFRAME);
-			GUI::quad->resize(child.first->position + Vec2(padding, -padding), child.first->dimension + Vec2(-padding * 2));
-			Shaders::quadShader.updateColor(GUI::COLOR::B);
-			GUI::quad->render(Renderer::WIREFRAME);
+			Path::rect(child.first->position + Vec2(-margin, margin), child.first->dimension + Vec2(margin * 2), 0, GUI::COLOR::R);
+			//GUI::quad->resize();
+			//Shaders::quadShader.updateColor(GUI::COLOR::R);
+			//GUI::quad->render(Renderer::WIREFRAME);
+			Path::rect(child.first->position, child.first->dimension, 0, GUI::COLOR::G);
+			//GUI::quad->resize(child.first->position, child.first->dimension);
+			//Shaders::quadShader.updateColor(GUI::COLOR::G);
+			//GUI::quad->render(Renderer::WIREFRAME);
+			Path::rect(child.first->position + Vec2(padding, -padding), child.first->dimension + Vec2(-padding * 2), 0, GUI::COLOR::B);
+			//GUI::quad->resize(child.first->position + Vec2(padding, -padding), child.first->dimension + Vec2(-padding * 2));
+			//Shaders::quadShader.updateColor(GUI::COLOR::B);
+			//GUI::quad->render(Renderer::WIREFRAME);
 		}
 	}
 }

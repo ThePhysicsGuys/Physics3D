@@ -3,7 +3,7 @@
 #include "../engine/math/vec.h"
 #include "../engine/math/mat4.h"
 
-#include "../batch/batch.h"
+#include "../batch/commandBatch.h"
 #include "../batch/batchConfig.h"
 
 #include <string>
@@ -167,7 +167,8 @@ namespace GUI {
 		Vec4f col;
 	};
 
-	extern Batch<Vertex>* batch;
+	extern BatchConfig batchConfig;
+	extern CommandBatch<GUI::Vertex>* batch;
 };
 
 #include "component.h"

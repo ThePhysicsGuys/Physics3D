@@ -12,10 +12,6 @@ class Texture;
 typedef void (*ButtonAction) (Button*);
 
 class Button : public Component {
-private:
-	void renderPressed(Vec4 blendColor);
-	void renderHovering(Vec4 blendColor);
-	void renderIdle(Vec4 blendColor);
 public:
 	ButtonAction action = [] (Button*) {};
 
