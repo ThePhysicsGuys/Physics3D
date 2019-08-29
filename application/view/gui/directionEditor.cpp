@@ -5,7 +5,8 @@
 #include "../engine/math/mathUtil.h"
 
 #include "gui.h"
-
+#include "path.h"
+#include "../texture.h"
 #include "../material.h"
 #include "../shaderProgram.h"
 #include "../renderUtils.h"
@@ -44,15 +45,11 @@ void DirectionEditor::render() {
 		GUI::guiFrameBuffer->unbind();
 		Renderer::disableDepthTest();
 
-		GUI::quad->resize(position, dimension);
-		Shaders::quadShader.updateColor(GUI::COLOR::blend(GUI::COLOR::BACK, blendColor));
-		GUI::quad->render(Renderer::WIREFRAME);
+		Path::rect(position, dimension, 0.0f, GUI::COLOR::blend(GUI::COLOR::BACK, blendColor));
 
 		Vec2 contentPosition = position + Vec2(GUI::padding, -GUI::padding);
 		Vec2 contentDimension = dimension - Vec2(GUI::padding) * 2;
-		GUI::quad->resize(contentPosition, contentDimension);
-		Shaders::quadShader.updateTexture(GUI::guiFrameBuffer->texture, blendColor);
-		GUI::quad->render();
+		Path::rectUV(GUI::guiFrameBuffer->texture->id, contentPosition, contentDimension, Vec2f(0), Vec2f(1), blendColor);
 	}
 }
 

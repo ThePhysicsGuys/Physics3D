@@ -48,9 +48,6 @@ void Panel::render() {
 		resize();
 
 		Path::rectFilled(position, dimension, 0, GUI::COLOR::blend(background, blendColor));
-		//Shaders::quadShader.updateColor(GUI::COLOR::blend(background, blendColor));
-		//GUI::quad->resize(position, dimension);
-		//GUI::quad->render();
 
 		renderChildren();
 	}

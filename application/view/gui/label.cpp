@@ -35,18 +35,10 @@ void Label::render() {
 		
 		Vec2 textPosition = position + Vec2(padding, -dimension.y + padding);
 		Path::text(font, text, textPosition, GUI::COLOR::blend(foregroundColor, blendColor), scale);
-		//font->render(text, fontPosition, GUI::COLOR::blend(foregroundColor, blendColor), scale);
 
 		if (debug) {
 			Path::rect(position, dimension, 0.0f, GUI::COLOR::R);
-			//GUI::quad->resize(position, dimension);
-			//Shaders::quadShader.updateColor(GUI::COLOR::R);
-			//GUI::quad->render(Renderer::WIREFRAME);
-
 			Path::rect(position + Vec2f(padding, -padding), dimension - Vec2f(padding) * 2, 0.0f, GUI::COLOR::G);
-			//GUI::quad->resize(position + Vec2(padding, -padding), dimension - Vec2(padding) * 2);
-			//Shaders::quadShader.updateColor(GUI::COLOR::G);
-			//GUI::quad->render(Renderer::WIREFRAME);
 		}
 	}
 }

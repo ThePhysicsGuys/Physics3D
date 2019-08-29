@@ -3,7 +3,7 @@
 #include "guiUtils.h"
 #include "../shaderProgram.h"
 #include "../texture.h"
-
+#include "path.h"
 #include "../mesh/primitive.h"
 
 ColorPicker::ColorPicker(double x, double y, double size) : Component(x, y, size, size) {
@@ -53,77 +53,56 @@ void ColorPicker::render() {
 
 		Vec4 blendColor = (disabled) ? GUI::COLOR::DISABLED : GUI::COLOR::WHITE;
 
-		/*GUI::shader->updateColor(GUI::COLOR::blend(background, blendColor));
-		GUI::quad->resize(position, dimension);
-		GUI::quad->render();*/
-
 		// Brightness
-		Vec2 brightnessBorderPosition = position + Vec2(padding, -padding);
-		Vec2 brightnessBorderDimension = Vec2(GUI::colorPickerBarWidth + 2 * GUI::colorPickerBarBorderWidth, height - 2 * padding);
-		Shaders::quadShader.updateColor(GUI::COLOR::blend(GUI::colorPickerBarBorderColor, blendColor));
-		GUI::quad->resize(brightnessBorderPosition, brightnessBorderDimension);
-		GUI::quad->render();
+		Vec2f brightnessBorderPosition = position + Vec2(padding, -padding);
+		Vec2f brightnessBorderDimension = Vec2(GUI::colorPickerBarWidth + 2 * GUI::colorPickerBarBorderWidth, height - 2 * padding);
+		Path::rectFilled(brightnessBorderPosition, brightnessBorderDimension, 0.0f, GUI::COLOR::blend(GUI::colorPickerBarBorderColor, blendColor));
 
-		Vec2 brightnessPosition = brightnessBorderPosition + Vec2(GUI::colorPickerBarBorderWidth, -GUI::colorPickerBarBorderWidth);
-		Vec2 brightnessDimension = Vec2(GUI::colorPickerBarWidth, brightnessBorderDimension.y - 2 * GUI::colorPickerBarBorderWidth);
-		Shaders::quadShader.updateTexture(GUI::colorPickerBrightnessTexture, GUI::COLOR::blend(GUI::COLOR::hsvaToRgba(Vec4(hsva.x, hsva.y, 1, 1)), blendColor));
-		GUI::quad->resize(brightnessPosition, brightnessDimension);
-		GUI::quad->render();
+		Vec2f brightnessPosition = brightnessBorderPosition + Vec2(GUI::colorPickerBarBorderWidth, -GUI::colorPickerBarBorderWidth);
+		Vec2f brightnessDimension = Vec2(GUI::colorPickerBarWidth, brightnessBorderDimension.y - 2 * GUI::colorPickerBarBorderWidth);
+		Path::rectUV(GUI::colorPickerBrightnessTexture->id, brightnessBorderPosition, brightnessBorderDimension, Vec2f(0), Vec2f(1), GUI::COLOR::blend(GUI::COLOR::hsvaToRgba(Vec4(hsva.x, hsva.y, 1, 1)), blendColor));
 
-		Vec2 brightnessSelectorPosition = brightnessPosition + Vec2((GUI::colorPickerBarWidth - GUI::colorPickerSelectorWidth) / 2, -(1 - hsva.z) * brightnessDimension.y + GUI::colorPickerSelectorHeight / 2);
-		Vec2 brightnessSelectorDimension = Vec2(GUI::colorPickerSelectorWidth, GUI::colorPickerSelectorHeight);
-		Shaders::quadShader.updateColor(GUI::COLOR::blend(GUI::colorPickerSelectorColor, blendColor));
-		GUI::quad->resize(brightnessSelectorPosition, brightnessSelectorDimension);
-		GUI::quad->render();
+		Vec2f brightnessSelectorPosition = brightnessPosition + Vec2((GUI::colorPickerBarWidth - GUI::colorPickerSelectorWidth) / 2, -(1 - hsva.z) * brightnessDimension.y + GUI::colorPickerSelectorHeight / 2);
+		Vec2f brightnessSelectorDimension = Vec2(GUI::colorPickerSelectorWidth, GUI::colorPickerSelectorHeight);
+		Path::rectFilled(brightnessSelectorPosition, brightnessSelectorDimension, 0.0f, GUI::COLOR::blend(GUI::colorPickerSelectorColor, blendColor));
 
 		// Alpha
-		Vec2 alphaBorderPosition = brightnessBorderPosition + Vec2(brightnessBorderDimension.x + GUI::colorPickerSpacing, 0);
-		Vec2 alphaBorderDimension = brightnessBorderDimension;
-		Shaders::quadShader.updateColor(GUI::COLOR::blend(GUI::colorPickerBarBorderColor, blendColor));
-		GUI::quad->resize(alphaBorderPosition, alphaBorderDimension);
-		GUI::quad->render();
+		Vec2f alphaBorderPosition = brightnessBorderPosition + Vec2(brightnessBorderDimension.x + GUI::colorPickerSpacing, 0);
+		Vec2f alphaBorderDimension = brightnessBorderDimension;
+		Path::rectFilled(alphaBorderPosition, alphaBorderDimension, 0.0f, GUI::COLOR::blend(GUI::colorPickerBarBorderColor, blendColor));;
 
-		Vec2 alphaPosition = alphaBorderPosition + Vec2(GUI::colorPickerBarBorderWidth, -GUI::colorPickerBarBorderWidth);
-		Vec2 alphaDimension = brightnessDimension;
-		GUI::quad->resize(alphaPosition, alphaDimension);
-		Shaders::quadShader.updateTexture(GUI::colorPickerAlphaPatternTexture);
-		GUI::quad->render();
-		Shaders::quadShader.updateTexture(GUI::colorPickerAlphaBrightnessTexture, GUI::COLOR::blend(GUI::COLOR::hsvaToRgba(Vec4(hsva.x, hsva.y, hsva.z, 1)), blendColor));
-		GUI::quad->render();
+		Vec2f alphaPosition = alphaBorderPosition + Vec2(GUI::colorPickerBarBorderWidth, -GUI::colorPickerBarBorderWidth);
+		Vec2f alphaDimension = brightnessDimension;
+		Path::rectUV(GUI::colorPickerAlphaPatternTexture->id, alphaPosition, alphaDimension);
+		Path::rectUV(GUI::colorPickerAlphaBrightnessTexture->id, alphaPosition, alphaDimension, Vec2f(0), Vec2f(1), GUI::COLOR::blend(GUI::COLOR::hsvaToRgba(Vec4(hsva.x, hsva.y, hsva.z, 1)), blendColor));
 
-		Vec2 alphaSelectorPosition = alphaPosition + Vec2((GUI::colorPickerBarWidth - GUI::colorPickerSelectorWidth) / 2, -(1 - hsva.w) * brightnessDimension.y + GUI::colorPickerSelectorHeight / 2);
-		Vec2 alphaSelectorDimension = brightnessSelectorDimension;
-		Shaders::quadShader.updateColor(GUI::COLOR::blend(GUI::colorPickerSelectorColor, blendColor));
-		GUI::quad->resize(alphaSelectorPosition, alphaSelectorDimension);
-		GUI::quad->render();
+		Vec2f alphaSelectorPosition = alphaPosition + Vec2((GUI::colorPickerBarWidth - GUI::colorPickerSelectorWidth) / 2, -(1 - hsva.w) * brightnessDimension.y + GUI::colorPickerSelectorHeight / 2);
+		Vec2f alphaSelectorDimension = brightnessSelectorDimension;
+		Path::rectFilled(alphaSelectorPosition, alphaSelectorDimension, 0.0f, GUI::COLOR::blend(GUI::colorPickerSelectorColor, blendColor));
 
 		// Hue
-		Vec2 huePosition = Vec2(alphaBorderPosition.x + alphaBorderDimension.x + GUI::colorPickerSpacing, alphaBorderPosition.y);
-		Vec2 hueDimension = Vec2(alphaBorderDimension.y);
-		Shaders::quadShader.updateTexture(GUI::colorPickerHueTexture, blendColor);
-		GUI::quad->resize(huePosition, hueDimension);
-		GUI::quad->render();
+		Vec2f huePosition = Vec2(alphaBorderPosition.x + alphaBorderDimension.x + GUI::colorPickerSpacing, alphaBorderPosition.y);
+		Vec2f hueDimension = Vec2(alphaBorderDimension.y);
+		Path::rectUV(GUI::colorPickerHueTexture->id, huePosition, hueDimension, Vec2f(0), Vec2f(1), blendColor);
 
-		Vec2 crosshairPosition = position + crosshair + Vec2(-GUI::colorPickerCrosshairSize, GUI::colorPickerCrosshairSize) / 2;
-		Vec2 crosshairDimesion = Vec2(GUI::colorPickerCrosshairSize);
-		Shaders::quadShader.updateTexture(GUI::colorPickerCrosshairTexture, blendColor);
-		GUI::quad->resize(crosshairPosition, crosshairDimesion);
-		GUI::quad->render();
+		Vec2f crosshairPosition = position + crosshair + Vec2(-GUI::colorPickerCrosshairSize, GUI::colorPickerCrosshairSize) / 2;
+		Vec2f crosshairDimension = Vec2(GUI::colorPickerCrosshairSize);
+		Path::rectUV(GUI::colorPickerCrosshairTexture->id, crosshairPosition, crosshairDimension, Vec2f(0), Vec2f(1), blendColor);
 
 		// Color
-		Vec2 colorBorderPosition = Vec2(huePosition.x + hueDimension.x + GUI::colorPickerSpacing, brightnessBorderPosition.y);
-		Vec2 colorBorderDimension = brightnessBorderDimension;
-		Shaders::quadShader.updateColor(GUI::COLOR::blend(GUI::colorPickerBarBorderColor, blendColor));
-		GUI::quad->resize(colorBorderPosition, colorBorderDimension);
-		GUI::quad->render();
+		Vec2f colorBorderPosition = Vec2(huePosition.x + hueDimension.x + GUI::colorPickerSpacing, brightnessBorderPosition.y);
+		Vec2f colorBorderDimension = brightnessBorderDimension;
+		Path::rectFilled(colorBorderPosition, colorBorderDimension, 0.0f, GUI::COLOR::blend(GUI::colorPickerBarBorderColor, blendColor));
 
-		Vec2 colorPosition = colorBorderPosition + Vec2(GUI::colorPickerBarBorderWidth, -GUI::colorPickerBarBorderWidth);
-		Vec2 colorDimension = brightnessDimension;
-		GUI::quad->resize(colorPosition, colorDimension);
-		Shaders::quadShader.updateTexture(GUI::colorPickerAlphaPatternTexture);
-		GUI::quad->render();
-		Shaders::quadShader.updateColor(GUI::COLOR::blend(GUI::COLOR::hsvaToRgba(hsva), blendColor));
-		GUI::quad->render();
+		Vec2f colorPosition = colorBorderPosition + Vec2(GUI::colorPickerBarBorderWidth, -GUI::colorPickerBarBorderWidth);
+		Vec2f colorDimension = brightnessDimension;
+		Path::rectUV(GUI::colorPickerAlphaPatternTexture->id, colorPosition, colorDimension);
+		Path::rectFilled(colorPosition, colorDimension, 0.0f, GUI::COLOR::blend(GUI::COLOR::hsvaToRgba(hsva), blendColor));
+		//GUI::quad->resize(colorPosition, colorDimension);
+		//Shaders::quadShader.updateTexture(GUI::colorPickerAlphaPatternTexture);
+		//GUI::quad->render();
+		//Shaders::quadShader.updateColor(GUI::COLOR::blend(GUI::COLOR::hsvaToRgba(hsva), blendColor));
+		//GUI::quad->render();
 	}
 }
 

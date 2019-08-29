@@ -43,7 +43,6 @@ void Button::render() {
 
 		Vec4 blendColor = (disabled) ? GUI::COLOR::DISABLED : GUI::COLOR::WHITE;
 
-		//GUI::quad->resize(position, dimension);
 		Vec2f buttonPosition = position;
 		Vec2f buttonDimension = dimension;
 
@@ -67,7 +66,6 @@ void Button::render() {
 
 		if (!text.empty())
 			Path::text(GUI::font, text, position + Vec2(borderWidth, -borderWidth), GUI::COLOR::blend(fontColor, blendColor), fontSize);
-		//GUI::font->render(text, position + Vec2(borderWidth, -borderWidth), GUI::COLOR::blend(fontColor, blendColor), fontSize);
 	}
 }
 

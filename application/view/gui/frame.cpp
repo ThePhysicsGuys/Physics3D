@@ -185,9 +185,6 @@ void Frame::render() {
 		Vec2f titleBarPosition = position;
 		Vec2f titleBarDimension = Vec2f(width, titleBarHeight);
 		Path::rectFilled(titleBarPosition, titleBarDimension, 0, GUI::COLOR::blend(titleBarColor, blendColor));
-		//Shaders::quadShader.updateColor(GUI::COLOR::blend(titleBarColor, blendColor));
-		//GUI::quad->resize(titleBarPosition, titleBarDimension);
-		//GUI::quad->render();
 
 		// Buttons
 		closeButton->render();
@@ -205,28 +202,14 @@ void Frame::render() {
 			Vec2f yRange = Vec2(-1, 1);
 			Vec4f color = GUI::COLOR::blend(Vec4f(0.4, 0.4, 0.4, 1), blendColor);
 
-			Path::rectFilled(offsetPosition, offsetDimension, 0.0, color);
-			//Path::rectUVRange(GUI::screen->blurFrameBuffer->texture->id, offsetPosition, offsetDimension, xRange, yRange, color);
-			//Shaders::quadShader.updateTexture(GUI::screen->blurFrameBuffer->texture, GUI::COLOR::blend(Vec4f(0.4, 0.4, 0.4, 1), blendColor));
-			//GUI::quad->resize(offsetPosition, offsetDimension, xRange, yRange);
-			//GUI::quad->render();
-
-			// Content
-			/*Vec2 contentPosition = position + Vec2(padding, -padding - titleBarHeight);
-			Vec2 contentDimension = dimension - Vec2(2 * padding, 2 * padding + titleBarHeight);
-			GUI::shader->update(backgroundColor);
-			GUI::quad->resize(contentPosition, contentDimension);
-			GUI::quad->render();*/
+			Path::rectUVRange(GUI::screen->blurFrameBuffer->texture->id, offsetPosition, offsetDimension, xRange, yRange, color);
 
 			renderChildren();
 		}
 
 		// Outline
-		Vec2f outlinePosition = titleBarPosition;
-		Vec2f outlineDimension = dimension;
-		Path::rect(outlinePosition, outlineDimension, 0, GUI::COLOR::blend(GUI::COLOR::NAVY, blendColor));
-		//Shaders::quadShader.updateColor(GUI::COLOR::blend(GUI::COLOR::NAVY, blendColor));
-		//GUI::quad->resize(outlinePosition, outlineDimension);
-		//GUI::quad->render(Renderer::WIREFRAME);
+		//Vec2f outlinePosition = titleBarPosition;
+		//Vec2f outlineDimension = dimension;
+		//Path::rect(outlinePosition, outlineDimension, 0, GUI::COLOR::blend(GUI::COLOR::NAVY, blendColor));
 	}
 }
