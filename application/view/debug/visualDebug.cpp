@@ -6,13 +6,16 @@
 #include "../mesh/pointMesh.h"
 
 #include "../font.h"
+#include "../batch/commandBatch.h"
+#include "../gui/path.h"
 #include "../gui/gui.h"
 
 #include "../../threePhaseBuffer.h"
+#include "../batch/commandBatch.h"
 
 #include <sstream>
 
-const char* const graphicsDebugLabels[]{
+const char* const graphicsDebugLabels[] {
 	"Update",
 	"Skybox",
 	"Vectors",
@@ -116,7 +119,7 @@ void updateVecMesh(VectorMesh* vectorMesh, AppDebug::ColoredVector* data, size_t
 			visibleVecs.add(vecColors[v.type].z);
 		}
 	}
-
+	
 	vectorMesh->update(visibleVecs.data, visibleVecs.size / 9);
 }
 
@@ -145,10 +148,14 @@ void updatePointMesh(PointMesh* pointMesh, AppDebug::ColoredPoint* data, size_t 
 	pointMesh->update(visiblePoints.data, visiblePoints.size / 10);
 }
 
-void renderDebugField(Vec2 dimension, Font* font, const char* varName, std::string value, const char* unit) {
+void addDebugField(Vec2 dimension, Font* font, const char* varName, std::string value, const char* unit) {
 	std::stringstream ss;
 	ss.precision(4);
 	ss << varName << ": " << value << unit;
-	font->render(ss.str().c_str(), Vec2(-dimension.x / dimension.y * 0.99, (1 - fieldIndex * 0.05) * 0.95), Vec3(1, 1, 1), 0.001);
+	Path::text(font, ss.str().c_str(), Vec2(-dimension.x / dimension.y * 0.99, (1 - fieldIndex * 0.05) * 0.95), Vec4(1, 1, 1, 1), 0.001);
 	fieldIndex++;
+}
+
+void renderDebugFields() {
+	GUI::batch->submit();
 }

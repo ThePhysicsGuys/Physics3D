@@ -1,7 +1,5 @@
 #include "font.h"
 
-#include "../engine/math/vec.h"
-
 #include "GL\glew.h"
 #include "GLFW\glfw3.h"
 
@@ -10,33 +8,12 @@
 #include "renderUtils.h"
 #include "gui/gui.h"
 #include "mesh/primitive.h"
+#include "gui/path.h"
 
 #include "../util/log.h"
 
-
 Font::Font(std::string font) {
-	initFontAtlas(font);
-	initFontBuffers();
-}
-
-void Font::initFontBuffers() {
-	glGenVertexArrays(1, &vao);
-	glGenBuffers(1, &vbo);
-
-	glBindVertexArray(vao);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-	glBufferData(GL_ARRAY_BUFFER, BUFFERSIZE * sizeof(CharacterData), NULL, GL_DYNAMIC_DRAW);
-
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-}
-
-void Font::initFontAtlas(std::string font) {
-	FT_Library  library;
+	FT_Library library;
 	FT_Face face;
 	FT_Error error;
 
@@ -69,7 +46,7 @@ void Font::initFontAtlas(std::string font) {
 	// Allocate memory
 	int penX = 0;
 	int penY = 0;
-	char* pixels = (char*)calloc(atlasDimension * atlasDimension, 1);
+	char* pixels = (char*)calloc(atlasDimension * atlasDimension * 4, 1);
 
 	// Render glyphs to atlas
 	for (unsigned char c = 0; c < CHARACTERCOUNT; c++) {
@@ -89,11 +66,14 @@ void Font::initFontAtlas(std::string font) {
 			for (int col = 0; col < bitmap->width; col++) {
 				int x = penX + col;
 				int y = penY + row;
-				pixels[x + y * atlasDimension] = bitmap->buffer[col + row * bitmap->pitch];
+				pixels[(x + y * atlasDimension) * 4 + 0] = 0xff;
+				pixels[(x + y * atlasDimension) * 4 + 1] = 0xff;
+				pixels[(x + y * atlasDimension) * 4 + 2] = 0xff;
+				pixels[(x + y * atlasDimension) * 4 + 3] = bitmap->buffer[col + row * bitmap->pitch];
 			}
 		}
 
-		characters[c] = Character (
+		characters[c] = Character(
 			penX,
 			penY,
 			bitmap->width,
@@ -109,7 +89,7 @@ void Font::initFontAtlas(std::string font) {
 	FT_Done_Face(face);
 	FT_Done_FreeType(library);
 
-	atlas = new Texture(atlasDimension, atlasDimension, pixels, GL_RED);
+	atlas = new Texture(atlasDimension, atlasDimension, pixels, GL_RGBA);
 
 	Log::resetSubject();
 }
@@ -135,74 +115,15 @@ Vec2 Font::size(const std::string& text, double size) {
 	return Vec2(width, height);
 }
 
-void Font::bufferCharacter(int index, double x, double y, double size) {
-	const Character& character = characters[index];
-	float descend = character.height - character.by;
-	float xpos = x + character.bx * size;
-	float ypos = y - descend * size;
-	
-	float w = character.width * size;
-	float h = character.height * size;
-	
-	float s = float(character.x) / atlas->width;
-	float t = float(character.y) / atlas->height;
-	float ds = float(character.width) / atlas->width;
-	float dt = float(character.height) / atlas->height;
-
-	characterBuffer[bufferIndex] = {
-		xpos	, ypos + h, s 	  , t,
-		xpos	, ypos    , s 	  , t + dt,
-		xpos + w, ypos    , s + ds, t + dt,
-		xpos + w, ypos + h, s + ds, t
-	};
+unsigned int Font::getAtlasID() const {
+	return atlas->id;
 }
 
-void Font::renderBuffer(int count) {
-	// Fill GPU buffer
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(CharacterData) * count, &characterBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	// Draw GPU buffer
-	glDrawArrays(GL_QUADS, 0, 4 * count);
+unsigned int Font::getAtlasWidth() const {
+	return atlas->width;
 }
 
-void Font::render(const std::string& text, double x, double y, Vec4 color, double size) {
-
-	glBindVertexArray(vao);
-
-	Shaders::fontShader.updateColor(color);
-	Shaders::fontShader.updateTexture(atlas);
-	
-	for (int index = 0; index < text.size(); index++, bufferIndex++) {
-		char character = text.at(index);
-
-		if (bufferIndex == BUFFERSIZE) {
-			renderBuffer(BUFFERSIZE);
-			bufferIndex = 0;
-		}
-
-		if (index == text.size() - 1) {
-			bufferCharacter(character, x, y, size);
-			renderBuffer(bufferIndex + 1);
-			bufferIndex = 0;
-			break;
-		}	
-			   
-		bufferCharacter(character, x, y, size);
-
-		x += (characters[character].advance >> 6) * size;
-	}
-
-	glBindVertexArray(0);
-
-	glBindTexture(GL_TEXTURE_2D, 0);
+unsigned int Font::getAtlasHeight() const {
+	return atlas->height;
 }
 
-void Font::render(const std::string& text, Vec2 position, Vec3 color, double size) {
-	render(text, position.x, position.y, Vec4(color.x, color.y, color.z, 1), size);
-}
-
-void Font::render(const std::string& text, Vec2 position, Vec4 color, double size) {
-	render(text, position.x, position.y, color, size);
-}

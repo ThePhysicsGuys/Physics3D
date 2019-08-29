@@ -7,6 +7,8 @@
 #include "../engine/math/vec.h"
 #include "../engine/math/mat2.h"
 
+#include "../batch/commandBatch.h"
+#include "../gui/path.h"
 #include "../gui/gui.h"
 #include "../screen.h"
 #include "../font.h"
@@ -75,29 +77,33 @@ void PieChart::renderPie(Screen& screen) const {
 }*/
 
 void PieChart::renderText(Screen& screen, Font* font) const {
+	Path::bind(GUI::batch);
+
 	// Title
 	Vec2f titlePosition = piePosition + Vec2f(pieSize * 1.3f, pieSize * 1.1f);
-	font->render(title, Vec2(titlePosition.x, titlePosition.y), Vec3(1, 1, 1), 0.001);
+	Path::text(font, title, Vec2(titlePosition.x, titlePosition.y), Vec4f(1, 1, 1, 1), 0.001);
 
 	Vec2f textPosition = piePosition + Vec2f(pieSize * 1.3f, pieSize * 1.1f - 0.05f);
 	Vec2 textPos = Vec2(textPosition.x, textPosition.y);
 
 	float totalWeight = getTotal();
 
-	font->render(totalValue, textPos + Vec2(0.50, 0.035), Vec3(1,1,1), 0.0006);
+	Path::text(font, totalValue, textPos + Vec2(0.50, 0.035), Vec4(1,1,1,1), 0.0006);
 
 	for(int i = 0; i < parts.size(); i++) {
 		const DataPoint& p = parts[i];
 		Vec2 linePos = textPos + Vec2(0, -i*0.035);
-		font->render(p.label, linePos, Vec3(p.color), 0.0006);
+		Path::text(font, p.label, linePos, Vec4(p.color, 1), 0.0006);
 
 		std::stringstream percent;
 		percent.precision(4);
 		percent << p.weight/totalWeight * 100;
 		percent << "%";
-		font->render(percent.str(), linePos + Vec2(0.35, 0), Vec3(p.color), 0.0006);
-		font->render(p.value, linePos + Vec2(0.50, 0), Vec3(p.color), 0.0006);
+		Path::text(font, percent.str(), linePos + Vec2(0.35, 0), Vec4(p.color, 1), 0.0006);
+		Path::text(font, p.value, linePos + Vec2(0.50, 0), Vec4(p.color, 1), 0.0006);
 	}
+
+	GUI::batch->submit();
 }
 
 void PieChart::add(DataPoint& p) {
@@ -123,6 +129,8 @@ float PieChart::getTotal() const {
 }
 
 void BarChart::render() {
+	Path::bind(GUI::batch);
+
 	glUseProgram(0);
 
 	float titleHeight = 0.045;
@@ -170,7 +178,7 @@ void BarChart::render() {
 	glEnd();
 	glPopMatrix();
 
-	GUI::font->render(title, position + Vec2f(0, this->dimension.y - titleHeight), GUI::COLOR::WHITE, 0.001);
+	Path::text(GUI::font, title, position + Vec2f(0, this->dimension.y - titleHeight), GUI::COLOR::WHITE, 0.001);
 
 	for (int cl = 0; cl < data.height; cl++) {
 		const BarChartClassInformation& info = classes[cl];
@@ -185,19 +193,21 @@ void BarChart::render() {
 			Vec2f topTextPosition = botLeft + Vec2(0, height+drawingSize.y * 0.02);
 			//topTextPosition.x *= GUI::screen->dimension.x / GUI::screen->dimension.y;
 
-			GUI::font->render(dataPoint.value, topTextPosition, info.color, 0.0005);
+			Path::text(GUI::font, dataPoint.value, topTextPosition, Vec4(info.color, 1), 0.0005);
 		}
 	}
 
 	for (int i = 0; i < data.width; i++) {
 		Vec2f botLeft = position + Vec2f(marginLeft, 0) + Vec2f(categoryWidth * i, 0);
 		//botLeft.x *= GUI::screen->dimension.x / GUI::screen->dimension.y;
-		GUI::font->render(labels[i], botLeft, GUI::COLOR::WHITE, 0.0005);
+		Path::text(GUI::font, labels[i], botLeft, GUI::COLOR::WHITE, 0.0005);
 	}
 
 	for (int cl = 0; cl < data.height; cl++) {
-		GUI::font->render(classes[cl].name, drawingPosition + Vec2f(this->dimension.x - 0.3, drawingSize.y - 0.035 * cl), classes[cl].color, 0.0007);
+		Path::text(GUI::font, classes[cl].name, drawingPosition + Vec2f(this->dimension.x - 0.3, drawingSize.y - 0.035 * cl), Vec4(classes[cl].color, 1), 0.0007);
 	}
+
+	GUI::batch->submit();
 }
 
 float BarChart::getMaxWeight() const {
