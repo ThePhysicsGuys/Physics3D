@@ -221,39 +221,46 @@ float BarChart::getMaxWeight() const {
 	return best;
 }
 
-long long computeCost(const Bounds& bounds); // defined in boundsTree.cpp
-
 void recursiveRenderTree(const TreeNode& tree, const Vec3f& treeColor, Vec2f origin, float allottedWidth, long long maxCost) {
-	if (tree.isLeafNode()) {
-		return;
-	}
-	for (int i = 0; i < tree.nodeCount; i++) {
-		Vec2f nextStep = origin + Vec2f(-allottedWidth / 2 + allottedWidth * ((tree.nodeCount != 1)?(float(i) / (tree.nodeCount-1)):0.5f), -0.04f);
-		float colorDarkning = pow(1.0f * computeCost(tree[i].bounds) / maxCost, 0.25f);
+	if (!tree.isLeafNode()) {
+		for (int i = 0; i < tree.nodeCount; i++) {
+			Vec2f nextStep = origin + Vec2f(-allottedWidth / 2 + allottedWidth * ((tree.nodeCount != 1)?(float(i) / (tree.nodeCount-1)):0.5f), -0.04f);
+			float colorDarkning = pow(1.0f * computeCost(tree[i].bounds) / maxCost, 0.25f);
 
-		color(treeColor * colorDarkning);
-		vertex(origin);
-		vertex(nextStep);
-		recursiveRenderTree(tree[i], treeColor, nextStep, allottedWidth / tree.nodeCount, maxCost);
+			/*color(treeColor * colorDarkning);
+			vertex(origin);
+			vertex(nextStep);*/
+
+			Path::line(origin, nextStep, 1.0f, Vec4f(treeColor * colorDarkning, 1.0f), Vec4f(treeColor * colorDarkning, 1.0f));
+		
+
+			recursiveRenderTree(tree[i], treeColor, nextStep, allottedWidth / tree.nodeCount, maxCost);
+		}
 	}
+	if (!tree.divisible) Path::circleFilled(origin, 0.006, GUI::COLOR::RED, 8);
 }
 
 void renderTreeStructure(Screen& screen, const TreeNode& tree, const Vec3f& treeColor, Vec2f origin, float allottedWidth) {
-	glUseProgram(0);
+	//glUseProgram(0);
 
 	Vec2i size = screen.dimension;
-	glPushMatrix();
-	glScalef(float(size.y) / size.x, 1.0f, 1.0f);
 
 	long long maxCost = computeCost(tree[0].bounds);
 	for (int i = 1; i < tree.nodeCount; i++) {
 		maxCost = std::max(maxCost, computeCost(tree[1].bounds));
 	}
 
+	/*glPushMatrix();
+	glScalef(float(size.y) / size.x, 1.0f, 1.0f);
+
+	
+
 	//
 	glScaled(float(GUI::screen->dimension.y) / GUI::screen->dimension.x, 1, 1);
-	glBegin(GL_LINES);
+	glBegin(GL_LINES);*/
 	recursiveRenderTree(tree, treeColor, origin, allottedWidth, maxCost);
-	glEnd();
-	glPopMatrix();
+	/*glEnd();
+	glPopMatrix();*/
+
+	GUI::batch->submit();
 }

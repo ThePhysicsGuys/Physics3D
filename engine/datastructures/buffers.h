@@ -1,6 +1,6 @@
 #pragma once
 
-inline unsigned long nextPowerOf2(unsigned long v) {
+inline unsigned long long nextPowerOf2(unsigned long long v) {
 	v--;
 	v |= v >> 1;
 	v |= v >> 2;

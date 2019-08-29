@@ -83,6 +83,7 @@ public:
 	Shape localToGlobal(CFramef frame) const;
 	Shape globalToLocal(CFramef frame) const;
 	Shape scaled(float scaleX, float scaleY, float scaleZ) const;
+	Shape scaled(double scaleX, double scaleY, double scaleZ) const;
 
 	bool isValid() const;
 	bool containsPoint(Vec3f point) const;

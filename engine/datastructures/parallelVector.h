@@ -61,7 +61,7 @@ inline void fixFinalBlock(ParallelVec3* buf, size_t size, Vec3f value) {
 	size_t lastBlockIndex = size / 8;
 
 	if (remaining != 0) {
-		for (size_t i = remaining; i < 8; i++) {
+		for (int i = static_cast<int>(remaining); i < 8; i++) {
 			buf[lastBlockIndex].setVec(i, value);
 		}
 	}

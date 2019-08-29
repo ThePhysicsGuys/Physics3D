@@ -1,7 +1,5 @@
 #pragma once
 
-struct Physical;
-
 #include "math/vec.h"
 #include "math/mat3.h"
 #include "math/cframe.h"

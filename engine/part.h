@@ -1,7 +1,7 @@
 #pragma once
 
 struct Part;
-struct Physical;
+class Physical;
 #include "geometry/shape.h"
 #include "math/mat3.h"
 #include "math/position.h"

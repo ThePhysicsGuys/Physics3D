@@ -19,5 +19,5 @@ ExtendedPart::ExtendedPart(const Shape& hitbox, const VisualShape& shape, const 
 void ExtendedPart::scale(double scaleX, double scaleY, double scaleZ) {
 	Part::scale(scaleX, scaleY, scaleZ);
 
-	visualScale = DiagonalMat3f(scaleX, scaleY, scaleZ) * visualScale;
+	visualScale = DiagonalMat3f(float(scaleX), float(scaleY), float(scaleZ)) * visualScale;
 }

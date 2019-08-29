@@ -25,11 +25,11 @@ Attenuation attenuation = { 0, 0, 0.5 };
 
 const int lightCount = 5;
 Light lights[lightCount] = {
-	Light(Vec3f(10, 5, -10), Vec3f(1, 0.84, 0.69), 6, attenuation),
-	Light(Vec3f(10, 5, 10), Vec3f(1, 0.84, 0.69), 6, attenuation),
-	Light(Vec3f(-10, 5, -10), Vec3f(1, 0.84, 0.69), 6, attenuation),
-	Light(Vec3f(-10, 5, 10), Vec3f(1, 0.84, 0.69), 6, attenuation),
-	Light(Vec3f(0, 10, 0), Vec3f(1, 0.90, 0.75), 10, attenuation)
+	Light(Vec3f(10, 5, -10), Vec3f(1, 0.84f, 0.69f), 6, attenuation),
+	Light(Vec3f(10, 5, 10), Vec3f(1, 0.84f, 0.69f), 6, attenuation),
+	Light(Vec3f(-10, 5, -10), Vec3f(1, 0.84f, 0.69f), 6, attenuation),
+	Light(Vec3f(-10, 5, 10), Vec3f(1, 0.84f, 0.69f), 6, attenuation),
+	Light(Vec3f(0, 10, 0), Vec3f(1, 0.90f, 0.75f), 10, attenuation)
 };
 
 ModelLayer::ModelLayer() : Layer() {
@@ -77,7 +77,7 @@ void ModelLayer::render() {
 
 		// Picker code
 		if (&part == screen->intersectedPart)
-			material.ambient = part.material.ambient + Vec4f(-0.1, -0.1, -0.1, 0);
+			material.ambient = part.material.ambient + Vec4f(-0.1f, -0.1f, -0.1f, 0);
 		else
 			material.ambient = part.material.ambient;
 
@@ -114,9 +114,9 @@ void ModelLayer::render() {
 		Material material = part->material;
 
 		if (part == screen->selectedPart)
-			material.ambient = part->material.ambient + Vec4f(0.1, 0.1, 0.1, -0.2);
+			material.ambient = part->material.ambient + Vec4f(0.1f, 0.1f, 0.1f, -0.2f);
 		else if (part == screen->intersectedPart)
-			material.ambient = part->material.ambient + Vec4f(-0.1, -0.1, -0.1, 0);
+			material.ambient = part->material.ambient + Vec4f(-0.1f, -0.1f, -0.1f, 0);
 		else
 			material.ambient = part->material.ambient;
 

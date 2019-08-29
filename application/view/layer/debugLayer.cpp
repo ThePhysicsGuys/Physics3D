@@ -65,7 +65,7 @@ void recursiveRenderColTree(const TreeNode& node, int depth) {
 	}
 
 	Vec4f color = colors[depth % 6];
-	color.w = 0.3;
+	color.w = 0.3f;
 
 	renderBounds(node.bounds.expanded((5 - depth) * 0.002), color);
 }
@@ -84,7 +84,7 @@ bool recursiveColTreeForOneObject(const TreeNode& node, const Physical* physical
 		for (const TreeNode& subNode : node) {
 			if (recursiveColTreeForOneObject(subNode, physical, bounds)) {
 				Vec4f green = GUI::COLOR::GREEN;
-				green.w = 0.3;
+				green.w = 0.3f;
 
 				renderBounds(node.bounds, green);
 				return true;

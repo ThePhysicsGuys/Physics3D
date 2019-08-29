@@ -69,14 +69,14 @@ struct EnvironmentFrame : public FrameBlueprint, public Frame {
 		gammaLabel = new Label("Gamma", 0, 0);
 		gammaSlider = new Slider(0, 0, 0, 3, 1);
 		gammaSlider->action = [] (Slider* s) {
-			Shaders::basicShader.updateGamma(s->value);
+			Shaders::basicShader.updateGamma(float(s->value));
 		};
 		gammaValueLabel = new Label("", 0, 0);
 
 		exposureLabel = new Label("Exposure", 0, 0);
 		exposureSlider = new Slider(0, 0, 0, 2, 1);
 		exposureSlider->action = [] (Slider* s) {
-			Shaders::basicShader.updateExposure(s->value);
+			Shaders::basicShader.updateExposure(float(s->value));
 		};
 		exposureValueLabel = new Label("", 0, 0);
 
@@ -362,7 +362,7 @@ struct PropertiesFrame : public FrameBlueprint, public Frame {
 		reflectanceSlider = new Slider(0, 0, 0, 5, 1);
 		reflectanceSlider->action = [] (Slider* slider) {
 			if (GUI::screen->selectedPart) {
-				GUI::screen->selectedPart->material.reflectance = slider->value;
+				GUI::screen->selectedPart->material.reflectance = static_cast<float>(slider->value);
 			}
 		};
 	}

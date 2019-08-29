@@ -70,7 +70,7 @@ CFramef Shape::getInertialEigenVectors() const {
 
 Shape Shape::translated(Vec3f offset) const {
 	ParallelVec3* newBuf = createParallelVecBuf(this->vertexCount);
-	for (unsigned int i = 0; i < this->vertexCount; i++) {
+	for (int i = 0; i < this->vertexCount; i++) {
 		newBuf[i >> 3].setVec(i & 0x7, offset + (*this)[i]);
 	}
 
@@ -116,6 +116,9 @@ Shape Shape::scaled(float scaleX, float scaleY, float scaleZ) const {
 
 	fixFinalBlock(newBuf, this->vertexCount, newBuf[this->vertexCount >> 3][this->vertexCount & 0x7]);
 	return Shape(newBuf, triangles, vertexCount, triangleCount);
+}
+Shape Shape::scaled(double scaleX, double scaleY, double scaleZ) const {
+	return scaled(static_cast<float>(scaleX), static_cast<float>(scaleY), static_cast<float>(scaleZ));
 }
 
 BoundingBox Shape::getBounds() const {
@@ -572,7 +575,7 @@ float Shape::getIntersectionDistance(Vec3f origin, Vec3f direction) const {
 
 		if (a > -EPSILON && a < EPSILON) continue;   
 		
-		f = 1.0 / a;
+		f = 1.0f / a;
 		s = origin - v0;
 		u = f * (s * h);
 
