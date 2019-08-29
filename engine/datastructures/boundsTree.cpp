@@ -48,49 +48,52 @@ TreeNode::~TreeNode() {
 }
 
 void addToSubTrees(TreeNode& node, TreeNode&& newNode) {
-	long long bestCost = computeCombinationCost(newNode.bounds, node.subTrees[0].bounds);
-	int bestIndex = 0;
-	for (int i = 1; i < node.nodeCount; i++) {
-		long long newCost = computeCombinationCost(newNode.bounds, node.subTrees[i].bounds);
-		if (newCost < bestCost) {
-			bestCost = newCost;
-			bestIndex = i;
-		}
-	}
-	if (node.divisible) {
-		node.subTrees[bestIndex].add(std::move(newNode));
+	if (node.nodeCount != MAX_BRANCHES) {
+		new(&node.subTrees[node.nodeCount++]) TreeNode(std::move(newNode));
 	} else {
-		// push the whole group down, make a new node containing it and the new node
-		TreeNode* newNodes = new TreeNode[MAX_BRANCHES];
-		new(newNodes) TreeNode(std::move(node));
-		new(newNodes + 1) TreeNode(std::move(newNode));
-
-		new(&node) TreeNode(newNodes, 2);
+		long long bestCost = computeCombinationCost(newNode.bounds, node.subTrees[0].bounds);
+		int bestIndex = 0;
+		for (int i = 1; i < node.nodeCount; i++) {
+			long long newCost = computeCombinationCost(newNode.bounds, node.subTrees[i].bounds);
+			if (newCost < bestCost) {
+				bestCost = newCost;
+				bestIndex = i;
+			}
+		}
+		node.subTrees[bestIndex].addOutside(std::move(newNode));
 	}
 }
 
-void TreeNode::add(TreeNode&& newNode) {
-	// if top node is a group, then it adds the new node to the group
+// If this node is undivisible, then the new node will be added to be outside of this node
+void TreeNode::addOutside(TreeNode&& newNode) {
+	if (this->divisible) {
+		this->addInside(std::move(newNode));
+	} else {
+		// push the whole group down, make a new node containing it and the new node
+		TreeNode* newNodes = new TreeNode[MAX_BRANCHES];
+		new(newNodes) TreeNode(std::move(*this));
+		new(newNodes + 1) TreeNode(std::move(newNode));
+		new(this) TreeNode(newNodes, 2);
+	}
+	this->bounds = unionOfBounds(this->bounds, newNode.bounds);
+}
+
+// if top node is undivisible, then the new node will be inside of the group
+void TreeNode::addInside(TreeNode&& newNode) {
 	if (isLeafNode()) {
 		TreeNode* newNodes = new TreeNode[MAX_BRANCHES];
 
-		newNodes[0].bounds = this->bounds;
-		newNodes[0].nodeCount = this->nodeCount;
-		newNodes[0].object = this->object;
-		newNodes[0].divisible = true;
-
+		new(newNodes) TreeNode(std::move(*this));
 		new(newNodes + 1) TreeNode(std::move(newNode));
 
 		// only the top node of a group is undivisible, restructuring within a group is still allowed
 
-		this->nodeCount = 2;
-		this->subTrees = newNodes;
+		new(this) TreeNode(newNodes, 2);
+		this->divisible = newNodes[0].divisible;
+		newNodes[0].divisible = true;
+		newNodes[1].divisible = true;
 	} else {
-		if (nodeCount != MAX_BRANCHES) {
-			new(&subTrees[nodeCount++]) TreeNode(std::move(newNode));
-		} else {
-			addToSubTrees(*this, std::move(newNode));
-		}
+		addToSubTrees(*this, std::move(newNode));
 	}
 	this->bounds = unionOfBounds(this->bounds, newNode.bounds);
 }
@@ -119,7 +122,7 @@ void TreeNode::recalculateBoundsRecursive() {
 }
 
 void transferObject(TreeNode& from, TreeNode& to, size_t index){
-	to.add(std::move(from.subTrees[index]));
+	to.addOutside(std::move(from.subTrees[index]));
 	new(&from.subTrees[index]) TreeNode(std::move(from.subTrees[--from.nodeCount]));
 }
 

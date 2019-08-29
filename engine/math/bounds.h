@@ -44,3 +44,9 @@ inline bool intersects(const Bounds& first, const Bounds& second) {
 inline Bounds unionOfBounds(const Bounds& first, const Bounds& second) {
 	return Bounds(min(first.min, second.min), max(first.max, second.max));
 }
+inline bool operator==(const Bounds& first, const Bounds& second) {
+	return first.min == second.min && first.max == second.max;
+}
+inline bool operator!=(const Bounds& first, const Bounds& second) {
+	return first.min != second.min || first.max != second.max;
+}

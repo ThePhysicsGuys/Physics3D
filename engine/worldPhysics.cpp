@@ -172,7 +172,7 @@ void findColissions(WorldPrototype& world, std::vector<Colission>& colissions) {
 
 void recursiveFindColissionsInternal(WorldPrototype& world, std::vector<Colission>& colissions, TreeNode& trunkNode) {
 	// within the same node
-	if (trunkNode.isLeafNode())
+	if (trunkNode.isLeafNode() || !trunkNode.divisible)
 		return;
 
 	for (int i = 0; i < trunkNode.nodeCount; i++) {

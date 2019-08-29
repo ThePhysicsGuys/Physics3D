@@ -28,14 +28,15 @@ struct TreeNode {
 	New elements will not be added to this group unless specifically specified
 	If false, then no subnodes are allowed to be exchanged with the rest of the tree. This node must be viewed as a black box. 
 	*/
-	bool divisible;
+	bool divisible = true;
 
 	inline bool isLeafNode() const { return nodeCount == LEAF_NODE_SIGNIFIER; }
 
-	inline TreeNode() : nodeCount(LEAF_NODE_SIGNIFIER), object(nullptr) {};
+	inline TreeNode() : nodeCount(LEAF_NODE_SIGNIFIER), object(nullptr) {}
 	inline TreeNode(TreeNode* subTrees, int nodeCount);
-	inline TreeNode(void* object, const Bounds& bounds) : nodeCount(LEAF_NODE_SIGNIFIER), object(object), bounds(bounds), divisible(false) {}
-	inline TreeNode(const Bounds& bounds, TreeNode* subTrees, int nodeCount) : bounds(bounds), subTrees(subTrees), nodeCount(nodeCount), divisible(true) {}
+	inline TreeNode(void* object, const Bounds& bounds) : nodeCount(LEAF_NODE_SIGNIFIER), object(object), bounds(bounds) {}
+	inline TreeNode(void* object, const Bounds& bounds, bool divisible) : nodeCount(LEAF_NODE_SIGNIFIER), object(object), bounds(bounds), divisible(divisible) {}
+	inline TreeNode(const Bounds& bounds, TreeNode* subTrees, int nodeCount) : bounds(bounds), subTrees(subTrees), nodeCount(nodeCount) {}
 
 	inline TreeNode(const TreeNode&) = delete;
 	inline void operator=(const TreeNode&) = delete;
@@ -59,7 +60,9 @@ struct TreeNode {
 
 	inline ~TreeNode();
 
-	void add(TreeNode&& newNode);
+
+	void addOutside(TreeNode&& newNode);
+	void addInside(TreeNode&& newNode);
 	inline void remove(int index) {
 		--nodeCount;
 		if (index != nodeCount)
@@ -82,6 +85,10 @@ struct TreeNode {
 };
 
 long long computeCost(const Bounds& bounds);
+
+Bounds computeBoundsOfList(const TreeNode* const* list, size_t count);
+
+Bounds computeBoundsOfList(const TreeNode* list, size_t count);
 
 struct TreeStackElement {
 	TreeNode* node;
@@ -143,6 +150,16 @@ struct TreeIterBase {
 			top->index++;
 		} while (top->index == top->node->nodeCount);
 	}
+
+	inline void updateBoundsAllTheWayToTop() {
+		TreeStackElement* newTop = top;
+		while (newTop + 1 != stack) {
+			TreeNode* n = newTop->node;
+			n->recalculateBoundsFromSubBounds();
+			newTop--;
+		}
+	}
+
 	// removes the object currently pointed to
 	inline void remove() {
 		do {
@@ -153,6 +170,7 @@ struct TreeIterBase {
 			top--;
 			top->index++;
 		}
+		updateBoundsAllTheWayToTop();
 		riseUntilAvailableWhile();
 	}
 };
@@ -328,11 +346,11 @@ struct BoundsTree {
 	}
 
 	void add(Boundable* obj, const Bounds& bounds) {
-		rootNode.add(TreeNode(obj, bounds));
+		rootNode.addOutside(TreeNode(obj, bounds, false));
 	}
 
 	void addToExistingGroup(Boundable* obj, const Bounds& bounds, TreeNode& groupNode) {
-		groupNode.add(TreeNode(obj, bounds));
+		groupNode.addInside(TreeNode(obj, bounds, true));
 	}
 
 	void addToExistingGroup(Boundable* obj, const Bounds& bounds, Boundable* objInGroup, const Bounds& objInGroupBounds) {
@@ -344,6 +362,7 @@ struct BoundsTree {
 					curNode = *iter;
 				}
 				addToExistingGroup(obj, bounds, *curNode);
+				iter.updateBoundsAllTheWayToTop();
 				return;
 			}
 		}

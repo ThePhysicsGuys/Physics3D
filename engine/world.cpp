@@ -44,8 +44,8 @@ void WorldPrototype::addPartUnsafe(Part* part, bool anchored) {
 }
 void WorldPrototype::removePartUnsafe(Part* part) {
 	Physical* parent = part->parent;
+	objectTree.remove(part);
 	if (parent->detachPart(part)) {
-		objectTree.remove(part);
 		physicals.remove(parent);
 	}
 	
@@ -110,6 +110,22 @@ void WorldPrototype::detachPart(Part* part) {
 	}
 }
 
+void recursiveTreeValidCheck(const TreeNode& node) {
+	if (node.isLeafNode()) return;
+	
+	Bounds bounds = node[0].bounds;
+	for (int i = 1; i < node.nodeCount; i++) {
+		bounds = unionOfBounds(bounds, node[i].bounds);
+	}
+	if (bounds != node.bounds) {
+		throw "A node in the tree does not have valid bounds!";
+	}
+
+	for (TreeNode& n : node) {
+		recursiveTreeValidCheck(n);
+	}
+}
+
 bool WorldPrototype::isValid() const {
 	for (const Physical& phys : iterPhysicals()) {
 		for (const Part& part : phys) {
@@ -120,6 +136,8 @@ bool WorldPrototype::isValid() const {
 			}
 		}
 	}
+
+	recursiveTreeValidCheck(objectTree.rootNode);
 
 	return true;
 }
