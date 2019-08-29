@@ -82,7 +82,7 @@ public:
 		clear();
 	}
 
-	virtual void clear() {
+	void clear() {
 		vertexBuffer.clear();
 		indexBuffer.clear();
 

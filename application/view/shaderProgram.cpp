@@ -457,14 +457,13 @@ void EdgeShader::updateTexture(HDRTexture* texture) {
 
 // GuiShader
 
-void GuiShader::updateProjection(const Mat4f& orthoMatrix) {
+void GuiShader::init(const Mat4f& orthoMatrix) {
 	bind();
 	shader.setUniform("projectionMatrix", orthoMatrix);
+	shader.setUniform("textureSampler", 0);
 }
 
-void GuiShader::updateTexture(Texture* texture) {
+void GuiShader::setTextured(bool textured) {
 	bind();
-	texture->bind();
-	shader.setUniform("textured", true);
-	shader.setUniform("textureSampler", texture->unit);
+	shader.setUniform("textured", textured);
 }

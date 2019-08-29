@@ -161,8 +161,8 @@ struct GuiShader : public ShaderProgram {
 	GuiShader() : ShaderProgram() {}
 	GuiShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, "projectionMatrix", "textureSampler", "textured") {}
 
-	void updateProjection(const Mat4f& orthoMatrix);
-	void updateTexture(Texture* texture);
+	void init(const Mat4f& orthoMatrix);
+	void setTextured(bool textured);
 };
 
 namespace Shaders {

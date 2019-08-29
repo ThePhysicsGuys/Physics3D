@@ -3,9 +3,18 @@
 #include "../engine/math/vec.h"
 #include "../gui/gui.h"
 
+class Font;
+
 namespace Path {
-	
-	// Primitives
+
+	//! Batch
+
+	extern CommandBatch<GUI::Vertex>* batch;
+
+	// Binds the given batch
+	void bind(CommandBatch<GUI::Vertex>* batch);
+
+	//! Primitives
 
 	// Adds a line to the batch
 	void line(const Vec2f& a, const Vec2f& b, float thickness = 1.0f, const Vec4f& colorA = GUI::COLOR::WHITE, const Vec4f& colorB = GUI::COLOR::WHITE);
@@ -34,11 +43,23 @@ namespace Path {
 	// Adds a filled rectangle to the batch
 	void rectFilled(const Vec2f& pos, const Vec2f& dim, float rounding = 0.0f, const Vec4f& color = GUI::COLOR::WHITE);
 
+	//? Adds a rect with UV coordinates and a texture id to the batch, uvMin starts default at lower left, uvMax at upper right
+	void rectUV(unsigned int id, const Vec2f& pos, const Vec2f& dim, const Vec2f& uvMin = Vec2f(0, 0), const Vec2f& uvMax = Vec2f(1, 1), const Vec4f& color = Vec4f(1.0f));
+
+	//  Adds a rect with an UV range and a texture id to the batch
+	void rectUVRange(unsigned int id, const Vec2f& pos, const Vec2f& dim, const Vec2f& xRange, const Vec2f& yRange, const Vec4f& color = Vec4f(1.0f));
+
 	// Adds a quad to the batch
 	void quad(const Vec2f& a, const Vec2f& b, const Vec2f& c, const Vec2f& d, const Vec4f& color = GUI::COLOR::WHITE, float thickness = 1.0f);
 
 	// Adds a filled quad to the batch
 	void quadFilled(const Vec2f& a, const Vec2f& b, const Vec2f& c, const Vec2f& d, const Vec4f& color = GUI::COLOR::WHITE);
+
+	//? Adds a quad with UV coordinates and a texture id to the batch, default starting at the upper left corner and going clockwise
+	void quadUV(unsigned int id, const Vec2f& a, const Vec2f& b, const Vec2f& c, const Vec2f& d, const Vec2f& uvA = Vec2f(0, 0), const Vec2f& uvB = Vec2f(0, 1), const Vec2f& uvC = Vec2f(1, 1), const Vec2f& uvD = Vec2f(0, 1));
+
+	// Adds a string to the batch with the given font
+	void text(Font* font, const std::string& text, const Vec2f& pos, const Vec4f& color, double size);
 
 	// Adds a bezier curve to the batch, with the given control points
 	void bezier(const Vec2f& a, const Vec2f& b, const Vec2f& c, const Vec2f& d, float thickness = 1.0f, const Vec4f& color = GUI::COLOR::WHITE, int precision = 20);
@@ -53,7 +74,7 @@ namespace Path {
 	void catmullRom(Vec2f* points, size_t size, int precision =  20, float thickness = 1.0f, const Vec4f& color = GUI::COLOR::WHITE, bool closed = false, float tension = 0.0f, float alpha = 0.5f);
 	
 
-	// Polygon building
+	//! Polygon building
 
 	// Adds a vertex to the current path
 	void lineTo(const Vec2f& vertex);
