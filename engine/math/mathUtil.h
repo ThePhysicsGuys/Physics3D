@@ -72,14 +72,18 @@ inline std::string str(const LargeVector<T>& vector) {
 	return ss.str();
 }
 
-template<typename N>
-inline std::ostream& operator<<(std::ostream& os, const Vec4Template<N>& vector) {
-	os << "(" << vector.x << ", " << vector.y << ", " << vector.z << ", " << vector.w << ")";
+template<typename T, size_t Size>
+inline std::ostream& operator<<(std::ostream& os, const Vector<T, Size>& vector) {
+	os << '(';
+	for (size_t i = 0; i < Size - 1; i++) {
+		os << vector[i] << ", ";
+	}
+	os << vector[Size - 1] << ")";
 	return os;
 }
 
-template<typename N>
-inline std::string str(const Vec4Template<N>& vector) {
+template<typename T, size_t Size>
+inline std::string str(const Vector<T, Size>& vector) {
 	std::stringstream ss;
 	ss << vector;
 	return ss.str();
@@ -102,19 +106,6 @@ template<template<typename> typename Mat, typename N, typename std::enable_if<st
 inline std::string str(const Mat<N>& matrix) {
 	std::stringstream ss;
 	ss << matrix;
-	return ss.str();
-}
-
-template<typename N>
-inline std::ostream& operator<<(std::ostream& os, const Vec3Template<N>& vector) {
-	os << "(" << vector.x << ", " << vector.y << ", " << vector.z << ")";
-	return os;
-}
-
-template<typename N>
-inline std::string str(const Vec3Template<N>& vector) {
-	std::stringstream ss;
-	ss << vector;
 	return ss.str();
 }
 
@@ -143,19 +134,6 @@ template<typename N>
 inline std::string str(const Mat2Template<N>& matrix) {
 	std::stringstream ss;
 	ss << matrix;
-	return ss.str();
-}
-
-template<typename N>
-inline std::ostream& operator<<(std::ostream& os, const Vec2Template<N>& vector) {
-	os << "(" << vector.x << ", " << vector.y << ")";
-	return os;
-}
-
-template<typename N>
-inline std::string str(const Vec2Template<N>& vector) {
-	std::stringstream ss;
-	ss << vector;
 	return ss.str();
 }
 

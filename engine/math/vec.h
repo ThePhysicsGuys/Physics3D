@@ -2,8 +2,123 @@
 
 #include <cmath>
 
-template<template<typename, size_t> typename VectorBasis, typename T, typename T2, size_t Size>
-auto operator*(const VectorBasis<T, Size>& a, const VectorBasis<T2, Size>& b) -> decltype(a[0]*b[0]+a[1]*b[1]) {
+
+template<typename T, size_t Size>
+struct Vector {
+	T data[Size];
+
+	Vector() {
+		for (size_t i = 0; i < Size; i++) {
+			this->data[i] = 0;
+		}
+	}
+	template<typename OtherT>
+	Vector(const Vector<OtherT, Size>& other) {
+		for (size_t i = 0; i < Size; i++) {
+			this->data[i] = static_cast<T>(other.data[i]);
+		}
+	}
+	explicit Vector(T v) {
+		for (size_t i = 0; i < Size; i++) {
+			this->data[i] = v;
+		}
+	};
+	Vector(const Vector<T, Size - 1>& other, T finalVal) {
+		for (size_t i = 0; i < Size - 1; i++) {
+			this->data[i] = other.data[i];
+		}
+		this->data[Size - 1] = finalVal;
+	}
+	Vector(const Vector<T, Size + 1> & other) {
+		for (size_t i = 0; i < Size; i++) {
+			this->data[i] = other.data[i];
+		}
+	}
+
+	T& operator[](size_t index) { return data[index]; }
+	const T& operator[](size_t index) const { return data[index]; }
+};
+
+template<typename T>
+struct Vector<T, 2> {
+	union {
+		struct { T x; T y; };
+		T data[2];
+	};
+	Vector() : x(0), y(0) {}
+	Vector(T x, T y) : x(x), y(y) {}
+	explicit Vector(T v) : x(v), y(v) {}
+	template<typename OtherT>
+	Vector(const Vector<OtherT, 2>& other) : x(static_cast<T>(other.x)), y(static_cast<T>(other.y)) {}
+	explicit Vector(const Vector<T, 3> & other) : x(other.x), y(other.y) {}
+	
+	T& operator[](size_t index) { return data[index]; }
+	const T& operator[](size_t index) const { return data[index]; }
+};
+
+template<typename T>
+struct Vector<T, 3> {
+	union {
+		struct { T x; T y; T z; };
+		T data[3];
+	};
+	Vector() : x(0), y(0), z(0) {}
+	Vector(T x, T y, T z) : x(x), y(y), z(z) {};
+	explicit Vector(T v) : x(v), y(v), z(v) {}
+	template<typename OtherT>
+	Vector(const Vector<OtherT, 3>& other) : x(static_cast<T>(other.x)), y(static_cast<T>(other.y)), z(static_cast<T>(other.z)) {}
+	Vector(const Vector<T, 2>& other, T z) : x(other.x), y(other.y), z(z) {}
+	explicit Vector(const Vector<T, 4> & other) : x(other.x), y(other.y), z(other.z) {}
+
+	T& operator[](size_t index) { return data[index]; }
+	const T& operator[](size_t index) const { return data[index]; }
+
+	Vector<T, 3> rotateAround(const Vector<T, 3> other, T angle) const {
+		T s = sin(angle);
+		T c = cos(angle);
+
+		return *this * c + (other % *this) * s + other * (other * *this) * (1 - c);
+	}
+};
+
+template<typename T>
+struct Vector<T, 4> {
+	union {
+		struct { T x; T y; T z; T w; };
+		T data[4];
+	};
+	Vector() : x(0), y(0), z(0), w(0) {}
+	Vector(T x, T y, T z, T w) : x(x), y(y), z(z), w(w) {};
+	explicit Vector(T v) : x(v), y(v), z(v), w(v) {}
+	template<typename OtherT>
+	Vector(const Vector<OtherT, 4>& other) : x(static_cast<T>(other.x)), y(static_cast<T>(other.y)), z(static_cast<T>(other.z)), w(static_cast<T>(other.w)) {}
+	Vector(const Vector<T, 3>& other, T w) : x(other.x), y(other.y), z(other.z), w(w) {}
+	explicit Vector(const Vector<T, 5> & other) : x(other[0]), y(other[1]), z(other[2]), w(other[3]) {}
+
+	T& operator[](size_t index) { return data[index]; }
+	const T& operator[](size_t index) const { return data[index]; }
+};
+
+typedef Vector<double, 2>		Vec2;
+typedef Vector<float, 2>		Vec2f;
+typedef Vector<long long, 2>	Vec2l;
+typedef Vector<int, 2>			Vec2i;
+
+typedef Vector<double, 3>		Vec3;
+typedef Vector<float, 3>		Vec3f;
+typedef Vector<long long, 3>	Vec3l;
+typedef Vector<int, 3>			Vec3i;
+
+typedef Vector<double, 4>		Vec4;
+typedef Vector<float, 4>		Vec4f;
+typedef Vector<long long, 4>	Vec4l;
+typedef Vector<int, 4>			Vec4i;
+
+
+
+
+template<typename T, typename T2, size_t Size>
+auto operator*(const Vector<T, Size>& a, const Vector<T2, Size>& b) -> decltype(a[0]*b[0]+a[1]*b[1]) {
 	decltype(a[0] * b[0] + a[1] * b[1]) result = a[0] * b[0];
 	for (size_t i = 1; i < Size; i++) {
 		result += a[i] * b[i];
@@ -11,105 +126,105 @@ auto operator*(const VectorBasis<T, Size>& a, const VectorBasis<T2, Size>& b) ->
 	return result;
 }
 
-template<template<typename, size_t> typename VectorBasis, typename T, typename T2, size_t Size>
-auto operator+(const VectorBasis<T, Size>& a, const VectorBasis<T2, Size>& b) -> VectorBasis<decltype(a[0] + b[0]), Size> {
-	VectorBasis<decltype(a[0] + b[0]), Size> result;
+template<typename T, typename T2, size_t Size>
+auto operator+(const Vector<T, Size>& a, const Vector<T2, Size>& b) -> Vector<decltype(a[0] + b[0]), Size> {
+	Vector<decltype(a[0] + b[0]), Size> result;
 	for (size_t i = 0; i < Size; i++) {
 		result[i] = a[i] + b[i];
 	}
 	return result;
 }
 
-template<template<typename, size_t> typename VectorBasis, typename T, typename T2, size_t Size>
-auto operator-(const VectorBasis<T, Size>& a, const VectorBasis<T2, Size>& b) -> VectorBasis<decltype(a[0] - b[0]), Size> {
-	VectorBasis<decltype(a[0] - b[0]), Size> result;
+template<typename T, typename T2, size_t Size>
+auto operator-(const Vector<T, Size>& a, const Vector<T2, Size>& b) -> Vector<decltype(a[0] - b[0]), Size> {
+	Vector<decltype(a[0] - b[0]), Size> result;
 	for (size_t i = 0; i < Size; i++) {
 		result[i] = a[i] - b[i];
 	}
 	return result;
 }
 
-template<template<typename, size_t> typename VectorBasis, typename T, typename T2, size_t Size>
-auto operator*(const VectorBasis<T, Size>& vec, const T2& factor) -> VectorBasis<decltype(vec[0] * factor), Size> {
-	VectorBasis<decltype(vec[0] * factor), Size> result;
+template<typename T, typename T2, size_t Size>
+auto operator*(const Vector<T, Size>& vec, const T2& factor) -> Vector<decltype(vec[0] * factor), Size> {
+	Vector<decltype(vec[0] * factor), Size> result;
 	for (size_t i = 0; i < Size; i++) {
 		result[i] = vec[i] * factor;
 	}
 	return result;
 }
 
-template<template<typename, size_t> typename VectorBasis, typename T, size_t Size>
-auto operator*(const T& factor, const VectorBasis<T, Size>& vec) -> VectorBasis<decltype(factor * vec[0]), Size> {
-	VectorBasis<decltype(factor * vec[0]), Size> result;
+template<typename T, size_t Size>
+auto operator*(const T& factor, const Vector<T, Size>& vec) -> Vector<decltype(factor * vec[0]), Size> {
+	Vector<decltype(factor * vec[0]), Size> result;
 	for (size_t i = 0; i < Size; i++) {
 		result[i] = factor * vec[i];
 	}
 	return result;
 }
 
-template<template<typename, size_t> typename VectorBasis, typename T, typename T2, size_t Size>
-auto operator/(const VectorBasis<T, Size>& vec, const T2& factor) -> VectorBasis<decltype(vec[0] / factor), Size> {
-	VectorBasis<decltype(vec[0] / factor), Size> result;
+template<typename T, typename T2, size_t Size>
+auto operator/(const Vector<T, Size>& vec, const T2& factor) -> Vector<decltype(vec[0] / factor), Size> {
+	Vector<decltype(vec[0] / factor), Size> result;
 	for (size_t i = 0; i < Size; i++) {
 		result[i] = vec[i] / factor;
 	}
 	return result;
 }
 
-template<template<typename, size_t> typename VectorBasis, typename T, size_t Size>
-VectorBasis<T, Size> operator-(const VectorBasis<T, Size>& vec) {
-	VectorBasis<T, Size> result;
+template<typename T, size_t Size>
+Vector<T, Size> operator-(const Vector<T, Size>& vec) {
+	Vector<T, Size> result;
 	for (size_t i = 0; i < Size; i++) {
 		result[i] = -vec[i];
 	}
 	return result;
 }
 
-template<template<typename, size_t> typename VectorBasis, typename T, typename T2, size_t Size>
-VectorBasis<T, Size>& operator+=(VectorBasis<T, Size>& vec, const VectorBasis<T2, Size>& other) {
+template<typename T, typename T2, size_t Size>
+Vector<T, Size>& operator+=(Vector<T, Size>& vec, const Vector<T2, Size>& other) {
 	for (size_t i = 0; i < Size; i++) {
 		vec[i] += other[i];
 	}
 	return vec;
 }
-template<template<typename, size_t> typename VectorBasis, typename T, typename T2, size_t Size>
-VectorBasis<T, Size>& operator-=(VectorBasis<T, Size>& vec, const VectorBasis<T2, Size>& other) {
+template<typename T, typename T2, size_t Size>
+Vector<T, Size>& operator-=(Vector<T, Size>& vec, const Vector<T2, Size>& other) {
 	for (size_t i = 0; i < Size; i++) {
 		vec[i] -= other[i];
 	}
 	return vec;
 }
-template<template<typename, size_t> typename VectorBasis, typename T, typename T2, size_t Size>
-VectorBasis<T, Size>& operator*=(VectorBasis<T, Size>& vec, const T2& factor) {
+template<typename T, typename T2, size_t Size>
+Vector<T, Size>& operator*=(Vector<T, Size>& vec, const T2& factor) {
 	for (size_t i = 0; i < Size; i++) {
 		vec[i] *= factor;
 	}
 	return vec;
 }
-template<template<typename, size_t> typename VectorBasis, typename T, typename T2, size_t Size>
-VectorBasis<T, Size>& operator/=(VectorBasis<T, Size>& vec, const T2& factor) {
+template<typename T, typename T2, size_t Size>
+Vector<T, Size>& operator/=(Vector<T, Size>& vec, const T2& factor) {
 	for (size_t i = 0; i < Size; i++) {
 		vec[i] /= factor;
 	}
 	return vec;
 }
 
-template<template<typename, size_t> typename VectorBasis, typename T, typename T2>
-auto operator%(const VectorBasis<T, 2>& first, const VectorBasis<T2, 2>& second) -> decltype(first[0] * second[1] - first[1] * second[0]) {
+template<typename T, typename T2>
+auto operator%(const Vector<T, 2>& first, const Vector<T2, 2>& second) -> decltype(first[0] * second[1] - first[1] * second[0]) {
 	return first[0] * second[1] - first[1] * second[0];
 }
 
-template<template<typename, size_t> typename VectorBasis, typename T, typename T2>
-auto operator%(const VectorBasis<T, 3>& first, const VectorBasis<T2, 3>& second) -> VectorBasis<decltype(first[1] * second[2] - first[2] * second[1]), 3> {
-	return VectorBasis<decltype(first[1] * second[2] - first[2] * second[1]), 3>{
+template<typename T, typename T2>
+auto operator%(const Vector<T, 3>& first, const Vector<T2, 3>& second) -> Vector<decltype(first[1] * second[2] - first[2] * second[1]), 3> {
+	return Vector<decltype(first[1] * second[2] - first[2] * second[1]), 3>{
 		first[1] * second[2] - first[2] * second[1],
 			first[2] * second[0] - first[0] * second[2],
 			first[0] * second[1] - first[1] * second[0]
 	};
 }
 
-template<template<typename, size_t> typename VectorBasis, typename T, size_t Size>
-T lengthSquared(const VectorBasis<T, Size>& vec) {
+template<typename T, size_t Size>
+T lengthSquared(const Vector<T, Size>& vec) {
 	T sum = vec[0] * vec[0];
 
 	for (size_t i = 1; i < Size; i++) {
@@ -118,59 +233,59 @@ T lengthSquared(const VectorBasis<T, Size>& vec) {
 	return sum;
 }
 
-template<template<typename, size_t> typename VectorBasis, typename T, size_t Size>
-auto length(const VectorBasis<T, Size>& vec) {
+template<typename T, size_t Size>
+auto length(const Vector<T, Size>& vec) {
 	return sqrt(lengthSquared(vec));
 }
 
-template<template<typename, size_t> typename VectorBasis, typename T>
-T length(const VectorBasis<T, 2>& vec) {
+template<typename T>
+T length(const Vector<T, 2>& vec) {
 	return hypot(vec[0], vec[1]);
 }
 
-/*template<template<typename, size_t> typename VectorBasis, typename T>
-T length(const VectorBasis<T, 3>& vec) {
+/*template<typename T>
+T length(const Vector<T, 3>& vec) {
 	return hypot(vec[0], vec[1], vec[2]);
 }*/
 
-template<template<typename, size_t> typename VectorBasis, typename T, size_t Size>
-VectorBasis<T, Size> normalize(const VectorBasis<T, Size>& vec) {
+template<typename T, size_t Size>
+Vector<T, Size> normalize(const Vector<T, Size>& vec) {
 	return vec / length(vec);
 }
 
-template<template<typename, size_t> typename VectorBasis, typename T, size_t Size>
-VectorBasis<T, Size> abs(const VectorBasis<T, Size>& vec) {
-	VectorBasis<T, Size> result;
+template<typename T, size_t Size>
+Vector<T, Size> abs(const Vector<T, Size>& vec) {
+	Vector<T, Size> result;
 	for (size_t i = 0; i < Size; i++)
 		result[i] = fabs(vec[i]);
 	return result;
 }
 
-template<template<typename, size_t> typename VectorBasis, typename T, size_t Size>
-bool isLongerThan(const VectorBasis<T, Size>& vec, const T& length) {
+template<typename T, size_t Size>
+bool isLongerThan(const Vector<T, Size>& vec, const T& length) {
 	return lengthSquared(vec) > length * length;
 }
 
-template<template<typename, size_t> typename VectorBasis, typename T, size_t Size>
-bool isShorterThan(const VectorBasis<T, Size>& vec, const T& length) {
+template<typename T, size_t Size>
+bool isShorterThan(const Vector<T, Size>& vec, const T& length) {
 	return lengthSquared(vec) < length* length;
 }
 
-template<template<typename, size_t> typename VectorBasis, typename T, size_t Size>
-VectorBasis<T, Size> withLength(const VectorBasis<T, Size>& vec, const T& newLength) {
+template<typename T, size_t Size>
+Vector<T, Size> withLength(const Vector<T, Size>& vec, const T& newLength) {
 	return vec * (newLength / length(vec));
 }
 
-template<template<typename, size_t> typename VectorBasis, typename T, size_t Size>
-VectorBasis<T, Size> maxLength(const VectorBasis<T, Size>& vec, const T& maxLength) {
+template<typename T, size_t Size>
+Vector<T, Size> maxLength(const Vector<T, Size>& vec, const T& maxLength) {
 	if (isLongerThan(vec, maxLength))
 		return withLength(vec, maxLength);
 	else
 		return vec;
 }
 
-template<template<typename, size_t> typename VectorBasis, typename T, size_t Size>
-VectorBasis<T, Size> minLength(const VectorBasis<T, Size>& vec, const T& minLength) {
+template<typename T, size_t Size>
+Vector<T, Size> minLength(const Vector<T, Size>& vec, const T& minLength) {
 	if (isShorterThan(vec, minLength))
 		return withLength(vec, minLength);
 	else
@@ -182,8 +297,8 @@ VectorBasis<T, Size> minLength(const VectorBasis<T, Size>& vec, const T& minLeng
 * @param v the result of dot(onto, otherVec)
 * @return vec * (v/lengthSquared(vec))
 */
-template<template<typename, size_t> typename VectorBasis, typename T, size_t Size>
-VectorBasis<T, Size> reProject(const VectorBasis<T, Size>& onto, const T& v) {
+template<typename T, size_t Size>
+Vector<T, Size> reProject(const Vector<T, Size>& onto, const T& v) {
 	return onto * v / lengthSquared(onto);
 }
 
@@ -193,13 +308,13 @@ VectorBasis<T, Size> reProject(const VectorBasis<T, Size>& onto, const T& v) {
 * @param onto vector to be projected on
 * @return a projected version of the given vector
 */
-template<template<typename, size_t> typename VectorBasis, typename T, size_t Size>
-VectorBasis<T, Size> project(const VectorBasis<T, Size>& vec, const VectorBasis<T, Size>& onto) {
+template<typename T, size_t Size>
+Vector<T, Size> project(const Vector<T, Size>& vec, const Vector<T, Size>& onto) {
 	return onto * ((onto * vec) / lengthSquared(onto));
 }
 
-template<template<typename, size_t> typename VectorBasis, typename T, size_t Size>
-auto angleBetween(const VectorBasis<T, Size>& first, const VectorBasis<T, Size>& second) -> decltype(acos(normalize(first)* normalize(second))) {
+template<typename T, size_t Size>
+auto angleBetween(const Vector<T, Size>& first, const Vector<T, Size>& second) -> decltype(acos(normalize(first)* normalize(second))) {
 	return acos(normalize(first) * normalize(second));
 }
 
@@ -208,8 +323,8 @@ auto angleBetween(const VectorBasis<T, Size>& first, const VectorBasis<T, Size>&
 * @param point
 * @return the distance
 */
-template<template<typename, size_t> typename VectorBasis, typename T, size_t Size>
-T pointToLineDistance(const VectorBasis<T, Size>& line, const VectorBasis<T, Size>& point) {
+template<typename T, size_t Size>
+T pointToLineDistance(const Vector<T, Size>& line, const Vector<T, Size>& point) {
 	return length(point - project(point, line));
 }
 
@@ -218,121 +333,36 @@ T pointToLineDistance(const VectorBasis<T, Size>& line, const VectorBasis<T, Siz
 * @param point
 * @return the square of the distance
 */
-template<template<typename, size_t> typename VectorBasis, typename T, size_t Size>
-T pointToLineDistanceSquared(const VectorBasis<T, Size>& line, const VectorBasis<T, Size>& point) {
+template<typename T, size_t Size>
+T pointToLineDistanceSquared(const Vector<T, Size>& line, const Vector<T, Size>& point) {
 	return lengthSquared(point - project(point, line));
 }
 
-template<template<typename, size_t> typename VectorBasis, typename T, size_t Size>
-VectorBasis<T, Size> bisect(const VectorBasis<T, Size>& first, const VectorBasis<T, Size>& second) {
+template<typename T, size_t Size>
+Vector<T, Size> bisect(const Vector<T, Size>& first, const Vector<T, Size>& second) {
 	return first * length(second) + second * length(first);
 }
 
-template<template<typename, size_t> typename VectorBasis, typename T, size_t Size>
-VectorBasis<T, Size> elementWiseMul(const VectorBasis<T, Size>& first, const VectorBasis<T, Size>& second) {
-	VectorBasis<T, Size> result;
+template<typename T, size_t Size>
+Vector<T, Size> elementWiseMul(const Vector<T, Size>& first, const Vector<T, Size>& second) {
+	Vector<T, Size> result;
 	for (size_t i = 0; i < Size; i++)
 		result[i] = first[i] * second[i];
 	return result;
 }
 
-template<template<typename, size_t> typename VectorBasis, typename T, size_t Size>
-VectorBasis<T, Size> elementWiseSquare(const VectorBasis<T, Size>& vec) {
-	VectorBasis<T, Size> result;
+template<typename T, size_t Size>
+Vector<T, Size> elementWiseSquare(const Vector<T, Size>& vec) {
+	Vector<T, Size> result;
 	for (size_t i = 0; i < Size; i++)
 		result[i] = vec[i] * vec[i];
 	return result;
 }
 
-template<template<typename, size_t> typename VectorBasis, typename T, size_t Size>
-VectorBasis<T, Size> elementWiseCube(const VectorBasis<T, Size>& vec) {
-	VectorBasis<T, Size> result;
+template<typename T, size_t Size>
+Vector<T, Size> elementWiseCube(const Vector<T, Size>& vec) {
+	Vector<T, Size> result;
 	for (size_t i = 0; i < Size; i++)
 		result[i] = vec[i] * vec[i] * vec[i];
 	return result;
 }
-
-template<typename T, size_t Size = 2>
-struct Vec2Template {
-public:
-	union {
-		struct {T x; T y;};
-		T data[2];
-	};
-
-	Vec2Template() : x(0), y(0) {}
-	explicit Vec2Template(T v) : x(v), y(v) {};
-	Vec2Template(T x, T y) : x(x), y(y) {};
-	template<template<typename, size_t> typename VectorBasis, typename OtherT>
-	Vec2Template(const VectorBasis<OtherT, 2>& other) : x(static_cast<T>(other[0])), y(static_cast<T>(other[1])) {};
-	
-	T& operator[](size_t index) {return data[index];}
-	const T& operator[](size_t index) const {return data[index];}
-};
-
-
-template<typename T, size_t Size = 3>
-struct Vec3Template {
-public:
-	union {
-		struct {T x; T y; T z;};
-		T data[3];
-	};
-
-	Vec3Template() : x(0), y(0), z(0) {}
-	explicit Vec3Template(T v) : x(v), y(v), z(v) {};
-	Vec3Template(T x, T y, T z) : x(x), y(y), z(z) {};
-	template<template<typename, size_t> typename VectorBasis, typename OtherT>
-	Vec3Template(const VectorBasis<OtherT, 3>& other) : x(static_cast<T>(other[0])), y(static_cast<T>(other[1])), z(static_cast<T>(other[2])) {};
-	template<template<typename, size_t> typename VectorBasis, typename OtherT, typename OtherT2>
-	Vec3Template(const VectorBasis<OtherT, 2>& other, const OtherT2& z) : x(static_cast<T>(other[0])), y(static_cast<T>(other[1])), z(static_cast<T>(z)) {};
-	~Vec3Template() {};
-
-	Vec3Template<T, Size> rotateAround(const Vec3Template<T, Size> other, T angle) const {
-		T s = sin(angle);
-		T c = cos(angle);
-
-		return *this* c + (other % *this) * s + other * (other * *this) * (1 - c);
-	}
-	
-	T& operator[](size_t index) {return data[index];}
-	const T& operator[](size_t index) const {return data[index];}
-};
-
-template<typename T, size_t Size = 4>
-struct Vec4Template {
-public:
-	union {
-		struct {T x; T y; T z; T w;};
-		T data[4];
-	};
-
-	Vec4Template() : x(0), y(0), z(0), w(0) {};
-	explicit Vec4Template(T v) : x(v), y(v), z(v), w(v) {};
-	Vec4Template(T x, T y, T z, T w) : x(x), y(y), z(z), w(w) {};
-	template<template<typename, size_t> typename VectorBasis, typename OtherT>
-	Vec4Template(const VectorBasis<OtherT, 4>& other) : x(static_cast<T>(other[0])), y(static_cast<T>(other[1])), z(static_cast<T>(other[2])), w(static_cast<T>(other[3])) {};
-	template<template<typename, size_t> typename VectorBasis, typename OtherT, typename OtherT2>
-	Vec4Template(const VectorBasis<OtherT, 3>& other, const OtherT2& w) : x(static_cast<T>(other[0])), y(static_cast<T>(other[1])), z(static_cast<T>(other[2])), w(static_cast<T>(w)) {};
-
-	template<typename T>
-	explicit operator Vec3Template<T>() const {return Vec3Template<T>(x, y, z);}
-
-	T& operator[](size_t index) {return data[index];}
-	const T& operator[](size_t index) const {return data[index];}
-};
-
-typedef Vec2Template<double>	Vec2;
-typedef Vec2Template<float>		Vec2f;
-typedef Vec2Template<long long>	Vec2l;
-typedef Vec2Template<int>		Vec2i;
-
-typedef Vec3Template<double>	Vec3;
-typedef Vec3Template<float>		Vec3f;
-typedef Vec3Template<long long>	Vec3l;
-typedef Vec3Template<int>		Vec3i;
-
-typedef Vec4Template<double>	Vec4;
-typedef Vec4Template<float>		Vec4f;
-typedef Vec4Template<long long>	Vec4l;
-typedef Vec4Template<int>		Vec4i;

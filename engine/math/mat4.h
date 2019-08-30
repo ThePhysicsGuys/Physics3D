@@ -141,7 +141,7 @@ struct Mat4Template {
 		return Mat4Template(m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, r30, r31, r32, r33);
 	}
 
-	Mat4Template translate(Vec3Template<N> dv) const {
+	Mat4Template translate(Vector<N, 3> dv) const {
 		return translate(dv.x, dv.y, dv.z);
 	}
 
@@ -197,21 +197,21 @@ struct Mat4Template {
 		return Mat4Template(r00, r01, r02, r03, r10, r11, r12, r13, r20, r21, r22, r23, r30, r31, r32, r33);
 	}
 
-	Vec3Template<N> operator*(const Vec3Template<N>& v) const {
+	Vector<N, 3> operator*(const Vector<N, 3>& v) const {
 		N v0 = v.x * m00 + v.y * m10 + v.z * m20 + m30;
 		N v1 = v.x * m01 + v.y * m11 + v.z * m21 + m31;
 		N v2 = v.x * m02 + v.y * m12 + v.z * m22 + m32;
 
-		return Vec3Template<N>(v0, v1, v2);
+		return Vector<N, 3>(v0, v1, v2);
 	}
 
-	Vec4Template<N> operator*(const Vec4Template<N>& v) const {
+	Vector<N, 4> operator*(const Vector<N, 4>& v) const {
 		N v0 = v.x * m00 + v.y * m10 + v.z * m20 + v.w * m30;
 		N v1 = v.x * m01 + v.y * m11 + v.z * m21 + v.w * m31;
 		N v2 = v.x * m02 + v.y * m12 + v.z * m22 + v.w * m32;
 		N v3 = v.x * m03 + v.y * m13 + v.z * m23 + v.w * m33;
 
-		return Vec4Template<N>(v0, v1, v2, v3);
+		return Vector<N, 4>(v0, v1, v2, v3);
 	}
 
 	Mat3Template<N> getRotation() const {
@@ -220,8 +220,8 @@ struct Mat4Template {
 							   m20, m21, m22);
 	}
 
-	Vec3Template<N> getTranslation() const {
-		return Vec3Template<N>(m30, m31, m32);
+	Vector<N, 3> getTranslation() const {
+		return Vector<N, 3>(m30, m31, m32);
 	}
 
 	/*template<typename N>

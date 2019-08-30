@@ -450,8 +450,8 @@ DiagonalMat3Template<N> operator*(const DiagonalMat3Template<N>& self, const Dia
 }
 
 template<template<typename> typename Mat, typename N, IS_SUBCLASS_OF(Mat<N>, M33Type)>
-Vec3Template<N> operator*(const Mat<N>& mat, const Vec3Template<N>& vec) {
-	return Vec3Template<N>(
+Vector<N, 3> operator*(const Mat<N>& mat, const Vector<N, 3>& vec) {
+	return Vector<N, 3>(
 		mat.m00 * vec.x + mat.m10 * vec.y + mat.m20 * vec.z,
 		mat.m01 * vec.x + mat.m11 * vec.y + mat.m21 * vec.z,
 		mat.m02 * vec.x + mat.m12 * vec.y + mat.m22 * vec.z
@@ -459,21 +459,21 @@ Vec3Template<N> operator*(const Mat<N>& mat, const Vec3Template<N>& vec) {
 }
 
 template<typename N>
-Mat3Template<N> outer(const Vec3Template<N>& self, const Vec3Template<N>& other) {
+Mat3Template<N> outer(const Vector<N, 3>& self, const Vector<N, 3>& other) {
 	return Mat3Template<N>(self.x*other.x, self.x*other.y, self.x*other.z,
 						   self.y*other.x, self.y*other.y, self.y*other.z,
 						   self.z*other.x, self.z*other.y, self.z*other.z);
 }
 
 template<typename N>
-SymmetricMat3Template<N> selfOuter(const Vec3Template<N>& v) {
+SymmetricMat3Template<N> selfOuter(const Vector<N, 3>& v) {
 	return SymmetricMat3Template<N>(
 		v.x * v.x, v.y* v.y, v.z* v.z,
 		v.x * v.y, v.x * v.z, v.y* v.z);
 }
 
 template<typename N>
-SymmetricMat3Template<N> skewSymmetricSquared(const Vec3Template<N>& v) {
+SymmetricMat3Template<N> skewSymmetricSquared(const Vector<N, 3>& v) {
 	N x = v.x, y = v.y, z = v.z;
 	return SymmetricMat3Template<N>(
 		y*y+z*z, x*x+z*z, x*x+y*y, 
@@ -498,7 +498,7 @@ SymmetricMat3Template<N> multiplyLeftRight(SymmetricMat3Template<N> sm, Mat3Temp
 	vec % x == createCrossProductEquivalent(vec) * x
 */
 template<typename N>
-Mat3Template<N> createCrossProductEquivalent(Vec3Template<N> vec) {
+Mat3Template<N> createCrossProductEquivalent(Vector<N, 3> vec) {
 	return Mat3Template<N>( 0, -vec.z, vec.y,
 							vec.z, 0, -vec.x,
 							-vec.y, vec.x, 0);
@@ -534,7 +534,7 @@ template<typename N>
 Mat3Template<N> fromEulerAngles(N alpha, N beta, N gamma);
 
 template<typename N> 
-Mat3Template<N> fromRotationVec(Vec3Template<N> rotVec);
+Mat3Template<N> fromRotationVec(Vector<N, 3> rotVec);
 
 template<typename N>
-Mat3Template<N> rotateAround(N angle, Vec3Template<N> normal);
+Mat3Template<N> rotateAround(N angle, Vector<N, 3> normal);

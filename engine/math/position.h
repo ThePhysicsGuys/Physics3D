@@ -3,7 +3,7 @@
 #include "fix.h"
 #include "vec.h"
 
-typedef Vec3Template<Fix<32>> Vec3Fix;
+typedef Vector<Fix<32>, 3> Vec3Fix;
 
 struct Position {
 	union {

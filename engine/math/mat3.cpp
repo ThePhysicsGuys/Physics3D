@@ -67,7 +67,7 @@ Mat3Template<N> Mat3Template<N>::rotate(N angle, N x, N y, N z) const {
 }
 
 template<typename N>
-Mat3Template<N> fromRotationVec(Vec3Template<N> rotVec) {
+Mat3Template<N> fromRotationVec(Vector<N, 3> rotVec) {
 	
 	N angle = length(rotVec);
 
@@ -94,7 +94,7 @@ Mat3Template<N> fromRotationVec(Vec3Template<N> rotVec) {
 }
 
 template<typename N>
-Mat3Template<N> rotateAround(N angle, Vec3Template<N> normal) {
+Mat3Template<N> rotateAround(N angle, Vector<N, 3> normal) {
 	// Using Rodrigues rotation formula;
 	normal = normalize(normal);
 	Mat3Template<N> W = Mat3Template<N> (
@@ -219,7 +219,7 @@ template Mat3Template<double> rotY(double);
 template Mat3Template<double> rotZ(double);
 template Mat3Template<double> fromEulerAngles(double, double, double);
 template Mat3Template<float> fromEulerAngles(float, float, float);
-template Mat3Template<double> fromRotationVec(Vec3Template<double> v);
-template Mat3Template<float> fromRotationVec(Vec3Template<float> v);
-template Mat3Template<double> rotateAround(double angle, Vec3Template<double> normal);
-template Mat3Template<float> rotateAround(float angle, Vec3Template<float> normal);
+template Mat3Template<double> fromRotationVec(Vector<double, 3> v);
+template Mat3Template<float> fromRotationVec(Vector<float, 3> v);
+template Mat3Template<double> rotateAround(double angle, Vector<double, 3> normal);
+template Mat3Template<float> rotateAround(float angle, Vector<float, 3> normal);

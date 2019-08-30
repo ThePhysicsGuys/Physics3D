@@ -7,30 +7,30 @@
 template<typename T>
 struct CFrameTemplate {
 public:
-	Vec3Template<T> position;
+	Vector<T, 3> position;
 	Mat3Template<T> rotation;
 
-	CFrameTemplate(Vec3Template<T> position, Mat3Template<T> rotation) : position(position), rotation(rotation) {}
-	explicit CFrameTemplate(Vec3Template<T> position) : position(position), rotation(1, 0, 0, 0, 1, 0, 0, 0, 1) {}
+	CFrameTemplate(Vector<T, 3> position, Mat3Template<T> rotation) : position(position), rotation(rotation) {}
+	explicit CFrameTemplate(Vector<T, 3> position) : position(position), rotation(1, 0, 0, 0, 1, 0, 0, 0, 1) {}
 	explicit CFrameTemplate(Mat3Template<T> rotation) : position(0,0,0), rotation(rotation) {}
 	CFrameTemplate() : position(0, 0, 0), rotation(1, 0, 0, 0, 1, 0, 0, 0, 1) {}
 
 	template<typename OtherT>
-	CFrameTemplate(const CFrameTemplate<OtherT>& other) : position(Vec3Template<T>(other.position)), rotation(Mat3Template<T>(other.rotation)) {}
+	CFrameTemplate(const CFrameTemplate<OtherT>& other) : position(Vector<T, 3>(other.position)), rotation(Mat3Template<T>(other.rotation)) {}
 
-	inline Vec3Template<T> localToGlobal(Vec3Template<T> lVec) const {
+	inline Vector<T, 3> localToGlobal(Vector<T, 3> lVec) const {
 		return rotation * lVec + position;
 	}
 
-	inline Vec3Template<T> globalToLocal(Vec3Template<T> gVec) const {
+	inline Vector<T, 3> globalToLocal(Vector<T, 3> gVec) const {
 		return rotation.transpose() * (gVec - position);
 	}
 
-	inline Vec3Template<T> localToRelative(Vec3Template<T> lVec) const {
+	inline Vector<T, 3> localToRelative(Vector<T, 3> lVec) const {
 		return rotation * lVec;
 	}
 
-	inline Vec3Template<T> relativeToLocal(Vec3Template<T> rVec) const {
+	inline Vector<T, 3> relativeToLocal(Vector<T, 3> rVec) const {
 		return rotation.transpose() * rVec;
 	}
 
@@ -62,7 +62,7 @@ public:
 		return CFrameTemplate<T>(rotation.transpose() * -position, rotation.transpose());
 	}
 
-	inline Vec3Template<T> getPosition() const {
+	inline Vector<T, 3> getPosition() const {
 		return position;
 	}
 
@@ -70,17 +70,17 @@ public:
 		return rotation;
 	}
 
-	inline CFrameTemplate<T>& operator+=(const Vec3Template<T>& delta) {
+	inline CFrameTemplate<T>& operator+=(const Vector<T, 3>& delta) {
 		position += delta;
 		return *this;
 	}
 
-	inline CFrameTemplate<T>& operator-=(const Vec3Template<T>& delta) {
+	inline CFrameTemplate<T>& operator-=(const Vector<T, 3>& delta) {
 		position -= delta;
 		return *this;
 	}
 
-	void translate(Vec3Template<T> translation) {
+	void translate(Vector<T, 3> translation) {
 		position += translation;
 	}
 
@@ -91,13 +91,13 @@ public:
 
 template<typename T>
 CFrameTemplate<T> Mat4ToCFrame(const Mat4Template<T>& mat) {
-	return CFrameTemplate<T>(Vec3Template<T>(mat.m30, mat.m31, mat.m32), Mat3Template<T>(mat.m00, mat.m01, mat.m02, mat.m10, mat.m11, mat.m12, mat.m20, mat.m21, mat.m22));
+	return CFrameTemplate<T>(Vector<T, 3>(mat.m30, mat.m31, mat.m32), Mat3Template<T>(mat.m00, mat.m01, mat.m02, mat.m10, mat.m11, mat.m12, mat.m20, mat.m21, mat.m22));
 };
 
 template<typename T>
 Mat4Template<T> CFrameToMat4(const CFrameTemplate<T>& cframe) {
 	const Mat3Template<T>& r = cframe.rotation;
-	const Vec3Template<T>& p = cframe.position;
+	const Vector<T, 3>& p = cframe.position;
 	return Mat4Template<T> (
 		r.m00, r.m01, r.m02, 0,
 		r.m10, r.m11, r.m12, 0,
@@ -106,11 +106,11 @@ Mat4Template<T> CFrameToMat4(const CFrameTemplate<T>& cframe) {
 	);
 }
 
-template<typename T> CFrameTemplate<T> operator+(const CFrameTemplate<T>& frame, const Vec3Template<T>& delta) {
+template<typename T> CFrameTemplate<T> operator+(const CFrameTemplate<T>& frame, const Vector<T, 3>& delta) {
 	return CFrameTemplate<T>(frame.position + delta, frame.rotation); 
 }
 
-template<typename T> CFrameTemplate<T> operator-(const CFrameTemplate<T>& frame, const Vec3Template<T>& delta) { 
+template<typename T> CFrameTemplate<T> operator-(const CFrameTemplate<T>& frame, const Vector<T, 3>& delta) { 
 	return CFrameTemplate<T>(frame.position - delta, frame.rotation); 
 }
 

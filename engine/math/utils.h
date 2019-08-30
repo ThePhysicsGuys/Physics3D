@@ -15,7 +15,7 @@
 	To get the actual intersection point: p=r0+t*r
 */
 template<typename N>
-inline N lineSurfaceIntersection(Vec3Template<N> relativePos, Vec3Template<N> r, Vec3Template<N> n) {
+inline N lineSurfaceIntersection(Vector<N, 3> relativePos, Vector<N, 3> r, Vector<N, 3> n) {
 	return (relativePos * n) / (r * n);
 }
 
@@ -44,14 +44,14 @@ s = -P * R0%u / n*P
 t =  P * R0%v / n*P
 */
 template<typename T>
-inline RayIntersection<T> rayTriangleIntersection(Vec3Template<T> point, Vec3Template<T> ray, Vec3Template<T> v0, Vec3Template<T> v1, Vec3Template<T> v2) {
-	Vec3Template<T> u = v1 - v0;
-	Vec3Template<T> v = v2 - v0;
+inline RayIntersection<T> rayTriangleIntersection(Vector<T, 3> point, Vector<T, 3> ray, Vector<T, 3> v0, Vector<T, 3> v1, Vector<T, 3> v2) {
+	Vector<T, 3> u = v1 - v0;
+	Vector<T, 3> v = v2 - v0;
 
-	Vec3Template<T> n = u%v;
-	Vec3Template<T> surfacePos = v0;
+	Vector<T, 3> n = u%v;
+	Vector<T, 3> surfacePos = v0;
 
-	Vec3Template<T> relPoint = point - v0;
+	Vector<T, 3> relPoint = point - v0;
 
 	T d = -relPoint * n / (n*ray); // lineSurfaceIntersection(relPoint, P, n);
 	T s = -ray * (relPoint%u) / (n*ray);
