@@ -49,7 +49,7 @@ void DirectionEditor::render() {
 
 		Vec2 contentPosition = position + Vec2(GUI::padding, -GUI::padding);
 		Vec2 contentDimension = dimension - Vec2(GUI::padding) * 2;
-		Path::rectUV(GUI::guiFrameBuffer->texture->id, contentPosition, contentDimension, Vec2f(0), Vec2f(1), blendColor);
+		Path::rectUV(GUI::guiFrameBuffer->texture->getID(), contentPosition, contentDimension, Vec2f(0), Vec2f(1), blendColor);
 	}
 }
 

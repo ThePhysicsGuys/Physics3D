@@ -116,7 +116,7 @@ Vec2 Font::size(const std::string& text, double size) {
 }
 
 unsigned int Font::getAtlasID() const {
-	return atlas->id;
+	return atlas->getID();
 }
 
 unsigned int Font::getAtlasWidth() const {

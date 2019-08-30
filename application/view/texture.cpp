@@ -9,7 +9,9 @@
 #include "../util/log.h"
 #include "../debug.h"
 
-// Texture
+#pragma region Texture
+
+//! Texture
 
 Texture* load(const std::string& name) {
 	int width;
@@ -82,6 +84,22 @@ Texture::Texture(unsigned int width, unsigned int height, const void* buffer, in
 	unbind();
 }
 
+Texture::~Texture() {
+	close();
+}
+
+Texture::Texture(Texture&& other) {
+	id = other.id;
+	other.id = 0;
+}
+
+Texture& Texture::operator=(Texture&& other) {
+	if (this != &other) {
+		close();
+		std::swap(id, other.id);
+	}
+}
+
 void Texture::loadFrameBufferTexture(unsigned int width, unsigned int height) {
 	bind();
 	glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, width, height, 0);
@@ -142,12 +160,18 @@ void Texture::unbind() {
 
 void Texture::close() {
 	glDeleteTextures(1, &id);
+	id = 0;
 }
 
+#pragma endregion
 
-// HDRTexture
+#pragma region HDRTexture
 
-HDRTexture::HDRTexture(unsigned int width, unsigned int height) : HDRTexture(width, height, nullptr) {};
+//! HDRTexture
+
+HDRTexture::HDRTexture(unsigned int width, unsigned int height) : HDRTexture(width, height, nullptr) {
+
+};
 
 HDRTexture::HDRTexture(unsigned int width, unsigned int height, const void* buffer) : width(width), height(height), unit(0) {
 	glGenTextures(1, &id);
@@ -159,6 +183,22 @@ HDRTexture::HDRTexture(unsigned int width, unsigned int height, const void* buff
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	unbind();
+}
+
+HDRTexture::~HDRTexture() {
+	close();
+}
+
+HDRTexture::HDRTexture(HDRTexture&& other) {
+	id = other.id;
+	other.id = 0;
+}
+
+HDRTexture& HDRTexture::operator=(HDRTexture&& other) {
+	if (this != &other) {
+		close();
+		std::swap(id, other.id);
+	}
 }
 
 void HDRTexture::resize(unsigned int width, unsigned int height, const void* buffer) {
@@ -187,10 +227,14 @@ void HDRTexture::unbind() {
 
 void HDRTexture::close() {
 	glDeleteTextures(1, &id);
+	id = 0;
 }
 
+#pragma endregion
 
-// TextureMultisample
+#pragma region TextureMultisample
+
+//! TextureMultisample
 
 MultisampleTexture::MultisampleTexture(unsigned int width, unsigned int height, unsigned int samples) : width(width), height(height), samples(samples), unit(0) {
 	glGenTextures(1, &id);
@@ -201,6 +245,22 @@ MultisampleTexture::MultisampleTexture(unsigned int width, unsigned int height, 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	unbind();
+}
+
+MultisampleTexture::~MultisampleTexture() {
+	close();
+}
+
+MultisampleTexture::MultisampleTexture(MultisampleTexture&& other) {
+	id = other.id;
+	other.id = 0;
+}
+
+MultisampleTexture& MultisampleTexture::operator=(MultisampleTexture&& other) {
+	if (this != &other) {
+		close();
+		std::swap(id, other.id);
+	}
 }
 
 void MultisampleTexture::resize(unsigned int width, unsigned int height) {
@@ -225,10 +285,14 @@ void MultisampleTexture::unbind() {
 
 void MultisampleTexture::close() {
 	glDeleteTextures(1, &id);
+	id = 0;
 }
 
+#pragma endregion
 
-// CubeMap
+#pragma region CubeMap
+
+//! CubeMap
 
 CubeMap::CubeMap(const std::string& right, const std::string& left, const std::string& top, const std::string& bottom, const std::string& front, const std::string& back) : unit(0) {
 	glGenTextures(1, &id);
@@ -242,6 +306,22 @@ CubeMap::CubeMap(const std::string& right, const std::string& left, const std::s
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 	bind();
+}
+
+CubeMap::~CubeMap() {
+	close();
+}
+
+CubeMap::CubeMap(CubeMap&& other) {
+	id = other.id;
+	other.id = 0;
+}
+
+CubeMap& CubeMap::operator=(CubeMap&& other) {
+	if (this != &other) {
+		close();
+		std::swap(id, other.id);
+	}
 }
 
 void CubeMap::bind() {
@@ -283,10 +363,14 @@ void CubeMap::load(const std::string& right, const std::string& left, const std:
 
 void CubeMap::close() {
 	glDeleteTextures(1, &id);
+	id = 0;
 }
 
+#pragma endregion
 
-// DepthTexture
+#pragma region DepthTexture
+
+//! DepthTexture
 
 DepthTexture::DepthTexture(unsigned int width, unsigned int height): width(width), height(height), unit(0) {
 	glGenTextures(1, &id);
@@ -300,6 +384,22 @@ DepthTexture::DepthTexture(unsigned int width, unsigned int height): width(width
 	unbind();
 }
 
+DepthTexture::~DepthTexture() {
+	close();
+}
+
+DepthTexture::DepthTexture(DepthTexture&& other) {
+	id = other.id;
+	other.id = 0;
+}
+
+DepthTexture& DepthTexture::operator=(DepthTexture&& other) {
+	if (this != &other) {
+		close();
+		std::swap(id, other.id);
+	}
+}
+
 void DepthTexture::bind() {
 	bind(unit);
 }
@@ -310,11 +410,13 @@ void DepthTexture::bind(int unit) {
 	glBindTexture(GL_TEXTURE_2D, id);
 }
 
-
 void DepthTexture::unbind() {
 	glBindTexture(GL_TEXTURE_2D, id);
 }
 
 void DepthTexture::close() {
 	glDeleteTextures(1, &id);
+	id = 0;
 }
+
+#pragma endregion

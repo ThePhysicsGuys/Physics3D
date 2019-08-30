@@ -1,8 +1,13 @@
 #pragma once
 
 class Bindable {
-public:
+protected:
 	unsigned int id;
+public:
+
+	unsigned int getID() {
+		return id;
+	}
 
 	virtual void bind() = 0;
 	virtual void unbind() = 0;

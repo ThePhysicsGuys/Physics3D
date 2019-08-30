@@ -18,6 +18,12 @@ public:
 	Texture(unsigned int width, unsigned int height, const void* buffer, int format);
 	Texture(unsigned int width, unsigned int height);
 
+	~Texture();
+	Texture(Texture&& other);
+	Texture(const Texture&) = delete;
+	Texture& operator=(Texture&& other);
+	Texture& operator=(const Texture&) = delete;
+
 	void bind(int unit);
 	void bind() override;
 	void unbind() override;
@@ -43,6 +49,12 @@ public:
 	HDRTexture(unsigned int width, unsigned int height, const void* buffer);
 	HDRTexture(unsigned int width, unsigned int height);
 
+	~HDRTexture();
+	HDRTexture(HDRTexture&& other);
+	HDRTexture(const HDRTexture&) = delete;
+	HDRTexture& operator=(HDRTexture&& other);
+	HDRTexture& operator=(const HDRTexture&) = delete;
+
 	void bind(int unit);
 	void bind() override;
 	void unbind() override;
@@ -61,6 +73,12 @@ public:
 
 	MultisampleTexture(unsigned int width, unsigned int height, unsigned int samples);
 
+	~MultisampleTexture();
+	MultisampleTexture(MultisampleTexture&& other);
+	MultisampleTexture(const MultisampleTexture&) = delete;
+	MultisampleTexture& operator=(MultisampleTexture&& other);
+	MultisampleTexture& operator=(const MultisampleTexture&) = delete;
+
 	void bind(int unit);
 	void bind() override;
 	void unbind() override;
@@ -74,6 +92,12 @@ public:
 	int unit;
 
 	CubeMap(const std::string& right, const std::string& left, const std::string& top, const std::string& bottom, const std::string& front, const std::string& back);
+
+	~CubeMap();
+	CubeMap(CubeMap&& other);
+	CubeMap(const CubeMap&) = delete;
+	CubeMap& operator=(CubeMap&& other);
+	CubeMap& operator=(const CubeMap&) = delete;
 
 	void load(const std::string& right, const std::string& left, const std::string& top, const std::string& bottom, const std::string& front, const std::string& back);
 
@@ -90,6 +114,12 @@ public:
 	unsigned int height;
 
 	DepthTexture(unsigned int width, unsigned int height);
+
+	~DepthTexture();
+	DepthTexture(DepthTexture&& other);
+	DepthTexture(const DepthTexture&) = delete;
+	DepthTexture& operator=(DepthTexture&& other);
+	DepthTexture& operator=(const DepthTexture&) = delete;
 
 	void bind(int unit);
 	void bind() override;

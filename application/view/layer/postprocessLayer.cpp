@@ -27,6 +27,9 @@ void PostprocessLayer::update() {
 
 void PostprocessLayer::render() {
 	screen->screenFrameBuffer->unbind();
+	Renderer::clearColor();
+	Renderer::clearDepth();
+
 	Renderer::disableDepthTest();
 	Shaders::quadShader.updateProjection(Mat4f());
 	Shaders::quadShader.updateTexture(screen->screenFrameBuffer->texture);

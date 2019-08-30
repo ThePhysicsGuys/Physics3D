@@ -54,13 +54,13 @@ void FrameBuffer::resize(Vec2i dimension) {
 void FrameBuffer::attach(Texture* texture) {
 	bind();
 	this->texture = texture;
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture->id, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture->getID(), 0);
 }
 
 void FrameBuffer::attach(RenderBuffer* renderBuffer) {
 	bind();
 	this->renderBuffer = renderBuffer;
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderBuffer->id);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderBuffer->getID());
 }
 
 void FrameBuffer::close() {
@@ -77,10 +77,10 @@ HDRFrameBuffer::HDRFrameBuffer() {
 
 HDRFrameBuffer::HDRFrameBuffer(unsigned int width, unsigned int height) : HDRFrameBuffer() {
 	texture = new HDRTexture(width, height);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture->id, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture->getID(), 0);
 	
 	renderBuffer = new RenderBuffer(width, height);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderBuffer->id);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderBuffer->getID());
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		Log::error("FrameBuffer object with id (%d) not complete", id);
@@ -117,10 +117,10 @@ MultisampleFrameBuffer::MultisampleFrameBuffer() {
 
 MultisampleFrameBuffer::MultisampleFrameBuffer(unsigned int width, unsigned int height, int samples) : MultisampleFrameBuffer() {
 	texture = new MultisampleTexture(width, height, samples);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, texture->id, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, texture->getID(), 0);
 
 	renderBuffer = new MultisampleRenderBuffer(width, height, samples);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderBuffer->id);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderBuffer->getID());
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		Log::error("FrameBuffer object with id (%d) not complete", id);
@@ -154,7 +154,7 @@ DepthFrameBuffer::DepthFrameBuffer(unsigned int width, unsigned int height) {
 	texture = new DepthTexture(width, height);
 	glGenFramebuffers(1, &id);
 	glBindFramebuffer(GL_FRAMEBUFFER, id);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture->id, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture->getID(), 0);
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -170,6 +170,6 @@ void DepthFrameBuffer::unbind() {
 }
 
 void DepthFrameBuffer::close() {
-	glDeleteTextures(1, &texture->id);
+	texture->close();
 	glDeleteFramebuffers(1, &id);
 }

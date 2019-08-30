@@ -202,7 +202,7 @@ void Frame::render() {
 			Vec2f yRange = Vec2(-1, 1);
 			Vec4f color = GUI::COLOR::blend(Vec4f(0.4, 0.4, 0.4, 1), blendColor);
 
-			Path::rectUVRange(GUI::screen->blurFrameBuffer->texture->id, offsetPosition, offsetDimension, xRange, yRange, color);
+			Path::rectUVRange(GUI::screen->blurFrameBuffer->texture->getID(), offsetPosition, offsetDimension, xRange, yRange, color);
 
 			renderChildren();
 		}

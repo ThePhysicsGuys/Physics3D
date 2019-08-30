@@ -383,6 +383,8 @@ namespace GUI {
 		}
 
 		Renderer::disableCulling();
+		Renderer::enableBlending();
+		Renderer::standardBlendFunction();
 		Renderer::disableDepthTest();
 		Shaders::guiShader.init(screen->camera.orthoMatrix);
 		GUI::batch->submit();

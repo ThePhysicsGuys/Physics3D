@@ -33,7 +33,7 @@ void Image::render() {
 		Vec4 blendColor = (disabled) ? GUI::COLOR::DISABLED : GUI::COLOR::WHITE;
 
 		if (texture)
-			Path::rectUV(texture->id, position, dimension);
+			Path::rectUV(texture->getID(), position, dimension);
 		else 
 			Path::rectFilled(position, dimension, 0, GUI::COLOR::blend(GUI::COLOR::BLACK, blendColor));
 	}

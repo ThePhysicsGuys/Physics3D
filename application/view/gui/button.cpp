@@ -55,13 +55,13 @@ void Button::render() {
 
 
 		if (pressed)
-			if (textured) Path::rectUV(pressTexture->id, position, dimension);
+			if (textured) Path::rectUV(pressTexture->getID(), position, dimension);
 			else Path::rectFilled(position, dimension, 0, GUI::COLOR::blend(pressColor, blendColor));
 		else if (hovering)
-			if (textured) Path::rectUV(hoverTexture->id, position, dimension);
+			if (textured) Path::rectUV(hoverTexture->getID(), position, dimension);
 			else Path::rectFilled(position, dimension, 0, GUI::COLOR::blend(hoverColor, blendColor));
 		else
-			if (textured) Path::rectUV(idleTexture->id, position, dimension);
+			if (textured) Path::rectUV(idleTexture->getID(), position, dimension);
 			else Path::rectFilled(position, dimension, 0, GUI::COLOR::blend(idleColor, blendColor));
 
 		if (!text.empty())

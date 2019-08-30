@@ -70,7 +70,6 @@ void Slider::render() {
 		Path::rectFilled(handlePosition, handleDimension, 0.0f, GUI::COLOR::blend(handleColor, blendColor));
 		Path::rect(handlePosition, handleDimension, 0.0f, GUI::COLOR::blend(GUI::COLOR::ACCENT, blendColor));
 
-
 		if (debug)
 			Path::rect(position, dimension, 0.0f, GUI::COLOR::RED);
 	}

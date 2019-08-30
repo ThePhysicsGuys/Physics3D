@@ -71,9 +71,9 @@ void CheckBox::render() {
 		if (pressed)
 			if (textured)
 				if (checked)
-					Path::rectUV(pressCheckedTexture->id, checkBoxPosition, checkBoxDimension);
+					Path::rectUV(pressCheckedTexture->getID(), checkBoxPosition, checkBoxDimension);
 				else
-					Path::rectUV(pressUncheckedTexture->id, checkBoxPosition, checkBoxDimension);
+					Path::rectUV(pressUncheckedTexture->getID(), checkBoxPosition, checkBoxDimension);
 			else
 				if (checked)
 					Path::rectFilled(checkBoxPosition, checkBoxPosition, 0.0f, GUI::COLOR::blend(pressCheckedColor, blendColor));
@@ -82,9 +82,9 @@ void CheckBox::render() {
 		else if (hovering)
 			if (textured)
 				if (checked)
-					Path::rectUV(checkedTexture->id, checkBoxPosition, checkBoxDimension);
+					Path::rectUV(checkedTexture->getID(), checkBoxPosition, checkBoxDimension);
 				else
-					Path::rectUV(uncheckedTexture->id, checkBoxPosition, checkBoxDimension);
+					Path::rectUV(uncheckedTexture->getID(), checkBoxPosition, checkBoxDimension);
 			else
 				if (checked)
 					Path::rectFilled(checkBoxPosition, checkBoxPosition, 0.0f, GUI::COLOR::blend(checkedColor, blendColor));
@@ -93,9 +93,9 @@ void CheckBox::render() {
 		else
 			if (textured)
 				if (checked)
-					Path::rectUV(hoverCheckedTexture->id, checkBoxPosition, checkBoxDimension);
+					Path::rectUV(hoverCheckedTexture->getID(), checkBoxPosition, checkBoxDimension);
 				else
-					Path::rectUV(hoverUncheckedTexture->id, checkBoxPosition, checkBoxDimension);
+					Path::rectUV(hoverUncheckedTexture->getID(), checkBoxPosition, checkBoxDimension);
 			else
 				if (checked)
 					Path::rectFilled(checkBoxPosition, checkBoxPosition, 0.0f, GUI::COLOR::blend(hoverCheckedColor, blendColor));
