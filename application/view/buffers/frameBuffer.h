@@ -18,6 +18,12 @@ public:
 	FrameBuffer(unsigned int width, unsigned int height);
 	FrameBuffer(Texture* colorAttachment, RenderBuffer* depthStencilAttachment);
 
+	~FrameBuffer();
+	FrameBuffer(FrameBuffer&& other);
+	FrameBuffer(const FrameBuffer&) = delete;
+	FrameBuffer& operator=(FrameBuffer&& other);
+	FrameBuffer& operator=(const FrameBuffer&) = delete;
+
 	void resize(Vec2i dimension);
 
 	void bind() override;
@@ -41,6 +47,12 @@ public:
 	HDRFrameBuffer();
 	HDRFrameBuffer(unsigned int width, unsigned int height);
 
+	~HDRFrameBuffer();
+	HDRFrameBuffer(HDRFrameBuffer&& other);
+	HDRFrameBuffer(const HDRFrameBuffer&) = delete;
+	HDRFrameBuffer& operator=(HDRFrameBuffer&& other);
+	HDRFrameBuffer& operator=(const HDRFrameBuffer&) = delete;
+
 	void resize(Vec2i dimension);
 
 	void bind() override;
@@ -62,6 +74,12 @@ public:
 	MultisampleFrameBuffer();
 	MultisampleFrameBuffer(unsigned int width, unsigned int height, int samples);
 
+	~MultisampleFrameBuffer();
+	MultisampleFrameBuffer(MultisampleFrameBuffer&& other);
+	MultisampleFrameBuffer(const MultisampleFrameBuffer&) = delete;
+	MultisampleFrameBuffer& operator=(MultisampleFrameBuffer&& other);
+	MultisampleFrameBuffer& operator=(const MultisampleFrameBuffer&) = delete;
+
 	void resize(Vec2i dimension);
 
 	void bind() override;
@@ -79,6 +97,12 @@ public:
 	DepthTexture* texture = nullptr;
 
 	DepthFrameBuffer(unsigned int width, unsigned int height);
+
+	~DepthFrameBuffer();
+	DepthFrameBuffer(DepthFrameBuffer&& other);
+	DepthFrameBuffer(const DepthFrameBuffer&) = delete;
+	DepthFrameBuffer& operator=(DepthFrameBuffer&& other);
+	DepthFrameBuffer& operator=(const DepthFrameBuffer&) = delete;
 
 	void bind() override;
 	void unbind() override;

@@ -18,6 +18,18 @@ VertexArray::~VertexArray() {
 	Log::debug("Deleted vertex array with id (%d)", id);
 }
 
+VertexArray::VertexArray(VertexArray&& other) {
+	id = other.id;
+	other.id = 0;
+}
+
+VertexArray& VertexArray::operator=(VertexArray&& other) {
+	if (this != &other) {
+		close();
+		std::swap(id, other.id);
+	}
+}
+
 void VertexArray::bind() {
 	glBindVertexArray(id);
 	for (unsigned int i = 0; i < attributeArrayOffset; i++)
@@ -57,4 +69,5 @@ void VertexArray::addBuffer(VertexBuffer& buffer, const BufferLayout& layout) {
 void VertexArray::close() {
 	unbind();
 	glDeleteVertexArrays(1, &id);
+	id = 0;
 }

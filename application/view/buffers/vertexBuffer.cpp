@@ -23,6 +23,18 @@ VertexBuffer::~VertexBuffer() {
 	Log::warn("Deleted vertex buffer with id (%d)", id);
 }
 
+VertexBuffer::VertexBuffer(VertexBuffer&& other) {
+	id = other.id;
+	other.id = 0;
+}
+
+VertexBuffer& VertexBuffer::operator=(VertexBuffer&& other) {
+	if (this != &other) {
+		close();
+		std::swap(id, other.id);
+	}
+}
+
 void VertexBuffer::fill(const void * data, size_t sizeInBytes, unsigned int mode) {
 	bind();
 	glBufferData(GL_ARRAY_BUFFER, sizeInBytes, data, mode);
@@ -44,4 +56,5 @@ void VertexBuffer::unbind() {
 void VertexBuffer::close() {
 	unbind();
 	glDeleteBuffers(1, &id);
+	id = 0;
 }

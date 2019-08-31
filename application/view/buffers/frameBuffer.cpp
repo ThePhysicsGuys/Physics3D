@@ -7,6 +7,10 @@
 #include "../texture.h"
 #include "../util/log.h"
 
+#pragma region FrameBuffer
+
+//! FrameBuffer
+
 FrameBuffer::FrameBuffer() {
 	glGenFramebuffers(1, &id);
 	bind();
@@ -32,6 +36,30 @@ FrameBuffer::FrameBuffer(Texture* colorAttachment, RenderBuffer* depthStencilAtt
 		Log::error("FrameBuffer object with id (%d) not complete", id);
 
 	unbind();
+}
+
+FrameBuffer::~FrameBuffer() {
+	close();
+}
+
+FrameBuffer::FrameBuffer(FrameBuffer&& other) {
+	id = other.id;
+	other.id = 0;
+
+	texture = other.texture;
+	other.texture = nullptr;
+
+	renderBuffer = other.renderBuffer;
+	other.renderBuffer = nullptr;
+}
+
+FrameBuffer& FrameBuffer::operator=(FrameBuffer&& other) {
+	if (this != &other) {
+		close();
+		std::swap(id, other.id);
+		std::swap(texture, other.texture);
+		std::swap(renderBuffer, other.renderBuffer);
+	}
 }
 
 void FrameBuffer::bind() {
@@ -64,11 +92,18 @@ void FrameBuffer::attach(RenderBuffer* renderBuffer) {
 }
 
 void FrameBuffer::close() {
+	texture->close();
+	renderBuffer->close();
+
 	glDeleteFramebuffers(1, &id);
+	id = 0;
 }
 
+#pragma endregion
 
-// HDRFrameBuffer
+#pragma region HDRFrameBuffer
+
+//! HDRFrameBuffer
 
 HDRFrameBuffer::HDRFrameBuffer() {
 	glGenFramebuffers(1, &id);
@@ -88,6 +123,30 @@ HDRFrameBuffer::HDRFrameBuffer(unsigned int width, unsigned int height) : HDRFra
 	unbind();
 };
 
+HDRFrameBuffer::~HDRFrameBuffer() {
+	close();
+}
+
+HDRFrameBuffer::HDRFrameBuffer(HDRFrameBuffer&& other) {
+	id = other.id;
+	other.id = 0;
+
+	texture = other.texture;
+	other.texture = nullptr;
+
+	renderBuffer = other.renderBuffer;
+	other.renderBuffer = nullptr;
+}
+
+HDRFrameBuffer& HDRFrameBuffer::operator=(HDRFrameBuffer&& other) {
+	if (this != &other) {
+		close();
+		std::swap(id, other.id);
+		std::swap(texture, other.texture);
+		std::swap(renderBuffer, other.renderBuffer);
+	}
+}
+
 void HDRFrameBuffer::resize(Vec2i dimension) {
 	if (texture)
 		texture->resize(dimension.x, dimension.y);
@@ -104,11 +163,18 @@ void HDRFrameBuffer::unbind() {
 };
 
 void HDRFrameBuffer::close() {
+	texture->close();
+	renderBuffer->close();
+
 	glDeleteFramebuffers(1, &id);
+	id = 0;
 };
 
+#pragma endregion
 
-// MutisampleFrameBuffer
+#pragma region MultisampleFrameBuffer
+
+//! MultisampleFrameBuffer
 
 MultisampleFrameBuffer::MultisampleFrameBuffer() {
 	glGenFramebuffers(1, &id);
@@ -128,6 +194,30 @@ MultisampleFrameBuffer::MultisampleFrameBuffer(unsigned int width, unsigned int 
 	unbind();
 };
 
+MultisampleFrameBuffer::~MultisampleFrameBuffer() {
+	close();
+}
+
+MultisampleFrameBuffer::MultisampleFrameBuffer(MultisampleFrameBuffer&& other) {
+	id = other.id;
+	other.id = 0;
+
+	texture = other.texture;
+	other.texture = nullptr;
+
+	renderBuffer = other.renderBuffer;
+	other.renderBuffer = nullptr;
+}
+
+MultisampleFrameBuffer& MultisampleFrameBuffer::operator=(MultisampleFrameBuffer&& other) {
+	if (this != &other) {
+		close();
+		std::swap(id, other.id);
+		std::swap(texture, other.texture);
+		std::swap(renderBuffer, other.renderBuffer);
+	}
+}
+
 void MultisampleFrameBuffer::resize(Vec2i dimension) {
 	if (texture)
 		texture->resize(dimension.x, dimension.y);
@@ -144,11 +234,18 @@ void MultisampleFrameBuffer::unbind() {
 };
 
 void MultisampleFrameBuffer::close() {
+	texture->close();
+	renderBuffer->close();
+
 	glDeleteFramebuffers(1, &id);
+	id = 0;
 };
 
+#pragma endregion
 
-// DepthFrameBuffer
+#pragma region DepthFrameBuffer
+
+//! DepthFrameBuffer
 
 DepthFrameBuffer::DepthFrameBuffer(unsigned int width, unsigned int height) {
 	texture = new DepthTexture(width, height);
@@ -158,6 +255,26 @@ DepthFrameBuffer::DepthFrameBuffer(unsigned int width, unsigned int height) {
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+DepthFrameBuffer::~DepthFrameBuffer() {
+	close();
+}
+
+DepthFrameBuffer::DepthFrameBuffer(DepthFrameBuffer&& other) {
+	id = other.id;
+	other.id = 0;
+
+	texture = other.texture;
+	other.texture = nullptr;
+}
+
+DepthFrameBuffer& DepthFrameBuffer::operator=(DepthFrameBuffer&& other) {
+	if (this != &other) {
+		close();
+		std::swap(id, other.id);
+		std::swap(texture, other.texture);
+	}
 }
 
 void DepthFrameBuffer::bind() {
@@ -172,4 +289,7 @@ void DepthFrameBuffer::unbind() {
 void DepthFrameBuffer::close() {
 	texture->close();
 	glDeleteFramebuffers(1, &id);
+	id = 0;
 }
+
+#pragma endregion

@@ -24,6 +24,18 @@ IndexBuffer::~IndexBuffer() {
 	Log::warn("Deleted index buffer with id (%d)", id);
 }
 
+IndexBuffer::IndexBuffer(IndexBuffer&& other) {
+	id = other.id;
+	other.id = 0;
+}
+
+IndexBuffer& IndexBuffer::operator=(IndexBuffer&& other) {
+	if (this != &other) {
+		close();
+		std::swap(id, other.id);
+	}
+}
+
 void IndexBuffer::fill(const unsigned int* data, size_t size, unsigned int mode) {
 	bind();
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, size * sizeof(unsigned int), data, mode);
@@ -45,4 +57,5 @@ void IndexBuffer::unbind() {
 void IndexBuffer::close() {
 	unbind();
 	glDeleteBuffers(1, &id);
+	id = 0;
 }

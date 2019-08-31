@@ -163,8 +163,6 @@ in vec3 fposition;
 in vec3 fnormal;
 in vec3 fcenter;
 
-vec3 normal;
-
 struct Material {
 	vec4 ambient;
 	vec3 diffuse;
@@ -220,7 +218,7 @@ vec4 fog(vec4 color) {
 vec3 calcDirectionalLight() {
 	// Directional light
 	vec3 directionalLight = normalize(sunDirection);
-	float directionalFactor = 0.4 * max(dot(normal, directionalLight), 0.0);
+	float directionalFactor = 0.4 * max(dot(fnormal, directionalLight), 0.0);
 	vec3 directional = directionalFactor * sunColor;
 	return directional;
 }
@@ -234,14 +232,14 @@ vec3 calcLightColor(Light light) {
 	// Diffuse light
 	vec3 lightDirection = light.position - fposition;
 	vec3 toLightSource = normalize(lightDirection);
-	float diffuseFactor = max(dot(normal, toLightSource), 0.0);
+	float diffuseFactor = max(dot(fnormal, toLightSource), 0.0);
 	vec3 diffuse = material.diffuse * diffuseFactor * light.color;
 
 	// Specular light
 	float specularPower = 10.0f;
 	vec3 cameraDirection = normalize(-(viewMatrix * vec4(fposition, 1)).xyz);
 	vec3 fromLightSource = -toLightSource;
-	vec3 reflectedLight = normalize(reflect(fromLightSource, normal));
+	vec3 reflectedLight = normalize(reflect(fromLightSource, fnormal));
 	float specularFactor = max(dot(cameraDirection, (viewMatrix * vec4(reflectedLight, 0)).xyz), 0.0);
 	specularFactor = pow(specularFactor, specularPower);
 	vec3 specular = material.specular * material.reflectance * specularFactor * light.color;
@@ -264,13 +262,6 @@ mat3 rodrigues() {
 }
 
 void main() {
-	/*if (material.normalmapped) {
-		normal = texture(normalSampler, fuv).rgb;
-		normal = normalize(normal * 2 - 1);
-		normal = normalize(modelMatrix * vec4(normal, 0)).xyz;
-		normal = rodrigues() * normal;
-	}*/
-	normal = fnormal;
 
 	// Light calculations
 	vec3 lightColors = vec3(0);
