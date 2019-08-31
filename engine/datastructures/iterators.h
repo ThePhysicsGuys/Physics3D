@@ -95,14 +95,14 @@ class FilteredIterator {
 	
 public:
 	FilteredIterator(const Iter& iter, const IterEnd& iterEnd, const Filter& filter) : iter(iter), filter(filter) {
-		while (!(this->iter != this->iterEnd) && !this->filter(*this->iter)) {
+		while (this->iter != this->iterEnd && !this->filter(*this->iter)) {
 			++this->iter;
 		}
 	}
 	void operator++() {
 		do {
 			++iter;
-		} while (!(iter != iterEnd) && !filter(*iter));
+		} while (iter != iterEnd && !filter(*iter));
 	}
 	decltype(*std::declval<Iter>())& operator*() const {
 		return *iter;
