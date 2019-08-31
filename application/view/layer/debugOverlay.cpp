@@ -13,10 +13,13 @@
 #include "../../worlds.h"
 #include "../../../engine/sharedLockGuard.h"
 
-// Pies
-BarChartClassInformation iterChartClasses[] {{ "GJK Collide", Vec3f(0.2f, 0.2f, 1.0f) }, { "GJK No Collide", Vec3f(1.0f, 0.5f, 0.0f) }, { "EPA", Vec3f(1.0f, 1.0f, 0.0f) }};
-BarChart iterationChart("Iteration Statistics", "", GJKCollidesIterationStatistics.labels, iterChartClasses, Vec2f(-1.0f + 0.1f, -0.3f), Vec2f(0.8f, 0.6f), 3, 17);
+BarChartClassInformation iterChartClasses[] {
+	{ "GJK Collide"   , Vec3f(0.2f, 0.2f, 1.0f) },
+	{ "GJK No Collide", Vec3f(1.0f, 0.5f, 0.0f) }, 
+	{ "EPA"           , Vec3f(1.0f, 1.0f, 0.0f) }
+};
 
+BarChart iterationChart("Iteration Statistics", "", GJKCollidesIterationStatistics.labels, iterChartClasses, Vec2f(-1.0f + 0.1f, -0.3f), Vec2f(0.8f, 0.6f), 3, 17);
 
 DebugOverlay::DebugOverlay() {
 
@@ -31,6 +34,7 @@ void DebugOverlay::init() {
 }
 
 void DebugOverlay::update() {
+	using namespace Debug;
 	fieldIndex = 0;
 }
 
@@ -41,11 +45,12 @@ void DebugOverlay::render() {
 
 	graphicsMeasure.mark(GraphicsProcess::PROFILER);
 
-	size_t objCount = screen->world->getPartCount();
+	using namespace Debug;
+	size_t objectCount = screen->world->getPartCount();
 	addDebugField(screen->dimension, GUI::font, "Screen", str(screen->dimension) + ", [" + std::to_string(screen->camera.aspect) + ":1]", "");
 	addDebugField(screen->dimension, GUI::font, "Position", str(screen->camera.cframe.position), "");
-	addDebugField(screen->dimension, GUI::font, "Objects", objCount, "");
-	addDebugField(screen->dimension, GUI::font, "Intersections", getTheoreticalNumberOfIntersections(objCount), "");
+	addDebugField(screen->dimension, GUI::font, "Objects", objectCount, "");
+	addDebugField(screen->dimension, GUI::font, "Intersections", getTheoreticalNumberOfIntersections(objectCount), "");
 	addDebugField(screen->dimension, GUI::font, "AVG Collide GJK Iterations", gjkCollideIterStats.avg(), "");
 	addDebugField(screen->dimension, GUI::font, "AVG No Collide GJK Iterations", gjkNoCollideIterStats.avg(), "");
 	addDebugField(screen->dimension, GUI::font, "TPS", physicsMeasure.getAvgTPS(), "");
@@ -87,4 +92,6 @@ void DebugOverlay::render() {
 	}
 }
 
-void DebugOverlay::close() {}
+void DebugOverlay::close() {
+
+}

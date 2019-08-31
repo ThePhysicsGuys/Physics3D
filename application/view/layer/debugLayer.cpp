@@ -32,10 +32,8 @@ Vec4f colors[] {
 	GUI::COLOR::PURPLE
 };
 
-
 void renderSphere(double radius, Position position, Vec4f color) {
 	Shaders::basicShader.updateMaterial(Material(color));
-
 	Shaders::basicShader.updateModel(CFrameToMat4(GlobalCFrame(position, DiagonalMat3(1, 1, 1) * radius)));
 
 	Library::sphere->render();
@@ -43,7 +41,6 @@ void renderSphere(double radius, Position position, Vec4f color) {
 
 void renderBox(const GlobalCFrame& cframe, double width, double height, double depth, Vec4f color) {
 	Shaders::basicShader.updateMaterial(Material(color));
-
 	Shaders::basicShader.updateModel(CFrameToMat4(GlobalCFrame(cframe.getPosition(), cframe.getRotation() * DiagonalMat3(width, height, depth))));
 
 	Library::cube->render();
@@ -51,8 +48,8 @@ void renderBox(const GlobalCFrame& cframe, double width, double height, double d
 
 void renderBounds(const Bounds& bounds, const Vec4f& color) {
 	Vec3Fix diagonal = bounds.getDiagonal();
-	Position p = bounds.getCenter();
-	renderBox(GlobalCFrame(p), diagonal.x, diagonal.y, diagonal.z, color);
+	Position position = bounds.getCenter();
+	renderBox(GlobalCFrame(position), diagonal.x, diagonal.y, diagonal.z, color);
 }
 
 void recursiveRenderColTree(const TreeNode& node, int depth) {
@@ -94,7 +91,6 @@ bool recursiveColTreeForOneObject(const TreeNode& node, const Physical* physical
 	return false;
 }
 
-
 DebugLayer::DebugLayer() {
 
 }
@@ -115,25 +111,25 @@ void DebugLayer::init() {
 
 
 	// Point init
-	float* buf = new float[5 * 10];
+	float* buffer = new float[5 * 10];
 	for (int i = 0; i < 5; i++) {
-		buf[i * 10 + 0] = 0.5f + i;
-		buf[i * 10 + 1] = 1.0f; // position
-		buf[i * 10 + 2] = 0.5f;
+		buffer[i * 10 + 0] = 0.5f + i;
+		buffer[i * 10 + 1] = 1.0f; // position
+		buffer[i * 10 + 2] = 0.5f;
 
-		buf[i * 10 + 3] = 0.02f * i; // size
+		buffer[i * 10 + 3] = 0.02f * i; // size
 
-		buf[i * 10 + 4] = 1.0f;
-		buf[i * 10 + 5] = 1.0f; // color 1 orange
-		buf[i * 10 + 6] = 0.0f;
+		buffer[i * 10 + 4] = 1.0f;
+		buffer[i * 10 + 5] = 1.0f; // color 1 orange
+		buffer[i * 10 + 6] = 0.0f;
 
-		buf[i * 10 + 7] = 0.0f;
-		buf[i * 10 + 8] = 0.0f; // color 2 white
-		buf[i * 10 + 9] = 0.0f;
+		buffer[i * 10 + 7] = 0.0f;
+		buffer[i * 10 + 8] = 0.0f; // color 2 white
+		buffer[i * 10 + 9] = 0.0f;
 
 	}
 
-	pointMesh = new PointMesh(buf, 5);
+	pointMesh = new PointMesh(buffer, 5);
 
 }
 
@@ -142,26 +138,30 @@ void DebugLayer::update() {
 }
 
 void DebugLayer::render() {
-	// Initialize vector log buffer
 	graphicsMeasure.mark(GraphicsProcess::VECTORS);
-	AddableBuffer<AppDebug::ColoredVector>& vecLog = AppDebug::getVectorBuffer();
-	AddableBuffer<AppDebug::ColoredPoint>& pointLog = AppDebug::getPointBuffer();
+	
+	using namespace Debug;
+	using namespace AppDebug;
 
-	for (const Physical& p : screen->world->iterPhysicals()) {
-		pointLog.add(AppDebug::ColoredPoint(p.getCenterOfMass(), Debug::CENTER_OF_MASS));
+	// Initialize vector log buffer
+	AddableBuffer<ColoredVector>& vecLog = getVectorBuffer();
+	AddableBuffer<ColoredPoint>& pointLog = getPointBuffer();
+
+	for (const Physical& physical : screen->world->iterPhysicals()) {
+		pointLog.add(ColoredPoint(physical.getCenterOfMass(), CENTER_OF_MASS));
 	}
 
-	for (const ConstraintGroup& c : screen->world->constraints) {
-		for (const BallConstraint& bc : c.ballConstraints) {
-			vecLog.add(AppDebug::ColoredVector(bc.a->getCFrame().getPosition(), bc.a->getCFrame().localToRelative(bc.attachA), Debug::INFO_VEC));
-			vecLog.add(AppDebug::ColoredVector(bc.b->getCFrame().getPosition(), bc.b->getCFrame().localToRelative(bc.attachB), Debug::INFO_VEC));
+	for (const ConstraintGroup& constraintGroup : screen->world->constraints) {
+		for (const BallConstraint& ballConstraint : constraintGroup.ballConstraints) {
+			vecLog.add(ColoredVector(ballConstraint.a->getCFrame().getPosition(), ballConstraint.a->getCFrame().localToRelative(ballConstraint.attachA), INFO_VEC));
+			vecLog.add(ColoredVector(ballConstraint.b->getCFrame().getPosition(), ballConstraint.b->getCFrame().localToRelative(ballConstraint.attachB), INFO_VEC));
 		}
 	}
 
 	if (screen->selectedPart != nullptr) {
 		GlobalCFrame selectedCFrame(screen->selectedPart->cframe);
 		for (const Vec3f& corner : screen->selectedPart->hitbox.iterVertices()) {
-			vecLog.add(AppDebug::ColoredVector(selectedCFrame.localToGlobal(corner), screen->selectedPart->parent->getVelocityOfPoint(Vec3(selectedCFrame.localToRelative(corner))), Debug::VELOCITY));
+			vecLog.add(ColoredVector(selectedCFrame.localToGlobal(corner), screen->selectedPart->parent->getVelocityOfPoint(Vec3(selectedCFrame.localToRelative(corner))), VELOCITY));
 		}
 
 		if (colissionSpheresMode == SphereColissionRenderMode::SELECTED) {
@@ -215,7 +215,7 @@ void DebugLayer::render() {
 		}
 	}
 
-	switch (renderColTree) {
+	switch (colTreeRenderMode) {
 		case ColTreeRenderMode::ALL:
 			recursiveRenderColTree(screen->world->objectTree.rootNode, 0);
 			break;
@@ -229,7 +229,7 @@ void DebugLayer::render() {
 
 	// Update debug meshes
 	graphicsMeasure.mark(GraphicsProcess::VECTORS);
-	updateVecMesh(vectorMesh, vecLog.data, vecLog.size);
+	updateVectorMesh(vectorMesh, vecLog.data, vecLog.size);
 	updatePointMesh(pointMesh, pointLog.data, pointLog.size);
 
 

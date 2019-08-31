@@ -54,7 +54,7 @@ void StandardInputHandler::keyDown(int key, int modifiers) {
 			screen.selectedPart = nullptr;
 		}
 	} else if (KeyboardOptions::Debug::pies == key) {
-		renderPiesEnabled = !renderPiesEnabled;
+		Debug::renderPiesEnabled = !Debug::renderPiesEnabled;
 	} else if (KeyboardOptions::Part::anchor == key) {
 		if (screen.selectedPart != nullptr) {
 			if (screen.world->isAnchored(screen.selectedPart->parent)) {
@@ -74,21 +74,21 @@ void StandardInputHandler::keyDown(int key, int modifiers) {
 	} else if (KeyboardOptions::Edit::rotate == key) {
 		Picker::editTools.editMode = EditTools::EditMode::ROTATE;
 	} else if (KeyboardOptions::Edit::translate == key) {
-			Picker::editTools.editMode = EditTools::EditMode::TRANSLATE;
+		Picker::editTools.editMode = EditTools::EditMode::TRANSLATE;
 	} else if (KeyboardOptions::Edit::scale == key) {
-			Picker::editTools.editMode = EditTools::EditMode::SCALE;
+		Picker::editTools.editMode = EditTools::EditMode::SCALE;
 	} else if (KeyboardOptions::Debug::spheres == key) {
-			colissionSpheresMode = static_cast<SphereColissionRenderMode>((static_cast<int>(colissionSpheresMode) + 1) % 3);
+		Debug::colissionSpheresMode = static_cast<Debug::SphereColissionRenderMode>((static_cast<int>(Debug::colissionSpheresMode) + 1) % 3);
 	} else if (KeyboardOptions::Debug::tree == key) {
-		renderColTree = static_cast<ColTreeRenderMode>((static_cast<int>(renderColTree) + 1) % 3);
+		Debug::colTreeRenderMode = static_cast<Debug::ColTreeRenderMode>((static_cast<int>(Debug::colTreeRenderMode) + 1) % 3);
 	}
 	
 
 	if(Keyboard::F1 <= key && Keyboard::F9 >= key) {
-		toggleDebugVecType(static_cast<Debug::VectorType>(key - Keyboard::F1.code));
+		toggleVectorType(static_cast<Debug::VectorType>(key - Keyboard::F1.code));
 	}
 	if (Keyboard::NUMBER_1 <= key && Keyboard::NUMBER_3 >= key) {
-		toggleDebugPointType(static_cast<Debug::PointType>(key - Keyboard::NUMBER_1.code));
+		togglePointType(static_cast<Debug::PointType>(key - Keyboard::NUMBER_1.code));
 	}
 };
 

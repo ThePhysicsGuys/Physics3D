@@ -15,8 +15,7 @@
 
 #include "../engine/datastructures/boundsTree.h"
 
-#define _USE_MATH_DEFINES
-#include "math.h"
+#include "../engine/math/mathUtil.h"
 
 #define MAX_ANGLE 0.1f
 
@@ -38,33 +37,33 @@ const Vec3f pieColors[30]{
 	Vec3f(0.5f,0.5f,0.5f),
 };
 
-void vertex(Vec2f v) {
-	glVertex2f(v.x, v.y);
+void vertex(Vec2f vertex) {
+	glVertex2f(vertex.x, vertex.y);
 }
-void color(Vec3f c) {
-	glColor3f(c.x, c.y, c.z);
+void color(Vec3f color) {
+	glColor3f(color.x, color.y, color.z);
 }
 
 void PieChart::renderPie(Screen& screen) const {
-	Vec2f curPos = Vec2f(pieSize, 0);
+	Vec2f cursorPosition = Vec2f(pieSize, 0);
 
 	float totalWeight = getTotal();
-	for(DataPoint p : parts) {
-		float angle = float(M_PI * 2 * p.weight / totalWeight);
+	for(DataPoint dataPoint : parts) {
+		float angle = float(PI * 2 * dataPoint.weight / totalWeight);
 
 		int subdivisions = int(angle / MAX_ANGLE + 1);
 		
 		Mat2f rotation = fromAngle(angle / subdivisions);
 
 		glBegin(GL_TRIANGLE_FAN); {
-			color(p.color);
+			color(dataPoint.color);
 			vertex(piePosition);
-			vertex(piePosition + curPos);
+			vertex(piePosition + cursorPosition);
 			for(int i = 0; i < subdivisions; i++) {
-				curPos = rotation * curPos;
-				vertex(piePosition + curPos);
+				cursorPosition = rotation * cursorPosition;
+				vertex(piePosition + cursorPosition);
 			}
-		}glEnd();
+		} glEnd();
 	}
 }
 
@@ -83,31 +82,30 @@ void PieChart::renderText(Screen& screen, Font* font) const {
 	Vec2f titlePosition = piePosition + Vec2f(pieSize * 1.3f, pieSize * 1.1f);
 	Path::text(font, title, Vec2(titlePosition.x, titlePosition.y), Vec4f(1, 1, 1, 1), 0.001);
 
-	Vec2f textPosition = piePosition + Vec2f(pieSize * 1.3f, pieSize * 1.1f - 0.05f);
-	Vec2 textPos = Vec2(textPosition.x, textPosition.y);
+	Vec2f textPosition = Vec2(piePosition + Vec2f(pieSize * 1.3f, pieSize * 1.1f - 0.05f));
 
 	float totalWeight = getTotal();
 
-	Path::text(font, totalValue, textPos + Vec2(0.50, 0.035), Vec4(1,1,1,1), 0.0006);
+	Path::text(font, totalValue, textPosition + Vec2(0.50, 0.035), Vec4(1,1,1,1), 0.0006);
 
 	for(int i = 0; i < parts.size(); i++) {
 		const DataPoint& p = parts[i];
-		Vec2 linePos = textPos + Vec2(0, -i*0.035);
-		Path::text(font, p.label, linePos, Vec4(p.color, 1), 0.0006);
+		Vec2 linePosition = textPosition + Vec2(0, -i*0.035);
+		Path::text(font, p.label, linePosition, Vec4(p.color, 1), 0.0006);
 
 		std::stringstream percent;
 		percent.precision(4);
 		percent << p.weight/totalWeight * 100;
 		percent << "%";
-		Path::text(font, percent.str(), linePos + Vec2(0.35, 0), Vec4(p.color, 1), 0.0006);
-		Path::text(font, p.value, linePos + Vec2(0.50, 0), Vec4(p.color, 1), 0.0006);
+		Path::text(font, percent.str(), linePosition + Vec2(0.35, 0), Vec4(p.color, 1), 0.0006);
+		Path::text(font, p.value, linePosition + Vec2(0.50, 0), Vec4(p.color, 1), 0.0006);
 	}
 
 	GUI::batch->submit();
 }
 
-void PieChart::add(DataPoint& p) {
-	this->parts.push_back(p);
+void PieChart::add(DataPoint& dataPoint) {
+	this->parts.push_back(dataPoint);
 }
 
 void startPieRendering(Screen& screen) {
@@ -186,11 +184,11 @@ void BarChart::render() {
 		for (int i = 0; i < data.width; i++) {
 			const WeightValue& dataPoint = data[cl][i];
 
-			Vec2f botLeft = drawingPosition + Vec2f(categoryWidth * i + barWidth * cl, 0);
+			Vec2f bottomLeft = drawingPosition + Vec2f(categoryWidth * i + barWidth * cl, 0);
 
 			float height = drawingSize.y * dataPoint.weight / max;
 
-			Vec2f topTextPosition = botLeft + Vec2(0, height+drawingSize.y * 0.02);
+			Vec2f topTextPosition = bottomLeft + Vec2(0, height+drawingSize.y * 0.02);
 			//topTextPosition.x *= GUI::screen->dimension.x / GUI::screen->dimension.y;
 
 			Path::text(GUI::font, dataPoint.value, topTextPosition, Vec4(info.color, 1), 0.0005);

@@ -194,40 +194,40 @@ struct DebugFrame : public FrameBlueprint, public Frame {
 		renderLabel = new Label("Render", 0, 0);
 		renderPiesCheckBox = new CheckBox("Statistics", 0, 0, true);
 		renderSpheresCheckBox = new CheckBox("Collision spheres", 0, 0, true);
-		infoVectorCheckBox->action = [](CheckBox* c) { toggleDebugVecType(Debug::INFO_VEC); };
-		velocityCheckBox->action = [](CheckBox* c) { toggleDebugVecType(Debug::VELOCITY); };
-		accelerationCheckBox->action = [](CheckBox* c) { toggleDebugVecType(Debug::ACCELERATION); };
-		forceCheckBox->action = [](CheckBox* c) { toggleDebugVecType(Debug::FORCE); };
-		angularImpulseCheckBox->action = [](CheckBox* c) { toggleDebugVecType(Debug::ANGULAR_IMPULSE); };
-		positionCheckBox->action = [](CheckBox* c) { toggleDebugVecType(Debug::POSITION); };
-		momentCheckBox->action = [](CheckBox* c) { toggleDebugVecType(Debug::MOMENT); };
-		impulseCheckBox->action = [](CheckBox* c) { toggleDebugVecType(Debug::IMPULSE); };
-		angularVelocityCheckBox->action = [](CheckBox* c) { toggleDebugVecType(Debug::ANGULAR_VELOCITY); };
-		infoPointCheckBox->action = [](CheckBox* c) { toggleDebugPointType(Debug::INFO_POINT); };
-		centerOfMassCheckBox->action = [](CheckBox* c) { toggleDebugPointType(Debug::CENTER_OF_MASS); };
-		intersectionCheckBox->action = [](CheckBox* c) { toggleDebugPointType(Debug::INTERSECTION); };
-		renderPiesCheckBox->action = [](CheckBox* c) { renderPiesEnabled = !renderPiesEnabled; };
-		renderSpheresCheckBox->action = [](CheckBox* c) { colissionSpheresMode = static_cast<SphereColissionRenderMode>((static_cast<int>(colissionSpheresMode) + 1) % 3); };
+		infoVectorCheckBox->action = [](CheckBox* c) { toggleVectorType(Debug::INFO_VEC); };
+		velocityCheckBox->action = [](CheckBox* c) { toggleVectorType(Debug::VELOCITY); };
+		accelerationCheckBox->action = [](CheckBox* c) { toggleVectorType(Debug::ACCELERATION); };
+		forceCheckBox->action = [](CheckBox* c) { toggleVectorType(Debug::FORCE); };
+		angularImpulseCheckBox->action = [](CheckBox* c) { toggleVectorType(Debug::ANGULAR_IMPULSE); };
+		positionCheckBox->action = [](CheckBox* c) { toggleVectorType(Debug::POSITION); };
+		momentCheckBox->action = [](CheckBox* c) { toggleVectorType(Debug::MOMENT); };
+		impulseCheckBox->action = [](CheckBox* c) { toggleVectorType(Debug::IMPULSE); };
+		angularVelocityCheckBox->action = [](CheckBox* c) { toggleVectorType(Debug::ANGULAR_VELOCITY); };
+		infoPointCheckBox->action = [](CheckBox* c) { togglePointType(Debug::INFO_POINT); };
+		centerOfMassCheckBox->action = [](CheckBox* c) { togglePointType(Debug::CENTER_OF_MASS); };
+		intersectionCheckBox->action = [](CheckBox* c) { togglePointType(Debug::INTERSECTION); };
+		renderPiesCheckBox->action = [](CheckBox* c) { Debug::renderPiesEnabled = !Debug::renderPiesEnabled; };
+		renderSpheresCheckBox->action = [](CheckBox* c) { Debug::colissionSpheresMode = static_cast<Debug::SphereColissionRenderMode>((static_cast<int>(Debug::colissionSpheresMode) + 1) % 3); };
 	}
 
 	void update() override {
 		if (!visible)
 			return;
 
-		infoVectorCheckBox->checked = debug_enabled[Debug::INFO_VEC];
-		positionCheckBox->checked = debug_enabled[Debug::POSITION];
-		velocityCheckBox->checked = debug_enabled[Debug::VELOCITY];
-		momentCheckBox->checked = debug_enabled[Debug::MOMENT];
-		forceCheckBox->checked = debug_enabled[Debug::FORCE];
-		accelerationCheckBox->checked = debug_enabled[Debug::ACCELERATION];
-		angularImpulseCheckBox->checked = debug_enabled[Debug::ANGULAR_IMPULSE];
-		impulseCheckBox->checked = debug_enabled[Debug::IMPULSE];
-		angularVelocityCheckBox->checked = debug_enabled[Debug::ANGULAR_VELOCITY];
-		infoPointCheckBox->checked = point_debug_enabled[Debug::INFO_POINT];
-		centerOfMassCheckBox->checked = point_debug_enabled[Debug::CENTER_OF_MASS];
-		intersectionCheckBox->checked = point_debug_enabled[Debug::INTERSECTION];
-		renderPiesCheckBox->checked = renderPiesEnabled;
-		renderSpheresCheckBox->checked = colissionSpheresMode != SphereColissionRenderMode::NONE;
+		infoVectorCheckBox->checked = Debug::vectorDebugEnabled[Debug::INFO_VEC];
+		positionCheckBox->checked = Debug::vectorDebugEnabled[Debug::POSITION];
+		velocityCheckBox->checked = Debug::vectorDebugEnabled[Debug::VELOCITY];
+		momentCheckBox->checked = Debug::vectorDebugEnabled[Debug::MOMENT];
+		forceCheckBox->checked = Debug::vectorDebugEnabled[Debug::FORCE];
+		accelerationCheckBox->checked = Debug::vectorDebugEnabled[Debug::ACCELERATION];
+		angularImpulseCheckBox->checked = Debug::vectorDebugEnabled[Debug::ANGULAR_IMPULSE];
+		impulseCheckBox->checked = Debug::vectorDebugEnabled[Debug::IMPULSE];
+		angularVelocityCheckBox->checked = Debug::vectorDebugEnabled[Debug::ANGULAR_VELOCITY];
+		infoPointCheckBox->checked = Debug::pointDebugEnabled[Debug::INFO_POINT];
+		centerOfMassCheckBox->checked = Debug::pointDebugEnabled[Debug::CENTER_OF_MASS];
+		intersectionCheckBox->checked = Debug::pointDebugEnabled[Debug::INTERSECTION];
+		renderPiesCheckBox->checked = Debug::renderPiesEnabled;
+		renderSpheresCheckBox->checked = Debug::colissionSpheresMode != Debug::SphereColissionRenderMode::NONE;
 	}
 
 };
