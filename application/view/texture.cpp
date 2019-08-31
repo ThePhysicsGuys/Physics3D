@@ -98,6 +98,8 @@ Texture& Texture::operator=(Texture&& other) {
 		close();
 		std::swap(id, other.id);
 	}
+
+	return *this;
 }
 
 void Texture::loadFrameBufferTexture(unsigned int width, unsigned int height) {
@@ -199,6 +201,8 @@ HDRTexture& HDRTexture::operator=(HDRTexture&& other) {
 		close();
 		std::swap(id, other.id);
 	}
+
+	return *this;
 }
 
 void HDRTexture::resize(unsigned int width, unsigned int height, const void* buffer) {
@@ -261,6 +265,8 @@ MultisampleTexture& MultisampleTexture::operator=(MultisampleTexture&& other) {
 		close();
 		std::swap(id, other.id);
 	}
+
+	return *this;
 }
 
 void MultisampleTexture::resize(unsigned int width, unsigned int height) {
@@ -322,6 +328,8 @@ CubeMap& CubeMap::operator=(CubeMap&& other) {
 		close();
 		std::swap(id, other.id);
 	}
+
+	return *this;
 }
 
 void CubeMap::bind() {
@@ -398,6 +406,8 @@ DepthTexture& DepthTexture::operator=(DepthTexture&& other) {
 		close();
 		std::swap(id, other.id);
 	}
+
+	return *this;
 }
 
 void DepthTexture::bind() {

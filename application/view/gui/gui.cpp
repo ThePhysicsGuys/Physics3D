@@ -239,19 +239,11 @@ namespace GUI {
 	Vec4 fontColor = COLOR::SILVER;
 	double fontSize = 0.0009;
 
-	// Batch
-	BufferLayout bufferLayout({ 
-		{ "pos", BufferDataType::FLOAT2 },
-		{ "uv", BufferDataType::FLOAT2 },
-		{ "col", BufferDataType::FLOAT4 }
-	});
-
-	BatchConfig batchConfig(bufferLayout);
-	CommandBatch<Vertex>* batch;
+	GuiBatch* batch;
 
 	void init(Screen* screen, Font* font) {
 
-		GUI::batch = new CommandBatch<Vertex>(batchConfig);
+		GUI::batch = new GuiBatch();
 
 		GUI::screen = screen;
 		GUI::font = font;
@@ -372,7 +364,6 @@ namespace GUI {
 		Shaders::blurShader.updateTexture(screen->blurFrameBuffer->texture);
 		Shaders::blurShader.updateType(BlurShader::BlurType::HORIZONTAL);
 		screen->quad->render();
-		Shaders::blurShader.updateTexture(screen->blurFrameBuffer->texture);
 		Shaders::blurShader.updateType(BlurShader::BlurType::VERTICAL);
 		screen->quad->render();
 		screen->blurFrameBuffer->unbind();
@@ -384,8 +375,6 @@ namespace GUI {
 
 		Renderer::disableCulling();
 		Renderer::enableBlending();
-		Renderer::standardBlendFunction();
-		Renderer::disableDepthTest();
 		Shaders::guiShader.init(screen->camera.orthoMatrix);
 		GUI::batch->submit();
 	}

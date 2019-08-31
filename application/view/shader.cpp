@@ -291,6 +291,26 @@ Shader::Shader(const std::string& vertexShader, const std::string& fragmentShade
 	this->name = name;
 }
 
+Shader::~Shader() {
+	close();
+}
+
+Shader::Shader(Shader&& other) {
+	id = other.id;
+	other.id = 0;
+}
+
+Shader& Shader::operator=(Shader&& other) {
+	if (this != &other) {
+		close();
+		std::swap(id, other.id);
+		name = std::move(other.name);
+		uniforms = std::move(other.uniforms);
+	}
+
+	return *this;
+}
+
 void Shader::bind() {
 	glUseProgram(id);
 }

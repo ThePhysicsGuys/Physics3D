@@ -20,7 +20,7 @@ inline N lineSurfaceIntersection(Vector<N, 3> relativePos, Vector<N, 3> r, Vecto
 }
 
 /*
-	see rayTriangleIntersection
+	See rayTriangleIntersection
 */
 template<typename T>
 struct RayIntersection {
@@ -30,18 +30,18 @@ struct RayIntersection {
 };
 
 /*
-Ray is defined as: P0 + r*P
-Triangle surface is defined by: S0 + s*U + t*V
+	Ray is defined as: P0 + r*P
+	Triangle surface is defined by: S0 + s*U + t*V
 
-To solve:
-P0 + r*P = S0 + s*U + t*V
-=> s*U + t*V - r*P + R0 = 0
-with R0 = P0-S0
+	To solve:
+	P0 + r*P = S0 + s*U + t*V
+	=> s*U + t*V - r*P + R0 = 0
+	with R0 = P0-S0
 
-Solving the system yields:
-d = -R0 * u%v / n*P
-s = -P * R0%u / n*P
-t =  P * R0%v / n*P
+	Solving the system yields:
+	d = -R0 * u%v / n*P
+	s = -P * R0%u / n*P
+	t =  P * R0%v / n*P
 */
 template<typename T>
 inline RayIntersection<T> rayTriangleIntersection(Vector<T, 3> point, Vector<T, 3> ray, Vector<T, 3> v0, Vector<T, 3> v1, Vector<T, 3> v2) {
@@ -61,7 +61,7 @@ inline RayIntersection<T> rayTriangleIntersection(Vector<T, 3> point, Vector<T, 
 }
 
 /*
-	computes the squared distance of a point at relativePoint to a plane going through the origin, with normal planeNormal
+	Computes the squared distance of a point at relativePoint to a plane going through the origin, with normal planeNormal
 	
 	(planeNormal * relativePoint)*(planeNormal * relativePoint) / planeNormal.lengthSquared();
 */

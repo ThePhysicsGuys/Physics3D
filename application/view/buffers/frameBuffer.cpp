@@ -60,6 +60,8 @@ FrameBuffer& FrameBuffer::operator=(FrameBuffer&& other) {
 		std::swap(texture, other.texture);
 		std::swap(renderBuffer, other.renderBuffer);
 	}
+
+	return *this;
 }
 
 void FrameBuffer::bind() {
@@ -145,6 +147,8 @@ HDRFrameBuffer& HDRFrameBuffer::operator=(HDRFrameBuffer&& other) {
 		std::swap(texture, other.texture);
 		std::swap(renderBuffer, other.renderBuffer);
 	}
+
+	return *this;
 }
 
 void HDRFrameBuffer::resize(Vec2i dimension) {
@@ -216,6 +220,8 @@ MultisampleFrameBuffer& MultisampleFrameBuffer::operator=(MultisampleFrameBuffer
 		std::swap(texture, other.texture);
 		std::swap(renderBuffer, other.renderBuffer);
 	}
+
+	return *this;
 }
 
 void MultisampleFrameBuffer::resize(Vec2i dimension) {
@@ -275,6 +281,8 @@ DepthFrameBuffer& DepthFrameBuffer::operator=(DepthFrameBuffer&& other) {
 		std::swap(id, other.id);
 		std::swap(texture, other.texture);
 	}
+
+	return *this;
 }
 
 void DepthFrameBuffer::bind() {

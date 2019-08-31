@@ -26,6 +26,8 @@ RenderBuffer& RenderBuffer::operator=(RenderBuffer&& other) {
 		close();
 		std::swap(id, other.id);
 	}
+
+	return *this;
 }
 
 
@@ -75,6 +77,8 @@ MultisampleRenderBuffer& MultisampleRenderBuffer::operator=(MultisampleRenderBuf
 		close();
 		std::swap(id, other.id);
 	}
+
+	return *this;
 }
 
 void MultisampleRenderBuffer::resize(unsigned int width, unsigned int height) {

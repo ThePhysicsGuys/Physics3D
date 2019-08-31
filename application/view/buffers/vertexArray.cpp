@@ -28,6 +28,8 @@ VertexArray& VertexArray::operator=(VertexArray&& other) {
 		close();
 		std::swap(id, other.id);
 	}
+
+	return *this;
 }
 
 void VertexArray::bind() {

@@ -24,7 +24,7 @@ BufferElement::BufferElement(std::string name, BufferDataType::BufferDataTypeInf
 }
 
 BufferLayout::BufferLayout() : stride(0) {
-
+	
 };
 
 BufferLayout::BufferLayout(std::vector<BufferElement> elements) : elements(elements) {

@@ -9,10 +9,11 @@ namespace Path {
 
 	//! Batch
 
-	extern CommandBatch<GUI::Vertex>* batch;
+	// Current batch
+	extern GuiBatch* batch;
 
 	// Binds the given batch
-	void bind(CommandBatch<GUI::Vertex>* batch);
+	void bind(GuiBatch* batch);
 
 	//! Primitives
 

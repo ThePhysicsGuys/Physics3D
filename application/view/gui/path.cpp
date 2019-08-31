@@ -9,12 +9,13 @@
 
 namespace Path {
 
+	#pragma region Batch
 
 	//! Batch
 
-	CommandBatch<GUI::Vertex>* batch = nullptr;
+	GuiBatch* batch = nullptr;
 
-	void bind(CommandBatch<GUI::Vertex>* batch) {
+	void bind(GuiBatch* batch) {
 		Path::batch = batch;
 	}
 
@@ -57,6 +58,9 @@ namespace Path {
 		pushQuad(Vec2f(a + dxy), Vec2f(b + dxy), Vec2f(b - dxy), Vec2f(a - dxy), colorA, colorB, colorB, colorA);
 	}
 
+	#pragma endregion
+
+	#pragma region Primitives
 
 	//! Primitives
 
@@ -458,6 +462,10 @@ namespace Path {
 		}
 	}
 
+	#pragma endregion
+
+	#pragma region Path
+
 	//! Path
 
 	std::vector<Vec2f> path;
@@ -522,4 +530,7 @@ namespace Path {
 
 		clear();
 	}
+
+	#pragma endregion
+
 }

@@ -33,6 +33,8 @@ VertexBuffer& VertexBuffer::operator=(VertexBuffer&& other) {
 		close();
 		std::swap(id, other.id);
 	}
+
+	return *this;
 }
 
 void VertexBuffer::fill(const void * data, size_t sizeInBytes, unsigned int mode) {

@@ -34,6 +34,8 @@ IndexBuffer& IndexBuffer::operator=(IndexBuffer&& other) {
 		close();
 		std::swap(id, other.id);
 	}
+
+	return *this;
 }
 
 void IndexBuffer::fill(const unsigned int* data, size_t size, unsigned int mode) {

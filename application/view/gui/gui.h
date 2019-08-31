@@ -3,7 +3,7 @@
 #include "../engine/math/vec.h"
 #include "../engine/math/mat4.h"
 
-#include "../batch/commandBatch.h"
+#include "../batch/guiBatch.h"
 #include "../batch/batchConfig.h"
 
 #include <string>
@@ -160,15 +160,7 @@ namespace GUI {
 	void update(Mat4f orthoMatrix);
 	void render(Mat4f orthoMatrix);
 
-	// Batch
-	struct Vertex {
-		Vec2f pos;
-		Vec2f uv;
-		Vec4f col;
-	};
-
-	extern BatchConfig batchConfig;
-	extern CommandBatch<GUI::Vertex>* batch;
+	extern GuiBatch* batch;
 };
 
 #include "component.h"
