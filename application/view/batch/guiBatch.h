@@ -36,7 +36,8 @@ public:
 				BufferElement("pos", BufferDataType::FLOAT2),
 				BufferElement("uv", BufferDataType::FLOAT2),
 				BufferElement("col", BufferDataType::FLOAT4)
-			})
+			}),
+			Renderer::TRIANGLES
 		)) {
 
 	}

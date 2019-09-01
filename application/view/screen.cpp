@@ -243,6 +243,13 @@ void Screen::render() {
 }
 
 void Screen::close() {
+	screenFrameBuffer->close();
+	blurFrameBuffer->close();
+
+	layerStack.close();
+
+	Library::close();
+
 	Shaders::close();
 
 	KeyboardOptions::save(properties);

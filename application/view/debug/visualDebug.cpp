@@ -7,7 +7,7 @@
 
 #include "../font.h"
 #include "../batch/commandBatch.h"
-#include "../gui/path.h"
+#include "../path/path.h"
 #include "../gui/gui.h"
 
 #include "../../threePhaseBuffer.h"

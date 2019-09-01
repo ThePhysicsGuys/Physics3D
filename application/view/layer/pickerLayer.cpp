@@ -27,4 +27,5 @@ void PickerLayer::render() {
 }
 
 void PickerLayer::close() {
+	Picker::close();
 }

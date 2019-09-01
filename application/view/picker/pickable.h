@@ -7,6 +7,7 @@ class Screen;
 struct Pickable {
 	virtual void init() {};
 	virtual void render(Screen& screen) {};
+	virtual void close() {};
 
 	virtual float intersect(Screen&, const Ray& ray) = 0;
 

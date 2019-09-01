@@ -145,6 +145,13 @@ void EditTools::render(Screen& screen) {
 	Renderer::disableDepthTest();
 }
 
+void EditTools::close() {
+	rotateMesh->close();
+	translateCenterMesh->close();
+	translateMesh->close();
+	scaleCenterMesh->close();
+	scaleMesh->close();
+}
 
 float EditTools::intersect(Screen& screen, const Ray& ray) {
 	VisualShape* tool[2];
@@ -203,7 +210,6 @@ void EditTools::press(Screen& screen) {
 	selectedEditDirection = intersectedEditDirection;
 	selectedPoint = intersectedPoint;
 }
-
 
 void EditTools::release(Screen& screen) {
 	selectedEditDirection = EditDirection::NONE;

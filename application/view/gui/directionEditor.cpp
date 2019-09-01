@@ -5,7 +5,7 @@
 #include "../engine/math/mathUtil.h"
 
 #include "gui.h"
-#include "path.h"
+#include "../path/path.h"
 #include "../texture.h"
 #include "../material.h"
 #include "../shaderProgram.h"

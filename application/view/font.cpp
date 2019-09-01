@@ -8,7 +8,7 @@
 #include "renderUtils.h"
 #include "gui/gui.h"
 #include "mesh/primitive.h"
-#include "gui/path.h"
+#include "path/path.h"
 
 #include "../util/log.h"
 
@@ -92,6 +92,28 @@ Font::Font(std::string font) {
 	atlas = new Texture(atlasDimension, atlasDimension, pixels, GL_RGBA);
 
 	Log::resetSubject();
+}
+
+Font::~Font() {
+	close();
+}
+
+Font::Font(Font&& other) {
+	atlas = other.atlas;
+	other.atlas = nullptr;
+}
+
+Font& Font::operator=(Font&& other) {
+	if (this != &other) {
+		close();
+		atlas = std::move(other.atlas);
+	}
+
+	return *this;
+}
+
+void Font::close() {
+	atlas->close();
 }
 
 Vec2 Font::size(const std::string& text, double size) {

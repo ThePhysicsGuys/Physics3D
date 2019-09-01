@@ -57,5 +57,5 @@ void GuiLayer::render() {
 }
 
 void GuiLayer::close() {
-	
+	GUI::close();
 }

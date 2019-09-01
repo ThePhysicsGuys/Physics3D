@@ -13,6 +13,7 @@ namespace Picker {
 	void init();
 	void update(Screen& screen, Vec2 mousePosition);
 	void render(Screen& screen);
+	void close();
 
 	void press(Screen& screen);
 	void release(Screen& screen);

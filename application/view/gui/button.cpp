@@ -3,7 +3,7 @@
 #include "../texture.h"
 #include "../shaderProgram.h"
 #include "../font.h"
-#include "path.h"
+#include "../path/path.h"
 
 #include "../mesh/primitive.h"
 

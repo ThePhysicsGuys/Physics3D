@@ -1,7 +1,7 @@
 #include "label.h"
 
 #include "gui.h"
-#include "path.h"
+#include "../path/path.h"
 
 #include "../shaderProgram.h"
 #include "../renderUtils.h"

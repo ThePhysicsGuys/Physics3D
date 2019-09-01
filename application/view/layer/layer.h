@@ -9,7 +9,7 @@ protected:
 	Screen* screen = nullptr;
 public:
 
-	static enum {
+	enum {
 		// No flags, update, render and events are called
 		none = 0,
 
@@ -41,6 +41,5 @@ public:
 	virtual void event() {}
 	virtual void update() {}
 	virtual void render() {}
-
 	virtual void close() {}
 };

@@ -5,7 +5,7 @@
 #include "orderedVector.h"
 #include "colorPicker.h"
 #include "frame.h"
-#include "path.h"
+#include "../path/path.h"
 
 #include "../../visualShape.h"
 #include "../../io/import.h"
@@ -377,5 +377,32 @@ namespace GUI {
 		Renderer::enableBlending();
 		Shaders::guiShader.init(screen->camera.orthoMatrix);
 		GUI::batch->submit();
+	}
+
+	void close() {
+		// Framebuffers
+		guiFrameBuffer->close();
+
+		// Textures
+		closeButtonHoverTexture->close();
+		closeButtonIdleTexture->close();
+		closeButtonPressTexture->close();
+		minimizeButtonHoverTexture->close();
+		minimizeButtonIdleTexture->close();
+		minimizeButtonPressTexture->close();
+		colorPickerCrosshairTexture->close();
+		colorPickerHueTexture->close();
+		colorPickerBrightnessTexture->close();
+		colorPickerAlphaBrightnessTexture->close();
+		colorPickerAlphaPatternTexture->close();
+		checkBoxUncheckedTexture->close();
+		checkBoxCheckedTexture->close();
+		checkBoxPressCheckedTexture->close();
+		checkBoxPressUncheckedTexture->close();
+		checkBoxHoverCheckedTexture->close();
+		checkBoxHoverUncheckedTexture->close();
+		
+		// Fonts
+		font->close();
 	}
 }

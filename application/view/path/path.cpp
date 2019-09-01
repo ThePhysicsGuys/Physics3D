@@ -2,7 +2,6 @@
 
 #include <vector>
 
-#include "gui.h"
 #include "../font.h"
 #include "../screen.h"
 #include "../engine/math/mathUtil.h"

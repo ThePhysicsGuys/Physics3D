@@ -43,6 +43,66 @@ public:
 		currentIndex = 0;
 	};
 
+	Batch(const Batch&) = delete;
+
+	Batch& operator=(const Batch&) = delete;
+
+	~Batch() {
+		close();
+	}
+
+	Batch(Batch&& other) {
+		vao = other.vao;
+		other.vao = nullptr;
+
+		vbo = other.vbo;
+		other.vbo = nullptr;
+
+		ibo = other.ibo;
+		other.ibo = nullptr;
+
+		indexCounter = other.indexCounter;
+		other.indexCounter = 0;
+
+		currentIndex = other.currentIndex;
+		other.currentIndex = 0;
+
+		vertexBuffer = std::move(other.vertexBuffer);
+		other.vertexBuffer.clear();
+
+		indexBuffer = std::move(other.indexBuffer);
+		other.indexBuffer.clear();
+
+		vertexPointer = other.vertexPointer;
+		other.vertexPointer = other.vertexBuffer.data();
+
+		indexPointer = other.indexPointer;
+		other.indexPointer = other.indexBuffer.data();
+
+		config = std::move(other.config);
+	}
+
+	Batch& operator=(Batch&& other) {
+		if (this != &other) {
+			close();
+			std::swap(vao, other.vao);
+			std::swap(vbo, other.vbo);
+			std::swap(ibo, other.ibo);
+
+			config = std::move(other.config);
+			vertexBuffer = std::move(other.vertexBuffer);
+			indexBuffer = std::move(other.indexBuffer);
+
+			indexCounter = std::move(other.indexBuffer);
+			currentIndex = std::move(other.currentIndex);
+
+			vertexPointer = std::move(other.vertexPointer);
+			indexPointer = std::move(other.indexPointer);
+		}
+
+		return *this;
+	}
+
 	inline void pushVertex(Vertex vertex) {
 		*vertexPointer++ = vertex;
 		indexCounter++;
@@ -91,6 +151,12 @@ public:
 
 		currentIndex = 0;
 		indexCounter = 0;
+	}
+
+	void close() {
+		vao->close();
+		vbo->close();
+		ibo->close();
 	}
 };
 

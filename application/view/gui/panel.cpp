@@ -2,7 +2,7 @@
 
 #include "gui.h"
 
-#include "path.h"
+#include "../path/path.h"
 
 #include "../shaderProgram.h"
 

@@ -3,7 +3,7 @@
 #include "guiUtils.h"
 #include "../shaderProgram.h"
 #include "../texture.h"
-#include "path.h"
+#include "../path/path.h"
 #include "../mesh/primitive.h"
 
 ColorPicker::ColorPicker(double x, double y, double size) : Component(x, y, size, size) {

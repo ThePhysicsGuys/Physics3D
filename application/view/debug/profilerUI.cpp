@@ -8,7 +8,7 @@
 #include "../engine/math/mat2.h"
 
 #include "../batch/commandBatch.h"
-#include "../gui/path.h"
+#include "../path/path.h"
 #include "../gui/gui.h"
 #include "../screen.h"
 #include "../font.h"
@@ -235,7 +235,7 @@ void recursiveRenderTree(const TreeNode& tree, const Vec3f& treeColor, Vec2f ori
 			recursiveRenderTree(tree[i], treeColor, nextStep, allottedWidth / tree.nodeCount, maxCost);
 		}
 	}
-	if (!tree.divisible) Path::circleFilled(origin, 0.006, GUI::COLOR::RED, 8);
+	if (!tree.divisible) Path::circleFilled(origin, 0.006f, GUI::COLOR::RED, 8);
 }
 
 void renderTreeStructure(Screen& screen, const TreeNode& tree, const Vec3f& treeColor, Vec2f origin, float allottedWidth) {

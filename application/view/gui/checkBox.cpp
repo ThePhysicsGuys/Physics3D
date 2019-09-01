@@ -1,7 +1,7 @@
 #include "CheckBox.h"
 
 #include "label.h"
-#include "path.h"
+#include "../path/path.h"
 
 #include "../texture.h"
 #include "../shaderProgram.h"
@@ -65,8 +65,6 @@ void CheckBox::render() {
 				checkBoxDimension = Vec2(GUI::checkBoxSize);
 			}
 		}
-
-		GUI::quad->resize(checkBoxPosition, checkBoxDimension);
 
 		if (pressed)
 			if (textured)

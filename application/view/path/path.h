@@ -3,8 +3,6 @@
 #include "../engine/math/vec.h"
 #include "../gui/gui.h"
 
-class Font;
-
 namespace Path {
 
 	//! Batch

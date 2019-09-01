@@ -49,5 +49,5 @@ void SkyboxLayer::render() {
 }
 
 void SkyboxLayer::close() {
-
+	skyboxTexture->close();
 }

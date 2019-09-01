@@ -45,6 +45,11 @@ namespace Picker {
 		}
 	}
 
+	// Close
+	void close() {
+		editTools.close();
+	}
+
 	// Intersections
 	// Intersection distance of the given ray with the given shape, transformed with the given cframe. 
 	float intersect(const Ray& ray, const Shape& shape, const GlobalCFrame& cframe) {

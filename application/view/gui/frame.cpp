@@ -1,6 +1,6 @@
 #include "frame.h"
 
-#include "path.h"
+#include "../path/path.h"
 #include "button.h"
 #include "label.h"
 

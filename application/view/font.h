@@ -49,6 +49,14 @@ public:
 
 	Font(std::string font);
 
+	~Font();
+	Font(Font&& other);
+	Font(const Font&) = delete;
+	Font& operator=(Font&& other);
+	Font& operator=(const Font&) = delete;
+
+	void close();
+
 	Vec2 size(const std::string& text, double scale);
 
 	unsigned int getAtlasID() const;

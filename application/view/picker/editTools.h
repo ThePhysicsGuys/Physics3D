@@ -31,6 +31,7 @@ struct EditTools : public Pickable {
 
 	void init() override;
 	void render(Screen& screen) override;
+	void close();
 
 	float intersect(Screen& screen, const Ray& ray) override;
 

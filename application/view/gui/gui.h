@@ -73,9 +73,6 @@ namespace GUI {
 	// ColorPicker
 	extern Frame* colorPickerFrame;
 	extern ColorPicker* colorPicker;
-
-	// Quad
-	extern Quad* quad;
 	
 	// Default
 	extern double padding;
@@ -83,9 +80,6 @@ namespace GUI {
 
 	// Label
 	extern Vec4 labelBackgroundColor;
-
-	// DirectionEditor
-	extern IndexedMesh* vectorMesh;
 
 	// Button
 	extern Texture* closeButtonHoverTexture;
@@ -145,6 +139,9 @@ namespace GUI {
 	extern Vec4 fontColor;
 	extern double fontSize;
 
+	// Batch
+	extern GuiBatch* batch;
+
 	// Container functions
 	void add(Component* component);
 	void remove(Component* component);
@@ -159,8 +156,7 @@ namespace GUI {
 	void init(Screen* screen, Font* font);
 	void update(Mat4f orthoMatrix);
 	void render(Mat4f orthoMatrix);
-
-	extern GuiBatch* batch;
+	void close();
 };
 
 #include "component.h"

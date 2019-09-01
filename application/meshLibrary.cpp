@@ -30,5 +30,6 @@ namespace Library {
 	void close() {
 		cube->close();
 		sphere->close();
+		vector->close();
 	}
 }

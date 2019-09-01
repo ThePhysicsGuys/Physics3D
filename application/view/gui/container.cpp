@@ -1,7 +1,7 @@
 #include "container.h"
 
 #include "layout.h"
-#include "path.h"
+#include "../path/path.h"
 
 #include "../shaderProgram.h"
 #include "../renderUtils.h"
