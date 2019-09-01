@@ -28,20 +28,20 @@ struct TreeNode {
 	New elements will not be added to this group unless specifically specified
 	If false, then no subnodes are allowed to be exchanged with the rest of the tree. This node must be viewed as a black box. 
 	*/
-	bool divisible = true;
+	bool isGroupHead = false;
 
 	inline bool isLeafNode() const { return nodeCount == LEAF_NODE_SIGNIFIER; }
 
 	inline TreeNode() : nodeCount(LEAF_NODE_SIGNIFIER), object(nullptr) {}
 	inline TreeNode(TreeNode* subTrees, int nodeCount);
 	inline TreeNode(void* object, const Bounds& bounds) : nodeCount(LEAF_NODE_SIGNIFIER), object(object), bounds(bounds) {}
-	inline TreeNode(void* object, const Bounds& bounds, bool divisible) : nodeCount(LEAF_NODE_SIGNIFIER), object(object), bounds(bounds), divisible(divisible) {}
+	inline TreeNode(void* object, const Bounds& bounds, bool isGroupHead) : nodeCount(LEAF_NODE_SIGNIFIER), object(object), bounds(bounds), isGroupHead(isGroupHead) {}
 	inline TreeNode(const Bounds& bounds, TreeNode* subTrees, int nodeCount) : bounds(bounds), subTrees(subTrees), nodeCount(nodeCount) {}
 
 	inline TreeNode(const TreeNode&) = delete;
 	inline void operator=(const TreeNode&) = delete;
 
-	inline TreeNode(TreeNode&& other) noexcept : nodeCount(other.nodeCount), subTrees(other.subTrees), bounds(other.bounds), divisible(other.divisible) {
+	inline TreeNode(TreeNode&& other) noexcept : nodeCount(other.nodeCount), subTrees(other.subTrees), bounds(other.bounds), isGroupHead(other.isGroupHead) {
 		other.subTrees = nullptr;
 		other.nodeCount = LEAF_NODE_SIGNIFIER;
 	}
@@ -49,7 +49,7 @@ struct TreeNode {
 		std::swap(this->nodeCount, other.nodeCount);
 		std::swap(this->subTrees, other.subTrees);
 		std::swap(this->bounds, other.bounds);
-		std::swap(this->divisible, other.divisible);
+		std::swap(this->isGroupHead, other.isGroupHead);
 		return *this;
 	}
 	
@@ -72,7 +72,9 @@ struct TreeNode {
 
 		if (nodeCount == 1) {
 			TreeNode* buf = subTrees;
+			bool resultDivisible = this->isGroupHead || buf[0].isGroupHead;
 			new(this) TreeNode(std::move(buf[0]));
+			this->isGroupHead = resultDivisible;
 			delete[] buf;
 		}
 	}
@@ -97,33 +99,69 @@ struct TreeStackElement {
 
 extern TreeNode dummy_TreeNode;
 
-struct TreeIterBase {
-	TreeStackElement stack[MAX_HEIGHT];
+struct NodeStack {
 	TreeStackElement* top;
+	TreeStackElement stack[MAX_HEIGHT];
 
-	TreeIterBase(TreeNode& rootNode) : stack{ TreeStackElement{&rootNode, 0} }, top(stack) {
+	NodeStack(TreeNode& rootNode) : stack{ TreeStackElement{&rootNode, 0} }, top(stack) {
 		if (rootNode.nodeCount == 0) {
 			top--;
 		}
 	}
-	TreeIterBase(const TreeIterBase& other) : stack{}, top(this->stack + (other.top - other.stack)) {
+	// a find function, returning the stack of all nodes leading up to the requested object
+	NodeStack(TreeNode& rootNode, const void* objToFind, const Bounds& objBounds) : NodeStack(rootNode) {
+		if (rootNode.isLeafNode()) {
+			if (rootNode.object == objToFind) {
+				return;
+			} else {
+				throw "Could not find obj in Tree!";
+			}
+		}
+		while (top + 1 != stack) {
+			if (top->index != top->node->nodeCount) {
+				TreeNode* nextNode = top->node->subTrees + top->index;
+				if (nextNode->bounds.contains(objBounds)) {
+					if (nextNode->isLeafNode()) {
+						if (nextNode->object == objToFind) {
+							top++;
+							*top = TreeStackElement{ nextNode, 0 };
+							return;
+						} else {
+							top->index++;
+						}
+					} else {
+						top++;
+						*top = TreeStackElement{ nextNode, 0 };
+					}
+				} else {
+					top->index++;
+				}
+			} else {
+				top--;
+				top->index++;
+			}
+		}
+
+		throw "Could not find obj in Tree!";
+	}
+	NodeStack(const NodeStack& other) : stack{}, top(this->stack + (other.top - other.stack)) {
 		for (int i = 0; i < top - stack + 1; i++) {
 			this->stack[i] = other.stack[i];
 		}
 	}
-	TreeIterBase(TreeIterBase&& other) noexcept : stack{}, top(this->stack + (other.top - other.stack)) {
+	NodeStack(NodeStack&& other) noexcept : stack{}, top(this->stack + (other.top - other.stack)) {
 		for (int i = 0; i < top - stack + 1; i++) {
 			this->stack[i] = other.stack[i];
 		}
 	}
-	TreeIterBase& operator=(const TreeIterBase& other) {
+	NodeStack& operator=(const NodeStack& other) {
 		this->top = this->stack + (other.top - other.stack);
 		for (int i = 0; i < top - stack + 1; i++) {
 			this->stack[i] = other.stack[i];
 		}
 		return *this;
 	}
-	TreeIterBase& operator=(TreeIterBase&& other) noexcept {
+	NodeStack& operator=(NodeStack&& other) noexcept {
 		this->top = this->stack + (other.top - other.stack);
 		for (int i = 0; i < top - stack + 1; i++) {
 			this->stack[i] = other.stack[i];
@@ -151,6 +189,20 @@ struct TreeIterBase {
 		} while (top->index == top->node->nodeCount);
 	}
 
+	inline void riseUntilGroupHeadDoWhile() {
+		do {
+			top--;
+			if (top < stack) throw "Did not find groupHead node above!";
+		} while (!top->node->isGroupHead);
+	}
+
+	inline void riseUntilGroupHeadWhile() {
+		while (!top->node->isGroupHead) {
+			top--;
+			if (top < stack) throw "Did not find groupHead node above!";
+		};
+	}
+
 	inline void updateBoundsAllTheWayToTop() {
 		TreeStackElement* newTop = top;
 		while (newTop + 1 != stack) {
@@ -175,8 +227,8 @@ struct TreeIterBase {
 	}
 };
 
-struct ConstTreeIterator : public TreeIterBase {
-	ConstTreeIterator(TreeNode& rootNode) : TreeIterBase(rootNode) {
+struct ConstTreeIterator : public NodeStack {
+	ConstTreeIterator(TreeNode& rootNode) : NodeStack(rootNode) {
 		// the very first element is a dummy, in order to detect when the tree is done
 		
 		if (rootNode.nodeCount == 0) return;
@@ -215,7 +267,7 @@ struct TreeIterator : public ConstTreeIterator {
 		if (rootNode.nodeCount == 0) return;
 	}
 	inline void remove() {
-		TreeIterBase::remove();
+		NodeStack::remove();
 		if (top < stack) return;
 		delveDown();
 	}
@@ -241,9 +293,9 @@ struct TreeIterator : public ConstTreeIterator {
 		However, BoundsNotContainedIn IS a correct filter
 */
 template<typename Filter>
-struct FilteredTreeIterator : public TreeIterBase {
+struct FilteredTreeIterator : public NodeStack {
 	Filter filter;
-	FilteredTreeIterator(TreeNode& rootNode, const Filter& filter) : TreeIterBase(rootNode), filter(filter) {
+	FilteredTreeIterator(TreeNode& rootNode, const Filter& filter) : NodeStack(rootNode), filter(filter) {
 		// the very first element is a dummy, in order to detect when the tree is done
 		if (rootNode.nodeCount == 0) return;
 
@@ -287,7 +339,7 @@ struct FilteredTreeIterator : public TreeIterBase {
 		delveDownFiltered();
 	}
 	inline void remove() {
-		TreeIterBase::remove();
+		NodeStack::remove();
 		if (top < stack) return;
 		delveDownFiltered();
 	}
@@ -346,46 +398,31 @@ struct BoundsTree {
 	}
 
 	void add(Boundable* obj, const Bounds& bounds) {
-		rootNode.addOutside(TreeNode(obj, bounds, false));
+		this->rootNode.addOutside(TreeNode(obj, bounds, true));
 	}
 
 	void addToExistingGroup(Boundable* obj, const Bounds& bounds, TreeNode& groupNode) {
-		groupNode.addInside(TreeNode(obj, bounds, true));
+		groupNode.addInside(TreeNode(obj, bounds, false));
 	}
 
-	void addToExistingGroup(Boundable* obj, const Bounds& bounds, Boundable* objInGroup, const Bounds& objInGroupBounds) {
-		for (FilteredTreeIterator<FinderFilter> iter(this->rootNode, FinderFilter(objInGroupBounds)); iter != IteratorEnd(); ++iter) {
-			TreeNode* curNode = *iter;
-			if (curNode->object == objInGroup) {
-				while (curNode->divisible) {
-					iter.top--;
-					curNode = *iter;
-				}
-				addToExistingGroup(obj, bounds, *curNode);
-				iter.updateBoundsAllTheWayToTop();
-				TreeStackElement* newTop = iter.top;
-				while (newTop + 1 != iter.stack) {
-					TreeNode* n = newTop->node;
-					n->bounds = unionOfBounds(n->bounds, bounds);
-					newTop--;
-				}
-				return;
-			}
+	void addToExistingGroup(Boundable* obj, const Bounds& bounds, const Boundable* objInGroup, const Bounds& objInGroupBounds) {
+		NodeStack iter(rootNode, objInGroup, objInGroupBounds);
+		iter.riseUntilGroupHeadWhile();
+		addToExistingGroup(obj, bounds, **iter);
+		iter.updateBoundsAllTheWayToTop();
+		TreeStackElement* newTop = iter.top;
+		while (newTop + 1 != iter.stack) {
+			TreeNode* n = newTop->node;
+			n->bounds = unionOfBounds(n->bounds, bounds);
+			newTop--;
 		}
-
-		throw "objInGroup was not found in this boundsTree, might objInGroupBounds be incorrect?";
 	}
 
-	void remove(Boundable* obj, const Bounds& strictBounds) {
-		for (FilteredTreeIterator<FinderFilter> iter(rootNode, strictBounds); iter != IteratorEnd(); ++iter) {
-			if ((*iter)->object == obj) {
-				iter.remove();
-				return;
-			}
-		}
-		throw "Object to remove not found!";
+	void remove(const Boundable* obj, const Bounds& strictBounds) {
+		NodeStack stack(rootNode, obj, strictBounds);
+		stack.remove();
 	}
-	void remove(Boundable* obj) {
+	void remove(const Boundable* obj) {
 		this->remove(obj, obj->getStrictBounds());
 	}
 
@@ -397,6 +434,26 @@ struct BoundsTree {
 
 		rootNode.recalculateBoundsRecursive();
 	}
+	
+	void updateObjectBounds(const Boundable* obj, const Bounds& oldBounds) {
+		NodeStack stack(rootNode, obj, oldBounds);
+		stack.top->node->bounds = obj->getStrictBounds();
+
+		stack.updateBoundsAllTheWayToTop();
+	}
+	void updateObjectGroupBounds(const Boundable* objInGroup, const Bounds& objOldBounds) {
+		NodeStack stack(rootNode, objInGroup, objOldBounds);
+		stack.riseUntilGroupHeadWhile(); // find group obj belongs to
+
+		for (TreeIterator iter(*stack.top->node); iter != IteratorEnd(); ++iter) {
+			TreeNode* node = *iter;
+			node->bounds = static_cast<Boundable*>(node->object)->getStrictBounds();
+		}
+		stack.top->node->recalculateBoundsRecursive(); // refresh group bounds
+
+		stack.updateBoundsAllTheWayToTop(); // refresh rest of tree to accommodate
+	}
+
 	inline void improveStructure() { rootNode.improveStructure(); }
 	
 	inline TreeIterator begin() { return TreeIterator(rootNode); };

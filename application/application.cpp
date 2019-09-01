@@ -53,8 +53,8 @@ int main(void) {
 
 void init() {
 	setupScreen();
-	setupPhysics();
 	setupWorld();
+	setupPhysics();
 	setupDebug();
 }
 

@@ -39,7 +39,7 @@ inline long long computeCombinationCost(const Bounds& newBox, const Bounds& expa
 	return computeCost(combinedBounds);
 }
 
-inline TreeNode::TreeNode(TreeNode* subTrees, int nodeCount) : subTrees(subTrees), nodeCount(nodeCount), divisible(true), bounds(computeBoundsOfList(subTrees, nodeCount)) {}
+inline TreeNode::TreeNode(TreeNode* subTrees, int nodeCount) : subTrees(subTrees), nodeCount(nodeCount), isGroupHead(false), bounds(computeBoundsOfList(subTrees, nodeCount)) {}
 
 TreeNode::~TreeNode() {
 	if (!isLeafNode()) {
@@ -66,7 +66,7 @@ void addToSubTrees(TreeNode& node, TreeNode&& newNode) {
 
 // If this node is undivisible, then the new node will be added to be outside of this node
 void TreeNode::addOutside(TreeNode&& newNode) {
-	if (this->divisible) {
+	if (!this->isGroupHead) {
 		this->addInside(std::move(newNode));
 	} else {
 		// push the whole group down, make a new node containing it and the new node
@@ -89,9 +89,9 @@ void TreeNode::addInside(TreeNode&& newNode) {
 		// only the top node of a group is undivisible, restructuring within a group is still allowed
 
 		new(this) TreeNode(newNodes, 2);
-		this->divisible = newNodes[0].divisible;
-		newNodes[0].divisible = true;
-		newNodes[1].divisible = true;
+		this->isGroupHead = newNodes[0].isGroupHead;
+		newNodes[0].isGroupHead = false;
+		newNodes[1].isGroupHead = false;
 	} else {
 		addToSubTrees(*this, std::move(newNode));
 	}
@@ -371,10 +371,10 @@ void TreeNode::improveStructure() {
 		// horizontal structure improvement
 		for (int i = 0; i < nodeCount - 1; i++) {
 			TreeNode& A = subTrees[i];
-			if (!A.divisible) continue;
+			if (A.isGroupHead) continue;
 			for (int j = i + 1; j < nodeCount; j++) {
 				TreeNode& B = subTrees[j];
-				if (!B.divisible) continue;
+				if (B.isGroupHead) continue;
 				if (intersects(A.bounds, B.bounds)) {
 					optimizeNodePairHorizontal(A, B);
 				}
@@ -384,7 +384,7 @@ void TreeNode::improveStructure() {
 		for (int i = 0; i < nodeCount; i++) {
 			TreeNode& A = subTrees[i];
 			if (A.isLeafNode()) continue;
-			if (!A.divisible) continue;
+			if (A.isGroupHead) continue;
 			for (int j = 0; j < nodeCount; j++) {
 				if (i == j) continue;
 				TreeNode& B = subTrees[j];

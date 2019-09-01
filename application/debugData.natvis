@@ -4,8 +4,8 @@
     <DisplayString>{double(value) / (1ULL &lt;&lt; $T1),g}</DisplayString>
   </Type>
   <Type Name="TreeNode">
-    <DisplayString Condition="nodeCount != 0x7FFFFFFF">TrunkNode Size={nodeCount} divisible={divisible}</DisplayString>
-    <DisplayString Condition="nodeCount == 0x7FFFFFFF">LeafNode {object} divisible={divisible}</DisplayString>
+    <DisplayString Condition="nodeCount != 0x7FFFFFFF">TrunkNode Size={nodeCount} isGroupHead={isGroupHead}</DisplayString>
+    <DisplayString Condition="nodeCount == 0x7FFFFFFF">LeafNode {object} isGroupHead={isGroupHead}</DisplayString>
     <Expand>
       <Item Name="bounds" ExcludeView="simple">bounds</Item>
       <ArrayItems Condition="nodeCount != 0x7FFFFFFF">
@@ -25,7 +25,7 @@
     </Expand>
   </Type>
   <Type Name="TreeStackElement">
-    <DisplayString Condition="node->nodeCount != 0x7FFFFFFF">index={index}/{node->nodeCount} bounds={node->bounds} divisible={node->divisible}</DisplayString>
+    <DisplayString Condition="node->nodeCount != 0x7FFFFFFF">index={index}/{node->nodeCount} bounds={node->bounds} isGroupHead={node->isGroupHead}</DisplayString>
     <DisplayString Condition="node->nodeCount == 0x7FFFFFFF">leafNode bounds={node->bounds}</DisplayString>
   </Type>
 </AutoVisualizer>
