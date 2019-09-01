@@ -115,7 +115,7 @@ namespace Picker {
 	void press(Screen& screen) {
 		// Check if users pressed on tool
 		
-		if (editTools.intersectedEditDirection != EditTools::EditDirection::NONE) {
+		if (screen.selectedPart && editTools.intersectedEditDirection != EditTools::EditDirection::NONE) {
 			editTools.press(screen);
 		} else { // Keep current part selected as long as tool is being used
 			// Update selected part
