@@ -8,6 +8,8 @@ public:
 	Vec3 localSelectedPoint;
 	Position magnetPoint;
 	virtual void applyExternalForces() override;
+
+	Part* selectedPart = nullptr;
 };
 
 class GravityWorld : public MagnetWorld {

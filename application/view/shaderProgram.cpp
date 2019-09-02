@@ -115,7 +115,7 @@ void BasicShader::updatePart(const ExtendedPart& part) {
 	bind();
 	shader.setUniform("includeNormals", part.visualShape.normals != nullptr);
 	shader.setUniform("includeUvs", part.visualShape.uvs != nullptr);
-	shader.setUniform("modelMatrix", TransformToMat4(part.cframe.position, Mat3f(part.cframe.rotation) * part.visualScale));
+	shader.setUniform("modelMatrix", TransformToMat4(part.getPosition(), Mat3f(part.getCFrame().getRotation()) * part.visualScale));
 }
 
 void BasicShader::updateMaterial(const Material& material) {

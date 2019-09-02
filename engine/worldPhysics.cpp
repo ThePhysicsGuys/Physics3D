@@ -132,18 +132,18 @@ inline void runColissionTests(Part& p1, Part& p2, WorldPrototype& world, std::ve
 	
 	double maxRadiusBetween = p1.maxRadius + p2.maxRadius;
 
-	Vec3 deltaPosition = p1.cframe.position - p2.cframe.position;
+	Vec3 deltaPosition = p1.getPosition() - p2.getPosition();
 	double distanceSqBetween = lengthSquared(deltaPosition);
 
 	if (distanceSqBetween > maxRadiusBetween * maxRadiusBetween) {
 		intersectionStatistics.addToTally(IntersectionResult::PART_DISTANCE_REJECT, 1);
 		return;
 	}
-	if (boundsSphereEarlyEnd(p1.localBounds, p1.cframe.globalToLocal(p2.cframe.getPosition()), p2.maxRadius)) {
+	if (boundsSphereEarlyEnd(p1.localBounds, p1.getCFrame().globalToLocal(p2.getPosition()), p2.maxRadius)) {
 		intersectionStatistics.addToTally(IntersectionResult::PART_BOUNDS_REJECT, 1);
 		return;
 	}
-	if (boundsSphereEarlyEnd(p2.localBounds, p2.cframe.globalToLocal(p1.cframe.getPosition()), p1.maxRadius)) {
+	if (boundsSphereEarlyEnd(p2.localBounds, p2.getCFrame().globalToLocal(p1.getPosition()), p1.maxRadius)) {
 		intersectionStatistics.addToTally(IntersectionResult::PART_BOUNDS_REJECT, 1);
 		return;
 	}

@@ -377,7 +377,7 @@ struct PropertiesFrame : public FrameBlueprint, public Frame {
 		if (selectedPart) {
 			partMeshIDLabel->text = "MeshID: " + std::to_string(selectedPart->drawMeshId);
 
-			positionLabel->text = "Position: " + str(selectedPart->cframe.position);
+			positionLabel->text = "Position: " + str(selectedPart->getCFrame().position);
 			partNameLabel->text = "Name: " + selectedPart->name;
 			velocityLabel->text = "Velocity: " + str(selectedPart->parent->velocity);
 			angularVelocityLabel->text = "Angular Velocity: " + str(selectedPart->parent->angularVelocity);

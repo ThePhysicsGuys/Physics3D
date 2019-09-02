@@ -82,7 +82,7 @@ void ModelLayer::render() {
 			material.ambient = part.material.ambient;
 
 		if (material.ambient.w < 1) {
-			transparentMeshes[lengthSquared(Vec3(screen->camera.cframe.position - part.cframe.position))] = &part;
+			transparentMeshes[lengthSquared(Vec3(screen->camera.cframe.position - part.getPosition()))] = &part;
 			continue;
 		}
 

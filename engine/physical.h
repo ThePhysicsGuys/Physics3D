@@ -63,6 +63,7 @@ class Physical {
 	void updateAttachedPartCFrames();
 	void translateUnsafe(const Vec3& translation);
 	void rotateAroundCenterOfMassUnsafe(const RotMat3& rotation);
+	void setCFrameUnsafe(const GlobalCFrame& newCFrame);
 public:
 	Part* mainPart;
 	WorldPrototype* world = nullptr;
@@ -164,6 +165,36 @@ public:
 	bool detachPart(Part* part);
 	void refreshWithNewParts();
 
+	void updatePart(const Part* updatedPart, const Bounds& updatedBounds);
+
+	CFrame getAttachFor(const Part* part) const {
+		if (part == mainPart) return CFrame();
+
+		for (const AttachedPart& p : parts) {
+			if (p.part == part)
+				return p.attachment;
+		}
+
+		throw "Part not in this physical!";
+	}
+
+	/*void setAttachFor(const Part* part, const CFrame& newCFrame) {
+		if (part != mainPart) {
+			for (AttachedPart& p : parts) {
+				if (p.part == part) {
+					p.attachment = newCFrame;
+					Bounds oldBounds = p.part->getStrictBounds();
+					p.part->cframe = getCFrame().localToGlobal(newCFrame);
+					world->updatePart(p.part, oldBounds);
+					return;
+				}
+			}
+		}
+
+		
+
+		throw "Part not in this physical!";
+	}*/
 
 	void update(double deltaT);
 	void applyForceAtCenterOfMass(Vec3 force);
@@ -180,7 +211,8 @@ public:
 	void translate(const Vec3& translation);
 
 	void setCFrame(const GlobalCFrame& newCFrame);
-	inline const GlobalCFrame& getCFrame() const { return mainPart->cframe; }
+	void setPartCFrame(Part* part, const GlobalCFrame& newCFrame);
+	inline const GlobalCFrame& getCFrame() const { return mainPart->getCFrame(); }
 
 	inline Position getPosition() const {
 		return getCentroid();

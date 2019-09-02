@@ -37,17 +37,29 @@ using DoubleFilterIter = FilteredIterator<FilteredBoundsTreeIter<Filter, Part>, 
 
 class WorldPrototype {
 private:
-	std::queue<std::function<void(WorldPrototype*)>> waitingOperations;
+	friend class Physical;
+	friend class Part;
+
+	std::queue<std::function<void(WorldPrototype&)>> waitingOperations;
 
 	size_t getTotalVertexCount();
 	void processQueue();
 
+	
 
 	void addPartUnsafe(Part* p, bool anchored);
 	void removePartUnsafe(Part* p);
 	void attachPartUnsafe(Part* part, Physical& phys, CFrame attachment);
 	void detachPartUnsafe(Part* part);
-	void pushOperation(const std::function<void(WorldPrototype*)>& operation);
+	void pushOperation(const std::function<void(WorldPrototype&)>& operation);
+	
+	void setPartCFrame(Part* part, const GlobalCFrame& newCFrame);
+	void updatePartBounds(const Part* updatedPart, const Bounds& updatedBounds);
+	void updatePartGroupBounds(const Part* mainPart, const Bounds& oldMainPartBounds);
+
+	//void registerGroupCFrameUpdate(const Part& partInGroup, const Bounds& oldBounds);
+	//void updatePartGroup(const Part& part, const Bounds& oldBounds);
+
 public:
 	mutable std::shared_mutex lock;
 	mutable std::mutex queueLock;
@@ -58,8 +70,6 @@ public:
 
 	SplitUnorderedList<Physical*> physicals;
 
-	Part* selectedPart = nullptr;
-
 	WorldPrototype();
 	WorldPrototype(size_t initialPartCapacity);
 
@@ -69,6 +79,8 @@ public:
 	WorldPrototype& operator=(WorldPrototype&&) = delete;
 
 	void tick(double deltaT);
+
+	void requestModification(const std::function<void(WorldPrototype&)>& function);
 
 	void addPart(Part* p, bool anchored = false);
 	void attachPart(Part* p, Physical& phys, CFrame attachment);

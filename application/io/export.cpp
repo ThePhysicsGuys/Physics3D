@@ -218,8 +218,8 @@ void savePart(std::ofstream& output, const ExtendedPart& part, std::string shape
 	output << "\tshape = " << shape << std::endl;
 	output << "\tname = " << part.name << std::endl;
 	output << "\tmode = " << Export::str(part.renderMode) << std::endl;
-	output << "\tposition = " << Export::str(part.cframe.position) << std::endl;
-	output << "\trotation = " << Export::str(part.cframe.rotation) << std::endl;
+	output << "\tposition = " << Export::str(part.getCFrame().position) << std::endl;
+	output << "\trotation = " << Export::str(part.getCFrame().rotation) << std::endl;
 	output << "\tdensity = " << Export::str(part.properties.density) << std::endl;
 	output << "\tfriction = " << Export::str(part.properties.friction) << std::endl;
 	output << "\tvelocity = " << Export::str(part.parent->velocity) << std::endl;

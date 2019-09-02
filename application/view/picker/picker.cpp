@@ -66,11 +66,11 @@ namespace Picker {
 
 		for (ExtendedPart& part : screen.world->iterPartsFiltered(RayIntersectBoundsFilter(ray))) {
 			if (&part == screen.camera.attachment) continue;
-			Vec3 relPos = part.cframe.position - ray.start;
+			Vec3 relPos = part.getPosition() - ray.start;
 			if (pointToLineDistanceSquared(ray.direction, relPos) > part.maxRadius * part.maxRadius)
 				continue;
 
-			float distance = intersect(ray, part.hitbox, part.cframe);
+			float distance = intersect(ray, part.hitbox, part.getCFrame());
 
 			if (distance < closestIntersectDistance && distance > 0) {
 				closestIntersectDistance = distance;
@@ -129,7 +129,7 @@ namespace Picker {
 
 			// Update intersected point if a physical has been intersected and move physical
 			if (screen.intersectedPart) {
-				screen.world->localSelectedPoint = screen.selectedPart->cframe.globalToLocal(screen.intersectedPoint);
+				screen.world->localSelectedPoint = screen.selectedPart->getCFrame().globalToLocal(screen.intersectedPoint);
 				moveGrabbedPhysicalLateral(screen);
 			}
 		}
