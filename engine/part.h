@@ -1,7 +1,8 @@
 #pragma once
 
-struct Part;
+class Part;
 class Physical;
+class WorldPrototype;
 #include "geometry/shape.h"
 #include "math/mat3.h"
 #include "math/position.h"
@@ -16,12 +17,14 @@ struct PartPhysicalData {
 	Part* part;
 };
 
-struct Part {
+class Part {
+	friend class Physical;
+
+	GlobalCFrame cframe;
 public:
 	Physical* parent = nullptr;
 	Shape hitbox;
 	double maxRadius;
-	GlobalCFrame cframe;
 	struct {
 		double density;
 		double friction;
@@ -40,4 +43,10 @@ public:
 	void scale(double scaleX, double scaleY, double scaleZ);
 
 	Bounds getStrictBounds() const;
+
+	Position getPosition() const { return cframe.getPosition(); }
+	const GlobalCFrame& getCFrame() const { return cframe; }
+	void setCFrame(const GlobalCFrame& newCFrame);
+
+	void attach(Part& other, const CFrame& relativeCFrame);
 };

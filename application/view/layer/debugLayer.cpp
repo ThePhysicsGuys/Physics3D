@@ -166,7 +166,7 @@ void DebugLayer::render() {
 	}
 
 	if (screen->selectedPart != nullptr) {
-		GlobalCFrame selectedCFrame(screen->selectedPart->cframe);
+		const GlobalCFrame& selectedCFrame = screen->selectedPart->getCFrame();
 		for (const Vec3f& corner : screen->selectedPart->hitbox.iterVertices()) {
 			vecLog.add(ColoredVector(selectedCFrame.localToGlobal(corner), screen->selectedPart->parent->getVelocityOfPoint(Vec3(selectedCFrame.localToRelative(corner))), VELOCITY));
 		}
@@ -178,11 +178,11 @@ void DebugLayer::render() {
 				Vec4f yellow = GUI::COLOR::YELLOW;
 				yellow.w = 0.5;
 				BoundingBox localBounds = screen->selectedPart->localBounds;
-				renderBox(screen->selectedPart->cframe.localToGlobal(CFrame(localBounds.getCenter())), localBounds.getWidth(), localBounds.getHeight(), localBounds.getDepth(), yellow);
+				renderBox(screen->selectedPart->getCFrame().localToGlobal(CFrame(localBounds.getCenter())), localBounds.getWidth(), localBounds.getHeight(), localBounds.getDepth(), yellow);
 
 				Vec4f green = GUI::COLOR::GREEN;
 				green.w = 0.5;
-				renderSphere(part.maxRadius * 2, part.cframe.getPosition(), green);
+				renderSphere(part.maxRadius * 2, part.getPosition(), green);
 			}
 
 			Vec4f red = GUI::COLOR::RED;
@@ -202,11 +202,11 @@ void DebugLayer::render() {
 				Vec4f yellow = GUI::COLOR::YELLOW;
 				yellow.w = 0.5;
 				BoundingBox localBounds = part.localBounds;
-				renderBox(part.cframe.localToGlobal(CFrame(localBounds.getCenter())), localBounds.getWidth(), localBounds.getHeight(), localBounds.getDepth(), yellow);
+				renderBox(part.getCFrame().localToGlobal(CFrame(localBounds.getCenter())), localBounds.getWidth(), localBounds.getHeight(), localBounds.getDepth(), yellow);
 
 				Vec4f green = GUI::COLOR::GREEN;
 				green.w = 0.5;
-				renderSphere(part.maxRadius * 2, part.cframe.getPosition(), green);
+				renderSphere(part.maxRadius * 2, part.getPosition(), green);
 			}
 		}
 

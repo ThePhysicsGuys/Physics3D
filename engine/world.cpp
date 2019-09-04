@@ -22,17 +22,25 @@ size_t WorldPrototype::getTotalVertexCount() {
 	return total;
 }
 
-void WorldPrototype::pushOperation(const std::function<void(WorldPrototype*)>& func) {
+void WorldPrototype::pushOperation(const std::function<void(WorldPrototype&)>& func) {
 	std::lock_guard<std::mutex> lg(queueLock);
 	waitingOperations.push(func);
 }
 
-
+void WorldPrototype::requestModification(const std::function<void(WorldPrototype&)>& function) {
+	if (lock.try_lock()) {
+		function(*this);
+		lock.unlock();
+	} else {
+		pushOperation(function);
+	}
+}
 
 void WorldPrototype::addPartUnsafe(Part* part, bool anchored) {
 	if (part->parent == nullptr) {
 		part->parent = new Physical(part);
 	}
+	part->parent->world = this;
 	part->parent->setAnchored(anchored);
 	if (anchored) {
 		physicals.addLeftSide(part->parent);
@@ -70,44 +78,40 @@ void WorldPrototype::processQueue() {
 	std::lock_guard<std::mutex> lg(queueLock);
 
 	while (!waitingOperations.empty()) {
-		std::function<void(WorldPrototype*)>& operation = waitingOperations.front();
-		operation(this);
+		std::function<void(WorldPrototype&)>& operation = waitingOperations.front();
+		operation(*this);
 		waitingOperations.pop();
 	}
 }
 
 
 void WorldPrototype::addPart(Part* part, bool anchored) {
-	if (lock.try_lock()) {
-		addPartUnsafe(part, anchored);
-		lock.unlock();
-	} else {
-		pushOperation([part, anchored](WorldPrototype* world) {world->addPartUnsafe(part, anchored); });
-	}
+	requestModification([part, anchored](WorldPrototype& world) {world.addPartUnsafe(part, anchored); });
 }
 void WorldPrototype::removePart(Part* part) {
-	if (lock.try_lock()) {
-		removePartUnsafe(part);
-		lock.unlock();
-	} else {
-		pushOperation([part](WorldPrototype* world) {world->removePartUnsafe(part); });
-	}
+	requestModification([part](WorldPrototype& world) {world.removePartUnsafe(part); });
 }
 void WorldPrototype::attachPart(Part* part, Physical& phys, CFrame attachment) {
-	if (lock.try_lock()) {
-		attachPartUnsafe(part, phys, attachment);
-		lock.unlock();
-	} else {
-		pushOperation([part, &phys, attachment](WorldPrototype* world) {world->attachPartUnsafe(part, phys, attachment); });
-	}
+	requestModification([part, &phys, attachment](WorldPrototype& world) {world.attachPartUnsafe(part, phys, attachment); });
 }
 void WorldPrototype::detachPart(Part* part) {
-	if (lock.try_lock()) {
-		detachPartUnsafe(part);
-		lock.unlock();
-	} else {
-		pushOperation([part](WorldPrototype* world) {world->detachPartUnsafe(part); });
-	}
+	requestModification([part](WorldPrototype& world) {world.detachPartUnsafe(part); });
+}
+
+void WorldPrototype::setPartCFrame(Part* part, const GlobalCFrame& newCFrame) {
+	Bounds oldBounds = part->getStrictBounds();
+
+	part->parent->setPartCFrame(part, newCFrame);
+
+	objectTree.updateObjectGroupBounds(part, oldBounds);
+}
+
+void WorldPrototype::updatePartBounds(const Part* updatedPart, const Bounds& oldBounds) {
+	objectTree.updateObjectBounds(updatedPart, oldBounds);
+}
+
+void WorldPrototype::updatePartGroupBounds(const Part* mainPart, const Bounds& oldMainPartBounds) {
+	objectTree.updateObjectGroupBounds(mainPart, oldMainPartBounds);
 }
 
 void recursiveTreeValidCheck(const TreeNode& node) {
@@ -128,6 +132,12 @@ void recursiveTreeValidCheck(const TreeNode& node) {
 
 bool WorldPrototype::isValid() const {
 	for (const Physical& phys : iterPhysicals()) {
+		if (phys.world != this) {
+			Log::error("physicals's world is not correct!");
+			__debugbreak();
+			return false;
+		}
+
 		for (const Part& part : phys) {
 			if (part.parent != &phys) {
 				Log::error("part's parent's child is not part");

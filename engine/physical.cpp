@@ -3,6 +3,8 @@
 #include "../util/log.h"
 #include "math/mathUtil.h"
 
+#include "world.h"
+
 #include "debug.h"
 #include <algorithm>
 #include <limits>
@@ -114,6 +116,13 @@ void Physical::refreshWithNewParts() {
 	}
 }
 
+void Physical::updatePart(const Part* updatedPart, const Bounds& updatedBounds) {
+	refreshWithNewParts();
+	if (this->world != nullptr) {
+		this->world->updatePartBounds(updatedPart, updatedBounds);
+	}
+}
+
 BoundingBox Physical::computeLocalBounds() const {
 	BoundingBox best(mainPart->hitbox.getBounds());
 
@@ -174,12 +183,20 @@ void Physical::updateAttachedPartCFrames() {
 	this->circumscribingSphere.origin = getCFrame().localToGlobal(localCentroid);
 }
 void Physical::rotateAroundCenterOfMass(const RotMat3& rotation) {
-	rotateAroundCenterOfMassUnsafe(rotation);
-	updateAttachedPartCFrames();
+	world->requestModification([this, rotation](WorldPrototype& world) {
+		Bounds oldBounds = this->mainPart->getStrictBounds();
+		rotateAroundCenterOfMassUnsafe(rotation);
+		updateAttachedPartCFrames();
+		world.updatePartGroupBounds(this->mainPart, oldBounds);
+	});
 }
 void Physical::translate(const Vec3& translation) {
-	translateUnsafe(translation);
-	updateAttachedPartCFrames();
+	world->requestModification([this, translation](WorldPrototype& world) {
+		Bounds oldBounds = this->mainPart->getStrictBounds();
+		translateUnsafe(translation);
+		updateAttachedPartCFrames();
+		world.updatePartGroupBounds(this->mainPart, oldBounds);
+	});
 }
 
 void Physical::update(double deltaT) {
@@ -248,7 +265,7 @@ void Physical::applyDragAtCenterOfMass(Vec3 drag) {
 }
 void Physical::applyDrag(Vec3Relative origin, Vec3Relative drag) {
 	Debug::logVector(getCenterOfMass() + origin, drag, Debug::POSITION);
-	translate(forceResponse * drag);
+	translateUnsafe(forceResponse * drag);
 	Vec3 angularDrag = origin % drag;
 	applyAngularDrag(angularDrag);
 }
@@ -257,7 +274,7 @@ void Physical::applyAngularDrag(Vec3 angularDrag) {
 	Vec3 localAngularDrag = getCFrame().relativeToLocal(angularDrag);
 	Vec3 localRotAcc = momentResponse * localAngularDrag;
 	Vec3 rotAcc = getCFrame().localToRelative(localRotAcc);
-	rotateAroundCenterOfMass(fromRotationVec(rotAcc));
+	rotateAroundCenterOfMassUnsafe(fromRotationVec(rotAcc));
 }
 
 Position Physical::getCenterOfMass() const {
@@ -283,13 +300,38 @@ Vec3 Physical::getAccelerationOfPoint(const Vec3Relative& point) const {
 	return getAcceleration() + getAngularAcceleration() % point + angularVelocity % (angularVelocity % point);
 }
 
-void Physical::setCFrame(const GlobalCFrame& newCFrame) {
+void Physical::setCFrameUnsafe(const GlobalCFrame& newCFrame) {
 	this->mainPart->cframe = newCFrame;
 	for (const AttachedPart& p : parts) {
 		p.part->cframe = newCFrame.localToGlobal(p.attachment);
 	}
 
 	this->circumscribingSphere.origin = getCFrame().localToGlobal(localCentroid);
+}
+
+void Physical::setCFrame(const GlobalCFrame& newCFrame) {
+	if (this->world != nullptr) {
+		world->requestModification([this, newCFrame](WorldPrototype& world) {
+			Bounds oldMainPartBounds = this->mainPart->getStrictBounds();
+
+			setCFrameUnsafe(newCFrame);
+
+			world.updatePartGroupBounds(this->mainPart, oldMainPartBounds);
+		});
+	} else {
+		setCFrameUnsafe(newCFrame);
+	}
+}
+
+void Physical::setPartCFrame(Part* part, const GlobalCFrame& newCFrame) {
+	if (part == mainPart) {
+		setCFrame(newCFrame);
+	} else {
+		CFrame attach = getAttachFor(part);
+		GlobalCFrame newMainCFrame = newCFrame.localToGlobal(~attach);
+
+		setCFrame(newMainCFrame);
+	}
 }
 
 /*

@@ -79,7 +79,7 @@ struct Matrix {
 		return result;
 	}
 
-	template<std::enable_if_t<Width == Height, size_t> Size = Width>
+	/*template<std::enable_if_t<Width == Height, size_t> Size = Width>
 	T det() const {
 		if constexpr (Size == 1) {
 			return data[0];
@@ -107,7 +107,7 @@ struct Matrix {
 			}
 		}
 		return total;
-	}
+	}*/
 
 	// Returns a row of this matrix
 	ArrayWithStride<T, Width> operator[](size_t index) { return ArrayWithStride<T, Width>{ data + index }; }

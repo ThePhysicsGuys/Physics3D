@@ -204,7 +204,7 @@ struct NodeStack {
 	}
 
 	inline void updateBoundsAllTheWayToTop() {
-		TreeStackElement* newTop = top;
+		TreeStackElement* newTop = top - 1;
 		while (newTop + 1 != stack) {
 			TreeNode* n = newTop->node;
 			n->recalculateBoundsFromSubBounds();

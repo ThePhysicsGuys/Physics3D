@@ -114,7 +114,7 @@ void Camera::update(float aspect) {
 
 void Camera::update() {
 	if (!flying && attachment != nullptr) {
-		cframe.position = attachment->cframe.position;
+		this->cframe.position = attachment->getCFrame().position;
 		viewDirty = true;
 	}
 

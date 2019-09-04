@@ -59,11 +59,18 @@ public:
 		return CFrame(rotation.transpose() * rFrame.position, rotation.transpose() * rFrame.rotation);
 	}
 	
-	inline void translate(const Vec3& offset) {
-		this->position += Vec3Fix(offset);
+	inline void translate(const Vec3Fix& offset) {
+		this->position += offset;
 	}
-	void rotate(Mat3 rot) {
-		rotation = rot * rotation;
+	inline GlobalCFrame translated(const Vec3Fix& offset) const {
+		return GlobalCFrame(position + offset);
+	}
+	inline void rotate(const Mat3& rot) {
+		this->rotation = rot * this->rotation;
+	}
+
+	inline GlobalCFrame rotated(const Mat3& rot) const {
+		return GlobalCFrame(position, rot * rotation);
 	}
 };
 

@@ -18,7 +18,7 @@ void MagnetWorld::applyExternalForces() {
 		Physical* selectedPhysical = selectedPart->parent;
 		GlobalCFrame cframe = selectedPhysical->getCFrame();
 		// Magnet force
-		Position absoluteSelectedPoint = selectedPart->cframe.localToGlobal(localSelectedPoint);
+		Position absoluteSelectedPoint = selectedPart->getCFrame().localToGlobal(localSelectedPoint);
 		Vec3 delta = magnetPoint - absoluteSelectedPoint;
 
 		Position centerOfmass = selectedPhysical->getCenterOfMass();
