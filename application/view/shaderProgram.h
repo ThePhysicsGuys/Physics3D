@@ -142,11 +142,11 @@ struct TestShader : public ShaderProgram {
 	void updateDisplacement(Texture* displacementMap);
 };
 
-struct ColorWheelShader : public ShaderProgram {
-	ColorWheelShader() : ShaderProgram() {}
-	ColorWheelShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, "projectionMatrix") {}
+struct LineShader : public ShaderProgram {
+	LineShader() : ShaderProgram() {}
+	LineShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, "projectionMatrix", "viewMatrix") {}
 
-	void updateProjection(Mat4f projectionMatrix);
+	void updateProjection(const Mat4f& projectionMatrix, const Mat4f& viewMatrix);
 };
 
 struct EdgeShader : public ShaderProgram {
@@ -177,7 +177,7 @@ namespace Shaders {
 	extern PointShader pointShader;
 	extern TestShader testShader;
 	extern BlurShader blurShader;
-	extern ColorWheelShader colorWheelShader;
+	extern LineShader lineShader;
 	extern EdgeShader edgeShader;
 	extern MaskShader maskShader;
 	extern GuiShader guiShader;

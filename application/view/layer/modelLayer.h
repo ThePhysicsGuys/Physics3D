@@ -7,7 +7,7 @@ class Screen;
 class ModelLayer : public Layer {
 public:
 	ModelLayer();
-	ModelLayer(Screen* screen, char flags = none);
+	ModelLayer(Screen* screen, char flags = None);
 
 	void init() override;
 	void update() override;

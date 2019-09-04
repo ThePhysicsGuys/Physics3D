@@ -14,7 +14,7 @@
 #define POINT_SHADER 9
 #define TEST_SHADER 10
 #define BLUR_SHADER 11
-#define COLORWHEEL_SHADER 12
+#define LINE_SHADER 12
 #define GUI_SHADER 13
 #define EDGE_SHADER 14
 #define SPHERE_MODEL 15

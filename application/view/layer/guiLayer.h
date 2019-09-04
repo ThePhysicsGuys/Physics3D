@@ -13,7 +13,7 @@ public:
 	EnvironmentFrame* environmentFrame;
 
 	GuiLayer();
-	GuiLayer(Screen* screen, char flags = none);
+	GuiLayer(Screen* screen, char flags = None);
 
 	void init() override;
 	void update() override;

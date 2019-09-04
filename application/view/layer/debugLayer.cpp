@@ -99,6 +99,12 @@ DebugLayer::DebugLayer(Screen* screen, char flags) : Layer("Debug layer", screen
 
 }
 
+#include "../batch/batch.h"
+#include "../batch/batchConfig.h"
+#include "../buffers/bufferLayout.h"
+
+#include "../path/path3D.h"
+
 void DebugLayer::init() {
 
 	// Origin init
@@ -132,6 +138,7 @@ void DebugLayer::init() {
 	pointMesh = new PointMesh(buffer, 5);
 
 }
+
 
 void DebugLayer::update() {
 	

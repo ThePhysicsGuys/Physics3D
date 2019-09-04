@@ -22,7 +22,7 @@ namespace Shaders {
 	PointShader pointShader;
 	TestShader testShader;
 	BlurShader blurShader;
-	ColorWheelShader colorWheelShader;
+	LineShader lineShader;
 	MaskShader maskShader;
 	EdgeShader edgeShader;
 	GuiShader guiShader;
@@ -40,7 +40,7 @@ namespace Shaders {
 		ShaderSource pointShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(POINT_SHADER)), "point.shader");
 		ShaderSource testShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(TEST_SHADER)), "test.shader");
 		ShaderSource blurShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(BLUR_SHADER)), "blur.shader");
-		ShaderSource colorWheelShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(COLORWHEEL_SHADER)), "colorwheel.shader");
+		ShaderSource lineShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(LINE_SHADER)), "line.shader");
 		ShaderSource maskShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(MASK_SHADER)), "mask.shader");
 		ShaderSource edgeShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(EDGE_SHADER)), "edge.shader");
 		ShaderSource guiShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(GUI_SHADER)), "gui.shader");
@@ -57,7 +57,7 @@ namespace Shaders {
 		new(&pointShader) PointShader(pointShaderSource);
 		new(&testShader) TestShader(testShaderSource);
 		new(&blurShader) BlurShader(blurShaderSource);
-		new(&colorWheelShader) ColorWheelShader(colorWheelShaderSource);
+		new(&lineShader) LineShader(lineShaderSource);
 		new(&maskShader) MaskShader(maskShaderSource);
 		new(&edgeShader) EdgeShader(edgeShaderSource);
 		new(&guiShader) GuiShader(guiShaderSource);
@@ -75,7 +75,7 @@ namespace Shaders {
 		pointShader.close();
 		testShader.close();
 		blurShader.close();
-		colorWheelShader.close();
+		lineShader.close();
 		maskShader.close();
 		edgeShader.close();
 		guiShader.close();
@@ -432,11 +432,12 @@ void TestShader::updateDisplacement(Texture* displacementMap) {
 }
 
 
-// ColorWheelShader
+// LineShader
 
-void ColorWheelShader::updateProjection(Mat4f projectionMatrix) {
+void LineShader::updateProjection(const Mat4f& projectionMatrix, const Mat4f& viewMatrix) {
 	bind();
 	shader.setUniform("projectionMatrix", projectionMatrix);
+	shader.setUniform("viewMatrix", viewMatrix);
 }
 
 

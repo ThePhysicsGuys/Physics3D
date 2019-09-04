@@ -7,7 +7,7 @@ class Screen;
 class SkyboxLayer : public Layer {
 public:
 	SkyboxLayer();
-	SkyboxLayer(Screen* screen, char flags = noUpdate | noEvents);
+	SkyboxLayer(Screen* screen, char flags = NoUpdate | NoEvents);
 
 	void init() override;
 	void update() override;

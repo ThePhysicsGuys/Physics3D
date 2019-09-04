@@ -48,7 +48,7 @@ void LayerStack::update() {
 	for (auto i = begin(); i != end(); ++i) {
 		Layer* layer = *i;
 		
-		if (layer->flags & (Layer::disabled | Layer::noUpdate))
+		if (layer->flags & (Layer::Disabled | Layer::NoUpdate))
 			continue;
 
 		layer->update();
@@ -59,7 +59,7 @@ void LayerStack::event() {
 	for (auto i = rbegin(); i != rend(); ++i) {
 		Layer* layer = *i;
 
-		if (layer->flags & (Layer::disabled | Layer::noEvents))
+		if (layer->flags & (Layer::Disabled | Layer::NoEvents))
 			continue;
 
 		layer->event();
@@ -71,7 +71,7 @@ void LayerStack::render() {
 	for (auto i = begin(); i != end(); ++i) {
 		Layer* layer = *i;
 
-		if (layer->flags & (Layer::disabled | Layer::noRender))
+		if (layer->flags & (Layer::Disabled | Layer::NoRender))
 			continue;
 
 		layer->render();

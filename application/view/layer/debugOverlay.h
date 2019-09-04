@@ -5,7 +5,7 @@
 class DebugOverlay : public Layer {
 public:
 	DebugOverlay();
-	DebugOverlay(Screen* screen, char flags = noEvents);
+	DebugOverlay(Screen* screen, char flags = NoEvents);
 
 
 	void init() override;
