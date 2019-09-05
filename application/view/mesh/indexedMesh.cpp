@@ -1,12 +1,13 @@
+#include "core.h"
+
 #include "indexedMesh.h"
 
 #include "../buffers/indexBuffer.h"
 #include "../buffers/vertexBuffer.h"
 #include "../buffers/vertexArray.h"
-#include "../renderUtils.h"
 #include "../engine/geometry/shape.h"
 #include "../../visualShape.h"
-#include "../util/log.h"
+#include "../renderUtils.h"
 
 IndexedMesh::IndexedMesh(const VisualShape& shape) : AbstractMesh(), vertexCount(shape.vertexCount), triangleCount(shape.triangleCount) {
 	float* vertices = new float[shape.vertexCount * 3];

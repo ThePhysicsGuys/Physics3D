@@ -1,9 +1,10 @@
+#include "core.h"
+
 #include "worlds.h"
 
 #include "../engine/debug.h"
 
 #include "../engine/constants.h"
-#include "../util/log.h"
 #include "application.h"
 #include "input/standardInputHandler.h"
 #include "view/screen.h"

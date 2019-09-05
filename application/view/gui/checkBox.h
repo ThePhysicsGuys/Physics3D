@@ -1,9 +1,5 @@
 #pragma once
 
-#include <string>
-
-#include "../engine/math/vec.h"
-
 #include "component.h"
 
 class CheckBox;

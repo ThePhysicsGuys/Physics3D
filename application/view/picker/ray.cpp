@@ -1,7 +1,6 @@
-#include "ray.h"
+#include "core.h"
 
-#include "../engine/math/vec.h"
-#include "../engine/math/mat4.h"
+#include "ray.h"
 
 #include "../screen.h"
 

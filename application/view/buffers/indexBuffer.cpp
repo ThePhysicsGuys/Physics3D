@@ -1,9 +1,10 @@
+#include "core.h"
+
 #include "indexBuffer.h"
 
 #include "GL\glew.h"
 #include "GLFW\glfw3.h"
 
-#include "../util/log.h"
 
 IndexBuffer::IndexBuffer() {
 	id = 0;

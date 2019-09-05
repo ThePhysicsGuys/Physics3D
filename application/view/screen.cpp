@@ -1,9 +1,9 @@
+#include "core.h"
+
 #include "screen.h"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-
-#include <map>
 
 #include "renderUtils.h"
 #include "texture.h"
@@ -17,7 +17,6 @@
 #include "../input/standardInputHandler.h"
 #include "../meshLibrary.h"
 #include "../visualShape.h"
-#include "../util/log.h"
 #include "../worlds.h"
 
 #include "layer/layerStack.h"
@@ -29,7 +28,7 @@
 #include "layer/debugLayer.h"
 #include "layer/debugOverlay.h"
 
-#include "gui\frames.h"
+#include "gui/frames.h"
 
 bool initGLFW() {
 	// Set window hints

@@ -1,3 +1,5 @@
+#include "core.h"
+
 #include "vertexBuffer.h"
 
 #include "GL\glew.h"

@@ -1,3 +1,5 @@
+#include "core.h"
+
 #include "gui.h"
 
 #include "component.h"

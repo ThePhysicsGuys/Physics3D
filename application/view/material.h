@@ -1,7 +1,5 @@
 #pragma once
 
-#include "../engine/math/vec.h"
-
 class Texture;
 
 struct Material {

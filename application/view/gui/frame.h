@@ -1,11 +1,7 @@
 #pragma once
 
-#include <string>
-
 #include "component.h"
 #include "container.h"
-
-#include "../engine/math/vec.h"
 
 class Button;
 class Label;

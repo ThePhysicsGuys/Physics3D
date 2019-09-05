@@ -1,4 +1,7 @@
+#include "core.h"
+
 #include "slider.h"
+
 #include "../path/path.h"
 
 #include "../shaderProgram.h"

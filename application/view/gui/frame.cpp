@@ -1,3 +1,5 @@
+#include "core.h"
+
 #include "frame.h"
 
 #include "../path/path.h"
@@ -13,7 +15,6 @@
 
 #include "../buffers/frameBuffer.h"
 
-#include "../util/log.h"
 #include "../engine/math/mathUtil.h"
 
 Frame::Frame() : Frame(0, 0) {

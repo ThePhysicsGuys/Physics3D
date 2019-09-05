@@ -1,7 +1,6 @@
-#include "modelLayer.h"
+#include "core.h"
 
-#include <map>
-#include <vector>
+#include "modelLayer.h"
 
 #include "../screen.h"
 #include "../shaderProgram.h"
@@ -53,6 +52,9 @@ void ModelLayer::update() {
 	lights[1].color = Vec3f(1-d, 0.3, 1 - d);
 	lights[2].color = Vec3f(0.2, 0.3*d, 1 - d);
 	lights[3].color = Vec3f(1-d, 1-d, d);*/
+}
+
+void ModelLayer::event(Event& event) {
 
 }
 

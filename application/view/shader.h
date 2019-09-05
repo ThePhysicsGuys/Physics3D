@@ -1,13 +1,6 @@
 #pragma once
 
-#include <string>
-#include <map>
-
 #include "bindable.h"
-
-#include "../engine/math/vec.h"
-#include "../engine/math/mat4.h"
-#include "../engine/math/position.h"
 
 struct ShaderSource {
 	std::string vertexSource;

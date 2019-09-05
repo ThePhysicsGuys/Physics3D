@@ -1,3 +1,5 @@
+#include "core.h"
+
 #include "shaderProgram.h"
 
 #include "texture.h"
@@ -8,7 +10,6 @@
 #include "../extendedPart.h"
 
 #include <sstream>
-#include <vector>
 
 namespace Shaders {
 	BasicShader basicShader;

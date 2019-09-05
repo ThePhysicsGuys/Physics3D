@@ -1,3 +1,5 @@
+#include "core.h"
+
 #include "frameBuffer.h"
 
 #include "GL\glew.h"
@@ -5,7 +7,6 @@
 
 #include "renderBuffer.h"
 #include "../texture.h"
-#include "../util/log.h"
 
 #pragma region FrameBuffer
 

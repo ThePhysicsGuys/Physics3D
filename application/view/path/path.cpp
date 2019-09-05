@@ -1,6 +1,6 @@
-#include "path.h"
+#include "core.h"
 
-#include <vector>
+#include "path.h"
 
 #include "../font.h"
 #include "../screen.h"

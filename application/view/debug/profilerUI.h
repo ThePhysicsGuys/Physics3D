@@ -1,8 +1,6 @@
 #pragma once
 
-#include <string>
 #include <sstream>
-#include <vector>
 
 #include "../engine/profiling.h"
 #include "../engine/math/largeMatrix.h"

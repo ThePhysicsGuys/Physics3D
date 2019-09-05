@@ -1,3 +1,5 @@
+#include "core.h"
+
 #include "skyboxLayer.h"
 
 #include <sstream>
@@ -29,6 +31,10 @@ void SkyboxLayer::init() {
 }
 
 void SkyboxLayer::update() {
+
+}
+
+void SkyboxLayer::event(Event& event) {
 
 }
 

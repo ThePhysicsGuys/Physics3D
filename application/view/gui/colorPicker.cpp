@@ -1,3 +1,5 @@
+#include "core.h"
+
 #include "colorPicker.h"
 
 #include "guiUtils.h"

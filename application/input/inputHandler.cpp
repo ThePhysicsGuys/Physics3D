@@ -1,12 +1,13 @@
+#include "core.h"
+
 #include "inputHandler.h"
 
 #include "keyboard.h"
 #include "mouse.h"
+#include "../event/event.h"
+#include "../event/keyEvent.h"
 
 #include "../eventHandler.h"
-
-#include "../util/log.h"
-
 
 void InputHandler::keyCallback(int key, int action, int mods) {
 	if (action == Keyboard::PRESS) {
@@ -83,6 +84,23 @@ InputHandler::InputHandler(GLFWwindow* window) : window(window) {
 
 	glfwSetKeyCallback(window, [] (GLFWwindow* window, int key, int scancode, int action, int mods) {
 		static_cast<InputHandler*>(glfwGetWindowUserPointer(window))->keyCallback(key, action, mods);
+
+		if (action == Keyboard::PRESS) {
+			KeyPressEvent event(key, mods);
+
+			//DISPATCH_EVENT(event, KeyPressEvent, getMousePos);
+			
+		}
+
+		if (action == Keyboard::RELEASE) {
+			KeyReleaseEvent event(key, mods);
+
+		}
+
+		if (action == Keyboard::REPEAT) {
+			KeyPressEvent event(key, mods, true);
+
+		}
 	});
 
 	glfwSetCursorPosCallback(window, [] (GLFWwindow* window, double x, double y) {

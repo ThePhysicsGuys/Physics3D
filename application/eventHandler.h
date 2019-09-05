@@ -4,9 +4,6 @@ class Screen;
 struct Camera;
 struct ExtendedPart;
 
-#include "../engine/math/vec.h"
-#include "../engine/math/position.h"
-
 typedef void (*CameraMoveHandler) (Screen&, Camera*, Vec3);
 typedef void (*WindowResizeHandler) (Screen&, Vec2i);
 typedef void (*PartRayIntersectHandler) (Screen&, ExtendedPart*, Position);

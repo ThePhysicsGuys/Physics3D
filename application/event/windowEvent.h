@@ -12,12 +12,12 @@ protected:
 
 class WindowResizeEvent : public WindowEvent {
 private:
-	int width;
-	int height;
+	unsigned int width;
+	unsigned int height;
 public:
 	EVENT_TYPE(WindowResize);
 
-	WindowResizeEvent(int width, int height) : width(width), height(height) {};
+	WindowResizeEvent(unsigned int width, unsigned int height) : width(width), height(height) {};
 };
 
 class WindowCloseEvent : public WindowEvent {;

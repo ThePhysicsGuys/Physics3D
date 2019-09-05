@@ -1,6 +1,6 @@
-#include "tickerThread.h"
+#include "core.h"
 
-#include "../util/Log.h"
+#include "tickerThread.h"
 
 using namespace std::chrono;
 TickerThread::TickerThread(double targetTPS, milliseconds tickSkipTimeout, void(*tickAction)()){

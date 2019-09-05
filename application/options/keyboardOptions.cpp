@@ -1,3 +1,5 @@
+#include "core.h"
+
 #include "keyboardOptions.h"
 
 namespace KeyboardOptions {

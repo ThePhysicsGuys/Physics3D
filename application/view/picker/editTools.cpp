@@ -1,7 +1,6 @@
-#include "editTools.h"
+#include "core.h"
 
-#include "../engine/math/vec.h"
-#include "../engine/math/mat3.h"
+#include "editTools.h"
 
 #include "picker.h"
 

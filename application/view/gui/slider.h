@@ -2,8 +2,6 @@
 
 #include "component.h"
 
-#include "../engine/math/vec.h"
-
 class Slider;
 
 typedef void(*SliderAction) (Slider*);

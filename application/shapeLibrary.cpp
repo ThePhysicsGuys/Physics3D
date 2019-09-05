@@ -1,4 +1,7 @@
+#include "core.h"
+
 #include "shapeLibrary.h"
+
 #include "../engine/math/mathUtil.h"
 
 namespace Library {

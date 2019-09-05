@@ -1,3 +1,5 @@
+#include "core.h"
+
 #include "meshLibrary.h"
 
 #include <sstream>

@@ -1,15 +1,11 @@
+#include "core.h"
+
 #include "export.h"
 
 #include "../visualShape.h"
 
-#include "../util/log.h"
-
-#include "../engine/math/vec.h"
-#include "../engine/math/mat3.h"
-
 #include <fstream>
 #include <sstream>
-#include <map>
 #include <direct.h>
 
 /*

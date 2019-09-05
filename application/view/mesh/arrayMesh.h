@@ -4,8 +4,6 @@
 
 #include "../buffers/bufferLayout.h"
 
-#include "../engine/math/vec.h"
-
 class VertexBuffer;
 
 class ArrayMesh : public AbstractMesh {

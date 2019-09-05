@@ -1,3 +1,5 @@
+#include "core.h"
+
 #include "debugOverlay.h"
 
 #include "../screen.h"
@@ -36,6 +38,10 @@ void DebugOverlay::init() {
 void DebugOverlay::update() {
 	using namespace Debug;
 	fieldIndex = 0;
+}
+
+void DebugOverlay::event(Event& event) {
+
 }
 
 void DebugOverlay::render() {

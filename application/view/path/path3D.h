@@ -1,7 +1,5 @@
 #pragma once
 
-#include "../engine/math/vec.h"
-
 #include "../batch/commandBatch.h"
 
 namespace Path3D {

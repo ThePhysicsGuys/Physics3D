@@ -1,7 +1,5 @@
 #pragma once
 
-#include "../engine/math/vec.h"
-
 namespace GUI {
 	// Clamps a value between a range
 	double clamp(double value, double min, double max);

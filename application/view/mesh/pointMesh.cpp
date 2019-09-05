@@ -1,11 +1,11 @@
+#include "core.h"
+
 #include "pointMesh.h"
 
 #include "../buffers/vertexArray.h"
 #include "../buffers/vertexBuffer.h"
 
 #include "../renderUtils.h"
-
-#include "../util/Log.h"
 
 PointMesh::PointMesh(const float* vertices, const size_t vertexCount, size_t capacity) : AbstractMesh(Renderer::POINT), vertexCount(vertexCount), capacity(capacity) {
 	vertexBuffer = new VertexBuffer(vertices, 10 * capacity * sizeof(float), Renderer::DYNAMIC_DRAW);

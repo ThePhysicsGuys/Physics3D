@@ -1,3 +1,5 @@
+#include "core.h"
+
 #include "resourceManager.h"
 
 #include <windows.h>

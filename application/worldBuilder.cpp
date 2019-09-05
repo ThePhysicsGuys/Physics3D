@@ -1,9 +1,9 @@
+#include "core.h"
+
 #include "worldBuilder.h"
 
 #include "application.h"
 #include "../engine/math/mathUtil.h"
-
-#include <cmath>
 
 namespace WorldBuilder {
 

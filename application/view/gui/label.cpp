@@ -1,3 +1,5 @@
+#include "core.h"
+
 #include "label.h"
 
 #include "gui.h"

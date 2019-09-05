@@ -1,7 +1,5 @@
 #pragma once
 
-#include <string>
-
 namespace Keyboard {
 
 	struct Key {

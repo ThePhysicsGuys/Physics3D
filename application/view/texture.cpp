@@ -1,3 +1,5 @@
+#include "core.h"
+
 #include "texture.h"
 
 #include "GL\glew.h"
@@ -6,7 +8,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb\stb_image.h"
 
-#include "../util/log.h"
 #include "../debug.h"
 
 #pragma region Texture

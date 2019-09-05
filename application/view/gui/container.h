@@ -3,10 +3,6 @@
 #include "orderedVector.h"
 #include "component.h"
 
-#include "../engine/math/vec.h"
-
-class Layout;
-
 class Container : public Component {
 public:
 	/*

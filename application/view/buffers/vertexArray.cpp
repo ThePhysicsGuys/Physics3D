@@ -1,3 +1,5 @@
+#include "core.h"
+
 #include "vertexArray.h"
 
 #include "GL\glew.h"
@@ -5,8 +7,6 @@
 
 #include "vertexBuffer.h"
 #include "bufferLayout.h"
-
-#include "../util/log.h"
 
 VertexArray::VertexArray() : attributeArrayOffset(0) {
 	glGenVertexArrays(1, &id);

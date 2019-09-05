@@ -1,3 +1,5 @@
+#include "core.h"
+
 #include "material.h"
 
 #include "texture.h"

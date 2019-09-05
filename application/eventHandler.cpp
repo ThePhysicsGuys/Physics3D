@@ -1,3 +1,5 @@
+#include "core.h"
+
 #include "eventHandler.h"
 
 #include "view\screen.h"

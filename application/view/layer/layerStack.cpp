@@ -1,7 +1,6 @@
-#include "layerStack.h"
+#include "core.h"
 
-#include <algorithm>
-#include "../util/log.h"
+#include "layerStack.h"
 
 LayerStack::LayerStack() {
 	insert = 0;
@@ -55,15 +54,17 @@ void LayerStack::update() {
 	}
 }
 
-void LayerStack::event() {
+void LayerStack::event(Event& event) {
 	for (auto i = rbegin(); i != rend(); ++i) {
 		Layer* layer = *i;
 
 		if (layer->flags & (Layer::Disabled | Layer::NoEvents))
 			continue;
 
-		layer->event();
-		// Check if event had 
+		layer->event(event);
+		
+		if (event.handled)
+			break;
 	}
 }
 

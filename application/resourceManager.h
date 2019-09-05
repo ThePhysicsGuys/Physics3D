@@ -1,7 +1,5 @@
 #pragma once
 
-#include <string>
-
 #define BASIC_SHADER 0
 #define VECTOR_SHADER 1
 #define ORIGIN_SHADER 2
@@ -20,4 +18,4 @@
 #define SPHERE_MODEL 15
 #define STALL_MODEL 16
 
-std::string getResourceAsString(int res);
+std::string getResourceAsString(int resource);

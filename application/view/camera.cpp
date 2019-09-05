@@ -1,11 +1,11 @@
+#include "core.h"
+
 #include "camera.h"
 
 #include "../extendedPart.h"
 
 #include "picker/picker.h"
 #include "screen.h"
-
-#include <cmath>
 
 Camera::Camera(Position position, Mat3 rotation) : cframe(GlobalCFrame(position, rotation)), speed(0.35), rspeed(0.04), flying(true) {
 	update();

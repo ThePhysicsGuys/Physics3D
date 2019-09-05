@@ -1,15 +1,12 @@
+#include "core.h"
+
 #include "panel.h"
 
 #include "gui.h"
-
-#include "../path/path.h"
-
-#include "../shaderProgram.h"
-
 #include "layout.h"
-#include "../util/log.h"
+#include "../path/path.h"
+#include "../shaderProgram.h"
 #include "../engine/math/mathUtil.h"
-
 #include "../mesh/primitive.h"
 
 

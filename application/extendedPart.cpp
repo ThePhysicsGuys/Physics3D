@@ -1,3 +1,5 @@
+#include "core.h"
+
 #include "extendedPart.h"
 
 ExtendedPart::ExtendedPart(const Shape& hitbox, const GlobalCFrame& position, double density, double friction, int drawMeshId, std::string name) : 

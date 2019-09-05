@@ -2,8 +2,6 @@
 
 #include "../bindable.h"
 
-#include "../util/log.h"
-
 class VertexBuffer : public Bindable {
 public:
 	VertexBuffer();

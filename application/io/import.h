@@ -1,13 +1,8 @@
 #pragma once
 
-#include <string>
 #include <istream>
 
-#include "../engine/math/vec.h"
-#include "../engine/math/mat3.h"
-
 #include "../engine/geometry/shape.h"
-
 
 #include "../view/screen.h"
 

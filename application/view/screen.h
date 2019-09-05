@@ -1,9 +1,5 @@
 #pragma once
 
-#include <vector>
-
-#include "../engine/math/vec.h"
-
 #include "../eventHandler.h"
 #include "../util/properties.h"
 #include "../visualShape.h"

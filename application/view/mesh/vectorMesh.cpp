@@ -1,6 +1,6 @@
-#include "vectorMesh.h"
+#include "core.h"
 
-#include "../util/Log.h"
+#include "vectorMesh.h"
 
 #include "../renderUtils.h"
 

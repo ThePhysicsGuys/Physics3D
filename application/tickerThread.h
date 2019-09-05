@@ -3,8 +3,6 @@
 #include <chrono>
 #include <thread>
 
-#include "../util/log.h"
-
 using namespace std::chrono;
 
 class TickerThread {

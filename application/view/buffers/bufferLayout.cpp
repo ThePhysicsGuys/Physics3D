@@ -1,7 +1,8 @@
+#include "core.h"
+
 #include "bufferLayout.h"
 
 #include "GL\glew.h"
-#include "../util/log.h"
 
 namespace BufferDataType {
 	const BufferDataTypeInfo NONE = { "none" , 0, 0, 0 };

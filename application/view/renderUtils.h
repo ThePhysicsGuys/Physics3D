@@ -3,8 +3,6 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include "../engine/math/vec.h"
-
 namespace Renderer {
 
 	// GL constants

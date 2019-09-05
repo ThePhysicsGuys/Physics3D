@@ -1,12 +1,11 @@
+#include "core.h"
+
 #include "import.h"
 
-#include <vector>
 #include <fstream>
-#include <map>
 
 #include "../view/texture.h"
 #include "../util/stringUtil.h"
-#include "../util/log.h"
 
 #include "../view/material.h"
 

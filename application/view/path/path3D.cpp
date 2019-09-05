@@ -1,6 +1,6 @@
-#include "path3D.h"
+#include "core.h"
 
-#include <vector>
+#include "path3D.h"
 
 namespace Path3D {
 

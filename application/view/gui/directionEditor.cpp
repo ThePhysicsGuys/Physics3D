@@ -1,6 +1,7 @@
+#include "core.h"
+
 #include "directionEditor.h"
 
-#include "../engine/math/vec.h"
 #include "../engine/math/cframe.h"
 #include "../engine/math/mathUtil.h"
 

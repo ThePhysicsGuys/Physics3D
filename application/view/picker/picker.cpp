@@ -1,8 +1,7 @@
+#include "core.h"
+
 #include "picker.h"
 
-
-#include "../engine/math/vec.h"
-#include "../engine/math/mat3.h"
 #include "../engine/math/mathUtil.h"
 
 #include "ray.h"
@@ -23,9 +22,6 @@
 #include "../engine/sharedLockGuard.h"
 #include "../engine/geometry/shape.h"
 #include "../engine/filters.h"
-
-#include "../util/log.h"
-
 
 namespace Picker {
 

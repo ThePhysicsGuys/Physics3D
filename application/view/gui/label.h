@@ -1,10 +1,6 @@
 #pragma once
 
-#include <string>
-
 #include "component.h"
-
-#include "../engine/math/vec.h"
 
 class Font;
 

@@ -3,12 +3,7 @@
 #include "GL\glew.h"
 #include "GLFW\glfw3.h"
 
-#include "../engine/math/vec.h"
-
 #include "keyboard.h"
-
-#include <string>
-
 
 class InputHandler {
 protected:

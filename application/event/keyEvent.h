@@ -23,10 +23,12 @@ protected:
 };
 
 class KeyPressEvent : public KeyEvent {
+private:
+	bool repeat;
 public:
-	EVENT_TYPE(KeyPress);
+	EVENT_TYPE(KeyPress)
 
-	KeyPressEvent(int key, int modifiers = 0) : KeyEvent(key, modifiers) {}
+	KeyPressEvent(int key, int modifiers = 0, bool repeat = false) : KeyEvent(key, modifiers), repeat(repeat) {}
 };
 
 class KeyReleaseEvent : public KeyEvent {

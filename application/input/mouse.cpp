@@ -1,7 +1,8 @@
+#include "core.h"
+
 #include "mouse.h"
 
 #include <stdexcept>
-#include <map>
 
 #include "GLFW\glfw3.h"
 

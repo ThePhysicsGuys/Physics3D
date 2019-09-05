@@ -1,3 +1,5 @@
+#include "core.h"
+
 #include "arrayMesh.h"
 
 #include "../buffers/vertexArray.h"

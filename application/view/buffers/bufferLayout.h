@@ -1,8 +1,5 @@
 #pragma once
 
-#include <vector>
-#include <string>
-
 namespace BufferDataType {
 
 	struct BufferDataTypeInfo {

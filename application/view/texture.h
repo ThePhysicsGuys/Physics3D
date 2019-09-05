@@ -2,10 +2,6 @@
 
 #include "bindable.h"
 
-#include "../engine/math/vec.h"
-
-#include <string>
-
 class Texture : public Bindable {
 public:
 	int unit;

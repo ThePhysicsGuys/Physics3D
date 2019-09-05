@@ -2,7 +2,6 @@
 
 #include "../engine/debug.h"
 
-#include "../engine/math/vec.h"
 #include "threePhaseBuffer.h"
 #include "../util/log.h"
 

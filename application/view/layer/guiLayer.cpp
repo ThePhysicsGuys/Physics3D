@@ -1,3 +1,5 @@
+#include "core.h"
+
 #include "guiLayer.h"
 
 #include "../font.h"
@@ -46,6 +48,10 @@ void GuiLayer::update() {
 	propertiesFrame->update();
 	debugFrame->update();
 	environmentFrame->update();
+}
+
+void GuiLayer::event(Event& event) {
+
 }
 
 void GuiLayer::render() {

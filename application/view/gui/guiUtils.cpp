@@ -1,3 +1,5 @@
+#include "core.h"
+
 #include "guiUtils.h"
 
 #include "../screen.h"

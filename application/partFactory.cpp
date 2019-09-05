@@ -1,3 +1,5 @@
+#include "core.h"
+
 #include "partFactory.h"
 
 PartFactory::PartFactory(const Shape& hitbox, const VisualShape& visualShape, Screen& screen, std::string name) : 

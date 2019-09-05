@@ -1,3 +1,5 @@
+#include "core.h"
+
 #include "font.h"
 
 #include "GL\glew.h"
@@ -9,8 +11,6 @@
 #include "gui/gui.h"
 #include "mesh/primitive.h"
 #include "path/path.h"
-
-#include "../util/log.h"
 
 Font::Font(std::string font) {
 	FT_Library library;

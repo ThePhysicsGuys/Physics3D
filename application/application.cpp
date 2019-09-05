@@ -1,3 +1,5 @@
+#include "core.h"
+
 #include "application.h"
 
 #include <thread>
@@ -16,8 +18,6 @@
 #include "../engine/part.h"
 #include "../engine/world.h"
 #include "../engine/physicsProfiler.h"
-
-#include "../util/log.h"
 
 #include "debug.h"
 #include "worlds.h"
@@ -315,7 +315,7 @@ void runTick() {
 void toggleFlying() {
 	if (screen.camera.flying) {
 		screen.camera.flying = false;
-		screen.camera.attachment->cframe = screen.camera.cframe;
+		screen.camera.attachment->setCFrame(screen.camera.cframe);
 		screen.world->addPart(screen.camera.attachment);
 	} else {
 		screen.world->removePart(screen.camera.attachment);

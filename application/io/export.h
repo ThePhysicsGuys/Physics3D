@@ -1,7 +1,5 @@
 #pragma once
 
-#include <string>
-
 #include "../view/camera.h"
 
 #include "../visualShape.h"

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <string>
-
 #include "view/material.h"
 
 #include "../engine/part.h"

@@ -11,6 +11,7 @@ public:
 
 	void init() override;
 	void update() override;
+	void event(Event& event) override;
 	void render() override;
 	void close() override;
 };

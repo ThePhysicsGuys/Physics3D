@@ -1,11 +1,8 @@
+#include "core.h"
+
 #include "profilerUI.h"
 
 #include <GL/glew.h>
-
-#include <algorithm>
-
-#include "../engine/math/vec.h"
-#include "../engine/math/mat2.h"
 
 #include "../batch/commandBatch.h"
 #include "../path/path.h"

@@ -1,12 +1,13 @@
 #pragma once
+
+#include "core.h"
+
 #include "batch.h"
 
 #include "../application/debug.h"
 #include "../engine/math/vec.h"
 
 #include "../shaderProgram.h"
-
-#include <vector>
 
 
 template<typename Vertex, typename Command>

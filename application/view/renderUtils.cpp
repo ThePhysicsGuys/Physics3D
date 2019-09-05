@@ -1,5 +1,6 @@
-#include "renderUtils.h"
+#include "core.h"
 
+#include "renderUtils.h"
 
 namespace Renderer {
 

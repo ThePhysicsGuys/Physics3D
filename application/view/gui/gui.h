@@ -1,13 +1,7 @@
 #pragma once
 
-#include "../engine/math/vec.h"
-#include "../engine/math/mat4.h"
-
 #include "../batch/guiBatch.h"
 #include "../batch/batchConfig.h"
-
-#include <string>
-#include <vector>
 
 class Component;
 class ColorPicker;

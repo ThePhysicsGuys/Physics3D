@@ -21,14 +21,16 @@ enum EventCategory {
 
 #define EVENT_TYPE(type) \
 	inline static EventType getStaticType() { return EventType::type; } \
-	inline virtual EventType getType() { return getStaticType(); } \
-	inline virtual std::string getName() { return #type; }
+	inline virtual EventType getType() const override { return getStaticType(); } \
+	inline virtual std::string getName() const override { return #type; }
 
 #define EVENT_CATEGORY(category) \
-	virtual char getCategory() { return category; }
+	virtual char getCategory() const override { return category; }
 
 class Event {
 public:
+	bool handled = false;
+
 	inline virtual EventType getType() const = 0;	
 	inline virtual char getCategory() const = 0;
 	inline virtual std::string getName() const = 0;
@@ -37,6 +39,26 @@ public:
 		return static_cast<char>(category) == getCategory();
 	}
 
-protected:
-	bool handled = false;
+};
+
+#define DISPATCH_EVENT(event, type, function) \
+	{ EventDispatcher dispatch(event); \
+	dispatch.dispatch<type>(std::bind(&function, this, std::placeholders::_1)); }
+
+
+class EventDispatcher {
+private:
+	Event& event;
+public:
+	EventDispatcher(Event& event) : event(event) {}
+
+	template<typename T, typename F>
+	bool dispatch(const F& function) {
+		if (event.getType() == T::getStaticType()) {
+			event.handled = function(static_cast<T&>(event));
+			return true;
+		}
+		return false;
+	}
+
 };

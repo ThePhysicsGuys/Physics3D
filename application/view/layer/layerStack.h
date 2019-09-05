@@ -2,8 +2,6 @@
 
 #include "layer.h"
 
-#include <vector>
-
 class LayerStack {
 private:
 	std::vector<Layer*> stack;
@@ -19,7 +17,7 @@ public:
 
 	void init();
 	void update();
-	void event();
+	void event(Event& event);
 	void render();
 	void close();
 

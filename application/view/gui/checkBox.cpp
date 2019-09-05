@@ -1,4 +1,6 @@
-#include "CheckBox.h"
+#include "core.h"
+
+#include "checkBox.h"
 
 #include "label.h"
 #include "../path/path.h"

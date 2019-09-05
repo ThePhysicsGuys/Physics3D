@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../../event/event.h"
 #include <string>
 
 class Screen;
@@ -38,7 +39,7 @@ public:
 	virtual void detach() {}
 
 	virtual void init() {}
-	virtual void event() {}
+	virtual void event(Event& event) {}
 	virtual void update() {}
 	virtual void render() {}
 	virtual void close() {}

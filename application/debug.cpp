@@ -1,3 +1,5 @@
+#include "core.h"
+
 #include "debug.h"
 
 #include <GL/glew.h>

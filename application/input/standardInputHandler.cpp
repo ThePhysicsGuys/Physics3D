@@ -1,3 +1,5 @@
+#include "core.h"
+
 #include "standardInputHandler.h"
 
 #include "keyboard.h"
@@ -14,7 +16,6 @@
 #include "../view/debug/visualDebug.h"
 #include "../shapeLibrary.h"
 
-#include <algorithm>
 #include <random>
 
 #include "../worlds.h"

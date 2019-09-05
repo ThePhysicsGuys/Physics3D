@@ -1,3 +1,5 @@
+#include "core.h"
+
 #include "debugLayer.h"
 
 #include "../mesh/arrayMesh.h"
@@ -99,12 +101,6 @@ DebugLayer::DebugLayer(Screen* screen, char flags) : Layer("Debug layer", screen
 
 }
 
-#include "../batch/batch.h"
-#include "../batch/batchConfig.h"
-#include "../buffers/bufferLayout.h"
-
-#include "../path/path3D.h"
-
 void DebugLayer::init() {
 
 	// Origin init
@@ -142,6 +138,10 @@ void DebugLayer::init() {
 
 void DebugLayer::update() {
 	
+}
+
+void DebugLayer::event(Event& event) {
+
 }
 
 void DebugLayer::render() {

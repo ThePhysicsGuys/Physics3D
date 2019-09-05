@@ -1,8 +1,8 @@
+#include "core.h"
 
 #include "keyboard.h"
 
 #include <stdexcept>
-#include <map>
 
 #include "GLFW\glfw3.h"
 

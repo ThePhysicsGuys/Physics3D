@@ -1,3 +1,5 @@
+#include "core.h"
+
 #include "pickerLayer.h"
 
 #include "../screen.h"
@@ -20,6 +22,10 @@ void PickerLayer::init() {
 
 void PickerLayer::update() {
 	Picker::update(*screen, handler->cursorPosition);
+}
+
+void PickerLayer::event(Event& event) {
+
 }
 
 void PickerLayer::render() {

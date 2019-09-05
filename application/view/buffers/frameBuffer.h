@@ -2,8 +2,6 @@
 
 #include "../bindable.h"
 
-#include "../engine/math/vec.h"
-
 class Texture;
 class RenderBuffer;
 

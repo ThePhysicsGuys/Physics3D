@@ -2,8 +2,6 @@
 
 #include "component.h"
 
-#include "../engine/math/vec.h"
-
 class Texture;
 
 class Image : public Component {

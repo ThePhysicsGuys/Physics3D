@@ -1,3 +1,5 @@
+#include "core.h"
+
 #include "postprocessLayer.h"
 
 #include "../buffers/frameBuffer.h"
@@ -22,6 +24,10 @@ void PostprocessLayer::init() {
 }
 
 void PostprocessLayer::update() {
+
+}
+
+void PostprocessLayer::event(Event& event) {
 
 }
 

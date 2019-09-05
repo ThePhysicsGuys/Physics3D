@@ -1,3 +1,5 @@
+#include "core.h"
+
 #include "button.h"
 
 #include "../texture.h"
