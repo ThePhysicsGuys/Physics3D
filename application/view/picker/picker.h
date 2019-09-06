@@ -8,10 +8,10 @@ namespace Picker {
 	
 	extern EditTools editTools;
 
-	void init();
-	void update(Screen& screen, Vec2 mousePosition);
-	void render(Screen& screen);
-	void close();
+	void onInit();
+	void onUpdate(Screen& screen, Vec2 mousePosition);
+	void onRender(Screen& screen);
+	void onClose();
 
 	void press(Screen& screen);
 	void release(Screen& screen);

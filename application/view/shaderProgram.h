@@ -182,6 +182,6 @@ namespace Shaders {
 	extern MaskShader maskShader;
 	extern GuiShader guiShader;
 
-	void init();
-	void close();
+	void onInit();
+	void onClose();
 }

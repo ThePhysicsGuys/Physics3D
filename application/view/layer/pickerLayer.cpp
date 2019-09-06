@@ -16,22 +16,22 @@ PickerLayer::PickerLayer(Screen * screen, char flags) : Layer("Picker", screen, 
 
 }
 
-void PickerLayer::init() {
-	Picker::init();
+void PickerLayer::onInit() {
+	Picker::onInit();
 }
 
-void PickerLayer::update() {
-	Picker::update(*screen, handler->cursorPosition);
+void PickerLayer::onUpdate() {
+	Picker::onUpdate(*screen, handler->mousePosition);
 }
 
-void PickerLayer::event(Event& event) {
+void PickerLayer::onEvent(Event& event) {
 
 }
 
-void PickerLayer::render() {
-	Picker::render(*screen);
+void PickerLayer::onRender() {
+	Picker::onRender(*screen);
 }
 
-void PickerLayer::close() {
-	Picker::close();
+void PickerLayer::onClose() {
+	Picker::onClose();
 }

@@ -3,6 +3,7 @@
 #include "../eventHandler.h"
 #include "../util/properties.h"
 #include "../visualShape.h"
+#include "event/event.h"
 #include "camera.h"
 
 struct Quad;
@@ -41,10 +42,11 @@ public:
 	Screen();
 	Screen(int width, int height, MagnetWorld* world);
 
-	void init();
-	void update();
-	void render();
-	void close();
+	void onInit();
+	void onUpdate();
+	void onEvent(Event& event);
+	void onRender();
+	void onClose();
 
 	bool shouldClose();
 	int addMeshShape(const VisualShape& mesh);

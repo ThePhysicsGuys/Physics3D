@@ -4,9 +4,9 @@
 
 enum class EventType {
 	None = 0,
-	WindowClose, WindowResize,
-	MouseScroll, MouseMove, MousePress, MouseRelease,
-	KeyPress, KeyRelease
+	WindowClose, WindowResize, FrameBufferResize,
+	MouseScroll, MouseMove, MousePress, MouseRelease, MouseExit, MouseEnter,
+	KeyPress, KeyRelease, KeyDoublePress
 };
 
 enum EventCategory {
@@ -41,10 +41,12 @@ public:
 
 };
 
+#define BIND_EVENT(function) \
+	std::bind(&function, this, std::placeholders::_1)
+
 #define DISPATCH_EVENT(event, type, function) \
 	{ EventDispatcher dispatch(event); \
-	dispatch.dispatch<type>(std::bind(&function, this, std::placeholders::_1)); }
-
+	dispatch.dispatch<type>(BIND_EVENT(function)); }
 
 class EventDispatcher {
 private:
@@ -55,7 +57,7 @@ public:
 	template<typename T, typename F>
 	bool dispatch(const F& function) {
 		if (event.getType() == T::getStaticType()) {
-			event.handled = function(static_cast<T&>(event));
+			event.handled = function(static_cast<T&>(event)); 
 			return true;
 		}
 		return false;

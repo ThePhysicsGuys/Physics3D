@@ -28,22 +28,22 @@ namespace Picker {
 	EditTools editTools = EditTools();
 
 	// Init
-	void init() {
-		editTools.init();
+	void onInit() {
+		editTools.onInit();
 	}
 
 	// Render
-	void render(Screen& screen) {
+	void onRender(Screen& screen) {
 		Shaders::maskShader.updateProjection(screen.camera.viewMatrix, screen.camera.projectionMatrix);
 
 		if (screen.selectedPart) {
-			editTools.render(screen);
+			editTools.onRender(screen);
 		}
 	}
 
 	// Close
-	void close() {
-		editTools.close();
+	void onClose() {
+		editTools.onClose();
 	}
 
 	// Intersections
@@ -91,7 +91,7 @@ namespace Picker {
 
 	// Update
 	// Calculates the mouse ray and the tool & physical intersections
-	void update(Screen& screen, Vec2 mousePosition) {
+	void onUpdate(Screen& screen, Vec2 mousePosition) {
 		// Calculate ray
 		Ray ray = getMouseRay(screen, mousePosition);
 		

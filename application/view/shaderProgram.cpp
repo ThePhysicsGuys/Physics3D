@@ -28,7 +28,7 @@ namespace Shaders {
 	EdgeShader edgeShader;
 	GuiShader guiShader;
 
-	void init() {
+	void onInit() {
 		// Shader source init
 		ShaderSource basicShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(BASIC_SHADER)), "basic.shader");
 		ShaderSource depthShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(DEPTH_SHADER)), "depth.shader");
@@ -64,7 +64,7 @@ namespace Shaders {
 		new(&guiShader) GuiShader(guiShaderSource);
 	}
 
-	void close() {
+	void onClose() {
 		basicShader.close();
 		depthShader.close();
 		vectorShader.close();

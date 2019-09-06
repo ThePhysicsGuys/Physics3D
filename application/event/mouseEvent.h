@@ -47,10 +47,25 @@ public:
 	}
 };
 
+class MouseEnterEvent : public MouseEvent {
+public:
+	EVENT_TYPE(MouseEnter);
+
+	MouseEnterEvent() {}
+};
+
+class MouseExitEvent : public MouseEvent {
+public:
+	EVENT_TYPE(MouseExit);
+
+	MouseExitEvent() {}
+};
+
 class MouseButtonEvent : public MouseEvent {
 private:
 	int button;
 	int modifiers;
+
 public:
 	EVENT_CATEGORY(EventCategoryMouse | EventCategoryInput);
 

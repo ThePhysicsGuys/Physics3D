@@ -15,22 +15,57 @@
 #include "../view/gui/guiUtils.h"
 #include "../view/debug/visualDebug.h"
 #include "../shapeLibrary.h"
-
-#include <random>
-
 #include "../worlds.h"
 #include "../view/screen.h"
 #include "../view/camera.h"
+#include <random>
 
 StandardInputHandler::StandardInputHandler(GLFWwindow* window, Screen& screen) : InputHandler(window), screen(screen) {}
 
-void StandardInputHandler::framebufferResize(Vec2i dimension) {
+void StandardInputHandler::onEvent(Event& event) {
+	screen.onEvent(event);
+
+	EventDispatcher dispatcher(event);
+
+	if (dispatcher.dispatch<MouseMoveEvent>(BIND_EVENT(StandardInputHandler::onMouseMove)))
+		return;
+		
+	if (dispatcher.dispatch<KeyPressEvent>(BIND_EVENT(StandardInputHandler::onKeyPress)))
+		return;	
+	
+	if (dispatcher.dispatch<MouseReleaseEvent>(BIND_EVENT(StandardInputHandler::onMouseRelease)))
+		return;	
+	
+	if (dispatcher.dispatch<MousePressEvent>(BIND_EVENT(StandardInputHandler::onMousePress)))
+		return;
+
+	if (dispatcher.dispatch<MouseScrollEvent>(BIND_EVENT(StandardInputHandler::onMouseScroll)))
+		return;
+
+	if (dispatcher.dispatch<DoubleKeyPressEvent>(BIND_EVENT(StandardInputHandler::onDoubleKeyPress)))
+		return;
+
+	if (dispatcher.dispatch<MouseExitEvent>(BIND_EVENT(StandardInputHandler::onMouseExit)))
+		return;
+
+	if (dispatcher.dispatch<FrameBufferResizeEvent>(BIND_EVENT(StandardInputHandler::onFrameBufferResize)))
+		return;
+
+}
+
+bool StandardInputHandler::onFrameBufferResize(FrameBufferResizeEvent& event) {
+	Vec2i dimension = Vec2i(event.getWidth(), event.getHeight());
+
 	Renderer::viewport(Vec2i(), dimension);
 
 	(*screen.eventHandler.windowResizeHandler) (screen, dimension);
+
+	return true;
 }
 
-void StandardInputHandler::keyDownOrRepeat(int key, int modifiers) {
+bool StandardInputHandler::onKeyPressOrRepeat(KeyPressEvent& event) {
+	int key = event.getKey();
+
 	if (KeyboardOptions::Tick::Speed::up == key) {
 		setSpeed(getSpeed() * 1.5);
 		Log::info("TPS is now: %f", getSpeed());
@@ -43,9 +78,17 @@ void StandardInputHandler::keyDownOrRepeat(int key, int modifiers) {
 		WorldBuilder::createDominoAt(Position(0.0 + (rand() % 100) * 0.001, 1.0 + (rand() % 100) * 0.001, 0.0 + (rand() % 100) * 0.001), fromEulerAngles(0.2, 0.3, 0.7));
 		Log::info("Created domino! There are %d objects in the world! ", screen.world->getPartCount());
 	}
+
+	return true;
 }
 
-void StandardInputHandler::keyDown(int key, int modifiers) {
+bool StandardInputHandler::onKeyPress(KeyPressEvent& event) {
+	if (event.isRepeated()) {
+		return onKeyPressOrRepeat(event);
+	}
+
+	int key = event.getKey();
+
 	if (KeyboardOptions::Tick::pause == key) {
 		togglePause();
 	} else if (KeyboardOptions::Part::remove == key) {
@@ -91,15 +134,23 @@ void StandardInputHandler::keyDown(int key, int modifiers) {
 	if (Keyboard::NUMBER_1 <= key && Keyboard::NUMBER_3 >= key) {
 		togglePointType(static_cast<Debug::PointType>(key - Keyboard::NUMBER_1.code));
 	}
+
+	return true;
 };
 
-void StandardInputHandler::doubleKeyDown(int key, int modifiers) {
-	if(KeyboardOptions::Move::fly == key) {
+bool StandardInputHandler::onDoubleKeyPress(DoubleKeyPressEvent& event) {
+	int key = event.getKey();
+
+	if (KeyboardOptions::Move::fly == key) {
 		toggleFlying();
 	}
+
+	return true;
 }
 
-void StandardInputHandler::mouseDown(int button, int mods) {
+bool StandardInputHandler::onMousePress(MousePressEvent& event) {
+	int button = event.getButton();
+
 	if (Mouse::RIGHT == button) rightDragging = true;
 	if (Mouse::MIDDLE == button) middleDragging = true;
 	if (Mouse::LEFT == button) leftDragging = true;
@@ -109,33 +160,39 @@ void StandardInputHandler::mouseDown(int button, int mods) {
 
 		if (GUI::intersectedComponent) {
 			GUI::select(GUI::superParent(GUI::intersectedComponent));
-			GUI::intersectedComponent->press(GUI::map(cursorPosition));
-			GUI::intersectedPoint = GUI::map(cursorPosition) - GUI::intersectedComponent->position;
+			GUI::intersectedComponent->press(GUI::map(mousePosition));
+			GUI::intersectedPoint = GUI::map(mousePosition) - GUI::intersectedComponent->position;
 		} else {
 			Picker::press(screen);
 		}
 	}
+
+	return true;
 };
 
-void StandardInputHandler::mouseUp(int button, int mods) {
+bool StandardInputHandler::onMouseRelease(MouseReleaseEvent& event) {
+	int button = event.getButton();
+
 	if (Mouse::RIGHT == button) rightDragging = false;
 	if (Mouse::MIDDLE == button) middleDragging = false;
 	if (Mouse::LEFT == button) leftDragging = false;
 
 	if (Mouse::LEFT == button) {
 		if (GUI::selectedComponent){
-			GUI::selectedComponent->release(GUI::map(cursorPosition));
+			GUI::selectedComponent->release(GUI::map(mousePosition));
 		}
 		
 		Picker::release(screen);
 	}
+
+	return true;
 };
 
-void StandardInputHandler::mouseMove(double x, double y) {
-	double dmx = (x - cursorPosition.x);
-	double dmy = (y - cursorPosition.y);
-	Vec2 newCursorPosition = Vec2(x, y);
-	Vec2 guiCursorPosition = GUI::map(cursorPosition);
+bool StandardInputHandler::onMouseMove(MouseMoveEvent& event) {
+	double dmx = (event.getX() - mousePosition.x);
+	double dmy = (event.getY() - mousePosition.y);
+	Vec2 newCursorPosition = Vec2(event.getX(), event.getY());
+	Vec2 guiCursorPosition = GUI::map(mousePosition);
 	Vec2 newGuiCursorPosition = GUI::map(newCursorPosition);
 
 	if (GUI::intersectedComponent) {
@@ -161,14 +218,20 @@ void StandardInputHandler::mouseMove(double x, double y) {
 		screen.camera.move(screen, dmx * -0.5, dmy * 0.5, 0, leftDragging);
 	}
 
-	cursorPosition = newCursorPosition;
+	mousePosition = newCursorPosition;
+
+	return true;
 };
 
-void StandardInputHandler::scroll(double xOffset, double yOffset) {
-	screen.camera.speed = GUI::clamp(screen.camera.speed * (1 + 0.2 * yOffset), 0.001, 100);
+bool StandardInputHandler::onMouseScroll(MouseScrollEvent& event) {
+	screen.camera.speed = GUI::clamp(screen.camera.speed * (1 + 0.2 * event.getYOffset()), 0.001, 100);
+
+	return true;
 };
 
-void StandardInputHandler::mouseExit() {
+bool StandardInputHandler::onMouseExit(MouseExitEvent& event) {
 	rightDragging = false;
 	leftDragging = false;
+
+	return true;
 };

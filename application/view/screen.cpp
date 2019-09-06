@@ -18,6 +18,7 @@
 #include "../meshLibrary.h"
 #include "../visualShape.h"
 #include "../worlds.h"
+#include "event/windowEvent.h"
 
 #include "layer/layerStack.h"
 #include "layer/skyboxLayer.h"
@@ -108,7 +109,7 @@ DebugLayer debugLayer;
 DebugOverlay debugOverlay;
 
 
-void Screen::init() {
+void Screen::onInit() {
 
 	// Log init
 	Log::setLogLevel(Log::Level::INFO);
@@ -123,7 +124,7 @@ void Screen::init() {
 
 
 	// Library init
-	Library::init();
+	Library::onInit();
 
 
 	// Render mode init
@@ -146,7 +147,7 @@ void Screen::init() {
 
 
 	// Shader init
-	Shaders::init();
+	Shaders::onInit();
 
 
 	// Layer creation
@@ -168,7 +169,7 @@ void Screen::init() {
 
 
 	// Layer init
-	layerStack.init();
+	layerStack.onInit();
 
 
 	// Eventhandler init
@@ -177,7 +178,7 @@ void Screen::init() {
 		screen.blurFrameBuffer->resize(dimension);
 		GUI::guiFrameBuffer->resize(dimension);
 
-		screen.camera.update(((float)dimension.x) / ((float)dimension.y));
+		screen.camera.onUpdate(((float)dimension.x) / ((float)dimension.y));
 		screen.dimension = dimension;
 	});
 
@@ -185,15 +186,16 @@ void Screen::init() {
 	// Camera init
 	camera.setPosition(Position(1.0, 1.0, -2.0));
 	camera.setRotation(Vec3(0, 3.1415, 0.0));
-	camera.update(1.0, camera.aspect, 0.01, 10000.0);
+	camera.onUpdate(1.0, camera.aspect, 0.01, 10000.0);
 
 
 	// Resize
-	handler->framebufferResize(dimension);
+	FrameBufferResizeEvent event(dimension.x, dimension.y);
+	handler->onFrameBufferResize(event);
 }
 
 
-void Screen::update() {
+void Screen::onUpdate() {
 
 	// IO events
 	if (handler->anyKey) {
@@ -215,16 +217,19 @@ void Screen::update() {
 	}
 
 	// Update camera
-	camera.update();
+	camera.onUpdate();
 
 
 	// Update layers
-	layerStack.update();
+	layerStack.onUpdate();
 
 }
 
+void Screen::onEvent(Event& event) {
+	layerStack.onEvent(event);
+}
 
-void Screen::render() {
+void Screen::onRender() {
 	// Render to screen Framebuffer
 	screenFrameBuffer->bind();
 	Renderer::clearColor();
@@ -232,7 +237,7 @@ void Screen::render() {
 
 	
 	// Render layers
-	layerStack.render();
+	layerStack.onRender();
 
 
 	// Finalize
@@ -241,15 +246,15 @@ void Screen::render() {
 	Renderer::pollGLFWEvents();
 }
 
-void Screen::close() {
+void Screen::onClose() {
 	screenFrameBuffer->close();
 	blurFrameBuffer->close();
 
-	layerStack.close();
+	layerStack.onClose();
 
-	Library::close();
+	Library::onClose();
 
-	Shaders::close();
+	Shaders::onClose();
 
 	KeyboardOptions::save(properties);
 

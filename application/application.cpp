@@ -43,8 +43,8 @@ int main(void) {
 	Log::info("Started rendering");
 	while (!screen.shouldClose()) {
 		graphicsMeasure.mark(GraphicsProcess::UPDATE);
-		screen.update();
-		screen.render();
+		screen.onUpdate();
+		screen.onRender();
 		graphicsMeasure.end();
 	}
 
@@ -76,7 +76,7 @@ void setupScreen() {
 	}
 
 	Log::info("Initializing screen");
-	screen.init();
+	screen.onInit();
 }
 
 void setupWorld() {
@@ -266,7 +266,7 @@ void stop(int returnCode) {
 	physicsThread.stop();
 
 	Log::info("Closing screen");
-	screen.close();
+	screen.onClose();
 
 	exit(returnCode);
 }

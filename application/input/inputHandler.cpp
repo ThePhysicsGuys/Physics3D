@@ -4,36 +4,90 @@
 
 #include "keyboard.h"
 #include "mouse.h"
+
 #include "../event/event.h"
 #include "../event/keyEvent.h"
+#include "../event/mouseEvent.h"
+#include "../event/windowEvent.h"
 
 #include "../eventHandler.h"
 
+#pragma region callbacks
+
 void InputHandler::keyCallback(int key, int action, int mods) {
 	if (action == Keyboard::PRESS) {
+
 		if (keys[key] == false && glfwGetTime() - timestamp[key] < keyInterval) {
-			doubleKeyDown(key, mods);
+			DoubleKeyPressEvent event(key, mods);
+			onEvent(event);
+		}  else {
+			KeyPressEvent event(key, mods);
+			onEvent(event);
 		}
 
 		keys[key] = true;
 		timestamp[key] = glfwGetTime();
 		anyKey++;
 
-		keyDown(key, mods);
-		keyDownOrRepeat(key, mods);
-	}
-
-	if (action == Keyboard::RELEASE) {
+	} else if (action == Keyboard::RELEASE) {
 		keys[key] = false;
 		anyKey--;
 
-		keyUp(key, mods);
-	}
+		KeyReleaseEvent event(key, mods);
+		onEvent(event);
 
-	if (action == Keyboard::REPEAT) {
-		keyRepeat(key, mods);
-		keyDownOrRepeat(key, mods);
+	} else if (action == Keyboard::REPEAT) {
+		KeyPressEvent event(key, mods, true);
+		onEvent(event);
 	}
+}
+
+void InputHandler::cursorCallback(double x, double y) {
+	MouseMoveEvent event(x, y);
+	onEvent(event);
+}
+
+void InputHandler::cursorEnterCallback(int entered) {
+	if (entered) {
+		MouseEnterEvent event;
+		onEvent(event);
+	} else {
+		MouseExitEvent event;
+		onEvent(event);
+	}
+}
+
+void InputHandler::scrollCallback(double xOffset, double yOffset) {
+	MouseScrollEvent event(xOffset, yOffset);
+	onEvent(event);
+}
+
+void InputHandler::mouseButtonCallback(int button, int action, int mods) {
+	if (action == Mouse::PRESS) {
+		MousePressEvent event(button, mods);
+		onEvent(event);
+	} else if (action == Mouse::RELEASE) {
+		MouseReleaseEvent event(button, mods);
+		onEvent(event);
+	}
+}
+
+void InputHandler::windowSizeCallback(int width, int height) {
+	WindowResizeEvent event(width, height);
+	onEvent(event);
+}
+
+void InputHandler::framebufferSizeCallback(int width, int height) {
+	FrameBufferResizeEvent event(width, height);
+	onEvent(event);
+}
+
+#pragma endregion
+
+Vec2 InputHandler::getMousePosition() {
+	double x, y;
+	glfwGetCursorPos(window, &x, &y);
+	return Vec2(x, y);
 }
 
 bool InputHandler::getKey(Keyboard::Key key) {
@@ -43,64 +97,11 @@ bool InputHandler::getKey(Keyboard::Key key) {
 	return keys[key.code];
 }
 
-void InputHandler::cursorCallback(double x, double y) {
-	mouseMove(x, y);
-}
-
-void InputHandler::cursorEnterCallback(int entered) {
-	if (entered)
-		mouseEnter();
-	else
-		mouseExit();
-}
-
-void InputHandler::scrollCallback(double xOffset, double yOffset) {
-	scroll(xOffset, yOffset);
-}
-
-void InputHandler::mouseButtonCallback(int button, int action, int mods) {
-	if (action == Mouse::PRESS)
-		mouseDown(button, mods);
-	if (action == Mouse::RELEASE)
-		mouseUp(button, mods);
-}
-
-void InputHandler::windowSizeCallback(int width, int height) {
-	windowResize(Vec2i(width, height));
-}
-
-void InputHandler::framebufferSizeCallback(int width, int height) {
-	framebufferResize(Vec2i(width, height));
-}
-
-Vec2 InputHandler::getMousePos() {
-	double x, y;
-	glfwGetCursorPos(window, &x, &y);
-	return Vec2(x, y);
-}
-
 InputHandler::InputHandler(GLFWwindow* window) : window(window) {
 	glfwSetWindowUserPointer(window, this);
 
 	glfwSetKeyCallback(window, [] (GLFWwindow* window, int key, int scancode, int action, int mods) {
 		static_cast<InputHandler*>(glfwGetWindowUserPointer(window))->keyCallback(key, action, mods);
-
-		if (action == Keyboard::PRESS) {
-			KeyPressEvent event(key, mods);
-
-			//DISPATCH_EVENT(event, KeyPressEvent, getMousePos);
-			
-		}
-
-		if (action == Keyboard::RELEASE) {
-			KeyReleaseEvent event(key, mods);
-
-		}
-
-		if (action == Keyboard::REPEAT) {
-			KeyPressEvent event(key, mods, true);
-
-		}
 	});
 
 	glfwSetCursorPosCallback(window, [] (GLFWwindow* window, double x, double y) {

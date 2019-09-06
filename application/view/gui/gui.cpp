@@ -243,7 +243,7 @@ namespace GUI {
 
 	GuiBatch* batch;
 
-	void init(Screen* screen, Font* font) {
+	void onInit(Screen* screen, Font* font) {
 
 		GUI::batch = new GuiBatch();
 
@@ -353,12 +353,12 @@ namespace GUI {
 		}
 	}
 
-	void update(Mat4f orthoMatrix) {
+	void onUpdate(Mat4f orthoMatrix) {
 		Shaders::quadShader.updateProjection(orthoMatrix);
 	}
 
-	void render(Mat4f orthoMatrix) {
-		update(orthoMatrix);
+	void onRender(Mat4f orthoMatrix) {
+		onUpdate(orthoMatrix);
 
 		screen->blurFrameBuffer->bind();
 		Shaders::quadShader.updateTexture(screen->screenFrameBuffer->texture);
@@ -381,7 +381,7 @@ namespace GUI {
 		GUI::batch->submit();
 	}
 
-	void close() {
+	void onClose() {
 		// Framebuffers
 		guiFrameBuffer->close();
 

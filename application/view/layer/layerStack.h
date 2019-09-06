@@ -15,11 +15,11 @@ public:
 	void pushOverlay(Layer* layer);
 	void popOverlay(Layer* layer);
 
-	void init();
-	void update();
-	void event(Event& event);
-	void render();
-	void close();
+	void onInit();
+	void onUpdate();
+	void onEvent(Event& event);
+	void onRender();
+	void onClose();
 
 	std::vector<Layer*>::iterator begin();
 	std::vector<Layer*>::iterator end();

@@ -147,10 +147,10 @@ namespace GUI {
 	bool intersectsSquare(Vec2 point, Vec2 topleft, Vec2 dimension);
 
 	// State function
-	void init(Screen* screen, Font* font);
-	void update(Mat4f orthoMatrix);
-	void render(Mat4f orthoMatrix);
-	void close();
+	void onInit(Screen* screen, Font* font);
+	void onUpdate(Mat4f orthoMatrix);
+	void onRender(Mat4f orthoMatrix);
+	void onClose();
 };
 
 #include "component.h"

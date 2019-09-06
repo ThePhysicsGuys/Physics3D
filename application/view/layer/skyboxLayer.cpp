@@ -26,19 +26,19 @@ SkyboxLayer::SkyboxLayer(Screen* screen, char flags) : Layer("Skybox", screen, f
 
 }
 
-void SkyboxLayer::init() {
+void SkyboxLayer::onInit() {
 	skyboxTexture = new CubeMap("../res/skybox/right.jpg", "../res/skybox/left.jpg", "../res/skybox/top.jpg", "../res/skybox/bottom.jpg", "../res/skybox/front.jpg", "../res/skybox/back.jpg");
 }
 
-void SkyboxLayer::update() {
+void SkyboxLayer::onUpdate() {
 
 }
 
-void SkyboxLayer::event(Event& event) {
+void SkyboxLayer::onEvent(Event& event) {
 
 }
 
-void SkyboxLayer::render() {
+void SkyboxLayer::onRender() {
 	graphicsMeasure.mark(GraphicsProcess::SKYBOX);
 
 	Renderer::disableDepthMask();
@@ -54,6 +54,6 @@ void SkyboxLayer::render() {
 	Renderer::enableDepthTest();
 }
 
-void SkyboxLayer::close() {
+void SkyboxLayer::onClose() {
 	skyboxTexture->close();
 }

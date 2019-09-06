@@ -8,7 +8,7 @@ LayerStack::LayerStack() {
 
 void LayerStack::pushLayer(Layer* layer) {
 	stack.insert(stack.begin() + insert++, layer);
-	layer->attach();
+	layer->onAttach();
 }
 
 void LayerStack::popLayer(Layer* layer) {
@@ -18,14 +18,14 @@ void LayerStack::popLayer(Layer* layer) {
 		stack.erase(where);
 		insert--;
 
-		layer->detach();
+		layer->onDetach();
 	}
 }
 
 void LayerStack::pushOverlay(Layer* layer) {
 	stack.emplace_back(layer);
 
-	layer->attach();
+	layer->onAttach();
 }
 
 void LayerStack::popOverlay(Layer * layer) {
@@ -33,55 +33,55 @@ void LayerStack::popOverlay(Layer * layer) {
 
 	if (where != end()) {
 		stack.erase(where);
-		layer->detach();
+		layer->onDetach();
 	}	
 }
 
-void LayerStack::init() {
+void LayerStack::onInit() {
 	for (auto i = begin(); i != end(); ++i) {
-		(*i)->init();
+		(*i)->onInit();
 	}
 }
 
-void LayerStack::update() {
+void LayerStack::onUpdate() {
 	for (auto i = begin(); i != end(); ++i) {
 		Layer* layer = *i;
 		
 		if (layer->flags & (Layer::Disabled | Layer::NoUpdate))
 			continue;
 
-		layer->update();
+		layer->onUpdate();
 	}
 }
 
-void LayerStack::event(Event& event) {
+void LayerStack::onEvent(Event& event) {
 	for (auto i = rbegin(); i != rend(); ++i) {
 		Layer* layer = *i;
 
 		if (layer->flags & (Layer::Disabled | Layer::NoEvents))
 			continue;
 
-		layer->event(event);
+		layer->onEvent(event);
 		
 		if (event.handled)
 			break;
 	}
 }
 
-void LayerStack::render() {
+void LayerStack::onRender() {
 	for (auto i = begin(); i != end(); ++i) {
 		Layer* layer = *i;
 
 		if (layer->flags & (Layer::Disabled | Layer::NoRender))
 			continue;
 
-		layer->render();
+		layer->onRender();
 	}
 }
 
-void LayerStack::close() {
+void LayerStack::onClose() {
 	for (auto i = rbegin(); i != rend(); ++i) {
-		(*i)->close();
+		(*i)->onClose();
 	}
 }
 

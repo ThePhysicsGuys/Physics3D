@@ -33,9 +33,9 @@ public:
 
 	ExtendedPart* attachment = nullptr;
 
-	void update();
-	void update(float fov, float aspect, float znear, float zfar);
-	void update(float aspect);
+	void onUpdate();
+	void onUpdate(float fov, float aspect, float znear, float zfar);
+	void onUpdate(float aspect);
 
 	Camera(Position position, Mat3 rotation);
 	Camera();

@@ -19,19 +19,19 @@ PostprocessLayer::PostprocessLayer(Screen * screen, char flags) : Layer("Postpro
 
 }
 
-void PostprocessLayer::init() {
+void PostprocessLayer::onInit() {
 
 }
 
-void PostprocessLayer::update() {
+void PostprocessLayer::onUpdate() {
 
 }
 
-void PostprocessLayer::event(Event& event) {
+void PostprocessLayer::onEvent(Event& event) {
 
 }
 
-void PostprocessLayer::render() {
+void PostprocessLayer::onRender() {
 	screen->screenFrameBuffer->unbind();
 	Renderer::clearColor();
 	Renderer::clearDepth();
@@ -42,6 +42,6 @@ void PostprocessLayer::render() {
 	screen->quad->render();
 }
 
-void PostprocessLayer::close() {
+void PostprocessLayer::onClose() {
 
 }

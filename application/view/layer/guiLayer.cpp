@@ -26,12 +26,12 @@ GuiLayer::GuiLayer(Screen* screen, char flags) : Layer("Gui", screen, flags) {
 
 }
 
-void GuiLayer::init() {
+void GuiLayer::onInit() {
 	// Font init
 	font = new Font("../res/fonts/droid.ttf");
 
 	// GUI init
-	GUI::init(screen, font);
+	GUI::onInit(screen, font);
 
 	// Frames init
 	propertiesFrame = new PropertiesFrame(0.75, 0.75);
@@ -39,10 +39,10 @@ void GuiLayer::init() {
 	debugFrame = new DebugFrame(0.7, 0.7);
 }
 
-void GuiLayer::update() {
+void GuiLayer::onUpdate() {
 
 	// Update GUI intersection
-	GUI::intersect(GUI::map(handler->cursorPosition));
+	GUI::intersect(GUI::map(handler->mousePosition));
 
 	// Update frames
 	propertiesFrame->update();
@@ -50,18 +50,18 @@ void GuiLayer::update() {
 	environmentFrame->update();
 }
 
-void GuiLayer::event(Event& event) {
+void GuiLayer::onEvent(Event& event) {
 
 }
 
-void GuiLayer::render() {
+void GuiLayer::onRender() {
 	// Render GUI
 	Renderer::disableDepthTest();
 	graphicsMeasure.mark(GraphicsProcess::OTHER);
 	Shaders::fontShader.updateProjection(screen->camera.orthoMatrix);
-	GUI::render(screen->camera.orthoMatrix);
+	GUI::onRender(screen->camera.orthoMatrix);
 }
 
-void GuiLayer::close() {
-	GUI::close();
+void GuiLayer::onClose() {
+	GUI::onClose();
 }

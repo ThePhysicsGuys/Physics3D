@@ -8,11 +8,11 @@
 #include "screen.h"
 
 Camera::Camera(Position position, Mat3 rotation) : cframe(GlobalCFrame(position, rotation)), speed(0.35), rspeed(0.04), flying(true) {
-	update();
+	onUpdate();
 };
 
 Camera::Camera() : cframe(GlobalCFrame()), speed(0.35), rspeed(0.04), flying(true) {
-	update();
+	onUpdate();
 };
 
 void Camera::setPosition(Position position) {
@@ -91,7 +91,7 @@ void Camera::move(Screen& screen, Vec3 delta, bool leftDragging) {
 	move(screen, delta.x, delta.y, delta.z, leftDragging);
 }
 
-void Camera::update(float fov, float aspect, float znear, float zfar) {
+void Camera::onUpdate(float fov, float aspect, float znear, float zfar) {
 	this->fov = fov;
 	this->aspect = aspect;
 	this->znear = znear;
@@ -99,20 +99,20 @@ void Camera::update(float fov, float aspect, float znear, float zfar) {
 
 	projectionDirty = true;
 
-	update();
+	onUpdate();
 }
 
-void Camera::update(float aspect) {
+void Camera::onUpdate(float aspect) {
 	this->aspect = aspect;
 
 	projectionDirty = true;
 
 	orthoMatrix = ortho(-aspect, aspect, -1.0f, 1.0f, -1000.0f, 1000.0f);
 
-	update();
+	onUpdate();
 }
 
-void Camera::update() {
+void Camera::onUpdate() {
 	if (!flying && attachment != nullptr) {
 		this->cframe.position = attachment->getCFrame().position;
 		viewDirty = true;

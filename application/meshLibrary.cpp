@@ -17,7 +17,7 @@ namespace Library {
 	IndexedMesh* sphere = nullptr;
 	IndexedMesh* vector = nullptr;
 
-	void init() {
+	void onInit() {
 		// Cube
 		cube = new IndexedMesh(VisualShape(createCube(1)));
 		
@@ -29,7 +29,7 @@ namespace Library {
 		vector = new IndexedMesh(vectorShape);
 	}
 
-	void close() {
+	void onClose() {
 		cube->close();
 		sphere->close();
 		vector->close();

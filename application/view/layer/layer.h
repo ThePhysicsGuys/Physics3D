@@ -35,12 +35,12 @@ public:
 	Layer(const std::string& name, Screen* screen, char flags = None) : name(name), screen(screen), flags(flags) {};
 	~Layer() {}
 
-	virtual void attach() {}
-	virtual void detach() {}
+	virtual void onAttach() {}
+	virtual void onDetach() {}
 
-	virtual void init() {}
-	virtual void event(Event& event) {}
-	virtual void update() {}
-	virtual void render() {}
-	virtual void close() {}
+	virtual void onInit() {}
+	virtual void onEvent(Event& event) {}
+	virtual void onUpdate() {}
+	virtual void onRender() {}
+	virtual void onClose() {}
 };

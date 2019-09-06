@@ -16,9 +16,9 @@ public:
 	DebugLayer();
 	DebugLayer(Screen* screen, char flags = NoUpdate | NoEvents);
 
-	void init() override;
-	void update() override;
-	void event(Event& event) override;
-	void render() override;
-	void close() override;
+	void onInit() override;
+	void onUpdate() override;
+	void onEvent(Event& event) override;
+	void onRender() override;
+	void onClose() override;
 }; 

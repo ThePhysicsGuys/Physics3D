@@ -29,9 +29,9 @@ struct EditTools : public Pickable {
 	EditDirection intersectedEditDirection;
 	Vec3f intersectedPoint;
 
-	void init() override;
-	void render(Screen& screen) override;
-	void close();
+	void onInit() override;
+	void onRender(Screen& screen) override;
+	void onClose();
 
 	float intersect(Screen& screen, const Ray& ray) override;
 

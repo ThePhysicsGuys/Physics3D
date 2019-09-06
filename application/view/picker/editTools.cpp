@@ -43,7 +43,7 @@ IndexedMesh* scaleMesh = nullptr;
 VisualShape scaleShape;
 
 
-void EditTools::init() {
+void EditTools::onInit() {
 
 	// Edit line init
 	line = new Line();
@@ -75,7 +75,7 @@ void EditTools::init() {
 }
 
 
-void EditTools::render(Screen& screen) {
+void EditTools::onRender(Screen& screen) {
 	IndexedMesh* shaft = nullptr;
 	IndexedMesh* center = nullptr;
 
@@ -143,7 +143,7 @@ void EditTools::render(Screen& screen) {
 	Renderer::disableDepthTest();
 }
 
-void EditTools::close() {
+void EditTools::onClose() {
 	rotateMesh->close();
 	translateCenterMesh->close();
 	translateMesh->close();

@@ -39,11 +39,11 @@ ModelLayer::ModelLayer(Screen* screen, char flags) : Layer("Model", screen, flag
 
 }
 
-void ModelLayer::init() {
+void ModelLayer::onInit() {
 	Shaders::basicShader.createLightArray(lightCount);
 }
 
-void ModelLayer::update() {
+void ModelLayer::onUpdate() {
 	// Update lights
 	/*static long long t = 0;
 	float d = 0.5 + 0.5 * sin(t++ * 0.005);
@@ -54,11 +54,11 @@ void ModelLayer::update() {
 	lights[3].color = Vec3f(1-d, 1-d, d);*/
 }
 
-void ModelLayer::event(Event& event) {
+void ModelLayer::onEvent(Event& event) {
 
 }
 
-void ModelLayer::render() {
+void ModelLayer::onRender() {
 	graphicsMeasure.mark(GraphicsProcess::PHYSICALS);
 
 	SharedLockGuard lg(screen->world->lock);
@@ -142,6 +142,6 @@ void ModelLayer::render() {
 	}
 }
 
-void ModelLayer::close() {
+void ModelLayer::onClose() {
 
 }

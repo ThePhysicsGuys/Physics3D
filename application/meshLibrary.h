@@ -7,6 +7,6 @@ namespace Library {
 	extern IndexedMesh* sphere;
 	extern IndexedMesh* vector;
 	
-	void init();
-	void close();
+	void onInit();
+	void onClose();
 }

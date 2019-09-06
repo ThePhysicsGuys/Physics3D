@@ -31,20 +31,20 @@ DebugOverlay::DebugOverlay(Screen* screen, char flags) : Layer("Debug overlay", 
 
 }
 
-void DebugOverlay::init() {
+void DebugOverlay::onInit() {
 
 }
 
-void DebugOverlay::update() {
+void DebugOverlay::onUpdate() {
 	using namespace Debug;
 	fieldIndex = 0;
 }
 
-void DebugOverlay::event(Event& event) {
+void DebugOverlay::onEvent(Event& event) {
 
 }
 
-void DebugOverlay::render() {
+void DebugOverlay::onRender() {
 
 	Renderer::disableDepthTest();
 	Shaders::fontShader.updateProjection(screen->camera.orthoMatrix);
@@ -98,6 +98,6 @@ void DebugOverlay::render() {
 	}
 }
 
-void DebugOverlay::close() {
+void DebugOverlay::onClose() {
 
 }

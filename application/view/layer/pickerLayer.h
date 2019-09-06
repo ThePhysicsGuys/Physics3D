@@ -9,9 +9,9 @@ public:
 	PickerLayer();
 	PickerLayer(Screen* screen, char flags = None);
 
-	void init() override;
-	void update() override;
-	void event(Event& event) override;
-	void render() override;
-	void close() override;
+	void onInit() override;
+	void onUpdate() override;
+	void onEvent(Event& event) override;
+	void onRender() override;
+	void onClose() override;
 };

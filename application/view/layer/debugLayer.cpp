@@ -101,7 +101,7 @@ DebugLayer::DebugLayer(Screen* screen, char flags) : Layer("Debug layer", screen
 
 }
 
-void DebugLayer::init() {
+void DebugLayer::onInit() {
 
 	// Origin init
 	float originVertices[3] = { 0, 0, 5 };
@@ -136,15 +136,15 @@ void DebugLayer::init() {
 }
 
 
-void DebugLayer::update() {
+void DebugLayer::onUpdate() {
 	
 }
 
-void DebugLayer::event(Event& event) {
+void DebugLayer::onEvent(Event& event) {
 
 }
 
-void DebugLayer::render() {
+void DebugLayer::onRender() {
 	graphicsMeasure.mark(GraphicsProcess::VECTORS);
 	
 	using namespace Debug;
@@ -259,6 +259,6 @@ void DebugLayer::render() {
 	originMesh->render();
 }
 
-void DebugLayer::close() {
+void DebugLayer::onClose() {
 
 }
