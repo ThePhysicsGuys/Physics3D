@@ -12,10 +12,6 @@ class Screen;
 class StandardInputHandler : public InputHandler {
 public: 
 	Screen& screen;
-	Vec2 mousePosition;
-	bool rightDragging = false;
-	bool middleDragging = false;
-	bool leftDragging = false;
 
 	StandardInputHandler(GLFWwindow* window, Screen& screen);
 
@@ -25,9 +21,4 @@ public:
 	bool onKeyPress(KeyPressEvent& event);
 	bool onKeyPressOrRepeat(KeyPressEvent& event);
 	bool onDoubleKeyPress(DoubleKeyPressEvent& event);
-	bool onMousePress(MousePressEvent& event);
-	bool onMouseRelease(MouseReleaseEvent& event);
-	bool onMouseMove(MouseMoveEvent& event);
-	bool onMouseScroll(MouseScrollEvent& event);
-	bool onMouseExit(MouseExitEvent& event);
 };

@@ -94,3 +94,47 @@ public:
 
 	MouseReleaseEvent(int button, int modifiers = 0) : MouseButtonEvent(button, modifiers) {}
 };
+
+class MouseDragEvent : public MouseEvent {
+private:
+	int oldX;
+	int oldY;
+	int newX;
+	int newY;
+
+	bool leftDragging;
+	bool middleDragging;
+	bool rightDragging;
+public:
+	EVENT_TYPE(MouseDrag);
+
+	MouseDragEvent(int oldX, int oldY, int newX, int newY, bool leftDragging, bool middleDragging, bool rightDragging) : oldX(oldX), oldY(oldY), newX(newX), newY(newY), leftDragging(leftDragging), middleDragging(middleDragging), rightDragging(rightDragging) {}
+
+	inline int getOldX() const {
+		return oldX;
+	}
+
+	inline int getOldY() const {
+		return oldY;
+	}
+
+	inline int getNewX() const {
+		return newX;
+	}
+
+	inline int getNewY() const {
+		return newY;
+	}
+
+	inline bool isLeftDragging() const {
+		return leftDragging;
+	}
+
+	inline bool isMiddleDragging() const {
+		return middleDragging;
+	}
+
+	inline bool isRightDragging() const {
+		return rightDragging;
+	}
+};

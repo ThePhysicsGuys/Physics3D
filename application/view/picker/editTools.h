@@ -35,9 +35,9 @@ struct EditTools : public Pickable {
 
 	float intersect(Screen& screen, const Ray& ray) override;
 
-	void press(Screen& screen) override;
-	void release(Screen& screen) override;
-	void drag(Screen& screen) override;
+	void onMousePress(Screen& screen) override;
+	void onMouseRelease(Screen& screen) override;
+	void onMouseDrag(Screen& screen) override;
 
 	void dragTranslateTool(Screen& screen);
 	void dragRotateTool(Screen& screen);

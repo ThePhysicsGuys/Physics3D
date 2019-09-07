@@ -11,6 +11,10 @@ namespace Keyboard {
 			return other.code == code;
 		}
 
+		bool operator!=(const Key& other) const {
+			return other.code != code;
+		}
+
 		bool operator>=(const Key& other) const {
 			return other.code >= code;
 		}
@@ -32,6 +36,10 @@ namespace Keyboard {
 			return other == code;
 		}
 
+		bool operator!=(int other) const {
+			return other != code;
+		}
+
 		bool operator>=(int other) const {
 			return other >= code;
 		}
@@ -51,6 +59,10 @@ namespace Keyboard {
 		// Key <-> string
 		bool operator==(const std::string& other) const {
 			return other == name;
+		}
+
+		bool operator!=(const std::string& other) const {
+			return other != name;
 		}
 	};
 

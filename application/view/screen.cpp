@@ -226,6 +226,8 @@ void Screen::onUpdate() {
 }
 
 void Screen::onEvent(Event& event) {
+	camera.onEvent(event);
+
 	layerStack.onEvent(event);
 }
 

@@ -1,11 +1,17 @@
 #include "core.h"
 
 #include "camera.h"
+#include "screen.h"
+#include "application.h"
+#include "gui/guiUtils.h"
+
+#include "event/event.h"
+#include "event/mouseEvent.h"
+#include "input/mouse.h"
 
 #include "../extendedPart.h"
 
 #include "picker/picker.h"
-#include "screen.h"
 
 Camera::Camera(Position position, Mat3 rotation) : cframe(GlobalCFrame(position, rotation)), speed(0.35), rspeed(0.04), flying(true) {
 	onUpdate();
@@ -89,6 +95,35 @@ void Camera::move(Screen& screen, double dx, double dy, double dz, bool leftDrag
 
 void Camera::move(Screen& screen, Vec3 delta, bool leftDragging) {
 	move(screen, delta.x, delta.y, delta.z, leftDragging);
+}
+
+bool Camera::onMouseDrag(MouseDragEvent& event) {
+	double dmx = (event.getNewX() - event.getOldX());
+	double dmy = (event.getNewY() - event.getOldY());
+
+	// Camera rotating
+	if (event.isRightDragging()) {
+		rotate(screen, dmy * 0.1, dmx * 0.1, 0, event.isLeftDragging());
+	}
+
+	// Camera moving
+	if (event.isMiddleDragging()) {
+		move(screen, dmx * -0.2, dmy * 0.2, 0, event.isLeftDragging());
+	}
+
+	return false;
+}
+
+bool Camera::onMouseScroll(MouseScrollEvent& event) {
+	speed = GUI::clamp(speed * (1 + 0.2 * event.getYOffset()), 0.001, 100);
+
+	return true;
+};
+
+void Camera::onEvent(Event& event) {
+	EventDispatcher dispatcher(event);
+	dispatcher.dispatch<MouseDragEvent>(BIND_EVENT_METHOD(Camera::onMouseDrag));
+	dispatcher.dispatch<MouseScrollEvent>(BIND_EVENT_METHOD(Camera::onMouseScroll));
 }
 
 void Camera::onUpdate(float fov, float aspect, float znear, float zfar) {

@@ -30,6 +30,7 @@ void InputHandler::keyCallback(int key, int action, int mods) {
 		anyKey++;
 
 	} else if (action == Keyboard::RELEASE) {
+
 		keys[key] = false;
 		anyKey--;
 
@@ -45,6 +46,13 @@ void InputHandler::keyCallback(int key, int action, int mods) {
 void InputHandler::cursorCallback(double x, double y) {
 	MouseMoveEvent event(x, y);
 	onEvent(event);
+
+	if (leftDragging || middleDragging || rightDragging) {
+		MouseDragEvent event(mousePosition.x, mousePosition.y, x, y, leftDragging, middleDragging, rightDragging);
+		onEvent(event);
+	}
+
+	mousePosition = Vec2(x, y);
 }
 
 void InputHandler::cursorEnterCallback(int entered) {
@@ -52,6 +60,10 @@ void InputHandler::cursorEnterCallback(int entered) {
 		MouseEnterEvent event;
 		onEvent(event);
 	} else {
+		leftDragging = false;
+		middleDragging = false;
+		rightDragging = false;
+
 		MouseExitEvent event;
 		onEvent(event);
 	}
@@ -64,9 +76,19 @@ void InputHandler::scrollCallback(double xOffset, double yOffset) {
 
 void InputHandler::mouseButtonCallback(int button, int action, int mods) {
 	if (action == Mouse::PRESS) {
+
+		if (Mouse::RIGHT == button) rightDragging = true;
+		if (Mouse::MIDDLE == button) middleDragging = true;
+		if (Mouse::LEFT == button) leftDragging = true;
+
 		MousePressEvent event(button, mods);
 		onEvent(event);
 	} else if (action == Mouse::RELEASE) {
+
+		if (Mouse::RIGHT == button) rightDragging = false;
+		if (Mouse::MIDDLE == button) middleDragging = false;
+		if (Mouse::LEFT == button) leftDragging = false;
+
 		MouseReleaseEvent event(button, mods);
 		onEvent(event);
 	}

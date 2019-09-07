@@ -11,14 +11,26 @@ namespace Mouse {
 			return other.code == code;
 		}
 
+		bool operator!=(const Button& other) const {
+			return other.code != code;
+		}
+
 		// Key <-> int
 		bool operator==(int other) const {
 			return other == code;
 		}
 
+		bool operator!=(int other) const {
+			return other != code;
+		}
+
 		// Key <-> string
 		bool operator==(const std::string& other) const {
 			return other == name;
+		}
+
+		bool operator!=(const std::string& other) const {
+			return other != name;
 		}
 	};
 							 

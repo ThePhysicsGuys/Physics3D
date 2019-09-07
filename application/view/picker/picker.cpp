@@ -4,6 +4,10 @@
 
 #include "../engine/math/mathUtil.h"
 
+#include "event/event.h"
+#include "event/mouseEvent.h"
+#include "input/mouse.h"
+
 #include "ray.h"
 
 #include "../screen.h"
@@ -30,6 +34,14 @@ namespace Picker {
 	// Init
 	void onInit() {
 		editTools.onInit();
+	}
+
+	void onEvent(Event& event) {
+		EventDispatcher dispatcher(event);
+
+		dispatcher.dispatch<MousePressEvent>(onMousePress);
+		dispatcher.dispatch<MouseReleaseEvent>(onMouseRelease);
+		dispatcher.dispatch<MouseDragEvent>(onMouseDrag);
 	}
 
 	// Render
@@ -113,11 +125,13 @@ namespace Picker {
 
 	// Events
 	// Mouse press behaviour
-	void press(Screen& screen) {
+	bool onMousePress(MousePressEvent& event) {
 		// Check if users pressed on tool
-		
+		if (Mouse::LEFT != event.getButton())
+			return false;
+
 		if (screen.selectedPart && editTools.intersectedEditDirection != EditTools::EditDirection::NONE) {
-			editTools.press(screen);
+			editTools.onMousePress(screen);
 		} else { // Keep current part selected as long as tool is being used
 			// Update selected part
 			screen.selectedPart = screen.intersectedPart;
@@ -129,27 +143,39 @@ namespace Picker {
 				moveGrabbedPhysicalLateral(screen);
 			}
 		}
+
+		return true;
 	}
 
 	// Mouse release behaviour
-	void release(Screen& screen) {
+	bool onMouseRelease(MouseReleaseEvent& event) {
+		if (Mouse::LEFT != event.getButton())
+			return false;
+
 		// Reset selectedpart
 		screen.world->selectedPart = nullptr;
 
 		// Reset selected tool
-		editTools.release(screen);
+		editTools.onMouseRelease(screen);
+
+		return true;
 	}
 
 	
 	// Mouse drag behaviour
-	void drag(Screen& screen) {
+	bool onMouseDrag(MouseDragEvent& event) {
+		if (!event.isLeftDragging())
+			return false;
+
 		if (editTools.selectedEditDirection != EditTools::EditDirection::NONE) {
-			editTools.drag(screen);
+			editTools.onMouseDrag(screen);
 		} else {
 			if (screen.selectedPart) {
 				moveGrabbedPhysicalLateral(screen);
 			}
 		}
+
+		return true;
 	}
 
 	void moveGrabbedPhysicalLateral(Screen& screen) {

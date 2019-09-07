@@ -5,7 +5,7 @@
 enum class EventType {
 	None = 0,
 	WindowClose, WindowResize, FrameBufferResize,
-	MouseScroll, MouseMove, MousePress, MouseRelease, MouseExit, MouseEnter,
+	MouseScroll, MouseMove, MouseDrag, MousePress, MouseRelease, MouseExit, MouseEnter,
 	KeyPress, KeyRelease, KeyDoublePress
 };
 
@@ -41,12 +41,20 @@ public:
 
 };
 
-#define BIND_EVENT(function) \
+// For class methods only
+
+#define BIND_EVENT_METHOD(function) \
 	std::bind(&function, this, std::placeholders::_1)
 
-#define DISPATCH_EVENT(event, type, function) \
+#define DISPATCH_EVENT_METHOD(event, type, function) \
 	{ EventDispatcher dispatch(event); \
-	dispatch.dispatch<type>(BIND_EVENT(function)); }
+	dispatch.dispatch<type>(BIND_EVENT_METHOD(function)); }
+
+// For free functions only
+
+#define DISPATCH_EVENT_FUNCTION(event, type, function) \
+	{ EventDispatcher dispatch(event); \
+	dispatch.dispatch<type>(function); }
 
 class EventDispatcher {
 private:

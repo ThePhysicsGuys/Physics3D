@@ -1,6 +1,7 @@
 #include "core.h"
 
 #include "gui.h"
+#include "guiUtils.h"
 
 #include "component.h"
 #include "container.h"
@@ -8,6 +9,11 @@
 #include "colorPicker.h"
 #include "frame.h"
 #include "../path/path.h"
+
+#include "event/event.h"
+#include "event/mouseEvent.h"
+#include "input/mouse.h"
+#include "input/standardInputHandler.h"
 
 #include "../../visualShape.h"
 #include "../../io/import.h"
@@ -170,7 +176,7 @@ namespace GUI {
 	Vec2 intersectedPoint;
 
 	// Defaults
-	double margin = 0.01;
+	double margin = 0.005;
 	double padding = 0.01;
 
 	// ColorPicker
@@ -232,14 +238,14 @@ namespace GUI {
 
 	// Frame
 	double frameButtonOffset = 0.003;
-	double frameTitleBarHeight = 0.06;
+	double frameTitleBarHeight = 0.045;
 	Vec4 frameTitleBarColor = COLOR::ACCENT;
 	Vec4 frameBackgroundColor = COLOR::BACK;
 
 	// Font
 	Font* font = nullptr;
 	Vec4 fontColor = COLOR::SILVER;
-	double fontSize = 0.0009;
+	double fontSize = 0.0007;
 
 	GuiBatch* batch;
 
@@ -353,8 +359,62 @@ namespace GUI {
 		}
 	}
 
+	bool onMouseMove(MouseMoveEvent& event) {
+		if (GUI::intersectedComponent) {
+			Vec2 guiCursorPosition = GUI::map(Vec2(event.getX(), event.getY()));
+			GUI::intersectedComponent->hover(guiCursorPosition);
+		}
+
+		return false;
+	}
+
+	bool onMouseDrag(MouseDragEvent& event) {
+		if (GUI::selectedComponent) {
+			Vec2 guiCursorPosition = GUI::map(Vec2(event.getOldX(), event.getOldY()));
+			Vec2 newGuiCursorPosition = GUI::map(Vec2(event.getNewX(), event.getNewY()));
+
+			GUI::selectedComponent->drag(newGuiCursorPosition, guiCursorPosition);
+
+			return true;
+		}
+
+		return false;
+	}
+
+	bool onMouseRelease(MouseReleaseEvent& event) {
+		if (Mouse::LEFT == event.getButton()) {
+			if (GUI::selectedComponent) {
+				GUI::selectedComponent->release(GUI::map(handler->getMousePosition()));
+			}
+		}
+		return false;
+	}
+
+	bool onMousePress(MousePressEvent& event) {
+		if (Mouse::LEFT == event.getButton()) {
+			GUI::selectedComponent = GUI::intersectedComponent;
+
+			if (GUI::intersectedComponent) {
+				GUI::select(GUI::superParent(GUI::intersectedComponent));
+				GUI::intersectedComponent->press(GUI::map(handler->getMousePosition()));
+				GUI::intersectedPoint = GUI::map(handler->getMousePosition()) - GUI::intersectedComponent->position;
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	void onUpdate(Mat4f orthoMatrix) {
 		Shaders::quadShader.updateProjection(orthoMatrix);
+	}
+
+	void onEvent(Event& event) {
+		EventDispatcher dispatcher(event);
+		dispatcher.dispatch<MousePressEvent>(onMousePress);
+		dispatcher.dispatch<MouseReleaseEvent>(onMouseRelease);
+		dispatcher.dispatch<MouseDragEvent>(onMouseDrag);
 	}
 
 	void onRender(Mat4f orthoMatrix) {

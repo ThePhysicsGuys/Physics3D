@@ -11,6 +11,7 @@ class Screen;
 class Font;
 class FrameBuffer;
 class IndexedMesh;
+class Event;
 struct Quad;
 
 namespace GUI {
@@ -148,6 +149,7 @@ namespace GUI {
 
 	// State function
 	void onInit(Screen* screen, Font* font);
+	void onEvent(Event& event);
 	void onUpdate(Mat4f orthoMatrix);
 	void onRender(Mat4f orthoMatrix);
 	void onClose();

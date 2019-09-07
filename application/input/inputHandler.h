@@ -24,8 +24,15 @@ private:
 
 	double keyInterval = 0.2;
 public:
-	InputHandler(GLFWwindow* window);
 	char anyKey = 0;
+
+	bool rightDragging = false;
+	bool middleDragging = false;
+	bool leftDragging = false;
+
+	Vec2 mousePosition;
+
+	InputHandler(GLFWwindow* window);
 
 	bool getKey(Keyboard::Key key);
 	Vec2 getMousePosition();

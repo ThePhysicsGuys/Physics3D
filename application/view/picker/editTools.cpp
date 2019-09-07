@@ -204,16 +204,16 @@ float EditTools::intersect(Screen& screen, const Ray& ray) {
 }
 
 
-void EditTools::press(Screen& screen) {
+void EditTools::onMousePress(Screen& screen) {
 	selectedEditDirection = intersectedEditDirection;
 	selectedPoint = intersectedPoint;
 }
 
-void EditTools::release(Screen& screen) {
+void EditTools::onMouseRelease(Screen& screen) {
 	selectedEditDirection = EditDirection::NONE;
 }
 
-void EditTools::drag(Screen& screen) {
+void EditTools::onMouseDrag(Screen& screen) {
 	if (screen.selectedPart == nullptr) 
 		return;
 	switch (editMode) {

@@ -11,7 +11,7 @@ struct Pickable {
 
 	virtual float intersect(Screen&, const Ray& ray) = 0;
 
-	virtual void press(Screen& screen) {};
-	virtual void release(Screen& screen) {};
-	virtual void drag(Screen& screen) {};
+	virtual void onMousePress(Screen& screen) {};
+	virtual void onMouseRelease(Screen& screen) {};
+	virtual void onMouseDrag(Screen& screen) {};
 };

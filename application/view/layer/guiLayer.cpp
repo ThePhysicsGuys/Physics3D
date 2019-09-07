@@ -51,7 +51,7 @@ void GuiLayer::onUpdate() {
 }
 
 void GuiLayer::onEvent(Event& event) {
-
+	GUI::onEvent(event);
 }
 
 void GuiLayer::onRender() {

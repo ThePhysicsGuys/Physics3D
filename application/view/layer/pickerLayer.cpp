@@ -25,7 +25,7 @@ void PickerLayer::onUpdate() {
 }
 
 void PickerLayer::onEvent(Event& event) {
-
+	Picker::onEvent(event);
 }
 
 void PickerLayer::onRender() {

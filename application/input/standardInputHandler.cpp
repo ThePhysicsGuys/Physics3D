@@ -27,28 +27,13 @@ void StandardInputHandler::onEvent(Event& event) {
 
 	EventDispatcher dispatcher(event);
 
-	if (dispatcher.dispatch<MouseMoveEvent>(BIND_EVENT(StandardInputHandler::onMouseMove)))
-		return;
-		
-	if (dispatcher.dispatch<KeyPressEvent>(BIND_EVENT(StandardInputHandler::onKeyPress)))
+	if (dispatcher.dispatch<KeyPressEvent>(BIND_EVENT_METHOD(StandardInputHandler::onKeyPress)))
 		return;	
-	
-	if (dispatcher.dispatch<MouseReleaseEvent>(BIND_EVENT(StandardInputHandler::onMouseRelease)))
-		return;	
-	
-	if (dispatcher.dispatch<MousePressEvent>(BIND_EVENT(StandardInputHandler::onMousePress)))
+
+	if (dispatcher.dispatch<DoubleKeyPressEvent>(BIND_EVENT_METHOD(StandardInputHandler::onDoubleKeyPress)))
 		return;
 
-	if (dispatcher.dispatch<MouseScrollEvent>(BIND_EVENT(StandardInputHandler::onMouseScroll)))
-		return;
-
-	if (dispatcher.dispatch<DoubleKeyPressEvent>(BIND_EVENT(StandardInputHandler::onDoubleKeyPress)))
-		return;
-
-	if (dispatcher.dispatch<MouseExitEvent>(BIND_EVENT(StandardInputHandler::onMouseExit)))
-		return;
-
-	if (dispatcher.dispatch<FrameBufferResizeEvent>(BIND_EVENT(StandardInputHandler::onFrameBufferResize)))
+	if (dispatcher.dispatch<FrameBufferResizeEvent>(BIND_EVENT_METHOD(StandardInputHandler::onFrameBufferResize)))
 		return;
 
 }
@@ -147,91 +132,3 @@ bool StandardInputHandler::onDoubleKeyPress(DoubleKeyPressEvent& event) {
 
 	return true;
 }
-
-bool StandardInputHandler::onMousePress(MousePressEvent& event) {
-	int button = event.getButton();
-
-	if (Mouse::RIGHT == button) rightDragging = true;
-	if (Mouse::MIDDLE == button) middleDragging = true;
-	if (Mouse::LEFT == button) leftDragging = true;
-
-	if (Mouse::LEFT == button) {
-		GUI::selectedComponent = GUI::intersectedComponent;
-
-		if (GUI::intersectedComponent) {
-			GUI::select(GUI::superParent(GUI::intersectedComponent));
-			GUI::intersectedComponent->press(GUI::map(mousePosition));
-			GUI::intersectedPoint = GUI::map(mousePosition) - GUI::intersectedComponent->position;
-		} else {
-			Picker::press(screen);
-		}
-	}
-
-	return true;
-};
-
-bool StandardInputHandler::onMouseRelease(MouseReleaseEvent& event) {
-	int button = event.getButton();
-
-	if (Mouse::RIGHT == button) rightDragging = false;
-	if (Mouse::MIDDLE == button) middleDragging = false;
-	if (Mouse::LEFT == button) leftDragging = false;
-
-	if (Mouse::LEFT == button) {
-		if (GUI::selectedComponent){
-			GUI::selectedComponent->release(GUI::map(mousePosition));
-		}
-		
-		Picker::release(screen);
-	}
-
-	return true;
-};
-
-bool StandardInputHandler::onMouseMove(MouseMoveEvent& event) {
-	double dmx = (event.getX() - mousePosition.x);
-	double dmy = (event.getY() - mousePosition.y);
-	Vec2 newCursorPosition = Vec2(event.getX(), event.getY());
-	Vec2 guiCursorPosition = GUI::map(mousePosition);
-	Vec2 newGuiCursorPosition = GUI::map(newCursorPosition);
-
-	if (GUI::intersectedComponent) {
-		GUI::intersectedComponent->hover(guiCursorPosition);
-	}
-
-	// Camera rotating
-	if (rightDragging) {
-		screen.camera.rotate(screen, dmy * 0.1, dmx * 0.1, 0, leftDragging);
-	}
-	
-	if (leftDragging) {
-		if (GUI::selectedComponent) {
-			GUI::selectedComponent->drag(newGuiCursorPosition, guiCursorPosition);
-		} else {
-			// Phyiscal moving
-			Picker::drag(screen);
-		}
-	}
-
-	// Camera moving
-	if (middleDragging) {
-		screen.camera.move(screen, dmx * -0.5, dmy * 0.5, 0, leftDragging);
-	}
-
-	mousePosition = newCursorPosition;
-
-	return true;
-};
-
-bool StandardInputHandler::onMouseScroll(MouseScrollEvent& event) {
-	screen.camera.speed = GUI::clamp(screen.camera.speed * (1 + 0.2 * event.getYOffset()), 0.001, 100);
-
-	return true;
-};
-
-bool StandardInputHandler::onMouseExit(MouseExitEvent& event) {
-	rightDragging = false;
-	leftDragging = false;
-
-	return true;
-};

@@ -5,6 +5,9 @@
 struct ExtendedPart;
 struct Camera;
 class Screen;
+class Event;
+class MouseDragEvent;
+class MouseScrollEvent;
 
 struct Camera {
 private:
@@ -15,6 +18,8 @@ private:
 	float znear;
 	float zfar;
 	
+	bool onMouseScroll(MouseScrollEvent& event);
+	bool onMouseDrag(MouseDragEvent& event);
 public:
 	GlobalCFrame cframe;
 	double speed;
@@ -36,6 +41,7 @@ public:
 	void onUpdate();
 	void onUpdate(float fov, float aspect, float znear, float zfar);
 	void onUpdate(float aspect);
+	void onEvent(Event& event);
 
 	Camera(Position position, Mat3 rotation);
 	Camera();
