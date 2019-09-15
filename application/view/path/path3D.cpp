@@ -15,7 +15,7 @@ namespace Path3D {
 	// Adds the vertices to the batch with the necessary indices, this does not reserve space on the batch
 	void pushLine(const Vec3f& a, const Vec3f& b, const Vec4f& colorA, const Vec4f& colorB, float thickness) {
 		batch->pushVertex({ a, colorA });
-		batch->pushVertex({ b, colorA });
+		batch->pushVertex({ b, colorB });
 
 		batch->pushIndex(0);
 		batch->pushIndex(1);

@@ -133,7 +133,7 @@ public:
 		vbo->fill((const void *) vertexBuffer.data(), vertexBuffer.size() * sizeof(Vertex), Renderer::STREAM_DRAW);
 		ibo->fill((const unsigned int *) indexBuffer.data(), indexBuffer.size(), Renderer::STREAM_DRAW);
 
-		Renderer::drawElements(Renderer::TRIANGLES, indexBuffer.size(), Renderer::UINT, nullptr);
+		Renderer::drawElements(config.type, indexBuffer.size(), Renderer::UINT, nullptr);
 
 		vbo->unbind();
 		ibo->unbind();

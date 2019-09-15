@@ -419,7 +419,7 @@ namespace GUI {
 
 	void onRender(Mat4f orthoMatrix) {
 		onUpdate(orthoMatrix);
-
+		
 		screen->blurFrameBuffer->bind();
 		Shaders::quadShader.updateTexture(screen->screenFrameBuffer->texture);
 		screen->quad->render();

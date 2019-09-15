@@ -13,9 +13,15 @@ namespace Path3D {
 
 	extern Batch<Vertex>* batch;
 
+	void bind(Batch<Vertex>* batch);
+
+
 	//! Primitives
 
+	void line(const Vec3f& a, const Vec3f& b, float thickness = 1.0f, const Vec4f& colorA = Vec4f(1.0f), const Vec4f& colorB = Vec4f(1.0f));
+
 	void polyLine(Vec3f* points, size_t size, float thickness = 1.0f, const Vec4f& color = Vec4f(1.0f), bool closed = false);
+
 
 	//! Polygon building
 

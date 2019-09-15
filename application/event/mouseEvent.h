@@ -67,7 +67,7 @@ private:
 	int modifiers;
 
 public:
-	EVENT_CATEGORY(EventCategoryMouse | EventCategoryInput);
+	EVENT_CATEGORY(EventCategoryMouse | EventCategoryMouseButton | EventCategoryInput);
 
 	inline int getButton() const {
 		return button;

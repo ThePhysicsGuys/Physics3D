@@ -95,6 +95,8 @@ void FrameBuffer::attach(RenderBuffer* renderBuffer) {
 }
 
 void FrameBuffer::close() {
+	Log::warn("Closing framebuffer #%d", id);
+
 	texture->close();
 	renderBuffer->close();
 
@@ -168,6 +170,8 @@ void HDRFrameBuffer::unbind() {
 };
 
 void HDRFrameBuffer::close() {
+	Log::warn("Closing HDR framebuffer #%d", id);
+
 	texture->close();
 	renderBuffer->close();
 
@@ -241,6 +245,8 @@ void MultisampleFrameBuffer::unbind() {
 };
 
 void MultisampleFrameBuffer::close() {
+	Log::warn("Closing multisample framebuffer #%d", id);
+
 	texture->close();
 	renderBuffer->close();
 
@@ -296,6 +302,8 @@ void DepthFrameBuffer::unbind() {
 }
 
 void DepthFrameBuffer::close() {
+	Log::warn("Closing depth framebuffer #%d", id);
+
 	texture->close();
 	glDeleteFramebuffers(1, &id);
 	id = 0;
