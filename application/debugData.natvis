@@ -15,7 +15,11 @@
       <Item Name="object" ExcludeView="simple" Condition="nodeCount == 0x7FFFFFFF">object</Item>
     </Expand>
   </Type>
-  <Type Name="TreeIterBase">
+  <Type Name="TreeStackElement">
+    <DisplayString Condition="node->nodeCount != 0x7FFFFFFF">index={index}/{node->nodeCount} bounds={node->bounds} isGroupHead={node->isGroupHead}</DisplayString>
+    <DisplayString Condition="node->nodeCount == 0x7FFFFFFF">leafNode bounds={node->bounds}</DisplayString>
+  </Type>
+  <Type Name="NodeStack">
     <DisplayString>Size={top - stack + 1} Top={top->node->bounds}</DisplayString>
     <Expand>
       <ArrayItems Condition="top >= stack">
@@ -23,9 +27,5 @@
         <ValuePointer>stack</ValuePointer>
       </ArrayItems>
     </Expand>
-  </Type>
-  <Type Name="TreeStackElement">
-    <DisplayString Condition="node->nodeCount != 0x7FFFFFFF">index={index}/{node->nodeCount} bounds={node->bounds} isGroupHead={node->isGroupHead}</DisplayString>
-    <DisplayString Condition="node->nodeCount == 0x7FFFFFFF">leafNode bounds={node->bounds}</DisplayString>
   </Type>
 </AutoVisualizer>

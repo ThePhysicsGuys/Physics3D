@@ -204,10 +204,20 @@ struct NodeStack {
 	}
 
 	inline void updateBoundsAllTheWayToTop() {
-		TreeStackElement* newTop = top - 1;
+		TreeStackElement* newTop = top;
 		while (newTop + 1 != stack) {
 			TreeNode* n = newTop->node;
 			n->recalculateBoundsFromSubBounds();
+			newTop--;
+		}
+	}
+
+	inline void expandBoundsAllTheWayToTop() {
+		Bounds expandedTopBounds = top->node->bounds;
+		TreeStackElement* newTop = top - 1;
+		while (newTop + 1 != stack) {
+			TreeNode* n = newTop->node;
+			n->bounds = unionOfBounds(n->bounds, expandedTopBounds);
 			newTop--;
 		}
 	}
@@ -401,21 +411,25 @@ struct BoundsTree {
 		this->rootNode.addOutside(TreeNode(obj, bounds, true));
 	}
 
+	void add(TreeNode&& node) {
+		this->rootNode.addOutside(std::move(node));
+	}
+
 	void addToExistingGroup(Boundable* obj, const Bounds& bounds, TreeNode& groupNode) {
 		groupNode.addInside(TreeNode(obj, bounds, false));
+	}
+
+	NodeStack findGroupFor(const Boundable* obj, const Bounds& objBounds) {
+		NodeStack iter(rootNode, obj, objBounds);
+		iter.riseUntilGroupHeadWhile();
+		return iter;
 	}
 
 	void addToExistingGroup(Boundable* obj, const Bounds& bounds, const Boundable* objInGroup, const Bounds& objInGroupBounds) {
 		NodeStack iter(rootNode, objInGroup, objInGroupBounds);
 		iter.riseUntilGroupHeadWhile();
 		addToExistingGroup(obj, bounds, **iter);
-		iter.updateBoundsAllTheWayToTop();
-		TreeStackElement* newTop = iter.top;
-		while (newTop + 1 != iter.stack) {
-			TreeNode* n = newTop->node;
-			n->bounds = unionOfBounds(n->bounds, bounds);
-			newTop--;
-		}
+		iter.expandBoundsAllTheWayToTop();
 	}
 
 	void remove(const Boundable* obj, const Bounds& strictBounds) {
@@ -438,7 +452,7 @@ struct BoundsTree {
 	void updateObjectBounds(const Boundable* obj, const Bounds& oldBounds) {
 		NodeStack stack(rootNode, obj, oldBounds);
 		stack.top->node->bounds = obj->getStrictBounds();
-
+		stack.top--;
 		stack.updateBoundsAllTheWayToTop();
 	}
 	void updateObjectGroupBounds(const Boundable* objInGroup, const Bounds& objOldBounds) {
@@ -450,7 +464,7 @@ struct BoundsTree {
 			node->bounds = static_cast<Boundable*>(node->object)->getStrictBounds();
 		}
 		stack.top->node->recalculateBoundsRecursive(); // refresh group bounds
-
+		stack.top--;
 		stack.updateBoundsAllTheWayToTop(); // refresh rest of tree to accommodate
 	}
 

@@ -12,6 +12,7 @@ public:
 
 	CFrameTemplate(Vector<T, 3> position, Mat3Template<T> rotation) : position(position), rotation(rotation) {}
 	explicit CFrameTemplate(Vector<T, 3> position) : position(position), rotation(1, 0, 0, 0, 1, 0, 0, 0, 1) {}
+	explicit CFrameTemplate(T x, T y, T z) : position(x, y, z), rotation(1, 0, 0, 0, 1, 0, 0, 0, 1) {}
 	explicit CFrameTemplate(Mat3Template<T> rotation) : position(0,0,0), rotation(rotation) {}
 	CFrameTemplate() : position(0, 0, 0), rotation(1, 0, 0, 0, 1, 0, 0, 0, 1) {}
 

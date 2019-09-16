@@ -49,4 +49,5 @@ public:
 	void setCFrame(const GlobalCFrame& newCFrame);
 
 	void attach(Part& other, const CFrame& relativeCFrame);
+	void detach();
 };

@@ -66,27 +66,22 @@ void Part::setCFrame(const GlobalCFrame& newCFrame) {
 }
 
 
-/*void Part::attach(Part& other, const CFrame& relativeCFrame) {
+void Part::attach(Part& other, const CFrame& relativeCFrame) {
 	if (this->parent == nullptr) {
 		this->parent = new Physical(this);
-
 		this->parent->attachPart(&other, relativeCFrame);
 	} else {
-		if (this->parent == other.parent) {
-			if (this->parent->mainPart == &other) {
-				this->parent->makeMainPart(this);
-
-				this->parent->attachPart(&other, relativeCFrame);
-			} else {
-				CFrame trueCFrame = this->parent->getAttachFor(this).localToGlobal(relativeCFrame);
-
-				this->parent->attachPart(&other, trueCFrame);
-			}
+		if (this->parent->mainPart == this) {
+			this->parent->attachPart(&other, relativeCFrame);
 		} else {
-			other.parent->detachPart(&other);
-
-
+			CFrame trueCFrame = this->parent->getAttachFor(this).attachment.localToGlobal(relativeCFrame);
+			this->parent->attachPart(&other, trueCFrame);
 		}
 	}
+}
 
-}*/
+void Part::detach() {
+	if (this->parent != nullptr) {
+		this->parent->detachPart(this);
+	}
+}

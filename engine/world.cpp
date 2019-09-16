@@ -39,24 +39,36 @@ void WorldPrototype::requestModification(const std::function<void(WorldPrototype
 void WorldPrototype::addPartUnsafe(Part* part, bool anchored) {
 	if (part->parent == nullptr) {
 		part->parent = new Physical(part);
+		physicals.add(part->parent);
+		objectTree.add(part, part->getStrictBounds());
+	} else {
+		if (part->parent->world == this) {
+			Log::warn("Attempting to readd part to world");
+			return;
+		}
+		TreeNode newNode(part->parent->mainPart, part->parent->mainPart->getStrictBounds(), true);
+		for (AttachedPart& p : part->parent->parts) {
+			newNode.addInside(TreeNode(p.part, p.part->getStrictBounds(), false));
+		}
+		objectTree.add(std::move(newNode));
+		physicals.add(part->parent);
 	}
 	part->parent->world = this;
 	part->parent->setAnchored(anchored);
-	if (anchored) {
-		physicals.addLeftSide(part->parent);
-	} else {
-		physicals.add(part->parent);
-	}
-	objectTree.add(part, part->getStrictBounds());
+
 	ASSERT_VALID;
 }
 void WorldPrototype::removePartUnsafe(Part* part) {
+	ASSERT_VALID;
 	Physical* parent = part->parent;
-	objectTree.remove(part);
-	if (parent->detachPart(part)) {
-		physicals.remove(parent);
-	}
+	parent->detachPart(part);
 	
+	ASSERT_VALID;
+}
+void WorldPrototype::removePhysicalUnsafe(Physical* p) {
+	NodeStack stack = objectTree.findGroupFor(p->mainPart, p->mainPart->getStrictBounds());
+	stack.remove();
+	physicals.remove(p);
 	ASSERT_VALID;
 }
 void WorldPrototype::attachPartUnsafe(Part* part, Physical& phys, CFrame attachment) {
@@ -90,6 +102,9 @@ void WorldPrototype::addPart(Part* part, bool anchored) {
 }
 void WorldPrototype::removePart(Part* part) {
 	requestModification([part](WorldPrototype& world) {world.removePartUnsafe(part); });
+}
+void WorldPrototype::removePhysical(Physical* phys) {
+	requestModification([phys](WorldPrototype& world) {world.removePhysicalUnsafe(phys); });
 }
 void WorldPrototype::attachPart(Part* part, Physical& phys, CFrame attachment) {
 	requestModification([part, &phys, attachment](WorldPrototype& world) {world.attachPartUnsafe(part, phys, attachment); });

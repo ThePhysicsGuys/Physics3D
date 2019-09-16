@@ -72,7 +72,8 @@ void GravityWorld::applyExternalForces() {
 
 double GravityWorld::getTotalPotentialEnergy() const {
 	double total = 0.0;
-	for(const Physical& p : iterFreePhysicals()) {
+	for(const Physical& p : iterPhysicals()) {
+		if (p.anchored) continue;
 		total += Vec3(Position() - p.getCenterOfMass()) * gravity * p.mass;
 	}
 	return total;

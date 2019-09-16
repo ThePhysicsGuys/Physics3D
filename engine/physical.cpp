@@ -51,24 +51,89 @@ void Physical::makeMainPart(AttachedPart& newMainPart) {
 	}
 }
 
-void Physical::attachPart(Part* part, CFrame attachment) {
-	part->parent = this;
+void Physical::attachPhysical(Physical* phys, const CFrame& attachment) {
+	size_t originalAttachCount = this->parts.size;
+	const GlobalCFrame& cf = this->getCFrame();
+	phys->mainPart->cframe = cf.localToGlobal(attachment);
+	this->parts.add(AttachedPart{attachment, phys->mainPart});
+	phys->mainPart->parent = this;
 
-	parts.add(AttachedPart{attachment, part});
+	for (AttachedPart& ap : phys->parts) {
+		CFrame globalAttach = attachment.localToGlobal(ap.attachment);
+		this->parts.add(AttachedPart{globalAttach, ap.part});
+		ap.part->cframe = cf.localToGlobal(globalAttach);
+		ap.part->parent = this;
+	}
 
-	part->cframe = getCFrame().localToGlobal(attachment);
+	if (phys->world != nullptr) {
+		phys->world->removePhysical(phys);
+	}
+	phys->mainPart = nullptr;
+	phys->parts.clear();
+	delete phys;
+	if (this->world != nullptr) {
+		NodeStack stack = world->objectTree.findGroupFor(this->mainPart, this->mainPart->getStrictBounds());
+		TreeNode& group = **stack;
+		for (size_t i = originalAttachCount; i < this->parts.size; i++) {
+			Part* p = parts[i].part;
+			this->world->objectTree.addToExistingGroup(p, p->getStrictBounds(), group);
+		}
+		stack.expandBoundsAllTheWayToTop();
+	}
+}
+
+void Physical::attachPart(Part* part, const CFrame& attachment) {
+	if (part->parent != nullptr) { // part is already in a physical
+		if (part->parent == this) { // move part within this physical
+			if (part == this->mainPart) {
+				for (AttachedPart& ap : parts) {
+					ap.attachment = attachment.globalToLocal(ap.attachment);
+				}
+			} else {
+				getAttachFor(part).attachment = attachment;
+			}
+			Bounds oldBounds = part->getStrictBounds();
+			part->cframe = getCFrame().localToGlobal(attachment);
+			if (this->world != nullptr) {
+				this->world->updatePartBounds(part, oldBounds);
+			}
+		} else {
+			// attach other part's entire physical
+			if (part->parent->mainPart == part) {
+				attachPhysical(part->parent, attachment);
+			} else {
+				CFrame newAttach = attachment.localToGlobal(~part->parent->getAttachFor(part).attachment);
+				attachPhysical(part->parent, newAttach);
+			}
+		}
+	} else {
+		part->parent = this;
+		parts.add(AttachedPart{ attachment, part });
+		part->cframe = getCFrame().localToGlobal(attachment);
+
+		if (this->world != nullptr) {
+			this->world->objectTree.addToExistingGroup(part, part->getStrictBounds(), this->mainPart, this->mainPart->getStrictBounds());
+		}
+	}
 
 	refreshWithNewParts();
 }
-bool Physical::detachPart(Part* part) {
+void Physical::detachPart(Part* part) {
+	if (this->world != nullptr) {
+		this->world->objectTree.remove(part);
+	}
 	if (part == mainPart) {
+		if (parts.size == 0) {
+			return;
+		}
 		part->parent = nullptr;
 		if (parts.size >= 1) {
 			makeMainPart(parts[parts.size-1]);
 			refreshWithNewParts();
-			return false;
 		} else {
-			return true;
+			if (this->world != nullptr) {
+				this->world->removePhysical(this);
+			}
 		}
 	} else {
 		for (auto iter = parts.begin(); iter != parts.end(); ++iter) {
@@ -77,12 +142,11 @@ bool Physical::detachPart(Part* part) {
 				part->parent = nullptr;
 				parts.remove(iter);
 				refreshWithNewParts();
-				return false;
+				return;
 			}
 		}
+		throw "Error: could not find part to remove!";
 	}
-
-	throw "Error: could not find part to remove!";
 }
 
 void Physical::refreshWithNewParts() {
@@ -327,7 +391,7 @@ void Physical::setPartCFrame(Part* part, const GlobalCFrame& newCFrame) {
 	if (part == mainPart) {
 		setCFrame(newCFrame);
 	} else {
-		CFrame attach = getAttachFor(part);
+		CFrame attach = getAttachFor(part).attachment;
 		GlobalCFrame newMainCFrame = newCFrame.localToGlobal(~attach);
 
 		setCFrame(newMainCFrame);

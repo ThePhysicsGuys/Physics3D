@@ -49,12 +49,13 @@ private:
 
 	void addPartUnsafe(Part* p, bool anchored);
 	void removePartUnsafe(Part* p);
+	void removePhysicalUnsafe(Physical* p);
 	void attachPartUnsafe(Part* part, Physical& phys, CFrame attachment);
 	void detachPartUnsafe(Part* part);
 	void pushOperation(const std::function<void(WorldPrototype&)>& operation);
 	
 	void setPartCFrame(Part* part, const GlobalCFrame& newCFrame);
-	void updatePartBounds(const Part* updatedPart, const Bounds& updatedBounds);
+	void updatePartBounds(const Part* updatedPart, const Bounds& oldBounds);
 	void updatePartGroupBounds(const Part* mainPart, const Bounds& oldMainPartBounds);
 
 	//void registerGroupCFrameUpdate(const Part& partInGroup, const Bounds& oldBounds);
@@ -86,6 +87,7 @@ public:
 	void attachPart(Part* p, Physical& phys, CFrame attachment);
 	void detachPart(Part* p);
 	void removePart(Part* p);
+	void removePhysical(Physical* p);
 
 	inline bool isAnchored(Physical* p) const {
 		return p->anchored;

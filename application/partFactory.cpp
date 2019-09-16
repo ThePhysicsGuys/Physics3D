@@ -9,7 +9,15 @@ ExtendedPart* PartFactory::produce(const GlobalCFrame& cframe, double density, d
 	count++;
 	GlobalCFrame realCFrame = cframe.localToGlobal(CFrame(backTransform));
 	return new ExtendedPart(hitbox, visualShape, realCFrame, density, friction, drawMeshID, (name.empty()) ? this->name + " " + std::to_string(count) : name);
-} 
+}
+ExtendedPart* PartFactory::produce(double density, double friction, std::string name) const {
+	return this->produce(GlobalCFrame(), density, friction, name);
+}
+ExtendedPart* PartFactory::produce(ExtendedPart* partToAttachTo, const CFrame& attachment, double density, double friction, std::string name) const {
+	ExtendedPart* part = this->produce(GlobalCFrame(), density, friction, name);
+	partToAttachTo->attach(*part, attachment);
+	return part;
+}
 
 ExtendedPart* PartFactory::produceScaled(const GlobalCFrame& cframe, double density, double friction, double scaleX, double scaleY, double scaleZ, std::string name) const {
 	count++;
@@ -17,6 +25,14 @@ ExtendedPart* PartFactory::produceScaled(const GlobalCFrame& cframe, double dens
 	ExtendedPart* p = new ExtendedPart(hitbox, visualShape, realCFrame, density, friction, drawMeshID, (name.empty()) ? this->name + " " + std::to_string(count) : name);
 	p->scale(scaleX, scaleY, scaleZ);
 	return p;
+}
+ExtendedPart* PartFactory::produceScaled(double density, double friction, double scaleX, double scaleY, double scaleZ, std::string name) const {
+	return produceScaled(GlobalCFrame(), density, friction, scaleX, scaleY, scaleZ, name);
+}
+ExtendedPart* PartFactory::produceScaled(ExtendedPart* partToAttachTo, const CFrame& attachment, double density, double friction, double scaleX, double scaleY, double scaleZ, std::string name) const {
+	ExtendedPart* part = this->produceScaled(GlobalCFrame(), density, friction, scaleX, scaleY, scaleZ, name);
+	partToAttachTo->attach(*part, attachment);
+	return part;
 }
 
 ExtendedPart* createUniquePart(Screen& screen, const Shape& hitbox, const VisualShape& visualShape, const GlobalCFrame& position, double density, double friction, std::string name) {

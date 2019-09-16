@@ -147,7 +147,7 @@ public:
 	void operator=(const Physical&) = delete;
 
 	~Physical() {
-		mainPart->parent = nullptr;
+		if(mainPart != nullptr) mainPart->parent = nullptr;
 		mainPart = nullptr;
 		for (AttachedPart& atPart:parts) {
 			atPart.part->parent = nullptr;
@@ -157,44 +157,35 @@ public:
 
 	void makeMainPart(AttachedPart& newMainPart);
 	void makeMainPart(Part* newMainPart);
-	void attachPart(Part* part, CFrame attachment);
+	void attachPart(Part* part, const CFrame& attachment);
+	// deletes the given physical
+	void attachPhysical(Physical* phys, const CFrame& attachment);
 	/* 
 		returns whether the part that's been removed is the last part in the physical, 
 		meaning it should be destroyed
 	*/
-	bool detachPart(Part* part);
+	void detachPart(Part* part);
 	void refreshWithNewParts();
 
 	void updatePart(const Part* updatedPart, const Bounds& updatedBounds);
 
-	CFrame getAttachFor(const Part* part) const {
-		if (part == mainPart) return CFrame();
-
+	const AttachedPart& getAttachFor(const Part* attachedPart) const {
 		for (const AttachedPart& p : parts) {
-			if (p.part == part)
-				return p.attachment;
+			if (p.part == attachedPart)
+				return p;
 		}
 
 		throw "Part not in this physical!";
 	}
 
-	/*void setAttachFor(const Part* part, const CFrame& newCFrame) {
-		if (part != mainPart) {
-			for (AttachedPart& p : parts) {
-				if (p.part == part) {
-					p.attachment = newCFrame;
-					Bounds oldBounds = p.part->getStrictBounds();
-					p.part->cframe = getCFrame().localToGlobal(newCFrame);
-					world->updatePart(p.part, oldBounds);
-					return;
-				}
-			}
+	AttachedPart& getAttachFor(const Part* attachedPart) {
+		for (AttachedPart& p : parts) {
+			if (p.part == attachedPart)
+				return p;
 		}
 
-		
-
 		throw "Part not in this physical!";
-	}*/
+	}
 
 	void update(double deltaT);
 	void applyForceAtCenterOfMass(Vec3 force);

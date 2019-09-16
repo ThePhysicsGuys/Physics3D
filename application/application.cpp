@@ -113,10 +113,10 @@ void setupWorld() {
 	// Walls
 	PartFactory xWallFactory(BoundingBox(0.7, wallHeight, floorSize.y - 0.7).toShape(), screen, "xWall");
 	PartFactory zWallFactory(BoundingBox(floorSize.x, wallHeight, 0.7).toShape(), screen, "zWall");
-	world.addPart(xWallFactory.produce(GlobalCFrame(Position(floorSize.x / 2, wallHeight / 2, 0.0)), 20000000.0, 1.0), true);
-	world.addPart(zWallFactory.produce(GlobalCFrame(Position(0.0, wallHeight / 2, floorSize.y / 2)), 20000000.0, 1.0), true);
-	world.addPart(xWallFactory.produce(GlobalCFrame(Position(-floorSize.x / 2, wallHeight / 2, 0.0)), 20000000.0, 1.0), true);
-	world.addPart(zWallFactory.produce(GlobalCFrame(Position(0.0, wallHeight / 2, -floorSize.y / 2)), 20000000.0, 1.0), true);
+	world.addPart(xWallFactory.produce(GlobalCFrame(Position(floorSize.x / 2, wallHeight / 2, 0.0)), 2.0, 1.0), true);
+	world.addPart(zWallFactory.produce(GlobalCFrame(Position(0.0, wallHeight / 2, floorSize.y / 2)), 2.0, 1.0), true);
+	world.addPart(xWallFactory.produce(GlobalCFrame(Position(-floorSize.x / 2, wallHeight / 2, 0.0)), 2.0, 1.0), true);
+	world.addPart(zWallFactory.produce(GlobalCFrame(Position(0.0, wallHeight / 2, -floorSize.y / 2)), 2.0, 1.0), true);
 
 	// hollow box
 	/*WorldBuilder::HollowBoxParts parts = WorldBuilder::buildHollowBox(Bounds(Position(12.0, 3.0, 14.0), Position(20.0, 8.0, 20.0)), 0.3);
@@ -125,31 +125,35 @@ void setupWorld() {
 	parts.back->material.ambient = Vec4f(0.4, 0.6, 1.0, 0.3);*/
 
 	// Rotating walls
-	PartFactory rotatingWallFactory(BoundingBox(5.0, 3.0, 0.5).toShape(), screen, "rotatingWall");
+	/*PartFactory rotatingWallFactory(BoundingBox(5.0, 3.0, 0.5).toShape(), screen, "rotatingWall");
 	ExtendedPart* rotatingWall = rotatingWallFactory.produce(GlobalCFrame(Position(-12.0, 1.7, 0.0)), 20000000.0, 1.0);
 	ExtendedPart* rotatingWall2 = rotatingWallFactory.produce(GlobalCFrame(Position(-12.0, 1.7, 5.0)), 20000000.0, 1.0);
 	world.addPart(rotatingWall, true);
 	world.addPart(rotatingWall2, true);
 	rotatingWall->parent->angularVelocity = Vec3(0, -0.7, 0);
-	rotatingWall2->parent->angularVelocity = Vec3(0, 0.7, 0);
+	rotatingWall2->parent->angularVelocity = Vec3(0, 0.7, 0);*/
 
 	// Many many parts
-	for (int i = 0; i < 3; i++) {
+	/*for (int i = 0; i < 3; i++) {
 		ExtendedPart* newCube = cubeFactory.produce(GlobalCFrame(fRand(-10.0, 0.0), fRand(1.0, 1.0), fRand(-10.0, 0.0)), 1.0, 0.2);
 		world.addPart(newCube);
-	}
+	}*/
 
 	ExtendedPart* carBody = cubeFactory.produceScaled(GlobalCFrame(5.0, 1.0, 5.0), 1.0, 0.7, 2.0, 0.1, 1.0, "CarBody");
-	ExtendedPart* carLeftPanel = cubeFactory.produceScaled(GlobalCFrame(), 1.0, 0.7, 2.0, 0.4, 0.1, "CarLeftSide");
-	ExtendedPart* carRightPanel = cubeFactory.produceScaled(GlobalCFrame(), 1.0, 0.7, 2.0, 0.4, 0.1, "CarRightSide");
-	ExtendedPart* carLeftWindow = cubeFactory.produceScaled(GlobalCFrame(), 1.0, 0.7, 1.4, 0.8, 0.1, "WindowLeft");
-	ExtendedPart* carRightWindow = cubeFactory.produceScaled(GlobalCFrame(), 1.0, 0.7, 1.4, 0.8, 0.1, "WindowRight");
-	ExtendedPart* carWedgeLeft = wedgeFactory.produceScaled(GlobalCFrame(), 1.0, 0.7, 0.6, 0.8, 0.1, "WedgeLeft");
-	ExtendedPart* carWedgeRight = wedgeFactory.produceScaled(GlobalCFrame(), 1.0, 0.7, 0.6, 0.8, 0.1, "WedgeRight");
-	ExtendedPart* carFrontPanel = cubeFactory.produceScaled(GlobalCFrame(), 1.0, 0.7, 0.1, 0.4, 1.0, "FrontPanel");
-	ExtendedPart* carTrunkPanel = cubeFactory.produceScaled(GlobalCFrame(), 1.0, 0.7, 0.1, 1.2, 1.0, "TrunkPanel");
-	ExtendedPart* carRoof = cubeFactory.produceScaled(GlobalCFrame(5.0, 1.0, 5.0), 1.0, 0.7, 1.4, 0.1, 1.0, "Roof");
-	ExtendedPart* carWindshield = cubeFactory.produceScaled(GlobalCFrame(5.0, 1.0, 5.0), 1.0, 0.7, 1.0, 0.1, 1.0, "Windshield");
+	ExtendedPart* carLeftPanel =	cubeFactory.produceScaled(carBody, CFrame(0.0, 0.25, -0.5), 1.0, 0.7, 2.0, 0.4, 0.1, "CarLeftSide");
+	ExtendedPart* carRightPanel =	cubeFactory.produceScaled(carBody, CFrame(0.0, 0.25, 0.5), 1.0, 0.7, 2.0, 0.4, 0.1, "CarRightSide");
+	//ExtendedPart* carLeftWindow =	cubeFactory.produceScaled(carBody, CFrame(-0.3, 0.85, -0.5), 1.0, 0.7, 1.4, 0.8, 0.1, "WindowLeft");
+	ExtendedPart* carLeftWindow =	cubeFactory.produceScaled(1.0, 0.7, 1.4, 0.8, 0.05, "WindowLeft");
+	ExtendedPart* carWedgeLeft =	wedgeFactory.produceScaled(carLeftWindow, CFrame(1.0, 0.0, 0.0), 1.0, 0.7, 0.6, 0.8, 0.1, "WedgeLeft");
+	carLeftPanel->attach(*carLeftWindow, CFrame(-0.3, 0.6, 0.0));
+	ExtendedPart* carRightWindow =	cubeFactory.produceScaled(1.0, 0.7, 1.4, 0.8, 0.05, "WindowRight");
+	ExtendedPart* carWedgeRight =	wedgeFactory.produceScaled(carRightWindow, CFrame(1.0, 0.0, 0.0), 1.0, 0.7, 0.6, 0.8, 0.1, "WedgeRight");
+	carRightPanel->attach(*carRightWindow, CFrame(-0.3, 0.6, 0.0));
+	ExtendedPart* carFrontPanel =	cubeFactory.produceScaled(carBody, CFrame(1.0, 0.25, 0.0), 1.0, 0.7, 0.1, 0.4, 1.0, "FrontPanel");
+	ExtendedPart* carTrunkPanel =	cubeFactory.produceScaled(carBody, CFrame(-1.0, 0.65, 0.0), 1.0, 0.7, 0.1, 1.2, 1.0, "TrunkPanel");
+	ExtendedPart* carRoof =			cubeFactory.produceScaled(carBody, CFrame(-0.3, 1.25, 0.0), 1.0, 0.7, 1.4, 0.1, 1.0, "Roof");
+
+	ExtendedPart* carWindshield =	cubeFactory.produceScaled(carBody, CFrame(Vec3(0.7, 0.85, 0.0), fromEulerAngles(0.0, 0.0, -0.91)), 1.0, 0.7, 1.0, 0.05, 1.0, "Windshield");
 	ExtendedPart* wheel1 = smallSphereFactory.produce(GlobalCFrame(5.8, 1.0, 5.8), 1.0, 1.0, "Wheel");
 	ExtendedPart* wheel2 = smallSphereFactory.produce(GlobalCFrame(5.8, 1.0, 4.2), 1.0, 1.0, "Wheel");
 	ExtendedPart* wheel3 = smallSphereFactory.produce(GlobalCFrame(4.2, 1.0, 5.8), 1.0, 1.0, "Wheel");
@@ -160,16 +164,7 @@ void setupWorld() {
 	carWindshield->material.ambient = Vec4f(0.7, 0.7, 1.0, 0.5);
 
 	world.addPart(carBody);
-	world.attachPart(carLeftPanel, *carBody->parent, CFrame(Vec3(0.0, 0.25, -0.5)));
-	world.attachPart(carRightPanel, *carBody->parent, CFrame(Vec3(0.0, 0.25, 0.5)));
-	world.attachPart(carLeftWindow, *carBody->parent, CFrame(Vec3(-0.3, 0.85, -0.5)));
-	world.attachPart(carRightWindow, *carBody->parent, CFrame(Vec3(-0.3, 0.85, 0.5)));
-	world.attachPart(carWedgeLeft, *carBody->parent, CFrame(Vec3(0.7, 0.85, -0.5)));
-	world.attachPart(carWedgeRight, *carBody->parent, CFrame(Vec3(0.7, 0.85, 0.5)));
-	world.attachPart(carFrontPanel, *carBody->parent, CFrame(Vec3(1.0, 0.25, 0.0)));
-	world.attachPart(carTrunkPanel, *carBody->parent, CFrame(Vec3(-1.0, 0.65, 0.0)));
-	world.attachPart(carRoof, *carBody->parent, CFrame(Vec3(-0.3, 1.25, 0.0)));
-	world.attachPart(carWindshield, *carBody->parent, CFrame(Vec3(0.7, 0.85, 0.0), fromEulerAngles(0.0, 0.0, -0.91)));
+
 	world.addPart(wheel1);
 	world.addPart(wheel2);
 	world.addPart(wheel3);
@@ -178,38 +173,9 @@ void setupWorld() {
 	ConstraintGroup car;
 	car.ballConstraints.push_back(BallConstraint{ Vec3(0.8, 0.0, 0.8), carBody->parent, Vec3(0,0,0), wheel1->parent });
 	car.ballConstraints.push_back(BallConstraint{ Vec3(0.8, 0.0, -0.8), carBody->parent, Vec3(0,0,0), wheel2->parent });
-	car.ballConstraints.push_back(BallConstraint{ Vec3(0,0,0), wheel3->parent, Vec3(-0.8, 0.0, 0.8), carBody->parent });
+	car.ballConstraints.push_back(BallConstraint{ Vec3(-0.8, 0.0, 0.8), carBody->parent, Vec3(0,0,0), wheel3->parent });
 	car.ballConstraints.push_back(BallConstraint{ Vec3(-0.8, 0.0, -0.8), carBody->parent, Vec3(0,0,0), wheel4->parent });
 	world.constraints.push_back(std::move(car));
-
-
-	ConstraintGroup dumbell;
-	ExtendedPart* dumbellBar = cubeFactory.produceScaled(GlobalCFrame(5.0, 1.0, 7.0), 1.0, 0.7, 1.5, 0.2, 0.2, "DumbellBar");
-	ExtendedPart* weight1 = smallSphereFactory.produce(GlobalCFrame(3.8, 1.0, 7.0), 1.0, 0.7, "Weight1");
-	ExtendedPart* weight2 = smallSphereFactory.produce(GlobalCFrame(6.2, 1.0, 7.0), 1.0, 0.7, "Weight2");
-
-	world.addPart(dumbellBar);
-	world.addPart(weight1);
-	world.addPart(weight2);
-
-	dumbell.ballConstraints.push_back(BallConstraint{ Vec3(-1.2, 0.0, 0.0), dumbellBar->parent, Vec3(0,0,0), weight1->parent });
-	dumbell.ballConstraints.push_back(BallConstraint{ Vec3(0,0,0), weight2->parent, Vec3(1.2, 0.0, 0.0), dumbellBar->parent});
-	world.constraints.push_back(std::move(dumbell));
-
-
-	ExtendedPart* bigCube1 = bigCubeFactory.produce(GlobalCFrame(-20.0, 2.0, -20.0), 0.1, 0.2, "BigCube1");
-	ExtendedPart* bigCube2 = bigCubeFactory.produce(GlobalCFrame(-20.0, 2.0, -16.0), 0.1, 0.2, "BigCube2");
-	ExtendedPart* bigCube3 = bigCubeFactory.produce(GlobalCFrame(-20.0, 2.0, -12.0), 0.1, 0.2, "BigCube3");
-
-	world.addPart(bigCube1);
-	world.addPart(bigCube2);
-	world.addPart(bigCube3);
-
-	ConstraintGroup group;
-	group.ballConstraints.push_back(BallConstraint{ Vec3(0,0,2.0), bigCube1->parent, Vec3(0,0,-2.0), bigCube2->parent });
-	group.ballConstraints.push_back(BallConstraint{ Vec3(0,0,2.0), bigCube2->parent, Vec3(0,0,-2.0), bigCube3->parent });
-	world.constraints.push_back(std::move(group));
-
 
 	int minX = -2;
 	int maxX = 2;

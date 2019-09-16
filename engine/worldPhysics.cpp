@@ -231,7 +231,7 @@ void WorldPrototype::tick(double deltaT) {
 	for (const ConstraintGroup& group : constraints) {
 		group.apply();
 	}
-
+	
 	physicsMeasure.mark(PhysicsProcess::WAIT_FOR_LOCK);
 	mutLock.upgrade();
 	physicsMeasure.mark(PhysicsProcess::UPDATING);
@@ -255,14 +255,16 @@ void WorldPrototype::applyExternalForces() {}
 
 double WorldPrototype::getTotalKineticEnergy() const {
 	double total = 0.0;
-	for(const Physical& p : iterFreePhysicals()) {
+	for(const Physical& p : iterPhysicals()) {
+		if (p.anchored) continue;
 		total += p.getKineticEnergy();
 	}
 	return total;
 }
 double WorldPrototype::getTotalPotentialEnergy() const {
 	double total = 0.0;
-	for(const Physical& p : iterFreePhysicals()) {
+	for(const Physical& p : iterPhysicals()) {
+		if (p.anchored) continue;
 		total += getPotentialEnergyOfPhysical(p);
 	}
 	return total;
