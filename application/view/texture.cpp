@@ -162,6 +162,8 @@ void Texture::unbind() {
 }
 
 void Texture::close() {
+	Log::warn("Closed texture #%d", id);
+
 	glDeleteTextures(1, &id);
 	id = 0;
 }
@@ -231,6 +233,8 @@ void HDRTexture::unbind() {
 }
 
 void HDRTexture::close() {
+	Log::warn("Closed HDR texture #%d", id);
+
 	glDeleteTextures(1, &id);
 	id = 0;
 }
@@ -291,6 +295,8 @@ void MultisampleTexture::unbind() {
 }
 
 void MultisampleTexture::close() {
+	Log::warn("Closed multisample texture #%d", id);
+
 	glDeleteTextures(1, &id);
 	id = 0;
 }
@@ -371,6 +377,8 @@ void CubeMap::load(const std::string& right, const std::string& left, const std:
 }
 
 void CubeMap::close() {
+	Log::warn("Closed cubemap texture #%d", id);
+
 	glDeleteTextures(1, &id);
 	id = 0;
 }
@@ -426,6 +434,8 @@ void DepthTexture::unbind() {
 }
 
 void DepthTexture::close() {
+	Log::warn("Closed depth texture #%d", id);
+
 	glDeleteTextures(1, &id);
 	id = 0;
 }

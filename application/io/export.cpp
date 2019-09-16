@@ -228,8 +228,8 @@ void saveCamera(std::ofstream& output, Camera& camera) {
 	output << "camera:" << std::endl;
 	output << "\tposition = " << Export::str(camera.cframe.position) << std::endl;
 	output << "\trotation = " << Export::str(camera.cframe.rotation) << std::endl;
-	output << "\tspeed = " << Export::str(camera.speed) << std::endl;
-	output << "\trspeed = " << Export::str(camera.rspeed) << std::endl;
+	output << "\tspeed = " << Export::str(camera.velocity) << std::endl;
+	output << "\trspeed = " << Export::str(camera.angularVelocity) << std::endl;
 	output << "\tflying = " << Export::str(camera.flying) << std::endl;
 }
 

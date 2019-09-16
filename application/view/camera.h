@@ -8,22 +8,47 @@ class Screen;
 class Event;
 class MouseDragEvent;
 class MouseScrollEvent;
+class KeyReleaseEvent;
 
 struct Camera {
 private:
-	bool viewDirty = true;
-	bool projectionDirty = true;
+
+	enum CameraFlags : char {
+		// No flags
+		None =				0 << 0,
+
+		// Whether the view matrix needs to be recalculated
+		ViewDirty =			1 << 0,
+
+		// Whether the projection matrix needs to be recalculated
+		ProjectionDirty =	1 << 1
+	};
+
+	char flags = None;
 
 	float fov;
 	float znear;
 	float zfar;
-	
+
+	double velocityIncrease = 0.071;
+	double currentVelocity = 0;
+	Vec3 lastDirection = Vec3();	
+	bool moving = false;
+
+	double angularVelocityIncrease = 0.15;
+	double currentAngularVelocity = 0;
+	Vec3 lastRotation = Vec3();	
+	bool rotating = false;
+
+	bool wasLeftDragging = false;
+
 	bool onMouseScroll(MouseScrollEvent& event);
 	bool onMouseDrag(MouseDragEvent& event);
+	bool onKeyRelease(KeyReleaseEvent& event);
 public:
 	GlobalCFrame cframe;
-	double speed;
-	double rspeed;
+	double velocity;
+	double angularVelocity;
 	bool flying;
 
 	float aspect;
@@ -52,9 +77,9 @@ public:
 	void setRotation(double alpha, double beta, double gamma);
 	void setRotation(Vec3 rotation);
 
-	void rotate(Screen& screen, double dalpha, double dbeta, double dgamma, bool leftDragging);
-	void rotate(Screen& screen, Vec3 delta, bool leftDragging);
+	void rotate(Screen& screen, double dalpha, double dbeta, double dgamma, bool leftDragging, bool accelerating = true);
+	void rotate(Screen& screen, Vec3 delta, bool leftDragging, bool accelerating = true);
 
-	void move(Screen& screen, double dx, double dy, double dz, bool leftDragging);
-	void move(Screen& screen, Vec3 delta, bool leftDragging);
+	void move(Screen& screen, double dx, double dy, double dz, bool leftDragging, bool accelerating = true);
+	void move(Screen& screen, Vec3 delta, bool leftDragging, bool accelerating = true);
 };

@@ -387,8 +387,8 @@ void parseSubject(Subject subject, std::string path, std::map<std::string, std::
 		bool fly = Import::parseInt(fields.at("flying"));
 
 		screen.camera.cframe = GlobalCFrame(pos, rot);
-		screen.camera.speed = speed;
-		screen.camera.rspeed = rspeed;
+		screen.camera.velocity = speed;
+		screen.camera.angularVelocity = rspeed;
 		screen.camera.flying = fly;
 	} else if (subject == Subject::GLOBAL) {
 
