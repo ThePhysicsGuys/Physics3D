@@ -74,24 +74,13 @@ public:
 	}
 };
 
-
-inline Mat4 CFrameToMat4(const GlobalCFrame& cframe) {
-	const Mat3& r = cframe.rotation;
-	Vec3 p(double(cframe.position.x), double(cframe.position.y), double(cframe.position.z));
-	return Mat4(
-		r.m00, r.m01, r.m02, 0,
-		r.m10, r.m11, r.m12, 0,
-		r.m20, r.m21, r.m22, 0,
-		p.x, p.y, p.z, 1
-	);
-}
-
-inline Mat4 TransformToMat4(const Position& position, const Mat3f& r) {
+inline Mat4 TransformToMat4(const Position& position, const Mat3& r) {
 	Vec3 p(double(position.x), double(position.y), double(position.z));
-	return Mat4(
-		r.m00, r.m01, r.m02, 0,
-		r.m10, r.m11, r.m12, 0,
-		r.m20, r.m21, r.m22, 0,
-		p.x, p.y, p.z, 1
-	);
+	return Mat4(Matrix<double, 3, 3>(r), p, Vec3(0, 0, 0), 1.0);
 }
+inline Mat4 CFrameToMat4(const GlobalCFrame& cframe) {
+	return TransformToMat4(cframe.getPosition(), cframe.getRotation());
+}
+
+
+

@@ -1,17 +1,16 @@
 #pragma once
 
-template<typename N>
-struct Mat4Template;
-
-typedef Mat4Template<double>	Mat4;
-typedef Mat4Template<float>		Mat4f;
-typedef Mat4Template<long long>	Mat4l;
 
 #include "vec.h"
 #include "mat3.h"
+#include "matBase.h"
 
-template<typename N>
-struct Mat4Template {
+typedef Matrix<double, 4, 4>	Mat4;
+typedef Matrix<float, 4, 4>		Mat4f;
+typedef Matrix<long long, 4, 4>	Mat4l;
+
+/*template<typename N>
+struct Matrix<N, 4, 4> {
 	union {
 		struct {
 			N m00, m01, m02, m03;
@@ -23,21 +22,16 @@ struct Mat4Template {
 		N m[16];
 	};
 
-	Mat4Template() : m00(1), m01(0), m02(0), m03(0), m10(0), m11(1), m12(0), m13(0), m20(0), m21(0), m22(1), m23(0), m30(0), m31(0), m32(0), m33(1) {};
+	Matrix() : m00(1), m01(0), m02(0), m03(0), m10(0), m11(1), m12(0), m13(0), m20(0), m21(0), m22(1), m23(0), m30(0), m31(0), m32(0), m33(1) {};
 
-	Mat4Template(N m00, N m01, N m02, N m03, N m10, N m11, N m12, N m13, N m20, N m21, N m22, N m23, N m30, N m31, N m32, N m33) :
+	Matrix(N m00, N m01, N m02, N m03, N m10, N m11, N m12, N m13, N m20, N m21, N m22, N m23, N m30, N m31, N m32, N m33) :
 		m00(m00), m01(m01), m02(m02), m03(m03), m10(m10), m11(m11), m12(m12), m13(m13), m20(m20), m21(m21), m22(m22), m23(m23), m30(m30), m31(m31), m32(m32), m33(m33) {};
 
-	Mat4Template(const N other[16]) {
+	Matrix(const N other[16]) {
 		for (int i = 0; i < 16; i++) m[i] = other[i];
 	};
 
-	template<typename OtherN>
-	Mat4Template(const Mat4Template<OtherN>& other) {
-		for (int i = 0; i < 16; i++) m[i] = static_cast<N>(other.m[i]);
-	}
-
-	Mat4Template(const Mat3Template<N>& other) {
+	Matrix(const Mat3Template<N>& other) {
 		m00 = other.m00;
 		m01 = other.m01;
 		m02 = other.m02;
@@ -196,6 +190,15 @@ struct Mat4Template {
 
 		return Mat4Template(r00, r01, r02, r03, r10, r11, r12, r13, r20, r21, r22, r23, r30, r31, r32, r33);
 	}
+	Vector<N, 4> operator*(const Vector<N, 4>& v) const {
+		N v0 = v.x * m00 + v.y * m10 + v.z * m20 + v.w * m30;
+		N v1 = v.x * m01 + v.y * m11 + v.z * m21 + v.w * m31;
+		N v2 = v.x * m02 + v.y * m12 + v.z * m22 + v.w * m32;
+		N v3 = v.x * m03 + v.y * m13 + v.z * m23 + v.w * m33;
+
+		return Vector<N, 4>(v0, v1, v2, v3);
+	}
+	
 
 	Vector<N, 3> operator*(const Vector<N, 3>& v) const {
 		N v0 = v.x * m00 + v.y * m10 + v.z * m20 + m30;
@@ -205,14 +208,7 @@ struct Mat4Template {
 		return Vector<N, 3>(v0, v1, v2);
 	}
 
-	Vector<N, 4> operator*(const Vector<N, 4>& v) const {
-		N v0 = v.x * m00 + v.y * m10 + v.z * m20 + v.w * m30;
-		N v1 = v.x * m01 + v.y * m11 + v.z * m21 + v.w * m31;
-		N v2 = v.x * m02 + v.y * m12 + v.z * m22 + v.w * m32;
-		N v3 = v.x * m03 + v.y * m13 + v.z * m23 + v.w * m33;
-
-		return Vector<N, 4>(v0, v1, v2, v3);
-	}
+	
 
 	Mat3Template<N> getRotation() const {
 		return Mat3Template<N>(m00, m01, m02,
@@ -224,17 +220,83 @@ struct Mat4Template {
 		return Vector<N, 3>(m30, m31, m32);
 	}
 
-	/*template<typename N>
+	template<typename N>
 	Mat4Template<M> Mat4Template<M>() const {
 		return Mat4Template<M>(static_cast<M>(m00), static_cast<M>(m01), static_cast<M>(m02), static_cast<M>(m03), 
 							   static_cast<M>(m10), static_cast<M>(m11), static_cast<M>(m12), static_cast<M>(m13), 
 							   static_cast<M>(m20), static_cast<M>(m21), static_cast<M>(m22), static_cast<M>(m23), 
 							   static_cast<M>(m30), static_cast<M>(m31), static_cast<M>(m32), static_cast<M>(m33));
-	}*/
-};
+	}
+
+	operator Matrix<N, 4, 4>() const {
+		return fromColMajorData<N, 4, 4>(this->m);
+	}
+	Mat4Template(const Matrix<N, 4, 4>& mat) {
+		toColMajorData(mat, this->m);
+	}
+};*/
 
 Mat4f ortho(float left, float right, float bottom, float top, float zNear, float zFar);
 
 Mat4f perspective(float fov, float aspect, float zNear, float zFar);
 
 Mat4f lookAt(Mat4f m, Vec3f from, Vec3f to, Vec3f up = Vec3f(0, 1, 0));
+
+template<typename N>
+Matrix<N, 4, 4> rotate(const Matrix<N, 4, 4>&, N angle, N x, N y, N z);
+
+template<typename N>
+Matrix<N, 4, 4> translate(const Matrix<N, 4, 4>& mat, N x, N y, N z) {
+	Matrix<N, 1, 4> r{ x, y, z, 1.0 };
+	Matrix<N, 1, 4> rr = mat * r;
+	/*N r30 = m00 * x + m10 * y + m20 * z + m30;
+	N r31 = m01 * x + m11 * y + m21 * z + m31;
+	N r32 = m02 * x + m12 * y + m22 * z + m32;
+	N r33 = m03 * x + m13 * y + m23 * z + m33;*/
+
+	return joinHorizontal(mat.getSubMatrix<3, 4>(0, 0), rr);
+
+	/*return Matrix<N, 4, 4>(
+		m00, m01, m02, m03, 
+		m10, m11, m12, m13, 
+		m20, m21, m22, m23, 
+		r30, r31, r32, r33
+	);*/
+}
+
+template<typename N>
+Matrix<N, 4, 4> scale(const Matrix<N, 4, 4> & mat, const Vector<N, 3>& scaleVec) {
+	Matrix<N, 4, 4> result;
+
+	for (int i = 0; i < 3; i++) {
+		for (int j = 0; j < 4; j++) {
+			result[j][i] = mat[j][i] * scaleVec[i];
+		}
+	}
+	for (int j = 0; j < 4; j++) {
+		result[j][3] = mat[j][3];
+	}
+
+	return result;
+	/*return Mat4Template<N>(
+		x * m00, x * m01, x * m02, x * m03,
+		y * m10, y * m11, y * m12, y * m13,
+		z * m20, z * m21, z * m22, z * m23,
+		m30, m31, m32, m33
+	);*/
+}
+
+template<typename N>
+Matrix<N, 4, 4> scale(const Matrix<N, 4, 4> & mat, N x, N y, N z) {
+	return scale(mat, Vector<N, 3>(x, y, z));
+}
+
+template<typename N>
+Matrix<N, 4, 4> scale(const Matrix<N, 4, 4> & mat, N v) {
+	return scale(mat, v, v, v);
+}
+
+template<typename N>
+Matrix<N, 4, 4> translate(const Matrix<N, 4, 4>& mat, const Vector<N, 3>& dv) {
+	return translate(mat, dv.x, dv.y, dv.z);
+}

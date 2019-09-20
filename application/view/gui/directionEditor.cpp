@@ -23,7 +23,7 @@
 DirectionEditor::DirectionEditor(double x, double y, double width, double height) : Component(x, y, width, height) {
 	viewPosition = Position(0.0, 0.0, -3.0);
 	viewMatrix = CFrameToMat4(GlobalCFrame(viewPosition));
-	modelMatrix = Mat4f(); //.scale(4, 0.5, 4);
+	modelMatrix = Matrix<float, 4, 4>::IDENTITY(); //.scale(4, 0.5, 4);
 	rspeed = 10;
 }
 
@@ -55,7 +55,7 @@ void DirectionEditor::render() {
 }
 
 void DirectionEditor::rotate(double dalpha, double dbeta, double dgamma) {
-	modelMatrix = rotX(float(dalpha)) * modelMatrix.getRotation() * rotZ(float(-dbeta));
+	modelMatrix = Mat4f(Matrix<float, 3, 3>(rotX(float(dalpha)) * Mat3f(modelMatrix.getSubMatrix<3, 3>(0,0)) * rotZ(float(-dbeta))), 1.0f);
 	(*action)(this);
 }
 

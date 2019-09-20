@@ -23,12 +23,12 @@ const Vec3 unitVectors[12]{
 	Vec3(-1.0, 0.0, 0.0),
 	Vec3(0.0, -1.0, 0.0),
 	Vec3(0.0, 0.0, -1.0),
-	Vec3(2.3, 7.6, 0.1).normalize(),
-	Vec3(1000.3, 934.2, 3.401).normalize(),
-	Vec3(2.6, 0.65, 1.7).normalize(),
-	Vec3(-2.32, 0.0000012, 3.8).normalize(),
-	Vec3(-5.3, -4.3, -3.3).normalize(),
-	Vec3(-1000, -1000, -1000).normalize(),
+	normalize(Vec3(2.3, 7.6, 0.1)),
+	normalize(Vec3(1000.3, 934.2, 3.401)),
+	normalize(Vec3(2.6, 0.65, 1.7)),
+	normalize(Vec3(-2.32, 0.0000012, 3.8)),
+	normalize(Vec3(-5.3, -4.3, -3.3)),
+	normalize(Vec3(-1000, -1000, -1000)),
 };
 const Mat3 matrices[9]{
 	Mat3(0,0,0,0,0,0,0,0,0),

@@ -255,7 +255,7 @@ void DebugLayer::onRender() {
 
 	// Render origin mesh
 	graphicsMeasure.mark(GraphicsProcess::ORIGIN);
-	Shaders::originShader.updateProjection(screen->camera.viewMatrix, Mat3f(screen->camera.cframe.rotation), screen->camera.projectionMatrix, screen->camera.orthoMatrix, screen->camera.cframe.position);
+	Shaders::originShader.updateProjection(screen->camera.viewMatrix, Matrix<float, 4, 4>(Matrix<double, 3, 3>(screen->camera.cframe.rotation), 1.0f), screen->camera.projectionMatrix, screen->camera.orthoMatrix, screen->camera.cframe.position);
 	originMesh->render();
 }
 

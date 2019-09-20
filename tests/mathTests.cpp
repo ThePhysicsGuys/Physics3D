@@ -5,23 +5,122 @@
 #include "../engine/math/largeMatrix.h"
 #include "../engine/math/mathUtil.h"
 
-Mat3 IDENTITY = Mat3(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0);
+Mat2 IDENTITY2 = Mat2{1.0, 0.0, 0.0, 1.0};
+Mat3 IDENTITY3 = Mat3(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0);
+Matrix<double, 3, 3> IDENTITY32{ 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0 };
+Mat4 IDENTITY4 = Mat4{
+	1,0,0,0,
+	0,1,0,0,
+	0,0,1,0,
+	0,0,0,1
+};
 
 #define ASSERT(condition) ASSERT_TOLERANT(condition, 0.00000001)
 
-TEST_CASE(matrixInverse) {
+TEST_CASE(stuff) {
+	Matrix<int, 3, 5> mat{
+		5,7,9,
+		6,9,2,
+		3,9,5,
+		3,8,4,
+		3,8,1
+	};
+
+	ASSERT((mat.getSubMatrix<2, 3>(1, 0)) == (Matrix<int, 2, 3>{
+		6, 9,
+		3, 9,
+		3, 8
+	}));
+
+	ASSERT((mat.withoutRow(2)) == (Matrix<int, 3, 4>{
+		5, 7, 9,
+		6, 9, 2,
+		3, 8, 4,
+		3, 8, 1
+	}));
+
+	ASSERT((mat.withoutCol(1)) == (Matrix<int, 2, 5>{
+		5, 9,
+		6, 2,
+		3, 5,
+		3, 4,
+		3, 1
+	}));
+}
+
+TEST_CASE(determinant) {
+	Matrix<double, 3, 3> m3{
+		1, 7, 21,
+		7, 6, 9, 
+		1, 3, 8
+	};
+
+	logf("m=%s\nm.det()=%f", str(m3).c_str(), det(m3));
+
+	ASSERT(det(m3) == 7);
+
+
+	Mat4 m4{
+		1, 7, 21, 6, 
+		7, 6, 9, 8, 
+		1, 3, 8, 4, 
+		2, 9, 7, 3
+	};
+
+	logf("m=%s\nm.det()=%f", str(m4).c_str(), det(m4));
+
+	ASSERT(det(m4) == -983);
+}
+
+
+TEST_CASE(matrixInverse2) {
+	Mat2 m{ 4,7,9,3};
+
+	logf("m=%s\n~m=%s\nm.inverse()=%s\nm.det()=%f", str(m).c_str(), str(~m).c_str(), str(~m).c_str(), det(m));
+
+	ASSERT(det(m) * det(~m) == 1.0);
+	ASSERT(m * ~m == IDENTITY2);
+	ASSERT(~m * m == IDENTITY2);
+}
+
+TEST_CASE(matrixInverse3) {
 	Mat3 m(1,3,4,7,6,9,5,3,2);
 	SymmetricMat3 s(1, 4, 7, 6, 9, 8);
 	DiagonalMat3 d(7, 5, 3);
 
 	logf("m=%s\n~m=%s\nm.inverse()=%s\nm.det()=%f", str(m).c_str(), str(~m).c_str(), str(m.inverse()).c_str(), m.det());
 
-	ASSERT(m * ~m == IDENTITY);
-	ASSERT(~m * m == IDENTITY);
-	ASSERT(s * ~s == IDENTITY);
-	ASSERT(~s * s == IDENTITY);
-	ASSERT(d * ~d == IDENTITY);
-	ASSERT(~d * d == IDENTITY);
+	ASSERT(m * ~m == IDENTITY3);
+	ASSERT(~m * m == IDENTITY3);
+	ASSERT(s * ~s == IDENTITY3);
+	ASSERT(~s * s == IDENTITY3);
+	ASSERT(d * ~d == IDENTITY3);
+	ASSERT(~d * d == IDENTITY3);
+}
+
+TEST_CASE(matrixInverse3v2) {
+	Matrix<double, 3, 3> m{ 1, 3, 4, 7, 6, 9, 5, 3, 2 };
+	Mat3 mOld(m);
+
+	logf("m=%s\n~m=%s\nm.inverse()=%s\nm.det()=%f", str(m).c_str(), str(~m).c_str(), str(~m).c_str(), det(m));
+
+	ASSERT(Mat3(~m) == mOld.inverse());
+
+	ASSERT(det(m) * det(~m) == 1.0);
+
+	ASSERT(m * ~m == IDENTITY32);
+	ASSERT(~m * m == IDENTITY32);
+}
+
+TEST_CASE(matrixInverse4) {
+	Mat4 m{ 1, 3, 4, 7, 7, 9, 3, 5, 4, 9, 1, 2, 6, 7, 6, 9, 1 };
+
+	logf("m=%s\n~m=%s\nm.inverse()=%s\nm.det()=%f", str(m).c_str(), str(~m).c_str(), str(~m).c_str(), det(m));
+
+	ASSERT(det(m) * det(~m) == 1.0);
+
+	ASSERT(m * ~m == IDENTITY4);
+	ASSERT(~m * m == IDENTITY4);
 }
 
 TEST_CASE(cframeInverse) {
@@ -75,9 +174,9 @@ TEST_CASE(matrixAssociativity) {
 	ASSERT((A3*B3)*v3 == (A3*(B3*v3)));
 
 
-	Mat4 A4(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16);
-	Mat4 B4(11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 57, 61, 67, 71);
-	Mat4 C4(0.1, 0.2, 0.7, 0.9, -0.3, -0.5, 0.9, 0.1, -0.3, -0.8, 1.6, 0.4, 0.7, 0.3, 0.1, 0.1);
+	Mat4 A4{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+	Mat4 B4{ 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 57, 61, 67, 71 };
+	Mat4 C4{ 0.1, 0.2, 0.7, 0.9, -0.3, -0.5, 0.9, 0.1, -0.3, -0.8, 1.6, 0.4, 0.7, 0.3, 0.1, 0.1 };
 
 	ASSERT((A4*B4)*C4 == A4*(B4*C4));
 
@@ -105,10 +204,10 @@ TEST_CASE(cframeMat4Equivalence) {
 	Vec3 v(17, -0.7, 9.4);
 
 	ASSERT(Mat4ToCFrame(CFrameToMat4(A)) == A);
-	ASSERT(A.localToGlobal(v) == CFrameToMat4(A) * v);
-	ASSERT(A.globalToLocal(v) == CFrameToMat4(A).inverse() * v);
-	ASSERT(A4 * v == Mat4ToCFrame(A4).localToGlobal(v));
-	ASSERT(A4.inverse() * v == Mat4ToCFrame(A4).globalToLocal(v));
+	ASSERT(A.localToGlobal(v) == Vec3(CFrameToMat4(A) * Vec4(v, 1.0)));
+	ASSERT(A.globalToLocal(v) == Vec3(~CFrameToMat4(A) * Vec4(v, 1.0)));
+	ASSERT(Vec3(A4 * Vec4(v, 1.0)) == Mat4ToCFrame(A4).localToGlobal(v));
+	ASSERT(Vec3(~A4 * Vec4(v, 1.0)) == Mat4ToCFrame(A4).globalToLocal(v));
 }
 
 TEST_CASE(fromEuler) {
@@ -123,7 +222,7 @@ TEST_CASE(crossProduct) {
 	Vec3 u(-7.3, 1.8, 0.5);
 
 	ASSERT(v % u == -(u % v));
-	ASSERT((2.0f * v) % (3.0f * u) == 6.0f * (v % u));
+	ASSERT((2.0 * v) % (3.0 * u) == 6.0 * (v % u));
 
 	ASSERT(x % y == z);
 	ASSERT(y % x == -z);

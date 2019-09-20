@@ -84,7 +84,7 @@ struct EnvironmentFrame : public FrameBlueprint, public Frame {
 		sunColorButton = new Button(0, 0, GUI::sliderBarWidth, GUI::sliderHandleHeight, false);
 		sunDirectionEditor = new DirectionEditor(0, 0, GUI::sliderBarWidth, GUI::sliderBarWidth);
 		sunDirectionEditor->action = [] (DirectionEditor* d) {
-			Shaders::basicShader.updateSunDirection(d->modelMatrix * Vec3(0, 1, 0));
+			Shaders::basicShader.updateSunDirection(Vec3f(d->modelMatrix * Vec4f(0, 1, 0, 1)));
 		};
 
 		sunColorButton->setColor(Vec4(1));

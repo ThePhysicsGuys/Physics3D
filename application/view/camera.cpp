@@ -245,14 +245,14 @@ void Camera::onUpdate() {
 		flags ^= ProjectionDirty;
 		
 		projectionMatrix = perspective(fov, aspect, znear, zfar);
-		invertedProjectionMatrix = projectionMatrix.inverse();
+		invertedProjectionMatrix = ~projectionMatrix;
 	}
 
 	// Update view matrix
 	if (flags & ViewDirty) {
 		flags ^= ViewDirty;
 
-		viewMatrix = Mat4f(cframe.rotation).translate(-Vec3f(float(cframe.position.x), float(cframe.position.y), float(cframe.position.z)));
-		invertedViewMatrix = viewMatrix.inverse();
+		viewMatrix = translate(Mat4f(Matrix<double, 3, 3>(cframe.rotation), 1.0f), -Vec3f(float(cframe.position.x), float(cframe.position.y), float(cframe.position.z)));
+		invertedViewMatrix = ~viewMatrix;
 	}
 }

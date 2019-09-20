@@ -3,36 +3,77 @@
 #include "vec.h"
 #include <type_traits>
 #include <initializer_list>
-
-template<typename T, size_t Stride>
-struct ArrayWithStride {
-	T* startingElement;
-	T& operator[](size_t index) const { return startingElement[index * Stride]; }
-};
-template<typename T, size_t Stride>
-struct ArrayWithStrideConst {
-	const T* startingElement;
-	const T& operator[](size_t index) const { return startingElement[index * Stride]; }
-};
+#include <assert.h>
 
 template<typename T, size_t Width, size_t Height>
-struct Matrix {
+struct MatrixIndex {
+	T* data;
+	size_t row;
+	T& operator[](size_t col) const { 
+		assert(row >= 0 && row < Height);
+		assert(col >= 0 && col < Width);
+
+		return data[col * Height + row]; 
+	}
+};
+template<typename T, size_t Width, size_t Height>
+class Matrix {
 	T data[Width * Height];
 
-	Matrix<T, Width, Height>() {
-		for (size_t i = 0; i < Width * Height; i++) {
-			this->data[i] = 0;
+public:
+	// Returns a row of this matrix
+	MatrixIndex<T, Width, Height> operator[](size_t row) { return MatrixIndex<T, Width, Height>{ data, row }; }
+	// Returns a row of this matrix
+	MatrixIndex<const T, Width, Height> operator[](size_t col) const { return MatrixIndex<const T, Width, Height>{ data, col }; }
+
+	Matrix<T, Width, Height>() = default;
+
+	/*
+		Initialize matrices like so
+
+		Matrix<T, 4, 3>{
+			1, 2, 3, 4,
+			5, 6, 7, 8,
+			9, 10, 11, 12
+		};
+	*/
+	Matrix<T, Width, Height>(const std::initializer_list<T>& list) {
+		assert(list.size() == Width * Height);
+		auto listIter = list.begin();
+		for (size_t row = 0; row < Height; row++) {
+			for (size_t col = 0; col < Width; col++) {
+				(*this)[row][col] = *listIter;
+				++listIter;
+			}
 		}
 	}
 
-	// construction with initializer list
-	// initializer list must always be ROW-MAJOR
-	Matrix<T, Width, Height>(const std::initializer_list<T>& list) {
-		for (size_t row = 0; row < Height; row++) {
-			for (size_t col = 0; col < Width; col++) {
-				(*this)[row][col] = list[row * Width + col];
+	template<typename OtherT1, typename OtherT2, typename OtherT3, typename OtherT4>
+	Matrix<T, Width, Height>(const Matrix<OtherT1, Width - 1, Height - 1>& topLeftMat, const Vector<OtherT2, Height - 1>& rightCol, const Vector<OtherT3, Width - 1>& bottomRow, const OtherT4& bottomLeftVal) {
+		for (size_t row = 0; row < Height - 1; row++) {
+			for (size_t col = 0; col < Width - 1; col++) {
+				(*this)[row][col] = topLeftMat[row][col];
 			}
+			(*this)[row][Width - 1] = rightCol[row];
 		}
+		for (size_t col = 0; col < Width - 1; col++) {
+			(*this)[Height - 1][col] = bottomRow[col];
+		}
+		(*this)[Height - 1][Width - 1] = bottomLeftVal;
+	}
+
+	template<typename OtherT1, typename OtherT2>
+	Matrix<T, Width, Height>(const Matrix<OtherT1, Width - 1, Height - 1> & topLeftMat, const OtherT2& bottomLeftVal) {
+		for (size_t row = 0; row < Height - 1; row++) {
+			for (size_t col = 0; col < Width - 1; col++) {
+				(*this)[row][col] = topLeftMat[row][col];
+			}
+			(*this)[row][Width - 1] = 0.0;
+		}
+		for (size_t col = 0; col < Width - 1; col++) {
+			(*this)[Height - 1][col] = 0.0;
+		}
+		(*this)[Height - 1][Width - 1] = bottomLeftVal;
 	}
 
 	void setDataRowMajor(const T* data) {
@@ -52,8 +93,9 @@ struct Matrix {
 
 	template<typename T2>
 	Matrix<T, Width, Height>(const Matrix<T2, Width, Height>& mat) {
-		for (size_t i = 0; i < Width * Height; i++) {
-			this->data[i] = static_cast<T>(mat.data[i]);
+		for (size_t row = 0; row < Height; row++) {
+			for(size_t col = 0; col < Width; col++)
+			(*this)[row][col] = static_cast<T>(mat[row][col]);
 		}
 	}
 
@@ -68,7 +110,10 @@ struct Matrix {
 	}
 
 	template<size_t SubWidth, size_t SubHeight>
-	Matrix<T, SubWidth, SubHeight> getSubMatrix(size_t topLeftRow, size_t topLeftCol) {
+	Matrix<T, SubWidth, SubHeight> getSubMatrix(size_t topLeftRow, size_t topLeftCol) const {
+		assert(topLeftRow >= 0 && topLeftRow + SubHeight <= Height);
+		assert(topLeftCol >= 0 && topLeftCol + SubWidth <= Width);
+
 		Matrix<T, SubWidth, SubHeight> result;
 
 		for (size_t row = 0; row < SubHeight; row++) {
@@ -79,44 +124,277 @@ struct Matrix {
 		return result;
 	}
 
-	/*template<std::enable_if_t<Width == Height, size_t> Size = Width>
-	T det() const {
-		if constexpr (Size == 1) {
-			return data[0];
-		}
-		if constexpr (Size == 2) {
-			return data[0] * data[3] - data[1] * data[2];
-		}
-		T total = 0;
-		for (size_t col = 0; col < Size; col++) {
-			Matrix<T, Size - 1, Size - 1> minorMat;
-			for (size_t row = 0; row < Size - 1; row++) {
-				for (size_t j = 0; j < col; j++) {
-					minorMat[row][j] = (*this)[row + 1][j];
-				}
-				// skip i-th row
-				for (size_t j = row; j < Size-1; j++) {
-					minorMat[row][j] = (*this)[row + 1][j+1];
-				}
-			}
-			T detOfMinor = minorMat.det();
-			if (col % 2 == 0) {
-				total += detOfMinor * (*this)[0][col];
-			} else {
-				total -= detOfMinor * (*this)[0][col];
-			}
-		}
-		return total;
-	}*/
+	template<size_t SubWidth, size_t SubHeight>
+	void setSubMatrix(const Matrix<T, SubWidth, SubHeight>& mat, size_t topLeftRow, size_t topLeftCol) {
+		assert(topLeftRow >= 0 && topLeftRow + SubHeight <= Height);
+		assert(topLeftCol >= 0 && topLeftCol + SubWidth <= Width);
 
+		for (size_t row = 0; row < SubHeight; row++) {
+			for (size_t col = 0; col < SubWidth; col++) {
+				(*this)[row + topLeftRow][col + topLeftCol] = mat[row][col];
+			}
+		}
+	}
+
+	Matrix<T, Width - 1, Height> withoutCol(size_t colToDelete) const {
+		assert(colToDelete >= 0 && colToDelete < Width);
+
+		Matrix<T, Width - 1, Height> newMat;
+		for (size_t row = 0; row < Height; row++) {
+			for (size_t col = 0; col < colToDelete; col++) {
+				newMat[row][col] = (*this)[row][col];
+			}
+			for (size_t col = colToDelete+1; col < Width; col++) {
+				newMat[row][col - 1] = (*this)[row][col];
+			}
+		}
+		return newMat;
+	}
+	Matrix<T, Width, Height - 1> withoutRow(size_t rowToDelete) const {
+		assert(rowToDelete >= 0 && rowToDelete < Height);
+
+		Matrix<T, Width, Height - 1> newMat;
+		for (size_t col = 0; col < Width; col++) {
+			for (size_t row = 0; row < rowToDelete; row++) {
+				newMat[row][col] = (*this)[row][col];
+			}
+			for (size_t row = rowToDelete; row < Height - 1; row++) {
+				newMat[row][col] = (*this)[row + 1][col];
+			}
+		}
+
+		return newMat;
+	}
+	Matrix<T, Width - 1, Height - 1> withoutRowCol(size_t rowToDelete, size_t colToDelete) const {
+		assert(colToDelete >= 0 && colToDelete < Width);
+		assert(rowToDelete >= 0 && rowToDelete < Height);
+
+		Matrix<T, Width - 1, Height - 1> newMat;
+		for (size_t row = 0; row < rowToDelete; row++) {
+			for (size_t col = 0; col < colToDelete; col++) {
+				newMat[row][col] = (*this)[row][col];
+			}
+			for (size_t col = colToDelete + 1; col < Width; col++) {
+				newMat[row][col - 1] = (*this)[row][col];
+			}
+		}
+		for (size_t row = rowToDelete + 1; row < Height; row++) {
+			for (size_t col = 0; col < colToDelete; col++) {
+				newMat[row - 1][col] = (*this)[row][col];
+			}
+			for (size_t col = colToDelete + 1; col < Width; col++) {
+				newMat[row - 1][col - 1] = (*this)[row][col];
+			}
+		}
+		return newMat;
+	}
+	
+	void setRow(size_t row, const Vector<T, Width>& data) {
+		assert(row >= 0 && row < Height);
+
+		for (size_t i = 0; i < Width; i++) {
+			(*this)[row][i] = data[i];
+		}
+	}
+	void setCol(size_t col, const Vector<T, Height>& data) {
+		assert(col >= 0 && col < Width);
+
+		for (size_t i = 0; i < Height; i++) {
+			(*this)[i][col] = data[i];
+		}
+	}
+
+	static Matrix<T, Width, Height> ZEROS() {
+		Matrix<T, Width, Height> mat;
+		for (size_t row = 0; row < Height; row++) {
+			for (size_t col = 0; col < Width; col++) {
+				mat[row][col] = 0;
+			}
+		}
+		return mat;
+	}
+
+	static Matrix<T, Width, Height> IDENTITY() {
+		Matrix<T, Width, Height> mat;
+		for (size_t row = 0; row < Height; row++) {
+			for (size_t col = 0; col < Width; col++) {
+				mat[row][col] = (row == col) ? 1 : 0;
+			}
+		}
+		return mat;
+	}
+};
+
+
+/*
+	Symmetric matrix indexing
+	0
+	1 2
+	3 4 5
+	6 7 8 9
+	A B C D E
+
+	[3][0] = 6
+	[1][0] = 1
+	[2][2] = 5
+	[a][b] = a*(a+1)/2+b
+*/
+
+
+template<typename T, size_t Size>
+struct SymmetricMatrixIndex {
+	T* data;
+	size_t row;
+
+	T& operator[](size_t col) const {
+		size_t a = (row > col) ? row : col; // max
+		size_t b = (row > col) ? col : row; // min
+
+		assert(b >= 0);
+		assert(a < Size);
+
+		return data[a * (a + 1) / 2 + b];
+	}
+};
+template<typename T, size_t Size>
+class SymmetricMatrix {
+	T data[Size * (Size + 1) / 2];
+public:
 	// Returns a row of this matrix
-	ArrayWithStride<T, Width> operator[](size_t index) { return ArrayWithStride<T, Width>{ data + index }; }
+	SymmetricMatrixIndex<T, Size> operator[](size_t row) { return SymmetricMatrixIndex<T, Size>{ data, row }; }
 	// Returns a row of this matrix
-	ArrayWithStrideConst<T, Width> operator[](size_t index) const { return ArrayWithStrideConst<T, Width>{ data + index }; }
+	SymmetricMatrixIndex<const T, Size> operator[](size_t row) const { return SymmetricMatrixIndex<const T, Size>{ data, row }; }
+
+	SymmetricMatrix<T, Size>() = default;
+	/*
+		Initialize symmetric matrices like so
+
+		SymmetricMatrix<T, 4>{
+			1,
+			2, 3,
+			4, 5, 6,
+			7, 8, 9, 10
+		};
+	*/
+	SymmetricMatrix<T, Size>(const std::initializer_list<T>& list) {
+		assert(list.size() == Size * (Size + 1) / 2);
+
+		auto listIter = list.begin();
+		for (size_t row = 0; row < Size; row++) {
+			for (size_t col = 0; col <= row; col++) {
+				(*this)[row][col] = *listIter;
+				++listIter;
+			}
+		}
+	}
+
+	static SymmetricMatrix<T, Size> ZEROS() {
+		SymmetricMatrix<T, Size> mat;
+		for (size_t row = 0; row < Size; row++) {
+			for (size_t col = 0; col <= row; col++) {
+				mat[row][col] = 0;
+			}
+		}
+		return mat;
+	}
+
+	static SymmetricMatrix<T, Size> IDENTITY() {
+		SymmetricMatrix<T, Size> mat;
+		for (size_t row = 0; row < Size; row++) {
+			for (size_t col = 0; col <= row; col++) {
+				mat[row][col] = (row == col) ? 1 : 0;
+			}
+		}
+		return mat;
+	}
+
+	operator Matrix<T, Size, Size>() const {
+		Matrix<T, Size, Size> mat;
+		for (size_t row = 0; row < Size; row++) {
+			for (size_t col = 0; col <= row; col++) {
+				const T& val = (*this)[row][col];
+				mat[row][col] = val;
+				mat[col][row] = val;
+			}
+		}
+		return mat;
+	}
+};
+
+template<typename T, size_t Size>
+class DiagonalMatrix {
+	T data[Size];
+public:
+	T& operator[](size_t index) { assert(index >= 0 && index < Size); return data[index]; }
+	const T& operator[](size_t index) const { assert(index >= 0 && index < Size); return data[index]; }
+
+	DiagonalMatrix<T, Size>() = default;
+	/*
+		Initialize diagonal matrices like so
+
+		DiagonalMatrix<T, 4>{
+			1,
+			   2,
+			      3,
+			         4
+		};
+	*/
+	DiagonalMatrix<T, Size>(const std::initializer_list<T>& list) {
+		assert(list.size() == Size);
+
+		auto listIter = list.begin();
+		for (size_t i = 0; i < Size; i++) {
+			(*this)[i] = *listIter;
+			++listIter;
+		}
+	}
+
+	static DiagonalMatrix<T, Size> ZEROS() {
+		DiagonalMatrix<T, Size> mat;
+		for (size_t i = 0; i < Size; i++) {
+			mat[i] = 0;
+		}
+		return mat;
+	}
+
+	static DiagonalMatrix<T, Size> IDENTITY() {
+		DiagonalMatrix<T, Size> mat;
+		for (size_t i = 0; i < Size; i++) {
+			mat[i] = 1;
+		}
+		return mat;
+	}
+
+	operator SymmetricMatrix<T, Size>() const {
+		SymmetricMatrix<T, Size> mat;
+		for (size_t row = 0; row < Size; row++) {
+			for (size_t col = 0; col < row; col++) {
+				mat[row][col] = 0;
+			}
+			mat[row][row] = this->data[row];
+		}
+		return mat;
+	}
+
+	operator Matrix<T, Size, Size>() const {
+		Matrix<T, Size, Size> mat;
+		for (size_t row = 0; row < Size; row++) {
+			for (size_t col = 0; col < row; col++) {
+				mat[row][col] = 0;
+				mat[col][row] = 0;
+			}
+			mat[row][row] = (*this)[row];
+		}
+		return mat;
+	}
 };
 
 template<typename T, size_t Size>
 using SquareMatrix = Matrix<T, Size, Size>;
+
+/*
+	===== Operators =====
+*/
 
 template<typename T, size_t Width, size_t Height>
 Matrix<T, Width, Height> fromColMajorData(const T* data) {
@@ -140,9 +418,27 @@ Matrix<T, Width, Height> fromRowMajorData(const T* data) {
 	return mat;
 }
 
-template<template<typename, size_t> typename VectorBasis, typename T, size_t Width, size_t Height>
-VectorBasis<T, Height> operator*(const Matrix<T, Width, Height>& m, const VectorBasis<T, Width>& v) {
-	VectorBasis<T, Height> result;
+template<typename T, size_t Width, size_t Height>
+void toColMajorData(const Matrix<T, Width, Height>& matrix, T* buf) {
+	for (size_t row = 0; row < Height; row++) {
+		for (size_t col = 0; col < Width; col++) {
+			buf[row + col * Height] = matrix[row][col];
+		}
+	}
+}
+
+template<typename T, size_t Width, size_t Height>
+void toRowMajorData(const Matrix<T, Width, Height>& matrix, T* buf) {
+	for (size_t row = 0; row < Height; row++) {
+		for (size_t col = 0; col < Width; col++) {
+			buf[row * Width + col] = matrix[row][col];
+		}
+	}
+}
+
+template<typename T, size_t Width, size_t Height>
+Vector<T, Height> operator*(const Matrix<T, Width, Height>& m, const Vector<T, Width>& v) {
+	Vector<T, Height> result;
 
 	for (size_t row = 0; row < Height; row++) {
 		T sum = m[row][0] * v[0];
@@ -154,28 +450,74 @@ VectorBasis<T, Height> operator*(const Matrix<T, Width, Height>& m, const Vector
 	return result;
 }
 
-template<typename T, size_t ResultWidth, size_t ResultHeight, size_t Josize_tSize>
-Matrix<T, ResultWidth, ResultHeight> operator*(const Matrix<T, Josize_tSize, ResultHeight>& m1, const Matrix<T, ResultWidth, Josize_tSize>& m2) {
-	Matrix<T, ResultWidth, ResultHeight> result;
+template<typename T, size_t Size>
+T det(const Matrix<T, Size, Size>& matrix) {
+	T total = 0;
 
-	for (size_t m2Col = 0; m2Col < ResultWidth; m2Col++) {
-		for (size_t row = 0; row < ResultHeight; row++) {
-			T sum = m1[row][0] * m2[0][m2Col];
-			for (size_t col = 1; col < Josize_tSize; col++) {
-				sum += m1[row][col] * m2[col][m2Col];
-			}
-			result[row][m2Col] = sum;
+	Matrix<T, Size, Size - 1> allButFirstRow = matrix.getSubMatrix<Size, Size-1>(1,0);
+
+	for (size_t col = 0; col < Size; col++) {
+		T detOfMinor = det(allButFirstRow.withoutCol(col));
+		
+		T value = detOfMinor * matrix[0][col];
+
+		total += (col % 2 == 0)? value : -value;
+	}
+	return total;
+}
+template<typename T>
+T det(const Matrix<T, 0, 0> & matrix) {
+	return 1; // for shits n giggles
+}
+template<typename T>
+T det(const Matrix<T, 1, 1>& matrix) {
+	return matrix[0][0];
+}
+template<typename T>
+T det(const Matrix<T, 2, 2> & matrix) {
+	return matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0];
+}
+
+template<typename T, size_t Height, size_t Width1, size_t Width2>
+Matrix<T, Width1 + Width2, Height> joinHorizontal(const Matrix<T, Width1, Height>& mat1, const Matrix<T, Width2, Height>& mat2) {
+	Matrix<T, Width1 + Width2, Height> result;
+	for (size_t row = 0; row < Height; row++) {
+		for (size_t col = 0; col < Width1; col++) {
+			result[row][col] = mat1[row][col];
+		}
+		for (size_t col = 0; col < Width2; col++) {
+			result[row][col + Width1] = mat2[row][col];
 		}
 	}
 	return result;
 }
+
+template<typename T, size_t Width, size_t Height1, size_t Height2>
+Matrix<T, Width, Height1 + Height2> joinVertical(const Matrix<T, Width, Height1>& mat1, const Matrix<T, Width, Height2>& mat2) {
+	Matrix<T, Width, Height1 + Height2> result;
+	for (size_t row = 0; row < Height1; row++) {
+		for (size_t col = 0; col < Width; col++) {
+			result[row][col] = mat1[row][col];
+		}
+	}
+	for (size_t row = 0; row < Height2; row++) {
+		for (size_t col = 0; col < Width; col++) {
+			result[row + Height1][col] = mat2[row][col];
+		}
+	}
+	return result;
+}
+
+/*
+	===== Everything standard matrix =====
+*/
 
 template<typename T, size_t Width, size_t Height>
 Matrix<T, Width, Height> operator+(const Matrix<T, Width, Height>& m1, const Matrix<T, Width, Height>& m2) {
 	Matrix<T, Width, Height> result;
 
 	for (size_t row = 0; row < Height; row++) {
-		for (size_t col = 1; col < Width; col++) {
+		for (size_t col = 0; col < Width; col++) {
 			result[row][col] = m1[row][col] + m2[row][col];
 		}
 	}
@@ -187,8 +529,36 @@ Matrix<T, Width, Height> operator-(const Matrix<T, Width, Height>& m1, const Mat
 	Matrix<T, Width, Height> result;
 
 	for (size_t row = 0; row < Height; row++) {
-		for (size_t col = 1; col < Width; col++) {
+		for (size_t col = 0; col < Width; col++) {
 			result[row][col] = m1[row][col] - m2[row][col];
+		}
+	}
+	return result;
+}
+
+template<typename T, size_t Width, size_t Height>
+Matrix<T, Width, Height> operator-(const Matrix<T, Width, Height>& m) {
+	Matrix<T, Width, Height> result;
+
+	for (size_t row = 0; row < Height; row++) {
+		for (size_t col = 0; col < Width; col++) {
+			result[row][col] = -m[row][col];
+		}
+	}
+	return result;
+}
+
+template<typename T, size_t ResultWidth, size_t ResultHeight, size_t IntermediateSize>
+Matrix<T, ResultWidth, ResultHeight> operator*(const Matrix<T, IntermediateSize, ResultHeight>& m1, const Matrix<T, ResultWidth, IntermediateSize>& m2) {
+	Matrix<T, ResultWidth, ResultHeight> result;
+
+	for (size_t col = 0; col < ResultWidth; col++) {
+		for (size_t row = 0; row < ResultHeight; row++) {
+			T sum = m1[row][0] * m2[0][col];
+			for (size_t i = 1; i < IntermediateSize; i++) {
+				sum += m1[row][i] * m2[i][col];
+			}
+			result[row][col] = sum;
 		}
 	}
 	return result;
@@ -199,7 +569,7 @@ Matrix<T, Width, Height> operator*(const Matrix<T, Width, Height>& m1, const T& 
 	Matrix<T, Width, Height> result;
 
 	for (size_t row = 0; row < Height; row++) {
-		for (size_t col = 1; col < Width; col++) {
+		for (size_t col = 0; col < Width; col++) {
 			result[row][col] = m1[row][col] * factor;
 		}
 	}
@@ -211,7 +581,7 @@ Matrix<T, Width, Height> operator*(const T& factor, const Matrix<T, Width, Heigh
 	Matrix<T, Width, Height> result;
 
 	for (size_t row = 0; row < Height; row++) {
-		for (size_t col = 1; col < Width; col++) {
+		for (size_t col = 0; col < Width; col++) {
 			result[row][col] = factor * m1[row][col];
 		}
 	}
@@ -223,7 +593,7 @@ Matrix<T, Width, Height> operator/(const Matrix<T, Width, Height>& m1, const T& 
 	Matrix<T, Width, Height> result;
 
 	for (size_t row = 0; row < Height; row++) {
-		for (size_t col = 1; col < Width; col++) {
+		for (size_t col = 0; col < Width; col++) {
 			result[row][col] = m1[row][col] / factor;
 		}
 	}
@@ -233,7 +603,7 @@ Matrix<T, Width, Height> operator/(const Matrix<T, Width, Height>& m1, const T& 
 template<typename T, size_t Width, size_t Height>
 Matrix<T, Width, Height>& operator+=(const Matrix<T, Width, Height>& m1, const Matrix<T, Width, Height>& m2) {
 	for (size_t row = 0; row < Height; row++) {
-		for (size_t col = 1; col < Width; col++) {
+		for (size_t col = 0; col < Width; col++) {
 			m1[row][col] += m2[row][col];
 		}
 	}
@@ -242,7 +612,7 @@ Matrix<T, Width, Height>& operator+=(const Matrix<T, Width, Height>& m1, const M
 template<typename T, size_t Width, size_t Height>
 Matrix<T, Width, Height>& operator-=(const Matrix<T, Width, Height>& m1, const Matrix<T, Width, Height>& m2) {
 	for (size_t row = 0; row < Height; row++) {
-		for (size_t col = 1; col < Width; col++) {
+		for (size_t col = 0; col < Width; col++) {
 			m1[row][col] -= m2[row][col];
 		}
 	}
@@ -251,7 +621,7 @@ Matrix<T, Width, Height>& operator-=(const Matrix<T, Width, Height>& m1, const M
 template<typename T, size_t Width, size_t Height>
 Matrix<T, Width, Height>& operator*=(const Matrix<T, Width, Height>& mat, const T& factor) {
 	for (size_t row = 0; row < Height; row++) {
-		for (size_t col = 1; col < Width; col++) {
+		for (size_t col = 0; col < Width; col++) {
 			mat[row][col] *= factor;
 		}
 	}
@@ -260,9 +630,299 @@ Matrix<T, Width, Height>& operator*=(const Matrix<T, Width, Height>& mat, const 
 template<typename T, size_t Width, size_t Height>
 Matrix<T, Width, Height>& operator/=(const Matrix<T, Width, Height>& mat, const T& factor) {
 	for (size_t row = 0; row < Height; row++) {
-		for (size_t col = 1; col < Width; col++) {
+		for (size_t col = 0; col < Width; col++) {
 			mat[row][col] /= factor;
 		}
 	}
 	return mat;
+}
+
+template<typename T, size_t Size>
+Matrix<T, Size, Size> operator~(const Matrix<T, Size, Size>& matrix) {
+	Matrix<T, Size, Size> result;
+
+	T d = det(matrix);
+
+	for (size_t row = 0; row < Size; row++) {
+		for (size_t col = 0; col < Size; col++) {
+			Matrix<T, Size - 1, Size - 1> tmp = matrix.withoutRowCol(row, col);
+			T coFactor = det(tmp);
+
+			T value = coFactor / d;
+
+			// transpose the coFactors here, therefore indexing [col][row]
+			result[col][row] = ((row + col) % 2 == 0) ? value : -value;
+		}
+	}
+	return result;
+}
+
+
+/*
+	===== Everything symmetric matrix ===== 
+*/
+
+
+template<typename T, size_t Size>
+SymmetricMatrix<T, Size> operator+(const SymmetricMatrix<T, Size>& m1, const SymmetricMatrix<T, Size>& m2) {
+	SymmetricMatrix<T, Size> result;
+
+	for (size_t row = 0; row < Size; row++) {
+		for (size_t col = 0; col <= row; col++) {
+			result[row][col] = m1[row][col] + m2[row][col];
+		}
+	}
+	return result;
+}
+
+template<typename T, size_t Size>
+SymmetricMatrix<T, Size> operator-(const SymmetricMatrix<T, Size>& m1, const SymmetricMatrix<T, Size>& m2) {
+	SymmetricMatrix<T, Size> result;
+
+	for (size_t row = 0; row < Size; row++) {
+		for (size_t col = 0; col <= row; col++) {
+			result[row][col] = m1[row][col] - m2[row][col];
+		}
+	}
+	return result;
+}
+
+template<typename T, size_t Size>
+SymmetricMatrix<T, Size> operator-(const SymmetricMatrix<T, Size>& m) {
+	SymmetricMatrix<T, Size> result;
+
+	for (size_t row = 0; row < Size; row++) {
+		for (size_t col = 0; col <= row; col++) {
+			result[row][col] = -m[row][col];
+		}
+	}
+	return result;
+}
+
+template<typename T, size_t Size>
+SymmetricMatrix<T, Size> operator*(const SymmetricMatrix<T, Size>& m1, const SymmetricMatrix<T, Size>& m2) {
+	SymmetricMatrix<T, Size> result;
+
+	for (size_t col = 0; col < Size; col++) {
+		for (size_t row = 0; row <= col; row++) {
+			T sum = m1[row][0] * m2[0][col];
+			for (size_t i = 1; i < Size; i++) {
+				sum += m1[row][i] * m2[i][col];
+			}
+			result[row][col] = sum;
+		}
+	}
+	return result;
+}
+
+
+
+
+template<typename T, size_t Size>
+SymmetricMatrix<T, Size> operator*(const SymmetricMatrix<T, Size>& m1, const T& factor) {
+	SymmetricMatrix<T, Size> result;
+
+	for (size_t row = 0; row < Size; row++) {
+		for (size_t col = 0; col <= row; col++) {
+			result[row][col] = m1[row][col] * factor;
+		}
+	}
+	return result;
+}
+
+template<typename T, size_t Size>
+SymmetricMatrix<T, Size> operator*(const T& factor, const SymmetricMatrix<T, Size>& m1) {
+	SymmetricMatrix<T, Size> result;
+
+	for (size_t row = 0; row < Size; row++) {
+		for (size_t col = 0; col <= row; col++) {
+			result[row][col] = factor * m1[row][col];
+		}
+	}
+	return result;
+}
+
+template<typename T, size_t Size>
+SymmetricMatrix<T, Size> operator/(const SymmetricMatrix<T, Size>& m1, const T& factor) {
+	SymmetricMatrix<T, Size> result;
+
+	for (size_t row = 0; row < Size; row++) {
+		for (size_t col = 0; col <= row; col++) {
+			result[row][col] = m1[row][col] / factor;
+		}
+	}
+	return result;
+}
+
+template<typename T, size_t Size>
+SymmetricMatrix<T, Size>& operator+=(const SymmetricMatrix<T, Size>& m1, const SymmetricMatrix<T, Size>& m2) {
+	for (size_t row = 0; row < Size; row++) {
+		for (size_t col = 0; col <= row; col++) {
+			m1[row][col] += m2[row][col];
+		}
+	}
+	return m1;
+}
+template<typename T, size_t Size>
+SymmetricMatrix<T, Size>& operator-=(const SymmetricMatrix<T, Size>& m1, const SymmetricMatrix<T, Size>& m2) {
+	for (size_t row = 0; row < Size; row++) {
+		for (size_t col = 0; col <= row; col++) {
+			m1[row][col] -= m2[row][col];
+		}
+	}
+	return m1;
+}
+template<typename T, size_t Size>
+SymmetricMatrix<T, Size>& operator*=(const SymmetricMatrix<T, Size>& mat, const T& factor) {
+	for (size_t row = 0; row < Size; row++) {
+		for (size_t col = 0; col <= row; col++) {
+			mat[row][col] *= factor;
+		}
+	}
+	return mat;
+}
+template<typename T, size_t Size>
+SymmetricMatrix<T, Size>& operator/=(const SymmetricMatrix<T, Size>& mat, const T& factor) {
+	for (size_t row = 0; row < Size; row++) {
+		for (size_t col = 0; col <= row; col++) {
+			mat[row][col] /= factor;
+		}
+	}
+	return mat;
+}
+
+template<typename T, size_t Size>
+SymmetricMatrix<T, Size> operator~(const SymmetricMatrix<T, Size>& matrix) {
+	SymmetricMatrix<T, Size> result;
+
+	T d = det(matrix);
+
+	for (size_t row = 0; row < Size; row++) {
+		for (size_t col = 0; col <= row; col++) {
+			Matrix<T, Size - 1, Size - 1> tmp = matrix.withoutRowCol(row, col);
+			T coFactor = det(tmp);
+
+			T value = coFactor / d;
+
+			// transpose the coFactors here, therefore indexing [col][row]
+			result[col][row] = ((row + col) % 2 == 0) ? value : -value;
+		}
+	}
+	return result;
+}
+
+/*
+	===== Everything Diagonal Matrix =====
+*/
+
+template<typename T, size_t Size>
+DiagonalMatrix<T, Size> operator+(const DiagonalMatrix<T, Size>& m1, const DiagonalMatrix<T, Size>& m2) {
+	DiagonalMatrix<T, Size> result;
+
+	for (size_t i = 0; i < Size; i++) {
+		result[i] = m1[i] + m2[i];
+	}
+	return result;
+}
+
+template<typename T, size_t Size>
+DiagonalMatrix<T, Size> operator-(const DiagonalMatrix<T, Size>& m1, const DiagonalMatrix<T, Size>& m2) {
+	DiagonalMatrix<T, Size> result;
+
+	for (size_t i = 0; i < Size; i++) {
+		result[i] = m1[i] - m2[i];
+	}
+	return result;
+}
+
+template<typename T, size_t Size>
+DiagonalMatrix<T, Size> operator-(const DiagonalMatrix<T, Size>& m) {
+	DiagonalMatrix<T, Size> result;
+
+	for (size_t i = 0; i < Size; i++) {
+		result[i] = -m[i];
+	}
+	return result;
+}
+
+template<typename T, size_t Size>
+DiagonalMatrix<T, Size> operator*(const DiagonalMatrix<T, Size>& m1, const DiagonalMatrix<T, Size>& m2) {
+	DiagonalMatrix<T, Size> result;
+
+	for (size_t i = 0; i < Size; i++) {
+		result[i] = m1[i] * m2[i];
+	}
+	return result;
+}
+
+
+
+
+template<typename T, size_t Size>
+DiagonalMatrix<T, Size> operator*(const DiagonalMatrix<T, Size>& m1, const T& factor) {
+	DiagonalMatrix<T, Size> result;
+
+	for (size_t i = 0; i < Size; i++) {
+			result[i] = m1[i] * factor;
+	}
+	return result;
+}
+
+template<typename T, size_t Size>
+DiagonalMatrix<T, Size> operator*(const T& factor, const DiagonalMatrix<T, Size>& m1) {
+	DiagonalMatrix<T, Size> result;
+
+	for (size_t i = 0; i < Size; i++) {
+		result[i] = factor * m1[i];
+	}
+	return result;
+}
+
+template<typename T, size_t Size>
+DiagonalMatrix<T, Size> operator/(const DiagonalMatrix<T, Size>& m1, const T& factor) {
+	DiagonalMatrix<T, Size> result;
+
+	for (size_t i = 0; i < Size; i++) {
+		result[i] = m1[i] / factor;
+	}
+	return result;
+}
+
+template<typename T, size_t Size>
+DiagonalMatrix<T, Size>& operator+=(const DiagonalMatrix<T, Size>& m1, const DiagonalMatrix<T, Size>& m2) {
+	for (size_t i = 0; i < Size; i++) {
+		m1[i] += m2[i];
+	}
+	return m1;
+}
+template<typename T, size_t Size>
+DiagonalMatrix<T, Size>& operator-=(const DiagonalMatrix<T, Size>& m1, const DiagonalMatrix<T, Size>& m2) {
+	for (size_t i = 0; i < Size; i++) {
+		m1[i] -= m2[i];
+	}
+	return m1;
+}
+template<typename T, size_t Size>
+DiagonalMatrix<T, Size>& operator*=(const DiagonalMatrix<T, Size>& mat, const T& factor) {
+	for (size_t i = 0; i < Size; i++) {
+		mat[i] *= factor;
+	}
+	return mat;
+}
+template<typename T, size_t Size>
+DiagonalMatrix<T, Size>& operator/=(const DiagonalMatrix<T, Size>& mat, const T& factor) {
+	for (size_t i = 0; i < Size; i++) {
+		mat[i] /= factor;
+	}
+	return mat;
+}
+
+template<typename T, size_t Size>
+DiagonalMatrix<T, Size> operator~(const DiagonalMatrix<T, Size>& matrix) {
+	DiagonalMatrix<T, Size> result;
+
+	for (size_t i = 0; i < Size; i++) {
+		result[i] = 1 / matrix[i];
+	}
+	return result;
 }

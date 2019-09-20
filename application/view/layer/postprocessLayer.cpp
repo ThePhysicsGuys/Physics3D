@@ -37,7 +37,7 @@ void PostprocessLayer::onRender() {
 	Renderer::clearDepth();
 
 	Renderer::disableDepthTest();
-	Shaders::quadShader.updateProjection(Mat4f());
+	Shaders::quadShader.updateProjection(Matrix<double, 4, 4>::IDENTITY());
 	Shaders::quadShader.updateTexture(screen->screenFrameBuffer->texture);
 	screen->quad->render();
 }

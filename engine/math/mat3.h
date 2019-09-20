@@ -76,6 +76,9 @@ public:
 																	   static_cast<N>(o.m10), static_cast<N>(o.m11), static_cast<N>(o.m12), 
 																	   static_cast<N>(o.m20), static_cast<N>(o.m21), static_cast<N>(o.m22)) {}
 
+	template<typename OtherN>
+	Mat3Template(const Matrix<OtherN, 3, 3>& o) : m00(o[0][0]), m01(o[1][0]), m02(o[2][0]), m10(o[0][1]), m11(o[1][1]), m12(o[2][1]), m20(o[0][2]), m21(o[1][2]), m22(o[2][2]) {}
+
 	N det() const {
 		return m00 * (m11 * m22 - m12 * m21) - m01 * (m10 * m22 - m12 * m20) + m02 * (m10 * m21 - m11 * m20);
 	}
@@ -141,10 +144,14 @@ public:
 		return *this;
 	}
 
-	ArrayWithStride<N, 3> operator[](int index) { return ArrayWithStride<N, 3>{m + index}; }
-	ArrayWithStrideConst<N, 3> operator[](int index) const { return ArrayWithStrideConst<N, 3>{m + index}; }
+	MatrixIndex<N, 3, 3> operator[](size_t index) { return MatrixIndex<N, 3, 3>{m, index}; }
+	MatrixIndex<const N, 3, 3> operator[](size_t index) const { return MatrixIndex<const N, 3, 3>{m, index}; }
 
 	// EigenSet<N> getEigenDecomposition() const;
+
+	operator Matrix<N, 3, 3>() const {
+		return fromColMajorData<N, 3, 3>(this->m);
+	}
 };
 
 
@@ -491,6 +498,8 @@ SymmetricMat3Template<N> multiplyLeftRight(SymmetricMat3Template<N> sm, Mat3Temp
 	Mat3Template<N> r = otherMat * sm * otherMat.transpose();
 	return SymmetricMat3Template<N>(r.m00, r.m11, r.m22, r.m01, r.m02, r.m12);
 }
+
+
 
 /*
 	Returns the cross product equivalent matrix

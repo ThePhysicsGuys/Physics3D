@@ -47,7 +47,9 @@ void Shader::setUniform(const std::string& uniform, const Vec4f& value) const {
 }
 
 void Shader::setUniform(const std::string& uniform, const Mat4f& value) const {
-	glUniformMatrix4fv(uniforms.at(uniform), 1, GL_FALSE, value.m);
+	float buf[16];
+	toColMajorData(value, buf);
+	glUniformMatrix4fv(uniforms.at(uniform), 1, GL_FALSE, buf);
 }
 
 unsigned int compileShader(const std::string& source, unsigned int type) {

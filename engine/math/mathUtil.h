@@ -18,7 +18,7 @@ inline double fRand(double fMin, double fMax) {
 	return fMin + f * (fMax - fMin);
 }
 
-template<typename N>
+/*template<typename N>
 inline std::ostream& operator<<(std::ostream& os, const Mat4Template<N>& matrix) {
 	os << "(\n\t";
 	for (int i = 0; i < 15; i++) {
@@ -35,7 +35,7 @@ inline std::string str(const Mat4Template<N>& matrix) {
 	std::stringstream ss;
 	ss << matrix;
 	return ss.str();
-}
+}*/
 
 template<typename T>
 inline std::ostream& operator<<(std::ostream& os, const LargeMatrix<T>& matrix) {
@@ -120,18 +120,24 @@ inline std::string str(const Position& position) {
 	return ss.str();
 }
 
-template<typename N>
-inline std::ostream& operator<<(std::ostream& os, const Mat2Template<N>& matrix) {
-	os << "(\n\t";
+template<typename N, size_t Width, size_t Height>
+inline std::ostream& operator<<(std::ostream& os, const Matrix<N, Width, Height>& matrix) {
+	os << "(\n";
 
-	os << matrix.m[0] << ", " << matrix.m[1] << ";\n\t";
-	os << matrix.m[2] << ", " << matrix.m[3] << ")";
+	for (size_t row = 0; row < Height; row++) {
+		os << "\t";
+		for (size_t col = 0; col < Width; col++) {
+			os << matrix[row][col] << ", ";
+		}
+		os << "\n";
+	}
+	os << ")";
 
 	return os;
 }
 
-template<typename N>
-inline std::string str(const Mat2Template<N>& matrix) {
+template<typename N, size_t Width, size_t Height>
+inline std::string str(const Matrix<N, Width, Height>& matrix) {
 	std::stringstream ss;
 	ss << matrix;
 	return ss.str();

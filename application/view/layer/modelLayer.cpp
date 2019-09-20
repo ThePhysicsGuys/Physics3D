@@ -135,7 +135,7 @@ void ModelLayer::onRender() {
 	// Render lights
 	graphicsMeasure.mark(GraphicsProcess::LIGHTING);
 	for (Light light : lights) {
-		Mat4f transformation = Mat4f().translate(light.position).scale(0.1f);
+		Mat4f transformation = scale(translate(Matrix<float, 4, 4>::IDENTITY(), light.position), 0.1f);
 		Shaders::basicShader.updateMaterial(Material(Vec4f(light.color, 1), Vec3f(), Vec3f(), 10));
 		Shaders::basicShader.updateModel(transformation);
 		Library::sphere->render();

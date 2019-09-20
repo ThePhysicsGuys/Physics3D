@@ -241,11 +241,14 @@ void Screen::onRender() {
 	// Render layers
 	layerStack.onRender();
 
+	graphicsMeasure.mark(GraphicsProcess::FINALIZE);
 
 	// Finalize
 	Renderer::swapGLFWInterval(0);
 	Renderer::swapGLFWBuffers();
 	Renderer::pollGLFWEvents();
+
+	graphicsMeasure.mark(GraphicsProcess::OTHER);
 }
 
 void Screen::onClose() {

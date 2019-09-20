@@ -70,7 +70,7 @@ void DebugOverlay::onRender() {
 		float leftSide = float(screen->dimension.x) / float(screen->dimension.y);
 		PieChart graphicsPie = toPieChart(graphicsMeasure, "Graphics", Vec2f(-leftSide + 1.5f, -0.7f), 0.2f);
 		PieChart physicsPie = toPieChart(physicsMeasure, "Physics", Vec2f(-leftSide + 0.3f, -0.7f), 0.2f);
-		PieChart intersectionPie = toPieChart(intersectionStatistics, "Intersection Statistics", Vec2f(-leftSide + 2.7f, -0.7f), 0.2f);
+		PieChart intersectionPie = toPieChart(intersectionStatistics, "Intersections", Vec2f(-leftSide + 2.7f, -0.7f), 0.2f);
 		physicsPie.renderText(*screen, GUI::font);
 		graphicsPie.renderText(*screen, GUI::font);
 		intersectionPie.renderText(*screen, GUI::font);

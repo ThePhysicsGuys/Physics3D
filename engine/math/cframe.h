@@ -91,20 +91,15 @@ public:
 };
 
 template<typename T>
-CFrameTemplate<T> Mat4ToCFrame(const Mat4Template<T>& mat) {
-	return CFrameTemplate<T>(Vector<T, 3>(mat.m30, mat.m31, mat.m32), Mat3Template<T>(mat.m00, mat.m01, mat.m02, mat.m10, mat.m11, mat.m12, mat.m20, mat.m21, mat.m22));
+CFrameTemplate<T> Mat4ToCFrame(const Matrix<T, 4, 4>& mat) {
+	return CFrameTemplate<T>(Vector<T, 3>(mat[0][3], mat[1][3], mat[2][3]), mat.getSubMatrix<3, 3>(0,0));
 };
 
 template<typename T>
-Mat4Template<T> CFrameToMat4(const CFrameTemplate<T>& cframe) {
+Matrix<T, 4, 4> CFrameToMat4(const CFrameTemplate<T>& cframe) {
 	const Mat3Template<T>& r = cframe.rotation;
 	const Vector<T, 3>& p = cframe.position;
-	return Mat4Template<T> (
-		r.m00, r.m01, r.m02, 0,
-		r.m10, r.m11, r.m12, 0,
-		r.m20, r.m21, r.m22, 0,
-		p.x,   p.y,   p.z,   1
-	);
+	return Matrix<T, 4, 4>(Matrix<T, 3, 3>(r), p, Vector<T, 3>(0, 0, 0), 1.0);
 }
 
 template<typename T> CFrameTemplate<T> operator+(const CFrameTemplate<T>& frame, const Vector<T, 3>& delta) {

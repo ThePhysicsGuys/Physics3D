@@ -114,11 +114,11 @@ void EditTools::onRender(Screen& screen) {
 			Shaders::maskShader.updateColor(GUI::COLOR::G);
 			break;
 		case EditDirection::X:
-			Shaders::maskShader.updateModel(modelMatrix * transformations[1]);
+			Shaders::maskShader.updateModel(modelMatrix * Mat4(Matrix<double, 3, 3>(transformations[1]), 1.0f));
 			Shaders::maskShader.updateColor(GUI::COLOR::R);
 			break;
 		case EditDirection::Z:
-			Shaders::maskShader.updateModel(modelMatrix * transformations[2]);
+			Shaders::maskShader.updateModel(modelMatrix * Mat4(Matrix<double, 3, 3>(transformations[2]), 1.0f));
 			Shaders::maskShader.updateColor(GUI::COLOR::B);
 			break;
 		}
@@ -132,12 +132,12 @@ void EditTools::onRender(Screen& screen) {
 
 	// X
 	Shaders::basicShader.updateMaterial(Material(GUI::COLOR::R));
-	Shaders::basicShader.updateModel(modelMatrix * transformations[1]);
+	Shaders::basicShader.updateModel(modelMatrix * Mat4(Matrix<double, 3, 3>(transformations[1]), 1.0f));
 	shaft->render();
 
 	// Z
 	Shaders::basicShader.updateMaterial(Material(GUI::COLOR::B));
-	Shaders::basicShader.updateModel(modelMatrix * transformations[2]);
+	Shaders::basicShader.updateModel(modelMatrix * Mat4(Matrix<double, 3, 3>(transformations[2]), 1.0f));
 	shaft->render();
 
 	Renderer::disableDepthTest();
