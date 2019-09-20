@@ -1,7 +1,6 @@
 #pragma once
 
 #include "vec.h"
-#include <type_traits>
 #include <initializer_list>
 #include <assert.h>
 
@@ -223,6 +222,45 @@ public:
 		}
 		return mat;
 	}
+
+
+	static Matrix<T, Width, Height> fromColMajorData(const T* data) {
+		Matrix<T, Width, Height> mat;
+		for (size_t row = 0; row < Height; row++) {
+			for (size_t col = 0; col < Width; col++) {
+				mat[row][col] = data[row + col * Height];
+			}
+		}
+		return mat;
+	}
+
+	static Matrix<T, Width, Height> fromRowMajorData(const T* data) {
+		Matrix<T, Width, Height> mat;
+		for (size_t row = 0; row < Height; row++) {
+			for (size_t col = 0; col < Width; col++) {
+				mat[row][col] = data[row * Width + col];
+			}
+		}
+		return mat;
+	}
+
+	void toColMajorData(T* buf) const {
+		for (size_t row = 0; row < Height; row++) {
+			for (size_t col = 0; col < Width; col++) {
+				buf[row + col * Height] = (*this)[row][col];
+			}
+		}
+	}
+
+	void toRowMajorData(T* buf) const {
+		for (size_t row = 0; row < Height; row++) {
+			for (size_t col = 0; col < Width; col++) {
+				buf[row * Width + col] = (*this)[row][col];
+			}
+		}
+	}
+
+
 };
 
 
@@ -392,63 +430,49 @@ public:
 template<typename T, size_t Size>
 using SquareMatrix = Matrix<T, Size, Size>;
 
+template<typename T, size_t Size>
+using UnitaryMatrix = SquareMatrix<T, Size>;
+
+
+/*
+	===== Predefined matrices
+*/
+
+// Mat2
+typedef Matrix<double, 2, 2>	Mat2;
+typedef Matrix<float, 2, 2>		Mat2f;
+typedef Matrix<long long, 2, 2>	Mat2l;
+typedef Matrix<double, 2, 2>	RotMat2;
+
+// Mat3
+typedef Matrix<double, 3, 3>	Mat3;
+typedef Matrix<float, 3, 3>		Mat3f;
+typedef Matrix<long long, 3, 3>	Mat3l;
+
+typedef SymmetricMatrix<double, 3>		SymmetricMat3;
+typedef SymmetricMatrix<float, 3>		SymmetricMat3f;
+typedef SymmetricMatrix<long long, 3>	SymmetricMat3l;
+
+typedef DiagonalMatrix<double, 3>		DiagonalMat3;
+typedef DiagonalMatrix<float, 3>			DiagonalMat3f;
+typedef DiagonalMatrix<long long, 3>		DiagonalMat3l;
+
+typedef Matrix<double, 3, 3>	RotMat3;
+typedef Matrix<float, 3, 3>		RotMat3f;
+typedef Matrix<long long, 3, 3>	RotMat3l;
+
+// Mat4
+typedef Matrix<double, 4, 4>	Mat4;
+typedef Matrix<float, 4, 4>		Mat4f;
+typedef Matrix<long long, 4, 4>	Mat4l;
+
+
+
+
+
 /*
 	===== Operators =====
 */
-
-template<typename T, size_t Width, size_t Height>
-Matrix<T, Width, Height> fromColMajorData(const T* data) {
-	Matrix<T, Width, Height> mat;
-	for (size_t row = 0; row < Height; row++) {
-		for (size_t col = 0; col < Width; col++) {
-			mat[row][col] = data[row + col * Height];
-		}
-	}
-	return mat;
-}
-
-template<typename T, size_t Width, size_t Height>
-Matrix<T, Width, Height> fromRowMajorData(const T* data) {
-	Matrix<T, Width, Height> mat;
-	for (size_t row = 0; row < Height; row++) {
-		for (size_t col = 0; col < Width; col++) {
-			mat[row][col] = data[row * Width + col];
-		}
-	}
-	return mat;
-}
-
-template<typename T, size_t Width, size_t Height>
-void toColMajorData(const Matrix<T, Width, Height>& matrix, T* buf) {
-	for (size_t row = 0; row < Height; row++) {
-		for (size_t col = 0; col < Width; col++) {
-			buf[row + col * Height] = matrix[row][col];
-		}
-	}
-}
-
-template<typename T, size_t Width, size_t Height>
-void toRowMajorData(const Matrix<T, Width, Height>& matrix, T* buf) {
-	for (size_t row = 0; row < Height; row++) {
-		for (size_t col = 0; col < Width; col++) {
-			buf[row * Width + col] = matrix[row][col];
-		}
-	}
-}
-
-template<typename T, size_t Width, size_t Height>
-Vector<T, Height> operator*(const Matrix<T, Width, Height>& m, const Vector<T, Width>& v) {
-	Vector<T, Height> result;
-
-	for (size_t row = 0; row < Height; row++) {
-		T sum = m[row][0] * v[0];
-		for (size_t col = 1; col < Width; col++) {
-			sum += m[row][col] * v[col];
-		}
-		result[row] = sum;
-	}
-	return result;
-}
 
 template<typename T, size_t Size>
 T det(const Matrix<T, Size, Size>& matrix) {
@@ -476,6 +500,23 @@ T det(const Matrix<T, 1, 1>& matrix) {
 template<typename T>
 T det(const Matrix<T, 2, 2> & matrix) {
 	return matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0];
+}
+template<typename T, size_t Size>
+T det(const SymmetricMatrix<T, Size>& mat) {
+	return det(static_cast<Matrix<T, Size, Size>>(mat));
+}
+template<typename T, size_t Size>
+T det(const DiagonalMatrix<T, Size>& mat) {
+	T total = mat[0];
+
+	for (size_t i = 1; i < Size; i++) {
+		total *= mat[i];
+	}
+	return total;
+}
+template<typename T>
+T det(const DiagonalMatrix<T, 0>& mat) {
+	return 1;
 }
 
 template<typename T, size_t Height, size_t Width1, size_t Width2>
@@ -548,6 +589,20 @@ Matrix<T, Width, Height> operator-(const Matrix<T, Width, Height>& m) {
 	return result;
 }
 
+template<typename T, size_t Width, size_t Height>
+Vector<T, Height> operator*(const Matrix<T, Width, Height>& m, const Vector<T, Width>& v) {
+	Vector<T, Height> result;
+
+	for (size_t row = 0; row < Height; row++) {
+		T sum = m[row][0] * v[0];
+		for (size_t col = 1; col < Width; col++) {
+			sum += m[row][col] * v[col];
+		}
+		result[row] = sum;
+	}
+	return result;
+}
+
 template<typename T, size_t ResultWidth, size_t ResultHeight, size_t IntermediateSize>
 Matrix<T, ResultWidth, ResultHeight> operator*(const Matrix<T, IntermediateSize, ResultHeight>& m1, const Matrix<T, ResultWidth, IntermediateSize>& m2) {
 	Matrix<T, ResultWidth, ResultHeight> result;
@@ -601,7 +656,7 @@ Matrix<T, Width, Height> operator/(const Matrix<T, Width, Height>& m1, const T& 
 }
 
 template<typename T, size_t Width, size_t Height>
-Matrix<T, Width, Height>& operator+=(const Matrix<T, Width, Height>& m1, const Matrix<T, Width, Height>& m2) {
+Matrix<T, Width, Height>& operator+=(Matrix<T, Width, Height>& m1, const Matrix<T, Width, Height>& m2) {
 	for (size_t row = 0; row < Height; row++) {
 		for (size_t col = 0; col < Width; col++) {
 			m1[row][col] += m2[row][col];
@@ -610,7 +665,7 @@ Matrix<T, Width, Height>& operator+=(const Matrix<T, Width, Height>& m1, const M
 	return m1;
 }
 template<typename T, size_t Width, size_t Height>
-Matrix<T, Width, Height>& operator-=(const Matrix<T, Width, Height>& m1, const Matrix<T, Width, Height>& m2) {
+Matrix<T, Width, Height>& operator-=(Matrix<T, Width, Height>& m1, const Matrix<T, Width, Height>& m2) {
 	for (size_t row = 0; row < Height; row++) {
 		for (size_t col = 0; col < Width; col++) {
 			m1[row][col] -= m2[row][col];
@@ -619,7 +674,7 @@ Matrix<T, Width, Height>& operator-=(const Matrix<T, Width, Height>& m1, const M
 	return m1;
 }
 template<typename T, size_t Width, size_t Height>
-Matrix<T, Width, Height>& operator*=(const Matrix<T, Width, Height>& mat, const T& factor) {
+Matrix<T, Width, Height>& operator*=(Matrix<T, Width, Height>& mat, const T& factor) {
 	for (size_t row = 0; row < Height; row++) {
 		for (size_t col = 0; col < Width; col++) {
 			mat[row][col] *= factor;
@@ -628,7 +683,7 @@ Matrix<T, Width, Height>& operator*=(const Matrix<T, Width, Height>& mat, const 
 	return mat;
 }
 template<typename T, size_t Width, size_t Height>
-Matrix<T, Width, Height>& operator/=(const Matrix<T, Width, Height>& mat, const T& factor) {
+Matrix<T, Width, Height>& operator/=(Matrix<T, Width, Height>& mat, const T& factor) {
 	for (size_t row = 0; row < Height; row++) {
 		for (size_t col = 0; col < Width; col++) {
 			mat[row][col] /= factor;
@@ -700,6 +755,20 @@ SymmetricMatrix<T, Size> operator-(const SymmetricMatrix<T, Size>& m) {
 }
 
 template<typename T, size_t Size>
+Vector<T, Size> operator*(const SymmetricMatrix<T, Size>& m, const Vector<T, Size>& v) {
+	Vector<T, Size> result;
+
+	for (size_t row = 0; row < Size; row++) {
+		T sum = m[row][0] * v[0];
+		for (size_t col = 1; col < Size; col++) {
+			sum += m[row][col] * v[col];
+		}
+		result[row] = sum;
+	}
+	return result;
+}
+
+template<typename T, size_t Size>
 SymmetricMatrix<T, Size> operator*(const SymmetricMatrix<T, Size>& m1, const SymmetricMatrix<T, Size>& m2) {
 	SymmetricMatrix<T, Size> result;
 
@@ -714,9 +783,6 @@ SymmetricMatrix<T, Size> operator*(const SymmetricMatrix<T, Size>& m1, const Sym
 	}
 	return result;
 }
-
-
-
 
 template<typename T, size_t Size>
 SymmetricMatrix<T, Size> operator*(const SymmetricMatrix<T, Size>& m1, const T& factor) {
@@ -755,7 +821,7 @@ SymmetricMatrix<T, Size> operator/(const SymmetricMatrix<T, Size>& m1, const T& 
 }
 
 template<typename T, size_t Size>
-SymmetricMatrix<T, Size>& operator+=(const SymmetricMatrix<T, Size>& m1, const SymmetricMatrix<T, Size>& m2) {
+SymmetricMatrix<T, Size>& operator+=(SymmetricMatrix<T, Size>& m1, const SymmetricMatrix<T, Size>& m2) {
 	for (size_t row = 0; row < Size; row++) {
 		for (size_t col = 0; col <= row; col++) {
 			m1[row][col] += m2[row][col];
@@ -764,7 +830,7 @@ SymmetricMatrix<T, Size>& operator+=(const SymmetricMatrix<T, Size>& m1, const S
 	return m1;
 }
 template<typename T, size_t Size>
-SymmetricMatrix<T, Size>& operator-=(const SymmetricMatrix<T, Size>& m1, const SymmetricMatrix<T, Size>& m2) {
+SymmetricMatrix<T, Size>& operator-=(SymmetricMatrix<T, Size>& m1, const SymmetricMatrix<T, Size>& m2) {
 	for (size_t row = 0; row < Size; row++) {
 		for (size_t col = 0; col <= row; col++) {
 			m1[row][col] -= m2[row][col];
@@ -773,7 +839,7 @@ SymmetricMatrix<T, Size>& operator-=(const SymmetricMatrix<T, Size>& m1, const S
 	return m1;
 }
 template<typename T, size_t Size>
-SymmetricMatrix<T, Size>& operator*=(const SymmetricMatrix<T, Size>& mat, const T& factor) {
+SymmetricMatrix<T, Size>& operator*=(SymmetricMatrix<T, Size>& mat, const T& factor) {
 	for (size_t row = 0; row < Size; row++) {
 		for (size_t col = 0; col <= row; col++) {
 			mat[row][col] *= factor;
@@ -782,7 +848,7 @@ SymmetricMatrix<T, Size>& operator*=(const SymmetricMatrix<T, Size>& mat, const 
 	return mat;
 }
 template<typename T, size_t Size>
-SymmetricMatrix<T, Size>& operator/=(const SymmetricMatrix<T, Size>& mat, const T& factor) {
+SymmetricMatrix<T, Size>& operator/=(SymmetricMatrix<T, Size>& mat, const T& factor) {
 	for (size_t row = 0; row < Size; row++) {
 		for (size_t col = 0; col <= row; col++) {
 			mat[row][col] /= factor;
@@ -799,7 +865,7 @@ SymmetricMatrix<T, Size> operator~(const SymmetricMatrix<T, Size>& matrix) {
 
 	for (size_t row = 0; row < Size; row++) {
 		for (size_t col = 0; col <= row; col++) {
-			Matrix<T, Size - 1, Size - 1> tmp = matrix.withoutRowCol(row, col);
+			Matrix<T, Size - 1, Size - 1> tmp = static_cast<Matrix<T, Size, Size>>(matrix).withoutRowCol(row, col);
 			T coFactor = det(tmp);
 
 			T value = coFactor / d;
@@ -846,6 +912,16 @@ DiagonalMatrix<T, Size> operator-(const DiagonalMatrix<T, Size>& m) {
 }
 
 template<typename T, size_t Size>
+Vector<T, Size> operator*(const DiagonalMatrix<T, Size>& m, const Vector<T, Size>& v) {
+	Vector<T, Size> result;
+
+	for (size_t i = 0; i < Size; i++) {
+		result[i] = m[i] * v[i];
+	}
+	return result;
+}
+
+template<typename T, size_t Size>
 DiagonalMatrix<T, Size> operator*(const DiagonalMatrix<T, Size>& m1, const DiagonalMatrix<T, Size>& m2) {
 	DiagonalMatrix<T, Size> result;
 
@@ -854,9 +930,6 @@ DiagonalMatrix<T, Size> operator*(const DiagonalMatrix<T, Size>& m1, const Diago
 	}
 	return result;
 }
-
-
-
 
 template<typename T, size_t Size>
 DiagonalMatrix<T, Size> operator*(const DiagonalMatrix<T, Size>& m1, const T& factor) {
@@ -889,28 +962,28 @@ DiagonalMatrix<T, Size> operator/(const DiagonalMatrix<T, Size>& m1, const T& fa
 }
 
 template<typename T, size_t Size>
-DiagonalMatrix<T, Size>& operator+=(const DiagonalMatrix<T, Size>& m1, const DiagonalMatrix<T, Size>& m2) {
+DiagonalMatrix<T, Size>& operator+=(DiagonalMatrix<T, Size>& m1, const DiagonalMatrix<T, Size>& m2) {
 	for (size_t i = 0; i < Size; i++) {
 		m1[i] += m2[i];
 	}
 	return m1;
 }
 template<typename T, size_t Size>
-DiagonalMatrix<T, Size>& operator-=(const DiagonalMatrix<T, Size>& m1, const DiagonalMatrix<T, Size>& m2) {
+DiagonalMatrix<T, Size>& operator-=(DiagonalMatrix<T, Size>& m1, const DiagonalMatrix<T, Size>& m2) {
 	for (size_t i = 0; i < Size; i++) {
 		m1[i] -= m2[i];
 	}
 	return m1;
 }
 template<typename T, size_t Size>
-DiagonalMatrix<T, Size>& operator*=(const DiagonalMatrix<T, Size>& mat, const T& factor) {
+DiagonalMatrix<T, Size>& operator*=(DiagonalMatrix<T, Size>& mat, const T& factor) {
 	for (size_t i = 0; i < Size; i++) {
 		mat[i] *= factor;
 	}
 	return mat;
 }
 template<typename T, size_t Size>
-DiagonalMatrix<T, Size>& operator/=(const DiagonalMatrix<T, Size>& mat, const T& factor) {
+DiagonalMatrix<T, Size>& operator/=(DiagonalMatrix<T, Size>& mat, const T& factor) {
 	for (size_t i = 0; i < Size; i++) {
 		mat[i] /= factor;
 	}
@@ -923,6 +996,67 @@ DiagonalMatrix<T, Size> operator~(const DiagonalMatrix<T, Size>& matrix) {
 
 	for (size_t i = 0; i < Size; i++) {
 		result[i] = 1 / matrix[i];
+	}
+	return result;
+}
+
+/*
+	===== Compatibility between the matrix types =====
+*/
+
+template<typename T, size_t Size>
+SymmetricMatrix<T, Size> operator*(const SymmetricMatrix<T, Size>& m1, const DiagonalMatrix<T, Size>& m2) {
+	return m1 * static_cast<SymmetricMatrix<T, Size>>(m2);
+}
+template<typename T, size_t Size>
+SymmetricMatrix<T, Size> operator*(const DiagonalMatrix<T, Size>& m1, const SymmetricMatrix<T, Size>& m2) {
+	return static_cast<SymmetricMatrix<T, Size>>(m1) * m2;
+}
+
+template<typename T, size_t Size, size_t Width>
+Matrix<T, Width, Size> operator*(const SymmetricMatrix<T, Size>& m1, const Matrix<T, Width, Size>& m2) {
+	return static_cast<Matrix<T, Size, Size>>(m1)* m2;
+}
+template<typename T, size_t Size, size_t Height>
+Matrix<T, Size, Height> operator*(const Matrix<T, Size, Height>& m1, const SymmetricMatrix<T, Size>& m2) {
+	return m1 * static_cast<Matrix<T, Size, Size>>(m2);
+}
+
+template<typename T, size_t Size, size_t Width>
+Matrix<T, Width, Size> operator*(const DiagonalMatrix<T, Size>& m1, const Matrix<T, Width, Size>& m2) {
+	return static_cast<Matrix<T, Size, Size>>(m1)* m2;
+}
+template<typename T, size_t Size, size_t Height>
+Matrix<T, Size, Height> operator*(const Matrix<T, Size, Height>& m1, const DiagonalMatrix<T, Size>& m2) {
+	return m1 * static_cast<Matrix<T, Size, Size>>(m2);
+}
+
+
+/*
+	===== Other functions =====
+*/
+
+template<typename T, size_t Width, size_t Height>
+Matrix<T, Width, Height> outer(const Vector<T, Height>& v1, const Vector<T, Width>& v2) {
+	Matrix<T, Width, Height> result;
+
+	for (size_t row = 0; row < Height; row++) {
+		for (size_t col = 0; col < Width; col++) {
+			result[row][col] = v1[row] * v2[col];
+		}
+	}
+
+	return result;
+}
+
+template<typename T, size_t Size>
+SymmetricMatrix<T, Size> selfOuter(const Vector<T, Size>& v) {
+	SymmetricMatrix<T, Size> result;
+
+	for (size_t row = 0; row < Size; row++) {
+		for (size_t col = 0; col <= row; col++) {
+			result[row][col] = v[row] * v[col];
+		}
 	}
 	return result;
 }

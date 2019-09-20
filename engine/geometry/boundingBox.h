@@ -2,7 +2,7 @@
 
 struct BoundingBox;
 
-#include "../math/vec.h"
+#include "../math/linalg/vec.h"
 #include "shape.h"
 
 struct BoundingBox {

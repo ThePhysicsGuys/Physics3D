@@ -4,7 +4,7 @@
 
 #include <vector>
 
-#include "../engine/math/vec.h"
+#include "../engine/math/linalg/vec.h"
 
 #include "../buffers/vertexArray.h"
 #include "../buffers/vertexBuffer.h"

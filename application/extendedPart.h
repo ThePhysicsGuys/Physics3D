@@ -18,9 +18,7 @@ struct ExtendedPart : public Part {
 
 	VisualShape visualShape;
 
-	Mat3f visualScale = Mat3f(1, 0, 0, 
-							  0, 1, 0, 
-							  0, 0, 1);
+	Mat3f visualScale = Mat3f::IDENTITY();
 
 	ExtendedPart() = default;
 	ExtendedPart(const Shape& hitbox, const GlobalCFrame& position, double density, double friction, int drawMeshId, std::string name = "Part");

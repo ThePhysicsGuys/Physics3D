@@ -1,7 +1,7 @@
 #pragma once
 
-#include "math/vec.h"
-#include "math/mat3.h"
+#include "math/linalg/vec.h"
+#include "math/linalg/mat.h"
 #include "math/cframe.h"
 #include "part.h"
 #include "math/bounds.h"

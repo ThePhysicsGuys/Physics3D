@@ -36,14 +36,14 @@ Vec4f colors[] {
 
 void renderSphere(double radius, Position position, Vec4f color) {
 	Shaders::basicShader.updateMaterial(Material(color));
-	Shaders::basicShader.updateModel(CFrameToMat4(GlobalCFrame(position, DiagonalMat3(1, 1, 1) * radius)));
+	Shaders::basicShader.updateModel(CFrameToMat4(GlobalCFrame(position, DiagonalMat3::IDENTITY() * radius)));
 
 	Library::sphere->render();
 }
 
 void renderBox(const GlobalCFrame& cframe, double width, double height, double depth, Vec4f color) {
 	Shaders::basicShader.updateMaterial(Material(color));
-	Shaders::basicShader.updateModel(CFrameToMat4(GlobalCFrame(cframe.getPosition(), cframe.getRotation() * DiagonalMat3(width, height, depth))));
+	Shaders::basicShader.updateModel(CFrameToMat4(GlobalCFrame(cframe.getPosition(), cframe.getRotation() * DiagonalMat3 { width, height, depth })));
 
 	Library::cube->render();
 }

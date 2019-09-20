@@ -7,11 +7,13 @@
 #include <math.h>
 
 #include "convexShapeBuilder.h"
+#include "../math/linalg/vec.h"
+#include "../math/linalg/trigonometry.h"
 #include "../math/utils.h"
+#include "../math/mathUtil.h"
 #include "../../util/Log.h"
 #include "../engineException.h"
 #include "../debug.h"
-#include "../math/mathUtil.h"
 #include "../physicsProfiler.h"
 #include "computationBuffer.h"
 #include "intersection.h"
@@ -60,13 +62,13 @@ Shape::Shape(const Vec3f* vertices, const SharedArrayPtr<const Triangle>& triang
 	vertexCount(vertexCount), 
 	triangleCount(triangleCount) {}
 
-CFramef Shape::getInertialEigenVectors() const {
+/*CFramef Shape::getInertialEigenVectors() const {
 	Vec3 centerOfMass = getCenterOfMass();
 	SymmetricMat3 inertia = getInertia(centerOfMass);
 	Mat3 basis = inertia.getEigenDecomposition().eigenVectors;
 
 	return CFramef(Vec3f(centerOfMass), Mat3f(basis));
-}
+}*/
 
 Shape Shape::translated(Vec3f offset) const {
 	ParallelVec3* newBuf = createParallelVecBuf(this->vertexCount);
@@ -504,7 +506,7 @@ double Shape::getMaxRadius(Vec3f reference) const {
 	This has been reworked to a surface integral resulting in the given formulae
 */
 SymmetricMat3 Shape::getInertia(CFrame reference) const {
-	SymmetricMat3 total(0, 0, 0, 0, 0, 0);
+	SymmetricMat3 total(SymmetricMat3::ZEROS());
 	for (Triangle triangle : iterTriangles()) {
 		Vec3 v0 = reference.globalToLocal(Vec3((*this)[triangle.firstIndex]));
 		Vec3 v1 = reference.globalToLocal(Vec3((*this)[triangle.secondIndex]));
@@ -519,9 +521,9 @@ SymmetricMat3 Shape::getInertia(CFrame reference) const {
 		Vec3 squaredIntegral = elementWiseCube(v0) + elementWiseCube(v1) + elementWiseCube(v2) + elementWiseMul(elementWiseSquare(v0), v1 + v2) + elementWiseMul(elementWiseSquare(v1), v0 + v2) + elementWiseMul(elementWiseSquare(v2), v0 + v1) + elementWiseMul(elementWiseMul(v0, v1), v2);
 		Vec3 diagonalElementParts = elementWiseMul(dFactor, squaredIntegral) / 60;
 
-		total.m00 += diagonalElementParts.y + diagonalElementParts.z;
-		total.m11 += diagonalElementParts.z + diagonalElementParts.x;
-		total.m22 += diagonalElementParts.x + diagonalElementParts.y;
+		total[0][0] += diagonalElementParts.y + diagonalElementParts.z;
+		total[1][1] += diagonalElementParts.z + diagonalElementParts.x;
+		total[2][2] += diagonalElementParts.x + diagonalElementParts.y;
 
 		// Other Elements
 		double selfProducts  =	v0.x*v0.y*v0.z + v1.x*v1.y*v1.z + v2.x*v2.y*v2.z;
@@ -532,9 +534,9 @@ SymmetricMat3 Shape::getInertia(CFrame reference) const {
 
 		double xyzIntegral = -(3 * selfProducts + twoSames + allDifferents / 2) / 60;
 
-		total.m01 += dFactor.z * xyzIntegral;
-		total.m02 += dFactor.y * xyzIntegral;
-		total.m12 += dFactor.x * xyzIntegral;
+		total[1][0] += dFactor.z * xyzIntegral;
+		total[2][0] += dFactor.y * xyzIntegral;
+		total[2][1] += dFactor.x * xyzIntegral;
 	}
 	
 	return total;

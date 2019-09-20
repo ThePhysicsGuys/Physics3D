@@ -1,18 +1,17 @@
 #pragma once
 
 #include "position.h"
-#include "mat3.h"
-#include "mat4.h"
+#include "linalg/mat.h"
 #include "cframe.h"
 
 class GlobalCFrame {
 public:
 	Position position;
 	Mat3 rotation;
-	GlobalCFrame() : position(), rotation(1,0,0,0,1,0,0,0,1) {}
-	GlobalCFrame(const Fix<32>& x, const Fix<32>& y, const Fix<32>& z) : position(x, y, z), rotation(1, 0, 0, 0, 1, 0, 0, 0, 1) {}
-	GlobalCFrame(double x, double y, double z) : position(x, y, z), rotation(1, 0, 0, 0, 1, 0, 0, 0, 1) {}
-	GlobalCFrame(const Position& position) : position(position), rotation(1,0,0,0,1,0,0,0,1) {}
+	GlobalCFrame() : position(), rotation(Mat3::IDENTITY()) {}
+	GlobalCFrame(const Fix<32>& x, const Fix<32>& y, const Fix<32>& z) : position(x, y, z), rotation(Mat3::IDENTITY()) {}
+	GlobalCFrame(double x, double y, double z) : position(x, y, z), rotation(Mat3::IDENTITY()) {}
+	GlobalCFrame(const Position& position) : position(position), rotation(Mat3::IDENTITY()) {}
 	GlobalCFrame(const Mat3& rotation) : position(), rotation(rotation) {}
 	GlobalCFrame(const Position& position, const Mat3& rotation) : position(position), rotation(rotation) {}
 

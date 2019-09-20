@@ -40,9 +40,13 @@ std::string Export::str(Vec4 vector) {
 std::string Export::str(Mat3 matrix) {
 	std::stringstream ss;
 
-	ss << matrix.m00 << " " << matrix.m01 << " " << matrix.m02 << " ";
-	ss << matrix.m10 << " " << matrix.m11 << " " << matrix.m12 << " ";
-	ss << matrix.m20 << " " << matrix.m21 << " " << matrix.m22;
+	double data[9];
+	matrix.toColMajorData(data);
+
+	ss << data[0];
+	for (int i = 1; i < 9; i++) {
+		ss << ' ' << data[i];
+	}
 
 	return ss.str();
 }
@@ -54,7 +58,7 @@ std::string Export::str(Position pos) {
 }
 
 std::string Export::str(DiagonalMat3 matrix) {
-	return Export::str(Vec3(matrix.m[0], matrix.m[1], matrix.m[2]));
+	return Export::str(Vec3(matrix[0], matrix[1], matrix[2]));
 }
 
 std::string Export::str(int num) {

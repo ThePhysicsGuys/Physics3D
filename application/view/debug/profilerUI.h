@@ -3,7 +3,7 @@
 #include <sstream>
 
 #include "../engine/profiling.h"
-#include "../engine/math/largeMatrix.h"
+#include "../engine/math/linalg/largeMatrix.h"
 #include "../gui/component.h"
 
 class Font;

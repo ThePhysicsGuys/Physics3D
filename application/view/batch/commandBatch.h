@@ -5,7 +5,7 @@
 #include "batch.h"
 
 #include "../application/debug.h"
-#include "../engine/math/vec.h"
+#include "../engine/math/linalg/vec.h"
 
 #include "../shaderProgram.h"
 

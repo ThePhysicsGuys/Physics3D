@@ -1,8 +1,7 @@
 #pragma once
 
-#include "../engine/math/mat3.h"
-#include "../engine/math/mat4.h"
-#include "../engine/math/vec.h"
+#include "../engine/math/linalg/vec.h"
+#include "../engine/math/linalg/mat.h"
 #include "../engine/templateUtils.h"
 #include "../engine/math/cframe.h"
 
@@ -38,76 +37,6 @@ bool tolerantGreaterOrEqual(const Num1& first, const Num2& second, Tol tolerance
 	return first + tolerance >= second;
 }
 
-
-template<template<typename> typename Mat, template<typename> typename MatMat, typename Num1, typename Num2, typename Tol, IS_SUBCLASS_OF(Mat<Num1>, M33Type), IS_SUBCLASS_OF(MatMat<Num2>, M33Type)>
-bool tolerantEquals(const Mat<Num1>& first, const MatMat<Num2>& second, Tol tolerance) {
-	return
-		tolerantEquals(first.m00, second.m00, tolerance) && tolerantEquals(first.m01, second.m01, tolerance) && tolerantEquals(first.m02, second.m02, tolerance) &&
-		tolerantEquals(first.m10, second.m10, tolerance) && tolerantEquals(first.m11, second.m11, tolerance) && tolerantEquals(first.m12, second.m12, tolerance) &&
-		tolerantEquals(first.m20, second.m20, tolerance) && tolerantEquals(first.m21, second.m21, tolerance) && tolerantEquals(first.m22, second.m22, tolerance);
-}
-template<template<typename> typename Mat, template<typename> typename MatMat, typename Num1, typename Num2, typename Tol, IS_SUBCLASS_OF(Mat<Num1>, M33Type), IS_SUBCLASS_OF(MatMat<Num2>, M33Type)>
-bool tolerantNotEquals(const Mat<Num1>& first, const MatMat<Num2>& second, Tol tolerance) {
-	return
-		tolerantNotEquals(first.m00, second.m00, tolerance) || tolerantNotEquals(first.m01, second.m01, tolerance) || tolerantNotEquals(first.m02, second.m02, tolerance) ||
-		tolerantNotEquals(first.m10, second.m10, tolerance) || tolerantNotEquals(first.m11, second.m11, tolerance) || tolerantNotEquals(first.m12, second.m12, tolerance) ||
-		tolerantNotEquals(first.m20, second.m20, tolerance) || tolerantNotEquals(first.m21, second.m21, tolerance) || tolerantNotEquals(first.m22, second.m22, tolerance);
-}
-
-template<typename Num1, typename Num2, typename Tol>
-bool tolerantEquals(const Mat3Template<Num1>& first, const Mat3Template<Num2>& second, Tol tolerance) {
-	for (int i = 0; i < 9; i++)
-		if (!tolerantEquals(first.m[i], second.m[i], tolerance))
-			return false;
-	return true;
-}
-template<typename Num1, typename Num2, typename Tol>
-bool tolerantNotEquals(const Mat3Template<Num1>& first, const Mat3Template<Num2>& second, Tol tolerance) {
-	for (int i = 0; i < 9; i++)
-		if (tolerantNotEquals(first.m[i], second.m[i], tolerance))
-			return true;
-	return false;
-}
-
-/*template<typename Num1, typename Num2, typename Tol>
-bool tolerantEquals(const Vec2Template<Num1>& first, const Vec2Template<Num2>& second, Tol tolerance) {
-	return tolerantEquals(first.x, second.x, tolerance) &&
-		tolerantEquals(first.y, second.y, tolerance);
-}
-template<typename Num1, typename Num2, typename Tol>
-bool tolerantNotEquals(const Vec2Template<Num1>& first, const Vec2Template<Num2>& second, Tol tolerance) {
-	return tolerantNotEquals(first.x, second.x, tolerance) ||
-		tolerantNotEquals(first.y, second.y, tolerance);
-}
-
-template<typename Num1, typename Num2, typename Tol>
-bool tolerantEquals(const Vec3Template<Num1>& first, const Vec3Template<Num2>& second, Tol tolerance) {
-	return tolerantEquals(first.x, second.x, tolerance) &&
-		tolerantEquals(first.y, second.y, tolerance) &&
-		tolerantEquals(first.z, second.z, tolerance);
-}
-template<typename Num1, typename Num2, typename Tol>
-bool tolerantNotEquals(const Vec3Template<Num1>& first, const Vec3Template<Num2>& second, Tol tolerance) {
-	return tolerantNotEquals(first.x, second.x, tolerance) ||
-		tolerantNotEquals(first.y, second.y, tolerance) ||
-		tolerantNotEquals(first.z, second.z, tolerance);
-}
-
-template<typename Num1, typename Num2, typename Tol>
-bool tolerantEquals(const Vec4Template<Num1>& first, const Vec4Template<Num2>& second, Tol tolerance) {
-	return tolerantEquals(first.x, second.x, tolerance) &&
-		tolerantEquals(first.y, second.y, tolerance) &&
-		tolerantEquals(first.z, second.z, tolerance) &&
-		tolerantEquals(first.w, second.w, tolerance);
-}
-template<typename Num1, typename Num2, typename Tol>
-bool tolerantNotEquals(const Vec4Template<Num1>& first, const Vec4Template<Num2>& second, Tol tolerance) {
-	return tolerantNotEquals(first.x, second.x, tolerance) ||
-		tolerantNotEquals(first.y, second.y, tolerance) ||
-		tolerantNotEquals(first.z, second.z, tolerance) ||
-		tolerantNotEquals(first.w, second.w, tolerance);
-}*/
-
 template<typename Num1, typename Num2, typename Tol, size_t Size>
 bool tolerantEquals(const Vector<Num1, Size> & first, const Vector<Num2, Size>& second, Tol tolerance) {
 	for (size_t i = 0; i < Size; i++) {
@@ -133,6 +62,25 @@ bool tolerantEquals(const Matrix<Num1, Width, Height>& first, const Matrix<Num2,
 	return true;
 }
 
+template<typename Num1, typename Num2, typename Tol, size_t Size>
+bool tolerantEquals(const SymmetricMatrix<Num1, Size>& first, const SymmetricMatrix<Num2, Size>& second, Tol tolerance) {
+	for (size_t row = 0; row < Size; row++)
+		for (size_t col = 0; col < Size; col++)
+			if (!tolerantEquals(first[row][col], second[row][col], tolerance))
+				return false;
+
+	return true;
+}
+
+template<typename Num1, typename Num2, typename Tol, size_t Size>
+bool tolerantEquals(const DiagonalMatrix<Num1, Size>& first, const DiagonalMatrix<Num2, Size>& second, Tol tolerance) {
+	for (size_t i = 0; i < Size; i++)
+		if (!tolerantEquals(first[i], second[i], tolerance))
+			return false;
+
+	return true;
+}
+
 template<typename Num1, typename Num2, typename Tol, size_t Width, size_t Height>
 bool tolerantNotEquals(const Matrix<Num1, Width, Height>& first, const Matrix<Num2, Width, Height>& second, Tol tolerance) {
 	for (size_t row = 0; row < Height; row++)
@@ -140,6 +88,25 @@ bool tolerantNotEquals(const Matrix<Num1, Width, Height>& first, const Matrix<Nu
 			if (tolerantNotEquals(first[row][col], second[row][col], tolerance))
 				return true;
 	
+	return false;
+}
+
+template<typename Num1, typename Num2, typename Tol, size_t Size>
+bool tolerantNotEquals(const SymmetricMatrix<Num1, Size>& first, const SymmetricMatrix<Num2, Size>& second, Tol tolerance) {
+	for (size_t row = 0; row < Size; row++)
+		for (size_t col = 0; col < Size; col++)
+			if (tolerantNotEquals(first[row][col], second[row][col], tolerance))
+				return true;
+
+	return false;
+}
+
+template<typename Num1, typename Num2, typename Tol, size_t Size>
+bool tolerantNotEquals(const DiagonalMatrix<Num1, Size>& first, const DiagonalMatrix<Num2, Size>& second, Tol tolerance) {
+	for (size_t i = 0; i < Size; i++)
+		if (tolerantNotEquals(first[i], second[i], tolerance))
+			return true;
+
 	return false;
 }
 
@@ -155,7 +122,7 @@ bool tolerantNotEquals(const CFrame& first, const CFrame& second, Tol tolerance)
 		tolerantNotEquals(first.rotation, second.rotation, tolerance);
 }
 
-template<typename Tol, typename N>
+/*template<typename Tol, typename N>
 bool tolerantEquals(const EigenValues<N>& a, const EigenValues<N>& b, Tol tolerance) {
 	return tolerantEquals(a[0], b[0], tolerance) && tolerantEquals(a[1], b[1], tolerance) && tolerantEquals(a[2], b[2], tolerance) ||
 		tolerantEquals(a[0], b[0], tolerance) && tolerantEquals(a[1], b[2], tolerance) && tolerantEquals(a[2], b[1], tolerance) ||
@@ -164,3 +131,4 @@ bool tolerantEquals(const EigenValues<N>& a, const EigenValues<N>& b, Tol tolera
 		tolerantEquals(a[0], b[2], tolerance) && tolerantEquals(a[1], b[0], tolerance) && tolerantEquals(a[2], b[1], tolerance) ||
 		tolerantEquals(a[0], b[2], tolerance) && tolerantEquals(a[1], b[1], tolerance) && tolerantEquals(a[2], b[0], tolerance);
 }
+*/

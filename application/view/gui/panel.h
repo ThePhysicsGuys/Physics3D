@@ -3,7 +3,7 @@
 #include "component.h"
 #include "container.h"
 
-#include "../engine/math/vec.h"
+#include "../engine/math/linalg/vec.h"
 
 #include <vector>
 

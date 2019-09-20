@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../engine/math/vec.h"
+#include "../engine/math/linalg/vec.h"
 
 struct Attenuation {
 	float constant;

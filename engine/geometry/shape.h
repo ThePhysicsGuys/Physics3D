@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../math/vec.h"
+#include "../math/linalg/vec.h"
 #include "../math/cframe.h"
 #include "../datastructures/parallelVector.h"
 #include "../datastructures/sharedArray.h"
@@ -90,7 +90,7 @@ public:
 	float getIntersectionDistance(Vec3f origin, Vec3f direction) const;
 	double getVolume() const;
 
-	CFramef getInertialEigenVectors() const;
+	//CFramef getInertialEigenVectors() const;
 	BoundingBox getBounds() const;
 	void computeNormals(Vec3f* buffer) const;
 	Vec3 getCenterOfMass() const;

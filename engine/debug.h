@@ -1,6 +1,6 @@
 #pragma once
 
-#include "math/vec.h"
+#include "math/linalg/vec.h"
 #include "math/position.h"
 #include "math/cframe.h"
 #include "math/globalCFrame.h"

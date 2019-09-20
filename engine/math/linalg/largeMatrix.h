@@ -1,8 +1,6 @@
 #pragma once
 
-#include "mat2.h"
-#include "mat3.h"
-#include "mat4.h"
+#include "mat.h"
 
 template<typename T>
 class LargeVector {
@@ -114,7 +112,7 @@ public:
 		return data + width * index;
 	}
 
-	void setSubMatrix(size_t topLeftRow, size_t topLeftCol, const Mat3Template<T>& matrix) {
+	void setSubMatrix(size_t topLeftRow, size_t topLeftCol, const Matrix<T, 3, 3>& matrix) {
 		for (size_t row = 0; row < 3; row++) {
 			for (size_t col = 0; col < 3; col++) {
 				(*this)[row + topLeftRow][col + topLeftCol] = matrix[row][col];

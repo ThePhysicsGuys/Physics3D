@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include "math/vec.h"
+#include "math/linalg/vec.h"
 
 class Physical;
 

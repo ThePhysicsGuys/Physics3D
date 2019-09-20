@@ -19,10 +19,10 @@
 
 
 Mat3 transformations[] = {
-	Mat3(),
-	Mat3().rotate(-3.14159265359/2.0, 0, 0, 1),
-	Mat3().rotate(3.14159265359/2.0, 1, 0, 0),
-	Mat3()
+	Mat3::IDENTITY(),
+	rotZ(-3.14159265359/2.0),
+	rotX(3.14159265359/2.0),
+	Mat3::IDENTITY()
 };
 
 

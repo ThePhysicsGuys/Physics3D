@@ -1,8 +1,8 @@
 #include "constraintGroup.h"
 
-#include "math/largeMatrix.h"
+#include "math/linalg/largeMatrix.h"
 #include "physical.h"
-#include "math/mat3.h"
+#include "math/linalg/mat.h"
 
 #include "math/mathUtil.h"
 #include <fstream>

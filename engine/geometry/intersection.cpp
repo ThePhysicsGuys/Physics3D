@@ -1,6 +1,6 @@
 #include "intersection.h"
 
-#include "../math/vec.h"
+#include "../math/linalg/vec.h"
 #include "convexShapeBuilder.h"
 #include "computationBuffer.h"
 #include "../math/utils.h"

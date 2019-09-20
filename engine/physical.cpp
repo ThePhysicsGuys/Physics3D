@@ -1,9 +1,11 @@
 #include "physical.h"
 
 #include "../util/log.h"
-#include "math/mathUtil.h"
 
 #include "world.h"
+#include "math/linalg/mat.h"
+#include "math/linalg/misc.h"
+#include "math/linalg/trigonometry.h"
 
 #include "debug.h"
 #include <algorithm>
@@ -172,10 +174,10 @@ void Physical::refreshWithNewParts() {
 	this->circumscribingSphere.origin = getCFrame().localToGlobal(localCentroid);
 
 	if (this->anchored) {
-		this->forceResponse = SymmetricMat3(0, 0, 0, 0, 0, 0);
-		this->momentResponse = SymmetricMat3(0, 0, 0, 0, 0, 0);
+		this->forceResponse = SymmetricMat3::ZEROS();
+		this->momentResponse = SymmetricMat3::ZEROS();
 	} else {
-		this->forceResponse = SymmetricMat3(1 / mass, 1 / mass, 1 / mass, 0, 0, 0);
+		this->forceResponse = SymmetricMat3::IDENTITY() * (1/mass);
 		this->momentResponse = ~inertia;
 	}
 }
@@ -417,7 +419,7 @@ Mat3 Physical::getResponseMatrix(const Vec3Local& actionPoint, const Vec3Local& 
 
 	Mat3 rotationFactor = responseCross * momentResponse * actionCross;
 
-	return forceResponse - rotationFactor;
+	return Mat3(forceResponse) - rotationFactor;
 }
 double Physical::getInertiaOfPointInDirectionLocal(const Vec3Local& localPoint, const Vec3Local& localDirection) const {
 	SymmetricMat3 accMat = getResponseMatrix(localPoint);

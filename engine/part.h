@@ -4,7 +4,7 @@ class Part;
 class Physical;
 class WorldPrototype;
 #include "geometry/shape.h"
-#include "math/mat3.h"
+#include "math/linalg/mat.h"
 #include "math/position.h"
 #include "math/globalCFrame.h"
 #include "math/bounds.h"

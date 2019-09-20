@@ -83,18 +83,20 @@ DiagonalMat3 Import::parseDiagonalMat3(std::string mat) {
 	std::vector<std::string> tokens = split(mat, ' ');
 	DiagonalMat3 matrix = DiagonalMat3();
 	for (int i = 0; i < 3; i++) {
-		matrix.m[i] = Import::parseDouble(tokens[i]);
+		matrix[i] = Import::parseDouble(tokens[i]);
 	}
 	return matrix;
 }
 
 Mat3 Import::parseMat3(std::string mat) {
 	std::vector<std::string> tokens = split(mat, ' ');
-	Mat3 matrix = Mat3();
+	double data[9];
+
 	for (int i = 0; i < 9; i++) {
-		matrix.m[i] = Import::parseDouble(tokens[i]);
+		data[i] = Import::parseDouble(tokens[i]);
 	}
-	return matrix;
+
+	return Matrix<double, 3, 3>::fromColMajorData(data);
 }
 
 template<typename T>

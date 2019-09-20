@@ -1,23 +1,22 @@
 #pragma once
 
-#include "vec.h"
-#include "mat3.h"
-#include "mat4.h"
+#include "linalg/vec.h"
+#include "linalg/mat.h"
 
 template<typename T>
 struct CFrameTemplate {
 public:
 	Vector<T, 3> position;
-	Mat3Template<T> rotation;
+	Matrix<T, 3, 3> rotation;
 
-	CFrameTemplate(Vector<T, 3> position, Mat3Template<T> rotation) : position(position), rotation(rotation) {}
-	explicit CFrameTemplate(Vector<T, 3> position) : position(position), rotation(1, 0, 0, 0, 1, 0, 0, 0, 1) {}
-	explicit CFrameTemplate(T x, T y, T z) : position(x, y, z), rotation(1, 0, 0, 0, 1, 0, 0, 0, 1) {}
-	explicit CFrameTemplate(Mat3Template<T> rotation) : position(0,0,0), rotation(rotation) {}
-	CFrameTemplate() : position(0, 0, 0), rotation(1, 0, 0, 0, 1, 0, 0, 0, 1) {}
+	CFrameTemplate(Vector<T, 3> position, Matrix<T, 3, 3> rotation) : position(position), rotation(rotation) {}
+	explicit CFrameTemplate(Vector<T, 3> position) : position(position), rotation(Mat3::IDENTITY()) {}
+	explicit CFrameTemplate(T x, T y, T z) : position(x, y, z), rotation(Mat3::IDENTITY()) {}
+	explicit CFrameTemplate(Matrix<T, 3, 3> rotation) : position(0,0,0), rotation(rotation) {}
+	CFrameTemplate() : position(0, 0, 0), rotation(Mat3::IDENTITY()) {}
 
 	template<typename OtherT>
-	CFrameTemplate(const CFrameTemplate<OtherT>& other) : position(Vector<T, 3>(other.position)), rotation(Mat3Template<T>(other.rotation)) {}
+	CFrameTemplate(const CFrameTemplate<OtherT>& other) : position(Vector<T, 3>(other.position)), rotation(Matrix<T, 3, 3>(other.rotation)) {}
 
 	inline Vector<T, 3> localToGlobal(Vector<T, 3> lVec) const {
 		return rotation * lVec + position;
@@ -51,11 +50,11 @@ public:
 		return CFrameTemplate<T>(rotation.transpose()*rFrame.position, rotation.transpose() * rFrame.rotation);
 	}
 
-	inline Mat3Template<T> localToGlobal(const Mat3Template<T>& localRot) const {
+	inline Matrix<T, 3, 3> localToGlobal(const Matrix<T, 3, 3>& localRot) const {
 		return rotation * localRot;
 	}
 
-	inline Mat3Template<T> globalToLocal(const Mat3Template<T>& globalRot) const {
+	inline Matrix<T, 3, 3> globalToLocal(const Matrix<T, 3, 3>& globalRot) const {
 		return rotation.transpose() * globalRot;
 	}
 
@@ -67,7 +66,7 @@ public:
 		return position;
 	}
 
-	inline Mat3Template<T> getRotation() const {
+	inline Matrix<T, 3, 3> getRotation() const {
 		return rotation;
 	}
 
@@ -85,7 +84,7 @@ public:
 		position += translation;
 	}
 
-	void rotate(Mat3Template<T> rot) {
+	void rotate(Matrix<T, 3, 3> rot) {
 		rotation = rot * rotation;
 	}
 };
@@ -97,7 +96,7 @@ CFrameTemplate<T> Mat4ToCFrame(const Matrix<T, 4, 4>& mat) {
 
 template<typename T>
 Matrix<T, 4, 4> CFrameToMat4(const CFrameTemplate<T>& cframe) {
-	const Mat3Template<T>& r = cframe.rotation;
+	const Matrix<T, 3, 3>& r = cframe.rotation;
 	const Vector<T, 3>& p = cframe.position;
 	return Matrix<T, 4, 4>(Matrix<T, 3, 3>(r), p, Vector<T, 3>(0, 0, 0), 1.0);
 }

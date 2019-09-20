@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "../math/vec.h"
+#include "../math/linalg/vec.h"
 
 struct Simplex;
 

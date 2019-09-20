@@ -5,7 +5,7 @@
 #include "layout.h"
 #include "gui.h"
 
-#include "../engine/math/vec.h"
+#include "../engine/math/linalg/vec.h"
 
 class Component {
 public:

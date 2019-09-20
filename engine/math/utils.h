@@ -1,6 +1,6 @@
 #pragma once
 
-#include "vec.h"
+#include "linalg/vec.h"
 
 /*
 	Computes the intersection of a line along <r> starting at r0

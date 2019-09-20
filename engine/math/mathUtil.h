@@ -1,10 +1,8 @@
 #pragma once
 
-#include "vec.h"
-#include "mat2.h"
-#include "mat3.h"
-#include "mat4.h"
-#include "largeMatrix.h"
+#include "linalg/vec.h"
+#include "linalg/mat.h"
+#include "linalg/largeMatrix.h"
 #include "cframe.h"
 #include "position.h"
 
@@ -17,25 +15,6 @@ inline double fRand(double fMin, double fMax) {
 	double f = (double) rand() / RAND_MAX;
 	return fMin + f * (fMax - fMin);
 }
-
-/*template<typename N>
-inline std::ostream& operator<<(std::ostream& os, const Mat4Template<N>& matrix) {
-	os << "(\n\t";
-	for (int i = 0; i < 15; i++) {
-		os << matrix.m[i];
-		os << (((i + 1) % 4 == 0) ? ";\n\t" : ", ");
-	}
-	os << matrix.m[15] << ")";
-
-	return os;
-}
-
-template<typename N>
-inline std::string str(const Mat4Template<N>& matrix) {
-	std::stringstream ss;
-	ss << matrix;
-	return ss.str();
-}*/
 
 template<typename T>
 inline std::ostream& operator<<(std::ostream& os, const LargeMatrix<T>& matrix) {
@@ -89,7 +68,7 @@ inline std::string str(const Vector<T, Size>& vector) {
 	return ss.str();
 }
 
-
+/*
 template<template<typename> typename Mat, typename N, typename std::enable_if<std::is_base_of<M33Type, Mat<N>>::value>::type* = nullptr>
 inline std::ostream& operator<<(std::ostream& os, const Mat<N>& matrix) {
 	os << "(\n\t";
@@ -108,7 +87,7 @@ inline std::string str(const Mat<N>& matrix) {
 	ss << matrix;
 	return ss.str();
 }
-
+*/
 inline std::ostream& operator<<(std::ostream& os, const Position& position) {
 	os << "(" << double(position.x) << ", " << double(position.y) << ", " << double(position.z) << ")";
 	return os;
@@ -142,7 +121,7 @@ inline std::string str(const Matrix<N, Width, Height>& matrix) {
 	ss << matrix;
 	return ss.str();
 }
-
+/*
 template<typename N>
 inline std::ostream& operator<<(std::ostream& os, const EigenValues<N>& v) {
 	os << "EigenValues(" << v[0] << ", " << v[1] << ", " << v[2] << ")";
@@ -155,8 +134,15 @@ inline std::string str(const EigenValues<N>& v) {
 	ss << v;
 	return ss.str();
 }
+*/
 
-std::ostream& operator<<(std::ostream& os, const CFrame& cframe);
-std::string str(const CFrame& cframe);
+inline std::ostream& operator<<(std::ostream& os, const CFrame& cframe) {
+	os << "CFrame(" << cframe.position << ", " << cframe.rotation << ")";
+	return os;
+}
 
-
+inline std::string str(const CFrame& cframe) {
+	std::stringstream ss;
+	ss << cframe;
+	return ss.str();
+}

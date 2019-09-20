@@ -1,8 +1,5 @@
 #pragma once
 
-#include <cmath>
-
-
 template<typename T, size_t Size>
 struct Vector {
 	T data[Size];
@@ -234,34 +231,6 @@ T lengthSquared(const Vector<T, Size>& vec) {
 }
 
 template<typename T, size_t Size>
-auto length(const Vector<T, Size>& vec) {
-	return sqrt(lengthSquared(vec));
-}
-
-template<typename T>
-T length(const Vector<T, 2>& vec) {
-	return hypot(vec[0], vec[1]);
-}
-
-/*template<typename T>
-T length(const Vector<T, 3>& vec) {
-	return hypot(vec[0], vec[1], vec[2]);
-}*/
-
-template<typename T, size_t Size>
-Vector<T, Size> normalize(const Vector<T, Size>& vec) {
-	return vec / length(vec);
-}
-
-template<typename T, size_t Size>
-Vector<T, Size> abs(const Vector<T, Size>& vec) {
-	Vector<T, Size> result;
-	for (size_t i = 0; i < Size; i++)
-		result[i] = fabs(vec[i]);
-	return result;
-}
-
-template<typename T, size_t Size>
 bool isLongerThan(const Vector<T, Size>& vec, const T& length) {
 	return lengthSquared(vec) > length * length;
 }
@@ -271,26 +240,6 @@ bool isShorterThan(const Vector<T, Size>& vec, const T& length) {
 	return lengthSquared(vec) < length* length;
 }
 
-template<typename T, size_t Size>
-Vector<T, Size> withLength(const Vector<T, Size>& vec, const T& newLength) {
-	return vec * (newLength / length(vec));
-}
-
-template<typename T, size_t Size>
-Vector<T, Size> maxLength(const Vector<T, Size>& vec, const T& maxLength) {
-	if (isLongerThan(vec, maxLength))
-		return withLength(vec, maxLength);
-	else
-		return vec;
-}
-
-template<typename T, size_t Size>
-Vector<T, Size> minLength(const Vector<T, Size>& vec, const T& minLength) {
-	if (isShorterThan(vec, minLength))
-		return withLength(vec, minLength);
-	else
-		return vec;
-}
 
 /**
 * used to project the result of a dotproduct back onto the original vector
@@ -313,11 +262,6 @@ Vector<T, Size> project(const Vector<T, Size>& vec, const Vector<T, Size>& onto)
 	return onto * ((onto * vec) / lengthSquared(onto));
 }
 
-template<typename T, size_t Size>
-auto angleBetween(const Vector<T, Size>& first, const Vector<T, Size>& second) -> decltype(acos(normalize(first)* normalize(second))) {
-	return acos(normalize(first) * normalize(second));
-}
-
 /**
 * returns the distance of the given point to the line that goes through the origin along this vector
 * @param point
@@ -336,11 +280,6 @@ T pointToLineDistance(const Vector<T, Size>& line, const Vector<T, Size>& point)
 template<typename T, size_t Size>
 T pointToLineDistanceSquared(const Vector<T, Size>& line, const Vector<T, Size>& point) {
 	return lengthSquared(point - project(point, line));
-}
-
-template<typename T, size_t Size>
-Vector<T, Size> bisect(const Vector<T, Size>& first, const Vector<T, Size>& second) {
-	return first * length(second) + second * length(first);
 }
 
 template<typename T, size_t Size>

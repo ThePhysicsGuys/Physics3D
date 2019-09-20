@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../engine/math/vec.h"
-#include "../engine/math/mat3.h"
+#include "../engine/math/linalg/vec.h"
+#include "../engine/math/linalg/mat.h"
 
 extern const Vec3 vectors[13];
 extern const Vec3 unitVectors[12];

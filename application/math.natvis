@@ -1,27 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?> 
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
-  <Type Name="Vec2Template&lt;*&gt;">
+  <Type Name="Vector&lt;*,2&gt;">
     <DisplayString>{{{x, g}, {y, g}}}</DisplayString>
   </Type>
-  <Type Name="Vec3Template&lt;*&gt;">
+  <Type Name="Vector&lt;*,3&gt;">
     <DisplayString>{{{x, g}, {y, g}, {z, g}}}</DisplayString>
   </Type>
-  <Type Name="Vec4Template&lt;*&gt;">
+  <Type Name="Vector&lt;*,4&gt;">
     <DisplayString>{{{x, g}, {y, g}, {z, g}, {w, g}}}</DisplayString>
   </Type>
-
-  <Type Name="Mat2Template&lt;*&gt;">
-    <DisplayString>{{ ({m00, g}, {m01, g})  ({m10, g}, {m11, g}) }}</DisplayString>
+  <Type Name="Matrix&lt;*,2,2&gt;">
+    <Expand>
+      <Synthetic Name="Row 1"><DisplayString>{data[0],g}, {data[2],g}</DisplayString></Synthetic>
+      <Synthetic Name="Row 2"><DisplayString>{data[1],g}, {data[3],g}</DisplayString></Synthetic>
+    </Expand>
   </Type>
+  <Type Name="Matrix&lt;*,3,3&gt;">
+    <Expand>
+      <Synthetic Name="Row 1"><DisplayString>{data[0],g}, {data[3],g}, {data[6],g}</DisplayString></Synthetic>
+      <Synthetic Name="Row 2"><DisplayString>{data[1],g}, {data[4],g}, {data[7],g}</DisplayString></Synthetic>
+      <Synthetic Name="Row 3"><DisplayString>{data[2],g}, {data[5],g}, {data[8],g}</DisplayString></Synthetic>
+    </Expand>
+  </Type>
+  <Type Name="Matrix&lt;*,4,4&gt;">
+    <Expand>
+      <Synthetic Name="Row 1"><DisplayString>{data[0],g}, {data[4],g}, {data[8],g}, {data[12],g}</DisplayString></Synthetic>
+      <Synthetic Name="Row 2"><DisplayString>{data[1],g}, {data[5],g}, {data[9],g}, {data[13],g}</DisplayString></Synthetic>
+      <Synthetic Name="Row 3"><DisplayString>{data[2],g}, {data[6],g}, {data[10],g}, {data[14],g}</DisplayString></Synthetic>
+      <Synthetic Name="Row 3"><DisplayString>{data[3],g}, {data[7],g}, {data[11],g}, {data[15],g}</DisplayString></Synthetic>
+    </Expand>
+  </Type>
+  <!--<Type Name="Matrix&lt;*,3,3&gt;">
+    <Expand>
+      <Item Name="Row 1">{{data[0], g}, {data[3], g}, {data[6], g}}</Item>
+      <Item Name="Row 2">{{data[1], g}, {data[4], g}, {data[7], g}}</Item>
+      <Item Name="Row 2">{{data[2], g}, {data[5], g}, {data[8], g}}</Item>
+    </Expand>
+  </Type>-->
   
-  <Type Name="Mat3Template&lt;*&gt;">
-    <DisplayString>{{ ({m00, g}, {m01, g}, {m02, g})  ({m10, g}, {m11, g}, {m12, g})  ({m20, g}, {m21, g}, {m22, g}) }}</DisplayString>
-  </Type>
-  
-  <Type Name="Mat4Template&lt;*&gt;">
-    <DisplayString>{{ ({m00, g}, {m01, g}, {m02, g}, {m03, g})  ({m10, g}, {m11, g}, {m12, g}, {m13, g})  ({m20, g}, {m21, g}, {m22, g}, {m23, g})  ({m30, g}, {m31, g}, {m32, g}, {m33, g}) }}</DisplayString>
-  </Type>
-
   <Type Name="Position">
     <DisplayString>{{{x, g}, {y, g}, {z, g}}}</DisplayString>
   </Type>

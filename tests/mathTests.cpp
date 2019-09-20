@@ -1,19 +1,11 @@
 #include "testsMain.h"
 
-#include "../engine/math/mat3.h"
-#include "../engine/math/mat4.h"
-#include "../engine/math/largeMatrix.h"
+#include "../engine/math/linalg/vec.h"
+#include "../engine/math/linalg/mat.h"
+#include "../engine/math/linalg/trigonometry.h"
+#include "../engine/math/linalg/misc.h"
+#include "../engine/math/linalg/largeMatrix.h"
 #include "../engine/math/mathUtil.h"
-
-Mat2 IDENTITY2 = Mat2{1.0, 0.0, 0.0, 1.0};
-Mat3 IDENTITY3 = Mat3(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0);
-Matrix<double, 3, 3> IDENTITY32{ 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0 };
-Mat4 IDENTITY4 = Mat4{
-	1,0,0,0,
-	0,1,0,0,
-	0,0,1,0,
-	0,0,0,1
-};
 
 #define ASSERT(condition) ASSERT_TOLERANT(condition, 0.00000001)
 
@@ -79,37 +71,23 @@ TEST_CASE(matrixInverse2) {
 	logf("m=%s\n~m=%s\nm.inverse()=%s\nm.det()=%f", str(m).c_str(), str(~m).c_str(), str(~m).c_str(), det(m));
 
 	ASSERT(det(m) * det(~m) == 1.0);
-	ASSERT(m * ~m == IDENTITY2);
-	ASSERT(~m * m == IDENTITY2);
+	ASSERT(m * ~m == Mat2::IDENTITY());
+	ASSERT(~m * m == Mat2::IDENTITY());
 }
 
 TEST_CASE(matrixInverse3) {
-	Mat3 m(1,3,4,7,6,9,5,3,2);
-	SymmetricMat3 s(1, 4, 7, 6, 9, 8);
-	DiagonalMat3 d(7, 5, 3);
+	Mat3 m{ 1,3,4,7,6,9,5,3,2 };
+	SymmetricMat3 s{1, 4, 7, 6, 9, 8};
+	DiagonalMat3 d{ 7, 5, 3 };
 
-	logf("m=%s\n~m=%s\nm.inverse()=%s\nm.det()=%f", str(m).c_str(), str(~m).c_str(), str(m.inverse()).c_str(), m.det());
+	logf("m=%s\n~m=%s\nm.det()=%f", str(m).c_str(), str(~m).c_str(), det(m));
 
-	ASSERT(m * ~m == IDENTITY3);
-	ASSERT(~m * m == IDENTITY3);
-	ASSERT(s * ~s == IDENTITY3);
-	ASSERT(~s * s == IDENTITY3);
-	ASSERT(d * ~d == IDENTITY3);
-	ASSERT(~d * d == IDENTITY3);
-}
-
-TEST_CASE(matrixInverse3v2) {
-	Matrix<double, 3, 3> m{ 1, 3, 4, 7, 6, 9, 5, 3, 2 };
-	Mat3 mOld(m);
-
-	logf("m=%s\n~m=%s\nm.inverse()=%s\nm.det()=%f", str(m).c_str(), str(~m).c_str(), str(~m).c_str(), det(m));
-
-	ASSERT(Mat3(~m) == mOld.inverse());
-
-	ASSERT(det(m) * det(~m) == 1.0);
-
-	ASSERT(m * ~m == IDENTITY32);
-	ASSERT(~m * m == IDENTITY32);
+	ASSERT(m * ~m == Mat3::IDENTITY());
+	ASSERT(~m * m == Mat3::IDENTITY());
+	ASSERT(s * ~s == Mat3::IDENTITY());
+	ASSERT(~s * s == Mat3::IDENTITY());
+	ASSERT(d * ~d == Mat3::IDENTITY());
+	ASSERT(~d * d == Mat3::IDENTITY());
 }
 
 TEST_CASE(matrixInverse4) {
@@ -119,8 +97,8 @@ TEST_CASE(matrixInverse4) {
 
 	ASSERT(det(m) * det(~m) == 1.0);
 
-	ASSERT(m * ~m == IDENTITY4);
-	ASSERT(~m * m == IDENTITY4);
+	ASSERT(m * ~m == Mat4::IDENTITY());
+	ASSERT(~m * m == Mat4::IDENTITY());
 }
 
 TEST_CASE(cframeInverse) {
@@ -163,9 +141,9 @@ TEST_CASE(testFromRotationVec) {
 
 TEST_CASE(matrixAssociativity) {
 
-	Mat3 A3(1, 2, 3, 4, 5, 6, 7, 8, 9);
-	Mat3 B3(11, 13, 17, 19, 23, 29, 31, 37, 41);
-	Mat3 C3(0.1, 0.2, 0.7, 0.9, -0.3, -0.5, 0.9, 0.1, -0.3);
+	Mat3 A3{ 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+	Mat3 B3{ 11, 13, 17, 19, 23, 29, 31, 37, 41 };
+	Mat3 C3{ 0.1, 0.2, 0.7, 0.9, -0.3, -0.5, 0.9, 0.1, -0.3 };
 
 	ASSERT((A3*B3)*C3 == A3*(B3*C3));
 
@@ -233,9 +211,9 @@ TEST_CASE(crossProduct) {
 }
 
 TEST_CASE(matrixTypes) {
-	Mat3 a(1, 2, 3, 4, 5, 6, 7, 8, 9);
-	SymmetricMat3 sym(2, 2, 2, 7, 8, 9);
-	DiagonalMat3 dia(1,2,5);
+	Mat3 a{ 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+	SymmetricMat3 sym{ 2, 2, 2, 7, 8, 9 };
+	DiagonalMat3 dia{ 1,2,5 };
 
 	Mat3 asym = a*sym;
 	Mat3 syma = sym*a;
@@ -247,7 +225,7 @@ TEST_CASE(matrixTypes) {
 
 	DiagonalMat3 diadia = dia*dia;
 }
-
+/*
 #include <iostream>
 #include <algorithm>
 
@@ -288,7 +266,7 @@ TEST_CASE(eigenDecomposition) {
 		}
 	}
 	// ASSERT(false);
-}
+}*/
 
 TEST_CASE(largeMatrixVectorProduct) {
 	LargeMatrix<double> mat(5, 5);

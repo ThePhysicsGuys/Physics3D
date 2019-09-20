@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fix.h"
-#include "vec.h"
+#include "linalg/vec.h"
 
 typedef Vector<Fix<32>, 3> Vec3Fix;
 

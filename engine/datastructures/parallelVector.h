@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../math/vec.h"
+#include "../math/linalg/vec.h"
 #include "../../util/log.h"
 
 struct alignas(32) ParallelVec3 {

@@ -8,6 +8,8 @@
 #include "../util/Log.h"
 
 #include "math/mathUtil.h"
+#include "math/linalg/vec.h"
+#include "math/linalg/trigonometry.h"
 
 #include "debug.h"
 #include "constants.h"

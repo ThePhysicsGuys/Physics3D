@@ -1,7 +1,8 @@
 #include "testsMain.h"
 
-#include "../engine/math/mat3.h"
-#include "../engine/math/vec.h"
+#include "../engine/math/linalg/vec.h"
+#include "../engine/math/linalg/mat.h"
+#include "../engine/math/linalg/trigonometry.h"
 #include "../engine/math/mathUtil.h"
 #include "../engine/math/utils.h"
 

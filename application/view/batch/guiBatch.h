@@ -4,7 +4,7 @@
 #include "batchConfig.h"
 
 #include "../buffers/bufferLayout.h"
-#include "../engine/math/vec.h"
+#include "../engine/math/linalg/vec.h"
 
 #include "../shaderProgram.h"
 

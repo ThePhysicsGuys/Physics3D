@@ -1,6 +1,6 @@
 #pragma once
 
-#include "vec.h"
+#include "linalg/vec.h"
 #include "position.h"
 #include "bounds.h"
 
