@@ -236,7 +236,22 @@ void Camera::onUpdate() {
 
 	// Attach the camera to the attached part, if there is anys
 	if (!flying && attachment != nullptr) {
-		this->cframe.position = attachment->getCFrame().position;
+		double distance = 6.0;
+		Vec3 vertical = Vec3(0, 1, 0);
+		Vec3 forward = cframe.rotation.transpose() * Vec3(0, 0, 1);
+
+		// Sinus angle between camera direction and the xz plane
+		double sinAlpha = vertical * forward;
+
+		double dy = distance * sinAlpha;
+		double dz = sqrt(distance * distance - dy * dy);
+
+		Vec3 translationZ = normalize(Vec3(forward.x, 0, forward.z)) * dz;
+		Vec3 translationY = Vec3(0, dy, 0);
+		Vec3 translation = translationY + translationZ;
+
+		this->cframe.position = attachment->getCFrame().position + translation;
+
 		flags |= ViewDirty;
 	}
 

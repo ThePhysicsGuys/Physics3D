@@ -71,6 +71,13 @@ void ModelLayer::onRender() {
 	Shaders::basicShader.updateLight(lights, lightCount);
 	Shaders::maskShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix);
 
+	// Render player if not in flying mode
+	if (!screen->camera.flying) {
+		Shaders::basicShader.updateMaterial(Material());
+		Shaders::basicShader.updateModel(CFrameToMat4(screen->camera.attachment->getCFrame()));
+		Library::sphere->render();
+	}
+
 	// Render world objects
 	for (ExtendedPart& part : *screen->world) {
 		int meshId = part.drawMeshId;
