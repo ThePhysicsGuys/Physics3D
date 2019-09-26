@@ -210,6 +210,15 @@ FixedLocalBuffer<TreeNode*, 2 * MAX_BRANCHES> nodesToList(TreeNode& first, TreeN
 	return allNodes;
 }
 
+size_t getNumberOfObjectsInNode(const TreeNode& node) {
+	if (node.isLeafNode()) return 1;
+
+	size_t runningTotal = 0;
+	for (const TreeNode& subNode : node) {
+		runningTotal += getNumberOfObjectsInNode(subNode);
+	}
+	return runningTotal;
+}
 
 long long computeCost(const NodePermutation& perm) {
 	return computeCost(perm.getBoundsA()) + computeCost(perm.getBoundsB());
@@ -337,7 +346,7 @@ void optimizeNodePairHorizontal(TreeNode& first, TreeNode& second) {
 void optimizeNodePairVertical(TreeNode& node, TreeNode& group) {
 	// given: group is not a leafnode
 
-	long long originalCost = /*computeCost(node.bounds) + */computeCost(group.bounds);
+	long long originalCost = computeCost(group.bounds);
 	long long bestCost = originalCost;
 	int bestIndex = -1;
 
@@ -350,7 +359,7 @@ void optimizeNodePairVertical(TreeNode& node, TreeNode& group) {
 			if (i == j) continue;
 			resultingGroupBounds = unionOfBounds(resultingGroupBounds, group[j].bounds);
 		}
-		long long cost = /*computeCost(thisObjBounds) + */computeCost(resultingGroupBounds);
+		long long cost = computeCost(resultingGroupBounds);
 		if (cost < bestCost) {
 			bestCost = cost;
 			bestIndex = i;

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #pragma region ResourceAllocator
 
 //! ResourceAllocator

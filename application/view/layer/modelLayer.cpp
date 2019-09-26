@@ -79,7 +79,7 @@ void ModelLayer::onRender() {
 	}
 
 	// Render world objects
-	for (ExtendedPart& part : *screen->world) {
+	for (ExtendedPart& part : screen->world->iterPartsFiltered(DoNothingFilter<Part>(), ALL_PARTS)) {
 		int meshId = part.drawMeshId;
 
 		Material material = part.material;

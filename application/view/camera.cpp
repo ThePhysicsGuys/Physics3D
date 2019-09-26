@@ -173,6 +173,8 @@ bool Camera::onMouseDrag(MouseDragEvent& event) {
 bool Camera::onMouseScroll(MouseScrollEvent& event) {
 	velocity = GUI::clamp(velocity * (1 + 0.2 * event.getYOffset()), 0.001, 100);
 
+	thirdPersonDistance -= event.getYOffset();
+
 	return true;
 };
 
@@ -236,15 +238,14 @@ void Camera::onUpdate() {
 
 	// Attach the camera to the attached part, if there is anys
 	if (!flying && attachment != nullptr) {
-		double distance = 6.0;
 		Vec3 vertical = Vec3(0, 1, 0);
 		Vec3 forward = cframe.rotation.transpose() * Vec3(0, 0, 1);
 
 		// Sinus angle between camera direction and the xz plane
 		double sinAlpha = vertical * forward;
 
-		double dy = distance * sinAlpha;
-		double dz = sqrt(distance * distance - dy * dy);
+		double dy = thirdPersonDistance * sinAlpha;
+		double dz = sqrt(thirdPersonDistance * thirdPersonDistance - dy * dy);
 
 		Vec3 translationZ = normalize(Vec3(forward.x, 0, forward.z)) * dz;
 		Vec3 translationY = Vec3(0, dy, 0);

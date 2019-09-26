@@ -94,7 +94,8 @@ void DebugOverlay::onRender() {
 		iterationChart.render();
 
 		SharedLockGuard lg(screen->world->lock);
-		renderTreeStructure(*screen, screen->world->objectTree.rootNode, Vec3f(0, 1, 0), Vec2f(1.0, 0.95), 1.0f);
+		renderTreeStructure(*screen, screen->world->objectTree.rootNode, Vec3f(0, 1, 0), Vec2f(1.4, 0.95), 0.7f);
+		renderTreeStructure(*screen, screen->world->terrainTree.rootNode, Vec3f(0, 0, 1), Vec2f(0.4, 0.95), 0.7f);
 	}
 }
 

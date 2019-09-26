@@ -113,6 +113,17 @@ void WorldPrototype::detachPart(Part* part) {
 	requestModification([part](WorldPrototype& world) {world.detachPartUnsafe(part); });
 }
 
+void WorldPrototype::addTerrainPart(Part* part) {
+	terrainTree.add(part, part->getStrictBounds());
+}
+void WorldPrototype::removeTerrainPart(Part* part) {
+	terrainTree.remove(part, part->getStrictBounds());
+}
+void WorldPrototype::optimizeTerrain() {
+	for(int i = 0; i < 5; i++)
+		terrainTree.improveStructure();
+}
+
 void WorldPrototype::setPartCFrame(Part* part, const GlobalCFrame& newCFrame) {
 	Bounds oldBounds = part->getStrictBounds();
 
