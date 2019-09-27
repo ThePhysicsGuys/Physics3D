@@ -259,29 +259,29 @@ namespace GUI {
 		GUI::quad = new Quad();
 
 		// closeButton
-		GUI::closeButtonIdleTexture = load("../res/textures/gui/close_idle.png");
-		GUI::closeButtonHoverTexture = load("../res/textures/gui/close_hover.png");
-		GUI::closeButtonPressTexture = load("../res/textures/gui/close_press.png");
+		GUI::closeButtonIdleTexture = Texture::load("../res/textures/gui/close_idle.png");
+		GUI::closeButtonHoverTexture = Texture::load("../res/textures/gui/close_hover.png");
+		GUI::closeButtonPressTexture = Texture::load("../res/textures/gui/close_press.png");
 
 		// minimizeButton
-		GUI::minimizeButtonIdleTexture = load("../res/textures/gui/minimize_idle.png");
-		GUI::minimizeButtonHoverTexture = load("../res/textures/gui/minimize_hover.png");
-		GUI::minimizeButtonPressTexture = load("../res/textures/gui/minimize_press.png");
+		GUI::minimizeButtonIdleTexture = Texture::load("../res/textures/gui/minimize_idle.png");
+		GUI::minimizeButtonHoverTexture = Texture::load("../res/textures/gui/minimize_hover.png");
+		GUI::minimizeButtonPressTexture = Texture::load("../res/textures/gui/minimize_press.png");
 
 		// Checkbox
-		GUI::checkBoxUncheckedTexture = load("../res/textures/gui/unchecked.png");
-		GUI::checkBoxCheckedTexture = load("../res/textures/gui/checked.png");
+		GUI::checkBoxUncheckedTexture = Texture::load("../res/textures/gui/unchecked.png");
+		GUI::checkBoxCheckedTexture = Texture::load("../res/textures/gui/checked.png");
 		GUI::checkBoxPressCheckedTexture = GUI::checkBoxCheckedTexture->colored(Vec3(1.3));
 		GUI::checkBoxPressUncheckedTexture = GUI::checkBoxUncheckedTexture->colored(Vec3(1.3));
 		GUI::checkBoxHoverCheckedTexture = GUI::checkBoxCheckedTexture->colored(Vec3(0.999));
 		GUI::checkBoxHoverUncheckedTexture = GUI::checkBoxUncheckedTexture->colored(Vec3(0.999));
 
 		// ColorPicker
-		GUI::colorPickerHueTexture = load("../res/textures/gui/hue.png");
-		GUI::colorPickerAlphaBrightnessTexture = load("../res/textures/gui/alphaBrightness.png");
-		GUI::colorPickerAlphaPatternTexture = load("../res/textures/gui/alphaPattern.png");
-		GUI::colorPickerBrightnessTexture = load("../res/textures/gui/brightness.png");
-		GUI::colorPickerCrosshairTexture = load("../res/textures/gui/crosshair.png");
+		GUI::colorPickerHueTexture = Texture::load("../res/textures/gui/hue.png");
+		GUI::colorPickerAlphaBrightnessTexture = Texture::load("../res/textures/gui/alphaBrightness.png");
+		GUI::colorPickerAlphaPatternTexture = Texture::load("../res/textures/gui/alphaPattern.png");
+		GUI::colorPickerBrightnessTexture = Texture::load("../res/textures/gui/brightness.png");
+		GUI::colorPickerCrosshairTexture = Texture::load("../res/textures/gui/crosshair.png");
 
 		GUI::colorPicker = new ColorPicker(0, 0);
 		GUI::colorPickerFrame = new Frame(0, 0, "Color");

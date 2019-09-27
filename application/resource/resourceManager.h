@@ -2,6 +2,8 @@
 
 #include "core.h"
 
+#include <typeinfo>
+
 #include "resource.h"
 
 class ResourceManager {
@@ -103,7 +105,7 @@ public:
 			return static_cast<T*>(iterator->second.value);
 		} else {
 			Log::warn("Resource not loaded (%s), trying to load requested resource...", name.c_str());
-			T* resource = add(name);
+			T* resource = ResourceManager::add<T>(name);
 
 			if (resource) {
 				return resource;
@@ -115,7 +117,7 @@ public:
 	}
 
 	template<typename T>
-	static T* add(const std::string& path, const std::string& name = "") {
+	static T* add(const std::string& path, std::string name = "") {
 		if (name.empty())
 			name = path;
 
@@ -128,24 +130,58 @@ public:
 			resource.count++; 
 			return static_cast<T*>(resource.value);
 		} else {
-			T* resource = T::getAllocator().load(path);
+			T* resource = T::getAllocator().load(path, name);
 
 			if (resource == nullptr) {
 				Log::warn("Resource could not be loaded (%s)", path.c_str());
 				return nullptr;
 			} else {
-				resource.setName(name);
-				manager.resources.emplace(name, CountedResource(resource, 1));
+				CountedResource countedResource = { resource, 1 };
+				manager.resources.emplace(name, countedResource);
 
 				return resource;
 			}
 		}
 	}
 
-	bool exists(const std::string& name) {
+	static bool exists(const std::string& name) {
 		ResourceManager& manager = instance();
 
 		auto iterator = manager.resources.find(name);
 		return iterator != manager.resources.end();
+	}
+
+	template<typename T>
+	static std::vector<T*> getResourcesOfClass() {
+		std::vector<T*> resources;
+		ResourceManager& manager = ResourceManager::instance();
+
+		for (auto iterator : manager.resources) {
+			if (typeid(T) == typeid(iterator.second.value))
+				resources.push_back(static_cast<T*>(iterator.second.value));
+		}
+	}
+
+	static std::vector<Resource*> getResourcesOfType(ResourceType type) {
+		std::vector<Resource*> resources;
+		ResourceManager& manager = ResourceManager::instance();
+		
+		for (auto iterator : manager.resources) {
+			if (iterator.second.value->getType() == type)
+				resources.push_back(iterator.second.value);
+		}
+
+		return resources;
+	}
+
+	static std::vector<Resource*> getResources() {
+		std::vector<Resource*> resources;
+		ResourceManager& manager = ResourceManager::instance();
+
+		for (auto iterator : manager.resources) {
+			resources.push_back(iterator.second.value);
+		}
+
+		return resources;
 	}
 };

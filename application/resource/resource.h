@@ -4,9 +4,9 @@
 
 //! ResourceAllocator
 template<typename T>
-class ResourceAllocater {
+class ResourceAllocator {
 public:
-	virtual T* load(std::string filename) = 0;
+	virtual T* load(std::string name, std::string path) = 0;
 };
 
 #pragma endregion
@@ -45,7 +45,7 @@ public:
 	inline std::string getPath() const;
 
 	template<typename T>
-	static ResourceAllocater<T>* getAllocator() {
+	static ResourceAllocator<T> getAllocator() {
 		return T::getAllocator();
 	}
 };

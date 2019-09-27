@@ -43,6 +43,6 @@ void Image::render() {
 
 Vec2 Image::resize() {
 	if (resizing)
-		dimension = Vec2(texture->width, texture->height);
+		dimension = Vec2(texture->getWidth(), texture->getHeight());
 	return dimension;
 }

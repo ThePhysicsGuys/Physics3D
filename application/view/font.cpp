@@ -142,10 +142,10 @@ unsigned int Font::getAtlasID() const {
 }
 
 unsigned int Font::getAtlasWidth() const {
-	return atlas->width;
+	return atlas->getWidth();
 }
 
 unsigned int Font::getAtlasHeight() const {
-	return atlas->height;
+	return atlas->getHeight();
 }
 

@@ -339,10 +339,10 @@ void parseSubject(Subject subject, std::string path, std::map<std::string, std::
 		material.reflectance = Import::parseFloat(fields.at("reflectance"));
 
 		if (!fields.at("texture").empty())
-			material.texture = load(fields.at("texture"));
+			material.texture = Texture::load(fields.at("texture"));
 
 		if (!fields.at("normals").empty())
-			material.normal = load(fields.at("normals"));
+			material.normal = Texture::load(fields.at("normals"));
 
 		double density = Import::parseDouble(fields.at("density"));
 		double friction = Import::parseDouble(fields.at("friction"));

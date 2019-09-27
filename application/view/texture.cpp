@@ -14,7 +14,46 @@
 
 //! Texture
 
-Texture* load(const std::string& name) {
+int getChannelsFromFormat(int format) {
+	switch (format) {
+	case GL_RED:
+	case GL_GREEN:
+	case GL_BLUE:
+	case GL_ALPHA:
+		return 1;
+		break;
+	case GL_RGB:
+		return 3;
+		break;
+	case GL_RGBA:
+		return 4;
+		break;
+	default:
+		Log::warn("Unknown format: %x, assuming 4 channels", format);
+		return 4;
+	}
+
+}
+
+int getFormatFromChannels(int channels) {
+	switch (channels) {
+	case 1:
+		return GL_RED;
+		break;
+	case 3:
+		return GL_RGB;
+		break;
+	case 4:
+		return GL_RGBA;
+		break;
+	default:
+		Log::warn("Unknown amount of channels: %d, assuming RGB", channels);
+		Log::resetSubject();
+		return GL_RGB;
+	}
+}
+
+Texture* Texture::load(const std::string& name) {
 	int width;
 	int height;
 	int channels;
@@ -24,25 +63,7 @@ Texture* load(const std::string& name) {
 	Texture* texture = nullptr;
 
 	if (data) {
-		int format;
-
-		switch (channels) {
-			case 1:
-				format = GL_RED;
-				break;
-			case 3:
-				format = GL_RGB;
-				break;
-			case 4:
-				format = GL_RGBA;
-				break;
-			default:
-				Log::setSubject(name);
-				Log::warn("Unknown amount of channels: %d, choosing RGB", channels);
-				Log::resetSubject();
-				format = GL_RGB;
-		}
-
+		int format = getFormatFromChannels(channels);
 		texture = new Texture(width, height, data, format);
 	} else {
 		Log::setSubject(name);
@@ -54,35 +75,30 @@ Texture* load(const std::string& name) {
 	return texture;
 }
 
-Texture::Texture(unsigned int width, unsigned int height) : Texture(width, height, nullptr, GL_RGBA) {};
+Texture::Texture(int width, int height) : Texture(width, height, nullptr, GL_RGBA) {
 
-Texture::Texture(unsigned int width, unsigned int height, const void* buffer, int format) : width(width), height(height), unit(0), format(format) {
+}
+
+Texture::Texture(int width, int height, const void* buffer, int format) : Texture(width, height, buffer, GL_TEXTURE_2D, format, format, GL_UNSIGNED_BYTE) {
+
+}
+
+Texture::Texture(int width, int height, const void* buffer, int target, int format, int internalFormat, int type) : width(width), height(height), target(target), format(format), internalFormat(internalFormat), type(type), unit(0) {
 	glGenTextures(1, &id);
 
-	switch (format) {
-		case GL_RED:
-		case GL_GREEN:
-		case GL_BLUE:
-		case GL_ALPHA:
-			channels = 1;
-			break;
-		case GL_RGB:
-			channels = 3;
-			break;
-		case GL_RGBA:
-			channels = 4;
-			break;
-		default:
-			channels = 4;
-	}
+	channels = getChannelsFromFormat(format);
 
 	bind();
-	glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, buffer);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	create(target, 0, internalFormat, width, height, 0, format, type, buffer);
+	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	unbind();
+}
+
+void Texture::create(int target, int level, int internalFormat, int width, int height, int border, int format, int type, const void* buffer) {
+	glTexImage2D(target, 0, internalFormat, width, height, 0, format, type, buffer);
 }
 
 Texture::~Texture() {
@@ -103,15 +119,15 @@ Texture& Texture::operator=(Texture&& other) {
 	return *this;
 }
 
-void Texture::loadFrameBufferTexture(unsigned int width, unsigned int height) {
+void Texture::loadFrameBufferTexture(int width, int height) {
 	bind();
-	glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, width, height, 0);
+	glCopyTexImage2D(target, 0, internalFormat, 0, 0, width, height, 0);
 	unbind();
 }
 
-void Texture::resize(unsigned int width, unsigned int height, const void* buffer) {
+void Texture::resize(int width, int height, const void* buffer) {
 	bind();
-	glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, buffer);
+	glTexImage2D(target, 0, internalFormat, width, height, 0, format, type, buffer);
 	unbind();
 }
 
@@ -121,16 +137,16 @@ Texture* Texture::colored(Vec3 color) {
 
 Texture* Texture::colored(Vec4 color) {
 	bind();
-	unsigned char* buffer = (unsigned char*) malloc(width * height * channels);
+	unsigned char* buffer = (unsigned char*)malloc(width * height * channels);
 
-	glGetTexImage(GL_TEXTURE_2D, 0, format, GL_UNSIGNED_BYTE, buffer);
-	
+	glGetTexImage(target, 0, format, type, buffer);
+
 	for (unsigned int j = 0; j < height; j++) {
 		for (unsigned int i = 0; i < width; i++) {
 			for (int k = 0; k < channels; k++) {
 
 				int index = (i + height * j) * channels + k;
-				unsigned char value = unsigned char (buffer[index] * color[k]);
+				unsigned char value = unsigned char(buffer[index] * color[k]);
 				buffer[index] = value;
 			}
 		}
@@ -143,14 +159,14 @@ Texture* Texture::colored(Vec4 color) {
 	return texture;
 }
 
-void Texture::resize(unsigned int width, unsigned int height) {
+void Texture::resize(int width, int height) {
 	resize(width, height, nullptr);
 }
 
 void Texture::bind(int unit) {
 	this->unit = unit;
 	glActiveTexture(GL_TEXTURE0 + unit);
-	glBindTexture(GL_TEXTURE_2D, id);
+	glBindTexture(target, id);
 }
 
 void Texture::bind() {
@@ -158,7 +174,7 @@ void Texture::bind() {
 }
 
 void Texture::unbind() {
-	glBindTexture(GL_TEXTURE_2D, 0);
+	glBindTexture(target, 0);
 }
 
 void Texture::close() {
@@ -168,75 +184,54 @@ void Texture::close() {
 	id = 0;
 }
 
+int Texture::getWidth() const {
+	return width;
+}
+
+int Texture::getHeight() const {
+	return height;
+}
+
+int Texture::getInternalFormat() const {
+	return internalFormat;
+}
+
+int Texture::getFormat() const {
+	return format;
+}
+
+int Texture::getTarget() const {
+	return target;
+}
+
+int Texture::getType() const {
+	return type;
+}
+
+int Texture::getChannels() const {
+	return channels;
+}
+
+int Texture::getUnit() const {
+	return unit;
+}
+
+void Texture::setUnit(int unit) {
+	this->unit = unit;
+}
+
 #pragma endregion
 
 #pragma region HDRTexture
 
 //! HDRTexture
 
-HDRTexture::HDRTexture(unsigned int width, unsigned int height) : HDRTexture(width, height, nullptr) {
+HDRTexture::HDRTexture(int width, int height) : HDRTexture(width, height, nullptr) {
 
 };
 
-HDRTexture::HDRTexture(unsigned int width, unsigned int height, const void* buffer) : width(width), height(height), unit(0) {
-	glGenTextures(1, &id);
+HDRTexture::HDRTexture(int width, int height, const void* buffer) : Texture(width, height, buffer, GL_TEXTURE_2D, GL_RGBA, GL_RGBA16F, GL_FLOAT) {
 
-	bind();
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, buffer);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	unbind();
-}
-
-HDRTexture::~HDRTexture() {
-	close();
-}
-
-HDRTexture::HDRTexture(HDRTexture&& other) {
-	id = other.id;
-	other.id = 0;
-}
-
-HDRTexture& HDRTexture::operator=(HDRTexture&& other) {
-	if (this != &other) {
-		close();
-		std::swap(id, other.id);
-	}
-
-	return *this;
-}
-
-void HDRTexture::resize(unsigned int width, unsigned int height, const void* buffer) {
-	bind();
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, buffer);
-	unbind();
-}
-
-void HDRTexture::resize(unsigned int width, unsigned int height) {
-	resize(width, height, nullptr);
-}
-
-void HDRTexture::bind(int unit) {
-	this->unit = unit;
-	glActiveTexture(GL_TEXTURE0 + unit);
-	glBindTexture(GL_TEXTURE_2D, id);
-}
-
-void HDRTexture::bind() {
-	bind(unit);
-}
-
-void HDRTexture::unbind() {
-	glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-void HDRTexture::close() {
-	Log::warn("Closed HDR texture #%d", id);
-
-	glDeleteTextures(1, &id);
-	id = 0;
 }
 
 #pragma endregion
@@ -245,10 +240,10 @@ void HDRTexture::close() {
 
 //! TextureMultisample
 
-MultisampleTexture::MultisampleTexture(unsigned int width, unsigned int height, unsigned int samples) : width(width), height(height), samples(samples), unit(0) {
+MultisampleTexture::MultisampleTexture(int width, int height, int samples) : Texture(width, height, nullptr, GL_TEXTURE_2D_MULTISAMPLE, 0, GL_RGBA, 0), samples(samples) {
 	glGenTextures(1, &id);
 	bind();
-	glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, GL_RGBA, width, height, GL_TRUE);
+	create(target, 0, internalFormat, width, height, 0, format, type, nullptr);
 	glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -256,49 +251,14 @@ MultisampleTexture::MultisampleTexture(unsigned int width, unsigned int height, 
 	unbind();
 }
 
-MultisampleTexture::~MultisampleTexture() {
-	close();
+void MultisampleTexture::create(int target, int level, int internalFormat, int width, int height, int border, int format, int type, const void* buffer) {
+	glTexImage2DMultisample(target, samples, internalFormat, width, height, GL_TRUE);
 }
 
-MultisampleTexture::MultisampleTexture(MultisampleTexture&& other) {
-	id = other.id;
-	other.id = 0;
-}
-
-MultisampleTexture& MultisampleTexture::operator=(MultisampleTexture&& other) {
-	if (this != &other) {
-		close();
-		std::swap(id, other.id);
-	}
-
-	return *this;
-}
-
-void MultisampleTexture::resize(unsigned int width, unsigned int height) {
+void MultisampleTexture::resize(int width, int height) {
 	bind();
-	glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, GL_RGB, width, height, GL_TRUE);
+	glTexImage2DMultisample(target, samples, internalFormat, width, height, GL_TRUE);
 	unbind();
-}
-
-void MultisampleTexture::bind() {
-	bind(unit);
-}
-
-void MultisampleTexture::bind(int unit) {
-	this->unit = unit;
-	glActiveTexture(GL_TEXTURE0 + unit);
-	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, id);
-}
-
-void MultisampleTexture::unbind() {
-	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
-}
-
-void MultisampleTexture::close() {
-	Log::warn("Closed multisample texture #%d", id);
-
-	glDeleteTextures(1, &id);
-	id = 0;
 }
 
 #pragma endregion
@@ -307,56 +267,18 @@ void MultisampleTexture::close() {
 
 //! CubeMap
 
-CubeMap::CubeMap(const std::string& right, const std::string& left, const std::string& top, const std::string& bottom, const std::string& front, const std::string& back) : unit(0) {
-	glGenTextures(1, &id);
+CubeMap::CubeMap(const std::string& right, const std::string& left, const std::string& top, const std::string& bottom, const std::string& front, const std::string& back) : Texture(0, 0, nullptr, GL_TEXTURE_CUBE_MAP, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE) {
 	bind();
-	
 	load(right, left, top, bottom, front, back);
-	
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-	bind();
+	glTexParameteri(target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	unbind();
 }
 
-CubeMap::~CubeMap() {
-	close();
-}
+void CubeMap::create(int target, int level, int internalFormat, int width, int height, int border, int format, int type, const void* buffer) {
 
-CubeMap::CubeMap(CubeMap&& other) {
-	id = other.id;
-	other.id = 0;
-}
-
-CubeMap& CubeMap::operator=(CubeMap&& other) {
-	if (this != &other) {
-		close();
-		std::swap(id, other.id);
-	}
-
-	return *this;
-}
-
-void CubeMap::bind() {
-	bind(unit);
-}
-
-void CubeMap::bind(int unit) {
-	this->unit = unit;
-	glActiveTexture(GL_TEXTURE0 + unit);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, id);
-}
-
-void CubeMap::unbind() {
-	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
 
 void CubeMap::load(const std::string& right, const std::string& left, const std::string& top, const std::string& bottom, const std::string& front, const std::string& back) {
-	int width;
-	int height;
-	int channels;
 	unsigned char* data;
 	std::string faces[6] = { right, left, top, bottom, front, back };
 
@@ -364,23 +286,23 @@ void CubeMap::load(const std::string& right, const std::string& left, const std:
 
 	for (int i = 0; i < 6; i++) {
 		data = stbi_load(faces[i].c_str(), &width, &height, &channels, 0);
+
+		format = internalFormat = getFormatFromChannels(channels);
+
 		if (data)
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, (channels == 4)? GL_RGBA : GL_RGB, width, height, 0, (channels == 4) ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, data);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, format, width, height, 0, internalFormat, type, data);
 		else {
 			Log::setSubject(faces[i]);
 			Log::error("Failed to load texture");
 			Log::resetSubject();
 		}
 
-		stbi_image_free(data);	
+		stbi_image_free(data);
 	}
 }
 
-void CubeMap::close() {
-	Log::warn("Closed cubemap texture #%d", id);
-
-	glDeleteTextures(1, &id);
-	id = 0;
+void CubeMap::resize(int width, int height) {
+	Log::error("Resizing of cubemap not supported yet");
 }
 
 #pragma endregion
@@ -389,55 +311,8 @@ void CubeMap::close() {
 
 //! DepthTexture
 
-DepthTexture::DepthTexture(unsigned int width, unsigned int height): width(width), height(height), unit(0) {
-	glGenTextures(1, &id);
+DepthTexture::DepthTexture(int width, int height) : Texture(width, height, nullptr, GL_TEXTURE_2D, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_FLOAT) {
 
-	bind();
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	unbind();
-}
-
-DepthTexture::~DepthTexture() {
-	close();
-}
-
-DepthTexture::DepthTexture(DepthTexture&& other) {
-	id = other.id;
-	other.id = 0;
-}
-
-DepthTexture& DepthTexture::operator=(DepthTexture&& other) {
-	if (this != &other) {
-		close();
-		std::swap(id, other.id);
-	}
-
-	return *this;
-}
-
-void DepthTexture::bind() {
-	bind(unit);
-}
-
-void DepthTexture::bind(int unit) {
-	this->unit = unit;
-	glActiveTexture(GL_TEXTURE0 + unit);
-	glBindTexture(GL_TEXTURE_2D, id);
-}
-
-void DepthTexture::unbind() {
-	glBindTexture(GL_TEXTURE_2D, id);
-}
-
-void DepthTexture::close() {
-	Log::warn("Closed depth texture #%d", id);
-
-	glDeleteTextures(1, &id);
-	id = 0;
 }
 
 #pragma endregion
