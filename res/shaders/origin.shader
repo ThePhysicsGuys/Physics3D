@@ -53,7 +53,7 @@ void main() {
 		EndPrimitive();
 	}
 
-	float camerax = floor(viewPosition.x);
+	/*float camerax = floor(viewPosition.x);
 	float cameraz = floor(viewPosition.z);
 	
 	for (float t = 0.0; t < gridSize / 2; t++) {	
@@ -73,7 +73,7 @@ void main() {
 		gl_Position = projectionMatrix * viewMatrix * vec4(camerax - t, 0, cameraz - gridSize / 2, 1); EmitVertex();
 		gl_Position = projectionMatrix * viewMatrix * vec4(camerax - t, 0, cameraz + gridSize / 2, 1); EmitVertex();
 		EndPrimitive();
-	}
+	}*/
 }
 
 ///////////////////////////////////////////////////////////////////////////

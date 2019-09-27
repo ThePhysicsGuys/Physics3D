@@ -15,6 +15,11 @@
 
 #include "constraintGroup.h"
 
+#define FREE_PARTS 0x1
+#define TERRAIN_PARTS 0x2
+#define ALL_PARTS FREE_PARTS | TERRAIN_PARTS
+
+
 typedef ListOfPtrIter<Physical> PhysicalIter;
 typedef ListOfPtrIter<const Physical> ConstPhysicalIter;
 
@@ -33,7 +38,21 @@ template<typename ExtendedPart>
 using ConstBasicExtendedPartIterFactory = CastingIteratorFactoryWithEnd<ConstBasicPartIterFactory, const ExtendedPart&>;
 
 template<typename Filter>
-using DoubleFilterIter = FilteredIterator<FilteredBoundsTreeIter<Filter, Part>, IteratorEnd, Filter>;
+using DoubleFilterIter = FilteredIterator<IteratorGroup<TreeIterFactory<Part, Filter>, 2>, IteratorEnd, Filter>;
+
+template<typename Filter>
+using ConstDoubleFilterIter = FilteredIterator<IteratorGroup<TreeIterFactory<const Part, Filter>, 2>, IteratorEnd, Filter>;
+
+
+
+/*template<typename Filter>
+class FilteredWorldIterator : DoubleFilterIter<Filter> {
+public:
+	void add(BoundsTree<Part>& tree) {
+		DoubleFilterIter<Filter>::iter.add(tree.iterFiltered(DoubleFilterIter<Filter>::filter));
+	}
+	FilteredWorldIterator(const Filter& filter) : DoubleFilterIter<Filter>(IteratorGroup<TreeIterFactory<Part, Filter>, 3>(), IteratorEnd(), filter) {}
+};*/
 
 class WorldPrototype {
 private:
@@ -58,13 +77,12 @@ private:
 	void updatePartBounds(const Part* updatedPart, const Bounds& oldBounds);
 	void updatePartGroupBounds(const Part* mainPart, const Bounds& oldMainPartBounds);
 
-	//void registerGroupCFrameUpdate(const Part& partInGroup, const Bounds& oldBounds);
-	//void updatePartGroup(const Part& part, const Bounds& oldBounds);
-
 public:
 	mutable std::shared_mutex lock;
 	mutable std::mutex queueLock;
 	BoundsTree<Part> objectTree;
+	BoundsTree<Part> terrainTree;
+
 	std::vector<ConstraintGroup> constraints;
 
 	size_t age = 0;
@@ -83,11 +101,15 @@ public:
 
 	void requestModification(const std::function<void(WorldPrototype&)>& function);
 
-	void addPart(Part* p, bool anchored = false);
-	void attachPart(Part* p, Physical& phys, CFrame attachment);
-	void detachPart(Part* p);
-	void removePart(Part* p);
-	void removePhysical(Physical* p);
+	void addPart(Part* part, bool anchored = false);
+	void attachPart(Part* part, Physical& phys, CFrame attachment);
+	void detachPart(Part* part);
+	void removePart(Part* part);
+	void removePhysical(Physical* part);
+
+	void addTerrainPart(Part* part);
+	void removeTerrainPart(Part* part);
+	void optimizeTerrain();
 
 	inline bool isAnchored(Physical* p) const {
 		return p->anchored;
@@ -101,28 +123,16 @@ public:
 		p->setAnchored(false);
 	}
 
-	inline size_t getPartCount() const {
-		size_t total = 0;
-		for (const Physical& p : iterPhysicals()) {
-			total += p.getPartCount();
-		}
-		return total;
-	}
-
 	inline size_t getAnchoredPartCount() const {
-		size_t total = 0;
-		for (const Physical& p : iterAnchoredPhysicals()) {
-			total += p.getPartCount();
-		}
-		return total;
+		return terrainTree.getNumberOfObjects();
 	}
 
 	inline size_t getFreePartCount() const {
-		size_t total = 0;
-		for (const Physical& p : iterFreePhysicals()) {
-			total += p.getPartCount();
-		}
-		return total;
+		return objectTree.getNumberOfObjects();
+	}
+
+	inline size_t getPartCount() const {
+		return getAnchoredPartCount() + getFreePartCount();
 	}
 
 	virtual void applyExternalForces();
@@ -154,13 +164,41 @@ public:
 	ConstBasicPartIterFactory iterFreeParts() const { return ConstBasicPartIterFactory(ConstBasicPartIter(iterFreePhysicals().begin(), iterFreePhysicals().end())); }
 
 	template<typename Filter>
-	IteratorFactory<CastingIterator<DoubleFilterIter<Filter>, Part&>, IteratorEnd> iterPartsFiltered(const Filter& filter) {
-		return IteratorFactory<CastingIterator<DoubleFilterIter<Filter>, Part&>, IteratorEnd>(
-			CastingIterator<DoubleFilterIter<Filter>, Part&>(
-				DoubleFilterIter<Filter>(objectTree.iterFiltered(filter).begin(), IteratorEnd(), filter)
-				),
-			IteratorEnd()
-		);
+	IteratorFactoryWithEnd<DoubleFilterIter<Filter>> iterPartsFiltered(const Filter& filter, unsigned int partsMask = ALL_PARTS) {
+
+		size_t size = 0;
+		TreeIterFactory<Part, Filter> iters[2];
+		if (partsMask & FREE_PARTS) {
+			iters[size++] = objectTree.iterFiltered(filter);
+		}
+		if (partsMask & TERRAIN_PARTS) {
+			iters[size++] = terrainTree.iterFiltered(filter);
+		}
+
+		IteratorGroup<TreeIterFactory<Part, Filter>, 2> group(iters, size);
+
+		DoubleFilterIter<Filter> doubleFilter(group, IteratorEnd(), filter);
+		
+		return IteratorFactoryWithEnd<DoubleFilterIter<Filter>>(std::move(doubleFilter));
+	}
+
+	template<typename Filter>
+	IteratorFactoryWithEnd<ConstDoubleFilterIter<Filter>> iterPartsFiltered(const Filter& filter, unsigned int partsMask = ALL_PARTS) const {
+
+		size_t size = 0;
+		TreeIterFactory<Part, Filter> iters[2];
+		if (partsMask & FREE_PARTS) {
+			iters[size++] = objectTree.iterFiltered(filter);
+		}
+		if (partsMask & TERRAIN_PARTS) {
+			iters[size++] = terrainTree.iterFiltered(filter);
+		}
+
+		IteratorGroup<TreeIterFactory<Part, Filter>, 2> group(iters, size);
+
+		ConstDoubleFilterIter<Filter> doubleFilter(group, IteratorEnd(), filter);
+
+		return IteratorFactoryWithEnd<ConstDoubleFilterIter<Filter>>(std::move(doubleFilter));
 	}
 };
 
@@ -178,12 +216,20 @@ public:
 	inline ConstBasicExtendedPartIterFactory<T> iterFreeParts() const { return ConstBasicExtendedPartIterFactory<T>(WorldPrototype::iterFreeParts()); }
 
 	template<typename Filter>
-	IteratorFactory<CastingIterator<DoubleFilterIter<Filter>, T&>, IteratorEnd> iterPartsFiltered(const Filter& filter) {
-		return IteratorFactory<CastingIterator<DoubleFilterIter<Filter>, T&>, IteratorEnd>(
+	IteratorFactoryWithEnd<CastingIterator<DoubleFilterIter<Filter>, T&>> iterPartsFiltered(const Filter& filter, unsigned int partsMask = FREE_PARTS) {
+		return IteratorFactoryWithEnd<CastingIterator<DoubleFilterIter<Filter>, T&>>(
 			CastingIterator<DoubleFilterIter<Filter>, T&>(
-				DoubleFilterIter<Filter>(objectTree.iterFiltered(filter).begin(), IteratorEnd(), filter)
-			), 
-			IteratorEnd()
+				WorldPrototype::iterPartsFiltered(filter, partsMask).begin()
+			)
+		);
+	}
+
+	template<typename Filter>
+	IteratorFactoryWithEnd<CastingIterator<ConstDoubleFilterIter<Filter>, const T&>> iterPartsFiltered(const Filter& filter, unsigned int partsMask = FREE_PARTS) const {
+		return IteratorFactoryWithEnd<CastingIterator<ConstDoubleFilterIter<Filter>, const T&>>(
+			CastingIterator<ConstDoubleFilterIter<Filter>, const T&>(
+				WorldPrototype::iterPartsFiltered(filter, partsMask).begin()
+			)
 		);
 	}
 };

@@ -8,7 +8,7 @@ template<typename T, size_t Width, size_t Height>
 struct MatrixIndex {
 	T* data;
 	size_t row;
-	T& operator[](size_t col) const { 
+	inline constexpr T& operator[](size_t col) const {
 		assert(row >= 0 && row < Height);
 		assert(col >= 0 && col < Width);
 
@@ -21,9 +21,9 @@ class Matrix {
 
 public:
 	// Returns a row of this matrix
-	MatrixIndex<T, Width, Height> operator[](size_t row) { return MatrixIndex<T, Width, Height>{ data, row }; }
+	inline constexpr MatrixIndex<T, Width, Height> operator[](size_t row) { return MatrixIndex<T, Width, Height>{ data, row }; }
 	// Returns a row of this matrix
-	MatrixIndex<const T, Width, Height> operator[](size_t col) const { return MatrixIndex<const T, Width, Height>{ data, col }; }
+	inline constexpr MatrixIndex<const T, Width, Height> operator[](size_t col) const { return MatrixIndex<const T, Width, Height>{ data, col }; }
 
 	Matrix<T, Width, Height>() = default;
 
@@ -36,7 +36,7 @@ public:
 			9, 10, 11, 12
 		};
 	*/
-	Matrix<T, Width, Height>(const std::initializer_list<T>& list) {
+	inline constexpr Matrix<T, Width, Height>(const std::initializer_list<T>& list) {
 		assert(list.size() == Width * Height);
 		auto listIter = list.begin();
 		for (size_t row = 0; row < Height; row++) {
@@ -203,7 +203,7 @@ public:
 		}
 	}
 
-	static Matrix<T, Width, Height> ZEROS() {
+	static inline constexpr Matrix<T, Width, Height> ZEROS() {
 		Matrix<T, Width, Height> mat;
 		for (size_t row = 0; row < Height; row++) {
 			for (size_t col = 0; col < Width; col++) {
@@ -213,7 +213,7 @@ public:
 		return mat;
 	}
 
-	static Matrix<T, Width, Height> IDENTITY() {
+	static inline constexpr Matrix<T, Width, Height> IDENTITY() {
 		Matrix<T, Width, Height> mat;
 		for (size_t row = 0; row < Height; row++) {
 			for (size_t col = 0; col < Width; col++) {
@@ -284,7 +284,7 @@ struct SymmetricMatrixIndex {
 	T* data;
 	size_t row;
 
-	T& operator[](size_t col) const {
+	inline constexpr T& operator[](size_t col) const {
 		size_t a = (row > col) ? row : col; // max
 		size_t b = (row > col) ? col : row; // min
 
@@ -299,9 +299,9 @@ class SymmetricMatrix {
 	T data[Size * (Size + 1) / 2];
 public:
 	// Returns a row of this matrix
-	SymmetricMatrixIndex<T, Size> operator[](size_t row) { return SymmetricMatrixIndex<T, Size>{ data, row }; }
+	inline constexpr SymmetricMatrixIndex<T, Size> operator[](size_t row) { return SymmetricMatrixIndex<T, Size>{ data, row }; }
 	// Returns a row of this matrix
-	SymmetricMatrixIndex<const T, Size> operator[](size_t row) const { return SymmetricMatrixIndex<const T, Size>{ data, row }; }
+	inline constexpr SymmetricMatrixIndex<const T, Size> operator[](size_t row) const { return SymmetricMatrixIndex<const T, Size>{ data, row }; }
 
 	SymmetricMatrix<T, Size>() = default;
 	/*
@@ -314,7 +314,7 @@ public:
 			7, 8, 9, 10
 		};
 	*/
-	SymmetricMatrix<T, Size>(const std::initializer_list<T>& list) {
+	inline constexpr SymmetricMatrix<T, Size>(const std::initializer_list<T>& list) {
 		assert(list.size() == Size * (Size + 1) / 2);
 
 		auto listIter = list.begin();
@@ -326,7 +326,7 @@ public:
 		}
 	}
 
-	static SymmetricMatrix<T, Size> ZEROS() {
+	static inline constexpr SymmetricMatrix<T, Size> ZEROS() {
 		SymmetricMatrix<T, Size> mat;
 		for (size_t row = 0; row < Size; row++) {
 			for (size_t col = 0; col <= row; col++) {
@@ -336,7 +336,7 @@ public:
 		return mat;
 	}
 
-	static SymmetricMatrix<T, Size> IDENTITY() {
+	static inline constexpr SymmetricMatrix<T, Size> IDENTITY() {
 		SymmetricMatrix<T, Size> mat;
 		for (size_t row = 0; row < Size; row++) {
 			for (size_t col = 0; col <= row; col++) {
@@ -363,8 +363,8 @@ template<typename T, size_t Size>
 class DiagonalMatrix {
 	T data[Size];
 public:
-	T& operator[](size_t index) { assert(index >= 0 && index < Size); return data[index]; }
-	const T& operator[](size_t index) const { assert(index >= 0 && index < Size); return data[index]; }
+	inline constexpr T& operator[](size_t index) { assert(index >= 0 && index < Size); return data[index]; }
+	inline constexpr const T& operator[](size_t index) const { assert(index >= 0 && index < Size); return data[index]; }
 
 	DiagonalMatrix<T, Size>() = default;
 	/*
@@ -377,7 +377,7 @@ public:
 			         4
 		};
 	*/
-	DiagonalMatrix<T, Size>(const std::initializer_list<T>& list) {
+	inline constexpr DiagonalMatrix<T, Size>(const std::initializer_list<T>& list) {
 		assert(list.size() == Size);
 
 		auto listIter = list.begin();
@@ -387,7 +387,7 @@ public:
 		}
 	}
 
-	static DiagonalMatrix<T, Size> ZEROS() {
+	static inline constexpr DiagonalMatrix<T, Size> ZEROS() {
 		DiagonalMatrix<T, Size> mat;
 		for (size_t i = 0; i < Size; i++) {
 			mat[i] = 0;
@@ -395,7 +395,7 @@ public:
 		return mat;
 	}
 
-	static DiagonalMatrix<T, Size> IDENTITY() {
+	static inline constexpr DiagonalMatrix<T, Size> IDENTITY() {
 		DiagonalMatrix<T, Size> mat;
 		for (size_t i = 0; i < Size; i++) {
 			mat[i] = 1;

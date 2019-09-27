@@ -109,7 +109,7 @@ bool StandardInputHandler::onKeyPress(KeyPressEvent& event) {
 	} else if (KeyboardOptions::Debug::spheres == key) {
 		Debug::colissionSpheresMode = static_cast<Debug::SphereColissionRenderMode>((static_cast<int>(Debug::colissionSpheresMode) + 1) % 3);
 	} else if (KeyboardOptions::Debug::tree == key) {
-		Debug::colTreeRenderMode = static_cast<Debug::ColTreeRenderMode>((static_cast<int>(Debug::colTreeRenderMode) + 1) % 3);
+		Debug::colTreeRenderMode = static_cast<Debug::ColTreeRenderMode>((static_cast<int>(Debug::colTreeRenderMode) + 1) % 5);
 	}
 	
 

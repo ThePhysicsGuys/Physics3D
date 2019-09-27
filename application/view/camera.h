@@ -51,6 +51,8 @@ public:
 	double angularVelocity;
 	bool flying;
 
+	double thirdPersonDistance = 6.0;
+
 	float aspect;
 	
 	Mat4f viewMatrix;

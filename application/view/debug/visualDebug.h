@@ -38,6 +38,8 @@ namespace Debug {
 	enum class ColTreeRenderMode : int {
 		NONE,
 		SELECTED,
+		FREE,
+		TERRAIN,
 		ALL
 	};
 

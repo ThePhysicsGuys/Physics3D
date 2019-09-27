@@ -223,8 +223,15 @@ void DebugLayer::onRender() {
 	}
 
 	switch (colTreeRenderMode) {
+		case ColTreeRenderMode::FREE:
+			recursiveRenderColTree(screen->world->objectTree.rootNode, 0);
+			break;
+		case ColTreeRenderMode::TERRAIN:
+			recursiveRenderColTree(screen->world->terrainTree.rootNode, 0);
+			break;
 		case ColTreeRenderMode::ALL:
 			recursiveRenderColTree(screen->world->objectTree.rootNode, 0);
+			recursiveRenderColTree(screen->world->terrainTree.rootNode, 0);
 			break;
 		case ColTreeRenderMode::SELECTED:
 			if (screen->selectedPart != nullptr)
