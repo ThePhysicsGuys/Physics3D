@@ -13,6 +13,7 @@ const char * physicsLabels[]{
 	"Update Tree Structure",
 	"Wait for lock",
 	"Updates",
+	"Queue",
 	"Other"
 };
 

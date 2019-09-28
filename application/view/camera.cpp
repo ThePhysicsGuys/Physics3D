@@ -16,6 +16,7 @@
 #include "../extendedPart.h"
 
 #include "picker/picker.h"
+#include "worlds.h"
 
 Camera::Camera(Position position, Mat3 rotation) : cframe(GlobalCFrame(position, rotation)), velocity(0.35), angularVelocity(0.04), flying(true) {
 	onUpdate();
@@ -52,9 +53,11 @@ void Camera::rotate(Screen& screen, double dalpha, double dbeta, double dgamma, 
 
 	cframe.rotation = rotX(float(currentAngularVelocity * dalpha)) * Mat3f(cframe.rotation) * rotY(float(currentAngularVelocity * dbeta));
 
-	if (leftDragging) 
-		Picker::moveGrabbedPhysicalLateral(screen);
-
+	if (leftDragging) {
+		screen.world->asyncModification([&screen]() {
+			Picker::moveGrabbedPhysicalLateral(screen);
+		});
+	}
 	// Accelerate camera rotation
 	if (accelerating)
 		currentAngularVelocity += angularVelocity * angularVelocityIncrease;
@@ -95,8 +98,11 @@ void Camera::move(Screen& screen, double dx, double dy, double dz, bool leftDrag
 		Vec3 translationY = Vec3(0, dy, 0);
 		translation += translationY;
 
-		if (leftDragging) 
-			Picker::moveGrabbedPhysicalLateral(screen);
+		if (leftDragging) {
+			screen.world->asyncModification([&screen]() {
+				Picker::moveGrabbedPhysicalLateral(screen);
+			});
+		}
 	}
 
 	if (dz != 0) {
@@ -104,8 +110,11 @@ void Camera::move(Screen& screen, double dx, double dy, double dz, bool leftDrag
 		Vec3 translationZ = normalize(Vec3(cameraRotationZ.x, 0, cameraRotationZ.z)) * dz;
 		translation += translationZ;
 
-		if (leftDragging) 
-			Picker::moveGrabbedPhysicalTransversal(screen, -currentVelocity * dz);
+		if (leftDragging) {
+			screen.world->asyncModification([&screen, dz, this]() {
+				Picker::moveGrabbedPhysicalTransversal(screen, -currentVelocity * dz);
+			});
+		}
 	}
 
 	translation *= currentVelocity;

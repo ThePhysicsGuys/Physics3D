@@ -9,6 +9,12 @@ class WorldPrototype;
 #include "math/globalCFrame.h"
 #include "math/bounds.h"
 
+enum class PartClass {
+	NONE,
+	FREE,
+	TERRAIN,
+};
+
 struct PartPhysicalData {
 	GlobalCFrame cframe;
 	Shape hitbox;
@@ -23,7 +29,7 @@ class Part {
 
 	GlobalCFrame cframe;
 
-	bool isTerrainPart = false;
+	PartClass partClass = PartClass::NONE;
 public:
 	Physical* parent = nullptr;
 	Shape hitbox;

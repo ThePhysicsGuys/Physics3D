@@ -249,20 +249,16 @@ void Physical::updateAttachedPartCFrames() {
 	this->circumscribingSphere.origin = getCFrame().localToGlobal(localCentroid);
 }
 void Physical::rotateAroundCenterOfMass(const RotMat3& rotation) {
-	world->requestModification([this, rotation](WorldPrototype& world) {
-		Bounds oldBounds = this->mainPart->getStrictBounds();
-		rotateAroundCenterOfMassUnsafe(rotation);
-		updateAttachedPartCFrames();
-		world.updatePartGroupBounds(this->mainPart, oldBounds);
-	});
+	Bounds oldBounds = this->mainPart->getStrictBounds();
+	rotateAroundCenterOfMassUnsafe(rotation);
+	updateAttachedPartCFrames();
+	world->updatePartGroupBounds(this->mainPart, oldBounds);
 }
 void Physical::translate(const Vec3& translation) {
-	world->requestModification([this, translation](WorldPrototype& world) {
-		Bounds oldBounds = this->mainPart->getStrictBounds();
-		translateUnsafe(translation);
-		updateAttachedPartCFrames();
-		world.updatePartGroupBounds(this->mainPart, oldBounds);
-	});
+	Bounds oldBounds = this->mainPart->getStrictBounds();
+	translateUnsafe(translation);
+	updateAttachedPartCFrames();
+	world->updatePartGroupBounds(this->mainPart, oldBounds);
 }
 
 void Physical::update(double deltaT) {
@@ -377,13 +373,11 @@ void Physical::setCFrameUnsafe(const GlobalCFrame& newCFrame) {
 
 void Physical::setCFrame(const GlobalCFrame& newCFrame) {
 	if (this->world != nullptr) {
-		world->requestModification([this, newCFrame](WorldPrototype& world) {
-			Bounds oldMainPartBounds = this->mainPart->getStrictBounds();
+		Bounds oldMainPartBounds = this->mainPart->getStrictBounds();
 
-			setCFrameUnsafe(newCFrame);
+		setCFrameUnsafe(newCFrame);
 
-			world.updatePartGroupBounds(this->mainPart, oldMainPartBounds);
-		});
+		world->updatePartGroupBounds(this->mainPart, oldMainPartBounds);
 	} else {
 		setCFrameUnsafe(newCFrame);
 	}

@@ -61,7 +61,6 @@ void ModelLayer::onEvent(Event& event) {
 void ModelLayer::onRender() {
 	graphicsMeasure.mark(GraphicsProcess::PHYSICALS);
 
-	SharedLockGuard lg(screen->world->lock);
 	Shaders::basicShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
 
 	std::map<double, ExtendedPart*> transparentMeshes;
@@ -70,52 +69,44 @@ void ModelLayer::onRender() {
 	Shaders::basicShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
 	Shaders::basicShader.updateLight(lights, lightCount);
 	Shaders::maskShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix);
-
-	// Render player if not in flying mode
-	if (!screen->camera.flying) {
-		Shaders::basicShader.updateMaterial(Material());
-		Shaders::basicShader.updateModel(CFrameToMat4(screen->camera.attachment->getCFrame()));
-		Library::sphere->render();
-	}
-
-	// Render world objects
-	for (ExtendedPart& part : screen->world->iterPartsFiltered(DoNothingFilter<Part>(), ALL_PARTS)) {
-		int meshId = part.drawMeshId;
-
-		Material material = part.material;
-
-		// Picker code
-		if (&part == screen->intersectedPart)
-			material.ambient = part.material.ambient + Vec4f(-0.1f, -0.1f, -0.1f, 0);
-		else
-			material.ambient = part.material.ambient;
-
-		if (material.ambient.w < 1) {
-			transparentMeshes[lengthSquared(Vec3(screen->camera.cframe.position - part.getPosition()))] = &part;
-			continue;
+	
+	graphicsMeasure.mark(GraphicsProcess::WAIT_FOR_LOCK);
+	screen->world->syncReadOnlyOperation([this, &transparentMeshes]() {
+		graphicsMeasure.mark(GraphicsProcess::PHYSICALS);
+		// Render player if not in flying mode
+		if (!screen->camera.flying) {
+			Shaders::basicShader.updateMaterial(Material());
+			Shaders::basicShader.updateModel(CFrameToMat4(screen->camera.attachment->getCFrame()));
+			Library::sphere->render();
 		}
 
-		Shaders::basicShader.updateMaterial(material);
+		// Render world objects
+		for (ExtendedPart& part : screen->world->iterPartsFiltered(DoNothingFilter<Part>(), ALL_PARTS)) {
+			int meshId = part.drawMeshId;
 
-		// Render each physical
-		Shaders::basicShader.updatePart(part);
+			Material material = part.material;
 
-		if (meshId == -1) continue;
+			// Picker code
+			if (&part == screen->intersectedPart)
+				material.ambient = part.material.ambient + Vec4f(-0.1f, -0.1f, -0.1f, 0);
+			else
+				material.ambient = part.material.ambient;
 
-		/*if (&part == selectedPart) {
-			maskFrameBuffer->bind();
-			Renderer::clearDepth();
-			Renderer::clearColor();
-			Shaders::maskShader.updateModel(CFrameToMat4(part.cframe));
-			meshes[meshId]->render();
-			Shaders::edgeShader.updateTexture(maskFrameBuffer->texture);
-			quad->render();
-			image->texture = maskFrameBuffer->texture;
-			modelFrameBuffer->bind();
-		} else {*/
+			if (material.ambient.w < 1) {
+				transparentMeshes[lengthSquared(Vec3(screen->camera.cframe.position - part.getPosition()))] = &part;
+				continue;
+			}
+
+			Shaders::basicShader.updateMaterial(material);
+
+			// Render each physical
+			Shaders::basicShader.updatePart(part);
+
+			if (meshId == -1) continue;
+
 			screen->meshes[meshId]->render(part.renderMode);
-		//}
-	}
+		}
+	});
 
 	for (auto iterator = transparentMeshes.rbegin(); iterator != transparentMeshes.rend(); ++iterator) {
 		ExtendedPart* part = (*iterator).second;
