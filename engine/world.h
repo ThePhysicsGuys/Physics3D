@@ -54,9 +54,10 @@ private:
 	void setPartCFrame(Part* part, const GlobalCFrame& newCFrame);
 	void updatePartBounds(const Part* updatedPart, const Bounds& oldBounds);
 	void updatePartGroupBounds(const Part* mainPart, const Bounds& oldMainPartBounds);
+	void removePartFromTrees(const Part* part);
 
-	BoundsTree<Part>& getTreeForType(PartClass pc);
-	const BoundsTree<Part>& getTreeForType(PartClass pc) const;
+	BoundsTree<Part>& getTreeForPart(const Part* part);
+	const BoundsTree<Part>& getTreeForPart(const Part* part) const;
 
 protected:
 	virtual void applyExternalForces();

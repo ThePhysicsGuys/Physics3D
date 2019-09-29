@@ -120,35 +120,43 @@ void Physical::attachPart(Part* part, const CFrame& attachment) {
 
 	refreshWithNewParts();
 }
+
+// detaches part, without updating World
+// Returns true if this physical has no more parts and should be deleted
 void Physical::detachPart(Part* part) {
-	if (this->world != nullptr) {
-		this->world->objectTree.remove(part);
-	}
 	if (part == mainPart) {
 		if (parts.size == 0) {
+			delete this;
+			return;
+		} else {
+			makeMainPart(parts[parts.size - 1]);
+		}
+	}
+	for (int i = parts.size - 1; i >= 0; i--) {
+		AttachedPart& at = parts[i];
+		if (at.part == part) {
+			part->parent = nullptr;
+			parts.remove(i);
+			if (this->world != nullptr) {
+				this->world->removePartFromTrees(part);
+			}
+			refreshWithNewParts();
 			return;
 		}
-		part->parent = nullptr;
-		if (parts.size >= 1) {
-			makeMainPart(parts[parts.size-1]);
-			refreshWithNewParts();
-		} else {
-			if (this->world != nullptr) {
-				this->world->removePhysical(this);
-			}
-		}
-	} else {
-		for (auto iter = parts.begin(); iter != parts.end(); ++iter) {
-			AttachedPart& at = *iter;
-			if (at.part == part) {
-				part->parent = nullptr;
-				parts.remove(iter);
-				refreshWithNewParts();
-				return;
-			}
-		}
-		throw "Error: could not find part to remove!";
 	}
+	throw "Error: could not find part to remove!";
+}
+
+inline Physical::~Physical() {
+	if (this->world != nullptr) {
+		this->world->removePhysical(this);
+	}
+	if (mainPart != nullptr) mainPart->parent = nullptr;
+	for (AttachedPart& atPart : parts) {
+		atPart.part->parent = nullptr;
+	}
+	mainPart = nullptr;
+	parts.clear();
 }
 
 void Physical::refreshWithNewParts() {

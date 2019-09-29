@@ -140,7 +140,7 @@ public:
 
 	void operator++() {
 		++curIter;
-		if (!(curIter != curEnd)) {
+		while (!(curIter != curEnd)) {
 			++curFactoryIndex;
 			if (curFactoryIndex == size) return;
 			curIter = factories[curFactoryIndex].begin();

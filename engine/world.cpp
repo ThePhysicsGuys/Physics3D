@@ -11,26 +11,12 @@
 
 WorldPrototype::WorldPrototype(double deltaT) : deltaT(deltaT) {}
 
-BoundsTree<Part>& WorldPrototype::getTreeForType(PartClass pc) {
-	switch (pc) {
-	case PartClass::FREE:
-		return this->objectTree;
-	case PartClass::TERRAIN:
-		return this->terrainTree;
-	default:
-		throw "invalid PartClass!";
-	}
+BoundsTree<Part>& WorldPrototype::getTreeForPart(const Part* part) {
+	return (part->isTerrainPart) ? this->terrainTree : this->objectTree;
 }
 
-const BoundsTree<Part>& WorldPrototype::getTreeForType(PartClass pc) const {
-	switch (pc) {
-	case PartClass::FREE:
-		return this->objectTree;
-	case PartClass::TERRAIN:
-		return this->terrainTree;
-	default:
-		throw "invalid PartClass!";
-	}
+const BoundsTree<Part>& WorldPrototype::getTreeForPart(const Part* part) const {
+	return (part->isTerrainPart) ? this->terrainTree : this->objectTree;
 }
 
 void WorldPrototype::addPart(Part* part, bool anchored) {
@@ -52,7 +38,6 @@ void WorldPrototype::addPart(Part* part, bool anchored) {
 	}
 	part->parent->world = this;
 	part->parent->setAnchored(anchored);
-	part->partClass = PartClass::FREE;
 
 	ASSERT_VALID;
 }
@@ -77,6 +62,9 @@ void WorldPrototype::optimizeTerrain() {
 		terrainTree.improveStructure();
 }
 
+
+
+
 void WorldPrototype::setPartCFrame(Part* part, const GlobalCFrame& newCFrame) {
 	Bounds oldBounds = part->getStrictBounds();
 
@@ -92,6 +80,13 @@ void WorldPrototype::updatePartBounds(const Part* updatedPart, const Bounds& old
 void WorldPrototype::updatePartGroupBounds(const Part* mainPart, const Bounds& oldMainPartBounds) {
 	objectTree.updateObjectGroupBounds(mainPart, oldMainPartBounds);
 }
+
+void WorldPrototype::removePartFromTrees(const Part* part) {
+	getTreeForPart(part).remove(part);
+}
+
+
+
 
 void recursiveTreeValidCheck(const TreeNode& node) {
 	if (node.isLeafNode()) return;
