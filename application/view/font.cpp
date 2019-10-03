@@ -17,7 +17,7 @@ Font::Font(std::string font) {
 	FT_Face face;
 	FT_Error error;
 
-	Log::setSubject(font);
+	Log::subject s(font);
 
 	// Init
 	error = FT_Init_FreeType(&library);
@@ -90,8 +90,6 @@ Font::Font(std::string font) {
 	FT_Done_FreeType(library);
 
 	atlas = new Texture(atlasDimension, atlasDimension, pixels, GL_RGBA);
-
-	Log::resetSubject();
 }
 
 Font::~Font() {

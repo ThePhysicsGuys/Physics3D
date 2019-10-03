@@ -2,13 +2,12 @@
 
 #include "textureResource.h"
 
-#include "../view/texture.h"
+TextureResource* TextureAllocator::load(const std::string& name, const std::string& path) {
+	Texture texture(Texture::load(path));
 
-TextureResource* TextureAllocator::load(std::string name, std::string path) {
-	Texture* texture = Texture::load(path);
-
-	if (texture)
-		return new TextureResource(name, path, texture);
-	else
+	if (texture.getID() != 0) {
+		return new TextureResource(name, path, std::move(texture));
+	} else {
 		return nullptr;
+	}
 }

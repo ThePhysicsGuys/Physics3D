@@ -22,11 +22,14 @@
 #include "debug.h"
 #include "worlds.h"
 #include "tickerThread.h"
-#include "resourceManager.h"
+#include "resourceLoader.h"
 #include "worldBuilder.h"
 
 #include "io/export.h"
 #include "io/import.h"
+
+#include "resource/resourceManager.h"
+#include "resource/textureResource.h"
 
 #define TICKS_PER_SECOND 120.0
 #define TICK_SKIP_TIME std::chrono::milliseconds(3000)
@@ -150,9 +153,10 @@ void setupWorld() {
 	PartFactory wedgeFactory(Library::wedge, screen, "Wedge");
 
 	// Floor
-	/*Vec2 floorSize(50.0, 50.0);
+	Vec2 floorSize(50.0, 50.0);
 	double wallHeight = 7.0;
-	Material floorMaterial = Material(Texture::load("../res/textures/floor/floor_color.jpg"));
+	ResourceManager::add<TextureResource>("../res/textures/floor/floor_color.jpg", "floorMaterial");
+	Material floorMaterial = Material(ResourceManager::get<TextureResource>("floorMaterial"));
 	ExtendedPart* floorExtendedPart = createUniquePart(screen, BoundingBox(floorSize.x, 1.0, floorSize.y).toShape(), GlobalCFrame(0.0, 0.0, 0.0), 2.0, 1.0);
 	floorExtendedPart->material = floorMaterial;
 	world.addTerrainPart(floorExtendedPart);
@@ -163,7 +167,7 @@ void setupWorld() {
 	world.addTerrainPart(xWallFactory.produce(GlobalCFrame(Position(floorSize.x / 2, wallHeight / 2, 0.0)), 2.0, 1.0));
 	world.addTerrainPart(zWallFactory.produce(GlobalCFrame(Position(0.0, wallHeight / 2, floorSize.y / 2)), 2.0, 1.0));
 	world.addTerrainPart(xWallFactory.produce(GlobalCFrame(Position(-floorSize.x / 2, wallHeight / 2, 0.0)), 2.0, 1.0));
-	world.addTerrainPart(zWallFactory.produce(GlobalCFrame(Position(0.0, wallHeight / 2, -floorSize.y / 2)), 2.0, 1.0));*/
+	world.addTerrainPart(zWallFactory.produce(GlobalCFrame(Position(0.0, wallHeight / 2, -floorSize.y / 2)), 2.0, 1.0));
 
 	// hollow box
 	/*WorldBuilder::HollowBoxParts parts = WorldBuilder::buildHollowBox(Bounds(Position(12.0, 3.0, 14.0), Position(20.0, 8.0, 20.0)), 0.3);
@@ -243,8 +247,8 @@ void setupWorld() {
 			}
 		}
 	}
-	buildTerrain();
-	world.optimizeTerrain();
+	//buildTerrain();
+	//world.optimizeTerrain();
 
 	// Player
 	screen.camera.attachment = sphereFactory.produce(GlobalCFrame(), 1.0, 0.2);

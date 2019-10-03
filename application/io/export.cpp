@@ -248,7 +248,7 @@ void saveBinaryWorld(const std::string& name, World<ExtendedPart>& world, Camera
 }
 
 void saveNonBinaryWorld(const std::string& name, World<ExtendedPart>& world, Camera& camera) {
-	Log::setSubject(name);
+	Log::subject s(name);
 	Log::info("Exporting world...");
 
 	std::string folder = std::string("./") + name;
@@ -303,7 +303,6 @@ void saveNonBinaryWorld(const std::string& name, World<ExtendedPart>& world, Cam
 	}
 
 	Log::info("World exported");
-	Log::resetSubject();
 
 	output.close();
 }

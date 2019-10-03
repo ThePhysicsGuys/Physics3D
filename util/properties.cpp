@@ -39,7 +39,7 @@ namespace PropertiesParser {
 	Properties read(const std::string& file) {
 		Properties properties;
 
-		Log::setSubject(file);
+		Log::subject s(file);
 
 		std::ifstream inputstream;
 		inputstream.open(file.c_str());
@@ -70,13 +70,11 @@ namespace PropertiesParser {
 
 		inputstream.close();
 
-		Log::resetSubject();
-
 		return properties;
 	}
 
 	void write(const std::string& file, Properties& properties) {
-		Log::setSubject(file);
+		Log::subject s(file);
 
 		Log::info("Writing %d properties", properties.get().size());
 
@@ -90,8 +88,6 @@ namespace PropertiesParser {
 		for (auto property : properties.get()) {
 			outputstream << property.first << ": " << property.second << std::endl;
 		}
-
-		Log::resetSubject();
 
 		outputstream.close();
 	}

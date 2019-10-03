@@ -3,8 +3,16 @@
 class Bindable {
 protected:
 	unsigned int id;
-public:
 
+	Bindable() : id(0) {
+
+	}
+
+	Bindable(unsigned int id) : id(id) {
+
+	}
+
+public:
 	unsigned int getID() {
 		return id;
 	}

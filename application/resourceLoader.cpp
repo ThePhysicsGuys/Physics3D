@@ -1,6 +1,6 @@
 #include "core.h"
 
-#include "resourceManager.h"
+#include "resourceLoader.h"
 
 #include <windows.h>
 #include "resource.h"

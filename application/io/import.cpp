@@ -293,9 +293,9 @@ VisualShape OBJImport::load(std::string file, bool binary) {
 	struct stat buffer;
 
 	if (stat(file.c_str(), &buffer) == -1) {
-		Log::setSubject(file.c_str());
+		Log::subject(file.c_str());
 		Log::error("File not found: %s", file.c_str());
-		Log::resetSubject();
+
 		return VisualShape();
 	}
 
@@ -338,11 +338,12 @@ void parseSubject(Subject subject, std::string path, std::map<std::string, std::
 		material.specular = Import::parseVec3(fields.at("specular"));
 		material.reflectance = Import::parseFloat(fields.at("reflectance"));
 
-		if (!fields.at("texture").empty())
+		//! deprecated
+		/*if (!fields.at("texture").empty())
 			material.texture = Texture::load(fields.at("texture"));
 
 		if (!fields.at("normals").empty())
-			material.normal = Texture::load(fields.at("normals"));
+			material.normal = Texture::load(fields.at("normals"));*/
 
 		double density = Import::parseDouble(fields.at("density"));
 		double friction = Import::parseDouble(fields.at("friction"));
@@ -404,7 +405,7 @@ void loadBinaryWorld(std::string name, World<ExtendedPart>& world, Screen& scree
 }
 
 void loadNonBinaryWorld(std::string name, World<ExtendedPart>& world, Screen& screen) {
-	Log::setSubject(name);
+	Log::subject s(name);
 
 	Subject subject = Subject::NONE;
 	std::map<std::string, std::string> fields;
@@ -447,8 +448,6 @@ void loadNonBinaryWorld(std::string name, World<ExtendedPart>& world, Screen& sc
 	}
 
 	parseSubject(subject, path, fields, factories, world, screen);
-
-	Log::resetSubject();
 }
 
 void WorldImport::load(std::string name, World<ExtendedPart>& world, Screen& screen, bool binary) {

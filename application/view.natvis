@@ -17,8 +17,9 @@
   </Type>
 
   <Type Name="Texture">
-    <DisplayString>dimension=({width}, {height}), unit={unit}, channels={channels}</DisplayString>
+    <DisplayString>id={id}, dimension=({width}, {height}), unit={unit}, channels={channels}</DisplayString>
     <Expand>
+      <Item Name="id">id</Item> 
       <Item Name="unit">unit</Item>
       <Item Name="width">width</Item>
       <Item Name="height">height</Item>

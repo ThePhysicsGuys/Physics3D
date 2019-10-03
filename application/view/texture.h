@@ -20,6 +20,7 @@ public:
 	Texture(int width, int height, const void* buffer, int target, int format, int internalFormat, int type);
 	Texture(int width, int height, const void* buffer, int format);
 	Texture(int width, int height);
+	Texture();
 
 	~Texture();
 	Texture(Texture&& other);
@@ -40,7 +41,7 @@ public:
 	Texture* colored(Vec3 color);
 	Texture* colored(Vec4 color);
 
-	static Texture* load(const std::string& name);
+	static Texture load(const std::string& name);
 
 	int getWidth() const;
 	int getHeight() const;

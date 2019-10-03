@@ -48,31 +48,37 @@ int getFormatFromChannels(int channels) {
 		break;
 	default:
 		Log::warn("Unknown amount of channels: %d, assuming RGB", channels);
-		Log::resetSubject();
 		return GL_RGB;
 	}
 }
 
-Texture* Texture::load(const std::string& name) {
+Texture Texture::load(const std::string& name) {
 	int width;
 	int height;
 	int channels;
 	stbi_set_flip_vertically_on_load(true);
 	unsigned char* data = stbi_load(name.c_str(), &width, &height, &channels, 0);
 
-	Texture* texture = nullptr;
-
 	if (data) {
 		int format = getFormatFromChannels(channels);
-		texture = new Texture(width, height, data, format);
-	} else {
-		Log::setSubject(name);
-		Log::error("Failed to load texture");
-		Log::resetSubject();
-	}
 
-	stbi_image_free(data);
-	return texture;
+		Texture texture(width, height, data, format);
+
+		stbi_image_free(data);
+
+		return texture;
+	} else {
+		Log::subject s(name);
+		Log::error("Failed to load texture");
+
+		stbi_image_free(data);
+
+		return Texture();
+	}
+}
+
+Texture::Texture() : width(0), height(0), internalFormat(0), format(0), target(0), type(0), unit(0), channels(0) {
+
 }
 
 Texture::Texture(int width, int height) : Texture(width, height, nullptr, GL_RGBA) {
@@ -105,15 +111,39 @@ Texture::~Texture() {
 	close();
 }
 
-Texture::Texture(Texture&& other) {
-	id = other.id;
+Texture::Texture(Texture&& other) : Bindable(other.id), width(other.width), height(other.height), internalFormat(other.internalFormat), format(other.format), target(other.target), type(other.type), unit(other.unit), channels(other.channels) {
 	other.id = 0;
+	other.width = 0;
+	other.height = 0;
+	other.type = 0;
+	other.internalFormat = 0;
+	other.format = 0;
+	other.channels = 0;
+	other.type = 0;
+	other.unit = 0;
 }
 
 Texture& Texture::operator=(Texture&& other) {
 	if (this != &other) {
-		close();
+		id = 0;
+		width = 0;
+		height = 0;
+		type = 0;
+		internalFormat = 0;
+		format = 0;
+		channels = 0;
+		type = 0;
+		unit = 0;
+
 		std::swap(id, other.id);
+		std::swap(width, other.width);
+		std::swap(height, other.height);
+		std::swap(internalFormat, other.internalFormat);
+		std::swap(format, other.format);
+		std::swap(target, other.target);
+		std::swap(type, other.type);
+		std::swap(unit, other.unit);
+		std::swap(channels, other.channels);
 	}
 
 	return *this;
@@ -178,10 +208,12 @@ void Texture::unbind() {
 }
 
 void Texture::close() {
-	Log::warn("Closed texture #%d", id);
+	if (id != 0) {
+		Log::warn("Closed texture #%d", id);
 
-	glDeleteTextures(1, &id);
-	id = 0;
+		glDeleteTextures(1, &id);
+		id = 0;
+	}
 }
 
 int Texture::getWidth() const {
@@ -292,9 +324,8 @@ void CubeMap::load(const std::string& right, const std::string& left, const std:
 		if (data)
 			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, format, width, height, 0, internalFormat, type, data);
 		else {
-			Log::setSubject(faces[i]);
+			Log::subject s(faces[i]);
 			Log::error("Failed to load texture");
-			Log::resetSubject();
 		}
 
 		stbi_image_free(data);

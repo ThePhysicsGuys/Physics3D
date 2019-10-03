@@ -6,7 +6,7 @@
 #include "material.h"
 #include "light.h"
 
-#include "../resourceManager.h"
+#include "../resourceLoader.h"
 #include "../extendedPart.h"
 
 #include <sstream>
@@ -88,13 +88,12 @@ ShaderProgram::ShaderProgram(ShaderSource shaderSource, const Args&... args) : s
 
 	std::vector<std::string> uniforms = { args... };
 
-	Log::setSubject(shader.name);
+	Log::subject(shader.name);
 
 	for (const std::string& uniform : uniforms) {
 		shader.createUniform(uniform);
 	}
 
-	Log::resetSubject();
 }
 
 void ShaderProgram::bind() {

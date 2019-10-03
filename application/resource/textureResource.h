@@ -1,35 +1,31 @@
 #pragma once
 
-#include "core.h"
+#include "resource.h"
 
-#include "resourceManager.h"
+#include "../view/texture.h"
 
 class TextureResource;
-class Texture;
 
 class TextureAllocator : public ResourceAllocator<TextureResource> {
 public:
-	virtual TextureResource* load(std::string name, std::string path) override;
+	virtual TextureResource* load(const std::string& name, const std::string& path) override;
 };
 
-class TextureResource : public Resource {
-private:
-	Texture* texture = nullptr;
-
+class TextureResource : public Resource, public Texture {
 public:
-	DEFINE_RESOURCE(Texture, "default/defaultTexture.png");
+	DEFINE_RESOURCE(Texture, "../res/textures/default/defaultTexture.png");
 
-	TextureResource(std::string path, Texture* texture) : Resource(path), texture(texture) {
+	TextureResource(const std::string& path, Texture&& texture) : Resource(path, path), Texture(std::move(texture)) {
 	
 	}
 
-	TextureResource(std::string name, std::string path, Texture* texture) : Resource(name, path), texture(texture) {
+	TextureResource(const std::string& name, const std::string& path, Texture&& texture) : Resource(name, path), Texture(std::move(texture)) {
 	
 	}
 
-	Texture* getTexture() {
-		return texture;
-	}
+	virtual void close() override {
+		Texture::close();
+	};
 
 	static TextureAllocator getAllocator() {
 		return TextureAllocator();
