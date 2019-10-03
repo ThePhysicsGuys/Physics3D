@@ -220,6 +220,21 @@ size_t getNumberOfObjectsInNode(const TreeNode& node) {
 	return runningTotal;
 }
 
+size_t getLengthOfLongestBranch(const TreeNode& node) {
+	if (node.isLeafNode()) return 0;
+
+	size_t best = 0;
+
+	for (const TreeNode& subNode : node) {
+		size_t lengthOfBranch = getLengthOfLongestBranch(subNode);
+		if (lengthOfBranch > best) {
+			best = lengthOfBranch;
+		}
+	}
+
+	return best + 1;
+}
+
 long long computeCost(const NodePermutation& perm) {
 	return computeCost(perm.getBoundsA()) + computeCost(perm.getBoundsB());
 }

@@ -36,7 +36,7 @@
 
 
 TickerThread physicsThread;
-GravityWorld world(Vec3(0.0, -10.0, 0.0));
+GravityWorld world(1 / TICKS_PER_SECOND, Vec3(0.0, -10.0, 0.0));
 Screen screen;
 
 
@@ -265,7 +265,7 @@ void setupPhysics() {
 		physicsMeasure.mark(PhysicsProcess::OTHER);
 
 		AppDebug::logTickStart();
-		world.tick(1 / physicsThread.getTPS());
+		world.tick();
 		AppDebug::logTickEnd();
 
 		physicsMeasure.end();
@@ -332,12 +332,14 @@ void runTick() {
 // Flying
 
 void toggleFlying() {
-	if (screen.camera.flying) {
-		screen.camera.flying = false;
-		screen.camera.attachment->setCFrame(screen.camera.cframe);
-		screen.world->addPart(screen.camera.attachment);
-	} else {
-		screen.world->removePart(screen.camera.attachment);
-		screen.camera.flying = true;
-	}
+	world.asyncModification([]() {
+		if (screen.camera.flying) {
+			screen.camera.flying = false;
+			screen.camera.attachment->setCFrame(screen.camera.cframe);
+			screen.world->addPart(screen.camera.attachment);
+		} else {
+			screen.world->removePart(screen.camera.attachment);
+			screen.camera.flying = true;
+		}
+	});
 }

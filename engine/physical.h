@@ -64,6 +64,9 @@ class Physical {
 	void translateUnsafe(const Vec3& translation);
 	void rotateAroundCenterOfMassUnsafe(const RotMat3& rotation);
 	void setCFrameUnsafe(const GlobalCFrame& newCFrame);
+
+	// deletes the given physical
+	void attachPhysical(Physical* phys, const CFrame& attachment);
 public:
 	Part* mainPart;
 	WorldPrototype* world = nullptr;
@@ -101,20 +104,22 @@ public:
 		this->circumscribingSphere.origin = getCFrame().localToGlobal(localCentroid);
 	}
 
-	Physical(Physical&& other) noexcept : parts(std::move(other.parts)) {
-		//this->cframe = other.cframe;
-		this->mainPart = other.mainPart;
-		this->velocity = other.velocity;
-		this->angularVelocity = other.angularVelocity;
-		this->totalForce = other.totalForce;
-		this->totalMoment = other.totalMoment;
-		this->mass = other.mass;
-		this->localCenterOfMass = other.localCenterOfMass;
-		this->inertia = other.inertia;
-		this->localCentroid = other.localCentroid;
-		this->circumscribingSphere = other.circumscribingSphere;
-		this->localBounds = other.localBounds;
-
+	Physical(Physical&& other) noexcept : 
+		mainPart(std::move(other.mainPart)), 
+		parts(std::move(other.parts)), 
+		forceResponse(other.forceResponse), 
+		momentResponse(other.momentResponse),	
+		velocity(other.velocity),
+		angularVelocity(other.angularVelocity),
+		totalForce(other.totalForce),
+		totalMoment(other.totalMoment),
+		mass(other.mass),
+		localCenterOfMass(other.localCenterOfMass),
+		inertia(other.inertia),
+		localCentroid(other.localCentroid),
+		circumscribingSphere(other.circumscribingSphere),
+		localBounds(other.localBounds)
+		{
 		mainPart->parent = this;
 		for (AttachedPart& p : parts) {
 			p.part->parent = this;
@@ -146,25 +151,8 @@ public:
 	Physical(const Physical&) = delete;
 	void operator=(const Physical&) = delete;
 
-	~Physical() {
-		if(mainPart != nullptr) mainPart->parent = nullptr;
-		mainPart = nullptr;
-		for (AttachedPart& atPart:parts) {
-			atPart.part->parent = nullptr;
-		}
-		parts.clear();
-	}
+	~Physical();
 
-	void makeMainPart(AttachedPart& newMainPart);
-	void makeMainPart(Part* newMainPart);
-	void attachPart(Part* part, const CFrame& attachment);
-	// deletes the given physical
-	void attachPhysical(Physical* phys, const CFrame& attachment);
-	/* 
-		returns whether the part that's been removed is the last part in the physical, 
-		meaning it should be destroyed
-	*/
-	void detachPart(Part* part);
 	void refreshWithNewParts();
 
 	void updatePart(const Part* updatedPart, const Bounds& updatedBounds);
@@ -237,6 +225,15 @@ public:
 
 	inline void setAnchored(bool anchored) { this->anchored = anchored; refreshWithNewParts(); }
 	
+
+
+	void makeMainPart(AttachedPart& newMainPart);
+	void makeMainPart(Part* newMainPart);
+	void attachPart(Part* part, const CFrame& attachment);
+	void detachPart(Part* part);
+
+
+
 	PartIter begin() { return PartIter(parts.begin()-1, mainPart); }
 	ConstPartIter begin() const { return ConstPartIter(parts.begin()-1, mainPart);}
 

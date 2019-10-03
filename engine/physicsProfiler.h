@@ -15,6 +15,7 @@ enum class PhysicsProcess {
 	UPDATE_TREE_STRUCTURE,
 	WAIT_FOR_LOCK,
 	UPDATING,
+	QUEUE,
 	OTHER,
 	COUNT
 };

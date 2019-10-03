@@ -86,15 +86,15 @@ bool StandardInputHandler::onKeyPress(KeyPressEvent& event) {
 		Debug::renderPiesEnabled = !Debug::renderPiesEnabled;
 	} else if (KeyboardOptions::Part::anchor == key) {
 		if (screen.selectedPart != nullptr) {
-			if (screen.world->isAnchored(screen.selectedPart->parent)) {
-				screen.world->unanchor(screen.selectedPart->parent);
+			if (screen.selectedPart->parent->anchored) {
+				screen.selectedPart->parent->setAnchored(false);
 			} else {
 				Physical* parent = screen.selectedPart->parent;
 				parent->velocity = Vec3();
 				parent->angularVelocity = Vec3();
 				parent->totalForce = Vec3();
 				parent->totalMoment = Vec3();
-				screen.world->anchor(screen.selectedPart->parent);
+				screen.selectedPart->parent->setAnchored(true);
 			}
 		}
 	} else if (KeyboardOptions::World::valid == key) {

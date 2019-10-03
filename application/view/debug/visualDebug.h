@@ -18,6 +18,7 @@ enum GraphicsProcess {
 	WAIT_FOR_LOCK,
 	PHYSICALS,
 	ORIGIN,
+	PICKER,
 	PROFILER,
 	FINALIZE,
 	OTHER,

@@ -26,6 +26,7 @@
 #include "../engine/sharedLockGuard.h"
 #include "../engine/geometry/shape.h"
 #include "../engine/filters.h"
+#include "view/debug/visualDebug.h"
 
 namespace Picker {
 
@@ -66,25 +67,28 @@ namespace Picker {
 
 	// Calculates the closest intersection of the given ray with the physicals in the world
 	void intersectPhysicals(Screen& screen, const Ray& ray) {
-		SharedLockGuard guard(screen.world->lock);
 
 		ExtendedPart* closestIntersectedPart = nullptr;
 		Position closestIntersectedPoint = Position();
 		float closestIntersectDistance = INFINITY;
+		
+		graphicsMeasure.mark(GraphicsProcess::WAIT_FOR_LOCK);
+		screen.world->syncReadOnlyOperation([&screen, &closestIntersectDistance, &closestIntersectedPart, &closestIntersectedPoint, &ray]() {
+			graphicsMeasure.mark(GraphicsProcess::PICKER);
+			for (ExtendedPart& part : screen.world->iterPartsFiltered(RayIntersectBoundsFilter(ray))) {
+				if (&part == screen.camera.attachment) continue;
+				Vec3 relPos = part.getPosition() - ray.start;
+				if (pointToLineDistanceSquared(ray.direction, relPos) > part.maxRadius * part.maxRadius)
+					continue;
 
-		for (ExtendedPart& part : screen.world->iterPartsFiltered(RayIntersectBoundsFilter(ray))) {
-			if (&part == screen.camera.attachment) continue;
-			Vec3 relPos = part.getPosition() - ray.start;
-			if (pointToLineDistanceSquared(ray.direction, relPos) > part.maxRadius * part.maxRadius)
-				continue;
+				float distance = intersect(ray, part.hitbox, part.getCFrame());
 
-			float distance = intersect(ray, part.hitbox, part.getCFrame());
-
-			if (distance < closestIntersectDistance && distance > 0) {
-				closestIntersectDistance = distance;
-				closestIntersectedPart = &part;
+				if (distance < closestIntersectDistance && distance > 0) {
+					closestIntersectDistance = distance;
+					closestIntersectedPart = &part;
+				}
 			}
-		}
+		});
 
 		if (closestIntersectDistance == INFINITY) {
 			closestIntersectedPart = nullptr;
@@ -104,6 +108,7 @@ namespace Picker {
 	// Update
 	// Calculates the mouse ray and the tool & physical intersections
 	void onUpdate(Screen& screen, Vec2 mousePosition) {
+		graphicsMeasure.mark(GraphicsProcess::PICKER);
 		// Calculate ray
 		Ray ray = getMouseRay(screen, mousePosition);
 		
@@ -139,8 +144,10 @@ namespace Picker {
 
 			// Update intersected point if a physical has been intersected and move physical
 			if (screen.intersectedPart) {
-				screen.world->localSelectedPoint = screen.selectedPart->getCFrame().globalToLocal(screen.intersectedPoint);
-				moveGrabbedPhysicalLateral(screen);
+				screen.world->asyncModification([]() {
+					screen.world->localSelectedPoint = screen.selectedPart->getCFrame().globalToLocal(screen.intersectedPoint);
+					moveGrabbedPhysicalLateral(screen);
+				});
 			}
 		}
 
@@ -171,7 +178,9 @@ namespace Picker {
 			editTools.onMouseDrag(screen);
 		} else {
 			if (screen.selectedPart) {
-				moveGrabbedPhysicalLateral(screen);
+				screen.world->asyncModification([]() {
+					moveGrabbedPhysicalLateral(screen);
+				});
 			}
 		}
 
@@ -180,7 +189,7 @@ namespace Picker {
 
 	void moveGrabbedPhysicalLateral(Screen& screen) {
 		if (screen.selectedPart == nullptr) return;
-
+		
 		Mat3 cameraFrame = (screen.camera.cframe.rotation).transpose();
 		Vec3 cameraDirection = cameraFrame * Vec3(0, 0, 1);
 
@@ -199,7 +208,7 @@ namespace Picker {
 
 	void moveGrabbedPhysicalTransversal(Screen& screen, double dz) {
 		if (screen.selectedPart == nullptr) return;
-
+		
 		Mat3 cameraFrame = screen.camera.cframe.rotation.transpose();
 		Vec3 cameraDirection = cameraFrame * Vec3(0, 0, 1);
 		Vec3 cameraYDirection = normalize(Vec3(cameraDirection.x, 0, cameraDirection.z));

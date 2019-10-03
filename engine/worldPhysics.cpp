@@ -13,7 +13,6 @@
 
 #include "debug.h"
 #include "constants.h"
-#include "sharedLockGuard.h"
 #include "physicsProfiler.h"
 #include "engineException.h"
 
@@ -167,13 +166,6 @@ void handleTerrainCollision(Part& part1, Part& part2, Position collisionPoint, V
 	p1.applyForce(collissionRelP1, dynamicFricForce);
 }
 
-struct Colission {
-	Part* p1;
-	Part* p2;
-	Position intersection;
-	Vec3 exitVector;
-};
-
 bool boundsSphereEarlyEnd(const BoundingBox& bounds, const Vec3& localSphereCenter, double sphereRadius) {
 	const Vec3& sphere = localSphereCenter;
 
@@ -259,55 +251,64 @@ void recursiveFindColissionsBetween(WorldPrototype& world, std::vector<Colission
 	}
 }
 
+/*
+	===== World Tick =====
+*/
 
-void WorldPrototype::tick(double deltaT) {
-	SharedLockGuard mutLock(lock);
-
+void WorldPrototype::tick() {
 	physicsMeasure.mark(PhysicsProcess::EXTERNALS);
 	applyExternalForces();
+	
+	findColissions();
 
-	physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
-	std::vector<Colission> colissions;
-	std::vector<Colission> terrainColissions;
-
-	recursiveFindColissionsInternal(*this, colissions, objectTree.rootNode);
-	recursiveFindColissionsBetween(*this, terrainColissions, objectTree.rootNode, terrainTree.rootNode);
-
-	physicsMeasure.mark(PhysicsProcess::COLISSION_HANDLING);
-	for (Colission c : colissions) {
-		handleCollision(*c.p1, *c.p2, c.intersection, c.exitVector);
-	}
-	for (Colission c : terrainColissions) {
-		handleTerrainCollision(*c.p1, *c.p2, c.intersection, c.exitVector);
-	}
+	handleColissions();
 
 	intersectionStatistics.nextTally();
+	
+	handleConstraints();
 
+	update();
+}
+
+void WorldPrototype::applyExternalForces() {}
+void WorldPrototype::findColissions() {
+	physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
+
+	currentObjectColissions.clear();
+	currentTerrainColissions.clear();
+
+	recursiveFindColissionsInternal(*this, currentObjectColissions, objectTree.rootNode);
+	recursiveFindColissionsBetween(*this, currentTerrainColissions, objectTree.rootNode, terrainTree.rootNode);
+}
+void WorldPrototype::handleColissions() {
+	physicsMeasure.mark(PhysicsProcess::COLISSION_HANDLING);
+	for (Colission c : currentObjectColissions) {
+		handleCollision(*c.p1, *c.p2, c.intersection, c.exitVector);
+	}
+	for (Colission c : currentTerrainColissions) {
+		handleTerrainCollision(*c.p1, *c.p2, c.intersection, c.exitVector);
+	}
+}
+void WorldPrototype::handleConstraints() {
 	physicsMeasure.mark(PhysicsProcess::CONSTRAINTS);
 	for (const ConstraintGroup& group : constraints) {
 		group.apply();
 	}
-	
-	physicsMeasure.mark(PhysicsProcess::WAIT_FOR_LOCK);
-	mutLock.upgrade();
+}
+void WorldPrototype::update() {
 	physicsMeasure.mark(PhysicsProcess::UPDATING);
-	for(Physical& physical : iterPhysicals()) {
-		physical.update(deltaT);
+	for (Physical& physical : iterPhysicals()) {
+		physical.update(this->deltaT);
 	}
 
 	physicsMeasure.mark(PhysicsProcess::UPDATE_TREE_BOUNDS);
 	objectTree.recalculateBounds();
 	physicsMeasure.mark(PhysicsProcess::UPDATE_TREE_STRUCTURE);
 	objectTree.improveStructure();
-
-	physicsMeasure.mark(PhysicsProcess::OTHER);
-	processQueue();
-
 	age++;
 }
 
 
-void WorldPrototype::applyExternalForces() {}
 
 double WorldPrototype::getTotalKineticEnergy() const {
 	double total = 0.0;

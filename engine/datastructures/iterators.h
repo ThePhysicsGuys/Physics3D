@@ -140,7 +140,7 @@ public:
 
 	void operator++() {
 		++curIter;
-		if (!(curIter != curEnd)) {
+		while (!(curIter != curEnd)) {
 			++curFactoryIndex;
 			if (curFactoryIndex == size) return;
 			curIter = factories[curFactoryIndex].begin();
@@ -153,4 +153,20 @@ public:
 	bool operator!=(IteratorEnd) const {
 		return curFactoryIndex != size;
 	}
+};
+
+template<typename Iter>
+struct DereferencingIterator {
+	Iter baseIter;
+
+	DereferencingIterator(const Iter& baseIter) : baseIter(baseIter) {}
+	DereferencingIterator(Iter&& baseIter) : baseIter(std::move(baseIter)) {}
+	
+	void operator++() { ++baseIter; }
+	void operator++(int) { baseIter++; }
+	decltype(**baseIter)& operator*() const { return **baseIter; }
+	bool operator!=(const DereferencingIterator& other) const { return this->baseIter != other.baseIter; }
+	bool operator!=(const Iter& other) const { return this->baseIter != other; }
+	bool operator==(const DereferencingIterator& other) const { return this->baseIter == other.baseIter; }
+	bool operator==(const Iter& other) const { return this->baseIter == other; }
 };

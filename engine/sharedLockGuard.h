@@ -37,3 +37,21 @@ public:
 		isHard = false;
 	}
 };
+
+class UnlockOnDestroy {
+	std::shared_mutex& mutex;
+public:
+	/* assumes it is given a locked mutex
+	Unlocks when destroyed*/
+	inline UnlockOnDestroy(std::shared_mutex& mutex) : mutex(mutex) {}
+	~UnlockOnDestroy() { mutex.unlock(); }
+};
+
+class UnlockSharedOnDestroy {
+	std::shared_mutex& mutex;
+public:
+	/* assumes it is given a shared_locked mutex
+	Unlocks when destroyed*/
+	inline UnlockSharedOnDestroy(std::shared_mutex& mutex) : mutex(mutex) {}
+	~UnlockSharedOnDestroy() { mutex.unlock_shared(); }
+};

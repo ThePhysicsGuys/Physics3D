@@ -87,11 +87,11 @@ namespace WorldBuilder {
 
 		world.addPart(bottom);
 		Physical & parent = *bottom->parent;
-		world.attachPart(top, parent, CFrame(Vec3(0, box.getHeight() - wallThickness, 0)));
-		world.attachPart(left, parent, CFrame(Vec3(box.getWidth() / 2 - wallThickness / 2, box.getHeight() / 2 - wallThickness / 2, 0)));
-		world.attachPart(right, parent, CFrame(Vec3(-box.getWidth() / 2 + wallThickness / 2, box.getHeight() / 2 - wallThickness / 2, 0)));
-		world.attachPart(front, parent, CFrame(Vec3(0, box.getHeight() / 2 - wallThickness / 2, box.getDepth() / 2 - wallThickness / 2)));
-		world.attachPart(back, parent, CFrame(Vec3(0, box.getHeight() / 2 - wallThickness / 2, -box.getDepth() / 2 + wallThickness / 2)));
+		parent.attachPart(top, CFrame(Vec3(0, box.getHeight() - wallThickness, 0)));
+		parent.attachPart(left, CFrame(Vec3(box.getWidth() / 2 - wallThickness / 2, box.getHeight() / 2 - wallThickness / 2, 0)));
+		parent.attachPart(right, CFrame(Vec3(-box.getWidth() / 2 + wallThickness / 2, box.getHeight() / 2 - wallThickness / 2, 0)));
+		parent.attachPart(front, CFrame(Vec3(0, box.getHeight() / 2 - wallThickness / 2, box.getDepth() / 2 - wallThickness / 2)));
+		parent.attachPart(back, CFrame(Vec3(0, box.getHeight() / 2 - wallThickness / 2, -box.getDepth() / 2 + wallThickness / 2)));
 
 		return HollowBoxParts{ bottom, top, left, right, front, back };
 	}

@@ -402,6 +402,8 @@ struct TreeIterFactory;
 
 size_t getNumberOfObjectsInNode(const TreeNode& node);
 
+size_t getLengthOfLongestBranch(const TreeNode& node);
+
 template<typename Boundable>
 struct BoundsTree {
 	mutable TreeNode rootNode;
