@@ -167,7 +167,7 @@ void DebugLayer::onRender() {
 
 	if (screen->selectedPart != nullptr) {
 		const GlobalCFrame& selectedCFrame = screen->selectedPart->getCFrame();
-		for (const Vec3f& corner : screen->selectedPart->hitbox.iterVertices()) {
+		for (const Vec3f& corner : screen->selectedPart->hitbox.asPolyhedron().iterVertices()) {
 			vecLog.add(ColoredVector(selectedCFrame.localToGlobal(corner), screen->selectedPart->parent->getVelocityOfPoint(Vec3(selectedCFrame.localToRelative(corner))), VELOCITY));
 		}
 
@@ -189,10 +189,6 @@ void DebugLayer::onRender() {
 			red.w = 0.5;
 			BoundingBox localBounds = selectedPhys.localBounds;
 			renderBox(selectedPhys.getCFrame().localToGlobal(CFrame(localBounds.getCenter())), localBounds.getWidth(), localBounds.getHeight(), localBounds.getDepth(), red);
-
-			Vec4f blue = GUI::COLOR::BLUE;
-			blue.w = 0.5;
-			renderSphere(selectedPhys.circumscribingSphere.radius * 2, selectedPhys.circumscribingSphere.origin, blue);
 		}
 	}
 
@@ -215,10 +211,6 @@ void DebugLayer::onRender() {
 			red.w = 0.5;
 			BoundingBox localBounds = phys.localBounds;
 			renderBox(phys.getCFrame().localToGlobal(CFrame(localBounds.getCenter())), localBounds.getWidth(), localBounds.getHeight(), localBounds.getDepth(), red);
-
-			Vec4f blue = GUI::COLOR::BLUE;
-			blue.w = 0.5;
-			renderSphere(phys.circumscribingSphere.radius * 2, phys.circumscribingSphere.origin, blue);
 		}
 	}
 

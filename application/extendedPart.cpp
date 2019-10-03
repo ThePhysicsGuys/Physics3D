@@ -3,7 +3,7 @@
 #include "extendedPart.h"
 
 ExtendedPart::ExtendedPart(const Shape& hitbox, const GlobalCFrame& position, double density, double friction, int drawMeshId, std::string name) : 
-	Part(hitbox, position, density, friction), visualShape(hitbox) {
+	Part(hitbox, position, density, friction), visualShape(hitbox.asPolyhedron()) {
 	this->name = name;
 	this->drawMeshId = drawMeshId;
 }

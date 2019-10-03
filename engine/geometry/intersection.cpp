@@ -54,13 +54,13 @@ inline int furthestIndexInDirection(Vec3* vertices, int vertexCount, Vec3 direct
 	return bestVertexIndex;
 }
 
-inline MinkPoint getSupport(const Shape& first, const Shape& second, const Vec3f& searchDirection) {
+inline MinkPoint getSupport(const Polyhedron& first, const Polyhedron& second, const Vec3f& searchDirection) {
 	int furthestIndex1 = first.furthestIndexInDirection(searchDirection);
 	int furthestIndex2 = second.furthestIndexInDirection(-searchDirection);
 	return MinkPoint{first[furthestIndex1] - second[furthestIndex2], first[furthestIndex1], second[furthestIndex2] };
 }
 
-inline MinkPoint getSupport(const Shape& first, const Shape& second, const CFramef& transform, const Vec3f& searchDirection) {
+inline MinkPoint getSupport(const Polyhedron& first, const Polyhedron& second, const CFramef& transform, const Vec3f& searchDirection) {
 	/*int furthestIndex1 = first.furthestIndexInDirection(searchDirection);
 	Vec3f transformedSearchDirection = transform.relativeToLocal(searchDirection);
 	int furthestIndex2 = second.furthestIndexInDirection(-transformedSearchDirection);
@@ -74,7 +74,7 @@ inline MinkPoint getSupport(const Shape& first, const Shape& second, const CFram
 	return MinkPoint{ furthest1 - secondVertex, furthest1, secondVertex };
 }
 
-bool runGJK(const Shape& first, const Shape& second, const Vec3f& initialSearchDirection, Tetrahedron& simplex, int& iter) {
+bool runGJK(const Polyhedron& first, const Polyhedron& second, const Vec3f& initialSearchDirection, Tetrahedron& simplex, int& iter) {
 	MinkPoint A(getSupport(first, second, initialSearchDirection));
 	MinkPoint B, C, D;
 
@@ -193,7 +193,7 @@ bool runGJK(const Shape& first, const Shape& second, const Vec3f& initialSearchD
 	return false;
 }
 
-bool runGJKTransformed(const Shape& first, const Shape& second, const CFramef& transform, const Vec3f& initialSearchDirection, Tetrahedron& simplex, int& iter) {
+bool runGJKTransformed(const Polyhedron& first, const Polyhedron& second, const CFramef& transform, const Vec3f& initialSearchDirection, Tetrahedron& simplex, int& iter) {
 	MinkPoint A(getSupport(first, second, transform, initialSearchDirection));
 	MinkPoint B, C, D;
 
@@ -329,7 +329,7 @@ void initializeBuffer(const Tetrahedron& s, ComputationBuffers& b) {
 	b.knownVecs[3] = MinkowskiPointIndices{s.D.originFirst, s.D.originSecond};
 }
 
-bool runEPA(const Shape& first, const Shape& second, const Tetrahedron& s, Vec3f& intersection, Vec3f& exitVector, ComputationBuffers& bufs, int& iter) {
+bool runEPA(const Polyhedron& first, const Polyhedron& second, const Tetrahedron& s, Vec3f& intersection, Vec3f& exitVector, ComputationBuffers& bufs, int& iter) {
 	bufs.ensureCapacity(first.vertexCount + second.vertexCount + EPA_MAX_ITER, first.triangleCount + second.triangleCount + EPA_MAX_ITER*2);
 
 	initializeBuffer(s, bufs);
@@ -392,7 +392,7 @@ bool runEPA(const Shape& first, const Shape& second, const Tetrahedron& s, Vec3f
 	return false;
 }
 
-bool runEPATransformed(const Shape& first, const Shape& second, const Tetrahedron& s, const CFramef& relativeCFrame, Vec3f& intersection, Vec3f& exitVector, ComputationBuffers& bufs, int& iter) {
+bool runEPATransformed(const Polyhedron& first, const Polyhedron& second, const Tetrahedron& s, const CFramef& relativeCFrame, Vec3f& intersection, Vec3f& exitVector, ComputationBuffers& bufs, int& iter) {
 	bufs.ensureCapacity(first.vertexCount + second.vertexCount + EPA_MAX_ITER, first.triangleCount + second.triangleCount + EPA_MAX_ITER * 2);
 
 	initializeBuffer(s, bufs);

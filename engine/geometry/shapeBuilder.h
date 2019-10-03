@@ -15,6 +15,6 @@ public:
 
 	void addPoint(Vec3f point, int replacingTriangleIndex);
 
-	Shape toShape() const;
+	Polyhedron toShape() const;
 	IndexedShape toIndexedShape() const;
 };

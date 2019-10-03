@@ -175,7 +175,7 @@ TEST_CASE(testIntersection) {
 	Vec3 buf2[8];
 
 	BoundingBox statBox{-0.33, -0.37, -0.73, 0.33, 0.37, 0.73};
-	Shape stationary = statBox.toShape(buf1);
+	Polyhedron stationary = statBox.toShape(buf1);
 
 	Vec3 i;
 
@@ -185,7 +185,7 @@ TEST_CASE(testIntersection) {
 				printf("x=%f, y=%f, z=%f", x, y, z);
 
 				BoundingBox movBox{-0.17 + x, -0.57 + y, -0.71 + z, 0.17 + x, 0.57 + y, 0.71 + z};
-				Shape moving = movBox.toShape(buf1);
+				Polyhedron moving = movBox.toShape(buf1);
 
 				ASSERT(statBox.intersects(movBox) == stationary.intersects(moving, i));
 			}

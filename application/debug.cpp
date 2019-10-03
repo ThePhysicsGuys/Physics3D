@@ -60,7 +60,7 @@ namespace AppDebug {
 			}}
 		}
 
-		void logShape(const Shape& shape, const GlobalCFrame& location) {
+		void logShape(const Polyhedron& shape, const GlobalCFrame& location) {
 			for(int i = 0; i < shape.triangleCount; i++) {
 				Triangle t = shape.triangles[i];
 				for(int j = 0; j < 3; j++) {

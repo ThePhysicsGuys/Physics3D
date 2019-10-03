@@ -7,7 +7,7 @@ ConvexShapeBuilder::ConvexShapeBuilder(Vec3f * vertBuf, Triangle* triangleBuf, i
 	fillNeighborBuf(triangleBuf, triangleCount, neighborBuf);
 }
 
-ConvexShapeBuilder::ConvexShapeBuilder(const Shape& s, Vec3f * vertBuf, Triangle* triangleBuf, TriangleNeighbors* neighborBuf, int* removalBuffer, EdgePiece* newTriangleBuffer)
+ConvexShapeBuilder::ConvexShapeBuilder(const Polyhedron& s, Vec3f * vertBuf, Triangle* triangleBuf, TriangleNeighbors* neighborBuf, int* removalBuffer, EdgePiece* newTriangleBuffer)
 	: vertexBuf(vertBuf), triangleBuf(triangleBuf), vertexCount(s.vertexCount), triangleCount(s.triangleCount), neighborBuf(neighborBuf), removalBuffer(removalBuffer), newTriangleBuffer(newTriangleBuffer) {
 
 	for(int i = 0; i < s.vertexCount; i++) {
@@ -236,8 +236,8 @@ bool ConvexShapeBuilder::addPoint(const Vec3f& point) {
 	return false;
 }
 
-Shape ConvexShapeBuilder::toShape() const {
-	return Shape(vertexBuf, SharedArrayPtr<const Triangle>::staticSharedArrayPtr(triangleBuf), vertexCount, triangleCount);
+Polyhedron ConvexShapeBuilder::toShape() const {
+	return Polyhedron(vertexBuf, SharedArrayPtr<const Triangle>::staticSharedArrayPtr(triangleBuf), vertexCount, triangleCount);
 }
 IndexedShape ConvexShapeBuilder::toIndexedShape() const {
 	return IndexedShape{vertexBuf, SharedArrayPtr<const Triangle>::staticSharedArrayPtr(triangleBuf), vertexCount, triangleCount, neighborBuf};

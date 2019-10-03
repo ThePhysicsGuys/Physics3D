@@ -5,7 +5,7 @@
 #include "math/cframe.h"
 #include "math/globalCFrame.h"
 
-struct Shape;
+struct Polyhedron;
 
 namespace Debug {
 	
@@ -35,10 +35,10 @@ namespace Debug {
 	void logVector(Position origin, Vec3 vec, VectorType type);
 	void logPoint(Position point, PointType type);
 	void logCFrame(CFrame frame, CFrameType type);
-	void logShape(const Shape& shape);
+	void logShape(const Polyhedron& shape);
 
 	void setVectorLogAction(void(*logger)(Position origin, Vec3 vec, VectorType type));
 	void setPointLogAction(void(*logger)(Position point, PointType type));
 	void setCFrameLogAction(void(*logger)(CFrame frame, CFrameType type));
-	void setShapeLogAction(void(*logger)(const Shape& shape, const GlobalCFrame& location));
+	void setShapeLogAction(void(*logger)(const Polyhedron& shape, const GlobalCFrame& location));
 }

@@ -17,9 +17,10 @@ struct MatrixIndex {
 };
 template<typename T, size_t Width, size_t Height>
 class Matrix {
+public:
 	T data[Width * Height];
 
-public:
+
 	// Returns a row of this matrix
 	inline constexpr MatrixIndex<T, Width, Height> operator[](size_t row) { return MatrixIndex<T, Width, Height>{ data, row }; }
 	// Returns a row of this matrix
@@ -601,6 +602,33 @@ Vector<T, Height> operator*(const Matrix<T, Width, Height>& m, const Vector<T, W
 		result[row] = sum;
 	}
 	return result;
+}
+
+template<typename T>
+Matrix<T, 3, 3> operator*(const Matrix<T, 3, 3>& m, const Matrix<T, 3, 3> & m2) {
+	Matrix<T, 3, 3> result;
+	result.data[0] = m.data[0] * m2.data[0] + m.data[3] * m2.data[1] + m.data[6] * m2.data[2];
+	result.data[1] = m.data[1] * m2.data[0] + m.data[4] * m2.data[1] + m.data[7] * m2.data[2];
+	result.data[2] = m.data[2] * m2.data[0] + m.data[5] * m2.data[1] + m.data[8] * m2.data[2];
+
+	result.data[3] = m.data[0] * m2.data[3] + m.data[3] * m2.data[4] + m.data[6] * m2.data[5];
+	result.data[4] = m.data[1] * m2.data[3] + m.data[4] * m2.data[4] + m.data[7] * m2.data[5];
+	result.data[5] = m.data[2] * m2.data[3] + m.data[5] * m2.data[4] + m.data[8] * m2.data[5];
+	
+	result.data[6] = m.data[0] * m2.data[6] + m.data[3] * m2.data[7] + m.data[6] * m2.data[8];
+	result.data[7] = m.data[1] * m2.data[6] + m.data[4] * m2.data[7] + m.data[7] * m2.data[8];
+	result.data[8] = m.data[2] * m2.data[6] + m.data[5] * m2.data[7] + m.data[8] * m2.data[8];
+
+	return result;
+}
+
+template<typename T>
+Vector<T, 3> operator*(const Matrix<T, 3, 3>& m, const Vector<T, 3>& v) {
+	T x = m.data[0] * v[0] + m.data[3] * v[1] + m.data[6] * v[2];
+	T y = m.data[1] * v[0] + m.data[4] * v[1] + m.data[7] * v[2];
+	T z = m.data[2] * v[0] + m.data[5] * v[1] + m.data[8] * v[2];
+
+	return Vector<T, 3>(x, y, z);
 }
 
 template<typename T, size_t ResultWidth, size_t ResultHeight, size_t IntermediateSize>

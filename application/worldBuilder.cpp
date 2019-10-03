@@ -7,12 +7,11 @@
 
 namespace WorldBuilder {
 
-	Shape dominoShape;
+	Shape dominoShape(BoundingBox{ -0.1, -0.7, -0.3, 0.1, 0.7, 0.3 }.toShape());
 	PartFactory dominoFactory;
 	PartFactory legFactory;
 
 	void init() {
-		dominoShape = BoundingBox{ -0.1, -0.7, -0.3, 0.1, 0.7, 0.3 }.toShape();
 		dominoFactory = PartFactory(dominoShape, screen, "domino");
 		legFactory = PartFactory(BoundingBox(0.05, 0.5, 0.05).toShape(), screen, "SpiderLeg");
 	}
