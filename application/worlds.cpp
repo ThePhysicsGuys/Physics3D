@@ -13,6 +13,7 @@
 #define PICKER_STRENGTH 100
 #define PICKER_SPEED_STRENGTH 12
 #define PICKER_ANGULAR_REDUCE_STRENGTH 50
+#define RUN_SPEED 5
 
 void MagnetWorld::applyExternalForces() {
 	if (selectedPart != nullptr && !isAnchored(selectedPart->parent)) {
@@ -55,18 +56,28 @@ void GravityWorld::applyExternalForces() {
 		Vec3f playerZ = screen.camera.cframe.rotation.transpose() * Vec3(0, 0, 1);
 		Debug::logVector(screen.camera.cframe.position - playerZ, playerX, Debug::INFO_VEC);
 
-		if(handler->anyKey) {
-			Vec3 UP(0, 1, 0);
-			Vec3 forward = normalize(playerZ % UP % UP);
-			Vec3 right = -normalize(playerX % UP % UP);
-			bool leftDragging = handler->leftDragging;
-			if(handler->getKey(KeyboardOptions::Move::forward)) player->parent->applyForceAtCenterOfMass(forward * player->parent->mass * 20.0);
-			if(handler->getKey(KeyboardOptions::Move::backward)) player->parent->applyForceAtCenterOfMass(-forward * player->parent->mass * 20.0);
-			if(handler->getKey(KeyboardOptions::Move::right)) player->parent->applyForceAtCenterOfMass(right * player->parent->mass * 20.0);
-			if(handler->getKey(KeyboardOptions::Move::left)) player->parent->applyForceAtCenterOfMass(-right * player->parent->mass * 20.0);
-			if(handler->getKey(KeyboardOptions::Move::jump))
-				player->parent->applyForceAtCenterOfMass(Vec3(0.0, 50.0 * player->parent->mass, 0.0));
-		}
+		Vec3 UP(0, 1, 0);
+		Vec3 forward = normalize(playerZ % UP % UP);
+		Vec3 right = -normalize(playerX % UP % UP);
+
+		Vec3 total(0, 0, 0);
+		if (handler->getKey(KeyboardOptions::Move::forward)) total += forward;
+		if (handler->getKey(KeyboardOptions::Move::backward)) total -= forward;
+		if (handler->getKey(KeyboardOptions::Move::right)) total += right;
+		if (handler->getKey(KeyboardOptions::Move::left)) total -= right;
+
+		Vec3 runVector = (lengthSquared(total) >= 0.00005) ? normalize(total) * RUN_SPEED : Vec3(0, 0, 0);
+
+		player->conveyorEffect = runVector;
+
+
+
+		/*if(handler->getKey(KeyboardOptions::Move::forward)) player->parent->applyForceAtCenterOfMass(forward * player->parent->mass * 20.0);
+		if(handler->getKey(KeyboardOptions::Move::backward)) player->parent->applyForceAtCenterOfMass(-forward * player->parent->mass * 20.0);
+		if(handler->getKey(KeyboardOptions::Move::right)) player->parent->applyForceAtCenterOfMass(right * player->parent->mass * 20.0);
+		if(handler->getKey(KeyboardOptions::Move::left)) player->parent->applyForceAtCenterOfMass(-right * player->parent->mass * 20.0);*/
+		if(handler->getKey(KeyboardOptions::Move::jump))
+			player->parent->applyForceAtCenterOfMass(Vec3(0.0, 50.0 * player->parent->mass, 0.0));
 	}
 }
 

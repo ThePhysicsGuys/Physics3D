@@ -3,7 +3,7 @@
 #include "../eventHandler.h"
 #include "../util/properties.h"
 #include "../visualShape.h"
-#include "event/event.h"
+#include "../event/event.h"
 #include "camera.h"
 
 struct Quad;

@@ -58,7 +58,7 @@ void handleCollision(Part& part1, Part& part2, Position collisionPoint, Vec3 exi
 	p2.applyForce(collissionRelP2, -depthForce);
 
 
-	Vec3 relativeVelocity = p1.getVelocityOfPoint(collissionRelP1) - p2.getVelocityOfPoint(collissionRelP2);
+	Vec3 relativeVelocity = (p1.getVelocityOfPoint(collissionRelP1) - part1.conveyorEffect) - (p2.getVelocityOfPoint(collissionRelP2) - part2.conveyorEffect);
 
 	bool isImpulseColission = relativeVelocity * exitVector > 0;
 
@@ -70,7 +70,7 @@ void handleCollision(Part& part1, Part& part2, Position collisionPoint, Vec3 exi
 		impulse = zeroRelVelImpulse * (1.0+ELASTICITY);
 		if(!anchoredColission) p1.applyImpulse(collissionRelP1, impulse);
 		p2.applyImpulse(collissionRelP2, -impulse);
-		relativeVelocity = p1.getVelocityOfPoint(collissionRelP1) - p2.getVelocityOfPoint(collissionRelP2); // set new relativeVelocity
+		relativeVelocity = (p1.getVelocityOfPoint(collissionRelP1) - part1.conveyorEffect) - (p2.getVelocityOfPoint(collissionRelP2) - part2.conveyorEffect); // set new relativeVelocity
 	}
 
 	Vec3 slidingVelocity = exitVector % relativeVelocity % exitVector / lengthSquared(exitVector);

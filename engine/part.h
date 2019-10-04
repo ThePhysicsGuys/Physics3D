@@ -36,6 +36,14 @@ public:
 
 	BoundingBox localBounds;
 
+	/*
+		This is extra velocity that should be added to any colission
+		if this part is anchored, this gives the velocity of another part sliding on top of it, with perfect friction
+
+		In other words, this is the desired relative velocity for there to be no friction
+	*/
+	Vec3 conveyorEffect = Vec3(0, 0, 0);
+
 	Part() = default;
 	Part(const Shape& shape, const GlobalCFrame& position, double density, double friction);
 	~Part();

@@ -73,9 +73,10 @@ void ModelLayer::onRender() {
 
 	// Render player if not in flying mode
 	if (!screen->camera.flying) {
+		ExtendedPart* player = screen->camera.attachment;
 		Shaders::basicShader.updateMaterial(Material());
-		Shaders::basicShader.updateModel(CFrameToMat4(screen->camera.attachment->getCFrame()));
-		Library::sphere->render();
+		Shaders::basicShader.updatePart(*player);
+		if(player->drawMeshId != -1) screen->meshes[player->drawMeshId]->render(player->renderMode);
 	}
 
 	// Render world objects

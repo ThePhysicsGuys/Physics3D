@@ -118,6 +118,13 @@ void setupWorld() {
 	world.addPart(xWallFactory.produce(GlobalCFrame(Position(-floorSize.x / 2, wallHeight / 2, 0.0)), 2.0, 1.0), true);
 	world.addPart(zWallFactory.produce(GlobalCFrame(Position(0.0, wallHeight / 2, -floorSize.y / 2)), 2.0, 1.0), true);
 
+	ExtendedPart* conveyor = createUniquePart(screen, BoundingBox(1.0, 0.3, floorSize.y).toShape(), GlobalCFrame(10.0, 0.65, 0.0), 2.0, 1.0);
+
+	conveyor->conveyorEffect = Vec3(0, 0, 2.0);
+	world.addPart(conveyor, true);
+
+	world.addPart(cubeFactory.produceScaled(GlobalCFrame(10, 1.0, 0.0), 1.0, 0.2, 0.2, 0.2, 0.2, "TinyCube"));
+
 	// hollow box
 	/*WorldBuilder::HollowBoxParts parts = WorldBuilder::buildHollowBox(Bounds(Position(12.0, 3.0, 14.0), Position(20.0, 8.0, 20.0)), 0.3);
 
@@ -139,10 +146,9 @@ void setupWorld() {
 		world.addPart(newCube);
 	}*/
 
-	ExtendedPart* carBody = cubeFactory.produceScaled(GlobalCFrame(5.0, 1.0, 5.0), 1.0, 0.7, 2.0, 0.1, 1.0, "CarBody");
+	/*ExtendedPart* carBody = cubeFactory.produceScaled(GlobalCFrame(5.0, 1.0, 5.0), 1.0, 0.7, 2.0, 0.1, 1.0, "CarBody");
 	ExtendedPart* carLeftPanel =	cubeFactory.produceScaled(carBody, CFrame(0.0, 0.25, -0.5), 1.0, 0.7, 2.0, 0.4, 0.1, "CarLeftSide");
 	ExtendedPart* carRightPanel =	cubeFactory.produceScaled(carBody, CFrame(0.0, 0.25, 0.5), 1.0, 0.7, 2.0, 0.4, 0.1, "CarRightSide");
-	//ExtendedPart* carLeftWindow =	cubeFactory.produceScaled(carBody, CFrame(-0.3, 0.85, -0.5), 1.0, 0.7, 1.4, 0.8, 0.1, "WindowLeft");
 	ExtendedPart* carLeftWindow =	cubeFactory.produceScaled(1.0, 0.7, 1.4, 0.8, 0.05, "WindowLeft");
 	ExtendedPart* carWedgeLeft =	wedgeFactory.produceScaled(carLeftWindow, CFrame(1.0, 0.0, 0.0), 1.0, 0.7, 0.6, 0.8, 0.1, "WedgeLeft");
 	carLeftPanel->attach(*carLeftWindow, CFrame(-0.3, 0.6, 0.0));
@@ -175,8 +181,9 @@ void setupWorld() {
 	car.ballConstraints.push_back(BallConstraint{ Vec3(0.8, 0.0, -0.8), carBody->parent, Vec3(0,0,0), wheel2->parent });
 	car.ballConstraints.push_back(BallConstraint{ Vec3(-0.8, 0.0, 0.8), carBody->parent, Vec3(0,0,0), wheel3->parent });
 	car.ballConstraints.push_back(BallConstraint{ Vec3(-0.8, 0.0, -0.8), carBody->parent, Vec3(0,0,0), wheel4->parent });
-	world.constraints.push_back(std::move(car));
+	world.constraints.push_back(std::move(car));*/
 
+	/*
 	int minX = -2;
 	int maxX = 2;
 	int minY = 0;
@@ -184,7 +191,7 @@ void setupWorld() {
 	int minZ = -2;
 	int maxZ = 2;
 
-	/*for (double x = minX; x < maxX; x += 1.01) {
+	for (double x = minX; x < maxX; x += 1.01) {
 		for (double y = minY; y < maxY; y += 1.01) {
 			for (double z = minZ; z < maxZ; z += 1.01) {
 				ExtendedPart* newCube = cubeFactory.produce(GlobalCFrame(x - 5, y + 1, z - 5), 1.0, 0.2);
@@ -198,9 +205,7 @@ void setupWorld() {
 	}
 	*/
 	// Player
-	screen.camera.attachment = sphereFactory.produce(GlobalCFrame(), 1.0, 0.2);
-	screen.camera.attachment->properties.friction = 0.5;
-	screen.camera.attachment->drawMeshId = -1;
+	screen.camera.attachment = createUniquePart(screen, Library::createPrism(50, 0.2, 1.0), GlobalCFrame(), 1.0, 5.0, "Player");
 
 	if (!world.isValid()) {
 		throw "World not valid!";
@@ -281,8 +286,9 @@ void runTick() {
 void toggleFlying() {
 	if (screen.camera.flying) {
 		screen.camera.flying = false;
-		screen.camera.attachment->setCFrame(screen.camera.cframe);
+		screen.camera.attachment->setCFrame(GlobalCFrame(screen.camera.cframe.getPosition()));
 		screen.world->addPart(screen.camera.attachment);
+		screen.camera.attachment->parent->momentResponse = SymmetricMat3::ZEROS();
 	} else {
 		screen.world->removePart(screen.camera.attachment);
 		screen.camera.flying = true;
