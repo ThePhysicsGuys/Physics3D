@@ -13,7 +13,6 @@
 
 #include "debug.h"
 #include "constants.h"
-#include "sharedLockGuard.h"
 #include "physicsProfiler.h"
 #include "engineException.h"
 
@@ -24,7 +23,6 @@
 /*
 	exitVector is the distance p2 must travel so that the shapes are no longer colliding
 */
-template<bool anchoredColission>
 void handleCollision(Part& part1, Part& part2, Position collisionPoint, Vec3 exitVector) {
 	Debug::logPoint(collisionPoint, Debug::INTERSECTION);
 	Physical& p1 = *part1.parent;
@@ -38,14 +36,9 @@ void handleCollision(Part& part1, Part& part2, Position collisionPoint, Vec3 exi
 	Vec3 collissionRelP1 = collisionPoint - p1.getCenterOfMass();
 	Vec3 collissionRelP2 = collisionPoint - p2.getCenterOfMass();
 
-	double combinedInertia;
-	if(anchoredColission)
-		combinedInertia = p2.getInertiaOfPointInDirectionRelative(collissionRelP2, exitVector);
-	else {
-		double inertia1 = p1.getInertiaOfPointInDirectionRelative(collissionRelP1, exitVector);
-		double inertia2 = p2.getInertiaOfPointInDirectionRelative(collissionRelP2, exitVector);
-		combinedInertia = 1 / (1 / inertia1 + 1 / inertia2);
-	}
+	double inertia1A = p1.getInertiaOfPointInDirectionRelative(collissionRelP1, exitVector);
+	double inertia2A = p2.getInertiaOfPointInDirectionRelative(collissionRelP2, exitVector);
+	double combinedInertia = 1 / (1 / inertia1A + 1 / inertia2A);
 
 	// Friction
 	double staticFriction = part1.properties.friction * part2.properties.friction;
@@ -54,7 +47,7 @@ void handleCollision(Part& part1, Part& part2, Position collisionPoint, Vec3 exi
 	
 	Vec3 depthForce = -exitVector * (COLLISSION_DEPTH_FORCE_MULTIPLIER * combinedInertia);
 
-	if(!anchoredColission) p1.applyForce(collissionRelP1, depthForce);
+	p1.applyForce(collissionRelP1, depthForce);
 	p2.applyForce(collissionRelP2, -depthForce);
 
 
@@ -68,7 +61,7 @@ void handleCollision(Part& part1, Part& part2, Position collisionPoint, Vec3 exi
 		Vec3 desiredAccel = -exitVector * (relativeVelocity * exitVector) / lengthSquared(exitVector);
 		Vec3 zeroRelVelImpulse = desiredAccel * combinedInertia;
 		impulse = zeroRelVelImpulse * (1.0+ELASTICITY);
-		if(!anchoredColission) p1.applyImpulse(collissionRelP1, impulse);
+		p1.applyImpulse(collissionRelP1, impulse);
 		p2.applyImpulse(collissionRelP2, -impulse);
 		relativeVelocity = (p1.getVelocityOfPoint(collissionRelP1) - part1.conveyorEffect) - (p2.getVelocityOfPoint(collissionRelP2) - part2.conveyorEffect); // set new relativeVelocity
 	}
@@ -76,14 +69,9 @@ void handleCollision(Part& part1, Part& part2, Position collisionPoint, Vec3 exi
 	Vec3 slidingVelocity = exitVector % relativeVelocity % exitVector / lengthSquared(exitVector);
 
 	// Compute combined inertia in the horizontal direction
-	double combinedHorizontalInertia;
-	if (anchoredColission)
-		combinedHorizontalInertia = p2.getInertiaOfPointInDirectionRelative(collissionRelP2, slidingVelocity);
-	else {
-		double inertia1 = p1.getInertiaOfPointInDirectionRelative(collissionRelP1, slidingVelocity);
-		double inertia2 = p2.getInertiaOfPointInDirectionRelative(collissionRelP2, slidingVelocity);
-		combinedHorizontalInertia = 1 / (1 / inertia1 + 1 / inertia2);
-	}
+	double inertia1B = p1.getInertiaOfPointInDirectionRelative(collissionRelP1, slidingVelocity);
+	double inertia2B = p2.getInertiaOfPointInDirectionRelative(collissionRelP2, slidingVelocity);
+	double combinedHorizontalInertia = 1 / (1 / inertia1B + 1 / inertia2B);
 
 	if (isImpulseColission) {
 		Vec3 maxFrictionImpulse = -exitVector % impulse % exitVector / lengthSquared(exitVector) * staticFriction;
@@ -91,7 +79,7 @@ void handleCollision(Part& part1, Part& part2, Position collisionPoint, Vec3 exi
 
 		Vec3 fricImpulse = (lengthSquared(stopFricImpulse) < lengthSquared(maxFrictionImpulse)) ? stopFricImpulse : maxFrictionImpulse;
 
-		if (!anchoredColission) p1.applyImpulse(collissionRelP1, fricImpulse);
+		p1.applyImpulse(collissionRelP1, fricImpulse);
 		p2.applyImpulse(collissionRelP2, -fricImpulse);
 	}
 
@@ -106,16 +94,77 @@ void handleCollision(Part& part1, Part& part2, Position collisionPoint, Vec3 exi
 		double effectFactor = slidingSpeed / (dynamicSaturationSpeed);
 		dynamicFricForce = -slidingVelocity / slidingSpeed * frictionForce * effectFactor;
 	}
-	if (!anchoredColission) p1.applyForce(collissionRelP1, dynamicFricForce);
+	p1.applyForce(collissionRelP1, dynamicFricForce);
 	p2.applyForce(collissionRelP2, -dynamicFricForce);
 }
 
-struct Colission {
-	Part* p1;
-	Part* p2;
-	Position intersection;
-	Vec3 exitVector;
-};
+/*
+	exitVector is the distance p2 must travel so that the shapes are no longer colliding
+*/
+void handleTerrainCollision(Part& part1, Part& part2, Position collisionPoint, Vec3 exitVector) {
+	Debug::logPoint(collisionPoint, Debug::INTERSECTION);
+	Physical& p1 = *part1.parent;
+
+	double sizeOrder = std::min(part1.maxRadius, part2.maxRadius);
+	if (lengthSquared(exitVector) <= 1E-8 * sizeOrder * sizeOrder) {
+		return; // don't do anything for very small colissions
+	}
+
+	Vec3 collissionRelP1 = collisionPoint - p1.getCenterOfMass();
+
+	double inertia = p1.getInertiaOfPointInDirectionRelative(collissionRelP1, exitVector);
+
+	// Friction
+	double staticFriction = part1.properties.friction * part2.properties.friction;
+	double dynamicFriction = part1.properties.friction * part2.properties.friction;
+
+
+	Vec3 depthForce = -exitVector * (COLLISSION_DEPTH_FORCE_MULTIPLIER * inertia);
+
+	p1.applyForce(collissionRelP1, depthForce);
+
+
+	Vec3 relativeVelocity = p1.getVelocityOfPoint(collissionRelP1);
+
+	bool isImpulseColission = relativeVelocity * exitVector > 0;
+
+	Vec3 impulse;
+
+	if (isImpulseColission) { // moving towards the other object
+		Vec3 desiredAccel = -exitVector * (relativeVelocity * exitVector) / lengthSquared(exitVector);
+		Vec3 zeroRelVelImpulse = desiredAccel * inertia;
+		impulse = zeroRelVelImpulse * (1.0 + ELASTICITY);
+		p1.applyImpulse(collissionRelP1, impulse);
+		relativeVelocity = p1.getVelocityOfPoint(collissionRelP1); // set new relativeVelocity
+	}
+
+	Vec3 slidingVelocity = exitVector % relativeVelocity % exitVector / lengthSquared(exitVector);
+
+	// Compute combined inertia in the horizontal direction
+	double combinedHorizontalInertia = p1.getInertiaOfPointInDirectionRelative(collissionRelP1, slidingVelocity);
+
+	if (isImpulseColission) {
+		Vec3 maxFrictionImpulse = -exitVector % impulse % exitVector / lengthSquared(exitVector) * staticFriction;
+		Vec3 stopFricImpulse = -slidingVelocity * combinedHorizontalInertia;
+
+		Vec3 fricImpulse = (lengthSquared(stopFricImpulse) < lengthSquared(maxFrictionImpulse)) ? stopFricImpulse : maxFrictionImpulse;
+
+		p1.applyImpulse(collissionRelP1, fricImpulse);
+	}
+
+	double normalForce = length(depthForce);
+	double frictionForce = normalForce * dynamicFriction;
+	double slidingSpeed = length(slidingVelocity) + 1E-100;
+	Vec3 dynamicFricForce;
+	double dynamicSaturationSpeed = sizeOrder * 0.01;
+	if (slidingSpeed > dynamicSaturationSpeed) {
+		dynamicFricForce = -slidingVelocity / slidingSpeed * frictionForce;
+	} else {
+		double effectFactor = slidingSpeed / (dynamicSaturationSpeed);
+		dynamicFricForce = -slidingVelocity / slidingSpeed * frictionForce * effectFactor;
+	}
+	p1.applyForce(collissionRelP1, dynamicFricForce);
+}
 
 bool boundsSphereEarlyEnd(const BoundingBox& bounds, const Vec3& localSphereCenter, double sphereRadius) {
 	const Vec3& sphere = localSphereCenter;
@@ -164,14 +213,6 @@ inline void runColissionTests(Part& p1, Part& p2, WorldPrototype& world, std::ve
 void recursiveFindColissionsInternal(WorldPrototype& world, std::vector<Colission>& colissions, TreeNode& trunkNode);
 void recursiveFindColissionsBetween(WorldPrototype& world, std::vector<Colission>& colissions, TreeNode& first, TreeNode& second);
 
-void findColissions(WorldPrototype& world, std::vector<Colission>& colissions) {
-	TreeNode& node = world.objectTree.rootNode;
-	
-	// two kinds of collissions: intra-node, and inter-node
-
-	recursiveFindColissionsInternal(world, colissions, node);
-}
-
 void recursiveFindColissionsInternal(WorldPrototype& world, std::vector<Colission>& colissions, TreeNode& trunkNode) {
 	// within the same node
 	if (trunkNode.isLeafNode() || trunkNode.isGroupHead)
@@ -210,50 +251,64 @@ void recursiveFindColissionsBetween(WorldPrototype& world, std::vector<Colission
 	}
 }
 
+/*
+	===== World Tick =====
+*/
 
-void WorldPrototype::tick(double deltaT) {
-	SharedLockGuard mutLock(lock);
-
+void WorldPrototype::tick() {
 	physicsMeasure.mark(PhysicsProcess::EXTERNALS);
 	applyExternalForces();
+	
+	findColissions();
 
-	physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
-	std::vector<Colission> colissions;
-
-	findColissions(*this, colissions);
-	physicsMeasure.mark(PhysicsProcess::COLISSION_HANDLING);
-	for (int i = 0; i < colissions.size(); i++) {
-		Colission c = colissions[i];
-		handleCollision<false>(*c.p1, *c.p2, c.intersection, c.exitVector);
-	}
+	handleColissions();
 
 	intersectionStatistics.nextTally();
+	
+	handleConstraints();
 
+	update();
+}
+
+void WorldPrototype::applyExternalForces() {}
+void WorldPrototype::findColissions() {
+	physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
+
+	currentObjectColissions.clear();
+	currentTerrainColissions.clear();
+
+	recursiveFindColissionsInternal(*this, currentObjectColissions, objectTree.rootNode);
+	recursiveFindColissionsBetween(*this, currentTerrainColissions, objectTree.rootNode, terrainTree.rootNode);
+}
+void WorldPrototype::handleColissions() {
+	physicsMeasure.mark(PhysicsProcess::COLISSION_HANDLING);
+	for (Colission c : currentObjectColissions) {
+		handleCollision(*c.p1, *c.p2, c.intersection, c.exitVector);
+	}
+	for (Colission c : currentTerrainColissions) {
+		handleTerrainCollision(*c.p1, *c.p2, c.intersection, c.exitVector);
+	}
+}
+void WorldPrototype::handleConstraints() {
 	physicsMeasure.mark(PhysicsProcess::CONSTRAINTS);
 	for (const ConstraintGroup& group : constraints) {
 		group.apply();
 	}
-	
-	physicsMeasure.mark(PhysicsProcess::WAIT_FOR_LOCK);
-	mutLock.upgrade();
+}
+void WorldPrototype::update() {
 	physicsMeasure.mark(PhysicsProcess::UPDATING);
-	for(Physical& physical : iterPhysicals()) {
-		physical.update(deltaT);
+	for (Physical& physical : iterPhysicals()) {
+		physical.update(this->deltaT);
 	}
 
 	physicsMeasure.mark(PhysicsProcess::UPDATE_TREE_BOUNDS);
 	objectTree.recalculateBounds();
 	physicsMeasure.mark(PhysicsProcess::UPDATE_TREE_STRUCTURE);
 	objectTree.improveStructure();
-
-	physicsMeasure.mark(PhysicsProcess::OTHER);
-	processQueue();
-
 	age++;
 }
 
 
-void WorldPrototype::applyExternalForces() {}
 
 double WorldPrototype::getTotalKineticEnergy() const {
 	double total = 0.0;

@@ -11,7 +11,7 @@
 
 void Shader::createUniform(const std::string& uniform) {
 	bind();
-	Log::setSubject(name);
+	Log::subject s(name);
 	int location = glGetUniformLocation(id, uniform.c_str());
 	if (location < 0)
 		Log::error("Could not find uniform (%s) in shader (%s)", uniform.c_str(), name.c_str());
@@ -19,7 +19,6 @@ void Shader::createUniform(const std::string& uniform) {
 		Log::debug("Created uniform (%s) in shader (%s) with id (%d)", uniform.c_str(), name.c_str(), location);
 	}
 	uniforms.insert(std::make_pair(uniform, location));
-	Log::resetSubject();
 }
 
 void Shader::setUniform(const std::string& uniform, int value) const {
@@ -96,7 +95,7 @@ unsigned int compileShaderWithDebug(const std::string& name, const std::string& 
 unsigned int createShader(const std::string& vertexShader, const std::string& fragmentShader, const std::string& geometryShader, const std::string& tesselationControlShader, const std::string& tesselationEvaluateShader, const std::string& name) {
 	unsigned int program = glCreateProgram();
 
-	Log::setSubject(name);
+	Log::subject s(name);
 
 	Log::info("Compiling shader (%s)", name.c_str());
 
@@ -140,8 +139,6 @@ unsigned int createShader(const std::string& vertexShader, const std::string& fr
 
 	Log::info("Created shader with id (%d)", name.c_str(), program);
 
-	Log::resetSubject();
-
 	return program;
 }
 
@@ -172,35 +169,35 @@ std::string parseFile(const std::string& path) {
 }
 
 ShaderSource parseShader(const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath, const std::string& tesselationControlPath, const std::string& tesselationEvaluatePath, const std::string& name) {
-	Log::setSubject(name);
+	Log::subject s(name);
 	std::string vertexFile = parseFile(vertexPath);
 	std::string fragmentFile = parseFile(fragmentPath);
 	std::string geometryFile = parseFile(geometryPath);
 	std::string tesselationControlFile = parseFile(tesselationControlPath);
 	std::string tesselationEvaluateFile = parseFile(tesselationEvaluatePath);
-	Log::resetSubject();
+
 	return { vertexFile , fragmentFile , geometryFile, tesselationControlFile, tesselationEvaluateFile, name };
 }
 
 ShaderSource parseShader(const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath, const std::string& name) {
-	Log::setSubject(name);
+	Log::subject s(name);
 	std::string vertexFile = parseFile(vertexPath);
 	std::string fragmentFile = parseFile(fragmentPath);
 	std::string geometryFile = parseFile(geometryPath);
-	Log::resetSubject();
+
 	return { vertexFile , fragmentFile , geometryFile, "", "", name };
 }
 
 ShaderSource parseShader(const std::string& vertexPath, const std::string& fragmentPath, const std::string& name) {
-	Log::setSubject(name);
+	Log::subject s(name);
 	std::string vertexFile = parseFile(vertexPath);
 	std::string fragmentFile = parseFile(fragmentPath);
-	Log::resetSubject();
+
 	return { vertexFile , fragmentFile , "", "", "", name };
 }
 
 ShaderSource parseShader(std::istream& shaderTextStream, const std::string& name) {
-	Log::setSubject(name);
+	Log::subject s(name);
 
 	Log::info("Reading (%s)", name.c_str());
 
@@ -274,7 +271,6 @@ ShaderSource parseShader(std::istream& shaderTextStream, const std::string& name
 	}
 
 	Log::setDelimiter("\n");
-	Log::resetSubject();
 
 	return { vertexFile , fragmentFile , geometryFile, tesselationControlFile, tesselationEvaluateFile, name };
 }
@@ -324,7 +320,7 @@ void Shader::unbind() {
 
 void Shader::close() {
 	if (id != 0) {
-		Log::setSubject(name);
+		Log::subject s(name);
 		unbind();
 		Log::info("Closing shader");
 
@@ -332,7 +328,6 @@ void Shader::close() {
 		id = 0;
 
 		Log::info("Closed shader");
-		Log::resetSubject();
 	}
 }
 

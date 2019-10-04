@@ -4,9 +4,12 @@
 #include "datastructures/boundsTree.h"
 #include "part.h"
 
+
+
 struct RayIntersectBoundsFilter {
 	Ray ray;
 
+	RayIntersectBoundsFilter() = default;
 	RayIntersectBoundsFilter(const Ray& ray) : ray(ray) {}
 
 	bool operator()(const TreeNode& node) const {

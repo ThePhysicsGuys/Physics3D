@@ -6,7 +6,7 @@
 #include "../engine/math/mathUtil.h"
 
 /*TEST_CASE(volumeApproximation) {
-	Shape s = house;
+	Polyhedron s = house;
 
 	BoundingBox b = s.getBounds();
 
@@ -38,7 +38,7 @@
 }
 
 TEST_CASE(centerOfMassApproximation) {
-	Shape s = house;
+	Polyhedron s = house;
 
 	BoundingBox b = s.getBounds();
 
@@ -73,7 +73,7 @@ TEST_CASE(centerOfMassApproximation) {
 
 TEST_CASE(inertiaApproximation) {
 
-	Shape s = house;
+	Polyhedron s = house;
 
 	BoundingBox b = s.getBounds();
 

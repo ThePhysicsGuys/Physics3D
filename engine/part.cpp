@@ -81,7 +81,6 @@ void Part::attach(Part& other, const CFrame& relativeCFrame) {
 }
 
 void Part::detach() {
-	if (this->parent != nullptr) {
-		this->parent->detachPart(this);
-	}
+	if (this->parent == nullptr) throw "No physical to detach from!";
+	this->parent->detachPart(this);
 }

@@ -6,7 +6,7 @@
 
 #include "view/mesh/indexedMesh.h"
 
-#include "resourceManager.h"
+#include "resourceLoader.h"
 #include "shapeLibrary.h"
 #include "visualShape.h"
 

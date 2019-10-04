@@ -22,10 +22,18 @@ namespace Log {
 		SUBJECT = 13
 	};
 
+	class subject {
+	public:
+		subject(const std::string& title);
+		~subject();
+
+		subject(subject&& other) = delete;
+		subject(const subject&) = delete;
+		subject& operator=(subject&& other) = delete;
+		subject& operator=(const subject&) = delete;
+	};
+
 	void setDelimiter(std::string delimiter);
-	
-	void setSubject(std::string subject);
-	void resetSubject();
 	
 	void setColor(int color);
 

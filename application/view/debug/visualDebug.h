@@ -18,6 +18,7 @@ enum GraphicsProcess {
 	WAIT_FOR_LOCK,
 	PHYSICALS,
 	ORIGIN,
+	PICKER,
 	PROFILER,
 	FINALIZE,
 	OTHER,
@@ -38,6 +39,8 @@ namespace Debug {
 	enum class ColTreeRenderMode : int {
 		NONE,
 		SELECTED,
+		FREE,
+		TERRAIN,
 		ALL
 	};
 

@@ -216,17 +216,20 @@ void EditTools::onMouseRelease(Screen& screen) {
 void EditTools::onMouseDrag(Screen& screen) {
 	if (screen.selectedPart == nullptr) 
 		return;
-	switch (editMode) {
-		case EditMode::TRANSLATE:
-			dragTranslateTool(screen);
-			break;
-		case EditMode::ROTATE:
-			dragRotateTool(screen);
-			break;
-		case EditMode::SCALE:
-			dragScaleTool(screen);
-			break;
-	}
+
+	screen.world->asyncModification([&screen, this](){
+		switch (editMode) {
+			case EditMode::TRANSLATE:
+				dragTranslateTool(screen);
+				break;
+			case EditMode::ROTATE:
+				dragRotateTool(screen);
+				break;
+			case EditMode::SCALE:
+				dragScaleTool(screen);
+				break;
+		}
+	});
 }
 
 
@@ -319,7 +322,9 @@ void EditTools::dragScaleTool(Screen& screen) {
 void EditTools::dragTranslateTool(Screen& screen) {
 	if (selectedEditDirection == EditDirection::CENTER) {
 		screen.selectedPoint = screen.selectedPart->getPosition() + selectedPoint;
-		Picker::moveGrabbedPhysicalLateral(screen);
+		screen.world->asyncModification([&screen]() {
+			Picker::moveGrabbedPhysicalLateral(screen);
+		});
 	} else {
 		// Closest point on ray1 (A + s * a) from ray2 (B + t * b). Ray1 is the ray from the parts' center in the direction of the edit tool, ray2 is the mouse ray. Directions a and b are normalized. Only s is calculated.
 		Position B = screen.camera.cframe.position;

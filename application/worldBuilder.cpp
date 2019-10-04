@@ -7,12 +7,11 @@
 
 namespace WorldBuilder {
 
-	Shape dominoShape;
+	Shape dominoShape(BoundingBox{ -0.1, -0.7, -0.3, 0.1, 0.7, 0.3 }.toShape());
 	PartFactory dominoFactory;
 	PartFactory legFactory;
 
 	void init() {
-		dominoShape = BoundingBox{ -0.1, -0.7, -0.3, 0.1, 0.7, 0.3 }.toShape();
 		dominoFactory = PartFactory(dominoShape, screen, "domino");
 		legFactory = PartFactory(BoundingBox(0.05, 0.5, 0.05).toShape(), screen, "SpiderLeg");
 	}
@@ -87,11 +86,11 @@ namespace WorldBuilder {
 
 		world.addPart(bottom);
 		Physical & parent = *bottom->parent;
-		world.attachPart(top, parent, CFrame(Vec3(0, box.getHeight() - wallThickness, 0)));
-		world.attachPart(left, parent, CFrame(Vec3(box.getWidth() / 2 - wallThickness / 2, box.getHeight() / 2 - wallThickness / 2, 0)));
-		world.attachPart(right, parent, CFrame(Vec3(-box.getWidth() / 2 + wallThickness / 2, box.getHeight() / 2 - wallThickness / 2, 0)));
-		world.attachPart(front, parent, CFrame(Vec3(0, box.getHeight() / 2 - wallThickness / 2, box.getDepth() / 2 - wallThickness / 2)));
-		world.attachPart(back, parent, CFrame(Vec3(0, box.getHeight() / 2 - wallThickness / 2, -box.getDepth() / 2 + wallThickness / 2)));
+		parent.attachPart(top, CFrame(Vec3(0, box.getHeight() - wallThickness, 0)));
+		parent.attachPart(left, CFrame(Vec3(box.getWidth() / 2 - wallThickness / 2, box.getHeight() / 2 - wallThickness / 2, 0)));
+		parent.attachPart(right, CFrame(Vec3(-box.getWidth() / 2 + wallThickness / 2, box.getHeight() / 2 - wallThickness / 2, 0)));
+		parent.attachPart(front, CFrame(Vec3(0, box.getHeight() / 2 - wallThickness / 2, box.getDepth() / 2 - wallThickness / 2)));
+		parent.attachPart(back, CFrame(Vec3(0, box.getHeight() / 2 - wallThickness / 2, -box.getDepth() / 2 + wallThickness / 2)));
 
 		return HollowBoxParts{ bottom, top, left, right, front, back };
 	}

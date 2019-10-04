@@ -23,6 +23,7 @@
 #include "layer/layerStack.h"
 #include "layer/skyboxLayer.h"
 #include "layer/modelLayer.h"
+#include "layer/testLayer.h"
 #include "layer/pickerLayer.h"
 #include "layer/postprocessLayer.h"
 #include "layer/guiLayer.h"
@@ -102,6 +103,7 @@ StandardInputHandler* handler = nullptr;
 LayerStack layerStack;
 SkyboxLayer skyboxLayer;
 ModelLayer modelLayer;
+TestLayer testLayer;
 PickerLayer pickerLayer;
 PostprocessLayer postprocessLayer;
 GuiLayer guiLayer;
@@ -153,6 +155,7 @@ void Screen::onInit() {
 	// Layer creation
 	skyboxLayer 	 = SkyboxLayer		(this);
 	modelLayer 		 = ModelLayer		(this);
+	testLayer		 = TestLayer		(this);
 	debugLayer 		 = DebugLayer		(this);
 	pickerLayer 	 = PickerLayer		(this);
 	postprocessLayer = PostprocessLayer	(this);
@@ -161,6 +164,7 @@ void Screen::onInit() {
 
 	layerStack.pushLayer(&skyboxLayer);
 	layerStack.pushLayer(&modelLayer);
+	layerStack.pushLayer(&testLayer);
 	layerStack.pushLayer(&debugLayer);
 	layerStack.pushLayer(&pickerLayer);
 	layerStack.pushLayer(&postprocessLayer);
@@ -201,9 +205,9 @@ void Screen::onUpdate() {
 	if (handler->anyKey) {
 		bool leftDragging = handler->leftDragging;
 		if (handler->getKey(KeyboardOptions::Move::forward))  camera.move(*this, 0, 0, -1, leftDragging);
-		if (handler->getKey(KeyboardOptions::Move::backward))  camera.move(*this, 0, 0, 1, leftDragging);
-		if (handler->getKey(KeyboardOptions::Move::right))  camera.move(*this, 1, 0, 0, leftDragging);
-		if (handler->getKey(KeyboardOptions::Move::left))  camera.move(*this, -1, 0, 0, leftDragging);
+		if (handler->getKey(KeyboardOptions::Move::backward)) camera.move(*this, 0, 0, 1, leftDragging);
+		if (handler->getKey(KeyboardOptions::Move::right))	  camera.move(*this, 1, 0, 0, leftDragging);
+		if (handler->getKey(KeyboardOptions::Move::left))     camera.move(*this, -1, 0, 0, leftDragging);
 		if (handler->getKey(KeyboardOptions::Move::ascend))
 			if (camera.flying) camera.move(*this, 0, 1, 0, leftDragging);
 		if (handler->getKey(KeyboardOptions::Move::descend))

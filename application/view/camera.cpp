@@ -16,6 +16,7 @@
 #include "../extendedPart.h"
 
 #include "picker/picker.h"
+#include "worlds.h"
 
 Camera::Camera(Position position, Mat3 rotation) : cframe(GlobalCFrame(position, rotation)), velocity(0.35), angularVelocity(0.04), flying(true) {
 	onUpdate();
@@ -52,9 +53,11 @@ void Camera::rotate(Screen& screen, double dalpha, double dbeta, double dgamma, 
 
 	cframe.rotation = rotX(float(currentAngularVelocity * dalpha)) * Mat3f(cframe.rotation) * rotY(float(currentAngularVelocity * dbeta));
 
-	if (leftDragging) 
-		Picker::moveGrabbedPhysicalLateral(screen);
-
+	if (leftDragging) {
+		screen.world->asyncModification([&screen]() {
+			Picker::moveGrabbedPhysicalLateral(screen);
+		});
+	}
 	// Accelerate camera rotation
 	if (accelerating)
 		currentAngularVelocity += angularVelocity * angularVelocityIncrease;
@@ -95,8 +98,11 @@ void Camera::move(Screen& screen, double dx, double dy, double dz, bool leftDrag
 		Vec3 translationY = Vec3(0, dy, 0);
 		translation += translationY;
 
-		if (leftDragging) 
-			Picker::moveGrabbedPhysicalLateral(screen);
+		if (leftDragging) {
+			screen.world->asyncModification([&screen]() {
+				Picker::moveGrabbedPhysicalLateral(screen);
+			});
+		}
 	}
 
 	if (dz != 0) {
@@ -104,8 +110,11 @@ void Camera::move(Screen& screen, double dx, double dy, double dz, bool leftDrag
 		Vec3 translationZ = normalize(Vec3(cameraRotationZ.x, 0, cameraRotationZ.z)) * dz;
 		translation += translationZ;
 
-		if (leftDragging) 
-			Picker::moveGrabbedPhysicalTransversal(screen, -currentVelocity * dz);
+		if (leftDragging) {
+			screen.world->asyncModification([&screen, dz, this]() {
+				Picker::moveGrabbedPhysicalTransversal(screen, -currentVelocity * dz);
+			});
+		}
 	}
 
 	translation *= currentVelocity;
@@ -173,6 +182,8 @@ bool Camera::onMouseDrag(MouseDragEvent& event) {
 bool Camera::onMouseScroll(MouseScrollEvent& event) {
 	velocity = GUI::clamp(velocity * (1 + 0.2 * event.getYOffset()), 0.001, 100);
 
+	thirdPersonDistance -= event.getYOffset();
+
 	return true;
 };
 
@@ -236,15 +247,14 @@ void Camera::onUpdate() {
 
 	// Attach the camera to the attached part, if there is anys
 	if (!flying && attachment != nullptr) {
-		double distance = 6.0;
 		Vec3 vertical = Vec3(0, 1, 0);
 		Vec3 forward = cframe.rotation.transpose() * Vec3(0, 0, 1);
 
 		// Sinus angle between camera direction and the xz plane
 		double sinAlpha = vertical * forward;
 
-		double dy = distance * sinAlpha;
-		double dz = sqrt(distance * distance - dy * dy);
+		double dy = thirdPersonDistance * sinAlpha;
+		double dz = sqrt(thirdPersonDistance * thirdPersonDistance - dy * dy);
 
 		Vec3 translationZ = normalize(Vec3(forward.x, 0, forward.z)) * dz;
 		Vec3 translationY = Vec3(0, dy, 0);

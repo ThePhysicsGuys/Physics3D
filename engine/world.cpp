@@ -1,5 +1,6 @@
 #include "world.h"
 
+#include <algorithm>
 
 #ifdef CHECK_SANITY
 #define ASSERT_VALID if (!isValid()) {throw "World not valid!";}
@@ -8,38 +9,20 @@
 #endif
 
 
-WorldPrototype::WorldPrototype() : WorldPrototype(16) {}
-WorldPrototype::WorldPrototype(size_t initialPartCapacity) : physicals(initialPartCapacity) {
+WorldPrototype::WorldPrototype(double deltaT) : deltaT(deltaT) {}
 
+BoundsTree<Part>& WorldPrototype::getTreeForPart(const Part* part) {
+	return (part->isTerrainPart) ? this->terrainTree : this->objectTree;
 }
 
-
-size_t WorldPrototype::getTotalVertexCount() {
-	size_t total = 0;
-	for (const Physical& phys : iterPhysicals())
-		for (const Part& part : phys)
-			total += part.hitbox.vertexCount;
-	return total;
+const BoundsTree<Part>& WorldPrototype::getTreeForPart(const Part* part) const {
+	return (part->isTerrainPart) ? this->terrainTree : this->objectTree;
 }
 
-void WorldPrototype::pushOperation(const std::function<void(WorldPrototype&)>& func) {
-	std::lock_guard<std::mutex> lg(queueLock);
-	waitingOperations.push(func);
-}
-
-void WorldPrototype::requestModification(const std::function<void(WorldPrototype&)>& function) {
-	if (lock.try_lock()) {
-		function(*this);
-		lock.unlock();
-	} else {
-		pushOperation(function);
-	}
-}
-
-void WorldPrototype::addPartUnsafe(Part* part, bool anchored) {
+void WorldPrototype::addPart(Part* part, bool anchored) {
 	if (part->parent == nullptr) {
 		part->parent = new Physical(part);
-		physicals.add(part->parent);
+		physicals.push_back(part->parent);
 		objectTree.add(part, part->getStrictBounds());
 	} else {
 		if (part->parent->world == this) {
@@ -51,67 +34,36 @@ void WorldPrototype::addPartUnsafe(Part* part, bool anchored) {
 			newNode.addInside(TreeNode(p.part, p.part->getStrictBounds(), false));
 		}
 		objectTree.add(std::move(newNode));
-		physicals.add(part->parent);
+		physicals.push_back(part->parent);
 	}
 	part->parent->world = this;
 	part->parent->setAnchored(anchored);
 
 	ASSERT_VALID;
 }
-void WorldPrototype::removePartUnsafe(Part* part) {
+void WorldPrototype::removePart(Part* part) {
 	ASSERT_VALID;
 	Physical* parent = part->parent;
 	parent->detachPart(part);
-	
+
 	ASSERT_VALID;
-}
-void WorldPrototype::removePhysicalUnsafe(Physical* p) {
-	NodeStack stack = objectTree.findGroupFor(p->mainPart, p->mainPart->getStrictBounds());
-	stack.remove();
-	physicals.remove(p);
-	ASSERT_VALID;
-}
-void WorldPrototype::attachPartUnsafe(Part* part, Physical& phys, CFrame attachment) {
-	if (part->parent != nullptr) {
-		removePartUnsafe(part);
-	}
-	phys.attachPart(part, attachment);
-	objectTree.addToExistingGroup(part, part->getStrictBounds(), phys.mainPart, phys.mainPart->getStrictBounds());
-	ASSERT_VALID;
-}
-
-void WorldPrototype::detachPartUnsafe(Part* part) {
-	removePartUnsafe(part);
-	addPartUnsafe(part, false);
-	ASSERT_VALID;
-}
-
-void WorldPrototype::processQueue() {
-	std::lock_guard<std::mutex> lg(queueLock);
-
-	while (!waitingOperations.empty()) {
-		std::function<void(WorldPrototype&)>& operation = waitingOperations.front();
-		operation(*this);
-		waitingOperations.pop();
-	}
-}
-
-
-void WorldPrototype::addPart(Part* part, bool anchored) {
-	requestModification([part, anchored](WorldPrototype& world) {world.addPartUnsafe(part, anchored); });
-}
-void WorldPrototype::removePart(Part* part) {
-	requestModification([part](WorldPrototype& world) {world.removePartUnsafe(part); });
 }
 void WorldPrototype::removePhysical(Physical* phys) {
-	requestModification([phys](WorldPrototype& world) {world.removePhysicalUnsafe(phys); });
+	NodeStack stack = objectTree.findGroupFor(phys->mainPart, phys->mainPart->getStrictBounds());
+	stack.remove();
+	physicals.erase(std::remove(physicals.begin(), physicals.end(), phys));
+	ASSERT_VALID;
 }
-void WorldPrototype::attachPart(Part* part, Physical& phys, CFrame attachment) {
-	requestModification([part, &phys, attachment](WorldPrototype& world) {world.attachPartUnsafe(part, phys, attachment); });
+void WorldPrototype::addTerrainPart(Part* part) {
+	terrainTree.add(part, part->getStrictBounds());
 }
-void WorldPrototype::detachPart(Part* part) {
-	requestModification([part](WorldPrototype& world) {world.detachPartUnsafe(part); });
+void WorldPrototype::optimizeTerrain() {
+	for(int i = 0; i < 5; i++)
+		terrainTree.improveStructure();
 }
+
+
+
 
 void WorldPrototype::setPartCFrame(Part* part, const GlobalCFrame& newCFrame) {
 	Bounds oldBounds = part->getStrictBounds();
@@ -128,6 +80,13 @@ void WorldPrototype::updatePartBounds(const Part* updatedPart, const Bounds& old
 void WorldPrototype::updatePartGroupBounds(const Part* mainPart, const Bounds& oldMainPartBounds) {
 	objectTree.updateObjectGroupBounds(mainPart, oldMainPartBounds);
 }
+
+void WorldPrototype::removePartFromTrees(const Part* part) {
+	getTreeForPart(part).remove(part);
+}
+
+
+
 
 void recursiveTreeValidCheck(const TreeNode& node) {
 	if (node.isLeafNode()) return;

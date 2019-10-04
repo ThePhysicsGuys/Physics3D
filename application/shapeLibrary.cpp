@@ -60,20 +60,20 @@ namespace Library {
 		{2, 3, 4}, {2, 4, 5} // diagonalSide
 	};
 
-	const Shape icosahedron(icosahedronVertices, SharedArrayPtr<const Triangle>::staticSharedArrayPtr(icosahedronTriangles), 12, 20);
-	const Shape trianglePyramid(trianglePyramidVertices, SharedArrayPtr<const Triangle>::staticSharedArrayPtr(trianglePyramidTriangles), 4, 4);
-	const Shape house(houseVertices, SharedArrayPtr<const Triangle>::staticSharedArrayPtr(houseTriangles), 10, 16);
-	const Shape wedge(wedgeVertices, SharedArrayPtr<const Triangle>::staticSharedArrayPtr(wedgeTriangles), 6, 8);
+	const Polyhedron icosahedron(icosahedronVertices, SharedArrayPtr<const Triangle>::staticSharedArrayPtr(icosahedronTriangles), 12, 20);
+	const Polyhedron trianglePyramid(trianglePyramidVertices, SharedArrayPtr<const Triangle>::staticSharedArrayPtr(trianglePyramidTriangles), 4, 4);
+	const Polyhedron house(houseVertices, SharedArrayPtr<const Triangle>::staticSharedArrayPtr(houseTriangles), 10, 16);
+	const Polyhedron wedge(wedgeVertices, SharedArrayPtr<const Triangle>::staticSharedArrayPtr(wedgeTriangles), 6, 8);
 
-	Shape createCube(double side) {
+	Polyhedron createCube(double side) {
 		return createBox(side, side, side);
 	}
 
-	Shape createBox(double width, double height, double length) {
+	Polyhedron createBox(double width, double height, double length) {
 		return BoundingBox(width, height, length).toShape();
 	}
 
-	Shape createPrism(unsigned int sides, double radius, double height) {
+	Polyhedron createPrism(unsigned int sides, double radius, double height) {
 		unsigned int vertexCount = sides * 2;
 		unsigned int triangleCount = sides * 2 + (sides - 2) * 2;
 		Vec3f* vecBuf = new Vec3f[vertexCount];
@@ -101,10 +101,10 @@ namespace Library {
 			capOffset[i + (sides-2)] = Triangle{ 1, (i + 2) * 2+1, (i + 1) * 2+1 };
 		}
 
-		return Shape(vecBuf, SharedArrayPtr<const Triangle>(triangleBuf), vertexCount, triangleCount);
+		return Polyhedron(vecBuf, SharedArrayPtr<const Triangle>(triangleBuf), vertexCount, triangleCount);
 	}
 
-	Shape createPointyPrism(unsigned int sides, double radius, double height, double topOffset, double bottomOffset) {
+	Polyhedron createPointyPrism(unsigned int sides, double radius, double height, double topOffset, double bottomOffset) {
 		unsigned int vertexCount = sides * 2 + 2;
 		unsigned int triangleCount = sides * 4;
 		Vec3f* vecBuf = new Vec3f[vertexCount];
@@ -139,6 +139,6 @@ namespace Library {
 			capOffset[i + sides] = Triangle{ topIndex, ((i + 1) % sides) * 2 + 1, i * 2 + 1 };
 		}
 
-		return Shape(vecBuf, SharedArrayPtr<const Triangle>(triangleBuf), vertexCount, triangleCount);
+		return Polyhedron(vecBuf, SharedArrayPtr<const Triangle>(triangleBuf), vertexCount, triangleCount);
 	}
 }

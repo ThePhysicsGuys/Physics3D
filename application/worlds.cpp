@@ -16,7 +16,7 @@
 #define RUN_SPEED 5
 
 void MagnetWorld::applyExternalForces() {
-	if (selectedPart != nullptr && !isAnchored(selectedPart->parent)) {
+	if (selectedPart != nullptr && !selectedPart->parent->anchored) {
 		Physical* selectedPhysical = selectedPart->parent;
 		GlobalCFrame cframe = selectedPhysical->getCFrame();
 		// Magnet force
@@ -33,14 +33,15 @@ void MagnetWorld::applyExternalForces() {
 	}
 }
 
-GravityWorld::GravityWorld(Vec3 gravity) : gravity(gravity) {}
+MagnetWorld::MagnetWorld(double deltaT) : SynchronizedWorld<ExtendedPart>(deltaT) {}
+GravityWorld::GravityWorld(double deltaT, Vec3 gravity) : MagnetWorld(deltaT), gravity(gravity) {}
 
 void GravityWorld::applyExternalForces() {
 	MagnetWorld::applyExternalForces();
 	// Gravity force
-	for(Physical& physical : iterFreePhysicals()) {
+	for(Physical& physical : iterPhysicals()) {
 		// object.applyForceAtCenterOfMass((Vec3(0.0, 5.0, 0.0) - object.getCenterOfMass() * 1.0) * object.mass);
-		physical.applyForceAtCenterOfMass(gravity * physical.mass);
+		if(!physical.anchored) physical.applyForceAtCenterOfMass(gravity * physical.mass);
 	}
 
 	// Player movement

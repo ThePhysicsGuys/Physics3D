@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core.h"
+#include <typeinfo>
 
 #include "resource.h"
 
@@ -13,42 +13,32 @@ private:
 		int count;
 	};
 
-	std::unordered_map<ResourceType, Resource*> defaultResources;
-	std::unordered_map<std::string, CountedResource> resources;
-
-	static ResourceManager& instance() {
-		static ResourceManager resourceManager;
-
-		return resourceManager;
-	}
+	static std::unordered_map<ResourceType, Resource*> defaultResources;
+	static std::unordered_map<std::string, CountedResource> resources;
 
 	static void onResourceNameChange(Resource* changedResource, const std::string& newName) {
-		ResourceManager manager = instance();
+		auto iterator = ResourceManager::resources.find(changedResource->getName());
 
-		auto iterator = manager.resources.find(changedResource->getName());
-
-		if (iterator == manager.resources.end()) {
+		if (iterator == ResourceManager::resources.end()) {
 			Log::error("The changed resource is not found (%s)", changedResource->getName().c_str());
 			return;
 		} else {
-			if (manager.resources.find(newName) != manager.resources.end()) {
+			if (ResourceManager::resources.find(newName) != ResourceManager::resources.end()) {
 				Log::error("Resource name has already been taken (%s)", newName.c_str());
 				return;
 			} else {
 				CountedResource countedResource = iterator->second;
 				countedResource.value->name = newName;
-				manager.resources.emplace(newName, countedResource);
-				manager.resources.erase(iterator);
+				ResourceManager::resources.emplace(newName, countedResource);
+				ResourceManager::resources.erase(iterator);
 			}
 		}
 	}
 
 	static void onResourcePathChange(Resource* changedResource, const std::string& newPath) {
-		ResourceManager manager = instance();
+		auto iterator = ResourceManager::resources.find(changedResource->getName());
 
-		auto iterator = manager.resources.find(changedResource->getName());
-
-		if (iterator == manager.resources.end()) {
+		if (iterator == ResourceManager::resources.end()) {
 			Log::error("The changed resource is not found (%s)", changedResource->getName().c_str());
 			return;
 		} else {
@@ -64,88 +54,120 @@ private:
 		}
 	}
 
-	void initDefaultResources() {
-		
-	}
-
 	template<typename T>
 	static T* getDefaultResource() {
-		ResourceManager manager = instance();
+		//Log::subject("DEFAULT");
+		//Log::debug("Getting default resource: (%s)", T::getStaticTypeName().c_str());
+		auto iterator = ResourceManager::defaultResources.find(T::getStaticType());
 
-		auto iterator = manager.defaultResources.find(T::getStaticType());
-
-		if (iterator != manager.defaultResources.end())
+		if (iterator != ResourceManager::defaultResources.end()) {
+			//Log::debug("Found default resource: (%s)", T::getStaticTypeName().c_str());
 			return static_cast<T*>(iterator->second);
-		else {
-			Resource* defaultResource = manager.add<T>(T::getDefaultPath());
+		} else {
+			//Log::debug("Default resource not found: (%s), trying to load default resource", T::getStaticTypeName().c_str());
+			Resource* defaultResource = ResourceManager::add<T>(T::getDefaultPath(), "default_" + T::getStaticTypeName());
 
 			if (defaultResource) {
-				manager.defaultResources[T::getStaticType()] = defaultResource;
+				//Log::debug("Loaded default resource; (%s)", T::getStaticTypeName().c_str());
+				ResourceManager::defaultResources[T::getStaticType()] = defaultResource;
 				return static_cast<T*>(defaultResource);
 			} else {
+				//Log::debug("Default resource not loaded: (%s)", T::getStaticTypeName().c_str());
 				return nullptr;
 			}
 		}
 	}
 
-	ResourceManager() {
-		initDefaultResources();
-	}
+	ResourceManager();
+	~ResourceManager();
 
 public:
 	template<typename T> 
 	static T* get(const std::string& name) {
-		ResourceManager& manager = instance();
+		//Log::subject s("GET");
+		//Log::debug("Getting resource: (%s)", name.c_str());
 
-		auto iterator = manager.resources.find(name);
+		auto iterator = ResourceManager::resources.find(name);
 
-		if (iterator != manager.resources.end()) {
+		if (iterator != ResourceManager::resources.end()) {
+			//Log::debug("Found resource: (%s)", name.c_str());
+
 			return static_cast<T*>(iterator->second.value);
 		} else {
-			Log::warn("Resource not loaded (%s), trying to load requested resource...", name.c_str());
-			T* resource = add(name);
-
-			if (resource) {
-				return resource;
-			} else {
-				Log::warn("Resource could not be loaded (%s), using default resource", name.c_str());
-				return manager.getDefaultResource<T>();
-			}
+			//Log::warn("Resource not loaded: (%s), using default resource", name.c_str());
+			return ResourceManager::getDefaultResource<T>();
 		}
 	}
 
 	template<typename T>
-	static T* add(const std::string& path, const std::string& name = "") {
+	static T* add(const std::string& path, std::string name = "") {
+		Log::subject s("ADD");
+		//Log::debug("Adding resource: (%s, %s)", name.c_str(), path.c_str());
+
 		if (name.empty())
 			name = path;
 
-		ResourceManager& manager = instance();
+		auto iterator = ResourceManager::resources.find(name);
 
-		auto iterator = manager.resources.find(name);
-
-		if (iterator != manager.resources.end()) {
+		if (iterator != ResourceManager::resources.end()) {
+			//Log::debug("Found resource: (%s, %s)", name.c_str(), path.c_str());
 			auto& resource = (*iterator).second;
 			resource.count++; 
 			return static_cast<T*>(resource.value);
 		} else {
-			T* resource = T::getAllocator().load(path);
+			//Log::debug("Resource not found: (%s, %s), trying to load resource", name.c_str(), path.c_str());
+
+			T* resource = T::getAllocator().load(name, path);
 
 			if (resource == nullptr) {
-				Log::warn("Resource could not be loaded (%s)", path.c_str());
+				Log::warn("Resource not loaded: (%s, %s)", name.c_str(), path.c_str());
 				return nullptr;
 			} else {
-				resource.setName(name);
-				manager.resources.emplace(name, CountedResource(resource, 1));
+				//Log::debug("Loaded resource: (%s, %s)", name.c_str(), path.c_str());
+
+				CountedResource countedResource = { resource, 1 };
+				ResourceManager::resources.emplace(name, countedResource);
 
 				return resource;
 			}
 		}
 	}
 
-	bool exists(const std::string& name) {
-		ResourceManager& manager = instance();
+	static bool exists(const std::string& name) {
+		auto iterator = ResourceManager::resources.find(name);
+		return iterator != ResourceManager::resources.end();
+	}
 
-		auto iterator = manager.resources.find(name);
-		return iterator != manager.resources.end();
+	template<typename T>
+	static std::vector<T*> getResourcesOfClass() {
+		std::vector<T*> list;
+
+		for (auto iterator : ResourceManager::resources) {
+			if (typeid(T) == typeid(iterator.second.value))
+				list.push_back(static_cast<T*>(iterator.second.value));
+		}
+
+		return list;
+	}
+
+	static std::vector<Resource*> getResourcesOfType(ResourceType type) {
+		std::vector<Resource*> list;
+		
+		for (auto iterator : ResourceManager::resources) {
+			if (iterator.second.value->getType() == type)
+				list.push_back(iterator.second.value);
+		}
+
+		return list;
+	}
+
+	static std::vector<Resource*> getResources() {
+		std::vector<Resource*> list;
+
+		for (auto iterator : ResourceManager::resources) {
+			list.push_back(iterator.second.value);
+		}
+
+		return list;
 	}
 };

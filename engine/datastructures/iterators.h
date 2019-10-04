@@ -89,11 +89,11 @@ public:
 
 template<typename Iter, typename IterEnd, typename Filter>
 class FilteredIterator {
+public:
 	Iter iter;
 	IterEnd iterEnd;
 	Filter filter;
 	
-public:
 	FilteredIterator(const Iter& iter, const IterEnd& iterEnd, const Filter& filter) : iter(iter), filter(filter) {
 		while (this->iter != this->iterEnd && !this->filter(*this->iter)) {
 			++this->iter;
@@ -110,4 +110,63 @@ public:
 	bool operator!=(IteratorEnd) const {
 		return iter != iterEnd;
 	}
+};
+
+template<typename IterFactory, size_t BufferSize>
+class IteratorGroup {
+	IterFactory factories[BufferSize];
+	size_t size = 0;
+	
+	decltype(std::declval<IterFactory>().begin()) curIter;
+	decltype(std::declval<IterFactory>().end())  curEnd;
+
+	size_t curFactoryIndex = 0;
+public:
+
+	IteratorGroup() = default;
+
+	IteratorGroup(IterFactory list[BufferSize], size_t count) : size(count), curIter(list[0].begin()), curEnd(list[0].end()) {
+		for (size_t i = 0; i < count; i++) {
+			factories[i] = list[i];
+		}
+
+		while (!(curIter != curEnd)) {
+			++curFactoryIndex;
+			if (curFactoryIndex == size) break;
+			curIter = factories[curFactoryIndex].begin();
+			curEnd = factories[curFactoryIndex].end();
+		}
+	}
+
+	void operator++() {
+		++curIter;
+		while (!(curIter != curEnd)) {
+			++curFactoryIndex;
+			if (curFactoryIndex == size) return;
+			curIter = factories[curFactoryIndex].begin();
+			curEnd = factories[curFactoryIndex].end();
+		}
+	}
+	decltype(*std::declval<IterFactory>().begin())& operator*() const {
+		return *curIter;
+	}
+	bool operator!=(IteratorEnd) const {
+		return curFactoryIndex != size;
+	}
+};
+
+template<typename Iter>
+struct DereferencingIterator {
+	Iter baseIter;
+
+	DereferencingIterator(const Iter& baseIter) : baseIter(baseIter) {}
+	DereferencingIterator(Iter&& baseIter) : baseIter(std::move(baseIter)) {}
+	
+	void operator++() { ++baseIter; }
+	void operator++(int) { baseIter++; }
+	decltype(**baseIter)& operator*() const { return **baseIter; }
+	bool operator!=(const DereferencingIterator& other) const { return this->baseIter != other.baseIter; }
+	bool operator!=(const Iter& other) const { return this->baseIter != other; }
+	bool operator==(const DereferencingIterator& other) const { return this->baseIter == other.baseIter; }
+	bool operator==(const Iter& other) const { return this->baseIter == other; }
 };

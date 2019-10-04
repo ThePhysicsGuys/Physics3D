@@ -3,16 +3,24 @@
 #include "bindable.h"
 
 class Texture : public Bindable {
-public:
-	int unit;
-	unsigned int width;
-	unsigned int height;
-	
+protected:
+	int width;
+	int height;
+	int internalFormat;
 	int format;
+	int target;
+	int type;
+
+	int unit;
 	int channels;
 
-	Texture(unsigned int width, unsigned int height, const void* buffer, int format);
-	Texture(unsigned int width, unsigned int height);
+	virtual void create(int target, int level, int internalFormat, int width, int height, int border, int format, int type, const void* buffer);
+
+public:
+	Texture(int width, int height, const void* buffer, int target, int format, int internalFormat, int type);
+	Texture(int width, int height, const void* buffer, int format);
+	Texture(int width, int height);
+	Texture();
 
 	~Texture();
 	Texture(Texture&& other);
@@ -20,105 +28,65 @@ public:
 	Texture& operator=(Texture&& other);
 	Texture& operator=(const Texture&) = delete;
 
-	void bind(int unit);
-	void bind() override;
-	void unbind() override;
-	void close() override;
+	virtual void bind(int unit);
+	virtual void bind() override;
+	virtual void unbind() override;
+	virtual void close() override;
 
-	void resize(unsigned int width, unsigned int height);
-	void resize(unsigned int width, unsigned int height, const void* buffer);
+	virtual void resize(int width, int height);
+	virtual void resize(int width, int height, const void* buffer);
 
-	void loadFrameBufferTexture(unsigned int width, unsigned int height);
+	void loadFrameBufferTexture(int width, int height);
 
 	Texture* colored(Vec3 color);
 	Texture* colored(Vec4 color);
+
+	static Texture load(const std::string& name);
+
+	int getWidth() const;
+	int getHeight() const;
+	int getInternalFormat() const;
+	int getFormat() const;
+	int getTarget() const;
+	int getType() const;
+	int getChannels() const;
+	int getUnit() const;
+
+	void setUnit(int unit);
 };
 
-Texture* load(const std::string& name);
 
-class HDRTexture : public Bindable {
+class HDRTexture : public Texture {
 public:
-	int unit;
-	unsigned int width;
-	unsigned int height;
-
-	HDRTexture(unsigned int width, unsigned int height, const void* buffer);
-	HDRTexture(unsigned int width, unsigned int height);
-
-	~HDRTexture();
-	HDRTexture(HDRTexture&& other);
-	HDRTexture(const HDRTexture&) = delete;
-	HDRTexture& operator=(HDRTexture&& other);
-	HDRTexture& operator=(const HDRTexture&) = delete;
-
-	void bind(int unit);
-	void bind() override;
-	void unbind() override;
-	void close() override;
-
-	void resize(unsigned int width, unsigned int height);
-	void resize(unsigned int width, unsigned int height, const void* buffer);
+	HDRTexture(int width, int height, const void* buffer);
+	HDRTexture(int width, int height);
 };
 
-class MultisampleTexture : public Bindable {
+class MultisampleTexture : public Texture {
+protected:
+	int samples;
+
+	virtual void create(int target, int level, int internalFormat, int width, int height, int border, int format, int type, const void* buffer) override;
+
 public:
-	int unit;
-	unsigned int width;
-	unsigned int height;
-	unsigned int samples;
+	MultisampleTexture(int width, int height, int samples);
 
-	MultisampleTexture(unsigned int width, unsigned int height, unsigned int samples);
-
-	~MultisampleTexture();
-	MultisampleTexture(MultisampleTexture&& other);
-	MultisampleTexture(const MultisampleTexture&) = delete;
-	MultisampleTexture& operator=(MultisampleTexture&& other);
-	MultisampleTexture& operator=(const MultisampleTexture&) = delete;
-
-	void bind(int unit);
-	void bind() override;
-	void unbind() override;
-	void close() override;
-
-	void resize(unsigned int width, unsigned int height);
+	void resize(int width, int height) override;
 };
 
-class CubeMap : public Bindable {
-public:
-	int unit;
+class CubeMap : public Texture {
+protected:
+	virtual void create(int target, int level, int internalFormat, int width, int height, int border, int format, int type, const void* buffer) override;
 
+public:
 	CubeMap(const std::string& right, const std::string& left, const std::string& top, const std::string& bottom, const std::string& front, const std::string& back);
-
-	~CubeMap();
-	CubeMap(CubeMap&& other);
-	CubeMap(const CubeMap&) = delete;
-	CubeMap& operator=(CubeMap&& other);
-	CubeMap& operator=(const CubeMap&) = delete;
 
 	void load(const std::string& right, const std::string& left, const std::string& top, const std::string& bottom, const std::string& front, const std::string& back);
 
-	void bind(int unit);
-	void bind() override;
-	void unbind() override;
-	void close() override;
+	void resize(int width, int height) override;
 };
 
-class DepthTexture : public Bindable {
+class DepthTexture : public Texture {
 public:
-	int unit;
-	unsigned int width;
-	unsigned int height;
-
-	DepthTexture(unsigned int width, unsigned int height);
-
-	~DepthTexture();
-	DepthTexture(DepthTexture&& other);
-	DepthTexture(const DepthTexture&) = delete;
-	DepthTexture& operator=(DepthTexture&& other);
-	DepthTexture& operator=(const DepthTexture&) = delete;
-
-	void bind(int unit);
-	void bind() override;
-	void unbind() override;
-	void close() override;
+	DepthTexture(int width, int height);
 };

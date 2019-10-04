@@ -6,7 +6,7 @@
 #include "material.h"
 #include "light.h"
 
-#include "../resourceManager.h"
+#include "../resourceLoader.h"
 #include "../extendedPart.h"
 
 #include <sstream>
@@ -88,13 +88,12 @@ ShaderProgram::ShaderProgram(ShaderSource shaderSource, const Args&... args) : s
 
 	std::vector<std::string> uniforms = { args... };
 
-	Log::setSubject(shader.name);
+	Log::subject(shader.name);
 
 	for (const std::string& uniform : uniforms) {
 		shader.createUniform(uniform);
 	}
 
-	Log::resetSubject();
 }
 
 void ShaderProgram::bind() {
@@ -129,7 +128,7 @@ void BasicShader::updateMaterial(const Material& material) {
 	if (material.texture) {
 		material.texture->bind();
 		shader.setUniform("material.textured", true);
-		shader.setUniform("textureSampler", material.texture->unit);
+		shader.setUniform("textureSampler", material.texture->getUnit());
 	} else {
 		shader.setUniform("material.textured", false);
 		shader.setUniform("textureSampler", 0);
@@ -138,7 +137,7 @@ void BasicShader::updateMaterial(const Material& material) {
 	if (material.normal) {
 		material.normal->bind();
 		shader.setUniform("material.normalmapped", true);
-		shader.setUniform("normalSampler", material.normal->unit);
+		shader.setUniform("normalSampler", material.normal->getUnit());
 	} else {
 		shader.setUniform("material.normalmapped", false);
 		shader.setUniform("normalSampler", 0);
@@ -255,9 +254,9 @@ void SkyboxShader::updateProjection(const Mat4f& viewMatrix, const Mat4f& projec
 	shader.setUniform("projectionMatrix", projectionMatrix);
 }
 
-void SkyboxShader::updateCubeMap(const CubeMap& skybox) {
+void SkyboxShader::updateCubeMap(CubeMap* skybox) {
 	bind();
-	shader.setUniform("skyboxTexture", skybox.unit);
+	shader.setUniform("skyboxTexture", skybox->getUnit());
 }
 
 void SkyboxShader::updateLightDirection(const Vec3f& lightDirection) {
@@ -319,7 +318,7 @@ void QuadShader::updateTexture(Texture* texture, const Vec4f& color) {
 	bind();
 	texture->bind();
 	shader.setUniform("textured", true);
-	shader.setUniform("textureSampler", texture->unit);
+	shader.setUniform("textureSampler", texture->getUnit());
 	shader.setUniform("color", color);
 }
 
@@ -334,7 +333,7 @@ void BlurShader::updateType(BlurType type) {
 void BlurShader::updateTexture(Texture* texture) {
 	bind();
 	texture->bind();
-	shader.setUniform("image", texture->unit);
+	shader.setUniform("image", texture->getUnit());
 }
 
 
@@ -343,13 +342,13 @@ void BlurShader::updateTexture(Texture* texture) {
 void PostProcessShader::updateTexture(Texture* texture) {
 	bind();
 	texture->bind();
-	shader.setUniform("textureSampler", texture->unit);
+	shader.setUniform("textureSampler", texture->getUnit());
 }
 
 void PostProcessShader::updateTexture(HDRTexture* texture) {
 	bind();
 	texture->bind();
-	shader.setUniform("textureSampler", texture->unit);
+	shader.setUniform("textureSampler", texture->getUnit());
 }
 
 
@@ -380,7 +379,7 @@ void FontShader::updateProjection(const Mat4f& projectionMatrix) {
 void FontShader::updateTexture(Texture* texture) {
 	bind();
 	texture->bind();
-	shader.setUniform("text", texture->unit);
+	shader.setUniform("text", texture->getUnit());
 }
 
 
@@ -429,7 +428,7 @@ void TestShader::updateViewPosition(const Position& viewPosition) {
 void TestShader::updateDisplacement(Texture* displacementMap) {
 	bind();
 	displacementMap->bind();
-	shader.setUniform("displacementMap", displacementMap->unit);
+	shader.setUniform("displacementMap", displacementMap->getUnit());
 }
 
 
@@ -442,19 +441,18 @@ void LineShader::updateProjection(const Mat4f& projectionMatrix, const Mat4f& vi
 }
 
 
-
 // EdgeShader
 
 void EdgeShader::updateTexture(Texture* texture) {
 	bind();
 	texture->bind();
-	shader.setUniform("textureSampler", texture->unit);
+	shader.setUniform("textureSampler", texture->getUnit());
 }
 
 void EdgeShader::updateTexture(HDRTexture* texture) {
 	bind();
 	texture->bind();
-	shader.setUniform("textureSampler", texture->unit);
+	shader.setUniform("textureSampler", texture->getUnit());
 }
 
 // GuiShader

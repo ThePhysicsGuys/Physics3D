@@ -26,7 +26,7 @@ public:
 	EdgePiece* newTriangleBuffer;
 
 	ConvexShapeBuilder(Vec3f * vertBuf, Triangle* triangleBuf, int vertexCount, int triangleCount, TriangleNeighbors* neighborBuf, int* removalBuffer, EdgePiece* newTriangleBuffer);
-	ConvexShapeBuilder(const Shape& s, Vec3f * newVertBuf, Triangle* newTriangleBuf, TriangleNeighbors* neighborBuf, int* removalBuffer, EdgePiece* newTriangleBuffer);
+	ConvexShapeBuilder(const Polyhedron& s, Vec3f * newVertBuf, Triangle* newTriangleBuf, TriangleNeighbors* neighborBuf, int* removalBuffer, EdgePiece* newTriangleBuffer);
 
 	void addPoint(const Vec3f& point, int oldTriangleIndex);
 	// returns true if successful
@@ -35,6 +35,6 @@ public:
 	void removeTriangle(int triangleIndex);
 	bool isAbove(const Vec3f& point, Triangle t);
 
-	Shape toShape() const;
+	Polyhedron toShape() const;
 	IndexedShape toIndexedShape() const;
 };

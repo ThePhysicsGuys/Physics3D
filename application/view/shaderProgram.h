@@ -31,7 +31,7 @@ struct SkyboxShader : public ShaderProgram {
 	SkyboxShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, "viewMatrix", "projectionMatrix", "skyboxTexture", "lightDirection") {}
 
 	void updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix);
-	void updateCubeMap(const CubeMap& skybox);
+	void updateCubeMap(CubeMap* skybox);
 	void updateLightDirection(const Vec3f& lightDirection);
 };
 

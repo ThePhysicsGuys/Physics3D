@@ -52,8 +52,8 @@ void ShapeBuilder::addPoint(Vec3f point, int oldTriangleIndex) {
 	
 }
 
-Shape ShapeBuilder::toShape() const {
-	return Shape(vertexBuf, SharedArrayPtr<const Triangle>::staticSharedArrayPtr(triangleBuf), vertexCount, triangleCount);
+Polyhedron ShapeBuilder::toShape() const {
+	return Polyhedron(vertexBuf, SharedArrayPtr<const Triangle>::staticSharedArrayPtr(triangleBuf), vertexCount, triangleCount);
 }
 
 IndexedShape ShapeBuilder::toIndexedShape() const {

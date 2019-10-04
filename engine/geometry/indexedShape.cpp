@@ -29,7 +29,7 @@ int TriangleNeighbors::getNeighborIndex(int neighbor) {
 	throw "Neighbor not found in getNeighborIndex";
 }
 
-IndexedShape::IndexedShape(const Vec3f* vertices, SharedArrayPtr<const Triangle> triangles, int vertexCount, int triangleCount, TriangleNeighbors * neighborBuf) : Shape(vertices, triangles, vertexCount, triangleCount), neighbors(neighborBuf) {}
+IndexedShape::IndexedShape(const Vec3f* vertices, SharedArrayPtr<const Triangle> triangles, int vertexCount, int triangleCount, TriangleNeighbors * neighborBuf) : Polyhedron(vertices, triangles, vertexCount, triangleCount), neighbors(neighborBuf) {}
 
 void fillNeighborBuf(const Triangle* triangles, int triangleCount, TriangleNeighbors* neighborBuf) {
 	for(int i = 0; i < triangleCount; i++) {
@@ -64,7 +64,7 @@ void fillNeighborBuf(const Triangle* triangles, int triangleCount, TriangleNeigh
 
 
 bool IndexedShape::isValid() const {
-	if(!Shape::isValid()) { return false; };
+	if(!Polyhedron::isValid()) { return false; };
 
 	// Assert that all neighbors are filled in
 	for(int i = 0; i < triangleCount; i++)

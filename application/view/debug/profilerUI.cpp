@@ -222,13 +222,8 @@ void recursiveRenderTree(const TreeNode& tree, const Vec3f& treeColor, Vec2f ori
 			Vec2f nextStep = origin + Vec2f(-allottedWidth / 2 + allottedWidth * ((tree.nodeCount != 1)?(float(i) / (tree.nodeCount-1)):0.5f), -0.04f);
 			float colorDarkning = pow(1.0f * computeCost(tree[i].bounds) / maxCost, 0.25f);
 
-			/*color(treeColor * colorDarkning);
-			vertex(origin);
-			vertex(nextStep);*/
-
 			Path::line(origin, nextStep, 1.0f, Vec4f(treeColor * colorDarkning, 1.0f), Vec4f(treeColor * colorDarkning, 1.0f));
 		
-
 			recursiveRenderTree(tree[i], treeColor, nextStep, allottedWidth / tree.nodeCount, maxCost);
 		}
 	}
@@ -245,17 +240,6 @@ void renderTreeStructure(Screen& screen, const TreeNode& tree, const Vec3f& tree
 		maxCost = std::max(maxCost, computeCost(tree[1].bounds));
 	}
 
-	/*glPushMatrix();
-	glScalef(float(size.y) / size.x, 1.0f, 1.0f);
-
-	
-
-	//
-	glScaled(float(GUI::screen->dimension.y) / GUI::screen->dimension.x, 1, 1);
-	glBegin(GL_LINES);*/
 	recursiveRenderTree(tree, treeColor, origin, allottedWidth, maxCost);
-	/*glEnd();
-	glPopMatrix();*/
-
 	GUI::batch->submit();
 }

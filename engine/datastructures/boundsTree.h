@@ -365,7 +365,6 @@ typedef FilteredTreeIterator<Position, containsFilterPoint> TreeIteratorContaini
 */
 
 
-
 template<typename Iter, typename Boundable>
 struct BoundsTreeIter {
 	Iter iter;
@@ -384,12 +383,11 @@ struct BoundsTreeIter {
 template<typename Filter, typename Boundable>
 using FilteredBoundsTreeIter = BoundsTreeIter<FilteredTreeIterator<Filter>, Boundable>;
 
-template<typename Iter>
-struct TreeIterFactory : IteratorFactory<Iter, IteratorEnd> {
-	TreeIterFactory(const Iter& iter) : IteratorFactory<Iter, IteratorEnd>(iter, IteratorEnd()) {}
-	TreeIterFactory(Iter&& iter) : IteratorFactory<Iter, IteratorEnd>(std::move(iter), IteratorEnd()) {}
+template<typename Boundable>
+struct DoNothingFilter {
+	constexpr bool operator()(const TreeNode& node) const { return true; }
+	constexpr bool operator()(const Boundable& b) const { return true; }
 };
-
 struct FinderFilter {
 	Bounds filterBounds;
 
@@ -399,22 +397,32 @@ struct FinderFilter {
 	bool operator()(const TreeNode& b) const { return b.bounds.contains(filterBounds); }
 };
 
+template<typename Boundable, typename Filter>
+struct TreeIterFactory;
+
+size_t getNumberOfObjectsInNode(const TreeNode& node);
+
+size_t getLengthOfLongestBranch(const TreeNode& node);
+
 template<typename Boundable>
 struct BoundsTree {
-	TreeNode rootNode;
+	mutable TreeNode rootNode;
 
 	BoundsTree() : rootNode(new TreeNode[MAX_BRANCHES], 0) {
 
 	}
 
-	void add(Boundable* obj, const Bounds& bounds) {
-		this->rootNode.addOutside(TreeNode(obj, bounds, true));
-	}
-
 	void add(TreeNode&& node) {
 		this->rootNode.addOutside(std::move(node));
+		if (this->rootNode.nodeCount == 1) {
+			this->rootNode.bounds = node.bounds; // bit of a band-aid fix, as an empty treeNode's bounds can't really be defined
+		}
 	}
 
+	void add(Boundable* obj, const Bounds& bounds) {
+		this->add(TreeNode(obj, bounds, true));
+	}
+	
 	void addToExistingGroup(Boundable* obj, const Bounds& bounds, TreeNode& groupNode) {
 		groupNode.addInside(TreeNode(obj, bounds, false));
 	}
@@ -433,8 +441,18 @@ struct BoundsTree {
 	}
 
 	void remove(const Boundable* obj, const Bounds& strictBounds) {
-		NodeStack stack(rootNode, obj, strictBounds);
-		stack.remove();
+		if (rootNode.isLeafNode()) {
+			if (rootNode.object == obj) {
+				rootNode.nodeCount = 0;
+				rootNode.bounds = Bounds();
+				rootNode.subTrees = new TreeNode[MAX_BRANCHES];
+			} else {
+				throw "Attempting to remove nonexistent object!";
+			}
+		} else {
+			NodeStack stack(rootNode, obj, strictBounds);
+			stack.remove();
+		}
 	}
 	void remove(const Boundable* obj) {
 		this->remove(obj, obj->getStrictBounds());
@@ -470,12 +488,41 @@ struct BoundsTree {
 
 	inline void improveStructure() { rootNode.improveStructure(); }
 	
+	inline size_t getNumberOfObjects() const {
+		return getNumberOfObjectsInNode(this->rootNode);
+	}
+
 	inline TreeIterator begin() { return TreeIterator(rootNode); };
 	inline ConstTreeIterator begin() const { return ConstTreeIterator(const_cast<TreeNode&>(rootNode)); };
 	inline IteratorEnd end() const { return IteratorEnd(); };
 
 	template<typename Filter>
-	inline TreeIterFactory<FilteredBoundsTreeIter<Filter, Boundable>> iterFiltered(const Filter& filter) {
-		return TreeIterFactory<FilteredBoundsTreeIter<Filter, Boundable>>(FilteredBoundsTreeIter<Filter, Boundable>(FilteredTreeIterator<Filter>(this->rootNode, filter)));
-	}
+	inline TreeIterFactory<Boundable, Filter> iterFiltered(const Filter& filter);
+
+	template<typename Filter>
+	inline TreeIterFactory<const Boundable, Filter> iterFiltered(const Filter& filter) const;
 };
+
+template<typename Boundable, typename Filter>
+struct TreeIterFactory {
+	TreeNode* rootNode;
+	Filter filter;
+	TreeIterFactory() {}
+	TreeIterFactory(TreeNode* rootNode, const Filter& filter) : rootNode(rootNode), filter(filter) {}
+	FilteredBoundsTreeIter<Filter, Boundable> begin() const {
+		return FilteredBoundsTreeIter<Filter, Boundable>(FilteredTreeIterator<Filter>(*rootNode, filter));
+	}
+	constexpr IteratorEnd end() const { return IteratorEnd(); }
+};
+
+template<typename Boundable>
+template<typename Filter>
+inline TreeIterFactory<Boundable, Filter> BoundsTree<Boundable>::iterFiltered(const Filter& filter) {
+	return TreeIterFactory<Boundable, Filter>(&this->rootNode, filter);
+}
+
+template<typename Boundable>
+template<typename Filter>
+inline TreeIterFactory<const Boundable, Filter> BoundsTree<Boundable>::iterFiltered(const Filter& filter) const {
+	return TreeIterFactory<const Boundable, Filter>(&this->rootNode, filter);
+}

@@ -206,9 +206,8 @@ void OBJExport::save(const std::string& filename, const VisualShape& shape, bool
 	WorldExport
 */
 
-void savePart(std::ofstream& output, const ExtendedPart& part, std::string shape, bool anchored) {
+void savePart(std::ofstream& output, const ExtendedPart& part, std::string shape) {
 	output << "part:" << std::endl;
-	output << "\tanchored = " << anchored << std::endl;
 	output << "\ttexture = " << "" << std::endl;
 	output << "\tnormals = " << "" << std::endl;
 	output << "\tambient = " << Export::str(part.material.ambient) << std::endl;
@@ -239,8 +238,7 @@ void saveCamera(std::ofstream& output, Camera& camera) {
 
 void saveGlobals(std::ofstream& output, World<ExtendedPart>& world) {
 	output << "global:" << std::endl;
-	output << "\tfreeparts = " << world.getPartCount() << std::endl;
-	output << "\tanchoredparts = " << world.getAnchoredPartCount() << std::endl;
+	output << "\tparts = " << world.getPartCount() << std::endl;
 }
 
 void saveBinaryWorld(const std::string& name, World<ExtendedPart>& world, Camera& camera) {
@@ -248,7 +246,7 @@ void saveBinaryWorld(const std::string& name, World<ExtendedPart>& world, Camera
 }
 
 void saveNonBinaryWorld(const std::string& name, World<ExtendedPart>& world, Camera& camera) {
-	Log::setSubject(name);
+	Log::subject s(name);
 	Log::info("Exporting world...");
 
 	std::string folder = std::string("./") + name;
@@ -268,24 +266,7 @@ void saveNonBinaryWorld(const std::string& name, World<ExtendedPart>& world, Cam
 
 	std::map<int, std::string> shapes;
 
-	for (const Part& part : world.iterAnchoredParts()) {
-		const ExtendedPart& extendedPart = static_cast<const ExtendedPart&>(part);
-
-		std::string shape;
-		if (shapes.count(extendedPart.drawMeshId)) {
-			shape = shapes.at(extendedPart.drawMeshId);
-		} else {
-			shape = "part_" + Export::str(extendedPart.drawMeshId);
-			shapes[extendedPart.drawMeshId] = shape;
-			
-			Log::info("Exporting %s", shape.c_str());
-			OBJExport::save(folder + "/" + shape + ".obj", extendedPart.visualShape);
-		}
-
-		savePart(output, extendedPart, shape, true);
-	}
-
-	for (const Part& part : world.iterFreeParts()) {
+	for (const Part& part : world) {
 		const ExtendedPart& extendedPart = static_cast<const ExtendedPart&>(part);
 
 		std::string shape;
@@ -299,11 +280,10 @@ void saveNonBinaryWorld(const std::string& name, World<ExtendedPart>& world, Cam
 			OBJExport::save(folder + "/" + shape + ".obj", extendedPart.visualShape);
 		}
 
-		savePart(output, extendedPart, shape, false);
+		savePart(output, extendedPart, shape);
 	}
 
 	Log::info("World exported");
-	Log::resetSubject();
 
 	output.close();
 }

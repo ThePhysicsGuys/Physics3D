@@ -269,7 +269,7 @@ TEST_CASE(inelasticColission2) {
 }
 
 /*TEST_CASE(testPointAccelMatrixAndInertiaInDirection) {
-	Part part(Shape(), CFrame(Vec3(7.6, 3.4, 3.9), fromEulerAngles(1.1, 0.7, 0.9)), 1.0, 1.0);
+	Part part(Polyhedron(), CFrame(Vec3(7.6, 3.4, 3.9), fromEulerAngles(1.1, 0.7, 0.9)), 1.0, 1.0);
 	Physical p(&part, 5.0, DiagonalMat3(2, 7, 5));
 
 	Vec3 localPoint(0.8, 0.6, 0.9);

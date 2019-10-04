@@ -1,14 +1,20 @@
 #pragma once
 
 #include "../core.h"
+class ResourceManager;
 
 #pragma region ResourceAllocator
 
 //! ResourceAllocator
 template<typename T>
-class ResourceAllocater {
+class ResourceAllocator {
+	friend ResourceManager;
+	
+protected:
+	ResourceAllocator() {};
+
 public:
-	virtual T* load(std::string filename) = 0;
+	virtual T* load(const std::string& name, const std::string& path) = 0;
 };
 
 #pragma endregion
@@ -23,31 +29,30 @@ enum class ResourceType {
 	OBJ
 };
 
-class ResourceManager;
-
 class Resource {
 	friend ResourceManager;
 
-private:
+protected:
 	std::string path;
 	std::string name;
 
-	inline void setName(const std::string& name);
-	inline void setPath(const std::string& path);
-
-protected:
 	Resource(std::string path);
 	Resource(std::string name, std::string path);
 
 public:
 	inline virtual ResourceType getType() const = 0;
 	inline virtual std::string getTypeName() const = 0;
+	
+	virtual void close() = 0;
 
 	inline std::string getName() const;
 	inline std::string getPath() const;
 
+	inline void setName(const std::string& name);
+	inline void setPath(const std::string& path);
+
 	template<typename T>
-	static ResourceAllocater<T>* getAllocator() {
+	static ResourceAllocator<T> getAllocator() {
 		return T::getAllocator();
 	}
 };
@@ -55,7 +60,8 @@ public:
 #define DEFINE_RESOURCE(type, path) \
 	inline static std::string getDefaultPath() { return path; } \
 	inline static ResourceType getStaticType() { return ResourceType::type; } \
-	inline virtual std::string getTypeName() const override { return #type; } \
+	inline static std::string getStaticTypeName() { return #type; } \
+	inline virtual std::string getTypeName() const override { return getStaticTypeName(); } \
 	inline virtual ResourceType getType() const override { return getStaticType(); }
 
 #pragma endregion

@@ -64,6 +64,9 @@ class Physical {
 	void translateUnsafe(const Vec3& translation);
 	void rotateAroundCenterOfMassUnsafe(const RotMat3& rotation);
 	void setCFrameUnsafe(const GlobalCFrame& newCFrame);
+
+	// deletes the given physical
+	void attachPhysical(Physical* phys, const CFrame& attachment);
 public:
 	Part* mainPart;
 	WorldPrototype* world = nullptr;
@@ -83,9 +86,6 @@ public:
 
 	bool anchored = false;
 
-	Vec3 localCentroid;
-	GlobalSphere circumscribingSphere;
-
 	BoundingBox localBounds;
 
 	Physical() = default;
@@ -93,28 +93,23 @@ public:
 	inline Physical(Part* part, double mass, SymmetricMat3 inertia) : mass(mass), inertia(inertia), mainPart(part) {
 		//parts.push_back(AttachedPart{ CFrame(), part });
 		
-		Sphere smallestSphere = part->hitbox.getCircumscribingSphere();
 		this->localBounds = computeLocalBounds();
-		Sphere s = computeLocalCircumscribingSphere();
-		this->localCentroid = s.origin;
-		this->circumscribingSphere.radius = s.radius;
-		this->circumscribingSphere.origin = getCFrame().localToGlobal(localCentroid);
 	}
 
-	Physical(Physical&& other) noexcept : parts(std::move(other.parts)) {
-		//this->cframe = other.cframe;
-		this->mainPart = other.mainPart;
-		this->velocity = other.velocity;
-		this->angularVelocity = other.angularVelocity;
-		this->totalForce = other.totalForce;
-		this->totalMoment = other.totalMoment;
-		this->mass = other.mass;
-		this->localCenterOfMass = other.localCenterOfMass;
-		this->inertia = other.inertia;
-		this->localCentroid = other.localCentroid;
-		this->circumscribingSphere = other.circumscribingSphere;
-		this->localBounds = other.localBounds;
-
+	Physical(Physical&& other) noexcept : 
+		mainPart(std::move(other.mainPart)), 
+		parts(std::move(other.parts)), 
+		forceResponse(other.forceResponse), 
+		momentResponse(other.momentResponse),	
+		velocity(other.velocity),
+		angularVelocity(other.angularVelocity),
+		totalForce(other.totalForce),
+		totalMoment(other.totalMoment),
+		mass(other.mass),
+		localCenterOfMass(other.localCenterOfMass),
+		inertia(other.inertia),
+		localBounds(other.localBounds)
+		{
 		mainPart->parent = this;
 		for (AttachedPart& p : parts) {
 			p.part->parent = this;
@@ -132,8 +127,6 @@ public:
 		this->mass = other.mass;
 		this->localCenterOfMass = other.localCenterOfMass;
 		this->inertia = other.inertia;
-		this->localCentroid = other.localCentroid;
-		this->circumscribingSphere = other.circumscribingSphere;
 		this->localBounds = other.localBounds;
 
 		mainPart->parent = this;
@@ -146,25 +139,8 @@ public:
 	Physical(const Physical&) = delete;
 	void operator=(const Physical&) = delete;
 
-	~Physical() {
-		if(mainPart != nullptr) mainPart->parent = nullptr;
-		mainPart = nullptr;
-		for (AttachedPart& atPart:parts) {
-			atPart.part->parent = nullptr;
-		}
-		parts.clear();
-	}
+	~Physical();
 
-	void makeMainPart(AttachedPart& newMainPart);
-	void makeMainPart(Part* newMainPart);
-	void attachPart(Part* part, const CFrame& attachment);
-	// deletes the given physical
-	void attachPhysical(Physical* phys, const CFrame& attachment);
-	/* 
-		returns whether the part that's been removed is the last part in the physical, 
-		meaning it should be destroyed
-	*/
-	void detachPart(Part* part);
 	void refreshWithNewParts();
 
 	void updatePart(const Part* updatedPart, const Bounds& updatedBounds);
@@ -206,20 +182,12 @@ public:
 	inline const GlobalCFrame& getCFrame() const { return mainPart->getCFrame(); }
 
 	inline Position getPosition() const {
-		return getCentroid();
+		return getCFrame().getPosition();
 	}
 
 	Bounds getStrictBounds() const;
 
-	inline Bounds getLooseBounds() const {
-		Position pos = getPosition();
-		Fix<32> offset(circumscribingSphere.radius);
-		Vec3Fix offsetVec(offset, offset, offset);
-		return Bounds(pos - offsetVec, pos + offsetVec);
-	}
-
 	Position getCenterOfMass() const;
-	Position getCentroid() const;
 	Vec3 getAcceleration() const;
 	Vec3 getAngularAcceleration() const;
 	Vec3 getVelocityOfPoint(const Vec3Relative& point) const;
@@ -233,10 +201,18 @@ public:
 	double getKineticEnergy() const;
 	inline size_t getPartCount() const { return parts.size + 1; }
 	BoundingBox computeLocalBounds() const;
-	Sphere computeLocalCircumscribingSphere() const;
 
 	inline void setAnchored(bool anchored) { this->anchored = anchored; refreshWithNewParts(); }
 	
+
+
+	void makeMainPart(AttachedPart& newMainPart);
+	void makeMainPart(Part* newMainPart);
+	void attachPart(Part* part, const CFrame& attachment);
+	void detachPart(Part* part);
+
+
+
 	PartIter begin() { return PartIter(parts.begin()-1, mainPart); }
 	ConstPartIter begin() const { return ConstPartIter(parts.begin()-1, mainPart);}
 

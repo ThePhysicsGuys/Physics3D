@@ -19,8 +19,11 @@ struct PartPhysicalData {
 
 class Part {
 	friend class Physical;
+	friend class WorldPrototype;
 
 	GlobalCFrame cframe;
+
+	bool isTerrainPart = false;
 public:
 	Physical* parent = nullptr;
 	Shape hitbox;

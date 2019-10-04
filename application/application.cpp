@@ -22,18 +22,21 @@
 #include "debug.h"
 #include "worlds.h"
 #include "tickerThread.h"
-#include "resourceManager.h"
+#include "resourceLoader.h"
 #include "worldBuilder.h"
 
 #include "io/export.h"
 #include "io/import.h"
+
+#include "resource/resourceManager.h"
+#include "resource/textureResource.h"
 
 #define TICKS_PER_SECOND 120.0
 #define TICK_SKIP_TIME std::chrono::milliseconds(3000)
 
 
 TickerThread physicsThread;
-GravityWorld world(Vec3(0.0, -10.0, 0.0));
+GravityWorld world(1 / TICKS_PER_SECOND, Vec3(0.0, -10.0, 0.0));
 Screen screen;
 
 
@@ -79,6 +82,54 @@ void setupScreen() {
 	screen.onInit();
 }
 
+double getYOffset(double x, double z) {
+	return -10 * cos(x / 30.0 + z / 20.0) - 7 * sin(-x / 25.0 + z / 17.0 + 2.4) + 2 * sin(x / 4.0 + z / 7.0) + sin(x / 9.0 - z / 3.0) + sin(-x / 3.0 + z / 5.0);
+}
+
+void buildTerrain() {
+	PartFactory treeTrunkfactory(Library::createPrism(7, 0.5, 11.0), screen, "TreeTrunk");
+	PartFactory icosahedronFactory(Library::icosahedron.scaled(4.0, 4.0, 4.0), screen, "Icosahedron");
+	PartFactory leafFactory(Library::icosahedron.scaled(2.0, 2.3, 1.9), screen, "Leaf");
+	for (int x = -50; x < 50; x++) {
+		for (int z = -50; z < 50; z++) {
+			double yOffset = getYOffset(x * 3.0, z * 3.0);
+			Position pos((x + fRand(0.0, 1.0)) * 3.0, fRand(0.0, 1.0) + yOffset, (z + fRand(0.0, 1.0)) * 3.0);
+			GlobalCFrame cf(pos, fromEulerAngles(fRand(0.0, 3.1415), fRand(0.0, 3.1415), fRand(0.0, 3.1415)));
+			ExtendedPart* newPart = icosahedronFactory.produce(cf, 1.0, 1.0, "terrain");
+			newPart->material.ambient = Vec4(0.0, yOffset / 40.0 + 0.5, 0.0, 1.0);
+			world.addTerrainPart(newPart);
+		}
+	}
+
+	for (int i = 0; i < 200; i++) {
+		double x = fRand(-150, 150);
+		double z = fRand(-150, 150);
+
+
+		Position treePos(x, getYOffset(x, z) + 8.0, z);
+
+		GlobalCFrame trunkCFrame(treePos, fromEulerAngles(fRand(-0.1, 0.1), fRand(-3.1415, 3.1415), fRand(-0.1, 0.1)));
+
+		ExtendedPart* trunk = treeTrunkfactory.produce(trunkCFrame, 1.0, 1.0, "trunk");
+		trunk->material.ambient = GUI::COLOR::get(0x654321);
+		world.addTerrainPart(trunk);
+
+		Position treeTop = trunkCFrame.localToGlobal(Vec3(0.0, 5.5, 0.0));
+
+
+		for (int j = 0; j < 15; j++) {
+
+			GlobalCFrame leavesCFrame(treeTop + Vec3(fRand(-1.0, 1.0), fRand(-1.0, 1.0), fRand(-1.0, 1.0)), fromEulerAngles(fRand(0.0, 3.1415), fRand(0.0, 3.1415), fRand(0.0, 3.1415)));
+			ExtendedPart* leaves = leafFactory.produce(leavesCFrame, 1.0, 1.0, "trunk");
+
+			leaves->material.ambient = Vec4(fRand(-0.2, 0.2), 0.6 + fRand(-0.2, 0.2), 0.0, 1.0);
+
+			world.addTerrainPart(leaves);
+		}
+		
+	}
+}
+
 void setupWorld() {
 	Log::info("Initializing world");
 
@@ -98,25 +149,25 @@ void setupWorld() {
 	PartFactory bigCubeFactory(Library::createCube(2.0), screen, "Cube");
 	PartFactory sphereFactory(sphereShape, screen, "Sphere");
 	PartFactory smallSphereFactory(sphereShape.scaled(0.5, 0.5, 0.5), screen, "SmallSphere");
-	PartFactory smallIcosahedronFactory(Library::icosahedron.scaled(0.3, 0.3, 0.3), screen, "SmallIcosahedron");
 	PartFactory triangleFactory(Library::trianglePyramid, screen, "Triangle");
 	PartFactory wedgeFactory(Library::wedge, screen, "Wedge");
 
 	// Floor
 	Vec2 floorSize(50.0, 50.0);
 	double wallHeight = 7.0;
-	Material floorMaterial = Material(load("../res/textures/floor/floor_color.jpg"));
+	ResourceManager::add<TextureResource>("../res/textures/floor/floor_color.jpg", "floorMaterial");
+	Material floorMaterial = Material(ResourceManager::get<TextureResource>("floorMaterial"));
 	ExtendedPart* floorExtendedPart = createUniquePart(screen, BoundingBox(floorSize.x, 1.0, floorSize.y).toShape(), GlobalCFrame(0.0, 0.0, 0.0), 2.0, 1.0);
 	floorExtendedPart->material = floorMaterial;
-	world.addPart(floorExtendedPart, true);
+	world.addTerrainPart(floorExtendedPart);
 
 	// Walls
 	PartFactory xWallFactory(BoundingBox(0.7, wallHeight, floorSize.y - 0.7).toShape(), screen, "xWall");
 	PartFactory zWallFactory(BoundingBox(floorSize.x, wallHeight, 0.7).toShape(), screen, "zWall");
-	world.addPart(xWallFactory.produce(GlobalCFrame(Position(floorSize.x / 2, wallHeight / 2, 0.0)), 2.0, 1.0), true);
-	world.addPart(zWallFactory.produce(GlobalCFrame(Position(0.0, wallHeight / 2, floorSize.y / 2)), 2.0, 1.0), true);
-	world.addPart(xWallFactory.produce(GlobalCFrame(Position(-floorSize.x / 2, wallHeight / 2, 0.0)), 2.0, 1.0), true);
-	world.addPart(zWallFactory.produce(GlobalCFrame(Position(0.0, wallHeight / 2, -floorSize.y / 2)), 2.0, 1.0), true);
+	world.addTerrainPart(xWallFactory.produce(GlobalCFrame(Position(floorSize.x / 2, wallHeight / 2, 0.0)), 2.0, 1.0));
+	world.addTerrainPart(zWallFactory.produce(GlobalCFrame(Position(0.0, wallHeight / 2, floorSize.y / 2)), 2.0, 1.0));
+	world.addTerrainPart(xWallFactory.produce(GlobalCFrame(Position(-floorSize.x / 2, wallHeight / 2, 0.0)), 2.0, 1.0));
+	world.addTerrainPart(zWallFactory.produce(GlobalCFrame(Position(0.0, wallHeight / 2, -floorSize.y / 2)), 2.0, 1.0));
 
 	ExtendedPart* conveyor = createUniquePart(screen, BoundingBox(1.0, 0.3, floorSize.y).toShape(), GlobalCFrame(10.0, 0.65, 0.0), 2.0, 1.0);
 
@@ -202,8 +253,10 @@ void setupWorld() {
 				world.addPart(triangleFactory.produce(GlobalCFrame(Position(x - 20, y + 1, z + 20)), 1.0, 0.2));
 			}
 		}
-	}
-	*/
+	}*/
+	//buildTerrain();
+	//world.optimizeTerrain();
+
 	// Player
 	screen.camera.attachment = createUniquePart(screen, Library::createPrism(50, 0.2, 1.0), GlobalCFrame(), 1.0, 5.0, "Player");
 
@@ -217,7 +270,7 @@ void setupPhysics() {
 		physicsMeasure.mark(PhysicsProcess::OTHER);
 
 		AppDebug::logTickStart();
-		world.tick(1 / physicsThread.getTPS());
+		world.tick();
 		AppDebug::logTickEnd();
 
 		physicsMeasure.end();
@@ -284,13 +337,15 @@ void runTick() {
 // Flying
 
 void toggleFlying() {
-	if (screen.camera.flying) {
-		screen.camera.flying = false;
-		screen.camera.attachment->setCFrame(GlobalCFrame(screen.camera.cframe.getPosition()));
-		screen.world->addPart(screen.camera.attachment);
-		screen.camera.attachment->parent->momentResponse = SymmetricMat3::ZEROS();
-	} else {
-		screen.world->removePart(screen.camera.attachment);
-		screen.camera.flying = true;
-	}
+	world.asyncModification([]() {
+		if (screen.camera.flying) {
+			screen.camera.flying = false;
+			screen.camera.attachment->setCFrame(GlobalCFrame(screen.camera.cframe.getPosition()));
+			screen.world->addPart(screen.camera.attachment);
+			screen.camera.attachment->parent->momentResponse = SymmetricMat3::ZEROS();
+		} else {
+			screen.world->removePart(screen.camera.attachment);
+			screen.camera.flying = true;
+		}
+	});
 }

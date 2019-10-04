@@ -1,5 +1,3 @@
-#include "resource.h"
-
 #include "core.h"
 
 #include "resourceManager.h"

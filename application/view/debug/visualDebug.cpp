@@ -23,6 +23,7 @@ const char* const graphicsDebugLabels[]{
 		"Wait For Lock",
 		"Physicals",
 		"Origin",
+		"Picker",
 		"Profiler",
 		"Finalize",
 		"Other"

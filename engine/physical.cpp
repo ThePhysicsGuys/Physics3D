@@ -120,35 +120,43 @@ void Physical::attachPart(Part* part, const CFrame& attachment) {
 
 	refreshWithNewParts();
 }
+
+// detaches part, without updating World
+// Returns true if this physical has no more parts and should be deleted
 void Physical::detachPart(Part* part) {
-	if (this->world != nullptr) {
-		this->world->objectTree.remove(part);
-	}
 	if (part == mainPart) {
 		if (parts.size == 0) {
+			delete this;
+			return;
+		} else {
+			makeMainPart(parts[parts.size - 1]);
+		}
+	}
+	for (int i = parts.size - 1; i >= 0; i--) {
+		AttachedPart& at = parts[i];
+		if (at.part == part) {
+			part->parent = nullptr;
+			parts.remove(i);
+			if (this->world != nullptr) {
+				this->world->removePartFromTrees(part);
+			}
+			refreshWithNewParts();
 			return;
 		}
-		part->parent = nullptr;
-		if (parts.size >= 1) {
-			makeMainPart(parts[parts.size-1]);
-			refreshWithNewParts();
-		} else {
-			if (this->world != nullptr) {
-				this->world->removePhysical(this);
-			}
-		}
-	} else {
-		for (auto iter = parts.begin(); iter != parts.end(); ++iter) {
-			AttachedPart& at = *iter;
-			if (at.part == part) {
-				part->parent = nullptr;
-				parts.remove(iter);
-				refreshWithNewParts();
-				return;
-			}
-		}
-		throw "Error: could not find part to remove!";
 	}
+	throw "Error: could not find part to remove!";
+}
+
+inline Physical::~Physical() {
+	if (this->world != nullptr) {
+		this->world->removePhysical(this);
+	}
+	if (mainPart != nullptr) mainPart->parent = nullptr;
+	for (AttachedPart& atPart : parts) {
+		atPart.part->parent = nullptr;
+	}
+	mainPart = nullptr;
+	parts.clear();
 }
 
 void Physical::refreshWithNewParts() {
@@ -168,10 +176,6 @@ void Physical::refreshWithNewParts() {
 	this->inertia = totalInertia;
 
 	this->localBounds = computeLocalBounds();
-	Sphere s = computeLocalCircumscribingSphere();
-	this->localCentroid = s.origin;
-	this->circumscribingSphere.radius = s.radius;
-	this->circumscribingSphere.origin = getCFrame().localToGlobal(localCentroid);
 
 	if (this->anchored) {
 		this->forceResponse = SymmetricMat3::ZEROS();
@@ -221,17 +225,6 @@ Bounds Physical::getStrictBounds() const {
 	return bounds;
 }
 
-Sphere Physical::computeLocalCircumscribingSphere() const {
-	BoundingBox b = computeLocalBounds();
-	Vec3 localCentroid = b.getCenter();
-	double maxRadiusSq = mainPart->hitbox.getMaxRadiusSq(localCentroid);
-	for (const AttachedPart& p : parts) {
-		double radiusSq = p.part->hitbox.getMaxRadiusSq(p.attachment.globalToLocal(localCentroid));
-		maxRadiusSq = std::max(maxRadiusSq, radiusSq);
-	}
-	return Sphere{ localCentroid, sqrt(maxRadiusSq) };
-}
-
 void Physical::rotateAroundCenterOfMassUnsafe(const RotMat3& rotation) {
 	Vec3 relCenterOfMass = getCFrame().localToRelative(localCenterOfMass);
 	Vec3 relativeRotationOffset = rotation * relCenterOfMass - relCenterOfMass;
@@ -245,24 +238,18 @@ void Physical::updateAttachedPartCFrames() {
 	for (AttachedPart& attachment : parts) {
 		attachment.part->cframe = getCFrame().localToGlobal(attachment.attachment);
 	}
-
-	this->circumscribingSphere.origin = getCFrame().localToGlobal(localCentroid);
 }
 void Physical::rotateAroundCenterOfMass(const RotMat3& rotation) {
-	world->requestModification([this, rotation](WorldPrototype& world) {
-		Bounds oldBounds = this->mainPart->getStrictBounds();
-		rotateAroundCenterOfMassUnsafe(rotation);
-		updateAttachedPartCFrames();
-		world.updatePartGroupBounds(this->mainPart, oldBounds);
-	});
+	Bounds oldBounds = this->mainPart->getStrictBounds();
+	rotateAroundCenterOfMassUnsafe(rotation);
+	updateAttachedPartCFrames();
+	world->updatePartGroupBounds(this->mainPart, oldBounds);
 }
 void Physical::translate(const Vec3& translation) {
-	world->requestModification([this, translation](WorldPrototype& world) {
-		Bounds oldBounds = this->mainPart->getStrictBounds();
-		translateUnsafe(translation);
-		updateAttachedPartCFrames();
-		world.updatePartGroupBounds(this->mainPart, oldBounds);
-	});
+	Bounds oldBounds = this->mainPart->getStrictBounds();
+	translateUnsafe(translation);
+	updateAttachedPartCFrames();
+	world->updatePartGroupBounds(this->mainPart, oldBounds);
 }
 
 void Physical::update(double deltaT) {
@@ -346,10 +333,6 @@ void Physical::applyAngularDrag(Vec3 angularDrag) {
 Position Physical::getCenterOfMass() const {
 	return getCFrame().localToGlobal(localCenterOfMass);
 }
-Position Physical::getCentroid() const {
-	return getCFrame().localToGlobal(localCentroid);
-}
-
 Vec3 Physical::getVelocityOfPoint(const Vec3Relative& point) const {
 	return velocity + angularVelocity % point;
 }
@@ -371,19 +354,15 @@ void Physical::setCFrameUnsafe(const GlobalCFrame& newCFrame) {
 	for (const AttachedPart& p : parts) {
 		p.part->cframe = newCFrame.localToGlobal(p.attachment);
 	}
-
-	this->circumscribingSphere.origin = getCFrame().localToGlobal(localCentroid);
 }
 
 void Physical::setCFrame(const GlobalCFrame& newCFrame) {
 	if (this->world != nullptr) {
-		world->requestModification([this, newCFrame](WorldPrototype& world) {
-			Bounds oldMainPartBounds = this->mainPart->getStrictBounds();
+		Bounds oldMainPartBounds = this->mainPart->getStrictBounds();
 
-			setCFrameUnsafe(newCFrame);
+		setCFrameUnsafe(newCFrame);
 
-			world.updatePartGroupBounds(this->mainPart, oldMainPartBounds);
-		});
+		world->updatePartGroupBounds(this->mainPart, oldMainPartBounds);
 	} else {
 		setCFrameUnsafe(newCFrame);
 	}
