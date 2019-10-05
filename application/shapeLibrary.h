@@ -21,7 +21,7 @@ namespace Library {
 
 	sides must be >= 3
 	*/
-	Polyhedron createPrism(unsigned int sides, double radius, double height);
+	Polyhedron createPrism(int sides, double radius, double height);
 
 	/*
 	Creates a pointed prism with the given number of sides
@@ -37,5 +37,5 @@ namespace Library {
 
 	sides must be >= 3
 	*/
-	Polyhedron createPointyPrism(unsigned int sides, double radius, double height, double topOffset, double bottomOffset);
+	Polyhedron createPointyPrism(int sides, double radius, double height, double topOffset, double bottomOffset);
 }

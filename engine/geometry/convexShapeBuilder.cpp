@@ -14,7 +14,9 @@ ConvexShapeBuilder::ConvexShapeBuilder(const Polyhedron& s, Vec3f * vertBuf, Tri
 		vertBuf[i] = s[i];
 	}
 
-	memcpy(triangleBuf, s.triangles.get(), s.triangleCount * sizeof(Triangle));
+	for (int i = 0; i < s.triangleCount; i++) {
+		triangleBuf[i] = s.getTriangle(i);
+	}
 
 	fillNeighborBuf(triangleBuf, triangleCount, neighborBuf);
 }
@@ -110,7 +112,7 @@ struct ConvexTriangleIterator {
 			// this triangle is an edge, add it to the list
 			
 			int vertexInTriangleIndex = (previousTriangleSide + 2) % 3;
-			unsigned int vertex = shapeBuilder.triangleBuf[previousTriangle][vertexInTriangleIndex];
+			int vertex = shapeBuilder.triangleBuf[previousTriangle][vertexInTriangleIndex];
 
 			newTrianglesList[newTriangleCount++] = EdgePiece{vertex, currentTriangle, arrivingNeighborIndex};
 		}
@@ -121,7 +123,7 @@ struct ConvexTriangleIterator {
 		shapeBuilder.neighborBuf[next].AB_Neighbor = previous;
 	}
 
-	void createTipTriangle(unsigned int newPointVertex, unsigned int previousVertex, int triangleToBeReplaced, EdgePiece replacingInfo) {
+	void createTipTriangle(int newPointVertex, int previousVertex, int triangleToBeReplaced, EdgePiece replacingInfo) {
 		// int toBeReplaced = removalList[i];
 		// EdgePiece replacingInfo = newTrianglesList[i];
 
@@ -133,10 +135,10 @@ struct ConvexTriangleIterator {
 		shapeBuilder.neighborBuf[edgeTriangle][replacingInfo.neighborIndexOfEdgeTriangle] = triangleToBeReplaced;
 	}
 
-	void applyUpdates(unsigned int newPointVertex) {
+	void applyUpdates(int newPointVertex) {
 		int easilyMovableTriangles = std::min(newTriangleCount, removalCount);
 
-		unsigned int previousVertex = newTrianglesList[newTriangleCount-1].vertexIndex;
+		int previousVertex = newTrianglesList[newTriangleCount-1].vertexIndex;
 		int previousTriangle = -1;
 		
 		{
@@ -237,8 +239,8 @@ bool ConvexShapeBuilder::addPoint(const Vec3f& point) {
 }
 
 Polyhedron ConvexShapeBuilder::toShape() const {
-	return Polyhedron(vertexBuf, SharedArrayPtr<const Triangle>::staticSharedArrayPtr(triangleBuf), vertexCount, triangleCount);
+	return Polyhedron(vertexBuf, triangleBuf, vertexCount, triangleCount);
 }
 IndexedShape ConvexShapeBuilder::toIndexedShape() const {
-	return IndexedShape{vertexBuf, SharedArrayPtr<const Triangle>::staticSharedArrayPtr(triangleBuf), vertexCount, triangleCount, neighborBuf};
+	return IndexedShape{vertexBuf, triangleBuf, vertexCount, triangleCount, neighborBuf};
 }

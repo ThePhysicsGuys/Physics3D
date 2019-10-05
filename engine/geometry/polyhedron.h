@@ -1,17 +1,22 @@
 #pragma once
 
-//#include "shape.h"
 #include "../math/linalg/vec.h"
 #include "../math/cframe.h"
-#include "../datastructures/parallelVector.h"
 #include "../datastructures/sharedArray.h"
+#include "../datastructures/alignedPtr.h"
+#include "../datastructures/iteratorFactory.h"
+
+#include <utility>
 
 struct Triangle;
 struct Polyhedron;
 struct ShapeVecIter;
 struct ShapeVecIterFactory;
+struct ShapeTriangleIter;
 
 #include "boundingBox.h"
+
+size_t getOffset(size_t size);
 
 struct Sphere {
 	Vec3 origin = Vec3();
@@ -21,9 +26,9 @@ struct Sphere {
 struct Triangle {
 	union {
 		struct { 
-			unsigned int firstIndex, secondIndex, thirdIndex; 
+			int firstIndex, secondIndex, thirdIndex; 
 		};
-		unsigned int indexes[3];
+		int indexes[3];
 	};
 
 	bool sharesEdgeWith(Triangle other) const;
@@ -31,48 +36,73 @@ struct Triangle {
 	Triangle leftShift() const;
 	Triangle operator~() const;
 	bool operator==(const Triangle& other) const;
-	inline unsigned int operator[](int i) const {
+	inline int operator[](int i) const {
 		return indexes[i]; 
 	};
 };
 
-
-struct VertexIterFactory {
-	const Vec3f* verts;
-	int size;
-	inline const Vec3f* begin() const {
-		return verts;
-	};
-	inline const Vec3f* end() const {
-		return verts + size;
-	};
+struct ShapeVertexIter {
+	float* curVertex;
+	size_t offset;
+	Vec3f operator*() const {
+		return Vec3f{ *curVertex, *(curVertex + offset), *(curVertex + 2 * offset) };
+	}
+	void operator++() {
+		++curVertex;
+	}
+	bool operator!=(const ShapeVertexIter& other) const {
+		return curVertex != other.curVertex;
+	}
 };
 
+struct ShapeTriangleIter {
+	int* curTriangle;
+	size_t offset;
+	Triangle operator*() const {
+		return Triangle{ *curTriangle, *(curTriangle + offset), *(curTriangle + 2 * offset) };
+	}
+	void operator++() {
+		++curTriangle;
+	}
+	bool operator!=(const ShapeTriangleIter& other) const {
+		return curTriangle != other.curTriangle;
+	}
+};
 
 struct Polyhedron {
-	struct TriangleIter {
-		const Triangle* first;
-		int size;
-		inline const Triangle* begin() const { 
-			return first;
-		};
-		inline const Triangle* end() const { 
-			return first + size; 
-		};
-	};
 
 	
 private:
-	SharedArrayPtr<const ParallelVec3> vertices;
-	Polyhedron(const ParallelVec3* vertices, const SharedArrayPtr<const Triangle>& triangles, int vertexCount, int triangleCount);
-	Polyhedron(const SharedArrayPtr<const ParallelVec3>& vertices, const SharedArrayPtr<const Triangle>& triangles, int vertexCount, int triangleCount) : vertices(vertices), triangles(triangles), vertexCount(vertexCount), triangleCount(triangleCount) {};
+	SharedAlignedPointer<float> vertices;
+	SharedAlignedPointer<int> triangles;
+	const float* copyOfVerts() const;
+	Polyhedron(const SharedAlignedPointer<float>& vertices, const SharedAlignedPointer<int>& triangles, int vertexCount, int triangleCount);
 public:
-	SharedArrayPtr<const Triangle> triangles;
 	int vertexCount;
 	int triangleCount;
+	int refCount = 1;
 
-	Polyhedron() : vertices(nullptr), triangles(SharedArrayPtr<const Triangle>::staticSharedArrayPtr(nullptr)), vertexCount(0), triangleCount(0) {};
-	Polyhedron(const Vec3f* vertices, const SharedArrayPtr<const Triangle>& triangles, int vertexCount, int triangleCount);
+	Polyhedron() : vertices(), triangles(), vertexCount(0), triangleCount(0) {};
+	Polyhedron(const Polyhedron& p) : vertices(p.vertices), triangles(p.triangles), vertexCount(p.vertexCount), triangleCount(p.triangleCount) {};
+	Polyhedron(Polyhedron&& p) noexcept : vertices(std::move(p.vertices)), triangles(std::move(p.triangles)), vertexCount(p.vertexCount), triangleCount(p.triangleCount) {};
+
+	Polyhedron& operator=(const Polyhedron& p) {
+		this->vertices = p.vertices;
+		this->triangles = p.triangles;
+		this->vertexCount = p.vertexCount;
+		this->triangleCount = p.triangleCount;
+		return *this;
+	};
+	Polyhedron& operator=(Polyhedron&& p) noexcept {
+		std::swap(this->vertices, p.vertices);
+		std::swap(this->triangles, p.triangles);
+		this->vertexCount = p.vertexCount;
+		this->triangleCount = p.triangleCount;
+		return *this;
+	};
+
+	~Polyhedron();
+	Polyhedron(const Vec3f* vertices, const Triangle* triangles, int vertexCount, int triangleCount);
 	Polyhedron translated(Vec3f offset) const;
 	Polyhedron rotated(RotMat3f rotation) const;
 	Polyhedron localToGlobal(CFramef frame) const;
@@ -106,39 +136,24 @@ public:
 	int furthestIndexInDirection(const Vec3f& direction) const;
 	Vec3f furthestInDirection(const Vec3f& direction) const;
 
+	inline const float* getXVerts() const { return this->vertices.get(); }
+	inline const float* getYVerts() const { return this->vertices.get() + getOffset(vertexCount); }
+	inline const float* getZVerts() const { return this->vertices.get() + 2 * getOffset(vertexCount); }
+
 	inline Vec3f operator[](int index) const {
-		return this->vertices[index >> 3][index & 7];
+		return Vec3f(this->getXVerts()[index], this->getYVerts()[index], this->getZVerts()[index]);
 	}
 
-	inline TriangleIter iterTriangles() const { 
-		return TriangleIter { triangles.get(), triangleCount };
-	};
-	inline ShapeVecIterFactory iterVertices() const;
+	inline Triangle getTriangle(int index) const {
+		size_t offset = getOffset(triangleCount);
+		return Triangle{ triangles[index], triangles[index + offset], triangles[index + 2 * offset] };
+	}
+
+	IteratorFactory<ShapeVertexIter> iterVertices() const {
+		return IteratorFactory<ShapeVertexIter>(ShapeVertexIter{ vertices, getOffset(vertexCount) }, ShapeVertexIter{ vertices + vertexCount, getOffset(vertexCount) });
+	}
+	IteratorFactory<ShapeTriangleIter> iterTriangles() const {
+		return IteratorFactory<ShapeTriangleIter>(ShapeTriangleIter{ triangles, getOffset(triangleCount) }, ShapeTriangleIter{ triangles + triangleCount, getOffset(triangleCount) });
+	}
 };
 
-struct ShapeVecIter {
-	const Polyhedron& shape;
-	int index;
-	Vec3f operator*() const {
-		return shape.operator[](index);
-	}
-	int operator++() {
-		return ++index;
-	}
-	bool operator!=(const ShapeVecIter& other) const {
-		return index != other.index;
-	}
-};
-struct ShapeVecIterFactory {
-	const Polyhedron& shape;
-	int size;
-	inline ShapeVecIter begin() const {
-		return ShapeVecIter{ shape, 0 };
-	};
-	inline ShapeVecIter end() const {
-		return ShapeVecIter{ shape, size };
-	};
-};
-inline ShapeVecIterFactory Polyhedron::iterVertices() const {
-	return ShapeVecIterFactory{ *this, vertexCount };
-};

@@ -62,7 +62,7 @@ namespace AppDebug {
 
 		void logShape(const Polyhedron& shape, const GlobalCFrame& location) {
 			for(int i = 0; i < shape.triangleCount; i++) {
-				Triangle t = shape.triangles[i];
+				Triangle t = shape.getTriangle(i);
 				for(int j = 0; j < 3; j++) {
 					Debug::logVector(location.localToGlobal(shape[t[j]]), location.localToRelative(shape[t[(j + 1) % 3]] - shape[t[j]]), Debug::INFO_VEC);
 				}

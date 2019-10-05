@@ -17,7 +17,83 @@
 #include "../physicsProfiler.h"
 #include "computationBuffer.h"
 #include "intersection.h"
-#include "../datastructures/parallelVector.h"
+
+size_t getOffset(size_t size) {
+	return (size + 7) & 0xFFFFFFFFFFFFFFF8;
+}
+
+inline SharedAlignedPointer<float> createParallelVecBuf(size_t size) {
+	return SharedAlignedPointer<float>(getOffset(size) * 3, 32);
+}
+inline SharedAlignedPointer<int> createParallelTriangleBuf(size_t size) {
+	return SharedAlignedPointer<int>(getOffset(size) * 3, 32);
+}
+
+template<typename T>
+inline void fixFinalBlock(T* buf, size_t size) {
+	size_t offset = getOffset(size);
+	T* xValues = buf;
+	T* yValues = buf + offset;
+	T* zValues = buf + 2 * offset;
+
+	for (size_t i = size; i < offset; i++) {
+		xValues[i] = xValues[size - 1];
+		yValues[i] = yValues[size - 1];
+		zValues[i] = zValues[size - 1];
+	}
+}
+
+inline SharedAlignedPointer<float> createAndFillParallelVecBuf(size_t size, const Vec3f* vectors) {
+	SharedAlignedPointer<float> buf = createParallelVecBuf(size);
+
+	size_t offset = getOffset(size);
+
+	float* xValues = buf;
+	float* yValues = buf + offset;
+	float* zValues = buf + 2 * offset;
+
+	for (size_t i = 0; i < size; i++) {
+		xValues[i] = vectors[i].x;
+		yValues[i] = vectors[i].y;
+		zValues[i] = vectors[i].z;
+	}
+	fixFinalBlock(buf.get(), size);
+
+	return buf;
+}
+
+inline SharedAlignedPointer<int> createAndFillParallelTriangleBuf(size_t size, const Triangle* triangles) {
+	SharedAlignedPointer<int> buf = createParallelTriangleBuf(size);
+
+	size_t offset = getOffset(size);
+
+	int* aValues = buf;
+	int* bValues = buf + offset;
+	int* cValues = buf + 2 * offset;
+
+	for (size_t i = 0; i < size; i++) {
+		aValues[i] = triangles[i].firstIndex;
+		bValues[i] = triangles[i].secondIndex;
+		cValues[i] = triangles[i].thirdIndex;
+	}
+	fixFinalBlock(buf.get(), size);
+
+	return buf;
+}
+
+
+inline void setInBuf(float* buf, size_t size, size_t index, const Vec3f& value) {
+	size_t offset = getOffset(size);
+
+	float* xValues = buf;
+	float* yValues = buf + offset;
+	float* zValues = buf + 2 * offset;
+
+	xValues[index] = value.x;
+	yValues[index] = value.y;
+	zValues[index] = value.z;
+}
+
 
 bool Triangle::sharesEdgeWith(Triangle other) const {
 	return firstIndex == other.secondIndex && secondIndex == other.firstIndex ||
@@ -51,14 +127,29 @@ Triangle Triangle::leftShift() const {
 	return Triangle { secondIndex, thirdIndex, firstIndex };
 }
 
-inline Polyhedron::Polyhedron(const ParallelVec3* vertices, const SharedArrayPtr<const Triangle>& triangles, int vertexCount, int triangleCount) : 
-	vertices(SharedArrayPtr<const ParallelVec3>(vertices)), triangles(triangles), vertexCount(vertexCount), triangleCount(triangleCount) {
+const float* copyVerts(const float* verts, size_t vertexCount) {
+	float* buf = createParallelVecBuf(vertexCount);
+	for (size_t i = 0; i < getOffset(vertexCount) * 3; i++) {
+		buf[i] = verts[i];
+	}
+	return buf;
+}
+
+const float* Polyhedron::copyOfVerts() const {
+	return copyVerts(this->vertices, this->vertexCount);
+}
+
+inline Polyhedron::Polyhedron(const SharedAlignedPointer<float>& vertices, const SharedAlignedPointer<int>& triangles, int vertexCount, int triangleCount) :
+	vertices(vertices), triangles(triangles), vertexCount(vertexCount), triangleCount(triangleCount) {
+}
+
+Polyhedron::~Polyhedron() {
 	
 }
 
-Polyhedron::Polyhedron(const Vec3f* vertices, const SharedArrayPtr<const Triangle>& triangles, int vertexCount, int triangleCount) :
-	vertices(createAndFillParallelVecBuf(vertices, vertexCount)),
-	triangles(triangles), 
+Polyhedron::Polyhedron(const Vec3f* vertices, const Triangle* triangles, int vertexCount, int triangleCount) :
+	vertices(createAndFillParallelVecBuf(vertexCount, vertices)),
+	triangles(createAndFillParallelTriangleBuf(triangleCount, triangles)),
 	vertexCount(vertexCount), 
 	triangleCount(triangleCount) {}
 
@@ -71,52 +162,52 @@ Polyhedron::Polyhedron(const Vec3f* vertices, const SharedArrayPtr<const Triangl
 }*/
 
 Polyhedron Polyhedron::translated(Vec3f offset) const {
-	ParallelVec3* newBuf = createParallelVecBuf(this->vertexCount);
+	SharedAlignedPointer<float> newBuf = createParallelVecBuf(this->vertexCount);
 	for (int i = 0; i < this->vertexCount; i++) {
-		newBuf[i >> 3].setVec(i & 0x7, offset + (*this)[i]);
+		setInBuf(newBuf, vertexCount, i, (*this)[i] + offset);
 	}
 
-	fixFinalBlock(newBuf, this->vertexCount, newBuf[this->vertexCount >> 3][this->vertexCount & 0x7]);
+	fixFinalBlock(newBuf.get(), this->vertexCount);
 	return Polyhedron(newBuf, triangles, vertexCount, triangleCount);
 }
 
 Polyhedron Polyhedron::rotated(RotMat3f rotation) const {
-	ParallelVec3* newBuf = createParallelVecBuf(this->vertexCount);
+	SharedAlignedPointer<float> newBuf = createParallelVecBuf(this->vertexCount);
 	for (int i = 0; i < this->vertexCount; i++) {
-		newBuf[i >> 3].setVec(i & 0x7, rotation * (*this)[i]);
+		setInBuf(newBuf, vertexCount, i, rotation * (*this)[i]);
 	}
 
-	fixFinalBlock(newBuf, this->vertexCount, newBuf[this->vertexCount >> 3][this->vertexCount & 0x7]);
+	fixFinalBlock(newBuf.get(), this->vertexCount);
 	return Polyhedron(newBuf, triangles, vertexCount, triangleCount);
 }
 
 Polyhedron Polyhedron::localToGlobal(CFramef frame) const {
-	ParallelVec3* newBuf = createParallelVecBuf(this->vertexCount);
+	SharedAlignedPointer<float> newBuf = createParallelVecBuf(this->vertexCount);
 	for (int i = 0; i < this->vertexCount; i++) {
-		newBuf[i >> 3].setVec(i & 0x7, frame.localToGlobal((*this)[i]));
+		setInBuf(newBuf, vertexCount, i, frame.localToGlobal((*this)[i]));
 	}
 
-	fixFinalBlock(newBuf, this->vertexCount, newBuf[this->vertexCount >> 3][this->vertexCount & 0x7]);
+	fixFinalBlock(newBuf.get(), this->vertexCount);
 	return Polyhedron(newBuf, triangles, vertexCount, triangleCount);
 }
 
 Polyhedron Polyhedron::globalToLocal(CFramef frame) const {
-	ParallelVec3* newBuf = createParallelVecBuf(this->vertexCount);
+	SharedAlignedPointer<float> newBuf = createParallelVecBuf(this->vertexCount);
 	for (int i = 0; i < this->vertexCount; i++) {
-		newBuf[i >> 3].setVec(i & 0x7, frame.globalToLocal((*this)[i]));
+		setInBuf(newBuf, vertexCount, i, frame.globalToLocal((*this)[i]));
 	}
 
-	fixFinalBlock(newBuf, this->vertexCount, newBuf[this->vertexCount >> 3][this->vertexCount & 0x7]);
+	fixFinalBlock(newBuf.get(), this->vertexCount);
 	return Polyhedron(newBuf, triangles, vertexCount, triangleCount);
 }
 Polyhedron Polyhedron::scaled(float scaleX, float scaleY, float scaleZ) const {
-	ParallelVec3* newBuf = createParallelVecBuf(this->vertexCount);
+	SharedAlignedPointer<float> newBuf = createParallelVecBuf(this->vertexCount);
 	for (int i = 0; i < this->vertexCount; i++) {
-		Vec3f curVec = (*this)[i];
-		newBuf[i >> 3].setVec(i & 0x7, scaleX * curVec.x, scaleY * curVec.y, scaleZ * curVec.z);
+		Vec3f v = (*this)[i];
+		setInBuf(newBuf, vertexCount, i, Vec3f(scaleX * v.x, scaleY * v.y, scaleZ * v.z));
 	}
 
-	fixFinalBlock(newBuf, this->vertexCount, newBuf[this->vertexCount >> 3][this->vertexCount & 0x7]);
+	fixFinalBlock(newBuf.get(), this->vertexCount);
 	return Polyhedron(newBuf, triangles, vertexCount, triangleCount);
 }
 Polyhedron Polyhedron::scaled(double scaleX, double scaleY, double scaleZ) const {
@@ -143,23 +234,23 @@ BoundingBox Polyhedron::getBounds() const {
 }
 
 // for every edge, of every triangle, check that it coincides with exactly one other triangle, in reverse order
-bool isComplete(const Triangle* triangles, int triangleCount) {
-	for (int i = 0; i < triangleCount; i++) {
-		Triangle a = triangles[i];
-		
-		for (int j = 0; j < triangleCount; j++) {
-			if (j == i) continue;
+bool isComplete(ShapeTriangleIter iter, ShapeTriangleIter fin) {
+	for (; iter != fin; ++iter) {
+		Triangle a = *iter;
 
-			Triangle b = triangles[j];
+		ShapeTriangleIter iter2 = iter;
+		++iter2;
+		for (; iter2 != fin; ++iter2) {
+			Triangle b = *iter2;
 
 			if (a.sharesEdgeWith(b)) {  // correctly oriented
 				goto endOfLoop;
 			} else if (a.sharesEdgeWith(~b)) {	// wrongly oriented
-				Log::warn("triangles[%d](%d, %d, %d) and triangles[%d](%d, %d, %d) are joined wrongly", i, a.firstIndex, a.secondIndex, a.thirdIndex, j, b.firstIndex, b.secondIndex, b.thirdIndex);
+				Log::warn("triangle (%d, %d, %d) and triangle (%d, %d, %d) are joined wrongly", a.firstIndex, a.secondIndex, a.thirdIndex, b.firstIndex, b.secondIndex, b.thirdIndex);
 				return false;
 			}
 		}
-		Log::warn("No triangle found that shares an edge with triangles[%d]", i);
+		Log::warn("No triangle found that shares an edge with triangle(%d, %d, %d)", a.firstIndex, a.secondIndex, a.thirdIndex);
 		return false;
 		endOfLoop:;
 	}
@@ -167,7 +258,8 @@ bool isComplete(const Triangle* triangles, int triangleCount) {
 }
 
 bool Polyhedron::isValid() const {
-	return isComplete(triangles.get(), triangleCount) && getVolume() >= 0;
+	IteratorFactory<ShapeTriangleIter> f = iterTriangles();
+	return isComplete(f.begin(), f.end()) && getVolume() >= 0;
 }
 
 Vec3f Polyhedron::getNormalVecOfTriangle(Triangle triangle) const {
@@ -176,10 +268,9 @@ Vec3f Polyhedron::getNormalVecOfTriangle(Triangle triangle) const {
 }
 
 
-
+// TODO parallelize
 void Polyhedron::computeNormals(Vec3f* buffer) const {
-	for (int i = 0; i < triangleCount; i++) {
-		Triangle triangle = triangles[i];
+	for (Triangle triangle : iterTriangles()) {
 		Vec3f v0 = (*this)[triangle.firstIndex];
 		Vec3f v1 = (*this)[triangle.secondIndex];
 		Vec3f v2 = (*this)[triangle.thirdIndex];
@@ -199,6 +290,7 @@ void Polyhedron::computeNormals(Vec3f* buffer) const {
 	}
 }
 
+//TODO parallelize
 bool Polyhedron::containsPoint(Vec3f point) const {
 	Vec3f ray(1, 0, 0);
 
@@ -251,21 +343,24 @@ int Polyhedron::furthestIndexInDirection(const Vec3f& direction) const {
 	__m256 dy = _mm256_set1_ps(direction.y);
 	__m256 dz = _mm256_set1_ps(direction.z);
 
-	const ParallelVec3& firstBlock = vertices[0];
-	__m256 xTxd = _mm256_mul_ps(dx, _mm256_load_ps(firstBlock.xvalues));
-	__m256 yTyd = _mm256_mul_ps(dy, _mm256_load_ps(firstBlock.yvalues));
-	__m256 zTzd = _mm256_mul_ps(dz, _mm256_load_ps(firstBlock.zvalues));
+	size_t offset = getOffset(this->vertexCount);
+	const float* xValues = this->vertices;
+	const float* yValues = this->vertices + offset;
+	const float* zValues = this->vertices + 2 * offset;
+
+	__m256 xTxd = _mm256_mul_ps(dx, _mm256_load_ps(xValues));
+	__m256 yTyd = _mm256_mul_ps(dy, _mm256_load_ps(yValues));
+	__m256 zTzd = _mm256_mul_ps(dz, _mm256_load_ps(zValues));
 
 	__m256 bestDot = _mm256_add_ps(_mm256_add_ps(xTxd, yTyd), zTzd);
 	__m256i bestIndices = _mm256_set1_epi32(0);
 
 	for(int blockI = 1; blockI < (vertexCount+7)/8; blockI++) {
-		const ParallelVec3& block = vertices[blockI];
 		__m256i indices = _mm256_set1_epi32(blockI);
 
-		__m256 xTxd = _mm256_mul_ps(dx, _mm256_load_ps(block.xvalues));
-		__m256 yTyd = _mm256_mul_ps(dy, _mm256_load_ps(block.yvalues));
-		__m256 zTzd = _mm256_mul_ps(dz, _mm256_load_ps(block.zvalues));
+		__m256 xTxd = _mm256_mul_ps(dx, _mm256_load_ps(xValues + blockI * 8));
+		__m256 yTyd = _mm256_mul_ps(dy, _mm256_load_ps(yValues + blockI * 8));
+		__m256 zTzd = _mm256_mul_ps(dz, _mm256_load_ps(zValues + blockI * 8));
 		__m256 dot = _mm256_add_ps(_mm256_add_ps(xTxd, yTyd), zTzd);
 
 		__m256 whichAreMax = _mm256_cmp_ps(dot, bestDot, _CMP_GT_OQ); // Greater than, false if dot == NaN
@@ -292,11 +387,14 @@ Vec3f Polyhedron::furthestInDirection(const Vec3f& direction) const {
 	__m256 dy = _mm256_set1_ps(direction.y);
 	__m256 dz = _mm256_set1_ps(direction.z);
 
-	const ParallelVec3& firstBlock = vertices[0];
+	size_t offset = getOffset(this->vertexCount);
+	const float* xValues = this->vertices;
+	const float* yValues = this->vertices + offset;
+	const float* zValues = this->vertices + 2 * offset;
 
-	__m256 bestX = _mm256_load_ps(firstBlock.xvalues);
-	__m256 bestY = _mm256_load_ps(firstBlock.yvalues);
-	__m256 bestZ = _mm256_load_ps(firstBlock.zvalues);
+	__m256 bestX = _mm256_load_ps(xValues);
+	__m256 bestY = _mm256_load_ps(yValues);
+	__m256 bestZ = _mm256_load_ps(zValues);
 
 	__m256 xTxd = _mm256_mul_ps(dx, bestX);
 	__m256 yTyd = _mm256_mul_ps(dy, bestY);
@@ -305,12 +403,11 @@ Vec3f Polyhedron::furthestInDirection(const Vec3f& direction) const {
 	__m256 bestDot = _mm256_add_ps(_mm256_add_ps(xTxd, yTyd), zTzd);
 
 	for (int blockI = 1; blockI < (vertexCount + 7) / 8; blockI++) {
-		const ParallelVec3& block = vertices[blockI];
 		__m256i indices = _mm256_set1_epi32(blockI);
 
-		__m256 xVal = _mm256_load_ps(block.xvalues);
-		__m256 yVal = _mm256_load_ps(block.yvalues);
-		__m256 zVal = _mm256_load_ps(block.zvalues);
+		__m256 xVal = _mm256_load_ps(xValues + blockI * 8);
+		__m256 yVal = _mm256_load_ps(yValues + blockI * 8);
+		__m256 zVal = _mm256_load_ps(zValues + blockI * 8);
 
 		__m256 xTxd = _mm256_mul_ps(dx, xVal);
 		__m256 yTyd = _mm256_mul_ps(dy, yVal);

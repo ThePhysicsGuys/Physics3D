@@ -6,7 +6,7 @@
 
 // used in building shape
 struct EdgePiece {
-	unsigned int vertexIndex;
+	int vertexIndex;
 	int edgeTriangle;
 	int neighborIndexOfEdgeTriangle;
 };

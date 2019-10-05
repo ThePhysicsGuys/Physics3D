@@ -43,5 +43,5 @@ Polyhedron BoundingBox::toShape() const {
 	vertBuf[5] = Vec3f(xmaxf, yminf, zmaxf);
 	vertBuf[6] = Vec3f(xmaxf, ymaxf, zmaxf);
 	vertBuf[7] = Vec3f(xminf, ymaxf, zmaxf);
-	return Polyhedron(vertBuf, SharedArrayPtr<const Triangle>::staticSharedArrayPtr(triangles), 8, 12);
+	return Polyhedron(vertBuf, triangles, 8, 12);
 }

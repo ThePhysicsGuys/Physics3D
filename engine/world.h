@@ -121,7 +121,7 @@ public:
 	IteratorEnd end() const { return IteratorEnd(); }
 
 	template<typename Filter>
-	IteratorFactoryWithEnd<DoubleFilterIter<Filter>> iterPartsFiltered(const Filter& filter, unsigned int partsMask = ALL_PARTS) {
+	IteratorFactoryWithEnd<DoubleFilterIter<Filter>> iterPartsFiltered(const Filter& filter, int partsMask = ALL_PARTS) {
 
 		size_t size = 0;
 		TreeIterFactory<Part, Filter> iters[2];
@@ -140,7 +140,7 @@ public:
 	}
 
 	template<typename Filter>
-	IteratorFactoryWithEnd<ConstDoubleFilterIter<Filter>> iterPartsFiltered(const Filter& filter, unsigned int partsMask = ALL_PARTS) const {
+	IteratorFactoryWithEnd<ConstDoubleFilterIter<Filter>> iterPartsFiltered(const Filter& filter, int partsMask = ALL_PARTS) const {
 
 		size_t size = 0;
 		TreeIterFactory<Part, Filter> iters[2];
@@ -168,7 +168,7 @@ public:
 	inline IteratorEnd end() const { return IteratorEnd(); }
 
 	template<typename Filter>
-	IteratorFactoryWithEnd<CastingIterator<DoubleFilterIter<Filter>, T&>> iterPartsFiltered(const Filter& filter, unsigned int partsMask = FREE_PARTS) {
+	IteratorFactoryWithEnd<CastingIterator<DoubleFilterIter<Filter>, T&>> iterPartsFiltered(const Filter& filter, int partsMask = FREE_PARTS) {
 		return IteratorFactoryWithEnd<CastingIterator<DoubleFilterIter<Filter>, T&>>(
 			CastingIterator<DoubleFilterIter<Filter>, T&>(
 				WorldPrototype::iterPartsFiltered(filter, partsMask).begin()
@@ -177,7 +177,7 @@ public:
 	}
 
 	template<typename Filter>
-	IteratorFactoryWithEnd<CastingIterator<ConstDoubleFilterIter<Filter>, const T&>> iterPartsFiltered(const Filter& filter, unsigned int partsMask = FREE_PARTS) const {
+	IteratorFactoryWithEnd<CastingIterator<ConstDoubleFilterIter<Filter>, const T&>> iterPartsFiltered(const Filter& filter, int partsMask = FREE_PARTS) const {
 		return IteratorFactoryWithEnd<CastingIterator<ConstDoubleFilterIter<Filter>, const T&>>(
 			CastingIterator<ConstDoubleFilterIter<Filter>, const T&>(
 				WorldPrototype::iterPartsFiltered(filter, partsMask).begin()

@@ -21,16 +21,16 @@ struct alignas(32) ParallelVec3 {
 		}
 	}
 
-	inline Vec3f operator[](unsigned int i) const {
+	inline Vec3f operator[](int i) const {
 		return Vec3f(xvalues[i], yvalues[i], zvalues[i]);
 	}
 	
-	inline void setVec(unsigned int i, float x, float y, float z) {
+	inline void setVec(int i, float x, float y, float z) {
 		xvalues[i] = x;
 		yvalues[i] = y;
 		zvalues[i] = z;
 	}
-	inline void setVec(unsigned int i, Vec3f v) {
+	inline void setVec(int i, Vec3f v) {
 		xvalues[i] = v.x;
 		yvalues[i] = v.y;
 		zvalues[i] = v.z;
