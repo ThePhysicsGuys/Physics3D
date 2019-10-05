@@ -250,7 +250,9 @@ struct PropertiesFrame : public FrameBlueprint, public Frame {
 	Label* energyLabel = nullptr;
 	Label* massLabel = nullptr;
 	Label* frictionLabel = nullptr;
+	Label* bouncynessLabel = nullptr;
 	Label* densityLabel = nullptr;
+	Label* conveyorEffectLabel = nullptr;
 
 	Label* materialLabel = nullptr;
 	Button* ambientColorButton = nullptr;
@@ -275,7 +277,9 @@ struct PropertiesFrame : public FrameBlueprint, public Frame {
 		add(energyLabel, Align::FILL);
 		add(massLabel, Align::FILL);
 		add(frictionLabel, Align::FILL);
+		add(bouncynessLabel, Align::FILL);
 		add(densityLabel, Align::FILL);
+		add(conveyorEffectLabel, Align::FILL);
 
 		add(materialLabel, Align::CENTER);
 		add(ambientColorButton, Align::FILL);
@@ -301,7 +305,9 @@ struct PropertiesFrame : public FrameBlueprint, public Frame {
 		energyLabel = new Label("", 0, 0);
 		massLabel = new Label("", 0, 0);
 		frictionLabel = new Label("", 0, 0);
+		bouncynessLabel = new Label("", 0, 0);
 		densityLabel = new Label("", 0, 0);
+		conveyorEffectLabel = new Label("", 0, 0);
 
 		materialLabel = new Label("Material", 0, 0);
 		renderModeCheckBox = new CheckBox("Wireframe", 0, 0, true);
@@ -388,7 +394,9 @@ struct PropertiesFrame : public FrameBlueprint, public Frame {
 			energyLabel->text = "Energy: " + std::to_string(kineticEnergy + potentialEnergy);
 			massLabel->text = "Mass: " + std::to_string(selectedPart->mass);
 			frictionLabel->text = "Friction: " + std::to_string(selectedPart->properties.friction);
+			bouncynessLabel->text = "Bouncyness: " + std::to_string(selectedPart->properties.bouncyness);
 			densityLabel->text = "Density: " + std::to_string(selectedPart->properties.density);
+			conveyorEffectLabel->text = "ConveyorEffect: " + str(selectedPart->conveyorEffect);
 
 			renderModeCheckBox->checked = selectedPart->renderMode == Renderer::WIREFRAME;
 
@@ -424,7 +432,9 @@ struct PropertiesFrame : public FrameBlueprint, public Frame {
 			energyLabel->text = "Energy: -";
 			massLabel->text = "Mass: -";
 			frictionLabel->text = "Friction: -";
+			bouncynessLabel->text = "Bouncyness: -";
 			densityLabel->text = "Density: -";
+			conveyorEffectLabel->text = "ConveyorEffect: -";
 
 			ambientColorButton->disabled = true;
 			ambientColorButton->setColor(Vec4(1));

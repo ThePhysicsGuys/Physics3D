@@ -17,21 +17,24 @@ struct PartPhysicalData {
 	Part* part;
 };
 
+struct PartProperties {
+	double density;
+	double friction;
+	double bouncyness;
+};
+
 class Part {
 	friend class Physical;
 	friend class WorldPrototype;
 
 	GlobalCFrame cframe;
 
-	bool isTerrainPart = false;
 public:
+	bool isTerrainPart = false;
 	Physical* parent = nullptr;
 	Shape hitbox;
 	double maxRadius;
-	struct {
-		double density;
-		double friction;
-	} properties;
+	PartProperties properties;
 
 	double mass;
 	SymmetricMat3 inertia;
@@ -48,7 +51,7 @@ public:
 	Vec3 conveyorEffect = Vec3(0, 0, 0);
 
 	Part() = default;
-	Part(const Shape& shape, const GlobalCFrame& position, double density, double friction);
+	Part(const Shape& shape, const GlobalCFrame& position, const PartProperties& properties);
 	~Part();
 	bool intersects(const Part& other, Position& intersection, Vec3& exitVector) const;
 	void scale(double scaleX, double scaleY, double scaleZ);

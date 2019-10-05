@@ -347,6 +347,7 @@ void parseSubject(Subject subject, std::string path, std::map<std::string, std::
 
 		double density = Import::parseDouble(fields.at("density"));
 		double friction = Import::parseDouble(fields.at("friction"));
+		double bouncyness = Import::parseDouble(fields.at("bouncyness"));
 		double mass = Import::parseDouble(fields.at("mass"));
 
 		Position pos = Import::parsePosition(fields.at("position"));
@@ -371,7 +372,7 @@ void parseSubject(Subject subject, std::string path, std::map<std::string, std::
 			factories[shapeReference] = PartFactory(shape, screen, name);
 		}
 
-		ExtendedPart* part = factories.at(shapeReference).produce(cframe, density, friction, name);
+		ExtendedPart* part = factories.at(shapeReference).produce(cframe, {density, friction, bouncyness}, name);
 
 		Physical physical = Physical(part, mass, inertia);
 		physical.angularVelocity = angularvelocity;

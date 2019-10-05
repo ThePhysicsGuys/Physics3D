@@ -95,7 +95,7 @@ void buildTerrain() {
 			double yOffset = getYOffset(x * 3.0, z * 3.0);
 			Position pos((x + fRand(0.0, 1.0)) * 3.0, fRand(0.0, 1.0) + yOffset, (z + fRand(0.0, 1.0)) * 3.0);
 			GlobalCFrame cf(pos, fromEulerAngles(fRand(0.0, 3.1415), fRand(0.0, 3.1415), fRand(0.0, 3.1415)));
-			ExtendedPart* newPart = icosahedronFactory.produce(cf, 1.0, 1.0, "terrain");
+			ExtendedPart* newPart = icosahedronFactory.produce(cf, { 1.0, 1.0, 0.3 }, "terrain");
 			newPart->material.ambient = Vec4(0.0, yOffset / 40.0 + 0.5, 0.0, 1.0);
 			world.addTerrainPart(newPart);
 		}
@@ -110,7 +110,7 @@ void buildTerrain() {
 
 		GlobalCFrame trunkCFrame(treePos, fromEulerAngles(fRand(-0.1, 0.1), fRand(-3.1415, 3.1415), fRand(-0.1, 0.1)));
 
-		ExtendedPart* trunk = treeTrunkfactory.produce(trunkCFrame, 1.0, 1.0, "trunk");
+		ExtendedPart* trunk = treeTrunkfactory.produce(trunkCFrame, { 1.0, 1.0, 0.3 }, "trunk");
 		trunk->material.ambient = GUI::COLOR::get(0x654321);
 		world.addTerrainPart(trunk);
 
@@ -120,7 +120,7 @@ void buildTerrain() {
 		for (int j = 0; j < 15; j++) {
 
 			GlobalCFrame leavesCFrame(treeTop + Vec3(fRand(-1.0, 1.0), fRand(-1.0, 1.0), fRand(-1.0, 1.0)), fromEulerAngles(fRand(0.0, 3.1415), fRand(0.0, 3.1415), fRand(0.0, 3.1415)));
-			ExtendedPart* leaves = leafFactory.produce(leavesCFrame, 1.0, 1.0, "trunk");
+			ExtendedPart* leaves = leafFactory.produce(leavesCFrame, { 1.0, 1.0, 0.3 }, "trunk");
 
 			leaves->material.ambient = Vec4(fRand(-0.2, 0.2), 0.6 + fRand(-0.2, 0.2), 0.0, 1.0);
 
@@ -157,24 +157,26 @@ void setupWorld() {
 	double wallHeight = 7.0;
 	ResourceManager::add<TextureResource>("../res/textures/floor/floor_color.jpg", "floorMaterial");
 	Material floorMaterial = Material(ResourceManager::get<TextureResource>("floorMaterial"));
-	ExtendedPart* floorExtendedPart = createUniquePart(screen, BoundingBox(floorSize.x, 1.0, floorSize.y).toShape(), GlobalCFrame(0.0, 0.0, 0.0), 2.0, 1.0);
+	ExtendedPart* floorExtendedPart = createUniquePart(screen, BoundingBox(floorSize.x, 1.0, floorSize.y).toShape(), GlobalCFrame(0.0, 0.0, 0.0), { 2.0, 1.0, 0.3 });
 	floorExtendedPart->material = floorMaterial;
 	world.addTerrainPart(floorExtendedPart);
+
+	PartProperties wallProperties{ 2.0, 1.0, 0.3 };
 
 	// Walls
 	PartFactory xWallFactory(BoundingBox(0.7, wallHeight, floorSize.y - 0.7).toShape(), screen, "xWall");
 	PartFactory zWallFactory(BoundingBox(floorSize.x, wallHeight, 0.7).toShape(), screen, "zWall");
-	world.addTerrainPart(xWallFactory.produce(GlobalCFrame(Position(floorSize.x / 2, wallHeight / 2, 0.0)), 2.0, 1.0));
-	world.addTerrainPart(zWallFactory.produce(GlobalCFrame(Position(0.0, wallHeight / 2, floorSize.y / 2)), 2.0, 1.0));
-	world.addTerrainPart(xWallFactory.produce(GlobalCFrame(Position(-floorSize.x / 2, wallHeight / 2, 0.0)), 2.0, 1.0));
-	world.addTerrainPart(zWallFactory.produce(GlobalCFrame(Position(0.0, wallHeight / 2, -floorSize.y / 2)), 2.0, 1.0));
+	world.addTerrainPart(xWallFactory.produce(GlobalCFrame(Position(floorSize.x / 2, wallHeight / 2, 0.0)), wallProperties));
+	world.addTerrainPart(zWallFactory.produce(GlobalCFrame(Position(0.0, wallHeight / 2, floorSize.y / 2)), wallProperties));
+	world.addTerrainPart(xWallFactory.produce(GlobalCFrame(Position(-floorSize.x / 2, wallHeight / 2, 0.0)), wallProperties));
+	world.addTerrainPart(zWallFactory.produce(GlobalCFrame(Position(0.0, wallHeight / 2, -floorSize.y / 2)), wallProperties));
 
-	ExtendedPart* conveyor = createUniquePart(screen, BoundingBox(1.0, 0.3, floorSize.y).toShape(), GlobalCFrame(10.0, 0.65, 0.0), 2.0, 1.0);
+	ExtendedPart* conveyor = createUniquePart(screen, BoundingBox(1.0, 0.3, floorSize.y).toShape(), GlobalCFrame(10.0, 0.65, 0.0), { 2.0, 1.0, 0.3 });
 
 	conveyor->conveyorEffect = Vec3(0, 0, 2.0);
-	world.addPart(conveyor, true);
+	world.addTerrainPart(conveyor);
 
-	world.addPart(cubeFactory.produceScaled(GlobalCFrame(10, 1.0, 0.0), 1.0, 0.2, 0.2, 0.2, 0.2, "TinyCube"));
+	world.addPart(cubeFactory.produceScaled(GlobalCFrame(10, 1.0, 0.0), { 1.0, 0.2, 0.3 }, 0.2, 0.2, 0.2, "TinyCube"));
 
 	// hollow box
 	/*WorldBuilder::HollowBoxParts parts = WorldBuilder::buildHollowBox(Bounds(Position(12.0, 3.0, 14.0), Position(20.0, 8.0, 20.0)), 0.3);
@@ -258,7 +260,8 @@ void setupWorld() {
 	//world.optimizeTerrain();
 
 	// Player
-	screen.camera.attachment = createUniquePart(screen, Library::createPrism(50, 0.2, 1.0), GlobalCFrame(), 1.0, 5.0, "Player");
+	screen.camera.attachment = createUniquePart(screen, Library::createPrism(50, 0.2, 1.0), GlobalCFrame(), { 1.0, 5.0, 0.0 }, "Player");
+	screen.camera.attachment->conveyorEffect = Vec3(1.0, 0.0, 1.0);
 
 	if (!world.isValid()) {
 		throw "World not valid!";

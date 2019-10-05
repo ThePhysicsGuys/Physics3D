@@ -228,6 +228,7 @@ struct NodeStack {
 			top--;
 			top->node->remove(top->index);
 		} while (top->node->nodeCount == 0);
+		if (top == stack) return;
 		if (top->node->isLeafNode()) {
 			top--;
 			top->index++;

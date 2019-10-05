@@ -17,7 +17,7 @@ namespace WorldBuilder {
 	}
 
 	void createDominoAt(Position pos, Mat3 rotation) {
-		ExtendedPart* domino = dominoFactory.produce(GlobalCFrame(pos, rotation), 1, 0.7);
+		ExtendedPart* domino = dominoFactory.produce(GlobalCFrame(pos, rotation), { 1, 0.7, 0.3 });
 		world.addPart(domino);
 	}
 
@@ -43,7 +43,7 @@ namespace WorldBuilder {
 
 	void SpiderFactory::buildSpider(const GlobalCFrame& spiderPosition) {
 		//ExtendedPart* spiderBody = createUniquePart(screen, createPointyPrism(legCount, 0.5, 0.2, 0.1, 0.1), spiderPosition, 1.0, 0.0, "SpiderBody");
-		ExtendedPart* spiderBody = bodyFactory.produce(spiderPosition, 1.0, 0.5);
+		ExtendedPart* spiderBody = bodyFactory.produce(spiderPosition, { 1.0, 0.5, 0.3 });
 		spiderBody->material.ambient = Vec4f(0.6f, 0.6f, 0.6f, 1.0f);
 
 		//PartFactory legFactory(BoundingBox(0.05, 0.5, 0.05).toShape(), screen, "SpiderLeg");
@@ -55,7 +55,7 @@ namespace WorldBuilder {
 		Physical* spider = spiderBody->parent;
 
 		for (int i = 0; i < legCount; i++) {
-			ExtendedPart* leg = legFactory.produce(GlobalCFrame(), 1.0, 0.5, std::string("LegPart ") + std::to_string(i));
+			ExtendedPart* leg = legFactory.produce(GlobalCFrame(), { 1.0, 0.5, 0.3 }, std::string("LegPart ") + std::to_string(i));
 			leg->material.ambient = Vec4f(0.4f, 0.4f, 0.4f, 1.0f);
 
 			double angle = i * PI * 2 / legCount;
@@ -77,12 +77,12 @@ namespace WorldBuilder {
 		PartFactory ypf(YPlateShape, screen);
 		PartFactory zpf(ZPlateShape, screen);
 
-		ExtendedPart* bottom = ypf.produce(GlobalCFrame(box.getCenter() - Vec3(0, box.getHeight() / 2 - wallThickness / 2, 0)), 1.0, 0.2, "BottomPlate");
-		ExtendedPart* top = ypf.produce(GlobalCFrame(), 1.0, 0.2, "TopPlate");
-		ExtendedPart* left = xpf.produce(GlobalCFrame(), 1.0, 0.2, "LeftPlate");
-		ExtendedPart* right = xpf.produce(GlobalCFrame(), 1.0, 0.2, "RightPlate");
-		ExtendedPart* front = zpf.produce(GlobalCFrame(), 1.0, 0.2, "FrontPlate");
-		ExtendedPart* back = zpf.produce(GlobalCFrame(), 1.0, 0.2, "BackPlate");
+		ExtendedPart* bottom = ypf.produce(GlobalCFrame(box.getCenter() - Vec3(0, box.getHeight() / 2 - wallThickness / 2, 0)), { 1.0, 0.2, 0.3 }, "BottomPlate");
+		ExtendedPart* top = ypf.produce(GlobalCFrame(), { 1.0, 0.2, 0.3 }, "TopPlate");
+		ExtendedPart* left = xpf.produce(GlobalCFrame(), { 1.0, 0.2, 0.3 }, "LeftPlate");
+		ExtendedPart* right = xpf.produce(GlobalCFrame(), { 1.0, 0.2, 0.3 }, "RightPlate");
+		ExtendedPart* front = zpf.produce(GlobalCFrame(), { 1.0, 0.2, 0.3 }, "FrontPlate");
+		ExtendedPart* back = zpf.produce(GlobalCFrame(), { 1.0, 0.2, 0.3 }, "BackPlate");
 
 		world.addPart(bottom);
 		Physical & parent = *bottom->parent;

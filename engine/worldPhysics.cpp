@@ -18,8 +18,6 @@
 
 #include <vector>
 
-#define ELASTICITY 0.3
-
 /*
 	exitVector is the distance p2 must travel so that the shapes are no longer colliding
 */
@@ -57,10 +55,12 @@ void handleCollision(Part& part1, Part& part2, Position collisionPoint, Vec3 exi
 
 	Vec3 impulse;
 
+	double combinedBouncyness = part1.properties.bouncyness * part2.properties.bouncyness;
+
 	if(isImpulseColission) { // moving towards the other object
 		Vec3 desiredAccel = -exitVector * (relativeVelocity * exitVector) / lengthSquared(exitVector);
 		Vec3 zeroRelVelImpulse = desiredAccel * combinedInertia;
-		impulse = zeroRelVelImpulse * (1.0+ELASTICITY);
+		impulse = zeroRelVelImpulse * (1.0 + combinedBouncyness);
 		p1.applyImpulse(collissionRelP1, impulse);
 		p2.applyImpulse(collissionRelP2, -impulse);
 		relativeVelocity = (p1.getVelocityOfPoint(collissionRelP1) - part1.conveyorEffect) - (p2.getVelocityOfPoint(collissionRelP2) - part2.conveyorEffect); // set new relativeVelocity
@@ -124,18 +124,21 @@ void handleTerrainCollision(Part& part1, Part& part2, Position collisionPoint, V
 	p1.applyForce(collissionRelP1, depthForce);
 
 
-	Vec3 relativeVelocity = p1.getVelocityOfPoint(collissionRelP1);
+	Vec3 relativeVelocity = p1.getVelocityOfPoint(collissionRelP1) - part1.conveyorEffect + part2.conveyorEffect;
 
 	bool isImpulseColission = relativeVelocity * exitVector > 0;
 
 	Vec3 impulse;
 
+
+	double combinedBouncyness = part1.properties.bouncyness * part2.properties.bouncyness;
+
 	if (isImpulseColission) { // moving towards the other object
 		Vec3 desiredAccel = -exitVector * (relativeVelocity * exitVector) / lengthSquared(exitVector);
 		Vec3 zeroRelVelImpulse = desiredAccel * inertia;
-		impulse = zeroRelVelImpulse * (1.0 + ELASTICITY);
+		impulse = zeroRelVelImpulse * (1.0 + combinedBouncyness);
 		p1.applyImpulse(collissionRelP1, impulse);
-		relativeVelocity = p1.getVelocityOfPoint(collissionRelP1); // set new relativeVelocity
+		relativeVelocity = p1.getVelocityOfPoint(collissionRelP1) - part1.conveyorEffect + part2.conveyorEffect; // set new relativeVelocity
 	}
 
 	Vec3 slidingVelocity = exitVector % relativeVelocity % exitVector / lengthSquared(exitVector);
@@ -179,7 +182,7 @@ bool boundsSphereEarlyEnd(const BoundingBox& bounds, const Vec3& localSphereCent
 }
 
 inline void runColissionTests(Part& p1, Part& p2, WorldPrototype& world, std::vector<Colission>& colissions) {
-	if (p1.parent->anchored && p2.parent->anchored) return;
+	if ((p1.isTerrainPart || p1.parent->anchored) && (p2.isTerrainPart || p2.parent->anchored)) return;
 	
 	double maxRadiusBetween = p1.maxRadius + p2.maxRadius;
 

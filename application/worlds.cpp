@@ -14,6 +14,8 @@
 #define PICKER_SPEED_STRENGTH 12
 #define PICKER_ANGULAR_REDUCE_STRENGTH 50
 #define RUN_SPEED 5
+#define JUMP_SPEED 6
+#define AIR_RUN_SPEED_FACTOR 2
 
 void MagnetWorld::applyExternalForces() {
 	if (selectedPart != nullptr && !selectedPart->parent->anchored) {
@@ -69,16 +71,27 @@ void GravityWorld::applyExternalForces() {
 
 		Vec3 runVector = (lengthSquared(total) >= 0.00005) ? normalize(total) * RUN_SPEED : Vec3(0, 0, 0);
 
-		player->conveyorEffect = runVector;
+		Vec3 desiredSpeed = runVector;
+		Vec3 actualSpeed = player->parent->velocity;
 
+		Vec3 speedToGain = desiredSpeed - actualSpeed;
+
+		speedToGain.y = 0;
+
+		player->parent->applyForceAtCenterOfMass(speedToGain * player->mass * AIR_RUN_SPEED_FACTOR);
+
+		if (handler->getKey(KeyboardOptions::Move::jump))
+			runVector += Vec3(0, JUMP_SPEED, 0);
+
+		player->conveyorEffect = runVector;
 
 
 		/*if(handler->getKey(KeyboardOptions::Move::forward)) player->parent->applyForceAtCenterOfMass(forward * player->parent->mass * 20.0);
 		if(handler->getKey(KeyboardOptions::Move::backward)) player->parent->applyForceAtCenterOfMass(-forward * player->parent->mass * 20.0);
 		if(handler->getKey(KeyboardOptions::Move::right)) player->parent->applyForceAtCenterOfMass(right * player->parent->mass * 20.0);
 		if(handler->getKey(KeyboardOptions::Move::left)) player->parent->applyForceAtCenterOfMass(-right * player->parent->mass * 20.0);*/
-		if(handler->getKey(KeyboardOptions::Move::jump))
-			player->parent->applyForceAtCenterOfMass(Vec3(0.0, 50.0 * player->parent->mass, 0.0));
+		//if(handler->getKey(KeyboardOptions::Move::jump))
+		//	player->parent->applyForceAtCenterOfMass(Vec3(0.0, 50.0 * player->parent->mass, 0.0));
 	}
 }
 
