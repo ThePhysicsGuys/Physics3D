@@ -243,7 +243,7 @@ void setupWorld() {
 	int minX = -2;
 	int maxX = 2;
 	int minY = 0;
-	int maxY = 5;
+	int maxY = 20;
 	int minZ = -2;
 	int maxZ = 2;
 

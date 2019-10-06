@@ -5,6 +5,7 @@
 #include "../datastructures/sharedArray.h"
 #include "../datastructures/alignedPtr.h"
 #include "../datastructures/iteratorFactory.h"
+#include "genericCollidable.h"
 
 #include <utility>
 
@@ -18,7 +19,7 @@ struct ShapeTriangleIter;
 
 size_t getOffset(size_t size);
 
-struct Sphere {
+struct CircumscribingSphere {
 	Vec3 origin = Vec3();
 	double radius = 0;
 };
@@ -69,7 +70,7 @@ struct ShapeTriangleIter {
 	}
 };
 
-struct Polyhedron {
+struct Polyhedron : public GenericCollidable {
 
 	
 private:
@@ -80,28 +81,10 @@ private:
 public:
 	int vertexCount;
 	int triangleCount;
-	int refCount = 1;
 
 	Polyhedron() : vertices(), triangles(), vertexCount(0), triangleCount(0) {};
-	Polyhedron(const Polyhedron& p) : vertices(p.vertices), triangles(p.triangles), vertexCount(p.vertexCount), triangleCount(p.triangleCount) {};
-	Polyhedron(Polyhedron&& p) noexcept : vertices(std::move(p.vertices)), triangles(std::move(p.triangles)), vertexCount(p.vertexCount), triangleCount(p.triangleCount) {};
-
-	Polyhedron& operator=(const Polyhedron& p) {
-		this->vertices = p.vertices;
-		this->triangles = p.triangles;
-		this->vertexCount = p.vertexCount;
-		this->triangleCount = p.triangleCount;
-		return *this;
-	};
-	Polyhedron& operator=(Polyhedron&& p) noexcept {
-		std::swap(this->vertices, p.vertices);
-		std::swap(this->triangles, p.triangles);
-		this->vertexCount = p.vertexCount;
-		this->triangleCount = p.triangleCount;
-		return *this;
-	};
-
 	~Polyhedron();
+
 	Polyhedron(const Vec3f* vertices, const Triangle* triangles, int vertexCount, int triangleCount);
 	Polyhedron translated(Vec3f offset) const;
 	Polyhedron rotated(RotMat3f rotation) const;
@@ -123,7 +106,7 @@ public:
 	SymmetricMat3 getInertia(Vec3 reference) const;
 	SymmetricMat3 getInertia(Mat3 reference) const;
 	SymmetricMat3 getInertia(CFrame reference) const;
-	Sphere getCircumscribingSphere() const;
+	CircumscribingSphere getCircumscribingSphere() const;
 	void getCircumscribedEllipsoid() const;
 	double getMaxRadius() const;
 	double getMaxRadius(Vec3f reference) const;
@@ -131,10 +114,9 @@ public:
 	double getMaxRadiusSq(Vec3f reference) const;
 	Vec3f getNormalVecOfTriangle(Triangle triangle) const;
 
-	bool intersects(const Polyhedron& other, Vec3f& intersection, Vec3f& exitVector, const Vec3& centerConnection) const;
 	bool intersectsTransformed(const Polyhedron& other, const CFramef& relativeCFrame, Vec3f& intersection, Vec3f& exitVector) const;
 	int furthestIndexInDirection(const Vec3f& direction) const;
-	Vec3f furthestInDirection(const Vec3f& direction) const;
+	virtual Vec3f furthestInDirection(const Vec3f& direction) const override;
 
 	inline const float* getXVerts() const { return this->vertices.get(); }
 	inline const float* getYVerts() const { return this->vertices.get() + getOffset(vertexCount); }

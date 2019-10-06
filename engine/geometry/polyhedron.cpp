@@ -18,6 +18,8 @@
 #include "computationBuffer.h"
 #include "intersection.h"
 
+#include "../physicsProfiler.h"
+
 size_t getOffset(size_t size) {
 	return (size + 7) & 0xFFFFFFFFFFFFFFF8;
 }
@@ -478,26 +480,6 @@ void incDebugTally(HistoricTally<N, long long, IterationTime>& tally, int iterTi
 }
 
 ComputationBuffers buffers(1000, 2000);
-bool Polyhedron::intersects(const Polyhedron& other, Vec3f& intersection, Vec3f& exitVector, const Vec3& centerConnection) const {
-	Tetrahedron result;
-	int iter;
-	physicsMeasure.mark(PhysicsProcess::GJK_COL);
-	bool collides = runGJK(*this, other, Vec3f(centerConnection), result, iter);
-	
-	if(collides) {
-		incDebugTally(GJKCollidesIterationStatistics, iter + 2);
-		physicsMeasure.mark(PhysicsProcess::EPA);
-		bool epaResult = runEPA(*this, other, result, intersection, exitVector, buffers, iter);
-		incDebugTally(EPAIterationStatistics, iter);
-		return epaResult;
-	} else {
-		incDebugTally(GJKNoCollidesIterationStatistics, iter + 2);
-		physicsMeasure.mark(PhysicsProcess::OTHER, PhysicsProcess::GJK_NO_COL);
-		return false;
-	}
-}
-
-#include "../physicsProfiler.h"
 
 bool Polyhedron::intersectsTransformed(const Polyhedron& other, const CFramef& relativeCFramef, Vec3f& intersection, Vec3f& exitVector) const {
 	Tetrahedron result;
@@ -555,11 +537,11 @@ Vec3 Polyhedron::getCenterOfMass() const {
 	return total / (24 * getVolume());
 }
 
-Sphere Polyhedron::getCircumscribingSphere() const {
+CircumscribingSphere Polyhedron::getCircumscribingSphere() const {
 	BoundingBox bounds = getBounds();
 	Vec3 center = Vec3(bounds.xmax + bounds.xmin, bounds.ymax + bounds.ymin, bounds.zmax + bounds.zmin) / 2.0;
 	double radius = getMaxRadius(center);
-	return Sphere{center, radius};
+	return CircumscribingSphere{center, radius};
 }
 
 double Polyhedron::getMaxRadiusSq() const {

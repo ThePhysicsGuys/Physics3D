@@ -6,6 +6,11 @@
 #include "../math/linalg/mat.h"
 #include "polyhedron.h"
 
+enum class ShapeType {
+	SPHERE,
+	POLYHEDRON,
+};
+
 class Shape {
 	Polyhedron polyhedron;
 
@@ -27,7 +32,7 @@ public:
 	inline SymmetricMat3 getInertia(Vec3 reference) const { return polyhedron.getInertia(reference); };
 	inline SymmetricMat3 getInertia(Mat3 reference) const { return polyhedron.getInertia(reference); };
 	inline SymmetricMat3 getInertia(CFrame reference) const { return polyhedron.getInertia(reference); };
-	inline Sphere getCircumscribingSphere() const { return polyhedron.getCircumscribingSphere(); };
+	inline CircumscribingSphere getCircumscribingSphere() const { return polyhedron.getCircumscribingSphere(); };
 	inline double getMaxRadius() const { return polyhedron.getMaxRadius(); };
 	inline double getMaxRadiusSq() const { return polyhedron.getMaxRadiusSq(); };
 
@@ -38,3 +43,5 @@ public:
 
 	Polyhedron asPolyhedron() const { return polyhedron; }
 };
+
+
