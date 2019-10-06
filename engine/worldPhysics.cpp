@@ -273,7 +273,12 @@ void WorldPrototype::tick() {
 	update();
 }
 
-void WorldPrototype::applyExternalForces() {}
+void WorldPrototype::applyExternalForces() {
+	for (ExternalForce* force : externalForces) {
+		force->apply(this);
+	}
+}
+
 void WorldPrototype::findColissions() {
 	physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
 
@@ -323,14 +328,17 @@ double WorldPrototype::getTotalKineticEnergy() const {
 }
 double WorldPrototype::getTotalPotentialEnergy() const {
 	double total = 0.0;
-	for(const Physical& p : iterPhysicals()) {
-		if (p.anchored) continue;
-		total += getPotentialEnergyOfPhysical(p);
+	for(ExternalForce* force : externalForces) {
+		total += force->getTotalPotentialEnergyForThisForce(this);
 	}
 	return total;
 }
 double WorldPrototype::getPotentialEnergyOfPhysical(const Physical& p) const {
-	return 0.0;
+	double total = 0.0;
+	for (ExternalForce* force : externalForces) {
+		total += force->getPotentialEnergyForObject(this, p);
+	}
+	return total;
 }
 double WorldPrototype::getTotalEnergy() const {
 	return getTotalKineticEnergy() + getTotalPotentialEnergy();

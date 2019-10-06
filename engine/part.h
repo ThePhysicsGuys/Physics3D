@@ -59,6 +59,7 @@ public:
 	Bounds getStrictBounds() const;
 
 	Position getPosition() const { return cframe.getPosition(); }
+	Position getCenterOfMass() const { return cframe.localToGlobal(localCenterOfMass); }
 	const GlobalCFrame& getCFrame() const { return cframe; }
 	void setCFrame(const GlobalCFrame& newCFrame);
 

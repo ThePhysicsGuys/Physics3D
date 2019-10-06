@@ -14,7 +14,6 @@
 #include "../view/gui/gui.h"
 #include "../view/gui/guiUtils.h"
 #include "../view/debug/visualDebug.h"
-#include "../shapeLibrary.h"
 #include "../worlds.h"
 #include "../view/screen.h"
 #include "../view/camera.h"

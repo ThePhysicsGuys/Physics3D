@@ -17,7 +17,11 @@
 #define JUMP_SPEED 6
 #define AIR_RUN_SPEED_FACTOR 2
 
-void MagnetWorld::applyExternalForces() {
+PlayerWorld::PlayerWorld(double deltaT) : SynchronizedWorld<ExtendedPart>(deltaT) {}
+
+void PlayerWorld::applyExternalForces() {
+	SynchronizedWorld<ExtendedPart>::applyExternalForces();
+
 	if (selectedPart != nullptr && !selectedPart->parent->anchored) {
 		Physical* selectedPhysical = selectedPart->parent;
 		GlobalCFrame cframe = selectedPhysical->getCFrame();
@@ -33,27 +37,10 @@ void MagnetWorld::applyExternalForces() {
 		Vec3 angular = -cframe.localToRelative(selectedPhysical->inertia * cframe.relativeToLocal(selectedPhysical->angularVelocity)) * PICKER_ANGULAR_REDUCE_STRENGTH;// / (delta.length() + 1);
 		selectedPhysical->applyMoment(angular);
 	}
-}
-
-MagnetWorld::MagnetWorld(double deltaT) : SynchronizedWorld<ExtendedPart>(deltaT) {}
-GravityWorld::GravityWorld(double deltaT, Vec3 gravity) : MagnetWorld(deltaT), gravity(gravity) {}
-
-void GravityWorld::applyExternalForces() {
-	MagnetWorld::applyExternalForces();
-	// Gravity force
-	for(Physical& physical : iterPhysicals()) {
-		// object.applyForceAtCenterOfMass((Vec3(0.0, 5.0, 0.0) - object.getCenterOfMass() * 1.0) * object.mass);
-		if(!physical.anchored) physical.applyForceAtCenterOfMass(gravity * physical.mass);
-	}
 
 	// Player movement
-	if(!screen.camera.flying) {
+	if (!screen.camera.flying) {
 		ExtendedPart* player = screen.camera.attachment;
-		/*Vec3 upOrientation = player->cframe.localToRelative(Vec3(0.0, 1.0, 0.0));
-		Vec3 moment = -Vec3(0.0, 1.0, 0.0) % upOrientation * 700;
-		player->parent->applyMoment(moment * player->parent->mass);
-		player->parent->angularVelocity *= 0.98;
-		player->parent->velocity *= 0.999;*/
 
 		Vec3f playerX = screen.camera.cframe.rotation.transpose() * Vec3(1, 0, 0);
 		Vec3f playerZ = screen.camera.cframe.rotation.transpose() * Vec3(0, 0, 1);
@@ -84,25 +71,5 @@ void GravityWorld::applyExternalForces() {
 			runVector += Vec3(0, JUMP_SPEED, 0);
 
 		player->conveyorEffect = runVector;
-
-
-		/*if(handler->getKey(KeyboardOptions::Move::forward)) player->parent->applyForceAtCenterOfMass(forward * player->parent->mass * 20.0);
-		if(handler->getKey(KeyboardOptions::Move::backward)) player->parent->applyForceAtCenterOfMass(-forward * player->parent->mass * 20.0);
-		if(handler->getKey(KeyboardOptions::Move::right)) player->parent->applyForceAtCenterOfMass(right * player->parent->mass * 20.0);
-		if(handler->getKey(KeyboardOptions::Move::left)) player->parent->applyForceAtCenterOfMass(-right * player->parent->mass * 20.0);*/
-		//if(handler->getKey(KeyboardOptions::Move::jump))
-		//	player->parent->applyForceAtCenterOfMass(Vec3(0.0, 50.0 * player->parent->mass, 0.0));
 	}
-}
-
-double GravityWorld::getTotalPotentialEnergy() const {
-	double total = 0.0;
-	for(const Physical& p : iterPhysicals()) {
-		if (p.anchored) continue;
-		total += Vec3(Position() - p.getCenterOfMass()) * gravity * p.mass;
-	}
-	return total;
-}
-double GravityWorld::getPotentialEnergyOfPhysical(const Physical& p) const {
-	return Vec3(Position() - p.getCenterOfMass()) * gravity * p.mass;
 }

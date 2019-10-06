@@ -73,7 +73,7 @@ Screen::Screen() {
 
 };
 
-Screen::Screen(int width, int height, MagnetWorld* world) {
+Screen::Screen(int width, int height, PlayerWorld* world) {
 	this->world = world;
 
 	// Create a windowed mode window and its OpenGL context 

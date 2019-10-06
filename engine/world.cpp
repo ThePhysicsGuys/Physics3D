@@ -90,6 +90,15 @@ void WorldPrototype::removePartFromTrees(const Part* part) {
 
 
 
+void WorldPrototype::addExternalForce(ExternalForce* force) {
+	externalForces.push_back(force);
+}
+
+void WorldPrototype::removeExternalForce(ExternalForce* force) {
+	externalForces.erase(std::remove(externalForces.begin(), externalForces.end(), force));
+}
+
+
 
 void recursiveTreeValidCheck(const TreeNode& node) {
 	if (node.isLeafNode()) return;

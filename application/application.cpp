@@ -13,10 +13,10 @@
 #include "view/material.h"
 
 #include "../engine/geometry/shape.h"
-#include "../engine/geometry/convexShapeBuilder.h"
 #include "../engine/math/mathUtil.h"
 #include "../engine/part.h"
 #include "../engine/world.h"
+#include "../engine/misc/gravityForce.h"
 #include "../engine/physicsProfiler.h"
 
 #include "debug.h"
@@ -36,7 +36,7 @@
 
 
 TickerThread physicsThread;
-GravityWorld world(1 / TICKS_PER_SECOND, Vec3(0.0, -10.0, 0.0));
+PlayerWorld world(1 / TICKS_PER_SECOND);
 Screen screen;
 
 
@@ -132,6 +132,8 @@ void buildTerrain() {
 
 void setupWorld() {
 	Log::info("Initializing world");
+
+	world.addExternalForce(new ExternalGravity(Vec3(0, -10.0, 0.0)));
 
 	// WorldBuilder init
 	WorldBuilder::init();

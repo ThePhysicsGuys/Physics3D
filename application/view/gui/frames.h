@@ -378,7 +378,7 @@ struct PropertiesFrame : public FrameBlueprint, public Frame {
 			return;
 
 		ExtendedPart* selectedPart = GUI::screen->selectedPart;
-		MagnetWorld* world = GUI::screen->world;
+		PlayerWorld* world = GUI::screen->world;
 
 		if (selectedPart) {
 			partMeshIDLabel->text = "MeshID: " + std::to_string(selectedPart->drawMeshId);

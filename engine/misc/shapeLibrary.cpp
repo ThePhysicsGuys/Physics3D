@@ -1,8 +1,6 @@
-#include "core.h"
-
 #include "shapeLibrary.h"
 
-#include "../engine/math/mathUtil.h"
+#include "../math/mathUtil.h"
 
 namespace Library {
 	float g = (1.0 + sqrt(5.0)) / 2.0;

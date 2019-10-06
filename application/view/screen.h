@@ -11,7 +11,7 @@ class FrameBuffer;
 class HDRFrameBuffer;
 class StandardInputHandler;
 class IndexedMesh;
-class MagnetWorld;
+class PlayerWorld;
 
 bool initGLEW();
 bool initGLFW();
@@ -20,7 +20,7 @@ void terminateGLFW();
 class Screen {
 public:
 	std::vector<IndexedMesh*> meshes;
-	MagnetWorld* world;
+	PlayerWorld* world;
 	Vec2i dimension;
 
 	Camera camera;
@@ -40,7 +40,7 @@ public:
 	Position selectedPoint;
 
 	Screen();
-	Screen(int width, int height, MagnetWorld* world);
+	Screen(int width, int height, PlayerWorld* world);
 
 	void onInit();
 	void onUpdate();

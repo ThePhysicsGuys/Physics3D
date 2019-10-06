@@ -1,9 +1,9 @@
 #pragma once
 
 class Screen;
-class GravityWorld;
+class PlayerWorld;
 
-extern GravityWorld world;
+extern PlayerWorld world;
 extern Screen screen;
 
 void init();
