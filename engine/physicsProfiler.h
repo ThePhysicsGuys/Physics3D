@@ -3,12 +3,11 @@
 #include "profiling.h"
 
 enum class PhysicsProcess {
-	TRANSFORMS,
-	EXTERNALS,
 	GJK_COL,
 	GJK_NO_COL,
 	EPA,
 	COLISSION_OTHER,
+	EXTERNALS,
 	COLISSION_HANDLING,
 	CONSTRAINTS,
 	UPDATE_TREE_BOUNDS,

@@ -259,10 +259,11 @@ void recursiveFindColissionsBetween(WorldPrototype& world, std::vector<Colission
 */
 
 void WorldPrototype::tick() {
-	physicsMeasure.mark(PhysicsProcess::EXTERNALS);
-	applyExternalForces();
 	
 	findColissions();
+
+	physicsMeasure.mark(PhysicsProcess::EXTERNALS);
+	applyExternalForces();
 
 	handleColissions();
 

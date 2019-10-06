@@ -53,7 +53,7 @@ public:
 		clearCurrentTally();
 	}
 
-	inline size_t size() const {
+	constexpr inline size_t size() const {
 		return static_cast<size_t>(Category::COUNT);
 	}
 };
