@@ -155,7 +155,7 @@ void setupWorld() {
 	// Floor
 	Vec2 floorSize(50.0, 50.0);
 	double wallHeight = 7.0;
-	ResourceManager::add<TextureResource>("../res/textures/floor/floor_color.jpg", "floorMaterial");
+	ResourceManager::add<TextureResource>("floorMaterial", "../res/textures/floor/floor_color.jpg");
 	Material floorMaterial = Material(ResourceManager::get<TextureResource>("floorMaterial"));
 	ExtendedPart* floorExtendedPart = createUniquePart(screen, BoundingBox(floorSize.x, 1.0, floorSize.y).toShape(), GlobalCFrame(0.0, 0.0, 0.0), 2.0, 1.0);
 	floorExtendedPart->material = floorMaterial;

@@ -100,12 +100,9 @@ public:
 	}
 
 	template<typename T>
-	static T* add(const std::string& path, std::string name = "") {
+	static T* add(const std::string& name, const std::string& path) {
 		Log::subject s("ADD");
 		//Log::debug("Adding resource: (%s, %s)", name.c_str(), path.c_str());
-
-		if (name.empty())
-			name = path;
 
 		auto iterator = ResourceManager::resources.find(name);
 
@@ -131,6 +128,11 @@ public:
 				return resource;
 			}
 		}
+	}
+
+	template<typename T>
+	static T* add(const std::string& path) {
+		return add<T>(path, path);
 	}
 
 	static bool exists(const std::string& name) {

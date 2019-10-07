@@ -113,8 +113,8 @@ ShaderProgram::~ShaderProgram() {
 
 void BasicShader::updatePart(const ExtendedPart& part) {
 	bind();
-	shader.setUniform("includeNormals", part.visualShape.normals != nullptr);
-	shader.setUniform("includeUvs", part.visualShape.uvs != nullptr);
+	shader.setUniform("includeNormals", int(part.visualShape.normals != nullptr));
+	shader.setUniform("includeUvs", int(part.visualShape.uvs != nullptr));
 	shader.setUniform("modelMatrix", TransformToMat4(part.getPosition(), Mat3f(part.getCFrame().getRotation()) * part.visualScale));
 }
 
@@ -127,19 +127,19 @@ void BasicShader::updateMaterial(const Material& material) {
 
 	if (material.texture) {
 		material.texture->bind();
-		shader.setUniform("material.textured", true);
+		shader.setUniform("material.textured", 1);
 		shader.setUniform("textureSampler", material.texture->getUnit());
 	} else {
-		shader.setUniform("material.textured", false);
+		shader.setUniform("material.textured", 0);
 		shader.setUniform("textureSampler", 0);
 	}
 
 	if (material.normal) {
 		material.normal->bind();
-		shader.setUniform("material.normalmapped", true);
+		shader.setUniform("material.normalmapped", 1);
 		shader.setUniform("normalSampler", material.normal->getUnit());
 	} else {
-		shader.setUniform("material.normalmapped", false);
+		shader.setUniform("material.normalmapped", 0);
 		shader.setUniform("normalSampler", 0);
 	}
 }

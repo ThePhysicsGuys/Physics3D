@@ -18,12 +18,12 @@ inline std::string Resource::getPath() const {
 	return path;
 }
 
-Resource::Resource(std::string path) {
+Resource::Resource(const std::string& path) {
 	this->name = path;
 	this->path = path;
 }
 
-Resource::Resource(std::string name, std::string path) {
+Resource::Resource(const std::string& name, const std::string& path) {
 	this->name = name;
 	this->path = path;
 }

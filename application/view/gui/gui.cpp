@@ -262,24 +262,24 @@ namespace GUI {
 		GUI::quad = new Quad();
 
 		// closeButton
-		ResourceManager::add<TextureResource>("../res/textures/gui/close_idle.png", "closeButtonIdleTexture");
-		ResourceManager::add<TextureResource>("../res/textures/gui/close_hover.png", "closeButtonHoverTexture");
-		ResourceManager::add<TextureResource>("../res/textures/gui/close_press.png", "closeButtonPressTexture");
+		ResourceManager::add<TextureResource>("closeButtonIdleTexture", "../res/textures/gui/close_idle.png");
+		ResourceManager::add<TextureResource>("closeButtonHoverTexture", "../res/textures/gui/close_hover.png");
+		ResourceManager::add<TextureResource>("closeButtonPressTexture", "../res/textures/gui/close_press.png");
 		GUI::closeButtonIdleTexture = ResourceManager::get<TextureResource>("closeButtonIdleTexture");
 		GUI::closeButtonHoverTexture = ResourceManager::get<TextureResource>("closeButtonHoverTexture");
 		GUI::closeButtonPressTexture = ResourceManager::get<TextureResource>("closeButtonPressTexture");
 
 		// minimizeButton
-		ResourceManager::add<TextureResource>("../res/textures/gui/minimize_idle.png", "minimizeButtonIdleTexture");
-		ResourceManager::add<TextureResource>("../res/textures/gui/minimize_hover.png", "minimizeButtonHoverTexture");
-		ResourceManager::add<TextureResource>("../res/textures/gui/minimize_press.png", "minimizeButtonPressTexture");
+		ResourceManager::add<TextureResource>("minimizeButtonIdleTexture", "../res/textures/gui/minimize_idle.png");
+		ResourceManager::add<TextureResource>("minimizeButtonHoverTexture", "../res/textures/gui/minimize_hover.png");
+		ResourceManager::add<TextureResource>("minimizeButtonPressTexture", "../res/textures/gui/minimize_press.png");
 		GUI::minimizeButtonIdleTexture = ResourceManager::get<TextureResource>("minimizeButtonIdleTexture");
 		GUI::minimizeButtonHoverTexture = ResourceManager::get<TextureResource>("minimizeButtonHoverTexture");
 		GUI::minimizeButtonPressTexture = ResourceManager::get<TextureResource>("minimizeButtonPressTexture");
 
 		// Checkbox
-		ResourceManager::add<TextureResource>("../res/textures/gui/unchecked.png", "checkBoxUncheckedTexture");
-		ResourceManager::add<TextureResource>("../res/textures/gui/checked.png", "checkBoxCheckedTexture");
+		ResourceManager::add<TextureResource>("checkBoxUncheckedTexture", "../res/textures/gui/unchecked.png");
+		ResourceManager::add<TextureResource>("checkBoxCheckedTexture", "../res/textures/gui/checked.png");
 		GUI::checkBoxUncheckedTexture = ResourceManager::get<TextureResource>("checkBoxUncheckedTexture");
 		GUI::checkBoxCheckedTexture = ResourceManager::get<TextureResource>("checkBoxCheckedTexture");
 		GUI::checkBoxPressCheckedTexture = GUI::checkBoxCheckedTexture->colored(Vec3(1.3));
@@ -288,11 +288,11 @@ namespace GUI {
 		GUI::checkBoxHoverUncheckedTexture = GUI::checkBoxUncheckedTexture->colored(Vec3(0.999));
 
 		// ColorPicker
-		ResourceManager::add<TextureResource>("../res/textures/gui/hue.png", "colorPickerHueTexture");
-		ResourceManager::add<TextureResource>("../res/textures/gui/alphaBrightness.png", "colorPickerAlphaBrightnessTexture");
-		ResourceManager::add<TextureResource>("../res/textures/gui/alphaPattern.png", "colorPickerAlphaPatternTexture");
-		ResourceManager::add<TextureResource>("../res/textures/gui/brightness.png", "colorPickerBrightnessTexture");
-		ResourceManager::add<TextureResource>("../res/textures/gui/crosshair.png", "colorPickerCrosshairTexture");
+		ResourceManager::add<TextureResource>("colorPickerHueTexture", "../res/textures/gui/hue.png");
+		ResourceManager::add<TextureResource>("colorPickerAlphaBrightnessTexture", "../res/textures/gui/alphaBrightness.png");
+		ResourceManager::add<TextureResource>("colorPickerAlphaPatternTexture", "../res/textures/gui/alphaPattern.png");
+		ResourceManager::add<TextureResource>("colorPickerBrightnessTexture", "../res/textures/gui/brightness.png");
+		ResourceManager::add<TextureResource>("colorPickerCrosshairTexture", "../res/textures/gui/crosshair.png");
 		GUI::colorPickerHueTexture = ResourceManager::get<TextureResource>("colorPickerHueTexture");
 		GUI::colorPickerAlphaBrightnessTexture = ResourceManager::get<TextureResource>("colorPickerAlphaBrightnessTexture");
 		GUI::colorPickerAlphaPatternTexture = ResourceManager::get<TextureResource>("colorPickerAlphaPatternTexture");

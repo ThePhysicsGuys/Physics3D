@@ -36,8 +36,8 @@ layout(triangle_strip, max_vertices = 3) out;
 layout(line_strip, max_vertices = 9) out;
 #endif
 
-uniform bool includeUvs;
-uniform bool includeNormals;
+uniform int includeUvs;
+uniform int includeNormals;
 
 uniform vec3 viewPosition;
 uniform mat4 viewMatrix;
@@ -55,23 +55,14 @@ out vec3 fposition;
 out vec3 fnormal;
 out vec3 fcenter;
 
-vec3 center(bool transform) {
-	if (transform)
-		return vec3(gl_in[0].gl_Position + gl_in[1].gl_Position + gl_in[2].gl_Position) / 3;
-	else
-		return (gposition[0] + gposition[1] + gposition[2]) / 3;
+vec3 center() {
+	return vec3(gl_in[0].gl_Position + gl_in[1].gl_Position + gl_in[2].gl_Position) / 3;
 }
 
-vec3 normal(bool transform) {
-	vec3 a; 
-	vec3 b;
-	if (transform) {
-		a = vec3(gl_in[0].gl_Position) - vec3(gl_in[1].gl_Position);
-		b = vec3(gl_in[2].gl_Position) - vec3(gl_in[1].gl_Position);
-	} else {
-		a = gposition[0] - gposition[1];
-		b = gposition[2] - gposition[0];
-	}
+vec3 normal() {
+	vec3 a = vec3(gl_in[0].gl_Position) - vec3(gl_in[1].gl_Position);
+	vec3 b = vec3(gl_in[2].gl_Position) - vec3(gl_in[1].gl_Position);
+	
 	vec3 norm = normalize(cross(a, b));
 	return -norm;
 }
@@ -84,12 +75,12 @@ vec2 uv(vec3 p, vec3 n, vec3 u, vec3 v) {
 }
 
 void main() {
-	fnormal = normal(true);
-	fcenter = center(true);
+	fnormal = normal();
+	fcenter = center();
 
 	mat4 transform = projectionMatrix * viewMatrix;
 
-	#ifdef DEBUG
+#ifdef DEBUG
 	float arrowLength = 0.05;
 	float arrowWidth = 0.02;
 	vec4 arrowTop = vec4(fcenter + 0.3 * fnormal, 1);
@@ -105,47 +96,30 @@ void main() {
 	gl_Position = transform * arrowRight; EmitVertex();
 	gl_Position = transform * arrowBase; EmitVertex();
 	EndPrimitive();
-	#endif
+#endif
 
 	vec3 u = gposition[2] - gposition[0];
-	vec3 n = normal(false);
+	vec3 n = normalize(cross(gposition[0] - gposition[1], gposition[2] - gposition[0]));
 	vec3 v = cross(n, u);
-	vec3 c = center(false);
-	if (dot(c-dot(c, n) * n, u) < 0) {
-		vec3 t = v;
-		v = u;
-		u = -t;
-	}
 
 	// Vertex 1
 	fposition = gl_in[0].gl_Position.xyz;
-
-	if (includeUvs) fuv = guv[0];
-	else fuv = uv(gposition[0], n, u, v);
-
-	if (includeNormals) fnormal = gnormal[0].value;
+	fuv = includeUvs * guv[0] + (1 - includeUvs) * uv(gposition[0], n, u, v);
+	fnormal = includeNormals * gnormal[0].value + (1 - includeNormals) * fnormal;
 
 	gl_Position = transform * gl_in[0].gl_Position; EmitVertex();
 
-
 	// Vertex 2
 	fposition = gl_in[1].gl_Position.xyz;
-
-	if (includeUvs) fuv = guv[1];
-	else fuv = uv(gposition[1], n, u, v);
-
-	if (includeNormals) fnormal = gnormal[1].value;
+	fuv = includeUvs * guv[1] + (1 - includeUvs) * uv(gposition[1], n, u, v);
+	fnormal = includeNormals * gnormal[1].value + (1 - includeNormals) * fnormal;
 
 	gl_Position = transform * gl_in[1].gl_Position; EmitVertex();
 
-
 	// Vertex 3
 	fposition = gl_in[2].gl_Position.xyz;
-
-	if (includeUvs) fuv = guv[2];
-	else fuv = uv(gposition[2], n, u, v);
-
-	if (includeNormals) fnormal = gnormal[2].value;
+	fuv = includeUvs * guv[2] + (1 - includeUvs) * uv(gposition[2], n, u, v);
+	fnormal = includeNormals * gnormal[2].value + (1 - includeNormals) * fnormal;
 
 	gl_Position = transform * gl_in[2].gl_Position; EmitVertex();
 	EndPrimitive();
@@ -168,8 +142,8 @@ struct Material {
 	vec3 diffuse;
 	vec3 specular;
 	float reflectance;
-	bool textured;
-	bool normalmapped;
+	int textured;
+	int normalmapped;
 };
 
 struct Attenuation {
@@ -188,6 +162,7 @@ struct Light {
 uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
+
 uniform Material material;
 uniform sampler2D textureSampler;
 uniform sampler2D normalSampler;
@@ -199,7 +174,7 @@ uniform vec3 sunDirection = vec3(1, 1, 0);
 uniform vec3 sunColor = vec3(1, 1, 1);
 uniform float exposure = 1.0;
 uniform float gamma = 1.0;
-uniform bool hdr = true;
+uniform int hdr = 1;
 
 vec4 fog(vec4 color) {
 	vec3 cameraDirection = -(viewMatrix * vec4(fposition, 1)).xyz;
@@ -280,13 +255,10 @@ void main() {
 	outColor = outColor + vec4(calcDirectionalLight(), 0);
 
 	// Apply texture if present
-	if (material.textured)
-		outColor = outColor * texture(textureSampler, fuv);
+	outColor *= material.textured * texture(textureSampler, fuv) + (1 - material.textured) * vec4(1);
 
 	// HDR correction
-	//outColor = vec4(outColor.rgb / (outColor.rgb + vec3(1.0)), outColor.a);
-	if (hdr)
-		outColor = vec4(vec3(1.0) - exp(-outColor.rgb * exposure), outColor.a);
+	outColor = hdr * vec4(vec3(1.0) - exp(-outColor.rgb * exposure), outColor.a) + (1 - hdr) * outColor;
 
 	// Gamma correction
 	outColor = vec4(pow(outColor.rgb, vec3(1.0 / gamma)), outColor.a);

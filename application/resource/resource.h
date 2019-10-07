@@ -35,8 +35,8 @@ protected:
 	std::string path;
 	std::string name;
 
-	Resource(std::string path);
-	Resource(std::string name, std::string path);
+	Resource(const std::string& path);
+	Resource(const std::string& name, const std::string& path);
 
 public:
 	inline virtual ResourceType getType() const = 0;
@@ -47,8 +47,8 @@ public:
 	inline std::string getName() const;
 	inline std::string getPath() const;
 
-	inline void setName(const std::string& name);
-	inline void setPath(const std::string& path);
+	void setName(const std::string& name);
+	void setPath(const std::string& path);
 
 	template<typename T>
 	static ResourceAllocator<T> getAllocator() {
