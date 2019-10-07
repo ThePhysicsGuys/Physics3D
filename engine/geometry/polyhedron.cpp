@@ -1,4 +1,4 @@
-#include "shape.h"
+#include "polyhedron.h"
 
 #include <stdlib.h>
 #include <cstring>
@@ -17,7 +17,85 @@
 #include "../physicsProfiler.h"
 #include "computationBuffer.h"
 #include "intersection.h"
-#include "../datastructures/parallelVector.h"
+
+#include "../physicsProfiler.h"
+
+size_t getOffset(size_t size) {
+	return (size + 7) & 0xFFFFFFFFFFFFFFF8;
+}
+
+inline SharedAlignedPointer<float> createParallelVecBuf(size_t size) {
+	return SharedAlignedPointer<float>(getOffset(size) * 3, 32);
+}
+inline SharedAlignedPointer<int> createParallelTriangleBuf(size_t size) {
+	return SharedAlignedPointer<int>(getOffset(size) * 3, 32);
+}
+
+template<typename T>
+inline void fixFinalBlock(T* buf, size_t size) {
+	size_t offset = getOffset(size);
+	T* xValues = buf;
+	T* yValues = buf + offset;
+	T* zValues = buf + 2 * offset;
+
+	for (size_t i = size; i < offset; i++) {
+		xValues[i] = xValues[size - 1];
+		yValues[i] = yValues[size - 1];
+		zValues[i] = zValues[size - 1];
+	}
+}
+
+inline SharedAlignedPointer<float> createAndFillParallelVecBuf(size_t size, const Vec3f* vectors) {
+	SharedAlignedPointer<float> buf = createParallelVecBuf(size);
+
+	size_t offset = getOffset(size);
+
+	float* xValues = buf;
+	float* yValues = buf + offset;
+	float* zValues = buf + 2 * offset;
+
+	for (size_t i = 0; i < size; i++) {
+		xValues[i] = vectors[i].x;
+		yValues[i] = vectors[i].y;
+		zValues[i] = vectors[i].z;
+	}
+	fixFinalBlock(buf.get(), size);
+
+	return buf;
+}
+
+inline SharedAlignedPointer<int> createAndFillParallelTriangleBuf(size_t size, const Triangle* triangles) {
+	SharedAlignedPointer<int> buf = createParallelTriangleBuf(size);
+
+	size_t offset = getOffset(size);
+
+	int* aValues = buf;
+	int* bValues = buf + offset;
+	int* cValues = buf + 2 * offset;
+
+	for (size_t i = 0; i < size; i++) {
+		aValues[i] = triangles[i].firstIndex;
+		bValues[i] = triangles[i].secondIndex;
+		cValues[i] = triangles[i].thirdIndex;
+	}
+	fixFinalBlock(buf.get(), size);
+
+	return buf;
+}
+
+
+inline void setInBuf(float* buf, size_t size, size_t index, const Vec3f& value) {
+	size_t offset = getOffset(size);
+
+	float* xValues = buf;
+	float* yValues = buf + offset;
+	float* zValues = buf + 2 * offset;
+
+	xValues[index] = value.x;
+	yValues[index] = value.y;
+	zValues[index] = value.z;
+}
+
 
 bool Triangle::sharesEdgeWith(Triangle other) const {
 	return firstIndex == other.secondIndex && secondIndex == other.firstIndex ||
@@ -51,18 +129,33 @@ Triangle Triangle::leftShift() const {
 	return Triangle { secondIndex, thirdIndex, firstIndex };
 }
 
-inline Shape::Shape(const ParallelVec3* vertices, const SharedArrayPtr<const Triangle>& triangles, int vertexCount, int triangleCount) : 
-	vertices(SharedArrayPtr<const ParallelVec3>(vertices)), triangles(triangles), vertexCount(vertexCount), triangleCount(triangleCount) {
+const float* copyVerts(const float* verts, size_t vertexCount) {
+	float* buf = createParallelVecBuf(vertexCount);
+	for (size_t i = 0; i < getOffset(vertexCount) * 3; i++) {
+		buf[i] = verts[i];
+	}
+	return buf;
+}
+
+const float* Polyhedron::copyOfVerts() const {
+	return copyVerts(this->vertices, this->vertexCount);
+}
+
+inline Polyhedron::Polyhedron(const SharedAlignedPointer<float>& vertices, const SharedAlignedPointer<int>& triangles, int vertexCount, int triangleCount) :
+	vertices(vertices), triangles(triangles), vertexCount(vertexCount), triangleCount(triangleCount) {
+}
+
+Polyhedron::~Polyhedron() {
 	
 }
 
-Shape::Shape(const Vec3f* vertices, const SharedArrayPtr<const Triangle>& triangles, int vertexCount, int triangleCount) :
-	vertices(createAndFillParallelVecBuf(vertices, vertexCount)),
-	triangles(triangles), 
+Polyhedron::Polyhedron(const Vec3f* vertices, const Triangle* triangles, int vertexCount, int triangleCount) :
+	vertices(createAndFillParallelVecBuf(vertexCount, vertices)),
+	triangles(createAndFillParallelTriangleBuf(triangleCount, triangles)),
 	vertexCount(vertexCount), 
 	triangleCount(triangleCount) {}
 
-/*CFramef Shape::getInertialEigenVectors() const {
+/*CFramef Polyhedron::getInertialEigenVectors() const {
 	Vec3 centerOfMass = getCenterOfMass();
 	SymmetricMat3 inertia = getInertia(centerOfMass);
 	Mat3 basis = inertia.getEigenDecomposition().eigenVectors;
@@ -70,60 +163,60 @@ Shape::Shape(const Vec3f* vertices, const SharedArrayPtr<const Triangle>& triang
 	return CFramef(Vec3f(centerOfMass), Mat3f(basis));
 }*/
 
-Shape Shape::translated(Vec3f offset) const {
-	ParallelVec3* newBuf = createParallelVecBuf(this->vertexCount);
+Polyhedron Polyhedron::translated(Vec3f offset) const {
+	SharedAlignedPointer<float> newBuf = createParallelVecBuf(this->vertexCount);
 	for (int i = 0; i < this->vertexCount; i++) {
-		newBuf[i >> 3].setVec(i & 0x7, offset + (*this)[i]);
+		setInBuf(newBuf, vertexCount, i, (*this)[i] + offset);
 	}
 
-	fixFinalBlock(newBuf, this->vertexCount, newBuf[this->vertexCount >> 3][this->vertexCount & 0x7]);
-	return Shape(newBuf, triangles, vertexCount, triangleCount);
+	fixFinalBlock(newBuf.get(), this->vertexCount);
+	return Polyhedron(newBuf, triangles, vertexCount, triangleCount);
 }
 
-Shape Shape::rotated(RotMat3f rotation) const {
-	ParallelVec3* newBuf = createParallelVecBuf(this->vertexCount);
+Polyhedron Polyhedron::rotated(RotMat3f rotation) const {
+	SharedAlignedPointer<float> newBuf = createParallelVecBuf(this->vertexCount);
 	for (int i = 0; i < this->vertexCount; i++) {
-		newBuf[i >> 3].setVec(i & 0x7, rotation * (*this)[i]);
+		setInBuf(newBuf, vertexCount, i, rotation * (*this)[i]);
 	}
 
-	fixFinalBlock(newBuf, this->vertexCount, newBuf[this->vertexCount >> 3][this->vertexCount & 0x7]);
-	return Shape(newBuf, triangles, vertexCount, triangleCount);
+	fixFinalBlock(newBuf.get(), this->vertexCount);
+	return Polyhedron(newBuf, triangles, vertexCount, triangleCount);
 }
 
-Shape Shape::localToGlobal(CFramef frame) const {
-	ParallelVec3* newBuf = createParallelVecBuf(this->vertexCount);
+Polyhedron Polyhedron::localToGlobal(CFramef frame) const {
+	SharedAlignedPointer<float> newBuf = createParallelVecBuf(this->vertexCount);
 	for (int i = 0; i < this->vertexCount; i++) {
-		newBuf[i >> 3].setVec(i & 0x7, frame.localToGlobal((*this)[i]));
+		setInBuf(newBuf, vertexCount, i, frame.localToGlobal((*this)[i]));
 	}
 
-	fixFinalBlock(newBuf, this->vertexCount, newBuf[this->vertexCount >> 3][this->vertexCount & 0x7]);
-	return Shape(newBuf, triangles, vertexCount, triangleCount);
+	fixFinalBlock(newBuf.get(), this->vertexCount);
+	return Polyhedron(newBuf, triangles, vertexCount, triangleCount);
 }
 
-Shape Shape::globalToLocal(CFramef frame) const {
-	ParallelVec3* newBuf = createParallelVecBuf(this->vertexCount);
+Polyhedron Polyhedron::globalToLocal(CFramef frame) const {
+	SharedAlignedPointer<float> newBuf = createParallelVecBuf(this->vertexCount);
 	for (int i = 0; i < this->vertexCount; i++) {
-		newBuf[i >> 3].setVec(i & 0x7, frame.globalToLocal((*this)[i]));
+		setInBuf(newBuf, vertexCount, i, frame.globalToLocal((*this)[i]));
 	}
 
-	fixFinalBlock(newBuf, this->vertexCount, newBuf[this->vertexCount >> 3][this->vertexCount & 0x7]);
-	return Shape(newBuf, triangles, vertexCount, triangleCount);
+	fixFinalBlock(newBuf.get(), this->vertexCount);
+	return Polyhedron(newBuf, triangles, vertexCount, triangleCount);
 }
-Shape Shape::scaled(float scaleX, float scaleY, float scaleZ) const {
-	ParallelVec3* newBuf = createParallelVecBuf(this->vertexCount);
+Polyhedron Polyhedron::scaled(float scaleX, float scaleY, float scaleZ) const {
+	SharedAlignedPointer<float> newBuf = createParallelVecBuf(this->vertexCount);
 	for (int i = 0; i < this->vertexCount; i++) {
-		Vec3f curVec = (*this)[i];
-		newBuf[i >> 3].setVec(i & 0x7, scaleX * curVec.x, scaleY * curVec.y, scaleZ * curVec.z);
+		Vec3f v = (*this)[i];
+		setInBuf(newBuf, vertexCount, i, Vec3f(scaleX * v.x, scaleY * v.y, scaleZ * v.z));
 	}
 
-	fixFinalBlock(newBuf, this->vertexCount, newBuf[this->vertexCount >> 3][this->vertexCount & 0x7]);
-	return Shape(newBuf, triangles, vertexCount, triangleCount);
+	fixFinalBlock(newBuf.get(), this->vertexCount);
+	return Polyhedron(newBuf, triangles, vertexCount, triangleCount);
 }
-Shape Shape::scaled(double scaleX, double scaleY, double scaleZ) const {
+Polyhedron Polyhedron::scaled(double scaleX, double scaleY, double scaleZ) const {
 	return scaled(static_cast<float>(scaleX), static_cast<float>(scaleY), static_cast<float>(scaleZ));
 }
 
-BoundingBox Shape::getBounds() const {
+BoundingBox Polyhedron::getBounds() const {
 	double xmin = (*this)[0].x, xmax = (*this)[0].x;
 	double ymin = (*this)[0].y, ymax = (*this)[0].y;
 	double zmin = (*this)[0].z, zmax = (*this)[0].z;
@@ -143,43 +236,43 @@ BoundingBox Shape::getBounds() const {
 }
 
 // for every edge, of every triangle, check that it coincides with exactly one other triangle, in reverse order
-bool isComplete(const Triangle* triangles, int triangleCount) {
-	for (int i = 0; i < triangleCount; i++) {
-		Triangle a = triangles[i];
-		
-		for (int j = 0; j < triangleCount; j++) {
-			if (j == i) continue;
+bool isComplete(ShapeTriangleIter iter, ShapeTriangleIter fin) {
+	for (; iter != fin; ++iter) {
+		Triangle a = *iter;
 
-			Triangle b = triangles[j];
+		ShapeTriangleIter iter2 = iter;
+		++iter2;
+		for (; iter2 != fin; ++iter2) {
+			Triangle b = *iter2;
 
 			if (a.sharesEdgeWith(b)) {  // correctly oriented
 				goto endOfLoop;
 			} else if (a.sharesEdgeWith(~b)) {	// wrongly oriented
-				Log::warn("triangles[%d](%d, %d, %d) and triangles[%d](%d, %d, %d) are joined wrongly", i, a.firstIndex, a.secondIndex, a.thirdIndex, j, b.firstIndex, b.secondIndex, b.thirdIndex);
+				Log::warn("triangle (%d, %d, %d) and triangle (%d, %d, %d) are joined wrongly", a.firstIndex, a.secondIndex, a.thirdIndex, b.firstIndex, b.secondIndex, b.thirdIndex);
 				return false;
 			}
 		}
-		Log::warn("No triangle found that shares an edge with triangles[%d]", i);
+		Log::warn("No triangle found that shares an edge with triangle(%d, %d, %d)", a.firstIndex, a.secondIndex, a.thirdIndex);
 		return false;
 		endOfLoop:;
 	}
 	return true;
 }
 
-bool Shape::isValid() const {
-	return isComplete(triangles.get(), triangleCount) && getVolume() >= 0;
+bool Polyhedron::isValid() const {
+	IteratorFactory<ShapeTriangleIter> f = iterTriangles();
+	return isComplete(f.begin(), f.end()) && getVolume() >= 0;
 }
 
-Vec3f Shape::getNormalVecOfTriangle(Triangle triangle) const {
+Vec3f Polyhedron::getNormalVecOfTriangle(Triangle triangle) const {
 	Vec3f v0 = (*this)[triangle.firstIndex];
 	return ((*this)[triangle.secondIndex] - v0) % ((*this)[triangle.thirdIndex] - v0);
 }
 
 
-
-void Shape::computeNormals(Vec3f* buffer) const {
-	for (int i = 0; i < triangleCount; i++) {
-		Triangle triangle = triangles[i];
+// TODO parallelize
+void Polyhedron::computeNormals(Vec3f* buffer) const {
+	for (Triangle triangle : iterTriangles()) {
 		Vec3f v0 = (*this)[triangle.firstIndex];
 		Vec3f v1 = (*this)[triangle.secondIndex];
 		Vec3f v2 = (*this)[triangle.thirdIndex];
@@ -199,7 +292,8 @@ void Shape::computeNormals(Vec3f* buffer) const {
 	}
 }
 
-bool Shape::containsPoint(Vec3f point) const {
+//TODO parallelize
+bool Polyhedron::containsPoint(Vec3f point) const {
 	Vec3f ray(1, 0, 0);
 
 	bool isExiting = false;
@@ -246,26 +340,29 @@ inline uint32_t mm256_extract_epi32_var_indx(__m256i vec, int i)
 	return         _mm_cvtsi128_si32(_mm256_castsi256_si128(val));
 }
 
-int Shape::furthestIndexInDirection(const Vec3f& direction) const {
+int Polyhedron::furthestIndexInDirection(const Vec3f& direction) const {
 	__m256 dx = _mm256_set1_ps(direction.x);
 	__m256 dy = _mm256_set1_ps(direction.y);
 	__m256 dz = _mm256_set1_ps(direction.z);
 
-	const ParallelVec3& firstBlock = vertices[0];
-	__m256 xTxd = _mm256_mul_ps(dx, _mm256_load_ps(firstBlock.xvalues));
-	__m256 yTyd = _mm256_mul_ps(dy, _mm256_load_ps(firstBlock.yvalues));
-	__m256 zTzd = _mm256_mul_ps(dz, _mm256_load_ps(firstBlock.zvalues));
+	size_t offset = getOffset(this->vertexCount);
+	const float* xValues = this->vertices;
+	const float* yValues = this->vertices + offset;
+	const float* zValues = this->vertices + 2 * offset;
+
+	__m256 xTxd = _mm256_mul_ps(dx, _mm256_load_ps(xValues));
+	__m256 yTyd = _mm256_mul_ps(dy, _mm256_load_ps(yValues));
+	__m256 zTzd = _mm256_mul_ps(dz, _mm256_load_ps(zValues));
 
 	__m256 bestDot = _mm256_add_ps(_mm256_add_ps(xTxd, yTyd), zTzd);
 	__m256i bestIndices = _mm256_set1_epi32(0);
 
 	for(int blockI = 1; blockI < (vertexCount+7)/8; blockI++) {
-		const ParallelVec3& block = vertices[blockI];
 		__m256i indices = _mm256_set1_epi32(blockI);
 
-		__m256 xTxd = _mm256_mul_ps(dx, _mm256_load_ps(block.xvalues));
-		__m256 yTyd = _mm256_mul_ps(dy, _mm256_load_ps(block.yvalues));
-		__m256 zTzd = _mm256_mul_ps(dz, _mm256_load_ps(block.zvalues));
+		__m256 xTxd = _mm256_mul_ps(dx, _mm256_load_ps(xValues + blockI * 8));
+		__m256 yTyd = _mm256_mul_ps(dy, _mm256_load_ps(yValues + blockI * 8));
+		__m256 zTzd = _mm256_mul_ps(dz, _mm256_load_ps(zValues + blockI * 8));
 		__m256 dot = _mm256_add_ps(_mm256_add_ps(xTxd, yTyd), zTzd);
 
 		__m256 whichAreMax = _mm256_cmp_ps(dot, bestDot, _CMP_GT_OQ); // Greater than, false if dot == NaN
@@ -287,16 +384,19 @@ int Shape::furthestIndexInDirection(const Vec3f& direction) const {
 	return block * 8 + index;
 }
 
-Vec3f Shape::furthestInDirection(const Vec3f& direction) const {
+Vec3f Polyhedron::furthestInDirection(const Vec3f& direction) const {
 	__m256 dx = _mm256_set1_ps(direction.x);
 	__m256 dy = _mm256_set1_ps(direction.y);
 	__m256 dz = _mm256_set1_ps(direction.z);
 
-	const ParallelVec3& firstBlock = vertices[0];
+	size_t offset = getOffset(this->vertexCount);
+	const float* xValues = this->vertices;
+	const float* yValues = this->vertices + offset;
+	const float* zValues = this->vertices + 2 * offset;
 
-	__m256 bestX = _mm256_load_ps(firstBlock.xvalues);
-	__m256 bestY = _mm256_load_ps(firstBlock.yvalues);
-	__m256 bestZ = _mm256_load_ps(firstBlock.zvalues);
+	__m256 bestX = _mm256_load_ps(xValues);
+	__m256 bestY = _mm256_load_ps(yValues);
+	__m256 bestZ = _mm256_load_ps(zValues);
 
 	__m256 xTxd = _mm256_mul_ps(dx, bestX);
 	__m256 yTyd = _mm256_mul_ps(dy, bestY);
@@ -305,12 +405,11 @@ Vec3f Shape::furthestInDirection(const Vec3f& direction) const {
 	__m256 bestDot = _mm256_add_ps(_mm256_add_ps(xTxd, yTyd), zTzd);
 
 	for (int blockI = 1; blockI < (vertexCount + 7) / 8; blockI++) {
-		const ParallelVec3& block = vertices[blockI];
 		__m256i indices = _mm256_set1_epi32(blockI);
 
-		__m256 xVal = _mm256_load_ps(block.xvalues);
-		__m256 yVal = _mm256_load_ps(block.yvalues);
-		__m256 zVal = _mm256_load_ps(block.zvalues);
+		__m256 xVal = _mm256_load_ps(xValues + blockI * 8);
+		__m256 yVal = _mm256_load_ps(yValues + blockI * 8);
+		__m256 zVal = _mm256_load_ps(zValues + blockI * 8);
 
 		__m256 xTxd = _mm256_mul_ps(dx, xVal);
 		__m256 yTyd = _mm256_mul_ps(dy, yVal);
@@ -340,7 +439,7 @@ Vec3f Shape::furthestInDirection(const Vec3f& direction) const {
 }
 
 #else
-int Shape::furthestIndexInDirection(const Vec3f& direction) const {
+int Polyhedron::furthestIndexInDirection(const Vec3f& direction) const {
 	float bestDot = (*this)[0] * direction;
 	int bestVertexIndex = 0;
 	for(int i = 1; i < vertexCount; i++) {
@@ -354,7 +453,7 @@ int Shape::furthestIndexInDirection(const Vec3f& direction) const {
 	return bestVertexIndex;
 }
 
-Vec3f Shape::furthestInDirection(const Vec3f& direction) const {
+Vec3f Polyhedron::furthestInDirection(const Vec3f& direction) const {
 	float bestDot = (*this)[0] * direction;
 	Vec3f bestVertex = (*this)[0];
 	for (int i = 1; i < vertexCount; i++) {
@@ -381,28 +480,8 @@ void incDebugTally(HistoricTally<N, long long, IterationTime>& tally, int iterTi
 }
 
 ComputationBuffers buffers(1000, 2000);
-bool Shape::intersects(const Shape& other, Vec3f& intersection, Vec3f& exitVector, const Vec3& centerConnection) const {
-	Tetrahedron result;
-	int iter;
-	physicsMeasure.mark(PhysicsProcess::GJK_COL);
-	bool collides = runGJK(*this, other, Vec3f(centerConnection), result, iter);
-	
-	if(collides) {
-		incDebugTally(GJKCollidesIterationStatistics, iter + 2);
-		physicsMeasure.mark(PhysicsProcess::EPA);
-		bool epaResult = runEPA(*this, other, result, intersection, exitVector, buffers, iter);
-		incDebugTally(EPAIterationStatistics, iter);
-		return epaResult;
-	} else {
-		incDebugTally(GJKNoCollidesIterationStatistics, iter + 2);
-		physicsMeasure.mark(PhysicsProcess::OTHER, PhysicsProcess::GJK_NO_COL);
-		return false;
-	}
-}
 
-#include "../physicsProfiler.h"
-
-bool Shape::intersectsTransformed(const Shape& other, const CFramef& relativeCFramef, Vec3f& intersection, Vec3f& exitVector) const {
+bool Polyhedron::intersectsTransformed(const Polyhedron& other, const CFramef& relativeCFramef, Vec3f& intersection, Vec3f& exitVector) const {
 	Tetrahedron result;
 	int iter;
 	physicsMeasure.mark(PhysicsProcess::GJK_COL);
@@ -421,7 +500,7 @@ bool Shape::intersectsTransformed(const Shape& other, const CFramef& relativeCFr
 	}
 }
 
-double Shape::getVolume() const {
+double Polyhedron::getVolume() const {
 	double total = 0;
 	for (Triangle triangle : iterTriangles()) {
 		Vec3f v0 = (*this)[triangle.firstIndex];
@@ -439,7 +518,7 @@ double Shape::getVolume() const {
 	return total;
 }
 
-Vec3 Shape::getCenterOfMass() const {
+Vec3 Polyhedron::getCenterOfMass() const {
 	Vec3 total(0,0,0);
 	for (Triangle triangle : iterTriangles()) {
 		Vec3f v0 = (*this)[triangle.firstIndex];
@@ -458,14 +537,14 @@ Vec3 Shape::getCenterOfMass() const {
 	return total / (24 * getVolume());
 }
 
-Sphere Shape::getCircumscribingSphere() const {
+CircumscribingSphere Polyhedron::getCircumscribingSphere() const {
 	BoundingBox bounds = getBounds();
 	Vec3 center = Vec3(bounds.xmax + bounds.xmin, bounds.ymax + bounds.ymin, bounds.zmax + bounds.zmin) / 2.0;
 	double radius = getMaxRadius(center);
-	return Sphere{center, radius};
+	return CircumscribingSphere{center, radius};
 }
 
-double Shape::getMaxRadiusSq() const {
+double Polyhedron::getMaxRadiusSq() const {
 	double bestDistSq = 0;
 	for(Vec3f vertex : iterVertices()) {
 		double distSq = lengthSquared(vertex);
@@ -476,7 +555,7 @@ double Shape::getMaxRadiusSq() const {
 	return bestDistSq;
 }
 
-double Shape::getMaxRadiusSq(Vec3f reference) const {
+double Polyhedron::getMaxRadiusSq(Vec3f reference) const {
 	double bestDistSq = 0;
 	for (Vec3f vertex : iterVertices()) {
 		double distSq = lengthSquared(vertex-reference);
@@ -487,11 +566,11 @@ double Shape::getMaxRadiusSq(Vec3f reference) const {
 	return bestDistSq;
 }
 
-double Shape::getMaxRadius() const {
+double Polyhedron::getMaxRadius() const {
 	return sqrt(getMaxRadiusSq());
 }
 
-double Shape::getMaxRadius(Vec3f reference) const {
+double Polyhedron::getMaxRadius(Vec3f reference) const {
 	return sqrt(getMaxRadiusSq(reference));
 }
 
@@ -505,7 +584,7 @@ double Shape::getMaxRadius(Vec3f reference) const {
 
 	This has been reworked to a surface integral resulting in the given formulae
 */
-SymmetricMat3 Shape::getInertia(CFrame reference) const {
+SymmetricMat3 Polyhedron::getInertia(CFrame reference) const {
 	SymmetricMat3 total(SymmetricMat3::ZEROS());
 	for (Triangle triangle : iterTriangles()) {
 		Vec3 v0 = reference.globalToLocal(Vec3((*this)[triangle.firstIndex]));
@@ -542,23 +621,23 @@ SymmetricMat3 Shape::getInertia(CFrame reference) const {
 	return total;
 }
 
-SymmetricMat3 Shape::getInertia(Vec3 reference) const {
+SymmetricMat3 Polyhedron::getInertia(Vec3 reference) const {
 	return this->getInertia(CFrame(reference));
 }
 
-SymmetricMat3 Shape::getInertia(Mat3 reference) const {
+SymmetricMat3 Polyhedron::getInertia(Mat3 reference) const {
 	return this->getInertia(CFrame(reference));
 }
 
-SymmetricMat3 Shape::getInertia() const {
+SymmetricMat3 Polyhedron::getInertia() const {
 	return this->getInertia(CFrame());
 }
 
-void Shape::getCircumscribedEllipsoid() const {
+void Polyhedron::getCircumscribedEllipsoid() const {
 
 }
 
-float Shape::getIntersectionDistance(Vec3f origin, Vec3f direction) const {
+float Polyhedron::getIntersectionDistance(Vec3f origin, Vec3f direction) const {
 	const float EPSILON = 0.0000001f;
 	float t = INFINITY;
 	for (Triangle triangle : iterTriangles()) {

@@ -2,18 +2,18 @@
 
 #include "extendedPart.h"
 
-ExtendedPart::ExtendedPart(const Shape& hitbox, const GlobalCFrame& position, double density, double friction, int drawMeshId, std::string name) : 
-	Part(hitbox, position, density, friction), visualShape(hitbox) {
+ExtendedPart::ExtendedPart(const Shape& hitbox, const GlobalCFrame& position, const PartProperties& properties, int drawMeshId, std::string name) :
+	Part(hitbox, position, properties), visualShape(hitbox.asPolyhedron()) {
 	this->name = name;
 	this->drawMeshId = drawMeshId;
 }
-ExtendedPart::ExtendedPart(const VisualShape& shape, const GlobalCFrame& position, double density, double friction, int drawMeshId, std::string name) :
-	Part(static_cast<const VisualShape&>(shape), position, density, friction), visualShape(shape) {
+ExtendedPart::ExtendedPart(const VisualShape& shape, const GlobalCFrame& position, const PartProperties& properties, int drawMeshId, std::string name) :
+	Part(static_cast<const VisualShape&>(shape), position, properties), visualShape(shape) {
 	this->name = name;
 	this->drawMeshId = drawMeshId;
 }
-ExtendedPart::ExtendedPart(const Shape& hitbox, const VisualShape& shape, const GlobalCFrame& position, double density, double friction, int drawMeshId, std::string name) :
-	Part(hitbox, position, density, friction), visualShape(shape) {
+ExtendedPart::ExtendedPart(const Shape& hitbox, const VisualShape& shape, const GlobalCFrame& position, const PartProperties& properties, int drawMeshId, std::string name) :
+	Part(hitbox, position, properties), visualShape(shape) {
 	this->name = name;
 	this->drawMeshId = drawMeshId;
 }

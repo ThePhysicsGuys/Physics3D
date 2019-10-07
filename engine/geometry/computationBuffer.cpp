@@ -1,5 +1,7 @@
 #include "computationBuffer.h"
 
+#include "../../util/log.h"
+
 ComputationBuffers::ComputationBuffers(int initialVertCount, int initialTriangleCount) :
 	vertexCapacity(initialVertCount), triangleCapacity(initialTriangleCount) {
 	createVertexBuffersUnsafe(initialVertCount);

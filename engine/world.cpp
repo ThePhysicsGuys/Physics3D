@@ -20,6 +20,7 @@ const BoundsTree<Part>& WorldPrototype::getTreeForPart(const Part* part) const {
 }
 
 void WorldPrototype::addPart(Part* part, bool anchored) {
+	ASSERT_VALID;
 	if (part->parent == nullptr) {
 		part->parent = new Physical(part);
 		physicals.push_back(part->parent);
@@ -27,6 +28,7 @@ void WorldPrototype::addPart(Part* part, bool anchored) {
 	} else {
 		if (part->parent->world == this) {
 			Log::warn("Attempting to readd part to world");
+			ASSERT_VALID;
 			return;
 		}
 		TreeNode newNode(part->parent->mainPart, part->parent->mainPart->getStrictBounds(), true);
@@ -56,6 +58,7 @@ void WorldPrototype::removePhysical(Physical* phys) {
 }
 void WorldPrototype::addTerrainPart(Part* part) {
 	terrainTree.add(part, part->getStrictBounds());
+	part->isTerrainPart = true;
 }
 void WorldPrototype::optimizeTerrain() {
 	for(int i = 0; i < 5; i++)
@@ -85,6 +88,15 @@ void WorldPrototype::removePartFromTrees(const Part* part) {
 	getTreeForPart(part).remove(part);
 }
 
+
+
+void WorldPrototype::addExternalForce(ExternalForce* force) {
+	externalForces.push_back(force);
+}
+
+void WorldPrototype::removeExternalForce(ExternalForce* force) {
+	externalForces.erase(std::remove(externalForces.begin(), externalForces.end(), force));
+}
 
 
 

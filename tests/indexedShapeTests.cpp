@@ -41,7 +41,7 @@ TEST_CASE(buildConvexShape) {
 
 	auto triPtr = SharedArrayPtr<const Triangle>::staticSharedArrayPtr(triangles);
 
-	Shape simpleTetrahedron(verts, triPtr, 4, 4);
+	Polyhedron simpleTetrahedron(verts, triPtr, 4, 4);
 
 	ASSERT_TRUE(simpleTetrahedron.isValid());
 
@@ -58,7 +58,7 @@ TEST_CASE(buildConvexShape) {
 
 	auto triPtr2 = SharedArrayPtr<const Triangle>::staticSharedArrayPtr(triangles2);
 
-	Shape simpleTetrahedron2(verts2, triPtr2, 4, 4);
+	Polyhedron simpleTetrahedron2(verts2, triPtr2, 4, 4);
 
 	ASSERT_TRUE(simpleTetrahedron2.isValid());
 

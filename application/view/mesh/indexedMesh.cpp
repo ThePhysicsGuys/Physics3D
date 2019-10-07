@@ -17,12 +17,19 @@ IndexedMesh::IndexedMesh(const VisualShape& shape) : AbstractMesh(), vertexCount
 		vertices[i * 3 + 1] = vertex.y;
 		vertices[i * 3 + 2] = vertex.z;
 	}
+	unsigned int* triangles = new unsigned int[shape.triangleCount * 3];
+	for (int i = 0; i < triangleCount; i++) {
+		Triangle triangle = shape.getTriangle(i);
+		triangles[i * 3] = triangle.firstIndex;
+		triangles[i * 3 + 1] = triangle.secondIndex;
+		triangles[i * 3 + 2] = triangle.thirdIndex;
+	}
 
 	vertexBuffer = new VertexBuffer(vertices, 3 * vertexCount * sizeof(float));
 	normalBuffer = new VertexBuffer(reinterpret_cast<float const *>(shape.normals.get()), 3 * vertexCount * sizeof(float));
 	uvBuffer = new VertexBuffer(reinterpret_cast<float const *>(shape.uvs.get()), 2 * vertexCount * sizeof(float));
 
-	indexBuffer = new IndexBuffer(reinterpret_cast<unsigned int const *>(shape.triangles.get()), 3 * triangleCount);
+	indexBuffer = new IndexBuffer(triangles, 3 * triangleCount);
 
 	vertexBufferLayout = {
 		{{ "vposition", BufferDataType::FLOAT3 }}

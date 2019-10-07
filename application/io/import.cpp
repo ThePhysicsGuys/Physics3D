@@ -117,9 +117,9 @@ T Import::read(std::istream& input) {
 */
 
 struct Group {
-	unsigned int position;
-	unsigned int normal;
-	unsigned int uv;
+	int position;
+	int normal;
+	int uv;
 
 	Group() {
 		position = -1;
@@ -199,7 +199,7 @@ VisualShape reorder(const std::vector<Vec3f>& positions, const std::vector<Vec3f
 		}
 	}
 
-	return VisualShape(positionArray, SharedArrayPtr<const Vec3f>(normalArray), SharedArrayPtr<const Vec2f>(uvArray), SharedArrayPtr<const Triangle>(triangleArray), (int)positions.size(), (int)faces.size());
+	return VisualShape(positionArray, SharedArrayPtr<const Vec3f>(normalArray), SharedArrayPtr<const Vec2f>(uvArray), triangleArray, (int)positions.size(), (int)faces.size());
 }
 
 VisualShape loadBinaryObj(std::istream& input) {
@@ -240,7 +240,7 @@ VisualShape loadBinaryObj(std::istream& input) {
 		triangles[i] = Import::read<Triangle>(input);
 	}
 
-	return VisualShape(vertices, SharedArrayPtr<const Vec3f>(normals), SharedArrayPtr<const Vec2f>(uvs), SharedArrayPtr<const Triangle>(triangles), vertexCount, triangleCount);
+	return VisualShape(vertices, SharedArrayPtr<const Vec3f>(normals), SharedArrayPtr<const Vec2f>(uvs), triangles, vertexCount, triangleCount);
 }
 
 VisualShape loadNonBinaryObj(std::istream& input) {
@@ -347,6 +347,7 @@ void parseSubject(Subject subject, std::string path, std::map<std::string, std::
 
 		double density = Import::parseDouble(fields.at("density"));
 		double friction = Import::parseDouble(fields.at("friction"));
+		double bouncyness = Import::parseDouble(fields.at("bouncyness"));
 		double mass = Import::parseDouble(fields.at("mass"));
 
 		Position pos = Import::parsePosition(fields.at("position"));
@@ -371,7 +372,7 @@ void parseSubject(Subject subject, std::string path, std::map<std::string, std::
 			factories[shapeReference] = PartFactory(shape, screen, name);
 		}
 
-		ExtendedPart* part = factories.at(shapeReference).produce(cframe, density, friction, name);
+		ExtendedPart* part = factories.at(shapeReference).produce(cframe, {density, friction, bouncyness}, name);
 
 		Physical physical = Physical(part, mass, inertia);
 		physical.angularVelocity = angularvelocity;

@@ -1,15 +1,15 @@
 #pragma once
 
-#include "../engine/geometry/shape.h"
+#include "../geometry/shape.h"
 
 namespace Library {
-	extern const Shape icosahedron;
-	extern const Shape trianglePyramid;
-	extern const Shape house;
-	extern const Shape wedge;
+	extern const Polyhedron icosahedron;
+	extern const Polyhedron trianglePyramid;
+	extern const Polyhedron house;
+	extern const Polyhedron wedge;
 
-	Shape createCube(double side);
-	Shape createBox(double width, double height, double length);
+	Polyhedron createCube(double side);
+	Polyhedron createBox(double width, double height, double length);
 
 	/*
 	Creates a prism with the given number of sides
@@ -21,7 +21,7 @@ namespace Library {
 
 	sides must be >= 3
 	*/
-	Shape createPrism(unsigned int sides, double radius, double height);
+	Polyhedron createPrism(int sides, double radius, double height);
 
 	/*
 	Creates a pointed prism with the given number of sides
@@ -37,5 +37,5 @@ namespace Library {
 
 	sides must be >= 3
 	*/
-	Shape createPointyPrism(unsigned int sides, double radius, double height, double topOffset, double bottomOffset);
+	Polyhedron createPointyPrism(int sides, double radius, double height, double topOffset, double bottomOffset);
 }

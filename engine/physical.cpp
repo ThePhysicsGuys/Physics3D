@@ -176,10 +176,6 @@ void Physical::refreshWithNewParts() {
 	this->inertia = totalInertia;
 
 	this->localBounds = computeLocalBounds();
-	Sphere s = computeLocalCircumscribingSphere();
-	this->localCentroid = s.origin;
-	this->circumscribingSphere.radius = s.radius;
-	this->circumscribingSphere.origin = getCFrame().localToGlobal(localCentroid);
 
 	if (this->anchored) {
 		this->forceResponse = SymmetricMat3::ZEROS();
@@ -229,17 +225,6 @@ Bounds Physical::getStrictBounds() const {
 	return bounds;
 }
 
-Sphere Physical::computeLocalCircumscribingSphere() const {
-	BoundingBox b = computeLocalBounds();
-	Vec3 localCentroid = b.getCenter();
-	double maxRadiusSq = mainPart->hitbox.getMaxRadiusSq(localCentroid);
-	for (const AttachedPart& p : parts) {
-		double radiusSq = p.part->hitbox.getMaxRadiusSq(p.attachment.globalToLocal(localCentroid));
-		maxRadiusSq = std::max(maxRadiusSq, radiusSq);
-	}
-	return Sphere{ localCentroid, sqrt(maxRadiusSq) };
-}
-
 void Physical::rotateAroundCenterOfMassUnsafe(const RotMat3& rotation) {
 	Vec3 relCenterOfMass = getCFrame().localToRelative(localCenterOfMass);
 	Vec3 relativeRotationOffset = rotation * relCenterOfMass - relCenterOfMass;
@@ -253,8 +238,6 @@ void Physical::updateAttachedPartCFrames() {
 	for (AttachedPart& attachment : parts) {
 		attachment.part->cframe = getCFrame().localToGlobal(attachment.attachment);
 	}
-
-	this->circumscribingSphere.origin = getCFrame().localToGlobal(localCentroid);
 }
 void Physical::rotateAroundCenterOfMass(const RotMat3& rotation) {
 	Bounds oldBounds = this->mainPart->getStrictBounds();
@@ -350,10 +333,6 @@ void Physical::applyAngularDrag(Vec3 angularDrag) {
 Position Physical::getCenterOfMass() const {
 	return getCFrame().localToGlobal(localCenterOfMass);
 }
-Position Physical::getCentroid() const {
-	return getCFrame().localToGlobal(localCentroid);
-}
-
 Vec3 Physical::getVelocityOfPoint(const Vec3Relative& point) const {
 	return velocity + angularVelocity % point;
 }
@@ -375,8 +354,6 @@ void Physical::setCFrameUnsafe(const GlobalCFrame& newCFrame) {
 	for (const AttachedPart& p : parts) {
 		p.part->cframe = newCFrame.localToGlobal(p.attachment);
 	}
-
-	this->circumscribingSphere.origin = getCFrame().localToGlobal(localCentroid);
 }
 
 void Physical::setCFrame(const GlobalCFrame& newCFrame) {

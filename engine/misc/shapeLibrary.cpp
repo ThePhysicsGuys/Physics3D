@@ -1,8 +1,6 @@
-#include "core.h"
-
 #include "shapeLibrary.h"
 
-#include "../engine/math/mathUtil.h"
+#include "../math/mathUtil.h"
 
 namespace Library {
 	float g = (1.0 + sqrt(5.0)) / 2.0;
@@ -60,85 +58,85 @@ namespace Library {
 		{2, 3, 4}, {2, 4, 5} // diagonalSide
 	};
 
-	const Shape icosahedron(icosahedronVertices, SharedArrayPtr<const Triangle>::staticSharedArrayPtr(icosahedronTriangles), 12, 20);
-	const Shape trianglePyramid(trianglePyramidVertices, SharedArrayPtr<const Triangle>::staticSharedArrayPtr(trianglePyramidTriangles), 4, 4);
-	const Shape house(houseVertices, SharedArrayPtr<const Triangle>::staticSharedArrayPtr(houseTriangles), 10, 16);
-	const Shape wedge(wedgeVertices, SharedArrayPtr<const Triangle>::staticSharedArrayPtr(wedgeTriangles), 6, 8);
+	const Polyhedron icosahedron(icosahedronVertices, icosahedronTriangles, 12, 20);
+	const Polyhedron trianglePyramid(trianglePyramidVertices, trianglePyramidTriangles, 4, 4);
+	const Polyhedron house(houseVertices, houseTriangles, 10, 16);
+	const Polyhedron wedge(wedgeVertices, wedgeTriangles, 6, 8);
 
-	Shape createCube(double side) {
+	Polyhedron createCube(double side) {
 		return createBox(side, side, side);
 	}
 
-	Shape createBox(double width, double height, double length) {
+	Polyhedron createBox(double width, double height, double length) {
 		return BoundingBox(width, height, length).toShape();
 	}
 
-	Shape createPrism(unsigned int sides, double radius, double height) {
-		unsigned int vertexCount = sides * 2;
-		unsigned int triangleCount = sides * 2 + (sides - 2) * 2;
+	Polyhedron createPrism(int sides, double radius, double height) {
+		int vertexCount = sides * 2;
+		int triangleCount = sides * 2 + (sides - 2) * 2;
 		Vec3f* vecBuf = new Vec3f[vertexCount];
 		Triangle* triangleBuf = new Triangle[triangleCount];
 
 		// vertices
-		for (unsigned int i = 0; i < sides; i++) {
-			double angle = i * 2 * PI / sides;
+		for (int i = 0; i < sides; i++) {
+			double angle = i * PI * 2 / sides;
 			vecBuf[i*2] = Vec3f(cos(angle) * radius, -height / 2, sin(angle) * radius);
 			vecBuf[i*2+1] = Vec3f(cos(angle) * radius, height / 2, sin(angle) * radius);
 		}
 
 		// sides
-		for (unsigned int i = 0; i < sides; i++) {
-			unsigned int botLeft = i * 2;
-			unsigned int botRight = ((i+1)%sides) * 2;
+		for (int i = 0; i < sides; i++) {
+			int botLeft = i * 2;
+			int botRight = ((i+1)%sides) * 2;
 			triangleBuf[i*2] = Triangle{ botLeft, botLeft + 1, botRight }; // botLeft, botRight, topLeft
 			triangleBuf[i*2 + 1] = Triangle{ botRight + 1, botRight, botLeft + 1 }; // topRight, topLeft, botRight
 		}
 
 		Triangle* capOffset = triangleBuf + sides * 2;
 		// top and bottom
-		for (unsigned int i = 0; i < sides - 2; i++) { // common corner is i=0
+		for (int i = 0; i < sides - 2; i++) { // common corner is i=0
 			capOffset[i] = Triangle{ 0, (i + 1) * 2, (i + 2) * 2 };
 			capOffset[i + (sides-2)] = Triangle{ 1, (i + 2) * 2+1, (i + 1) * 2+1 };
 		}
 
-		return Shape(vecBuf, SharedArrayPtr<const Triangle>(triangleBuf), vertexCount, triangleCount);
+		return Polyhedron(vecBuf, triangleBuf, vertexCount, triangleCount);
 	}
 
-	Shape createPointyPrism(unsigned int sides, double radius, double height, double topOffset, double bottomOffset) {
-		unsigned int vertexCount = sides * 2 + 2;
-		unsigned int triangleCount = sides * 4;
+	Polyhedron createPointyPrism(int sides, double radius, double height, double topOffset, double bottomOffset) {
+		int vertexCount = sides * 2 + 2;
+		int triangleCount = sides * 4;
 		Vec3f* vecBuf = new Vec3f[vertexCount];
 		Triangle* triangleBuf = new Triangle[triangleCount];
 
 		// vertices
-		for (unsigned int i = 0; i < sides; i++) {
-			double angle = i * 2 * PI / sides;
+		for (int i = 0; i < sides; i++) {
+			double angle = i * PI * 2 / sides;
 			vecBuf[i * 2] = Vec3f(cos(angle) * radius, -height / 2, sin(angle) * radius);
 			vecBuf[i * 2 + 1] = Vec3f(cos(angle) * radius, height / 2, sin(angle) * radius);
 		}
 
-		unsigned int bottomIndex = sides * 2;
-		unsigned int topIndex = sides * 2 + 1;
+		int bottomIndex = sides * 2;
+		int topIndex = sides * 2 + 1;
 
 		vecBuf[bottomIndex] = Vec3f(0, -height / 2 - bottomOffset, 0);
 		vecBuf[topIndex] = Vec3f(0, height / 2 + topOffset, 0);
 
 
 		// sides
-		for (unsigned int i = 0; i < sides; i++) {
-			unsigned int botLeft = i * 2;
-			unsigned int botRight = ((i + 1) % sides) * 2;
+		for (int i = 0; i < sides; i++) {
+			int botLeft = i * 2;
+			int botRight = ((i + 1) % sides) * 2;
 			triangleBuf[i * 2] = Triangle{ botLeft, botLeft + 1, botRight }; // botLeft, botRight, topLeft
 			triangleBuf[i * 2 + 1] = Triangle{ botRight + 1, botRight, botLeft + 1 }; // topRight, topLeft, botRight
 		}
 
 		Triangle* capOffset = triangleBuf + sides * 2;
 		// top and bottom
-		for (unsigned int i = 0; i < sides; i++) { // common corner is i=0
+		for (int i = 0; i < sides; i++) { // common corner is i=0
 			capOffset[i] = Triangle{ bottomIndex, i * 2, ((i+1) % sides) * 2 };
 			capOffset[i + sides] = Triangle{ topIndex, ((i + 1) % sides) * 2 + 1, i * 2 + 1 };
 		}
 
-		return Shape(vecBuf, SharedArrayPtr<const Triangle>(triangleBuf), vertexCount, triangleCount);
+		return Polyhedron(vecBuf, triangleBuf, vertexCount, triangleCount);
 	}
 }

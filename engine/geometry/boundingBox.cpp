@@ -1,5 +1,7 @@
 #include "boundingBox.h"
 
+#include "polyhedron.h"
+
 Triangle triangles[12] = {
 	{1,0,2},{3,2,0}, // BOTTOM
 	{1,5,0},{4,0,5}, // FRONT
@@ -23,7 +25,7 @@ bool BoundingBox::containsPoint(Vec3 point) const {
 		point.z >= zmin && point.z <= zmax;
 }
 
-Shape BoundingBox::toShape() const {
+Polyhedron BoundingBox::toShape() const {
 	float xminf = static_cast<float>(xmin);
 	float xmaxf = static_cast<float>(xmax);
 	float yminf = static_cast<float>(ymin);
@@ -41,5 +43,5 @@ Shape BoundingBox::toShape() const {
 	vertBuf[5] = Vec3f(xmaxf, yminf, zmaxf);
 	vertBuf[6] = Vec3f(xmaxf, ymaxf, zmaxf);
 	vertBuf[7] = Vec3f(xminf, ymaxf, zmaxf);
-	return Shape(vertBuf, SharedArrayPtr<const Triangle>::staticSharedArrayPtr(triangles), 8, 12);
+	return Polyhedron(vertBuf, triangles, 8, 12);
 }

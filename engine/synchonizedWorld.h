@@ -78,11 +78,11 @@ public:
 
 	virtual void tick() override {
 		SharedLockGuard mutLock(lock);
-
+		
+		this->findColissions();
+		
 		physicsMeasure.mark(PhysicsProcess::EXTERNALS);
 		this->applyExternalForces();
-
-		this->findColissions();
 
 		this->handleColissions();
 

@@ -1,9 +1,9 @@
 #pragma once
 
 struct BoundingBox;
+struct Polyhedron;
 
 #include "../math/linalg/vec.h"
-#include "shape.h"
 
 struct BoundingBox {
 	double xmin, ymin, zmin;
@@ -15,7 +15,7 @@ struct BoundingBox {
 
 	bool intersects(BoundingBox other) const;
 	bool containsPoint(Vec3 point) const;
-	Shape toShape() const;
+	Polyhedron toShape() const;
 	inline double getWidth() const { return xmax - xmin; }
 	inline double getHeight() const { return ymax - ymin; }
 	inline double getDepth() const { return zmax - zmin; }

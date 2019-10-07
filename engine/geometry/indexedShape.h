@@ -23,10 +23,10 @@ struct TriangleNeighbors {
 	TriangleIndex(Triangle* triangles, int triangleCount, TriangleNeighbors * neighborBuf);
 };*/
 
-struct IndexedShape : Shape {
+struct IndexedShape : Polyhedron {
 	TriangleNeighbors * neighbors;
 	
-	IndexedShape(const Vec3f* vertices, SharedArrayPtr<const Triangle> triangles, int vertexCount, int triangleCount, TriangleNeighbors * neighborBuf);
+	IndexedShape(const Vec3f* vertices, const Triangle* triangles, int vertexCount, int triangleCount, TriangleNeighbors * neighborBuf);
 
 	bool isValid() const;
 };

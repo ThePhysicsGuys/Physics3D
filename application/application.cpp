@@ -13,10 +13,10 @@
 #include "view/material.h"
 
 #include "../engine/geometry/shape.h"
-#include "../engine/geometry/convexShapeBuilder.h"
 #include "../engine/math/mathUtil.h"
 #include "../engine/part.h"
 #include "../engine/world.h"
+#include "../engine/misc/gravityForce.h"
 #include "../engine/physicsProfiler.h"
 
 #include "debug.h"
@@ -36,7 +36,7 @@
 
 
 TickerThread physicsThread;
-GravityWorld world(1 / TICKS_PER_SECOND, Vec3(0.0, -10.0, 0.0));
+PlayerWorld world(1 / TICKS_PER_SECOND);
 Screen screen;
 
 
@@ -95,7 +95,7 @@ void buildTerrain() {
 			double yOffset = getYOffset(x * 3.0, z * 3.0);
 			Position pos((x + fRand(0.0, 1.0)) * 3.0, fRand(0.0, 1.0) + yOffset, (z + fRand(0.0, 1.0)) * 3.0);
 			GlobalCFrame cf(pos, fromEulerAngles(fRand(0.0, 3.1415), fRand(0.0, 3.1415), fRand(0.0, 3.1415)));
-			ExtendedPart* newPart = icosahedronFactory.produce(cf, 1.0, 1.0, "terrain");
+			ExtendedPart* newPart = icosahedronFactory.produce(cf, { 1.0, 1.0, 0.3 }, "terrain");
 			newPart->material.ambient = Vec4(0.0, yOffset / 40.0 + 0.5, 0.0, 1.0);
 			world.addTerrainPart(newPart);
 		}
@@ -110,7 +110,7 @@ void buildTerrain() {
 
 		GlobalCFrame trunkCFrame(treePos, fromEulerAngles(fRand(-0.1, 0.1), fRand(-3.1415, 3.1415), fRand(-0.1, 0.1)));
 
-		ExtendedPart* trunk = treeTrunkfactory.produce(trunkCFrame, 1.0, 1.0, "trunk");
+		ExtendedPart* trunk = treeTrunkfactory.produce(trunkCFrame, { 1.0, 1.0, 0.3 }, "trunk");
 		trunk->material.ambient = GUI::COLOR::get(0x654321);
 		world.addTerrainPart(trunk);
 
@@ -120,7 +120,7 @@ void buildTerrain() {
 		for (int j = 0; j < 15; j++) {
 
 			GlobalCFrame leavesCFrame(treeTop + Vec3(fRand(-1.0, 1.0), fRand(-1.0, 1.0), fRand(-1.0, 1.0)), fromEulerAngles(fRand(0.0, 3.1415), fRand(0.0, 3.1415), fRand(0.0, 3.1415)));
-			ExtendedPart* leaves = leafFactory.produce(leavesCFrame, 1.0, 1.0, "trunk");
+			ExtendedPart* leaves = leafFactory.produce(leavesCFrame, { 1.0, 1.0, 0.3 }, "trunk");
 
 			leaves->material.ambient = Vec4(fRand(-0.2, 0.2), 0.6 + fRand(-0.2, 0.2), 0.0, 1.0);
 
@@ -132,6 +132,8 @@ void buildTerrain() {
 
 void setupWorld() {
 	Log::info("Initializing world");
+
+	world.addExternalForce(new ExternalGravity(Vec3(0, -10.0, 0.0)));
 
 	// WorldBuilder init
 	WorldBuilder::init();
@@ -157,17 +159,26 @@ void setupWorld() {
 	double wallHeight = 7.0;
 	ResourceManager::add<TextureResource>("floorMaterial", "../res/textures/floor/floor_color.jpg");
 	Material floorMaterial = Material(ResourceManager::get<TextureResource>("floorMaterial"));
-	ExtendedPart* floorExtendedPart = createUniquePart(screen, BoundingBox(floorSize.x, 1.0, floorSize.y).toShape(), GlobalCFrame(0.0, 0.0, 0.0), 2.0, 1.0);
+	ExtendedPart* floorExtendedPart = createUniquePart(screen, BoundingBox(floorSize.x, 1.0, floorSize.y).toShape(), GlobalCFrame(0.0, 0.0, 0.0), { 2.0, 1.0, 0.3 });
 	floorExtendedPart->material = floorMaterial;
 	world.addTerrainPart(floorExtendedPart);
+
+	PartProperties wallProperties{ 2.0, 1.0, 0.3 };
 
 	// Walls
 	PartFactory xWallFactory(BoundingBox(0.7, wallHeight, floorSize.y - 0.7).toShape(), screen, "xWall");
 	PartFactory zWallFactory(BoundingBox(floorSize.x, wallHeight, 0.7).toShape(), screen, "zWall");
-	world.addTerrainPart(xWallFactory.produce(GlobalCFrame(Position(floorSize.x / 2, wallHeight / 2, 0.0)), 2.0, 1.0));
-	world.addTerrainPart(zWallFactory.produce(GlobalCFrame(Position(0.0, wallHeight / 2, floorSize.y / 2)), 2.0, 1.0));
-	world.addTerrainPart(xWallFactory.produce(GlobalCFrame(Position(-floorSize.x / 2, wallHeight / 2, 0.0)), 2.0, 1.0));
-	world.addTerrainPart(zWallFactory.produce(GlobalCFrame(Position(0.0, wallHeight / 2, -floorSize.y / 2)), 2.0, 1.0));
+	world.addTerrainPart(xWallFactory.produce(GlobalCFrame(Position(floorSize.x / 2, wallHeight / 2, 0.0)), wallProperties));
+	world.addTerrainPart(zWallFactory.produce(GlobalCFrame(Position(0.0, wallHeight / 2, floorSize.y / 2)), wallProperties));
+	world.addTerrainPart(xWallFactory.produce(GlobalCFrame(Position(-floorSize.x / 2, wallHeight / 2, 0.0)), wallProperties));
+	world.addTerrainPart(zWallFactory.produce(GlobalCFrame(Position(0.0, wallHeight / 2, -floorSize.y / 2)), wallProperties));
+
+	ExtendedPart* conveyor = createUniquePart(screen, BoundingBox(1.0, 0.3, floorSize.y).toShape(), GlobalCFrame(10.0, 0.65, 0.0), { 2.0, 1.0, 0.3 });
+
+	conveyor->conveyorEffect = Vec3(0, 0, 2.0);
+	world.addTerrainPart(conveyor);
+
+	world.addPart(cubeFactory.produceScaled(GlobalCFrame(10, 1.0, 0.0), { 1.0, 0.2, 0.3 }, 0.2, 0.2, 0.2, "TinyCube"));
 
 	// hollow box
 	/*WorldBuilder::HollowBoxParts parts = WorldBuilder::buildHollowBox(Bounds(Position(12.0, 3.0, 14.0), Position(20.0, 8.0, 20.0)), 0.3);
@@ -190,25 +201,27 @@ void setupWorld() {
 		world.addPart(newCube);
 	}*/
 
-	ExtendedPart* carBody = cubeFactory.produceScaled(GlobalCFrame(5.0, 1.0, 5.0), 1.0, 0.7, 2.0, 0.1, 1.0, "CarBody");
-	ExtendedPart* carLeftPanel =	cubeFactory.produceScaled(carBody, CFrame(0.0, 0.25, -0.5), 1.0, 0.7, 2.0, 0.4, 0.1, "CarLeftSide");
-	ExtendedPart* carRightPanel =	cubeFactory.produceScaled(carBody, CFrame(0.0, 0.25, 0.5), 1.0, 0.7, 2.0, 0.4, 0.1, "CarRightSide");
-	//ExtendedPart* carLeftWindow =	cubeFactory.produceScaled(carBody, CFrame(-0.3, 0.85, -0.5), 1.0, 0.7, 1.4, 0.8, 0.1, "WindowLeft");
-	ExtendedPart* carLeftWindow =	cubeFactory.produceScaled(1.0, 0.7, 1.4, 0.8, 0.05, "WindowLeft");
-	ExtendedPart* carWedgeLeft =	wedgeFactory.produceScaled(carLeftWindow, CFrame(1.0, 0.0, 0.0), 1.0, 0.7, 0.6, 0.8, 0.1, "WedgeLeft");
-	carLeftPanel->attach(*carLeftWindow, CFrame(-0.3, 0.6, 0.0));
-	ExtendedPart* carRightWindow =	cubeFactory.produceScaled(1.0, 0.7, 1.4, 0.8, 0.05, "WindowRight");
-	ExtendedPart* carWedgeRight =	wedgeFactory.produceScaled(carRightWindow, CFrame(1.0, 0.0, 0.0), 1.0, 0.7, 0.6, 0.8, 0.1, "WedgeRight");
-	carRightPanel->attach(*carRightWindow, CFrame(-0.3, 0.6, 0.0));
-	ExtendedPart* carFrontPanel =	cubeFactory.produceScaled(carBody, CFrame(1.0, 0.25, 0.0), 1.0, 0.7, 0.1, 0.4, 1.0, "FrontPanel");
-	ExtendedPart* carTrunkPanel =	cubeFactory.produceScaled(carBody, CFrame(-1.0, 0.65, 0.0), 1.0, 0.7, 0.1, 1.2, 1.0, "TrunkPanel");
-	ExtendedPart* carRoof =			cubeFactory.produceScaled(carBody, CFrame(-0.3, 1.25, 0.0), 1.0, 0.7, 1.4, 0.1, 1.0, "Roof");
+	PartProperties carProperties{ 1.0, 0.7, 0.3 };
+	PartProperties wheelProperties{ 1.0, 2.0, 0.7 };
 
-	ExtendedPart* carWindshield =	cubeFactory.produceScaled(carBody, CFrame(Vec3(0.7, 0.85, 0.0), fromEulerAngles(0.0, 0.0, -0.91)), 1.0, 0.7, 1.0, 0.05, 1.0, "Windshield");
-	ExtendedPart* wheel1 = smallSphereFactory.produce(GlobalCFrame(5.8, 1.0, 5.8), 1.0, 1.0, "Wheel");
-	ExtendedPart* wheel2 = smallSphereFactory.produce(GlobalCFrame(5.8, 1.0, 4.2), 1.0, 1.0, "Wheel");
-	ExtendedPart* wheel3 = smallSphereFactory.produce(GlobalCFrame(4.2, 1.0, 5.8), 1.0, 1.0, "Wheel");
-	ExtendedPart* wheel4 = smallSphereFactory.produce(GlobalCFrame(4.2, 1.0, 4.2), 1.0, 1.0, "Wheel");
+	ExtendedPart* carBody = cubeFactory.produceScaled(GlobalCFrame(5.0, 1.0, 5.0), carProperties, 2.0, 0.1, 1.0, "CarBody");
+	ExtendedPart* carLeftPanel =	cubeFactory.produceScaled(carBody, CFrame(0.0, 0.25, -0.5), carProperties, 2.0, 0.4, 0.1, "CarLeftSide");
+	ExtendedPart* carRightPanel =	cubeFactory.produceScaled(carBody, CFrame(0.0, 0.25, 0.5), carProperties, 2.0, 0.4, 0.1, "CarRightSide");
+	ExtendedPart* carLeftWindow =	cubeFactory.produceScaled(carProperties, 1.4, 0.8, 0.05, "WindowLeft");
+	ExtendedPart* carWedgeLeft =	wedgeFactory.produceScaled(carLeftWindow, CFrame(1.0, 0.0, 0.0), carProperties, 0.6, 0.8, 0.1, "WedgeLeft");
+	carLeftPanel->attach(*carLeftWindow, CFrame(-0.3, 0.6, 0.0));
+	ExtendedPart* carRightWindow =	cubeFactory.produceScaled(carProperties, 1.4, 0.8, 0.05, "WindowRight");
+	ExtendedPart* carWedgeRight =	wedgeFactory.produceScaled(carRightWindow, CFrame(1.0, 0.0, 0.0), carProperties, 0.6, 0.8, 0.1, "WedgeRight");
+	carRightPanel->attach(*carRightWindow, CFrame(-0.3, 0.6, 0.0));
+	ExtendedPart* carFrontPanel =	cubeFactory.produceScaled(carBody, CFrame(1.0, 0.25, 0.0), carProperties, 0.1, 0.4, 1.0, "FrontPanel");
+	ExtendedPart* carTrunkPanel =	cubeFactory.produceScaled(carBody, CFrame(-1.0, 0.65, 0.0), carProperties, 0.1, 1.2, 1.0, "TrunkPanel");
+	ExtendedPart* carRoof =			cubeFactory.produceScaled(carBody, CFrame(-0.3, 1.25, 0.0), carProperties, 1.4, 0.1, 1.0, "Roof");
+
+	ExtendedPart* carWindshield =	cubeFactory.produceScaled(carBody, CFrame(Vec3(0.7, 0.85, 0.0), fromEulerAngles(0.0, 0.0, -0.91)), carProperties, 1.0, 0.05, 1.0, "Windshield");
+	ExtendedPart* wheel1 = smallSphereFactory.produce(GlobalCFrame(5.8, 1.0, 5.8), wheelProperties, "Wheel");
+	ExtendedPart* wheel2 = smallSphereFactory.produce(GlobalCFrame(5.8, 1.0, 4.2), wheelProperties, "Wheel");
+	ExtendedPart* wheel3 = smallSphereFactory.produce(GlobalCFrame(4.2, 1.0, 5.8), wheelProperties, "Wheel");
+	ExtendedPart* wheel4 = smallSphereFactory.produce(GlobalCFrame(4.2, 1.0, 4.2), wheelProperties, "Wheel");
 
 	carLeftWindow->material.ambient = Vec4f(0.7, 0.7, 1.0, 0.5);
 	carRightWindow->material.ambient = Vec4f(0.7, 0.7, 1.0, 0.5);
@@ -228,22 +241,24 @@ void setupWorld() {
 	car.ballConstraints.push_back(BallConstraint{ Vec3(-0.8, 0.0, -0.8), carBody->parent, Vec3(0,0,0), wheel4->parent });
 	world.constraints.push_back(std::move(car));
 
+	
 	int minX = -2;
 	int maxX = 2;
 	int minY = 0;
-	int maxY = 5;
+	int maxY = 20;
 	int minZ = -2;
 	int maxZ = 2;
+
 
 	for (double x = minX; x < maxX; x += 1.01) {
 		for (double y = minY; y < maxY; y += 1.01) {
 			for (double z = minZ; z < maxZ; z += 1.01) {
-				ExtendedPart* newCube = cubeFactory.produce(GlobalCFrame(x - 5, y + 1, z - 5), 1.0, 0.2);
+				ExtendedPart* newCube = cubeFactory.produce(GlobalCFrame(x - 5, y + 1, z - 5), { 1.0, 0.2, 0.5 });
 				newCube->material.ambient = Vec4f((x-minX)/(maxX-minX), (y-minY)/(maxY-minY), (z-minZ)/(maxZ-minZ), 1.0f);
 				world.addPart(newCube);
-				world.addPart(sphereFactory.produce(GlobalCFrame(Position(x + 5, y + 1, z - 5)), 1.0, 0.2));
+				world.addPart(sphereFactory.produce(GlobalCFrame(Position(x + 5, y + 1, z - 5)), { 1.0, 0.2, 0.5 }));
 				spiderFactories[rand() & 0x00000003].buildSpider(GlobalCFrame(Position(x+y*0.1, y+1, z)));
-				world.addPart(triangleFactory.produce(GlobalCFrame(Position(x - 20, y + 1, z + 20)), 1.0, 0.2));
+				world.addPart(triangleFactory.produce(GlobalCFrame(Position(x - 20, y + 1, z + 20)), { 1.0, 0.2, 0.5 }));
 			}
 		}
 	}
@@ -251,9 +266,8 @@ void setupWorld() {
 	//world.optimizeTerrain();
 
 	// Player
-	screen.camera.attachment = sphereFactory.produce(GlobalCFrame(), 1.0, 0.2);
-	screen.camera.attachment->properties.friction = 0.5;
-	screen.camera.attachment->drawMeshId = -1;
+	screen.camera.attachment = createUniquePart(screen, Library::createPrism(50, 0.2, 1.0), GlobalCFrame(), { 1.0, 5.0, 0.0 }, "Player");
+	screen.camera.attachment->conveyorEffect = Vec3(1.0, 0.0, 1.0);
 
 	if (!world.isValid()) {
 		throw "World not valid!";
@@ -335,8 +349,9 @@ void toggleFlying() {
 	world.asyncModification([]() {
 		if (screen.camera.flying) {
 			screen.camera.flying = false;
-			screen.camera.attachment->setCFrame(screen.camera.cframe);
+			screen.camera.attachment->setCFrame(GlobalCFrame(screen.camera.cframe.getPosition()));
 			screen.world->addPart(screen.camera.attachment);
+			screen.camera.attachment->parent->momentResponse = SymmetricMat3::ZEROS();
 		} else {
 			screen.world->removePart(screen.camera.attachment);
 			screen.camera.flying = true;

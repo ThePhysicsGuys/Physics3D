@@ -2,6 +2,7 @@
 
 
 #include "../math/linalg/vec.h"
+#include "genericCollidable.h"
 
 struct Simplex;
 
@@ -9,17 +10,9 @@ struct MinkowskiPointIndices {
 	Vec3f indices[2];
 
 	Vec3f& operator[](int i) { return indices[i]; }
-	/*bool operator==(const MinkowskiPointIndices& other) const {
-		return this->indices[0] == other.indices[0] &&
-			this->indices[1] == other.indices[1];
-	}*/
 };
 
-#include "convexShapeBuilder.h"
 #include "computationBuffer.h"
-#include "../math/utils.h"
-#include "../../util/log.h"
-#include "../debug.h"
 
 struct Simplex {
 	Vec3 A, B, C, D;
@@ -47,15 +40,11 @@ struct MinkPoint {
 	Vec3f p;
 	Vec3f originFirst;
 	Vec3f originSecond;
-	/*int originFirst;
-	int originSecond;*/
 };
 
 struct Tetrahedron {
 	MinkPoint A, B, C, D;
 };
 
-bool runGJK(const Shape& first, const Shape& second, const Vec3f& initialSearchDirection, Tetrahedron& simp, int& iter);
-bool runGJKTransformed(const Shape& first, const Shape& second, const CFramef& relativeCFrame, const Vec3f& initialSearchDirection, Tetrahedron& simp, int& iter);
-bool runEPA(const Shape& first, const Shape& second, const Tetrahedron& s, Vec3f& intersection, Vec3f& exitVector, ComputationBuffers& bufs, int& iter);
-bool runEPATransformed(const Shape& first, const Shape& second, const Tetrahedron& s, const CFramef& relativeCFrame, Vec3f& intersection, Vec3f& exitVector, ComputationBuffers& bufs, int& iter);
+bool runGJKTransformed(const GenericCollidable& first, const GenericCollidable& second, const CFramef& relativeCFrame, const Vec3f& initialSearchDirection, Tetrahedron& simp, int& iter);
+bool runEPATransformed(const GenericCollidable& first, const GenericCollidable& second, const Tetrahedron& s, const CFramef& relativeCFrame, Vec3f& intersection, Vec3f& exitVector, ComputationBuffers& bufs, int& iter);

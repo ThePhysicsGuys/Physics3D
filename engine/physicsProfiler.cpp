@@ -1,16 +1,15 @@
 #include "physicsProfiler.h"
 
 const char * physicsLabels[]{
-	"Transforms",
-	"Externals",
 	"GJK Col",
 	"GJK No Col",
 	"EPA",
 	"Collision",
+	"Externals",
 	"Col. Handling",
 	"Constraints",
-	"Update Tree Bounds",
-	"Update Tree Structure",
+	"Tree Bounds",
+	"Tree Structure",
 	"Wait for lock",
 	"Updates",
 	"Queue",
@@ -19,9 +18,9 @@ const char * physicsLabels[]{
 
 const char * intersectionLabels[]{
 	"Colission",
-	"GJK reject",
-	"Part Dist reject",
-	"Part Bound reject"
+	"GJK Reject",
+	"Part Dist Reject",
+	"Part Bound Reject"
 };
 
 const char* iterationLabels[]{

@@ -17,14 +17,14 @@
 #define MAX_ANGLE 0.1f
 
 const Vec3f pieColors[30]{
-	Vec3f(1,0,0),
-	Vec3f(0,1,0),
 	Vec3f(0.2f,0.2f,1),
 	Vec3f(1,0.5f,0),
 	Vec3f(1,1,0),
 	Vec3f(1,0,1),
+	Vec3f(0,1,0),
 	Vec3f(0,1,1),
 	Vec3f(1,1,1),
+	Vec3f(1,0,0),
 	Vec3f(0.5f,0,0),
 	Vec3f(0,0.5f,0),
 	Vec3f(0,0,0.5f),

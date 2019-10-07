@@ -18,14 +18,14 @@ void ShapeBuilder::addPoint(Vec3f point, int oldTriangleIndex) {
 	update neighbors
 	*/
 
-	unsigned int newPointIndex = vertexCount;
+	int newPointIndex = vertexCount;
 
 	// add extra point
 	vertexBuf[newPointIndex] = point;
 	
-	unsigned int t0Index = oldTriangleIndex;
-	unsigned int t1Index = triangleCount;
-	unsigned int t2Index = triangleCount + 1;
+	int t0Index = oldTriangleIndex;
+	int t1Index = triangleCount;
+	int t2Index = triangleCount + 1;
 
 	Triangle oldT = triangleBuf[oldTriangleIndex];
 	TriangleNeighbors oldNeighbors = neighborBuf[oldTriangleIndex];
@@ -52,10 +52,10 @@ void ShapeBuilder::addPoint(Vec3f point, int oldTriangleIndex) {
 	
 }
 
-Shape ShapeBuilder::toShape() const {
-	return Shape(vertexBuf, SharedArrayPtr<const Triangle>::staticSharedArrayPtr(triangleBuf), vertexCount, triangleCount);
+Polyhedron ShapeBuilder::toShape() const {
+	return Polyhedron(vertexBuf, triangleBuf, vertexCount, triangleCount);
 }
 
 IndexedShape ShapeBuilder::toIndexedShape() const {
-	return IndexedShape(vertexBuf, SharedArrayPtr<const Triangle>::staticSharedArrayPtr(triangleBuf), vertexCount, triangleCount, neighborBuf);
+	return IndexedShape(vertexBuf, triangleBuf, vertexCount, triangleCount, neighborBuf);
 }

@@ -61,24 +61,19 @@ void ModelLayer::onEvent(Event& event) {
 void ModelLayer::onRender() {
 	graphicsMeasure.mark(GraphicsProcess::PHYSICALS);
 
-	Shaders::basicShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
-
 	std::map<double, ExtendedPart*> transparentMeshes;
 
-	// Bind basic uniforms
-	Shaders::basicShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
-	Shaders::basicShader.updateLight(lights, lightCount);
-	Shaders::maskShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix);
-	
 	graphicsMeasure.mark(GraphicsProcess::WAIT_FOR_LOCK);
+	
 	screen->world->syncReadOnlyOperation([this, &transparentMeshes]() {
+		graphicsMeasure.mark(GraphicsProcess::UPDATE);
+
+		// Bind basic uniforms
+		Shaders::basicShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
+		Shaders::basicShader.updateLight(lights, lightCount);
+		Shaders::maskShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix);
+
 		graphicsMeasure.mark(GraphicsProcess::PHYSICALS);
-		// Render player if not in flying mode
-		if (!screen->camera.flying) {
-			Shaders::basicShader.updateMaterial(Material());
-			Shaders::basicShader.updateModel(CFrameToMat4(screen->camera.attachment->getCFrame()));
-			Library::sphere->render();
-		}
 
 		// Render world objects
 		for (ExtendedPart& part : screen->world->iterPartsFiltered(DoNothingFilter<Part>(), ALL_PARTS)) {
