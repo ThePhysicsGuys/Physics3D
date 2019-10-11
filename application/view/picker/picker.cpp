@@ -25,7 +25,7 @@
 #include "../engine/physical.h"
 #include "../engine/sharedLockGuard.h"
 #include "../engine/geometry/shape.h"
-#include "../engine/filters.h"
+#include "../engine/misc/filters/rayIntersectsBoundsFilter.h"
 #include "view/debug/visualDebug.h"
 
 namespace Picker {

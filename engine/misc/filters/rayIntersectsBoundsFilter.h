@@ -1,8 +1,8 @@
 #pragma once
 
-#include "math/ray.h"
-#include "datastructures/boundsTree.h"
-#include "part.h"
+#include "../../math/bounds.h"
+#include "../../datastructures/boundsTree.h"
+#include "../../part.h"
 
 
 

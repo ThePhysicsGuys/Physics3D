@@ -12,7 +12,6 @@
 #include "../math/utils.h"
 #include "../math/mathUtil.h"
 #include "../../util/Log.h"
-#include "../engineException.h"
 #include "../debug.h"
 #include "../physicsProfiler.h"
 #include "computationBuffer.h"
