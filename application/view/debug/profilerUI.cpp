@@ -14,9 +14,16 @@
 
 #include "../engine/math/mathUtil.h"
 
+#include "../texture.h"
+#include "../buffers/frameBuffer.h"
+
+#pragma region PieChart
+
+//! PieChart
+
 #define MAX_ANGLE 0.1f
 
-const Vec3f pieColors[30]{
+const Vec3f pieColors[30] {
 	Vec3f(0.2f,0.2f,1),
 	Vec3f(1,0.5f,0),
 	Vec3f(1,1,0),
@@ -34,43 +41,26 @@ const Vec3f pieColors[30]{
 	Vec3f(0.5f,0.5f,0.5f),
 };
 
-void vertex(Vec2f vertex) {
-	glVertex2f(vertex.x, vertex.y);
-}
-void color(Vec3f color) {
-	glColor3f(color.x, color.y, color.z);
-}
-
 void PieChart::renderPie(Screen& screen) const {
 	Vec2f cursorPosition = Vec2f(pieSize, 0);
 
+	float oldAngle = 0.0f;
+	float newAngle = 0.0f;
 	float totalWeight = getTotal();
-	for(DataPoint dataPoint : parts) {
+
+	if (totalWeight == 0.0)
+		return;
+
+	for (DataPoint dataPoint : parts) {
 		float angle = float(PI * 2 * dataPoint.weight / totalWeight);
-
 		int subdivisions = int(angle / MAX_ANGLE + 1);
-		
-		Mat2f rotation = fromAngle(angle / subdivisions);
+		newAngle += angle;
 
-		glBegin(GL_TRIANGLE_FAN); {
-			color(dataPoint.color);
-			vertex(piePosition);
-			vertex(piePosition + cursorPosition);
-			for(int i = 0; i < subdivisions; i++) {
-				cursorPosition = rotation * cursorPosition;
-				vertex(piePosition + cursorPosition);
-			}
-		} glEnd();
+		Path::circleSegmentFilled(piePosition, pieSize, oldAngle, newAngle, Vec4f(dataPoint.color, 1.0f), subdivisions);
+
+		oldAngle = newAngle;
 	}
 }
-
-/*void PieChart::renderValueUnit(Font* font, float value, const char* unit, Vec2 position, Vec3f color) const {
-	std::stringstream ss;
-	ss.precision(4);
-	ss << value;
-	ss << unit;
-	font->render(ss.str(), position, color, 0.0006);
-}*/
 
 void PieChart::renderText(Screen& screen, Font* font) const {
 	Path::bind(GUI::batch);
@@ -83,9 +73,9 @@ void PieChart::renderText(Screen& screen, Font* font) const {
 
 	float totalWeight = getTotal();
 
-	Path::text(font, totalValue, textPosition + Vec2(0.50, 0.035), Vec4(1,1,1,1), 0.0006);
+	Path::text(font, totalValue, textPosition + Vec2(0.50, 0.035), Vec4(1, 1, 1, 1), 0.0006);
 
-	for(int i = 0; i < parts.size(); i++) {
+	for (int i = 0; i < parts.size(); i++) {
 		const DataPoint& p = parts[i];
 		Vec2 linePosition = textPosition + Vec2(0, -i*0.035);
 		Path::text(font, p.label, linePosition, Vec4(p.color, 1), 0.0006);
@@ -105,84 +95,56 @@ void PieChart::add(DataPoint& dataPoint) {
 	this->parts.push_back(dataPoint);
 }
 
-void startPieRendering(Screen& screen) {
-	glUseProgram(0);
-	Vec2i size = screen.dimension;
-	glPushMatrix();
-	glScalef(float(size.y) / size.x, 1.0f, 1.0f);
-}
-
-void endPieRendering(Screen& screen) {
-	glPopMatrix();
-}
-
 float PieChart::getTotal() const {
 	float totalWeight = 0;
-	for(DataPoint p : parts)
+	for (DataPoint p : parts)
 		totalWeight += p.weight;
 	return totalWeight;
 }
 
+#pragma endregion
+
+#pragma region BarChart
+
+//! BartChart
+
 void BarChart::render() {
 	Path::bind(GUI::batch);
 
-	glUseProgram(0);
-
 	float titleHeight = 0.045;
-
 	float marginLeft = this->dimension.x * 0.0;
 	float marginBottom = this->dimension.y * 0.045;
 	float marginTop = titleHeight + 0.05;
+	float max = getMaxWeight();
 
 	Vec2f drawingPosition = position + Vec2f(marginLeft, marginBottom);
-
 	Vec2f drawingSize = this->dimension - Vec2f(marginLeft, marginBottom+marginTop);
 
 	float categoryWidth = drawingSize.x / data.width;
 	float barWidth = drawingSize.x / ((data.height+0.5) * data.width);
 
-	float max = getMaxWeight();
-
-	glPushMatrix();
-	glScaled(float(GUI::screen->dimension.y) / GUI::screen->dimension.x, 1, 1);
-
-	//Log::debug("Screenres: x=%d, y=%d", GUI::screen->dimension.x, GUI::screen->dimension.y);
-
-	glBegin(GL_QUADS);
-	/*color(Vec3f(0.7, 0.7, 0.7));
-	vertex(position);
-	vertex(position + Vec2f(size.x, 0));
-	vertex(position + size);
-	vertex(position + Vec2f(0, size.y));*/
 	for (int cl = 0; cl < data.height; cl++) {
 		const BarChartClassInformation& info = classes[cl];
-		color(info.color);
+
 		for (int i = 0; i < data.width; i++) {
 			const WeightValue& dataPoint = data[cl][i];
 
-			Vec2f botLeft = drawingPosition + Vec2f(categoryWidth * i + barWidth*cl, 0);
-
 			float height = drawingSize.y * dataPoint.weight / max;
+			Vec2f topLeft = drawingPosition + Vec2f(categoryWidth * i + barWidth*cl, height);
 
-			vertex(botLeft);
-			vertex(botLeft + Vec2f(barWidth, 0));
-			vertex(botLeft + Vec2f(barWidth, height));
-			vertex(botLeft + Vec2f(0, height));
+			Path::rectFilled(topLeft, Vec2f(barWidth, height), 0.0f, Vec4f(info.color, 1.0f));
 		}
 	}
-	glEnd();
-	glPopMatrix();
 
 	Path::text(GUI::font, title, position + Vec2f(0, this->dimension.y - titleHeight), GUI::COLOR::WHITE, 0.001);
 
 	for (int cl = 0; cl < data.height; cl++) {
 		const BarChartClassInformation& info = classes[cl];
-		color(info.color);
+
 		for (int i = 0; i < data.width; i++) {
 			const WeightValue& dataPoint = data[cl][i];
 
 			Vec2f bottomLeft = drawingPosition + Vec2f(categoryWidth * i + barWidth * cl, 0);
-
 			float height = drawingSize.y * dataPoint.weight / max;
 
 			Vec2f topTextPosition = bottomLeft + Vec2(0, height+drawingSize.y * 0.02);
@@ -194,52 +156,133 @@ void BarChart::render() {
 
 	for (int i = 0; i < data.width; i++) {
 		Vec2f botLeft = position + Vec2f(marginLeft, 0) + Vec2f(categoryWidth * i, 0);
-		//botLeft.x *= GUI::screen->dimension.x / GUI::screen->dimension.y;
 		Path::text(GUI::font, labels[i], botLeft, GUI::COLOR::WHITE, 0.0005);
 	}
 
-	for (int cl = 0; cl < data.height; cl++) {
+	for (int cl = 0; cl < data.height; cl++)
 		Path::text(GUI::font, classes[cl].name, drawingPosition + Vec2f(this->dimension.x - 0.3, drawingSize.y - 0.035 * cl), Vec4(classes[cl].color, 1), 0.0007);
-	}
 
 	GUI::batch->submit();
 }
 
 float BarChart::getMaxWeight() const {
 	float best = 0;
-	for (const WeightValue& wv:data){
-		float w = wv.weight;
-		if (w > best) {
-			best = w;
-		}
+	for (const WeightValue& wv : data) {
+		if (wv.weight > best)
+			best = wv.weight;
 	}
 	return best;
 }
 
+#pragma endregion
+
+#pragma region Tree
+
+//! Tree
+
 void recursiveRenderTree(const TreeNode& tree, const Vec3f& treeColor, Vec2f origin, float allottedWidth, long long maxCost) {
 	if (!tree.isLeafNode()) {
 		for (int i = 0; i < tree.nodeCount; i++) {
-			Vec2f nextStep = origin + Vec2f(-allottedWidth / 2 + allottedWidth * ((tree.nodeCount != 1)?(float(i) / (tree.nodeCount-1)):0.5f), -0.04f);
+			Vec2f nextStep = origin + Vec2f(-allottedWidth / 2 + allottedWidth * ((tree.nodeCount != 1) ? (float(i) / (tree.nodeCount-1)) : 0.5f), -0.1f);
 			float colorDarkning = pow(1.0f * computeCost(tree[i].bounds) / maxCost, 0.25f);
 
-			Path::line(origin, nextStep, 1.0f, Vec4f(treeColor * colorDarkning, 1.0f), Vec4f(treeColor * colorDarkning, 1.0f));
-		
+			Path::bezierVertical(origin, nextStep, 1.0f, Vec4f(treeColor * colorDarkning, 1.0f));
+
 			recursiveRenderTree(tree[i], treeColor, nextStep, allottedWidth / tree.nodeCount, maxCost);
 		}
 	}
-	if (tree.isGroupHead) Path::circleFilled(origin, 0.006f, GUI::COLOR::RED, 8);
+
+	if (tree.isGroupHead)
+		Path::circleFilled(origin, 0.006f, GUI::COLOR::RED, 8);
 }
 
 void renderTreeStructure(Screen& screen, const TreeNode& tree, const Vec3f& treeColor, Vec2f origin, float allottedWidth) {
-	//glUseProgram(0);
-
-	Vec2i size = screen.dimension;
-
 	long long maxCost = computeCost(tree[0].bounds);
-	for (int i = 1; i < tree.nodeCount; i++) {
+
+	for (int i = 1; i < tree.nodeCount; i++)
 		maxCost = std::max(maxCost, computeCost(tree[1].bounds));
-	}
 
 	recursiveRenderTree(tree, treeColor, origin, allottedWidth, maxCost);
 	GUI::batch->submit();
 }
+
+#pragma endregion
+
+#pragma region SlidingDataChart
+
+//! SlidingDataChart
+
+void SlidingLineChart::add(float value) {
+	if (data.empty()) {
+		deviation = 1.0f;
+		mean = value;
+
+		data.push(value);
+		
+		return;
+	}
+
+	data.push(value);
+
+	float variance = deviation * deviation;
+	float newVariance = variance;
+	float newMean = mean;
+
+	if (data.size() > size) {
+		float s = size;
+		float s1 = s - 1.0f;
+
+		newMean = mean + (value - data.front()) / s;
+		float diffMean = newMean - mean;
+
+		newVariance = variance + diffMean * s / s1 * (2.0f * (data.front() - mean) + s1 * diffMean);
+
+		data.pop();
+	} else {
+		float s = data.size();
+
+		float s1 = s - 1.0f;
+		float s2 = s - 2.0f;
+
+		newMean = (mean * s1 + value) / s;
+		newVariance = (s2 * variance + (value - newMean) * (value - mean)) / s1;
+	}
+	
+	mean = newMean;
+	deviation = sqrt(newVariance);
+}
+
+void SlidingLineChart::render() {
+	Vec2f xRange = Vec2f(-GUI::screen->camera.aspect, GUI::screen->camera.aspect) * 2;
+	Vec2f yRange = Vec2(-1, 1);
+	float axisOffset = 0.03;
+	Path::rectUVRange(GUI::screen->blurFrameBuffer->texture->getID(), position, dimension, xRange, yRange, Vec4f(0.4, 0.4, 0.4, 1));
+	Path::line(position + Vec2f(-axisOffset, -dimension.y), position + Vec2f(dimension.x + axisOffset, -dimension.y), 2.0f, GUI::COLOR::WHITE);
+	Path::line(position + Vec2f(0, axisOffset), position + Vec2f(0, -dimension.y - axisOffset), 2.0f, GUI::COLOR::WHITE);
+
+	float usedDeviaton = fmax(deviation, 0.341 * mean);
+	float stepX = dimension.x / size;
+	float stepY = dimension.y / usedDeviaton / 6.82f;
+	float startY = mean - usedDeviaton;
+
+	Vec2f bottomLeft = position - Vec2f(0.0f, dimension.y);
+
+	for (int i = 0; i < data.size(); i++) {
+		float value = data._Get_container()[i];
+
+		Vec2f point = bottomLeft + Vec2f(i * stepX, (value - startY) * stepY);
+
+		Path::lineTo(point);
+	}
+
+	Path::stroke(GUI::COLOR::ACCENT, 1.0f);
+
+	float lastValue = data._Get_container()[data.size() - 1];
+	float lastY = (lastValue - startY) * stepY;
+	float scale = 0.001f;
+	Vec2f titleSize = GUI::font->size(title, scale);
+	Path::text(GUI::font, std::to_string(lastValue), Vec2f((bottomLeft.x + dimension.x) * 1.01, bottomLeft.y + lastY), GUI::COLOR::WHITE, scale);
+	Path::text(GUI::font, title, Vec2f(position.x + (dimension.x - titleSize.x) / 2.0f, position.y + axisOffset), GUI::COLOR::WHITE, scale);
+}
+
+#pragma endregion

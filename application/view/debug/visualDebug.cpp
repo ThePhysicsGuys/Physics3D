@@ -160,4 +160,5 @@ namespace Debug {
 	void renderDebugFields() {
 		GUI::batch->submit();
 	}
+
 }

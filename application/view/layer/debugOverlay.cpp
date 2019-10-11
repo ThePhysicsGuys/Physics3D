@@ -15,6 +15,8 @@
 #include "../../worlds.h"
 #include "../../../engine/sharedLockGuard.h"
 
+#include "view/path/path.h"
+
 BarChartClassInformation iterChartClasses[] {
 	{ "GJK Collide"   , Vec3f(0.2f, 0.2f, 1.0f) },
 	{ "GJK No Collide", Vec3f(1.0f, 0.5f, 0.0f) }, 
@@ -22,6 +24,7 @@ BarChartClassInformation iterChartClasses[] {
 };
 
 BarChart iterationChart("Iteration Statistics", "", GJKCollidesIterationStatistics.labels, iterChartClasses, Vec2f(-1.0f + 0.1f, -0.3f), Vec2f(0.8f, 0.6f), 3, 17);
+SlidingLineChart slidingChart("test", 100, Vec2f(-0.3, 0.2), Vec2f(0.7, 0.4));
 
 DebugOverlay::DebugOverlay() {
 
@@ -71,14 +74,14 @@ void DebugOverlay::onRender() {
 		PieChart graphicsPie = toPieChart(graphicsMeasure, "Graphics", Vec2f(-leftSide + 1.5f, -0.7f), 0.2f);
 		PieChart physicsPie = toPieChart(physicsMeasure, "Physics", Vec2f(-leftSide + 0.3f, -0.7f), 0.2f);
 		PieChart intersectionPie = toPieChart(intersectionStatistics, "Intersections", Vec2f(-leftSide + 2.7f, -0.7f), 0.2f);
+
 		physicsPie.renderText(*screen, GUI::font);
 		graphicsPie.renderText(*screen, GUI::font);
 		intersectionPie.renderText(*screen, GUI::font);
-		startPieRendering(*screen);
+
 		physicsPie.renderPie(*screen);
 		graphicsPie.renderPie(*screen);
 		intersectionPie.renderPie(*screen);
-		endPieRendering(*screen);
 
 		ParallelArray<long long, 17> gjkColIter = GJKCollidesIterationStatistics.history.avg();
 		ParallelArray<long long, 17> gjkNoColIter = GJKNoCollidesIterationStatistics.history.avg();
@@ -99,6 +102,11 @@ void DebugOverlay::onRender() {
 			renderTreeStructure(*this->screen, this->screen->world->objectTree.rootNode, Vec3f(0, 1, 0), Vec2f(1.4, 0.95), 0.7f);
 			renderTreeStructure(*this->screen, this->screen->world->terrainTree.rootNode, Vec3f(0, 0, 1), Vec2f(0.4, 0.95), 0.7f);
 		});
+
+		Path::bind(GUI::batch);
+		slidingChart.add(graphicsMeasure.getAvgTPS());
+		slidingChart.render();
+		GUI::batch->submit();
 	}
 }
 

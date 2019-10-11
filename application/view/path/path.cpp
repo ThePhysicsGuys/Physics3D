@@ -63,6 +63,10 @@ namespace Path {
 
 	//! Primitives
 
+	void line(const Vec2f& a, const Vec2f& b, float thickness, const Vec4f& color) {
+		line(a, b, thickness, color, color);
+	}
+
 	void line(const Vec2f& a, const Vec2f& b, float thickness, const Vec4f& colorA, const Vec4f& colorB) {
 		int vertexCount = 4;
 		int indexCount = 6;
@@ -155,7 +159,7 @@ namespace Path {
 			Path::batch->pushVertex({ newPoint, Vec2(1), color });
 		}
 
-		for (int i = 0; i < precision + 1; i++) {
+		for (int i = 1; i <= precision + 1; i++) {
 			Path::batch->pushIndex(0);
 			Path::batch->pushIndex(i + 1);
 			Path::batch->pushIndex(i);
@@ -332,6 +336,20 @@ namespace Path {
 
 			oldPoint = newPoint;
 		}
+	}
+
+	void bezierHorizontal(const Vec2f& start, const Vec2f& end, float thickness, const Vec4f& color, int precision) {
+		float mid = (start.x + end.x) / 2.0f;
+		Vec2f c1 = Vec2f(mid, start.y);
+		Vec2f c2 = Vec2f(mid, end.y);
+		bezier(start, c1, c2, end, thickness, color, precision);
+	}
+
+	void bezierVertical(const Vec2f& start, const Vec2f& end, float thickness, const Vec4f& color, int precision) {
+		float mid = (start.y + end.y) / 2.0f;
+		Vec2f c1 = Vec2f(start.x, mid);
+		Vec2f c2 = Vec2f(end.x, mid);
+		bezier(start, c1, c2, end, thickness, color, precision);
 	}
 
 	void polyLine(Vec2f* points, size_t size, float thickness, const Vec4f& color, bool closed) {

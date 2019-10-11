@@ -1,6 +1,7 @@
 #pragma once
 
 #include <sstream>
+#include <queue>
 
 #include "../engine/profiling.h"
 #include "../engine/math/linalg/largeMatrix.h"
@@ -60,7 +61,21 @@ struct BarChart : public Component {
 	float getMaxWeight() const;
 };
 
-void startPieRendering(Screen& screen);
-void endPieRendering(Screen& screen);
+struct SlidingDataChart : public Component {
+	const char* title;
+
+	int size;
+	std::queue<float> data;
+
+	float mean;
+	float deviation;
+
+	inline SlidingDataChart(const char* title, int size, Vec2 position, Vec2 dimension) : title(title), size(size), mean(0), deviation(1), Component(position, dimension) {};
+
+	void add(float value);
+	void render() override;
+	inline Vec2 resize() override { return dimension;  }
+};
+
 void renderTreeStructure(Screen& screen, const TreeNode& tree, const Vec3f& treeColor, Vec2f origin, float allottedWidth);
 

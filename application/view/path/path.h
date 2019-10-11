@@ -13,10 +13,14 @@ namespace Path {
 	// Binds the given batch
 	void bind(GuiBatch* batch);
 
+
 	//! Primitives
 
 	// Adds a line to the batch
-	void line(const Vec2f& a, const Vec2f& b, float thickness = 1.0f, const Vec4f& colorA = GUI::COLOR::WHITE, const Vec4f& colorB = GUI::COLOR::WHITE);
+	void line(const Vec2f& a, const Vec2f& b, float thickness = 1.0f, const Vec4f& color = GUI::COLOR::WHITE);
+
+	// Adds a line to the batch
+	void line(const Vec2f& a, const Vec2f& b, float thickness, const Vec4f& colorA, const Vec4f& colorB);
 
 	// Adds a circle tott the batch
 	void circle(const Vec2f& center, float radius, const Vec4f& color = GUI::COLOR::WHITE, float thickness = 1.0f, int precision = 20);
@@ -39,14 +43,14 @@ namespace Path {
 	// Adds a rectangle to the batch, with pos being the topleft corner and dim the dimension
 	void rect(const Vec2f& pos, const Vec2f& dim, float rounding = 0.0f, const Vec4f& color = GUI::COLOR::WHITE, float thickness = 1.0f);
 
-	// Adds a filled rectangle to the batch
+	// Adds a filled rectangle to the batch, with pos being the topleft corner and dim the dimension
 	void rectFilled(const Vec2f& pos, const Vec2f& dim, float rounding = 0.0f, const Vec4f& color = GUI::COLOR::WHITE);
 
-	//? Adds a rect with UV coordinates and a texture id to the batch, uvMin starts default at lower left, uvMax at upper right
-	void rectUV(unsigned int id, const Vec2f& pos, const Vec2f& dim, const Vec2f& uvMin = Vec2f(0, 0), const Vec2f& uvMax = Vec2f(1, 1), const Vec4f& color = Vec4f(1.0f));
+	//? Adds a rect with UV coordinates and a texture id to the batch, with pos being the topleft corner and dim the dimension, uvMin starts default at lower left, uvMax at upper right
+	void rectUV(unsigned int id, const Vec2f& pos, const Vec2f& dim, const Vec2f& uvMin = Vec2f(0, 0), const Vec2f& uvMax = Vec2f(1, 1), const Vec4f& color = GUI::COLOR::WHITE);
 
-	//  Adds a rect with an UV range and a texture id to the batch
-	void rectUVRange(unsigned int id, const Vec2f& pos, const Vec2f& dim, const Vec2f& xRange, const Vec2f& yRange, const Vec4f& color = Vec4f(1.0f));
+	//  Adds a rect with an UV range and a texture id to the batch, with pos being the topleft corner and dim the dimension
+	void rectUVRange(unsigned int id, const Vec2f& pos, const Vec2f& dim, const Vec2f& xRange, const Vec2f& yRange, const Vec4f& color = GUI::COLOR::WHITE);
 
 	// Adds a quad to the batch
 	void quad(const Vec2f& a, const Vec2f& b, const Vec2f& c, const Vec2f& d, const Vec4f& color = GUI::COLOR::WHITE, float thickness = 1.0f);
@@ -62,6 +66,12 @@ namespace Path {
 
 	// Adds a bezier curve to the batch, with the given control points
 	void bezier(const Vec2f& a, const Vec2f& b, const Vec2f& c, const Vec2f& d, float thickness = 1.0f, const Vec4f& color = GUI::COLOR::WHITE, int precision = 20);
+
+	// Adds a horizontal oriented bezier curve to the batch, with the given start and end
+	void bezierHorizontal(const Vec2f& start, const Vec2f& end, float thickness = 1.0f, const Vec4f& color = GUI::COLOR::WHITE, int precision = 20);
+
+	// Adds a vertical oriented bezier curve to the batch, with the given start and end
+	void bezierVertical(const Vec2f& start, const Vec2f& end, float thickness = 1.0f, const Vec4f& color = GUI::COLOR::WHITE, int precision = 20);
 
 	// Adds a polyline to the batch, through the given points
 	void polyLine(Vec2f* points, size_t size, float thickness = 1.0f, const Vec4f& color = GUI::COLOR::WHITE, bool closed = false);
@@ -91,9 +101,9 @@ namespace Path {
 	void clear();
 
 	// Fills the convex polygon defined by the current path
-	void fill(Vec4f color);
+	void fill(Vec4f color = GUI::COLOR::WHITE);
 
 	// Draws the current path
-	void stroke(Vec4f color, float thickness = 1.0f, bool closed = false);
+	void stroke(Vec4f color = GUI::COLOR::WHITE, float thickness = 1.0f, bool closed = false);
 }
 
