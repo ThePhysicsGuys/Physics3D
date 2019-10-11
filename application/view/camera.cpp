@@ -36,22 +36,29 @@ void Camera::setPosition(Fix<32> x, Fix<32> y, Fix<32> z) {
 	setPosition(Position(x, y, z));
 }
 
-void Camera::setRotation(double alpha, double beta, double gamma) {
+void Camera::setRotation(const UnitaryMatrix<double, 3>& rotation) {
 	flags |= ViewDirty;
 
-	Mat3 euler = fromEulerAngles(alpha, beta, gamma);
-	cframe.rotation = euler;
+	cframe.rotation = rotation;
+}
+
+void Camera::setRotation(double alpha, double beta, double gamma) {
+	this->setRotation(fromEulerAngles(alpha, beta, gamma));
 }
 
 void Camera::setRotation(Vec3 rotation) {
 	setRotation(rotation.x, rotation.y, rotation.z);
 }
 
+Mat4f Camera::getViewRotation() {
+	return Mat4f(cframe.rotation.transpose(), 1.0f);
+}
+
 void Camera::rotate(Screen& screen, double dalpha, double dbeta, double dgamma, bool leftDragging, bool accelerating) {
 	flags |= ViewDirty;
 	rotating = accelerating;
 
-	cframe.rotation = rotX(float(currentAngularVelocity * dalpha)) * Mat3f(cframe.rotation) * rotY(float(currentAngularVelocity * dbeta));
+	cframe.rotation = rotY(currentAngularVelocity * dbeta) * cframe.rotation * rotX(currentAngularVelocity * dalpha);
 
 	if (leftDragging) {
 		screen.world->asyncModification([&screen]() {
@@ -86,12 +93,15 @@ void Camera::move(Screen& screen, double dx, double dy, double dz, bool leftDrag
 	Vec3 translation = Vec3();
 
 	if (dx != 0) {
-		Vec3 cameraRotationX = cframe.rotation.transpose() * Vec3(1, 0, 0);
+		Vec3 cameraRotationX = cframe.rotation * Vec3(1, 0, 0);
 		Vec3 translationX = normalize(Vec3(cameraRotationX.x, 0, cameraRotationX.z)) * dx;
 		translation += translationX;
 
-		if (leftDragging) 
-			Picker::moveGrabbedPhysicalLateral(screen);
+		if (leftDragging) {
+			screen.world->asyncModification([&screen]() {
+				Picker::moveGrabbedPhysicalLateral(screen);
+			});
+		}
 	}
 
 	if (dy != 0) {
@@ -106,7 +116,7 @@ void Camera::move(Screen& screen, double dx, double dy, double dz, bool leftDrag
 	}
 
 	if (dz != 0) {
-		Vec3 cameraRotationZ = cframe.rotation.transpose() * Vec3(0, 0, 1);
+		Vec3 cameraRotationZ = cframe.rotation * Vec3(0, 0, 1);
 		Vec3 translationZ = normalize(Vec3(cameraRotationZ.x, 0, cameraRotationZ.z)) * dz;
 		translation += translationZ;
 
@@ -164,17 +174,17 @@ bool Camera::onKeyRelease(KeyReleaseEvent& event) {
 }
 
 bool Camera::onMouseDrag(MouseDragEvent& event) {
-	double dmx = (event.getNewX() - event.getOldX());
-	double dmy = (event.getNewY() - event.getOldY());
+	double dmx = event.getNewX() - event.getOldX();
+	double dmy = event.getNewY() - event.getOldY();
 
 	// Camera rotating
 	if (event.isRightDragging())
-		rotate(screen, dmy * 0.1, dmx * 0.1, 0, event.isLeftDragging());
+		rotate(screen, -dmy * 0.1, -dmx * 0.1, 0, event.isLeftDragging());
 	
 
 	// Camera moving
 	if (event.isMiddleDragging())
-		move(screen, dmx * -0.2, dmy * 0.2, 0, event.isLeftDragging());
+		move(screen, dmx * 0.2, -dmy * 0.2, 0, event.isLeftDragging());
 
 	return false;
 }
@@ -248,7 +258,7 @@ void Camera::onUpdate() {
 	// Attach the camera to the attached part, if there is anys
 	if (!flying && attachment != nullptr) {
 		Vec3 vertical = Vec3(0, 1, 0);
-		Vec3 forward = cframe.rotation.transpose() * Vec3(0, 0, 1);
+		Vec3 forward = cframe.rotation * Vec3(0, 0, 1);
 
 		// Sinus angle between camera direction and the xz plane
 		double sinAlpha = vertical * forward;
@@ -277,7 +287,7 @@ void Camera::onUpdate() {
 	if (flags & ViewDirty) {
 		flags ^= ViewDirty;
 
-		viewMatrix = translate(Mat4f(Matrix<double, 3, 3>(cframe.rotation), 1.0f), -Vec3f(float(cframe.position.x), float(cframe.position.y), float(cframe.position.z)));
+		viewMatrix = translate(getViewRotation(), -Vec3f(float(cframe.position.x), float(cframe.position.y), float(cframe.position.z)));
 		invertedViewMatrix = ~viewMatrix;
 	}
 }
