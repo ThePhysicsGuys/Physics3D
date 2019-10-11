@@ -26,16 +26,13 @@ private:
 
 	char flags = None;
 
-	float fov;
-	float znear;
-	float zfar;
 
-	double velocityIncrease = 0.071;
+	double velocityIncrease = 0.5;
 	double currentVelocity = 0;
 	Vec3 lastDirection = Vec3();	
 	bool moving = false;
 
-	double angularVelocityIncrease = 0.15;
+	double angularVelocityIncrease = 0.5;
 	double currentAngularVelocity = 0;
 	Vec3 lastRotation = Vec3();	
 	bool rotating = false;
@@ -53,6 +50,9 @@ public:
 
 	double thirdPersonDistance = 6.0;
 
+	float fov;
+	float znear;
+	float zfar;
 	float aspect;
 	
 	Mat4f viewMatrix;
@@ -87,4 +87,14 @@ public:
 	void move(Screen& screen, Vec3 delta, bool leftDragging, bool accelerating = true);
 
 	Mat4f getViewRotation();
+
+	double getRightOffsetAtZ1() const;
+	double getTopOffsetAtZ1() const;
+
+	inline Vec3 getForwardDirection() const { return -cframe.rotation.getCol(2); }
+	inline Vec3 getBackwardDirection() const { return cframe.rotation.getCol(2); }
+	inline Vec3 getUpDirection() const { return cframe.rotation.getCol(1); }
+	inline Vec3 getDownDirection() const { return -cframe.rotation.getCol(1); }
+	inline Vec3 getLeftDirection() const { return -cframe.rotation.getCol(0); }
+	inline Vec3 getRightDirection() const { return cframe.rotation.getCol(0); }
 };

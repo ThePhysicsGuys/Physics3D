@@ -258,7 +258,7 @@ void Camera::onUpdate() {
 	// Attach the camera to the attached part, if there is anys
 	if (!flying && attachment != nullptr) {
 		Vec3 vertical = Vec3(0, 1, 0);
-		Vec3 forward = cframe.rotation * Vec3(0, 0, 1);
+		Vec3 forward = getForwardDirection();
 
 		// Sinus angle between camera direction and the xz plane
 		double sinAlpha = vertical * forward;
@@ -266,8 +266,8 @@ void Camera::onUpdate() {
 		double dy = thirdPersonDistance * sinAlpha;
 		double dz = sqrt(thirdPersonDistance * thirdPersonDistance - dy * dy);
 
-		Vec3 translationZ = normalize(Vec3(forward.x, 0, forward.z)) * dz;
-		Vec3 translationY = Vec3(0, dy, 0);
+		Vec3 translationZ = normalize(-Vec3(forward.x, 0, forward.z)) * dz;
+		Vec3 translationY = Vec3(0, -dy, 0);
 		Vec3 translation = translationY + translationZ;
 
 		this->cframe.position = attachment->getCFrame().position + translation;
@@ -290,4 +290,12 @@ void Camera::onUpdate() {
 		viewMatrix = translate(getViewRotation(), -Vec3f(float(cframe.position.x), float(cframe.position.y), float(cframe.position.z)));
 		invertedViewMatrix = ~viewMatrix;
 	}
+}
+
+
+double Camera::getRightOffsetAtZ1() const {
+	return tan(double(fov) / 2) * aspect;
+}
+double Camera::getTopOffsetAtZ1() const {
+	return tan(double(fov) / 2);
 }

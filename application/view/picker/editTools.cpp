@@ -168,6 +168,8 @@ float EditTools::intersect(Screen& screen, const Ray& ray) {
 		tool[0] = &scaleShape;
 		tool[1] = &scaleCenterShape;
 		break;
+	default:
+		throw "Error: Impossible!";
 	}
 
 	float closestToolDistance = INFINITY;
