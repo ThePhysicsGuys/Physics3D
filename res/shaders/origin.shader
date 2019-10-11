@@ -1,5 +1,10 @@
-#shader vertex // vertex shader
+[common]
+
 #version 330 core
+
+//------------------------------------------------------------------------------//
+
+[vertex]
 
 layout(location = 0) in vec3 rotation;
 
@@ -7,10 +12,9 @@ void main() {
 	gl_Position = vec4(0.8, -0.8, -1, 1);
 }
 
-///////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------//
 
-#shader geometry // geometry shader
-#version 330 core
+[geometry]
 
 layout(points) in;
 layout(line_strip, max_vertices = 256) out;
@@ -76,10 +80,9 @@ void main() {
 	}*/
 }
 
-///////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------//
 
-#shader fragment // fragment shader
-#version 330 core
+[fragment]
 
 layout(location = 0) out vec4 outColor;
 

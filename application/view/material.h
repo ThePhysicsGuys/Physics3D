@@ -18,6 +18,16 @@ struct Material {
 	Material(Texture* texture) : Material(Vec4f(1.0), Vec3f(1.0), Vec3f(1.0f), 1.0f, texture) {};
 	Material() : Material(Vec4f(1.0f), Vec3f(1.0f), Vec3f(1.0f), 1.0f) {};
 
+	bool operator==(const Material& other) const {
+		return 
+			other.ambient == ambient &&
+			other.diffuse == diffuse &&
+			other.specular == specular &&
+			other.reflectance == reflectance &&
+			other.texture == texture &&
+			other.normal == normal;
+	}
+
 	void setTexture(Texture* texture);
 	void setNormalMap(Texture* normalMap);
 };

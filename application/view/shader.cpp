@@ -203,40 +203,44 @@ ShaderSource parseShader(std::istream& shaderTextStream, const std::string& name
 
 	enum class ShaderType {
 		NONE = -1,
-		VERTEX = 0,
-		FRAGMENT = 1,
-		GEOMETRY = 2,
-		TESSELATION_CONTROL = 3,
-		TESSELATION_EVALUATE = 4
+		COMMON = 0,
+		VERTEX = 1,
+		FRAGMENT = 2,
+		GEOMETRY = 3,
+		TESSELATION_CONTROL = 4,
+		TESSELATION_EVALUATE = 5
 	};
 
 	ShaderType type = ShaderType::NONE;
 
 	std::string line;
-	std::stringstream stringStream[5];
+	std::stringstream stringStream[6];
 
 	int lineNumber = 0;
 	while (getline(shaderTextStream, line)) {
 		lineNumber++;
-		if (line.find("#shader vertex") != std::string::npos) {
+		if (line.find("[vertex]") != std::string::npos) {
 			type = ShaderType::VERTEX;
-		} else if (line.find("#shader fragment") != std::string::npos) {
+		} else if (line.find("[fragment]") != std::string::npos) {
 			type = ShaderType::FRAGMENT;
-		} else if (line.find("#shader geometry") != std::string::npos) {
-			type = ShaderType::GEOMETRY;} 
-		else if (line.find("#shader tesselation control") != std::string::npos) {
-			type = ShaderType::TESSELATION_CONTROL;} 
-		else if (line.find("#shader tesselation evaluate") != std::string::npos) {
+		} else if (line.find("[geometry]") != std::string::npos) {
+			type = ShaderType::GEOMETRY;
+		} else if (line.find("[tesselation control]") != std::string::npos) {
+			type = ShaderType::TESSELATION_CONTROL;
+		} else if (line.find("[tesselation evaluate]") != std::string::npos) {
 			type = ShaderType::TESSELATION_EVALUATE;
+		} else if (line.find("[common]") != std::string::npos) {
+			type = ShaderType::COMMON;
 		} else {
 			if (type == ShaderType::NONE) {
 				Log::warn("(line %d): code before the first #shader instruction will be ignored", lineNumber);
 				continue;
 			}
-			stringStream[(int)type] << line << "\n";
+			stringStream[(int) type] << line << "\n";
 		}
 	}
 
+	std::string commonFile = stringStream[(int)ShaderType::COMMON].str();
 	std::string vertexFile = stringStream[(int)ShaderType::VERTEX].str();
 	std::string fragmentFile = stringStream[(int)ShaderType::FRAGMENT].str();
 	std::string geometryFile = stringStream[(int)ShaderType::GEOMETRY].str();
@@ -245,29 +249,39 @@ ShaderSource parseShader(std::istream& shaderTextStream, const std::string& name
 	
 	Log::setDelimiter("");
 
+	if (!commonFile.empty()) {
+		Log::info("Common file: ");
+		Log::print("done\n", Log::Color::DEBUG);
+	}
+
 	if (!vertexFile.empty()) {
 		Log::info("Vertex shader: ");
 		Log::print("done\n", Log::Color::DEBUG);
+		vertexFile = commonFile + vertexFile;
 	}
 
 	if (!fragmentFile.empty()) {
 		Log::info("Fragment shader: ");
 		Log::print("done\n", Log::Color::DEBUG);
+		fragmentFile = commonFile + fragmentFile;
 	}
 
 	if (!geometryFile.empty()) {
 		Log::info("Geometry shader: ");
 		Log::print("done\n", Log::Color::DEBUG);
+		geometryFile = commonFile + geometryFile;
 	}
 
 	if (!tesselationControlFile.empty()) {
 		Log::info("Tesselation control shader: ");
 		Log::print("done\n", Log::Color::DEBUG);
+		tesselationControlFile = commonFile + tesselationControlFile;
 	}
 
 	if (!tesselationEvaluateFile.empty()) {
 		Log::info("Tesselation evaluation shader: ");
 		Log::print("done\n", Log::Color::DEBUG);
+		tesselationEvaluateFile = commonFile + tesselationEvaluateFile;
 	}
 
 	Log::setDelimiter("\n");

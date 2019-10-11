@@ -42,8 +42,8 @@ void PlayerWorld::applyExternalForces() {
 	if (!screen.camera.flying) {
 		ExtendedPart* player = screen.camera.attachment;
 
-		Vec3f playerX = screen.camera.cframe.rotation.transpose() * Vec3(1, 0, 0);
-		Vec3f playerZ = screen.camera.cframe.rotation.transpose() * Vec3(0, 0, 1);
+		Vec3f playerX = screen.camera.cframe.rotation * Vec3(1, 0, 0);
+		Vec3f playerZ = screen.camera.cframe.rotation * Vec3(0, 0, 1);
 		Debug::logVector(screen.camera.cframe.position - playerZ, playerX, Debug::INFO_VEC);
 
 		Vec3 UP(0, 1, 0);

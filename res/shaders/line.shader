@@ -1,5 +1,10 @@
-#shader vertex
+[common]
+
 #version 330 core
+
+//------------------------------------------------------------------------------//
+
+[vertex]
 
 layout (location = 0) in vec3 vposition;
 layout (location = 1) in vec4 vcolor;
@@ -14,10 +19,9 @@ void main() {
 	fcolor = vcolor;
 }
 
-////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------//
 
-#shader fragment
-#version 330 core
+[fragment]
 
 in vec4 fcolor;
 

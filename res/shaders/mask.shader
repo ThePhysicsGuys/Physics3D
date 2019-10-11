@@ -1,5 +1,10 @@
-#shader vertex
+[common]
+
 #version 330 core
+
+//------------------------------------------------------------------------------//
+
+[vertex]
 
 layout(location = 0) in vec3 vposition;
 
@@ -11,10 +16,9 @@ void main() {
 	gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(vposition, 1.0);
 }
 
-////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------//
 
-#shader fragment
-#version 330 core
+[fragment]
 
 out vec4 outColor;
 

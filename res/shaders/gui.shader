@@ -1,5 +1,10 @@
-#shader vertex
+[common]
+
 #version 330 core
+
+//------------------------------------------------------------------------------//
+
+[vertex]
 
 layout(location = 0) in vec2 vposition;
 layout(location = 1) in vec2 vuv;
@@ -16,10 +21,9 @@ void main() {
 	fuv = vuv;
 }
 
-////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------//
 
-#shader fragment
-#version 330 core
+[fragment]
 
 out vec4 outColor;
 

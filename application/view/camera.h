@@ -76,6 +76,7 @@ public:
 	void setPosition(Position position);
 	void setPosition(Fix<32> x, Fix<32> y, Fix<32> z);
 
+	void setRotation(const UnitaryMatrix<double, 3>& rotation);
 	void setRotation(double alpha, double beta, double gamma);
 	void setRotation(Vec3 rotation);
 
@@ -84,4 +85,6 @@ public:
 
 	void move(Screen& screen, double dx, double dy, double dz, bool leftDragging, bool accelerating = true);
 	void move(Screen& screen, Vec3 delta, bool leftDragging, bool accelerating = true);
+
+	Mat4f getViewRotation();
 };

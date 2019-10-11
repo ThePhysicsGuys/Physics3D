@@ -1,5 +1,10 @@
-#shader vertex
+[common]
+
 #version 410 core
+
+//------------------------------------------------------------------------------//
+
+[vertex]
 
 layout(location = 0) in vec3 vposition;
 layout(location = 1) in vec3 vnormal;
@@ -17,10 +22,9 @@ void main() {
 	tcUV = vUV;
 }
 
-///////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------//
 
-#shader tesselation control
-#version 410 core
+[tesselation control]
 
 // define the number of CPs in the output patch                                                 
 layout(vertices = 4) out;
@@ -54,10 +58,9 @@ void main() {
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------//
 
-#shader tesselation evaluate
-#version 410 core
+[tesselation evaluate]
 
 layout(quads, equal_spacing, ccw) in;
 
@@ -110,10 +113,9 @@ void main() {
 	gl_Position = projectionMatrix * viewMatrix * vec4(fposition, 1.0);
 }
 
-///////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------//
 
-#shader fragment
-#version 410 core
+[fragment]
 
 in vec3 fposition;
 in vec3 fnormal;

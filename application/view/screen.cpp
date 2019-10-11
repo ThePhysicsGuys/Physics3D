@@ -164,7 +164,7 @@ void Screen::onInit() {
 
 	layerStack.pushLayer(&skyboxLayer);
 	layerStack.pushLayer(&modelLayer);
-	layerStack.pushLayer(&testLayer);
+	//layerStack.pushLayer(&testLayer);
 	layerStack.pushLayer(&debugLayer);
 	layerStack.pushLayer(&pickerLayer);
 	layerStack.pushLayer(&postprocessLayer);
@@ -212,10 +212,10 @@ void Screen::onUpdate() {
 			if (camera.flying) camera.move(*this, 0, 1, 0, leftDragging);
 		if (handler->getKey(KeyboardOptions::Move::descend))
 			if (camera.flying) camera.move(*this, 0, -1, 0, leftDragging);
-		if (handler->getKey(KeyboardOptions::Rotate::left))  camera.rotate(*this, 0, -1, 0, leftDragging);
-		if (handler->getKey(KeyboardOptions::Rotate::right)) camera.rotate(*this, 0, 1, 0, leftDragging);
-		if (handler->getKey(KeyboardOptions::Rotate::up))    camera.rotate(*this, -1, 0, 0, leftDragging);
-		if (handler->getKey(KeyboardOptions::Rotate::down))  camera.rotate(*this, 1, 0, 0, leftDragging);
+		if (handler->getKey(KeyboardOptions::Rotate::left))  camera.rotate(*this, 0, 1, 0, leftDragging);
+		if (handler->getKey(KeyboardOptions::Rotate::right)) camera.rotate(*this, 0, -1, 0, leftDragging);
+		if (handler->getKey(KeyboardOptions::Rotate::up))    camera.rotate(*this, 1, 0, 0, leftDragging);
+		if (handler->getKey(KeyboardOptions::Rotate::down))  camera.rotate(*this, -1, 0, 0, leftDragging);
 		if (handler->getKey(KeyboardOptions::Application::close)) Renderer::closeGLFWWindow();
 		if (handler->getKey(KeyboardOptions::Debug::frame)) { guiLayer.debugFrame->visible = true; guiLayer.debugFrame->position = Vec2(0.8); GUI::select(guiLayer.debugFrame); }
 	}

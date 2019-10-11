@@ -1,5 +1,10 @@
-#shader vertex
+[common]
+
 #version 330 core
+
+//------------------------------------------------------------------------------//
+
+[vertex]
 
 layout(location = 0) in vec4 positions;
 
@@ -10,10 +15,9 @@ void main() {
 	ftextureUV = positions.zw;
 }
 
-////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------//
 
-#shader fragment
-#version 330 core
+[fragment]
 
 in vec2 ftextureUV;
 out vec4 outColor;

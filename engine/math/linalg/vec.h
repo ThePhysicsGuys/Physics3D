@@ -9,31 +9,49 @@ struct Vector {
 			this->data[i] = 0;
 		}
 	}
+
 	template<typename OtherT>
 	Vector(const Vector<OtherT, Size>& other) {
 		for (size_t i = 0; i < Size; i++) {
 			this->data[i] = static_cast<T>(other.data[i]);
 		}
 	}
+
 	explicit Vector(T v) {
 		for (size_t i = 0; i < Size; i++) {
 			this->data[i] = v;
 		}
 	};
+
 	Vector(const Vector<T, Size - 1>& other, T finalVal) {
 		for (size_t i = 0; i < Size - 1; i++) {
 			this->data[i] = other.data[i];
 		}
 		this->data[Size - 1] = finalVal;
 	}
-	Vector(const Vector<T, Size + 1> & other) {
+
+	Vector(const Vector<T, Size + 1>& other) {
 		for (size_t i = 0; i < Size; i++) {
 			this->data[i] = other.data[i];
 		}
 	}
 
-	T& operator[](size_t index) { return data[index]; }
-	const T& operator[](size_t index) const { return data[index]; }
+	T& operator[](size_t index) {
+		return data[index];
+	}
+
+	const T& operator[](size_t index) const {
+		return data[index];
+	}
+
+	template<typename T, size_t Size>
+	bool operator==(const Vector<T, Size>& other) const {
+		for (size_t i = 0; i < Size; i++)
+			if (data[i] != other[i])
+				return false;
+
+		return true;
+	}
 };
 
 template<typename T>
@@ -42,6 +60,7 @@ struct Vector<T, 2> {
 		struct { T x; T y; };
 		T data[2];
 	};
+
 	Vector() : x(0), y(0) {}
 	Vector(T x, T y) : x(x), y(y) {}
 	explicit Vector(T v) : x(v), y(v) {}
@@ -49,8 +68,17 @@ struct Vector<T, 2> {
 	Vector(const Vector<OtherT, 2>& other) : x(static_cast<T>(other.x)), y(static_cast<T>(other.y)) {}
 	explicit Vector(const Vector<T, 3> & other) : x(other.x), y(other.y) {}
 	
-	T& operator[](size_t index) { return data[index]; }
-	const T& operator[](size_t index) const { return data[index]; }
+	T& operator[](size_t index) {
+		return data[index]; 
+	}
+
+	const T& operator[](size_t index) const { 
+		return data[index]; 
+	}
+
+	bool operator==(const Vector<T, 2>& other) const {
+		return (other[0] == data[0]) && (other[1] == data[1]);
+	}
 };
 
 template<typename T>
@@ -59,6 +87,7 @@ struct Vector<T, 3> {
 		struct { T x; T y; T z; };
 		T data[3];
 	};
+
 	Vector() : x(0), y(0), z(0) {}
 	Vector(T x, T y, T z) : x(x), y(y), z(z) {};
 	explicit Vector(T v) : x(v), y(v), z(v) {}
@@ -67,8 +96,17 @@ struct Vector<T, 3> {
 	Vector(const Vector<T, 2>& other, T z) : x(other.x), y(other.y), z(z) {}
 	explicit Vector(const Vector<T, 4> & other) : x(other.x), y(other.y), z(other.z) {}
 
-	T& operator[](size_t index) { return data[index]; }
-	const T& operator[](size_t index) const { return data[index]; }
+	T& operator[](size_t index) { 
+		return data[index]; 
+	}
+
+	const T& operator[](size_t index) const { 
+		return data[index];
+	}
+
+	bool operator==(const Vector<T, 3>& other) const {
+		return (other[0] == data[0]) && (other[1] == data[1]) && (other[2] == data[2]);
+	}
 
 	Vector<T, 3> rotateAround(const Vector<T, 3> other, T angle) const {
 		T s = sin(angle);
@@ -92,9 +130,19 @@ struct Vector<T, 4> {
 	Vector(const Vector<T, 3>& other, T w) : x(other.x), y(other.y), z(other.z), w(w) {}
 	explicit Vector(const Vector<T, 5> & other) : x(other[0]), y(other[1]), z(other[2]), w(other[3]) {}
 
-	T& operator[](size_t index) { return data[index]; }
-	const T& operator[](size_t index) const { return data[index]; }
-};
+	T& operator[](size_t index) { 
+		return data[index]; 
+	}
+
+	const T& operator[](size_t index) const { 
+		return data[index]; 
+	}
+
+	bool operator==(const Vector<T, 4>& other) const {
+		return (other[0] == data[0]) && (other[1] == data[1]) && (other[2] == data[2]) && (other[3] == data[3]);
+	}
+}; 
+
 
 typedef Vector<double, 2>		Vec2;
 typedef Vector<float, 2>		Vec2f;
@@ -110,8 +158,6 @@ typedef Vector<double, 4>		Vec4;
 typedef Vector<float, 4>		Vec4f;
 typedef Vector<long long, 4>	Vec4l;
 typedef Vector<int, 4>			Vec4i;
-
-
 
 
 template<typename T, typename T2, size_t Size>
@@ -184,6 +230,7 @@ Vector<T, Size>& operator+=(Vector<T, Size>& vec, const Vector<T2, Size>& other)
 	}
 	return vec;
 }
+
 template<typename T, typename T2, size_t Size>
 Vector<T, Size>& operator-=(Vector<T, Size>& vec, const Vector<T2, Size>& other) {
 	for (size_t i = 0; i < Size; i++) {
@@ -191,6 +238,7 @@ Vector<T, Size>& operator-=(Vector<T, Size>& vec, const Vector<T2, Size>& other)
 	}
 	return vec;
 }
+
 template<typename T, typename T2, size_t Size>
 Vector<T, Size>& operator*=(Vector<T, Size>& vec, const T2& factor) {
 	for (size_t i = 0; i < Size; i++) {
@@ -198,6 +246,7 @@ Vector<T, Size>& operator*=(Vector<T, Size>& vec, const T2& factor) {
 	}
 	return vec;
 }
+
 template<typename T, typename T2, size_t Size>
 Vector<T, Size>& operator/=(Vector<T, Size>& vec, const T2& factor) {
 	for (size_t i = 0; i < Size; i++) {

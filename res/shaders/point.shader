@@ -1,5 +1,10 @@
-#shader vertex // vertex shader
-#version 330 core 
+[common]
+
+#version 330 core
+
+//------------------------------------------------------------------------------//
+
+[vertex]
 
 layout(location = 0) in vec3 vposition;
 layout(location = 1) in float vsize;
@@ -17,10 +22,9 @@ void main() {
 	gl_Position = vec4(vposition, 1);
 }
 
-///////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------//
 
-#shader geometry // geometry shader
-#version 330 core
+[geometry]
 
 layout(points) in;
 layout(triangle_strip, max_vertices = 24) out;
@@ -72,10 +76,9 @@ void main() {
 	makeTriangle(xNeg, yNeg, zPos, colorA);
 }
 
-///////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------//
 
-#shader fragment // fragment shader
-#version 330 core
+[fragment]
 
 layout(location = 0) out vec4 outColor;
 

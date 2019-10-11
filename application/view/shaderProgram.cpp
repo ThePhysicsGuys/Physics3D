@@ -111,6 +111,11 @@ ShaderProgram::~ShaderProgram() {
 
 // BasicShader
 
+void BasicShader::updateUniforms(int id) {
+	bind();
+	shader.setUniform("uniforms", id);
+}
+
 void BasicShader::updatePart(const ExtendedPart& part) {
 	bind();
 	shader.setUniform("includeNormals", int(part.visualShape.normals != nullptr));

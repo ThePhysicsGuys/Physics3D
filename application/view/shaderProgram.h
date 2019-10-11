@@ -46,7 +46,7 @@ struct MaskShader : public ShaderProgram {
 
 struct BasicShader : public ShaderProgram {
 	BasicShader() : ShaderProgram() {}
-	BasicShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, "modelMatrix", "viewMatrix", "projectionMatrix", "viewPosition", "includeNormals", "includeUvs", "material.ambient", "material.diffuse", "material.specular", "material.reflectance", "material.textured", "material.normalmapped", "textureSampler", "normalSampler", "sunDirection", "sunColor", "gamma", "hdr", "exposure") {}
+	BasicShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, "modelMatrix", "viewMatrix", "projectionMatrix", "viewPosition", "includeNormals", "includeUvs", "material.ambient", "material.diffuse", "material.specular", "material.reflectance", "material.textured", "material.normalmapped", "textureSampler", "normalSampler", "sunDirection", "sunColor", "gamma", "hdr", "exposure", "uniforms") {}
 
 	void createLightArray(int size);
 	void updateSunDirection(const Vec3f& sunDirection);
@@ -59,7 +59,7 @@ struct BasicShader : public ShaderProgram {
 	void updatePart(const ExtendedPart& part);
 	void updateMaterial(const Material& material);
 	void updateModel(const Mat4f& modelMatrix);
-
+	void updateUniforms(int id);
 };
 
 struct DepthShader : public ShaderProgram {

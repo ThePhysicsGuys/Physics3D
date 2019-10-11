@@ -1,5 +1,11 @@
-#shader vertex
+[common]
+
 #version 330 core
+
+//------------------------------------------------------------------------------//
+
+[vertex]
+
 layout (location = 0) in vec3 vposition;
 
 varying vec3 scattering;
@@ -62,10 +68,9 @@ void main() {
 	gl_Position = position;
 }
 
-//////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------//
 
-#shader fragment
-#version 330  core
+[fragment]
 
 out vec4 outColor;
 

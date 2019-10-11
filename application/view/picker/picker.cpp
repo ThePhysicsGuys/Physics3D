@@ -25,7 +25,7 @@
 #include "../engine/physical.h"
 #include "../engine/sharedLockGuard.h"
 #include "../engine/geometry/shape.h"
-#include "../engine/filters.h"
+#include "../engine/misc/filters/rayIntersectsBoundsFilter.h"
 #include "view/debug/visualDebug.h"
 
 namespace Picker {
@@ -190,8 +190,7 @@ namespace Picker {
 	void moveGrabbedPhysicalLateral(Screen& screen) {
 		if (screen.selectedPart == nullptr) return;
 		
-		Mat3 cameraFrame = (screen.camera.cframe.rotation).transpose();
-		Vec3 cameraDirection = cameraFrame * Vec3(0, 0, 1);
+		Vec3 cameraDirection = screen.camera.cframe.rotation * Vec3(0, 0, 1);
 
 		double distance = Vec3(screen.selectedPoint - screen.camera.cframe.position) * cameraDirection / (screen.ray * cameraDirection);
 		Position planeIntersection = screen.camera.cframe.position + screen.ray * distance;
@@ -209,8 +208,7 @@ namespace Picker {
 	void moveGrabbedPhysicalTransversal(Screen& screen, double dz) {
 		if (screen.selectedPart == nullptr) return;
 		
-		Mat3 cameraFrame = screen.camera.cframe.rotation.transpose();
-		Vec3 cameraDirection = cameraFrame * Vec3(0, 0, 1);
+		Vec3 cameraDirection = screen.camera.cframe.rotation * Vec3(0, 0, 1);
 		Vec3 cameraYDirection = normalize(Vec3(cameraDirection.x, 0, cameraDirection.z));
 
 		double distance = Vec3(screen.selectedPoint - screen.camera.cframe.position) * cameraDirection / (screen.ray * cameraDirection);

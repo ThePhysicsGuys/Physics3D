@@ -1,5 +1,10 @@
-#shader vertex 
+[common]
+
 #version 330 core
+
+//------------------------------------------------------------------------------//
+
+[vertex]
 
 layout (location = 0) in vec4 vertex;
 
@@ -12,10 +17,9 @@ void main() {
     fUVTexture = vertex.zw;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------//
 
-#shader fragment
-#version 330 core
+[fragment]
 
 in vec2 fUVTexture;
 out vec4 outColor;
