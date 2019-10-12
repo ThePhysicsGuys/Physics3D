@@ -278,13 +278,39 @@ namespace Path {
 		Path::batch->pushCommand(id);
 	}
 
-	void text(Font* font, const std::string& text, const Vec2f& pos, const Vec4f& color, double size) {
+	void text(Font* font, const std::string& text, double size, const Vec2f& pos, const Vec4f& color, char textPivot) {
+		if (text.empty())
+			return;
+
+		int vertexCount = 4 * text.size();
+		int indexCount = 6 * text.size();
+		Vec2f textSize = font->size(text, size);
+
+		// TextPivotHL default
 		float x = pos.x;
+
+		// TextPivotVB default
+		float y = pos.y;
+
+		if (textPivot & TextPivotHC)
+			x -= textSize.x / 2.0f;
+
+		if (textPivot & TextPivotHR)
+			x -= textSize.x;
+
+		if (textPivot & TextPivotVT)
+			y -= textSize.y;
+
+		if (textPivot & TextPivotVC)
+			y -= textSize.y / 2.0f;
+
+		Path::batch->pushCommand(0);
+		Path::batch->reserve(vertexCount, indexCount);
 		for (auto iterator = text.begin(); iterator != text.end(); iterator++) {
 			const Font::Character& character = font->characters[*iterator];
 			float descend = character.height - character.by;
 			float xpos = x + character.bx * size;
-			float ypos = pos.y - descend * size;
+			float ypos = y - descend * size;
 
 			float w = character.width * size;
 			float h = character.height * size;
@@ -293,9 +319,6 @@ namespace Path {
 			float t = float(character.y) / font->getAtlasHeight();
 			float ds = float(character.width) / font->getAtlasWidth();
 			float dt = float(character.height) / font->getAtlasHeight();
-
-			int vertexCount = 4;
-			int indexCount = 6;
 
 			Vec2f a = Vec2f(xpos, ypos);
 			Vec2f b = Vec2f(xpos + w, ypos);
@@ -306,13 +329,12 @@ namespace Path {
 			Vec2f uvC = Vec2f(s + ds, t);
 			Vec2f uvD = Vec2f(s, t);
 
-			Path::batch->pushCommand(0);
-			Path::batch->reserve(vertexCount, indexCount);
 			pushQuad(a, b, c, d, color, color, color, color, uvA, uvB, uvC, uvD);
-			Path::batch->pushCommand(font->getAtlasID());
 
 			x += (character.advance >> 6) * size;
 		}
+
+		Path::batch->pushCommand(font->getAtlasID());
 	}
 
 	void bezier(const Vec2f& a, const Vec2f& b, const Vec2f& c, const Vec2f& d, float thickness, const Vec4f& color, int precision) {

@@ -1,5 +1,8 @@
 #include "core.h"
 
+#include "GL/glew.h"
+#include "GLFW/glfw3.h"
+
 #include "modelLayer.h"
 
 #include "../screen.h"
@@ -41,6 +44,25 @@ ModelLayer::ModelLayer(Screen* screen, char flags) : Layer("Model", screen, flag
 
 void ModelLayer::onInit() {
 	Shaders::basicShader.createLightArray(lightCount);
+
+	CFramef frame(Vec3f(1.0f, 2.0f, 3.0f), Mat3f{ -0.0f, -1.0f, -2.0f, -3.0f, -4.0f, -5.0f, -6.0f, -7.0f, -8.0f });
+	Material material = Material(Vec4f(1.0f, 2.0f, 1.0f, 2.0f), Vec3f(3.0f, 4.0f, 3.0f), Vec3f(5.0f, 6.0f, 5.0f), 7.0f);	
+
+	//glGenTextures(1, &id);
+}
+
+void fillUniformBuffer(int id, float* texture, const Material& material, const Mat4f& matrix) {
+	int index = id * 28;
+	for (float i : matrix.data)
+		texture[index++] = i;
+	for (float i : material.ambient.data)
+		texture[index++] = i;
+	for (float i : material.diffuse.data)
+		texture[index++] = i;
+	texture[index++] = material.reflectance;
+	for (float i : material.specular.data)
+		texture[index++] = i;
+	texture[index++] = 0;
 }
 
 void ModelLayer::onUpdate() {
@@ -93,9 +115,13 @@ void ModelLayer::onRender() {
 			}
 
 			Shaders::basicShader.updateMaterial(material);
-
-			// Render each physical
 			Shaders::basicShader.updatePart(part);
+
+			/*fillUniformBuffer(0, texture, material, CFrameToMat4(part.getCFrame()));
+			glBindTexture(GL_TEXTURE_2D, id);
+			glActiveTexture(GL_TEXTURE0);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 28, 1, 0, GL_RGBA, GL_FLOAT, texture);
+			Shaders::basicShader.updateUniforms(id);*/
 
 			if (meshId == -1) continue;
 

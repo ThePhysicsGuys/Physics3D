@@ -67,25 +67,25 @@ void PieChart::renderText(Screen& screen, Font* font) const {
 
 	// Title
 	Vec2f titlePosition = piePosition + Vec2f(pieSize * 1.3f, pieSize * 1.1f);
-	Path::text(font, title, Vec2(titlePosition.x, titlePosition.y), Vec4f(1, 1, 1, 1), 0.001);
+	Path::text(font, title, 0.001, Vec2(titlePosition.x, titlePosition.y), Vec4f(1, 1, 1, 1));
 
 	Vec2f textPosition = Vec2(piePosition + Vec2f(pieSize * 1.3f, pieSize * 1.1f - 0.05f));
 
 	float totalWeight = getTotal();
 
-	Path::text(font, totalValue, textPosition + Vec2(0.50, 0.035), Vec4(1, 1, 1, 1), 0.0006);
+	Path::text(font, totalValue, 0.0006, textPosition + Vec2(0.50, 0.035), Vec4(1, 1, 1, 1));
 
 	for (int i = 0; i < parts.size(); i++) {
 		const DataPoint& p = parts[i];
 		Vec2 linePosition = textPosition + Vec2(0, -i*0.035);
-		Path::text(font, p.label, linePosition, Vec4(p.color, 1), 0.0006);
+		Path::text(font, p.label, 0.0006, linePosition, Vec4(p.color, 1));
 
 		std::stringstream percent;
 		percent.precision(4);
 		percent << p.weight/totalWeight * 100;
 		percent << "%";
-		Path::text(font, percent.str(), linePosition + Vec2(0.35, 0), Vec4(p.color, 1), 0.0006);
-		Path::text(font, p.value, linePosition + Vec2(0.50, 0), Vec4(p.color, 1), 0.0006);
+		Path::text(font, percent.str(), 0.0006, linePosition + Vec2(0.35, 0), Vec4(p.color, 1));
+		Path::text(font, p.value, 0.0006, linePosition + Vec2(0.50, 0), Vec4(p.color, 1));
 	}
 
 	GUI::batch->submit();
@@ -136,7 +136,7 @@ void BarChart::render() {
 		}
 	}
 
-	Path::text(GUI::font, title, position + Vec2f(0, this->dimension.y - titleHeight), GUI::COLOR::WHITE, 0.001);
+	Path::text(GUI::font, title, 0.001, position + Vec2f(0, this->dimension.y - titleHeight), GUI::COLOR::WHITE);
 
 	for (int cl = 0; cl < data.height; cl++) {
 		const BarChartClassInformation& info = classes[cl];
@@ -150,17 +150,17 @@ void BarChart::render() {
 			Vec2f topTextPosition = bottomLeft + Vec2(0, height+drawingSize.y * 0.02);
 			//topTextPosition.x *= GUI::screen->dimension.x / GUI::screen->dimension.y;
 
-			Path::text(GUI::font, dataPoint.value, topTextPosition, Vec4(info.color, 1), 0.0005);
+			Path::text(GUI::font, dataPoint.value, 0.0005, topTextPosition, Vec4(info.color, 1));
 		}
 	}
 
 	for (int i = 0; i < data.width; i++) {
 		Vec2f botLeft = position + Vec2f(marginLeft, 0) + Vec2f(categoryWidth * i, 0);
-		Path::text(GUI::font, labels[i], botLeft, GUI::COLOR::WHITE, 0.0005);
+		Path::text(GUI::font, labels[i], 0.0005, botLeft, GUI::COLOR::WHITE);
 	}
 
 	for (int cl = 0; cl < data.height; cl++)
-		Path::text(GUI::font, classes[cl].name, drawingPosition + Vec2f(this->dimension.x - 0.3, drawingSize.y - 0.035 * cl), Vec4(classes[cl].color, 1), 0.0007);
+		Path::text(GUI::font, classes[cl].name, 0.0007, drawingPosition + Vec2f(this->dimension.x - 0.3, drawingSize.y - 0.035 * cl), Vec4(classes[cl].color, 1));
 
 	GUI::batch->submit();
 }
@@ -253,9 +253,9 @@ void SlidingLineChart::add(float value) {
 }
 
 void SlidingLineChart::render() {
-	Vec2f xRange = Vec2f(-GUI::screen->camera.aspect, GUI::screen->camera.aspect) * 2;
-	Vec2f yRange = Vec2(-1, 1);
 	float axisOffset = 0.03;
+	Vec2f yRange = Vec2(-1, 1);
+	Vec2f xRange = Vec2f(-GUI::screen->camera.aspect, GUI::screen->camera.aspect) * 2;
 	Path::rectUVRange(GUI::screen->blurFrameBuffer->texture->getID(), position, dimension, xRange, yRange, Vec4f(0.4, 0.4, 0.4, 1));
 	Path::line(position + Vec2f(-axisOffset, -dimension.y), position + Vec2f(dimension.x + axisOffset, -dimension.y), 2.0f, GUI::COLOR::WHITE);
 	Path::line(position + Vec2f(0, axisOffset), position + Vec2f(0, -dimension.y - axisOffset), 2.0f, GUI::COLOR::WHITE);
@@ -281,8 +281,8 @@ void SlidingLineChart::render() {
 	float lastY = (lastValue - startY) * stepY;
 	float scale = 0.001f;
 	Vec2f titleSize = GUI::font->size(title, scale);
-	Path::text(GUI::font, std::to_string(lastValue), Vec2f((bottomLeft.x + dimension.x) * 1.01, bottomLeft.y + lastY), GUI::COLOR::WHITE, scale);
-	Path::text(GUI::font, title, Vec2f(position.x + (dimension.x - titleSize.x) / 2.0f, position.y + axisOffset), GUI::COLOR::WHITE, scale);
+	Path::text(GUI::font, std::to_string(lastValue), scale, Vec2f((bottomLeft.x + dimension.x) * 1.01, bottomLeft.y + lastY), GUI::COLOR::WHITE);
+	Path::text(GUI::font, title, scale, Vec2f(position.x + (dimension.x - titleSize.x) / 2.0f, position.y + axisOffset), GUI::COLOR::WHITE);
 }
 
 #pragma endregion

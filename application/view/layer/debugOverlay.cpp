@@ -24,7 +24,8 @@ BarChartClassInformation iterChartClasses[] {
 };
 
 BarChart iterationChart("Iteration Statistics", "", GJKCollidesIterationStatistics.labels, iterChartClasses, Vec2f(-1.0f + 0.1f, -0.3f), Vec2f(0.8f, 0.6f), 3, 17);
-SlidingLineChart slidingChart("test", 100, Vec2f(-0.3, 0.2), Vec2f(0.7, 0.4));
+
+SlidingLineChart fpsSlidingChart("FPS", 100, Vec2f(-0.3, 0.2), Vec2f(0.7, 0.4));
 
 DebugOverlay::DebugOverlay() {
 
@@ -104,8 +105,8 @@ void DebugOverlay::onRender() {
 		});
 
 		Path::bind(GUI::batch);
-		slidingChart.add(graphicsMeasure.getAvgTPS());
-		slidingChart.render();
+		fpsSlidingChart.add(graphicsMeasure.getAvgTPS());
+		fpsSlidingChart.render();
 		GUI::batch->submit();
 	}
 }

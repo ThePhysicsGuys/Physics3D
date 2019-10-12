@@ -153,7 +153,7 @@ namespace Debug {
 		std::stringstream string;
 		string.precision(4);
 		string << varName << ": " << value << unit;
-		Path::text(font, string.str().c_str(), Vec2(-dimension.x / dimension.y * 0.99, (1 - fieldIndex * 0.05) * 0.95), Vec4(1, 1, 1, 1), 0.001);
+		Path::text(font, string.str().c_str(), 0.001, Vec2(-dimension.x / dimension.y * 0.99, (1 - fieldIndex * 0.05) * 0.95), Vec4(1, 1, 1, 1));
 		fieldIndex++;
 	}
 

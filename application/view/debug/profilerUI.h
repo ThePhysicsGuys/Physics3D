@@ -61,7 +61,7 @@ struct BarChart : public Component {
 	float getMaxWeight() const;
 };
 
-struct SlidingDataChart : public Component {
+struct SlidingLineChart : public Component {
 	const char* title;
 
 	int size;
@@ -70,7 +70,7 @@ struct SlidingDataChart : public Component {
 	float mean;
 	float deviation;
 
-	inline SlidingDataChart(const char* title, int size, Vec2 position, Vec2 dimension) : title(title), size(size), mean(0), deviation(1), Component(position, dimension) {};
+	inline SlidingLineChart(const char* title, int size, Vec2 position, Vec2 dimension) : title(title), size(size), mean(0), deviation(1), Component(position, dimension) {};
 
 	void add(float value);
 	void render() override;

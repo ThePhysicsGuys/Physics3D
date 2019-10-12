@@ -36,7 +36,7 @@ void Label::render() {
 		resize();
 		
 		Vec2 textPosition = position + Vec2(padding, -dimension.y + padding);
-		Path::text(font, text, textPosition, GUI::COLOR::blend(foregroundColor, blendColor), scale);
+		Path::text(font, text, scale, textPosition, GUI::COLOR::blend(foregroundColor, blendColor));
 
 		if (debug) {
 			Path::rect(position, dimension, 0.0f, GUI::COLOR::R);

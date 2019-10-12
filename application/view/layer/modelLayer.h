@@ -5,6 +5,9 @@
 class Screen;
 
 class ModelLayer : public Layer {
+private:
+	unsigned int id;
+	float texture[28];
 public:
 	ModelLayer();
 	ModelLayer(Screen* screen, char flags = None);

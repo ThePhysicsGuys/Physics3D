@@ -55,7 +55,6 @@ void Button::render() {
 			buttonDimension = dimension - Vec2f(borderWidth) * 2;
 		}
 
-
 		if (pressed)
 			if (textured) Path::rectUV(pressTexture->getID(), position, dimension);
 			else Path::rectFilled(position, dimension, 0, GUI::COLOR::blend(pressColor, blendColor));
@@ -67,7 +66,7 @@ void Button::render() {
 			else Path::rectFilled(position, dimension, 0, GUI::COLOR::blend(idleColor, blendColor));
 
 		if (!text.empty())
-			Path::text(GUI::font, text, position + Vec2(borderWidth, -borderWidth), GUI::COLOR::blend(fontColor, blendColor), fontSize);
+			Path::text(GUI::font, text, fontSize, position + Vec2(borderWidth, -borderWidth), GUI::COLOR::blend(fontColor, blendColor));
 	}
 }
 

@@ -5,6 +5,28 @@
 
 namespace Path {
 
+	//! Flags
+
+	enum TextFlags : char {
+		// Align text pivot horizontal left
+		TextPivotHL = 1 << 0,
+
+		// Align text pivot horizontal centered
+		TextPivotHC = 1 << 1,
+
+		// Align text pivot horizontal right
+		TextPivotHR = 1 << 2,
+
+		// Align text pivot vertical top
+		TextPivotVT = 1 << 3,
+
+		// Align text pivot vertical centered
+		TextPivotVC = 1 << 4,
+
+		// Align text pivot vertical bottom
+		TextPivotVB = 1 << 5
+	};					  
+
 	//! Batch
 
 	// Current batch
@@ -62,7 +84,7 @@ namespace Path {
 	void quadUV(unsigned int id, const Vec2f& a, const Vec2f& b, const Vec2f& c, const Vec2f& d, const Vec2f& uvA = Vec2f(0, 0), const Vec2f& uvB = Vec2f(0, 1), const Vec2f& uvC = Vec2f(1, 1), const Vec2f& uvD = Vec2f(0, 1));
 
 	// Adds a string to the batch with the given font
-	void text(Font* font, const std::string& text, const Vec2f& pos, const Vec4f& color, double size);
+	void text(Font* font, const std::string& text, double size, const Vec2f& pos, const Vec4f& color = GUI::COLOR::WHITE, char textPivot = TextPivotHL | TextPivotVB);
 
 	// Adds a bezier curve to the batch, with the given control points
 	void bezier(const Vec2f& a, const Vec2f& b, const Vec2f& c, const Vec2f& d, float thickness = 1.0f, const Vec4f& color = GUI::COLOR::WHITE, int precision = 20);
