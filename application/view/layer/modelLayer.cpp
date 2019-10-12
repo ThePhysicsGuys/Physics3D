@@ -19,6 +19,8 @@
 #include "../../meshLibrary.h"
 #include "../engine/sharedLockGuard.h"
 
+#include "../engine/misc/filters/visibilityFilter.h"
+
 
 // Light uniforms
 Vec3f sunDirection;
@@ -97,8 +99,11 @@ void ModelLayer::onRender() {
 
 		graphicsMeasure.mark(GraphicsProcess::PHYSICALS);
 
+		const Camera& camera = screen->camera;
+
+		VisibilityFilter filter(camera.cframe.position, camera.getForwardDirection(), camera.getUpDirection(), camera.fov, camera.aspect, camera.zfar);
 		// Render world objects
-		for (ExtendedPart& part : screen->world->iterPartsFiltered(DoNothingFilter<Part>(), ALL_PARTS)) {
+		for (ExtendedPart& part : screen->world->iterPartsFiltered(filter, ALL_PARTS)) {
 			int meshId = part.drawMeshId;
 
 			Material material = part.material;

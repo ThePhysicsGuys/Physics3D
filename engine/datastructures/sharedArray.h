@@ -22,12 +22,12 @@ public:
 		return *this;
 	}
 
-	inline SharedArrayPtr(SharedArrayPtr<T>&& other) : ptr(other.ptr), refCount(other.refCount) {
+	inline SharedArrayPtr(SharedArrayPtr<T>&& other) noexcept : ptr(other.ptr), refCount(other.refCount)  {
 		other.ptr = nullptr;
 		other.refCount = nullptr;
 	}
 
-	inline SharedArrayPtr& operator=(SharedArrayPtr<T>&& other) {
+	inline SharedArrayPtr& operator=(SharedArrayPtr<T>&& other) noexcept {
 		this->~SharedArrayPtr();
 		this->ptr = other.ptr;
 		this->refCount = other.refCount;
