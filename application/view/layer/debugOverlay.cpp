@@ -61,14 +61,14 @@ void DebugOverlay::onRender() {
 	addDebugField(screen->dimension, GUI::font, "Screen", str(screen->dimension) + ", [" + std::to_string(screen->camera.aspect) + ":1]", "");
 	addDebugField(screen->dimension, GUI::font, "Position", str(screen->camera.cframe.position), "");
 	addDebugField(screen->dimension, GUI::font, "Objects", objectCount, "");
-	addDebugField(screen->dimension, GUI::font, "Intersections", getTheoreticalNumberOfIntersections(objectCount), "");
+	//addDebugField(screen->dimension, GUI::font, "Intersections", getTheoreticalNumberOfIntersections(objectCount), "");
 	addDebugField(screen->dimension, GUI::font, "AVG Collide GJK Iterations", gjkCollideIterStats.avg(), "");
 	addDebugField(screen->dimension, GUI::font, "AVG No Collide GJK Iterations", gjkNoCollideIterStats.avg(), "");
 	addDebugField(screen->dimension, GUI::font, "TPS", physicsMeasure.getAvgTPS(), "");
 	addDebugField(screen->dimension, GUI::font, "FPS", graphicsMeasure.getAvgTPS(), "");
-	addDebugField(screen->dimension, GUI::font, "World Kinetic Energy", screen->world->getTotalKineticEnergy(), "");
+	/*addDebugField(screen->dimension, GUI::font, "World Kinetic Energy", screen->world->getTotalKineticEnergy(), "");
 	addDebugField(screen->dimension, GUI::font, "World Potential Energy", screen->world->getTotalPotentialEnergy(), "");
-	addDebugField(screen->dimension, GUI::font, "World Energy", screen->world->getTotalEnergy(), "");
+	addDebugField(screen->dimension, GUI::font, "World Energy", screen->world->getTotalEnergy(), "");*/
 	addDebugField(screen->dimension, GUI::font, "World Age", screen->world->age, " ticks");
 
 	if (renderPiesEnabled) {

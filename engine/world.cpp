@@ -25,6 +25,8 @@ void WorldPrototype::addPart(Part* part, bool anchored) {
 		part->parent = new Physical(part);
 		physicals.push_back(part->parent);
 		objectTree.add(part, part->getStrictBounds());
+
+		objectCount++;
 	} else {
 		if (part->parent->world == this) {
 			Log::warn("Attempting to readd part to world");
@@ -37,6 +39,8 @@ void WorldPrototype::addPart(Part* part, bool anchored) {
 		}
 		objectTree.add(std::move(newNode));
 		physicals.push_back(part->parent);
+
+		objectCount += part->parent->getPartCount();
 	}
 	part->parent->world = this;
 	part->parent->setAnchored(anchored);
@@ -48,15 +52,22 @@ void WorldPrototype::removePart(Part* part) {
 	Physical* parent = part->parent;
 	parent->detachPart(part);
 
+	objectCount--;
+
 	ASSERT_VALID;
 }
 void WorldPrototype::removePhysical(Physical* phys) {
+	objectCount -= phys->getPartCount();
+
 	NodeStack stack = objectTree.findGroupFor(phys->mainPart, phys->mainPart->getStrictBounds());
 	stack.remove();
 	physicals.erase(std::remove(physicals.begin(), physicals.end(), phys));
+
 	ASSERT_VALID;
 }
 void WorldPrototype::addTerrainPart(Part* part) {
+	objectCount++;
+
 	terrainTree.add(part, part->getStrictBounds());
 	part->isTerrainPart = true;
 }

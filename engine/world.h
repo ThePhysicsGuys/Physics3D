@@ -77,6 +77,7 @@ public:
 	std::vector<ConstraintGroup> constraints;
 
 	size_t age = 0;
+	size_t objectCount = 0;
 	double deltaT;
 
 	std::vector<Physical*> physicals;
@@ -97,16 +98,8 @@ public:
 	void addTerrainPart(Part* part);
 	void optimizeTerrain();
 
-	inline size_t getTerrainPartCount() const {
-		return terrainTree.getNumberOfObjects();
-	}
-
-	inline size_t getFreePartCount() const {
-		return objectTree.getNumberOfObjects();
-	}
-
 	inline size_t getPartCount() const {
-		return getTerrainPartCount() + getFreePartCount();
+		return objectCount;
 	}
 
 	virtual double getTotalKineticEnergy() const;
