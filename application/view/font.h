@@ -2,14 +2,13 @@
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
+#include "texture.h"
 
-class Texture;
-
-#define CHARACTERCOUNT 128
+#define CHARACTER_COUNT 128
 
 class Font {
 public:
-	Texture* atlas = nullptr;
+	Texture atlas;
 
 	struct Character {
 		union {
@@ -41,8 +40,9 @@ public:
 		Character() {};
 		Character(int x, int y, int width, int height, int bx, int by, int advance) : x(x), y(y), width(width), height(height), bx(bx), by(by), advance(advance) {};
 
-	} characters[CHARACTERCOUNT];
+	} characters[CHARACTER_COUNT];
 
+	Font();
 	Font(std::string font);
 
 	~Font();
@@ -53,7 +53,7 @@ public:
 
 	void close();
 
-	Vec2 size(const std::string& text, double scale);
+	Vec2f size(const std::string& text, double scale);
 
 	unsigned int getAtlasID() const;
 	unsigned int getAtlasWidth() const;

@@ -27,6 +27,7 @@ namespace Path {
 		TextPivotVB = 1 << 5
 	};					  
 
+
 	//! Batch
 
 	// Current batch

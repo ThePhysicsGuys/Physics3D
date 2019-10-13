@@ -10,10 +10,10 @@ class Slider : public Component {
 public:
 	SliderAction action = [] (Slider*) {};
 
-	Vec4 handleColor;
-	Vec4 backgroundColor;
-	Vec4 foregroundFilledColor;
-	Vec4 foregroundEmptyColor;
+	Vec4f handleColor;
+	Vec4f backgroundColor;
+	Vec4f foregroundFilledColor;
+	Vec4f foregroundEmptyColor;
 
 	double handleWidth;
 	double barWidth;

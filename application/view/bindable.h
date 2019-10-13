@@ -13,7 +13,7 @@ protected:
 	}
 
 public:
-	unsigned int getID() {
+	unsigned int getID() const {
 		return id;
 	}
 

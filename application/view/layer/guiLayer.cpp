@@ -27,11 +27,8 @@ GuiLayer::GuiLayer(Screen* screen, char flags) : Layer("Gui", screen, flags) {
 }
 
 void GuiLayer::onInit() {
-	// Font init
-	font = new Font("../res/fonts/droid.ttf");
-
 	// GUI init
-	GUI::onInit(screen, font);
+	GUI::onInit(screen);
 
 	// Frames init
 	propertiesFrame = new PropertiesFrame(0.75, 0.75);

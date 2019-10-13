@@ -53,7 +53,7 @@ Slider::Slider(double x, double y, double width, double height, double min, doub
 void Slider::render() {
 	if (visible) {
 
-		Vec4 blendColor = (disabled) ? GUI::COLOR::DISABLED : GUI::COLOR::WHITE;
+		Vec4f blendColor = (disabled) ? GUI::COLOR::DISABLED : GUI::COLOR::WHITE;
 
 		resize();
 

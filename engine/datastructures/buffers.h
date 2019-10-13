@@ -18,6 +18,7 @@ struct ListIter {
 	T* begin() const { return start; }
 	T* end() const { return fin; }
 };
+
 /*template<typename T>
 struct ConstListIter {
 	const T* start;
@@ -29,29 +30,37 @@ struct ConstListIter {
 template<typename T>
 struct ListOfPtrIter {
 	T* const* cur;
+
 	ListOfPtrIter() = default;
 	ListOfPtrIter(T* const* cur) : cur(cur) {}
+
 	T& operator*() const {
 		return **cur;
 	}
+
 	ListOfPtrIter& operator++() {
 		cur++;
 		return *this;
 	}
+
 	ListOfPtrIter operator++(int) {
 		ListOfPtrIter prevSelf = *this;
 		cur++;
 		return prevSelf;
 	}
+
 	bool operator==(const ListOfPtrIter& other) const {
 		return this->cur == other.cur;
 	}
+
 	bool operator!=(const ListOfPtrIter& other) const {
 		return this->cur != other.cur;
 	}
+
 	T* operator->() const {
 		return *cur;
 	}
+
 	operator T* () const {
 		return *cur;
 	}
@@ -77,37 +86,47 @@ struct BufferWithCapacity {
 
 	BufferWithCapacity() : data(nullptr), capacity(0) {};
 	BufferWithCapacity(size_t initialCapacity) : data(new T[initialCapacity]), capacity(initialCapacity) {}
-	~BufferWithCapacity() {
-		delete[] data;
-	}
-	BufferWithCapacity(const BufferWithCapacity& other) = delete;
-	void operator=(const BufferWithCapacity& other) = delete;
+
 	BufferWithCapacity(BufferWithCapacity&& other) noexcept {
 		this->data = other.data;
 		this->capacity = other.capacity;
 		other.data = nullptr;
 		other.capacity = 0;
 	}
+
+	~BufferWithCapacity() {
+		delete[] data;
+	}
+
+	BufferWithCapacity(const BufferWithCapacity& other) = delete;
+	void operator=(const BufferWithCapacity& other) = delete;
+
 	BufferWithCapacity& operator=(BufferWithCapacity&& other) noexcept {
 		std::swap(this->data, other.data);
 		std::swap(this->capacity, other.capacity);
 		return *this;
 	}
+
 	void resize(size_t newCapacity, size_t sizeToCopy) {
-		//Log::debug("Extending %s buffer capacity to %d", typeid(T).name(), newCapacity);
 		T* newBuf = new T[newCapacity];
-		for (size_t i = 0; i < sizeToCopy; i++) {
+		for (size_t i = 0; i < sizeToCopy; i++) 
 			newBuf[i] = std::move(data[i]);
-		}
+		
 		delete[] data;
 		data = newBuf;
 		capacity = newCapacity;
 	}
-	void ensureCapacity(size_t newCapacity, size_t sizeToCopy) {
-		if (newCapacity > capacity) {
-			resize(nextPowerOf2(newCapacity), sizeToCopy);
+
+	size_t ensureCapacity(size_t newCapacity, size_t sizeToCopy) {
+		if (newCapacity > this->capacity) {
+			size_t nextPower = nextPowerOf2(newCapacity);
+			resize(nextPower, sizeToCopy);
+			return nextPower;
 		}
+
+		return this->capacity;
 	}
+
 	T& operator[](size_t index) { return data[index]; }
 	const T& operator[](size_t index) const { return data[index]; }
 };
@@ -120,22 +139,23 @@ struct AddableBuffer : public BufferWithCapacity<T> {
 	AddableBuffer(size_t initialCapacity) : BufferWithCapacity<T>(initialCapacity) {}
 
 	AddableBuffer(T* data, size_t dataSize, size_t initialCapacity) : BufferWithCapacity<T>(initialCapacity), size(dataSize) {
-		if (data == nullptr) Log::fatal("Could not create AddableBuffer of size: %d", initialCapacity);
-		for (size_t i = 0; i < dataSize; i++) {
+		if (data == nullptr)
+			Log::fatal("Could not create AddableBuffer of size: %d", initialCapacity);
+		
+		for (size_t i = 0; i < dataSize; i++)
 			this->data[i] = data[i];
-		}
 	}
 
-	~AddableBuffer() {
-	}
+	~AddableBuffer() {}
 
 	AddableBuffer(const AddableBuffer<T>&) = delete;
 	AddableBuffer& operator=(const AddableBuffer<T>&) = delete;
 
-	AddableBuffer(AddableBuffer<T> && other) noexcept : BufferWithCapacity<T>(std::move(other)), size(other.size) {
+	AddableBuffer(AddableBuffer<T>&& other) noexcept : BufferWithCapacity<T>(std::move(other)), size(other.size) {
 		other.size = 0;
 	}
-	AddableBuffer<T>& operator=(AddableBuffer<T> && other) noexcept {
+
+	AddableBuffer<T>& operator=(AddableBuffer<T>&& other) noexcept {
 		BufferWithCapacity<T>::operator=(std::move(other));
 		size_t tmpSize = this->size;
 		this->size = other.size;
@@ -143,14 +163,23 @@ struct AddableBuffer : public BufferWithCapacity<T> {
 		return *this;
 	}
 
+	inline void resize(size_t newCapacity) {
+		BufferWithCapacity<T>::resize(newCapacity, this->size);
+	}
+
+	inline size_t ensureCapacity(size_t newCapacity) {
+		size_t newSize = BufferWithCapacity<T>::ensureCapacity(newCapacity, this->size);
+		return newSize;
+	}
+
 	inline T* add(const T& obj) {
-		this->ensureCapacity(this->size + 1, this->size);
+		this->ensureCapacity(this->size + 1);
 		this->data[this->size] = obj;
 		return &this->data[this->size++];
 	}
 
 	inline T* add(T&& obj) {
-		this->ensureCapacity(this->size + 1, this->size);
+		this->ensureCapacity(this->size + 1);
 		this->data[this->size] = std::move(obj);
 		return &this->data[this->size++];
 	}
@@ -180,6 +209,7 @@ struct FixedLocalBuffer {
 
 	const T* begin() const { return &buf; }
 	T* begin() { return &buf; }
+
 	const T* end() const { return buf + size; }
 	T* end() { return buf + size; }
 

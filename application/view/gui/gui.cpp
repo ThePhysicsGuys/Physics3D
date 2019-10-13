@@ -30,144 +30,145 @@
 
 #include "../../resource/resourceManager.h"
 #include "../../resource/textureResource.h"
+#include "../../resource/fontResource.h"
 
 namespace GUI {
 	namespace COLOR {
-		Vec4 get(int hex, bool alpha) {
-			Vec4 color;
+		Vec4f get(int hex, bool alpha) {
+			Vec4f color;
 			if (!alpha) hex = (hex << 8) | 0xFF;
-			color.x = ((hex >> 24) & 0xFF) / 255.0;
-			color.y = ((hex >> 16) & 0xFF) / 255.0;
-			color.z = ((hex >> 8) & 0xFF) / 255.0;
-			color.w = (hex & 0xFF) / 255.0;
+			color.x = ((hex >> 24) & 0xFF) / 255.0f;
+			color.y = ((hex >> 16) & 0xFF) / 255.0f;
+			color.z = ((hex >> 8) & 0xFF) / 255.0f;
+			color.w = (hex & 0xFF) / 255.0f;
 			return color;
 		}
 
-		Vec4 get(int hex) {
+		Vec4f get(int hex) {
 			return get(hex, false);
 		}
 
-		Vec3 hsvToRgb(Vec3 hsv) {
-			double h = hsv.x * 360.0;
-			double s = hsv.y;
-			double v = hsv.z;
+		Vec3f hsvToRgb(Vec3f hsv) {
+			float h = hsv.x * 360.0f;
+			float s = hsv.y;
+			float v = hsv.z;
 
 			if (s == 0.0)
-				return Vec3(v, v, v);
+				return Vec3f(v, v, v);
 				
-			int hi = (int)(h / 60.0) % 6;
-			double f = (h / 60.0) - hi;
-			double p = v * (1.0 - s);
-			double q = v * (1.0 - s * f);
-			double t = v * (1.0 - s * (1.0 - f));
+			int hi = (int) (h / 60.0f) % 6;
+			float f = (h / 60.0f) - hi;
+			float p = v * (1.0f - s);
+			float q = v * (1.0f - s * f);
+			float t = v * (1.0f - s * (1.0f - f));
 			
 			switch (hi) {
 				case 0:
-					return Vec3(v, t, p);
+					return Vec3f(v, t, p);
 					break;
 				case 1:
-					return Vec3(q, v, p);
+					return Vec3f(q, v, p);
 					break;
 				case 2:
-					return Vec3(p, v, t);
+					return Vec3f(p, v, t);
 					break;
 				case 3:
-					return Vec3(p, q, v);
+					return Vec3f(p, q, v);
 					break;
 				case 4:
-					return Vec3(t, p, v);
+					return Vec3f(t, p, v);
 					break;
 				case 5:
-					return Vec3(v, p, q);
+					return Vec3f(v, p, q);
 					break;
 			}
 
-			return Vec3();
+			return Vec3f();
 		}
 
-		Vec4 hsvaToRgba(Vec4 hsva) {
-			Vec3 color = hsvToRgb(Vec3(hsva.x, hsva.y, hsva.z));
-			return Vec4(color.x, color.y, color.z, hsva.w);
+		Vec4f hsvaToRgba(Vec4f hsva) {
+			Vec3f color = hsvToRgb(Vec3f(hsva.x, hsva.y, hsva.z));
+			return Vec4f(color.x, color.y, color.z, hsva.w);
 		}
 
-		Vec4 rgbaToHsva(Vec4 rgba) {
-			Vec3 color = rgbToHsv(Vec3(rgba.x, rgba.y, rgba.z));
-			return Vec4(color.x, color.y, color.z, rgba.w);
+		Vec4f rgbaToHsva(Vec4f rgba) {
+			Vec3f color = rgbToHsv(Vec3f(rgba.x, rgba.y, rgba.z));
+			return Vec4f(color.x, color.y, color.z, rgba.w);
 		}
 
-		Vec3 rgbToHsv(Vec3 rgb) {
-			double r = rgb.x;
-			double g = rgb.y;
-			double b = rgb.z;
-
-			double h = 0;
-			double s = 0;
-			double v = 0;
-
-			double min = fmin(fmin(r, g), b);
-			double max = fmax(fmax(r, g), b);
-
-			double d = max - min;
+		Vec3f rgbToHsv(Vec3f rgb) {
+			float r = rgb.x;
+			float g = rgb.y;
+			float b = rgb.z;
+			
+			float h = 0.0f;
+			float s = 0.0f;
+			float v = 0.0f;
+			
+			float min = fmin(fmin(r, g), b);
+			float max = fmax(fmax(r, g), b);
+			
+			float d = max - min;
 			v = max;
 
-			if (d == 0) {
-				h = 0;
-				s = 0;
+			if (d == 0.0f) {
+				h = 0.0f;
+				s = 0.0f;
 			} else {
 				s = d / max;
 
-				double dr = (((max - r) / 6.0) + (max / 2.0)) / d;
-				double dg = (((max - g) / 6.0) + (max / 2.0)) / d;
-				double db = (((max - b) / 6.0) + (max / 2.0)) / d;
+				float dr = (((max - r) / 6.0f) + (max / 2.0f)) / d;
+				float dg = (((max - g) / 6.0f) + (max / 2.0f)) / d;
+				float db = (((max - b) / 6.0f) + (max / 2.0f)) / d;
 
 				if (r == max)
 					h = db - dg;
 				else if (g == max)
-					h = 1.0 / 3.0 + dr - db;
+					h = 1.0f / 3.0f + dr - db;
 				else if (b == max)
-					h = 2.0 / 3.0 + dg - dr;
+					h = 2.0f / 3.0f + dg - dr;
 
-				if (h < 0)
-					h += 1;
-				if (h > 1)
-					h -= 1;
+				if (h < 0.0f)
+					h += 1.0f;
+				if (h > 1.0f)
+					h -= 1.0f;
 			
 			}
 
-			return Vec3(h, s, v);
+			return Vec3f(h, s, v);
 		}
 
-		Vec4 blend(Vec4 color1, Vec4 color2) {
-			return Vec4(color1.x * color2.x, color1.y * color2.y, color1.z * color2.z, color1.w * color2.w);
+		Vec4f blend(Vec4f color1, Vec4f color2) {
+			return Vec4f(color1.x * color2.x, color1.y * color2.y, color1.z * color2.z, color1.w * color2.w);
 		}
 
-		Vec4 DISABLED = get(0xA0A0A0);
-		Vec4 ACCENT = get(0x1F6678);
-		Vec4 BACK = get(0x4D4D4D);
-		Vec4 ALPHA = get(0x0, true);
+		Vec4f DISABLED = get(0xA0A0A0);
+		Vec4f ACCENT   = get(0x1F6678);
+		Vec4f BACK     = get(0x4D4D4D);
+		Vec4f ALPHA    = get(0x0, true);
 
-		Vec4 R = get(0xFF0000);
-		Vec4 G = get(0x00FF00);
-		Vec4 B = get(0x0000FF);
-		Vec4 A = get(0x0, true);
+		Vec4f R        = get(0xFF0000);
+		Vec4f G        = get(0x00FF00);
+		Vec4f B        = get(0x0000FF);
+		Vec4f A        = get(0x0, true);
 
-		Vec4 NAVY = get(0x001F3F);
-		Vec4 BLUE = get(0x0074D9);
-		Vec4 AQUA = get(0x7FDBFF);
-		Vec4 TEAL = get(0x39CCCC);
-		Vec4 OLIVE = get(0x3D9970);
-		Vec4 GREEN = get(0x2ECC40);
-		Vec4 LIME = get(0x01FF70);
-		Vec4 YELLOW	= get(0xFFDC00);
-		Vec4 ORANGE	= get(0xFF851B);
-		Vec4 RED = get(0xFF4136);
-		Vec4 MAROON	= get(0x85144b);
-		Vec4 FUCHSIA = get(0xF012BE);
-		Vec4 PURPLE	= get(0xB10DC9);
-		Vec4 BLACK = get(0x111111);
-		Vec4 GRAY = get(0xAAAAAA);
-		Vec4 SILVER	= get(0xDDDDDD);
-		Vec4 WHITE = get(0xFFFFFF);
+		Vec4f NAVY     = get(0x001F3F);
+		Vec4f BLUE     = get(0x0074D9);
+		Vec4f AQUA     = get(0x7FDBFF);
+		Vec4f TEAL     = get(0x39CCCC);
+		Vec4f OLIVE    = get(0x3D9970);
+		Vec4f GREEN    = get(0x2ECC40);
+		Vec4f LIME     = get(0x01FF70);
+		Vec4f YELLOW   = get(0xFFDC00);
+		Vec4f ORANGE   = get(0xFF851B);
+		Vec4f RED      = get(0xFF4136);
+		Vec4f MAROON   = get(0x85144b);
+		Vec4f FUCHSIA  = get(0xF012BE);
+		Vec4f PURPLE   = get(0xB10DC9);
+		Vec4f BLACK    = get(0x111111);
+		Vec4f GRAY     = get(0xAAAAAA);
+		Vec4f SILVER   = get(0xDDDDDD);
+		Vec4f WHITE    = get(0xFFFFFF);
 	};
 
 	// Global
@@ -190,7 +191,7 @@ namespace GUI {
 	Quad* quad = nullptr;
 
 	// Label
-	Vec4 labelBackgroundColor = COLOR::WHITE;
+	Vec4f labelBackgroundColor = COLOR::WHITE;
 
 	// Button
 	Texture* closeButtonHoverTexture;
@@ -199,7 +200,7 @@ namespace GUI {
 	Texture* minimizeButtonHoverTexture;
 	Texture* minimizeButtonIdleTexture;
 	Texture* minimizeButtonPressTexture;
-	Vec4 borderColor = COLOR::SILVER;
+	Vec4f borderColor = COLOR::SILVER;
 	double borderWidth = 0.004;
 
 	// Slider
@@ -207,10 +208,10 @@ namespace GUI {
 	double sliderHandleWidth = 0.02;
 	double sliderBarHeight = 0.004;
 	double sliderHandleHeight = 0.04;
-	Vec4 sliderHandleColor = COLOR::BACK;
-	Vec4 sliderBackgroundColor = COLOR::ALPHA;
-	Vec4 sliderForegroundFilledColor = COLOR::ACCENT;
-	Vec4 sliderForegroundEmptyColor = COLOR::GRAY;
+	Vec4f sliderHandleColor = COLOR::BACK;
+	Vec4f sliderBackgroundColor = COLOR::ALPHA;
+	Vec4f sliderForegroundFilledColor = COLOR::ACCENT;
+	Vec4f sliderForegroundEmptyColor = COLOR::GRAY;
 	
 	// ColorPicker
 	Texture* colorPickerCrosshairTexture;
@@ -218,7 +219,7 @@ namespace GUI {
 	Texture* colorPickerBrightnessTexture;
 	Texture* colorPickerAlphaBrightnessTexture;
 	Texture* colorPickerAlphaPatternTexture;
-	Vec4 colorPickerBarBorderColor = COLOR::SILVER;
+	Vec4f colorPickerBarBorderColor = COLOR::SILVER;
 	double colorPickerBarWidth = 0.05;
 	double colorPickerHueSize = 0.4;
 	double colorPickerCrosshairSize = 0.03;	
@@ -226,7 +227,7 @@ namespace GUI {
 	double colorPickerBarBorderWidth = 0.005;
 	double colorPickerSelectorWidth = 0.08;
 	double colorPickerSelectorHeight = 0.004;
-	Vec4 colorPickerSelectorColor = COLOR::SILVER;
+	Vec4f colorPickerSelectorColor = COLOR::SILVER;
 	
 	// CheckBox
 	Texture* checkBoxUncheckedTexture;
@@ -242,24 +243,27 @@ namespace GUI {
 	// Frame
 	double frameButtonOffset = 0.003;
 	double frameTitleBarHeight = 0.045;
-	Vec4 frameTitleBarColor = COLOR::ACCENT;
-	Vec4 frameBackgroundColor = COLOR::BACK;
+	Vec4f frameTitleBarColor = COLOR::ACCENT;
+	Vec4f frameBackgroundColor = COLOR::BACK;
 
 	// Font
 	Font* font = nullptr;
-	Vec4 fontColor = COLOR::SILVER;
+	Vec4f fontColor = COLOR::SILVER;
 	double fontSize = 0.0007;
 
 	GuiBatch* batch;
 
-	void onInit(Screen* screen, Font* font) {
+	void onInit(Screen* screen) {
 
 		GUI::batch = new GuiBatch();
 
 		GUI::screen = screen;
-		GUI::font = font;
-		GUI::guiFrameBuffer = new FrameBuffer(screen->dimension.x, screen->dimension.y);
 		GUI::quad = new Quad();
+		GUI::guiFrameBuffer = new FrameBuffer(screen->dimension.x, screen->dimension.y);
+
+		// font
+		ResourceManager::add<FontResource>("font", "../res/fonts/droid.ttf");
+		GUI::font = ResourceManager::get<FontResource>("font");
 
 		// closeButton
 		ResourceManager::add<TextureResource>("closeButtonIdleTexture", "../res/textures/gui/close_idle.png");

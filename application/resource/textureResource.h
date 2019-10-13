@@ -13,7 +13,7 @@ public:
 
 class TextureResource : public Resource, public Texture {
 public:
-	DEFINE_RESOURCE(Texture, "../res/textures/default/defaultTexture.png");
+	DEFINE_RESOURCE(Texture, "../res/textures/default/default.png");
 
 	TextureResource(const std::string& path, Texture&& texture) : Resource(path, path), Texture(std::move(texture)) {
 	

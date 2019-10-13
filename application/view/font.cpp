@@ -12,6 +12,10 @@
 #include "mesh/primitive.h"
 #include "path/path.h"
 
+Font::Font() {
+
+}
+
 Font::Font(std::string font) {
 	FT_Library library;
 	FT_Face face;
@@ -21,22 +25,28 @@ Font::Font(std::string font) {
 
 	// Init
 	error = FT_Init_FreeType(&library);
-	if (error)
+	if (error) {
 		Log::error("Error loading freetype library");
+
+		return;
+	}
 
 	error = FT_New_Face(library, font.c_str(), 0, &face);
 
-	if (error == FT_Err_Unknown_File_Format)
-		Log::error("FREETYTPE: Font format not supported");
-	else if (error)
-		Log::error("FREETYTPE: Failed to read font");
+	if (error ) {
+		Log::error("FREETYTPE: Failed to read font (%s)", font.c_str());
+		if (error == FT_Err_Unknown_File_Format)
+			Log::error("FREETYTPE: Font format not supported", font.c_str());
+
+		return;
+	} 
 
 	FT_Set_Pixel_Sizes(face, 0, 48);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	// Calculate atlas dimension
 	int maxCharacterHeight = (face->size->metrics.height >> 6);
-	int maxDimension = maxCharacterHeight * ceil(sqrt(CHARACTERCOUNT));
+	int maxDimension = maxCharacterHeight * ceil(sqrt(CHARACTER_COUNT));
 	int atlasDimension = 1;
 
 	// Resize atlas to maxDimension with powers of 2
@@ -49,7 +59,7 @@ Font::Font(std::string font) {
 	char* pixels = (char*)calloc(atlasDimension * atlasDimension * 4, 1);
 
 	// Render glyphs to atlas
-	for (unsigned char c = 0; c < CHARACTERCOUNT; c++) {
+	for (unsigned char c = 0; c < CHARACTER_COUNT; c++) {
 		if (FT_Load_Char(face, c, FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT | FT_LOAD_TARGET_LIGHT)) {
 			Log::error("FREETYTPE: Failed to load Glyph");
 			continue;
@@ -89,7 +99,7 @@ Font::Font(std::string font) {
 	FT_Done_Face(face);
 	FT_Done_FreeType(library);
 
-	atlas = new Texture(atlasDimension, atlasDimension, pixels, GL_RGBA);
+	atlas = Texture(atlasDimension, atlasDimension, pixels, GL_RGBA);
 }
 
 Font::~Font() {
@@ -97,31 +107,37 @@ Font::~Font() {
 }
 
 Font::Font(Font&& other) {
-	atlas = other.atlas;
-	other.atlas = nullptr;
+	atlas = std::move(other.atlas);
+
+	for (int i = 0; i < CHARACTER_COUNT; i++) {
+		characters[i] = other.characters[i];
+	}
 }
 
 Font& Font::operator=(Font&& other) {
 	if (this != &other) {
-		close();
-		atlas = std::move(other.atlas);
+		std::swap(atlas, other.atlas);
+
+		for (int i = 0; i < CHARACTER_COUNT; i++) {
+			characters[i] = other.characters[i];
+		}
 	}
 
 	return *this;
 }
 
 void Font::close() {
-	atlas->close();
+	atlas.close();
 }
 
-Vec2 Font::size(const std::string& text, double size) {
+Vec2f Font::size(const std::string& text, double size) {
 	std::string::const_iterator iterator;
-	double width = 0;
-	double height = 0;
+	float width = 0.0f;
+	float height = 0.0f;
 
 	for (iterator = text.begin(); iterator != text.end(); iterator++) {
-		Character character = characters[*iterator];
-		double advance = character.advance >> 6;
+		Character& character = characters[*iterator];
+		float advance = character.advance >> 6;
 		if (iterator == text.begin())
 			width += (advance - character.bearing.x) * size;
 		else if (iterator == text.end() - 1)
@@ -132,18 +148,18 @@ Vec2 Font::size(const std::string& text, double size) {
 		height = fmax(character.size.y * size, height);
 	}
 	
-	return Vec2(width, height);
+	return Vec2f(width, height);
 }
 
 unsigned int Font::getAtlasID() const {
-	return atlas->getID();
+	return atlas.getID();
 }
 
 unsigned int Font::getAtlasWidth() const {
-	return atlas->getWidth();
+	return atlas.getWidth();
 }
 
 unsigned int Font::getAtlasHeight() const {
-	return atlas->getHeight();
+	return atlas.getHeight();
 }
 
