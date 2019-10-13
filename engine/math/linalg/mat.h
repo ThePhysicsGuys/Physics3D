@@ -377,38 +377,31 @@ public:
 		return mat;
 	}
 
-	Vector<T, Width> getRow(size_t row) const {
-		assert(row >= 0 && row < Height);
-		Vector<T, Width> result;
+	Vector<T, Size> getRow(size_t row) const {
+		assert(row >= 0 && row < Size);
+		Vector<T, Size> result;
 
-		for(size_t i = 0; i < Width; i++) {
+		for(size_t i = 0; i < Size; i++) {
 			result[i] = (*this)[row][i];
 		}
 		return result;
 	}
 
-	Vector<T, Height> getCol(size_t col) const {
-		assert(col >= 0 && col < Width);
-		Vector<T, Height> result;
+	Vector<T, Size> getCol(size_t col) const {
+		assert(col >= 0 && col < Size);
+		Vector<T, Size> result;
 
-		for(size_t i = 0; i < Height; i++) {
+		for(size_t i = 0; i < Size; i++) {
 			result[i] = (*this)[i][col];
 		}
 		return result;
 	}
 
-	void setRow(size_t row, const Vector<T, Width> & data) {
-		assert(row >= 0 && row < Height);
+	void setRowCol(size_t rowCol, const Vector<T, Size> & data) {
+		assert(rowCol >= 0 && rowCol < Size);
 
-		for(size_t i = 0; i < Width; i++) {
-			(*this)[row][i] = data[i];
-		}
-	}
-	void setCol(size_t col, const Vector<T, Height> & data) {
-		assert(col >= 0 && col < Width);
-
-		for(size_t i = 0; i < Height; i++) {
-			(*this)[i][col] = data[i];
+		for(size_t i = 0; i < Size; i++) {
+			(*this)[rowCol][i] = data[i];
 		}
 	}
 };
