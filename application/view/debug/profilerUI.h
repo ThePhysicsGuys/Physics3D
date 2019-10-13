@@ -41,7 +41,7 @@ struct PieChart {
 	float getTotal() const;
 };
 
-struct BarChartClassInformation {
+struct BarChartClassInfo {
 	std::string name;
 	Vec3f color;
 };
@@ -49,11 +49,11 @@ struct BarChartClassInformation {
 struct BarChart : public Component {
 	const char* title;
 	const char** labels;
-	BarChartClassInformation* classes;
+	BarChartClassInfo* classes;
 	LargeMatrix<WeightValue> data;
 	std::string totalValue;
 
-	inline BarChart(const char* title, std::string totalValue, const char** labels, BarChartClassInformation* classes, Vec2f chartPosition, Vec2f chartSize, int classCount, int barCount) : 
+	inline BarChart(const char* title, std::string totalValue, const char** labels, BarChartClassInfo* classes, Vec2f chartPosition, Vec2f chartSize, int classCount, int barCount) : 
 		title(title), totalValue(totalValue), classes(classes), labels(labels), data(barCount, classCount), Component(chartPosition, chartSize) {}
 	void render() override;
 	inline Vec2 resize() override { return dimension; };
@@ -61,20 +61,35 @@ struct BarChart : public Component {
 	float getMaxWeight() const;
 };
 
-struct SlidingLineChart : public Component {
-	const char* title;
-
+struct SlidingChartDataSetInfo {
 	int size;
+	std::string title;
 	std::queue<float> data;
+	Vec4f color;
+	float lineSize;
 
 	float mean;
 	float deviation;
 
-	inline SlidingLineChart(const char* title, int size, Vec2 position, Vec2 dimension) : title(title), size(size), mean(0), deviation(1), Component(position, dimension) {};
+	SlidingChartDataSetInfo() : title(""), size(0), mean(0), deviation(1), color(GUI::COLOR::ALPHA), lineSize(0) {}
+	SlidingChartDataSetInfo(const std::string& title, int size, Vec4f color = GUI::COLOR::ACCENT, float lineSize = 1.0f) : title(title), size(size), mean(0), deviation(1), color(color), lineSize(lineSize) {};
 
 	void add(float value);
+};
+
+struct SlidingChart : public Component {
+	std::string title;
+	std::map<std::string, SlidingChartDataSetInfo> dataSets;
+
+	SlidingChart(const std::string& title, const Vec2& position, const Vec2& dimension);
+
+	void add(const std::string& title, float value);
+	void add(const SlidingChartDataSetInfo& dataSet);
+
+	SlidingChartDataSetInfo get(const std::string& title);
+
 	void render() override;
-	inline Vec2 resize() override { return dimension;  }
+	Vec2 resize() override;
 };
 
 void renderTreeStructure(Screen& screen, const TreeNode& tree, const Vec3f& treeColor, Vec2f origin, float allottedWidth);

@@ -20,6 +20,7 @@ VisibilityFilter::VisibilityFilter(Position origin, Vec3 cameraForward, Vec3 cam
 	boxNormals[3] = leftNormal;
 	boxNormals[4] = cameraForward;
 }
+
 VisibilityFilter::VisibilityFilter(Position origin, Vec3 cameraForward, Vec3 cameraUp, double fov, double aspect, double maxDepth) :
 	VisibilityFilter(
 		origin, 
@@ -47,6 +48,7 @@ bool VisibilityFilter::operator()(const TreeNode& node) const {
 	}
 	return true;
 }
+
 /*   A
 	/
    / o---o  <-- cornerOfInterest for B

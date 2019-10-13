@@ -17,7 +17,7 @@
 
 #include "view/path/path.h"
 
-BarChartClassInformation iterChartClasses[] {
+BarChartClassInfo iterChartClasses[] {
 	{ "GJK Collide"   , Vec3f(0.2f, 0.2f, 1.0f) },
 	{ "GJK No Collide", Vec3f(1.0f, 0.5f, 0.0f) }, 
 	{ "EPA"           , Vec3f(1.0f, 1.0f, 0.0f) }
@@ -25,7 +25,7 @@ BarChartClassInformation iterChartClasses[] {
 
 BarChart iterationChart("Iteration Statistics", "", GJKCollidesIterationStatistics.labels, iterChartClasses, Vec2f(-1.0f + 0.1f, -0.3f), Vec2f(0.8f, 0.6f), 3, 17);
 
-SlidingLineChart fpsSlidingChart("FPS", 100, Vec2f(-0.3, 0.2), Vec2f(0.7, 0.4));
+SlidingChart fpsSlidingChart("Fps Fps", Vec2f(-0.3, 0.2), Vec2f(0.7, 0.4));
 
 DebugOverlay::DebugOverlay() {
 
@@ -36,7 +36,8 @@ DebugOverlay::DebugOverlay(Screen* screen, char flags) : Layer("Debug overlay", 
 }
 
 void DebugOverlay::onInit() {
-
+	fpsSlidingChart.add(SlidingChartDataSetInfo("Fps 1", 100, GUI::COLOR::ORANGE, 2.0));
+	fpsSlidingChart.add(SlidingChartDataSetInfo("Fps 2", 50, GUI::COLOR::BLUE, 1.0));
 }
 
 void DebugOverlay::onUpdate() {
@@ -71,6 +72,8 @@ void DebugOverlay::onRender() {
 	addDebugField(screen->dimension, GUI::font, "World Age", screen->world->age, " ticks");
 
 	if (renderPiesEnabled) {
+		Path::bind(GUI::batch);
+
 		float leftSide = float(screen->dimension.x) / float(screen->dimension.y);
 		PieChart graphicsPie = toPieChart(graphicsMeasure, "Graphics", Vec2f(-leftSide + 1.5f, -0.7f), 0.2f);
 		PieChart physicsPie = toPieChart(physicsMeasure, "Physics", Vec2f(-leftSide + 0.3f, -0.7f), 0.2f);
@@ -97,16 +100,17 @@ void DebugOverlay::onRender() {
 		iterationChart.position = Vec2f(-leftSide + 0.1f, -0.3);
 		iterationChart.render();
 
-		graphicsMeasure.mark(GraphicsProcess::WAIT_FOR_LOCK);
-		screen->world->syncReadOnlyOperation([this]() {
+		//graphicsMeasure.mark(GraphicsProcess::WAIT_FOR_LOCK);
+		//screen->world->syncReadOnlyOperation([this]() {
 			graphicsMeasure.mark(GraphicsProcess::PROFILER);
 			renderTreeStructure(*this->screen, this->screen->world->objectTree.rootNode, Vec3f(0, 1, 0), Vec2f(1.4, 0.95), 0.7f);
 			renderTreeStructure(*this->screen, this->screen->world->terrainTree.rootNode, Vec3f(0, 0, 1), Vec2f(0.4, 0.95), 0.7f);
-		});
+		//});
 
-		Path::bind(GUI::batch);
-		fpsSlidingChart.add(graphicsMeasure.getAvgTPS());
+		fpsSlidingChart.add("Fps 1", graphicsMeasure.getAvgTPS());
+		fpsSlidingChart.add("Fps 2", physicsMeasure.getAvgTPS());
 		fpsSlidingChart.render();
+
 		GUI::batch->submit();
 	}
 }

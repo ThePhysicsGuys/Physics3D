@@ -4,8 +4,6 @@
 #include "../../datastructures/boundsTree.h"
 #include "../../part.h"
 
-
-
 struct RayIntersectBoundsFilter {
 	Ray ray;
 

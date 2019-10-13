@@ -377,7 +377,7 @@ public:
 		return mat;
 	}
 
-	Vector<T, Width> getRow(size_t row) const {
+	/*Vector<T, Width> getRow(size_t row) const {
 		assert(row >= 0 && row < Height);
 		Vector<T, Width> result;
 
@@ -395,9 +395,9 @@ public:
 			result[i] = (*this)[i][col];
 		}
 		return result;
-	}
+	}*/
 
-	void setRow(size_t row, const Vector<T, Width> & data) {
+	/*void setRow(size_t row, const Vector<T, Width> & data) {
 		assert(row >= 0 && row < Height);
 
 		for(size_t i = 0; i < Width; i++) {
@@ -410,7 +410,7 @@ public:
 		for(size_t i = 0; i < Height; i++) {
 			(*this)[i][col] = data[i];
 		}
-	}
+	}*/
 };
 
 template<typename T, size_t Size>

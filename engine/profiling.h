@@ -3,7 +3,7 @@
 #include <chrono>
 #include <map>
 
-#include "circularBuffer.h"
+#include "datastructures/buffers.h"
 #include "parallelArray.h"
 
 template<size_t N>

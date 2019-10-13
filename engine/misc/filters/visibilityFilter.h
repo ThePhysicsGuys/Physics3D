@@ -12,6 +12,7 @@ class VisibilityFilter {
 public:
 	VisibilityFilter() = default;
 	VisibilityFilter(Position origin, Vec3 viewPortTop, Vec3 viewPortRight, Vec3 viewPortDown, Vec3 viewPortLeft, Vec3 cameraForward, double maxDepth);
+	
 	/*
 		Creates a VisibilityFilter from the values derived from usual camera parameters.
 
@@ -20,6 +21,7 @@ public:
 		cameraRight: should be perpendicular to cameraForward & cameraUp, furthest visible point, starting from cameraForward, in the right direction.
 	*/
 	VisibilityFilter(Position origin, Vec3 cameraForward, Vec3 cameraUp, Vec3 cameraRight, double maxDepth);
+	
 	/*
 		Creates a VisibilityFilter from the values derived from usual camera parameters.
 

@@ -63,7 +63,6 @@ void PieChart::renderPie(Screen& screen) const {
 }
 
 void PieChart::renderText(Screen& screen, Font* font) const {
-	Path::bind(GUI::batch);
 
 	// Title
 	Vec2f titlePosition = piePosition + Vec2f(pieSize * 1.3f, pieSize * 1.1f);
@@ -87,8 +86,6 @@ void PieChart::renderText(Screen& screen, Font* font) const {
 		Path::text(font, percent.str(), 0.0006, linePosition + Vec2(0.35, 0), Vec4(p.color, 1));
 		Path::text(font, p.value, 0.0006, linePosition + Vec2(0.50, 0), Vec4(p.color, 1));
 	}
-
-	GUI::batch->submit();
 }
 
 void PieChart::add(DataPoint& dataPoint) {
@@ -109,8 +106,6 @@ float PieChart::getTotal() const {
 //! BartChart
 
 void BarChart::render() {
-	Path::bind(GUI::batch);
-
 	float titleHeight = 0.045;
 	float marginLeft = this->dimension.x * 0.0;
 	float marginBottom = this->dimension.y * 0.045;
@@ -124,7 +119,7 @@ void BarChart::render() {
 	float barWidth = drawingSize.x / ((data.height+0.5) * data.width);
 
 	for (int cl = 0; cl < data.height; cl++) {
-		const BarChartClassInformation& info = classes[cl];
+		const BarChartClassInfo& info = classes[cl];
 
 		for (int i = 0; i < data.width; i++) {
 			const WeightValue& dataPoint = data[cl][i];
@@ -139,7 +134,7 @@ void BarChart::render() {
 	Path::text(GUI::font, title, 0.001, position + Vec2f(0, this->dimension.y - titleHeight), GUI::COLOR::WHITE);
 
 	for (int cl = 0; cl < data.height; cl++) {
-		const BarChartClassInformation& info = classes[cl];
+		const BarChartClassInfo& info = classes[cl];
 
 		for (int i = 0; i < data.width; i++) {
 			const WeightValue& dataPoint = data[cl][i];
@@ -161,8 +156,6 @@ void BarChart::render() {
 
 	for (int cl = 0; cl < data.height; cl++)
 		Path::text(GUI::font, classes[cl].name, 0.0007, drawingPosition + Vec2f(this->dimension.x - 0.3, drawingSize.y - 0.035 * cl), Vec4(classes[cl].color, 1));
-
-	GUI::batch->submit();
 }
 
 float BarChart::getMaxWeight() const {
@@ -186,7 +179,8 @@ void recursiveRenderTree(const TreeNode& tree, const Vec3f& treeColor, Vec2f ori
 			Vec2f nextStep = origin + Vec2f(-allottedWidth / 2 + allottedWidth * ((tree.nodeCount != 1) ? (float(i) / (tree.nodeCount-1)) : 0.5f), -0.1f);
 			float colorDarkning = pow(1.0f * computeCost(tree[i].bounds) / maxCost, 0.25f);
 
-			Path::bezierVertical(origin, nextStep, 1.0f, Vec4f(treeColor * colorDarkning, 1.0f));
+			//Path::bezierVertical(origin, nextStep, 1.0f, Vec4f(treeColor * colorDarkning, 1.0f), 15);
+			Path::line(origin, nextStep, 1.0f, Vec4f(treeColor * colorDarkning, 1.0f));
 
 			recursiveRenderTree(tree[i], treeColor, nextStep, allottedWidth / tree.nodeCount, maxCost);
 		}
@@ -203,7 +197,6 @@ void renderTreeStructure(Screen& screen, const TreeNode& tree, const Vec3f& tree
 		maxCost = std::max(maxCost, computeCost(tree[1].bounds));
 
 	recursiveRenderTree(tree, treeColor, origin, allottedWidth, maxCost);
-	GUI::batch->submit();
 }
 
 #pragma endregion
@@ -212,7 +205,7 @@ void renderTreeStructure(Screen& screen, const TreeNode& tree, const Vec3f& tree
 
 //! SlidingDataChart
 
-void SlidingLineChart::add(float value) {
+void SlidingChartDataSetInfo::add(float value) {
 	if (data.empty()) {
 		deviation = 1.0f;
 		mean = value;
@@ -252,7 +245,21 @@ void SlidingLineChart::add(float value) {
 	deviation = sqrt(newVariance);
 }
 
-void SlidingLineChart::render() {
+SlidingChart::SlidingChart(const std::string& title, const Vec2& position, const Vec2& dimension) : title(title), Component(position, dimension) {}
+
+void SlidingChart::add(const SlidingChartDataSetInfo& dataSet) {
+	dataSets[dataSet.title] = dataSet;
+}
+
+void SlidingChart::add(const std::string& title, float value) {
+	return dataSets.at(title).add(value);
+}
+
+SlidingChartDataSetInfo SlidingChart::get(const std::string& title) {
+	return dataSets.at(title);
+}
+
+void SlidingChart::render() {
 	float axisOffset = 0.03;
 	Vec2f yRange = Vec2(-1, 1);
 	Vec2f xRange = Vec2f(-GUI::screen->camera.aspect, GUI::screen->camera.aspect) * 2;
@@ -260,29 +267,37 @@ void SlidingLineChart::render() {
 	Path::line(position + Vec2f(-axisOffset, -dimension.y), position + Vec2f(dimension.x + axisOffset, -dimension.y), 2.0f, GUI::COLOR::WHITE);
 	Path::line(position + Vec2f(0, axisOffset), position + Vec2f(0, -dimension.y - axisOffset), 2.0f, GUI::COLOR::WHITE);
 
-	float usedDeviaton = fmax(deviation, 0.341 * mean);
-	float stepX = dimension.x / size;
-	float stepY = dimension.y / usedDeviaton / 6.82f;
-	float startY = mean - usedDeviaton;
+	for (auto dataSetIterator : dataSets) {
+		SlidingChartDataSetInfo& dataSet = dataSetIterator.second;
 
-	Vec2f bottomLeft = position - Vec2f(0.0f, dimension.y);
+		float usedDeviaton = fmax(dataSet.deviation, 0.1*dataSet.mean);
+		float stepX = dimension.x / dataSet.size;
+		float stepY = dimension.y / usedDeviaton / 6.82f;
+		float startY = dataSet.mean - usedDeviaton;
 
-	for (int i = 0; i < data.size(); i++) {
-		float value = data._Get_container()[i];
+		Vec2f bottomLeft = position - Vec2f(0.0f, dimension.y);
 
-		Vec2f point = bottomLeft + Vec2f(i * stepX, (value - startY) * stepY);
+		for (int i = 0; i < dataSet.data.size(); i++) {
+			float value = dataSet.data._Get_container()[i];
 
-		Path::lineTo(point);
+			Vec2f point = bottomLeft + Vec2f(i * stepX, (value - startY) * stepY);
+
+			Path::lineTo(point);
+		}
+
+		Path::stroke(dataSet.color, dataSet.lineSize);
+
+		float lastValue = dataSet.data._Get_container()[dataSet.data.size() - 1];
+		float lastY = (lastValue - startY) * stepY;
+		Path::text(GUI::font, std::to_string(lastValue), 0.0008f, Vec2f((bottomLeft.x + dimension.x) * 1.01, bottomLeft.y + lastY), dataSet.color, Path::TextPivotVC);
 	}
 
-	Path::stroke(GUI::COLOR::ACCENT, 1.0f);
+	Vec2f titleSize = GUI::font->size(title, 0.001f);
+	Path::text(GUI::font, title, 0.001f, Vec2f(position.x + dimension.x / 2.0, position.y + axisOffset), GUI::COLOR::WHITE, Path::TextPivotHC);
+}
 
-	float lastValue = data._Get_container()[data.size() - 1];
-	float lastY = (lastValue - startY) * stepY;
-	float scale = 0.001f;
-	Vec2f titleSize = GUI::font->size(title, scale);
-	Path::text(GUI::font, std::to_string(lastValue), scale, Vec2f((bottomLeft.x + dimension.x) * 1.01, bottomLeft.y + lastY), GUI::COLOR::WHITE);
-	Path::text(GUI::font, title, scale, Vec2f(position.x + (dimension.x - titleSize.x) / 2.0f, position.y + axisOffset), GUI::COLOR::WHITE);
+Vec2 SlidingChart::resize() {
+	return dimension;
 }
 
 #pragma endregion
