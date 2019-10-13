@@ -1,10 +1,8 @@
 #pragma once
 
+#include "core.h"
+
 #include "batchConfig.h"
-
-#include <vector>
-
-#include "../engine/math/linalg/vec.h"
 
 #include "../buffers/vertexArray.h"
 #include "../buffers/vertexBuffer.h"

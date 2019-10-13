@@ -8,7 +8,7 @@
 #include "../application/worldBuilder.h"
 #include "../options/keyboardOptions.h"
 #include "../view/renderUtils.h"
-#include "../engine/math/mathUtil.h"
+#include "../physics/math/mathUtil.h"
 #include "../application.h"
 #include "../view/picker/picker.h"
 #include "../view/gui/gui.h"

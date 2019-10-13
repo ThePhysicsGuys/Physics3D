@@ -9,11 +9,11 @@
 #include "../debug/profilerUI.h"
 #include "../debug/visualDebug.h"
 
-#include "../engine/physicsProfiler.h"
-#include "../engine/math/mathUtil.h"
+#include "../physics/physicsProfiler.h"
+#include "../physics/math/mathUtil.h"
 
-#include "../../worlds.h"
-#include "../../../engine/sharedLockGuard.h"
+#include "worlds.h"
+#include "../physics/sharedLockGuard.h"
 
 #include "view/path/path.h"
 

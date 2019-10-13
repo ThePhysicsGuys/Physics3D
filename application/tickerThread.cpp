@@ -4,14 +4,9 @@
 
 using namespace std::chrono;
 TickerThread::TickerThread(double targetTPS, milliseconds tickSkipTimeout, void(*tickAction)()){
-
 	this->TPS = targetTPS;
 	this->tickSkipTimeout = tickSkipTimeout;
 	this->tickAction = tickAction;
-
-	
-
-	
 }
 
 TickerThread::~TickerThread(){

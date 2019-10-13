@@ -4,8 +4,8 @@
 #include "GLFW\glfw3.h"
 
 #include "arrayMesh.h"
-#include "../engine/math/linalg/vec.h"
-#include "../engine/math/mathUtil.h"
+#include "../physics/math/linalg/vec.h"
+#include "../physics/math/mathUtil.h"
 
 struct Primitive {
 	unsigned int vao;

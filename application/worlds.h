@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../engine/synchonizedWorld.h"
+#include "../physics/synchonizedWorld.h"
 #include "extendedPart.h"
 
 class PlayerWorld : public SynchronizedWorld<ExtendedPart> {

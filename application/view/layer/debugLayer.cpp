@@ -7,10 +7,10 @@
 #include "../mesh/vectorMesh.h"
 #include "../mesh/indexedMesh.h"
 
-#include "../engine/datastructures/boundsTree.h"
-#include "../engine/math/mathUtil.h"
-#include "../engine/math/bounds.h"
-#include "../engine/physical.h"
+#include "../physics/datastructures/boundsTree.h"
+#include "../physics/math/mathUtil.h"
+#include "../physics/math/bounds.h"
+#include "../physics/physical.h"
 
 #include "../screen.h"
 #include "../material.h"

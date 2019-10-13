@@ -13,7 +13,7 @@
 
 #include "../application/io/import.h"
 
-#include "../../visualShape.h"
+#include "visualShape.h"
 
 #include "../gui/gui.h"
 

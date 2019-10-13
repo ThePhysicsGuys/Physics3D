@@ -5,9 +5,9 @@
 #include <GL/glew.h>
 
 #include "../util/log.h"
-#include "../engine/geometry/shape.h"
-#include "../engine/debug.h"
-#include "../engine/math/mathUtil.h"
+#include "../physics/geometry/shape.h"
+#include "../physics/debug.h"
+#include "../physics/math/mathUtil.h"
 #include "threePhaseBuffer.h"
 
 #include "view/screen.h"

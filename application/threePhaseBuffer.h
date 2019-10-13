@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../engine/datastructures/buffers.h"
+#include "../physics/datastructures/buffers.h"
 
 #include <mutex>
 

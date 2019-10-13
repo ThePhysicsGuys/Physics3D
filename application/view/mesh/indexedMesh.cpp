@@ -5,8 +5,8 @@
 #include "../buffers/indexBuffer.h"
 #include "../buffers/vertexBuffer.h"
 #include "../buffers/vertexArray.h"
-#include "../engine/geometry/shape.h"
-#include "../../visualShape.h"
+#include "../physics/geometry/shape.h"
+#include "visualShape.h"
 #include "../renderUtils.h"
 
 IndexedMesh::IndexedMesh(const VisualShape& shape) : AbstractMesh(), vertexCount(shape.vertexCount), triangleCount(shape.triangleCount) {

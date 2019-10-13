@@ -7,7 +7,7 @@
 #include "../gui/frames.h"
 #include "../renderUtils.h"
 #include "../shaderProgram.h"
-#include "../../input/standardInputHandler.h"
+#include "input/standardInputHandler.h"
 #include "../gui/guiUtils.h"
 
 // Font

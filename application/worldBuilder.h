@@ -2,12 +2,12 @@
 
 #include "debug.h"
 #include "worlds.h"
-#include "../engine/misc/shapeLibrary.h"
+#include "../physics/misc/shapeLibrary.h"
 #include "extendedPart.h"
 #include "partFactory.h"
 
-#include "../engine/geometry/shape.h"
-#include "../engine/geometry/convexShapeBuilder.h"
+#include "../physics/geometry/shape.h"
+#include "../physics/geometry/convexShapeBuilder.h"
 
 namespace WorldBuilder {
 	void init();

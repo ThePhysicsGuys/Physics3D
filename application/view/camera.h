@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../engine/math/globalCFrame.h"
+#include "../physics/math/globalCFrame.h"
 
 struct ExtendedPart;
 struct Camera;

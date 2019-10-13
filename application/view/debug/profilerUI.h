@@ -3,8 +3,8 @@
 #include <sstream>
 #include <queue>
 
-#include "../engine/profiling.h"
-#include "../engine/math/linalg/largeMatrix.h"
+#include "../physics/profiling.h"
+#include "../physics/math/linalg/largeMatrix.h"
 #include "../gui/component.h"
 
 class Font;

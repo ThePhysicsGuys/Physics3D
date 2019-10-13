@@ -2,7 +2,7 @@
 
 #include "picker.h"
 
-#include "../engine/math/mathUtil.h"
+#include "../physics/math/mathUtil.h"
 
 #include "event/event.h"
 #include "event/mouseEvent.h"
@@ -22,10 +22,10 @@
 #include "../../application.h"
 #include "../../io/import.h"
 
-#include "../engine/physical.h"
-#include "../engine/sharedLockGuard.h"
-#include "../engine/geometry/shape.h"
-#include "../engine/misc/filters/rayIntersectsBoundsFilter.h"
+#include "../physics/physical.h"
+#include "../physics/sharedLockGuard.h"
+#include "../physics/geometry/shape.h"
+#include "../physics/misc/filters/rayIntersectsBoundsFilter.h"
 #include "view/debug/visualDebug.h"
 
 namespace Picker {

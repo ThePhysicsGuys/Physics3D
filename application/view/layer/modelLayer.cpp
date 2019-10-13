@@ -11,15 +11,15 @@
 
 #include "../mesh/indexedMesh.h"
 
-#include "../../worlds.h"
-#include "../../extendedPart.h"
+#include "worlds.h"
+#include "extendedPart.h"
 
 #include "../debug/visualDebug.h"
 
-#include "../../meshLibrary.h"
-#include "../engine/sharedLockGuard.h"
+#include "meshLibrary.h"
+#include "../physics/sharedLockGuard.h"
 
-#include "../engine/misc/filters/visibilityFilter.h"
+#include "../physics/misc/filters/visibilityFilter.h"
 
 
 // Light uniforms

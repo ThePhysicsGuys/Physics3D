@@ -2,9 +2,8 @@
 
 #include "worlds.h"
 
-#include "../engine/debug.h"
-
-#include "../engine/constants.h"
+#include "../physics/debug.h"
+#include "../physics/constants.h"
 #include "application.h"
 #include "input/standardInputHandler.h"
 #include "view/screen.h"

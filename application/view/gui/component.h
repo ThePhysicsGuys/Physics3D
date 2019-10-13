@@ -1,11 +1,9 @@
 #pragma once
 
-#include <string>
+#include "core.h"
 
 #include "layout.h"
 #include "gui.h"
-
-#include "../engine/math/linalg/vec.h"
 
 class Component {
 public:

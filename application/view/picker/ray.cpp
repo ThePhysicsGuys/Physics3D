@@ -1,9 +1,7 @@
 #include "core.h"
 
 #include "ray.h"
-
 #include "../screen.h"
-
 
 Vec2f getNormalizedDeviceSpacePosition(Vec2f viewportSpacePosition, Vec2f screenSize) {
 	float x = 2 * viewportSpacePosition.x / screenSize.x - 1;

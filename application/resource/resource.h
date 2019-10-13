@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../core.h"
 class ResourceManager;
 
 #pragma region ResourceAllocator

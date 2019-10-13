@@ -1,15 +1,13 @@
 #pragma once
 
+#include "core.h"
+
 #include "commandBatch.h"
 #include "batchConfig.h"
 
 #include "../buffers/bufferLayout.h"
-#include "../engine/math/linalg/vec.h"
 
 #include "../shaderProgram.h"
-
-#include <vector>
-#include <string>
 
 struct GuiCommand {
 	// Amount of indices to render

@@ -5,10 +5,8 @@
 #include "batch.h"
 
 #include "../application/debug.h"
-#include "../engine/math/linalg/vec.h"
 
 #include "../shaderProgram.h"
-
 
 template<typename Vertex, typename Command>
 class CommandBatch : public Batch<Vertex> {

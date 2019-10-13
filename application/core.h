@@ -9,10 +9,10 @@
 #include <cmath>
 #include <map>
 
-#include "../engine/math/linalg/vec.h"
-#include "../engine/math/fix.h"
-#include "../engine/math/linalg/mat.h"
-#include "../engine/math/linalg/trigonometry.h"
-#include "../engine/math/position.h"
+#include "../physics/math/linalg/vec.h"
+#include "../physics/math/fix.h"
+#include "../physics/math/linalg/mat.h"
+#include "../physics/math/linalg/trigonometry.h"
+#include "../physics/math/position.h"
 
 #include "../util/log.h"

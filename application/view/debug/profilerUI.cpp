@@ -10,9 +10,9 @@
 #include "../screen.h"
 #include "../font.h"
 
-#include "../engine/datastructures/boundsTree.h"
+#include "../physics/datastructures/boundsTree.h"
 
-#include "../engine/math/mathUtil.h"
+#include "../physics/math/mathUtil.h"
 
 #include "../texture.h"
 #include "../buffers/frameBuffer.h"

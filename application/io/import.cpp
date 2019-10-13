@@ -9,7 +9,7 @@
 
 #include "../view/material.h"
 
-#include "../engine/physical.h"
+#include "../physics/physical.h"
 
 #include "../partFactory.h"
 

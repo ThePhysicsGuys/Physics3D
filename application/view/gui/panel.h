@@ -3,10 +3,6 @@
 #include "component.h"
 #include "container.h"
 
-#include "../engine/math/linalg/vec.h"
-
-#include <vector>
-
 class Panel : public Container {
 public:
 	Vec4 background;

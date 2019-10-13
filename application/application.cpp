@@ -12,12 +12,12 @@
 #include "view/debug/visualDebug.h"
 #include "view/material.h"
 
-#include "../engine/geometry/shape.h"
-#include "../engine/math/mathUtil.h"
-#include "../engine/part.h"
-#include "../engine/world.h"
-#include "../engine/misc/gravityForce.h"
-#include "../engine/physicsProfiler.h"
+#include "../physics/geometry/shape.h"
+#include "../physics/math/mathUtil.h"
+#include "../physics/part.h"
+#include "../physics/world.h"
+#include "../physics/misc/gravityForce.h"
+#include "../physics/physicsProfiler.h"
 
 #include "debug.h"
 #include "worlds.h"

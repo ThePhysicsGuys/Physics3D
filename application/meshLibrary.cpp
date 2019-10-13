@@ -7,7 +7,7 @@
 #include "view/mesh/indexedMesh.h"
 
 #include "resourceLoader.h"
-#include "../engine/misc/shapeLibrary.h"
+#include "../physics/misc/shapeLibrary.h"
 #include "visualShape.h"
 
 #include "io/import.h"

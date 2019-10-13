@@ -2,7 +2,7 @@
 
 #include <istream>
 
-#include "../engine/geometry/shape.h"
+#include "../physics/geometry/shape.h"
 
 #include "../view/screen.h"
 

@@ -12,7 +12,7 @@
 #include "../mesh/indexedMesh.h"
 #include "../application/meshLibrary.h"
 
-#include "../engine/geometry/boundingBox.h"
+#include "../physics/geometry/boundingBox.h"
 
 #include "../debug/visualDebug.h"
 

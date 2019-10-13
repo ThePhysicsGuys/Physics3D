@@ -2,8 +2,8 @@
 
 #include "directionEditor.h"
 
-#include "../engine/math/cframe.h"
-#include "../engine/math/mathUtil.h"
+#include "../physics/math/cframe.h"
+#include "../physics/math/mathUtil.h"
 
 #include "gui.h"
 #include "../path/path.h"

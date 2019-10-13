@@ -5,7 +5,6 @@
 #include "GL\glew.h"
 #include "GLFW\glfw3.h"
 
-
 IndexBuffer::IndexBuffer() {
 	id = 0;
 	Log::debug("Created empty index buffer");

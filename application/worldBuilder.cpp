@@ -3,7 +3,7 @@
 #include "worldBuilder.h"
 
 #include "application.h"
-#include "../engine/math/mathUtil.h"
+#include "../physics/math/mathUtil.h"
 
 namespace WorldBuilder {
 

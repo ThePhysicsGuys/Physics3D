@@ -2,7 +2,7 @@
 
 #include "view/material.h"
 
-#include "../engine/part.h"
+#include "../physics/part.h"
 
 #include "visualShape.h"
 

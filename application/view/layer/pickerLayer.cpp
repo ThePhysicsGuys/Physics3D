@@ -6,7 +6,7 @@
 
 #include "../picker/picker.h"
 
-#include "../../input/standardInputHandler.h"
+#include "input/standardInputHandler.h"
 
 PickerLayer::PickerLayer() : Layer() {
 

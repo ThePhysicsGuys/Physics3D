@@ -28,9 +28,9 @@
 #include "../mesh/indexedMesh.h"
 #include "../mesh/primitive.h"
 
-#include "../../resource/resourceManager.h"
-#include "../../resource/textureResource.h"
-#include "../../resource/fontResource.h"
+#include "resource/resourceManager.h"
+#include "resource/textureResource.h"
+#include "resource/fontResource.h"
 
 namespace GUI {
 	namespace COLOR {

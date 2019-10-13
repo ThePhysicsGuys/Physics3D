@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../engine/math/linalg/vec.h"
-#include "../engine/geometry/shape.h"
-#include "../engine/datastructures/sharedArray.h"
+#include "../physics/math/linalg/vec.h"
+#include "../physics/geometry/shape.h"
+#include "../physics/datastructures/sharedArray.h"
 
 struct VisualShape : public Polyhedron {
 	SharedArrayPtr<const Vec3f> normals;
