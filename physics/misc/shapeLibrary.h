@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../geometry/shape.h"
+#include "../geometry/polyhedron.h"
 
 namespace Library {
 	extern const Polyhedron icosahedron;

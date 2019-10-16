@@ -18,8 +18,8 @@ typedef Vec3 Vec3Local;
 typedef Vec3 Vec3Relative;
 
 struct AttachedPart {
-	CFrame attachment;
-	Part* part;
+	CFrame attachment = CFrame();
+	Part* part = nullptr;
 };
 
 struct PartIter {

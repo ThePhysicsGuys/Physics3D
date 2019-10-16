@@ -4,7 +4,8 @@ struct ComputationBuffers;
 
 #include "../math/linalg/vec.h"
 #include "convexShapeBuilder.h"
-#include "intersection.h"
+
+struct MinkowskiPointIndices;
 
 struct ComputationBuffers {
 	Vec3f* vertBuf;

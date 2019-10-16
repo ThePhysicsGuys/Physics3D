@@ -2,6 +2,7 @@
 
 #include "../math/linalg/vec.h"
 #include "../math/cframe.h"
+#include "../math/transform.h"
 #include "../datastructures/sharedArray.h"
 #include "../datastructures/alignedPtr.h"
 #include "../datastructures/iteratorFactory.h"
@@ -18,11 +19,6 @@ struct ShapeTriangleIter;
 #include "boundingBox.h"
 
 size_t getOffset(size_t size);
-
-struct CircumscribingSphere {
-	Vec3 origin = Vec3();
-	double radius = 0;
-};
 
 struct Triangle {
 	union {
@@ -114,7 +110,6 @@ public:
 	double getMaxRadiusSq(Vec3f reference) const;
 	Vec3f getNormalVecOfTriangle(Triangle triangle) const;
 
-	bool intersectsTransformed(const Polyhedron& other, const CFramef& relativeCFrame, Vec3f& intersection, Vec3f& exitVector) const;
 	int furthestIndexInDirection(const Vec3f& direction) const;
 	virtual Vec3f furthestInDirection(const Vec3f& direction) const override;
 

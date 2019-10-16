@@ -23,6 +23,19 @@ struct PartProperties {
 	double bouncyness;
 };
 
+struct PartIntersection {
+	bool intersects;
+	Position intersection;
+	Vec3 exitVector;
+
+	PartIntersection() : intersects(false) {}
+	PartIntersection(const Position& intersection, const Vec3& exitVector) :
+		intersects(true),
+		intersection(intersection),
+		exitVector(exitVector) {}
+};
+
+
 class Part {
 	friend class Physical;
 	friend class WorldPrototype;
@@ -53,7 +66,7 @@ public:
 	Part() = default;
 	Part(const Shape& shape, const GlobalCFrame& position, const PartProperties& properties);
 	~Part();
-	bool intersects(const Part& other, Position& intersection, Vec3& exitVector) const;
+	PartIntersection intersects(const Part& other) const;
 	void scale(double scaleX, double scaleY, double scaleZ);
 
 	Bounds getStrictBounds() const;

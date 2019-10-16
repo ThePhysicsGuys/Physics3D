@@ -30,47 +30,47 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{DC20CBAC-AB67-4A0C-BBE2-65DC81DEF289}</ProjectGuid>
     <RootNamespace>physics</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <ProjectName>physics</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Tests|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Tests|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -190,8 +190,10 @@
     <ClCompile Include="geometry\computationBuffer.cpp" />
     <ClCompile Include="geometry\convexShapeBuilder.cpp" />
     <ClCompile Include="geometry\indexedShape.cpp" />
+    <ClCompile Include="geometry\genericIntersection.cpp" />
     <ClCompile Include="geometry\intersection.cpp" />
     <ClCompile Include="geometry\polyhedron.cpp" />
+    <ClCompile Include="geometry\shape.cpp" />
     <ClCompile Include="geometry\shapeBuilder.cpp" />
     <ClCompile Include="geometry\sphere.cpp" />
     <ClCompile Include="math\cframe.cpp" />
@@ -207,6 +209,7 @@
     <ClCompile Include="worldPhysics.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="geometry\basicShapes.h" />
     <ClInclude Include="constants.h" />
     <ClInclude Include="constraintGroup.h" />
     <ClInclude Include="datastructures\alignedPtr.h" />
@@ -224,6 +227,7 @@
     <ClInclude Include="geometry\convexShapeBuilder.h" />
     <ClInclude Include="geometry\genericCollidable.h" />
     <ClInclude Include="geometry\indexedShape.h" />
+    <ClInclude Include="geometry\genericIntersection.h" />
     <ClInclude Include="geometry\intersection.h" />
     <ClInclude Include="geometry\polyhedron.h" />
     <ClInclude Include="geometry\shape.h" />
@@ -233,11 +237,13 @@
     <ClInclude Include="math\cframe.h" />
     <ClInclude Include="math\fix.h" />
     <ClInclude Include="math\globalCFrame.h" />
+    <ClInclude Include="math\globalTransform.h" />
     <ClInclude Include="math\largeMatrix.h" />
     <ClInclude Include="math\linalg\commonMatrices.h" />
     <ClInclude Include="math\linalg\largeMatrix.h" />
     <ClInclude Include="math\linalg\mat.h" />
     <ClInclude Include="math\linalg\misc.h" />
+    <ClInclude Include="math\transform.h" />
     <ClInclude Include="math\linalg\trigonometry.h" />
     <ClInclude Include="math\linalg\vec.h" />
     <ClInclude Include="math\mat2.h" />

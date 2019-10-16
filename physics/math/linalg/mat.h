@@ -1134,3 +1134,38 @@ SymmetricMatrix<T, Size> selfOuter(const Vector<T, Size>& v) {
 	}
 	return result;
 }
+
+
+template<typename T, size_t Size>
+Vector<T, Size> toVector(const Matrix<T, 1, Size>& mat) {
+	Vector<T, Size> result;
+	for(size_t i = 0; i < Size; i++) {
+		result[i] = mat[i][0];
+	}
+	return result;
+}
+template<typename T, size_t Size>
+Vector<T, Size> toVector(const Matrix<T, Size, 1>& mat) {
+	Vector<T, Size> result;
+	for(size_t i = 0; i < Size; i++) {
+		result[i] = mat[0][i];
+	}
+	return result;
+}
+
+template<typename T, size_t Size>
+Matrix<T, 1, Size> toRowMatrix(const Vector<T, Size>& vec) {
+	Matrix<T, 1, Size> result;
+	for(size_t i = 0; i < Size; i++) {
+		result[0][i] = vec[i];
+	}
+	return result;
+}
+template<typename T, size_t Size>
+Matrix<T, Size, 1> toColMatrix(const Vector<T, Size>& vec) {
+	Matrix<T, Size, 1> result;
+	for(size_t i = 0; i < Size; i++) {
+		result[i][0] = vec[i];
+	}
+	return result;
+}

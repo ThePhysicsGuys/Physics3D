@@ -3,7 +3,7 @@
 #include "../math/mathUtil.h"
 
 namespace Library {
-	float g = (1.0 + sqrt(5.0)) / 2.0;
+	float g = 1.61803398874989484820458683436563811772030917980576286213544862270526046281890f;
 
 	Vec3f icosahedronVertices[]{
 		Vec3f(0, 0.5, g / 2), Vec3f(0, 0.5, -g / 2), Vec3f(0, -0.5, -g / 2), Vec3f(0, -0.5, g / 2),

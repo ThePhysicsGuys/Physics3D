@@ -1,6 +1,7 @@
 #include "computationBuffer.h"
 
 #include "../../util/log.h"
+#include "genericIntersection.h"
 
 ComputationBuffers::ComputationBuffers(int initialVertCount, int initialTriangleCount) :
 	vertexCapacity(initialVertCount), triangleCapacity(initialTriangleCount) {

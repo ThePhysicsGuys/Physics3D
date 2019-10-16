@@ -6,7 +6,6 @@
 #include <set>
 #include <math.h>
 
-#include "convexShapeBuilder.h"
 #include "../math/linalg/vec.h"
 #include "../math/linalg/trigonometry.h"
 #include "../math/utils.h"
@@ -14,10 +13,7 @@
 #include "../../util/Log.h"
 #include "../debug.h"
 #include "../physicsProfiler.h"
-#include "computationBuffer.h"
-#include "intersection.h"
 
-#include "../physicsProfiler.h"
 
 size_t getOffset(size_t size) {
 	return (size + 7) & 0xFFFFFFFFFFFFFFF8;
@@ -466,38 +462,6 @@ Vec3f Polyhedron::furthestInDirection(const Vec3f& direction) const {
 	return bestVertex;
 }
 #endif
-
-template<int N>
-void incDebugTally(HistoricTally<N, long long, IterationTime>& tally, int iterTime) {
-	if (iterTime >= 200) {
-		tally.addToTally(IterationTime::LIMIT_REACHED, 1);
-	} else if (iterTime >= 15) {
-		tally.addToTally(IterationTime::TOOMANY, 1);
-	} else {
-		tally.addToTally(static_cast<IterationTime>(iterTime), 1);
-	}
-}
-
-ComputationBuffers buffers(1000, 2000);
-
-bool Polyhedron::intersectsTransformed(const Polyhedron& other, const CFramef& relativeCFramef, Vec3f& intersection, Vec3f& exitVector) const {
-	Tetrahedron result;
-	int iter;
-	physicsMeasure.mark(PhysicsProcess::GJK_COL);
-	bool collides = runGJKTransformed(*this, other, relativeCFramef, -relativeCFramef.position, result, iter);
-	
-	if(collides) {
-		incDebugTally(GJKCollidesIterationStatistics, iter + 2);
-		physicsMeasure.mark(PhysicsProcess::EPA);
-		bool epaResult = runEPATransformed(*this, other, result, relativeCFramef, intersection, exitVector, buffers, iter);
-		incDebugTally(EPAIterationStatistics, iter);
-		return epaResult;
-	} else {
-		incDebugTally(GJKNoCollidesIterationStatistics, iter + 2);
-		physicsMeasure.mark(PhysicsProcess::OTHER, PhysicsProcess::GJK_NO_COL);
-		return false;
-	}
-}
 
 double Polyhedron::getVolume() const {
 	double total = 0;

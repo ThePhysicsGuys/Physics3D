@@ -1,8 +1,8 @@
 #include "worldBenchmark.h"
 
-#include "../engine/world.h"
-#include "../engine/misc/shapeLibrary.h"
-#include "../engine/math/linalg/commonMatrices.h"
+#include "../physics/world.h"
+#include "../physics/misc/shapeLibrary.h"
+#include "../physics/math/linalg/commonMatrices.h"
 
 class BasicWorldBenchmark : public WorldBenchmark {
 public:

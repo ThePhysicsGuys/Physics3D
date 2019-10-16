@@ -22,3 +22,8 @@ struct BoundingBox {
 	inline Vec3 getCenter() const { return Vec3(xmin + xmax, ymin + ymax, zmin + zmax) / 2; }
 	inline BoundingBox expanded(double amount) const { return BoundingBox(xmin - amount, ymin - amount, zmin - amount, xmax + amount, ymax + amount, zmax + amount); }
 };
+
+struct CircumscribingSphere {
+	Vec3 origin = Vec3();
+	double radius = 0;
+};

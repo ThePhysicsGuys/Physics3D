@@ -1,7 +1,7 @@
 #pragma once
 
 #include "benchmark.h"
-#include "../engine/world.h"
+#include "../physics/world.h"
 
 class WorldBenchmark : public Benchmark {
 protected:

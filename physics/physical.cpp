@@ -132,7 +132,7 @@ void Physical::detachPart(Part* part) {
 			makeMainPart(parts[parts.size - 1]);
 		}
 	}
-	for (int i = parts.size - 1; i >= 0; i--) {
+	for (signed long long i = parts.size - 1; i >= 0; i--) {
 		AttachedPart& at = parts[i];
 		if (at.part == part) {
 			part->parent = nullptr;
