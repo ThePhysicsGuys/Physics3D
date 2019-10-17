@@ -101,7 +101,7 @@ void ModelLayer::onRender() {
 
 		const Camera& camera = screen->camera;
 
-		VisibilityFilter filter(camera.cframe.position, camera.getForwardDirection(), camera.getUpDirection(), camera.fov, camera.aspect, camera.zfar);
+		VisibilityFilter filter = VisibilityFilter::forWindow(camera.cframe.position, camera.getForwardDirection(), camera.getUpDirection(), camera.fov, camera.aspect, camera.zfar);
 		// Render world objects
 		for (ExtendedPart& part : screen->world->iterPartsFiltered(filter, ALL_PARTS)) {
 			int meshId = part.drawMeshId;
