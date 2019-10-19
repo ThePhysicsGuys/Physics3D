@@ -38,4 +38,8 @@ namespace Library {
 	sides must be >= 3
 	*/
 	Polyhedron createPointyPrism(int sides, double radius, double height, double topOffset, double bottomOffset);
+
+
+	Polyhedron createSphere(double radius, int steps = 1);
+	Polyhedron createSpikeBall(double internalRadius, double spikeRadius, int steps, int spikeSteps);
 }

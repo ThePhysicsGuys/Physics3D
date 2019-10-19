@@ -23,6 +23,7 @@
     <ProjectGuid>{CA5FECF4-EDD2-4387-9967-66B047052B0B}</ProjectGuid>
     <RootNamespace>benchmarks</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>benchmarks</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -127,6 +128,7 @@
   <ItemGroup>
     <ClCompile Include="basicWorld.cpp" />
     <ClCompile Include="benchmarkMain.cpp" />
+    <ClCompile Include="complexObjectBenchmark.cpp" />
     <ClCompile Include="worldBenchmark.cpp" />
   </ItemGroup>
   <ItemGroup>

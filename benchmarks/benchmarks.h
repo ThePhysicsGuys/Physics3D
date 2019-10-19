@@ -3,3 +3,4 @@
 #include "benchmark.h"
 
 Benchmark* basicWorld();
+Benchmark* complexObject();
