@@ -86,14 +86,11 @@ public:
 
 	bool anchored = false;
 
-	BoundingBox localBounds;
-
 	Physical() = default;
 	explicit Physical(Part* part);
 	inline Physical(Part* part, double mass, SymmetricMat3 inertia) : mass(mass), inertia(inertia), mainPart(part) {
 		//parts.push_back(AttachedPart{ CFrame(), part });
 		
-		this->localBounds = computeLocalBounds();
 	}
 
 	Physical(Physical&& other) noexcept : 
@@ -107,8 +104,7 @@ public:
 		totalMoment(other.totalMoment),
 		mass(other.mass),
 		localCenterOfMass(other.localCenterOfMass),
-		inertia(other.inertia),
-		localBounds(other.localBounds)
+		inertia(other.inertia)
 		{
 		mainPart->parent = this;
 		for (AttachedPart& p : parts) {
@@ -127,7 +123,6 @@ public:
 		this->mass = other.mass;
 		this->localCenterOfMass = other.localCenterOfMass;
 		this->inertia = other.inertia;
-		this->localBounds = other.localBounds;
 
 		mainPart->parent = this;
 		for (AttachedPart& p : parts) {

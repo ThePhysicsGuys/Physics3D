@@ -43,11 +43,9 @@ public:
 	Shape scaled(double scaleX, double scaleY, double scaleZ) const;
 	
 	BoundingBox getBounds() const;
+	BoundingBox getBounds(const Mat3& referenceFrame) const;
 	Vec3 getCenterOfMass() const;
 	SymmetricMat3 getInertia() const;
-	SymmetricMat3 getInertia(Vec3 reference) const;
-	SymmetricMat3 getInertia(Mat3 reference) const;
-	SymmetricMat3 getInertia(CFrame reference) const;
 	CircumscribingSphere getCircumscribingSphere() const;
 	double getMaxRadius() const;
 	double getMaxRadiusSq() const;

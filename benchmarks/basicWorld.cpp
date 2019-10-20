@@ -6,7 +6,9 @@
 
 class BasicWorldBenchmark : public WorldBenchmark {
 public:
-	BasicWorldBenchmark() : WorldBenchmark(10000) {
+	BasicWorldBenchmark() : WorldBenchmark("basicWorld", 10000) {}
+
+	void init() {
 		Polyhedron cube = Library::createCube(0.9);
 		Polyhedron floor = Library::createBox(50.0, 0.5, 50.0);
 		Polyhedron wall = Library::createBox(0.2, 10.0, 50.0);
@@ -27,6 +29,5 @@ public:
 			}
 		}
 	}
-};
+} basicWorld;
 
-Benchmark* basicWorld() { return new BasicWorldBenchmark(); }

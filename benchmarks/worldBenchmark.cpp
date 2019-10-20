@@ -6,7 +6,7 @@
 #include <sstream>
 #include "../physics/misc/gravityForce.h"
 
-WorldBenchmark::WorldBenchmark(int tickCount) : world(0.005), tickCount(tickCount) {
+WorldBenchmark::WorldBenchmark(const char* name, int tickCount) : Benchmark(name), world(0.005), tickCount(tickCount) {
 	world.addExternalForce(new ExternalGravity(Vec3(0, -10, 0)));
 }
 

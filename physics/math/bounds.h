@@ -1,6 +1,7 @@
 #pragma once
 
 #include "position.h"
+#include "../geometry/boundingBox.h"
 
 struct Bounds {
 	Position min;
@@ -49,4 +50,15 @@ inline bool operator==(const Bounds& first, const Bounds& second) {
 }
 inline bool operator!=(const Bounds& first, const Bounds& second) {
 	return first.min != second.min || first.max != second.max;
+}
+
+inline Bounds operator+(const BoundingBox& localBox, const Position& pos) {
+	Position min = pos + localBox.min;
+	Position max = pos + localBox.max;
+	return Bounds(min, max);
+}
+inline BoundingBox operator-(const Bounds& box, const Position& pos) {
+	Vec3 min = box.min - pos;
+	Vec3 max = box.max - pos;
+	return BoundingBox(min, max);
 }

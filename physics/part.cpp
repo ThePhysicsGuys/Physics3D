@@ -45,14 +45,9 @@ PartIntersection Part::intersects(const Part& other) const {
 }
 
 Bounds Part::getStrictBounds() const {
-	Fix<32> xmax = this->cframe.localToGlobal(this->hitbox.furthestInDirection(this->cframe.relativeToLocal(Vec3(1, 0, 0)))).x;
-	Fix<32> xmin = this->cframe.localToGlobal(this->hitbox.furthestInDirection(this->cframe.relativeToLocal(Vec3(-1, 0, 0)))).x;
-	Fix<32> ymax = this->cframe.localToGlobal(this->hitbox.furthestInDirection(this->cframe.relativeToLocal(Vec3(0, 1, 0)))).y;
-	Fix<32> ymin = this->cframe.localToGlobal(this->hitbox.furthestInDirection(this->cframe.relativeToLocal(Vec3(0, -1, 0)))).y;
-	Fix<32> zmax = this->cframe.localToGlobal(this->hitbox.furthestInDirection(this->cframe.relativeToLocal(Vec3(0, 0, 1)))).z;
-	Fix<32> zmin = this->cframe.localToGlobal(this->hitbox.furthestInDirection(this->cframe.relativeToLocal(Vec3(0, 0, -1)))).z;
-
-	return Bounds(Position(xmin, ymin, zmin), Position(xmax, ymax, zmax));
+	BoundingBox boundsOfHitbox = this->hitbox.getBounds(this->cframe.getRotation());
+	
+	return boundsOfHitbox + getPosition();
 }
 
 void Part::scale(double scaleX, double scaleY, double scaleZ) {

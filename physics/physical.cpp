@@ -175,8 +175,6 @@ void Physical::refreshWithNewParts() {
 	this->localCenterOfMass = totalCenterOfMass;
 	this->inertia = totalInertia;
 
-	this->localBounds = computeLocalBounds();
-
 	if (this->anchored) {
 		this->forceResponse = SymmetricMat3::ZEROS();
 		this->momentResponse = SymmetricMat3::ZEROS();

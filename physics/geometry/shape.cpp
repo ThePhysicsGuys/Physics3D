@@ -25,11 +25,9 @@ double Shape::getVolume() const { return polyhedron->getVolume(); }
 Shape Shape::scaled(float scaleX, float scaleY, float scaleZ) const { return Shape(new Polyhedron(polyhedron->scaled(scaleX, scaleY, scaleZ))); }
 Shape Shape::scaled(double scaleX, double scaleY, double scaleZ) const { return Shape(new Polyhedron(polyhedron->scaled(scaleX, scaleY, scaleZ))); }
 BoundingBox Shape::getBounds() const { return polyhedron->getBounds(); }
+BoundingBox Shape::getBounds(const Mat3& referenceFrame) const { return polyhedron->getBounds(referenceFrame); }
 Vec3 Shape::getCenterOfMass() const { return polyhedron->getCenterOfMass(); }
 SymmetricMat3 Shape::getInertia() const { return polyhedron->getInertia(); }
-SymmetricMat3 Shape::getInertia(Vec3 reference) const { return polyhedron->getInertia(reference); }
-SymmetricMat3 Shape::getInertia(Mat3 reference) const { return polyhedron->getInertia(reference); }
-SymmetricMat3 Shape::getInertia(CFrame reference) const { return polyhedron->getInertia(reference); }
 CircumscribingSphere Shape::getCircumscribingSphere() const { return polyhedron->getCircumscribingSphere(); }
 double Shape::getMaxRadius() const { return polyhedron->getMaxRadius(); }
 

@@ -33,7 +33,10 @@ struct Triangle {
 	Triangle leftShift() const;
 	Triangle operator~() const;
 	bool operator==(const Triangle& other) const;
-	inline int operator[](int i) const {
+	inline int& operator[](int i) {
+		return indexes[i];
+	};
+	inline const int& operator[](int i) const {
 		return indexes[i]; 
 	};
 };
@@ -96,6 +99,7 @@ public:
 
 	//CFramef getInertialEigenVectors() const;
 	BoundingBox getBounds() const;
+	BoundingBox getBounds(const Mat3f& referenceFrame) const;
 	void computeNormals(Vec3f* buffer) const;
 	Vec3 getCenterOfMass() const;
 	SymmetricMat3 getInertia() const;
@@ -132,5 +136,8 @@ public:
 	IteratorFactory<ShapeTriangleIter> iterTriangles() const {
 		return IteratorFactory<ShapeTriangleIter>(ShapeTriangleIter{ triangles, getOffset(triangleCount) }, ShapeTriangleIter{ triangles + triangleCount, getOffset(triangleCount) });
 	}
+
+	void getTriangles(Triangle* triangleBuf) const;
+	void getVertices(Vec3f* vertexBuf) const;
 };
 
