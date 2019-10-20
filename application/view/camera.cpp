@@ -4,17 +4,16 @@
 #include "screen.h"
 #include "input/standardInputHandler.h"
 #include "application.h"
-#include "gui/guiUtils.h"
+#include "../graphics/gui/guiUtils.h"
 
-#include "event/event.h"
-#include "event/mouseEvent.h"
-#include "event/keyEvent.h"
-#include "input/mouse.h"
-#include "input/keyboard.h"
-#include "options/keyboardOptions.h"
+#include "../engine/event/event.h"
+#include "../engine/event/mouseEvent.h"
+#include "../engine/event/keyEvent.h"
+#include "../engine/input/mouse.h"
+#include "../engine/input/keyboard.h"
+#include "../engine/options/keyboardOptions.h"
 
 #include "../extendedPart.h"
-
 #include "picker/picker.h"
 #include "worlds.h"
 

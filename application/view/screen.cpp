@@ -5,22 +5,22 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include "renderUtils.h"
-#include "texture.h"
-#include "shaderProgram.h"
+#include "../graphics/renderUtils.h"
+#include "../graphics/texture.h"
+#include "shader/shaders.h"
 
-#include "mesh/indexedMesh.h"
-#include "mesh/primitive.h"
-#include "debug/visualDebug.h"
-#include "buffers/frameBuffer.h"
-#include "../options/keyboardOptions.h"
+#include "../graphics/mesh/indexedMesh.h"
+#include "../graphics/mesh/primitive.h"
+#include "../graphics/debug/visualDebug.h"
+#include "../graphics/buffers/frameBuffer.h"
+#include "../engine/options/keyboardOptions.h"
 #include "../input/standardInputHandler.h"
-#include "../meshLibrary.h"
-#include "../visualShape.h"
+#include "../graphics/meshLibrary.h"
+#include "../graphics/visualShape.h"
 #include "../worlds.h"
-#include "event/windowEvent.h"
+#include "../engine/event/windowEvent.h"
 
-#include "layer/layerStack.h"
+#include "../engine/layer/layerStack.h"
 #include "layer/skyboxLayer.h"
 #include "layer/modelLayer.h"
 #include "layer/testLayer.h"
@@ -30,7 +30,7 @@
 #include "layer/debugLayer.h"
 #include "layer/debugOverlay.h"
 
-#include "gui/frames.h"
+#include "frames.h"
 
 bool initGLFW() {
 	// Set window hints
@@ -149,7 +149,7 @@ void Screen::onInit() {
 
 
 	// Shader init
-	Shaders::onInit();
+	ApplicationShaders::onInit();
 
 
 	// Layer creation
@@ -263,7 +263,7 @@ void Screen::onClose() {
 
 	Library::onClose();
 
-	Shaders::onClose();
+	ApplicationShaders::onClose();
 
 	KeyboardOptions::save(properties);
 

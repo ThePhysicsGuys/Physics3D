@@ -1,9 +1,9 @@
 #include "testsMain.h"
 
-#include "../engine/geometry/shape.h"
-#include "../application/shapeLibrary.h"
+#include "../physics/geometry/shape.h"
+#include "../physics/misc/shapeLibrary.h"
 
-#include "../engine/math/mathUtil.h"
+#include "../physics/math/mathUtil.h"
 
 /*TEST_CASE(volumeApproximation) {
 	Polyhedron s = house;

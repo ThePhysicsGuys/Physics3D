@@ -1,12 +1,12 @@
 #pragma once
 
-#include "debug.h"
 #include "worlds.h"
-#include "../physics/misc/shapeLibrary.h"
 #include "extendedPart.h"
 #include "partFactory.h"
 
+#include "../graphics/debug/debug.h"
 #include "../physics/geometry/shape.h"
+#include "../physics/misc/shapeLibrary.h"
 #include "../physics/geometry/convexShapeBuilder.h"
 
 namespace WorldBuilder {

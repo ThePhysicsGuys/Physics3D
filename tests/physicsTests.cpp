@@ -1,8 +1,8 @@
 #include "testsMain.h"
 
-#include "../engine/world.h"
-#include "../application/shapeLibrary.h"
-#include "../engine/math/mathUtil.h"
+#include "../physics/world.h"
+#include "../physics/misc/shapeLibrary.h"
+#include "../physics/math/mathUtil.h"
 #include "../util/log.h"
 
 
