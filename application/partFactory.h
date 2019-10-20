@@ -1,6 +1,6 @@
 #pragma once
 
-#include "visualShape.h"
+#include "../graphics/visualShape.h"
 #include "extendedPart.h"
 #include "view/screen.h"
 

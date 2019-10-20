@@ -173,6 +173,7 @@
   <ItemGroup>
     <ClCompile Include="log.cpp" />
     <ClCompile Include="properties.cpp" />
+    <ClCompile Include="resourceLoader.cpp" />
     <ClCompile Include="stringUtil.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -182,6 +183,7 @@
     <ClInclude Include="math\rot3.h" />
     <ClInclude Include="math\vec3.h" />
     <ClInclude Include="properties.h" />
+    <ClInclude Include="resourceLoader.h" />
     <ClInclude Include="stringUtil.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

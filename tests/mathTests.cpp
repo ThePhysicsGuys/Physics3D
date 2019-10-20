@@ -1,11 +1,11 @@
 #include "testsMain.h"
 
-#include "../engine/math/linalg/vec.h"
-#include "../engine/math/linalg/mat.h"
-#include "../engine/math/linalg/trigonometry.h"
-#include "../engine/math/linalg/misc.h"
-#include "../engine/math/linalg/largeMatrix.h"
-#include "../engine/math/mathUtil.h"
+#include "../physics/math/linalg/vec.h"
+#include "../physics/math/linalg/mat.h"
+#include "../physics/math/linalg/trigonometry.h"
+#include "../physics/math/linalg/misc.h"
+#include "../physics/math/linalg/largeMatrix.h"
+#include "../physics/math/mathUtil.h"
 
 #define ASSERT(condition) ASSERT_TOLERANT(condition, 0.00000001)
 

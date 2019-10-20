@@ -1,7 +1,7 @@
 #include "testsMain.h"
 
-#include "../engine/math/vec3.h"
-#include "../engine/datastructures/parallelVector.h"
+#include "../physics/math/linalg/vec.h"
+#include "../physics/datastructures/parallelVector.h"
 #include <immintrin.h>
 #include "../util/log.h"
 

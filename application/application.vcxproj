@@ -117,13 +117,13 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)application</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>GLEW_STATIC ; _MBCS;%(PreprocessorDefinitions);FT2_BUILD_LIBRARY</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions);</PreprocessorDefinitions>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>core.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)lib;$(OutDir)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;shell32.lib;glfw3.lib;glew32s.lib;opengl32.lib;physics3d.lib;freetype.lib;util.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;shell32.lib;physics.lib;util.lib;graphics.lib;engine.lib;</AdditionalDependencies>
       <AdditionalOptions>/NODEFAULTLIB:LIBCMT</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
@@ -164,7 +164,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)application</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>GLEW_STATIC ; _MBCS;%(PreprocessorDefinitions);FT2_BUILD_LIBRARY;NDEBUG</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions);NDEBUG</PreprocessorDefinitions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <EnablePREfast>false</EnablePREfast>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -174,7 +174,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(SolutionDir)lib;$(OutDir)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;shell32.lib;glfw3.lib;glew32s.lib;opengl32.lib;physics3d.lib;freetype.lib;util.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;shell32.lib;physics.lib;util.lib;engine.lib;graphics.lib;</AdditionalDependencies>
       <AdditionalOptions>/NODEFAULTLIB:LIBCMT</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
@@ -186,7 +186,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)application</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>GLEW_STATIC ; _MBCS;%(PreprocessorDefinitions);FT2_BUILD_LIBRARY</PreprocessorDefinitions>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
@@ -201,91 +201,31 @@
   <ItemGroup>
     <ClInclude Include="application.h" />
     <ClInclude Include="core.h" />
-    <ClInclude Include="debug.h" />
-    <ClInclude Include="event\event.h" />
-    <ClInclude Include="event\keyEvent.h" />
-    <ClInclude Include="event\mouseEvent.h" />
-    <ClInclude Include="event\windowEvent.h" />
-    <ClInclude Include="resource\fontResource.h" />
-    <ClInclude Include="resource\resource.h" />
-    <ClInclude Include="resource\resourceManager.h" />
-    <ClInclude Include="input\inputHandler.h" />
-    <ClInclude Include="input\keyboard.h" />
-    <ClInclude Include="input\mouse.h" />
-    <ClInclude Include="meshLibrary.h" />
-    <ClInclude Include="view\layer\testLayer.h" />
-    <ClInclude Include="resource\textureResource.h" />
-    <ClInclude Include="view\batch\guiBatch.h" />
-    <ClInclude Include="view\gui\guiUtils.h" />
-    <ClInclude Include="view\path\path.h" />
-    <ClInclude Include="view\layer\debugLayer.h" />
-    <ClInclude Include="view\layer\debugOverlay.h" />
-    <ClInclude Include="view\layer\guiLayer.h" />
-    <ClInclude Include="view\layer\layer.h" />
-    <ClInclude Include="options\keyboardOptions.h" />
-    <ClInclude Include="view\batch\batch.h" />
-    <ClInclude Include="view\batch\batchConfig.h" />
-    <ClInclude Include="view\batch\batchManager.h" />
-    <ClInclude Include="view\layer\layerStack.h" />
-    <ClInclude Include="view\layer\modelLayer.h" />
-    <ClInclude Include="view\layer\pickerLayer.h" />
-    <ClInclude Include="view\layer\postprocessLayer.h" />
-    <ClInclude Include="view\layer\skyboxLayer.h" />
-    <ClInclude Include="view\path\path3D.h" />
-    <ClInclude Include="view\picker\editTools.h" />
-    <ClInclude Include="eventHandler.h" />
     <ClInclude Include="io\export.h" />
-    <ClInclude Include="extendedPart.h" />
     <ClInclude Include="io\import.h" />
+    <ClInclude Include="layer\testLayer.h" />
+    <ClInclude Include="layer\debugLayer.h" />
+    <ClInclude Include="layer\debugOverlay.h" />
+    <ClInclude Include="layer\guiLayer.h" />
+    <ClInclude Include="layer\modelLayer.h" />
+    <ClInclude Include="layer\pickerLayer.h" />
+    <ClInclude Include="layer\postprocessLayer.h" />
+    <ClInclude Include="layer\skyboxLayer.h" />
+    <ClInclude Include="picker\editTools.h" />
+    <ClInclude Include="eventHandler.h" />
+    <ClInclude Include="extendedPart.h" />
     <ClInclude Include="partFactory.h" />
-    <ClInclude Include="resource.h" />
-    <ClInclude Include="resourceLoader.h" />
     <ClInclude Include="input\standardInputHandler.h" />
-    <ClInclude Include="threePhaseBuffer.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="resources.h" />
+    <ClInclude Include="shader\shaders.h" />
     <ClInclude Include="tickerThread.h" />
-    <ClInclude Include="view\bindable.h" />
-    <ClInclude Include="view\font.h" />
-    <ClInclude Include="view\mesh\abstractMesh.h" />
-    <ClInclude Include="view\buffers\bufferLayout.h" />
+    <ClInclude Include="picker\pickable.h" />
+    <ClInclude Include="picker\ray.h" />
+    <ClInclude Include="picker\picker.h" />
     <ClInclude Include="view\camera.h" />
-    <ClInclude Include="view\gui\button.h" />
-    <ClInclude Include="view\gui\checkBox.h" />
-    <ClInclude Include="view\gui\colorPicker.h" />
-    <ClInclude Include="view\gui\component.h" />
-    <ClInclude Include="view\gui\container.h" />
-    <ClInclude Include="view\gui\frame.h" />
-    <ClInclude Include="view\gui\frames.h" />
-    <ClInclude Include="view\gui\gui.h" />
-    <ClInclude Include="view\gui\image.h" />
-    <ClInclude Include="view\gui\label.h" />
-    <ClInclude Include="view\gui\layout.h" />
-    <ClInclude Include="view\gui\orderedVector.h" />
-    <ClInclude Include="view\gui\panel.h" />
-    <ClInclude Include="view\gui\slider.h" />
-    <ClInclude Include="view\gui\directionEditor.h" />
-    <ClInclude Include="view\picker\pickable.h" />
-    <ClInclude Include="view\picker\ray.h" />
-    <ClInclude Include="view\renderUtils.h" />
-    <ClInclude Include="view\buffers\indexBuffer.h" />
-    <ClInclude Include="view\picker\picker.h" />
-    <ClInclude Include="view\buffers\frameBuffer.h" />
-    <ClInclude Include="view\mesh\pointMesh.h" />
-    <ClInclude Include="view\debug\profilerUI.h" />
-    <ClInclude Include="view\buffers\renderBuffer.h" />
+    <ClInclude Include="view\frames.h" />
     <ClInclude Include="view\screen.h" />
-    <ClInclude Include="view\shader.h" />
-    <ClInclude Include="view\mesh\arrayMesh.h" />
-    <ClInclude Include="view\mesh\indexedMesh.h" />
-    <ClInclude Include="view\texture.h" />
-    <ClInclude Include="view\mesh\vectorMesh.h" />
-    <ClInclude Include="view\buffers\vertexArray.h" />
-    <ClInclude Include="view\buffers\vertexBuffer.h" />
-    <ClInclude Include="view\mesh\primitive.h" />
-    <ClInclude Include="view\light.h" />
-    <ClInclude Include="view\material.h" />
-    <ClInclude Include="view\debug\visualDebug.h" />
-    <ClInclude Include="view\shaderProgram.h" />
-    <ClInclude Include="visualShape.h" />
     <ClInclude Include="worldBuilder.h" />
     <ClInclude Include="worlds.h" />
   </ItemGroup>
@@ -297,96 +237,33 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">core.h</PrecompiledHeaderFile>
     </ClCompile>
-    <ClCompile Include="debug.cpp" />
-    <ClCompile Include="input\inputHandler.cpp" />
-    <ClCompile Include="input\keyboard.cpp" />
-    <ClCompile Include="input\mouse.cpp" />
-    <ClCompile Include="meshLibrary.cpp" />
-    <ClCompile Include="options\keyboardOptions.cpp" />
-    <ClCompile Include="resource\fontResource.cpp" />
-    <ClCompile Include="resource\resource.cpp" />
-    <ClCompile Include="resource\resourceManager.cpp" />
-    <ClCompile Include="resource\textureResource.cpp" />
-    <ClCompile Include="view\batch\commandBatch.h" />
-    <ClCompile Include="view\gui\guiUtils.cpp" />
-    <ClCompile Include="view\layer\testLayer.cpp" />
-    <ClCompile Include="view\path\path.cpp" />
-    <ClCompile Include="view\batch\batchManager.cpp" />
-    <ClCompile Include="view\buffers\bufferLayout.cpp" />
-    <ClCompile Include="view\buffers\indexBuffer.cpp" />
-    <ClCompile Include="view\buffers\vertexArray.cpp" />
-    <ClCompile Include="view\buffers\vertexBuffer.cpp" />
-    <ClCompile Include="view\gui\container.cpp" />
-    <ClCompile Include="view\layer\debugLayer.cpp" />
-    <ClCompile Include="view\layer\debugOverlay.cpp" />
-    <ClCompile Include="view\layer\guiLayer.cpp" />
-    <ClCompile Include="view\layer\layerStack.cpp" />
-    <ClCompile Include="view\layer\modelLayer.cpp" />
-    <ClCompile Include="view\layer\pickerLayer.cpp" />
-    <ClCompile Include="view\layer\postprocessLayer.cpp" />
-    <ClCompile Include="view\layer\skyboxLayer.cpp" />
-    <ClCompile Include="view\material.cpp" />
-    <ClCompile Include="view\mesh\abstractMesh.cpp" />
-    <ClCompile Include="view\path\path3D.cpp" />
-    <ClCompile Include="view\picker\editTools.cpp" />
-    <ClCompile Include="eventHandler.cpp" />
     <ClCompile Include="io\export.cpp" />
-    <ClCompile Include="extendedPart.cpp" />
     <ClCompile Include="io\import.cpp" />
+    <ClCompile Include="layer\postprocessLayer.cpp" />
+    <ClCompile Include="layer\resources.cpp" />
+    <ClCompile Include="layer\testLayer.cpp" />
+    <ClCompile Include="layer\debugLayer.cpp" />
+    <ClCompile Include="layer\debugOverlay.cpp" />
+    <ClCompile Include="layer\guiLayer.cpp" />
+    <ClCompile Include="layer\modelLayer.cpp" />
+    <ClCompile Include="layer\pickerLayer.cpp" />
+    <ClCompile Include="layer\skyboxLayer.cpp" />
+    <ClCompile Include="picker\editTools.cpp" />
+    <ClCompile Include="eventHandler.cpp" />
+    <ClCompile Include="extendedPart.cpp" />
     <ClCompile Include="partFactory.cpp" />
-    <ClCompile Include="resourceLoader.cpp" />
-    <ClCompile Include="view\picker\ray.cpp" />
-    <ClCompile Include="view\shaderProgram.cpp" />
+    <ClCompile Include="picker\ray.cpp" />
     <ClCompile Include="input\standardInputHandler.cpp" />
+    <ClCompile Include="shader\shaders.cpp" />
     <ClCompile Include="tickerThread.cpp" />
+    <ClCompile Include="picker\picker.cpp" />
     <ClCompile Include="view\camera.cpp" />
-    <ClCompile Include="view\font.cpp" />
-    <ClCompile Include="view\buffers\frameBuffer.cpp" />
-    <ClCompile Include="view\gui\button.cpp" />
-    <ClCompile Include="view\gui\checkBox.cpp" />
-    <ClCompile Include="view\gui\colorPicker.cpp" />
-    <ClCompile Include="view\gui\frame.cpp" />
-    <ClCompile Include="view\gui\gui.cpp" />
-    <ClCompile Include="view\gui\image.cpp" />
-    <ClCompile Include="view\gui\label.cpp" />
-    <ClCompile Include="view\gui\layout.cpp" />
-    <ClCompile Include="view\gui\panel.cpp" />
-    <ClCompile Include="view\gui\slider.cpp" />
-    <ClCompile Include="view\gui\directionEditor.cpp" />
-    <ClCompile Include="view\picker\picker.cpp" />
-    <ClCompile Include="view\mesh\pointMesh.cpp" />
-    <ClCompile Include="view\debug\profilerUI.cpp" />
-    <ClCompile Include="view\buffers\renderBuffer.cpp" />
-    <ClCompile Include="view\renderUtils.cpp" />
     <ClCompile Include="view\screen.cpp" />
-    <ClCompile Include="view\shader.cpp" />
-    <ClCompile Include="view\mesh\arrayMesh.cpp" />
-    <ClCompile Include="view\mesh\indexedMesh.cpp" />
-    <ClCompile Include="view\texture.cpp" />
-    <ClCompile Include="view\mesh\vectorMesh.cpp" />
-    <ClCompile Include="view\debug\visualDebug.cpp" />
     <ClCompile Include="worldBuilder.cpp" />
     <ClCompile Include="worlds.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="application.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\res\shaders\basic.shader" />
-    <None Include="..\res\shaders\blur.shader" />
-    <None Include="..\res\shaders\line.shader" />
-    <None Include="..\res\shaders\depth.shader" />
-    <None Include="..\res\shaders\edge.shader" />
-    <None Include="..\res\shaders\font.shader" />
-    <None Include="..\res\shaders\gui.shader" />
-    <None Include="..\res\shaders\mask.shader" />
-    <None Include="..\res\shaders\origin.shader" />
-    <None Include="..\res\shaders\point.shader" />
-    <None Include="..\res\shaders\postprocess.shader" />
-    <None Include="..\res\shaders\quad.shader" />
-    <None Include="..\res\shaders\skybox.shader" />
-    <None Include="..\res\shaders\test.shader" />
-    <None Include="..\res\shaders\vector.shader" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\res\icon.ico" />
@@ -400,6 +277,9 @@
       <SubType>Designer</SubType>
     </Natvis>
     <Natvis Include="view.natvis" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\res\shaders\edge.shader" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

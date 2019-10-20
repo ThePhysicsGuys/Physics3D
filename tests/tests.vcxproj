@@ -27,7 +27,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\application\view\gui\gui.cpp" />
     <ClCompile Include="dataStructureTests.cpp" />
     <ClCompile Include="estimationTests.cpp" />
     <ClCompile Include="geometryTests.cpp" />
