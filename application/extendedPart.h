@@ -1,10 +1,8 @@
 #pragma once
 
-#include "view/material.h"
-
+#include "../graphics/material.h"
+#include "../graphics/visualShape.h"
 #include "../physics/part.h"
-
-#include "visualShape.h"
 
 struct ExtendedPart : public Part {
 	

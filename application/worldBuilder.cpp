@@ -55,7 +55,7 @@ namespace WorldBuilder {
 		Physical* spider = spiderBody->parent;
 
 		for (int i = 0; i < legCount; i++) {
-			ExtendedPart* leg = legFactory.produce(GlobalCFrame(), { 1.0, 0.5, 0.3 }, std::string("LegPart ") + std::to_string(i));
+			ExtendedPart* leg = legFactory.produce(GlobalCFrame(), { 1.0, 0.5, 0.3 }, "LegPart " + std::to_string(i));
 			leg->material.ambient = Vec4f(0.4f, 0.4f, 0.4f, 1.0f);
 
 			double angle = i * PI * 2 / legCount;

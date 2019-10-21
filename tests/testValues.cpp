@@ -1,6 +1,6 @@
 #include "testValues.h"
 
-#include "../engine/math/linalg/trigonometry.h"
+#include "../physics/math/linalg/trigonometry.h"
 
 const Vec3 vectors[13]{
 	Vec3(0.0, 0.0, 0.0),

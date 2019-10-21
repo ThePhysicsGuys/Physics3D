@@ -1,9 +1,8 @@
 #include "testsMain.h"
 
 #include "../util/log.h"
-#include "../engine/math/cframe.h"
-#include "../engine/smallVector.h"
-#include "../engine/datastructures/buffers.h"
+#include "../physics/math/cframe.h"
+#include "../physics/datastructures/buffers.h"
 #include <vector>
 
 volatile double t;
@@ -75,6 +74,8 @@ TEST_CASE(profileVectorOfVectors) {
 	Log::debug("Total %d", sum);
 }
 
+//! Deprecated
+/*
 TEST_CASE(profileSmallVectorOfVectorsTooLarge) {
 	SmallVector<int, 5>* vector = new SmallVector<int, 5>[VECTOR_COUNT];
 	//Log::debug("sizeof(vector) == %d", sizeof(SmallVector<int, 5>));

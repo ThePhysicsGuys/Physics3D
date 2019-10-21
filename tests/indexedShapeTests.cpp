@@ -1,8 +1,8 @@
 #include "testsMain.h"
-#include "../engine/geometry/indexedShape.h"
-#include "../engine/geometry/shapeBuilder.h"
-#include "../engine/geometry/convexShapeBuilder.h"
-#include "../application/shapeLibrary.h"
+#include "../physics/geometry/indexedShape.h"
+#include "../physics/geometry/shapeBuilder.h"
+#include "../physics/geometry/convexShapeBuilder.h"
+#include "../physics/misc/shapeLibrary.h"
 
 TEST_CASE(testIndexedShape) {
 	Vec3f verts[]{Vec3f(0.0, 0.0, 0.0), Vec3f(1.0, 0.0, 0.0), Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 1.0, 0.0)};

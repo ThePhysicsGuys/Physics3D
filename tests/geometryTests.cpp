@@ -1,15 +1,15 @@
 #include "testsMain.h"
 
-#include "../engine/math/linalg/vec.h"
-#include "../engine/math/linalg/mat.h"
-#include "../engine/math/linalg/trigonometry.h"
-#include "../engine/math/mathUtil.h"
-#include "../engine/math/utils.h"
+#include "../physics/math/linalg/vec.h"
+#include "../physics/math/linalg/mat.h"
+#include "../physics/math/linalg/trigonometry.h"
+#include "../physics/math/mathUtil.h"
+#include "../physics/math/utils.h"
 
-#include "../engine/geometry/shape.h"
-#include "../engine/geometry/boundingBox.h"
+#include "../physics/geometry/shape.h"
+#include "../physics/geometry/boundingBox.h"
 
-#include "../application/shapeLibrary.h"
+#include "../physics/misc/shapeLibrary.h"
 
 #include "testValues.h"
 

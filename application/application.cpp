@@ -8,10 +8,12 @@
 #include <fstream>
 
 #include "view/screen.h"
-#include "view/texture.h"
-#include "view/debug/visualDebug.h"
-#include "view/material.h"
 
+#include "../graphics/resources.h"
+#include "../graphics/texture.h"
+#include "../graphics/material.h"
+#include "../graphics/debug/debug.h"
+#include "../graphics/debug/visualDebug.h"
 #include "../physics/geometry/shape.h"
 #include "../physics/math/mathUtil.h"
 #include "../physics/part.h"
@@ -19,17 +21,18 @@
 #include "../physics/misc/gravityForce.h"
 #include "../physics/physicsProfiler.h"
 
-#include "debug.h"
 #include "worlds.h"
+#include "partFactory.h"
 #include "tickerThread.h"
-#include "resourceLoader.h"
 #include "worldBuilder.h"
 
 #include "io/export.h"
 #include "io/import.h"
 
-#include "resource/resourceManager.h"
-#include "resource/textureResource.h"
+#include "../util/resourceLoader.h"
+#include "../engine/resource/resourceManager.h"
+#include "../engine/resource/textureResource.h"
+#include "../engine/io/import.h"
 
 #define TICKS_PER_SECOND 120.0
 #define TICK_SKIP_TIME std::chrono::milliseconds(3000)
@@ -138,8 +141,9 @@ void setupWorld() {
 	// WorldBuilder init
 	WorldBuilder::init();
 
-	// Sphere shape
-	VisualShape sphereShape = OBJImport::load((std::istream&) std::istringstream(getResourceAsString(SPHERE_MODEL)));
+	// Sphere shape 
+	// TODO remove link to graphics
+	VisualShape sphereShape = OBJImport::load((std::istream&) std::istringstream(getResourceAsString(graphicsResources, SPHERE_MODEL)));
 	Vec3f* normalBuf = new Vec3f[sphereShape.vertexCount];
 	sphereShape.computeNormals(normalBuf);
 	sphereShape.normals = SharedArrayPtr<const Vec3f>(normalBuf);
@@ -201,7 +205,7 @@ void setupWorld() {
 		world.addPart(newCube);
 	}*/
 
-	PartProperties carProperties{ 1.0, 0.7, 0.3 };
+	/*PartProperties carProperties{ 1.0, 0.7, 0.3 };
 	PartProperties wheelProperties{ 1.0, 2.0, 0.7 };
 
 	ExtendedPart* carBody = cubeFactory.produceScaled(GlobalCFrame(5.0, 1.0, 5.0), carProperties, 2.0, 0.1, 1.0, "CarBody");
@@ -239,7 +243,7 @@ void setupWorld() {
 	car.ballConstraints.push_back(BallConstraint{ Vec3(0.8, 0.0, -0.8), carBody->parent, Vec3(0,0,0), wheel2->parent });
 	car.ballConstraints.push_back(BallConstraint{ Vec3(-0.8, 0.0, 0.8), carBody->parent, Vec3(0,0,0), wheel3->parent });
 	car.ballConstraints.push_back(BallConstraint{ Vec3(-0.8, 0.0, -0.8), carBody->parent, Vec3(0,0,0), wheel4->parent });
-	world.constraints.push_back(std::move(car));
+	world.constraints.push_back(std::move(car));*/
 
 	
 	int minX = -2;
@@ -257,7 +261,7 @@ void setupWorld() {
 				newCube->material.ambient = Vec4f((x-minX)/(maxX-minX), (y-minY)/(maxY-minY), (z-minZ)/(maxZ-minZ), 1.0f);
 				world.addPart(newCube);
 				world.addPart(sphereFactory.produce(GlobalCFrame(Position(x + 5, y + 1, z - 5)), { 1.0, 0.2, 0.5 }));
-				spiderFactories[rand() & 0x00000003].buildSpider(GlobalCFrame(Position(x+y*0.1, y+1, z)));
+				//spiderFactories[rand() & 0x00000003].buildSpider(GlobalCFrame(Position(x+y*0.1, y+1, z)));
 				world.addPart(triangleFactory.produce(GlobalCFrame(Position(x - 20, y + 1, z + 20)), { 1.0, 0.2, 0.5 }));
 			}
 		}

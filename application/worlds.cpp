@@ -7,7 +7,7 @@
 #include "application.h"
 #include "input/standardInputHandler.h"
 #include "view/screen.h"
-#include "options/keyboardOptions.h"
+#include "../engine/options/keyboardOptions.h"
 
 #define PICKER_STRENGTH 100
 #define PICKER_SPEED_STRENGTH 12

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../engine/math/linalg/vec.h"
-#include "../engine/math/linalg/mat.h"
-#include "../engine/templateUtils.h"
-#include "../engine/math/cframe.h"
+#include "../physics/math/linalg/vec.h"
+#include "../physics/math/linalg/mat.h"
+#include "../physics/templateUtils.h"
+#include "../physics/math/cframe.h"
 
 template<typename Num1, typename Num2, typename Tol, IS_ARITHMETIC(Num1), IS_ARITHMETIC(Num2)>
 bool tolerantEquals(const Num1& first, const Num2& second, Tol tolerance) {

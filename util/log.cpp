@@ -29,14 +29,13 @@ namespace Log {
 			newSubject = title != lastSubject;
 		} else {
 			if (title == subjects.top()) {
-				newSubject == false;
+				newSubject = false;
 			} else if (title == lastSubject) {
 				newSubject = false;
-				subjects.push(title);
 			} else {
 				newSubject = true;
-				subjects.push(title);
 			}
+			subjects.push(title);
 		}
 	}
 
