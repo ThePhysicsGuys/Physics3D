@@ -43,11 +43,11 @@ const char* iterationLabels[]{
 	"MAX",
 };
 
-BreakdownAverageProfiler<100, PhysicsProcess> physicsMeasure(physicsLabels);
-HistoricTally<1, long long, IntersectionResult> intersectionStatistics(intersectionLabels);
-CircularBuffer<int, 1> gjkCollideIterStats;
-CircularBuffer<int, 1> gjkNoCollideIterStats;
+BreakdownAverageProfiler<PhysicsProcess> physicsMeasure(physicsLabels, 100);
+HistoricTally<long long, IntersectionResult> intersectionStatistics(intersectionLabels, 1);
+CircularBuffer<int> gjkCollideIterStats(1);
+CircularBuffer<int> gjkNoCollideIterStats(1);
 
-HistoricTally<1, long long, IterationTime> GJKCollidesIterationStatistics(iterationLabels);
-HistoricTally<1, long long, IterationTime> GJKNoCollidesIterationStatistics(iterationLabels);
-HistoricTally<1, long long, IterationTime> EPAIterationStatistics(iterationLabels);
+HistoricTally<long long, IterationTime> GJKCollidesIterationStatistics(iterationLabels, 1);
+HistoricTally<long long, IterationTime> GJKNoCollidesIterationStatistics(iterationLabels, 1);
+HistoricTally<long long, IterationTime> EPAIterationStatistics(iterationLabels, 1);

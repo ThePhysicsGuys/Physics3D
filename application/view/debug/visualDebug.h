@@ -26,7 +26,7 @@ enum GraphicsProcess {
 };
 
 extern const char* const graphicsDebugLabels[];
-extern BreakdownAverageProfiler<60, GraphicsProcess> graphicsMeasure;
+extern BreakdownAverageProfiler<GraphicsProcess> graphicsMeasure;
 
 namespace Debug {
 
@@ -68,8 +68,8 @@ namespace Debug {
 		addDebugField(dimension, font, varName, std::to_string(value), unit);
 	}
 
-	template<size_t N, typename EnumType>
-	PieChart toPieChart(BreakdownAverageProfiler<N, EnumType>& profiler, const char* title, Vec2f piePosition, float pieSize) {
+	template<typename EnumType>
+	PieChart toPieChart(BreakdownAverageProfiler<EnumType>& profiler, const char* title, Vec2f piePosition, float pieSize) {
 		auto results = profiler.history.avg();
 		auto averageTotalTime = results.sum();
 
@@ -83,8 +83,8 @@ namespace Debug {
 		return chart;
 	}
 
-	template<size_t N, typename Unit, typename EnumType>
-	PieChart toPieChart(HistoricTally<N, Unit, EnumType>& tally, const char* title, Vec2f piePosition, float pieSize) {
+	template<typename Unit, typename EnumType>
+	PieChart toPieChart(HistoricTally<Unit, EnumType>& tally, const char* title, Vec2f piePosition, float pieSize) {
 		int sum = 0;
 		for (auto entry : tally.history) 
 			sum += (int) entry.sum();

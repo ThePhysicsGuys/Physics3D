@@ -368,7 +368,7 @@ void parseSubject(Subject subject, std::string path, std::map<std::string, std::
 
 		if (!factories.count(shapeReference)) {
 			Log::info("Loading part %s in factory", (path + shapeReference).c_str());
-			VisualShape shape = OBJImport::load(path + shapeReference);
+			Shape shape = OBJImport::load(path + shapeReference);
 			factories[shapeReference] = PartFactory(shape, screen, name);
 		}
 

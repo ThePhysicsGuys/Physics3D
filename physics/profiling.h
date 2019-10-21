@@ -6,12 +6,14 @@
 #include "datastructures/buffers.h"
 #include "parallelArray.h"
 
-template<size_t N>
 class TimerMeasure {
 	std::chrono::time_point<std::chrono::steady_clock> lastClock = std::chrono::high_resolution_clock::now();
 public:
-	CircularBuffer<std::chrono::nanoseconds, N> pastTickLengths;
-	CircularBuffer<std::chrono::nanoseconds, N> pastBetweenTimes;
+	CircularBuffer<std::chrono::nanoseconds> pastTickLengths;
+	CircularBuffer<std::chrono::nanoseconds> pastBetweenTimes;
+
+	TimerMeasure(size_t capacity) : pastTickLengths(capacity), pastBetweenTimes(capacity) {}
+
 	inline void start() {
 		std::chrono::time_point<std::chrono::steady_clock> curTime = std::chrono::high_resolution_clock::now();
 		std::chrono::nanoseconds timeSinceLast = curTime - lastClock;
@@ -24,12 +26,19 @@ public:
 	}
 };
 
-template<size_t N, typename Unit, typename Category>
+template<typename Unit, typename Category>
 class HistoricTally {
 	ParallelArray<Unit, static_cast<size_t>(Category::COUNT)> currentTally;
 public:
 	char const * labels[static_cast<size_t>(Category::COUNT)];
-	CircularBuffer<ParallelArray<Unit, static_cast<size_t>(Category::COUNT)>, N> history;
+	CircularBuffer<ParallelArray<Unit, static_cast<size_t>(Category::COUNT)>> history;
+
+	inline HistoricTally(char const* const labels[static_cast<size_t>(Category::COUNT)], size_t size) : history(size) {
+		for(size_t i = 0; i < static_cast<size_t>(Category::COUNT); i++) {
+			this->labels[i] = labels[i];
+		}
+		clearCurrentTally();
+	}
 
 	inline void addToTally(Category category, Unit amount) {
 		currentTally[static_cast<size_t>(category)] += amount;
@@ -46,33 +55,26 @@ public:
 		clearCurrentTally();
 	}
 
-	inline HistoricTally(char const * const labels[static_cast<size_t>(Category::COUNT)]) {
-		for(size_t i = 0; i < static_cast<size_t>(Category::COUNT); i++) {
-			this->labels[i] = labels[i];
-		}
-		clearCurrentTally();
-	}
-
 	constexpr inline size_t size() const {
 		return static_cast<size_t>(Category::COUNT);
 	}
 };
 
-template<size_t N, typename ProcessType>
-class BreakdownAverageProfiler : public HistoricTally<N, std::chrono::nanoseconds, ProcessType> {
+template<typename ProcessType>
+class BreakdownAverageProfiler : public HistoricTally<std::chrono::nanoseconds, ProcessType> {
 	std::chrono::time_point<std::chrono::steady_clock> startTime = std::chrono::high_resolution_clock::now();
 	ProcessType currentProcess = static_cast<ProcessType>(-1);
 
 
 public:
-	CircularBuffer<std::chrono::time_point<std::chrono::steady_clock>, N> tickHistory;
+	CircularBuffer<std::chrono::time_point<std::chrono::steady_clock>> tickHistory;
 
-	inline BreakdownAverageProfiler(char const * const labels[static_cast<size_t>(ProcessType::COUNT)]) : HistoricTally<N, std::chrono::nanoseconds, ProcessType>(labels) {}
+	inline BreakdownAverageProfiler(char const * const labels[static_cast<size_t>(ProcessType::COUNT)], size_t capacity) : HistoricTally<std::chrono::nanoseconds, ProcessType>(labels, capacity), tickHistory(capacity) {}
 
 	inline void mark(ProcessType process) {
 		std::chrono::time_point<std::chrono::steady_clock> curTime = std::chrono::high_resolution_clock::now();
 		if(currentProcess != static_cast<ProcessType>(-1)) {
-			HistoricTally<N, std::chrono::nanoseconds, ProcessType>::addToTally(currentProcess, curTime - startTime);
+			HistoricTally<std::chrono::nanoseconds, ProcessType>::addToTally(currentProcess, curTime - startTime);
 		}
 		startTime = curTime;
 		currentProcess = process;
@@ -81,7 +83,7 @@ public:
 	inline void mark(ProcessType process, ProcessType overrideOldProcess) {
 		std::chrono::time_point<std::chrono::steady_clock> curTime = std::chrono::high_resolution_clock::now();
 		if (currentProcess != static_cast<ProcessType>(-1)) {
-			HistoricTally<N, std::chrono::nanoseconds, ProcessType>::addToTally(overrideOldProcess, curTime - startTime);
+			HistoricTally<std::chrono::nanoseconds, ProcessType>::addToTally(overrideOldProcess, curTime - startTime);
 		}
 		startTime = curTime;
 		currentProcess = process;
@@ -99,10 +101,8 @@ public:
 	inline double getAvgTPS() {
 		size_t numTicks = tickHistory.size();
 		if(numTicks != 0) {
-			size_t index = (tickHistory.curI + numTicks - 1) % numTicks;
-			size_t lastKnown = tickHistory.curI % numTicks;
-			std::chrono::time_point<std::chrono::steady_clock> firstTime = tickHistory.buf[lastKnown];
-			std::chrono::time_point<std::chrono::steady_clock> lastTime = tickHistory.buf[index];
+			std::chrono::time_point<std::chrono::steady_clock> firstTime = tickHistory.tail();
+			std::chrono::time_point<std::chrono::steady_clock> lastTime = tickHistory.front();
 			std::chrono::nanoseconds delta = lastTime - firstTime;
 
 			double timeTaken = delta.count() * 1E-9;

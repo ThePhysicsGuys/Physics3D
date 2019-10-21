@@ -30,7 +30,3 @@ ExtendedPart* createUniquePart(Screen& screen, const Shape& hitbox, const Visual
 inline ExtendedPart* createUniquePart(Screen& screen, const Shape& shape, const GlobalCFrame& position, const PartProperties& properties, std::string name = "Part") {
 	return createUniquePart(screen, shape, VisualShape(shape.asPolyhedron()), position, properties, name);
 }
-
-inline ExtendedPart* createUniquePart(Screen& screen, const VisualShape& shape, const GlobalCFrame& position, const PartProperties& properties, std::string name = "Part") {
-	return createUniquePart(screen, static_cast<const Shape&>(shape), shape, position, properties, name);
-}

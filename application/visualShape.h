@@ -2,6 +2,7 @@
 
 #include "../physics/math/linalg/vec.h"
 #include "../physics/geometry/shape.h"
+#include "../physics/geometry/polyhedron.h"
 #include "../physics/datastructures/sharedArray.h"
 
 struct VisualShape : public Polyhedron {
@@ -18,4 +19,6 @@ struct VisualShape : public Polyhedron {
 
 	VisualShape(Vec3f* vertices, SharedArrayPtr<const Vec3f> normals, SharedArrayPtr<const Vec2f> uvs, const Triangle* triangles, int vertexCount, int triangleCount) :
 		Polyhedron(vertices, triangles, vertexCount, triangleCount), normals(normals), uvs(uvs) {}
+
+	operator Shape() const { return Shape(static_cast<Polyhedron>(*this)); }
 };
