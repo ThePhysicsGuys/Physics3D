@@ -67,10 +67,6 @@ bool StandardInputHandler::onKeyPressOrRepeat(KeyPressEvent& event) {
 }
 
 bool StandardInputHandler::onKeyPress(KeyPressEvent& event) {
-	if (event.isRepeated()) {
-		return onKeyPressOrRepeat(event);
-	}
-
 	int key = event.getKey();
 
 	if (KeyboardOptions::Tick::pause == key) {
@@ -119,7 +115,7 @@ bool StandardInputHandler::onKeyPress(KeyPressEvent& event) {
 		togglePointType(static_cast<Debug::PointType>(key - Keyboard::NUMBER_1.code));
 	}
 
-	return true;
+	return onKeyPressOrRepeat(event);
 };
 
 bool StandardInputHandler::onDoubleKeyPress(DoubleKeyPressEvent& event) {

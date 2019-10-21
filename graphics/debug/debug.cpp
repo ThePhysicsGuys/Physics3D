@@ -10,6 +10,8 @@
 #include "../physics/math/mathUtil.h"
 #include "threePhaseBuffer.h"
 
+#include "../physics/geometry/polyhedron.h"
+
 void clearError() {
 	while (glGetError() != GL_NO_ERROR);
 }
