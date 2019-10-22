@@ -46,5 +46,5 @@ struct Tetrahedron {
 	MinkPoint A, B, C, D;
 };
 
-bool runGJKTransformed(const GenericCollidable& first, const GenericCollidable& second, const Transformf& relativeTransform, const Vec3f& initialSearchDirection, Tetrahedron& simp, int& iter);
-bool runEPATransformed(const GenericCollidable& first, const GenericCollidable& second, const Tetrahedron& s, const Transformf& relativeTransform, Vec3f& intersection, Vec3f& exitVector, ComputationBuffers& bufs, int& iter);
+bool runGJKTransformed(const GenericCollidable& first, const GenericCollidable& second, const CFramef& relativeTransform, const Vec3f& initialSearchDirection, Tetrahedron& simp, int& iter);
+bool runEPATransformed(const GenericCollidable& first, const GenericCollidable& second, const Tetrahedron& s, const CFramef& relativeTransform, Vec3f& intersection, Vec3f& exitVector, ComputationBuffers& bufs, int& iter);

@@ -28,7 +28,7 @@ void incDebugTally(HistoricTally<long long, IterationTime>& tally, int iterTime)
 
 ComputationBuffers buffers(1000, 2000);
 
-Intersection intersectsTransformed(const Polyhedron& first, const Polyhedron& second, const CFrame& relativeTransform) {
+Intersection intersectsTransformed(const GenericCollidable& first, const GenericCollidable& second, const CFrame& relativeTransform) {
 	Tetrahedron result;
 	int iter;
 	physicsMeasure.mark(PhysicsProcess::GJK_COL);

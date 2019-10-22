@@ -54,7 +54,7 @@ inline int furthestIndexInDirection(Vec3* vertices, int vertexCount, Vec3 direct
 	return bestVertexIndex;
 }
 
-inline MinkPoint getSupport(const GenericCollidable& first, const GenericCollidable& second, const Transformf& transform, const Vec3f& searchDirection) {
+inline MinkPoint getSupport(const GenericCollidable& first, const GenericCollidable& second, const CFramef& transform, const Vec3f& searchDirection) {
 	Vec3f furthest1 = first.furthestInDirection(searchDirection);  // in local space of first
 	Vec3f transformedSearchDirection = transform.relativeToLocal(searchDirection);
 	Vec3f furthest2 = second.furthestInDirection(-transformedSearchDirection);  // in local space of second
@@ -62,7 +62,7 @@ inline MinkPoint getSupport(const GenericCollidable& first, const GenericCollida
 	return MinkPoint{ furthest1 - secondVertex, furthest1, secondVertex };  // local to first
 }
 
-bool runGJKTransformed(const GenericCollidable& first, const GenericCollidable& second, const Transformf& transform, const Vec3f& initialSearchDirection, Tetrahedron& simplex, int& iter) {
+bool runGJKTransformed(const GenericCollidable& first, const GenericCollidable& second, const CFramef& transform, const Vec3f& initialSearchDirection, Tetrahedron& simplex, int& iter) {
 	MinkPoint A(getSupport(first, second, transform, initialSearchDirection));
 	MinkPoint B, C, D;
 
@@ -198,7 +198,7 @@ void initializeBuffer(const Tetrahedron& s, ComputationBuffers& b) {
 	b.knownVecs[3] = MinkowskiPointIndices{s.D.originFirst, s.D.originSecond};
 }
 
-bool runEPATransformed(const GenericCollidable& first, const GenericCollidable& second, const Tetrahedron& s, const Transformf& transform, Vec3f& intersection, Vec3f& exitVector, ComputationBuffers& bufs, int& iter) {
+bool runEPATransformed(const GenericCollidable& first, const GenericCollidable& second, const Tetrahedron& s, const CFramef& transform, Vec3f& intersection, Vec3f& exitVector, ComputationBuffers& bufs, int& iter) {
 	initializeBuffer(s, bufs);
 
 	ConvexShapeBuilder builder(bufs.vertBuf, bufs.triangleBuf, 4, 4, bufs.neighborBuf, bufs.removalBuf, bufs.edgeBuf);

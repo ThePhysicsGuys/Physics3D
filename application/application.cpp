@@ -260,7 +260,7 @@ void setupWorld() {
 				ExtendedPart* newCube = cubeFactory.produce(GlobalCFrame(x - 5, y + 1, z - 5), { 1.0, 0.2, 0.5 });
 				newCube->material.ambient = Vec4f((x-minX)/(maxX-minX), (y-minY)/(maxY-minY), (z-minZ)/(maxZ-minZ), 1.0f);
 				world.addPart(newCube);
-				world.addPart(sphereFactory.produce(GlobalCFrame(Position(x + 5, y + 1, z - 5)), { 1.0, 0.2, 0.5 }));
+				//world.addPart(sphereFactory.produce(GlobalCFrame(Position(x + 5, y + 1, z - 5)), { 1.0, 0.2, 0.5 }));
 				//spiderFactories[rand() & 0x00000003].buildSpider(GlobalCFrame(Position(x+y*0.1, y+1, z)));
 				world.addPart(triangleFactory.produce(GlobalCFrame(Position(x - 20, y + 1, z + 20)), { 1.0, 0.2, 0.5 }));
 			}
