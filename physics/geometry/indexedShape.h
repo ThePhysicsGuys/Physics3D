@@ -1,6 +1,6 @@
 #pragma once
 
-#include "shape.h"
+#include "polyhedron.h"
 #include "../datastructures/sharedArray.h"
 
 struct TriangleNeighbors {

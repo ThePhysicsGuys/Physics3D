@@ -204,22 +204,22 @@ void renderTreeStructure(Screen& screen, const TreeNode& tree, const Vec3f& tree
 //! SlidingDataChart
 
 void SlidingChartDataSetInfo::add(float value) {
-	if (data.empty()) {
+	if (data.size() == 0) {
 		deviation = 1.0f;
 		mean = value;
 
-		data.push(value);
+		data.add(value);
 		
 		return;
 	}
 
-	data.push(value);
+	data.add(value);
 
 	float variance = deviation * deviation;
 	float newVariance = variance;
 	float newMean = mean;
 
-	if (data.size() > size) {
+	if (data.size() >= size) {
 		float s = size;
 		float s1 = s - 1.0f;
 
@@ -227,8 +227,6 @@ void SlidingChartDataSetInfo::add(float value) {
 		float diffMean = newMean - mean;
 
 		newVariance = variance + diffMean * s / s1 * (2.0f * (data.front() - mean) + s1 * diffMean);
-
-		data.pop();
 	} else {
 		float s = data.size();
 
@@ -274,17 +272,18 @@ void SlidingChart::render() {
 
 		Vec2f bottomLeft = position - Vec2f(0.0f, dimension.y);
 
-		for (int i = 0; i < dataSet.data.size(); i++) {
-			float value = dataSet.data._Get_container()[i];
-
+		int i = 0;
+		for (float value : dataSet.data) {
 			Vec2f point = bottomLeft + Vec2f(i * stepX, (value - startY) * stepY);
 
 			Path::lineTo(point);
+
+			i++;
 		}
 
 		Path::stroke(dataSet.color, dataSet.lineSize);
 
-		float lastValue = dataSet.data._Get_container()[dataSet.data.size() - 1];
+		float lastValue = dataSet.data.front();
 		float lastY = (lastValue - startY) * stepY;
 		Path::text(GUI::font, std::to_string(lastValue), 0.0008f, Vec2f((bottomLeft.x + dimension.x) * 1.01, bottomLeft.y + lastY), dataSet.color, Path::TextPivotVC);
 	}

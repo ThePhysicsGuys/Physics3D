@@ -29,7 +29,7 @@ const char* const graphicsDebugLabels[]{
 		"Other"
 };
 
-BreakdownAverageProfiler<60, GraphicsProcess> graphicsMeasure = BreakdownAverageProfiler<60, GraphicsProcess>(graphicsDebugLabels);
+BreakdownAverageProfiler<GraphicsProcess> graphicsMeasure(graphicsDebugLabels, 60);
 
 namespace Debug {
 

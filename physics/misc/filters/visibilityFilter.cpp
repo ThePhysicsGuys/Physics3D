@@ -3,32 +3,65 @@
 #include "../../../util/log.h"
 #include "../../math/linalg/trigonometry.h"
 
-VisibilityFilter::VisibilityFilter(Position origin, Vec3 viewPortTop, Vec3 viewPortRight, Vec3 viewPortDown, Vec3 viewPortLeft, Vec3 cameraForward, double maxDepth) :
+VisibilityFilter::VisibilityFilter(Position origin, Vec3 normals[5], double maxDepth) :
 	origin(origin), 
-	boxNormals{viewPortTop, viewPortRight, viewPortDown, viewPortLeft, cameraForward},
+	boxNormals{normals[0], normals[1], normals[2], normals[3], normals[4]},
 	maxDepth(maxDepth) {}
 
-VisibilityFilter::VisibilityFilter(Position origin, Vec3 cameraForward, Vec3 cameraUp, Vec3 cameraRight, double maxDepth) : origin(origin), maxDepth(maxDepth) {
-	Vec3 upNormal = (cameraForward + cameraUp) % cameraRight;
-	Vec3 downNormal = -(cameraForward - cameraUp) % cameraRight;
-	Vec3 leftNormal = -(cameraForward + cameraRight) % cameraUp;
-	Vec3 rightNormal = (cameraForward - cameraRight) % cameraUp;
+VisibilityFilter VisibilityFilter::fromSteps(Position origin, Vec3 stepForward, Vec3 stepUp, Vec3 stepRight, double maxDepth) {
+	Vec3 upNormal = (stepForward + stepUp) % stepRight;
+	Vec3 downNormal = -(stepForward - stepUp) % stepRight;
+	Vec3 leftNormal = -(stepForward + stepRight) % stepUp;
+	Vec3 rightNormal = (stepForward - stepRight) % stepUp;
 
-	boxNormals[0] = upNormal;
-	boxNormals[1] = rightNormal;
-	boxNormals[2] = downNormal;
-	boxNormals[3] = leftNormal;
-	boxNormals[4] = cameraForward;
+	Vec3 normals[5]{upNormal, downNormal, leftNormal, rightNormal, stepForward};
+
+	return VisibilityFilter(origin, normals, maxDepth);
 }
 
-VisibilityFilter::VisibilityFilter(Position origin, Vec3 cameraForward, Vec3 cameraUp, double fov, double aspect, double maxDepth) :
-	VisibilityFilter(
-		origin, 
-		normalize(cameraForward),
-		normalize(cameraUp) * tan(fov / 2),
-		normalize(cameraUp % cameraForward) * tan(fov / 2) * aspect,
+VisibilityFilter VisibilityFilter::fromSteps(Position origin, Vec3 stepForward, Vec3 stepUp, Vec3 stepRight, double maxDepth, double left, double right, double down, double up) {
+	Vec3 upNormal = (stepForward + stepUp * up) % stepRight;
+	Vec3 downNormal = -(stepForward + stepUp * down) % stepRight;
+	Vec3 leftNormal = -(stepForward - stepRight * left) % stepUp;
+	Vec3 rightNormal = (stepForward - stepRight * right) % stepUp;
+
+	Vec3 normals[5]{upNormal, downNormal, leftNormal, rightNormal, stepForward};
+
+	return VisibilityFilter(origin, normals, maxDepth);
+}
+
+VisibilityFilter VisibilityFilter::forWindow(Position origin, Vec3 cameraForward, Vec3 cameraUp, double fov, double aspect, double maxDepth) {
+	double tanFov = tan(fov / 2);
+	
+	Vec3 stepForward = normalize(cameraForward);
+	Vec3 stepUp = normalize(cameraUp) * tanFov;
+	Vec3 stepRight = normalize(cameraUp % cameraForward) * tanFov * aspect;
+
+	return fromSteps(
+		origin,
+		stepForward,
+		stepUp,
+		stepRight,
 		maxDepth
-	) {}
+	);
+}
+
+VisibilityFilter VisibilityFilter::forSubWindow(Position origin, Vec3 cameraForward, Vec3 cameraUp, double fov, double aspect, double maxDepth, double left, double right, double down, double up) {
+	double tanFov = tan(fov / 2);
+
+	Vec3 stepForward = normalize(cameraForward);
+	Vec3 stepUp = normalize(cameraUp) * tanFov;
+	Vec3 stepRight = normalize(cameraUp % cameraForward) * tanFov * aspect;
+	
+	return fromSteps(
+		origin,
+		stepForward,
+		stepUp,
+		stepRight,
+		maxDepth,
+		left, right, down, up
+	);
+}
 
 bool VisibilityFilter::operator()(const TreeNode& node) const {
 	double offsets[5]{0,0,0,0,maxDepth};

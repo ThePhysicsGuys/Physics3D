@@ -1,7 +1,7 @@
 #pragma once
 
 #include "benchmark.h"
-#include "../engine/world.h"
+#include "../physics/world.h"
 
 class WorldBenchmark : public Benchmark {
 protected:
@@ -9,7 +9,7 @@ protected:
 	int tickCount;
 
 public:
-	WorldBenchmark(int tickCount);
+	WorldBenchmark(const char* name, int tickCount);
 
 	virtual void run() override;
 	virtual void printResults(double timeTaken) override;

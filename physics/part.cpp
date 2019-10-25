@@ -2,6 +2,10 @@
 
 #include "physical.h"
 
+#include "math/globalTransform.h"
+
+#include "geometry/intersection.h"
+
 namespace {
 	void recalculate(Part& part) {
 		part.maxRadius = part.hitbox.getMaxRadius();
@@ -29,26 +33,21 @@ Part::~Part() {
 	}
 }
 
-bool Part::intersects(const Part& other, Position& intersection, Vec3& exitVector) const {
-	const CFramef relativeCFrame(this->cframe.globalToLocal(other.cframe));
-	Vec3f localIntersection, localExitVector;
-	if(this->hitbox.intersectsTransformed(other.hitbox, relativeCFrame, localIntersection, localExitVector)) {
-		intersection = this->cframe.localToGlobal(Vec3(localIntersection));
-		exitVector = this->cframe.localToRelative(Vec3(localExitVector));
-		return true;
+PartIntersection Part::intersects(const Part& other) const {
+	CFrame relativeTransform = this->cframe.globalToLocal(other.cframe);
+	Intersection result = intersectsTransformed(this->hitbox, other.hitbox, relativeTransform);
+	if(result.intersects) {
+		Position intersection = this->cframe.localToGlobal(result.intersection);
+		Vec3 exitVector = this->cframe.localToRelative(result.exitVector);
+		return PartIntersection(intersection, exitVector);
 	}
-	return false;
+	return PartIntersection();
 }
 
 Bounds Part::getStrictBounds() const {
-	Fix<32> xmax = this->cframe.localToGlobal(this->hitbox.furthestInDirection(this->cframe.relativeToLocal(Vec3(1, 0, 0)))).x;
-	Fix<32> xmin = this->cframe.localToGlobal(this->hitbox.furthestInDirection(this->cframe.relativeToLocal(Vec3(-1, 0, 0)))).x;
-	Fix<32> ymax = this->cframe.localToGlobal(this->hitbox.furthestInDirection(this->cframe.relativeToLocal(Vec3(0, 1, 0)))).y;
-	Fix<32> ymin = this->cframe.localToGlobal(this->hitbox.furthestInDirection(this->cframe.relativeToLocal(Vec3(0, -1, 0)))).y;
-	Fix<32> zmax = this->cframe.localToGlobal(this->hitbox.furthestInDirection(this->cframe.relativeToLocal(Vec3(0, 0, 1)))).z;
-	Fix<32> zmin = this->cframe.localToGlobal(this->hitbox.furthestInDirection(this->cframe.relativeToLocal(Vec3(0, 0, -1)))).z;
-
-	return Bounds(Position(xmin, ymin, zmin), Position(xmax, ymax, zmax));
+	BoundingBox boundsOfHitbox = this->hitbox.getBounds(this->cframe.getRotation());
+	
+	return boundsOfHitbox + getPosition();
 }
 
 void Part::scale(double scaleX, double scaleY, double scaleZ) {

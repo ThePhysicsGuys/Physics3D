@@ -291,7 +291,7 @@ NodePermutation findBestPermutation(const FixedLocalBuffer<TreeNode*, 2 * MAX_BR
 	ABCD EFGH
 	*/
 	currentPermutation.pushB(allNodes[0]);
-	for (int i = 0; i < allNodes.size - 1; i++) {
+	for (size_t i = 0; i < allNodes.size - 1; i++) {
 		currentPermutation.replaceBPushToA(allNodes[i + 1]);  // A B    AB C    ABC D     ABCD E
 		if (currentPermutation.countA == MAX_BRANCHES) {
 			for (int j = MAX_BRANCHES + 1; j < allNodes.size; j++) {

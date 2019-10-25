@@ -2,6 +2,7 @@
 
 #include "../math/linalg/vec.h"
 #include "../math/cframe.h"
+#include "../math/transform.h"
 #include "../datastructures/sharedArray.h"
 #include "../datastructures/alignedPtr.h"
 #include "../datastructures/iteratorFactory.h"
@@ -19,11 +20,6 @@ struct ShapeTriangleIter;
 
 size_t getOffset(size_t size);
 
-struct CircumscribingSphere {
-	Vec3 origin = Vec3();
-	double radius = 0;
-};
-
 struct Triangle {
 	union {
 		struct { 
@@ -37,7 +33,10 @@ struct Triangle {
 	Triangle leftShift() const;
 	Triangle operator~() const;
 	bool operator==(const Triangle& other) const;
-	inline int operator[](int i) const {
+	inline int& operator[](int i) {
+		return indexes[i];
+	};
+	inline const int& operator[](int i) const {
 		return indexes[i]; 
 	};
 };
@@ -100,6 +99,7 @@ public:
 
 	//CFramef getInertialEigenVectors() const;
 	BoundingBox getBounds() const;
+	BoundingBox getBounds(const Mat3f& referenceFrame) const;
 	void computeNormals(Vec3f* buffer) const;
 	Vec3 getCenterOfMass() const;
 	SymmetricMat3 getInertia() const;
@@ -114,7 +114,6 @@ public:
 	double getMaxRadiusSq(Vec3f reference) const;
 	Vec3f getNormalVecOfTriangle(Triangle triangle) const;
 
-	bool intersectsTransformed(const Polyhedron& other, const CFramef& relativeCFrame, Vec3f& intersection, Vec3f& exitVector) const;
 	int furthestIndexInDirection(const Vec3f& direction) const;
 	virtual Vec3f furthestInDirection(const Vec3f& direction) const override;
 
@@ -137,5 +136,8 @@ public:
 	IteratorFactory<ShapeTriangleIter> iterTriangles() const {
 		return IteratorFactory<ShapeTriangleIter>(ShapeTriangleIter{ triangles, getOffset(triangleCount) }, ShapeTriangleIter{ triangles + triangleCount, getOffset(triangleCount) });
 	}
+
+	void getTriangles(Triangle* triangleBuf) const;
+	void getVertices(Vec3f* vertexBuf) const;
 };
 

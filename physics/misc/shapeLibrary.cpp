@@ -2,8 +2,15 @@
 
 #include "../math/mathUtil.h"
 
+#include <utility>
+#include <map>
+
+#include "../datastructures/buffers.h"
+
+#include "../math/linalg/trigonometry.h"
+
 namespace Library {
-	float g = (1.0 + sqrt(5.0)) / 2.0;
+	float g = 1.61803398874989484820458683436563811772030917980576286213544862270526046281890f;
 
 	Vec3f icosahedronVertices[]{
 		Vec3f(0, 0.5, g / 2), Vec3f(0, 0.5, -g / 2), Vec3f(0, -0.5, -g / 2), Vec3f(0, -0.5, g / 2),
@@ -138,5 +145,159 @@ namespace Library {
 		}
 
 		return Polyhedron(vecBuf, triangleBuf, vertexCount, triangleCount);
+	}
+
+	// divides every triangle into 4 smaller triangles
+	static std::pair<Vec3f*, Triangle*> tesselate(Vec3f* vecBuf, Triangle* triangleBuf, size_t vertexCount, size_t triangleCount) {
+		assert(triangleCount % 2 == 0);
+		size_t newVecBufSize = vertexCount + triangleCount * 3 / 2;
+		size_t newTriIndex = triangleCount*4;
+
+		int curMapIndex = vertexCount;
+
+		std::map<std::pair<int, int>, int> newPoints;
+
+
+
+		for(size_t i = triangleCount; i-- > 0;) {
+			// first collect the 6 new points
+
+			Triangle& curT = triangleBuf[i];
+
+			Triangle newCenterTriangle;
+
+			for(int j = 0; j < 3; j++) {
+				int a = curT[j];
+				int b = curT[(j + 1) % 3];
+
+				if(b > a) { std::swap(a, b); }
+
+				std::pair<int, int> edge(a, b);
+
+				auto result = newPoints.find(edge);
+
+				int index;
+
+				if(result == newPoints.end()) {
+					index = curMapIndex++;
+					newPoints[edge] = index;
+					vecBuf[index] = (vecBuf[a] + vecBuf[b]) / 2;
+				} else {
+					index = newPoints[edge];
+				}
+
+				newCenterTriangle[j] = index;
+			}
+
+			triangleBuf[--newTriIndex] = Triangle{newCenterTriangle[1], newCenterTriangle[0], curT[1]};
+			triangleBuf[--newTriIndex] = Triangle{newCenterTriangle[2], newCenterTriangle[1], curT[2]};
+			triangleBuf[--newTriIndex] = Triangle{newCenterTriangle[0], newCenterTriangle[2], curT[0]};
+			triangleBuf[--newTriIndex] = newCenterTriangle;
+		}
+		assert(curMapIndex == newVecBufSize);
+		return std::pair<Vec3f*, Triangle*>(vecBuf, triangleBuf);
+	}
+
+
+
+
+	Polyhedron createSphere(double radius, int steps) {
+
+		int vertices = 12;
+		int triangles = 20;
+
+		for(int i = 0; i < steps; i++) {
+			vertices = vertices + triangles * 3 / 2;
+			triangles = triangles * 4;
+		}
+
+		Polyhedron curSphere = icosahedron;
+		Vec3f* vecBuf = new Vec3f[vertices];
+		Triangle* triBuf = new Triangle[triangles];
+
+		curSphere.getVertices(vecBuf);
+		curSphere.getTriangles(triBuf);
+
+		vertices = 12;
+		triangles = 20;
+		for(int i = 0; i < steps; i++) {
+			tesselate(vecBuf, triBuf, vertices, triangles);
+			vertices = vertices + triangles * 3 / 2;
+			triangles = triangles * 4;
+		}
+
+		// size 42 x 80
+		// size 162 x 320
+		// size 642 x 1280
+
+		for(size_t i = 0; i < vertices; i++) {
+			vecBuf[i] = normalize(vecBuf[i]) * radius;
+		}
+
+		Polyhedron poly(vecBuf, triBuf, vertices, triangles);
+
+
+
+		//Polyhedron poly(vecBuf, triBuf, 12, 20);
+
+		delete[] vecBuf;
+		delete[] triBuf;
+
+		return poly;
+	}
+
+	Polyhedron createSpikeBall(double internalRadius, double spikeRadius, int steps, int spikeSteps) {
+
+		int vertices = 12;
+		int triangles = 20;
+
+		for(int i = 0; i < steps; i++) {
+			vertices = vertices + triangles * 3 / 2;
+			triangles = triangles * 4;
+		}
+
+		Polyhedron curSphere = icosahedron;
+		Vec3f* vecBuf = new Vec3f[vertices];
+		Triangle* triBuf = new Triangle[triangles];
+
+		curSphere.getVertices(vecBuf);
+		curSphere.getTriangles(triBuf);
+
+		vertices = 12;
+		triangles = 20;
+		for(int i = 0; i < steps; i++) {
+			tesselate(vecBuf, triBuf, vertices, triangles);
+			vertices = vertices + triangles * 3 / 2;
+			triangles = triangles * 4;
+		}
+
+		// size 42 x 80
+		// size 162 x 320
+		// size 642 x 1280
+
+		int spikeVerts = 12;
+		int spikeTris = 20;
+		for(int i = 0; i < spikeSteps; i++) {
+			spikeVerts = spikeVerts + spikeTris * 3 / 2;
+			spikeTris = spikeTris * 4;
+		}
+
+		for(size_t i = 0; i < spikeVerts; i++) {
+			vecBuf[i] = normalize(vecBuf[i]) * spikeRadius;
+		}
+		for(size_t i = spikeVerts; i < vertices; i++) {
+			vecBuf[i] = normalize(vecBuf[i]) * internalRadius;
+		}
+
+		Polyhedron poly(vecBuf, triBuf, vertices, triangles);
+
+
+
+		//Polyhedron poly(vecBuf, triBuf, 12, 20);
+
+		delete[] vecBuf;
+		delete[] triBuf;
+
+		return poly;
 	}
 }

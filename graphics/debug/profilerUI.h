@@ -64,15 +64,15 @@ struct BarChart : public Component {
 struct SlidingChartDataSetInfo {
 	int size;
 	std::string title;
-	std::queue<float> data;
+	CircularBuffer<float> data;
 	Vec4f color;
 	float lineSize;
 
 	float mean;
 	float deviation;
 
-	SlidingChartDataSetInfo() : title(""), size(0), mean(0), deviation(1), color(GUI::COLOR::ALPHA), lineSize(0) {}
-	SlidingChartDataSetInfo(const std::string& title, int size, Vec4f color = GUI::COLOR::ACCENT, float lineSize = 1.0f) : title(title), size(size), mean(0), deviation(1), color(color), lineSize(lineSize) {};
+	SlidingChartDataSetInfo() : title(""), size(0), mean(0), deviation(1), color(GUI::COLOR::ALPHA), lineSize(0), data() {}
+	SlidingChartDataSetInfo(const std::string& title, int size, Vec4f color = GUI::COLOR::ACCENT, float lineSize = 1.0f) : title(title), size(size), mean(0), deviation(1), color(color), lineSize(lineSize), data(size) {};
 
 	void add(float value);
 };

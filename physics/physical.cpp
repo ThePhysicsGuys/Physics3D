@@ -132,7 +132,7 @@ void Physical::detachPart(Part* part) {
 			makeMainPart(parts[parts.size - 1]);
 		}
 	}
-	for (int i = parts.size - 1; i >= 0; i--) {
+	for (signed long long i = parts.size - 1; i >= 0; i--) {
 		AttachedPart& at = parts[i];
 		if (at.part == part) {
 			part->parent = nullptr;
@@ -174,8 +174,6 @@ void Physical::refreshWithNewParts() {
 	this->mass = totalMass;
 	this->localCenterOfMass = totalCenterOfMass;
 	this->inertia = totalInertia;
-
-	this->localBounds = computeLocalBounds();
 
 	if (this->anchored) {
 		this->forceResponse = SymmetricMat3::ZEROS();

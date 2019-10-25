@@ -201,11 +201,10 @@ inline void runColissionTests(Part& p1, Part& p2, WorldPrototype& world, std::ve
 		return;
 	}
 
-	Position intersection;
-	Vec3 exitVector;
-	if (p1.intersects(p2, intersection, exitVector)) {
+	PartIntersection result = p1.intersects(p2);
+	if (result.intersects) {
 		intersectionStatistics.addToTally(IntersectionResult::COLISSION, 1);
-		colissions.push_back(Colission{ &p1, &p2, intersection, exitVector });
+		colissions.push_back(Colission{ &p1, &p2, result.intersection, result.exitVector });
 	} else {
 		intersectionStatistics.addToTally(IntersectionResult::GJK_REJECT, 1);
 	}

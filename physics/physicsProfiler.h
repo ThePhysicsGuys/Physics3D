@@ -35,10 +35,10 @@ enum class IterationTime {
 	COUNT = 17
 };
 
-extern BreakdownAverageProfiler<100, PhysicsProcess> physicsMeasure;
-extern HistoricTally<1, long long, IntersectionResult> intersectionStatistics;
-extern CircularBuffer<int, 1> gjkCollideIterStats;
-extern CircularBuffer<int, 1> gjkNoCollideIterStats;
-extern HistoricTally<1, long long, IterationTime> GJKCollidesIterationStatistics;
-extern HistoricTally<1, long long, IterationTime> GJKNoCollidesIterationStatistics;
-extern HistoricTally<1, long long, IterationTime> EPAIterationStatistics;
+extern BreakdownAverageProfiler<PhysicsProcess> physicsMeasure;
+extern HistoricTally<long long, IntersectionResult> intersectionStatistics;
+extern CircularBuffer<int> gjkCollideIterStats;
+extern CircularBuffer<int> gjkNoCollideIterStats;
+extern HistoricTally<long long, IterationTime> GJKCollidesIterationStatistics;
+extern HistoricTally<long long, IterationTime> GJKNoCollidesIterationStatistics;
+extern HistoricTally<long long, IterationTime> EPAIterationStatistics;

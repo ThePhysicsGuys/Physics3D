@@ -184,11 +184,6 @@ void DebugLayer::onRender() {
 				green.w = 0.5;
 				renderSphere(part.maxRadius * 2, part.getPosition(), green);
 			}
-
-			Vec4f red = GUI::COLOR::RED;
-			red.w = 0.5;
-			BoundingBox localBounds = selectedPhys.localBounds;
-			renderBox(selectedPhys.getCFrame().localToGlobal(CFrame(localBounds.getCenter())), localBounds.getWidth(), localBounds.getHeight(), localBounds.getDepth(), red);
 		}
 	}
 
@@ -204,13 +199,6 @@ void DebugLayer::onRender() {
 				green.w = 0.5;
 				renderSphere(part.maxRadius * 2, part.getPosition(), green);
 			}
-		}
-
-		for (Physical& phys : screen->world->iterPhysicals()) {
-			Vec4f red = GUI::COLOR::RED;
-			red.w = 0.5;
-			BoundingBox localBounds = phys.localBounds;
-			renderBox(phys.getCFrame().localToGlobal(CFrame(localBounds.getCenter())), localBounds.getWidth(), localBounds.getHeight(), localBounds.getDepth(), red);
 		}
 	}
 

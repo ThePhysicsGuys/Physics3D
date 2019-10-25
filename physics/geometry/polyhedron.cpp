@@ -6,7 +6,6 @@
 #include <set>
 #include <math.h>
 
-#include "convexShapeBuilder.h"
 #include "../math/linalg/vec.h"
 #include "../math/linalg/trigonometry.h"
 #include "../math/utils.h"
@@ -14,10 +13,7 @@
 #include "../../util/Log.h"
 #include "../debug.h"
 #include "../physicsProfiler.h"
-#include "computationBuffer.h"
-#include "intersection.h"
 
-#include "../physicsProfiler.h"
 
 size_t getOffset(size_t size) {
 	return (size + 7) & 0xFFFFFFFFFFFFFFF8;
@@ -213,25 +209,6 @@ Polyhedron Polyhedron::scaled(float scaleX, float scaleY, float scaleZ) const {
 }
 Polyhedron Polyhedron::scaled(double scaleX, double scaleY, double scaleZ) const {
 	return scaled(static_cast<float>(scaleX), static_cast<float>(scaleY), static_cast<float>(scaleZ));
-}
-
-BoundingBox Polyhedron::getBounds() const {
-	double xmin = (*this)[0].x, xmax = (*this)[0].x;
-	double ymin = (*this)[0].y, ymax = (*this)[0].y;
-	double zmin = (*this)[0].z, zmax = (*this)[0].z;
-
-	for (int i = 1; i < vertexCount; i++) {
-		const Vec3f current = (*this)[i];
-
-		if (current.x < xmin) xmin = current.x;
-		if (current.x > xmax) xmax = current.x;
-		if (current.y < ymin) ymin = current.y;
-		if (current.y > ymax) ymax = current.y;
-		if (current.z < zmin) zmin = current.z;
-		if (current.z > zmax) zmax = current.z;
-	}
-
-	return BoundingBox { xmin, ymin, zmin, xmax, ymax, zmax };
 }
 
 // for every edge, of every triangle, check that it coincides with exactly one other triangle, in reverse order
@@ -437,6 +414,131 @@ Vec3f Polyhedron::furthestInDirection(const Vec3f& direction) const {
 	return Vec3f(bestX.m256_f32[index], bestY.m256_f32[index], bestZ.m256_f32[index]);
 }
 
+BoundingBox toBounds(__m256 xMin, __m256 xMax, __m256 yMin, __m256 yMax, __m256 zMin, __m256 zMax) {
+	// now we compare the remaining 8 elements
+	xMin = _mm256_min_ps(xMin, _mm256_permute2f128_ps(xMin, xMin, 1));
+	xMax = _mm256_max_ps(xMax, _mm256_permute2f128_ps(xMax, xMax, 1));
+	yMin = _mm256_min_ps(yMin, _mm256_permute2f128_ps(yMin, yMin, 1));
+	yMax = _mm256_max_ps(yMax, _mm256_permute2f128_ps(yMax, yMax, 1));
+	zMin = _mm256_min_ps(zMin, _mm256_permute2f128_ps(zMin, zMin, 1));
+	zMax = _mm256_max_ps(zMax, _mm256_permute2f128_ps(zMax, zMax, 1));
+
+	__m256 xyMin = _mm256_permute2f128_ps(xMin, yMin, 0x20);
+	xyMin = _mm256_min_ps(xyMin, _mm256_permute_ps(xyMin, 0b01001110)); // swap 2x2
+
+	__m256 xyMax = _mm256_permute2f128_ps(xMax, yMax, 0x20);
+	xyMax = _mm256_max_ps(xyMax, _mm256_permute_ps(xyMax, 0b01001110)); // swap 2x2
+
+	zMin = _mm256_min_ps(zMin, _mm256_permute_ps(zMin, 0b01001110)); // swap 2x2
+	zMax = _mm256_max_ps(zMax, _mm256_permute_ps(zMax, 0b01001110)); // swap 2x2
+
+
+	__m256 zxzyMin = _mm256_blend_ps(xyMin, zMin, 0b00110011); // stored as xxyyzzzz
+	zxzyMin = _mm256_min_ps(zxzyMin, _mm256_permute_ps(zxzyMin, 0b10110001));
+
+	__m256 zxzyMax = _mm256_blend_ps(xyMax, zMax, 0b00110011);
+	zxzyMax = _mm256_max_ps(zxzyMax, _mm256_permute_ps(zxzyMax, 0b10110001));
+	// reg structure zzxxzzyy
+
+	return BoundingBox{zxzyMin.m256_f32[2], zxzyMin.m256_f32[6], zxzyMin.m256_f32[0], zxzyMax.m256_f32[2], zxzyMax.m256_f32[6], zxzyMax.m256_f32[0]};
+}
+
+BoundingBox Polyhedron::getBounds() const {
+	size_t offset = getOffset(this->vertexCount);
+	const float* xValues = this->vertices;
+	const float* yValues = this->vertices + offset;
+	const float* zValues = this->vertices + 2 * offset;
+
+	__m256 xMax = _mm256_load_ps(xValues);
+	__m256 xMin = xMax;
+	__m256 yMax = _mm256_load_ps(yValues);
+	__m256 yMin = yMax;
+	__m256 zMax = _mm256_load_ps(zValues);
+	__m256 zMin = zMax;
+
+	for(int blockI = 1; blockI < (vertexCount + 7) / 8; blockI++) {
+		__m256i indices = _mm256_set1_epi32(blockI);
+
+		__m256 xVal = _mm256_load_ps(xValues + blockI * 8);
+		__m256 yVal = _mm256_load_ps(yValues + blockI * 8);
+		__m256 zVal = _mm256_load_ps(zValues + blockI * 8);
+
+		xMax = _mm256_max_ps(xMax, xVal);
+		yMax = _mm256_max_ps(yMax, yVal);
+		zMax = _mm256_max_ps(zMax, zVal);
+
+		xMin = _mm256_min_ps(xMin, xVal);
+		yMin = _mm256_min_ps(yMin, yVal);
+		zMin = _mm256_min_ps(zMin, zVal);
+	}
+
+	return toBounds(xMin, xMax, yMin, yMax, zMin, zMax);
+}
+
+BoundingBox Polyhedron::getBounds(const Mat3f& referenceFrame) const {
+	size_t offset = getOffset(this->vertexCount);
+	const float* xValues = this->vertices;
+	const float* yValues = this->vertices + offset;
+	const float* zValues = this->vertices + 2 * offset;
+
+	Vec3 xDir = referenceFrame.getRow(0);
+	Vec3 yDir = referenceFrame.getRow(1);
+	Vec3 zDir = referenceFrame.getRow(2);
+	
+	__m256 xVal = _mm256_load_ps(xValues);
+	__m256 yVal = _mm256_load_ps(yValues);
+	__m256 zVal = _mm256_load_ps(zValues);
+
+	__m256 xTx = _mm256_mul_ps(_mm256_set1_ps(xDir.x), xVal);
+	__m256 xTy = _mm256_mul_ps(_mm256_set1_ps(xDir.y), yVal);
+	__m256 xTz = _mm256_mul_ps(_mm256_set1_ps(xDir.z), zVal);
+	__m256 xMin = _mm256_add_ps(_mm256_add_ps(xTx, xTy), xTz);
+	__m256 xMax = xMin;
+
+	__m256 yTx = _mm256_mul_ps(_mm256_set1_ps(yDir.x), xVal);
+	__m256 yTy = _mm256_mul_ps(_mm256_set1_ps(yDir.y), yVal);
+	__m256 yTz = _mm256_mul_ps(_mm256_set1_ps(yDir.z), zVal);
+	__m256 yMin = _mm256_add_ps(_mm256_add_ps(yTx, yTy), yTz);
+	__m256 yMax = yMin;
+
+	__m256 zTx = _mm256_mul_ps(_mm256_set1_ps(zDir.x), xVal);
+	__m256 zTy = _mm256_mul_ps(_mm256_set1_ps(zDir.y), yVal);
+	__m256 zTz = _mm256_mul_ps(_mm256_set1_ps(zDir.z), zVal);
+	__m256 zMin = _mm256_add_ps(_mm256_add_ps(zTx, zTy), zTz);
+	__m256 zMax = zMin;
+
+	for(int blockI = 1; blockI < (vertexCount + 7) / 8; blockI++) {
+		__m256 xVal = _mm256_load_ps(xValues + blockI * 8);
+		__m256 yVal = _mm256_load_ps(yValues + blockI * 8);
+		__m256 zVal = _mm256_load_ps(zValues + blockI * 8);
+
+		__m256 xTx = _mm256_mul_ps(_mm256_set1_ps(xDir.x), xVal);
+		__m256 xTy = _mm256_mul_ps(_mm256_set1_ps(xDir.y), yVal);
+		__m256 xTz = _mm256_mul_ps(_mm256_set1_ps(xDir.z), zVal);
+		__m256 dotX = _mm256_add_ps(_mm256_add_ps(xTx, xTy), xTz);
+
+		__m256 yTx = _mm256_mul_ps(_mm256_set1_ps(yDir.x), xVal);
+		__m256 yTy = _mm256_mul_ps(_mm256_set1_ps(yDir.y), yVal);
+		__m256 yTz = _mm256_mul_ps(_mm256_set1_ps(yDir.z), zVal);
+		__m256 dotY = _mm256_add_ps(_mm256_add_ps(yTx, yTy), yTz);
+
+		__m256 zTx = _mm256_mul_ps(_mm256_set1_ps(zDir.x), xVal);
+		__m256 zTy = _mm256_mul_ps(_mm256_set1_ps(zDir.y), yVal);
+		__m256 zTz = _mm256_mul_ps(_mm256_set1_ps(zDir.z), zVal);
+		__m256 dotZ = _mm256_add_ps(_mm256_add_ps(zTx, zTy), zTz);
+
+		xMin = _mm256_min_ps(xMin, dotX);
+		xMax = _mm256_max_ps(xMax, dotX);
+		yMin = _mm256_min_ps(yMin, dotY);
+		yMax = _mm256_max_ps(yMax, dotY);
+		zMin = _mm256_min_ps(zMin, dotZ);
+		zMax = _mm256_max_ps(zMax, dotZ);
+	}
+
+	return toBounds(xMin, xMax, yMin, yMax, zMin, zMax);
+}
+
+
 #else
 int Polyhedron::furthestIndexInDirection(const Vec3f& direction) const {
 	float bestDot = (*this)[0] * direction;
@@ -465,39 +567,40 @@ Vec3f Polyhedron::furthestInDirection(const Vec3f& direction) const {
 
 	return bestVertex;
 }
+
+
+BoundingBox Polyhedron::getBounds() const {
+	double xmin = (*this)[0].x, xmax = (*this)[0].x;
+	double ymin = (*this)[0].y, ymax = (*this)[0].y;
+	double zmin = (*this)[0].z, zmax = (*this)[0].z;
+
+	for(int i = 1; i < vertexCount; i++) {
+		const Vec3f current = (*this)[i];
+
+		if(current.x < xmin) xmin = current.x;
+		if(current.x > xmax) xmax = current.x;
+		if(current.y < ymin) ymin = current.y;
+		if(current.y > ymax) ymax = current.y;
+		if(current.z < zmin) zmin = current.z;
+		if(current.z > zmax) zmax = current.z;
+	}
+
+	return BoundingBox{xmin, ymin, zmin, xmax, ymax, zmax};
+}
+
+BoundingBox Polyhedron::getBounds(const Mat3f& referenceFrame) const {
+	Mat3f transp = referenceFrame.transpose();
+	double xmax = (referenceFrame * this->furthestInDirection(transp * Vec3f(1, 0, 0))).x;
+	double xmin = (referenceFrame * this->furthestInDirection(transp * Vec3f(-1, 0, 0))).x;
+	double ymax = (referenceFrame * this->furthestInDirection(transp * Vec3f(0, 1, 0))).y;
+	double ymin = (referenceFrame * this->furthestInDirection(transp * Vec3f(0, -1, 0))).y;
+	double zmax = (referenceFrame * this->furthestInDirection(transp * Vec3f(0, 0, 1))).z;
+	double zmin = (referenceFrame * this->furthestInDirection(transp * Vec3f(0, 0, -1))).z;
+
+	return BoundingBox(xmin, ymin, zmin, xmax, ymax, zmax);
+}
+
 #endif
-
-template<int N>
-void incDebugTally(HistoricTally<N, long long, IterationTime>& tally, int iterTime) {
-	if (iterTime >= 200) {
-		tally.addToTally(IterationTime::LIMIT_REACHED, 1);
-	} else if (iterTime >= 15) {
-		tally.addToTally(IterationTime::TOOMANY, 1);
-	} else {
-		tally.addToTally(static_cast<IterationTime>(iterTime), 1);
-	}
-}
-
-ComputationBuffers buffers(1000, 2000);
-
-bool Polyhedron::intersectsTransformed(const Polyhedron& other, const CFramef& relativeCFramef, Vec3f& intersection, Vec3f& exitVector) const {
-	Tetrahedron result;
-	int iter;
-	physicsMeasure.mark(PhysicsProcess::GJK_COL);
-	bool collides = runGJKTransformed(*this, other, relativeCFramef, -relativeCFramef.position, result, iter);
-	
-	if(collides) {
-		incDebugTally(GJKCollidesIterationStatistics, iter + 2);
-		physicsMeasure.mark(PhysicsProcess::EPA);
-		bool epaResult = runEPATransformed(*this, other, result, relativeCFramef, intersection, exitVector, buffers, iter);
-		incDebugTally(EPAIterationStatistics, iter);
-		return epaResult;
-	} else {
-		incDebugTally(GJKNoCollidesIterationStatistics, iter + 2);
-		physicsMeasure.mark(PhysicsProcess::OTHER, PhysicsProcess::GJK_NO_COL);
-		return false;
-	}
-}
 
 double Polyhedron::getVolume() const {
 	double total = 0;
@@ -634,6 +737,20 @@ SymmetricMat3 Polyhedron::getInertia() const {
 
 void Polyhedron::getCircumscribedEllipsoid() const {
 
+}
+
+
+void Polyhedron::getTriangles(Triangle* triangleBuf) const {
+	size_t i = 0;
+	for(Triangle triangle : iterTriangles()) {
+		triangleBuf[i++] = triangle;
+	}
+}
+void Polyhedron::getVertices(Vec3f* vertexBuf) const {
+	size_t i = 0;
+	for(Vec3f vertex : iterVertices()) {
+		vertexBuf[i++] = vertex;
+	}
 }
 
 float Polyhedron::getIntersectionDistance(Vec3f origin, Vec3f direction) const {

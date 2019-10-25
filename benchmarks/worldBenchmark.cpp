@@ -1,12 +1,12 @@
 #include "worldBenchmark.h"
 
 #include "../util/log.h"
-#include "../engine/physicsProfiler.h"
+#include "../physics/physicsProfiler.h"
 #include <iostream>
 #include <sstream>
-#include "../engine/misc/gravityForce.h"
+#include "../physics/misc/gravityForce.h"
 
-WorldBenchmark::WorldBenchmark(int tickCount) : world(0.005), tickCount(tickCount) {
+WorldBenchmark::WorldBenchmark(const char* name, int tickCount) : Benchmark(name), world(0.005), tickCount(tickCount) {
 	world.addExternalForce(new ExternalGravity(Vec3(0, -10, 0)));
 }
 

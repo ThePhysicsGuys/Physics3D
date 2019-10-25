@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-#ifdef CHECK_SANITY
+#ifndef NDEBUG
 #define ASSERT_VALID if (!isValid()) {throw "World not valid!";}
 #else
 #define ASSERT_VALID

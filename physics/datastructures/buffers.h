@@ -1,5 +1,7 @@
 #pragma once
 
+#include "iteratorEnd.h"
+
 inline unsigned long long nextPowerOf2(unsigned long long v) {
 	v--;
 	v |= v >> 1;
@@ -218,17 +220,89 @@ struct FixedLocalBuffer {
 	}
 };
 
-template<typename T, size_t N>
+template<typename T>
+struct CircularIter {
+	T* iter;
+	T* bufStart;
+	T* bufEnd;
+	size_t itemsLeft;
+
+	void operator++() {
+		iter++;
+		if(iter == bufEnd) {
+			iter = bufStart;
+		}
+		itemsLeft--;
+	}
+
+	T& operator*() const { return *iter; }
+
+	bool operator==(IteratorEnd) const {
+		return this->itemsLeft == 0;
+	}
+
+	bool operator!=(IteratorEnd) const {
+		return this->itemsLeft != 0;
+	}
+};
+
+template<typename T>
 struct CircularBuffer {
-	T buf[N];
+private:
+	T* buf;
 	size_t curI = 0;
+	size_t capacity;
 	bool hasComeAround = false;
+public:
+	CircularBuffer() : buf(nullptr), capacity(0) {}
+	CircularBuffer(size_t capacity) : buf(new T[capacity+1]), capacity(capacity) {}
+	~CircularBuffer() { delete[] buf; }
+	
+	inline size_t size() const {
+		if(hasComeAround)
+			return capacity;
+		else
+			return curI;
+	}
+
+	CircularBuffer(const CircularBuffer<T>& other) : buf(new T[other.capacity+1]), curI(other.curI), capacity(other.capacity), hasComeAround(other.hasComeAround) {
+		for(size_t i = 0; i < other.capacity; i++) {
+			this->buf[i] = other.buf[i];
+		}
+	}
+	CircularBuffer& operator=(const CircularBuffer<T>& other) {
+		if(this->capacity != other.capacity) {
+			delete[] this->buf;
+			this->buf = new T[other.capacity];
+		}
+
+		this->curI = other.curI;
+		this->capacity = other.capacity;
+		this->hasComeAround = other.hasComeAround;
+		for(size_t i = 0; i < other.capacity; i++) {
+			this->buf[i] = other.buf[i];
+		}
+		return *this;
+	}
+	CircularBuffer(CircularBuffer<T>&& other) : buf(other.buf), curI(other.curI), capacity(other.capacity), hasComeAround(other.hasComeAround) {
+		other.buf = nullptr;
+		other.capacity = 0;
+		other.curI = 0; 
+		other.hasComeAround = false;
+	}
+	CircularBuffer& operator=(CircularBuffer<T>&& other) {
+		std::swap(this->buf, other.buf);
+		std::swap(this->curI, other.curI);
+		std::swap(this->capacity, other.capacity);
+		std::swap(this->hasComeAround, other.hasComeAround);
+		return *this;
+	}
 
 	inline void add(const T& newObj) {
 		buf[curI] = newObj;
 		curI++;
 
-		if (curI >= N) {
+		if (curI >= capacity) {
 			curI = 0;
 			hasComeAround = true;
 		}
@@ -259,18 +333,57 @@ struct CircularBuffer {
 		return T(total / limit);
 	}
 
-	inline size_t size() const {
-		if (hasComeAround)
-			return N;
-		else
-			return curI;
+	inline void resize(size_t newCapacity) {
+		T* newBuf = new T[newCapacity];
+
+		T* cur = newBuf;
+
+		size_t elementsForgotten = (this->capacity > newCapacity) ? this->capacity - newCapacity : 0;
+
+		if(hasComeAround) {
+			for(size_t i = curI + elementsForgotten; i < capacity; i++) {
+				*cur = buf[i];
+				cur++;
+			}
+
+			if(elementsForgotten > capacity - curI) {
+				elementsForgotten -= (capacity - curI);
+			}
+		}
+		for(size_t i = elementsForgotten; i < curI; i++) {
+			*cur = buf[i];
+			cur++;
+		}
+
+		delete[] buf;
+		this->buf = newBuf;
 	}
 
-	inline T* begin() {
-		return &buf[0];
+	T& front() {
+		return (curI == 0) ? buf[capacity-1] : buf[curI-1];
 	}
 
-	inline T* end() {
-		return &buf[0] + size();
+	const T& front() const {
+		return (curI == 0) ? buf[capacity - 1] : buf[curI - 1];
+	}
+
+	T& tail() {
+		return hasComeAround ? buf[curI] : buf[0];
+	}
+
+	const T& tail() const {
+		return hasComeAround ? buf[curI] : buf[0];
+	}
+
+	inline CircularIter<T> begin() {
+		return CircularIter<T>{hasComeAround? buf + curI : buf, buf, buf+capacity, size()};
+	}
+
+	inline CircularIter<const T> begin() const {
+		return CircularIter<const T>{hasComeAround ? buf + curI : buf, buf, buf + capacity, size()};
+	}
+
+	inline IteratorEnd end() {
+		return IteratorEnd();
 	}
 };

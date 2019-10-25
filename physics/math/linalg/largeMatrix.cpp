@@ -59,7 +59,7 @@ void destructiveSolve(LargeMatrix<T>& m, LargeVector<T>& v) {
 		T pivotVectorElement = v[i];
 
 		v[i] /= pivot;
-		for (int j = i - 1; j >= 0; j--) {
+		for (signed long long j = i - 1; j >= 0; j--) {
 			T* row = m[j];
 			v[j] -= v[i] * row[i];
 		}
