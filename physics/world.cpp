@@ -145,6 +145,7 @@ bool WorldPrototype::isValid() const {
 	}
 
 	recursiveTreeValidCheck(objectTree.rootNode);
+	recursiveTreeValidCheck(terrainTree.rootNode);
 
 	return true;
 }

@@ -141,9 +141,9 @@ void setupWorld() {
 	// WorldBuilder init
 	WorldBuilder::init();
 
-	// Sphere shape 
-	// TODO remove link to graphics
-	VisualShape sphereShape = OBJImport::load((std::istream&) std::istringstream(getResourceAsString(graphicsResources, SPHERE_MODEL)));
+	// Sphere shape
+	Polyhedron sphere(Library::createSphere(0.5, 3));
+	VisualShape sphereShape = VisualShape(sphere);
 	Vec3f* normalBuf = new Vec3f[sphereShape.vertexCount];
 	sphereShape.computeNormals(normalBuf);
 	sphereShape.normals = SharedArrayPtr<const Vec3f>(normalBuf);
