@@ -29,7 +29,7 @@ GuiLayer::GuiLayer(Screen* screen, char flags) : Layer("Gui", screen, flags) {
 
 void GuiLayer::onInit() {
 	// GUI init
-	GUI::onInit(GUI::WindowInfo{ screen->dimension, screen->camera.aspect });
+	GUI::onInit({ screen->dimension, screen->camera.aspect }, screen->screenFrameBuffer);
 
 	// Frames init
 	propertiesFrame = new PropertiesFrame(0.75, 0.75);
@@ -39,7 +39,7 @@ void GuiLayer::onInit() {
 
 void GuiLayer::onUpdate() {
 	// Update GUI
-	GUI::onUpdate(GUI::WindowInfo{ screen->dimension, screen->camera.aspect }, screen->camera.orthoMatrix);
+	GUI::onUpdate(screen->camera.orthoMatrix);
 
 	// Update GUI intersection
 	GUI::intersect(GUI::map(handler->mousePosition));

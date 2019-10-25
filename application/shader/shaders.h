@@ -53,19 +53,6 @@ struct DepthShader : public ShaderProgram {
 	void updateModel(const Mat4f& modelMatrix);
 };
 
-struct BlurShader : public ShaderProgram {
-	BlurShader() : ShaderProgram() {}
-	BlurShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, "image", "horizontal") {}
-
-	enum class BlurType {
-		HORIZONTAL = 0,
-		VERTICAL = 1
-	};
-
-	void updateType(BlurType type);
-	void updateTexture(Texture* texture);
-};
-
 struct PostProcessShader : public ShaderProgram {
 	PostProcessShader() : ShaderProgram() {}
 	PostProcessShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, "textureSampler") {}
@@ -140,7 +127,6 @@ namespace ApplicationShaders {
 	extern SkyboxShader skyboxShader;
 	extern PointShader pointShader;
 	extern TestShader testShader;
-	extern BlurShader blurShader;
 	extern LineShader lineShader;
 	extern EdgeShader edgeShader;
 	extern MaskShader maskShader;

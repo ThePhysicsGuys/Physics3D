@@ -258,7 +258,7 @@ SlidingChartDataSetInfo SlidingChart::get(const std::string& title) {
 }
 
 void SlidingChart::render() {
-	float axisOffset = 0.03;
+	/*float axisOffset = 0.03;
 
 	Path::rect(position, dimension, 0.0f, Vec4f(0.4, 0.4, 0.4, 1));
 	Path::line(position + Vec2f(-axisOffset, -dimension.y), position + Vec2f(dimension.x + axisOffset, -dimension.y), 2.0f, GUI::COLOR::WHITE);
@@ -290,7 +290,7 @@ void SlidingChart::render() {
 	}
 
 	Vec2f titleSize = GUI::font->size(title, 0.001f);
-	Path::text(GUI::font, title, 0.001f, Vec2f(position.x + dimension.x / 2.0, position.y + axisOffset), GUI::COLOR::WHITE, Path::TextPivotHC);
+	Path::text(GUI::font, title, 0.001f, Vec2f(position.x + dimension.x / 2.0, position.y + axisOffset), GUI::COLOR::WHITE, Path::TextPivotHC);*/
 }
 
 Vec2 SlidingChart::resize() {

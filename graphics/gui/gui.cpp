@@ -251,9 +251,14 @@ namespace GUI {
 	Vec4f fontColor = COLOR::SILVER;
 	double fontSize = 0.0007;
 
+	// Blur framebuffer
+	FrameBuffer* blurFrameBuffer;
+	FrameBuffer* screenFrameBuffer;
+
+	// Batch
 	GuiBatch* batch;
 
-	void onInit(const WindowInfo& info) {
+	void onInit(const WindowInfo& info, FrameBuffer* screenFrameBuffer) {
 		// Init
 		GraphicsShaders::onInit();
 
@@ -261,6 +266,8 @@ namespace GUI {
 		GUI::batch = new GuiBatch();
 		GUI::quad = new Quad();
 		GUI::guiFrameBuffer = new FrameBuffer(windowInfo.dimension.x, windowInfo.dimension.y);
+		GUI::blurFrameBuffer = new FrameBuffer(windowInfo.dimension.x, windowInfo.dimension.y);
+		GUI::screenFrameBuffer = screenFrameBuffer;
 
 		// font
 		ResourceManager::add<FontResource>("font", "../res/fonts/droid.ttf");
@@ -311,7 +318,7 @@ namespace GUI {
 		GUI::add(colorPickerFrame);
 	}
 	
-	void intersect(Vec2 mouse) {
+	void intersect(const Vec2& mouse) {
 		Component* intersected = nullptr;
 		for (Component* component : components) {
 			// Skip hidden components
@@ -361,7 +368,7 @@ namespace GUI {
 		return superParent;
 	}
 
-	bool intersectsSquare(Vec2 point, Vec2 topleft, Vec2 dimension) {
+	bool intersectsSquare(const Vec2& point, const Vec2& topleft, const Vec2& dimension) {
 		Vec2 halfDimension = dimension / 2;
 		Vec2 center = topleft + Vec2(halfDimension.x, -halfDimension.y);
 		return fabs(point.x - center.x) < halfDimension.x && fabs(point.y - center.y) < halfDimension.y;
@@ -427,8 +434,14 @@ namespace GUI {
 		return false;
 	}
 
-	void onUpdate(const WindowInfo& info, Mat4f orthoMatrix) {
+	void updateWindowInfo(const WindowInfo& info) {
 		GUI::windowInfo = info;
+		
+		guiFrameBuffer->resize(info.dimension);
+		blurFrameBuffer->resize(info.dimension);
+	}
+
+	void onUpdate(Mat4f orthoMatrix) {
 		GraphicsShaders::quadShader.updateProjection(orthoMatrix);
 	}
 
@@ -440,15 +453,16 @@ namespace GUI {
 	}
 
 	void onRender(Mat4f orthoMatrix) {	
-		/*screen->blurFrameBuffer->bind();
-		Shaders::quadShader.updateTexture(screen->screenFrameBuffer->texture);
-		screen->quad->render();
-		Shaders::blurShader.updateTexture(screen->blurFrameBuffer->texture);
-		Shaders::blurShader.updateType(BlurShader::BlurType::HORIZONTAL);
-		screen->quad->render();
-		Shaders::blurShader.updateType(BlurShader::BlurType::VERTICAL);
-		screen->quad->render();
-		screen->blurFrameBuffer->unbind();*/
+		GUI::blurFrameBuffer->bind();
+		GraphicsShaders::quadShader.updateProjection(orthoMatrix);
+		GraphicsShaders::quadShader.updateTexture(screenFrameBuffer->texture);
+		quad->render();
+		GraphicsShaders::blurShader.updateTexture(blurFrameBuffer->texture);
+		GraphicsShaders::blurShader.updateType(BlurShader::BlurType::HORIZONTAL);
+		quad->render();
+		GraphicsShaders::blurShader.updateType(BlurShader::BlurType::VERTICAL);
+		quad->render();
+		blurFrameBuffer->unbind();
 
 		Path::bind(GUI::batch);
 		for (auto iterator = components.rbegin(); iterator != components.rend(); ++iterator) {
@@ -467,6 +481,7 @@ namespace GUI {
 		
 		// Framebuffers
 		guiFrameBuffer->close();
+		blurFrameBuffer->close();
 
 		// Textures
 		closeButtonHoverTexture->close();

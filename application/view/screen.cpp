@@ -178,12 +178,11 @@ void Screen::onInit() {
 
 	// Eventhandler init
 	eventHandler.setWindowResizeCallback([](Screen& screen, Vec2i dimension) {
-		screen.screenFrameBuffer->resize(dimension);
-		screen.blurFrameBuffer->resize(dimension);
-		GUI::guiFrameBuffer->resize(dimension);
-
 		screen.camera.onUpdate(((float)dimension.x) / ((float)dimension.y));
 		screen.dimension = dimension;
+
+		screen.screenFrameBuffer->resize(screen.dimension);
+		GUI::updateWindowInfo({ screen.dimension, screen.camera.aspect });
 	});
 
 

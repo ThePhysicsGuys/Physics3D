@@ -70,6 +70,7 @@ namespace GUI {
 	extern Component* selectedComponent;
 	extern Vec2 intersectedPoint;
 	extern FrameBuffer* guiFrameBuffer;
+	extern FrameBuffer* blurFrameBuffer;
 
 	// ColorPicker
 	extern Frame* colorPickerFrame;
@@ -150,13 +151,16 @@ namespace GUI {
 	Component* superParent(Component* child);
 
 	// Event functions
-	void intersect(Vec2 mouse);
-	bool intersectsSquare(Vec2 point, Vec2 topleft, Vec2 dimension);
+	void intersect(const Vec2& mouse);
+	bool intersectsSquare(const Vec2& point, const Vec2& topleft, const Vec2& dimension);
+
+	// WindowInfo
+	void updateWindowInfo(const WindowInfo& info);
 
 	// State function
-	void onInit(const WindowInfo& info);
+	void onInit(const WindowInfo& info, FrameBuffer* screenFrameBuffer);
 	void onEvent(Event& event);
-	void onUpdate(const WindowInfo& info, Mat4f orthoMatrix);
+	void onUpdate(Mat4f orthoMatrix);
 	void onRender(Mat4f orthoMatrix);
 	void onClose();
 };
