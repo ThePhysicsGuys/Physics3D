@@ -1,5 +1,3 @@
-#include "core.h"
-
 #include "resourceManager.h"
 
 std::unordered_map<ResourceType, Resource*> ResourceManager::defaultResources = {};

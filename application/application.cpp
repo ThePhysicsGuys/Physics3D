@@ -29,9 +29,9 @@
 #include "io/export.h"
 #include "io/import.h"
 
-#include "../util/resourceLoader.h"
-#include "../engine/resource/resourceManager.h"
-#include "../engine/resource/textureResource.h"
+#include "../util/resource/resourceLoader.h"
+#include "../util/resource/resourceManager.h"
+#include "../graphics/resource/textureResource.h"
 #include "../engine/io/import.h"
 
 #define TICKS_PER_SECOND 120.0

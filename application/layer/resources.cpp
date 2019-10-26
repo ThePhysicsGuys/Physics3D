@@ -3,7 +3,7 @@
 #include "resources.h"
 
 #include "resource.h"
-#include "../util/resourceLoader.h"
+#include "../util/resource/resourceLoader.h"
 
 ResourceStruct applicationResources[] {
 	{ IDR_SHADER1, "SHADER" },

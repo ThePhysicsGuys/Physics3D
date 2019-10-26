@@ -1,5 +1,3 @@
-#include "core.h"
-
 #include "resourceManager.h"
 
 inline void Resource::setName(const std::string& name) {

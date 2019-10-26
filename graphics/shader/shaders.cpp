@@ -4,7 +4,7 @@
 #include "resources.h"
 #include "texture.h"
 
-#include "../util/resourceLoader.h"
+#include "../util/resource/resourceLoader.h"
 
 #include <sstream>
 

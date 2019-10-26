@@ -1,8 +1,8 @@
 #pragma once
 
-#include "resource.h"
+#include "../util/resource/resource.h"
 
-#include "../graphics/texture.h"
+#include "../texture.h"
 
 class TextureResource;
 

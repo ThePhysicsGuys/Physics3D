@@ -6,7 +6,7 @@
 
 #include "mesh/indexedMesh.h"
 
-#include "../util/resourceLoader.h"
+#include "../util/resource/resourceLoader.h"
 #include "../physics/misc/shapeLibrary.h"
 #include "../engine/io/import.h"
 #include "resources.h"

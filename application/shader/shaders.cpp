@@ -8,7 +8,7 @@
 #include "../graphics/material.h"
 #include "../graphics/light.h"
 
-#include "../util/resourceLoader.h"
+#include "../util/resource/resourceLoader.h"
 
 #include <sstream>
 

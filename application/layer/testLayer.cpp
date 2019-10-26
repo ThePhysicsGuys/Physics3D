@@ -12,9 +12,9 @@
 #include "../graphics/gui/image.h"
 #include "../graphics/gui/frame.h"
 
-#include "../engine/resource/resource.h"
-#include "../engine/resource/resourceManager.h"
-#include "../engine/resource/textureResource.h"
+#include "../util/resource/resource.h"
+#include "../util/resource/resourceManager.h"
+#include "../graphics/resource/textureResource.h"
 
 Batch<Path3D::Vertex>* batch = nullptr;
 

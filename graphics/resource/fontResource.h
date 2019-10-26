@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../resource/resource.h"
+#include "../util/resource/resource.h"
 
-#include "../graphics/font.h"
+#include "../font.h"
 
 class FontResource;
 
