@@ -211,7 +211,6 @@
     <ClCompile Include="worldPhysics.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="geometry\basicShapes.h" />
     <ClInclude Include="constants.h" />
     <ClInclude Include="constraintGroup.h" />
     <ClInclude Include="datastructures\alignedPtr.h" />
@@ -227,6 +226,7 @@
     <ClInclude Include="geometry\boundingBox.h" />
     <ClInclude Include="geometry\computationBuffer.h" />
     <ClInclude Include="geometry\convexShapeBuilder.h" />
+    <ClInclude Include="geometry\dimensions.h" />
     <ClInclude Include="geometry\genericCollidable.h" />
     <ClInclude Include="geometry\indexedShape.h" />
     <ClInclude Include="geometry\genericIntersection.h" />
