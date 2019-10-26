@@ -182,7 +182,6 @@ void Screen::onInit() {
 		screen.dimension = dimension;
 
 		screen.screenFrameBuffer->resize(screen.dimension);
-		GUI::updateWindowInfo({ screen.dimension, screen.camera.aspect });
 	});
 
 

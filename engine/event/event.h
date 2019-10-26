@@ -59,6 +59,7 @@ public:
 class EventDispatcher {
 private:
 	Event& event;
+
 public:
 	EventDispatcher(Event& event) : event(event) {}
 
@@ -70,5 +71,4 @@ public:
 		}
 		return false;
 	}
-
 };

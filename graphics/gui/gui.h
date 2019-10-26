@@ -10,7 +10,6 @@ class Texture;
 class Font;
 class FrameBuffer;
 class IndexedMesh;
-class Event;
 struct Quad;
 
 namespace GUI {
@@ -57,15 +56,13 @@ namespace GUI {
 		Vec4f blend(Vec4f color1, Vec4f color2);
 	};
 
-	// temp
 	struct WindowInfo {
 		Vec2i dimension;
 		float aspect;
 	};
 
-	extern WindowInfo windowInfo;
-
 	// Global
+	extern WindowInfo windowInfo;
 	extern Component* intersectedComponent;
 	extern Component* selectedComponent;
 	extern Vec2 intersectedPoint;
@@ -154,15 +151,18 @@ namespace GUI {
 	void intersect(const Vec2& mouse);
 	bool intersectsSquare(const Vec2& point, const Vec2& topleft, const Vec2& dimension);
 
-	// WindowInfo
-	void updateWindowInfo(const WindowInfo& info);
-
 	// State function
 	void onInit(const WindowInfo& info, FrameBuffer* screenFrameBuffer);
-	void onEvent(Event& event);
 	void onUpdate(Mat4f orthoMatrix);
 	void onRender(Mat4f orthoMatrix);
 	void onClose();
+
+	// Events
+	bool onMouseMove(int newX, int newY);
+	bool onMouseDrag(int oldX, int oldY, int newX, int newY);
+	bool onMouseRelease(int x, int y);
+	bool onMousePress(int x, int y);
+	bool onWindowResize(const WindowInfo& info);
 };
 
 #include "component.h"
