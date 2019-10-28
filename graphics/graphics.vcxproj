@@ -82,7 +82,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)graphics;</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>core.h</PrecompiledHeaderFile>
-      <PreprocessorDefinitions>FT2_BUILD_LIBRARY;GLEW_STATIC;_MBCS;%(PreprocessorDefinitions);</PreprocessorDefinitions>
+      <PreprocessorDefinitions>FT2_BUILD_LIBRARY;GLEW_STATIC;_MBCS;NDEBUG;%(PreprocessorDefinitions);</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
