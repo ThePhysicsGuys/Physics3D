@@ -29,9 +29,9 @@
 #include "io/export.h"
 #include "io/import.h"
 
-#include "../util/resourceLoader.h"
-#include "../engine/resource/resourceManager.h"
-#include "../engine/resource/textureResource.h"
+#include "../util/resource/resourceLoader.h"
+#include "../util/resource/resourceManager.h"
+#include "../graphics/resource/textureResource.h"
 #include "../engine/io/import.h"
 
 #define TICKS_PER_SECOND 120.0
@@ -141,9 +141,9 @@ void setupWorld() {
 	// WorldBuilder init
 	WorldBuilder::init();
 
-	// Sphere shape 
-	// TODO remove link to graphics
-	VisualShape sphereShape = OBJImport::load((std::istream&) std::istringstream(getResourceAsString(graphicsResources, SPHERE_MODEL)));
+	// Sphere shape
+	Polyhedron sphere(Library::createSphere(0.5, 3));
+	VisualShape sphereShape = VisualShape(sphere);
 	Vec3f* normalBuf = new Vec3f[sphereShape.vertexCount];
 	sphereShape.computeNormals(normalBuf);
 	sphereShape.normals = SharedArrayPtr<const Vec3f>(normalBuf);

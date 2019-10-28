@@ -5,16 +5,13 @@
 #include <sstream>
 
 #include "shader/shaders.h"
+#include "view/screen.h"
 #include "../graphics/renderUtils.h"
 #include "../graphics/texture.h"
-#include "view/screen.h"
-
 #include "../graphics/mesh/indexedMesh.h"
 #include "../graphics/meshLibrary.h"
-
-#include "../physics/geometry/boundingBox.h"
-
 #include "../graphics/debug/visualDebug.h"
+#include "../physics/geometry/boundingBox.h"
 
 CubeMap* skyboxTexture = nullptr;
 

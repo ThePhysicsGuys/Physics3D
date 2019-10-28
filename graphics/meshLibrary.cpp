@@ -6,7 +6,7 @@
 
 #include "mesh/indexedMesh.h"
 
-#include "../util/resourceLoader.h"
+#include "../util/resource/resourceLoader.h"
 #include "../physics/misc/shapeLibrary.h"
 #include "../engine/io/import.h"
 #include "resources.h"
@@ -23,7 +23,8 @@ namespace Library {
 		cube = new IndexedMesh(VisualShape(createCube(1)));
 		
 		// Sphere
-		VisualShape sphereShape(OBJImport::load((std::istream&) std::istringstream(getResourceAsString(graphicsResources, SPHERE_MODEL))));
+		//VisualShape sphereShape(OBJImport::load((std::istream&) std::istringstream(getResourceAsString(graphicsResources, SPHERE_MODEL))));
+		VisualShape sphereShape(OBJImport::load("../res/models/sphere.obj"));
 		sphere = new IndexedMesh(sphereShape);
 
 		VisualShape vectorShape = OBJImport::load("../res/models/gui/translate_shaft.obj");

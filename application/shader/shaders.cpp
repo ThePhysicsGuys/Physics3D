@@ -8,7 +8,7 @@
 #include "../graphics/material.h"
 #include "../graphics/light.h"
 
-#include "../util/resourceLoader.h"
+#include "../util/resource/resourceLoader.h"
 
 #include <sstream>
 
@@ -22,7 +22,6 @@ namespace ApplicationShaders {
 	SkyboxShader skyboxShader;
 	PointShader pointShader;
 	TestShader testShader;
-	BlurShader blurShader;
 	LineShader lineShader;
 	MaskShader maskShader;
 	EdgeShader edgeShader;
@@ -38,7 +37,6 @@ namespace ApplicationShaders {
 		ShaderSource skyboxShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(applicationResources, SKYBOX_SHADER)), "skybox.shader");
 		ShaderSource pointShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(applicationResources, POINT_SHADER)), "point.shader");
 		ShaderSource testShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(applicationResources, TEST_SHADER)), "test.shader");
-		ShaderSource blurShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(applicationResources, BLUR_SHADER)), "blur.shader");
 		ShaderSource lineShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(applicationResources, LINE_SHADER)), "line.shader");
 		ShaderSource maskShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(applicationResources, MASK_SHADER)), "mask.shader");
 		ShaderSource edgeShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(applicationResources, EDGE_SHADER)), "edge.shader");
@@ -53,7 +51,6 @@ namespace ApplicationShaders {
 		new(&skyboxShader) SkyboxShader(skyboxShaderSource);
 		new(&pointShader) PointShader(pointShaderSource);
 		new(&testShader) TestShader(testShaderSource);
-		new(&blurShader) BlurShader(blurShaderSource);
 		new(&lineShader) LineShader(lineShaderSource);
 		new(&maskShader) MaskShader(maskShaderSource);
 		new(&edgeShader) EdgeShader(edgeShaderSource);
@@ -69,7 +66,6 @@ namespace ApplicationShaders {
 		postProcessShader.close();
 		pointShader.close();
 		testShader.close();
-		blurShader.close();
 		lineShader.close();
 		maskShader.close();
 		edgeShader.close();
@@ -267,20 +263,6 @@ void DepthShader::updateLight(const Mat4f& lightMatrix) {
 void DepthShader::updateModel(const Mat4f& modelMatrix) {
 	bind();
 	shader.setUniform("modelMatrix", modelMatrix);
-}
-
-
-// BlurShader
-
-void BlurShader::updateType(BlurType type) {
-	bind();
-	shader.setUniform("horizontal", (int)type);
-}
-
-void BlurShader::updateTexture(Texture* texture) {
-	bind();
-	texture->bind();
-	shader.setUniform("image", texture->getUnit());
 }
 
 

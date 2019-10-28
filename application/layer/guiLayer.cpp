@@ -10,6 +10,7 @@
 #include "../graphics/renderUtils.h"
 #include "../graphics/shader/shaders.h"
 #include "../graphics/gui/guiUtils.h"
+#include "../engine/input/mouse.h"
 
 // Font
 Font* font = nullptr;
@@ -27,9 +28,40 @@ GuiLayer::GuiLayer(Screen* screen, char flags) : Layer("Gui", screen, flags) {
 
 }
 
+
+bool onMouseMove(const MouseMoveEvent& event) {
+	return GUI::onMouseMove(event.getNewX(), event.getNewY());
+}
+
+bool onMousePress(const MousePressEvent& event) {
+	if (Mouse::LEFT == event.getButton()) {
+		return GUI::onMousePress(event.getX(), event.getY());
+	}
+
+	return false;
+}
+
+bool onMouseRelease(const MouseReleaseEvent& event) {
+	if (Mouse::LEFT == event.getButton()) {
+		return GUI::onMouseRelease(event.getX(), event.getY());
+	}
+
+	return false;
+}
+
+bool onMouseDrag(const MouseDragEvent& event) {
+	return GUI::onMouseDrag(event.getOldX(), event.getOldY(), event.getNewX(), event.getNewY());
+}
+
+bool onWindowResize(const WindowResizeEvent& event) {
+	float aspect = ((float) event.getWidth()) / ((float) event.getHeight());
+	Vec2i dimension = Vec2i(event.getWidth(), event.getHeight());
+	return GUI::onWindowResize({ dimension, aspect });
+}
+
 void GuiLayer::onInit() {
 	// GUI init
-	GUI::onInit(GUI::WindowInfo{ screen->dimension, screen->camera.aspect });
+	GUI::onInit({ screen->dimension, screen->camera.aspect }, screen->screenFrameBuffer);
 
 	// Frames init
 	propertiesFrame = new PropertiesFrame(0.75, 0.75);
@@ -39,7 +71,7 @@ void GuiLayer::onInit() {
 
 void GuiLayer::onUpdate() {
 	// Update GUI
-	GUI::onUpdate(GUI::WindowInfo{ screen->dimension, screen->camera.aspect }, screen->camera.orthoMatrix);
+	GUI::onUpdate(screen->camera.orthoMatrix);
 
 	// Update GUI intersection
 	GUI::intersect(GUI::map(handler->mousePosition));
@@ -51,7 +83,12 @@ void GuiLayer::onUpdate() {
 }
 
 void GuiLayer::onEvent(Event& event) {
-	GUI::onEvent(event); // TODO remove 
+	EventDispatcher dispatcher(event);
+	dispatcher.dispatch<MouseMoveEvent>(onMouseMove);
+	dispatcher.dispatch<MousePressEvent>(onMousePress);
+	dispatcher.dispatch<MouseReleaseEvent>(onMouseRelease);
+	dispatcher.dispatch<MouseDragEvent>(onMouseDrag);
+	dispatcher.dispatch<WindowResizeEvent>(onWindowResize);
 }
 
 void GuiLayer::onRender() {

@@ -293,6 +293,11 @@ bool Polyhedron::containsPoint(Vec3f point) const {
 #ifdef __AVX__
 #include <immintrin.h>
 #ifdef _MSC_VER
+
+#define SWAP_2x2 0b01001110
+#define SWAP_1x1 0b10110001
+
+
 inline uint32_t __builtin_ctz(uint32_t x) {
 	unsigned long ret;
 	_BitScanForward(&ret, x);
@@ -348,9 +353,9 @@ int Polyhedron::furthestIndexInDirection(const Vec3f& direction) const {
 	// find max of our 8 left candidates
 	__m256 swap4x4 = _mm256_permute2f128_ps(bestDot, bestDot, 1);
 	__m256 bestDotInternalMax = _mm256_max_ps(bestDot, swap4x4);
-	__m256 swap2x2 = _mm256_permute_ps(bestDotInternalMax, 0b01001110);
+	__m256 swap2x2 = _mm256_permute_ps(bestDotInternalMax, SWAP_2x2);
 	bestDotInternalMax = _mm256_max_ps(bestDotInternalMax, swap2x2);
-	__m256 swap1x1 = _mm256_permute_ps(bestDotInternalMax, 0b10110001);
+	__m256 swap1x1 = _mm256_permute_ps(bestDotInternalMax, SWAP_1x1);
 	bestDotInternalMax = _mm256_max_ps(bestDotInternalMax, swap1x1);
 
 	__m256 compare = _mm256_cmp_ps(bestDotInternalMax, bestDot, _CMP_EQ_OQ);
@@ -402,9 +407,9 @@ Vec3f Polyhedron::furthestInDirection(const Vec3f& direction) const {
 	// now we find the max of the remaining 8 elements
 	__m256 swap4x4 = _mm256_permute2f128_ps(bestDot, bestDot, 1);
 	__m256 bestDotInternalMax = _mm256_max_ps(bestDot, swap4x4);
-	__m256 swap2x2 = _mm256_permute_ps(bestDotInternalMax, 0b01001110);
+	__m256 swap2x2 = _mm256_permute_ps(bestDotInternalMax, SWAP_2x2);
 	bestDotInternalMax = _mm256_max_ps(bestDotInternalMax, swap2x2);
-	__m256 swap1x1 = _mm256_permute_ps(bestDotInternalMax, 0b10110001);
+	__m256 swap1x1 = _mm256_permute_ps(bestDotInternalMax, SWAP_1x1);
 	bestDotInternalMax = _mm256_max_ps(bestDotInternalMax, swap1x1);
 
 	__m256 compare = _mm256_cmp_ps(bestDotInternalMax, bestDot, _CMP_EQ_OQ);
@@ -414,30 +419,26 @@ Vec3f Polyhedron::furthestInDirection(const Vec3f& direction) const {
 	return Vec3f(bestX.m256_f32[index], bestY.m256_f32[index], bestZ.m256_f32[index]);
 }
 
+// compare the remaining 8 elements
 BoundingBox toBounds(__m256 xMin, __m256 xMax, __m256 yMin, __m256 yMax, __m256 zMin, __m256 zMax) {
 	// now we compare the remaining 8 elements
-	xMin = _mm256_min_ps(xMin, _mm256_permute2f128_ps(xMin, xMin, 1));
-	xMax = _mm256_max_ps(xMax, _mm256_permute2f128_ps(xMax, xMax, 1));
-	yMin = _mm256_min_ps(yMin, _mm256_permute2f128_ps(yMin, yMin, 1));
-	yMax = _mm256_max_ps(yMax, _mm256_permute2f128_ps(yMax, yMax, 1));
+	__m256 xyMin = _mm256_min_ps(_mm256_permute2f128_ps(xMin, yMin, 0x20), _mm256_permute2f128_ps(xMin, yMin, 0x31));
+	__m256 xyMax = _mm256_max_ps(_mm256_permute2f128_ps(xMax, yMax, 0x20), _mm256_permute2f128_ps(xMax, yMax, 0x31));
 	zMin = _mm256_min_ps(zMin, _mm256_permute2f128_ps(zMin, zMin, 1));
 	zMax = _mm256_max_ps(zMax, _mm256_permute2f128_ps(zMax, zMax, 1));
 
-	__m256 xyMin = _mm256_permute2f128_ps(xMin, yMin, 0x20);
-	xyMin = _mm256_min_ps(xyMin, _mm256_permute_ps(xyMin, 0b01001110)); // swap 2x2
-
-	__m256 xyMax = _mm256_permute2f128_ps(xMax, yMax, 0x20);
-	xyMax = _mm256_max_ps(xyMax, _mm256_permute_ps(xyMax, 0b01001110)); // swap 2x2
-
-	zMin = _mm256_min_ps(zMin, _mm256_permute_ps(zMin, 0b01001110)); // swap 2x2
-	zMax = _mm256_max_ps(zMax, _mm256_permute_ps(zMax, 0b01001110)); // swap 2x2
+	xyMin = _mm256_min_ps(xyMin, _mm256_permute_ps(xyMin, SWAP_2x2));
+	xyMax = _mm256_max_ps(xyMax, _mm256_permute_ps(xyMax, SWAP_2x2));
+	
+	zMin = _mm256_min_ps(zMin, _mm256_permute_ps(zMin, SWAP_2x2));
+	zMax = _mm256_max_ps(zMax, _mm256_permute_ps(zMax, SWAP_2x2));
 
 
 	__m256 zxzyMin = _mm256_blend_ps(xyMin, zMin, 0b00110011); // stored as xxyyzzzz
-	zxzyMin = _mm256_min_ps(zxzyMin, _mm256_permute_ps(zxzyMin, 0b10110001));
+	zxzyMin = _mm256_min_ps(zxzyMin, _mm256_permute_ps(zxzyMin, SWAP_1x1));
 
 	__m256 zxzyMax = _mm256_blend_ps(xyMax, zMax, 0b00110011);
-	zxzyMax = _mm256_max_ps(zxzyMax, _mm256_permute_ps(zxzyMax, 0b10110001));
+	zxzyMax = _mm256_max_ps(zxzyMax, _mm256_permute_ps(zxzyMax, SWAP_1x1));
 	// reg structure zzxxzzyy
 
 	return BoundingBox{zxzyMin.m256_f32[2], zxzyMin.m256_f32[6], zxzyMin.m256_f32[0], zxzyMax.m256_f32[2], zxzyMax.m256_f32[6], zxzyMax.m256_f32[0]};

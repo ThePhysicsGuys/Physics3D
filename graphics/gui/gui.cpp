@@ -11,11 +11,6 @@
 #include "path/path.h"
 #include "shader/shaders.h"
 
-#include "../engine/event/event.h"
-#include "../engine/event/mouseEvent.h"
-#include "../engine/input/mouse.h"
-#include "../engine/io/import.h"
-
 #include "font.h"
 #include "texture.h"
 #include "visualShape.h"
@@ -26,9 +21,9 @@
 #include "../mesh/indexedMesh.h"
 #include "../mesh/primitive.h"
 
-#include "../engine/resource/resourceManager.h"
-#include "../engine/resource/textureResource.h"
-#include "../engine/resource/fontResource.h"
+#include "../util/resource/resourceManager.h"
+#include "../resource/textureResource.h"
+#include "../resource/fontResource.h"
 
 namespace GUI {
 	namespace COLOR {
@@ -169,10 +164,8 @@ namespace GUI {
 		Vec4f WHITE    = get(0xFFFFFF);
 	};
 
-	// Temp
-	WindowInfo windowInfo;
-
 	// Global
+	WindowInfo windowInfo;
 	OrderedVector<Component*> components;
 	FrameBuffer* guiFrameBuffer = nullptr;
 	Component* intersectedComponent = nullptr;
@@ -251,9 +244,14 @@ namespace GUI {
 	Vec4f fontColor = COLOR::SILVER;
 	double fontSize = 0.0007;
 
+	// Blur framebuffer
+	FrameBuffer* blurFrameBuffer;
+	FrameBuffer* screenFrameBuffer;
+
+	// Batch
 	GuiBatch* batch;
 
-	void onInit(const WindowInfo& info) {
+	void onInit(const WindowInfo& info, FrameBuffer* screenFrameBuffer) {
 		// Init
 		GraphicsShaders::onInit();
 
@@ -261,6 +259,8 @@ namespace GUI {
 		GUI::batch = new GuiBatch();
 		GUI::quad = new Quad();
 		GUI::guiFrameBuffer = new FrameBuffer(windowInfo.dimension.x, windowInfo.dimension.y);
+		GUI::blurFrameBuffer = new FrameBuffer(windowInfo.dimension.x, windowInfo.dimension.y);
+		GUI::screenFrameBuffer = screenFrameBuffer;
 
 		// font
 		ResourceManager::add<FontResource>("font", "../res/fonts/droid.ttf");
@@ -311,7 +311,7 @@ namespace GUI {
 		GUI::add(colorPickerFrame);
 	}
 	
-	void intersect(Vec2 mouse) {
+	void intersect(const Vec2& mouse) {
 		Component* intersected = nullptr;
 		for (Component* component : components) {
 			// Skip hidden components
@@ -361,7 +361,7 @@ namespace GUI {
 		return superParent;
 	}
 
-	bool intersectsSquare(Vec2 point, Vec2 topleft, Vec2 dimension) {
+	bool intersectsSquare(const Vec2& point, const Vec2& topleft, const Vec2& dimension) {
 		Vec2 halfDimension = dimension / 2;
 		Vec2 center = topleft + Vec2(halfDimension.x, -halfDimension.y);
 		return fabs(point.x - center.x) < halfDimension.x && fabs(point.y - center.y) < halfDimension.y;
@@ -380,19 +380,19 @@ namespace GUI {
 		}
 	}
 
-	bool onMouseMove(MouseMoveEvent& event) {
+	bool onMouseMove(int newX, int newY) {
 		if (GUI::intersectedComponent) {
-			Vec2 guiCursorPosition = GUI::map(Vec2(event.getNewX(), event.getNewY()));
+			Vec2 guiCursorPosition = GUI::map(Vec2(newX, newY));
 			GUI::intersectedComponent->hover(guiCursorPosition);
 		}
 
 		return false;
 	}
 
-	bool onMouseDrag(MouseDragEvent& event) {
+	bool onMouseDrag(int oldX, int oldY, int newX, int newY) {
 		if (GUI::selectedComponent) {
-			Vec2 guiCursorPosition = GUI::map(Vec2(event.getOldX(), event.getOldY()));
-			Vec2 newGuiCursorPosition = GUI::map(Vec2(event.getNewX(), event.getNewY()));
+			Vec2 guiCursorPosition = GUI::map(Vec2(oldX, oldY));
+			Vec2 newGuiCursorPosition = GUI::map(Vec2(newX, newY));
 
 			GUI::selectedComponent->drag(newGuiCursorPosition, guiCursorPosition);
 
@@ -402,53 +402,52 @@ namespace GUI {
 		return false;
 	}
 
-	bool onMouseRelease(MouseReleaseEvent& event) {
-		if (Mouse::LEFT == event.getButton()) {
-			if (GUI::selectedComponent) {
-				GUI::selectedComponent->release(GUI::map(Vec2(event.getX(), event.getY())));
-			}
-		}
-		return false;
-	}
-
-	bool onMousePress(MousePressEvent& event) {
-		if (Mouse::LEFT == event.getButton()) {
-			GUI::selectedComponent = GUI::intersectedComponent;
-
-			if (GUI::intersectedComponent) {
-				GUI::select(GUI::superParent(GUI::intersectedComponent));
-				GUI::intersectedComponent->press(GUI::map(Vec2(event.getX(), event.getY())));
-				GUI::intersectedPoint = GUI::map(Vec2(event.getX(), event.getY())) - GUI::intersectedComponent->position;
-
-				return true;
-			}
+	bool onMouseRelease(int x, int y) {
+		if (GUI::selectedComponent) {
+			GUI::selectedComponent->release(GUI::map(Vec2(x, y)));
 		}
 
 		return false;
 	}
 
-	void onUpdate(const WindowInfo& info, Mat4f orthoMatrix) {
+	bool onMousePress(int x, int y) {
+		GUI::selectedComponent = GUI::intersectedComponent;
+
+		if (GUI::intersectedComponent) {
+			GUI::select(GUI::superParent(GUI::intersectedComponent));
+			GUI::intersectedComponent->press(GUI::map(Vec2(x, y)));
+			GUI::intersectedPoint = GUI::map(Vec2(x, y)) - GUI::intersectedComponent->position;
+
+			return true;
+		}
+
+		return false;
+	}
+
+	bool onWindowResize(const WindowInfo& info) {
 		GUI::windowInfo = info;
+		
+		guiFrameBuffer->resize(info.dimension);
+		blurFrameBuffer->resize(info.dimension);
+
+		return false;
+	}
+
+	void onUpdate(Mat4f orthoMatrix) {
 		GraphicsShaders::quadShader.updateProjection(orthoMatrix);
 	}
 
-	void onEvent(Event& event) {
-		EventDispatcher dispatcher(event);
-		dispatcher.dispatch<MousePressEvent>(onMousePress);
-		dispatcher.dispatch<MouseReleaseEvent>(onMouseRelease);
-		dispatcher.dispatch<MouseDragEvent>(onMouseDrag);
-	}
-
 	void onRender(Mat4f orthoMatrix) {	
-		/*screen->blurFrameBuffer->bind();
-		Shaders::quadShader.updateTexture(screen->screenFrameBuffer->texture);
-		screen->quad->render();
-		Shaders::blurShader.updateTexture(screen->blurFrameBuffer->texture);
-		Shaders::blurShader.updateType(BlurShader::BlurType::HORIZONTAL);
-		screen->quad->render();
-		Shaders::blurShader.updateType(BlurShader::BlurType::VERTICAL);
-		screen->quad->render();
-		screen->blurFrameBuffer->unbind();*/
+		GUI::blurFrameBuffer->bind();
+		GraphicsShaders::quadShader.updateProjection(orthoMatrix);
+		GraphicsShaders::quadShader.updateTexture(screenFrameBuffer->texture);
+		quad->render();
+		GraphicsShaders::blurShader.updateTexture(blurFrameBuffer->texture);
+		GraphicsShaders::blurShader.updateType(BlurShader::BlurType::HORIZONTAL);
+		quad->render();
+		GraphicsShaders::blurShader.updateType(BlurShader::BlurType::VERTICAL);
+		quad->render();
+		blurFrameBuffer->unbind();
 
 		Path::bind(GUI::batch);
 		for (auto iterator = components.rbegin(); iterator != components.rend(); ++iterator) {
@@ -467,6 +466,7 @@ namespace GUI {
 		
 		// Framebuffers
 		guiFrameBuffer->close();
+		blurFrameBuffer->close();
 
 		// Textures
 		closeButtonHoverTexture->close();

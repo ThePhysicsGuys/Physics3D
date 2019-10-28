@@ -15,7 +15,7 @@ Intersection intersectsTransformed(const Shape& first, const Shape& second, cons
 }
 
 
-void incDebugTally(HistoricTally<long long, IterationTime>& tally, int iterTime) {
+static void incDebugTally(HistoricTally<long long, IterationTime>& tally, int iterTime) {
 	if(iterTime >= 200) {
 		tally.addToTally(IterationTime::LIMIT_REACHED, 1);
 	} else if(iterTime >= 15) {

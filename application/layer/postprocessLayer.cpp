@@ -6,7 +6,7 @@
 
 #include "../graphics/mesh/primitive.h"
 
-#include "../graphics/shader/shaders.h"
+#include "../application/shader/shaders.h"
 #include "../graphics/renderUtils.h"
 #include "../graphics/texture.h"
 #include "view/screen.h"
@@ -37,8 +37,7 @@ void PostprocessLayer::onRender() {
 	Renderer::clearDepth();
 
 	Renderer::disableDepthTest();
-	GraphicsShaders::quadShader.updateProjection(Matrix<double, 4, 4>::IDENTITY());
-	GraphicsShaders::quadShader.updateTexture(screen->screenFrameBuffer->texture);
+	ApplicationShaders::postProcessShader.updateTexture(screen->screenFrameBuffer->texture);
 	screen->quad->render();
 }
 

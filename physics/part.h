@@ -9,14 +9,6 @@ class WorldPrototype;
 #include "math/globalCFrame.h"
 #include "math/bounds.h"
 
-struct PartPhysicalData {
-	GlobalCFrame cframe;
-	Shape hitbox;
-	double maxRadius;
-	double friction;
-	Part* part;
-};
-
 struct PartProperties {
 	double density;
 	double friction;

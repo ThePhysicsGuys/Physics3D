@@ -19,11 +19,11 @@ public:
 
 	WindowResizeEvent(unsigned int width, unsigned int height) : width(width), height(height) {};
 
-	inline unsigned int getWidth() {
+	inline unsigned int getWidth() const {
 		return width;
 	}
 
-	inline unsigned int getHeight() {
+	inline unsigned int getHeight() const {
 		return height;
 	}
 };
@@ -44,11 +44,11 @@ public:
 
 	FrameBufferResizeEvent(unsigned int width, unsigned int height) : width(width), height(height) {};
 
-	inline unsigned int getWidth() {
+	inline unsigned int getWidth() const {
 		return width;
 	}
 
-	inline unsigned int getHeight() {
+	inline unsigned int getHeight() const {
 		return height;
 	}
 };

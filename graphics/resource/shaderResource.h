@@ -1,8 +1,8 @@
 #pragma once
 
-#include "resource.h"
+#include "../util/resource/resource.h"
 
-#include "../graphics/shader/shaderProgram.h"
+#include "../shader/shaderProgram.h"
 
 #pragma region SkyboxShader
 

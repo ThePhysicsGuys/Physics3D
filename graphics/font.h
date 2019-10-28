@@ -37,7 +37,7 @@ public:
 		
 		unsigned int advance;
 
-		Character() {};
+		Character() : x(0), y(0), width(0), height(0), bx(0), by(0), advance(0) {};
 		Character(int x, int y, int width, int height, int bx, int by, int advance) : x(x), y(y), width(width), height(height), bx(bx), by(by), advance(advance) {};
 
 	} characters[CHARACTER_COUNT];

@@ -311,6 +311,18 @@ Vector<T, Size> project(const Vector<T, Size>& vec, const Vector<T, Size>& onto)
 	return onto * ((onto * vec) / lengthSquared(onto));
 }
 
+
+/**
+* projects vec onto a plane with normal vector planeNormal
+* @param vec vector to be projected
+* @param planeNormal plane to be projected on
+* @return a projected version of the given vector
+*/
+template<typename T, size_t Size>
+Vector<T, Size> projectToPlaneNormal(const Vector<T, Size>& vec, const Vector<T, Size>& planeNormal) {
+	return vec - vec * planeNormal * planeNormal / lengthSquared(planeNormal);
+}
+
 /**
 * returns the distance of the given point to the line that goes through the origin along this vector
 * @param point

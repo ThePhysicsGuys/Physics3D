@@ -194,11 +194,11 @@ void Frame::render() {
 			// Padding
 			Vec2f offsetPosition = titleBarPosition + Vec2f(0, -titleBarHeight);
 			Vec2f offsetDimension = dimension + Vec2f(0, -titleBarHeight);
-			//Vec2f xRange = Vec2f(-GUI::screen->camera.aspect, GUI::screen->camera.aspect) * 2;
+			Vec2f xRange = Vec2f(-GUI::windowInfo.aspect, GUI::windowInfo.aspect) * 2;
 			Vec2f yRange = Vec2(-1, 1);
 			Vec4f color = GUI::COLOR::blend(Vec4f(0.4, 0.4, 0.4, 1), blendColor);
 
-			//Path::rectUVRange(GUI::screen->blurFrameBuffer->texture->getID(), offsetPosition, offsetDimension, xRange, yRange, color);
+			Path::rectUVRange(GUI::blurFrameBuffer->texture->getID(), offsetPosition, offsetDimension, xRange, yRange, color);
 
 			renderChildren();
 		}

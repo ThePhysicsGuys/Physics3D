@@ -219,7 +219,7 @@ void SlidingChartDataSetInfo::add(float value) {
 	float newVariance = variance;
 	float newMean = mean;
 
-	if (data.size() >= size) {
+	if (data.size() == size) {
 		float s = size;
 		float s1 = s - 1.0f;
 

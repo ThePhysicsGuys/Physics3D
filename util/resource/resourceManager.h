@@ -1,6 +1,9 @@
 #pragma once
 
+#include "../log.h"
+
 #include <typeinfo>
+#include <unordered_map>
 
 #include "resource.h"
 

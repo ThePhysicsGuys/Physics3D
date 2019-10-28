@@ -6,11 +6,22 @@
 #include "../../part.h"
 
 class VisibilityFilter {
+public:
 	Position origin;
-	Vec3 boxNormals[5]; // normals of the viewPort, facing outward
+private:
+	union {
+		Vec3 boxNormals[5]; // normals of the viewPort, facing outward
+		struct {
+			Vec3 up;
+			Vec3 down;
+			Vec3 left;
+			Vec3 right;
+			Vec3 forward;
+		};
+	};
 	double maxDepth;
 public:
-	VisibilityFilter() = default;
+	VisibilityFilter() : boxNormals{} {};
 	VisibilityFilter(Position origin, Vec3 normals[5], double maxDepth);
 	
 	/*
@@ -60,4 +71,11 @@ public:
 	bool operator()(const Part& part) const {
 		return true;
 	}
+
+
+	inline Vec3 getForwardStep() const { return forward; }
+	inline Vec3 getTopOfViewPort() const { return projectToPlaneNormal(forward, up); }
+	inline Vec3 getBottomOfViewPort() const { return projectToPlaneNormal(forward, down); }
+	inline Vec3 getLeftOfViewPort() const { return projectToPlaneNormal(forward, left); }
+	inline Vec3 getRightOfViewPort() const { return projectToPlaneNormal(forward, right); }
 };

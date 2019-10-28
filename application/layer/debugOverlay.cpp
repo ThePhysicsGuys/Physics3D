@@ -101,12 +101,12 @@ void DebugOverlay::onRender() {
 		iterationChart.position = Vec2f(-leftSide + 0.1f, -0.3);
 		iterationChart.render();
 
-		//graphicsMeasure.mark(GraphicsProcess::WAIT_FOR_LOCK);
-		//screen->world->syncReadOnlyOperation([this]() {
+		graphicsMeasure.mark(GraphicsProcess::WAIT_FOR_LOCK);
+		screen->world->syncReadOnlyOperation([this]() {
 			graphicsMeasure.mark(GraphicsProcess::PROFILER);
 			renderTreeStructure(*this->screen, this->screen->world->objectTree.rootNode, Vec3f(0, 1, 0), Vec2f(1.4, 0.95), 0.7f);
 			renderTreeStructure(*this->screen, this->screen->world->terrainTree.rootNode, Vec3f(0, 0, 1), Vec2f(0.4, 0.95), 0.7f);
-		//});
+		});
 
 		fpsSlidingChart.add("Fps 1", graphicsMeasure.getAvgTPS());
 		fpsSlidingChart.add("Fps 2", physicsMeasure.getAvgTPS());

@@ -2,8 +2,8 @@
 
 #include "shaderResource.h"
 
-#include "../graphics/texture.h"
-#include "../resourceLoader.h"
+#include "../texture.h"
+#include "../util/resource/resourceLoader.h"
 #include <sstream>
 
 #pragma region SkyboxShader

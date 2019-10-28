@@ -2,10 +2,13 @@
 
 
 #include "boundingBox.h"
+#include "dimensions.h"
 #include "../math/linalg/vec.h"
 #include "../math/linalg/mat.h"
 #include "../math/cframe.h"
 #include "../math/transform.h"
+
+struct Sphere;
 
 enum class ShapeType : size_t {
 	BOX = 0,
@@ -22,18 +25,15 @@ public:
 		ShapeType type; // we assume that the polyhedron * will never be in the range of ShapeType, let's hope that's the case
 	};
 public:
-	double width;
-	union {
-		double height;
-		double radius;
-	};
-	double depth;
+	Dimensions dimensions;
 public:
 	Shape();
 	Shape(const Polyhedron* polyhedron);
 
 	Shape(const Polyhedron& polyhedron);
 	Shape(Polyhedron&& polyhedron);
+
+	Shape(Sphere sphere);
 
 	bool containsPoint(Vec3f point) const;
 	float getIntersectionDistance(Vec3f origin, Vec3f direction) const;
@@ -46,7 +46,6 @@ public:
 	BoundingBox getBounds(const Mat3& referenceFrame) const;
 	Vec3 getCenterOfMass() const;
 	SymmetricMat3 getInertia() const;
-	CircumscribingSphere getCircumscribingSphere() const;
 	double getMaxRadius() const;
 	double getMaxRadiusSq() const;
 

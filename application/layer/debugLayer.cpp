@@ -146,7 +146,7 @@ void DebugLayer::onEvent(Event& event) {
 
 void DebugLayer::onRender() {
 	graphicsMeasure.mark(GraphicsProcess::VECTORS);
-	
+
 	using namespace Debug;
 	using namespace AppDebug;
 
@@ -154,55 +154,56 @@ void DebugLayer::onRender() {
 	AddableBuffer<ColoredVector>& vecLog = getVectorBuffer();
 	AddableBuffer<ColoredPoint>& pointLog = getPointBuffer();
 
-	for (const Physical& physical : screen->world->iterPhysicals()) {
+	for(const Physical& physical : screen->world->iterPhysicals()) {
 		pointLog.add(ColoredPoint(physical.getCenterOfMass(), CENTER_OF_MASS));
 	}
 
-	for (const ConstraintGroup& constraintGroup : screen->world->constraints) {
-		for (const BallConstraint& ballConstraint : constraintGroup.ballConstraints) {
-			vecLog.add(ColoredVector(ballConstraint.a->getCFrame().getPosition(), ballConstraint.a->getCFrame().localToRelative(ballConstraint.attachA), INFO_VEC));
-			vecLog.add(ColoredVector(ballConstraint.b->getCFrame().getPosition(), ballConstraint.b->getCFrame().localToRelative(ballConstraint.attachB), INFO_VEC));
-		}
-	}
-
-	if (screen->selectedPart != nullptr) {
-		const GlobalCFrame& selectedCFrame = screen->selectedPart->getCFrame();
-		for (const Vec3f& corner : screen->selectedPart->hitbox.asPolyhedron().iterVertices()) {
-			vecLog.add(ColoredVector(selectedCFrame.localToGlobal(corner), screen->selectedPart->parent->getVelocityOfPoint(Vec3(selectedCFrame.localToRelative(corner))), VELOCITY));
-		}
-
-		if (colissionSpheresMode == SphereColissionRenderMode::SELECTED) {
-			Physical& selectedPhys = *screen->selectedPart->parent;
-
-			for (Part& part : selectedPhys) {
-				Vec4f yellow = GUI::COLOR::YELLOW;
-				yellow.w = 0.5;
-				BoundingBox localBounds = screen->selectedPart->localBounds;
-				renderBox(screen->selectedPart->getCFrame().localToGlobal(CFrame(localBounds.getCenter())), localBounds.getWidth(), localBounds.getHeight(), localBounds.getDepth(), yellow);
-
-				Vec4f green = GUI::COLOR::GREEN;
-				green.w = 0.5;
-				renderSphere(part.maxRadius * 2, part.getPosition(), green);
+	screen->world->syncReadOnlyOperation([this, &vecLog]() {
+		for(const ConstraintGroup& constraintGroup : screen->world->constraints) {
+			for(const BallConstraint& ballConstraint : constraintGroup.ballConstraints) {
+				vecLog.add(ColoredVector(ballConstraint.a->getCFrame().getPosition(), ballConstraint.a->getCFrame().localToRelative(ballConstraint.attachA), INFO_VEC));
+				vecLog.add(ColoredVector(ballConstraint.b->getCFrame().getPosition(), ballConstraint.b->getCFrame().localToRelative(ballConstraint.attachB), INFO_VEC));
 			}
 		}
-	}
 
-	if (colissionSpheresMode == SphereColissionRenderMode::ALL) {
-		for (Physical& phys : screen->world->iterPhysicals()) {
-			for (Part& part : phys) {
-				Vec4f yellow = GUI::COLOR::YELLOW;
-				yellow.w = 0.5;
-				BoundingBox localBounds = part.localBounds;
-				renderBox(part.getCFrame().localToGlobal(CFrame(localBounds.getCenter())), localBounds.getWidth(), localBounds.getHeight(), localBounds.getDepth(), yellow);
+		if(screen->selectedPart != nullptr) {
+			const GlobalCFrame& selectedCFrame = screen->selectedPart->getCFrame();
+			for(const Vec3f& corner : screen->selectedPart->hitbox.asPolyhedron().iterVertices()) {
+				vecLog.add(ColoredVector(selectedCFrame.localToGlobal(corner), screen->selectedPart->parent->getVelocityOfPoint(Vec3(selectedCFrame.localToRelative(corner))), VELOCITY));
+			}
 
-				Vec4f green = GUI::COLOR::GREEN;
-				green.w = 0.5;
-				renderSphere(part.maxRadius * 2, part.getPosition(), green);
+			if(colissionSpheresMode == SphereColissionRenderMode::SELECTED) {
+				Physical& selectedPhys = *screen->selectedPart->parent;
+
+				for(Part& part : selectedPhys) {
+					Vec4f yellow = GUI::COLOR::YELLOW;
+					yellow.w = 0.5;
+					BoundingBox localBounds = screen->selectedPart->localBounds;
+					renderBox(screen->selectedPart->getCFrame().localToGlobal(CFrame(localBounds.getCenter())), localBounds.getWidth(), localBounds.getHeight(), localBounds.getDepth(), yellow);
+
+					Vec4f green = GUI::COLOR::GREEN;
+					green.w = 0.5;
+					renderSphere(part.maxRadius * 2, part.getPosition(), green);
+				}
 			}
 		}
-	}
 
-	switch (colTreeRenderMode) {
+		if(colissionSpheresMode == SphereColissionRenderMode::ALL) {
+			for(Physical& phys : screen->world->iterPhysicals()) {
+				for(Part& part : phys) {
+					Vec4f yellow = GUI::COLOR::YELLOW;
+					yellow.w = 0.5;
+					BoundingBox localBounds = part.localBounds;
+					renderBox(part.getCFrame().localToGlobal(CFrame(localBounds.getCenter())), localBounds.getWidth(), localBounds.getHeight(), localBounds.getDepth(), yellow);
+
+					Vec4f green = GUI::COLOR::GREEN;
+					green.w = 0.5;
+					renderSphere(part.maxRadius * 2, part.getPosition(), green);
+				}
+			}
+		}
+
+		switch(colTreeRenderMode) {
 		case ColTreeRenderMode::FREE:
 			recursiveRenderColTree(screen->world->objectTree.rootNode, 0);
 			break;
@@ -214,10 +215,11 @@ void DebugLayer::onRender() {
 			recursiveRenderColTree(screen->world->terrainTree.rootNode, 0);
 			break;
 		case ColTreeRenderMode::SELECTED:
-			if (screen->selectedPart != nullptr)
+			if(screen->selectedPart != nullptr)
 				recursiveColTreeForOneObject(screen->world->objectTree.rootNode, screen->selectedPart->parent, screen->selectedPart->parent->getStrictBounds());
 			break;
-	}
+		}
+	});
 
 	Renderer::disableDepthTest();
 
