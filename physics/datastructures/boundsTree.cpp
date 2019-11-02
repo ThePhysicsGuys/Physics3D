@@ -1,5 +1,7 @@
 #include "boundsTree.h"
 
+#include "buffers.h"
+
 #include <utility>
 #include <new>
 #include <limits>

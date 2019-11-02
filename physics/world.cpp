@@ -1,6 +1,7 @@
 #include "world.h"
 
 #include <algorithm>
+#include "../util/log.h"
 
 #ifndef NDEBUG
 #define ASSERT_VALID if (!isValid()) {throw "World not valid!";}

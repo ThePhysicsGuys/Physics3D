@@ -10,9 +10,9 @@
 #include "math/globalCFrame.h"
 
 #include <vector>
-#include "datastructures/splitUnorderedList.h"
 
-#include "../util/log.h"
+#include "datastructures/iteratorEnd.h"
+
 
 typedef Vec3 Vec3Local;
 typedef Vec3 Vec3Relative;
@@ -24,27 +24,29 @@ struct AttachedPart {
 
 struct PartIter {
 	AttachedPart* iter;
+	AttachedPart* iterEnd;
 	Part* first;
 
 	PartIter() = default;
-	PartIter(AttachedPart* iter, Part* first) : iter(iter), first(first) {}
+	PartIter(AttachedPart* iter, AttachedPart* iterEnd, Part* first) : iter(iter-1), iterEnd(iterEnd), first(first) {}
 
 	inline Part& operator*() const {
-		return (first != nullptr)? *first : *iter->part;
+		return (first != nullptr) ? *first : *iter->part;
 	}
 	inline void operator++() {
 		++iter;
 		first = nullptr;
 	}
-	inline bool operator!=(const PartIter& other) const { return this->iter != other.iter; }
-	inline bool operator==(const PartIter& other) const { return this->iter == other.iter; }
+	inline bool operator!=(IteratorEnd) const { return this->iter != this->iterEnd; }
+	inline bool operator==(IteratorEnd) const { return this->iter == this->iterEnd; }
 };
 struct ConstPartIter {
 	const AttachedPart* iter;
+	const AttachedPart* iterEnd;
 	const Part* first;
 
 	ConstPartIter() = default;
-	ConstPartIter(const AttachedPart* iter, Part* first) : iter(iter), first(first) {}
+	ConstPartIter(const AttachedPart* iter, const AttachedPart* iterEnd, const Part* first) : iter(iter - 1), iterEnd(iterEnd), first(first) {}
 
 	inline const Part& operator*() const {
 		return (first != nullptr) ? *first : *iter->part;
@@ -53,8 +55,8 @@ struct ConstPartIter {
 		++iter;
 		first = nullptr;
 	}
-	inline bool operator!=(const ConstPartIter& other) const { return this->iter != other.iter; }
-	inline bool operator==(const ConstPartIter& other) const { return this->iter == other.iter; }
+	inline bool operator!=(IteratorEnd) const { return this->iter != this->iterEnd; }
+	inline bool operator==(IteratorEnd) const { return this->iter == this->iterEnd; }
 };
 
 class WorldPrototype;
@@ -70,7 +72,7 @@ class Physical {
 public:
 	Part* mainPart;
 	WorldPrototype* world = nullptr;
-	SplitUnorderedList<AttachedPart> parts;
+	std::vector<AttachedPart> parts;
 	Vec3 velocity = Vec3();
 	Vec3 angularVelocity = Vec3();
 
@@ -194,7 +196,7 @@ public:
 	double getVelocityKineticEnergy() const;
 	double getAngularKineticEnergy() const;
 	double getKineticEnergy() const;
-	inline size_t getPartCount() const { return parts.size + 1; }
+	inline size_t getPartCount() const { return parts.size() + 1; }
 	BoundingBox computeLocalBounds() const;
 
 	inline void setAnchored(bool anchored) { this->anchored = anchored; refreshWithNewParts(); }
@@ -208,11 +210,10 @@ public:
 
 
 
-	PartIter begin() { return PartIter(parts.begin()-1, mainPart); }
-	ConstPartIter begin() const { return ConstPartIter(parts.begin()-1, mainPart);}
+	PartIter begin() { return PartIter(parts.begin()._Ptr, parts.begin()._Ptr + parts.size(), mainPart); }
+	ConstPartIter begin() const { return ConstPartIter(parts.begin()._Ptr, parts.begin()._Ptr + parts.size(), mainPart);}
 
-	PartIter end() { return PartIter(parts.end(), mainPart); }
-	ConstPartIter end() const { return ConstPartIter(parts.end(), mainPart);}
+	IteratorEnd end() const { return IteratorEnd(); }
 
 	const Part& operator[](size_t index) const { return (index == 0) ? *mainPart : *parts[index - 1].part; }
 	Part& operator[](size_t index) { return (index == 0) ? *mainPart : *parts[index - 1].part; }

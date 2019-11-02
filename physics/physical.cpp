@@ -37,8 +37,12 @@ void Physical::makeMainPart(Part* newMainPart) {
 	throw "Attempting to make a part not in this physical the mainPart!";
 }
 
+bool liesInVector(const std::vector<AttachedPart>& vec, const AttachedPart* ptr) {
+	return vec.begin()._Ptr <= ptr && vec.end()._Ptr < ptr;
+}
+
 void Physical::makeMainPart(AttachedPart& newMainPart) {
-	if (parts.liesInList(&newMainPart)) {
+	if (liesInVector(parts, &newMainPart)) {
 		CFrame& newCenterCFrame = newMainPart.attachment;
 		std::swap(mainPart, newMainPart.part);
 		for (AttachedPart& atPart : parts) {
@@ -47,22 +51,22 @@ void Physical::makeMainPart(AttachedPart& newMainPart) {
 			}
 		}
 		newCenterCFrame = ~newCenterCFrame;
-		parts.size--;
+		parts.pop_back();
 	} else {
 		throw "Attempting to make a part not in this physical the mainPart!";
 	}
 }
 
 void Physical::attachPhysical(Physical* phys, const CFrame& attachment) {
-	size_t originalAttachCount = this->parts.size;
+	size_t originalAttachCount = this->parts.size();
 	const GlobalCFrame& cf = this->getCFrame();
 	phys->mainPart->cframe = cf.localToGlobal(attachment);
-	this->parts.add(AttachedPart{attachment, phys->mainPart});
+	this->parts.push_back(AttachedPart{attachment, phys->mainPart});
 	phys->mainPart->parent = this;
 
 	for (AttachedPart& ap : phys->parts) {
 		CFrame globalAttach = attachment.localToGlobal(ap.attachment);
-		this->parts.add(AttachedPart{globalAttach, ap.part});
+		this->parts.push_back(AttachedPart{globalAttach, ap.part});
 		ap.part->cframe = cf.localToGlobal(globalAttach);
 		ap.part->parent = this;
 	}
@@ -76,7 +80,7 @@ void Physical::attachPhysical(Physical* phys, const CFrame& attachment) {
 	if (this->world != nullptr) {
 		NodeStack stack = world->objectTree.findGroupFor(this->mainPart, this->mainPart->getStrictBounds());
 		TreeNode& group = **stack;
-		for (size_t i = originalAttachCount; i < this->parts.size; i++) {
+		for (size_t i = originalAttachCount; i < this->parts.size(); i++) {
 			Part* p = parts[i].part;
 			this->world->objectTree.addToExistingGroup(p, p->getStrictBounds(), group);
 		}
@@ -110,7 +114,7 @@ void Physical::attachPart(Part* part, const CFrame& attachment) {
 		}
 	} else {
 		part->parent = this;
-		parts.add(AttachedPart{ attachment, part });
+		parts.push_back(AttachedPart{ attachment, part });
 		part->cframe = getCFrame().localToGlobal(attachment);
 
 		if (this->world != nullptr) {
@@ -125,18 +129,18 @@ void Physical::attachPart(Part* part, const CFrame& attachment) {
 // Returns true if this physical has no more parts and should be deleted
 void Physical::detachPart(Part* part) {
 	if (part == mainPart) {
-		if (parts.size == 0) {
+		if (parts.size() == 0) {
 			delete this;
 			return;
 		} else {
-			makeMainPart(parts[parts.size - 1]);
+			makeMainPart(parts[parts.size() - 1]);
 		}
 	}
-	for (signed long long i = parts.size - 1; i >= 0; i--) {
+	for (signed long long i = parts.size() - 1; i >= 0; i--) {
 		AttachedPart& at = parts[i];
 		if (at.part == part) {
 			part->parent = nullptr;
-			parts.remove(i);
+			parts.erase(parts.begin() + i);
 			if (this->world != nullptr) {
 				this->world->removePartFromTrees(part);
 			}
