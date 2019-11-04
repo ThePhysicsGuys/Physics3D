@@ -3,7 +3,7 @@
 #include "path.h"
 
 #include "font.h"
-//#include "../screen.h"
+
 #include "../physics/math/mathUtil.h"
 
 namespace Path {
@@ -21,32 +21,16 @@ namespace Path {
 	// Adds the vertices to the batch with the necessary indices, this does not reserve space on the batch. 
 	//? Expects vertices in clockwise order
 	void pushQuad(const Vec2f& a, const Vec2f& b, const Vec2f& c, const Vec2f& d, const Vec4f& colorA = Vec4f(1), const Vec4f& colorB = Vec4f(1), const Vec4f& colorC = Vec4f(1), const Vec4f& colorD = Vec4f(1), const Vec2f& uvA = Vec2f(1), const Vec2f& uvB = Vec2f(1), const Vec2f& uvC = Vec2f(1), const Vec2f& uvD = Vec2f(1)) {
-		Path::batch->pushVertex({ a, uvA, colorA });
-		Path::batch->pushVertex({ b, uvB, colorB });
-		Path::batch->pushVertex({ c, uvC, colorC });
-		Path::batch->pushVertex({ d, uvD, colorD });
-
-		Path::batch->pushIndex(0);
-		Path::batch->pushIndex(1);
-		Path::batch->pushIndex(2);
-		Path::batch->pushIndex(2);
-		Path::batch->pushIndex(3);
-		Path::batch->pushIndex(0);
-
+		Path::batch->pushVertices({ { a, uvA, colorA }, { b, uvB, colorB }, { c, uvC, colorC }, { d, uvD, colorD } });
+		Path::batch->pushIndices({ 0, 1, 2, 2, 3, 0 });
 		Path::batch->endIndex();
 	}
 
 	// Adds the vertices to the batch with the necessary indices, this does not reserve space on the batch
 	//? Expects vertices in clockwise order
 	void pushTriangle(const Vec2f& a, const Vec2f& b, const Vec2f& c, const Vec4f& colorA = Vec4f(1), const Vec4f& colorB = Vec4f(1), const Vec4f& colorC = Vec4f(1), const Vec2f& uvA = Vec2f(1), const Vec2f& uvB = Vec2f(1), const Vec2f& uvC = Vec2f(1)) {
-		Path::batch->pushVertex({ a, uvA, colorA });
-		Path::batch->pushVertex({ b, uvB, colorB });
-		Path::batch->pushVertex({ c, uvC, colorC });
-
-		Path::batch->pushIndex(0);
-		Path::batch->pushIndex(1);
-		Path::batch->pushIndex(2);
-
+		Path::batch->pushVertices({ { a, uvA, colorA }, { b, uvB, colorB }, { c, uvC, colorC } });
+		Path::batch->pushIndices({ 0, 1, 2 });
 		Path::batch->endIndex();
 	}
 
@@ -68,21 +52,21 @@ namespace Path {
 	}
 
 	void line(const Vec2f& a, const Vec2f& b, float thickness, const Vec4f& colorA, const Vec4f& colorB) {
-		int vertexCount = 4;
-		int indexCount = 6;
+		size_t vertexCount = 4;
+		size_t indexCount = 6;
 		Path::batch->reserve(vertexCount, indexCount);
 
 		pushLine(a, b, colorA, colorB, thickness);
 	}
 
-	void circle(const Vec2f& center, float radius, const Vec4f& color, float thickness, int precision) {
-		int vertexCount = 4 * precision;
-		int indexCount = 6 * precision;
+	void circle(const Vec2f& center, float radius, const Vec4f& color, float thickness, size_t precision) {
+		size_t vertexCount = 4 * precision;
+		size_t indexCount = 6 * precision;
 		Path::batch->reserve(vertexCount, indexCount);
 
 		Vec2f oldPoint = center + Vec2f(radius, 0);
 		float step = 2.0 * PI / (float) precision;
-		for (int i = 1; i <= precision; i++) {
+		for (size_t i = 1; i <= precision; i++) {
 			float angle = i * step;
 
 			Vec2f newPoint = Vec2f(center.x + radius * cos(angle), center.y + radius * sin(angle));
@@ -93,31 +77,28 @@ namespace Path {
 		}
 	}
 
-	void circleFilled(const Vec2f& center, float radius, const Vec4f& color, int precision) {
-		int vertexCount = precision;
-		int indexCount = 3 * (precision - 2);
+	void circleFilled(const Vec2f& center, float radius, const Vec4f& color, size_t precision) {
+		size_t vertexCount = precision;
+		size_t indexCount = 3 * (precision - 2);
 		Path::batch->reserve(vertexCount, indexCount);
 				
 		float step = 2.0f * PI / (float) precision;
-		for (int i = 0; i < precision; i++) {
+		for (size_t i = 0; i < precision; i++) {
 			float angle = i * step;
 
 			Vec2f point = Vec2f(center.x + radius * cos(angle), center.y + radius * sin(angle));
 			Path::batch->pushVertex({ point, Vec2(1), color });
 		}
 
-		for (int i = 1; i < precision - 1; i++) {
-			Path::batch->pushIndex(0);
-			Path::batch->pushIndex(i + 1);
-			Path::batch->pushIndex(i);
-		}
+		for (size_t i = 1; i < precision - 1; i++)
+			Path::batch->pushIndices({ 0, i + 1, i });
 
 		Path::batch->endIndex();
 	}
 
-	void circleSegment(const Vec2f& center, float radius, float minAngle, float maxAngle, bool sides, const Vec4f& color, float thickness, int precision) {
-		int vertexCount = 4 * (precision + (sides? 2 : 0));
-		int indexCount = 6 * (precision + (sides? 2 : 0));
+	void circleSegment(const Vec2f& center, float radius, float minAngle, float maxAngle, bool sides, const Vec4f& color, float thickness, size_t precision) {
+		size_t vertexCount = 4 * (precision + (sides? 2 : 0));
+		size_t indexCount = 6 * (precision + (sides? 2 : 0));
 		Path::batch->reserve(vertexCount, indexCount);
 		
 		Vec2f oldPoint = Vec2f(center.x + radius * cos(minAngle), center.y + radius * sin(minAngle));
@@ -126,7 +107,7 @@ namespace Path {
 			pushLine(center, oldPoint, color, color, thickness);
 
 		float step = (maxAngle - minAngle) / (float)precision;
-		for (int i = 1; i <= precision; i++) {
+		for (size_t i = 1; i <= precision; i++) {
 			float angle = minAngle + i * step;
 
 			Vec2f newPoint = Vec2f(center.x + radius * cos(angle), center.y + radius * sin(angle));
@@ -140,9 +121,9 @@ namespace Path {
 			pushLine(center, oldPoint, color, color, thickness);
 	}
 
-	void circleSegmentFilled(const Vec2f& center, float radius, float minAngle, float maxAngle, const Vec4f& color, int precision) {
-		int vertexCount = precision + 2;
-		int indexCount = 3 * precision;
+	void circleSegmentFilled(const Vec2f& center, float radius, float minAngle, float maxAngle, const Vec4f& color, size_t precision) {
+		size_t vertexCount = precision + 2;
+		size_t indexCount = 3 * precision;
 		Path::batch->reserve(vertexCount, indexCount);
 		
 		Vec2f oldPoint = Vec2f(center.x + radius * cos(minAngle), center.y + radius * sin(minAngle));
@@ -151,7 +132,7 @@ namespace Path {
 		Path::batch->pushVertex({ oldPoint, Vec2f(1.0f), color });
 
 		float step = (maxAngle - minAngle) / (float) precision;
-		for (int i = 1; i <= precision; i++) {
+		for (size_t i = 1; i <= precision; i++) {
 			float angle = minAngle + i * step;
 
 			Vec2f newPoint = Vec2f(center.x + radius * cos(angle), center.y + radius * sin(angle));
@@ -159,18 +140,15 @@ namespace Path {
 			Path::batch->pushVertex({ newPoint, Vec2(1), color });
 		}
 
-		for (int i = 1; i <= precision + 1; i++) {
-			Path::batch->pushIndex(0);
-			Path::batch->pushIndex(i + 1);
-			Path::batch->pushIndex(i);
-		}
-
+		for (size_t i = 1; i <= precision + 1; i++)
+			Path::batch->pushIndices({ 0, i + 1, i });
+		
 		Path::batch->endIndex();
 	}
 
 	void triangle(const Vec2f& a, const Vec2f& b, const Vec2f& c, const Vec4f& color, float thickness) {
-		int vertexCount = 4 * 3;
-		int indexCount = 6 * 3;
+		size_t vertexCount = 4 * 3;
+		size_t indexCount = 6 * 3;
 		Path::batch->reserve(vertexCount, indexCount);
 
 		pushLine(a, b, color, color, thickness);
@@ -179,8 +157,8 @@ namespace Path {
 	}
 
 	void triangleFilled(const Vec2f& a, const Vec2f& b, const Vec2f& c, const Vec4f& color) {
-		int vertexCount = 3;
-		int indexCount = 3;
+		size_t vertexCount = 3;
+		size_t indexCount = 3;
 		Path::batch->reserve(vertexCount, indexCount);
 
 		pushTriangle(a, b, c, color, color, color);
@@ -195,8 +173,8 @@ namespace Path {
 
 	void rectFilled(const Vec2f& pos, const Vec2f& dim, float rounding, const Vec4f& color) {
 		//if (rounding == 0) {
-			int vertexCount = 4;
-			int indexCount = 6;
+			size_t vertexCount = 4;
+			size_t indexCount = 6;
 			Path::batch->reserve(vertexCount, indexCount);
 
 			pushQuad(pos, pos + Vec2f(dim.x, 0), pos + Vec2f(dim.x, -dim.y), pos + Vec2f(0, -dim.y), color, color, color, color);
@@ -205,8 +183,8 @@ namespace Path {
 	}
 
 	void rectUV(unsigned int id, const Vec2f& pos, const Vec2f& dim, const Vec2f& uvMin, const Vec2f& uvMax, const Vec4f& color) {
-		int vertexCount = 4;
-		int indexCount = 6;
+		size_t vertexCount = 4;
+		size_t indexCount = 6;
 
 		Vec2f a = pos;
 		Vec2f b = Vec2f(pos.x + dim.x, pos.y);
@@ -224,8 +202,8 @@ namespace Path {
 	}
 
 	void rectUVRange(unsigned int id, const Vec2f& pos, const Vec2f& dim, const Vec2f& xRange, const Vec2f& yRange, const Vec4f& color) {
-		int vertexCount = 4;
-		int indexCount = 6;
+		size_t vertexCount = 4;
+		size_t indexCount = 6;
 		
 		float dx = xRange.y - xRange.x;
 		float dy = yRange.y - yRange.x;
@@ -251,8 +229,8 @@ namespace Path {
 	}
 
 	void quad(const Vec2f& a, const Vec2f& b, const Vec2f& c, const Vec2f& d, const Vec4f& color, float thickness) {
-		int vertexCount = 4 * 4;
-		int indexCount = 6 * 4;
+		size_t vertexCount = 4 * 4;
+		size_t indexCount = 6 * 4;
 		Path::batch->reserve(vertexCount, indexCount);
 
 		pushLine(a, b, color, color, thickness);
@@ -262,16 +240,16 @@ namespace Path {
 	}
 
 	void quadFilled(const Vec2f& a, const Vec2f& b, const Vec2f& c, const Vec2f& d, const Vec4f& color) {
-		int vertexCount = 4;
-		int indexCount = 6;
+		size_t vertexCount = 4;
+		size_t indexCount = 6;
 		Path::batch->reserve(vertexCount, indexCount);
 
 		pushQuad(a, b, c, d, color, color, color, color);
 	}
 
 	void quadUV(unsigned int id, const Vec2f& a, const Vec2f& b, const Vec2f& c, const Vec2f& d, const Vec2f& uvA, const Vec2f& uvB, const Vec2f& uvC, const Vec2f& uvD) {
-		int vertexCount = 4;
-		int indexCount = 6;
+		size_t vertexCount = 4;
+		size_t indexCount = 6;
 		Path::batch->pushCommand(0);
 		Path::batch->reserve(vertexCount, indexCount);
 		pushQuad(a, b, c, d, Vec4(1), Vec4(1), Vec4(1), Vec4(1), uvA, uvB, uvC, uvD);
@@ -282,8 +260,8 @@ namespace Path {
 		if (text.empty())
 			return;
 
-		int vertexCount = 4 * text.size();
-		int indexCount = 6 * text.size();
+		size_t vertexCount = 4 * text.size();
+		size_t indexCount = 6 * text.size();
 		Vec2f textSize = font->size(text, size);
 
 		// TextPivotHL default
@@ -337,14 +315,14 @@ namespace Path {
 		Path::batch->pushCommand(font->getAtlasID());
 	}
 
-	void bezier(const Vec2f& a, const Vec2f& b, const Vec2f& c, const Vec2f& d, float thickness, const Vec4f& color, int precision) {
-		int vertexCount = 4 * precision;
-		int indexCount = 6 * precision;
+	void bezier(const Vec2f& a, const Vec2f& b, const Vec2f& c, const Vec2f& d, float thickness, const Vec4f& color, size_t precision) {
+		size_t vertexCount = 4 * precision;
+		size_t indexCount = 6 * precision;
 		Path::batch->reserve(vertexCount, indexCount);
 
 		Vec2f oldPoint = a;
 		float step = 1.0f / (float)precision;
-		for (int i = 1; i <= precision; i++) {
+		for (size_t i = 1; i <= precision; i++) {
 			float t = i * step;
 			float s = 1 - t;
 
@@ -360,14 +338,14 @@ namespace Path {
 		}
 	}
 
-	void bezierHorizontal(const Vec2f& start, const Vec2f& end, float thickness, const Vec4f& color, int precision) {
+	void bezierHorizontal(const Vec2f& start, const Vec2f& end, float thickness, const Vec4f& color, size_t precision) {
 		float mid = (start.x + end.x) / 2.0f;
 		Vec2f c1 = Vec2f(mid, start.y);
 		Vec2f c2 = Vec2f(mid, end.y);
 		bezier(start, c1, c2, end, thickness, color, precision);
 	}
 
-	void bezierVertical(const Vec2f& start, const Vec2f& end, float thickness, const Vec4f& color, int precision) {
+	void bezierVertical(const Vec2f& start, const Vec2f& end, float thickness, const Vec4f& color, size_t precision) {
 		float mid = (start.y + end.y) / 2.0f;
 		Vec2f c1 = Vec2f(start.x, mid);
 		Vec2f c2 = Vec2f(end.x, mid);
@@ -381,12 +359,12 @@ namespace Path {
 		if (size == 1)
 			return; // Points not supported yet
 
-		int vertexCount = 4 * (size - (closed? 0 : 1));
-		int indexCount = 6 * (size - (closed ? 0 : 1));
+		size_t vertexCount = 4 * (size - (closed? 0 : 1));
+		size_t indexCount = 6 * (size - (closed ? 0 : 1));
 
 		Path::batch->reserve(vertexCount, indexCount);
 
-		for (int i = 0; i < size - 1; i++)
+		for (size_t i = 0; i < size - 1; i++)
 			pushLine(points[i], points[i + 1], color, color, thickness);
 		
 		if (closed)
@@ -408,19 +386,16 @@ namespace Path {
 			return;
 		}
 
-		int vertexCount = size;
-		int indexCount = 3 * (size - 2);
+		size_t vertexCount = size;
+		size_t indexCount = 3 * (size - 2);
 
 		Path::batch->reserve(vertexCount, indexCount);
 
-		for (int i = 0; i < size; i++)
+		for (size_t i = 0; i < size; i++)
 			Path::batch->pushVertex({ points[i], Vec2f(1), color });
 
-		for (int i = 0; i < size - 2; i++) {
-			Path::batch->pushIndex(0);
-			Path::batch->pushIndex(i + 1);
-			Path::batch->pushIndex(i + 2);
-		}
+		for (size_t i = 0; i < size - 2; i++)
+			Path::batch->pushIndices({ 0, i + 1, i + 2 });
 
 		Path::batch->endIndex();
 	}
@@ -450,24 +425,26 @@ namespace Path {
 
 		pList[0] = points[0] - start;
 		tList[0] = pow(lengthSquared(pList[0]), alpha2);
-		for (int i = 1; i < size; i++) {
+
+		for (size_t i = 1; i < size; i++) {
 			pList[i] = points[i] - points[i - 1];
 			tList[i] = pow(lengthSquared(pList[i]), alpha2);
 		}
+
 		pList[size] = end - points[size - 1];
 		tList[size] = pow(lengthSquared(pList[size]), alpha2);
 
 
 		// Reserve vertices
-		int vertexCount = 4 * size * precision;
-		int indexCount = 6 * size * precision;
+		size_t vertexCount = 4 * size * precision;
+		size_t indexCount = 6 * size * precision;
 
 		Path::batch->reserve(vertexCount, indexCount);
 
 		float s = 1.0f - tension;
 		float step = 1.0f / (float)precision;
 
-		for (int i = 1; i < size; i++) {
+		for (size_t i = 1; i < size; i++) {
 			// Calculate segment
 			float t012 = tList[i - 1] + tList[i];
 			Vec2f p20 = pList[i - 1] + pList[i];
@@ -485,7 +462,7 @@ namespace Path {
 			
 			// Split segment
 			Vec2f oldPoint = d;
-			for (int j = 1; j <= precision; j++) {
+			for (size_t j = 1; j <= precision; j++) {
 				float t = j * step;
 				float w4 = 1.0f;
 				float w3 = w4 * t;
@@ -513,7 +490,7 @@ namespace Path {
 		path.push_back(vertex);
 	}
 
-	void arcTo(const Vec2f& center, float radius, float minAngle, float maxAngle, int precision) {
+	void arcTo(const Vec2f& center, float radius, float minAngle, float maxAngle, size_t precision) {
 		if (precision == 0 || radius == 0.0f) {
 			path.push_back(center);
 			return;
@@ -521,13 +498,13 @@ namespace Path {
 
 		path.reserve(path.size() + precision + 1);
 
-		for (int i = 0; i <= precision; i++) {
+		for (size_t i = 0; i <= precision; i++) {
 			float angle = minAngle + ((float)i / (float)precision) * (maxAngle - minAngle);
 			path.push_back(Vec2f(center.x + radius * cos(angle), center.y + radius * sin(angle)));
 		}
 	}
 
-	void bezierTo(const Vec2f& end, const Vec2f& tc1, const Vec2f& tc2, int precision) {
+	void bezierTo(const Vec2f& end, const Vec2f& tc1, const Vec2f& tc2, size_t precision) {
 		Vec2f start = path.back();
 
 		float step = 1.0f / (float)precision;
@@ -544,7 +521,7 @@ namespace Path {
 		}
 	}
 
-	void bezierTo(const Vec2f& end, int precision) {
+	void bezierTo(const Vec2f& end, size_t precision) {
 		Vec2f start = path.back();
 
 		float mid = (start.y + end.y) / 2.0f;

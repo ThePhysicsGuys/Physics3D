@@ -108,8 +108,20 @@ public:
 		indexCounter++;
 	}
 
+	inline void pushVertices(std::initializer_list<Vertex> vertices) {
+		for (Vertex vertex : vertices) {
+			*vertexPointer++ = vertex;
+			indexCounter++;
+		}
+	}
+
 	inline void pushIndex(size_t index) {
 		*indexPointer++ = currentIndex + index;
+	}
+
+	inline void pushIndices(std::initializer_list<size_t> indices) {
+		for (size_t index : indices)
+			*indexPointer++ = currentIndex + index;
 	}
 
 	void reserve(size_t vertexCount, size_t indexCount) {

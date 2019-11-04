@@ -44,17 +44,17 @@ namespace Path {
 	// Adds a line to the batch
 	void line(const Vec2f& a, const Vec2f& b, float thickness, const Vec4f& colorA, const Vec4f& colorB);
 
-	// Adds a circle tott the batch
-	void circle(const Vec2f& center, float radius, const Vec4f& color = GUI::COLOR::WHITE, float thickness = 1.0f, int precision = 20);
+	// Adds a circle to the the batch
+	void circle(const Vec2f& center, float radius, const Vec4f& color = GUI::COLOR::WHITE, float thickness = 1.0f, size_t precision = 20);
 
 	// Adds a filled circle to the batch
-	void circleFilled(const Vec2f& center, float radius, const Vec4f& color = GUI::COLOR::WHITE, int precision = 20);
+	void circleFilled(const Vec2f& center, float radius, const Vec4f& color = GUI::COLOR::WHITE, size_t precision = 20);
 
 	// Adds a circle tott the batch
-	void circleSegment(const Vec2f& center, float radius, float minAngle, float maxAngle, bool sides, const Vec4f& color = GUI::COLOR::WHITE, float thickness = 1.0f, int precision = 20);
+	void circleSegment(const Vec2f& center, float radius, float minAngle, float maxAngle, bool sides, const Vec4f& color = GUI::COLOR::WHITE, float thickness = 1.0f, size_t precision = 20);
 
 	// Adds a filled circle to the batch
-	void circleSegmentFilled(const Vec2f& center, float radius, float minAngle, float maxAngle, const Vec4f& color = GUI::COLOR::WHITE, int precision = 20);
+	void circleSegmentFilled(const Vec2f& center, float radius, float minAngle, float maxAngle, const Vec4f& color = GUI::COLOR::WHITE, size_t precision = 20);
 
 	// Adds a triangle to the batch
 	void triangle(const Vec2f& a, const Vec2f& b, const Vec2f& c, const Vec4f& color = GUI::COLOR::WHITE, float thickness = 1.0f);
@@ -87,13 +87,13 @@ namespace Path {
 	void text(Font* font, const std::string& text, double size, const Vec2f& pos, const Vec4f& color = GUI::COLOR::WHITE, char textPivot = TextPivotHL | TextPivotVB);
 
 	// Adds a bezier curve to the batch, with the given control points
-	void bezier(const Vec2f& a, const Vec2f& b, const Vec2f& c, const Vec2f& d, float thickness = 1.0f, const Vec4f& color = GUI::COLOR::WHITE, int precision = 20);
+	void bezier(const Vec2f& a, const Vec2f& b, const Vec2f& c, const Vec2f& d, float thickness = 1.0f, const Vec4f& color = GUI::COLOR::WHITE, size_t precision = 20);
 
 	// Adds a horizontal oriented bezier curve to the batch, with the given start and end
-	void bezierHorizontal(const Vec2f& start, const Vec2f& end, float thickness = 1.0f, const Vec4f& color = GUI::COLOR::WHITE, int precision = 20);
+	void bezierHorizontal(const Vec2f& start, const Vec2f& end, float thickness = 1.0f, const Vec4f& color = GUI::COLOR::WHITE, size_t precision = 20);
 
 	// Adds a vertical oriented bezier curve to the batch, with the given start and end
-	void bezierVertical(const Vec2f& start, const Vec2f& end, float thickness = 1.0f, const Vec4f& color = GUI::COLOR::WHITE, int precision = 20);
+	void bezierVertical(const Vec2f& start, const Vec2f& end, float thickness = 1.0f, const Vec4f& color = GUI::COLOR::WHITE, size_t precision = 20);
 
 	// Adds a polyline to the batch, through the given points
 	void polyLine(Vec2f* points, size_t size, float thickness = 1.0f, const Vec4f& color = GUI::COLOR::WHITE, bool closed = false);
@@ -111,13 +111,13 @@ namespace Path {
 	void lineTo(const Vec2f& vertex);
 
 	// Adds and arc around the given center to the path
-	void arcTo(const Vec2f& center, float radius, float minAngle, float maxAngle, int precision);
+	void arcTo(const Vec2f& center, float radius, float minAngle, float maxAngle, size_t precision = 20);
 
 	// Adds a bezier curve to the path with the given tangent control points, starting from the last point in the path
-	void bezierTo(const Vec2f& end, const Vec2f& tc1, const Vec2f& tc2, int precision);
+	void bezierTo(const Vec2f& end, const Vec2f& tc1, const Vec2f& tc2, size_t precision = 20);
 
 	// Adds a bezier curve to the path, starting from the last point in the path
-	void bezierTo(const Vec2f& end, int precision);
+	void bezierTo(const Vec2f& end, size_t precision = 20);
 
 	// Removes all vertices from the path
 	void clear();
