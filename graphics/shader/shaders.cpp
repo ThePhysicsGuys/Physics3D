@@ -42,9 +42,6 @@ namespace GraphicsShaders {
 		ShaderSource guiShaderSource = parseShader((std::istream&) std::istringstream(guiShaderSourceFile), "gui.shader");
 		ShaderSource quadShaderSource = parseShader((std::istream&) std::istringstream(quadShaderSourceFile), "quad.shader");
 		ShaderSource blurShaderSource = parseShader((std::istream&) std::istringstream(blurShaderSourceFile), "blur.shader");
-		//ShaderSource blurShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(applicationResources, BLUR_SHADER)), "blur.shader");
-		//ShaderSource guiShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(graphicsResources, GUI_SHADER)), "gui.shader");
-		//ShaderSource quadShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(graphicsResources, QUAD_SHADER)), "quad.shader");
 
 		// Shader init
 		new(&guiShader) GuiShader(guiShaderSource);

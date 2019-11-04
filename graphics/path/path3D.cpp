@@ -23,6 +23,16 @@ namespace Path3D {
 		batch->endIndex();
 	}
 
+	// Adds the vertices to the batch with the necessary indices, this does not reserve space on the batch, this method is for line strip
+	void pushLineStrip(const Vec3f& p, const Vec4f& color, float thickness) {
+		batch->pushVertex({ p, color });
+
+		batch->pushIndex(-1);
+		batch->pushIndex(0);
+
+		batch->endIndex();
+	}
+
 
 	//! Primitives
 
@@ -41,16 +51,26 @@ namespace Path3D {
 		if (size == 1)
 			return; // Points not supported yet
 
-		int vertexCount = 4 * (size - (closed ? 0 : 1));
-		int indexCount = 6 * (size - (closed ? 0 : 1));
+		int vertexCount = size;
+		int indexCount = 2 * (size - (closed ? 0 : 1));
 
 		Path3D::batch->reserve(vertexCount, indexCount);
 
-		for (int i = 0; i < size - 1; i++)
-			pushLine(points[i], points[i + 1], color, color, thickness);
+		batch->pushVertex({ points[0], color });
+		
+		for (int i = 1; i < size; i++) {
+			batch->pushVertex({ points[i], color });
 
-		if (closed)
-			pushLine(points[size - 1], points[0], color, color, thickness);
+			batch->pushIndex(i - 1);
+			batch->pushIndex(i);
+		}
+
+		if (closed) {
+			batch->pushIndex(size - 1);
+			batch->pushIndex(0);
+		}
+
+		batch->endIndex();
 	}
 
 	//! Path

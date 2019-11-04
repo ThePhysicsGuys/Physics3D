@@ -22,11 +22,12 @@ protected:
 	std::vector<Vertex> vertexBuffer;
 	std::vector<unsigned int> indexBuffer;
 
-	int indexCounter;
+	size_t indexCounter;
+
 public:
 	Vertex* vertexPointer;
 	unsigned int* indexPointer;
-	int currentIndex;
+	size_t currentIndex;
 
 	Batch(BatchConfig config) : config(config) {
 		vao = new VertexArray();
@@ -38,6 +39,7 @@ public:
 		vertexPointer = vertexBuffer.data();
 		indexPointer = indexBuffer.data();
 
+		indexCounter = 0;
 		currentIndex = 0;
 	};
 
@@ -106,16 +108,16 @@ public:
 		indexCounter++;
 	}
 
-	inline void pushIndex(unsigned int index) {
+	inline void pushIndex(size_t index) {
 		*indexPointer++ = currentIndex + index;
 	}
 
-	void reserve(int vertexCount, int indexCount) {
-		int oldVertexBufferSize = vertexBuffer.size();
+	void reserve(size_t vertexCount, size_t indexCount) {
+		size_t oldVertexBufferSize = vertexBuffer.size();
 		vertexBuffer.resize(oldVertexBufferSize + vertexCount);
 		vertexPointer = vertexBuffer.data() + oldVertexBufferSize;
 
-		int oldIndexBufferSize = indexBuffer.size();
+		size_t oldIndexBufferSize = indexBuffer.size();
 		indexBuffer.resize(oldIndexBufferSize + indexCount);
 		indexPointer = indexBuffer.data() + oldIndexBufferSize;
 	}
@@ -152,6 +154,8 @@ public:
 	}
 
 	void close() {
+		clear();
+
 		vao->close();
 		vbo->close();
 		ibo->close();

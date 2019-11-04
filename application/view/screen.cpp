@@ -164,7 +164,7 @@ void Screen::onInit() {
 
 	layerStack.pushLayer(&skyboxLayer);
 	layerStack.pushLayer(&modelLayer);
-	//layerStack.pushLayer(&testLayer);
+	layerStack.pushLayer(&testLayer);
 	layerStack.pushLayer(&debugLayer);
 	layerStack.pushLayer(&pickerLayer);
 	layerStack.pushLayer(&postprocessLayer);

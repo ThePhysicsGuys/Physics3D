@@ -282,6 +282,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\res\shaders\edge.shader" />
+    <None Include="..\res\shaders\line.shader" />
     <None Include="..\res\shaders\postprocess.shader" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

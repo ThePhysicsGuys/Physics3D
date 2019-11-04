@@ -2,48 +2,21 @@
 
 #include "testLayer.h"
 #include "view/screen.h"
-#include "../graphics/path/path3D.h"
-#include "../graphics/path/path.h"
-#include "../graphics/batch/batch.h"
-#include "../graphics/batch/batchConfig.h"
-#include "../graphics/buffers/bufferLayout.h"
 #include "../shader/shaders.h"
 #include "../graphics/renderUtils.h"
-#include "../graphics/gui/image.h"
-#include "../graphics/gui/frame.h"
-
-#include "../util/resource/resource.h"
-#include "../util/resource/resourceManager.h"
-#include "../graphics/resource/textureResource.h"
-
-Batch<Path3D::Vertex>* batch = nullptr;
-
-Frame* frame = nullptr;
-Image* image = nullptr;
 
 TestLayer::TestLayer() : Layer() {}
 
 TestLayer::TestLayer(Screen* screen, char flags) : Layer("TestLayer", screen, flags) {}
 
 void TestLayer::onInit() {
-	batch = new Batch<Path3D::Vertex> (
-		BatchConfig(
-			BufferLayout({
-				BufferElement("pos", BufferDataType::FLOAT3),
-				BufferElement("col", BufferDataType::FLOAT4)
-			}),
-		    Renderer::LINES)
-		);
+	BufferLayout layout = BufferLayout({
+		BufferElement("pos", BufferDataType::FLOAT3),
+		BufferElement("col", BufferDataType::FLOAT4)
+	});
 
-
-	/*ResourceManager::add<TextureResource>("../res/textures/logo.png", "test");
-	ResourceManager::add<TextureResource>("../res/textures/logo.png", "test");
-	auto r = ResourceManager::get<TextureResource>("test");
-	auto g = ResourceManager::get<TextureResource>("test");
-	image = new Image(0, 0, r);
-	frame = new Frame(0, 0, "oi");
-	frame->add(image);
-	GUI::add(frame);*/
+	BatchConfig config = BatchConfig(layout, Renderer::LINES);
+	batch = new Batch<Path3D::Vertex>(config);
 }
 
 void TestLayer::onUpdate() {
@@ -55,17 +28,24 @@ void TestLayer::onEvent(Event& event) {
 }
 
 void TestLayer::onRender() {
-	/*Path3D::bind(batch);
-	Path3D::line(Vec3f(0), Vec3f(1));
+	Path3D::bind(batch);
 
-	Shaders::lineShader.updateProjection(screen->camera.projectionMatrix, screen->camera.viewMatrix);
-	Renderer::disableDepthTest();
-	Path3D::batch->submit();*/
-
-
+	Path3D::lineTo(Vec3f(0));
 	
+	float size = 50.0;
+	for (float i = 0.0; i <= size; i++) {
+		float a =  2.0 * 3.14159265359 / size * i;
+		Vec3f v = Vec3f(cos(a), sin(a), cos(a) * sin(a));
+		Path3D::bezierTo(v, 20);
+	}
+
+	Path3D::stroke(Vec4f(1), 1);
+
+	ApplicationShaders::lineShader.updateProjection(screen->camera.projectionMatrix, screen->camera.viewMatrix);
+	Renderer::disableDepthTest();
+	Path3D::batch->submit();
 }
 
 void TestLayer::onClose() {
-
+	batch->close();
 }
