@@ -30,7 +30,18 @@ void TestLayer::onEvent(Event& event) {
 void TestLayer::onRender() {
 	Path3D::bind(batch);
 
-	Path3D::circle(Vec3f(0), 2, Vec3f(1));
+	for (float t = 0.0f; t <= 10.0f; t += 0.01f) {
+		float x = t;
+		float y = cos(2 * t);
+		float z = sin(t + cos(1 - t));
+		Path3D::lineTo(Vec3f(x, y, z));
+	}
+
+	Path3D::stroke([] (int i, const Vec3f& p) {
+		return GUI::COLOR::hsvaToRgba(
+			Vec4f(1.0f / Path3D::size() * i, 1, 1, 1)
+		);
+	});
 
 	ApplicationShaders::lineShader.updateProjection(screen->camera.projectionMatrix, screen->camera.viewMatrix);
 	Renderer::disableDepthTest();

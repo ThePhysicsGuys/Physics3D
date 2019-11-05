@@ -4,6 +4,11 @@
 
 namespace Path {
 
+	//! Pattern
+
+	typedef std::function<Vec4f(int, const Vec2f&)> Pattern2D;
+
+
 	//! Flags
 
 	enum TextFlags : char {
@@ -87,22 +92,40 @@ namespace Path {
 	void text(Font* font, const std::string& text, double size, const Vec2f& pos, const Vec4f& color = GUI::COLOR::WHITE, char textPivot = TextPivotHL | TextPivotVB);
 
 	// Adds a bezier curve to the batch, with the given control points
-	void bezier(const Vec2f& a, const Vec2f& b, const Vec2f& c, const Vec2f& d, float thickness = 1.0f, const Vec4f& color = GUI::COLOR::WHITE, size_t precision = 20);
+	void bezier(const Vec2f& a, const Vec2f& b, const Vec2f& c, const Vec2f& d, const Vec4f& color = GUI::COLOR::WHITE, float thickness = 1.0f, size_t precision = 20);
+
+	// Adds a bezier curve to the batch, with the given control points
+	void bezier(const Vec2f& a, const Vec2f& b, const Vec2f& c, const Vec2f& d, Pattern2D pattern, float thickness = 1.0f, size_t precision = 20);
 
 	// Adds a horizontal oriented bezier curve to the batch, with the given start and end
-	void bezierHorizontal(const Vec2f& start, const Vec2f& end, float thickness = 1.0f, const Vec4f& color = GUI::COLOR::WHITE, size_t precision = 20);
+	void bezierHorizontal(const Vec2f& start, const Vec2f& end, const Vec4f& color = GUI::COLOR::WHITE, float thickness = 1.0f, size_t precision = 20);
+
+	// Adds a horizontal oriented bezier curve to the batch, with the given start and end
+	void bezierHorizontal(const Vec2f& start, const Vec2f& end, Pattern2D pattern, float thickness = 1.0f, size_t precision = 20);
 
 	// Adds a vertical oriented bezier curve to the batch, with the given start and end
-	void bezierVertical(const Vec2f& start, const Vec2f& end, float thickness = 1.0f, const Vec4f& color = GUI::COLOR::WHITE, size_t precision = 20);
+	void bezierVertical(const Vec2f& start, const Vec2f& end, const Vec4f& color = GUI::COLOR::WHITE, float thickness = 1.0f, size_t precision = 20);
+
+	// Adds a vertical oriented bezier curve to the batch, with the given start and end
+	void bezierVertical(const Vec2f& start, const Vec2f& end, Pattern2D pattern, float thickness = 1.0f, size_t precision = 20);
 
 	// Adds a polyline to the batch, through the given points
-	void polyLine(Vec2f* points, size_t size, float thickness = 1.0f, const Vec4f& color = GUI::COLOR::WHITE, bool closed = false);
+	void polyLine(Vec2f* points, size_t size, const Vec4f& color = GUI::COLOR::WHITE, float thickness = 1.0f, bool closed = false);
+
+	// Adds a polyline to the batch, through the given points
+	void polyLine(Vec2f* points, size_t size, Pattern2D pattern, float thickness = 1.0f, bool closed = false);
 
 	// Adds a polygon to the batch, with the given points
 	void polygonFilled(Vec2f* points, size_t size, const Vec4f& color = GUI::COLOR::WHITE);
 
+	// Adds a polygon to the batch, with the given points
+	void polygonFilled(Vec2f* points, size_t size, Pattern2D pattern);
+
 	// Adds an Catmull-Rom spline to batch, interpolating the given control points
-	void catmullRom(Vec2f* points, size_t size, int precision =  20, float thickness = 1.0f, const Vec4f& color = GUI::COLOR::WHITE, bool closed = false, float tension = 0.0f, float alpha = 0.5f);
+	void catmullRom(Vec2f* points, size_t size, const Vec4f& color = GUI::COLOR::WHITE, int precision = 20, float thickness = 1.0f, bool closed = false, float tension = 0.0f, float alpha = 0.5f);
+
+	// Adds an Catmull-Rom spline to batch, interpolating the given control points
+	void catmullRom(Vec2f* points, size_t size, Pattern2D pattern, int precision = 20, float thickness = 1.0f, bool closed = false, float tension = 0.0f, float alpha = 0.5f);
 	
 
 	//! Polygon building
@@ -119,13 +142,22 @@ namespace Path {
 	// Adds a bezier curve to the path, starting from the last point in the path
 	void bezierTo(const Vec2f& end, size_t precision = 20);
 
-	// Removes all vertices from the path
-	void clear();
+	// Fills the convex polygon defined by the current path
+	void fill(const Vec4f& color = GUI::COLOR::WHITE);
 
 	// Fills the convex polygon defined by the current path
-	void fill(Vec4f color = GUI::COLOR::WHITE);
+	void fill(Pattern2D pattern);
 
 	// Draws the current path
-	void stroke(Vec4f color = GUI::COLOR::WHITE, float thickness = 1.0f, bool closed = false);
+	void stroke(const Vec4f& color = GUI::COLOR::WHITE, float thickness = 1.0f, bool closed = false);
+	
+	// Draws the current path
+	void stroke(Pattern2D pattern, float thickness = 1.0f, bool closed = false);
+
+	// Return the amount of vertices in the path
+	int size();
+
+	// Removes all vertices from the path
+	void clear();
 }
 

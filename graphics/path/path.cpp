@@ -6,6 +6,8 @@
 
 #include "../physics/math/mathUtil.h"
 
+#define DEFAULT_PATTERN_2D(color) [color] (int i, const Vec2f& p) { return color; }
+
 namespace Path {
 
 	#pragma region Batch
@@ -315,12 +317,17 @@ namespace Path {
 		Path::batch->pushCommand(font->getAtlasID());
 	}
 
-	void bezier(const Vec2f& a, const Vec2f& b, const Vec2f& c, const Vec2f& d, float thickness, const Vec4f& color, size_t precision) {
+	void bezier(const Vec2f& a, const Vec2f& b, const Vec2f& c, const Vec2f& d, const Vec4f& color, float thickness, size_t precision) {
+		bezier(a, b, c, d, DEFAULT_PATTERN_2D(color), thickness, precision);
+	}
+
+	void bezier(const Vec2f& a, const Vec2f& b, const Vec2f& c, const Vec2f& d, Pattern2D pattern, float thickness, size_t precision) {
 		size_t vertexCount = 4 * precision;
 		size_t indexCount = 6 * precision;
 		Path::batch->reserve(vertexCount, indexCount);
 
 		Vec2f oldPoint = a;
+		Vec4f oldColor = pattern(0, oldPoint);
 		float step = 1.0f / (float)precision;
 		for (size_t i = 1; i <= precision; i++) {
 			float t = i * step;
@@ -332,27 +339,41 @@ namespace Path {
 			float w4 = t * t * t;
 
 			Vec2f newPoint = w1 * a + w2 * b + w3 * c + w4 * d;
-			pushLine(oldPoint, newPoint, color, color, thickness);
+			Vec4f newColor = pattern(i, newPoint);
+			pushLine(oldPoint, newPoint, oldColor, newColor, thickness);
 
 			oldPoint = newPoint;
+			oldColor = newColor;
 		}
 	}
 
-	void bezierHorizontal(const Vec2f& start, const Vec2f& end, float thickness, const Vec4f& color, size_t precision) {
+	void bezierHorizontal(const Vec2f& start, const Vec2f& end, const Vec4f& color, float thickness, size_t precision) {
+		bezierHorizontal(start, end, DEFAULT_PATTERN_2D(color), thickness, precision);
+	}
+
+	void bezierHorizontal(const Vec2f& start, const Vec2f& end, Pattern2D pattern, float thickness, size_t precision) {
 		float mid = (start.x + end.x) / 2.0f;
 		Vec2f c1 = Vec2f(mid, start.y);
 		Vec2f c2 = Vec2f(mid, end.y);
-		bezier(start, c1, c2, end, thickness, color, precision);
+		bezier(start, c1, c2, end, pattern, thickness, precision);
 	}
 
-	void bezierVertical(const Vec2f& start, const Vec2f& end, float thickness, const Vec4f& color, size_t precision) {
+	void bezierVertical(const Vec2f& start, const Vec2f& end, const Vec4f& color, float thickness, size_t precision) {
+		bezierVertical(start, end, DEFAULT_PATTERN_2D(color), thickness, precision);
+	}
+
+	void bezierVertical(const Vec2f& start, const Vec2f& end, Pattern2D pattern, float thickness, size_t precision) {
 		float mid = (start.y + end.y) / 2.0f;
 		Vec2f c1 = Vec2f(start.x, mid);
 		Vec2f c2 = Vec2f(end.x, mid);
-		bezier(start, c1, c2, end, thickness, color, precision);
+		bezier(start, c1, c2, end, pattern, thickness, precision);
 	}
 
-	void polyLine(Vec2f* points, size_t size, float thickness, const Vec4f& color, bool closed) {
+	void polyLine(Vec2f* points, size_t size, const Vec4f& color, float thickness, bool closed) {
+		polyLine(points, size, DEFAULT_PATTERN_2D(color), thickness, closed);
+	}
+
+	void polyLine(Vec2f* points, size_t size, Pattern2D pattern, float thickness, bool closed) {
 		if (size == 0)
 			return; 
 
@@ -364,14 +385,22 @@ namespace Path {
 
 		Path::batch->reserve(vertexCount, indexCount);
 
-		for (size_t i = 0; i < size - 1; i++)
-			pushLine(points[i], points[i + 1], color, color, thickness);
+		Vec4f oldColor = pattern(0, points[0]);
+		for (size_t i = 0; i < size - 1; i++) {
+			Vec4f newColor = pattern(i + 1, points[i + 1]);
+			pushLine(points[i], points[i + 1], oldColor, newColor, thickness);
+			oldColor = newColor;
+		}
 		
 		if (closed)
-			pushLine(points[size - 1], points[0], color, color, thickness);
+			pushLine(points[size - 1], points[0], oldColor, pattern(0, points[0]), thickness);
 	}
 
-	void polygonFilled(Vec2f* points, size_t size, const Vec4f & color) {
+	void polygonFilled(Vec2f* points, size_t size, const Vec4f& color) {
+		polygonFilled(points, size, DEFAULT_PATTERN_2D(color));
+	}
+
+	void polygonFilled(Vec2f* points, size_t size, Pattern2D pattern) {
 		if (size == 0) {
 			return;
 		}
@@ -382,7 +411,7 @@ namespace Path {
 		}
 
 		if (size == 2) {
-			line(points[0], points[1], 1.0f, color, color);
+			line(points[0], points[1], 1.0f, pattern(0, points[0]), pattern(1, points[1]));
 			return;
 		}
 
@@ -392,18 +421,22 @@ namespace Path {
 		Path::batch->reserve(vertexCount, indexCount);
 
 		for (size_t i = 0; i < size; i++)
-			Path::batch->pushVertex({ points[i], Vec2f(1), color });
+			Path::batch->pushVertex({ points[i], Vec2f(1), pattern(i, points[i]) });
 
 		for (size_t i = 0; i < size - 2; i++)
 			Path::batch->pushIndices({ 0, i + 1, i + 2 });
 
 		Path::batch->endIndex();
 	}
+	
+	void catmullRom(Vec2f* points, size_t size, const Vec4f& color, int precision, float thickness, bool closed, float tension, float alpha) {
+		catmullRom(points, size, DEFAULT_PATTERN_2D(color), precision, thickness, closed, tension, alpha);
+	}
 
-	void catmullRom(Vec2f* points, size_t size, int precision, float thickness, const Vec4f& color, bool closed, float tension, float alpha) {
+	void catmullRom(Vec2f* points, size_t size, Pattern2D pattern, int precision, float thickness, bool closed, float tension, float alpha) {
 		// Checks
 		if (tension == 1.0f)
-			polyLine(points, size, thickness, color, closed);
+			polyLine(points, size, pattern, thickness, closed);
 
 		if (size == 0)
 			return;
@@ -412,7 +445,7 @@ namespace Path {
 			return; // Points not supported yet
 
 		if (size == 2)
-			line(points[0], points[1], thickness, color, color);
+			line(points[0], points[1], 1.0f, pattern(0, points[0]), pattern(1, points[1]));
 
 
 		// Build lists
@@ -462,6 +495,7 @@ namespace Path {
 			
 			// Split segment
 			Vec2f oldPoint = d;
+			Vec4f oldColor = pattern((i - 1) * precision, oldPoint);
 			for (size_t j = 1; j <= precision; j++) {
 				float t = j * step;
 				float w4 = 1.0f;
@@ -470,10 +504,12 @@ namespace Path {
 				float w1 = w2 * t;
 
 				Vec2f newPoint = a * w1 + b * w2 + c * w3 + d * w4;
+				Vec4f newColor = pattern((i - 1) * precision + j, newPoint);
 
-				pushLine(oldPoint, newPoint, color, color, thickness);
+				pushLine(oldPoint, newPoint, oldColor, newColor, thickness);
 
 				oldPoint = newPoint;
+				oldColor = newColor;
 			}
 		}
 	}
@@ -531,20 +567,32 @@ namespace Path {
 		bezierTo(end, c1, c2, precision);
 	}
 
+	void stroke(const Vec4f& color, float thickness, bool closed) {
+		stroke(DEFAULT_PATTERN_2D(color), thickness, closed);
+	}
+
+	void stroke(Pattern2D pattern, float thickness, bool closed) {
+		polyLine(path.data(), path.size(), pattern, thickness, closed);
+
+		clear();
+	}
+
+	void fill(const Vec4f& color) {
+		fill(DEFAULT_PATTERN_2D(color));
+	}
+
+	void fill(Pattern2D pattern) {
+		polygonFilled(path.data(), path.size(), pattern);
+
+		clear();
+	}
+
+	int size() {
+		return path.size();
+	}
+
 	void clear() {
 		path.clear();
-	}
-
-	void stroke(Vec4f color, float thickness, bool closed) {
-		polyLine(path.data(), path.size(), thickness, color, closed);
-
-		clear();
-	}
-
-	void fill(Vec4f color) {
-		polygonFilled(path.data(), path.size(), color);
-
-		clear();
 	}
 
 	#pragma endregion

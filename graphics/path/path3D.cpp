@@ -4,6 +4,8 @@
 
 #include "../physics/math/mathUtil.h"
 
+#define DEFAULT_PATTERN_3D(color) [color] (int i, const Vec3f& p) { return color; }
+
 namespace Path3D {
 
 	//! Batch
@@ -14,21 +16,18 @@ namespace Path3D {
 		Path3D::batch = batch;
 	}
 
-	// Adds the vertices to the batch with the necessary indices, this does not reserve space on the batch
-	void pushLine(const Vec3f& a, const Vec3f& b, const Vec4f& colorA, const Vec4f& colorB, float thickness) {
-		Path3D::batch->pushVertices({ { a, colorA }, { b, colorB } });
-		Path3D::batch->pushIndices({ 0, 1 });
-		Path3D::batch->endIndex();
-	}
 
 	//! Primitives
 
-	void line(const Vec3f& a, const Vec3f& b, float thickness, const Vec4f& colorA, const Vec4f& colorB) {
+	void line(const Vec3f& a, const Vec3f& b, const Vec4f& colorA, const Vec4f& colorB, float thickness) {
 		size_t vertexCount = 4;
 		size_t indexCount = 6;
 		Path3D::batch->reserve(vertexCount, indexCount);
 
-		pushLine(a, b, colorA, colorB, thickness);
+		Path3D::batch->pushVertices({ { a, colorA }, { b, colorB } });
+		Path3D::batch->pushIndices({ 0, 1 });
+
+		Path3D::batch->endIndex();
 	}
 
 	void circle(const Vec3f& center, float radius, const Vec3f& normal, float thickness, const Vec4f& color, size_t precision) {
@@ -61,9 +60,10 @@ namespace Path3D {
 		Path3D::batch->endIndex();
 	}
 
-	void triangle(const Vec3f& a, const Vec3f& b, const Vec3f& c, float thickness, const Vec4f& colorA, const Vec4f& colorB, const Vec4f& colorC) {
+	void triangle(const Vec3f& a, const Vec3f& b, const Vec3f& c, const Vec4f& colorA, const Vec4f& colorB, const Vec4f& colorC, float thickness) {
 		size_t vertexCount = 3;
 		size_t indexCount = 6;
+		Path3D::batch->reserve(vertexCount, indexCount);
 
 		Path3D::batch->pushVertices({ { a, colorA }, { b, colorB }, { c, colorC } });
 		Path3D::batch->pushIndices({ 0, 1, 1, 2, 2, 0 });
@@ -71,7 +71,18 @@ namespace Path3D {
 		Path3D::batch->endIndex();
 	}
 
-	void polyLine(Vec3f* points, size_t size, float thickness, const Vec4f& color, bool closed) {
+	void quad(const Vec3f& a, const Vec3f& b, const Vec3f& c, const Vec3f& d, const Vec4f& colorA, const Vec4f& colorB, const Vec4f& colorC, Vec4f colorD, float thickness) {
+		size_t vertexCount = 4;
+		size_t indexCount = 8;
+		Path3D::batch->reserve(vertexCount, indexCount);
+
+		Path3D::batch->pushVertices({ { a, colorA }, { b, colorB }, { c, colorC }, { d, colorD } });
+		Path3D::batch->pushIndices({ 0, 1, 1, 2, 2, 3, 3, 0 });
+
+		Path3D::batch->endIndex();
+	}
+
+	void polyLine(Vec3f* points, size_t size, Pattern3D pattern, float thickness, bool closed) {
 		if (size == 0)
 			return;
 
@@ -83,18 +94,22 @@ namespace Path3D {
 
 		Path3D::batch->reserve(vertexCount, indexCount);
 
-		Path3D::batch->pushVertex({ points[0], color });
-		
+		Path3D::batch->pushVertex({ points[0], pattern(0, points[0]) });
+
 		for (size_t i = 1; i < size; i++) {
-			Path3D::batch->pushVertex({ points[i], color });
+			Path3D::batch->pushVertex({ points[i], pattern(i, points[i]) });
 			Path3D::batch->pushIndices({ i - 1, i });
 		}
 
-		if (closed) 
+		if (closed)
 			Path3D::batch->pushIndices({ size - 1, 0 });
-		
+
 
 		Path3D::batch->endIndex();
+	}
+
+	void polyLine(Vec3f* points, size_t size, const Vec4f& color, float thickness, bool closed) {
+		polyLine(points, size, DEFAULT_PATTERN_3D(color));
 	}
 
 	//! Path
@@ -133,14 +148,20 @@ namespace Path3D {
 		bezierTo(end, c1, c2, precision);
 	}
 
-	void clear() {
-		path.clear();
+	void stroke(Vec4f color, float thickness, bool closed) {
+		stroke(DEFAULT_PATTERN_3D(color), thickness, closed);
 	}
 
-	void stroke(Vec4f color, float thickness, bool closed) {
-		polyLine(path.data(), path.size(), thickness, color, closed);
-
+	void stroke(Pattern3D pattern, float thickness, bool closed) {
+		polyLine(path.data(), path.size(), pattern, thickness, closed);
 		clear();
 	}
 
+	int size() {
+		return path.size();
+	}
+
+	void clear() {
+		path.clear();
+	}
 }
