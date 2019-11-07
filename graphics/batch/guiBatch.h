@@ -46,7 +46,7 @@ public:
 			return;
 
 		Vec4f scissor = Vec4f();
-		GuiCommand command = { count, Vec4f(), textureID, currentIndexOffset };
+		GuiCommand command = { count, scissor, textureID, currentIndexOffset };
 
 		CommandBatch<GuiVertex, GuiCommand>::pushCommand(command);
 	}

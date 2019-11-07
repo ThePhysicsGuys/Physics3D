@@ -31,6 +31,7 @@ inline std::ostream& operator<<(std::ostream& os, const LargeMatrix<T>& matrix) 
 template<typename T>
 inline std::string str(const LargeMatrix<T>& matrix) {
 	std::stringstream ss;
+	ss.precision(4);
 	ss << matrix;
 	return ss.str();
 }
@@ -47,6 +48,7 @@ inline std::ostream& operator<<(std::ostream& os, const LargeVector<T>& vector) 
 template<typename T>
 inline std::string str(const LargeVector<T>& vector) {
 	std::stringstream ss;
+	ss.precision(4);
 	ss << vector;
 	return ss.str();
 }
@@ -64,6 +66,7 @@ inline std::ostream& operator<<(std::ostream& os, const Vector<T, Size>& vector)
 template<typename T, size_t Size>
 inline std::string str(const Vector<T, Size>& vector) {
 	std::stringstream ss;
+	ss.precision(4);
 	ss << vector;
 	return ss.str();
 }
@@ -95,7 +98,29 @@ inline std::ostream& operator<<(std::ostream& os, const Position& position) {
 
 inline std::string str(const Position& position) {
 	std::stringstream ss;
+	ss.precision(4);
 	ss << position;
+	return ss.str();
+}
+
+inline std::string str(double value) {
+	std::stringstream ss;
+	ss.precision(4);
+	ss << value;
+	return ss.str();
+}
+
+inline std::string str(float value) {
+	std::stringstream ss;
+	ss.precision(4);
+	ss << value;
+	return ss.str();
+}
+
+inline std::string str(int value) {
+	std::stringstream ss;
+	ss.precision(4);
+	ss << value;
 	return ss.str();
 }
 
@@ -118,6 +143,7 @@ inline std::ostream& operator<<(std::ostream& os, const Matrix<N, Width, Height>
 template<typename N, size_t Width, size_t Height>
 inline std::string str(const Matrix<N, Width, Height>& matrix) {
 	std::stringstream ss;
+	ss.precision(4);
 	ss << matrix;
 	return ss.str();
 }
@@ -143,6 +169,7 @@ inline std::ostream& operator<<(std::ostream& os, const CFrame& cframe) {
 
 inline std::string str(const CFrame& cframe) {
 	std::stringstream ss;
+	ss.precision(4);
 	ss << cframe;
 	return ss.str();
 }

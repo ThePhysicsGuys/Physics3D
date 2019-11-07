@@ -382,7 +382,7 @@ struct PropertiesFrame : public FrameBlueprint, public Frame {
 		PlayerWorld* world = screen.world;
 
 		if (selectedPart) {
-			partMeshIDLabel->text = "MeshID: " + std::to_string(selectedPart->drawMeshId);
+			partMeshIDLabel->text = "MeshID: " + str(selectedPart->drawMeshId);
 
 			positionLabel->text = "Position: " + str(selectedPart->getCFrame().position);
 			partNameLabel->text = "Name: " + selectedPart->name;
@@ -390,13 +390,13 @@ struct PropertiesFrame : public FrameBlueprint, public Frame {
 			angularVelocityLabel->text = "Angular Velocity: " + str(selectedPart->parent->angularVelocity);
 			double kineticEnergy = selectedPart->parent->getKineticEnergy();
 			double potentialEnergy = world->getPotentialEnergyOfPhysical(*selectedPart->parent);
-			kineticEnergyLabel->text = "Kinetic Energy: " + std::to_string(kineticEnergy);
-			potentialEnergyLabel->text = "Potential Energy: " + std::to_string(potentialEnergy);
-			energyLabel->text = "Energy: " + std::to_string(kineticEnergy + potentialEnergy);
-			massLabel->text = "Mass: " + std::to_string(selectedPart->mass);
-			frictionLabel->text = "Friction: " + std::to_string(selectedPart->properties.friction);
-			bouncynessLabel->text = "Bouncyness: " + std::to_string(selectedPart->properties.bouncyness);
-			densityLabel->text = "Density: " + std::to_string(selectedPart->properties.density);
+			kineticEnergyLabel->text = "Kinetic Energy: " + str(kineticEnergy);
+			potentialEnergyLabel->text = "Potential Energy: " + str(potentialEnergy);
+			energyLabel->text = "Energy: " + str(kineticEnergy + potentialEnergy);
+			massLabel->text = "Mass: " + str(selectedPart->mass);
+			frictionLabel->text = "Friction: " + str(selectedPart->properties.friction);
+			bouncynessLabel->text = "Bouncyness: " + str(selectedPart->properties.bouncyness);
+			densityLabel->text = "Density: " + str(selectedPart->properties.density);
 			conveyorEffectLabel->text = "ConveyorEffect: " + str(selectedPart->conveyorEffect);
 
 			renderModeCheckBox->checked = selectedPart->renderMode == Renderer::WIREFRAME;

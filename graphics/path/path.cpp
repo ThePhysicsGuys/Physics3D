@@ -49,11 +49,11 @@ namespace Path {
 
 	//! Primitives
 
-	void line(const Vec2f& a, const Vec2f& b, float thickness, const Vec4f& color) {
-		line(a, b, thickness, color, color);
+	void line(const Vec2f& a, const Vec2f& b, const Vec4f& color, float thickness) {
+		line(a, b, color, color, thickness);
 	}
 
-	void line(const Vec2f& a, const Vec2f& b, float thickness, const Vec4f& colorA, const Vec4f& colorB) {
+	void line(const Vec2f& a, const Vec2f& b, const Vec4f& colorA, const Vec4f& colorB, float thickness) {
 		size_t vertexCount = 4;
 		size_t indexCount = 6;
 		Path::batch->reserve(vertexCount, indexCount);
@@ -411,7 +411,7 @@ namespace Path {
 		}
 
 		if (size == 2) {
-			line(points[0], points[1], 1.0f, pattern(0, points[0]), pattern(1, points[1]));
+			line(points[0], points[1], pattern(0, points[0]), pattern(1, points[1]), 1.0f);
 			return;
 		}
 
@@ -445,7 +445,7 @@ namespace Path {
 			return; // Points not supported yet
 
 		if (size == 2)
-			line(points[0], points[1], 1.0f, pattern(0, points[0]), pattern(1, points[1]));
+			line(points[0], points[1], pattern(0, points[0]), pattern(1, points[1]), 1.0f);
 
 
 		// Build lists

@@ -2,6 +2,8 @@
 
 #include "../gui/gui.h"
 
+#define DEFAULT_SCISSOR Vec4f(0, 0, GUI::windowInfo.dimension.x, GUI::windowInfo.dimension.y);
+
 namespace Path {
 
 	//! Pattern
@@ -44,10 +46,10 @@ namespace Path {
 	//! Primitives
 
 	// Adds a line to the batch
-	void line(const Vec2f& a, const Vec2f& b, float thickness = 1.0f, const Vec4f& color = GUI::COLOR::WHITE);
+	void line(const Vec2f& a, const Vec2f& b, const Vec4f& color = GUI::COLOR::WHITE, float thickness = 1.0f);
 
 	// Adds a line to the batch
-	void line(const Vec2f& a, const Vec2f& b, float thickness, const Vec4f& colorA, const Vec4f& colorB);
+	void line(const Vec2f& a, const Vec2f& b, const Vec4f& colorA = GUI::COLOR::WHITE, const Vec4f& colorB = GUI::COLOR::WHITE, float thickness = 1.0f);
 
 	// Adds a circle to the the batch
 	void circle(const Vec2f& center, float radius, const Vec4f& color = GUI::COLOR::WHITE, float thickness = 1.0f, size_t precision = 20);

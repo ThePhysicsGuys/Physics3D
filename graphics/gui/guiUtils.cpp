@@ -34,4 +34,8 @@ namespace GUI {
 	Vec2 unmapDimension(Vec2 dimension) {
 		return Vec2(map(dimension.x, 0, 2 * GUI::windowInfo.aspect, 0, GUI::windowInfo.dimension.x), map(dimension.y, 0, 2, 0, GUI::windowInfo.dimension.y));
 	}
+
+	bool between(double value, double min, double max) {
+		return min <= value && value <= max;
+	}
 }

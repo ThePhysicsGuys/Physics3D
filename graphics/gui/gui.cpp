@@ -234,6 +234,8 @@ namespace GUI {
 	double checkBoxLabelOffset = 0.02;
 
 	// Frame
+	double frameMinimumSize = 0.05;
+	double frameResizeHandleSize = 0.014;
 	double frameButtonOffset = 0.003;
 	double frameTitleBarHeight = 0.045;
 	Vec4f frameTitleBarColor = COLOR::ACCENT;
@@ -405,6 +407,7 @@ namespace GUI {
 	bool onMouseRelease(int x, int y) {
 		if (GUI::selectedComponent) {
 			GUI::selectedComponent->release(GUI::map(Vec2(x, y)));
+			GUI::selectedComponent = nullptr;
 		}
 
 		return false;

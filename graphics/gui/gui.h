@@ -128,6 +128,8 @@ namespace GUI {
 	extern double checkBoxLabelOffset;
 
 	// Frame
+	extern double frameMinimumSize;
+	extern double frameResizeHandleSize;
 	extern double frameTitleBarHeight;
 	extern double frameButtonOffset;
 	extern Vec4f frameTitleBarColor;

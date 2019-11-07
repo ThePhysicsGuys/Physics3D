@@ -18,4 +18,7 @@ namespace GUI {
 
 	// Maps a dimension from view space to screen space
 	Vec2 unmapDimension(Vec2 dimension);
+
+	// Return whether the given value is between min and max
+	bool between(double value, double min, double max);
 }

@@ -178,7 +178,7 @@ void recursiveRenderTree(const TreeNode& tree, const Vec3f& treeColor, Vec2f ori
 			float colorDarkning = pow(1.0f * computeCost(tree[i].bounds) / maxCost, 0.25f);
 
 			//Path::bezierVertical(origin, nextStep, 1.0f, Vec4f(treeColor * colorDarkning, 1.0f), 15);
-			Path::line(origin, nextStep, 1.0f, Vec4f(treeColor * colorDarkning, 1.0f));
+			Path::line(origin, nextStep, Vec4f(treeColor * colorDarkning, 1.0f), 1.0f);
 
 			recursiveRenderTree(tree[i], treeColor, nextStep, allottedWidth / tree.nodeCount, maxCost);
 		}
@@ -259,8 +259,8 @@ void SlidingChart::render() {
 	float axisOffset = 0.03;
 
 	Path::rect(position, dimension, 0.0f, Vec4f(0.4, 0.4, 0.4, 1));
-	Path::line(position + Vec2f(-axisOffset, -dimension.y), position + Vec2f(dimension.x + axisOffset, -dimension.y), 2.0f, GUI::COLOR::WHITE);
-	Path::line(position + Vec2f(0, axisOffset), position + Vec2f(0, -dimension.y - axisOffset), 2.0f, GUI::COLOR::WHITE);
+	Path::line(position + Vec2f(-axisOffset, -dimension.y), position + Vec2f(dimension.x + axisOffset, -dimension.y), GUI::COLOR::WHITE, 2.0f);
+	Path::line(position + Vec2f(0, axisOffset), position + Vec2f(0, -dimension.y - axisOffset), GUI::COLOR::WHITE, 2.0f);
 
 	for (auto dataSetIterator : dataSets) {
 		SlidingChartDataSetInfo& dataSet = dataSetIterator.second;

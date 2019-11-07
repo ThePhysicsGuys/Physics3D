@@ -8,6 +8,7 @@
 #include "texture.h"
 #include "shader/shaderProgram.h"
 #include "renderUtils.h"
+#include "guiUtils.h"
 #include "mesh/primitive.h"
 #include "buffers/frameBuffer.h"
 #include "../physics/math/mathUtil.h"
@@ -162,12 +163,55 @@ void Frame::enable() {
 		component.first->enable();
 }
 
+void Frame::press(Vec2 point) {
+	if (GUI::between(point.x - x, 0, GUI::frameResizeHandleSize)) {
+		resizeFlags |= resizingW;
+		resizing = false;
+	}
+
+	if (GUI::between(point.y - y, -GUI::frameResizeHandleSize, 0)) {
+		resizeFlags |= resizingN;
+		resizing = false;
+	}
+
+	if (GUI::between(point.x - x - width, -GUI::frameResizeHandleSize, 0)) {
+		resizeFlags |= resizingE;
+		resizing = false;
+	}
+
+	if (GUI::between(point.y - y + height, 0, GUI::frameResizeHandleSize)) {
+		resizeFlags |= resizingS;
+		resizing = false;
+	}
+}
+
+void Frame::release(Vec2 point) {
+	resizeFlags = None;
+}
+
 void Frame::drag(Vec2 newPoint, Vec2 oldPoint) {
 	if (disabled)
 		return;
 
-	position += newPoint - oldPoint;
-	anchor = nullptr;
+	if (resizeFlags != None) {
+		// component resizing should be off right now
+		if (resizeFlags & resizingE) {
+			width = GUI::clamp(newPoint.x - x, title->width, 10);
+		} else if (resizeFlags & resizingW) {
+			width = GUI::clamp(x - newPoint.x + width, title->width, 10);
+			x = newPoint.x;
+		}
+
+		if (resizeFlags & resizingS) {
+			height = GUI::clamp(y - newPoint.y, titleBarHeight, 10);
+		} else if (resizeFlags & resizingN) {
+			height = GUI::clamp(newPoint.y - y + height, titleBarHeight, 10);
+			y = newPoint.y;
+		}
+	} else {
+		position += newPoint - oldPoint;
+		anchor = nullptr;
+	}
 }
 
 void Frame::render() {
@@ -202,10 +246,5 @@ void Frame::render() {
 
 			renderChildren();
 		}
-
-		// Outline
-		//Vec2f outlinePosition = titleBarPosition;
-		//Vec2f outlineDimension = dimension;
-		//Path::rect(outlinePosition, outlineDimension, 0, GUI::COLOR::blend(GUI::COLOR::NAVY, blendColor));
 	}
 }
