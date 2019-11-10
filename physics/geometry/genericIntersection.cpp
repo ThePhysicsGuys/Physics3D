@@ -9,7 +9,7 @@
 #include "../constants.h"
 #include "polyhedron.h"
 
-Vec3f getNormalVec(Triangle t, Vec3f* vertices) {
+static Vec3f getNormalVec(Triangle t, Vec3f* vertices) {
 	Vec3f v0 = vertices[t[0]];
 	Vec3f v1 = vertices[t[1]];
 	Vec3f v2 = vertices[t[2]];
@@ -17,11 +17,11 @@ Vec3f getNormalVec(Triangle t, Vec3f* vertices) {
 	return (v1 - v0) % (v2 - v0);
 }
 
-double getDistanceOfTriangleToOriginSquared(Triangle t, Vec3f* vertices) {
+static double getDistanceOfTriangleToOriginSquared(Triangle t, Vec3f* vertices) {
 	return pointToPlaneDistanceSquared(getNormalVec(t, vertices), vertices[t[0]]);
 }
 
-int getNearestSurface(ConvexShapeBuilder& builder, double& distanceSquared) {
+static int getNearestSurface(ConvexShapeBuilder& builder, double& distanceSquared) {
 	int best = 0;
 	double bestDistSq = getDistanceOfTriangleToOriginSquared(builder.triangleBuf[0], builder.vertexBuf);
 
@@ -40,7 +40,7 @@ int getNearestSurface(ConvexShapeBuilder& builder, double& distanceSquared) {
 	return best;
 }
 
-inline int furthestIndexInDirection(Vec3* vertices, int vertexCount, Vec3 direction) {
+static int furthestIndexInDirection(Vec3* vertices, int vertexCount, Vec3 direction) {
 	double bestDot = vertices[0] * direction;
 	int bestVertexIndex = 0;
 	for(int i = 1; i < vertexCount; i++) {
@@ -54,16 +54,16 @@ inline int furthestIndexInDirection(Vec3* vertices, int vertexCount, Vec3 direct
 	return bestVertexIndex;
 }
 
-inline MinkPoint getSupport(const GenericCollidable& first, const GenericCollidable& second, const CFramef& transform, const Vec3f& searchDirection) {
-	Vec3f furthest1 = first.furthestInDirection(searchDirection);  // in local space of first
-	Vec3f transformedSearchDirection = transform.relativeToLocal(searchDirection);
-	Vec3f furthest2 = second.furthestInDirection(-transformedSearchDirection);  // in local space of second
-	Vec3f secondVertex = transform.localToGlobal(furthest2);  // converted to local space of first
+static MinkPoint getSupport(const ColissionPair& info, const Vec3f& searchDirection) {
+	Vec3f furthest1 = info.scaleFirst * info.first.furthestInDirection(~info.scaleFirst * searchDirection);  // in local space of first
+	Vec3f transformedSearchDirection = -info.transform.relativeToLocal(searchDirection);
+	Vec3f furthest2 = info.scaleSecond * info.second.furthestInDirection(~info.scaleSecond * transformedSearchDirection);  // in local space of second
+	Vec3f secondVertex = info.transform.localToGlobal(furthest2);  // converted to local space of first
 	return MinkPoint{ furthest1 - secondVertex, furthest1, secondVertex };  // local to first
 }
 
-bool runGJKTransformed(const GenericCollidable& first, const GenericCollidable& second, const CFramef& transform, const Vec3f& initialSearchDirection, Tetrahedron& simplex, int& iter) {
-	MinkPoint A(getSupport(first, second, transform, initialSearchDirection));
+bool runGJKTransformed(const ColissionPair& info, const Vec3f& initialSearchDirection, Tetrahedron& simplex, int& iter) {
+	MinkPoint A(getSupport(info, initialSearchDirection));
 	MinkPoint B, C, D;
 
 	// set new searchdirection to be straight at the origin
@@ -75,7 +75,7 @@ bool runGJKTransformed(const GenericCollidable& first, const GenericCollidable& 
 	// line segment, check if line, or either point closer
 	// B can't be closer since we picked a point towards the origin
 	// Just one test, to see if the line segment or A is closer
-	B = getSupport(first, second, transform, searchDirection);
+	B = getSupport(info, searchDirection);
 	if (B.p * searchDirection < 0) {
 		iter = -2;
 		return false;
@@ -85,7 +85,7 @@ bool runGJKTransformed(const GenericCollidable& first, const GenericCollidable& 
 	Vec3f AB = A.p - B.p;
 	searchDirection = -(AO % AB) % AB;
 
-	C = getSupport(first, second, transform, searchDirection);
+	C = getSupport(info, searchDirection);
 	if (C.p * searchDirection < 0) {
 		iter = -1;
 		return false;
@@ -107,7 +107,7 @@ bool runGJKTransformed(const GenericCollidable& first, const GenericCollidable& 
 			A = B;
 			B = C;
 			searchDirection = -(AO % AB) % AB;
-			C = getSupport(first, second, transform, searchDirection);
+			C = getSupport(info, searchDirection);
 			if(C.p * searchDirection < 0)
 				return false;
 		} else {
@@ -115,7 +115,7 @@ bool runGJKTransformed(const GenericCollidable& first, const GenericCollidable& 
 				// edge of AC is closest, searchDirection perpendicular to AC towards O
 				B = C;
 				searchDirection = -(AO % AC) % AC;
-				C = getSupport(first, second, transform, searchDirection);
+				C = getSupport(info, searchDirection);
 				if(C.p * searchDirection < 0)
 					return false;
 			} else {
@@ -136,7 +136,7 @@ bool runGJKTransformed(const GenericCollidable& first, const GenericCollidable& 
 				// s.B is C.p
 				// s.C is B.p
 				// s.D is A.p
-				D = getSupport(first, second, transform, searchDirection);
+				D = getSupport(info, searchDirection);
 				if(D.p * searchDirection < 0)
 					return false;
 				Vec3f AO = -D.p;
@@ -198,7 +198,7 @@ void initializeBuffer(const Tetrahedron& s, ComputationBuffers& b) {
 	b.knownVecs[3] = MinkowskiPointIndices{s.D.originFirst, s.D.originSecond};
 }
 
-bool runEPATransformed(const GenericCollidable& first, const GenericCollidable& second, const Tetrahedron& s, const CFramef& transform, Vec3f& intersection, Vec3f& exitVector, ComputationBuffers& bufs, int& iter) {
+bool runEPATransformed(const ColissionPair& info, const Tetrahedron& s, Vec3f& intersection, Vec3f& exitVector, ComputationBuffers& bufs, int& iter) {
 	initializeBuffer(s, bufs);
 
 	ConvexShapeBuilder builder(bufs.vertBuf, bufs.triangleBuf, 4, 4, bufs.neighborBuf, bufs.removalBuf, bufs.edgeBuf);
@@ -213,7 +213,7 @@ bool runEPATransformed(const GenericCollidable& first, const GenericCollidable& 
 		Vec3f c = builder.vertexBuf[closestTriangle[2]];
 		Vec3f closestTriangleNormal = getNormalVec(closestTriangle, builder.vertexBuf);
 
-		MinkPoint point(getSupport(first, second, transform, closestTriangleNormal));
+		MinkPoint point(getSupport(info, closestTriangleNormal));
 
 		// point is the new point to be added, check if it's past the current triangle
 		double newPointDistSq = pow(point.p * closestTriangleNormal, 2) / lengthSquared(closestTriangleNormal);

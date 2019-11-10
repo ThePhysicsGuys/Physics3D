@@ -48,6 +48,15 @@ public:
 		}
 	}
 
+	template<typename OtherT>
+	inline constexpr Matrix<T, Width, Height>(const Matrix<OtherT, Width, Height>& m) {
+		for(size_t row = 0; row < Height; row++) {
+			for(size_t col = 0; col < Width; col++) {
+				(*this)[row][col] = m[row][col];
+			}
+		}
+	}
+
 	template<typename OtherT1, typename OtherT2, typename OtherT3, typename OtherT4>
 	Matrix<T, Width, Height>(const Matrix<OtherT1, Width - 1, Height - 1>& topLeftMat, const Vector<OtherT2, Height - 1>& rightCol, const Vector<OtherT3, Width - 1>& bottomRow, const OtherT4& bottomLeftVal) {
 		for (size_t row = 0; row < Height - 1; row++) {
@@ -88,14 +97,6 @@ public:
 			for (size_t col = 0; col < Width; col++) {
 				(*this)[row][col] = data[row + col * Height];
 			}
-		}
-	}
-
-	template<typename T2>
-	Matrix<T, Width, Height>(const Matrix<T2, Width, Height>& mat) {
-		for (size_t row = 0; row < Height; row++) {
-			for(size_t col = 0; col < Width; col++)
-			(*this)[row][col] = static_cast<T>(mat[row][col]);
 		}
 	}
 
@@ -345,6 +346,15 @@ public:
 		}
 	}
 
+	template<typename OtherT>
+	inline constexpr SymmetricMatrix<T, Size>(const SymmetricMatrix<OtherT, Size>& m) {
+		for(size_t row = 0; row < Size; row++) {
+			for(size_t col = 0; col <= row; col++) {
+				(*this)[row][col] = m[row][col];
+			}
+		}
+	}
+
 	static inline constexpr SymmetricMatrix<T, Size> ZEROS() {
 		SymmetricMatrix<T, Size> mat;
 		for (size_t row = 0; row < Size; row++) {
@@ -431,6 +441,13 @@ public:
 		for (size_t i = 0; i < Size; i++) {
 			(*this)[i] = *listIter;
 			++listIter;
+		}
+	}
+
+	template<typename OtherT>
+	inline constexpr DiagonalMatrix<T, Size>(const DiagonalMatrix<OtherT, Size>& m) {
+		for(size_t i = 0; i < Size; i++) {
+			(*this)[i] = static_cast<T>(m[i]);
 		}
 	}
 

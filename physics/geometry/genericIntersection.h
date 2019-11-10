@@ -46,5 +46,13 @@ struct Tetrahedron {
 	MinkPoint A, B, C, D;
 };
 
-bool runGJKTransformed(const GenericCollidable& first, const GenericCollidable& second, const CFramef& relativeTransform, const Vec3f& initialSearchDirection, Tetrahedron& simp, int& iter);
-bool runEPATransformed(const GenericCollidable& first, const GenericCollidable& second, const Tetrahedron& s, const CFramef& relativeTransform, Vec3f& intersection, Vec3f& exitVector, ComputationBuffers& bufs, int& iter);
+struct ColissionPair {
+	const GenericCollidable& first;
+	const GenericCollidable& second;
+	CFramef transform;
+	DiagonalMat3f scaleFirst;
+	DiagonalMat3f scaleSecond;
+};
+
+bool runGJKTransformed(const ColissionPair& colissionPair, const Vec3f& initialSearchDirection, Tetrahedron& simp, int& iter);
+bool runEPATransformed(const ColissionPair& colissionPair, const Tetrahedron& s, Vec3f& intersection, Vec3f& exitVector, ComputationBuffers& bufs, int& iter);

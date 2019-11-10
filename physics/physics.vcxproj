@@ -226,14 +226,15 @@
     <ClInclude Include="geometry\boundingBox.h" />
     <ClInclude Include="geometry\computationBuffer.h" />
     <ClInclude Include="geometry\convexShapeBuilder.h" />
-    <ClInclude Include="geometry\dimensions.h" />
     <ClInclude Include="geometry\genericCollidable.h" />
     <ClInclude Include="geometry\indexedShape.h" />
     <ClInclude Include="geometry\genericIntersection.h" />
     <ClInclude Include="geometry\intersection.h" />
+    <ClInclude Include="geometry\normalizedPolyhedron.h" />
     <ClInclude Include="geometry\polyhedron.h" />
     <ClInclude Include="geometry\shape.h" />
     <ClInclude Include="geometry\shapeBuilder.h" />
+    <ClInclude Include="geometry\normalizedShape.h" />
     <ClInclude Include="geometry\sphere.h" />
     <ClInclude Include="math\bounds.h" />
     <ClInclude Include="math\cframe.h" />
@@ -270,6 +271,7 @@
     <ClInclude Include="math\vec4.h" />
     <ClInclude Include="physicsProfiler.h" />
     <ClInclude Include="profiling.h" />
+    <ClInclude Include="geometry\scalableInertialMatrix.h" />
     <ClInclude Include="sharedLockGuard.h" />
     <ClInclude Include="synchonizedWorld.h" />
     <ClInclude Include="templateUtils.h" />

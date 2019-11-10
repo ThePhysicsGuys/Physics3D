@@ -164,16 +164,16 @@ inline Physical::~Physical() {
 }
 
 void Physical::refreshWithNewParts() {
-	double totalMass = mainPart->mass;
-	SymmetricMat3 totalInertia = mainPart->inertia;
-	Vec3 totalCenterOfMass = mainPart->localCenterOfMass * mainPart->mass;
+	double totalMass = mainPart->getMass();
+	SymmetricMat3 totalInertia = mainPart->getInertia();
+	Vec3 totalCenterOfMass = mainPart->getLocalCenterOfMass() * mainPart->getMass();
 	for (const AttachedPart& p : parts) {
-		totalMass += p.part->mass;
-		totalCenterOfMass += p.attachment.localToGlobal(p.part->localCenterOfMass) * p.part->mass;
+		totalMass += p.part->getMass();
+		totalCenterOfMass += p.attachment.localToGlobal(p.part->getLocalCenterOfMass()) * p.part->getMass();
 	}
 	totalCenterOfMass /= totalMass;
 	for (const AttachedPart& p : parts) {
-		totalInertia += transformBasis(p.part->inertia, p.attachment.getRotation()) + skewSymmetricSquared(p.attachment.getPosition() - totalCenterOfMass) * p.part->mass;
+		totalInertia += transformBasis(p.part->getInertia(), p.attachment.getRotation()) + skewSymmetricSquared(p.attachment.getPosition() - totalCenterOfMass) * p.part->getMass();
 	}
 	this->mass = totalMass;
 	this->localCenterOfMass = totalCenterOfMass;

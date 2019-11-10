@@ -10,9 +10,6 @@ namespace {
 	void recalculate(Part& part) {
 		part.maxRadius = part.hitbox.getMaxRadius();
 		part.localBounds = part.hitbox.getBounds();
-		part.mass = part.hitbox.getVolume() * part.properties.density;
-		part.inertia = part.hitbox.getInertia() * part.properties.density;
-		part.localCenterOfMass = part.hitbox.getCenterOfMass();
 	}
 
 	void recalculateAndUpdateParent(Part& part, const Bounds& oldBounds) {

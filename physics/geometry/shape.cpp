@@ -1,79 +1,50 @@
 #include "shape.h"
 
 #include "polyhedron.h"
+#include "normalizedPolyhedron.h"
 #include "sphere.h"
 
+Shape::Shape() : baseShape(nullptr), scale{1,1,1} {}
+Shape::Shape(const ShapeClass* baseShape, DiagonalMat3 scale) : baseShape(baseShape), scale(scale) {}
+Shape::Shape(const ShapeClass* baseShape) : baseShape(baseShape), scale{1,1,1} {}
+Shape::Shape(const ShapeClass* baseShape, double width, double height, double depth) : baseShape(baseShape), scale{width / 2, height / 2, depth / 2} {}
+Shape::Shape(const Polyhedron& baseShape) : baseShape(new NormalizedPolyhedron(baseShape)), scale{1,1,1} {}
+Shape::Shape(Polyhedron&& baseShape) : baseShape(new NormalizedPolyhedron(std::move(baseShape))), scale{1,1,1} {}
 
-/*#define CUSTOM_DISPATCH(func) \
-switch(this->type) {\
-case BOX: Box(width, height, depth).func; break;\
-case WEDGE: Wedge(width, height, depth).func; break;\
-case SPHERE: Sphere(radius).func; break;\
-case CYLINDER: Cylinder(radius, depth).func; break;\
-case CONE: Cone(radius, depth).func; break;\
-default: this->polyhedron->func;\
-}*/
-
-#define CUSTOM_DISPATCH(func) \
-switch(this->type) {\
-case ShapeType::SPHERE: return Sphere(this->dimensions.width).func;\
-default: return this->polyhedron->func;\
+bool Shape::containsPoint(Vec3 point) const {
+	return baseShape->containsPoint(~scale * point);
 }
-
-
-Shape::Shape() : polyhedron() {}
-Shape::Shape(const Polyhedron* polyhedron) : polyhedron(polyhedron) {}
-Shape::Shape(const Polyhedron& polyhedron) : polyhedron(new Polyhedron(polyhedron)) {}
-Shape::Shape(Polyhedron&& polyhedron) : polyhedron(new Polyhedron(std::move(polyhedron))) {}
-Shape::Shape(Sphere sphere) : dimensions{sphere.radius, sphere.radius,sphere.radius}, type(ShapeType::SPHERE) {}
-
-bool Shape::containsPoint(Vec3f point) const {
-	CUSTOM_DISPATCH(containsPoint(point));
-}
-float Shape::getIntersectionDistance(Vec3f origin, Vec3f direction) const {
-	CUSTOM_DISPATCH(getIntersectionDistance(origin, direction));
+double Shape::getIntersectionDistance(Vec3 origin, Vec3 direction) const {
+	return baseShape->getIntersectionDistance(~scale * origin, ~scale * direction);
 }
 double Shape::getVolume() const {
-	CUSTOM_DISPATCH(getVolume());
-}
-Shape Shape::scaled(float scaleX, float scaleY, float scaleZ) const {
-	return scaled(double(scaleX), double(scaleY), double(scaleZ));
+	return baseShape->volume * det(scale);
 }
 Shape Shape::scaled(double scaleX, double scaleY, double scaleZ) const {
-	switch(this->type) {
-	case ShapeType::SPHERE:
-		return *this;
-	default:
-		return Shape(new Polyhedron(polyhedron->scaled(scaleX, scaleY, scaleZ)));
-	}
+	return Shape(baseShape, scale * DiagonalMat3{scaleX, scaleY, scaleZ});
 }
 BoundingBox Shape::getBounds() const {
-	CUSTOM_DISPATCH(getBounds());
+	return baseShape->getBounds().scaled(scale[0], scale[1], scale[2]);
 }
 BoundingBox Shape::getBounds(const Mat3& referenceFrame) const {
-	CUSTOM_DISPATCH(getBounds(referenceFrame));
+	return baseShape->getBounds(referenceFrame * scale);
 }
 Vec3 Shape::getCenterOfMass() const {
-	CUSTOM_DISPATCH(getCenterOfMass());
+	return scale * baseShape->centerOfMass;
 }
 SymmetricMat3 Shape::getInertia() const {
-	CUSTOM_DISPATCH(getInertia());
+	return baseShape->inertia.toMatrix(scale);
 }
 double Shape::getMaxRadius() const {
-	CUSTOM_DISPATCH(getMaxRadius());
+	return baseShape->getScaledMaxRadius(scale);
 }
 double Shape::getMaxRadiusSq() const {
-	CUSTOM_DISPATCH(getMaxRadiusSq());
+	return baseShape->getScaledMaxRadiusSq(scale);
 }
 Vec3f Shape::furthestInDirection(const Vec3f& direction) const {
-	CUSTOM_DISPATCH(furthestInDirection(direction));
+	return baseShape->furthestInDirection(direction);
 }
 
 Polyhedron Shape::asPolyhedron() const {
-	switch(this->type) {
-	case ShapeType::SPHERE:
-		return Sphere(this->dimensions.width).asPolyhedron();
-	default:
-		return *polyhedron;
-	}
+	return baseShape->asPolyhedron();
 }

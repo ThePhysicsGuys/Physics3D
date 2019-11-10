@@ -11,7 +11,7 @@
 
 
 Intersection intersectsTransformed(const Shape& first, const Shape& second, const CFrame& relativeTransform) {
-	return intersectsTransformed(*first.polyhedron, *second.polyhedron, relativeTransform);
+	return intersectsTransformed(*first.baseShape, *second.baseShape, relativeTransform, first.scale, second.scale);
 }
 
 
@@ -28,18 +28,19 @@ static void incDebugTally(HistoricTally<long long, IterationTime>& tally, int it
 
 ComputationBuffers buffers(1000, 2000);
 
-Intersection intersectsTransformed(const GenericCollidable& first, const GenericCollidable& second, const CFrame& relativeTransform) {
+Intersection intersectsTransformed(const GenericCollidable& first, const GenericCollidable& second, const CFrame& relativeTransform, const DiagonalMat3& scaleFirst, const DiagonalMat3& scaleSecond) {
 	Tetrahedron result;
 	int iter;
+	ColissionPair info{first, second, relativeTransform, scaleFirst, scaleSecond};
 	physicsMeasure.mark(PhysicsProcess::GJK_COL);
-	bool collides = runGJKTransformed(first, second, relativeTransform, -relativeTransform.position, result, iter);
+	bool collides = runGJKTransformed(info, -relativeTransform.position, result, iter);
 
 	if(collides) {
 		incDebugTally(GJKCollidesIterationStatistics, iter + 2);
 		physicsMeasure.mark(PhysicsProcess::EPA);
 		Vec3f intersection;
 		Vec3f exitVector;
-		bool epaResult = runEPATransformed(first, second, result, relativeTransform, intersection, exitVector, buffers, iter);
+		bool epaResult = runEPATransformed(info, result, intersection, exitVector, buffers, iter);
 		incDebugTally(EPAIterationStatistics, iter);
 		if(!epaResult) {
 			return Intersection();

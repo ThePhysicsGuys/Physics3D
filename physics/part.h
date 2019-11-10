@@ -40,11 +40,6 @@ public:
 	Shape hitbox;
 	double maxRadius;
 	PartProperties properties;
-
-	double mass;
-	SymmetricMat3 inertia;
-	Vec3 localCenterOfMass;
-
 	BoundingBox localBounds;
 
 	/*
@@ -64,7 +59,10 @@ public:
 	Bounds getStrictBounds() const;
 
 	Position getPosition() const { return cframe.getPosition(); }
-	Position getCenterOfMass() const { return cframe.localToGlobal(localCenterOfMass); }
+	double getMass() const { return hitbox.getVolume() * properties.density; }
+	Vec3 getLocalCenterOfMass() const { return hitbox.getCenterOfMass(); }
+	Position getCenterOfMass() const { return cframe.localToGlobal(this->getLocalCenterOfMass()); }
+	SymmetricMat3 getInertia() const { return hitbox.getInertia() * properties.density; }
 	const GlobalCFrame& getCFrame() const { return cframe; }
 	void setCFrame(const GlobalCFrame& newCFrame);
 

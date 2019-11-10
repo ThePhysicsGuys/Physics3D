@@ -677,6 +677,76 @@ double Polyhedron::getMaxRadius(Vec3f reference) const {
 	return sqrt(getMaxRadiusSq(reference));
 }
 
+
+double Polyhedron::getScaledMaxRadiusSq(DiagonalMat3 scale) const {
+	double bestDistSq = 0;
+	for(Vec3f vertex : iterVertices()) {
+		double distSq = lengthSquared(scale * Vec3(vertex));
+		if(distSq > bestDistSq) {
+			bestDistSq = distSq;
+		}
+	}
+	return bestDistSq;
+}
+double Polyhedron::getScaledMaxRadius(DiagonalMat3 scale) const {
+	return sqrt(getScaledMaxRadiusSq(scale));
+}
+
+/*
+	The total inertial matrix is given by the integral over the volume of the shape of the following matrix:
+	[[
+	[y^2+z^2,    xy,    xz],
+	[xy,    x^2+z^2,    yz],
+	[xz,    yz,    x^2+y^2]
+	]]
+
+	This has been reworked to a surface integral resulting in the given formulae
+
+	This function returns an intermediary step which can easily be converted to scaled versions of the inertial matrix
+*/
+ScalableInertialMatrix Polyhedron::getScalableInertia(const CFrame& reference) const {
+	Vec3 totalDiagElementParts(0, 0, 0);
+	Vec3 totalOffDiag(0, 0, 0);
+	for (Triangle triangle : iterTriangles()) {
+		Vec3 v0 = reference.globalToLocal(Vec3((*this)[triangle.firstIndex]));
+		Vec3 v1 = reference.globalToLocal(Vec3((*this)[triangle.secondIndex]));
+		Vec3 v2 = reference.globalToLocal(Vec3((*this)[triangle.thirdIndex]));
+
+		Vec3 D1 = v1 - v0; // scales x:sx y:sy z:sz
+		Vec3 D2 = v2 - v0; // scales x:sx y:sy z:sz
+
+		Vec3 dFactor = D1 % D2;   // scales x: sy*sz,  y:  sx*sz    z: sx*sy
+
+		// Diagonal Elements      // sx*sx*sx,  sy*sy*sy,  sz*sz*sz
+		Vec3 squaredIntegral = elementWiseCube(v0) + elementWiseCube(v1) + elementWiseCube(v2) + elementWiseMul(elementWiseSquare(v0), v1 + v2) + elementWiseMul(elementWiseSquare(v1), v0 + v2) + elementWiseMul(elementWiseSquare(v2), v0 + v1) + elementWiseMul(elementWiseMul(v0, v1), v2);
+		Vec3 diagonalElementParts = elementWiseMul(dFactor, squaredIntegral); // (sx^3)*sy*sz, sx*(sy^3)*sz, sx*sy*(sz^3)
+
+		totalDiagElementParts += diagonalElementParts;
+
+		//total[0][0] += diagonalElementParts.y + diagonalElementParts.z; // sx*sy*sz*(sy^2+sz^2)
+		//total[1][1] += diagonalElementParts.z + diagonalElementParts.x; // sx*sy*sz*(sz^2+sx^2)
+		//total[2][2] += diagonalElementParts.x + diagonalElementParts.y; // sx*sy*sz*(sx^2+sy^2)
+
+		// Other Elements
+		double selfProducts  =	v0.x*v0.y*v0.z + v1.x*v1.y*v1.z + v2.x*v2.y*v2.z;
+		double twoSames      =	v0.x*v0.y*v1.z + v0.x*v1.y*v0.z + v0.x*v1.y*v1.z + v0.x*v0.y*v2.z + v0.x*v2.y*v0.z + v0.x*v2.y*v2.z +
+								v1.x*v0.y*v0.z + v1.x*v1.y*v0.z + v1.x*v0.y*v1.z + v1.x*v1.y*v2.z + v1.x*v2.y*v1.z + v1.x*v2.y*v2.z +
+								v2.x*v0.y*v0.z + v2.x*v1.y*v2.z + v2.x*v0.y*v2.z + v2.x*v1.y*v1.z + v2.x*v2.y*v0.z + v2.x*v2.y*v1.z;
+		double allDifferents =	v0.x*v1.y*v2.z + v0.x*v2.y*v1.z + v1.x*v0.y*v2.z + v1.x*v2.y*v0.z + v2.x*v0.y*v1.z + v2.x*v1.y*v0.z;
+
+		double xyzIntegral = -(3 * selfProducts + twoSames + allDifferents / 2); // scales linearly by sx*sy*sz
+
+		totalOffDiag += dFactor * xyzIntegral;
+
+		//total[1][0] += dFactor.z * xyzIntegral; // sx*sy*sz* sx*sy
+		//total[2][0] += dFactor.y * xyzIntegral; // sx*sy*sz* sx*sz
+		//total[2][1] += dFactor.x * xyzIntegral; // sx*sy*sz* sz*sy
+	}
+	
+	return ScalableInertialMatrix(totalDiagElementParts / 60, totalOffDiag / 60);
+}
+
+
 /*
 	The total inertial matrix is given by the integral over the volume of the shape of the following matrix:
 	[[
@@ -687,41 +757,8 @@ double Polyhedron::getMaxRadius(Vec3f reference) const {
 
 	This has been reworked to a surface integral resulting in the given formulae
 */
-SymmetricMat3 Polyhedron::getInertia(CFrame reference) const {
-	SymmetricMat3 total(SymmetricMat3::ZEROS());
-	for (Triangle triangle : iterTriangles()) {
-		Vec3 v0 = reference.globalToLocal(Vec3((*this)[triangle.firstIndex]));
-		Vec3 v1 = reference.globalToLocal(Vec3((*this)[triangle.secondIndex]));
-		Vec3 v2 = reference.globalToLocal(Vec3((*this)[triangle.thirdIndex]));
-
-		Vec3 D1 = v1 - v0;
-		Vec3 D2 = v2 - v0;
-
-		Vec3 dFactor = D1 % D2;
-
-		// Diagonal Elements
-		Vec3 squaredIntegral = elementWiseCube(v0) + elementWiseCube(v1) + elementWiseCube(v2) + elementWiseMul(elementWiseSquare(v0), v1 + v2) + elementWiseMul(elementWiseSquare(v1), v0 + v2) + elementWiseMul(elementWiseSquare(v2), v0 + v1) + elementWiseMul(elementWiseMul(v0, v1), v2);
-		Vec3 diagonalElementParts = elementWiseMul(dFactor, squaredIntegral) / 60;
-
-		total[0][0] += diagonalElementParts.y + diagonalElementParts.z;
-		total[1][1] += diagonalElementParts.z + diagonalElementParts.x;
-		total[2][2] += diagonalElementParts.x + diagonalElementParts.y;
-
-		// Other Elements
-		double selfProducts  =	v0.x*v0.y*v0.z + v1.x*v1.y*v1.z + v2.x*v2.y*v2.z;
-		double twoSames      =	v0.x*v0.y*v1.z + v0.x*v1.y*v0.z + v0.x*v1.y*v1.z + v0.x*v0.y*v2.z + v0.x*v2.y*v0.z + v0.x*v2.y*v2.z +
-								v1.x*v0.y*v0.z + v1.x*v1.y*v0.z + v1.x*v0.y*v1.z + v1.x*v1.y*v2.z + v1.x*v2.y*v1.z + v1.x*v2.y*v2.z +
-								v2.x*v0.y*v0.z + v2.x*v1.y*v2.z + v2.x*v0.y*v2.z + v2.x*v1.y*v1.z + v2.x*v2.y*v0.z + v2.x*v2.y*v1.z;
-		double allDifferents =	v0.x*v1.y*v2.z + v0.x*v2.y*v1.z + v1.x*v0.y*v2.z + v1.x*v2.y*v0.z + v2.x*v0.y*v1.z + v2.x*v1.y*v0.z;
-
-		double xyzIntegral = -(3 * selfProducts + twoSames + allDifferents / 2) / 60;
-
-		total[1][0] += dFactor.z * xyzIntegral;
-		total[2][0] += dFactor.y * xyzIntegral;
-		total[2][1] += dFactor.x * xyzIntegral;
-	}
-	
-	return total;
+SymmetricMat3 Polyhedron::getInertia(const CFrame& reference) const {
+	return getScalableInertia(reference).toMatrix();
 }
 
 SymmetricMat3 Polyhedron::getInertia(Vec3 reference) const {

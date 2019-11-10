@@ -22,6 +22,6 @@ struct Intersection {
 };
 
 Intersection intersectsTransformed(const Shape& first, const Shape& second, const CFrame& relativeTransform);
-Intersection intersectsTransformed(const GenericCollidable& first, const GenericCollidable& second, const CFrame& relativeTransform);
+Intersection intersectsTransformed(const GenericCollidable& first, const GenericCollidable& second, const CFrame& relativeTransform, const DiagonalMat3& scaleFirst, const DiagonalMat3& scaleSecond);
 
 

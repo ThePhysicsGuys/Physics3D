@@ -28,6 +28,9 @@ struct BoundingBox {
 	inline double getDepth() const { return zmax - zmin; }
 	inline Vec3 getCenter() const { return (min+max) / 2; }
 	inline BoundingBox expanded(double amount) const { return BoundingBox(xmin - amount, ymin - amount, zmin - amount, xmax + amount, ymax + amount, zmax + amount); }
+	inline BoundingBox scaled(double scaleX, double scaleY, double scaleZ) {
+		return BoundingBox{xmin * scaleX, ymin * scaleY, zmin * scaleZ, xmax * scaleX, ymax * scaleY, zmax * scaleZ};
+	}
 };
 
 struct CircumscribingSphere {

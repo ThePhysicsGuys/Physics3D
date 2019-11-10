@@ -15,7 +15,7 @@ public:
 		}
 	}
 	virtual double getPotentialEnergyForObject(const WorldPrototype* world, const Part& part) const override {
-		return Vec3(Position() - part.getCenterOfMass()) * gravity * part.mass;
+		return Vec3(Position() - part.getCenterOfMass()) * gravity * part.getMass();
 	}
 	virtual double getPotentialEnergyForObject(const WorldPrototype* world, const Physical& phys) const override {
 		return Vec3(Position() - phys.getCenterOfMass()) * gravity * phys.mass;

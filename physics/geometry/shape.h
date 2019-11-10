@@ -2,44 +2,28 @@
 
 
 #include "boundingBox.h"
-#include "dimensions.h"
 #include "../math/linalg/vec.h"
 #include "../math/linalg/mat.h"
 #include "../math/cframe.h"
 #include "../math/transform.h"
-
-struct Sphere;
-
-enum class ShapeType : size_t {
-	BOX = 0,
-	WEDGE = 1,
-	SPHERE = 2,
-	CYLINDER = 3,
-	CONE = 4,
-};
+#include "normalizedShape.h"
 
 class Shape {
+	Shape(const ShapeClass* baseShape, DiagonalMat3 scale);
 public:
-	union {
-		const Polyhedron* polyhedron;
-		ShapeType type; // we assume that the polyhedron * will never be in the range of ShapeType, let's hope that's the case
-	};
-public:
-	Dimensions dimensions;
+	const ShapeClass* baseShape;
+	DiagonalMat3 scale;
 public:
 	Shape();
-	Shape(const Polyhedron* polyhedron);
+	Shape(const ShapeClass* baseShape);
+	Shape(const ShapeClass* baseShape, double width, double height, double depth);
+	Shape(const Polyhedron& baseShape);
+	Shape(Polyhedron&& baseShape);
 
-	Shape(const Polyhedron& polyhedron);
-	Shape(Polyhedron&& polyhedron);
-
-	Shape(Sphere sphere);
-
-	bool containsPoint(Vec3f point) const;
-	float getIntersectionDistance(Vec3f origin, Vec3f direction) const;
+	bool containsPoint(Vec3 point) const;
+	double getIntersectionDistance(Vec3 origin, Vec3 direction) const;
 	double getVolume() const;
 
-	Shape scaled(float scaleX, float scaleY, float scaleZ) const;
 	Shape scaled(double scaleX, double scaleY, double scaleZ) const;
 	
 	BoundingBox getBounds() const;

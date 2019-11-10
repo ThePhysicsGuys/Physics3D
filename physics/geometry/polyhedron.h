@@ -3,10 +3,12 @@
 #include "../math/linalg/vec.h"
 #include "../math/cframe.h"
 #include "../math/transform.h"
+#include "boundingBox.h"
 #include "../datastructures/sharedArray.h"
 #include "../datastructures/alignedPtr.h"
 #include "../datastructures/iteratorFactory.h"
 #include "genericCollidable.h"
+#include "scalableInertialMatrix.h"
 
 #include <utility>
 
@@ -16,7 +18,6 @@ struct ShapeVecIter;
 struct ShapeVecIterFactory;
 struct ShapeTriangleIter;
 
-#include "boundingBox.h"
 
 size_t getOffset(size_t size);
 
@@ -105,13 +106,16 @@ public:
 	SymmetricMat3 getInertia() const;
 	SymmetricMat3 getInertia(Vec3 reference) const;
 	SymmetricMat3 getInertia(Mat3 reference) const;
-	SymmetricMat3 getInertia(CFrame reference) const;
+	SymmetricMat3 getInertia(const CFrame& reference) const;
+	ScalableInertialMatrix getScalableInertia(const CFrame& reference) const;
 	CircumscribingSphere getCircumscribingSphere() const;
 	void getCircumscribedEllipsoid() const;
 	double getMaxRadius() const;
 	double getMaxRadius(Vec3f reference) const;
 	double getMaxRadiusSq() const;
 	double getMaxRadiusSq(Vec3f reference) const;
+	double getScaledMaxRadius(DiagonalMat3 scale) const;
+	double getScaledMaxRadiusSq(DiagonalMat3 scale) const;
 	Vec3f getNormalVecOfTriangle(Triangle triangle) const;
 
 	int furthestIndexInDirection(const Vec3f& direction) const;

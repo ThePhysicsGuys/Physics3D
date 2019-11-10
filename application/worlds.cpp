@@ -64,7 +64,7 @@ void PlayerWorld::applyExternalForces() {
 
 		speedToGain.y = 0;
 
-		player->parent->applyForceAtCenterOfMass(speedToGain * player->mass * AIR_RUN_SPEED_FACTOR);
+		player->parent->applyForceAtCenterOfMass(speedToGain * player->getMass() * AIR_RUN_SPEED_FACTOR);
 
 		if (handler->getKey(KeyboardOptions::Move::jump))
 			runVector += Vec3(0, JUMP_SPEED, 0);

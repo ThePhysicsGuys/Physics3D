@@ -250,6 +250,7 @@ struct PropertiesFrame : public FrameBlueprint, public Frame {
 	Label* potentialEnergyLabel = nullptr;
 	Label* energyLabel = nullptr;
 	Label* massLabel = nullptr;
+	Label* inertiaLabel = nullptr;
 	Label* frictionLabel = nullptr;
 	Label* bouncynessLabel = nullptr;
 	Label* densityLabel = nullptr;
@@ -277,6 +278,7 @@ struct PropertiesFrame : public FrameBlueprint, public Frame {
 		add(potentialEnergyLabel, Align::FILL);
 		add(energyLabel, Align::FILL);
 		add(massLabel, Align::FILL);
+		add(inertiaLabel, Align::FILL);
 		add(frictionLabel, Align::FILL);
 		add(bouncynessLabel, Align::FILL);
 		add(densityLabel, Align::FILL);
@@ -305,6 +307,7 @@ struct PropertiesFrame : public FrameBlueprint, public Frame {
 		potentialEnergyLabel = new Label("", 0, 0);
 		energyLabel = new Label("", 0, 0);
 		massLabel = new Label("", 0, 0);
+		inertiaLabel = new Label("", 0, 0);
 		frictionLabel = new Label("", 0, 0);
 		bouncynessLabel = new Label("", 0, 0);
 		densityLabel = new Label("", 0, 0);
@@ -393,7 +396,8 @@ struct PropertiesFrame : public FrameBlueprint, public Frame {
 			kineticEnergyLabel->text = "Kinetic Energy: " + str(kineticEnergy);
 			potentialEnergyLabel->text = "Potential Energy: " + str(potentialEnergy);
 			energyLabel->text = "Energy: " + str(kineticEnergy + potentialEnergy);
-			massLabel->text = "Mass: " + str(selectedPart->mass);
+			massLabel->text = "Mass: " + str(selectedPart->getMass());
+			inertiaLabel->text = "Inertia: " + str(Mat3(selectedPart->getInertia()));
 			frictionLabel->text = "Friction: " + str(selectedPart->properties.friction);
 			bouncynessLabel->text = "Bouncyness: " + str(selectedPart->properties.bouncyness);
 			densityLabel->text = "Density: " + str(selectedPart->properties.density);
@@ -432,6 +436,7 @@ struct PropertiesFrame : public FrameBlueprint, public Frame {
 			potentialEnergyLabel->text = "Potential Energy: -";
 			energyLabel->text = "Energy: -";
 			massLabel->text = "Mass: -";
+			inertiaLabel->text = "Inertia: -";
 			frictionLabel->text = "Friction: -";
 			bouncynessLabel->text = "Bouncyness: -";
 			densityLabel->text = "Density: -";

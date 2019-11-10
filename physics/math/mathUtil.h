@@ -126,14 +126,13 @@ inline std::string str(int value) {
 
 template<typename N, size_t Width, size_t Height>
 inline std::ostream& operator<<(std::ostream& os, const Matrix<N, Width, Height>& matrix) {
-	os << "(\n";
+	os << "(";
 
 	for (size_t row = 0; row < Height; row++) {
-		os << "\t";
-		for (size_t col = 0; col < Width; col++) {
+		for (size_t col = 0; col < Width-1; col++) {
 			os << matrix[row][col] << ", ";
 		}
-		os << "\n";
+		os << matrix[row][Width-1] << "; ";
 	}
 	os << ")";
 
