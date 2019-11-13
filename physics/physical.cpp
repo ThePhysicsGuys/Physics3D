@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <limits>
 
+#include "integrityCheck.h"
 
 
 Physical::Physical(Part* part) : mainPart(part) {
@@ -278,12 +279,15 @@ void Physical::update(double deltaT) {
 }
 
 void Physical::applyForceAtCenterOfMass(Vec3 force) {
+	CHECK_VALID_VEC(force);
 	totalForce += force;
 
 	Debug::logVector(getCenterOfMass(), force, Debug::FORCE);
 }
 
 void Physical::applyForce(Vec3Relative origin, Vec3 force) {
+	CHECK_VALID_VEC(origin);
+	CHECK_VALID_VEC(force);
 	totalForce += force;
 
 	Debug::logVector(getCenterOfMass() + origin, force, Debug::FORCE);
@@ -292,21 +296,26 @@ void Physical::applyForce(Vec3Relative origin, Vec3 force) {
 }
 
 void Physical::applyMoment(Vec3 moment) {
+	CHECK_VALID_VEC(moment);
 	totalMoment += moment;
 	Debug::logVector(getCenterOfMass(), moment, Debug::MOMENT);
 }
 
 void Physical::applyImpulseAtCenterOfMass(Vec3 impulse) {
+	CHECK_VALID_VEC(impulse);
 	Debug::logVector(getCenterOfMass(), impulse, Debug::IMPULSE);
 	velocity += forceResponse * impulse;
 }
 void Physical::applyImpulse(Vec3Relative origin, Vec3Relative impulse) {
+	CHECK_VALID_VEC(origin);
+	CHECK_VALID_VEC(impulse);
 	Debug::logVector(getCenterOfMass() + origin, impulse, Debug::IMPULSE);
 	velocity += forceResponse * impulse;
 	Vec3 angularImpulse = origin % impulse;
 	applyAngularImpulse(angularImpulse);
 }
 void Physical::applyAngularImpulse(Vec3 angularImpulse) {
+	CHECK_VALID_VEC(angularImpulse);
 	Debug::logVector(getCenterOfMass(), angularImpulse, Debug::ANGULAR_IMPULSE);
 	Vec3 localAngularImpulse = getCFrame().relativeToLocal(angularImpulse);
 	Vec3 localRotAcc = momentResponse * localAngularImpulse;
@@ -315,16 +324,20 @@ void Physical::applyAngularImpulse(Vec3 angularImpulse) {
 }
 
 void Physical::applyDragAtCenterOfMass(Vec3 drag) {
+	CHECK_VALID_VEC(drag);
 	Debug::logVector(getCenterOfMass(), drag, Debug::POSITION);
 	translate(forceResponse * drag);
 }
 void Physical::applyDrag(Vec3Relative origin, Vec3Relative drag) {
+	CHECK_VALID_VEC(origin);
+	CHECK_VALID_VEC(drag);
 	Debug::logVector(getCenterOfMass() + origin, drag, Debug::POSITION);
 	translateUnsafe(forceResponse * drag);
 	Vec3 angularDrag = origin % drag;
 	applyAngularDrag(angularDrag);
 }
 void Physical::applyAngularDrag(Vec3 angularDrag) {
+	CHECK_VALID_VEC(angularDrag);
 	Debug::logVector(getCenterOfMass(), angularDrag, Debug::INFO_VEC);
 	Vec3 localAngularDrag = getCFrame().relativeToLocal(angularDrag);
 	Vec3 localRotAcc = momentResponse * localAngularDrag;

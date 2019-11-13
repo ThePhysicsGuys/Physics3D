@@ -17,6 +17,8 @@
 
 #include <vector>
 
+#include "integrityCheck.h"
+
 /*
 	exitVector is the distance p2 must travel so that the shapes are no longer colliding
 */
@@ -48,7 +50,7 @@ void handleCollision(Part& part1, Part& part2, Position collisionPoint, Vec3 exi
 	p2.applyForce(collissionRelP2, -depthForce);
 
 
-	Vec3 relativeVelocity = (p1.getVelocityOfPoint(collissionRelP1) - part1.conveyorEffect) - (p2.getVelocityOfPoint(collissionRelP2) - part2.conveyorEffect);
+	Vec3 relativeVelocity = (p1.getVelocityOfPoint(collissionRelP1) - part1.properties.conveyorEffect) - (p2.getVelocityOfPoint(collissionRelP2) - part2.properties.conveyorEffect);
 
 	bool isImpulseColission = relativeVelocity * exitVector > 0;
 
@@ -62,7 +64,7 @@ void handleCollision(Part& part1, Part& part2, Position collisionPoint, Vec3 exi
 		impulse = zeroRelVelImpulse * (1.0 + combinedBouncyness);
 		p1.applyImpulse(collissionRelP1, impulse);
 		p2.applyImpulse(collissionRelP2, -impulse);
-		relativeVelocity = (p1.getVelocityOfPoint(collissionRelP1) - part1.conveyorEffect) - (p2.getVelocityOfPoint(collissionRelP2) - part2.conveyorEffect); // set new relativeVelocity
+		relativeVelocity = (p1.getVelocityOfPoint(collissionRelP1) - part1.properties.conveyorEffect) - (p2.getVelocityOfPoint(collissionRelP2) - part2.properties.conveyorEffect); // set new relativeVelocity
 	}
 
 	Vec3 slidingVelocity = exitVector % relativeVelocity % exitVector / lengthSquared(exitVector);
@@ -123,7 +125,7 @@ void handleTerrainCollision(Part& part1, Part& part2, Position collisionPoint, V
 	p1.applyForce(collissionRelP1, depthForce);
 
 
-	Vec3 relativeVelocity = p1.getVelocityOfPoint(collissionRelP1) - part1.conveyorEffect + part2.conveyorEffect;
+	Vec3 relativeVelocity = p1.getVelocityOfPoint(collissionRelP1) - part1.properties.conveyorEffect + part2.properties.conveyorEffect;
 
 	bool isImpulseColission = relativeVelocity * exitVector > 0;
 
@@ -137,7 +139,7 @@ void handleTerrainCollision(Part& part1, Part& part2, Position collisionPoint, V
 		Vec3 zeroRelVelImpulse = desiredAccel * inertia;
 		impulse = zeroRelVelImpulse * (1.0 + combinedBouncyness);
 		p1.applyImpulse(collissionRelP1, impulse);
-		relativeVelocity = p1.getVelocityOfPoint(collissionRelP1) - part1.conveyorEffect + part2.conveyorEffect; // set new relativeVelocity
+		relativeVelocity = p1.getVelocityOfPoint(collissionRelP1) - part1.properties.conveyorEffect + part2.properties.conveyorEffect; // set new relativeVelocity
 	}
 
 	Vec3 slidingVelocity = exitVector % relativeVelocity % exitVector / lengthSquared(exitVector);
@@ -204,6 +206,7 @@ inline void runColissionTests(Part& p1, Part& p2, WorldPrototype& world, std::ve
 	PartIntersection result = p1.intersects(p2);
 	if (result.intersects) {
 		intersectionStatistics.addToTally(IntersectionResult::COLISSION, 1);
+
 		colissions.push_back(Colission{ &p1, &p2, result.intersection, result.exitVector });
 	} else {
 		intersectionStatistics.addToTally(IntersectionResult::GJK_REJECT, 1);

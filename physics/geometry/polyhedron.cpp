@@ -13,84 +13,10 @@
 #include "../../util/Log.h"
 #include "../debug.h"
 #include "../physicsProfiler.h"
+#include "normalizedPolyhedron.h"
+#include "shape.h"
 
-
-size_t getOffset(size_t size) {
-	return (size + 7) & 0xFFFFFFFFFFFFFFF8;
-}
-
-inline SharedAlignedPointer<float> createParallelVecBuf(size_t size) {
-	return SharedAlignedPointer<float>(getOffset(size) * 3, 32);
-}
-inline SharedAlignedPointer<int> createParallelTriangleBuf(size_t size) {
-	return SharedAlignedPointer<int>(getOffset(size) * 3, 32);
-}
-
-template<typename T>
-inline void fixFinalBlock(T* buf, size_t size) {
-	size_t offset = getOffset(size);
-	T* xValues = buf;
-	T* yValues = buf + offset;
-	T* zValues = buf + 2 * offset;
-
-	for (size_t i = size; i < offset; i++) {
-		xValues[i] = xValues[size - 1];
-		yValues[i] = yValues[size - 1];
-		zValues[i] = zValues[size - 1];
-	}
-}
-
-inline SharedAlignedPointer<float> createAndFillParallelVecBuf(size_t size, const Vec3f* vectors) {
-	SharedAlignedPointer<float> buf = createParallelVecBuf(size);
-
-	size_t offset = getOffset(size);
-
-	float* xValues = buf;
-	float* yValues = buf + offset;
-	float* zValues = buf + 2 * offset;
-
-	for (size_t i = 0; i < size; i++) {
-		xValues[i] = vectors[i].x;
-		yValues[i] = vectors[i].y;
-		zValues[i] = vectors[i].z;
-	}
-	fixFinalBlock(buf.get(), size);
-
-	return buf;
-}
-
-inline SharedAlignedPointer<int> createAndFillParallelTriangleBuf(size_t size, const Triangle* triangles) {
-	SharedAlignedPointer<int> buf = createParallelTriangleBuf(size);
-
-	size_t offset = getOffset(size);
-
-	int* aValues = buf;
-	int* bValues = buf + offset;
-	int* cValues = buf + 2 * offset;
-
-	for (size_t i = 0; i < size; i++) {
-		aValues[i] = triangles[i].firstIndex;
-		bValues[i] = triangles[i].secondIndex;
-		cValues[i] = triangles[i].thirdIndex;
-	}
-	fixFinalBlock(buf.get(), size);
-
-	return buf;
-}
-
-
-inline void setInBuf(float* buf, size_t size, size_t index, const Vec3f& value) {
-	size_t offset = getOffset(size);
-
-	float* xValues = buf;
-	float* yValues = buf + offset;
-	float* zValues = buf + 2 * offset;
-
-	xValues[index] = value.x;
-	yValues[index] = value.y;
-	zValues[index] = value.z;
-}
-
+#include "polyhedronInternals.h"
 
 bool Triangle::sharesEdgeWith(Triangle other) const {
 	return firstIndex == other.secondIndex && secondIndex == other.firstIndex ||
@@ -124,20 +50,8 @@ Triangle Triangle::leftShift() const {
 	return Triangle { secondIndex, thirdIndex, firstIndex };
 }
 
-const float* copyVerts(const float* verts, size_t vertexCount) {
-	float* buf = createParallelVecBuf(vertexCount);
-	for (size_t i = 0; i < getOffset(vertexCount) * 3; i++) {
-		buf[i] = verts[i];
-	}
-	return buf;
-}
-
-const float* Polyhedron::copyOfVerts() const {
-	return copyVerts(this->vertices, this->vertexCount);
-}
-
-inline Polyhedron::Polyhedron(const SharedAlignedPointer<float>& vertices, const SharedAlignedPointer<int>& triangles, int vertexCount, int triangleCount) :
-	vertices(vertices), triangles(triangles), vertexCount(vertexCount), triangleCount(triangleCount) {
+inline Polyhedron::Polyhedron(UniqueAlignedPointer<float>&& vertices, UniqueAlignedPointer<int>&& triangles, int vertexCount, int triangleCount) :
+	vertices(std::move(vertices)), triangles(std::move(triangles)), vertexCount(vertexCount), triangleCount(triangleCount) {
 }
 
 Polyhedron::~Polyhedron() {
@@ -150,65 +64,94 @@ Polyhedron::Polyhedron(const Vec3f* vertices, const Triangle* triangles, int ver
 	vertexCount(vertexCount), 
 	triangleCount(triangleCount) {}
 
-/*CFramef Polyhedron::getInertialEigenVectors() const {
-	Vec3 centerOfMass = getCenterOfMass();
-	SymmetricMat3 inertia = getInertia(centerOfMass);
-	Mat3 basis = inertia.getEigenDecomposition().eigenVectors;
+Polyhedron::Polyhedron(const Polyhedron& poly) : 
+	vertices(copy(poly.vertices, poly.vertexCount)), 
+	triangles(copy(poly.triangles, poly.triangleCount)), 
+	vertexCount(poly.vertexCount), 
+	triangleCount(poly.triangleCount) {}
 
-	return CFramef(Vec3f(centerOfMass), Mat3f(basis));
-}*/
+
+Polyhedron& Polyhedron::operator=(Polyhedron&& poly) noexcept {
+	this->vertices = std::move(poly.vertices);
+	this->triangles = std::move(poly.triangles);
+	this->vertexCount = poly.vertexCount;
+	this->triangleCount = poly.triangleCount;
+	return *this;
+}
+Polyhedron& Polyhedron::operator=(const Polyhedron& poly) {
+	this->vertices = copy(poly.vertices, poly.vertexCount);
+	this->triangles = copy(poly.triangles, poly.triangleCount);
+	this->vertexCount = poly.vertexCount;
+	this->triangleCount = poly.triangleCount;
+	return *this;
+}
+
+Vec3f Polyhedron::operator[](int index) const {
+	return Vec3f(this->vertices[index], this->vertices[index + getOffset(vertexCount)], this->vertices[index + 2*getOffset(vertexCount)]);
+}
 
 Polyhedron Polyhedron::translated(Vec3f offset) const {
-	SharedAlignedPointer<float> newBuf = createParallelVecBuf(this->vertexCount);
+	UniqueAlignedPointer<float> newBuf = createParallelVecBuf(this->vertexCount);
 	for (int i = 0; i < this->vertexCount; i++) {
 		setInBuf(newBuf, vertexCount, i, (*this)[i] + offset);
 	}
 
 	fixFinalBlock(newBuf.get(), this->vertexCount);
-	return Polyhedron(newBuf, triangles, vertexCount, triangleCount);
+	return Polyhedron(std::move(newBuf), copy(triangles, triangleCount), vertexCount, triangleCount);
 }
 
 Polyhedron Polyhedron::rotated(RotMat3f rotation) const {
-	SharedAlignedPointer<float> newBuf = createParallelVecBuf(this->vertexCount);
+	UniqueAlignedPointer<float> newBuf = createParallelVecBuf(this->vertexCount);
 	for (int i = 0; i < this->vertexCount; i++) {
 		setInBuf(newBuf, vertexCount, i, rotation * (*this)[i]);
 	}
 
 	fixFinalBlock(newBuf.get(), this->vertexCount);
-	return Polyhedron(newBuf, triangles, vertexCount, triangleCount);
+	return Polyhedron(std::move(newBuf), copy(triangles, triangleCount), vertexCount, triangleCount);
 }
 
 Polyhedron Polyhedron::localToGlobal(CFramef frame) const {
-	SharedAlignedPointer<float> newBuf = createParallelVecBuf(this->vertexCount);
+	UniqueAlignedPointer<float> newBuf = createParallelVecBuf(this->vertexCount);
 	for (int i = 0; i < this->vertexCount; i++) {
 		setInBuf(newBuf, vertexCount, i, frame.localToGlobal((*this)[i]));
 	}
 
 	fixFinalBlock(newBuf.get(), this->vertexCount);
-	return Polyhedron(newBuf, triangles, vertexCount, triangleCount);
+	return Polyhedron(std::move(newBuf), copy(triangles, triangleCount), vertexCount, triangleCount);
 }
 
 Polyhedron Polyhedron::globalToLocal(CFramef frame) const {
-	SharedAlignedPointer<float> newBuf = createParallelVecBuf(this->vertexCount);
+	UniqueAlignedPointer<float> newBuf = createParallelVecBuf(this->vertexCount);
 	for (int i = 0; i < this->vertexCount; i++) {
 		setInBuf(newBuf, vertexCount, i, frame.globalToLocal((*this)[i]));
 	}
 
 	fixFinalBlock(newBuf.get(), this->vertexCount);
-	return Polyhedron(newBuf, triangles, vertexCount, triangleCount);
+	return Polyhedron(std::move(newBuf), copy(triangles, triangleCount), vertexCount, triangleCount);
 }
 Polyhedron Polyhedron::scaled(float scaleX, float scaleY, float scaleZ) const {
-	SharedAlignedPointer<float> newBuf = createParallelVecBuf(this->vertexCount);
+	UniqueAlignedPointer<float> newBuf = createParallelVecBuf(this->vertexCount);
 	for (int i = 0; i < this->vertexCount; i++) {
 		Vec3f v = (*this)[i];
 		setInBuf(newBuf, vertexCount, i, Vec3f(scaleX * v.x, scaleY * v.y, scaleZ * v.z));
 	}
 
 	fixFinalBlock(newBuf.get(), this->vertexCount);
-	return Polyhedron(newBuf, triangles, vertexCount, triangleCount);
+	return Polyhedron(std::move(newBuf), copy(triangles, triangleCount), vertexCount, triangleCount);
 }
 Polyhedron Polyhedron::scaled(double scaleX, double scaleY, double scaleZ) const {
 	return scaled(static_cast<float>(scaleX), static_cast<float>(scaleY), static_cast<float>(scaleZ));
+}
+
+Polyhedron Polyhedron::translatedAndScaled(Vec3f translation, DiagonalMat3f scale) const {
+	UniqueAlignedPointer<float> newBuf = createParallelVecBuf(this->vertexCount);
+	for(int i = 0; i < this->vertexCount; i++) {
+		Vec3f cur = (*this)[i];
+		setInBuf(newBuf, vertexCount, i, scale * (cur + translation));
+	}
+
+	fixFinalBlock(newBuf.get(), this->vertexCount);
+	return Polyhedron(std::move(newBuf), copy(triangles, triangleCount), vertexCount, triangleCount);
 }
 
 // for every edge, of every triangle, check that it coincides with exactly one other triangle, in reverse order
@@ -778,6 +721,37 @@ void Polyhedron::getCircumscribedEllipsoid() const {
 }
 
 
+NormalizedPolyhedron Polyhedron::normalized() const {
+	BoundingBox bounds = getBounds();
+	Vec3 center = bounds.getCenter();
+	DiagonalMat3 scale{2 / bounds.getWidth(), 2 / bounds.getHeight(), 2 / bounds.getDepth()};
+	
+	Polyhedron scaled = translatedAndScaled(-center, scale);
+
+	double volume = scaled.getVolume();
+	Vec3 centerOfMass = scaled.getCenterOfMass();
+	ScalableInertialMatrix inertia = scaled.getScalableInertia(CFrame(centerOfMass));
+
+	return NormalizedPolyhedron(std::move(scaled), center, ~scale, volume, centerOfMass, inertia);
+}
+
+Polyhedron::operator Shape() const {
+	BoundingBox bounds = getBounds();
+	return Shape(new NormalizedPolyhedron(this->normalized()), bounds.getWidth(), bounds.getHeight(), bounds.getDepth());
+}
+
+Triangle Polyhedron::getTriangle(int index) const {
+	size_t offset = getOffset(triangleCount);
+	return Triangle{triangles[index], triangles[index + offset], triangles[index + 2 * offset]};
+}
+
+IteratorFactory<ShapeVertexIter> Polyhedron::iterVertices() const {
+	return IteratorFactory<ShapeVertexIter>(ShapeVertexIter{vertices, getOffset(vertexCount)}, ShapeVertexIter{vertices + vertexCount, getOffset(vertexCount)});
+}
+IteratorFactory<ShapeTriangleIter> Polyhedron::iterTriangles() const {
+	return IteratorFactory<ShapeTriangleIter>(ShapeTriangleIter{triangles, getOffset(triangleCount)}, ShapeTriangleIter{triangles + triangleCount, getOffset(triangleCount)});
+}
+
 void Polyhedron::getTriangles(Triangle* triangleBuf) const {
 	size_t i = 0;
 	for(Triangle triangle : iterTriangles()) {
@@ -832,3 +806,4 @@ float Polyhedron::getIntersectionDistance(Vec3f origin, Vec3f direction) const {
 
 	return t;
 }
+

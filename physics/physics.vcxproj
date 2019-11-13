@@ -196,8 +196,10 @@
     <ClCompile Include="geometry\genericIntersection.cpp" />
     <ClCompile Include="geometry\intersection.cpp" />
     <ClCompile Include="geometry\polyhedron.cpp" />
+    <ClCompile Include="geometry\polyhedronInternals.cpp" />
     <ClCompile Include="geometry\shape.cpp" />
     <ClCompile Include="geometry\shapeBuilder.cpp" />
+    <ClCompile Include="geometry\shapeClass.cpp" />
     <ClCompile Include="geometry\sphere.cpp" />
     <ClCompile Include="math\cframe.cpp" />
     <ClCompile Include="math\fix.cpp" />
@@ -208,6 +210,7 @@
     <ClCompile Include="part.cpp" />
     <ClCompile Include="physical.cpp" />
     <ClCompile Include="physicsProfiler.cpp" />
+    <ClCompile Include="misc\serialization.cpp" />
     <ClCompile Include="world.cpp" />
     <ClCompile Include="worldPhysics.cpp" />
   </ItemGroup>
@@ -232,10 +235,12 @@
     <ClInclude Include="geometry\intersection.h" />
     <ClInclude Include="geometry\normalizedPolyhedron.h" />
     <ClInclude Include="geometry\polyhedron.h" />
+    <ClInclude Include="geometry\polyhedronInternals.h" />
     <ClInclude Include="geometry\shape.h" />
     <ClInclude Include="geometry\shapeBuilder.h" />
-    <ClInclude Include="geometry\normalizedShape.h" />
+    <ClInclude Include="geometry\shapeClass.h" />
     <ClInclude Include="geometry\sphere.h" />
+    <ClInclude Include="integrityCheck.h" />
     <ClInclude Include="math\bounds.h" />
     <ClInclude Include="math\cframe.h" />
     <ClInclude Include="math\fix.h" />
@@ -272,6 +277,7 @@
     <ClInclude Include="physicsProfiler.h" />
     <ClInclude Include="profiling.h" />
     <ClInclude Include="geometry\scalableInertialMatrix.h" />
+    <ClInclude Include="misc\serialization.h" />
     <ClInclude Include="sharedLockGuard.h" />
     <ClInclude Include="synchonizedWorld.h" />
     <ClInclude Include="templateUtils.h" />

@@ -13,6 +13,7 @@ struct PartProperties {
 	double density;
 	double friction;
 	double bouncyness;
+	Vec3 conveyorEffect = Vec3(0, 0, 0);
 };
 
 struct PartIntersection {
@@ -48,7 +49,6 @@ public:
 
 		In other words, this is the desired relative velocity for there to be no friction
 	*/
-	Vec3 conveyorEffect = Vec3(0, 0, 0);
 
 	Part() = default;
 	Part(const Shape& shape, const GlobalCFrame& position, const PartProperties& properties);
@@ -68,4 +68,10 @@ public:
 
 	void attach(Part& other, const CFrame& relativeCFrame);
 	void detach();
+
+	virtual void serializeCore(std::ostream& ostream) const;
+	void serialize(std::ostream& ostream) const;
+	void serialize(std::ostream& ostream, const CFrame& attachment) const;
+	static Part deserialize(std::istream& istream);
+	static Part deserialize(std::istream& istream, const GlobalCFrame& parentLocation);
 };

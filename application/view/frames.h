@@ -401,7 +401,7 @@ struct PropertiesFrame : public FrameBlueprint, public Frame {
 			frictionLabel->text = "Friction: " + str(selectedPart->properties.friction);
 			bouncynessLabel->text = "Bouncyness: " + str(selectedPart->properties.bouncyness);
 			densityLabel->text = "Density: " + str(selectedPart->properties.density);
-			conveyorEffectLabel->text = "ConveyorEffect: " + str(selectedPart->conveyorEffect);
+			conveyorEffectLabel->text = "ConveyorEffect: " + str(selectedPart->properties.conveyorEffect);
 
 			renderModeCheckBox->checked = selectedPart->renderMode == Renderer::WIREFRAME;
 

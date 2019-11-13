@@ -179,7 +179,7 @@ void setupWorld() {
 
 	ExtendedPart* conveyor = createUniquePart(screen, BoundingBox(1.0, 0.3, floorSize.y).toShape(), GlobalCFrame(10.0, 0.65, 0.0), { 2.0, 1.0, 0.3 });
 
-	conveyor->conveyorEffect = Vec3(0, 0, 2.0);
+	conveyor->properties.conveyorEffect = Vec3(0, 0, 2.0);
 	world.addTerrainPart(conveyor);
 
 	world.addPart(cubeFactory.produceScaled(GlobalCFrame(10, 1.0, 0.0), { 1.0, 0.2, 0.3 }, 0.2, 0.2, 0.2, "TinyCube"));
@@ -205,7 +205,7 @@ void setupWorld() {
 		world.addPart(newCube);
 	}*/
 
-	/*PartProperties carProperties{ 1.0, 0.7, 0.3 };
+	PartProperties carProperties{ 1.0, 0.7, 0.3 };
 	PartProperties wheelProperties{ 1.0, 2.0, 0.7 };
 
 	ExtendedPart* carBody = cubeFactory.produceScaled(GlobalCFrame(5.0, 1.0, 5.0), carProperties, 2.0, 0.1, 1.0, "CarBody");
@@ -243,13 +243,13 @@ void setupWorld() {
 	car.ballConstraints.push_back(BallConstraint{ Vec3(0.8, 0.0, -0.8), carBody->parent, Vec3(0,0,0), wheel2->parent });
 	car.ballConstraints.push_back(BallConstraint{ Vec3(-0.8, 0.0, 0.8), carBody->parent, Vec3(0,0,0), wheel3->parent });
 	car.ballConstraints.push_back(BallConstraint{ Vec3(-0.8, 0.0, -0.8), carBody->parent, Vec3(0,0,0), wheel4->parent });
-	world.constraints.push_back(std::move(car));*/
+	world.constraints.push_back(std::move(car));
 
 	
 	int minX = -2;
 	int maxX = 2;
 	int minY = 0;
-	int maxY = 20;
+	int maxY = 10;
 	int minZ = -2;
 	int maxZ = 2;
 
@@ -260,8 +260,8 @@ void setupWorld() {
 				ExtendedPart* newCube = cubeFactory.produce(GlobalCFrame(x - 5, y + 1, z - 5), { 1.0, 0.2, 0.5 });
 				newCube->material.ambient = Vec4f((x-minX)/(maxX-minX), (y-minY)/(maxY-minY), (z-minZ)/(maxZ-minZ), 1.0f);
 				world.addPart(newCube);
-				//world.addPart(sphereFactory.produce(GlobalCFrame(Position(x + 5, y + 1, z - 5)), { 1.0, 0.2, 0.5 }));
-				//spiderFactories[rand() & 0x00000003].buildSpider(GlobalCFrame(Position(x+y*0.1, y+1, z)));
+				world.addPart(sphereFactory.produce(GlobalCFrame(Position(x + 5, y + 1, z - 5)), { 1.0, 0.2, 0.5 }));
+				spiderFactories[rand() & 0x00000003].buildSpider(GlobalCFrame(Position(x+y*0.1, y+1, z)));
 				world.addPart(triangleFactory.produce(GlobalCFrame(Position(x - 20, y + 1, z + 20)), { 1.0, 0.2, 0.5 }));
 			}
 		}
@@ -271,7 +271,7 @@ void setupWorld() {
 
 	// Player
 	screen.camera.attachment = createUniquePart(screen, Library::createPrism(50, 0.2, 1.0), GlobalCFrame(), { 1.0, 5.0, 0.0 }, "Player");
-	screen.camera.attachment->conveyorEffect = Vec3(1.0, 0.0, 1.0);
+	screen.camera.attachment->properties.conveyorEffect = Vec3(1.0, 0.0, 1.0);
 
 	if (!world.isValid()) {
 		throw "World not valid!";

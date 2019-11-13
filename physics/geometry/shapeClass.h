@@ -16,20 +16,22 @@ public:
 	const double volume;
 	const Vec3 centerOfMass;
 	const ScalableInertialMatrix inertia;
+	const int classID;
 
-	ShapeClass(double volume, Vec3 centerOfMass, ScalableInertialMatrix inertia) : centerOfMass(centerOfMass), inertia(inertia), volume(volume) {}
+	ShapeClass(double volume, Vec3 centerOfMass, ScalableInertialMatrix inertia, int classID);
+	ShapeClass(double volume, Vec3 centerOfMass, ScalableInertialMatrix inertia);
 
 	virtual bool containsPoint(Vec3 point) const = 0;
 	virtual double getIntersectionDistance(Vec3 origin, Vec3 direction) const = 0;
 
 	virtual BoundingBox getBounds() const = 0;
 	virtual BoundingBox getBounds(const Mat3& referenceFrame) const = 0;
-	virtual double getMaxRadius() const = 0;
-	virtual double getMaxRadiusSq() const = 0;
 	virtual double getScaledMaxRadius(DiagonalMat3 scale) const = 0;
 	virtual double getScaledMaxRadiusSq(DiagonalMat3 scale) const = 0;
 
 	virtual Vec3f furthestInDirection(const Vec3f& direction) const = 0;
 
 	virtual Polyhedron asPolyhedron() const = 0;
+
+	static const ShapeClass* getShapeClassForId(int classID);
 };

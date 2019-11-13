@@ -6,6 +6,8 @@
 
 #include "geometry/intersection.h"
 
+#include "integrityCheck.h"
+
 namespace {
 	void recalculate(Part& part) {
 		part.maxRadius = part.hitbox.getMaxRadius();
@@ -30,12 +32,20 @@ Part::~Part() {
 	}
 }
 
+#include "misc/serialization.h"
+#include "../application/extendedPart.h"
+
 PartIntersection Part::intersects(const Part& other) const {
 	CFrame relativeTransform = this->cframe.globalToLocal(other.cframe);
 	Intersection result = intersectsTransformed(this->hitbox, other.hitbox, relativeTransform);
 	if(result.intersects) {
 		Position intersection = this->cframe.localToGlobal(result.intersection);
 		Vec3 exitVector = this->cframe.localToRelative(result.exitVector);
+
+
+		CHECK_VALID_VEC(result.exitVector);
+
+
 		return PartIntersection(intersection, exitVector);
 	}
 	return PartIntersection();

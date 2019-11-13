@@ -6,7 +6,9 @@
 #include "../math/linalg/mat.h"
 #include "../math/cframe.h"
 #include "../math/transform.h"
-#include "normalizedShape.h"
+#include "shapeClass.h"
+
+#include <iosfwd>
 
 class Shape {
 	Shape(const ShapeClass* baseShape, DiagonalMat3 scale);
@@ -17,8 +19,6 @@ public:
 	Shape();
 	Shape(const ShapeClass* baseShape);
 	Shape(const ShapeClass* baseShape, double width, double height, double depth);
-	Shape(const Polyhedron& baseShape);
-	Shape(Polyhedron&& baseShape);
 
 	bool containsPoint(Vec3 point) const;
 	double getIntersectionDistance(Vec3 origin, Vec3 direction) const;
@@ -36,6 +36,9 @@ public:
 	Vec3f furthestInDirection(const Vec3f& direction) const;
 
 	Polyhedron asPolyhedron() const;
+
+	void serialize(std::ostream& ostream) const;
+	static Shape deserialize(std::istream& istream);
 };
 
 

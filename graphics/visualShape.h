@@ -20,5 +20,5 @@ struct VisualShape : public Polyhedron {
 	VisualShape(Vec3f* vertices, SharedArrayPtr<const Vec3f> normals, SharedArrayPtr<const Vec2f> uvs, const Triangle* triangles, int vertexCount, int triangleCount) :
 		Polyhedron(vertices, triangles, vertexCount, triangleCount), normals(normals), uvs(uvs) {}
 
-	operator Shape() const { return Shape(static_cast<Polyhedron>(*this)); }
+	operator Shape() const { return static_cast<Polyhedron>(*this); }
 };

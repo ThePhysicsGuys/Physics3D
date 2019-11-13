@@ -69,6 +69,6 @@ void PlayerWorld::applyExternalForces() {
 		if (handler->getKey(KeyboardOptions::Move::jump))
 			runVector += Vec3(0, JUMP_SPEED, 0);
 
-		player->conveyorEffect = runVector;
+		player->properties.conveyorEffect = runVector;
 	}
 }

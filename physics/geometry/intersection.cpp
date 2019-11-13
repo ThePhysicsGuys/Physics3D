@@ -8,6 +8,7 @@
 #include "shape.h"
 #include "polyhedron.h"
 
+#include "../integrityCheck.h"
 
 
 Intersection intersectsTransformed(const Shape& first, const Shape& second, const CFrame& relativeTransform) {
@@ -40,7 +41,11 @@ Intersection intersectsTransformed(const GenericCollidable& first, const Generic
 		physicsMeasure.mark(PhysicsProcess::EPA);
 		Vec3f intersection;
 		Vec3f exitVector;
+
+
 		bool epaResult = runEPATransformed(info, result, intersection, exitVector, buffers, iter);
+
+		CHECK_VALID_VEC(exitVector);
 		incDebugTally(EPAIterationStatistics, iter);
 		if(!epaResult) {
 			return Intersection();

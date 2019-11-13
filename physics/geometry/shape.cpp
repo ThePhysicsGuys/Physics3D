@@ -4,12 +4,12 @@
 #include "normalizedPolyhedron.h"
 #include "sphere.h"
 
+#include "../misc/serialization.h"
+
 Shape::Shape() : baseShape(nullptr), scale{1,1,1} {}
 Shape::Shape(const ShapeClass* baseShape, DiagonalMat3 scale) : baseShape(baseShape), scale(scale) {}
 Shape::Shape(const ShapeClass* baseShape) : baseShape(baseShape), scale{1,1,1} {}
 Shape::Shape(const ShapeClass* baseShape, double width, double height, double depth) : baseShape(baseShape), scale{width / 2, height / 2, depth / 2} {}
-Shape::Shape(const Polyhedron& baseShape) : baseShape(new NormalizedPolyhedron(baseShape)), scale{1,1,1} {}
-Shape::Shape(Polyhedron&& baseShape) : baseShape(new NormalizedPolyhedron(std::move(baseShape))), scale{1,1,1} {}
 
 bool Shape::containsPoint(Vec3 point) const {
 	return baseShape->containsPoint(~scale * point);
@@ -46,5 +46,5 @@ Vec3f Shape::furthestInDirection(const Vec3f& direction) const {
 }
 
 Polyhedron Shape::asPolyhedron() const {
-	return baseShape->asPolyhedron();
+	return baseShape->asPolyhedron().scaled(scale);
 }
