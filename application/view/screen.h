@@ -20,6 +20,7 @@ void terminateGLFW();
 class Screen {
 public:
 	std::vector<IndexedMesh*> meshes;
+	std::map<const ShapeClass*, int> shapeClassMeshIds;
 	PlayerWorld* world;
 	Vec2i dimension;
 
@@ -50,6 +51,8 @@ public:
 
 	bool shouldClose();
 	int addMeshShape(const VisualShape& mesh);
+	void registerMeshFor(const ShapeClass* shapeClass, const VisualShape& mesh);
+	int getOrCreateMeshFor(const ShapeClass* shapeClass);
 };
 
 extern StandardInputHandler* handler;

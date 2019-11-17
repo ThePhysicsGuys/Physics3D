@@ -24,9 +24,9 @@ public:
 	virtual bool containsPoint(Vec3 point) const = 0;
 	virtual double getIntersectionDistance(Vec3 origin, Vec3 direction) const = 0;
 
-	virtual BoundingBox getBounds() const = 0;
-	virtual BoundingBox getBounds(const Mat3& referenceFrame) const = 0;
-	virtual double getScaledMaxRadius(DiagonalMat3 scale) const = 0;
+	virtual BoundingBox getBounds(const RotMat3& referenceFrame, const DiagonalMat3& scale) const = 0;
+
+	virtual double getScaledMaxRadius(DiagonalMat3 scale) const;
 	virtual double getScaledMaxRadiusSq(DiagonalMat3 scale) const = 0;
 
 	virtual Vec3f furthestInDirection(const Vec3f& direction) const = 0;

@@ -24,6 +24,15 @@ public:
 	double getIntersectionDistance(Vec3 origin, Vec3 direction) const;
 	double getVolume() const;
 
+
+	inline double getWidth() const { return scale[0] * 2; }
+	inline double getHeight() const { return scale[1] * 2; }
+	inline double getDepth() const { return scale[2] * 2; }
+
+	inline void setWidth(double newWidth) { scale[0] = newWidth / 2; }
+	inline void setHeight(double newHeight) { scale[1] = newHeight / 2; }
+	inline void setDepth(double newDepth) { scale[2] = newDepth / 2; }
+
 	Shape scaled(double scaleX, double scaleY, double scaleZ) const;
 	
 	BoundingBox getBounds() const;

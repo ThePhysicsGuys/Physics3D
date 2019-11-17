@@ -226,6 +226,7 @@
     <ClInclude Include="datastructures\parallelVector.h" />
     <ClInclude Include="datastructures\sharedArray.h" />
     <ClInclude Include="debug.h" />
+    <ClInclude Include="geometry\basicShapes.h" />
     <ClInclude Include="geometry\boundingBox.h" />
     <ClInclude Include="geometry\computationBuffer.h" />
     <ClInclude Include="geometry\convexShapeBuilder.h" />
@@ -266,6 +267,7 @@
     <ClInclude Include="math\vec.h" />
     <ClInclude Include="math\vec2.h" />
     <ClInclude Include="math\vec3.h" />
+    <ClInclude Include="misc\filters\outOfBoundsFilter.h" />
     <ClInclude Include="misc\filters\rayIntersectsBoundsFilter.h" />
     <ClInclude Include="misc\filters\visibilityFilter.h" />
     <ClInclude Include="misc\gravityForce.h" />

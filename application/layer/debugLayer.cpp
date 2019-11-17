@@ -178,7 +178,7 @@ void DebugLayer::onRender() {
 				for(Part& part : selectedPhys) {
 					Vec4f yellow = GUI::COLOR::YELLOW;
 					yellow.w = 0.5;
-					BoundingBox localBounds = screen->selectedPart->localBounds;
+					BoundingBox localBounds = screen->selectedPart->getLocalBounds();
 					renderBox(screen->selectedPart->getCFrame().localToGlobal(CFrame(localBounds.getCenter())), localBounds.getWidth(), localBounds.getHeight(), localBounds.getDepth(), yellow);
 
 					Vec4f green = GUI::COLOR::GREEN;
@@ -193,7 +193,7 @@ void DebugLayer::onRender() {
 				for(Part& part : phys) {
 					Vec4f yellow = GUI::COLOR::YELLOW;
 					yellow.w = 0.5;
-					BoundingBox localBounds = part.localBounds;
+					BoundingBox localBounds = part.getLocalBounds();
 					renderBox(part.getCFrame().localToGlobal(CFrame(localBounds.getCenter())), localBounds.getWidth(), localBounds.getHeight(), localBounds.getDepth(), yellow);
 
 					Vec4f green = GUI::COLOR::GREEN;

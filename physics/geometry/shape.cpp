@@ -24,10 +24,10 @@ Shape Shape::scaled(double scaleX, double scaleY, double scaleZ) const {
 	return Shape(baseShape, scale * DiagonalMat3{scaleX, scaleY, scaleZ});
 }
 BoundingBox Shape::getBounds() const {
-	return baseShape->getBounds().scaled(scale[0], scale[1], scale[2]);
+	return BoundingBox{-scale[0], -scale[1], -scale[2], scale[0], scale[1], scale[2]};
 }
 BoundingBox Shape::getBounds(const Mat3& referenceFrame) const {
-	return baseShape->getBounds(referenceFrame * scale);
+	return baseShape->getBounds(referenceFrame, scale);
 }
 Vec3 Shape::getCenterOfMass() const {
 	return scale * baseShape->centerOfMass;

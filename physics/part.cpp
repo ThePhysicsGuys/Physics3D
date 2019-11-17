@@ -11,7 +11,6 @@
 namespace {
 	void recalculate(Part& part) {
 		part.maxRadius = part.hitbox.getMaxRadius();
-		part.localBounds = part.hitbox.getBounds();
 	}
 
 	void recalculateAndUpdateParent(Part& part, const Bounds& oldBounds) {
@@ -51,6 +50,11 @@ PartIntersection Part::intersects(const Part& other) const {
 	return PartIntersection();
 }
 
+BoundingBox Part::getLocalBounds() const {
+	Vec3 v = Vec3(this->hitbox.scale[0], this->hitbox.scale[1], this->hitbox.scale[2]);
+	return BoundingBox(-v, v);
+}
+
 Bounds Part::getStrictBounds() const {
 	BoundingBox boundsOfHitbox = this->hitbox.getBounds(this->cframe.getRotation());
 	
@@ -69,6 +73,32 @@ void Part::setCFrame(const GlobalCFrame& newCFrame) {
 	} else {
 		this->parent->setPartCFrame(this, newCFrame);
 	}
+}
+
+double Part::getWidth() const {
+	return this->hitbox.getWidth();
+}
+double Part::getHeight() const {
+	return this->hitbox.getHeight();
+}
+double Part::getDepth() const {
+	return this->hitbox.getDepth();
+}
+
+void Part::setWidth(double newWidth) {
+	Bounds oldBounds = this->getStrictBounds();
+	this->hitbox.setWidth(newWidth);
+	recalculateAndUpdateParent(*this, oldBounds);
+}
+void Part::setHeight(double newHeight) {
+	Bounds oldBounds = this->getStrictBounds();
+	this->hitbox.setHeight(newHeight);
+	recalculateAndUpdateParent(*this, oldBounds);
+}
+void Part::setDepth(double newDepth) {
+	Bounds oldBounds = this->getStrictBounds();
+	this->hitbox.setDepth(newDepth);
+	recalculateAndUpdateParent(*this, oldBounds);
 }
 
 

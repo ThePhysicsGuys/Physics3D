@@ -41,7 +41,6 @@ public:
 	Shape hitbox;
 	double maxRadius;
 	PartProperties properties;
-	BoundingBox localBounds;
 
 	/*
 		This is extra velocity that should be added to any colission
@@ -58,6 +57,8 @@ public:
 
 	Bounds getStrictBounds() const;
 
+	BoundingBox getLocalBounds() const;
+
 	Position getPosition() const { return cframe.getPosition(); }
 	double getMass() const { return hitbox.getVolume() * properties.density; }
 	Vec3 getLocalCenterOfMass() const { return hitbox.getCenterOfMass(); }
@@ -65,6 +66,15 @@ public:
 	SymmetricMat3 getInertia() const { return hitbox.getInertia() * properties.density; }
 	const GlobalCFrame& getCFrame() const { return cframe; }
 	void setCFrame(const GlobalCFrame& newCFrame);
+
+	double getWidth() const;
+	double getHeight() const;
+	double getDepth() const;
+
+	void setWidth(double newWidth);
+	void setHeight(double newHeight);
+	void setDepth(double newDepth);
+
 
 	void attach(Part& other, const CFrame& relativeCFrame);
 	void detach();

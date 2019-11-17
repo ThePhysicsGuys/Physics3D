@@ -136,6 +136,7 @@
     <ClCompile Include="benchmark.cpp" />
     <ClCompile Include="complexObjectBenchmark.cpp" />
     <ClCompile Include="getBoundsPerformance.cpp" />
+    <ClCompile Include="manyCubesBenchmark.cpp" />
     <ClCompile Include="worldBenchmark.cpp" />
   </ItemGroup>
   <ItemGroup>

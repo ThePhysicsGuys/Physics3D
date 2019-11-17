@@ -276,6 +276,30 @@ bool Screen::shouldClose() {
 
 int Screen::addMeshShape(const VisualShape& s) {
 	int size = (int) meshes.size();
+	Log::error("Mesh %d added!", size);
 	meshes.push_back(new IndexedMesh(s));
 	return size;
+}
+void Screen::registerMeshFor(const ShapeClass* shapeClass, const VisualShape& mesh) {
+	if(shapeClassMeshIds.find(shapeClass) == shapeClassMeshIds.end()) throw "Attempting to re-register existing ShapeClass!";
+
+	int meshId = this->addMeshShape(mesh);
+
+	Log::error("Mesh %d registered!", meshId);
+
+	shapeClassMeshIds.insert(std::pair<const ShapeClass*, int>(shapeClass, meshId));
+}
+int Screen::getOrCreateMeshFor(const ShapeClass* shapeClass) {
+	auto found = shapeClassMeshIds.find(shapeClass);
+	if(found != shapeClassMeshIds.end()) {
+		// mesh found!
+		int meshId = (*found).second;
+		Log::error("Mesh %d reused!", meshId);
+		return meshId;
+	} else {
+		// mesh not found :(
+		VisualShape mesh(shapeClass->asPolyhedron());
+		int meshId = this->addMeshShape(mesh);
+		shapeClassMeshIds.insert(std::pair<const ShapeClass*, int>(shapeClass, meshId));
+	}
 }

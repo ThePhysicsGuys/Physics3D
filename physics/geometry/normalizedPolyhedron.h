@@ -15,11 +15,8 @@ public:
 	virtual double getIntersectionDistance(Vec3 origin, Vec3 direction) const override {
 		return Polyhedron::getIntersectionDistance(origin, direction);
 	}
-	virtual BoundingBox getBounds() const override {
-		return Polyhedron::getBounds();
-	}
-	virtual BoundingBox getBounds(const Mat3& referenceFrame) const override {
-		return Polyhedron::getBounds(referenceFrame);
+	virtual BoundingBox getBounds(const Mat3& rotation, const DiagonalMat3& scale) const override {
+		return Polyhedron::getBounds(rotation * scale);
 	}
 	virtual double getScaledMaxRadius(DiagonalMat3 scale) const override {
 		return Polyhedron::getScaledMaxRadius(scale);

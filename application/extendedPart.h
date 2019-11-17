@@ -25,6 +25,9 @@ struct ExtendedPart : public Part {
 	ExtendedPart(const Shape& hitbox, const VisualShape& shape, const GlobalCFrame& position, const PartProperties& properties, int drawMeshId, std::string name = "Part");
 
 	void scale(double scaleX, double scaleY, double scaleZ);
+	void setWidth(double newWidth);
+	void setHeight(double newHeight);
+	void setDepth(double newDepth);
 
 	virtual void serializeCore(std::ostream& ostream) const override;
 	static ExtendedPart deserialize(std::istream& istream);

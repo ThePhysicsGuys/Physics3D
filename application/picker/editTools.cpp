@@ -301,16 +301,17 @@ void EditTools::dragScaleTool(Screen& screen) {
 	Vec3 deltaPos = screen.camera.cframe.position - screen.selectedPart->getPosition();
 	double distance = length(deltaPos - (deltaPos * ray) * ray) / length(selectedPoint);
 
-	Vec3 a;
+	Log::debug("dist : %f", distance);
+
 	switch (selectedEditDirection) {
 	case EditDirection::X:
-		screen.selectedPart->scale(distance / screen.selectedPart->localBounds.getWidth() * 2, 1, 1);
+		screen.selectedPart->setWidth(distance * 2);
 		break;
 	case EditDirection::Y:
-		screen.selectedPart->scale(1, distance / screen.selectedPart->localBounds.getHeight() * 2, 1);
+		screen.selectedPart->setHeight(distance * 2);
 		break;
 	case EditDirection::Z:
-		screen.selectedPart->scale(1, 1, distance / screen.selectedPart->localBounds.getDepth() * 2);
+		screen.selectedPart->setDepth(distance * 2);
 		break;
 	case EditDirection::CENTER:
 		double amount = distance / screen.selectedPart->maxRadius / sqrt(3.0);
