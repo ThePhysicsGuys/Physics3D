@@ -10,7 +10,7 @@ There is an example application for debugging and testing included in [applicati
 The graphics libraries are only necessary when building the application and the tests, so feel free to leave them be if you're only building the engine. 
 
 ## Dependencies
-### Application
+### Application & graphics
 - [GLFW](https://www.glfw.org/) Verified working with GLFW 3.2.1  
 - [GLEW](http://glew.sourceforge.net/) Verified with GLEW 2.1.0
 - [stb_image](https://github.com/nothings/stb) Verified with stb_image.h v2.22
@@ -19,15 +19,27 @@ The graphics libraries are only necessary when building the application and the 
 ## Setup Guide
 ### Visual Studio
 - Clone the repository
-- Create a solution in the root directory of the repository
-- 'engine' on its own does not depend on any GL libraries, so if you wish to only build it then you may skip the setup for application & tests.
-- Download the dependencies, and remember where you stored the .lib's and the .h's
-- Import the 4 projects:
-  - application
-  - engine
-  - tests
-  - util
-- Configuration:
+- 'physics' on its own does not depend on any GL libraries, so if you wish to only build it then you may skip the setup for application & tests.
+- Download the dependencies, the Visual Studio configuration expects the libraries to be stored in Physics3D/lib/
+  includes should be stored in Physics3D/include/
+  With Physics3D/ the root folder of the git project. 
+  Your project structure should look like this:  
+  Physics3D/  
+  &nbsp;&nbsp;&nbsp;&nbsp;    include/  
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      freetype/  
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      GL/  
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      GLFW/  
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      stb/  
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      ft2build.h  
+  &nbsp;&nbsp;&nbsp;&nbsp;    lib/  
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      freetype.lib  
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      glew32.lib  
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      glew32s.lib  
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      glfw3.dll  
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      glfw3.lib  
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      glfw3dll.lib  
+  &nbsp;&nbsp;&nbsp;&nbsp;    (Project and other files)  
+- Configuration (Should already be configured in the provided project and solution files):
   - General > Configuration type: 
     - application & tests: Application (.exe)
     - engine & util: Static library (.lib)
@@ -44,6 +56,8 @@ The graphics libraries are only necessary when building the application and the 
 ## Authors
 * **Lennart Van Hirtum** - [VonTum](https://github.com/VonTum)
 * **Matthias Vandersanden** - [olympus112](https://github.com/olympus112)
+
+This list is inconclusive as new contributors are always welcome! 
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
