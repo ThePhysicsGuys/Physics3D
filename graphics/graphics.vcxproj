@@ -239,6 +239,7 @@
     <ClInclude Include="texture.h" />
     <ClInclude Include="debug\threePhaseBuffer.h" />
     <ClInclude Include="debug\visualDebug.h" />
+    <ClInclude Include="visualData.h" />
     <ClInclude Include="visualShape.h" />
   </ItemGroup>
   <ItemGroup>

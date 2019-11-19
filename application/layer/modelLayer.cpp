@@ -100,7 +100,7 @@ void ModelLayer::onRender() {
 		VisibilityFilter filter = VisibilityFilter::forWindow(camera.cframe.position, camera.getForwardDirection(), camera.getUpDirection(), camera.fov, camera.aspect, camera.zfar);
 		// Render world objects
 		for (ExtendedPart& part : screen->world->iterPartsFiltered(filter, ALL_PARTS)) {
-			int meshId = part.drawMeshId;
+			int meshId = part.visualData.drawMeshId;
 
 			Material material = part.material;
 
@@ -126,7 +126,7 @@ void ModelLayer::onRender() {
 
 			if (meshId == -1) continue;
 
-			screen->meshes[meshId]->render(part.renderMode);
+			Screen::meshes[meshId]->render(part.renderMode);
 		}
 	});
 
@@ -147,9 +147,9 @@ void ModelLayer::onRender() {
 		// Render each physical
 		ApplicationShaders::basicShader.updatePart(*part);
 
-		if (part->drawMeshId == -1) continue;
+		if (part->visualData.drawMeshId == -1) continue;
 
-		screen->meshes[part->drawMeshId]->render(part->renderMode);
+		Screen::meshes[part->visualData.drawMeshId]->render(part->renderMode);
 	}
 
 	// Render lights

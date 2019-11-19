@@ -21,7 +21,14 @@ namespace {
 	}
 }
 
-Part::Part(const Shape& shape, const GlobalCFrame& position, const PartProperties& properties) : hitbox(shape), cframe(position), properties(properties) {
+Part::Part(const Shape& shape, const GlobalCFrame& position, const PartProperties& properties)
+	: hitbox(shape), cframe(position), properties(properties) {
+	recalculate(*this);
+}
+
+Part::Part(const Shape& shape, Part& attachTo, const CFrame& attach, const PartProperties& properties)
+	: hitbox(shape), cframe(attachTo.cframe.localToGlobal(attach)), properties(properties) {
+	attachTo.attach(*this, attach);
 	recalculate(*this);
 }
 

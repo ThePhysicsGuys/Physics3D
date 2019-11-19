@@ -6,13 +6,6 @@ class PlayerWorld;
 extern PlayerWorld world;
 extern Screen screen;
 
-void init();
-
-void setupPhysics();
-void setupWorld();
-void setupScreen();
-void setupDebug();
-
 void pause();
 void unpause();
 bool isPaused();

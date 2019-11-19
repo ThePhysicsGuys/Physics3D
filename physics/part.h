@@ -51,6 +51,7 @@ public:
 
 	Part() = default;
 	Part(const Shape& shape, const GlobalCFrame& position, const PartProperties& properties);
+	Part(const Shape& shape, Part& attachTo, const CFrame& attach, const PartProperties& properties);
 	~Part();
 	PartIntersection intersects(const Part& other) const;
 	void scale(double scaleX, double scaleY, double scaleZ);

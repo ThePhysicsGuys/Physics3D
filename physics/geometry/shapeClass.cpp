@@ -31,17 +31,17 @@ static struct CubeClass : public ShapeClass {
 		}
 
 		//origin + t * direction = x1z
-		double tx = -origin.x / direction.x;
+		double tx = (1-origin.x) / direction.x;
 
 		Vec3 intersX = origin + tx * direction;
 		if(abs(intersX.y) <= 1.0 && abs(intersX.z) <= 1.0) return tx;
 
-		double ty = -origin.y / direction.y;
+		double ty = (1-origin.y) / direction.y;
 
 		Vec3 intersY = origin + ty * direction;
 		if(abs(intersY.x) <= 1.0 && abs(intersY.z) <= 1.0) return ty;
 
-		double tz = -origin.z / direction.z;
+		double tz = (1-origin.z) / direction.z;
 
 		Vec3 intersZ = origin + tz * direction;
 		if(abs(intersZ.x) <= 1.0 && abs(intersZ.y) <= 1.0) return tz;
@@ -80,7 +80,7 @@ static struct SphereClass : public ShapeClass {
 	}
 	virtual double getIntersectionDistance(Vec3 origin, Vec3 direction) const {
 		//o*o + o*d*t + o*d*t + t*t*d*d
-		double c = origin * origin;
+		double c = origin * origin - 1;
 		double b = origin * direction;
 		double a = direction * direction;
 

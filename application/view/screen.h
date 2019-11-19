@@ -3,6 +3,7 @@
 #include "../eventHandler.h"
 #include "../util/properties.h"
 #include "../graphics/visualShape.h"
+#include "../graphics/visualData.h"
 #include "../engine/event/event.h"
 #include "camera.h"
 
@@ -19,8 +20,8 @@ void terminateGLFW();
 
 class Screen {
 public:
-	std::vector<IndexedMesh*> meshes;
-	std::map<const ShapeClass*, int> shapeClassMeshIds;
+	static std::vector<IndexedMesh*> meshes;
+	static std::map<const ShapeClass*, VisualData> shapeClassMeshIds;
 	PlayerWorld* world;
 	Vec2i dimension;
 
@@ -50,9 +51,10 @@ public:
 	void onClose();
 
 	bool shouldClose();
-	int addMeshShape(const VisualShape& mesh);
-	void registerMeshFor(const ShapeClass* shapeClass, const VisualShape& mesh);
-	int getOrCreateMeshFor(const ShapeClass* shapeClass);
+	static VisualData addMeshShape(const VisualShape& mesh);
+	static VisualData registerMeshFor(const ShapeClass* shapeClass, const VisualShape& mesh);
+	static VisualData registerMeshFor(const ShapeClass* shapeClass);
+	static VisualData getOrCreateMeshFor(const ShapeClass* shapeClass);
 };
 
 extern StandardInputHandler* handler;

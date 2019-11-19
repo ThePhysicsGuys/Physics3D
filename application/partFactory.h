@@ -1,32 +1,24 @@
 #pragma once
 
 #include "../graphics/visualShape.h"
+#include "../physics/geometry/normalizedPolyhedron.h"
 #include "extendedPart.h"
 #include "view/screen.h"
 
 class PartFactory {
-	mutable size_t count;
+	mutable size_t count = 0;
 	
 	std::string name;
 	Shape hitbox;
-	VisualShape visualShape;
-	int drawMeshID;
-	CFramef backTransform;
+	VisualData visualData;
 public:
 	PartFactory() = default;
-	PartFactory(const Shape& hitbox, const VisualShape& visualShape, Screen& screen, std::string name);
-	PartFactory(const Shape& shape, Screen& screen, std::string name = "Part") : PartFactory(shape, VisualShape(shape.asPolyhedron()), screen, name) {}
-	PartFactory(const VisualShape& shape, Screen& screen, std::string name) : PartFactory(static_cast<const Shape&>(shape), shape, screen, name) {}
-	ExtendedPart* produce(const GlobalCFrame& cframe, const PartProperties& properties, std::string name = "") const;
-	ExtendedPart* produce(const PartProperties& properties, std::string name = "") const;
-	ExtendedPart* produce(ExtendedPart* partToAttachTo, const CFrame& attachment, const PartProperties& properties, std::string name = "") const;
-	ExtendedPart* produceScaled(const GlobalCFrame& cframe, const PartProperties& properties, double scaleX, double scaleY, double scaleZ, std::string name = "") const;
-	ExtendedPart* produceScaled(const PartProperties& properties, double scaleX, double scaleY, double scaleZ, std::string name = "") const;
-	ExtendedPart* produceScaled(ExtendedPart* partToAttachTo, const CFrame& attachment, const PartProperties& properties, double scaleX, double scaleY, double scaleZ, std::string name = "") const;
+	PartFactory(const Shape& hitbox, Screen& screen, std::string name = "Part");
+	PartFactory(const Shape& hitbox, const VisualShape& visualShape, Screen& screen, std::string name = "Part");
+	ExtendedPart* produce(const GlobalCFrame& cframe, const PartProperties& properties, std::string name = "Part") const;
+	ExtendedPart* produce(const PartProperties& properties, std::string name = "Part") const;
+	ExtendedPart* produce(ExtendedPart* partToAttachTo, const CFrame& attachment, const PartProperties& properties, std::string name = "Part") const;
+	ExtendedPart* produceScaled(const GlobalCFrame& cframe, const PartProperties& properties, double scaleX, double scaleY, double scaleZ, std::string name = "Part") const;
+	ExtendedPart* produceScaled(const PartProperties& properties, double scaleX, double scaleY, double scaleZ, std::string name = "Part") const;
+	ExtendedPart* produceScaled(ExtendedPart* partToAttachTo, const CFrame& attachment, const PartProperties& properties, double scaleX, double scaleY, double scaleZ, std::string name = "Part") const;
 };
-
-ExtendedPart* createUniquePart(Screen& screen, const Shape& hitbox, const VisualShape& visualShape, const GlobalCFrame& position, const PartProperties& properties, std::string name = "Part");
-
-inline ExtendedPart* createUniquePart(Screen& screen, const Shape& shape, const GlobalCFrame& position, const PartProperties& properties, std::string name = "Part") {
-	return createUniquePart(screen, shape, VisualShape(shape.asPolyhedron()), position, properties, name);
-}

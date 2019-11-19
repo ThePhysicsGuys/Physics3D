@@ -32,6 +32,9 @@
 
 #include "frames.h"
 
+std::vector<IndexedMesh*> Screen::meshes;
+std::map<const ShapeClass*, VisualData> Screen::shapeClassMeshIds;
+
 bool initGLFW() {
 	// Set window hints
 	//Renderer::setGLFWMultisampleSamples(4);
@@ -274,32 +277,35 @@ bool Screen::shouldClose() {
 	return Renderer::isGLFWWindowClosed();
 }
 
-int Screen::addMeshShape(const VisualShape& s) {
+VisualData Screen::addMeshShape(const VisualShape& s) {
 	int size = (int) meshes.size();
-	Log::error("Mesh %d added!", size);
+	//Log::error("Mesh %d added!", size);
 	meshes.push_back(new IndexedMesh(s));
-	return size;
+	return VisualData{size, s.uvs != nullptr, s.normals != nullptr};
 }
-void Screen::registerMeshFor(const ShapeClass* shapeClass, const VisualShape& mesh) {
-	if(shapeClassMeshIds.find(shapeClass) == shapeClassMeshIds.end()) throw "Attempting to re-register existing ShapeClass!";
+VisualData Screen::registerMeshFor(const ShapeClass* shapeClass, const VisualShape& mesh) {
+	if(shapeClassMeshIds.find(shapeClass) != shapeClassMeshIds.end()) throw "Attempting to re-register existing ShapeClass!";
 
-	int meshId = this->addMeshShape(mesh);
+	VisualData meshData = addMeshShape(mesh);
 
-	Log::error("Mesh %d registered!", meshId);
+	//Log::error("Mesh %d registered!", meshData);
 
-	shapeClassMeshIds.insert(std::pair<const ShapeClass*, int>(shapeClass, meshId));
+	shapeClassMeshIds.insert(std::pair<const ShapeClass*, VisualData>(shapeClass, meshData));
+	return meshData;
 }
-int Screen::getOrCreateMeshFor(const ShapeClass* shapeClass) {
+VisualData Screen::registerMeshFor(const ShapeClass* shapeClass) {
+	return registerMeshFor(shapeClass, VisualShape(shapeClass->asPolyhedron()));
+}
+VisualData Screen::getOrCreateMeshFor(const ShapeClass* shapeClass) {
 	auto found = shapeClassMeshIds.find(shapeClass);
+
 	if(found != shapeClassMeshIds.end()) {
 		// mesh found!
-		int meshId = (*found).second;
-		Log::error("Mesh %d reused!", meshId);
-		return meshId;
+		VisualData meshData = (*found).second;
+		//Log::error("Mesh %d reused!", meshData);
+		return meshData;
 	} else {
 		// mesh not found :(
-		VisualShape mesh(shapeClass->asPolyhedron());
-		int meshId = this->addMeshShape(mesh);
-		shapeClassMeshIds.insert(std::pair<const ShapeClass*, int>(shapeClass, meshId));
+		return registerMeshFor(shapeClass);
 	}
 }

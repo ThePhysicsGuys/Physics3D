@@ -82,9 +82,9 @@ void BasicShader::updateUniforms(int id) {
 
 void BasicShader::updatePart(const ExtendedPart& part) {
 	bind();
-	shader.setUniform("includeNormals", int(part.visualShape.normals != nullptr));
-	shader.setUniform("includeUvs", int(part.visualShape.uvs != nullptr));
-	shader.setUniform("modelMatrix", TransformToMat4(part.getPosition(), Mat3f(part.getCFrame().getRotation()) * part.visualScale));
+	shader.setUniform("includeNormals", int(part.visualData.includeNormals));
+	shader.setUniform("includeUvs", int(part.visualData.includeUVs));
+	shader.setUniform("modelMatrix", TransformToMat4(part.getPosition(), Mat3f(part.getCFrame().getRotation()) * DiagonalMat3f(part.hitbox.scale)));
 }
 
 void BasicShader::updateMaterial(const Material& material) {

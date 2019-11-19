@@ -2,13 +2,18 @@
 
 #include "partFactory.h"
 
-PartFactory::PartFactory(const Shape& hitbox, const VisualShape& visualShape, Screen& screen, std::string name) : 
-	hitbox(hitbox), name(name), count(0), visualShape(visualShape), drawMeshID(screen.addMeshShape(visualShape)) {}
+
+PartFactory::PartFactory(const Shape& hitbox, Screen& screen, std::string name) : 
+	hitbox(hitbox), visualData(Screen::getOrCreateMeshFor(hitbox.baseShape)), name(name) {
+}
+
+PartFactory::PartFactory(const Shape& hitbox, const VisualShape& visualShape, Screen& screen, std::string name) :
+	hitbox(hitbox), visualData(Screen::addMeshShape(visualShape)), name(name) {
+}
 
 ExtendedPart* PartFactory::produce(const GlobalCFrame& cframe, const PartProperties& properties, std::string name) const {
 	count++;
-	GlobalCFrame realCFrame = cframe.localToGlobal(CFrame(backTransform));
-	return new ExtendedPart(hitbox, visualShape, realCFrame, properties, drawMeshID, (name.empty()) ? this->name + " " + std::to_string(count) : name);
+	return new ExtendedPart(hitbox, cframe, properties, visualData, (name.empty()) ? this->name + " " + std::to_string(count) : name);
 }
 ExtendedPart* PartFactory::produce(const PartProperties& properties, std::string name) const {
 	return this->produce(GlobalCFrame(), properties, name);
@@ -21,8 +26,7 @@ ExtendedPart* PartFactory::produce(ExtendedPart* partToAttachTo, const CFrame& a
 
 ExtendedPart* PartFactory::produceScaled(const GlobalCFrame& cframe, const PartProperties& properties, double scaleX, double scaleY, double scaleZ, std::string name) const {
 	count++;
-	GlobalCFrame realCFrame = cframe.localToGlobal(CFrame(backTransform));
-	ExtendedPart* p = new ExtendedPart(hitbox, visualShape, realCFrame, properties, drawMeshID, (name.empty()) ? this->name + " " + std::to_string(count) : name);
+	ExtendedPart* p = new ExtendedPart(hitbox, cframe, properties, visualData, (name.empty()) ? this->name + " " + std::to_string(count) : name);
 	p->scale(scaleX, scaleY, scaleZ);
 	return p;
 }
@@ -36,7 +40,6 @@ ExtendedPart* PartFactory::produceScaled(ExtendedPart* partToAttachTo, const CFr
 }
 
 ExtendedPart* createUniquePart(Screen& screen, const Shape& hitbox, const VisualShape& visualShape, const GlobalCFrame& position, const PartProperties& properties, std::string name) {
-	ExtendedPart* partPtr = new ExtendedPart(hitbox, visualShape, position, properties, 0, name);
-	partPtr->drawMeshId = screen.addMeshShape(visualShape);
+	ExtendedPart* partPtr = new ExtendedPart(hitbox, position, properties, screen.addMeshShape(visualShape), name);
 	return partPtr;
 }

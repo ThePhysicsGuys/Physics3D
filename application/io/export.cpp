@@ -76,14 +76,14 @@ void saveNonBinaryWorld(const std::string& name, World<ExtendedPart>& world, Cam
 		const ExtendedPart& extendedPart = static_cast<const ExtendedPart&>(part);
 
 		std::string shape;
-		if (shapes.count(extendedPart.drawMeshId)) {
-			shape = shapes.at(extendedPart.drawMeshId);
+		if (shapes.count(extendedPart.visualData.drawMeshId)) {
+			shape = shapes.at(extendedPart.visualData.drawMeshId);
 		} else {
-			shape = "part_" + Export::str(extendedPart.drawMeshId);
-			shapes[extendedPart.drawMeshId] = shape;
+			shape = "part_" + Export::str(extendedPart.visualData.drawMeshId);
+			shapes[extendedPart.visualData.drawMeshId] = shape;
 
-			Log::info("Exporting %s", shape.c_str());
-			OBJExport::save(folder + "/" + shape + ".obj", extendedPart.visualShape);
+			//Log::info("Exporting %s", shape.c_str());
+			//OBJExport::save(folder + "/" + shape + ".obj", extendedPart.visualShape);
 		}
 
 		savePart(output, extendedPart, shape);

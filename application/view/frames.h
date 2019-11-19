@@ -385,7 +385,7 @@ struct PropertiesFrame : public FrameBlueprint, public Frame {
 		PlayerWorld* world = screen.world;
 
 		if (selectedPart) {
-			partMeshIDLabel->text = "MeshID: " + str(selectedPart->drawMeshId);
+			partMeshIDLabel->text = "MeshID: " + str(selectedPart->visualData.drawMeshId);
 
 			positionLabel->text = "Position: " + str(selectedPart->getCFrame().position);
 			partNameLabel->text = "Name: " + selectedPart->name;
