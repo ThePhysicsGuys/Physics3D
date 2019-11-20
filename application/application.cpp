@@ -35,7 +35,7 @@
 #include "../engine/io/import.h"
 
 #define TICKS_PER_SECOND 120.0
-#define TICK_SKIP_TIME std::chrono::milliseconds(10)
+#define TICK_SKIP_TIME std::chrono::milliseconds(1000)
 
 
 TickerThread physicsThread;
@@ -120,7 +120,7 @@ void setupWorld() {
 	WorldBuilder::SpiderFactory spiderFactories[]{ {0.5, 3},{0.5, 4},{0.5, 5},{0.5, 6} };
 	Shape triangle(Library::trianglePyramid);
 
-	WorldBuilder::buildFloorAndWalls(50.0, 50.0, 7.0);
+	WorldBuilder::buildFloorAndWalls(50.0, 50.0, 1.0);
 
 	world.addPart(new ExtendedPart(Sphere(2.0), GlobalCFrame(10, 3, 10), {1.0, 0.3, 0.7}, "SphereThing"));
 
@@ -175,13 +175,12 @@ void setupWorld() {
 		}
 	}
 
-	WorldBuilder::buildTerrain(500.0, 500.0);
+	WorldBuilder::buildTerrain(250.0, 250.0);
 	world.optimizeTerrain();
 
 	// Player
-	screen.camera.attachment = new ExtendedPart(Library::createPrism(50, 1.0, 2.0), GlobalCFrame(), { 1.0, 5.0, 0.0 }, "Player");
-	screen.camera.attachment->properties.conveyorEffect = Vec3(1.0, 0.0, 1.0);
-
+	screen.camera.attachment = new ExtendedPart(Library::createPrism(50, 0.3, 1.5), GlobalCFrame(), { 1.0, 5.0, 0.0 }, "Player");
+	
 	if (!world.isValid()) {
 		throw "World not valid!";
 	}

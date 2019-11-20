@@ -1,5 +1,7 @@
 #pragma once
 
+#include <chrono>
+
 #include "../eventHandler.h"
 #include "../util/properties.h"
 #include "../graphics/visualShape.h"
@@ -19,6 +21,7 @@ bool initGLFW();
 void terminateGLFW();
 
 class Screen {
+	std::chrono::time_point<std::chrono::steady_clock> lastUpdate = std::chrono::steady_clock::now();
 public:
 	static std::vector<IndexedMesh*> meshes;
 	static std::map<const ShapeClass*, VisualData> shapeClassMeshIds;

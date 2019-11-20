@@ -111,7 +111,7 @@ public:
 	void removeExternalForce(ExternalForce* force);
 
 
-	bool isValid() const;
+	virtual bool isValid() const;
 
 	IteratorFactory<PhysicalIter> iterPhysicals() { return IteratorFactory<PhysicalIter>(physicals.begin(), physicals.end()); }
 	IteratorFactory<ConstPhysicalIter> iterPhysicals() const { return IteratorFactory<ConstPhysicalIter>(physicals.begin(), physicals.end()); }

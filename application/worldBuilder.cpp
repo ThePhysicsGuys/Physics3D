@@ -16,9 +16,13 @@ namespace WorldBuilder {
 
 
 	Shape wedge;
+	Shape treeTrunk;
+	Shape icosahedron;
 
 	void init() {
 		wedge = Shape(Library::wedge);
+		treeTrunk = Shape(Library::createPrism(7, 0.5, 11.0));
+		icosahedron= Shape(Library::icosahedron);
 	}
 
 	void createDominoAt(Position pos, Mat3 rotation) {
@@ -111,13 +115,39 @@ namespace WorldBuilder {
 	}
 
 	double getYOffset(double x, double z) {
-		return -10 * cos(x / 30.0 + z / 20.0) - 7 * sin(-x / 25.0 + z / 17.0 + 2.4) + 2 * sin(x / 4.0 + z / 7.0) + sin(x / 9.0 - z / 3.0) + sin(-x / 3.0 + z / 5.0);
+		double regimeYOffset = -10 * cos(x / 30.0 + z / 20.0) - 7 * sin(-x / 25.0 + z / 17.0 + 2.4) + 2 * sin(x / 4.0 + z / 7.0) + sin(x / 9.0 - z / 3.0) + sin(-x / 3.0 + z / 5.0);
+		double distFromOriginSq = x * x + z * z;
+		if(distFromOriginSq < 5000.0) {
+			double factor = distFromOriginSq / 5000.0;
+			return regimeYOffset * factor + (1-factor) * -5;
+		} else {
+			return regimeYOffset;
+		}
+	}
+
+	void buildTree(Position treePos) {
+		GlobalCFrame trunkCFrame(treePos, fromEulerAngles(fRand(-0.1, 0.1), fRand(-3.1415, 3.1415), fRand(-0.1, 0.1)));
+
+		ExtendedPart* trunk = new ExtendedPart(treeTrunk, trunkCFrame, {1.0, 1.0, 0.3}, "trunk");
+		trunk->material.ambient = GUI::COLOR::get(0x654321);
+		world.addTerrainPart(trunk);
+
+		Position treeTop = trunkCFrame.localToGlobal(Vec3(0.0, 5.5, 0.0));
+
+
+		for(int j = 0; j < 15; j++) {
+			GlobalCFrame leavesCFrame(treeTop + Vec3(fRand(-1.0, 1.0), fRand(-1.0, 1.0), fRand(-1.0, 1.0)), fromEulerAngles(fRand(0.0, 3.1415), fRand(0.0, 3.1415), fRand(0.0, 3.1415)));
+			ExtendedPart* leaves = new ExtendedPart(icosahedron.scaled(2.1, 1.9, 1.7), leavesCFrame, {1.0, 1.0, 0.3}, "trunk");
+
+			leaves->material.ambient = Vec4(fRand(-0.2, 0.2), 0.6 + fRand(-0.2, 0.2), 0.0, 1.0);
+
+			world.addTerrainPart(leaves);
+		}
 	}
 
 	void buildTerrain(double width, double depth) {
 		Log::debug("Starting basic terrain building!");
-		Shape treeTrunk(Library::createPrism(7, 0.5, 11.0));
-		Shape icosahedron(Library::icosahedron);
+
 		for(double x = -width/2; x < width/2; x+=3.0) {
 			for(double z = -depth/2; z < depth/2; z+=3.0) {
 				double yOffset = getYOffset(x, z);
@@ -128,34 +158,19 @@ namespace WorldBuilder {
 				world.addTerrainPart(newPart);
 			}
 		}
+		
+
 
 		Log::debug("Finished terrain, adding trees!");
 		for(int i = 0; i < width * depth / 70; i++) {
 			double x = fRand(-width/2, width/2);
 			double z = fRand(-depth/2, depth/2);
 
+			if(abs(x) < 30.0 && abs(z) < 30.0) continue;
 
 			Position treePos(x, getYOffset(x, z) + 8.0, z);
 
-			GlobalCFrame trunkCFrame(treePos, fromEulerAngles(fRand(-0.1, 0.1), fRand(-3.1415, 3.1415), fRand(-0.1, 0.1)));
-
-			ExtendedPart* trunk = new ExtendedPart(treeTrunk, trunkCFrame, {1.0, 1.0, 0.3}, "trunk");
-			trunk->material.ambient = GUI::COLOR::get(0x654321);
-			world.addTerrainPart(trunk);
-
-			Position treeTop = trunkCFrame.localToGlobal(Vec3(0.0, 5.5, 0.0));
-
-
-			for(int j = 0; j < 15; j++) {
-
-				GlobalCFrame leavesCFrame(treeTop + Vec3(fRand(-1.0, 1.0), fRand(-1.0, 1.0), fRand(-1.0, 1.0)), fromEulerAngles(fRand(0.0, 3.1415), fRand(0.0, 3.1415), fRand(0.0, 3.1415)));
-				ExtendedPart* leaves = new ExtendedPart(icosahedron.scaled(2.1, 1.9, 1.7), leavesCFrame, {1.0, 1.0, 0.3}, "trunk");
-
-				leaves->material.ambient = Vec4(fRand(-0.2, 0.2), 0.6 + fRand(-0.2, 0.2), 0.0, 1.0);
-
-				world.addTerrainPart(leaves);
-			}
-
+			buildTree(treePos);
 		}
 	}
 	void buildCar(const GlobalCFrame& location) {
