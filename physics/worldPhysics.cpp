@@ -125,7 +125,7 @@ void handleTerrainCollision(Part& part1, Part& part2, Position collisionPoint, V
 	p1.applyForce(collissionRelP1, depthForce);
 
 
-	Vec3 relativeVelocity = p1.getVelocityOfPoint(collissionRelP1) - part1.properties.conveyorEffect + part2.properties.conveyorEffect;
+	Vec3 relativeVelocity = p1.getVelocityOfPoint(collissionRelP1) - part1.properties.conveyorEffect + part2.getCFrame().localToRelative(part2.properties.conveyorEffect);
 
 	bool isImpulseColission = relativeVelocity * exitVector > 0;
 
@@ -139,7 +139,7 @@ void handleTerrainCollision(Part& part1, Part& part2, Position collisionPoint, V
 		Vec3 zeroRelVelImpulse = desiredAccel * inertia;
 		impulse = zeroRelVelImpulse * (1.0 + combinedBouncyness);
 		p1.applyImpulse(collissionRelP1, impulse);
-		relativeVelocity = p1.getVelocityOfPoint(collissionRelP1) - part1.properties.conveyorEffect + part2.properties.conveyorEffect; // set new relativeVelocity
+		relativeVelocity = p1.getVelocityOfPoint(collissionRelP1) - part1.properties.conveyorEffect + part2.getCFrame().localToRelative(part2.properties.conveyorEffect); // set new relativeVelocity
 	}
 
 	Vec3 slidingVelocity = exitVector % relativeVelocity % exitVector / lengthSquared(exitVector);

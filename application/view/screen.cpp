@@ -30,6 +30,8 @@
 #include "layer/debugLayer.h"
 #include "layer/debugOverlay.h"
 
+#include "../physics/geometry/shapeClass.h"
+
 #include "frames.h"
 
 std::vector<IndexedMesh*> Screen::meshes;

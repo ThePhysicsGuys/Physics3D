@@ -3,6 +3,7 @@
 #include "../geometry/polyhedronInternals.h"
 #include "../part.h"
 #include "../geometry/shape.h"
+#include "../geometry/shapeClass.h"
 
 void serialize(const char* data, size_t size, std::ostream& ostream) {
 	ostream.write(data, size);

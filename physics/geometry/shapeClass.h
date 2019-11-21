@@ -33,5 +33,14 @@ public:
 
 	virtual Polyhedron asPolyhedron() const = 0;
 
+	// these functions determine the relations between the axes, for example, for Sphere, all axes must be equal
+	virtual void setScaleX(double newX, DiagonalMat3& scale) const;
+	virtual void setScaleY(double newY, DiagonalMat3& scale) const;
+	virtual void setScaleZ(double newZ, DiagonalMat3& scale) const;
+
 	static const ShapeClass* getShapeClassForId(int classID);
 };
+
+extern const ShapeClass* const sphereClass;
+extern const ShapeClass* const boxClass;
+extern const ShapeClass* const cylinderClass;

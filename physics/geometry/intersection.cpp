@@ -9,7 +9,7 @@
 #include "polyhedron.h"
 
 #include "../integrityCheck.h"
-
+#include "shapeClass.h"
 
 Intersection intersectsTransformed(const Shape& first, const Shape& second, const CFrame& relativeTransform) {
 	return intersectsTransformed(*first.baseShape, *second.baseShape, relativeTransform, first.scale, second.scale);

@@ -18,6 +18,7 @@ namespace WorldBuilder {
 	void buildCar(const GlobalCFrame& location);
 	void buildFloor(double width, double depth);
 	void buildFloorAndWalls(double width, double depth, double wallHeight);
+	void buildConveyor(double width, double length, const GlobalCFrame& cframe, double speed);
 
 	struct HollowBoxParts {
 		ExtendedPart* bottom;

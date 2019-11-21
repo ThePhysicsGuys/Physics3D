@@ -101,19 +101,143 @@ static struct SphereClass : public ShapeClass {
 		return scale[0] * scale[0];
 	}
 
+	virtual double getScaledMaxRadius(DiagonalMat3 scale) const {
+		return scale[0];
+	}
+
 	virtual Vec3f furthestInDirection(const Vec3f& direction) const {
 		return normalize(direction);
 	}
 
 	virtual Polyhedron asPolyhedron() const {
-		return Library::createSphere(2.0, 3);
+		return Library::createSphere(1.0, 3);
+	}
+
+	void setScaleX(double newX, DiagonalMat3& scale) const override {
+		scale[0] = newX;
+		scale[1] = newX;
+		scale[2] = newX;
+	}
+	void setScaleY(double newY, DiagonalMat3& scale) const override {
+		scale[0] = newY;
+		scale[1] = newY;
+		scale[2] = newY;
+	}
+	void setScaleZ(double newZ, DiagonalMat3& scale) const override {
+		scale[0] = newZ;
+		scale[1] = newZ;
+		scale[2] = newZ;
+	}
+};
+
+static struct CylinderClass : public ShapeClass {
+	/*
+	Inertia of cyllinder: 
+		z = V * 1/2
+		x, y = V * 7/12
+
+		X = y + z = 7/12
+		Y = x + z = 7/12
+		Z = x + y = 1/2
+
+		x = 1/4 * M_PI * 2
+		y = 1/4 * M_PI * 2
+		z = 1/3 * M_PI * 2
+	*/
+
+	CylinderClass() : ShapeClass(M_PI * 2.0, Vec3(0, 0, 0), ScalableInertialMatrix(Vec3(M_PI / 2.0, M_PI / 2.0, M_PI * 2.0/3.0), Vec3(0, 0, 0)), 2) {};
+
+	virtual bool containsPoint(Vec3 point) const {
+		return abs(point.z) <= 1.0 && point.x * point.x + point.y + point.y <= 1.0;
+	}
+
+	virtual double getIntersectionDistance(Vec3 origin, Vec3 direction) const {
+		Vec2 xyOrigin(origin.x, origin.y);
+		Vec2 xyDirection(direction.x, direction.y);
+
+		//o*o + o*d*t + o*d*t + t*t*d*d
+		double c = xyOrigin * xyOrigin - 1;
+		double b = xyOrigin * xyDirection;
+		double a = xyDirection * xyDirection;
+
+		// solve a*t^2 + 2*b*t + c
+		double D = b * b - a * c;
+		if(D >= 0) {
+			double t = (-b + -sqrt(D)) / a;
+			double z = origin.z + t * direction.z;
+			if(abs(z) <= 1.0) {
+				return t;
+			} else {
+				// origin + t * direction = 1 => t = (1-origin)/direction
+				
+				double t2 = (((origin.z >= 0)?1:-1) - origin.z) / direction.z;
+
+				double x = origin.x + t2 * direction.x;
+				double y = origin.y + t2 * direction.y;
+
+				if(x * x + y * y <= 1.0) {
+					return t2;
+				} else {
+					return INFINITY;
+				}
+			}
+		} else {
+			return INFINITY;
+		}
+	}
+
+	virtual BoundingBox getBounds(const RotMat3& rotation, const DiagonalMat3& scale) const {
+		double height = scale[2];
+		double radius = scale[0];
+
+		Vec3 normalizedZVector = abs(rotation.getCol(2));
+		Vec3 zVector = normalizedZVector * height;
+
+		double extraX = sqrt(1 - normalizedZVector.x * normalizedZVector.x);
+		double extraY = sqrt(1 - normalizedZVector.y * normalizedZVector.y);
+		double extraZ = sqrt(1 - normalizedZVector.z * normalizedZVector.z);
+
+		double x = zVector.x + extraX * radius;
+		double y = zVector.y + extraY * radius;
+		double z = zVector.z + extraZ * radius;
+
+		return BoundingBox{-x, -y, -z, x, y, z};
+	}
+
+	virtual double getScaledMaxRadiusSq(DiagonalMat3 scale) const {
+		return scale[0] * scale[0] + scale[2] * scale[2];
+	}
+
+	virtual Vec3f furthestInDirection(const Vec3f& direction) const {
+		float normalizer = sqrt(direction.x * direction.x + direction.y * direction.y);
+		return Vec3f(direction.x / normalizer, direction.y / normalizer, (direction.z >= 0.0f) ? 1.0f : -1.0f);
+	}
+
+	virtual Polyhedron asPolyhedron() const {
+		return Library::createZPrism(64, 1.0, 2.0);
+	}
+
+	void setScaleX(double newX, DiagonalMat3& scale) const override {
+		scale[0] = newX;
+		scale[1] = newX;
+	}
+	void setScaleY(double newY, DiagonalMat3& scale) const override {
+		scale[0] = newY;
+		scale[1] = newY;
 	}
 };
 
 static const CubeClass box;
 static const SphereClass sphere;
+static const CylinderClass cylinder;
 
-static std::map<int, const ShapeClass*> knownShapeClasses{{0, &box}, {1, &sphere}};
+
+const ShapeClass* const sphereClass = &sphere;
+const ShapeClass* const boxClass = &box;
+const ShapeClass* const cylinderClass = &cylinder;
+
+
+static std::map<int, const ShapeClass*> knownShapeClasses{{0, &box}, {1, &sphere}, {2, &cylinder}};
 
 int newClassID() {
 	if(knownShapeClasses.empty()) return 0;
@@ -138,18 +262,24 @@ double ShapeClass::getScaledMaxRadius(DiagonalMat3 scale) const {
 	return sqrt(this->getScaledMaxRadiusSq(scale));
 }
 
-// radius 1 sphere
-//static ShapeClass sphere()
 
-//static const NormalizedPolyhedron sphere(Library::createSphere(1.0, 2).normalized());
+void ShapeClass::setScaleX(double newX, DiagonalMat3& scale) const {
+	scale[0] = newX;
+}
+void ShapeClass::setScaleY(double newY, DiagonalMat3& scale) const {
+	scale[1] = newY;
+}
+void ShapeClass::setScaleZ(double newZ, DiagonalMat3& scale) const {
+	scale[2] = newZ;
+}
 
 Shape Sphere(double radius) {
 	return Shape(&sphere, radius * 2, radius * 2, radius * 2);
 }
 
-/*Shape Cyllinder(double radius, double height) {
-
-}*/
+Shape Cylinder(double radius, double height) {
+	return Shape(&cylinder, radius * 2, radius * 2, height);
+}
 
 Shape Box(double width, double height, double depth) {
 	return Shape(&box, width, height, depth);

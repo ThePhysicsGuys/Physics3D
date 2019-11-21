@@ -3,6 +3,7 @@
 #include "polyhedron.h"
 #include "normalizedPolyhedron.h"
 #include "sphere.h"
+#include "shapeClass.h"
 
 #include "../misc/serialization.h"
 
@@ -47,4 +48,14 @@ Vec3f Shape::furthestInDirection(const Vec3f& direction) const {
 
 Polyhedron Shape::asPolyhedron() const {
 	return baseShape->asPolyhedron().scaled(scale);
+}
+
+void Shape::setWidth(double newWidth) {
+	baseShape->setScaleX(newWidth / 2, scale);
+}
+void Shape::setHeight(double newHeight) {
+	baseShape->setScaleY(newHeight / 2, scale);
+}
+void Shape::setDepth(double newDepth) {
+	baseShape->setScaleZ(newDepth / 2, scale);
 }

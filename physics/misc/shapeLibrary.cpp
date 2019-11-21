@@ -78,11 +78,46 @@ namespace Library {
 		return BoundingBox(width, height, length).toShape();
 	}
 
-	Polyhedron createPrism(int sides, double radius, double height) {
-		int vertexCount = sides * 2;
+	// Returns a new Triangle[sides * 2 + (sides - 2) * 2]
+	static Triangle* createPrismTriangles(int sides) {
 		int triangleCount = sides * 2 + (sides - 2) * 2;
-		Vec3f* vecBuf = new Vec3f[vertexCount];
 		Triangle* triangleBuf = new Triangle[triangleCount];
+
+		// sides
+		for(int i = 0; i < sides; i++) {
+			int botLeft = i * 2;
+			int botRight = ((i + 1) % sides) * 2;
+			triangleBuf[i * 2] = Triangle{botLeft, botLeft + 1, botRight}; // botLeft, botRight, topLeft
+			triangleBuf[i * 2 + 1] = Triangle{botRight + 1, botRight, botLeft + 1}; // topRight, topLeft, botRight
+		}
+
+		Triangle* capOffset = triangleBuf + sides * 2;
+		// top and bottom
+		for(int i = 0; i < sides - 2; i++) { // common corner is i=0
+			capOffset[i] = Triangle{0, (i + 1) * 2, (i + 2) * 2};
+			capOffset[i + (sides - 2)] = Triangle{1, (i + 2) * 2 + 1, (i + 1) * 2 + 1};
+		}
+
+		return triangleBuf;
+	}
+
+	Polyhedron createXPrism(int sides, double radius, double height) {
+		int vertexCount = sides * 2;
+		Vec3f* vecBuf = new Vec3f[vertexCount];
+
+		// vertices
+		for(int i = 0; i < sides; i++) {
+			double angle = i * PI * 2 / sides;
+			vecBuf[i * 2] = Vec3f(height / 2, cos(angle) * radius, sin(angle) * radius);
+			vecBuf[i * 2 + 1] = Vec3f(-height / 2, cos(angle) * radius, sin(angle) * radius);
+		}
+
+		return Polyhedron(vecBuf, createPrismTriangles(sides), vertexCount, sides * 2 + (sides - 2) * 2);
+	}
+
+	Polyhedron createYPrism(int sides, double radius, double height) {
+		int vertexCount = sides * 2;
+		Vec3f* vecBuf = new Vec3f[vertexCount];
 
 		// vertices
 		for (int i = 0; i < sides; i++) {
@@ -91,29 +126,46 @@ namespace Library {
 			vecBuf[i*2+1] = Vec3f(cos(angle) * radius, height / 2, sin(angle) * radius);
 		}
 
+		return Polyhedron(vecBuf, createPrismTriangles(sides), vertexCount, sides * 2 + (sides - 2) * 2);
+	}
+
+	Polyhedron createZPrism(int sides, double radius, double height) {
+		int vertexCount = sides * 2;
+		Vec3f* vecBuf = new Vec3f[vertexCount];
+
+		// vertices
+		for(int i = 0; i < sides; i++) {
+			double angle = i * PI * 2 / sides;
+			vecBuf[i * 2] = Vec3f(cos(angle) * radius, sin(angle) * radius, height / 2);
+			vecBuf[i * 2 + 1] = Vec3f(cos(angle) * radius, sin(angle) * radius, -height / 2);
+		}
+
+		return Polyhedron(vecBuf, createPrismTriangles(sides), vertexCount, sides * 2 + (sides - 2) * 2);
+	}
+
+	Triangle* createPointyPrismTriangles(int sides, int bottomIndex, int topIndex) {
+		int triangleCount = sides * 4;
+		Triangle* triangleBuf = new Triangle[triangleCount];
 		// sides
-		for (int i = 0; i < sides; i++) {
+		for(int i = 0; i < sides; i++) {
 			int botLeft = i * 2;
-			int botRight = ((i+1)%sides) * 2;
-			triangleBuf[i*2] = Triangle{ botLeft, botLeft + 1, botRight }; // botLeft, botRight, topLeft
-			triangleBuf[i*2 + 1] = Triangle{ botRight + 1, botRight, botLeft + 1 }; // topRight, topLeft, botRight
+			int botRight = ((i + 1) % sides) * 2;
+			triangleBuf[i * 2] = Triangle{botLeft, botLeft + 1, botRight}; // botLeft, botRight, topLeft
+			triangleBuf[i * 2 + 1] = Triangle{botRight + 1, botRight, botLeft + 1}; // topRight, topLeft, botRight
 		}
 
 		Triangle* capOffset = triangleBuf + sides * 2;
 		// top and bottom
-		for (int i = 0; i < sides - 2; i++) { // common corner is i=0
-			capOffset[i] = Triangle{ 0, (i + 1) * 2, (i + 2) * 2 };
-			capOffset[i + (sides-2)] = Triangle{ 1, (i + 2) * 2+1, (i + 1) * 2+1 };
+		for(int i = 0; i < sides; i++) { // common corner is i=0
+			capOffset[i] = Triangle{bottomIndex, i * 2, ((i + 1) % sides) * 2};
+			capOffset[i + sides] = Triangle{topIndex, ((i + 1) % sides) * 2 + 1, i * 2 + 1};
 		}
-
-		return Polyhedron(vecBuf, triangleBuf, vertexCount, triangleCount);
+		return triangleBuf;
 	}
 
 	Polyhedron createPointyPrism(int sides, double radius, double height, double topOffset, double bottomOffset) {
 		int vertexCount = sides * 2 + 2;
-		int triangleCount = sides * 4;
 		Vec3f* vecBuf = new Vec3f[vertexCount];
-		Triangle* triangleBuf = new Triangle[triangleCount];
 
 		// vertices
 		for (int i = 0; i < sides; i++) {
@@ -128,23 +180,9 @@ namespace Library {
 		vecBuf[bottomIndex] = Vec3f(0, -height / 2 - bottomOffset, 0);
 		vecBuf[topIndex] = Vec3f(0, height / 2 + topOffset, 0);
 
+		Triangle* triangleBuf = createPointyPrismTriangles(sides, bottomIndex, topIndex);
 
-		// sides
-		for (int i = 0; i < sides; i++) {
-			int botLeft = i * 2;
-			int botRight = ((i + 1) % sides) * 2;
-			triangleBuf[i * 2] = Triangle{ botLeft, botLeft + 1, botRight }; // botLeft, botRight, topLeft
-			triangleBuf[i * 2 + 1] = Triangle{ botRight + 1, botRight, botLeft + 1 }; // topRight, topLeft, botRight
-		}
-
-		Triangle* capOffset = triangleBuf + sides * 2;
-		// top and bottom
-		for (int i = 0; i < sides; i++) { // common corner is i=0
-			capOffset[i] = Triangle{ bottomIndex, i * 2, ((i+1) % sides) * 2 };
-			capOffset[i + sides] = Triangle{ topIndex, ((i + 1) % sides) * 2 + 1, i * 2 + 1 };
-		}
-
-		return Polyhedron(vecBuf, triangleBuf, vertexCount, triangleCount);
+		return Polyhedron(vecBuf, triangleBuf, vertexCount, sides * 4);
 	}
 
 	// divides every triangle into 4 smaller triangles

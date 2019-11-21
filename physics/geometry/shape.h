@@ -6,9 +6,10 @@
 #include "../math/linalg/mat.h"
 #include "../math/cframe.h"
 #include "../math/transform.h"
-#include "shapeClass.h"
 
 #include <iosfwd>
+
+class ShapeClass;
 
 class Shape {
 	Shape(const ShapeClass* baseShape, DiagonalMat3 scale);
@@ -29,9 +30,9 @@ public:
 	inline double getHeight() const { return scale[1] * 2; }
 	inline double getDepth() const { return scale[2] * 2; }
 
-	inline void setWidth(double newWidth) { scale[0] = newWidth / 2; }
-	inline void setHeight(double newHeight) { scale[1] = newHeight / 2; }
-	inline void setDepth(double newDepth) { scale[2] = newDepth / 2; }
+	void setWidth(double newWidth);
+	void setHeight(double newHeight);
+	void setDepth(double newDepth);
 
 	Shape scaled(double scaleX, double scaleY, double scaleZ) const;
 	

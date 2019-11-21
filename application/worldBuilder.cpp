@@ -145,9 +145,25 @@ namespace WorldBuilder {
 		}
 	}
 
-	void buildTerrain(double width, double depth) {
-		Log::debug("Starting basic terrain building!");
+	void buildConveyor(double width, double length, const GlobalCFrame& cframe, double speed) {
+		ExtendedPart* conveyor = new ExtendedPart(Box(width, 0.3, length), cframe, {1.0, 0.8, 0.0, Vec3(0.0, 0.0, speed)}, "Conveyor");
+		conveyor->material.ambient = Vec4f(0.2, 0.2, 0.2, 1.0);
+		world.addTerrainPart(conveyor);
+		ExtendedPart* leftWall = new ExtendedPart(Box(0.2, 0.6, length), cframe.localToGlobal(CFrame(-width/2 - 0.1, 0.1, 0.0)), {1.0, 0.4, 0.3, Vec3(0.0, 0.0, 0.0)}, "Wall");
+		world.addTerrainPart(leftWall);
+		ExtendedPart* rightWall = new ExtendedPart(Box(0.2, 0.6, length), cframe.localToGlobal(CFrame(width / 2 + 0.1, 0.1, 0.0)), {1.0, 0.4, 0.3, Vec3(0.0, 0.0, 0.0)}, "Wall");
+		world.addTerrainPart(rightWall);
+	}
 
+	void buildTerrain(double width, double depth) {
+		Log::subject s("Terrain");
+		Log::info("Starting terrain building!");
+
+		int maxProgress = 10;
+
+		int lastProgress = 0;
+
+		Log::info("0%%");
 		for(double x = -width/2; x < width/2; x+=3.0) {
 			for(double z = -depth/2; z < depth/2; z+=3.0) {
 				double yOffset = getYOffset(x, z);
@@ -157,11 +173,20 @@ namespace WorldBuilder {
 				newPart->material.ambient = Vec4(0.0, yOffset / 40.0 + 0.5, 0.0, 1.0);
 				world.addTerrainPart(newPart);
 			}
+
+			double progress = (x + width / 2) / width;
+
+			int progressToInt = progress * maxProgress;
+
+			if(progressToInt > lastProgress) {
+				Log::info("%d%%", int(progressToInt * 100.0 / maxProgress));
+			}
+			lastProgress = progressToInt;
 		}
-		
+		Log::info("100%%");
 
 
-		Log::debug("Finished terrain, adding trees!");
+		Log::info("Finished terrain, adding trees!");
 		for(int i = 0; i < width * depth / 70; i++) {
 			double x = fRand(-width/2, width/2);
 			double z = fRand(-depth/2, depth/2);
@@ -172,6 +197,8 @@ namespace WorldBuilder {
 
 			buildTree(treePos);
 		}
+		Log::info("Optimizing terrain! (This will take around 1.5x the time it took to build the world)");
+		world.optimizeTerrain();
 	}
 	void buildCar(const GlobalCFrame& location) {
 		PartProperties carProperties{1.0, 0.7, 0.3};
