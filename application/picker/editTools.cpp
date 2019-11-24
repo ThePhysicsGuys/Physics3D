@@ -27,7 +27,7 @@ Mat3 transformations[] = {
 };
 
 // Render variables
-Line* line = nullptr;
+LinePrimitive* line = nullptr;
 
 IndexedMesh* rotateMesh = nullptr;
 VisualShape rotateShape;
@@ -46,7 +46,7 @@ VisualShape scaleShape;
 void EditTools::onInit() {
 
 	// Edit line init
-	line = new Line();
+	line = new LinePrimitive();
 	line->resize(Vec3f(0, -100000, 0), Vec3f(0, 100000, 0));
 
 	// Rotate shape init

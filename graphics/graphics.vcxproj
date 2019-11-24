@@ -166,6 +166,8 @@
     <ClCompile Include="gui\layout.cpp" />
     <ClCompile Include="gui\panel.cpp" />
     <ClCompile Include="gui\slider.cpp" />
+    <ClCompile Include="gui\text.cpp" />
+    <ClCompile Include="gui\text.h" />
     <ClCompile Include="material.cpp" />
     <ClCompile Include="meshLibrary.cpp" />
     <ClCompile Include="mesh\abstractMesh.cpp" />

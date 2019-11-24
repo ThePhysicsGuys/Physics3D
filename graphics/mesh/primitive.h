@@ -104,7 +104,7 @@ struct Quad : public Primitive {
 
 // Line
 
-struct Line : public Primitive {
+struct LinePrimitive : public Primitive {
 
 	void resize(Vec3f p1, Vec3f p2) {
 		float vertices[2][3] = {
@@ -124,7 +124,7 @@ struct Line : public Primitive {
 		Primitive::resize(vertices);
 	}
 
-	Line() : Primitive(3, 2) {
+	LinePrimitive() : Primitive(3, 2) {
 		resize(Vec3f(-1), Vec3f(1));
 	}
 

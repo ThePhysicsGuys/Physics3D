@@ -59,8 +59,8 @@ Font::Font(std::string font) {
 	char* pixels = (char*)calloc(atlasDimension * atlasDimension * 4, 1);
 
 	// Render glyphs to atlas
-	for (unsigned char c = 0; c < CHARACTER_COUNT; c++) {
-		if (FT_Load_Char(face, c, FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT | FT_LOAD_TARGET_LIGHT)) {
+	for (unsigned char character = 0; character < CHARACTER_COUNT; character++) {
+		if (FT_Load_Char(face, character, FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT | FT_LOAD_TARGET_LIGHT)) {
 			Log::error("FREETYTPE: Failed to load Glyph");
 			continue;
 		}
@@ -83,7 +83,8 @@ Font::Font(std::string font) {
 			}
 		}
 
-		characters[c] = Character(
+		characters[character] = Character(
+			character,
 			penX,
 			penY,
 			bitmap->width,
@@ -130,7 +131,7 @@ void Font::close() {
 	atlas.close();
 }
 
-Vec2f Font::size(const std::string& text, double size) {
+Vec2f Font::size(const std::string& text, double fontSize) {
 	std::string::const_iterator iterator;
 	float width = 0.0f;
 	float height = 0.0f;
@@ -139,16 +140,23 @@ Vec2f Font::size(const std::string& text, double size) {
 		Character& character = characters[*iterator];
 		float advance = character.advance >> 6;
 		if (iterator == text.begin())
-			width += (advance - character.bearing.x) * size;
+			width += (advance - character.bearing.x) * fontSize;
 		else if (iterator == text.end() - 1)
-			width += (character.bearing.x + character.size.x) * size;
+			width += (character.bearing.x + character.size.x) * fontSize;
  		else 
-			width += advance * size;
+			width += advance * fontSize;
 		
-		height = fmax(character.size.y * size, height);
+		height = fmax(character.size.y * fontSize, height);
 	}
 	
 	return Vec2f(width, height);
+}
+
+Character& Font::getCharacter(unsigned int id) {
+	if (id >= CHARACTER_COUNT)
+		return characters[32];
+
+	return characters[id];
 }
 
 unsigned int Font::getAtlasID() const {
