@@ -72,21 +72,19 @@ void saveNonBinaryWorld(const std::string& name, World<ExtendedPart>& world, Cam
 
 	std::map<int, std::string> shapes;
 
-	for (const Part& part : world) {
-		const ExtendedPart& extendedPart = static_cast<const ExtendedPart&>(part);
-
+	for (const ExtendedPart& part : world.iterPartsFiltered(DoNothingFilter<Part>(), ALL_PARTS)) {
 		std::string shape;
-		if (shapes.count(extendedPart.visualData.drawMeshId)) {
-			shape = shapes.at(extendedPart.visualData.drawMeshId);
+		if (shapes.count(part.visualData.drawMeshId)) {
+			shape = shapes.at(part.visualData.drawMeshId);
 		} else {
-			shape = "part_" + Export::str(extendedPart.visualData.drawMeshId);
-			shapes[extendedPart.visualData.drawMeshId] = shape;
+			shape = "part_" + Export::str(part.visualData.drawMeshId);
+			shapes[part.visualData.drawMeshId] = shape;
 
 			//Log::info("Exporting %s", shape.c_str());
 			//OBJExport::save(folder + "/" + shape + ".obj", extendedPart.visualShape);
 		}
 
-		savePart(output, extendedPart, shape);
+		savePart(output, part, shape);
 	}
 
 	Log::info("World exported");

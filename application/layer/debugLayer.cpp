@@ -154,8 +154,8 @@ void DebugLayer::onRender() {
 	AddableBuffer<ColoredVector>& vecLog = getVectorBuffer();
 	AddableBuffer<ColoredPoint>& pointLog = getPointBuffer();
 
-	for(const Physical& physical : screen->world->iterPhysicals()) {
-		pointLog.add(ColoredPoint(physical.getCenterOfMass(), CENTER_OF_MASS));
+	for(const MotorizedPhysical* physical : screen->world->iterPhysicals()) {
+		pointLog.add(ColoredPoint(physical->getCenterOfMass(), CENTER_OF_MASS));
 	}
 
 	screen->world->syncReadOnlyOperation([this, &vecLog]() {
@@ -189,8 +189,8 @@ void DebugLayer::onRender() {
 		}
 
 		if(colissionSpheresMode == SphereColissionRenderMode::ALL) {
-			for(Physical& phys : screen->world->iterPhysicals()) {
-				for(Part& part : phys) {
+			for(MotorizedPhysical* phys : screen->world->iterPhysicals()) {
+				for(Part& part : *phys) {
 					Vec4f yellow = GUI::COLOR::YELLOW;
 					yellow.w = 0.5;
 					BoundingBox localBounds = part.getLocalBounds();

@@ -87,8 +87,6 @@ bool StandardInputHandler::onKeyPress(KeyPressEvent& event) {
 				Physical* parent = screen.selectedPart->parent;
 				parent->velocity = Vec3();
 				parent->angularVelocity = Vec3();
-				parent->totalForce = Vec3();
-				parent->totalMoment = Vec3();
 				screen.selectedPart->parent->setAnchored(true);
 			}
 		}

@@ -111,7 +111,7 @@ void Part::setDepth(double newDepth) {
 
 void Part::attach(Part& other, const CFrame& relativeCFrame) {
 	if (this->parent == nullptr) {
-		this->parent = new Physical(this);
+		this->parent = new MotorizedPhysical(this);
 		this->parent->attachPart(&other, relativeCFrame);
 	} else {
 		if (this->parent->mainPart == this) {

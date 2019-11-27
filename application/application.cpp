@@ -238,7 +238,7 @@ void setupWorld(int argc, const char** args) {
 		}
 	}
 
-	WorldBuilder::buildTerrain(250.0, 250.0);
+	//WorldBuilder::buildTerrain(250.0, 250.0);
 
 
 	ExtendedPart* ropeStart = new ExtendedPart(Box(2.0, 1.5, 0.7), GlobalCFrame(10.0, 2.0, -10.0), {1.0, 0.7, 0.3}, "RopeA");
@@ -342,7 +342,7 @@ void toggleFlying() {
 			screen.camera.flying = false;
 			screen.camera.attachment->setCFrame(GlobalCFrame(screen.camera.cframe.getPosition()));
 			screen.world->addPart(screen.camera.attachment);
-			screen.camera.attachment->parent->momentResponse = SymmetricMat3::ZEROS();
+			screen.camera.attachment->parent->mainPhysical->momentResponse = SymmetricMat3::ZEROS();
 		} else {
 			screen.world->removePart(screen.camera.attachment);
 			screen.camera.flying = true;
