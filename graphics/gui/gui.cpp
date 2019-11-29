@@ -430,8 +430,8 @@ namespace GUI {
 	bool onWindowResize(const WindowInfo& info) {
 		GUI::windowInfo = info;
 		
-		guiFrameBuffer->resize(info.dimension);
-		blurFrameBuffer->resize(info.dimension);
+		GUI::guiFrameBuffer->resize(info.dimension);
+		GUI::blurFrameBuffer->resize(info.dimension);
 
 		return false;
 	}
@@ -445,10 +445,10 @@ namespace GUI {
 		GraphicsShaders::quadShader.updateProjection(orthoMatrix);
 		GraphicsShaders::quadShader.updateTexture(screenFrameBuffer->texture);
 		quad->render();
-		GraphicsShaders::blurShader.updateTexture(blurFrameBuffer->texture);
-		GraphicsShaders::blurShader.updateType(BlurShader::BlurType::HORIZONTAL);
-		quad->render();
-		GraphicsShaders::blurShader.updateType(BlurShader::BlurType::VERTICAL);
+		GraphicsShaders::horizontalBlurShader.updateTexture(blurFrameBuffer->texture);
+		GraphicsShaders::horizontalBlurShader.updateWidth(windowInfo.dimension.x);
+		GraphicsShaders::verticalBlurShader.updateTexture(blurFrameBuffer->texture);
+		GraphicsShaders::verticalBlurShader.updateWidth(windowInfo.dimension.y);
 		quad->render();
 		blurFrameBuffer->unbind();
 

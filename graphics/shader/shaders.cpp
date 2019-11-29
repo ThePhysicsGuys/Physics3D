@@ -11,48 +11,162 @@
 namespace GraphicsShaders {
 	GuiShader guiShader;
 	QuadShader quadShader;
-	BlurShader blurShader;
+	BlurShader horizontalBlurShader;
+	BlurShader verticalBlurShader;
 
 	void onInit() {
 		std::string guiShaderSourceFile =
-			"[common]\n\r"
-			"#version 330 core\n\r"
-			"[vertex]\n\r"
-			"layout(location = 0) in vec2 vposition;layout(location = 1) in vec2 vuv;layout(location = 2) in vec4 vcolor;uniform mat4 projectionMatrix;out vec4 fcolor;out vec2 fuv;void main() {gl_Position = projectionMatrix * vec4(vposition, 0.0, 1.0);fcolor = vcolor;fuv = vuv;}\n\r"
-			"[fragment]\n\r"
-			"out vec4 outColor;in vec2 fuv;in vec4 fcolor;uniform sampler2D textureSampler;uniform bool textured = false;void main() {outColor = (textured) ? texture(textureSampler, fuv) * fcolor : fcolor;}\n\r";
+			R"(
+			[common]
+			#version 330 core
+			[vertex]
+			layout(location = 0) in vec2 vposition;
+			layout(location = 1) in vec2 vuv;
+			layout(location = 2) in vec4 vcolor;
+			uniform mat4 projectionMatrix;
+			out vec4 fcolor;out vec2 fuv;
+			void main() {
+				gl_Position = projectionMatrix * vec4(vposition, 0.0, 1.0);
+				fcolor = vcolor;fuv = vuv;
+			}
+			[fragment]
+			out vec4 outColor;
+			in vec2 fuv;
+			in vec4 fcolor;
+			uniform sampler2D textureSampler;
+			uniform bool textured = false;
+			void main() {
+				outColor = (textured) ? texture(textureSampler, fuv) * fcolor : fcolor;
+			}
+		)";
 
 		std::string quadShaderSourceFile =
-			"[common]\n\r"
-			"#version 330 core\n\r"
-			"[vertex]\n\r"
-			"layout(location = 0) in vec4 vposition;uniform mat4 projectionMatrix;out vec2 fUV;void main() {gl_Position = projectionMatrix * vec4(vposition.xy, 0.0, 1.0);fUV = vposition.zw;}\n\r"
-			"[fragment]\n\r"
-			"out vec4 outColor;in vec2 fUV;uniform bool textured;uniform sampler2D textureSampler;uniform vec4 color = vec4(1, 1, 1, 1);void main() {outColor = (textured) ? texture(textureSampler, fUV) * color : color;}\n\r";
+		R"(
+			[common]
+			#version 330 core
+			[vertex]
+			layout(location = 0) 
+			in vec4 vposition;
+			uniform mat4 projectionMatrix;
+			out vec2 fUV;
+			void main() {
+				gl_Position = projectionMatrix * vec4(vposition.xy, 0.0, 1.0);fUV = vposition.zw;
+			}
+			[fragment]
+			out vec4 outColor;
+			in vec2 fUV;
+			uniform bool textured;
+			uniform sampler2D textureSampler;
+			uniform vec4 color = vec4(1, 1, 1, 1);
+			void main() {
+				outColor = (textured) ? texture(textureSampler, fUV) * color : color;
+			}
+		)";
 
-		std::string blurShaderSourceFile =
-			"[common]\n\r"
-			"#version 330 core\n\r"
-			"[vertex]\n\r"
-			"layout(location = 0) in vec4 positions;out vec2 fUV;void main() {gl_Position = vec4(positions.xy, 0.0, 1.0);fUV = positions.zw;}\n\r"
-			"[fragment]\n\r"
-			"out vec4 outColor;in vec2 fUV;uniform sampler2D image;uniform bool horizontal;uniform float weight[5] = { 0.227027f, 0.1945946f, 0.1216216f, 0.054054f, 0.016216f };void main() {vec2 offset = 4.0 / textureSize(image, 0);vec3 result = texture(image, fUV).rgb * weight[0];if (horizontal) {for (int i = 1; i < 5; ++i) {result += texture(image, fUV + vec2(offset.x * i, 0.0)).rgb * weight[i];result += texture(image, fUV - vec2(offset.x * i, 0.0)).rgb * weight[i];}}else {for (int i = 1; i < 5; ++i) {result += texture(image, fUV + vec2(0.0, offset.y * i)).rgb * weight[i];result += texture(image, fUV - vec2(0.0, offset.y * i)).rgb * weight[i];}}outColor = vec4(result, 1.0);}\n\r";
+		std::string horizontalBlurShaderVertexSourceFile =
+		R"(
+			[common]
+			#version 330
+			[vertex]
+			layout(location = 0) in vec2 vposition;
+			out vec2 fUV[15];
+			uniform float width = 3.0;
+			void main() {
+				float part = 1.0 / width;
+				vec2 UV = vposition * 0.5 + 0.5;
+				gl_Position = vec4(vposition, 0.0, 1.0);
+				fUV[0]  = UV + vec2(0.0, -part * 7.0);
+				fUV[1]  = UV + vec2(0.0, -part * 6.0);
+				fUV[2]  = UV + vec2(0.0, -part * 5.0);
+				fUV[3]  = UV + vec2(0.0, -part * 4.0);
+				fUV[4]  = UV + vec2(0.0, -part * 3.0);
+				fUV[5]  = UV + vec2(0.0, -part * 2.0);
+				fUV[6]  = UV + vec2(0.0, -part);
+				fUV[7]  = UV;
+				fUV[8]  = UV + vec2(0.0,  part);
+				fUV[9]  = UV + vec2(0.0,  part * 2.0);
+				fUV[10] = UV + vec2(0.0,  part * 3.0);
+				fUV[11] = UV + vec2(0.0,  part * 4.0);
+				fUV[12] = UV + vec2(0.0,  part * 5.0);
+				fUV[13] = UV + vec2(0.0,  part * 6.0);
+				fUV[13] = UV + vec2(0.0,  part * 7.0);
+			}
+		)";
+
+		std::string verticalBlurShaderVertexSourceFile =
+			R"(
+			[common]
+			#version 330
+			[vertex]
+			layout(location = 0) in vec2 vposition;
+			out vec2 fUV[15];
+			uniform float width = 3.0;
+			void main() {
+				float part = 1.0 / width;
+				vec2 UV = vposition * 0.5 + 0.5;
+				gl_Position = vec4(vposition, 0.0, 1.0);
+				fUV[0]  = UV + vec2(-part * 7.0, 0.0);
+				fUV[1]  = UV + vec2(-part * 6.0, 0.0);
+				fUV[2]  = UV + vec2(-part * 5.0, 0.0);
+				fUV[3]  = UV + vec2(-part * 4.0, 0.0);
+				fUV[4]  = UV + vec2(-part * 3.0, 0.0);
+				fUV[5]  = UV + vec2(-part * 2.0, 0.0);
+				fUV[6]  = UV + vec2(-part, 0.0);
+				fUV[7]  = UV;
+				fUV[8]  = UV + vec2(part, 0.0);
+				fUV[9]  = UV + vec2(part * 2.0, 0.0);
+				fUV[10] = UV + vec2(part * 3.0, 0.0);
+				fUV[11] = UV + vec2(part * 4.0, 0.0);
+				fUV[12] = UV + vec2(part * 5.0, 0.0);
+				fUV[13] = UV + vec2(part * 6.0, 0.0);
+				fUV[14] = UV + vec2(part * 7.0, 0.0);
+			}
+		)";
+
+		std::string blurShaderFragmentSourceFile =
+			R"(
+			[fragment]
+			in vec2 fUV[15];
+			out vec4 outColor;
+			uniform sampler2D image;
+			void main() {
+				outColor = vec4(0.0);
+				outColor += texture(image, fUV[0]) * 0.0044299121055113265;
+				outColor += texture(image, fUV[1]) * 0.00895781211794;
+				outColor += texture(image, fUV[2]) * 0.0215963866053;
+				outColor += texture(image, fUV[3]) * 0.0443683338718;
+				outColor += texture(image, fUV[4]) * 0.0776744219933;
+				outColor += texture(image, fUV[5]) * 0.115876621105;
+				outColor += texture(image, fUV[6]) * 0.147308056121;
+				outColor += texture(image, fUV[7]) * 0.159576912161;
+				outColor += texture(image, fUV[8]) * 0.147308056121;
+				outColor += texture(image, fUV[9]) * 0.115876621105;
+				outColor += texture(image, fUV[10]) * 0.0776744219933;
+				outColor += texture(image, fUV[11]) * 0.0443683338718;
+				outColor += texture(image, fUV[12]) * 0.0215963866053;
+				outColor += texture(image, fUV[13]) * 0.00895781211794;
+				outColor += texture(image, fUV[14]) * 0.0044299121055113265;
+			}
+		)";
 
 		// Shader source init
 		ShaderSource guiShaderSource = parseShader((std::istream&) std::istringstream(guiShaderSourceFile), "gui.shader");
 		ShaderSource quadShaderSource = parseShader((std::istream&) std::istringstream(quadShaderSourceFile), "quad.shader");
-		ShaderSource blurShaderSource = parseShader((std::istream&) std::istringstream(blurShaderSourceFile), "blur.shader");
+		ShaderSource horizontalBlurShaderSource = parseShader((std::istream&) std::istringstream(horizontalBlurShaderVertexSourceFile + blurShaderFragmentSourceFile), "horizontalBlur.shader");
+		ShaderSource verticalBlurShaderSource = parseShader((std::istream&) std::istringstream(verticalBlurShaderVertexSourceFile + blurShaderFragmentSourceFile), "verticalBlur.shader");
 
 		// Shader init
 		new(&guiShader) GuiShader(guiShaderSource);
 		new(&quadShader) QuadShader(quadShaderSource);
-		new(&blurShader) BlurShader(blurShaderSource);
+		new(&horizontalBlurShader) BlurShader(horizontalBlurShaderSource);
+		new(&verticalBlurShader) BlurShader(verticalBlurShaderSource);
 	}
 
 	void onClose() {
+		horizontalBlurShader.close();
+		verticalBlurShader.close();
 		guiShader.close();
 		quadShader.close();
-		blurShader.close();
 	}
 }
 
@@ -98,10 +212,9 @@ void QuadShader::updateTexture(Texture* texture, const Vec4f& color) {
 
 
 // BlurShader
-
-void BlurShader::updateType(BlurType type) {
+void BlurShader::updateWidth(float width) {
 	bind();
-	shader.setUniform("horizontal", (int)type);
+	shader.setUniform("width", width);
 }
 
 void BlurShader::updateTexture(Texture* texture) {

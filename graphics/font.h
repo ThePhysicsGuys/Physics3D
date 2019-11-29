@@ -3,15 +3,14 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include "texture.h"
-#include "gui/text.h"
 
 #define CHARACTER_COUNT 128
+
+struct Character;
 
 class Font {
 public:
 	Texture atlas;
-
-	Character characters[CHARACTER_COUNT];
 
 	Font();
 	Font(std::string font);
