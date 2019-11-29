@@ -241,6 +241,7 @@
     <ClInclude Include="geometry\shapeBuilder.h" />
     <ClInclude Include="geometry\shapeClass.h" />
     <ClInclude Include="geometry\sphere.h" />
+    <ClInclude Include="hardConstraint.h" />
     <ClInclude Include="integrityCheck.h" />
     <ClInclude Include="math\bounds.h" />
     <ClInclude Include="math\cframe.h" />

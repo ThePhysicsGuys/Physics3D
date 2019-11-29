@@ -5,12 +5,15 @@
 #include "GL\glew.h"
 #include "GLFW\glfw3.h"
 
-#include "texture.h"
+#include "gui/text.h"
 #include "shader/shaderProgram.h"
 #include "renderUtils.h"
 #include "gui/gui.h"
 #include "mesh/primitive.h"
+
 #include "path/path.h"
+
+Character characters[CHARACTER_COUNT];
 
 Font::Font() {
 
@@ -111,7 +114,7 @@ Font::Font(Font&& other) {
 	atlas = std::move(other.atlas);
 
 	for (int i = 0; i < CHARACTER_COUNT; i++) {
-		characters[i] = other.characters[i];
+		characters[i] = other.getCharacter(i);
 	}
 }
 
@@ -120,7 +123,7 @@ Font& Font::operator=(Font&& other) {
 		std::swap(atlas, other.atlas);
 
 		for (int i = 0; i < CHARACTER_COUNT; i++) {
-			characters[i] = other.characters[i];
+			characters[i] = other.getCharacter(i);
 		}
 	}
 

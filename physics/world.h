@@ -23,12 +23,6 @@ struct Colission {
 
 class ExternalForce;
 
-typedef DereferencingIterator<std::vector<Physical*>::iterator> PhysicalIter;
-typedef DereferencingIterator<std::vector<Physical*>::const_iterator> ConstPhysicalIter;
-
-typedef IteratorFactory<PhysicalIter> PhysicalIterFactory;
-typedef IteratorFactory<ConstPhysicalIter> ConstPhysicalIterFactory;
-
 template<typename Filter>
 using DoubleFilterIter = FilteredIterator<IteratorGroup<TreeIterFactory<Part, Filter>, 2>, IteratorEnd, Filter>;
 
@@ -80,7 +74,7 @@ public:
 	size_t objectCount = 0;
 	double deltaT;
 
-	std::vector<Physical*> physicals;
+	std::vector<MotorizedPhysical*> physicals;
 
 	WorldPrototype(double deltaT);
 	~WorldPrototype();
@@ -118,8 +112,8 @@ public:
 
 	virtual bool isValid() const;
 
-	IteratorFactory<PhysicalIter> iterPhysicals() { return IteratorFactory<PhysicalIter>(physicals.begin(), physicals.end()); }
-	IteratorFactory<ConstPhysicalIter> iterPhysicals() const { return IteratorFactory<ConstPhysicalIter>(physicals.begin(), physicals.end()); }
+	IteratorFactory<std::vector<MotorizedPhysical*>::iterator> iterPhysicals() { return IteratorFactory<std::vector<MotorizedPhysical*>::iterator>(physicals.begin(), physicals.end()); }
+	IteratorFactory<std::vector<MotorizedPhysical*>::const_iterator> iterPhysicals() const { return IteratorFactory<std::vector<MotorizedPhysical*>::const_iterator>(physicals.begin(), physicals.end()); }
 
 	template<typename Filter>
 	IteratorFactoryWithEnd<DoubleFilterIter<Filter>> iterPartsFiltered(const Filter& filter, int partsMask = ALL_PARTS) {
@@ -176,8 +170,8 @@ public:
 	}
 	virtual double getTotalPotentialEnergyForThisForce(const WorldPrototype* world) const {
 		double total = 0.0;
-		for (Physical& p : world->iterPhysicals()) {
-			total += this->getPotentialEnergyForObject(world, p);
+		for (MotorizedPhysical* p : world->iterPhysicals()) {
+			total += this->getPotentialEnergyForObject(world, *p);
 		}
 		return total;
 	}

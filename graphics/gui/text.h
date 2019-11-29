@@ -2,8 +2,6 @@
 
 #include "core.h"
 
-class Font;
-
 struct Character {
 	union {
 		struct {
@@ -84,6 +82,8 @@ enum TextFlags : char {
 	TextPivotVB = 1 << 5
 };
 
+class Font;
+
 struct Text {
 	std::string textString;
 
@@ -102,6 +102,6 @@ struct Text {
 };
 
 class TextLoader {
-private:
+public:
 	std::vector<Line> loadText(const Text& text);
 };

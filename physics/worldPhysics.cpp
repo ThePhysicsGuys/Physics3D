@@ -314,8 +314,8 @@ void WorldPrototype::handleConstraints() {
 }
 void WorldPrototype::update() {
 	physicsMeasure.mark(PhysicsProcess::UPDATING);
-	for (Physical& physical : iterPhysicals()) {
-		physical.update(this->deltaT);
+	for (MotorizedPhysical* physical : iterPhysicals()) {
+		physical->update(this->deltaT);
 	}
 
 	physicsMeasure.mark(PhysicsProcess::UPDATE_TREE_BOUNDS);
@@ -329,9 +329,9 @@ void WorldPrototype::update() {
 
 double WorldPrototype::getTotalKineticEnergy() const {
 	double total = 0.0;
-	for(const Physical& p : iterPhysicals()) {
-		if (p.anchored) continue;
-		total += p.getKineticEnergy();
+	for(const MotorizedPhysical* p : iterPhysicals()) {
+		if (p->anchored) continue;
+		total += p->getKineticEnergy();
 	}
 	return total;
 }

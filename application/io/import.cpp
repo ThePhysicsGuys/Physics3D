@@ -64,7 +64,8 @@ void parseSubject(Subject subject, std::string path, std::map<std::string, std::
 
 		ExtendedPart* part = factories.at(shapeReference).produce(cframe, { density, friction, bouncyness }, name);
 
-		Physical physical = Physical(part, mass, inertia);
+		// commented out because of error
+		/*Physical physical = Physical(part, mass, inertia);
 		physical.angularVelocity = angularvelocity;
 		physical.velocity = velocity;
 
@@ -72,7 +73,7 @@ void parseSubject(Subject subject, std::string path, std::map<std::string, std::
 		part->material = material;
 		part->renderMode = mode;
 
-		world.addPart(part, anchored);
+		world.addPart(part, anchored);*/
 	} else if (subject == Subject::CAMERA) {
 		Position pos = Import::parsePosition(fields.at("position"));
 		Mat3 rot = Import::parseMat3(fields.at("rotation"));

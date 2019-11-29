@@ -41,8 +41,8 @@ const BoundsTree<Part>& WorldPrototype::getTreeForPart(const Part* part) const {
 void WorldPrototype::addPart(Part* part, bool anchored) {
 	ASSERT_VALID;
 	if (part->parent == nullptr) {
-		part->parent = new Physical(part);
-		physicals.push_back(part->parent);
+		part->parent = new MotorizedPhysical(part);
+		physicals.push_back(part->parent->mainPhysical);
 		objectTree.add(part, part->getStrictBounds());
 
 		objectCount++;
@@ -57,7 +57,7 @@ void WorldPrototype::addPart(Part* part, bool anchored) {
 			newNode.addInside(TreeNode(p.part, p.part->getStrictBounds(), false));
 		}
 		objectTree.add(std::move(newNode));
-		physicals.push_back(part->parent);
+		physicals.push_back(part->parent->mainPhysical);
 
 		objectCount += part->parent->getPartCount();
 	}
@@ -180,15 +180,15 @@ void recursiveTreeValidCheck(const TreeNode& node) {
 }
 
 bool WorldPrototype::isValid() const {
-	for (const Physical& phys : iterPhysicals()) {
-		if (phys.world != this) {
+	for (const Physical* phys : iterPhysicals()) {
+		if (phys->world != this) {
 			Log::error("physicals's world is not correct!");
 			__debugbreak();
 			return false;
 		}
 
-		for (const Part& part : phys) {
-			if (part.parent != &phys) {
+		for (const Part& part : *phys) {
+			if (part.parent != phys) {
 				Log::error("part's parent's child is not part");
 				__debugbreak();
 				return false;
