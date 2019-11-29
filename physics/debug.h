@@ -5,6 +5,8 @@
 #include "math/cframe.h"
 #include "math/globalCFrame.h"
 
+class Part;
+
 struct Polyhedron;
 
 namespace Debug {
@@ -41,4 +43,6 @@ namespace Debug {
 	void setPointLogAction(void(*logger)(Position point, PointType type));
 	void setCFrameLogAction(void(*logger)(CFrame frame, CFrameType type));
 	void setShapeLogAction(void(*logger)(const Polyhedron& shape, const GlobalCFrame& location));
+
+	void saveIntersectionError(const Part* first, const Part* second, const char* reason);
 }

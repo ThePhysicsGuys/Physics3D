@@ -1,5 +1,7 @@
 #include "indexedShape.h"
 
+#include <stdexcept>
+
 int& TriangleNeighbors::operator[](int index) {
 	return this->neighbors[index];
 }
@@ -17,7 +19,7 @@ int TriangleNeighbors::replaceNeighbor(int oldNeighbor, int newNeighbor) {
 			return i;
 		}
 	}
-	throw "Neighbor not found in replaceNeighbor";
+	throw std::runtime_error("Neighbor not found in replaceNeighbor");
 }
 
 int TriangleNeighbors::getNeighborIndex(int neighbor) {
@@ -26,7 +28,7 @@ int TriangleNeighbors::getNeighborIndex(int neighbor) {
 			return i;
 		}
 	}
-	throw "Neighbor not found in getNeighborIndex";
+	throw std::runtime_error("Neighbor not found in getNeighborIndex");
 }
 
 IndexedShape::IndexedShape(const Vec3f* vertices, const Triangle* triangles, int vertexCount, int triangleCount, TriangleNeighbors * neighborBuf) : Polyhedron(vertices, triangles, vertexCount, triangleCount), neighbors(neighborBuf) {}

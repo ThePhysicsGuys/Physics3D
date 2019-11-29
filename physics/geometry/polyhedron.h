@@ -138,7 +138,4 @@ public:
 
 	void getTriangles(Triangle* triangleBuf) const;
 	void getVertices(Vec3f* vertexBuf) const;
-
-	void serialize(std::ostream& ostream) const;
-	static Polyhedron deserialize(std::istream& istream);
 };

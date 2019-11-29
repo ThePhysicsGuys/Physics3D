@@ -10,8 +10,10 @@
 #include "../math/globalcframe.h"
 #include "../geometry/polyhedron.h"
 #include "../geometry/shape.h"
-#include "../part.h"
 
+#include "../part.h"
+#include "../world.h"
+#include "../physical.h"
 
 void serialize(const char* data, size_t size, std::ostream& ostream);
 void deserialize(char* buf, size_t size, std::istream& istream);
@@ -60,6 +62,23 @@ template<>
 Part deserialize<Part>(std::istream& istream);
 
 
+template<typename PartType = Part, void(SerializePartFunc)(const PartType& part, std::ostream& ostream)>
+void serializeWorld(const World<PartType>& world, std::ostream& ostream) {
+	size_t terrainPartCount = world.getPartCount(TERRAIN_PARTS);
+	size_t freePartCount = world.getPartCount(FREE_PARTS);
+	serialize<size_t>(terrainPartCount, ostream);
+	serialize<size_t>(freePartCount, ostream);
+	for(const PartType& part : world.iterParts(TERRAIN_PARTS)) {
+		SerializePartFunc(part, ostream);
+	}
+}
+
+template<typename PartType = Part>
+World<PartType> deserializeWorld(std::istream& istream) {
+
+}
+
+
 
 
 template<typename T>
@@ -75,9 +94,6 @@ void deserializeArray(T* buf, size_t size, std::istream& istream) {
 		buf[i] = deserialize<T>(istream);
 	}
 }
-
-
-
 
 
 template<typename T>

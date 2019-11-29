@@ -23,6 +23,8 @@
 #include "../physics/misc/gravityForce.h"
 #include "../physics/physicsProfiler.h"
 
+#include "../physics/misc/serialization.h"
+
 #include "worlds.h"
 #include "tickerThread.h"
 #include "worldBuilder.h"
@@ -65,11 +67,34 @@ void setupWorld(int argc, const char** args);
 void setupScreen();
 void setupDebug();
 
+void loadLoosePartsWorld(const char* fileName) {
+	world.addExternalForce(new ExternalGravity(Vec3(0, -10.0, 0.0)));
+
+	std::ifstream file;
+	file.open(fileName, std::ios::binary);
+
+	int partCount = deserialize<int>(file);
+	for(int i = 0; i < partCount; i++) {
+		ExtendedPart* p = new ExtendedPart(deserialize<Part>(file));
+
+		world.addPart(p);
+	}
+	file.close();
+}
+
+bool has_suffix(const std::string& str, const std::string& suffix) {
+	return str.size() >= suffix.size() &&
+		str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
+}
 
 void init(int argc, const char** args) {
 	setupScreen();
 	registerShapes();
-	setupWorld(argc, args);
+	if(argc >= 2 && has_suffix(args[1], ".looseParts")) {
+		loadLoosePartsWorld(args[1]);
+	} else {
+		setupWorld(argc, args);
+	}
 	setupPhysics();
 	setupDebug();
 }

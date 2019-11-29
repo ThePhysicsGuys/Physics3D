@@ -72,7 +72,7 @@ void saveNonBinaryWorld(const std::string& name, World<ExtendedPart>& world, Cam
 
 	std::map<int, std::string> shapes;
 
-	for (const Part& part : world) {
+	for (const Part& part : world.iterParts()) {
 		const ExtendedPart& extendedPart = static_cast<const ExtendedPart&>(part);
 
 		std::string shape;

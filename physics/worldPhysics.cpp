@@ -175,7 +175,8 @@ bool boundsSphereEarlyEnd(const DiagonalMat3& scale, const Vec3& sphereCenter, d
 }
 
 inline void runColissionTests(Part& p1, Part& p2, WorldPrototype& world, std::vector<Colission>& colissions) {
-	if ((p1.isTerrainPart || p1.parent->anchored) && (p2.isTerrainPart || p2.parent->anchored)) return;
+	if ((p1.isTerrainPart || p1.parent->anchored) && (p2.isTerrainPart || p2.parent->anchored)) return; // TODO Unneccecary test?
+
 	
 	double maxRadiusBetween = p1.maxRadius + p2.maxRadius;
 
@@ -228,7 +229,21 @@ void recursiveFindColissionsBetween(WorldPrototype& world, std::vector<Colission
 	if (!intersects(first.bounds, second.bounds)) return;
 	
 	if (first.isLeafNode() && second.isLeafNode()) {
-		runColissionTests(*static_cast<Part*>(first.object), *static_cast<Part*>(second.object), world, colissions);
+		Part* firstObj = static_cast<Part*>(first.object);
+		Part* secondObj = static_cast<Part*>(second.object);
+#ifdef CATCH_INTERSECTION_ERRORS
+		try {
+			runColissionTests(*firstObj, *secondObj, world, colissions);
+		} catch(const std::exception& err) {
+			Log::fatal("Error occurred during intersection: %s", err.what());
+
+			Debug::saveIntersectionError(firstObj, secondObj, "colError");
+
+			throw err;
+		}
+#else
+		runColissionTests(*firstObj, *secondObj, world, colissions);
+#endif
 	} else {
 		bool preferFirst = computeCost(first.bounds) <= computeCost(second.bounds);
 		if (preferFirst && !first.isLeafNode() || second.isLeafNode()) {

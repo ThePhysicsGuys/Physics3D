@@ -23,7 +23,4 @@ struct ExtendedPart : public Part {
 	ExtendedPart(const Shape& hitbox, const GlobalCFrame& position, const PartProperties& properties, VisualData visualData, std::string name = "Part");
 
 	ExtendedPart(const Shape& hitbox, ExtendedPart* attachTo, const CFrame& attach, const PartProperties& properties, std::string name = "Part");
-
-	virtual void serializeCore(std::ostream& ostream) const override;
-	static ExtendedPart deserialize(std::istream& istream);
 };

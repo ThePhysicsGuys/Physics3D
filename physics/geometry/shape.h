@@ -46,9 +46,6 @@ public:
 	Vec3f furthestInDirection(const Vec3f& direction) const;
 
 	Polyhedron asPolyhedron() const;
-
-	void serialize(std::ostream& ostream) const;
-	static Shape deserialize(std::istream& istream);
 };
 
 

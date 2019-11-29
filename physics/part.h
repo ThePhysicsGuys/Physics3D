@@ -79,10 +79,4 @@ public:
 
 	void attach(Part& other, const CFrame& relativeCFrame);
 	void detach();
-
-	virtual void serializeCore(std::ostream& ostream) const;
-	void serialize(std::ostream& ostream) const;
-	void serialize(std::ostream& ostream, const CFrame& attachment) const;
-	static Part deserialize(std::istream& istream);
-	static Part deserialize(std::istream& istream, const GlobalCFrame& parentLocation);
 };

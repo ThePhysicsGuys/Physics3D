@@ -101,6 +101,7 @@ struct NodeStack {
 	TreeStackElement* top;
 	TreeStackElement stack[MAX_HEIGHT];
 
+	NodeStack() = default;
 	NodeStack(TreeNode& rootNode) : stack{ TreeStackElement{&rootNode, 0} }, top(stack) {
 		if (rootNode.nodeCount == 0) {
 			top--;
@@ -237,6 +238,7 @@ struct NodeStack {
 };
 
 struct ConstTreeIterator : public NodeStack {
+	ConstTreeIterator() = default;
 	ConstTreeIterator(TreeNode& rootNode) : NodeStack(rootNode) {
 		// the very first element is a dummy, in order to detect when the tree is done
 		
@@ -270,6 +272,7 @@ struct ConstTreeIterator : public NodeStack {
 };
 
 struct TreeIterator : public ConstTreeIterator {
+	TreeIterator() = default;
 	TreeIterator(TreeNode& rootNode) : ConstTreeIterator(rootNode) {
 		// the very first element is a dummy, in order to detect when the tree is done
 
@@ -367,6 +370,7 @@ typedef FilteredTreeIterator<Position, containsFilterPoint> TreeIteratorContaini
 template<typename Iter, typename Boundable>
 struct BoundsTreeIter {
 	Iter iter;
+	BoundsTreeIter() = default;
 	BoundsTreeIter(const Iter& iter) : iter(iter) {}
 	void operator++() {
 		++iter;
