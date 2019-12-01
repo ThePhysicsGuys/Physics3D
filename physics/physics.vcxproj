@@ -185,6 +185,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="constraintGroup.cpp" />
+    <ClCompile Include="constraints\motorConstraint.cpp" />
     <ClCompile Include="datastructures\alignedPtr.cpp" />
     <ClCompile Include="datastructures\boundsTree.cpp" />
     <ClCompile Include="datastructures\parallelVector.cpp" />
@@ -217,6 +218,7 @@
   <ItemGroup>
     <ClInclude Include="constants.h" />
     <ClInclude Include="constraintGroup.h" />
+    <ClInclude Include="constraints\motorConstraint.h" />
     <ClInclude Include="datastructures\alignedPtr.h" />
     <ClInclude Include="datastructures\boundsTree.h" />
     <ClInclude Include="datastructures\buffers.h" />
@@ -241,7 +243,7 @@
     <ClInclude Include="geometry\shapeBuilder.h" />
     <ClInclude Include="geometry\shapeClass.h" />
     <ClInclude Include="geometry\sphere.h" />
-    <ClInclude Include="hardConstraint.h" />
+    <ClInclude Include="constraints\hardConstraint.h" />
     <ClInclude Include="integrityCheck.h" />
     <ClInclude Include="math\bounds.h" />
     <ClInclude Include="math\cframe.h" />
@@ -273,6 +275,7 @@
     <ClInclude Include="misc\filters\visibilityFilter.h" />
     <ClInclude Include="misc\gravityForce.h" />
     <ClInclude Include="misc\shapeLibrary.h" />
+    <ClInclude Include="motion.h" />
     <ClInclude Include="parallelArray.h" />
     <ClInclude Include="part.h" />
     <ClInclude Include="physical.h" />

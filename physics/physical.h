@@ -12,7 +12,7 @@
 #include "datastructures/iteratorEnd.h"
 
 #include "part.h"
-#include "hardConstraint.h"
+#include "constraints/hardConstraint.h"
 
 typedef Vec3 Vec3Local;
 typedef Vec3 Vec3Relative;

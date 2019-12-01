@@ -62,24 +62,6 @@ template<>
 Part deserialize<Part>(std::istream& istream);
 
 
-template<typename PartType = Part, void(SerializePartFunc)(const PartType& part, std::ostream& ostream)>
-void serializeWorld(const World<PartType>& world, std::ostream& ostream) {
-	size_t terrainPartCount = world.getPartCount(TERRAIN_PARTS);
-	size_t freePartCount = world.getPartCount(FREE_PARTS);
-	serialize<size_t>(terrainPartCount, ostream);
-	serialize<size_t>(freePartCount, ostream);
-	for(const PartType& part : world.iterParts(TERRAIN_PARTS)) {
-		SerializePartFunc(part, ostream);
-	}
-}
-
-template<typename PartType = Part>
-World<PartType> deserializeWorld(std::istream& istream) {
-
-}
-
-
-
 
 template<typename T>
 void serializeArray(const T* data, size_t size, std::ostream& ostream) {
