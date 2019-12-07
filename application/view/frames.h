@@ -389,8 +389,8 @@ struct PropertiesFrame : public FrameBlueprint, public Frame {
 
 			positionLabel->text = "Position: " + str(selectedPart->getCFrame().position);
 			partNameLabel->text = "Name: " + selectedPart->name;
-			velocityLabel->text = "Velocity: " + str(selectedPart->parent->velocity);
-			angularVelocityLabel->text = "Angular Velocity: " + str(selectedPart->parent->angularVelocity);
+			velocityLabel->text = "Velocity: " + str(selectedPart->getVelocity());
+			angularVelocityLabel->text = "Angular Velocity: " + str(selectedPart->getAngularVelocity());
 			double kineticEnergy = selectedPart->parent->getKineticEnergy();
 			double potentialEnergy = world->getPotentialEnergyOfPhysical(*selectedPart->parent);
 			kineticEnergyLabel->text = "Kinetic Energy: " + str(kineticEnergy);

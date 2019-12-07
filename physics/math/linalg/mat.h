@@ -444,6 +444,12 @@ public:
 		}
 	}
 
+	inline constexpr DiagonalMatrix<T, Size>(const T* list) {
+		for(size_t i = 0; i < Size; i++) {
+			(*this)[i] = list[i];
+		}
+	}
+
 	template<typename OtherT>
 	inline constexpr DiagonalMatrix<T, Size>(const DiagonalMatrix<OtherT, Size>& m) {
 		for(size_t i = 0; i < Size; i++) {

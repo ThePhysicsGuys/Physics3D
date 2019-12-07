@@ -68,6 +68,11 @@ public:
 	const GlobalCFrame& getCFrame() const { return cframe; }
 	void setCFrame(const GlobalCFrame& newCFrame);
 
+	Vec3 getVelocity() const;
+	Vec3 getAngularVelocity() const;
+
+	void translate(Vec3 translation);
+
 	double getWidth() const;
 	double getHeight() const;
 	double getDepth() const;

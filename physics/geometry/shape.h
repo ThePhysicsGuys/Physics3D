@@ -7,9 +7,8 @@
 #include "../math/cframe.h"
 #include "../math/transform.h"
 
-#include <iosfwd>
-
 class ShapeClass;
+class Polyhedron;
 
 class Shape {
 	Shape(const ShapeClass* baseShape, DiagonalMat3 scale);
@@ -39,6 +38,7 @@ public:
 	BoundingBox getBounds() const;
 	BoundingBox getBounds(const Mat3& referenceFrame) const;
 	Vec3 getCenterOfMass() const;
+	// defined around the object's Center Of Mass
 	SymmetricMat3 getInertia() const;
 	double getMaxRadius() const;
 	double getMaxRadiusSq() const;

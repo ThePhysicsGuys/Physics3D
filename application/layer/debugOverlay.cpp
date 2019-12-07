@@ -93,9 +93,9 @@ void DebugOverlay::onRender() {
 		ParallelArray<long long, 17> epaIter = EPAIterationStatistics.history.avg();
 
 		for (size_t i = 0; i < GJKCollidesIterationStatistics.size(); i++) {
-			iterationChart.data[0][i] = WeightValue{ (float)gjkColIter[i], std::to_string(gjkColIter[i]) };
-			iterationChart.data[1][i] = WeightValue{ (float)gjkNoColIter[i], std::to_string(gjkNoColIter[i]) };
-			iterationChart.data[2][i] = WeightValue{ (float)epaIter[i], std::to_string(epaIter[i]) };
+			iterationChart.data.get(0, i) = WeightValue{ (float)gjkColIter[i], std::to_string(gjkColIter[i]) };
+			iterationChart.data.get(1, i) = WeightValue{ (float)gjkNoColIter[i], std::to_string(gjkNoColIter[i]) };
+			iterationChart.data.get(2, i) = WeightValue{ (float)epaIter[i], std::to_string(epaIter[i]) };
 		}
 
 		iterationChart.position = Vec2f(-leftSide + 0.1f, -0.3);

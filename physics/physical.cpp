@@ -2,6 +2,7 @@
 
 #include "../util/log.h"
 
+#include "inertia.h"
 #include "world.h"
 #include "math/linalg/mat.h"
 #include "math/linalg/misc.h"
@@ -12,7 +13,6 @@
 #include <limits>
 
 #include "integrityCheck.h"
-
 
 Physical::Physical(Part* part, MotorizedPhysical* mainPhysical) : mainPart(part), mainPhysical(mainPhysical) {
 	if (part->parent != nullptr) {
@@ -34,6 +34,16 @@ Physical::Physical(Physical&& other) noexcept :
 	mainPart->parent = this;
 	for(AttachedPart& p : parts) {
 		p.part->parent = this;
+	}
+}
+
+Physical::~Physical() {
+	if(mainPart != nullptr) {
+		mainPart->parent = nullptr;
+		mainPart = nullptr;
+	}
+	for(AttachedPart& atPart : parts) {
+		atPart.part->parent = nullptr;
 	}
 }
 
@@ -162,11 +172,12 @@ void Physical::attachPart(Part* part, const CFrame& attachment) {
 void Physical::detachPart(Part* part) {
 	if (part == mainPart) {
 		if (parts.size() == 0) {
-			delete this;
-			return;
+			mainPart = nullptr;
 		} else {
 			makeMainPart(parts[parts.size() - 1]);
 		}
+		part->parent = nullptr;
+		return;
 	}
 	for (signed long long i = parts.size() - 1; i >= 0; i--) {
 		AttachedPart& at = parts[i];
@@ -183,29 +194,20 @@ void Physical::detachPart(Part* part) {
 	throw "Error: could not find part to remove!";
 }
 
-inline Physical::~Physical() {
-	if (this->world != nullptr) {
-		this->world->removePhysical(this);
-	}
-	if (mainPart != nullptr) mainPart->parent = nullptr;
-	for (AttachedPart& atPart : parts) {
-		atPart.part->parent = nullptr;
-	}
-	mainPart = nullptr;
-	parts.clear();
-}
-
 void Physical::refreshWithNewParts() {
 	double totalMass = mainPart->getMass();
-	SymmetricMat3 totalInertia = mainPart->getInertia();
 	Vec3 totalCenterOfMass = mainPart->getLocalCenterOfMass() * mainPart->getMass();
 	for (const AttachedPart& p : parts) {
 		totalMass += p.part->getMass();
 		totalCenterOfMass += p.attachment.localToGlobal(p.part->getLocalCenterOfMass()) * p.part->getMass();
 	}
 	totalCenterOfMass /= totalMass;
+
+	SymmetricMat3 totalInertia = getTranslatedInertiaAroundCenterOfMass(mainPart->getInertia(), mainPart->getLocalCenterOfMass(), totalCenterOfMass, mainPart->getMass());;
+
 	for (const AttachedPart& p : parts) {
-		totalInertia += transformBasis(p.part->getInertia(), p.attachment.getRotation()) + skewSymmetricSquared(p.attachment.getPosition() - totalCenterOfMass) * p.part->getMass();
+		const Part* part = p.part;
+		totalInertia += getTransformedInertiaAroundCenterOfMass(part->getInertia(), part->getLocalCenterOfMass(), p.attachment, totalCenterOfMass, part->getMass());
 	}
 	this->mass = totalMass;
 	this->localCenterOfMass = totalCenterOfMass;
@@ -379,6 +381,7 @@ void MotorizedPhysical::applyAngularDrag(Vec3 angularDrag) {
 Position Physical::getCenterOfMass() const {
 	return getCFrame().localToGlobal(localCenterOfMass);
 }
+// gets velocity of point relative to center of mass
 Vec3 Physical::getVelocityOfPoint(const Vec3Relative& point) const {
 	return velocity + angularVelocity % point;
 }

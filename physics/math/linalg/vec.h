@@ -10,6 +10,8 @@ struct Vector {
 		}
 	}
 
+	Vector(const Vector& other) = default;
+
 	template<typename OtherT>
 	Vector(const Vector<OtherT, Size>& other) {
 		for (size_t i = 0; i < Size; i++) {
@@ -64,6 +66,7 @@ struct Vector<T, 2> {
 	Vector() : x(0), y(0) {}
 	Vector(T x, T y) : x(x), y(y) {}
 	explicit Vector(T v) : x(v), y(v) {}
+	Vector(const Vector& other) = default;
 	template<typename OtherT>
 	Vector(const Vector<OtherT, 2>& other) : x(static_cast<T>(other.x)), y(static_cast<T>(other.y)) {}
 	explicit Vector(const Vector<T, 3> & other) : x(other.x), y(other.y) {}
@@ -91,6 +94,7 @@ struct Vector<T, 3> {
 	Vector() : x(0), y(0), z(0) {}
 	Vector(T x, T y, T z) : x(x), y(y), z(z) {};
 	explicit Vector(T v) : x(v), y(v), z(v) {}
+	Vector(const Vector& other) = default;
 	template<typename OtherT>
 	Vector(const Vector<OtherT, 3>& other) : x(static_cast<T>(other.x)), y(static_cast<T>(other.y)), z(static_cast<T>(other.z)) {}
 	Vector(const Vector<T, 2>& other, T z) : x(other.x), y(other.y), z(z) {}
@@ -107,13 +111,6 @@ struct Vector<T, 3> {
 	bool operator==(const Vector<T, 3>& other) const {
 		return (other[0] == data[0]) && (other[1] == data[1]) && (other[2] == data[2]);
 	}
-
-	Vector<T, 3> rotateAround(const Vector<T, 3> other, T angle) const {
-		T s = sin(angle);
-		T c = cos(angle);
-
-		return *this * c + (other % *this) * s + other * (other * *this) * (1 - c);
-	}
 };
 
 template<typename T>
@@ -125,6 +122,7 @@ struct Vector<T, 4> {
 	Vector() : x(0), y(0), z(0), w(0) {}
 	Vector(T x, T y, T z, T w) : x(x), y(y), z(z), w(w) {};
 	explicit Vector(T v) : x(v), y(v), z(v), w(v) {}
+	Vector(const Vector& other) = default;
 	template<typename OtherT>
 	Vector(const Vector<OtherT, 4>& other) : x(static_cast<T>(other.x)), y(static_cast<T>(other.y)), z(static_cast<T>(other.z)), w(static_cast<T>(other.w)) {}
 	Vector(const Vector<T, 3>& other, T w) : x(other.x), y(other.y), z(other.z), w(w) {}

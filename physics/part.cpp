@@ -82,6 +82,30 @@ void Part::setCFrame(const GlobalCFrame& newCFrame) {
 	}
 }
 
+Vec3 Part::getVelocity() const {
+	if(parent != nullptr) {
+		return parent->getVelocityOfPoint(this->cframe.position - parent->getCenterOfMass());
+	} else {
+		return Vec3(0.0,0.0,0.0);
+	}
+}
+
+Vec3 Part::getAngularVelocity() const {
+	if(parent != nullptr) {
+		return parent->angularVelocity;
+	} else {
+		return Vec3(0.0, 0.0, 0.0);
+	}
+}
+
+void Part::translate(Vec3 translation) {
+	if(this->parent != nullptr) {
+		this->parent->translate(translation);
+	} else {// TODO BAD FOR TERRAIN PARTS
+		this->cframe.translate(translation);
+	}
+}
+
 double Part::getWidth() const {
 	return this->hitbox.getWidth();
 }

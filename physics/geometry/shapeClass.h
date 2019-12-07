@@ -6,6 +6,8 @@
 #include "genericCollidable.h"
 #include "scalableInertialMatrix.h"
 
+class Polyhedron;
+
 // a ShapeClass is defined as a shape with dimentions -1..1 in all axes. All functions work on scaled versions of the shape. 
 // examples include: 
 //    Sphere of radius=1

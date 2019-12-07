@@ -3,6 +3,7 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include "texture.h"
+#include <string>
 
 #define CHARACTER_COUNT 128
 

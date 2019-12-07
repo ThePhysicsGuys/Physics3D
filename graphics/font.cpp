@@ -13,6 +13,8 @@
 
 #include "path/path.h"
 
+#include <string>
+
 Character characters[CHARACTER_COUNT];
 
 Font::Font() {
