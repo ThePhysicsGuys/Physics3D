@@ -5,11 +5,12 @@
 #include "../physics/math/linalg/trigonometry.h"
 #include "../physics/math/linalg/misc.h"
 #include "../physics/math/linalg/largeMatrix.h"
+#include "../physics/math/linalg/eigen.h"
 #include "../physics/math/mathUtil.h"
 
 #define ASSERT(condition) ASSERT_TOLERANT(condition, 0.00000001)
 
-TEST_CASE(stuff) {
+TEST_CASE(subMatrixOperations) {
 	Matrix<int, 3, 5> mat{
 		5,7,9,
 		6,9,2,
@@ -60,7 +61,6 @@ TEST_CASE(determinant) {
 	};
 
 	logf("m=%s\nm.det()=%f", str(m4).c_str(), det(m4));
-
 	ASSERT(det(m4) == -983);
 }
 
@@ -84,14 +84,18 @@ TEST_CASE(matrixInverse3) {
 
 	ASSERT(m * ~m == Mat3::IDENTITY());
 	ASSERT(~m * m == Mat3::IDENTITY());
-	ASSERT(s * ~s == Mat3::IDENTITY());
-	ASSERT(~s * s == Mat3::IDENTITY());
-	ASSERT(d * ~d == Mat3::IDENTITY());
-	ASSERT(~d * d == Mat3::IDENTITY());
+	ASSERT(s * ~s == SymmetricMat3::IDENTITY());
+	ASSERT(~s * s == SymmetricMat3::IDENTITY());
+	ASSERT(d * ~d == DiagonalMat3::IDENTITY());
+	ASSERT(~d * d == DiagonalMat3::IDENTITY());
 }
 
 TEST_CASE(matrixInverse4) {
-	Mat4 m{ 1, 3, 4, 7, 7, 9, 3, 5, 4, 9, 1, 2, 6, 7, 6, 9, 1 };
+	Mat4 m{ 
+		1, 3, 4, 7, 
+		7, 9, 3, 5, 
+		4, 9, 1, 2, 
+		6, 7, 6, 9};
 
 	logf("m=%s\n~m=%s\nm.inverse()=%s\nm.det()=%f", str(m).c_str(), str(~m).c_str(), str(~m).c_str(), det(m));
 
@@ -225,7 +229,7 @@ TEST_CASE(matrixTypes) {
 
 	DiagonalMat3 diadia = dia*dia;
 }
-/*
+
 #include <iostream>
 #include <algorithm>
 
@@ -233,40 +237,21 @@ TEST_CASE(eigenDecomposition) {
 	for(double x = -1.25; x < 1.5; x += 0.1) {
 		for(double y = -1.35; y < 1.5; y += 0.1) {
 			for(double z = -1.55; z < 1.5; z += 0.1) {
+				RotMat3 orthoPart = fromEulerAngles(0.21, 0.31, 0.41);
+				DiagonalMat3 eigenMat{x,y,z};
 
-				
+				SymmetricMat3 testMat = transformBasis(SymmetricMat3(eigenMat), orthoPart);
 
-				Mat3 orthoPart = fromEulerAngles(0.21, 0.31, 0.41);
-				Mat3 eigenMat(x, 0, 0, 0, y, 0, 0, 0, z);
-				Mat3 testMatTmp = orthoPart * eigenMat * ~orthoPart;
+				EigenSet<double, 3> v = getEigenDecomposition(testMat);
 
-				SymmetricMat3 testMat(testMatTmp.m00, testMatTmp.m11, testMatTmp.m22, testMatTmp.m01, testMatTmp.m02, testMatTmp.m12);
+				EigenValues<double, 3> realValues{x,y,z};
 
-				// std::cout << testMat;
-
-				// std::cout << "doing" << x << ',' << y << ',' << z << '\n';
-
-				EigenSet<double> v = testMat.getEigenDecomposition();
-
-				ASSERT(EigenValues<double>(x, y, z) == v.eigenValues);
-				ASSERT(v.eigenVectors * v.eigenValues.asDiagonalMatrix() * ~v.eigenVectors == testMat);
-
-
-				// ASSERT()
-
-				// std::cout << "Real: " << x << "," << y << ',' << z << " calculated: " << x << "," << y << ',' << z << '\n';
-
-				// Log::debug("D0: %f, D1: %f, CrightPart: %f", D0, D1, CrightPart);
-
-				//std::cout.precision(17);
-				// std::cout << std::scientific;
-
-				// if(v.eigenValues.v[0] > 0) std::cout <<std::fixed<< x << ','<<y<<','<<z<<'='<<std::scientific<<v.eigenValues.v[0] << '\n';
+				ASSERT(realValues == v.eigenValues);
+				ASSERT(transformBasis(v.eigenValues.asDiagonalMatrix(), v.eigenVectors) == testMat);
 			}
 		}
 	}
-	// ASSERT(false);
-}*/
+}
 
 TEST_CASE(largeMatrixVectorProduct) {
 	LargeMatrix<double> mat(5, 5);
@@ -278,10 +263,10 @@ TEST_CASE(largeMatrixVectorProduct) {
 
 	for (int i = 0; i < 5; i++) {
 		for (int j = 0; j < 5; j++) {
-			mat[i][j] = 0;
+			mat.get(i, j) = 0;
 		}
-		mat[i][0] = i * 2;
-		mat[0][i] = i * 2;
+		mat.get(i, 0) = i * 2;
+		mat.get(0, i) = i * 2;
 	}
 
 	LargeVector<double> newVector = mat * vec;
@@ -297,15 +282,17 @@ TEST_CASE(largeMatrixVectorSolve) {
 
 	for (int i = 0; i < 5; i++) {
 		for (int j = 0; j < 5; j++) {
-			mat[i][j] = fRand(-1.0, 1.0);
+			mat.get(i,j) = fRand(-1.0, 1.0);
 		}
 	}
 
-	mat[0][0] = 0;
+	mat.get(0,0) = 0;
 
 	LargeVector<double> newVector = mat * vec;
 
 	LargeVector<double> solutionVector = newVector;
 
 	destructiveSolve(mat, solutionVector);
+
+	ASSERT(solutionVector == vec);
 }

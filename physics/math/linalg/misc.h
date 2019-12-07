@@ -33,6 +33,16 @@ SymmetricMatrix<T, 3> transformBasis(const SymmetricMatrix<T, 3>& sm, const Matr
 }
 
 template<typename T>
+SymmetricMatrix<T, 3> transformBasis(const DiagonalMatrix<T, 3>& dm, const Matrix<T, 3, 3>& rotation) {
+	Matrix<T, 3, 3> r = rotation * dm * ~rotation;
+	return SymmetricMatrix<T, 3>{
+			r[0][0],
+			r[1][0], r[1][1],
+			r[2][0], r[2][1], r[2][2]
+	};
+}
+
+template<typename T>
 SymmetricMatrix<T, 3> multiplyLeftRight(const SymmetricMatrix<T, 3>& sm, const Matrix<T, 3, 3>& otherMat) {
 	Matrix<T, 3, 3> r = otherMat * sm * otherMat.transpose();
 	return SymmetricMatrix<T, 3>{

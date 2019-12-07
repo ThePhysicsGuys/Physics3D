@@ -18,7 +18,7 @@ public:
 		return SymmetricMat3{
 			diagonal.y + diagonal.z,
 			offDiagonal.z, diagonal.x + diagonal.z,
-			offDiagonal.y, offDiagonal.x, diagonal.y + diagonal.z
+			offDiagonal.y, offDiagonal.x, diagonal.x + diagonal.y
 		};
 	}
 
@@ -30,7 +30,7 @@ public:
 		return SymmetricMat3{
 			scaledDC.y + scaledDC.z,
 			scaledOD.z, scaledDC.x + scaledDC.z,
-			scaledOD.y, scaledOD.x, scaledDC.y + scaledDC.z
+			scaledOD.y, scaledOD.x, scaledDC.x + scaledDC.y
 		};
 	}
 

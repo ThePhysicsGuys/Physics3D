@@ -119,7 +119,7 @@ void BarChart::render() {
 		const BarChartClassInfo& info = classes[cl];
 
 		for (int i = 0; i < data.width; i++) {
-			const WeightValue& dataPoint = data[cl][i];
+			const WeightValue& dataPoint = data.get(cl, i);
 
 			float height = drawingSize.y * dataPoint.weight / max;
 			Vec2f topLeft = drawingPosition + Vec2f(categoryWidth * i + barWidth*cl, height);
@@ -134,7 +134,7 @@ void BarChart::render() {
 		const BarChartClassInfo& info = classes[cl];
 
 		for (int i = 0; i < data.width; i++) {
-			const WeightValue& dataPoint = data[cl][i];
+			const WeightValue& dataPoint = data.get(cl, i);
 
 			Vec2f bottomLeft = drawingPosition + Vec2f(categoryWidth * i + barWidth * cl, 0);
 			float height = drawingSize.y * dataPoint.weight / max;

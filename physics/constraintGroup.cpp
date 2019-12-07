@@ -14,7 +14,7 @@ LargeMatrix<double> computeInteractionMatrix(const ConstraintGroup& group) {
 	LargeMatrix<double> systemToSolve(dimension, dimension);
 	for (size_t i = 0; i < dimension; i++) {
 		for (size_t j = 0; j < dimension; j++) {
-			systemToSolve[i][j] = 0.0;
+			systemToSolve.get(i, j) = 0.0;
 		}
 	}
 

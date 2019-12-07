@@ -47,7 +47,7 @@ TEST_CASE(profileAddableBuffer) {
 	t = total;
 }*/
 
-#define VECTOR_COUNT 200
+/*#define VECTOR_COUNT 200
 #define ITER_MAX 10
 #define VECTOR_SIZE 3
 
@@ -72,7 +72,7 @@ TEST_CASE(profileVectorOfVectors) {
 	}
 
 	Log::debug("Total %d", sum);
-}
+}*/
 
 //! Deprecated
 /*

@@ -2,6 +2,7 @@
 
 #include "linalg/vec.h"
 #include "linalg/mat.h"
+#include "linalg/eigen.h"
 #include "linalg/largeMatrix.h"
 #include "cframe.h"
 #include "position.h"
@@ -71,26 +72,6 @@ inline std::string str(const Vector<T, Size>& vector) {
 	return ss.str();
 }
 
-/*
-template<template<typename> typename Mat, typename N, typename std::enable_if<std::is_base_of<M33Type, Mat<N>>::value>::type* = nullptr>
-inline std::ostream& operator<<(std::ostream& os, const Mat<N>& matrix) {
-	os << "(\n\t";
-
-	os << matrix.m00 << ", " << matrix.m01 << ", " << matrix.m02 << ";\n\t";
-	os << matrix.m10 << ", " << matrix.m11 << ", " << matrix.m12 << ";\n\t";
-	os << matrix.m20 << ", " << matrix.m21 << ", " << matrix.m22 << ";\n)";
-
-	return os;
-}
-
-
-template<template<typename> typename Mat, typename N, typename std::enable_if<std::is_base_of<M33Type, Mat<N>>::value>::type* = nullptr>
-inline std::string str(const Mat<N>& matrix) {
-	std::stringstream ss;
-	ss << matrix;
-	return ss.str();
-}
-*/
 inline std::ostream& operator<<(std::ostream& os, const Position& position) {
 	os << "(" << double(position.x) << ", " << double(position.y) << ", " << double(position.z) << ")";
 	return os;
@@ -139,6 +120,33 @@ inline std::ostream& operator<<(std::ostream& os, const Matrix<N, Width, Height>
 	return os;
 }
 
+template<typename N, size_t Size>
+inline std::ostream& operator<<(std::ostream& os, const SymmetricMatrix<N, Size>& matrix) {
+	os << "(";
+
+	for(size_t row = 0; row < Size; row++) {
+		for(size_t col = 0; col < Size - 1; col++) {
+			os << matrix[row][col] << ", ";
+		}
+		os << matrix[row][Size - 1] << "; ";
+	}
+	os << ")";
+
+	return os;
+}
+
+template<typename N, size_t Size>
+inline std::ostream& operator<<(std::ostream& os, const DiagonalMatrix<N, Size>& matrix) {
+	os << "Diag(";
+
+	for(size_t i = 0; i < Size; i++) {
+		os << matrix[i] << "; ";
+	}
+	os << ")";
+
+	return os;
+}
+
 template<typename N, size_t Width, size_t Height>
 inline std::string str(const Matrix<N, Width, Height>& matrix) {
 	std::stringstream ss;
@@ -146,20 +154,39 @@ inline std::string str(const Matrix<N, Width, Height>& matrix) {
 	ss << matrix;
 	return ss.str();
 }
-/*
-template<typename N>
-inline std::ostream& operator<<(std::ostream& os, const EigenValues<N>& v) {
-	os << "EigenValues(" << v[0] << ", " << v[1] << ", " << v[2] << ")";
+template<typename N, size_t Size>
+inline std::string str(const SymmetricMatrix<N, Size>& matrix) {
+	std::stringstream ss;
+	ss.precision(4);
+	ss << matrix;
+	return ss.str();
+}
+template<typename N, size_t Size>
+inline std::string str(const DiagonalMatrix<N, Size>& matrix) {
+	std::stringstream ss;
+	ss.precision(4);
+	ss << matrix;
+	return ss.str();
+}
+
+
+template<typename N, size_t Size>
+inline std::ostream& operator<<(std::ostream& os, const EigenValues<N, Size>& v) {
+	os << "EigenValues(";
+	for(size_t i = 0; i < Size - 1; i++)
+		os << v[i] << ", ";
+
+	os << v[Size - 1] << ")";
 	return os;
 }
 
-template<typename N>
-inline std::string str(const EigenValues<N>& v) {
+template<typename N, size_t Size>
+inline std::string str(const EigenValues<N, Size>& v) {
 	std::stringstream ss;
 	ss << v;
 	return ss.str();
 }
-*/
+
 
 inline std::ostream& operator<<(std::ostream& os, const CFrame& cframe) {
 	os << "CFrame(" << cframe.position << ", " << cframe.rotation << ")";

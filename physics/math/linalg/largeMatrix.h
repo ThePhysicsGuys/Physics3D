@@ -16,8 +16,8 @@ public:
 		for (size_t i = 0; i < size; i++)
 			this->data[i] = initialData[i];
 	}
-	LargeVector(const LargeVector& other) : size(other.size), data(new T[size]) {
-		for (int i = 0; i < size; i++) {
+	LargeVector(const LargeVector& other) : size(other.size), data(new T[other.size]) {
+		for (int i = 0; i < other.size; i++) {
 			this->data[i] = other.data[i];
 		}
 	}
@@ -61,8 +61,14 @@ public:
 	}
 
 	~LargeVector() { delete[] data; }
-	T& operator[] (size_t index) { return data[index]; }
-	const T& operator[] (size_t index) const { return data[index]; }
+	T& operator[] (size_t index) {
+		assert(index >= 0 && index < size);
+		return data[index];
+	}
+	const T& operator[] (size_t index) const {
+		assert(index >= 0 && index < size);
+		return data[index];
+	}
 };
 
 template<typename T>
@@ -103,18 +109,23 @@ public:
 		return *this;
 	}
 
-	T* operator[](size_t index) {
-		return data + width * index;
+	T& get(size_t row, size_t col) {
+		assert(row >= 0 && row < height);
+		assert(col >= 0 && col < width);
+		return data[width * row + col];
 	}
-	const T* operator[](size_t index) const {
-		return data + width * index;
+
+	const T& get(size_t row, size_t col) const {
+		assert(row >= 0 && row < height);
+		assert(col >= 0 && col < width);
+		return data[width * row + col];
 	}
 
 	template<size_t Width, size_t Height>
 	void setSubMatrix(size_t topLeftRow, size_t topLeftCol, const Matrix<T, Width, Height>& matrix) {
 		for (size_t row = 0; row < Height; row++) {
 			for (size_t col = 0; col < Width; col++) {
-				(*this)[row + topLeftRow][col + topLeftCol] = matrix[row][col];
+				this->get(row + topLeftRow, col + topLeftCol) = matrix[row][col];
 			}
 		}
 	}
@@ -122,7 +133,7 @@ public:
 	void setSubMatrix(size_t topLeftRow, size_t topLeftCol, const LargeMatrix& matrix) {
 		for (size_t row = 0; row < matrix.height; row++) {
 			for (size_t col = 0; col < matrix.width; col++) {
-				(*this)[row + topLeftRow][col + topLeftCol] = matrix[row][col];
+				this->get(row + topLeftRow, col + topLeftCol) = matrix[row][col];
 			}
 		}
 	}
@@ -198,12 +209,10 @@ LargeVector<T> operator*(const LargeMatrix<T>& m, const LargeVector<T>& v) {
 	LargeVector<T> newVector(m.height);
 
 	for (size_t i = 0; i < m.height; i++) {
-		const T* row = m[i];
-
-		T total = row[0] * v[0];
+		T total = m.get(i, 0) * v[0];
 
 		for (size_t j = 1; j < m.width; j++) {
-			total += row[j] * v[j];
+			total += m.get(i, j) * v[j];
 		}
 		newVector[i] = total;
 	}

@@ -65,6 +65,15 @@ namespace Library {
 		{2, 3, 4}, {2, 4, 5} // diagonalSide
 	};
 
+	Triangle boxTriangles[12] = {
+	{1,0,2},{3,2,0}, // BOTTOM
+	{1,5,0},{4,0,5}, // FRONT
+	{1,2,5},{6,5,2}, // RIGHT
+	{6,2,7},{3,7,2}, // BACK
+	{3,0,7},{4,7,0}, // LEFT
+	{4,5,7},{6,7,5}, // TOP
+	};
+
 	const Polyhedron icosahedron(icosahedronVertices, icosahedronTriangles, 12, 20);
 	const Polyhedron trianglePyramid(trianglePyramidVertices, trianglePyramidTriangles, 4, 4);
 	const Polyhedron house(houseVertices, houseTriangles, 10, 16);
@@ -74,8 +83,22 @@ namespace Library {
 		return createBox(side, side, side);
 	}
 
-	Polyhedron createBox(double width, double height, double length) {
-		return BoundingBox(width, height, length).toShape();
+	Polyhedron createBox(double width, double height, double depth) {
+		float dx = float(width / 2.0);
+		float dy = float(height / 2.0);
+		float dz = float(depth / 2.0);
+
+		Vec3f vertBuf[8]{
+			Vec3f(-dx, -dy, -dz),
+			Vec3f(dx, -dy, -dz),
+			Vec3f(dx, dy, -dz),
+			Vec3f(-dx, dy, -dz),
+			Vec3f(-dx, -dy, dz),
+			Vec3f(dx, -dy, dz),
+			Vec3f(dx, dy, dz),
+			Vec3f(-dx, dy, dz)
+		};
+		return Polyhedron(vertBuf, boxTriangles, 8, 12);
 	}
 
 	// Returns a new Triangle[sides * 2 + (sides - 2) * 2]

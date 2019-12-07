@@ -5,11 +5,8 @@
 
 template<typename T>
 void swapRows(LargeMatrix<T>& m, LargeVector<T>& v, size_t rowA, size_t rowB) {
-	T* a = m[rowA];
-	T* b = m[rowB];
-	
 	for (size_t i = 0; i < m.width; i++) {
-		std::swap(a[i], b[i]);
+		std::swap(m.get(rowA, i), m.get(rowB, i));
 	}
 	std::swap(v[rowA], v[rowB]);
 }
@@ -21,10 +18,10 @@ void destructiveSolve(LargeMatrix<T>& m, LargeVector<T>& v) {
 
 	// make matrix upper triangular
 	for (size_t i = 0; i < size; i++) {
-		T bestPivot = std::abs(m[i][i]);
+		T bestPivot = std::abs(m.get(i, i));
 		size_t bestPivotIndex = i;
 		for (size_t j = i + 1; j < size; j++) {
-			T newPivot = std::abs(m[j][i]);
+			T newPivot = std::abs(m.get(j, i));
 			if (newPivot > bestPivot) {
 				bestPivot = newPivot;
 				bestPivotIndex = j;
@@ -35,18 +32,16 @@ void destructiveSolve(LargeMatrix<T>& m, LargeVector<T>& v) {
 			swapRows(m, v, bestPivotIndex, i);
 		}
 
-		T* pivotRow = m[i];
-		T pivot = pivotRow[i];
+		T pivot = m.get(i, i);
 		T pivotVectorElement = v[i];
 
 		for (size_t j = i + 1; j < size; j++) {
-			T* rowToEliminate = m[j];
-			T factor = rowToEliminate[i] / pivot;
+			T factor = m.get(j, i) / pivot;
 
-			rowToEliminate[i] -= pivotRow[i] * factor;
+			m.get(j, i) -= m.get(i, i) * factor;
 
 			for (size_t k = i + 1; k < size; k++) {
-				rowToEliminate[k] -= pivotRow[k] * factor;
+				m.get(j, k) -= m.get(i, k) * factor;
 			}
 			v[j] -= pivotVectorElement * factor;
 		}
@@ -54,14 +49,12 @@ void destructiveSolve(LargeMatrix<T>& m, LargeVector<T>& v) {
 
 	// back substitution
 	for (signed long long i = size - 1; i >= 0; i--) {
-		T* pivotRow = m[i];
-		T pivot = pivotRow[i];
+		T pivot = m.get(i, i);
 		T pivotVectorElement = v[i];
 
 		v[i] /= pivot;
 		for (signed long long j = i - 1; j >= 0; j--) {
-			T* row = m[j];
-			v[j] -= v[i] * row[i];
+			v[j] -= v[i] * m.get(j, i);
 		}
 	}
 }

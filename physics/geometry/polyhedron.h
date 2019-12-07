@@ -57,14 +57,17 @@ struct ShapeVertexIter {
 struct ShapeTriangleIter {
 	int* curTriangle;
 	size_t offset;
-	Triangle operator*() const {
+	inline Triangle operator*() const {
 		return Triangle{ *curTriangle, *(curTriangle + offset), *(curTriangle + 2 * offset) };
 	}
-	void operator++() {
+	inline void operator++() {
 		++curTriangle;
 	}
-	bool operator!=(const ShapeTriangleIter& other) const {
+	inline bool operator!=(const ShapeTriangleIter& other) const {
 		return curTriangle != other.curTriangle;
+	}
+	inline bool operator==(const ShapeTriangleIter& other) const {
+		return curTriangle == other.curTriangle;
 	}
 };
 
@@ -103,16 +106,14 @@ public:
 	float getIntersectionDistance(Vec3f origin, Vec3f direction) const;
 	double getVolume() const;
 
-	//CFramef getInertialEigenVectors() const;
 	BoundingBox getBounds() const;
 	BoundingBox getBounds(const Mat3f& referenceFrame) const;
 	void computeNormals(Vec3f* buffer) const;
 	Vec3 getCenterOfMass() const;
-	SymmetricMat3 getInertia() const;
-	SymmetricMat3 getInertia(Vec3 reference) const;
-	SymmetricMat3 getInertia(Mat3 reference) const;
+	SymmetricMat3 getInertiaAroundCenterOfMass() const;
 	SymmetricMat3 getInertia(const CFrame& reference) const;
 	ScalableInertialMatrix getScalableInertia(const CFrame& reference) const;
+	ScalableInertialMatrix getScalableInertiaAroundCenterOfMass() const;
 	CircumscribingSphere getCircumscribingSphere() const;
 	void getCircumscribedEllipsoid() const;
 	double getMaxRadius() const;

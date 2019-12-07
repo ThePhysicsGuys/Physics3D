@@ -358,6 +358,6 @@ void EditTools::dragTranslateTool(Screen& screen) {
 		Vec3 translationCorrection = a * (a * selectedPoint);
 		Vec3 translation = s * a - translationCorrection;
 
-		screen.selectedPart->parent->translate(translation);
+		screen.selectedPart->translate(translation);
 	}
 }
