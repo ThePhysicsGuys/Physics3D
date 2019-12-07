@@ -103,7 +103,7 @@ void EditTools::onRender(Screen& screen) {
 	// Center, only rendered if editMode != EditMode::ROTATE
 	if (center) {
 		ApplicationShaders::basicShader.updateModel(modelMatrix);
-		ApplicationShaders::basicShader.updateMaterial(Material(GUI::COLOR::WHITE));
+		ApplicationShaders::basicShader.updateMaterial(Material(COLOR::WHITE));
 		center->render();
 	}
 
@@ -111,15 +111,15 @@ void EditTools::onRender(Screen& screen) {
 		switch (selectedEditDirection) {
 		case EditDirection::Y:
 			ApplicationShaders::maskShader.updateModel(modelMatrix);
-			ApplicationShaders::maskShader.updateColor(GUI::COLOR::G);
+			ApplicationShaders::maskShader.updateColor(COLOR::G);
 			break;
 		case EditDirection::X:
 			ApplicationShaders::maskShader.updateModel(modelMatrix * Mat4(Matrix<double, 3, 3>(transformations[1]), 1.0f));
-			ApplicationShaders::maskShader.updateColor(GUI::COLOR::R);
+			ApplicationShaders::maskShader.updateColor(COLOR::R);
 			break;
 		case EditDirection::Z:
 			ApplicationShaders::maskShader.updateModel(modelMatrix * Mat4(Matrix<double, 3, 3>(transformations[2]), 1.0f));
-			ApplicationShaders::maskShader.updateColor(GUI::COLOR::B);
+			ApplicationShaders::maskShader.updateColor(COLOR::B);
 			break;
 		}
 		line->render();
@@ -127,16 +127,16 @@ void EditTools::onRender(Screen& screen) {
 
 	// Y
 	ApplicationShaders::basicShader.updateModel(modelMatrix);
-	ApplicationShaders::basicShader.updateMaterial(Material(GUI::COLOR::G));
+	ApplicationShaders::basicShader.updateMaterial(Material(COLOR::G));
 	shaft->render();
 
 	// X
-	ApplicationShaders::basicShader.updateMaterial(Material(GUI::COLOR::R));
+	ApplicationShaders::basicShader.updateMaterial(Material(COLOR::R));
 	ApplicationShaders::basicShader.updateModel(modelMatrix * Mat4(Matrix<double, 3, 3>(transformations[1]), 1.0f));
 	shaft->render();
 
 	// Z
-	ApplicationShaders::basicShader.updateMaterial(Material(GUI::COLOR::B));
+	ApplicationShaders::basicShader.updateMaterial(Material(COLOR::B));
 	ApplicationShaders::basicShader.updateModel(modelMatrix * Mat4(Matrix<double, 3, 3>(transformations[2]), 1.0f));
 	shaft->render();
 
@@ -178,11 +178,9 @@ float EditTools::intersect(Screen& screen, const Ray& ray) {
 	// Check intersections of selected tool
 	for (int i = 0; i < (tool[1] ? 4 : 3); i++) {
 		GlobalCFrame frame = screen.selectedPart->getCFrame();
-
 		frame.rotation = frame.getRotation() * transformations[i];
 
 		VisualShape& shape = *tool[i / 3];
-
 		Position rayStart = ray.start;
 
 		float distance = shape.getIntersectionDistance(frame.globalToLocal(ray.start), frame.relativeToLocal(ray.direction));

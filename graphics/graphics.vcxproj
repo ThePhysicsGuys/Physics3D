@@ -155,6 +155,7 @@
     <ClCompile Include="font.cpp" />
     <ClCompile Include="gui\button.cpp" />
     <ClCompile Include="gui\checkBox.cpp" />
+    <ClCompile Include="gui\color.cpp" />
     <ClCompile Include="gui\colorPicker.cpp" />
     <ClCompile Include="gui\container.cpp" />
     <ClCompile Include="gui\directionEditor.cpp" />
@@ -206,6 +207,7 @@
     <ClInclude Include="font.h" />
     <ClInclude Include="gui\button.h" />
     <ClInclude Include="gui\checkBox.h" />
+    <ClInclude Include="gui\color.h" />
     <ClInclude Include="gui\colorPicker.h" />
     <ClInclude Include="gui\component.h" />
     <ClInclude Include="gui\container.h" />

@@ -19,7 +19,7 @@ namespace Path3D {
 
 	//! Primitives
 
-	void line(const Vec3f& a, const Vec3f& b, const Vec4f& colorA, const Vec4f& colorB, float thickness) {
+	void line(const Vec3f& a, const Vec3f& b, const Color& colorA, const Color& colorB, float thickness) {
 		size_t vertexCount = 4;
 		size_t indexCount = 6;
 		Path3D::batch->reserve(vertexCount, indexCount);
@@ -30,7 +30,7 @@ namespace Path3D {
 		Path3D::batch->endIndex();
 	}
 
-	void circle(const Vec3f& center, float radius, const Vec3f& normal, float thickness, const Vec4f& color, size_t precision) {
+	void circle(const Vec3f& center, float radius, const Vec3f& normal, float thickness, const Color& color, size_t precision) {
 		Vec3f n = normalize(normal);
 		Vec3f u = Vec3f(n.y, -n.x, 0);
 
@@ -60,7 +60,7 @@ namespace Path3D {
 		Path3D::batch->endIndex();
 	}
 
-	void triangle(const Vec3f& a, const Vec3f& b, const Vec3f& c, const Vec4f& colorA, const Vec4f& colorB, const Vec4f& colorC, float thickness) {
+	void triangle(const Vec3f& a, const Vec3f& b, const Vec3f& c, const Color& colorA, const Color& colorB, const Color& colorC, float thickness) {
 		size_t vertexCount = 3;
 		size_t indexCount = 6;
 		Path3D::batch->reserve(vertexCount, indexCount);
@@ -71,7 +71,7 @@ namespace Path3D {
 		Path3D::batch->endIndex();
 	}
 
-	void quad(const Vec3f& a, const Vec3f& b, const Vec3f& c, const Vec3f& d, const Vec4f& colorA, const Vec4f& colorB, const Vec4f& colorC, Vec4f colorD, float thickness) {
+	void quad(const Vec3f& a, const Vec3f& b, const Vec3f& c, const Vec3f& d, const Color& colorA, const Color& colorB, const Color& colorC, Color colorD, float thickness) {
 		size_t vertexCount = 4;
 		size_t indexCount = 8;
 		Path3D::batch->reserve(vertexCount, indexCount);
@@ -108,7 +108,7 @@ namespace Path3D {
 		Path3D::batch->endIndex();
 	}
 
-	void polyLine(Vec3f* points, size_t size, const Vec4f& color, float thickness, bool closed) {
+	void polyLine(Vec3f* points, size_t size, const Color& color, float thickness, bool closed) {
 		polyLine(points, size, DEFAULT_PATTERN_3D(color));
 	}
 
@@ -148,7 +148,7 @@ namespace Path3D {
 		bezierTo(end, c1, c2, precision);
 	}
 
-	void stroke(Vec4f color, float thickness, bool closed) {
+	void stroke(const Color& color, float thickness, bool closed) {
 		stroke(DEFAULT_PATTERN_3D(color), thickness, closed);
 	}
 

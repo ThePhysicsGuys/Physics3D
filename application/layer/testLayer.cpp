@@ -38,8 +38,8 @@ void TestLayer::onRender() {
 	}
 
 	Path3D::stroke([] (int i, const Vec3f& p) {
-		return GUI::COLOR::hsvaToRgba(
-			Vec4f(1.0f / Path3D::size() * i, 1, 1, 1)
+		return COLOR::hsvaToRgba(
+			Color(1.0f / Path3D::size() * i, 1, 1, 1)
 		);
 	});
 

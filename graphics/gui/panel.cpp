@@ -10,13 +10,13 @@
 #include "../physics/math/mathUtil.h"
 
 Panel::Panel(double x, double y) : Container(x, y) {
-	this->background = GUI::COLOR::BACK;
+	this->background = COLOR::BACK;
 	this->padding = GUI::padding;
 	this->margin = GUI::margin;
 };
 
 Panel::Panel(double x, double y, double width, double height) : Container(x, y, width, height) {
-	this->background = GUI::COLOR::BACK;
+	this->background = COLOR::BACK;
 	this->padding = GUI::padding;
 	this->margin = GUI::margin;
 };
@@ -39,11 +39,11 @@ Vec2 Panel::resize() {
 void Panel::render() {
 	if (visible) {
 
-		Vec4 blendColor = (disabled) ? GUI::COLOR::DISABLED : GUI::COLOR::WHITE;
+		Color blendColor = (disabled) ? COLOR::DISABLED : COLOR::WHITE;
 
 		resize();
 
-		Path::rectFilled(position, dimension, 0, GUI::COLOR::blend(background, blendColor));
+		Path::rectFilled(position, dimension, 0, COLOR::blend(background, blendColor));
 
 		renderChildren();
 	}

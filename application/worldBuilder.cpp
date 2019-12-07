@@ -129,7 +129,7 @@ namespace WorldBuilder {
 		GlobalCFrame trunkCFrame(treePos, fromEulerAngles(fRand(-0.1, 0.1), fRand(-3.1415, 3.1415), fRand(-0.1, 0.1)));
 
 		ExtendedPart* trunk = new ExtendedPart(treeTrunk, trunkCFrame, {1.0, 1.0, 0.3}, "trunk");
-		trunk->material.ambient = GUI::COLOR::get(0x654321);
+		trunk->material.ambient = COLOR::get(0x654321);
 		world.addTerrainPart(trunk);
 
 		Position treeTop = trunkCFrame.localToGlobal(Vec3(0.0, 5.5, 0.0));

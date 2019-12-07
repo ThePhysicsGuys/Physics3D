@@ -5,7 +5,7 @@
 
 class Panel : public Container {
 public:
-	Vec4 background;
+	Color background;
 
 	Panel(double x, double y);
 	Panel(double x, double y, double width, double height);

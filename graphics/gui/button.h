@@ -16,21 +16,21 @@ public:
 	Texture* pressTexture = nullptr;
 
 	std::string text;
-	Vec4 fontColor;
+	Color fontColor;
 	double fontSize;
 
 	bool textured = false;
 	bool hovering = false;
 	bool pressed = false;
 
-	Vec4 hoverColor;
-	Vec4 idleColor;
-	Vec4 pressColor;
+	Color hoverColor;
+	Color idleColor;
+	Color pressColor;
 
-	Vec4 borderColor;
+	Color borderColor;
 	double borderWidth;
 
-	void setColor(Vec4 color);
+	void setColor(const Color& color);
 
 	Button(double x, double y, double width, double height, bool textured);
 	Button(std::string text, double x, double y, bool textured);

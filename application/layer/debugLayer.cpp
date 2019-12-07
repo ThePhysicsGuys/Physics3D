@@ -26,29 +26,29 @@
 #include "../graphics/meshLibrary.h"
 
 Vec4f colors[] {
-	GUI::COLOR::BLUE,
-	GUI::COLOR::GREEN,
-	GUI::COLOR::YELLOW,
-	GUI::COLOR::ORANGE,
-	GUI::COLOR::RED,
-	GUI::COLOR::PURPLE
+	COLOR::BLUE,
+	COLOR::GREEN,
+	COLOR::YELLOW,
+	COLOR::ORANGE,
+	COLOR::RED,
+	COLOR::PURPLE
 };
 
-void renderSphere(double radius, Position position, Vec4f color) {
+void renderSphere(double radius, const Position& position, const Color& color) {
 	ApplicationShaders::basicShader.updateMaterial(Material(color));
 	ApplicationShaders::basicShader.updateModel(CFrameToMat4(GlobalCFrame(position, DiagonalMat3::IDENTITY() * radius)));
 
 	Library::sphere->render();
 }
 
-void renderBox(const GlobalCFrame& cframe, double width, double height, double depth, Vec4f color) {
+void renderBox(const GlobalCFrame& cframe, double width, double height, double depth, const Color& color) {
 	ApplicationShaders::basicShader.updateMaterial(Material(color));
 	ApplicationShaders::basicShader.updateModel(CFrameToMat4(GlobalCFrame(cframe.getPosition(), cframe.getRotation() * DiagonalMat3 { width, height, depth })));
 
 	Library::cube->render();
 }
 
-void renderBounds(const Bounds& bounds, const Vec4f& color) {
+void renderBounds(const Bounds& bounds, const Color& color) {
 	Vec3Fix diagonal = bounds.getDiagonal();
 	Position position = bounds.getCenter();
 	renderBox(GlobalCFrame(position), diagonal.x, diagonal.y, diagonal.z, color);
@@ -82,7 +82,7 @@ bool recursiveColTreeForOneObject(const TreeNode& node, const Physical* physical
 		//if (!intersects(node.bounds, bounds)) return false;
 		for (const TreeNode& subNode : node) {
 			if (recursiveColTreeForOneObject(subNode, physical, bounds)) {
-				Vec4f green = GUI::COLOR::GREEN;
+				Color green = COLOR::GREEN;
 				green.w = 0.3f;
 
 				renderBounds(node.bounds, green);
@@ -176,12 +176,12 @@ void DebugLayer::onRender() {
 				Physical& selectedPhys = *screen->selectedPart->parent;
 
 				for(Part& part : selectedPhys) {
-					Vec4f yellow = GUI::COLOR::YELLOW;
+					Color yellow = COLOR::YELLOW;
 					yellow.w = 0.5;
 					BoundingBox localBounds = screen->selectedPart->getLocalBounds();
 					renderBox(screen->selectedPart->getCFrame().localToGlobal(CFrame(localBounds.getCenter())), localBounds.getWidth(), localBounds.getHeight(), localBounds.getDepth(), yellow);
 
-					Vec4f green = GUI::COLOR::GREEN;
+					Color green = COLOR::GREEN;
 					green.w = 0.5;
 					renderSphere(part.maxRadius * 2, part.getPosition(), green);
 				}
@@ -191,12 +191,12 @@ void DebugLayer::onRender() {
 		if(colissionSpheresMode == SphereColissionRenderMode::ALL) {
 			for(MotorizedPhysical* phys : screen->world->iterPhysicals()) {
 				for(Part& part : *phys) {
-					Vec4f yellow = GUI::COLOR::YELLOW;
+					Color yellow = COLOR::YELLOW;
 					yellow.w = 0.5;
 					BoundingBox localBounds = part.getLocalBounds();
 					renderBox(part.getCFrame().localToGlobal(CFrame(localBounds.getCenter())), localBounds.getWidth(), localBounds.getHeight(), localBounds.getDepth(), yellow);
 
-					Vec4f green = GUI::COLOR::GREEN;
+					Color green = COLOR::GREEN;
 					green.w = 0.5;
 					renderSphere(part.maxRadius * 2, part.getPosition(), green);
 				}

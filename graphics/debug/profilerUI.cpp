@@ -21,22 +21,22 @@
 
 #define MAX_ANGLE 0.1f
 
-const Vec3f pieColors[30] {
-	Vec3f(0.2f,0.2f,1),
-	Vec3f(1,0.5f,0),
-	Vec3f(1,1,0),
-	Vec3f(1,0,1),
-	Vec3f(0,1,0),
-	Vec3f(0,1,1),
-	Vec3f(1,1,1),
-	Vec3f(1,0,0),
-	Vec3f(0.5f,0,0),
-	Vec3f(0,0.5f,0),
-	Vec3f(0,0,0.5f),
-	Vec3f(0.5f,0.5f,0),
-	Vec3f(0.5f,0,0.5f),
-	Vec3f(0,0.5f,0.5f),
-	Vec3f(0.5f,0.5f,0.5f),
+const Color3 pieColors[30] {
+	Color3(0.2f,0.2f,1),
+	Color3(1,0.5f,0),
+	Color3(1,1,0),
+	Color3(1,0,1),
+	Color3(0,1,0),
+	Color3(0,1,1),
+	Color3(1,1,1),
+	Color3(1,0,0),
+	Color3(0.5f,0,0),
+	Color3(0,0.5f,0),
+	Color3(0,0,0.5f),
+	Color3(0.5f,0.5f,0),
+	Color3(0.5f,0,0.5f),
+	Color3(0,0.5f,0.5f),
+	Color3(0.5f,0.5f,0.5f),
 };
 
 void PieChart::renderPie(Screen& screen) const {
@@ -67,22 +67,21 @@ void PieChart::renderText(Screen& screen, Font* font) const {
 	Path::text(font, title, 0.001, Vec2(titlePosition.x, titlePosition.y), Vec4f(1, 1, 1, 1));
 
 	Vec2f textPosition = Vec2(piePosition + Vec2f(pieSize * 1.3f, pieSize * 1.1f - 0.05f));
-
 	float totalWeight = getTotal();
 
-	Path::text(font, totalValue, 0.0006, textPosition + Vec2(0.50, 0.035), Vec4(1, 1, 1, 1));
+	Path::text(font, totalValue, 0.0006, textPosition + Vec2(0.50, 0.035), Color(1, 1, 1, 1));
 
 	for (int i = 0; i < parts.size(); i++) {
 		const DataPoint& p = parts[i];
 		Vec2 linePosition = textPosition + Vec2(0, -i*0.035);
-		Path::text(font, p.label, 0.0006, linePosition, Vec4(p.color, 1));
+		Path::text(font, p.label, 0.0006, linePosition, Color(p.color, 1));
 
 		std::stringstream percent;
 		percent.precision(4);
 		percent << p.weight/totalWeight * 100;
 		percent << "%";
 		Path::text(font, percent.str(), 0.0006, linePosition + Vec2(0.35, 0), Vec4(p.color, 1));
-		Path::text(font, p.value, 0.0006, linePosition + Vec2(0.50, 0), Vec4(p.color, 1));
+		Path::text(font, p.value, 0.0006, linePosition + Vec2(0.50, 0), Color(p.color, 1));
 	}
 }
 
@@ -125,11 +124,11 @@ void BarChart::render() {
 			float height = drawingSize.y * dataPoint.weight / max;
 			Vec2f topLeft = drawingPosition + Vec2f(categoryWidth * i + barWidth*cl, height);
 
-			Path::rectFilled(topLeft, Vec2f(barWidth, height), 0.0f, Vec4f(info.color, 1.0f));
+			Path::rectFilled(topLeft, Vec2f(barWidth, height), 0.0f, Color(info.color, 1.0f));
 		}
 	}
 
-	Path::text(GUI::font, title, 0.001, position + Vec2f(0, this->dimension.y - titleHeight), GUI::COLOR::WHITE);
+	Path::text(GUI::font, title, 0.001, position + Vec2f(0, this->dimension.y - titleHeight), COLOR::WHITE);
 
 	for (int cl = 0; cl < data.height; cl++) {
 		const BarChartClassInfo& info = classes[cl];
@@ -143,17 +142,17 @@ void BarChart::render() {
 			Vec2f topTextPosition = bottomLeft + Vec2(0, height+drawingSize.y * 0.02);
 			//topTextPosition.x *= GUI::screen->dimension.x / GUI::screen->dimension.y;
 
-			Path::text(GUI::font, dataPoint.value, 0.0005, topTextPosition, Vec4(info.color, 1));
+			Path::text(GUI::font, dataPoint.value, 0.0005, topTextPosition, Color(info.color, 1));
 		}
 	}
 
 	for (int i = 0; i < data.width; i++) {
 		Vec2f botLeft = position + Vec2f(marginLeft, 0) + Vec2f(categoryWidth * i, 0);
-		Path::text(GUI::font, labels[i], 0.0005, botLeft, GUI::COLOR::WHITE);
+		Path::text(GUI::font, labels[i], 0.0005, botLeft, COLOR::WHITE);
 	}
 
 	for (int cl = 0; cl < data.height; cl++)
-		Path::text(GUI::font, classes[cl].name, 0.0007, drawingPosition + Vec2f(this->dimension.x - 0.3, drawingSize.y - 0.035 * cl), Vec4(classes[cl].color, 1));
+		Path::text(GUI::font, classes[cl].name, 0.0007, drawingPosition + Vec2f(this->dimension.x - 0.3, drawingSize.y - 0.035 * cl), Color(classes[cl].color, 1));
 }
 
 float BarChart::getMaxWeight() const {
@@ -178,14 +177,14 @@ void recursiveRenderTree(const TreeNode& tree, const Vec3f& treeColor, Vec2f ori
 			float colorDarkning = pow(1.0f * computeCost(tree[i].bounds) / maxCost, 0.25f);
 
 			//Path::bezierVertical(origin, nextStep, 1.0f, Vec4f(treeColor * colorDarkning, 1.0f), 15);
-			Path::line(origin, nextStep, Vec4f(treeColor * colorDarkning, 1.0f), 1.0f);
+			Path::line(origin, nextStep, Color(treeColor * colorDarkning, 1.0f), 1.0f);
 
 			recursiveRenderTree(tree[i], treeColor, nextStep, allottedWidth / tree.nodeCount, maxCost);
 		}
 	}
 
 	if (tree.isGroupHead)
-		Path::circleFilled(origin, 0.006f, GUI::COLOR::RED, 8);
+		Path::circleFilled(origin, 0.006f, COLOR::RED, 8);
 }
 
 void renderTreeStructure(Screen& screen, const TreeNode& tree, const Vec3f& treeColor, Vec2f origin, float allottedWidth) {
@@ -259,8 +258,8 @@ void SlidingChart::render() {
 	float axisOffset = 0.03;
 
 	Path::rect(position, dimension, 0.0f, Vec4f(0.4, 0.4, 0.4, 1));
-	Path::line(position + Vec2f(-axisOffset, -dimension.y), position + Vec2f(dimension.x + axisOffset, -dimension.y), GUI::COLOR::WHITE, 2.0f);
-	Path::line(position + Vec2f(0, axisOffset), position + Vec2f(0, -dimension.y - axisOffset), GUI::COLOR::WHITE, 2.0f);
+	Path::line(position + Vec2f(-axisOffset, -dimension.y), position + Vec2f(dimension.x + axisOffset, -dimension.y), COLOR::WHITE, 2.0f);
+	Path::line(position + Vec2f(0, axisOffset), position + Vec2f(0, -dimension.y - axisOffset), COLOR::WHITE, 2.0f);
 
 	for (auto dataSetIterator : dataSets) {
 		SlidingChartDataSetInfo& dataSet = dataSetIterator.second;
@@ -289,7 +288,7 @@ void SlidingChart::render() {
 	}
 
 	Vec2f titleSize = GUI::font->size(title, 0.001f);
-	Path::text(GUI::font, title, 0.001f, Vec2f(position.x + dimension.x / 2.0, position.y + axisOffset), GUI::COLOR::WHITE, Path::TextPivotHC);
+	Path::text(GUI::font, title, 0.001f, Vec2f(position.x + dimension.x / 2.0, position.y + axisOffset), COLOR::WHITE, Path::TextPivotHC);
 }
 
 Vec2 SlidingChart::resize() {

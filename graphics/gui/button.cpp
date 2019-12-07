@@ -43,13 +43,13 @@ void Button::render() {
 	if (visible) {
 		resize();
 
-		Vec4 blendColor = (disabled) ? GUI::COLOR::DISABLED : GUI::COLOR::WHITE;
+		Color blendColor = (disabled) ? COLOR::DISABLED : COLOR::WHITE;
 
 		Vec2f buttonPosition = position;
 		Vec2f buttonDimension = dimension;
 
 		if (borderWidth > 0) {
-			Path::rectFilled(buttonPosition, buttonDimension, 0, GUI::COLOR::blend(borderColor, blendColor));
+			Path::rectFilled(buttonPosition, buttonDimension, 0, COLOR::blend(borderColor, blendColor));
 
 			buttonPosition = position + Vec2f(borderWidth, -borderWidth);
 			buttonDimension = dimension - Vec2f(borderWidth) * 2;
@@ -57,16 +57,16 @@ void Button::render() {
 
 		if (pressed)
 			if (textured) Path::rectUV(pressTexture->getID(), position, dimension);
-			else Path::rectFilled(position, dimension, 0, GUI::COLOR::blend(pressColor, blendColor));
+			else Path::rectFilled(position, dimension, 0, COLOR::blend(pressColor, blendColor));
 		else if (hovering)
 			if (textured) Path::rectUV(hoverTexture->getID(), position, dimension);
-			else Path::rectFilled(position, dimension, 0, GUI::COLOR::blend(hoverColor, blendColor));
+			else Path::rectFilled(position, dimension, 0, COLOR::blend(hoverColor, blendColor));
 		else
 			if (textured) Path::rectUV(idleTexture->getID(), position, dimension);
-			else Path::rectFilled(position, dimension, 0, GUI::COLOR::blend(idleColor, blendColor));
+			else Path::rectFilled(position, dimension, 0, COLOR::blend(idleColor, blendColor));
 
 		if (!text.empty())
-			Path::text(GUI::font, text, fontSize, position + Vec2(borderWidth, -borderWidth), GUI::COLOR::blend(fontColor, blendColor));
+			Path::text(GUI::font, text, fontSize, position + Vec2(borderWidth, -borderWidth), COLOR::blend(fontColor, blendColor));
 	}
 }
 
@@ -108,7 +108,7 @@ void Button::release(Vec2 point) {
 	(*action)(this);
 }
 
-void Button::setColor(Vec4 color) {
+void Button::setColor(const Color& color) {
 	idleColor = color;
 	pressColor = color;
 	hoverColor = color;

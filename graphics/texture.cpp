@@ -161,11 +161,11 @@ void Texture::resize(int width, int height, const void* buffer) {
 	unbind();
 }
 
-Texture* Texture::colored(Vec3 color) {
-	return colored(Vec4(color.x, color.y, color.z, 1));
+Texture* Texture::colored(Color3 color) {
+	return colored(Color(color.x, color.y, color.z, 1));
 }
 
-Texture* Texture::colored(Vec4 color) {
+Texture* Texture::colored(Color color) {
 	bind();
 	unsigned char* buffer = (unsigned char*)malloc(width * height * channels);
 

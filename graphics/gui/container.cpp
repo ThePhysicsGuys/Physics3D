@@ -59,9 +59,9 @@ void Container::renderChildren() {
 	for (auto child : children) {
 		child.first->render();
 		if (debug) {
-			Path::rect(child.first->position + Vec2(-margin, margin), child.first->dimension + Vec2(margin * 2), 0, GUI::COLOR::R);
-			Path::rect(child.first->position, child.first->dimension, 0, GUI::COLOR::G);
-			Path::rect(child.first->position + Vec2(padding, -padding), child.first->dimension + Vec2(-padding * 2), 0, GUI::COLOR::B);
+			Path::rect(child.first->position + Vec2(-margin, margin), child.first->dimension + Vec2(margin * 2), 0, COLOR::R);
+			Path::rect(child.first->position, child.first->dimension, 0, COLOR::G);
+			Path::rect(child.first->position + Vec2(padding, -padding), child.first->dimension + Vec2(-padding * 2), 0, COLOR::B);
 		}
 	}
 }

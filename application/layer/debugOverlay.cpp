@@ -37,8 +37,8 @@ DebugOverlay::DebugOverlay(Screen* screen, char flags) : Layer("Debug overlay", 
 }
 
 void DebugOverlay::onInit() {
-	fpsSlidingChart.add(SlidingChartDataSetInfo("Fps 1", 100, GUI::COLOR::ORANGE, 2.0));
-	fpsSlidingChart.add(SlidingChartDataSetInfo("Fps 2", 50, GUI::COLOR::BLUE, 1.0));
+	fpsSlidingChart.add(SlidingChartDataSetInfo("Fps 1", 100, COLOR::ORANGE, 2.0));
+	fpsSlidingChart.add(SlidingChartDataSetInfo("Fps 2", 50, COLOR::BLUE, 1.0));
 }
 
 void DebugOverlay::onUpdate() {

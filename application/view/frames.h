@@ -88,7 +88,7 @@ struct EnvironmentFrame : public FrameBlueprint, public Frame {
 			ApplicationShaders::basicShader.updateSunDirection(Vec3f(d->modelMatrix * Vec4f(0, 1, 0, 1)));
 		};
 
-		sunColorButton->setColor(Vec4(1));
+		sunColorButton->setColor(Color(1));
 		sunColorButton->action = [] (Button* button) {
 			EnvironmentFrame* environmentFrame = static_cast<EnvironmentFrame*>(button->parent);
 
@@ -443,13 +443,13 @@ struct PropertiesFrame : public FrameBlueprint, public Frame {
 			conveyorEffectLabel->text = "ConveyorEffect: -";
 
 			ambientColorButton->disabled = true;
-			ambientColorButton->setColor(Vec4(1));
+			ambientColorButton->setColor(Color(1));
 
 			diffuseColorButton->disabled = true;
-			diffuseColorButton->setColor(Vec4(1));
+			diffuseColorButton->setColor(Color(1));
 
 			specularColorButton->disabled = true;
-			specularColorButton->setColor(Vec4(1));
+			specularColorButton->setColor(Color(1));
 
 			reflectanceSlider->disabled = true;
 			reflectanceSlider->value = (reflectanceSlider->max + reflectanceSlider->min) / 2;

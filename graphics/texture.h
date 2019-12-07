@@ -1,6 +1,7 @@
 #pragma once
 
 #include "bindable.h"
+#include "gui/color.h"
 
 class Texture : public Bindable {
 protected:
@@ -38,8 +39,8 @@ public:
 
 	void loadFrameBufferTexture(int width, int height);
 
-	Texture* colored(Vec3 color);
-	Texture* colored(Vec4 color);
+	Texture* colored(Color3 color);
+	Texture* colored(Color color);
 
 	static Texture load(const std::string& name);
 

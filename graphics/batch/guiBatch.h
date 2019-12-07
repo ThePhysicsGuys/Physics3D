@@ -4,7 +4,7 @@
 
 #include "commandBatch.h"
 #include "batchConfig.h"
-
+#include "../gui/color.h"
 #include "../buffers/bufferLayout.h"
 #include "../shader/shaders.h"
 
@@ -22,7 +22,7 @@ struct GuiCommand {
 struct GuiVertex {
 	Vec2f pos;
 	Vec2f uv;
-	Vec4f col;
+	Color col;
 };
 
 class GuiBatch : public CommandBatch<GuiVertex, GuiCommand> {
