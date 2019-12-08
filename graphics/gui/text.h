@@ -2,37 +2,7 @@
 
 #include "core.h"
 
-struct Character {
-	union {
-		struct {
-			int x;
-			int y;
-		};
-		Vec2i origin;
-	};
-
-	union {
-		struct {
-			int width;
-			int height;
-		};
-		Vec2i size;
-	};
-
-	union {
-		struct {
-			int bx;
-			int by;
-		};
-		Vec2i bearing;
-	};
-
-	unsigned int advance;
-	unsigned int id;
-
-	Character();
-	Character(unsigned int id, int x, int y, int width, int height, int bx, int by, unsigned int advance);
-};
+#include "font.h"
 
 struct Word {
 	// List of characters in this word

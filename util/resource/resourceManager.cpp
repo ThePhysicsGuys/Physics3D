@@ -8,10 +8,5 @@ ResourceManager::ResourceManager() {
 }
 
 ResourceManager::~ResourceManager() {
-	for (auto iterator : resources) {
-		iterator.second.value->close();
-	}
-
-	resources.clear();
-	defaultResources.clear();
+	ResourceManager::close();
 }

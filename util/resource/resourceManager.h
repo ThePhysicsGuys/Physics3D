@@ -133,6 +133,15 @@ public:
 		}
 	}
 
+	static void close() {
+		for (auto iterator : resources) {
+			iterator.second.value->close();
+		}
+
+		resources.clear();
+		defaultResources.clear();
+	}
+
 	template<typename T>
 	static T* add(const std::string& path) {
 		return add<T>(path, path);

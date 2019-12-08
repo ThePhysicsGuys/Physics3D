@@ -29,6 +29,9 @@ Image::Image(double x, double y, double width, double height, Texture* texture) 
 }
 
 void Image::render() {
+	if (!texture)
+		return;
+
 	if (visible) {
 		Color blendColor = (disabled) ? COLOR::DISABLED : COLOR::WHITE;
 
@@ -40,7 +43,11 @@ void Image::render() {
 }
 
 Vec2 Image::resize() {
+	if (!texture)
+		return dimension;
+
 	if (resizing)
 		dimension = Vec2(texture->getWidth(), texture->getHeight());
+
 	return dimension;
 }

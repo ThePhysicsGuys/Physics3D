@@ -15,7 +15,19 @@
 
 #include <string>
 
-Character characters[CHARACTER_COUNT];
+#pragma region Character
+
+Character::Character() : id(0), x(0), y(0), width(0), height(0), bx(0), by(0), advance(0) {
+
+};
+
+Character::Character(unsigned int id, int x, int y, int width, int height, int bx, int by, unsigned int advance) : id(id), x(x), y(y), width(width), height(height), bx(bx), by(by), advance(advance) {
+
+};
+
+#pragma endregion
+
+#pragma region Font
 
 Font::Font() {
 
@@ -176,3 +188,4 @@ unsigned int Font::getAtlasHeight() const {
 	return atlas.getHeight();
 }
 
+#pragma endregion

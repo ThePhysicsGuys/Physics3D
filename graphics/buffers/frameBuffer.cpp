@@ -78,6 +78,7 @@ void FrameBuffer::resize(Vec2i dimension) {
 
 	if (texture)
 		texture->resize(dimension.x, dimension.y);
+
 	if (renderBuffer)
 		renderBuffer->resize(dimension.x, dimension.y);
 }
