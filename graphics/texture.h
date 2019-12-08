@@ -44,6 +44,7 @@ public:
 
 	static Texture load(const std::string& name);
 
+	float getAspect() const;
 	int getWidth() const;
 	int getHeight() const;
 	int getInternalFormat() const;

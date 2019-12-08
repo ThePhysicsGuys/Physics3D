@@ -216,6 +216,10 @@ void Texture::close() {
 	}
 }
 
+float Texture::getAspect() const {
+	return ((float) width) / ((float) height);
+}
+
 int Texture::getWidth() const {
 	return width;
 }

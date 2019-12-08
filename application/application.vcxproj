@@ -243,7 +243,7 @@
     <ClCompile Include="io\export.cpp" />
     <ClCompile Include="io\import.cpp" />
     <ClCompile Include="layer\postprocessLayer.cpp" />
-    <ClCompile Include="layer\resources.cpp" />
+    <ClCompile Include="resources.cpp" />
     <ClCompile Include="layer\testLayer.cpp" />
     <ClCompile Include="layer\debugLayer.cpp" />
     <ClCompile Include="layer\debugOverlay.cpp" />

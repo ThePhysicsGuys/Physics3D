@@ -58,24 +58,42 @@ public:
 
 		Batch<GuiVertex>::vao->bind();
 
-		Batch<GuiVertex>::vbo->fill((const void *) Batch<GuiVertex>::vertexBuffer.data(), Batch<GuiVertex>::vertexBuffer.size() * sizeof(GuiVertex), Renderer::STREAM_DRAW);
-		Batch<GuiVertex>::ibo->fill((const unsigned int *) Batch<GuiVertex>::indexBuffer.data(), Batch<GuiVertex>::indexBuffer.size(), Renderer::STREAM_DRAW);
+		Batch<GuiVertex>::vbo->fill((const void*) Batch<GuiVertex>::vertexBuffer.data(), Batch<GuiVertex>::vertexBuffer.size() * sizeof(GuiVertex), Renderer::STREAM_DRAW);
+		Batch<GuiVertex>::ibo->fill((const unsigned int*) Batch<GuiVertex>::indexBuffer.data(), Batch<GuiVertex>::indexBuffer.size(), Renderer::STREAM_DRAW);
+
+		int lastID = 0;
+		int lastCount = 0;
+		size_t lastIndexOffset = 0;
 
 		for (const GuiCommand& command : commandBuffer) {
+			int ID = command.textureID;
+			int count = command.count;
+			size_t indexOffset = command.indexOffset;
 
-			if (command.textureID != 0) {
-				Renderer::bindTexture2D(command.textureID);
-				GraphicsShaders::guiShader.setTextured(true);
+			if (ID == lastID) {
+				// merge calls, no shader update
+				lastCount += count;
 			} else {
-				GraphicsShaders::guiShader.setTextured(false);
+				// render merged calls, shader update, texture bind, render this call
+				Renderer::drawElements(Renderer::TRIANGLES, lastCount, Renderer::UINT, (const void*) (intptr_t) (lastIndexOffset * sizeof(unsigned int)));
+
+				// update shader
+				if (ID == 0) {
+					GraphicsShaders::guiShader.setTextured(false);
+				} else {
+					Renderer::bindTexture2D(ID);
+					GraphicsShaders::guiShader.setTextured(true);
+				}
+
+				lastCount = count;
+				lastIndexOffset = indexOffset;
 			}
 
-			// TODO project clip rectangle to framebuffer space
-			//Renderer::scissor(command.clip.x, command.clip.y, command.clip.z, command.clip.w);
-
-			Renderer::drawElements(Renderer::TRIANGLES, command.count, Renderer::UINT, (const void *)(intptr_t)(command.indexOffset * sizeof(unsigned int)));
-
+			// update last ID
+			lastID = ID;
 		}
+
+		Renderer::drawElements(Renderer::TRIANGLES, lastCount, Renderer::UINT, (const void*) (intptr_t) (lastIndexOffset * sizeof(unsigned int)));
 
 		Batch<GuiVertex>::vbo->unbind();
 		Batch<GuiVertex>::ibo->unbind();

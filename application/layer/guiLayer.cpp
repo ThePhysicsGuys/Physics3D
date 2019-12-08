@@ -12,6 +12,8 @@
 #include "../graphics/gui/guiUtils.h"
 #include "../engine/input/mouse.h"
 
+#include "../graphics/buffers/frameBuffer.h"
+
 // Font
 Font* font = nullptr;
 
@@ -19,6 +21,9 @@ Font* font = nullptr;
 PropertiesFrame* propertiesFrame = nullptr;
 DebugFrame* debugFrame = nullptr;
 EnvironmentFrame* environmentFrame = nullptr;
+
+ImageFrame* originalRender = nullptr;
+ImageFrame* blurRender = nullptr;
 
 GuiLayer::GuiLayer() {
 
@@ -67,6 +72,8 @@ void GuiLayer::onInit() {
 	propertiesFrame = new PropertiesFrame(0.75, 0.75);
 	environmentFrame = new EnvironmentFrame(0.8, 0.8);
 	debugFrame = new DebugFrame(0.7, 0.7);
+	originalRender = new ImageFrame(0, 0, "original");
+	blurRender = new ImageFrame(0, 0, "blur");
 }
 
 void GuiLayer::onUpdate() {
@@ -80,6 +87,8 @@ void GuiLayer::onUpdate() {
 	propertiesFrame->update();
 	debugFrame->update();
 	environmentFrame->update();
+	originalRender->update();
+	blurRender->update();
 }
 
 void GuiLayer::onEvent(Event& event) {
@@ -97,6 +106,9 @@ void GuiLayer::onRender() {
 	graphicsMeasure.mark(GraphicsProcess::OTHER);
 	ApplicationShaders::fontShader.updateProjection(screen->camera.orthoMatrix);
 	GUI::onRender(screen->camera.orthoMatrix);
+
+	originalRender->image->texture = screen->screenFrameBuffer->texture;
+	blurRender->image->texture = screen->blurFrameBuffer->texture;
 }
 
 void GuiLayer::onClose() {

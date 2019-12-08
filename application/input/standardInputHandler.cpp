@@ -32,16 +32,26 @@ void StandardInputHandler::onEvent(Event& event) {
 	if (dispatcher.dispatch<DoubleKeyPressEvent>(BIND_EVENT_METHOD(StandardInputHandler::onDoubleKeyPress)))
 		return;
 
-	if (dispatcher.dispatch<FrameBufferResizeEvent>(BIND_EVENT_METHOD(StandardInputHandler::onFrameBufferResize)))
+	if (dispatcher.dispatch<WindowResizeEvent>(BIND_EVENT_METHOD(StandardInputHandler::onWindowResize)))
 		return;
 
+}
+
+bool StandardInputHandler::onWindowResize(WindowResizeEvent& event) {
+	Vec2i dimension = Vec2i(event.getWidth(), event.getHeight());
+
+	Renderer::viewport(Vec2i(), dimension);
+	Log::debug("Window resize: %s", str(dimension));
+	(*screen.eventHandler.windowResizeHandler) (screen, dimension);
+
+	return true;
 }
 
 bool StandardInputHandler::onFrameBufferResize(FrameBufferResizeEvent& event) {
 	Vec2i dimension = Vec2i(event.getWidth(), event.getHeight());
 
 	Renderer::viewport(Vec2i(), dimension);
-
+	Log::debug("Framebuffer resize: %s", str(dimension));
 	(*screen.eventHandler.windowResizeHandler) (screen, dimension);
 
 	return true;

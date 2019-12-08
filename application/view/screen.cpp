@@ -19,7 +19,7 @@
 #include "../graphics/visualShape.h"
 #include "../worlds.h"
 #include "../engine/event/windowEvent.h"
-
+#include "../util/resource/resourceManager.h"
 #include "../engine/layer/layerStack.h"
 #include "layer/skyboxLayer.h"
 #include "layer/modelLayer.h"
@@ -185,8 +185,9 @@ void Screen::onInit() {
 	eventHandler.setWindowResizeCallback([](Screen& screen, Vec2i dimension) {
 		screen.camera.onUpdate(((float)dimension.x) / ((float)dimension.y));
 		screen.dimension = dimension;
-
+		LOG_DEBUG("dimension: %s", str(dimension));
 		screen.screenFrameBuffer->resize(screen.dimension);
+		screen.blurFrameBuffer->resize(screen.dimension);
 	});
 
 
@@ -270,6 +271,8 @@ void Screen::onClose() {
 	layerStack.onClose();
 
 	Library::onClose();
+
+	ResourceManager::close();
 
 	ApplicationShaders::onClose();
 

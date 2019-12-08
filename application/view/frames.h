@@ -4,6 +4,7 @@
 #include "../graphics/gui/label.h"
 #include "../graphics/gui/slider.h"
 #include "../graphics/gui/checkBox.h"
+#include "../graphics/gui/image.h"
 #include "../graphics/gui/button.h"
 #include "../graphics/gui/directionEditor.h"
 #include "../graphics/gui/colorPicker.h"
@@ -11,6 +12,7 @@
 #include "../graphics/debug/visualDebug.h"
 #include "../graphics/shader/shaderProgram.h"
 #include "../graphics/renderUtils.h"
+#include "../graphics/texture.h"
 #include "shader/shaders.h"
 #include "extendedPart.h"
 #include "application.h"
@@ -22,6 +24,29 @@
 struct FrameBlueprint {
 	virtual void init() = 0;
 	virtual void update() = 0;
+};
+
+struct ImageFrame : public FrameBlueprint, public Frame {
+	Image* image = nullptr;
+
+	ImageFrame(double x, double y, std::string title) : Frame(x, y, 1, 1, title) {
+		init();
+
+		add(image);
+
+		GUI::add(this);
+	}
+
+	void init() override {
+		image = new Image(0, 0, width, height, nullptr);
+	}
+
+	void update() override {
+		if (image->texture) {
+			height = width / image->texture->getAspect();
+			image->dimension = dimension;
+		}
+	}
 };
 
 // Environment frame
