@@ -40,9 +40,10 @@ namespace BufferDataType {
 struct BufferElement {
 	std::string name;
 	BufferDataType::BufferDataTypeInfo info;
+	bool instanced;
 	bool normalized;
 
-	BufferElement(std::string name, BufferDataType::BufferDataTypeInfo info, bool normalized = false);
+	BufferElement(std::string name, BufferDataType::BufferDataTypeInfo info, bool instanced = false, bool normalized = false);
 };
 
 struct BufferLayout {

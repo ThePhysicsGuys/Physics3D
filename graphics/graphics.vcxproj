@@ -138,7 +138,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="batch\batchManager.cpp" />
     <ClCompile Include="buffers\bufferLayout.cpp" />
     <ClCompile Include="buffers\frameBuffer.cpp" />
     <ClCompile Include="buffers\indexBuffer.cpp" />
@@ -191,9 +190,10 @@
   <ItemGroup>
     <ClInclude Include="batch\batch.h" />
     <ClInclude Include="batch\batchConfig.h" />
-    <ClInclude Include="batch\batchManager.h" />
     <ClInclude Include="batch\commandBatch.h" />
     <ClInclude Include="batch\guiBatch.h" />
+    <ClInclude Include="batch\instanceBatch.h" />
+    <ClInclude Include="batch\instanceBatchManager.h" />
     <ClInclude Include="bindable.h" />
     <ClInclude Include="buffers\bufferLayout.h" />
     <ClInclude Include="buffers\frameBuffer.h" />

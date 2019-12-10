@@ -31,8 +31,8 @@ ArrayMesh::ArrayMesh(const float* vertices, const float* uv, const unsigned int 
 		{{ "vUV", BufferDataType::FLOAT2 }}
 	};
 
-	vertexArray->addBuffer(*vertexBuffer, vertexBufferLayout);
-	vertexArray->addBuffer(*uvBuffer, uvBufferLayout);
+	vao->addBuffer(vertexBuffer, vertexBufferLayout);
+	vao->addBuffer(uvBuffer, uvBufferLayout);
 }
 
 ArrayMesh::ArrayMesh(const float* vertices, const unsigned int vertexCount, const unsigned int dimensions, unsigned int renderMode) : AbstractMesh(renderMode), vertexCount(vertexCount) {
@@ -42,15 +42,15 @@ ArrayMesh::ArrayMesh(const float* vertices, const unsigned int vertexCount, cons
 		{{ "vposition", (dimensions == 2) ? BufferDataType::FLOAT2 : BufferDataType::FLOAT3 }}
 	};
 
-	vertexArray->addBuffer(*vertexBuffer, vertexBufferLayout);
+	vao->addBuffer(vertexBuffer, vertexBufferLayout);
 }
 
 void ArrayMesh::render() {
-	vertexArray->bind();
+	vao->bind();
 	Renderer::drawArrays(renderMode, 0, vertexCount);
 }
 
 void ArrayMesh::close() {
 	vertexBuffer->close();
-	vertexArray->close();
+	vao->close();
 }

@@ -104,37 +104,15 @@ DebugLayer::DebugLayer(Screen* screen, char flags) : Layer("Debug layer", screen
 void DebugLayer::onInit() {
 
 	// Origin init
-	float originVertices[3] = { 0, 0, 5 };
-	originMesh = new ArrayMesh(originVertices, 1, 3, Renderer::POINT);
-
+	originMesh = new ArrayMesh(nullptr, 1, 3, Renderer::POINT);
 
 	// Vector init
-	vectorMesh = new VectorMesh(new float[128 * 9], 128);
-
+	vectorMesh = new VectorMesh(nullptr, 0);
 
 	// Point init
-	float* buffer = new float[5 * 10];
-	for (int i = 0; i < 5; i++) {
-		buffer[i * 10 + 0] = 0.5f + i;
-		buffer[i * 10 + 1] = 1.0f; // position
-		buffer[i * 10 + 2] = 0.5f;
-
-		buffer[i * 10 + 3] = 0.02f * i; // size
-
-		buffer[i * 10 + 4] = 1.0f;
-		buffer[i * 10 + 5] = 1.0f; // color 1 orange
-		buffer[i * 10 + 6] = 0.0f;
-
-		buffer[i * 10 + 7] = 0.0f;
-		buffer[i * 10 + 8] = 0.0f; // color 2 white
-		buffer[i * 10 + 9] = 0.0f;
-
-	}
-
-	pointMesh = new PointMesh(buffer, 5);
+	pointMesh = new PointMesh(nullptr, 0);
 
 }
-
 
 void DebugLayer::onUpdate() {
 	

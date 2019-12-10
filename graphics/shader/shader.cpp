@@ -137,7 +137,7 @@ unsigned int createShader(const std::string& vertexShader, const std::string& fr
 	if (!tesselationEvaluateShader.empty())
 		glCall(glDeleteShader(tes));
 
-	Log::info("Created shader with id (%d)", name.c_str(), program);
+	Log::info("Created shader with id (%d)", name.c_str(), (int) program);
 
 	return program;
 }

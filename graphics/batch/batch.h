@@ -29,12 +29,12 @@ public:
 	unsigned int* indexPointer;
 	size_t currentIndex;
 
-	Batch(BatchConfig config) : config(config) {
+	Batch(const BatchConfig& config) : config(config) {
 		vao = new VertexArray();
 		vbo = new VertexBuffer(nullptr, 0);
 		ibo = new IndexBuffer(nullptr, 0);
 
-		vao->addBuffer(*vbo, config.bufferLayout);
+		vao->addBuffer(vbo, config.bufferLayout);
 
 		vertexPointer = vertexBuffer.data();
 		indexPointer = indexBuffer.data();

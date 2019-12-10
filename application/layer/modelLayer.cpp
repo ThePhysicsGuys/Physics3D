@@ -37,30 +37,12 @@ ModelLayer::ModelLayer() : Layer() {
 }
 
 ModelLayer::ModelLayer(Screen* screen, char flags) : Layer("Model", screen, flags) {
-
+	manager = new InstanceBatchManager();
 }
 
 void ModelLayer::onInit() {
 	ApplicationShaders::basicShader.createLightArray(lightCount);
-
-	CFramef frame(Vec3f(1.0f, 2.0f, 3.0f), Mat3f{ -0.0f, -1.0f, -2.0f, -3.0f, -4.0f, -5.0f, -6.0f, -7.0f, -8.0f });
-	Material material = Material(Vec4f(1.0f, 2.0f, 1.0f, 2.0f), Vec3f(3.0f, 4.0f, 3.0f), Vec3f(5.0f, 6.0f, 5.0f), 7.0f);	
-
-	//glGenTextures(1, &id);
-}
-
-void fillUniformBuffer(int id, float* texture, const Material& material, const Mat4f& matrix) {
-	int index = id * 28;
-	for (float i : matrix.data)
-		texture[index++] = i;
-	for (float i : material.ambient.data)
-		texture[index++] = i;
-	for (float i : material.diffuse.data)
-		texture[index++] = i;
-	texture[index++] = material.reflectance;
-	for (float i : material.specular.data)
-		texture[index++] = i;
-	texture[index++] = 0;
+	ApplicationShaders::instanceBasicShader.createLightArray(lightCount);
 }
 
 void ModelLayer::onUpdate() {
@@ -149,8 +131,6 @@ void ModelLayer::onRender() {
 			material.ambient = part->material.ambient;
 
 		ApplicationShaders::basicShader.updateMaterial(material);
-
-		// Render each physical
 		ApplicationShaders::basicShader.updatePart(*part);
 
 		if (part->visualData.drawMeshId == -1) continue;
@@ -166,6 +146,27 @@ void ModelLayer::onRender() {
 		ApplicationShaders::basicShader.updateModel(transformation);
 		Library::sphere->render();
 	}
+
+
+	/*int minX = -2;
+	int maxX = 2;
+	int minY = 0;
+	int maxY = 20;
+	int minZ = -2;
+	int maxZ = 2; 
+
+	for (double x = minX; x < maxX; x += 1.01) {
+		for (double y = minY; y < maxY; y += 1.01) {
+			for (double z = minZ; z < maxZ; z += 1.01) {
+				manager->add(screen->meshes[2], UniformLayout(CFrameToMat4(CFrame(x, y, z)), Vec4f(1), Vec3f(1), Vec3f(1), 1));
+			}
+		}
+	}
+
+	ApplicationShaders::instanceBasicShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
+	ApplicationShaders::instanceBasicShader.updateLight(lights, lightCount);
+
+	//manager->submit();*/
 }
 
 void ModelLayer::onClose() {
