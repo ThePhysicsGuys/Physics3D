@@ -242,7 +242,7 @@
     <ClCompile Include="io\export.cpp" />
     <ClCompile Include="io\import.cpp" />
     <ClCompile Include="layer\postprocessLayer.cpp" />
-    <ClCompile Include="layer\resources.cpp" />
+    <ClCompile Include="resources.cpp" />
     <ClCompile Include="layer\testLayer.cpp" />
     <ClCompile Include="layer\debugLayer.cpp" />
     <ClCompile Include="layer\debugOverlay.cpp" />
@@ -281,7 +281,7 @@
     <Natvis Include="view.natvis" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\res\shaders\edge.shader" />
+    <None Include="..\res\shaders\instance_basic.shader" />
     <None Include="..\res\shaders\line.shader" />
     <None Include="..\res\shaders\postprocess.shader" />
   </ItemGroup>

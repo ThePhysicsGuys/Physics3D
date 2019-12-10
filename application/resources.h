@@ -17,6 +17,6 @@ extern ResourceStruct applicationResources[];
 #define TEST_SHADER 10
 #define BLUR_SHADER 11
 #define LINE_SHADER 12
-#define EDGE_SHADER 13
+#define INSTANCE_BASIC_SHADER 13
 #define SPHERE_MODEL 14
 #define STALL_MODEL 15

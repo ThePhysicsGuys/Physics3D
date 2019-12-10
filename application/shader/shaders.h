@@ -109,12 +109,18 @@ struct LineShader : public ShaderProgram {
 	void updateProjection(const Mat4f& projectionMatrix, const Mat4f& viewMatrix);
 };
 
-struct EdgeShader : public ShaderProgram {
-	EdgeShader() : ShaderProgram() {}
-	EdgeShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, "textureSampler") {}
+struct InstanceBasicShader : public ShaderProgram {
+	InstanceBasicShader() : ShaderProgram() {}
+	InstanceBasicShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, "viewMatrix", "projectionMatrix", "viewPosition", "sunDirection", "sunColor", "gamma", "hdr", "exposure") {}
 
-	void updateTexture(Texture* texture);
-	void updateTexture(HDRTexture* texture);
+	void createLightArray(int size);
+	void updateSunDirection(const Vec3f& sunDirection);
+	void updateSunColor(const Vec3f& sunColor);
+	void updateGamma(float gamma);
+	void updateHDR(bool hdr);
+	void updateExposure(float exposure);
+	void updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Position& viewPosition);
+	void updateLight(Light lights[], int size);
 };
 
 namespace ApplicationShaders {
@@ -128,7 +134,7 @@ namespace ApplicationShaders {
 	extern PointShader pointShader;
 	extern TestShader testShader;
 	extern LineShader lineShader;
-	extern EdgeShader edgeShader;
+	extern InstanceBasicShader instanceBasicShader;
 	extern MaskShader maskShader;
 
 	void onInit();
