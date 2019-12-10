@@ -4,6 +4,7 @@
 #include "../graphics/gui/label.h"
 #include "../graphics/gui/slider.h"
 #include "../graphics/gui/checkBox.h"
+#include "../graphics/gui/image.h"
 #include "../graphics/gui/button.h"
 #include "../graphics/gui/directionEditor.h"
 #include "../graphics/gui/colorPicker.h"
@@ -11,6 +12,7 @@
 #include "../graphics/debug/visualDebug.h"
 #include "../graphics/shader/shaderProgram.h"
 #include "../graphics/renderUtils.h"
+#include "../graphics/texture.h"
 #include "shader/shaders.h"
 #include "extendedPart.h"
 #include "application.h"
@@ -22,6 +24,29 @@
 struct FrameBlueprint {
 	virtual void init() = 0;
 	virtual void update() = 0;
+};
+
+struct ImageFrame : public FrameBlueprint, public Frame {
+	Image* image = nullptr;
+
+	ImageFrame(double x, double y, std::string title) : Frame(x, y, 1, 1, title) {
+		init();
+
+		add(image);
+
+		GUI::add(this);
+	}
+
+	void init() override {
+		image = new Image(0, 0, width, height, nullptr);
+	}
+
+	void update() override {
+		if (image->texture) {
+			height = width / image->texture->getAspect();
+			image->dimension = dimension;
+		}
+	}
 };
 
 // Environment frame
@@ -88,7 +113,7 @@ struct EnvironmentFrame : public FrameBlueprint, public Frame {
 			ApplicationShaders::basicShader.updateSunDirection(Vec3f(d->modelMatrix * Vec4f(0, 1, 0, 1)));
 		};
 
-		sunColorButton->setColor(Vec4(1));
+		sunColorButton->setColor(Color(1));
 		sunColorButton->action = [] (Button* button) {
 			EnvironmentFrame* environmentFrame = static_cast<EnvironmentFrame*>(button->parent);
 
@@ -385,12 +410,12 @@ struct PropertiesFrame : public FrameBlueprint, public Frame {
 		PlayerWorld* world = screen.world;
 
 		if (selectedPart) {
-			partMeshIDLabel->text = "MeshID: " + str(selectedPart->drawMeshId);
+			partMeshIDLabel->text = "MeshID: " + str(selectedPart->visualData.drawMeshId);
 
 			positionLabel->text = "Position: " + str(selectedPart->getCFrame().position);
 			partNameLabel->text = "Name: " + selectedPart->name;
-			velocityLabel->text = "Velocity: " + str(selectedPart->parent->velocity);
-			angularVelocityLabel->text = "Angular Velocity: " + str(selectedPart->parent->angularVelocity);
+			velocityLabel->text = "Velocity: " + str(selectedPart->getVelocity());
+			angularVelocityLabel->text = "Angular Velocity: " + str(selectedPart->getAngularVelocity());
 			double kineticEnergy = selectedPart->parent->getKineticEnergy();
 			double potentialEnergy = world->getPotentialEnergyOfPhysical(*selectedPart->parent);
 			kineticEnergyLabel->text = "Kinetic Energy: " + str(kineticEnergy);
@@ -401,7 +426,7 @@ struct PropertiesFrame : public FrameBlueprint, public Frame {
 			frictionLabel->text = "Friction: " + str(selectedPart->properties.friction);
 			bouncynessLabel->text = "Bouncyness: " + str(selectedPart->properties.bouncyness);
 			densityLabel->text = "Density: " + str(selectedPart->properties.density);
-			conveyorEffectLabel->text = "ConveyorEffect: " + str(selectedPart->conveyorEffect);
+			conveyorEffectLabel->text = "ConveyorEffect: " + str(selectedPart->properties.conveyorEffect);
 
 			renderModeCheckBox->checked = selectedPart->renderMode == Renderer::WIREFRAME;
 
@@ -443,13 +468,13 @@ struct PropertiesFrame : public FrameBlueprint, public Frame {
 			conveyorEffectLabel->text = "ConveyorEffect: -";
 
 			ambientColorButton->disabled = true;
-			ambientColorButton->setColor(Vec4(1));
+			ambientColorButton->setColor(Color(1));
 
 			diffuseColorButton->disabled = true;
-			diffuseColorButton->setColor(Vec4(1));
+			diffuseColorButton->setColor(Color(1));
 
 			specularColorButton->disabled = true;
-			specularColorButton->setColor(Vec4(1));
+			specularColorButton->setColor(Color(1));
 
 			reflectanceSlider->disabled = true;
 			reflectanceSlider->value = (reflectanceSlider->max + reflectanceSlider->min) / 2;

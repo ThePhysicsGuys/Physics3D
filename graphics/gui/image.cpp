@@ -29,18 +29,25 @@ Image::Image(double x, double y, double width, double height, Texture* texture) 
 }
 
 void Image::render() {
+	if (!texture)
+		return;
+
 	if (visible) {
-		Vec4 blendColor = (disabled) ? GUI::COLOR::DISABLED : GUI::COLOR::WHITE;
+		Color blendColor = (disabled) ? COLOR::DISABLED : COLOR::WHITE;
 
 		if (texture)
 			Path::rectUV(texture->getID(), position, dimension);
 		else 
-			Path::rectFilled(position, dimension, 0, GUI::COLOR::blend(GUI::COLOR::BLACK, blendColor));
+			Path::rectFilled(position, dimension, 0, COLOR::blend(COLOR::BLACK, blendColor));
 	}
 }
 
 Vec2 Image::resize() {
+	if (!texture)
+		return dimension;
+
 	if (resizing)
 		dimension = Vec2(texture->getWidth(), texture->getHeight());
+
 	return dimension;
 }

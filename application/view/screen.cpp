@@ -19,7 +19,7 @@
 #include "../graphics/visualShape.h"
 #include "../worlds.h"
 #include "../engine/event/windowEvent.h"
-
+#include "../util/resource/resourceManager.h"
 #include "../engine/layer/layerStack.h"
 #include "layer/skyboxLayer.h"
 #include "layer/modelLayer.h"
@@ -30,7 +30,12 @@
 #include "layer/debugLayer.h"
 #include "layer/debugOverlay.h"
 
+#include "../physics/geometry/shapeClass.h"
+
 #include "frames.h"
+
+std::vector<IndexedMesh*> Screen::meshes;
+std::map<const ShapeClass*, VisualData> Screen::shapeClassMeshIds;
 
 bool initGLFW() {
 	// Set window hints
@@ -180,8 +185,9 @@ void Screen::onInit() {
 	eventHandler.setWindowResizeCallback([](Screen& screen, Vec2i dimension) {
 		screen.camera.onUpdate(((float)dimension.x) / ((float)dimension.y));
 		screen.dimension = dimension;
-
+		LOG_DEBUG("dimension: %s", str(dimension));
 		screen.screenFrameBuffer->resize(screen.dimension);
+		screen.blurFrameBuffer->resize(screen.dimension);
 	});
 
 
@@ -198,22 +204,27 @@ void Screen::onInit() {
 
 
 void Screen::onUpdate() {
+	std::chrono::time_point<std::chrono::steady_clock> curUpdate = std::chrono::steady_clock::now();
+	std::chrono::nanoseconds deltaTnanos = curUpdate - this->lastUpdate;
+	this->lastUpdate = curUpdate;
+
+	double speedAdjustment = deltaTnanos.count() * 0.000000001 * 60.0;
 
 	// IO events
 	if (handler->anyKey) {
 		bool leftDragging = handler->leftDragging;
-		if (handler->getKey(KeyboardOptions::Move::forward))  camera.move(*this, 0, 0, -1, leftDragging);
-		if (handler->getKey(KeyboardOptions::Move::backward)) camera.move(*this, 0, 0, 1, leftDragging);
-		if (handler->getKey(KeyboardOptions::Move::right))	  camera.move(*this, 1, 0, 0, leftDragging);
-		if (handler->getKey(KeyboardOptions::Move::left))     camera.move(*this, -1, 0, 0, leftDragging);
+		if (handler->getKey(KeyboardOptions::Move::forward))  camera.move(*this, 0, 0, -1 * speedAdjustment, leftDragging);
+		if (handler->getKey(KeyboardOptions::Move::backward)) camera.move(*this, 0, 0, 1 * speedAdjustment, leftDragging);
+		if (handler->getKey(KeyboardOptions::Move::right))	  camera.move(*this, 1 * speedAdjustment, 0, 0, leftDragging);
+		if (handler->getKey(KeyboardOptions::Move::left))     camera.move(*this, -1 * speedAdjustment, 0, 0, leftDragging);
 		if (handler->getKey(KeyboardOptions::Move::ascend))
-			if (camera.flying) camera.move(*this, 0, 1, 0, leftDragging);
+			if (camera.flying) camera.move(*this, 0, 1 * speedAdjustment, 0, leftDragging);
 		if (handler->getKey(KeyboardOptions::Move::descend))
-			if (camera.flying) camera.move(*this, 0, -1, 0, leftDragging);
-		if (handler->getKey(KeyboardOptions::Rotate::left))  camera.rotate(*this, 0, 1, 0, leftDragging);
-		if (handler->getKey(KeyboardOptions::Rotate::right)) camera.rotate(*this, 0, -1, 0, leftDragging);
-		if (handler->getKey(KeyboardOptions::Rotate::up))    camera.rotate(*this, 1, 0, 0, leftDragging);
-		if (handler->getKey(KeyboardOptions::Rotate::down))  camera.rotate(*this, -1, 0, 0, leftDragging);
+			if (camera.flying) camera.move(*this, 0, -1 * speedAdjustment, 0, leftDragging);
+		if (handler->getKey(KeyboardOptions::Rotate::left))  camera.rotate(*this, 0, 1 * speedAdjustment, 0, leftDragging);
+		if (handler->getKey(KeyboardOptions::Rotate::right)) camera.rotate(*this, 0, -1 * speedAdjustment, 0, leftDragging);
+		if (handler->getKey(KeyboardOptions::Rotate::up))    camera.rotate(*this, 1 * speedAdjustment, 0, 0, leftDragging);
+		if (handler->getKey(KeyboardOptions::Rotate::down))  camera.rotate(*this, -1 * speedAdjustment, 0, 0, leftDragging);
 		if (handler->getKey(KeyboardOptions::Application::close)) Renderer::closeGLFWWindow();
 		if (handler->getKey(KeyboardOptions::Debug::frame)) { guiLayer.debugFrame->visible = true; guiLayer.debugFrame->position = Vec2(0.8); GUI::select(guiLayer.debugFrame); }
 	}
@@ -261,6 +272,8 @@ void Screen::onClose() {
 
 	Library::onClose();
 
+	ResourceManager::close();
+
 	ApplicationShaders::onClose();
 
 	KeyboardOptions::save(properties);
@@ -274,8 +287,35 @@ bool Screen::shouldClose() {
 	return Renderer::isGLFWWindowClosed();
 }
 
-int Screen::addMeshShape(const VisualShape& s) {
+VisualData Screen::addMeshShape(const VisualShape& s) {
 	int size = (int) meshes.size();
+	//Log::error("Mesh %d added!", size);
 	meshes.push_back(new IndexedMesh(s));
-	return size;
+	return VisualData{size, s.uvs != nullptr, s.normals != nullptr};
+}
+VisualData Screen::registerMeshFor(const ShapeClass* shapeClass, const VisualShape& mesh) {
+	if(shapeClassMeshIds.find(shapeClass) != shapeClassMeshIds.end()) throw "Attempting to re-register existing ShapeClass!";
+
+	VisualData meshData = addMeshShape(mesh);
+
+	//Log::error("Mesh %d registered!", meshData);
+
+	shapeClassMeshIds.insert(std::pair<const ShapeClass*, VisualData>(shapeClass, meshData));
+	return meshData;
+}
+VisualData Screen::registerMeshFor(const ShapeClass* shapeClass) {
+	return registerMeshFor(shapeClass, VisualShape(shapeClass->asPolyhedron()));
+}
+VisualData Screen::getOrCreateMeshFor(const ShapeClass* shapeClass) {
+	auto found = shapeClassMeshIds.find(shapeClass);
+
+	if(found != shapeClassMeshIds.end()) {
+		// mesh found!
+		VisualData meshData = (*found).second;
+		//Log::error("Mesh %d reused!", meshData);
+		return meshData;
+	} else {
+		// mesh not found :(
+		return registerMeshFor(shapeClass);
+	}
 }

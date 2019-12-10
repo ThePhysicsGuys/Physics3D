@@ -5,12 +5,15 @@
 struct PropertiesFrame;
 struct DebugFrame;
 struct EnvironmentFrame;
+struct ImageFrame;
 
 class GuiLayer : public Layer {
 public:
 	PropertiesFrame* propertiesFrame;
 	DebugFrame* debugFrame;
 	EnvironmentFrame* environmentFrame;
+	ImageFrame* originalRender;
+	ImageFrame* blurRender;
 
 	GuiLayer();
 	GuiLayer(Screen* screen, char flags = None);

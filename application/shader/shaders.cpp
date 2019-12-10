@@ -82,9 +82,9 @@ void BasicShader::updateUniforms(int id) {
 
 void BasicShader::updatePart(const ExtendedPart& part) {
 	bind();
-	shader.setUniform("includeNormals", int(part.visualShape.normals != nullptr));
-	shader.setUniform("includeUvs", int(part.visualShape.uvs != nullptr));
-	shader.setUniform("modelMatrix", TransformToMat4(part.getPosition(), Mat3f(part.getCFrame().getRotation()) * part.visualScale));
+	shader.setUniform("includeNormals", int(part.visualData.includeNormals));
+	shader.setUniform("includeUvs", int(part.visualData.includeUVs));
+	shader.setUniform("modelMatrix", TransformToMat4(part.getPosition(), Mat3f(part.getCFrame().getRotation()) * DiagonalMat3f(part.hitbox.scale)));
 }
 
 void BasicShader::updateMaterial(const Material& material) {
@@ -182,7 +182,7 @@ void BasicShader::updateSunDirection(const Vec3f& sunDirection) {
 	shader.setUniform("sunDirection", sunDirection);
 }
 
-void BasicShader::updateSunColor(const Vec3f& sunColor) {
+void BasicShader::updateSunColor(const Color3& sunColor) {
 	bind();
 	shader.setUniform("sunColor", sunColor);
 }
@@ -247,7 +247,7 @@ void MaskShader::updateModel(const Mat4f& modelMatrix) {
 	shader.setUniform("modelMatrix", modelMatrix);
 }
 
-void MaskShader::updateColor(const Vec4f& color) {
+void MaskShader::updateColor(const Color& color) {
 	bind();
 	shader.setUniform("color", color);
 }
@@ -295,7 +295,7 @@ void OriginShader::updateProjection(const Mat4f& viewMatrix, const Mat4f& rotate
 
 // FontShader
 
-void FontShader::updateColor(const Vec4f& color) {
+void FontShader::updateColor(const Color& color) {
 	bind();
 	shader.setUniform("color", color);
 }

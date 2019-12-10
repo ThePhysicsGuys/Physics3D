@@ -10,8 +10,8 @@ public:
 	ExternalGravity(Vec3 gravity) : gravity(gravity) {}
 
 	virtual void apply(WorldPrototype* world) override {
-		for (Physical& p : world->iterPhysicals()) {
-			p.applyForceAtCenterOfMass(gravity * p.mass);
+		for (MotorizedPhysical* p : world->iterPhysicals()) {
+			p->applyForceAtCenterOfMass(gravity * p->mass);
 		}
 	}
 	virtual double getPotentialEnergyForObject(const WorldPrototype* world, const Part& part) const override {

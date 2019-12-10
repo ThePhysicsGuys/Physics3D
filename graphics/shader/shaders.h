@@ -26,21 +26,17 @@ struct QuadShader : public ShaderProgram {
 
 struct BlurShader : public ShaderProgram {
 	BlurShader() : ShaderProgram() {}
-	BlurShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, "image", "horizontal") {}
+	BlurShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, "image", "width") {}
 
-	enum class BlurType {
-		HORIZONTAL = 0,
-		VERTICAL = 1
-	};
-
-	void updateType(BlurType type);
+	void updateWidth(float width);
 	void updateTexture(Texture* texture);
 };
 
 namespace GraphicsShaders {
 	extern GuiShader guiShader;
 	extern QuadShader quadShader;
-	extern BlurShader blurShader;
+	extern BlurShader horizontalBlurShader;
+	extern BlurShader verticalBlurShader;
 
 	void onInit();
 	void onClose();

@@ -27,7 +27,7 @@ Mat3 transformations[] = {
 };
 
 // Render variables
-Line* line = nullptr;
+LinePrimitive* line = nullptr;
 
 IndexedMesh* rotateMesh = nullptr;
 VisualShape rotateShape;
@@ -46,7 +46,7 @@ VisualShape scaleShape;
 void EditTools::onInit() {
 
 	// Edit line init
-	line = new Line();
+	line = new LinePrimitive();
 	line->resize(Vec3f(0, -100000, 0), Vec3f(0, 100000, 0));
 
 	// Rotate shape init
@@ -103,7 +103,7 @@ void EditTools::onRender(Screen& screen) {
 	// Center, only rendered if editMode != EditMode::ROTATE
 	if (center) {
 		ApplicationShaders::basicShader.updateModel(modelMatrix);
-		ApplicationShaders::basicShader.updateMaterial(Material(GUI::COLOR::WHITE));
+		ApplicationShaders::basicShader.updateMaterial(Material(COLOR::WHITE));
 		center->render();
 	}
 
@@ -111,15 +111,15 @@ void EditTools::onRender(Screen& screen) {
 		switch (selectedEditDirection) {
 		case EditDirection::Y:
 			ApplicationShaders::maskShader.updateModel(modelMatrix);
-			ApplicationShaders::maskShader.updateColor(GUI::COLOR::G);
+			ApplicationShaders::maskShader.updateColor(COLOR::G);
 			break;
 		case EditDirection::X:
 			ApplicationShaders::maskShader.updateModel(modelMatrix * Mat4(Matrix<double, 3, 3>(transformations[1]), 1.0f));
-			ApplicationShaders::maskShader.updateColor(GUI::COLOR::R);
+			ApplicationShaders::maskShader.updateColor(COLOR::R);
 			break;
 		case EditDirection::Z:
 			ApplicationShaders::maskShader.updateModel(modelMatrix * Mat4(Matrix<double, 3, 3>(transformations[2]), 1.0f));
-			ApplicationShaders::maskShader.updateColor(GUI::COLOR::B);
+			ApplicationShaders::maskShader.updateColor(COLOR::B);
 			break;
 		}
 		line->render();
@@ -127,16 +127,16 @@ void EditTools::onRender(Screen& screen) {
 
 	// Y
 	ApplicationShaders::basicShader.updateModel(modelMatrix);
-	ApplicationShaders::basicShader.updateMaterial(Material(GUI::COLOR::G));
+	ApplicationShaders::basicShader.updateMaterial(Material(COLOR::G));
 	shaft->render();
 
 	// X
-	ApplicationShaders::basicShader.updateMaterial(Material(GUI::COLOR::R));
+	ApplicationShaders::basicShader.updateMaterial(Material(COLOR::R));
 	ApplicationShaders::basicShader.updateModel(modelMatrix * Mat4(Matrix<double, 3, 3>(transformations[1]), 1.0f));
 	shaft->render();
 
 	// Z
-	ApplicationShaders::basicShader.updateMaterial(Material(GUI::COLOR::B));
+	ApplicationShaders::basicShader.updateMaterial(Material(COLOR::B));
 	ApplicationShaders::basicShader.updateModel(modelMatrix * Mat4(Matrix<double, 3, 3>(transformations[2]), 1.0f));
 	shaft->render();
 
@@ -178,11 +178,9 @@ float EditTools::intersect(Screen& screen, const Ray& ray) {
 	// Check intersections of selected tool
 	for (int i = 0; i < (tool[1] ? 4 : 3); i++) {
 		GlobalCFrame frame = screen.selectedPart->getCFrame();
-
 		frame.rotation = frame.getRotation() * transformations[i];
 
 		VisualShape& shape = *tool[i / 3];
-
 		Position rayStart = ray.start;
 
 		float distance = shape.getIntersectionDistance(frame.globalToLocal(ray.start), frame.relativeToLocal(ray.direction));
@@ -301,16 +299,17 @@ void EditTools::dragScaleTool(Screen& screen) {
 	Vec3 deltaPos = screen.camera.cframe.position - screen.selectedPart->getPosition();
 	double distance = length(deltaPos - (deltaPos * ray) * ray) / length(selectedPoint);
 
-	Vec3 a;
+	Log::debug("dist : %f", distance);
+
 	switch (selectedEditDirection) {
 	case EditDirection::X:
-		screen.selectedPart->scale(distance / screen.selectedPart->localBounds.getWidth() * 2, 1, 1);
+		screen.selectedPart->setWidth(distance * 2);
 		break;
 	case EditDirection::Y:
-		screen.selectedPart->scale(1, distance / screen.selectedPart->localBounds.getHeight() * 2, 1);
+		screen.selectedPart->setHeight(distance * 2);
 		break;
 	case EditDirection::Z:
-		screen.selectedPart->scale(1, 1, distance / screen.selectedPart->localBounds.getDepth() * 2);
+		screen.selectedPart->setDepth(distance * 2);
 		break;
 	case EditDirection::CENTER:
 		double amount = distance / screen.selectedPart->maxRadius / sqrt(3.0);
@@ -359,6 +358,6 @@ void EditTools::dragTranslateTool(Screen& screen) {
 		Vec3 translationCorrection = a * (a * selectedPoint);
 		Vec3 translation = s * a - translationCorrection;
 
-		screen.selectedPart->parent->translate(translation);
+		screen.selectedPart->translate(translation);
 	}
 }

@@ -305,8 +305,8 @@ struct SymmetricMatrixIndex {
 	size_t row;
 
 	inline constexpr T& operator[](size_t col) const {
-		size_t a = (row > col) ? row : col; // max
-		size_t b = (row > col) ? col : row; // min
+		size_t a = (row >= col) ? row : col; // max
+		size_t b = (row >= col) ? col : row; // min
 
 		assert(b >= 0);
 		assert(a < Size);
@@ -441,6 +441,12 @@ public:
 		for (size_t i = 0; i < Size; i++) {
 			(*this)[i] = *listIter;
 			++listIter;
+		}
+	}
+
+	inline constexpr DiagonalMatrix<T, Size>(const T* list) {
+		for(size_t i = 0; i < Size; i++) {
+			(*this)[i] = list[i];
 		}
 	}
 

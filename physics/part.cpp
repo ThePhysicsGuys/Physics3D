@@ -6,10 +6,11 @@
 
 #include "geometry/intersection.h"
 
+#include "integrityCheck.h"
+
 namespace {
 	void recalculate(Part& part) {
 		part.maxRadius = part.hitbox.getMaxRadius();
-		part.localBounds = part.hitbox.getBounds();
 	}
 
 	void recalculateAndUpdateParent(Part& part, const Bounds& oldBounds) {
@@ -20,7 +21,14 @@ namespace {
 	}
 }
 
-Part::Part(const Shape& shape, const GlobalCFrame& position, const PartProperties& properties) : hitbox(shape), cframe(position), properties(properties) {
+Part::Part(const Shape& shape, const GlobalCFrame& position, const PartProperties& properties)
+	: hitbox(shape), cframe(position), properties(properties) {
+	recalculate(*this);
+}
+
+Part::Part(const Shape& shape, Part& attachTo, const CFrame& attach, const PartProperties& properties)
+	: hitbox(shape), cframe(attachTo.cframe.localToGlobal(attach)), properties(properties) {
+	attachTo.attach(*this, attach);
 	recalculate(*this);
 }
 
@@ -30,15 +38,28 @@ Part::~Part() {
 	}
 }
 
+#include "misc/serialization.h"
+#include "../application/extendedPart.h"
+
 PartIntersection Part::intersects(const Part& other) const {
 	CFrame relativeTransform = this->cframe.globalToLocal(other.cframe);
 	Intersection result = intersectsTransformed(this->hitbox, other.hitbox, relativeTransform);
 	if(result.intersects) {
 		Position intersection = this->cframe.localToGlobal(result.intersection);
 		Vec3 exitVector = this->cframe.localToRelative(result.exitVector);
+
+
+		CHECK_VALID_VEC(result.exitVector);
+
+
 		return PartIntersection(intersection, exitVector);
 	}
 	return PartIntersection();
+}
+
+BoundingBox Part::getLocalBounds() const {
+	Vec3 v = Vec3(this->hitbox.scale[0], this->hitbox.scale[1], this->hitbox.scale[2]);
+	return BoundingBox(-v, v);
 }
 
 Bounds Part::getStrictBounds() const {
@@ -61,10 +82,60 @@ void Part::setCFrame(const GlobalCFrame& newCFrame) {
 	}
 }
 
+Vec3 Part::getVelocity() const {
+	if(parent != nullptr) {
+		return parent->getVelocityOfPoint(this->cframe.position - parent->getCenterOfMass());
+	} else {
+		return Vec3(0.0,0.0,0.0);
+	}
+}
+
+Vec3 Part::getAngularVelocity() const {
+	if(parent != nullptr) {
+		return parent->angularVelocity;
+	} else {
+		return Vec3(0.0, 0.0, 0.0);
+	}
+}
+
+void Part::translate(Vec3 translation) {
+	if(this->parent != nullptr) {
+		this->parent->translate(translation);
+	} else {// TODO BAD FOR TERRAIN PARTS
+		this->cframe.translate(translation);
+	}
+}
+
+double Part::getWidth() const {
+	return this->hitbox.getWidth();
+}
+double Part::getHeight() const {
+	return this->hitbox.getHeight();
+}
+double Part::getDepth() const {
+	return this->hitbox.getDepth();
+}
+
+void Part::setWidth(double newWidth) {
+	Bounds oldBounds = this->getStrictBounds();
+	this->hitbox.setWidth(newWidth);
+	recalculateAndUpdateParent(*this, oldBounds);
+}
+void Part::setHeight(double newHeight) {
+	Bounds oldBounds = this->getStrictBounds();
+	this->hitbox.setHeight(newHeight);
+	recalculateAndUpdateParent(*this, oldBounds);
+}
+void Part::setDepth(double newDepth) {
+	Bounds oldBounds = this->getStrictBounds();
+	this->hitbox.setDepth(newDepth);
+	recalculateAndUpdateParent(*this, oldBounds);
+}
+
 
 void Part::attach(Part& other, const CFrame& relativeCFrame) {
 	if (this->parent == nullptr) {
-		this->parent = new Physical(this);
+		this->parent = new MotorizedPhysical(this);
 		this->parent->attachPart(&other, relativeCFrame);
 	} else {
 		if (this->parent->mainPart == this) {

@@ -217,14 +217,14 @@ void Frame::drag(Vec2 newPoint, Vec2 oldPoint) {
 void Frame::render() {
 	if (visible) {
 
-		Vec4 blendColor = (disabled) ? GUI::COLOR::DISABLED : GUI::COLOR::WHITE;
+		Color blendColor = (disabled) ? COLOR::DISABLED : COLOR::WHITE;
 
 		resize();
 
 		// TitleBar
 		Vec2f titleBarPosition = position;
 		Vec2f titleBarDimension = Vec2f(width, titleBarHeight);
-		Path::rectFilled(titleBarPosition, titleBarDimension, 0, GUI::COLOR::blend(titleBarColor, blendColor));
+		Path::rectFilled(titleBarPosition, titleBarDimension, 0, COLOR::blend(titleBarColor, blendColor));
 
 		// Buttons
 		closeButton->render();
@@ -240,7 +240,7 @@ void Frame::render() {
 			Vec2f offsetDimension = dimension + Vec2f(0, -titleBarHeight);
 			Vec2f xRange = Vec2f(-GUI::windowInfo.aspect, GUI::windowInfo.aspect) * 2;
 			Vec2f yRange = Vec2(-1, 1);
-			Vec4f color = GUI::COLOR::blend(Vec4f(0.4, 0.4, 0.4, 1), blendColor);
+			Color color = COLOR::blend(Color(0.4, 0.4, 0.4, 1), blendColor);
 
 			Path::rectUVRange(GUI::blurFrameBuffer->texture->getID(), offsetPosition, offsetDimension, xRange, yRange, color);
 

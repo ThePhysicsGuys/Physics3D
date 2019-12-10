@@ -1,7 +1,9 @@
 #pragma once
 
 #include "../graphics/material.h"
+#include "../graphics/visualData.h"
 #include "../graphics/visualShape.h"
+#include "../graphics/visualData.h"
 #include "../physics/part.h"
 
 struct ExtendedPart : public Part {
@@ -12,16 +14,13 @@ struct ExtendedPart : public Part {
 
 	int renderMode = 0x1B02; // GL_FILL
 
-	int drawMeshId;
-
-	VisualShape visualShape;
-
-	Mat3f visualScale = Mat3f::IDENTITY();
+	VisualData visualData;
 
 	ExtendedPart() = default;
-	ExtendedPart(const Shape& hitbox, const GlobalCFrame& position, const PartProperties& properties, int drawMeshId, std::string name = "Part");
-	ExtendedPart(const VisualShape& shape, const GlobalCFrame& position, const PartProperties& properties, int drawMeshId, std::string name = "Part");
-	ExtendedPart(const Shape& hitbox, const VisualShape& shape, const GlobalCFrame& position, const PartProperties& properties, int drawMeshId, std::string name = "Part");
+	ExtendedPart(Part && part, std::string name = "Part");
+	ExtendedPart(Part&& part, VisualData visualData, std::string name = "Part");
+	ExtendedPart(const Shape& hitbox, const GlobalCFrame& position, const PartProperties& properties, std::string name = "Part");
+	ExtendedPart(const Shape& hitbox, const GlobalCFrame& position, const PartProperties& properties, VisualData visualData, std::string name = "Part");
 
-	void scale(double scaleX, double scaleY, double scaleZ);
+	ExtendedPart(const Shape& hitbox, ExtendedPart* attachTo, const CFrame& attach, const PartProperties& properties, std::string name = "Part");
 };

@@ -65,9 +65,11 @@ void ModelLayer::onRender() {
 
 	std::map<double, ExtendedPart*> transparentMeshes;
 
+	std::vector<ExtendedPart*> meshesToDraw;
+
 	graphicsMeasure.mark(GraphicsProcess::WAIT_FOR_LOCK);
 	
-	screen->world->syncReadOnlyOperation([this, &transparentMeshes]() {
+	screen->world->syncReadOnlyOperation([this, &meshesToDraw]() {
 		graphicsMeasure.mark(GraphicsProcess::UPDATE);
 
 		// Bind basic uniforms
@@ -82,29 +84,39 @@ void ModelLayer::onRender() {
 		VisibilityFilter filter = VisibilityFilter::forWindow(camera.cframe.position, camera.getForwardDirection(), camera.getUpDirection(), camera.fov, camera.aspect, camera.zfar);
 		// Render world objects
 		for (ExtendedPart& part : screen->world->iterPartsFiltered(filter, ALL_PARTS)) {
-			int meshId = part.drawMeshId;
-
-			Material material = part.material;
-
-			// Picker code
-			if (&part == screen->intersectedPart)
-				material.ambient = part.material.ambient + Vec4f(-0.1f, -0.1f, -0.1f, 0);
-			else
-				material.ambient = part.material.ambient;
-
-			if (material.ambient.w < 1) {
-				transparentMeshes[lengthSquared(Vec3(screen->camera.cframe.position - part.getPosition()))] = &part;
-				continue;
-			}
-
-			ApplicationShaders::basicShader.updateMaterial(material);
-			ApplicationShaders::basicShader.updatePart(part);
-
-			if (meshId == -1) continue;
-
-			screen->meshes[meshId]->render(part.renderMode);
+			meshesToDraw.push_back(&part);
 		}
 	});
+
+	for(ExtendedPart* part : meshesToDraw) {
+		Material material = part->material;
+
+		// Picker code
+		if(part == screen->intersectedPart)
+			material.ambient = part->material.ambient + Vec4f(-0.1f, -0.1f, -0.1f, 0);
+		else
+			material.ambient = part->material.ambient;
+
+		if(material.ambient.w < 1) {
+			transparentMeshes[lengthSquared(Vec3(screen->camera.cframe.position - part->getPosition()))] = part;
+			continue;
+		}
+
+		ApplicationShaders::basicShader.updateMaterial(material);
+		ApplicationShaders::basicShader.updatePart(*part);
+
+		/*fillUniformBuffer(0, texture, material, CFrameToMat4(part.getCFrame()));
+		glBindTexture(GL_TEXTURE_2D, id);
+		glActiveTexture(GL_TEXTURE0);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 28, 1, 0, GL_RGBA, GL_FLOAT, texture);
+		Shaders::basicShader.updateUniforms(id);*/
+
+		int meshId = part->visualData.drawMeshId;
+
+		if(meshId == -1) continue;
+
+		Screen::meshes[meshId]->render(part->renderMode);
+	}
 
 	for (auto iterator = transparentMeshes.rbegin(); iterator != transparentMeshes.rend(); ++iterator) {
 		ExtendedPart* part = (*iterator).second;
@@ -121,9 +133,9 @@ void ModelLayer::onRender() {
 		ApplicationShaders::basicShader.updateMaterial(material);
 		ApplicationShaders::basicShader.updatePart(*part);
 
-		if (part->drawMeshId == -1) continue;
+		if (part->visualData.drawMeshId == -1) continue;
 
-		screen->meshes[part->drawMeshId]->render(part->renderMode);
+		Screen::meshes[part->visualData.drawMeshId]->render(part->renderMode);
 	}
 
 	// Render lights

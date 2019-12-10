@@ -11,15 +11,13 @@
 #include "scalableInertialMatrix.h"
 
 #include <utility>
+#include <iosfwd>
 
 struct Triangle;
 struct Polyhedron;
 struct ShapeVecIter;
 struct ShapeVecIterFactory;
 struct ShapeTriangleIter;
-
-
-size_t getOffset(size_t size);
 
 struct Triangle {
 	union {
@@ -59,25 +57,28 @@ struct ShapeVertexIter {
 struct ShapeTriangleIter {
 	int* curTriangle;
 	size_t offset;
-	Triangle operator*() const {
+	inline Triangle operator*() const {
 		return Triangle{ *curTriangle, *(curTriangle + offset), *(curTriangle + 2 * offset) };
 	}
-	void operator++() {
+	inline void operator++() {
 		++curTriangle;
 	}
-	bool operator!=(const ShapeTriangleIter& other) const {
+	inline bool operator!=(const ShapeTriangleIter& other) const {
 		return curTriangle != other.curTriangle;
+	}
+	inline bool operator==(const ShapeTriangleIter& other) const {
+		return curTriangle == other.curTriangle;
 	}
 };
 
-struct Polyhedron : public GenericCollidable {
+class NormalizedPolyhedron;
+class Shape;
 
-	
+struct Polyhedron : public GenericCollidable {
 private:
-	SharedAlignedPointer<float> vertices;
-	SharedAlignedPointer<int> triangles;
-	const float* copyOfVerts() const;
-	Polyhedron(const SharedAlignedPointer<float>& vertices, const SharedAlignedPointer<int>& triangles, int vertexCount, int triangleCount);
+	UniqueAlignedPointer<float> vertices;
+	UniqueAlignedPointer<int> triangles;
+	Polyhedron(UniqueAlignedPointer<float>&& vertices, UniqueAlignedPointer<int>&& triangles, int vertexCount, int triangleCount);
 public:
 	int vertexCount;
 	int triangleCount;
@@ -86,28 +87,33 @@ public:
 	~Polyhedron();
 
 	Polyhedron(const Vec3f* vertices, const Triangle* triangles, int vertexCount, int triangleCount);
+	Polyhedron(Polyhedron&& poly) noexcept : vertices(std::move(poly.vertices)), triangles(std::move(poly.triangles)), vertexCount(poly.vertexCount), triangleCount(poly.triangleCount) {}
+	Polyhedron(const Polyhedron& poly);
+	Polyhedron& operator=(Polyhedron&& poly) noexcept;
+	Polyhedron& operator=(const Polyhedron& poly);
+
 	Polyhedron translated(Vec3f offset) const;
 	Polyhedron rotated(RotMat3f rotation) const;
 	Polyhedron localToGlobal(CFramef frame) const;
 	Polyhedron globalToLocal(CFramef frame) const;
 	Polyhedron scaled(float scaleX, float scaleY, float scaleZ) const;
 	Polyhedron scaled(double scaleX, double scaleY, double scaleZ) const;
+	Polyhedron scaled(DiagonalMat3 scale) const { return scaled(scale[0], scale[1], scale[2]); }
+	Polyhedron translatedAndScaled(Vec3f translation, DiagonalMat3f scale) const;
 
 	bool isValid() const;
 	bool containsPoint(Vec3f point) const;
 	float getIntersectionDistance(Vec3f origin, Vec3f direction) const;
 	double getVolume() const;
 
-	//CFramef getInertialEigenVectors() const;
 	BoundingBox getBounds() const;
 	BoundingBox getBounds(const Mat3f& referenceFrame) const;
 	void computeNormals(Vec3f* buffer) const;
 	Vec3 getCenterOfMass() const;
-	SymmetricMat3 getInertia() const;
-	SymmetricMat3 getInertia(Vec3 reference) const;
-	SymmetricMat3 getInertia(Mat3 reference) const;
+	SymmetricMat3 getInertiaAroundCenterOfMass() const;
 	SymmetricMat3 getInertia(const CFrame& reference) const;
 	ScalableInertialMatrix getScalableInertia(const CFrame& reference) const;
+	ScalableInertialMatrix getScalableInertiaAroundCenterOfMass() const;
 	CircumscribingSphere getCircumscribingSphere() const;
 	void getCircumscribedEllipsoid() const;
 	double getMaxRadius() const;
@@ -121,27 +127,16 @@ public:
 	int furthestIndexInDirection(const Vec3f& direction) const;
 	virtual Vec3f furthestInDirection(const Vec3f& direction) const override;
 
-	inline const float* getXVerts() const { return this->vertices.get(); }
-	inline const float* getYVerts() const { return this->vertices.get() + getOffset(vertexCount); }
-	inline const float* getZVerts() const { return this->vertices.get() + 2 * getOffset(vertexCount); }
+	Vec3f operator[](int index) const;
 
-	inline Vec3f operator[](int index) const {
-		return Vec3f(this->getXVerts()[index], this->getYVerts()[index], this->getZVerts()[index]);
-	}
+	NormalizedPolyhedron normalized() const;
+	operator Shape() const;
 
-	inline Triangle getTriangle(int index) const {
-		size_t offset = getOffset(triangleCount);
-		return Triangle{ triangles[index], triangles[index + offset], triangles[index + 2 * offset] };
-	}
+	Triangle getTriangle(int index) const;
 
-	IteratorFactory<ShapeVertexIter> iterVertices() const {
-		return IteratorFactory<ShapeVertexIter>(ShapeVertexIter{ vertices, getOffset(vertexCount) }, ShapeVertexIter{ vertices + vertexCount, getOffset(vertexCount) });
-	}
-	IteratorFactory<ShapeTriangleIter> iterTriangles() const {
-		return IteratorFactory<ShapeTriangleIter>(ShapeTriangleIter{ triangles, getOffset(triangleCount) }, ShapeTriangleIter{ triangles + triangleCount, getOffset(triangleCount) });
-	}
+	IteratorFactory<ShapeVertexIter> iterVertices() const;
+	IteratorFactory<ShapeTriangleIter> iterTriangles() const;
 
 	void getTriangles(Triangle* triangleBuf) const;
 	void getVertices(Vec3f* vertexBuf) const;
 };
-

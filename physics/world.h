@@ -8,6 +8,7 @@
 #include "datastructures/iterators.h"
 #include "datastructures/iteratorEnd.h"
 #include "datastructures/boundsTree.h"
+#include "math/linalg/largeMatrix.h"
 
 #define FREE_PARTS 0x1
 #define TERRAIN_PARTS 0x2
@@ -22,28 +23,16 @@ struct Colission {
 
 class ExternalForce;
 
-typedef DereferencingIterator<std::vector<Physical*>::iterator> PhysicalIter;
-typedef DereferencingIterator<std::vector<Physical*>::const_iterator> ConstPhysicalIter;
-
-typedef IteratorFactory<PhysicalIter> PhysicalIterFactory;
-typedef IteratorFactory<ConstPhysicalIter> ConstPhysicalIterFactory;
-
-typedef CompositeIterator<PhysicalIter, PhysicalIter> BasicPartIter;
-typedef CompositeIterator<ConstPhysicalIter, ConstPhysicalIter> ConstBasicPartIter;
-
-typedef IteratorFactoryWithEnd<BasicPartIter> BasicPartIterFactory;
-typedef IteratorFactoryWithEnd<ConstBasicPartIter> ConstBasicPartIterFactory;
-
-template<typename ExtendedPart>
-using BasicExtendedPartIterFactory = CastingIteratorFactoryWithEnd<BasicPartIterFactory, ExtendedPart&>;
-template<typename ExtendedPart>
-using ConstBasicExtendedPartIterFactory = CastingIteratorFactoryWithEnd<ConstBasicPartIterFactory, const ExtendedPart&>;
-
 template<typename Filter>
 using DoubleFilterIter = FilteredIterator<IteratorGroup<TreeIterFactory<Part, Filter>, 2>, IteratorEnd, Filter>;
 
 template<typename Filter>
 using ConstDoubleFilterIter = FilteredIterator<IteratorGroup<TreeIterFactory<const Part, Filter>, 2>, IteratorEnd, Filter>;
+
+using WorldPartIter = IteratorGroup<IteratorFactoryWithEnd<BoundsTreeIter<TreeIterator, Part>>, 2>;
+using ConstWorldPartIter = IteratorGroup<IteratorFactoryWithEnd<BoundsTreeIter<ConstTreeIterator, const Part>>, 2>;
+
+class Layer;
 
 class WorldPrototype {
 private:
@@ -63,6 +52,10 @@ private:
 	BoundsTree<Part>& getTreeForPart(const Part* part);
 	const BoundsTree<Part>& getTreeForPart(const Part* part) const;
 
+	std::vector<Layer> layers;
+	// signifies which layers collide
+	LargeSymmetricMatrix<bool> colissionMatrix;
+
 protected:
 	virtual void applyExternalForces();
 	virtual void findColissions();
@@ -71,6 +64,7 @@ protected:
 	virtual void update();
 
 public:
+
 	BoundsTree<Part> objectTree;
 	BoundsTree<Part> terrainTree;
 
@@ -80,14 +74,16 @@ public:
 	size_t objectCount = 0;
 	double deltaT;
 
-	std::vector<Physical*> physicals;
+	std::vector<MotorizedPhysical*> physicals;
 
 	WorldPrototype(double deltaT);
+	~WorldPrototype();
 
 	WorldPrototype(const WorldPrototype&) = delete;
 	WorldPrototype(WorldPrototype&&) = delete;
 	WorldPrototype& operator=(const WorldPrototype&) = delete;
 	WorldPrototype& operator=(WorldPrototype&&) = delete;
+
 
 	virtual void tick();
 
@@ -98,7 +94,10 @@ public:
 	void addTerrainPart(Part* part);
 	void optimizeTerrain();
 
-	inline size_t getPartCount() const {
+	// creates a new layer, returning it's ID
+	int createLayer();
+
+	inline size_t getPartCount(int partsMask = ALL_PARTS) const {
 		return objectCount;
 	}
 
@@ -111,14 +110,10 @@ public:
 	void removeExternalForce(ExternalForce* force);
 
 
-	bool isValid() const;
+	virtual bool isValid() const;
 
-	IteratorFactory<PhysicalIter> iterPhysicals() { return IteratorFactory<PhysicalIter>(physicals.begin(), physicals.end()); }
-	IteratorFactory<ConstPhysicalIter> iterPhysicals() const { return IteratorFactory<ConstPhysicalIter>(physicals.begin(), physicals.end()); }
-
-	BasicPartIter begin() { return BasicPartIter(iterPhysicals().begin(), iterPhysicals().end()); }
-	ConstBasicPartIter begin() const { return ConstBasicPartIter(iterPhysicals().begin(), iterPhysicals().end()); }
-	IteratorEnd end() const { return IteratorEnd(); }
+	IteratorFactory<std::vector<MotorizedPhysical*>::iterator> iterPhysicals() { return IteratorFactory<std::vector<MotorizedPhysical*>::iterator>(physicals.begin(), physicals.end()); }
+	IteratorFactory<std::vector<MotorizedPhysical*>::const_iterator> iterPhysicals() const { return IteratorFactory<std::vector<MotorizedPhysical*>::const_iterator>(physicals.begin(), physicals.end()); }
 
 	template<typename Filter>
 	IteratorFactoryWithEnd<DoubleFilterIter<Filter>> iterPartsFiltered(const Filter& filter, int partsMask = ALL_PARTS) {
@@ -157,6 +152,9 @@ public:
 
 		return IteratorFactoryWithEnd<ConstDoubleFilterIter<Filter>>(std::move(doubleFilter));
 	}
+
+	IteratorFactoryWithEnd<WorldPartIter> iterParts(int partsMask = ALL_PARTS);
+	IteratorFactoryWithEnd<ConstWorldPartIter> iterParts(int partsMask = ALL_PARTS) const;
 };
 
 class ExternalForce {
@@ -172,8 +170,8 @@ public:
 	}
 	virtual double getTotalPotentialEnergyForThisForce(const WorldPrototype* world) const {
 		double total = 0.0;
-		for (Physical& p : world->iterPhysicals()) {
-			total += this->getPotentialEnergyForObject(world, p);
+		for (MotorizedPhysical* p : world->iterPhysicals()) {
+			total += this->getPotentialEnergyForObject(world, *p);
 		}
 		return total;
 	}
@@ -183,12 +181,9 @@ template<typename T = Part>
 class World : public WorldPrototype {
 public:
 	World(double deltaT) : WorldPrototype(deltaT) {}
-	inline CastingIterator<BasicPartIter, T&> begin() { return CastingIterator<BasicPartIter, T&>(WorldPrototype::begin()); }
-	inline CastingIterator<ConstBasicPartIter, const T&> begin() const { return CastingIterator<ConstBasicPartIter, const T&>(WorldPrototype::begin()); }
-	inline IteratorEnd end() const { return IteratorEnd(); }
 
 	template<typename Filter>
-	IteratorFactoryWithEnd<CastingIterator<DoubleFilterIter<Filter>, T&>> iterPartsFiltered(const Filter& filter, int partsMask = FREE_PARTS) {
+	IteratorFactoryWithEnd<CastingIterator<DoubleFilterIter<Filter>, T&>> iterPartsFiltered(const Filter& filter, int partsMask = ALL_PARTS) {
 		return IteratorFactoryWithEnd<CastingIterator<DoubleFilterIter<Filter>, T&>>(
 			CastingIterator<DoubleFilterIter<Filter>, T&>(
 				WorldPrototype::iterPartsFiltered(filter, partsMask).begin()
@@ -197,10 +192,26 @@ public:
 	}
 
 	template<typename Filter>
-	IteratorFactoryWithEnd<CastingIterator<ConstDoubleFilterIter<Filter>, const T&>> iterPartsFiltered(const Filter& filter, int partsMask = FREE_PARTS) const {
+	IteratorFactoryWithEnd<CastingIterator<ConstDoubleFilterIter<Filter>, const T&>> iterPartsFiltered(const Filter& filter, int partsMask = ALL_PARTS) const {
 		return IteratorFactoryWithEnd<CastingIterator<ConstDoubleFilterIter<Filter>, const T&>>(
 			CastingIterator<ConstDoubleFilterIter<Filter>, const T&>(
 				WorldPrototype::iterPartsFiltered(filter, partsMask).begin()
+			)
+		);
+	}
+
+	IteratorFactoryWithEnd<CastingIterator<WorldPartIter, T&>> iterParts(int partsMask = ALL_PARTS) {
+		return IteratorFactoryWithEnd<CastingIterator<WorldPartIter, T&>>(
+			CastingIterator<WorldPartIter, T&>(
+				WorldPrototype::iterParts(partsMask).begin()
+			)
+		);
+	}
+
+	IteratorFactoryWithEnd<CastingIterator<ConstWorldPartIter, const T&>> iterParts(int partsMask = ALL_PARTS) const {
+		return IteratorFactoryWithEnd<CastingIterator<ConstWorldPartIter, const T&>>(
+			CastingIterator<ConstWorldPartIter, const T&>(
+				WorldPrototype::iterParts(partsMask).begin()
 			)
 		);
 	}

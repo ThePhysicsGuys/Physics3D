@@ -11,7 +11,7 @@ class Font;
 class Screen;
 struct TreeNode;
 
-extern const Vec3f pieColors[30];
+extern const Color3 pieColors[30];
 
 struct WeightValue {
 	float weight;
@@ -21,7 +21,7 @@ struct WeightValue {
 struct DataPoint {
 	float weight;
 	std::string value;
-	Vec3f color;
+	Color3 color;
 	const char* label;
 	DataPoint() : color(), weight(0) {}
 	DataPoint(float weight, std::string value, Vec3f color, const char* label) : weight(weight), value(value), color(color), label(label) {}
@@ -43,7 +43,7 @@ struct PieChart {
 
 struct BarChartClassInfo {
 	std::string name;
-	Vec3f color;
+	Color3 color;
 };
 
 struct BarChart : public Component {
@@ -65,14 +65,14 @@ struct SlidingChartDataSetInfo {
 	int size;
 	std::string title;
 	CircularBuffer<float> data;
-	Vec4f color;
+	Color color;
 	float lineSize;
 
 	float mean;
 	float deviation;
 
-	SlidingChartDataSetInfo() : title(""), size(0), mean(0), deviation(1), color(GUI::COLOR::ALPHA), lineSize(0), data() {}
-	SlidingChartDataSetInfo(const std::string& title, int size, Vec4f color = GUI::COLOR::ACCENT, float lineSize = 1.0f) : title(title), size(size), mean(0), deviation(1), color(color), lineSize(lineSize), data(size) {};
+	SlidingChartDataSetInfo() : title(""), size(0), mean(0), deviation(1), color(COLOR::ALPHA), lineSize(0), data() {}
+	SlidingChartDataSetInfo(const std::string& title, int size, Color color = COLOR::ACCENT, float lineSize = 1.0f) : title(title), size(size), mean(0), deviation(1), color(color), lineSize(lineSize), data(size) {};
 
 	void add(float value);
 };
@@ -92,5 +92,5 @@ struct SlidingChart : public Component {
 	Vec2 resize() override;
 };
 
-void renderTreeStructure(Screen& screen, const TreeNode& tree, const Vec3f& treeColor, Vec2f origin, float allottedWidth);
+void renderTreeStructure(Screen& screen, const TreeNode& tree, const Color3& treeColor, Vec2f origin, float allottedWidth);
 

@@ -3,45 +3,48 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include "texture.h"
+#include <string>
 
 #define CHARACTER_COUNT 128
 
+struct Character {
+	union {
+		struct {
+			int x;
+			int y;
+		};
+		Vec2i origin;
+	};
+
+	union {
+		struct {
+			int width;
+			int height;
+		};
+		Vec2i size;
+	};
+
+	union {
+		struct {
+			int bx;
+			int by;
+		};
+		Vec2i bearing;
+	};
+
+	unsigned int advance;
+	unsigned int id;
+
+	Character();
+	Character(unsigned int id, int x, int y, int width, int height, int bx, int by, unsigned int advance);
+};
+
 class Font {
-public:
+private:
 	Texture atlas;
+	Character characters[CHARACTER_COUNT];
 
-	struct Character {
-		union {
-			struct {
-				int x;
-				int y;
-			};
-			Vec2i origin;
-		};
-
-		union {
-			struct {
-				int width;
-				int height;
-			};
-			Vec2i size;
-		};
-		
-		union {
-			struct {
-				int bx;
-				int by;
-			};
-			Vec2i bearing;
-		};
-		
-		unsigned int advance;
-
-		Character() : x(0), y(0), width(0), height(0), bx(0), by(0), advance(0) {};
-		Character(int x, int y, int width, int height, int bx, int by, int advance) : x(x), y(y), width(width), height(height), bx(bx), by(by), advance(advance) {};
-
-	} characters[CHARACTER_COUNT];
-
+public:
 	Font();
 	Font(std::string font);
 
@@ -54,6 +57,7 @@ public:
 	void close();
 
 	Vec2f size(const std::string& text, double scale);
+	Character& getCharacter(unsigned int id);
 
 	unsigned int getAtlasID() const;
 	unsigned int getAtlasWidth() const;

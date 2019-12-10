@@ -5,12 +5,29 @@
 #include "GL\glew.h"
 #include "GLFW\glfw3.h"
 
-#include "texture.h"
+#include "gui/text.h"
 #include "shader/shaderProgram.h"
 #include "renderUtils.h"
 #include "gui/gui.h"
 #include "mesh/primitive.h"
+
 #include "path/path.h"
+
+#include <string>
+
+#pragma region Character
+
+Character::Character() : id(0), x(0), y(0), width(0), height(0), bx(0), by(0), advance(0) {
+
+};
+
+Character::Character(unsigned int id, int x, int y, int width, int height, int bx, int by, unsigned int advance) : id(id), x(x), y(y), width(width), height(height), bx(bx), by(by), advance(advance) {
+
+};
+
+#pragma endregion
+
+#pragma region Font
 
 Font::Font() {
 
@@ -59,8 +76,8 @@ Font::Font(std::string font) {
 	char* pixels = (char*)calloc(atlasDimension * atlasDimension * 4, 1);
 
 	// Render glyphs to atlas
-	for (unsigned char c = 0; c < CHARACTER_COUNT; c++) {
-		if (FT_Load_Char(face, c, FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT | FT_LOAD_TARGET_LIGHT)) {
+	for (unsigned char character = 0; character < CHARACTER_COUNT; character++) {
+		if (FT_Load_Char(face, character, FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT | FT_LOAD_TARGET_LIGHT)) {
 			Log::error("FREETYTPE: Failed to load Glyph");
 			continue;
 		}
@@ -83,7 +100,8 @@ Font::Font(std::string font) {
 			}
 		}
 
-		characters[c] = Character(
+		characters[character] = Character(
+			character,
 			penX,
 			penY,
 			bitmap->width,
@@ -110,7 +128,7 @@ Font::Font(Font&& other) {
 	atlas = std::move(other.atlas);
 
 	for (int i = 0; i < CHARACTER_COUNT; i++) {
-		characters[i] = other.characters[i];
+		characters[i] = other.getCharacter(i);
 	}
 }
 
@@ -119,7 +137,7 @@ Font& Font::operator=(Font&& other) {
 		std::swap(atlas, other.atlas);
 
 		for (int i = 0; i < CHARACTER_COUNT; i++) {
-			characters[i] = other.characters[i];
+			characters[i] = other.getCharacter(i);
 		}
 	}
 
@@ -130,7 +148,7 @@ void Font::close() {
 	atlas.close();
 }
 
-Vec2f Font::size(const std::string& text, double size) {
+Vec2f Font::size(const std::string& text, double fontSize) {
 	std::string::const_iterator iterator;
 	float width = 0.0f;
 	float height = 0.0f;
@@ -139,16 +157,23 @@ Vec2f Font::size(const std::string& text, double size) {
 		Character& character = characters[*iterator];
 		float advance = character.advance >> 6;
 		if (iterator == text.begin())
-			width += (advance - character.bearing.x) * size;
+			width += (advance - character.bearing.x) * fontSize;
 		else if (iterator == text.end() - 1)
-			width += (character.bearing.x + character.size.x) * size;
+			width += (character.bearing.x + character.size.x) * fontSize;
  		else 
-			width += advance * size;
+			width += advance * fontSize;
 		
-		height = fmax(character.size.y * size, height);
+		height = fmax(character.size.y * fontSize, height);
 	}
 	
 	return Vec2f(width, height);
+}
+
+Character& Font::getCharacter(unsigned int id) {
+	if (id >= CHARACTER_COUNT)
+		return characters[32];
+
+	return characters[id];
 }
 
 unsigned int Font::getAtlasID() const {
@@ -163,3 +188,4 @@ unsigned int Font::getAtlasHeight() const {
 	return atlas.getHeight();
 }
 
+#pragma endregion

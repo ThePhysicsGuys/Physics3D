@@ -2,6 +2,8 @@
 
 #include <string>
 
+#define LOG_DEBUG(FMT, ...) Log::debug(std::string("[%s:%d] ") + FMT, __FUNCTION__, __LINE__, __VA_ARGS__);
+
 namespace Log {
 
 	static const int BLACK = 0x0;

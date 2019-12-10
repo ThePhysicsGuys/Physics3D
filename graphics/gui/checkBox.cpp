@@ -11,7 +11,6 @@
 
 #include "mesh/primitive.h"
 
-
 CheckBox::CheckBox(std::string text, double x, double y, double width, double height, bool textured) : Component(x, y, width, height) {
 	this->label = new Label(text, x, y);
 	this->checkBoxLabelOffset = GUI::checkBoxLabelOffset;
@@ -47,7 +46,7 @@ void CheckBox::render() {
 	if (visible) {
 		resize();
 
-		Vec4f blendColor = (disabled) ? GUI::COLOR::DISABLED : GUI::COLOR::WHITE;
+		Color blendColor = (disabled) ? COLOR::DISABLED : COLOR::WHITE;
 
 		Vec2f checkBoxPosition;
 		Vec2f checkBoxDimension;
@@ -76,9 +75,9 @@ void CheckBox::render() {
 					Path::rectUV(pressUncheckedTexture->getID(), checkBoxPosition, checkBoxDimension);
 			else
 				if (checked)
-					Path::rectFilled(checkBoxPosition, checkBoxPosition, 0.0f, GUI::COLOR::blend(pressCheckedColor, blendColor));
+					Path::rectFilled(checkBoxPosition, checkBoxPosition, 0.0f, COLOR::blend(pressCheckedColor, blendColor));
 				else
-					Path::rectFilled(checkBoxPosition, checkBoxPosition, 0.0f, GUI::COLOR::blend(pressUncheckedColor, blendColor));
+					Path::rectFilled(checkBoxPosition, checkBoxPosition, 0.0f, COLOR::blend(pressUncheckedColor, blendColor));
 		else if (hovering)
 			if (textured)
 				if (checked)
@@ -87,9 +86,9 @@ void CheckBox::render() {
 					Path::rectUV(uncheckedTexture->getID(), checkBoxPosition, checkBoxDimension);
 			else
 				if (checked)
-					Path::rectFilled(checkBoxPosition, checkBoxPosition, 0.0f, GUI::COLOR::blend(checkedColor, blendColor));
+					Path::rectFilled(checkBoxPosition, checkBoxPosition, 0.0f, COLOR::blend(checkedColor, blendColor));
 				else
-					Path::rectFilled(checkBoxPosition, checkBoxPosition, 0.0f, GUI::COLOR::blend(uncheckedColor, blendColor));
+					Path::rectFilled(checkBoxPosition, checkBoxPosition, 0.0f, COLOR::blend(uncheckedColor, blendColor));
 		else
 			if (textured)
 				if (checked)
@@ -98,9 +97,9 @@ void CheckBox::render() {
 					Path::rectUV(hoverUncheckedTexture->getID(), checkBoxPosition, checkBoxDimension);
 			else
 				if (checked)
-					Path::rectFilled(checkBoxPosition, checkBoxPosition, 0.0f, GUI::COLOR::blend(hoverCheckedColor, blendColor));
+					Path::rectFilled(checkBoxPosition, checkBoxPosition, 0.0f, COLOR::blend(hoverCheckedColor, blendColor));
 				else
-					Path::rectFilled(checkBoxPosition, checkBoxPosition, 0.0f, GUI::COLOR::blend(hoverUncheckedColor, blendColor));
+					Path::rectFilled(checkBoxPosition, checkBoxPosition, 0.0f, COLOR::blend(hoverUncheckedColor, blendColor));
 
 		if (!label->text.empty()) {
 			Vec2 labelPosition;
@@ -116,8 +115,8 @@ void CheckBox::render() {
 		}
 
 		if (debug) {
-			Path::rect(position, dimension, 0.0f, GUI::COLOR::RED);
-			Path::rect(checkBoxPosition, checkBoxDimension, 0.0f, GUI::COLOR::GREEN);
+			Path::rect(position, dimension, 0.0f, COLOR::RED);
+			Path::rect(checkBoxPosition, checkBoxDimension, 0.0f, COLOR::GREEN);
 		}
 	}
 }

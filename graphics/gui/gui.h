@@ -2,6 +2,7 @@
 
 #include "../batch/guiBatch.h"
 #include "../batch/batchConfig.h"
+#include "color.h"
 
 class Component;
 class ColorPicker;
@@ -14,48 +15,7 @@ struct Quad;
 
 namespace GUI {
 
-	// Colors
-	namespace COLOR {
-		extern Vec4f DISABLED;
-		extern Vec4f ACCENT;
-		extern Vec4f BACK;
-		extern Vec4f ALPHA;
-
-		extern Vec4f R;
-		extern Vec4f G;
-		extern Vec4f B;
-		extern Vec4f A;
-
-		extern Vec4f NAVY;
-		extern Vec4f BLUE;
-		extern Vec4f AQUA;
-		extern Vec4f TEAL;
-		extern Vec4f OLIVE;
-		extern Vec4f GREEN;
-		extern Vec4f LIME;
-		extern Vec4f YELLOW;
-		extern Vec4f ORANGE;
-		extern Vec4f RED;
-		extern Vec4f MAROON;
-		extern Vec4f FUCHSIA;
-		extern Vec4f PURPLE;
-		extern Vec4f BLACK;
-		extern Vec4f GRAY;
-		extern Vec4f SILVER;
-		extern Vec4f WHITE;
-			
-		// format: 0xRRGGBBAA
-		Vec4f get(int hex, bool alpha);
-		Vec4f get(int hex);
-		
-		Vec3f hsvToRgb(Vec3f hsv);
-		Vec3f rgbToHsv(Vec3f rgb);
-		Vec4f hsvaToRgba(Vec4f hsva);
-		Vec4f rgbaToHsva(Vec4f rgba);
-
-		Vec4f blend(Vec4f color1, Vec4f color2);
-	};
-
+	// Window
 	struct WindowInfo {
 		Vec2i dimension;
 		float aspect;
@@ -87,7 +47,7 @@ namespace GUI {
 	extern Texture* minimizeButtonHoverTexture;
 	extern Texture* minimizeButtonIdleTexture;
 	extern Texture* minimizeButtonPressTexture;
-	extern Vec4f borderColor;
+	extern Color borderColor;
 	extern double borderWidth;
 
 	// Slider
@@ -95,10 +55,10 @@ namespace GUI {
 	extern double sliderHandleWidth;
 	extern double sliderBarHeight;
 	extern double sliderHandleHeight;
-	extern Vec4f sliderHandleColor;
-	extern Vec4f sliderBackgroundColor;
-	extern Vec4f sliderForegroundFilledColor;
-	extern Vec4f sliderForegroundEmptyColor;
+	extern Color sliderHandleColor;
+	extern Color sliderBackgroundColor;
+	extern Color sliderForegroundFilledColor;
+	extern Color sliderForegroundEmptyColor;
 
 	// ColorPicker
 	extern Texture* colorPickerCrosshairTexture;
@@ -106,7 +66,7 @@ namespace GUI {
 	extern Texture* colorPickerBrightnessTexture;
 	extern Texture* colorPickerAlphaBrightnessTexture;
 	extern Texture* colorPickerAlphaPatternTexture;
-	extern Vec4f colorPickerBarBorderColor;
+	extern Color colorPickerBarBorderColor;
 	extern double colorPickerBarWidth;
 	extern double colorPickerHueSize;
 	extern double colorPickerSpacing;
@@ -114,7 +74,7 @@ namespace GUI {
 	extern double colorPickerBarBorderWidth;
 	extern double colorPickerSelectorWidth;
 	extern double colorPickerSelectorHeight;
-	extern Vec4f colorPickerSelectorColor;
+	extern Color colorPickerSelectorColor;
 
 	// CheckBox
 	extern Texture* checkBoxUncheckedTexture;
@@ -132,12 +92,12 @@ namespace GUI {
 	extern double frameResizeHandleSize;
 	extern double frameTitleBarHeight;
 	extern double frameButtonOffset;
-	extern Vec4f frameTitleBarColor;
-	extern Vec4f frameBackgroundColor;
+	extern Color frameTitleBarColor;
+	extern Color frameBackgroundColor;
 
 	// Font
 	extern Font* font;
-	extern Vec4f fontColor;
+	extern Color fontColor;
 	extern double fontSize;
 
 	// Batch

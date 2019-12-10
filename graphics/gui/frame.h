@@ -37,9 +37,9 @@ public:
 	Label* title;
 
 	double titleBarHeight;
-	Vec4 titleBarColor;
+	Color titleBarColor;
 
-	Vec4 backgroundColor;
+	Color backgroundColor;
 
 	bool minimized = false;
 

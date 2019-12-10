@@ -6,18 +6,32 @@
 #include <sstream>
 #include "../physics/misc/gravityForce.h"
 
+#include "../physics/geometry/basicShapes.h"
+#include "../physics/math/linalg/commonMatrices.h"
+
+#include "../physics/misc/shapeLibrary.h"
+
+#include "../physics/misc/filters/outOfBoundsFilter.h"
+
 WorldBenchmark::WorldBenchmark(const char* name, int tickCount) : Benchmark(name), world(0.005), tickCount(tickCount) {
 	world.addExternalForce(new ExternalGravity(Vec3(0, -10, 0)));
 }
 
 void WorldBenchmark::run() {
 	world.isValid();
-	Part* partToTrack = world.physicals[0]->mainPart;
+	Part& partToTrack = (*world.physicals[0])[0];
 	for (int i = 0; i < tickCount; i++) {
 		if (i % (tickCount / 8) == 0) {
 			Log::print("Tick %d\n", i);
-			Position pos = partToTrack->getCFrame().getPosition();
+			Position pos = partToTrack.getCFrame().getPosition();
 			Log::print("Location of object: %.5f %.5f %.5f\n", double(pos.x), double(pos.y), double(pos.z));
+
+			size_t partsOutOfBounds = 0;
+			for(const Part& p : world.iterPartsFiltered(OutOfBoundsFilter(Bounds(Position(-100.0, -100.0, -100.0), Position(100.0, 100.0, 100.0))))) {
+				partsOutOfBounds++;
+			}
+
+			Log::print("%d/%d parts out of bounds!\n", partsOutOfBounds, world.getPartCount());
 		}
 
 		physicsMeasure.mark(PhysicsProcess::OTHER);
@@ -152,4 +166,13 @@ void WorldBenchmark::printResults(double timeTakenMillis) {
 	Log::setColor(Log::STRONG | Log::MAGENTA);
 	std::cout << "[Intersection Statistics]\n";
 	printBreakdown(intersectionStatistics.history.avg().values, intersectionStatistics.labels, intersectionStatistics.size(), "");
+}
+
+
+void WorldBenchmark::createFloor(double w, double h, double wallHeight) {
+	world.addTerrainPart(new Part(Library::createBox(w, 1.0, h), GlobalCFrame(0.0, 0.0, 0.0), basicProperties));
+	world.addTerrainPart(new Part(Library::createBox(0.8, wallHeight, h), GlobalCFrame(w, wallHeight/2, 0.0), basicProperties));
+	world.addTerrainPart(new Part(Library::createBox(0.8, wallHeight, h), GlobalCFrame(-w, wallHeight / 2, 0.0), basicProperties));
+	world.addTerrainPart(new Part(Library::createBox(w, wallHeight, 0.8), GlobalCFrame(0.0, wallHeight / 2, h), basicProperties));
+	world.addTerrainPart(new Part(Library::createBox(w, wallHeight, 0.8), GlobalCFrame(0.0, wallHeight / 2, -h), basicProperties));
 }

@@ -18,6 +18,7 @@ public:
 	void onEvent(Event& event) override;
 
 	bool onFrameBufferResize(FrameBufferResizeEvent& event);
+	bool onWindowResize(WindowResizeEvent& event);
 	bool onKeyPress(KeyPressEvent& event);
 	bool onKeyPressOrRepeat(KeyPressEvent& event);
 	bool onDoubleKeyPress(DoubleKeyPressEvent& event);

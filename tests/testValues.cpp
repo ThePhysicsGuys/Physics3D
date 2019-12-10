@@ -1,6 +1,7 @@
 #include "testValues.h"
 
 #include "../physics/math/linalg/trigonometry.h"
+#include "../physics/math/linalg/commonMatrices.h"
 
 const Vec3 vectors[13]{
 	Vec3(0.0, 0.0, 0.0),
@@ -43,17 +44,25 @@ const Mat3 matrices[9]{
 	Mat3{5.3, 0,0,0, 7.3, 0,0,0, 2.3},
 	Mat3{3.7, 2.3, -3.5, 1.3, -2.5, 1.6, -3.2, 2.3, 3.4},
 };
-const RotMat3 rotMatrices[9]{
+const RotMat3 rotMatrices[18]{
 	Mat3::IDENTITY(),
-	rotX(0.1),
-	rotY(0.1),
-	rotZ(0.1),
-	rotX(-0.1),
-	rotY(-0.1),
-	rotZ(-0.1),
+	rotX(0.8),
+	rotY(0.8),
+	rotZ(0.8),
+	rotX(-0.8),
+	rotY(-0.8),
+	rotZ(-0.8),
 	fromEulerAngles(0.2, 0.3, 0.4),
 	fromEulerAngles(1.2, -0.5, 0.3),
-
+	ROT_X_90(double),
+	ROT_X_180(double),
+	ROT_X_270(double),
+	ROT_Y_90(double),
+	ROT_Y_180(double),
+	ROT_Y_270(double),
+	ROT_Z_90(double),
+	ROT_Z_180(double),
+	ROT_Z_270(double),
 };
 
 Vec3f badVerticesI[8]{

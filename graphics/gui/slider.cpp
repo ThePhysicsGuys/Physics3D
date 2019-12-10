@@ -51,28 +51,28 @@ Slider::Slider(double x, double y, double width, double height, double min, doub
 void Slider::render() {
 	if (visible) {
 
-		Vec4f blendColor = (disabled) ? GUI::COLOR::DISABLED : GUI::COLOR::WHITE;
+		Color blendColor = (disabled) ? COLOR::DISABLED : COLOR::WHITE;
 
 		resize();
 
-		Path::rectFilled(position, dimension, 0.0f, GUI::COLOR::blend(backgroundColor, blendColor));
+		Path::rectFilled(position, dimension, 0.0f, COLOR::blend(backgroundColor, blendColor));
 		
 		double progress = (value - min) / (max - min);
 		Vec2 sliderFilledPosition = position + Vec2(padding + handleWidth / 2, -height / 2 + barHeight / 2);
 		Vec2 sliderFilledDimension = Vec2(barWidth * progress, barHeight);
-		Path::rectFilled(sliderFilledPosition, sliderFilledDimension, 0.0f, GUI::COLOR::blend(foregroundFilledColor, blendColor));
+		Path::rectFilled(sliderFilledPosition, sliderFilledDimension, 0.0f, COLOR::blend(foregroundFilledColor, blendColor));
 
 		Vec2 sliderEmptyPosition = sliderFilledPosition + Vec2(sliderFilledDimension.x, 0);
 		Vec2 sliderEmptyDimension = Vec2(barWidth * (1.0 - progress), barHeight);
-		Path::rectFilled(sliderEmptyPosition, sliderEmptyDimension, 0.0f, GUI::COLOR::blend(foregroundEmptyColor, blendColor));
+		Path::rectFilled(sliderEmptyPosition, sliderEmptyDimension, 0.0f, COLOR::blend(foregroundEmptyColor, blendColor));
 
 		Vec2 handlePosition = Vec2(sliderEmptyPosition.x - handleWidth / 2, position.y - height / 2 + handleHeight / 2);
 		Vec2 handleDimension = Vec2(handleWidth, handleHeight);
-		Path::rectFilled(handlePosition, handleDimension, 0.0f, GUI::COLOR::blend(handleColor, blendColor));
-		Path::rect(handlePosition, handleDimension, 0.0f, GUI::COLOR::blend(GUI::COLOR::ACCENT, blendColor));
+		Path::rectFilled(handlePosition, handleDimension, 0.0f, COLOR::blend(handleColor, blendColor));
+		Path::rect(handlePosition, handleDimension, 0.0f, COLOR::blend(COLOR::ACCENT, blendColor));
 
 		if (debug)
-			Path::rect(position, dimension, 0.0f, GUI::COLOR::RED);
+			Path::rect(position, dimension, 0.0f, COLOR::RED);
 	}
 }
 

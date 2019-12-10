@@ -154,6 +154,7 @@
     <ClCompile Include="font.cpp" />
     <ClCompile Include="gui\button.cpp" />
     <ClCompile Include="gui\checkBox.cpp" />
+    <ClCompile Include="gui\color.cpp" />
     <ClCompile Include="gui\colorPicker.cpp" />
     <ClCompile Include="gui\container.cpp" />
     <ClCompile Include="gui\directionEditor.cpp" />
@@ -165,6 +166,8 @@
     <ClCompile Include="gui\layout.cpp" />
     <ClCompile Include="gui\panel.cpp" />
     <ClCompile Include="gui\slider.cpp" />
+    <ClCompile Include="gui\text.cpp" />
+    <ClCompile Include="gui\text.h" />
     <ClCompile Include="material.cpp" />
     <ClCompile Include="meshLibrary.cpp" />
     <ClCompile Include="mesh\abstractMesh.cpp" />
@@ -204,6 +207,7 @@
     <ClInclude Include="font.h" />
     <ClInclude Include="gui\button.h" />
     <ClInclude Include="gui\checkBox.h" />
+    <ClInclude Include="gui\color.h" />
     <ClInclude Include="gui\colorPicker.h" />
     <ClInclude Include="gui\component.h" />
     <ClInclude Include="gui\container.h" />
@@ -239,6 +243,7 @@
     <ClInclude Include="texture.h" />
     <ClInclude Include="debug\threePhaseBuffer.h" />
     <ClInclude Include="debug\visualDebug.h" />
+    <ClInclude Include="visualData.h" />
     <ClInclude Include="visualShape.h" />
   </ItemGroup>
   <ItemGroup>

@@ -17,6 +17,8 @@
 
 #include <vector>
 
+#include "integrityCheck.h"
+
 /*
 	exitVector is the distance p2 must travel so that the shapes are no longer colliding
 */
@@ -48,7 +50,7 @@ void handleCollision(Part& part1, Part& part2, Position collisionPoint, Vec3 exi
 	p2.applyForce(collissionRelP2, -depthForce);
 
 
-	Vec3 relativeVelocity = (p1.getVelocityOfPoint(collissionRelP1) - part1.conveyorEffect) - (p2.getVelocityOfPoint(collissionRelP2) - part2.conveyorEffect);
+	Vec3 relativeVelocity = (p1.getVelocityOfPoint(collissionRelP1) - part1.properties.conveyorEffect) - (p2.getVelocityOfPoint(collissionRelP2) - part2.properties.conveyorEffect);
 
 	bool isImpulseColission = relativeVelocity * exitVector > 0;
 
@@ -62,7 +64,7 @@ void handleCollision(Part& part1, Part& part2, Position collisionPoint, Vec3 exi
 		impulse = zeroRelVelImpulse * (1.0 + combinedBouncyness);
 		p1.applyImpulse(collissionRelP1, impulse);
 		p2.applyImpulse(collissionRelP2, -impulse);
-		relativeVelocity = (p1.getVelocityOfPoint(collissionRelP1) - part1.conveyorEffect) - (p2.getVelocityOfPoint(collissionRelP2) - part2.conveyorEffect); // set new relativeVelocity
+		relativeVelocity = (p1.getVelocityOfPoint(collissionRelP1) - part1.properties.conveyorEffect) - (p2.getVelocityOfPoint(collissionRelP2) - part2.properties.conveyorEffect); // set new relativeVelocity
 	}
 
 	Vec3 slidingVelocity = exitVector % relativeVelocity % exitVector / lengthSquared(exitVector);
@@ -123,7 +125,7 @@ void handleTerrainCollision(Part& part1, Part& part2, Position collisionPoint, V
 	p1.applyForce(collissionRelP1, depthForce);
 
 
-	Vec3 relativeVelocity = p1.getVelocityOfPoint(collissionRelP1) - part1.conveyorEffect + part2.conveyorEffect;
+	Vec3 relativeVelocity = p1.getVelocityOfPoint(collissionRelP1) - part1.properties.conveyorEffect + part2.getCFrame().localToRelative(part2.properties.conveyorEffect);
 
 	bool isImpulseColission = relativeVelocity * exitVector > 0;
 
@@ -137,7 +139,7 @@ void handleTerrainCollision(Part& part1, Part& part2, Position collisionPoint, V
 		Vec3 zeroRelVelImpulse = desiredAccel * inertia;
 		impulse = zeroRelVelImpulse * (1.0 + combinedBouncyness);
 		p1.applyImpulse(collissionRelP1, impulse);
-		relativeVelocity = p1.getVelocityOfPoint(collissionRelP1) - part1.conveyorEffect + part2.conveyorEffect; // set new relativeVelocity
+		relativeVelocity = p1.getVelocityOfPoint(collissionRelP1) - part1.properties.conveyorEffect + part2.getCFrame().localToRelative(part2.properties.conveyorEffect); // set new relativeVelocity
 	}
 
 	Vec3 slidingVelocity = exitVector % relativeVelocity % exitVector / lengthSquared(exitVector);
@@ -168,20 +170,13 @@ void handleTerrainCollision(Part& part1, Part& part2, Position collisionPoint, V
 	p1.applyForce(collissionRelP1, dynamicFricForce);
 }
 
-bool boundsSphereEarlyEnd(const BoundingBox& bounds, const Vec3& localSphereCenter, double sphereRadius) {
-	const Vec3& sphere = localSphereCenter;
-
-	BoundingBox expandedBounds = bounds.expanded(sphereRadius);
-
-	if (expandedBounds.containsPoint(localSphereCenter)) {
-		return false;
-	} else {
-		return true;
-	}
+bool boundsSphereEarlyEnd(const DiagonalMat3& scale, const Vec3& sphereCenter, double sphereRadius) {
+	return std::abs(sphereCenter.x) > scale[0] + sphereRadius || std::abs(sphereCenter.y) > scale[1] + sphereRadius || std::abs(sphereCenter.z) > scale[2] + sphereRadius;
 }
 
 inline void runColissionTests(Part& p1, Part& p2, WorldPrototype& world, std::vector<Colission>& colissions) {
-	if ((p1.isTerrainPart || p1.parent->anchored) && (p2.isTerrainPart || p2.parent->anchored)) return;
+	if ((p1.isTerrainPart || p1.parent->anchored) && (p2.isTerrainPart || p2.parent->anchored)) return; // TODO Unneccecary test?
+
 	
 	double maxRadiusBetween = p1.maxRadius + p2.maxRadius;
 
@@ -192,11 +187,11 @@ inline void runColissionTests(Part& p1, Part& p2, WorldPrototype& world, std::ve
 		intersectionStatistics.addToTally(IntersectionResult::PART_DISTANCE_REJECT, 1);
 		return;
 	}
-	if (boundsSphereEarlyEnd(p1.localBounds, p1.getCFrame().globalToLocal(p2.getPosition()), p2.maxRadius)) {
+	if (boundsSphereEarlyEnd(p1.hitbox.scale, p1.getCFrame().globalToLocal(p2.getPosition()), p2.maxRadius)) {
 		intersectionStatistics.addToTally(IntersectionResult::PART_BOUNDS_REJECT, 1);
 		return;
 	}
-	if (boundsSphereEarlyEnd(p2.localBounds, p2.getCFrame().globalToLocal(p1.getPosition()), p1.maxRadius)) {
+	if (boundsSphereEarlyEnd(p2.hitbox.scale, p2.getCFrame().globalToLocal(p1.getPosition()), p1.maxRadius)) {
 		intersectionStatistics.addToTally(IntersectionResult::PART_BOUNDS_REJECT, 1);
 		return;
 	}
@@ -204,6 +199,7 @@ inline void runColissionTests(Part& p1, Part& p2, WorldPrototype& world, std::ve
 	PartIntersection result = p1.intersects(p2);
 	if (result.intersects) {
 		intersectionStatistics.addToTally(IntersectionResult::COLISSION, 1);
+
 		colissions.push_back(Colission{ &p1, &p2, result.intersection, result.exitVector });
 	} else {
 		intersectionStatistics.addToTally(IntersectionResult::GJK_REJECT, 1);
@@ -233,7 +229,21 @@ void recursiveFindColissionsBetween(WorldPrototype& world, std::vector<Colission
 	if (!intersects(first.bounds, second.bounds)) return;
 	
 	if (first.isLeafNode() && second.isLeafNode()) {
-		runColissionTests(*static_cast<Part*>(first.object), *static_cast<Part*>(second.object), world, colissions);
+		Part* firstObj = static_cast<Part*>(first.object);
+		Part* secondObj = static_cast<Part*>(second.object);
+#ifdef CATCH_INTERSECTION_ERRORS
+		try {
+			runColissionTests(*firstObj, *secondObj, world, colissions);
+		} catch(const std::exception& err) {
+			Log::fatal("Error occurred during intersection: %s", err.what());
+
+			Debug::saveIntersectionError(firstObj, secondObj, "colError");
+
+			throw err;
+		}
+#else
+		runColissionTests(*firstObj, *secondObj, world, colissions);
+#endif
 	} else {
 		bool preferFirst = computeCost(first.bounds) <= computeCost(second.bounds);
 		if (preferFirst && !first.isLeafNode() || second.isLeafNode()) {
@@ -304,8 +314,8 @@ void WorldPrototype::handleConstraints() {
 }
 void WorldPrototype::update() {
 	physicsMeasure.mark(PhysicsProcess::UPDATING);
-	for (Physical& physical : iterPhysicals()) {
-		physical.update(this->deltaT);
+	for (MotorizedPhysical* physical : iterPhysicals()) {
+		physical->update(this->deltaT);
 	}
 
 	physicsMeasure.mark(PhysicsProcess::UPDATE_TREE_BOUNDS);
@@ -319,9 +329,9 @@ void WorldPrototype::update() {
 
 double WorldPrototype::getTotalKineticEnergy() const {
 	double total = 0.0;
-	for(const Physical& p : iterPhysicals()) {
-		if (p.anchored) continue;
-		total += p.getKineticEnergy();
+	for(const MotorizedPhysical* p : iterPhysicals()) {
+		if (p->anchored) continue;
+		total += p->getKineticEnergy();
 	}
 	return total;
 }

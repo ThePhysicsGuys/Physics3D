@@ -9,6 +9,8 @@
 #include "../constants.h"
 #include "polyhedron.h"
 
+#include "../integrityCheck.h"
+
 static Vec3f getNormalVec(Triangle t, Vec3f* vertices) {
 	Vec3f v0 = vertices[t[0]];
 	Vec3f v1 = vertices[t[1]];
@@ -21,7 +23,12 @@ static double getDistanceOfTriangleToOriginSquared(Triangle t, Vec3f* vertices) 
 	return pointToPlaneDistanceSquared(getNormalVec(t, vertices), vertices[t[0]]);
 }
 
-static int getNearestSurface(ConvexShapeBuilder& builder, double& distanceSquared) {
+struct NearestSurface {
+	int triangleIndex;
+	double distanceSquared;
+};
+
+static NearestSurface getNearestSurface(const ConvexShapeBuilder& builder) {
 	int best = 0;
 	double bestDistSq = getDistanceOfTriangleToOriginSquared(builder.triangleBuf[0], builder.vertexBuf);
 
@@ -36,8 +43,7 @@ static int getNearestSurface(ConvexShapeBuilder& builder, double& distanceSquare
 		}
 	}
 
-	distanceSquared = bestDistSq;
-	return best;
+	return NearestSurface{best, bestDistSq};
 }
 
 static int furthestIndexInDirection(Vec3* vertices, int vertexCount, Vec3 direction) {
@@ -55,9 +61,9 @@ static int furthestIndexInDirection(Vec3* vertices, int vertexCount, Vec3 direct
 }
 
 static MinkPoint getSupport(const ColissionPair& info, const Vec3f& searchDirection) {
-	Vec3f furthest1 = info.scaleFirst * info.first.furthestInDirection(~info.scaleFirst * searchDirection);  // in local space of first
+	Vec3f furthest1 = info.scaleFirst * info.first.furthestInDirection(info.scaleFirst * searchDirection);  // in local space of first
 	Vec3f transformedSearchDirection = -info.transform.relativeToLocal(searchDirection);
-	Vec3f furthest2 = info.scaleSecond * info.second.furthestInDirection(~info.scaleSecond * transformedSearchDirection);  // in local space of second
+	Vec3f furthest2 = info.scaleSecond * info.second.furthestInDirection(info.scaleSecond * transformedSearchDirection);  // in local space of second
 	Vec3f secondVertex = info.transform.localToGlobal(furthest2);  // converted to local space of first
 	return MinkPoint{ furthest1 - secondVertex, furthest1, secondVertex };  // local to first
 }
@@ -204,9 +210,9 @@ bool runEPATransformed(const ColissionPair& info, const Tetrahedron& s, Vec3f& i
 	ConvexShapeBuilder builder(bufs.vertBuf, bufs.triangleBuf, 4, 4, bufs.neighborBuf, bufs.removalBuf, bufs.edgeBuf);
 
 	for(iter = 0; iter < EPA_MAX_ITER; iter++) {
-
-		double distSq;
-		int closestTriangleIndex = getNearestSurface(builder, distSq);
+		NearestSurface ns = getNearestSurface(builder);
+		int closestTriangleIndex = ns.triangleIndex;
+		double distSq = ns.distanceSquared;
 		Triangle closestTriangle = builder.triangleBuf[closestTriangleIndex];
 		Vec3f a = builder.vertexBuf[closestTriangle[0]];
 		Vec3f b = builder.vertexBuf[closestTriangle[1]];
@@ -220,6 +226,7 @@ bool runEPATransformed(const ColissionPair& info, const Tetrahedron& s, Vec3f& i
 
 		MinkowskiPointIndices curIndices{point.originFirst, point.originSecond};
 
+		// Do not remove! The inversion catches NaN as well!
 		if(!(newPointDistSq <= distSq * 1.01)) {
 			bufs.knownVecs[builder.vertexCount] = curIndices;
 			builder.addPoint(point.p, closestTriangleIndex);
@@ -229,6 +236,8 @@ bool runEPATransformed(const ColissionPair& info, const Tetrahedron& s, Vec3f& i
 			RayIntersection<float> ri = rayTriangleIntersection(Vec3f(), closestTriangleNormal, a, b, c);
 
 			exitVector = ri.d * closestTriangleNormal;
+
+			CHECK_VALID_VEC(exitVector);
 
 			MinkowskiPointIndices inds[3]{bufs.knownVecs[closestTriangle[0]], bufs.knownVecs[closestTriangle[1]], bufs.knownVecs[closestTriangle[2]]};
 

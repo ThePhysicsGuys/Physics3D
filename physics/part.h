@@ -13,6 +13,7 @@ struct PartProperties {
 	double density;
 	double friction;
 	double bouncyness;
+	Vec3 conveyorEffect = Vec3(0, 0, 0);
 };
 
 struct PartIntersection {
@@ -40,7 +41,6 @@ public:
 	Shape hitbox;
 	double maxRadius;
 	PartProperties properties;
-	BoundingBox localBounds;
 
 	/*
 		This is extra velocity that should be added to any colission
@@ -48,15 +48,17 @@ public:
 
 		In other words, this is the desired relative velocity for there to be no friction
 	*/
-	Vec3 conveyorEffect = Vec3(0, 0, 0);
 
 	Part() = default;
 	Part(const Shape& shape, const GlobalCFrame& position, const PartProperties& properties);
+	Part(const Shape& shape, Part& attachTo, const CFrame& attach, const PartProperties& properties);
 	~Part();
 	PartIntersection intersects(const Part& other) const;
 	void scale(double scaleX, double scaleY, double scaleZ);
 
 	Bounds getStrictBounds() const;
+
+	BoundingBox getLocalBounds() const;
 
 	Position getPosition() const { return cframe.getPosition(); }
 	double getMass() const { return hitbox.getVolume() * properties.density; }
@@ -65,6 +67,20 @@ public:
 	SymmetricMat3 getInertia() const { return hitbox.getInertia() * properties.density; }
 	const GlobalCFrame& getCFrame() const { return cframe; }
 	void setCFrame(const GlobalCFrame& newCFrame);
+
+	Vec3 getVelocity() const;
+	Vec3 getAngularVelocity() const;
+
+	void translate(Vec3 translation);
+
+	double getWidth() const;
+	double getHeight() const;
+	double getDepth() const;
+
+	void setWidth(double newWidth);
+	void setHeight(double newHeight);
+	void setDepth(double newDepth);
+
 
 	void attach(Part& other, const CFrame& relativeCFrame);
 	void detach();

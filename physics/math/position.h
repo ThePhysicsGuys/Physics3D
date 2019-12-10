@@ -16,6 +16,7 @@ struct Position {
 	};
 	inline Position() : x(), y(), z() {}
 	inline Position(Fix<32> x, Fix<32> y, Fix<32> z) : x(x), y(y), z(z) {}
+	inline Position(double x, double y, double z) : x(Fix<32>(x)), y(Fix<32>(y)), z(Fix<32>(z)) {}
 	inline const Fix<32>& operator[](size_t index) const { return v[index]; }
 	inline Fix<32>& operator[](size_t index) { return v[index]; }
 };

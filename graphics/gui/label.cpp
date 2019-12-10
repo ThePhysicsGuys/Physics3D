@@ -13,9 +13,9 @@ Label::Label(std::string text, double x, double y) : Label(text, x, y, GUI::font
 
 Label::Label(std::string text, double x, double y, double size) : Label(text, x, y, size, GUI::fontColor) {};
 
-Label::Label(std::string text, double x, double y, double size, Vec4 color) : Label(text, x, y, size, color, GUI::font) {};
+Label::Label(std::string text, double x, double y, double size, Color color) : Label(text, x, y, size, color, GUI::font) {};
 
-Label::Label(std::string text, double x, double y, double scale, Vec4 color, Font* font) : Component(x, y) {
+Label::Label(std::string text, double x, double y, double scale, Color color, Font* font) : Component(x, y) {
 	this->font = font;
 	this->text = text;
 	this->scale = scale;
@@ -28,16 +28,16 @@ Label::Label(std::string text, double x, double y, double scale, Vec4 color, Fon
 void Label::render() {
 	if (visible) {
 
-		Vec4 blendColor = (disabled) ? GUI::COLOR::DISABLED : GUI::COLOR::WHITE;
+		Color blendColor = (disabled) ? COLOR::DISABLED : COLOR::WHITE;
 
 		resize();
 		
 		Vec2 textPosition = position + Vec2(padding, -dimension.y + padding);
-		Path::text(font, text, scale, textPosition, GUI::COLOR::blend(foregroundColor, blendColor));
+		Path::text(font, text, scale, textPosition, COLOR::blend(foregroundColor, blendColor));
 
 		if (debug) {
-			Path::rect(position, dimension, 0.0f, GUI::COLOR::R);
-			Path::rect(position + Vec2f(padding, -padding), dimension - Vec2f(padding) * 2, 0.0f, GUI::COLOR::G);
+			Path::rect(position, dimension, 0.0f, COLOR::R);
+			Path::rect(position + Vec2f(padding, -padding), dimension - Vec2f(padding) * 2, 0.0f, COLOR::G);
 		}
 	}
 }

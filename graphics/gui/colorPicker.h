@@ -18,16 +18,16 @@ private:
 public:
 	ColorPickerAction action = [] (ColorPicker*) {};
 
-	Vec4 hsva;
-	Vec4 background;
+	Color hsva;
+	Color background;
 
 	Component* focus = nullptr;
 
 	ColorPicker(double x, double y, double size);
 	ColorPicker(double x, double y);
 
-	void setRgba(Vec4 rgba);
-	Vec4 getRgba();
+	void setRgba(Color rgba);
+	Color getRgba();
 
 	Vec2 resize() override;
 	void render() override;

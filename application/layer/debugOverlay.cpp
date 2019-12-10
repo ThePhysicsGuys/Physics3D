@@ -37,8 +37,8 @@ DebugOverlay::DebugOverlay(Screen* screen, char flags) : Layer("Debug overlay", 
 }
 
 void DebugOverlay::onInit() {
-	fpsSlidingChart.add(SlidingChartDataSetInfo("Fps 1", 100, GUI::COLOR::ORANGE, 2.0));
-	fpsSlidingChart.add(SlidingChartDataSetInfo("Fps 2", 50, GUI::COLOR::BLUE, 1.0));
+	fpsSlidingChart.add(SlidingChartDataSetInfo("Fps 1", 100, COLOR::ORANGE, 2.0));
+	fpsSlidingChart.add(SlidingChartDataSetInfo("Fps 2", 50, COLOR::BLUE, 1.0));
 }
 
 void DebugOverlay::onUpdate() {
@@ -93,9 +93,9 @@ void DebugOverlay::onRender() {
 		ParallelArray<long long, 17> epaIter = EPAIterationStatistics.history.avg();
 
 		for (size_t i = 0; i < GJKCollidesIterationStatistics.size(); i++) {
-			iterationChart.data[0][i] = WeightValue{ (float)gjkColIter[i], std::to_string(gjkColIter[i]) };
-			iterationChart.data[1][i] = WeightValue{ (float)gjkNoColIter[i], std::to_string(gjkNoColIter[i]) };
-			iterationChart.data[2][i] = WeightValue{ (float)epaIter[i], std::to_string(epaIter[i]) };
+			iterationChart.data.get(0, i) = WeightValue{ (float)gjkColIter[i], std::to_string(gjkColIter[i]) };
+			iterationChart.data.get(1, i) = WeightValue{ (float)gjkNoColIter[i], std::to_string(gjkNoColIter[i]) };
+			iterationChart.data.get(2, i) = WeightValue{ (float)epaIter[i], std::to_string(epaIter[i]) };
 		}
 
 		iterationChart.position = Vec2f(-leftSide + 0.1f, -0.3);

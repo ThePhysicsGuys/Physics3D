@@ -26,7 +26,7 @@ DirectionEditor::DirectionEditor(double x, double y, double width, double height
 void DirectionEditor::render() {
 	if (visible) {
 
-		Vec4 blendColor = (disabled) ? GUI::COLOR::DISABLED : GUI::COLOR::WHITE;
+		Color blendColor = (disabled) ? COLOR::DISABLED : COLOR::WHITE;
 
 		// Draw onto gui framebuffer
 		GUI::guiFrameBuffer->bind();
@@ -42,7 +42,7 @@ void DirectionEditor::render() {
 		GUI::guiFrameBuffer->unbind();
 		Renderer::disableDepthTest();
 
-		Path::rect(position, dimension, 0.0f, GUI::COLOR::blend(GUI::COLOR::BACK, blendColor));
+		Path::rect(position, dimension, 0.0f, COLOR::blend(COLOR::BACK, blendColor));
 
 		Vec2 contentPosition = position + Vec2(GUI::padding, -GUI::padding);
 		Vec2 contentDimension = dimension - Vec2(GUI::padding) * 2;

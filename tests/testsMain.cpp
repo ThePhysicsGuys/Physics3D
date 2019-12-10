@@ -41,8 +41,8 @@ enum Color {
 };
 
 Color SUCCESS_COLOR = GREEN;
-Color FAILURE_COLOR = MAGENTA;
-Color ERROR_COLOR = RED;
+Color FAILURE_COLOR = RED;
+Color ERROR_COLOR = MAGENTA;
 Color SKIP_COLOR = LIGHT_GRAY;
 
 void color(Color c) {
@@ -134,7 +134,7 @@ public:
 		time_point<system_clock> startTime;
 		try {
 			color(CYAN);
-			cout << "Running " << fileName << ":" << funcName;
+			cout << fileName << ":" << funcName;
 
 			startTime = system_clock::now();
 

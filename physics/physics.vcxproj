@@ -161,7 +161,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
-      <PreprocessorDefinitions>_MBCS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_MBCS;NDEBUG;CATCH_INTERSECTION_ERRORS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -185,22 +185,25 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="constraintGroup.cpp" />
+    <ClCompile Include="constraints\motorConstraint.cpp" />
     <ClCompile Include="datastructures\alignedPtr.cpp" />
     <ClCompile Include="datastructures\boundsTree.cpp" />
     <ClCompile Include="datastructures\parallelVector.cpp" />
     <ClCompile Include="debug.cpp" />
-    <ClCompile Include="geometry\boundingBox.cpp" />
     <ClCompile Include="geometry\computationBuffer.cpp" />
     <ClCompile Include="geometry\convexShapeBuilder.cpp" />
     <ClCompile Include="geometry\indexedShape.cpp" />
     <ClCompile Include="geometry\genericIntersection.cpp" />
     <ClCompile Include="geometry\intersection.cpp" />
     <ClCompile Include="geometry\polyhedron.cpp" />
+    <ClCompile Include="geometry\polyhedronInternals.cpp" />
     <ClCompile Include="geometry\shape.cpp" />
     <ClCompile Include="geometry\shapeBuilder.cpp" />
+    <ClCompile Include="geometry\shapeClass.cpp" />
     <ClCompile Include="geometry\sphere.cpp" />
     <ClCompile Include="math\cframe.cpp" />
     <ClCompile Include="math\fix.cpp" />
+    <ClCompile Include="math\linalg\eigen.cpp" />
     <ClCompile Include="math\linalg\largeMatrix.cpp" />
     <ClCompile Include="math\linalg\trigonometry.cpp" />
     <ClCompile Include="misc\filters\visibilityFilter.cpp" />
@@ -208,12 +211,14 @@
     <ClCompile Include="part.cpp" />
     <ClCompile Include="physical.cpp" />
     <ClCompile Include="physicsProfiler.cpp" />
+    <ClCompile Include="misc\serialization.cpp" />
     <ClCompile Include="world.cpp" />
     <ClCompile Include="worldPhysics.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="constants.h" />
     <ClInclude Include="constraintGroup.h" />
+    <ClInclude Include="constraints\motorConstraint.h" />
     <ClInclude Include="datastructures\alignedPtr.h" />
     <ClInclude Include="datastructures\boundsTree.h" />
     <ClInclude Include="datastructures\buffers.h" />
@@ -223,19 +228,24 @@
     <ClInclude Include="datastructures\parallelVector.h" />
     <ClInclude Include="datastructures\sharedArray.h" />
     <ClInclude Include="debug.h" />
+    <ClInclude Include="geometry\basicShapes.h" />
     <ClInclude Include="geometry\boundingBox.h" />
     <ClInclude Include="geometry\computationBuffer.h" />
     <ClInclude Include="geometry\convexShapeBuilder.h" />
     <ClInclude Include="geometry\genericCollidable.h" />
     <ClInclude Include="geometry\indexedShape.h" />
     <ClInclude Include="geometry\genericIntersection.h" />
+    <ClInclude Include="inertia.h" />
     <ClInclude Include="geometry\intersection.h" />
     <ClInclude Include="geometry\normalizedPolyhedron.h" />
     <ClInclude Include="geometry\polyhedron.h" />
+    <ClInclude Include="geometry\polyhedronInternals.h" />
     <ClInclude Include="geometry\shape.h" />
     <ClInclude Include="geometry\shapeBuilder.h" />
-    <ClInclude Include="geometry\normalizedShape.h" />
+    <ClInclude Include="geometry\shapeClass.h" />
     <ClInclude Include="geometry\sphere.h" />
+    <ClInclude Include="constraints\hardConstraint.h" />
+    <ClInclude Include="integrityCheck.h" />
     <ClInclude Include="math\bounds.h" />
     <ClInclude Include="math\cframe.h" />
     <ClInclude Include="math\fix.h" />
@@ -243,6 +253,7 @@
     <ClInclude Include="math\globalTransform.h" />
     <ClInclude Include="math\largeMatrix.h" />
     <ClInclude Include="math\linalg\commonMatrices.h" />
+    <ClInclude Include="math\linalg\eigen.h" />
     <ClInclude Include="math\linalg\largeMatrix.h" />
     <ClInclude Include="math\linalg\mat.h" />
     <ClInclude Include="math\linalg\misc.h" />
@@ -261,10 +272,12 @@
     <ClInclude Include="math\vec.h" />
     <ClInclude Include="math\vec2.h" />
     <ClInclude Include="math\vec3.h" />
+    <ClInclude Include="misc\filters\outOfBoundsFilter.h" />
     <ClInclude Include="misc\filters\rayIntersectsBoundsFilter.h" />
     <ClInclude Include="misc\filters\visibilityFilter.h" />
     <ClInclude Include="misc\gravityForce.h" />
     <ClInclude Include="misc\shapeLibrary.h" />
+    <ClInclude Include="motion.h" />
     <ClInclude Include="parallelArray.h" />
     <ClInclude Include="part.h" />
     <ClInclude Include="physical.h" />
@@ -272,6 +285,7 @@
     <ClInclude Include="physicsProfiler.h" />
     <ClInclude Include="profiling.h" />
     <ClInclude Include="geometry\scalableInertialMatrix.h" />
+    <ClInclude Include="misc\serialization.h" />
     <ClInclude Include="sharedLockGuard.h" />
     <ClInclude Include="synchonizedWorld.h" />
     <ClInclude Include="templateUtils.h" />

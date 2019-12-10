@@ -1,30 +1,23 @@
 #pragma once
 
 #include "polyhedron.h"
-#include "normalizedShape.h"
+#include "shapeClass.h"
 
 class NormalizedPolyhedron : public ShapeClass, public Polyhedron {
+	friend class Polyhedron;
+	NormalizedPolyhedron(Polyhedron&& poly, Vec3 originalCenter, DiagonalMat3 originalScale, double volume, Vec3 localCenterOfMass, ScalableInertialMatrix inertia) : 
+		Polyhedron(std::move(poly)), ShapeClass(volume, localCenterOfMass, inertia), originalCenter(originalCenter), originalScale(originalScale) {}
 public:
-	NormalizedPolyhedron(Polyhedron&& poly) : Polyhedron(std::move(poly)), ShapeClass(poly.getVolume(), poly.getCenterOfMass(), poly.getScalableInertia(CFrame(poly.getCenterOfMass()))) {}
-	NormalizedPolyhedron(const Polyhedron& poly) : Polyhedron(poly), ShapeClass(poly.getVolume(), poly.getCenterOfMass(), poly.getScalableInertia(CFrame(poly.getCenterOfMass()))) {}
-
+	const Vec3 originalCenter;
+	const DiagonalMat3 originalScale;
 	virtual bool containsPoint(Vec3 point) const override {
 		return Polyhedron::containsPoint(point);
 	}
 	virtual double getIntersectionDistance(Vec3 origin, Vec3 direction) const override {
 		return Polyhedron::getIntersectionDistance(origin, direction);
 	}
-	virtual BoundingBox getBounds() const override {
-		return Polyhedron::getBounds();
-	}
-	virtual BoundingBox getBounds(const Mat3& referenceFrame) const override {
-		return Polyhedron::getBounds(referenceFrame);
-	}
-	virtual double getMaxRadius() const override {
-		return Polyhedron::getMaxRadius();
-	}
-	virtual double getMaxRadiusSq() const override {
-		return Polyhedron::getMaxRadiusSq();
+	virtual BoundingBox getBounds(const Mat3& rotation, const DiagonalMat3& scale) const override {
+		return Polyhedron::getBounds(rotation * scale);
 	}
 	virtual double getScaledMaxRadius(DiagonalMat3 scale) const override {
 		return Polyhedron::getScaledMaxRadius(scale);

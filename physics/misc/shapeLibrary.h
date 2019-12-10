@@ -11,6 +11,10 @@ namespace Library {
 	Polyhedron createCube(double side);
 	Polyhedron createBox(double width, double height, double length);
 
+	Polyhedron createXPrism(int sides, double radius, double height);
+	Polyhedron createYPrism(int sides, double radius, double height);
+	Polyhedron createZPrism(int sides, double radius, double height);
+
 	/*
 	Creates a prism with the given number of sides
 	result.vertices will contain all the corners, grouped 2 by 2 rotating counterclockwise as seen from the top
@@ -21,8 +25,10 @@ namespace Library {
 
 	sides must be >= 3
 	*/
-	Polyhedron createPrism(int sides, double radius, double height);
-
+	inline Polyhedron createPrism(int sides, double radius, double height) {
+		return createYPrism(sides, radius, height);
+	}
+	
 	/*
 	Creates a pointed prism with the given number of sides
 	result.vertices will contain all the corners:

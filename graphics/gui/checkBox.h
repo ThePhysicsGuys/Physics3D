@@ -9,10 +9,6 @@ class Label;
 typedef void (*CheckBoxAction) (CheckBox*);
 
 class CheckBox : public Component {
-private:
-	void renderHovering(Vec4 blendColor);
-	void renderPressed(Vec4 blendColor);
-	void renderIdle(Vec4 blendColor);
 public:
 	CheckBoxAction action = [] (CheckBox*) {};
 
@@ -28,12 +24,12 @@ public:
 	bool pressed = false;
 	bool checked = false;
 
-	Vec4 pressUncheckedColor;
-	Vec4 pressCheckedColor;
-	Vec4 hoverUncheckedColor;
-	Vec4 hoverCheckedColor;
-	Vec4 uncheckedColor;
-	Vec4 checkedColor;
+	Color pressUncheckedColor;
+	Color pressCheckedColor;
+	Color hoverUncheckedColor;
+	Color hoverCheckedColor;
+	Color uncheckedColor;
+	Color checkedColor;
 
 	double checkOffset;
 	double checkBoxLabelOffset;

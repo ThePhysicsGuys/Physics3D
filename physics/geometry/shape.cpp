@@ -3,13 +3,14 @@
 #include "polyhedron.h"
 #include "normalizedPolyhedron.h"
 #include "sphere.h"
+#include "shapeClass.h"
+
+#include "../misc/serialization.h"
 
 Shape::Shape() : baseShape(nullptr), scale{1,1,1} {}
 Shape::Shape(const ShapeClass* baseShape, DiagonalMat3 scale) : baseShape(baseShape), scale(scale) {}
 Shape::Shape(const ShapeClass* baseShape) : baseShape(baseShape), scale{1,1,1} {}
 Shape::Shape(const ShapeClass* baseShape, double width, double height, double depth) : baseShape(baseShape), scale{width / 2, height / 2, depth / 2} {}
-Shape::Shape(const Polyhedron& baseShape) : baseShape(new NormalizedPolyhedron(baseShape)), scale{1,1,1} {}
-Shape::Shape(Polyhedron&& baseShape) : baseShape(new NormalizedPolyhedron(std::move(baseShape))), scale{1,1,1} {}
 
 bool Shape::containsPoint(Vec3 point) const {
 	return baseShape->containsPoint(~scale * point);
@@ -24,10 +25,10 @@ Shape Shape::scaled(double scaleX, double scaleY, double scaleZ) const {
 	return Shape(baseShape, scale * DiagonalMat3{scaleX, scaleY, scaleZ});
 }
 BoundingBox Shape::getBounds() const {
-	return baseShape->getBounds().scaled(scale[0], scale[1], scale[2]);
+	return BoundingBox{-scale[0], -scale[1], -scale[2], scale[0], scale[1], scale[2]};
 }
 BoundingBox Shape::getBounds(const Mat3& referenceFrame) const {
-	return baseShape->getBounds(referenceFrame * scale);
+	return baseShape->getBounds(referenceFrame, scale);
 }
 Vec3 Shape::getCenterOfMass() const {
 	return scale * baseShape->centerOfMass;
@@ -46,5 +47,15 @@ Vec3f Shape::furthestInDirection(const Vec3f& direction) const {
 }
 
 Polyhedron Shape::asPolyhedron() const {
-	return baseShape->asPolyhedron();
+	return baseShape->asPolyhedron().scaled(scale);
+}
+
+void Shape::setWidth(double newWidth) {
+	baseShape->setScaleX(newWidth / 2, scale);
+}
+void Shape::setHeight(double newHeight) {
+	baseShape->setScaleY(newHeight / 2, scale);
+}
+void Shape::setDepth(double newDepth) {
+	baseShape->setScaleZ(newDepth / 2, scale);
 }

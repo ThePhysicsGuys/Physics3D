@@ -10,10 +10,10 @@ struct Attenuation {
 
 struct Light {
 	Vec3f position;
-	Vec3f color;
+	Color3 color;
 	float intensity;
 	Attenuation attenuation;
 
-	Light(Vec3f position, Vec3f color, float intensity, Attenuation attenuation) : position(position), color(color), intensity(intensity), attenuation(attenuation) {};
+	Light(Vec3f position, Color3 color, float intensity, Attenuation attenuation) : position(position), color(color), intensity(intensity), attenuation(attenuation) {};
 };
 

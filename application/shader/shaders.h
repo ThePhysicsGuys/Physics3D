@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../graphics/shader/shaderProgram.h"
+#include "../graphics/gui/color.h"
 
 class HDRTexture;
 class Texture;
@@ -24,7 +25,7 @@ struct MaskShader : public ShaderProgram {
 
 	void updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix);
 	void updateModel(const Mat4f& modelMatrix);
-	void updateColor(const Vec4f& color);
+	void updateColor(const Color& color);
 };
 
 struct BasicShader : public ShaderProgram {
@@ -33,7 +34,7 @@ struct BasicShader : public ShaderProgram {
 
 	void createLightArray(int size);
 	void updateSunDirection(const Vec3f& sunDirection);
-	void updateSunColor(const Vec3f& sunColor);
+	void updateSunColor(const Color3& sunColor);
 	void updateGamma(float gamma);
 	void updateHDR(bool hdr);
 	void updateExposure(float exposure);
@@ -72,7 +73,7 @@ struct FontShader : public ShaderProgram {
 	FontShader() : ShaderProgram() {}
 	FontShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, "projectionMatrix", "color", "text") {}
 
-	void updateColor(const Vec4f& color);
+	void updateColor(const Color& color);
 	void updateProjection(const Mat4f& projectionMatrix);
 	void updateTexture(Texture* texture);
 };

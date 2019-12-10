@@ -10,7 +10,25 @@
 #endif
 
 
-WorldPrototype::WorldPrototype(double deltaT) : deltaT(deltaT) {}
+class Layer {
+	BoundsTree<Part>& tree;
+public:
+	Layer(BoundsTree<Part>& tree) : tree(tree) {}
+};
+
+
+WorldPrototype::WorldPrototype(double deltaT) : 
+	deltaT(deltaT), 
+	layers{Layer{objectTree}, Layer{terrainTree}},
+	colissionMatrix(2) {
+	colissionMatrix.get(0, 0) = true; // free-free
+	colissionMatrix.get(1, 0) = true; // free-terrain
+	colissionMatrix.get(1, 1) = false; // terrain-terrain
+}
+
+WorldPrototype::~WorldPrototype() {
+
+}
 
 BoundsTree<Part>& WorldPrototype::getTreeForPart(const Part* part) {
 	return (part->isTerrainPart) ? this->terrainTree : this->objectTree;
@@ -23,8 +41,8 @@ const BoundsTree<Part>& WorldPrototype::getTreeForPart(const Part* part) const {
 void WorldPrototype::addPart(Part* part, bool anchored) {
 	ASSERT_VALID;
 	if (part->parent == nullptr) {
-		part->parent = new Physical(part);
-		physicals.push_back(part->parent);
+		part->parent = new MotorizedPhysical(part);
+		physicals.push_back(part->parent->mainPhysical);
 		objectTree.add(part, part->getStrictBounds());
 
 		objectCount++;
@@ -39,7 +57,7 @@ void WorldPrototype::addPart(Part* part, bool anchored) {
 			newNode.addInside(TreeNode(p.part, p.part->getStrictBounds(), false));
 		}
 		objectTree.add(std::move(newNode));
-		physicals.push_back(part->parent);
+		physicals.push_back(part->parent->mainPhysical);
 
 		objectCount += part->parent->getPartCount();
 	}
@@ -110,6 +128,39 @@ void WorldPrototype::removeExternalForce(ExternalForce* force) {
 	externalForces.erase(std::remove(externalForces.begin(), externalForces.end(), force));
 }
 
+//using WorldPartIter = IteratorGroup<IteratorFactory<BoundsTreeIter<TreeIterator, Part>, IteratorEnd>, 2>;
+IteratorFactoryWithEnd<WorldPartIter> WorldPrototype::iterParts(int partsMask) {
+	size_t size = 0;
+	IteratorFactoryWithEnd<BoundsTreeIter<TreeIterator, Part>> iters[2];
+	if(partsMask & FREE_PARTS) {
+		BoundsTreeIter<TreeIterator, Part> i(objectTree.begin());
+		iters[size++] = IteratorFactoryWithEnd<BoundsTreeIter<TreeIterator, Part>>(i);
+	}
+	if(partsMask & TERRAIN_PARTS) {
+		BoundsTreeIter<TreeIterator, Part> i(terrainTree.begin());
+		iters[size++] = IteratorFactoryWithEnd<BoundsTreeIter<TreeIterator, Part>>(i);
+	}
+
+	WorldPartIter group(iters, size);
+
+	return IteratorFactoryWithEnd<WorldPartIter>(std::move(group));
+}
+IteratorFactoryWithEnd<ConstWorldPartIter> WorldPrototype::iterParts(int partsMask) const {
+	size_t size = 0;
+	IteratorFactoryWithEnd<BoundsTreeIter<ConstTreeIterator, const Part>> iters[2];
+	if(partsMask & FREE_PARTS) {
+		BoundsTreeIter<ConstTreeIterator, const Part> i(objectTree.begin());
+		iters[size++] = IteratorFactoryWithEnd<BoundsTreeIter<ConstTreeIterator, const Part>>(i);
+	}
+	if(partsMask & TERRAIN_PARTS) {
+		BoundsTreeIter<ConstTreeIterator, const Part> i(terrainTree.begin());
+		iters[size++] = IteratorFactoryWithEnd<BoundsTreeIter<ConstTreeIterator, const Part>>(i);
+	}
+
+	ConstWorldPartIter group(iters, size);
+
+	return IteratorFactoryWithEnd<ConstWorldPartIter>(std::move(group));
+}
 
 
 void recursiveTreeValidCheck(const TreeNode& node) {
@@ -129,15 +180,15 @@ void recursiveTreeValidCheck(const TreeNode& node) {
 }
 
 bool WorldPrototype::isValid() const {
-	for (const Physical& phys : iterPhysicals()) {
-		if (phys.world != this) {
+	for (const Physical* phys : iterPhysicals()) {
+		if (phys->world != this) {
 			Log::error("physicals's world is not correct!");
 			__debugbreak();
 			return false;
 		}
 
-		for (const Part& part : phys) {
-			if (part.parent != &phys) {
+		for (const Part& part : *phys) {
+			if (part.parent != phys) {
 				Log::error("part's parent's child is not part");
 				__debugbreak();
 				return false;

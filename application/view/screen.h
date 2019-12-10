@@ -1,8 +1,11 @@
 #pragma once
 
+#include <chrono>
+
 #include "../eventHandler.h"
 #include "../util/properties.h"
 #include "../graphics/visualShape.h"
+#include "../graphics/visualData.h"
 #include "../engine/event/event.h"
 #include "camera.h"
 
@@ -18,8 +21,10 @@ bool initGLFW();
 void terminateGLFW();
 
 class Screen {
+	std::chrono::time_point<std::chrono::steady_clock> lastUpdate = std::chrono::steady_clock::now();
 public:
-	std::vector<IndexedMesh*> meshes;
+	static std::vector<IndexedMesh*> meshes;
+	static std::map<const ShapeClass*, VisualData> shapeClassMeshIds;
 	PlayerWorld* world;
 	Vec2i dimension;
 
@@ -49,7 +54,10 @@ public:
 	void onClose();
 
 	bool shouldClose();
-	int addMeshShape(const VisualShape& mesh);
+	static VisualData addMeshShape(const VisualShape& mesh);
+	static VisualData registerMeshFor(const ShapeClass* shapeClass, const VisualShape& mesh);
+	static VisualData registerMeshFor(const ShapeClass* shapeClass);
+	static VisualData getOrCreateMeshFor(const ShapeClass* shapeClass);
 };
 
 extern StandardInputHandler* handler;

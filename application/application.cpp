@@ -15,14 +15,17 @@
 #include "../graphics/debug/debug.h"
 #include "../graphics/debug/visualDebug.h"
 #include "../physics/geometry/shape.h"
+#include "../physics/geometry/basicShapes.h"
 #include "../physics/math/mathUtil.h"
+#include "../physics/math/linalg/commonMatrices.h"
 #include "../physics/part.h"
 #include "../physics/world.h"
 #include "../physics/misc/gravityForce.h"
 #include "../physics/physicsProfiler.h"
 
+#include "../physics/misc/serialization.h"
+
 #include "worlds.h"
-#include "partFactory.h"
 #include "tickerThread.h"
 #include "worldBuilder.h"
 
@@ -35,16 +38,17 @@
 #include "../engine/io/import.h"
 
 #define TICKS_PER_SECOND 120.0
-#define TICK_SKIP_TIME std::chrono::milliseconds(3000)
+#define TICK_SKIP_TIME std::chrono::milliseconds(1000)
 
 
 TickerThread physicsThread;
 PlayerWorld world(1 / TICKS_PER_SECOND);
 Screen screen;
 
+void init(int argc, const char** args);
 
-int main(void) {
-	init();
+int main(int argc, const char** args) {
+	init(argc, args);
 
 	Log::info("Started rendering");
 	while (!screen.shouldClose()) {
@@ -57,9 +61,40 @@ int main(void) {
 	stop(0);
 }
 
-void init() {
+void setupPhysics();
+void registerShapes();
+void setupWorld(int argc, const char** args);
+void setupScreen();
+void setupDebug();
+
+void loadLoosePartsWorld(const char* fileName) {
+	world.addExternalForce(new ExternalGravity(Vec3(0, -10.0, 0.0)));
+
+	std::ifstream file;
+	file.open(fileName, std::ios::binary);
+
+	int partCount = deserialize<int>(file);
+	for(int i = 0; i < partCount; i++) {
+		ExtendedPart* p = new ExtendedPart(deserialize<Part>(file));
+
+		world.addPart(p);
+	}
+	file.close();
+}
+
+bool has_suffix(const std::string& str, const std::string& suffix) {
+	return str.size() >= suffix.size() &&
+		str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
+}
+
+void init(int argc, const char** args) {
 	setupScreen();
-	setupWorld();
+	registerShapes();
+	if(argc >= 2 && has_suffix(args[1], ".looseParts")) {
+		loadLoosePartsWorld(args[1]);
+	} else {
+		setupWorld(argc, args);
+	}
 	setupPhysics();
 	setupDebug();
 }
@@ -85,55 +120,73 @@ void setupScreen() {
 	screen.onInit();
 }
 
-double getYOffset(double x, double z) {
-	return -10 * cos(x / 30.0 + z / 20.0) - 7 * sin(-x / 25.0 + z / 17.0 + 2.4) + 2 * sin(x / 4.0 + z / 7.0) + sin(x / 9.0 - z / 3.0) + sin(-x / 3.0 + z / 5.0);
-}
+// Generates a cylinder with 
+static VisualShape createCylinder(int sides, double radius, double height) {
+	int vertexCount = sides * 4;
+	Vec3f* vecBuf = new Vec3f[vertexCount];
 
-void buildTerrain() {
-	PartFactory treeTrunkfactory(Library::createPrism(7, 0.5, 11.0), screen, "TreeTrunk");
-	PartFactory icosahedronFactory(Library::icosahedron.scaled(4.0, 4.0, 4.0), screen, "Icosahedron");
-	PartFactory leafFactory(Library::icosahedron.scaled(2.0, 2.3, 1.9), screen, "Leaf");
-	for (int x = -50; x < 50; x++) {
-		for (int z = -50; z < 50; z++) {
-			double yOffset = getYOffset(x * 3.0, z * 3.0);
-			Position pos((x + fRand(0.0, 1.0)) * 3.0, fRand(0.0, 1.0) + yOffset, (z + fRand(0.0, 1.0)) * 3.0);
-			GlobalCFrame cf(pos, fromEulerAngles(fRand(0.0, 3.1415), fRand(0.0, 3.1415), fRand(0.0, 3.1415)));
-			ExtendedPart* newPart = icosahedronFactory.produce(cf, { 1.0, 1.0, 0.3 }, "terrain");
-			newPart->material.ambient = Vec4(0.0, yOffset / 40.0 + 0.5, 0.0, 1.0);
-			world.addTerrainPart(newPart);
-		}
+
+	// vertices
+	for(int i = 0; i < sides; i++) {
+		double angle = i * PI * 2 / sides;
+		Vec3f bottom(cos(angle) * radius, sin(angle) * radius, height / 2);
+		Vec3f top(cos(angle) * radius, sin(angle) * radius, -height / 2);
+		vecBuf[i * 2] = bottom;
+		vecBuf[i * 2 + 1] = top;
+		vecBuf[i * 2 + sides * 2] = bottom;
+		vecBuf[i * 2 + 1 + sides * 2] = top;
 	}
 
-	for (int i = 0; i < 200; i++) {
-		double x = fRand(-150, 150);
-		double z = fRand(-150, 150);
+	int triangleCount = sides * 2 + (sides - 2) * 2;
+	Triangle* triangleBuf = new Triangle[triangleCount];
 
-
-		Position treePos(x, getYOffset(x, z) + 8.0, z);
-
-		GlobalCFrame trunkCFrame(treePos, fromEulerAngles(fRand(-0.1, 0.1), fRand(-3.1415, 3.1415), fRand(-0.1, 0.1)));
-
-		ExtendedPart* trunk = treeTrunkfactory.produce(trunkCFrame, { 1.0, 1.0, 0.3 }, "trunk");
-		trunk->material.ambient = GUI::COLOR::get(0x654321);
-		world.addTerrainPart(trunk);
-
-		Position treeTop = trunkCFrame.localToGlobal(Vec3(0.0, 5.5, 0.0));
-
-
-		for (int j = 0; j < 15; j++) {
-
-			GlobalCFrame leavesCFrame(treeTop + Vec3(fRand(-1.0, 1.0), fRand(-1.0, 1.0), fRand(-1.0, 1.0)), fromEulerAngles(fRand(0.0, 3.1415), fRand(0.0, 3.1415), fRand(0.0, 3.1415)));
-			ExtendedPart* leaves = leafFactory.produce(leavesCFrame, { 1.0, 1.0, 0.3 }, "trunk");
-
-			leaves->material.ambient = Vec4(fRand(-0.2, 0.2), 0.6 + fRand(-0.2, 0.2), 0.0, 1.0);
-
-			world.addTerrainPart(leaves);
-		}
-		
+	// sides
+	for(int i = 0; i < sides; i++) {
+		int botLeft = i * 2;
+		int botRight = ((i + 1) % sides) * 2;
+		triangleBuf[i * 2] = Triangle{botLeft, botLeft + 1, botRight}; // botLeft, botRight, topLeft
+		triangleBuf[i * 2 + 1] = Triangle{botRight + 1, botRight, botLeft + 1}; // topRight, topLeft, botRight
 	}
+
+	Vec3f* normals = new Vec3f[vertexCount];
+
+	for(int i = 0; i < sides * 2; i++) {
+		Vec3f vertex = vecBuf[i];
+		normals[i] = normalize(Vec3(vertex.x, vertex.y, 0));
+	}
+
+	Triangle* capOffset = triangleBuf + sides * 2;
+	// top and bottom
+	for(int i = 0; i < sides - 2; i++) { // common corner is i=0
+		capOffset[i] = Triangle{sides * 2 + 0, sides * 2 + (i + 1) * 2, sides * 2 + (i + 2) * 2};
+		capOffset[i + (sides - 2)] = Triangle{sides * 2 + 1, sides * 2 + (i + 2) * 2 + 1, sides * 2 + (i + 1) * 2 + 1};
+	}
+
+	for(int i = 0; i < sides; i++) {
+		normals[i * 2 + sides * 2] = Vec3f(0, 0, 1);
+		normals[i * 2 + sides * 2 + 1] = Vec3f(0, 0, -1);
+	}
+
+	return VisualShape(vecBuf, SharedArrayPtr<const Vec3f>(normals), triangleBuf, vertexCount, triangleCount);
 }
 
-void setupWorld() {
+static void registerShapes() {
+	Polyhedron sphere(Library::createSphere(1.0, 3));
+	VisualShape sphereShape = VisualShape(sphere);
+	Vec3f* normalBuf = new Vec3f[sphereShape.vertexCount];
+	sphereShape.computeNormals(normalBuf);
+	sphereShape.normals = SharedArrayPtr<const Vec3f>(normalBuf);
+	
+	screen.registerMeshFor(Sphere(1.0).baseShape, sphereShape);
+
+	screen.registerMeshFor(Box(2.0, 2.0, 2.0).baseShape);
+
+	screen.registerMeshFor(Cylinder(1.0, 2.0).baseShape, createCylinder(64, 1.0, 2.0));
+}
+
+
+
+void setupWorld(int argc, const char** args) {
 	Log::info("Initializing world");
 
 	world.addExternalForce(new ExternalGravity(Vec3(0, -10.0, 0.0)));
@@ -141,138 +194,96 @@ void setupWorld() {
 	// WorldBuilder init
 	WorldBuilder::init();
 
-	// Sphere shape
-	Polyhedron sphere(Library::createSphere(0.5, 3));
-	VisualShape sphereShape = VisualShape(sphere);
-	Vec3f* normalBuf = new Vec3f[sphereShape.vertexCount];
-	sphereShape.computeNormals(normalBuf);
-	sphereShape.normals = SharedArrayPtr<const Vec3f>(normalBuf);
-
 	// Part factories
-	WorldBuilder::SpiderFactory spiderFactories[]{ {0.5, 3},{0.5, 4},{0.5, 5},{0.5, 6} };
-	PartFactory legFactory = PartFactory(BoundingBox(0.05, 0.5, 0.05).toShape(), screen, "SpiderLeg");
-	PartFactory cubeFactory(Library::createCube(1.0), screen, "Cube");
-	PartFactory bigCubeFactory(Library::createCube(2.0), screen, "Cube");
-	PartFactory sphereFactory(sphereShape, screen, "Sphere");
-	PartFactory smallSphereFactory(sphereShape.scaled(0.5, 0.5, 0.5), screen, "SmallSphere");
-	PartFactory triangleFactory(Library::trianglePyramid, screen, "Triangle");
-	PartFactory wedgeFactory(Library::wedge, screen, "Wedge");
+	WorldBuilder::SpiderFactory spiderFactories[]{ {0.5, 4},{0.5, 6},{0.5, 8},{0.5, 10} };
+	Shape triangle(Library::trianglePyramid);
 
-	// Floor
-	Vec2 floorSize(50.0, 50.0);
-	double wallHeight = 7.0;
-	ResourceManager::add<TextureResource>("floorMaterial", "../res/textures/floor/floor_color.jpg");
-	Material floorMaterial = Material(ResourceManager::get<TextureResource>("floorMaterial"));
-	ExtendedPart* floorExtendedPart = createUniquePart(screen, BoundingBox(floorSize.x, 1.0, floorSize.y).toShape(), GlobalCFrame(0.0, 0.0, 0.0), { 2.0, 1.0, 0.3 });
-	floorExtendedPart->material = floorMaterial;
-	world.addTerrainPart(floorExtendedPart);
+	WorldBuilder::buildFloorAndWalls(50.0, 50.0, 1.0);
 
-	PartProperties wallProperties{ 2.0, 1.0, 0.3 };
+	world.addPart(new ExtendedPart(Sphere(2.0), GlobalCFrame(10, 3, 10), {1.0, 0.3, 0.7}, "SphereThing"));
 
-	// Walls
-	PartFactory xWallFactory(BoundingBox(0.7, wallHeight, floorSize.y - 0.7).toShape(), screen, "xWall");
-	PartFactory zWallFactory(BoundingBox(floorSize.x, wallHeight, 0.7).toShape(), screen, "zWall");
-	world.addTerrainPart(xWallFactory.produce(GlobalCFrame(Position(floorSize.x / 2, wallHeight / 2, 0.0)), wallProperties));
-	world.addTerrainPart(zWallFactory.produce(GlobalCFrame(Position(0.0, wallHeight / 2, floorSize.y / 2)), wallProperties));
-	world.addTerrainPart(xWallFactory.produce(GlobalCFrame(Position(-floorSize.x / 2, wallHeight / 2, 0.0)), wallProperties));
-	world.addTerrainPart(zWallFactory.produce(GlobalCFrame(Position(0.0, wallHeight / 2, -floorSize.y / 2)), wallProperties));
+	ExtendedPart* conveyor = new ExtendedPart(Box(1.0, 0.3, 50.0), GlobalCFrame(10.0, 0.65, 0.0), { 2.0, 1.0, 0.3 });
 
-	ExtendedPart* conveyor = createUniquePart(screen, BoundingBox(1.0, 0.3, floorSize.y).toShape(), GlobalCFrame(10.0, 0.65, 0.0), { 2.0, 1.0, 0.3 });
-
-	conveyor->conveyorEffect = Vec3(0, 0, 2.0);
+	conveyor->properties.conveyorEffect = Vec3(0, 0, 2.0);
 	world.addTerrainPart(conveyor);
 
-	world.addPart(cubeFactory.produceScaled(GlobalCFrame(10, 1.0, 0.0), { 1.0, 0.2, 0.3 }, 0.2, 0.2, 0.2, "TinyCube"));
+	world.addPart(new ExtendedPart(Box(0.2, 0.2, 0.2), GlobalCFrame(10, 1.0, 0.0), { 1.0, 0.2, 0.3 }, "TinyCube"));
 
 	// hollow box
-	/*WorldBuilder::HollowBoxParts parts = WorldBuilder::buildHollowBox(Bounds(Position(12.0, 3.0, 14.0), Position(20.0, 8.0, 20.0)), 0.3);
+	WorldBuilder::HollowBoxParts parts = WorldBuilder::buildHollowBox(Bounds(Position(12.0, 3.0, 14.0), Position(20.0, 8.0, 20.0)), 0.3);
 
 	parts.front->material.ambient = Vec4f(0.4, 0.6, 1.0, 0.3);
-	parts.back->material.ambient = Vec4f(0.4, 0.6, 1.0, 0.3);*/
+	parts.back->material.ambient = Vec4f(0.4, 0.6, 1.0, 0.3);
 
 	// Rotating walls
-	/*PartFactory rotatingWallFactory(BoundingBox(5.0, 3.0, 0.5).toShape(), screen, "rotatingWall");
-	ExtendedPart* rotatingWall = rotatingWallFactory.produce(GlobalCFrame(Position(-12.0, 1.7, 0.0)), 20000000.0, 1.0);
-	ExtendedPart* rotatingWall2 = rotatingWallFactory.produce(GlobalCFrame(Position(-12.0, 1.7, 5.0)), 20000000.0, 1.0);
+	ExtendedPart* rotatingWall = new ExtendedPart(Box(5.0, 3.0, 0.5), GlobalCFrame(Position(-12.0, 1.7, 0.0)), {1.0, 1.0, 0.7});
+	ExtendedPart* rotatingWall2 = new ExtendedPart(Box(5.0, 3.0, 0.5), GlobalCFrame(Position(-12.0, 1.7, 5.0)), {1.0, 1.0, 0.7});
 	world.addPart(rotatingWall, true);
 	world.addPart(rotatingWall2, true);
 	rotatingWall->parent->angularVelocity = Vec3(0, -0.7, 0);
-	rotatingWall2->parent->angularVelocity = Vec3(0, 0.7, 0);*/
+	rotatingWall2->parent->angularVelocity = Vec3(0, 0.7, 0);
 
 	// Many many parts
-	/*for (int i = 0; i < 3; i++) {
-		ExtendedPart* newCube = cubeFactory.produce(GlobalCFrame(fRand(-10.0, 0.0), fRand(1.0, 1.0), fRand(-10.0, 0.0)), 1.0, 0.2);
+	for (int i = 0; i < 3; i++) {
+		ExtendedPart* newCube = new ExtendedPart(Box(1.0, 1.0, 1.0), GlobalCFrame(fRand(-10.0, 0.0), fRand(1.0, 1.0), fRand(-10.0, 0.0)), {1.0, 0.2, 0.7});
 		world.addPart(newCube);
-	}*/
+	}
 
-	/*PartProperties carProperties{ 1.0, 0.7, 0.3 };
-	PartProperties wheelProperties{ 1.0, 2.0, 0.7 };
-
-	ExtendedPart* carBody = cubeFactory.produceScaled(GlobalCFrame(5.0, 1.0, 5.0), carProperties, 2.0, 0.1, 1.0, "CarBody");
-	ExtendedPart* carLeftPanel =	cubeFactory.produceScaled(carBody, CFrame(0.0, 0.25, -0.5), carProperties, 2.0, 0.4, 0.1, "CarLeftSide");
-	ExtendedPart* carRightPanel =	cubeFactory.produceScaled(carBody, CFrame(0.0, 0.25, 0.5), carProperties, 2.0, 0.4, 0.1, "CarRightSide");
-	ExtendedPart* carLeftWindow =	cubeFactory.produceScaled(carProperties, 1.4, 0.8, 0.05, "WindowLeft");
-	ExtendedPart* carWedgeLeft =	wedgeFactory.produceScaled(carLeftWindow, CFrame(1.0, 0.0, 0.0), carProperties, 0.6, 0.8, 0.1, "WedgeLeft");
-	carLeftPanel->attach(*carLeftWindow, CFrame(-0.3, 0.6, 0.0));
-	ExtendedPart* carRightWindow =	cubeFactory.produceScaled(carProperties, 1.4, 0.8, 0.05, "WindowRight");
-	ExtendedPart* carWedgeRight =	wedgeFactory.produceScaled(carRightWindow, CFrame(1.0, 0.0, 0.0), carProperties, 0.6, 0.8, 0.1, "WedgeRight");
-	carRightPanel->attach(*carRightWindow, CFrame(-0.3, 0.6, 0.0));
-	ExtendedPart* carFrontPanel =	cubeFactory.produceScaled(carBody, CFrame(1.0, 0.25, 0.0), carProperties, 0.1, 0.4, 1.0, "FrontPanel");
-	ExtendedPart* carTrunkPanel =	cubeFactory.produceScaled(carBody, CFrame(-1.0, 0.65, 0.0), carProperties, 0.1, 1.2, 1.0, "TrunkPanel");
-	ExtendedPart* carRoof =			cubeFactory.produceScaled(carBody, CFrame(-0.3, 1.25, 0.0), carProperties, 1.4, 0.1, 1.0, "Roof");
-
-	ExtendedPart* carWindshield =	cubeFactory.produceScaled(carBody, CFrame(Vec3(0.7, 0.85, 0.0), fromEulerAngles(0.0, 0.0, -0.91)), carProperties, 1.0, 0.05, 1.0, "Windshield");
-	ExtendedPart* wheel1 = smallSphereFactory.produce(GlobalCFrame(5.8, 1.0, 5.8), wheelProperties, "Wheel");
-	ExtendedPart* wheel2 = smallSphereFactory.produce(GlobalCFrame(5.8, 1.0, 4.2), wheelProperties, "Wheel");
-	ExtendedPart* wheel3 = smallSphereFactory.produce(GlobalCFrame(4.2, 1.0, 5.8), wheelProperties, "Wheel");
-	ExtendedPart* wheel4 = smallSphereFactory.produce(GlobalCFrame(4.2, 1.0, 4.2), wheelProperties, "Wheel");
-
-	carLeftWindow->material.ambient = Vec4f(0.7, 0.7, 1.0, 0.5);
-	carRightWindow->material.ambient = Vec4f(0.7, 0.7, 1.0, 0.5);
-	carWindshield->material.ambient = Vec4f(0.7, 0.7, 1.0, 0.5);
-
-	world.addPart(carBody);
-
-	world.addPart(wheel1);
-	world.addPart(wheel2);
-	world.addPart(wheel3);
-	world.addPart(wheel4);
-
-	ConstraintGroup car;
-	car.ballConstraints.push_back(BallConstraint{ Vec3(0.8, 0.0, 0.8), carBody->parent, Vec3(0,0,0), wheel1->parent });
-	car.ballConstraints.push_back(BallConstraint{ Vec3(0.8, 0.0, -0.8), carBody->parent, Vec3(0,0,0), wheel2->parent });
-	car.ballConstraints.push_back(BallConstraint{ Vec3(-0.8, 0.0, 0.8), carBody->parent, Vec3(0,0,0), wheel3->parent });
-	car.ballConstraints.push_back(BallConstraint{ Vec3(-0.8, 0.0, -0.8), carBody->parent, Vec3(0,0,0), wheel4->parent });
-	world.constraints.push_back(std::move(car));*/
-
+	WorldBuilder::buildCar(GlobalCFrame(5.0, 1.0, 5.0));
 	
-	int minX = -2;
-	int maxX = 2;
+
+	WorldBuilder::buildConveyor(1.5, 7.0, GlobalCFrame(-10.0, 1.0, -10.0, fromEulerAngles(0.15, 0.0, 0.0)), 1.5);
+	WorldBuilder::buildConveyor(1.5, 7.0, GlobalCFrame(-12.5, 1.0, -14.0, fromEulerAngles(0.0, 3.1415/2, -0.15)), 1.5);
+	WorldBuilder::buildConveyor(1.5, 7.0, GlobalCFrame(-16.5, 1.0, -11.5, fromEulerAngles(-0.15, 0.0, -0.0)), -1.5);
+	WorldBuilder::buildConveyor(1.5, 7.0, GlobalCFrame(-14.0, 1.0, -7.5, fromEulerAngles(0.0, 3.1415 / 2, 0.15)), -1.5);
+
+	int minX = 0;
+	int maxX = 3;
 	int minY = 0;
-	int maxY = 20;
-	int minZ = -2;
-	int maxZ = 2;
+	int maxY = 3;
+	int minZ = 0;
+	int maxZ = 3;
 
+	//Cylinder(1.0, 1.0).
 
-	for (double x = minX; x < maxX; x += 1.01) {
-		for (double y = minY; y < maxY; y += 1.01) {
-			for (double z = minZ; z < maxZ; z += 1.01) {
-				ExtendedPart* newCube = cubeFactory.produce(GlobalCFrame(x - 5, y + 1, z - 5), { 1.0, 0.2, 0.5 });
+	GlobalCFrame rootFrame(Position(0.0, 15.0, 0.0), fromEulerAngles(3.1415 / 4, 3.1415 / 4, 0.0));
+	
+	for (double x = minX; x < maxX; x += 1.00001) {
+		for (double y = minY; y < maxY; y += 1.00001) {
+			for (double z = minZ; z < maxZ; z += 1.00001) {
+				ExtendedPart* newCube = new ExtendedPart(Box(1.0, 1.0, 1.0), GlobalCFrame(Position(x - 5, y + 10, z - 5)), { 1.0, 1.0, 0.0 }, "Box");
 				newCube->material.ambient = Vec4f((x-minX)/(maxX-minX), (y-minY)/(maxY-minY), (z-minZ)/(maxZ-minZ), 1.0f);
 				world.addPart(newCube);
-				//world.addPart(sphereFactory.produce(GlobalCFrame(Position(x + 5, y + 1, z - 5)), { 1.0, 0.2, 0.5 }));
-				//spiderFactories[rand() & 0x00000003].buildSpider(GlobalCFrame(Position(x+y*0.1, y+1, z)));
-				world.addPart(triangleFactory.produce(GlobalCFrame(Position(x - 20, y + 1, z + 20)), { 1.0, 0.2, 0.5 }));
+				world.addPart(new ExtendedPart(Sphere(0.5), GlobalCFrame(Position(x + 5, y + 1, z - 5)), { 1.0, 0.2, 0.5 }, "Sphere"));
+				spiderFactories[rand() & 0x00000003].buildSpider(GlobalCFrame(Position(x+y*0.1, y+1, z)));
+				world.addPart(new ExtendedPart(triangle, GlobalCFrame(Position(x - 20, y + 1, z + 20)), { 1.0, 0.2, 0.5 }, "Triangle"));
+
+				world.addPart(new ExtendedPart(Cylinder(0.3, 1.2), GlobalCFrame(x - 5, y + 1, z + 5, fromEulerAngles(3.1415/4, 3.1415/4, 0.0)), {1.0, 0.2, 0.5}, "Cylinder"));
 			}
 		}
 	}
-	//buildTerrain();
-	//world.optimizeTerrain();
+
+	//WorldBuilder::buildTerrain(250.0, 250.0);
+
+
+	ExtendedPart* ropeStart = new ExtendedPart(Box(2.0, 1.5, 0.7), GlobalCFrame(10.0, 2.0, -10.0), {1.0, 0.7, 0.3}, "RopeA");
+	ExtendedPart* ropeB = new ExtendedPart(Box(1.5, 1.2, 0.9), GlobalCFrame(10.0, 2.0, -14.0), {1.0, 0.7, 0.3}, "RopeB");
+	ExtendedPart* ropeC = new ExtendedPart(Box(2.0, 1.5, 0.7), GlobalCFrame(10.0, 2.0, -18.0), {1.0, 0.7, 0.3}, "RopeC");
+
+	world.addPart(ropeStart);
+	world.addPart(ropeB);
+	world.addPart(ropeC);
+
+	ConstraintGroup group;
+
+	group.ballConstraints.push_back(BallConstraint{Vec3(0.0, 0.0, -2.0), ropeStart->parent, Vec3(0.0, 0.0, 2.0), ropeB->parent});
+	group.ballConstraints.push_back(BallConstraint{Vec3(0.0, 0.0, -2.0), ropeB->parent, Vec3(0.0, 0.0, 2.0), ropeC->parent});
+
+	world.constraints.push_back(group);
 
 	// Player
-	screen.camera.attachment = createUniquePart(screen, Library::createPrism(50, 0.2, 1.0), GlobalCFrame(), { 1.0, 5.0, 0.0 }, "Player");
-	screen.camera.attachment->conveyorEffect = Vec3(1.0, 0.0, 1.0);
-
+	screen.camera.attachment = new ExtendedPart(Library::createPrism(50, 0.3, 1.5), GlobalCFrame(), { 1.0, 5.0, 0.0 }, "Player");
+	
 	if (!world.isValid()) {
 		throw "World not valid!";
 	}
@@ -314,10 +325,11 @@ void stop(int returnCode) {
 bool paused = true;
 
 void togglePause() {
-	if (paused)
+	if(paused) {
 		unpause();
-	else
+	} else {
 		pause();
+	}
 }
 
 void pause() {
@@ -355,7 +367,7 @@ void toggleFlying() {
 			screen.camera.flying = false;
 			screen.camera.attachment->setCFrame(GlobalCFrame(screen.camera.cframe.getPosition()));
 			screen.world->addPart(screen.camera.attachment);
-			screen.camera.attachment->parent->momentResponse = SymmetricMat3::ZEROS();
+			screen.camera.attachment->parent->mainPhysical->momentResponse = SymmetricMat3::ZEROS();
 		} else {
 			screen.world->removePart(screen.camera.attachment);
 			screen.camera.flying = true;
