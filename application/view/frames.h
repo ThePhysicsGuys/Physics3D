@@ -29,7 +29,7 @@ struct FrameBlueprint {
 struct ImageFrame : public FrameBlueprint, public Frame {
 	Image* image = nullptr;
 
-	ImageFrame(double x, double y, std::string title) : Frame(x, y, 1, 1, title) {
+	ImageFrame(double x, double y, std::string title) : Frame(x, y, title) {
 		init();
 
 		add(image);
@@ -38,14 +38,11 @@ struct ImageFrame : public FrameBlueprint, public Frame {
 	}
 
 	void init() override {
-		image = new Image(0, 0, width, height, nullptr);
+		image = (new Image(0, 0, nullptr))->fixWidth(1);
 	}
 
 	void update() override {
-		if (image->texture) {
-			height = width / image->texture->getAspect();
-			image->dimension = dimension;
-		}
+
 	}
 };
 

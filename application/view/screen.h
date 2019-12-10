@@ -34,7 +34,6 @@ public:
 	Properties properties;
 
 	FrameBuffer* screenFrameBuffer = nullptr;
-	FrameBuffer* blurFrameBuffer = nullptr;
 	Quad* quad = nullptr;
 
 	// Picker

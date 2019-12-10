@@ -55,6 +55,10 @@ struct Quad : public Primitive {
 		resize(Vec2f(-1, 1), Vec2f(2));
 	}
 
+	Quad(Vec2f topLeft, Vec2f dimension) : Primitive(4, 4) {
+		resize(topLeft, dimension);
+	}
+
 	void resize(Vec2f position, Vec2f dimension, Vec2f xRange, Vec2f yRange) {
 		float dx = xRange.y - xRange.x;
 		float dy = yRange.y - yRange.x;
