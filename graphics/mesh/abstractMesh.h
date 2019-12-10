@@ -6,7 +6,7 @@ class VertexArray;
 
 class AbstractMesh {
 public:
-	VertexArray* vertexArray = nullptr;
+	VertexArray* vao = nullptr;
 	BufferLayout bufferLayout;
 	unsigned int renderMode;
 

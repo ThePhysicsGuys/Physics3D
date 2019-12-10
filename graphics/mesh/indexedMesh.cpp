@@ -43,9 +43,9 @@ IndexedMesh::IndexedMesh(const VisualShape& shape) : AbstractMesh(), vertexCount
 		{{ "vUV", BufferDataType::FLOAT2 }}
 	};
 
-	vertexArray->addBuffer(*vertexBuffer, vertexBufferLayout);
-	vertexArray->addBuffer(*normalBuffer, normalBufferLayout);
-	vertexArray->addBuffer(*uvBuffer, uvBufferLayout);
+	vao->addBuffer(vertexBuffer, vertexBufferLayout);
+	vao->addBuffer(normalBuffer, normalBufferLayout);
+	vao->addBuffer(uvBuffer, uvBufferLayout);
 }
 
 IndexedMesh::IndexedMesh(const float* vertices, const float* normals, const float* uvs, const unsigned int* indices, const int vertexCount, const int triangleCount) : AbstractMesh(), vertexCount(vertexCount), triangleCount(triangleCount) {
@@ -68,9 +68,9 @@ IndexedMesh::IndexedMesh(const float* vertices, const float* normals, const floa
 	};
 
 
-	vertexArray->addBuffer(*vertexBuffer, vertexBufferLayout);
-	vertexArray->addBuffer(*normalBuffer, normalBufferLayout);
-	vertexArray->addBuffer(*uvBuffer, uvBufferLayout);
+	vao->addBuffer(vertexBuffer, vertexBufferLayout);
+	vao->addBuffer(normalBuffer, normalBufferLayout);
+	vao->addBuffer(uvBuffer, uvBufferLayout);
 }
 
 void IndexedMesh::render() {
@@ -78,7 +78,7 @@ void IndexedMesh::render() {
 }
 
 void IndexedMesh::render(unsigned int mode)  {
-	vertexArray->bind();
+	vao->bind();
 	indexBuffer->bind();
 
 	glPolygonMode(GL_FRONT_AND_BACK, mode);
@@ -89,5 +89,5 @@ void IndexedMesh::render(unsigned int mode)  {
 void IndexedMesh::close() {
 	vertexBuffer->close();
 	indexBuffer->close();
-	vertexArray->close();
+	vao->close();
 }

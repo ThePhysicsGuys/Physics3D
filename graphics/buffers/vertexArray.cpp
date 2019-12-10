@@ -39,14 +39,15 @@ void VertexArray::bind() {
 }
 
 void VertexArray::unbind() {
+	glBindVertexArray(id);
 	for (unsigned int i = 0; i < attributeArrayOffset; i++)
 		glDisableVertexAttribArray(i);
 	glBindVertexArray(0);
 }
 
-void VertexArray::addBuffer(VertexBuffer& buffer, const BufferLayout& layout) {
+void VertexArray::addBuffer(VertexBuffer* buffer, const BufferLayout& layout) {
 	bind();
-	buffer.bind();
+	buffer->bind();
 
 	size_t offset = 0;
 	for (size_t i = 0; i < layout.elements.size(); i++) {
@@ -55,9 +56,13 @@ void VertexArray::addBuffer(VertexBuffer& buffer, const BufferLayout& layout) {
 		int iterations = (element.info == BufferDataType::MAT2 || element.info == BufferDataType::MAT3 || element.info == BufferDataType::MAT4)? element.info.count : 1;
 
 		for (size_t j = 0; j < iterations; j++) {
-			glEnableVertexAttribArray(attributeArrayOffset + i + j);
-			glVertexAttribPointer(attributeArrayOffset + i + j, element.info.count, element.info.type, element.normalized, layout.stride, (const void*) offset);
+			size_t attribArrayIndex = attributeArrayOffset + i + j;
+			glEnableVertexAttribArray(attribArrayIndex);
+			glVertexAttribPointer(attribArrayIndex, element.info.count, element.info.type, element.normalized, layout.stride, (const void*) offset);
 			
+			if (element.instanced)
+				glVertexAttribDivisor(attribArrayIndex, 1);
+
 			offset += element.info.size;
 
 			if (j > 0) 
