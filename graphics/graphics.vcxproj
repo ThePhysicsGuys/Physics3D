@@ -253,6 +253,9 @@
     <None Include="..\res\shaders\gui.shader" />
     <None Include="..\res\shaders\quad.shader" />
   </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="component.natvis" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

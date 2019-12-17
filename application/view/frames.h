@@ -13,6 +13,9 @@
 #include "../graphics/shader/shaderProgram.h"
 #include "../graphics/renderUtils.h"
 #include "../graphics/texture.h"
+#include "../graphics/resource/textureResource.h"
+#include "../util/resource/resourceManager.h"
+#include "../util/resource/resource.h"
 #include "shader/shaders.h"
 #include "extendedPart.h"
 #include "application.h"
@@ -24,6 +27,38 @@
 struct FrameBlueprint {
 	virtual void init() = 0;
 	virtual void update() = 0;
+};
+
+struct ResourceManagerFrame : public FrameBlueprint, public Frame {
+	std::vector<Image*> images;
+
+	ResourceManagerFrame(double x, double y, std::string title) : Frame(x, y, 1, 1, title) {
+		init();
+
+		GUI::add(this);
+	}
+
+	void init() override {
+		update();
+	}
+
+	void update() override {
+		auto textures = ResourceManager::getResourcesOfType(ResourceType::Texture);
+		
+		if (textures.size() != images.size()) {
+			for (Image* i : images) 
+				remove(i);
+
+			images.clear();
+			
+			for (Resource* r : textures) {
+				TextureResource* tr = static_cast<TextureResource*>(r);
+				Image* i = (new Image(0, 0, tr))->fixWidth(0.1);
+				images.push_back(i);
+				add(i);
+			}
+		}
+	}
 };
 
 struct ImageFrame : public FrameBlueprint, public Frame {

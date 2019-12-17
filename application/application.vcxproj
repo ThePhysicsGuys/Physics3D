@@ -203,7 +203,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
+    <ClInclude Include="ecs\component.h" />
     <ClInclude Include="core.h" />
+    <ClInclude Include="ecs\entity.h" />
     <ClInclude Include="io\export.h" />
     <ClInclude Include="io\import.h" />
     <ClInclude Include="layer\testLayer.h" />
@@ -234,12 +236,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="application.cpp" />
+    <ClCompile Include="ecs\component.cpp" />
     <ClCompile Include="core.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">core.h</PrecompiledHeaderFile>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">core.h</PrecompiledHeaderFile>
     </ClCompile>
+    <ClCompile Include="ecs\entity.cpp" />
     <ClCompile Include="io\export.cpp" />
     <ClCompile Include="io\import.cpp" />
     <ClCompile Include="layer\postprocessLayer.cpp" />
@@ -272,9 +276,6 @@
     <Image Include="..\res\icon.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Natvis Include="component.natvis">
-      <SubType>Designer</SubType>
-    </Natvis>
     <Natvis Include="debugData.natvis" />
     <Natvis Include="math.natvis">
       <SubType>Designer</SubType>
