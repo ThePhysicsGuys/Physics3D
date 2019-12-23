@@ -1,9 +1,9 @@
 #include "core.h"
 #include "component.h"
 
-#include "entity.h"
+#include "../entity.h"
 
-Entity* Component::getEntity() {
+Entity* Component::getEntity() const {
 	return entity;
 }
 

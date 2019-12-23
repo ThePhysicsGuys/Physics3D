@@ -1,7 +1,7 @@
 #include "core.h"
 #include "entity.h"
 
-#include "component.h"
+#include "components/component.h"
 
 void Entity::addComponent(Component* component) {
 	if (component == nullptr)
