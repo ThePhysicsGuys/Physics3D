@@ -203,7 +203,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
+    <ClInclude Include="ecs\components\component.h" />
     <ClInclude Include="core.h" />
+    <ClInclude Include="ecs\components\model.h" />
+    <ClInclude Include="ecs\entity.h" />
     <ClInclude Include="io\export.h" />
     <ClInclude Include="io\import.h" />
     <ClInclude Include="layer\testLayer.h" />
@@ -226,6 +229,7 @@
     <ClInclude Include="picker\pickable.h" />
     <ClInclude Include="picker\ray.h" />
     <ClInclude Include="picker\picker.h" />
+    <ClInclude Include="ecs\components\transform.h" />
     <ClInclude Include="view\camera.h" />
     <ClInclude Include="view\frames.h" />
     <ClInclude Include="view\screen.h" />
@@ -234,12 +238,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="application.cpp" />
+    <ClCompile Include="ecs\components\component.cpp" />
     <ClCompile Include="core.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">core.h</PrecompiledHeaderFile>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">core.h</PrecompiledHeaderFile>
     </ClCompile>
+    <ClCompile Include="ecs\components\model.cpp" />
+    <ClCompile Include="ecs\entity.cpp" />
     <ClCompile Include="io\export.cpp" />
     <ClCompile Include="io\import.cpp" />
     <ClCompile Include="layer\postprocessLayer.cpp" />
@@ -260,6 +267,7 @@
     <ClCompile Include="shader\shaders.cpp" />
     <ClCompile Include="tickerThread.cpp" />
     <ClCompile Include="picker\picker.cpp" />
+    <ClCompile Include="ecs\components\transform.cpp" />
     <ClCompile Include="view\camera.cpp" />
     <ClCompile Include="view\screen.cpp" />
     <ClCompile Include="worldBuilder.cpp" />
@@ -272,9 +280,6 @@
     <Image Include="..\res\icon.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Natvis Include="component.natvis">
-      <SubType>Designer</SubType>
-    </Natvis>
     <Natvis Include="debugData.natvis" />
     <Natvis Include="math.natvis">
       <SubType>Designer</SubType>
@@ -282,7 +287,7 @@
     <Natvis Include="view.natvis" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\res\shaders\edge.shader" />
+    <None Include="..\res\shaders\instance_basic.shader" />
     <None Include="..\res\shaders\line.shader" />
     <None Include="..\res\shaders\postprocess.shader" />
   </ItemGroup>

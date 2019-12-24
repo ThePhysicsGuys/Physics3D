@@ -24,7 +24,7 @@ namespace ApplicationShaders {
 	TestShader testShader;
 	LineShader lineShader;
 	MaskShader maskShader;
-	EdgeShader edgeShader;
+	InstanceBasicShader instanceBasicShader;
 
 	void onInit() {
 		// Shader source init
@@ -39,7 +39,7 @@ namespace ApplicationShaders {
 		ShaderSource testShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(applicationResources, TEST_SHADER)), "test.shader");
 		ShaderSource lineShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(applicationResources, LINE_SHADER)), "line.shader");
 		ShaderSource maskShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(applicationResources, MASK_SHADER)), "mask.shader");
-		ShaderSource edgeShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(applicationResources, EDGE_SHADER)), "edge.shader");
+		ShaderSource instanceBasicShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(applicationResources, INSTANCE_BASIC_SHADER)), "instance_basic.shader");
 
 		// Shader init
 		new(&basicShader) BasicShader(basicShaderSource);
@@ -53,7 +53,7 @@ namespace ApplicationShaders {
 		new(&testShader) TestShader(testShaderSource);
 		new(&lineShader) LineShader(lineShaderSource);
 		new(&maskShader) MaskShader(maskShaderSource);
-		new(&edgeShader) EdgeShader(edgeShaderSource);
+		new(&instanceBasicShader) InstanceBasicShader(instanceBasicShaderSource);
 	}
 
 	void onClose() {
@@ -68,7 +68,7 @@ namespace ApplicationShaders {
 		testShader.close();
 		lineShader.close();
 		maskShader.close();
-		edgeShader.close();
+		instanceBasicShader.close();
 	}
 }
 
@@ -370,16 +370,100 @@ void LineShader::updateProjection(const Mat4f& projectionMatrix, const Mat4f& vi
 }
 
 
-// EdgeShader
+// InstanceBasicShader
 
-void EdgeShader::updateTexture(Texture* texture) {
+void InstanceBasicShader::updateLight(Light lights[], int size) {
 	bind();
-	texture->bind();
-	shader.setUniform("textureSampler", texture->getUnit());
+	for (int i = 0; i < size; i++) {
+		std::string uniform;
+		std::string index = std::to_string(i);
+
+		// position
+		uniform = "lights[" + index + "].position";
+		shader.setUniform(uniform, lights[i].position);
+
+		// color
+		uniform = "lights[" + index + "].color";
+		shader.setUniform(uniform, lights[i].color);
+
+		// intensity
+		uniform = "lights[" + index + "].intensity";
+		shader.setUniform(uniform, lights[i].intensity);
+
+		// attenuation.constant
+		uniform = "lights[" + index + "].attenuation.constant";
+		shader.setUniform(uniform, lights[i].attenuation.constant);
+
+		// attenuation.linear
+		uniform = "lights[" + index + "].attenuation.linear";
+		shader.setUniform(uniform, lights[i].attenuation.linear);
+
+		// attenuation.exponent
+		uniform = "lights[" + index + "].attenuation.exponent";
+		shader.setUniform(uniform, lights[i].attenuation.exponent);
+	}
 }
 
-void EdgeShader::updateTexture(HDRTexture* texture) {
+void InstanceBasicShader::createLightArray(int size) {
 	bind();
-	texture->bind();
-	shader.setUniform("textureSampler", texture->getUnit());
+	for (int i = 0; i < size; i++) {
+		std::string uniform;
+		std::string index = std::to_string(i);
+
+		// position
+		uniform = "lights[" + index + "].position";
+		shader.createUniform(uniform);
+
+		// color
+		uniform = "lights[" + index + "].color";
+		shader.createUniform(uniform);
+
+		// intensity
+		uniform = "lights[" + index + "].intensity";
+		shader.createUniform(uniform);
+
+		// attenuation.constant
+		uniform = "lights[" + index + "].attenuation.constant";
+		shader.createUniform(uniform);
+
+		// attenuation.linear
+		uniform = "lights[" + index + "].attenuation.linear";
+		shader.createUniform(uniform);
+
+		// attenuation.exponent
+		uniform = "lights[" + index + "].attenuation.exponent";
+		shader.createUniform(uniform);
+	}
+}
+
+void InstanceBasicShader::updateSunDirection(const Vec3f& sunDirection) {
+	bind();
+	shader.setUniform("sunDirection", sunDirection);
+}
+
+void InstanceBasicShader::updateSunColor(const Vec3f& sunColor) {
+	bind();
+	shader.setUniform("sunColor", sunColor);
+}
+
+void InstanceBasicShader::updateGamma(float gamma) {
+	bind();
+	shader.setUniform("gamma", gamma);
+}
+
+void InstanceBasicShader::updateHDR(bool hdr) {
+	bind();
+	shader.setUniform("hdr", hdr);
+}
+
+void InstanceBasicShader::updateExposure(float exposure) {
+	bind();
+	shader.setUniform("exposure", exposure);
+}
+
+void InstanceBasicShader::updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Position& viewPosition) {
+	bind();
+	shader.setUniform("viewMatrix", viewMatrix);
+	shader.setUniform("projectionMatrix", projectionMatrix);
+	shader.setUniform("viewPosition", viewPosition);
 }

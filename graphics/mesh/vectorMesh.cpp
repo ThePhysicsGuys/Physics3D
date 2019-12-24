@@ -18,17 +18,17 @@ VectorMesh::VectorMesh(const float* vertices, const size_t vertexCount, size_t c
 		}
 	};
 
-	vertexArray->addBuffer(*vertexBuffer, bufferLayout);
+	vao->addBuffer(vertexBuffer, bufferLayout);
 }
 
 void VectorMesh::render() {
-	vertexArray->bind();
+	vao->bind();
 	Renderer::drawArrays(renderMode, 0, vertexCount);
 }
 
 void VectorMesh::close() {
 	vertexBuffer->close();
-	vertexArray->close();
+	vao->close();
 }
 
 void VectorMesh::update(const float* vertices, const size_t vertexCount) {

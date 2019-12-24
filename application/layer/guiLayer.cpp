@@ -108,7 +108,7 @@ void GuiLayer::onRender() {
 	GUI::onRender(screen->camera.orthoMatrix);
 
 	originalRender->image->texture = screen->screenFrameBuffer->texture;
-	blurRender->image->texture = screen->blurFrameBuffer->texture;
+	blurRender->image->texture = GUI::blurFrameBuffer->texture;
 }
 
 void GuiLayer::onClose() {

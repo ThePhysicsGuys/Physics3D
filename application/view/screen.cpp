@@ -150,7 +150,6 @@ void Screen::onInit() {
 	// Framebuffer init
 	quad = new Quad();
 	screenFrameBuffer = new FrameBuffer(dimension.x, dimension.y);
-	blurFrameBuffer = new FrameBuffer(dimension.x, dimension.y);
 
 
 	// Shader init
@@ -187,7 +186,7 @@ void Screen::onInit() {
 		screen.dimension = dimension;
 		LOG_DEBUG("dimension: %s", str(dimension));
 		screen.screenFrameBuffer->resize(screen.dimension);
-		screen.blurFrameBuffer->resize(screen.dimension);
+		GUI::blurFrameBuffer->resize(screen.dimension);
 	});
 
 
@@ -213,19 +212,28 @@ void Screen::onUpdate() {
 	// IO events
 	if (handler->anyKey) {
 		bool leftDragging = handler->leftDragging;
-		if (handler->getKey(KeyboardOptions::Move::forward))  camera.move(*this, 0, 0, -1 * speedAdjustment, leftDragging);
-		if (handler->getKey(KeyboardOptions::Move::backward)) camera.move(*this, 0, 0, 1 * speedAdjustment, leftDragging);
-		if (handler->getKey(KeyboardOptions::Move::right))	  camera.move(*this, 1 * speedAdjustment, 0, 0, leftDragging);
-		if (handler->getKey(KeyboardOptions::Move::left))     camera.move(*this, -1 * speedAdjustment, 0, 0, leftDragging);
+		if (handler->getKey(KeyboardOptions::Move::forward))  
+			camera.move(*this, 0, 0, -1 * speedAdjustment, leftDragging);
+		if (handler->getKey(KeyboardOptions::Move::backward)) 
+			camera.move(*this, 0, 0, 1 * speedAdjustment, leftDragging);
+		if (handler->getKey(KeyboardOptions::Move::right))	 
+			camera.move(*this, 1 * speedAdjustment, 0, 0, leftDragging);
+		if (handler->getKey(KeyboardOptions::Move::left))    
+			camera.move(*this, -1 * speedAdjustment, 0, 0, leftDragging);
 		if (handler->getKey(KeyboardOptions::Move::ascend))
 			if (camera.flying) camera.move(*this, 0, 1 * speedAdjustment, 0, leftDragging);
 		if (handler->getKey(KeyboardOptions::Move::descend))
 			if (camera.flying) camera.move(*this, 0, -1 * speedAdjustment, 0, leftDragging);
-		if (handler->getKey(KeyboardOptions::Rotate::left))  camera.rotate(*this, 0, 1 * speedAdjustment, 0, leftDragging);
-		if (handler->getKey(KeyboardOptions::Rotate::right)) camera.rotate(*this, 0, -1 * speedAdjustment, 0, leftDragging);
-		if (handler->getKey(KeyboardOptions::Rotate::up))    camera.rotate(*this, 1 * speedAdjustment, 0, 0, leftDragging);
-		if (handler->getKey(KeyboardOptions::Rotate::down))  camera.rotate(*this, -1 * speedAdjustment, 0, 0, leftDragging);
-		if (handler->getKey(KeyboardOptions::Application::close)) Renderer::closeGLFWWindow();
+		if (handler->getKey(KeyboardOptions::Rotate::left))  
+			camera.rotate(*this, 0, 1 * speedAdjustment, 0, leftDragging);
+		if (handler->getKey(KeyboardOptions::Rotate::right)) 
+			camera.rotate(*this, 0, -1 * speedAdjustment, 0, leftDragging);
+		if (handler->getKey(KeyboardOptions::Rotate::up))    
+			camera.rotate(*this, 1 * speedAdjustment, 0, 0, leftDragging);
+		if (handler->getKey(KeyboardOptions::Rotate::down))  
+			camera.rotate(*this, -1 * speedAdjustment, 0, 0, leftDragging);
+		if (handler->getKey(KeyboardOptions::Application::close)) 
+			Renderer::closeGLFWWindow();
 		if (handler->getKey(KeyboardOptions::Debug::frame)) { guiLayer.debugFrame->visible = true; guiLayer.debugFrame->position = Vec2(0.8); GUI::select(guiLayer.debugFrame); }
 	}
 
@@ -266,7 +274,6 @@ void Screen::onRender() {
 
 void Screen::onClose() {
 	screenFrameBuffer->close();
-	blurFrameBuffer->close();
 
 	layerStack.onClose();
 

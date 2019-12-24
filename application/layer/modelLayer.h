@@ -1,13 +1,13 @@
 #pragma once
 
 #include "../engine/layer/layer.h"
+#include "../graphics/batch/instanceBatchManager.h"
 
 class Screen;
 
 class ModelLayer : public Layer {
 private:
-	unsigned int id;
-	float texture[28];
+	InstanceBatchManager* manager = nullptr;
 public:
 	ModelLayer();
 	ModelLayer(Screen* screen, char flags = None);

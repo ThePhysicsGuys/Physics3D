@@ -6,9 +6,9 @@
 #include "renderUtils.h"
 
 AbstractMesh::AbstractMesh(unsigned int rendermode) : renderMode(renderMode) {
-	vertexArray = new VertexArray();
+	vao = new VertexArray();
 };
 
 AbstractMesh::AbstractMesh() : renderMode(Renderer::TRIANGLES) {
-	vertexArray = new VertexArray();
+	vao = new VertexArray();
 };
