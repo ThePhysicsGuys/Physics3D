@@ -1,11 +1,13 @@
-#include "../physics/math/mathUtil.h"
-#include "../physics/math/linalg/trigonometry.h"
-
 #include "testsMain.h"
+
+#include "compare.h"
+#include "../physics/misc/toString.h"
 
 #include "../physics/math/linalg/mat.h"
 #include "../physics/math/linalg/vec.h"
 
+#include "../physics/math/mathUtil.h"
+#include "../physics/math/linalg/trigonometry.h"
 
 #include <string>
 #include <vector>

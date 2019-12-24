@@ -20,10 +20,10 @@ LargeMatrix<double> computeInteractionMatrix(const ConstraintGroup& group) {
 
 	size_t matrixIndex = 0;
 	for (const BallConstraint& bc : ballConstraints) {
-		/*Local to A*/ Mat3 responseA = bc.a->getResponseMatrix(bc.attachA);
-		/*Local to B*/ Mat3 responseB = bc.b->getResponseMatrix(bc.attachB);
-		GlobalCFrame cfA = bc.a->getCFrame();
-		GlobalCFrame cfB = bc.b->getCFrame();
+		/*Local to A*/ Mat3 responseA = bc.a->mainPhysical->getResponseMatrix(bc.a->localToMain(bc.attachA));
+		/*Local to B*/ Mat3 responseB = bc.b->mainPhysical->getResponseMatrix(bc.a->localToMain(bc.attachB));
+		GlobalCFrame cfA = bc.a->mainPhysical->getCFrame();
+		GlobalCFrame cfB = bc.b->mainPhysical->getCFrame();
 		/*Global?*/ Mat3 selfResponse = cfA.rotation * responseA * cfA.rotation.transpose() + cfB.rotation * responseB * cfB.rotation.transpose();
 
 		systemToSolve.setSubMatrix(matrixIndex, matrixIndex, selfResponse);
@@ -55,9 +55,9 @@ LargeMatrix<double> computeInteractionMatrix(const ConstraintGroup& group) {
 					 isPositive = true;  sharedBody = x.b; actorOffset = x.attachB; responseOffset = y.attachB; }
 			else {continue;}
 			
-			Mat3 response = sharedBody->getResponseMatrix(actorOffset, responseOffset);
+			Mat3 response = sharedBody->mainPhysical->getResponseMatrix(sharedBody->localToMain(actorOffset), sharedBody->localToMain(responseOffset));
 
-			const Mat3& rot = sharedBody->getCFrame().getRotation();
+			const Mat3& rot = sharedBody->mainPhysical->getCFrame().getRotation();
 
 			Mat3 globalResponse = rot * response * rot.transpose();
 
@@ -100,8 +100,8 @@ void ConstraintGroup::apply() const {
 	for (const BallConstraint& bc : ballConstraints) {
 		Vec3 drag;
 		for (int i = 0; i < 3; i++) { drag[i] = dragVector[matrixIndex + i]; }
-		bc.a->applyDrag(bc.a->getCFrame().localToRelative(bc.attachA), drag);
-		bc.b->applyDrag(bc.b->getCFrame().localToRelative(bc.attachB), -drag);
+		bc.a->applyDragToPhysical(bc.a->getCFrame().localToRelative(bc.attachA), drag);
+		bc.b->applyDragToPhysical(bc.b->getCFrame().localToRelative(bc.attachB), -drag);
 
 		matrixIndex += 3;
 	}
@@ -109,8 +109,8 @@ void ConstraintGroup::apply() const {
 	// solve for velocity
 	matrixIndex = 0;
 	for (const BallConstraint& bc : ballConstraints) {
-		Vec3 vb = bc.b->getVelocityOfPoint(bc.b->getCFrame().localToRelative(bc.attachB));
-		Vec3 va = bc.a->getVelocityOfPoint(bc.a->getCFrame().localToRelative(bc.attachA));
+		Vec3 vb = bc.b->getMotion().getVelocityOfPoint(bc.b->getCFrame().localToRelative(bc.attachB));
+		Vec3 va = bc.a->getMotion().getVelocityOfPoint(bc.a->getCFrame().localToRelative(bc.attachA));
 
 		velocityVector.setSubVector(matrixIndex, vb - va);
 
@@ -122,8 +122,8 @@ void ConstraintGroup::apply() const {
 	for (const BallConstraint& bc : ballConstraints) {
 		Vec3 impulse;
 		for (int i = 0; i < 3; i++) { impulse[i] = velocityVector[matrixIndex + i]; }
-		bc.a->applyImpulse(bc.a->getCFrame().localToRelative(bc.attachA), impulse);
-		bc.b->applyImpulse(bc.b->getCFrame().localToRelative(bc.attachB), -impulse);
+		bc.a->applyImpulseToPhysical(bc.a->getCFrame().localToRelative(bc.attachA), impulse);
+		bc.b->applyImpulseToPhysical(bc.b->getCFrame().localToRelative(bc.attachB), -impulse);
 
 		matrixIndex += 3;
 	}
@@ -131,8 +131,8 @@ void ConstraintGroup::apply() const {
 	// solve for acceleration
 	matrixIndex = 0;
 	for (const BallConstraint& bc : ballConstraints) {
-		Vec3 ab = bc.b->getAccelerationOfPoint(bc.b->getCFrame().localToRelative(bc.attachB));
-		Vec3 aa = bc.a->getAccelerationOfPoint(bc.a->getCFrame().localToRelative(bc.attachA));
+		Vec3 ab = bc.b->getMotion().getAccelerationOfPoint(bc.b->getCFrame().localToRelative(bc.attachB));
+		Vec3 aa = bc.a->getMotion().getAccelerationOfPoint(bc.a->getCFrame().localToRelative(bc.attachA));
 
 		accelerationVector.setSubVector(matrixIndex, ab - aa);
 
@@ -145,8 +145,8 @@ void ConstraintGroup::apply() const {
 	for (const BallConstraint& bc : ballConstraints) {
 		Vec3 force;
 		for (int i = 0; i < 3; i++) {force[i] = accelerationVector[matrixIndex + i];}
-		bc.a->applyForce(bc.a->getCFrame().localToRelative(bc.attachA), force);
-		bc.b->applyForce(bc.b->getCFrame().localToRelative(bc.attachB), -force);
+		bc.a->applyForceToPhysical(bc.a->getCFrame().localToRelative(bc.attachA), force);
+		bc.b->applyForceToPhysical(bc.b->getCFrame().localToRelative(bc.attachB), -force);
 
 		matrixIndex += 3;
 	}

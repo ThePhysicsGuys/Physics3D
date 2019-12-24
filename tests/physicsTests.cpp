@@ -1,9 +1,14 @@
 #include "testsMain.h"
 
+#include "compare.h"
+#include "../physics/misc/toString.h"
+
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 #include "../physics/world.h"
 #include "../physics/inertia.h"
 #include "../physics/misc/shapeLibrary.h"
-#include "../physics/math/mathUtil.h"
 #include "../physics/math/linalg/trigonometry.h"
 #include "../physics/math/linalg/misc.h"
 #include "../physics/math/linalg/commonMatrices.h"
@@ -90,7 +95,7 @@ TEST_CASE(applyForceToRotate) {
 }
 
 TEST_CASE(momentToAngularVelocity) {
-	Part part(Box(1.0, 1.0, 1.0), GlobalCFrame(rotY(PI / 2)), {1.0, 1.0, 0.7});
+	Part part(Box(1.0, 1.0, 1.0), GlobalCFrame(rotY(M_PI / 2)), {1.0, 1.0, 0.7});
 	MotorizedPhysical p(&part);
 
 	Vec3 moment(1.0, 0.0, 0.0);
@@ -100,7 +105,7 @@ TEST_CASE(momentToAngularVelocity) {
 		p.update(0.05);
 	}
 
-	ASSERT(p.angularVelocity == moment * 50 * 0.05 / p.inertia[0][0]);
+	ASSERT(p.getMotion().angularVelocity == moment * 50 * 0.05 / p.inertia[0][0]);
 }
 
 TEST_CASE(rotationImpulse) {
@@ -126,15 +131,15 @@ TEST_CASE(testPointAcceleration) {
 
 	testPhys.applyForce(localPoint, force);
 
-	Vec3 acceleration = testPhys.getAcceleration();
-	Vec3 angularAcceleration = testPhys.getAngularAcceleration();
-	Vec3 pointAcceleration = testPhys.getAccelerationOfPoint(localPoint);
+	Vec3 acceleration = testPhys.getMotion().acceleration;
+	Vec3 angularAcceleration = testPhys.getMotion().angularAcceleration;
+	Vec3 pointAcceleration = testPhys.getMotion().getAccelerationOfPoint(localPoint);
 
 	testPhys.update(deltaT);
 
-	Vec3 actualAcceleration = testPhys.velocity / deltaT;
-	Vec3 actualAngularAcceleration = testPhys.angularVelocity / deltaT;
-	Vec3 actualPointAcceleration = testPhys.getVelocityOfPoint(testPhys.getCFrame().localToRelative(localPoint)) / deltaT;
+	Vec3 actualAcceleration = testPhys.getMotion().velocity / deltaT;
+	Vec3 actualAngularAcceleration = testPhys.getMotion().angularVelocity / deltaT;
+	Vec3 actualPointAcceleration = testPhys.getMotion().getVelocityOfPoint(testPhys.getCFrame().localToRelative(localPoint)) / deltaT;
 
 	ASSERT(acceleration == actualAcceleration);
 	ASSERT(angularAcceleration == actualAngularAcceleration);
@@ -153,7 +158,7 @@ TEST_CASE(testGetPointAccelerationMatrix) {
 
 	logStream << accelMatrix;
 
-	Vec3 actualAcceleration = testPhys.getAccelerationOfPoint(localPoint);
+	Vec3 actualAcceleration = testPhys.getMotion().getAccelerationOfPoint(localPoint);
 
 	ASSERT(actualAcceleration == accelMatrix * force);
 }
@@ -162,19 +167,14 @@ TEST_CASE(impulseTest) {
 	MotorizedPhysical p(&part);
 
 	p.applyImpulseAtCenterOfMass(Vec3(15, 0, 0));
-	ASSERT(p.velocity == Vec3(3,0,0));
-	ASSERT(p.angularVelocity == Vec3(0, 0, 0));
+	ASSERT(p.getMotion().velocity == Vec3(3,0,0));
+	ASSERT(p.getMotion().angularVelocity == Vec3(0, 0, 0));
 
 	Vec3 angularImpulse = Vec3(0, 2, 0) % Vec3(-15, 0, 0);
 
 	p.applyImpulse(Vec3(0, 2, 0), Vec3(-15, 0, 0));
-	ASSERT(p.velocity == Vec3(0, 0, 0));
-	ASSERT(p.angularVelocity == ~part.getInertia() * angularImpulse);
-
-	p.velocity = Vec3();
-	p.angularVelocity = Vec3();
-
-
+	ASSERT(p.getMotion().velocity == Vec3(0, 0, 0));
+	ASSERT(p.getMotion().angularVelocity == ~part.getInertia() * angularImpulse);
 }
 
 TEST_CASE(testPointAccelMatrixImpulse) {
@@ -188,7 +188,7 @@ TEST_CASE(testPointAccelMatrixImpulse) {
 
 	p.applyImpulse(part.getCFrame().localToRelative(localPoint), part.getCFrame().localToRelative(localImpulse));
 
-	Vec3 realAccel = part.getCFrame().relativeToLocal(p.getVelocityOfPoint(part.getCFrame().localToRelative(localPoint)));
+	Vec3 realAccel = part.getCFrame().relativeToLocal(p.getMotion().getVelocityOfPoint(part.getCFrame().localToRelative(localPoint)));
 
 	ASSERT(estimatedAccel == realAccel);
 }
@@ -200,10 +200,10 @@ TEST_CASE(inelasticColission) {
 	Vec3 localPoint(0.8, 0.6, 0.9);
 	Vec3 relativePoint = p.getCFrame().localToRelative(localPoint);
 
-	p.velocity = Vec3(0.3, -1.3, 1.2);
-	p.angularVelocity = Vec3(0.7, 0.5, -0.9);
+	p.getMotion().velocity = Vec3(0.3, -1.3, 1.2);
+	p.getMotion().angularVelocity = Vec3(0.7, 0.5, -0.9);
 
-	Vec3 velOfPoint = p.getVelocityOfPoint(relativePoint);
+	Vec3 velOfPoint = p.getMotion().getVelocityOfPoint(relativePoint);
 
 	ASSERT(velOfPoint.y < 0);
 
@@ -229,7 +229,7 @@ TEST_CASE(inelasticColission) {
 	p.applyImpulse(relativePoint, relativeImpulse);
 	
 
-	Vec3 velOfPointAfter = p.getVelocityOfPoint(relativePoint);
+	Vec3 velOfPointAfter = p.getMotion().getVelocityOfPoint(relativePoint);
 	logStream << "New velocity: " << str(velOfPointAfter);
 	logStream << "velInDirection After: " << velOfPointAfter * normalize(direction);
 	logStream << "estimatedAccelRelative: " << str(estimatedAccelRelative);
@@ -247,10 +247,10 @@ TEST_CASE(inelasticColission2) {
 	Vec3 relativePoint = p.getCFrame().localToRelative(localPoint);
 	Vec3 normal(0.0, 170.0, 0.0);
 
-	p.velocity = Vec3(0.3, -1.3, 1.2);
-	p.angularVelocity = Vec3(0.7, 0.5, -0.9);
+	p.getMotion().velocity = Vec3(0.3, -1.3, 1.2);
+	p.getMotion().angularVelocity = Vec3(0.7, 0.5, -0.9);
 
-	Vec3 velOfPoint = p.getVelocityOfPoint(relativePoint);
+	Vec3 velOfPoint = p.getMotion().getVelocityOfPoint(relativePoint);
 
 	ASSERT(velOfPoint.y < 0);
 
@@ -267,7 +267,7 @@ TEST_CASE(inelasticColission2) {
 	p.applyImpulse(relativePoint, impulse);
 
 
-	Vec3 velOfPointAfter = p.getVelocityOfPoint(relativePoint);
+	Vec3 velOfPointAfter = p.getMotion().getVelocityOfPoint(relativePoint);
 	logStream << "New velocity: " + str(velOfPointAfter);
 	logStream << "velInDirection After: ", velOfPointAfter * normalize(normal);
 	//logStream << "estimatedAccelRelative: " + str(estimatedAccelRelative);
@@ -335,9 +335,6 @@ TEST_CASE(testMultiPartPhysicalSimple) {
 	phys.attachPart(&p2, CFrame(Vec3(1.0, 0.0, 0.0)));
 
 	MotorizedPhysical phys2(&doubleP);
-
-	phys.refreshWithNewParts();
-	phys2.refreshWithNewParts();
 
 	ASSERT(phys.mass == p1.getMass() + p2.getMass());
 	ASSERT(phys.localCenterOfMass == Vec3(0.5, 0, 0));

@@ -131,31 +131,42 @@ Matrix<N, 3, 3> rotate(const Matrix<N, 3, 3> & mat, N angle, N x, N y, N z) {
 	return mat * rotator;
 }
 
-template<typename N>
-Matrix<N, 3, 3> fromRotationVec(Vector<N, 3> rotVec) {
+template<typename T>
+RotationMatrix<T, 3> fromRotationVec(Vector<T, 3> rotVec) {
 
-	N angle = length(rotVec);
+	T angle = length(rotVec);
 
-	if (!(angle != 0)) { // inverse is important! Catches weird values like Nan and Inf too
-		return Matrix<N, 3, 3>::IDENTITY();
+	if (angle == 0) {
+		return Matrix<T, 3, 3>::IDENTITY();
 	}
 
-	rotVec /= angle;
-	N x = rotVec.x;
-	N y = rotVec.y;
-	N z = rotVec.z;
+	Vector<T, 3> normalizedRotVec = rotVec / angle;
 
-	N sinA = sin(angle);
-	N cosA = cos(angle);
+	T x = normalizedRotVec.x;
+	T y = normalizedRotVec.y;
+	T z = normalizedRotVec.z;
+	
+	T sinA = sin(angle);
+	T cosA = cos(angle);
 
-	Matrix<N, 3, 3> outerProd = outer(rotVec, rotVec);
-	Matrix<N, 3, 3> rotor = Matrix<N, 3, 3>{
+	Matrix<T, 3, 3> outerProd = outer(normalizedRotVec, normalizedRotVec);
+	Matrix<T, 3, 3> rotor{
 		cosA,	    -z * sinA,   y * sinA,
 		z * sinA,   cosA,		-x * sinA,
 		-y * sinA,  x * sinA,	 cosA
 	};
 
 	return outerProd * (1 - cosA) + rotor;
+}
+
+template<typename T>
+Vector<T, 3> fromRotationMatrix(const RotationMatrix<T, 3>& m) {
+	Vector<T, 3> axisOfRotation(m[2][1] - m[1][2], m[0][2] - m[2][0], m[1][0] - m[0][1]);
+	double trace = m[0][0] + m[1][1] + m[2][2];
+
+	double angle = acos((trace - 1) / 2);
+
+	return normalize(axisOfRotation) * angle;
 }
 
 template<typename N>

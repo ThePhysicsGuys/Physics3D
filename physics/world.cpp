@@ -38,30 +38,42 @@ const BoundsTree<Part>& WorldPrototype::getTreeForPart(const Part* part) const {
 	return (part->isTerrainPart) ? this->terrainTree : this->objectTree;
 }
 
+static void addToNode(TreeNode& nodeToAddTo, const Physical* physicalToAdd) {
+	nodeToAddTo.addInside(TreeNode(physicalToAdd->mainPart, physicalToAdd->mainPart->getStrictBounds(), false));
+	for(const AttachedPart& p : physicalToAdd->parts) {
+		nodeToAddTo.addInside(TreeNode(p.part, p.part->getStrictBounds(), false));
+	}
+	for(const ConnectedPhysical& conPhys : physicalToAdd->childPhysicals) {
+		addToNode(nodeToAddTo, &conPhys);
+	}
+}
+
+static TreeNode createNodeFor(const MotorizedPhysical* phys) {
+	TreeNode newNode(phys->mainPart, phys->mainPart->getStrictBounds(), true);
+	for(const AttachedPart& p : phys->parts) {
+		newNode.addInside(TreeNode(p.part, p.part->getStrictBounds(), false));
+	}
+	for(const ConnectedPhysical& conPhys : phys->childPhysicals) {
+		addToNode(newNode, &conPhys);
+	}
+	return newNode;
+}
+
 void WorldPrototype::addPart(Part* part, bool anchored) {
 	ASSERT_VALID;
-	if (part->parent == nullptr) {
-		part->parent = new MotorizedPhysical(part);
-		physicals.push_back(part->parent->mainPhysical);
-		objectTree.add(part, part->getStrictBounds());
-
-		objectCount++;
-	} else {
-		if (part->parent->world == this) {
-			Log::warn("Attempting to readd part to world");
-			ASSERT_VALID;
-			return;
-		}
-		TreeNode newNode(part->parent->mainPart, part->parent->mainPart->getStrictBounds(), true);
-		for (AttachedPart& p : part->parent->parts) {
-			newNode.addInside(TreeNode(p.part, p.part->getStrictBounds(), false));
-		}
-		objectTree.add(std::move(newNode));
-		physicals.push_back(part->parent->mainPhysical);
-
-		objectCount += part->parent->getPartCount();
+	part->ensureHasParent();
+	if (part->parent->mainPhysical->world == this) {
+		Log::warn("Attempting to readd part to world");
+		ASSERT_VALID;
+		return;
 	}
-	part->parent->world = this;
+	
+	objectTree.add(std::move(createNodeFor(part->parent->mainPhysical)));
+	physicals.push_back(part->parent->mainPhysical);
+
+	objectCount += part->parent->getPartCount();
+	
+	part->parent->mainPhysical->world = this;
 	part->parent->setAnchored(anchored);
 
 	ASSERT_VALID;
@@ -75,7 +87,7 @@ void WorldPrototype::removePart(Part* part) {
 
 	ASSERT_VALID;
 }
-void WorldPrototype::removePhysical(Physical* phys) {
+void WorldPrototype::removeMainPhysical(MotorizedPhysical* phys) {
 	objectCount -= phys->getPartCount();
 
 	NodeStack stack = objectTree.findGroupFor(phys->mainPart, phys->mainPart->getStrictBounds());
@@ -178,22 +190,40 @@ void recursiveTreeValidCheck(const TreeNode& node) {
 		recursiveTreeValidCheck(n);
 	}
 }
+static bool isConnectedPhysicalValid(const ConnectedPhysical* phys, const MotorizedPhysical* mainPhys);
+
+static bool isPhysicalValid(const Physical* phys, const MotorizedPhysical* mainPhys) {
+	if(phys->mainPhysical != mainPhys) {
+		Log::error("Physical's parent is not mainPhys!");
+		__debugbreak();
+		return false;
+	}
+	for(const Part& part : *phys) {
+		if(part.parent != phys) {
+			Log::error("part's parent's child is not part");
+			__debugbreak();
+			return false;
+		}
+	}
+	for(const ConnectedPhysical& subPhys : phys->childPhysicals) {
+		if(!isConnectedPhysicalValid(&subPhys, mainPhys)) return false;
+	}
+	return true;
+}
+
+static bool isConnectedPhysicalValid(const ConnectedPhysical* phys, const MotorizedPhysical* mainPhys) {
+	if(!isPhysicalValid(phys, mainPhys)) return false;
+}
 
 bool WorldPrototype::isValid() const {
-	for (const Physical* phys : iterPhysicals()) {
+	for (const MotorizedPhysical* phys : iterPhysicals()) {
 		if (phys->world != this) {
 			Log::error("physicals's world is not correct!");
 			__debugbreak();
 			return false;
 		}
 
-		for (const Part& part : *phys) {
-			if (part.parent != phys) {
-				Log::error("part's parent's child is not part");
-				__debugbreak();
-				return false;
-			}
-		}
+		if(!isPhysicalValid(phys, phys)) return false;
 	}
 
 	recursiveTreeValidCheck(objectTree.rootNode);

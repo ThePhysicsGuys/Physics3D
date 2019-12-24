@@ -45,13 +45,13 @@ Color FAILURE_COLOR = RED;
 Color ERROR_COLOR = MAGENTA;
 Color SKIP_COLOR = LIGHT_GRAY;
 
-void color(Color c) {
+static void color(Color c) {
 	SetConsoleTextAttribute(console, c);
 }
 
 stringstream logStream;
 
-void resetLog() {
+static void resetLog() {
 	logStream.str("");
 	logStream.clear();
 }
@@ -68,13 +68,13 @@ void logf(const char* format, ...) {
 	logStream << logBuffer << '\n';
 }
 
-void printDeltaTime(time_point<system_clock> startTime, Color c) {
+static void printDeltaTime(time_point<system_clock> startTime, Color c) {
 	duration<double> delta = system_clock::now() - startTime;
 	color(c);
 	cout << " (" << fixed << delta.count() << "s)\n";
 }
 
-ifstream getFileStream(const char* fileName) {
+static ifstream getFileStream(const char* fileName) {
 	ifstream s(fileName);
 	if(s.good()) return s;
 
@@ -84,7 +84,7 @@ ifstream getFileStream(const char* fileName) {
 	return ifstream(string("..\\..\\tests\\") + fileName);
 }
 
-void printFileSlice(const char* fileName, int line) {
+static void printFileSlice(const char* fileName, int line) {
 	ifstream inFile = getFileStream(fileName);
 
 	int t = 0;
@@ -114,31 +114,37 @@ void printFileSlice(const char* fileName, int line) {
 	}
 }
 
-void dumpLog() {
+static void dumpLog() {
 	color(GREEN);
 	cout << logStream.str().c_str();
 }
 
-class Test {
+static class Test {
 public:
 	const char* filePath;
 	const char* fileName;
 	const char* funcName;
-	void(*testFunc)();
+	void(*testFunc)(TestInterface&);
 
 	Test() : filePath(nullptr), funcName(nullptr), testFunc(nullptr) {};
-	Test(const char* filePath, const char* funcName, void(*testFunc)()) : filePath(filePath), funcName(funcName), testFunc(testFunc),
+	Test(const char* filePath, const char* funcName, void(*testFunc)(TestInterface&)) : filePath(filePath), funcName(funcName), testFunc(testFunc),
 	fileName(strrchr(this->filePath, sepChar) ? strrchr(this->filePath, sepChar) + 1 : this->filePath) {}
 	void run() {
 		resetLog();
 		time_point<system_clock> startTime;
+
+		TestInterface testInterface;
+
 		try {
 			color(CYAN);
 			cout << fileName << ":" << funcName;
 
 			startTime = system_clock::now();
 
-			testFunc();
+			testFunc(testInterface);
+
+			color(GRAY);
+			cout << " [" << testInterface.getAssertCount() << "]";
 
 			printDeltaTime(startTime, SUCCESS_COLOR);
 		} catch (AssertionError& e) {
@@ -152,7 +158,7 @@ public:
 			printFileSlice(filePath, e.line);
 
 			color(YELLOW);
-			cout << " >>>> " << e.what() << endl;
+			cout << e.what() << endl;
 			color(WHITE);
 
 		} catch (exception& e) {
@@ -181,7 +187,7 @@ const char* AssertionError::what() const { return info; }
 // For some reason having this in static memory breaks it, a pointer seems to work
 vector<Test>* tests = nullptr;
 
-void initConsole() {
+static void initConsole() {
 	console = GetStdHandle(STD_OUTPUT_HANDLE);
 	HWND consoleWindow = GetConsoleWindow();
 
@@ -200,8 +206,21 @@ int main(int argc, char * argv[]) {
 	color(ERROR_COLOR); cout << "[ERROR] ";
 	color(SKIP_COLOR); cout << "[SKIP]" << endl;
 	color(WHITE); cout << "Number of tests: " << tests->size() << endl;
-	for (Test& t : *tests) {
-		t.run();
+
+	if(argc == 1) {
+		for(Test& t : *tests) {
+			t.run();
+		}
+	} else {
+		for(Test& t : *tests) {
+			for(size_t i = 1; i < argc; i++) {
+				std::string strArg(argv[i]);
+				if(strArg == t.fileName || strArg == t.funcName) {
+					t.run();
+					break;
+				}
+			}
+		}
 	}
 	color(WHITE);  cout << "Tests finished" << endl;
 
@@ -229,12 +248,12 @@ int main(int argc, char * argv[]) {
 	}
 }
 
-void logAssertError(string text) {
+static void logAssertError(string text) {
 	color(RED);
 	cout << text.c_str();
 }
 
-TestAdder::TestAdder(const char* file, const char* name, void(*f)()) {
+TestAdder::TestAdder(const char* file, const char* name, void(*f)(TestInterface&)) {
 	if (tests == nullptr) tests = new vector<Test>();
 
 	tests->push_back(Test(file, name, f));

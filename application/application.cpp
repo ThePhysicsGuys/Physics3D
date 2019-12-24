@@ -22,6 +22,8 @@
 #include "../physics/world.h"
 #include "../physics/misc/gravityForce.h"
 #include "../physics/physicsProfiler.h"
+#include "../physics/constraints/motorConstraint.h"
+#include "../physics/constraints/fixedConstraint.h"
 
 #include "../physics/misc/serialization.h"
 
@@ -189,7 +191,7 @@ static void registerShapes() {
 void setupWorld(int argc, const char** args) {
 	Log::info("Initializing world");
 
-	world.addExternalForce(new ExternalGravity(Vec3(0, -10.0, 0.0)));
+	//world.addExternalForce(new ExternalGravity(Vec3(0, -10.0, 0.0)));
 
 	// WorldBuilder init
 	WorldBuilder::init();
@@ -200,7 +202,7 @@ void setupWorld(int argc, const char** args) {
 
 	WorldBuilder::buildFloorAndWalls(50.0, 50.0, 1.0);
 
-	world.addPart(new ExtendedPart(Sphere(2.0), GlobalCFrame(10, 3, 10), {1.0, 0.3, 0.7}, "SphereThing"));
+	/*world.addPart(new ExtendedPart(Sphere(2.0), GlobalCFrame(10, 3, 10), {1.0, 0.3, 0.7}, "SphereThing"));
 
 	ExtendedPart* conveyor = new ExtendedPart(Box(1.0, 0.3, 50.0), GlobalCFrame(10.0, 0.65, 0.0), { 2.0, 1.0, 0.3 });
 
@@ -220,8 +222,8 @@ void setupWorld(int argc, const char** args) {
 	ExtendedPart* rotatingWall2 = new ExtendedPart(Box(5.0, 3.0, 0.5), GlobalCFrame(Position(-12.0, 1.7, 5.0)), {1.0, 1.0, 0.7});
 	world.addPart(rotatingWall, true);
 	world.addPart(rotatingWall2, true);
-	rotatingWall->parent->angularVelocity = Vec3(0, -0.7, 0);
-	rotatingWall2->parent->angularVelocity = Vec3(0, 0.7, 0);
+	rotatingWall->parent->motion.angularVelocity = Vec3(0, -0.7, 0);
+	rotatingWall2->parent->motion.angularVelocity = Vec3(0, 0.7, 0);
 
 	// Many many parts
 	for (int i = 0; i < 3; i++) {
@@ -244,8 +246,6 @@ void setupWorld(int argc, const char** args) {
 	int minZ = 0;
 	int maxZ = 3;
 
-	//Cylinder(1.0, 1.0).
-
 	GlobalCFrame rootFrame(Position(0.0, 15.0, 0.0), fromEulerAngles(3.1415 / 4, 3.1415 / 4, 0.0));
 	
 	for (double x = minX; x < maxX; x += 1.00001) {
@@ -263,7 +263,7 @@ void setupWorld(int argc, const char** args) {
 		}
 	}
 
-	//WorldBuilder::buildTerrain(250.0, 250.0);
+	//WorldBuilder::buildTerrain(500.0, 500.0);
 
 
 	ExtendedPart* ropeStart = new ExtendedPart(Box(2.0, 1.5, 0.7), GlobalCFrame(10.0, 2.0, -10.0), {1.0, 0.7, 0.3}, "RopeA");
@@ -279,8 +279,54 @@ void setupWorld(int argc, const char** args) {
 	group.ballConstraints.push_back(BallConstraint{Vec3(0.0, 0.0, -2.0), ropeStart->parent, Vec3(0.0, 0.0, 2.0), ropeB->parent});
 	group.ballConstraints.push_back(BallConstraint{Vec3(0.0, 0.0, -2.0), ropeB->parent, Vec3(0.0, 0.0, 2.0), ropeC->parent});
 
-	world.constraints.push_back(group);
+	world.constraints.push_back(group);//*/
 
+
+
+	ExtendedPart* ep1 = new ExtendedPart(Box(1.0, 2.0, 1.0), GlobalCFrame(3.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "MainPart");
+	ExtendedPart* ap1 = new ExtendedPart(Box(1.0, 2.0, 1.0), GlobalCFrame(), {1.0, 1.0, 1.0}, "AttachedPart");
+
+	ep1->attach(ap1, new FixedConstraint(), CFrame(1.0, 0.0, 0.0), CFrame(0.0, 0.0, 0.0));
+
+	world.addPart(ep1);
+	world.addPart(ap1);
+
+	ep1->parent->mainPhysical->applyAngularImpulse(Vec3(1.0, 0.5, 0.0) * 1);
+
+	ExtendedPart* ep2 = new ExtendedPart(Box(1.0, 2.0, 1.0), GlobalCFrame(-3.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "MainPart");
+	ExtendedPart* ap2 = new ExtendedPart(Box(1.0, 2.0, 1.0), GlobalCFrame(), {1.0, 1.0, 1.0}, "AttachedPart");
+
+	ep2->attach(ap2, CFrame(1.0, 0.0, 0.0));
+
+	world.addPart(ep2);
+	world.addPart(ap2);
+
+	ep2->parent->mainPhysical->applyAngularImpulse(Vec3(1.0, 0.5, 0.0) * 1);
+
+
+
+	/*{
+		int minX = -5;
+		int maxX = 5;
+		int minY = -5;
+		int maxY = 5;
+		int minZ = -5;
+		int maxZ = 5;
+
+		GlobalCFrame ref(0, 15, 0, fromEulerAngles(3.1415 / 4, 3.1415 / 4, 0.0));
+
+		//Part* newCube = new Part(Box(1.0, 1.0, 1.0), ref.localToGlobal(CFrame(0,0,0)), {1.0, 0.2, 0.5});
+		//world.addPart(newCube);
+
+		for(double x = minX; x < maxX; x += 1.01) {
+			for(double y = minY; y < maxY; y += 1.01) {
+				for(double z = minZ; z < maxZ; z += 1.01) {
+					ExtendedPart* newCube = new ExtendedPart(Library::createBox(1.0, 1.0, 1.0), ref.localToGlobal(CFrame(x, y, z)), {1.0, 0.2, 0.5});
+					world.addPart(newCube);
+				}
+			}
+		}
+	}*/
 	// Player
 	screen.camera.attachment = new ExtendedPart(Library::createPrism(50, 0.3, 1.5), GlobalCFrame(), { 1.0, 5.0, 0.0 }, "Player");
 	

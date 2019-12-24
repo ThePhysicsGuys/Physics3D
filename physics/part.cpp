@@ -8,6 +8,8 @@
 
 #include "integrityCheck.h"
 
+#include "misc/validityHelper.h"
+
 namespace {
 	void recalculate(Part& part) {
 		part.maxRadius = part.hitbox.getMaxRadius();
@@ -28,7 +30,7 @@ Part::Part(const Shape& shape, const GlobalCFrame& position, const PartPropertie
 
 Part::Part(const Shape& shape, Part& attachTo, const CFrame& attach, const PartProperties& properties)
 	: hitbox(shape), cframe(attachTo.cframe.localToGlobal(attach)), properties(properties) {
-	attachTo.attach(*this, attach);
+	attachTo.attach(this, attach);
 	recalculate(*this);
 }
 
@@ -65,6 +67,9 @@ BoundingBox Part::getLocalBounds() const {
 Bounds Part::getStrictBounds() const {
 	BoundingBox boundsOfHitbox = this->hitbox.getBounds(this->cframe.getRotation());
 	
+	assert(isVecValid(boundsOfHitbox.min));
+	assert(isVecValid(boundsOfHitbox.max));
+
 	return boundsOfHitbox + getPosition();
 }
 
@@ -82,26 +87,17 @@ void Part::setCFrame(const GlobalCFrame& newCFrame) {
 	}
 }
 
-Vec3 Part::getVelocity() const {
-	if(parent != nullptr) {
-		return parent->getVelocityOfPoint(this->cframe.position - parent->getCenterOfMass());
-	} else {
-		return Vec3(0.0,0.0,0.0);
-	}
-}
-
-Vec3 Part::getAngularVelocity() const {
-	if(parent != nullptr) {
-		return parent->angularVelocity;
-	} else {
-		return Vec3(0.0, 0.0, 0.0);
-	}
+Motion Part::getMotion() const {
+	if(parent == nullptr) return Motion();
+	Motion parentsMotion = parent->getMotion();
+	Vec3 offset = this->cframe.getPosition() - parent->getObjectCenterOfMass();
+	return parentsMotion.getMotionOfPoint(offset);
 }
 
 void Part::translate(Vec3 translation) {
 	if(this->parent != nullptr) {
 		this->parent->translate(translation);
-	} else {// TODO BAD FOR TERRAIN PARTS
+	} else {
 		this->cframe.translate(translation);
 	}
 }
@@ -133,21 +129,43 @@ void Part::setDepth(double newDepth) {
 }
 
 
-void Part::attach(Part& other, const CFrame& relativeCFrame) {
+void Part::attach(Part* other, const CFrame& relativeCFrame) {
 	if (this->parent == nullptr) {
 		this->parent = new MotorizedPhysical(this);
-		this->parent->attachPart(&other, relativeCFrame);
+		this->parent->attachPart(other, relativeCFrame);
 	} else {
-		if (this->parent->mainPart == this) {
-			this->parent->attachPart(&other, relativeCFrame);
-		} else {
-			CFrame trueCFrame = this->parent->getAttachFor(this).attachment.localToGlobal(relativeCFrame);
-			this->parent->attachPart(&other, trueCFrame);
-		}
+		this->parent->attachPart(other, fromRelativeToPartToRelativeToPhysical(this, relativeCFrame));
+	}
+}
+
+void Part::attach(Part* other, HardConstraint* constraint, const CFrame& attachToThis, const CFrame& attachToThat) {
+	if(this->parent == nullptr) {
+		MotorizedPhysical* newPhys = new MotorizedPhysical(this);
+		this->parent = newPhys;
+		this->parent->attachPart(other, constraint, attachToThis, attachToThat);
+	} else {
+		this->parent->attachPhysical(Physical(other, this->parent->mainPhysical), constraint, fromRelativeToPartToRelativeToPhysical(this, attachToThis), attachToThat);
 	}
 }
 
 void Part::detach() {
 	if (this->parent == nullptr) throw "No physical to detach from!";
 	this->parent->detachPart(this);
+}
+
+void Part::ensureHasParent() {
+	if(this->parent == nullptr) {
+		this->parent = new MotorizedPhysical(this);
+	}
+}
+
+bool Part::isValid() const {
+	assert(isfinite(hitbox.getVolume()));
+	assert(isfinite(maxRadius));
+	assert(isfinite(properties.density));
+	assert(isfinite(properties.friction));
+	assert(isfinite(properties.bouncyness));
+	assert(isVecValid(properties.conveyorEffect));
+
+	return true;
 }

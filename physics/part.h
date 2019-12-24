@@ -1,6 +1,7 @@
 #pragma once
 
 class Part;
+class HardConstraint;
 class Physical;
 class WorldPrototype;
 #include "geometry/shape.h"
@@ -8,11 +9,19 @@ class WorldPrototype;
 #include "math/position.h"
 #include "math/globalCFrame.h"
 #include "math/bounds.h"
+#include "motion.h"
 
 struct PartProperties {
 	double density;
 	double friction;
 	double bouncyness;
+
+	/*
+		This is extra velocity that should be added to any colission
+		if this part is anchored, this gives the velocity of another part sliding on top of it, with perfect friction
+
+		In other words, this is the desired relative velocity for there to be no friction
+	*/
 	Vec3 conveyorEffect = Vec3(0, 0, 0);
 };
 
@@ -42,13 +51,6 @@ public:
 	double maxRadius;
 	PartProperties properties;
 
-	/*
-		This is extra velocity that should be added to any colission
-		if this part is anchored, this gives the velocity of another part sliding on top of it, with perfect friction
-
-		In other words, this is the desired relative velocity for there to be no friction
-	*/
-
 	Part() = default;
 	Part(const Shape& shape, const GlobalCFrame& position, const PartProperties& properties);
 	Part(const Shape& shape, Part& attachTo, const CFrame& attach, const PartProperties& properties);
@@ -68,8 +70,7 @@ public:
 	const GlobalCFrame& getCFrame() const { return cframe; }
 	void setCFrame(const GlobalCFrame& newCFrame);
 
-	Vec3 getVelocity() const;
-	Vec3 getAngularVelocity() const;
+	Motion getMotion() const;
 
 	void translate(Vec3 translation);
 
@@ -81,7 +82,11 @@ public:
 	void setHeight(double newHeight);
 	void setDepth(double newDepth);
 
+	void ensureHasParent();
 
-	void attach(Part& other, const CFrame& relativeCFrame);
+	void attach(Part* other, const CFrame& relativeCFrame);
+	void attach(Part* other, HardConstraint* constraint, const CFrame& attachToThis, const CFrame& attachToThat);
 	void detach();
+
+	bool isValid() const;
 };

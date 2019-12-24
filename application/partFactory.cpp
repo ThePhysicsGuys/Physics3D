@@ -20,7 +20,7 @@ ExtendedPart* PartFactory::produce(const PartProperties& properties, std::string
 }
 ExtendedPart* PartFactory::produce(ExtendedPart* partToAttachTo, const CFrame& attachment, const PartProperties& properties, std::string name) const {
 	ExtendedPart* part = this->produce(GlobalCFrame(), properties, name);
-	partToAttachTo->attach(*part, attachment);
+	partToAttachTo->attach(part, attachment);
 	return part;
 }
 
@@ -35,7 +35,7 @@ ExtendedPart* PartFactory::produceScaled(const PartProperties& properties, doubl
 }
 ExtendedPart* PartFactory::produceScaled(ExtendedPart* partToAttachTo, const CFrame& attachment, const PartProperties& properties, double scaleX, double scaleY, double scaleZ, std::string name) const {
 	ExtendedPart* part = this->produceScaled(GlobalCFrame(), properties, scaleX, scaleY, scaleZ, name);
-	partToAttachTo->attach(*part, attachment);
+	partToAttachTo->attach(part, attachment);
 	return part;
 }
 

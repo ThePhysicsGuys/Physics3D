@@ -2,14 +2,8 @@
 
 #include "hardConstraint.h"
 
-class MotorConstraint : public HardConstraint {
-	NormalizedVec3 motorDirection;
-	double motorSpeed;
-	double currentAngle;
+class FixedConstraint : public HardConstraint {
 public:
-	
-	MotorConstraint(Vec3 angularVelocity);
-
 	virtual void update(double deltaT) override;
 	// this CFrame determines the relative position of the constraint's attach1 and attach2
 	virtual CFrame getRelativeCFrame() override;

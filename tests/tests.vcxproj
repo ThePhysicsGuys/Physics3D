@@ -27,12 +27,15 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="constraintTests.cpp" />
     <ClCompile Include="dataStructureTests.cpp" />
+    <ClCompile Include="estimateMotion.cpp" />
     <ClCompile Include="estimationTests.cpp" />
     <ClCompile Include="geometryTests.cpp" />
     <ClCompile Include="guiTests.cpp" />
     <ClCompile Include="indexedShapeTests.cpp" />
     <ClCompile Include="mathTests.cpp" />
+    <ClCompile Include="motionTests.cpp" />
     <ClCompile Include="parallelTests.cpp" />
     <ClCompile Include="physicsTests.cpp" />
     <ClCompile Include="testsMain.cpp" />
@@ -40,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="compare.h" />
+    <ClInclude Include="estimateMotion.h" />
     <ClInclude Include="testsMain.h" />
     <ClInclude Include="testValues.h" />
   </ItemGroup>

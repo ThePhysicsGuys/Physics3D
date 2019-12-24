@@ -8,7 +8,7 @@
 #include "../application/worldBuilder.h"
 #include "../engine/options/keyboardOptions.h"
 #include "../graphics/renderUtils.h"
-#include "../physics/math/mathUtil.h"
+#include "../physics/misc/toString.h"
 #include "../application.h"
 #include "../picker/picker.h"
 #include "../graphics/gui/gui.h"
@@ -94,9 +94,9 @@ bool StandardInputHandler::onKeyPress(KeyPressEvent& event) {
 			if (screen.selectedPart->parent->anchored) {
 				screen.selectedPart->parent->setAnchored(false);
 			} else {
-				Physical* parent = screen.selectedPart->parent;
-				parent->velocity = Vec3();
-				parent->angularVelocity = Vec3();
+				MotorizedPhysical* parent = screen.selectedPart->parent->mainPhysical;
+				parent->motionOfCenterOfMass.velocity = Vec3();
+				parent->motionOfCenterOfMass.angularVelocity = Vec3();
 				screen.selectedPart->parent->setAnchored(true);
 			}
 		}

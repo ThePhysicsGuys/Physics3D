@@ -89,13 +89,10 @@ public:
 
 	void addPart(Part* part, bool anchored = false);
 	void removePart(Part* part);
-	void removePhysical(Physical* part);
+	void removeMainPhysical(MotorizedPhysical* part);
 
 	void addTerrainPart(Part* part);
 	void optimizeTerrain();
-
-	// creates a new layer, returning it's ID
-	int createLayer();
 
 	inline size_t getPartCount(int partsMask = ALL_PARTS) const {
 		return objectCount;
@@ -103,7 +100,7 @@ public:
 
 	virtual double getTotalKineticEnergy() const;
 	virtual double getTotalPotentialEnergy() const;
-	virtual double getPotentialEnergyOfPhysical(const Physical& p) const;
+	virtual double getPotentialEnergyOfPhysical(const MotorizedPhysical& p) const;
 	virtual double getTotalEnergy() const;
 
 	void addExternalForce(ExternalForce* force);
@@ -161,7 +158,7 @@ class ExternalForce {
 public:
 	virtual void apply(WorldPrototype* world) = 0;
 	virtual double getPotentialEnergyForObject(const WorldPrototype* world, const Part&) const = 0;
-	virtual double getPotentialEnergyForObject(const WorldPrototype* world, const Physical& phys) const {
+	virtual double getPotentialEnergyForObject(const WorldPrototype* world, const MotorizedPhysical& phys) const {
 		double total = 0.0;
 		for (const Part& p : phys) {
 			total += this->getPotentialEnergyForObject(world, p);

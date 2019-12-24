@@ -1,10 +1,12 @@
 #include "testsMain.h"
 
+#include "compare.h"
+#include "../physics/misc/toString.h"
+
 #include "../physics/math/linalg/vec.h"
 #include "../physics/math/linalg/mat.h"
 #include "../physics/math/linalg/trigonometry.h"
 #include "../physics/math/linalg/eigen.h"
-#include "../physics/math/mathUtil.h"
 #include "../physics/math/utils.h"
 
 #include "../physics/geometry/shape.h"
@@ -76,7 +78,7 @@ TEST_CASE(shapeCenterOfMass) {
 	ASSERT("Center Of Mass Box: %s", transform.localToGlobal(boxShape.getCenterOfMass()) == transformedShape.getCenterOfMass());
 }
 
-TEST_CASE(shapeInertiaMatrix) {
+/*TEST_CASE(shapeInertiaMatrix) {
 	Polyhedron boxShape = Library::createBox(2.0, 2.0, 2.0);
 
 	CFramef transform(Vec3f(0,0,0), fromEulerAngles(0.7f, 0.2f, 0.3f));
@@ -91,7 +93,7 @@ TEST_CASE(shapeInertiaMatrix) {
 	Polyhedron rotatedHouse = newHouse.rotated(fromEulerAngles(0.0, 0.3, 0.0));
 	logf("Inertia of House: %s", str(newHouse.getInertiaAroundCenterOfMass()).c_str());
 	logf("Inertia of Rotated House: %s", str(rotatedHouse.getInertiaAroundCenterOfMass()).c_str());
-}
+}*/
 
 TEST_CASE(shapeInertiaRotationInvariance) {
 	Polyhedron testShape = Library::house.translated(-Vec3f(Library::house.getCenterOfMass()));

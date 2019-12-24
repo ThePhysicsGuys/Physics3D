@@ -1,5 +1,8 @@
 #include "testsMain.h"
 
+#include "compare.h"
+#include "../physics/misc/toString.h"
+
 #include "../physics/math/linalg/vec.h"
 #include "../physics/math/linalg/mat.h"
 #include "../physics/math/linalg/trigonometry.h"
@@ -214,22 +217,6 @@ TEST_CASE(crossProduct) {
 	ASSERT(x % z == -y);
 }
 
-TEST_CASE(matrixTypes) {
-	Mat3 a{ 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-	SymmetricMat3 sym{ 2, 2, 2, 7, 8, 9 };
-	DiagonalMat3 dia{ 1,2,5 };
-
-	Mat3 asym = a*sym;
-	Mat3 syma = sym*a;
-
-	SymmetricMat3 symdia = sym*dia;
-	SymmetricMat3 diasym = dia*sym;
-
-	SymmetricMat3 symsym = sym*sym;
-
-	DiagonalMat3 diadia = dia*dia;
-}
-
 #include <iostream>
 #include <algorithm>
 
@@ -251,25 +238,6 @@ TEST_CASE(eigenDecomposition) {
 			}
 		}
 	}
-}
-
-TEST_CASE(largeMatrixVectorProduct) {
-	LargeMatrix<double> mat(5, 5);
-	LargeVector<double> vec(5);
-
-	for (int i = 0; i < 5; i++) {
-		vec[i] = i + 2;
-	}
-
-	for (int i = 0; i < 5; i++) {
-		for (int j = 0; j < 5; j++) {
-			mat.get(i, j) = 0;
-		}
-		mat.get(i, 0) = i * 2;
-		mat.get(0, i) = i * 2;
-	}
-
-	LargeVector<double> newVector = mat * vec;
 }
 
 TEST_CASE(largeMatrixVectorSolve) {
@@ -296,3 +264,34 @@ TEST_CASE(largeMatrixVectorSolve) {
 
 	ASSERT(solutionVector == vec);
 }
+
+
+TEST_CASE(testFromRotationVecInvertsFromRotationMatrix) {
+	for(double x = -1.55; x < 1.55; x += 0.17) {
+		for(double y = -1.55; y < 1.55; y += 0.13) {
+			for(double z = -1.55; z < 1.55; z += 0.19) {
+				Vec3 v(x, y, z);
+				Mat3 rotMat = fromRotationVec(v);
+
+				Vec3 resultingVec = fromRotationMatrix(rotMat);
+
+				// logStream << "v = " << v << "\n  rotMat = " << rotMat << "  resultingVec = " << resultingVec;
+
+				ASSERT(v == resultingVec);
+
+				Mat3 m = fromEulerAngles(x, y, z);
+
+				Vec3 rotVec = fromRotationMatrix(m);
+
+				Mat3 resultingMat = fromRotationVec(rotVec);
+
+				// logStream << "m = " << m << "\n  rotVec = " << rotVec << "  resultingMat = " << resultingMat;
+
+				ASSERT(m == resultingMat);
+			}
+		}
+	}
+
+
+}
+

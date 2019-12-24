@@ -3,12 +3,21 @@
 #include "compare.h"
 #include <sstream>
 
+class TestInterface {
+	size_t assertCount = 0;
+public:
+	inline void markAssert() {
+		assertCount++;
+	}
+	inline size_t getAssertCount() const { return assertCount; }
+};
+
 #define __JOIN2(a,b) a##b
 #define __JOIN(a,b) __JOIN2(a,b)
-#define TEST_CASE(func) void func(); static TestAdder __JOIN(tAdder, __LINE__)(__FILE__, #func, func); void func()
+#define TEST_CASE(func) void func(TestInterface& __testInterface); static TestAdder __JOIN(tAdder, __LINE__)(__FILE__, #func, func); void func(TestInterface& __testInterface)
 
 struct TestAdder {
-	TestAdder(const char* filePath, const char* nameName, void(*testFunc)());
+	TestAdder(const char* filePath, const char* nameName, void(*testFunc)(TestInterface&));
 };
 
 class AssertionError {
@@ -27,13 +36,11 @@ void logf(const char* format, ...);
 template<typename R, typename P>
 const char* errMsg(const R& first, const P& second, const char* sep) {
 	std::stringstream s;
-	s << "(";
 	s << first;
 	s << ' ';
 	s << sep;
-	s << ' ';
+	s << '\n';
 	s << second;
-	s << ")";
 
 	std::string msg = s.str();
 
@@ -110,22 +117,22 @@ struct TolerantAssertBuilder {
 	TolerantAssertComparer<T, Tol> operator<(const T& other) const { return TolerantAssertComparer<T, Tol>(line, other, tolerance); }
 };
 
-#define ASSERT_STRICT(condition) (AssertBuilder(__LINE__) < condition)
-#define ASSERT_TOLERANT(condition, tolerance) (TolerantAssertBuilder<decltype(tolerance)>(__LINE__, tolerance) < condition)
-#define ASSERT_TRUE(condition) if(!(condition)) throw AssertionError(__LINE__, "False")
-#define ASSERT_FALSE(condition) if(condition) throw AssertionError(__LINE__, "True")
+#define ASSERT_STRICT(condition) do {__testInterface.markAssert(); (AssertBuilder(__LINE__) < condition);}while(false)
+#define ASSERT_TOLERANT(condition, tolerance) do {__testInterface.markAssert(); (TolerantAssertBuilder<decltype(tolerance)>(__LINE__, tolerance) < condition);}while(false)
+#define ASSERT_TRUE(condition) do {__testInterface.markAssert(); if(!(condition)) throw AssertionError(__LINE__, "False");}while(false)
+#define ASSERT_FALSE(condition) do {__testInterface.markAssert(); if(condition) throw AssertionError(__LINE__, "True");}while(false)
 
 #define PREV_VAL_NAME __JOIN(____previousValue, __LINE__)
 #define ISFILLED_NAME __JOIN(____isFilled, __LINE__)
-#define REMAINS_CONSTANT_STRICT(value) {\
+#define REMAINS_CONSTANT_STRICT(value) do{\
 	static bool ISFILLED_NAME = false;\
 	static auto PREV_VAL_NAME = value;\
 	if(ISFILLED_NAME) ASSERT_STRICT(PREV_VAL_NAME == (value));\
 	ISFILLED_NAME = true;\
-}
-#define REMAINS_CONSTANT_TOLERANT(value, tolerance) {\
+}while(false)
+#define REMAINS_CONSTANT_TOLERANT(value, tolerance) do{\
 	static bool ISFILLED_NAME = false;\
 	static auto PREV_VAL_NAME = value;\
 	if(ISFILLED_NAME) ASSERT_TOLERANT(PREV_VAL_NAME == (value), tolerance);\
 	ISFILLED_NAME = true;\
-}
+}while(false)

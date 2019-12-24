@@ -1,4 +1,8 @@
 #include "testsMain.h"
+
+#include "compare.h"
+#include "../physics/misc/toString.h"
+
 #include "../physics/geometry/indexedShape.h"
 #include "../physics/geometry/shapeBuilder.h"
 #include "../physics/geometry/convexShapeBuilder.h"

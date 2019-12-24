@@ -1,5 +1,8 @@
 #include "testsMain.h"
 
+#include "compare.h"
+#include "../physics/misc/toString.h"
+
 #include "../physics/math/linalg/vec.h"
 #include "../physics/datastructures/parallelVector.h"
 #include <immintrin.h>

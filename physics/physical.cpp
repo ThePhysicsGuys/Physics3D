@@ -14,27 +14,22 @@
 
 #include "integrityCheck.h"
 
+#include "misc/validityHelper.h"
+
+
+/*
+	===== Physical Structure =====
+*/
+
+#pragma region structure
+
 Physical::Physical(Part* part, MotorizedPhysical* mainPhysical) : mainPart(part), mainPhysical(mainPhysical) {
 	if (part->parent != nullptr) {
-		throw "Attempting to re-add part to different physical!";
+		throw "This part is already in another physical!";
 	}
 	part->parent = this;
 
 	refreshWithNewParts();
-}
-
-Physical::Physical(Physical&& other) noexcept :
-	mainPart(std::move(other.mainPart)),
-	parts(std::move(other.parts)),
-	velocity(other.velocity),
-	angularVelocity(other.angularVelocity),
-	mass(other.mass),
-	localCenterOfMass(other.localCenterOfMass),
-	inertia(other.inertia) {
-	mainPart->parent = this;
-	for(AttachedPart& p : parts) {
-		p.part->parent = this;
-	}
 }
 
 Physical::~Physical() {
@@ -47,20 +42,36 @@ Physical::~Physical() {
 	}
 }
 
+Physical::Physical(Physical&& other) noexcept :
+	mainPart(other.mainPart),
+	parts(std::move(other.parts)),
+	mainPhysical(other.mainPhysical),
+	mass(other.mass),
+	localCenterOfMass(other.localCenterOfMass),
+	inertia(other.inertia) {
+	mainPart->parent = this;
+	other.mainPart = nullptr;
+	for(AttachedPart& p : parts) {
+		p.part->parent = this;
+		p.part = nullptr;
+	}
+}
+
 Physical& Physical::operator=(Physical&& other) noexcept {
-	//this->cframe = other.cframe;
 	this->mainPart = other.mainPart;
 	this->parts = std::move(other.parts);
-	this->velocity = other.velocity;
-	this->angularVelocity = other.angularVelocity;
+	this->mainPhysical == other.mainPhysical;
 	this->mass = other.mass;
 	this->localCenterOfMass = other.localCenterOfMass;
 	this->inertia = other.inertia;
 
 	mainPart->parent = this;
-	for(AttachedPart& p : parts) {
+	other.mainPart = nullptr;
+	for(AttachedPart& p : other.parts) {
 		p.part->parent = this;
+		p.part = nullptr;
 	}
+	
 	return *this;
 }
 
@@ -79,7 +90,7 @@ void Physical::makeMainPart(Part* newMainPart) {
 	throw "Attempting to make a part not in this physical the mainPart!";
 }
 
-bool liesInVector(const std::vector<AttachedPart>& vec, const AttachedPart* ptr) {
+static bool liesInVector(const std::vector<AttachedPart>& vec, const AttachedPart* ptr) {
 	return vec.begin()._Ptr <= ptr && vec.end()._Ptr < ptr;
 }
 
@@ -99,35 +110,92 @@ void Physical::makeMainPart(AttachedPart& newMainPart) {
 	}
 }
 
-void Physical::attachPhysical(Physical* phys, const CFrame& attachment) {
+void Physical::attachPhysical(Physical&& phys, const CFrame& attachment) {
 	size_t originalAttachCount = this->parts.size();
 	const GlobalCFrame& cf = this->getCFrame();
-	phys->mainPart->cframe = cf.localToGlobal(attachment);
-	this->parts.push_back(AttachedPart{attachment, phys->mainPart});
-	phys->mainPart->parent = this;
+	phys.mainPart->cframe = cf.localToGlobal(attachment);
+	this->parts.push_back(AttachedPart{attachment, phys.mainPart});
+	phys.mainPart->parent = this;
 
-	for (AttachedPart& ap : phys->parts) {
+	for (AttachedPart& ap : phys.parts) {
 		CFrame globalAttach = attachment.localToGlobal(ap.attachment);
 		this->parts.push_back(AttachedPart{globalAttach, ap.part});
 		ap.part->cframe = cf.localToGlobal(globalAttach);
 		ap.part->parent = this;
 	}
 
-	if (phys->world != nullptr) {
-		phys->world->removePhysical(phys);
+	if (phys.mainPhysical->world != nullptr) {
+		phys.mainPhysical->world->removeMainPhysical(phys.mainPhysical);
 	}
-	phys->mainPart = nullptr;
-	phys->parts.clear();
-	delete phys;
-	if (this->world != nullptr) {
-		NodeStack stack = world->objectTree.findGroupFor(this->mainPart, this->mainPart->getStrictBounds());
+	phys.mainPart = nullptr;
+	phys.parts.clear();
+	delete &phys;
+	if (this->mainPhysical->world != nullptr) {
+		NodeStack stack = this->mainPhysical->world->objectTree.findGroupFor(this->mainPart, this->mainPart->getStrictBounds());
 		TreeNode& group = **stack;
 		for (size_t i = originalAttachCount; i < this->parts.size(); i++) {
 			Part* p = parts[i].part;
-			this->world->objectTree.addToExistingGroup(p, p->getStrictBounds(), group);
+			this->mainPhysical->world->objectTree.addToExistingGroup(p, p->getStrictBounds(), group);
 		}
 		stack.expandBoundsAllTheWayToTop();
 	}
+}
+
+bool Physical::isMainPhysical() const {
+	Physical* ptr = mainPhysical;
+	return ptr == this;
+}
+
+void Physical::removeChild(ConnectedPhysical* child) {
+	assert(child >= this->childPhysicals.begin()._Ptr && child < this->childPhysicals.end()._Ptr);
+
+	*child = std::move(childPhysicals.back());
+	childPhysicals.pop_back();
+}
+
+void Physical::attachPhysical(Physical&& phys, HardConstraint* constraint, const CFrame& attachToThis, const CFrame& attachToThat) {
+	if(phys.isMainPhysical()) {
+		childPhysicals.push_back(ConnectedPhysical(std::move(phys), this, constraint, attachToThat, attachToThis));
+		delete &phys;
+	} else {
+		ConnectedPhysical& connectedPhys = static_cast<ConnectedPhysical&>(phys);
+		Physical* parent = connectedPhys.parent;
+		assert(parent != nullptr);
+		childPhysicals.push_back(ConnectedPhysical(std::move(phys), this, constraint, attachToThat, attachToThis));
+		parent->removeChild(&connectedPhys);
+	}
+
+	
+
+	childPhysicals.back().updateCFrame(this->getCFrame());
+
+	mainPhysical->refreshPhysicalProperties();
+}
+
+void Physical::attachPart(Part* part, HardConstraint* constraint, const CFrame& attachToThis, const CFrame& attachToThat) {
+	if(part->parent == nullptr) {
+		childPhysicals.push_back(ConnectedPhysical(Physical(part, this->mainPhysical), this, constraint, attachToThat, attachToThis));
+	} else {
+		attachPhysical(std::move(*part->parent), constraint, attachToThis, fromRelativeToPartToRelativeToPhysical(part, attachToThat));
+	}
+
+	childPhysicals.back().updateCFrame(this->getCFrame());
+
+	mainPhysical->refreshPhysicalProperties();
+}
+
+
+static Physical* findPhysicalParent(Physical* findIn, const ConnectedPhysical* toBeFound) {
+	if(toBeFound >= findIn->childPhysicals.begin()._Ptr && toBeFound < findIn->childPhysicals.end()._Ptr) {
+		return findIn;
+	}
+	for(ConnectedPhysical& p : findIn->childPhysicals) {
+		Physical* result = findPhysicalParent(&p, toBeFound);
+		if(result != nullptr) {
+			return result;
+		}
+	}
+	return nullptr;
 }
 
 void Physical::attachPart(Part* part, const CFrame& attachment) {
@@ -142,16 +210,16 @@ void Physical::attachPart(Part* part, const CFrame& attachment) {
 			}
 			Bounds oldBounds = part->getStrictBounds();
 			part->cframe = getCFrame().localToGlobal(attachment);
-			if (this->world != nullptr) {
-				this->world->updatePartBounds(part, oldBounds);
+			if (this->mainPhysical->world != nullptr) {
+				this->mainPhysical->world->updatePartBounds(part, oldBounds);
 			}
 		} else {
 			// attach other part's entire physical
 			if (part->parent->mainPart == part) {
-				attachPhysical(part->parent, attachment);
+				attachPhysical(std::move(*part->parent), attachment);
 			} else {
 				CFrame newAttach = attachment.localToGlobal(~part->parent->getAttachFor(part).attachment);
-				attachPhysical(part->parent, newAttach);
+				attachPhysical(std::move(*part->parent), newAttach);
 			}
 		}
 	} else {
@@ -159,8 +227,8 @@ void Physical::attachPart(Part* part, const CFrame& attachment) {
 		parts.push_back(AttachedPart{ attachment, part });
 		part->cframe = getCFrame().localToGlobal(attachment);
 
-		if (this->world != nullptr) {
-			this->world->objectTree.addToExistingGroup(part, part->getStrictBounds(), this->mainPart, this->mainPart->getStrictBounds());
+		if (this->mainPhysical->world != nullptr) {
+			this->mainPhysical->world->objectTree.addToExistingGroup(part, part->getStrictBounds(), this->mainPart, this->mainPart->getStrictBounds());
 		}
 	}
 
@@ -170,6 +238,18 @@ void Physical::attachPart(Part* part, const CFrame& attachment) {
 // detaches part, without updating World
 // Returns true if this physical has no more parts and should be deleted
 void Physical::detachPart(Part* part) {
+	for(auto iter = parts.begin(); iter != parts.end(); iter++) {
+		AttachedPart& at = *iter;
+		if(at.part == part) {
+			part->parent = nullptr;
+			parts.erase(iter);
+			if(this->mainPhysical->world != nullptr) {
+				this->mainPhysical->world->removePartFromTrees(part);
+			}
+			refreshWithNewParts();
+			return;
+		}
+	}
 	if (part == mainPart) {
 		if (parts.size() == 0) {
 			mainPart = nullptr;
@@ -179,20 +259,54 @@ void Physical::detachPart(Part* part) {
 		part->parent = nullptr;
 		return;
 	}
-	for (signed long long i = parts.size() - 1; i >= 0; i--) {
-		AttachedPart& at = parts[i];
-		if (at.part == part) {
-			part->parent = nullptr;
-			parts.erase(parts.begin() + i);
-			if (this->world != nullptr) {
-				this->world->removePartFromTrees(part);
-			}
-			refreshWithNewParts();
-			return;
-		}
-	}
 	throw "Error: could not find part to remove!";
 }
+
+void Physical::setCFrameUnsafe(const GlobalCFrame& newCFrame) {
+	this->mainPart->cframe = newCFrame;
+	for(const AttachedPart& p : parts) {
+		p.part->cframe = newCFrame.localToGlobal(p.attachment);
+	}
+}
+
+void Physical::updateAttachedPhysicals(double deltaT) {
+	GlobalCFrame thisCFrame = getCFrame();
+	for(ConnectedPhysical& p : childPhysicals) {
+		p.constraintWithParent->update(deltaT);
+		p.updateCFrame(thisCFrame);
+	}
+}
+
+void Physical::setCFrame(const GlobalCFrame& newCFrame) {
+	if(this->mainPhysical->world != nullptr) {
+		Bounds oldMainPartBounds = this->mainPart->getStrictBounds();
+
+		setCFrameUnsafe(newCFrame);
+
+		this->mainPhysical->world->updatePartGroupBounds(this->mainPart, oldMainPartBounds);
+	} else {
+		setCFrameUnsafe(newCFrame);
+	}
+}
+
+void Physical::setPartCFrame(Part* part, const GlobalCFrame& newCFrame) {
+	if(part == mainPart) {
+		setCFrame(newCFrame);
+	} else {
+		CFrame attach = getAttachFor(part).attachment;
+		GlobalCFrame newMainCFrame = newCFrame.localToGlobal(~attach);
+
+		setCFrame(newMainCFrame);
+	}
+}
+
+#pragma endregion
+
+/*
+	===== Refresh functions =====
+*/
+
+#pragma region refresh
 
 void Physical::refreshWithNewParts() {
 	double totalMass = mainPart->getMass();
@@ -213,52 +327,14 @@ void Physical::refreshWithNewParts() {
 	this->localCenterOfMass = totalCenterOfMass;
 	this->inertia = totalInertia;
 
-	if (this->anchored) {
-		this->mainPhysical->forceResponse = SymmetricMat3::ZEROS();
-		this->mainPhysical->momentResponse = SymmetricMat3::ZEROS();
-	} else {
-		this->mainPhysical->forceResponse = SymmetricMat3::IDENTITY() * (1/mass);
-		this->mainPhysical->momentResponse = ~inertia;
-	}
+	mainPhysical->refreshPhysicalProperties();
 }
 
 void Physical::updatePart(const Part* updatedPart, const Bounds& updatedBounds) {
 	refreshWithNewParts();
-	if (this->world != nullptr) {
-		this->world->updatePartBounds(updatedPart, updatedBounds);
+	if (this->mainPhysical->world != nullptr) {
+		this->mainPhysical->world->updatePartBounds(updatedPart, updatedBounds);
 	}
-}
-
-BoundingBox Physical::computeLocalBounds() const {
-	BoundingBox best(mainPart->hitbox.getBounds());
-
-	for (const AttachedPart& p : parts) {
-		double xmax = p.attachment.localToGlobal(p.part->hitbox.furthestInDirection(p.attachment.relativeToLocal(Vec3(1, 0, 0)))).x;
-		double xmin = p.attachment.localToGlobal(p.part->hitbox.furthestInDirection(p.attachment.relativeToLocal(Vec3(-1, 0, 0)))).x;
-		double ymax = p.attachment.localToGlobal(p.part->hitbox.furthestInDirection(p.attachment.relativeToLocal(Vec3(0, 1, 0)))).y;
-		double ymin = p.attachment.localToGlobal(p.part->hitbox.furthestInDirection(p.attachment.relativeToLocal(Vec3(0, -1, 0)))).y;
-		double zmax = p.attachment.localToGlobal(p.part->hitbox.furthestInDirection(p.attachment.relativeToLocal(Vec3(0, 0, 1)))).z;
-		double zmin = p.attachment.localToGlobal(p.part->hitbox.furthestInDirection(p.attachment.relativeToLocal(Vec3(0, 0, -1)))).z;
-
-		best.xmax = std::max(best.xmax, xmax);
-		best.xmin = std::min(best.xmin, xmin);
-		best.ymax = std::max(best.ymax, ymax);
-		best.ymin = std::min(best.ymin, ymin);
-		best.zmax = std::max(best.zmax, zmax);
-		best.zmin = std::min(best.zmin, zmin);
-	}
-
-	return best;
-}
-
-Bounds Physical::getStrictBounds() const {
-	Bounds bounds = mainPart->getStrictBounds();
-
-	for (const AttachedPart& p : parts) {
-		bounds = unionOfBounds(bounds, p.part->getStrictBounds());
-	}
-
-	return bounds;
 }
 
 void Physical::rotateAroundCenterOfMassUnsafe(const RotMat3& rotation) {
@@ -279,16 +355,62 @@ void Physical::rotateAroundCenterOfMass(const RotMat3& rotation) {
 	Bounds oldBounds = this->mainPart->getStrictBounds();
 	rotateAroundCenterOfMassUnsafe(rotation);
 	updateAttachedPartCFrames();
-	world->updatePartGroupBounds(this->mainPart, oldBounds);
+	mainPhysical->world->updatePartGroupBounds(this->mainPart, oldBounds);
 }
 void Physical::translate(const Vec3& translation) {
 	Bounds oldBounds = this->mainPart->getStrictBounds();
 	translateUnsafe(translation);
 	updateAttachedPartCFrames();
-	world->updatePartGroupBounds(this->mainPart, oldBounds);
+	mainPhysical->world->updatePartGroupBounds(this->mainPart, oldBounds);
 }
 
+static std::pair<Vec3, double> getRecursiveCenterOfMass(const Physical& phys) {
+	Vec3 totalCOM = phys.mass * phys.localCenterOfMass;
+	double totalMass = phys.mass;
+	for(const ConnectedPhysical& conPhys : phys.childPhysicals) {
+		CFrame relFrame = conPhys.getRelativeCFrameToParent();
+		std::pair<Vec3, double> localCOM = getRecursiveCenterOfMass(conPhys);
+		totalCOM += localCOM.second * relFrame.localToGlobal(localCOM.first);
+		totalMass += localCOM.second;
+	}
+	return std::pair<Vec3, double>(totalCOM / totalMass, totalMass);
+}
+
+static SymmetricMat3 getRecursiveInertia(const Physical& phys, const CFrame& offsetCFrame, const Vec3& localCOMOfMain) {
+	SymmetricMat3 totalInertia = getTransformedInertiaAroundCenterOfMass(phys.inertia, phys.localCenterOfMass, offsetCFrame, localCOMOfMain, phys.mass);
+
+	for(const ConnectedPhysical& conPhys : phys.childPhysicals) {
+		CFrame cframeToConPhys = conPhys.getRelativeCFrameToParent();
+
+		CFrame offsetOfConPhys = offsetCFrame.localToGlobal(cframeToConPhys);
+
+		totalInertia += getRecursiveInertia(conPhys, offsetOfConPhys, localCOMOfMain);
+	}
+	return totalInertia;
+}
+
+void MotorizedPhysical::refreshPhysicalProperties() {
+	std::pair<Vec3, double> result = getRecursiveCenterOfMass(*this);
+	totalCenterOfMass = result.first;
+	totalMass = result.second;
+
+	SymmetricMat3 totalInertia = getRecursiveInertia(*this, CFrame(0, 0, 0), totalCenterOfMass);
+
+	forceResponse = SymmetricMat3::IDENTITY() * (1 / totalMass);
+	momentResponse = ~totalInertia;
+}
+
+#pragma endregion
+
+/*
+	===== Update =====
+*/
+
+#pragma region update
+
 void MotorizedPhysical::update(double deltaT) {
+	refreshPhysicalProperties();
+
 	Vec3 accel = forceResponse * totalForce * deltaT;
 	
 	Vec3 localMoment = getCFrame().relativeToLocal(totalMoment);
@@ -298,18 +420,33 @@ void MotorizedPhysical::update(double deltaT) {
 	totalForce = Vec3();
 	totalMoment = Vec3();
 
-	velocity += accel;
-	angularVelocity += rotAcc;
+	motionOfCenterOfMass.velocity += accel;
+	motionOfCenterOfMass.angularVelocity += rotAcc;
 
-	Vec3 movement = velocity * deltaT + accel * deltaT * deltaT / 2;
+	Vec3 movement = motionOfCenterOfMass.velocity * deltaT + accel * deltaT * deltaT / 2;
 
-	Mat3 rotation = fromRotationVec(angularVelocity * deltaT);
+	Mat3 rotation = fromRotationVec(motionOfCenterOfMass.angularVelocity * deltaT);
 
 	rotateAroundCenterOfMassUnsafe(rotation);
 	translateUnsafe(movement);
 
 	updateAttachedPartCFrames();
+
+	updateAttachedPhysicals(deltaT);
 }
+
+void ConnectedPhysical::updateCFrame(const GlobalCFrame& parentCFrame) {
+	GlobalCFrame newPosition = parentCFrame.localToGlobal(getRelativeCFrameToParent());
+	setCFrameUnsafe(newPosition);
+}
+
+#pragma endregion
+
+/*
+	===== application of forces and the like
+*/
+
+#pragma region apply
 
 void MotorizedPhysical::applyForceAtCenterOfMass(Vec3 force) {
 	CHECK_VALID_VEC(force);
@@ -337,13 +474,13 @@ void MotorizedPhysical::applyMoment(Vec3 moment) {
 void MotorizedPhysical::applyImpulseAtCenterOfMass(Vec3 impulse) {
 	CHECK_VALID_VEC(impulse);
 	Debug::logVector(getCenterOfMass(), impulse, Debug::IMPULSE);
-	velocity += forceResponse * impulse;
+	motionOfCenterOfMass.velocity += forceResponse * impulse;
 }
 void MotorizedPhysical::applyImpulse(Vec3Relative origin, Vec3Relative impulse) {
 	CHECK_VALID_VEC(origin);
 	CHECK_VALID_VEC(impulse);
 	Debug::logVector(getCenterOfMass() + origin, impulse, Debug::IMPULSE);
-	velocity += forceResponse * impulse;
+	motionOfCenterOfMass.velocity += forceResponse * impulse;
 	Vec3 angularImpulse = origin % impulse;
 	applyAngularImpulse(angularImpulse);
 }
@@ -353,7 +490,7 @@ void MotorizedPhysical::applyAngularImpulse(Vec3 angularImpulse) {
 	Vec3 localAngularImpulse = getCFrame().relativeToLocal(angularImpulse);
 	Vec3 localRotAcc = momentResponse * localAngularImpulse;
 	Vec3 rotAcc = getCFrame().localToRelative(localRotAcc);
-	angularVelocity += rotAcc;
+	motionOfCenterOfMass.angularVelocity += rotAcc;
 }
 
 void MotorizedPhysical::applyDragAtCenterOfMass(Vec3 drag) {
@@ -378,54 +515,48 @@ void MotorizedPhysical::applyAngularDrag(Vec3 angularDrag) {
 	rotateAroundCenterOfMassUnsafe(fromRotationVec(rotAcc));
 }
 
-Position Physical::getCenterOfMass() const {
+
+void Physical::applyDragToPhysical(Vec3 origin, Vec3 drag) {
+	Vec3 COMOffset = mainPhysical->getCenterOfMass() - getCFrame().getPosition();
+	mainPhysical->applyDrag(origin + COMOffset, drag);
+}
+void Physical::applyImpulseToPhysical(Vec3 origin, Vec3 impulse) {
+	Vec3 COMOffset = mainPhysical->getCenterOfMass() - getCFrame().getPosition();
+	mainPhysical->applyImpulse(origin + COMOffset, impulse);
+}
+void Physical::applyForceToPhysical(Vec3 origin, Vec3 force) {
+	Vec3 COMOffset = mainPhysical->getCenterOfMass() - getCFrame().getPosition();
+	mainPhysical->applyForce(origin + COMOffset, force);
+}
+
+#pragma endregion
+
+#pragma region getters
+
+Position Physical::getObjectCenterOfMass() const {
 	return getCFrame().localToGlobal(localCenterOfMass);
 }
-// gets velocity of point relative to center of mass
-Vec3 Physical::getVelocityOfPoint(const Vec3Relative& point) const {
-	return velocity + angularVelocity % point;
+
+GlobalCFrame Physical::getObjectCenterOfMassCFrame() const {
+	return GlobalCFrame(getCFrame().localToGlobal(localCenterOfMass), getCFrame().getRotation());
 }
 
-Vec3 MotorizedPhysical::getAcceleration() const {
-	return forceResponse * totalForce;
+double Physical::getVelocityKineticEnergy() const {
+	return mass * lengthSquared(getMotion().velocity) / 2;
 }
-
-Vec3 MotorizedPhysical::getAngularAcceleration() const {
-	return momentResponse * getCFrame().relativeToLocal(totalMoment);
+double Physical::getAngularKineticEnergy() const {
+	Vec3 localAngularVel = getCFrame().relativeToLocal(getMotion().angularVelocity);
+	return (inertia * localAngularVel) * localAngularVel / 2;
 }
-
-Vec3 Physical::getAccelerationOfPoint(const Vec3Relative& point) const {
-	return getAcceleration() + getAngularAcceleration() % point + angularVelocity % (angularVelocity % point);
+double Physical::getKineticEnergy() const {
+	return getVelocityKineticEnergy() + getAngularKineticEnergy();
 }
-
-void Physical::setCFrameUnsafe(const GlobalCFrame& newCFrame) {
-	this->mainPart->cframe = newCFrame;
-	for (const AttachedPart& p : parts) {
-		p.part->cframe = newCFrame.localToGlobal(p.attachment);
-	}
+CFrame Physical::getRelativeCFrameToMain() const {
+	return mainPhysical->getCFrame().globalToLocal(this->getCFrame());
 }
-
-void Physical::setCFrame(const GlobalCFrame& newCFrame) {
-	if (this->world != nullptr) {
-		Bounds oldMainPartBounds = this->mainPart->getStrictBounds();
-
-		setCFrameUnsafe(newCFrame);
-
-		world->updatePartGroupBounds(this->mainPart, oldMainPartBounds);
-	} else {
-		setCFrameUnsafe(newCFrame);
-	}
-}
-
-void Physical::setPartCFrame(Part* part, const GlobalCFrame& newCFrame) {
-	if (part == mainPart) {
-		setCFrame(newCFrame);
-	} else {
-		CFrame attach = getAttachFor(part).attachment;
-		GlobalCFrame newMainCFrame = newCFrame.localToGlobal(~attach);
-
-		setCFrame(newMainCFrame);
-	}
+Vec3 Physical::localToMain(const Vec3Local& vec) const {
+	Position globalPos = this->getCFrame().localToGlobal(vec);
+	return mainPhysical->getCFrame().globalToLocal(globalPos);
 }
 
 /*
@@ -468,46 +599,111 @@ double MotorizedPhysical::getInertiaOfPointInDirectionRelative(const Vec3Relativ
 	return getInertiaOfPointInDirectionLocal(getCFrame().relativeToLocal(relPoint), getCFrame().relativeToLocal(relDirection));
 }
 
-double Physical::getVelocityKineticEnergy() const {
-	return mass * lengthSquared(velocity) / 2;
-}
-double Physical::getAngularKineticEnergy() const {
-	Vec3 localAngularVel = getCFrame().relativeToLocal(angularVelocity);
-	return (inertia * localAngularVel) * localAngularVel / 2;
-}
-double Physical::getKineticEnergy() const {
-	return getVelocityKineticEnergy() + getAngularKineticEnergy();
+CFrame ConnectedPhysical::getRelativeCFrameToParent() const {
+	return attachOnParent.localToGlobal(constraintWithParent->getRelativeCFrame().localToGlobal(~attachOnThis));
 }
 
-ConnectedPhysical::ConnectedPhysical(Physical&& phys, HardConstraint* constraintWithParent, MotorizedPhysical* mainPhysical) :
-	Physical(std::move(phys)), constraintWithParent(constraintWithParent) {
-	this->mainPhysical = mainPhysical;
+Position MotorizedPhysical::getCenterOfMass() const {
+	return getCFrame().localToGlobal(totalCenterOfMass);
 }
 
-MotorizedPhysical::MotorizedPhysical(Part* mainPart) : Physical(mainPart, this) {}
-
-Vec3 Physical::getAcceleration() const { return mainPhysical->getAcceleration(); }
-Vec3 Physical::getAngularAcceleration() const { return mainPhysical->getAngularAcceleration(); }
-
-void Physical::applyForceAtCenterOfMass(Vec3 force) { mainPhysical->applyForceAtCenterOfMass(force); }
-void Physical::applyForce(Vec3Relative origin, Vec3 force) { mainPhysical->applyForce(origin, force); }
-void Physical::applyMoment(Vec3 moment) { mainPhysical->applyMoment(moment); }
-void Physical::applyImpulseAtCenterOfMass(Vec3 impulse) { mainPhysical->applyImpulseAtCenterOfMass(impulse); }
-void Physical::applyImpulse(Vec3Relative origin, Vec3Relative impulse) { mainPhysical->applyImpulse(origin, impulse); }
-void Physical::applyAngularImpulse(Vec3 angularImpulse) { mainPhysical->applyAngularImpulse(angularImpulse); }
-void Physical::applyDragAtCenterOfMass(Vec3 drag) { mainPhysical->applyDragAtCenterOfMass(drag); }
-void Physical::applyDrag(Vec3Relative origin, Vec3Relative drag) { mainPhysical->applyDrag(origin, drag); }
-void Physical::applyAngularDrag(Vec3 angularDrag) { mainPhysical->applyAngularDrag(angularDrag); }
-
-SymmetricMat3 Physical::getResponseMatrix(const Vec3Local& localPoint) const {
-	return mainPhysical->getResponseMatrix(localPoint);
+GlobalCFrame MotorizedPhysical::getCenterOfMassCFrame() const {
+	return GlobalCFrame(getCFrame().localToGlobal(totalCenterOfMass), getCFrame().getRotation());
 }
-Mat3 Physical::getResponseMatrix(const Vec3Local& actionPoint, const Vec3Local& responsePoint) const {
-	return mainPhysical->getResponseMatrix(actionPoint, responsePoint);
+
+Motion Physical::getMotion() const {
+	if(this->isMainPhysical()) {
+		MotorizedPhysical* self = (MotorizedPhysical*) this;
+
+		return self->motionOfCenterOfMass.getMotionOfPoint(getCFrame().localToRelative(self->localCenterOfMass - self->totalCenterOfMass));
+	} else {
+		ConnectedPhysical* self = (ConnectedPhysical*) this;
+		
+		Physical* parent = self->parent;
+
+		// All motion and offset variables here are expressed in the global frame
+
+		Motion parentMotion = parent->getMotion();
+
+		Vec3 connectionOffsetOnParent = parent->getCFrame().localToRelative(self->attachOnParent.getPosition() - parent->localCenterOfMass);
+
+		Motion motionOfConnectOnParent = parentMotion.getMotionOfPoint(connectionOffsetOnParent);
+
+		Vec3 jointOffset = parent->getCFrame().localToRelative(self->attachOnParent.localToRelative(self->constraintWithParent->getRelativeCFrame().getPosition()));
+
+		Motion motionPastJoint = motionOfConnectOnParent.addRelativeMotion(self->constraintWithParent->getRelativeMotion()).getMotionOfPoint(jointOffset);
+
+		Vec3 connectionOffsetOnSelf = self->getCFrame().localToRelative(self->attachOnThis.getPosition() - self->localCenterOfMass);
+
+		return motionPastJoint.getMotionOfPoint(-connectionOffsetOnSelf);
+	}
 }
-double Physical::getInertiaOfPointInDirectionLocal(const Vec3Local& localPoint, const Vec3Local& localDirection) const {
-	return mainPhysical->getInertiaOfPointInDirectionLocal(localPoint, localDirection);
+
+#pragma endregion
+
+
+ConnectedPhysical::ConnectedPhysical(Physical&& phys, Physical* parent, HardConstraint* constraintWithParent, const CFrame& attachOnThis, const CFrame& attachOnParent) :
+	Physical(std::move(phys)), parent(parent), attachOnThis(attachOnThis), attachOnParent(attachOnParent), constraintWithParent(constraintWithParent) {
 }
-double Physical::getInertiaOfPointInDirectionRelative(const Vec3Relative& relativePoint, const Vec3Relative& relativeDirection) const 							{
-	return mainPhysical->getInertiaOfPointInDirectionRelative(relativePoint, relativeDirection);
+
+MotorizedPhysical::MotorizedPhysical(Part* mainPart) : Physical(mainPart, this) {
+	refreshPhysicalProperties();
+}
+
+void MotorizedPhysical::ensureWorld(WorldPrototype* world) {
+	if(this->world == world) return;
+	if(this->world != nullptr) {
+		this->world->removeMainPhysical(this);
+	}
+	throw "TODO";
+}
+
+#pragma region isValid
+
+bool Physical::isValid() const {
+	assert(isfinite(mass));
+	assert(isVecValid(localCenterOfMass));
+	assert(isMatValid(inertia));
+
+	for(const AttachedPart& ap : parts) {
+		assert(isCFrameValid(ap.attachment));
+		assert(ap.part->isValid());
+	}
+
+	for(const ConnectedPhysical& p : childPhysicals) {
+		assert(p.isValid());
+	}
+
+	return true;
+}
+bool MotorizedPhysical::isValid() const {
+	assert(Physical::isValid());
+	
+	assert(isVecValid(totalForce));
+	assert(isVecValid(totalMoment));
+	assert(isfinite(totalMass));
+	assert(isVecValid(totalCenterOfMass));
+	assert(isMatValid(forceResponse));
+	assert(isMatValid(momentResponse));
+
+	return true;
+}
+
+bool ConnectedPhysical::isValid() const {
+	assert(Physical::isValid());
+
+	assert(isCFrameValid(attachOnParent));
+	assert(isCFrameValid(attachOnThis));
+
+	return true;
+}
+
+#pragma endregion
+
+CFrame fromRelativeToPartToRelativeToPhysical(const Part* part, const CFrame& cframeRelativeToPart) {
+	if(part->parent->mainPart == part) {
+		return cframeRelativeToPart;
+	} else {
+		return part->parent->getAttachFor(part).attachment.localToGlobal(cframeRelativeToPart);
+	}
 }

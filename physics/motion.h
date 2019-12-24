@@ -1,6 +1,7 @@
 #pragma once
 
 #include "math/linalg/vec.h"
+#include "math/cframe.h"
 
 struct Motion {
 	union {
@@ -32,7 +33,7 @@ struct Motion {
 		return acceleration + angularAcceleration % relativePoint + angularVelocity % (angularVelocity % relativePoint);
 	}
 
-	inline Motion getMotionOfRelativePoint(Vec3 relativePoint) const {
+	inline Motion getMotionOfPoint(Vec3 relativePoint) const {
 		return Motion(
 			getVelocityOfPoint(relativePoint), 
 			angularVelocity, 
@@ -50,14 +51,6 @@ struct Motion {
 		);
 	}
 };
-
-inline Motion localToGlobal(const CFrame& cframe, const Motion& motion) {
-	
-}
-
-inline Motion globalToLocal(const CFrame& cframe, const Motion& motion) {
-	
-}
 
 inline Motion localToRelative(const CFrame& cframe, const Motion& motion) {
 	Motion result;

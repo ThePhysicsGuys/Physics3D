@@ -1,5 +1,8 @@
 #include "testsMain.h"
 
+#include "compare.h"
+#include "../physics/misc/toString.h"
+
 #include "../util/log.h"
 #include "../physics/math/cframe.h"
 #include "../physics/datastructures/buffers.h"

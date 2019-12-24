@@ -8,7 +8,7 @@
 #include "../graphics/gui/button.h"
 #include "../graphics/gui/directionEditor.h"
 #include "../graphics/gui/colorPicker.h"
-#include "../physics/math/mathUtil.h"
+#include "../physics/misc/toString.h"
 #include "../graphics/debug/visualDebug.h"
 #include "../graphics/shader/shaderProgram.h"
 #include "../graphics/renderUtils.h"
@@ -414,10 +414,10 @@ struct PropertiesFrame : public FrameBlueprint, public Frame {
 
 			positionLabel->text = "Position: " + str(selectedPart->getCFrame().position);
 			partNameLabel->text = "Name: " + selectedPart->name;
-			velocityLabel->text = "Velocity: " + str(selectedPart->getVelocity());
-			angularVelocityLabel->text = "Angular Velocity: " + str(selectedPart->getAngularVelocity());
+			velocityLabel->text = "Velocity: " + str(selectedPart->getMotion().velocity);
+			angularVelocityLabel->text = "Angular Velocity: " + str(selectedPart->getMotion().angularVelocity);
 			double kineticEnergy = selectedPart->parent->getKineticEnergy();
-			double potentialEnergy = world->getPotentialEnergyOfPhysical(*selectedPart->parent);
+			double potentialEnergy = world->getPotentialEnergyOfPhysical(*selectedPart->parent->mainPhysical);
 			kineticEnergyLabel->text = "Kinetic Energy: " + str(kineticEnergy);
 			potentialEnergyLabel->text = "Potential Energy: " + str(potentialEnergy);
 			energyLabel->text = "Energy: " + str(kineticEnergy + potentialEnergy);

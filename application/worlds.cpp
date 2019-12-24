@@ -28,13 +28,13 @@ void PlayerWorld::applyExternalForces() {
 		Position absoluteSelectedPoint = selectedPart->getCFrame().localToGlobal(localSelectedPoint);
 		Vec3 delta = magnetPoint - absoluteSelectedPoint;
 
-		Position centerOfmass = selectedPhysical->getCenterOfMass();
+		Position centerOfmass = selectedPhysical->getObjectCenterOfMass();
 
-		Vec3 relativeSelectedPointSpeed = selectedPhysical->getVelocityOfPoint(absoluteSelectedPoint - centerOfmass);
+		Vec3 relativeSelectedPointSpeed = selectedPhysical->getMotion().getVelocityOfPoint(absoluteSelectedPoint - centerOfmass);
 		Vec3 force = selectedPhysical->mass * (delta * PICKER_STRENGTH - relativeSelectedPointSpeed * PICKER_SPEED_STRENGTH);
-		selectedPhysical->applyForce(absoluteSelectedPoint - centerOfmass, force);
-		Vec3 angular = -cframe.localToRelative(selectedPhysical->inertia * cframe.relativeToLocal(selectedPhysical->angularVelocity)) * PICKER_ANGULAR_REDUCE_STRENGTH;// / (delta.length() + 1);
-		selectedPhysical->applyMoment(angular);
+		selectedPhysical->applyForceToPhysical(absoluteSelectedPoint - centerOfmass, force);
+		Vec3 angular = -cframe.localToRelative(selectedPhysical->inertia * cframe.relativeToLocal(selectedPhysical->getMotion().angularVelocity)) * PICKER_ANGULAR_REDUCE_STRENGTH;// / (delta.length() + 1);
+		selectedPhysical->mainPhysical->applyMoment(angular);
 	}
 
 	// Player movement
@@ -58,13 +58,13 @@ void PlayerWorld::applyExternalForces() {
 		Vec3 runVector = (lengthSquared(total) >= 0.00005) ? normalize(total) * RUN_SPEED : Vec3(0, 0, 0);
 
 		Vec3 desiredSpeed = runVector;
-		Vec3 actualSpeed = player->parent->velocity;
+		Vec3 actualSpeed = player->parent->getMotion().velocity;
 
 		Vec3 speedToGain = desiredSpeed - actualSpeed;
 
 		speedToGain.y = 0;
 
-		player->parent->applyForceAtCenterOfMass(speedToGain * player->getMass() * AIR_RUN_SPEED_FACTOR);
+		player->parent->mainPhysical->applyForceAtCenterOfMass(speedToGain * player->getMass() * AIR_RUN_SPEED_FACTOR);
 
 		if (handler->getKey(KeyboardOptions::Move::jump))
 			runVector += Vec3(0, JUMP_SPEED, 0);

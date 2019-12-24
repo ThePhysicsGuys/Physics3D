@@ -157,6 +157,9 @@ typedef Vector<float, 4>		Vec4f;
 typedef Vector<long long, 4>	Vec4l;
 typedef Vector<int, 4>			Vec4i;
 
+typedef Vec2 NormalizedVec2;
+typedef Vec3 NormalizedVec3;
+typedef Vec4 NormalizedVec4;
 
 template<typename T, typename T2, size_t Size>
 auto operator*(const Vector<T, Size>& a, const Vector<T2, Size>& b) -> decltype(a[0]*b[0]+a[1]*b[1]) {

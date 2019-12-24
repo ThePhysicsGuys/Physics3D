@@ -508,6 +508,9 @@ using UnitaryMatrix = SquareMatrix<T, Size>;
 	===== Predefined matrices
 */
 
+template<typename T, size_t Size>
+using RotationMatrix = Matrix<T, Size, Size>;
+
 // Mat2
 typedef Matrix<double, 2, 2>	Mat2;
 typedef Matrix<float, 2, 2>		Mat2f;
@@ -527,9 +530,9 @@ typedef DiagonalMatrix<double, 3>		DiagonalMat3;
 typedef DiagonalMatrix<float, 3>			DiagonalMat3f;
 typedef DiagonalMatrix<long long, 3>		DiagonalMat3l;
 
-typedef Matrix<double, 3, 3>	RotMat3;
-typedef Matrix<float, 3, 3>		RotMat3f;
-typedef Matrix<long long, 3, 3>	RotMat3l;
+typedef RotationMatrix<double, 3>	RotMat3;
+typedef RotationMatrix<float, 3>		RotMat3f;
+typedef RotationMatrix<long long, 3>	RotMat3l;
 
 // Mat4
 typedef Matrix<double, 4, 4>	Mat4;

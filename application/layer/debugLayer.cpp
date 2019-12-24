@@ -69,9 +69,9 @@ void recursiveRenderColTree(const TreeNode& node, int depth) {
 	renderBounds(node.bounds.expanded((5 - depth) * 0.002), color);
 }
 
-bool recursiveColTreeForOneObject(const TreeNode& node, const Physical* physical, const Bounds& bounds) {
+bool recursiveColTreeForOneObject(const TreeNode& node, const Part* part, const Bounds& bounds) {
 	if (node.isLeafNode()) {
-		if (node.object == physical)
+		if (node.object == part)
 			return true;
 		/*for (const BoundedPhysical& p : *node.physicals) {
 			if (p.object == physical) {
@@ -81,7 +81,7 @@ bool recursiveColTreeForOneObject(const TreeNode& node, const Physical* physical
 	} else {
 		//if (!intersects(node.bounds, bounds)) return false;
 		for (const TreeNode& subNode : node) {
-			if (recursiveColTreeForOneObject(subNode, physical, bounds)) {
+			if (recursiveColTreeForOneObject(subNode, part, bounds)) {
 				Color green = COLOR::GREEN;
 				green.w = 0.3f;
 
@@ -155,7 +155,8 @@ void DebugLayer::onRender() {
 	AddableBuffer<ColoredPoint>& pointLog = getPointBuffer();
 
 	for(const MotorizedPhysical* physical : screen->world->iterPhysicals()) {
-		pointLog.add(ColoredPoint(physical->getCenterOfMass(), CENTER_OF_MASS));
+		Position com = physical->getCenterOfMass();
+		pointLog.add(ColoredPoint(com, CENTER_OF_MASS));
 	}
 
 	screen->world->syncReadOnlyOperation([this, &vecLog]() {
@@ -169,7 +170,7 @@ void DebugLayer::onRender() {
 		if(screen->selectedPart != nullptr) {
 			const GlobalCFrame& selectedCFrame = screen->selectedPart->getCFrame();
 			for(const Vec3f& corner : screen->selectedPart->hitbox.asPolyhedron().iterVertices()) {
-				vecLog.add(ColoredVector(selectedCFrame.localToGlobal(corner), screen->selectedPart->parent->getVelocityOfPoint(Vec3(selectedCFrame.localToRelative(corner))), VELOCITY));
+				vecLog.add(ColoredVector(selectedCFrame.localToGlobal(corner), screen->selectedPart->parent->getMotion().getVelocityOfPoint(Vec3(selectedCFrame.localToRelative(corner))), VELOCITY));
 			}
 
 			if(colissionSpheresMode == SphereColissionRenderMode::SELECTED) {
@@ -216,7 +217,7 @@ void DebugLayer::onRender() {
 			break;
 		case ColTreeRenderMode::SELECTED:
 			if(screen->selectedPart != nullptr)
-				recursiveColTreeForOneObject(screen->world->objectTree.rootNode, screen->selectedPart->parent, screen->selectedPart->parent->getStrictBounds());
+				recursiveColTreeForOneObject(screen->world->objectTree.rootNode, screen->selectedPart, screen->selectedPart->getStrictBounds());
 			break;
 		}
 	});
