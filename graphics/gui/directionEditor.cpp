@@ -4,6 +4,7 @@
 
 #include "../physics/math/cframe.h"
 #include "../physics/math/mathUtil.h"
+#include "../physics/math/globalCFrame.h"
 
 #include "gui.h"
 #include "texture.h"

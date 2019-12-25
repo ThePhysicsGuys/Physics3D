@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../../util/log.h"
 #include "iteratorEnd.h"
 
 inline unsigned long long nextPowerOf2(unsigned long long v) {

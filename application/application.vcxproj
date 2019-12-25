@@ -205,6 +205,7 @@
     <ClInclude Include="application.h" />
     <ClInclude Include="ecs\components\component.h" />
     <ClInclude Include="core.h" />
+    <ClInclude Include="ecs\components\mesh.h" />
     <ClInclude Include="ecs\components\model.h" />
     <ClInclude Include="ecs\entity.h" />
     <ClInclude Include="io\export.h" />
@@ -245,6 +246,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">core.h</PrecompiledHeaderFile>
     </ClCompile>
+    <ClCompile Include="ecs\components\mesh.cpp" />
     <ClCompile Include="ecs\components\model.cpp" />
     <ClCompile Include="ecs\entity.cpp" />
     <ClCompile Include="io\export.cpp" />

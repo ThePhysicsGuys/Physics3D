@@ -2,15 +2,6 @@
 
 #version 330 core
 
-#define TEXTURE_WIDTH 7.0
-#define MATRIX_ROW_0_OFFSET			((0. + 0.5) / TEXTURE_WIDTH)
-#define MATRIX_ROW_1_OFFSET			((1. + 0.5) / TEXTURE_WIDTH)
-#define MATRIX_ROW_2_OFFSET			((2. + 0.5) / TEXTURE_WIDTH)
-#define MATRIX_ROW_3_OFFSET			((3. + 0.5) / TEXTURE_WIDTH)
-#define AMBIENT_OFFSET				((4. + 0.5) / TEXTURE_WIDTH)
-#define DIFFUSE_REFLECTION_OFFSET   ((5. + 0.5) / TEXTURE_WIDTH)
-#define SPUCULAR_OFFSET				((6. + 0.5) / TEXTURE_WIDTH)
-
 //------------------------------------------------------------------------------//
 
 [vertex]
@@ -242,20 +233,6 @@ vec3 calcLightColor(Light light) {
 }
 
 void main() {
-	// Uniform extraction
-	/*float textureHeight = 1.0;
-	float modelID = 0.0;
-	float modelOffset = (modelID + 0.5) / textureHeight;
-
-	mat4 model = mat4(
-		texture2D(uniforms, vec2(MATRIX_ROW_0_OFFSET, modelOffset)),
-		texture2D(uniforms, vec2(MATRIX_ROW_1_OFFSET, modelOffset)),
-		texture2D(uniforms, vec2(MATRIX_ROW_2_OFFSET, modelOffset)),
-		texture2D(uniforms, vec2(MATRIX_ROW_3_OFFSET, modelOffset))
-	);*/
-
-	//vec4 ambient = texture2D(uniforms, vec2(AMBIENT_OFFSET, modelOffset));
-
 	// Light calculations
 	vec3 lightColors = vec3(0);
 	int count = 0;
@@ -268,7 +245,6 @@ void main() {
 
 	// Take average of colors
 	outColor = vec4(lightColors / count * material.ambient.rgb, material.ambient.a);
-	//outColor = texture(uniforms, vec2());
 
 	// Directional light
 	outColor = outColor + vec4(calcDirectionalLight(), 0);

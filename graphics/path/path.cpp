@@ -4,7 +4,7 @@
 
 #include "font.h"
 #include "gui/text.h"
-
+#include "../batch/guiBatch.h"
 #include "../physics/math/mathUtil.h"
 
 #define DEFAULT_PATTERN_2D(color) [color] (int i, const Vec2f& p) { return color; }

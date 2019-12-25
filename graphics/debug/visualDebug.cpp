@@ -7,6 +7,7 @@
 
 #include "font.h"
 #include "batch/commandBatch.h"
+#include "batch/guiBatch.h"
 #include "path/path.h"
 #include "gui/gui.h"
 
