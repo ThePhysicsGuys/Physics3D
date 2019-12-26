@@ -138,6 +138,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\include\imgui\imgui.cpp" />
+    <ClCompile Include="..\include\imgui\imgui_demo.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\include\imgui\imgui_draw.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\include\imgui\imgui_impl_glfw.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\include\imgui\imgui_impl_opengl3.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\include\imgui\imgui_widgets.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="buffers\bufferLayout.cpp" />
     <ClCompile Include="buffers\frameBuffer.cpp" />
     <ClCompile Include="buffers\indexBuffer.cpp" />
@@ -188,6 +204,14 @@
     <ClCompile Include="debug\visualDebug.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\include\imgui\imconfig.h" />
+    <ClInclude Include="..\include\imgui\imgui.h" />
+    <ClInclude Include="..\include\imgui\imgui_impl_glfw.h" />
+    <ClInclude Include="..\include\imgui\imgui_impl_opengl3.h" />
+    <ClInclude Include="..\include\imgui\imgui_internal.h" />
+    <ClInclude Include="..\include\imgui\imstb_rectpack.h" />
+    <ClInclude Include="..\include\imgui\imstb_textedit.h" />
+    <ClInclude Include="..\include\imgui\imstb_truetype.h" />
     <ClInclude Include="batch\batch.h" />
     <ClInclude Include="batch\batchConfig.h" />
     <ClInclude Include="batch\commandBatch.h" />
@@ -216,6 +240,7 @@
     <ClInclude Include="gui\gui.h" />
     <ClInclude Include="gui\guiUtils.h" />
     <ClInclude Include="gui\image.h" />
+    <ClInclude Include="gui\imgui\imguiExtension.h" />
     <ClInclude Include="gui\label.h" />
     <ClInclude Include="gui\layout.h" />
     <ClInclude Include="gui\orderedVector.h" />

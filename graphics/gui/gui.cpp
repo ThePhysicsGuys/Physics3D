@@ -304,21 +304,22 @@ namespace GUI {
 	}
 
 	void onRender(Mat4f orthoMatrix) {	
+		// Render gui
 		GUI::blurFrameBuffer->bind();
 		GraphicsShaders::quadShader.updateProjection(orthoMatrix);
 		GraphicsShaders::quadShader.updateTexture(screenFrameBuffer->texture);
 		quad->render();
 		GraphicsShaders::horizontalBlurShader.updateTexture(blurFrameBuffer->texture);
 		GraphicsShaders::horizontalBlurShader.updateWidth(windowInfo.dimension.x);
+		quad->render();
 		GraphicsShaders::verticalBlurShader.updateTexture(blurFrameBuffer->texture);
 		GraphicsShaders::verticalBlurShader.updateWidth(windowInfo.dimension.y);
 		quad->render();
 		blurFrameBuffer->unbind();
 
 		Path::bind(GUI::batch);
-		for (auto iterator = components.rbegin(); iterator != components.rend(); ++iterator) {
+		for (auto iterator = components.rbegin(); iterator != components.rend(); ++iterator)
 			(*iterator)->render();
-		}
 
 		Renderer::disableCulling();
 		Renderer::enableBlending();

@@ -19,11 +19,6 @@ Font* font = nullptr;
 
 // Frames
 PropertiesFrame* propertiesFrame = nullptr;
-DebugFrame* debugFrame = nullptr;
-EnvironmentFrame* environmentFrame = nullptr;
-
-ImageFrame* originalRender = nullptr;
-ImageFrame* blurRender = nullptr;
 
 GuiLayer::GuiLayer() {
 
@@ -67,13 +62,6 @@ bool onWindowResize(const WindowResizeEvent& event) {
 void GuiLayer::onInit() {
 	// GUI init
 	GUI::onInit({ screen->dimension, screen->camera.aspect }, screen->screenFrameBuffer);
-
-	// Frames init
-	propertiesFrame = new PropertiesFrame(0.75, 0.75);
-	environmentFrame = new EnvironmentFrame(0.8, 0.8);
-	debugFrame = new DebugFrame(0.7, 0.7);
-	originalRender = new ImageFrame(0, 0, "original");
-	blurRender = new ImageFrame(0, 0, "blur");
 }
 
 void GuiLayer::onUpdate() {
@@ -82,13 +70,6 @@ void GuiLayer::onUpdate() {
 
 	// Update GUI intersection
 	GUI::intersect(GUI::map(handler->mousePosition));
-
-	// Update frames
-	propertiesFrame->update();
-	debugFrame->update();
-	environmentFrame->update();
-	originalRender->update();
-	blurRender->update();
 }
 
 void GuiLayer::onEvent(Event& event) {
@@ -107,8 +88,9 @@ void GuiLayer::onRender() {
 	ApplicationShaders::fontShader.updateProjection(screen->camera.orthoMatrix);
 	GUI::onRender(screen->camera.orthoMatrix);
 
-	originalRender->image->texture = screen->screenFrameBuffer->texture;
-	blurRender->image->texture = GUI::blurFrameBuffer->texture;
+	EnvironmentFrame::render();
+	DebugFrame::render();
+	PropertiesFrame::render();
 }
 
 void GuiLayer::onClose() {

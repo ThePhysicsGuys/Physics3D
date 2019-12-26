@@ -271,6 +271,7 @@
     <ClCompile Include="picker\picker.cpp" />
     <ClCompile Include="ecs\components\transform.cpp" />
     <ClCompile Include="view\camera.cpp" />
+    <ClCompile Include="view\frames.cpp" />
     <ClCompile Include="view\screen.cpp" />
     <ClCompile Include="worldBuilder.cpp" />
     <ClCompile Include="worlds.cpp" />

@@ -34,6 +34,10 @@
 
 #include "frames.h"
 
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_opengl3.h"
+
 std::vector<IndexedMesh*> Screen::meshes;
 std::map<const ShapeClass*, VisualData> Screen::shapeClassMeshIds;
 
@@ -199,6 +203,13 @@ void Screen::onInit() {
 	// Resize
 	FrameBufferResizeEvent event(dimension.x, dimension.y);
 	handler->onFrameBufferResize(event);
+
+
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void) io;
+	ImGui::StyleColorsDark();
+	ImGui_ImplGlfw_InitForOpenGL(Renderer::getGLFWContext(), true);
+	ImGui_ImplOpenGL3_Init("#version 130");
 }
 
 
@@ -234,7 +245,6 @@ void Screen::onUpdate() {
 			camera.rotate(*this, -1 * speedAdjustment, 0, 0, leftDragging);
 		if (handler->getKey(KeyboardOptions::Application::close)) 
 			Renderer::closeGLFWWindow();
-		if (handler->getKey(KeyboardOptions::Debug::frame)) { guiLayer.debugFrame->visible = true; guiLayer.debugFrame->position = Vec2(0.8); GUI::select(guiLayer.debugFrame); }
 	}
 
 	// Update camera
@@ -253,14 +263,23 @@ void Screen::onEvent(Event& event) {
 }
 
 void Screen::onRender() {
+
+	// Init imgui
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplGlfw_NewFrame();
+	ImGui::NewFrame();
+
 	// Render to screen Framebuffer
 	screenFrameBuffer->bind();
 	Renderer::clearColor();
 	Renderer::clearDepth();
 
-	
 	// Render layers
 	layerStack.onRender();
+
+	// Render imgui
+	ImGui::Render();
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 	graphicsMeasure.mark(GraphicsProcess::FINALIZE);
 
@@ -273,6 +292,10 @@ void Screen::onRender() {
 }
 
 void Screen::onClose() {
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
+
 	screenFrameBuffer->close();
 
 	layerStack.onClose();
@@ -300,6 +323,7 @@ VisualData Screen::addMeshShape(const VisualShape& s) {
 	meshes.push_back(new IndexedMesh(s));
 	return VisualData{size, s.uvs != nullptr, s.normals != nullptr};
 }
+
 VisualData Screen::registerMeshFor(const ShapeClass* shapeClass, const VisualShape& mesh) {
 	if(shapeClassMeshIds.find(shapeClass) != shapeClassMeshIds.end()) throw "Attempting to re-register existing ShapeClass!";
 
@@ -310,9 +334,11 @@ VisualData Screen::registerMeshFor(const ShapeClass* shapeClass, const VisualSha
 	shapeClassMeshIds.insert(std::pair<const ShapeClass*, VisualData>(shapeClass, meshData));
 	return meshData;
 }
+
 VisualData Screen::registerMeshFor(const ShapeClass* shapeClass) {
 	return registerMeshFor(shapeClass, VisualShape(shapeClass->asPolyhedron()));
 }
+
 VisualData Screen::getOrCreateMeshFor(const ShapeClass* shapeClass) {
 	auto found = shapeClassMeshIds.find(shapeClass);
 
