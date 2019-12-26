@@ -100,6 +100,9 @@ bool StandardInputHandler::onKeyPress(KeyPressEvent& event) {
 				screen.selectedPart->parent->setAnchored(true);
 			}
 		}
+	} else if(KeyboardOptions::Part::makeMainPart == key) {
+		Log::info("Made %s the main part of it's physical", screen.selectedPart->name.c_str());
+		screen.selectedPart->makeMainPart();
 	} else if (KeyboardOptions::World::valid == key) {
 		Log::debug("Checking World::isValid()");
 		screen.world->isValid();
@@ -113,7 +116,7 @@ bool StandardInputHandler::onKeyPress(KeyPressEvent& event) {
 		Debug::colissionSpheresMode = static_cast<Debug::SphereColissionRenderMode>((static_cast<int>(Debug::colissionSpheresMode) + 1) % 3);
 	} else if (KeyboardOptions::Debug::tree == key) {
 		Debug::colTreeRenderMode = static_cast<Debug::ColTreeRenderMode>((static_cast<int>(Debug::colTreeRenderMode) + 1) % 5);
-	}
+	} 
 	
 
 	if(Keyboard::F1 <= key && Keyboard::F9 >= key) {

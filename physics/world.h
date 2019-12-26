@@ -37,6 +37,8 @@ class Layer;
 class WorldPrototype {
 private:
 	friend class Physical;
+	friend class MotorizedPhysical;
+	friend class ConnectedPhysical;
 	friend class Part;
 
 	std::vector<ExternalForce*> externalForces;

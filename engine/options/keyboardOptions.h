@@ -51,6 +51,7 @@ namespace KeyboardOptions {
 	namespace Part {
 		extern Key remove;
 		extern Key anchor;
+		extern Key makeMainPart;
 	}
 
 	namespace Application {
