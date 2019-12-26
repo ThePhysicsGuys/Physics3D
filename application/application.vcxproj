@@ -290,7 +290,6 @@
     <Natvis Include="view.natvis" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\res\shaders\instance_basic.shader" />
     <None Include="..\res\shaders\line.shader" />
     <None Include="..\res\shaders\postprocess.shader" />
   </ItemGroup>

@@ -69,11 +69,10 @@ class Physical {
 	friend class Part;
 protected:
 	void updateAttachedPartCFrames();
-	void translateUnsafe(const Vec3& translation);
-	void rotateAroundCenterOfMassUnsafe(const RotMat3& rotation);
+	void updateAttachedPhysicals(double deltaT);
+	void translateUnsafeRecursive(const Vec3Fix& translation);
 	void setCFrameUnsafe(const GlobalCFrame& newCFrame);
 
-	void updateAttachedPhysicals(double deltaT);
 
 	void refreshWithNewParts();
 
@@ -126,9 +125,6 @@ public:
 
 		throw "Part not in this physical!";
 	}
-
-	void rotateAroundCenterOfMass(const RotMat3& rotation);
-	void translate(const Vec3& translation);
 
 	void setCFrame(const GlobalCFrame& newCFrame);
 	void setPartCFrame(Part* part, const GlobalCFrame& newCFrame);
@@ -195,6 +191,7 @@ public:
 };
 
 class MotorizedPhysical : public Physical {
+	void rotateAroundCenterOfMassUnsafe(const RotMat3& rotation);
 public:
 	void refreshPhysicalProperties();
 	Vec3 totalForce = Vec3(0.0, 0.0, 0.0);
@@ -219,6 +216,9 @@ public:
 
 	void update(double deltaT);
 
+	void rotateAroundCenterOfMass(const RotMat3& rotation);
+	void translate(const Vec3& translation);
+
 	void applyForceAtCenterOfMass(Vec3 force);
 	void applyForce(Vec3Relative origin, Vec3 force);
 	void applyMoment(Vec3 moment);
@@ -236,5 +236,3 @@ public:
 
 	bool isValid() const;
 };
-
-CFrame fromRelativeToPartToRelativeToPhysical(const Part* part, const CFrame& cframeRelativeToPart);

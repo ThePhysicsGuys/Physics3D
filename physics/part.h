@@ -3,6 +3,8 @@
 class Part;
 class HardConstraint;
 class Physical;
+class ConnectedPhysical;
+class MotorizedPhysical;
 class WorldPrototype;
 #include "geometry/shape.h"
 #include "math/linalg/mat.h"
@@ -40,6 +42,8 @@ struct PartIntersection {
 
 class Part {
 	friend class Physical;
+	friend class ConnectedPhysical;
+	friend class MotorizedPhysical;
 	friend class WorldPrototype;
 
 	GlobalCFrame cframe;
@@ -70,7 +74,12 @@ public:
 	const GlobalCFrame& getCFrame() const { return cframe; }
 	void setCFrame(const GlobalCFrame& newCFrame);
 
+	CFrame transformCFrameToParent(const CFrame& cframeRelativeToPart);
+
 	Motion getMotion() const;
+
+	bool isMainPart() const;
+	void makeMainPart();
 
 	void translate(Vec3 translation);
 

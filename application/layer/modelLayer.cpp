@@ -60,6 +60,49 @@ void ModelLayer::onEvent(Event& event) {
 
 }
 
+static enum class RelationToSelectedPart {
+	NONE,
+	SELF,
+	DIRECT_ATTACH,
+	MAINPART,
+	PHYSICAL_ATTACH,
+	MAINPHYSICAL_ATTACH
+};
+
+static RelationToSelectedPart getRelationToSelectedPart(const Part* selectedPart, const Part* testPart) {
+	if(selectedPart == nullptr) return RelationToSelectedPart::NONE;
+	if(testPart == selectedPart) return RelationToSelectedPart::SELF;
+	if(selectedPart->parent != nullptr && testPart->parent != nullptr) {
+		if(testPart->parent == selectedPart->parent) {
+			if(testPart->isMainPart()) return RelationToSelectedPart::MAINPART;
+			else return RelationToSelectedPart::DIRECT_ATTACH;
+		} else if(testPart->parent->mainPhysical == selectedPart->parent->mainPhysical) {
+			if(testPart->parent->isMainPhysical()) return RelationToSelectedPart::MAINPHYSICAL_ATTACH;
+			else return RelationToSelectedPart::PHYSICAL_ATTACH;
+		}
+	}
+	return RelationToSelectedPart::NONE;
+}
+
+static Vec4f getAmbientForPartForSelected(Screen& screen, Part* part) {
+	switch(getRelationToSelectedPart(screen.selectedPart, part)) {
+	case RelationToSelectedPart::NONE: return Vec4f(0.0f,0,0,0);
+	case RelationToSelectedPart::SELF: return Vec4f(0.5f,0,0, 0);
+	case RelationToSelectedPart::DIRECT_ATTACH: return Vec4f(0,0.25f,0, 0);
+	case RelationToSelectedPart::MAINPART: return Vec4f(0,1.0f,0, 0);
+	case RelationToSelectedPart::PHYSICAL_ATTACH: return Vec4f(0,0,0.25f, 0);
+	case RelationToSelectedPart::MAINPHYSICAL_ATTACH: return Vec4f(0,0,1.0f, 0);
+	}
+}
+
+static Vec4f getAmbientForPart(Screen& screen, Part* part) {
+	Vec4f computedAmbient = getAmbientForPartForSelected(screen, part);
+	if(part == screen.intersectedPart) {
+		computedAmbient += Vec4f(-0.1f, -0.1f, -0.1f, 0);
+	}
+	return computedAmbient;
+}
+
 void ModelLayer::onRender() {
 	graphicsMeasure.mark(GraphicsProcess::PHYSICALS);
 
@@ -92,10 +135,7 @@ void ModelLayer::onRender() {
 		Material material = part->material;
 
 		// Picker code
-		if(part == screen->intersectedPart)
-			material.ambient = part->material.ambient + Vec4f(-0.1f, -0.1f, -0.1f, 0);
-		else
-			material.ambient = part->material.ambient;
+		material.ambient += getAmbientForPart(*screen, part);
 
 		if(material.ambient.w < 1) {
 			transparentMeshes[lengthSquared(Vec3(screen->camera.cframe.position - part->getPosition()))] = part;
@@ -123,12 +163,7 @@ void ModelLayer::onRender() {
 
 		Material material = part->material;
 
-		if (part == screen->selectedPart)
-			material.ambient = part->material.ambient + Vec4f(0.1f, 0.1f, 0.1f, -0.2f);
-		else if (part == screen->intersectedPart)
-			material.ambient = part->material.ambient + Vec4f(-0.1f, -0.1f, -0.1f, 0);
-		else
-			material.ambient = part->material.ambient;
+		material.ambient += getAmbientForPart(*screen, part);
 
 		ApplicationShaders::basicShader.updateMaterial(material);
 		ApplicationShaders::basicShader.updatePart(*part);

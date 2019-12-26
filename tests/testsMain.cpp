@@ -207,7 +207,7 @@ int main(int argc, char * argv[]) {
 	color(SKIP_COLOR); cout << "[SKIP]" << endl;
 	color(WHITE); cout << "Number of tests: " << tests->size() << endl;
 
-	if(argc == 1) {
+	if(argc == 1 || argc == 2 && std::string("--coverage") == argv[1]) {
 		for(Test& t : *tests) {
 			t.run();
 		}
@@ -224,7 +224,7 @@ int main(int argc, char * argv[]) {
 	}
 	color(WHITE);  cout << "Tests finished" << endl;
 
-	
+	if(argc == 2 && std::string("--coverage") == argv[1]) return 0;
 
 	while(true) {
 		string input;

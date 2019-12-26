@@ -40,9 +40,6 @@ Part::~Part() {
 	}
 }
 
-#include "misc/serialization.h"
-#include "../application/extendedPart.h"
-
 PartIntersection Part::intersects(const Part& other) const {
 	CFrame relativeTransform = this->cframe.globalToLocal(other.cframe);
 	Intersection result = intersectsTransformed(this->hitbox, other.hitbox, relativeTransform);
@@ -80,7 +77,7 @@ void Part::scale(double scaleX, double scaleY, double scaleZ) {
 }
 
 void Part::setCFrame(const GlobalCFrame& newCFrame) {
-	if (this->parent == nullptr) {
+	if(this->parent == nullptr) {
 		this->cframe = newCFrame;
 	} else {
 		this->parent->setPartCFrame(this, newCFrame);
@@ -96,7 +93,7 @@ Motion Part::getMotion() const {
 
 void Part::translate(Vec3 translation) {
 	if(this->parent != nullptr) {
-		this->parent->translate(translation);
+		this->parent->mainPhysical->translate(translation);
 	} else {
 		this->cframe.translate(translation);
 	}
@@ -130,11 +127,11 @@ void Part::setDepth(double newDepth) {
 
 
 void Part::attach(Part* other, const CFrame& relativeCFrame) {
-	if (this->parent == nullptr) {
+	if(this->parent == nullptr) {
 		this->parent = new MotorizedPhysical(this);
 		this->parent->attachPart(other, relativeCFrame);
 	} else {
-		this->parent->attachPart(other, fromRelativeToPartToRelativeToPhysical(this, relativeCFrame));
+		this->parent->attachPart(other, this->transformCFrameToParent(relativeCFrame));
 	}
 }
 
@@ -144,18 +141,36 @@ void Part::attach(Part* other, HardConstraint* constraint, const CFrame& attachT
 		this->parent = newPhys;
 		this->parent->attachPart(other, constraint, attachToThis, attachToThat);
 	} else {
-		this->parent->attachPhysical(Physical(other, this->parent->mainPhysical), constraint, fromRelativeToPartToRelativeToPhysical(this, attachToThis), attachToThat);
+		this->parent->attachPhysical(Physical(other, this->parent->mainPhysical), constraint, this->transformCFrameToParent(attachToThis), attachToThat);
 	}
 }
 
 void Part::detach() {
-	if (this->parent == nullptr) throw "No physical to detach from!";
+	if(this->parent == nullptr) throw "No physical to detach from!";
 	this->parent->detachPart(this);
 }
 
 void Part::ensureHasParent() {
 	if(this->parent == nullptr) {
 		this->parent = new MotorizedPhysical(this);
+	}
+}
+
+CFrame Part::transformCFrameToParent(const CFrame& cframeRelativeToPart) {
+	if(this->isMainPart()) {
+		return cframeRelativeToPart;
+	} else {
+		return this->parent->getAttachFor(this).attachment.localToGlobal(cframeRelativeToPart);
+	}
+}
+
+bool Part::isMainPart() const {
+	return this->parent == nullptr || this->parent->mainPart == this;
+}
+
+void Part::makeMainPart() {
+	if(!this->isMainPart()) {
+		this->parent->makeMainPart(this);
 	}
 }
 
