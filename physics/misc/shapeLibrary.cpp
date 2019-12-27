@@ -1,7 +1,5 @@
 #include "shapeLibrary.h"
 
-#include "../math/mathUtil.h"
-
 #include <utility>
 #include <map>
 
@@ -11,6 +9,7 @@
 
 namespace Library {
 	float g = 1.61803398874989484820458683436563811772030917980576286213544862270526046281890f;
+	float PI = 3.14159265359f;
 
 	Vec3f icosahedronVertices[]{
 		Vec3f(0, 0.5, g / 2), Vec3f(0, 0.5, -g / 2), Vec3f(0, -0.5, -g / 2), Vec3f(0, -0.5, g / 2),
@@ -79,11 +78,11 @@ namespace Library {
 	const Polyhedron house(houseVertices, houseTriangles, 10, 16);
 	const Polyhedron wedge(wedgeVertices, wedgeTriangles, 6, 8);
 
-	Polyhedron createCube(double side) {
+	Polyhedron createCube(float side) {
 		return createBox(side, side, side);
 	}
 
-	Polyhedron createBox(double width, double height, double depth) {
+	Polyhedron createBox(float width, float height, float depth) {
 		float dx = float(width / 2.0);
 		float dy = float(height / 2.0);
 		float dz = float(depth / 2.0);
@@ -103,7 +102,8 @@ namespace Library {
 
 	// Returns a new Triangle[sides * 2 + (sides - 2) * 2]
 	static Triangle* createPrismTriangles(int sides) {
-		int triangleCount = sides * 2 + (sides - 2) * 2;
+		if(sides <= 1) throw "invalid number of sides!";
+		int triangleCount = (sides - 1) * 4;
 		Triangle* triangleBuf = new Triangle[triangleCount];
 
 		// sides
@@ -114,7 +114,7 @@ namespace Library {
 			triangleBuf[i * 2 + 1] = Triangle{botRight + 1, botRight, botLeft + 1}; // topRight, topLeft, botRight
 		}
 
-		Triangle* capOffset = triangleBuf + sides * 2;
+		Triangle* capOffset = triangleBuf + size_t(sides) * 2;
 		// top and bottom
 		for(int i = 0; i < sides - 2; i++) { // common corner is i=0
 			capOffset[i] = Triangle{0, (i + 1) * 2, (i + 2) * 2};
@@ -124,13 +124,13 @@ namespace Library {
 		return triangleBuf;
 	}
 
-	Polyhedron createXPrism(int sides, double radius, double height) {
+	Polyhedron createXPrism(int sides, float radius, float height) {
 		int vertexCount = sides * 2;
 		Vec3f* vecBuf = new Vec3f[vertexCount];
 
 		// vertices
 		for(int i = 0; i < sides; i++) {
-			double angle = i * PI * 2 / sides;
+			float angle = i * PI * 2 / sides;
 			vecBuf[i * 2] = Vec3f(height / 2, cos(angle) * radius, sin(angle) * radius);
 			vecBuf[i * 2 + 1] = Vec3f(-height / 2, cos(angle) * radius, sin(angle) * radius);
 		}
@@ -138,13 +138,13 @@ namespace Library {
 		return Polyhedron(vecBuf, createPrismTriangles(sides), vertexCount, sides * 2 + (sides - 2) * 2);
 	}
 
-	Polyhedron createYPrism(int sides, double radius, double height) {
+	Polyhedron createYPrism(int sides, float radius, float height) {
 		int vertexCount = sides * 2;
 		Vec3f* vecBuf = new Vec3f[vertexCount];
 
 		// vertices
 		for (int i = 0; i < sides; i++) {
-			double angle = i * PI * 2 / sides;
+			float angle = i * PI * 2 / sides;
 			vecBuf[i*2] = Vec3f(cos(angle) * radius, -height / 2, sin(angle) * radius);
 			vecBuf[i*2+1] = Vec3f(cos(angle) * radius, height / 2, sin(angle) * radius);
 		}
@@ -152,13 +152,13 @@ namespace Library {
 		return Polyhedron(vecBuf, createPrismTriangles(sides), vertexCount, sides * 2 + (sides - 2) * 2);
 	}
 
-	Polyhedron createZPrism(int sides, double radius, double height) {
+	Polyhedron createZPrism(int sides, float radius, float height) {
 		int vertexCount = sides * 2;
 		Vec3f* vecBuf = new Vec3f[vertexCount];
 
 		// vertices
 		for(int i = 0; i < sides; i++) {
-			double angle = i * PI * 2 / sides;
+			float angle = i * PI * 2 / sides;
 			vecBuf[i * 2] = Vec3f(cos(angle) * radius, sin(angle) * radius, height / 2);
 			vecBuf[i * 2 + 1] = Vec3f(cos(angle) * radius, sin(angle) * radius, -height / 2);
 		}
@@ -177,7 +177,7 @@ namespace Library {
 			triangleBuf[i * 2 + 1] = Triangle{botRight + 1, botRight, botLeft + 1}; // topRight, topLeft, botRight
 		}
 
-		Triangle* capOffset = triangleBuf + sides * 2;
+		Triangle* capOffset = triangleBuf + size_t(sides) * 2;
 		// top and bottom
 		for(int i = 0; i < sides; i++) { // common corner is i=0
 			capOffset[i] = Triangle{bottomIndex, i * 2, ((i + 1) % sides) * 2};
@@ -186,13 +186,13 @@ namespace Library {
 		return triangleBuf;
 	}
 
-	Polyhedron createPointyPrism(int sides, double radius, double height, double topOffset, double bottomOffset) {
+	Polyhedron createPointyPrism(int sides, float radius, float height, float topOffset, float bottomOffset) {
 		int vertexCount = sides * 2 + 2;
 		Vec3f* vecBuf = new Vec3f[vertexCount];
 
 		// vertices
-		for (int i = 0; i < sides; i++) {
-			double angle = i * PI * 2 / sides;
+		for (size_t i = 0; i < sides; i++) {
+			float angle = i * PI * 2 / sides;
 			vecBuf[i * 2] = Vec3f(cos(angle) * radius, -height / 2, sin(angle) * radius);
 			vecBuf[i * 2 + 1] = Vec3f(cos(angle) * radius, height / 2, sin(angle) * radius);
 		}
@@ -209,10 +209,10 @@ namespace Library {
 	}
 
 	// divides every triangle into 4 smaller triangles
-	static std::pair<Vec3f*, Triangle*> tesselate(Vec3f* vecBuf, Triangle* triangleBuf, size_t vertexCount, size_t triangleCount) {
+	static std::pair<Vec3f*, Triangle*> tesselate(Vec3f* vecBuf, Triangle* triangleBuf, int vertexCount, int triangleCount) {
 		assert(triangleCount % 2 == 0);
-		size_t newVecBufSize = vertexCount + triangleCount * 3 / 2;
-		size_t newTriIndex = triangleCount*4;
+		int newVecBufSize = vertexCount + triangleCount * 3 / 2;
+		int newTriIndex = triangleCount*4;
 
 		int curMapIndex = vertexCount;
 
@@ -262,7 +262,7 @@ namespace Library {
 
 
 
-	Polyhedron createSphere(double radius, int steps) {
+	Polyhedron createSphere(float radius, int steps) {
 
 		int vertices = 12;
 		int triangles = 20;
@@ -307,7 +307,7 @@ namespace Library {
 		return poly;
 	}
 
-	Polyhedron createSpikeBall(double internalRadius, double spikeRadius, int steps, int spikeSteps) {
+	Polyhedron createSpikeBall(float internalRadius, float spikeRadius, int steps, int spikeSteps) {
 
 		int vertices = 12;
 		int triangles = 20;

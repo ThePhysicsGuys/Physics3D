@@ -5,7 +5,7 @@
 #include "../math/transform.h"
 #include "genericCollidable.h"
 
-class ComputationBuffers;
+struct ComputationBuffers;
 struct Simplex;
 
 struct MinkowskiPointIndices {

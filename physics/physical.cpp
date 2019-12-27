@@ -60,7 +60,7 @@ Physical::Physical(Physical&& other) noexcept :
 Physical& Physical::operator=(Physical&& other) noexcept {
 	this->mainPart = other.mainPart;
 	this->parts = std::move(other.parts);
-	this->mainPhysical == other.mainPhysical;
+	this->mainPhysical = other.mainPhysical;
 	this->mass = other.mass;
 	this->localCenterOfMass = other.localCenterOfMass;
 	this->inertia = other.inertia;
@@ -168,13 +168,15 @@ void Physical::removeChild(ConnectedPhysical* child) {
 void Physical::attachPhysical(Physical&& phys, HardConstraint* constraint, const CFrame& attachToThis, const CFrame& attachToThat) {
 	throw "todo makeMainPhysical";
 	if(phys.isMainPhysical()) {
-		childPhysicals.push_back(ConnectedPhysical(std::move(phys), this, constraint, attachToThat, attachToThis));
+		ConnectedPhysical childToAdd(std::move(phys), this, constraint, attachToThat, attachToThis);
+		childPhysicals.push_back(std::move(childToAdd));
 		delete &phys;
 	} else {
 		ConnectedPhysical& connectedPhys = static_cast<ConnectedPhysical&>(phys);
 		Physical* parent = connectedPhys.parent;
 		assert(parent != nullptr);
-		childPhysicals.push_back(ConnectedPhysical(std::move(phys), this, constraint, attachToThat, attachToThis));
+		ConnectedPhysical childToAdd(std::move(phys), this, constraint, attachToThat, attachToThis);
+		childPhysicals.push_back(std::move(childToAdd));
 		parent->removeChild(&connectedPhys);
 	}
 
@@ -285,6 +287,7 @@ void Physical::updateAttachedPhysicals(double deltaT) {
 	for(ConnectedPhysical& p : childPhysicals) {
 		p.constraintWithParent->update(deltaT);
 		p.updateCFrame(thisCFrame);
+		p.updateAttachedPhysicals(deltaT);
 	}
 }
 

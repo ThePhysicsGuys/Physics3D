@@ -37,7 +37,7 @@ public:
 			9, 10, 11, 12
 		};
 	*/
-	inline constexpr Matrix<T, Width, Height>(const std::initializer_list<T>& list) {
+	inline constexpr Matrix<T, Width, Height>(const std::initializer_list<T>& list) : data{} {
 		assert(list.size() == Width * Height);
 		auto listIter = list.begin();
 		for (size_t row = 0; row < Height; row++) {
@@ -52,7 +52,7 @@ public:
 	inline constexpr Matrix<T, Width, Height>(const Matrix<OtherT, Width, Height>& m) {
 		for(size_t row = 0; row < Height; row++) {
 			for(size_t col = 0; col < Width; col++) {
-				(*this)[row][col] = m[row][col];
+				(*this)[row][col] = static_cast<T>(m[row][col]);
 			}
 		}
 	}
@@ -334,7 +334,7 @@ public:
 			7, 8, 9, 10
 		};
 	*/
-	inline constexpr SymmetricMatrix<T, Size>(const std::initializer_list<T>& list) {
+	inline constexpr SymmetricMatrix<T, Size>(const std::initializer_list<T>& list) : data{} {
 		assert(list.size() == Size * (Size + 1) / 2);
 
 		auto listIter = list.begin();

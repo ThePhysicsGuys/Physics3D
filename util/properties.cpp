@@ -10,7 +10,7 @@ std::string Properties::get(std::string property) const {
 	try {
 		std::string value = properties.at(property);
 		return value;
-	} catch (std::out_of_range& const e) {
+	} catch (const std::out_of_range&) {
 		return NOT_FOUND;
 	}
 }

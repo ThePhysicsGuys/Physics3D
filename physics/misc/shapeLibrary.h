@@ -8,12 +8,12 @@ namespace Library {
 	extern const Polyhedron house;
 	extern const Polyhedron wedge;
 
-	Polyhedron createCube(double side);
-	Polyhedron createBox(double width, double height, double length);
+	Polyhedron createCube(float side);
+	Polyhedron createBox(float width, float height, float length);
 
-	Polyhedron createXPrism(int sides, double radius, double height);
-	Polyhedron createYPrism(int sides, double radius, double height);
-	Polyhedron createZPrism(int sides, double radius, double height);
+	Polyhedron createXPrism(int sides, float radius, float height);
+	Polyhedron createYPrism(int sides, float radius, float height);
+	Polyhedron createZPrism(int sides, float radius, float height);
 
 	/*
 	Creates a prism with the given number of sides
@@ -25,7 +25,7 @@ namespace Library {
 
 	sides must be >= 3
 	*/
-	inline Polyhedron createPrism(int sides, double radius, double height) {
+	inline Polyhedron createPrism(int sides, float radius, float height) {
 		return createYPrism(sides, radius, height);
 	}
 	
@@ -43,9 +43,9 @@ namespace Library {
 
 	sides must be >= 3
 	*/
-	Polyhedron createPointyPrism(int sides, double radius, double height, double topOffset, double bottomOffset);
+	Polyhedron createPointyPrism(int sides, float radius, float height, float topOffset, float bottomOffset);
 
 
-	Polyhedron createSphere(double radius, int steps = 1);
-	Polyhedron createSpikeBall(double internalRadius, double spikeRadius, int steps, int spikeSteps);
+	Polyhedron createSphere(float radius, int steps = 1);
+	Polyhedron createSpikeBall(float internalRadius, float spikeRadius, int steps, int spikeSteps);
 }

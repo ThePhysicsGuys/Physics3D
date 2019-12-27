@@ -10,7 +10,7 @@
 #include "../misc/shapeLibrary.h"
 #include "../math/linalg/trigonometry.h"
 
-static struct CubeClass : public ShapeClass {
+struct CubeClass : public ShapeClass {
 	CubeClass() : ShapeClass(8, Vec3(0, 0, 0), ScalableInertialMatrix(Vec3(8.0 / 3.0, 8.0 / 3.0, 8.0 / 3.0), Vec3(0, 0, 0)), 0) {};
 
 	virtual bool containsPoint(Vec3 point) const {
@@ -63,7 +63,7 @@ static struct CubeClass : public ShapeClass {
 
 	virtual Vec3f furthestInDirection(const Vec3f& direction) const {
 		Vec3f polyresult = asPolyhedron().furthestInDirection(direction);
-		Vec3f result(direction.x < 0 ? -1 : 1, direction.y < 0 ? -1 : 1, direction.z < 0 ? -1 : 1);
+		Vec3f result(direction.x < 0 ? -1.0f : 1.0f, direction.y < 0 ? -1.0f : 1.0f, direction.z < 0 ? -1.0f : 1.0f);
 		return polyresult;
 	}
 
@@ -72,7 +72,7 @@ static struct CubeClass : public ShapeClass {
 	}
 };
 
-static struct SphereClass : public ShapeClass {
+struct SphereClass : public ShapeClass {
 	SphereClass() : ShapeClass(4.0 / 3.0 * M_PI, Vec3(0, 0, 0), ScalableInertialMatrix(Vec3(4.0 / 15.0 * M_PI, 4.0 / 15.0 * M_PI, 4.0 / 15.0 * M_PI), Vec3(0, 0, 0)), 1) {};
 
 	virtual bool containsPoint(Vec3 point) const {
@@ -130,7 +130,7 @@ static struct SphereClass : public ShapeClass {
 	}
 };
 
-static struct CylinderClass : public ShapeClass {
+struct CylinderClass : public ShapeClass {
 	/*
 	Inertia of cyllinder: 
 		z = V * 1/2
