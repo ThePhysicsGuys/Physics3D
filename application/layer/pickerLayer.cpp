@@ -8,19 +8,13 @@
 
 #include "input/standardInputHandler.h"
 
-PickerLayer::PickerLayer() : Layer() {
-
-}
-
-PickerLayer::PickerLayer(Screen * screen, char flags) : Layer("Picker", screen, flags) {
-
-}
-
 void PickerLayer::onInit() {
 	Picker::onInit();
 }
 
 void PickerLayer::onUpdate() {
+	Screen* screen = static_cast<Screen*>(this->ptr);
+
 	Picker::onUpdate(*screen, handler->mousePosition);
 }
 
@@ -29,6 +23,8 @@ void PickerLayer::onEvent(Event& event) {
 }
 
 void PickerLayer::onRender() {
+	Screen* screen = static_cast<Screen*>(this->ptr);
+
 	Picker::onRender(*screen);
 }
 

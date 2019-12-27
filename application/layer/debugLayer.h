@@ -5,6 +5,7 @@
 class ArrayMesh;
 class PointMesh;
 class VectorMesh;
+class Screen;
 
 class DebugLayer : public Layer {
 private:
@@ -13,8 +14,8 @@ private:
 	ArrayMesh* originMesh = nullptr;
 
 public:
-	DebugLayer();
-	DebugLayer(Screen* screen, char flags = NoUpdate | NoEvents);
+	DebugLayer() : Layer() {};
+	DebugLayer(Screen* screen, char flags = NoUpdate | NoEvents) : Layer("Debug layer", screen, flags) {};
 
 	void onInit() override;
 	void onUpdate() override;

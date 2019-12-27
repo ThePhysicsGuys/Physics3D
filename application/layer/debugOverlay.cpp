@@ -17,7 +17,6 @@
 
 #include "worlds.h"
 
-
 BarChartClassInfo iterChartClasses[] {
 	{ "GJK Collide"   , Vec3f(0.2f, 0.2f, 1.0f) },
 	{ "GJK No Collide", Vec3f(1.0f, 0.5f, 0.0f) }, 
@@ -27,14 +26,6 @@ BarChartClassInfo iterChartClasses[] {
 BarChart iterationChart("Iteration Statistics", "", GJKCollidesIterationStatistics.labels, iterChartClasses, Vec2f(-1.0f + 0.1f, -0.3f), Vec2f(0.8f, 0.6f), 3, 17);
 
 SlidingChart fpsSlidingChart("Fps Fps", Vec2f(-0.3, 0.2), Vec2f(0.7, 0.4));
-
-DebugOverlay::DebugOverlay() {
-
-}
-
-DebugOverlay::DebugOverlay(Screen* screen, char flags) : Layer("Debug overlay", screen, flags) {
-
-}
 
 void DebugOverlay::onInit() {
 	fpsSlidingChart.add(SlidingChartDataSetInfo("Fps 1", 100, COLOR::ORANGE, 2.0));
@@ -51,6 +42,7 @@ void DebugOverlay::onEvent(Event& event) {
 }
 
 void DebugOverlay::onRender() {
+	Screen* screen = static_cast<Screen*>(this->ptr);
 
 	Renderer::disableDepthTest();
 	ApplicationShaders::fontShader.updateProjection(screen->camera.orthoMatrix);
@@ -103,9 +95,11 @@ void DebugOverlay::onRender() {
 
 		graphicsMeasure.mark(GraphicsProcess::WAIT_FOR_LOCK);
 		screen->world->syncReadOnlyOperation([this]() {
+			Screen* screen = static_cast<Screen*>(this->ptr);
+
 			graphicsMeasure.mark(GraphicsProcess::PROFILER);
-			renderTreeStructure(*this->screen, this->screen->world->objectTree.rootNode, Vec3f(0, 1, 0), Vec2f(1.4, 0.95), 0.7f);
-			renderTreeStructure(*this->screen, this->screen->world->terrainTree.rootNode, Vec3f(0, 0, 1), Vec2f(0.4, 0.95), 0.7f);
+			renderTreeStructure(*screen, screen->world->objectTree.rootNode, Vec3f(0, 1, 0), Vec2f(1.4, 0.95), 0.7f);
+			renderTreeStructure(*screen, screen->world->terrainTree.rootNode, Vec3f(0, 0, 1), Vec2f(0.4, 0.95), 0.7f);
 		});
 
 		fpsSlidingChart.add("Fps 1", graphicsMeasure.getAvgTPS());

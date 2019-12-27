@@ -39,7 +39,7 @@ namespace ApplicationShaders {
 		ShaderSource testShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(applicationResources, TEST_SHADER)), "test.shader");
 		ShaderSource lineShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(applicationResources, LINE_SHADER)), "line.shader");
 		ShaderSource maskShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(applicationResources, MASK_SHADER)), "mask.shader");
-		ShaderSource instanceBasicShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(applicationResources, INSTANCE_BASIC_SHADER)), "instance_basic.shader");
+		ShaderSource instanceBasicShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(applicationResources, BASIC_SHADER)), "instance_basic.shader");
 
 		// Shader init
 		new(&basicShader) BasicShader(basicShaderSource);

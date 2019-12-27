@@ -32,15 +32,9 @@ Light lights[lightCount] = {
 	Light(Vec3f(0, 10, 0), Vec3f(1, 0.90f, 0.75f), 10, attenuation)
 };
 
-ModelLayer::ModelLayer() : Layer() {
-
-}
-
-ModelLayer::ModelLayer(Screen* screen, char flags) : Layer("Model", screen, flags) {
-	manager = new InstanceBatchManager();
-}
-
 void ModelLayer::onInit() {
+	manager = new InstanceBatchManager();
+
 	ApplicationShaders::basicShader.createLightArray(lightCount);
 	ApplicationShaders::instanceBasicShader.createLightArray(lightCount);
 }
@@ -104,6 +98,8 @@ static Vec4f getAmbientForPart(Screen& screen, Part* part) {
 }
 
 void ModelLayer::onRender() {
+	Screen* screen = static_cast<Screen*>(this->ptr);
+
 	graphicsMeasure.mark(GraphicsProcess::PHYSICALS);
 
 	std::map<double, ExtendedPart*> transparentMeshes;
@@ -113,6 +109,8 @@ void ModelLayer::onRender() {
 	graphicsMeasure.mark(GraphicsProcess::WAIT_FOR_LOCK);
 	
 	screen->world->syncReadOnlyOperation([this, &meshesToDraw]() {
+		Screen* screen = static_cast<Screen*>(this->ptr);
+
 		graphicsMeasure.mark(GraphicsProcess::UPDATE);
 
 		// Bind basic uniforms

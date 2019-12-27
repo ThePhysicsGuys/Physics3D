@@ -7,10 +7,6 @@
 #include "ecs/components/model.h"
 #include "ecs/components/transform.h"
 
-TestLayer::TestLayer() : Layer() {}
-
-TestLayer::TestLayer(Screen* screen, char flags) : Layer("TestLayer", screen, flags) {}
-
 void TestLayer::onInit() {
 	Entity* entity = new Entity();
 	TransformComp* t = new TransformComp(GlobalCFrame());

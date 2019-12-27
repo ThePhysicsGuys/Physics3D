@@ -11,23 +11,10 @@
 #include "../graphics/shader/shaders.h"
 #include "../graphics/gui/guiUtils.h"
 #include "../engine/input/mouse.h"
-
 #include "../graphics/buffers/frameBuffer.h"
 
 // Font
 Font* font = nullptr;
-
-// Frames
-PropertiesFrame* propertiesFrame = nullptr;
-
-GuiLayer::GuiLayer() {
-
-};
-
-GuiLayer::GuiLayer(Screen* screen, char flags) : Layer("Gui", screen, flags) {
-
-}
-
 
 bool onMouseMove(const MouseMoveEvent& event) {
 	return GUI::onMouseMove(event.getNewX(), event.getNewY());
@@ -60,11 +47,15 @@ bool onWindowResize(const WindowResizeEvent& event) {
 }
 
 void GuiLayer::onInit() {
+	Screen* screen = static_cast<Screen*>(this->ptr);
+
 	// GUI init
 	GUI::onInit({ screen->dimension, screen->camera.aspect }, screen->screenFrameBuffer);
 }
 
 void GuiLayer::onUpdate() {
+	Screen* screen = static_cast<Screen*>(this->ptr);
+
 	// Update GUI
 	GUI::onUpdate(screen->camera.orthoMatrix);
 
@@ -82,6 +73,8 @@ void GuiLayer::onEvent(Event& event) {
 }
 
 void GuiLayer::onRender() {
+	Screen* screen = static_cast<Screen*>(this->ptr);
+
 	// Render GUI
 	Renderer::disableDepthTest();
 	graphicsMeasure.mark(GraphicsProcess::OTHER);

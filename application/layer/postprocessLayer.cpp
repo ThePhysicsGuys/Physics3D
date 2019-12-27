@@ -11,14 +11,6 @@
 #include "../graphics/texture.h"
 #include "view/screen.h"
 
-PostprocessLayer::PostprocessLayer() : Layer() {
-
-}
-
-PostprocessLayer::PostprocessLayer(Screen* screen, char flags) : Layer("Postprocess", screen, flags) {
-
-}
-
 void PostprocessLayer::onInit() {
 
 }
@@ -32,6 +24,8 @@ void PostprocessLayer::onEvent(Event& event) {
 }
 
 void PostprocessLayer::onRender() {
+	Screen* screen = static_cast<Screen*>(this->ptr);
+
 	screen->screenFrameBuffer->unbind();
 	Renderer::clearColor();
 	Renderer::clearDepth();

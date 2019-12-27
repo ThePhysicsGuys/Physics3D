@@ -9,8 +9,8 @@ class ModelLayer : public Layer {
 private:
 	InstanceBatchManager* manager = nullptr;
 public:
-	ModelLayer();
-	ModelLayer(Screen* screen, char flags = None);
+	ModelLayer() : Layer() {};
+	ModelLayer(Screen* screen, char flags = None) : Layer("Model", screen, flags) {};
 
 	void onInit() override;
 	void onUpdate() override;

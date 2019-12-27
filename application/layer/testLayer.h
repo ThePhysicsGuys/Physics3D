@@ -6,8 +6,8 @@ class Screen;
 
 class TestLayer : public Layer {
 public:
-	TestLayer();
-	TestLayer(Screen* screen, char flags = 0);
+	TestLayer() : Layer() {};
+	TestLayer(Screen* screen, char flags = None) : Layer("TestLayer", screen, flags) {};
 
 	void onInit() override;
 	void onUpdate() override;
