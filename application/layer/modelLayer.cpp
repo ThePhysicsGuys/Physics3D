@@ -18,6 +18,8 @@
 #include "../physics/sharedLockGuard.h"
 #include "../physics/misc/filters/visibilityFilter.h"
 
+namespace Application {
+
 // Light uniforms
 Vec3f sunDirection;
 Vec3f sunColor;
@@ -70,14 +72,14 @@ static enum class RelationToSelectedPart {
 };
 
 static RelationToSelectedPart getRelationToSelectedPart(const Part* selectedPart, const Part* testPart) {
-	if(selectedPart == nullptr) return RelationToSelectedPart::NONE;
-	if(testPart == selectedPart) return RelationToSelectedPart::SELF;
-	if(selectedPart->parent != nullptr && testPart->parent != nullptr) {
-		if(testPart->parent == selectedPart->parent) {
-			if(testPart->isMainPart()) return RelationToSelectedPart::MAINPART;
+	if (selectedPart == nullptr) return RelationToSelectedPart::NONE;
+	if (testPart == selectedPart) return RelationToSelectedPart::SELF;
+	if (selectedPart->parent != nullptr && testPart->parent != nullptr) {
+		if (testPart->parent == selectedPart->parent) {
+			if (testPart->isMainPart()) return RelationToSelectedPart::MAINPART;
 			else return RelationToSelectedPart::DIRECT_ATTACH;
-		} else if(testPart->parent->mainPhysical == selectedPart->parent->mainPhysical) {
-			if(testPart->parent->isMainPhysical()) return RelationToSelectedPart::MAINPHYSICAL_ATTACH;
+		} else if (testPart->parent->mainPhysical == selectedPart->parent->mainPhysical) {
+			if (testPart->parent->isMainPhysical()) return RelationToSelectedPart::MAINPHYSICAL_ATTACH;
 			else return RelationToSelectedPart::PHYSICAL_ATTACH;
 		}
 	}
@@ -85,19 +87,19 @@ static RelationToSelectedPart getRelationToSelectedPart(const Part* selectedPart
 }
 
 static Vec4f getAmbientForPartForSelected(Screen& screen, Part* part) {
-	switch(getRelationToSelectedPart(screen.selectedPart, part)) {
-	case RelationToSelectedPart::NONE: return Vec4f(0.0f,0,0,0);
-	case RelationToSelectedPart::SELF: return Vec4f(0.5f,0,0, 0);
-	case RelationToSelectedPart::DIRECT_ATTACH: return Vec4f(0,0.25f,0, 0);
-	case RelationToSelectedPart::MAINPART: return Vec4f(0,1.0f,0, 0);
-	case RelationToSelectedPart::PHYSICAL_ATTACH: return Vec4f(0,0,0.25f, 0);
-	case RelationToSelectedPart::MAINPHYSICAL_ATTACH: return Vec4f(0,0,1.0f, 0);
+	switch (getRelationToSelectedPart(screen.selectedPart, part)) {
+		case RelationToSelectedPart::NONE: return Vec4f(0.0f, 0, 0, 0);
+		case RelationToSelectedPart::SELF: return Vec4f(0.5f, 0, 0, 0);
+		case RelationToSelectedPart::DIRECT_ATTACH: return Vec4f(0, 0.25f, 0, 0);
+		case RelationToSelectedPart::MAINPART: return Vec4f(0, 1.0f, 0, 0);
+		case RelationToSelectedPart::PHYSICAL_ATTACH: return Vec4f(0, 0, 0.25f, 0);
+		case RelationToSelectedPart::MAINPHYSICAL_ATTACH: return Vec4f(0, 0, 1.0f, 0);
 	}
 }
 
 static Vec4f getAmbientForPart(Screen& screen, Part* part) {
 	Vec4f computedAmbient = getAmbientForPartForSelected(screen, part);
-	if(part == screen.intersectedPart) {
+	if (part == screen.intersectedPart) {
 		computedAmbient += Vec4f(-0.1f, -0.1f, -0.1f, 0);
 	}
 	return computedAmbient;
@@ -111,8 +113,8 @@ void ModelLayer::onRender() {
 	std::vector<ExtendedPart*> meshesToDraw;
 
 	graphicsMeasure.mark(GraphicsProcess::WAIT_FOR_LOCK);
-	
-	screen->world->syncReadOnlyOperation([this, &meshesToDraw]() {
+
+	screen->world->syncReadOnlyOperation([this, &meshesToDraw] () {
 		graphicsMeasure.mark(GraphicsProcess::UPDATE);
 
 		// Bind basic uniforms
@@ -129,15 +131,15 @@ void ModelLayer::onRender() {
 		for (ExtendedPart& part : screen->world->iterPartsFiltered(filter, ALL_PARTS)) {
 			meshesToDraw.push_back(&part);
 		}
-	});
+		});
 
-	for(ExtendedPart* part : meshesToDraw) {
+	for (ExtendedPart* part : meshesToDraw) {
 		Material material = part->material;
 
 		// Picker code
 		material.ambient += getAmbientForPart(*screen, part);
 
-		if(material.ambient.w < 1) {
+		if (material.ambient.w < 1) {
 			transparentMeshes[lengthSquared(Vec3(screen->camera.cframe.position - part->getPosition()))] = part;
 			continue;
 		}
@@ -153,7 +155,7 @@ void ModelLayer::onRender() {
 
 		int meshId = part->visualData.drawMeshId;
 
-		if(meshId == -1) continue;
+		if (meshId == -1) continue;
 
 		Screen::meshes[meshId]->render(part->renderMode);
 	}
@@ -188,7 +190,7 @@ void ModelLayer::onRender() {
 	int minY = 0;
 	int maxY = 20;
 	int minZ = -2;
-	int maxZ = 2; 
+	int maxZ = 2;
 
 	for (double x = minX; x < maxX; x += 1.01) {
 		for (double y = minY; y < maxY; y += 1.01) {
@@ -207,3 +209,5 @@ void ModelLayer::onRender() {
 void ModelLayer::onClose() {
 
 }
+
+};

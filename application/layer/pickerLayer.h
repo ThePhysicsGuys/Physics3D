@@ -2,7 +2,7 @@
 
 #include "../engine/layer/layer.h"
 
-class Screen;
+namespace Application {
 
 class PickerLayer : public Layer {
 public:
@@ -14,4 +14,6 @@ public:
 	void onEvent(Event& event) override;
 	void onRender() override;
 	void onClose() override;
+};
+
 };

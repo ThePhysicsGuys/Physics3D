@@ -2,26 +2,29 @@
 
 #include "../physics/math/globalCFrame.h"
 
-struct ExtendedPart;
-struct Camera;
-class Screen;
 class Event;
 class MouseDragEvent;
 class MouseScrollEvent;
 class KeyReleaseEvent;
+
+namespace Application {
+
+struct ExtendedPart;
+struct Camera;
+class Screen;
 
 struct Camera {
 private:
 
 	enum CameraFlags : char {
 		// No flags
-		None =				0 << 0,
+		None = 0 << 0,
 
 		// Whether the view matrix needs to be recalculated
-		ViewDirty =			1 << 0,
+		ViewDirty = 1 << 0,
 
 		// Whether the projection matrix needs to be recalculated
-		ProjectionDirty =	1 << 1
+		ProjectionDirty = 1 << 1
 	};
 
 	char flags = None;
@@ -29,19 +32,20 @@ private:
 
 	double velocityIncrease = 0.5;
 	double currentVelocity = 0;
-	Vec3 lastDirection = Vec3();	
+	Vec3 lastDirection = Vec3();
 	bool moving = false;
 
 	double angularVelocityIncrease = 0.5;
 	double currentAngularVelocity = 0;
-	Vec3 lastRotation = Vec3();	
+	Vec3 lastRotation = Vec3();
 	bool rotating = false;
 
 	bool wasLeftDragging = false;
 
-	bool onMouseScroll(MouseScrollEvent& event);
-	bool onMouseDrag(MouseDragEvent& event);
-	bool onKeyRelease(KeyReleaseEvent& event);
+	bool onMouseScroll(::MouseScrollEvent& event);
+	bool onMouseDrag(::MouseDragEvent& event);
+	bool onKeyRelease(::KeyReleaseEvent& event);
+
 public:
 	GlobalCFrame cframe;
 	double velocity;
@@ -54,7 +58,7 @@ public:
 	float znear;
 	float zfar;
 	float aspect;
-	
+
 	Mat4f viewMatrix;
 	Mat4f invertedViewMatrix;
 
@@ -97,4 +101,6 @@ public:
 	inline Vec3 getDownDirection() const { return -cframe.rotation.getCol(1); }
 	inline Vec3 getLeftDirection() const { return -cframe.rotation.getCol(0); }
 	inline Vec3 getRightDirection() const { return cframe.rotation.getCol(0); }
+};
+
 };

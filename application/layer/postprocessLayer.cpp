@@ -3,13 +3,14 @@
 #include "postprocessLayer.h"
 
 #include "../graphics/buffers/frameBuffer.h"
-
 #include "../graphics/mesh/primitive.h"
-
-#include "../application/shader/shaders.h"
 #include "../graphics/renderUtils.h"
 #include "../graphics/texture.h"
-#include "view/screen.h"
+
+#include "../application/shader/shaders.h"
+#include "../view/screen.h"
+
+namespace Application {
 
 PostprocessLayer::PostprocessLayer() : Layer() {
 
@@ -27,7 +28,7 @@ void PostprocessLayer::onUpdate() {
 
 }
 
-void PostprocessLayer::onEvent(Event& event) {
+void PostprocessLayer::onEvent(::Event& event) {
 
 }
 
@@ -44,3 +45,5 @@ void PostprocessLayer::onRender() {
 void PostprocessLayer::onClose() {
 
 }
+
+};

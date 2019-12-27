@@ -18,11 +18,12 @@
 #include "../graphics/material.h"
 #include "../graphics/gui/gui.h"
 
+namespace Application {
 
 Mat3 transformations[] = {
 	Mat3::IDENTITY(),
-	rotZ(-3.14159265359/2.0),
-	rotX(3.14159265359/2.0),
+	rotZ(-3.14159265359 / 2.0),
+	rotX(3.14159265359 / 2.0),
 	Mat3::IDENTITY()
 };
 
@@ -81,18 +82,18 @@ void EditTools::onRender(Screen& screen) {
 
 	// Select correct render meshes
 	switch (editMode) {
-	case EditMode::TRANSLATE:
-		shaft = translateMesh;
-		center = translateCenterMesh;
-		break;
-	case EditMode::ROTATE:
-		shaft = rotateMesh;
-		center = nullptr;
-		break;
-	case EditMode::SCALE:
-		shaft = scaleMesh;
-		center = scaleCenterMesh;
-		break;
+		case EditMode::TRANSLATE:
+			shaft = translateMesh;
+			center = translateCenterMesh;
+			break;
+		case EditMode::ROTATE:
+			shaft = rotateMesh;
+			center = nullptr;
+			break;
+		case EditMode::SCALE:
+			shaft = scaleMesh;
+			center = scaleCenterMesh;
+			break;
 	}
 
 	Mat4 modelMatrix = CFrameToMat4(screen.selectedPart->getCFrame());
@@ -109,18 +110,18 @@ void EditTools::onRender(Screen& screen) {
 
 	if (selectedEditDirection != EditDirection::NONE) {
 		switch (selectedEditDirection) {
-		case EditDirection::Y:
-			ApplicationShaders::maskShader.updateModel(modelMatrix);
-			ApplicationShaders::maskShader.updateColor(COLOR::G);
-			break;
-		case EditDirection::X:
-			ApplicationShaders::maskShader.updateModel(modelMatrix * Mat4(Matrix<double, 3, 3>(transformations[1]), 1.0f));
-			ApplicationShaders::maskShader.updateColor(COLOR::R);
-			break;
-		case EditDirection::Z:
-			ApplicationShaders::maskShader.updateModel(modelMatrix * Mat4(Matrix<double, 3, 3>(transformations[2]), 1.0f));
-			ApplicationShaders::maskShader.updateColor(COLOR::B);
-			break;
+			case EditDirection::Y:
+				ApplicationShaders::maskShader.updateModel(modelMatrix);
+				ApplicationShaders::maskShader.updateColor(COLOR::G);
+				break;
+			case EditDirection::X:
+				ApplicationShaders::maskShader.updateModel(modelMatrix * Mat4(Matrix<double, 3, 3>(transformations[1]), 1.0f));
+				ApplicationShaders::maskShader.updateColor(COLOR::R);
+				break;
+			case EditDirection::Z:
+				ApplicationShaders::maskShader.updateModel(modelMatrix * Mat4(Matrix<double, 3, 3>(transformations[2]), 1.0f));
+				ApplicationShaders::maskShader.updateColor(COLOR::B);
+				break;
 		}
 		line->render();
 	}
@@ -156,20 +157,20 @@ float EditTools::intersect(Screen& screen, const Ray& ray) {
 
 	// Select correct tools
 	switch (editMode) {
-	case EditMode::TRANSLATE:
-		tool[0] = &translateShape;
-		tool[1] = &translateCenterShape;
-		break;
-	case EditMode::ROTATE:
-		tool[0] = &rotateShape;
-		tool[1] = nullptr;
-		break;
-	case EditMode::SCALE:
-		tool[0] = &scaleShape;
-		tool[1] = &scaleCenterShape;
-		break;
-	default:
-		throw "Error: Impossible!";
+		case EditMode::TRANSLATE:
+			tool[0] = &translateShape;
+			tool[1] = &translateCenterShape;
+			break;
+		case EditMode::ROTATE:
+			tool[0] = &rotateShape;
+			tool[1] = nullptr;
+			break;
+		case EditMode::SCALE:
+			tool[0] = &scaleShape;
+			tool[1] = &scaleCenterShape;
+			break;
+		default:
+			throw "Error: Impossible!";
 	}
 
 	float closestToolDistance = INFINITY;
@@ -214,10 +215,10 @@ void EditTools::onMouseRelease(Screen& screen) {
 }
 
 void EditTools::onMouseDrag(Screen& screen) {
-	if (screen.selectedPart == nullptr) 
+	if (screen.selectedPart == nullptr)
 		return;
 
-	screen.world->asyncModification([&screen, this](){
+	screen.world->asyncModification([&screen, this] () {
 		switch (editMode) {
 			case EditMode::TRANSLATE:
 				dragTranslateTool(screen);
@@ -229,7 +230,7 @@ void EditTools::onMouseDrag(Screen& screen) {
 				dragScaleTool(screen);
 				break;
 		}
-	});
+		});
 }
 
 
@@ -239,15 +240,15 @@ void EditTools::dragRotateTool(Screen& screen) {
 	Vec3 n;
 	Position p0 = screen.selectedPart->getPosition();
 	switch (selectedEditDirection) {
-	case EditDirection::X:
-		n = Vec3(1, 0, 0);
-		break;
-	case EditDirection::Y:
-		n = Vec3(0, 1, 0);
-		break;
-	case EditDirection::Z:
-		n = Vec3(0, 0, 1);
-		break;
+		case EditDirection::X:
+			n = Vec3(1, 0, 0);
+			break;
+		case EditDirection::Y:
+			n = Vec3(0, 1, 0);
+			break;
+		case EditDirection::Z:
+			n = Vec3(0, 0, 1);
+			break;
 	}
 
 	// Apply model matrix
@@ -302,19 +303,19 @@ void EditTools::dragScaleTool(Screen& screen) {
 	Log::debug("dist : %f", distance);
 
 	switch (selectedEditDirection) {
-	case EditDirection::X:
-		screen.selectedPart->setWidth(distance * 2);
-		break;
-	case EditDirection::Y:
-		screen.selectedPart->setHeight(distance * 2);
-		break;
-	case EditDirection::Z:
-		screen.selectedPart->setDepth(distance * 2);
-		break;
-	case EditDirection::CENTER:
-		double amount = distance / screen.selectedPart->maxRadius / sqrt(3.0);
-		screen.selectedPart->scale(amount, amount, amount);
-		break;
+		case EditDirection::X:
+			screen.selectedPart->setWidth(distance * 2);
+			break;
+		case EditDirection::Y:
+			screen.selectedPart->setHeight(distance * 2);
+			break;
+		case EditDirection::Z:
+			screen.selectedPart->setDepth(distance * 2);
+			break;
+		case EditDirection::CENTER:
+			double amount = distance / screen.selectedPart->maxRadius / sqrt(3.0);
+			screen.selectedPart->scale(amount, amount, amount);
+			break;
 	}
 }
 
@@ -323,9 +324,9 @@ void EditTools::dragScaleTool(Screen& screen) {
 void EditTools::dragTranslateTool(Screen& screen) {
 	if (selectedEditDirection == EditDirection::CENTER) {
 		screen.selectedPoint = screen.selectedPart->getPosition() + selectedPoint;
-		screen.world->asyncModification([&screen]() {
+		screen.world->asyncModification([&screen] () {
 			Picker::moveGrabbedPhysicalLateral(screen);
-		});
+			});
 	} else {
 		// Closest point on ray1 (A + s * a) from ray2 (B + t * b). Ray1 is the ray from the parts' center in the direction of the edit tool, ray2 is the mouse ray. Directions a and b are normalized. Only s is calculated.
 		Position B = screen.camera.cframe.position;
@@ -333,15 +334,15 @@ void EditTools::dragTranslateTool(Screen& screen) {
 		Position A = screen.selectedPart->getPosition();
 		Vec3 a;
 		switch (selectedEditDirection) {
-		case EditDirection::X:
-			a = Vec3(1, 0, 0);
-			break;
-		case EditDirection::Y:
-			a = Vec3(0, 1, 0);
-			break;
-		case EditDirection::Z:
-			a = Vec3(0, 0, 1);
-			break;
+			case EditDirection::X:
+				a = Vec3(1, 0, 0);
+				break;
+			case EditDirection::Y:
+				a = Vec3(0, 1, 0);
+				break;
+			case EditDirection::Z:
+				a = Vec3(0, 0, 1);
+				break;
 		}
 
 		// Rotate a according to model rotation
@@ -361,3 +362,5 @@ void EditTools::dragTranslateTool(Screen& screen) {
 		screen.selectedPart->translate(translation);
 	}
 }
+
+};

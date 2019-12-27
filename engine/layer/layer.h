@@ -4,11 +4,12 @@
 
 #include <string>
 
-class Screen;
+class Application::Screen;
 
 class Layer {
 protected:
 	Screen* screen = nullptr;
+
 public:
 
 	enum LayerFlags : char {

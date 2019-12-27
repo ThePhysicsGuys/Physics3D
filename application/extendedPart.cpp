@@ -4,6 +4,8 @@
 #include "../physics/misc/serialization.h"
 #include "view/screen.h"
 
+namespace Application {
+
 ExtendedPart::ExtendedPart(Part&& part, VisualData visualData, std::string name) :
 	Part(std::move(part)), visualData(visualData), name(name) {
 }
@@ -22,3 +24,5 @@ ExtendedPart::ExtendedPart(const Shape& hitbox, const GlobalCFrame& position, co
 ExtendedPart::ExtendedPart(const Shape& hitbox, ExtendedPart* attachTo, const CFrame& attach, const PartProperties& properties, std::string name) :
 	Part(hitbox, *attachTo, attach, properties), visualData(Screen::getOrCreateMeshFor(hitbox.baseShape)), name(name) {
 }
+
+};

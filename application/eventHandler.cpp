@@ -5,6 +5,8 @@
 #include "view\screen.h"
 #include "extendedPart.h"
 
+namespace Application {
+
 void* EventHandler::getPtr() const {
 	return pointer;
 }
@@ -40,3 +42,5 @@ void EventHandler::setPartTouchCallback(PartTouchHandler handler) {
 void EventHandler::setPartReleaseCallback(PartReleaseHandler handler) {
 	partReleaseHandler = handler;
 }
+
+};

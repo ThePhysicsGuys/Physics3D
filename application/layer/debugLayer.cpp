@@ -25,6 +25,8 @@
 #include "worlds.h"
 #include "../graphics/meshLibrary.h"
 
+namespace Application {
+
 Vec4f colors[] {
 	COLOR::BLUE,
 	COLOR::GREEN,
@@ -35,14 +37,14 @@ Vec4f colors[] {
 };
 
 void renderSphere(double radius, const Position& position, const Color& color) {
-	ApplicationShaders::basicShader.updateMaterial(Material(color));
+	ApplicationShaders::basicShader.updateMaterial(::Material(color));
 	ApplicationShaders::basicShader.updateModel(CFrameToMat4(GlobalCFrame(position, DiagonalMat3::IDENTITY() * radius)));
 
 	Library::sphere->render();
 }
 
 void renderBox(const GlobalCFrame& cframe, double width, double height, double depth, const Color& color) {
-	ApplicationShaders::basicShader.updateMaterial(Material(color));
+	ApplicationShaders::basicShader.updateMaterial(::Material(color));
 	ApplicationShaders::basicShader.updateModel(CFrameToMat4(GlobalCFrame(cframe.getPosition(), cframe.getRotation() * DiagonalMat3 { width, height, depth })));
 
 	Library::cube->render();
@@ -115,10 +117,10 @@ void DebugLayer::onInit() {
 }
 
 void DebugLayer::onUpdate() {
-	
+
 }
 
-void DebugLayer::onEvent(Event& event) {
+void DebugLayer::onEvent(::Event& event) {
 
 }
 
@@ -132,29 +134,29 @@ void DebugLayer::onRender() {
 	AddableBuffer<ColoredVector>& vecLog = getVectorBuffer();
 	AddableBuffer<ColoredPoint>& pointLog = getPointBuffer();
 
-	for(const MotorizedPhysical* physical : screen->world->iterPhysicals()) {
+	for (const MotorizedPhysical* physical : screen->world->iterPhysicals()) {
 		Position com = physical->getCenterOfMass();
 		pointLog.add(ColoredPoint(com, CENTER_OF_MASS));
 	}
 
-	screen->world->syncReadOnlyOperation([this, &vecLog]() {
-		for(const ConstraintGroup& constraintGroup : screen->world->constraints) {
-			for(const BallConstraint& ballConstraint : constraintGroup.ballConstraints) {
+	screen->world->syncReadOnlyOperation([this, &vecLog] () {
+		for (const ConstraintGroup& constraintGroup : screen->world->constraints) {
+			for (const BallConstraint& ballConstraint : constraintGroup.ballConstraints) {
 				vecLog.add(ColoredVector(ballConstraint.a->getCFrame().getPosition(), ballConstraint.a->getCFrame().localToRelative(ballConstraint.attachA), INFO_VEC));
 				vecLog.add(ColoredVector(ballConstraint.b->getCFrame().getPosition(), ballConstraint.b->getCFrame().localToRelative(ballConstraint.attachB), INFO_VEC));
 			}
 		}
 
-		if(screen->selectedPart != nullptr) {
+		if (screen->selectedPart != nullptr) {
 			const GlobalCFrame& selectedCFrame = screen->selectedPart->getCFrame();
-			for(const Vec3f& corner : screen->selectedPart->hitbox.asPolyhedron().iterVertices()) {
+			for (const Vec3f& corner : screen->selectedPart->hitbox.asPolyhedron().iterVertices()) {
 				vecLog.add(ColoredVector(selectedCFrame.localToGlobal(corner), screen->selectedPart->parent->getMotion().getVelocityOfPoint(Vec3(selectedCFrame.localToRelative(corner))), VELOCITY));
 			}
 
-			if(colissionSpheresMode == SphereColissionRenderMode::SELECTED) {
+			if (colissionSpheresMode == SphereColissionRenderMode::SELECTED) {
 				Physical& selectedPhys = *screen->selectedPart->parent;
 
-				for(Part& part : selectedPhys) {
+				for (Part& part : selectedPhys) {
 					Color yellow = COLOR::YELLOW;
 					yellow.w = 0.5;
 					BoundingBox localBounds = screen->selectedPart->getLocalBounds();
@@ -167,9 +169,9 @@ void DebugLayer::onRender() {
 			}
 		}
 
-		if(colissionSpheresMode == SphereColissionRenderMode::ALL) {
-			for(MotorizedPhysical* phys : screen->world->iterPhysicals()) {
-				for(Part& part : *phys) {
+		if (colissionSpheresMode == SphereColissionRenderMode::ALL) {
+			for (MotorizedPhysical* phys : screen->world->iterPhysicals()) {
+				for (Part& part : *phys) {
 					Color yellow = COLOR::YELLOW;
 					yellow.w = 0.5;
 					BoundingBox localBounds = part.getLocalBounds();
@@ -182,23 +184,23 @@ void DebugLayer::onRender() {
 			}
 		}
 
-		switch(colTreeRenderMode) {
-		case ColTreeRenderMode::FREE:
-			recursiveRenderColTree(screen->world->objectTree.rootNode, 0);
-			break;
-		case ColTreeRenderMode::TERRAIN:
-			recursiveRenderColTree(screen->world->terrainTree.rootNode, 0);
-			break;
-		case ColTreeRenderMode::ALL:
-			recursiveRenderColTree(screen->world->objectTree.rootNode, 0);
-			recursiveRenderColTree(screen->world->terrainTree.rootNode, 0);
-			break;
-		case ColTreeRenderMode::SELECTED:
-			if(screen->selectedPart != nullptr)
-				recursiveColTreeForOneObject(screen->world->objectTree.rootNode, screen->selectedPart, screen->selectedPart->getStrictBounds());
-			break;
+		switch (colTreeRenderMode) {
+			case ColTreeRenderMode::FREE:
+				recursiveRenderColTree(screen->world->objectTree.rootNode, 0);
+				break;
+			case ColTreeRenderMode::TERRAIN:
+				recursiveRenderColTree(screen->world->terrainTree.rootNode, 0);
+				break;
+			case ColTreeRenderMode::ALL:
+				recursiveRenderColTree(screen->world->objectTree.rootNode, 0);
+				recursiveRenderColTree(screen->world->terrainTree.rootNode, 0);
+				break;
+			case ColTreeRenderMode::SELECTED:
+				if (screen->selectedPart != nullptr)
+					recursiveColTreeForOneObject(screen->world->objectTree.rootNode, screen->selectedPart, screen->selectedPart->getStrictBounds());
+				break;
 		}
-	});
+		});
 
 	Renderer::disableDepthTest();
 
@@ -230,3 +232,5 @@ void DebugLayer::onRender() {
 void DebugLayer::onClose() {
 
 }
+
+};

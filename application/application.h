@@ -1,5 +1,7 @@
 #pragma once
 
+namespace Application {
+
 class Screen;
 class PlayerWorld;
 
@@ -18,3 +20,4 @@ void stop(int returnCode);
 
 void toggleFlying();
 
+};

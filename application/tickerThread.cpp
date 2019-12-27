@@ -2,26 +2,28 @@
 
 #include "tickerThread.h"
 
+namespace Application {
+
 using namespace std::chrono;
-TickerThread::TickerThread(double targetTPS, milliseconds tickSkipTimeout, void(*tickAction)()){
+TickerThread::TickerThread(double targetTPS, milliseconds tickSkipTimeout, void(*tickAction)()) {
 	this->TPS = targetTPS;
 	this->tickSkipTimeout = tickSkipTimeout;
 	this->tickAction = tickAction;
 }
 
-TickerThread::~TickerThread(){
+TickerThread::~TickerThread() {
 	this->stop();
 }
 
-void TickerThread::start(){
+void TickerThread::start() {
 	this->stopped = false;
 
-	this->thread = std::thread([this]() {
+	this->thread = std::thread([this] () {
 		time_point<system_clock> nextTarget = system_clock::now();
 
 		while (!(this->stopped)) {
 
-			microseconds tickTime = microseconds((long long)(1000000 / (this->TPS * this->speed)));
+			microseconds tickTime = microseconds((long long) (1000000 / (this->TPS * this->speed)));
 
 			this->tickAction();
 
@@ -32,20 +34,22 @@ void TickerThread::start(){
 			} else {
 				// We're behind schedule
 				if (nextTarget < curTime - this->tickSkipTimeout) {
-					Log::warn("Can't keep up! Skipping %d ticks!", (int) ((curTime-nextTarget).count() / (1E3 * this->tickSkipTimeout.count())));
+					Log::warn("Can't keep up! Skipping %d ticks!", (int) ((curTime - nextTarget).count() / (1E3 * this->tickSkipTimeout.count())));
 
 					nextTarget = curTime;
 				}
 			}
 		}
-	});
+		});
 }
 
 void TickerThread::runTick() {
 	this->tickAction();
 }
 
-void TickerThread::stop(){
+void TickerThread::stop() {
 	this->stopped = true;
-	if(this->thread.joinable()) this->thread.join();
+	if (this->thread.joinable()) this->thread.join();
 }
+
+};

@@ -13,6 +13,8 @@
 #include "../graphics/debug/visualDebug.h"
 #include "../physics/geometry/boundingBox.h"
 
+namespace Application {
+
 CubeMap* skyboxTexture = nullptr;
 
 SkyboxLayer::SkyboxLayer() : Layer() {
@@ -54,3 +56,5 @@ void SkyboxLayer::onRender() {
 void SkyboxLayer::onClose() {
 	skyboxTexture->close();
 }
+
+};

@@ -2,6 +2,8 @@
 
 #include "../engine/layer/layer.h"
 
+namespace Application {
+
 class GuiLayer : public Layer {
 public:
 	GuiLayer();
@@ -12,4 +14,6 @@ public:
 	void onEvent(Event& event) override;
 	void onRender() override;
 	void onClose() override;
+};
+
 };

@@ -16,9 +16,11 @@
 
 #include "imgui/imgui.h"
 
+namespace Application {
+
 // Environment frame
 
-struct EnvironmentFrame  {
+struct EnvironmentFrame {
 
 	static bool hdr;
 	static float gamma;
@@ -31,18 +33,8 @@ struct EnvironmentFrame  {
 		// Hdr checkbox
 		if (ImGui::Checkbox("HDR", &hdr)) {
 			ApplicationShaders::basicShader.updateHDR(hdr);
-
-			/*if (hdr) {
-				exposureSlider->enable();
-				exposureValueLabel->enable();
-				exposureLabel->enable();
-			} else {
-				exposureSlider->enable();
-				exposureValueLabel->enable();
-				exposureLabel->enable();
-			}*/
 		}
-		
+
 		// Gamma slider
 		if (ImGui::SliderFloat("Gamma", &gamma, 0, 3))
 			ApplicationShaders::basicShader.updateGamma(gamma);
@@ -66,7 +58,7 @@ struct FrameBlueprint {
 // Debug frame
 
 struct DebugFrame {
-	
+
 	// Todo remove
 	static bool renderSpheres;
 
@@ -113,8 +105,8 @@ struct PropertiesFrame {
 		ExtendedPart* sp = screen.selectedPart;
 
 		if (ImGui::CollapsingHeader("General")) {
-			ImGui::Text("Name: %s", (sp)? sp->name.c_str() : "-");
-			ImGui::Text("Mesh ID: %s", (sp)? str(sp->visualData.drawMeshId) : "-");
+			ImGui::Text("Name: %s", (sp) ? sp->name.c_str() : "-");
+			ImGui::Text("Mesh ID: %s", (sp) ? str(sp->visualData.drawMeshId) : "-");
 		}
 
 		if (ImGui::CollapsingHeader("Physical")) {
@@ -135,7 +127,7 @@ struct PropertiesFrame {
 				position[2] = 0;
 				ImGui::InputFloat3("Position", position, 3, ImGuiInputTextFlags_ReadOnly);
 			}
-	
+
 			ImGui::Text("Velocity: %s", (sp) ? str(sp->getMotion().velocity).c_str() : "-");
 			ImGui::Text("Acceleration: %s", (sp) ? str(sp->getMotion().acceleration).c_str() : "-");
 			ImGui::Text("Angular velocity: %s", (sp) ? str(sp->getMotion().angularVelocity).c_str() : "-");
@@ -164,4 +156,6 @@ struct PropertiesFrame {
 
 		ImGui::End();
 	}
+};
+
 };

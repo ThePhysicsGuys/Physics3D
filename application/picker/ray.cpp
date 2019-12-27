@@ -3,6 +3,8 @@
 #include "ray.h"
 #include "view/screen.h"
 
+namespace Application {
+
 Vec2f getNormalizedDeviceSpacePosition(Vec2f viewportSpacePosition, Vec2f screenSize) {
 	float x = 2 * viewportSpacePosition.x / screenSize.x - 1;
 	float y = 2 * viewportSpacePosition.y / screenSize.y - 1;
@@ -26,3 +28,5 @@ Ray getMouseRay(Screen& screen, Vec2f mouse) {
 
 	return { start, Vec3(direction) };
 }
+
+};

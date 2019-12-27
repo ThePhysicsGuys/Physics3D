@@ -7,6 +7,8 @@
 #include "ecs/components/model.h"
 #include "ecs/components/transform.h"
 
+namespace Application {
+
 TestLayer::TestLayer() : Layer() {}
 
 TestLayer::TestLayer(Screen* screen, char flags) : Layer("TestLayer", screen, flags) {}
@@ -29,9 +31,11 @@ void TestLayer::onEvent(Event& event) {
 }
 
 void TestLayer::onRender() {
-	
+
 }
 
 void TestLayer::onClose() {
 
 }
+
+};

@@ -8,11 +8,13 @@
 
 #include "input/standardInputHandler.h"
 
+namespace Application {
+
 PickerLayer::PickerLayer() : Layer() {
 
 }
 
-PickerLayer::PickerLayer(Screen * screen, char flags) : Layer("Picker", screen, flags) {
+PickerLayer::PickerLayer(Screen* screen, char flags) : Layer("Picker", screen, flags) {
 
 }
 
@@ -35,3 +37,5 @@ void PickerLayer::onRender() {
 void PickerLayer::onClose() {
 	Picker::onClose();
 }
+
+};

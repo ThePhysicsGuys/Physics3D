@@ -42,6 +42,7 @@
 #define TICKS_PER_SECOND 120.0
 #define TICK_SKIP_TIME std::chrono::milliseconds(1000)
 
+namespace Application {
 
 TickerThread physicsThread;
 PlayerWorld world(1 / TICKS_PER_SECOND);
@@ -76,7 +77,7 @@ void loadLoosePartsWorld(const char* fileName) {
 	file.open(fileName, std::ios::binary);
 
 	int partCount = deserialize<int>(file);
-	for(int i = 0; i < partCount; i++) {
+	for (int i = 0; i < partCount; i++) {
 		ExtendedPart* p = new ExtendedPart(deserialize<Part>(file));
 
 		world.addPart(p);
@@ -92,7 +93,7 @@ bool has_suffix(const std::string& str, const std::string& suffix) {
 void init(int argc, const char** args) {
 	setupScreen();
 	registerShapes();
-	if(argc >= 2 && has_suffix(args[1], ".looseParts")) {
+	if (argc >= 2 && has_suffix(args[1], ".looseParts")) {
 		loadLoosePartsWorld(args[1]);
 	} else {
 		setupWorld(argc, args);
@@ -129,7 +130,7 @@ static VisualShape createCylinder(int sides, double radius, double height) {
 
 
 	// vertices
-	for(int i = 0; i < sides; i++) {
+	for (int i = 0; i < sides; i++) {
 		double angle = i * PI * 2 / sides;
 		Vec3f bottom(cos(angle) * radius, sin(angle) * radius, height / 2);
 		Vec3f top(cos(angle) * radius, sin(angle) * radius, -height / 2);
@@ -143,28 +144,28 @@ static VisualShape createCylinder(int sides, double radius, double height) {
 	Triangle* triangleBuf = new Triangle[triangleCount];
 
 	// sides
-	for(int i = 0; i < sides; i++) {
+	for (int i = 0; i < sides; i++) {
 		int botLeft = i * 2;
 		int botRight = ((i + 1) % sides) * 2;
-		triangleBuf[i * 2] = Triangle{botLeft, botLeft + 1, botRight}; // botLeft, botRight, topLeft
-		triangleBuf[i * 2 + 1] = Triangle{botRight + 1, botRight, botLeft + 1}; // topRight, topLeft, botRight
+		triangleBuf[i * 2] = Triangle { botLeft, botLeft + 1, botRight }; // botLeft, botRight, topLeft
+		triangleBuf[i * 2 + 1] = Triangle { botRight + 1, botRight, botLeft + 1 }; // topRight, topLeft, botRight
 	}
 
 	Vec3f* normals = new Vec3f[vertexCount];
 
-	for(int i = 0; i < sides * 2; i++) {
+	for (int i = 0; i < sides * 2; i++) {
 		Vec3f vertex = vecBuf[i];
 		normals[i] = normalize(Vec3(vertex.x, vertex.y, 0));
 	}
 
 	Triangle* capOffset = triangleBuf + sides * 2;
 	// top and bottom
-	for(int i = 0; i < sides - 2; i++) { // common corner is i=0
-		capOffset[i] = Triangle{sides * 2 + 0, sides * 2 + (i + 1) * 2, sides * 2 + (i + 2) * 2};
-		capOffset[i + (sides - 2)] = Triangle{sides * 2 + 1, sides * 2 + (i + 2) * 2 + 1, sides * 2 + (i + 1) * 2 + 1};
+	for (int i = 0; i < sides - 2; i++) { // common corner is i=0
+		capOffset[i] = Triangle { sides * 2 + 0, sides * 2 + (i + 1) * 2, sides * 2 + (i + 2) * 2 };
+		capOffset[i + (sides - 2)] = Triangle { sides * 2 + 1, sides * 2 + (i + 2) * 2 + 1, sides * 2 + (i + 1) * 2 + 1 };
 	}
 
-	for(int i = 0; i < sides; i++) {
+	for (int i = 0; i < sides; i++) {
 		normals[i * 2 + sides * 2] = Vec3f(0, 0, 1);
 		normals[i * 2 + sides * 2 + 1] = Vec3f(0, 0, -1);
 	}
@@ -178,7 +179,7 @@ static void registerShapes() {
 	Vec3f* normalBuf = new Vec3f[sphereShape.vertexCount];
 	sphereShape.computeNormals(normalBuf);
 	sphereShape.normals = SharedArrayPtr<const Vec3f>(normalBuf);
-	
+
 	screen.registerMeshFor(Sphere(1.0).baseShape, sphereShape);
 
 	screen.registerMeshFor(Box(2.0, 2.0, 2.0).baseShape);
@@ -197,7 +198,7 @@ void setupWorld(int argc, const char** args) {
 	WorldBuilder::init();
 
 	// Part factories
-	WorldBuilder::SpiderFactory spiderFactories[]{ {0.5, 4},{0.5, 6},{0.5, 8},{0.5, 10} };
+	WorldBuilder::SpiderFactory spiderFactories[] { {0.5, 4},{0.5, 6},{0.5, 8},{0.5, 10} };
 	Shape triangle(Library::trianglePyramid);
 
 	WorldBuilder::buildFloorAndWalls(50.0, 50.0, 1.0);
@@ -232,7 +233,7 @@ void setupWorld(int argc, const char** args) {
 	}
 
 	WorldBuilder::buildCar(GlobalCFrame(5.0, 1.0, 5.0));
-	
+
 
 	WorldBuilder::buildConveyor(1.5, 7.0, GlobalCFrame(-10.0, 1.0, -10.0, fromEulerAngles(0.15, 0.0, 0.0)), 1.5);
 	WorldBuilder::buildConveyor(1.5, 7.0, GlobalCFrame(-12.5, 1.0, -14.0, fromEulerAngles(0.0, 3.1415/2, -0.15)), 1.5);
@@ -247,7 +248,7 @@ void setupWorld(int argc, const char** args) {
 	int maxZ = 3;
 
 	GlobalCFrame rootFrame(Position(0.0, 15.0, 0.0), fromEulerAngles(3.1415 / 4, 3.1415 / 4, 0.0));
-	
+
 	for (double x = minX; x < maxX; x += 1.00001) {
 		for (double y = minY; y < maxY; y += 1.00001) {
 			for (double z = minZ; z < maxZ; z += 1.00001) {
@@ -283,8 +284,8 @@ void setupWorld(int argc, const char** args) {
 
 
 
-	ExtendedPart* ep1 = new ExtendedPart(Box(1.0, 2.0, 1.0), GlobalCFrame(3.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "MainPart");
-	ExtendedPart* ap1 = new ExtendedPart(Box(1.0, 2.0, 1.0), GlobalCFrame(), {1.0, 1.0, 1.0}, "AttachedPart");
+	ExtendedPart* ep1 = new ExtendedPart(Box(1.0, 2.0, 1.0), GlobalCFrame(3.0, 3.0, 0.0), { 1.0, 1.0, 1.0 }, "MainPart");
+	ExtendedPart* ap1 = new ExtendedPart(Box(1.0, 2.0, 1.0), GlobalCFrame(), { 1.0, 1.0, 1.0 }, "AttachedPart");
 
 	ep1->attach(ap1, new FixedConstraint(), CFrame(1.0, 0.0, 0.0), CFrame(0.0, 0.0, 0.0));
 
@@ -293,8 +294,8 @@ void setupWorld(int argc, const char** args) {
 
 	ep1->parent->mainPhysical->applyAngularImpulse(Vec3(1.0, 0.5, 0.0) * 1);
 
-	ExtendedPart* ep2 = new ExtendedPart(Box(1.0, 2.0, 1.0), GlobalCFrame(-3.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "MainPart");
-	ExtendedPart* ap2 = new ExtendedPart(Box(1.0, 2.0, 1.0), GlobalCFrame(), {1.0, 1.0, 1.0}, "AttachedPart");
+	ExtendedPart* ep2 = new ExtendedPart(Box(1.0, 2.0, 1.0), GlobalCFrame(-3.0, 3.0, 0.0), { 1.0, 1.0, 1.0 }, "MainPart");
+	ExtendedPart* ap2 = new ExtendedPart(Box(1.0, 2.0, 1.0), GlobalCFrame(), { 1.0, 1.0, 1.0 }, "AttachedPart");
 
 	ep2->attach(ap2, CFrame(1.0, 0.0, 0.0));
 
@@ -329,14 +330,14 @@ void setupWorld(int argc, const char** args) {
 	}*/
 	// Player
 	screen.camera.attachment = new ExtendedPart(Library::createPrism(50, 0.3, 1.5), GlobalCFrame(), { 1.0, 5.0, 0.0 }, "Player");
-	
+
 	if (!world.isValid()) {
 		throw "World not valid!";
 	}
 }
 
 void setupPhysics() {
-	physicsThread = TickerThread(TICKS_PER_SECOND, TICK_SKIP_TIME, []() {
+	physicsThread = TickerThread(TICKS_PER_SECOND, TICK_SKIP_TIME, [] () {
 		physicsMeasure.mark(PhysicsProcess::OTHER);
 
 		AppDebug::logTickStart();
@@ -348,7 +349,7 @@ void setupPhysics() {
 		GJKCollidesIterationStatistics.nextTally();
 		GJKNoCollidesIterationStatistics.nextTally();
 		EPAIterationStatistics.nextTally();
-	});
+		});
 }
 
 void setupDebug() {
@@ -371,7 +372,7 @@ void stop(int returnCode) {
 bool paused = true;
 
 void togglePause() {
-	if(paused) {
+	if (paused) {
 		unpause();
 	} else {
 		pause();
@@ -408,7 +409,7 @@ void runTick() {
 // Flying
 
 void toggleFlying() {
-	world.asyncModification([]() {
+	world.asyncModification([] () {
 		if (screen.camera.flying) {
 			screen.camera.flying = false;
 			screen.camera.attachment->setCFrame(GlobalCFrame(screen.camera.cframe.getPosition()));
@@ -418,5 +419,7 @@ void toggleFlying() {
 			screen.world->removePart(screen.camera.attachment);
 			screen.camera.flying = true;
 		}
-	});
+		});
 }
+
+};

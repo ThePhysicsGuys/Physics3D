@@ -3,11 +3,12 @@
 #include "../engine/layer/layer.h"
 #include "../graphics/batch/instanceBatchManager.h"
 
-class Screen;
+namespace Application {
 
 class ModelLayer : public Layer {
 private:
 	InstanceBatchManager* manager = nullptr;
+
 public:
 	ModelLayer();
 	ModelLayer(Screen* screen, char flags = None);
@@ -17,4 +18,6 @@ public:
 	void onEvent(Event& event) override;
 	void onRender() override;
 	void onClose() override;
+};
+
 };

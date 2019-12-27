@@ -14,6 +14,8 @@
 
 #include "../graphics/buffers/frameBuffer.h"
 
+namespace Application {
+
 // Font
 Font* font = nullptr;
 
@@ -96,3 +98,5 @@ void GuiLayer::onRender() {
 void GuiLayer::onClose() {
 	GUI::onClose();
 }
+
+};

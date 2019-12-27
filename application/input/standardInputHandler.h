@@ -7,19 +7,23 @@
 #include "../engine/event/mouseEvent.h"
 #include "../engine/event/windowEvent.h"
 
+namespace Application {
+
 class Screen;
 
 class StandardInputHandler : public InputHandler {
-public: 
+public:
 	Screen& screen;
 
 	StandardInputHandler(GLFWwindow* window, Screen& screen);
 
-	void onEvent(Event& event) override;
+	void onEvent(::Event& event) override;
 
 	bool onFrameBufferResize(FrameBufferResizeEvent& event);
 	bool onWindowResize(WindowResizeEvent& event);
 	bool onKeyPress(KeyPressEvent& event);
 	bool onKeyPressOrRepeat(KeyPressEvent& event);
 	bool onDoubleKeyPress(DoubleKeyPressEvent& event);
+};
+
 };

@@ -2,6 +2,8 @@
 
 #include "../engine/layer/layer.h"
 
+namespace Application {
+
 class DebugOverlay : public Layer {
 public:
 	DebugOverlay();
@@ -12,4 +14,6 @@ public:
 	void onEvent(Event& event) override;
 	void onRender() override;
 	void onClose() override;
+};
+
 };

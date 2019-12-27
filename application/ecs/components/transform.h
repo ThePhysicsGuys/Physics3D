@@ -4,6 +4,8 @@
 
 #include "../physics/math/globalCFrame.h"
 
+namespace Application {
+
 /*
 	A Component representing the position, rotation and scale of the parent entity
 */
@@ -36,3 +38,4 @@ public:
 	virtual bool isUnique() const override;
 };
 
+};

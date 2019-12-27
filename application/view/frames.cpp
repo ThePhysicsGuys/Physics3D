@@ -1,6 +1,8 @@
 #include "core.h"
 #include "frames.h"
 
+namespace Application {
+
 #pragma region EnvironmentFrame
 
 bool EnvironmentFrame::hdr = true;
@@ -15,3 +17,5 @@ Color3 EnvironmentFrame::sunColor = Color3(1);
 float PropertiesFrame::position[3] = { 0, 0, 0 };
 
 #pragma endregion
+
+};

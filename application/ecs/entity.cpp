@@ -3,6 +3,8 @@
 
 #include "components/component.h"
 
+namespace Application {
+
 void Entity::addComponent(Component* component) {
 	if (component == nullptr)
 		return;
@@ -61,7 +63,7 @@ void Entity::setParent(Entity* parent) {
 	if (parent != nullptr && containsChild(parent))
 		return;
 
-	if (this->parent != nullptr) 
+	if (this->parent != nullptr)
 		this->parent->removeChild(this);
 
 	this->parent = parent;
@@ -102,3 +104,5 @@ bool Entity::containsChild(Entity* query) {
 
 	return false;
 }
+
+};
