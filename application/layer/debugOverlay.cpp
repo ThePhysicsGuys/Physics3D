@@ -29,14 +29,6 @@ BarChart iterationChart("Iteration Statistics", "", GJKCollidesIterationStatisti
 
 SlidingChart fpsSlidingChart("Fps Fps", Vec2f(-0.3, 0.2), Vec2f(0.7, 0.4));
 
-DebugOverlay::DebugOverlay() {
-
-}
-
-DebugOverlay::DebugOverlay(Screen* screen, char flags) : Layer("Debug overlay", screen, flags) {
-
-}
-
 void DebugOverlay::onInit() {
 	fpsSlidingChart.add(SlidingChartDataSetInfo("Fps 1", 100, COLOR::ORANGE, 2.0));
 	fpsSlidingChart.add(SlidingChartDataSetInfo("Fps 2", 50, COLOR::BLUE, 1.0));
@@ -52,6 +44,7 @@ void DebugOverlay::onEvent(Event& event) {
 }
 
 void DebugOverlay::onRender() {
+	Screen* screen = static_cast<Screen*>(this->ptr);
 
 	Renderer::disableDepthTest();
 	ApplicationShaders::fontShader.updateProjection(screen->camera.orthoMatrix);
@@ -103,11 +96,13 @@ void DebugOverlay::onRender() {
 		iterationChart.render();
 
 		graphicsMeasure.mark(GraphicsProcess::WAIT_FOR_LOCK);
-		screen->world->syncReadOnlyOperation([this] () {
+		screen->world->syncReadOnlyOperation([this]() {
+			Screen* screen = static_cast<Screen*>(this->ptr);
+
 			graphicsMeasure.mark(GraphicsProcess::PROFILER);
-			renderTreeStructure(*this->screen, this->screen->world->objectTree.rootNode, Vec3f(0, 1, 0), Vec2f(1.4, 0.95), 0.7f);
-			renderTreeStructure(*this->screen, this->screen->world->terrainTree.rootNode, Vec3f(0, 0, 1), Vec2f(0.4, 0.95), 0.7f);
-			});
+			renderTreeStructure(*screen, screen->world->objectTree.rootNode, Vec3f(0, 1, 0), Vec2f(1.4, 0.95), 0.7f);
+			renderTreeStructure(*screen, screen->world->terrainTree.rootNode, Vec3f(0, 0, 1), Vec2f(0.4, 0.95), 0.7f);
+		});
 
 		fpsSlidingChart.add("Fps 1", graphicsMeasure.getAvgTPS());
 		fpsSlidingChart.add("Fps 2", physicsMeasure.getAvgTPS());

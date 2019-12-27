@@ -85,7 +85,9 @@ bool StandardInputHandler::onKeyPress(KeyPressEvent& event) {
 		togglePause();
 	} else if (KeyboardOptions::Part::remove == key) {
 		if (screen.selectedPart != nullptr) {
-			screen.world->removePart(screen.selectedPart);
+			screen.world->asyncModification([world = screen.world, selectedPart = screen.selectedPart]() {
+				world->removePart(selectedPart);
+			});
 			screen.world->selectedPart = nullptr;
 			screen.selectedPart = nullptr;
 		}
@@ -107,7 +109,9 @@ bool StandardInputHandler::onKeyPress(KeyPressEvent& event) {
 		screen.selectedPart->makeMainPart();
 	} else if (KeyboardOptions::World::valid == key) {
 		Log::debug("Checking World::isValid()");
-		screen.world->isValid();
+		screen.world->asyncReadOnlyOperation([world = screen.world]() {
+			world->isValid();
+		});
 	} else if (KeyboardOptions::Edit::rotate == key) {
 		Picker::editTools.editMode = EditTools::EditMode::ROTATE;
 	} else if (KeyboardOptions::Edit::translate == key) {

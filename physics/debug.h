@@ -7,7 +7,7 @@
 
 class Part;
 
-struct Polyhedron;
+class Polyhedron;
 
 namespace Debug {
 	

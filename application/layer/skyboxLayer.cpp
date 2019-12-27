@@ -17,14 +17,6 @@ namespace Application {
 
 CubeMap* skyboxTexture = nullptr;
 
-SkyboxLayer::SkyboxLayer() : Layer() {
-
-};
-
-SkyboxLayer::SkyboxLayer(Screen* screen, char flags) : Layer("Skybox", screen, flags) {
-
-}
-
 void SkyboxLayer::onInit() {
 	skyboxTexture = new CubeMap("../res/skybox/right.jpg", "../res/skybox/left.jpg", "../res/skybox/top.jpg", "../res/skybox/bottom.jpg", "../res/skybox/front.jpg", "../res/skybox/back.jpg");
 }
@@ -38,6 +30,8 @@ void SkyboxLayer::onEvent(Event& event) {
 }
 
 void SkyboxLayer::onRender() {
+	Screen* screen = static_cast<Screen*>(this->ptr);
+
 	graphicsMeasure.mark(GraphicsProcess::SKYBOX);
 
 	Renderer::disableDepthMask();

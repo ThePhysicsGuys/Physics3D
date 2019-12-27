@@ -4,6 +4,7 @@
 
 #include <typeinfo>
 #include <unordered_map>
+#include <map>
 
 #include "resource.h"
 
@@ -11,6 +12,7 @@ class ResourceManager {
 	friend Resource;
 
 private:
+
 	struct CountedResource {
 		Resource* value;
 		int count;
@@ -183,5 +185,20 @@ public:
 		}
 
 		return list;
+	}
+
+	static std::map<std::string, std::vector<Resource*>> getResourceMap() {
+		std::map<std::string, std::vector<Resource*>> map;
+
+		for (auto iterator : ResourceManager::resources) {
+			Resource* resource = iterator.second.value;
+
+			if (map.find(resource->getTypeName()) == map.end())
+				map[resource->getTypeName()] = std::vector<Resource*>();
+
+			map[resource->getTypeName()].push_back(resource);
+		}
+
+		return map;
 	}
 };

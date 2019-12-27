@@ -6,8 +6,8 @@ namespace Application {
 
 class PickerLayer : public Layer {
 public:
-	PickerLayer();
-	PickerLayer(Screen* screen, char flags = None);
+	PickerLayer() : Layer() {};
+	PickerLayer(Screen* screen, char flags = None) : Layer("Picker", screen, flags) {};
 
 	void onInit() override;
 	void onUpdate() override;

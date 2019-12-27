@@ -3,11 +3,13 @@
 #include "../engine/layer/layer.h"
 
 namespace Application {
+	
+class Screen;
 
 class GuiLayer : public Layer {
 public:
-	GuiLayer();
-	GuiLayer(Screen* screen, char flags = None);
+	GuiLayer() : Layer() {};
+	GuiLayer(Screen* screen, char flags = None) : Layer("Gui", screen, flags) {};
 
 	void onInit() override;
 	void onUpdate() override;

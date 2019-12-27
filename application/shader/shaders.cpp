@@ -15,6 +15,7 @@
 namespace Application {
 
 namespace ApplicationShaders {
+	
 BasicShader basicShader;
 DepthShader depthShader;
 VectorShader vectorShader;

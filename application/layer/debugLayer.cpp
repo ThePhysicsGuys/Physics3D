@@ -95,14 +95,6 @@ bool recursiveColTreeForOneObject(const TreeNode& node, const Part* part, const 
 	return false;
 }
 
-DebugLayer::DebugLayer() {
-
-}
-
-DebugLayer::DebugLayer(Screen* screen, char flags) : Layer("Debug layer", screen, flags) {
-
-}
-
 void DebugLayer::onInit() {
 
 	// Origin init
@@ -125,6 +117,8 @@ void DebugLayer::onEvent(::Event& event) {
 }
 
 void DebugLayer::onRender() {
+	Screen* screen = static_cast<Screen*>(this->ptr);
+
 	graphicsMeasure.mark(GraphicsProcess::VECTORS);
 
 	using namespace Debug;
@@ -139,9 +133,10 @@ void DebugLayer::onRender() {
 		pointLog.add(ColoredPoint(com, CENTER_OF_MASS));
 	}
 
-	screen->world->syncReadOnlyOperation([this, &vecLog] () {
-		for (const ConstraintGroup& constraintGroup : screen->world->constraints) {
-			for (const BallConstraint& ballConstraint : constraintGroup.ballConstraints) {
+	screen->world->syncReadOnlyOperation([this, &vecLog]() {
+		Screen* screen = static_cast<Screen*>(this->ptr);
+		for(const ConstraintGroup& constraintGroup : screen->world->constraints) {
+			for(const BallConstraint& ballConstraint : constraintGroup.ballConstraints) {
 				vecLog.add(ColoredVector(ballConstraint.a->getCFrame().getPosition(), ballConstraint.a->getCFrame().localToRelative(ballConstraint.attachA), INFO_VEC));
 				vecLog.add(ColoredVector(ballConstraint.b->getCFrame().getPosition(), ballConstraint.b->getCFrame().localToRelative(ballConstraint.attachB), INFO_VEC));
 			}

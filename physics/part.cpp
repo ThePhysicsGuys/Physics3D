@@ -136,9 +136,8 @@ void Part::attach(Part* other, const CFrame& relativeCFrame) {
 }
 
 void Part::attach(Part* other, HardConstraint* constraint, const CFrame& attachToThis, const CFrame& attachToThat) {
-	if(this->parent == nullptr) {
-		MotorizedPhysical* newPhys = new MotorizedPhysical(this);
-		this->parent = newPhys;
+	this->ensureHasParent();
+	if(other->parent == nullptr) {
 		this->parent->attachPart(other, constraint, attachToThis, attachToThat);
 	} else {
 		this->parent->attachPhysical(Physical(other, this->parent->mainPhysical), constraint, this->transformCFrameToParent(attachToThis), attachToThat);

@@ -56,5 +56,5 @@ double Sphere::getMaxRadiusSq() const {
 }
 
 Polyhedron Sphere::asPolyhedron() const {
-	return Library::createSphere(radius, 4);
+	return Library::createSphere(float(radius), 4);
 }

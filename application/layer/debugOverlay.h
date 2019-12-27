@@ -4,10 +4,12 @@
 
 namespace Application {
 
+class Screen;
+
 class DebugOverlay : public Layer {
 public:
-	DebugOverlay();
-	DebugOverlay(Screen* screen, char flags = NoEvents);
+	DebugOverlay() : Layer() {};
+	DebugOverlay(Screen* screen, char flags = NoEvents) : Layer("Debug overlay", screen, flags) {};
 
 	void onInit() override;
 	void onUpdate() override;

@@ -4,11 +4,9 @@
 
 #include <string>
 
-class Application::Screen;
-
 class Layer {
 protected:
-	Screen* screen = nullptr;
+	void* ptr = nullptr;
 
 public:
 
@@ -33,8 +31,8 @@ public:
 
 	char flags;
 
-	Layer() {};
-	Layer(const std::string& name, Screen* screen, char flags = None) : name(name), screen(screen), flags(flags) {};
+	Layer() : name(""), ptr(nullptr), flags(None) {};
+	Layer(const std::string& name, void* ptr, char flags = None) : name(name), ptr(ptr), flags(flags) {};
 	~Layer() {}
 
 	virtual void onAttach() {}
