@@ -15,9 +15,7 @@ void togglePause();
 void runTick();
 void setSpeed(double newSpeed);
 double getSpeed();
-
 void stop(int returnCode);
-
 void toggleFlying();
 
 };

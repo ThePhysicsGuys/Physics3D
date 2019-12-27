@@ -35,8 +35,8 @@ struct PieChart {
 	std::string totalValue;
 
 	inline PieChart(const char* title, std::string totalValue, Vec2f piePosition, float pieSize) : title(title), totalValue(totalValue), piePosition(piePosition), pieSize(pieSize) {}
-	void renderPie(Screen& screen) const;
-	void renderText(Screen& screen, Font* font) const;
+	void renderPie() const;
+	void renderText(Font* font) const;
 	void add(DataPoint& p);
 	float getTotal() const;
 };
@@ -92,5 +92,5 @@ struct SlidingChart : public Component {
 	Vec2 resize() override;
 };
 
-void renderTreeStructure(Screen& screen, const TreeNode& tree, const Color3& treeColor, Vec2f origin, float allottedWidth);
+void renderTreeStructure(const TreeNode& tree, const Color3& treeColor, Vec2f origin, float allottedWidth);
 

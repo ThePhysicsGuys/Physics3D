@@ -5,6 +5,8 @@
 
 namespace Application {
 
+class Screen;
+
 class ModelLayer : public Layer {
 private:
 	InstanceBatchManager* manager = nullptr;

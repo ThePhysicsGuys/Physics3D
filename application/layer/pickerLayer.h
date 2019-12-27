@@ -4,6 +4,8 @@
 
 namespace Application {
 
+class Screen;
+
 class PickerLayer : public Layer {
 public:
 	PickerLayer() : Layer() {};

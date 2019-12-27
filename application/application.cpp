@@ -49,21 +49,6 @@ PlayerWorld world(1 / TICKS_PER_SECOND);
 Screen screen;
 
 void init(int argc, const char** args);
-
-int main(int argc, const char** args) {
-	init(argc, args);
-
-	Log::info("Started rendering");
-	while (!screen.shouldClose()) {
-		graphicsMeasure.mark(GraphicsProcess::UPDATE);
-		screen.onUpdate();
-		screen.onRender();
-		graphicsMeasure.end();
-	}
-
-	stop(0);
-}
-
 void setupPhysics();
 void registerShapes();
 void setupWorld(int argc, const char** args);
@@ -93,11 +78,13 @@ bool has_suffix(const std::string& str, const std::string& suffix) {
 void init(int argc, const char** args) {
 	setupScreen();
 	registerShapes();
-	if (argc >= 2 && has_suffix(args[1], ".looseParts")) {
+
+	if (argc >= 2 && has_suffix(args[1], ".looseParts")) 
 		loadLoosePartsWorld(args[1]);
-	} else {
+	else 
 		setupWorld(argc, args);
-	}
+	
+
 	setupPhysics();
 	setupDebug();
 }
@@ -423,3 +410,17 @@ void toggleFlying() {
 }
 
 };
+
+int main(int argc, const char** args) {
+	Application::init(argc, args);
+
+	Log::info("Started rendering");
+	while (!Application::screen.shouldClose()) {
+		graphicsMeasure.mark(GraphicsProcess::UPDATE);
+		Application::screen.onUpdate();
+		Application::screen.onRender();
+		graphicsMeasure.end();
+	}
+
+	Application::stop(0);
+}
