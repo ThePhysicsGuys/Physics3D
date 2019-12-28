@@ -105,6 +105,17 @@ bool StandardInputHandler::onKeyPress(KeyPressEvent& event) {
 	} else if(KeyboardOptions::Part::makeMainPart == key) {
 		Log::info("Made %s the main part of it's physical", screen.selectedPart->name.c_str());
 		screen.selectedPart->makeMainPart();
+	} else if(KeyboardOptions::Part::makeMainPhysical == key) {
+		if(screen.selectedPart->parent != nullptr) {
+			if(!screen.selectedPart->parent->isMainPhysical()) {
+				Log::info("Made %s the main physical", screen.selectedPart->name.c_str());
+				((ConnectedPhysical*) screen.selectedPart->parent)->makeMainPhysical();
+			} else {
+				Log::warn("This physical is already the main physical!");
+			}
+		} else {
+			Log::warn("This part has no physical!");
+		}
 	} else if (KeyboardOptions::World::valid == key) {
 		Log::debug("Checking World::isValid()");
 		screen.world->asyncReadOnlyOperation([world = screen.world]() {

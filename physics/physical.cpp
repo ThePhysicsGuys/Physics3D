@@ -122,6 +122,10 @@ void Physical::makeMainPart(AttachedPart& newMainPart) {
 	}
 }
 
+void ConnectedPhysical::makeMainPhysical() {
+	throw "Not implemented!";
+}
+
 void Physical::attachPhysical(Physical&& phys, const CFrame& attachment) {
 	size_t originalAttachCount = this->parts.size();
 	const GlobalCFrame& cf = this->getCFrame();

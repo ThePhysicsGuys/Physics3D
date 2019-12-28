@@ -48,6 +48,7 @@ namespace KeyboardOptions {
 		Key remove = Keyboard::UNKNOWN;
 		Key anchor = Keyboard::UNKNOWN;
 		Key makeMainPart = Keyboard::UNKNOWN;
+		Key makeMainPhysical = Keyboard::UNKNOWN;
 	}
 
 	namespace Application {
@@ -99,6 +100,7 @@ namespace KeyboardOptions {
 		Part::anchor = loadKey(properties, "part.anchor");
 		Part::remove = loadKey(properties, "part.delete");
 		Part::makeMainPart = loadKey(properties, "part.makeMainPart");
+		Part::makeMainPhysical = loadKey(properties, "part.makeMainPhysical");
 
 		// Edit
 		Edit::translate = loadKey(properties, "edit.translate");

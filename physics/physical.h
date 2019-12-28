@@ -12,52 +12,11 @@
 #include "datastructures/iteratorEnd.h"
 
 #include "part.h"
+#include "rigidBody.h"
 #include "constraints/hardConstraint.h"
 
 typedef Vec3 Vec3Local;
 typedef Vec3 Vec3Relative;
-
-struct AttachedPart {
-	CFrame attachment = CFrame();
-	Part* part = nullptr;
-};
-
-struct PartIter {
-	AttachedPart* iter;
-	AttachedPart* iterEnd;
-	Part* first;
-
-	PartIter() = default;
-	PartIter(AttachedPart* iter, AttachedPart* iterEnd, Part* first) : iter(iter-1), iterEnd(iterEnd), first(first) {}
-
-	inline Part& operator*() const {
-		return (first != nullptr) ? *first : *iter->part;
-	}
-	inline void operator++() {
-		++iter;
-		first = nullptr;
-	}
-	inline bool operator!=(IteratorEnd) const { return this->iter != this->iterEnd; }
-	inline bool operator==(IteratorEnd) const { return this->iter == this->iterEnd; }
-};
-struct ConstPartIter {
-	const AttachedPart* iter;
-	const AttachedPart* iterEnd;
-	const Part* first;
-
-	ConstPartIter() = default;
-	ConstPartIter(const AttachedPart* iter, const AttachedPart* iterEnd, const Part* first) : iter(iter - 1), iterEnd(iterEnd), first(first) {}
-
-	inline const Part& operator*() const {
-		return (first != nullptr) ? *first : *iter->part;
-	}
-	inline void operator++() {
-		++iter;
-		first = nullptr;
-	}
-	inline bool operator!=(IteratorEnd) const { return this->iter != this->iterEnd; }
-	inline bool operator==(IteratorEnd) const { return this->iter == this->iterEnd; }
-};
 
 class WorldPrototype;
 
@@ -90,6 +49,8 @@ public:
 	double mass;
 	Vec3 localCenterOfMass;
 	SymmetricMat3 inertia;
+
+	RigidBody rigidBody;
 
 	MotorizedPhysical* mainPhysical;
 	std::vector<ConnectedPhysical> childPhysicals;
@@ -184,6 +145,8 @@ public:
 	ConnectedPhysical(Physical&& phys, Physical* parent, HardConstraint* constraintWithParent, const CFrame& attachOnThis, const CFrame& attachOnParent);
 
 	CFrame getRelativeCFrameToParent() const;
+
+	void makeMainPhysical();
 
 	void updateCFrame(const GlobalCFrame& parentCFrame);
 

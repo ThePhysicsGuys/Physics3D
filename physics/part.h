@@ -2,6 +2,7 @@
 
 class Part;
 class HardConstraint;
+class RigidBody;
 class Physical;
 class ConnectedPhysical;
 class MotorizedPhysical;
@@ -41,6 +42,7 @@ struct PartIntersection {
 
 
 class Part {
+	friend class RigidBody;
 	friend class Physical;
 	friend class ConnectedPhysical;
 	friend class MotorizedPhysical;
