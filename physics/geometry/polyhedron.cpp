@@ -297,7 +297,7 @@ int Polyhedron::furthestIndexInDirection(const Vec3f& direction) const {
 	__m256i bestIndices = _mm256_set1_epi32(0);
 
 	for(size_t blockI = 1; blockI < (vertexCount+7)/8; blockI++) {
-		__m256i indices = _mm256_set1_epi32(blockI);
+		__m256i indices = _mm256_set1_epi32(int(blockI));
 
 		__m256 xTxd = _mm256_mul_ps(dx, _mm256_load_ps(xValues + blockI * 8));
 		__m256 yTyd = _mm256_mul_ps(dy, _mm256_load_ps(yValues + blockI * 8));
@@ -346,7 +346,7 @@ Vec3f Polyhedron::furthestInDirection(const Vec3f& direction) const {
 	__m256 bestDot = _mm256_add_ps(_mm256_add_ps(xTxd, yTyd), zTzd);
 
 	for (size_t blockI = 1; blockI < (vertexCount + 7) / 8; blockI++) {
-		__m256i indices = _mm256_set1_epi32(blockI);
+		__m256i indices = _mm256_set1_epi32(int(blockI));
 
 		__m256 xVal = _mm256_load_ps(xValues + blockI * 8);
 		__m256 yVal = _mm256_load_ps(yValues + blockI * 8);
@@ -420,7 +420,7 @@ BoundingBox Polyhedron::getBounds() const {
 	__m256 zMin = zMax;
 
 	for(size_t blockI = 1; blockI < (vertexCount + 7) / 8; blockI++) {
-		__m256i indices = _mm256_set1_epi32(blockI);
+		__m256i indices = _mm256_set1_epi32(int(blockI));
 
 		__m256 xVal = _mm256_load_ps(xValues + blockI * 8);
 		__m256 yVal = _mm256_load_ps(yValues + blockI * 8);
@@ -446,9 +446,9 @@ BoundingBox Polyhedron::getBounds(const Mat3f& referenceFrame) const {
 	const float* yValues = this->vertices + offset;
 	const float* zValues = this->vertices + 2 * offset;
 
-	Vec3 xDir = referenceFrame.getRow(0);
-	Vec3 yDir = referenceFrame.getRow(1);
-	Vec3 zDir = referenceFrame.getRow(2);
+	Vec3f xDir = referenceFrame.getRow(0);
+	Vec3f yDir = referenceFrame.getRow(1);
+	Vec3f zDir = referenceFrame.getRow(2);
 	
 	__m256 xVal = _mm256_load_ps(xValues);
 	__m256 yVal = _mm256_load_ps(yValues);

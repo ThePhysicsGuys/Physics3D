@@ -125,7 +125,8 @@ public:
 
 	IteratorGroup() = default;
 
-	IteratorGroup(IterFactory list[BufferSize], size_t count) : size(count), curIter(list[0].begin()), curEnd(list[0].end()) {
+	IteratorGroup(IterFactory (&list)[BufferSize], size_t count) : size(count), curIter(list[0].begin()), curEnd(list[0].end()), factories{} {
+		if(count > BufferSize) throw "Invalid count!";
 		for (size_t i = 0; i < count; i++) {
 			factories[i] = list[i];
 		}

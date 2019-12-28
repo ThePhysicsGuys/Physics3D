@@ -1,5 +1,7 @@
 #pragma once
 
+namespace Application {
+
 class Screen;
 class PlayerWorld;
 
@@ -13,8 +15,7 @@ void togglePause();
 void runTick();
 void setSpeed(double newSpeed);
 double getSpeed();
-
 void stop(int returnCode);
-
 void toggleFlying();
 
+};

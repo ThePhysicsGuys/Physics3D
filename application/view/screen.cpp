@@ -37,6 +37,8 @@
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 
+namespace Application {
+
 std::vector<IndexedMesh*> Screen::meshes;
 std::map<const ShapeClass*, VisualData> Screen::shapeClassMeshIds;
 
@@ -150,8 +152,8 @@ void Screen::onInit() {
 
 
 	// Framebuffer init
-	quad = new Quad();
-	screenFrameBuffer = new FrameBuffer(dimension.x, dimension.y);
+	quad = new ::Quad();
+	screenFrameBuffer = new ::FrameBuffer(dimension.x, dimension.y);
 
 
 	// Shader init
@@ -159,14 +161,14 @@ void Screen::onInit() {
 
 
 	// Layer creation
-	skyboxLayer 	 = SkyboxLayer		(this);
-	modelLayer 		 = ModelLayer		(this);
-	testLayer		 = TestLayer		(this);
-	debugLayer 		 = DebugLayer		(this);
-	pickerLayer 	 = PickerLayer		(this);
-	postprocessLayer = PostprocessLayer	(this);
-	guiLayer		 = GuiLayer			(this);
-	debugOverlay 	 = DebugOverlay		(this);
+	skyboxLayer = SkyboxLayer(this);
+	modelLayer = ModelLayer(this);
+	testLayer = TestLayer(this);
+	debugLayer = DebugLayer(this);
+	pickerLayer = PickerLayer(this);
+	postprocessLayer = PostprocessLayer(this);
+	guiLayer = GuiLayer(this);
+	debugOverlay = DebugOverlay(this);
 
 	layerStack.pushLayer(&skyboxLayer);
 	layerStack.pushLayer(&modelLayer);
@@ -183,13 +185,13 @@ void Screen::onInit() {
 
 
 	// Eventhandler init
-	eventHandler.setWindowResizeCallback([](Screen& screen, Vec2i dimension) {
-		screen.camera.onUpdate(((float)dimension.x) / ((float)dimension.y));
+	eventHandler.setWindowResizeCallback([] (Screen& screen, Vec2i dimension) {
+		screen.camera.onUpdate(((float) dimension.x) / ((float) dimension.y));
 		screen.dimension = dimension;
 		LOG_DEBUG("dimension: %s", str(dimension));
 		screen.screenFrameBuffer->resize(screen.dimension);
 		GUI::blurFrameBuffer->resize(screen.dimension);
-	});
+		});
 
 
 	// Camera init
@@ -221,27 +223,27 @@ void Screen::onUpdate() {
 	// IO events
 	if (handler->anyKey) {
 		bool leftDragging = handler->leftDragging;
-		if (handler->getKey(KeyboardOptions::Move::forward))  
+		if (handler->getKey(KeyboardOptions::Move::forward))
 			camera.move(*this, 0, 0, -1 * speedAdjustment, leftDragging);
-		if (handler->getKey(KeyboardOptions::Move::backward)) 
+		if (handler->getKey(KeyboardOptions::Move::backward))
 			camera.move(*this, 0, 0, 1 * speedAdjustment, leftDragging);
-		if (handler->getKey(KeyboardOptions::Move::right))	 
+		if (handler->getKey(KeyboardOptions::Move::right))
 			camera.move(*this, 1 * speedAdjustment, 0, 0, leftDragging);
-		if (handler->getKey(KeyboardOptions::Move::left))    
+		if (handler->getKey(KeyboardOptions::Move::left))
 			camera.move(*this, -1 * speedAdjustment, 0, 0, leftDragging);
 		if (handler->getKey(KeyboardOptions::Move::ascend))
 			if (camera.flying) camera.move(*this, 0, 1 * speedAdjustment, 0, leftDragging);
 		if (handler->getKey(KeyboardOptions::Move::descend))
 			if (camera.flying) camera.move(*this, 0, -1 * speedAdjustment, 0, leftDragging);
-		if (handler->getKey(KeyboardOptions::Rotate::left))  
+		if (handler->getKey(KeyboardOptions::Rotate::left))
 			camera.rotate(*this, 0, 1 * speedAdjustment, 0, leftDragging);
-		if (handler->getKey(KeyboardOptions::Rotate::right)) 
+		if (handler->getKey(KeyboardOptions::Rotate::right))
 			camera.rotate(*this, 0, -1 * speedAdjustment, 0, leftDragging);
-		if (handler->getKey(KeyboardOptions::Rotate::up))    
+		if (handler->getKey(KeyboardOptions::Rotate::up))
 			camera.rotate(*this, 1 * speedAdjustment, 0, 0, leftDragging);
-		if (handler->getKey(KeyboardOptions::Rotate::down))  
+		if (handler->getKey(KeyboardOptions::Rotate::down))
 			camera.rotate(*this, -1 * speedAdjustment, 0, 0, leftDragging);
-		if (handler->getKey(KeyboardOptions::Application::close)) 
+		if (handler->getKey(KeyboardOptions::Application::close))
 			Renderer::closeGLFWWindow();
 	}
 
@@ -254,7 +256,7 @@ void Screen::onUpdate() {
 
 }
 
-void Screen::onEvent(Event& event) {
+void Screen::onEvent(::Event& event) {
 	camera.onEvent(event);
 
 	layerStack.onEvent(event);
@@ -319,11 +321,11 @@ VisualData Screen::addMeshShape(const VisualShape& s) {
 	int size = (int) meshes.size();
 	//Log::error("Mesh %d added!", size);
 	meshes.push_back(new IndexedMesh(s));
-	return VisualData{size, s.uvs != nullptr, s.normals != nullptr};
+	return VisualData { size, s.uvs != nullptr, s.normals != nullptr };
 }
 
 VisualData Screen::registerMeshFor(const ShapeClass* shapeClass, const VisualShape& mesh) {
-	if(shapeClassMeshIds.find(shapeClass) != shapeClassMeshIds.end()) throw "Attempting to re-register existing ShapeClass!";
+	if (shapeClassMeshIds.find(shapeClass) != shapeClassMeshIds.end()) throw "Attempting to re-register existing ShapeClass!";
 
 	VisualData meshData = addMeshShape(mesh);
 
@@ -340,7 +342,7 @@ VisualData Screen::registerMeshFor(const ShapeClass* shapeClass) {
 VisualData Screen::getOrCreateMeshFor(const ShapeClass* shapeClass) {
 	auto found = shapeClassMeshIds.find(shapeClass);
 
-	if(found != shapeClassMeshIds.end()) {
+	if (found != shapeClassMeshIds.end()) {
 		// mesh found!
 		VisualData meshData = (*found).second;
 		//Log::error("Mesh %d reused!", meshData);
@@ -350,3 +352,5 @@ VisualData Screen::getOrCreateMeshFor(const ShapeClass* shapeClass) {
 		return registerMeshFor(shapeClass);
 	}
 }
+
+};

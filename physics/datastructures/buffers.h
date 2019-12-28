@@ -202,13 +202,13 @@ struct AddableBuffer : public BufferWithCapacity<T> {
 	}
 };
 
-template<typename T, size_t N>
+template<typename T, int N>
 struct FixedLocalBuffer {
-	T buf[N];
-	size_t size = 0;
+	T buf[N]{};
+	int size = 0;
 
-	T& operator[](size_t index) { return buf[index]; }
-	const T& operator[](size_t index) const { return buf[index]; }
+	T& operator[](int index) { return buf[index]; }
+	const T& operator[](int index) const { return buf[index]; }
 
 	const T* begin() const { return &buf; }
 	T* begin() { return &buf; }

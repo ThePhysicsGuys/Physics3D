@@ -3,6 +3,8 @@
 #include "component.h"
 #include "transform.h"
 
+namespace Application {
+
 struct ExtendedPart;
 
 /*
@@ -43,3 +45,4 @@ public:
 
 };
 
+};

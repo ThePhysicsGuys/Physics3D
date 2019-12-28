@@ -17,9 +17,11 @@
 
 #include "worlds.h"
 
+namespace Application {
+
 BarChartClassInfo iterChartClasses[] {
 	{ "GJK Collide"   , Vec3f(0.2f, 0.2f, 1.0f) },
-	{ "GJK No Collide", Vec3f(1.0f, 0.5f, 0.0f) }, 
+	{ "GJK No Collide", Vec3f(1.0f, 0.5f, 0.0f) },
 	{ "EPA"           , Vec3f(1.0f, 1.0f, 0.0f) }
 };
 
@@ -72,22 +74,22 @@ void DebugOverlay::onRender() {
 		PieChart physicsPie = toPieChart(physicsMeasure, "Physics", Vec2f(-leftSide + 0.3f, -0.7f), 0.2f);
 		PieChart intersectionPie = toPieChart(intersectionStatistics, "Intersections", Vec2f(-leftSide + 2.7f, -0.7f), 0.2f);
 
-		physicsPie.renderText(*screen, GUI::font);
-		graphicsPie.renderText(*screen, GUI::font);
-		intersectionPie.renderText(*screen, GUI::font);
+		physicsPie.renderText(GUI::font);
+		graphicsPie.renderText(GUI::font);
+		intersectionPie.renderText(GUI::font);
 
-		physicsPie.renderPie(*screen);
-		graphicsPie.renderPie(*screen);
-		intersectionPie.renderPie(*screen);
+		physicsPie.renderPie();
+		graphicsPie.renderPie();
+		intersectionPie.renderPie();
 
 		ParallelArray<long long, 17> gjkColIter = GJKCollidesIterationStatistics.history.avg();
 		ParallelArray<long long, 17> gjkNoColIter = GJKNoCollidesIterationStatistics.history.avg();
 		ParallelArray<long long, 17> epaIter = EPAIterationStatistics.history.avg();
 
 		for (size_t i = 0; i < GJKCollidesIterationStatistics.size(); i++) {
-			iterationChart.data.get(0, i) = WeightValue{ (float)gjkColIter[i], std::to_string(gjkColIter[i]) };
-			iterationChart.data.get(1, i) = WeightValue{ (float)gjkNoColIter[i], std::to_string(gjkNoColIter[i]) };
-			iterationChart.data.get(2, i) = WeightValue{ (float)epaIter[i], std::to_string(epaIter[i]) };
+			iterationChart.data.get(0, i) = WeightValue { (float) gjkColIter[i], std::to_string(gjkColIter[i]) };
+			iterationChart.data.get(1, i) = WeightValue { (float) gjkNoColIter[i], std::to_string(gjkNoColIter[i]) };
+			iterationChart.data.get(2, i) = WeightValue { (float) epaIter[i], std::to_string(epaIter[i]) };
 		}
 
 		iterationChart.position = Vec2f(-leftSide + 0.1f, -0.3);
@@ -98,8 +100,8 @@ void DebugOverlay::onRender() {
 			Screen* screen = static_cast<Screen*>(this->ptr);
 
 			graphicsMeasure.mark(GraphicsProcess::PROFILER);
-			renderTreeStructure(*screen, screen->world->objectTree.rootNode, Vec3f(0, 1, 0), Vec2f(1.4, 0.95), 0.7f);
-			renderTreeStructure(*screen, screen->world->terrainTree.rootNode, Vec3f(0, 0, 1), Vec2f(0.4, 0.95), 0.7f);
+			renderTreeStructure(screen->world->objectTree.rootNode, Vec3f(0, 1, 0), Vec2f(1.4, 0.95), 0.7f);
+			renderTreeStructure(screen->world->terrainTree.rootNode, Vec3f(0, 0, 1), Vec2f(0.4, 0.95), 0.7f);
 		});
 
 		fpsSlidingChart.add("Fps 1", graphicsMeasure.getAvgTPS());
@@ -113,3 +115,5 @@ void DebugOverlay::onRender() {
 void DebugOverlay::onClose() {
 
 }
+
+};

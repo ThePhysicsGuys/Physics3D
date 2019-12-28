@@ -7,6 +7,8 @@
 #include "ecs/components/model.h"
 #include "ecs/components/transform.h"
 
+namespace Application {
+
 void TestLayer::onInit() {
 	Entity* entity = new Entity();
 	TransformComp* t = new TransformComp(GlobalCFrame());
@@ -25,9 +27,11 @@ void TestLayer::onEvent(Event& event) {
 }
 
 void TestLayer::onRender() {
-	
+
 }
 
 void TestLayer::onClose() {
 
 }
+
+};

@@ -7,8 +7,11 @@ class HDRTexture;
 class Texture;
 class CubeMap;
 struct Light;
-struct ExtendedPart;
 struct Material;
+
+namespace Application {
+
+struct ExtendedPart;
 
 struct SkyboxShader : public ShaderProgram {
 	SkyboxShader() : ShaderProgram() {}
@@ -125,19 +128,21 @@ struct InstanceBasicShader : public ShaderProgram {
 };
 
 namespace ApplicationShaders {
-	extern BasicShader basicShader;
-	extern DepthShader depthShader;
-	extern VectorShader vectorShader;
-	extern OriginShader originShader;
-	extern FontShader fontShader;
-	extern PostProcessShader postProcessShader;
-	extern SkyboxShader skyboxShader;
-	extern PointShader pointShader;
-	extern TestShader testShader;
-	extern LineShader lineShader;
-	extern InstanceBasicShader instanceBasicShader;
-	extern MaskShader maskShader;
+extern BasicShader basicShader;
+extern DepthShader depthShader;
+extern VectorShader vectorShader;
+extern OriginShader originShader;
+extern FontShader fontShader;
+extern PostProcessShader postProcessShader;
+extern SkyboxShader skyboxShader;
+extern PointShader pointShader;
+extern TestShader testShader;
+extern LineShader lineShader;
+extern InstanceBasicShader instanceBasicShader;
+extern MaskShader maskShader;
 
-	void onInit();
-	void onClose();
+void onInit();
+void onClose();
 }
+
+};

@@ -14,7 +14,7 @@
 #include <iosfwd>
 
 struct Triangle;
-struct Polyhedron;
+class Polyhedron;
 struct ShapeVecIter;
 struct ShapeVecIterFactory;
 struct ShapeTriangleIter;
@@ -74,8 +74,7 @@ struct ShapeTriangleIter {
 class NormalizedPolyhedron;
 class Shape;
 
-struct Polyhedron : public GenericCollidable {
-private:
+class Polyhedron : public GenericCollidable {
 	UniqueAlignedPointer<float> vertices;
 	UniqueAlignedPointer<int> triangles;
 	Polyhedron(UniqueAlignedPointer<float>&& vertices, UniqueAlignedPointer<int>&& triangles, int vertexCount, int triangleCount);

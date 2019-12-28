@@ -2,6 +2,8 @@
 
 #include "ray.h"
 
+namespace Application {
+
 class Screen;
 
 struct Pickable {
@@ -14,4 +16,6 @@ struct Pickable {
 	virtual void onMousePress(Screen& screen) {};
 	virtual void onMouseRelease(Screen& screen) {};
 	virtual void onMouseDrag(Screen& screen) {};
+};
+
 };

@@ -3,6 +3,8 @@
 
 #include "extendedPart.h"
 
+namespace Application {
+
 ExtendedPart* Model::getExtendedPart() const {
 	return extendedPart;
 }
@@ -27,3 +29,5 @@ void Model::setTransform(const TransformComp& transform) {
 bool Model::isUnique() const {
 	return true;
 }
+
+};

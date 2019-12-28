@@ -5,12 +5,15 @@
 #include "extendedPart.h"
 #include "view/screen.h"
 
+namespace Application {
+
 class PartFactory {
 	mutable size_t count = 0;
-	
+
 	std::string name;
 	Shape hitbox;
 	VisualData visualData;
+
 public:
 	PartFactory() = default;
 	PartFactory(const Shape& hitbox, Screen& screen, std::string name = "Part");
@@ -21,4 +24,6 @@ public:
 	ExtendedPart* produceScaled(const GlobalCFrame& cframe, const PartProperties& properties, double scaleX, double scaleY, double scaleZ, std::string name = "Part") const;
 	ExtendedPart* produceScaled(const PartProperties& properties, double scaleX, double scaleY, double scaleZ, std::string name = "Part") const;
 	ExtendedPart* produceScaled(ExtendedPart* partToAttachTo, const CFrame& attachment, const PartProperties& properties, double scaleX, double scaleY, double scaleZ, std::string name = "Part") const;
+};
+
 };

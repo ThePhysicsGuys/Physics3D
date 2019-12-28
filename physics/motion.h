@@ -13,7 +13,7 @@ struct Motion {
 		};
 		Vec3 components[4];
 	};
-	inline Motion() : components{} {};
+	inline Motion() : velocity(0,0,0), angularVelocity(0,0,0), acceleration(0,0,0), angularAcceleration(0,0,0) {};
 
 	inline Motion(Vec3 velocity, Vec3 angularVelocity) : 
 		velocity(velocity), 

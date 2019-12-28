@@ -12,64 +12,67 @@
 
 #include <sstream>
 
+namespace Application {
+
 namespace ApplicationShaders {
-	BasicShader basicShader;
-	DepthShader depthShader;
-	VectorShader vectorShader;
-	OriginShader originShader;
-	FontShader fontShader;
-	PostProcessShader postProcessShader;
-	SkyboxShader skyboxShader;
-	PointShader pointShader;
-	TestShader testShader;
-	LineShader lineShader;
-	MaskShader maskShader;
-	InstanceBasicShader instanceBasicShader;
+	
+BasicShader basicShader;
+DepthShader depthShader;
+VectorShader vectorShader;
+OriginShader originShader;
+FontShader fontShader;
+PostProcessShader postProcessShader;
+SkyboxShader skyboxShader;
+PointShader pointShader;
+TestShader testShader;
+LineShader lineShader;
+MaskShader maskShader;
+InstanceBasicShader instanceBasicShader;
 
-	void onInit() {
-		// Shader source init
-		ShaderSource basicShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(applicationResources, BASIC_SHADER)), "basic.shader");
-		ShaderSource depthShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(applicationResources, DEPTH_SHADER)), "depth.shader");
-		ShaderSource vectorShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(applicationResources, VECTOR_SHADER)), "vector.shader");
-		ShaderSource fontShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(applicationResources, FONT_SHADER)), "font.shader");
-		ShaderSource originShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(applicationResources, ORIGIN_SHADER)), "origin.shader");
-		ShaderSource postProcessShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(applicationResources, POSTPROCESS_SHADER)), "postProcess.shader");
-		ShaderSource skyboxShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(applicationResources, SKYBOX_SHADER)), "skybox.shader");
-		ShaderSource pointShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(applicationResources, POINT_SHADER)), "point.shader");
-		ShaderSource testShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(applicationResources, TEST_SHADER)), "test.shader");
-		ShaderSource lineShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(applicationResources, LINE_SHADER)), "line.shader");
-		ShaderSource maskShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(applicationResources, MASK_SHADER)), "mask.shader");
-		ShaderSource instanceBasicShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(applicationResources, BASIC_SHADER)), "instance_basic.shader");
+void onInit() {
+	// Shader source init
+	ShaderSource basicShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(applicationResources, BASIC_SHADER)), "basic.shader");
+	ShaderSource depthShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(applicationResources, DEPTH_SHADER)), "depth.shader");
+	ShaderSource vectorShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(applicationResources, VECTOR_SHADER)), "vector.shader");
+	ShaderSource fontShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(applicationResources, FONT_SHADER)), "font.shader");
+	ShaderSource originShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(applicationResources, ORIGIN_SHADER)), "origin.shader");
+	ShaderSource postProcessShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(applicationResources, POSTPROCESS_SHADER)), "postProcess.shader");
+	ShaderSource skyboxShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(applicationResources, SKYBOX_SHADER)), "skybox.shader");
+	ShaderSource pointShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(applicationResources, POINT_SHADER)), "point.shader");
+	ShaderSource testShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(applicationResources, TEST_SHADER)), "test.shader");
+	ShaderSource lineShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(applicationResources, LINE_SHADER)), "line.shader");
+	ShaderSource maskShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(applicationResources, MASK_SHADER)), "mask.shader");
+	ShaderSource instanceBasicShaderSource = parseShader((std::istream&) std::istringstream(getResourceAsString(applicationResources, BASIC_SHADER)), "instance_basic.shader");
 
-		// Shader init
-		new(&basicShader) BasicShader(basicShaderSource);
-		new(&depthShader) DepthShader(depthShaderSource);
-		new(&vectorShader) VectorShader(vectorShaderSource);
-		new(&fontShader) FontShader(fontShaderSource);
-		new(&originShader) OriginShader(originShaderSource);
-		new(&postProcessShader) PostProcessShader(postProcessShaderSource);
-		new(&skyboxShader) SkyboxShader(skyboxShaderSource);
-		new(&pointShader) PointShader(pointShaderSource);
-		new(&testShader) TestShader(testShaderSource);
-		new(&lineShader) LineShader(lineShaderSource);
-		new(&maskShader) MaskShader(maskShaderSource);
-		new(&instanceBasicShader) InstanceBasicShader(instanceBasicShaderSource);
-	}
+	// Shader init
+	new(&basicShader) BasicShader(basicShaderSource);
+	new(&depthShader) DepthShader(depthShaderSource);
+	new(&vectorShader) VectorShader(vectorShaderSource);
+	new(&fontShader) FontShader(fontShaderSource);
+	new(&originShader) OriginShader(originShaderSource);
+	new(&postProcessShader) PostProcessShader(postProcessShaderSource);
+	new(&skyboxShader) SkyboxShader(skyboxShaderSource);
+	new(&pointShader) PointShader(pointShaderSource);
+	new(&testShader) TestShader(testShaderSource);
+	new(&lineShader) LineShader(lineShaderSource);
+	new(&maskShader) MaskShader(maskShaderSource);
+	new(&instanceBasicShader) InstanceBasicShader(instanceBasicShaderSource);
+}
 
-	void onClose() {
-		basicShader.close();
-		depthShader.close();
-		vectorShader.close();
-		fontShader.close();
-		originShader.close();
-		skyboxShader.close();
-		postProcessShader.close();
-		pointShader.close();
-		testShader.close();
-		lineShader.close();
-		maskShader.close();
-		instanceBasicShader.close();
-	}
+void onClose() {
+	basicShader.close();
+	depthShader.close();
+	vectorShader.close();
+	fontShader.close();
+	originShader.close();
+	skyboxShader.close();
+	postProcessShader.close();
+	pointShader.close();
+	testShader.close();
+	lineShader.close();
+	maskShader.close();
+	instanceBasicShader.close();
+}
 }
 
 
@@ -467,3 +470,5 @@ void InstanceBasicShader::updateProjection(const Mat4f& viewMatrix, const Mat4f&
 	shader.setUniform("projectionMatrix", projectionMatrix);
 	shader.setUniform("viewPosition", viewPosition);
 }
+
+};

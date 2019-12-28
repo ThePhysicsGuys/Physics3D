@@ -83,6 +83,8 @@ void WorldPrototype::removePart(Part* part) {
 	Physical* parent = part->parent;
 	parent->detachPart(part);
 
+	
+
 	objectCount--;
 
 	ASSERT_VALID;
@@ -143,7 +145,7 @@ void WorldPrototype::removeExternalForce(ExternalForce* force) {
 //using WorldPartIter = IteratorGroup<IteratorFactory<BoundsTreeIter<TreeIterator, Part>, IteratorEnd>, 2>;
 IteratorFactoryWithEnd<WorldPartIter> WorldPrototype::iterParts(int partsMask) {
 	size_t size = 0;
-	IteratorFactoryWithEnd<BoundsTreeIter<TreeIterator, Part>> iters[2];
+	IteratorFactoryWithEnd<BoundsTreeIter<TreeIterator, Part>> iters[2]{};
 	if(partsMask & FREE_PARTS) {
 		BoundsTreeIter<TreeIterator, Part> i(objectTree.begin());
 		iters[size++] = IteratorFactoryWithEnd<BoundsTreeIter<TreeIterator, Part>>(i);
@@ -159,7 +161,7 @@ IteratorFactoryWithEnd<WorldPartIter> WorldPrototype::iterParts(int partsMask) {
 }
 IteratorFactoryWithEnd<ConstWorldPartIter> WorldPrototype::iterParts(int partsMask) const {
 	size_t size = 0;
-	IteratorFactoryWithEnd<BoundsTreeIter<ConstTreeIterator, const Part>> iters[2];
+	IteratorFactoryWithEnd<BoundsTreeIter<ConstTreeIterator, const Part>> iters[2]{};
 	if(partsMask & FREE_PARTS) {
 		BoundsTreeIter<ConstTreeIterator, const Part> i(objectTree.begin());
 		iters[size++] = IteratorFactoryWithEnd<BoundsTreeIter<ConstTreeIterator, const Part>>(i);
@@ -212,7 +214,7 @@ static bool isPhysicalValid(const Physical* phys, const MotorizedPhysical* mainP
 }
 
 static bool isConnectedPhysicalValid(const ConnectedPhysical* phys, const MotorizedPhysical* mainPhys) {
-	if(!isPhysicalValid(phys, mainPhys)) return false;
+	return isPhysicalValid(phys, mainPhys);
 }
 
 bool WorldPrototype::isValid() const {

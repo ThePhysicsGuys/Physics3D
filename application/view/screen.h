@@ -13,8 +13,11 @@
 struct Quad;
 class FrameBuffer;
 class HDRFrameBuffer;
-class StandardInputHandler;
 class IndexedMesh;
+
+namespace Application {
+
+class StandardInputHandler;
 class PlayerWorld;
 
 bool initGLEW();
@@ -22,7 +25,9 @@ bool initGLFW();
 void terminateGLFW();
 
 class Screen {
+private:
 	std::chrono::time_point<std::chrono::steady_clock> lastUpdate = std::chrono::steady_clock::now();
+
 public:
 	static std::vector<IndexedMesh*> meshes;
 	static std::map<const ShapeClass*, VisualData> shapeClassMeshIds;
@@ -49,7 +54,7 @@ public:
 
 	void onInit();
 	void onUpdate();
-	void onEvent(Event& event);
+	void onEvent(::Event& event);
 	void onRender();
 	void onClose();
 
@@ -61,3 +66,5 @@ public:
 };
 
 extern StandardInputHandler* handler;
+
+};

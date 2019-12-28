@@ -16,6 +16,8 @@
 
 #include "imgui/imgui.h"
 
+namespace Application {
+
 // Resource frame
 struct ResourceFrame {
 	static void render() {		
@@ -238,4 +240,6 @@ struct BigFrame {
 #pragma endregion
 		ImGui::End();
 	}
+};
+
 };

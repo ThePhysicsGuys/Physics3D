@@ -2,8 +2,9 @@
 
 #include "partFactory.h"
 
+namespace Application {
 
-PartFactory::PartFactory(const Shape& hitbox, Screen& screen, std::string name) : 
+PartFactory::PartFactory(const Shape& hitbox, Screen& screen, std::string name) :
 	hitbox(hitbox), visualData(Screen::getOrCreateMeshFor(hitbox.baseShape)), name(name) {
 }
 
@@ -43,3 +44,5 @@ ExtendedPart* createUniquePart(Screen& screen, const Shape& hitbox, const Visual
 	ExtendedPart* partPtr = new ExtendedPart(hitbox, position, properties, screen.addMeshShape(visualShape), name);
 	return partPtr;
 }
+
+};

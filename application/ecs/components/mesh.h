@@ -2,6 +2,8 @@
 
 #include "component.h"
 
+namespace Application {
+
 class IndexedMesh;
 
 /*
@@ -30,3 +32,5 @@ public:
 	*/
 	void setIndexedMesh(IndexedMesh* indexedMesh);
 };
+
+}

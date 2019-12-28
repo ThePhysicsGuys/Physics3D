@@ -8,6 +8,8 @@
 
 #include "input/standardInputHandler.h"
 
+namespace Application {
+
 void PickerLayer::onInit() {
 	Picker::onInit();
 }
@@ -31,3 +33,5 @@ void PickerLayer::onRender() {
 void PickerLayer::onClose() {
 	Picker::onClose();
 }
+
+};
