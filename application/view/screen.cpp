@@ -20,7 +20,6 @@
 #include "../worlds.h"
 #include "../engine/event/windowEvent.h"
 #include "../util/resource/resourceManager.h"
-#include "../engine/layer/layerStack.h"
 #include "layer/skyboxLayer.h"
 #include "layer/modelLayer.h"
 #include "layer/testLayer.h"
@@ -109,7 +108,6 @@ StandardInputHandler* handler = nullptr;
 
 
 // Layers
-LayerStack layerStack;
 SkyboxLayer skyboxLayer;
 ModelLayer modelLayer;
 TestLayer testLayer;

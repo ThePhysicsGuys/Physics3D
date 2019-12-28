@@ -7,6 +7,7 @@
 #include "../graphics/visualShape.h"
 #include "../graphics/visualData.h"
 #include "../engine/event/event.h"
+#include "../engine/layer/layerStack.h"
 #include "camera.h"
 
 struct Quad;
@@ -29,7 +30,7 @@ public:
 	Vec2i dimension;
 
 	Camera camera;
-
+	LayerStack layerStack;
 	EventHandler eventHandler;
 	Properties properties;
 
