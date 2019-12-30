@@ -203,7 +203,7 @@ void Physical::detachAllChildPhysicals() {
 }
 
 
-void Physical::detachChild(ConnectedPhysical&& formerChild) {
+void Physical::detachChildAndGiveItNewMain(ConnectedPhysical&& formerChild) {
 	delete formerChild.constraintWithParent;
 	MotorizedPhysical* newPhys = new MotorizedPhysical(std::move(static_cast<Physical&>(formerChild)));
 	WorldPrototype* world = this->mainPhysical->world;
@@ -213,22 +213,45 @@ void Physical::detachChild(ConnectedPhysical&& formerChild) {
 	childPhysicals.remove(std::move(formerChild));
 }
 
+void Physical::detachAllHardConstraintsForSinglePartPhysical(bool alsoDelete) {
+	this->detachAllChildPhysicals();
+	MotorizedPhysical* mainPhys = this->mainPhysical; // save main physical because it'll get deleted by parent->detachChild()
+	if(this != mainPhys) {
+		ConnectedPhysical& self = static_cast<ConnectedPhysical&>(*this);
+		Physical* parent = self.parent;
+		if(alsoDelete) {
+			parent->detachChildPartAndDelete(std::move(self));
+		} else {
+			parent->detachChildAndGiveItNewMain(std::move(self));
+		}
+		mainPhys->refreshPhysicalProperties();
+	} else {
+		if(alsoDelete) {
+			if(mainPhys->world != nullptr) {
+				mainPhys->world->removeMainPhysical(mainPhys);
+			}
+			delete mainPhys;
+		}
+	}
+}
+
+void Physical::detachChildPartAndDelete(ConnectedPhysical&& formerChild) {
+	delete formerChild.constraintWithParent;
+	WorldPrototype* world = this->mainPhysical->world;
+	if(world != nullptr) {
+		world->removePartFromTrees(formerChild.rigidBody.mainPart);
+	}
+	childPhysicals.remove(std::move(formerChild));
+}
+
 void Physical::detachPart(Part* part, bool partStaysInWorld) {
 	if(part == rigidBody.getMainPart()) {
 		if(rigidBody.getPartCount() == 1) {
-			this->detachAllChildPhysicals();
-			MotorizedPhysical* mainPhys = this->mainPhysical; // save main physical because it'll get deleted by parent->detachChild()
-			if(!this->isMainPhysical()) {
-				ConnectedPhysical& self = static_cast<ConnectedPhysical&>(*this);
-				Physical* parent = self.parent;
-				parent->detachChild(std::move(self));
-			}
-			mainPhys->refreshPhysicalProperties();
+			// we have to disconnect this from other physicals as we're detaching the last part in the physical
+
+			this->detachAllHardConstraintsForSinglePartPhysical(!partStaysInWorld);
 			// new parent
 			assert(part->parent->childPhysicals.size() == 0);
-			if(!partStaysInWorld) {
-				delete part->parent->mainPhysical;
-			}
 		} else {
 			AttachedPart& newMainPartAndLaterOldPart = rigidBody.parts.back();
 			makeMainPart(newMainPartAndLaterOldPart); // now points to old part

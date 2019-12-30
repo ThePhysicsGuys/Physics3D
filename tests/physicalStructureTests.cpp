@@ -42,6 +42,34 @@ TEST_CASE(testManyAttachBasic) {
 	delete d;
 }
 
+TEST_CASE(testManualDetach) {
+	Part* a = createPart();
+	Part* b = createPart();
+	Part* c = createPart();
+	Part* d = createPart();
+
+	a->attach(b, CFrame());
+	a->attach(c, CFrame());
+	c->attach(d, CFrame());
+
+	// a should be mainPart
+	ASSERT_TRUE(a->isMainPart());
+	ASSERT_FALSE(b->isMainPart());
+	ASSERT_FALSE(c->isMainPart());
+	ASSERT_FALSE(d->isMainPart());
+
+	b->detach();
+	ASSERT_TRUE(b->isMainPart());
+
+	a->detach();
+	ASSERT_TRUE(c->parent->rigidBody.mainPart != a);
+
+	delete b;
+	delete a;
+	delete c;
+	delete d;
+}
+
 TEST_CASE(testManyAttachComplex) {
 	Part* a = createPart();
 	Part* b = createPart();

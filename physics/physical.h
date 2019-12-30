@@ -90,8 +90,11 @@ public:
 	bool isMainPhysical() const;
 	void removeChild(ConnectedPhysical* child);
 
+private:
 	void detachAllChildPhysicals();
-	void detachChild(ConnectedPhysical&& formerChild);
+	void detachAllHardConstraintsForSinglePartPhysical(bool alsoDelete);
+	void detachChildAndGiveItNewMain(ConnectedPhysical&& formerChild);
+	void detachChildPartAndDelete(ConnectedPhysical&& formerChild);
 };
 
 
