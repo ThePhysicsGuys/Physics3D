@@ -3,6 +3,8 @@
 #include "../physics/synchonizedWorld.h"
 #include "extendedPart.h"
 
+namespace Application {
+
 class PlayerWorld : public SynchronizedWorld<ExtendedPart> {
 public:
 	PlayerWorld(double deltaT);
@@ -11,4 +13,6 @@ public:
 	virtual void applyExternalForces() override;
 
 	Part* selectedPart = nullptr;
+};
+
 };

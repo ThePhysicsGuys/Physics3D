@@ -16,6 +16,8 @@
 #define JUMP_SPEED 6
 #define AIR_RUN_SPEED_FACTOR 2
 
+namespace Application {
+
 PlayerWorld::PlayerWorld(double deltaT) : SynchronizedWorld<ExtendedPart>(deltaT) {}
 
 void PlayerWorld::applyExternalForces() {
@@ -72,3 +74,5 @@ void PlayerWorld::applyExternalForces() {
 		player->properties.conveyorEffect = runVector;
 	}
 }
+
+};

@@ -7,6 +7,8 @@ class PointMesh;
 class VectorMesh;
 class Screen;
 
+namespace Application {
+
 class DebugLayer : public Layer {
 private:
 	VectorMesh* vectorMesh = nullptr;
@@ -22,4 +24,6 @@ public:
 	void onEvent(Event& event) override;
 	void onRender() override;
 	void onClose() override;
-}; 
+};
+
+};

@@ -11,6 +11,8 @@
 #include "extendedPart.h"
 #include "view/camera.h"
 
+namespace Application {
+
 void savePart(std::ofstream& output, const ExtendedPart& part, std::string shape) {
 	output << "part:" << std::endl;
 	output << "\ttexture = " << "" << std::endl;
@@ -100,3 +102,5 @@ void WorldExport::save(const std::string& name, World<ExtendedPart>& world, Came
 /*
 	End of WorldExport
 */
+
+};

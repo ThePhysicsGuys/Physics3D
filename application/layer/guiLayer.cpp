@@ -13,6 +13,8 @@
 #include "../engine/input/mouse.h"
 #include "../graphics/buffers/frameBuffer.h"
 
+namespace Application {
+
 // Font
 Font* font = nullptr;
 
@@ -81,11 +83,12 @@ void GuiLayer::onRender() {
 	ApplicationShaders::fontShader.updateProjection(screen->camera.orthoMatrix);
 	GUI::onRender(screen->camera.orthoMatrix);
 
-	EnvironmentFrame::render();
-	DebugFrame::render();
-	PropertiesFrame::render();
+	//ResourceFrame::render();
+	BigFrame::render();
 }
 
 void GuiLayer::onClose() {
 	GUI::onClose();
 }
+
+};

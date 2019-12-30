@@ -39,7 +39,7 @@ const Color3 pieColors[30] {
 	Color3(0.5f,0.5f,0.5f),
 };
 
-void PieChart::renderPie(Screen& screen) const {
+void PieChart::renderPie() const {
 	Vec2f cursorPosition = Vec2f(pieSize, 0);
 
 	float oldAngle = 0.0f;
@@ -60,7 +60,7 @@ void PieChart::renderPie(Screen& screen) const {
 	}
 }
 
-void PieChart::renderText(Screen& screen, Font* font) const {
+void PieChart::renderText(Font* font) const {
 
 	// Title
 	Vec2f titlePosition = piePosition + Vec2f(pieSize * 1.3f, pieSize * 1.1f);
@@ -187,7 +187,7 @@ void recursiveRenderTree(const TreeNode& tree, const Vec3f& treeColor, Vec2f ori
 		Path::circleFilled(origin, 0.006f, COLOR::RED, 8);
 }
 
-void renderTreeStructure(Screen& screen, const TreeNode& tree, const Vec3f& treeColor, Vec2f origin, float allottedWidth) {
+void renderTreeStructure(const TreeNode& tree, const Vec3f& treeColor, Vec2f origin, float allottedWidth) {
 	long long maxCost = computeCost(tree[0].bounds);
 
 	for (int i = 1; i < tree.nodeCount; i++)

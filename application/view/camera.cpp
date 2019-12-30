@@ -17,6 +17,8 @@
 #include "picker/picker.h"
 #include "worlds.h"
 
+namespace Application {
+
 Camera::Camera(Position position, Mat3 rotation) : cframe(GlobalCFrame(position, rotation)), velocity(0.35), angularVelocity(0.04), flying(true) {
 	onUpdate();
 };
@@ -60,9 +62,9 @@ void Camera::rotate(Screen& screen, double dalpha, double dbeta, double dgamma, 
 	cframe.rotation = rotY(currentAngularVelocity * dbeta) * cframe.rotation * rotX(currentAngularVelocity * dalpha);
 
 	if (leftDragging) {
-		screen.world->asyncModification([&screen]() {
+		screen.world->asyncModification([&screen] () {
 			Picker::moveGrabbedPhysicalLateral(screen);
-		});
+			});
 	}
 	// Accelerate camera rotation
 	if (accelerating)
@@ -88,7 +90,7 @@ void Camera::move(Screen& screen, double dx, double dy, double dz, bool leftDrag
 	moving = accelerating;
 
 	(*screen.eventHandler.cameraMoveHandler) (screen, this, Vec3(dx, dy, dz));
-	
+
 	Vec3 translation = Vec3();
 
 	if (dx != 0) {
@@ -97,9 +99,9 @@ void Camera::move(Screen& screen, double dx, double dy, double dz, bool leftDrag
 		translation += translationX;
 
 		if (leftDragging) {
-			screen.world->asyncModification([&screen]() {
+			screen.world->asyncModification([&screen] () {
 				Picker::moveGrabbedPhysicalLateral(screen);
-			});
+				});
 		}
 	}
 
@@ -108,9 +110,9 @@ void Camera::move(Screen& screen, double dx, double dy, double dz, bool leftDrag
 		translation += translationY;
 
 		if (leftDragging) {
-			screen.world->asyncModification([&screen]() {
+			screen.world->asyncModification([&screen] () {
 				Picker::moveGrabbedPhysicalLateral(screen);
-			});
+				});
 		}
 	}
 
@@ -120,9 +122,9 @@ void Camera::move(Screen& screen, double dx, double dy, double dz, bool leftDrag
 		translation += translationZ;
 
 		if (leftDragging) {
-			screen.world->asyncModification([&screen, dz, this]() {
+			screen.world->asyncModification([&screen, dz, this] () {
 				Picker::moveGrabbedPhysicalTransversal(screen, -currentVelocity * dz);
-			});
+				});
 		}
 	}
 
@@ -149,7 +151,7 @@ void Camera::move(Screen& screen, Vec3 delta, bool leftDragging, bool accelerati
 	move(screen, delta.x, delta.y, delta.z, leftDragging, accelerating);
 }
 
-bool Camera::onKeyRelease(KeyReleaseEvent& event) {
+bool Camera::onKeyRelease(::KeyReleaseEvent& event) {
 
 	int key = event.getKey();
 
@@ -172,14 +174,14 @@ bool Camera::onKeyRelease(KeyReleaseEvent& event) {
 	return false;
 }
 
-bool Camera::onMouseDrag(MouseDragEvent& event) {
+bool Camera::onMouseDrag(::MouseDragEvent& event) {
 	double dmx = event.getNewX() - event.getOldX();
 	double dmy = event.getNewY() - event.getOldY();
 
 	// Camera rotating
 	if (event.isRightDragging())
 		rotate(screen, -dmy * 0.1, -dmx * 0.1, 0, event.isLeftDragging());
-	
+
 
 	// Camera moving
 	if (event.isMiddleDragging())
@@ -188,7 +190,7 @@ bool Camera::onMouseDrag(MouseDragEvent& event) {
 	return false;
 }
 
-bool Camera::onMouseScroll(MouseScrollEvent& event) {
+bool Camera::onMouseScroll(::MouseScrollEvent& event) {
 	velocity = GUI::clamp(velocity * (1 + 0.2 * event.getYOffset()), 0.001, 100);
 
 	thirdPersonDistance -= event.getYOffset();
@@ -196,7 +198,7 @@ bool Camera::onMouseScroll(MouseScrollEvent& event) {
 	return true;
 };
 
-void Camera::onEvent(Event& event) {
+void Camera::onEvent(::Event& event) {
 	EventDispatcher dispatcher(event);
 	dispatcher.dispatch<MouseDragEvent>(BIND_EVENT_METHOD(Camera::onMouseDrag));
 	dispatcher.dispatch<MouseScrollEvent>(BIND_EVENT_METHOD(Camera::onMouseScroll));
@@ -277,7 +279,7 @@ void Camera::onUpdate() {
 	// Update projection matrix
 	if (flags & ProjectionDirty) {
 		flags ^= ProjectionDirty;
-		
+
 		projectionMatrix = perspective(fov, aspect, znear, zfar);
 		invertedProjectionMatrix = ~projectionMatrix;
 	}
@@ -291,10 +293,12 @@ void Camera::onUpdate() {
 	}
 }
 
-
 double Camera::getRightOffsetAtZ1() const {
 	return tan(double(fov) / 2) * aspect;
 }
+
 double Camera::getTopOffsetAtZ1() const {
 	return tan(double(fov) / 2);
 }
+
+};

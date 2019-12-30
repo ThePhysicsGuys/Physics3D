@@ -9,6 +9,8 @@
 #include "partFactory.h"
 #include <fstream>
 
+namespace Application {
+
 /*
 	WorldImport
 */
@@ -152,3 +154,5 @@ void WorldImport::load(std::string name, World<ExtendedPart>& world, Screen& scr
 /*
 	End of WorldImport
 */
+
+};

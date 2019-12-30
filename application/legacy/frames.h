@@ -22,6 +22,8 @@
 #include "worlds.h"
 #include "screen.h"
 
+namespace Application {
+
 // Frame blueprint
 
 struct FrameBlueprint {
@@ -44,13 +46,13 @@ struct ResourceManagerFrame : public FrameBlueprint, public Frame {
 
 	void update() override {
 		auto textures = ResourceManager::getResourcesOfType(ResourceType::Texture);
-		
+
 		if (textures.size() != images.size()) {
-			for (Image* i : images) 
+			for (Image* i : images)
 				remove(i);
 
 			images.clear();
-			
+
 			for (Resource* r : textures) {
 				TextureResource* tr = static_cast<TextureResource*>(r);
 				Image* i = (new Image(0, 0, tr))->fixWidth(0.1);
@@ -98,7 +100,7 @@ struct EnvironmentFrame : public FrameBlueprint, public Frame {
 	Button* sunColorButton = nullptr;
 	DirectionEditor* sunDirectionEditor = nullptr;
 
-	EnvironmentFrame(double x, double y) : Frame(x, y, "Environment")  {
+	EnvironmentFrame(double x, double y) : Frame(x, y, "Environment") {
 		// frame = new Frame(x, y, "Environment");
 
 		init();
@@ -113,14 +115,14 @@ struct EnvironmentFrame : public FrameBlueprint, public Frame {
 		add(sunLabel, Align::CENTER);
 		add(sunColorButton, Align::CENTER);
 		add(sunDirectionEditor, Align::CENTER);
-		
+
 		GUI::add(this);
 	}
 
 	void init() override {
 		hdrCheckBox = new CheckBox("HDR", 0, 0, true);
 		hdrCheckBox->checked = true;
-		hdrCheckBox->action = [](CheckBox* c) {
+		hdrCheckBox->action = [] (CheckBox* c) {
 			ApplicationShaders::basicShader.updateHDR(c->checked);
 		};
 
@@ -252,20 +254,20 @@ struct DebugFrame : public FrameBlueprint, public Frame {
 		renderLabel = new Label("Render", 0, 0);
 		renderPiesCheckBox = new CheckBox("Statistics", 0, 0, true);
 		renderSpheresCheckBox = new CheckBox("Collision spheres", 0, 0, true);
-		infoVectorCheckBox->action = [](CheckBox* c) { toggleVectorType(Debug::INFO_VEC); };
-		velocityCheckBox->action = [](CheckBox* c) { toggleVectorType(Debug::VELOCITY); };
-		accelerationCheckBox->action = [](CheckBox* c) { toggleVectorType(Debug::ACCELERATION); };
-		forceCheckBox->action = [](CheckBox* c) { toggleVectorType(Debug::FORCE); };
-		angularImpulseCheckBox->action = [](CheckBox* c) { toggleVectorType(Debug::ANGULAR_IMPULSE); };
-		positionCheckBox->action = [](CheckBox* c) { toggleVectorType(Debug::POSITION); };
-		momentCheckBox->action = [](CheckBox* c) { toggleVectorType(Debug::MOMENT); };
-		impulseCheckBox->action = [](CheckBox* c) { toggleVectorType(Debug::IMPULSE); };
-		angularVelocityCheckBox->action = [](CheckBox* c) { toggleVectorType(Debug::ANGULAR_VELOCITY); };
-		infoPointCheckBox->action = [](CheckBox* c) { togglePointType(Debug::INFO_POINT); };
-		centerOfMassCheckBox->action = [](CheckBox* c) { togglePointType(Debug::CENTER_OF_MASS); };
-		intersectionCheckBox->action = [](CheckBox* c) { togglePointType(Debug::INTERSECTION); };
-		renderPiesCheckBox->action = [](CheckBox* c) { Debug::renderPiesEnabled = !Debug::renderPiesEnabled; };
-		renderSpheresCheckBox->action = [](CheckBox* c) { Debug::colissionSpheresMode = static_cast<Debug::SphereColissionRenderMode>((static_cast<int>(Debug::colissionSpheresMode) + 1) % 3); };
+		infoVectorCheckBox->action = [] (CheckBox* c) { toggleVectorType(Debug::INFO_VEC); };
+		velocityCheckBox->action = [] (CheckBox* c) { toggleVectorType(Debug::VELOCITY); };
+		accelerationCheckBox->action = [] (CheckBox* c) { toggleVectorType(Debug::ACCELERATION); };
+		forceCheckBox->action = [] (CheckBox* c) { toggleVectorType(Debug::FORCE); };
+		angularImpulseCheckBox->action = [] (CheckBox* c) { toggleVectorType(Debug::ANGULAR_IMPULSE); };
+		positionCheckBox->action = [] (CheckBox* c) { toggleVectorType(Debug::POSITION); };
+		momentCheckBox->action = [] (CheckBox* c) { toggleVectorType(Debug::MOMENT); };
+		impulseCheckBox->action = [] (CheckBox* c) { toggleVectorType(Debug::IMPULSE); };
+		angularVelocityCheckBox->action = [] (CheckBox* c) { toggleVectorType(Debug::ANGULAR_VELOCITY); };
+		infoPointCheckBox->action = [] (CheckBox* c) { togglePointType(Debug::INFO_POINT); };
+		centerOfMassCheckBox->action = [] (CheckBox* c) { togglePointType(Debug::CENTER_OF_MASS); };
+		intersectionCheckBox->action = [] (CheckBox* c) { togglePointType(Debug::INTERSECTION); };
+		renderPiesCheckBox->action = [] (CheckBox* c) { Debug::renderPiesEnabled = !Debug::renderPiesEnabled; };
+		renderSpheresCheckBox->action = [] (CheckBox* c) { Debug::colissionSpheresMode = static_cast<Debug::SphereColissionRenderMode>((static_cast<int>(Debug::colissionSpheresMode) + 1) % 3); };
 	}
 
 	void update() override {
@@ -322,7 +324,7 @@ struct PropertiesFrame : public FrameBlueprint, public Frame {
 
 	PropertiesFrame(double x, double y) : Frame(x, y, "Properties") {
 		init();
-	
+
 		add(generalLabel, Align::CENTER);
 		add(partNameLabel, Align::FILL);
 		add(partMeshIDLabel, Align::FILL);
@@ -514,5 +516,6 @@ struct PropertiesFrame : public FrameBlueprint, public Frame {
 			renderModeCheckBox->checked = false;
 		}
 	}
+};
 
 };

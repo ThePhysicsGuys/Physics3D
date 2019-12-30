@@ -3,6 +3,8 @@
 #include <chrono>
 #include <thread>
 
+namespace Application {
+
 using namespace std::chrono;
 
 class TickerThread {
@@ -33,11 +35,13 @@ public:
 	void start();
 	void stop();
 
-	void setTPS(double newTPS) {this->TPS = newTPS;}
+	void setTPS(double newTPS) { this->TPS = newTPS; }
 	double getTPS() const { return this->TPS; }
 
 	void setSpeed(double newSpeed) { this->speed = newSpeed; }
 	double getSpeed() { return this->speed; }
 
 	void runTick();
+};
+
 };

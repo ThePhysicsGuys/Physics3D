@@ -1,5 +1,7 @@
 #pragma once
 
+namespace Application {
+
 class Entity;
 
 /*
@@ -29,3 +31,4 @@ public:
 	virtual bool isUnique() const = 0;
 };
 
+};

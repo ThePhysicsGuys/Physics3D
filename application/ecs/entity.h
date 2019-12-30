@@ -1,6 +1,8 @@
 #pragma once
 #include <typeinfo>
 
+namespace Application {
+
 class Component;
 
 class Entity {
@@ -120,7 +122,7 @@ public:
 
 		return parent->getComponent<T>();
 	}
-	
+
 	/*
 		Returns all components of the given type in this entity if present, nullptr otherwise
 	*/
@@ -142,7 +144,7 @@ public:
 	template<typename T, typename = std::enable_if<std::is_base_of<Component, T>::value>>
 	std::vector<T*> getComponentsInChildren() {
 		std::vector<T*> results;
-		
+
 		for (Entity* child : children) {
 			for (T* component : child->getComponents<T>())
 				results.push_back(component);
@@ -166,3 +168,4 @@ public:
 	}
 };
 
+};

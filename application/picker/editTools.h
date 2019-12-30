@@ -2,6 +2,8 @@
 
 #include "pickable.h"
 
+namespace Application {
+
 struct EditTools : public Pickable {
 
 	enum class EditMode {
@@ -44,3 +46,4 @@ struct EditTools : public Pickable {
 	void dragScaleTool(Screen& screen);
 };
 
+};

@@ -1,5 +1,7 @@
 #pragma once
 
+namespace Application {
+
 class Screen;
 struct Camera;
 struct ExtendedPart;
@@ -24,7 +26,7 @@ public:
 	PartClickHandler partClickHandler = [] (Screen&, ExtendedPart*, Vec3) {};
 	PartTouchHandler partTouchHandler = [] (ExtendedPart*, ExtendedPart*, Vec3) {};
 	PartReleaseHandler partReleaseHandler = [] (ExtendedPart*, ExtendedPart*) {};
-	
+
 	void* getPtr() const;
 	void setPtr(void* ptr);
 	void setCameraMoveCallback(CameraMoveHandler handler);
@@ -35,3 +37,5 @@ public:
 	void setPartTouchCallback(PartTouchHandler handler);
 	void setPartReleaseCallback(PartReleaseHandler handler);
 };
+
+}
