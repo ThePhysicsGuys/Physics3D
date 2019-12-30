@@ -84,19 +84,20 @@ TEST_CASE(rotationInvariance) {
 
 TEST_CASE(applyForceToRotate) {
 	Part part(Box(1.0, 1.0, 1.0), GlobalCFrame(0,0,0,fromEulerAngles(0.3, 0.7, 0.9)), {1.0, 1.0, 0.7});
-	MotorizedPhysical p(&part);
+	part.ensureHasParent();
 
 	Vec3 relAttach = Vec3(1.0, 0.0, 0.0);
 	Vec3 force = Vec3(0.0, 1.0, 0.0);
 
-	p.applyForce(relAttach, force);
-	ASSERT(p.totalForce == force);
-	ASSERT(p.totalMoment == Vec3(0.0, 0.0, 1.0));
+	part.parent->mainPhysical->applyForce(relAttach, force);
+	ASSERT(part.parent->mainPhysical->totalForce == force);
+	ASSERT(part.parent->mainPhysical->totalMoment == Vec3(0.0, 0.0, 1.0));
 }
 
 TEST_CASE(momentToAngularVelocity) {
 	Part part(Box(1.0, 1.0, 1.0), GlobalCFrame(rotY(M_PI / 2)), {1.0, 1.0, 0.7});
-	MotorizedPhysical p(&part);
+	part.ensureHasParent();
+	MotorizedPhysical& p = *part.parent->mainPhysical;
 
 	Vec3 moment(1.0, 0.0, 0.0);
 
@@ -105,12 +106,13 @@ TEST_CASE(momentToAngularVelocity) {
 		p.update(0.05);
 	}
 
-	ASSERT(p.getMotion().angularVelocity == moment * 50 * 0.05 / p.inertia[0][0]);
+	ASSERT(p.getMotion().angularVelocity == moment * 50 * 0.05 * p.momentResponse[0][0]);
 }
 
 TEST_CASE(rotationImpulse) {
 	Part part(Box(0.2, 20.0, 0.2), GlobalCFrame(0,0,0), {1.0, 1.0, 0.7});
-	MotorizedPhysical veryLongBoxPhysical(&part);
+	part.ensureHasParent();
+	MotorizedPhysical& veryLongBoxPhysical = *part.parent->mainPhysical;
 
 	Vec3 xMoment = Vec3(1.0, 0.0, 0.0);
 	Vec3 yMoment = Vec3(0.0, 1.0, 0.0);
@@ -124,7 +126,8 @@ TEST_CASE(rotationImpulse) {
 
 TEST_CASE(testPointAcceleration) {
 	Part testPart(Box(1.0, 2.0, 3.0), GlobalCFrame(0,0,0), {1.0, 1.0, 0.7});
-	MotorizedPhysical testPhys(&testPart);
+	testPart.ensureHasParent();
+	MotorizedPhysical& testPhys = *testPart.parent->mainPhysical;
 	Vec3 localPoint(3, 5, 7);
 	Vec3 force(-4, -3, 0.5);
 	double deltaT = 0.00001;
@@ -148,7 +151,8 @@ TEST_CASE(testPointAcceleration) {
 
 TEST_CASE(testGetPointAccelerationMatrix) {
 	Part testPart(Box(1.0, 2.0, 3.0), GlobalCFrame(0,0,0), {1.0, 1.0, 0.7});
-	MotorizedPhysical testPhys(&testPart);
+	testPart.ensureHasParent();
+	MotorizedPhysical& testPhys = *testPart.parent->mainPhysical;
 	Vec3 localPoint(3, 5, 7);
 	Vec3 force(-4, -3, 0.5);
 
@@ -164,7 +168,8 @@ TEST_CASE(testGetPointAccelerationMatrix) {
 }
 TEST_CASE(impulseTest) {
 	Part part(Box(1.0, 2.0, 2.5), GlobalCFrame(0,0,0), {1.0, 1.0, 0.7});
-	MotorizedPhysical p(&part);
+	part.ensureHasParent();
+	MotorizedPhysical& p = *part.parent->mainPhysical;
 
 	p.applyImpulseAtCenterOfMass(Vec3(15, 0, 0));
 	ASSERT(p.getMotion().velocity == Vec3(3,0,0));
@@ -179,7 +184,8 @@ TEST_CASE(impulseTest) {
 
 TEST_CASE(testPointAccelMatrixImpulse) {
 	Part part(Box(1.0, 2.0, 3.0), GlobalCFrame(7.6, 3.4, 3.9, fromEulerAngles(1.1, 0.7, 0.9)), {1.0, 1.0, 0.7});
-	MotorizedPhysical p(&part);
+	part.ensureHasParent();
+	MotorizedPhysical& p = *part.parent->mainPhysical;
 
 	Vec3 localPoint(0.8, 0.6, 0.9);
 	Vec3 localImpulse(0.3, -0.7, 0.6);
@@ -195,7 +201,8 @@ TEST_CASE(testPointAccelMatrixImpulse) {
 
 TEST_CASE(inelasticColission) {
 	Part part(Box(1.0, 2.0, 3.0), GlobalCFrame(7.6, 3.4, 3.9, fromEulerAngles(1.1, 0.7, 0.9)), {1.0, 1.0, 0.7});
-	MotorizedPhysical p(&part);
+	part.ensureHasParent();
+	MotorizedPhysical& p = *part.parent->mainPhysical;
 
 	Vec3 localPoint(0.8, 0.6, 0.9);
 	Vec3 relativePoint = p.getCFrame().localToRelative(localPoint);
@@ -241,7 +248,8 @@ TEST_CASE(inelasticColission) {
 
 TEST_CASE(inelasticColission2) {
 	Part part(Box(1.0, 2.0, 3.0), GlobalCFrame(/*Vec3(7.6, 3.4, 3.9), fromEulerAngles(1.1, 0.7, 0.9)*/), {1.0, 1.0, 0.7});
-	MotorizedPhysical p(&part);
+	part.ensureHasParent();
+	MotorizedPhysical& p = *part.parent->mainPhysical;
 
 	Vec3 localPoint(0.8, 0.6, 0.9);
 	Vec3 relativePoint = p.getCFrame().localToRelative(localPoint);
@@ -331,14 +339,17 @@ TEST_CASE(testMultiPartPhysicalSimple) {
 	Part p2(box2, GlobalCFrame(), {10.0, 0.5, 0.5});
 	Part doubleP(doubleBox, GlobalCFrame(), {10.0, 0.5, 0.5});
 
-	MotorizedPhysical phys(&p1);
+	p1.ensureHasParent();
+	MotorizedPhysical& phys = *p1.parent->mainPhysical;
 	phys.attachPart(&p2, CFrame(Vec3(1.0, 0.0, 0.0)));
 
-	MotorizedPhysical phys2(&doubleP);
+	doubleP.ensureHasParent();
+	MotorizedPhysical& phys2 = *doubleP.parent->mainPhysical;
 
-	ASSERT(phys.mass == p1.getMass() + p2.getMass());
-	ASSERT(phys.localCenterOfMass == Vec3(0.5, 0, 0));
-	ASSERT(phys.inertia == phys2.inertia);
+	ASSERT(phys.totalMass == p1.getMass() + p2.getMass());
+	ASSERT(phys.totalCenterOfMass == Vec3(0.5, 0, 0));
+	ASSERT(phys.forceResponse == phys2.forceResponse);
+	ASSERT(phys.momentResponse == phys2.momentResponse);
 }
 
 TEST_CASE(testMultiPartPhysicalRotated) {
@@ -354,9 +365,10 @@ TEST_CASE(testMultiPartPhysicalRotated) {
 
 	MotorizedPhysical phys2(doubleP);
 
-	ASSERT(phys.mass == p1->getMass() + p2->getMass());
-	ASSERT(phys.localCenterOfMass == Vec3(0.5, 0, 0));
-	ASSERT(phys.inertia == phys2.inertia);
+	ASSERT(phys.totalMass == p1->getMass() + p2->getMass());
+	ASSERT(phys.totalCenterOfMass == Vec3(0.5, 0, 0));
+	ASSERT(phys.forceResponse == phys2.forceResponse);
+	ASSERT(phys.momentResponse == phys2.momentResponse);
 }
 
 TEST_CASE(testShapeNativeScaling) {

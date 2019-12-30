@@ -29,8 +29,6 @@ void savePart(std::ofstream& output, const ExtendedPart& part, std::string shape
 	output << "\tbouncyness = " << Export::str(part.properties.bouncyness) << std::endl;
 	output << "\tvelocity = " << Export::str(part.parent->getMotion().velocity) << std::endl;
 	output << "\tangularvelocity = " << Export::str(part.parent->getMotion().angularVelocity) << std::endl;
-	output << "\tmass = " << Export::str(part.parent->mass) << std::endl;
-	output << "\tinertia = " << Export::str(part.parent->inertia) << std::endl;
 }
 
 void saveCamera(std::ofstream& output, Camera& camera) {

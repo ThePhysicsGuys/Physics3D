@@ -4,6 +4,8 @@
 
 #include "../util/log.h"
 
+#include "misc/validityHelper.h"
+
 RigidBody::RigidBody(Part* mainPart) : 
 	mainPart(mainPart), 
 	mass(mainPart->getMass()),
@@ -28,9 +30,19 @@ void RigidBody::attach(Part* part, const CFrame& attachment) {
 
 	refreshWithNewParts();
 }
-void RigidBody::detach(AttachedPart& part) {
-	part = std::move(parts.back());
-	parts.pop_back();
+void RigidBody::detach(Part* part) {
+	for(AttachedPart& atPart : parts) {
+		if(atPart.part == part) {
+			parts.remove(std::move(atPart));
+			refreshWithNewParts();
+			return;
+		}
+	}
+
+	throw "part not found!";
+}
+void RigidBody::detach(AttachedPart&& part) {
+	parts.remove(std::move(part));
 	refreshWithNewParts();
 	return;
 }
@@ -108,7 +120,7 @@ void RigidBody::setCFrame(const GlobalCFrame& newCFrame) {
 	}
 }
 
-void RigidBody::setPartCFrame(Part* part, const GlobalCFrame& newCFrame) {
+void RigidBody::setCFrameOfPart(Part* part, const GlobalCFrame& newCFrame) {
 	if(part == mainPart) {
 		setCFrame(newCFrame);
 	} else {
@@ -117,4 +129,45 @@ void RigidBody::setPartCFrame(Part* part, const GlobalCFrame& newCFrame) {
 
 		setCFrame(newMainCFrame);
 	}
+}
+
+void RigidBody::translate(const Vec3Fix& translation) {
+	mainPart->cframe.translate(translation);
+	for(AttachedPart& atPart : parts) {
+		atPart.part->cframe.translate(translation);
+	}
+}
+
+void RigidBody::rotateAroundLocalPoint(const Vec3& localPoint, const RotMat3& rotation) {
+	Vec3 relPoint = getCFrame().localToRelative(localPoint);
+	Vec3 relativeRotationOffset = rotation * relPoint - relPoint;
+	mainPart->cframe.rotate(rotation);
+	mainPart->cframe.translate(-relativeRotationOffset);
+	for(AttachedPart& atPart : parts) {
+		atPart.part->cframe = mainPart->cframe.localToGlobal(atPart.attachment);
+	}
+}
+
+void RigidBody::setAttachFor(Part* part, const CFrame& attach) {
+	if(mainPart == part) {
+		for(AttachedPart& ap : parts) {
+			ap.attachment = attach.globalToLocal(ap.attachment);
+		}
+	} else {
+		AttachedPart& atPart = getAttachFor(part);
+		atPart.attachment = attach;
+	}
+	refreshWithNewParts();
+}
+
+bool RigidBody::isValid() const {
+	assert(isfinite(mass));
+	assert(isVecValid(localCenterOfMass));
+	assert(isMatValid(inertia));
+	assert(mainPart->isValid());
+	for(const AttachedPart& ap : parts) {
+		assert(isCFrameValid(ap.attachment));
+		assert(ap.part->isValid());
+	}
+	return true;
 }

@@ -19,18 +19,18 @@
 
 TEST_CASE(testBallConstraint) {
 	Part part1(Box(2.0, 2.0, 2.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
-	MotorizedPhysical phys1(&part1);
+	part1.ensureHasParent();
 	Part part2(Box(2.0, 2.0, 2.0), GlobalCFrame(6.0, 0.0, 0.0), {1.0, 1.0, 1.0});
-	MotorizedPhysical phys2(&part2);
+	part2.ensureHasParent();
 	ConstraintGroup group;
-	group.ballConstraints.push_back(BallConstraint{Vec3(3.0, 0.0, 0.0), &phys1, Vec3(-3.0, 0.0, 0.0), &phys2});
+	group.ballConstraints.push_back(BallConstraint{Vec3(3.0, 0.0, 0.0), part1.parent->mainPhysical, Vec3(-3.0, 0.0, 0.0), part2.parent->mainPhysical});
 
-	phys1.applyForceAtCenterOfMass(Vec3(2, 0, 0));
+	part1.parent->mainPhysical->applyForceAtCenterOfMass(Vec3(2, 0, 0));
 
 	group.apply();
 
-	ASSERT(phys1.getMotion().acceleration == Vec3(0.125, 0.0, 0.0));
-	ASSERT(phys2.getMotion().acceleration == Vec3(0.125, 0.0, 0.0));
+	ASSERT(part1.getMotion().acceleration == Vec3(0.125, 0.0, 0.0));
+	ASSERT(part2.getMotion().acceleration == Vec3(0.125, 0.0, 0.0));
 }
 
 TEST_CASE(testMotionOfPhysicalSinglePart) {
@@ -143,8 +143,8 @@ TEST_CASE(testMotionOfPhysicalPartsRotation) {
 TEST_CASE(testMotionOfPhysicalPartsBasicFixedConstraint) {
 	Part p1(Sphere(1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
 	Part p2(Sphere(1.0), GlobalCFrame(1.0, 0.0, 0.0), {3.0, 1.0, 1.0});
-	FixedConstraint fixedConstr;
-	p1.attach(&p2, &fixedConstr, CFrame(1.0, 0.0, 0.0), CFrame(0,0,0));
+	
+	p1.attach(&p2, new FixedConstraint(), CFrame(1.0, 0.0, 0.0), CFrame(0,0,0));
 
 	Motion COMMotion(Vec3(1.0, 0.7, 1.3), Vec3(0, 0, 0));
 
@@ -181,8 +181,8 @@ TEST_CASE(testMotionOfPhysicalPartsBasicFixedConstraint) {
 TEST_CASE(testMotionOfPhysicalPartsRotationFixedConstraint) {
 	Part p1(Sphere(1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
 	Part p2(Sphere(1.0), GlobalCFrame(1.0, 0.0, 0.0), {3.0, 1.0, 1.0});
-	FixedConstraint fixedConstr;
-	p1.attach(&p2, &fixedConstr, CFrame(1.0, 0.0, 0.0), CFrame(0, 0, 0));
+	
+	p1.attach(&p2, new FixedConstraint(), CFrame(1.0, 0.0, 0.0), CFrame(0, 0, 0));
 
 	Motion COMMotion(Vec3(0, 0, 0), Vec3(-0.3, 1.7, -1.1));
 
@@ -264,8 +264,8 @@ TEST_CASE(testMotionOfPhysicalJointsBasic) {
 
 	Part p1e(Sphere(1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
 	Part p2e(Sphere(1.0), GlobalCFrame(1.0, 0.0, 0.0), {3.0, 1.0, 1.0});
-	FixedConstraint f;
-	p1e.attach(&p2e, &f, CFrame(1.0, 0.0, 0.0), CFrame(0, 0, 0));
+	
+	p1e.attach(&p2e, new FixedConstraint(), CFrame(1.0, 0.0, 0.0), CFrame(0, 0, 0));
 
 	Motion COMMotion(Vec3(1.0, 0.7, 1.3), Vec3(0,0,0));
 
@@ -283,8 +283,8 @@ TEST_CASE(testMotionOfPhysicalJointsRotation) {
 
 	Part p1e(Sphere(1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
 	Part p2e(Sphere(1.0), GlobalCFrame(1.0, 0.0, 0.0), {3.0, 1.0, 1.0});
-	FixedConstraint f;
-	p1e.attach(&p2e, &f, CFrame(1.0, 0.0, 0.0), CFrame(0.0, 0.0, 0.0));
+	
+	p1e.attach(&p2e, new FixedConstraint(), CFrame(1.0, 0.0, 0.0), CFrame(0.0, 0.0, 0.0));
 
 	Motion COMMotion(Vec3(0,0,0), Vec3(-0.3, 1.7, -1.1));
 
@@ -309,8 +309,8 @@ TEST_CASE(testMotionOfPhysicalJoints) {
 
 	Part p1e(Sphere(1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
 	Part p2e(Sphere(1.0), GlobalCFrame(1.0, 0.0, 0.0), {3.0, 1.0, 1.0});
-	FixedConstraint f;
-	p1e.attach(&p2e, &f, CFrame(1.0, 0.0, 0.0), CFrame(0, 0, 0));
+	
+	p1e.attach(&p2e, new FixedConstraint(), CFrame(1.0, 0.0, 0.0), CFrame(0, 0, 0));
 
 	Motion COMMotion(Vec3(1.0, 0.7, 1.3), Vec3(-0.3, 1.7, -1.1));
 
@@ -335,8 +335,8 @@ TEST_CASE(testFixedConstraintProperties) {
 
 	Part p1e(Sphere(1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
 	Part p2e(Sphere(1.0), GlobalCFrame(), {3.0, 1.0, 1.0});
-	FixedConstraint f;
-	p1e.attach(&p2e, &f, CFrame(0.3, -0.8, 0.0), CFrame(-0.7, -0.8, 0));
+	
+	p1e.attach(&p2e, new FixedConstraint(), CFrame(0.3, -0.8, 0.0), CFrame(-0.7, -0.8, 0));
 
 	MotorizedPhysical* phys1 = p1.parent->mainPhysical;
 	MotorizedPhysical* phys1e = p1e.parent->mainPhysical;
@@ -363,8 +363,8 @@ TEST_CASE(testApplyForceToFixedConstraint) {
 
 	Part p1e(Box(1.0, 2.0, 3.0), GlobalCFrame(), {1.0, 1.0, 1.0});
 	Part p2e(Box(1.5, 2.3, 1.2), GlobalCFrame(), {1.0, 1.0, 1.0});
-	FixedConstraint fix;
-	p1e.attach(&p2e, &fix, attach, CFrame());
+	
+	p1e.attach(&p2e, new FixedConstraint(), attach, CFrame());
 
 	MotorizedPhysical* phys1 = p1.parent->mainPhysical;
 	MotorizedPhysical* phys1e = p1e.parent->mainPhysical;

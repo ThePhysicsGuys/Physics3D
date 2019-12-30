@@ -7,8 +7,7 @@
 #include "math/position.h"
 #include "math/globalCFrame.h"
 
-#include <vector>
-
+#include "datastructures/unorderedVector.h"
 #include "datastructures/iteratorEnd.h"
 
 #include "part.h"
@@ -26,14 +25,11 @@ class MotorizedPhysical;
 class Physical {
 	friend class WorldPrototype;
 	friend class Part;
+
+	void makeMainPart(AttachedPart& newMainPart);
 protected:
-	void updateAttachedPartCFrames();
 	void updateAttachedPhysicals(double deltaT);
 	void translateUnsafeRecursive(const Vec3Fix& translation);
-	void setCFrameUnsafe(const GlobalCFrame& newCFrame);
-
-
-	void refreshWithNewParts();
 
 	// deletes the given physical
 	void attachPhysical(Physical&& phys, const CFrame& attachment);
@@ -43,17 +39,10 @@ protected:
 	void attachPart(Part* part, HardConstraint* constraint, const CFrame& attachToThis, const CFrame& attachToThat);
 	
 public:
-	Part* mainPart;
-	std::vector<AttachedPart> parts;
-
-	double mass;
-	Vec3 localCenterOfMass;
-	SymmetricMat3 inertia;
-
 	RigidBody rigidBody;
 
 	MotorizedPhysical* mainPhysical;
-	std::vector<ConnectedPhysical> childPhysicals;
+	UnorderedVector<ConnectedPhysical> childPhysicals;
 
 	bool anchored = false;
 
@@ -65,46 +54,19 @@ public:
 	Physical(const Physical&) = delete;
 	void operator=(const Physical&) = delete;
 
-	~Physical();
-
-	void updatePart(const Part* updatedPart, const Bounds& updatedBounds);
-
-	const AttachedPart& getAttachFor(const Part* attachedPart) const {
-		for (const AttachedPart& p : parts) {
-			if (p.part == attachedPart)
-				return p;
-		}
-
-		throw "Part not in this physical!";
-	}
-
-	AttachedPart& getAttachFor(const Part* attachedPart) {
-		for (AttachedPart& p : parts) {
-			if (p.part == attachedPart)
-				return p;
-		}
-
-		throw "Part not in this physical!";
-	}
-
 	void setCFrame(const GlobalCFrame& newCFrame);
 	void setPartCFrame(Part* part, const GlobalCFrame& newCFrame);
-	inline const GlobalCFrame& getCFrame() const { return mainPart->getCFrame(); }
+	inline const GlobalCFrame& getCFrame() const { return rigidBody.getCFrame(); }
 
 	inline Position getPosition() const {
 		return getCFrame().getPosition();
 	}
 
-	Position getObjectCenterOfMass() const;
-	GlobalCFrame getObjectCenterOfMassCFrame() const;
 	Motion getMotion() const;
 	
 	double getVelocityKineticEnergy() const;
 	double getAngularKineticEnergy() const;
 	double getKineticEnergy() const;
-	inline size_t getPartCount() const { return parts.size() + 1; }
-
-	inline void setAnchored(bool anchored) { this->anchored = anchored; refreshWithNewParts(); }
 
 	void applyDragToPhysical(Vec3 origin, Vec3 drag);
 	void applyForceToPhysical(Vec3 origin, Vec3 force);
@@ -113,25 +75,23 @@ public:
 	CFrame getRelativeCFrameToMain() const;
 	Vec3 localToMain(const Vec3Local& vec) const;
 
-	void makeMainPart(AttachedPart& newMainPart);
 	void makeMainPart(Part* newMainPart);
 	void attachPart(Part* part, const CFrame& attachment);
-	void detachPart(Part* part);
+	void detachPart(Part* part, bool partStaysInWorld);
 
+	size_t getNumberOfPartsInThisAndChildren() const;
+	void setMainPhysicalRecursive(MotorizedPhysical* newMainPhysical);
 
-
-	PartIter begin() { return PartIter(parts.begin()._Ptr, parts.begin()._Ptr + parts.size(), mainPart); }
-	ConstPartIter begin() const { return ConstPartIter(parts.begin()._Ptr, parts.begin()._Ptr + parts.size(), mainPart);}
-
-	IteratorEnd end() const { return IteratorEnd(); }
-
-	const Part& operator[](size_t index) const { return (index == 0) ? *mainPart : *parts[index - 1].part; }
-	Part& operator[](size_t index) { return (index == 0) ? *mainPart : *parts[index - 1].part; }
+	void notifyPartPropertiesChanged(Part* part);
+	void notifyPartPropertiesAndBoundsChanged(Part* part, const Bounds& oldBounds);
 
 	bool isValid() const;
 
 	bool isMainPhysical() const;
 	void removeChild(ConnectedPhysical* child);
+
+	void detachAllChildPhysicals();
+	void detachChild(ConnectedPhysical&& formerChild);
 };
 
 
@@ -171,6 +131,7 @@ public:
 	Motion motionOfCenterOfMass;
 	
 	MotorizedPhysical(Part* mainPart);
+	MotorizedPhysical(Physical&& movedPhys);
 
 	Position getCenterOfMass() const;
 	GlobalCFrame getCenterOfMassCFrame() const;
@@ -196,6 +157,8 @@ public:
 	Mat3 getResponseMatrix(const Vec3Local& actionPoint, const Vec3Local& responsePoint) const;
 	double getInertiaOfPointInDirectionLocal(const Vec3Local& localPoint, const Vec3Local& localDirection) const;
 	double getInertiaOfPointInDirectionRelative(const Vec3Relative& relativePoint, const Vec3Relative& relativeDirection) const;
+	inline Part* getMainPart() { return this->rigidBody.mainPart; }
+	inline const Part* getMainPart() const { return this->rigidBody.mainPart; }
 
 	bool isValid() const;
 };

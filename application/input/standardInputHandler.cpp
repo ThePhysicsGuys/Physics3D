@@ -92,16 +92,7 @@ bool StandardInputHandler::onKeyPress(KeyPressEvent& event) {
 	} else if (KeyboardOptions::Debug::pies == key) {
 		Debug::renderPiesEnabled = !Debug::renderPiesEnabled;
 	} else if (KeyboardOptions::Part::anchor == key) {
-		if (screen.selectedPart != nullptr) {
-			if (screen.selectedPart->parent->anchored) {
-				screen.selectedPart->parent->setAnchored(false);
-			} else {
-				MotorizedPhysical* parent = screen.selectedPart->parent->mainPhysical;
-				parent->motionOfCenterOfMass.velocity = Vec3();
-				parent->motionOfCenterOfMass.angularVelocity = Vec3();
-				screen.selectedPart->parent->setAnchored(true);
-			}
-		}
+		throw "Not implemented!";
 	} else if(KeyboardOptions::Part::makeMainPart == key) {
 		Log::info("Made %s the main part of it's physical", screen.selectedPart->name.c_str());
 		screen.selectedPart->makeMainPart();

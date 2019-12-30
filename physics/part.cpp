@@ -18,7 +18,7 @@ namespace {
 	void recalculateAndUpdateParent(Part& part, const Bounds& oldBounds) {
 		recalculate(part);
 		if (part.parent != nullptr) {
-			part.parent->updatePart(&part, oldBounds);
+			part.parent->notifyPartPropertiesAndBoundsChanged(&part, oldBounds);
 		}
 	}
 }
@@ -36,7 +36,7 @@ Part::Part(const Shape& shape, Part& attachTo, const CFrame& attach, const PartP
 
 Part::~Part() {
 	if (parent != nullptr) {
-		parent->detachPart(this);
+		parent->detachPart(this, false);
 	}
 }
 
@@ -87,7 +87,7 @@ void Part::setCFrame(const GlobalCFrame& newCFrame) {
 Motion Part::getMotion() const {
 	if(parent == nullptr) return Motion();
 	Motion parentsMotion = parent->getMotion();
-	Vec3 offset = this->cframe.getPosition() - parent->getObjectCenterOfMass();
+	Vec3 offset = this->cframe.getPosition() - parent->rigidBody.getCenterOfMass();
 	return parentsMotion.getMotionOfPoint(offset);
 }
 
@@ -146,7 +146,7 @@ void Part::attach(Part* other, HardConstraint* constraint, const CFrame& attachT
 
 void Part::detach() {
 	if(this->parent == nullptr) throw "No physical to detach from!";
-	this->parent->detachPart(this);
+	this->parent->detachPart(this, true);
 }
 
 void Part::ensureHasParent() {
@@ -159,12 +159,12 @@ CFrame Part::transformCFrameToParent(const CFrame& cframeRelativeToPart) {
 	if(this->isMainPart()) {
 		return cframeRelativeToPart;
 	} else {
-		return this->parent->getAttachFor(this).attachment.localToGlobal(cframeRelativeToPart);
+		return this->parent->rigidBody.getAttachFor(this).attachment.localToGlobal(cframeRelativeToPart);
 	}
 }
 
 bool Part::isMainPart() const {
-	return this->parent == nullptr || this->parent->mainPart == this;
+	return this->parent == nullptr || this->parent->rigidBody.mainPart == this;
 }
 
 void Part::makeMainPart() {

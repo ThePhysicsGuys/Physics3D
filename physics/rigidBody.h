@@ -1,8 +1,8 @@
 #pragma once
 
+#include "datastructures/unorderedVector.h"
 #include "datastructures/iteratorEnd.h"
 #include "part.h"
-#include <vector>
 
 struct AttachedPart {
 	CFrame attachment = CFrame();
@@ -47,9 +47,9 @@ struct ConstPartIter {
 };
 
 class RigidBody {
-	Part* mainPart;
-	std::vector<AttachedPart> parts;
 public:
+	Part* mainPart;
+	UnorderedVector<AttachedPart> parts;
 	double mass;            // not part of official state, updated at every tick
 	Vec3 localCenterOfMass; // not part of official state, updated at every tick
 	SymmetricMat3 inertia;  // not part of official state, updated at every tick
@@ -65,13 +65,17 @@ public:
 
 	void attach(RigidBody&& otherBody, const CFrame& attachment);
 	void attach(Part* part, const CFrame& attachment);
-	void detach(AttachedPart& part);
+	void detach(Part* part);
+	void detach(AttachedPart&& part);
 	const AttachedPart& getAttachFor(const Part* attachedPart) const;
 	AttachedPart& getAttachFor(const Part* attachedPart);
 
+	inline const Part* getMainPart() const { return mainPart; }
+	inline Part* getMainPart() { return mainPart; }
+
 	// returns the offset CFrame from the original mainPart, can be used for syncing calling function
 	CFrame makeMainPart(AttachedPart& newMainPart);
-
+	
 
 	PartIter begin() { return PartIter(parts.begin()._Ptr, parts.begin()._Ptr + parts.size(), mainPart); }
 	ConstPartIter begin() const { return ConstPartIter(parts.begin()._Ptr, parts.begin()._Ptr + parts.size(), mainPart); }
@@ -84,7 +88,11 @@ public:
 	inline size_t getPartCount() const { return parts.size() + 1; }
 
 	void setCFrame(const GlobalCFrame& newCFrame);
-	void setPartCFrame(Part* part, const GlobalCFrame& newCFrame);
+	void setCFrameOfPart(Part* part, const GlobalCFrame& newCFrame);
+	void translate(const Vec3Fix& translation);
+	void rotateAroundLocalPoint(const Vec3& localPoint, const RotMat3& rotation);
+
+	void setAttachFor(Part* part, const CFrame& newAttach);
 
 	inline const GlobalCFrame& getCFrame() const {
 		return mainPart->getCFrame();
@@ -99,6 +107,8 @@ public:
 		return GlobalCFrame(getCFrame().localToGlobal(localCenterOfMass), getCFrame().getRotation());
 	}
 
-private:
+	bool isValid() const;
+
 	void refreshWithNewParts();
+private:
 };

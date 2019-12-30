@@ -76,6 +76,7 @@ struct TreeNode {
 			delete[] buf;
 		}
 	}
+	
 
 	void recalculateBounds();
 	void recalculateBoundsFromSubBounds();
@@ -430,6 +431,10 @@ struct BoundsTree {
 		groupNode.addInside(TreeNode(obj, bounds, false));
 	}
 
+	NodeStack find(const Boundable* obj, const Bounds& objBounds) {
+		return NodeStack(rootNode, obj, objBounds);
+	}
+
 	NodeStack findGroupFor(const Boundable* obj, const Bounds& objBounds) {
 		NodeStack iter(rootNode, obj, objBounds);
 		iter.riseUntilGroupHeadWhile();
@@ -459,6 +464,23 @@ struct BoundsTree {
 	}
 	void remove(const Boundable* obj) {
 		this->remove(obj, obj->getStrictBounds());
+	}
+
+	// removes and returns the node for the given object
+	inline TreeNode grab(const Boundable* obj, const Bounds& objBounds) {
+		NodeStack iter(rootNode, obj, objBounds);
+		TreeNode node = std::move(**iter);
+		iter.remove();
+		return node;
+	}
+
+	// removes and returns the group node for the given object
+	inline TreeNode grabGroupFor(const Boundable* obj, const Bounds& objBounds) {
+		NodeStack iter(rootNode, obj, objBounds);
+		iter.riseUntilGroupHeadWhile();
+		TreeNode node = std::move(**iter);
+		iter.remove();
+		return node;
 	}
 
 	inline void recalculateBounds() {

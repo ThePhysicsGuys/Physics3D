@@ -11,7 +11,7 @@ public:
 
 	virtual void apply(WorldPrototype* world) override {
 		for (MotorizedPhysical* p : world->iterPhysicals()) {
-			p->applyForceAtCenterOfMass(gravity * p->mass);
+			p->applyForceAtCenterOfMass(gravity * p->totalMass);
 		}
 	}
 	virtual double getPotentialEnergyForObject(const WorldPrototype* world, const Part& part) const override {

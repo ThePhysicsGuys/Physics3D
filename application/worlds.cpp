@@ -22,19 +22,19 @@ void PlayerWorld::applyExternalForces() {
 	SynchronizedWorld<ExtendedPart>::applyExternalForces();
 
 	if (selectedPart != nullptr && !selectedPart->parent->anchored) {
-		Physical* selectedPhysical = selectedPart->parent;
+		MotorizedPhysical* selectedPhysical = selectedPart->parent->mainPhysical;
 		GlobalCFrame cframe = selectedPhysical->getCFrame();
 		// Magnet force
 		Position absoluteSelectedPoint = selectedPart->getCFrame().localToGlobal(localSelectedPoint);
 		Vec3 delta = magnetPoint - absoluteSelectedPoint;
 
-		Position centerOfmass = selectedPhysical->getObjectCenterOfMass();
+		Position centerOfmass = selectedPhysical->getCenterOfMass();
 
 		Vec3 relativeSelectedPointSpeed = selectedPhysical->getMotion().getVelocityOfPoint(absoluteSelectedPoint - centerOfmass);
-		Vec3 force = selectedPhysical->mass * (delta * PICKER_STRENGTH - relativeSelectedPointSpeed * PICKER_SPEED_STRENGTH);
+		Vec3 force = selectedPhysical->totalMass * (delta * PICKER_STRENGTH - relativeSelectedPointSpeed * PICKER_SPEED_STRENGTH);
 		selectedPhysical->applyForceToPhysical(absoluteSelectedPoint - centerOfmass, force);
-		Vec3 angular = -cframe.localToRelative(selectedPhysical->inertia * cframe.relativeToLocal(selectedPhysical->getMotion().angularVelocity)) * PICKER_ANGULAR_REDUCE_STRENGTH;// / (delta.length() + 1);
-		selectedPhysical->mainPhysical->applyMoment(angular);
+		
+		selectedPhysical->motionOfCenterOfMass.angularVelocity *= 0.8;
 	}
 
 	// Player movement

@@ -230,6 +230,7 @@
     <ClInclude Include="datastructures\iterators.h" />
     <ClInclude Include="datastructures\parallelVector.h" />
     <ClInclude Include="datastructures\sharedArray.h" />
+    <ClInclude Include="datastructures\unorderedVector.h" />
     <ClInclude Include="debug.h" />
     <ClInclude Include="geometry\basicShapes.h" />
     <ClInclude Include="geometry\boundingBox.h" />

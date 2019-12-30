@@ -51,6 +51,24 @@ private:
 	void updatePartGroupBounds(const Part* mainPart, const Bounds& oldMainPartBounds);
 	void removePartFromTrees(const Part* part);
 
+
+	// These 3 methods do not edit the given physicals, they just adjust the world and it's BoundsTrees to match the new situation
+	
+	// splits newlySplitPhysical from mainPhysical in the world tree, also adds the new physical to the list of physicals
+	void splitPhysical(const MotorizedPhysical* mainPhysical, MotorizedPhysical* newlySplitPhysical);
+
+	void splitPartFromPhysical(const Part* part);
+	/*
+		merges the trees for two physicals, both physicals must have existed in the world before being merged
+	*/
+	void mergePhysicals(const MotorizedPhysical* firstPhysical, const MotorizedPhysical* secondPhysical);
+	/*
+		Adds a new part that wasn't previously in the tree to the group of the given physical
+	*/
+	void mergePartAndPhysical(const MotorizedPhysical* physical, Part* newPart);
+
+
+
 	BoundsTree<Part>& getTreeForPart(const Part* part);
 	const BoundsTree<Part>& getTreeForPart(const Part* part) const;
 
@@ -89,7 +107,7 @@ public:
 
 	virtual void tick();
 
-	void addPart(Part* part, bool anchored = false);
+	void addPart(Part* part);
 	void removePart(Part* part);
 	void removeMainPhysical(MotorizedPhysical* part);
 
@@ -162,7 +180,7 @@ public:
 	virtual double getPotentialEnergyForObject(const WorldPrototype* world, const Part&) const = 0;
 	virtual double getPotentialEnergyForObject(const WorldPrototype* world, const MotorizedPhysical& phys) const {
 		double total = 0.0;
-		for (const Part& p : phys) {
+		for (const Part& p : phys.rigidBody) {
 			total += this->getPotentialEnergyForObject(world, p);
 		}
 		return total;

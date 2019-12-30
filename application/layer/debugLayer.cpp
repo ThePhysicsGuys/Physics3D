@@ -149,7 +149,7 @@ void DebugLayer::onRender() {
 			if(colissionSpheresMode == SphereColissionRenderMode::SELECTED) {
 				Physical& selectedPhys = *screen->selectedPart->parent;
 
-				for(Part& part : selectedPhys) {
+				for(Part& part : selectedPhys.rigidBody) {
 					Color yellow = COLOR::YELLOW;
 					yellow.w = 0.5;
 					BoundingBox localBounds = screen->selectedPart->getLocalBounds();
@@ -164,7 +164,7 @@ void DebugLayer::onRender() {
 
 		if(colissionSpheresMode == SphereColissionRenderMode::ALL) {
 			for(MotorizedPhysical* phys : screen->world->iterPhysicals()) {
-				for(Part& part : *phys) {
+				for(Part& part : phys->rigidBody) {
 					Color yellow = COLOR::YELLOW;
 					yellow.w = 0.5;
 					BoundingBox localBounds = part.getLocalBounds();
