@@ -11,7 +11,6 @@
 #include "scalableInertialMatrix.h"
 
 #include <utility>
-#include <iosfwd>
 
 struct Triangle;
 class Polyhedron;

@@ -2,10 +2,7 @@
 
 #include "polyhedron.h"
 #include "normalizedPolyhedron.h"
-#include "sphere.h"
 #include "shapeClass.h"
-
-#include "../misc/serialization.h"
 
 Shape::Shape() : baseShape(nullptr), scale{1,1,1} {}
 Shape::Shape(const ShapeClass* baseShape, DiagonalMat3 scale) : baseShape(baseShape), scale(scale) {}

@@ -49,7 +49,7 @@ public:
 	}
 
 	template<typename OtherT>
-	inline constexpr Matrix<T, Width, Height>(const Matrix<OtherT, Width, Height>& m) {
+	inline constexpr Matrix<T, Width, Height>(const Matrix<OtherT, Width, Height>& m) : data{} {
 		for(size_t row = 0; row < Height; row++) {
 			for(size_t col = 0; col < Width; col++) {
 				(*this)[row][col] = static_cast<T>(m[row][col]);
@@ -58,7 +58,7 @@ public:
 	}
 
 	template<typename OtherT1, typename OtherT2, typename OtherT3, typename OtherT4>
-	Matrix<T, Width, Height>(const Matrix<OtherT1, Width - 1, Height - 1>& topLeftMat, const Vector<OtherT2, Height - 1>& rightCol, const Vector<OtherT3, Width - 1>& bottomRow, const OtherT4& bottomLeftVal) {
+	Matrix<T, Width, Height>(const Matrix<OtherT1, Width - 1, Height - 1>& topLeftMat, const Vector<OtherT2, Height - 1>& rightCol, const Vector<OtherT3, Width - 1>& bottomRow, const OtherT4& bottomLeftVal) : data{} {
 		for (size_t row = 0; row < Height - 1; row++) {
 			for (size_t col = 0; col < Width - 1; col++) {
 				(*this)[row][col] = topLeftMat[row][col];
@@ -72,7 +72,7 @@ public:
 	}
 
 	template<typename OtherT1, typename OtherT2>
-	Matrix<T, Width, Height>(const Matrix<OtherT1, Width - 1, Height - 1> & topLeftMat, const OtherT2& bottomLeftVal) {
+	Matrix<T, Width, Height>(const Matrix<OtherT1, Width - 1, Height - 1> & topLeftMat, const OtherT2& bottomLeftVal) : data{} {
 		for (size_t row = 0; row < Height - 1; row++) {
 			for (size_t col = 0; col < Width - 1; col++) {
 				(*this)[row][col] = topLeftMat[row][col];
@@ -347,7 +347,7 @@ public:
 	}
 
 	template<typename OtherT>
-	inline constexpr SymmetricMatrix<T, Size>(const SymmetricMatrix<OtherT, Size>& m) {
+	inline constexpr SymmetricMatrix<T, Size>(const SymmetricMatrix<OtherT, Size>& m) : data{} {
 		for(size_t row = 0; row < Size; row++) {
 			for(size_t col = 0; col <= row; col++) {
 				(*this)[row][col] = m[row][col];
@@ -434,7 +434,7 @@ public:
 			         4
 		};
 	*/
-	inline constexpr DiagonalMatrix<T, Size>(const std::initializer_list<T>& list) {
+	inline constexpr DiagonalMatrix<T, Size>(const std::initializer_list<T>& list) : data{} {
 		assert(list.size() == Size);
 
 		auto listIter = list.begin();
@@ -444,14 +444,14 @@ public:
 		}
 	}
 
-	inline constexpr DiagonalMatrix<T, Size>(const T* list) {
+	inline constexpr DiagonalMatrix<T, Size>(const T* list) : data{} {
 		for(size_t i = 0; i < Size; i++) {
 			(*this)[i] = list[i];
 		}
 	}
 
 	template<typename OtherT>
-	inline constexpr DiagonalMatrix<T, Size>(const DiagonalMatrix<OtherT, Size>& m) {
+	inline constexpr DiagonalMatrix<T, Size>(const DiagonalMatrix<OtherT, Size>& m) : data{} {
 		for(size_t i = 0; i < Size; i++) {
 			(*this)[i] = static_cast<T>(m[i]);
 		}

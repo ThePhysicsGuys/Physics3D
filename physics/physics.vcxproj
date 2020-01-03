@@ -201,7 +201,6 @@
     <ClCompile Include="geometry\shape.cpp" />
     <ClCompile Include="geometry\shapeBuilder.cpp" />
     <ClCompile Include="geometry\shapeClass.cpp" />
-    <ClCompile Include="geometry\sphere.cpp" />
     <ClCompile Include="math\cframe.cpp" />
     <ClCompile Include="math\fix.cpp" />
     <ClCompile Include="math\linalg\eigen.cpp" />
@@ -247,7 +246,6 @@
     <ClInclude Include="geometry\shape.h" />
     <ClInclude Include="geometry\shapeBuilder.h" />
     <ClInclude Include="geometry\shapeClass.h" />
-    <ClInclude Include="geometry\sphere.h" />
     <ClInclude Include="constraints\hardConstraint.h" />
     <ClInclude Include="integrityCheck.h" />
     <ClInclude Include="math\bounds.h" />
