@@ -1,18 +1,20 @@
+#include "resource.h"
+
 #include "resourceManager.h"
 
-inline void Resource::setName(const std::string& name) {
+void Resource::setName(const std::string& name) {
 	ResourceManager::onResourceNameChange(this, name);
 }
 
-inline void Resource::setPath(const std::string& path) {
+void Resource::setPath(const std::string& path) {
 	ResourceManager::onResourcePathChange(this, path);
 }
 
-inline std::string Resource::getName() const {
+std::string Resource::getName() const {
 	return name;
 }
 
-inline std::string Resource::getPath() const {
+std::string Resource::getPath() const {
 	return path;
 }
 

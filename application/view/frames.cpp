@@ -13,5 +13,6 @@ bool BigFrame::noRender;
 bool BigFrame::doUpdate;
 bool BigFrame::isDisabled;
 Layer* BigFrame::selectedLayer = nullptr;
+Resource* BigFrame::selectedResource = nullptr;
 
 }

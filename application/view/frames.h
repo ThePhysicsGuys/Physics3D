@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../physics/misc/toString.h"
+#include "../graphics/gui/color.h"
 #include "../graphics/debug/visualDebug.h"
 #include "../graphics/shader/shaderProgram.h"
 #include "../graphics/renderUtils.h"
@@ -17,45 +18,6 @@
 #include "imgui/imgui.h"
 
 namespace Application {
-
-// Resource frame
-struct ResourceFrame {
-	static void render() {		
-		ImGui::Begin("Resources");
-
-		// Resource type window
-        ImGui::BeginChild("Resource type", ImVec2(ImGui::GetWindowContentRegionWidth() * 0.5f, 260), false, ImGuiWindowFlags_HorizontalScrollbar);
-
-		//std::map;
-		for (auto iterator : ResourceManager::getResourceMap()) {
-			if (ImGui::CollapsingHeader(iterator.first.c_str())) {
-				for (Resource* resource : iterator.second) {
-					ImGui::Text(resource->getTypeName().c_str());
-				}
-			}
-		}
-
-        ImGui::EndChild();
-        
-		// Align horizontally
-        ImGui::SameLine();
-
-		// Resources of selected type
-        ImGui::BeginChild("Child2", ImVec2(0, 260), true, ImGuiWindowFlags_HorizontalScrollbar);
-        ImGui::Columns(2);
-        for (int i = 0; i < 100; i++) {
-            char buf[32];
-            sprintf_s(buf, "%03d", i);
-            ImGui::Button(buf, ImVec2(-FLT_MIN, 0.0f));
-            ImGui::NextColumn();
-        }
-        ImGui::EndChild();
-	
-		ImGui::End();
-
-		ImGui::ShowDemoWindow();
-	}
-};
 
 struct BigFrame {
 
@@ -78,7 +40,11 @@ struct BigFrame {
 	static bool isDisabled;
 	static Layer* selectedLayer;
 
+	// ResourceFrame
+	static Resource* selectedResource;
+
 	static void render() {
+		ImGui::ShowDemoWindow();
 		ImGui::Begin("Inspector");
 #pragma region PropertiesFrame
 		if (ImGui::CollapsingHeader("Properties")) {
@@ -189,6 +155,75 @@ struct BigFrame {
 			ImGui::Separator();
 		}
 
+#pragma endregion
+
+#pragma region ResourceFrame
+
+		if (ImGui::CollapsingHeader("Resources")) {
+			ImGui::Columns(2, 0, true);
+			ImGui::Separator();
+
+			auto map = ResourceManager::getResourceMap();
+			for (auto iterator = map.begin(); iterator != map.end(); ++iterator) {
+				if (ImGui::TreeNodeEx(iterator->first.c_str(), ImGuiTreeNodeFlags_SpanFullWidth)) {
+					for (Resource* resource : iterator->second) {
+						if (ImGui::Selectable(resource->getName().c_str(), resource == selectedResource))
+							selectedResource = resource;
+					}
+					ImGui::TreePop();
+				}
+			}
+
+			ImGui::NextColumn();
+			
+			if (selectedResource) {
+				ImGui::Text("Name: %s", selectedResource->getName().c_str());
+				ImGui::Text("Path: %s", selectedResource->getPath().c_str());
+				ImGui::Text("Type: %s", selectedResource->getTypeName().c_str());
+				switch (selectedResource->getType()) {
+					case ResourceType::Texture: {
+						TextureResource* texture = static_cast<TextureResource*>(selectedResource);
+
+						ImGui::Text("ID: %d", texture->getID());
+						ImGui::Text("Width: %d", texture->getWidth());
+						ImGui::Text("Height: %d", texture->getHeight());
+						ImGui::Text("Channels: %d", texture->getChannels());
+						ImGui::Text("Unit: %d", texture->getUnit());
+
+						if (ImGui::TreeNodeEx("Preview", ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_DefaultOpen)) {
+							float cw = ImGui::GetColumnWidth();
+							float ch = ImGui::GetWindowHeight();
+							float tw = ch * texture->getAspect();
+							float th = cw / texture->getAspect();
+
+							ImVec2 size;
+							if (th > ch)
+								size = ImVec2(tw, ch);
+							else
+								size = ImVec2(cw, th);
+
+							Vec4f c = COLOR::ACCENT;
+							ImGui::Unindent(ImGui::GetTreeNodeToLabelSpacing());
+							ImGui::Image((void*) (intptr_t) texture->getID(), size, ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 1, 1, 1), ImVec4(c.x, c.y, c.z, c.w));
+							
+							ImGui::TreePop();
+						}
+						}
+
+						break;
+					default:
+						ImGui::Text("Visual respresentation not supported.");
+						break;
+				}
+			} else {
+				ImGui::Text("No resource selected.");
+			}
+
+			ImGui::Columns(1);
+			ImGui::Separator();
+
+
+		}
 #pragma endregion
 
 #pragma region EnvironmentFrame

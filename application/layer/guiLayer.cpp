@@ -83,7 +83,6 @@ void GuiLayer::onRender() {
 	ApplicationShaders::fontShader.updateProjection(screen->camera.orthoMatrix);
 	GUI::onRender(screen->camera.orthoMatrix);
 
-	//ResourceFrame::render();
 	BigFrame::render();
 }
 
