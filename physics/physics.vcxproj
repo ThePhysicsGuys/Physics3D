@@ -247,7 +247,6 @@
     <ClInclude Include="geometry\shapeBuilder.h" />
     <ClInclude Include="geometry\shapeClass.h" />
     <ClInclude Include="constraints\hardConstraint.h" />
-    <ClInclude Include="integrityCheck.h" />
     <ClInclude Include="math\bounds.h" />
     <ClInclude Include="math\cframe.h" />
     <ClInclude Include="math\fix.h" />

@@ -23,29 +23,29 @@ class ConnectedPhysical;
 class MotorizedPhysical;
 
 class Physical {
-	friend class WorldPrototype;
-	friend class Part;
-
 	void makeMainPart(AttachedPart& newMainPart);
 protected:
 	void updateAttachedPhysicals(double deltaT);
 	void translateUnsafeRecursive(const Vec3Fix& translation);
 
+	void setMainPhysicalRecursive(MotorizedPhysical* newMainPhysical);
+
 	void attachPhysical(Physical* phys, const CFrame& attachment);
 	// deletes the given physical
 	void attachPhysical(MotorizedPhysical* phys, const CFrame& attachment);
 
+	// deletes the given physical
 	void attachPhysical(Physical* phys, HardConstraint* constraint, const CFrame& attachToThis, const CFrame& attachToThat);
 
-	void attachPart(Part* part, HardConstraint* constraint, const CFrame& attachToThis, const CFrame& attachToThat);
+	void removeChild(ConnectedPhysical* child);
+	void detachFromRigidBody(Part* part);
+	void detachFromRigidBody(AttachedPart&& part);
 	
 public:
 	RigidBody rigidBody;
 
 	MotorizedPhysical* mainPhysical;
 	UnorderedVector<ConnectedPhysical> childPhysicals;
-
-	bool anchored = false;
 
 	Physical() = default;
 	Physical(Part* mainPart, MotorizedPhysical* mainPhysical);
@@ -79,9 +79,9 @@ public:
 	void makeMainPart(Part* newMainPart);
 	void attachPart(Part* part, const CFrame& attachment);
 	void detachPart(Part* part, bool partStaysInWorld);
+	void attachPart(Part* part, HardConstraint* constraint, const CFrame& attachToThis, const CFrame& attachToThat);
 
 	size_t getNumberOfPartsInThisAndChildren() const;
-	void setMainPhysicalRecursive(MotorizedPhysical* newMainPhysical);
 
 	void notifyPartPropertiesChanged(Part* part);
 	void notifyPartPropertiesAndBoundsChanged(Part* part, const Bounds& oldBounds);
@@ -89,7 +89,6 @@ public:
 	bool isValid() const;
 
 	bool isMainPhysical() const;
-	void removeChild(ConnectedPhysical* child);
 
 private:
 	void detachAllChildPhysicals();
@@ -105,15 +104,15 @@ class ConnectedPhysical : public Physical {
 	CFrame attachOnThis;
 	HardConstraint* constraintWithParent;
 	Physical* parent;
+
+	void refreshCFrame();
+	void refreshCFrameRecursive();
 public:
 	ConnectedPhysical(Physical&& phys, Physical* parent, HardConstraint* constraintWithParent, const CFrame& attachOnThis, const CFrame& attachOnParent);
 
 	CFrame getRelativeCFrameToParent() const;
 
 	void makeMainPhysical();
-
-	void refreshCFrame();
-	void refreshCFrameRecursive();
 
 	bool isValid() const;
 };

@@ -12,8 +12,6 @@
 #include <algorithm>
 #include <limits>
 
-#include "integrityCheck.h"
-
 #include "misc/validityHelper.h"
 
 
@@ -280,6 +278,16 @@ void Physical::detachChildPartAndDelete(ConnectedPhysical&& formerChild) {
 	childPhysicals.remove(std::move(formerChild));
 }
 
+void Physical::detachFromRigidBody(Part* part) {
+	part->parent = nullptr;
+	rigidBody.detach(part);
+}
+
+void Physical::detachFromRigidBody(AttachedPart&& part) {
+	part.part->parent = nullptr;
+	rigidBody.detach(std::move(part));
+}
+
 void Physical::detachPart(Part* part, bool partStaysInWorld) {
 	if(part == rigidBody.getMainPart()) {
 		if(rigidBody.getPartCount() == 1) {
@@ -291,12 +299,12 @@ void Physical::detachPart(Part* part, bool partStaysInWorld) {
 		} else {
 			AttachedPart& newMainPartAndLaterOldPart = rigidBody.parts.back();
 			makeMainPart(newMainPartAndLaterOldPart); // now points to old part
-			rigidBody.detach(std::move(newMainPartAndLaterOldPart));
+			detachFromRigidBody(std::move(newMainPartAndLaterOldPart));
 
 			this->mainPhysical->refreshPhysicalProperties();
 		}
 	} else {
-		rigidBody.detach(part);
+		detachFromRigidBody(part);
 
 		this->mainPhysical->refreshPhysicalProperties();
 	}
@@ -465,15 +473,15 @@ void MotorizedPhysical::update(double deltaT) {
 #pragma region apply
 
 void MotorizedPhysical::applyForceAtCenterOfMass(Vec3 force) {
-	CHECK_VALID_VEC(force);
+	assert(isVecValid(force));
 	totalForce += force;
 
 	Debug::logVector(getCenterOfMass(), force, Debug::FORCE);
 }
 
 void MotorizedPhysical::applyForce(Vec3Relative origin, Vec3 force) {
-	CHECK_VALID_VEC(origin);
-	CHECK_VALID_VEC(force);
+	assert(isVecValid(origin));
+	assert(isVecValid(force));
 	totalForce += force;
 
 	Debug::logVector(getCenterOfMass() + origin, force, Debug::FORCE);
@@ -482,26 +490,26 @@ void MotorizedPhysical::applyForce(Vec3Relative origin, Vec3 force) {
 }
 
 void MotorizedPhysical::applyMoment(Vec3 moment) {
-	CHECK_VALID_VEC(moment);
+	assert(isVecValid(moment));
 	totalMoment += moment;
 	Debug::logVector(getCenterOfMass(), moment, Debug::MOMENT);
 }
 
 void MotorizedPhysical::applyImpulseAtCenterOfMass(Vec3 impulse) {
-	CHECK_VALID_VEC(impulse);
+	assert(isVecValid(impulse));
 	Debug::logVector(getCenterOfMass(), impulse, Debug::IMPULSE);
 	motionOfCenterOfMass.velocity += forceResponse * impulse;
 }
 void MotorizedPhysical::applyImpulse(Vec3Relative origin, Vec3Relative impulse) {
-	CHECK_VALID_VEC(origin);
-	CHECK_VALID_VEC(impulse);
+	assert(isVecValid(origin));
+	assert(isVecValid(impulse));
 	Debug::logVector(getCenterOfMass() + origin, impulse, Debug::IMPULSE);
 	motionOfCenterOfMass.velocity += forceResponse * impulse;
 	Vec3 angularImpulse = origin % impulse;
 	applyAngularImpulse(angularImpulse);
 }
 void MotorizedPhysical::applyAngularImpulse(Vec3 angularImpulse) {
-	CHECK_VALID_VEC(angularImpulse);
+	assert(isVecValid(angularImpulse));
 	Debug::logVector(getCenterOfMass(), angularImpulse, Debug::ANGULAR_IMPULSE);
 	Vec3 localAngularImpulse = getCFrame().relativeToLocal(angularImpulse);
 	Vec3 localRotAcc = momentResponse * localAngularImpulse;
@@ -510,20 +518,20 @@ void MotorizedPhysical::applyAngularImpulse(Vec3 angularImpulse) {
 }
 
 void MotorizedPhysical::applyDragAtCenterOfMass(Vec3 drag) {
-	CHECK_VALID_VEC(drag);
+	assert(isVecValid(drag));
 	Debug::logVector(getCenterOfMass(), drag, Debug::POSITION);
 	translate(forceResponse * drag);
 }
 void MotorizedPhysical::applyDrag(Vec3Relative origin, Vec3Relative drag) {
-	CHECK_VALID_VEC(origin);
-	CHECK_VALID_VEC(drag);
+	assert(isVecValid(origin));
+	assert(isVecValid(drag));
 	Debug::logVector(getCenterOfMass() + origin, drag, Debug::POSITION);
 	translateUnsafeRecursive(forceResponse * drag);
 	Vec3 angularDrag = origin % drag;
 	applyAngularDrag(angularDrag);
 }
 void MotorizedPhysical::applyAngularDrag(Vec3 angularDrag) {
-	CHECK_VALID_VEC(angularDrag);
+	assert(isVecValid(angularDrag));
 	Debug::logVector(getCenterOfMass(), angularDrag, Debug::INFO_VEC);
 	Vec3 localAngularDrag = getCFrame().relativeToLocal(angularDrag);
 	Vec3 localRotAcc = momentResponse * localAngularDrag;

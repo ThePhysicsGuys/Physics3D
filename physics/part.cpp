@@ -2,11 +2,7 @@
 
 #include "physical.h"
 
-#include "math/globalTransform.h"
-
 #include "geometry/intersection.h"
-
-#include "integrityCheck.h"
 
 #include "misc/validityHelper.h"
 
@@ -48,7 +44,7 @@ PartIntersection Part::intersects(const Part& other) const {
 		Vec3 exitVector = this->cframe.localToRelative(result.exitVector);
 
 
-		CHECK_VALID_VEC(result.exitVector);
+		isVecValid(result.exitVector);
 
 
 		return PartIntersection(intersection, exitVector);
@@ -137,11 +133,7 @@ void Part::attach(Part* other, const CFrame& relativeCFrame) {
 
 void Part::attach(Part* other, HardConstraint* constraint, const CFrame& attachToThis, const CFrame& attachToThat) {
 	this->ensureHasParent();
-	if(other->parent == nullptr) {
-		this->parent->attachPart(other, constraint, attachToThis, attachToThat);
-	} else {
-		this->parent->attachPhysical(other->parent, constraint, this->transformCFrameToParent(attachToThis), attachToThat);
-	}
+	this->parent->attachPart(other, constraint, attachToThis, attachToThat);
 }
 
 void Part::detach() {
@@ -171,6 +163,10 @@ void Part::makeMainPart() {
 	if(!this->isMainPart()) {
 		this->parent->makeMainPart(this);
 	}
+}
+
+bool Part::isFixed() const {
+	return false;
 }
 
 bool Part::isValid() const {

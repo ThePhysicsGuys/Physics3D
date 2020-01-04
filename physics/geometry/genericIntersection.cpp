@@ -9,7 +9,7 @@
 #include "../constants.h"
 #include "polyhedron.h"
 
-#include "../integrityCheck.h"
+#include "../misc/validityHelper.h"
 
 static Vec3f getNormalVec(Triangle t, Vec3f* vertices) {
 	Vec3f v0 = vertices[t[0]];
@@ -237,7 +237,7 @@ bool runEPATransformed(const ColissionPair& info, const Tetrahedron& s, Vec3f& i
 
 			exitVector = ri.d * closestTriangleNormal;
 
-			CHECK_VALID_VEC(exitVector);
+			assert(isVecValid(exitVector));
 
 			MinkowskiPointIndices inds[3]{bufs.knownVecs[closestTriangle[0]], bufs.knownVecs[closestTriangle[1]], bufs.knownVecs[closestTriangle[2]]};
 

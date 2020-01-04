@@ -23,7 +23,7 @@ PlayerWorld::PlayerWorld(double deltaT) : SynchronizedWorld<ExtendedPart>(deltaT
 void PlayerWorld::applyExternalForces() {
 	SynchronizedWorld<ExtendedPart>::applyExternalForces();
 
-	if (selectedPart != nullptr && !selectedPart->parent->anchored) {
+	if (selectedPart != nullptr && !selectedPart->isFixed()) {
 		MotorizedPhysical* selectedPhysical = selectedPart->parent->mainPhysical;
 		GlobalCFrame cframe = selectedPhysical->getCFrame();
 		// Magnet force

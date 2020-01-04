@@ -8,7 +8,7 @@
 #include "shape.h"
 #include "polyhedron.h"
 
-#include "../integrityCheck.h"
+#include "../misc/validityHelper.h"
 #include "shapeClass.h"
 
 Intersection intersectsTransformed(const Shape& first, const Shape& second, const CFrame& relativeTransform) {
@@ -45,7 +45,7 @@ Intersection intersectsTransformed(const GenericCollidable& first, const Generic
 
 		bool epaResult = runEPATransformed(info, result, intersection, exitVector, buffers, iter);
 
-		CHECK_VALID_VEC(exitVector);
+		assert(isVecValid(exitVector));
 		incDebugTally(EPAIterationStatistics, iter);
 		if(!epaResult) {
 			return Intersection();

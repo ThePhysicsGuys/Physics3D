@@ -99,5 +99,7 @@ public:
 	void attach(Part* other, HardConstraint* constraint, const CFrame& attachToThis, const CFrame& attachToThat);
 	void detach();
 
+	bool isFixed() const;
+
 	bool isValid() const;
 };

@@ -17,8 +17,6 @@
 
 #include <vector>
 
-#include "integrityCheck.h"
-
 /*
 	exitVector is the distance p2 must travel so that the shapes are no longer colliding
 */
@@ -184,7 +182,7 @@ bool boundsSphereEarlyEnd(const DiagonalMat3& scale, const Vec3& sphereCenter, d
 }
 
 inline void runColissionTests(Part& p1, Part& p2, WorldPrototype& world, std::vector<Colission>& colissions) {
-	if ((p1.isTerrainPart || p1.parent->anchored) && (p2.isTerrainPart || p2.parent->anchored)) return; // TODO Unneccecary test?
+	if (p1.isTerrainPart && p2.isTerrainPart) return; // TODO Unneccecary test?
 
 	
 	double maxRadiusBetween = p1.maxRadius + p2.maxRadius;
@@ -339,7 +337,6 @@ void WorldPrototype::update() {
 double WorldPrototype::getTotalKineticEnergy() const {
 	double total = 0.0;
 	for(const MotorizedPhysical* p : iterPhysicals()) {
-		if (p->anchored) continue;
 		total += p->getKineticEnergy();
 	}
 	return total;
