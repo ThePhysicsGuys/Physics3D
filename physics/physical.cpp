@@ -32,23 +32,26 @@ Physical::Physical(Part* part, MotorizedPhysical* mainPhysical) : rigidBody(part
 
 Physical::Physical(Physical&& other) noexcept :
 	rigidBody(std::move(other.rigidBody)), 
-	mainPhysical(other.mainPhysical) {
+	mainPhysical(other.mainPhysical),
+	childPhysicals(std::move(other.childPhysicals)) {
 	for(Part& p : this->rigidBody) {
 		p.parent = this;
 	}
 	for(ConnectedPhysical& p : this->childPhysicals) {
 		p.parent = this;
 	}
-	other.mainPhysical = nullptr;
 }
 
 Physical& Physical::operator=(Physical&& other) noexcept {
 	this->rigidBody = std::move(other.rigidBody);
+	this->mainPhysical = other.mainPhysical;
+	this->childPhysicals = std::move(other.childPhysicals);
 	for(Part& p : this->rigidBody) {
 		p.parent = this;
 	}
-
-	this->mainPhysical = other.mainPhysical;
+	for(ConnectedPhysical& p : this->childPhysicals) {
+		p.parent = this;
+	}
 	
 	return *this;
 }
@@ -84,27 +87,6 @@ void ConnectedPhysical::makeMainPhysical() {
 	throw "Not implemented!";
 }
 
-void Physical::attachPhysical(Physical&& phys, const CFrame& attachment) {
-	if(phys.mainPhysical->world != nullptr) {
-		phys.mainPhysical->world->removeMainPhysical(phys.mainPhysical);
-	}
-	if(this->mainPhysical->world != nullptr) {
-		Part* main = this->rigidBody.getMainPart();
-		NodeStack stack = this->mainPhysical->world->objectTree.findGroupFor(main, main->getStrictBounds());
-		TreeNode& group = **stack;
-		for(Part& p : phys.rigidBody) {
-			this->mainPhysical->world->objectTree.addToExistingGroup(&p, p.getStrictBounds(), group);
-		}
-		stack.expandBoundsAllTheWayToTop();
-	}
-
-	for(Part& part : phys.rigidBody) {
-		part.parent = this;
-	}
-
-	this->rigidBody.attach(std::move(phys.rigidBody), attachment);
-}
-
 bool Physical::isMainPhysical() const {
 	Physical* ptr = mainPhysical;
 	return ptr == this;
@@ -117,36 +99,53 @@ void Physical::removeChild(ConnectedPhysical* child) {
 	childPhysicals.pop_back();
 }
 
-void Physical::attachPhysical(Physical&& phys, HardConstraint* constraint, const CFrame& attachToThis, const CFrame& attachToThat) {
-	throw "todo makeMainPhysical";
-	if(phys.isMainPhysical()) {
-		ConnectedPhysical childToAdd(std::move(phys), this, constraint, attachToThat, attachToThis);
-		childPhysicals.push_back(std::move(childToAdd));
-		delete &phys;
-	} else {
-		ConnectedPhysical& connectedPhys = static_cast<ConnectedPhysical&>(phys);
-		Physical* parent = connectedPhys.parent;
-		assert(parent != nullptr);
-		ConnectedPhysical childToAdd(std::move(phys), this, constraint, attachToThat, attachToThis);
-		childPhysicals.push_back(std::move(childToAdd));
-		parent->removeChild(&connectedPhys);
+
+
+void Physical::attachPhysical(Physical* phys, HardConstraint* constraint, const CFrame& attachToThis, const CFrame& attachToThat) {
+	WorldPrototype* world = this->mainPhysical->world;
+	if(world != nullptr) {
+		world->mergePhysicals(this->mainPhysical, phys->mainPhysical);
 	}
 
-	
+	if(phys->isMainPhysical()) {
+		MotorizedPhysical* motorPhys = static_cast<MotorizedPhysical*>(phys);
+		ConnectedPhysical childToAdd(std::move(*motorPhys), this, constraint, attachToThat, attachToThis);
+		childPhysicals.push_back(std::move(childToAdd));
+		ConnectedPhysical& p = childPhysicals.back();
 
-	childPhysicals.back().updateCFrame(this->getCFrame());
+		p.parent = this;
+		p.setMainPhysicalRecursive(this->mainPhysical);
+
+		delete motorPhys;
+	} else {
+		throw "todo makeMainPhysical";
+		ConnectedPhysical* connectedPhys = static_cast<ConnectedPhysical*>(phys);
+		Physical* parent = connectedPhys->parent;
+		assert(parent != nullptr);
+		ConnectedPhysical childToAdd(std::move(*phys), this, constraint, attachToThat, attachToThis);
+		childPhysicals.push_back(std::move(childToAdd));
+		parent->removeChild(connectedPhys);
+	}
+
+
+
+
+	childPhysicals.back().refreshCFrameRecursive();
 
 	mainPhysical->refreshPhysicalProperties();
 }
 
 void Physical::attachPart(Part* part, HardConstraint* constraint, const CFrame& attachToThis, const CFrame& attachToThat) {
 	if(part->parent == nullptr) {
+		WorldPrototype* world = this->mainPhysical->world;
+		if(world != nullptr) {
+			world->mergePartAndPhysical(this->mainPhysical, part);
+		}
 		childPhysicals.push_back(ConnectedPhysical(Physical(part, this->mainPhysical), this, constraint, attachToThat, attachToThis));
+		childPhysicals.back().refreshCFrame();
 	} else {
-		attachPhysical(std::move(*part->parent), constraint, attachToThis, part->transformCFrameToParent(attachToThat));
+		attachPhysical(part->parent, constraint, attachToThis, part->transformCFrameToParent(attachToThat));
 	}
-
-	childPhysicals.back().updateCFrame(this->getCFrame());
 
 	mainPhysical->refreshPhysicalProperties();
 }
@@ -165,6 +164,43 @@ static Physical* findPhysicalParent(Physical* findIn, const ConnectedPhysical* t
 	return nullptr;
 }
 
+void Physical::attachPhysical(Physical* phys, const CFrame& attachment) {
+	if(phys->isMainPhysical()) {
+		attachPhysical(static_cast<MotorizedPhysical*>(phys), attachment);
+	} else {
+		throw "Not implemented!";
+	}
+}
+
+void Physical::attachPhysical(MotorizedPhysical* phys, const CFrame& attachment) {
+	this->childPhysicals.reserve(this->childPhysicals.size() + phys->childPhysicals.size());
+
+	for(Part& p : phys->rigidBody) {
+		p.parent = this;
+	}
+	this->rigidBody.attach(std::move(phys->rigidBody), attachment);
+	
+
+	for(ConnectedPhysical& conPhys : phys->childPhysicals) {
+		this->childPhysicals.push_back(std::move(conPhys));
+		ConnectedPhysical& conPhysOnThis = this->childPhysicals.back();
+		conPhysOnThis.attachOnParent = attachment.localToGlobal(conPhysOnThis.attachOnParent);
+		conPhysOnThis.parent = this;
+		conPhysOnThis.setMainPhysicalRecursive(this->mainPhysical);
+		conPhysOnThis.refreshCFrameRecursive();
+	}
+
+	WorldPrototype* world = this->mainPhysical->world;
+	if(world != nullptr) {
+		assert(phys->world == nullptr || phys->world == world);
+		world->mergePhysicals(this->mainPhysical, phys->mainPhysical);
+	}
+
+	delete phys;
+
+	mainPhysical->refreshPhysicalProperties();
+}
+
 void Physical::attachPart(Part* part, const CFrame& attachment) {
 	if (part->parent != nullptr) { // part is already in a physical
 		if (part->parent == this) {
@@ -172,10 +208,10 @@ void Physical::attachPart(Part* part, const CFrame& attachment) {
 		} else {
 			// attach other part's entire physical
 			if (part->isMainPart()) {
-				attachPhysical(std::move(*part->parent), attachment);
+				attachPhysical(part->parent, attachment);
 			} else {
 				CFrame newAttach = attachment.localToGlobal(~part->parent->rigidBody.getAttachFor(part).attachment);
-				attachPhysical(std::move(*part->parent), newAttach);
+				attachPhysical(part->parent, newAttach);
 			}
 		}
 	} else {
@@ -281,10 +317,9 @@ void Physical::notifyPartPropertiesAndBoundsChanged(Part* part, const Bounds& ol
 }
 
 void Physical::updateAttachedPhysicals(double deltaT) {
-	GlobalCFrame thisCFrame = getCFrame();
 	for(ConnectedPhysical& p : childPhysicals) {
 		p.constraintWithParent->update(deltaT);
-		p.updateCFrame(thisCFrame);
+		p.refreshCFrame();
 		p.updateAttachedPhysicals(deltaT);
 	}
 }
@@ -376,6 +411,18 @@ void MotorizedPhysical::refreshPhysicalProperties() {
 	momentResponse = ~totalInertia;
 }
 
+void ConnectedPhysical::refreshCFrame() {
+	GlobalCFrame newPosition = parent->getCFrame().localToGlobal(getRelativeCFrameToParent());
+	rigidBody.setCFrame(newPosition);
+}
+
+void ConnectedPhysical::refreshCFrameRecursive() {
+	this->refreshCFrame();
+	for(ConnectedPhysical& childPhys : childPhysicals) {
+		childPhys.refreshCFrameRecursive();
+	}
+}
+
 #pragma endregion
 
 /*
@@ -407,11 +454,6 @@ void MotorizedPhysical::update(double deltaT) {
 	translateUnsafeRecursive(movement);
 
 	updateAttachedPhysicals(deltaT);
-}
-
-void ConnectedPhysical::updateCFrame(const GlobalCFrame& parentCFrame) {
-	GlobalCFrame newPosition = parentCFrame.localToGlobal(getRelativeCFrameToParent());
-	rigidBody.setCFrame(newPosition);
 }
 
 #pragma endregion

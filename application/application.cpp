@@ -323,6 +323,21 @@ void setupWorld(int argc, const char** args) {
 		world.addPart(f2);
 	}
 
+	{
+		ExtendedPart* fixedConstraintGroupMain = new ExtendedPart(Box(1.0, 1.0, 1.0), GlobalCFrame(-3.0, 3.0, 7.0), {1.0, 1.0, 1.0}, "MainPart");
+		ExtendedPart* f2 = new ExtendedPart(Box(0.9, 0.9, 0.9), GlobalCFrame(), {1.0, 1.0, 1.0}, "f2");
+		ExtendedPart* f3 = new ExtendedPart(Box(0.8, 0.8, 0.8), GlobalCFrame(), {1.0, 1.0, 1.0}, "f3");
+		ExtendedPart* f4 = new ExtendedPart(Box(0.7, 0.7, 0.7), GlobalCFrame(), {1.0, 1.0, 1.0}, "f4");
+		ExtendedPart* f5 = new ExtendedPart(Box(0.6, 0.6, 0.6), GlobalCFrame(), {1.0, 1.0, 1.0}, "f5");
+
+		f2->attach(f3, new FixedConstraint(), CFrame(1.2, 0.0, 0.0), CFrame(0, 0, 0));
+		fixedConstraintGroupMain->attach(f2, new FixedConstraint(), CFrame(1.2, 0.0, 0.0), CFrame(0, 0, 0));
+		f3->attach(f4, new FixedConstraint(), CFrame(1.2, 0.0, 0.0), CFrame(0, 0, 0));
+		f4->attach(f5, new FixedConstraint(), CFrame(1.2, 0.0, 0.0), CFrame(0, 0, 0));
+
+		world.addPart(f2);
+	}
+
 	/*{
 		int minX = -5;
 		int maxX = 5;

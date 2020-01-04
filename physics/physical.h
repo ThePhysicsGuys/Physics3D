@@ -31,10 +31,11 @@ protected:
 	void updateAttachedPhysicals(double deltaT);
 	void translateUnsafeRecursive(const Vec3Fix& translation);
 
+	void attachPhysical(Physical* phys, const CFrame& attachment);
 	// deletes the given physical
-	void attachPhysical(Physical&& phys, const CFrame& attachment);
+	void attachPhysical(MotorizedPhysical* phys, const CFrame& attachment);
 
-	void attachPhysical(Physical&& phys, HardConstraint* constraint, const CFrame& attachToThis, const CFrame& attachToThat);
+	void attachPhysical(Physical* phys, HardConstraint* constraint, const CFrame& attachToThis, const CFrame& attachToThat);
 
 	void attachPart(Part* part, HardConstraint* constraint, const CFrame& attachToThis, const CFrame& attachToThat);
 	
@@ -111,7 +112,8 @@ public:
 
 	void makeMainPhysical();
 
-	void updateCFrame(const GlobalCFrame& parentCFrame);
+	void refreshCFrame();
+	void refreshCFrameRecursive();
 
 	bool isValid() const;
 };

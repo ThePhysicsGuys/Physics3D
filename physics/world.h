@@ -59,7 +59,9 @@ private:
 
 	void splitPartFromPhysical(const Part* part);
 	/*
-		merges the trees for two physicals, both physicals must have existed in the world before being merged
+		merges the trees for two physicals. 
+		firstPhysical must be part of this world, 
+		secondPhysical may or may not be in the world, but is not allowed to be in a different world
 	*/
 	void mergePhysicals(const MotorizedPhysical* firstPhysical, const MotorizedPhysical* secondPhysical);
 	/*

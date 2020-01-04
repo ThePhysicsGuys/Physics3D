@@ -140,7 +140,7 @@ void Part::attach(Part* other, HardConstraint* constraint, const CFrame& attachT
 	if(other->parent == nullptr) {
 		this->parent->attachPart(other, constraint, attachToThis, attachToThat);
 	} else {
-		this->parent->attachPhysical(Physical(other, this->parent->mainPhysical), constraint, this->transformCFrameToParent(attachToThis), attachToThat);
+		this->parent->attachPhysical(other->parent, constraint, this->transformCFrameToParent(attachToThis), attachToThat);
 	}
 }
 

@@ -105,6 +105,4 @@ TEST_CASE(testManyAttachComplex) {
 		ASSERT_TRUE(p->parent == parent);
 		delete p;
 	}
-
-	throw "TODO Memory leak in Part::attach(Part*, CFrame)";
 }
