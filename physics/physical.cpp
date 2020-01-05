@@ -81,13 +81,115 @@ static inline bool liesInVector(const std::vector<AttachedPart>& vec, const Atta
 	return vec.begin()._Ptr <= ptr && vec.end()._Ptr > ptr;
 }
 
+/*
+	We will build a new tree, starting from a copy of the current physical
+
+	S is the physical we are currently adding a child to
+	OS is old location of S, which is now invalid and which will be replaced in the next iteration
+	P (for parent) is the old parent of S, to be moved to be a child of S
+	T (for trash) is the physical currently being replaced by P
+	
+	We wish to make S the new Main Physical
+
+	      M
+	     / \
+	    /\
+	   P
+	  / \
+	 S
+	/ \
+
+	Split S off from the tree
+	Add a new empty node to S, call it T
+
+	            .
+	           / \
+	 S        P
+	/|\      / \
+	   T   OS
+	
+	Copy P to T, reversing OS's attachment
+
+	 S
+	/|\        .
+	   T      / \
+	  / \    P
+	OS
+
+	T is the new S
+	OS is the new T
+	P is the new OS
+	P's parent is the new P
+
+	if P has no parent, then the separate tree of S is copied into it and is the new mainPhysical
+*/
 void ConnectedPhysical::makeMainPhysical() {
-	throw "Not implemented!";
+	Physical* P = this->parent;
+	Physical newTop = std::move(*this);
+	ConnectedPhysical* T = nullptr;
+	ConnectedPhysical* OS = this;
+	Physical* S = &newTop;
+
+	// OS's Physical fields are invalid, but it's ConnectedPhysical fields are still valid
+
+	bool firstRun = true;
+	while(true) {
+		bool PIsMain = P->isMainPhysical();
+		// this part moves P down to be the child of S
+		// swap attachOnParent and attachOnThis and use inverted constraint
+		OS->constraintWithParent->invert();
+		if(firstRun) {
+			S->childPhysicals.push_back(ConnectedPhysical(std::move(*P),
+									    S,
+									    OS->constraintWithParent,
+									    OS->attachOnParent,
+									    OS->attachOnThis));
+			T = &S->childPhysicals.back();
+			firstRun = false;
+		} else {
+			*T = ConnectedPhysical(std::move(*P),
+								   S,
+								   OS->constraintWithParent,
+								   OS->attachOnParent,
+								   OS->attachOnThis);
+		}
+		
+		OS->constraintWithParent = nullptr;
+
+		// at this point, P::Physical is no longer valid, but the ConnectedPhysical's fields can still be used
+
+		S = T;
+		T = OS;
+
+		if(!PIsMain) {
+			ConnectedPhysical* OP = static_cast<ConnectedPhysical*>(P);
+			OS = OP;
+			P = OP->parent;
+		} else {
+			break;
+		}
+	}
+	S->childPhysicals.remove(std::move(*T)); // remove the last trash Physical
+
+	*P = std::move(newTop);
+
+	MotorizedPhysical* OP = static_cast<MotorizedPhysical*>(P);
+	OP->refreshPhysicalProperties();
 }
 
 bool Physical::isMainPhysical() const {
 	Physical* ptr = mainPhysical;
 	return ptr == this;
+}
+
+MotorizedPhysical* Physical::makeMainPhysical() {
+	if(this->isMainPhysical()) {
+		return static_cast<MotorizedPhysical*>(this);
+	} else {
+		MotorizedPhysical* main = this->mainPhysical;
+		static_cast<ConnectedPhysical*>(this)->makeMainPhysical();
+		return main;
+	}
 }
 
 void Physical::removeChild(ConnectedPhysical* child) {
@@ -702,6 +804,7 @@ bool Physical::isValid() const {
 
 	for(const ConnectedPhysical& p : childPhysicals) {
 		assert(p.isValid());
+		assert(p.parent == this);
 	}
 
 	return true;

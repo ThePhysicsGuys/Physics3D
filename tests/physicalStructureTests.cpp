@@ -10,6 +10,8 @@
 #include "../physics/physical.h"
 #include "../physics/constraints/fixedConstraint.h"
 
+#define ASSERT(x) ASSERT_STRICT(x)
+
 static Part* createPart() {
 	return new Part(Box(1.0, 1.0, 1.0), GlobalCFrame(), {1.0, 1.0, 1.0});
 }
@@ -62,7 +64,7 @@ TEST_CASE(testManualDetach) {
 	ASSERT_TRUE(b->isMainPart());
 
 	a->detach();
-	ASSERT_TRUE(c->parent->rigidBody.mainPart != a);
+	ASSERT(c->parent->rigidBody.mainPart != a);
 
 	delete b;
 	delete a;
@@ -105,4 +107,52 @@ TEST_CASE(testManyAttachComplex) {
 		ASSERT_TRUE(p->parent == parent);
 		delete p;
 	}
+}
+
+TEST_CASE(testBasicMakeMainPhysical) {
+	Part* a = createPart();
+	Part* b = createPart();
+
+	a->attach(b, new FixedConstraint(), CFrame(), CFrame());
+
+	ASSERT_TRUE(a->parent != nullptr);
+	ASSERT_TRUE(b->parent != nullptr);
+
+	ASSERT_TRUE(a->parent->isMainPhysical());
+	ASSERT_FALSE(b->parent->isMainPhysical());
+
+	MotorizedPhysical* m = b->parent->mainPhysical;
+	MotorizedPhysical* resultingMain = b->parent->makeMainPhysical();
+	ASSERT_TRUE(resultingMain == m);
+
+	ASSERT_TRUE(b->parent->isMainPhysical());
+	ASSERT_FALSE(a->parent->isMainPhysical());
+
+	ASSERT_TRUE(a->parent->childPhysicals.size() == 0);
+	ASSERT_TRUE(b->parent->childPhysicals.size() == 1);
+	ASSERT_TRUE(&b->parent->childPhysicals[0] == a->parent);
+	ASSERT_TRUE(a->isValid());
+	ASSERT_TRUE(b->isValid());
+}
+
+TEST_CASE(testAdvancedMakeMainPhysical) {
+	Part* a = createPart();
+	Part* b = createPart();
+	Part* c = createPart();
+	Part* d = createPart();
+	Part* e = createPart();
+	Part* f = createPart();
+	Part* g = createPart();
+
+	a->attach(b, new FixedConstraint(), CFrame(), CFrame());
+	a->attach(e, new FixedConstraint(), CFrame(), CFrame());
+	b->attach(c, new FixedConstraint(), CFrame(), CFrame());
+	b->attach(d, new FixedConstraint(), CFrame(), CFrame());
+	e->attach(f, new FixedConstraint(), CFrame(), CFrame());
+	f->attach(g, new FixedConstraint(), CFrame(), CFrame());
+
+	MotorizedPhysical* m = a->parent->mainPhysical;
+	MotorizedPhysical* resultingMain = f->parent->makeMainPhysical();
+	ASSERT_TRUE(resultingMain == m);
+	ASSERT_TRUE(m->isValid());
 }

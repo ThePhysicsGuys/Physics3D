@@ -9,14 +9,16 @@ public:
 	using std::vector<T>::vector;
 
 	inline void remove(T&& element) {
-		assert(&element >= &std::vector<T>::front());
+		T* el = &element;
+		T* frnt = &std::vector<T>::front();
+		assert(el >= frnt);
 		
-		T& bck = std::vector<T>::back();
+		T* bck = &std::vector<T>::back();
 		
-		assert(&element <= &bck);
+		assert(el <= bck);
 
-		if(&element != &bck) {
-			element = std::move(bck);
+		if(el != bck) {
+			*el = std::move(*bck);
 		}
 		std::vector<T>::pop_back();
 	}

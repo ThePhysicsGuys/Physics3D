@@ -89,6 +89,7 @@ public:
 	bool isValid() const;
 
 	bool isMainPhysical() const;
+	MotorizedPhysical* makeMainPhysical();
 
 private:
 	void detachAllChildPhysicals();
@@ -108,10 +109,14 @@ class ConnectedPhysical : public Physical {
 	void refreshCFrame();
 	void refreshCFrameRecursive();
 public:
+	ConnectedPhysical() = default;
 	ConnectedPhysical(Physical&& phys, Physical* parent, HardConstraint* constraintWithParent, const CFrame& attachOnThis, const CFrame& attachOnParent);
 
 	CFrame getRelativeCFrameToParent() const;
 
+	/*
+		Makes this physical the main Physical
+	*/
 	void makeMainPhysical();
 
 	bool isValid() const;
@@ -135,7 +140,7 @@ public:
 	Motion motionOfCenterOfMass;
 	
 	MotorizedPhysical(Part* mainPart);
-	MotorizedPhysical(Physical&& movedPhys);
+	explicit MotorizedPhysical(Physical&& movedPhys);
 
 	Position getCenterOfMass() const;
 	GlobalCFrame getCenterOfMassCFrame() const;

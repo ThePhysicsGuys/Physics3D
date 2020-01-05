@@ -14,4 +14,6 @@ public:
 	virtual CFrame getRelativeCFrame() = 0;
 
 	virtual Motion getRelativeMotion() = 0;
+
+	virtual ~HardConstraint() {}
 };
