@@ -19,11 +19,17 @@ public:
 	VertexBuffer* normalBuffer = nullptr;
 	VertexBuffer* uvBuffer = nullptr;
 
-	const int vertexCount;
-	const int triangleCount;
+	int vertexCount;
+	int triangleCount;
 
 	IndexedMesh(const VisualShape& shape);
 	IndexedMesh(const float* vertices, const float* normals, const float* uvs, const unsigned int* indices, const int vertexCount, const int triangleCount);
+
+	~IndexedMesh();
+	IndexedMesh(IndexedMesh&& other);
+	IndexedMesh(const IndexedMesh&) = delete;
+	IndexedMesh& operator=(IndexedMesh&& other);
+	IndexedMesh& operator=(const IndexedMesh&) = delete;
 
 	void render(unsigned int mode);
 

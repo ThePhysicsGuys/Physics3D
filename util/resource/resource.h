@@ -25,6 +25,8 @@ public:
 //! Resource
 enum class ResourceType {
 	None = 0,
+	Mesh,
+	Font,
 	Texture,
 	Shader,
 	OBJ

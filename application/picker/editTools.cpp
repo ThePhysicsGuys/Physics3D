@@ -18,6 +18,9 @@
 #include "../graphics/material.h"
 #include "../graphics/gui/gui.h"
 
+#include "../util/resource/resourceManager.h"
+#include "../engine/resource/meshResource.h"
+
 namespace Application {
 
 Mat3 transformations[] = {
@@ -30,21 +33,22 @@ Mat3 transformations[] = {
 // Render variables
 LinePrimitive* line = nullptr;
 
-IndexedMesh* rotateMesh = nullptr;
+MeshResource* rotateMesh = nullptr;
 VisualShape rotateShape;
 
-IndexedMesh* translateCenterMesh = nullptr;
+MeshResource* translateCenterMesh = nullptr;
 VisualShape translateCenterShape;
-IndexedMesh* translateMesh = nullptr;
+MeshResource* translateMesh = nullptr;
 VisualShape translateShape;
 
-IndexedMesh* scaleCenterMesh = nullptr;
+MeshResource* scaleCenterMesh = nullptr;
 VisualShape scaleCenterShape;
-IndexedMesh* scaleMesh = nullptr;
+MeshResource* scaleMesh = nullptr;
 VisualShape scaleShape;
 
-
 void EditTools::onInit() {
+
+	// TODO fix duplicate loading
 
 	// Edit line init
 	line = new LinePrimitive();
@@ -52,19 +56,19 @@ void EditTools::onInit() {
 
 	// Rotate shape init
 	rotateShape = OBJImport::load("../res/models/gui/rotate.obj");
-	rotateMesh = new IndexedMesh(rotateShape);
+	rotateMesh = ResourceManager::add<MeshResource>("../res/models/gui/rotate.obj");
 
 	// Scale shape init
 	scaleShape = OBJImport::load("../res/models/gui/scale_shaft.obj");
 	scaleCenterShape = OBJImport::load("../res/models/gui/scale_center.obj");
-	scaleMesh = new IndexedMesh(scaleShape);
-	scaleCenterMesh = new IndexedMesh(scaleCenterShape);
+	scaleMesh = ResourceManager::add<MeshResource>("../res/models/gui/scale_shaft.obj");
+	scaleCenterMesh = ResourceManager::add<MeshResource>("../res/models/gui/scale_center.obj");
 
 	// Translate shape init
 	translateShape = OBJImport::load("../res/models/gui/translate_shaft.obj");
 	translateCenterShape = OBJImport::load("../res/models/gui/translate_center.obj");
-	translateMesh = new IndexedMesh(translateShape);
-	translateCenterMesh = new IndexedMesh(translateCenterShape);
+	translateMesh = ResourceManager::add<MeshResource>("../res/models/gui/translate_shaft.obj");
+	translateCenterMesh = ResourceManager::add<MeshResource>("../res/models/gui/translate_center.obj");
 
 	// Intersected tool init
 	intersectedEditDirection = EditDirection::NONE;

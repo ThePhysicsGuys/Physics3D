@@ -13,7 +13,7 @@ public:
 
 class FontResource : public Resource, public Font {
 public:
-	DEFINE_RESOURCE(Texture, "../res/fonts/default/default.ttf");
+	DEFINE_RESOURCE(Font, "../res/fonts/default/default.ttf");
 
 	FontResource(const std::string& path, Font&& font) : Resource(path, path), Font(std::move(font)) {
 

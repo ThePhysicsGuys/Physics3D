@@ -98,10 +98,16 @@ void FrameBuffer::attach(RenderBuffer* renderBuffer) {
 void FrameBuffer::close() {
 	Log::warn("Closing framebuffer #%d", id);
 
-	texture->close();
-	renderBuffer->close();
+	if (texture)
+		texture->close();
+	
+	if (renderBuffer)
+		renderBuffer->close();
 
 	glDeleteFramebuffers(1, &id);
+
+	texture = nullptr;
+	renderBuffer = nullptr;
 	id = 0;
 }
 

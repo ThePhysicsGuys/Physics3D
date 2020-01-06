@@ -73,6 +73,52 @@ IndexedMesh::IndexedMesh(const float* vertices, const float* normals, const floa
 	vao->addBuffer(uvBuffer, uvBufferLayout);
 }
 
+IndexedMesh::~IndexedMesh() {
+	close();
+}
+
+IndexedMesh::IndexedMesh(IndexedMesh&& other) {
+	vao = other.vao;
+	bufferLayout = other.bufferLayout;
+	vertexBufferLayout = other.vertexBufferLayout;
+	normalBufferLayout = other.normalBufferLayout;
+	uvBufferLayout = other.uvBufferLayout;
+	vertexBuffer = other.vertexBuffer;
+	normalBuffer = other.normalBuffer;
+	uvBuffer = other.uvBuffer;
+	indexBuffer = other.indexBuffer;
+	vertexCount = other.vertexCount;
+	triangleCount = other.triangleCount;
+	
+	// Reset so they cant be deleted by close()
+	other.vao = nullptr;
+	other.uvBuffer = nullptr;
+	other.indexBuffer = nullptr;
+	other.vertexBuffer = nullptr;
+	other.normalBuffer = nullptr;
+
+	other.close();
+}
+
+IndexedMesh& IndexedMesh::operator=(IndexedMesh&& other) {
+	if (this != &other) {
+		close();
+		std::swap(vao                , other.vao               );
+		std::swap(bufferLayout       , other.bufferLayout      );
+		std::swap(vertexBufferLayout , other.vertexBufferLayout);
+		std::swap(normalBufferLayout , other.normalBufferLayout);
+		std::swap(uvBufferLayout     , other.uvBufferLayout    );
+		std::swap(vertexBuffer       , other.vertexBuffer      );
+		std::swap(normalBuffer       , other.normalBuffer      );
+		std::swap(uvBuffer           , other.uvBuffer          );
+		std::swap(indexBuffer        , other.indexBuffer       );
+		std::swap(vertexCount        , other.vertexCount       );
+		std::swap(triangleCount      , other.triangleCount     );
+	}
+
+	return *this;
+}
+
 void IndexedMesh::render() {
 	render(Renderer::FILL);
 }
@@ -87,7 +133,26 @@ void IndexedMesh::render(unsigned int mode)  {
 }
 
 void IndexedMesh::close() {
-	vertexBuffer->close();
-	indexBuffer->close();
-	vao->close();
+	if (vertexBuffer)
+		vertexBuffer->close();
+	if (indexBuffer)
+		indexBuffer->close();
+	if (normalBuffer)
+		normalBuffer->close();
+	if (uvBuffer)
+		uvBuffer->close();
+	if (vao)
+		vao->close();
+
+	vao = nullptr;
+	uvBuffer = nullptr;
+	indexBuffer = nullptr;
+	vertexBuffer = nullptr;
+	normalBuffer = nullptr;
+	uvBufferLayout = BufferLayout();
+	normalBufferLayout = BufferLayout();
+	vertexBufferLayout = BufferLayout();
+	bufferLayout = BufferLayout();
+	triangleCount = 0;
+	vertexCount = 0;
 }
