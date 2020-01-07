@@ -16,7 +16,7 @@ namespace GraphicsShaders {
 
 	void onInit() {
 		std::string guiShaderSourceFile =
-			R"(
+		R"(
 			[common]
 			#version 330 core
 			[vertex]

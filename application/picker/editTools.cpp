@@ -8,7 +8,6 @@
 #include "view/screen.h"
 #include "shader/shaders.h"
 
-
 #include "../engine/io/import.h"
 
 #include "../graphics/renderUtils.h"
@@ -34,17 +33,10 @@ Mat3 transformations[] = {
 LinePrimitive* line = nullptr;
 
 MeshResource* rotateMesh = nullptr;
-VisualShape rotateShape;
-
 MeshResource* translateCenterMesh = nullptr;
-VisualShape translateCenterShape;
 MeshResource* translateMesh = nullptr;
-VisualShape translateShape;
-
 MeshResource* scaleCenterMesh = nullptr;
-VisualShape scaleCenterShape;
 MeshResource* scaleMesh = nullptr;
-VisualShape scaleShape;
 
 void EditTools::onInit() {
 
@@ -55,18 +47,13 @@ void EditTools::onInit() {
 	line->resize(Vec3f(0, -100000, 0), Vec3f(0, 100000, 0));
 
 	// Rotate shape init
-	rotateShape = OBJImport::load("../res/models/gui/rotate.obj");
 	rotateMesh = ResourceManager::add<MeshResource>("../res/models/gui/rotate.obj");
 
 	// Scale shape init
-	scaleShape = OBJImport::load("../res/models/gui/scale_shaft.obj");
-	scaleCenterShape = OBJImport::load("../res/models/gui/scale_center.obj");
 	scaleMesh = ResourceManager::add<MeshResource>("../res/models/gui/scale_shaft.obj");
 	scaleCenterMesh = ResourceManager::add<MeshResource>("../res/models/gui/scale_center.obj");
 
 	// Translate shape init
-	translateShape = OBJImport::load("../res/models/gui/translate_shaft.obj");
-	translateCenterShape = OBJImport::load("../res/models/gui/translate_center.obj");
 	translateMesh = ResourceManager::add<MeshResource>("../res/models/gui/translate_shaft.obj");
 	translateCenterMesh = ResourceManager::add<MeshResource>("../res/models/gui/translate_center.obj");
 
@@ -87,16 +74,16 @@ void EditTools::onRender(Screen& screen) {
 	// Select correct render meshes
 	switch (editMode) {
 		case EditMode::TRANSLATE:
-			shaft = translateMesh;
-			center = translateCenterMesh;
+			shaft = translateMesh->getMesh();
+			center = translateCenterMesh->getMesh();
 			break;
 		case EditMode::ROTATE:
-			shaft = rotateMesh;
+			shaft = rotateMesh->getMesh();
 			center = nullptr;
 			break;
 		case EditMode::SCALE:
-			shaft = scaleMesh;
-			center = scaleCenterMesh;
+			shaft = scaleMesh->getMesh();
+			center = scaleCenterMesh->getMesh();
 			break;
 	}
 
@@ -162,16 +149,16 @@ float EditTools::intersect(Screen& screen, const Ray& ray) {
 	// Select correct tools
 	switch (editMode) {
 		case EditMode::TRANSLATE:
-			tool[0] = &translateShape;
-			tool[1] = &translateCenterShape;
+			tool[0] = &translateMesh->getShape();
+			tool[1] = &translateCenterMesh->getShape();
 			break;
 		case EditMode::ROTATE:
-			tool[0] = &rotateShape;
+			tool[0] = &rotateMesh->getShape();
 			tool[1] = nullptr;
 			break;
 		case EditMode::SCALE:
-			tool[0] = &scaleShape;
-			tool[1] = &scaleCenterShape;
+			tool[0] = &scaleMesh->getShape();
+			tool[1] = &scaleCenterMesh->getShape();
 			break;
 		default:
 			throw "Error: Impossible!";

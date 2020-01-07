@@ -9,6 +9,8 @@
 #include <fstream>
 #include <sstream>
 
+#include "../util/stringUtil.h"
+
 void Shader::createUniform(const std::string& uniform) {
 	bind();
 	Log::subject s(name);
@@ -238,6 +240,10 @@ ShaderSource parseShader(std::istream& shaderTextStream, const std::string& name
 			}
 			stringStream[(int) type] << line << "\n";
 		}
+	}
+
+	if (startWith(line, "uniform ")) {
+		std::string uniform = line.substr(8, line.length() - 8);
 	}
 
 	std::string commonFile = stringStream[(int)ShaderType::COMMON].str();
