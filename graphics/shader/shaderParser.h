@@ -2,7 +2,8 @@
 
 #include "shaderLexer.h"
 
-enum ShaderVariableType {
+enum class ShaderVariableType {
+	NONE,
 	VOID,
 	INT,
 	FLOAT,
@@ -17,7 +18,8 @@ enum ShaderVariableType {
 	SAMPLER3D
 };
 
-enum ShaderIOType {
+enum class ShaderIOType {
+	NONE,
 	IN,
 	OUT
 };
@@ -33,25 +35,40 @@ struct ShaderUniform {
 	ShaderVariableType variableType;
 };
 
+struct ShaderVSOUT : ShaderGlobal {
+	std::vector<ShaderGlobal> locals;
+};
+
 struct ShaderGlobal {
 	std::string name;
+	bool array;
 	ShaderIOType ioType;
 	ShaderVariableType variableType;
+};
+
+struct ShaderLocal {
+	std::string name;
+	bool array;
+	ShaderVariableType variableType;
+};
+
+struct ShaderStruct : ShaderLocal {
+	std::vector<ShaderGlobal> locals;
 };
 
 typedef std::vector<ShaderLayoutItem> ShaderLayout;
 typedef std::vector<ShaderUniform> ShaderUniforms;
 typedef std::vector<ShaderGlobal> ShaderGlobals;
+typedef std::vector<ShaderLocal> ShaderLocals;
 
 struct ShaderInfo {
 	ShaderLayout layout;
 	ShaderUniforms uniforms;
 	ShaderGlobals globals;
+	ShaderLocals locals;
 };
 
 class Parser {
 public:
-	static ShaderInfo parse(std::vector<Token> tokens) {
-		
-	}
+	static ShaderInfo parse(std::vector<Token> tokens);
 };
