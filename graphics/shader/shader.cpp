@@ -11,6 +11,8 @@
 
 #include "../util/stringUtil.h"
 
+#pragma region uniforms
+
 void Shader::createUniform(const std::string& uniform) {
 	bind();
 	Log::subject s(name);
@@ -53,6 +55,10 @@ void Shader::setUniform(const std::string& uniform, const Mat4f& value) const {
 	glUniformMatrix4fv(uniforms.at(uniform), 1, GL_FALSE, buf);
 }
 
+#pragma endregion
+
+#pragma region compile
+
 unsigned int compileShader(const std::string& source, unsigned int type) {
 	unsigned int id = glCreateShader(type);
 	
@@ -85,16 +91,16 @@ unsigned int compileShaderWithDebug(const std::string& name, const std::string& 
 	Log::info("%s: ", name.c_str());
 	
 	unsigned int id = compileShader(source, type);
-	if (id > 0) {
+
+	if (id > 0) 
 		Log::print("done\n", Log::Color::DEBUG);
-	}
 
 	Log::setDelimiter("\n");
 
 	return id;
 }
 
-unsigned int createShader(const std::string& vertexShader, const std::string& fragmentShader, const std::string& geometryShader, const std::string& tesselationControlShader, const std::string& tesselationEvaluateShader, const std::string& name) {
+unsigned int createShader(const std::string& name, const std::string& vertexShader, const std::string& fragmentShader, const std::string& geometryShader, const std::string& tesselationControlShader, const std::string& tesselationEvaluateShader) {
 	unsigned int program = glCreateProgram();
 
 	Log::subject s(name);
@@ -102,12 +108,11 @@ unsigned int createShader(const std::string& vertexShader, const std::string& fr
 	Log::info("Compiling shader (%s)", name.c_str());
 
 	unsigned int vs = compileShaderWithDebug("Vertex shader", vertexShader, GL_VERTEX_SHADER);
-	
 	unsigned int fs = compileShaderWithDebug("Fragment shader", fragmentShader, GL_FRAGMENT_SHADER);
 
 	unsigned int gs;
 	if (!geometryShader.empty())
-		gs = compileShaderWithDebug("Geometry shader",geometryShader, GL_GEOMETRY_SHADER);
+		gs = compileShaderWithDebug("Geometry shader", geometryShader, GL_GEOMETRY_SHADER);
 
 	unsigned int tcs;
 	if (!tesselationControlShader.empty()) 
@@ -116,7 +121,6 @@ unsigned int createShader(const std::string& vertexShader, const std::string& fr
 	unsigned int tes;
 	if (!tesselationEvaluateShader.empty())
 		tes = compileShaderWithDebug("Tesselation evaluate", tesselationEvaluateShader, GL_TESS_EVALUATION_SHADER);
-
 
 	glCall(glAttachShader(program, vs));
 	glCall(glAttachShader(program, fs));
@@ -144,6 +148,10 @@ unsigned int createShader(const std::string& vertexShader, const std::string& fr
 	return program;
 }
 
+#pragma endregion
+
+#pragma region parse
+
 std::string parseFile(const std::string& path) {
 	std::string line;
 	std::ifstream fileStream(path);
@@ -153,24 +161,22 @@ std::string parseFile(const std::string& path) {
 
 	Log::info("Reading (%s) ... ", path.c_str());
 
-	if (fileStream.fail()) {
+	if (fileStream.fail()) 
 		Log::print("Fail", Log::Color::ERROR);
-	} else {
+	else 
 		Log::print("Done", Log::Color::DEBUG);
-	}
 	
 	Log::setDelimiter("\n");
 
-	while (getline(fileStream, line)) {
+	while (getline(fileStream, line)) 
 		stringStream << line << "\n";
-	}
 
 	fileStream.close();
 
 	return stringStream.str();
 }
 
-ShaderSource parseShader(const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath, const std::string& tesselationControlPath, const std::string& tesselationEvaluatePath, const std::string& name) {
+ShaderSource parseShader(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath, const std::string& tesselationControlPath, const std::string& tesselationEvaluatePath) {
 	Log::subject s(name);
 	std::string vertexFile = parseFile(vertexPath);
 	std::string fragmentFile = parseFile(fragmentPath);
@@ -181,7 +187,7 @@ ShaderSource parseShader(const std::string& vertexPath, const std::string& fragm
 	return { vertexFile , fragmentFile , geometryFile, tesselationControlFile, tesselationEvaluateFile, name };
 }
 
-ShaderSource parseShader(const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath, const std::string& name) {
+ShaderSource parseShader(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath) {
 	Log::subject s(name);
 	std::string vertexFile = parseFile(vertexPath);
 	std::string fragmentFile = parseFile(fragmentPath);
@@ -190,7 +196,7 @@ ShaderSource parseShader(const std::string& vertexPath, const std::string& fragm
 	return { vertexFile , fragmentFile , geometryFile, "", "", name };
 }
 
-ShaderSource parseShader(const std::string& vertexPath, const std::string& fragmentPath, const std::string& name) {
+ShaderSource parseShader(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath) {
 	Log::subject s(name);
 	std::string vertexFile = parseFile(vertexPath);
 	std::string fragmentFile = parseFile(fragmentPath);
@@ -198,7 +204,7 @@ ShaderSource parseShader(const std::string& vertexPath, const std::string& fragm
 	return { vertexFile , fragmentFile , "", "", "", name };
 }
 
-ShaderSource parseShader(std::istream& shaderTextStream, const std::string& name) {
+ShaderSource parseShader(const std::string& name, std::istream& shaderTextStream) {
 	Log::subject s(name);
 
 	Log::info("Reading (%s)", name.c_str());
@@ -240,10 +246,6 @@ ShaderSource parseShader(std::istream& shaderTextStream, const std::string& name
 			}
 			stringStream[(int) type] << line << "\n";
 		}
-	}
-
-	if (startWith(line, "uniform ")) {
-		std::string uniform = line.substr(8, line.length() - 8);
 	}
 
 	std::string commonFile = stringStream[(int)ShaderType::COMMON].str();
@@ -294,20 +296,18 @@ ShaderSource parseShader(std::istream& shaderTextStream, const std::string& name
 
 	return { vertexFile , fragmentFile , geometryFile, tesselationControlFile, tesselationEvaluateFile, name };
 }
+#pragma endregion
 
-Shader::Shader(const std::string& vertexShader, const std::string& fragmentShader, const std::string& name) {
-	id = createShader(vertexShader, fragmentShader, "", "", "", name);
-	this->name = name;
-}
+#pragma region constructors
 
-Shader::Shader(const std::string& vertexShader, const std::string& fragmentShader, const std::string& geometryShader, const std::string& name) {
-	id = createShader(vertexShader, fragmentShader, geometryShader, "", "", name);
-	this->name = name;
-}
+Shader::Shader(const std::string& name, const std::string& vertexSource, const std::string& fragmentSource, const std::string& geometrySource, const std::string& tesselationControlSource, const std::string& tesselationEvaluateSource) : name(name) {
+	id = createShader(name, vertexSource, fragmentSource, geometrySource, tesselationControlSource, tesselationControlSource);
+	
+	if (!vertexSource.empty()) {
+		flags |= VERTEX;
+		
+	}
 
-Shader::Shader(const std::string& vertexShader, const std::string& fragmentShader, const std::string& geometryShader, const std::string& tesselationControlSource, const std::string& tesselationEvaluateSource, const std::string& name) {
-	id = createShader(vertexShader, fragmentShader, geometryShader, tesselationControlSource, tesselationEvaluateSource, name);
-	this->name = name;
 }
 
 Shader::~Shader() {
@@ -330,6 +330,10 @@ Shader& Shader::operator=(Shader&& other) {
 	return *this;
 }
 
+#pragma endregion
+
+#pragma region bindable
+
 void Shader::bind() {
 	glUseProgram(id);
 }
@@ -351,3 +355,4 @@ void Shader::close() {
 	}
 }
 
+#pragma endregion

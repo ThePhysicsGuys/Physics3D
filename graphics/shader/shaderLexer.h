@@ -6,7 +6,13 @@
 struct TokenType {
 
 	enum Type : char {
+		NONE,
 		ID,
+		OP,
+		COMMA,
+		ASSIGN,
+		NUMBER,
+		VERSION,
 		STRING,
 		COMMENT,
 		LP,
@@ -15,23 +21,24 @@ struct TokenType {
 		RB,
 		LC,
 		RC,
-		EOC,
+		EOL,
+		IN,
+		OUT,
+		LAYOUT,
+		LOCATION,
+		QUALIFIER,
 		UNIFORM,
 		TYPE,
-		NONE
+		EOC
 	};
 
-	static std::regex regexes[12];
-	static Type types[12];
-
-private:
-	Type type = NONE;
-
 public:
-	TokenType() = default;
-	TokenType(Type value) : type(type) {}
+	Type type;
+	std::regex regex;
 
-	operator Type() const { return type; }  
+	TokenType(Type type, std::regex regex) : type(type), regex(regex) {}
+
+	operator Type() const { return type; }
 	bool operator==(Type other) const { return type == other; }
 	bool operator==(TokenType other) const { return type == other.type; }
 	bool operator!=(Type other) const { return type != other; }
@@ -47,6 +54,8 @@ struct Token {
 
 class Lexer {
 private:
+	static std::vector<TokenType> types;
+
 	static Token nextToken(std::string& input);
 	static TokenType getMatch(const std::string& input);
 	static Token popToken(std::string& input, TokenType type, std::string value);

@@ -2,48 +2,44 @@
 
 #include "shaderLexer.h"
 
-TokenType::Type TokenType::types[12] = {
-	ID,
-	STRING,
-	COMMENT,
-	LP,
-	RP,
-	LB,
-	RB,
-	LC,
-	RC,
-	EOC,
-	UNIFORM,
-	TYPE
+std::vector<TokenType> Lexer::types = {
+	TokenType(TokenType::NONE, std::regex("(.*?)")),
+	TokenType(TokenType::ID, std::regex("[A-Za-z_]\\w*")),
+	TokenType(TokenType::ASSIGN, std::regex("=")),
+	TokenType(TokenType::COMMA, std::regex(",")),
+	TokenType(TokenType::OP, std::regex("\\+\\+?|--?|\\*\\*?|\\:|\\/\\/?|\\?|<=?|>=?")),
+	TokenType(TokenType::NUMBER, std::regex("^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?")),
+	TokenType(TokenType::VERSION, std::regex("#version")),
+	TokenType(TokenType::STRING, std::regex("\"((?:\\\\.|[^\\\\\"])*)\"")),
+	TokenType(TokenType::COMMENT, std::regex("\\/\\*((?:.|[^\\*\\/])*)\\*\\/")),
+	TokenType(TokenType::LP, std::regex("\\(")),
+	TokenType(TokenType::RP, std::regex("\\)")),
+	TokenType(TokenType::LB, std::regex("\\[")),
+	TokenType(TokenType::RB, std::regex("\\]")),
+	TokenType(TokenType::LC, std::regex("\\{")),
+	TokenType(TokenType::RC, std::regex("\\}")),
+	TokenType(TokenType::EOL, std::regex("\\;")),
+	TokenType(TokenType::IN, std::regex("in")),
+	TokenType(TokenType::OUT, std::regex("out")),
+	TokenType(TokenType::LAYOUT, std::regex("layout")),
+	TokenType(TokenType::LOCATION, std::regex("location")),
+	TokenType(TokenType::QUALIFIER, std::regex("const")),
+	TokenType(TokenType::UNIFORM, std::regex("uniform")),
+	TokenType(TokenType::TYPE, std::regex("mat2|mat3|mat4|float|int|vec2|vec3|vec4|struct|VS_OUT|sampler2D|void|sampler3D"))
 };
 
-std::regex TokenType::regexes[12] = {
-		std::regex("[A-Za-z_]\\w*"),
-		std::regex("\"((?:\\\\.|[^\\\\\"])*)\""),
-		std::regex("\\/\\*((?:.|[^\\*\\/])*)\\*\\/"),
-		std::regex("\\("),
-		std::regex("\\)"),
-		std::regex("\\["),
-		std::regex("\\]"),
-		std::regex("\\{"),
-		std::regex("\\}"),
-		std::regex("\\;"),
-		std::regex("uniform"),
-		std::regex("mat2|mat3|mat4|float|int|vec2|vec3|vec4")
-};
+TokenType Lexer::getMatch(const std::string& input) {
+	TokenType match = Lexer::types[0];
 
-inline TokenType Lexer::getMatch(const std::string& input) {
-	TokenType match = TokenType::NONE;
-
-	for (int i = 0; i < 12; i++) {
-		if (std::regex_match(input, TokenType::regexes[i]))
-			match = TokenType::types[i];
+	for (int i = 0; i < Lexer::types.size(); i++) {
+		if (std::regex_match(input, types[i].regex))
+			match = types[i];
 	}
 
 	return match;
 }
 
-inline Token Lexer::popToken(std::string& input, TokenType type, std::string value) {
+Token Lexer::popToken(std::string& input, TokenType type, std::string value) {
 	// Throw exception if the token is not recognized
 	if (type == TokenType::NONE)
 		Log::error("Type not recognized for value %s", value.c_str());
@@ -66,10 +62,10 @@ inline Token Lexer::popToken(std::string& input, TokenType type, std::string val
 	return Token(type, value);
 }
 
-inline Token Lexer::nextToken(std::string& input) {
+Token Lexer::nextToken(std::string& input) {
 	std::string currentToken;
 
-	TokenType lastMatch = TokenType::NONE;
+	TokenType lastMatch = Lexer::types[0];
 	for (int i = 0; i < input.length(); i++) {
 		currentToken.append(std::string(1, input.at(i)));
 
@@ -95,7 +91,7 @@ inline Token Lexer::nextToken(std::string& input) {
 	return popToken(input, lastMatch, currentToken);
 }
 
-inline std::vector<Token> Lexer::lex(std::string input) {
+std::vector<Token> Lexer::lex(std::string input) {
 	std::vector<Token> tokens;
 
 	input = trim(input);
@@ -109,7 +105,7 @@ inline std::vector<Token> Lexer::lex(std::string input) {
 		tokens.push_back(token);
 	}
 
-	tokens.push_back(Token(TokenType::EOC, ""));
+	tokens.push_back(Token(*Lexer::types.end(), ""));
 
 	return tokens;
 }
