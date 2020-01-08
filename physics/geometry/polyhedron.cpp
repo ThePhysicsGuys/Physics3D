@@ -64,10 +64,6 @@ Polyhedron::Polyhedron(const Vec3f* vertices, const Triangle* triangles, int ver
 	vertexCount(vertexCount), 
 	triangleCount(triangleCount) {
 
-	if(!this->isValid()) {
-		Log::warn("Invalid Shape found!");
-		__debugbreak();
-	}
 }
 
 Polyhedron::Polyhedron(Polyhedron&& poly) noexcept : 
@@ -76,10 +72,6 @@ Polyhedron::Polyhedron(Polyhedron&& poly) noexcept :
 	vertexCount(poly.vertexCount), 
 	triangleCount(poly.triangleCount) {
 	
-	if(!this->isValid()) {
-		Log::warn("Invalid Shape found!");
-		__debugbreak();
-	}
 }
 
 Polyhedron::Polyhedron(const Polyhedron& poly) : 
@@ -88,10 +80,6 @@ Polyhedron::Polyhedron(const Polyhedron& poly) :
 	vertexCount(poly.vertexCount), 
 	triangleCount(poly.triangleCount) {
 
-	if(!this->isValid()) {
-		Log::warn("Invalid Shape found!");
-		__debugbreak();
-	}
 }
 
 
@@ -101,11 +89,6 @@ Polyhedron& Polyhedron::operator=(Polyhedron&& poly) noexcept {
 	this->vertexCount = poly.vertexCount;
 	this->triangleCount = poly.triangleCount;
 
-	if(!this->isValid()) {
-		Log::warn("Invalid Shape found!");
-		__debugbreak();
-	}
-
 	return *this;
 }
 Polyhedron& Polyhedron::operator=(const Polyhedron& poly) {
@@ -113,11 +96,6 @@ Polyhedron& Polyhedron::operator=(const Polyhedron& poly) {
 	this->triangles = copy(poly.triangles, poly.triangleCount);
 	this->vertexCount = poly.vertexCount;
 	this->triangleCount = poly.triangleCount;
-
-	if(!this->isValid()) {
-		Log::warn("Invalid Shape found!");
-		__debugbreak();
-	}
 
 	return *this;
 }
