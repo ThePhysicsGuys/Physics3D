@@ -144,21 +144,21 @@ void EditTools::onClose() {
 }
 
 float EditTools::intersect(Screen& screen, const Ray& ray) {
-	VisualShape* tool[2];
+	VisualShape tool[2];
 
 	// Select correct tools
 	switch (editMode) {
 		case EditMode::TRANSLATE:
-			tool[0] = &translateMesh->getShape();
-			tool[1] = &translateCenterMesh->getShape();
+			tool[0] = translateMesh->getShape();
+			tool[1] = translateCenterMesh->getShape();
 			break;
 		case EditMode::ROTATE:
-			tool[0] = &rotateMesh->getShape();
-			tool[1] = nullptr;
+			tool[0] = rotateMesh->getShape();
+			tool[1] = VisualShape();
 			break;
 		case EditMode::SCALE:
-			tool[0] = &scaleMesh->getShape();
-			tool[1] = &scaleCenterMesh->getShape();
+			tool[0] = scaleMesh->getShape();
+			tool[1] = scaleCenterMesh->getShape();
 			break;
 		default:
 			throw "Error: Impossible!";
@@ -168,11 +168,11 @@ float EditTools::intersect(Screen& screen, const Ray& ray) {
 	EditDirection closestToolDirection = EditDirection::NONE;
 
 	// Check intersections of selected tool
-	for (int i = 0; i < (tool[1] ? 4 : 3); i++) {
+	for (int i = 0; i < 4; i++) {
 		GlobalCFrame frame = screen.selectedPart->getCFrame();
 		frame.rotation = frame.getRotation() * transformations[i];
 
-		VisualShape& shape = *tool[i / 3];
+		VisualShape shape = tool[i / 3];
 		Position rayStart = ray.start;
 
 		float distance = shape.getIntersectionDistance(frame.globalToLocal(ray.start), frame.relativeToLocal(ray.direction));

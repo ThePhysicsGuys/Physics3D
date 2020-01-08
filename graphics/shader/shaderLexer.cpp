@@ -105,7 +105,7 @@ std::vector<Token> Lexer::lex(std::string input) {
 		tokens.push_back(token);
 	}
 
-	tokens.push_back(Token(*Lexer::types.end(), ""));
+	tokens.push_back(Token(Lexer::types.back(), ""));
 
 	return tokens;
 }

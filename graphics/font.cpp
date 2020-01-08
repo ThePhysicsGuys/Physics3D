@@ -188,4 +188,8 @@ unsigned int Font::getAtlasHeight() const {
 	return atlas.getHeight();
 }
 
+Texture* Font::getAtlas() {
+	return &atlas;
+}
+
 #pragma endregion

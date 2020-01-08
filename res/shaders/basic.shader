@@ -43,7 +43,6 @@ layout(line_strip, max_vertices = 9) out;
 uniform int includeUvs;
 uniform int includeNormals;
 
-uniform vec3 viewPosition;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 
@@ -83,24 +82,6 @@ void main() {
 	fcenter = center();
 
 	mat4 transform = projectionMatrix * viewMatrix;
-
-#ifdef DEBUG
-	float arrowLength = 0.05;
-	float arrowWidth = 0.02;
-	vec4 arrowTop = vec4(fcenter + 0.3 * fnormal, 1);
-	vec3 norm = normalize(cross(arrowTop.xyz - viewPosition, fnormal));
-	vec4 arrowLeft = arrowTop - vec4(arrowLength * fnormal - arrowWidth * norm, 0);
-	vec4 arrowRight = arrowTop - vec4(arrowLength * fnormal + arrowWidth * norm, 0);
-	vec4 arrowBase = arrowTop - arrowLength * vec4(fnormal, 0);
-
-	gl_Position = transform * vec4(fcenter, 1); EmitVertex();
-	gl_Position = transform * arrowBase; EmitVertex();
-	gl_Position = transform * arrowLeft; EmitVertex();
-	gl_Position = transform * arrowTop; EmitVertex();
-	gl_Position = transform * arrowRight; EmitVertex();
-	gl_Position = transform * arrowBase; EmitVertex();
-	EndPrimitive();
-#endif
 
 	vec3 u = gposition[2] - gposition[0];
 	vec3 n = normalize(cross(gposition[0] - gposition[1], gposition[2] - gposition[0]));
@@ -146,7 +127,6 @@ struct Material {
 	vec3 specular;
 	float reflectance;
 	int textured;
-	int normalmapped;
 };
 
 struct Attenuation {
@@ -170,7 +150,6 @@ uniform mat4 projectionMatrix;
 
 uniform Material material;
 uniform sampler2D textureSampler;
-uniform sampler2D normalSampler;
 const int maxLights = 5;
 uniform Light lights[maxLights];
 
