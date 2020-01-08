@@ -25,7 +25,7 @@
 
 static const double DELTA_T = 0.01;
 static const int TICKS = 500;
-
+/*
 TEST_CASE(positionInvariance) {
 	Mat3 rotation = fromEulerAngles(0.0, 0.0, 0.0);
 
@@ -51,8 +51,8 @@ TEST_CASE(positionInvariance) {
 		REMAINS_CONSTANT(origin.globalToLocal(housePart.getCFrame()));
 		REMAINS_CONSTANT(origin.globalToLocal(icosaPart.getCFrame()));
 	}
-}
-
+}*/
+/*
 TEST_CASE(rotationInvariance) {
 	//Mat3 origins[]{fromEulerAngles(0,0,0), fromEulerAngles(0,1,0), fromEulerAngles(0,0.5,0), fromEulerAngles(0,-0.5,0),};
 
@@ -80,7 +80,7 @@ TEST_CASE(rotationInvariance) {
 		REMAINS_CONSTANT(origin.globalToLocal(housePart.getCFrame()));
 		REMAINS_CONSTANT(origin.globalToLocal(icosaPart.getCFrame()));
 	}
-}
+}*/
 
 TEST_CASE(applyForceToRotate) {
 	Part part(Box(1.0, 1.0, 1.0), GlobalCFrame(0,0,0,fromEulerAngles(0.3, 0.7, 0.9)), {1.0, 1.0, 0.7});

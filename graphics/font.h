@@ -57,8 +57,9 @@ public:
 	void close();
 
 	Vec2f size(const std::string& text, double scale);
-	Character& getCharacter(unsigned int id);
 
+	Texture* getAtlas();
+	Character& getCharacter(unsigned int id);
 	unsigned int getAtlasID() const;
 	unsigned int getAtlasWidth() const;
 	unsigned int getAtlasHeight() const;

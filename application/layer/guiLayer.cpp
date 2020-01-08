@@ -12,11 +12,10 @@
 #include "../graphics/gui/guiUtils.h"
 #include "../engine/input/mouse.h"
 #include "../graphics/buffers/frameBuffer.h"
+#include "../graphics/gui/gui.h"
+#include "../graphics/debug/visualDebug.h"
 
 namespace Application {
-
-// Font
-Font* font = nullptr;
 
 bool onMouseMove(const MouseMoveEvent& event) {
 	return GUI::onMouseMove(event.getNewX(), event.getNewY());
