@@ -207,25 +207,15 @@ void Physical::attachPhysical(Physical* phys, HardConstraint* constraint, const 
 		world->mergePhysicals(this->mainPhysical, phys->mainPhysical);
 	}
 
-	if(phys->isMainPhysical()) {
-		MotorizedPhysical* motorPhys = static_cast<MotorizedPhysical*>(phys);
-		ConnectedPhysical childToAdd(std::move(*motorPhys), this, constraint, attachToThat, attachToThis);
-		childPhysicals.push_back(std::move(childToAdd));
-		ConnectedPhysical& p = childPhysicals.back();
+	MotorizedPhysical* motorPhys = phys->makeMainPhysical();
+	ConnectedPhysical childToAdd(std::move(*motorPhys), this, constraint, attachToThat, attachToThis);
+	childPhysicals.push_back(std::move(childToAdd));
+	ConnectedPhysical& p = childPhysicals.back();
 
-		p.parent = this;
-		p.setMainPhysicalRecursive(this->mainPhysical);
+	p.parent = this;
+	p.setMainPhysicalRecursive(this->mainPhysical);
 
-		delete motorPhys;
-	} else {
-		throw "todo makeMainPhysical";
-		ConnectedPhysical* connectedPhys = static_cast<ConnectedPhysical*>(phys);
-		Physical* parent = connectedPhys->parent;
-		assert(parent != nullptr);
-		ConnectedPhysical childToAdd(std::move(*phys), this, constraint, attachToThat, attachToThis);
-		childPhysicals.push_back(std::move(childToAdd));
-		parent->removeChild(connectedPhys);
-	}
+	delete motorPhys;
 
 
 
@@ -265,11 +255,7 @@ static Physical* findPhysicalParent(Physical* findIn, const ConnectedPhysical* t
 }
 
 void Physical::attachPhysical(Physical* phys, const CFrame& attachment) {
-	if(phys->isMainPhysical()) {
-		attachPhysical(static_cast<MotorizedPhysical*>(phys), attachment);
-	} else {
-		throw "Not implemented!";
-	}
+	attachPhysical(phys->makeMainPhysical(), attachment);
 }
 
 void Physical::attachPhysical(MotorizedPhysical* phys, const CFrame& attachment) {
@@ -531,6 +517,14 @@ void ConnectedPhysical::refreshCFrameRecursive() {
 	for(ConnectedPhysical& childPhys : childPhysicals) {
 		childPhys.refreshCFrameRecursive();
 	}
+}
+
+void MotorizedPhysical::fullRefreshOfConnectedPhysicals() {
+	Bounds oldBounds = this->rigidBody.mainPart->getStrictBounds();
+	for(ConnectedPhysical& conPhys : childPhysicals) {
+		conPhys.refreshCFrameRecursive();
+	}
+	if(this->world != nullptr) this->world->updatePartGroupBounds(this->rigidBody.mainPart, oldBounds);
 }
 
 #pragma endregion

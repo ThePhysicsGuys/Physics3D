@@ -85,7 +85,7 @@ public:
 	~Polyhedron();
 
 	Polyhedron(const Vec3f* vertices, const Triangle* triangles, int vertexCount, int triangleCount);
-	Polyhedron(Polyhedron&& poly) noexcept : vertices(std::move(poly.vertices)), triangles(std::move(poly.triangles)), vertexCount(poly.vertexCount), triangleCount(poly.triangleCount) {}
+	Polyhedron(Polyhedron&& poly) noexcept;
 	Polyhedron(const Polyhedron& poly);
 	Polyhedron& operator=(Polyhedron&& poly) noexcept;
 	Polyhedron& operator=(const Polyhedron& poly);

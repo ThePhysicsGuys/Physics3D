@@ -28,4 +28,7 @@
       </ArrayItems>
     </Expand>
   </Type>
+  <Type Name="Part">
+    <DisplayString>parent={(void*) parent} mainPhys={(void*) parent->mainPhysical}</DisplayString>
+  </Type>
 </AutoVisualizer>

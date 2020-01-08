@@ -101,6 +101,8 @@ private:
 
 class ConnectedPhysical : public Physical {
 	friend class Physical;
+	friend class MotorizedPhysical;
+
 	CFrame attachOnParent;
 	CFrame attachOnThis;
 	HardConstraint* constraintWithParent;
@@ -123,6 +125,8 @@ public:
 };
 
 class MotorizedPhysical : public Physical {
+	friend class Physical;
+	friend class ConnectedPhysical;
 	void rotateAroundCenterOfMassUnsafe(const RotMat3& rotation);
 public:
 	void refreshPhysicalProperties();
@@ -168,6 +172,8 @@ public:
 	double getInertiaOfPointInDirectionRelative(const Vec3Relative& relativePoint, const Vec3Relative& relativeDirection) const;
 	inline Part* getMainPart() { return this->rigidBody.mainPart; }
 	inline const Part* getMainPart() const { return this->rigidBody.mainPart; }
+
+	void fullRefreshOfConnectedPhysicals();
 
 	bool isValid() const;
 };

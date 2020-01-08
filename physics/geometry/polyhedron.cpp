@@ -62,13 +62,37 @@ Polyhedron::Polyhedron(const Vec3f* vertices, const Triangle* triangles, int ver
 	vertices(createAndFillParallelVecBuf(vertexCount, vertices)),
 	triangles(createAndFillParallelTriangleBuf(triangleCount, triangles)),
 	vertexCount(vertexCount), 
-	triangleCount(triangleCount) {}
+	triangleCount(triangleCount) {
+
+	if(!this->isValid()) {
+		Log::warn("Invalid Shape found!");
+		__debugbreak();
+	}
+}
+
+Polyhedron::Polyhedron(Polyhedron&& poly) noexcept : 
+	vertices(std::move(poly.vertices)), 
+	triangles(std::move(poly.triangles)), 
+	vertexCount(poly.vertexCount), 
+	triangleCount(poly.triangleCount) {
+	
+	if(!this->isValid()) {
+		Log::warn("Invalid Shape found!");
+		__debugbreak();
+	}
+}
 
 Polyhedron::Polyhedron(const Polyhedron& poly) : 
 	vertices(copy(poly.vertices, poly.vertexCount)), 
 	triangles(copy(poly.triangles, poly.triangleCount)), 
 	vertexCount(poly.vertexCount), 
-	triangleCount(poly.triangleCount) {}
+	triangleCount(poly.triangleCount) {
+
+	if(!this->isValid()) {
+		Log::warn("Invalid Shape found!");
+		__debugbreak();
+	}
+}
 
 
 Polyhedron& Polyhedron::operator=(Polyhedron&& poly) noexcept {
@@ -76,6 +100,12 @@ Polyhedron& Polyhedron::operator=(Polyhedron&& poly) noexcept {
 	this->triangles = std::move(poly.triangles);
 	this->vertexCount = poly.vertexCount;
 	this->triangleCount = poly.triangleCount;
+
+	if(!this->isValid()) {
+		Log::warn("Invalid Shape found!");
+		__debugbreak();
+	}
+
 	return *this;
 }
 Polyhedron& Polyhedron::operator=(const Polyhedron& poly) {
@@ -83,6 +113,12 @@ Polyhedron& Polyhedron::operator=(const Polyhedron& poly) {
 	this->triangles = copy(poly.triangles, poly.triangleCount);
 	this->vertexCount = poly.vertexCount;
 	this->triangleCount = poly.triangleCount;
+
+	if(!this->isValid()) {
+		Log::warn("Invalid Shape found!");
+		__debugbreak();
+	}
+
 	return *this;
 }
 
@@ -191,7 +227,18 @@ static bool isComplete(const ShapeTriangleIter originalIter, const ShapeTriangle
 }
 
 bool Polyhedron::isValid() const {
+	for(int i = 0; i < triangleCount; i++) {
+		const Triangle& t = this->getTriangle(i);
+		for(const int& index : t.indexes) {
+			if(index < 0 || index >= vertexCount) {
+				Log::warn("Invalid triangle! Triangle %d points to a nonexistent vertex!", i);
+				return false;
+			}
+		}
+	}
+
 	IteratorFactory<ShapeTriangleIter> f = iterTriangles();
+
 	if(!isComplete(f.begin(), f.end())) return false;
 	if(getVolume() <= 0) return false;
 	return true;

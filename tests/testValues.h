@@ -11,3 +11,4 @@ extern const RotMat3 rotMatrices[18];
 // test for bad vertices
 extern Vec3f badVerticesI[8];
 extern Vec3f badVerticesJ[8];
+
