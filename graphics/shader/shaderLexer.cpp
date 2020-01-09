@@ -90,8 +90,8 @@ Token Lexer::nextToken(std::string& input) {
 	return popToken(input, lastMatch, currentToken);
 }
 
-std::vector<Token> Lexer::lex(std::string input) {
-	std::vector<Token> tokens;
+TokenStack Lexer::lex(std::string input) {
+	TokenStack tokens;
 
 	input = trim(input);
 
@@ -107,4 +107,35 @@ std::vector<Token> Lexer::lex(std::string input) {
 	tokens.push_back(Token(Lexer::types.back(), ""));
 
 	return tokens;
+}
+
+void TokenStack::initIterator() {
+	iterator = begin();
+}
+
+Token TokenStack::peek(size_t offset) {
+	if (iterator + offset < end())
+		return *(iterator + offset);
+	
+	return Token(Lexer::types[0], "");
+}
+
+Token TokenStack::pop() {
+	if (available())
+		return *iterator;
+
+	iterator++;
+
+	return Token(Lexer::types[0], "");
+}
+
+void TokenStack::popUntil(TokenType type) {
+	while (iterator != end() && iterator->type != type)
+		iterator++;
+
+	pop();
+}
+
+bool TokenStack::available(size_t offset) {
+	return iterator + offset < end();
 }

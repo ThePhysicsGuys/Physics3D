@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stack>
 #include "shaderLexer.h"
 
 enum class ShaderVariableType {
@@ -24,42 +25,46 @@ enum class ShaderIOType {
 	OUT
 };
 
+struct ShaderLocal {
+	std::string name;
+	ShaderVariableType variableType;
+	bool array;
+
+	ShaderLocal(const std::string& name, const ShaderVariableType& variableType, bool array) : name(name), variableType(variableType), array(array) {}
+};
+typedef std::vector<ShaderLocal> ShaderLocals;
+
+struct ShaderGlobal {
+	std::string name;
+	ShaderIOType ioType;
+	ShaderVariableType variableType;
+	bool array;
+
+	ShaderGlobal(const std::string& name, const ShaderIOType& ioType, const ShaderVariableType& variableType, bool array) : name(name), ioType(ioType), variableType(variableType), array(array) {};
+};
+typedef std::vector<ShaderGlobal> ShaderGlobals;
+
 struct ShaderLayoutItem {
 	int location;
 	ShaderIOType ioType;
 	ShaderVariableType variableType;
 };
-
-struct ShaderUniform {
-	std::string name;
-	ShaderVariableType variableType;
-};
-
-struct ShaderVSOUT : ShaderGlobal {
-	std::vector<ShaderGlobal> locals;
-};
-
-struct ShaderGlobal {
-	std::string name;
-	bool array;
-	ShaderIOType ioType;
-	ShaderVariableType variableType;
-};
-
-struct ShaderLocal {
-	std::string name;
-	bool array;
-	ShaderVariableType variableType;
-};
-
-struct ShaderStruct : ShaderLocal {
-	std::vector<ShaderGlobal> locals;
-};
-
 typedef std::vector<ShaderLayoutItem> ShaderLayout;
+
+struct ShaderVSOUT : public ShaderGlobal {
+	ShaderLocals locals;
+
+	ShaderVSOUT(const std::string& name, const ShaderIOType& ioType, const ShaderVariableType& variableType, bool array, const ShaderLocals& locals) : ShaderGlobal(name, ioType, variableType, array), locals(locals) {}
+};
+
+struct ShaderStruct : public ShaderLocal {
+	ShaderLocals locals;
+
+	ShaderStruct(const std::string& name, const ShaderVariableType& variableType, bool array, const ShaderLocals& locals) : ShaderLocal(name, variableType, array), locals(locals) {}
+};
+
+typedef ShaderLocal ShaderUniform;
 typedef std::vector<ShaderUniform> ShaderUniforms;
-typedef std::vector<ShaderGlobal> ShaderGlobals;
-typedef std::vector<ShaderLocal> ShaderLocals;
 
 struct ShaderInfo {
 	ShaderLayout layout;
@@ -70,5 +75,5 @@ struct ShaderInfo {
 
 class Parser {
 public:
-	static ShaderInfo parse(std::vector<Token> tokens);
+	static ShaderInfo parse(TokenStack& tokens);
 };

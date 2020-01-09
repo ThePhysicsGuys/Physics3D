@@ -51,7 +51,23 @@ struct Token {
 	Token(const TokenType& type, const std::string& value) : type(type), value(value) {}
 };
 
+
+struct TokenStack : public std::vector<Token> {
+private:
+	std::vector<Token>::iterator iterator;
+
+public:
+	void initIterator();
+
+	Token peek(size_t offset = 0);
+	Token pop();
+	void popUntil(TokenType type);
+
+	bool available(size_t offset = 0);
+};
+
 class Lexer {
+	friend TokenStack;
 private:
 	static std::vector<TokenType> types;
 
@@ -60,5 +76,5 @@ private:
 	static Token popToken(std::string& input, TokenType type, std::string value);
 
 public:
-	static std::vector<Token> lex(std::string input);
+	static TokenStack lex(std::string input);
 };
