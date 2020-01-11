@@ -2,16 +2,18 @@
 
 #include "shaderLexer.h"
 
-std::vector<TokenType> Lexer::types = {
+std::vector<TokenType> ShaderLexer::types = {
 	TokenType(TokenType::NONE, std::regex("(.*?)")),
 	TokenType(TokenType::ID, std::regex("[A-Za-z_]\\w*")),
 	TokenType(TokenType::ASSIGN, std::regex("=")),
 	TokenType(TokenType::COMMA, std::regex(",")),
+	TokenType(TokenType::DOT, std::regex("\\.")),
 	TokenType(TokenType::OP, std::regex("\\+\\+?|--?|\\*\\*?|\\:|\\/\\/?|\\?|<=?|>=?")),
 	TokenType(TokenType::NUMBER, std::regex("^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?")),
 	TokenType(TokenType::VERSION, std::regex("#version")),
+	TokenType(TokenType::PREP, std::regex("#ifdef|#ifndef|#else|#endif")),
 	TokenType(TokenType::STRING, std::regex("\"((?:\\\\.|[^\\\\\"])*)\"")),
-	TokenType(TokenType::COMMENT, std::regex("\\/\\*((?:.|[^\\*\\/])*)\\*\\/")),
+	TokenType(TokenType::COMMENT, std::regex("\\/\\*((?:.|[^\\*\\/])*)\\*\\/|\\/[\\/]+.*")),
 	TokenType(TokenType::LP, std::regex("\\(")),
 	TokenType(TokenType::RP, std::regex("\\)")),
 	TokenType(TokenType::LB, std::regex("\\[")),
@@ -27,10 +29,10 @@ std::vector<TokenType> Lexer::types = {
 	TokenType(TokenType::TYPE, std::regex("mat2|mat3|mat4|float|int|vec2|vec3|vec4|struct|VS_OUT|sampler2D|void|sampler3D"))
 };
 
-TokenType Lexer::getMatch(const std::string& input) {
-	TokenType match = Lexer::types[0];
+TokenType ShaderLexer::getMatch(const std::string& input) {
+	TokenType match = ShaderLexer::types[0];
 
-	for (int i = 0; i < Lexer::types.size(); i++) {
+	for (int i = 0; i < ShaderLexer::types.size(); i++) {
 		if (std::regex_match(input, types[i].regex))
 			match = types[i];
 	}
@@ -38,7 +40,7 @@ TokenType Lexer::getMatch(const std::string& input) {
 	return match;
 }
 
-Token Lexer::popToken(std::string& input, TokenType type, std::string value) {
+Token ShaderLexer::popToken(std::string& input, TokenType type, std::string value) {
 	// Throw exception if the token is not recognized
 	if (type == TokenType::NONE)
 		Log::error("Type not recognized for value %s", value.c_str());
@@ -61,10 +63,10 @@ Token Lexer::popToken(std::string& input, TokenType type, std::string value) {
 	return Token(type, value);
 }
 
-Token Lexer::nextToken(std::string& input) {
+Token ShaderLexer::nextToken(std::string& input) {
 	std::string currentToken;
 
-	TokenType lastMatch = Lexer::types[0];
+	TokenType lastMatch = ShaderLexer::types[0];
 	for (int i = 0; i < input.length(); i++) {
 		currentToken.append(std::string(1, input.at(i)));
 
@@ -90,7 +92,7 @@ Token Lexer::nextToken(std::string& input) {
 	return popToken(input, lastMatch, currentToken);
 }
 
-TokenStack Lexer::lex(std::string input) {
+TokenStack ShaderLexer::lex(std::string input) {
 	TokenStack tokens;
 
 	input = trim(input);
@@ -104,8 +106,6 @@ TokenStack Lexer::lex(std::string input) {
 		tokens.push_back(token);
 	}
 
-	tokens.push_back(Token(Lexer::types.back(), ""));
-
 	return tokens;
 }
 
@@ -117,23 +117,30 @@ Token TokenStack::peek(size_t offset) {
 	if (iterator + offset < end())
 		return *(iterator + offset);
 	
-	return Token(Lexer::types[0], "");
+	return Token(ShaderLexer::types[0], "");
 }
 
 Token TokenStack::pop() {
 	if (available())
-		return *iterator;
+		return *iterator++;
 
-	iterator++;
-
-	return Token(Lexer::types[0], "");
+	return Token(ShaderLexer::types[0], "");
 }
 
-void TokenStack::popUntil(TokenType type) {
-	while (iterator != end() && iterator->type != type)
-		iterator++;
+TokenStack TokenStack::until(const TokenType::Type& type, bool popType) {
+	TokenStack content;
+	while (iterator < end()) {
+		if (iterator->type == type)
+			break;
+		content.push_back(*iterator++);
+	}
 
-	pop();
+	if (popType)
+		pop();
+
+	content.initIterator();
+
+	return content;
 }
 
 bool TokenStack::available(size_t offset) {

@@ -32,6 +32,8 @@ ShaderVariableType parseVariableType(const Token& token) {
 		return ShaderVariableType::SAMPLER3D;
 	if (value == "struct")
 		return ShaderVariableType::STRUCT;
+	if (value == "VS_OUT")
+		return ShaderVariableType::VS_OUT;
 
 	return ShaderVariableType::NONE;
 }
@@ -47,15 +49,16 @@ ShaderIOType parseIOType(const Token& token) {
 	return ShaderIOType::NONE;
 }
 
-TokenStack collectNextScope(TokenStack& tokens) {
+TokenStack nextScope(TokenStack& tokens, const TokenType::Type& ltype, const TokenType::Type& rtype) {
 	int depth = -1;
 	TokenStack scope;
 	while (tokens.available()) {
 		Token token = tokens.pop();
 
-		if (token.type == TokenType::LC) {
-			depth++;
-		} else if (token.type == TokenType::RC) {
+		if (token.type == ltype) {
+			if (++depth == 0)
+				continue;
+		} else if (token.type == rtype) {
 			if (depth == 0)
 				break;
 			else if (depth > 0)
@@ -65,6 +68,7 @@ TokenStack collectNextScope(TokenStack& tokens) {
 		scope.push_back(token);
 	}
 
+	scope.initIterator();
 	return scope;
 }
 
@@ -86,18 +90,19 @@ bool testArray(TokenStack& tokens) {
 	return false;
 }
 
-ShaderLocals parseStructContent(TokenStack& tokens) {
-	TokenStack scope = collectNextScope(tokens);
+ShaderLocals parseStructContent(TokenStack& scope) {
 	ShaderLocals locals;
 
 	while (scope.available()) {
 		const Token& token = scope.peek();
 		switch (token.type) {
 			case TokenType::TYPE: {
-					ShaderLocal local = parseLocal(scope);
-					locals.push_back(local);
-					break;
-				}
+				ShaderLocal local = parseLocal(scope);
+				locals.push_back(local);
+				break;
+			} default: {
+				scope.pop();
+			}
 		}
 	}
 
@@ -108,7 +113,7 @@ ShaderStruct parseStruct(TokenStack& tokens) {
 	tokens.pop(); // pop STRUCT
 
 	std::string name = tokens.pop().value;
-	TokenStack scope = collectNextScope(tokens);
+	TokenStack scope = nextScope(tokens, TokenType::LC, TokenType::RC);
 	ShaderLocals locals = parseStructContent(scope);
 
 	// TODO check if array possible
@@ -117,20 +122,23 @@ ShaderStruct parseStruct(TokenStack& tokens) {
 
 ShaderUniform parseUniform(TokenStack& tokens) {
 	tokens.pop(); // pop UNIFORM
+
 	ShaderVariableType variableType = parseVariableType(tokens.pop());
 	std::string name = tokens.pop().value;
 	bool array = testArray(tokens);
+	tokens.until(TokenType::EOL);
 
 	return ShaderUniform(name, variableType, array);
 }
 
 ShaderVSOUT parseVSOUT(TokenStack& tokens, const ShaderIOType& ioType) {
-	ShaderLocals locals = parseStructContent(tokens);
+	TokenStack scope = nextScope(tokens, TokenType::LC, TokenType::RC);
+	ShaderLocals locals = parseStructContent(scope);
 	std::string name = tokens.pop().value;
 
 	bool array = testArray(tokens);
 
-	return ShaderVSOUT(name, ioType, ShaderVariableType::STRUCT, array, locals);
+	return ShaderVSOUT(name, ioType, ShaderVariableType::VS_OUT, array, locals);
 }
 
 ShaderLocal parseLocal(TokenStack& tokens) {
@@ -149,7 +157,7 @@ ShaderGlobal parseGlobal(TokenStack& tokens) {
 	ShaderVariableType variableType = parseVariableType(tokens.pop());
 
 	switch (variableType) {
-		case ShaderVariableType::STRUCT: {
+		case ShaderVariableType::VS_OUT: {
 			ShaderVSOUT vsout = parseVSOUT(tokens, ioType);
 			return vsout;
 			break;
@@ -163,10 +171,32 @@ ShaderGlobal parseGlobal(TokenStack& tokens) {
 }
 
 ShaderLayoutItem parseLayoutItem(TokenStack& tokens) {
-	return {};
+	tokens.pop();
+
+	TokenStack scope = nextScope(tokens, TokenType::LP, TokenType::RP);
+
+	ShaderLayoutAttributes attributes;
+	while (scope.available()) {
+		TokenStack setting = scope.until(TokenType::COMMA);
+		std::string attribute = setting.pop().value;
+		std::string value = (setting.peek().type == TokenType::ASSIGN) ? setting.pop().value : "";
+		
+		attributes.push_back(ShaderLayoutAttribute(attribute, value));
+	}
+
+	ShaderIOType ioType = parseIOType(tokens.pop());
+	
+	ShaderVariableType variableType = ShaderVariableType::NONE;
+	std::string name = "";
+	if (tokens.peek().type == TokenType::TYPE) {
+		variableType = parseVariableType(tokens.pop());
+		name = tokens.pop().value;
+	}
+
+	return ShaderLayoutItem(attributes, ioType, variableType, name);
 }
 
-ShaderInfo Parser::parse(TokenStack& tokens) {
+ShaderInfo ShaderParser::parse(TokenStack& tokens) {
 	tokens.initIterator();
 
 	ShaderLayout layout;
@@ -183,6 +213,7 @@ ShaderInfo Parser::parse(TokenStack& tokens) {
 				break; 
 			} case TokenType::IO: {
 				ShaderGlobal global = parseGlobal(tokens);
+
 				globals.push_back(global);
 				break;
 			} case TokenType::LAYOUT: {
@@ -190,15 +221,19 @@ ShaderInfo Parser::parse(TokenStack& tokens) {
 				layout.push_back(layoutItem);
 				break;
 			} case TokenType::TYPE: {
-				if (testFunction(tokens))
-					collectNextScope(tokens);
+				if (testFunction(tokens)) {
+					nextScope(tokens, TokenType::LC, TokenType::RC);
+					continue;
+				}
 
 				ShaderLocal local = parseLocal(tokens);
 				locals.push_back(local);
 				break;
+			} default: {
+				tokens.pop();
 			}
 		}
 	}
 
-	return {};
+	return ShaderInfo(layout, uniforms, globals, locals);
 }

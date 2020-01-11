@@ -10,9 +10,11 @@ struct TokenType {
 		ID,
 		OP,
 		COMMA,
+		DOT,
 		ASSIGN,
 		NUMBER,
 		VERSION,
+		PREP,
 		STRING,
 		COMMENT,
 		LP,
@@ -28,7 +30,6 @@ struct TokenType {
 		QUALIFIER,
 		UNIFORM,
 		TYPE,
-		EOC
 	};
 
 public:
@@ -51,7 +52,6 @@ struct Token {
 	Token(const TokenType& type, const std::string& value) : type(type), value(value) {}
 };
 
-
 struct TokenStack : public std::vector<Token> {
 private:
 	std::vector<Token>::iterator iterator;
@@ -61,12 +61,12 @@ public:
 
 	Token peek(size_t offset = 0);
 	Token pop();
-	void popUntil(TokenType type);
+	TokenStack until(const TokenType::Type& type, bool popType = true);
 
 	bool available(size_t offset = 0);
 };
 
-class Lexer {
+class ShaderLexer {
 	friend TokenStack;
 private:
 	static std::vector<TokenType> types;

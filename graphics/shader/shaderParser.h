@@ -15,6 +15,7 @@ enum class ShaderVariableType {
 	MAT3,
 	MAT4,
 	STRUCT,
+	VS_OUT,
 	SAMPLER2D,
 	SAMPLER3D
 };
@@ -44,10 +45,22 @@ struct ShaderGlobal {
 };
 typedef std::vector<ShaderGlobal> ShaderGlobals;
 
+struct ShaderLayoutAttribute {
+	std::string attribute;
+	std::string value;
+
+	ShaderLayoutAttribute(const std::string& attribute, const std::string& value) : attribute(attribute), value(value) {}
+};
+typedef std::vector<ShaderLayoutAttribute> ShaderLayoutAttributes;
+
 struct ShaderLayoutItem {
-	int location;
+	ShaderLayoutAttributes attributes;
 	ShaderIOType ioType;
+
 	ShaderVariableType variableType;
+	std::string name;
+
+	ShaderLayoutItem(const ShaderLayoutAttributes& attributes, const ShaderIOType& ioType, const ShaderVariableType& variableType, const std::string& name) : attributes(attributes), ioType(ioType), variableType(variableType), name(name) {}
 };
 typedef std::vector<ShaderLayoutItem> ShaderLayout;
 
@@ -71,9 +84,11 @@ struct ShaderInfo {
 	ShaderUniforms uniforms;
 	ShaderGlobals globals;
 	ShaderLocals locals;
+
+	ShaderInfo(const ShaderLayout& layout, const ShaderUniforms& uniforms, const ShaderGlobals& globals, const ShaderLocals& locals) : layout(layout), uniforms(uniforms), globals(globals), locals(locals) {}
 };
 
-class Parser {
+class ShaderParser {
 public:
 	static ShaderInfo parse(TokenStack& tokens);
 };
