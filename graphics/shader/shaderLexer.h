@@ -35,8 +35,9 @@ struct TokenType {
 public:
 	Type type;
 	std::regex regex;
+	bool accepting;
 
-	TokenType(Type type, std::regex regex) : type(type), regex(regex) {}
+	TokenType(Type type, std::regex regex, bool accepting) : type(type), regex(regex), accepting(accepting) {}
 
 	operator Type() const { return type; }
 	bool operator==(Type other) const { return type == other; }
@@ -73,8 +74,8 @@ private:
 
 	static Token nextToken(std::string& input);
 	static TokenType getMatch(const std::string& input);
-	static Token popToken(std::string& input, TokenType type, std::string value);
+	static Token popToken(std::string& input, const TokenType& type, std::string value);
 
 public:
-	static TokenStack lex(std::string input);
+	static TokenStack lex(const std::string& input);
 };

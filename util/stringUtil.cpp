@@ -37,14 +37,14 @@ bool startWith(std::string string, std::string prefix) {
 
 std::string ltrim(std::string string) {
 	string.erase(string.begin(), std::find_if(string.begin(), string.end(), [](int ch) {
-		return ch != ' ' && ch != '\t' && ch != '\n';
+		return ch != ' ' && ch != '\t' && ch != '\n' && ch != '\r';
 	}));
 	return string;
 }
 
 std::string rtrim(std::string string) {
 	string.erase(std::find_if(string.rbegin(), string.rend(), [](int ch) {
-		return ch != ' ' && ch != '\t' && ch != '\n';
+		return ch != ' ' && ch != '\t' && ch != '\n' && ch != '\r';
 	}).base(), string.end());
 	return string;
 }

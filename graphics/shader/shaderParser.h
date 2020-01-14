@@ -85,6 +85,7 @@ struct ShaderInfo {
 	ShaderGlobals globals;
 	ShaderLocals locals;
 
+	ShaderInfo() {}
 	ShaderInfo(const ShaderLayout& layout, const ShaderUniforms& uniforms, const ShaderGlobals& globals, const ShaderLocals& locals) : layout(layout), uniforms(uniforms), globals(globals), locals(locals) {}
 };
 

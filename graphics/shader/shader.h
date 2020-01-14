@@ -1,22 +1,34 @@
 #pragma once
 
 #include "../bindable.h"
+#include "shaderParser.h"
 
 struct ShaderSource {
+	std::string name;
+
 	std::string vertexSource;
 	std::string fragmentSource;
 	std::string geometrySource;
 	std::string tesselationControlSource;
 	std::string tesselationEvaluateSource;
-	std::string name;
+
+	ShaderSource();
+	ShaderSource(const std::string& name, const std::string& vertexSource, const std::string& fragmentSource, const std::string& geometrySource, const std::string& tesselationControlSource, const std::string& tesselationEvaluateSource);
 };
 
-ShaderSource parseShader(const std::string& name, std::istream& shaderTextStream);
-ShaderSource parseShader(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath);
-ShaderSource parseShader(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath);
-ShaderSource parseShader(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath, const std::string& tesselationControlPath, const std::string& tesselationEvaluatePath);
+struct ShaderStage {
+	std::string source;
+	ShaderInfo info;
+
+	ShaderStage();
+	ShaderStage(const std::string& source, const ShaderInfo& info);
+};
 
 class Shader : public Bindable {
+private:
+	std::map<std::string, int> uniforms;
+
+public:
 	enum ShaderFlags : char {
 		NONE                 = 0 << 0,
 		VERTEX               = 1 << 0,
@@ -26,28 +38,21 @@ class Shader : public Bindable {
 		TESSELATION_EVALUATE = 1 << 3
 	};
 
-private:
 	char flags = NONE;
-	std::map<std::string, int> uniforms;
-	std::vector<std::string> vertexUniforms;
-	std::vector<std::string> fragmentUniforms;
-	std::vector<std::string> geometryUniforms;
-	std::vector<std::string> tesselationControlUniforms;
-	std::vector<std::string> tesselationEvaluateUniforms;
 
-public:
 	std::string name;
-	std::string vertexSource;
-	std::string fragmentSource;
-	std::string geometrySource;
-	std::string tesselationControlSource;
-	std::string tesselationEvaluateSource;
 
-	Shader() {};
-	Shader(const std::string& vertexShader, const std::string& fragmentShader, const std::string& name) : Shader(vertexShader, fragmentShader, "", "", "", name) {};
-	Shader(const std::string& vertexShader, const std::string& fragmentShader, const std::string& geometryShader, const std::string& name) : Shader(vertexShader, fragmentShader, geometryShader, "", "", name) {};
+	ShaderStage vertexStage;
+	ShaderStage fragmentStage;
+	ShaderStage geometryStage;
+	ShaderStage tesselationControlStage;
+	ShaderStage tesselationEvaluationStage;
+
+	Shader();
+	Shader(const ShaderSource& shaderSource);
+	Shader(const std::string& name, const std::string& vertexShader, const std::string& fragmentShader);
+	Shader(const std::string& name, const std::string& vertexShader, const std::string& fragmentShader, const std::string& geometryShader);
 	Shader(const std::string& name, const std::string& vertexShader, const std::string& fragmentShader, const std::string& geometryShader, const std::string& tesselationControlSource, const std::string& tesselationEvaluateSource);
-	Shader(const ShaderSource& shaderSource) : Shader(shaderSource.vertexSource, shaderSource.fragmentSource, shaderSource.geometrySource, shaderSource.tesselationControlSource, shaderSource.tesselationEvaluateSource, shaderSource.name) {};
 
 	~Shader();
 	Shader(Shader&& other);
@@ -68,3 +73,8 @@ public:
 	void unbind() override;
 	void close() override;
 };
+
+ShaderSource parseShader(const std::string& name, std::istream& shaderTextStream);
+ShaderSource parseShader(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath);
+ShaderSource parseShader(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath);
+ShaderSource parseShader(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath, const std::string& tesselationControlPath, const std::string& tesselationEvaluatePath);

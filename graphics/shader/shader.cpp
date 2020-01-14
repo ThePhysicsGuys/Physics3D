@@ -184,7 +184,7 @@ ShaderSource parseShader(const std::string& name, const std::string& vertexPath,
 	std::string tesselationControlFile = parseFile(tesselationControlPath);
 	std::string tesselationEvaluateFile = parseFile(tesselationEvaluatePath);
 
-	return { name, vertexFile , fragmentFile , geometryFile, tesselationControlFile, tesselationEvaluateFile };
+	return ShaderSource(name, vertexFile , fragmentFile , geometryFile, tesselationControlFile, tesselationEvaluateFile);
 }
 
 ShaderSource parseShader(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath) {
@@ -193,7 +193,7 @@ ShaderSource parseShader(const std::string& name, const std::string& vertexPath,
 	std::string fragmentFile = parseFile(fragmentPath);
 	std::string geometryFile = parseFile(geometryPath);
 
-	return { name, vertexFile , fragmentFile , geometryFile, "", "" };
+	return ShaderSource(name, vertexFile , fragmentFile , geometryFile, "", "");
 }
 
 ShaderSource parseShader(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath) {
@@ -201,7 +201,7 @@ ShaderSource parseShader(const std::string& name, const std::string& vertexPath,
 	std::string vertexFile = parseFile(vertexPath);
 	std::string fragmentFile = parseFile(fragmentPath);
 
-	return { name, vertexFile , fragmentFile , "", "", "" };
+	return ShaderSource(name, vertexFile , fragmentFile , "", "", "");
 }
 
 ShaderSource parseShader(const std::string& name, std::istream& shaderTextStream) {
@@ -248,89 +248,115 @@ ShaderSource parseShader(const std::string& name, std::istream& shaderTextStream
 		}
 	}
 
-	std::string commonFile = stringStream[(int)ShaderType::COMMON].str();
-	std::string vertexFile = stringStream[(int)ShaderType::VERTEX].str();
-	std::string fragmentFile = stringStream[(int)ShaderType::FRAGMENT].str();
-	std::string geometryFile = stringStream[(int)ShaderType::GEOMETRY].str();
-	std::string tesselationControlFile = stringStream[(int)ShaderType::TESSELATION_CONTROL].str();
-	std::string tesselationEvaluateFile = stringStream[(int)ShaderType::TESSELATION_EVALUATE].str();
+	std::string commonSource = stringStream[(int) ShaderType::COMMON].str();
+	std::string vertexSource = stringStream[(int) ShaderType::VERTEX].str();
+	std::string fragmentSource = stringStream[(int) ShaderType::FRAGMENT].str();
+	std::string geometrySource = stringStream[(int) ShaderType::GEOMETRY].str();
+	std::string tesselationControlSource = stringStream[(int) ShaderType::TESSELATION_CONTROL].str();
+	std::string tesselationEvaluateSource = stringStream[(int) ShaderType::TESSELATION_EVALUATE].str();
 	
 	Log::setDelimiter("");
 
-	if (!commonFile.empty()) {
+	if (!commonSource.empty()) {
 		Log::info("Common file: ");
 		Log::print("done\n", Log::Color::DEBUG);
 	}
 
-	if (!vertexFile.empty()) {
+	if (!vertexSource.empty()) {
 		Log::info("Vertex shader: ");
 		Log::print("done\n", Log::Color::DEBUG);
-		vertexFile = commonFile + vertexFile;
+		vertexSource = commonSource + vertexSource;
 	}
 
-	if (!fragmentFile.empty()) {
+	if (!fragmentSource.empty()) {
 		Log::info("Fragment shader: ");
 		Log::print("done\n", Log::Color::DEBUG);
-		fragmentFile = commonFile + fragmentFile;
+		fragmentSource = commonSource + fragmentSource;
 	}
 
-	if (!geometryFile.empty()) {
+	if (!geometrySource.empty()) {
 		Log::info("Geometry shader: ");
 		Log::print("done\n", Log::Color::DEBUG);
-		geometryFile = commonFile + geometryFile;
+		geometrySource = commonSource + geometrySource;
 	}
 
-	if (!tesselationControlFile.empty()) {
+	if (!tesselationControlSource.empty()) {
 		Log::info("Tesselation control shader: ");
 		Log::print("done\n", Log::Color::DEBUG);
-		tesselationControlFile = commonFile + tesselationControlFile;
+		tesselationControlSource = commonSource + tesselationControlSource;
 	}
 
-	if (!tesselationEvaluateFile.empty()) {
+	if (!tesselationEvaluateSource.empty()) {
 		Log::info("Tesselation evaluation shader: ");
 		Log::print("done\n", Log::Color::DEBUG);
-		tesselationEvaluateFile = commonFile + tesselationEvaluateFile;
+		tesselationEvaluateSource = commonSource + tesselationEvaluateSource;
 	}
 
 	Log::setDelimiter("\n");
 
-	return { name, vertexFile , fragmentFile , geometryFile, tesselationControlFile, tesselationEvaluateFile };
+	return ShaderSource(name, vertexSource, fragmentSource, geometrySource, tesselationControlSource, tesselationEvaluateSource);
 }
 #pragma endregion
 
 #pragma region constructors
 
+ShaderStage::ShaderStage() {};
+ShaderStage::ShaderStage(const std::string& source, const ShaderInfo& info) : source(source), info(info) {};
+
+ShaderSource::ShaderSource() {};
+ShaderSource::ShaderSource(const std::string& name, const std::string& vertexSource, const std::string& fragmentSource, const std::string& geometrySource, const std::string& tesselationControlSource, const std::string& tesselationEvaluateSource) : name(name), vertexSource(vertexSource), fragmentSource(fragmentSource), geometrySource(geometrySource), tesselationControlSource(tesselationControlSource), tesselationEvaluateSource(tesselationEvaluateSource) {}
+
+Shader::Shader() {};
+Shader::Shader(const std::string& name, const std::string& vertexShader, const std::string& fragmentShader) : Shader(name, vertexShader, fragmentShader, "", "", "") {};
+Shader::Shader(const std::string& name, const std::string& vertexShader, const std::string& fragmentShader, const std::string& geometryShader) : Shader(name, vertexShader, fragmentShader, geometryShader, "", "") {};
+Shader::Shader(const ShaderSource& shaderSource) : Shader(shaderSource.name, shaderSource.vertexSource, shaderSource.fragmentSource, shaderSource.geometrySource, shaderSource.tesselationControlSource, shaderSource.tesselationEvaluateSource) {};
+
 Shader::Shader(const std::string& name, const std::string& vertexSource, const std::string& fragmentSource, const std::string& geometrySource, const std::string& tesselationControlSource, const std::string& tesselationEvaluateSource) : name(name) {
 	id = createShader(name, vertexSource, fragmentSource, geometrySource, tesselationControlSource, tesselationEvaluateSource);
 	
 	if (!vertexSource.empty()) {
-		this->vertexSource = vertexSource;
+#ifdef NDEBUG
+		TokenStack tokens = ShaderLexer::lex(vertexSource);
+		ShaderInfo info = ShaderParser::parse(tokens);
+		vertexStage = ShaderStage(vertexSource, info);
+#endif
 		flags |= VERTEX;
-		
 	}
 
 	if (!fragmentSource.empty()) {
-		this->fragmentSource = fragmentSource;
+#ifdef NDEBUG
+		TokenStack tokens = ShaderLexer::lex(fragmentSource);
+		ShaderInfo info = ShaderParser::parse(tokens);
+		fragmentStage = ShaderStage(fragmentSource, info);
+#endif
 		flags |= FRAGMENT;
-
 	}
 
 	if (!geometrySource.empty()) {
-		this->geometrySource = geometrySource;
+#ifdef NDEBUG
+		TokenStack tokens = ShaderLexer::lex(geometrySource);
+		ShaderInfo info = ShaderParser::parse(tokens);
+		geometryStage = ShaderStage(geometrySource, info);
+#endif
 		flags |= GEOMETRY;
-
 	}
 
 	if (!tesselationControlSource.empty()) {
-		this->tesselationControlSource = tesselationControlSource;
+#ifdef NDEBUG
+		TokenStack tokens = ShaderLexer::lex(tesselationControlSource);
+		ShaderInfo info = ShaderParser::parse(tokens);
+		tesselationControlStage = ShaderStage(tesselationControlSource, info);
+#endif
 		flags |= TESSELATION_CONTROL;
-
 	}
 
 	if (!tesselationEvaluateSource.empty()) {
-		this->tesselationEvaluateSource = tesselationEvaluateSource;
+#ifdef NDEBUG
+		TokenStack tokens = ShaderLexer::lex(tesselationEvaluateSource);
+		ShaderInfo info = ShaderParser::parse(tokens);
+		tesselationEvaluationStage = ShaderStage(tesselationEvaluateSource, info);
+#endif
 		flags |= TESSELATION_EVALUATE;
-
 	}
 }
 
