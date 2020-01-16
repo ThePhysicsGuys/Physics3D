@@ -91,5 +91,6 @@ struct ShaderInfo {
 
 class ShaderParser {
 public:
-	static ShaderInfo parse(TokenStack& tokens);
+	static ShaderInfo parse(const std::string& code);
+	static ShaderInfo parseTokens(TokenStack& tokens);
 };

@@ -16,7 +16,8 @@ struct TokenType {
 		VERSION,
 		PREP,
 		STRING,
-		COMMENT,
+		SINGLECOMMENT,
+		MULTICOMMENT,
 		LP,
 		RP,
 		LB,
@@ -31,13 +32,15 @@ struct TokenType {
 		UNIFORM,
 		TYPE,
 	};
-
+	
 public:
 	Type type;
 	std::regex regex;
+	char character;
 	bool accepting;
 
-	TokenType(Type type, std::regex regex, bool accepting) : type(type), regex(regex), accepting(accepting) {}
+	TokenType(Type type, std::regex regex) : type(type), regex(regex), accepting(false) {}
+	TokenType(Type type, char character) : type(type), character(character), accepting(true) {}
 
 	operator Type() const { return type; }
 	bool operator==(Type other) const { return type == other; }
@@ -53,16 +56,21 @@ struct Token {
 	Token(const TokenType& type, const std::string& value) : type(type), value(value) {}
 };
 
-struct TokenStack : public std::vector<Token> {
+struct TokenStack {
 private:
+	bool read = false;
+
+	std::vector<Token> stack;
 	std::vector<Token>::iterator iterator;
-
 public:
-	void initIterator();
+	void add(const Token& token);
 
+	void flip();
+
+	TokenStack until(const TokenType::Type& type, bool popType = true);
 	Token peek(size_t offset = 0);
 	Token pop();
-	TokenStack until(const TokenType::Type& type, bool popType = true);
+	void discard();
 
 	bool available(size_t offset = 0);
 };

@@ -65,10 +65,10 @@ TokenStack nextScope(TokenStack& tokens, const TokenType::Type& ltype, const Tok
 				depth--;
 		}
 
-		scope.push_back(token);
+		scope.add(token);
 	}
 
-	scope.initIterator();
+	scope.flip();
 	return scope;
 }
 
@@ -101,7 +101,7 @@ ShaderLocals parseStructContent(TokenStack& scope) {
 				locals.push_back(local);
 				break;
 			} default: {
-				scope.pop();
+				scope.discard();
 			}
 		}
 	}
@@ -110,7 +110,7 @@ ShaderLocals parseStructContent(TokenStack& scope) {
 }
 
 ShaderStruct parseStruct(TokenStack& tokens) {
-	tokens.pop(); // pop STRUCT
+	tokens.discard(); // pop STRUCT
 
 	std::string name = tokens.pop().value;
 	TokenStack scope = nextScope(tokens, TokenType::LC, TokenType::RC);
@@ -121,7 +121,7 @@ ShaderStruct parseStruct(TokenStack& tokens) {
 }
 
 ShaderUniform parseUniform(TokenStack& tokens) {
-	tokens.pop(); // pop UNIFORM
+	tokens.discard(); // pop UNIFORM
 
 	ShaderVariableType variableType = parseVariableType(tokens.pop());
 	std::string name = tokens.pop().value;
@@ -171,7 +171,7 @@ ShaderGlobal parseGlobal(TokenStack& tokens) {
 }
 
 ShaderLayoutItem parseLayoutItem(TokenStack& tokens) {
-	tokens.pop();
+	tokens.discard();
 
 	TokenStack scope = nextScope(tokens, TokenType::LP, TokenType::RP);
 
@@ -196,9 +196,12 @@ ShaderLayoutItem parseLayoutItem(TokenStack& tokens) {
 	return ShaderLayoutItem(attributes, ioType, variableType, name);
 }
 
-ShaderInfo ShaderParser::parse(TokenStack& tokens) {
-	tokens.initIterator();
+ShaderInfo ShaderParser::parse(const std::string& code) {
+	TokenStack tokens = ShaderLexer::lex(code);
+	return parseTokens(tokens);
+}
 
+ShaderInfo ShaderParser::parseTokens(TokenStack& tokens) {
 	ShaderLayout layout;
 	ShaderUniforms uniforms;
 	ShaderGlobals globals;
@@ -230,7 +233,7 @@ ShaderInfo ShaderParser::parse(TokenStack& tokens) {
 				locals.push_back(local);
 				break;
 			} default: {
-				tokens.pop();
+				tokens.discard();
 			}
 		}
 	}

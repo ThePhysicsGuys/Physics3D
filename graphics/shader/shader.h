@@ -25,19 +25,22 @@ struct ShaderStage {
 };
 
 class Shader : public Bindable {
-private:
-	std::map<std::string, int> uniforms;
-
 public:
-	enum ShaderFlags : char {
-		NONE                 = 0 << 0,
-		VERTEX               = 1 << 0,
-		FRAGMENT             = 1 << 1,
-		GEOMETRY             = 1 << 2,
-		TESSELATION_CONTROL  = 1 << 2,
-		TESSELATION_EVALUATE = 1 << 3
+	enum ShaderFlag : char {
+		NONE = 0 << 0,
+		VERTEX = 1 << 0,
+		FRAGMENT = 1 << 1,
+		GEOMETRY = 1 << 2,
+		TESSELATION_CONTROL = 1 << 3,
+		TESSELATION_EVALUATE = 1 << 4
 	};
 
+private:
+	std::map<std::string, int> uniforms;
+	void addUniforms(const ShaderUniforms& uniforms);
+	void addShaderStage(const ShaderStage& stage, const ShaderFlag& flag);
+
+public:
 	char flags = NONE;
 
 	std::string name;

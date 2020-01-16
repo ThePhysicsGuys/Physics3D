@@ -5,14 +5,13 @@
 struct ShaderProgram {
 public:
 	Shader shader;
-	ShaderSource shaderSource;
 
 	ShaderProgram() {};
 	ShaderProgram(const ShaderProgram&) = delete;
 	~ShaderProgram();
 
 	template <class ...Args>
-	ShaderProgram(ShaderSource shaderSource, const Args&... args) : shaderSource(shaderSource), shader(shaderSource) {
+	ShaderProgram(ShaderSource shaderSource, const Args&... args) : shader(shaderSource) {
 		std::vector<std::string> uniforms = { args... };
 
 		Log::subject s(shader.name);

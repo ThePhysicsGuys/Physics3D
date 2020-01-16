@@ -8,6 +8,7 @@
 
 #include <fstream>
 #include <sstream>
+#include <future>
 
 #include "../util/stringUtil.h"
 
@@ -17,11 +18,12 @@ void Shader::createUniform(const std::string& uniform) {
 	bind();
 	Log::subject s(name);
 	int location = glGetUniformLocation(id, uniform.c_str());
+
 	if (location < 0)
 		Log::error("Could not find uniform (%s) in shader (%s)", uniform.c_str(), name.c_str());
-	else {
+	else 
 		Log::debug("Created uniform (%s) in shader (%s) with id (%d)", uniform.c_str(), name.c_str(), location);
-	}
+	
 	uniforms.insert(std::make_pair(uniform, location));
 }
 
@@ -178,6 +180,7 @@ std::string parseFile(const std::string& path) {
 
 ShaderSource parseShader(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath, const std::string& tesselationControlPath, const std::string& tesselationEvaluatePath) {
 	Log::subject s(name);
+
 	std::string vertexFile = parseFile(vertexPath);
 	std::string fragmentFile = parseFile(fragmentPath);
 	std::string geometryFile = parseFile(geometryPath);
@@ -189,6 +192,7 @@ ShaderSource parseShader(const std::string& name, const std::string& vertexPath,
 
 ShaderSource parseShader(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath) {
 	Log::subject s(name);
+
 	std::string vertexFile = parseFile(vertexPath);
 	std::string fragmentFile = parseFile(fragmentPath);
 	std::string geometryFile = parseFile(geometryPath);
@@ -198,6 +202,7 @@ ShaderSource parseShader(const std::string& name, const std::string& vertexPath,
 
 ShaderSource parseShader(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath) {
 	Log::subject s(name);
+
 	std::string vertexFile = parseFile(vertexPath);
 	std::string fragmentFile = parseFile(fragmentPath);
 
@@ -296,6 +301,49 @@ ShaderSource parseShader(const std::string& name, std::istream& shaderTextStream
 
 	return ShaderSource(name, vertexSource, fragmentSource, geometrySource, tesselationControlSource, tesselationEvaluateSource);
 }
+
+void Shader::addUniforms(const ShaderUniforms& uniforms) {
+	for (const ShaderUniform& uniform : uniforms)
+		if (this->uniforms.find(uniform.name) == this->uniforms.end())
+			createUniform(uniform.name);
+}
+
+void Shader::addShaderStage(const ShaderStage& stage, const ShaderFlag& flag) {
+	if (!stage.source.empty()) {
+		// todo addUniforms(stage.info.uniforms);
+		flags |= flag;
+
+		switch (flag) {
+			case VERTEX:
+				vertexStage = stage;
+				break;
+			case FRAGMENT:
+				fragmentStage = stage;
+				break;
+			case GEOMETRY:
+				geometryStage = stage;
+				break;
+			case TESSELATION_CONTROL:
+				tesselationControlStage = stage;
+				break;
+			case TESSELATION_EVALUATE:
+				tesselationEvaluationStage = stage;
+				break;
+			default:
+				break;
+		}
+	}
+}
+
+ShaderStage parseShaderStage(const std::string& source) {
+	if (!source.empty()) {
+		ShaderInfo info = ShaderParser::parse(source);
+		return ShaderStage(source, info);
+	}
+	
+	return ShaderStage();
+}
+
 #pragma endregion
 
 #pragma region constructors
@@ -313,51 +361,18 @@ Shader::Shader(const ShaderSource& shaderSource) : Shader(shaderSource.name, sha
 
 Shader::Shader(const std::string& name, const std::string& vertexSource, const std::string& fragmentSource, const std::string& geometrySource, const std::string& tesselationControlSource, const std::string& tesselationEvaluateSource) : name(name) {
 	id = createShader(name, vertexSource, fragmentSource, geometrySource, tesselationControlSource, tesselationEvaluateSource);
-	
-	if (!vertexSource.empty()) {
-#ifdef NDEBUG
-		TokenStack tokens = ShaderLexer::lex(vertexSource);
-		ShaderInfo info = ShaderParser::parse(tokens);
-		vertexStage = ShaderStage(vertexSource, info);
-#endif
-		flags |= VERTEX;
-	}
 
-	if (!fragmentSource.empty()) {
-#ifdef NDEBUG
-		TokenStack tokens = ShaderLexer::lex(fragmentSource);
-		ShaderInfo info = ShaderParser::parse(tokens);
-		fragmentStage = ShaderStage(fragmentSource, info);
-#endif
-		flags |= FRAGMENT;
-	}
+	std::future<ShaderStage> futureVertexStage = std::async(std::launch::async, parseShaderStage, vertexSource);
+	std::future<ShaderStage> futureFragmentStage = std::async(std::launch::async, parseShaderStage, fragmentSource);
+	std::future<ShaderStage> futureGeometryStage = std::async(std::launch::async, parseShaderStage, geometrySource);
+	std::future<ShaderStage> futureTesselationControlStage = std::async(std::launch::async, parseShaderStage, tesselationControlSource);
+	std::future<ShaderStage> futureTesselationEvaluationStage = std::async(std::launch::async, parseShaderStage, tesselationEvaluateSource);
 
-	if (!geometrySource.empty()) {
-#ifdef NDEBUG
-		TokenStack tokens = ShaderLexer::lex(geometrySource);
-		ShaderInfo info = ShaderParser::parse(tokens);
-		geometryStage = ShaderStage(geometrySource, info);
-#endif
-		flags |= GEOMETRY;
-	}
-
-	if (!tesselationControlSource.empty()) {
-#ifdef NDEBUG
-		TokenStack tokens = ShaderLexer::lex(tesselationControlSource);
-		ShaderInfo info = ShaderParser::parse(tokens);
-		tesselationControlStage = ShaderStage(tesselationControlSource, info);
-#endif
-		flags |= TESSELATION_CONTROL;
-	}
-
-	if (!tesselationEvaluateSource.empty()) {
-#ifdef NDEBUG
-		TokenStack tokens = ShaderLexer::lex(tesselationEvaluateSource);
-		ShaderInfo info = ShaderParser::parse(tokens);
-		tesselationEvaluationStage = ShaderStage(tesselationEvaluateSource, info);
-#endif
-		flags |= TESSELATION_EVALUATE;
-	}
+	addShaderStage(futureVertexStage.get(), VERTEX);
+	addShaderStage(futureFragmentStage.get(), FRAGMENT);
+	addShaderStage(futureGeometryStage.get(), GEOMETRY);
+	addShaderStage(futureTesselationControlStage.get(), TESSELATION_CONTROL);
+	addShaderStage(futureTesselationEvaluationStage.get(), TESSELATION_EVALUATE);
 }
 
 Shader::~Shader() {
