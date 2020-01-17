@@ -13,6 +13,7 @@
 #include "part.h"
 #include "rigidBody.h"
 #include "constraints/hardConstraint.h"
+#include "constraints/hardPhysicalConnection.h"
 
 typedef Vec3 Vec3Local;
 typedef Vec3 Vec3Relative;
@@ -30,12 +31,16 @@ protected:
 
 	void setMainPhysicalRecursive(MotorizedPhysical* newMainPhysical);
 
+	// deletes the given physical
 	void attachPhysical(Physical* phys, const CFrame& attachment);
 	// deletes the given physical
 	void attachPhysical(MotorizedPhysical* phys, const CFrame& attachment);
 
 	// deletes the given physical
 	void attachPhysical(Physical* phys, HardConstraint* constraint, const CFrame& attachToThis, const CFrame& attachToThat);
+
+	// deletes the given physical
+	void attachPhysical(MotorizedPhysical* phys, HardConstraint* constraint, const CFrame& attachToThis, const CFrame& attachToThat);
 
 	void removeChild(ConnectedPhysical* child);
 	void detachFromRigidBody(Part* part);
@@ -49,6 +54,7 @@ public:
 
 	Physical() = default;
 	Physical(Part* mainPart, MotorizedPhysical* mainPhysical);
+	Physical(RigidBody&& rigidBody, MotorizedPhysical* mainPhysical);
 
 	Physical(Physical&& other) noexcept;
 	Physical& operator=(Physical&& other) noexcept;
@@ -85,6 +91,7 @@ public:
 
 	void notifyPartPropertiesChanged(Part* part);
 	void notifyPartPropertiesAndBoundsChanged(Part* part, const Bounds& oldBounds);
+	void notifyPartStdMoved(Part* oldPartPtr, Part* newPartPtr);
 
 	bool isValid() const;
 
@@ -103,15 +110,15 @@ class ConnectedPhysical : public Physical {
 	friend class Physical;
 	friend class MotorizedPhysical;
 
-	CFrame attachOnParent;
-	CFrame attachOnThis;
-	HardConstraint* constraintWithParent;
-	Physical* parent;
-
 	void refreshCFrame();
 	void refreshCFrameRecursive();
 public:
+	HardPhysicalConnection connectionToParent;
+	Physical* parent;
+
 	ConnectedPhysical() = default;
+	ConnectedPhysical(RigidBody&& rigidBody, Physical* parent, HardPhysicalConnection&& connectionToParent);
+	ConnectedPhysical(Physical&& phys, Physical* parent, HardPhysicalConnection&& connectionToParent);
 	ConnectedPhysical(Physical&& phys, Physical* parent, HardConstraint* constraintWithParent, const CFrame& attachOnThis, const CFrame& attachOnParent);
 
 	CFrame getRelativeCFrameToParent() const;
@@ -144,6 +151,7 @@ public:
 	Motion motionOfCenterOfMass;
 	
 	MotorizedPhysical(Part* mainPart);
+	MotorizedPhysical(RigidBody&& rigidBody);
 	explicit MotorizedPhysical(Physical&& movedPhys);
 
 	Position getCenterOfMass() const;
