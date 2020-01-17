@@ -36,6 +36,31 @@ Part::~Part() {
 	}
 }
 
+Part::Part(Part&& other) :
+	isTerrainPart(other.isTerrainPart),
+	parent(other.parent), 
+	hitbox(std::move(other.hitbox)), 
+	maxRadius(other.maxRadius), 
+	properties(std::move(other.properties)) {
+
+	if(parent != nullptr) parent->notifyPartStdMoved(&other, this);
+
+	other.parent = nullptr;
+}
+Part& Part::operator=(Part&& other) {
+	this->isTerrainPart = other.isTerrainPart;
+	this->parent = other.parent;
+	this->hitbox = std::move(other.hitbox);
+	this->maxRadius = other.maxRadius;
+	this->properties = std::move(other.properties);
+
+	if(parent != nullptr) parent->notifyPartStdMoved(&other, this);
+
+	other.parent = nullptr;
+
+	return *this;
+}
+
 PartIntersection Part::intersects(const Part& other) const {
 	CFrame relativeTransform = this->cframe.globalToLocal(other.cframe);
 	Intersection result = intersectsTransformed(this->hitbox, other.hitbox, relativeTransform);
@@ -44,7 +69,7 @@ PartIntersection Part::intersects(const Part& other) const {
 		Vec3 exitVector = this->cframe.localToRelative(result.exitVector);
 
 
-		isVecValid(result.exitVector);
+		assert(isVecValid(result.exitVector));
 
 
 		return PartIntersection(intersection, exitVector);

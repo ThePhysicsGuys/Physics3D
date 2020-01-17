@@ -2,6 +2,7 @@
 
 #include "../physics/synchonizedWorld.h"
 #include "extendedPart.h"
+#include "../physics/math/position.h"
 
 namespace Application {
 

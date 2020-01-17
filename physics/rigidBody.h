@@ -76,6 +76,7 @@ public:
 	// returns the offset CFrame from the original mainPart, can be used for syncing calling function
 	CFrame makeMainPart(AttachedPart& newMainPart);
 	
+	void notifyPartStdMoved(Part* oldPartPtr, Part* newPartPtr);
 
 	PartIter begin() { return PartIter(parts.begin()._Ptr, parts.begin()._Ptr + parts.size(), mainPart); }
 	ConstPartIter begin() const { return ConstPartIter(parts.begin()._Ptr, parts.begin()._Ptr + parts.size(), mainPart); }

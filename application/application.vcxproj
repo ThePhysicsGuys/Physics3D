@@ -208,8 +208,7 @@
     <ClInclude Include="ecs\components\mesh.h" />
     <ClInclude Include="ecs\components\model.h" />
     <ClInclude Include="ecs\entity.h" />
-    <ClInclude Include="io\export.h" />
-    <ClInclude Include="io\import.h" />
+    <ClInclude Include="io\serialization.h" />
     <ClInclude Include="layer\testLayer.h" />
     <ClInclude Include="layer\debugLayer.h" />
     <ClInclude Include="layer\debugOverlay.h" />
@@ -249,8 +248,7 @@
     <ClCompile Include="ecs\components\mesh.cpp" />
     <ClCompile Include="ecs\components\model.cpp" />
     <ClCompile Include="ecs\entity.cpp" />
-    <ClCompile Include="io\export.cpp" />
-    <ClCompile Include="io\import.cpp" />
+    <ClCompile Include="io\serialization.cpp" />
     <ClCompile Include="layer\postprocessLayer.cpp" />
     <ClCompile Include="resources.cpp" />
     <ClCompile Include="layer\testLayer.cpp" />

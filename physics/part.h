@@ -61,6 +61,13 @@ public:
 	Part(const Shape& shape, const GlobalCFrame& position, const PartProperties& properties);
 	Part(const Shape& shape, Part& attachTo, const CFrame& attach, const PartProperties& properties);
 	~Part();
+
+	Part(const Part& other) = delete;
+	Part& operator=(const Part& other) = delete;
+	Part(Part&& other);
+	Part& operator=(Part&& other);
+
+
 	PartIntersection intersects(const Part& other) const;
 	void scale(double scaleX, double scaleY, double scaleZ);
 

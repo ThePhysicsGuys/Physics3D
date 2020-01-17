@@ -93,6 +93,14 @@ CFrame RigidBody::makeMainPart(AttachedPart& newMainPart) {
 	}
 }
 
+void RigidBody::notifyPartStdMoved(Part* oldPartPtr, Part* newPartPtr) {
+	if(this->mainPart == oldPartPtr) {
+		this->mainPart = newPartPtr;
+	} else {
+		getAttachFor(oldPartPtr).part = newPartPtr;
+	}
+}
+
 void RigidBody::refreshWithNewParts() {
 	double totalMass = mainPart->getMass();
 	Vec3 totalCenterOfMass = mainPart->getLocalCenterOfMass() * mainPart->getMass();
