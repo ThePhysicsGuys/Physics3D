@@ -31,8 +31,7 @@
 #include "tickerThread.h"
 #include "worldBuilder.h"
 
-#include "io/export.h"
-#include "io/import.h"
+#include "io/serialization.h"
 
 #include "../util/resource/resourceLoader.h"
 #include "../util/resource/resourceManager.h"
@@ -55,21 +54,6 @@ void setupWorld(int argc, const char** args);
 void setupScreen();
 void setupDebug();
 
-void loadLoosePartsWorld(const char* fileName) {
-	world.addExternalForce(new ExternalGravity(Vec3(0, -10.0, 0.0)));
-
-	std::ifstream file;
-	file.open(fileName, std::ios::binary);
-
-	int partCount = deserialize<int>(file);
-	for (int i = 0; i < partCount; i++) {
-		ExtendedPart* p = new ExtendedPart(deserialize<Part>(file));
-
-		world.addPart(p);
-	}
-	file.close();
-}
-
 bool has_suffix(const std::string& str, const std::string& suffix) {
 	return str.size() >= suffix.size() &&
 		str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
@@ -78,12 +62,29 @@ bool has_suffix(const std::string& str, const std::string& suffix) {
 void init(int argc, const char** args) {
 	setupScreen();
 	registerShapes();
+	WorldBuilder::init();
 
-	if (argc >= 2 && has_suffix(args[1], ".looseParts")) 
-		loadLoosePartsWorld(args[1]);
-	else 
+	if(argc >= 2) {
+		const char* file = args[1];
+		if(has_suffix(file, ".parts")) {
+			WorldImportExport::loadLoosePartsIntoWorld(file, world);
+		} else if(has_suffix(file, ".physical")) {
+			WorldImportExport::loadSingleMotorizedPhysicalIntoWorld(file, world);
+		} else if(has_suffix(file, ".world")) {
+			world.addExternalForce(new ExternalGravity(Vec3(0, -10.0, 0.0)));
+			WorldImportExport::loadWorld(file, world);
+		}
+	} else {
 		setupWorld(argc, args);
-	
+	}
+
+
+	// Player
+	screen.camera.attachment = new ExtendedPart(Library::createPrism(50, 0.3, 1.5), GlobalCFrame(), {1.0, 5.0, 0.0}, "Player");
+
+	if(!world.isValid()) {
+		throw "World not valid!";
+	}
 
 	setupPhysics();
 	setupDebug();
@@ -182,15 +183,14 @@ void setupWorld(int argc, const char** args) {
 	world.addExternalForce(new ExternalGravity(Vec3(0, -10.0, 0.0)));
 
 	// WorldBuilder init
-	WorldBuilder::init();
 
 	// Part factories
-	WorldBuilder::SpiderFactory spiderFactories[] { {0.5, 4},{0.5, 6},{0.5, 8},{0.5, 10} };
-	Shape triangle(Library::trianglePyramid);
+	//WorldBuilder::SpiderFactory spiderFactories[] { {0.5, 4},{0.5, 6},{0.5, 8},{0.5, 10} };
+	//Shape triangle(Library::trianglePyramid);
 
 	WorldBuilder::buildFloorAndWalls(50.0, 50.0, 1.0);
 
-	/*world.addPart(new ExtendedPart(Sphere(2.0), GlobalCFrame(10, 3, 10), {1.0, 0.3, 0.7}, "SphereThing"));
+	world.addPart(new ExtendedPart(Sphere(2.0), GlobalCFrame(10, 3, 10), {1.0, 0.3, 0.7}, "SphereThing"));
 
 	ExtendedPart* conveyor = new ExtendedPart(Box(1.0, 0.3, 50.0), GlobalCFrame(10.0, 0.65, 0.0), { 2.0, 1.0, 0.3 });
 
@@ -206,12 +206,12 @@ void setupWorld(int argc, const char** args) {
 	parts.back->material.ambient = Vec4f(0.4, 0.6, 1.0, 0.3);
 
 	// Rotating walls
-	ExtendedPart* rotatingWall = new ExtendedPart(Box(5.0, 3.0, 0.5), GlobalCFrame(Position(-12.0, 1.7, 0.0)), {1.0, 1.0, 0.7});
+	/*ExtendedPart* rotatingWall = new ExtendedPart(Box(5.0, 3.0, 0.5), GlobalCFrame(Position(-12.0, 1.7, 0.0)), {1.0, 1.0, 0.7});
 	ExtendedPart* rotatingWall2 = new ExtendedPart(Box(5.0, 3.0, 0.5), GlobalCFrame(Position(-12.0, 1.7, 5.0)), {1.0, 1.0, 0.7});
 	world.addPart(rotatingWall, true);
 	world.addPart(rotatingWall2, true);
-	rotatingWall->parent->motion.angularVelocity = Vec3(0, -0.7, 0);
-	rotatingWall2->parent->motion.angularVelocity = Vec3(0, 0.7, 0);
+	rotatingWall->parent->mainPhysical->motionOfCenterOfMass.angularVelocity = Vec3(0, -0.7, 0);
+	rotatingWall2->parent->mainPhysical->motionOfCenterOfMass.angularVelocity = Vec3(0, 0.7, 0);*/
 
 	// Many many parts
 	for (int i = 0; i < 3; i++) {
@@ -243,15 +243,15 @@ void setupWorld(int argc, const char** args) {
 				newCube->material.ambient = Vec4f((x-minX)/(maxX-minX), (y-minY)/(maxY-minY), (z-minZ)/(maxZ-minZ), 1.0f);
 				world.addPart(newCube);
 				world.addPart(new ExtendedPart(Sphere(0.5), GlobalCFrame(Position(x + 5, y + 1, z - 5)), { 1.0, 0.2, 0.5 }, "Sphere"));
-				spiderFactories[rand() & 0x00000003].buildSpider(GlobalCFrame(Position(x+y*0.1, y+1, z)));
-				world.addPart(new ExtendedPart(triangle, GlobalCFrame(Position(x - 20, y + 1, z + 20)), { 1.0, 0.2, 0.5 }, "Triangle"));
+				//spiderFactories[rand() & 0x00000003].buildSpider(GlobalCFrame(Position(x+y*0.1, y+1, z)));
+				//world.addPart(new ExtendedPart(triangle, GlobalCFrame(Position(x - 20, y + 1, z + 20)), { 1.0, 0.2, 0.5 }, "Triangle"));
 
 				world.addPart(new ExtendedPart(Cylinder(0.3, 1.2), GlobalCFrame(x - 5, y + 1, z + 5, fromEulerAngles(3.1415/4, 3.1415/4, 0.0)), {1.0, 0.2, 0.5}, "Cylinder"));
 			}
 		}
 	}
 
-	//WorldBuilder::buildTerrain(500.0, 500.0);
+	WorldBuilder::buildTerrain(500.0, 500.0);
 
 
 	ExtendedPart* ropeStart = new ExtendedPart(Box(2.0, 1.5, 0.7), GlobalCFrame(10.0, 2.0, -10.0), {1.0, 0.7, 0.3}, "RopeA");
@@ -269,7 +269,15 @@ void setupWorld(int argc, const char** args) {
 
 	world.constraints.push_back(group);//*/
 
+	/*MotorConstraint mmmmmm(Vec3(0.5, -0.5, 0.6));
 
+	std::ofstream file;
+	file.open("motorConstraint.bin", std::ios::binary);
+	hardConstraintRegistry.serialize(mmmmmm, file);
+	file.close();*/
+
+	ExtendedPart* singularPart = new ExtendedPart(Box(1.0, 2.0, 1.0), GlobalCFrame(7.0, 1.0, 5.0), {1.3, 1.2, 1.1}, "SingularPart");
+	world.addPart(singularPart);
 
 	ExtendedPart* ep1 = new ExtendedPart(Box(1.0, 2.0, 1.0), GlobalCFrame(3.0, 3.0, 0.0), { 1.0, 1.0, 1.0 }, "MainPart");
 	ExtendedPart* ap1 = new ExtendedPart(Box(1.0, 2.0, 1.0), GlobalCFrame(), { 1.0, 1.0, 1.0 }, "AttachedPart");
@@ -336,7 +344,13 @@ void setupWorld(int argc, const char** args) {
 		f4->attach(f5, new FixedConstraint(), CFrame(1.2, 0.0, 0.0), CFrame(0, 0, 0));
 
 		world.addPart(f2);
+
+
+		WorldImportExport::saveLooseParts("../testPart.parts", 1, &fixedConstraintGroupMain);
+		WorldImportExport::saveSingleMotorizedPhysical("../testPhysical.physical", *fixedConstraintGroupMain->parent->mainPhysical);
 	}
+
+	WorldImportExport::saveWorld("../testWorld.world", world);
 
 	/*{
 		int minX = -5;
@@ -360,12 +374,6 @@ void setupWorld(int argc, const char** args) {
 			}
 		}
 	}*/
-	// Player
-	screen.camera.attachment = new ExtendedPart(Library::createPrism(50, 0.3, 1.5), GlobalCFrame(), { 1.0, 5.0, 0.0 }, "Player");
-
-	if (!world.isValid()) {
-		throw "World not valid!";
-	}
 }
 
 void setupPhysics() {

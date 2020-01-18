@@ -186,6 +186,10 @@ void WorldPrototype::mergePartAndPhysical(const MotorizedPhysical* physical, Par
 	this->objectTree.addToExistingGroup(newPart, newPart->getStrictBounds(), physical->getMainPart(), physical->getMainPart()->getStrictBounds());
 }
 
+void WorldPrototype::notifyPartStdMoved(Part* oldPartPtr, Part* newPartPtr) {
+	(*getTreeForPart(oldPartPtr).find(oldPartPtr, newPartPtr->getStrictBounds()))->object = newPartPtr;
+}
+
 void WorldPrototype::addExternalForce(ExternalForce* force) {
 	externalForces.push_back(force);
 }

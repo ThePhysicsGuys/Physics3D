@@ -70,6 +70,8 @@ private:
 	void mergePartAndPhysical(const MotorizedPhysical* physical, Part* newPart);
 
 
+	void notifyPartStdMoved(Part* oldPartPtr, Part* newPartPtr);
+
 
 	BoundsTree<Part>& getTreeForPart(const Part* part);
 	const BoundsTree<Part>& getTreeForPart(const Part* part) const;

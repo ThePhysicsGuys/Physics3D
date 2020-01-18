@@ -6,4 +6,3 @@ void FixedConstraint::invert() {}
 CFrame FixedConstraint::getRelativeCFrame() { return CFrame(0.0,0.0,0.0); }
 
 Motion FixedConstraint::getRelativeMotion() { return Motion(Vec3(0.0, 0.0, 0.0), Vec3(0.0, 0.0, 0.0)); }
-

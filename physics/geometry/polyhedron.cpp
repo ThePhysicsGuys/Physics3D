@@ -401,6 +401,8 @@ Vec3f Polyhedron::furthestInDirection(const Vec3f& direction) const {
 	uint32_t mask = _mm256_movemask_ps(compare);
 	uint32_t index = __builtin_ctz(mask);
 	
+	// a bug occurs here, when mask == 0 the resulting index is undefined
+
 	return Vec3f(bestX.m256_f32[index], bestY.m256_f32[index], bestZ.m256_f32[index]);
 }
 
