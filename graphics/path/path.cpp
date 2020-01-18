@@ -285,7 +285,7 @@ namespace Path {
 		if (textPivot & TextPivotVC)
 			y -= textSize.y / 2.0f;
 
-		//Path::batch->pushCommand(0);
+		Path::batch->pushCommand(0);
 		Path::batch->reserve(vertexCount, indexCount);
 		for (char c : text) {
 			int ascii = (int) c;

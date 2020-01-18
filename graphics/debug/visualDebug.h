@@ -59,7 +59,6 @@ namespace Debug {
 	void addDebugField(Vec2 dimension, Font* font, const char* varName, std::string value, const char* unit);
 	size_t getTheoreticalNumberOfIntersections(size_t objCount);
 	std::string toString(std::chrono::nanoseconds t);
-	void renderDebugFields();
 
 	template<typename T>
 	void addDebugField(Vec2 dimension, Font* font, const char* varName, T value, const char* unit) {

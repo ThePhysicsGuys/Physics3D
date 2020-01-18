@@ -157,9 +157,4 @@ namespace Debug {
 		Path::text(font, string.str().c_str(), 0.001, Vec2(-dimension.x / dimension.y * 0.99, (1 - fieldIndex * 0.05) * 0.95), Vec4(1, 1, 1, 1));
 		fieldIndex++;
 	}
-
-	void renderDebugFields() {
-		GUI::batch->submit();
-	}
-
 }

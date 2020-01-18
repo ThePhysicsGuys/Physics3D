@@ -29,10 +29,6 @@ namespace GUI {
 	extern FrameBuffer* guiFrameBuffer;
 	extern FrameBuffer* blurFrameBuffer;
 
-	// ColorPicker
-	extern Frame* colorPickerFrame;
-	extern ColorPicker* colorPicker;
-	
 	// Default
 	extern double padding;
 	extern double margin;

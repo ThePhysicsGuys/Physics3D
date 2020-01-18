@@ -45,6 +45,7 @@ void DebugOverlay::onEvent(Event& event) {
 
 void DebugOverlay::onRender() {
 	Screen* screen = static_cast<Screen*>(this->ptr);
+	Path::bind(GUI::batch);
 
 	Renderer::disableDepthTest();
 	ApplicationShaders::fontShader.updateProjection(screen->camera.orthoMatrix);
@@ -67,8 +68,6 @@ void DebugOverlay::onRender() {
 	addDebugField(screen->dimension, GUI::font, "World Age", screen->world->age, " ticks");
 
 	if (renderPiesEnabled) {
-		Path::bind(GUI::batch);
-
 		float leftSide = float(screen->dimension.x) / float(screen->dimension.y);
 		PieChart graphicsPie = toPieChart(graphicsMeasure, "Graphics", Vec2f(-leftSide + 1.5f, -0.7f), 0.2f);
 		PieChart physicsPie = toPieChart(physicsMeasure, "Physics", Vec2f(-leftSide + 0.3f, -0.7f), 0.2f);
@@ -108,8 +107,9 @@ void DebugOverlay::onRender() {
 		fpsSlidingChart.add("Fps 2", physicsMeasure.getAvgTPS());
 		fpsSlidingChart.render();
 
-		GUI::batch->submit();
 	}
+	
+	GUI::batch->submit();
 }
 
 void DebugOverlay::onClose() {

@@ -39,10 +39,6 @@ namespace GUI {
 	double margin = 0.005;
 	double padding = 0.01;
 
-	// ColorPicker
-	Frame* colorPickerFrame = nullptr;
-	ColorPicker* colorPicker = nullptr;
-
 	// Quad
 	Quad* quad = nullptr;
 
@@ -168,12 +164,6 @@ namespace GUI {
 		GUI::colorPickerAlphaPatternTexture = ResourceManager::get<TextureResource>("colorPickerAlphaPatternTexture");
 		GUI::colorPickerBrightnessTexture = ResourceManager::get<TextureResource>("colorPickerBrightnessTexture");
 		GUI::colorPickerCrosshairTexture = ResourceManager::get<TextureResource>("colorPickerCrosshairTexture");
-
-		GUI::colorPicker = new ColorPicker(0, 0);
-		GUI::colorPickerFrame = new Frame(0, 0, "Color");
-		GUI::colorPickerFrame->add(colorPicker);
-		GUI::colorPickerFrame->visible = false;
-		GUI::add(colorPickerFrame);
 	}
 	
 	void intersect(const Vec2& mouse) {
@@ -317,14 +307,9 @@ namespace GUI {
 		quad->render();
 		blurFrameBuffer->unbind();
 
-		Path::bind(GUI::batch);
-		for (auto iterator = components.rbegin(); iterator != components.rend(); ++iterator)
-			(*iterator)->render();
-
 		Renderer::disableCulling();
 		Renderer::enableBlending();
 		GraphicsShaders::guiShader.init(orthoMatrix);
-		GUI::batch->submit();
 	}
 
 	void onClose() {
