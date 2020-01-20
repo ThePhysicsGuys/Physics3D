@@ -66,6 +66,7 @@ public:
 	Shader& operator=(const Shader&) = delete;
 
 	void createUniform(const std::string& uniform);
+	int getUniform(const std::string& uniform) const;
 	void setUniform(const std::string& uniform, int value) const;
 	void setUniform(const std::string& uniform, float value) const;
 	void setUniform(const std::string& uniform, const Vec2f& value) const;

@@ -14,6 +14,14 @@
 
 #pragma region uniforms
 
+int Shader::getUniform(const std::string& uniform) const {
+	auto iterator = uniforms.find(uniform);
+	if (iterator != uniforms.end())
+		return iterator->second;
+
+	return -1;
+}
+
 void Shader::createUniform(const std::string& uniform) {
 	bind();
 	Log::subject s(name);

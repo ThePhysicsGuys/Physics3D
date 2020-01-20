@@ -90,6 +90,179 @@ void BigFrame::renderFontInfo(Font* font) {
 	}
 }
 
+void BigFrame::renderShaderStageInfo(const Shader& shader, const ShaderStage& stage) {
+	ImGui::Text("Name: %s", shader.name.c_str());
+	ImGui::Text("ID: %d", shader.getID());
+
+	if (stage.info.uniforms.size()) {
+		if (ImGui::TreeNode("Uniforms")) {
+			ImGui::Columns(4);
+			ImGui::Separator();
+			ImGui::Text("ID"); ImGui::NextColumn();
+			ImGui::Text("Name"); ImGui::NextColumn();
+			ImGui::Text("Type"); ImGui::NextColumn();
+			ImGui::Text("Array"); ImGui::NextColumn();
+			ImGui::Separator();
+
+			for (const ShaderUniform& uniform : stage.info.uniforms) {
+				ImGui::Text("%d", shader.getUniform(uniform.name)); ImGui::NextColumn();
+				ImGui::Text(uniform.name.c_str()); ImGui::NextColumn();
+				ImGui::Text(uniform.variableType.c_str()); ImGui::NextColumn();
+				if (uniform.array)
+					ImGui::Text("yes: %d", uniform.amount);
+				else
+					ImGui::Text("no");
+
+				ImGui::NextColumn();
+			}
+			ImGui::Columns(1);
+			ImGui::Separator();
+			ImGui::TreePop();
+		}
+	}
+
+	if (stage.info.locals.size()) {
+		if (ImGui::TreeNode("Locals")) {
+			ImGui::Columns(3);
+			ImGui::Separator();
+			ImGui::Text("Name"); ImGui::NextColumn();
+			ImGui::Text("Type"); ImGui::NextColumn();
+			ImGui::Text("Array"); ImGui::NextColumn();
+			ImGui::Separator();
+
+			for (const ShaderLocal& local : stage.info.locals) {
+				ImGui::Text(local.name.c_str()); ImGui::NextColumn();
+				ImGui::Text(local.variableType.c_str()); ImGui::NextColumn();
+				if (local.array)
+					ImGui::Text("yes: %d", local.amount);
+				else
+					ImGui::Text("no");
+
+				ImGui::NextColumn();
+			}
+			ImGui::Columns(1);
+			ImGui::Separator();
+			ImGui::TreePop();
+		}
+	}
+
+	if (stage.info.globals.size()) {
+		if (ImGui::TreeNode("Globals")) {
+			ImGui::Columns(4);
+			ImGui::Separator();
+			ImGui::Text("Name"); ImGui::NextColumn();
+			ImGui::Text("IO"); ImGui::NextColumn();
+			ImGui::Text("Type"); ImGui::NextColumn();
+			ImGui::Text("Array"); ImGui::NextColumn();
+			ImGui::Separator();
+
+			for (const ShaderGlobal& global : stage.info.globals) {
+				ImGui::Text(global.name.c_str()); ImGui::NextColumn();
+				ImGui::Text(global.ioType.c_str()); ImGui::NextColumn();
+				ImGui::Text(global.variableType.c_str()); ImGui::NextColumn();
+				if (global.array)
+					ImGui::Text("yes: %d", global.amount);
+				else
+					ImGui::Text("no");
+
+				ImGui::NextColumn();
+			}
+			ImGui::Columns(1);
+			ImGui::Separator();
+			ImGui::TreePop();
+		}
+	}
+
+	if (stage.info.structs.size()) {
+		if (ImGui::TreeNode("Structs")) {
+			for (const auto& strctit : stage.info.structs) {
+				const ShaderStruct& strct = strctit.second;
+
+				if (ImGui::TreeNode(strct.name.c_str())) {
+					ImGui::Columns(3);
+					ImGui::Separator();
+					ImGui::Text("Name"); ImGui::NextColumn();
+					ImGui::Text("Type"); ImGui::NextColumn();
+					ImGui::Text("Array"); ImGui::NextColumn();
+					ImGui::Separator();
+
+					for (const ShaderLocal& local : strct.locals) {
+						ImGui::Text(local.name.c_str()); ImGui::NextColumn();
+						ImGui::Text(local.variableType.c_str()); ImGui::NextColumn();
+						if (local.array)
+							ImGui::Text("yes: %d", local.amount);
+						else
+							ImGui::Text("no");
+
+						ImGui::NextColumn();
+					}
+					ImGui::Columns(1);
+					ImGui::Separator();
+					ImGui::TreePop();
+				}
+			}
+
+			ImGui::TreePop();
+		}
+	}
+
+	if (stage.info.defines.size()) {
+		if (ImGui::TreeNode("Defines")) {
+			ImGui::Columns(2);
+			ImGui::Separator();
+			ImGui::Text("Name"); ImGui::NextColumn();
+			ImGui::Text("Value"); ImGui::NextColumn();
+			ImGui::Separator();
+
+			for (const auto& define : stage.info.defines) {
+				ImGui::Text(define.first.c_str()); ImGui::NextColumn();
+				ImGui::Text("%d", (int) define.second); ImGui::NextColumn();
+			}
+			ImGui::Columns(1);
+			ImGui::Separator();
+			ImGui::TreePop();
+		}
+	}
+}
+
+void BigFrame::renderShaderFrame() {
+	const Shader& shader = ApplicationShaders::basicShader;
+	if (ImGui::CollapsingHeader("Shaders")) {
+		if (ImGui::BeginTabBar("##tabs", ImGuiTabBarFlags_None)) {
+			if (shader.flags & shader.VERTEX) {
+				if (ImGui::BeginTabItem("Vertex")) {
+					renderShaderStageInfo(shader, shader.vertexStage);
+					ImGui::EndTabItem();
+				}
+			}
+			if (shader.flags & shader.GEOMETRY) {
+				if (ImGui::BeginTabItem("Geometry")) {
+					renderShaderStageInfo(shader, shader.geometryStage);
+					ImGui::EndTabItem();
+				}
+			}
+			if (shader.flags & shader.TESSELATION_CONTROL) {
+				if (ImGui::BeginTabItem("Tesselation control")) {
+					renderShaderStageInfo(shader, shader.tesselationControlStage);
+					ImGui::EndTabItem();
+				}
+			}
+			if (shader.flags & shader.TESSELATION_EVALUATE) {
+				if (ImGui::BeginTabItem("Tesselation evaluate")) {
+					renderShaderStageInfo(shader, shader.tesselationEvaluationStage);
+					ImGui::EndTabItem();
+				}
+			}
+			if (shader.flags & shader.FRAGMENT) {
+				if (ImGui::BeginTabItem("Fragment")) {
+					renderShaderStageInfo(shader, shader.fragmentStage);
+					ImGui::EndTabItem();
+				}
+			}
+		}
+	}
+}
+
 void BigFrame::renderResourceFrame() {
 	if (ImGui::CollapsingHeader("Resources")) {
 		ImGui::Columns(2, 0, true);
@@ -296,6 +469,7 @@ void BigFrame::render() {
 
 	renderPropertiesFrame();
 	renderLayerFrame();
+	renderShaderFrame();
 	renderResourceFrame();
 	renderEnvironmentFrame();
 	renderDebugFrame();

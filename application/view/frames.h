@@ -5,6 +5,7 @@
 #include "../engine/layer/layer.h"
 #include "../graphics/texture.h"
 #include "../graphics/font.h"
+#include "../graphics/shader/shader.h"
 
 #include "imgui/imgui.h"
 
@@ -35,9 +36,11 @@ public:
 	static Resource* selectedResource;
 
 private:
+	static void renderShaderStageInfo(const Shader& shader, const ShaderStage& stage);
 	static void renderTextureInfo(Texture* texture);
 	static void renderFontInfo(Font* font);
 	
+	static void renderShaderFrame();
 	static void renderPropertiesFrame();
 	static void renderDebugFrame();
 	static void renderEnvironmentFrame();
