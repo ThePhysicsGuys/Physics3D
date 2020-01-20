@@ -5,7 +5,7 @@
 #include "batch.h"
 
 #include "../debug/debug.h"
-#include "../shader/shaderProgram.h"
+#include "../shader/shader.h"
 
 template<typename Vertex, typename Command>
 class CommandBatch : public Batch<Vertex> {

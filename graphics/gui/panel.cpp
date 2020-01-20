@@ -6,7 +6,6 @@
 #include "layout.h"
 #include "path/path.h"
 #include "mesh/primitive.h"
-#include "shader/shaderProgram.h"
 #include "../physics/math/mathUtil.h"
 
 Panel::Panel(double x, double y) : Container(x, y) {

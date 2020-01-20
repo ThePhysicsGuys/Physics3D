@@ -203,7 +203,6 @@
     <ClCompile Include="shader\shaderParser.cpp" />
     <ClCompile Include="shader\shaders.cpp" />
     <ClCompile Include="shader\shader.cpp" />
-    <ClCompile Include="shader\shaderProgram.cpp" />
     <ClCompile Include="texture.cpp" />
     <ClCompile Include="debug\visualDebug.cpp" />
   </ItemGroup>
@@ -269,7 +268,6 @@
     <ClInclude Include="shader\shader.h" />
     <ClInclude Include="shader\shaderLexer.h" />
     <ClInclude Include="shader\shaderParser.h" />
-    <ClInclude Include="shader\shaderProgram.h" />
     <ClInclude Include="shader\shaders.h" />
     <ClInclude Include="texture.h" />
     <ClInclude Include="debug\threePhaseBuffer.h" />

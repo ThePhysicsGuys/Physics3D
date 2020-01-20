@@ -6,7 +6,6 @@
 #include "button.h"
 #include "label.h"
 #include "texture.h"
-#include "shader/shaderProgram.h"
 #include "renderUtils.h"
 #include "guiUtils.h"
 #include "mesh/primitive.h"

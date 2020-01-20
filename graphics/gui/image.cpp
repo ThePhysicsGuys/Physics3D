@@ -5,7 +5,6 @@
 #include "texture.h"
 #include "guiUtils.h"
 #include "path/path.h"
-#include "shader/shaderProgram.h"
 #include "mesh/primitive.h"
 
 

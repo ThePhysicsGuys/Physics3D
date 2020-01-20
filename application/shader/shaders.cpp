@@ -80,39 +80,36 @@ void onClose() {
 
 void BasicShader::updateUniforms(int id) {
 	bind();
-	shader.setUniform("uniforms", id);
+	setUniform("uniforms", id);
 }
 
 void BasicShader::updatePart(const ExtendedPart& part) {
 	bind();
-	shader.setUniform("includeNormals", int(part.visualData.includeNormals));
-	shader.setUniform("includeUvs", int(part.visualData.includeUVs));
-	shader.setUniform("modelMatrix", TransformToMat4(part.getPosition(), Mat3f(part.getCFrame().getRotation()) * DiagonalMat3f(part.hitbox.scale)));
+	setUniform("includeNormals", int(part.visualData.includeNormals));
+	setUniform("includeUvs", int(part.visualData.includeUVs));
+	setUniform("modelMatrix", TransformToMat4(part.getPosition(), Mat3f(part.getCFrame().getRotation()) * DiagonalMat3f(part.hitbox.scale)));
 }
 
 void BasicShader::updateMaterial(const Material& material) {
 	bind();
-	shader.setUniform("material.ambient", material.ambient);
-	shader.setUniform("material.diffuse", material.diffuse);
-	shader.setUniform("material.specular", material.specular);
-	shader.setUniform("material.reflectance", material.reflectance);
+	setUniform("material.ambient", material.ambient);
+	setUniform("material.diffuse", material.diffuse);
+	setUniform("material.specular", material.specular);
+	setUniform("material.reflectance", material.reflectance);
 
 	if (material.texture) {
 		material.texture->bind();
-		shader.setUniform("material.textured", 1);
-		shader.setUniform("textureSampler", material.texture->getUnit());
+		setUniform("material.textured", 1);
+		setUniform("textureSampler", material.texture->getUnit());
 	} else {
-		shader.setUniform("material.textured", 0);
-		shader.setUniform("textureSampler", 0);
+		setUniform("material.textured", 0);
+		setUniform("textureSampler", 0);
 	}
 
 	if (material.normal) {
 		material.normal->bind();
-		shader.setUniform("material.normalmapped", 1);
-		shader.setUniform("normalSampler", material.normal->getUnit());
-	} else {
-		shader.setUniform("material.normalmapped", 0);
-		shader.setUniform("normalSampler", 0);
+		setUniform("material.normalmapped", 1);
+		setUniform("normalSampler", material.normal->getUnit());
 	}
 }
 
@@ -121,100 +118,68 @@ void BasicShader::updateLight(Light lights[], int size) {
 	for (int i = 0; i < size; i++) {
 		std::string uniform;
 		std::string index = std::to_string(i);
+		std::string variable = "lights[" + index + "].";
 
 		// position
-		uniform = "lights[" + index + "].position";
-		shader.setUniform(uniform, lights[i].position);
+		uniform = variable + "position";
+		setUniform(uniform, lights[i].position);
 
 		// color
-		uniform = "lights[" + index + "].color";
-		shader.setUniform(uniform, lights[i].color);
+		uniform = variable + "color";
+		setUniform(uniform, lights[i].color);
 
 		// intensity
-		uniform = "lights[" + index + "].intensity";
-		shader.setUniform(uniform, lights[i].intensity);
+		uniform = variable + "intensity";
+		setUniform(uniform, lights[i].intensity);
 
 		// attenuation.constant
-		uniform = "lights[" + index + "].attenuation.constant";
-		shader.setUniform(uniform, lights[i].attenuation.constant);
+		uniform = variable + "attenuation.constant";
+		setUniform(uniform, lights[i].attenuation.constant);
 
 		// attenuation.linear
-		uniform = "lights[" + index + "].attenuation.linear";
-		shader.setUniform(uniform, lights[i].attenuation.linear);
+		uniform = variable + "attenuation.linear";
+		setUniform(uniform, lights[i].attenuation.linear);
 
 		// attenuation.exponent
-		uniform = "lights[" + index + "].attenuation.exponent";
-		shader.setUniform(uniform, lights[i].attenuation.exponent);
-	}
-}
-
-void BasicShader::createLightArray(int size) {
-	bind();
-	for (int i = 0; i < size; i++) {
-		std::string uniform;
-		std::string index = std::to_string(i);
-
-		// position
-		uniform = "lights[" + index + "].position";
-		shader.createUniform(uniform);
-
-		// color
-		uniform = "lights[" + index + "].color";
-		shader.createUniform(uniform);
-
-		// intensity
-		uniform = "lights[" + index + "].intensity";
-		shader.createUniform(uniform);
-
-		// attenuation.constant
-		uniform = "lights[" + index + "].attenuation.constant";
-		shader.createUniform(uniform);
-
-		// attenuation.linear
-		uniform = "lights[" + index + "].attenuation.linear";
-		shader.createUniform(uniform);
-
-		// attenuation.exponent
-		uniform = "lights[" + index + "].attenuation.exponent";
-		shader.createUniform(uniform);
+		uniform = variable + "attenuation.exponent";
+		setUniform(uniform, lights[i].attenuation.exponent);
 	}
 }
 
 void BasicShader::updateSunDirection(const Vec3f& sunDirection) {
 	bind();
-	shader.setUniform("sunDirection", sunDirection);
+	setUniform("sunDirection", sunDirection);
 }
 
 void BasicShader::updateSunColor(const Color3& sunColor) {
 	bind();
-	shader.setUniform("sunColor", sunColor);
+	setUniform("sunColor", sunColor);
 }
 
 void BasicShader::updateGamma(float gamma) {
 	bind();
-	shader.setUniform("gamma", gamma);
+	setUniform("gamma", gamma);
 }
 
 void BasicShader::updateHDR(bool hdr) {
 	bind();
-	shader.setUniform("hdr", hdr);
+	setUniform("hdr", hdr);
 }
 
 void BasicShader::updateExposure(float exposure) {
 	bind();
-	shader.setUniform("exposure", exposure);
+	setUniform("exposure", exposure);
 }
 
 void BasicShader::updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Position& viewPosition) {
 	bind();
-	shader.setUniform("viewMatrix", viewMatrix);
-	shader.setUniform("projectionMatrix", projectionMatrix);
-	shader.setUniform("viewPosition", viewPosition);
+	setUniform("viewMatrix", viewMatrix);
+	setUniform("projectionMatrix", projectionMatrix);
 }
 
 void BasicShader::updateModel(const Mat4f& modelMatrix) {
 	bind();
-	shader.setUniform("modelMatrix", modelMatrix);
+	setUniform("modelMatrix", modelMatrix);
 }
 
 
@@ -222,18 +187,18 @@ void BasicShader::updateModel(const Mat4f& modelMatrix) {
 
 void SkyboxShader::updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix) {
 	bind();
-	shader.setUniform("viewMatrix", viewMatrix);
-	shader.setUniform("projectionMatrix", projectionMatrix);
+	setUniform("viewMatrix", viewMatrix);
+	setUniform("projectionMatrix", projectionMatrix);
 }
 
 void SkyboxShader::updateCubeMap(CubeMap* skybox) {
 	bind();
-	shader.setUniform("skyboxTexture", skybox->getUnit());
+	setUniform("skyboxTexture", skybox->getUnit());
 }
 
 void SkyboxShader::updateLightDirection(const Vec3f& lightDirection) {
 	bind();
-	shader.setUniform("lightDirection", lightDirection);
+	setUniform("lightDirection", lightDirection);
 }
 
 
@@ -241,18 +206,18 @@ void SkyboxShader::updateLightDirection(const Vec3f& lightDirection) {
 
 void MaskShader::updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix) {
 	bind();
-	shader.setUniform("viewMatrix", viewMatrix);
-	shader.setUniform("projectionMatrix", projectionMatrix);
+	setUniform("viewMatrix", viewMatrix);
+	setUniform("projectionMatrix", projectionMatrix);
 }
 
 void MaskShader::updateModel(const Mat4f& modelMatrix) {
 	bind();
-	shader.setUniform("modelMatrix", modelMatrix);
+	setUniform("modelMatrix", modelMatrix);
 }
 
 void MaskShader::updateColor(const Color& color) {
 	bind();
-	shader.setUniform("color", color);
+	setUniform("color", color);
 }
 
 
@@ -260,12 +225,12 @@ void MaskShader::updateColor(const Color& color) {
 
 void DepthShader::updateLight(const Mat4f& lightMatrix) {
 	bind();
-	shader.setUniform("lightMatrix", lightMatrix);
+	setUniform("lightMatrix", lightMatrix);
 }
 
 void DepthShader::updateModel(const Mat4f& modelMatrix) {
 	bind();
-	shader.setUniform("modelMatrix", modelMatrix);
+	setUniform("modelMatrix", modelMatrix);
 }
 
 
@@ -274,13 +239,13 @@ void DepthShader::updateModel(const Mat4f& modelMatrix) {
 void PostProcessShader::updateTexture(Texture* texture) {
 	bind();
 	texture->bind();
-	shader.setUniform("textureSampler", texture->getUnit());
+	setUniform("textureSampler", texture->getUnit());
 }
 
 void PostProcessShader::updateTexture(HDRTexture* texture) {
 	bind();
 	texture->bind();
-	shader.setUniform("textureSampler", texture->getUnit());
+	setUniform("textureSampler", texture->getUnit());
 }
 
 
@@ -288,11 +253,11 @@ void PostProcessShader::updateTexture(HDRTexture* texture) {
 
 void OriginShader::updateProjection(const Mat4f& viewMatrix, const Mat4f& rotatedViewMatrix, const Mat4f& projectionMatrix, const Mat4f& orthoMatrix, const Position& viewPosition) {
 	bind();
-	shader.setUniform("viewMatrix", viewMatrix);
-	shader.setUniform("rotatedViewMatrix", rotatedViewMatrix);
-	shader.setUniform("projectionMatrix", projectionMatrix);
-	shader.setUniform("orthoMatrix", orthoMatrix);
-	shader.setUniform("viewPosition", viewPosition);
+	setUniform("viewMatrix", viewMatrix);
+	setUniform("rotatedViewMatrix", rotatedViewMatrix);
+	setUniform("projectionMatrix", projectionMatrix);
+	setUniform("orthoMatrix", orthoMatrix);
+	setUniform("viewPosition", viewPosition);
 }
 
 
@@ -300,18 +265,18 @@ void OriginShader::updateProjection(const Mat4f& viewMatrix, const Mat4f& rotate
 
 void FontShader::updateColor(const Color& color) {
 	bind();
-	shader.setUniform("color", color);
+	setUniform("color", color);
 }
 
 void FontShader::updateProjection(const Mat4f& projectionMatrix) {
 	bind();
-	shader.setUniform("projectionMatrix", projectionMatrix);
+	setUniform("projectionMatrix", projectionMatrix);
 }
 
 void FontShader::updateTexture(Texture* texture) {
 	bind();
 	texture->bind();
-	shader.setUniform("text", texture->getUnit());
+	setUniform("text", texture->getUnit());
 }
 
 
@@ -319,9 +284,9 @@ void FontShader::updateTexture(Texture* texture) {
 
 void VectorShader::updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Position& viewPosition) {
 	bind();
-	shader.setUniform("viewMatrix", viewMatrix);
-	shader.setUniform("projectionMatrix", projectionMatrix);
-	shader.setUniform("viewPosition", viewPosition);
+	setUniform("viewMatrix", viewMatrix);
+	setUniform("projectionMatrix", projectionMatrix);
+	setUniform("viewPosition", viewPosition);
 }
 
 
@@ -329,9 +294,9 @@ void VectorShader::updateProjection(const Mat4f& viewMatrix, const Mat4f& projec
 
 void PointShader::updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Position& viewPosition) {
 	bind();
-	shader.setUniform("viewMatrix", viewMatrix);
-	shader.setUniform("projectionMatrix", projectionMatrix);
-	shader.setUniform("viewPosition", viewPosition);
+	setUniform("viewMatrix", viewMatrix);
+	setUniform("projectionMatrix", projectionMatrix);
+	setUniform("viewPosition", viewPosition);
 }
 
 
@@ -339,28 +304,28 @@ void PointShader::updateProjection(const Mat4f& viewMatrix, const Mat4f& project
 
 void TestShader::updateProjection(const Mat4f& projectionMatrix) {
 	bind();
-	shader.setUniform("projectionMatrix", projectionMatrix);
+	setUniform("projectionMatrix", projectionMatrix);
 }
 
 void TestShader::updateView(const Mat4f& viewMatrix) {
 	bind();
-	shader.setUniform("viewMatrix", viewMatrix);
+	setUniform("viewMatrix", viewMatrix);
 }
 
 void TestShader::updateModel(const Mat4f& modelMatrix) {
 	bind();
-	shader.setUniform("modelMatrix", modelMatrix);
+	setUniform("modelMatrix", modelMatrix);
 }
 
 void TestShader::updateViewPosition(const Position& viewPosition) {
 	bind();
-	shader.setUniform("viewPosition", viewPosition);
+	setUniform("viewPosition", viewPosition);
 }
 
 void TestShader::updateDisplacement(Texture* displacementMap) {
 	bind();
 	displacementMap->bind();
-	shader.setUniform("displacementMap", displacementMap->getUnit());
+	setUniform("displacementMap", displacementMap->getUnit());
 }
 
 
@@ -368,8 +333,8 @@ void TestShader::updateDisplacement(Texture* displacementMap) {
 
 void LineShader::updateProjection(const Mat4f& projectionMatrix, const Mat4f& viewMatrix) {
 	bind();
-	shader.setUniform("projectionMatrix", projectionMatrix);
-	shader.setUniform("viewMatrix", viewMatrix);
+	setUniform("projectionMatrix", projectionMatrix);
+	setUniform("viewMatrix", viewMatrix);
 }
 
 
@@ -383,92 +348,60 @@ void InstanceBasicShader::updateLight(Light lights[], int size) {
 
 		// position
 		uniform = "lights[" + index + "].position";
-		shader.setUniform(uniform, lights[i].position);
+		setUniform(uniform, lights[i].position);
 
 		// color
 		uniform = "lights[" + index + "].color";
-		shader.setUniform(uniform, lights[i].color);
+		setUniform(uniform, lights[i].color);
 
 		// intensity
 		uniform = "lights[" + index + "].intensity";
-		shader.setUniform(uniform, lights[i].intensity);
+		setUniform(uniform, lights[i].intensity);
 
 		// attenuation.constant
 		uniform = "lights[" + index + "].attenuation.constant";
-		shader.setUniform(uniform, lights[i].attenuation.constant);
+		setUniform(uniform, lights[i].attenuation.constant);
 
 		// attenuation.linear
 		uniform = "lights[" + index + "].attenuation.linear";
-		shader.setUniform(uniform, lights[i].attenuation.linear);
+		setUniform(uniform, lights[i].attenuation.linear);
 
 		// attenuation.exponent
 		uniform = "lights[" + index + "].attenuation.exponent";
-		shader.setUniform(uniform, lights[i].attenuation.exponent);
-	}
-}
-
-void InstanceBasicShader::createLightArray(int size) {
-	bind();
-	for (int i = 0; i < size; i++) {
-		std::string uniform;
-		std::string index = std::to_string(i);
-
-		// position
-		uniform = "lights[" + index + "].position";
-		shader.createUniform(uniform);
-
-		// color
-		uniform = "lights[" + index + "].color";
-		shader.createUniform(uniform);
-
-		// intensity
-		uniform = "lights[" + index + "].intensity";
-		shader.createUniform(uniform);
-
-		// attenuation.constant
-		uniform = "lights[" + index + "].attenuation.constant";
-		shader.createUniform(uniform);
-
-		// attenuation.linear
-		uniform = "lights[" + index + "].attenuation.linear";
-		shader.createUniform(uniform);
-
-		// attenuation.exponent
-		uniform = "lights[" + index + "].attenuation.exponent";
-		shader.createUniform(uniform);
+		setUniform(uniform, lights[i].attenuation.exponent);
 	}
 }
 
 void InstanceBasicShader::updateSunDirection(const Vec3f& sunDirection) {
 	bind();
-	shader.setUniform("sunDirection", sunDirection);
+	setUniform("sunDirection", sunDirection);
 }
 
 void InstanceBasicShader::updateSunColor(const Vec3f& sunColor) {
 	bind();
-	shader.setUniform("sunColor", sunColor);
+	setUniform("sunColor", sunColor);
 }
 
 void InstanceBasicShader::updateGamma(float gamma) {
 	bind();
-	shader.setUniform("gamma", gamma);
+	setUniform("gamma", gamma);
 }
 
 void InstanceBasicShader::updateHDR(bool hdr) {
 	bind();
-	shader.setUniform("hdr", hdr);
+	setUniform("hdr", hdr);
 }
 
 void InstanceBasicShader::updateExposure(float exposure) {
 	bind();
-	shader.setUniform("exposure", exposure);
+	setUniform("exposure", exposure);
 }
 
 void InstanceBasicShader::updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Position& viewPosition) {
 	bind();
-	shader.setUniform("viewMatrix", viewMatrix);
-	shader.setUniform("projectionMatrix", projectionMatrix);
-	shader.setUniform("viewPosition", viewPosition);
+	setUniform("viewMatrix", viewMatrix);
+	setUniform("projectionMatrix", projectionMatrix);
+	setUniform("viewPosition", viewPosition);
 }
 
 };

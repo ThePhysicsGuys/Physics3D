@@ -15,7 +15,6 @@
 #include "texture.h"
 #include "visualShape.h"
 #include "renderUtils.h"
-#include "shader/shaderProgram.h"
 
 #include "../buffers/frameBuffer.h"
 #include "../mesh/indexedMesh.h"

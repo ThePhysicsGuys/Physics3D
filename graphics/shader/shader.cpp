@@ -302,15 +302,68 @@ ShaderSource parseShader(const std::string& name, std::istream& shaderTextStream
 	return ShaderSource(name, vertexSource, fragmentSource, geometrySource, tesselationControlSource, tesselationEvaluateSource);
 }
 
-void Shader::addUniforms(const ShaderUniforms& uniforms) {
-	for (const ShaderUniform& uniform : uniforms)
-		if (this->uniforms.find(uniform.name) == this->uniforms.end())
-			createUniform(uniform.name);
+void Shader::addUniform(const std::string& uniform) {
+	if (uniforms.find(uniform) == uniforms.end())
+		createUniform(uniform);
+}
+
+std::vector<std::string> getSuffixes(const ShaderStage& stage, const ShaderLocal& local) {
+	std::vector<std::string> suffixes;
+
+	auto strct = stage.info.structs.find(local.variableType);
+	bool isStruct = strct != stage.info.structs.end();
+	bool isArray = local.array;
+
+	if (isArray) {
+		if (isStruct) { // struct array
+			for (int i = 0; i < local.amount; i++) {
+				std::string variable = local.name + "[" + std::to_string(i) + "].";
+
+				for (const ShaderLocal& local : strct->second.locals) {
+					std::vector<std::string> localSuffixes = getSuffixes(stage, local);
+
+					for (std::string localSuffix : localSuffixes) {
+						suffixes.push_back(variable + localSuffix);
+					}
+				}	
+			}
+		} else { // normal array
+			for (int i = 0; i < local.amount; i++) {
+				suffixes.push_back(local.name + "[" + std::to_string(i) + "]");
+			}
+		}
+	} else {
+		if (isStruct) {
+			std::string variable = local.name + ".";
+
+			for (const ShaderLocal& local : strct->second.locals) {
+				std::vector<std::string> localSuffixes = getSuffixes(stage, local);
+
+				for (std::string localSuffix : localSuffixes) {
+					suffixes.push_back(variable + localSuffix);
+				}
+			}
+		} else {
+			suffixes.push_back(local.name);
+		}
+	}
+
+	return suffixes;
+}
+
+void Shader::addUniforms(const ShaderStage& stage) {
+	for (const ShaderUniform& uniform : stage.info.uniforms) {
+		std::vector<std::string> variables = getSuffixes(stage, uniform);
+
+		for (const std::string& variable : variables)
+			addUniform(variable);
+	}
 }
 
 void Shader::addShaderStage(const ShaderStage& stage, const ShaderFlag& flag) {
 	if (!stage.source.empty()) {
-		// todo addUniforms(stage.info.uniforms);
+		addUniforms(stage);
+
 		flags |= flag;
 
 		switch (flag) {

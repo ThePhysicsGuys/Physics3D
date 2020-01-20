@@ -7,7 +7,6 @@
 #include "path/path.h"
 #include "renderUtils.h"
 #include "mesh/primitive.h"
-#include "shader/shaderProgram.h"
 
 Label::Label(std::string text, double x, double y) : Label(text, x, y, GUI::fontSize, GUI::fontColor) {};
 

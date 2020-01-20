@@ -6,7 +6,6 @@
 #include "path/path.h"
 
 #include "texture.h"
-#include "shader/shaderProgram.h"
 #include "renderUtils.h"
 
 #include "mesh/primitive.h"

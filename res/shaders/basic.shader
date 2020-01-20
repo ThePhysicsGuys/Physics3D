@@ -150,7 +150,7 @@ uniform mat4 projectionMatrix;
 
 uniform Material material;
 uniform sampler2D textureSampler;
-const int maxLights = 5;
+#define maxLights 5
 uniform Light lights[maxLights];
 
 // Environment

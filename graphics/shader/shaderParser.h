@@ -28,20 +28,22 @@ enum class ShaderIOType {
 
 struct ShaderLocal {
 	std::string name;
-	ShaderVariableType variableType;
+	std::string variableType;
 	bool array;
+	int amount;
 
-	ShaderLocal(const std::string& name, const ShaderVariableType& variableType, bool array) : name(name), variableType(variableType), array(array) {}
+	ShaderLocal(const std::string& name, const std::string& variableType, bool array, int amount) : name(name), variableType(variableType), array(array), amount(amount) {}
 };
 typedef std::vector<ShaderLocal> ShaderLocals;
 
 struct ShaderGlobal {
 	std::string name;
-	ShaderIOType ioType;
-	ShaderVariableType variableType;
+	std::string ioType;
+	std::string variableType;
 	bool array;
+	int amount;
 
-	ShaderGlobal(const std::string& name, const ShaderIOType& ioType, const ShaderVariableType& variableType, bool array) : name(name), ioType(ioType), variableType(variableType), array(array) {};
+	ShaderGlobal(const std::string& name, const std::string& ioType, const std::string& variableType, bool array, int amount) : name(name), ioType(ioType), variableType(variableType), array(array), amount(amount) {};
 };
 typedef std::vector<ShaderGlobal> ShaderGlobals;
 
@@ -55,38 +57,43 @@ typedef std::vector<ShaderLayoutAttribute> ShaderLayoutAttributes;
 
 struct ShaderLayoutItem {
 	ShaderLayoutAttributes attributes;
-	ShaderIOType ioType;
-
-	ShaderVariableType variableType;
+	std::string ioType;
+	std::string variableType;
 	std::string name;
 
-	ShaderLayoutItem(const ShaderLayoutAttributes& attributes, const ShaderIOType& ioType, const ShaderVariableType& variableType, const std::string& name) : attributes(attributes), ioType(ioType), variableType(variableType), name(name) {}
+	ShaderLayoutItem(const ShaderLayoutAttributes& attributes, const std::string& ioType, const std::string& variableType, const std::string& name) : attributes(attributes), ioType(ioType), variableType(variableType), name(name) {}
 };
 typedef std::vector<ShaderLayoutItem> ShaderLayout;
 
 struct ShaderVSOUT : public ShaderGlobal {
 	ShaderLocals locals;
 
-	ShaderVSOUT(const std::string& name, const ShaderIOType& ioType, const ShaderVariableType& variableType, bool array, const ShaderLocals& locals) : ShaderGlobal(name, ioType, variableType, array), locals(locals) {}
+	ShaderVSOUT(const std::string& name, const std::string& ioType, const std::string& variableType, bool array, int amount, const ShaderLocals& locals) : ShaderGlobal(name, ioType, variableType, array, amount), locals(locals) {}
 };
 
-struct ShaderStruct : public ShaderLocal {
+struct ShaderStruct {
+	std::string name;
 	ShaderLocals locals;
 
-	ShaderStruct(const std::string& name, const ShaderVariableType& variableType, bool array, const ShaderLocals& locals) : ShaderLocal(name, variableType, array), locals(locals) {}
+	ShaderStruct() {};
+	ShaderStruct(const std::string& name, const ShaderLocals& locals) : name(name), locals(locals) {}
 };
+typedef std::unordered_map<std::string, ShaderStruct> ShaderStructs;
 
 typedef ShaderLocal ShaderUniform;
 typedef std::vector<ShaderUniform> ShaderUniforms;
+typedef std::unordered_map<std::string, float> ShaderDefines;
 
 struct ShaderInfo {
 	ShaderLayout layout;
 	ShaderUniforms uniforms;
 	ShaderGlobals globals;
 	ShaderLocals locals;
+	ShaderDefines defines;
+	ShaderStructs structs;
 
 	ShaderInfo() {}
-	ShaderInfo(const ShaderLayout& layout, const ShaderUniforms& uniforms, const ShaderGlobals& globals, const ShaderLocals& locals) : layout(layout), uniforms(uniforms), globals(globals), locals(locals) {}
+	ShaderInfo(const ShaderLayout& layout, const ShaderUniforms& uniforms, const ShaderGlobals& globals, const ShaderLocals& locals, const ShaderDefines& defines, const ShaderStructs& structs) : layout(layout), uniforms(uniforms), globals(globals), locals(locals), defines(defines), structs(structs) {}
 };
 
 class ShaderParser {

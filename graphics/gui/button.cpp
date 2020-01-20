@@ -6,7 +6,6 @@
 #include "font.h"
 #include "path/path.h"
 
-#include "shader/shaderProgram.h"
 #include "mesh/primitive.h"
 
 

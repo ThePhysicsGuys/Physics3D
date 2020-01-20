@@ -6,7 +6,6 @@
 #include "texture.h"
 #include "path/path.h"
 #include "mesh/primitive.h"
-#include "shader/shaderProgram.h"
 
 ColorPicker::ColorPicker(double x, double y, double size) : Component(x, y, size, size) {
 	this->padding = GUI::padding;

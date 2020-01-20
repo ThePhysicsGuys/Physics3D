@@ -36,8 +36,10 @@ public:
 	};
 
 private:
-	std::map<std::string, int> uniforms;
-	void addUniforms(const ShaderUniforms& uniforms);
+	std::unordered_map<std::string, int> uniforms;
+
+	void addUniforms(const ShaderStage& stage);
+	void addUniform(const std::string& uniform);
 	void addShaderStage(const ShaderStage& stage, const ShaderFlag& flag);
 
 public:

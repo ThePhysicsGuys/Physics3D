@@ -175,13 +175,13 @@ namespace GraphicsShaders {
 
 void GuiShader::init(const Mat4f& orthoMatrix) {
 	bind();
-	shader.setUniform("projectionMatrix", orthoMatrix);
-	shader.setUniform("textureSampler", 0);
+	setUniform("projectionMatrix", orthoMatrix);
+	setUniform("textureSampler", 0);
 }
 
 void GuiShader::setTextured(bool textured) {
 	bind();
-	shader.setUniform("textured", textured);
+	setUniform("textured", textured);
 }
 
 
@@ -189,13 +189,13 @@ void GuiShader::setTextured(bool textured) {
 
 void QuadShader::updateProjection(const Mat4f& orthoMatrix) {
 	bind();
-	shader.setUniform("projectionMatrix", orthoMatrix);
+	setUniform("projectionMatrix", orthoMatrix);
 }
 
 void QuadShader::updateColor(const Vec4& color) {
 	bind();
-	shader.setUniform("textured", false);
-	shader.setUniform("color", color);
+	setUniform("textured", false);
+	setUniform("color", color);
 }
 
 void QuadShader::updateTexture(Texture* texture) {
@@ -205,20 +205,20 @@ void QuadShader::updateTexture(Texture* texture) {
 void QuadShader::updateTexture(Texture* texture, const Vec4f& color) {
 	bind();
 	texture->bind();
-	shader.setUniform("textured", true);
-	shader.setUniform("textureSampler", texture->getUnit());
-	shader.setUniform("color", color);
+	setUniform("textured", true);
+	setUniform("textureSampler", texture->getUnit());
+	setUniform("color", color);
 }
 
 
 // BlurShader
 void BlurShader::updateWidth(float width) {
 	bind();
-	shader.setUniform("width", width);
+	setUniform("width", width);
 }
 
 void BlurShader::updateTexture(Texture* texture) {
 	bind();
 	texture->bind();
-	shader.setUniform("image", texture->getUnit());
+	setUniform("image", texture->getUnit());
 }

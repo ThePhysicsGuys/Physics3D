@@ -1,22 +1,22 @@
 #pragma once
 
-#include "shaderProgram.h"
+#include "shadeR.h"
 
 #include "../physics/math/linalg/mat.h"
 
 class Texture;
 
-struct GuiShader : public ShaderProgram {
-	GuiShader() : ShaderProgram() {}
-	GuiShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, "projectionMatrix", "textureSampler", "textured") {}
+struct GuiShader : public Shader {
+	GuiShader() : Shader() {}
+	GuiShader(ShaderSource shaderSource) : Shader(shaderSource) {}
 
 	void init(const Mat4f& orthoMatrix);
 	void setTextured(bool textured);
 };
 
-struct QuadShader : public ShaderProgram {
-	QuadShader() : ShaderProgram() {}
-	QuadShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, "projectionMatrix", "color", "textureSampler", "textured") {}
+struct QuadShader : public Shader {
+	QuadShader() : Shader() {}
+	QuadShader(ShaderSource shaderSource) : Shader(shaderSource) {}
 
 	void updateProjection(const Mat4f& orthoMatrix);
 	void updateColor(const Vec4& color);
@@ -24,9 +24,9 @@ struct QuadShader : public ShaderProgram {
 	void updateTexture(Texture* texture, const Vec4f& color);
 };
 
-struct BlurShader : public ShaderProgram {
-	BlurShader() : ShaderProgram() {}
-	BlurShader(ShaderSource shaderSource) : ShaderProgram(shaderSource, "image", "width") {}
+struct BlurShader : public Shader {
+	BlurShader() : Shader() {}
+	BlurShader(ShaderSource shaderSource) : Shader(shaderSource) {}
 
 	void updateWidth(float width);
 	void updateTexture(Texture* texture);

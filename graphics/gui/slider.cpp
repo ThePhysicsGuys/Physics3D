@@ -3,7 +3,6 @@
 #include "slider.h"
 
 #include "path/path.h"
-#include "shader/shaderProgram.h"
 #include "renderUtils.h"
 #include "mesh/primitive.h"
 

@@ -36,9 +36,6 @@ Light lights[lightCount] = {
 
 void ModelLayer::onInit() {
 	manager = new InstanceBatchManager();
-
-	ApplicationShaders::basicShader.createLightArray(lightCount);
-	ApplicationShaders::instanceBasicShader.createLightArray(lightCount);
 }
 
 void ModelLayer::onUpdate() {

@@ -11,7 +11,6 @@
 #include "material.h"
 #include "renderUtils.h"
 #include "path/path.h"
-#include "shader/shaderProgram.h"
 #include "buffers/frameBuffer.h"
 #include "mesh/indexedMesh.h"
 #include "mesh/primitive.h"

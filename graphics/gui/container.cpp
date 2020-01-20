@@ -6,7 +6,6 @@
 #include "renderUtils.h"
 #include "path/path.h"
 #include "mesh/primitive.h"
-#include "shader/shaderProgram.h"
 
 Container::Container(Vec2 position) : Component(position), layout(new FlowLayout()) {
 };

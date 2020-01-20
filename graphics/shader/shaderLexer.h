@@ -26,6 +26,7 @@ struct TokenType {
 		RC,
 		EOL,
 		IO,
+		STRUCT,
 		LAYOUT,
 		LOCATION,
 		QUALIFIER,
