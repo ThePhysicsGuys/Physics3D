@@ -8,7 +8,8 @@
 #include "../graphics/material.h"
 #include "../graphics/light.h"
 
-#include "../util/resource/resourceLoader.h"
+#include "../util/resource/resource.h"
+#include "../util/resource/resourceManager.h"
 
 #include <sstream>
 
@@ -44,6 +45,7 @@ void onInit() {
 	ShaderSource maskShaderSource = parseShader("mask.shader", (std::istream&) std::istringstream(getResourceAsString(applicationResources, MASK_SHADER)));
 	ShaderSource instanceBasicShaderSource = parseShader("instance_basic.shader", (std::istream&) std::istringstream(getResourceAsString(applicationResources, BASIC_SHADER)));
 
+
 	// Shader init
 	new(&basicShader) BasicShader(basicShaderSource);
 	new(&depthShader) DepthShader(depthShaderSource);
@@ -57,6 +59,19 @@ void onInit() {
 	new(&lineShader) LineShader(lineShaderSource);
 	new(&maskShader) MaskShader(maskShaderSource);
 	new(&instanceBasicShader) InstanceBasicShader(instanceBasicShaderSource);
+
+	ResourceManager::add(&basicShader);
+	ResourceManager::add(&depthShader);
+	ResourceManager::add(&vectorShader);
+	ResourceManager::add(&fontShader);
+	ResourceManager::add(&originShader);
+	ResourceManager::add(&postProcessShader);
+	ResourceManager::add(&skyboxShader);
+	ResourceManager::add(&pointShader);
+	ResourceManager::add(&testShader);
+	ResourceManager::add(&lineShader);
+	ResourceManager::add(&maskShader);
+	ResourceManager::add(&instanceBasicShader);
 }
 
 void onClose() {

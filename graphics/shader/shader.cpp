@@ -443,6 +443,30 @@ Shader::~Shader() {
 Shader::Shader(Shader&& other) {
 	id = other.id;
 	other.id = 0;
+
+	uniforms = other.uniforms;
+	other.uniforms = std::unordered_map<std::string, int>();
+
+	vertexStage = other.vertexStage;
+	other.vertexStage = ShaderStage();
+
+	fragmentStage = other.fragmentStage;
+	other.fragmentStage = ShaderStage();
+
+	geometryStage = other.geometryStage;
+	other.geometryStage = ShaderStage();
+	
+	tesselationControlStage = other.tesselationControlStage;
+	other.tesselationControlStage = ShaderStage();
+	
+	tesselationEvaluationStage = other.tesselationEvaluationStage;
+	other.tesselationEvaluationStage = ShaderStage();
+
+	flags = other.flags;
+	other.flags = NONE;
+
+	name = other.name;
+	other.name = std::string();
 }
 
 Shader& Shader::operator=(Shader&& other) {

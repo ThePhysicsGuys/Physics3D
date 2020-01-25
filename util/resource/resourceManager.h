@@ -87,7 +87,7 @@ private:
 	~ResourceManager();
 
 public:
-	template<typename T> 
+	template<typename T, typename = std::enable_if<std::is_base_of<Resource, T>::value>>
 	static T* get(const std::string& name) {
 		//Log::subject s("GET");
 		//Log::debug("Getting resource: (%s)", name.c_str());
@@ -104,7 +104,22 @@ public:
 		}
 	}
 
-	template<typename T>
+	static void add(Resource* resource) {
+		if (resource == nullptr)
+			return;
+
+		auto iterator = ResourceManager::resources.find(resource->name);
+
+		if (iterator != ResourceManager::resources.end()) {
+			auto& resource = (*iterator).second;
+			resource.count++;
+		} else {
+			CountedResource countedResource = { resource, 1 };
+			ResourceManager::resources.emplace(resource->name, countedResource);
+		}
+	}
+
+	template<typename T, typename = std::enable_if<std::is_base_of<Resource, T>::value>>
 	static T* add(const std::string& name, const std::string& path) {
 		Log::subject s("ADD");
 		//Log::debug("Adding resource: (%s, %s)", name.c_str(), path.c_str());
@@ -135,6 +150,11 @@ public:
 		}
 	}
 
+	template<typename T, typename = std::enable_if<std::is_base_of<Resource, T>::value>>
+	static T* add(const std::string& path) {
+		return add<T>(path, path);
+	}
+
 	static void close() {
 		for (auto iterator : resources) {
 			iterator.second.value->close();
@@ -144,17 +164,12 @@ public:
 		defaultResources.clear();
 	}
 
-	template<typename T>
-	static T* add(const std::string& path) {
-		return add<T>(path, path);
-	}
-
 	static bool exists(const std::string& name) {
 		auto iterator = ResourceManager::resources.find(name);
 		return iterator != ResourceManager::resources.end();
 	}
 
-	template<typename T>
+	template<typename T, typename = std::enable_if<std::is_base_of<Resource, T>::value>>
 	static std::vector<T*> getResourcesOfClass() {
 		std::vector<T*> list;
 

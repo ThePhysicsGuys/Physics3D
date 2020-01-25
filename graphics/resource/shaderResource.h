@@ -1,65 +1,29 @@
 #pragma once
 
+#include "../util/resource/resourceLoader.h"
 #include "../util/resource/resource.h"
+#include "../shader/shader.h"
 
-#include "../shader/shaderProgram.h"
+class ShaderResource;
 
-#pragma region SkyboxShader
-
-//! SkyboxShader
-
-class SkyboxShaderAllocator : public ResourceAllocator<SkyboxShader> {
+class ShaderAllocator : public ResourceAllocator<ShaderResource> {
 public:
-	virtual SkyboxShader* load(const std::string& name, const std::string& path) override;
+	virtual ShaderResource* load(const std::string& name, const std::string& path) override;
 };
 
-class SkyboxShader : public Resource, public ShaderProgram {
+class ShaderResource : public Resource, public Shader {
 public:
-	DEFINE_RESOURCE(Shader, "../res/shaders/skybox.shader");
+	DEFINE_RESOURCE(Shader, "../res/shaders/basic.shader");
 
-	SkyboxShader(const std::string& name, const std::string& path, ShaderSource shaderSource) : Resource(name, path), ShaderProgram(shaderSource, "viewMatrix", "projectionMatrix", "skyboxTexture", "lightDirection") {}
-
-	void updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix);
-	void updateCubeMap(CubeMap* skybox);
-	void updateLightDirection(const Vec3f& lightDirection);
+	ShaderResource() : Resource(""), Shader() {};
+	ShaderResource(const std::string& name, const std::string& path, Shader& shader) : Resource(name, path), Shader(std::move(shader)) {}
+	ShaderResource(const std::string& name, const std::string& path, const ShaderSource& shaderSource) : Resource(name, path), Shader(shaderSource) {}
 
 	virtual void close() override {
-		ShaderProgram::close();
+		Shader::close();
 	}
 
-	static SkyboxShaderAllocator getAllocator() {
-		return SkyboxShaderAllocator();
-	}
-};
-
-#pragma endregion
-
-#pragma region MaskShader
-
-//! MaskShader
-
-class MaskShaderAllocator : public ResourceAllocator<MaskShader> {
-public:
-	virtual MaskShader* load(const std::string& name, const std::string& path) override;
-};
-
-class MaskShader : public Resource, public ShaderProgram {
-public:
-	DEFINE_RESOURCE(Shader, "../res/shaders/skybox.shade");
-
-	MaskShader(const std::string& name, const std::string& path, ShaderSource shaderSource) : Resource(name, path), ShaderProgram(shaderSource, "viewMatrix", "projectionMatrix", "modelMatrix", "color") {}
-
-	void updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix);
-	void updateModel(const Mat4f& modelMatrix);
-	void updateColor(const Vec4f& color);
-
-	virtual void close() {
-		ShaderProgram::close();
-	}
-
-	MaskShaderAllocator getAllocator() {
-		return MaskShaderAllocator();
+	static ShaderAllocator getAllocator() {
+		return ShaderAllocator();
 	}
 };
-
-#pragma endregion
