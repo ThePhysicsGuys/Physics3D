@@ -28,13 +28,14 @@ namespace Debug {
 	void saveIntersectionError(const Part* first, const Part* second, const char* reason) {
 		std::ofstream file;
 		std::stringstream name;
+		name << "../";
 		name << reason;
-		name << ".looseParts";
+		name << ".parts";
 		file.open(name.str().c_str(), std::ios::binary | std::ios::out);
 
-		serialize<int>(2, file);
-		serialize<Part>(*first, file);
-		serialize<Part>(*second, file);
+		throw "TODO";
+		//serializePartWithCFrame(*first, file);
+		//serializePartWithCFrame(*second, file);
 
 		file.close();
 	}

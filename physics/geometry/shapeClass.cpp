@@ -10,8 +10,11 @@
 #include "../misc/shapeLibrary.h"
 #include "../math/linalg/trigonometry.h"
 
+
+
+
 struct CubeClass : public ShapeClass {
-	CubeClass() : ShapeClass(8, Vec3(0, 0, 0), ScalableInertialMatrix(Vec3(8.0 / 3.0, 8.0 / 3.0, 8.0 / 3.0), Vec3(0, 0, 0)), 0) {};
+	CubeClass() : ShapeClass(8, Vec3(0, 0, 0), ScalableInertialMatrix(Vec3(8.0 / 3.0, 8.0 / 3.0, 8.0 / 3.0), Vec3(0, 0, 0)), CUBE_CLASS_ID) {};
 
 	virtual bool containsPoint(Vec3 point) const {
 		return abs(point.x) <= 1.0 && abs(point.y) <= 1.0 && abs(point.z) <= 1.0;
@@ -73,7 +76,7 @@ struct CubeClass : public ShapeClass {
 };
 
 struct SphereClass : public ShapeClass {
-	SphereClass() : ShapeClass(4.0 / 3.0 * M_PI, Vec3(0, 0, 0), ScalableInertialMatrix(Vec3(4.0 / 15.0 * M_PI, 4.0 / 15.0 * M_PI, 4.0 / 15.0 * M_PI), Vec3(0, 0, 0)), 1) {};
+	SphereClass() : ShapeClass(4.0 / 3.0 * M_PI, Vec3(0, 0, 0), ScalableInertialMatrix(Vec3(4.0 / 15.0 * M_PI, 4.0 / 15.0 * M_PI, 4.0 / 15.0 * M_PI), Vec3(0, 0, 0)), SPHERE_CLASS_ID) {};
 
 	virtual bool containsPoint(Vec3 point) const {
 		return lengthSquared(point) <= 1.0;
@@ -145,7 +148,7 @@ struct CylinderClass : public ShapeClass {
 		z = 1/3 * M_PI * 2
 	*/
 
-	CylinderClass() : ShapeClass(M_PI * 2.0, Vec3(0, 0, 0), ScalableInertialMatrix(Vec3(M_PI / 2.0, M_PI / 2.0, M_PI * 2.0/3.0), Vec3(0, 0, 0)), 2) {};
+	CylinderClass() : ShapeClass(M_PI * 2.0, Vec3(0, 0, 0), ScalableInertialMatrix(Vec3(M_PI / 2.0, M_PI / 2.0, M_PI * 2.0/3.0), Vec3(0, 0, 0)), CYLINDER_CLASS_ID) {};
 
 	virtual bool containsPoint(Vec3 point) const {
 		return abs(point.z) <= 1.0 && point.x * point.x + point.y + point.y <= 1.0;
@@ -237,26 +240,12 @@ const ShapeClass* const boxClass = &box;
 const ShapeClass* const cylinderClass = &cylinder;
 
 
-static std::map<int, const ShapeClass*> knownShapeClasses{{0, &box}, {1, &sphere}, {2, &cylinder}};
+ShapeClass::ShapeClass(double volume, Vec3 centerOfMass, ScalableInertialMatrix inertia, int intersectionClassID) : 
+	volume(volume), 
+	centerOfMass(centerOfMass), 
+	inertia(inertia), 
+	intersectionClassID(intersectionClassID) {}
 
-int newClassID() {
-	if(knownShapeClasses.empty()) return 0;
-	for(int i = 0; ; i++) {
-		if(knownShapeClasses.find(i) == knownShapeClasses.end()) {
-			return i;
-		}
-	}
-}
-
-ShapeClass::ShapeClass(double volume, Vec3 centerOfMass, ScalableInertialMatrix inertia, int classID) : volume(volume), centerOfMass(centerOfMass), inertia(inertia), classID(classID) {}
-ShapeClass::ShapeClass(double volume, Vec3 centerOfMass, ScalableInertialMatrix inertia) : ShapeClass(volume, centerOfMass, inertia, newClassID()) {
-	knownShapeClasses.insert(std::pair<int, const ShapeClass*>(this->classID, this));
-}
-
-
-const ShapeClass* ShapeClass::getShapeClassForId(int classID) {
-	return knownShapeClasses[classID];
-}
 
 double ShapeClass::getScaledMaxRadius(DiagonalMat3 scale) const {
 	return sqrt(this->getScaledMaxRadiusSq(scale));

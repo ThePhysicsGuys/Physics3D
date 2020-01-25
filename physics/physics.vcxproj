@@ -207,7 +207,7 @@
     <ClCompile Include="math\linalg\eigen.cpp" />
     <ClCompile Include="math\linalg\largeMatrix.cpp" />
     <ClCompile Include="math\linalg\trigonometry.cpp" />
-    <ClCompile Include="misc\constraintSerialization.cpp" />
+    <ClCompile Include="misc\dynamicSerialization.cpp" />
     <ClCompile Include="misc\filters\visibilityFilter.cpp" />
     <ClCompile Include="misc\shapeLibrary.cpp" />
     <ClCompile Include="part.cpp" />
@@ -281,6 +281,7 @@
     <ClInclude Include="misc\filters\rayIntersectsBoundsFilter.h" />
     <ClInclude Include="misc\filters\visibilityFilter.h" />
     <ClInclude Include="misc\gravityForce.h" />
+    <ClInclude Include="misc\partSerializationInformation.h" />
     <ClInclude Include="misc\serializeBasicTypes.h" />
     <ClInclude Include="misc\shapeLibrary.h" />
     <ClInclude Include="misc\toString.h" />

@@ -28,39 +28,45 @@
 #include "../constraints/fixedConstraint.h"
 #include "../constraints/motorConstraint.h"
 
+typedef uint32_t ShapeClassID;
+
 void serializePolyhedron(const Polyhedron& poly, std::ostream& ostream);
 Polyhedron deserializePolyhedron(std::istream& istream);
 
-void serializeShape(const Shape& shape, std::ostream& ostream);
-Shape deserializeShape(std::istream& istream);
+void serializeShape(const Shape& shape, std::ostream& ostream, const std::map<const ShapeClass*, ShapeClassID>& registry);
+Shape deserializeShape(std::istream& istream, const std::map<ShapeClassID, const ShapeClass*>& registry);
 
-void serializePart(const Part& part, std::ostream& ostream);
-Part deserializePart(std::istream& istream);
+class PartSerializationInformation;
+class PartDeSerializationInformation;
 
+void serializePartWithoutCFrame(const Part& part, std::ostream& ostream, PartSerializationInformation& serializationInformation);
+Part deserializePartWithoutCFrame(std::istream& istream, PartDeSerializationInformation& deserializationInformation);
+void serializePartWithCFrame(const Part& part, std::ostream& ostream, PartSerializationInformation& serializationInformation);
+Part deserializePartWithCFrame(std::istream& istream, PartDeSerializationInformation& deserializationInformation);
 
 class PartSerializer {
 public:
-	virtual void serializePart(const Part& part, std::ostream& ostream);
-	virtual Part* deserializePart(std::istream& istream);
+	virtual void serializePart(const Part& part, std::ostream& ostream, PartSerializationInformation& serializationInformation);
+	virtual Part* deserializePart(std::istream& istream, PartDeSerializationInformation& deserializationInformation);
 };
 
 template<typename ExtendedPart>
 class ExtendedPartSerializer : public PartSerializer {
 public:
-	virtual void serializePart(const Part& part, std::ostream& ostream) final override {
+	virtual void serializePart(const Part& part, std::ostream& ostream, PartSerializationInformation& serializationInformation) final override {
 		const ExtendedPart& ePart = static_cast<const ExtendedPart&>(part);
-		this->serialize(ePart, ostream);
+		this->serialize(ePart, ostream, serializationInformation);
 	}
-	virtual Part* deserializePart(std::istream& istream) final override {
-		return this->deserialize(istream);
+	virtual Part* deserializePart(std::istream& istream, PartDeSerializationInformation& deserializationInformation) final override {
+		return this->deserialize(istream, deserializationInformation);
 	}
 
-	virtual void serialize(const ExtendedPart& part, std::ostream& ostream) = 0;
-	virtual ExtendedPart* deserialize(std::istream& istream) = 0;
+	virtual void serialize(const ExtendedPart& part, std::ostream& ostream, PartSerializationInformation& serializationInformation) = 0;
+	virtual ExtendedPart* deserialize(std::istream& istream, PartDeSerializationInformation& deserializationInformation) = 0;
 };
 
-void serializeMotorizedPhysical(const MotorizedPhysical& phys, std::ostream& ostream, PartSerializer& partSerializer);
-MotorizedPhysical* deserializeMotorizedPhysical(std::istream& istream, PartSerializer& partSerializer);
+void serializeMotorizedPhysical(const MotorizedPhysical& phys, std::ostream& ostream, PartSerializer& partSerializer, PartSerializationInformation& serializationInformation);
+MotorizedPhysical* deserializeMotorizedPhysical(std::istream& istream, PartSerializer& partSerializer, PartDeSerializationInformation& deserializationInformation);
 
 void serializeWorldPrototype(const WorldPrototype& world, std::ostream& ostream, PartSerializer& partSerializer);
 void deserializeWorldPrototype(WorldPrototype& world, std::istream& istream, PartSerializer& partSerializer);
@@ -81,3 +87,6 @@ void serializeMotorConstraint(const MotorConstraint& constraint, std::ostream& o
 MotorConstraint* deserializeMotorConstraint(std::istream& istream);
 
 extern DynamicSerializerRegistry<HardConstraint> hardConstraintRegistry;
+extern DynamicSerializerRegistry<ShapeClass> shapeClassRegistry;
+extern std::vector<const ShapeClass*> builtinShapeClasses;
+

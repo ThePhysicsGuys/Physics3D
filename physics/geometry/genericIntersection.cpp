@@ -217,6 +217,11 @@ bool runEPATransformed(const ColissionPair& info, const Tetrahedron& s, Vec3f& i
 		Vec3f a = builder.vertexBuf[closestTriangle[0]];
 		Vec3f b = builder.vertexBuf[closestTriangle[1]];
 		Vec3f c = builder.vertexBuf[closestTriangle[2]];
+
+		assert(isVecValid(a));
+		assert(isVecValid(b));
+		assert(isVecValid(c));
+
 		Vec3f closestTriangleNormal = getNormalVec(closestTriangle, builder.vertexBuf);
 
 		MinkPoint point(getSupport(info, closestTriangleNormal));

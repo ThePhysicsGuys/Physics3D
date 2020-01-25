@@ -346,8 +346,8 @@ void setupWorld(int argc, const char** args) {
 		world.addPart(f2);
 
 
-		WorldImportExport::saveLooseParts("../testPart.parts", 1, &fixedConstraintGroupMain);
-		WorldImportExport::saveSingleMotorizedPhysical("../testPhysical.physical", *fixedConstraintGroupMain->parent->mainPhysical);
+		//WorldImportExport::saveLooseParts("../testPart.parts", 1, &fixedConstraintGroupMain);
+		//WorldImportExport::saveSingleMotorizedPhysical("../testPhysical.physical", *fixedConstraintGroupMain->parent->mainPhysical);
 	}
 
 	WorldImportExport::saveWorld("../testWorld.world", world);

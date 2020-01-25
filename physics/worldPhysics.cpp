@@ -247,6 +247,12 @@ void recursiveFindColissionsBetween(WorldPrototype& world, std::vector<Colission
 			Debug::saveIntersectionError(firstObj, secondObj, "colError");
 
 			throw err;
+		} catch(...) {
+			Log::fatal("Unknown error occured during intersection");
+
+			Debug::saveIntersectionError(firstObj, secondObj, "colError");
+
+			throw "exit";
 		}
 #else
 		runColissionTests(*firstObj, *secondObj, world, colissions);

@@ -12,12 +12,17 @@
 #include "serializeBasicTypes.h"
 
 class SerializationException : public std::exception {
+	std::string message;
 public:
 	SerializationException() = default;
-	SerializationException(const char* text) : std::exception(text) {}
+	SerializationException(std::string message) : message(message) {}
+
+	virtual const char* what() const override {
+		return message.c_str();
+	}
 };
 
-template<typename BaseType>
+template<typename BaseType, typename... ArgsToInstantiate>
 class DynamicSerializerRegistry {
 public:
 	struct DynamicSerializer {
@@ -26,23 +31,23 @@ public:
 		DynamicSerializer(int serializerID) : serializerID(serializerID) {}
 
 		virtual void serialize(const BaseType& object, std::ostream& ostream) const = 0;
-		virtual BaseType* deserialize(std::istream& istream) const = 0;
+		virtual BaseType* deserialize(std::istream& istream, ArgsToInstantiate... args) const = 0;
 	};
 
 	template<typename ConcreteType>
 	class ConcreteDynamicSerializer : public DynamicSerializer {
 		void (*serializeFunc)(const ConcreteType&, std::ostream&);
-		ConcreteType* (*deserializeFunc)(std::istream&);
+		ConcreteType* (*deserializeFunc)(std::istream&, ArgsToInstantiate...);
 	public:
-		ConcreteDynamicSerializer(void (*sf)(const ConcreteType&, std::ostream&), ConcreteType* (*dsf)(std::istream&), int serializerID) :
+		ConcreteDynamicSerializer(void (*sf)(const ConcreteType&, std::ostream&), ConcreteType* (*dsf)(std::istream&, ArgsToInstantiate...), int serializerID) :
 			DynamicSerializer(serializerID), serializeFunc(sf), deserializeFunc(dsf) {}
 
 		virtual void serialize(const BaseType& object, std::ostream& ostream) const override {
 			const ConcreteType& concreteObject = static_cast<const ConcreteType&>(object);
 			this->serializeFunc(concreteObject, ostream);
 		}
-		virtual BaseType* deserialize(std::istream& istream) const override {
-			return this->deserializeFunc(istream);
+		virtual BaseType* deserialize(std::istream& istream, ArgsToInstantiate... args) const override {
+			return this->deserializeFunc(istream, args...);
 		}
 	};
 
@@ -96,14 +101,14 @@ public:
 		serializer->serialize(object, ostream);
 	}
 
-	BaseType* deserialize(std::istream& istream) {
+	BaseType* deserialize(std::istream& istream, ArgsToInstantiate... args) {
 		int serialID = ::deserialize<int>(istream);
 		auto location = deserializeRegistry.find(serialID);
 		if(location == deserializeRegistry.end()) {
 			throw SerializationException("Invalid dynamic class ID!");
 		}
 		const DynamicSerializer* deserializer = (*location).second;
-		return deserializer->deserialize(istream);
+		return deserializer->deserialize(istream, args...);
 	}
 };
 

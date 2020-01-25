@@ -5,6 +5,7 @@
 #include "serialization.h"
 #include "dynamicSerialize.h"
 
+#include "../geometry/normalizedPolyhedron.h"
 
 #include "../constraints/hardConstraint.h"
 #include "../constraints/fixedConstraint.h"
@@ -25,12 +26,28 @@ MotorConstraint* deserializeMotorConstraint(std::istream& istream) {
 	return new MotorConstraint(angularVelocity, currentAngle);
 }
 
+void serializeNormalizedPolyhedron(const NormalizedPolyhedron& polyhedron, std::ostream& ostream) {
+	::serializePolyhedron(polyhedron, ostream);
+}
+NormalizedPolyhedron* deserializeNormalizedPolyhedron(std::istream& istream) {
+	Polyhedron poly = ::deserializePolyhedron(istream);
+	NormalizedPolyhedron* result = new NormalizedPolyhedron(poly.normalized());
+	return result;
+}
+
 static DynamicSerializerRegistry<HardConstraint>::ConcreteDynamicSerializer<FixedConstraint> fixedConstraintSerializer
 	(serializeFixedConstraint, deserializeFixedConstraint, 0);
 static DynamicSerializerRegistry<HardConstraint>::ConcreteDynamicSerializer<MotorConstraint> motorConstraintSerializer
 	(serializeMotorConstraint, deserializeMotorConstraint, 1);
 
+static DynamicSerializerRegistry<ShapeClass>::ConcreteDynamicSerializer<NormalizedPolyhedron> polyhedronSerializer
+	(serializeNormalizedPolyhedron, deserializeNormalizedPolyhedron, 0);
+
 DynamicSerializerRegistry<HardConstraint> hardConstraintRegistry{
 	{typeid(FixedConstraint), &fixedConstraintSerializer},
 	{typeid(MotorConstraint), &motorConstraintSerializer},
+};
+
+DynamicSerializerRegistry<ShapeClass> shapeClassRegistry {
+	{typeid(NormalizedPolyhedron), &polyhedronSerializer},
 };

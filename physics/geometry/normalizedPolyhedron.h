@@ -6,7 +6,7 @@
 class NormalizedPolyhedron : public ShapeClass, public Polyhedron {
 	friend class Polyhedron;
 	NormalizedPolyhedron(Polyhedron&& poly, Vec3 originalCenter, DiagonalMat3 originalScale, double volume, Vec3 localCenterOfMass, ScalableInertialMatrix inertia) : 
-		Polyhedron(std::move(poly)), ShapeClass(volume, localCenterOfMass, inertia), originalCenter(originalCenter), originalScale(originalScale) {}
+		Polyhedron(std::move(poly)), ShapeClass(volume, localCenterOfMass, inertia, CONVEX_POLYHEDRON_CLASS_ID), originalCenter(originalCenter), originalScale(originalScale) {}
 public:
 	const Vec3 originalCenter;
 	const DiagonalMat3 originalScale;

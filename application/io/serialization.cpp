@@ -14,11 +14,11 @@
 namespace Application {
 
 class CustomSerializer : public ExtendedPartSerializer<ExtendedPart> {
-	virtual void serialize(const ExtendedPart& part, std::ostream& ostream) override {
-		::serializePart(part, ostream);
+	virtual void serialize(const ExtendedPart& part, std::ostream& ostream, PartSerializationInformation& info) override {
+		::serializePartWithoutCFrame(part, ostream, info);
 	}
-	virtual ExtendedPart* deserialize(std::istream& istream) override {
-		return new ExtendedPart(::deserializePart(istream));
+	virtual ExtendedPart* deserialize(std::istream& istream, PartDeSerializationInformation& info) override {
+		return new ExtendedPart(::deserializePartWithoutCFrame(istream, info));
 	}
 };
 static CustomSerializer partSerializer;
@@ -29,8 +29,9 @@ void WorldImportExport::saveLooseParts(const char* fileName, size_t numberOfPart
 
 	for(size_t i = 0; i < numberOfParts; i++) {
 		const ExtendedPart* curPart = parts[i];
-		::serialize<GlobalCFrame>(curPart->getCFrame(), partFile);
-		partSerializer.serializePart(**parts, partFile);
+		
+		throw "TODO";
+		//::serializePartWithCFrame(*(parts[i]), partFile);
 	}
 	partFile.close();
 }
@@ -41,9 +42,10 @@ void WorldImportExport::loadLoosePartsIntoWorld(const char* fileName, World<Exte
 	file.open(fileName, std::ios::binary);
 
 	while(!file.eof()) {
-		ExtendedPart* p = new ExtendedPart(::deserializePart(file));
+		throw "TODO";
+		//ExtendedPart* p = new ExtendedPart(::deserializePartWithCFrame(file));
 
-		world.addPart(p);
+		//world.addPart(p);
 	}
 	file.close();
 }
@@ -53,16 +55,18 @@ void WorldImportExport::saveSingleMotorizedPhysical(const char* fileName, const 
 	std::ofstream physFile;
 	physFile.open(fileName, std::ios::binary);
 
-	serializeMotorizedPhysical(physical, physFile, partSerializer);
+	throw "TODO";
+	//serializeMotorizedPhysical(physical, physFile, partSerializer);
 	physFile.close();
 }
 void WorldImportExport::loadSingleMotorizedPhysicalIntoWorld(const char* fileName, World<ExtendedPart>& world) {
 	std::ifstream file;
 	file.open(fileName, std::ios::binary);
 
-	MotorizedPhysical* phys = ::deserializeMotorizedPhysical(file, partSerializer);
+	throw "TODO";
+	//MotorizedPhysical* phys = ::deserializeMotorizedPhysical(file, partSerializer);
 	file.close();
-	world.addPart(phys->getMainPart());
+	//world.addPart(phys->getMainPart());
 }
 
 
