@@ -8,10 +8,10 @@
 #include <fstream>
 
 #include "view/screen.h"
+#include "ecs/components/material.h"
 
 #include "../graphics/resources.h"
 #include "../graphics/texture.h"
-#include "../graphics/material.h"
 #include "../graphics/debug/debug.h"
 #include "../graphics/debug/visualDebug.h"
 #include "../physics/geometry/shape.h"

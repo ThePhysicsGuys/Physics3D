@@ -4,7 +4,7 @@
 #include "resources.h"
 #include "texture.h"
 
-#include "../util/resource/resourceLoader.h"
+#include "../util/resource/resourceManager.h"
 
 #include <sstream>
 
@@ -160,6 +160,11 @@ namespace GraphicsShaders {
 		new(&quadShader) QuadShader(quadShaderSource);
 		new(&horizontalBlurShader) BlurShader(horizontalBlurShaderSource);
 		new(&verticalBlurShader) BlurShader(verticalBlurShaderSource);
+
+		ResourceManager::add(&guiShader);
+		ResourceManager::add(&quadShader);
+		ResourceManager::add(&horizontalBlurShader);
+		ResourceManager::add(&verticalBlurShader);
 	}
 
 	void onClose() {

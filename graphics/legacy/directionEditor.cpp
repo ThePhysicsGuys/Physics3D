@@ -8,7 +8,6 @@
 
 #include "gui.h"
 #include "texture.h"
-#include "material.h"
 #include "renderUtils.h"
 #include "path/path.h"
 #include "buffers/frameBuffer.h"
@@ -34,9 +33,6 @@ void DirectionEditor::render() {
 		Renderer::clearColor();
 		Renderer::clearDepth();
 
-		//TODO GraphicsShaders::basicShader.updateMaterial(Material(GUI::COLOR::blend(GUI::COLOR::G, blendColor)));
-		//TODO GraphicsShaders::basicShader.updateModel(modelMatrix);
-		//Shaders::basicShader.updateProjection(viewMatrix, GUI::screen->camera.projectionMatrix, viewPosition);
 		Library::vector->render();
 
 		GUI::guiFrameBuffer->unbind();

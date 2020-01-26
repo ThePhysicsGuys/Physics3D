@@ -10,7 +10,7 @@
 #include "extendedPart.h"
 #include "worlds.h"
 
-#include "../graphics/light.h"
+#include "ecs/components/light.h"
 #include "../graphics/mesh/indexedMesh.h"
 #include "../graphics/meshLibrary.h"
 #include "../graphics/debug/visualDebug.h"

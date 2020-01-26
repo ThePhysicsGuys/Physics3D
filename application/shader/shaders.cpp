@@ -5,8 +5,8 @@
 #include "extendedPart.h"
 
 #include "../graphics/texture.h"
-#include "../graphics/material.h"
-#include "../graphics/light.h"
+#include "ecs/components/material.h"
+#include "ecs/components/light.h"
 
 #include "../util/resource/resource.h"
 #include "../util/resource/resourceManager.h"

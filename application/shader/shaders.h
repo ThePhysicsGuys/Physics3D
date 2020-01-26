@@ -7,11 +7,11 @@
 class HDRTexture;
 class Texture;
 class CubeMap;
-struct Light;
-struct Material;
 
 namespace Application {
 
+struct Light;
+struct Material;
 struct ExtendedPart;
 
 struct SkyboxShader : public ShaderResource {

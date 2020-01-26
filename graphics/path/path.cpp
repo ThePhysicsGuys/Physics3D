@@ -3,7 +3,6 @@
 #include "path.h"
 
 #include "font.h"
-#include "gui/text.h"
 #include "../batch/guiBatch.h"
 #include "../physics/math/mathUtil.h"
 

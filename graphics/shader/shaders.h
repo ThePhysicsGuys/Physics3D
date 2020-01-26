@@ -1,22 +1,22 @@
 #pragma once
 
-#include "shadeR.h"
-
+#include "shader.h"
+#include "../graphics/resource/shaderResource.h"
 #include "../physics/math/linalg/mat.h"
 
 class Texture;
 
-struct GuiShader : public Shader {
-	GuiShader() : Shader() {}
-	GuiShader(ShaderSource shaderSource) : Shader(shaderSource) {}
+struct GuiShader : public ShaderResource {
+	GuiShader() : ShaderResource() {}
+	GuiShader(ShaderSource shaderSource) : ShaderResource("GuiShader", "gui.shader", shaderSource) {}
 
 	void init(const Mat4f& orthoMatrix);
 	void setTextured(bool textured);
 };
 
-struct QuadShader : public Shader {
-	QuadShader() : Shader() {}
-	QuadShader(ShaderSource shaderSource) : Shader(shaderSource) {}
+struct QuadShader : public ShaderResource {
+	QuadShader() : ShaderResource() {}
+	QuadShader(ShaderSource shaderSource) : ShaderResource("QuadShader", "quad.shader", shaderSource) {}
 
 	void updateProjection(const Mat4f& orthoMatrix);
 	void updateColor(const Vec4& color);
@@ -24,9 +24,9 @@ struct QuadShader : public Shader {
 	void updateTexture(Texture* texture, const Vec4f& color);
 };
 
-struct BlurShader : public Shader {
-	BlurShader() : Shader() {}
-	BlurShader(ShaderSource shaderSource) : Shader(shaderSource) {}
+struct BlurShader : public ShaderResource {
+	BlurShader() : ShaderResource() {}
+	BlurShader(ShaderSource shaderSource) : ShaderResource("BlurShader", "blur.shader", shaderSource) {}
 
 	void updateWidth(float width);
 	void updateTexture(Texture* texture);

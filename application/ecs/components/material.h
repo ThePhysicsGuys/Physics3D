@@ -1,10 +1,13 @@
 #pragma once
 
-#include "gui/color.h"
+#include "../graphics/gui/color.h"
+#include "component.h"
 
 class Texture;
 
-struct Material {
+namespace Application {
+
+struct Material : public Component {
 	Texture* texture = nullptr;
 	Texture* normal = nullptr;
 
@@ -20,16 +23,14 @@ struct Material {
 	Material(Texture* texture) : Material(Color(1.0), Color3(1.0), Color3(1.0f), 1.0f, texture) {};
 	Material() : Material(Color(1.0f), Color3(1.0f), Color3(1.0f), 1.0f) {};
 
-	bool operator==(const Material& other) const {
-		return 
-			other.ambient == ambient &&
-			other.diffuse == diffuse &&
-			other.specular == specular &&
-			other.reflectance == reflectance &&
-			other.texture == texture &&
-			other.normal == normal;
-	}
-
+	bool operator==(const Material& other) const;
 	void setTexture(Texture* texture);
 	void setNormalMap(Texture* normalMap);
+
+	/*
+		Returns whether an Entity can contain multiple instances of this Component
+	*/
+	virtual bool isUnique() const;
+};
+
 };

@@ -4,10 +4,7 @@
 #include "guiUtils.h"
 
 #include "component.h"
-#include "container.h"
 #include "orderedVector.h"
-#include "colorPicker.h"
-#include "frame.h"
 #include "path/path.h"
 #include "shader/shaders.h"
 

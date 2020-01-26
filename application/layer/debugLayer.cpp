@@ -13,7 +13,7 @@
 #include "../physics/physical.h"
 
 #include "view/screen.h"
-#include "../graphics/material.h"
+#include "ecs/components/material.h"
 #include "../graphics/renderUtils.h"
 #include "shader/shaders.h"
 
@@ -37,14 +37,14 @@ Vec4f colors[] {
 };
 
 void renderSphere(double radius, const Position& position, const Color& color) {
-	ApplicationShaders::basicShader.updateMaterial(::Material(color));
+	ApplicationShaders::basicShader.updateMaterial(Material(color));
 	ApplicationShaders::basicShader.updateModel(CFrameToMat4(GlobalCFrame(position, DiagonalMat3::IDENTITY() * radius)));
 
 	Library::sphere->render();
 }
 
 void renderBox(const GlobalCFrame& cframe, double width, double height, double depth, const Color& color) {
-	ApplicationShaders::basicShader.updateMaterial(::Material(color));
+	ApplicationShaders::basicShader.updateMaterial(Material(color));
 	ApplicationShaders::basicShader.updateModel(CFrameToMat4(GlobalCFrame(cframe.getPosition(), cframe.getRotation() * DiagonalMat3 { width, height, depth })));
 
 	Library::cube->render();

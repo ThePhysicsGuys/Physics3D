@@ -31,6 +31,11 @@ public:
 		Sets the indexed mesh of this component to the given value
 	*/
 	void setIndexedMesh(IndexedMesh* indexedMesh);
+
+	/*
+		Returns whether an Entity can contain multiple instances of this Component
+	*/
+	virtual bool isUnique() const;
 };
 
 }

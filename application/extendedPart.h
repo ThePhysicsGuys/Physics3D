@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../graphics/material.h"
+#include "ecs/components/material.h"
 #include "../graphics/visualData.h"
 #include "../graphics/visualShape.h"
 #include "../graphics/visualData.h"
@@ -10,7 +10,7 @@ namespace Application {
 
 struct ExtendedPart : public Part {
 
-	::Material material;
+	Material material;
 
 	std::string name;
 
