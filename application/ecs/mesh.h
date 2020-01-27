@@ -1,6 +1,6 @@
 #pragma once
 
-#include "component.h"
+#include "../engine/ecs/component.h"
 
 namespace Application {
 
@@ -17,6 +17,8 @@ private:
 	IndexedMesh* indexedMesh;
 
 public:
+	DEFINE_COMPONENT(Mesh, true);
+
 	/*
 		Creates an new Mesh component with the given indexed mesh
 	*/
@@ -31,11 +33,6 @@ public:
 		Sets the indexed mesh of this component to the given value
 	*/
 	void setIndexedMesh(IndexedMesh* indexedMesh);
-
-	/*
-		Returns whether an Entity can contain multiple instances of this Component
-	*/
-	virtual bool isUnique() const;
 };
 
 }

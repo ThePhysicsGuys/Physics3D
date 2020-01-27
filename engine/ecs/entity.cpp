@@ -1,8 +1,6 @@
 #include "core.h"
 #include "entity.h"
 
-#include "components/component.h"
-
 namespace Application {
 
 void Entity::addComponent(Component* component) {
@@ -16,13 +14,14 @@ void Entity::addComponent(Component* component) {
 	}
 
 	component->setEntity(this);
-	components.push_back(component);
-
+	components.insert(std::pair<ComponentType, Component*>(component->getType(), component));
 }
 
 void Entity::removeComponent(Component* component) {
-	for (auto iterator = components.begin(); iterator != components.end(); ++iterator) {
-		if (*iterator == component) {
+	auto result = components.equal_range(component->getType());
+
+	for (auto iterator = result.first; iterator != result.second; ++iterator) {
+		if (iterator->second == component) {
 			components.erase(iterator);
 			component->setEntity(nullptr);
 			return;
@@ -30,9 +29,11 @@ void Entity::removeComponent(Component* component) {
 	}
 }
 
-bool Entity::containsComponent(Component* query) {
-	for (Component* component : components) {
-		if (component == query)
+bool Entity::containsComponent(Component* component) {
+	auto result = components.equal_range(component->getType());
+
+	for (auto iterator = result.first; iterator != result.second; ++iterator) {
+		if (iterator->second == component) 
 			return true;
 	}
 
@@ -40,18 +41,17 @@ bool Entity::containsComponent(Component* query) {
 }
 
 bool Entity::containsComponentOfType(Component* query) {
-	for (Component* component : components) {
-		if (typeid(component) == typeid(query))
-			return true;
-	}
+	return components.find(query->getType()) != components.end();
 }
 
 void Entity::overwriteComponent(Component* query) {
-	for (Component* component : components) {
-		if (typeid(component) == typeid(query)) {
-			removeComponent(component);
-			addComponent(query);
-		}
+	auto iterator = components.lower_bound(query->getType());
+	
+	if (iterator != components.end()) {
+		Component* component = iterator->second;
+		components.erase(iterator);
+		component->setEntity(nullptr);
+		addComponent(query);
 	}
 }
 

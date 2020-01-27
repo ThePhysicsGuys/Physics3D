@@ -10,7 +10,11 @@
 #include "extendedPart.h"
 #include "worlds.h"
 
-#include "ecs/components/light.h"
+#include "ecs/light.h"
+#include "ecs/material.h"
+#include "ecs/model.h"
+
+
 #include "../graphics/mesh/indexedMesh.h"
 #include "../graphics/meshLibrary.h"
 #include "../graphics/debug/visualDebug.h"
@@ -39,14 +43,7 @@ void ModelLayer::onInit() {
 }
 
 void ModelLayer::onUpdate() {
-	// Update lights
-	/*static long long t = 0;
-	float d = 0.5 + 0.5 * sin(t++ * 0.005);
-	sunDirection = Vec3f(0, cos(t * 0.005) , sin(t * 0.005));
-	lights[0].color = Vec3f(d, 0.3, 1-d);
-	lights[1].color = Vec3f(1-d, 0.3, 1 - d);
-	lights[2].color = Vec3f(0.2, 0.3*d, 1 - d);
-	lights[3].color = Vec3f(1-d, 1-d, d);*/
+		
 }
 
 void ModelLayer::onEvent(Event& event) {
@@ -122,11 +119,12 @@ void ModelLayer::onRender() {
 		const Camera& camera = screen->camera;
 
 		VisibilityFilter filter = VisibilityFilter::forWindow(camera.cframe.position, camera.getForwardDirection(), camera.getUpDirection(), camera.fov, camera.aspect, camera.zfar);
+		
 		// Render world objects
 		for (ExtendedPart& part : screen->world->iterPartsFiltered(filter, ALL_PARTS)) {
 			meshesToDraw.push_back(&part);
 		}
-		});
+	});
 
 	for (ExtendedPart* part : meshesToDraw) {
 		Material material = part->material;

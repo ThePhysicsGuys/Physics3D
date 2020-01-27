@@ -14,7 +14,7 @@
 #include "../graphics/mesh/primitive.h"
 #include "../graphics/mesh/indexedMesh.h"
 #include "../graphics/visualShape.h"
-#include "ecs/components/material.h"
+#include "ecs/material.h"
 #include "../graphics/gui/gui.h"
 
 #include "../util/resource/resourceManager.h"

@@ -8,7 +8,7 @@
 #include <fstream>
 
 #include "view/screen.h"
-#include "ecs/components/material.h"
+#include "ecs/material.h"
 
 #include "../graphics/resources.h"
 #include "../graphics/texture.h"

@@ -1,9 +1,9 @@
 #pragma once
 #include <typeinfo>
 
-namespace Application {
+#include "component.h"
 
-class Component;
+namespace Application {
 
 class Entity {
 private:
@@ -20,7 +20,7 @@ private:
 	/*
 		The components of this entity
 	*/
-	std::vector<Component*> components;
+	std::multimap<ComponentType, Component*> components;
 
 public:
 
@@ -84,12 +84,9 @@ public:
 	*/
 	template<typename T, typename = std::enable_if<std::is_base_of<Component, T>::value>>
 	T* getComponent() {
-		for (Component* component : components) {
-			if (typeid(T*) == typeid(component))
-				return static_cast<T*>(component);
-		}
+		auto iterator = components.find(T::getStaticType());
 
-		return nullptr;
+		return (iterator != components.end()) ? static_cast<T*>(iterator->second) : nullptr;
 	}
 
 	/*
@@ -130,11 +127,10 @@ public:
 	std::vector<T*> getComponents() {
 		std::vector<T*> results;
 
-		for (Component* component : components) {
-			if (typeid(T*) == typeid(component))
-				results.push_back(static_cast<T*>(component));
-		}
-
+		auto result = components.equal_range(T::getStaticType());
+		for (auto iterator = result.first; iterator != result.second; ++iterator)
+			results.push_back(iterator->second);
+		
 		return results;
 	}
 

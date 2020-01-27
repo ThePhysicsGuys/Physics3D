@@ -1,7 +1,7 @@
 #include "core.h"
 #include "transform.h"
 
-#include "../entity.h"
+#include "../engine/ecs/entity.h"
 #include "model.h"
 
 namespace Application {
@@ -21,10 +21,6 @@ GlobalCFrame TransformComp::getCFrame() const {
 
 void TransformComp::setCFrame(const GlobalCFrame& cframe) {
 	this->cframe = cframe;
-}
-
-bool TransformComp::isUnique() const {
-	return true;
 }
 
 };

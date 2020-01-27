@@ -3,9 +3,9 @@
 #include "testLayer.h"
 #include "view/screen.h"
 
-#include "ecs/entity.h";
-#include "ecs/components/model.h"
-#include "ecs/components/transform.h"
+#include "../engine/ecs/entity.h"
+#include "ecs/model.h"
+#include "ecs/transform.h"
 
 #include "../graphics/shader/shaderLexer.h"
 

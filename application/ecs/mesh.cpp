@@ -15,8 +15,4 @@ void Mesh::setIndexedMesh(IndexedMesh* indexedMesh) {
 	this->indexedMesh = indexedMesh;
 }
 
-bool Mesh::isUnique() const {
-	return true;
-}
-
 };

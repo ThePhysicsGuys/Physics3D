@@ -1,7 +1,6 @@
 #pragma once
 
-#include "component.h"
-
+#include "../engine/ecs/component.h"
 #include "../physics/math/globalCFrame.h"
 
 namespace Application {
@@ -17,6 +16,8 @@ private:
 	GlobalCFrame cframe;
 
 public:
+	DEFINE_COMPONENT(Transform, true);
+
 	/*
 		Created a new TransformComp with the given CFrame
 	*/
@@ -31,11 +32,6 @@ public:
 		Sets the CFrame of this TransformComp to the given value
 	*/
 	void setCFrame(const GlobalCFrame& cframe);
-
-	/*
-		Returns whether an Entity can contain multiple instances of this Component
-	*/
-	virtual bool isUnique() const override;
 };
 
 };

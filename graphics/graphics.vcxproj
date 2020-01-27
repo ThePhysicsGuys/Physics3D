@@ -171,6 +171,7 @@
     <ClCompile Include="debug\profilerUI.cpp" />
     <ClCompile Include="font.cpp" />
     <ClCompile Include="gui\color.cpp" />
+    <ClCompile Include="gui\container.cpp" />
     <ClCompile Include="gui\gui.cpp" />
     <ClCompile Include="gui\guiUtils.cpp" />
     <ClCompile Include="gui\layout.cpp" />
@@ -222,6 +223,7 @@
     <ClInclude Include="font.h" />
     <ClInclude Include="gui\color.h" />
     <ClInclude Include="gui\component.h" />
+    <ClInclude Include="gui\container.h" />
     <ClInclude Include="gui\gui.h" />
     <ClInclude Include="gui\guiUtils.h" />
     <ClInclude Include="gui\imgui\imguiExtension.h" />

@@ -2,7 +2,7 @@
 
 #include "../physics/math/linalg/vec.h"
 
-#include "component.h"
+#include "../engine/ecs/component.h"
 
 namespace Application {
 
@@ -13,19 +13,14 @@ struct Attenuation {
 };
 
 struct Light : public Component {
+	DEFINE_COMPONENT(Light, true);
+
 	Vec3f position;
 	Color3 color;
 	float intensity;
 	Attenuation attenuation;
 
 	Light(Vec3f position, Color3 color, float intensity, Attenuation attenuation) : position(position), color(color), intensity(intensity), attenuation(attenuation) {};
-
-	/*
-		Returns whether an Entity can contain multiple instances of this Component
-	*/
-	virtual bool isUnique() const {
-		return true;
-	}
 };
 
 };

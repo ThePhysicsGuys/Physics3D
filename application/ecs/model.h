@@ -1,6 +1,6 @@
 #pragma once
 
-#include "component.h"
+#include "../engine/ecs/component.h"
 #include "transform.h"
 
 namespace Application {
@@ -18,6 +18,8 @@ private:
 	ExtendedPart* extendedPart;
 
 public:
+	DEFINE_COMPONENT(Model, true);
+
 	/*
 		Returns the extendedPart of this model
 	*/
@@ -37,12 +39,6 @@ public:
 		Sets the transform of this model's ExtendedPart to the given value
 	*/
 	void setTransform(const TransformComp& transform);
-
-	/*
-		Returns whether an Entity can contain multiple instances of this Component
-	*/
-	virtual bool isUnique() const override;
-
 };
 
 };

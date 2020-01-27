@@ -1,7 +1,7 @@
 #include "core.h"
 #include "component.h"
 
-#include "../entity.h"
+#include "../engine/ecs/entity.h"
 
 namespace Application {
 

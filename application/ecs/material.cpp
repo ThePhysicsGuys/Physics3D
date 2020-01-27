@@ -16,10 +16,6 @@ void Material::setNormalMap(Texture* normalMap) {
 	this->normal = normalMap;
 }
 
-bool Material::isUnique() const {
-	return true;
-}
-
 bool Material::operator==(const Material& other) const {
 	return
 		other.ambient == ambient &&

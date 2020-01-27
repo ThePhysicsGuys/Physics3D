@@ -11,7 +11,7 @@
 #include "ray.h"
 
 #include "view/screen.h"
-#include "ecs/components/material.h"
+#include "ecs/material.h"
 #include "../graphics/renderUtils.h"
 #include "../graphics/mesh/primitive.h"
 #include "../graphics/mesh/indexedMesh.h"

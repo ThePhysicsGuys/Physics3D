@@ -203,13 +203,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
-    <ClInclude Include="ecs\components\component.h" />
     <ClInclude Include="core.h" />
-    <ClInclude Include="ecs\components\light.h" />
-    <ClInclude Include="ecs\components\material.h" />
-    <ClInclude Include="ecs\components\mesh.h" />
-    <ClInclude Include="ecs\components\model.h" />
-    <ClInclude Include="ecs\entity.h" />
+    <ClInclude Include="ecs\light.h" />
+    <ClInclude Include="ecs\material.h" />
+    <ClInclude Include="ecs\mesh.h" />
+    <ClInclude Include="ecs\model.h" />
     <ClInclude Include="io\serialization.h" />
     <ClInclude Include="layer\testLayer.h" />
     <ClInclude Include="layer\debugLayer.h" />
@@ -231,7 +229,7 @@
     <ClInclude Include="picker\pickable.h" />
     <ClInclude Include="picker\ray.h" />
     <ClInclude Include="picker\picker.h" />
-    <ClInclude Include="ecs\components\transform.h" />
+    <ClInclude Include="ecs\transform.h" />
     <ClInclude Include="view\camera.h" />
     <ClInclude Include="view\frames.h" />
     <ClInclude Include="view\screen.h" />
@@ -240,17 +238,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="application.cpp" />
-    <ClCompile Include="ecs\components\component.cpp" />
     <ClCompile Include="core.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">core.h</PrecompiledHeaderFile>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">core.h</PrecompiledHeaderFile>
     </ClCompile>
-    <ClCompile Include="ecs\components\material.cpp" />
-    <ClCompile Include="ecs\components\mesh.cpp" />
-    <ClCompile Include="ecs\components\model.cpp" />
-    <ClCompile Include="ecs\entity.cpp" />
+    <ClCompile Include="ecs\material.cpp" />
+    <ClCompile Include="ecs\mesh.cpp" />
+    <ClCompile Include="ecs\model.cpp" />
     <ClCompile Include="io\serialization.cpp" />
     <ClCompile Include="layer\postprocessLayer.cpp" />
     <ClCompile Include="resources.cpp" />
@@ -270,7 +266,7 @@
     <ClCompile Include="shader\shaders.cpp" />
     <ClCompile Include="tickerThread.cpp" />
     <ClCompile Include="picker\picker.cpp" />
-    <ClCompile Include="ecs\components\transform.cpp" />
+    <ClCompile Include="ecs\transform.cpp" />
     <ClCompile Include="view\camera.cpp" />
     <ClCompile Include="view\frames.cpp" />
     <ClCompile Include="view\screen.cpp" />

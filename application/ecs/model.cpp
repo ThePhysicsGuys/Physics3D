@@ -26,8 +26,4 @@ void Model::setTransform(const TransformComp& transform) {
 	getExtendedPart()->setCFrame(transform.getCFrame());
 }
 
-bool Model::isUnique() const {
-	return true;
-}
-
 };

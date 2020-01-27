@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ecs/components/material.h"
+#include "ecs/material.h"
 #include "../graphics/visualData.h"
 #include "../graphics/visualShape.h"
 #include "../graphics/visualData.h"

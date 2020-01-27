@@ -39,6 +39,7 @@
 
 namespace Application {
 
+std::vector<Entity*> Screen::entities;
 std::vector<IndexedMesh*> Screen::meshes;
 std::map<const ShapeClass*, VisualData> Screen::shapeClassMeshIds;
 
@@ -107,7 +108,6 @@ Screen::Screen(int width, int height, PlayerWorld* world) {
 
 // Handler
 StandardInputHandler* handler = nullptr;
-
 
 // Layers
 SkyboxLayer skyboxLayer;

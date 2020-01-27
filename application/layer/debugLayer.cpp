@@ -13,7 +13,7 @@
 #include "../physics/physical.h"
 
 #include "view/screen.h"
-#include "ecs/components/material.h"
+#include "ecs/material.h"
 #include "../graphics/renderUtils.h"
 #include "shader/shaders.h"
 

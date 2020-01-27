@@ -1,13 +1,14 @@
 #pragma once
 
 #include "../graphics/gui/color.h"
-#include "component.h"
-
+#include "../engine/ecs/component.h"
 class Texture;
 
 namespace Application {
 
 struct Material : public Component {
+	DEFINE_COMPONENT(Material, true);
+
 	Texture* texture = nullptr;
 	Texture* normal = nullptr;
 
@@ -26,11 +27,6 @@ struct Material : public Component {
 	bool operator==(const Material& other) const;
 	void setTexture(Texture* texture);
 	void setNormalMap(Texture* normalMap);
-
-	/*
-		Returns whether an Entity can contain multiple instances of this Component
-	*/
-	virtual bool isUnique() const;
 };
 
 };
