@@ -1,26 +1,6 @@
 #pragma once
 
-#include <iostream>
-#include <string>
-#include <unordered_map>
-#include <typeinfo>
-#include <typeindex>
-#include <type_traits>
-#include <stdexcept>
-#include <initializer_list>
-
 #include "serializeBasicTypes.h"
-
-class SerializationException : public std::exception {
-	std::string message;
-public:
-	SerializationException() = default;
-	SerializationException(std::string message) : message(message) {}
-
-	virtual const char* what() const override {
-		return message.c_str();
-	}
-};
 
 template<typename BaseType, typename... ArgsToInstantiate>
 class DynamicSerializerRegistry {
@@ -65,7 +45,7 @@ public:
 			deserializeRegistry.emplace(ds->serializerID, ds);
 		}
 	}
-	
+
 	template<typename ConcreteType, typename = typename std::enable_if<std::is_base_of<BaseType, ConcreteType>::value, int>::type>
 	void registerSerializerDeserializer(void (*serializeFunc)(const ConcreteType&, std::ostream&), ConcreteType* (*deserializeFunc)(std::istream&), int serializerID) {
 		if(deserializeRegistry.find(serializerID) != deserializeRegistry.end()) {
@@ -91,7 +71,7 @@ public:
 		registerSerializerDeserializer(serialize, deserialize, i);
 	}
 
-	void serialize(const BaseType& object, std::ostream& ostream) {
+	void serialize(const BaseType& object, std::ostream& ostream) const {
 		auto location = serializeRegistry.find(typeid(object));
 		if(location == serializeRegistry.end()) {
 			throw SerializationException("This class is not in the serialization registry!");
@@ -101,7 +81,7 @@ public:
 		serializer->serialize(object, ostream);
 	}
 
-	BaseType* deserialize(std::istream& istream, ArgsToInstantiate... args) {
+	BaseType* deserialize(std::istream& istream, ArgsToInstantiate... args) const {
 		int serialID = ::deserialize<int>(istream);
 		auto location = deserializeRegistry.find(serialID);
 		if(location == deserializeRegistry.end()) {
@@ -111,4 +91,3 @@ public:
 		return deserializer->deserialize(istream, args...);
 	}
 };
-

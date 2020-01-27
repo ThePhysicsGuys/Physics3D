@@ -13,15 +13,6 @@
 
 namespace Application {
 
-class CustomSerializer : public ExtendedPartSerializer<ExtendedPart> {
-	virtual void serialize(const ExtendedPart& part, std::ostream& ostream, PartSerializationInformation& info) override {
-		::serializePartWithoutCFrame(part, ostream, info);
-	}
-	virtual ExtendedPart* deserialize(std::istream& istream, PartDeSerializationInformation& info) override {
-		return new ExtendedPart(::deserializePartWithoutCFrame(istream, info));
-	}
-};
-static CustomSerializer partSerializer;
 
 void WorldImportExport::saveLooseParts(const char* fileName, size_t numberOfParts, const ExtendedPart* const* parts) {
 	std::ofstream partFile;
@@ -69,12 +60,21 @@ void WorldImportExport::loadSingleMotorizedPhysicalIntoWorld(const char* fileNam
 	//world.addPart(phys->getMainPart());
 }
 
+class ApplicationSerializationContext : public SerializationContext<ExtendedPart> {
+	virtual void serializeExtendedPart(const ExtendedPart& part, std::ostream& ostream, PartSerializationInformation& serializationInformation) const override {
+		::serializePartWithoutCFrame(part, ostream, serializationInformation);
+	}
+	virtual ExtendedPart* deserializeExtendedPart(std::istream& istream, PartDeSerializationInformation& deserializationInformation) const override {
+		return new ExtendedPart(::deserializePartWithoutCFrame(istream, deserializationInformation));
+	}
+} static context;
+
 
 void WorldImportExport::saveWorld(const char* fileName, const World<ExtendedPart>& world) {
 	std::ofstream file;
 	file.open(fileName, std::ios::binary);
 
-	::serializeWorld(world, file, partSerializer);
+	context.serializeWorld(world, file);
 
 	file.close();
 }
@@ -82,7 +82,7 @@ void WorldImportExport::loadWorld(const char* fileName, World<ExtendedPart>& wor
 	std::ifstream file;
 	file.open(fileName, std::ios::binary);
 
-	::deserializeWorld(world, file, partSerializer);
+	context.deserializeWorld(world, file);
 
 	file.close();
 }

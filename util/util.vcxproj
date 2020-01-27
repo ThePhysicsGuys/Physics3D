@@ -179,9 +179,11 @@
     <ClCompile Include="resource\resource.cpp" />
     <ClCompile Include="resource\resourceLoader.cpp" />
     <ClCompile Include="resource\resourceManager.cpp" />
+    <ClCompile Include="serializeBasicTypes.cpp" />
     <ClCompile Include="stringUtil.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="dynamicSerialize.h" />
     <ClInclude Include="log.h" />
     <ClInclude Include="math\mat3.h" />
     <ClInclude Include="math\mat4.h" />
@@ -191,6 +193,7 @@
     <ClInclude Include="resource\resource.h" />
     <ClInclude Include="resource\resourceLoader.h" />
     <ClInclude Include="resource\resourceManager.h" />
+    <ClInclude Include="serializeBasicTypes.h" />
     <ClInclude Include="stringUtil.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
