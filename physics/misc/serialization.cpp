@@ -3,39 +3,22 @@
 #include <map>
 #include <set>
 #include <limits.h>
+#include <string>
 
-#include "dynamicSerialize.h"
 #include "partSerializationInformation.h"
 
 #include "../geometry/polyhedron.h"
+#include "../geometry/normalizedPolyhedron.h"
 #include "../geometry/polyhedronInternals.h"
 #include "../geometry/shape.h"
 #include "../geometry/shapeClass.h"
 #include "../part.h"
 #include "../world.h"
-
 #include "../constraints/hardConstraint.h"
 #include "../constraints/fixedConstraint.h"
 #include "../constraints/motorConstraint.h"
 
-
-void serialize(const char* data, size_t size, std::ostream& ostream) {
-	ostream.write(data, size);
-}
-
-void deserialize(char* buf, size_t size, std::istream& istream) {
-	for(size_t i = 0; i < size; i++)
-		buf[i] = istream.get();
-}
-
-template<>
-void serialize<char>(const char& c, std::ostream& ostream) {
-	ostream << c;
-}
-template<>
-char deserialize<char>(std::istream& istream) {
-	return istream.get();
-}
+#pragma region serializeComponents
 
 void serializePolyhedron(const Polyhedron& poly, std::ostream& ostream) {
 	::serialize<int>(poly.vertexCount, ostream);
@@ -94,6 +77,33 @@ Shape deserializeShape(std::istream& istream, const std::map<ShapeClassID, const
 	return Shape(shapeClass, width, height, depth);
 }
 
+void serializeFixedConstraint(const FixedConstraint& object, std::ostream& ostream) {}
+FixedConstraint* deserializeFixedConstraint(std::istream& istream) { return new FixedConstraint(); }
+
+void serializeMotorConstraint(const MotorConstraint& constraint, std::ostream& ostream) {
+	::serialize<Vec3>(constraint.getAngularVelocity(), ostream);
+	::serialize<double>(constraint.getCurrentAngle(), ostream);
+}
+MotorConstraint* deserializeMotorConstraint(std::istream& istream) {
+	Vec3 angularVelocity = ::deserialize<Vec3>(istream);
+	double currentAngle = ::deserialize<double>(istream);
+
+	return new MotorConstraint(angularVelocity, currentAngle);
+}
+
+void serializeNormalizedPolyhedron(const NormalizedPolyhedron& polyhedron, std::ostream& ostream) {
+	::serializePolyhedron(polyhedron, ostream);
+}
+NormalizedPolyhedron* deserializeNormalizedPolyhedron(std::istream& istream) {
+	Polyhedron poly = ::deserializePolyhedron(istream);
+	NormalizedPolyhedron* result = new NormalizedPolyhedron(poly.normalized());
+	return result;
+}
+
+#pragma endregion
+
+#pragma region serializePartPhysicalAndRelated
+
 void serializePartWithoutCFrame(const Part& part, std::ostream& ostream, PartSerializationInformation& serializationInformation) {
 	::serializeShape(part.hitbox, ostream, serializationInformation.shapeClassRegistry);
 	::serialize<PartProperties>(part.properties, ostream);
@@ -101,7 +111,7 @@ void serializePartWithoutCFrame(const Part& part, std::ostream& ostream, PartSer
 
 void serializePartWithCFrame(const Part& part, std::ostream& ostream, PartSerializationInformation& serializationInformation) {
 	::serialize<GlobalCFrame>(part.getCFrame(), ostream);
-	::serializePartWithoutCFrame(part, ostream, serializationInformation);
+	serializePartWithoutCFrame(part, ostream, serializationInformation);
 }
 
 Part deserializePartWithoutCFrame(std::istream& istream, PartDeSerializationInformation& deserializationInformation) {
@@ -117,14 +127,14 @@ Part deserializePartWithCFrame(std::istream& istream, PartDeSerializationInforma
 	return Part(shape, cf, properties);
 }
 
-void PartSerializer::serializePart(const Part& part, std::ostream& ostream, PartSerializationInformation& serializationInformation) {
+void SerializationContextPrototype::serializePart(const Part& part, std::ostream& ostream, PartSerializationInformation& serializationInformation) const {
 	::serializePartWithoutCFrame(part, ostream, serializationInformation);
 }
-Part* PartSerializer::deserializePart(std::istream& istream, PartDeSerializationInformation& deserializationInformation) {
+Part* SerializationContextPrototype::deserializePart(std::istream& istream, PartDeSerializationInformation& deserializationInformation) const {
 	return new Part(::deserializePartWithoutCFrame(istream, deserializationInformation));
 }
 
-static void serializeRigidBody(const RigidBody& rigidBody, std::ostream& ostream, PartSerializer& partSerializer, PartSerializationInformation& serializationInformation) {
+static void serializeRigidBody(const RigidBody& rigidBody, std::ostream& ostream, const SerializationContextPrototype& partSerializer, PartSerializationInformation& serializationInformation) {
 	partSerializer.serializePart(*rigidBody.mainPart, ostream, serializationInformation);
 	::serialize<unsigned int>(rigidBody.parts.size(), ostream);
 	for(const AttachedPart& atPart : rigidBody.parts) {
@@ -133,7 +143,7 @@ static void serializeRigidBody(const RigidBody& rigidBody, std::ostream& ostream
 	}
 }
 
-static RigidBody deserializeRigidBody(std::istream& istream, PartSerializer& partSerializer, PartDeSerializationInformation& deserializationInformation) {
+static RigidBody deserializeRigidBody(std::istream& istream, const SerializationContextPrototype& partSerializer, PartDeSerializationInformation& deserializationInformation) {
 	Part* mainPart = partSerializer.deserializePart(istream, deserializationInformation);
 	unsigned int size = ::deserialize<unsigned int>(istream);
 	RigidBody result(mainPart);
@@ -146,14 +156,14 @@ static RigidBody deserializeRigidBody(std::istream& istream, PartSerializer& par
 	return result;
 }
 
-static void serializeHardPhysicalConnection(const HardPhysicalConnection& connection, std::ostream& ostream) {
+static void serializeHardPhysicalConnection(const HardPhysicalConnection& connection, std::ostream& ostream, const DynamicSerializerRegistry<HardConstraint>& hardConstraintRegistry) {
 	::serialize<CFrame>(connection.attachOnChild, ostream);
 	::serialize<CFrame>(connection.attachOnParent, ostream);
 
 	hardConstraintRegistry.serialize(*connection.constraintWithParent, ostream);
 }
 
-static HardPhysicalConnection deserializeHardPhysicalConnection(std::istream& istream) {
+static HardPhysicalConnection deserializeHardPhysicalConnection(std::istream& istream, const DynamicSerializerRegistry<HardConstraint>& hardConstraintRegistry) {
 	CFrame attachOnChild = ::deserialize<CFrame>(istream);
 	CFrame attachOnParent = ::deserialize<CFrame>(istream);
 
@@ -164,27 +174,27 @@ static HardPhysicalConnection deserializeHardPhysicalConnection(std::istream& is
 
 
 
-void serializeConnectionsFromPhysical(const Physical& phys, std::ostream& ostream, PartSerializer& partSerializer, PartSerializationInformation& serializationInformation) {
+static void serializeConnectionsFromPhysical(const Physical& phys, std::ostream& ostream, const SerializationContextPrototype& partSerializer, PartSerializationInformation& serializationInformation) {
 	serializeRigidBody(phys.rigidBody, ostream, partSerializer, serializationInformation);
 	::serialize<unsigned int>(phys.childPhysicals.size(), ostream);
 	for(const ConnectedPhysical& p : phys.childPhysicals) {
-		serializeHardPhysicalConnection(p.connectionToParent, ostream);
+		serializeHardPhysicalConnection(p.connectionToParent, ostream, partSerializer.dynamicHardConstraintSerializer);
 		serializeConnectionsFromPhysical(p, ostream, partSerializer, serializationInformation);
 	}
 }
 
-void serializeMotorizedPhysical(const MotorizedPhysical& phys, std::ostream& ostream, PartSerializer& partSerializer, PartSerializationInformation& serializationInformation) {
+static void serializeMotorizedPhysical(const MotorizedPhysical& phys, std::ostream& ostream, const SerializationContextPrototype& partSerializer, PartSerializationInformation& serializationInformation) {
 	::serialize<Motion>(phys.motionOfCenterOfMass, ostream);
 	::serialize<GlobalCFrame>(phys.getMainPart()->getCFrame(), ostream);
 
 	serializeConnectionsFromPhysical(phys, ostream, partSerializer, serializationInformation);
 }
 
-static void deserializeConnectionsOfPhysical(Physical& physToPopulate, std::istream& istream, PartSerializer& partSerializer, PartDeSerializationInformation& deserializationInformation) {
+static void deserializeConnectionsOfPhysical(Physical& physToPopulate, std::istream& istream, const SerializationContextPrototype& partSerializer, PartDeSerializationInformation& deserializationInformation) {
 	unsigned int childrenCount = ::deserialize<unsigned int>(istream);
 	physToPopulate.childPhysicals.reserve(childrenCount);
 	for(size_t i = 0; i < childrenCount; i++) {
-		HardPhysicalConnection connection = deserializeHardPhysicalConnection(istream);
+		HardPhysicalConnection connection = deserializeHardPhysicalConnection(istream, partSerializer.dynamicHardConstraintSerializer);
 		RigidBody b = deserializeRigidBody(istream, partSerializer, deserializationInformation);
 		physToPopulate.childPhysicals.push_back(ConnectedPhysical(std::move(b), &physToPopulate, std::move(connection)));
 		ConnectedPhysical& currentlyWorkingOn = physToPopulate.childPhysicals.back();
@@ -192,7 +202,7 @@ static void deserializeConnectionsOfPhysical(Physical& physToPopulate, std::istr
 	}
 }
 
-MotorizedPhysical* deserializeMotorizedPhysical(std::istream& istream, PartSerializer& partSerializer, PartDeSerializationInformation& deserializationInformation) {
+static MotorizedPhysical* deserializeMotorizedPhysical(std::istream& istream, const SerializationContextPrototype& partSerializer, PartDeSerializationInformation& deserializationInformation) {
 	Motion motion = ::deserialize<Motion>(istream);
 	GlobalCFrame cf = ::deserialize<GlobalCFrame>(istream);
 	RigidBody r = deserializeRigidBody(istream, partSerializer, deserializationInformation);
@@ -206,6 +216,12 @@ MotorizedPhysical* deserializeMotorizedPhysical(std::istream& istream, PartSeria
 	mainPhys->refreshPhysicalProperties();
 	return mainPhys;
 }
+
+#pragma endregion
+
+#pragma region serializeWorld
+
+#pragma region findShapeClass
 
 static void findShapeClass(const Part& part, std::set<const ShapeClass*>& found, const std::map<const ShapeClass*, ShapeClassID>& ignoredShapeClasses) {
 	const ShapeClass* shape = part.hitbox.baseShape;
@@ -241,7 +257,9 @@ static std::set<const ShapeClass*> findShapeClasses(const WorldPrototype& world,
 	return result;
 }
 
-static void serializeWorldPrototype(const WorldPrototype& world, std::ostream& ostream, PartSerializer& partSerializer, PartSerializationInformation& serializationInfo) {
+#pragma endregion
+
+static void serializeWorldPrototype(const WorldPrototype& world, std::ostream& ostream, const SerializationContextPrototype& partSerializer, PartSerializationInformation& serializationInfo) {
 	size_t numberOfPhysicals = world.physicals.size();
 	::serialize<size_t>(numberOfPhysicals, ostream);
 	
@@ -262,7 +280,7 @@ static void serializeWorldPrototype(const WorldPrototype& world, std::ostream& o
 	}
 }
 
-void deserializeWorldPrototype(WorldPrototype& world, std::istream& istream, PartSerializer& partSerializer, PartDeSerializationInformation& deserializationInfo) {
+static void deserializeWorldPrototype(WorldPrototype& world, std::istream& istream, const SerializationContextPrototype& partSerializer, PartDeSerializationInformation& deserializationInfo) {
 	size_t numberOfPhysicals = ::deserialize<size_t>(istream);
 	size_t numberOfTerrainParts = ::deserialize<size_t>(istream);
 	world.physicals.reserve(numberOfPhysicals);
@@ -280,57 +298,87 @@ void deserializeWorldPrototype(WorldPrototype& world, std::istream& istream, Par
 	}
 }
 
-
-void serializeWorldPrototype(const WorldPrototype& world, std::ostream& ostream, PartSerializer& partSerializer) {
-
+static std::map<const ShapeClass*, ShapeClassID> IDMapFromVector(const std::vector<const ShapeClass*>& v) {
 	std::map<const ShapeClass*, ShapeClassID> knownShapeClasses;
-	for(ShapeClassID i = 0; i < builtinShapeClasses.size(); i++) {
-		knownShapeClasses.emplace(builtinShapeClasses[i], i);
+	for(ShapeClassID i = 0; i < v.size(); i++) {
+		knownShapeClasses.emplace(v[i], i);
 	}
+	return knownShapeClasses;
+}
 
-	std::set<const ShapeClass*> shapeClassesToSerialize = findShapeClasses(world, knownShapeClasses);
-
-	PartSerializationInformation info{knownShapeClasses};
-
+// Note: new ids are added to knownShapeClasses
+static void serializeShapeClassesAndAssignNewIDs(const std::set<const ShapeClass*>& shapeClassesToSerialize, std::ostream& ostream, std::map<const ShapeClass*, ShapeClassID>& knownShapeClasses, const DynamicSerializerRegistry<ShapeClass>& dynamicShapeClassSerializer) {
 	::serialize<ShapeClassID>(shapeClassesToSerialize.size(), ostream);
-
-	//throw "TODO extract reading ShapeClasses and collecting information into it's own segment, to share for looseParts and singlePhysical";
 
 	ShapeClassID currentID = UINT_MAX;
 	for(const ShapeClass* sc : shapeClassesToSerialize) {
-		info.shapeClassRegistry.emplace(sc, currentID);
+		knownShapeClasses.emplace(sc, currentID);
 
 		::serialize<ShapeClassID>(currentID, ostream);
 		currentID--;
-		shapeClassRegistry.serialize(*sc, ostream);
+		dynamicShapeClassSerializer.serialize(*sc, ostream);
 	}
-
-	serializeWorldPrototype(world, ostream, partSerializer, info);
 }
 
-void deserializeWorldPrototype(WorldPrototype& world, std::istream& istream, PartSerializer& partSerializer) {
-	
+void SerializationContextPrototype::serializeWorld(const WorldPrototype& world, std::ostream& ostream) const {
+
+	std::map<const ShapeClass*, ShapeClassID> knownShapeClasses = IDMapFromVector(this->builtinShapeClasses);
+
+	std::set<const ShapeClass*> shapeClassesToSerialize = findShapeClasses(world, knownShapeClasses);
+
+	::serializeShapeClassesAndAssignNewIDs(shapeClassesToSerialize, ostream, knownShapeClasses, this->dynamicShapeClassSerializer);
+
+	PartSerializationInformation info{knownShapeClasses};
+
+	::serializeWorldPrototype(world, ostream, *this, info);
+}
+
+static std::map<ShapeClassID, const ShapeClass*> deserializeShapeClasses(std::istream& istream, const std::vector<const ShapeClass*>& builtinShapeClasses, const DynamicSerializerRegistry<ShapeClass>& serializer) {
 	std::map<ShapeClassID, const ShapeClass*> knownShapeClasses;
 
 	for(ShapeClassID i = 0; i < builtinShapeClasses.size(); i++) {
 		knownShapeClasses.emplace(i, builtinShapeClasses[i]);
 	}
 
-
 	ShapeClassID shapeClassCount = ::deserialize<ShapeClassID>(istream);
 
 	for(ShapeClassID i = 0; i < shapeClassCount; i++) {
 		ShapeClassID shapeClassID = ::deserialize<ShapeClassID>(istream);
-		const ShapeClass* newShapeClass = shapeClassRegistry.deserialize(istream);
+		const ShapeClass* newShapeClass = serializer.deserialize(istream);
 
 		if(knownShapeClasses.emplace(shapeClassID, newShapeClass).second == false) {
 			throw SerializationException("This shapeClass serialization ID is already in use! " + std::to_string(shapeClassID));
 		}
 	}
 
-	PartDeSerializationInformation info{knownShapeClasses};
-
-	deserializeWorldPrototype(world, istream, partSerializer, info);
+	return knownShapeClasses;
 }
 
-std::vector<const ShapeClass*> builtinShapeClasses{boxClass, sphereClass, cylinderClass};
+void SerializationContextPrototype::deserializeWorld(WorldPrototype& world, std::istream& istream) const {
+	PartDeSerializationInformation info{::deserializeShapeClasses(istream, this->builtinShapeClasses, this->dynamicShapeClassSerializer)};
+
+	::deserializeWorldPrototype(world, istream, *this, info);
+}
+
+#pragma endregion
+
+#pragma region SerializationContextConstructor
+
+static DynamicSerializerRegistry<HardConstraint>::ConcreteDynamicSerializer<FixedConstraint> fixedConstraintSerializer
+(serializeFixedConstraint, deserializeFixedConstraint, 0);
+static DynamicSerializerRegistry<HardConstraint>::ConcreteDynamicSerializer<MotorConstraint> motorConstraintSerializer
+(serializeMotorConstraint, deserializeMotorConstraint, 1);
+
+static DynamicSerializerRegistry<ShapeClass>::ConcreteDynamicSerializer<NormalizedPolyhedron> polyhedronSerializer
+(serializeNormalizedPolyhedron, deserializeNormalizedPolyhedron, 0);
+
+SerializationContextPrototype::SerializationContextPrototype() : dynamicHardConstraintSerializer{
+		{typeid(FixedConstraint), &fixedConstraintSerializer},
+		{typeid(MotorConstraint), &motorConstraintSerializer},
+	},
+	dynamicShapeClassSerializer{
+		{typeid(NormalizedPolyhedron), &polyhedronSerializer},
+	},
+	builtinShapeClasses{boxClass, sphereClass, cylinderClass} {}
+
+#pragma endregion

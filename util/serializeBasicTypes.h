@@ -1,12 +1,19 @@
 #pragma once
 
 #include <iostream>
+#include <exception>
 
-#include "../math/fix.h"
-#include "../math/linalg/vec.h"
-#include "../math/linalg/mat.h"
-#include "../math/cframe.h"
-#include "../math/globalcframe.h"
+class SerializationException : public std::exception {
+	std::string message;
+public:
+	SerializationException() = default;
+	SerializationException(std::string message) : message(message) {}
+
+	virtual const char* what() const override {
+		return message.c_str();
+	}
+};
+
 
 
 void serialize(const char* data, size_t size, std::ostream& ostream);
@@ -54,3 +61,4 @@ void deserializeArray(T* buf, size_t size, std::istream& istream) {
 		buf[i] = deserialize<T>(istream);
 	}
 }
+

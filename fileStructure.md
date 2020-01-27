@@ -97,7 +97,7 @@ This is a dynamically serialized type
 #### Builtin Shape Classes
 Identifier | Name | Extra Data | Size (bytes)
 ---------- | ---- | ---------- | ------------
-0 | NormalizedPolyhedron | int vertexCount <br> int triangleCount <br> Vec3f[] vertices <br> Triangle[] triangles; | 8 + vertexCount * 12 + triangleCount * 12
+0 | NormalizedPolyhedron | int vertexCount <br> int triangleCount <br> Vec3f[] vertices <br> Triangle[] triangles | 8 + vertexCount * 12 + triangleCount * 12
 
 ## A note on Dynamically serialized types:
 Dynamically serializable types must be registered in a DynamicSerializerRegistry
