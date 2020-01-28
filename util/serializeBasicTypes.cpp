@@ -1,5 +1,6 @@
 #include "serializeBasicTypes.h"
 
+#include <sstream>
 
 void serialize(const char* data, size_t size, std::ostream& ostream) {
 	ostream.write(data, size);
@@ -19,3 +20,17 @@ char deserialize<char>(std::istream& istream) {
 	return istream.get();
 }
 
+void serializeString(const std::string& str, std::ostream& ostream) {
+	::serialize(str.c_str(), str.length(), ostream);
+	::serialize<char>('\0', ostream);
+}
+
+std::string deserializeString(std::istream& istream) {
+	std::stringstream sstream;
+
+	while(char c = istream.get()) {
+		sstream << c;
+	}
+
+	return sstream.str();
+}

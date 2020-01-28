@@ -10,9 +10,52 @@
 #include "../physics/misc/serialization.h"
 
 #include <fstream>
+#include <sstream>
 
 namespace Application {
 
+static void serializeMaterial(const Material& material, std::ostream& ostream) {
+	::serialize<Color>(material.ambient, ostream);
+	::serialize<Color3>(material.diffuse, ostream);
+	::serialize<Color3>(material.specular, ostream);
+	::serialize<float>(material.reflectance, ostream);
+}
+
+static Material deserializeMaterial(std::istream& istream) {
+	Color ambient = ::deserialize<Color>(istream);
+	Color3 diffuse = ::deserialize<Color3>(istream);
+	Color3 specular = ::deserialize<Color3>(istream);
+	float reflectance = ::deserialize<float>(istream);
+
+	return Material(ambient, diffuse, specular, reflectance);
+}
+
+class Serializer : public SerializationSession<ExtendedPart> {
+public:
+	using SerializationSession<ExtendedPart>::SerializationSession;
+	virtual void serializeExtendedPart(const ExtendedPart& part, std::ostream& ostream) override {
+		::serializePartWithoutCFrame(part, ostream, this->shapeClassToIDMap);
+		serializeMaterial(part.material, ostream);
+		::serialize<int>(part.renderMode, ostream);
+		::serializeString(part.name, ostream);
+	}
+};
+
+class Deserializer : public DeSerializationSession<ExtendedPart> {
+public:
+	using DeSerializationSession<ExtendedPart>::DeSerializationSession;
+	virtual ExtendedPart* deserializeExtendedPart(std::istream& istream) override {
+		Part p = ::deserializePartWithoutCFrame(istream, this->IDToShapeClassMap);
+		Material mat = deserializeMaterial(istream);
+		int renderMode = ::deserialize<int>(istream);
+		ExtendedPart* result = new ExtendedPart(std::move(p), ::deserializeString(istream));
+
+		result->material = mat;
+		result->renderMode = renderMode;
+
+		return result;
+	}
+};
 
 void WorldImportExport::saveLooseParts(const char* fileName, size_t numberOfParts, const ExtendedPart* const* parts) {
 	std::ofstream partFile;
@@ -60,21 +103,13 @@ void WorldImportExport::loadSingleMotorizedPhysicalIntoWorld(const char* fileNam
 	//world.addPart(phys->getMainPart());
 }
 
-class ApplicationSerializationContext : public SerializationContext<ExtendedPart> {
-	virtual void serializeExtendedPart(const ExtendedPart& part, std::ostream& ostream, PartSerializationInformation& serializationInformation) const override {
-		::serializePartWithoutCFrame(part, ostream, serializationInformation);
-	}
-	virtual ExtendedPart* deserializeExtendedPart(std::istream& istream, PartDeSerializationInformation& deserializationInformation) const override {
-		return new ExtendedPart(::deserializePartWithoutCFrame(istream, deserializationInformation));
-	}
-} static context;
-
 
 void WorldImportExport::saveWorld(const char* fileName, const World<ExtendedPart>& world) {
 	std::ofstream file;
 	file.open(fileName, std::ios::binary);
 
-	context.serializeWorld(world, file);
+	Serializer serializer;
+	serializer.serializeWorld(world, file);
 
 	file.close();
 }
@@ -82,7 +117,8 @@ void WorldImportExport::loadWorld(const char* fileName, World<ExtendedPart>& wor
 	std::ifstream file;
 	file.open(fileName, std::ios::binary);
 
-	context.deserializeWorld(world, file);
+	Deserializer deserializer;
+	deserializer.deserializeWorld(world, file);
 
 	file.close();
 }

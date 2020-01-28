@@ -4,18 +4,9 @@ template<typename T, size_t Size>
 struct Vector {
 	T data[Size];
 
-	Vector() {
-		for (size_t i = 0; i < Size; i++) {
+	Vector() : data{} {
+		for(size_t i = 0; i < Size; i++) {
 			this->data[i] = 0;
-		}
-	}
-
-	Vector(const Vector& other) = default;
-
-	template<typename OtherT>
-	Vector(const Vector<OtherT, Size>& other) {
-		for (size_t i = 0; i < Size; i++) {
-			this->data[i] = static_cast<T>(other.data[i]);
 		}
 	}
 
@@ -32,9 +23,18 @@ struct Vector {
 		this->data[Size - 1] = finalVal;
 	}
 
-	Vector(const Vector<T, Size + 1>& other) {
-		for (size_t i = 0; i < Size; i++) {
-			this->data[i] = other.data[i];
+	template<typename OtherT>
+	operator Vector<OtherT, Size>() const {
+		Vector<OtherT, Size> result;
+		for(size_t i = 0; i < Size; i++) {
+			result.data[i] = static_cast<OtherT>(this->data[i]);
+		}
+	}
+
+	operator Vector<T, Size - 1>() const {
+		Vector<T, Size + 1> result;
+		for(size_t i = 0; i < Size - 1; i++) {
+			result.data[i] = this->data[i];
 		}
 	}
 
@@ -45,15 +45,6 @@ struct Vector {
 	const T& operator[](size_t index) const {
 		return data[index];
 	}
-
-	template<typename T, size_t Size>
-	bool operator==(const Vector<T, Size>& other) const {
-		for (size_t i = 0; i < Size; i++)
-			if (data[i] != other[i])
-				return false;
-
-		return true;
-	}
 };
 
 template<typename T>
@@ -63,24 +54,21 @@ struct Vector<T, 2> {
 		T data[2];
 	};
 
-	Vector() : x(0), y(0) {}
+	Vector() : Vector(0, 0) {}
 	Vector(T x, T y) : x(x), y(y) {}
 	explicit Vector(T v) : x(v), y(v) {}
-	Vector(const Vector& other) = default;
+
 	template<typename OtherT>
-	Vector(const Vector<OtherT, 2>& other) : x(static_cast<T>(other.x)), y(static_cast<T>(other.y)) {}
-	explicit Vector(const Vector<T, 3> & other) : x(other.x), y(other.y) {}
-	
+	operator Vector<OtherT, 2>() const {
+		return Vector<OtherT, 2>(static_cast<OtherT>(x), static_cast<OtherT>(y));
+	}
+
 	T& operator[](size_t index) {
 		return data[index]; 
 	}
 
 	const T& operator[](size_t index) const { 
 		return data[index]; 
-	}
-
-	bool operator==(const Vector<T, 2>& other) const {
-		return (other[0] == data[0]) && (other[1] == data[1]);
 	}
 };
 
@@ -91,14 +79,20 @@ struct Vector<T, 3> {
 		T data[3];
 	};
 
-	Vector() : x(0), y(0), z(0) {}
+	Vector() : Vector(0, 0, 0) {}
 	Vector(T x, T y, T z) : x(x), y(y), z(z) {};
 	explicit Vector(T v) : x(v), y(v), z(v) {}
-	Vector(const Vector& other) = default;
+	
+	Vector(const Vector<T, 2>& other, T finalVal) : x(other.x), y(other.y), z(finalVal) {}
+
 	template<typename OtherT>
-	Vector(const Vector<OtherT, 3>& other) : x(static_cast<T>(other.x)), y(static_cast<T>(other.y)), z(static_cast<T>(other.z)) {}
-	Vector(const Vector<T, 2>& other, T z) : x(other.x), y(other.y), z(z) {}
-	explicit Vector(const Vector<T, 4> & other) : x(other.x), y(other.y), z(other.z) {}
+	operator Vector<OtherT, 3>() const {
+		return Vector<OtherT, 3>(static_cast<OtherT>(x), static_cast<OtherT>(y), static_cast<OtherT>(z));
+	}
+
+	operator Vector<T, 2>() const {
+		return Vector<T, 2>(x, y);
+	}
 
 	T& operator[](size_t index) { 
 		return data[index]; 
@@ -106,10 +100,6 @@ struct Vector<T, 3> {
 
 	const T& operator[](size_t index) const { 
 		return data[index];
-	}
-
-	bool operator==(const Vector<T, 3>& other) const {
-		return (other[0] == data[0]) && (other[1] == data[1]) && (other[2] == data[2]);
 	}
 };
 
@@ -119,14 +109,20 @@ struct Vector<T, 4> {
 		struct { T x; T y; T z; T w; };
 		T data[4];
 	};
-	Vector() : x(0), y(0), z(0), w(0) {}
-	Vector(T x, T y, T z, T w) : x(x), y(y), z(z), w(w) {};
+	Vector() : Vector(0,0,0,0) {}
+	Vector(T x, T y, T z, T w) : x(x), y(y), z(z), w(w) {}
 	explicit Vector(T v) : x(v), y(v), z(v), w(v) {}
-	Vector(const Vector& other) = default;
+	
+	Vector(const Vector<T, 3>& other, T finalVal) : x(other.x), y(other.y), z(other.z), w(finalVal) {}
+
 	template<typename OtherT>
-	Vector(const Vector<OtherT, 4>& other) : x(static_cast<T>(other.x)), y(static_cast<T>(other.y)), z(static_cast<T>(other.z)), w(static_cast<T>(other.w)) {}
-	Vector(const Vector<T, 3>& other, T w) : x(other.x), y(other.y), z(other.z), w(w) {}
-	explicit Vector(const Vector<T, 5> & other) : x(other[0]), y(other[1]), z(other[2]), w(other[3]) {}
+	operator Vector<OtherT, 4>() const {
+		return Vector<OtherT, 4>(static_cast<OtherT>(x), static_cast<OtherT>(y), static_cast<OtherT>(z), static_cast<OtherT>(w));
+	}
+
+	operator Vector<T, 3>() const {
+		return Vector<T, 3>(x, y, z);
+	}
 
 	T& operator[](size_t index) { 
 		return data[index]; 
@@ -134,10 +130,6 @@ struct Vector<T, 4> {
 
 	const T& operator[](size_t index) const { 
 		return data[index]; 
-	}
-
-	bool operator==(const Vector<T, 4>& other) const {
-		return (other[0] == data[0]) && (other[1] == data[1]) && (other[2] == data[2]) && (other[3] == data[3]);
 	}
 }; 
 
@@ -268,6 +260,20 @@ auto operator%(const Vector<T, 3>& first, const Vector<T2, 3>& second) -> Vector
 			first[2] * second[0] - first[0] * second[2],
 			first[0] * second[1] - first[1] * second[0]
 	};
+}
+
+template<typename T, size_t Size>
+bool operator==(const Vector<T, Size>& first, const Vector<T, Size>& second) {
+	for(size_t i = 0; i < Size; i++)
+		if(first[i] != second[i])
+			return false;
+
+	return true;
+}
+
+template<typename T, size_t Size>
+bool operator!=(const Vector<T, Size>& first, const Vector<T, Size>& second) {
+	return !(first == second);
 }
 
 template<typename T, size_t Size>

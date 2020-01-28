@@ -25,7 +25,7 @@ struct PartProperties {
 
 		In other words, this is the desired relative velocity for there to be no friction
 	*/
-	Vec3 conveyorEffect = Vec3(0, 0, 0);
+	Vec3 conveyorEffect{0, 0, 0};
 };
 
 struct PartIntersection {
