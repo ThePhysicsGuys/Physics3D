@@ -66,6 +66,8 @@ void init(int argc, const char** args) {
 
 	if(argc >= 2) {
 		const char* file = args[1];
+		Log::info("Loading file %s", file);
+		auto startTime = std::chrono::high_resolution_clock::now();
 		if(has_suffix(file, ".parts")) {
 			WorldImportExport::loadLoosePartsIntoWorld(file, world);
 		} else if(has_suffix(file, ".physical")) {
@@ -74,6 +76,8 @@ void init(int argc, const char** args) {
 			world.addExternalForce(new ExternalGravity(Vec3(0, -10.0, 0.0)));
 			WorldImportExport::loadWorld(file, world);
 		}
+		std::chrono::nanoseconds deltaTime = std::chrono::high_resolution_clock::now() - startTime;
+		Log::info("File loaded, took %.4f ms", deltaTime.count() / 1E6);
 	} else {
 		setupWorld(argc, args);
 	}

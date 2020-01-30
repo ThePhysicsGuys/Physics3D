@@ -194,6 +194,7 @@
     <ClInclude Include="resource\resourceLoader.h" />
     <ClInclude Include="resource\resourceManager.h" />
     <ClInclude Include="serializeBasicTypes.h" />
+    <ClInclude Include="sharedObjectSerializer.h" />
     <ClInclude Include="stringUtil.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

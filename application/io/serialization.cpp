@@ -34,7 +34,6 @@ class Serializer : public SerializationSession<ExtendedPart> {
 public:
 	using SerializationSession<ExtendedPart>::SerializationSession;
 	virtual void serializeExtendedPart(const ExtendedPart& part, std::ostream& ostream) override {
-		::serializePartWithoutCFrame(part, ostream, this->shapeClassToIDMap);
 		serializeMaterial(part.material, ostream);
 		::serialize<int>(part.renderMode, ostream);
 		::serializeString(part.name, ostream);
@@ -44,11 +43,10 @@ public:
 class Deserializer : public DeSerializationSession<ExtendedPart> {
 public:
 	using DeSerializationSession<ExtendedPart>::DeSerializationSession;
-	virtual ExtendedPart* deserializeExtendedPart(std::istream& istream) override {
-		Part p = ::deserializePartWithoutCFrame(istream, this->IDToShapeClassMap);
+	virtual ExtendedPart* deserializeExtendedPart(Part&& partPhysicalData, std::istream& istream) override {
 		Material mat = deserializeMaterial(istream);
 		int renderMode = ::deserialize<int>(istream);
-		ExtendedPart* result = new ExtendedPart(std::move(p), ::deserializeString(istream));
+		ExtendedPart* result = new ExtendedPart(std::move(partPhysicalData), ::deserializeString(istream));
 
 		result->material = mat;
 		result->renderMode = renderMode;

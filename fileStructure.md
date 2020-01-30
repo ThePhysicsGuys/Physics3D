@@ -19,6 +19,20 @@ shape width    | double | 8
 shape height   | double | 8
 shape depth    | double | 8
 
+The shapeClass IDs are managed with a SharedObjectSerializer, so builtin ShapeClasses such as boxClass, sphereClass, cylinderClass
+
+#### Builtin ShapeClass IDs
+ID  | Name
+--- | ----
+0   | boxClass
+1   | sphereClass
+2   | cylinderClass
+
+Custom builtin ShapeClasses, such as polyhedra known to the reader of the file, will receive ids starting at the end of this list. 
+
+Shapeclasses that are embedded in the file, such as polyhedra receive ids based on their order in the header, counting down from UINT_MAX. 
+So the first ShapeClass in the list will get ID 0xFFFFFFFF, the second 0xFFFFFFFE etc. 
+
 ### PartProperties `48`
 Meaning        | Type   | Size (bytes)
 -------------- | ------ | ------------
@@ -80,15 +94,23 @@ Identifier | Name | Extra Data | Size (bytes)
 1 | MotorConstraint | Vec3 angularVelocity <br> double currentAngle | 32
 
 
+## Shared file header
+Meaning                           | Type                        | Size (bytes)
+--------------------------------- | --------------------------- | ------------
+version ID                        | unsigned int                | 4
+number of serialized ShapeClasses | unsigned int                | 4
+shared shapeClasses               | ShapeClass[ShapeClassCount] | sum(ShapeClassSize)
+
+The latest version ID is 0
+
 ## World
-Meaning                           | Type                             | Size (bytes)
---------------------------------- | -------------------------------- | ------------
-number of serialized ShapeClasses | int                              | 4
-shapeClasses                      | ShapeClass[ShapeClassCount]      | sum(ShapeClassSize)
-number of Physicals               | size_t                           | 8
-physicals                         | MotorizedPhysical[PhysicalCount] | sum(MotorizedPhysicalSize)
-number of terrain Parts           | size_t                           | 8
-terrain Parts                     | PartWithCFrame[TerrainPartCount] | TerrainPartCount * PartWithCFrameSize
+Meaning                  | Type                             | Size (bytes)
+-------------------------| -------------------------------- | ------------
+Shared File Header       | *                                | /
+number of Physicals      | size_t                           | 8
+physicals                | MotorizedPhysical[PhysicalCount] | sum(MotorizedPhysicalSize)
+number of terrain Parts  | size_t                           | 8
+terrain Parts            | PartWithCFrame[TerrainPartCount] | TerrainPartCount * PartWithCFrameSize
 
 
 ### ShapeClass
@@ -99,7 +121,12 @@ Identifier | Name | Extra Data | Size (bytes)
 ---------- | ---- | ---------- | ------------
 0 | NormalizedPolyhedron | int vertexCount <br> int triangleCount <br> Vec3f[] vertices <br> Triangle[] triangles | 8 + vertexCount * 12 + triangleCount * 12
 
-## A note on Dynamically serialized types:
+## Dynamically serialized types:
 Dynamically serializable types must be registered in a DynamicSerializerRegistry
 
 When serialized using the dynamic serializer, the resulting byte stream will be an integer denoting the type, and then any information needed to deserialize the type. When deserializing, the dynamic deserializer reads the type int, and then hands off deserialization to the appropriate deserializer. 
+
+## Shared Objects
+When objects are shared among different objects, a registry of these objects first has to be constructed, where an ID is assigned to each shared object. The IDs are then stored instead
+
+This can be done using a SharedObjectSerializer. 

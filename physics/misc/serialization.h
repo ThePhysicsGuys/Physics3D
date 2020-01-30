@@ -24,15 +24,12 @@
 #include "../constraints/motorConstraint.h"
 
 #include "../../util/serializeBasicTypes.h"
+#include "../../util/sharedObjectSerializer.h"
 #include "../../util/dynamicSerialize.h"
 
 
 void serializePolyhedron(const Polyhedron& poly, std::ostream& ostream);
 Polyhedron deserializePolyhedron(std::istream& istream);
-
-typedef uint32_t ShapeClassID;
-void serializeShape(const Shape& shape, std::ostream& ostream, const std::map<const ShapeClass*, ShapeClassID>& registry);
-Shape deserializeShape(std::istream& istream, const std::map<ShapeClassID, const ShapeClass*>& registry);
 
 void serializeFixedConstraint(const FixedConstraint& object, std::ostream& ostream);
 FixedConstraint* deserializeFixedConstraint(std::istream& istream);
@@ -40,30 +37,47 @@ FixedConstraint* deserializeFixedConstraint(std::istream& istream);
 void serializeMotorConstraint(const MotorConstraint& constraint, std::ostream& ostream);
 MotorConstraint* deserializeMotorConstraint(std::istream& istream);
 
-void serializePartWithoutCFrame(const Part& part, std::ostream& ostream, const std::map<const ShapeClass*, ShapeClassID>& classToIDMap);
-Part deserializePartWithoutCFrame(std::istream& istream, const std::map<ShapeClassID, const ShapeClass*>& IDToClassMap);
-void serializePartWithCFrame(const Part& part, std::ostream& ostream, const std::map<const ShapeClass*, ShapeClassID>& classToIDMap);
-Part deserializePartWithCFrame(std::istream& istream, const std::map<ShapeClassID, const ShapeClass*>& IDToClassMap);
+class ShapeSerializer {
+public:
+	SharedObjectSerializer<const ShapeClass*> sharedShapeClassSerializer;
+	ShapeSerializer() = default;
+	template<typename List>
+	inline ShapeSerializer(const List& knownShapeClasses) : sharedShapeClassSerializer(knownShapeClasses) {}
+
+	void include(const Shape& shape);
+	void serializeShape(const Shape& shape, std::ostream& ostream) const;
+};
+
+class ShapeDeserializer {
+public:
+	SharedObjectDeserializer<const ShapeClass*> sharedShapeClassDeserializer;
+	ShapeDeserializer() = default;
+	template<typename List>
+	inline ShapeDeserializer(const List& knownShapeClasses) : sharedShapeClassDeserializer(knownShapeClasses) {}
+
+	Shape deserializeShape(std::istream& ostream) const;
+};
 
 class SerializationSessionPrototype {
 protected:
-	std::map<const ShapeClass*, unsigned int> shapeClassToIDMap;
-	std::set<const ShapeClass*> shapeClassesToSerialize;
+	ShapeSerializer shapeSerializer;
 
+	void serializeRawPartWithoutCFrame(const Part& part, std::ostream& ostream) const;
+	void serializeRawPartWithCFrame(const Part& part, std::ostream& ostream) const;
 
+private:
 	void collectMotorizedPhysicalInformation(const MotorizedPhysical& motorizedPhys);
 	void collectConnectedPhysicalInformation(const ConnectedPhysical& connectedPhys);
 	void collectPhysicalInformation(const Physical& phys);
 
+	void serializeMotorizedPhysicalInContext(const MotorizedPhysical& motorizedPhys, std::ostream& ostream);
+	void serializePhysicalInContext(const Physical& phys, std::ostream& ostream);
+	void serializeRigidBodyInContext(const RigidBody& rigidBody, std::ostream& ostream);
+
+protected:
 	virtual void collectPartInformation(const Part& part);
-
 	virtual void serializeCollectedHeaderInformation(std::ostream& ostream);
-
-	void serializeMotorizedPhysical(const MotorizedPhysical& motorizedPhys, std::ostream& ostream);
-	void serializePhysical(const Physical& phys, std::ostream& ostream);
-	void serializeRigidBody(const RigidBody& rigidBody, std::ostream& ostream);
-
-	virtual void serializePart(const Part& part, std::ostream& ostream);
+	virtual void virtualSerializePart(const Part& part, std::ostream& ostream);
 public:
 	/*initializes the SerializationSession with the given ShapeClasses as "known" at deserialization, making it unneccecary to serialize them. 
 	Implicitly the builtin ShapeClasses from the physics engine, such as cubeClass and sphereClass are also included in this list */
@@ -73,16 +87,19 @@ public:
 };
 
 class DeSerializationSessionPrototype {
+private:
+	MotorizedPhysical* deserializeMotorizedPhysicalWithContext(std::istream& istream);
+	void deserializeConnectionsOfPhysicalWithContext(Physical& physToPopulate, std::istream& istream);
+	RigidBody deserializeRigidBodyWithContext(std::istream& istream);
 protected:
-	std::map<unsigned int, const ShapeClass*> IDToShapeClassMap;
+	ShapeDeserializer shapeDeserializer;
+
+	Part deserializeRawPart(const GlobalCFrame& knownCFrame, std::istream& istream) const;
+	Part deserializeRawPartWithCFrame(std::istream& istream) const;
 
 	virtual void deserializeAndCollectHeaderInformation(std::istream& istream);
 
-	MotorizedPhysical* deserializeMotorizedPhysical(std::istream& istream);
-	void deserializeConnectionsOfPhysical(Physical& physToPopulate, std::istream& istream);
-	RigidBody deserializeRigidBody(std::istream& istream);
-
-	virtual Part* deserializePart(std::istream& istream);
+	virtual Part* virtualDeserializePart(Part&& partPhysicalData, std::istream& istream);
 
 public:
 	/*initializes the DeSerializationSession with the given ShapeClasses as "known" at deserialization, these are used along with the deserialized ShapeClasses
@@ -93,24 +110,29 @@ public:
 	void deserializeWorld(WorldPrototype& world, std::istream& istream);
 };
 
-
-/*TODO: add information collection methods to serializationSession, such as visitPart, and serializePrerequisiteInformation
-These can be overridden to plug custom features into the serialization
-TODO: move PartSerializationInformation into SerializationSession*/
-
-
-
 template<typename ExtendedPartType>
 class SerializationSession : private SerializationSessionPrototype {
 protected:
-	using SerializationSessionPrototype::shapeClassToIDMap;
+	using SerializationSessionPrototype::shapeSerializer;
+	using SerializationSessionPrototype::serializeCollectedHeaderInformation;
+
+	virtual void collectExtendedPartInformation(const ExtendedPartType& part) {
+		SerializationSessionPrototype::collectPartInformation(part);
+	}
+
 	virtual void serializeExtendedPart(const ExtendedPartType& part, std::ostream& ostream) = 0;
 
-	virtual void serializePart(const Part& part, std::ostream& ostream) final override {
+private:
+	virtual void collectPartInformation(const Part& part) final override {
+		const ExtendedPartType& p = static_cast<const ExtendedPartType&>(part);
+		collectExtendedPartInformation(p);
+	}
+
+	virtual void virtualSerializePart(const Part& part, std::ostream& ostream) final override {
+		this->serializeRawPartWithoutCFrame(part, ostream);
 		const ExtendedPartType& p = static_cast<const ExtendedPartType&>(part);
 		serializeExtendedPart(p, ostream);
 	}
-
 public:
 	using SerializationSessionPrototype::SerializationSessionPrototype;
 
@@ -123,16 +145,18 @@ public:
 template<typename ExtendedPartType>
 class DeSerializationSession : private DeSerializationSessionPrototype {
 protected:
-	using DeSerializationSessionPrototype::IDToShapeClassMap;
-	virtual ExtendedPartType* deserializeExtendedPart(std::istream& istream) = 0;
+	using DeSerializationSessionPrototype::shapeDeserializer;
+	using DeSerializationSessionPrototype::deserializeAndCollectHeaderInformation;
+	
+	virtual ExtendedPartType* deserializeExtendedPart(Part&& partPhysicalData, std::istream& istream) = 0;
 
-	virtual Part* deserializePart(std::istream& istream) final override {
-		return deserializeExtendedPart(istream);
+private:
+	virtual Part* virtualDeserializePart(Part&& partPhysicalData, std::istream& istream) final override {
+		return deserializeExtendedPart(std::move(partPhysicalData), istream);
 	}
 
 public:
 	using DeSerializationSessionPrototype::DeSerializationSessionPrototype;
-
 
 	void deserializeWorld(World<ExtendedPartType>& world, std::istream& istream) {
 		DeSerializationSessionPrototype::deserializeWorld(world, istream);
