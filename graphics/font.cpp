@@ -5,8 +5,6 @@
 #include "GL\glew.h"
 #include "GLFW\glfw3.h"
 
-#include "gui/text.h"
-#include "shader/shaderProgram.h"
 #include "renderUtils.h"
 #include "gui/gui.h"
 #include "mesh/primitive.h"
@@ -73,7 +71,7 @@ Font::Font(std::string font) {
 	// Allocate memory
 	int penX = 0;
 	int penY = 0;
-	char* pixels = (char*)calloc(atlasDimension * atlasDimension * 4, 1);
+	char* pixels = (char*) calloc(atlasDimension * atlasDimension * 4, 1);
 
 	// Render glyphs to atlas
 	for (unsigned char character = 0; character < CHARACTER_COUNT; character++) {
@@ -84,13 +82,13 @@ Font::Font(std::string font) {
 
 		FT_Bitmap* bitmap = &face->glyph->bitmap;
 
-		if (penX + bitmap->width >= atlasDimension) {
+		if (penX + static_cast<int>(bitmap->width) >= atlasDimension) {
 			penX = 0;
 			penY += maxCharacterHeight;
 		}
 
-		for (int row = 0; row < bitmap->rows; row++) {
-			for (int col = 0; col < bitmap->width; col++) {
+		for (int row = 0; row < static_cast<int>(bitmap->rows); row++) {
+			for (int col = 0; col < static_cast<int>(bitmap->width); col++) {
 				int x = penX + col;
 				int y = penY + row;
 				pixels[(x + y * atlasDimension) * 4 + 0] = 0xff;

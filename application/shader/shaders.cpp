@@ -128,36 +128,40 @@ void BasicShader::updateMaterial(const Material& material) {
 	}
 }
 
-void BasicShader::updateLight(Light lights[], int size) {
+void BasicShader::updateLight(const std::vector<Light*> lights) {
 	bind();
-	for (int i = 0; i < size; i++) {
+
+	int size = lights.size();
+	setUniform("lightCount", size);
+
+	for (int i = 0; i < lights.size(); i++) {
 		std::string uniform;
 		std::string index = std::to_string(i);
 		std::string variable = "lights[" + index + "].";
 
 		// position
 		uniform = variable + "position";
-		setUniform(uniform, lights[i].position);
+		setUniform(uniform, lights[i]->position);
 
 		// color
 		uniform = variable + "color";
-		setUniform(uniform, lights[i].color);
+		setUniform(uniform, lights[i]->color);
 
 		// intensity
 		uniform = variable + "intensity";
-		setUniform(uniform, lights[i].intensity);
+		setUniform(uniform, lights[i]->intensity);
 
 		// attenuation.constant
 		uniform = variable + "attenuation.constant";
-		setUniform(uniform, lights[i].attenuation.constant);
+		setUniform(uniform, lights[i]->attenuation.constant);
 
 		// attenuation.linear
 		uniform = variable + "attenuation.linear";
-		setUniform(uniform, lights[i].attenuation.linear);
+		setUniform(uniform, lights[i]->attenuation.linear);
 
 		// attenuation.exponent
 		uniform = variable + "attenuation.exponent";
-		setUniform(uniform, lights[i].attenuation.exponent);
+		setUniform(uniform, lights[i]->attenuation.exponent);
 	}
 }
 

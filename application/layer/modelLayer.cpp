@@ -14,11 +14,11 @@
 #include "ecs/material.h"
 #include "ecs/model.h"
 
-
 #include "../graphics/mesh/indexedMesh.h"
 #include "../graphics/meshLibrary.h"
 #include "../graphics/debug/visualDebug.h"
 
+#include "../physics/math/linalg/vec.h"
 #include "../physics/sharedLockGuard.h"
 #include "../physics/misc/filters/visibilityFilter.h"
 
@@ -27,30 +27,8 @@ namespace Application {
 // Light uniforms
 Vec3f sunDirection;
 Vec3f sunColor;
-Attenuation attenuation = { 0, 0, 0.5 };
 
-const int lightCount = 5;
-Light lights[lightCount] = {
-	Light(Vec3f(10, 5, -10), Vec3f(1, 0.84f, 0.69f), 6, attenuation),
-	Light(Vec3f(10, 5, 10), Vec3f(1, 0.84f, 0.69f), 6, attenuation),
-	Light(Vec3f(-10, 5, -10), Vec3f(1, 0.84f, 0.69f), 6, attenuation),
-	Light(Vec3f(-10, 5, 10), Vec3f(1, 0.84f, 0.69f), 6, attenuation),
-	Light(Vec3f(0, 10, 0), Vec3f(1, 0.90f, 0.75f), 10, attenuation)
-};
-
-void ModelLayer::onInit() {
-	manager = new InstanceBatchManager();
-}
-
-void ModelLayer::onUpdate() {
-		
-}
-
-void ModelLayer::onEvent(Event& event) {
-
-}
-
-static enum class RelationToSelectedPart {
+enum class RelationToSelectedPart {
 	NONE,
 	SELF,
 	DIRECT_ATTACH,
@@ -60,143 +38,133 @@ static enum class RelationToSelectedPart {
 };
 
 static RelationToSelectedPart getRelationToSelectedPart(const Part* selectedPart, const Part* testPart) {
-	if (selectedPart == nullptr) return RelationToSelectedPart::NONE;
-	if (testPart == selectedPart) return RelationToSelectedPart::SELF;
+	if (selectedPart == nullptr) 
+		return RelationToSelectedPart::NONE;
+
+	if (testPart == selectedPart)
+		return RelationToSelectedPart::SELF;
+
 	if (selectedPart->parent != nullptr && testPart->parent != nullptr) {
 		if (testPart->parent == selectedPart->parent) {
-			if (testPart->isMainPart()) return RelationToSelectedPart::MAINPART;
-			else return RelationToSelectedPart::DIRECT_ATTACH;
+			if (testPart->isMainPart()) 
+				return RelationToSelectedPart::MAINPART;
+			else 
+				return RelationToSelectedPart::DIRECT_ATTACH;
 		} else if (testPart->parent->mainPhysical == selectedPart->parent->mainPhysical) {
-			if (testPart->parent->isMainPhysical()) return RelationToSelectedPart::MAINPHYSICAL_ATTACH;
-			else return RelationToSelectedPart::PHYSICAL_ATTACH;
+			if (testPart->parent->isMainPhysical()) 
+				return RelationToSelectedPart::MAINPHYSICAL_ATTACH;
+			else 
+				return RelationToSelectedPart::PHYSICAL_ATTACH;
 		}
 	}
+
 	return RelationToSelectedPart::NONE;
 }
 
-static Vec4f getAmbientForPartForSelected(Screen& screen, Part* part) {
-	switch (getRelationToSelectedPart(screen.selectedPart, part)) {
-		case RelationToSelectedPart::NONE: return Vec4f(0.0f, 0, 0, 0);
-		case RelationToSelectedPart::SELF: return Vec4f(0.5f, 0, 0, 0);
-		case RelationToSelectedPart::DIRECT_ATTACH: return Vec4f(0, 0.25f, 0, 0);
-		case RelationToSelectedPart::MAINPART: return Vec4f(0, 1.0f, 0, 0);
-		case RelationToSelectedPart::PHYSICAL_ATTACH: return Vec4f(0, 0, 0.25f, 0);
-		case RelationToSelectedPart::MAINPHYSICAL_ATTACH: return Vec4f(0, 0, 1.0f, 0);
+static Color getAmbientForPartForSelected(Screen* screen, Part* part) {
+	switch (getRelationToSelectedPart(screen->selectedPart, part)) {
+		case RelationToSelectedPart::NONE: 
+			return Color(0.0f, 0, 0, 0);
+		case RelationToSelectedPart::SELF:
+			return Color(0.5f, 0, 0, 0);
+		case RelationToSelectedPart::DIRECT_ATTACH: 
+			return Color(0, 0.25f, 0, 0);
+		case RelationToSelectedPart::MAINPART: 
+			return Color(0, 1.0f, 0, 0);
+		case RelationToSelectedPart::PHYSICAL_ATTACH: 
+			return Color(0, 0, 0.25f, 0);
+		case RelationToSelectedPart::MAINPHYSICAL_ATTACH: 
+			return Color(0, 0, 1.0f, 0);
 	}
+
+	return Color(0, 0, 0, 0);
 }
 
-static Vec4f getAmbientForPart(Screen& screen, Part* part) {
-	Vec4f computedAmbient = getAmbientForPartForSelected(screen, part);
-	if (part == screen.intersectedPart) {
+static Color getAmbientForPart(Screen* screen, Part* part) {
+	Color computedAmbient = getAmbientForPartForSelected(screen, part);
+	if (part == screen->intersectedPart) 
 		computedAmbient += Vec4f(-0.1f, -0.1f, -0.1f, 0);
-	}
+	
 	return computedAmbient;
+}
+
+void ModelLayer::onInit() {
+	Screen* screen = static_cast<Screen*>(this->ptr);
+
+	Attenuation attenuation = { 0, 0, 0.5 };
+	screen->entities.push_back(new Entity({ new Light(Vec3f(10, 5, -10), Color3(1, 0.84f, 0.69f), 6, attenuation) }));
+	screen->entities.push_back(new Entity({ new Light(Vec3f(10, 5, 10), Color3(1, 0.84f, 0.69f), 6, attenuation) }));
+	screen->entities.push_back(new Entity({ new Light(Vec3f(-10, 5, -10), Color3(1, 0.84f, 0.69f), 6, attenuation) }));
+	screen->entities.push_back(new Entity({ new Light(Vec3f(-10, 5, 10), Color3(1, 0.84f, 0.69f), 6, attenuation) }));
+	screen->entities.push_back(new Entity({ new Light(Vec3f(0, 5, 0), Color3(1, 0.90f, 0.75f), 10, attenuation) }));
+}
+
+void ModelLayer::onUpdate() {
+	Screen* screen = static_cast<Screen*>(this->ptr);
+
+	std::vector<Light*> lights;
+	for (Entity* entity : screen->entities) {
+		Light* light = entity->getComponent<Light>();
+
+		if (light == nullptr)
+			continue;
+
+		lights.push_back(light);
+	}
+
+	ApplicationShaders::basicShader.updateLight(lights);
+}
+
+void ModelLayer::onEvent(Event& event) {
+
 }
 
 void ModelLayer::onRender() {
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
+	graphicsMeasure.mark(GraphicsProcess::UPDATE);
+	ApplicationShaders::basicShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
+	ApplicationShaders::maskShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix);
+
+	std::vector<ExtendedPart*> visibleParts;
 	graphicsMeasure.mark(GraphicsProcess::PHYSICALS);
-
-	std::map<double, ExtendedPart*> transparentMeshes;
-
-	std::vector<ExtendedPart*> meshesToDraw;
-
-	graphicsMeasure.mark(GraphicsProcess::WAIT_FOR_LOCK);
-	
-	screen->world->syncReadOnlyOperation([this, &meshesToDraw]() {
-		Screen* screen = static_cast<Screen*>(this->ptr);
-
-		graphicsMeasure.mark(GraphicsProcess::UPDATE);
-
-		// Bind basic uniforms
-		ApplicationShaders::basicShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
-		ApplicationShaders::basicShader.updateLight(lights, lightCount);
-		ApplicationShaders::maskShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix);
-
-		graphicsMeasure.mark(GraphicsProcess::PHYSICALS);
-
-		const Camera& camera = screen->camera;
-
-		VisibilityFilter filter = VisibilityFilter::forWindow(camera.cframe.position, camera.getForwardDirection(), camera.getUpDirection(), camera.fov, camera.aspect, camera.zfar);
-		
-		// Render world objects
-		for (ExtendedPart& part : screen->world->iterPartsFiltered(filter, ALL_PARTS)) {
-			meshesToDraw.push_back(&part);
-		}
+	screen->world->syncReadOnlyOperation([this, &visibleParts, screen] () {
+		VisibilityFilter filter = VisibilityFilter::forWindow(screen->camera.cframe.position, screen->camera.getForwardDirection(), screen->camera.getUpDirection(), screen->camera.fov, screen->camera.aspect, screen->camera.zfar);
+		for (ExtendedPart& part : screen->world->iterPartsFiltered(filter, ALL_PARTS))
+			visibleParts.push_back(&part);
 	});
 
-	for (ExtendedPart* part : meshesToDraw) {
+	std::map<double, ExtendedPart*> transparentMeshes;
+	for (ExtendedPart* part : visibleParts) {
 		Material material = part->material;
-
-		// Picker code
-		material.ambient += getAmbientForPart(*screen, part);
+		material.ambient += getAmbientForPart(screen, part);
 
 		if (material.ambient.w < 1) {
 			transparentMeshes[lengthSquared(Vec3(screen->camera.cframe.position - part->getPosition()))] = part;
 			continue;
 		}
 
+		if (part->visualData.drawMeshId == -1)
+			continue;
+
 		ApplicationShaders::basicShader.updateMaterial(material);
 		ApplicationShaders::basicShader.updatePart(*part);
-
-		/*fillUniformBuffer(0, texture, material, CFrameToMat4(part.getCFrame()));
-		glBindTexture(GL_TEXTURE_2D, id);
-		glActiveTexture(GL_TEXTURE0);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 28, 1, 0, GL_RGBA, GL_FLOAT, texture);
-		Shaders::basicShader.updateUniforms(id);*/
-
-		int meshId = part->visualData.drawMeshId;
-
-		if (meshId == -1) continue;
-
-		Screen::meshes[meshId]->render(part->renderMode);
+		Screen::meshes[part->visualData.drawMeshId]->render(part->renderMode);
 	}
 
 	for (auto iterator = transparentMeshes.rbegin(); iterator != transparentMeshes.rend(); ++iterator) {
 		ExtendedPart* part = (*iterator).second;
 
 		Material material = part->material;
+		material.ambient += getAmbientForPart(screen, part);
 
-		material.ambient += getAmbientForPart(*screen, part);
+		if (part->visualData.drawMeshId == -1)
+			continue;
 
 		ApplicationShaders::basicShader.updateMaterial(material);
 		ApplicationShaders::basicShader.updatePart(*part);
-
-		if (part->visualData.drawMeshId == -1) continue;
-
 		Screen::meshes[part->visualData.drawMeshId]->render(part->renderMode);
 	}
-
-	// Render lights
-	graphicsMeasure.mark(GraphicsProcess::LIGHTING);
-	for (Light light : lights) {
-		Mat4f transformation = scale(translate(Matrix<float, 4, 4>::IDENTITY(), light.position), 0.1f);
-		ApplicationShaders::basicShader.updateMaterial(Material(Vec4f(light.color, 1), Vec3f(), Vec3f(), 10));
-		ApplicationShaders::basicShader.updateModel(transformation);
-		Library::sphere->render();
-	}
-
-
-	/*int minX = -2;
-	int maxX = 2;
-	int minY = 0;
-	int maxY = 20;
-	int minZ = -2;
-	int maxZ = 2;
-
-	for (double x = minX; x < maxX; x += 1.01) {
-		for (double y = minY; y < maxY; y += 1.01) {
-			for (double z = minZ; z < maxZ; z += 1.01) {
-				manager->add(screen->meshes[2], UniformLayout(CFrameToMat4(CFrame(x, y, z)), Vec4f(1), Vec3f(1), Vec3f(1), 1));
-			}
-		}
-	}
-
-	ApplicationShaders::instanceBasicShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
-	ApplicationShaders::instanceBasicShader.updateLight(lights, lightCount);
-
-	//manager->submit();*/
 }
 
 void ModelLayer::onClose() {

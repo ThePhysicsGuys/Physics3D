@@ -100,7 +100,7 @@ float PieChart::getTotal() const {
 
 #pragma region BarChart
 
-//! BartChart
+//! BarChart
 
 void BarChart::render() {
 	float titleHeight = 0.045;

@@ -171,8 +171,8 @@ Texture* Texture::colored(Color color) {
 
 	glGetTexImage(target, 0, format, type, buffer);
 
-	for (unsigned int j = 0; j < height; j++) {
-		for (unsigned int i = 0; i < width; i++) {
+	for (int j = 0; j < height; j++) {
+		for (int i = 0; i < width; i++) {
 			for (int k = 0; k < channels; k++) {
 
 				int index = (i + height * j) * channels + k;

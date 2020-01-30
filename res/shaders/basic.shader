@@ -150,7 +150,8 @@ uniform mat4 projectionMatrix;
 
 uniform Material material;
 uniform sampler2D textureSampler;
-#define maxLights 5
+#define maxLights 10
+uniform int lightCount;
 uniform Light lights[maxLights];
 
 // Environment
@@ -215,7 +216,7 @@ void main() {
 	// Light calculations
 	vec3 lightColors = vec3(0);
 	int count = 0;
-	for (int i = 0; i < maxLights; i++) {
+	for (int i = 0; i < min(maxLights, lightCount); i++) {
 		if (lights[i].intensity > 0) {
 			lightColors += calcLightColor(lights[i]);
 			count++;

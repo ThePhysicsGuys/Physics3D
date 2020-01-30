@@ -3,6 +3,17 @@
 
 namespace Application {
 
+
+Entity::Entity() {
+	parent = nullptr;
+}
+
+
+Entity::Entity(std::initializer_list<Component*> components) : Entity() {
+	for (Component* component : components)
+		this->components.insert(std::pair<ComponentType, Component*>(component->getType(), component));
+}
+
 void Entity::addComponent(Component* component) {
 	if (component == nullptr)
 		return;
@@ -41,7 +52,14 @@ bool Entity::containsComponent(Component* component) {
 }
 
 bool Entity::containsComponentOfType(Component* query) {
-	return components.find(query->getType()) != components.end();
+	if (query == nullptr)
+		return false;
+
+	return containsComponentOfType(query->getType());
+}
+
+bool Entity::containsComponentOfType(const ComponentType& type) {
+	return components.find(type) != components.end();
 }
 
 void Entity::overwriteComponent(Component* query) {

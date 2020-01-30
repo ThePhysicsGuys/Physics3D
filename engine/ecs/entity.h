@@ -23,6 +23,15 @@ private:
 	std::multimap<ComponentType, Component*> components;
 
 public:
+	/*
+		Creates an empty entity
+	*/
+	Entity();
+
+	/*
+		Creates an entity with the given components
+	*/
+	Entity(std::initializer_list<Component*> components);
 
 	/*
 		Returns the parent of this entity
@@ -73,6 +82,11 @@ public:
 		Returns whether this entity has a component of the same type as the given component
 	*/
 	bool containsComponentOfType(Component* component);
+
+	/*
+		Returns whether this entity has a component of the given type
+	*/
+	bool containsComponentOfType(const ComponentType& type);
 
 	/*
 		Gets the component of this entity which has the same type as the given component and overwrites the value

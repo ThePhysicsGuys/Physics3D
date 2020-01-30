@@ -42,7 +42,7 @@ struct BasicShader : public ShaderResource {
 	void updateHDR(bool hdr);
 	void updateExposure(float exposure);
 	void updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Position& viewPosition);
-	void updateLight(Light lights[], int size);
+	void updateLight(const std::vector<Light*> lights);
 	void updatePart(const ExtendedPart& part);
 	void updateMaterial(const Material& material);
 	void updateModel(const Mat4f& modelMatrix);

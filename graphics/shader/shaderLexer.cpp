@@ -24,7 +24,7 @@ std::vector<TokenType> ShaderLexer::types = {
 	TokenType(TokenType::TYPE, std::regex("mat2|mat3|mat4|float|int|vec2|vec3|vec4|VS_OUT|sampler2D|void|sampler3D")),
 	TokenType(TokenType::ID, std::regex("[A-Za-z_]\\w*")),
 	TokenType(TokenType::OP, std::regex("\\+\\+?|--?|\\*\\*?|\\:|\\/\\/?|\\?|<=?|>=?")),
-	TokenType(TokenType::NUMBER, std::regex("^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?")),
+	TokenType(TokenType::NUMBER, std::regex("^[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?")),
 	TokenType(TokenType::STRING, std::regex("\"((?:\\\\.|[^\\\\\"])*)\"")),
 	TokenType(TokenType::SINGLECOMMENT, std::regex("\\/[\\/]+.*")),
 	TokenType(TokenType::MULTICOMMENT, std::regex("\\/\\*((?:.|[^\\*\\/])*)\\*\\/"))
