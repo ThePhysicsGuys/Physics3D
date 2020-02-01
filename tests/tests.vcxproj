@@ -39,7 +39,6 @@
     <ClCompile Include="parallelTests.cpp" />
     <ClCompile Include="physicalStructureTests.cpp" />
     <ClCompile Include="physicsTests.cpp" />
-    <ClCompile Include="shaderTests.cpp" />
     <ClCompile Include="testsMain.cpp" />
     <ClCompile Include="testValues.cpp" />
   </ItemGroup>

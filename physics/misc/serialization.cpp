@@ -268,7 +268,6 @@ void SerializationSessionPrototype::serializeWorld(const WorldPrototype& world, 
 		virtualSerializePart(p, ostream);
 	}
 }
-
 void DeSerializationSessionPrototype::deserializeWorld(WorldPrototype& world, std::istream& istream) {
 	this->deserializeAndCollectHeaderInformation(istream);
 
@@ -289,7 +288,29 @@ void DeSerializationSessionPrototype::deserializeWorld(WorldPrototype& world, st
 	}
 }
 
+void SerializationSessionPrototype::serializeParts(const Part* const parts[], size_t partCount, std::ostream& ostream) {
+	for(size_t i = 0; i < partCount; i++) {
+		collectPartInformation(*(parts[i]));
+	}
+	serializeCollectedHeaderInformation(ostream);
+	::serialize<size_t>(partCount, ostream);
+	for(size_t i = 0; i < partCount; i++) {
+		::serialize<GlobalCFrame>(parts[i]->getCFrame(), ostream);
+		virtualSerializePart(*(parts[i]), ostream);
+	}
+}
 
+std::vector<Part*> DeSerializationSessionPrototype::deserializeParts(std::istream& istream) {
+	deserializeAndCollectHeaderInformation(istream);
+	size_t numberOfParts = ::deserialize<size_t>(istream);
+	std::vector<Part*> result;
+	result.reserve(numberOfParts);
+	for(size_t i = 0; i < numberOfParts; i++) {
+		Part* newPart = virtualDeserializePart(deserializeRawPartWithCFrame(istream), istream);
+		result.push_back(newPart);
+	}
+	return result;
+}
 
 
 void SerializationSessionPrototype::serializeCollectedHeaderInformation(std::ostream& ostream) {

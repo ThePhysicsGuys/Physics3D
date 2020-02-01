@@ -84,6 +84,7 @@ public:
 	SerializationSessionPrototype(const std::vector<const ShapeClass*>& knownShapeClasses = std::vector<const ShapeClass*>());
 
 	void serializeWorld(const WorldPrototype& world, std::ostream& ostream);
+	void serializeParts(const Part* const parts[], size_t partCount, std::ostream& ostream);
 };
 
 class DeSerializationSessionPrototype {
@@ -108,6 +109,7 @@ public:
 
 
 	void deserializeWorld(WorldPrototype& world, std::istream& istream);
+	std::vector<Part*> deserializeParts(std::istream& istream);
 };
 
 template<typename ExtendedPartType>
@@ -140,6 +142,18 @@ public:
 	void serializeWorld(const World<ExtendedPartType>& world, std::ostream& ostream) {
 		SerializationSessionPrototype::serializeWorld(world, ostream);
 	}
+
+	void serializeParts(const ExtendedPartType* const parts[], size_t partCount, std::ostream& ostream) {
+		for(size_t i = 0; i < partCount; i++) {
+			collectPartInformation(*(parts[i]));
+		}
+		serializeCollectedHeaderInformation(ostream);
+		::serialize<size_t>(partCount, ostream);
+		for(size_t i = 0; i < partCount; i++) {
+			::serialize<GlobalCFrame>(parts[i]->getCFrame(), ostream);
+			virtualSerializePart(*(parts[i]), ostream);
+		}
+	}
 };
 
 template<typename ExtendedPartType>
@@ -160,6 +174,17 @@ public:
 
 	void deserializeWorld(World<ExtendedPartType>& world, std::istream& istream) {
 		DeSerializationSessionPrototype::deserializeWorld(world, istream);
+	}
+	std::vector<ExtendedPartType*> deserializeParts(std::istream& istream) {
+		deserializeAndCollectHeaderInformation(istream);
+		size_t numberOfParts = ::deserialize<size_t>(istream);
+		std::vector<ExtendedPartType*> result;
+		result.reserve(numberOfParts);
+		for(size_t i = 0; i < numberOfParts; i++) {
+			ExtendedPartType* newPart = static_cast<ExtendedPartType*>(virtualDeserializePart(deserializeRawPartWithCFrame(istream), istream));
+			result.push_back(newPart);
+		}
+		return result;
 	}
 };
 

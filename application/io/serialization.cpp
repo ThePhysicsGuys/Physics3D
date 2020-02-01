@@ -55,16 +55,13 @@ public:
 	}
 };
 
-void WorldImportExport::saveLooseParts(const char* fileName, size_t numberOfParts, const ExtendedPart* const* parts) {
+void WorldImportExport::saveLooseParts(const char* fileName, size_t numberOfParts, const ExtendedPart* const parts[]) {
 	std::ofstream partFile;
 	partFile.open(fileName, std::ios::binary);
 
-	for(size_t i = 0; i < numberOfParts; i++) {
-		const ExtendedPart* curPart = parts[i];
-		
-		throw "TODO";
-		//::serializePartWithCFrame(*(parts[i]), partFile);
-	}
+	Serializer serializer;
+	serializer.serializeParts(parts, numberOfParts, partFile);
+
 	partFile.close();
 }
 void WorldImportExport::loadLoosePartsIntoWorld(const char* fileName, World<ExtendedPart>& world) {
@@ -73,34 +70,29 @@ void WorldImportExport::loadLoosePartsIntoWorld(const char* fileName, World<Exte
 	std::ifstream file;
 	file.open(fileName, std::ios::binary);
 
-	while(!file.eof()) {
-		throw "TODO";
-		//ExtendedPart* p = new ExtendedPart(::deserializePartWithCFrame(file));
-
-		//world.addPart(p);
-	}
+	Deserializer d;
+	std::vector<ExtendedPart*> result = d.deserializeParts(file);
 	file.close();
+
+	for(ExtendedPart* p : result) {
+		world.addPart(p);
+	}
 }
 
+void WorldImportExport::loadNativePartsIntoWorld(const char* fileName, World<ExtendedPart>& world) {
+	world.addExternalForce(new ExternalGravity(Vec3(0, -10.0, 0.0)));
 
-void WorldImportExport::saveSingleMotorizedPhysical(const char* fileName, const MotorizedPhysical& physical) {
-	std::ofstream physFile;
-	physFile.open(fileName, std::ios::binary);
-
-	throw "TODO";
-	//serializeMotorizedPhysical(physical, physFile, partSerializer);
-	physFile.close();
-}
-void WorldImportExport::loadSingleMotorizedPhysicalIntoWorld(const char* fileName, World<ExtendedPart>& world) {
 	std::ifstream file;
 	file.open(fileName, std::ios::binary);
 
-	throw "TODO";
-	//MotorizedPhysical* phys = ::deserializeMotorizedPhysical(file, partSerializer);
+	DeSerializationSessionPrototype d;
+	std::vector<Part*> result = d.deserializeParts(file);
 	file.close();
-	//world.addPart(phys->getMainPart());
-}
 
+	for(Part* p : result) {
+		world.addPart(new ExtendedPart(std::move(*p)));
+	}
+}
 
 void WorldImportExport::saveWorld(const char* fileName, const World<ExtendedPart>& world) {
 	std::ofstream file;
