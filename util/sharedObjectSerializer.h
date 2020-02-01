@@ -7,7 +7,7 @@
 
 #include "serializeBasicTypes.h"
 
-template<typename T, typename SerializeID = unsigned int>
+template<typename T, typename SerializeID = uint32_t>
 class SharedObjectSerializer {
 	SerializeID curPredefinedID = 0;
 	SerializeID curDynamicID = std::numeric_limits<SerializeID>::max();
@@ -56,7 +56,7 @@ public:
 	}
 };
 
-template<typename T, typename SerializeID = unsigned int>
+template<typename T, typename SerializeID = uint32_t>
 class SharedObjectDeserializer {
 	SerializeID curPredefinedID = 0;
 	SerializeID curDynamicID = std::numeric_limits<SerializeID>::max();

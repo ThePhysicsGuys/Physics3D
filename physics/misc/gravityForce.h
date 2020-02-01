@@ -3,11 +3,11 @@
 #include "../math/linalg/vec.h"
 #include "../world.h"
 
-class ExternalGravity : public ExternalForce {
-	Vec3 gravity;
+class DirectionalGravity : public ExternalForce {
 public:
+	Vec3 gravity;
 
-	ExternalGravity(Vec3 gravity) : gravity(gravity) {}
+	DirectionalGravity(Vec3 gravity) : gravity(gravity) {}
 
 	virtual void apply(WorldPrototype* world) override {
 		for (MotorizedPhysical* p : world->iterPhysicals()) {

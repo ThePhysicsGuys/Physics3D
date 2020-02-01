@@ -12,12 +12,12 @@ Properties           | PartProperties | 48
 User defined fields  | ...            | ?
 
 ### Shape `28`
-Meaning        | Type   | Size (bytes)
--------------- | ------ | ------------
-shape class ID | int    | 4
-shape width    | double | 8
-shape height   | double | 8
-shape depth    | double | 8
+Meaning        | Type     | Size (bytes)
+-------------- | -------- | ------------
+shape class ID | uint32_t | 4
+shape width    | double   | 8
+shape height   | double   | 8
+shape depth    | double   | 8
 
 The shapeClass IDs are managed with a SharedObjectSerializer, so builtin ShapeClasses such as boxClass, sphereClass, cylinderClass
 
@@ -58,7 +58,7 @@ Main Physical                   | Physical     | PhysicalSize
 Meaning                      | Type                 | Size (bytes)
 ---------------------------- | -------------------- | ------------
 rigidBody of Physical        | RigidBody            | 4 + PartSize + (N-1) * (96 + PartSize)
-number of attached physicals | unsigned int         | 4
+number of attached physicals | uint32_t         | 4
 List of Connected Physicals  | ConnectedPhysical[C] | sum(ConnectedPhysicalSize)
 
 #### RigidBody `4 + PartSize + (N-1) * (96 + PartSize)`
@@ -67,7 +67,7 @@ N is the total Number of parts in the RigidBody
 Meaning                  | Type              | Size (bytes)
 ------------------------ | ----------------- | ------------
 Main Part                | Part*             | PartSize
-number of attached parts | unsigned int      | 4
+number of attached parts | uint32_t          | 4
 attached parts           | AttachedPart[N-1] | (N-1) * (96 + PartSize)
 
 ##### AttachedPart `96 + PartSize`
@@ -97,20 +97,31 @@ Identifier | Name | Extra Data | Size (bytes)
 ## Shared file header
 Meaning                           | Type                        | Size (bytes)
 --------------------------------- | --------------------------- | ------------
-version ID                        | unsigned int                | 4
-number of serialized ShapeClasses | unsigned int                | 4
+version ID                        | uint32_t                    | 4
+number of serialized ShapeClasses | uint32_t                    | 4
 shared shapeClasses               | ShapeClass[ShapeClassCount] | sum(ShapeClassSize)
 
 The latest version ID is 0
 
 ## World
-Meaning                  | Type                             | Size (bytes)
--------------------------| -------------------------------- | ------------
-Shared File Header       | *                                | /
-number of Physicals      | size_t                           | 8
-physicals                | MotorizedPhysical[PhysicalCount] | sum(MotorizedPhysicalSize)
-number of terrain Parts  | size_t                           | 8
-terrain Parts            | PartWithCFrame[TerrainPartCount] | TerrainPartCount * PartWithCFrameSize
+Meaning                  | Type                              | Size (bytes)
+------------------------ | --------------------------------  | ------------
+externalForceCount       | uint64_t                          | 8
+External Forces          | ExternalForce[externalForceCount] | /
+Age of world             | uint64_t                          | 8
+Shared File Header       | *                                 | /
+number of Physicals      | uint64_t                          | 8
+physicals                | MotorizedPhysical[PhysicalCount]  | sum(MotorizedPhysicalSize)
+number of terrain Parts  | uint64_t                          | 8
+terrain Parts            | PartWithCFrame[TerrainPartCount]  | TerrainPartCount * PartWithCFrameSize
+
+### ExternalForce
+This is a dynamically serialized type
+
+#### Builtin External Forces
+Identifier | Name | Extra Data | Size (bytes)
+---------- | ---- | ---------- | ------------
+0 | DirectionalGravity | Vec3 gravity | 24
 
 
 ### ShapeClass
@@ -119,7 +130,7 @@ This is a dynamically serialized type
 #### Builtin Shape Classes
 Identifier | Name | Extra Data | Size (bytes)
 ---------- | ---- | ---------- | ------------
-0 | NormalizedPolyhedron | int vertexCount <br> int triangleCount <br> Vec3f[] vertices <br> Triangle[] triangles | 8 + vertexCount * 12 + triangleCount * 12
+0 | NormalizedPolyhedron | uint32_t vertexCount <br> uint32_t triangleCount <br> Vec3f[] vertices <br> Triangle[] triangles | 8 + vertexCount * 12 + triangleCount * 12
 
 ## Dynamically serialized types:
 Dynamically serializable types must be registered in a DynamicSerializerRegistry

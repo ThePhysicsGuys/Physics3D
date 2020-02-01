@@ -65,8 +65,6 @@ void WorldImportExport::saveLooseParts(const char* fileName, size_t numberOfPart
 	partFile.close();
 }
 void WorldImportExport::loadLoosePartsIntoWorld(const char* fileName, World<ExtendedPart>& world) {
-	world.addExternalForce(new ExternalGravity(Vec3(0, -10.0, 0.0)));
-
 	std::ifstream file;
 	file.open(fileName, std::ios::binary);
 
@@ -80,8 +78,6 @@ void WorldImportExport::loadLoosePartsIntoWorld(const char* fileName, World<Exte
 }
 
 void WorldImportExport::loadNativePartsIntoWorld(const char* fileName, World<ExtendedPart>& world) {
-	world.addExternalForce(new ExternalGravity(Vec3(0, -10.0, 0.0)));
-
 	std::ifstream file;
 	file.open(fileName, std::ios::binary);
 

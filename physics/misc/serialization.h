@@ -23,6 +23,8 @@
 #include "../constraints/fixedConstraint.h"
 #include "../constraints/motorConstraint.h"
 
+#include "../misc/gravityForce.h"
+
 #include "../../util/serializeBasicTypes.h"
 #include "../../util/sharedObjectSerializer.h"
 #include "../../util/dynamicSerialize.h"
@@ -37,6 +39,10 @@ FixedConstraint* deserializeFixedConstraint(std::istream& istream);
 void serializeMotorConstraint(const MotorConstraint& constraint, std::ostream& ostream);
 MotorConstraint* deserializeMotorConstraint(std::istream& istream);
 
+void serializeDirectionalGravity(const DirectionalGravity& gravity, std::ostream& ostream);
+DirectionalGravity* deserializeDirectionalGravity(std::istream& istream);
+
+
 class ShapeSerializer {
 public:
 	SharedObjectSerializer<const ShapeClass*> sharedShapeClassSerializer;
@@ -47,7 +53,6 @@ public:
 	void include(const Shape& shape);
 	void serializeShape(const Shape& shape, std::ostream& ostream) const;
 };
-
 class ShapeDeserializer {
 public:
 	SharedObjectDeserializer<const ShapeClass*> sharedShapeClassDeserializer;
@@ -57,6 +62,7 @@ public:
 
 	Shape deserializeShape(std::istream& ostream) const;
 };
+
 
 class SerializationSessionPrototype {
 protected:
@@ -111,6 +117,7 @@ public:
 	void deserializeWorld(WorldPrototype& world, std::istream& istream);
 	std::vector<Part*> deserializeParts(std::istream& istream);
 };
+
 
 template<typename ExtendedPartType>
 class SerializationSession : private SerializationSessionPrototype {
@@ -188,5 +195,7 @@ public:
 	}
 };
 
+
 extern DynamicSerializerRegistry<HardConstraint> dynamicHardConstraintSerializer;
 extern DynamicSerializerRegistry<ShapeClass> dynamicShapeClassSerializer;
+extern DynamicSerializerRegistry<ExternalForce> dynamicExternalForceSerializer;

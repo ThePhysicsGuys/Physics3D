@@ -73,7 +73,6 @@ void init(int argc, const char** args) {
 		} else if(has_suffix(file, ".nativeParts")) {
 			WorldImportExport::loadNativePartsIntoWorld(file, world);
 		} else if(has_suffix(file, ".world")) {
-			world.addExternalForce(new ExternalGravity(Vec3(0, -10.0, 0.0)));
 			WorldImportExport::loadWorld(file, world);
 		}
 		std::chrono::nanoseconds deltaTime = std::chrono::high_resolution_clock::now() - startTime;
@@ -186,7 +185,7 @@ static void registerShapes() {
 void setupWorld(int argc, const char** args) {
 	Log::info("Initializing world");
 
-	world.addExternalForce(new ExternalGravity(Vec3(0, -10.0, 0.0)));
+	world.addExternalForce(new DirectionalGravity(Vec3(0, -10.0, 0.0)));
 
 	// WorldBuilder init
 
@@ -257,7 +256,7 @@ void setupWorld(int argc, const char** args) {
 		}
 	}
 
-	WorldBuilder::buildTerrain(500.0, 500.0);
+	//WorldBuilder::buildTerrain(500.0, 500.0);
 
 
 	ExtendedPart* ropeStart = new ExtendedPart(Box(2.0, 1.5, 0.7), GlobalCFrame(10.0, 2.0, -10.0), {1.0, 0.7, 0.3}, "RopeA");

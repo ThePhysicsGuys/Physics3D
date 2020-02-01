@@ -41,8 +41,6 @@ private:
 	friend class ConnectedPhysical;
 	friend class Part;
 
-	std::vector<ExternalForce*> externalForces;
-
 	std::vector<Colission> currentObjectColissions;
 	std::vector<Colission> currentTerrainColissions;
 
@@ -88,6 +86,8 @@ protected:
 	virtual void update();
 
 public:
+
+	std::vector<ExternalForce*> externalForces;
 
 	BoundsTree<Part> objectTree;
 	BoundsTree<Part> terrainTree;

@@ -2,13 +2,13 @@
 
 #include "serializeBasicTypes.h"
 
-template<typename BaseType, typename... ArgsToInstantiate>
+template<typename BaseType, typename ClassIDType = uint32_t, typename... ArgsToInstantiate>
 class DynamicSerializerRegistry {
 public:
 	struct DynamicSerializer {
-		int serializerID;
+		ClassIDType serializerID;
 
-		DynamicSerializer(int serializerID) : serializerID(serializerID) {}
+		DynamicSerializer(ClassIDType serializerID) : serializerID(serializerID) {}
 
 		virtual void serialize(const BaseType& object, std::ostream& ostream) const = 0;
 		virtual BaseType* deserialize(std::istream& istream, ArgsToInstantiate... args) const = 0;
@@ -19,7 +19,7 @@ public:
 		void (*serializeFunc)(const ConcreteType&, std::ostream&);
 		ConcreteType* (*deserializeFunc)(std::istream&, ArgsToInstantiate...);
 	public:
-		ConcreteDynamicSerializer(void (*sf)(const ConcreteType&, std::ostream&), ConcreteType* (*dsf)(std::istream&, ArgsToInstantiate...), int serializerID) :
+		ConcreteDynamicSerializer(void (*sf)(const ConcreteType&, std::ostream&), ConcreteType* (*dsf)(std::istream&, ArgsToInstantiate...), ClassIDType serializerID) :
 			DynamicSerializer(serializerID), serializeFunc(sf), deserializeFunc(dsf) {}
 
 		virtual void serialize(const BaseType& object, std::ostream& ostream) const override {
@@ -33,7 +33,7 @@ public:
 
 private:
 	std::unordered_map<std::type_index, const DynamicSerializer*> serializeRegistry;
-	std::map<int, const DynamicSerializer*> deserializeRegistry;
+	std::map<ClassIDType, const DynamicSerializer*> deserializeRegistry;
 
 public:
 	DynamicSerializerRegistry() = default;
@@ -46,8 +46,8 @@ public:
 		}
 	}
 
-	template<typename ConcreteType, typename = typename std::enable_if<std::is_base_of<BaseType, ConcreteType>::value, int>::type>
-	void registerSerializerDeserializer(void (*serializeFunc)(const ConcreteType&, std::ostream&), ConcreteType* (*deserializeFunc)(std::istream&), int serializerID) {
+	template<typename ConcreteType, typename = typename std::enable_if<std::is_base_of<BaseType, ConcreteType>::value, ClassIDType>::type>
+	void registerSerializerDeserializer(void (*serializeFunc)(const ConcreteType&, std::ostream&), ConcreteType* (*deserializeFunc)(std::istream&), ClassIDType serializerID) {
 		if(deserializeRegistry.find(serializerID) != deserializeRegistry.end()) {
 			throw std::logic_error("A serializer with this id has already been defined!");
 		}
@@ -63,9 +63,9 @@ public:
 		deserializeRegistry.emplace(serializerID, newSerializer);
 	}
 
-	template<typename ConcreteType, typename = typename std::enable_if<std::is_base_of<BaseType, ConcreteType>::value, int>::type>
+	template<typename ConcreteType, typename = typename std::enable_if<std::is_base_of<BaseType, ConcreteType>::value, ClassIDType>::type>
 	void registerSerializerDeserializer(void (*serialize)(const ConcreteType&, std::ostream&), ConcreteType* (*deserialize)(std::istream&)) {
-		int i = 0;
+		ClassIDType i = 0;
 		while(deserializeRegistry.find(i++) != deserializeRegistry.end());
 
 		registerSerializerDeserializer(serialize, deserialize, i);
@@ -77,12 +77,12 @@ public:
 			throw SerializationException("This class is not in the serialization registry!");
 		}
 		const DynamicSerializer* serializer = (*location).second;
-		::serialize<int>(serializer->serializerID, ostream);
+		::serialize<ClassIDType>(serializer->serializerID, ostream);
 		serializer->serialize(object, ostream);
 	}
 
 	BaseType* deserialize(std::istream& istream, ArgsToInstantiate... args) const {
-		int serialID = ::deserialize<int>(istream);
+		ClassIDType serialID = ::deserialize<ClassIDType>(istream);
 		auto location = deserializeRegistry.find(serialID);
 		if(location == deserializeRegistry.end()) {
 			throw SerializationException("Invalid dynamic class ID!");
