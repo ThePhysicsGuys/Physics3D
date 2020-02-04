@@ -39,7 +39,7 @@
 
 namespace Application {
 
-std::vector<Entity*> Screen::entities;
+std::vector<Engine::Entity*> Screen::entities;
 std::vector<IndexedMesh*> Screen::meshes;
 std::map<const ShapeClass*, VisualData> Screen::shapeClassMeshIds;
 
@@ -172,11 +172,11 @@ void Screen::onInit() {
 
 	layerStack.pushLayer(&skyboxLayer);
 	layerStack.pushLayer(&modelLayer);
-	layerStack.pushLayer(&testLayer);
 	layerStack.pushLayer(&debugLayer);
 	layerStack.pushLayer(&pickerLayer);
 	layerStack.pushLayer(&postprocessLayer);
 	layerStack.pushLayer(&guiLayer);
+	layerStack.pushLayer(&testLayer);
 	layerStack.pushOverlay(&debugOverlay);
 
 

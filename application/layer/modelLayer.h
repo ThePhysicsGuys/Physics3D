@@ -15,6 +15,7 @@ public:
 	void onUpdate() override;
 	void onEvent(Event& event) override;
 	void onRender() override;
+	void onRender2();
 	void onClose() override;
 };
 

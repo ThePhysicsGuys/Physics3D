@@ -30,7 +30,7 @@ private:
 	std::chrono::time_point<std::chrono::steady_clock> lastUpdate = std::chrono::steady_clock::now();
 
 public:
-	static std::vector<Entity*> entities;
+	static std::vector<Engine::Entity*> entities;
 	static std::vector<IndexedMesh*> meshes;
 	static std::map<const ShapeClass*, VisualData> shapeClassMeshIds;
 	PlayerWorld* world;

@@ -13,6 +13,7 @@
 #include "ecs/light.h"
 #include "ecs/material.h"
 #include "ecs/model.h"
+#include "ecs/mesh.h"
 
 #include "../graphics/mesh/indexedMesh.h"
 #include "../graphics/meshLibrary.h"
@@ -92,18 +93,18 @@ void ModelLayer::onInit() {
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
 	Attenuation attenuation = { 0, 0, 0.5 };
-	screen->entities.push_back(new Entity({ new Light(Vec3f(10, 5, -10), Color3(1, 0.84f, 0.69f), 6, attenuation) }));
-	screen->entities.push_back(new Entity({ new Light(Vec3f(10, 5, 10), Color3(1, 0.84f, 0.69f), 6, attenuation) }));
-	screen->entities.push_back(new Entity({ new Light(Vec3f(-10, 5, -10), Color3(1, 0.84f, 0.69f), 6, attenuation) }));
-	screen->entities.push_back(new Entity({ new Light(Vec3f(-10, 5, 10), Color3(1, 0.84f, 0.69f), 6, attenuation) }));
-	screen->entities.push_back(new Entity({ new Light(Vec3f(0, 5, 0), Color3(1, 0.90f, 0.75f), 10, attenuation) }));
+	screen->entities.push_back(new Engine::Entity({ new Light(Vec3f(10, 5, -10), Color3(1, 0.84f, 0.69f), 6, attenuation) }));
+	screen->entities.push_back(new Engine::Entity({ new Light(Vec3f(10, 5, 10), Color3(1, 0.84f, 0.69f), 6, attenuation) }));
+	screen->entities.push_back(new Engine::Entity({ new Light(Vec3f(-10, 5, -10), Color3(1, 0.84f, 0.69f), 6, attenuation) }));
+	screen->entities.push_back(new Engine::Entity({ new Light(Vec3f(-10, 5, 10), Color3(1, 0.84f, 0.69f), 6, attenuation) }));
+	screen->entities.push_back(new Engine::Entity({ new Light(Vec3f(0, 5, 0), Color3(1, 0.90f, 0.75f), 10, attenuation) }));
 }
 
 void ModelLayer::onUpdate() {
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
 	std::vector<Light*> lights;
-	for (Entity* entity : screen->entities) {
+	for (Engine::Entity* entity : screen->entities) {
 		Light* light = entity->getComponent<Light>();
 
 		if (light == nullptr)
@@ -117,6 +118,70 @@ void ModelLayer::onUpdate() {
 
 void ModelLayer::onEvent(Event& event) {
 
+}
+
+void ModelLayer::onRender2() {
+	Screen* screen = static_cast<Screen*>(this->ptr);
+
+
+	graphicsMeasure.mark(GraphicsProcess::UPDATE);
+	ApplicationShaders::basicShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
+	ApplicationShaders::maskShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix);
+
+	// TODO move to update?
+	/*
+	screen->world->syncReadOnlyOperation([this, &visibleParts, screen] () {
+		VisibilityFilter filter = VisibilityFilter::forWindow(screen->camera.cframe.position, screen->camera.getForwardDirection(), screen->camera.getUpDirection(), screen->camera.fov, screen->camera.aspect, screen->camera.zfar);
+		for (ExtendedPart& part : screen->world->iterPartsFiltered(filter, ALL_PARTS))
+			visibleParts.push_back(&part);
+		});
+	*/
+
+	graphicsMeasure.mark(GraphicsProcess::PHYSICALS);
+	std::vector<Engine::Entity*> visibleEntities;
+	for (Engine::Entity* entity : screen->entities) {
+		//? filter based on position & camera already done
+
+		Mesh* mesh = entity->getComponent<Mesh>();
+		if (mesh)
+			visibleEntities.push_back(entity);
+
+	}
+
+	std::map<double, Engine::Entity*> transparentEntities;
+	for (Engine::Entity* entity : visibleEntities) {
+		TransformComponent* transform = entity->getComponent<TransformComponent>();
+		Material* material = entity->getComponentOrDefault<Material>();
+		// material.ambient += getAmbientForPart(screen, part);
+
+		if (material->ambient.w < 1) {
+			transparentEntities[lengthSquared(Vec3(screen->camera.cframe.position - transform->getCFrame().getPosition()))] = entity;
+			continue;
+		}
+
+		Mesh* mesh = entity->getComponent<Mesh>();
+		if (mesh)
+			continue;
+
+		ApplicationShaders::basicShader.updateMaterial(*material);
+		//ApplicationShaders::basicShader.updatePart(*part);
+		//mesh->getIndexedMesh()->render(part->renderMode);
+	}
+
+	for (auto iterator = transparentEntities.rbegin(); iterator != transparentEntities.rend(); ++iterator) {
+		Engine::Entity* entity = (*iterator).second;
+
+		Material* material = entity->getComponentOrDefault<Material>();
+		//material.ambient += getAmbientForPart(screen, part);
+
+		Mesh* mesh = entity->getComponent<Mesh>();
+		if (mesh)
+			continue;
+
+		ApplicationShaders::basicShader.updateMaterial(*material);
+		//ApplicationShaders::basicShader.updatePart(*part);
+		//mesh->getIndexedMesh()->render(part->renderMode);
+	}
 }
 
 void ModelLayer::onRender() {
