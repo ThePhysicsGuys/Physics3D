@@ -397,15 +397,11 @@ Vec3f Polyhedron::furthestInDirection(const Vec3f& direction) const {
 	__m256 swap1x1 = _mm256_permute_ps(bestDotInternalMax, SWAP_1x1);
 	bestDotInternalMax = _mm256_max_ps(bestDotInternalMax, swap1x1);
 
-	__m256 compare = _mm256_cmp_ps(bestDotInternalMax, bestDot, _CMP_EQ_OQ);
+	__m256 compare = _mm256_cmp_ps(bestDotInternalMax, bestDot, _CMP_EQ_UQ);
 	uint32_t mask = _mm256_movemask_ps(compare);
 
-	if(mask == 0) {
-		throw "Bad mask!";
-	}
-
 	uint32_t index = __builtin_ctz(mask);
-	
+
 	// a bug occurs here, when mask == 0 the resulting index is undefined
 
 	return Vec3f(bestX.m256_f32[index], bestY.m256_f32[index], bestZ.m256_f32[index]);

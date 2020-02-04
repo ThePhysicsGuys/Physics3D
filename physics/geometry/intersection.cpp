@@ -11,6 +11,8 @@
 #include "../misc/validityHelper.h"
 #include "shapeClass.h"
 
+#include <algorithm>
+
 Intersection intersectsTransformed(const Shape& first, const Shape& second, const CFrame& relativeTransform) {
 	return intersectsTransformed(*first.baseShape, *second.baseShape, relativeTransform, first.scale, second.scale);
 }
@@ -41,6 +43,14 @@ Intersection intersectsTransformed(const GenericCollidable& first, const Generic
 		physicsMeasure.mark(PhysicsProcess::EPA);
 		Vec3f intersection;
 		Vec3f exitVector;
+
+		if(!isfinite(result.A.p.x) || !isfinite(result.A.p.y) || !isfinite(result.A.p.z)) {
+			intersection = Vec3f(0.0f, 0.0f, 0.0f);
+			exitVector = Vec3f(std::min(scaleFirst[0], std::min(scaleFirst[1], std::min(scaleFirst[2], std::min(scaleSecond[0], std::min(scaleSecond[1], scaleSecond[2]))))),
+							   0.0f, 0.0f);
+
+			return Intersection(intersection, exitVector);
+		}
 
 		assert(isVecValid(result.A.p));
 		assert(isVecValid(result.A.originFirst));

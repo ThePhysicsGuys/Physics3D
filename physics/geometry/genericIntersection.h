@@ -54,5 +54,5 @@ struct ColissionPair {
 	DiagonalMat3f scaleSecond;
 };
 
-bool runGJKTransformed(const ColissionPair& colissionPair, const Vec3f& initialSearchDirection, Tetrahedron& simp, int& iter);
+bool runGJKTransformed(const ColissionPair& colissionPair, Vec3f initialSearchDirection, Tetrahedron& simp, int& iter);
 bool runEPATransformed(const ColissionPair& colissionPair, const Tetrahedron& s, Vec3f& intersection, Vec3f& exitVector, ComputationBuffers& bufs, int& iter);

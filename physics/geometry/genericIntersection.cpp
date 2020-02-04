@@ -68,12 +68,12 @@ static MinkPoint getSupport(const ColissionPair& info, const Vec3f& searchDirect
 	return MinkPoint{ furthest1 - secondVertex, furthest1, secondVertex };  // local to first
 }
 
-bool runGJKTransformed(const ColissionPair& info, const Vec3f& initialSearchDirection, Tetrahedron& simplex, int& iter) {
-	MinkPoint A(getSupport(info, initialSearchDirection));
+bool runGJKTransformed(const ColissionPair& info, Vec3f searchDirection, Tetrahedron& simplex, int& iter) {
+	MinkPoint A(getSupport(info, searchDirection));
 	MinkPoint B, C, D;
 
 	// set new searchdirection to be straight at the origin
-	Vec3f searchDirection = -A.p;
+	searchDirection = -A.p;
 
 	// GJK 2
 	// s.A is B.p
