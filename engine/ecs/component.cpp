@@ -3,7 +3,9 @@
 
 #include "../engine/ecs/entity.h"
 
-namespace Application {
+namespace Engine {
+
+Component* Component::defaultComponent;
 
 Entity* Component::getEntity() const {
 	return entity;

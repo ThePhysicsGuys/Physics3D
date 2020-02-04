@@ -1,11 +1,11 @@
 #pragma once
 
-namespace Application {
+namespace Engine {
 
 class Entity;
 
 enum class ComponentType {
-	Transform,
+	TransformComponent,
 	Material,
 	Mesh,
 	Model,
@@ -13,8 +13,9 @@ enum class ComponentType {
 };
 
 #define DEFINE_COMPONENT(type, unique) \
-	inline static ComponentType getStaticType() { return ComponentType::type; } \
-	inline virtual ComponentType getType() const override { return getStaticType(); } \
+	inline static Engine::Component* getDefaultComponent() { return defaultComponent; } \
+	inline static Engine::ComponentType getStaticType() { return Engine::ComponentType::type; } \
+	inline virtual Engine::ComponentType getType() const override { return getStaticType(); } \
 	inline virtual std::string getTypeName() const override { return #type; } \
 	inline virtual bool isUnique() const override { return unique; }
 
@@ -22,6 +23,12 @@ enum class ComponentType {
 	A class representing a Component of an Entity
 */
 class Component {
+protected:
+	/*
+		The default value of this Component
+	*/
+	static Component* defaultComponent;
+
 private:
 	/*
 		The parent entity of this Component

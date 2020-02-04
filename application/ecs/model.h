@@ -10,7 +10,7 @@ struct ExtendedPart;
 /*
 	A Component representing a model which is being physicsed by the physics engine, all the transform of the entity with this component will be taken from the model
 */
-class Model : public Component {
+class Model : public Engine::Component {
 private:
 	/*
 		The extendedPart of this model
@@ -33,12 +33,12 @@ public:
 	/*
 		Returns the transform of this model's extendedPart
 	*/
-	TransformComp getTransform();
+	TransformComponent getTransform();
 
 	/*
 		Sets the transform of this model's ExtendedPart to the given value
 	*/
-	void setTransform(const TransformComp& transform);
+	void setTransform(const TransformComponent& transform);
 };
 
 };

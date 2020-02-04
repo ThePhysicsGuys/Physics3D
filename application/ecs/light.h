@@ -12,7 +12,7 @@ struct Attenuation {
 	float exponent;
 };
 
-struct Light : public Component {
+struct Light : public Engine::Component {
 	DEFINE_COMPONENT(Light, true);
 
 	Vec3f position;

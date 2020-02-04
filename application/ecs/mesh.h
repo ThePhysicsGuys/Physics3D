@@ -9,7 +9,7 @@ class IndexedMesh;
 /*
 	A component representing a renderable mesh
 */
-class Mesh : public Component {
+class Mesh : public Engine::Component {
 private:
 	/*
 		The mesh of this Mesh component

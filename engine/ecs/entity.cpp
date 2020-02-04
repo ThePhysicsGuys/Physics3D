@@ -1,13 +1,11 @@
 #include "core.h"
 #include "entity.h"
 
-namespace Application {
-
+namespace Engine {
 
 Entity::Entity() {
 	parent = nullptr;
 }
-
 
 Entity::Entity(std::initializer_list<Component*> components) : Entity() {
 	for (Component* component : components)

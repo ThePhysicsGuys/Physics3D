@@ -3,7 +3,7 @@
 
 #include "component.h"
 
-namespace Application {
+namespace Engine {
 
 class Entity {
 private:
@@ -101,6 +101,16 @@ public:
 		auto iterator = components.find(T::getStaticType());
 
 		return (iterator != components.end()) ? static_cast<T*>(iterator->second) : nullptr;
+	}
+
+	/*
+		Returns the first component of the given type in this entity if present, default value otherwise
+	*/
+	template<typename T, typename = std::enable_if<std::is_base_of<Component, T>::value>>
+	T* getComponentOrDefault() {
+		auto iterator = components.find(T::getStaticType());
+
+		return (iterator != components.end()) ? static_cast<T*>(iterator->second) : static_cast<T*>(T::getDefaultComponent());
 	}
 
 	/*

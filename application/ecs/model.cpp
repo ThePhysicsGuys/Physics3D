@@ -13,16 +13,16 @@ void Model::setExtendedPart(ExtendedPart* extendedPart) {
 	this->extendedPart = extendedPart;
 }
 
-TransformComp Model::getTransform() {
+TransformComponent Model::getTransform() {
 	ExtendedPart* extendedPart = getExtendedPart();
 
 	if (extendedPart == nullptr)
-		return TransformComp(GlobalCFrame());
+		return TransformComponent(GlobalCFrame());
 
-	return TransformComp(getExtendedPart()->getCFrame());
+	return TransformComponent(getExtendedPart()->getCFrame());
 }
 
-void Model::setTransform(const TransformComp& transform) {
+void Model::setTransform(const TransformComponent& transform) {
 	getExtendedPart()->setCFrame(transform.getCFrame());
 }
 

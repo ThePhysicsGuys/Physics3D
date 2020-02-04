@@ -6,7 +6,7 @@ class Texture;
 
 namespace Application {
 
-struct Material : public Component {
+struct Material : public Engine::Component {
 	DEFINE_COMPONENT(Material, true);
 
 	Texture* texture = nullptr;
