@@ -41,8 +41,6 @@ private:
 	friend class ConnectedPhysical;
 	friend class Part;
 
-	std::vector<ExternalForce*> externalForces;
-
 	std::vector<Colission> currentObjectColissions;
 	std::vector<Colission> currentTerrainColissions;
 
@@ -57,7 +55,6 @@ private:
 	// splits newlySplitPhysical from mainPhysical in the world tree, also adds the new physical to the list of physicals
 	void splitPhysical(const MotorizedPhysical* mainPhysical, MotorizedPhysical* newlySplitPhysical);
 
-	void splitPartFromPhysical(const Part* part);
 	/*
 		merges the trees for two physicals. 
 		firstPhysical must be part of this world, 
@@ -71,6 +68,8 @@ private:
 
 
 	void notifyPartStdMoved(Part* oldPartPtr, Part* newPartPtr);
+
+	void notifyPartRemovedFromPhysical(Part* part);
 
 
 	BoundsTree<Part>& getTreeForPart(const Part* part);
@@ -88,6 +87,8 @@ protected:
 	virtual void update();
 
 public:
+
+	std::vector<ExternalForce*> externalForces;
 
 	BoundsTree<Part> objectTree;
 	BoundsTree<Part> terrainTree;

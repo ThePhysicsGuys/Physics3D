@@ -79,10 +79,8 @@ void WorldPrototype::addPart(Part* part) {
 }
 void WorldPrototype::removePart(Part* part) {
 	ASSERT_VALID;
-	Physical* parent = part->parent;
-	parent->detachPart(part, false);
-
-	objectCount--;
+	
+	part->parent->detachPart(part, false);
 
 	ASSERT_VALID;
 }
@@ -138,12 +136,6 @@ void WorldPrototype::splitPhysical(const MotorizedPhysical* mainPhysical, Motori
 	throw "todo split tree aswell";
 }
 
-void WorldPrototype::splitPartFromPhysical(const Part* partToSplit) {
-	objectTree.add(objectTree.grab(partToSplit, partToSplit->getStrictBounds()));
-	physicals.push_back(partToSplit->parent->mainPhysical);
-	partToSplit->parent->mainPhysical->world = this;
-}
-
 void WorldPrototype::mergePhysicals(const MotorizedPhysical* firstPhysical, const MotorizedPhysical* secondPhysical) {
 	assert(firstPhysical->world == this);
 
@@ -189,6 +181,12 @@ void WorldPrototype::mergePartAndPhysical(const MotorizedPhysical* physical, Par
 void WorldPrototype::notifyPartStdMoved(Part* oldPartPtr, Part* newPartPtr) {
 	(*getTreeForPart(oldPartPtr).find(oldPartPtr, newPartPtr->getStrictBounds()))->object = newPartPtr;
 }
+
+void WorldPrototype::notifyPartRemovedFromPhysical(Part* part) {
+	objectTree.remove(part);
+	objectCount--;
+}
+
 
 void WorldPrototype::addExternalForce(ExternalForce* force) {
 	externalForces.push_back(force);

@@ -51,7 +51,7 @@ void init(int argc, const char** args);
 void setupPhysics();
 void registerShapes();
 void setupWorld(int argc, const char** args);
-void setupScreen();
+void setupGL();
 void setupDebug();
 
 bool has_suffix(const std::string& str, const std::string& suffix) {
@@ -60,8 +60,12 @@ bool has_suffix(const std::string& str, const std::string& suffix) {
 }
 
 void init(int argc, const char** args) {
-	setupScreen();
+	setupGL();
 	registerShapes();
+	ResourceManager::add<TextureResource>("floorMaterial", "../res/textures/floor/floor_color.jpg");
+
+	WorldImportExport::registerTexture(ResourceManager::get<TextureResource>("floorMaterial"));
+
 	WorldBuilder::init();
 
 	if(argc >= 2) {
@@ -70,10 +74,9 @@ void init(int argc, const char** args) {
 		auto startTime = std::chrono::high_resolution_clock::now();
 		if(has_suffix(file, ".parts")) {
 			WorldImportExport::loadLoosePartsIntoWorld(file, world);
-		} else if(has_suffix(file, ".physical")) {
-			WorldImportExport::loadSingleMotorizedPhysicalIntoWorld(file, world);
+		} else if(has_suffix(file, ".nativeParts")) {
+			WorldImportExport::loadNativePartsIntoWorld(file, world);
 		} else if(has_suffix(file, ".world")) {
-			world.addExternalForce(new ExternalGravity(Vec3(0, -10.0, 0.0)));
 			WorldImportExport::loadWorld(file, world);
 		}
 		std::chrono::nanoseconds deltaTime = std::chrono::high_resolution_clock::now() - startTime;
@@ -81,6 +84,11 @@ void init(int argc, const char** args) {
 	} else {
 		setupWorld(argc, args);
 	}
+	
+	
+	Log::info("Initializing screen");
+	screen.onInit();
+	
 
 
 	// Player
@@ -94,7 +102,7 @@ void init(int argc, const char** args) {
 	setupDebug();
 }
 
-void setupScreen() {
+void setupGL() {
 	Log::info("Initializing GLFW");
 	if (!initGLFW()) {
 		Log::error("GLFW not initialised");
@@ -110,9 +118,6 @@ void setupScreen() {
 		std::cin.get();
 		stop(-1);
 	}
-
-	Log::info("Initializing screen");
-	screen.onInit();
 }
 
 // Generates a cylinder with 
@@ -184,7 +189,7 @@ static void registerShapes() {
 void setupWorld(int argc, const char** args) {
 	Log::info("Initializing world");
 
-	world.addExternalForce(new ExternalGravity(Vec3(0, -10.0, 0.0)));
+	world.addExternalForce(new DirectionalGravity(Vec3(0, -10.0, 0.0)));
 
 	// WorldBuilder init
 
@@ -350,8 +355,7 @@ void setupWorld(int argc, const char** args) {
 		world.addPart(f2);
 
 
-		//WorldImportExport::saveLooseParts("../testPart.parts", 1, &fixedConstraintGroupMain);
-		//WorldImportExport::saveSingleMotorizedPhysical("../testPhysical.physical", *fixedConstraintGroupMain->parent->mainPhysical);
+		WorldImportExport::saveLooseParts("../testPart.parts", 1, &fixedConstraintGroupMain);
 	}
 
 	WorldImportExport::saveWorld("../testWorld.world", world);

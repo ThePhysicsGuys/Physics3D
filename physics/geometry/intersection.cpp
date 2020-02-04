@@ -42,6 +42,18 @@ Intersection intersectsTransformed(const GenericCollidable& first, const Generic
 		Vec3f intersection;
 		Vec3f exitVector;
 
+		assert(isVecValid(result.A.p));
+		assert(isVecValid(result.A.originFirst));
+		assert(isVecValid(result.A.originSecond));
+		assert(isVecValid(result.B.p));
+		assert(isVecValid(result.B.originFirst));
+		assert(isVecValid(result.B.originSecond));
+		assert(isVecValid(result.C.p));
+		assert(isVecValid(result.C.originFirst));
+		assert(isVecValid(result.C.originSecond));
+		assert(isVecValid(result.D.p));
+		assert(isVecValid(result.D.originFirst));
+		assert(isVecValid(result.D.originSecond));
 
 		bool epaResult = runEPATransformed(info, result, intersection, exitVector, buffers, iter);
 

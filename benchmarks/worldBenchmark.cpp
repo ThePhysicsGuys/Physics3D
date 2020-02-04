@@ -14,7 +14,7 @@
 #include "../physics/misc/filters/outOfBoundsFilter.h"
 
 WorldBenchmark::WorldBenchmark(const char* name, int tickCount) : Benchmark(name), world(0.005), tickCount(tickCount) {
-	world.addExternalForce(new ExternalGravity(Vec3(0, -10, 0)));
+	world.addExternalForce(new DirectionalGravity(Vec3(0, -10, 0)));
 }
 
 void WorldBenchmark::run() {

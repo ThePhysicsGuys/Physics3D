@@ -30,13 +30,13 @@ namespace Debug {
 		std::stringstream name;
 		name << "../";
 		name << reason;
-		name << ".parts";
+		name << ".nativeParts";
 		file.open(name.str().c_str(), std::ios::binary | std::ios::out);
 
-		throw "TODO";
-		//serializePartWithCFrame(*first, file);
-		//serializePartWithCFrame(*second, file);
-
+		SerializationSessionPrototype session;
+		const Part* parts[2]{first, second};
+		session.serializeParts(parts, 2, file);
+		
 		file.close();
 	}
 }

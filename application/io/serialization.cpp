@@ -14,7 +14,15 @@
 
 namespace Application {
 
+FixedSharedObjectSerializerDeserializer<Texture*> textureSerializer{nullptr};
+
+void WorldImportExport::registerTexture(Texture* texture) {
+	textureSerializer.registerObject(texture);
+}
+
 static void serializeMaterial(const Material& material, std::ostream& ostream) {
+	textureSerializer.serialize(material.texture, ostream);
+	textureSerializer.serialize(material.normal, ostream);
 	::serialize<Color>(material.ambient, ostream);
 	::serialize<Color3>(material.diffuse, ostream);
 	::serialize<Color3>(material.specular, ostream);
@@ -22,12 +30,14 @@ static void serializeMaterial(const Material& material, std::ostream& ostream) {
 }
 
 static Material deserializeMaterial(std::istream& istream) {
+	Texture* texture = textureSerializer.deserialize(istream);
+	Texture* normal = textureSerializer.deserialize(istream);
 	Color ambient = ::deserialize<Color>(istream);
 	Color3 diffuse = ::deserialize<Color3>(istream);
 	Color3 specular = ::deserialize<Color3>(istream);
 	float reflectance = ::deserialize<float>(istream);
 
-	return Material(ambient, diffuse, specular, reflectance);
+	return Material(ambient, diffuse, specular, reflectance, texture, normal);
 }
 
 class Serializer : public SerializationSession<ExtendedPart> {
@@ -55,52 +65,40 @@ public:
 	}
 };
 
-void WorldImportExport::saveLooseParts(const char* fileName, size_t numberOfParts, const ExtendedPart* const* parts) {
+void WorldImportExport::saveLooseParts(const char* fileName, size_t numberOfParts, const ExtendedPart* const parts[]) {
 	std::ofstream partFile;
 	partFile.open(fileName, std::ios::binary);
 
-	for(size_t i = 0; i < numberOfParts; i++) {
-		const ExtendedPart* curPart = parts[i];
-		
-		throw "TODO";
-		//::serializePartWithCFrame(*(parts[i]), partFile);
-	}
+	Serializer serializer;
+	serializer.serializeParts(parts, numberOfParts, partFile);
+
 	partFile.close();
 }
 void WorldImportExport::loadLoosePartsIntoWorld(const char* fileName, World<ExtendedPart>& world) {
-	world.addExternalForce(new ExternalGravity(Vec3(0, -10.0, 0.0)));
-
 	std::ifstream file;
 	file.open(fileName, std::ios::binary);
 
-	while(!file.eof()) {
-		throw "TODO";
-		//ExtendedPart* p = new ExtendedPart(::deserializePartWithCFrame(file));
+	Deserializer d;
+	std::vector<ExtendedPart*> result = d.deserializeParts(file);
+	file.close();
 
-		//world.addPart(p);
+	for(ExtendedPart* p : result) {
+		world.addPart(p);
 	}
-	file.close();
 }
 
-
-void WorldImportExport::saveSingleMotorizedPhysical(const char* fileName, const MotorizedPhysical& physical) {
-	std::ofstream physFile;
-	physFile.open(fileName, std::ios::binary);
-
-	throw "TODO";
-	//serializeMotorizedPhysical(physical, physFile, partSerializer);
-	physFile.close();
-}
-void WorldImportExport::loadSingleMotorizedPhysicalIntoWorld(const char* fileName, World<ExtendedPart>& world) {
+void WorldImportExport::loadNativePartsIntoWorld(const char* fileName, World<ExtendedPart>& world) {
 	std::ifstream file;
 	file.open(fileName, std::ios::binary);
 
-	throw "TODO";
-	//MotorizedPhysical* phys = ::deserializeMotorizedPhysical(file, partSerializer);
+	DeSerializationSessionPrototype d;
+	std::vector<Part*> result = d.deserializeParts(file);
 	file.close();
-	//world.addPart(phys->getMainPart());
-}
 
+	for(Part* p : result) {
+		world.addPart(new ExtendedPart(std::move(*p)));
+	}
+}
 
 void WorldImportExport::saveWorld(const char* fileName, const World<ExtendedPart>& world) {
 	std::ofstream file;
