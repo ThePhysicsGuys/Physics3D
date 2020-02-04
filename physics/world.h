@@ -55,7 +55,6 @@ private:
 	// splits newlySplitPhysical from mainPhysical in the world tree, also adds the new physical to the list of physicals
 	void splitPhysical(const MotorizedPhysical* mainPhysical, MotorizedPhysical* newlySplitPhysical);
 
-	void splitPartFromPhysical(const Part* part);
 	/*
 		merges the trees for two physicals. 
 		firstPhysical must be part of this world, 
@@ -69,6 +68,8 @@ private:
 
 
 	void notifyPartStdMoved(Part* oldPartPtr, Part* newPartPtr);
+
+	void notifyPartRemovedFromPhysical(Part* part);
 
 
 	BoundsTree<Part>& getTreeForPart(const Part* part);

@@ -371,11 +371,21 @@ void Physical::detachChildPartAndDelete(ConnectedPhysical&& formerChild) {
 void Physical::detachFromRigidBody(Part* part) {
 	part->parent = nullptr;
 	rigidBody.detach(part);
+	WorldPrototype* world = this->mainPhysical->world;
+
+	if(world != nullptr) {
+		world->notifyPartRemovedFromPhysical(part);
+	}
 }
 
 void Physical::detachFromRigidBody(AttachedPart&& part) {
 	part.part->parent = nullptr;
 	rigidBody.detach(std::move(part));
+
+	WorldPrototype* world = this->mainPhysical->world;
+	if(world != nullptr) {
+		world->notifyPartRemovedFromPhysical(part.part);
+	}
 }
 
 void Physical::detachPart(Part* part, bool partStaysInWorld) {
@@ -401,6 +411,8 @@ void Physical::detachPart(Part* part, bool partStaysInWorld) {
 
 	if(partStaysInWorld) {
 		new MotorizedPhysical(part);
+	} else {
+		part->parent = nullptr;
 	}
 }
 
