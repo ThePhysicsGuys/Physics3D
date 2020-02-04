@@ -8,6 +8,8 @@
 
 namespace Application {
 namespace WorldImportExport {
+void registerTexture(Texture* texture);
+
 void saveWorld(const char* fileName, const World<ExtendedPart>& world);
 void saveLooseParts(const char* fileName, size_t numberOfParts, const ExtendedPart* const parts[]);
 

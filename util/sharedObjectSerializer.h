@@ -97,3 +97,47 @@ public:
 		return (*found).second;
 	}
 };
+
+
+template<typename T, typename SerializeID = uint32_t>
+class FixedSharedObjectSerializerDeserializer {
+	std::map<T, SerializeID> objectToIDMap;
+	std::map<SerializeID, T> IDToObjectMap;
+	SerializeID currentID = 0;
+
+public:
+	void registerObject(const T& object) {
+		objectToIDMap.emplace(object, currentID);
+		IDToObjectMap.emplace(currentID, object);
+		currentID++;
+	}
+	void removeObject(const T& object) {
+		auto iter = objectToIDMap.find(object);
+		SerializeID id = iter.second();
+		IDToObjectMap.erase(id);
+		objectToIDMap.erase(object);
+	}
+	FixedSharedObjectSerializerDeserializer(std::initializer_list<T> list) {
+		for(const T& item : list) {
+			registerObject(item);
+		}
+	}
+
+	void serialize(const T& object, std::ostream& ostream) const {
+		auto iter = objectToIDMap.find(object);
+		if(iter != objectToIDMap.end()) {
+			::serialize<SerializeID>((*iter).second, ostream);
+		} else {
+			throw SerializationException("The given object was not registered");
+		}
+	}
+	T deserialize(std::istream& istream) const {
+		SerializeID id = ::deserialize<SerializeID>(istream);
+		auto iter = IDToObjectMap.find(id);
+		if(iter != IDToObjectMap.end()) {
+			return (*iter).second;
+		} else {
+			throw SerializationException("There is no registered object matching id " + std::to_string(id));
+		}
+	}
+};

@@ -51,7 +51,6 @@ void makeDominoTower(int floors, int circumference, Position origin) {
 
 
 void buildFloor(double width, double depth) {
-	ResourceManager::add<TextureResource>("floorMaterial", "../res/textures/floor/floor_color.jpg");
 	Material floorMaterial = Material(ResourceManager::get<TextureResource>("floorMaterial"));
 	ExtendedPart* floorExtendedPart = new ExtendedPart(Box(width, 1.0, depth), GlobalCFrame(0.0, 0.0, 0.0), { 2.0, 1.0, 0.3 });
 	floorExtendedPart->material = floorMaterial;

@@ -14,7 +14,15 @@
 
 namespace Application {
 
+FixedSharedObjectSerializerDeserializer<Texture*> textureSerializer{nullptr};
+
+void WorldImportExport::registerTexture(Texture* texture) {
+	textureSerializer.registerObject(texture);
+}
+
 static void serializeMaterial(const Material& material, std::ostream& ostream) {
+	textureSerializer.serialize(material.texture, ostream);
+	textureSerializer.serialize(material.normal, ostream);
 	::serialize<Color>(material.ambient, ostream);
 	::serialize<Color3>(material.diffuse, ostream);
 	::serialize<Color3>(material.specular, ostream);
@@ -22,12 +30,14 @@ static void serializeMaterial(const Material& material, std::ostream& ostream) {
 }
 
 static Material deserializeMaterial(std::istream& istream) {
+	Texture* texture = textureSerializer.deserialize(istream);
+	Texture* normal = textureSerializer.deserialize(istream);
 	Color ambient = ::deserialize<Color>(istream);
 	Color3 diffuse = ::deserialize<Color3>(istream);
 	Color3 specular = ::deserialize<Color3>(istream);
 	float reflectance = ::deserialize<float>(istream);
 
-	return Material(ambient, diffuse, specular, reflectance);
+	return Material(ambient, diffuse, specular, reflectance, texture, normal);
 }
 
 class Serializer : public SerializationSession<ExtendedPart> {

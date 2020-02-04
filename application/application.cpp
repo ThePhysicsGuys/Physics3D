@@ -62,6 +62,10 @@ bool has_suffix(const std::string& str, const std::string& suffix) {
 void init(int argc, const char** args) {
 	setupGL();
 	registerShapes();
+	ResourceManager::add<TextureResource>("floorMaterial", "../res/textures/floor/floor_color.jpg");
+
+	WorldImportExport::registerTexture(ResourceManager::get<TextureResource>("floorMaterial"));
+
 	WorldBuilder::init();
 
 	if(argc >= 2) {
