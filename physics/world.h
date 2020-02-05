@@ -69,7 +69,7 @@ private:
 
 	void notifyPartStdMoved(Part* oldPartPtr, Part* newPartPtr);
 
-	void notifyPartRemovedFromPhysical(Part* part);
+	void notifyPartRemovedFromGroup(Part* part);
 
 
 	BoundsTree<Part>& getTreeForPart(const Part* part);

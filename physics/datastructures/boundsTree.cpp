@@ -6,16 +6,12 @@
 #include <new>
 #include <limits>
 
-static constexpr Fix<32> MIN_FIX(std::numeric_limits<long long>::lowest());
-static constexpr Fix<32> MAX_FIX(std::numeric_limits<long long>::max());
-TreeNode dummy_TreeNode(Bounds(Position(MIN_FIX, MIN_FIX, MIN_FIX), Position(MAX_FIX, MAX_FIX, MAX_FIX)), nullptr, 2);
-
-long long computeCost(const Bounds & bounds) {
+long long computeCost(const Bounds& bounds) {
 	Vec3Fix d = bounds.getDiagonal();
 	return (d.x + d.y + d.z).value;
 }
 
-Bounds computeBoundsOfList(const TreeNode* const* list, size_t count) {
+inline static Bounds computeBoundsOfList(const TreeNode* const* list, size_t count) {
 	Bounds bounds = list[0]->bounds;
 
 	for (size_t i = 1; i < count; i++) {
@@ -24,7 +20,7 @@ Bounds computeBoundsOfList(const TreeNode* const* list, size_t count) {
 	return bounds;
 }
 
-Bounds computeBoundsOfList(const TreeNode* list, size_t count) {
+inline static Bounds computeBoundsOfList(const TreeNode* list, size_t count) {
 	Bounds bounds = list[0].bounds;
 
 	for (size_t i = 1; i < count; i++) {
@@ -36,7 +32,7 @@ Bounds computeBoundsOfList(const TreeNode* list, size_t count) {
 /*
 Computes a metric to show the cost of combining two boundingboxes
 */
-inline long long computeCombinationCost(const Bounds& newBox, const Bounds& expandingBox) {
+inline static long long computeCombinationCost(const Bounds& newBox, const Bounds& expandingBox) {
 	Bounds combinedBounds = unionOfBounds(newBox, expandingBox);
 	return computeCost(combinedBounds);
 }
@@ -49,7 +45,7 @@ TreeNode::~TreeNode() {
 	}
 }
 
-void addToSubTrees(TreeNode& node, TreeNode&& newNode) {
+inline static void addToSubTrees(TreeNode& node, TreeNode&& newNode) {
 	if (node.nodeCount != MAX_BRANCHES) {
 		new(&node.subTrees[node.nodeCount++]) TreeNode(std::move(newNode));
 	} else {
@@ -100,6 +96,29 @@ void TreeNode::addInside(TreeNode&& newNode) {
 	this->bounds = unionOfBounds(this->bounds, newNode.bounds);
 }
 
+TreeNode TreeNode::remove(int index) {
+	assert(!this->isLeafNode());
+	assert(index < nodeCount);
+
+	TreeNode result = std::move(subTrees[index]);
+
+	--nodeCount;
+	if(index != nodeCount) {
+		subTrees[index] = std::move(subTrees[nodeCount]);
+	}
+	subTrees[nodeCount].~TreeNode();
+
+	if(nodeCount == 1) {
+		TreeNode* buf = subTrees;
+		bool resultIsGroupHead = this->isGroupHead || buf[0].isGroupHead;
+		new(this) TreeNode(std::move(buf[0]));
+		this->isGroupHead = resultIsGroupHead;
+		delete[] buf;
+	}
+
+	return result;
+}
+
 void TreeNode::recalculateBoundsFromSubBounds() {
 	this->bounds = subTrees[0].bounds;
 	for (int i = 1; i < nodeCount; i++) {
@@ -123,12 +142,37 @@ void TreeNode::recalculateBoundsRecursive() {
 	recalculateBounds();
 }
 
-void transferObject(TreeNode& from, TreeNode& to, size_t index){
+size_t TreeNode::getNumberOfObjectsInNode() const {
+	if(this->isLeafNode()) return 1;
+
+	size_t runningTotal = 0;
+	for(const TreeNode& subNode : *this) {
+		runningTotal += subNode.getNumberOfObjectsInNode();
+	}
+	return runningTotal;
+}
+
+size_t TreeNode::getLengthOfLongestBranch() const {
+	if(this->isLeafNode()) return 0;
+
+	size_t best = 0;
+
+	for(const TreeNode& subNode : *this) {
+		size_t lengthOfBranch = subNode.getLengthOfLongestBranch();
+		if(lengthOfBranch > best) {
+			best = lengthOfBranch;
+		}
+	}
+
+	return best + 1;
+}
+
+inline static void transferObject(TreeNode& from, TreeNode& to, size_t index){
 	to.addOutside(std::move(from.subTrees[index]));
 	new(&from.subTrees[index]) TreeNode(std::move(from.subTrees[--from.nodeCount]));
 }
 
-void exchangeObjects(TreeNode& first, TreeNode& second) {
+inline static void exchangeObjects(TreeNode& first, TreeNode& second) {
 	// send objects from first to second
 
 	// compute bounds of this without the given node
@@ -163,6 +207,139 @@ void exchangeObjects(TreeNode& first, TreeNode& second) {
 		}
 	}
 }
+
+NodeStack::NodeStack(TreeNode& rootNode) : stack{TreeStackElement{&rootNode, 0}}, top(stack) {
+	if(rootNode.nodeCount == 0) {
+		top--;
+	}
+}
+
+// a find function, returning the stack of all nodes leading up to the requested object
+
+NodeStack::NodeStack(TreeNode& rootNode, const void* objToFind, const Bounds& objBounds) : NodeStack(rootNode) {
+	if(rootNode.isLeafNode()) {
+		if(rootNode.object == objToFind) {
+			return;
+		} else {
+			throw "Could not find obj in Tree!";
+		}
+	}
+	while(top + 1 != stack) {
+		if(top->index != top->node->nodeCount) {
+			TreeNode* nextNode = top->node->subTrees + top->index;
+			if(nextNode->bounds.contains(objBounds)) {
+				if(nextNode->isLeafNode()) {
+					if(nextNode->object == objToFind) {
+						top++;
+						*top = TreeStackElement{nextNode, 0};
+						return;
+					} else {
+						top->index++;
+					}
+				} else {
+					top++;
+					*top = TreeStackElement{nextNode, 0};
+				}
+			} else {
+				top->index++;
+			}
+		} else {
+			top--;
+			top->index++;
+		}
+	}
+
+	throw "Could not find obj in Tree!";
+}
+
+NodeStack::NodeStack(const NodeStack& other) : stack{}, top(this->stack + (other.top - other.stack)) {
+	for(int i = 0; i < top - stack + 1; i++) {
+		this->stack[i] = other.stack[i];
+	}
+}
+NodeStack::NodeStack(NodeStack&& other) noexcept : stack{}, top(this->stack + (other.top - other.stack)) {
+	for(int i = 0; i < top - stack + 1; i++) {
+		this->stack[i] = other.stack[i];
+	}
+}
+NodeStack& NodeStack::operator=(const NodeStack& other) {
+	this->top = this->stack + (other.top - other.stack);
+	for(int i = 0; i < top - stack + 1; i++) {
+		this->stack[i] = other.stack[i];
+	}
+	return *this;
+}
+NodeStack& NodeStack::operator=(NodeStack&& other) noexcept {
+	this->top = this->stack + (other.top - other.stack);
+	for(int i = 0; i < top - stack + 1; i++) {
+		this->stack[i] = other.stack[i];
+	}
+	return *this;
+}
+
+void NodeStack::riseUntilAvailableWhile() {
+	while(top->index == top->node->nodeCount) {
+		top--;
+		if(top < stack) return;
+		top->index++;
+	}
+}
+void NodeStack::riseUntilAvailableDoWhile() {
+	do {
+		top--;
+		if(top < stack) return;
+		top->index++;
+	} while(top->index == top->node->nodeCount);
+}
+
+void NodeStack::riseUntilGroupHeadDoWhile() {
+	do {
+		top--;
+		if(top < stack) throw "Did not find groupHead node above!";
+	} while(!top->node->isGroupHead);
+}
+
+void NodeStack::riseUntilGroupHeadWhile() {
+	while(!top->node->isGroupHead) {
+		top--;
+		if(top < stack) throw "Did not find groupHead node above!";
+	};
+}
+
+void NodeStack::updateBoundsAllTheWayToTop() {
+	TreeStackElement* newTop = top;
+	while(newTop + 1 != stack) {
+		TreeNode* n = newTop->node;
+		n->recalculateBoundsFromSubBounds();
+		newTop--;
+	}
+}
+
+void NodeStack::expandBoundsAllTheWayToTop() {
+	Bounds expandedTopBounds = top->node->bounds;
+	TreeStackElement* newTop = top - 1;
+	while(newTop + 1 != stack) {
+		TreeNode* n = newTop->node;
+		n->bounds = unionOfBounds(n->bounds, expandedTopBounds);
+		newTop--;
+	}
+}
+
+// removes the object currently pointed to
+TreeNode NodeStack::remove() {
+	assert(top != stack);
+
+	top--;
+
+	TreeNode result = top->node->remove(top->index);
+
+	if(!top->node->isLeafNode()) {
+		updateBoundsAllTheWayToTop();
+		riseUntilAvailableWhile();
+	}
+	return result;
+}
+
 
 
 
@@ -212,36 +389,11 @@ FixedLocalBuffer<TreeNode*, 2 * MAX_BRANCHES> nodesToList(TreeNode& first, TreeN
 	return allNodes;
 }
 
-size_t getNumberOfObjectsInNode(const TreeNode& node) {
-	if (node.isLeafNode()) return 1;
-
-	size_t runningTotal = 0;
-	for (const TreeNode& subNode : node) {
-		runningTotal += getNumberOfObjectsInNode(subNode);
-	}
-	return runningTotal;
-}
-
-size_t getLengthOfLongestBranch(const TreeNode& node) {
-	if (node.isLeafNode()) return 0;
-
-	size_t best = 0;
-
-	for (const TreeNode& subNode : node) {
-		size_t lengthOfBranch = getLengthOfLongestBranch(subNode);
-		if (lengthOfBranch > best) {
-			best = lengthOfBranch;
-		}
-	}
-
-	return best + 1;
-}
-
-long long computeCost(const NodePermutation& perm) {
+inline static long long computeCost(const NodePermutation& perm) {
 	return computeCost(perm.getBoundsA()) + computeCost(perm.getBoundsB());
 }
 
-void updateBestPermutationIfNeeded(long long& bestCost, NodePermutation& bestPermutation, NodePermutation& currentPermutation) {
+inline static void updateBestPermutationIfNeeded(long long& bestCost, NodePermutation& bestPermutation, NodePermutation& currentPermutation) {
 	long long cost = computeCost(currentPermutation);
 	if (cost < bestCost) {
 		bestPermutation = currentPermutation;
@@ -249,7 +401,7 @@ void updateBestPermutationIfNeeded(long long& bestCost, NodePermutation& bestPer
 	}
 }
 
-void recursiveFindBestCombination(long long& bestCost, NodePermutation& bestPermutation, NodePermutation& currentPermutation, TreeNode*const* candidates, int size) {
+inline static void recursiveFindBestCombination(long long& bestCost, NodePermutation& bestPermutation, NodePermutation& currentPermutation, TreeNode*const* candidates, int size) {
 	if (size == 0) { // all nodes have been placed
 		updateBestPermutationIfNeeded(bestCost, bestPermutation, currentPermutation);
 	} else { // some nodes still left to place
@@ -308,7 +460,7 @@ NodePermutation findBestPermutation(const FixedLocalBuffer<TreeNode*, 2 * MAX_BR
 	return bestPermutation;
 }
 
-void fillNodePairWithPermutation(TreeNode& first, TreeNode& second, NodePermutation& bestPermutation) {
+inline static void fillNodePairWithPermutation(TreeNode& first, TreeNode& second, NodePermutation& bestPermutation) {
 	if (bestPermutation.countA == 1) bestPermutation.swap(); // make sure that the leafnode is always permutationB
 
 	TreeNode * availableGroups[2];
@@ -348,7 +500,7 @@ void fillNodePairWithPermutation(TreeNode& first, TreeNode& second, NodePermutat
 /*
 	This function tries all permutations of the subnodes of first and second, and finds which arrangement results in the smallest bounds
 */
-void optimizeNodePairHorizontal(TreeNode& first, TreeNode& second) {
+inline static void optimizeNodePairHorizontal(TreeNode& first, TreeNode& second) {
 	if (first.isLeafNode() && second.isLeafNode())
 		return;
 
@@ -360,7 +512,7 @@ void optimizeNodePairHorizontal(TreeNode& first, TreeNode& second) {
 		fillNodePairWithPermutation(first, second, bestPermutation);
 }
 
-void optimizeNodePairVertical(TreeNode& node, TreeNode& group) {
+inline static void optimizeNodePairVertical(TreeNode& node, TreeNode& group) {
 	// given: group is not a leafnode
 
 	long long originalCost = computeCost(group.bounds);

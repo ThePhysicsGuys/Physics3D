@@ -85,10 +85,6 @@ void WorldPrototype::removePart(Part* part) {
 	ASSERT_VALID;
 }
 void WorldPrototype::removeMainPhysical(MotorizedPhysical* motorPhys) {
-	objectCount -= motorPhys->getNumberOfPartsInThisAndChildren();
-
-	NodeStack stack = objectTree.findGroupFor(motorPhys->rigidBody.mainPart, motorPhys->rigidBody.mainPart->getStrictBounds());
-	stack.remove();
 	physicals.erase(std::remove(physicals.begin(), physicals.end(), motorPhys));
 
 	ASSERT_VALID;
@@ -100,8 +96,9 @@ void WorldPrototype::addTerrainPart(Part* part) {
 	part->isTerrainPart = true;
 }
 void WorldPrototype::optimizeTerrain() {
-	for(int i = 0; i < 5; i++)
+	for(int i = 0; i < 5; i++) {
 		terrainTree.improveStructure();
+	}
 }
 
 
@@ -133,7 +130,25 @@ void WorldPrototype::splitPhysical(const MotorizedPhysical* mainPhysical, Motori
 	physicals.push_back(newlySplitPhysical);
 	newlySplitPhysical->world = this;
 
-	throw "todo split tree aswell";
+	// split object tree
+	NodeStack stack = objectTree.findGroupFor(mainPhysical->getMainPart(), mainPhysical->getMainPart()->getStrictBounds());
+
+	TreeNode* node = *stack;
+
+	TreeNode newNode = objectTree.grab(newlySplitPhysical->getMainPart(), newlySplitPhysical->getMainPart()->getStrictBounds());
+	newNode.isGroupHead = true;
+
+	for(TreeIterator iter(*node); iter != IteratorEnd();) {
+		TreeNode* objectNode = *iter;
+		Part* part = static_cast<Part*>(objectNode->object);
+		if(part->parent->mainPhysical == newlySplitPhysical) {
+			newNode.addInside(iter.remove());
+		} else {
+			++iter;
+		}
+	}
+
+	objectTree.add(std::move(newNode));
 }
 
 void WorldPrototype::mergePhysicals(const MotorizedPhysical* firstPhysical, const MotorizedPhysical* secondPhysical) {
@@ -182,7 +197,7 @@ void WorldPrototype::notifyPartStdMoved(Part* oldPartPtr, Part* newPartPtr) {
 	(*getTreeForPart(oldPartPtr).find(oldPartPtr, newPartPtr->getStrictBounds()))->object = newPartPtr;
 }
 
-void WorldPrototype::notifyPartRemovedFromPhysical(Part* part) {
+void WorldPrototype::notifyPartRemovedFromGroup(Part* part) {
 	objectTree.remove(part);
 	objectCount--;
 }

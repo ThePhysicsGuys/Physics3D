@@ -360,11 +360,6 @@ void Physical::detachAllHardConstraintsForSinglePartPhysical(bool alsoDelete) {
 }
 
 void Physical::detachChildPartAndDelete(ConnectedPhysical&& formerChild) {
-	//delete formerChild.constraintWithParent;
-	WorldPrototype* world = this->mainPhysical->world;
-	if(world != nullptr) {
-		world->removePartFromTrees(formerChild.rigidBody.mainPart);
-	}
 	childPhysicals.remove(std::move(formerChild));
 }
 
@@ -372,23 +367,19 @@ void Physical::detachFromRigidBody(Part* part) {
 	part->parent = nullptr;
 	rigidBody.detach(part);
 	WorldPrototype* world = this->mainPhysical->world;
-
-	if(world != nullptr) {
-		world->notifyPartRemovedFromPhysical(part);
-	}
 }
 
 void Physical::detachFromRigidBody(AttachedPart&& part) {
 	part.part->parent = nullptr;
 	rigidBody.detach(std::move(part));
-
-	WorldPrototype* world = this->mainPhysical->world;
-	if(world != nullptr) {
-		world->notifyPartRemovedFromPhysical(part.part);
-	}
 }
 
 void Physical::detachPart(Part* part, bool partStaysInWorld) {
+	WorldPrototype* world = this->mainPhysical->world;
+	if(world != nullptr) {
+		world->notifyPartRemovedFromGroup(part);
+	}
+
 	if(part == rigidBody.getMainPart()) {
 		if(rigidBody.getPartCount() == 1) {
 			// we have to disconnect this from other physicals as we're detaching the last part in the physical
@@ -410,7 +401,12 @@ void Physical::detachPart(Part* part, bool partStaysInWorld) {
 	}
 
 	if(partStaysInWorld) {
-		new MotorizedPhysical(part);
+		MotorizedPhysical* phys = new MotorizedPhysical(part);
+
+		WorldPrototype* world = this->mainPhysical->world;
+		if(world != nullptr) {
+			world->addPart(part);
+		}
 	} else {
 		part->parent = nullptr;
 	}
