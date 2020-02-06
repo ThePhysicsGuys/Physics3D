@@ -6,10 +6,23 @@
 #include "../math/utils.h"
 #include "../../util/log.h"
 #include "../debug.h"
+#include "../physicsProfiler.h"
+#include "../profiling.h"
 #include "../constants.h"
 #include "polyhedron.h"
 
 #include "../misc/validityHelper.h"
+
+
+inline static void incDebugTally(HistoricTally<long long, IterationTime>& tally, int iterTime) {
+	if(iterTime >= GJK_MAX_ITER) {
+		tally.addToTally(IterationTime::LIMIT_REACHED, 1);
+	} else if(iterTime >= 15) {
+		tally.addToTally(IterationTime::TOOMANY, 1);
+	} else {
+		tally.addToTally(static_cast<IterationTime>(iterTime), 1);
+	}
+}
 
 static Vec3f getNormalVec(Triangle t, Vec3f* vertices) {
 	Vec3f v0 = vertices[t[0]];
@@ -68,7 +81,7 @@ static MinkPoint getSupport(const ColissionPair& info, const Vec3f& searchDirect
 	return MinkPoint{ furthest1 - secondVertex, furthest1, secondVertex };  // local to first
 }
 
-bool runGJKTransformed(const ColissionPair& info, Vec3f searchDirection, Tetrahedron& simplex, int& iter) {
+std::optional<Tetrahedron> runGJKTransformed(const ColissionPair& info, Vec3f searchDirection) {
 	MinkPoint A(getSupport(info, searchDirection));
 	MinkPoint B, C, D;
 
@@ -83,8 +96,8 @@ bool runGJKTransformed(const ColissionPair& info, Vec3f searchDirection, Tetrahe
 	// Just one test, to see if the line segment or A is closer
 	B = getSupport(info, searchDirection);
 	if (B.p * searchDirection < 0) {
-		iter = -2;
-		return false;
+		incDebugTally(GJKNoCollidesIterationStatistics, 0);
+		return std::optional<Tetrahedron>();
 	}
 
 	Vec3f AO = -B.p;
@@ -93,14 +106,14 @@ bool runGJKTransformed(const ColissionPair& info, Vec3f searchDirection, Tetrahe
 
 	C = getSupport(info, searchDirection);
 	if (C.p * searchDirection < 0) {
-		iter = -1;
-		return false;
+		incDebugTally(GJKNoCollidesIterationStatistics, 1);
+		return std::optional<Tetrahedron>();
 	}
 	// s.A is C.p  newest
 	// s.B is B.p
 	// s.C is A.p
 	// triangle, check if closest to one of the edges, point, or face
-	for(iter = 0; iter < GJK_MAX_ITER; iter++) {
+	for(int iter = 0; iter < GJK_MAX_ITER; iter++) {
 		Vec3f AO = -C.p;
 		Vec3f AB = B.p - C.p;
 		Vec3f AC = A.p - C.p;
@@ -114,16 +127,20 @@ bool runGJKTransformed(const ColissionPair& info, Vec3f searchDirection, Tetrahe
 			B = C;
 			searchDirection = -(AO % AB) % AB;
 			C = getSupport(info, searchDirection);
-			if(C.p * searchDirection < 0)
-				return false;
+			if(C.p * searchDirection < 0) {
+				incDebugTally(GJKNoCollidesIterationStatistics, iter+2);
+				return std::optional<Tetrahedron>();
+			}
 		} else {
 			if(AO*nAC > 0) {
 				// edge of AC is closest, searchDirection perpendicular to AC towards O
 				B = C;
 				searchDirection = -(AO % AC) % AC;
 				C = getSupport(info, searchDirection);
-				if(C.p * searchDirection < 0)
-					return false;
+				if(C.p * searchDirection < 0) {
+					incDebugTally(GJKNoCollidesIterationStatistics, iter + 2);
+					return std::optional<Tetrahedron>();
+				}
 			} else {
 				// hurray! best shape is tetrahedron
 				// just find which direction to look in
@@ -143,8 +160,10 @@ bool runGJKTransformed(const ColissionPair& info, Vec3f searchDirection, Tetrahe
 				// s.C is B.p
 				// s.D is A.p
 				D = getSupport(info, searchDirection);
-				if(D.p * searchDirection < 0)
-					return false;
+				if(D.p * searchDirection < 0) {
+					incDebugTally(GJKNoCollidesIterationStatistics, iter + 2);
+					return std::optional<Tetrahedron>();
+				}
 				Vec3f AO = -D.p;
 				// A is new point, at the top of the tetrahedron
 				Vec3f AB = C.p - D.p;
@@ -174,8 +193,8 @@ bool runGJKTransformed(const ColissionPair& info, Vec3f searchDirection, Tetrahe
 						} else {
 							// GOTCHA! TETRAHEDRON COVERS THE ORIGIN!
 
-							simplex = Tetrahedron{D, C, B, A};
-							return true;
+							incDebugTally(GJKCollidesIterationStatistics, iter + 2);
+							return std::optional<Tetrahedron>(Tetrahedron{D, C, B, A});
 						}
 					}
 				}
@@ -184,7 +203,8 @@ bool runGJKTransformed(const ColissionPair& info, Vec3f searchDirection, Tetrahe
 	}
 
 	Log::warn("GJK iteration limit reached!");
-	return false;
+	incDebugTally(GJKNoCollidesIterationStatistics, GJK_MAX_ITER + 2);
+	return std::optional<Tetrahedron>();
 }
 
 void initializeBuffer(const Tetrahedron& s, ComputationBuffers& b) {
@@ -204,12 +224,12 @@ void initializeBuffer(const Tetrahedron& s, ComputationBuffers& b) {
 	b.knownVecs[3] = MinkowskiPointIndices{s.D.originFirst, s.D.originSecond};
 }
 
-bool runEPATransformed(const ColissionPair& info, const Tetrahedron& s, Vec3f& intersection, Vec3f& exitVector, ComputationBuffers& bufs, int& iter) {
+bool runEPATransformed(const ColissionPair& info, const Tetrahedron& s, Vec3f& intersection, Vec3f& exitVector, ComputationBuffers& bufs) {
 	initializeBuffer(s, bufs);
 
 	ConvexShapeBuilder builder(bufs.vertBuf, bufs.triangleBuf, 4, 4, bufs.neighborBuf, bufs.removalBuf, bufs.edgeBuf);
 
-	for(iter = 0; iter < EPA_MAX_ITER; iter++) {
+	for(int iter = 0; iter < EPA_MAX_ITER; iter++) {
 		NearestSurface ns = getNearestSurface(builder);
 		int closestTriangleIndex = ns.triangleIndex;
 		double distSq = ns.distanceSquared;
@@ -266,10 +286,12 @@ bool runEPATransformed(const ColissionPair& info, const Tetrahedron& s, Vec3f& i
 
 			// intersection = (avgFirst + relativeCFrame.localToGlobal(avgSecond)) / 2;
 			intersection = (avgFirst + avgSecond) / 2;
+			incDebugTally(EPAIterationStatistics, iter);
 			return true;
 		}
 	}
 
 	Log::warn("EPA iteration limit exceeded! ");
+	incDebugTally(EPAIterationStatistics, EPA_MAX_ITER);
 	return false;
 }

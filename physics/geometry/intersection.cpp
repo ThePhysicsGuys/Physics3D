@@ -13,33 +13,20 @@
 
 #include <algorithm>
 
-Intersection intersectsTransformed(const Shape& first, const Shape& second, const CFrame& relativeTransform) {
+std::optional<Intersection> intersectsTransformed(const Shape& first, const Shape& second, const CFrame& relativeTransform) {
 	return intersectsTransformed(*first.baseShape, *second.baseShape, relativeTransform, first.scale, second.scale);
-}
-
-
-static void incDebugTally(HistoricTally<long long, IterationTime>& tally, int iterTime) {
-	if(iterTime >= 200) {
-		tally.addToTally(IterationTime::LIMIT_REACHED, 1);
-	} else if(iterTime >= 15) {
-		tally.addToTally(IterationTime::TOOMANY, 1);
-	} else {
-		tally.addToTally(static_cast<IterationTime>(iterTime), 1);
-	}
 }
 
 
 ComputationBuffers buffers(1000, 2000);
 
-Intersection intersectsTransformed(const GenericCollidable& first, const GenericCollidable& second, const CFrame& relativeTransform, const DiagonalMat3& scaleFirst, const DiagonalMat3& scaleSecond) {
-	Tetrahedron result;
-	int iter;
+std::optional<Intersection> intersectsTransformed(const GenericCollidable& first, const GenericCollidable& second, const CFrame& relativeTransform, const DiagonalMat3& scaleFirst, const DiagonalMat3& scaleSecond) {
 	ColissionPair info{first, second, relativeTransform, scaleFirst, scaleSecond};
 	physicsMeasure.mark(PhysicsProcess::GJK_COL);
-	bool collides = runGJKTransformed(info, -relativeTransform.position, result, iter);
+	std::optional collides = runGJKTransformed(info, -relativeTransform.position);
 
 	if(collides) {
-		incDebugTally(GJKCollidesIterationStatistics, iter + 2);
+		Tetrahedron& result = collides.value();
 		physicsMeasure.mark(PhysicsProcess::EPA);
 		Vec3f intersection;
 		Vec3f exitVector;
@@ -65,18 +52,16 @@ Intersection intersectsTransformed(const GenericCollidable& first, const Generic
 		assert(isVecValid(result.D.originFirst));
 		assert(isVecValid(result.D.originSecond));
 
-		bool epaResult = runEPATransformed(info, result, intersection, exitVector, buffers, iter);
+		bool epaResult = runEPATransformed(info, result, intersection, exitVector, buffers);
 
 		assert(isVecValid(exitVector));
-		incDebugTally(EPAIterationStatistics, iter);
 		if(!epaResult) {
-			return Intersection();
+			return std::optional<Intersection>();
 		} else {
-			return Intersection(intersection, exitVector);
+			return std::optional<Intersection>(Intersection(intersection, exitVector));
 		}
 	} else {
-		incDebugTally(GJKNoCollidesIterationStatistics, iter + 2);
 		physicsMeasure.mark(PhysicsProcess::OTHER, PhysicsProcess::GJK_NO_COL);
-		return Intersection();
+		return std::optional<Intersection>();
 	}
 }

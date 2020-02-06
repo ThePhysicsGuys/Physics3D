@@ -63,10 +63,10 @@ Part& Part::operator=(Part&& other) {
 
 PartIntersection Part::intersects(const Part& other) const {
 	CFrame relativeTransform = this->cframe.globalToLocal(other.cframe);
-	Intersection result = intersectsTransformed(this->hitbox, other.hitbox, relativeTransform);
-	if(result.intersects) {
-		Position intersection = this->cframe.localToGlobal(result.intersection);
-		Vec3 exitVector = this->cframe.localToRelative(result.exitVector);
+	std::optional<Intersection> result = intersectsTransformed(this->hitbox, other.hitbox, relativeTransform);
+	if(result) {
+		Position intersection = this->cframe.localToGlobal(result.value().intersection);
+		Vec3 exitVector = this->cframe.localToRelative(result.value().exitVector);
 
 
 		assert(isVecValid(result.exitVector));
