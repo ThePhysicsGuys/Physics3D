@@ -274,14 +274,6 @@ bool Polyhedron::containsPoint(Vec3f point) const {
 
 #ifdef __AVX__
 #include <immintrin.h>
-#ifdef _MSC_VER
-inline uint32_t __builtin_ctz(uint32_t x) {
-	unsigned long ret;
-	_BitScanForward(&ret, x);
-	return (int)ret;
-}
-#endif
-
 #define SWAP_2x2 0b01001110
 #define SWAP_1x1 0b10110001
 

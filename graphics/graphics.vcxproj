@@ -83,6 +83,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>core.h</PrecompiledHeaderFile>
       <PreprocessorDefinitions>FT2_BUILD_LIBRARY;GLEW_STATIC;_MBCS;NDEBUG;%(PreprocessorDefinitions);</PreprocessorDefinitions>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -113,6 +114,7 @@
       <PreprocessorDefinitions>GLEW_STATIC;_MBCS;%(PreprocessorDefinitions);FT2_BUILD_LIBRARY;</PreprocessorDefinitions>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>core.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Lib>
       <AdditionalDependencies>freetype.lib;glfw3.lib;glew32s.lib;opengl32.lib;physics.lib;util.lib;</AdditionalDependencies>
