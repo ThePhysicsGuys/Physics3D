@@ -120,7 +120,8 @@ public:
 	ConnectedPhysical(RigidBody&& rigidBody, Physical* parent, HardPhysicalConnection&& connectionToParent);
 	ConnectedPhysical(Physical&& phys, Physical* parent, HardPhysicalConnection&& connectionToParent);
 	ConnectedPhysical(Physical&& phys, Physical* parent, HardConstraint* constraintWithParent, const CFrame& attachOnThis, const CFrame& attachOnParent);
-
+	
+	void setCFrame(const GlobalCFrame& newCFrame);
 	CFrame getRelativeCFrameToParent() const;
 
 	/*
@@ -161,6 +162,7 @@ public:
 
 	void update(double deltaT);
 
+	void setCFrame(const GlobalCFrame& newCFrame);
 	void rotateAroundCenterOfMass(const RotMat3& rotation);
 	void translate(const Vec3& translation);
 

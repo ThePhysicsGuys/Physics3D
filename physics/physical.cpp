@@ -439,14 +439,38 @@ void Physical::updateAttachedPhysicals(double deltaT) {
 }
 
 void Physical::setCFrame(const GlobalCFrame& newCFrame) {
+	if(this->isMainPhysical()) {
+		MotorizedPhysical* motorThis = static_cast<MotorizedPhysical*>(this);
+		motorThis->setCFrame(newCFrame);
+	} else {
+		ConnectedPhysical* connectedThis = static_cast<ConnectedPhysical*>(this);
+		connectedThis->setCFrame(newCFrame);
+	}
+}
+
+void ConnectedPhysical::setCFrame(const GlobalCFrame& newCFrame) {
+	CFrame relativeCFrameToParent = this->getRelativeCFrameToParent();
+
+	GlobalCFrame resultingCFrame = newCFrame.localToGlobal(~relativeCFrameToParent);
+
+	this->parent->setCFrame(resultingCFrame);
+}
+
+void MotorizedPhysical::setCFrame(const GlobalCFrame& newCFrame) {
 	if(this->mainPhysical->world != nullptr) {
 		Bounds oldMainPartBounds = this->rigidBody.mainPart->getStrictBounds();
 
 		rigidBody.setCFrame(newCFrame);
+		for(ConnectedPhysical& conPhys : childPhysicals) {
+			conPhys.refreshCFrameRecursive();
+		}
 
 		this->mainPhysical->world->updatePartGroupBounds(this->rigidBody.mainPart, oldMainPartBounds);
 	} else {
 		rigidBody.setCFrame(newCFrame);
+		for(ConnectedPhysical& conPhys : childPhysicals) {
+			conPhys.refreshCFrameRecursive();
+		}
 	}
 }
 
