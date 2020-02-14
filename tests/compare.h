@@ -10,6 +10,7 @@
 #include "../physics/math/position.h"
 #include "../physics/math/globalCFrame.h"
 #include "../physics/motion.h"
+#include "../physics/relativeMotion.h"
 
 #include <utility>
 
@@ -145,6 +146,12 @@ bool tolerantEquals(const Motion& first, const Motion& second, Tol tolerance) {
 		if(!tolerantEquals(first.components[i], second.components[i], tolerance)) return false;
 	}
 	return true;
+}
+
+template<typename Tol>
+bool tolerantEquals(const RelativeMotion& first, const RelativeMotion& second, Tol tolerance) {
+	return tolerantEquals(first.relativeMotion, second.relativeMotion, tolerance) && 
+		tolerantEquals(first.locationOfRelativeMotion, second.locationOfRelativeMotion, tolerance);
 }
 
 template<typename T1, typename T2, typename Tol>

@@ -82,20 +82,12 @@ public:
 		return *this;
 	}
 
-	inline CFrameTemplate<T> operator+(const Vector<T, 3>& delta) {
+	inline CFrameTemplate<T> operator+(const Vector<T, 3>& delta) const {
 		return CFrameTemplate<T>(this->position + delta, this->rotation);
 	}
 
-	inline CFrameTemplate<T> operator-(const Vector<T, 3>& delta) {
+	inline CFrameTemplate<T> operator-(const Vector<T, 3>& delta) const {
 		return CFrameTemplate<T>(this->position - delta, this->rotation);
-	}
-
-	void translate(const Vector<T, 3>& translation) {
-		position += translation;
-	}
-
-	void rotate(const Matrix<T, 3, 3>& rot) {
-		rotation = rot * rotation;
 	}
 };
 

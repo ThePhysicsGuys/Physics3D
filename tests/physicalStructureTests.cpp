@@ -15,7 +15,7 @@
 #define ASSERT(x) ASSERT_STRICT(x)
 
 static CFrame cf() {
-	return createRandomCFrame<double>();
+	return createRandomCFrame();
 }
 
 static Part* createPart() {

@@ -38,6 +38,17 @@ Motion getMotionBySimulation(const Motion& m, const Vec3& point, double deltaT) 
 
 	return result;
 }
+std::pair<Vec3, Vec3> estimateMotion(const Vec3& startPos, const Vec3& midPos, const Vec3& endPos, double stepT) {
+	Vec3 distance1 = midPos - startPos;
+	Vec3 distance2 = endPos - midPos;
+
+	Vec3 velocity1 = distance1 / stepT;
+	Vec3 velocity2 = distance2 / stepT;
+
+	Vec3 acceleration = (velocity2 - velocity1) / stepT;
+
+	return std::make_pair(velocity1, acceleration);
+}
 std::pair<Vec3, Vec3> estimateMotion(const Position& startPos, const Position& midPos, const Position& endPos, double stepT) {
 	Vec3 distance1 = midPos - startPos;
 	Vec3 distance2 = endPos - midPos;
@@ -65,6 +76,19 @@ Vec3 getRotationVelFor(const RotMat3& before, const RotMat3& after, double delta
 	return rotationVec / deltaT;
 }
 
+Motion estimateMotion(const CFrame& step1, const CFrame& step2, const CFrame& step3, double stepT) {
+	Vec3 vel1 = Vec3(step2.getPosition() - step1.getPosition()) / stepT;
+	Vec3 vel2 = Vec3(step3.getPosition() - step2.getPosition()) / stepT;
+
+	Vec3 rotVel1 = getRotationVelFor(step1.getRotation(), step2.getRotation(), stepT);
+	Vec3 rotVel2 = getRotationVelFor(step2.getRotation(), step3.getRotation(), stepT);
+
+	Vec3 accel = (vel2 - vel1) / stepT;
+	Vec3 rotAccel = (rotVel2 - rotVel1) / stepT;
+
+	return Motion(vel1, rotVel1, accel, rotAccel);
+}
+
 Motion estimateMotion(const GlobalCFrame& step1, const GlobalCFrame& step2, const GlobalCFrame& step3, double stepT) {
 	Vec3 vel1 = Vec3(step2.getPosition() - step1.getPosition()) / stepT;
 	Vec3 vel2 = Vec3(step3.getPosition() - step2.getPosition()) / stepT;
@@ -76,4 +100,11 @@ Motion estimateMotion(const GlobalCFrame& step1, const GlobalCFrame& step2, cons
 	Vec3 rotAccel = (rotVel2 - rotVel1) / stepT;
 
 	return Motion(vel1, rotVel1, accel, rotAccel);
+}
+
+
+CFrame simulateForTime(const Motion& motion, const CFrame& startingCFrame, double deltaT) {
+	Motion::Movement mov = motion.getMovementAfterDeltaT(deltaT);
+
+	return CFrame(startingCFrame.getPosition() + mov.translation, fromRotationVec(mov.rotation) * startingCFrame.getRotation());
 }

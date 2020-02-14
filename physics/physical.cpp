@@ -179,6 +179,16 @@ void ConnectedPhysical::makeMainPhysical() {
 	OP->refreshPhysicalProperties();
 }
 
+Motion ConnectedPhysical::getRelativeMotionBetweenParentCOMAndSelfCOM() const {
+	RelativeMotion motionOfConnection = connectionToParent.getRelativeMotion();
+
+	Vec3 childCFrameToChildCOM = motionOfConnection.locationOfRelativeMotion.localToRelative(this->rigidBody.localCenterOfMass);
+
+	Motion motionOfCOM = motionOfConnection.relativeMotion.getMotionOfPoint(childCFrameToChildCOM);
+
+	return motionOfCOM;
+}
+
 bool Physical::isMainPhysical() const {
 	Physical* ptr = mainPhysical;
 	return ptr == this;
@@ -372,6 +382,19 @@ void Physical::detachFromRigidBody(Part* part) {
 void Physical::detachFromRigidBody(AttachedPart&& part) {
 	part.part->parent = nullptr;
 	rigidBody.detach(std::move(part));
+}
+
+std::pair<double, Vec3> Physical::getMotionOfCenterOfMassInternally() const {
+	double totalMass = this->rigidBody.mass;
+	Vec3 totalVelocity = Vec3(0,0,0);
+
+	for(const ConnectedPhysical& conPhys : childPhysicals) {
+		std::pair<double, Vec3> motionOfConnectedCOM;
+		totalMass += motionOfConnectedCOM.first;
+		//Motion motionOfConnection = conPhys.get
+		//Vec3 velocityRelativeToThis = 
+	}
+	throw "TODO";
 }
 
 void Physical::detachPart(Part* part, bool partStaysInWorld) {
@@ -592,12 +615,16 @@ void MotorizedPhysical::update(double deltaT) {
 	motionOfCenterOfMass.velocity += accel;
 	motionOfCenterOfMass.angularVelocity += rotAcc;
 
-	Vec3 movement = motionOfCenterOfMass.velocity * deltaT + accel * deltaT * deltaT / 2;
+	Vec3 movementOfCenterOfMass = motionOfCenterOfMass.velocity * deltaT + accel * deltaT * deltaT / 2;
+
+	// Vec3 motionOfCenterOfMassInternally = getMotionOfCenterOfMassInternally();
+	//throw "TODO";
+	// TODO
 
 	Mat3 rotation = fromRotationVec(motionOfCenterOfMass.angularVelocity * deltaT);
 
 	rotateAroundCenterOfMassUnsafe(rotation);
-	translateUnsafeRecursive(movement);
+	translateUnsafeRecursive(movementOfCenterOfMass);
 
 	updateAttachedPhysicals(deltaT);
 }
@@ -765,6 +792,8 @@ GlobalCFrame MotorizedPhysical::getCenterOfMassCFrame() const {
 	return GlobalCFrame(getCFrame().localToGlobal(totalCenterOfMass), getCFrame().getRotation());
 }
 
+#include "misc/toString.h"
+
 Motion Physical::getMotion() const {
 	if(this->isMainPhysical()) {
 		MotorizedPhysical* self = (MotorizedPhysical*) this;
@@ -779,17 +808,15 @@ Motion Physical::getMotion() const {
 
 		Motion parentMotion = parent->getMotion();
 
-		Vec3 connectionOffsetOnParent = parent->getCFrame().localToRelative(self->connectionToParent.attachOnParent.getPosition() - parent->rigidBody.localCenterOfMass);
+		RelativeMotion motionBetweenParentAndChild = self->connectionToParent.getRelativeMotion();
 
-		Motion motionOfConnectOnParent = parentMotion.getMotionOfPoint(connectionOffsetOnParent);
+		RelativeMotion inGlobalFrame = motionBetweenParentAndChild.extendBegin(CFrame(parent->getCFrame().getRotation()));
 
-		Vec3 jointOffset = parent->getCFrame().localToRelative(self->connectionToParent.attachOnParent.localToRelative(self->connectionToParent.constraintWithParent->getRelativeCFrame().getPosition()));
+		Motion result = inGlobalFrame.applyTo(parentMotion);
 
-		Motion motionPastJoint = motionOfConnectOnParent.addRelativeMotion(self->connectionToParent.constraintWithParent->getRelativeMotion()).getMotionOfPoint(jointOffset);
+		//Log::debug(str(result.velocity));
 
-		Vec3 connectionOffsetOnSelf = self->getCFrame().localToRelative(self->connectionToParent.attachOnChild.getPosition() - rigidBody.localCenterOfMass);
-
-		return motionPastJoint.getMotionOfPoint(-connectionOffsetOnSelf);
+		return result;
 	}
 }
 
@@ -819,7 +846,7 @@ ConnectedPhysical::ConnectedPhysical(Physical&& phys, Physical* parent, HardPhys
 	Physical(std::move(phys)), parent(parent), connectionToParent(std::move(connectionToParent)) {}
 
 ConnectedPhysical::ConnectedPhysical(Physical&& phys, Physical* parent, HardConstraint* constraintWithParent, const CFrame& attachOnThis, const CFrame& attachOnParent) :
-	Physical(std::move(phys)), parent(parent), connectionToParent(attachOnThis, attachOnParent, std::unique_ptr<HardConstraint>(constraintWithParent)) {}
+	Physical(std::move(phys)), parent(parent), connectionToParent(std::unique_ptr<HardConstraint>(constraintWithParent), attachOnThis, attachOnParent) {}
 
 MotorizedPhysical::MotorizedPhysical(Part* mainPart) : Physical(mainPart, this) {
 	refreshPhysicalProperties();

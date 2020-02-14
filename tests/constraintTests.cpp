@@ -11,6 +11,8 @@
 #include "../physics/part.h"
 #include "../physics/physical.h"
 #include "../physics/constraints/fixedConstraint.h"
+#include "../physics/constraints/motorConstraint.h"
+#include "../physics/constraints/sinusoidalPistonConstraint.h"
 #include "../physics/math/linalg/trigonometry.h"
 
 #define ASSERT(cond) ASSERT_TOLERANT(cond, 0.05)
@@ -396,4 +398,31 @@ TEST_CASE(testApplyForceToFixedConstraint) {
 
 	ASSERT(phys1->forceResponse == phys1e->forceResponse);
 	ASSERT(phys1->momentResponse == phys1e->momentResponse);
+}
+
+TEST_CASE(testPlainAttachAndFixedConstraintIndistinguishable) {
+	Part firstPart(Box(1.0, 1.0, 1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
+	Part secondPart(Box(0.5, 0.5, 0.5), GlobalCFrame(1.0, 0.0, 0.0), {1.0, 1.0, 1.0});
+
+	firstPart.attach(&secondPart, CFrame(1.0, 0.0, 0.0));
+
+	Part firstPart2(Box(1.0, 1.0, 1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
+	Part secondPart2(Box(0.5, 0.5, 0.5), GlobalCFrame(1.0, 0.0, 0.0), {1.0, 1.0, 1.0});
+
+	firstPart2.attach(&secondPart2, new FixedConstraint(), CFrame(0.5, 0.0, 0.0), CFrame(-0.5, 0.0, 0.0));
+
+	Vec3 impulse(1.3, 4.7, 0.2);
+	Vec3 impulsePos(2.6, 1.7, 2.8);
+
+	MotorizedPhysical* main1 = firstPart.parent->mainPhysical;
+	MotorizedPhysical* main2 = firstPart2.parent->mainPhysical;
+
+	main1->applyImpulse(impulsePos, impulse);
+	main2->applyImpulse(impulsePos, impulse);
+
+	main1->update(0.5);
+	main2->update(0.5);
+
+	ASSERT(main1->motionOfCenterOfMass == main2->motionOfCenterOfMass);
+	ASSERT(main1->getCFrame() == main2->getCFrame());
 }

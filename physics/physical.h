@@ -46,6 +46,14 @@ protected:
 	void detachFromRigidBody(Part* part);
 	void detachFromRigidBody(AttachedPart&& part);
 	
+	/*
+		Returns a representation for the motion of the center of mass within this physical
+
+		To get the actual motion compute (result.second / result.first)
+	*/
+	std::pair<double, Vec3> getMotionOfCenterOfMassInternally() const;
+
+
 public:
 	RigidBody rigidBody;
 
@@ -128,6 +136,8 @@ public:
 		Makes this physical the main Physical
 	*/
 	void makeMainPhysical();
+
+	Motion getRelativeMotionBetweenParentCOMAndSelfCOM() const;
 
 	bool isValid() const;
 };

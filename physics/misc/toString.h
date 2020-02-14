@@ -11,6 +11,7 @@
 #include "../math/position.h"
 #include "../math/globalCFrame.h"
 #include "../motion.h"
+#include "../relativeMotion.h"
 
 template<typename T>
 inline std::ostream& operator<<(std::ostream& os, const LargeMatrix<T>& matrix) {
@@ -129,6 +130,13 @@ inline std::ostream& operator<<(std::ostream& os, const Motion& motion) {
 	os << ", angularVel: " << motion.angularVelocity;
 	os << ", acc: " << motion.acceleration;
 	os << ", angularAcc: " << motion.angularAcceleration << "}";
+
+	return os;
+}
+
+inline std::ostream& operator<<(std::ostream& os, const RelativeMotion& relMotion) {
+	os << "{motion: " << relMotion.relativeMotion;
+	os << ", offset: " << relMotion.locationOfRelativeMotion << "}";
 
 	return os;
 }

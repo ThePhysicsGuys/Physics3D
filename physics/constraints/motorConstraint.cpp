@@ -17,17 +17,16 @@ MotorConstraint::MotorConstraint(Vec3 angularVelocity, double currentAngle) : Mo
 MotorConstraint::MotorConstraint(Vec3 angularVelocity) : MotorConstraint(angularVelocity, 0.0) {}
 
 void MotorConstraint::update(double deltaT) {
-	double currentAngle = this->currentAngle + deltaT * speed;
-	if(currentAngle < 0) currentAngle += 2 * M_PI;
-	if(currentAngle > 2 * M_PI) currentAngle -= 2 * M_PI;
+	this->currentAngle = this->currentAngle + deltaT * speed;
+	this->currentAngle = fmod(fmod(this->currentAngle, 2 * M_PI) + 2*M_PI, 2*M_PI);
 }
 
 void MotorConstraint::invert() { Log::error("MotorConstraint::invert is not implemented!"); }
 
-CFrame MotorConstraint::getRelativeCFrame() {
+CFrame MotorConstraint::getRelativeCFrame() const {
 	return CFrame(fromRotationVec(direction * currentAngle));
 }
 
-Motion MotorConstraint::getRelativeMotion() {
-	return Motion(Vec3(0,0,0), direction * speed);
+RelativeMotion MotorConstraint::getRelativeMotion() const {
+	return RelativeMotion(Motion(Vec3(0, 0, 0), direction * speed), CFrame(fromRotationVec(direction * currentAngle)));
 }

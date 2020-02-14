@@ -46,9 +46,27 @@ struct Motion {
 		return Motion(
 			velocity + relativeMotion.velocity,
 			angularVelocity + relativeMotion.angularVelocity,
-			acceleration + relativeMotion.acceleration,
+			acceleration + relativeMotion.acceleration + this->angularVelocity % relativeMotion.velocity * 2,
 			angularAcceleration + relativeMotion.angularAcceleration + angularVelocity % relativeMotion.angularVelocity
 		);
+	}
+
+	inline Motion addOffsetRelativeMotion(Vec3 offset, const Motion& relativeMotion) const {
+		return this->getMotionOfPoint(offset).addRelativeMotion(relativeMotion);
+	}
+
+
+	struct Movement {
+		Vec3 translation;
+		Vec3 rotation;
+	};
+
+	inline Movement getMovementAfterDeltaT(double deltaT) const {
+		Vec3 deltaPos = velocity * deltaT + acceleration * deltaT * deltaT / 2;
+
+		Vec3 rotation = angularVelocity * deltaT + angularAcceleration * deltaT * deltaT / 2;
+
+		return Movement{deltaPos, rotation};
 	}
 };
 

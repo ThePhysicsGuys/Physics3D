@@ -11,9 +11,27 @@
 
 #include "../physics/math/linalg/trigonometry.h"
 
+#include "../physics/motion.h"
+#include "../physics/relativeMotion.h"
+
+inline double createRandomDouble() {
+	return 2.0 * rand() / RAND_MAX - 1.0;
+}
+
+inline double createRandomNonzeroDouble() {
+	tryAgain:
+	double result = createRandomDouble();
+
+	if(abs(result) < 0.3) {
+		goto tryAgain;
+	}
+
+	return result;
+}
+
 // creates a random vector with elements between -1.0 and 1.0
 template<typename T, size_t Size>
-Vector<T, Size> createRandomVec() {
+Vector<T, Size> createRandomVecTemplate() {
 	Vector<T, Size> result;
 	for(size_t i = 0; i < Size; i++) {
 		result[i] = 2.0 * rand() / RAND_MAX - 1.0;
@@ -22,7 +40,7 @@ Vector<T, Size> createRandomVec() {
 }
 // creates a random average sized vector with elements between -1.0 and 1.0
 template<typename T, size_t Size>
-Vector<T, Size> createRandomNonzeroVec() {
+Vector<T, Size> createRandomNonzeroVecTemplate() {
 	Vector<T, Size> result;
 	tryAgain:
 	for(size_t i = 0; i < Size; i++) {
@@ -35,12 +53,38 @@ Vector<T, Size> createRandomNonzeroVec() {
 }
 // creates a random rotation
 template<typename T>
-Matrix<T, 3, 3> createRandomRotation() {
-	Vector<T, 3> angles = createRandomVec<T, 3>() * (M_PI / 2);
+Matrix<T, 3, 3> createRandomRotationTemplate() {
+	Vector<T, 3> angles = createRandomNonzeroVecTemplate<T, 3>() * (M_PI / 2);
 	return fromEulerAngles(angles.x, angles.y, angles.z);
 }
 // creates a random rotation
 template<typename T>
-CFrameTemplate<T> createRandomCFrame() {
-	return CFrameTemplate<T>(createRandomNonzeroVec<double, 3>(), createRandomRotation<double>());
+CFrameTemplate<T> createRandomCFrameTemplate() {
+	return CFrameTemplate<T>(createRandomNonzeroVecTemplate<double, 3>(), createRandomRotationTemplate<double>());
+}
+
+inline Vec3 createRandomVec() {
+	return createRandomVecTemplate<double, 3>();
+}
+inline Vec3 createRandomNonzeroVec3() {
+	return createRandomNonzeroVecTemplate<double, 3>();
+}
+inline Mat3 createRandomRotation() {
+	return createRandomRotationTemplate<double>();
+}
+inline CFrame createRandomCFrame() {
+	return createRandomCFrameTemplate<double>();
+}
+
+inline Motion createRandomMotion() {
+	Motion result;
+
+	for(Vec3& component : result.components) {
+		component = createRandomNonzeroVec3();
+	}
+
+	return result;
+}
+inline RelativeMotion createRandomRelativeMotion() {
+	return RelativeMotion(createRandomMotion(), createRandomCFrame());
 }

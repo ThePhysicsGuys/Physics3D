@@ -169,7 +169,7 @@ static HardPhysicalConnection deserializeHardPhysicalConnection(std::istream& is
 
 	HardConstraint* constraint = dynamicHardConstraintSerializer.deserialize(istream);
 
-	return HardPhysicalConnection(attachOnChild, attachOnParent, std::unique_ptr<HardConstraint>(constraint));
+	return HardPhysicalConnection(std::unique_ptr<HardConstraint>(constraint), attachOnChild, attachOnParent);
 }
 
 

@@ -189,6 +189,7 @@
   <ItemGroup>
     <ClCompile Include="constraintGroup.cpp" />
     <ClCompile Include="constraints\fixedConstraint.cpp" />
+    <ClCompile Include="constraints\hardConstraint.cpp" />
     <ClCompile Include="constraints\hardPhysicalConnection.cpp" />
     <ClCompile Include="constraints\motorConstraint.cpp" />
     <ClCompile Include="datastructures\alignedPtr.cpp" />
@@ -216,6 +217,7 @@
     <ClCompile Include="physical.cpp" />
     <ClCompile Include="physicsProfiler.cpp" />
     <ClCompile Include="misc\serialization.cpp" />
+    <ClCompile Include="constraints\sinusoidalPistonConstraint.cpp" />
     <ClCompile Include="rigidBody.cpp" />
     <ClCompile Include="world.cpp" />
     <ClCompile Include="worldPhysics.cpp" />
@@ -291,9 +293,11 @@
     <ClInclude Include="physical.h" />
     <ClInclude Include="math\vec4.h" />
     <ClInclude Include="physicsProfiler.h" />
+    <ClInclude Include="constraints\sinusoidalPistonConstraint.h" />
     <ClInclude Include="profiling.h" />
     <ClInclude Include="geometry\scalableInertialMatrix.h" />
     <ClInclude Include="misc\serialization.h" />
+    <ClInclude Include="relativeMotion.h" />
     <ClInclude Include="rigidBody.h" />
     <ClInclude Include="sharedLockGuard.h" />
     <ClInclude Include="synchonizedWorld.h" />

@@ -69,7 +69,7 @@ PartIntersection Part::intersects(const Part& other) const {
 		Vec3 exitVector = this->cframe.localToRelative(result.value().exitVector);
 
 
-		assert(isVecValid(result.exitVector));
+		assert(isVecValid(exitVector));
 
 
 		return PartIntersection(intersection, exitVector);
