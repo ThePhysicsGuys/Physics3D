@@ -77,8 +77,13 @@ public:
 		return getCFrame().getPosition();
 	}
 
+	/*
+		Returns the motion of this physical attached in it's center of mass
+
+		The motion is oriented globally
+	*/
 	Motion getMotion() const;
-	
+
 	double getVelocityKineticEnergy() const;
 	double getAngularKineticEnergy() const;
 	double getKineticEnergy() const;
@@ -161,8 +166,8 @@ public:
 
 	Motion motionOfCenterOfMass;
 	
-	MotorizedPhysical(Part* mainPart);
-	MotorizedPhysical(RigidBody&& rigidBody);
+	explicit MotorizedPhysical(Part* mainPart);
+	explicit MotorizedPhysical(RigidBody&& rigidBody);
 	explicit MotorizedPhysical(Physical&& movedPhys);
 
 	Position getCenterOfMass() const;

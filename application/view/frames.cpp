@@ -364,6 +364,16 @@ void BigFrame::renderPropertiesFrame() {
 			ImGui::Text("Conveyor: %s", (sp) ? str(sp->properties.conveyorEffect).c_str() : "-");
 			ImGui::Text("Inertia: %s", (sp) ? str(sp->getInertia()).c_str() : "-");
 
+			static volatile ExtendedPart* selectedPart = nullptr;
+			if(sp != nullptr) {
+				selectedPart = sp;
+			}
+
+			if(ImGui::Button("Debug This Part")) {
+				Log::debug("Debugging part %d", reinterpret_cast<uint64_t>(selectedPart));
+				__debugbreak();
+			}
+
 			ImGui::TreePop();
 		}
 

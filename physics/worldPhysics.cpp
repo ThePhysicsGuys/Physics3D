@@ -50,8 +50,10 @@ void handleCollision(Part& part1, Part& part2, Position collisionPoint, Vec3 exi
 	phys1.applyForce(collissionRelP1, depthForce);
 	phys2.applyForce(collissionRelP2, -depthForce);
 
+	Vec3 part1ToColission = collisionPoint - part1.getPosition();
+	Vec3 part2ToColission = collisionPoint - part2.getPosition();
 
-	Vec3 relativeVelocity = (parent1.getMotion().getVelocityOfPoint(collissionRelP1) - part1.properties.conveyorEffect) - (parent2.getMotion().getVelocityOfPoint(collissionRelP2) - part2.properties.conveyorEffect);
+	Vec3 relativeVelocity = (part1.getMotion().getVelocityOfPoint(part1ToColission) - part1.properties.conveyorEffect) - (part2.getMotion().getVelocityOfPoint(part2ToColission) - part2.properties.conveyorEffect);
 
 	bool isImpulseColission = relativeVelocity * exitVector > 0;
 
@@ -129,8 +131,9 @@ void handleTerrainCollision(Part& part1, Part& part2, Position collisionPoint, V
 
 	phys1.applyForce(collissionRelP1, depthForce);
 
-
-	Vec3 relativeVelocity = parent1.getMotion().getVelocityOfPoint(collissionRelP1) - part1.properties.conveyorEffect + part2.getCFrame().localToRelative(part2.properties.conveyorEffect);
+	//Vec3 rigidBodyToPart = part1.getCFrame().getPosition() - parent1.rigidBody.getCenterOfMass();
+	Vec3 partToColission = collisionPoint - part1.getPosition();
+	Vec3 relativeVelocity = part1.getMotion().getVelocityOfPoint(partToColission) - part1.properties.conveyorEffect + part2.getCFrame().localToRelative(part2.properties.conveyorEffect);
 
 	bool isImpulseColission = relativeVelocity * exitVector > 0;
 

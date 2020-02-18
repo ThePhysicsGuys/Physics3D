@@ -806,17 +806,16 @@ Motion Physical::getMotion() const {
 
 		// All motion and offset variables here are expressed in the global frame
 
-		Motion parentMotion = parent->getMotion();
+		Motion parentMotion = parent->getMotion().getMotionOfPoint(parent->getCFrame().localToRelative(-parent->rigidBody.localCenterOfMass));
 
 		RelativeMotion motionBetweenParentAndChild = self->connectionToParent.getRelativeMotion();
 
 		RelativeMotion inGlobalFrame = motionBetweenParentAndChild.extendBegin(CFrame(parent->getCFrame().getRotation()));
 
 		Motion result = inGlobalFrame.applyTo(parentMotion);
+		Vec3 offset = this->getCFrame().localToRelative(this->rigidBody.localCenterOfMass);
 
-		//Log::debug(str(result.velocity));
-
-		return result;
+		return result.getMotionOfPoint(offset);
 	}
 }
 

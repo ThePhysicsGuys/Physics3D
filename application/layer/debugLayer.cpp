@@ -144,8 +144,9 @@ void DebugLayer::onRender() {
 
 		if (screen->selectedPart != nullptr) {
 			const GlobalCFrame& selectedCFrame = screen->selectedPart->getCFrame();
+			Motion partMotion = screen->selectedPart->getMotion();
 			for (const Vec3f& corner : screen->selectedPart->hitbox.asPolyhedron().iterVertices()) {
-				vecLog.add(ColoredVector(selectedCFrame.localToGlobal(corner), screen->selectedPart->parent->getMotion().getVelocityOfPoint(Vec3(selectedCFrame.localToRelative(corner))), VELOCITY));
+				vecLog.add(ColoredVector(selectedCFrame.localToGlobal(corner), partMotion.getVelocityOfPoint(selectedCFrame.localToRelative(corner)), VELOCITY));
 			}
 
 			if (colissionSpheresMode == SphereColissionRenderMode::SELECTED) {
