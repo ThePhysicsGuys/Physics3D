@@ -4,11 +4,88 @@
 #include "../util/log.h"
 
 #ifndef NDEBUG
-#define ASSERT_VALID if (!isValid()) {throw "World not valid!";}
+#define ASSERT_VALID if (!isValid()) throw "World not valid!";
+#define ASSERT_TREE_VALID(tree) treeValidCheck(tree)
 #else
 #define ASSERT_VALID
+#define ASSERT_TREE_VALID(tree)
 #endif
 
+#pragma region worldValidity
+void recursiveTreeValidCheck(const TreeNode & node, bool hasAlreadyPassedGroupHead) {
+	if(hasAlreadyPassedGroupHead && node.isGroupHead) {
+		throw "Another group head found below one!";
+	}
+	if(node.isLeafNode()) {
+		if(!hasAlreadyPassedGroupHead && !node.isGroupHead) {
+			throw "No group head found in this subtree!";
+		}
+	} else {
+		Bounds bounds = node[0].bounds;
+		for(int i = 1; i < node.nodeCount; i++) {
+			bounds = unionOfBounds(bounds, node[i].bounds);
+		}
+		if(bounds != node.bounds) {
+			throw "A node in the tree does not have valid bounds!";
+		}
+
+		for(TreeNode& n : node) {
+			recursiveTreeValidCheck(n, node.isGroupHead || hasAlreadyPassedGroupHead);
+		}
+	}
+}
+static bool isConnectedPhysicalValid(const ConnectedPhysical * phys, const MotorizedPhysical * mainPhys);
+
+static bool isPhysicalValid(const Physical * phys, const MotorizedPhysical * mainPhys) {
+	if(phys->mainPhysical != mainPhys) {
+		Log::error("Physical's parent is not mainPhys!");
+		__debugbreak();
+		return false;
+	}
+	for(const Part& part : phys->rigidBody) {
+		if(part.parent != phys) {
+			Log::error("part's parent's child is not part");
+			__debugbreak();
+			return false;
+		}
+	}
+	for(const ConnectedPhysical& subPhys : phys->childPhysicals) {
+		if(!isConnectedPhysicalValid(&subPhys, mainPhys)) return false;
+	}
+	return true;
+}
+
+static bool isConnectedPhysicalValid(const ConnectedPhysical * phys, const MotorizedPhysical * mainPhys) {
+	return isPhysicalValid(phys, mainPhys);
+}
+
+inline static void treeValidCheck(const BoundsTree<Part>& tree) {
+	if(!tree.isEmpty()) {
+		recursiveTreeValidCheck(tree.rootNode, false);
+	}
+}
+
+bool WorldPrototype::isValid() const {
+	for(const MotorizedPhysical* phys : iterPhysicals()) {
+		if(phys->world != this) {
+			Log::error("physicals's world is not correct!");
+			__debugbreak();
+			return false;
+		}
+
+		if(!isPhysicalValid(phys, phys)) {
+			Log::error("Physical invalid!");
+			__debugbreak();
+			return false;
+		}
+	}
+
+	treeValidCheck(objectTree);
+	treeValidCheck(terrainTree);
+
+	return true;
+}
+#pragma endregion
 
 class Layer {
 	BoundsTree<Part>& tree;
@@ -94,11 +171,14 @@ void WorldPrototype::addTerrainPart(Part* part) {
 
 	terrainTree.add(part, part->getStrictBounds());
 	part->isTerrainPart = true;
+
+	ASSERT_VALID;
 }
 void WorldPrototype::optimizeTerrain() {
 	for(int i = 0; i < 5; i++) {
 		terrainTree.improveStructure();
 	}
+	ASSERT_VALID;
 }
 
 
@@ -110,18 +190,23 @@ void WorldPrototype::setPartCFrame(Part* part, const GlobalCFrame& newCFrame) {
 	part->parent->setPartCFrame(part, newCFrame);
 
 	objectTree.updateObjectGroupBounds(part, oldBounds);
+	ASSERT_VALID;
 }
 
 void WorldPrototype::updatePartBounds(const Part* updatedPart, const Bounds& oldBounds) {
 	objectTree.updateObjectBounds(updatedPart, oldBounds);
+	ASSERT_VALID;
 }
 
 void WorldPrototype::updatePartGroupBounds(const Part* mainPart, const Bounds& oldMainPartBounds) {
 	objectTree.updateObjectGroupBounds(mainPart, oldMainPartBounds);
+	ASSERT_VALID;
 }
 
 void WorldPrototype::removePartFromTrees(const Part* part) {
-	getTreeForPart(part).remove(part);
+	BoundsTree<Part>& tree = getTreeForPart(part);
+	tree.remove(part);
+	ASSERT_TREE_VALID(tree);
 }
 
 void WorldPrototype::splitPhysical(const MotorizedPhysical* mainPhysical, MotorizedPhysical* newlySplitPhysical) {
@@ -130,25 +215,64 @@ void WorldPrototype::splitPhysical(const MotorizedPhysical* mainPhysical, Motori
 	physicals.push_back(newlySplitPhysical);
 	newlySplitPhysical->world = this;
 
+	ASSERT_TREE_VALID(objectTree);
+
+	BoundsTree<Part> copyOfTree(objectTree);
+
+	goto skipTreeReinstate;
+	retry:
+	this->objectTree = copyOfTree;
+	skipTreeReinstate:
+
 	// split object tree
-	NodeStack stack = objectTree.findGroupFor(mainPhysical->getMainPart(), mainPhysical->getMainPart()->getStrictBounds());
+	// TODO: The findGroupFor and grap calls can be merged as an optimization
+	NodeStack stack = objectTree.findGroupFor(newlySplitPhysical->getMainPart(), newlySplitPhysical->getMainPart()->getStrictBounds());
 
 	TreeNode* node = *stack;
 
+	try{
+	ASSERT_TREE_VALID(objectTree);
 	TreeNode newNode = objectTree.grab(newlySplitPhysical->getMainPart(), newlySplitPhysical->getMainPart()->getStrictBounds());
-	newNode.isGroupHead = true;
+	ASSERT_TREE_VALID(objectTree);
+	if(!newNode.isGroupHead) {
+		newNode.isGroupHead = true;
 
-	for(TreeIterator iter(*node); iter != IteratorEnd();) {
-		TreeNode* objectNode = *iter;
-		Part* part = static_cast<Part*>(objectNode->object);
-		if(part->parent->mainPhysical == newlySplitPhysical) {
-			newNode.addInside(iter.remove());
-		} else {
-			++iter;
+		// node should still be valid at this time
+
+		bool passedAll = true;
+		for(TreeIterator iter(*node); iter != IteratorEnd();) {
+			TreeNode* objectNode = *iter;
+			Part* part = static_cast<Part*>(objectNode->object);
+			if(part->parent->mainPhysical == newlySplitPhysical) {
+				newNode.addInside(iter.remove());
+			} else {
+				passedAll = false;
+				++iter;
+			}
+		}
+		stack.updateBoundsAllTheWayToTop();
+		ASSERT_TREE_VALID(objectTree);
+		if(passedAll) {
+			__debugbreak();
 		}
 	}
 
 	objectTree.add(std::move(newNode));
+
+#ifndef NDEBUG
+	Bounds oldBounds = newNode.bounds;
+	newNode.recalculateBounds();
+	if(newNode.bounds != oldBounds) {
+		__debugbreak();
+	}
+#endif
+	//try{
+		ASSERT_TREE_VALID(objectTree);
+		return;
+	} catch(...) {
+		__debugbreak();
+	}
+	goto retry;
 }
 
 void WorldPrototype::mergePhysicals(const MotorizedPhysical* firstPhysical, const MotorizedPhysical* secondPhysical) {
@@ -184,6 +308,9 @@ void WorldPrototype::mergePhysicals(const MotorizedPhysical* firstPhysical, cons
 		stack.expandBoundsAllTheWayToTop();
 	}
 
+	ASSERT_TREE_VALID(objectTree);
+
+	// TODO
 	assert(false);
 }
 
@@ -191,15 +318,18 @@ void WorldPrototype::mergePartAndPhysical(const MotorizedPhysical* physical, Par
 	assert(physical->world == this);
 
 	this->objectTree.addToExistingGroup(newPart, newPart->getStrictBounds(), physical->getMainPart(), physical->getMainPart()->getStrictBounds());
+	ASSERT_TREE_VALID(objectTree);
 }
 
 void WorldPrototype::notifyPartStdMoved(Part* oldPartPtr, Part* newPartPtr) {
 	(*getTreeForPart(oldPartPtr).find(oldPartPtr, newPartPtr->getStrictBounds()))->object = newPartPtr;
+	ASSERT_TREE_VALID(objectTree);
 }
 
 void WorldPrototype::notifyPartRemovedFromGroup(Part* part) {
 	objectTree.remove(part);
 	objectCount--;
+	ASSERT_TREE_VALID(objectTree);
 }
 
 
@@ -246,59 +376,4 @@ IteratorFactoryWithEnd<ConstWorldPartIter> WorldPrototype::iterParts(int partsMa
 }
 
 
-void recursiveTreeValidCheck(const TreeNode& node) {
-	if (node.isLeafNode()) return;
-	
-	Bounds bounds = node[0].bounds;
-	for (int i = 1; i < node.nodeCount; i++) {
-		bounds = unionOfBounds(bounds, node[i].bounds);
-	}
-	if (bounds != node.bounds) {
-		throw "A node in the tree does not have valid bounds!";
-	}
 
-	for (TreeNode& n : node) {
-		recursiveTreeValidCheck(n);
-	}
-}
-static bool isConnectedPhysicalValid(const ConnectedPhysical* phys, const MotorizedPhysical* mainPhys);
-
-static bool isPhysicalValid(const Physical* phys, const MotorizedPhysical* mainPhys) {
-	if(phys->mainPhysical != mainPhys) {
-		Log::error("Physical's parent is not mainPhys!");
-		__debugbreak();
-		return false;
-	}
-	for(const Part& part : phys->rigidBody) {
-		if(part.parent != phys) {
-			Log::error("part's parent's child is not part");
-			__debugbreak();
-			return false;
-		}
-	}
-	for(const ConnectedPhysical& subPhys : phys->childPhysicals) {
-		if(!isConnectedPhysicalValid(&subPhys, mainPhys)) return false;
-	}
-	return true;
-}
-
-static bool isConnectedPhysicalValid(const ConnectedPhysical* phys, const MotorizedPhysical* mainPhys) {
-	return isPhysicalValid(phys, mainPhys);
-}
-
-bool WorldPrototype::isValid() const {
-	for (const MotorizedPhysical* phys : iterPhysicals()) {
-		if (phys->world != this) {
-			Log::error("physicals's world is not correct!");
-			__debugbreak();
-			return false;
-		}
-
-		if(!isPhysicalValid(phys, phys)) return false;
-	}
-
-	recursiveTreeValidCheck(objectTree.rootNode);
-	recursiveTreeValidCheck(terrainTree.rootNode);
-
-	return true;
-}

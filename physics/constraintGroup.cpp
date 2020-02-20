@@ -109,8 +109,8 @@ void ConstraintGroup::apply() const {
 	// solve for velocity
 	matrixIndex = 0;
 	for (const BallConstraint& bc : ballConstraints) {
-		Vec3 vb = bc.b->getMotion().getVelocityOfPoint(bc.b->getCFrame().localToRelative(bc.attachB));
-		Vec3 va = bc.a->getMotion().getVelocityOfPoint(bc.a->getCFrame().localToRelative(bc.attachA));
+		Vec3 vb = bc.b->getMotionOfCenterOfMass().getVelocityOfPoint(bc.b->getCFrame().localToRelative(bc.attachB));
+		Vec3 va = bc.a->getMotionOfCenterOfMass().getVelocityOfPoint(bc.a->getCFrame().localToRelative(bc.attachA));
 
 		velocityVector.setSubVector(matrixIndex, vb - va);
 
@@ -131,8 +131,8 @@ void ConstraintGroup::apply() const {
 	// solve for acceleration
 	matrixIndex = 0;
 	for (const BallConstraint& bc : ballConstraints) {
-		Vec3 ab = bc.b->getMotion().getAccelerationOfPoint(bc.b->getCFrame().localToRelative(bc.attachB));
-		Vec3 aa = bc.a->getMotion().getAccelerationOfPoint(bc.a->getCFrame().localToRelative(bc.attachA));
+		Vec3 ab = bc.b->getMotionOfCenterOfMass().getAccelerationOfPoint(bc.b->getCFrame().localToRelative(bc.attachB));
+		Vec3 aa = bc.a->getMotionOfCenterOfMass().getAccelerationOfPoint(bc.a->getCFrame().localToRelative(bc.attachA));
 
 		accelerationVector.setSubVector(matrixIndex, ab - aa);
 

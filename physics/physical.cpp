@@ -347,7 +347,7 @@ void Physical::detachChildAndGiveItNewMain(ConnectedPhysical&& formerChild) {
 	childPhysicals.remove(std::move(formerChild));
 }
 
-void Physical::detachAllHardConstraintsForSinglePartPhysical(bool alsoDelete) {
+void Physical::detachAllHardConstraintsForSinglePartPhysical(bool alsoDelete) && {
 	this->detachAllChildPhysicals();
 	MotorizedPhysical* mainPhys = this->mainPhysical; // save main physical because it'll get deleted by parent->detachChild()
 	if(this != mainPhys) {
@@ -398,29 +398,32 @@ std::pair<double, Vec3> Physical::getMotionOfCenterOfMassInternally() const {
 }
 
 void Physical::detachPart(Part* part, bool partStaysInWorld) {
+	assert(part->parent == this);
+
 	WorldPrototype* world = this->mainPhysical->world;
-	if(world != nullptr) {
-		world->notifyPartRemovedFromGroup(part);
-	}
 
-	if(part == rigidBody.getMainPart()) {
-		if(rigidBody.getPartCount() == 1) {
-			// we have to disconnect this from other physicals as we're detaching the last part in the physical
+	if(rigidBody.getPartCount() == 1) {
+		assert(part == rigidBody.getMainPart());
 
-			this->detachAllHardConstraintsForSinglePartPhysical(!partStaysInWorld);
-			// new parent
-			assert(part->parent->childPhysicals.size() == 0);
-		} else {
+		// we have to disconnect this from other physicals as we're detaching the last part in the physical
+
+		std::move(*this).detachAllHardConstraintsForSinglePartPhysical(!partStaysInWorld);
+		// After this function, this is no longer valid!
+		// It may have been moved
+	} else {
+		if(part == rigidBody.getMainPart()) {
 			AttachedPart& newMainPartAndLaterOldPart = rigidBody.parts.back();
 			makeMainPart(newMainPartAndLaterOldPart); // now points to old part
 			detachFromRigidBody(std::move(newMainPartAndLaterOldPart));
-
-			this->mainPhysical->refreshPhysicalProperties();
+		} else {
+			detachFromRigidBody(part);
 		}
-	} else {
-		detachFromRigidBody(part);
 
 		this->mainPhysical->refreshPhysicalProperties();
+	}
+
+	if(world != nullptr) {
+		world->notifyPartRemovedFromGroup(part);
 	}
 
 	if(partStaysInWorld) {
@@ -723,10 +726,10 @@ void Physical::applyForceToPhysical(Vec3 origin, Vec3 force) {
 #pragma region getters
 
 double Physical::getVelocityKineticEnergy() const {
-	return rigidBody.mass * lengthSquared(getMotion().velocity) / 2;
+	return rigidBody.mass * lengthSquared(getMotionOfCenterOfMass().velocity) / 2;
 }
 double Physical::getAngularKineticEnergy() const {
-	Vec3 localAngularVel = getCFrame().relativeToLocal(getMotion().angularVelocity);
+	Vec3 localAngularVel = getCFrame().relativeToLocal(getMotionOfCenterOfMass().angularVelocity);
 	return (rigidBody.inertia * localAngularVel) * localAngularVel / 2;
 }
 double Physical::getKineticEnergy() const {
@@ -796,29 +799,44 @@ GlobalCFrame MotorizedPhysical::getCenterOfMassCFrame() const {
 
 Motion Physical::getMotion() const {
 	if(this->isMainPhysical()) {
-		MotorizedPhysical* self = (MotorizedPhysical*) this;
-
-		return self->motionOfCenterOfMass.getMotionOfPoint(getCFrame().localToRelative(rigidBody.localCenterOfMass - self->totalCenterOfMass));
+		return ((MotorizedPhysical*) this)->getMotion();
 	} else {
-		ConnectedPhysical* self = (ConnectedPhysical*) this;
-		
-		Physical* parent = self->parent;
-
-		// All motion and offset variables here are expressed in the global frame
-
-		Motion parentMotion = parent->getMotion().getMotionOfPoint(parent->getCFrame().localToRelative(-parent->rigidBody.localCenterOfMass));
-
-		RelativeMotion motionBetweenParentAndChild = self->connectionToParent.getRelativeMotion();
-
-		RelativeMotion inGlobalFrame = motionBetweenParentAndChild.extendBegin(CFrame(parent->getCFrame().getRotation()));
-
-		Motion result = inGlobalFrame.applyTo(parentMotion);
-		Vec3 offset = this->getCFrame().localToRelative(this->rigidBody.localCenterOfMass);
-
-		return result.getMotionOfPoint(offset);
+		return ((ConnectedPhysical*) this)->getMotion();
 	}
 }
 
+Motion MotorizedPhysical::getMotion() const {
+	MotorizedPhysical* self = (MotorizedPhysical*) this;
+
+	return self->motionOfCenterOfMass.getMotionOfPoint(getCFrame().localToRelative(-self->totalCenterOfMass));
+}
+Motion ConnectedPhysical::getMotion() const {
+	ConnectedPhysical* self = (ConnectedPhysical*) this;
+
+	Physical* parent = self->parent;
+
+	// All motion and offset variables here are expressed in the global frame
+
+	Motion parentMotion = parent->getMotion();
+
+	RelativeMotion motionBetweenParentAndChild = self->connectionToParent.getRelativeMotion();
+
+	RelativeMotion inGlobalFrame = motionBetweenParentAndChild.extendBegin(CFrame(parent->getCFrame().getRotation()));
+
+	Motion result = inGlobalFrame.applyTo(parentMotion);
+
+	return result;
+}
+
+Motion Physical::getMotionOfCenterOfMass() const {
+	return this->getMotion().getMotionOfPoint(this->getCFrame().localToRelative(this->rigidBody.localCenterOfMass));
+}
+Motion MotorizedPhysical::getMotionOfCenterOfMass() const {
+	return this->getMotion().getMotionOfPoint(this->getCFrame().localToRelative(this->rigidBody.localCenterOfMass));
+}
+Motion ConnectedPhysical::getMotionOfCenterOfMass() const {
+	return this->getMotion().getMotionOfPoint(this->getCFrame().localToRelative(this->rigidBody.localCenterOfMass));
+}
 
 size_t Physical::getNumberOfPartsInThisAndChildren() const {
 	size_t totalParts = rigidBody.getPartCount();

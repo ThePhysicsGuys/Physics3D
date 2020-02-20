@@ -99,8 +99,8 @@ void DebugOverlay::onRender() {
 			Screen* screen = static_cast<Screen*>(this->ptr);
 
 			graphicsMeasure.mark(GraphicsProcess::PROFILER);
-			renderTreeStructure(screen->world->objectTree.rootNode, Vec3f(0, 1, 0), Vec2f(1.4, 0.95), 0.7f);
-			renderTreeStructure(screen->world->terrainTree.rootNode, Vec3f(0, 0, 1), Vec2f(0.4, 0.95), 0.7f);
+			renderTreeStructure(screen->world->objectTree, Vec3f(0, 1, 0), Vec2f(1.4, 0.95), 0.7f, screen->selectedPart);
+			renderTreeStructure(screen->world->terrainTree, Vec3f(0, 0, 1), Vec2f(0.4, 0.95), 0.7f, screen->selectedPart);
 		});
 
 		fpsSlidingChart.add("Fps 1", graphicsMeasure.getAvgTPS());

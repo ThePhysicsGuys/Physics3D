@@ -37,7 +37,44 @@ inline static long long computeCombinationCost(const Bounds& newBox, const Bound
 	return computeCost(combinedBounds);
 }
 
-inline TreeNode::TreeNode(TreeNode* subTrees, int nodeCount) : subTrees(subTrees), nodeCount(nodeCount), isGroupHead(false), bounds(computeBoundsOfList(subTrees, nodeCount)) {}
+TreeNode::TreeNode(TreeNode* subTrees, int nodeCount) : 
+	subTrees(subTrees), 
+	nodeCount(nodeCount), 
+	isGroupHead(false), 
+	bounds(computeBoundsOfList(subTrees, nodeCount)) {}
+
+
+TreeNode::TreeNode(const TreeNode& original) :
+	nodeCount(original.nodeCount),
+	isGroupHead(original.isGroupHead),
+	bounds(original.bounds) {
+
+	if(original.isLeafNode()) {
+		this->object = original.object;
+	} else {
+		this->subTrees = new TreeNode[MAX_BRANCHES];
+		for(size_t i = 0; i < original.nodeCount; i++) {
+			new(this->subTrees + i) TreeNode(original.subTrees[i]);
+		}
+	}
+}
+TreeNode& TreeNode::operator=(const TreeNode& original) {
+	this->~TreeNode();
+
+	this->nodeCount = original.nodeCount;
+	this->isGroupHead = original.isGroupHead;
+	this->bounds = original.bounds;
+
+	if(original.isLeafNode()) {
+		this->object = original.object;
+	} else {
+		this->subTrees = new TreeNode[MAX_BRANCHES];
+		for(size_t i = 0; i < original.nodeCount; i++) {
+			new(this->subTrees + i) TreeNode(original.subTrees[i]);
+		}
+	}
+	return *this;
+}
 
 TreeNode::~TreeNode() {
 	if (!isLeafNode()) {
@@ -114,6 +151,8 @@ TreeNode TreeNode::remove(int index) {
 		new(this) TreeNode(std::move(buf[0]));
 		this->isGroupHead = resultIsGroupHead;
 		delete[] buf;
+	} else {
+		this->recalculateBoundsFromSubBounds();
 	}
 
 	return result;
@@ -217,6 +256,9 @@ NodeStack::NodeStack(TreeNode& rootNode) : stack{TreeStackElement{&rootNode, 0}}
 // a find function, returning the stack of all nodes leading up to the requested object
 
 NodeStack::NodeStack(TreeNode& rootNode, const void* objToFind, const Bounds& objBounds) : NodeStack(rootNode) {
+	if(top + 1 == stack) {
+		throw "Could not find obj in Tree!";
+	}
 	if(rootNode.isLeafNode()) {
 		if(rootNode.object == objToFind) {
 			return;
@@ -224,7 +266,7 @@ NodeStack::NodeStack(TreeNode& rootNode, const void* objToFind, const Bounds& ob
 			throw "Could not find obj in Tree!";
 		}
 	}
-	while(top + 1 != stack) {
+	while(true) {
 		if(top->index != top->node->nodeCount) {
 			TreeNode* nextNode = top->node->subTrees + top->index;
 			if(nextNode->bounds.contains(objBounds)) {
@@ -245,6 +287,14 @@ NodeStack::NodeStack(TreeNode& rootNode, const void* objToFind, const Bounds& ob
 			}
 		} else {
 			top--;
+			/* 
+				this used to be in the while condition at the top, 
+				but checking it here is both more efficient, and fixes a nasty bug
+				where the top would be decremented making the condition true, but then an invalid index
+				(which so happened to be the memory location where the top pointer is stored) is incremented.
+				This would lead to crashes. 
+			*/
+			if(top + 1 == stack) break;
 			top->index++;
 		}
 	}
@@ -295,19 +345,21 @@ void NodeStack::riseUntilAvailableDoWhile() {
 void NodeStack::riseUntilGroupHeadDoWhile() {
 	do {
 		top--;
-		if(top < stack) throw "Did not find groupHead node above!";
+		assert(top >= stack);
 	} while(!top->node->isGroupHead);
 }
 
 void NodeStack::riseUntilGroupHeadWhile() {
 	while(!top->node->isGroupHead) {
 		top--;
-		if(top < stack) throw "Did not find groupHead node above!";
+		assert(top >= stack);
 	};
 }
 
 void NodeStack::updateBoundsAllTheWayToTop() {
-	TreeStackElement* newTop = top;
+	assert(top+1 >= stack);
+	if(top + 1 == stack) return;
+	TreeStackElement* newTop = top->node->isLeafNode()? top-1 : top;
 	while(newTop + 1 != stack) {
 		TreeNode* n = newTop->node;
 		n->recalculateBoundsFromSubBounds();
@@ -316,6 +368,8 @@ void NodeStack::updateBoundsAllTheWayToTop() {
 }
 
 void NodeStack::expandBoundsAllTheWayToTop() {
+	assert(top + 1 >= stack);
+	if(top + 1 == stack) return;
 	Bounds expandedTopBounds = top->node->bounds;
 	TreeStackElement* newTop = top - 1;
 	while(newTop + 1 != stack) {
@@ -333,8 +387,8 @@ TreeNode NodeStack::remove() {
 
 	TreeNode result = top->node->remove(top->index);
 
+	updateBoundsAllTheWayToTop();
 	if(!top->node->isLeafNode()) {
-		updateBoundsAllTheWayToTop();
 		riseUntilAvailableWhile();
 	}
 	return result;

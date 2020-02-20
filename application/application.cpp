@@ -226,10 +226,10 @@ void setupWorld(int argc, const char** args) {
 	rotatingWall2->parent->mainPhysical->motionOfCenterOfMass.angularVelocity = Vec3(0, 0.7, 0);*/
 
 	// Many many parts
-	/*for(int i = 0; i < 3; i++) {
+	for(int i = 0; i < 3; i++) {
 		ExtendedPart* newCube = new ExtendedPart(Box(1.0, 1.0, 1.0), GlobalCFrame(fRand(-10.0, 0.0), fRand(1.0, 1.0), fRand(-10.0, 0.0)), {1.0, 0.2, 0.7});
 		world.addPart(newCube);
-	}*/
+	}
 
 	//WorldBuilder::buildCar(GlobalCFrame(5.0, 1.0, 5.0));
 
@@ -288,7 +288,7 @@ void setupWorld(int argc, const char** args) {
 	hardConstraintRegistry.serialize(mmmmmm, file);
 	file.close();*/
 
-	/*ExtendedPart* singularPart = new ExtendedPart(Box(1.0, 2.0, 1.0), GlobalCFrame(7.0, 1.0, 5.0), {1.3, 1.2, 1.1}, "SingularPart");
+	ExtendedPart* singularPart = new ExtendedPart(Box(1.0, 2.0, 1.0), GlobalCFrame(7.0, 1.0, 5.0), {1.3, 1.2, 1.1}, "SingularPart");
 	world.addPart(singularPart);
 
 	ExtendedPart* ep1 = new ExtendedPart(Box(1.0, 2.0, 1.0), GlobalCFrame(3.0, 3.0, 0.0), { 1.0, 1.0, 1.0 }, "MainPart");
@@ -311,9 +311,9 @@ void setupWorld(int argc, const char** args) {
 	world.addPart(ep2);
 	world.addPart(ap2);
 
-	ep2->parent->mainPhysical->applyAngularImpulse(Vec3(1.0, 0.5, 0.0) * 1);*/
+	ep2->parent->mainPhysical->applyAngularImpulse(Vec3(1.0, 0.5, 0.0) * 1);
 
-	/*Vec3 angularVel(0.0, 0.0, -1.0);
+	Vec3 angularVel(0.0, 0.0, -1.0);
 	{
 		ExtendedPart* nativeFixedConstraintGroupMain = new ExtendedPart(Box(1.0, 1.0, 1.0), GlobalCFrame(Position(-3.0, 7.0, 2.0), fromEulerAngles(0.0, 0.0, -0.5)), {1.0, 1.0, 1.0}, "MainPart");
 		ExtendedPart* f2 = new ExtendedPart(Box(0.9, 0.9, 0.9), GlobalCFrame(), {1.0, 1.0, 1.0}, "f2");
@@ -346,9 +346,9 @@ void setupWorld(int argc, const char** args) {
 		world.addPart(f2);
 
 		f2->parent->mainPhysical->motionOfCenterOfMass.angularVelocity = angularVel;
-	}*/
+	}
 
-	/*{
+	{
 		ExtendedPart* fixedConstraintGroupMain = new ExtendedPart(Box(1.0, 1.0, 1.0), GlobalCFrame(-3.0, 3.0, 7.0), {1.0, 1.0, 1.0}, "MainPart");
 		ExtendedPart* f2 = new ExtendedPart(Box(0.9, 0.9, 0.9), GlobalCFrame(), {1.0, 1.0, 1.0}, "f2");
 		ExtendedPart* f3 = new ExtendedPart(Box(0.8, 0.8, 0.8), GlobalCFrame(), {1.0, 1.0, 1.0}, "f3");
@@ -361,7 +361,7 @@ void setupWorld(int argc, const char** args) {
 		f4->attach(f5, new FixedConstraint(), CFrame(1.2, 0.0, 0.0), CFrame(0, 0, 0));
 
 		world.addPart(f2);
-	}*/
+	}
 
 
 	{
@@ -383,7 +383,7 @@ void setupWorld(int argc, const char** args) {
 		//poweredCarBody->parent->mainPhysical->motionOfCenterOfMass.angularVelocity = Vec3(0.0, 1.0, 0.0);
 	}
 
-	/*{
+	{
 		ExtendedPart* mainBlock = new ExtendedPart(Box(1.0, 1.0, 1.0), GlobalCFrame(0.0, 5.0, 5.0), basicProperties, "Main Block");
 		ExtendedPart* attachedBlock = new ExtendedPart(Box(1.0, 1.0, 1.0), GlobalCFrame(), basicProperties, "Attached Block");
 
@@ -402,7 +402,7 @@ void setupWorld(int argc, const char** args) {
 		attachedBlock->attach(anotherAttachedBlock, new SinusoidalPistonConstraint(Vec3(0.0, 1.0, 0.0), 1.0, 5.0, 0.7), CFrame(0.0, 0.5, 0.0), CFrame(0.0, -0.5, 0.0));
 
 		world.addPart(mainBlock);
-	}*/
+	}
 
 }
 

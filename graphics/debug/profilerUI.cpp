@@ -170,30 +170,35 @@ float BarChart::getMaxWeight() const {
 
 //! Tree
 
-void recursiveRenderTree(const TreeNode& tree, const Vec3f& treeColor, Vec2f origin, float allottedWidth, long long maxCost) {
+void recursiveRenderTree(const TreeNode& tree, const Vec3f& treeColor, Vec2f origin, float allottedWidth, long long maxCost, const void* selectedObject) {
 	if (!tree.isLeafNode()) {
 		for (int i = 0; i < tree.nodeCount; i++) {
 			Vec2f nextStep = origin + Vec2f(-allottedWidth / 2 + allottedWidth * ((tree.nodeCount != 1) ? (float(i) / (tree.nodeCount-1)) : 0.5f), -0.1f);
 			float colorDarkning = pow(1.0f * computeCost(tree[i].bounds) / maxCost, 0.25f);
-
+			
 			//Path::bezierVertical(origin, nextStep, 1.0f, Vec4f(treeColor * colorDarkning, 1.0f), 15);
 			Path::line(origin, nextStep, Color(treeColor * colorDarkning, 1.0f), 1.0f);
 
-			recursiveRenderTree(tree[i], treeColor, nextStep, allottedWidth / tree.nodeCount, maxCost);
+			recursiveRenderTree(tree[i], treeColor, nextStep, allottedWidth / tree.nodeCount, maxCost, selectedObject);
 		}
 	}
 
-	if (tree.isGroupHead)
+	if(tree.object == selectedObject) {
+		Path::circleFilled(origin, 0.012f, COLOR::YELLOW, 8);
+	}
+
+	if(tree.isGroupHead) {
 		Path::circleFilled(origin, 0.006f, COLOR::RED, 8);
+	}
 }
 
-void renderTreeStructure(const TreeNode& tree, const Vec3f& treeColor, Vec2f origin, float allottedWidth) {
-	long long maxCost = computeCost(tree[0].bounds);
+void renderTreeStructure(const BoundsTree<Part>& tree, const Vec3f& treeColor, Vec2f origin, float allottedWidth, const void* selectedObject) {
+	if(tree.isEmpty()) {
+		return;
+	}
+	long long maxCost = computeCost(tree.rootNode.bounds);
 
-	for (int i = 1; i < tree.nodeCount; i++)
-		maxCost = std::max(maxCost, computeCost(tree[1].bounds));
-
-	recursiveRenderTree(tree, treeColor, origin, allottedWidth, maxCost);
+	recursiveRenderTree(tree.rootNode, treeColor, origin, allottedWidth, maxCost, selectedObject);
 }
 
 #pragma endregion

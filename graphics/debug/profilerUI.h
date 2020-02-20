@@ -92,5 +92,8 @@ struct SlidingChart : public Component {
 	Vec2 resize() override;
 };
 
-void renderTreeStructure(const TreeNode& tree, const Color3& treeColor, Vec2f origin, float allottedWidth);
+template<typename T>
+class BoundsTree;
+
+void renderTreeStructure(const BoundsTree<Part>& tree, const Color3& treeColor, Vec2f origin, float allottedWidth, const void* selectedObject);
 

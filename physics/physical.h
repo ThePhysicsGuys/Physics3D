@@ -78,11 +78,17 @@ public:
 	}
 
 	/*
-		Returns the motion of this physical attached in it's center of mass
+		Returns the motion of this physical positioned at it's getCFrame()
 
 		The motion is oriented globally
 	*/
 	Motion getMotion() const;
+	/*
+		Returns the motion of this physical positioned at it's center of mass
+
+		The motion is oriented globally
+	*/
+	Motion getMotionOfCenterOfMass() const;
 
 	double getVelocityKineticEnergy() const;
 	double getAngularKineticEnergy() const;
@@ -113,7 +119,7 @@ public:
 
 private:
 	void detachAllChildPhysicals();
-	void detachAllHardConstraintsForSinglePartPhysical(bool alsoDelete);
+	void detachAllHardConstraintsForSinglePartPhysical(bool alsoDelete) &&;
 	void detachChildAndGiveItNewMain(ConnectedPhysical&& formerChild);
 	void detachChildPartAndDelete(ConnectedPhysical&& formerChild);
 };
@@ -136,6 +142,20 @@ public:
 	
 	void setCFrame(const GlobalCFrame& newCFrame);
 	CFrame getRelativeCFrameToParent() const;
+
+
+	/*
+		Returns the motion of this physical positioned at it's getCFrame()
+
+		The motion is oriented globally
+	*/
+	Motion getMotion() const;
+	/*
+		Returns the motion of this physical positioned at it's center of mass
+
+		The motion is oriented globally
+	*/
+	Motion getMotionOfCenterOfMass() const;
 
 	/*
 		Makes this physical the main Physical
@@ -169,6 +189,20 @@ public:
 	explicit MotorizedPhysical(Part* mainPart);
 	explicit MotorizedPhysical(RigidBody&& rigidBody);
 	explicit MotorizedPhysical(Physical&& movedPhys);
+
+
+	/*
+		Returns the motion of this physical positioned at it's getCFrame()
+
+		The motion is oriented globally
+	*/
+	Motion getMotion() const;
+	/*
+		Returns the motion of this physical positioned at it's center of mass
+
+		The motion is oriented globally
+	*/
+	Motion getMotionOfCenterOfMass() const;
 
 	Position getCenterOfMass() const;
 	GlobalCFrame getCenterOfMassCFrame() const;

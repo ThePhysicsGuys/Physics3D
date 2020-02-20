@@ -31,14 +31,14 @@ struct TreeNode {
 
 	inline bool isLeafNode() const { return nodeCount == LEAF_NODE_SIGNIFIER; }
 
-	inline TreeNode() : nodeCount(LEAF_NODE_SIGNIFIER), object(nullptr) {}
-	inline TreeNode(TreeNode* subTrees, int nodeCount);
+	inline TreeNode() : nodeCount(0), object(nullptr) {}
+	TreeNode(TreeNode* subTrees, int nodeCount);
 	inline TreeNode(void* object, const Bounds& bounds) : nodeCount(LEAF_NODE_SIGNIFIER), object(object), bounds(bounds) {}
 	inline TreeNode(void* object, const Bounds& bounds, bool isGroupHead) : nodeCount(LEAF_NODE_SIGNIFIER), object(object), bounds(bounds), isGroupHead(isGroupHead) {}
 	inline TreeNode(const Bounds& bounds, TreeNode* subTrees, int nodeCount) : bounds(bounds), subTrees(subTrees), nodeCount(nodeCount) {}
 
-	inline TreeNode(const TreeNode&) = delete;
-	inline void operator=(const TreeNode&) = delete;
+	explicit TreeNode(const TreeNode& original);
+	TreeNode& operator=(const TreeNode& original);
 
 	inline TreeNode(TreeNode&& other) noexcept : nodeCount(other.nodeCount), subTrees(other.subTrees), bounds(other.bounds), isGroupHead(other.isGroupHead) {
 		other.subTrees = nullptr;
@@ -57,7 +57,7 @@ struct TreeNode {
 	inline TreeNode& operator[](int index) { return subTrees[index]; }
 	inline const TreeNode& operator[](int index) const { return subTrees[index]; }
 
-	inline ~TreeNode();
+	~TreeNode();
 
 
 	void addOutside(TreeNode&& newNode);
@@ -273,16 +273,24 @@ struct TreeIterFactory;
 
 template<typename Boundable>
 struct BoundsTree {
-	mutable TreeNode rootNode;
+	TreeNode rootNode;
 
-	BoundsTree() : rootNode(new TreeNode[MAX_BRANCHES], 0) {
+	BoundsTree() : rootNode() {
 
 	}
 
+	inline bool isEmpty() const {
+		return this->rootNode.nodeCount == 0;
+	}
+
 	void add(TreeNode&& node) {
-		this->rootNode.addOutside(std::move(node));
-		if (this->rootNode.nodeCount == 1) {
-			this->rootNode.bounds = node.bounds; // bit of a band-aid fix, as an empty treeNode's bounds can't really be defined
+		if(isEmpty()) {
+			this->rootNode = std::move(node);
+		} else {
+			this->rootNode.addOutside(std::move(node));
+			if(this->rootNode.nodeCount == 1) {
+				this->rootNode.bounds = node.bounds; // bit of a band-aid fix, as an empty treeNode's bounds can't really be defined
+			}
 		}
 	}
 
@@ -316,7 +324,7 @@ struct BoundsTree {
 			if (rootNode.object == obj) {
 				rootNode.nodeCount = 0;
 				rootNode.bounds = Bounds();
-				rootNode.subTrees = new TreeNode[MAX_BRANCHES];
+				rootNode.object = nullptr;
 			} else {
 				throw "Attempting to remove nonexistent object!";
 			}
@@ -331,18 +339,39 @@ struct BoundsTree {
 
 	// removes and returns the node for the given object
 	inline TreeNode grab(const Boundable* obj, const Bounds& objBounds) {
+		if(this->rootNode.isLeafNode()) {
+			if(this->rootNode.object == obj) {
+				TreeNode result(std::move(this->rootNode));
+				this->rootNode.object = nullptr;
+				this->rootNode.nodeCount = 0;
+				return result;
+			} else {
+				throw "Attempting to remove nonexistent object!";
+			}
+		}
 		NodeStack iter(rootNode, obj, objBounds);
 		return iter.remove();
 	}
 
 	// removes and returns the group node for the given object
 	inline TreeNode grabGroupFor(const Boundable* obj, const Bounds& objBounds) {
+		if(this->rootNode.isLeafNode()) {
+			if(this->rootNode.object == obj) {
+				TreeNode result(std::move(this->rootNode));
+				this->rootNode.object = nullptr;
+				this->rootNode.nodeCount = 0;
+				return result;
+			} else {
+				throw "Attempting to remove nonexistent object!";
+			}
+		}
 		NodeStack iter(rootNode, obj, objBounds);
 		iter.riseUntilGroupHeadWhile();
 		return iter.remove();
 	}
 
 	inline void recalculateBounds() {
+		if(isEmpty()) return;
 		for (TreeNode* currentNode : *this) {
 			Boundable* obj = static_cast<Boundable*>(currentNode->object);
 			currentNode->bounds = obj->getStrictBounds();
@@ -352,12 +381,14 @@ struct BoundsTree {
 	}
 	
 	void updateObjectBounds(const Boundable* obj, const Bounds& oldBounds) {
+		assert(!isEmpty());
 		NodeStack stack(rootNode, obj, oldBounds);
 		stack.top->node->bounds = obj->getStrictBounds();
 		stack.top--;
 		stack.updateBoundsAllTheWayToTop();
 	}
 	void updateObjectGroupBounds(const Boundable* objInGroup, const Bounds& objOldBounds) {
+		assert(!isEmpty());
 		NodeStack stack(rootNode, objInGroup, objOldBounds);
 		stack.riseUntilGroupHeadWhile(); // find group obj belongs to
 
@@ -370,10 +401,14 @@ struct BoundsTree {
 		stack.updateBoundsAllTheWayToTop(); // refresh rest of tree to accommodate
 	}
 
-	inline void improveStructure() { rootNode.improveStructure(); }
+	inline void improveStructure() { if(!isEmpty()) rootNode.improveStructure(); }
 	
 	inline size_t getNumberOfObjects() const {
-		return getNumberOfObjectsInNode(this->rootNode);
+		if(isEmpty()) {
+			return 0;
+		} else {
+			return getNumberOfObjectsInNode(this->rootNode);
+		}
 	}
 
 	inline TreeIterator begin() { return TreeIterator(rootNode); };

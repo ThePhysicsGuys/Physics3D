@@ -108,8 +108,12 @@ void Part::setCFrame(const GlobalCFrame& newCFrame) {
 Motion Part::getMotion() const {
 	if(parent == nullptr) return Motion();
 	Motion parentsMotion = parent->getMotion();
-	Vec3 offset = this->cframe.getPosition() - parent->rigidBody.getCenterOfMass();
-	return parentsMotion.getMotionOfPoint(offset);
+	if(this->isMainPart()) {
+		return parentsMotion;
+	} else {
+		Vec3 offset = parent->rigidBody.getAttachFor(this).attachment.getPosition();
+		return parentsMotion.getMotionOfPoint(offset);
+	}
 }
 
 void Part::translate(Vec3 translation) {
