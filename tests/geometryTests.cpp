@@ -60,7 +60,7 @@ bool isSymmetricTolerant(const Matrix<T, Size, Size>& m, Tol tolerance) {
 TEST_CASE(shapeVolume) {
 	Polyhedron boxShape = Library::createBox(2, 2, 2);
 
-	CFramef transform(Vec3f(0.3f, 0.7f, -3.5f), fromEulerAngles(0.7f, 0.2f, 0.3f));
+	CFramef transform(Vec3f(0.3f, 0.7f, -3.5f), Rotation::fromEulerAngles(0.7f, 0.2f, 0.3f));
 
 	Polyhedron transformedShape = boxShape.localToGlobal(transform);
 
@@ -71,7 +71,7 @@ TEST_CASE(shapeVolume) {
 TEST_CASE(shapeCenterOfMass) {
 	Polyhedron boxShape = Library::createBox(2.0, 2.0, 2.0);
 
-	CFramef transform(Vec3f(0.3f, 0.7f, -3.5f), fromEulerAngles(0.7f, 0.2f, 0.3f));
+	CFramef transform(Vec3f(0.3f, 0.7f, -3.5f), Rotation::fromEulerAngles(0.7f, 0.2f, 0.3f));
 
 	Polyhedron transformedShape = boxShape.localToGlobal(transform);
 	
@@ -107,7 +107,7 @@ TEST_CASE(shapeInertiaRotationInvariance) {
 
 	logStream << "Inertial eigenValues: " << getEigenDecomposition(testShape.getInertiaAroundCenterOfMass()).eigenValues.asDiagonalMatrix() << "\n";
 
-	for(const RotMat3& testRotation : rotMatrices) {
+	for(const Rotation& testRotation : rotations) {
 		
 
 		Polyhedron rotatedShape = testShape.rotated(testRotation);
@@ -132,7 +132,7 @@ TEST_CASE(shapeInertiaEigenValueInvariance) {
 
 	EigenValues<double, 3> initialEigenValues = getEigenDecomposition(testShape.getInertiaAroundCenterOfMass()).eigenValues;
 
-	for(RotMat3 testRotation : rotMatrices) {
+	for(Rotation testRotation : rotations) {
 		logStream << testRotation << '\n';
 
 		Polyhedron rotatedShape = testShape.rotated(testRotation);

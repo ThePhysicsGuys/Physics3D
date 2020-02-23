@@ -26,7 +26,8 @@ class MotorizedPhysical;
 class Physical {
 	void makeMainPart(AttachedPart& newMainPart);
 protected:
-	void updateAttachedPhysicals(double deltaT);
+	void updateAttachedPhysicals();
+	void updateConstraints(double deltaT);
 	void translateUnsafeRecursive(const Vec3Fix& translation);
 
 	void setMainPhysicalRecursive(MotorizedPhysical* newMainPhysical);
@@ -51,7 +52,7 @@ protected:
 
 		To get the actual motion compute (result.second / result.first)
 	*/
-	std::pair<double, Vec3> getMotionOfCenterOfMassInternally() const;
+	std::pair<double, TranslationalMotion> getMotionOfCenterOfMassInternally(const RelativeMotion& totalAccumulatedMotion) const;
 
 
 public:
@@ -162,7 +163,7 @@ public:
 	*/
 	void makeMainPhysical();
 
-	Motion getRelativeMotionBetweenParentCOMAndSelfCOM() const;
+	RelativeMotion getRelativeMotionBetweenParentAndSelf() const;
 
 	bool isValid() const;
 };
@@ -170,7 +171,7 @@ public:
 class MotorizedPhysical : public Physical {
 	friend class Physical;
 	friend class ConnectedPhysical;
-	void rotateAroundCenterOfMassUnsafe(const RotMat3& rotation);
+	void rotateAroundCenterOfMassUnsafe(const Rotation& rotation);
 public:
 	void refreshPhysicalProperties();
 	Vec3 totalForce = Vec3(0.0, 0.0, 0.0);
@@ -204,6 +205,8 @@ public:
 	*/
 	Motion getMotionOfCenterOfMass() const;
 
+	TranslationalMotion getInternalMotionOfCenterOfMass() const;
+
 	Position getCenterOfMass() const;
 	GlobalCFrame getCenterOfMassCFrame() const;
 
@@ -212,7 +215,7 @@ public:
 	void update(double deltaT);
 
 	void setCFrame(const GlobalCFrame& newCFrame);
-	void rotateAroundCenterOfMass(const RotMat3& rotation);
+	void rotateAroundCenterOfMass(const Rotation& rotation);
 	void translate(const Vec3& translation);
 
 	void applyForceAtCenterOfMass(Vec3 force);

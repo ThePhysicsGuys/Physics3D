@@ -33,8 +33,9 @@ std::optional<Intersection> intersectsTransformed(const GenericCollidable& first
 
 		if(!isfinite(result.A.p.x) || !isfinite(result.A.p.y) || !isfinite(result.A.p.z)) {
 			intersection = Vec3f(0.0f, 0.0f, 0.0f);
-			exitVector = Vec3f(std::min(scaleFirst[0], std::min(scaleFirst[1], std::min(scaleFirst[2], std::min(scaleSecond[0], std::min(scaleSecond[1], scaleSecond[2]))))),
-							   0.0f, 0.0f);
+			float minOfScaleFirst = float(std::min(scaleFirst[0], std::min(scaleFirst[1], scaleFirst[2])));
+			float minOfScaleSecond = float(std::min(scaleSecond[0], std::min(scaleSecond[1], scaleSecond[2])));
+			exitVector = Vec3f(std::min(minOfScaleFirst, minOfScaleSecond), 0.0f, 0.0f);
 
 			return Intersection(intersection, exitVector);
 		}

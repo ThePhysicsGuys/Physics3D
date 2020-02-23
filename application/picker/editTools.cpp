@@ -22,11 +22,11 @@
 
 namespace Application {
 
-Mat3 transformations[] = {
-	Mat3::IDENTITY(),
-	rotZ(-3.14159265359 / 2.0),
-	rotX(3.14159265359 / 2.0),
-	Mat3::IDENTITY()
+Rotation transformations[] {
+	Rotation::Predefined::IDENTITY,
+	Rotation::rotZ(-3.14159265359 / 2.0),
+	Rotation::rotX(3.14159265359 / 2.0),
+	Rotation::Predefined::IDENTITY
 };
 
 // Render variables
@@ -87,7 +87,8 @@ void EditTools::onRender(Screen& screen) {
 			break;
 	}
 
-	Mat4 modelMatrix = CFrameToMat4(screen.selectedPart->getCFrame());
+	GlobalCFrame selFrame = screen.selectedPart->getCFrame();
+	Mat4 modelMatrix(selFrame.getRotation().asRotationMatrix(), selFrame.getPosition() - Position(0,0,0), Vec3(0,0,0), 1);
 
 	Renderer::clearDepth();
 	Renderer::enableDepthTest();
@@ -270,19 +271,16 @@ void EditTools::dragRotateTool(Screen& screen) {
 
 	// Get angle between last intersectionVector and new one
 	double cosa = (selectedPoint * intersectionVector) / sqrt(length1sq * length2sq);
-	double a;
-
-	if (abs(cosa) < 1)
-		a = sign * acos(cosa);
-	else
-		return; // No rotation when vectors coincide
+	
+	if(!(abs(cosa) < 1)) return; // No rotation when vectors coincide
+	
+	double a = sign * acos(cosa);
 
 	// Update last intersectionVector
 	selectedPoint = intersectionVector;
 
 	// Apply rotation
-	Mat3 rotation = rotateAround(a, n);
-	screen.selectedPart->setCFrame(screen.selectedPart->getCFrame().rotated(rotation));
+	screen.selectedPart->setCFrame(screen.selectedPart->getCFrame().rotated(Rotation::fromRotationVec(a*n)));
 }
 
 // Drag behaviour of scale tool

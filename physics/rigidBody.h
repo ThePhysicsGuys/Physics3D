@@ -91,7 +91,7 @@ public:
 	void setCFrame(const GlobalCFrame& newCFrame);
 	void setCFrameOfPart(Part* part, const GlobalCFrame& newCFrame);
 	void translate(const Vec3Fix& translation);
-	void rotateAroundLocalPoint(const Vec3& localPoint, const RotMat3& rotation);
+	void rotateAroundLocalPoint(const Vec3& localPoint, const Rotation& rotation);
 
 	void setAttachFor(Part* part, const CFrame& newAttach);
 

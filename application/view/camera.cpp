@@ -19,7 +19,7 @@
 
 namespace Application {
 
-Camera::Camera(Position position, Mat3 rotation) : cframe(GlobalCFrame(position, rotation)), velocity(0.35), angularVelocity(0.04), flying(true) {
+Camera::Camera(const Position& position, const Rotation& rotation) : cframe(GlobalCFrame(position, rotation)), velocity(0.35), angularVelocity(0.04), flying(true) {
 	onUpdate();
 };
 
@@ -37,14 +37,14 @@ void Camera::setPosition(Fix<32> x, Fix<32> y, Fix<32> z) {
 	setPosition(Position(x, y, z));
 }
 
-void Camera::setRotation(const UnitaryMatrix<double, 3>& rotation) {
+void Camera::setRotation(const Rotation& rotation) {
 	flags |= ViewDirty;
 
 	cframe.rotation = rotation;
 }
 
 void Camera::setRotation(double alpha, double beta, double gamma) {
-	this->setRotation(fromEulerAngles(alpha, beta, gamma));
+	this->setRotation(Rotation::fromEulerAngles(alpha, beta, gamma));
 }
 
 void Camera::setRotation(Vec3 rotation) {
@@ -52,14 +52,14 @@ void Camera::setRotation(Vec3 rotation) {
 }
 
 Mat4f Camera::getViewRotation() {
-	return Mat4f(cframe.rotation.transpose(), 1.0f);
+	return Mat4f(cframe.rotation.asRotationMatrix().transpose(), 1.0f);
 }
 
 void Camera::rotate(Screen& screen, double dalpha, double dbeta, double dgamma, bool leftDragging, bool accelerating) {
 	flags |= ViewDirty;
 	rotating = accelerating;
 
-	cframe.rotation = rotY(currentAngularVelocity * dbeta) * cframe.rotation * rotX(currentAngularVelocity * dalpha);
+	cframe.rotation = Rotation::rotY(currentAngularVelocity * dbeta) * cframe.rotation * Rotation::rotX(currentAngularVelocity * dalpha);
 
 	if (leftDragging) {
 		screen.world->asyncModification([&screen] () {

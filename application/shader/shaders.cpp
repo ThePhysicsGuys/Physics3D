@@ -102,7 +102,8 @@ void BasicShader::updatePart(const ExtendedPart& part) {
 	bind();
 	setUniform("includeNormals", int(part.visualData.includeNormals));
 	setUniform("includeUvs", int(part.visualData.includeUVs));
-	setUniform("modelMatrix", TransformToMat4(part.getPosition(), Mat3f(part.getCFrame().getRotation()) * DiagonalMat3f(part.hitbox.scale)));
+	Mat3f rotationScale = Mat3f(part.getCFrame().getRotation().asRotationMatrix()) * DiagonalMat3f(part.hitbox.scale);
+	setUniform("modelMatrix", Mat4f(rotationScale, Vec3f(part.getPosition() - Position(0,0,0)), Vec3f(0.0f,0.0f,0.0f), 1.0f));
 }
 
 void BasicShader::updateMaterial(const Material& material) {

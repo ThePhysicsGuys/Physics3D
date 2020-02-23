@@ -146,7 +146,7 @@ void RigidBody::translate(const Vec3Fix& translation) {
 	}
 }
 
-void RigidBody::rotateAroundLocalPoint(const Vec3& localPoint, const RotMat3& rotation) {
+void RigidBody::rotateAroundLocalPoint(const Vec3& localPoint, const Rotation& rotation) {
 	Vec3 relPoint = getCFrame().localToRelative(localPoint);
 	Vec3 relativeRotationOffset = rotation * relPoint - relPoint;
 	mainPart->cframe.rotate(rotation);

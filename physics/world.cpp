@@ -217,62 +217,33 @@ void WorldPrototype::splitPhysical(const MotorizedPhysical* mainPhysical, Motori
 
 	ASSERT_TREE_VALID(objectTree);
 
-	BoundsTree<Part> copyOfTree(objectTree);
-
-	goto skipTreeReinstate;
-	retry:
-	this->objectTree = copyOfTree;
-	skipTreeReinstate:
-
 	// split object tree
 	// TODO: The findGroupFor and grap calls can be merged as an optimization
 	NodeStack stack = objectTree.findGroupFor(newlySplitPhysical->getMainPart(), newlySplitPhysical->getMainPart()->getStrictBounds());
 
 	TreeNode* node = *stack;
 
-	try{
-	ASSERT_TREE_VALID(objectTree);
 	TreeNode newNode = objectTree.grab(newlySplitPhysical->getMainPart(), newlySplitPhysical->getMainPart()->getStrictBounds());
-	ASSERT_TREE_VALID(objectTree);
 	if(!newNode.isGroupHead) {
 		newNode.isGroupHead = true;
 
 		// node should still be valid at this time
 
-		bool passedAll = true;
 		for(TreeIterator iter(*node); iter != IteratorEnd();) {
 			TreeNode* objectNode = *iter;
 			Part* part = static_cast<Part*>(objectNode->object);
 			if(part->parent->mainPhysical == newlySplitPhysical) {
 				newNode.addInside(iter.remove());
 			} else {
-				passedAll = false;
 				++iter;
 			}
 		}
 		stack.updateBoundsAllTheWayToTop();
-		ASSERT_TREE_VALID(objectTree);
-		if(passedAll) {
-			__debugbreak();
-		}
 	}
 
 	objectTree.add(std::move(newNode));
 
-#ifndef NDEBUG
-	Bounds oldBounds = newNode.bounds;
-	newNode.recalculateBounds();
-	if(newNode.bounds != oldBounds) {
-		__debugbreak();
-	}
-#endif
-	//try{
-		ASSERT_TREE_VALID(objectTree);
-		return;
-	} catch(...) {
-		__debugbreak();
-	}
-	goto retry;
+	ASSERT_TREE_VALID(objectTree);
 }
 
 void WorldPrototype::mergePhysicals(const MotorizedPhysical* firstPhysical, const MotorizedPhysical* secondPhysical) {

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../physics/math/rotation.h"
 #include "../physics/math/globalCFrame.h"
 
 class Event;
@@ -74,13 +75,13 @@ public:
 	void onUpdate(float aspect);
 	void onEvent(Event& event);
 
-	Camera(Position position, Mat3 rotation);
+	Camera(const Position& position, const Rotation& rotation);
 	Camera();
 
 	void setPosition(Position position);
 	void setPosition(Fix<32> x, Fix<32> y, Fix<32> z);
 
-	void setRotation(const UnitaryMatrix<double, 3>& rotation);
+	void setRotation(const Rotation& rotation);
 	void setRotation(double alpha, double beta, double gamma);
 	void setRotation(Vec3 rotation);
 
@@ -95,12 +96,12 @@ public:
 	double getRightOffsetAtZ1() const;
 	double getTopOffsetAtZ1() const;
 
-	inline Vec3 getForwardDirection() const { return -cframe.rotation.getCol(2); }
-	inline Vec3 getBackwardDirection() const { return cframe.rotation.getCol(2); }
-	inline Vec3 getUpDirection() const { return cframe.rotation.getCol(1); }
-	inline Vec3 getDownDirection() const { return -cframe.rotation.getCol(1); }
-	inline Vec3 getLeftDirection() const { return -cframe.rotation.getCol(0); }
-	inline Vec3 getRightDirection() const { return cframe.rotation.getCol(0); }
+	inline Vec3 getForwardDirection() const { return -cframe.rotation.asRotationMatrix().getCol(2); }
+	inline Vec3 getBackwardDirection() const { return cframe.rotation.asRotationMatrix().getCol(2); }
+	inline Vec3 getUpDirection() const { return cframe.rotation.asRotationMatrix().getCol(1); }
+	inline Vec3 getDownDirection() const { return -cframe.rotation.asRotationMatrix().getCol(1); }
+	inline Vec3 getLeftDirection() const { return -cframe.rotation.asRotationMatrix().getCol(0); }
+	inline Vec3 getRightDirection() const { return cframe.rotation.asRotationMatrix().getCol(0); }
 };
 
 };

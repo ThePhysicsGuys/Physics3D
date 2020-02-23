@@ -45,12 +45,17 @@ inline static bool isMatValid(const DiagonalMatrix<T, Size>& mat) {
 
 template<typename T>
 inline static bool isCFrameValid(const CFrameTemplate<T>& cframe) {
-	return isVecValid(cframe.getPosition()) && isMatValid(cframe.getRotation()) && abs(det(cframe.getRotation()) - 1.0) < 0.00002;
+	return isVecValid(cframe.getPosition()) && isMatValid(cframe.getRotation().asRotationMatrix()) && abs(det(cframe.getRotation().asRotationMatrix()) - 1.0) < 0.00002;
 }
 
+inline static bool isTranslationalMotionValid(const TranslationalMotion& motion) {
+	return isVecValid(motion.velocity) && isVecValid(motion.acceleration);
+}
+inline static bool isRotationalMotionValid(const RotationalMotion& motion) {
+	return isVecValid(motion.angularVelocity) && isVecValid(motion.angularAcceleration);
+}
+
+
 inline static bool isMotionValid(const Motion& motion) {
-	for(int i = 0; i < 4; i++) {
-		if(!isVecValid(motion.components[i])) return false;
-	}
-	return true;
+	return isTranslationalMotionValid(motion.translation) && isRotationalMotionValid(motion.rotation);
 }

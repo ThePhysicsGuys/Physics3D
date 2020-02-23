@@ -114,7 +114,7 @@ Polyhedron Polyhedron::translated(Vec3f offset) const {
 	return Polyhedron(std::move(newBuf), copy(triangles, triangleCount), vertexCount, triangleCount);
 }
 
-Polyhedron Polyhedron::rotated(RotMat3f rotation) const {
+Polyhedron Polyhedron::rotated(Rotationf rotation) const {
 	UniqueAlignedPointer<float> newBuf = createParallelVecBuf(this->vertexCount);
 	for (int i = 0; i < this->vertexCount; i++) {
 		setInBuf(newBuf, vertexCount, i, rotation * (*this)[i]);

@@ -2,6 +2,7 @@
 
 #include "../math/linalg/vec.h"
 #include "../math/linalg/mat.h"
+#include "../math/rotation.h"
 #include "boundingBox.h"
 #include "genericCollidable.h"
 #include "scalableInertialMatrix.h"
@@ -31,7 +32,7 @@ public:
 	virtual bool containsPoint(Vec3 point) const = 0;
 	virtual double getIntersectionDistance(Vec3 origin, Vec3 direction) const = 0;
 
-	virtual BoundingBox getBounds(const RotMat3& referenceFrame, const DiagonalMat3& scale) const = 0;
+	virtual BoundingBox getBounds(const Rotation& referenceFrame, const DiagonalMat3& scale) const = 0;
 
 	virtual double getScaledMaxRadius(DiagonalMat3 scale) const;
 	virtual double getScaledMaxRadiusSq(DiagonalMat3 scale) const = 0;

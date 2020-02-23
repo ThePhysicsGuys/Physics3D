@@ -116,6 +116,11 @@ inline std::ostream& operator<<(std::ostream& os, const EigenValues<N, Size>& v)
 	return os;
 }
 
+inline std::ostream& operator<<(std::ostream& os, const Rotation& rotation) {
+	os << rotation.asRotationMatrix();
+	return os;
+}
+
 inline std::ostream& operator<<(std::ostream& os, const CFrame& cframe) {
 	os << "CFrame(" << cframe.position << ", " << cframe.rotation << ")";
 	return os;
@@ -125,11 +130,23 @@ inline std::ostream& operator<<(std::ostream& os, const GlobalCFrame& cframe) {
 	return os;
 }
 
-inline std::ostream& operator<<(std::ostream& os, const Motion& motion) {
+inline std::ostream& operator<<(std::ostream& os, const TranslationalMotion& motion) {
 	os << "{vel: " << motion.velocity;
-	os << ", angularVel: " << motion.angularVelocity;
-	os << ", acc: " << motion.acceleration;
-	os << ", angularAcc: " << motion.angularAcceleration << "}";
+	os << ", accel: " << motion.acceleration << "}";
+	return os;
+}
+
+inline std::ostream& operator<<(std::ostream& os, const RotationalMotion& motion) {
+	os << "{angularVel: " << motion.angularVelocity;
+	os << ", angularAccel: " << motion.angularAcceleration << "}";
+	return os;
+}
+
+inline std::ostream& operator<<(std::ostream& os, const Motion& motion) {
+	os << "{vel: " << motion.translation.velocity;
+	os << ", angularVel: " << motion.rotation.angularVelocity;
+	os << ", accel: " << motion.translation.acceleration;
+	os << ", angularAccel: " << motion.rotation.angularAcceleration << "}";
 
 	return os;
 }

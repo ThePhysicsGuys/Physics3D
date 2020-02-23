@@ -530,10 +530,6 @@ typedef DiagonalMatrix<double, 3>		DiagonalMat3;
 typedef DiagonalMatrix<float, 3>			DiagonalMat3f;
 typedef DiagonalMatrix<long long, 3>		DiagonalMat3l;
 
-typedef RotationMatrix<double, 3>	RotMat3;
-typedef RotationMatrix<float, 3>		RotMat3f;
-typedef RotationMatrix<long long, 3>	RotMat3l;
-
 // Mat4
 typedef Matrix<double, 4, 4>	Mat4;
 typedef Matrix<float, 4, 4>		Mat4f;

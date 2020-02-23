@@ -31,8 +31,8 @@ TEST_CASE(testBallConstraint) {
 
 	group.apply();
 
-	ASSERT(part1.getMotion().acceleration == Vec3(0.125, 0.0, 0.0));
-	ASSERT(part2.getMotion().acceleration == Vec3(0.125, 0.0, 0.0));
+	ASSERT(part1.getMotion().translation.acceleration == Vec3(0.125, 0.0, 0.0));
+	ASSERT(part2.getMotion().translation.acceleration == Vec3(0.125, 0.0, 0.0));
 }
 
 TEST_CASE(testMotionOfPhysicalSinglePart) {
@@ -44,9 +44,9 @@ TEST_CASE(testMotionOfPhysicalSinglePart) {
 
 	p1.parent->mainPhysical->motionOfCenterOfMass = COMMotion;
 
-	Vec3 p1calculatedVelBefore = p1.getMotion().velocity;
+	Vec3 p1calculatedVelBefore = p1.getMotion().translation.velocity;
 
-	Vec3 p1calculatedAccelBefore = p1.getMotion().acceleration;
+	Vec3 p1calculatedAccelBefore = p1.getMotion().translation.acceleration;
 
 	Position p1PosBefore = p1.getCenterOfMass();
 
@@ -73,11 +73,11 @@ TEST_CASE(testMotionOfPhysicalPartsBasic) {
 
 	p1.parent->mainPhysical->motionOfCenterOfMass = COMMotion;
 
-	Vec3 p1calculatedVelBefore = p1.getMotion().velocity;
-	Vec3 p2calculatedVelBefore = p2.getMotion().velocity;
+	Vec3 p1calculatedVelBefore = p1.getMotion().translation.velocity;
+	Vec3 p2calculatedVelBefore = p2.getMotion().translation.velocity;
 
-	Vec3 p1calculatedAccelBefore = p1.getMotion().acceleration;
-	Vec3 p2calculatedAccelBefore = p2.getMotion().acceleration;
+	Vec3 p1calculatedAccelBefore = p1.getMotion().translation.acceleration;
+	Vec3 p2calculatedAccelBefore = p2.getMotion().translation.acceleration;
 
 	Position p1PosBefore = p1.getCenterOfMass();
 	Position p2PosBefore = p2.getCenterOfMass();
@@ -110,15 +110,15 @@ TEST_CASE(testMotionOfPhysicalPartsRotation) {
 
 	p1.parent->mainPhysical->motionOfCenterOfMass = COMMotion;
 
-	Vec3 p1calculatedVelBefore = p1.getMotion().velocity;
-	Vec3 p2calculatedVelBefore = p2.getMotion().velocity;
+	Vec3 p1calculatedVelBefore = p1.getMotion().translation.velocity;
+	Vec3 p2calculatedVelBefore = p2.getMotion().translation.velocity;
 
 	logStream << p1.parent->getMotion() << "\n";
 	logStream << p1.getMotion() << "\n";
 	logStream << p2.getMotion() << "\n";
 
-	Vec3 p1calculatedAccelBefore = p1.getMotion().acceleration;
-	Vec3 p2calculatedAccelBefore = p2.getMotion().acceleration;
+	Vec3 p1calculatedAccelBefore = p1.getMotion().translation.acceleration;
+	Vec3 p2calculatedAccelBefore = p2.getMotion().translation.acceleration;
 
 	GlobalCFrame p1CFrameBefore = p1.getCFrame();
 	GlobalCFrame p2CFrameBefore = p2.getCFrame();
@@ -136,10 +136,10 @@ TEST_CASE(testMotionOfPhysicalPartsRotation) {
 	Motion estimatedMotion1 = estimateMotion(p1CFrameBefore, p1CFrameMid, p1CFrameAfter, DELTA_T);
 	Motion estimatedMotion2 = estimateMotion(p2CFrameBefore, p2CFrameMid, p2CFrameAfter, DELTA_T);
 
-	ASSERT(estimatedMotion1.velocity == p1calculatedVelBefore);
-	ASSERT(estimatedMotion2.velocity == p2calculatedVelBefore);
-	ASSERT(estimatedMotion1.acceleration == p1calculatedAccelBefore);
-	ASSERT(estimatedMotion2.acceleration == p2calculatedAccelBefore);
+	ASSERT(estimatedMotion1.translation.velocity == p1calculatedVelBefore);
+	ASSERT(estimatedMotion2.translation.velocity == p2calculatedVelBefore);
+	ASSERT(estimatedMotion1.translation.acceleration == p1calculatedAccelBefore);
+	ASSERT(estimatedMotion2.translation.acceleration == p2calculatedAccelBefore);
 }
 
 TEST_CASE(testMotionOfPhysicalPartsBasicFixedConstraint) {
@@ -152,11 +152,11 @@ TEST_CASE(testMotionOfPhysicalPartsBasicFixedConstraint) {
 
 	p1.parent->mainPhysical->motionOfCenterOfMass = COMMotion;
 
-	Vec3 p1calculatedVelBefore = p1.getMotion().velocity;
-	Vec3 p2calculatedVelBefore = p2.getMotion().velocity;
+	Vec3 p1calculatedVelBefore = p1.getMotion().translation.velocity;
+	Vec3 p2calculatedVelBefore = p2.getMotion().translation.velocity;
 
-	Vec3 p1calculatedAccelBefore = p1.getMotion().acceleration;
-	Vec3 p2calculatedAccelBefore = p2.getMotion().acceleration;
+	Vec3 p1calculatedAccelBefore = p1.getMotion().translation.acceleration;
+	Vec3 p2calculatedAccelBefore = p2.getMotion().translation.acceleration;
 
 	Position p1PosBefore = p1.getCenterOfMass();
 	Position p2PosBefore = p2.getCenterOfMass();
@@ -190,15 +190,15 @@ TEST_CASE(testMotionOfPhysicalPartsRotationFixedConstraint) {
 
 	p1.parent->mainPhysical->motionOfCenterOfMass = COMMotion;
 
-	Vec3 p1calculatedVelBefore = p1.getMotion().velocity;
-	Vec3 p2calculatedVelBefore = p2.getMotion().velocity;
+	Vec3 p1calculatedVelBefore = p1.getMotion().translation.velocity;
+	Vec3 p2calculatedVelBefore = p2.getMotion().translation.velocity;
 
 	logStream << p1.parent->getMotion() << "\n";
 	logStream << p1.getMotion() << "\n";
 	logStream << p2.getMotion() << "\n";
 
-	Vec3 p1calculatedAccelBefore = p1.getMotion().acceleration;
-	Vec3 p2calculatedAccelBefore = p2.getMotion().acceleration;
+	Vec3 p1calculatedAccelBefore = p1.getMotion().translation.acceleration;
+	Vec3 p2calculatedAccelBefore = p2.getMotion().translation.acceleration;
 
 	Position p1PosBefore = p1.getCenterOfMass();
 	Position p2PosBefore = p2.getCenterOfMass();
@@ -231,11 +231,11 @@ TEST_CASE(testMotionOfPhysicalParts) {
 
 	p1.parent->mainPhysical->motionOfCenterOfMass = COMMotion;
 
-	Vec3 p1calculatedVelBefore = p1.getMotion().velocity;
-	Vec3 p2calculatedVelBefore = p2.getMotion().velocity;
+	Vec3 p1calculatedVelBefore = p1.getMotion().translation.velocity;
+	Vec3 p2calculatedVelBefore = p2.getMotion().translation.velocity;
 
-	Vec3 p1calculatedAccelBefore = p1.getMotion().acceleration;
-	Vec3 p2calculatedAccelBefore = p2.getMotion().acceleration;
+	Vec3 p1calculatedAccelBefore = p1.getMotion().translation.acceleration;
+	Vec3 p2calculatedAccelBefore = p2.getMotion().translation.acceleration;
 
 	Position p1PosBefore = p1.getCenterOfMass();
 	Position p2PosBefore = p2.getCenterOfMass();
@@ -355,7 +355,7 @@ TEST_CASE(testFixedConstraintProperties) {
 }
 
 TEST_CASE(testApplyForceToFixedConstraint) {
-	CFrame attach(Vec3(1.3, 0.7, 0.9), fromEulerAngles(0.3, -0.7, 0.9));
+	CFrame attach(Vec3(1.3, 0.7, 0.9), Rotation::fromEulerAngles(0.3, -0.7, 0.9));
 	
 	Part p1(Box(1.0, 2.0, 3.0), GlobalCFrame(), {1.0, 1.0, 1.0});
 	Part p2(Box(1.5, 2.3, 1.2), GlobalCFrame(), {1.0, 1.0, 1.0});

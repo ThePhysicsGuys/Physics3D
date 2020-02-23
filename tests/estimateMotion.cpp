@@ -4,19 +4,19 @@
 #include "../physics/math/linalg/trigonometry.h"
 
 Vec3 getVelocityBySimulation(const Motion& m, const Vec3& point, double deltaT) {
-	Mat3 rotation = fromRotationVec(m.angularVelocity * deltaT);
-	Vec3 delta = m.velocity * deltaT + (rotation * point - point);
+	Mat3 rotation = fromRotationVec(m.rotation.angularVelocity * deltaT);
+	Vec3 delta = m.translation.velocity * deltaT + (rotation * point - point);
 	return delta / deltaT;
 }
 
 Motion getMotionBySimulation(const Motion& m, const Vec3& point, double deltaT) {
 	Motion result;
 
-	Vec3 mainVel1 = m.velocity;
-	Vec3 mainVel2 = mainVel1 + m.acceleration * deltaT;
+	Vec3 mainVel1 = m.translation.velocity;
+	Vec3 mainVel2 = mainVel1 + m.translation.acceleration * deltaT;
 
-	Vec3 angularVel2 = m.angularVelocity + m.angularAcceleration * deltaT;
-	Vec3 rotVec1 = m.angularVelocity * deltaT;
+	Vec3 angularVel2 = m.rotation.angularVelocity + m.rotation.angularAcceleration * deltaT;
+	Vec3 rotVec1 = m.rotation.angularVelocity * deltaT;
 	Vec3 rotVec2 = angularVel2 * deltaT;
 	Mat3 rotation1 = fromRotationVec(rotVec1);
 	Mat3 rotation2 = fromRotationVec(rotVec2);
@@ -30,11 +30,11 @@ Motion getMotionBySimulation(const Motion& m, const Vec3& point, double deltaT) 
 	Vec3 vel1 = delta1 / deltaT;
 	Vec3 vel2 = delta2 / deltaT;
 
-	result.velocity = vel1;
-	result.acceleration = (vel2 - vel1) / deltaT;
+	result.translation.velocity = vel1;
+	result.translation.acceleration = (vel2 - vel1) / deltaT;
 
-	result.angularVelocity = m.angularVelocity;
-	result.angularAcceleration = m.angularAcceleration;
+	result.rotation.angularVelocity = m.rotation.angularVelocity;
+	result.rotation.angularAcceleration = m.rotation.angularAcceleration;
 
 	return result;
 }
@@ -64,13 +64,13 @@ std::pair<Vec3, Vec3> estimateMotion(const Position& startPos, const Position& m
 // secondRot = delta * firstRot
 // delta = secondRot * ~firstRot
 
-static Vec3 getRotationVecFor(const RotMat3& firstRot, const RotMat3& secondRot) {
-	RotMat3 delta = secondRot * ~firstRot;
+static Vec3 getRotationVecFor(const Rotation& firstRot, const Rotation& secondRot) {
+	Rotation delta = secondRot * ~firstRot;
 
-	return fromRotationMatrix(delta);
+	return delta.asRotationVector();
 }
 
-Vec3 getRotationVelFor(const RotMat3& before, const RotMat3& after, double deltaT) {
+Vec3 getRotationVelFor(const Rotation& before, const Rotation& after, double deltaT) {
 	Vec3 rotationVec = getRotationVecFor(before, after);
 
 	return rotationVec / deltaT;
@@ -104,7 +104,7 @@ Motion estimateMotion(const GlobalCFrame& step1, const GlobalCFrame& step2, cons
 
 
 CFrame simulateForTime(const Motion& motion, const CFrame& startingCFrame, double deltaT) {
-	Motion::Movement mov = motion.getMovementAfterDeltaT(deltaT);
+	Movement mov = motion.getMovementAfterDeltaT(deltaT);
 
-	return CFrame(startingCFrame.getPosition() + mov.translation, fromRotationVec(mov.rotation) * startingCFrame.getRotation());
+	return CFrame(startingCFrame.getPosition() + mov.translation, Rotation::fromRotationVec(mov.rotation) * startingCFrame.getRotation());
 }

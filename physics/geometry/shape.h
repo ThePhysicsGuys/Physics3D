@@ -36,7 +36,7 @@ public:
 	Shape scaled(double scaleX, double scaleY, double scaleZ) const;
 	
 	BoundingBox getBounds() const;
-	BoundingBox getBounds(const Mat3& referenceFrame) const;
+	BoundingBox getBounds(const Rotation& referenceFrame) const;
 	Vec3 getCenterOfMass() const;
 	// defined around the object's Center Of Mass
 	SymmetricMat3 getInertia() const;

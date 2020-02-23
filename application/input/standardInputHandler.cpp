@@ -72,7 +72,9 @@ bool StandardInputHandler::onKeyPressOrRepeat(KeyPressEvent& event) {
 		if (isPaused()) runTick();
 	} else if (Keyboard::O == key) {
 		world.asyncModification([]() {
-			WorldBuilder::createDominoAt(Position(0.0 + (rand() % 100) * 0.001, 1.0 + (rand() % 100) * 0.001, 0.0 + (rand() % 100) * 0.001), fromEulerAngles(0.2, 0.3, 0.7));
+			Position pos(0.0 + (rand() % 100) * 0.001, 1.0 + (rand() % 100) * 0.001, 0.0 + (rand() % 100) * 0.001);
+
+			WorldBuilder::createDominoAt(GlobalCFrame(pos, Rotation::fromEulerAngles(0.2, 0.3, 0.7)));
 		}); 
 		Log::info("Created domino! There are %d objects in the world! ", screen.world->getPartCount());
 	}

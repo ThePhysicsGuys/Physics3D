@@ -109,8 +109,8 @@ TEST_CASE(matrixInverse4) {
 }
 
 TEST_CASE(cframeInverse) {
-	CFrame A(Vec3(1.0, 0.8, 0.9), fromEulerAngles(0.3, 0.7, 0.9));
-	CFrame B(Vec3(8.2, -0.8, 3.4), fromEulerAngles(0.4, 0.4, 0.3));
+	CFrame A(Vec3(1.0, 0.8, 0.9), Rotation::fromEulerAngles(0.3, 0.7, 0.9));
+	CFrame B(Vec3(8.2, -0.8, 3.4), Rotation::fromEulerAngles(0.4, 0.4, 0.3));
 
 	ASSERT(A.localToGlobal(A.globalToLocal(B)) == B);
 	ASSERT(A.globalToLocal(A.localToGlobal(B)) == B);
@@ -172,27 +172,14 @@ TEST_CASE(matrixAssociativity) {
 
 TEST_CASE(cframeAssociativity) {
 
-	CFrame A(Vec3(0.7, 1.02, 0.9), fromEulerAngles(0.7, 0.9, 0.3));
-	CFrame B(Vec3(-0.2, 10.02, 0.3), fromEulerAngles(0.2, 0.2, 0.1));
-	CFrame C(Vec3(-0.2343657, 17.02, -9.3), fromEulerAngles(0.9, 0.4, 0.9));
+	CFrame A(Vec3(0.7, 1.02, 0.9), Rotation::fromEulerAngles(0.7, 0.9, 0.3));
+	CFrame B(Vec3(-0.2, 10.02, 0.3), Rotation::fromEulerAngles(0.2, 0.2, 0.1));
+	CFrame C(Vec3(-0.2343657, 17.02, -9.3), Rotation::fromEulerAngles(0.9, 0.4, 0.9));
 
 	Vec3 v(17, -0.7, 9.4);
 
 	ASSERT(A.localToGlobal(B).localToGlobal(C) == A.localToGlobal(B.localToGlobal(C)));
 	ASSERT(A.localToGlobal(B).localToGlobal(v) == A.localToGlobal(B).localToGlobal(v));
-}
-
-TEST_CASE(cframeMat4Equivalence) {
-	CFrame A(Vec3(0.7, 1.02, 0.9), fromEulerAngles(0.7, 0.9, 0.3));
-	Mat4 A4 = CFrameToMat4(A);
-
-	Vec3 v(17, -0.7, 9.4);
-
-	ASSERT(Mat4ToCFrame(CFrameToMat4(A)) == A);
-	ASSERT(A.localToGlobal(v) == Vec3(CFrameToMat4(A) * Vec4(v, 1.0)));
-	ASSERT(A.globalToLocal(v) == Vec3(~CFrameToMat4(A) * Vec4(v, 1.0)));
-	ASSERT(Vec3(A4 * Vec4(v, 1.0)) == Mat4ToCFrame(A4).localToGlobal(v));
-	ASSERT(Vec3(~A4 * Vec4(v, 1.0)) == Mat4ToCFrame(A4).globalToLocal(v));
 }
 
 TEST_CASE(fromEuler) {
@@ -217,17 +204,14 @@ TEST_CASE(crossProduct) {
 	ASSERT(x % z == -y);
 }
 
-#include <iostream>
-#include <algorithm>
-
 TEST_CASE(eigenDecomposition) {
 	for(double x = -1.25; x < 1.5; x += 0.1) {
 		for(double y = -1.35; y < 1.5; y += 0.1) {
 			for(double z = -1.55; z < 1.5; z += 0.1) {
-				RotMat3 orthoPart = fromEulerAngles(0.21, 0.31, 0.41);
+				Rotation orthoPart = Rotation::fromEulerAngles(0.21, 0.31, 0.41);
 				DiagonalMat3 eigenMat{x,y,z};
 
-				SymmetricMat3 testMat = transformBasis(SymmetricMat3(eigenMat), orthoPart);
+				SymmetricMat3 testMat = orthoPart.localToGlobal(SymmetricMat3(eigenMat));
 
 				EigenSet<double, 3> v = getEigenDecomposition(testMat);
 

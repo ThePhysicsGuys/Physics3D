@@ -124,6 +124,11 @@ bool tolerantEquals(const Position& a, const Position& b, Tol tolerance) {
 	return tolerantEquals(delta, Vec3(0, 0, 0), tolerance);
 }
 
+template<typename T, typename Tol>
+bool tolerantEquals(const RotationTemplate<T>& a, const RotationTemplate<T>& b, Tol tolerance) {
+	return tolerantEquals(a.asRotationMatrix(), b.asRotationMatrix(), tolerance);
+}
+
 template<typename Tol>
 bool tolerantEquals(const GlobalCFrame& first, const GlobalCFrame& second, Tol tolerance) {
 	return tolerantEquals(first.position, second.position, tolerance) &&
@@ -141,11 +146,21 @@ bool tolerantEquals(const EigenValues<N, 3>& a, const EigenValues<N, 3>& b, Tol 
 }
 
 template<typename Tol>
+bool tolerantEquals(const TranslationalMotion& first, const TranslationalMotion& second, Tol tolerance) {
+	return tolerantEquals(first.velocity, second.velocity, tolerance)
+		&& tolerantEquals(first.acceleration, second.acceleration, tolerance);
+}
+
+template<typename Tol>
+bool tolerantEquals(const RotationalMotion& first, const RotationalMotion& second, Tol tolerance) {
+	return tolerantEquals(first.angularVelocity, second.angularVelocity, tolerance)
+		&& tolerantEquals(first.angularAcceleration, second.angularAcceleration, tolerance);
+}
+
+template<typename Tol>
 bool tolerantEquals(const Motion& first, const Motion& second, Tol tolerance) {
-	for(int i = 0; i < 4; i++) {
-		if(!tolerantEquals(first.components[i], second.components[i], tolerance)) return false;
-	}
-	return true;
+	return tolerantEquals(first.translation, second.translation, tolerance)
+		&& tolerantEquals(first.rotation, second.rotation, tolerance);
 }
 
 template<typename Tol>
