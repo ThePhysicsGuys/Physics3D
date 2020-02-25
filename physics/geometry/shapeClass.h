@@ -7,12 +7,10 @@
 #include "genericCollidable.h"
 #include "scalableInertialMatrix.h"
 
-
 #define CUBE_CLASS_ID 0
 #define SPHERE_CLASS_ID 1
 #define CYLINDER_CLASS_ID 2
 #define CONVEX_POLYHEDRON_CLASS_ID 10
-
 class Polyhedron;
 
 // a ShapeClass is defined as a shape with dimentions -1..1 in all axes. All functions work on scaled versions of the shape. 

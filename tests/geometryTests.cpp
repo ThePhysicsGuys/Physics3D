@@ -81,7 +81,7 @@ TEST_CASE(shapeCenterOfMass) {
 /*TEST_CASE(shapeInertiaMatrix) {
 	Polyhedron boxShape = Library::createBox(2.0, 2.0, 2.0);
 
-	CFramef transform(Vec3f(0,0,0), fromEulerAngles(0.7f, 0.2f, 0.3f));
+	CFramef transform(Vec3f(0,0,0), rotationMatrixfromEulerAngles(0.7f, 0.2f, 0.3f));
 	Polyhedron transformedShape = boxShape.localToGlobal(transform);
 
 	logf("Inertia of Box: %s", str(boxShape.getInertiaAroundCenterOfMass()).c_str());
@@ -90,7 +90,7 @@ TEST_CASE(shapeCenterOfMass) {
 
 	Polyhedron h = Library::house;
 	Polyhedron newHouse = Library::house.translated(-Vec3f(Library::house.getCenterOfMass()));
-	Polyhedron rotatedHouse = newHouse.rotated(fromEulerAngles(0.0, 0.3, 0.0));
+	Polyhedron rotatedHouse = newHouse.rotated(rotationMatrixfromEulerAngles(0.0, 0.3, 0.0));
 	logf("Inertia of House: %s", str(newHouse.getInertiaAroundCenterOfMass()).c_str());
 	logf("Inertia of Rotated House: %s", str(rotatedHouse.getInertiaAroundCenterOfMass()).c_str());
 }*/

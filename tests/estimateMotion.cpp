@@ -4,7 +4,7 @@
 #include "../physics/math/linalg/trigonometry.h"
 
 Vec3 getVelocityBySimulation(const Motion& m, const Vec3& point, double deltaT) {
-	Mat3 rotation = fromRotationVec(m.rotation.angularVelocity * deltaT);
+	Rotation rotation = Rotation::fromRotationVec(m.rotation.angularVelocity * deltaT);
 	Vec3 delta = m.translation.velocity * deltaT + (rotation * point - point);
 	return delta / deltaT;
 }
@@ -18,8 +18,8 @@ Motion getMotionBySimulation(const Motion& m, const Vec3& point, double deltaT) 
 	Vec3 angularVel2 = m.rotation.angularVelocity + m.rotation.angularAcceleration * deltaT;
 	Vec3 rotVec1 = m.rotation.angularVelocity * deltaT;
 	Vec3 rotVec2 = angularVel2 * deltaT;
-	Mat3 rotation1 = fromRotationVec(rotVec1);
-	Mat3 rotation2 = fromRotationVec(rotVec2);
+	Rotation rotation1 = Rotation::fromRotationVec(rotVec1);
+	Rotation rotation2 = Rotation::fromRotationVec(rotVec2);
 
 	Vec3 pos0 = point;
 	Vec3 pos1 = mainVel1 * deltaT + rotation1 * pos0;

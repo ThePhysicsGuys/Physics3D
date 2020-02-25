@@ -150,8 +150,10 @@
     <ClInclude Include="io\import.h" />
     <ClInclude Include="layer\layer.h" />
     <ClInclude Include="layer\layerStack.h" />
+    <ClInclude Include="meshRegistry.h" />
     <ClInclude Include="options\keyboardOptions.h" />
     <ClInclude Include="resource\meshResource.h" />
+    <ClInclude Include="visualData.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core.cpp">
@@ -167,8 +169,10 @@
     <ClCompile Include="io\export.cpp" />
     <ClCompile Include="io\import.cpp" />
     <ClCompile Include="layer\layerStack.cpp" />
+    <ClCompile Include="meshRegistry.cpp" />
     <ClCompile Include="options\keyboardOptions.cpp" />
     <ClCompile Include="resource\meshResource.cpp" />
+    <ClCompile Include="visualData.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

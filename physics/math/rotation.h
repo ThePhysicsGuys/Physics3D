@@ -52,6 +52,12 @@ public:
 	static RotationTemplate fromRotationVec(const Vector<T, 3>& rotationVector);
 	static RotationTemplate fromRotationMatrix(const Matrix<T, 3, 3>& rotationMatrix);
 
+	static RotationTemplate faceX(Vector<T, 3> xDirection);
+	static RotationTemplate faceX(Vector<T, 3> xDirection, Vector<T, 3> yHint);
+	static RotationTemplate faceY(Vector<T, 3> yDirection);
+	static RotationTemplate faceY(Vector<T, 3> yDirection, Vector<T, 3> zHint);
+	static RotationTemplate faceZ(Vector<T, 3> zDirection);
+	static RotationTemplate faceZ(Vector<T, 3> zDirection, Vector<T, 3> xHint);
 
 	Matrix<T, 3, 3> asRotationMatrix() const;
 	Vector<T, 3> asRotationVector() const;
@@ -172,15 +178,15 @@ Vec3 RotationTemplate<T>::operator*(const Vector<T, 3>& vec) const {
 
 template<typename T>
 RotationTemplate<T> RotationTemplate<T>::rotX(double angle) {
-	return RotationTemplate<T>(::rotX(angle));
+	return RotationTemplate<T>(::rotMatX(angle));
 }
 template<typename T>
 RotationTemplate<T> RotationTemplate<T>::rotY(double angle) {
-	return RotationTemplate<T>(::rotY(angle));
+	return RotationTemplate<T>(::rotMatY(angle));
 }
 template<typename T>
 RotationTemplate<T> RotationTemplate<T>::rotZ(double angle) {
-	return RotationTemplate<T>(::rotZ(angle));
+	return RotationTemplate<T>(::rotMatZ(angle));
 }
 
 template<typename T>
@@ -196,7 +202,7 @@ RotationTemplate<T> RotationTemplate<T>::fromRotationMatrix(const Matrix<T, 3, 3
 
 template<typename T>
 RotationTemplate<T> RotationTemplate<T>::fromRotationVec(const Vector<T, 3>& rotationVector) {
-	return RotationTemplate<T>::fromRotationMatrix(::fromRotationVec(rotationVector));
+	return RotationTemplate<T>::fromRotationMatrix(::rotationMatrixfromRotationVec(rotationVector));
 }
 
 template<typename T>
@@ -205,13 +211,38 @@ Matrix<T, 3, 3> RotationTemplate<T>::asRotationMatrix() const {
 }
 template<typename T>
 Vector<T, 3> RotationTemplate<T>::asRotationVector() const {
-	return ::fromRotationMatrix(this->rotationMatrix);
+	return ::rotationVectorfromRotationMatrix(this->rotationMatrix);
 }
 
 template<typename T>
 template<typename OtherT>
 RotationTemplate<T>::operator RotationTemplate<OtherT>() const {
 	return RotationTemplate<OtherT>::fromRotationMatrix(static_cast<Matrix<OtherT, 3, 3>>(this->rotationMatrix));
+}
+
+template<typename T>
+RotationTemplate<T> RotationTemplate<T>::faceX(Vector<T, 3> xDirection) {
+	return RotationTemplate<T>::fromRotationMatrix(::faceMatX(xDirection));
+}
+template<typename T>
+RotationTemplate<T> RotationTemplate<T>::faceX(Vector<T, 3> xDirection, Vector<T, 3> yHint) {
+	return RotationTemplate<T>::fromRotationMatrix(::faceMatX(xDirection, yHint));
+}
+template<typename T>
+RotationTemplate<T> RotationTemplate<T>::faceY(Vector<T, 3> yDirection) {
+	return RotationTemplate<T>::fromRotationMatrix(::faceMatY(yDirection));
+}
+template<typename T>
+RotationTemplate<T> RotationTemplate<T>::faceY(Vector<T, 3> yDirection, Vector<T, 3> zHint) {
+	return RotationTemplate<T>::fromRotationMatrix(::faceMatY(yDirection, zHint));
+}
+template<typename T>
+RotationTemplate<T> RotationTemplate<T>::faceZ(Vector<T, 3> zDirection) {
+	return RotationTemplate<T>::fromRotationMatrix(::faceMatZ(zDirection));
+}
+template<typename T>
+RotationTemplate<T> RotationTemplate<T>::faceZ(Vector<T, 3> zDirection, Vector<T, 3> xHint) {
+	return RotationTemplate<T>::fromRotationMatrix(::faceMatZ(zDirection, xHint));
 }
 
 

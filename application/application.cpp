@@ -38,6 +38,7 @@
 #include "../util/resource/resourceManager.h"
 #include "../graphics/resource/textureResource.h"
 #include "../engine/io/import.h"
+#include "../engine/meshRegistry.h"
 
 #define TICKS_PER_SECOND 120.0
 #define TICK_SKIP_TIME std::chrono::milliseconds(1000)
@@ -50,7 +51,6 @@ Screen screen;
 
 void init(int argc, const char** args);
 void setupPhysics();
-void registerShapes();
 void setupWorld(int argc, const char** args);
 void setupGL();
 void setupDebug();
@@ -62,7 +62,8 @@ bool has_suffix(const std::string& str, const std::string& suffix) {
 
 void init(int argc, const char** args) {
 	setupGL();
-	registerShapes();
+	Engine::MeshRegistry::init();
+
 	ResourceManager::add<TextureResource>("floorMaterial", "../res/textures/floor/floor_color.jpg");
 
 	WorldImportExport::registerTexture(ResourceManager::get<TextureResource>("floorMaterial"));
@@ -121,77 +122,12 @@ void setupGL() {
 	}
 }
 
-// Generates a cylinder with 
-static VisualShape createCylinder(int sides, double radius, double height) {
-	assert(sides >= 2);
-	int vertexCount = sides * 4;
-	Vec3f* vecBuf = new Vec3f[vertexCount];
-
-
-	// vertices
-	for (int i = 0; i < sides; i++) {
-		double angle = i * PI * 2 / sides;
-		Vec3f bottom(cos(angle) * radius, sin(angle) * radius, height / 2);
-		Vec3f top(cos(angle) * radius, sin(angle) * radius, -height / 2);
-		vecBuf[i * 2] = bottom;
-		vecBuf[i * 2 + 1] = top;
-		vecBuf[i * 2 + sides * 2] = bottom;
-		vecBuf[i * 2 + 1 + sides * 2] = top;
-	}
-
-	int triangleCount = sides * 2 + (sides - 2) * 2;
-	Triangle* triangleBuf = new Triangle[triangleCount];
-
-	// sides
-	for (int i = 0; i < sides; i++) {
-		int botLeft = i * 2;
-		int botRight = ((i + 1) % sides) * 2;
-		triangleBuf[i * 2] = Triangle { botLeft, botLeft + 1, botRight }; // botLeft, botRight, topLeft
-		triangleBuf[i * 2 + 1] = Triangle { botRight + 1, botRight, botLeft + 1 }; // topRight, topLeft, botRight
-	}
-
-	Vec3f* normals = new Vec3f[vertexCount];
-
-	for (int i = 0; i < sides * 2; i++) {
-		Vec3f vertex = vecBuf[i];
-		normals[i] = normalize(Vec3(vertex.x, vertex.y, 0));
-	}
-
-	Triangle* capOffset = triangleBuf + sides * 2Ui64;
-	// top and bottom
-	for (int i = 0; i < sides - 2; i++) { // common corner is i=0
-		capOffset[i] = Triangle { sides * 2 + 0, sides * 2 + (i + 1) * 2, sides * 2 + (i + 2) * 2 };
-		capOffset[i + (sides - 2)] = Triangle { sides * 2 + 1, sides * 2 + (i + 2) * 2 + 1, sides * 2 + (i + 1) * 2 + 1 };
-	}
-
-	for (int i = 0; i < sides; i++) {
-		normals[i * 2 + sides * 2] = Vec3f(0, 0, 1);
-		normals[i * 2 + sides * 2 + 1] = Vec3f(0, 0, -1);
-	}
-
-	return VisualShape(vecBuf, SharedArrayPtr<const Vec3f>(normals), triangleBuf, vertexCount, triangleCount);
-}
-
-static void registerShapes() {
-	Polyhedron sphere(Library::createSphere(1.0, 3));
-	VisualShape sphereShape = VisualShape(sphere);
-	Vec3f* normalBuf = new Vec3f[sphereShape.vertexCount];
-	sphereShape.computeNormals(normalBuf);
-	sphereShape.normals = SharedArrayPtr<const Vec3f>(normalBuf);
-
-	screen.registerMeshFor(Sphere(1.0).baseShape, sphereShape);
-
-	screen.registerMeshFor(Box(2.0, 2.0, 2.0).baseShape);
-
-	screen.registerMeshFor(Cylinder(1.0, 2.0).baseShape, createCylinder(64, 1.0, 2.0));
-}
-
 
 
 void setupWorld(int argc, const char** args) {
 	Log::info("Initializing world");
 
-	//world.addExternalForce(new DirectionalGravity(Vec3(0, -10.0, 0.0)));
+	world.addExternalForce(new DirectionalGravity(Vec3(0, -10.0, 0.0)));
 
 	PartProperties basicProperties{1.0, 0.7, 0.3};
 
@@ -232,7 +168,7 @@ void setupWorld(int argc, const char** args) {
 		world.addPart(newCube);
 	}*/
 
-	//WorldBuilder::buildCar(GlobalCFrame(5.0, 1.0, 5.0));
+	WorldBuilder::buildCar(GlobalCFrame(5.0, 1.0, 5.0));
 
 
 	WorldBuilder::buildConveyor(1.5, 7.0, GlobalCFrame(-10.0, 1.0, -10.0, Rotation::fromEulerAngles(0.15, 0.0, 0.0)), 1.5);
@@ -259,7 +195,7 @@ void setupWorld(int argc, const char** args) {
 				//spiderFactories[rand() & 0x00000003].buildSpider(GlobalCFrame(Position(x+y*0.1, y+1, z)));
 				//world.addPart(new ExtendedPart(triangle, GlobalCFrame(Position(x - 20, y + 1, z + 20)), { 1.0, 0.2, 0.5 }, "Triangle"));
 
-				world.addPart(new ExtendedPart(Cylinder(0.3, 1.2), GlobalCFrame(x - 5, y + 1, z + 5, fromEulerAngles(3.1415/4, 3.1415/4, 0.0)), {1.0, 0.2, 0.5}, "Cylinder"));
+				world.addPart(new ExtendedPart(Cylinder(0.3, 1.2), GlobalCFrame(x - 5, y + 1, z + 5, rotationMatrixfromEulerAngles(3.1415/4, 3.1415/4, 0.0)), {1.0, 0.2, 0.5}, "Cylinder"));
 			}
 		}
 	}*/
@@ -374,10 +310,10 @@ void setupWorld(int argc, const char** args) {
 		ExtendedPart* BLWheel = new ExtendedPart(Cylinder(0.5, 0.2), GlobalCFrame(), basicProperties, "Back Left Wheel");
 		ExtendedPart* BRWheel = new ExtendedPart(Cylinder(0.5, 0.2), GlobalCFrame(), basicProperties, "Back Right Wheel");
 
-		poweredCarBody->attach(FLWheel, new MotorConstraint(Vec3(turnSpeed, 0.0, 0.0), -0.5), CFrame(Vec3(0.7, 0.0, 1.0)), CFrame(Rotation::Predefined::Y_90));
-		poweredCarBody->attach(FRWheel, new MotorConstraint(Vec3(turnSpeed, 0.0, 0.0), -0.5), CFrame(Vec3(-0.7, 0.0, 1.0)), CFrame(Rotation::Predefined::Y_90));
-		poweredCarBody->attach(BLWheel, new MotorConstraint(Vec3(turnSpeed, 0.0, 0.0), -0.5), CFrame(Vec3(0.7, 0.0, -1.0)), CFrame(Rotation::Predefined::Y_90));
-		poweredCarBody->attach(BRWheel, new MotorConstraint(Vec3(turnSpeed, 0.0, 0.0), -0.5), CFrame(Vec3(-0.7, 0.0, -1.0)), CFrame(Rotation::Predefined::Y_90));
+		poweredCarBody->attach(FLWheel, new MotorConstraint(Vec3(turnSpeed, 0.0, 0.0), 0.0), CFrame(Vec3(0.55, 0.0, 1.0)), CFrame(Vec3(0.0, 0.0, 0.15), Rotation::Predefined::Y_90));
+		poweredCarBody->attach(BLWheel, new MotorConstraint(Vec3(turnSpeed, 0.0, 0.0), 0.0), CFrame(Vec3(0.55, 0.0, -1.0)), CFrame(Vec3(0.0, 0.0, 0.15), Rotation::Predefined::Y_90));
+		poweredCarBody->attach(FRWheel, new MotorConstraint(Vec3(-turnSpeed, 0.0, 0.0), 0.0), CFrame(Vec3(-0.55, 0.0, 1.0), Rotation::Predefined::Y_180), CFrame(Vec3(0.0, 0.0, 0.15), Rotation::Predefined::Y_90));
+		poweredCarBody->attach(BRWheel, new MotorConstraint(Vec3(-turnSpeed, 0.0, 0.0), 0.0), CFrame(Vec3(-0.55, 0.0, -1.0), Rotation::Predefined::Y_180), CFrame(Vec3(0.0, 0.0, 0.15), Rotation::Predefined::Y_90));
 
 		world.addPart(poweredCarBody);
 
@@ -399,7 +335,7 @@ void setupWorld(int argc, const char** args) {
 		ExtendedPart* anotherAttachedBlock = new ExtendedPart(Box(1.0, 1.0, 1.0), GlobalCFrame(), basicProperties, "Another Attached Block");
 
 
-		mainBlock->attach(attachedBlock, new SinusoidalPistonConstraint(Vec3(1.0, 0.0, 0.0), 1.0, 3.0, 1.0), CFrame(0.5, 0.0, 0.0), CFrame(-0.5, 0.0, 1.0));
+		mainBlock->attach(attachedBlock, new SinusoidalPistonConstraint(Vec3(1.0, 0.0, 0.0), 1.0, 3.0, 1.0), CFrame(0.5, 0.0, 0.0), CFrame(-0.5, 0.0, 0.0));
 		attachedBlock->attach(anotherAttachedBlock, new SinusoidalPistonConstraint(Vec3(0.0, 1.0, 0.0), 1.0, 2.0, 0.7), CFrame(0.0, 0.5, 0.0), CFrame(0.0, -0.5, 0.0));
 
 		world.addPart(mainBlock);

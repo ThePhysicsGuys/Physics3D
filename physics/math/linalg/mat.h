@@ -37,7 +37,7 @@ public:
 			9, 10, 11, 12
 		};
 	*/
-	inline constexpr Matrix<T, Width, Height>(const std::initializer_list<T>& list) : data{} {
+	inline constexpr Matrix<T, Width, Height>(std::initializer_list<T> list) : data{} {
 		assert(list.size() == Width * Height);
 		auto listIter = list.begin();
 		for (size_t row = 0; row < Height; row++) {
@@ -83,6 +83,34 @@ public:
 			(*this)[Height - 1][col] = 0.0;
 		}
 		(*this)[Height - 1][Width - 1] = bottomLeftVal;
+	}
+	
+	inline static Matrix<T, Width, Height> fromRows(std::initializer_list<Vector<T, Width>> rows) {
+		assert(rows.size() == Height);
+		Matrix<T, Width, Height> result;
+		auto rowIter = rows.begin();
+		for(size_t row = 0; row < Height; row++) {
+			const Vector<T, Width>& curRow = *rowIter;
+			for(size_t col = 0; col < Width; col++) {
+				result[row][col] = curRow[col];
+			}
+			rowIter++;
+		}
+		return result;
+	}
+
+	inline static Matrix<T, Width, Height> fromColumns(std::initializer_list<Vector<T, Height>> columns) {
+		assert(columns.size() == Width);
+		Matrix<T, Width, Height> result;
+		auto colIter = columns.begin();
+		for(size_t col = 0; col < Width; col++) {
+			const Vector<T, Height>& curCol = *colIter;
+			for(size_t row = 0; row < Height; row++) {
+				result[row][col] = curCol[row];
+			}
+			colIter++;
+		}
+		return result;
 	}
 
 	void setDataRowMajor(const T* data) {

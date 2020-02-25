@@ -22,6 +22,7 @@
 #include "../util/resource/resourceManager.h"
 #include "layer/skyboxLayer.h"
 #include "layer/modelLayer.h"
+#include "layer/constraintLayer.h"
 #include "layer/testLayer.h"
 #include "layer/pickerLayer.h"
 #include "layer/postprocessLayer.h"
@@ -30,6 +31,7 @@
 #include "layer/debugOverlay.h"
 
 #include "../physics/geometry/shapeClass.h"
+#include "../../engine/meshRegistry.h"
 
 #include "frames.h"
 
@@ -40,8 +42,6 @@
 namespace Application {
 
 std::vector<Engine::Entity*> Screen::entities;
-std::vector<IndexedMesh*> Screen::meshes;
-std::map<const ShapeClass*, VisualData> Screen::shapeClassMeshIds;
 
 bool initGLFW() {
 	// Set window hints
@@ -112,6 +112,7 @@ StandardInputHandler* handler = nullptr;
 // Layers
 SkyboxLayer skyboxLayer;
 ModelLayer modelLayer;
+ConstraintLayer constraintLayer;
 TestLayer testLayer;
 PickerLayer pickerLayer;
 PostprocessLayer postprocessLayer;
@@ -124,6 +125,8 @@ void Screen::onInit() {
 
 	// Log init
 	Log::setLogLevel(Log::Level::INFO);
+
+
 
 
 	// Properties init
@@ -163,6 +166,7 @@ void Screen::onInit() {
 	// Layer creation
 	skyboxLayer = SkyboxLayer(this);
 	modelLayer = ModelLayer(this);
+	constraintLayer = ConstraintLayer(this);
 	testLayer = TestLayer(this);
 	debugLayer = DebugLayer(this);
 	pickerLayer = PickerLayer(this);
@@ -172,6 +176,7 @@ void Screen::onInit() {
 
 	layerStack.pushLayer(&skyboxLayer);
 	layerStack.pushLayer(&modelLayer);
+	layerStack.pushLayer(&constraintLayer);
 	layerStack.pushLayer(&debugLayer);
 	layerStack.pushLayer(&pickerLayer);
 	layerStack.pushLayer(&postprocessLayer);
@@ -314,42 +319,6 @@ void Screen::onClose() {
 
 bool Screen::shouldClose() {
 	return Renderer::isGLFWWindowClosed();
-}
-
-VisualData Screen::addMeshShape(const VisualShape& s) {
-	int size = (int) meshes.size();
-	//Log::error("Mesh %d added!", size);
-	meshes.push_back(new IndexedMesh(s));
-	return VisualData { size, s.uvs != nullptr, s.normals != nullptr };
-}
-
-VisualData Screen::registerMeshFor(const ShapeClass* shapeClass, const VisualShape& mesh) {
-	if (shapeClassMeshIds.find(shapeClass) != shapeClassMeshIds.end()) throw "Attempting to re-register existing ShapeClass!";
-
-	VisualData meshData = addMeshShape(mesh);
-
-	//Log::error("Mesh %d registered!", meshData);
-
-	shapeClassMeshIds.insert(std::pair<const ShapeClass*, VisualData>(shapeClass, meshData));
-	return meshData;
-}
-
-VisualData Screen::registerMeshFor(const ShapeClass* shapeClass) {
-	return registerMeshFor(shapeClass, VisualShape(shapeClass->asPolyhedron()));
-}
-
-VisualData Screen::getOrCreateMeshFor(const ShapeClass* shapeClass) {
-	auto found = shapeClassMeshIds.find(shapeClass);
-
-	if (found != shapeClassMeshIds.end()) {
-		// mesh found!
-		VisualData meshData = (*found).second;
-		//Log::error("Mesh %d reused!", meshData);
-		return meshData;
-	} else {
-		// mesh not found :(
-		return registerMeshFor(shapeClass);
-	}
 }
 
 };

@@ -129,17 +129,17 @@ TEST_CASE(testFromRotationVec) {
 		Vec3 rotationVec = rot * deltaT;
 		Vec3 pointToRotate = Vec3(1.0, 0.0, 0.0);
 
-		Mat3 rotMat = fromRotationVec(rotationVec);
+		Rotation rot = Rotation::fromRotationVec(rotationVec);
 
 		Vec3 rotateByRotVec = pointToRotate;
 		Vec3 rotateByRotMat = pointToRotate;
 
 		for(int i = 0; i < 500; i++) {
 			rotateByRotVec = rotateByRotVec + rotationVec % rotateByRotVec;
-			rotateByRotMat = rotMat * rotateByRotMat;
+			rotateByRotMat = rot * rotateByRotMat;
 		}
 
-		logStream << "rotVec: " << rotationVec << ", rotMat: " << rotMat << '\n';
+		logStream << "rotVec: " << rotationVec << ", rot: " << rot << '\n';
 		logStream << "newPointRotVec: " << rotateByRotVec << "\nnewPointRotMat: " << rotateByRotMat << '\n';
 
 		ASSERT_TOLERANT(rotateByRotVec == rotateByRotMat, 0.01);
@@ -183,7 +183,7 @@ TEST_CASE(cframeAssociativity) {
 }
 
 TEST_CASE(fromEuler) {
-	ASSERT(rotZ(0.5)*rotX(0.3)*rotY(0.7) == fromEulerAngles(0.3, 0.7, 0.5));
+	ASSERT(rotMatZ(0.5)*rotMatX(0.3)*rotMatY(0.7) == rotationMatrixfromEulerAngles(0.3, 0.7, 0.5));
 }
 
 TEST_CASE(crossProduct) {
@@ -255,23 +255,23 @@ TEST_CASE(testFromRotationVecInvertsFromRotationMatrix) {
 		for(double y = -1.55; y < 1.55; y += 0.13) {
 			for(double z = -1.55; z < 1.55; z += 0.19) {
 				Vec3 v(x, y, z);
-				Mat3 rotMat = fromRotationVec(v);
+				Rotation rot = Rotation::fromRotationVec(v);
 
-				Vec3 resultingVec = fromRotationMatrix(rotMat);
+				Vec3 resultingVec = rot.asRotationVector();
 
-				// logStream << "v = " << v << "\n  rotMat = " << rotMat << "  resultingVec = " << resultingVec;
+				// logStream << "v = " << v << "\n  rot = " << rot << "  resultingVec = " << resultingVec;
 
 				ASSERT(v == resultingVec);
 
-				Mat3 m = fromEulerAngles(x, y, z);
+				Rotation m = Rotation::fromEulerAngles(x, y, z);
 
-				Vec3 rotVec = fromRotationMatrix(m);
+				Vec3 rotVec = m.asRotationVector();
 
-				Mat3 resultingMat = fromRotationVec(rotVec);
+				Rotation resultingRot = Rotation::fromRotationVec(rotVec);
 
 				// logStream << "m = " << m << "\n  rotVec = " << rotVec << "  resultingMat = " << resultingMat;
 
-				ASSERT(m == resultingMat);
+				ASSERT(m == resultingRot);
 			}
 		}
 	}

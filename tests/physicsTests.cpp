@@ -27,12 +27,12 @@ static const double DELTA_T = 0.01;
 static const int TICKS = 500;
 /*
 TEST_CASE(positionInvariance) {
-	Mat3 rotation = fromEulerAngles(0.0, 0.0, 0.0);
+	Mat3 rotation = rotationMatrixfromEulerAngles(0.0, 0.0, 0.0);
 
 	Position origins[]{Position(0,0,0), Position(0,0,1), Position(5.3,0,-2.4),Position(0.3,0,0.7),Position(0.0000001,0,0.00000001)};
 
-	CFrame houseRelative(Vec3(0.7, 0.6, 1.6), fromEulerAngles(0.3, 0.7, 0.9));
-	CFrame icosaRelative(Vec3(0.7, 3.0, 1.6), fromEulerAngles(0.1, 0.1, 0.1));
+	CFrame houseRelative(Vec3(0.7, 0.6, 1.6), rotationMatrixfromEulerAngles(0.3, 0.7, 0.9));
+	CFrame icosaRelative(Vec3(0.7, 3.0, 1.6), rotationMatrixfromEulerAngles(0.1, 0.1, 0.1));
 
 	for(Position o:origins) {
 		GlobalCFrame origin(o, rotation);
@@ -54,17 +54,17 @@ TEST_CASE(positionInvariance) {
 }*/
 /*
 TEST_CASE(rotationInvariance) {
-	//Mat3 origins[]{fromEulerAngles(0,0,0), fromEulerAngles(0,1,0), fromEulerAngles(0,0.5,0), fromEulerAngles(0,-0.5,0),};
+	//Mat3 origins[]{rotationMatrixfromEulerAngles(0,0,0), rotationMatrixfromEulerAngles(0,1,0), rotationMatrixfromEulerAngles(0,0.5,0), rotationMatrixfromEulerAngles(0,-0.5,0),};
 
 	
 
-	CFrame houseRelative(Vec3(0.7, 0.6, 1.6), fromEulerAngles(0.3, 0.7, 0.9));
-	CFrame icosaRelative(Vec3(0.7, 3.0, 1.6), fromEulerAngles(0.1, 0.1, 0.1));
+	CFrame houseRelative(Vec3(0.7, 0.6, 1.6), rotationMatrixfromEulerAngles(0.3, 0.7, 0.9));
+	CFrame icosaRelative(Vec3(0.7, 3.0, 1.6), rotationMatrixfromEulerAngles(0.1, 0.1, 0.1));
 
 	for(double rotation = -1.5; rotation < 1.500001; rotation += 0.1) {
 		logStream << rotation << '\n';
 
-		GlobalCFrame origin(0,0,0, rotY(rotation));
+		GlobalCFrame origin(0,0,0, rotMatY(rotation));
 
 		Part housePart(Library::house, origin.localToGlobal(houseRelative), {1.0, 1.0, 0.7});
 		Part icosaPart(Library::icosahedron, origin.localToGlobal(icosaRelative), {10.0, 0.7, 0.7});
@@ -247,7 +247,7 @@ TEST_CASE(inelasticColission) {
 }
 
 TEST_CASE(inelasticColission2) {
-	Part part(Box(1.0, 2.0, 3.0), GlobalCFrame(/*Vec3(7.6, 3.4, 3.9), fromEulerAngles(1.1, 0.7, 0.9)*/), {1.0, 1.0, 0.7});
+	Part part(Box(1.0, 2.0, 3.0), GlobalCFrame(/*Vec3(7.6, 3.4, 3.9), rotationMatrixfromEulerAngles(1.1, 0.7, 0.9)*/), {1.0, 1.0, 0.7});
 	part.ensureHasParent();
 	MotorizedPhysical& p = *part.parent->mainPhysical;
 
@@ -286,7 +286,7 @@ TEST_CASE(inelasticColission2) {
 }
 
 /*TEST_CASE(testPointAccelMatrixAndInertiaInDirection) {
-	Part part(Polyhedron(), CFrame(Vec3(7.6, 3.4, 3.9), fromEulerAngles(1.1, 0.7, 0.9)), {1.0, 1.0, 0.7});
+	Part part(Polyhedron(), CFrame(Vec3(7.6, 3.4, 3.9), rotationMatrixfromEulerAngles(1.1, 0.7, 0.9)), {1.0, 1.0, 0.7});
 	MotorizedPhysical p(&part, 5.0, DiagonalMat3(2, 7, 5));
 
 	Vec3 localPoint(0.8, 0.6, 0.9);

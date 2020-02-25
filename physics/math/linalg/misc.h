@@ -2,7 +2,6 @@
 
 #include "mat.h"
 
-
 template<typename T>
 Matrix<T, 3, 3> createCrossProductEquivalent(const Vector<T, 3>& vec) {
 	return Matrix<T, 3, 3>{
