@@ -19,7 +19,7 @@ WorldBenchmark::WorldBenchmark(const char* name, int tickCount) : Benchmark(name
 
 void WorldBenchmark::run() {
 	world.isValid();
-	Part* partToTrack = (*world.physicals[0]).getMainPart();
+	Part& partToTrack = *world.physicals[0]->getMainPart();
 	for (int i = 0; i < tickCount; i++) {
 		if (i % (tickCount / 8) == 0) {
 			Log::print("Tick %d\n", i);

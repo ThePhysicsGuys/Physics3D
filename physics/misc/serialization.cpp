@@ -26,10 +26,10 @@ void serializePolyhedron(const Polyhedron& poly, std::ostream& ostream) {
 	::serialize<int>(poly.vertexCount, ostream);
 	::serialize<int>(poly.triangleCount, ostream);
 
-	for(uint32_t i = 0; i < poly.vertexCount; i++) {
+	for(int i = 0; i < poly.vertexCount; i++) {
 		::serialize<Vec3f>(poly[i], ostream);
 	}
-	for(uint32_t i = 0; i < poly.triangleCount; i++) {
+	for(int i = 0; i < poly.triangleCount; i++) {
 		::serialize<Triangle>(poly.getTriangle(i), ostream);
 	}
 }

@@ -19,7 +19,7 @@ public:
 		int minZ = -5;
 		int maxZ = 5;
 
-		GlobalCFrame ref(0, 15, 0, fromEulerAngles(3.1415 / 4, 3.1415 / 4, 0.0));
+		GlobalCFrame ref(0, 15, 0, Rotation::fromEulerAngles(3.1415 / 4, 3.1415 / 4, 0.0));
 
 		//Part* newCube = new Part(Box(1.0, 1.0, 1.0), ref.localToGlobal(CFrame(0,0,0)), {1.0, 0.2, 0.5});
 		//world.addPart(newCube);

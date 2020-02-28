@@ -7,7 +7,9 @@ struct RelativeMotion {
 	Motion relativeMotion;
 	CFrame locationOfRelativeMotion;
 
-	RelativeMotion(const Motion& relativeMotion, const CFrame& locationOfRelativeMotion) : 
+	RelativeMotion() = default;
+
+	inline RelativeMotion(const Motion& relativeMotion, const CFrame& locationOfRelativeMotion) : 
 		relativeMotion(relativeMotion), 
 		locationOfRelativeMotion(locationOfRelativeMotion) {}
 
@@ -47,7 +49,7 @@ struct RelativeMotion {
 		Returns a new RelativeMotion where this relativeMotion has been attached onto an extension
 	*/
 	inline RelativeMotion extendBegin(const CFrame& extension) const {
-		return RelativeMotion(localToRelative(extension, relativeMotion), extension.localToGlobal(locationOfRelativeMotion));
+		return RelativeMotion(localToGlobal(extension.getRotation() , relativeMotion), extension.localToGlobal(locationOfRelativeMotion));
 	}
 
 	inline Motion applyTo(const Motion& originMotion) const {
@@ -61,10 +63,17 @@ struct RelativeMotion {
 inline RelativeMotion operator+(const RelativeMotion& first, const RelativeMotion& second) {
 	CFrame relativeCFrameToBeAdded = first.locationOfRelativeMotion.localToRelative(second.locationOfRelativeMotion);
 	
-	Motion rotatedSecondMotion = localToRelative(first.locationOfRelativeMotion, second.relativeMotion);
+	Motion rotatedSecondMotion = localToGlobal(first.locationOfRelativeMotion.getRotation(), second.relativeMotion);
 	Motion motionOfEndpointWithSecondMotion = first.relativeMotion.addOffsetRelativeMotion(relativeCFrameToBeAdded.getPosition(), rotatedSecondMotion);
 
 	CFrame resultingOffset = relativeCFrameToBeAdded + first.locationOfRelativeMotion.getPosition();
 
 	return RelativeMotion(motionOfEndpointWithSecondMotion, resultingOffset);
+}
+/*
+	Appends the second RelativeMotion onto the end of the first one
+*/
+inline RelativeMotion& operator+=(RelativeMotion& first, const RelativeMotion& second) {
+	first = first + second;
+	return first;
 }

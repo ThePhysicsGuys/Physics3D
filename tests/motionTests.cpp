@@ -88,7 +88,7 @@ TEST_CASE(testPistonConstraint) {
 
 	CFrame cf2 = relMotion.locationOfRelativeMotion;
 
-	ASSERT((cf2.getPosition() - cf1.getPosition()) == relMotion.relativeMotion.velocity * DELTA_T);
+	ASSERT((cf2.getPosition() - cf1.getPosition()) == relMotion.relativeMotion.translation.velocity * DELTA_T);
 }
 
 TEST_CASE(testExtendingRelativeMotionCVecCommutes) {
@@ -137,7 +137,7 @@ TEST_CASE(testExtendingRelativeMotionCFrameCorrect) {
 
 	// manually compute resulting motion
 	Motion motionOfStartPoint = motionOfOrigin.getMotionOfPoint(offsetFromBegin.getPosition());
-	Motion rotatedRelativeMotion = localToRelative(offsetFromBegin, relMotion.relativeMotion);
+	Motion rotatedRelativeMotion = localToGlobal(offsetFromBegin.getRotation(), relMotion.relativeMotion);
 	CFrame rotatedOffset = offsetFromBegin.localToRelative(relMotion.locationOfRelativeMotion);
 	Motion motionOfEnd = motionOfStartPoint.getMotionOfPoint(rotatedOffset.getPosition()).addRelativeMotion(rotatedRelativeMotion);
 
@@ -152,7 +152,7 @@ TEST_CASE(testJoiningRelativeMotionCorrect) {
 	Motion motionOfEndPoint = r1.relativeMotion;
 	CFrame offsetForSecondEndPoint = r1.locationOfRelativeMotion.localToRelative(r2.locationOfRelativeMotion);
 
-	Motion secondMotionInNewSpace = localToRelative(r1.locationOfRelativeMotion, r2.relativeMotion);
+	Motion secondMotionInNewSpace = localToGlobal(r1.locationOfRelativeMotion.getRotation(), r2.relativeMotion);
 
 	Motion motionOfSecondEndPoint = 
 		motionOfEndPoint.getMotionOfPoint(offsetForSecondEndPoint.getPosition())

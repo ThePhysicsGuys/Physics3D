@@ -11,7 +11,7 @@ Vec3 getVelocityBySimulation(const Motion& m, const Vec3& point, double deltaT);
 Motion getMotionBySimulation(const Motion& m, const Vec3& point, double deltaT);
 std::pair<Vec3, Vec3> estimateMotion(const Vec3& startPos, const Vec3& midPos, const Vec3& endPos, double stepT);
 std::pair<Vec3, Vec3> estimateMotion(const Position& startPos, const Position& midPos, const Position& endPos, double stepT);
-Vec3 getRotationVelFor(const RotMat3& before, const RotMat3& after, double deltaT);
+Vec3 getRotationVelFor(const Rotation& before, const Rotation& after, double deltaT);
 Motion estimateMotion(const CFrame& step1, const CFrame& step2, const CFrame& step3, double stepT);
 Motion estimateMotion(const GlobalCFrame& step1, const GlobalCFrame& step2, const GlobalCFrame& step3, double stepT);
 

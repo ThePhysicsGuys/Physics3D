@@ -350,10 +350,10 @@ void BigFrame::renderPropertiesFrame() {
 				ImGui::InputFloat3("Position", position, 3, ImGuiInputTextFlags_ReadOnly);
 			}
 
-			ImGui::Text("Velocity: %s", (sp) ? str(sp->getMotion().velocity).c_str() : "-");
-			ImGui::Text("Acceleration: %s", (sp) ? str(sp->getMotion().acceleration).c_str() : "-");
-			ImGui::Text("Angular velocity: %s", (sp) ? str(sp->getMotion().angularVelocity).c_str() : "-");
-			ImGui::Text("Angular acceleration: %s", (sp) ? str(sp->getMotion().angularAcceleration).c_str() : "-");
+			ImGui::Text("Velocity: %s", (sp) ? str(sp->getMotion().translation.velocity).c_str() : "-");
+			ImGui::Text("Acceleration: %s", (sp) ? str(sp->getMotion().translation.acceleration).c_str() : "-");
+			ImGui::Text("Angular velocity: %s", (sp) ? str(sp->getMotion().rotation.angularVelocity).c_str() : "-");
+			ImGui::Text("Angular acceleration: %s", (sp) ? str(sp->getMotion().rotation.angularAcceleration).c_str() : "-");
 			ImGui::Text("Kinetic energy: %s", (sp) ? str(sp->parent->getKineticEnergy()).c_str() : "-");
 			ImGui::Text("Potential energy: %s", (sp) ? str(screen.world->getPotentialEnergyOfPhysical(*sp->parent->mainPhysical)).c_str() : "-");
 			ImGui::Text("Total energy: %s", (sp) ? str(screen.world->getPotentialEnergyOfPhysical(*sp->parent->mainPhysical) + sp->parent->getKineticEnergy()).c_str() : "-");

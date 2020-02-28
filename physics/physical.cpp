@@ -179,14 +179,8 @@ void ConnectedPhysical::makeMainPhysical() {
 	OP->refreshPhysicalProperties();
 }
 
-Motion ConnectedPhysical::getRelativeMotionBetweenParentCOMAndSelfCOM() const {
-	RelativeMotion motionOfConnection = connectionToParent.getRelativeMotion();
-
-	Vec3 childCFrameToChildCOM = motionOfConnection.locationOfRelativeMotion.localToRelative(this->rigidBody.localCenterOfMass);
-
-	Motion motionOfCOM = motionOfConnection.relativeMotion.getMotionOfPoint(childCFrameToChildCOM);
-
-	return motionOfCOM;
+RelativeMotion ConnectedPhysical::getRelativeMotionBetweenParentAndSelf() const {
+	return connectionToParent.getRelativeMotion();
 }
 
 bool Physical::isMainPhysical() const {
@@ -384,17 +378,22 @@ void Physical::detachFromRigidBody(AttachedPart&& part) {
 	rigidBody.detach(std::move(part));
 }
 
-std::pair<double, Vec3> Physical::getMotionOfCenterOfMassInternally() const {
+std::pair<double, TranslationalMotion> Physical::getMotionOfCenterOfMassInternally(const RelativeMotion& totalAccumulatedMotion) const {
 	double totalMass = this->rigidBody.mass;
-	Vec3 totalVelocity = Vec3(0,0,0);
+	TranslationalMotion totalMotion = totalAccumulatedMotion.relativeMotion.translation * this->rigidBody.mass;
 
 	for(const ConnectedPhysical& conPhys : childPhysicals) {
-		std::pair<double, Vec3> motionOfConnectedCOM;
-		totalMass += motionOfConnectedCOM.first;
-		//Motion motionOfConnection = conPhys.get
-		//Vec3 velocityRelativeToThis = 
+		RelativeMotion motionOfConPhys = totalAccumulatedMotion + conPhys.getRelativeMotionBetweenParentAndSelf();
+		std::pair<double, TranslationalMotion> motionOfConnected = conPhys.getMotionOfCenterOfMassInternally(motionOfConPhys);
+		totalMass += motionOfConnected.first;
+		totalMotion += localToGlobal(conPhys.getRelativeCFrameToParent().getRotation(), motionOfConnected.second);
 	}
-	throw "TODO";
+	return std::make_pair(totalMass, totalMotion);
+}
+
+TranslationalMotion MotorizedPhysical::getInternalMotionOfCenterOfMass() const {
+	std::pair<double, TranslationalMotion> result = this->getMotionOfCenterOfMassInternally(RelativeMotion());
+	return result.second * (1 / result.first);
 }
 
 void Physical::detachPart(Part* part, bool partStaysInWorld) {
@@ -456,11 +455,17 @@ void Physical::notifyPartStdMoved(Part* oldPartPtr, Part* newPartPtr) {
 	}
 }
 
-void Physical::updateAttachedPhysicals(double deltaT) {
+void Physical::updateConstraints(double deltaT) {
 	for(ConnectedPhysical& p : childPhysicals) {
 		p.connectionToParent.update(deltaT);
+		p.updateConstraints(deltaT);
+	}
+}
+
+void Physical::updateAttachedPhysicals() {
+	for(ConnectedPhysical& p : childPhysicals) {
 		p.refreshCFrame();
-		p.updateAttachedPhysicals(deltaT);
+		p.updateAttachedPhysicals();
 	}
 }
 
@@ -519,7 +524,7 @@ void Physical::setPartCFrame(Part* part, const GlobalCFrame& newCFrame) {
 
 #pragma region refresh
 
-void MotorizedPhysical::rotateAroundCenterOfMassUnsafe(const RotMat3& rotation) {
+void MotorizedPhysical::rotateAroundCenterOfMassUnsafe(const Rotation& rotation) {
 	rigidBody.rotateAroundLocalPoint(totalCenterOfMass, rotation);
 }
 void Physical::translateUnsafeRecursive(const Vec3Fix& translation) {
@@ -528,7 +533,7 @@ void Physical::translateUnsafeRecursive(const Vec3Fix& translation) {
 		conPhys.translateUnsafeRecursive(translation);
 	}
 }
-void MotorizedPhysical::rotateAroundCenterOfMass(const RotMat3& rotation) {
+void MotorizedPhysical::rotateAroundCenterOfMass(const Rotation& rotation) {
 	Bounds oldBounds = this->rigidBody.mainPart->getStrictBounds();
 	rotateAroundCenterOfMassUnsafe(rotation);
 	mainPhysical->world->updatePartGroupBounds(this->rigidBody.mainPart, oldBounds);
@@ -604,7 +609,6 @@ void MotorizedPhysical::fullRefreshOfConnectedPhysicals() {
 #pragma region update
 
 void MotorizedPhysical::update(double deltaT) {
-	refreshPhysicalProperties();
 
 	Vec3 accel = forceResponse * totalForce * deltaT;
 	
@@ -615,21 +619,22 @@ void MotorizedPhysical::update(double deltaT) {
 	totalForce = Vec3();
 	totalMoment = Vec3();
 
-	motionOfCenterOfMass.velocity += accel;
-	motionOfCenterOfMass.angularVelocity += rotAcc;
+	motionOfCenterOfMass.translation.velocity += accel;
+	motionOfCenterOfMass.rotation.angularVelocity += rotAcc;
 
-	Vec3 movementOfCenterOfMass = motionOfCenterOfMass.velocity * deltaT + accel * deltaT * deltaT / 2;
+	updateConstraints(deltaT);
 
-	// Vec3 motionOfCenterOfMassInternally = getMotionOfCenterOfMassInternally();
-	//throw "TODO";
-	// TODO
+	Vec3 oldCenterOfMass = this->totalCenterOfMass;
+	refreshPhysicalProperties();
+	Vec3 deltaCOM = this->totalCenterOfMass - oldCenterOfMass;
 
-	Mat3 rotation = fromRotationVec(motionOfCenterOfMass.angularVelocity * deltaT);
 
-	rotateAroundCenterOfMassUnsafe(rotation);
+	Vec3 movementOfCenterOfMass = motionOfCenterOfMass.translation.velocity * deltaT + accel * deltaT * deltaT / 2 - getCFrame().localToRelative(deltaCOM);
+
+	rotateAroundCenterOfMassUnsafe(Rotation::fromRotationVec(motionOfCenterOfMass.rotation.angularVelocity * deltaT));
 	translateUnsafeRecursive(movementOfCenterOfMass);
 
-	updateAttachedPhysicals(deltaT);
+	updateAttachedPhysicals();
 }
 
 #pragma endregion
@@ -666,13 +671,13 @@ void MotorizedPhysical::applyMoment(Vec3 moment) {
 void MotorizedPhysical::applyImpulseAtCenterOfMass(Vec3 impulse) {
 	assert(isVecValid(impulse));
 	Debug::logVector(getCenterOfMass(), impulse, Debug::IMPULSE);
-	motionOfCenterOfMass.velocity += forceResponse * impulse;
+	motionOfCenterOfMass.translation.velocity += forceResponse * impulse;
 }
 void MotorizedPhysical::applyImpulse(Vec3Relative origin, Vec3Relative impulse) {
 	assert(isVecValid(origin));
 	assert(isVecValid(impulse));
 	Debug::logVector(getCenterOfMass() + origin, impulse, Debug::IMPULSE);
-	motionOfCenterOfMass.velocity += forceResponse * impulse;
+	motionOfCenterOfMass.translation.velocity += forceResponse * impulse;
 	Vec3 angularImpulse = origin % impulse;
 	applyAngularImpulse(angularImpulse);
 }
@@ -682,7 +687,7 @@ void MotorizedPhysical::applyAngularImpulse(Vec3 angularImpulse) {
 	Vec3 localAngularImpulse = getCFrame().relativeToLocal(angularImpulse);
 	Vec3 localRotAcc = momentResponse * localAngularImpulse;
 	Vec3 rotAcc = getCFrame().localToRelative(localRotAcc);
-	motionOfCenterOfMass.angularVelocity += rotAcc;
+	motionOfCenterOfMass.rotation.angularVelocity += rotAcc;
 }
 
 void MotorizedPhysical::applyDragAtCenterOfMass(Vec3 drag) {
@@ -704,7 +709,7 @@ void MotorizedPhysical::applyAngularDrag(Vec3 angularDrag) {
 	Vec3 localAngularDrag = getCFrame().relativeToLocal(angularDrag);
 	Vec3 localRotAcc = momentResponse * localAngularDrag;
 	Vec3 rotAcc = getCFrame().localToRelative(localRotAcc);
-	rotateAroundCenterOfMassUnsafe(fromRotationVec(rotAcc));
+	rotateAroundCenterOfMassUnsafe(Rotation::fromRotationVec(rotAcc));
 }
 
 
@@ -726,10 +731,10 @@ void Physical::applyForceToPhysical(Vec3 origin, Vec3 force) {
 #pragma region getters
 
 double Physical::getVelocityKineticEnergy() const {
-	return rigidBody.mass * lengthSquared(getMotionOfCenterOfMass().velocity) / 2;
+	return rigidBody.mass * lengthSquared(getMotionOfCenterOfMass().translation.velocity) / 2;
 }
 double Physical::getAngularKineticEnergy() const {
-	Vec3 localAngularVel = getCFrame().relativeToLocal(getMotionOfCenterOfMass().angularVelocity);
+	Vec3 localAngularVel = getCFrame().relativeToLocal(getMotionOfCenterOfMass().rotation.angularVelocity);
 	return (rigidBody.inertia * localAngularVel) * localAngularVel / 2;
 }
 double Physical::getKineticEnergy() const {
@@ -795,8 +800,6 @@ GlobalCFrame MotorizedPhysical::getCenterOfMassCFrame() const {
 	return GlobalCFrame(getCFrame().localToGlobal(totalCenterOfMass), getCFrame().getRotation());
 }
 
-#include "misc/toString.h"
-
 Motion Physical::getMotion() const {
 	if(this->isMainPhysical()) {
 		return ((MotorizedPhysical*) this)->getMotion();
@@ -806,20 +809,18 @@ Motion Physical::getMotion() const {
 }
 
 Motion MotorizedPhysical::getMotion() const {
-	MotorizedPhysical* self = (MotorizedPhysical*) this;
+	TranslationalMotion localMotionOfCom = getInternalMotionOfCenterOfMass();
+	GlobalCFrame cf = this->getCFrame();
+	TranslationalMotion motionOfCom = localToGlobal(cf.getRotation(), localMotionOfCom);
 
-	return self->motionOfCenterOfMass.getMotionOfPoint(getCFrame().localToRelative(-self->totalCenterOfMass));
+	return -motionOfCom + motionOfCenterOfMass.getMotionOfPoint(cf.localToRelative(-totalCenterOfMass));
 }
 Motion ConnectedPhysical::getMotion() const {
-	ConnectedPhysical* self = (ConnectedPhysical*) this;
-
-	Physical* parent = self->parent;
-
 	// All motion and offset variables here are expressed in the global frame
 
 	Motion parentMotion = parent->getMotion();
 
-	RelativeMotion motionBetweenParentAndChild = self->connectionToParent.getRelativeMotion();
+	RelativeMotion motionBetweenParentAndChild = connectionToParent.getRelativeMotion();
 
 	RelativeMotion inGlobalFrame = motionBetweenParentAndChild.extendBegin(CFrame(parent->getCFrame().getRotation()));
 

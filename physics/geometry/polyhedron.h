@@ -91,7 +91,7 @@ public:
 	Polyhedron& operator=(const Polyhedron& poly);
 
 	Polyhedron translated(Vec3f offset) const;
-	Polyhedron rotated(RotMat3f rotation) const;
+	Polyhedron rotated(Rotationf rotation) const;
 	Polyhedron localToGlobal(CFramef frame) const;
 	Polyhedron globalToLocal(CFramef frame) const;
 	Polyhedron scaled(float scaleX, float scaleY, float scaleZ) const;

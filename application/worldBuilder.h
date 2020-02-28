@@ -13,7 +13,7 @@ namespace Application {
 namespace WorldBuilder {
 void init();
 
-void createDominoAt(Position pos, Mat3 rotation);
+void createDominoAt(const GlobalCFrame& cframe);
 void makeDominoStrip(int dominoCount, Position dominoStart, Vec3 dominoOffset);
 void makeDominoTower(int floors, int circumference, Position origin);
 void buildTerrain(double width, double depth);

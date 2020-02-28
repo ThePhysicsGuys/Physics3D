@@ -27,12 +27,12 @@ static const double DELTA_T = 0.01;
 static const int TICKS = 500;
 /*
 TEST_CASE(positionInvariance) {
-	Mat3 rotation = fromEulerAngles(0.0, 0.0, 0.0);
+	Mat3 rotation = rotationMatrixfromEulerAngles(0.0, 0.0, 0.0);
 
 	Position origins[]{Position(0,0,0), Position(0,0,1), Position(5.3,0,-2.4),Position(0.3,0,0.7),Position(0.0000001,0,0.00000001)};
 
-	CFrame houseRelative(Vec3(0.7, 0.6, 1.6), fromEulerAngles(0.3, 0.7, 0.9));
-	CFrame icosaRelative(Vec3(0.7, 3.0, 1.6), fromEulerAngles(0.1, 0.1, 0.1));
+	CFrame houseRelative(Vec3(0.7, 0.6, 1.6), rotationMatrixfromEulerAngles(0.3, 0.7, 0.9));
+	CFrame icosaRelative(Vec3(0.7, 3.0, 1.6), rotationMatrixfromEulerAngles(0.1, 0.1, 0.1));
 
 	for(Position o:origins) {
 		GlobalCFrame origin(o, rotation);
@@ -54,17 +54,17 @@ TEST_CASE(positionInvariance) {
 }*/
 /*
 TEST_CASE(rotationInvariance) {
-	//Mat3 origins[]{fromEulerAngles(0,0,0), fromEulerAngles(0,1,0), fromEulerAngles(0,0.5,0), fromEulerAngles(0,-0.5,0),};
+	//Mat3 origins[]{rotationMatrixfromEulerAngles(0,0,0), rotationMatrixfromEulerAngles(0,1,0), rotationMatrixfromEulerAngles(0,0.5,0), rotationMatrixfromEulerAngles(0,-0.5,0),};
 
 	
 
-	CFrame houseRelative(Vec3(0.7, 0.6, 1.6), fromEulerAngles(0.3, 0.7, 0.9));
-	CFrame icosaRelative(Vec3(0.7, 3.0, 1.6), fromEulerAngles(0.1, 0.1, 0.1));
+	CFrame houseRelative(Vec3(0.7, 0.6, 1.6), rotationMatrixfromEulerAngles(0.3, 0.7, 0.9));
+	CFrame icosaRelative(Vec3(0.7, 3.0, 1.6), rotationMatrixfromEulerAngles(0.1, 0.1, 0.1));
 
 	for(double rotation = -1.5; rotation < 1.500001; rotation += 0.1) {
 		logStream << rotation << '\n';
 
-		GlobalCFrame origin(0,0,0, rotY(rotation));
+		GlobalCFrame origin(0,0,0, rotMatY(rotation));
 
 		Part housePart(Library::house, origin.localToGlobal(houseRelative), {1.0, 1.0, 0.7});
 		Part icosaPart(Library::icosahedron, origin.localToGlobal(icosaRelative), {10.0, 0.7, 0.7});
@@ -83,7 +83,7 @@ TEST_CASE(rotationInvariance) {
 }*/
 
 TEST_CASE(applyForceToRotate) {
-	Part part(Box(1.0, 1.0, 1.0), GlobalCFrame(0,0,0,fromEulerAngles(0.3, 0.7, 0.9)), {1.0, 1.0, 0.7});
+	Part part(Box(1.0, 1.0, 1.0), GlobalCFrame(0,0,0, Rotation::fromEulerAngles(0.3, 0.7, 0.9)), {1.0, 1.0, 0.7});
 	part.ensureHasParent();
 
 	Vec3 relAttach = Vec3(1.0, 0.0, 0.0);
@@ -95,7 +95,7 @@ TEST_CASE(applyForceToRotate) {
 }
 
 TEST_CASE(momentToAngularVelocity) {
-	Part part(Box(1.0, 1.0, 1.0), GlobalCFrame(rotY(M_PI / 2)), {1.0, 1.0, 0.7});
+	Part part(Box(1.0, 1.0, 1.0), GlobalCFrame(Rotation::rotY(M_PI / 2)), {1.0, 1.0, 0.7});
 	part.ensureHasParent();
 	MotorizedPhysical& p = *part.parent->mainPhysical;
 
@@ -106,7 +106,7 @@ TEST_CASE(momentToAngularVelocity) {
 		p.update(0.05);
 	}
 
-	ASSERT(p.getMotion().angularVelocity == moment * 50 * 0.05 * p.momentResponse[0][0]);
+	ASSERT(p.getMotion().rotation.angularVelocity == moment * 50 * 0.05 * p.momentResponse[0][0]);
 }
 
 TEST_CASE(rotationImpulse) {
@@ -134,14 +134,14 @@ TEST_CASE(testPointAcceleration) {
 
 	testPhys.applyForce(localPoint, force);
 
-	Vec3 acceleration = testPhys.getMotion().acceleration;
-	Vec3 angularAcceleration = testPhys.getMotion().angularAcceleration;
+	Vec3 acceleration = testPhys.getMotion().translation.acceleration;
+	Vec3 angularAcceleration = testPhys.getMotion().rotation.angularAcceleration;
 	Vec3 pointAcceleration = testPhys.getMotion().getAccelerationOfPoint(localPoint);
 
 	testPhys.update(deltaT);
 
-	Vec3 actualAcceleration = testPhys.getMotion().velocity / deltaT;
-	Vec3 actualAngularAcceleration = testPhys.getMotion().angularVelocity / deltaT;
+	Vec3 actualAcceleration = testPhys.getMotion().translation.velocity / deltaT;
+	Vec3 actualAngularAcceleration = testPhys.getMotion().rotation.angularVelocity / deltaT;
 	Vec3 actualPointAcceleration = testPhys.getMotion().getVelocityOfPoint(testPhys.getCFrame().localToRelative(localPoint)) / deltaT;
 
 	ASSERT(acceleration == actualAcceleration);
@@ -172,18 +172,18 @@ TEST_CASE(impulseTest) {
 	MotorizedPhysical& p = *part.parent->mainPhysical;
 
 	p.applyImpulseAtCenterOfMass(Vec3(15, 0, 0));
-	ASSERT(p.getMotion().velocity == Vec3(3,0,0));
-	ASSERT(p.getMotion().angularVelocity == Vec3(0, 0, 0));
+	ASSERT(p.getMotion().translation.velocity == Vec3(3,0,0));
+	ASSERT(p.getMotion().rotation.angularVelocity == Vec3(0, 0, 0));
 
 	Vec3 angularImpulse = Vec3(0, 2, 0) % Vec3(-15, 0, 0);
 
 	p.applyImpulse(Vec3(0, 2, 0), Vec3(-15, 0, 0));
-	ASSERT(p.getMotion().velocity == Vec3(0, 0, 0));
-	ASSERT(p.getMotion().angularVelocity == ~part.getInertia() * angularImpulse);
+	ASSERT(p.getMotion().translation.velocity == Vec3(0, 0, 0));
+	ASSERT(p.getMotion().rotation.angularVelocity == ~part.getInertia() * angularImpulse);
 }
 
 TEST_CASE(testPointAccelMatrixImpulse) {
-	Part part(Box(1.0, 2.0, 3.0), GlobalCFrame(7.6, 3.4, 3.9, fromEulerAngles(1.1, 0.7, 0.9)), {1.0, 1.0, 0.7});
+	Part part(Box(1.0, 2.0, 3.0), GlobalCFrame(7.6, 3.4, 3.9, Rotation::fromEulerAngles(1.1, 0.7, 0.9)), {1.0, 1.0, 0.7});
 	part.ensureHasParent();
 	MotorizedPhysical& p = *part.parent->mainPhysical;
 
@@ -200,15 +200,15 @@ TEST_CASE(testPointAccelMatrixImpulse) {
 }
 
 TEST_CASE(inelasticColission) {
-	Part part(Box(1.0, 2.0, 3.0), GlobalCFrame(7.6, 3.4, 3.9, fromEulerAngles(1.1, 0.7, 0.9)), {1.0, 1.0, 0.7});
+	Part part(Box(1.0, 2.0, 3.0), GlobalCFrame(7.6, 3.4, 3.9, Rotation::fromEulerAngles(1.1, 0.7, 0.9)), {1.0, 1.0, 0.7});
 	part.ensureHasParent();
 	MotorizedPhysical& p = *part.parent->mainPhysical;
 
 	Vec3 localPoint(0.8, 0.6, 0.9);
 	Vec3 relativePoint = p.getCFrame().localToRelative(localPoint);
 
-	p.getMotion().velocity = Vec3(0.3, -1.3, 1.2);
-	p.getMotion().angularVelocity = Vec3(0.7, 0.5, -0.9);
+	p.getMotion().translation.velocity = Vec3(0.3, -1.3, 1.2);
+	p.getMotion().rotation.angularVelocity = Vec3(0.7, 0.5, -0.9);
 
 	Vec3 velOfPoint = p.getMotion().getVelocityOfPoint(relativePoint);
 
@@ -247,7 +247,7 @@ TEST_CASE(inelasticColission) {
 }
 
 TEST_CASE(inelasticColission2) {
-	Part part(Box(1.0, 2.0, 3.0), GlobalCFrame(/*Vec3(7.6, 3.4, 3.9), fromEulerAngles(1.1, 0.7, 0.9)*/), {1.0, 1.0, 0.7});
+	Part part(Box(1.0, 2.0, 3.0), GlobalCFrame(/*Vec3(7.6, 3.4, 3.9), rotationMatrixfromEulerAngles(1.1, 0.7, 0.9)*/), {1.0, 1.0, 0.7});
 	part.ensureHasParent();
 	MotorizedPhysical& p = *part.parent->mainPhysical;
 
@@ -255,8 +255,8 @@ TEST_CASE(inelasticColission2) {
 	Vec3 relativePoint = p.getCFrame().localToRelative(localPoint);
 	Vec3 normal(0.0, 170.0, 0.0);
 
-	p.getMotion().velocity = Vec3(0.3, -1.3, 1.2);
-	p.getMotion().angularVelocity = Vec3(0.7, 0.5, -0.9);
+	p.getMotion().translation.velocity = Vec3(0.3, -1.3, 1.2);
+	p.getMotion().rotation.angularVelocity = Vec3(0.7, 0.5, -0.9);
 
 	Vec3 velOfPoint = p.getMotion().getVelocityOfPoint(relativePoint);
 
@@ -286,7 +286,7 @@ TEST_CASE(inelasticColission2) {
 }
 
 /*TEST_CASE(testPointAccelMatrixAndInertiaInDirection) {
-	Part part(Polyhedron(), CFrame(Vec3(7.6, 3.4, 3.9), fromEulerAngles(1.1, 0.7, 0.9)), {1.0, 1.0, 0.7});
+	Part part(Polyhedron(), CFrame(Vec3(7.6, 3.4, 3.9), rotationMatrixfromEulerAngles(1.1, 0.7, 0.9)), {1.0, 1.0, 0.7});
 	MotorizedPhysical p(&part, 5.0, DiagonalMat3(2, 7, 5));
 
 	Vec3 localPoint(0.8, 0.6, 0.9);
@@ -302,7 +302,7 @@ TEST_CASE(inelasticColission2) {
 }*/
 
 TEST_CASE(testChangeInertialBasis) {
-	RotMat3 rotation = fromEulerAngles(0.6, 0.3, 0.7);
+	Rotation rotation = Rotation::fromEulerAngles(0.6, 0.3, 0.7);
 	Polyhedron rotatedTriangle = Library::trianglePyramid.rotated(rotation);
 	SymmetricMat3 triangleInertia = Library::trianglePyramid.getInertia(CFrame());
 	SymmetricMat3 rotatedTriangleInertia = rotatedTriangle.getInertia(CFrame());
@@ -361,7 +361,7 @@ TEST_CASE(testMultiPartPhysicalRotated) {
 	Part* doubleP = new Part(doubleBox, GlobalCFrame(), {10.0, 0, 0.7});
 
 	MotorizedPhysical phys(p1);
-	phys.attachPart(p2, CFrame(Vec3(1.0, 0.0, 0.0), ROT_Y_90(double)));
+	phys.attachPart(p2, CFrame(Vec3(1.0, 0.0, 0.0), Rotation::Predefined::Y_90));
 
 	MotorizedPhysical phys2(doubleP);
 

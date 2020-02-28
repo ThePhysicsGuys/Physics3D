@@ -24,7 +24,7 @@ Shape Shape::scaled(double scaleX, double scaleY, double scaleZ) const {
 BoundingBox Shape::getBounds() const {
 	return BoundingBox{-scale[0], -scale[1], -scale[2], scale[0], scale[1], scale[2]};
 }
-BoundingBox Shape::getBounds(const Mat3& referenceFrame) const {
+BoundingBox Shape::getBounds(const Rotation& referenceFrame) const {
 	return baseShape->getBounds(referenceFrame, scale);
 }
 Vec3 Shape::getCenterOfMass() const {

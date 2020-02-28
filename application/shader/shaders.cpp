@@ -100,9 +100,13 @@ void BasicShader::updateUniforms(int id) {
 
 void BasicShader::updatePart(const ExtendedPart& part) {
 	bind();
-	setUniform("includeNormals", int(part.visualData.includeNormals));
-	setUniform("includeUvs", int(part.visualData.includeUVs));
-	setUniform("modelMatrix", TransformToMat4(part.getPosition(), Mat3f(part.getCFrame().getRotation()) * DiagonalMat3f(part.hitbox.scale)));
+	BasicShader::updateIncludeNormalsAndUVs(part.visualData.includeNormals, part.visualData.includeUVs);
+	BasicShader::updateModel(part.getCFrame(), DiagonalMat3f(part.hitbox.scale));
+}
+void BasicShader::updateIncludeNormalsAndUVs(bool includeNormals, bool includeUVs) {
+	bind();
+	setUniform("includeNormals", int(includeNormals));
+	setUniform("includeUvs", int(includeUVs));
 }
 
 void BasicShader::updateMaterial(const Material& material) {
@@ -201,6 +205,15 @@ void BasicShader::updateModel(const Mat4f& modelMatrix) {
 	setUniform("modelMatrix", modelMatrix);
 }
 
+static Mat4f GlobalCFrameToMat4f(const GlobalCFrame& modelCFrame, DiagonalMat3f scale) {
+	Mat3f rotationScale = Mat3f(modelCFrame.getRotation().asRotationMatrix()) * scale;
+	return Mat4f(rotationScale, Vec3f(modelCFrame.getPosition() - Position(0, 0, 0)), Vec3f(0.0f, 0.0f, 0.0f), 1.0f);
+}
+
+void BasicShader::updateModel(const GlobalCFrame& modelCFrame, DiagonalMat3f scale) {
+	updateModel(GlobalCFrameToMat4f(modelCFrame, scale));
+}
+
 
 // SkyboxShader
 
@@ -233,6 +246,9 @@ void MaskShader::updateModel(const Mat4f& modelMatrix) {
 	bind();
 	setUniform("modelMatrix", modelMatrix);
 }
+void MaskShader::updateModel(const GlobalCFrame& modelCFrame, DiagonalMat3f scale) {
+	this->updateModel(GlobalCFrameToMat4f(modelCFrame, scale));
+}
 
 void MaskShader::updateColor(const Color& color) {
 	bind();
@@ -250,6 +266,9 @@ void DepthShader::updateLight(const Mat4f& lightMatrix) {
 void DepthShader::updateModel(const Mat4f& modelMatrix) {
 	bind();
 	setUniform("modelMatrix", modelMatrix);
+}
+void DepthShader::updateModel(const GlobalCFrame& modelCFrame, DiagonalMat3f scale) {
+	this->updateModel(GlobalCFrameToMat4f(modelCFrame, scale));
 }
 
 
@@ -334,6 +353,9 @@ void TestShader::updateView(const Mat4f& viewMatrix) {
 void TestShader::updateModel(const Mat4f& modelMatrix) {
 	bind();
 	setUniform("modelMatrix", modelMatrix);
+}
+void TestShader::updateModel(const GlobalCFrame& modelCFrame, DiagonalMat3f scale) {
+	this->updateModel(GlobalCFrameToMat4f(modelCFrame, scale));
 }
 
 void TestShader::updateViewPosition(const Position& viewPosition) {

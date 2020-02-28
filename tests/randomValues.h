@@ -53,9 +53,9 @@ Vector<T, Size> createRandomNonzeroVecTemplate() {
 }
 // creates a random rotation
 template<typename T>
-Matrix<T, 3, 3> createRandomRotationTemplate() {
+RotationTemplate<T> createRandomRotationTemplate() {
 	Vector<T, 3> angles = createRandomNonzeroVecTemplate<T, 3>() * (M_PI / 2);
-	return fromEulerAngles(angles.x, angles.y, angles.z);
+	return Rotation::fromEulerAngles(angles.x, angles.y, angles.z);
 }
 // creates a random rotation
 template<typename T>
@@ -76,14 +76,15 @@ inline CFrame createRandomCFrame() {
 	return createRandomCFrameTemplate<double>();
 }
 
+inline TranslationalMotion createRandomTranslationalMotion() {
+	return TranslationalMotion(createRandomNonzeroVec3(), createRandomNonzeroVec3());
+}
+inline RotationalMotion createRandomRotationalMotion() {
+	return RotationalMotion(createRandomNonzeroVec3(), createRandomNonzeroVec3());
+}
+
 inline Motion createRandomMotion() {
-	Motion result;
-
-	for(Vec3& component : result.components) {
-		component = createRandomNonzeroVec3();
-	}
-
-	return result;
+	return Motion(createRandomTranslationalMotion(), createRandomRotationalMotion());
 }
 inline RelativeMotion createRandomRelativeMotion() {
 	return RelativeMotion(createRandomMotion(), createRandomCFrame());

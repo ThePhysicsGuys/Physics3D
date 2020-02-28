@@ -3,6 +3,7 @@
 #include "../graphics/shader/shader.h"
 #include "../graphics/resource/shaderResource.h"
 #include "../graphics/gui/color.h"
+#include "../physics/math/globalCFrame.h"
 
 class HDRTexture;
 class Texture;
@@ -29,6 +30,7 @@ struct MaskShader : public ShaderResource {
 
 	void updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix);
 	void updateModel(const Mat4f& modelMatrix);
+	void updateModel(const GlobalCFrame& modelCFrame, DiagonalMat3f scale);
 	void updateColor(const Color& color);
 };
 
@@ -44,8 +46,10 @@ struct BasicShader : public ShaderResource {
 	void updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Position& viewPosition);
 	void updateLight(const std::vector<Light*> lights);
 	void updatePart(const ExtendedPart& part);
+	void updateIncludeNormalsAndUVs(bool includeNormals, bool includeUVs);
 	void updateMaterial(const Material& material);
 	void updateModel(const Mat4f& modelMatrix);
+	void updateModel(const GlobalCFrame& modelCFrame, DiagonalMat3f scale);
 	void updateUniforms(int id);
 };
 
@@ -55,6 +59,7 @@ struct DepthShader : public ShaderResource {
 
 	void updateLight(const Mat4f& lightMatrix);
 	void updateModel(const Mat4f& modelMatrix);
+	void updateModel(const GlobalCFrame& modelCFrame, DiagonalMat3f scale);
 };
 
 struct PostProcessShader : public ShaderResource {
@@ -102,6 +107,7 @@ struct TestShader : public ShaderResource {
 	void updateProjection(const Mat4f& projectionMatrix);
 	void updateView(const Mat4f& viewMatrix);
 	void updateModel(const Mat4f& modelMatrix);
+	void updateModel(const GlobalCFrame& modelCFrame, DiagonalMat3f scale);
 	void updateViewPosition(const Position& viewPosition);
 	void updateDisplacement(Texture* displacementMap);
 };

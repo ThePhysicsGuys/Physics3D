@@ -15,6 +15,8 @@
 #include "ecs/model.h"
 #include "ecs/mesh.h"
 
+#include "../engine/meshRegistry.h"
+
 #include "../graphics/mesh/indexedMesh.h"
 #include "../graphics/meshLibrary.h"
 #include "../graphics/debug/visualDebug.h"
@@ -227,7 +229,7 @@ void ModelLayer::onRender() {
 
 		ApplicationShaders::basicShader.updateMaterial(material);
 		ApplicationShaders::basicShader.updatePart(*part);
-		Screen::meshes[part->visualData.drawMeshId]->render(part->renderMode);
+		Engine::MeshRegistry::meshes[part->visualData.drawMeshId]->render(part->renderMode);
 	}
 
 	for (auto iterator = transparentMeshes.rbegin(); iterator != transparentMeshes.rend(); ++iterator) {
@@ -241,7 +243,7 @@ void ModelLayer::onRender() {
 
 		ApplicationShaders::basicShader.updateMaterial(material);
 		ApplicationShaders::basicShader.updatePart(*part);
-		Screen::meshes[part->visualData.drawMeshId]->render(part->renderMode);
+		Engine::MeshRegistry::meshes[part->visualData.drawMeshId]->render(part->renderMode);
 	}
 
 	ApplicationShaders::lineShader.updateProjection(screen->camera.projectionMatrix, screen->camera.viewMatrix);

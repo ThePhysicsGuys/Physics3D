@@ -20,13 +20,13 @@ LargeMatrix<double> computeInteractionMatrix(const ConstraintGroup& group) {
 
 	size_t matrixIndex = 0;
 	for (const BallConstraint& bc : ballConstraints) {
-		/*Local to A*/ Mat3 responseA = bc.a->mainPhysical->getResponseMatrix(bc.a->localToMain(bc.attachA));
-		/*Local to B*/ Mat3 responseB = bc.b->mainPhysical->getResponseMatrix(bc.a->localToMain(bc.attachB));
+		/*Local to A*/ SymmetricMat3 responseA = bc.a->mainPhysical->getResponseMatrix(bc.a->localToMain(bc.attachA));
+		/*Local to B*/ SymmetricMat3 responseB = bc.b->mainPhysical->getResponseMatrix(bc.a->localToMain(bc.attachB));
 		GlobalCFrame cfA = bc.a->mainPhysical->getCFrame();
 		GlobalCFrame cfB = bc.b->mainPhysical->getCFrame();
-		/*Global?*/ Mat3 selfResponse = cfA.rotation * responseA * cfA.rotation.transpose() + cfB.rotation * responseB * cfB.rotation.transpose();
+		/*Global?*/ SymmetricMat3 selfResponse = cfA.rotation.localToGlobal(responseA) + cfB.rotation.localToGlobal(responseB);
 
-		systemToSolve.setSubMatrix(matrixIndex, matrixIndex, selfResponse);
+		systemToSolve.setSubMatrix(matrixIndex, matrixIndex, Mat3(selfResponse));
 
 		matrixIndex += 3;
 	}

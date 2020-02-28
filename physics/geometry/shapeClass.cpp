@@ -52,8 +52,8 @@ struct CubeClass : public ShapeClass {
 		return INFINITY;
 	}
 
-	virtual BoundingBox getBounds(const RotMat3& rotation, const DiagonalMat3& scale) const {
-		Mat3 referenceFrame = rotation * scale;
+	virtual BoundingBox getBounds(const Rotation& rotation, const DiagonalMat3& scale) const {
+		Mat3 referenceFrame = rotation.asRotationMatrix() * scale;
 		double x = abs(referenceFrame[0][0]) + abs(referenceFrame[0][1]) + abs(referenceFrame[0][2]);
 		double y = abs(referenceFrame[1][0]) + abs(referenceFrame[1][1]) + abs(referenceFrame[1][2]);
 		double z = abs(referenceFrame[2][0]) + abs(referenceFrame[2][1]) + abs(referenceFrame[2][2]);
@@ -96,7 +96,7 @@ struct SphereClass : public ShapeClass {
 		}
 	}
 
-	virtual BoundingBox getBounds(const RotMat3& rotation, const DiagonalMat3& scale) const {
+	virtual BoundingBox getBounds(const Rotation& rotation, const DiagonalMat3& scale) const {
 		double s = scale[0];
 		return BoundingBox{-s, -s, -s, s, s, s};
 	}
@@ -189,11 +189,11 @@ struct CylinderClass : public ShapeClass {
 		}
 	}
 
-	virtual BoundingBox getBounds(const RotMat3& rotation, const DiagonalMat3& scale) const {
+	virtual BoundingBox getBounds(const Rotation& rotation, const DiagonalMat3& scale) const {
 		double height = scale[2];
 		double radius = scale[0];
 
-		Vec3 normalizedZVector = abs(rotation.getCol(2));
+		Vec3 normalizedZVector = abs(rotation.asRotationMatrix().getCol(2));
 		Vec3 zVector = normalizedZVector * height;
 
 		double extraX = sqrt(1 - normalizedZVector.x * normalizedZVector.x);

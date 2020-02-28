@@ -26,25 +26,25 @@ void init() {
 	icosahedron = Shape(Library::icosahedron);
 }
 
-void createDominoAt(Position pos, Mat3 rotation) {
-	ExtendedPart* domino = new ExtendedPart(Box(0.2, 1.4, 0.6), GlobalCFrame(pos, rotation), { 1, 0.7, 0.3 });
+void createDominoAt(const GlobalCFrame& cframe) {
+	ExtendedPart* domino = new ExtendedPart(Box(0.2, 1.4, 0.6), cframe, { 1, 0.7, 0.3 });
 	world.addPart(domino);
 }
 
 void makeDominoStrip(int dominoCount, Position dominoStart, Vec3 dominoOffset) {
 	for (int i = 0; i < dominoCount; i++) {
-		createDominoAt(dominoStart + dominoOffset * i, Mat3());
+		createDominoAt(GlobalCFrame(dominoStart + dominoOffset * i));
 	}
 }
 
 void makeDominoTower(int floors, int circumference, Position origin) {
 	double radius = circumference / 4.4;
-	Mat3 sideways = fromEulerAngles(PI / 2, 0.0, 0.0);
+	Rotation sideways = Rotation::fromEulerAngles(PI / 2, 0.0, 0.0);
 	for (int floor = 0; floor < floors; floor++) {
 		for (int j = 0; j < circumference; j++) {
 			double angle = (2 * PI * (j + (floor % 2) / 2.0)) / circumference;
 			Vec3 pos = Vec3(std::cos(angle) * radius, floor * 0.7 + 0.30, std::sin(angle) * radius);
-			createDominoAt(origin + pos, rotY(-angle) * sideways);
+			createDominoAt(GlobalCFrame(origin + pos, Rotation::rotY(-angle) * sideways));
 		}
 	}
 }
@@ -75,7 +75,7 @@ void SpiderFactory::buildSpider(const GlobalCFrame& spiderPosition) {
 
 	//PartFactory legFactory(BoundingBox(0.05, 0.5, 0.05).toShape(), screen, "SpiderLeg");
 
-	CFrame topOfLeg(Vec3(0.0, 0.25, 0.0), fromEulerAngles(0.2, 0.0, 0.0));
+	CFrame topOfLeg(Vec3(0.0, 0.25, 0.0), Rotation::fromEulerAngles(0.2, 0.0, 0.0));
 
 	world.addPart(spiderBody);
 
@@ -87,7 +87,7 @@ void SpiderFactory::buildSpider(const GlobalCFrame& spiderPosition) {
 
 		double angle = i * PI * 2 / legCount;
 
-		CFrame attachPointOnBody(rotY(angle) * Vec3(0.5, 0.0, 0.0), rotY(angle + PI / 2));
+		CFrame attachPointOnBody(Rotation::rotY(angle) * Vec3(0.5, 0.0, 0.0), Rotation::rotY(angle + PI / 2));
 		CFrame attach = attachPointOnBody.localToGlobal(~topOfLeg);
 
 		spider->attachPart(leg, attach);
@@ -126,7 +126,7 @@ double getYOffset(double x, double z) {
 }
 
 void buildTree(Position treePos) {
-	GlobalCFrame trunkCFrame(treePos, fromEulerAngles(fRand(-0.1, 0.1), fRand(-3.1415, 3.1415), fRand(-0.1, 0.1)));
+	GlobalCFrame trunkCFrame(treePos, Rotation::fromEulerAngles(fRand(-0.1, 0.1), fRand(-3.1415, 3.1415), fRand(-0.1, 0.1)));
 
 	ExtendedPart* trunk = new ExtendedPart(treeTrunk, trunkCFrame, { 1.0, 1.0, 0.3 }, "trunk");
 	trunk->material.ambient = COLOR::get(0x654321);
@@ -136,7 +136,7 @@ void buildTree(Position treePos) {
 
 
 	for (int j = 0; j < 15; j++) {
-		GlobalCFrame leavesCFrame(treeTop + Vec3(fRand(-1.0, 1.0), fRand(-1.0, 1.0), fRand(-1.0, 1.0)), fromEulerAngles(fRand(0.0, 3.1415), fRand(0.0, 3.1415), fRand(0.0, 3.1415)));
+		GlobalCFrame leavesCFrame(treeTop + Vec3(fRand(-1.0, 1.0), fRand(-1.0, 1.0), fRand(-1.0, 1.0)), Rotation::fromEulerAngles(fRand(0.0, 3.1415), fRand(0.0, 3.1415), fRand(0.0, 3.1415)));
 		ExtendedPart* leaves = new ExtendedPart(icosahedron.scaled(2.1, 1.9, 1.7), leavesCFrame, { 1.0, 1.0, 0.3 }, "trunk");
 
 		leaves->material.ambient = Vec4(fRand(-0.2, 0.2), 0.6 + fRand(-0.2, 0.2), 0.0, 1.0);
@@ -168,7 +168,7 @@ void buildTerrain(double width, double depth) {
 		for (double z = -depth / 2; z < depth / 2; z += 3.0) {
 			double yOffset = getYOffset(x, z);
 			Position pos((x / 3.0 + fRand(0.0, 1.0)) * 3.0, fRand(0.0, 1.0) + yOffset, (z / 3.0 + fRand(0.0, 1.0)) * 3.0);
-			GlobalCFrame cf(pos, fromEulerAngles(fRand(0.0, 3.1415), fRand(0.0, 3.1415), fRand(0.0, 3.1415)));
+			GlobalCFrame cf(pos, Rotation::fromEulerAngles(fRand(0.0, 3.1415), fRand(0.0, 3.1415), fRand(0.0, 3.1415)));
 			ExtendedPart* newPart = new ExtendedPart(icosahedron.scaled(4.0, 4.0, 4.0), cf, { 1.0, 1.0, 0.3 }, "terrain");
 			newPart->material.ambient = Vec4(0.0, yOffset / 40.0 + 0.5, 0.0, 1.0);
 			world.addTerrainPart(newPart);
@@ -215,7 +215,7 @@ void buildCar(const GlobalCFrame& location) {
 	ExtendedPart* carTrunkPanel = new ExtendedPart(Box(0.1, 1.2, 1.0), carBody, CFrame(-1.0, 0.65, 0.0), carProperties, "TrunkPanel");
 	ExtendedPart* carRoof = new ExtendedPart(Box(1.4, 0.1, 1.0), carBody, CFrame(-0.3, 1.25, 0.0), carProperties, "Roof");
 
-	ExtendedPart* carWindshield = new ExtendedPart(Box(1.0, 0.05, 1.0), carBody, CFrame(Vec3(0.7, 0.85, 0.0), fromEulerAngles(0.0, 0.0, -0.91)), carProperties, "Windshield");
+	ExtendedPart* carWindshield = new ExtendedPart(Box(1.0, 0.05, 1.0), carBody, CFrame(Vec3(0.7, 0.85, 0.0), Rotation::fromEulerAngles(0.0, 0.0, -0.91)), carProperties, "Windshield");
 	ExtendedPart* wheel1 = new ExtendedPart(Sphere(0.25), location.localToGlobal(CFrame(0.8, 0.0, 0.8)), wheelProperties, "Wheel");
 	ExtendedPart* wheel2 = new ExtendedPart(Sphere(0.25), location.localToGlobal(CFrame(0.8, 0.0, -0.8)), wheelProperties, "Wheel");
 	ExtendedPart* wheel3 = new ExtendedPart(Sphere(0.25), location.localToGlobal(CFrame(-0.8, 0.0, 0.8)), wheelProperties, "Wheel");

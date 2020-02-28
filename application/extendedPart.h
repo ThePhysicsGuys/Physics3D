@@ -1,9 +1,8 @@
 #pragma once
 
 #include "ecs/material.h"
-#include "../graphics/visualData.h"
+#include "../engine/visualData.h"
 #include "../graphics/visualShape.h"
-#include "../graphics/visualData.h"
 #include "../physics/part.h"
 
 namespace Application {

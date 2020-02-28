@@ -47,7 +47,7 @@ namespace AppDebug {
 			switch (type) {
 			case OBJECT_CFRAME: {
 				Vec3 pos = frame.position;
-				RotMat3 rot = frame.rotation;
+				Rotation rot = frame.rotation;
 				// buf.add(ColoredVec(frame.position, rot * Vec3(1.0, 0.0, 0.0), 0.0));
 				// buf.add(ColoredVec(frame.position, rot * Vec3(0.0, 1.0, 0.0), 0.3));
 				// buf.add(ColoredVec(frame.position, rot * Vec3(0.0, 0.0, 1.0), 0.6));
@@ -55,7 +55,7 @@ namespace AppDebug {
 				break;
 			case INERTIAL_CFRAME: {
 				Vec3 pos = frame.position;
-				RotMat3 rot = frame.rotation;
+				Rotation rot = frame.rotation;
 				// buf.add(ColoredVec(frame.position, rot * Vec3(1.0, 0.0, 0.0), 0.1));
 				// buf.add(ColoredVec(frame.position, rot * Vec3(0.0, 1.0, 0.0), 0.4));
 				// buf.add(ColoredVec(frame.position, rot * Vec3(0.0, 0.0, 1.0), 0.7));

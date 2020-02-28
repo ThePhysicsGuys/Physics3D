@@ -5,7 +5,7 @@
 #include "../eventHandler.h"
 #include "../util/properties.h"
 #include "../graphics/visualShape.h"
-#include "../graphics/visualData.h"
+#include "../engine/visualData.h"
 #include "../engine/event/event.h"
 #include "../engine/layer/layerStack.h"
 #include "../engine/ecs/entity.h"
@@ -31,8 +31,6 @@ private:
 
 public:
 	static std::vector<Engine::Entity*> entities;
-	static std::vector<IndexedMesh*> meshes;
-	static std::map<const ShapeClass*, VisualData> shapeClassMeshIds;
 	PlayerWorld* world;
 	Vec2i dimension;
 
@@ -40,7 +38,7 @@ public:
 	LayerStack layerStack;
 	EventHandler eventHandler;
 	Properties properties;
-
+	
 	FrameBuffer* screenFrameBuffer = nullptr;
 	Quad* quad = nullptr;
 
@@ -61,10 +59,6 @@ public:
 	void onClose();
 
 	bool shouldClose();
-	static VisualData addMeshShape(const VisualShape& mesh);
-	static VisualData registerMeshFor(const ShapeClass* shapeClass, const VisualShape& mesh);
-	static VisualData registerMeshFor(const ShapeClass* shapeClass);
-	static VisualData getOrCreateMeshFor(const ShapeClass* shapeClass);
 };
 
 extern StandardInputHandler* handler;

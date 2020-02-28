@@ -24,9 +24,9 @@ void MotorConstraint::update(double deltaT) {
 void MotorConstraint::invert() { Log::error("MotorConstraint::invert is not implemented!"); }
 
 CFrame MotorConstraint::getRelativeCFrame() const {
-	return CFrame(fromRotationVec(direction * currentAngle));
+	return CFrame(Rotation::fromRotationVec(direction * currentAngle));
 }
 
 RelativeMotion MotorConstraint::getRelativeMotion() const {
-	return RelativeMotion(Motion(Vec3(0, 0, 0), direction * speed), CFrame(fromRotationVec(direction * currentAngle)));
+	return RelativeMotion(Motion(Vec3(0, 0, 0), direction * speed), CFrame(Rotation::fromRotationVec(direction * currentAngle)));
 }
