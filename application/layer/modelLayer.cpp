@@ -246,9 +246,9 @@ void ModelLayer::onRender() {
 		Engine::MeshRegistry::meshes[part->visualData.drawMeshId]->render(part->renderMode);
 	}
 
-	ApplicationShaders::lineShader.updateProjection(screen->camera.projectionMatrix, screen->camera.viewMatrix);
-	Renderer::disableDepthTest();
-	Path3D::batch->submit();
+	//ApplicationShaders::lineShader.updateProjection(screen->camera.projectionMatrix, screen->camera.viewMatrix);
+	//Renderer::disableDepthTest();
+	//Path3D::batch->submit();
 }
 
 void ModelLayer::onClose() {

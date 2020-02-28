@@ -8,14 +8,14 @@ class Screen;
 
 class DebugOverlay : public Layer {
 public:
-	DebugOverlay() : Layer() {};
-	DebugOverlay(Screen* screen, char flags = NoEvents) : Layer("Debug overlay", screen, flags) {};
+	inline DebugOverlay() : Layer() {};
+	inline DebugOverlay(Screen* screen, char flags = NoEvents) : Layer("Debug overlay", screen, flags) {};
 
-	void onInit() override;
-	void onUpdate() override;
-	void onEvent(Event& event) override;
-	void onRender() override;
-	void onClose() override;
+	virtual void onInit() override;
+	virtual void onUpdate() override;
+	virtual void onEvent(Event& event) override;
+	virtual void onRender() override;
+	virtual void onClose() override;
 };
 
 };

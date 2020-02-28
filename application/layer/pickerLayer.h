@@ -8,14 +8,14 @@ class Screen;
 
 class PickerLayer : public Layer {
 public:
-	PickerLayer() : Layer() {};
-	PickerLayer(Screen* screen, char flags = None) : Layer("Picker", screen, flags) {};
+	inline PickerLayer() : Layer() {};
+	inline PickerLayer(Screen* screen, char flags = None) : Layer("Picker", screen, flags) {};
 
-	void onInit() override;
-	void onUpdate() override;
-	void onEvent(Event& event) override;
-	void onRender() override;
-	void onClose() override;
+	virtual void onInit() override;
+	virtual void onUpdate() override;
+	virtual void onEvent(Event& event) override;
+	virtual void onRender() override;
+	virtual void onClose() override;
 };
 
 };

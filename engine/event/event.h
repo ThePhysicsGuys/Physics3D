@@ -9,7 +9,7 @@ enum class EventType {
 	KeyPress, KeyRelease, KeyDoublePress
 };
 
-enum EventCategory {
+enum EventCategory : char {
 	EventCategoryNone		 = 0 << 0,
 	EventCategoryInput		 = 1 << 0,
 	EventCategoryMouse		 = 1 << 1, 
@@ -35,10 +35,13 @@ public:
 	inline virtual char getCategory() const = 0;
 	inline virtual std::string getName() const = 0;
 
-	inline bool inCategory(EventCategory category) const {
-		return static_cast<char>(category) == getCategory();
+	inline bool inCategory(char category) const {
+		return (category & getCategory()) != 0;
 	}
 
+	inline bool inCategory(const EventCategory& category) const {
+		return inCategory(category);
+	}
 };
 
 // For class methods only

@@ -8,15 +8,14 @@ class Screen;
 
 class ModelLayer : public Layer {
 public:
-	ModelLayer() : Layer() {};
-	ModelLayer(Screen* screen, char flags = None) : Layer("Model", screen, flags) {};
+	inline ModelLayer() : Layer() {};
+	inline ModelLayer(Screen* screen, char flags = None) : Layer("Model", screen, flags) {};
 
-	void onInit() override;
-	void onUpdate() override;
-	void onEvent(Event& event) override;
-	void onRender() override;
-	void onRender2();
-	void onClose() override;
+	virtual void onInit() override;
+	virtual void onUpdate() override;
+	virtual void onEvent(Event& event) override;
+	virtual void onRender() override;
+	virtual void onClose() override;
 };
 
 };

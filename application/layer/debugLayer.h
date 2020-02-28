@@ -16,14 +16,14 @@ private:
 	ArrayMesh* originMesh = nullptr;
 
 public:
-	DebugLayer() : Layer() {};
-	DebugLayer(Screen* screen, char flags = NoUpdate | NoEvents) : Layer("Debug layer", screen, flags) {};
+	inline DebugLayer() : Layer() {};
+	inline DebugLayer(Screen* screen, char flags = NoUpdate | NoEvents) : Layer("Debug layer", screen, flags) {};
 
-	void onInit() override;
-	void onUpdate() override;
-	void onEvent(Event& event) override;
-	void onRender() override;
-	void onClose() override;
+	virtual void onInit() override;
+	virtual void onUpdate() override;
+	virtual void onEvent(Event& event) override;
+	virtual void onRender() override;
+	virtual void onClose() override;
 };
 
 };

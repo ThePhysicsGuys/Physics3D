@@ -132,7 +132,7 @@ void TestLayer::onRender() {
 	Renderer::enableCulling();
 	Renderer::enableDepthMask();
 
-	ImGui::Begin("");
+	ImGui::Begin("Test");
 	ImGui::Image((void*) (intptr_t) frameBuffer->texture->getID(), ImVec2(300, 300));
 	ImGui::End();
 }

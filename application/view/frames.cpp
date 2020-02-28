@@ -318,7 +318,7 @@ void BigFrame::renderResourceFrame() {
 
 
 void BigFrame::renderPropertiesFrame() {
-	if (ImGui::CollapsingHeader("Properties")) {
+	if (ImGui::CollapsingHeader("Properties", ImGuiTreeNodeFlags_DefaultOpen)) {
 		ImGuiInputTextFlags flags = 0;
 		ExtendedPart* sp = screen.selectedPart;
 
@@ -396,7 +396,8 @@ void BigFrame::renderPropertiesFrame() {
 }
 
 void BigFrame::renderDebugFrame() {
-	if (ImGui::CollapsingHeader("Debug")) {
+	if (ImGui::CollapsingHeader("Debug", ImGuiTreeNodeFlags_DefaultOpen)) {
+		ImGui::SetNextTreeNodeOpen(true);
 		if (ImGui::TreeNode("Vectors")) {
 			ImGui::Checkbox("Info", &Debug::vectorDebugEnabled[Debug::INFO_VEC]);
 			ImGui::Checkbox("Position", &Debug::vectorDebugEnabled[Debug::POSITION]);
@@ -410,6 +411,7 @@ void BigFrame::renderDebugFrame() {
 			ImGui::TreePop();
 		}
 
+		ImGui::SetNextTreeNodeOpen(true);
 		if (ImGui::TreeNode("Points")) {
 			ImGui::Checkbox("Info", &Debug::pointDebugEnabled[Debug::INFO_POINT]);
 			ImGui::Checkbox("Center of mass", &Debug::pointDebugEnabled[Debug::CENTER_OF_MASS]);
@@ -418,6 +420,7 @@ void BigFrame::renderDebugFrame() {
 			ImGui::TreePop();
 		}
 
+		ImGui::SetNextTreeNodeOpen(true);
 		if (ImGui::TreeNode("Render")) {
 			ImGui::Checkbox("Render pies", &Debug::renderPiesEnabled);
 			if (ImGui::Button("Switch collision sphere render mode")) Debug::colissionSpheresMode = static_cast<Debug::SphereColissionRenderMode>((static_cast<int>(Debug::colissionSpheresMode) + 1) % 3);

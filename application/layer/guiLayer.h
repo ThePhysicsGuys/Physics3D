@@ -8,14 +8,14 @@ class Screen;
 
 class GuiLayer : public Layer {
 public:
-	GuiLayer() : Layer() {};
-	GuiLayer(Screen* screen, char flags = None) : Layer("Gui", screen, flags) {};
+	inline GuiLayer() : Layer() {};
+	inline GuiLayer(Screen* screen, char flags = None) : Layer("Gui", screen, flags) {};
 
-	void onInit() override;
-	void onUpdate() override;
-	void onEvent(Event& event) override;
-	void onRender() override;
-	void onClose() override;
+	virtual void onInit() override;
+	virtual void onUpdate() override;
+	virtual void onEvent(Event& event) override;
+	virtual void onRender() override;
+	virtual void onClose() override;
 };
 
 };

@@ -8,14 +8,14 @@ class Screen;
 
 class TestLayer : public Layer {
 public:
-	TestLayer() : Layer() {};
-	TestLayer(Screen* screen, char flags = None) : Layer("TestLayer", screen, flags) {};
+	inline TestLayer() : Layer() {};
+	inline TestLayer(Screen* screen, char flags = None) : Layer("TestLayer", screen, flags) {};
 
-	void onInit() override;
-	void onUpdate() override;
-	void onEvent(Event& event) override;
-	void onRender() override;
-	void onClose() override;
+	virtual void onInit() override;
+	virtual void onUpdate() override;
+	virtual void onEvent(Event& event) override;
+	virtual void onRender() override;
+	virtual void onClose() override;
 };
 
 };

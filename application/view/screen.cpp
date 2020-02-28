@@ -126,48 +126,37 @@ void Screen::onInit() {
 	// Log init
 	Log::setLogLevel(Log::Level::INFO);
 
-
-
-
 	// Properties init
 	properties = PropertiesParser::read("../res/.properties");
-
 
 	// load options from properties
 	KeyboardOptions::load(properties);
 
-
 	// Library init
 	Library::onInit();
-
 
 	// Render mode init
 	Renderer::enableCulling();
 	Renderer::enableDepthTest();
 
-
 	// InputHandler init
 	handler = new StandardInputHandler(Renderer::getGLFWContext(), *this);
 
-
 	// Screen size init
 	dimension = Renderer::getGLFWWindowSize();
-
 
 	// Framebuffer init
 	quad = new ::Quad();
 	screenFrameBuffer = new ::FrameBuffer(dimension.x, dimension.y);
 
-
 	// Shader init
 	ApplicationShaders::onInit();
-
 
 	// Layer creation
 	skyboxLayer = SkyboxLayer(this);
 	modelLayer = ModelLayer(this);
 	testLayer = TestLayer(this, Layer::Disabled);
-	constraintLayer = ConstraintLayer(this);
+	constraintLayer = ConstraintLayer(this, Layer::NoUpdate | Layer::NoEvents);
 	debugLayer = DebugLayer(this);
 	pickerLayer = PickerLayer(this);
 	postprocessLayer = PostprocessLayer(this);
@@ -184,10 +173,8 @@ void Screen::onInit() {
 	layerStack.pushLayer(&testLayer);
 	layerStack.pushOverlay(&debugOverlay);
 
-
 	// Layer init
 	layerStack.onInit();
-
 
 	// Eventhandler init
 	eventHandler.setWindowResizeCallback([] (Screen& screen, Vec2i dimension) {
@@ -197,17 +184,14 @@ void Screen::onInit() {
 		GUI::blurFrameBuffer->resize(screen.dimension);
 	});
 
-
 	// Camera init
 	camera.setPosition(Position(1.0, 1.0, -2.0));
 	camera.setRotation(Vec3(0, 3.1415, 0.0));
 	camera.onUpdate(1.0, camera.aspect, 0.01, 10000.0);
 
-
 	// Resize
 	FrameBufferResizeEvent event(dimension.x, dimension.y);
 	handler->onFrameBufferResize(event);
-
 
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void) io;
@@ -254,15 +238,22 @@ void Screen::onUpdate() {
 	// Update camera
 	camera.onUpdate();
 
-
 	// Update layers
 	layerStack.onUpdate();
-
 }
 
 void Screen::onEvent(::Event& event) {
-	camera.onEvent(event);
 
+	// Consume ImGui events
+	if (event.inCategory(EventCategoryKeyboard | EventCategoryMouseButton) || ImGui::IsAnyItemHovered() || ImGui::IsAnyItemActive()) {
+		ImGuiIO& io = ImGui::GetIO();
+		if (io.WantCaptureKeyboard || io.WantTextInput | io.WantCaptureMouse) {
+			event.handled = true;
+			return;
+		}
+	}
+
+	camera.onEvent(event);
 	layerStack.onEvent(event);
 }
 

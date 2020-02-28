@@ -275,14 +275,12 @@ void parsePreprocessor(TokenStack& tokens, ShaderDefines& defines) {
 	}
 }
 
-
-
 ShaderInfo ShaderParser::parse(const std::string& code) {
-#ifdef NDEBUG // RELEASE
+//#ifdef NDEBUG // RELEASE
 	TokenStack tokens = ShaderLexer::lex(code);
-#else
-	TokenStack tokens = ShaderLexer::lexDebug(code);
-#endif // NDEBUG
+//#else
+//	TokenStack tokens = ShaderLexer::lexDebug(code);
+//#endif // NDEBUG
 	return parseTokens(tokens);
 }
 

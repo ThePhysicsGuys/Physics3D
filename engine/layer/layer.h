@@ -31,16 +31,15 @@ public:
 
 	char flags;
 
-	Layer() : name(""), ptr(nullptr), flags(None) {};
-	Layer(const std::string& name, void* ptr, char flags = None) : name(name), ptr(ptr), flags(flags) {};
-	~Layer() {}
+	inline Layer() : name(""), ptr(nullptr), flags(None) {};
+	inline Layer(const std::string& name, void* ptr, char flags = None) : name(name), ptr(ptr), flags(flags) {};
+	inline ~Layer() {}
 
-	virtual void onAttach() {}
-	virtual void onDetach() {}
-
-	virtual void onInit() {}
-	virtual void onEvent(Event& event) {}
-	virtual void onUpdate() {}
-	virtual void onRender() {}
-	virtual void onClose() {}
+	inline virtual void onAttach() {}
+	inline virtual void onDetach() {}
+	inline virtual void onInit() {}
+	inline virtual void onEvent(Event& event) {}
+	inline virtual void onUpdate() {}
+	inline virtual void onRender() {}
+	inline virtual void onClose() {}
 };
