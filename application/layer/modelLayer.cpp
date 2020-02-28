@@ -19,6 +19,11 @@
 #include "../graphics/meshLibrary.h"
 #include "../graphics/debug/visualDebug.h"
 
+#include "../graphics/path/path3D.h"
+#include "../graphics/batch/batch.h"
+#include "../graphics/batch/batchConfig.h"
+#include "../graphics/gui/color.h"
+
 #include "../physics/math/linalg/vec.h"
 #include "../physics/sharedLockGuard.h"
 #include "../physics/misc/filters/visibilityFilter.h"
@@ -98,6 +103,13 @@ void ModelLayer::onInit() {
 	screen->entities.push_back(new Engine::Entity({ new Light(Vec3f(-10, 5, -10), Color3(1, 0.84f, 0.69f), 6, attenuation) }));
 	screen->entities.push_back(new Engine::Entity({ new Light(Vec3f(-10, 5, 10), Color3(1, 0.84f, 0.69f), 6, attenuation) }));
 	screen->entities.push_back(new Engine::Entity({ new Light(Vec3f(0, 5, 0), Color3(1, 0.90f, 0.75f), 10, attenuation) }));
+
+	BufferLayout layout = BufferLayout({
+		BufferElement("pos", BufferDataType::FLOAT3),
+		BufferElement("col", BufferDataType::FLOAT4)
+	});
+	BatchConfig config = BatchConfig(layout, Renderer::LINES);
+	Path3D::batch = new Batch<Path3D::Vertex>(config);
 }
 
 void ModelLayer::onUpdate() {
@@ -120,6 +132,7 @@ void ModelLayer::onEvent(Event& event) {
 
 }
 
+/*
 void ModelLayer::onRender2() {
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
@@ -129,13 +142,13 @@ void ModelLayer::onRender2() {
 	ApplicationShaders::maskShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix);
 
 	// TODO move to update?
-	/*
+	
 	screen->world->syncReadOnlyOperation([this, &visibleParts, screen] () {
 		VisibilityFilter filter = VisibilityFilter::forWindow(screen->camera.cframe.position, screen->camera.getForwardDirection(), screen->camera.getUpDirection(), screen->camera.fov, screen->camera.aspect, screen->camera.zfar);
 		for (ExtendedPart& part : screen->world->iterPartsFiltered(filter, ALL_PARTS))
 			visibleParts.push_back(&part);
 		});
-	*/
+	
 
 	graphicsMeasure.mark(GraphicsProcess::PHYSICALS);
 	std::vector<Engine::Entity*> visibleEntities;
@@ -182,7 +195,7 @@ void ModelLayer::onRender2() {
 		//ApplicationShaders::basicShader.updatePart(*part);
 		//mesh->getIndexedMesh()->render(part->renderMode);
 	}
-}
+}*/
 
 void ModelLayer::onRender() {
 	Screen* screen = static_cast<Screen*>(this->ptr);
@@ -230,6 +243,10 @@ void ModelLayer::onRender() {
 		ApplicationShaders::basicShader.updatePart(*part);
 		Screen::meshes[part->visualData.drawMeshId]->render(part->renderMode);
 	}
+
+	ApplicationShaders::lineShader.updateProjection(screen->camera.projectionMatrix, screen->camera.viewMatrix);
+	Renderer::disableDepthTest();
+	Path3D::batch->submit();
 }
 
 void ModelLayer::onClose() {

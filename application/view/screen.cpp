@@ -163,7 +163,7 @@ void Screen::onInit() {
 	// Layer creation
 	skyboxLayer = SkyboxLayer(this);
 	modelLayer = ModelLayer(this);
-	testLayer = TestLayer(this);
+	testLayer = TestLayer(this, Layer::Disabled);
 	debugLayer = DebugLayer(this);
 	pickerLayer = PickerLayer(this);
 	postprocessLayer = PostprocessLayer(this);

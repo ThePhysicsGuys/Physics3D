@@ -113,6 +113,33 @@ Token ShaderLexer::nextToken(std::string& input) {
 	return popToken(input, lastMatch, currentToken);
 }
 
+TokenStack ShaderLexer::lexDebug(const std::string& input) {
+	static enum UniformOrDefine {
+		UNIFORM,
+		DEFINE
+	};
+	
+	std::map<size_t, UniformOrDefine> uniformOrDefines;
+	
+	std::function<int(const std::string&)> i = [input] (const std::string& key) {
+		size_t lastIndex = 0;
+		while (true) {
+			size_t index = input.find(key, lastIndex + key.size());
+			
+			if (index == input.npos) {
+
+			}
+		}
+		return 0;
+	};
+
+	return TokenStack();
+	TokenStack tokens;
+	
+	
+
+}
+
 TokenStack ShaderLexer::lex(const std::string& input) {
 	TokenStack tokens;
 
