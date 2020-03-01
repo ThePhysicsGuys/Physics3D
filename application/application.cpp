@@ -55,12 +55,9 @@ void setupWorld(int argc, const char** args);
 void setupGL();
 void setupDebug();
 
-bool has_suffix(const std::string& str, const std::string& suffix) {
-	return str.size() >= suffix.size() &&
-		str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
-}
-
 void init(int argc, const char** args) {
+	auto start = high_resolution_clock::now();
+
 	setupGL();
 	Engine::MeshRegistry::init();
 
@@ -73,26 +70,23 @@ void init(int argc, const char** args) {
 	if(argc >= 2) {
 		const char* file = args[1];
 		Log::info("Loading file %s", file);
-		auto startTime = std::chrono::high_resolution_clock::now();
-		if(has_suffix(file, ".parts")) {
+		auto startTime = high_resolution_clock::now();
+		if(endsWith(file, ".parts")) {
 			WorldImportExport::loadLoosePartsIntoWorld(file, world);
-		} else if(has_suffix(file, ".nativeParts")) {
+		} else if(endsWith(file, ".nativeParts")) {
 			WorldImportExport::loadNativePartsIntoWorld(file, world);
-		} else if(has_suffix(file, ".world")) {
+		} else if(endsWith(file, ".world")) {
 			WorldImportExport::loadWorld(file, world);
 		}
-		std::chrono::nanoseconds deltaTime = std::chrono::high_resolution_clock::now() - startTime;
+		nanoseconds deltaTime = high_resolution_clock::now() - startTime;
 		Log::info("File loaded, took %.4f ms", deltaTime.count() / 1E6);
 	} else {
 		setupWorld(argc, args);
 	}
 	
-	
 	Log::info("Initializing screen");
 	screen.onInit();
 	
-
-
 	// Player
 	screen.camera.attachment = new ExtendedPart(Library::createPrism(50, 0.3, 1.5), GlobalCFrame(), {1.0, 5.0, 0.0}, "Player");
 
@@ -102,6 +96,10 @@ void init(int argc, const char** args) {
 
 	setupPhysics();
 	setupDebug();
+
+	auto stop = high_resolution_clock::now();
+	auto duration = duration_cast<milliseconds>(stop - start);
+	Log::info("Init Physics3D in %.4f ms", duration.count() / 1.0f);
 }
 
 void setupGL() {

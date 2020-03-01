@@ -1,6 +1,7 @@
 #include "core.h"
 
 #include "shaderLexer.h"
+#include "../util/stringUtil.h"
 
 std::vector<TokenType> ShaderLexer::types = {
 	TokenType(TokenType::NONE, std::regex("(.*?)")),
@@ -114,17 +115,11 @@ Token ShaderLexer::nextToken(std::string& input) {
 }
 
 TokenStack ShaderLexer::lexDebug(const std::string& input) {	
-	std::string i = R"(
-		
-		
-		
-	)";
 	std::function<std::vector<size_t>(const std::string&)> collect = [input] (const std::string& key) {
 		std::vector<size_t> list;
 		size_t lastIndex = 0;
 		while (true) {
 			size_t index = input.find(key, lastIndex);
-			
 			if (index == input.npos) {
 				break;
 			} else {
@@ -135,15 +130,104 @@ TokenStack ShaderLexer::lexDebug(const std::string& input) {
 		return list;
 	};
 
-	std::vector<size_t> defines = collect("#define");
-	std::vector<size_t> uniforms = collect("uniform");
+	std::function<std::pair<size_t, size_t>(size_t, bool)> next = [input] (size_t offset, bool allowEnter) {
+		size_t start = offset;
+		size_t index = offset;
+		while (true) {
+			const char& c = input[index];
+			if (c == ' ' || c == '\t' || c == '\r' || c == ';' || c == '\n' || c == '[') {
+				if (start == index) {
+					if (!allowEnter && c == '\n')
+						return std::make_pair(size_t(0), size_t(0));
+					else
+						start++;
+				} else {
+					break;
+				}
+			}
+			index++;
+		}
+		return std::make_pair(start, index);
+	};
 
+	std::function<size_t(char, char, size_t)> until = [input] (char l, char r, size_t offset) {
+		int depth = -1;
+		size_t index = offset;
+		size_t size = input.length();
+		while (index < size) {
+			const char& c = input[index];
+			if (c == l) {
+				depth++;
+			} else if (c == r) {
+				if (depth == 0)
+					break;
+				else if (depth > 0)
+					depth--;
+			}
+			index++;
+		}
+		return index;
+	};
 
 	TokenStack tokens;
-	return TokenStack();
-	
-	
+	std::vector<size_t> defines = collect("#define ");
+	std::vector<size_t> uniforms = collect("uniform ");
+	std::vector<size_t> structs = collect("struct ");
 
+	for (size_t index : defines) {
+		tokens.add(Token(TokenType(TokenType::PREP, 0), "#define"));
+		index += 7; // length("#define ")
+
+		auto [n1, n2] = next(index, false);
+		std::string name = input.substr(n1, n2 - n1);
+		tokens.add(Token(TokenType(TokenType::ID, 0), name));
+		index = n2;
+
+		auto [n3, n4] = next(index, false);
+		std::string value = input.substr(n3, n4 - n3);
+		if (!value.empty())
+			tokens.add(Token(TokenType(TokenType::NUMBER, 0), value));
+	}
+
+	for (size_t index : structs) {
+		tokens.add(Token(TokenType(TokenType::STRUCT, 0), "struct"));
+		index += 6; // length("uniform ")
+
+		size_t end = until('{', '}', index);
+		std::string content = input.substr(index, end - index + 1);
+		TokenStack strct = lex(content);
+		tokens.addAll(strct);
+
+		tokens.add(Token(TokenType(TokenType::EOL, 0), ""));
+	}
+
+	for (size_t index : uniforms) {
+		tokens.add(Token(TokenType(TokenType::UNIFORM, 0), "uniform"));
+		index += 7; // length("uniform ")
+
+		auto [n1, n2] = next(index, true);
+		std::string type = input.substr(n1, n2 - n1);
+		tokens.add(Token(TokenType(TokenType::TYPE, 0), type));
+		index = n2;
+
+		auto [n3, n4] = next(index, true);
+		std::string name = input.substr(n3, n4 - n3);
+		tokens.add(Token(TokenType(TokenType::ID, 0), name));
+		index = n4;
+
+		auto [n5, n6] = next(index, true);
+		std::string array = input.substr(n5 - 1, n6 - n5 + 1);
+		if (!array.empty() && startWith(array, "[") && endsWith(array, "]")) {
+			TokenStack content = lex(array);
+			tokens.addAll(content);
+		}
+
+		tokens.add(Token(TokenType(TokenType::EOL, 0), ""));
+	}
+
+	tokens.flip();
+
+	return tokens;
 }
 
 TokenStack ShaderLexer::lex(const std::string& input) {
@@ -165,7 +249,7 @@ TokenStack ShaderLexer::lex(const std::string& input) {
 	return tokens;
 }
 
-Token TokenStack::peek(size_t offset) {
+Token TokenStack::peek(size_t offset) const {
 	if (read)
 		if (available(offset))
 			return *(iterator + offset);
@@ -190,6 +274,12 @@ void TokenStack::discard() {
 void TokenStack::add(const Token& token) {
 	if (!read)
 		stack.push_back(token);
+}
+
+void TokenStack::addAll(const TokenStack& tokens) {
+	int index = 0;
+	while (tokens.available(index)) 
+		add(tokens.peek(index++));
 }
 
 void TokenStack::flip() {
@@ -219,9 +309,13 @@ TokenStack TokenStack::until(const TokenType::Type& type, bool popType) {
 	return content;
 }
 
-inline bool TokenStack::available(size_t offset) {
+inline bool TokenStack::available(size_t offset) const {
 	if (read)
 		return iterator + offset < stack.end();
 
 	return false;
+}
+
+inline size_t TokenStack::size() const {
+	return stack.size();
 }

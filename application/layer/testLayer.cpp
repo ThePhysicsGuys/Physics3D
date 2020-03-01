@@ -16,6 +16,7 @@
 #include "../graphics/debug/debug.h"
 #include "../graphics/buffers/frameBuffer.h"
 #include <sstream>
+#include "shader/shaders.h"
 #include "../graphics/renderUtils.h"
 
 #include "../graphics/buffers/vertexArray.h"
