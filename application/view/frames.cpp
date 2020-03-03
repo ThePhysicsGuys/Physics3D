@@ -354,15 +354,22 @@ void BigFrame::renderPropertiesFrame() {
 			ImGui::Text("Acceleration: %s", (sp) ? str(sp->getMotion().translation.acceleration).c_str() : "-");
 			ImGui::Text("Angular velocity: %s", (sp) ? str(sp->getMotion().rotation.angularVelocity).c_str() : "-");
 			ImGui::Text("Angular acceleration: %s", (sp) ? str(sp->getMotion().rotation.angularAcceleration).c_str() : "-");
-			ImGui::Text("Kinetic energy: %s", (sp) ? str(sp->parent->getKineticEnergy()).c_str() : "-");
-			ImGui::Text("Potential energy: %s", (sp) ? str(screen.world->getPotentialEnergyOfPhysical(*sp->parent->mainPhysical)).c_str() : "-");
-			ImGui::Text("Total energy: %s", (sp) ? str(screen.world->getPotentialEnergyOfPhysical(*sp->parent->mainPhysical) + sp->parent->getKineticEnergy()).c_str() : "-");
 			ImGui::Text("Mass: %s", (sp) ? str(sp->getMass()).c_str() : "-");
 			ImGui::Text("Friction: %s", (sp) ? str(sp->properties.friction).c_str() : "-");
 			ImGui::Text("Density: %s", (sp) ? str(sp->properties.density).c_str() : "-");
 			ImGui::Text("Bouncyness: %s", (sp) ? str(sp->properties.bouncyness).c_str() : "-");
 			ImGui::Text("Conveyor: %s", (sp) ? str(sp->properties.conveyorEffect).c_str() : "-");
 			ImGui::Text("Inertia: %s", (sp) ? str(sp->getInertia()).c_str() : "-");
+
+
+			if(sp != nullptr && sp->parent != nullptr) {
+				const MotorizedPhysical* phys = sp->parent->mainPhysical;
+				ImGui::Text("Physical Info");
+
+				ImGui::Text("Total impulse: %s", str(phys->getTotalImpulse()).c_str());
+				ImGui::Text("Total angular momentum: %s", str(phys->getTotalAngularMomentum()).c_str());
+				ImGui::Text("motion of COM: %s", str(phys->getMotionOfCenterOfMass()).c_str());
+			}
 
 			static volatile ExtendedPart* selectedPart = nullptr;
 			if(sp != nullptr) {

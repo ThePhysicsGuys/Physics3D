@@ -191,7 +191,6 @@ public:
 	explicit MotorizedPhysical(RigidBody&& rigidBody);
 	explicit MotorizedPhysical(Physical&& movedPhys);
 
-
 	/*
 		Returns the motion of this physical positioned at it's getCFrame()
 
@@ -209,6 +208,9 @@ public:
 
 	Position getCenterOfMass() const;
 	GlobalCFrame getCenterOfMassCFrame() const;
+
+	Vec3 getTotalImpulse() const;
+	Vec3 getTotalAngularMomentum() const;
 
 	void ensureWorld(WorldPrototype* world);
 
