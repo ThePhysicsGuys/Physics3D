@@ -65,15 +65,16 @@ private:
 	std::vector<Token>::iterator iterator;
 public:
 	void add(const Token& token);
+	void addAll(const TokenStack& tokens);
 
 	void flip();
 
 	TokenStack until(const TokenType::Type& type, bool popType = true);
-	Token peek(size_t offset = 0);
+	Token peek(size_t offset = 0) const;
 	Token pop();
 	void discard();
-
-	bool available(size_t offset = 0);
+	bool available(size_t offset = 0) const;
+	size_t size() const;
 };
 
 class ShaderLexer {

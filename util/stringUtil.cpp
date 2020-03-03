@@ -23,12 +23,30 @@ std::vector<std::string> split(const std::string& string, char splitter) {
 	return elements;
 }
 
-bool startWith(std::string string, std::string prefix) {
-	if (string.length() < prefix.length())
+bool startWith(const std::string& string, const std::string& prefix) {
+	int l1 = string.length();
+	int l2 = prefix.length();
+
+	if (l2 > l1)
 		return false;
 
-	for (size_t i = 0; i < prefix.length(); i++) {
+	for (size_t i = 0; i < l2; i++) {
 		if (string[i] != prefix[i])
+			return false;
+	}
+
+	return true;
+}
+
+bool endsWith(const std::string& string, const std::string& suffix) {
+	int l1 = string.length();
+	int l2 = suffix.length();
+
+	if (l2 > l1)
+		return false;
+
+	for (size_t i = 1; i <= l2; i++) {
+		if (string[l1 - i] != suffix[l2 - i])
 			return false;
 	}
 
