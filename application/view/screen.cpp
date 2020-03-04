@@ -5,6 +5,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include "../graphics/renderer.h"
 #include "../graphics/renderUtils.h"
 #include "../graphics/texture.h"
 #include "shader/shaders.h"
@@ -266,6 +267,11 @@ void Screen::onRender() {
 
 	// Render to screen Framebuffer
 	screenFrameBuffer->bind();
+	Renderer::enableBlending();
+	Renderer::enableCulling();
+	Renderer::enableDepthTest();
+	Renderer::enableDepthMask();
+	Renderer::standardBlendFunction();
 	Renderer::clearColor();
 	Renderer::clearDepth();
 

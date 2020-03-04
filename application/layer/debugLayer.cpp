@@ -14,7 +14,7 @@
 
 #include "view/screen.h"
 #include "ecs/material.h"
-#include "../graphics/renderUtils.h"
+#include "../graphics/renderer.h"
 #include "shader/shaders.h"
 
 #include "../graphics/debug/profilerUI.h"
@@ -118,6 +118,8 @@ void DebugLayer::onEvent(::Event& event) {
 
 void DebugLayer::onRender() {
 	Screen* screen = static_cast<Screen*>(this->ptr);
+
+	Renderer::beginScene();
 
 	graphicsMeasure.mark(GraphicsProcess::VECTORS);
 
@@ -223,6 +225,8 @@ void DebugLayer::onRender() {
 	graphicsMeasure.mark(GraphicsProcess::ORIGIN);
 	ApplicationShaders::originShader.updateProjection(screen->camera.viewMatrix, screen->camera.getViewRotation(), screen->camera.projectionMatrix, screen->camera.orthoMatrix, screen->camera.cframe.position);
 	originMesh->render();
+
+	Renderer::endScene();
 }
 
 void DebugLayer::onClose() {

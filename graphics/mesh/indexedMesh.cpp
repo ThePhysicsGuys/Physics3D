@@ -6,7 +6,7 @@
 #include "buffers/vertexBuffer.h"
 #include "buffers/vertexArray.h"
 #include "visualShape.h"
-#include "renderUtils.h"
+#include "renderer.h"
 #include "../physics/geometry/shape.h"
 
 IndexedMesh::IndexedMesh(const VisualShape& shape) : AbstractMesh(), vertexCount(shape.vertexCount), triangleCount(shape.triangleCount) {
@@ -127,9 +127,10 @@ void IndexedMesh::render(unsigned int mode)  {
 	vao->bind();
 	indexBuffer->bind();
 
-	glPolygonMode(GL_FRONT_AND_BACK, mode);
+	
+	Renderer::polygonMode(Renderer::FRONT_AND_BACK, mode);
 	Renderer::drawElements(renderMode, triangleCount * 3, Renderer::UINT, nullptr);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	Renderer::polygonMode(Renderer::FRONT_AND_BACK, Renderer::FILL);
 }
 
 void IndexedMesh::close() {

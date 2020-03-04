@@ -11,7 +11,7 @@
 #include "font.h"
 #include "texture.h"
 #include "visualShape.h"
-#include "renderUtils.h"
+#include "renderer.h"
 
 #include "../buffers/frameBuffer.h"
 #include "../mesh/indexedMesh.h"
@@ -290,6 +290,7 @@ namespace GUI {
 	}
 
 	void onRender(Mat4f orthoMatrix) {	
+
 		// Render gui
 		GUI::blurFrameBuffer->bind();
 		GraphicsShaders::quadShader.updateProjection(orthoMatrix);
@@ -302,10 +303,6 @@ namespace GUI {
 		GraphicsShaders::verticalBlurShader.updateWidth(windowInfo.dimension.y);
 		quad->render();
 		blurFrameBuffer->unbind();
-
-		Renderer::disableCulling();
-		Renderer::enableBlending();
-		GraphicsShaders::guiShader.init(orthoMatrix);
 	}
 
 	void onClose() {

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -194,6 +194,7 @@
     <ClCompile Include="shader\shaderParser.cpp" />
     <ClCompile Include="shader\shaders.cpp" />
     <ClCompile Include="shader\shader.cpp" />
+    <ClCompile Include="renderer.cpp" />
     <ClCompile Include="texture.cpp" />
     <ClCompile Include="debug\visualDebug.cpp" />
   </ItemGroup>
@@ -240,6 +241,7 @@
     <ClInclude Include="mesh\vectorMesh.h" />
     <ClInclude Include="path\path.h" />
     <ClInclude Include="path\path3D.h" />
+    <ClInclude Include="renderer.h" />
     <ClInclude Include="renderUtils.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="resources.h" />

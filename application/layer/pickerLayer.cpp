@@ -3,10 +3,9 @@
 #include "pickerLayer.h"
 
 #include "view/screen.h"
-
 #include "../picker/picker.h"
-
 #include "input/standardInputHandler.h"
+#include "../graphics/renderer.h"
 
 namespace Application {
 
@@ -27,7 +26,11 @@ void PickerLayer::onEvent(Event& event) {
 void PickerLayer::onRender() {
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
+	Renderer::beginScene();
+
 	Picker::onRender(*screen);
+
+	Renderer::endScene();
 }
 
 void PickerLayer::onClose() {

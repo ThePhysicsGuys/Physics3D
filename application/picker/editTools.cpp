@@ -10,7 +10,7 @@
 
 #include "../engine/io/import.h"
 
-#include "../graphics/renderUtils.h"
+#include "../graphics/renderer.h"
 #include "../graphics/mesh/primitive.h"
 #include "../graphics/mesh/indexedMesh.h"
 #include "../graphics/visualShape.h"

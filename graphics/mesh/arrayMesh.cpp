@@ -5,7 +5,7 @@
 #include "buffers/vertexArray.h"
 #include "buffers/vertexBuffer.h"
 
-#include "renderUtils.h"
+#include "renderer.h"
 
 ArrayMesh::ArrayMesh(Vec3f* positions, const unsigned int vertexCount) : ArrayMesh(reinterpret_cast<float const *>(positions), vertexCount * 3, 3) {
 

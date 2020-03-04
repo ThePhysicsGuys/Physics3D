@@ -2,7 +2,7 @@
 
 #include "vectorMesh.h"
 
-#include "renderUtils.h"
+#include "renderer.h"
 
 #include "buffers/vertexBuffer.h"
 #include "buffers/vertexArray.h"

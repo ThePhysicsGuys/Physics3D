@@ -3,7 +3,7 @@
 #include "abstractMesh.h"
 
 #include "buffers/vertexArray.h"
-#include "renderUtils.h"
+#include "renderer.h"
 
 AbstractMesh::AbstractMesh(unsigned int rendermode) : renderMode(renderMode) {
 	vao = new VertexArray();

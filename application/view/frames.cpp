@@ -3,7 +3,7 @@
 
 #include "../physics/misc/toString.h"
 #include "../graphics/debug/visualDebug.h"
-#include "../graphics/renderUtils.h"
+#include "../graphics/renderer.h"
 #include "../graphics/texture.h"
 
 #include "../graphics/resource/shaderResource.h"

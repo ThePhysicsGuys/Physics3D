@@ -4,7 +4,7 @@
 
 #include "../graphics/buffers/frameBuffer.h"
 #include "../graphics/mesh/primitive.h"
-#include "../graphics/renderUtils.h"
+#include "../graphics/renderer.h"
 #include "../graphics/texture.h"
 
 #include "../application/shader/shaders.h"
@@ -27,6 +27,8 @@ void PostprocessLayer::onEvent(::Event& event) {
 void PostprocessLayer::onRender() {
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
+	Renderer::beginScene();
+
 	screen->screenFrameBuffer->unbind();
 	Renderer::clearColor();
 	Renderer::clearDepth();
@@ -34,6 +36,8 @@ void PostprocessLayer::onRender() {
 	Renderer::disableDepthTest();
 	ApplicationShaders::postProcessShader.updateTexture(screen->screenFrameBuffer->texture);
 	screen->quad->render();
+
+	Renderer::endScene();
 }
 
 void PostprocessLayer::onClose() {

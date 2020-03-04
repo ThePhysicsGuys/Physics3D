@@ -17,7 +17,7 @@
 #include "../graphics/buffers/frameBuffer.h"
 #include <sstream>
 #include "shader/shaders.h"
-#include "../graphics/renderUtils.h"
+#include "../graphics/renderer.h"
 
 #include "../graphics/buffers/vertexArray.h"
 #include "../graphics/buffers/vertexBuffer.h"
@@ -106,6 +106,8 @@ void TestLayer::onEvent(Event& event) {
 }
 
 void TestLayer::onRender() {
+	Renderer::beginScene();
+
 	frameBuffer->bind();
 	shader->bind();
 
@@ -136,6 +138,8 @@ void TestLayer::onRender() {
 	ImGui::Begin("Test");
 	ImGui::Image((void*) (intptr_t) frameBuffer->texture->getID(), ImVec2(300, 300));
 	ImGui::End();
+
+	Renderer::endScene();
 }
 
 void TestLayer::onClose() {

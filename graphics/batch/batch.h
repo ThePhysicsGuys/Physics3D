@@ -8,7 +8,7 @@
 #include "../buffers/vertexBuffer.h"
 #include "../buffers/indexBuffer.h"
 
-#include "../renderUtils.h"
+#include "../renderer.h"
 
 template<typename Vertex>
 class Batch {

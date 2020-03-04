@@ -1,8 +1,5 @@
 #include "core.h"
 
-#include "GL/glew.h"
-#include "GLFW/glfw3.h"
-
 #include "modelLayer.h"
 
 #include "view/screen.h"
@@ -202,6 +199,8 @@ void ModelLayer::onRender2() {
 void ModelLayer::onRender() {
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
+	Renderer::beginScene();
+
 	graphicsMeasure.mark(GraphicsProcess::UPDATE);
 	ApplicationShaders::basicShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
 	ApplicationShaders::maskShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix);
@@ -246,9 +245,7 @@ void ModelLayer::onRender() {
 		Engine::MeshRegistry::meshes[part->visualData.drawMeshId]->render(part->renderMode);
 	}
 
-	//ApplicationShaders::lineShader.updateProjection(screen->camera.projectionMatrix, screen->camera.viewMatrix);
-	//Renderer::disableDepthTest();
-	//Path3D::batch->submit();
+	Renderer::endScene();
 }
 
 void ModelLayer::onClose() {

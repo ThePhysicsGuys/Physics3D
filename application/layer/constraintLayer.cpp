@@ -15,7 +15,7 @@
 #include "../physics/misc/toString.h"
 
 #include "../graphics/debug/debug.h"
-#include "../graphics/renderUtils.h"
+#include "../graphics/renderer.h"
 
 #include "../physics/constraints/sinusoidalPistonConstraint.h"
 #include "../physics/constraints/motorConstraint.h"

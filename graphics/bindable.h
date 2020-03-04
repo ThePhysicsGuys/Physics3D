@@ -1,19 +1,17 @@
 #pragma once
 
+typedef unsigned int GLID;
+
 class Bindable {
 protected:
-	unsigned int id;
+	GLID id;
 
-	Bindable() : id(0) {
-
-	}
-
-	Bindable(unsigned int id) : id(id) {
-
-	}
+	inline Bindable() : id(0) {}
+	inline Bindable(GLID id) : id(id) {}
 
 public:
-	unsigned int getID() const {
+
+	inline GLID getID() const {
 		return id;
 	}
 

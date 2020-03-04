@@ -7,7 +7,7 @@
 #include "shader/shaders.h"
 #include "input/standardInputHandler.h"
 #include "../graphics/font.h"
-#include "../graphics/renderUtils.h"
+#include "../graphics/renderer.h"
 #include "../graphics/shader/shaders.h"
 #include "../graphics/gui/guiUtils.h"
 #include "../engine/input/mouse.h"
@@ -76,13 +76,19 @@ void GuiLayer::onEvent(Event& event) {
 void GuiLayer::onRender() {
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
+	//Renderer::beginScene();
+
 	// Render GUI
 	Renderer::disableDepthTest();
+	Renderer::disableCulling();
+	Renderer::enableBlending();
+	//Renderer::
 	graphicsMeasure.mark(GraphicsProcess::OTHER);
 	ApplicationShaders::fontShader.updateProjection(screen->camera.orthoMatrix);
 	GUI::onRender(screen->camera.orthoMatrix);
-
 	BigFrame::render();
+
+	//Renderer::endScene();
 }
 
 void GuiLayer::onClose() {

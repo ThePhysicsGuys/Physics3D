@@ -4,7 +4,7 @@
 
 #include "buffers/vertexArray.h"
 #include "buffers/vertexBuffer.h"
-#include "renderUtils.h"
+#include "renderer.h"
 
 PointMesh::PointMesh(const float* vertices, const size_t vertexCount, size_t capacity) : AbstractMesh(Renderer::POINT), vertexCount(vertexCount), capacity(capacity) {
 	vertexBuffer = new VertexBuffer(nullptr, 10 * capacity * sizeof(float), Renderer::DYNAMIC_DRAW);
@@ -23,7 +23,7 @@ PointMesh::PointMesh(const float* vertices, const size_t vertexCount, size_t cap
 
 void PointMesh::render() {
 	vao->bind();
-	glDrawArrays((int)renderMode, 0, vertexCount);
+	Renderer::drawArrays(renderMode, 0, vertexCount);
 }
 
 void PointMesh::close() {

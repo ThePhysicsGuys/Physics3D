@@ -5,7 +5,7 @@
 #include "view/screen.h"
 #include "shader/shaders.h"
 
-#include "../graphics/renderUtils.h"
+#include "../graphics/renderer.h"
 #include "../graphics/debug/profilerUI.h"
 #include "../graphics/debug/visualDebug.h"
 #include "../graphics/path/path.h"
@@ -45,6 +45,9 @@ void DebugOverlay::onEvent(Event& event) {
 
 void DebugOverlay::onRender() {
 	Screen* screen = static_cast<Screen*>(this->ptr);
+
+	Renderer::beginScene();
+
 	Path::bind(GUI::batch);
 
 	Renderer::disableDepthTest();
@@ -110,6 +113,8 @@ void DebugOverlay::onRender() {
 	}
 	
 	GUI::batch->submit();
+
+	Renderer::endScene();
 }
 
 void DebugOverlay::onClose() {

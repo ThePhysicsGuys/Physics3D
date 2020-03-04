@@ -7,7 +7,7 @@
 
 #include "../application/worldBuilder.h"
 #include "../engine/options/keyboardOptions.h"
-#include "../graphics/renderUtils.h"
+#include "../graphics/renderer.h"
 #include "../physics/misc/toString.h"
 #include "../application.h"
 #include "../picker/picker.h"

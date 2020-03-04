@@ -6,7 +6,7 @@
 
 #include "shader/shaders.h"
 #include "view/screen.h"
-#include "../graphics/renderUtils.h"
+#include "../graphics/renderer.h"
 #include "../graphics/texture.h"
 #include "../graphics/mesh/indexedMesh.h"
 #include "../graphics/meshLibrary.h"
@@ -34,17 +34,17 @@ void SkyboxLayer::onRender() {
 
 	graphicsMeasure.mark(GraphicsProcess::SKYBOX);
 
+	Renderer::beginScene();
+
 	Renderer::disableDepthMask();
 	Renderer::disableCulling();
 	Renderer::enableBlending();
-	Renderer::standardBlendFunction();
 	ApplicationShaders::skyboxShader.updateLightDirection(Vec3());
 	ApplicationShaders::skyboxShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix);
 	skyboxTexture->bind();
 	Library::sphere->render();
-	Renderer::enableDepthMask();
-	Renderer::enableCulling();
-	Renderer::enableDepthTest();
+
+	Renderer::endScene();
 }
 
 void SkyboxLayer::onClose() {
