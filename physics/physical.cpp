@@ -386,7 +386,7 @@ std::pair<double, TranslationalMotion> Physical::getMotionOfCenterOfMassInternal
 		RelativeMotion motionOfConPhys = totalAccumulatedMotion + conPhys.getRelativeMotionBetweenParentAndSelf();
 		std::pair<double, TranslationalMotion> motionOfConnected = conPhys.getMotionOfCenterOfMassInternally(motionOfConPhys);
 		totalMass += motionOfConnected.first;
-		totalMotion += localToGlobal(conPhys.getRelativeCFrameToParent().getRotation(), motionOfConnected.second);
+		totalMotion += motionOfConnected.second;
 	}
 	return std::make_pair(totalMass, totalMotion);
 }
@@ -622,12 +622,21 @@ void MotorizedPhysical::update(double deltaT) {
 	motionOfCenterOfMass.translation.velocity += accel;
 	motionOfCenterOfMass.rotation.angularVelocity += rotAcc;
 
+	Vec3 curAngularMomentum = getTotalAngularMomentum();
+
 	updateConstraints(deltaT);
+
+	Vec3 angularMomentumNow = getTotalAngularMomentum();
+
+	Vec3 deltaAngularVelocity = momentResponse * (angularMomentumNow - curAngularMomentum);
+
+	this->motionOfCenterOfMass.rotation.angularVelocity -= deltaAngularVelocity;
 
 	Vec3 oldCenterOfMass = this->totalCenterOfMass;
 	refreshPhysicalProperties();
 	Vec3 deltaCOM = this->totalCenterOfMass - oldCenterOfMass;
 
+	
 
 	Vec3 movementOfCenterOfMass = motionOfCenterOfMass.translation.velocity * deltaT + accel * deltaT * deltaT / 2 - getCFrame().localToRelative(deltaCOM);
 
@@ -798,6 +807,14 @@ Position MotorizedPhysical::getCenterOfMass() const {
 
 GlobalCFrame MotorizedPhysical::getCenterOfMassCFrame() const {
 	return GlobalCFrame(getCFrame().localToGlobal(totalCenterOfMass), getCFrame().getRotation());
+}
+
+Vec3 MotorizedPhysical::getTotalImpulse() const {
+	return this->motionOfCenterOfMass.translation.velocity * this->totalMass;
+}
+Vec3 MotorizedPhysical::getTotalAngularMomentum() const {
+	SymmetricMat3 totalInertia = getRecursiveInertia(*this, CFrame(0, 0, 0), totalCenterOfMass);
+	return totalInertia * this->motionOfCenterOfMass.rotation.angularVelocity;
 }
 
 Motion Physical::getMotion() const {

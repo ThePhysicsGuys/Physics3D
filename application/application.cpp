@@ -125,7 +125,7 @@ void setupGL() {
 void setupWorld(int argc, const char** args) {
 	Log::info("Initializing world");
 
-	world.addExternalForce(new DirectionalGravity(Vec3(0, -10.0, 0.0)));
+	//world.addExternalForce(new DirectionalGravity(Vec3(0, -10.0, 0.0)));
 
 	PartProperties basicProperties{1.0, 0.7, 0.3};
 
@@ -137,7 +137,25 @@ void setupWorld(int argc, const char** args) {
 
 	WorldBuilder::buildFloorAndWalls(50.0, 50.0, 1.0);
 
-	/*world.addPart(new ExtendedPart(Sphere(2.0), GlobalCFrame(10, 3, 10), {1.0, 0.3, 0.7}, "SphereThing"));
+
+	{
+		ExtendedPart* sateliteBody = new ExtendedPart(Cylinder(0.5, 1.0), GlobalCFrame(0.0, 5.0, 0.0, Rotation::Predefined::X_90), basicProperties, "Satelite Body");
+		ExtendedPart* wing1 = new ExtendedPart(Box(1.0, 1.0, 1.0), GlobalCFrame(), basicProperties, "Wing 1");
+		ExtendedPart* wing2 = new ExtendedPart(Box(1.0, 1.0, 1.0), GlobalCFrame(), basicProperties, "Wing 2");
+
+
+		sateliteBody->attach(wing1, new SinusoidalPistonConstraint(Vec3(1.0, 0.0, 0.0), 1.0, 3.0, 1.0), CFrame(0.5, 0.0, 0.0), CFrame(-0.5, 0.0, 0.0));
+		sateliteBody->attach(wing2, new SinusoidalPistonConstraint(Vec3(1.0, 0.0, 0.0), 1.0, 3.0, 1.0), CFrame(Vec3(-0.5, 0.0, 0.0), Rotation::Predefined::Y_180), CFrame(-0.5, 0.0, 0.0));
+		//sateliteBody->attach(wing2, new SinusoidalPistonConstraint(Vec3(-1.0, 0.0, 0.0), 1.0, 3.0, 1.0), CFrame(-0.5, 0.0, 0.0), CFrame(0.5, 0.0, 0.0));
+
+		world.addPart(sateliteBody);
+
+		sateliteBody->parent->mainPhysical->motionOfCenterOfMass.rotation.angularVelocity = Vec3(0, 2, 0);
+	}
+
+
+
+	world.addPart(new ExtendedPart(Sphere(2.0), GlobalCFrame(10, 3, 10), {1.0, 0.3, 0.7}, "SphereThing"));
 
 	ExtendedPart* conveyor = new ExtendedPart(Box(1.0, 0.3, 50.0), GlobalCFrame(10.0, 0.65, 0.0), {2.0, 1.0, 0.3});
 
@@ -150,7 +168,7 @@ void setupWorld(int argc, const char** args) {
 	WorldBuilder::HollowBoxParts parts = WorldBuilder::buildHollowBox(Bounds(Position(12.0, 3.0, 14.0), Position(20.0, 8.0, 20.0)), 0.3);
 
 	parts.front->material.ambient = Vec4f(0.4, 0.6, 1.0, 0.3);
-	parts.back->material.ambient = Vec4f(0.4, 0.6, 1.0, 0.3);*/
+	parts.back->material.ambient = Vec4f(0.4, 0.6, 1.0, 0.3);
 
 	// Rotating walls
 	/*ExtendedPart* rotatingWall = new ExtendedPart(Box(5.0, 3.0, 0.5), GlobalCFrame(Position(-12.0, 1.7, 0.0)), {1.0, 1.0, 0.7});
@@ -166,7 +184,7 @@ void setupWorld(int argc, const char** args) {
 		world.addPart(newCube);
 	}*/
 
-	WorldBuilder::buildCar(GlobalCFrame(5.0, 1.0, 5.0));
+	//WorldBuilder::buildCar(GlobalCFrame(5.0, 1.0, 5.0));
 
 
 	WorldBuilder::buildConveyor(1.5, 7.0, GlobalCFrame(-10.0, 1.0, -10.0, Rotation::fromEulerAngles(0.15, 0.0, 0.0)), 1.5);
@@ -198,7 +216,7 @@ void setupWorld(int argc, const char** args) {
 		}
 	}*/
 
-	//WorldBuilder::buildTerrain(2000.0, 2000.0);
+	WorldBuilder::buildTerrain(200.0, 200.0);
 
 
 	/*ExtendedPart* ropeStart = new ExtendedPart(Box(2.0, 1.5, 0.7), GlobalCFrame(10.0, 2.0, -10.0), {1.0, 0.7, 0.3}, "RopeA");
@@ -337,6 +355,8 @@ void setupWorld(int argc, const char** args) {
 		attachedBlock->attach(anotherAttachedBlock, new SinusoidalPistonConstraint(Vec3(0.0, 1.0, 0.0), 1.0, 2.0, 0.7), CFrame(0.0, 0.5, 0.0), CFrame(0.0, -0.5, 0.0));
 
 		world.addPart(mainBlock);
+
+		mainBlock->parent->mainPhysical->motionOfCenterOfMass.rotation.angularVelocity = Vec3(0, 2, 0);
 	}
 
 }
