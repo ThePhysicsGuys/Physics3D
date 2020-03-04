@@ -7,7 +7,10 @@
 #include "../physics/profiling.h"
 #include "../physics/math/linalg/largeMatrix.h"
 
+namespace Graphics {
 class Font;
+};
+
 class Screen;
 struct TreeNode;
 
@@ -36,7 +39,7 @@ struct PieChart {
 
 	inline PieChart(const char* title, std::string totalValue, Vec2f piePosition, float pieSize) : title(title), totalValue(totalValue), piePosition(piePosition), pieSize(pieSize) {}
 	void renderPie() const;
-	void renderText(Font* font) const;
+	void renderText(Graphics::Font* font) const;
 	void add(DataPoint& p);
 	float getTotal() const;
 };

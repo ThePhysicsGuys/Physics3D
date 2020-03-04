@@ -11,15 +11,15 @@ public:
 	virtual TextureResource* load(const std::string& name, const std::string& path) override;
 };
 
-class TextureResource : public Resource, public Texture {
+class TextureResource : public Resource, public Graphics::Texture {
 public:
 	DEFINE_RESOURCE(Texture, "../res/textures/default/default.png");
 
-	TextureResource(const std::string& path, Texture&& texture) : Resource(path, path), Texture(std::move(texture)) {
+	TextureResource(const std::string& path, Graphics::Texture&& texture) : Resource(path, path), Texture(std::move(texture)) {
 	
 	}
 
-	TextureResource(const std::string& name, const std::string& path, Texture&& texture) : Resource(name, path), Texture(std::move(texture)) {
+	TextureResource(const std::string& name, const std::string& path, Graphics::Texture&& texture) : Resource(name, path), Graphics::Texture(std::move(texture)) {
 	
 	}
 

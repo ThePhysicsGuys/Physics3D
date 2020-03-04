@@ -79,9 +79,9 @@ void GuiLayer::onRender() {
 	//Renderer::beginScene();
 
 	// Render GUI
-	Renderer::disableDepthTest();
-	Renderer::disableCulling();
-	Renderer::enableBlending();
+	Graphics::Renderer::disableDepthTest();
+	Graphics::Renderer::disableCulling();
+	Graphics::Renderer::enableBlending();
 	//Renderer::
 	graphicsMeasure.mark(GraphicsProcess::OTHER);
 	ApplicationShaders::fontShader.updateProjection(screen->camera.orthoMatrix);

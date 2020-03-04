@@ -9,7 +9,7 @@
 #include "renderer.h"
 #include "../physics/geometry/shape.h"
 
-IndexedMesh::IndexedMesh(const VisualShape& shape) : AbstractMesh(), vertexCount(shape.vertexCount), triangleCount(shape.triangleCount) {
+IndexedMesh::IndexedMesh(const Graphics::VisualShape& shape) : AbstractMesh(), vertexCount(shape.vertexCount), triangleCount(shape.triangleCount) {
 	float* vertices = new float[shape.vertexCount * 3];
 	for(int i = 0; i < vertexCount; i++) {
 		Vec3f vertex = shape[i];
@@ -120,7 +120,7 @@ IndexedMesh& IndexedMesh::operator=(IndexedMesh&& other) {
 }
 
 void IndexedMesh::render() {
-	render(Renderer::FILL);
+	render(Graphics::Renderer::FILL);
 }
 
 void IndexedMesh::render(unsigned int mode)  {
@@ -128,9 +128,9 @@ void IndexedMesh::render(unsigned int mode)  {
 	indexBuffer->bind();
 
 	
-	Renderer::polygonMode(Renderer::FRONT_AND_BACK, mode);
-	Renderer::drawElements(renderMode, triangleCount * 3, Renderer::UINT, nullptr);
-	Renderer::polygonMode(Renderer::FRONT_AND_BACK, Renderer::FILL);
+	Graphics::Renderer::polygonMode(Graphics::Renderer::FRONT_AND_BACK, mode);
+	Graphics::Renderer::drawElements(renderMode, triangleCount * 3, Graphics::Renderer::UINT, nullptr);
+	Graphics::Renderer::polygonMode(Graphics::Renderer::FRONT_AND_BACK, Graphics::Renderer::FILL);
 }
 
 void IndexedMesh::close() {

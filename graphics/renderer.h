@@ -2,6 +2,8 @@
 
 #include "bindable.h"
 
+namespace Graphics {
+
 namespace Renderer {
 
 // GL constants
@@ -26,14 +28,14 @@ extern unsigned int UINT;
 // GLEW binding
 
 extern bool initGLEW();
- 
+
 extern void clearDepth();
 extern void clearColor();
 extern void clearStencil();
- 
+
 extern void lineStipple(int factor, short pattern);
 extern void lineWidth(float size);
- 
+
 extern void viewport(Vec2i origin, Vec2i dimension);
 
 extern void enableDepthMask();
@@ -46,7 +48,7 @@ extern void enableBlending();
 extern void disableBlending();
 extern void standardBlendFunction();
 extern void enableMultisampling();
- 
+
 extern const unsigned char* getVendor();
 extern const unsigned char* getVersion();
 extern const unsigned char* getRenderer();
@@ -62,3 +64,5 @@ extern void beginScene();
 extern void endScene();
 
 }
+
+};

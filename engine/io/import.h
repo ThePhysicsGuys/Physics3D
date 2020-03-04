@@ -2,7 +2,9 @@
 
 #include <istream>
 
+namespace Graphics {
 struct VisualShape;
+};
 
 namespace Import {
 	int parseInt(std::string num);
@@ -22,6 +24,6 @@ namespace Import {
 };
 
 namespace OBJImport {
-	VisualShape load(std::istream& file, bool binary = false);
-	VisualShape load(std::string file, bool binary = false);
+	Graphics::VisualShape load(std::istream& file, bool binary = false);
+	Graphics::VisualShape load(std::string file, bool binary = false);
 };

@@ -3,6 +3,8 @@
 #include "bindable.h"
 #include "gui/color.h"
 
+namespace Graphics {
+
 class Texture : public Bindable {
 protected:
 	int width;
@@ -91,4 +93,6 @@ public:
 class DepthTexture : public Texture {
 public:
 	DepthTexture(int width, int height);
+};
+
 };

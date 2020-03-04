@@ -4,7 +4,9 @@
 #include "../graphics/resource/shaderResource.h"
 #include "../physics/math/linalg/mat.h"
 
+namespace Graphics {
 class Texture;
+};
 
 struct GuiShader : public ShaderResource {
 	GuiShader() : ShaderResource() {}
@@ -20,8 +22,8 @@ struct QuadShader : public ShaderResource {
 
 	void updateProjection(const Mat4f& orthoMatrix);
 	void updateColor(const Vec4& color);
-	void updateTexture(Texture* texture);
-	void updateTexture(Texture* texture, const Vec4f& color);
+	void updateTexture(Graphics::Texture* texture);
+	void updateTexture(Graphics::Texture* texture, const Vec4f& color);
 };
 
 struct BlurShader : public ShaderResource {
@@ -29,7 +31,7 @@ struct BlurShader : public ShaderResource {
 	BlurShader(ShaderSource shaderSource) : ShaderResource("BlurShader", "blur.shader", shaderSource) {}
 
 	void updateWidth(float width);
-	void updateTexture(Texture* texture);
+	void updateTexture(Graphics::Texture* texture);
 };
 
 namespace GraphicsShaders {

@@ -19,10 +19,8 @@ VisualData box;
 VisualData sphere;
 VisualData cylinder;
 
-
-
 // Generates a cylinder with 
-static VisualShape createCylinder(int sides, double radius, double height) {
+static Graphics::VisualShape createCylinder(int sides, double radius, double height) {
 	assert(sides >= 2);
 	int vertexCount = sides * 4;
 	Vec3f* vecBuf = new Vec3f[vertexCount];
@@ -69,12 +67,12 @@ static VisualShape createCylinder(int sides, double radius, double height) {
 		normals[i * 2 + sides * 2 + 1] = Vec3f(0, 0, -1);
 	}
 
-	return VisualShape(vecBuf, SharedArrayPtr<const Vec3f>(normals), triangleBuf, vertexCount, triangleCount);
+	return Graphics::VisualShape(vecBuf, SharedArrayPtr<const Vec3f>(normals), triangleBuf, vertexCount, triangleCount);
 }
 
-VisualShape createSphere(double radius, int steps) {
+Graphics::VisualShape createSphere(double radius, int steps) {
 	Polyhedron sphere(Library::createSphere(radius, steps));
-	VisualShape sphereShape = VisualShape(sphere);
+	Graphics::VisualShape sphereShape = Graphics::VisualShape(sphere);
 	Vec3f* normalBuf = new Vec3f[sphereShape.vertexCount];
 	sphereShape.computeNormals(normalBuf);
 	sphereShape.normals = SharedArrayPtr<const Vec3f>(normalBuf);
@@ -88,14 +86,14 @@ void init() {
 }
 
 
-VisualData addMeshShape(const VisualShape& s) {
+VisualData addMeshShape(const Graphics::VisualShape& s) {
 	int size = (int) meshes.size();
 	//Log::error("Mesh %d added!", size);
 	meshes.push_back(new IndexedMesh(s));
 	return VisualData{size, s.uvs != nullptr, s.normals != nullptr};
 }
 
-VisualData registerMeshFor(const ShapeClass* shapeClass, const VisualShape& mesh) {
+VisualData registerMeshFor(const ShapeClass* shapeClass, const Graphics::VisualShape& mesh) {
 	if(shapeClassMeshIds.find(shapeClass) != shapeClassMeshIds.end()) throw "Attempting to re-register existing ShapeClass!";
 
 	VisualData meshData = addMeshShape(mesh);
@@ -107,7 +105,7 @@ VisualData registerMeshFor(const ShapeClass* shapeClass, const VisualShape& mesh
 }
 
 VisualData registerMeshFor(const ShapeClass* shapeClass) {
-	return registerMeshFor(shapeClass, VisualShape(shapeClass->asPolyhedron()));
+	return registerMeshFor(shapeClass, Graphics::VisualShape(shapeClass->asPolyhedron()));
 }
 
 VisualData getOrCreateMeshFor(const ShapeClass* shapeClass) {

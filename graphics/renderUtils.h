@@ -3,30 +3,34 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+namespace Graphics {
+
 namespace Renderer {
 
-	// GLFW binding
+// GLFW binding
 
-	extern bool initGLFW();
-	extern void terminateGLFW();
+extern bool initGLFW();
+extern void terminateGLFW();
 
-	extern GLFWwindow* getGLFWContext();
-	extern void createGLFWContext(int width, int height, const char* title);
-	extern void makeGLFWContextCurrent();
-	extern bool validGLFWContext();
+extern GLFWwindow* getGLFWContext();
+extern void createGLFWContext(int width, int height, const char* title);
+extern void makeGLFWContextCurrent();
+extern bool validGLFWContext();
 
-	extern void swapGLFWInterval(int interval);
-	extern void swapGLFWBuffers();
-	extern void pollGLFWEvents();
+extern void swapGLFWInterval(int interval);
+extern void swapGLFWBuffers();
+extern void pollGLFWEvents();
 
-	extern void closeGLFWWindow();
-	extern bool isGLFWWindowClosed();
+extern void closeGLFWWindow();
+extern bool isGLFWWindowClosed();
 
-	extern Vec2i getGLFWWindowSize();
-	extern Vec4i getGLFWFrameSize();
-	
-	extern void enableGLFWCursor();
-	extern void disableGLFWCursor();
+extern Vec2i getGLFWWindowSize();
+extern Vec4i getGLFWFrameSize();
 
-	extern void setGLFWMultisampleSamples(int samples);
+extern void enableGLFWCursor();
+extern void disableGLFWCursor();
+
+extern void setGLFWMultisampleSamples(int samples);
 }
+
+};

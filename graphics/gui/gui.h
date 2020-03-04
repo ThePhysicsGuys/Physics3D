@@ -7,11 +7,13 @@
 class Component;
 class ColorPicker;
 class Frame;
-class Texture;
-class Font;
 class FrameBuffer;
 class IndexedMesh;
 struct Quad;
+namespace Graphics {
+class Font;
+class Texture;
+};
 
 namespace GUI {
 
@@ -37,12 +39,12 @@ namespace GUI {
 	extern Vec4f labelBackgroundColor;
 
 	// Button
-	extern Texture* closeButtonHoverTexture;
-	extern Texture* closeButtonIdleTexture;
-	extern Texture* closeButtonPressTexture;
-	extern Texture* minimizeButtonHoverTexture;
-	extern Texture* minimizeButtonIdleTexture;
-	extern Texture* minimizeButtonPressTexture;
+	extern Graphics::Texture* closeButtonHoverTexture;
+	extern Graphics::Texture* closeButtonIdleTexture;
+	extern Graphics::Texture* closeButtonPressTexture;
+	extern Graphics::Texture* minimizeButtonHoverTexture;
+	extern Graphics::Texture* minimizeButtonIdleTexture;
+	extern Graphics::Texture* minimizeButtonPressTexture;
 	extern Color borderColor;
 	extern double borderWidth;
 
@@ -57,11 +59,11 @@ namespace GUI {
 	extern Color sliderForegroundEmptyColor;
 
 	// ColorPicker
-	extern Texture* colorPickerCrosshairTexture;
-	extern Texture* colorPickerHueTexture;
-	extern Texture* colorPickerBrightnessTexture;
-	extern Texture* colorPickerAlphaBrightnessTexture;
-	extern Texture* colorPickerAlphaPatternTexture;
+	extern Graphics::Texture* colorPickerCrosshairTexture;
+	extern Graphics::Texture* colorPickerHueTexture;
+	extern Graphics::Texture* colorPickerBrightnessTexture;
+	extern Graphics::Texture* colorPickerAlphaBrightnessTexture;
+	extern Graphics::Texture* colorPickerAlphaPatternTexture;
 	extern Color colorPickerBarBorderColor;
 	extern double colorPickerBarWidth;
 	extern double colorPickerHueSize;
@@ -73,12 +75,12 @@ namespace GUI {
 	extern Color colorPickerSelectorColor;
 
 	// CheckBox
-	extern Texture* checkBoxUncheckedTexture;
-	extern Texture* checkBoxCheckedTexture;
-	extern Texture* checkBoxPressCheckedTexture;
-	extern Texture* checkBoxPressUncheckedTexture;
-	extern Texture* checkBoxHoverCheckedTexture;
-	extern Texture* checkBoxHoverUncheckedTexture;
+	extern Graphics::Texture* checkBoxUncheckedTexture;
+	extern Graphics::Texture* checkBoxCheckedTexture;
+	extern Graphics::Texture* checkBoxPressCheckedTexture;
+	extern Graphics::Texture* checkBoxPressUncheckedTexture;
+	extern Graphics::Texture* checkBoxHoverCheckedTexture;
+	extern Graphics::Texture* checkBoxHoverUncheckedTexture;
 	extern double checkBoxOffset;
 	extern double checkBoxSize;
 	extern double checkBoxLabelOffset;
@@ -92,7 +94,7 @@ namespace GUI {
 	extern Color frameBackgroundColor;
 
 	// Font
-	extern Font* font;
+	extern Graphics::Font* font;
 	extern Color fontColor;
 	extern double fontSize;
 

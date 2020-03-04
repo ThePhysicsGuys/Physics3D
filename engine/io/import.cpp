@@ -159,7 +159,7 @@ struct Face {
 	}
 };
 
-VisualShape reorder(const std::vector<Vec3f>& positions, const std::vector<Vec3f>& normals, const std::vector<Vec2f>& uvs, const std::vector<Face>& faces, Flags flags) {
+Graphics::VisualShape reorder(const std::vector<Vec3f>& positions, const std::vector<Vec3f>& normals, const std::vector<Vec2f>& uvs, const std::vector<Face>& faces, Flags flags) {
 	
 	// Positions
 	Vec3f* positionArray = new Vec3f[positions.size()];
@@ -192,10 +192,10 @@ VisualShape reorder(const std::vector<Vec3f>& positions, const std::vector<Vec3f
 		}
 	}
 
-	return VisualShape(positionArray, SharedArrayPtr<const Vec3f>(normalArray), SharedArrayPtr<const Vec2f>(uvArray), triangleArray, (int)positions.size(), (int)faces.size());
+	return Graphics::VisualShape(positionArray, SharedArrayPtr<const Vec3f>(normalArray), SharedArrayPtr<const Vec2f>(uvArray), triangleArray, (int)positions.size(), (int)faces.size());
 }
 
-VisualShape loadBinaryObj(std::istream& input) {
+Graphics::VisualShape loadBinaryObj(std::istream& input) {
 	char flag = Import::read<char>(input);
 	int vertexCount = Import::read<int>(input);
 	int triangleCount = Import::read<int>(input);
@@ -233,10 +233,10 @@ VisualShape loadBinaryObj(std::istream& input) {
 		triangles[i] = Import::read<Triangle>(input);
 	}
 
-	return VisualShape(vertices, SharedArrayPtr<const Vec3f>(normals), SharedArrayPtr<const Vec2f>(uvs), triangles, vertexCount, triangleCount);
+	return Graphics::VisualShape(vertices, SharedArrayPtr<const Vec3f>(normals), SharedArrayPtr<const Vec2f>(uvs), triangles, vertexCount, triangleCount);
 }
 
-VisualShape loadNonBinaryObj(std::istream& input) {
+Graphics::VisualShape loadNonBinaryObj(std::istream& input) {
 	std::vector<Vec3f> vertices;
 	std::vector<Vec3f> normals;
 	std::vector<Vec2f> uvs;
@@ -275,21 +275,21 @@ VisualShape loadNonBinaryObj(std::istream& input) {
 	return reorder(vertices, normals, uvs, faces, flags);
 }
 
-VisualShape OBJImport::load(std::istream& file, bool binary) {
+Graphics::VisualShape OBJImport::load(std::istream& file, bool binary) {
 	if (binary)
 		return loadBinaryObj(file);
 	else
 		return loadNonBinaryObj(file);
 }
 
-VisualShape OBJImport::load(std::string file, bool binary) {
+Graphics::VisualShape OBJImport::load(std::string file, bool binary) {
 	struct stat buffer;
 
 	if (stat(file.c_str(), &buffer) == -1) {
 		Log::subject(file.c_str());
 		Log::error("File not found: %s", file.c_str());
 
-		return VisualShape();
+		return Graphics::VisualShape();
 	}
 
 	std::ifstream input;
@@ -299,7 +299,7 @@ VisualShape OBJImport::load(std::string file, bool binary) {
 	else
 		input.open(file);
 
-	VisualShape shape = load(input, binary);
+	Graphics::VisualShape shape = load(input, binary);
 
 	input.close();
 

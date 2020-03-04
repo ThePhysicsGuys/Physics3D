@@ -1,6 +1,8 @@
 #pragma once
 
+namespace Graphics {
 struct VisualShape;
+};
 
 namespace Export {
 	template<typename T>
@@ -19,5 +21,5 @@ namespace Export {
 };
 
 namespace OBJExport {
-	void save(const std::string& file, const VisualShape&, bool binary = false);
+	void save(const std::string& file, const Graphics::VisualShape&, bool binary = false);
 };

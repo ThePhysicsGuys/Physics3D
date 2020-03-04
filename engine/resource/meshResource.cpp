@@ -5,7 +5,7 @@
 #include "../graphics/visualShape.h"
 
 MeshResource* MeshAllocator::load(const std::string& name, const std::string& path) {
-	VisualShape shape = OBJImport::load(path);
+	Graphics::VisualShape shape = OBJImport::load(path);
 	IndexedMesh* mesh = new IndexedMesh(shape);
 	return new MeshResource(name, path, mesh, shape);
 }

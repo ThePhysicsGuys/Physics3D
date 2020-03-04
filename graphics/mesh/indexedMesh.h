@@ -6,7 +6,10 @@
 
 class IndexBuffer;
 class VertexBuffer;
+
+namespace Graphics {
 struct VisualShape;
+};
 
 class IndexedMesh : public AbstractMesh {
 public:
@@ -22,7 +25,7 @@ public:
 	int vertexCount;
 	int triangleCount;
 
-	IndexedMesh(const VisualShape& shape);
+	IndexedMesh(const Graphics::VisualShape& shape);
 	IndexedMesh(const float* vertices, const float* normals, const float* uvs, const unsigned int* indices, const int vertexCount, const int triangleCount);
 
 	~IndexedMesh();

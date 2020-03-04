@@ -7,6 +7,8 @@
 
 #define CHARACTER_COUNT 128
 
+namespace Graphics {
+
 struct Character {
 	union {
 		struct {
@@ -63,4 +65,6 @@ public:
 	unsigned int getAtlasID() const;
 	unsigned int getAtlasWidth() const;
 	unsigned int getAtlasHeight() const;
+};
+
 };

@@ -2,11 +2,15 @@
 
 class IndexedMesh;
 
+namespace Graphics {
+
 namespace Library {
-	extern IndexedMesh* cube;
-	extern IndexedMesh* sphere;
-	extern IndexedMesh* vector;
-	
-	void onInit();
-	void onClose();
+extern IndexedMesh* cube;
+extern IndexedMesh* sphere;
+extern IndexedMesh* vector;
+
+void onInit();
+void onClose();
 }
+
+};

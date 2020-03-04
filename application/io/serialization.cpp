@@ -14,9 +14,9 @@
 
 namespace Application {
 
-FixedSharedObjectSerializerDeserializer<Texture*> textureSerializer{nullptr};
+FixedSharedObjectSerializerDeserializer<Graphics::Texture*> textureSerializer{nullptr};
 
-void WorldImportExport::registerTexture(Texture* texture) {
+void WorldImportExport::registerTexture(Graphics::Texture* texture) {
 	textureSerializer.registerObject(texture);
 }
 
@@ -30,8 +30,8 @@ static void serializeMaterial(const Material& material, std::ostream& ostream) {
 }
 
 static Material deserializeMaterial(std::istream& istream) {
-	Texture* texture = textureSerializer.deserialize(istream);
-	Texture* normal = textureSerializer.deserialize(istream);
+	Graphics::Texture* texture = textureSerializer.deserialize(istream);
+	Graphics::Texture* normal = textureSerializer.deserialize(istream);
 	Color ambient = ::deserialize<Color>(istream);
 	Color3 diffuse = ::deserialize<Color3>(istream);
 	Color3 specular = ::deserialize<Color3>(istream);

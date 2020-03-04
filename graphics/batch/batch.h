@@ -142,10 +142,10 @@ public:
 	virtual void submit() {
 		vao->bind();
 
-		vbo->fill((const void *) vertexBuffer.data(), vertexBuffer.size() * sizeof(Vertex), Renderer::STREAM_DRAW);
-		ibo->fill((const unsigned int *) indexBuffer.data(), indexBuffer.size(), Renderer::STREAM_DRAW);
+		vbo->fill((const void *) vertexBuffer.data(), vertexBuffer.size() * sizeof(Vertex), Graphics::Renderer::STREAM_DRAW);
+		ibo->fill((const unsigned int *) indexBuffer.data(), indexBuffer.size(), Graphics::Renderer::STREAM_DRAW);
 
-		Renderer::drawElements(config.type, indexBuffer.size(), Renderer::UINT, nullptr);
+		Graphics::Renderer::drawElements(config.type, indexBuffer.size(), Graphics::Renderer::UINT, nullptr);
 
 		vbo->unbind();
 		ibo->unbind();

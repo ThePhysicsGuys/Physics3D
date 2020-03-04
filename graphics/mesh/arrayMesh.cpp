@@ -15,7 +15,7 @@ ArrayMesh::ArrayMesh(Vec2f* positions, const unsigned int vertexCount) : ArrayMe
 
 };
 
-ArrayMesh::ArrayMesh(const float* positions, const unsigned int vertexCount, const unsigned int dimensions) : ArrayMesh(positions, vertexCount, dimensions, Renderer::TRIANGLES) {
+ArrayMesh::ArrayMesh(const float* positions, const unsigned int vertexCount, const unsigned int dimensions) : ArrayMesh(positions, vertexCount, dimensions, Graphics::Renderer::TRIANGLES) {
 
 };
 
@@ -47,7 +47,7 @@ ArrayMesh::ArrayMesh(const float* vertices, const unsigned int vertexCount, cons
 
 void ArrayMesh::render() {
 	vao->bind();
-	Renderer::drawArrays(renderMode, 0, vertexCount);
+	Graphics::Renderer::drawArrays(renderMode, 0, vertexCount);
 }
 
 void ArrayMesh::close() {

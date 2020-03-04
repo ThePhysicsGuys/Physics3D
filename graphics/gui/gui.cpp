@@ -42,12 +42,12 @@ namespace GUI {
 	Vec4f labelBackgroundColor = COLOR::WHITE;
 
 	// Button
-	Texture* closeButtonHoverTexture;
-	Texture* closeButtonIdleTexture;
-	Texture* closeButtonPressTexture;
-	Texture* minimizeButtonHoverTexture;
-	Texture* minimizeButtonIdleTexture;
-	Texture* minimizeButtonPressTexture;
+	Graphics::Texture* closeButtonHoverTexture;
+	Graphics::Texture* closeButtonIdleTexture;
+	Graphics::Texture* closeButtonPressTexture;
+	Graphics::Texture* minimizeButtonHoverTexture;
+	Graphics::Texture* minimizeButtonIdleTexture;
+	Graphics::Texture* minimizeButtonPressTexture;
 	Color borderColor = COLOR::SILVER;
 	double borderWidth = 0.004;
 
@@ -62,11 +62,11 @@ namespace GUI {
 	Color sliderForegroundEmptyColor = COLOR::GRAY;
 	
 	// ColorPicker
-	Texture* colorPickerCrosshairTexture;
-	Texture* colorPickerHueTexture;
-	Texture* colorPickerBrightnessTexture;
-	Texture* colorPickerAlphaBrightnessTexture;
-	Texture* colorPickerAlphaPatternTexture;
+	Graphics::Texture* colorPickerCrosshairTexture;
+	Graphics::Texture* colorPickerHueTexture;
+	Graphics::Texture* colorPickerBrightnessTexture;
+	Graphics::Texture* colorPickerAlphaBrightnessTexture;
+	Graphics::Texture* colorPickerAlphaPatternTexture;
 	Color colorPickerBarBorderColor = COLOR::SILVER;
 	double colorPickerBarWidth = 0.05;
 	double colorPickerHueSize = 0.4;
@@ -78,12 +78,12 @@ namespace GUI {
 	Color colorPickerSelectorColor = COLOR::SILVER;
 	
 	// CheckBox
-	Texture* checkBoxUncheckedTexture;
-	Texture* checkBoxCheckedTexture;
-	Texture* checkBoxPressCheckedTexture;
-	Texture* checkBoxPressUncheckedTexture;
-	Texture* checkBoxHoverCheckedTexture;
-	Texture* checkBoxHoverUncheckedTexture;
+	Graphics::Texture* checkBoxUncheckedTexture;
+	Graphics::Texture* checkBoxCheckedTexture;
+	Graphics::Texture* checkBoxPressCheckedTexture;
+	Graphics::Texture* checkBoxPressUncheckedTexture;
+	Graphics::Texture* checkBoxHoverCheckedTexture;
+	Graphics::Texture* checkBoxHoverUncheckedTexture;
 	double checkBoxOffset = 0.006;
 	double checkBoxSize = 0.03;
 	double checkBoxLabelOffset = 0.02;
@@ -97,7 +97,7 @@ namespace GUI {
 	Color frameBackgroundColor = COLOR::BACK;
 
 	// Font
-	Font* font = nullptr;
+	Graphics::Font* font = nullptr;
 	Color fontColor = COLOR::SILVER;
 	double fontSize = 0.0007;
 

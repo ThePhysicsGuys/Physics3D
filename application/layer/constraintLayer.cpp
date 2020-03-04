@@ -30,7 +30,7 @@ void ConstraintLayer::onDetach() {
 }
 
 void ConstraintLayer::onInit() {
-	this->hexagon = Engine::MeshRegistry::addMeshShape(VisualShape(Library::createPrism(6, 0.5, 1.0)));
+	this->hexagon = Engine::MeshRegistry::addMeshShape(Graphics::VisualShape(Library::createPrism(6, 0.5, 1.0)));
 
 }
 void ConstraintLayer::onUpdate() {
@@ -41,7 +41,7 @@ static void renderObject(const VisualData& shape, const GlobalCFrame& cframe, co
 	ApplicationShaders::basicShader.updateMaterial(material);
 	ApplicationShaders::basicShader.updateIncludeNormalsAndUVs(false, false);
 	ApplicationShaders::basicShader.updateModel(cframe, scale);
-	shape.render(Renderer::FILL);
+	shape.render(Graphics::Renderer::FILL);
 }
 
 static void renderConstraintLineBetween(Position p1, Position p2) {

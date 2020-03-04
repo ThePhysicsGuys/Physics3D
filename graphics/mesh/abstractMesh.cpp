@@ -9,6 +9,6 @@ AbstractMesh::AbstractMesh(unsigned int rendermode) : renderMode(renderMode) {
 	vao = new VertexArray();
 };
 
-AbstractMesh::AbstractMesh() : renderMode(Renderer::TRIANGLES) {
+AbstractMesh::AbstractMesh() : renderMode(Graphics::Renderer::TRIANGLES) {
 	vao = new VertexArray();
 };

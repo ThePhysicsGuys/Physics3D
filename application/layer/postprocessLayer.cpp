@@ -27,17 +27,17 @@ void PostprocessLayer::onEvent(::Event& event) {
 void PostprocessLayer::onRender() {
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
-	Renderer::beginScene();
+	Graphics::Renderer::beginScene();
 
 	screen->screenFrameBuffer->unbind();
-	Renderer::clearColor();
-	Renderer::clearDepth();
+	Graphics::Renderer::clearColor();
+	Graphics::Renderer::clearDepth();
 
-	Renderer::disableDepthTest();
+	Graphics::Renderer::disableDepthTest();
 	ApplicationShaders::postProcessShader.updateTexture(screen->screenFrameBuffer->texture);
 	screen->quad->render();
 
-	Renderer::endScene();
+	Graphics::Renderer::endScene();
 }
 
 void PostprocessLayer::onClose() {

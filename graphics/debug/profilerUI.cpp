@@ -60,7 +60,7 @@ void PieChart::renderPie() const {
 	}
 }
 
-void PieChart::renderText(Font* font) const {
+void PieChart::renderText(Graphics::Font* font) const {
 
 	// Title
 	Vec2f titlePosition = piePosition + Vec2f(pieSize * 1.3f, pieSize * 1.1f);

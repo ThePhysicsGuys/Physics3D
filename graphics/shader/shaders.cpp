@@ -203,11 +203,11 @@ void QuadShader::updateColor(const Vec4& color) {
 	setUniform("color", color);
 }
 
-void QuadShader::updateTexture(Texture* texture) {
+void QuadShader::updateTexture(Graphics::Texture* texture) {
 	updateTexture(texture, Vec4f(1));
 }
 
-void QuadShader::updateTexture(Texture* texture, const Vec4f& color) {
+void QuadShader::updateTexture(Graphics::Texture* texture, const Vec4f& color) {
 	bind();
 	texture->bind();
 	setUniform("textured", true);
@@ -222,7 +222,7 @@ void BlurShader::updateWidth(float width) {
 	setUniform("width", width);
 }
 
-void BlurShader::updateTexture(Texture* texture) {
+void BlurShader::updateTexture(Graphics::Texture* texture) {
 	bind();
 	texture->bind();
 	setUniform("image", texture->getUnit());

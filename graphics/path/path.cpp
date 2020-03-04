@@ -258,7 +258,7 @@ namespace Path {
 		Path::batch->pushCommand(id);
 	}
 
-	void text(Font* font, const std::string& text, double size, const Vec2f& pos, const Color& color, char textPivot) {
+	void text(Graphics::Font* font, const std::string& text, double size, const Vec2f& pos, const Color& color, char textPivot) {
 		if (text.empty())
 			return;
 
@@ -288,7 +288,7 @@ namespace Path {
 		Path::batch->reserve(vertexCount, indexCount);
 		for (char c : text) {
 			int ascii = (int) c;
-			const Character& character = font->getCharacter(ascii);
+			const Graphics::Character& character = font->getCharacter(ascii);
 			float descend = character.height - character.by;
 			float xpos = x + character.bx * size;
 			float ypos = y - descend * size;

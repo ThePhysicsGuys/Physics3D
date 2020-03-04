@@ -90,8 +90,8 @@ void EditTools::onRender(Screen& screen) {
 	GlobalCFrame selFrame = screen.selectedPart->getCFrame();
 	Mat4 modelMatrix(selFrame.getRotation().asRotationMatrix(), selFrame.getPosition() - Position(0,0,0), Vec3(0,0,0), 1);
 
-	Renderer::clearDepth();
-	Renderer::enableDepthTest();
+	Graphics::Renderer::clearDepth();
+	Graphics::Renderer::enableDepthTest();
 
 	// Center, only rendered if editMode != EditMode::ROTATE
 	if (center) {
@@ -133,7 +133,7 @@ void EditTools::onRender(Screen& screen) {
 	ApplicationShaders::basicShader.updateModel(modelMatrix * Mat4(Matrix<double, 3, 3>(transformations[2]), 1.0f));
 	shaft->render();
 
-	Renderer::disableDepthTest();
+	Graphics::Renderer::disableDepthTest();
 }
 
 void EditTools::onClose() {
@@ -145,7 +145,7 @@ void EditTools::onClose() {
 }
 
 float EditTools::intersect(Screen& screen, const Ray& ray) {
-	VisualShape tool[2];
+	Graphics::VisualShape tool[2];
 
 	// Select correct tools
 	switch (editMode) {
@@ -155,7 +155,7 @@ float EditTools::intersect(Screen& screen, const Ray& ray) {
 			break;
 		case EditMode::ROTATE:
 			tool[0] = rotateMesh->getShape();
-			tool[1] = VisualShape();
+			tool[1] = Graphics::VisualShape();
 			break;
 		case EditMode::SCALE:
 			tool[0] = scaleMesh->getShape();
@@ -173,7 +173,7 @@ float EditTools::intersect(Screen& screen, const Ray& ray) {
 		GlobalCFrame frame = screen.selectedPart->getCFrame();
 		frame.rotation = frame.getRotation() * transformations[i];
 
-		VisualShape shape = tool[i / 3];
+		Graphics::VisualShape shape = tool[i / 3];
 		Position rayStart = ray.start;
 
 		float distance = shape.getIntersectionDistance(frame.globalToLocal(ray.start), frame.relativeToLocal(ray.direction));

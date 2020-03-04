@@ -7,8 +7,8 @@
 #include "buffers/vertexBuffer.h"
 #include "buffers/vertexArray.h"
 
-VectorMesh::VectorMesh(const float* vertices, const size_t vertexCount, size_t capacity) : AbstractMesh(Renderer::POINT), vertexCount(vertexCount), capacity(capacity) {
-	vertexBuffer = new VertexBuffer(vertices, 9 * capacity * sizeof(float), Renderer::DYNAMIC_DRAW);
+VectorMesh::VectorMesh(const float* vertices, const size_t vertexCount, size_t capacity) : AbstractMesh(Graphics::Renderer::POINT), vertexCount(vertexCount), capacity(capacity) {
+	vertexBuffer = new VertexBuffer(vertices, 9 * capacity * sizeof(float), Graphics::Renderer::DYNAMIC_DRAW);
 	
 	bufferLayout = {
 		{
@@ -23,7 +23,7 @@ VectorMesh::VectorMesh(const float* vertices, const size_t vertexCount, size_t c
 
 void VectorMesh::render() {
 	vao->bind();
-	Renderer::drawArrays(renderMode, 0, vertexCount);
+	Graphics::Renderer::drawArrays(renderMode, 0, vertexCount);
 }
 
 void VectorMesh::close() {
@@ -37,7 +37,7 @@ void VectorMesh::update(const float* vertices, const size_t vertexCount) {
 	if (vertexCount > capacity) {
 		capacity = vertexCount;
 		Log::warn("Vector buffer overflow, creating new buffer with size (%d)", vertexCount);
-		vertexBuffer->fill(vertices, capacity * bufferLayout.stride * sizeof(float), Renderer::DYNAMIC_DRAW);
+		vertexBuffer->fill(vertices, capacity * bufferLayout.stride * sizeof(float), Graphics::Renderer::DYNAMIC_DRAW);
 	} else {
 		vertexBuffer->update(vertices, vertexCount * bufferLayout.stride * sizeof(float), 0);
 	}

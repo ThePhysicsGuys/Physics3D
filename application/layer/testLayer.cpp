@@ -106,18 +106,18 @@ void TestLayer::onEvent(Event& event) {
 }
 
 void TestLayer::onRender() {
-	Renderer::beginScene();
+	Graphics::Renderer::beginScene();
 
 	frameBuffer->bind();
 	shader->bind();
 
-	Renderer::disableDepthMask();
-	Renderer::disableCulling();
-	Renderer::enableBlending();
-	Renderer::standardBlendFunction();
-	Renderer::clearColor();
-	Renderer::clearDepth();
-	Renderer::disableDepthTest();
+	Graphics::Renderer::disableDepthMask();
+	Graphics::Renderer::disableCulling();
+	Graphics::Renderer::enableBlending();
+	Graphics::Renderer::standardBlendFunction();
+	Graphics::Renderer::clearColor();
+	Graphics::Renderer::clearDepth();
+	Graphics::Renderer::disableDepthTest();
 	glClearColor(0.1f, 0.1f, 0.7f, 1.0f);
 
 	// draw 100 instanced quads	
@@ -126,20 +126,20 @@ void TestLayer::onRender() {
 	glBindVertexArray(0);*/
 
 	vao->bind();
-	Renderer::drawArrays(Renderer::FILL, 0, 6);
+	Graphics::Renderer::drawArrays(Graphics::Renderer::FILL, 0, 6);
 	vao->unbind();
 	
 	frameBuffer->unbind();
 
-	Renderer::enableDepthTest();
-	Renderer::enableCulling();
-	Renderer::enableDepthMask();
+	Graphics::Renderer::enableDepthTest();
+	Graphics::Renderer::enableCulling();
+	Graphics::Renderer::enableDepthMask();
 
 	ImGui::Begin("Test");
 	ImGui::Image((void*) (intptr_t) frameBuffer->texture->getID(), ImVec2(300, 300));
 	ImGui::End();
 
-	Renderer::endScene();
+	Graphics::Renderer::endScene();
 }
 
 void TestLayer::onClose() {

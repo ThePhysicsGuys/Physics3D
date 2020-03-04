@@ -223,7 +223,7 @@ void SkyboxShader::updateProjection(const Mat4f& viewMatrix, const Mat4f& projec
 	setUniform("projectionMatrix", projectionMatrix);
 }
 
-void SkyboxShader::updateCubeMap(CubeMap* skybox) {
+void SkyboxShader::updateCubeMap(Graphics::CubeMap* skybox) {
 	bind();
 	setUniform("skyboxTexture", skybox->getUnit());
 }
@@ -274,13 +274,13 @@ void DepthShader::updateModel(const GlobalCFrame& modelCFrame, DiagonalMat3f sca
 
 // PostProcessShader
 
-void PostProcessShader::updateTexture(Texture* texture) {
+void PostProcessShader::updateTexture(Graphics::Texture* texture) {
 	bind();
 	texture->bind();
 	setUniform("textureSampler", texture->getUnit());
 }
 
-void PostProcessShader::updateTexture(HDRTexture* texture) {
+void PostProcessShader::updateTexture(Graphics::HDRTexture* texture) {
 	bind();
 	texture->bind();
 	setUniform("textureSampler", texture->getUnit());
@@ -311,7 +311,7 @@ void FontShader::updateProjection(const Mat4f& projectionMatrix) {
 	setUniform("projectionMatrix", projectionMatrix);
 }
 
-void FontShader::updateTexture(Texture* texture) {
+void FontShader::updateTexture(Graphics::Texture* texture) {
 	bind();
 	texture->bind();
 	setUniform("text", texture->getUnit());
@@ -363,7 +363,7 @@ void TestShader::updateViewPosition(const Position& viewPosition) {
 	setUniform("viewPosition", viewPosition);
 }
 
-void TestShader::updateDisplacement(Texture* displacementMap) {
+void TestShader::updateDisplacement(Graphics::Texture* displacementMap) {
 	bind();
 	displacementMap->bind();
 	setUniform("displacementMap", displacementMap->getUnit());

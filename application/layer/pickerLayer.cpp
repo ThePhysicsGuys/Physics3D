@@ -26,11 +26,11 @@ void PickerLayer::onEvent(Event& event) {
 void PickerLayer::onRender() {
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
-	Renderer::beginScene();
+	Graphics::Renderer::beginScene();
 
 	Picker::onRender(*screen);
 
-	Renderer::endScene();
+	Graphics::Renderer::endScene();
 }
 
 void PickerLayer::onClose() {

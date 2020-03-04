@@ -10,45 +10,47 @@
 
 #include "debug/debug.h"
 
+namespace Graphics {
+
 #pragma region Texture
 
 //! Texture
 
 int getChannelsFromFormat(int format) {
 	switch (format) {
-	case GL_RED:
-	case GL_GREEN:
-	case GL_BLUE:
-	case GL_ALPHA:
-		return 1;
-		break;
-	case GL_RGB:
-		return 3;
-		break;
-	case GL_RGBA:
-		return 4;
-		break;
-	default:
-		Log::warn("Unknown format: %x, assuming 4 channels", format);
-		return 4;
+		case GL_RED:
+		case GL_GREEN:
+		case GL_BLUE:
+		case GL_ALPHA:
+			return 1;
+			break;
+		case GL_RGB:
+			return 3;
+			break;
+		case GL_RGBA:
+			return 4;
+			break;
+		default:
+			Log::warn("Unknown format: %x, assuming 4 channels", format);
+			return 4;
 	}
 
 }
 
 int getFormatFromChannels(int channels) {
 	switch (channels) {
-	case 1:
-		return GL_RED;
-		break;
-	case 3:
-		return GL_RGB;
-		break;
-	case 4:
-		return GL_RGBA;
-		break;
-	default:
-		Log::warn("Unknown amount of channels: %d, assuming RGB", channels);
-		return GL_RGB;
+		case 1:
+			return GL_RED;
+			break;
+		case 3:
+			return GL_RGB;
+			break;
+		case 4:
+			return GL_RGBA;
+			break;
+		default:
+			Log::warn("Unknown amount of channels: %d, assuming RGB", channels);
+			return GL_RGB;
 	}
 }
 
@@ -167,7 +169,7 @@ Texture* Texture::colored(Color3 color) {
 
 Texture* Texture::colored(Color color) {
 	bind();
-	unsigned char* buffer = (unsigned char*)malloc(width * height * channels);
+	unsigned char* buffer = (unsigned char*) malloc(width * height * channels);
 
 	glGetTexImage(target, 0, format, type, buffer);
 
@@ -351,3 +353,5 @@ DepthTexture::DepthTexture(int width, int height) : Texture(width, height, nullp
 }
 
 #pragma endregion
+
+};

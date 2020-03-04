@@ -40,14 +40,14 @@ void renderSphere(double radius, const Position& position, const Color& color) {
 	ApplicationShaders::basicShader.updateMaterial(Material(color));
 	ApplicationShaders::basicShader.updateModel(Mat4f(Mat3f::IDENTITY() * float(radius), Vec3f(position - Position(0,0,0)), Vec3f(0.0f,0.0f,0.0f),1.0f));
 
-	Library::sphere->render();
+	Graphics::Library::sphere->render();
 }
 
 void renderBox(const GlobalCFrame& cframe, double width, double height, double depth, const Color& color) {
 	ApplicationShaders::basicShader.updateMaterial(Material(color));
 	ApplicationShaders::basicShader.updateModel(Mat4f(cframe.getRotation().asRotationMatrix() * DiagonalMat3 { width, height, depth }, Vec3f(cframe.getPosition() - Position(0,0,0)), Vec3f(0.0f,0.0f,0.0f), 1.0f));
 
-	Library::cube->render();
+	Graphics::Library::cube->render();
 }
 
 void renderBounds(const Bounds& bounds, const Color& color) {
@@ -98,7 +98,7 @@ bool recursiveColTreeForOneObject(const TreeNode& node, const Part* part, const 
 void DebugLayer::onInit() {
 
 	// Origin init
-	originMesh = new ArrayMesh(nullptr, 1, 3, Renderer::POINT);
+	originMesh = new ArrayMesh(nullptr, 1, 3, Graphics::Renderer::POINT);
 
 	// Vector init
 	vectorMesh = new VectorMesh(nullptr, 0);
@@ -119,7 +119,7 @@ void DebugLayer::onEvent(::Event& event) {
 void DebugLayer::onRender() {
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
-	Renderer::beginScene();
+	Graphics::Renderer::beginScene();
 
 	graphicsMeasure.mark(GraphicsProcess::VECTORS);
 
@@ -200,7 +200,7 @@ void DebugLayer::onRender() {
 		}
 		});
 
-	Renderer::disableDepthTest();
+	Graphics::Renderer::disableDepthTest();
 
 	// Update debug meshes
 	graphicsMeasure.mark(GraphicsProcess::VECTORS);
@@ -219,14 +219,14 @@ void DebugLayer::onRender() {
 	ApplicationShaders::pointShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
 	pointMesh->render();
 
-	Renderer::enableDepthTest();
+	Graphics::Renderer::enableDepthTest();
 
 	// Render origin mesh
 	graphicsMeasure.mark(GraphicsProcess::ORIGIN);
 	ApplicationShaders::originShader.updateProjection(screen->camera.viewMatrix, screen->camera.getViewRotation(), screen->camera.projectionMatrix, screen->camera.orthoMatrix, screen->camera.cframe.position);
 	originMesh->render();
 
-	Renderer::endScene();
+	Graphics::Renderer::endScene();
 }
 
 void DebugLayer::onClose() {

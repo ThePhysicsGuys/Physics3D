@@ -5,9 +5,11 @@
 #include "../graphics/gui/color.h"
 #include "../physics/math/globalCFrame.h"
 
+namespace Graphics {
 class HDRTexture;
 class Texture;
 class CubeMap;
+};
 
 namespace Application {
 
@@ -20,7 +22,7 @@ struct SkyboxShader : public ShaderResource {
 	SkyboxShader(ShaderSource shaderSource) : ShaderResource("skyboxShader", "skybox.shader", shaderSource) {}
 
 	void updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix);
-	void updateCubeMap(CubeMap* skybox);
+	void updateCubeMap(Graphics::CubeMap* skybox);
 	void updateLightDirection(const Vec3f& lightDirection);
 };
 
@@ -66,8 +68,8 @@ struct PostProcessShader : public ShaderResource {
 	PostProcessShader() : ShaderResource() {}
 	PostProcessShader(ShaderSource shaderSource) : ShaderResource("PostProcessShader", "postprocess.shader", shaderSource) {}
 
-	void updateTexture(Texture* texture);
-	void updateTexture(HDRTexture* texture);
+	void updateTexture(Graphics::Texture* texture);
+	void updateTexture(Graphics::HDRTexture* texture);
 };
 
 struct OriginShader : public ShaderResource {
@@ -83,7 +85,7 @@ struct FontShader : public ShaderResource {
 
 	void updateColor(const Color& color);
 	void updateProjection(const Mat4f& projectionMatrix);
-	void updateTexture(Texture* texture);
+	void updateTexture(Graphics::Texture* texture);
 };
 
 struct VectorShader : public ShaderResource {
@@ -109,7 +111,7 @@ struct TestShader : public ShaderResource {
 	void updateModel(const Mat4f& modelMatrix);
 	void updateModel(const GlobalCFrame& modelCFrame, DiagonalMat3f scale);
 	void updateViewPosition(const Position& viewPosition);
-	void updateDisplacement(Texture* displacementMap);
+	void updateDisplacement(Graphics::Texture* displacementMap);
 };
 
 struct LineShader : public ShaderResource {

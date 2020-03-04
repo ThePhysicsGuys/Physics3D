@@ -15,10 +15,10 @@
 
 namespace Application {
 
-CubeMap* skyboxTexture = nullptr;
+Graphics::CubeMap* skyboxTexture = nullptr;
 
 void SkyboxLayer::onInit() {
-	skyboxTexture = new CubeMap("../res/skybox/right.jpg", "../res/skybox/left.jpg", "../res/skybox/top.jpg", "../res/skybox/bottom.jpg", "../res/skybox/front.jpg", "../res/skybox/back.jpg");
+	skyboxTexture = new Graphics::CubeMap("../res/skybox/right.jpg", "../res/skybox/left.jpg", "../res/skybox/top.jpg", "../res/skybox/bottom.jpg", "../res/skybox/front.jpg", "../res/skybox/back.jpg");
 }
 
 void SkyboxLayer::onUpdate() {
@@ -34,17 +34,17 @@ void SkyboxLayer::onRender() {
 
 	graphicsMeasure.mark(GraphicsProcess::SKYBOX);
 
-	Renderer::beginScene();
+	Graphics::Renderer::beginScene();
 
-	Renderer::disableDepthMask();
-	Renderer::disableCulling();
-	Renderer::enableBlending();
+	Graphics::Renderer::disableDepthMask();
+	Graphics::Renderer::disableCulling();
+	Graphics::Renderer::enableBlending();
 	ApplicationShaders::skyboxShader.updateLightDirection(Vec3());
 	ApplicationShaders::skyboxShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix);
 	skyboxTexture->bind();
-	Library::sphere->render();
+	Graphics::Library::sphere->render();
 
-	Renderer::endScene();
+	Graphics::Renderer::endScene();
 }
 
 void SkyboxLayer::onClose() {

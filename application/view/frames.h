@@ -37,8 +37,8 @@ public:
 
 private:
 	static void renderShaderStageInfo(Shader* shader, const ShaderStage& stage);
-	static void renderTextureInfo(Texture* texture);
-	static void renderFontInfo(Font* font);
+	static void renderTextureInfo(Graphics::Texture* texture);
+	static void renderFontInfo(Graphics::Font* font);
 	static void renderShaderInfo(Shader* shader);
 	
 	static void renderPropertiesFrame();

@@ -49,7 +49,7 @@ bool initGLFW() {
 	//Renderer::setGLFWMultisampleSamples(4);
 
 	// Initialize GLFW
-	if (!Renderer::initGLFW()) {
+	if (!Graphics::Renderer::initGLFW()) {
 		Log::error("GLFW failed to initialize");
 		return false;
 	}
@@ -63,7 +63,7 @@ bool initGLFW() {
 
 bool initGLEW() {
 	// Init GLEW after creating a valid rendering context
-	if (!Renderer::initGLEW()) {
+	if (!Graphics::Renderer::initGLEW()) {
 		terminateGLFW();
 
 		Log::error("GLEW Failed to initialize!");
@@ -77,7 +77,7 @@ bool initGLEW() {
 
 void terminateGLFW() {
 	Log::info("Closing GLFW");
-	Renderer::terminateGLFW();
+	Graphics::Renderer::terminateGLFW();
 	Log::info("Closed GLFW");
 }
 
@@ -89,21 +89,21 @@ Screen::Screen(int width, int height, PlayerWorld* world) {
 	this->world = world;
 
 	// Create a windowed mode window and its OpenGL context 
-	Renderer::createGLFWContext(width, height, "Physics3D");
+	Graphics::Renderer::createGLFWContext(width, height, "Physics3D");
 
-	if (!Renderer::validGLFWContext()) {
+	if (!Graphics::Renderer::validGLFWContext()) {
 		Log::fatal("Invalid rendering context");
 		terminateGLFW();
 		exit(-1);
 	}
 
 	// Make the window's context current 
-	Renderer::makeGLFWContextCurrent();
+	Graphics::Renderer::makeGLFWContextCurrent();
 
-	Log::info("OpenGL vendor: (%s)", Renderer::getVendor());
-	Log::info("OpenGL renderer: (%s)", Renderer::getRenderer());
-	Log::info("OpenGL version: (%s)", Renderer::getVersion());
-	Log::info("OpenGL shader version: (%s)", Renderer::getShaderVersion());
+	Log::info("OpenGL vendor: (%s)", Graphics::Renderer::getVendor());
+	Log::info("OpenGL renderer: (%s)", Graphics::Renderer::getRenderer());
+	Log::info("OpenGL version: (%s)", Graphics::Renderer::getVersion());
+	Log::info("OpenGL shader version: (%s)", Graphics::Renderer::getShaderVersion());
 }
 
 
@@ -134,17 +134,13 @@ void Screen::onInit() {
 	KeyboardOptions::load(properties);
 
 	// Library init
-	Library::onInit();
-
-	// Render mode init
-	Renderer::enableCulling();
-	Renderer::enableDepthTest();
+	Graphics::Library::onInit();
 
 	// InputHandler init
-	handler = new StandardInputHandler(Renderer::getGLFWContext(), *this);
+	handler = new StandardInputHandler(Graphics::Renderer::getGLFWContext(), *this);
 
 	// Screen size init
-	dimension = Renderer::getGLFWWindowSize();
+	dimension = Graphics::Renderer::getGLFWWindowSize();
 
 	// Framebuffer init
 	quad = new ::Quad();
@@ -197,7 +193,7 @@ void Screen::onInit() {
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void) io;
 	ImGui::StyleColorsDark();
-	ImGui_ImplGlfw_InitForOpenGL(Renderer::getGLFWContext(), true);
+	ImGui_ImplGlfw_InitForOpenGL(Graphics::Renderer::getGLFWContext(), true);
 	ImGui_ImplOpenGL3_Init("#version 130");
 }
 
@@ -233,7 +229,7 @@ void Screen::onUpdate() {
 		if (handler->getKey(KeyboardOptions::Rotate::down))
 			camera.rotate(*this, -1 * speedAdjustment, 0, 0, leftDragging);
 		if (handler->getKey(KeyboardOptions::Application::close))
-			Renderer::closeGLFWWindow();
+			Graphics::Renderer::closeGLFWWindow();
 	}
 
 	// Update camera
@@ -267,13 +263,13 @@ void Screen::onRender() {
 
 	// Render to screen Framebuffer
 	screenFrameBuffer->bind();
-	Renderer::enableBlending();
-	Renderer::enableCulling();
-	Renderer::enableDepthTest();
-	Renderer::enableDepthMask();
-	Renderer::standardBlendFunction();
-	Renderer::clearColor();
-	Renderer::clearDepth();
+	Graphics::Renderer::enableBlending();
+	Graphics::Renderer::enableCulling();
+	Graphics::Renderer::enableDepthTest();
+	Graphics::Renderer::enableDepthMask();
+	Graphics::Renderer::standardBlendFunction();
+	Graphics::Renderer::clearColor();
+	Graphics::Renderer::clearDepth();
 
 	// Render layers
 	layerStack.onRender();
@@ -285,9 +281,9 @@ void Screen::onRender() {
 	graphicsMeasure.mark(GraphicsProcess::FINALIZE);
 
 	// Finalize
-	Renderer::swapGLFWInterval(0);
-	Renderer::swapGLFWBuffers();
-	Renderer::pollGLFWEvents();
+	Graphics::Renderer::swapGLFWInterval(0);
+	Graphics::Renderer::swapGLFWBuffers();
+	Graphics::Renderer::pollGLFWEvents();
 
 	graphicsMeasure.mark(GraphicsProcess::OTHER);
 }
@@ -301,7 +297,7 @@ void Screen::onClose() {
 
 	layerStack.onClose();
 
-	Library::onClose();
+	Graphics::Library::onClose();
 
 	ResourceManager::close();
 
@@ -315,7 +311,7 @@ void Screen::onClose() {
 }
 
 bool Screen::shouldClose() {
-	return Renderer::isGLFWWindowClosed();
+	return Graphics::Renderer::isGLFWWindowClosed();
 }
 
 };

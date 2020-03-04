@@ -2,19 +2,21 @@
 
 #include "../bindable.h"
 
+namespace Graphics {
 class Texture;
+};
 class RenderBuffer;
 
 class FrameBuffer : public Bindable {
 public:
 	Vec2i dimension;
 
-	Texture* texture = nullptr;
+	Graphics::Texture* texture = nullptr;
 	RenderBuffer* renderBuffer = nullptr;
 	
 	FrameBuffer();
 	FrameBuffer(unsigned int width, unsigned int height);
-	FrameBuffer(Texture* colorAttachment, RenderBuffer* depthStencilAttachment);
+	FrameBuffer(Graphics::Texture* colorAttachment, RenderBuffer* depthStencilAttachment);
 
 	~FrameBuffer();
 	FrameBuffer(FrameBuffer&& other);
@@ -28,18 +30,19 @@ public:
 	void unbind() override;
 	void close() override;
 
-	void attach(Texture* texture); 
+	void attach(Graphics::Texture* texture);
 	void attach(RenderBuffer* renderBuffer);
 };
 
-
+namespace Graphics {
 class HDRTexture;
+};
 
 class HDRFrameBuffer : public Bindable {
 public:
 	Vec2i dimension;
 
-	HDRTexture* texture = nullptr;
+	Graphics::HDRTexture* texture = nullptr;
 	RenderBuffer* renderBuffer = nullptr;
 
 	HDRFrameBuffer();
@@ -58,15 +61,16 @@ public:
 	void close() override;
 };
 
-
+namespace Graphics {
 class MultisampleTexture;
+};
 class MultisampleRenderBuffer;
 
 class MultisampleFrameBuffer : public Bindable {
 public:
 	Vec2i dimension;
 
-	MultisampleTexture* texture = nullptr;
+	Graphics::MultisampleTexture* texture = nullptr;
 	MultisampleRenderBuffer* renderBuffer = nullptr;
 
 	MultisampleFrameBuffer();
@@ -85,14 +89,15 @@ public:
 	void close() override;
 };
 
-
+namespace Graphics {
 class DepthTexture;
+};
 
 class DepthFrameBuffer : public Bindable {
 public:
 	unsigned int width;
 	unsigned int height;
-	DepthTexture* texture = nullptr;
+	Graphics::DepthTexture* texture = nullptr;
 
 	DepthFrameBuffer(unsigned int width, unsigned int height);
 

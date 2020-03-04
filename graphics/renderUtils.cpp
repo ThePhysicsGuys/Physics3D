@@ -2,82 +2,86 @@
 
 #include "renderUtils.h"
 
+namespace Graphics {
+
 namespace Renderer {
 
-	// GLFW binding
+// GLFW binding
 
-	GLFWwindow* GLFWContext;
+GLFWwindow* GLFWContext;
 
-	bool initGLFW() {
-		return glfwInit();
-	}
+bool initGLFW() {
+	return glfwInit();
+}
 
-	void terminateGLFW() {
-		glfwTerminate();
-	}
-	
-	void makeGLFWContextCurrent() {
-		glfwMakeContextCurrent(GLFWContext);
-	}
+void terminateGLFW() {
+	glfwTerminate();
+}
 
-	void createGLFWContext(int width, int height, const char* title) {
-		GLFWContext = glfwCreateWindow(width, height, title, nullptr, nullptr);
-	}
+void makeGLFWContextCurrent() {
+	glfwMakeContextCurrent(GLFWContext);
+}
 
-	bool validGLFWContext() {
-		return GLFWContext;
-	}
+void createGLFWContext(int width, int height, const char* title) {
+	GLFWContext = glfwCreateWindow(width, height, title, nullptr, nullptr);
+}
 
-	GLFWwindow* getGLFWContext() {
-		return GLFWContext;
-	}
+bool validGLFWContext() {
+	return GLFWContext;
+}
 
-	void swapGLFWInterval(int interval) {
-		glfwSwapInterval(interval);
-	}
+GLFWwindow* getGLFWContext() {
+	return GLFWContext;
+}
 
-	void swapGLFWBuffers() {
-		glfwSwapBuffers(GLFWContext);
-	}
+void swapGLFWInterval(int interval) {
+	glfwSwapInterval(interval);
+}
 
-	void pollGLFWEvents() {
-		glfwPollEvents();
-	}
+void swapGLFWBuffers() {
+	glfwSwapBuffers(GLFWContext);
+}
 
-	void closeGLFWWindow() {
-		glfwSetWindowShouldClose(GLFWContext, GLFW_TRUE);
-	}
+void pollGLFWEvents() {
+	glfwPollEvents();
+}
 
-	bool isGLFWWindowClosed() {
-		return glfwWindowShouldClose(GLFWContext);
-	}
+void closeGLFWWindow() {
+	glfwSetWindowShouldClose(GLFWContext, GLFW_TRUE);
+}
 
-	void setGLFWMultisampleSamples(int samples) {
-		glfwWindowHint(GLFW_SAMPLES, samples);
-	};
+bool isGLFWWindowClosed() {
+	return glfwWindowShouldClose(GLFWContext);
+}
 
-	Vec2i getGLFWWindowSize() {
-		int width;
-		int height;
-		glfwGetWindowSize(GLFWContext, &width, &height);
-		return Vec2i(width, height);
-	}
+void setGLFWMultisampleSamples(int samples) {
+	glfwWindowHint(GLFW_SAMPLES, samples);
+};
 
-	Vec4i getGLFWFrameSize() {
-		int left;
-		int top;
-		int right;
-		int bottom;
-		glfwGetWindowFrameSize(GLFWContext, &left, &top, &right, &bottom);
-		return Vec4i(left, top, right, bottom);
-	}
+Vec2i getGLFWWindowSize() {
+	int width;
+	int height;
+	glfwGetWindowSize(GLFWContext, &width, &height);
+	return Vec2i(width, height);
+}
 
-	void enableGLFWCursor() {
-		glfwSetInputMode(GLFWContext, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-	}
+Vec4i getGLFWFrameSize() {
+	int left;
+	int top;
+	int right;
+	int bottom;
+	glfwGetWindowFrameSize(GLFWContext, &left, &top, &right, &bottom);
+	return Vec4i(left, top, right, bottom);
+}
 
-	void disableGLFWCursor() {
-		glfwSetInputMode(GLFWContext, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-	}
+void enableGLFWCursor() {
+	glfwSetInputMode(GLFWContext, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+}
+
+void disableGLFWCursor() {
+	glfwSetInputMode(GLFWContext, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+}
 
 }
+
+};

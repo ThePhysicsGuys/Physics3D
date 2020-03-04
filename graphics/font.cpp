@@ -13,6 +13,8 @@
 
 #include <string>
 
+namespace Graphics {
+
 #pragma region Character
 
 Character::Character() : id(0), x(0), y(0), width(0), height(0), bx(0), by(0), advance(0) {
@@ -48,13 +50,13 @@ Font::Font(std::string font) {
 
 	error = FT_New_Face(library, font.c_str(), 0, &face);
 
-	if (error ) {
+	if (error) {
 		Log::error("FREETYTPE: Failed to read font (%s)", font.c_str());
 		if (error == FT_Err_Unknown_File_Format)
 			Log::error("FREETYTPE: Font format not supported", font.c_str());
 
 		return;
-	} 
+	}
 
 	FT_Set_Pixel_Sizes(face, 0, 48);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -158,12 +160,12 @@ Vec2f Font::size(const std::string& text, double fontSize) {
 			width += (advance - character.bearing.x) * fontSize;
 		else if (iterator == text.end() - 1)
 			width += (character.bearing.x + character.size.x) * fontSize;
- 		else 
+		else
 			width += advance * fontSize;
-		
+
 		height = fmax(character.size.y * fontSize, height);
 	}
-	
+
 	return Vec2f(width, height);
 }
 
@@ -191,3 +193,5 @@ Texture* Font::getAtlas() {
 }
 
 #pragma endregion
+
+};

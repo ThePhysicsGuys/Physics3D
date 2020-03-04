@@ -12,28 +12,31 @@
 #include "resources.h"
 #include "visualShape.h"
 
+namespace Graphics {
 
 namespace Library {
-	IndexedMesh* cube = nullptr;
-	IndexedMesh* sphere = nullptr;
-	IndexedMesh* vector = nullptr;
+IndexedMesh* cube = nullptr;
+IndexedMesh* sphere = nullptr;
+IndexedMesh* vector = nullptr;
 
-	void onInit() {
-		// Cube
-		cube = new IndexedMesh(VisualShape(createCube(1)));
-		
-		// Sphere
-		//VisualShape sphereShape(OBJImport::load((std::istream&) std::istringstream(getResourceAsString(graphicsResources, SPHERE_MODEL))));
-		VisualShape sphereShape(OBJImport::load("../res/models/sphere.obj"));
-		sphere = new IndexedMesh(sphereShape);
+void onInit() {
+	// Cube
+	cube = new IndexedMesh(Graphics::VisualShape(::Library::createCube(1)));
 
-		VisualShape vectorShape = OBJImport::load("../res/models/gui/translate_shaft.obj");
-		vector = new IndexedMesh(vectorShape);
-	}
+	// Sphere
+	//VisualShape sphereShape(OBJImport::load((std::istream&) std::istringstream(getResourceAsString(graphicsResources, SPHERE_MODEL))));
+	Graphics::VisualShape sphereShape(OBJImport::load("../res/models/sphere.obj"));
+	sphere = new IndexedMesh(sphereShape);
 
-	void onClose() {
-		cube->close();
-		sphere->close();
-		vector->close();
-	}
+	Graphics::VisualShape vectorShape = OBJImport::load("../res/models/gui/translate_shaft.obj");
+	vector = new IndexedMesh(vectorShape);
 }
+
+void onClose() {
+	cube->close();
+	sphere->close();
+	vector->close();
+}
+}
+
+};

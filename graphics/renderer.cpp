@@ -5,6 +5,8 @@
 #include "renderer.h"
 #include <stack>
 
+namespace Graphics {
+
 namespace Renderer {
 
 unsigned int WIREFRAME = GL_LINE;
@@ -28,18 +30,18 @@ struct RenderState {
 	GLID dfbo;
 	GLID rfbo;
 	GLID rbo;
-	GLID texture; 
+	GLID texture;
 	//GLID program; 
-	GLID vao; 
-	GLID vbo; 
-	GLID ibo; 
-	int activeTexture; 
-	int viewport[4]; 
-	int mode[2];  
-	bool blend;   
-	bool cull;	  
-	bool depth;   
-	bool scissor; 
+	GLID vao;
+	GLID vbo;
+	GLID ibo;
+	int activeTexture;
+	int viewport[4];
+	int mode[2];
+	bool blend;
+	bool cull;
+	bool depth;
+	bool scissor;
 	bool depthmask;
 };
 
@@ -229,3 +231,5 @@ void drawArrays(unsigned int mode, int first, size_t count) {
 }
 
 }
+
+};

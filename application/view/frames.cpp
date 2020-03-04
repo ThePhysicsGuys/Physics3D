@@ -31,7 +31,7 @@ bool BigFrame::isDisabled;
 Layer* BigFrame::selectedLayer = nullptr;
 Resource* BigFrame::selectedResource = nullptr;
 
-void BigFrame::renderTextureInfo(Texture* texture) {
+void BigFrame::renderTextureInfo(Graphics::Texture* texture) {
 	ImGui::Text("ID: %d", texture->getID());
 	ImGui::Text("Width: %d", texture->getWidth());
 	ImGui::Text("Height: %d", texture->getHeight());
@@ -58,7 +58,7 @@ void BigFrame::renderTextureInfo(Texture* texture) {
 	}
 }
 
-void BigFrame::renderFontInfo(Font* font) {
+void BigFrame::renderFontInfo(Graphics::Font* font) {
 	if (ImGui::TreeNode("Atlas")) {
 		renderTextureInfo(font->getAtlas());
 		ImGui::TreePop();
@@ -67,7 +67,7 @@ void BigFrame::renderFontInfo(Font* font) {
 	char selectedCharacter = 0;
 	if (ImGui::TreeNode("Characters")) {
 		for (int i = 0; i < CHARACTER_COUNT; i++) {
-			Character& character = font->getCharacter(i);
+			Graphics::Character& character = font->getCharacter(i);
 
 			float s = float(character.x) / font->getAtlasWidth();
 			float t = float(character.y) / font->getAtlasHeight();
@@ -81,7 +81,7 @@ void BigFrame::renderFontInfo(Font* font) {
 				ImGui::SameLine();
 		}
 		if (ImGui::TreeNodeEx("Info", ImGuiTreeNodeFlags_DefaultOpen)) {
-			Character& c = font->getCharacter(selectedCharacter);
+			Graphics::Character& c = font->getCharacter(selectedCharacter);
 			ImGui::Text("Character: %s", std::string(1, (char) selectedCharacter).c_str());
 			ImGui::Text("ID: %d", c.id);
 			ImGui::Text("Origin: (%d, %d)", c.x, c.x);
@@ -391,8 +391,8 @@ void BigFrame::renderPropertiesFrame() {
 				ImGui::ColorEdit3("Diffuse", sp->material.diffuse.data);
 				ImGui::ColorEdit3("Specular", sp->material.specular.data);
 				ImGui::SliderFloat("Reflectance", &sp->material.reflectance, 0, 1);
-				if (ImGui::Button(sp ? (sp->renderMode == Renderer::FILL ? "Render mode: fill" : "Render mode: wireframe") : "l"))
-					if (sp) sp->renderMode = sp->renderMode == Renderer::FILL ? Renderer::WIREFRAME : Renderer::FILL;
+				if (ImGui::Button(sp ? (sp->renderMode == Graphics::Renderer::FILL ? "Render mode: fill" : "Render mode: wireframe") : "l"))
+					if (sp) sp->renderMode = sp->renderMode == Graphics::Renderer::FILL ? Graphics::Renderer::WIREFRAME : Graphics::Renderer::FILL;
 			} else {
 				ImGui::Text("No part selected");
 			}

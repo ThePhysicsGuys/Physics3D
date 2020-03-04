@@ -42,7 +42,7 @@ void StandardInputHandler::onEvent(::Event& event) {
 bool StandardInputHandler::onWindowResize(WindowResizeEvent& event) {
 	Vec2i dimension = Vec2i(event.getWidth(), event.getHeight());
 
-	Renderer::viewport(Vec2i(), dimension);
+	Graphics::Renderer::viewport(Vec2i(), dimension);
 	Log::debug("Window resize: %s", str(dimension));
 	(*screen.eventHandler.windowResizeHandler) (screen, dimension);
 
@@ -52,7 +52,7 @@ bool StandardInputHandler::onWindowResize(WindowResizeEvent& event) {
 bool StandardInputHandler::onFrameBufferResize(FrameBufferResizeEvent& event) {
 	Vec2i dimension = Vec2i(event.getWidth(), event.getHeight());
 
-	Renderer::viewport(Vec2i(), dimension);
+	Graphics::Renderer::viewport(Vec2i(), dimension);
 	Log::debug("Framebuffer resize: %s", str(dimension));
 	(*screen.eventHandler.windowResizeHandler) (screen, dimension);
 

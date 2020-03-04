@@ -46,11 +46,11 @@ void DebugOverlay::onEvent(Event& event) {
 void DebugOverlay::onRender() {
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
-	Renderer::beginScene();
+	Graphics::Renderer::beginScene();
 
 	Path::bind(GUI::batch);
 
-	Renderer::disableDepthTest();
+	Graphics::Renderer::disableDepthTest();
 	ApplicationShaders::fontShader.updateProjection(screen->camera.orthoMatrix);
 
 	graphicsMeasure.mark(GraphicsProcess::PROFILER);
@@ -114,7 +114,7 @@ void DebugOverlay::onRender() {
 	
 	GUI::batch->submit();
 
-	Renderer::endScene();
+	Graphics::Renderer::endScene();
 }
 
 void DebugOverlay::onClose() {

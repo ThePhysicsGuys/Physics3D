@@ -77,7 +77,7 @@ std::string Export::str(double num) {
 	OBJExport
 */
 
-void saveBinaryObj(std::string filename, const VisualShape& shape) {
+void saveBinaryObj(std::string filename, const Graphics::VisualShape& shape) {
 	struct stat buffer;
 
 	if (stat(filename.c_str(), &buffer) != -1) {
@@ -137,7 +137,7 @@ void saveBinaryObj(std::string filename, const VisualShape& shape) {
 	output.close();
 }
 
-void saveNonBinaryObj(const std::string& filename, const VisualShape& shape) {
+void saveNonBinaryObj(const std::string& filename, const Graphics::VisualShape& shape) {
 	struct stat buffer;
 
 	if (stat(filename.c_str(), &buffer) != -1) {
@@ -187,7 +187,7 @@ void saveNonBinaryObj(const std::string& filename, const VisualShape& shape) {
 	output.close();
 }
 
-void OBJExport::save(const std::string& filename, const VisualShape& shape, bool binary) {
+void OBJExport::save(const std::string& filename, const Graphics::VisualShape& shape, bool binary) {
 	if (binary)
 		saveBinaryObj(filename, shape);
 	else

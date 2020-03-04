@@ -13,8 +13,8 @@ extern VisualData cylinder;
 
 void init();
 
-VisualData addMeshShape(const VisualShape& mesh);
-VisualData registerMeshFor(const ShapeClass* shapeClass, const VisualShape& mesh);
+VisualData addMeshShape(const Graphics::VisualShape& mesh);
+VisualData registerMeshFor(const ShapeClass* shapeClass, const Graphics::VisualShape& mesh);
 VisualData registerMeshFor(const ShapeClass* shapeClass);
 VisualData getOrCreateMeshFor(const ShapeClass* shapeClass);
 };

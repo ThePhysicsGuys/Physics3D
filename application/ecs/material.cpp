@@ -6,12 +6,12 @@
 
 namespace Application {
 
-void Material::setTexture(Texture* texture) {
+void Material::setTexture(Graphics::Texture* texture) {
 	texture->setUnit(0);
 	this->texture = texture;
 }
 
-void Material::setNormalMap(Texture* normalMap) {
+void Material::setNormalMap(Graphics::Texture* normalMap) {
 	normalMap->setUnit(1);
 	this->normal = normalMap;
 }

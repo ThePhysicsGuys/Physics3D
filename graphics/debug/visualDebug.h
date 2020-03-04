@@ -6,7 +6,10 @@
 
 class PointMesh;
 class VectorMesh;
+
+namespace Graphics {
 class Font;
+};
 
 enum GraphicsProcess {
 	UPDATE,
@@ -56,12 +59,12 @@ namespace Debug {
 	void updateVectorMesh(VectorMesh* vectorMesh, AppDebug::ColoredVector* data, size_t size);
 	void updatePointMesh(PointMesh* pointMesh, AppDebug::ColoredPoint* data, size_t size);
 
-	void addDebugField(Vec2 dimension, Font* font, const char* varName, std::string value, const char* unit);
+	void addDebugField(Vec2 dimension, Graphics::Font* font, const char* varName, std::string value, const char* unit);
 	size_t getTheoreticalNumberOfIntersections(size_t objCount);
 	std::string toString(std::chrono::nanoseconds t);
 
 	template<typename T>
-	void addDebugField(Vec2 dimension, Font* font, const char* varName, T value, const char* unit) {
+	void addDebugField(Vec2 dimension, Graphics::Font* font, const char* varName, T value, const char* unit) {
 		addDebugField(dimension, font, varName, std::to_string(value), unit);
 	}
 

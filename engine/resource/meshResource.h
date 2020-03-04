@@ -15,15 +15,15 @@ public:
 class MeshResource : public Resource {
 private:
 	IndexedMesh* mesh;
-	VisualShape shape;
+	Graphics::VisualShape shape;
 public:
 	DEFINE_RESOURCE(Mesh, "../res/fonts/default/default.ttf");
 
-	MeshResource(const std::string& path, IndexedMesh* mesh, VisualShape shape) : Resource(path, path), mesh(mesh), shape(shape) {
+	MeshResource(const std::string& path, IndexedMesh* mesh, Graphics::VisualShape shape) : Resource(path, path), mesh(mesh), shape(shape) {
 
 	}
 
-	MeshResource(const std::string& name, const std::string& path, IndexedMesh* mesh, VisualShape shape) : Resource(name, path), mesh(mesh), shape(shape) {
+	MeshResource(const std::string& name, const std::string& path, IndexedMesh* mesh, Graphics::VisualShape shape) : Resource(name, path), mesh(mesh), shape(shape) {
 
 	}
 
@@ -31,7 +31,7 @@ public:
 		return mesh;
 	};
 
-	VisualShape getShape() {
+	Graphics::VisualShape getShape() {
 		return shape;
 	}
 

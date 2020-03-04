@@ -150,7 +150,7 @@ namespace Debug {
 		pointMesh->update(visiblePoints.data, visiblePoints.size / 10);
 	}
 
-	void addDebugField(Vec2 dimension, Font* font, const char* varName, std::string value, const char* unit) {
+	void addDebugField(Vec2 dimension, Graphics::Font* font, const char* varName, std::string value, const char* unit) {
 		std::stringstream string;
 		string.precision(4);
 		string << varName << ": " << value << unit;

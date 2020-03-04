@@ -6,8 +6,8 @@
 #include "buffers/vertexBuffer.h"
 #include "renderer.h"
 
-PointMesh::PointMesh(const float* vertices, const size_t vertexCount, size_t capacity) : AbstractMesh(Renderer::POINT), vertexCount(vertexCount), capacity(capacity) {
-	vertexBuffer = new VertexBuffer(nullptr, 10 * capacity * sizeof(float), Renderer::DYNAMIC_DRAW);
+PointMesh::PointMesh(const float* vertices, const size_t vertexCount, size_t capacity) : AbstractMesh(Graphics::Renderer::POINT), vertexCount(vertexCount), capacity(capacity) {
+	vertexBuffer = new VertexBuffer(nullptr, 10 * capacity * sizeof(float), Graphics::Renderer::DYNAMIC_DRAW);
 
 	bufferLayout = {
 		{
@@ -23,7 +23,7 @@ PointMesh::PointMesh(const float* vertices, const size_t vertexCount, size_t cap
 
 void PointMesh::render() {
 	vao->bind();
-	Renderer::drawArrays(renderMode, 0, vertexCount);
+	Graphics::Renderer::drawArrays(renderMode, 0, vertexCount);
 }
 
 void PointMesh::close() {
@@ -37,7 +37,7 @@ void PointMesh::update(const float* vertices, const size_t vertexCount) {
 	if (vertexCount > capacity) {
 		capacity = vertexCount;
 		Log::warn("Point buffer overflow, creating new buffer with size (%d)", vertexCount);
-		vertexBuffer->fill(vertices, capacity * bufferLayout.stride * sizeof(float), Renderer::DYNAMIC_DRAW);
+		vertexBuffer->fill(vertices, capacity * bufferLayout.stride * sizeof(float), Graphics::Renderer::DYNAMIC_DRAW);
 	} else {
 		vertexBuffer->update(vertices, vertexCount * bufferLayout.stride * sizeof(float), 0);
 	}

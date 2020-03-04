@@ -91,7 +91,7 @@ namespace Path {
 	void quadUV(unsigned int id, const Vec2f& a, const Vec2f& b, const Vec2f& c, const Vec2f& d, const Vec2f& uvA = Vec2f(0, 0), const Vec2f& uvB = Vec2f(0, 1), const Vec2f& uvC = Vec2f(1, 1), const Vec2f& uvD = Vec2f(0, 1));
 
 	// Adds a string to the batch with the given font
-	void text(Font* font, const std::string& text, double size, const Vec2f& pos, const Color& color = COLOR::WHITE, char textPivot = TextPivotHL | TextPivotVB);
+	void text(Graphics::Font* font, const std::string& text, double size, const Vec2f& pos, const Color& color = COLOR::WHITE, char textPivot = TextPivotHL | TextPivotVB);
 
 	// Adds a bezier curve to the batch, with the given control points
 	void bezier(const Vec2f& a, const Vec2f& b, const Vec2f& c, const Vec2f& d, const Color& color = COLOR::WHITE, float thickness = 1.0f, size_t precision = 20);
