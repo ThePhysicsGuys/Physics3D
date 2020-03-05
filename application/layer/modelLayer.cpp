@@ -94,6 +94,7 @@ static Color getAmbientForPart(Screen* screen, Part* part) {
 }
 
 void ModelLayer::onInit() {
+	using namespace Graphics;
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
 	Attenuation attenuation = { 0, 0, 0.5 };
@@ -107,7 +108,7 @@ void ModelLayer::onInit() {
 		BufferElement("pos", BufferDataType::FLOAT3),
 		BufferElement("col", BufferDataType::FLOAT4)
 	});
-	BatchConfig config = BatchConfig(layout, Graphics::Renderer::LINES);
+	BatchConfig config = BatchConfig(layout, Renderer::LINES);
 	Path3D::batch = new Batch<Path3D::Vertex>(config);
 }
 
@@ -197,9 +198,10 @@ void ModelLayer::onRender2() {
 }*/
 
 void ModelLayer::onRender() {
+	using namespace Graphics;
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
-	Graphics::Renderer::beginScene();
+	Renderer::beginScene();
 
 	graphicsMeasure.mark(GraphicsProcess::UPDATE);
 	ApplicationShaders::basicShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
@@ -245,7 +247,7 @@ void ModelLayer::onRender() {
 		Engine::MeshRegistry::meshes[part->visualData.drawMeshId]->render(part->renderMode);
 	}
 
-	Graphics::Renderer::endScene();
+	Renderer::endScene();
 }
 
 void ModelLayer::onClose() {

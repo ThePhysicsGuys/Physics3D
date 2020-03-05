@@ -8,6 +8,8 @@
 #include "../buffers/bufferLayout.h"
 #include "../graphics/debug/debug.h"
 
+namespace Graphics {
+
 template<typename UniformLayout>
 class InstanceBatch {
 private:
@@ -49,4 +51,6 @@ public:
 		ubo->close();
 		mesh = nullptr;
 	}
+};
+
 };

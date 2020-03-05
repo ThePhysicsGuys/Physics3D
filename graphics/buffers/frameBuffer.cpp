@@ -8,6 +8,8 @@
 #include "renderBuffer.h"
 #include "texture.h"
 
+namespace Graphics {
+
 #pragma region FrameBuffer
 
 //! FrameBuffer
@@ -29,7 +31,7 @@ FrameBuffer::FrameBuffer(unsigned int width, unsigned int height) : FrameBuffer(
 	unbind();
 }
 
-FrameBuffer::FrameBuffer(Graphics::Texture* colorAttachment, RenderBuffer* depthStencilAttachment) : FrameBuffer() {
+FrameBuffer::FrameBuffer(Texture* colorAttachment, RenderBuffer* depthStencilAttachment) : FrameBuffer() {
 	attach(colorAttachment);
 	attach(depthStencilAttachment);
 
@@ -83,7 +85,7 @@ void FrameBuffer::resize(Vec2i dimension) {
 		renderBuffer->resize(dimension.x, dimension.y);
 }
 
-void FrameBuffer::attach(Graphics::Texture* texture) {
+void FrameBuffer::attach(Texture* texture) {
 	bind();
 	this->texture = texture;
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture->getID(), 0);
@@ -100,7 +102,7 @@ void FrameBuffer::close() {
 
 	if (texture)
 		texture->close();
-	
+
 	if (renderBuffer)
 		renderBuffer->close();
 
@@ -123,9 +125,9 @@ HDRFrameBuffer::HDRFrameBuffer() {
 }
 
 HDRFrameBuffer::HDRFrameBuffer(unsigned int width, unsigned int height) : HDRFrameBuffer() {
-	texture = new Graphics::HDRTexture(width, height);
+	texture = new HDRTexture(width, height);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture->getID(), 0);
-	
+
 	renderBuffer = new RenderBuffer(width, height);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderBuffer->getID());
 
@@ -198,7 +200,7 @@ MultisampleFrameBuffer::MultisampleFrameBuffer() {
 }
 
 MultisampleFrameBuffer::MultisampleFrameBuffer(unsigned int width, unsigned int height, int samples) : MultisampleFrameBuffer() {
-	texture = new Graphics::MultisampleTexture(width, height, samples);
+	texture = new MultisampleTexture(width, height, samples);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, texture->getID(), 0);
 
 	renderBuffer = new MultisampleRenderBuffer(width, height, samples);
@@ -268,7 +270,7 @@ void MultisampleFrameBuffer::close() {
 //! DepthFrameBuffer
 
 DepthFrameBuffer::DepthFrameBuffer(unsigned int width, unsigned int height) {
-	texture = new Graphics::DepthTexture(width, height);
+	texture = new DepthTexture(width, height);
 	glGenFramebuffers(1, &id);
 	glBindFramebuffer(GL_FRAMEBUFFER, id);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture->getID(), 0);
@@ -317,3 +319,5 @@ void DepthFrameBuffer::close() {
 }
 
 #pragma endregion
+
+}

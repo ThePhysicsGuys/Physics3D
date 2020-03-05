@@ -14,6 +14,7 @@
 #include "../physics/datastructures/boundsTree.h"
 #include "../physics/math/mathUtil.h"
 
+namespace Graphics {
 
 #pragma region PieChart
 
@@ -73,12 +74,12 @@ void PieChart::renderText(Graphics::Font* font) const {
 
 	for (int i = 0; i < parts.size(); i++) {
 		const DataPoint& p = parts[i];
-		Vec2 linePosition = textPosition + Vec2(0, -i*0.035);
+		Vec2 linePosition = textPosition + Vec2(0, -i * 0.035);
 		Path::text(font, p.label, 0.0006, linePosition, Color(p.color, 1));
 
 		std::stringstream percent;
 		percent.precision(4);
-		percent << p.weight/totalWeight * 100;
+		percent << p.weight / totalWeight * 100;
 		percent << "%";
 		Path::text(font, percent.str(), 0.0006, linePosition + Vec2(0.35, 0), Vec4(p.color, 1));
 		Path::text(font, p.value, 0.0006, linePosition + Vec2(0.50, 0), Color(p.color, 1));
@@ -110,10 +111,10 @@ void BarChart::render() {
 	float max = getMaxWeight();
 
 	Vec2f drawingPosition = position + Vec2f(marginLeft, marginBottom);
-	Vec2f drawingSize = this->dimension - Vec2f(marginLeft, marginBottom+marginTop);
+	Vec2f drawingSize = this->dimension - Vec2f(marginLeft, marginBottom + marginTop);
 
 	float categoryWidth = drawingSize.x / data.width;
-	float barWidth = drawingSize.x / ((data.height+0.5) * data.width);
+	float barWidth = drawingSize.x / ((data.height + 0.5) * data.width);
 
 	for (int cl = 0; cl < data.height; cl++) {
 		const BarChartClassInfo& info = classes[cl];
@@ -122,7 +123,7 @@ void BarChart::render() {
 			const WeightValue& dataPoint = data.get(cl, i);
 
 			float height = drawingSize.y * dataPoint.weight / max;
-			Vec2f topLeft = drawingPosition + Vec2f(categoryWidth * i + barWidth*cl, height);
+			Vec2f topLeft = drawingPosition + Vec2f(categoryWidth * i + barWidth * cl, height);
 
 			Path::rectFilled(topLeft, Vec2f(barWidth, height), 0.0f, Color(info.color, 1.0f));
 		}
@@ -139,7 +140,7 @@ void BarChart::render() {
 			Vec2f bottomLeft = drawingPosition + Vec2f(categoryWidth * i + barWidth * cl, 0);
 			float height = drawingSize.y * dataPoint.weight / max;
 
-			Vec2f topTextPosition = bottomLeft + Vec2(0, height+drawingSize.y * 0.02);
+			Vec2f topTextPosition = bottomLeft + Vec2(0, height + drawingSize.y * 0.02);
 			//topTextPosition.x *= GUI::screen->dimension.x / GUI::screen->dimension.y;
 
 			Path::text(GUI::font, dataPoint.value, 0.0005, topTextPosition, Color(info.color, 1));
@@ -173,9 +174,9 @@ float BarChart::getMaxWeight() const {
 void recursiveRenderTree(const TreeNode& tree, const Vec3f& treeColor, Vec2f origin, float allottedWidth, long long maxCost, const void* selectedObject) {
 	if (!tree.isLeafNode()) {
 		for (int i = 0; i < tree.nodeCount; i++) {
-			Vec2f nextStep = origin + Vec2f(-allottedWidth / 2 + allottedWidth * ((tree.nodeCount != 1) ? (float(i) / (tree.nodeCount-1)) : 0.5f), -0.1f);
+			Vec2f nextStep = origin + Vec2f(-allottedWidth / 2 + allottedWidth * ((tree.nodeCount != 1) ? (float(i) / (tree.nodeCount - 1)) : 0.5f), -0.1f);
 			float colorDarkning = pow(1.0f * computeCost(tree[i].bounds) / maxCost, 0.25f);
-			
+
 			//Path::bezierVertical(origin, nextStep, 1.0f, Vec4f(treeColor * colorDarkning, 1.0f), 15);
 			Path::line(origin, nextStep, Color(treeColor * colorDarkning, 1.0f), 1.0f);
 
@@ -183,17 +184,17 @@ void recursiveRenderTree(const TreeNode& tree, const Vec3f& treeColor, Vec2f ori
 		}
 	}
 
-	if(tree.object == selectedObject) {
+	if (tree.object == selectedObject) {
 		Path::circleFilled(origin, 0.012f, COLOR::YELLOW, 8);
 	}
 
-	if(tree.isGroupHead) {
+	if (tree.isGroupHead) {
 		Path::circleFilled(origin, 0.006f, COLOR::RED, 8);
 	}
 }
 
 void renderTreeStructure(const BoundsTree<Part>& tree, const Vec3f& treeColor, Vec2f origin, float allottedWidth, const void* selectedObject) {
-	if(tree.isEmpty()) {
+	if (tree.isEmpty()) {
 		return;
 	}
 	long long maxCost = computeCost(tree.rootNode.bounds);
@@ -213,7 +214,7 @@ void SlidingChartDataSetInfo::add(float value) {
 		mean = value;
 
 		data.add(value);
-		
+
 		return;
 	}
 
@@ -240,7 +241,7 @@ void SlidingChartDataSetInfo::add(float value) {
 		newMean = (mean * s1 + value) / s;
 		newVariance = (s2 * variance + (value - newMean) * (value - mean)) / s1;
 	}
-	
+
 	mean = newMean;
 	deviation = sqrt(newVariance);
 }
@@ -269,7 +270,7 @@ void SlidingChart::render() {
 	for (auto dataSetIterator : dataSets) {
 		SlidingChartDataSetInfo& dataSet = dataSetIterator.second;
 
-		float usedDeviaton = fmax(dataSet.deviation, 0.1*dataSet.mean);
+		float usedDeviaton = fmax(dataSet.deviation, 0.1 * dataSet.mean);
 		float stepX = dimension.x / dataSet.size;
 		float stepY = dimension.y / usedDeviaton / 6.82f;
 		float startY = dataSet.mean - usedDeviaton;
@@ -301,3 +302,5 @@ Vec2 SlidingChart::resize() {
 }
 
 #pragma endregion
+
+};

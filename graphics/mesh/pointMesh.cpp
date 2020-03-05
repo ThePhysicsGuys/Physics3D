@@ -6,6 +6,8 @@
 #include "buffers/vertexBuffer.h"
 #include "renderer.h"
 
+namespace Graphics {
+
 PointMesh::PointMesh(const float* vertices, const size_t vertexCount, size_t capacity) : AbstractMesh(Graphics::Renderer::POINT), vertexCount(vertexCount), capacity(capacity) {
 	vertexBuffer = new VertexBuffer(nullptr, 10 * capacity * sizeof(float), Graphics::Renderer::DYNAMIC_DRAW);
 
@@ -42,3 +44,5 @@ void PointMesh::update(const float* vertices, const size_t vertexCount) {
 		vertexBuffer->update(vertices, vertexCount * bufferLayout.stride * sizeof(float), 0);
 	}
 }
+
+};

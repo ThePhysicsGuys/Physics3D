@@ -3,6 +3,8 @@
 #include "../bindable.h"
 #include "shaderParser.h"
 
+namespace Graphics {
+
 struct ShaderSource {
 	std::string name;
 
@@ -24,7 +26,7 @@ struct ShaderStage {
 	ShaderStage(const std::string& source, const ShaderInfo& info);
 };
 
-class Shader : public Bindable {
+class Shader : public Graphics::Bindable {
 public:
 	enum ShaderFlag : char {
 		NONE = 0 << 0,
@@ -84,3 +86,5 @@ ShaderSource parseShader(const std::string& name, std::istream& shaderTextStream
 ShaderSource parseShader(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath);
 ShaderSource parseShader(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath);
 ShaderSource parseShader(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath, const std::string& tesselationControlPath, const std::string& tesselationEvaluatePath);
+
+};

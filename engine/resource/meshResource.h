@@ -14,20 +14,20 @@ public:
 
 class MeshResource : public Resource {
 private:
-	IndexedMesh* mesh;
+	Graphics::IndexedMesh* mesh;
 	Graphics::VisualShape shape;
 public:
 	DEFINE_RESOURCE(Mesh, "../res/fonts/default/default.ttf");
 
-	MeshResource(const std::string& path, IndexedMesh* mesh, Graphics::VisualShape shape) : Resource(path, path), mesh(mesh), shape(shape) {
+	MeshResource(const std::string& path, Graphics::IndexedMesh* mesh, Graphics::VisualShape shape) : Resource(path, path), mesh(mesh), shape(shape) {
 
 	}
 
-	MeshResource(const std::string& name, const std::string& path, IndexedMesh* mesh, Graphics::VisualShape shape) : Resource(name, path), mesh(mesh), shape(shape) {
+	MeshResource(const std::string& name, const std::string& path, Graphics::IndexedMesh* mesh, Graphics::VisualShape shape) : Resource(name, path), mesh(mesh), shape(shape) {
 
 	}
 
-	IndexedMesh* getMesh() {
+	Graphics::IndexedMesh* getMesh() {
 		return mesh;
 	};
 

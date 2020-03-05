@@ -1,5 +1,7 @@
 #pragma once
 
+namespace Graphics {
+
 class Container;
 
 enum class Align {
@@ -17,4 +19,6 @@ public:
 class FlowLayout : public Layout {
 public:
 	Vec2 resize(Container* container, Vec2 minDimension = Vec2()) override;
+};
+
 };

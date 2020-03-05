@@ -32,7 +32,7 @@ void SkyboxLayer::onEvent(Event& event) {
 void SkyboxLayer::onRender() {
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
-	graphicsMeasure.mark(GraphicsProcess::SKYBOX);
+	Graphics::graphicsMeasure.mark(Graphics::GraphicsProcess::SKYBOX);
 
 	Graphics::Renderer::beginScene();
 

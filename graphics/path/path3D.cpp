@@ -6,13 +6,15 @@
 
 #define DEFAULT_PATTERN_3D(color) [color] (int i, const Vec3f& p) { return color; }
 
+namespace Graphics {
+
 namespace Path3D {
 
 	//! Batch
 
-	Batch<Vertex>* batch = nullptr;
+	Graphics::Batch<Vertex>* batch = nullptr;
 
-	void bind(Batch<Vertex>* batch) {
+	void bind(Graphics::Batch<Vertex>* batch) {
 		Path3D::batch = batch;
 	}
 
@@ -165,3 +167,5 @@ namespace Path3D {
 		path.clear();
 	}
 }
+
+};

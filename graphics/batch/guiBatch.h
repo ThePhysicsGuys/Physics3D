@@ -8,6 +8,8 @@
 #include "../buffers/bufferLayout.h"
 #include "../shader/shaders.h"
 
+namespace Graphics {
+
 struct GuiCommand {
 	// Amount of indices to render
 	size_t count;
@@ -33,7 +35,7 @@ public:
 				BufferElement("pos", BufferDataType::FLOAT2),
 				BufferElement("uv", BufferDataType::FLOAT2),
 				BufferElement("col", BufferDataType::FLOAT4)
-			}),
+				}),
 			Graphics::Renderer::TRIANGLES
 		)) {
 
@@ -107,4 +109,6 @@ public:
 		Batch<GuiVertex>::clear();
 		commandBuffer.clear();
 	}
+};
+
 };

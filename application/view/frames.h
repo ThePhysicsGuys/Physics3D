@@ -36,10 +36,10 @@ public:
 	static Resource* selectedResource;
 
 private:
-	static void renderShaderStageInfo(Shader* shader, const ShaderStage& stage);
+	static void renderShaderStageInfo(Graphics::Shader* shader, const Graphics::ShaderStage& stage);
 	static void renderTextureInfo(Graphics::Texture* texture);
 	static void renderFontInfo(Graphics::Font* font);
-	static void renderShaderInfo(Shader* shader);
+	static void renderShaderInfo(Graphics::Shader* shader);
 	
 	static void renderPropertiesFrame();
 	static void renderDebugFrame();

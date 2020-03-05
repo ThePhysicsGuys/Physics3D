@@ -4,6 +4,8 @@
 
 #include "container.h"
 
+namespace Graphics {
+
 Vec2 FlowLayout::resize(Container* container, Vec2 minDimension) {
 	// Resulting width of the container
 	double contentWidth = minDimension.x;
@@ -113,3 +115,5 @@ Vec2 FlowLayout::resize(Container* container, Vec2 minDimension) {
 
 	return container->dimension;
 }
+
+};

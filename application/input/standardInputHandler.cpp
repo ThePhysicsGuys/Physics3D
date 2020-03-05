@@ -83,6 +83,8 @@ bool StandardInputHandler::onKeyPressOrRepeat(KeyPressEvent& event) {
 }
 
 bool StandardInputHandler::onKeyPress(KeyPressEvent& event) {
+	using namespace Graphics::Debug;
+
 	int key = event.getKey();
 
 	if (KeyboardOptions::Tick::pause == key) {
@@ -96,7 +98,7 @@ bool StandardInputHandler::onKeyPress(KeyPressEvent& event) {
 			screen.selectedPart = nullptr;
 		}
 	} else if (KeyboardOptions::Debug::pies == key) {
-		Debug::renderPiesEnabled = !Debug::renderPiesEnabled;
+		renderPiesEnabled = !renderPiesEnabled;
 	} else if (KeyboardOptions::Part::anchor == key) {
 		throw "Not implemented!";
 	} else if(KeyboardOptions::Part::makeMainPart == key) {
@@ -125,9 +127,9 @@ bool StandardInputHandler::onKeyPress(KeyPressEvent& event) {
 	} else if (KeyboardOptions::Edit::scale == key) {
 		Picker::editTools.editMode = EditTools::EditMode::SCALE;
 	} else if (KeyboardOptions::Debug::spheres == key) {
-		Debug::colissionSpheresMode = static_cast<Debug::SphereColissionRenderMode>((static_cast<int>(Debug::colissionSpheresMode) + 1) % 3);
+		colissionSpheresMode = static_cast<SphereColissionRenderMode>((static_cast<int>(colissionSpheresMode) + 1) % 3);
 	} else if (KeyboardOptions::Debug::tree == key) {
-		Debug::colTreeRenderMode = static_cast<Debug::ColTreeRenderMode>((static_cast<int>(Debug::colTreeRenderMode) + 1) % 5);
+		colTreeRenderMode = static_cast<ColTreeRenderMode>((static_cast<int>(colTreeRenderMode) + 1) % 5);
 	}
 
 	if (Keyboard::F1 <= key && Keyboard::F9 >= key) {

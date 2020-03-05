@@ -143,8 +143,8 @@ void Screen::onInit() {
 	dimension = Graphics::Renderer::getGLFWWindowSize();
 
 	// Framebuffer init
-	quad = new ::Quad();
-	screenFrameBuffer = new ::FrameBuffer(dimension.x, dimension.y);
+	quad = new Graphics::Quad();
+	screenFrameBuffer = new Graphics::FrameBuffer(dimension.x, dimension.y);
 
 	// Shader init
 	ApplicationShaders::onInit();
@@ -178,7 +178,7 @@ void Screen::onInit() {
 		screen.camera.onUpdate(((float) dimension.x) / ((float) dimension.y));
 		screen.dimension = dimension;
 		screen.screenFrameBuffer->resize(screen.dimension);
-		GUI::blurFrameBuffer->resize(screen.dimension);
+		Graphics::GUI::blurFrameBuffer->resize(screen.dimension);
 	});
 
 	// Camera init
@@ -278,14 +278,14 @@ void Screen::onRender() {
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-	graphicsMeasure.mark(GraphicsProcess::FINALIZE);
+	Graphics::graphicsMeasure.mark(Graphics::GraphicsProcess::FINALIZE);
 
 	// Finalize
 	Graphics::Renderer::swapGLFWInterval(0);
 	Graphics::Renderer::swapGLFWBuffers();
 	Graphics::Renderer::pollGLFWEvents();
 
-	graphicsMeasure.mark(GraphicsProcess::OTHER);
+	Graphics::graphicsMeasure.mark(Graphics::GraphicsProcess::OTHER);
 }
 
 void Screen::onClose() {

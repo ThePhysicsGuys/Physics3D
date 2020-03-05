@@ -3,6 +3,8 @@
 #include "orderedVector.h"
 #include "component.h"
 
+namespace Graphics {
+
 class Container : public Component {
 public:
 	/*
@@ -36,7 +38,7 @@ public:
 	void add(Component* child, Align alignment);
 
 	/*
-		Returns the child with its alignment 
+		Returns the child with its alignment
 	*/
 	std::pair<Component*, Align> get(Component* child);
 
@@ -58,3 +60,5 @@ public:
 	virtual void render() = 0;
 	virtual Vec2 resize() = 0;
 };
+
+}

@@ -61,9 +61,9 @@ void init(int argc, const char** args) {
 	setupGL();
 	Engine::MeshRegistry::init();
 
-	ResourceManager::add<TextureResource>("floorMaterial", "../res/textures/floor/floor_color.jpg");
+	ResourceManager::add<Graphics::TextureResource>("floorMaterial", "../res/textures/floor/floor_color.jpg");
 
-	WorldImportExport::registerTexture(ResourceManager::get<TextureResource>("floorMaterial"));
+	WorldImportExport::registerTexture(ResourceManager::get<Graphics::TextureResource>("floorMaterial"));
 
 	WorldBuilder::init();
 
@@ -365,9 +365,9 @@ void setupPhysics() {
 	physicsThread = TickerThread(TICKS_PER_SECOND, TICK_SKIP_TIME, [] () {
 		physicsMeasure.mark(PhysicsProcess::OTHER);
 
-		AppDebug::logTickStart();
+		Graphics::AppDebug::logTickStart();
 		world.tick();
-		AppDebug::logTickEnd();
+		Graphics::AppDebug::logTickEnd();
 
 		physicsMeasure.end();
 
@@ -378,7 +378,7 @@ void setupPhysics() {
 }
 
 void setupDebug() {
-	AppDebug::setupDebugHooks();
+	Graphics::AppDebug::setupDebugHooks();
 }
 
 void stop(int returnCode) {
@@ -453,10 +453,10 @@ int main(int argc, const char** args) {
 
 	Log::info("Started rendering");
 	while (!Application::screen.shouldClose()) {
-		graphicsMeasure.mark(GraphicsProcess::UPDATE);
+		Graphics::graphicsMeasure.mark(Graphics::GraphicsProcess::UPDATE);
 		Application::screen.onUpdate();
 		Application::screen.onRender();
-		graphicsMeasure.end();
+		Graphics::graphicsMeasure.end();
 	}
 
 	Application::stop(0);

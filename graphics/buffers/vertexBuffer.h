@@ -2,6 +2,8 @@
 
 #include "../bindable.h"
 
+namespace Graphics {
+
 class VertexBuffer : public Bindable {
 public:
 	VertexBuffer();
@@ -20,4 +22,7 @@ public:
 	void bind() override;
 	void unbind() override;
 	void close() override;
+};
+
+
 };

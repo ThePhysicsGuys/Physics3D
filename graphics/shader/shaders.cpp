@@ -8,14 +8,16 @@
 
 #include <sstream>
 
-namespace GraphicsShaders {
-	GuiShader guiShader;
-	QuadShader quadShader;
-	BlurShader horizontalBlurShader;
-	BlurShader verticalBlurShader;
+namespace Graphics {
 
-	void onInit() {
-		std::string guiShaderSourceFile =
+namespace GraphicsShaders {
+GuiShader guiShader;
+QuadShader quadShader;
+BlurShader horizontalBlurShader;
+BlurShader verticalBlurShader;
+
+void onInit() {
+	std::string guiShaderSourceFile =
 		R"(
 			[common]
 			#version 330 core
@@ -40,7 +42,7 @@ namespace GraphicsShaders {
 			}
 		)";
 
-		std::string quadShaderSourceFile =
+	std::string quadShaderSourceFile =
 		R"(
 			[common]
 			#version 330 core
@@ -63,7 +65,7 @@ namespace GraphicsShaders {
 			}
 		)";
 
-		std::string horizontalBlurShaderVertexSourceFile =
+	std::string horizontalBlurShaderVertexSourceFile =
 		R"(
 			[common]
 			#version 330
@@ -93,8 +95,8 @@ namespace GraphicsShaders {
 			}
 		)";
 
-		std::string verticalBlurShaderVertexSourceFile =
-			R"(
+	std::string verticalBlurShaderVertexSourceFile =
+		R"(
 			[common]
 			#version 330
 			[vertex]
@@ -123,8 +125,8 @@ namespace GraphicsShaders {
 			}
 		)";
 
-		std::string blurShaderFragmentSourceFile =
-			R"(
+	std::string blurShaderFragmentSourceFile =
+		R"(
 			[fragment]
 			in vec2 fUV[15];
 			out vec4 outColor;
@@ -149,30 +151,30 @@ namespace GraphicsShaders {
 			}
 		)";
 
-		// Shader source init
-		ShaderSource guiShaderSource = parseShader("gui.shader", (std::istream&) std::istringstream(guiShaderSourceFile));
-		ShaderSource quadShaderSource = parseShader("quad.shader", (std::istream&) std::istringstream(quadShaderSourceFile));
-		ShaderSource horizontalBlurShaderSource = parseShader("horizontalBlur.shader", (std::istream&) std::istringstream(horizontalBlurShaderVertexSourceFile + blurShaderFragmentSourceFile));
-		ShaderSource verticalBlurShaderSource = parseShader("verticalBlur.shader", (std::istream&) std::istringstream(verticalBlurShaderVertexSourceFile + blurShaderFragmentSourceFile));
+	// Shader source init
+	ShaderSource guiShaderSource = parseShader("gui.shader", (std::istream&) std::istringstream(guiShaderSourceFile));
+	ShaderSource quadShaderSource = parseShader("quad.shader", (std::istream&) std::istringstream(quadShaderSourceFile));
+	ShaderSource horizontalBlurShaderSource = parseShader("horizontalBlur.shader", (std::istream&) std::istringstream(horizontalBlurShaderVertexSourceFile + blurShaderFragmentSourceFile));
+	ShaderSource verticalBlurShaderSource = parseShader("verticalBlur.shader", (std::istream&) std::istringstream(verticalBlurShaderVertexSourceFile + blurShaderFragmentSourceFile));
 
-		// Shader init
-		new(&guiShader) GuiShader(guiShaderSource);
-		new(&quadShader) QuadShader(quadShaderSource);
-		new(&horizontalBlurShader) BlurShader(horizontalBlurShaderSource);
-		new(&verticalBlurShader) BlurShader(verticalBlurShaderSource);
+	// Shader init
+	new(&guiShader) GuiShader(guiShaderSource);
+	new(&quadShader) QuadShader(quadShaderSource);
+	new(&horizontalBlurShader) BlurShader(horizontalBlurShaderSource);
+	new(&verticalBlurShader) BlurShader(verticalBlurShaderSource);
 
-		ResourceManager::add(&guiShader);
-		ResourceManager::add(&quadShader);
-		ResourceManager::add(&horizontalBlurShader);
-		ResourceManager::add(&verticalBlurShader);
-	}
+	ResourceManager::add(&guiShader);
+	ResourceManager::add(&quadShader);
+	ResourceManager::add(&horizontalBlurShader);
+	ResourceManager::add(&verticalBlurShader);
+}
 
-	void onClose() {
-		horizontalBlurShader.close();
-		verticalBlurShader.close();
-		guiShader.close();
-		quadShader.close();
-	}
+void onClose() {
+	horizontalBlurShader.close();
+	verticalBlurShader.close();
+	guiShader.close();
+	quadShader.close();
+}
 }
 
 
@@ -227,3 +229,5 @@ void BlurShader::updateTexture(Graphics::Texture* texture) {
 	texture->bind();
 	setUniform("image", texture->getUnit());
 }
+
+};

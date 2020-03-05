@@ -8,6 +8,8 @@
 #include "vertexBuffer.h"
 #include "bufferLayout.h"
 
+namespace Graphics {
+
 VertexArray::VertexArray() : attributeArrayOffset(0) {
 	glGenVertexArrays(1, &id);
 	glBindVertexArray(id);
@@ -53,19 +55,19 @@ void VertexArray::addBuffer(VertexBuffer* buffer, const BufferLayout& layout) {
 	for (size_t i = 0; i < layout.elements.size(); i++) {
 		auto& element = layout.elements[i];
 
-		int iterations = (element.info == BufferDataType::MAT2 || element.info == BufferDataType::MAT3 || element.info == BufferDataType::MAT4)? element.info.count : 1;
+		int iterations = (element.info == BufferDataType::MAT2 || element.info == BufferDataType::MAT3 || element.info == BufferDataType::MAT4) ? element.info.count : 1;
 
 		for (size_t j = 0; j < iterations; j++) {
 			size_t attribArrayIndex = attributeArrayOffset + i + j;
 			glEnableVertexAttribArray(attribArrayIndex);
 			glVertexAttribPointer(attribArrayIndex, element.info.count, element.info.type, element.normalized, layout.stride, (const void*) offset);
-			
+
 			if (element.instanced)
 				glVertexAttribDivisor(attribArrayIndex, 1);
 
 			offset += element.info.size;
 
-			if (j > 0) 
+			if (j > 0)
 				attributeArrayOffset++;
 		}
 	}
@@ -78,3 +80,5 @@ void VertexArray::close() {
 	glDeleteVertexArrays(1, &id);
 	id = 0;
 }
+
+};

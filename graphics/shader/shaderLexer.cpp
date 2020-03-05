@@ -3,6 +3,8 @@
 #include "shaderLexer.h"
 #include "../util/stringUtil.h"
 
+namespace Graphics {
+
 std::vector<TokenType> ShaderLexer::types = {
 	TokenType(TokenType::NONE, std::regex("(.*?)")),
 	TokenType(TokenType::COMMA, ','),
@@ -44,9 +46,9 @@ TokenType ShaderLexer::getMatch(const std::string& input) {
 
 	for (int i = 1; i < ShaderLexer::types.size(); i++) {
 		if (types[i].accepting) {
-			if (input.length() == 1 && input.at(0) == types[i].character) 
+			if (input.length() == 1 && input.at(0) == types[i].character)
 				return types[i];
-			else 
+			else
 				continue;
 		} else {
 			if (std::regex_match(input, types[i].regex))
@@ -114,7 +116,7 @@ Token ShaderLexer::nextToken(std::string& input) {
 	return popToken(input, lastMatch, currentToken);
 }
 
-TokenStack ShaderLexer::lexDebug(const std::string& input) {	
+TokenStack ShaderLexer::lexDebug(const std::string& input) {
 	std::function<std::vector<size_t>(const std::string&)> collect = [input] (const std::string& key) {
 		std::vector<size_t> list;
 		size_t lastIndex = 0;
@@ -253,15 +255,15 @@ Token TokenStack::peek(size_t offset) const {
 	if (read)
 		if (available(offset))
 			return *(iterator + offset);
-	
+
 	return Token(ShaderLexer::types[0], "");
 }
 
 Token TokenStack::pop() {
-	if (read) 
+	if (read)
 		if (available())
 			return *iterator++;
-	
+
 	return Token(ShaderLexer::types[0], "");
 }
 
@@ -278,7 +280,7 @@ void TokenStack::add(const Token& token) {
 
 void TokenStack::addAll(const TokenStack& tokens) {
 	int index = 0;
-	while (tokens.available(index)) 
+	while (tokens.available(index))
 		add(tokens.peek(index++));
 }
 
@@ -291,7 +293,7 @@ void TokenStack::flip() {
 
 TokenStack TokenStack::until(const TokenType::Type& type, bool popType) {
 	TokenStack content;
-	
+
 	if (read) {
 		while (available()) {
 			if (iterator->type == type)
@@ -303,7 +305,7 @@ TokenStack TokenStack::until(const TokenType::Type& type, bool popType) {
 		if (popType)
 			discard();
 	}
-	
+
 	content.flip();
 
 	return content;
@@ -319,3 +321,5 @@ inline bool TokenStack::available(size_t offset) const {
 inline size_t TokenStack::size() const {
 	return stack.size();
 }
+
+};

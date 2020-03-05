@@ -3,6 +3,8 @@
 typedef Vec4f Color;
 typedef Vec3f Color3;
 
+namespace Graphics {
+
 // Colors
 namespace COLOR {
 	extern Color DISABLED;
@@ -43,4 +45,6 @@ namespace COLOR {
 	Color rgbaToHsva(Color rgba);
 
 	Color blend(Color color1, Color color2);
+};
+
 };

@@ -7,6 +7,8 @@
 #include "path/path.h"
 #include "mesh/primitive.h"
 
+namespace Graphics {
+
 Container::Container(Vec2 position) : Component(position), layout(new FlowLayout()) {
 };
 
@@ -64,3 +66,5 @@ void Container::renderChildren() {
 		}
 	}
 }
+
+};

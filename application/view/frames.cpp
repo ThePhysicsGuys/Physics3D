@@ -18,6 +18,7 @@
 #include "screen.h"
 
 namespace Application {
+using namespace Graphics;
 
 bool BigFrame::hdr = true;
 float BigFrame::gamma = 1.0f;
@@ -31,7 +32,7 @@ bool BigFrame::isDisabled;
 Layer* BigFrame::selectedLayer = nullptr;
 Resource* BigFrame::selectedResource = nullptr;
 
-void BigFrame::renderTextureInfo(Graphics::Texture* texture) {
+void BigFrame::renderTextureInfo(Texture* texture) {
 	ImGui::Text("ID: %d", texture->getID());
 	ImGui::Text("Width: %d", texture->getWidth());
 	ImGui::Text("Height: %d", texture->getHeight());
@@ -58,7 +59,7 @@ void BigFrame::renderTextureInfo(Graphics::Texture* texture) {
 	}
 }
 
-void BigFrame::renderFontInfo(Graphics::Font* font) {
+void BigFrame::renderFontInfo(Font* font) {
 	if (ImGui::TreeNode("Atlas")) {
 		renderTextureInfo(font->getAtlas());
 		ImGui::TreePop();
@@ -67,7 +68,7 @@ void BigFrame::renderFontInfo(Graphics::Font* font) {
 	char selectedCharacter = 0;
 	if (ImGui::TreeNode("Characters")) {
 		for (int i = 0; i < CHARACTER_COUNT; i++) {
-			Graphics::Character& character = font->getCharacter(i);
+			Character& character = font->getCharacter(i);
 
 			float s = float(character.x) / font->getAtlasWidth();
 			float t = float(character.y) / font->getAtlasHeight();
@@ -81,7 +82,7 @@ void BigFrame::renderFontInfo(Graphics::Font* font) {
 				ImGui::SameLine();
 		}
 		if (ImGui::TreeNodeEx("Info", ImGuiTreeNodeFlags_DefaultOpen)) {
-			Graphics::Character& c = font->getCharacter(selectedCharacter);
+			Character& c = font->getCharacter(selectedCharacter);
 			ImGui::Text("Character: %s", std::string(1, (char) selectedCharacter).c_str());
 			ImGui::Text("ID: %d", c.id);
 			ImGui::Text("Origin: (%d, %d)", c.x, c.x);
@@ -391,8 +392,8 @@ void BigFrame::renderPropertiesFrame() {
 				ImGui::ColorEdit3("Diffuse", sp->material.diffuse.data);
 				ImGui::ColorEdit3("Specular", sp->material.specular.data);
 				ImGui::SliderFloat("Reflectance", &sp->material.reflectance, 0, 1);
-				if (ImGui::Button(sp ? (sp->renderMode == Graphics::Renderer::FILL ? "Render mode: fill" : "Render mode: wireframe") : "l"))
-					if (sp) sp->renderMode = sp->renderMode == Graphics::Renderer::FILL ? Graphics::Renderer::WIREFRAME : Graphics::Renderer::FILL;
+				if (ImGui::Button(sp ? (sp->renderMode == Renderer::FILL ? "Render mode: fill" : "Render mode: wireframe") : "l"))
+					if (sp) sp->renderMode = sp->renderMode == Renderer::FILL ? Renderer::WIREFRAME : Renderer::FILL;
 			} else {
 				ImGui::Text("No part selected");
 			}
@@ -403,34 +404,36 @@ void BigFrame::renderPropertiesFrame() {
 }
 
 void BigFrame::renderDebugFrame() {
+	using namespace ::Debug;
+	using namespace Graphics::Debug;
 	if (ImGui::CollapsingHeader("Debug", ImGuiTreeNodeFlags_DefaultOpen)) {
 		ImGui::SetNextTreeNodeOpen(true);
 		if (ImGui::TreeNode("Vectors")) {
-			ImGui::Checkbox("Info", &Debug::vectorDebugEnabled[Debug::INFO_VEC]);
-			ImGui::Checkbox("Position", &Debug::vectorDebugEnabled[Debug::POSITION]);
-			ImGui::Checkbox("Velocity", &Debug::vectorDebugEnabled[Debug::VELOCITY]);
-			ImGui::Checkbox("Acceleration", &Debug::vectorDebugEnabled[Debug::ACCELERATION]);
-			ImGui::Checkbox("Moment", &Debug::vectorDebugEnabled[Debug::MOMENT]);
-			ImGui::Checkbox("Force", &Debug::vectorDebugEnabled[Debug::FORCE]);
-			ImGui::Checkbox("Angular impulse", &Debug::vectorDebugEnabled[Debug::ANGULAR_IMPULSE]);
-			ImGui::Checkbox("Impulse", &Debug::vectorDebugEnabled[Debug::IMPULSE]);
+			ImGui::Checkbox("Info", &vectorDebugEnabled[INFO_VEC]);
+			ImGui::Checkbox("Position", &vectorDebugEnabled[POSITION]);
+			ImGui::Checkbox("Velocity", &vectorDebugEnabled[VELOCITY]);
+			ImGui::Checkbox("Acceleration", &vectorDebugEnabled[ACCELERATION]);
+			ImGui::Checkbox("Moment", &vectorDebugEnabled[MOMENT]);
+			ImGui::Checkbox("Force", &vectorDebugEnabled[FORCE]);
+			ImGui::Checkbox("Angular impulse", &vectorDebugEnabled[ANGULAR_IMPULSE]);
+			ImGui::Checkbox("Impulse", &vectorDebugEnabled[IMPULSE]);
 
 			ImGui::TreePop();
 		}
 
 		ImGui::SetNextTreeNodeOpen(true);
 		if (ImGui::TreeNode("Points")) {
-			ImGui::Checkbox("Info", &Debug::pointDebugEnabled[Debug::INFO_POINT]);
-			ImGui::Checkbox("Center of mass", &Debug::pointDebugEnabled[Debug::CENTER_OF_MASS]);
-			ImGui::Checkbox("Intersections", &Debug::pointDebugEnabled[Debug::INTERSECTION]);
+			ImGui::Checkbox("Info", &pointDebugEnabled[INFO_POINT]);
+			ImGui::Checkbox("Center of mass", &pointDebugEnabled[CENTER_OF_MASS]);
+			ImGui::Checkbox("Intersections", &pointDebugEnabled[INTERSECTION]);
 
 			ImGui::TreePop();
 		}
 
 		ImGui::SetNextTreeNodeOpen(true);
 		if (ImGui::TreeNode("Render")) {
-			ImGui::Checkbox("Render pies", &Debug::renderPiesEnabled);
-			if (ImGui::Button("Switch collision sphere render mode")) Debug::colissionSpheresMode = static_cast<Debug::SphereColissionRenderMode>((static_cast<int>(Debug::colissionSpheresMode) + 1) % 3);
+			ImGui::Checkbox("Render pies", &renderPiesEnabled);
+			if (ImGui::Button("Switch collision sphere render mode")) colissionSpheresMode = static_cast<SphereColissionRenderMode>((static_cast<int>(colissionSpheresMode) + 1) % 3);
 
 			ImGui::TreePop();
 		}

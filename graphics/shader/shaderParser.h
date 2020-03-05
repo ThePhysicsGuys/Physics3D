@@ -3,6 +3,8 @@
 #include <stack>
 #include "shaderLexer.h"
 
+namespace Graphics {
+
 enum class ShaderVariableType {
 	NONE,
 	VOID,
@@ -100,4 +102,6 @@ class ShaderParser {
 public:
 	static ShaderInfo parse(const std::string& code);
 	static ShaderInfo parseTokens(TokenStack& tokens);
+};
+
 };

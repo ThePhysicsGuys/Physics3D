@@ -7,6 +7,8 @@
 #include "../debug/debug.h"
 #include "../shader/shader.h"
 
+namespace Graphics {
+
 template<typename Vertex, typename Command>
 class CommandBatch : public Batch<Vertex> {
 protected:
@@ -29,7 +31,7 @@ public:
 	}
 
 	virtual void submit() {
-	
+
 	};
 
 	virtual void clear() {
@@ -37,4 +39,6 @@ public:
 		Batch<Vertex>::clear();
 		commandBuffer.clear();
 	}
+};
+
 };

@@ -2,6 +2,8 @@
 
 typedef unsigned int GLID;
 
+namespace Graphics {
+
 class Bindable {
 protected:
 	GLID id;
@@ -18,4 +20,6 @@ public:
 	virtual void bind() = 0;
 	virtual void unbind() = 0;
 	virtual void close() = 0;
+};
+
 };

@@ -2,6 +2,8 @@
 
 #include "../bindable.h"
 
+namespace Graphics {
+
 class RenderBuffer : public Bindable {
 public:
 	unsigned int width;
@@ -42,4 +44,6 @@ public:
 	void close() override;
 
 	void resize(unsigned int width, unsigned int height);
+};
+
 };

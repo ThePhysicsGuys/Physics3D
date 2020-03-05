@@ -7,12 +7,13 @@
 #include "../physics/profiling.h"
 #include "../physics/math/linalg/largeMatrix.h"
 
-namespace Graphics {
-class Font;
-};
-
-class Screen;
+template<typename T>
+class BoundsTree;
 struct TreeNode;
+
+namespace Graphics {
+
+class Font;
 
 extern const Color3 pieColors[30];
 
@@ -56,7 +57,7 @@ struct BarChart : public Component {
 	LargeMatrix<WeightValue> data;
 	std::string totalValue;
 
-	inline BarChart(const char* title, std::string totalValue, const char** labels, BarChartClassInfo* classes, Vec2f chartPosition, Vec2f chartSize, int classCount, int barCount) : 
+	inline BarChart(const char* title, std::string totalValue, const char** labels, BarChartClassInfo* classes, Vec2f chartPosition, Vec2f chartSize, int classCount, int barCount) :
 		title(title), totalValue(totalValue), classes(classes), labels(labels), data(barCount, classCount), Component(chartPosition, chartSize) {}
 	void render() override;
 	inline Vec2 resize() override { return dimension; };
@@ -95,8 +96,6 @@ struct SlidingChart : public Component {
 	Vec2 resize() override;
 };
 
-template<typename T>
-class BoundsTree;
-
 void renderTreeStructure(const BoundsTree<Part>& tree, const Color3& treeColor, Vec2f origin, float allottedWidth, const void* selectedObject);
 
+};

@@ -28,12 +28,12 @@
 namespace Application {
 
 Vec4f colors[] {
-	COLOR::BLUE,
-	COLOR::GREEN,
-	COLOR::YELLOW,
-	COLOR::ORANGE,
-	COLOR::RED,
-	COLOR::PURPLE
+	Graphics::COLOR::BLUE,
+	Graphics::COLOR::GREEN,
+	Graphics::COLOR::YELLOW,
+	Graphics::COLOR::ORANGE,
+	Graphics::COLOR::RED,
+	Graphics::COLOR::PURPLE
 };
 
 void renderSphere(double radius, const Position& position, const Color& color) {
@@ -84,7 +84,7 @@ bool recursiveColTreeForOneObject(const TreeNode& node, const Part* part, const 
 		//if (!intersects(node.bounds, bounds)) return false;
 		for (const TreeNode& subNode : node) {
 			if (recursiveColTreeForOneObject(subNode, part, bounds)) {
-				Color green = COLOR::GREEN;
+				Color green = Graphics::COLOR::GREEN;
 				green.w = 0.3f;
 
 				renderBounds(node.bounds, green);
@@ -98,13 +98,13 @@ bool recursiveColTreeForOneObject(const TreeNode& node, const Part* part, const 
 void DebugLayer::onInit() {
 
 	// Origin init
-	originMesh = new ArrayMesh(nullptr, 1, 3, Graphics::Renderer::POINT);
+	originMesh = new Graphics::ArrayMesh(nullptr, 1, 3, Graphics::Renderer::POINT);
 
 	// Vector init
-	vectorMesh = new VectorMesh(nullptr, 0);
+	vectorMesh = new Graphics::VectorMesh(nullptr, 0);
 
 	// Point init
-	pointMesh = new PointMesh(nullptr, 0);
+	pointMesh = new Graphics::PointMesh(nullptr, 0);
 
 }
 
@@ -121,10 +121,10 @@ void DebugLayer::onRender() {
 
 	Graphics::Renderer::beginScene();
 
-	graphicsMeasure.mark(GraphicsProcess::VECTORS);
+	Graphics::graphicsMeasure.mark(Graphics::GraphicsProcess::VECTORS);
 
-	using namespace Debug;
-	using namespace AppDebug;
+	using namespace Graphics::Debug;
+	using namespace Graphics::AppDebug;
 
 	// Initialize vector log buffer
 	AddableBuffer<ColoredVector>& vecLog = getVectorBuffer();
@@ -132,15 +132,15 @@ void DebugLayer::onRender() {
 
 	for (const MotorizedPhysical* physical : screen->world->iterPhysicals()) {
 		Position com = physical->getCenterOfMass();
-		pointLog.add(ColoredPoint(com, CENTER_OF_MASS));
+		pointLog.add(ColoredPoint(com, ::Debug::CENTER_OF_MASS));
 	}
 
 	screen->world->syncReadOnlyOperation([this, &vecLog]() {
 		Screen* screen = static_cast<Screen*>(this->ptr);
 		for(const ConstraintGroup& constraintGroup : screen->world->constraints) {
 			for(const BallConstraint& ballConstraint : constraintGroup.ballConstraints) {
-				vecLog.add(ColoredVector(ballConstraint.a->getCFrame().getPosition(), ballConstraint.a->getCFrame().localToRelative(ballConstraint.attachA), INFO_VEC));
-				vecLog.add(ColoredVector(ballConstraint.b->getCFrame().getPosition(), ballConstraint.b->getCFrame().localToRelative(ballConstraint.attachB), INFO_VEC));
+				vecLog.add(ColoredVector(ballConstraint.a->getCFrame().getPosition(), ballConstraint.a->getCFrame().localToRelative(ballConstraint.attachA), ::Debug::INFO_VEC));
+				vecLog.add(ColoredVector(ballConstraint.b->getCFrame().getPosition(), ballConstraint.b->getCFrame().localToRelative(ballConstraint.attachB), ::Debug::INFO_VEC));
 			}
 		}
 
@@ -148,19 +148,19 @@ void DebugLayer::onRender() {
 			const GlobalCFrame& selectedCFrame = screen->selectedPart->getCFrame();
 			Motion partMotion = screen->selectedPart->getMotion();
 			for (const Vec3f& corner : screen->selectedPart->hitbox.asPolyhedron().iterVertices()) {
-				vecLog.add(ColoredVector(selectedCFrame.localToGlobal(corner), partMotion.getVelocityOfPoint(selectedCFrame.localToRelative(corner)), VELOCITY));
+				vecLog.add(ColoredVector(selectedCFrame.localToGlobal(corner), partMotion.getVelocityOfPoint(selectedCFrame.localToRelative(corner)), ::Debug::VELOCITY));
 			}
 
 			if (colissionSpheresMode == SphereColissionRenderMode::SELECTED) {
 				Physical& selectedPhys = *screen->selectedPart->parent;
 
 				for(Part& part : selectedPhys.rigidBody) {
-					Color yellow = COLOR::YELLOW;
+					Color yellow = Graphics::COLOR::YELLOW;
 					yellow.w = 0.5;
 					BoundingBox localBounds = screen->selectedPart->getLocalBounds();
 					renderBox(screen->selectedPart->getCFrame().localToGlobal(CFrame(localBounds.getCenter())), localBounds.getWidth(), localBounds.getHeight(), localBounds.getDepth(), yellow);
 
-					Color green = COLOR::GREEN;
+					Color green = Graphics::COLOR::GREEN;
 					green.w = 0.5;
 					renderSphere(part.maxRadius * 2, part.getPosition(), green);
 				}
@@ -170,12 +170,12 @@ void DebugLayer::onRender() {
 		if(colissionSpheresMode == SphereColissionRenderMode::ALL) {
 			for(MotorizedPhysical* phys : screen->world->iterPhysicals()) {
 				for(Part& part : phys->rigidBody) {
-					Color yellow = COLOR::YELLOW;
+					Color yellow = Graphics::COLOR::YELLOW;
 					yellow.w = 0.5;
 					BoundingBox localBounds = part.getLocalBounds();
 					renderBox(part.getCFrame().localToGlobal(CFrame(localBounds.getCenter())), localBounds.getWidth(), localBounds.getHeight(), localBounds.getDepth(), yellow);
 
-					Color green = COLOR::GREEN;
+					Color green = Graphics::COLOR::GREEN;
 					green.w = 0.5;
 					renderSphere(part.maxRadius * 2, part.getPosition(), green);
 				}
@@ -203,26 +203,26 @@ void DebugLayer::onRender() {
 	Graphics::Renderer::disableDepthTest();
 
 	// Update debug meshes
-	graphicsMeasure.mark(GraphicsProcess::VECTORS);
+	Graphics::graphicsMeasure.mark(Graphics::GraphicsProcess::VECTORS);
 	updateVectorMesh(vectorMesh, vecLog.data, vecLog.size);
 	updatePointMesh(pointMesh, pointLog.data, pointLog.size);
 
 
 	// Render vector mesh
-	graphicsMeasure.mark(GraphicsProcess::VECTORS);
+	Graphics::graphicsMeasure.mark(Graphics::GraphicsProcess::VECTORS);
 	ApplicationShaders::vectorShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
 	vectorMesh->render();
 
 
 	// Render point mesh
-	graphicsMeasure.mark(GraphicsProcess::VECTORS);
+	Graphics::graphicsMeasure.mark(Graphics::GraphicsProcess::VECTORS);
 	ApplicationShaders::pointShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
 	pointMesh->render();
 
 	Graphics::Renderer::enableDepthTest();
 
 	// Render origin mesh
-	graphicsMeasure.mark(GraphicsProcess::ORIGIN);
+	Graphics::graphicsMeasure.mark(Graphics::GraphicsProcess::ORIGIN);
 	ApplicationShaders::originShader.updateProjection(screen->camera.viewMatrix, screen->camera.getViewRotation(), screen->camera.projectionMatrix, screen->camera.orthoMatrix, screen->camera.cframe.position);
 	originMesh->render();
 

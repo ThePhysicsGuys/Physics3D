@@ -191,7 +191,7 @@ bool Camera::onMouseDrag(::MouseDragEvent& event) {
 }
 
 bool Camera::onMouseScroll(::MouseScrollEvent& event) {
-	velocity = GUI::clamp(velocity * (1 + 0.2 * event.getYOffset()), 0.001, 100);
+	velocity = Graphics::GUI::clamp(velocity * (1 + 0.2 * event.getYOffset()), 0.001, 100);
 
 	thirdPersonDistance -= event.getYOffset();
 

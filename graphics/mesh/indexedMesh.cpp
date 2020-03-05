@@ -9,9 +9,11 @@
 #include "renderer.h"
 #include "../physics/geometry/shape.h"
 
+namespace Graphics {
+
 IndexedMesh::IndexedMesh(const Graphics::VisualShape& shape) : AbstractMesh(), vertexCount(shape.vertexCount), triangleCount(shape.triangleCount) {
 	float* vertices = new float[shape.vertexCount * 3];
-	for(int i = 0; i < vertexCount; i++) {
+	for (int i = 0; i < vertexCount; i++) {
 		Vec3f vertex = shape[i];
 		vertices[i * 3] = vertex.x;
 		vertices[i * 3 + 1] = vertex.y;
@@ -26,8 +28,8 @@ IndexedMesh::IndexedMesh(const Graphics::VisualShape& shape) : AbstractMesh(), v
 	}
 
 	vertexBuffer = new VertexBuffer(vertices, 3 * vertexCount * sizeof(float));
-	normalBuffer = new VertexBuffer(reinterpret_cast<float const *>(shape.normals.get()), 3 * vertexCount * sizeof(float));
-	uvBuffer = new VertexBuffer(reinterpret_cast<float const *>(shape.uvs.get()), 2 * vertexCount * sizeof(float));
+	normalBuffer = new VertexBuffer(reinterpret_cast<float const*>(shape.normals.get()), 3 * vertexCount * sizeof(float));
+	uvBuffer = new VertexBuffer(reinterpret_cast<float const*>(shape.uvs.get()), 2 * vertexCount * sizeof(float));
 
 	indexBuffer = new IndexBuffer(triangles, 3 * triangleCount);
 
@@ -89,7 +91,7 @@ IndexedMesh::IndexedMesh(IndexedMesh&& other) {
 	indexBuffer = other.indexBuffer;
 	vertexCount = other.vertexCount;
 	triangleCount = other.triangleCount;
-	
+
 	// Reset so they cant be deleted by close()
 	other.vao = nullptr;
 	other.uvBuffer = nullptr;
@@ -103,17 +105,17 @@ IndexedMesh::IndexedMesh(IndexedMesh&& other) {
 IndexedMesh& IndexedMesh::operator=(IndexedMesh&& other) {
 	if (this != &other) {
 		close();
-		std::swap(vao                , other.vao               );
-		std::swap(bufferLayout       , other.bufferLayout      );
-		std::swap(vertexBufferLayout , other.vertexBufferLayout);
-		std::swap(normalBufferLayout , other.normalBufferLayout);
-		std::swap(uvBufferLayout     , other.uvBufferLayout    );
-		std::swap(vertexBuffer       , other.vertexBuffer      );
-		std::swap(normalBuffer       , other.normalBuffer      );
-		std::swap(uvBuffer           , other.uvBuffer          );
-		std::swap(indexBuffer        , other.indexBuffer       );
-		std::swap(vertexCount        , other.vertexCount       );
-		std::swap(triangleCount      , other.triangleCount     );
+		std::swap(vao, other.vao);
+		std::swap(bufferLayout, other.bufferLayout);
+		std::swap(vertexBufferLayout, other.vertexBufferLayout);
+		std::swap(normalBufferLayout, other.normalBufferLayout);
+		std::swap(uvBufferLayout, other.uvBufferLayout);
+		std::swap(vertexBuffer, other.vertexBuffer);
+		std::swap(normalBuffer, other.normalBuffer);
+		std::swap(uvBuffer, other.uvBuffer);
+		std::swap(indexBuffer, other.indexBuffer);
+		std::swap(vertexCount, other.vertexCount);
+		std::swap(triangleCount, other.triangleCount);
 	}
 
 	return *this;
@@ -123,11 +125,11 @@ void IndexedMesh::render() {
 	render(Graphics::Renderer::FILL);
 }
 
-void IndexedMesh::render(unsigned int mode)  {
+void IndexedMesh::render(unsigned int mode) {
 	vao->bind();
 	indexBuffer->bind();
 
-	
+
 	Graphics::Renderer::polygonMode(Graphics::Renderer::FRONT_AND_BACK, mode);
 	Graphics::Renderer::drawElements(renderMode, triangleCount * 3, Graphics::Renderer::UINT, nullptr);
 	Graphics::Renderer::polygonMode(Graphics::Renderer::FRONT_AND_BACK, Graphics::Renderer::FILL);
@@ -157,3 +159,5 @@ void IndexedMesh::close() {
 	triangleCount = 0;
 	vertexCount = 0;
 }
+
+};

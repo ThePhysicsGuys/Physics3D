@@ -5,6 +5,8 @@
 #include "GL\glew.h"
 #include "GLFW\glfw3.h"
 
+namespace Graphics {
+
 IndexBuffer::IndexBuffer() {
 	id = 0;
 	Log::debug("Created empty index buffer");
@@ -61,3 +63,5 @@ void IndexBuffer::close() {
 	glDeleteBuffers(1, &id);
 	id = 0;
 }
+
+};

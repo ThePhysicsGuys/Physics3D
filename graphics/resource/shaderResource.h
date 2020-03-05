@@ -4,6 +4,8 @@
 #include "../util/resource/resource.h"
 #include "../shader/shader.h"
 
+namespace Graphics {
+
 class ShaderResource;
 
 class ShaderAllocator : public ResourceAllocator<ShaderResource> {
@@ -26,4 +28,6 @@ public:
 	static ShaderAllocator getAllocator() {
 		return ShaderAllocator();
 	}
+};
+
 };

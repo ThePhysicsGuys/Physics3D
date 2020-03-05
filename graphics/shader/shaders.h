@@ -6,7 +6,6 @@
 
 namespace Graphics {
 class Texture;
-};
 
 struct GuiShader : public ShaderResource {
 	GuiShader() : ShaderResource() {}
@@ -35,11 +34,13 @@ struct BlurShader : public ShaderResource {
 };
 
 namespace GraphicsShaders {
-	extern GuiShader guiShader;
-	extern QuadShader quadShader;
-	extern BlurShader horizontalBlurShader;
-	extern BlurShader verticalBlurShader;
+extern GuiShader guiShader;
+extern QuadShader quadShader;
+extern BlurShader horizontalBlurShader;
+extern BlurShader verticalBlurShader;
 
-	void onInit();
-	void onClose();
+void onInit();
+void onClose();
 }
+
+};

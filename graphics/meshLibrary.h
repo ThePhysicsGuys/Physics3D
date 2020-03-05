@@ -1,8 +1,9 @@
 #pragma once
 
-class IndexedMesh;
 
 namespace Graphics {
+
+class IndexedMesh;
 
 namespace Library {
 extern IndexedMesh* cube;

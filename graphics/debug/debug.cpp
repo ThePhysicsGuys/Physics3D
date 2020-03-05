@@ -12,6 +12,8 @@
 
 #include "../physics/geometry/polyhedron.h"
 
+namespace Graphics {
+
 void clearError() {
 	while (glGetError() != GL_NO_ERROR);
 }
@@ -28,88 +30,90 @@ bool logCall(const char* func, const char* file, int line) {
 }
 
 namespace AppDebug {
-	
-	ThreePhaseBuffer<ColoredVector> vecBuf(256);
-	ThreePhaseBuffer<ColoredPoint> pointBuf(256);
 
-	namespace Logging {
-		using namespace Debug;
+ThreePhaseBuffer<ColoredVector> vecBuf(256);
+ThreePhaseBuffer<ColoredPoint> pointBuf(256);
 
-		void logVector(Position origin, Vec3 vec, VectorType type) {
-			vecBuf.add(ColoredVector(origin, vec, type));
-		}
+namespace Logging {
+using namespace Debug;
 
-		void logPoint(Position point, PointType type) {
-			pointBuf.add(ColoredPoint(point, type));
-		}
+void logVector(Position origin, Vec3 vec, VectorType type) {
+	vecBuf.add(ColoredVector(origin, vec, type));
+}
 
-		void logCFrame(CFrame frame, CFrameType type) {
-			switch (type) {
-			case OBJECT_CFRAME: {
+void logPoint(Position point, PointType type) {
+	pointBuf.add(ColoredPoint(point, type));
+}
+
+void logCFrame(CFrame frame, CFrameType type) {
+	switch (type) {
+		case OBJECT_CFRAME: {
 				Vec3 pos = frame.position;
 				Rotation rot = frame.rotation;
 				// buf.add(ColoredVec(frame.position, rot * Vec3(1.0, 0.0, 0.0), 0.0));
 				// buf.add(ColoredVec(frame.position, rot * Vec3(0.0, 1.0, 0.0), 0.3));
 				// buf.add(ColoredVec(frame.position, rot * Vec3(0.0, 0.0, 1.0), 0.6));
 			}
-				break;
-			case INERTIAL_CFRAME: {
+						  break;
+		case INERTIAL_CFRAME: {
 				Vec3 pos = frame.position;
 				Rotation rot = frame.rotation;
 				// buf.add(ColoredVec(frame.position, rot * Vec3(1.0, 0.0, 0.0), 0.1));
 				// buf.add(ColoredVec(frame.position, rot * Vec3(0.0, 1.0, 0.0), 0.4));
 				// buf.add(ColoredVec(frame.position, rot * Vec3(0.0, 0.0, 1.0), 0.7));
 			}
-				break;
-			}
-		}
-
-		void logShape(const Polyhedron& shape, const GlobalCFrame& location) {
-			for(int i = 0; i < shape.triangleCount; i++) {
-				Triangle t = shape.getTriangle(i);
-				for(int j = 0; j < 3; j++) {
-					Debug::logVector(location.localToGlobal(shape[t[j]]), location.localToRelative(shape[t[(j + 1) % 3]] - shape[t[j]]), Debug::INFO_VEC);
-				}
-			}
-		}
-	}
-
-	void logTickStart() {
-
-	}
-
-	void logTickEnd() {
-		vecBuf.pushWriteBuffer();
-		pointBuf.pushWriteBuffer();
-	}
-
-	void logFrameStart() {
-
-	}
-
-	void logFrameEnd() {
-
-	}
-
-	void setupDebugHooks() {
-		Log::info("Set up debug hooks!");
-		Debug::setVectorLogAction(Logging::logVector);
-		Debug::setPointLogAction(Logging::logPoint);
-		Debug::setCFrameLogAction(Logging::logCFrame);
-		Debug::setShapeLogAction(Logging::logShape);
-	}
-
-	/*
-		Returns a copy of the current vec buffer
-	*/
-	AddableBuffer<ColoredVector>& getVectorBuffer() {
-		return vecBuf.pullOutputBuffer();
-	}
-
-	/*
-		Returns a copy of the current point buffer
-	*/
-	AddableBuffer<ColoredPoint>& getPointBuffer() {
-		return pointBuf.pullOutputBuffer();
+							break;
 	}
 }
+
+void logShape(const Polyhedron& shape, const GlobalCFrame& location) {
+	for (int i = 0; i < shape.triangleCount; i++) {
+		Triangle t = shape.getTriangle(i);
+		for (int j = 0; j < 3; j++) {
+			Debug::logVector(location.localToGlobal(shape[t[j]]), location.localToRelative(shape[t[(j + 1) % 3]] - shape[t[j]]), Debug::INFO_VEC);
+		}
+	}
+}
+}
+
+void logTickStart() {
+
+}
+
+void logTickEnd() {
+	vecBuf.pushWriteBuffer();
+	pointBuf.pushWriteBuffer();
+}
+
+void logFrameStart() {
+
+}
+
+void logFrameEnd() {
+
+}
+
+void setupDebugHooks() {
+	Log::info("Set up debug hooks!");
+	Debug::setVectorLogAction(Logging::logVector);
+	Debug::setPointLogAction(Logging::logPoint);
+	Debug::setCFrameLogAction(Logging::logCFrame);
+	Debug::setShapeLogAction(Logging::logShape);
+}
+
+/*
+	Returns a copy of the current vec buffer
+*/
+AddableBuffer<ColoredVector>& getVectorBuffer() {
+	return vecBuf.pullOutputBuffer();
+}
+
+/*
+	Returns a copy of the current point buffer
+*/
+AddableBuffer<ColoredPoint>& getPointBuffer() {
+	return pointBuf.pullOutputBuffer();
+}
+}
+
+};

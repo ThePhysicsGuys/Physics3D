@@ -4,6 +4,8 @@
 
 #include "../buffers/bufferLayout.h"
 
+namespace Graphics {
+
 class VertexBuffer;
 
 class ArrayMesh : public AbstractMesh {
@@ -26,3 +28,4 @@ public:
 	void close() override;
 };
 
+};

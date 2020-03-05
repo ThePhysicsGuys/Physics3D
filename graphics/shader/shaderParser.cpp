@@ -2,6 +2,8 @@
 
 #include "shaderParser.h"
 
+namespace Graphics {
+
 ShaderLocal parseLocal(TokenStack& tokens, const ShaderDefines& defines);
 
 ShaderVariableType parseVariableType(const std::string& value) {
@@ -338,3 +340,5 @@ ShaderInfo ShaderParser::parseTokens(TokenStack& tokens) {
 
 	return ShaderInfo(layout, uniforms, globals, locals, defines, structs);
 }
+
+};

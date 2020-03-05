@@ -4,12 +4,11 @@
 
 #include "../buffers/bufferLayout.h"
 
+namespace Graphics {
+
 class IndexBuffer;
 class VertexBuffer;
-
-namespace Graphics {
 struct VisualShape;
-};
 
 class IndexedMesh : public AbstractMesh {
 public:
@@ -40,3 +39,4 @@ public:
 	void close() override;
 };
 
+};

@@ -12,6 +12,8 @@
 
 #include "../util/stringUtil.h"
 
+namespace Graphics {
+
 #pragma region uniforms
 
 int Shader::getUniform(const std::string& uniform) const {
@@ -29,9 +31,9 @@ void Shader::createUniform(const std::string& uniform) {
 
 	if (location < 0)
 		Log::error("Could not find uniform (%s) in shader (%s)", uniform.c_str(), name.c_str());
-	else 
+	else
 		Log::debug("Created uniform (%s) in shader (%s) with id (%d)", uniform.c_str(), name.c_str(), location);
-	
+
 	uniforms.insert(std::make_pair(uniform, location));
 }
 
@@ -71,11 +73,11 @@ void Shader::setUniform(const std::string& uniform, const Mat4f& value) const {
 
 unsigned int compileShader(const std::string& source, unsigned int type) {
 	unsigned int id = glCreateShader(type);
-	
+
 	const char* src = source.c_str();
-	
+
 	glShaderSource(id, 1, &src, nullptr);
-	
+
 	glCall(glCompileShader(id));
 
 	// Error handling
@@ -88,7 +90,7 @@ unsigned int compileShader(const std::string& source, unsigned int type) {
 		glGetShaderInfoLog(id, length, &length, message);
 		Log::print("fail\n", Log::Color::ERROR);
 		Log::error(message);
-		
+
 		glDeleteShader(id);
 		return 0;
 	}
@@ -99,10 +101,10 @@ unsigned int compileShader(const std::string& source, unsigned int type) {
 unsigned int compileShaderWithDebug(const std::string& name, const std::string& source, unsigned int type) {
 	Log::setDelimiter("");
 	Log::info("%s: ", name.c_str());
-	
+
 	unsigned int id = compileShader(source, type);
 
-	if (id > 0) 
+	if (id > 0)
 		Log::print("done\n", Log::Color::DEBUG);
 
 	Log::setDelimiter("\n");
@@ -125,16 +127,16 @@ unsigned int createShader(const std::string& name, const std::string& vertexShad
 		gs = compileShaderWithDebug("Geometry shader", geometryShader, GL_GEOMETRY_SHADER);
 
 	unsigned int tcs;
-	if (!tesselationControlShader.empty()) 
+	if (!tesselationControlShader.empty())
 		tcs = compileShaderWithDebug("Tesselation control shader", tesselationControlShader, GL_TESS_CONTROL_SHADER);
-	
+
 	unsigned int tes;
 	if (!tesselationEvaluateShader.empty())
 		tes = compileShaderWithDebug("Tesselation evaluate", tesselationEvaluateShader, GL_TESS_EVALUATION_SHADER);
 
 	glCall(glAttachShader(program, vs));
 	glCall(glAttachShader(program, fs));
-	if (!geometryShader.empty()) 
+	if (!geometryShader.empty())
 		glCall(glAttachShader(program, gs));
 	if (!tesselationControlShader.empty())
 		glCall(glAttachShader(program, tcs));
@@ -171,14 +173,14 @@ std::string parseFile(const std::string& path) {
 
 	Log::info("Reading (%s) ... ", path.c_str());
 
-	if (fileStream.fail()) 
+	if (fileStream.fail())
 		Log::print("Fail", Log::Color::ERROR);
-	else 
+	else
 		Log::print("Done", Log::Color::DEBUG);
-	
+
 	Log::setDelimiter("\n");
 
-	while (getline(fileStream, line)) 
+	while (getline(fileStream, line))
 		stringStream << line << "\n";
 
 	fileStream.close();
@@ -195,7 +197,7 @@ ShaderSource parseShader(const std::string& name, const std::string& vertexPath,
 	std::string tesselationControlFile = parseFile(tesselationControlPath);
 	std::string tesselationEvaluateFile = parseFile(tesselationEvaluatePath);
 
-	return ShaderSource(name, vertexFile , fragmentFile , geometryFile, tesselationControlFile, tesselationEvaluateFile);
+	return ShaderSource(name, vertexFile, fragmentFile, geometryFile, tesselationControlFile, tesselationEvaluateFile);
 }
 
 ShaderSource parseShader(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath) {
@@ -205,7 +207,7 @@ ShaderSource parseShader(const std::string& name, const std::string& vertexPath,
 	std::string fragmentFile = parseFile(fragmentPath);
 	std::string geometryFile = parseFile(geometryPath);
 
-	return ShaderSource(name, vertexFile , fragmentFile , geometryFile, "", "");
+	return ShaderSource(name, vertexFile, fragmentFile, geometryFile, "", "");
 }
 
 ShaderSource parseShader(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath) {
@@ -214,7 +216,7 @@ ShaderSource parseShader(const std::string& name, const std::string& vertexPath,
 	std::string vertexFile = parseFile(vertexPath);
 	std::string fragmentFile = parseFile(fragmentPath);
 
-	return ShaderSource(name, vertexFile , fragmentFile , "", "", "");
+	return ShaderSource(name, vertexFile, fragmentFile, "", "", "");
 }
 
 ShaderSource parseShader(const std::string& name, std::istream& shaderTextStream) {
@@ -267,7 +269,7 @@ ShaderSource parseShader(const std::string& name, std::istream& shaderTextStream
 	std::string geometrySource = stringStream[(int) ShaderType::GEOMETRY].str();
 	std::string tesselationControlSource = stringStream[(int) ShaderType::TESSELATION_CONTROL].str();
 	std::string tesselationEvaluateSource = stringStream[(int) ShaderType::TESSELATION_EVALUATE].str();
-	
+
 	Log::setDelimiter("");
 
 	if (!commonSource.empty()) {
@@ -333,7 +335,7 @@ std::vector<std::string> getSuffixes(const ShaderStage& stage, const ShaderLocal
 					for (std::string localSuffix : localSuffixes) {
 						suffixes.push_back(variable + localSuffix);
 					}
-				}	
+				}
 			}
 		} else { // normal array
 			for (int i = 0; i < local.amount; i++) {
@@ -401,7 +403,7 @@ ShaderStage parseShaderStage(const std::string& source) {
 		ShaderInfo info = ShaderParser::parse(source);
 		return ShaderStage(source, info);
 	}
-	
+
 	return ShaderStage();
 }
 
@@ -461,10 +463,10 @@ Shader::Shader(Shader&& other) {
 
 	geometryStage = other.geometryStage;
 	other.geometryStage = ShaderStage();
-	
+
 	tesselationControlStage = other.tesselationControlStage;
 	other.tesselationControlStage = ShaderStage();
-	
+
 	tesselationEvaluationStage = other.tesselationEvaluationStage;
 	other.tesselationEvaluationStage = ShaderStage();
 
@@ -512,3 +514,5 @@ void Shader::close() {
 }
 
 #pragma endregion
+
+};

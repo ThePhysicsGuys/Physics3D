@@ -7,11 +7,13 @@
 
 #include "renderer.h"
 
-ArrayMesh::ArrayMesh(Vec3f* positions, const unsigned int vertexCount) : ArrayMesh(reinterpret_cast<float const *>(positions), vertexCount * 3, 3) {
+namespace Graphics {
+
+ArrayMesh::ArrayMesh(Vec3f* positions, const unsigned int vertexCount) : ArrayMesh(reinterpret_cast<float const*>(positions), vertexCount * 3, 3) {
 
 };
 
-ArrayMesh::ArrayMesh(Vec2f* positions, const unsigned int vertexCount) : ArrayMesh(reinterpret_cast<float const *>(positions), vertexCount * 2, 2) {
+ArrayMesh::ArrayMesh(Vec2f* positions, const unsigned int vertexCount) : ArrayMesh(reinterpret_cast<float const*>(positions), vertexCount * 2, 2) {
 
 };
 
@@ -23,8 +25,8 @@ ArrayMesh::ArrayMesh(const float* vertices, const float* uv, const unsigned int 
 	vertexBuffer = new VertexBuffer(vertices, dimensions * vertexCount * sizeof(float));
 	uvBuffer = new VertexBuffer(uv, 2 * vertexCount * sizeof(float));
 
-	vertexBufferLayout = { 
-		{{ "vposition", (dimensions == 2) ? BufferDataType::FLOAT2 : BufferDataType::FLOAT3 }} 
+	vertexBufferLayout = {
+		{{ "vposition", (dimensions == 2) ? BufferDataType::FLOAT2 : BufferDataType::FLOAT3 }}
 	};
 
 	uvBufferLayout = {
@@ -54,3 +56,5 @@ void ArrayMesh::close() {
 	vertexBuffer->close();
 	vao->close();
 }
+
+};

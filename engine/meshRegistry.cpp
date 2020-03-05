@@ -13,7 +13,7 @@
 
 namespace Engine::MeshRegistry {
 
-std::vector<::IndexedMesh*> meshes;
+std::vector<Graphics::IndexedMesh*> meshes;
 std::map<const ShapeClass*, VisualData> shapeClassMeshIds;
 VisualData box;
 VisualData sphere;
@@ -89,7 +89,7 @@ void init() {
 VisualData addMeshShape(const Graphics::VisualShape& s) {
 	int size = (int) meshes.size();
 	//Log::error("Mesh %d added!", size);
-	meshes.push_back(new IndexedMesh(s));
+	meshes.push_back(new Graphics::IndexedMesh(s));
 	return VisualData{size, s.uvs != nullptr, s.normals != nullptr};
 }
 

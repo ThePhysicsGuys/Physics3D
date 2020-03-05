@@ -5,6 +5,8 @@
 #include "GL\glew.h"
 #include "GLFW\glfw3.h"
 
+namespace Graphics {
+
 RenderBuffer::RenderBuffer(unsigned int width, unsigned int height) : width(width), height(height) {
 	glGenRenderbuffers(1, &id);
 
@@ -102,3 +104,5 @@ void MultisampleRenderBuffer::close() {
 	glDeleteRenderbuffers(1, &id);
 	id = 0;
 }
+
+};

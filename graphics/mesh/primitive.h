@@ -7,6 +7,8 @@
 #include "../physics/math/linalg/vec.h"
 #include "../physics/math/mathUtil.h"
 
+namespace Graphics {
+
 struct Primitive {
 	unsigned int vao;
 	unsigned int vbo;
@@ -14,7 +16,7 @@ struct Primitive {
 	int N;
 
 	template<int M, int N>
-	void resize(float (&vertices)[M][N]) {
+	void resize(float(&vertices)[M][N]) {
 		glBindVertexArray(vao);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, M * N * sizeof(float), vertices);
@@ -124,7 +126,7 @@ struct LinePrimitive : public Primitive {
 			{ p1.x,	p1.y, 0 },
 			{ p2.x,	p2.y, 0 }
 		};
-		
+
 		Primitive::resize(vertices);
 	}
 
@@ -184,7 +186,7 @@ struct TrianglePrimitive : public Primitive {
 		glPolygonMode(GL_FRONT_AND_BACK, mode);
 
 		glBindVertexArray(vao);
-		glDrawArrays((patched)? GL_PATCHES : GL_TRIANGLES, 0, 3);
+		glDrawArrays((patched) ? GL_PATCHES : GL_TRIANGLES, 0, 3);
 		glBindVertexArray(0);
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -193,4 +195,6 @@ struct TrianglePrimitive : public Primitive {
 	void render() override {
 		render(GL_FILL);
 	}
+};
+
 };

@@ -11,10 +11,13 @@
 #include "../engine/ecs/entity.h"
 #include "camera.h"
 
+
+namespace Graphics {
 struct Quad;
 class FrameBuffer;
 class HDRFrameBuffer;
 class IndexedMesh;
+};
 
 namespace Application {
 
@@ -39,8 +42,8 @@ public:
 	EventHandler eventHandler;
 	Properties properties;
 	
-	FrameBuffer* screenFrameBuffer = nullptr;
-	Quad* quad = nullptr;
+	Graphics::FrameBuffer* screenFrameBuffer = nullptr;
+	Graphics::Quad* quad = nullptr;
 
 	// Picker
 	Vec3f ray;

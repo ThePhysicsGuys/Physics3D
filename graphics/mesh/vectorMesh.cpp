@@ -7,9 +7,11 @@
 #include "buffers/vertexBuffer.h"
 #include "buffers/vertexArray.h"
 
+namespace Graphics {
+
 VectorMesh::VectorMesh(const float* vertices, const size_t vertexCount, size_t capacity) : AbstractMesh(Graphics::Renderer::POINT), vertexCount(vertexCount), capacity(capacity) {
 	vertexBuffer = new VertexBuffer(vertices, 9 * capacity * sizeof(float), Graphics::Renderer::DYNAMIC_DRAW);
-	
+
 	bufferLayout = {
 		{
 			{ "vposition", BufferDataType::FLOAT3 },
@@ -42,3 +44,5 @@ void VectorMesh::update(const float* vertices, const size_t vertexCount) {
 		vertexBuffer->update(vertices, vertexCount * bufferLayout.stride * sizeof(float), 0);
 	}
 }
+
+};

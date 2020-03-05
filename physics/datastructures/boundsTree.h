@@ -11,7 +11,6 @@
 #include <new>
 #include <assert.h>
 
-
 #define MAX_BRANCHES 4
 #define MAX_HEIGHT 64
 #define LEAF_NODE_SIGNIFIER 0x7FFFFFFF

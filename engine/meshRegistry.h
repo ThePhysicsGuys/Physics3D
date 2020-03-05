@@ -5,7 +5,7 @@
 #include "../physics/geometry/shapeClass.h"
 
 namespace Engine::MeshRegistry {
-extern std::vector<::IndexedMesh*> meshes;
+extern std::vector<Graphics::IndexedMesh*> meshes;
 extern std::map<const ShapeClass*, VisualData> shapeClassMeshIds;
 extern VisualData box;
 extern VisualData sphere;

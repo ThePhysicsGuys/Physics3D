@@ -2,8 +2,10 @@
 
 #include "fontResource.h"
 
+namespace Graphics {
+
 FontResource* FontAllocator::load(const std::string& name, const std::string& path) {
-	Graphics::Font font(path);
+	Font font(path);
 
 	if (font.getAtlasID() != 0) {
 		return new FontResource(name, path, std::move(font));
@@ -11,3 +13,5 @@ FontResource* FontAllocator::load(const std::string& name, const std::string& pa
 		return nullptr;
 	}
 }
+
+};

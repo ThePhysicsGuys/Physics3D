@@ -3,6 +3,8 @@
 #include "../batch/batch.h"
 #include "../gui/gui.h"
 
+namespace Graphics {
+
 namespace Path3D {
 
 	//! Pattern
@@ -17,9 +19,9 @@ namespace Path3D {
 		Vec4f col;
 	};
 
-	extern Batch<Vertex>* batch;
+	extern Graphics::Batch<Vertex>* batch;
 
-	void bind(Batch<Vertex>* batch);
+	void bind(Graphics::Batch<Vertex>* batch);
 
 
 	//! Primitives
@@ -67,3 +69,5 @@ namespace Path3D {
 	void clear();
 
 }
+
+};

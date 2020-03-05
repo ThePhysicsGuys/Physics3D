@@ -2,6 +2,8 @@
 
 #include "../bindable.h"
 
+namespace Graphics {
+
 class IndexBuffer : public Bindable {
 public:
 	IndexBuffer();
@@ -20,4 +22,6 @@ public:
 	void bind() override;
 	void unbind() override;
 	void close() override;
+};
+
 };

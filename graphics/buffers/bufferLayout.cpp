@@ -4,20 +4,22 @@
 
 #include "GL\glew.h"
 
+namespace Graphics {
+
 namespace BufferDataType {
-	const BufferDataTypeInfo NONE   = { "none"  , 0		  , 0, 0  };
-	const BufferDataTypeInfo BOOL   = { "bool"  , GL_BYTE , 1, 1  };
-	const BufferDataTypeInfo INT    = { "int"   , GL_INT  , 1, 4  };
-	const BufferDataTypeInfo INT2   = { "vec2i" , GL_INT  , 2, 8  };
-	const BufferDataTypeInfo INT3   = { "vec3i" , GL_INT  , 3, 12 };
-	const BufferDataTypeInfo INT4   = { "vec4i" , GL_INT  , 4, 16 };
-	const BufferDataTypeInfo FLOAT  = { "float" , GL_FLOAT, 1, 4  };
-	const BufferDataTypeInfo FLOAT2 = { "vec2"  , GL_FLOAT, 2, 8  };
-	const BufferDataTypeInfo FLOAT3 = { "vec3"  , GL_FLOAT, 3, 12 };
-	const BufferDataTypeInfo FLOAT4 = { "vec4"  , GL_FLOAT, 4, 16 };
-	const BufferDataTypeInfo MAT2   = { "mat2"  , GL_FLOAT, 2, 8  }; // per row
-	const BufferDataTypeInfo MAT3   = { "mat3"  , GL_FLOAT, 3, 12 }; // per row
-	const BufferDataTypeInfo MAT4   = { "mat4"  , GL_FLOAT, 4, 16 }; // per row
+const BufferDataTypeInfo NONE = { "none"  , 0		  , 0, 0 };
+const BufferDataTypeInfo BOOL = { "bool"  , GL_BYTE , 1, 1 };
+const BufferDataTypeInfo INT = { "int"   , GL_INT  , 1, 4 };
+const BufferDataTypeInfo INT2 = { "vec2i" , GL_INT  , 2, 8 };
+const BufferDataTypeInfo INT3 = { "vec3i" , GL_INT  , 3, 12 };
+const BufferDataTypeInfo INT4 = { "vec4i" , GL_INT  , 4, 16 };
+const BufferDataTypeInfo FLOAT = { "float" , GL_FLOAT, 1, 4 };
+const BufferDataTypeInfo FLOAT2 = { "vec2"  , GL_FLOAT, 2, 8 };
+const BufferDataTypeInfo FLOAT3 = { "vec3"  , GL_FLOAT, 3, 12 };
+const BufferDataTypeInfo FLOAT4 = { "vec4"  , GL_FLOAT, 4, 16 };
+const BufferDataTypeInfo MAT2 = { "mat2"  , GL_FLOAT, 2, 8 }; // per row
+const BufferDataTypeInfo MAT3 = { "mat3"  , GL_FLOAT, 3, 12 }; // per row
+const BufferDataTypeInfo MAT4 = { "mat4"  , GL_FLOAT, 4, 16 }; // per row
 }
 
 BufferElement::BufferElement(std::string name, BufferDataType::BufferDataTypeInfo info, bool instanced, bool normalized) : name(name), info(info), instanced(instanced), normalized(normalized) {
@@ -25,7 +27,7 @@ BufferElement::BufferElement(std::string name, BufferDataType::BufferDataTypeInf
 }
 
 BufferLayout::BufferLayout() : stride(0) {
-	
+
 };
 
 BufferLayout::BufferLayout(std::vector<BufferElement> elements) : elements(elements) {
@@ -43,3 +45,5 @@ BufferLayout::BufferLayout(std::vector<BufferElement> elements) : elements(eleme
 BufferLayout::~BufferLayout() {
 	//Log::debug("Deleted buffer layout");
 }
+
+};

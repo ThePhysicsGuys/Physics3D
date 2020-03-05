@@ -4,6 +4,8 @@
 
 #define DEFAULT_SCISSOR Vec4f(0, 0, GUI::windowInfo.dimension.x, GUI::windowInfo.dimension.y);
 
+namespace Graphics {
+
 namespace Path {
 
 	//! Pattern
@@ -37,10 +39,10 @@ namespace Path {
 	//! Batch
 
 	// Current batch
-	extern GuiBatch* batch;
+	extern Graphics::GuiBatch* batch;
 
 	// Binds the given batch
-	void bind(GuiBatch* batch);
+	void bind(Graphics::GuiBatch* batch);
 
 
 	//! Primitives
@@ -163,3 +165,4 @@ namespace Path {
 	void clear();
 }
 
+};

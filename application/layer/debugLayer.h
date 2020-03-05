@@ -2,18 +2,21 @@
 
 #include "../engine/layer/layer.h"
 
+namespace Graphics {
 class ArrayMesh;
 class PointMesh;
 class VectorMesh;
+};
+
 class Screen;
 
 namespace Application {
 
 class DebugLayer : public Layer {
 private:
-	VectorMesh* vectorMesh = nullptr;
-	PointMesh* pointMesh = nullptr;
-	ArrayMesh* originMesh = nullptr;
+	Graphics::VectorMesh* vectorMesh = nullptr;
+	Graphics::PointMesh* pointMesh = nullptr;
+	Graphics::ArrayMesh* originMesh = nullptr;
 
 public:
 	inline DebugLayer() : Layer() {};

@@ -8,6 +8,8 @@
 
 #define DEFAULT_PATTERN_2D(color) [color] (int i, const Vec2f& p) { return color; }
 
+namespace Graphics {
+
 namespace Path {
 
 	#pragma region Batch
@@ -258,7 +260,7 @@ namespace Path {
 		Path::batch->pushCommand(id);
 	}
 
-	void text(Graphics::Font* font, const std::string& text, double size, const Vec2f& pos, const Color& color, char textPivot) {
+	void text(Font* font, const std::string& text, double size, const Vec2f& pos, const Color& color, char textPivot) {
 		if (text.empty())
 			return;
 
@@ -288,7 +290,7 @@ namespace Path {
 		Path::batch->reserve(vertexCount, indexCount);
 		for (char c : text) {
 			int ascii = (int) c;
-			const Graphics::Character& character = font->getCharacter(ascii);
+			const Character& character = font->getCharacter(ascii);
 			float descend = character.height - character.by;
 			float xpos = x + character.bx * size;
 			float ypos = y - descend * size;
@@ -599,3 +601,5 @@ namespace Path {
 	#pragma endregion
 
 }
+
+};

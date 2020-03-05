@@ -6,6 +6,6 @@
 
 MeshResource* MeshAllocator::load(const std::string& name, const std::string& path) {
 	Graphics::VisualShape shape = OBJImport::load(path);
-	IndexedMesh* mesh = new IndexedMesh(shape);
+	Graphics::IndexedMesh* mesh = new Graphics::IndexedMesh(shape);
 	return new MeshResource(name, path, mesh, shape);
 }

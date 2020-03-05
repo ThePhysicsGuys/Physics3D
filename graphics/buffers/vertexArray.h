@@ -2,8 +2,10 @@
 
 #include "../bindable.h"
 
-class VertexBuffer;
+namespace Graphics {
+
 struct BufferLayout;
+class VertexBuffer;
 
 class VertexArray : public Bindable {
 public:
@@ -22,4 +24,6 @@ public:
 	void close() override;
 
 	void addBuffer(VertexBuffer* buffer, const BufferLayout& layout);
+};
+
 };

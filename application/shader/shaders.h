@@ -12,6 +12,7 @@ class CubeMap;
 };
 
 namespace Application {
+using namespace Graphics;
 
 struct Light;
 struct Material;

@@ -3,6 +3,8 @@
 #include "../util/stringUtil.h"
 #include <regex>
 
+namespace Graphics {
+
 struct TokenType {
 
 	enum Type : char {
@@ -33,7 +35,7 @@ struct TokenType {
 		UNIFORM,
 		TYPE,
 	};
-	
+
 public:
 	Type type;
 	std::regex regex;
@@ -89,4 +91,6 @@ private:
 public:
 	static TokenStack lex(const std::string& input);
 	static TokenStack lexDebug(const std::string& input);
+};
+
 };

@@ -51,7 +51,7 @@ void makeDominoTower(int floors, int circumference, Position origin) {
 
 
 void buildFloor(double width, double depth) {
-	Material floorMaterial = Material(ResourceManager::get<TextureResource>("floorMaterial"));
+	Material floorMaterial = Material(ResourceManager::get<Graphics::TextureResource>("floorMaterial"));
 	ExtendedPart* floorExtendedPart = new ExtendedPart(Box(width, 1.0, depth), GlobalCFrame(0.0, 0.0, 0.0), { 2.0, 1.0, 0.3 });
 	floorExtendedPart->material = floorMaterial;
 	world.addTerrainPart(floorExtendedPart);
@@ -129,7 +129,7 @@ void buildTree(Position treePos) {
 	GlobalCFrame trunkCFrame(treePos, Rotation::fromEulerAngles(fRand(-0.1, 0.1), fRand(-3.1415, 3.1415), fRand(-0.1, 0.1)));
 
 	ExtendedPart* trunk = new ExtendedPart(treeTrunk, trunkCFrame, { 1.0, 1.0, 0.3 }, "trunk");
-	trunk->material.ambient = COLOR::get(0x654321);
+	trunk->material.ambient = Graphics::COLOR::get(0x654321);
 	world.addTerrainPart(trunk);
 
 	Position treeTop = trunkCFrame.localToGlobal(Vec3(0.0, 5.5, 0.0));

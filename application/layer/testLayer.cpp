@@ -25,18 +25,18 @@
 
 namespace Application {
 
-FrameBuffer* frameBuffer;
+Graphics::FrameBuffer* frameBuffer;
 Shader* shader;
 unsigned int quadVAO;
 unsigned int quadVBO;
 unsigned int instanceVBO;
 
-VertexArray* vao;
-VertexBuffer* vbo;
+Graphics::VertexArray* vao;
+Graphics::VertexBuffer* vbo;
 
 void TestLayer::onInit() {
 	shader = ResourceManager::add<ShaderResource>("../res/shaders/instance.shader");
-	frameBuffer = new FrameBuffer(300, 300);
+	frameBuffer = new Graphics::FrameBuffer(300, 300);
 
 	int index = 0;
 	float offset = 0.1f;
@@ -61,12 +61,12 @@ void TestLayer::onInit() {
 		 0.05f,  0.05f,  0.0f, 1.0f, 1.0f
 	};
 
-	vao = new VertexArray();
-	vbo = new VertexBuffer(quadVertices, sizeof(quadVertices), GL_STATIC_DRAW);
+	vao = new Graphics::VertexArray();
+	vbo = new Graphics::VertexBuffer(quadVertices, sizeof(quadVertices), GL_STATIC_DRAW);
 	
-	BufferLayout layout = BufferLayout(
-		{ BufferElement("positions", BufferDataType::FLOAT2),
-		BufferElement("colors", BufferDataType::FLOAT3) }
+	Graphics::BufferLayout layout = Graphics::BufferLayout(
+		{ Graphics::BufferElement("positions", Graphics::BufferDataType::FLOAT2),
+		Graphics::BufferElement("colors", Graphics::BufferDataType::FLOAT3) }
 	);
 	
 	vao->addBuffer(vbo, layout);

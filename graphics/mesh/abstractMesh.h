@@ -2,6 +2,8 @@
 
 #include "../buffers/bufferLayout.h"
 
+namespace Graphics {
+
 class VertexArray;
 
 class AbstractMesh {
@@ -17,3 +19,4 @@ public:
 	virtual void close() = 0;
 };
 
+};

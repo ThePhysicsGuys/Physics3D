@@ -2,6 +2,8 @@
 
 #include "abstractMesh.h"
 
+namespace Graphics {
+
 class VertexBuffer;
 
 class PointMesh : public AbstractMesh {
@@ -17,4 +19,6 @@ public:
 
 	void render() override;
 	void close() override;
+};
+
 };

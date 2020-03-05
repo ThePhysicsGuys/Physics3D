@@ -30,7 +30,7 @@ Rotation transformations[] {
 };
 
 // Render variables
-LinePrimitive* line = nullptr;
+Graphics::LinePrimitive* line = nullptr;
 
 MeshResource* rotateMesh = nullptr;
 MeshResource* translateCenterMesh = nullptr;
@@ -43,7 +43,7 @@ void EditTools::onInit() {
 	// TODO fix duplicate loading
 
 	// Edit line init
-	line = new LinePrimitive();
+	line = new Graphics::LinePrimitive();
 	line->resize(Vec3f(0, -100000, 0), Vec3f(0, 100000, 0));
 
 	// Rotate shape init
@@ -68,6 +68,8 @@ void EditTools::onInit() {
 
 
 void EditTools::onRender(Screen& screen) {
+	using namespace Graphics;
+
 	IndexedMesh* shaft = nullptr;
 	IndexedMesh* center = nullptr;
 
@@ -90,8 +92,8 @@ void EditTools::onRender(Screen& screen) {
 	GlobalCFrame selFrame = screen.selectedPart->getCFrame();
 	Mat4 modelMatrix(selFrame.getRotation().asRotationMatrix(), selFrame.getPosition() - Position(0,0,0), Vec3(0,0,0), 1);
 
-	Graphics::Renderer::clearDepth();
-	Graphics::Renderer::enableDepthTest();
+	Renderer::clearDepth();
+	Renderer::enableDepthTest();
 
 	// Center, only rendered if editMode != EditMode::ROTATE
 	if (center) {
@@ -133,7 +135,7 @@ void EditTools::onRender(Screen& screen) {
 	ApplicationShaders::basicShader.updateModel(modelMatrix * Mat4(Matrix<double, 3, 3>(transformations[2]), 1.0f));
 	shaft->render();
 
-	Graphics::Renderer::disableDepthTest();
+	Renderer::disableDepthTest();
 }
 
 void EditTools::onClose() {

@@ -18,10 +18,12 @@
 namespace Application {
 
 bool onMouseMove(const MouseMoveEvent& event) {
+	using namespace Graphics;
 	return GUI::onMouseMove(event.getNewX(), event.getNewY());
 }
 
 bool onMousePress(const MousePressEvent& event) {
+	using namespace Graphics;
 	if (Mouse::LEFT == event.getButton()) {
 		return GUI::onMousePress(event.getX(), event.getY());
 	}
@@ -30,6 +32,8 @@ bool onMousePress(const MousePressEvent& event) {
 }
 
 bool onMouseRelease(const MouseReleaseEvent& event) {
+	using namespace Graphics;
+
 	if (Mouse::LEFT == event.getButton()) {
 		return GUI::onMouseRelease(event.getX(), event.getY());
 	}
@@ -38,16 +42,20 @@ bool onMouseRelease(const MouseReleaseEvent& event) {
 }
 
 bool onMouseDrag(const MouseDragEvent& event) {
+	using namespace Graphics;
 	return GUI::onMouseDrag(event.getOldX(), event.getOldY(), event.getNewX(), event.getNewY());
 }
 
 bool onWindowResize(const WindowResizeEvent& event) {
+	using namespace Graphics;
 	float aspect = ((float) event.getWidth()) / ((float) event.getHeight());
 	Vec2i dimension = Vec2i(event.getWidth(), event.getHeight());
 	return GUI::onWindowResize({ dimension, aspect });
 }
 
 void GuiLayer::onInit() {
+	using namespace Graphics;
+
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
 	// GUI init
@@ -55,6 +63,8 @@ void GuiLayer::onInit() {
 }
 
 void GuiLayer::onUpdate() {
+	using namespace Graphics;
+
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
 	// Update GUI
@@ -74,14 +84,15 @@ void GuiLayer::onEvent(Event& event) {
 }
 
 void GuiLayer::onRender() {
+	using namespace Graphics;
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
 	//Renderer::beginScene();
 
 	// Render GUI
-	Graphics::Renderer::disableDepthTest();
-	Graphics::Renderer::disableCulling();
-	Graphics::Renderer::enableBlending();
+	Renderer::disableDepthTest();
+	Renderer::disableCulling();
+	Renderer::enableBlending();
 	//Renderer::
 	graphicsMeasure.mark(GraphicsProcess::OTHER);
 	ApplicationShaders::fontShader.updateProjection(screen->camera.orthoMatrix);
@@ -92,6 +103,7 @@ void GuiLayer::onRender() {
 }
 
 void GuiLayer::onClose() {
+	using namespace Graphics;
 	GUI::onClose();
 }
 
