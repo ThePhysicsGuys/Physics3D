@@ -25,5 +25,6 @@ namespace Import {
 
 namespace OBJImport {
 	Graphics::VisualShape load(std::istream& file, bool binary = false);
-	Graphics::VisualShape load(std::string file, bool binary = false);
+	Graphics::VisualShape load(const std::string& file, bool binary);
+	Graphics::VisualShape load(const std::string& file);
 };

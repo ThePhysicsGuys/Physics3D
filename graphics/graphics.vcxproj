@@ -186,7 +186,6 @@
     <ClCompile Include="path\path.cpp" />
     <ClCompile Include="path\path3D.cpp" />
     <ClCompile Include="renderUtils.cpp" />
-    <ClCompile Include="resources.cpp" />
     <ClCompile Include="resource\fontResource.cpp" />
     <ClCompile Include="resource\shaderResource.cpp" />
     <ClCompile Include="resource\textureResource.cpp" />
@@ -243,8 +242,6 @@
     <ClInclude Include="path\path3D.h" />
     <ClInclude Include="renderer.h" />
     <ClInclude Include="renderUtils.h" />
-    <ClInclude Include="resource.h" />
-    <ClInclude Include="resources.h" />
     <ClInclude Include="resource\fontResource.h" />
     <ClInclude Include="resource\shaderResource.h" />
     <ClInclude Include="resource\textureResource.h" />
@@ -256,9 +253,6 @@
     <ClInclude Include="debug\threePhaseBuffer.h" />
     <ClInclude Include="debug\visualDebug.h" />
     <ClInclude Include="visualShape.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="graphics.rc" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\res\shaders\gui.shader" />

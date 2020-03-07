@@ -10,7 +10,6 @@
 #include "view/screen.h"
 #include "ecs/material.h"
 
-#include "../graphics/resources.h"
 #include "../graphics/texture.h"
 #include "../graphics/debug/debug.h"
 #include "../graphics/debug/visualDebug.h"

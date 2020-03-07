@@ -6,10 +6,8 @@
 
 #include "mesh/indexedMesh.h"
 
-#include "../util/resource/resourceLoader.h"
 #include "../physics/misc/shapeLibrary.h"
 #include "../engine/io/import.h"
-#include "resources.h"
 #include "visualShape.h"
 
 namespace Graphics {
@@ -17,25 +15,18 @@ namespace Graphics {
 namespace Library {
 IndexedMesh* cube = nullptr;
 IndexedMesh* sphere = nullptr;
-IndexedMesh* vector = nullptr;
 
 void onInit() {
 	// Cube
-	cube = new IndexedMesh(Graphics::VisualShape(::Library::createCube(1)));
+	cube = new IndexedMesh(VisualShape(::Library::createCube(1)));
 
 	// Sphere
-	//VisualShape sphereShape(OBJImport::load((std::istream&) std::istringstream(getResourceAsString(graphicsResources, SPHERE_MODEL))));
-	Graphics::VisualShape sphereShape(OBJImport::load("../res/models/sphere.obj"));
-	sphere = new IndexedMesh(sphereShape);
-
-	Graphics::VisualShape vectorShape = OBJImport::load("../res/models/gui/translate_shaft.obj");
-	vector = new IndexedMesh(vectorShape);
+	sphere = new IndexedMesh(VisualShape(::Library::createSphere(1)));
 }
 
 void onClose() {
 	cube->close();
 	sphere->close();
-	vector->close();
 }
 }
 

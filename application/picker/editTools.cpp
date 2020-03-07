@@ -9,6 +9,7 @@
 #include "shader/shaders.h"
 
 #include "../engine/io/import.h"
+#include "../engine/io/export.h"
 
 #include "../graphics/renderer.h"
 #include "../graphics/mesh/primitive.h"
@@ -47,15 +48,15 @@ void EditTools::onInit() {
 	line->resize(Vec3f(0, -100000, 0), Vec3f(0, 100000, 0));
 
 	// Rotate shape init
-	rotateMesh = ResourceManager::add<MeshResource>("../res/models/gui/rotate.obj");
+	rotateMesh = ResourceManager::add<MeshResource>("../res/models/gui/rotate.bobj");
 
 	// Scale shape init
-	scaleMesh = ResourceManager::add<MeshResource>("../res/models/gui/scale_shaft.obj");
-	scaleCenterMesh = ResourceManager::add<MeshResource>("../res/models/gui/scale_center.obj");
+	scaleMesh = ResourceManager::add<MeshResource>("../res/models/gui/scale_shaft.bobj");
+	scaleCenterMesh = ResourceManager::add<MeshResource>("../res/models/gui/scale_center.bobj");
 
 	// Translate shape init
-	translateMesh = ResourceManager::add<MeshResource>("../res/models/gui/translate_shaft.obj");
-	translateCenterMesh = ResourceManager::add<MeshResource>("../res/models/gui/translate_center.obj");
+	translateMesh = ResourceManager::add<MeshResource>("../res/models/gui/translate_shaft.bobj");
+	translateCenterMesh = ResourceManager::add<MeshResource>("../res/models/gui/translate_center.bobj");
 
 	// Intersected tool init
 	intersectedEditDirection = EditDirection::NONE;

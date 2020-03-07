@@ -282,9 +282,20 @@ Graphics::VisualShape OBJImport::load(std::istream& file, bool binary) {
 		return loadNonBinaryObj(file);
 }
 
-Graphics::VisualShape OBJImport::load(std::string file, bool binary) {
-	struct stat buffer;
+Graphics::VisualShape OBJImport::load(const std::string& file) {
+	bool binary;
+	if (endsWith(file, ".bobj"))
+		binary = true;
+	else if (endsWith(file, ".obj"))
+		binary = false;
+	else
+		return Graphics::VisualShape();
 
+	return OBJImport::load(file, binary);
+}
+
+Graphics::VisualShape OBJImport::load(const std::string& file, bool binary) {
+	struct stat buffer;
 	if (stat(file.c_str(), &buffer) == -1) {
 		Log::subject(file.c_str());
 		Log::error("File not found: %s", file.c_str());

@@ -1,7 +1,6 @@
 #include "core.h"
 
 #include "shaders.h"
-#include "resources.h"
 #include "texture.h"
 
 #include "../util/resource/resourceManager.h"
