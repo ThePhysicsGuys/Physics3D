@@ -115,24 +115,11 @@ const BoundsTree<Part>& WorldPrototype::getTreeForPart(const Part* part) const {
 	return (part->isTerrainPart) ? this->terrainTree : this->objectTree;
 }
 
-static void addToNode(TreeNode& nodeToAddTo, const Physical* physicalToAdd) {
-	nodeToAddTo.addInside(TreeNode(physicalToAdd->rigidBody.mainPart, physicalToAdd->rigidBody.mainPart->getStrictBounds(), false));
-	for(const AttachedPart& p : physicalToAdd->rigidBody.parts) {
-		nodeToAddTo.addInside(TreeNode(p.part, p.part->getStrictBounds(), false));
-	}
-	for(const ConnectedPhysical& conPhys : physicalToAdd->childPhysicals) {
-		addToNode(nodeToAddTo, &conPhys);
-	}
-}
-
-static TreeNode createNodeFor(const MotorizedPhysical* phys) {
+static TreeNode createNodeFor(MotorizedPhysical* phys) {
 	TreeNode newNode(phys->rigidBody.mainPart, phys->rigidBody.mainPart->getStrictBounds(), true);
-	for(const AttachedPart& p : phys->rigidBody.parts) {
-		newNode.addInside(TreeNode(p.part, p.part->getStrictBounds(), false));
-	}
-	for(const ConnectedPhysical& conPhys : phys->childPhysicals) {
-		addToNode(newNode, &conPhys);
-	}
+	phys->forEachPartExceptMainPart([&newNode](Part& part) {
+		newNode.addInside(TreeNode(&part, part.getStrictBounds(), false));
+	});
 	return newNode;
 }
 
@@ -145,7 +132,7 @@ void WorldPrototype::addPart(Part* part) {
 		return;
 	}
 	
-	objectTree.add(std::move(createNodeFor(part->parent->mainPhysical)));
+	objectTree.add(createNodeFor(part->parent->mainPhysical));
 	physicals.push_back(part->parent->mainPhysical);
 
 	objectCount += part->parent->mainPhysical->getNumberOfPartsInThisAndChildren();
@@ -153,15 +140,20 @@ void WorldPrototype::addPart(Part* part) {
 	part->parent->mainPhysical->world = this;
 
 	ASSERT_VALID;
+
+	part->parent->mainPhysical->forEachPart([this](Part& part) {
+		this->onPartAdded(&part);
+	});
 }
 void WorldPrototype::removePart(Part* part) {
 	ASSERT_VALID;
 	
-	part->parent->detachPart(part, false);
+	part->parent->removePart(part);
 
 	ASSERT_VALID;
 }
-void WorldPrototype::removeMainPhysical(MotorizedPhysical* motorPhys) {
+
+void WorldPrototype::notifyMainPhysicalObsolete(MotorizedPhysical* motorPhys) {
 	physicals.erase(std::remove(physicals.begin(), physicals.end(), motorPhys));
 
 	ASSERT_VALID;
@@ -173,6 +165,8 @@ void WorldPrototype::addTerrainPart(Part* part) {
 	part->isTerrainPart = true;
 
 	ASSERT_VALID;
+
+	this->onPartAdded(part);
 }
 void WorldPrototype::optimizeTerrain() {
 	for(int i = 0; i < 5; i++) {
@@ -181,40 +175,27 @@ void WorldPrototype::optimizeTerrain() {
 	ASSERT_VALID;
 }
 
-
-
-
-void WorldPrototype::setPartCFrame(Part* part, const GlobalCFrame& newCFrame) {
-	Bounds oldBounds = part->getStrictBounds();
-
-	part->parent->setPartCFrame(part, newCFrame);
-
-	objectTree.updateObjectGroupBounds(part, oldBounds);
-	ASSERT_VALID;
-}
-
-void WorldPrototype::updatePartBounds(const Part* updatedPart, const Bounds& oldBounds) {
+void WorldPrototype::notifyPartBoundsUpdated(const Part* updatedPart, const Bounds& oldBounds) {
 	objectTree.updateObjectBounds(updatedPart, oldBounds);
 	ASSERT_VALID;
 }
 
-void WorldPrototype::updatePartGroupBounds(const Part* mainPart, const Bounds& oldMainPartBounds) {
+void WorldPrototype::notifyPartGroupBoundsUpdated(const Part* mainPart, const Bounds& oldMainPartBounds) {
 	objectTree.updateObjectGroupBounds(mainPart, oldMainPartBounds);
 	ASSERT_VALID;
 }
 
-void WorldPrototype::removePartFromTrees(const Part* part) {
-	BoundsTree<Part>& tree = getTreeForPart(part);
-	tree.remove(part);
-	ASSERT_TREE_VALID(tree);
+
+void WorldPrototype::notifyNewPhysicalCreatedWhenSplitting(MotorizedPhysical* newPhysical) {
+	physicals.push_back(newPhysical);
+	newPhysical->world = this;
 }
 
-void WorldPrototype::splitPhysical(const MotorizedPhysical* mainPhysical, MotorizedPhysical* newlySplitPhysical) {
+void WorldPrototype::notifyPhysicalHasBeenSplit(const MotorizedPhysical* mainPhysical, MotorizedPhysical* newlySplitPhysical) {
 	assert(mainPhysical->world == this);
 	assert(newlySplitPhysical->world == nullptr);
-	physicals.push_back(newlySplitPhysical);
-	newlySplitPhysical->world = this;
-
+	this->notifyNewPhysicalCreatedWhenSplitting(newlySplitPhysical);
+	
 	ASSERT_TREE_VALID(objectTree);
 
 	// split object tree
@@ -246,7 +227,7 @@ void WorldPrototype::splitPhysical(const MotorizedPhysical* mainPhysical, Motori
 	ASSERT_TREE_VALID(objectTree);
 }
 
-void WorldPrototype::mergePhysicals(const MotorizedPhysical* firstPhysical, const MotorizedPhysical* secondPhysical) {
+void WorldPrototype::mergePhysicalGroups(const MotorizedPhysical* firstPhysical, MotorizedPhysical* secondPhysical) {
 	assert(firstPhysical->world == this);
 
 	if(secondPhysical->world != nullptr) {
@@ -271,6 +252,10 @@ void WorldPrototype::mergePhysicals(const MotorizedPhysical* firstPhysical, cons
 		group.addInside(std::move(groupNode));
 		stack.expandBoundsAllTheWayToTop();
 	} else {
+		secondPhysical->forEachPart([this](Part& part) {
+			this->onPartAdded(&part);
+		});
+
 		const Part* main = firstPhysical->getMainPart();
 		NodeStack stack = objectTree.findGroupFor(main, main->getStrictBounds());
 		TreeNode& group = **stack;
@@ -280,16 +265,20 @@ void WorldPrototype::mergePhysicals(const MotorizedPhysical* firstPhysical, cons
 	}
 
 	ASSERT_TREE_VALID(objectTree);
-
-	// TODO
-	assert(false);
 }
 
-void WorldPrototype::mergePartAndPhysical(const MotorizedPhysical* physical, Part* newPart) {
+void WorldPrototype::notifyPhysicalsMerged(const MotorizedPhysical* firstPhysical, MotorizedPhysical* secondPhysical) {
+	mergePhysicalGroups(firstPhysical, secondPhysical);
+}
+
+void WorldPrototype::notifyNewPartAddedToPhysical(const MotorizedPhysical* physical, Part* newPart) {
 	assert(physical->world == this);
 
 	this->objectTree.addToExistingGroup(newPart, newPart->getStrictBounds(), physical->getMainPart(), physical->getMainPart()->getStrictBounds());
+	objectCount++;
 	ASSERT_TREE_VALID(objectTree);
+
+	onPartAdded(newPart);
 }
 
 void WorldPrototype::notifyPartStdMoved(Part* oldPartPtr, Part* newPartPtr) {
@@ -297,12 +286,29 @@ void WorldPrototype::notifyPartStdMoved(Part* oldPartPtr, Part* newPartPtr) {
 	ASSERT_TREE_VALID(objectTree);
 }
 
-void WorldPrototype::notifyPartRemovedFromGroup(Part* part) {
-	objectTree.remove(part);
-	objectCount--;
+void WorldPrototype::notifyPartDetachedFromPhysical(Part* part) {
+	assert(part->parent != nullptr);
+	assert(part->parent->childPhysicals.size() == 0);
+	assert(part->parent->rigidBody.getPartCount() == 1);
+	assert(part->parent->isMainPhysical());
+
+	objectTree.moveOutOfGroup(part);
 	ASSERT_TREE_VALID(objectTree);
 }
 
+void WorldPrototype::notifyPartRemovedFromPhysical(Part* part) {
+	assert(part->parent == nullptr);
+
+	objectTree.remove(part);
+	objectCount--;
+	ASSERT_TREE_VALID(objectTree);
+
+	this->onPartRemoved(part);
+}
+
+
+void WorldPrototype::onPartAdded(Part* newPart) {}
+void WorldPrototype::onPartRemoved(Part* removedPart) {}
 
 void WorldPrototype::addExternalForce(ExternalForce* force) {
 	externalForces.push_back(force);
@@ -312,7 +318,6 @@ void WorldPrototype::removeExternalForce(ExternalForce* force) {
 	externalForces.erase(std::remove(externalForces.begin(), externalForces.end(), force));
 }
 
-//using WorldPartIter = IteratorGroup<IteratorFactory<BoundsTreeIter<TreeIterator, Part>, IteratorEnd>, 2>;
 IteratorFactoryWithEnd<WorldPartIter> WorldPrototype::iterParts(int partsMask) {
 	size_t size = 0;
 	IteratorFactoryWithEnd<BoundsTreeIter<TreeIterator, Part>> iters[2]{};

@@ -335,6 +335,16 @@ struct BoundsTree {
 	void remove(const Boundable* obj) {
 		this->remove(obj, obj->getStrictBounds());
 	}
+	void moveOutOfGroup(const Boundable* obj, const Bounds& strictBounds) {
+		TreeNode node = this->grab(obj, strictBounds);
+
+		node.isGroupHead = true;
+
+		this->add(std::move(node));
+	}
+	void moveOutOfGroup(const Boundable* obj) {
+		this->moveOutOfGroup(obj, obj->getStrictBounds());
+	}
 
 	// removes and returns the node for the given object
 	inline TreeNode grab(const Boundable* obj, const Bounds& objBounds) {

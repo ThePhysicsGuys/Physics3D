@@ -31,12 +31,12 @@ The Physics3D project consists of 7 projects, each with its own role:
   Your project structure should look like this:  
   Physics3D/  
   | - include/  
-  | | - freetype/ (freetype headers)
-  | | - GL/ (glew headers)
-  | | - GLFW/ (glfw3 headers)
-  | | - imgui/ (imgui headers)
-  | | - stb/ (stb_image.h)
-  | | - ft2build.h
+  | | - freetype/ (freetype headers)  
+  | | - GL/ (glew headers)  
+  | | - GLFW/ (glfw3 headers)  
+  | | - imgui/ (imgui headers)  
+  | | - stb/ (stb_image.h)  
+  | | - ft2build.h  
   | - lib/  
   | | - freetype.lib  
   | | - glew32.lib  

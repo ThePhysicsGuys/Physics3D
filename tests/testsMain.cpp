@@ -126,7 +126,7 @@ public:
 	const char* funcName;
 	void(*testFunc)(TestInterface&);
 
-	Test() : filePath(nullptr), funcName(nullptr), testFunc(nullptr) {};
+	Test() : filePath(nullptr), funcName(nullptr), fileName(nullptr), testFunc(nullptr) {};
 	Test(const char* filePath, const char* funcName, void(*testFunc)(TestInterface&)) : filePath(filePath), funcName(funcName), testFunc(testFunc),
 	fileName(strrchr(this->filePath, sepChar) ? strrchr(this->filePath, sepChar) + 1 : this->filePath) {}
 	void run() {

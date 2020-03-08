@@ -78,6 +78,33 @@ public:
 	
 	void notifyPartStdMoved(Part* oldPartPtr, Part* newPartPtr);
 
+	// expects a function of type void(const Part&)
+	template<typename Func>
+	void forEachAttachedPart(const Func& func) const {
+		for(const AttachedPart& atPart : parts) {
+			func(static_cast<const Part&>(*atPart.part));
+		}
+	}
+	// expects a function of type void(Part&)
+	template<typename Func>
+	void forEachAttachedPart(const Func& func) {
+		for(const AttachedPart& atPart : parts) {
+			func(*atPart.part);
+		}
+	}
+	// expects a function of type void(const Part&)
+	template<typename Func>
+	void forEachPart(const Func& func) const {
+		func(static_cast<const Part&>(*this->mainPart));
+		this->forEachAttachedPart(func);
+	}
+	// expects a function of type void(Part&)
+	template<typename Func>
+	void forEachPart(const Func& func) {
+		func(*this->mainPart);
+		this->forEachAttachedPart(func);
+	}
+
 	PartIter begin() { return PartIter(parts.begin()._Ptr, parts.begin()._Ptr + parts.size(), mainPart); }
 	ConstPartIter begin() const { return ConstPartIter(parts.begin()._Ptr, parts.begin()._Ptr + parts.size(), mainPart); }
 

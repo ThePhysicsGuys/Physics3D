@@ -32,7 +32,7 @@ Part::Part(const Shape& shape, Part& attachTo, const CFrame& attach, const PartP
 
 Part::~Part() {
 	if (parent != nullptr) {
-		parent->detachPart(this, false);
+		parent->removePart(this);
 	}
 }
 
@@ -167,7 +167,7 @@ void Part::attach(Part* other, HardConstraint* constraint, const CFrame& attachT
 
 void Part::detach() {
 	if(this->parent == nullptr) throw "No physical to detach from!";
-	this->parent->detachPart(this, true);
+	this->parent->detachPart(this);
 }
 
 void Part::ensureHasParent() {

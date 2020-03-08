@@ -214,7 +214,7 @@ void Physical::attachPhysical(Physical* phys, HardConstraint* constraint, const 
 void Physical::attachPhysical(MotorizedPhysical* phys, HardConstraint* constraint, const CFrame& attachToThis, const CFrame& attachToThat) {
 	WorldPrototype* world = this->mainPhysical->world;
 	if(world != nullptr) {
-		world->mergePhysicals(this->mainPhysical, mainPhysical);
+		world->notifyPhysicalsMerged(this->mainPhysical, mainPhysical);
 	}
 
 	ConnectedPhysical childToAdd(std::move(*phys), this, constraint, attachToThat, attachToThis);
@@ -235,7 +235,7 @@ void Physical::attachPart(Part* part, HardConstraint* constraint, const CFrame& 
 	if(part->parent == nullptr) {
 		WorldPrototype* world = this->mainPhysical->world;
 		if(world != nullptr) {
-			world->mergePartAndPhysical(this->mainPhysical, part);
+			world->notifyNewPartAddedToPhysical(this->mainPhysical, part);
 		}
 		childPhysicals.push_back(ConnectedPhysical(Physical(part, this->mainPhysical), this, constraint, attachToThat, attachToThis));
 		childPhysicals.back().refreshCFrame();
@@ -285,7 +285,7 @@ void Physical::attachPhysical(MotorizedPhysical* phys, const CFrame& attachment)
 	WorldPrototype* world = this->mainPhysical->world;
 	if(world != nullptr) {
 		assert(phys->world == nullptr || phys->world == world);
-		world->mergePhysicals(this->mainPhysical, phys->mainPhysical);
+		world->notifyPhysicalsMerged(this->mainPhysical, phys->mainPhysical);
 	}
 
 	delete phys;
@@ -308,7 +308,7 @@ void Physical::attachPart(Part* part, const CFrame& attachment) {
 		}
 	} else {
 		if(this->mainPhysical->world != nullptr) {
-			this->mainPhysical->world->mergePartAndPhysical(this->mainPhysical, part);
+			this->mainPhysical->world->notifyNewPartAddedToPhysical(this->mainPhysical, part);
 		}
 		part->parent = this;
 		rigidBody.attach(part, attachment);
@@ -319,52 +319,14 @@ void Physical::attachPart(Part* part, const CFrame& attachment) {
 void Physical::detachAllChildPhysicals() {
 	WorldPrototype* world = this->mainPhysical->world;
 	for(ConnectedPhysical& child : childPhysicals) {
-		//delete child.constraintWithParent;
 		MotorizedPhysical* newPhys = new MotorizedPhysical(std::move(static_cast<Physical&>(child)));
 		
 		if(world != nullptr) {
-			world->splitPhysical(this->mainPhysical, newPhys);
+			world->notifyPhysicalHasBeenSplit(this->mainPhysical, newPhys);
 		}
 	}
 
-	childPhysicals.clear();
-}
-
-
-void Physical::detachChildAndGiveItNewMain(ConnectedPhysical&& formerChild) {
-	//delete formerChild.constraintWithParent;
-	MotorizedPhysical* newPhys = new MotorizedPhysical(std::move(static_cast<Physical&>(formerChild)));
-	WorldPrototype* world = this->mainPhysical->world;
-	if(world != nullptr) {
-		world->splitPhysical(this->mainPhysical, newPhys);
-	}
-	childPhysicals.remove(std::move(formerChild));
-}
-
-void Physical::detachAllHardConstraintsForSinglePartPhysical(bool alsoDelete) && {
-	this->detachAllChildPhysicals();
-	MotorizedPhysical* mainPhys = this->mainPhysical; // save main physical because it'll get deleted by parent->detachChild()
-	if(this != mainPhys) {
-		ConnectedPhysical& self = static_cast<ConnectedPhysical&>(*this);
-		Physical* parent = self.parent;
-		if(alsoDelete) {
-			parent->detachChildPartAndDelete(std::move(self));
-		} else {
-			parent->detachChildAndGiveItNewMain(std::move(self));
-		}
-		mainPhys->refreshPhysicalProperties();
-	} else {
-		if(alsoDelete) {
-			if(mainPhys->world != nullptr) {
-				mainPhys->world->removeMainPhysical(mainPhys);
-			}
-			delete mainPhys;
-		}
-	}
-}
-
-void Physical::detachChildPartAndDelete(ConnectedPhysical&& formerChild) {
-	childPhysicals.remove(std::move(formerChild));
+	childPhysicals.clear(); // calls the destructors on all (now invalid) children, deleting the constraints in the process
 }
 
 void Physical::detachFromRigidBody(Part* part) {
@@ -396,7 +358,22 @@ TranslationalMotion MotorizedPhysical::getInternalMotionOfCenterOfMass() const {
 	return result.second * (1 / result.first);
 }
 
-void Physical::detachPart(Part* part, bool partStaysInWorld) {
+void Physical::detachPartAssumingMultipleParts(Part* part) {
+	assert(part->parent == this);
+	assert(rigidBody.getPartCount() > 1);
+
+	if(part == rigidBody.getMainPart()) {
+		AttachedPart& newMainPartAndLaterOldPart = rigidBody.parts.back();
+		makeMainPart(newMainPartAndLaterOldPart); // now points to old part
+		detachFromRigidBody(std::move(newMainPartAndLaterOldPart));
+	} else {
+		detachFromRigidBody(part);
+	}
+
+	this->mainPhysical->refreshPhysicalProperties();
+}
+
+void Physical::detachPart(Part* part) {
 	assert(part->parent == this);
 
 	WorldPrototype* world = this->mainPhysical->world;
@@ -406,44 +383,77 @@ void Physical::detachPart(Part* part, bool partStaysInWorld) {
 
 		// we have to disconnect this from other physicals as we're detaching the last part in the physical
 
-		std::move(*this).detachAllHardConstraintsForSinglePartPhysical(!partStaysInWorld);
-		// After this function, this is no longer valid!
-		// It may have been moved
-	} else {
-		if(part == rigidBody.getMainPart()) {
-			AttachedPart& newMainPartAndLaterOldPart = rigidBody.parts.back();
-			makeMainPart(newMainPartAndLaterOldPart); // now points to old part
-			detachFromRigidBody(std::move(newMainPartAndLaterOldPart));
-		} else {
-			detachFromRigidBody(part);
+		this->detachAllChildPhysicals();
+		MotorizedPhysical* mainPhys = this->mainPhysical; // save main physical because it'll get deleted by parent->detachChild()
+		if(this != mainPhys) {
+			ConnectedPhysical& self = static_cast<ConnectedPhysical&>(*this);
+			MotorizedPhysical* newPhys = new MotorizedPhysical(std::move(static_cast<Physical&>(self)));
+			if(world != nullptr) {
+				world->notifyPhysicalHasBeenSplit(mainPhys, newPhys);
+			}
+			self.parent->childPhysicals.remove(std::move(self)); // double move, but okay, since remove really only needs the address of self
+			mainPhys->refreshPhysicalProperties();
 		}
 
-		this->mainPhysical->refreshPhysicalProperties();
+		// After this, self, and hence also *this* is no longer valid!
+		// It has been removed
+	} else {
+		detachPartAssumingMultipleParts(part);
+		MotorizedPhysical* newPhys = new MotorizedPhysical(part);
+		part->parent = newPhys;
+		if(world != nullptr) {
+			world->notifyNewPhysicalCreatedWhenSplitting(newPhys);
+		}
 	}
 
 	if(world != nullptr) {
-		world->notifyPartRemovedFromGroup(part);
-	}
-
-	if(partStaysInWorld) {
-		MotorizedPhysical* phys = new MotorizedPhysical(part);
-
-		WorldPrototype* world = this->mainPhysical->world;
-		if(world != nullptr) {
-			world->addPart(part);
-		}
-	} else {
-		part->parent = nullptr;
+		world->notifyPartDetachedFromPhysical(part);
 	}
 }
 
+void Physical::removePart(Part* part) {
+	assert(part->parent == this);
+
+	WorldPrototype* world = this->mainPhysical->world;
+
+	if(rigidBody.getPartCount() == 1) {
+		assert(part == rigidBody.getMainPart());
+
+		// we have to disconnect this from other physicals as we're removing the last part in the physical
+
+		this->detachAllChildPhysicals();
+		MotorizedPhysical* mainPhys = this->mainPhysical; // save main physical because it'll get deleted by parent->detachChild()
+		if(this != mainPhys) {
+			ConnectedPhysical& self = static_cast<ConnectedPhysical&>(*this);
+			self.parent->childPhysicals.remove(std::move(self));
+			mainPhys->refreshPhysicalProperties();
+		} else {
+			if(mainPhys->world != nullptr) {
+				mainPhys->world->notifyMainPhysicalObsolete(mainPhys);
+			}
+			delete mainPhys;
+		}
+
+		// After this, self, and hence also *this* is no longer valid!
+		// It has been removed
+	} else {
+		detachPartAssumingMultipleParts(part);
+	}
+	part->parent = nullptr;
+
+	if(world != nullptr) {
+		world->notifyPartRemovedFromPhysical(part);
+	}
+}
+
+// TODO: this seems to need to update the encompassing MotorizedPhysical as well
 void Physical::notifyPartPropertiesChanged(Part* part) {
 	rigidBody.refreshWithNewParts();
 }
 void Physical::notifyPartPropertiesAndBoundsChanged(Part* part, const Bounds& oldBounds) {
 	notifyPartPropertiesChanged(part);
 	if(this->mainPhysical->world != nullptr) {
-		this->mainPhysical->world->updatePartBounds(part, oldBounds);
+		this->mainPhysical->world->notifyPartBoundsUpdated(part, oldBounds);
 	}
 }
 void Physical::notifyPartStdMoved(Part* oldPartPtr, Part* newPartPtr) {
@@ -496,7 +506,7 @@ void MotorizedPhysical::setCFrame(const GlobalCFrame& newCFrame) {
 			conPhys.refreshCFrameRecursive();
 		}
 
-		this->mainPhysical->world->updatePartGroupBounds(this->rigidBody.mainPart, oldMainPartBounds);
+		this->mainPhysical->world->notifyPartGroupBoundsUpdated(this->rigidBody.mainPart, oldMainPartBounds);
 	} else {
 		rigidBody.setCFrame(newCFrame);
 		for(ConnectedPhysical& conPhys : childPhysicals) {
@@ -536,12 +546,12 @@ void Physical::translateUnsafeRecursive(const Vec3Fix& translation) {
 void MotorizedPhysical::rotateAroundCenterOfMass(const Rotation& rotation) {
 	Bounds oldBounds = this->rigidBody.mainPart->getStrictBounds();
 	rotateAroundCenterOfMassUnsafe(rotation);
-	mainPhysical->world->updatePartGroupBounds(this->rigidBody.mainPart, oldBounds);
+	mainPhysical->world->notifyPartGroupBoundsUpdated(this->rigidBody.mainPart, oldBounds);
 }
 void MotorizedPhysical::translate(const Vec3& translation) {
 	Bounds oldBounds = this->rigidBody.mainPart->getStrictBounds();
 	translateUnsafeRecursive(translation);
-	mainPhysical->world->updatePartGroupBounds(this->rigidBody.mainPart, oldBounds);
+	mainPhysical->world->notifyPartGroupBoundsUpdated(this->rigidBody.mainPart, oldBounds);
 }
 
 static std::pair<Vec3, double> getRecursiveCenterOfMass(const Physical& phys) {
@@ -597,7 +607,7 @@ void MotorizedPhysical::fullRefreshOfConnectedPhysicals() {
 	for(ConnectedPhysical& conPhys : childPhysicals) {
 		conPhys.refreshCFrameRecursive();
 	}
-	if(this->world != nullptr) this->world->updatePartGroupBounds(this->rigidBody.mainPart, oldBounds);
+	if(this->world != nullptr) this->world->notifyPartGroupBoundsUpdated(this->rigidBody.mainPart, oldBounds);
 }
 
 #pragma endregion
@@ -899,7 +909,7 @@ MotorizedPhysical::MotorizedPhysical(Physical&& movedPhys) : Physical(std::move(
 void MotorizedPhysical::ensureWorld(WorldPrototype* world) {
 	if(this->world == world) return;
 	if(this->world != nullptr) {
-		this->world->removeMainPhysical(this);
+		this->world->notifyMainPhysicalObsolete(this);
 	}
 	throw "TODO";
 }

@@ -46,6 +46,8 @@ protected:
 	void removeChild(ConnectedPhysical* child);
 	void detachFromRigidBody(Part* part);
 	void detachFromRigidBody(AttachedPart&& part);
+
+	void detachPartAssumingMultipleParts(Part* part);
 	
 	/*
 		Returns a representation for the motion of the center of mass within this physical
@@ -54,7 +56,29 @@ protected:
 	*/
 	std::pair<double, TranslationalMotion> getMotionOfCenterOfMassInternally(const RelativeMotion& totalAccumulatedMotion) const;
 
+	// expects a function of type void(const Part&)
+	template<typename Func>
+	void forEachPartInChildren(const Func& func) const;
 
+	// expects a function of type void(Part&)
+	template<typename Func>
+	void forEachPartInChildren(const Func& func);
+
+	// expects a function of type void(const Part&)
+	template<typename Func>
+	void forEachPartInThisAndChildren(const Func& func) const;
+
+	// expects a function of type void(Part&)
+	template<typename Func>
+	void forEachPartInThisAndChildren(const Func& func);
+
+	// expects a function of type void(const HardPhysicalConnection&, const Physical& parent, const Physical& child)
+	template<typename Func>
+	void forEachHardConstraintInChildren(const Func& func) const;
+
+	// expects a function of type void(HardPhysicalConnection&, Physical& parent, Physical& child)
+	template<typename Func>
+	void forEachHardConstraintInChildren(const Func& func);
 public:
 	RigidBody rigidBody;
 
@@ -104,7 +128,22 @@ public:
 
 	void makeMainPart(Part* newMainPart);
 	void attachPart(Part* part, const CFrame& attachment);
-	void detachPart(Part* part, bool partStaysInWorld);
+	/*
+		detaches a part from this Physical
+		Leaves the detached part with a MotorizedPhysical parent in which it is the only part
+		As opposed to Physical::removePart(Part*)
+
+		this Physical may no longer be valid after calling detachPart
+	*/
+	void detachPart(Part* part);
+	/*
+		removes a part from this Physical
+		After this method: part->parent == nullptr
+		As opposed to Physical::detachPart(Part*)
+
+		this Physical may no longer be valid after calling removePart
+	*/
+	void removePart(Part* part);
 	void attachPart(Part* part, HardConstraint* constraint, const CFrame& attachToThis, const CFrame& attachToThat);
 
 	size_t getNumberOfPartsInThisAndChildren() const;
@@ -120,9 +159,6 @@ public:
 
 private:
 	void detachAllChildPhysicals();
-	void detachAllHardConstraintsForSinglePartPhysical(bool alsoDelete) &&;
-	void detachChildAndGiveItNewMain(ConnectedPhysical&& formerChild);
-	void detachChildPartAndDelete(ConnectedPhysical&& formerChild);
 };
 
 
@@ -239,5 +275,87 @@ public:
 
 	void fullRefreshOfConnectedPhysicals();
 
+	// expects a function of type void(const Part&)
+	template<typename Func>
+	void forEachPart(const Func& func) const { this->forEachPartInThisAndChildren(func); }
+
+	// expects a function of type void(Part&)
+	template<typename Func>
+	void forEachPart(const Func& func) { this->forEachPartInThisAndChildren(func); }
+
+	// expects a function of type void(const Part&)
+	template<typename Func>
+	void forEachPartExceptMainPart(const Func& func) const {
+		this->rigidBody.forEachAttachedPart(func);
+		this->forEachPartInChildren(func); 
+	}
+
+	// expects a function of type void(Part&)
+	template<typename Func>
+	void forEachPartExceptMainPart(const Func& func) {
+		this->rigidBody.forEachAttachedPart(func);
+		this->forEachPartInChildren(func); 
+	}
+
+	// expects a function of type void(const Physical& parent, const ConnectedPhysical& child)
+	template<typename Func>
+	void forEachHardConstraint(const Func& func) const {
+		this->forEachHardConstraintInChildren(func);
+	}
+
+	// expects a function of type void(Physical& parent, ConnectedPhysical& child)
+	template<typename Func>
+	void forEachHardConstraint(const Func& func) {
+		this->forEachHardConstraintInChildren(func);
+	}
+
 	bool isValid() const;
 };
+
+// expects a function of type void(const Part&)
+template<typename Func>
+void Physical::forEachPartInChildren(const Func& func) const {
+	for(const ConnectedPhysical& conPhys : this->childPhysicals) {
+		conPhys.forEachPartInThisAndChildren(func);
+	}
+}
+
+// expects a function of type void(Part&)
+template<typename Func>
+void Physical::forEachPartInChildren(const Func& func) {
+	for(ConnectedPhysical& conPhys : this->childPhysicals) {
+		conPhys.forEachPartInThisAndChildren(func);
+	}
+}
+
+// expects a function of type void(const Part&)
+template<typename Func>
+void Physical::forEachPartInThisAndChildren(const Func& func) const {
+	this->rigidBody.forEachPart(func);
+	this->forEachPartInChildren(func);
+}
+
+// expects a function of type void(Part&)
+template<typename Func>
+void Physical::forEachPartInThisAndChildren(const Func& func) {
+	this->rigidBody.forEachPart(func);
+	this->forEachPartInChildren(func);
+}
+
+// expects a function of type void(const Physical& parent, const ConnectedPhysical& child)
+template<typename Func>
+void Physical::forEachHardConstraintInChildren(const Func& func) const {
+	for(const ConnectedPhysical& conPhys : this->childPhysicals) {
+		func(*this, conPhys);
+		conPhys.forEachHardConstraintInChildren(func);
+	}
+}
+
+// expects a function of type void(Physical& parent, ConnectedPhysical& child)
+template<typename Func>
+void Physical::forEachHardConstraintInChildren(const Func& func) {
+	for(ConnectedPhysical& conPhys : this->childPhysicals) {
+		func(*this, conPhys);
+		conPhys.forEachHardConstraintInChildren(func);
+	}
+}

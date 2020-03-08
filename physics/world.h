@@ -44,33 +44,47 @@ private:
 	std::vector<Colission> currentObjectColissions;
 	std::vector<Colission> currentTerrainColissions;
 
-	void setPartCFrame(Part* part, const GlobalCFrame& newCFrame);
-	void updatePartBounds(const Part* updatedPart, const Bounds& oldBounds);
-	void updatePartGroupBounds(const Part* mainPart, const Bounds& oldMainPartBounds);
-	void removePartFromTrees(const Part* part);
+	void notifyPartBoundsUpdated(const Part* updatedPart, const Bounds& oldBounds);
+	void notifyPartGroupBoundsUpdated(const Part* mainPart, const Bounds& oldMainPartBounds);
 
+	/*
+		This method is called by World or Physical when new MotorizedPhysicals are created which need to be added to the list
+	*/
+	void notifyNewPhysicalCreatedWhenSplitting(MotorizedPhysical* newPhysical);
 
-	// These 3 methods do not edit the given physicals, they just adjust the world and it's BoundsTrees to match the new situation
-	
 	// splits newlySplitPhysical from mainPhysical in the world tree, also adds the new physical to the list of physicals
-	void splitPhysical(const MotorizedPhysical* mainPhysical, MotorizedPhysical* newlySplitPhysical);
+	void notifyPhysicalHasBeenSplit(const MotorizedPhysical* mainPhysical, MotorizedPhysical* newlySplitPhysical);
 
 	/*
 		merges the trees for two physicals. 
 		firstPhysical must be part of this world, 
 		secondPhysical may or may not be in the world, but is not allowed to be in a different world
 	*/
-	void mergePhysicals(const MotorizedPhysical* firstPhysical, const MotorizedPhysical* secondPhysical);
+	void notifyPhysicalsMerged(const MotorizedPhysical* firstPhysical, MotorizedPhysical* secondPhysical);
 	/*
 		Adds a new part that wasn't previously in the tree to the group of the given physical
 	*/
-	void mergePartAndPhysical(const MotorizedPhysical* physical, Part* newPart);
+	void notifyNewPartAddedToPhysical(const MotorizedPhysical* physical, Part* newPart);
 
+	/*
+		When a part is std::move'd to a different location, this function is called to update any pointers
 
+		This is something that in general should not be performed when the part is already in a world, but this function is provided for completeness
+	*/
 	void notifyPartStdMoved(Part* oldPartPtr, Part* newPartPtr);
 
-	void notifyPartRemovedFromGroup(Part* part);
+	/*
+		Called when a MainPhysical has become obsolete
+		This usually happens right before the physical is deleted
+	*/
+	void notifyMainPhysicalObsolete(MotorizedPhysical* part);
 
+	void notifyPartDetachedFromPhysical(Part* part);
+	void notifyPartRemovedFromPhysical(Part* part);
+
+
+private: // actually private fields and methods, not to be used by any friends
+	void mergePhysicalGroups(const MotorizedPhysical* first, MotorizedPhysical* second);
 
 	BoundsTree<Part>& getTreeForPart(const Part* part);
 	const BoundsTree<Part>& getTreeForPart(const Part* part) const;
@@ -80,12 +94,17 @@ private:
 	LargeSymmetricMatrix<bool> colissionMatrix;
 
 protected:
+	// World tick steps
 	virtual void applyExternalForces();
 	virtual void findColissions();
 	virtual void handleColissions();
 	virtual void handleConstraints();
 	virtual void update();
 
+
+	// event handlers
+	virtual void onPartAdded(Part* newPart);
+	virtual void onPartRemoved(Part* removedPart); 
 public:
 
 	std::vector<ExternalForce*> externalForces;
@@ -114,7 +133,6 @@ public:
 
 	void addPart(Part* part);
 	void removePart(Part* part);
-	void removeMainPhysical(MotorizedPhysical* part);
 
 	void addTerrainPart(Part* part);
 	void optimizeTerrain();

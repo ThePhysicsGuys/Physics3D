@@ -21,7 +21,7 @@ private:
 	};
 	double maxDepth;
 public:
-	VisibilityFilter() : boxNormals{} {};
+	VisibilityFilter() : up(), down(), left(), right(), forward() {};
 	VisibilityFilter(Position origin, Vec3 normals[5], double maxDepth);
 	
 	/*

@@ -24,8 +24,8 @@ std::vector<std::string> split(const std::string& string, char splitter) {
 }
 
 bool startWith(const std::string& string, const std::string& prefix) {
-	int l1 = string.length();
-	int l2 = prefix.length();
+	size_t l1 = string.length();
+	size_t l2 = prefix.length();
 
 	if (l2 > l1)
 		return false;
@@ -39,8 +39,8 @@ bool startWith(const std::string& string, const std::string& prefix) {
 }
 
 bool endsWith(const std::string& string, const std::string& suffix) {
-	int l1 = string.length();
-	int l2 = suffix.length();
+	size_t l1 = string.length();
+	size_t l2 = suffix.length();
 
 	if (l2 > l1)
 		return false;
