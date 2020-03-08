@@ -26,27 +26,59 @@
 namespace Application {
 
 Graphics::FrameBuffer* frameBuffer;
-Shader* shader;
-unsigned int quadVAO;
-unsigned int quadVBO;
-unsigned int instanceVBO;
-
 Graphics::VertexArray* vao;
 Graphics::VertexBuffer* vbo;
 
+std::vector<Vec2> translations;
+GLuint quadVAO;
+GLuint shader;
+
+static unsigned int compileShader(const std::string& source, unsigned int type) {
+	GLuint id = glCreateShader(type);
+	const char* src = source.c_str();
+	glShaderSource(id, 1, &src, nullptr);
+	glCompileShader(id);
+
+	GLint result;
+	glGetShaderiv(id, GL_COMPILE_STATUS, &result);
+
+	if (result == GL_FALSE) {
+		GLint length;
+		glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
+		char* message = (char*) alloca(length * sizeof(char));
+		glGetShaderInfoLog(id, length, &length, message);
+		Log::error(message);
+		glDeleteShader(id);
+		return 0;
+	}
+	return id;
+}
+
+static GLuint createShader	(const std::string& vertexShader, const std::string& fragmentShader) {
+	GLuint program = glCreateProgram();
+	GLuint vs = compileShader(vertexShader, GL_VERTEX_SHADER);
+	GLuint fs = compileShader(fragmentShader, GL_FRAGMENT_SHADER);
+
+	glAttachShader(program, vs);
+	glAttachShader(program, fs);
+	glLinkProgram(program);
+	glValidateProgram(program);
+	glDeleteShader(vs);
+	glDeleteShader(fs);
+
+	return program;
+}
+
 void TestLayer::onInit() {
-	shader = ResourceManager::add<ShaderResource>("../res/shaders/instance.shader");
 	frameBuffer = new Graphics::FrameBuffer(300, 300);
 
-	int index = 0;
-	float offset = 0.1f;
-	Vec2 translations[100];
-	for (int y = -10; y < 10; y += 2) {
-		for (int x = -10; x < 10; x += 2) {
+	float size = 10.0;
+	for (float y = -size; y < size; y += 1.0) {
+		for (float x = -size; x < size; x += 1.0) {
 			Vec2 translation;
-			translation.x = (float) x / 10.0f + offset;
-			translation.y = (float) y / 10.0f + offset;
-			translations[index++] = translation;
+			translation.x = x / size;
+			translation.y = y / size;
+			translations.push_back(translation);
 		}
 	}
 
@@ -55,46 +87,80 @@ void TestLayer::onInit() {
 		-0.05f,  0.05f,  1.0f, 0.0f, 0.0f,
 		 0.05f, -0.05f,  0.0f, 1.0f, 0.0f,
 		-0.05f, -0.05f,  0.0f, 0.0f, 1.0f,
-
-		-0.05f,  0.05f,  1.0f, 0.0f, 0.0f,
-		 0.05f, -0.05f,  0.0f, 1.0f, 0.0f,
 		 0.05f,  0.05f,  0.0f, 1.0f, 1.0f
 	};
 
-	vao = new Graphics::VertexArray();
-	vbo = new Graphics::VertexBuffer(quadVertices, sizeof(quadVertices), GL_STATIC_DRAW);
-	
-	Graphics::BufferLayout layout = Graphics::BufferLayout(
-		{ Graphics::BufferElement("positions", Graphics::BufferDataType::FLOAT2),
-		Graphics::BufferElement("colors", Graphics::BufferDataType::FLOAT3) }
-	);
-	
-	vao->addBuffer(vbo, layout);
+	unsigned int indices[] = {
+		1, 3, 2,
+		1, 3, 0
+	};
 
-	//glGenBuffers(1, &instanceVBO);
-	//glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
-	//glBufferData(GL_ARRAY_BUFFER, sizeof(translations), translations, GL_STATIC_DRAW);
+	GLuint instanceVBO;
+	glGenBuffers(1, &instanceVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+	glBufferData(GL_ARRAY_BUFFER, translations.size() * sizeof(Vec2), translations.data(), GL_STATIC_DRAW);
 
 	// create
+	GLuint quadVBO;
+	GLuint indexVBO;
 	glGenVertexArrays(1, &quadVAO);
 	glGenBuffers(1, &quadVBO);
+	glGenBuffers(1, &indexVBO);
 	glBindVertexArray(quadVAO);
+
 	// buffer
 	glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
+
+	// indices
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexVBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
 	// vertices
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*) 0);
+
 	// colors
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*) (intptr_t) (2 * sizeof(float)));
+
 	// offsets
-	//glEnableVertexAttribArray(2);
-	//glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
-	//glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*) 0);
-	//glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glEnableVertexAttribArray(2);
+	glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*) 0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
 	// divisor
-	//glVertexAttribDivisor(2, 1);
+	glVertexAttribDivisor(2, 1);
+
+	std::string vertexShader = R"(
+		#version 330 core
+		layout (location = 0) in vec2 vPosition;
+		layout (location = 1) in vec3 vColor;
+		layout (location = 2) in vec2 vOffset;
+
+		out vec3 fColor;
+
+		uniform mat3 matrix;
+
+		void main() {
+			vec2 position = (matrix * vec3(vPosition, 1.0)).xy;
+			gl_Position = vec4(position + vOffset, 0.0, 1.0);
+			fColor = vColor;
+		}  
+	)";
+
+	std::string fragmentShader = R"(
+		#version 330 core
+		in vec3 fColor;
+		out vec4 outColor;
+
+		void main() {
+			outColor = vec4(fColor, 1);
+		}
+	)";
+
+	shader = createShader(vertexShader, fragmentShader);
 }
 
 void TestLayer::onUpdate() {
@@ -106,40 +172,34 @@ void TestLayer::onEvent(Event& event) {
 }
 
 void TestLayer::onRender() {
-	Graphics::Renderer::beginScene();
+	using namespace Graphics;
+	using namespace Graphics::Renderer;
+	
+	beginScene();
 
 	frameBuffer->bind();
-	shader->bind();
 
-	Graphics::Renderer::disableDepthMask();
-	Graphics::Renderer::disableCulling();
-	Graphics::Renderer::enableBlending();
-	Graphics::Renderer::standardBlendFunction();
-	Graphics::Renderer::clearColor();
-	Graphics::Renderer::clearDepth();
-	Graphics::Renderer::disableDepthTest();
+	glUseProgram(shader);
+	glBindVertexArray(quadVAO);
+
+	clearColor();
+	clearDepth();
+	enableCulling();
+	enableBlending();
+	enableDepthMask();
+	enableDepthTest();
+	standardBlendFunction();
 	glClearColor(0.1f, 0.1f, 0.7f, 1.0f);
 
-	// draw 100 instanced quads	
-	/*glBindVertexArray(quadVAO);
-	glDrawArrays(GL_TRIANGLES, 0, 6); // 100 triangles of 6 vertices each
-	glBindVertexArray(0);*/
+	glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, translations.size());
 
-	vao->bind();
-	Graphics::Renderer::drawArrays(Graphics::Renderer::FILL, 0, 6);
-	vao->unbind();
-	
 	frameBuffer->unbind();
 
-	Graphics::Renderer::enableDepthTest();
-	Graphics::Renderer::enableCulling();
-	Graphics::Renderer::enableDepthMask();
-
+	endScene();
+	
 	ImGui::Begin("Test");
 	ImGui::Image((void*) (intptr_t) frameBuffer->texture->getID(), ImVec2(300, 300));
 	ImGui::End();
-
-	Graphics::Renderer::endScene();
 }
 
 void TestLayer::onClose() {

@@ -139,6 +139,8 @@
     <ClInclude Include="core.h" />
     <ClInclude Include="ecs\component.h" />
     <ClInclude Include="ecs\entity.h" />
+    <ClInclude Include="ecs\node.h" />
+    <ClInclude Include="ecs\tree.h" />
     <ClInclude Include="event\event.h" />
     <ClInclude Include="event\keyEvent.h" />
     <ClInclude Include="event\mouseEvent.h" />
@@ -163,6 +165,8 @@
     </ClCompile>
     <ClCompile Include="ecs\component.cpp" />
     <ClCompile Include="ecs\entity.cpp" />
+    <ClCompile Include="ecs\node.cpp" />
+    <ClCompile Include="ecs\tree.cpp" />
     <ClCompile Include="input\inputHandler.cpp" />
     <ClCompile Include="input\keyboard.cpp" />
     <ClCompile Include="input\mouse.cpp" />

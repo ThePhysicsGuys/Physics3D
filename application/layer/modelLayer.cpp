@@ -98,11 +98,11 @@ void ModelLayer::onInit() {
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
 	Attenuation attenuation = { 0, 0, 0.5 };
-	screen->entities.push_back(new Engine::Entity({ new Light(Vec3f(10, 5, -10), Color3(1, 0.84f, 0.69f), 6, attenuation) }));
-	screen->entities.push_back(new Engine::Entity({ new Light(Vec3f(10, 5, 10), Color3(1, 0.84f, 0.69f), 6, attenuation) }));
-	screen->entities.push_back(new Engine::Entity({ new Light(Vec3f(-10, 5, -10), Color3(1, 0.84f, 0.69f), 6, attenuation) }));
-	screen->entities.push_back(new Engine::Entity({ new Light(Vec3f(-10, 5, 10), Color3(1, 0.84f, 0.69f), 6, attenuation) }));
-	screen->entities.push_back(new Engine::Entity({ new Light(Vec3f(0, 5, 0), Color3(1, 0.90f, 0.75f), 10, attenuation) }));
+	screen->entities.push_back(new Engine::Entity("Light", { new Light(Vec3f(10, 5, -10), Color3(1, 0.84f, 0.69f), 6, attenuation) }));
+	screen->entities.push_back(new Engine::Entity("Light", { new Light(Vec3f(10, 5, 10), Color3(1, 0.84f, 0.69f), 6, attenuation) }));
+	screen->entities.push_back(new Engine::Entity("Light", { new Light(Vec3f(-10, 5, -10), Color3(1, 0.84f, 0.69f), 6, attenuation) }));
+	screen->entities.push_back(new Engine::Entity("Light", { new Light(Vec3f(-10, 5, 10), Color3(1, 0.84f, 0.69f), 6, attenuation) }));
+	screen->entities.push_back(new Engine::Entity("Light", { new Light(Vec3f(0, 5, 0), Color3(1, 0.90f, 0.75f), 10, attenuation) }));
 
 	BufferLayout layout = BufferLayout({
 		BufferElement("pos", BufferDataType::FLOAT3),

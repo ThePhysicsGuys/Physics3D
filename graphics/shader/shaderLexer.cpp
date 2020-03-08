@@ -219,7 +219,7 @@ TokenStack ShaderLexer::lexDebug(const std::string& input) {
 
 		auto [n5, n6] = next(index, true);
 		std::string array = input.substr(n5 - 1, n6 - n5 + 1);
-		if (!array.empty() && startWith(array, "[") && endsWith(array, "]")) {
+		if (!array.empty() && startsWith(array, "[") && endsWith(array, "]")) {
 			TokenStack content = lex(array);
 			tokens.addAll(content);
 		}

@@ -20,7 +20,7 @@ FrameBuffer::FrameBuffer() {
 }
 
 FrameBuffer::FrameBuffer(unsigned int width, unsigned int height) : FrameBuffer() {
-	texture = new Graphics::Texture(width, height);
+	texture = new Texture(width, height);
 	renderBuffer = new RenderBuffer(width, height);
 	attach(texture);
 	attach(renderBuffer);

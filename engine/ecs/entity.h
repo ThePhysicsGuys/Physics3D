@@ -1,68 +1,31 @@
 #pragma once
-#include <typeinfo>
 
+#include "node.h"
 #include "component.h"
 
 namespace Engine {
 
-class Entity {
-private:
-	/*
-		The parent of this entity
-	*/
-	Entity* parent;
-
-	/*
-		The children of this entity
-	*/
-	std::vector<Entity*> children;
-
+class Entity : public Node {
+protected:
 	/*
 		The components of this entity
 	*/
 	std::multimap<ComponentType, Component*> components;
 
 public:
+#pragma region constructors
 	/*
 		Creates an empty entity
 	*/
-	Entity();
+	Entity(const std::string& name);
 
 	/*
 		Creates an entity with the given components
 	*/
-	Entity(std::initializer_list<Component*> components);
+	Entity(const std::string& name, std::initializer_list<Component*> components);
+#pragma endregion
 
-	/*
-		Returns the parent of this entity
-	*/
-	Entity* getParent();
-
-	/*
-		Sets the parent of this entity to the given value
-	*/
-	void setParent(Entity* parent);
-
-	/*
-		Returns the children of this entity
-	*/
-	std::vector<Entity*> getChildren();
-
-	/*
-		Adds the given child to the children
-	*/
-	void addChild(Entity* child);
-
-	/*
-		Removes the given child from the children
-	*/
-	void removeChild(Entity* child);
-
-	/*
-		Returns whether the children recursively contain the given entity using depth first search
-	*/
-	bool containsChild(Entity* child);
-
+#pragma region components
 	/*
 		Adds the given component to this entity, if the component is unique and already is part of this entity, the component will overwrite the existing one
 	*/
@@ -114,37 +77,6 @@ public:
 	}
 
 	/*
-		Returns the component of the given type in any of its children using depth first search if present, nullptr otherwise
-	*/
-	template<typename T, typename = std::enable_if<std::is_base_of<Component, T>::value>>
-	T* getComponentInChildren() {
-		for (Entity* child : children) {
-			T* component = child->getComponent<T>();
-
-			if (component != nullptr)
-				return component;
-
-			T* component = child->getComponentInChildren<T>();
-
-			if (component != nullptr)
-				return component;
-		}
-
-		return nullptr;
-	}
-
-	/*
-		Returns the first component of the given type in the parent of this entity if present, nullptr otherwise
-	*/
-	template<typename T, typename = std::enable_if<std::is_base_of<Component, T>::value>>
-	T* getComponentInParent() {
-		if (parent == nullptr)
-			return nullptr;
-
-		return parent->getComponent<T>();
-	}
-
-	/*
 		Returns all components of the given type in this entity if present, nullptr otherwise
 	*/
 	template<typename T, typename = std::enable_if<std::is_base_of<Component, T>::value>>
@@ -157,35 +89,19 @@ public:
 		
 		return results;
 	}
+#pragma endregion
+
+#pragma region virtual functions
+	/*
+		Adds the given child to the children
+	*/
+	virtual void addChild(Node* child) override;
 
 	/*
-		Returns all components of the given type in any of its children using depth first search if present, nullptr otherwise
+		Removes the given child from the children
 	*/
-	template<typename T, typename = std::enable_if<std::is_base_of<Component, T>::value>>
-	std::vector<T*> getComponentsInChildren() {
-		std::vector<T*> results;
-
-		for (Entity* child : children) {
-			for (T* component : child->getComponents<T>())
-				results.push_back(component);
-
-			for (T* component : child->getComponentsInChildren<T>())
-				results.push_back(component);
-		}
-
-		return results;
-	}
-
-	/*
-		Returns all the components of the given type in the parent of this entity if present, nullptr otherwise
-	*/
-	template<typename T, typename = std::enable_if<std::is_base_of<Component, T>::value>>
-	std::vector<T*> getComponentsInParent() {
-		if (parent == nullptr)
-			return std::vector<T*>();
-
-		return parent->getComponents<T>();
-	}
+	virtual void removeChild(Node* child) override;
+#pragma endregion
 };
 
 };

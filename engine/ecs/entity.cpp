@@ -1,29 +1,39 @@
 #include "core.h"
+
 #include "entity.h"
+#include "tree.h"
 
 namespace Engine {
 
-Entity::Entity() {
+#pragma region constructors
+
+Entity::Entity(const std::string& name) : Node(name) {
 	parent = nullptr;
 }
 
-Entity::Entity(std::initializer_list<Component*> components) : Entity() {
+Entity::Entity(const std::string& name, std::initializer_list<Component*> components) : Entity(name) {
 	for (Component* component : components)
 		this->components.insert(std::pair<ComponentType, Component*>(component->getType(), component));
 }
+
+#pragma endregion
+
+#pragma region components
 
 void Entity::addComponent(Component* component) {
 	if (component == nullptr)
 		return;
 
-	if (component->isUnique()) {
-		if (containsComponentOfType(component)) {
+	if (containsComponentOfType(component)) {
+		if (component->isUnique()) {
 			overwriteComponent(component);
 		}
+	} else {
+		tree->onAddComponentToEntity(this, component);
+		components.insert({ component->getType(), component });
 	}
 
 	component->setEntity(this);
-	components.insert(std::pair<ComponentType, Component*>(component->getType(), component));
 }
 
 void Entity::removeComponent(Component* component) {
@@ -33,9 +43,12 @@ void Entity::removeComponent(Component* component) {
 		if (iterator->second == component) {
 			components.erase(iterator);
 			component->setEntity(nullptr);
-			return;
+			break;
 		}
 	}
+
+	if (!containsComponentOfType(component))
+		tree->onRemoveComponentFromEntity(this, component);
 }
 
 bool Entity::containsComponent(Component* component) {
@@ -71,54 +84,21 @@ void Entity::overwriteComponent(Component* query) {
 	}
 }
 
-Entity* Entity::getParent() {
-	return parent;
+#pragma endregion
+
+#pragma region children
+
+void Entity::addChild(Node* child) {
+	Node::addChild(child);
+	// todo add constraint
 }
 
-void Entity::setParent(Entity* parent) {
-	if (parent != nullptr && containsChild(parent))
-		return;
-
-	if (this->parent != nullptr)
-		this->parent->removeChild(this);
-
-	this->parent = parent;
+void Entity::removeChild(Node* child) {
+	Node::removeChild(child);
+	// todo remove constraint
 }
 
-std::vector<Entity*> Entity::getChildren() {
-	return children;
-}
+#pragma endregion
 
-void Entity::addChild(Entity* child) {
-	if (parent == child)
-		return;
-
-	if (containsChild(child))
-		return;
-
-	children.push_back(child);
-}
-
-void Entity::removeChild(Entity* child) {
-	for (auto iterator = children.begin(); iterator != children.end(); ++iterator) {
-		if (*iterator == child) {
-			children.erase(iterator);
-			child->setParent(nullptr);
-			return;
-		}
-	}
-}
-
-bool Entity::containsChild(Entity* query) {
-	for (Entity* child : children) {
-		if (child == query)
-			return true;
-
-		if (child->containsChild(query))
-			return true;
-	}
-
-	return false;
-}
 
 };
