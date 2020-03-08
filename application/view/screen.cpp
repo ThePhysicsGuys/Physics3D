@@ -32,7 +32,8 @@
 #include "layer/debugOverlay.h"
 
 #include "../physics/geometry/shapeClass.h"
-#include "../../engine/meshRegistry.h"
+#include "../engine/meshRegistry.h"
+#include "../engine/ecs/tree.h"
 
 #include "frames.h"
 
@@ -197,8 +198,9 @@ void Screen::onInit() {
 	ImGui_ImplOpenGL3_Init("#version 130");
 }
 
-
 void Screen::onUpdate() {
+	Engine::ECSTree* tree = this->world->ecstree;
+
 	std::chrono::time_point<std::chrono::steady_clock> curUpdate = std::chrono::steady_clock::now();
 	std::chrono::nanoseconds deltaTnanos = curUpdate - this->lastUpdate;
 	this->lastUpdate = curUpdate;
@@ -255,7 +257,6 @@ void Screen::onEvent(::Event& event) {
 }
 
 void Screen::onRender() {
-
 	// Init imgui
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();

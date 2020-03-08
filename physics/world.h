@@ -22,6 +22,7 @@ struct Colission {
 };
 
 class ExternalForce;
+class Layer;
 
 template<typename Filter>
 using DoubleFilterIter = FilteredIterator<IteratorGroup<TreeIterFactory<Part, Filter>, 2>, IteratorEnd, Filter>;
@@ -31,8 +32,6 @@ using ConstDoubleFilterIter = FilteredIterator<IteratorGroup<TreeIterFactory<con
 
 using WorldPartIter = IteratorGroup<IteratorFactoryWithEnd<BoundsTreeIter<TreeIterator, Part>>, 2>;
 using ConstWorldPartIter = IteratorGroup<IteratorFactoryWithEnd<BoundsTreeIter<ConstTreeIterator, const Part>>, 2>;
-
-class Layer;
 
 class WorldPrototype {
 private:
@@ -44,7 +43,13 @@ private:
 	std::vector<Colission> currentObjectColissions;
 	std::vector<Colission> currentTerrainColissions;
 
+	/*
+		Called when then bounds of a part are updated
+	*/
 	void notifyPartBoundsUpdated(const Part* updatedPart, const Bounds& oldBounds);
+	/*
+		Called when then bounds of a group of parts are updated
+	*/
 	void notifyPartGroupBoundsUpdated(const Part* mainPart, const Bounds& oldMainPartBounds);
 
 	/*
@@ -52,11 +57,13 @@ private:
 	*/
 	void notifyNewPhysicalCreatedWhenSplitting(MotorizedPhysical* newPhysical);
 
-	// splits newlySplitPhysical from mainPhysical in the world tree, also adds the new physical to the list of physicals
+	/*
+		Splits newlySplitPhysical from mainPhysical in the world tree, also adds the new physical to the list of physicals
+	*/
 	void notifyPhysicalHasBeenSplit(const MotorizedPhysical* mainPhysical, MotorizedPhysical* newlySplitPhysical);
 
 	/*
-		merges the trees for two physicals. 
+		Merges the trees for two physicals. 
 		firstPhysical must be part of this world, 
 		secondPhysical may or may not be in the world, but is not allowed to be in a different world
 	*/
@@ -68,7 +75,6 @@ private:
 
 	/*
 		When a part is std::move'd to a different location, this function is called to update any pointers
-
 		This is something that in general should not be performed when the part is already in a world, but this function is provided for completeness
 	*/
 	void notifyPartStdMoved(Part* oldPartPtr, Part* newPartPtr);
@@ -79,7 +85,13 @@ private:
 	*/
 	void notifyMainPhysicalObsolete(MotorizedPhysical* part);
 
+	/*
+		Called when a part gets detached from a physical
+	*/
 	void notifyPartDetachedFromPhysical(Part* part);
+	/*
+		Called when a part gets removed from a physical
+	*/
 	void notifyPartRemovedFromPhysical(Part* part);
 
 
@@ -90,7 +102,9 @@ private: // actually private fields and methods, not to be used by any friends
 	const BoundsTree<Part>& getTreeForPart(const Part* part) const;
 
 	std::vector<Layer> layers;
-	// signifies which layers collide
+	/*
+		Signifies which layers collide
+	*/
 	LargeSymmetricMatrix<bool> colissionMatrix;
 
 protected:
@@ -105,20 +119,19 @@ protected:
 	// event handlers
 	virtual void onPartAdded(Part* newPart);
 	virtual void onPartRemoved(Part* removedPart); 
-public:
 
+public:
 	std::vector<ExternalForce*> externalForces;
+	std::vector<MotorizedPhysical*> physicals;
+	std::vector<ConstraintGroup> constraints;
 
 	BoundsTree<Part> objectTree;
 	BoundsTree<Part> terrainTree;
-
-	std::vector<ConstraintGroup> constraints;
 
 	size_t age = 0;
 	size_t objectCount = 0;
 	double deltaT;
 
-	std::vector<MotorizedPhysical*> physicals;
 
 	WorldPrototype(double deltaT);
 	~WorldPrototype();
@@ -157,7 +170,6 @@ public:
 
 	template<typename Filter>
 	IteratorFactoryWithEnd<DoubleFilterIter<Filter>> iterPartsFiltered(const Filter& filter, int partsMask = ALL_PARTS) {
-
 		size_t size = 0;
 		TreeIterFactory<Part, Filter> iters[2];
 		if (partsMask & FREE_PARTS) {

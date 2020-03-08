@@ -4,14 +4,14 @@
 
 namespace Engine {
 
-class Tree;
+class ECSTree;
 
 class Node {
 protected:
 	/*
 		The tree that this node belongs to
 	*/
-	Tree* tree;
+	ECSTree* tree;
 
 	/*
 		The parent of this node
@@ -59,7 +59,15 @@ public:
 	*/
 	void setName(const std::string& name);
 
+	/*
+		Gets the tree of this node
+	*/
+	ECSTree* getTree();
 
+	/*
+		Sets the tree of this node to the given value
+	*/
+	void setTree(ECSTree* tree);
 
 	/*
 		Adds the given child to the children

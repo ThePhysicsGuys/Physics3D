@@ -215,7 +215,7 @@ void setupWorld(int argc, const char** args) {
 		}
 	}*/
 
-	WorldBuilder::buildTerrain(200.0, 200.0);
+	//WorldBuilder::buildTerrain(200.0, 200.0);
 
 
 	/*ExtendedPart* ropeStart = new ExtendedPart(Box(2.0, 1.5, 0.7), GlobalCFrame(10.0, 2.0, -10.0), {1.0, 0.7, 0.3}, "RopeA");

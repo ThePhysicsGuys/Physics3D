@@ -24,16 +24,18 @@ void Entity::addComponent(Component* component) {
 	if (component == nullptr)
 		return;
 
+	component->setEntity(this);
+	
 	if (containsComponentOfType(component)) {
 		if (component->isUnique()) {
 			overwriteComponent(component);
 		}
 	} else {
-		tree->onAddComponentToEntity(this, component);
 		components.insert({ component->getType(), component });
-	}
 
-	component->setEntity(this);
+		if (tree != nullptr)
+			tree->onAddComponentToEntity(this, component);
+	}
 }
 
 void Entity::removeComponent(Component* component) {
@@ -48,7 +50,8 @@ void Entity::removeComponent(Component* component) {
 	}
 
 	if (!containsComponentOfType(component))
-		tree->onRemoveComponentFromEntity(this, component);
+		if (tree != nullptr)
+			tree->onRemoveComponentFromEntity(this, component);
 }
 
 bool Entity::containsComponent(Component* component) {

@@ -37,6 +37,15 @@ void Node::setName(const std::string& name) {
 	this->name = name;
 }
 
+ECSTree* Node::getTree() {
+	return tree;
+}
+
+void Node::setTree(ECSTree* tree) {
+	// todo remove node from other tree
+	this->tree = tree;
+}
+
 void Node::addChild(Node* child) {
 	if (getParent() == child)
 		return;

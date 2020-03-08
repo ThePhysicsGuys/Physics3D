@@ -2,12 +2,15 @@
 
 #include "worlds.h"
 
+#include "ecs/model.h"
+#include "application.h"
+#include "view/screen.h"
+#include "input/standardInputHandler.h"
 #include "../physics/debug.h"
 #include "../physics/constants.h"
-#include "application.h"
-#include "input/standardInputHandler.h"
-#include "view/screen.h"
 #include "../engine/options/keyboardOptions.h"
+#include "../engine/ecs/entity.h"
+#include "../engine/ecs/component.h"
 
 #define PICKER_STRENGTH 100
 #define PICKER_SPEED_STRENGTH 12
@@ -18,7 +21,9 @@
 
 namespace Application {
 
-PlayerWorld::PlayerWorld(double deltaT) : SynchronizedWorld<ExtendedPart>(deltaT) {}
+PlayerWorld::PlayerWorld(double deltaT) : SynchronizedWorld<ExtendedPart>(deltaT) {
+	ecstree = new Engine::ECSTree();
+}
 
 void PlayerWorld::applyExternalForces() {
 	SynchronizedWorld<ExtendedPart>::applyExternalForces();
@@ -73,6 +78,17 @@ void PlayerWorld::applyExternalForces() {
 
 		player->properties.conveyorEffect = runVector;
 	}
+}
+
+void PlayerWorld::onPartAdded(Part* part) {
+	Engine::Entity* entity = new Engine::Entity("Unnamed part");
+	Engine::Component* model = new Model(part);
+	entity->addComponent(model);
+	ecstree->addNode(ecstree->getRoot(), entity);
+}
+
+void PlayerWorld::onPartRemoved(Part* part) {
+	
 }
 
 };

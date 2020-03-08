@@ -1,20 +1,24 @@
 #include "core.h"
 #include "model.h"
 
-#include "extendedPart.h"
+#include "../physics/part.h"
 
 namespace Application {
 
-ExtendedPart* Model::getExtendedPart() const {
+Model::Model(Part* part) {
+	this->extendedPart = part;
+}
+
+Part* Model::getExtendedPart() const {
 	return extendedPart;
 }
 
-void Model::setExtendedPart(ExtendedPart* extendedPart) {
+void Model::setExtendedPart(Part* extendedPart) {
 	this->extendedPart = extendedPart;
 }
 
 TransformComponent Model::getTransform() {
-	ExtendedPart* extendedPart = getExtendedPart();
+	Part* extendedPart = getExtendedPart();
 
 	if (extendedPart == nullptr)
 		return TransformComponent(GlobalCFrame());

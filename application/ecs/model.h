@@ -3,9 +3,9 @@
 #include "../engine/ecs/component.h"
 #include "transform.h"
 
-namespace Application {
+struct Part;
 
-struct ExtendedPart;
+namespace Application {
 
 /*
 	A Component representing a model which is being physicsed by the physics engine, all the transform of the entity with this component will be taken from the model
@@ -15,20 +15,25 @@ private:
 	/*
 		The extendedPart of this model
 	*/
-	ExtendedPart* extendedPart;
+	Part* extendedPart;
 
 public:
 	DEFINE_COMPONENT(Model, true);
 
 	/*
+		Creates a model with the given extendedpart
+	*/
+	Model(Part* part);
+
+	/*
 		Returns the extendedPart of this model
 	*/
-	ExtendedPart* getExtendedPart() const;
+	Part* getExtendedPart() const;
 
 	/*
 		Sets the extendedPart of this model to the given value
 	*/
-	void setExtendedPart(ExtendedPart* extendedPart);
+	void setExtendedPart(Part* extendedPart);
 
 	/*
 		Returns the transform of this model's extendedPart

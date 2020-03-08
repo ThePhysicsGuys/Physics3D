@@ -4,7 +4,7 @@
 
 namespace Engine {
 
-void Tree::onAddComponentToEntity(Entity* entity, Component* component) {
+void ECSTree::onAddComponentToEntity(Entity* entity, Component* component) {
 	if (component == nullptr || entity == nullptr)
 		return;
 
@@ -18,7 +18,7 @@ void Tree::onAddComponentToEntity(Entity* entity, Component* component) {
 	}
 }
 
-void Tree::onRemoveComponentFromEntity(Entity* entity, Component* component) {
+void ECSTree::onRemoveComponentFromEntity(Entity* entity, Component* component) {
 	if (component == nullptr || entity == nullptr)
 		return;
 
@@ -38,31 +38,42 @@ void Tree::onRemoveComponentFromEntity(Entity* entity, Component* component) {
 	}
 }
 
-Tree::Tree() {
+ECSTree::ECSTree() {
 	root = new Node("Tree");
+	map = std::unordered_map<ComponentType, std::multimap<std::string, Entity*>>();
 }
 
-Node* Tree::getRoot() {
+Node* ECSTree::getRoot() {
 	return root;
 }
 
-Node* Tree::addGroup(Node* root, const std::string& name) {
+Node* ECSTree::addGroup(Node* root, const std::string& name) {
 	if (root == nullptr)
 		return nullptr;
 
 	Node* group = new Node(name);
+	group->setTree(this);
 	root->addChild(group);
 }
 
-Entity* Tree::addEntity(Node* root, const std::string& name) {
+Entity* ECSTree::addEntity(Node* root, const std::string& name) {
 	if (root == nullptr)
 		return nullptr;
 
 	Entity* entity = new Entity(name);
+	entity->setTree(this);
 	root->addChild(entity);
 }
 
-std::multimap<std::string, Entity*> Tree::getEntitiesWithComponent(const ComponentType& type) {
+void ECSTree::addNode(Node* root, Node* node) {
+	if (root == nullptr)
+		return;
+
+	node->setTree(this);
+	root->addChild(node);
+}
+
+std::multimap<std::string, Entity*> ECSTree::getEntitiesWithComponent(const ComponentType& type) {
 	auto list = map.find(type);
 
 	if (list == map.end())

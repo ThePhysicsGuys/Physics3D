@@ -6,7 +6,7 @@
 
 namespace Engine {
 	
-class Tree {
+class ECSTree {
 	friend Entity;
 private:
 	/*
@@ -33,7 +33,7 @@ public:
 	/*
 		Creates a tree with an empty root
 	*/
-	Tree();
+	ECSTree();
 
 	/*
 		Returns the root of this tree
@@ -49,6 +49,11 @@ public:
 		Adds an empty entity with the given name to the given root
 	*/
 	Entity* addEntity(Node* root, const std::string& name);
+
+	/*
+		Adds the given node to the given root
+	*/
+	void addNode(Node* root, Node* node);
 
 	/*
 		Returns all entities with a component of the given type

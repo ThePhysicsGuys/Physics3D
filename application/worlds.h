@@ -1,19 +1,25 @@
 #pragma once
 
-#include "../physics/synchonizedWorld.h"
 #include "extendedPart.h"
+#include "../engine/ecs/tree.h"
 #include "../physics/math/position.h"
+#include "../physics/synchonizedWorld.h"
 
 namespace Application {
 
 class PlayerWorld : public SynchronizedWorld<ExtendedPart> {
 public:
 	PlayerWorld(double deltaT);
-	Vec3 localSelectedPoint;
-	Position magnetPoint;
-	virtual void applyExternalForces() override;
+
+	Engine::ECSTree* ecstree;
 
 	Part* selectedPart = nullptr;
+	Vec3 localSelectedPoint;
+	Position magnetPoint;
+	
+	virtual void applyExternalForces() override;
+	virtual void onPartAdded(Part* part) override;
+	virtual void onPartRemoved(Part* part) override;
 };
 
 };
