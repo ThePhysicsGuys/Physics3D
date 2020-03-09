@@ -1,13 +1,21 @@
 #pragma once
 
-#include "../util/resource/resource.h"
 #include "../graphics/gui/color.h"
 #include "../engine/layer/layer.h"
-#include "../graphics/texture.h"
-#include "../graphics/font.h"
-#include "../graphics/shader/shader.h"
+#include "../engine/layer/layerStack.h"
 
-#include "imgui/imgui.h"
+namespace Graphics {
+class Shader;
+struct ShaderStage;
+class Texture;
+class Font;
+}
+
+namespace Engine {
+class Node;
+}
+
+class Resource;
 
 namespace Application {
 
@@ -36,11 +44,13 @@ public:
 	static Resource* selectedResource;
 
 private:
+	static void renderECSNode(Engine::Node* node);
 	static void renderShaderStageInfo(Graphics::Shader* shader, const Graphics::ShaderStage& stage);
 	static void renderTextureInfo(Graphics::Texture* texture);
 	static void renderFontInfo(Graphics::Font* font);
 	static void renderShaderInfo(Graphics::Shader* shader);
 	
+	static void renderECSTree();
 	static void renderPropertiesFrame();
 	static void renderDebugFrame();
 	static void renderEnvironmentFrame();
@@ -48,6 +58,7 @@ private:
 	static void renderResourceFrame();
 
 public:
+	static void onInit();
 	static void render();
 
 };

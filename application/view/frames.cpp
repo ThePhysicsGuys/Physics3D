@@ -1,21 +1,31 @@
 #include "core.h"
 #include "frames.h"
 
-#include "../physics/misc/toString.h"
-#include "../graphics/debug/visualDebug.h"
-#include "../graphics/renderer.h"
-#include "../graphics/texture.h"
-
-#include "../graphics/resource/shaderResource.h"
-#include "../graphics/resource/textureResource.h"
-#include "../graphics/resource/fontResource.h"
-#include "../util/resource/resourceManager.h"
+#include "imgui/imgui.h"
+#include "imgui/imgui_internal.h"
 
 #include "shader/shaders.h"
 #include "extendedPart.h"
 #include "application.h"
 #include "worlds.h"
 #include "screen.h"
+
+#include "../physics/misc/toString.h"
+
+#include "../graphics/debug/visualDebug.h"
+#include "../graphics/renderer.h"
+#include "../graphics/texture.h"
+#include "../graphics/resource/shaderResource.h"
+#include "../graphics/resource/textureResource.h"
+#include "../graphics/resource/fontResource.h"
+#include "../graphics/font.h"
+#include "../graphics/shader/shader.h"
+
+#include "../engine/ecs/tree.h"
+#include "../engine/ecs/node.h"
+
+#include "../util/resource/resource.h"
+#include "../util/resource/resourceManager.h"
 
 namespace Application {
 using namespace Graphics;
@@ -31,6 +41,61 @@ bool BigFrame::doUpdate;
 bool BigFrame::isDisabled;
 Layer* BigFrame::selectedLayer = nullptr;
 Resource* BigFrame::selectedResource = nullptr;
+
+TextureResource* folderIcon;
+TextureResource* objectIcon;
+
+bool MyTreeNode(void* ptr_id, ImGuiTreeNodeFlags flags, const char* label) {
+	ImGuiContext& g = *GImGui;
+	ImGuiWindow* window = g.CurrentWindow;
+
+	ImU32 id = window->GetID(ptr_id);
+	ImVec2 pos = window->DC.CursorPos;
+	ImRect button(pos, ImVec2(pos.x + ImGui::GetContentRegionAvail().x, pos.y + g.FontSize + g.Style.FramePadding.y * 2));
+	bool opened = ImGui::TreeNodeBehaviorIsOpen(id);
+	bool leaf = (flags & ImGuiTreeNodeFlags_Leaf) != 0;
+
+	bool hovered, held;
+	if (ImGui::ButtonBehavior(button, id, &hovered, &held, true))
+		if (!leaf)
+			window->DC.StateStorage->SetInt(id, opened ? 0 : 1);
+	ImU32 color = ImGui::GetColorU32(ImGuiCol_Button);
+	if (held) {
+		color = ImGui::GetColorU32(ImGuiCol_ButtonActive);
+	} else if (hovered) {
+		color = ImGui::GetColorU32(ImGuiCol_ButtonHovered);
+	}
+
+	if (hovered || held)
+		window->DrawList->AddRectFilled(button.Min, button.Max, color);
+
+	// Icon
+	float arrowWidth = g.FontSize;
+	float buttonSize = g.FontSize + g.Style.FramePadding.y * 2;
+	window->DrawList->AddImage((void*) (intptr_t) (leaf ? objectIcon : folderIcon)->getID(), ImVec2(pos.x + arrowWidth, pos.y), ImVec2(pos.x + buttonSize + arrowWidth, pos.y + buttonSize));
+
+	// Text
+	ImVec2 textPos = ImVec2(pos.x + buttonSize + arrowWidth + g.Style.ItemInnerSpacing.x, pos.y + g.Style.FramePadding.y);
+	ImGui::RenderText(textPos, label);
+
+	// Arrow
+	ImVec2 padding = ImVec2(g.Style.FramePadding.x, ImMin(window->DC.CurrLineTextBaseOffset, g.Style.FramePadding.y));
+	float arrowOffset = abs(g.FontSize - arrowWidth) / 2.0f;
+	if (!leaf)
+		ImGui::RenderArrow(window->DrawList, ImVec2(pos.x + arrowOffset, textPos.y), ImGui::GetColorU32(ImGuiCol_Text), opened ? ImGuiDir_Down : ImGuiDir_Right, 1.0f);
+
+	ImGui::ItemSize(button, g.Style.FramePadding.y);
+	ImGui::ItemAdd(button, id);
+
+	if (opened)
+		ImGui::TreePush(label);
+	return opened;
+}
+
+void BigFrame::onInit() {
+	folderIcon = ResourceManager::add<TextureResource>("folder", "../res/textures/gui/folder.png");
+	objectIcon = ResourceManager::add<TextureResource>("object", "../res/textures/gui/object.png");
+}
 
 void BigFrame::renderTextureInfo(Texture* texture) {
 	ImGui::Text("ID: %d", texture->getID());
@@ -317,10 +382,41 @@ void BigFrame::renderResourceFrame() {
 	}
 }
 
+void BigFrame::renderECSNode(Engine::Node* node) {
+	static ImGuiTreeNodeFlags baseFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
+	const auto& children = node->getChildren();
+
+	if (children.size() > 0) {
+		ImGuiTreeNodeFlags flags = baseFlags;
+		bool open = MyTreeNode((void*) (intptr_t) node, flags, node->getName().c_str());
+		if (open) {
+			for (Engine::Node* child : children)
+				renderECSNode(child);
+			ImGui::TreePop();
+		}
+	} else {
+		ImGuiTreeNodeFlags flags = baseFlags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+		MyTreeNode((void*) (intptr_t) node, flags, node->getName().c_str());
+	}
+}
+
+void BigFrame::renderECSTree() {
+	using namespace Engine;
+
+	ECSTree* tree = world.ecstree;
+
+	if (tree == nullptr)
+		return;
+
+	Node* root = tree->getRoot();
+	renderECSNode(root);
+}
 
 void BigFrame::renderPropertiesFrame() {
 	if (ImGui::CollapsingHeader("Properties", ImGuiTreeNodeFlags_DefaultOpen)) {
 		ImGuiInputTextFlags flags = 0;
+
+		
 		ExtendedPart* sp = screen.selectedPart;
 
 		ImGui::SetNextTreeNodeOpen(true);
@@ -499,14 +595,17 @@ void BigFrame::renderLayerFrame() {
 
 void BigFrame::render() {
 	ImGui::ShowDemoWindow();
-	ImGui::Begin("Inspector");
 
+	ImGui::Begin("Tree");
+	renderECSTree();
+	ImGui::End();
+
+	ImGui::Begin("Inspector");
 	renderPropertiesFrame();
 	renderLayerFrame();
 	renderResourceFrame();
 	renderEnvironmentFrame();
 	renderDebugFrame();
-
 	ImGui::End();
 }
 

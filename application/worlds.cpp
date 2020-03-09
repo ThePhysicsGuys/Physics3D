@@ -31,16 +31,15 @@ void PlayerWorld::applyExternalForces() {
 	if (selectedPart != nullptr && !selectedPart->isFixed()) {
 		MotorizedPhysical* selectedPhysical = selectedPart->parent->mainPhysical;
 		GlobalCFrame cframe = selectedPhysical->getCFrame();
+
 		// Magnet force
 		Position absoluteSelectedPoint = selectedPart->getCFrame().localToGlobal(localSelectedPoint);
-		Vec3 delta = magnetPoint - absoluteSelectedPoint;
-
 		Position centerOfmass = selectedPhysical->getCenterOfMass();
-
+		Vec3 delta = magnetPoint - absoluteSelectedPoint;
 		Vec3 relativeSelectedPointSpeed = selectedPhysical->getMotion().getVelocityOfPoint(absoluteSelectedPoint - centerOfmass);
 		Vec3 force = selectedPhysical->totalMass * (delta * PICKER_STRENGTH - relativeSelectedPointSpeed * PICKER_SPEED_STRENGTH);
-		selectedPhysical->applyForceToPhysical(absoluteSelectedPoint - centerOfmass, force);
 		
+		selectedPhysical->applyForceToPhysical(absoluteSelectedPoint - centerOfmass, force);
 		selectedPhysical->motionOfCenterOfMass.rotation.angularVelocity *= 0.8;
 	}
 
@@ -52,23 +51,24 @@ void PlayerWorld::applyExternalForces() {
 		Vec3f playerZ = screen.camera.cframe.rotation * Vec3(0, 0, 1);
 		Debug::logVector(screen.camera.cframe.position - playerZ, playerX, Debug::INFO_VEC);
 
-		Vec3 UP(0, 1, 0);
-		Vec3 forward = normalize(playerZ % UP % UP);
-		Vec3 right = -normalize(playerX % UP % UP);
+		Vec3 up(0, 1, 0);
+		Vec3 forward = normalize(playerZ % up % up);
+		Vec3 right = -normalize(playerX % up % up);
 
 		Vec3 total(0, 0, 0);
-		if (handler->getKey(KeyboardOptions::Move::forward)) total += forward;
-		if (handler->getKey(KeyboardOptions::Move::backward)) total -= forward;
-		if (handler->getKey(KeyboardOptions::Move::right)) total += right;
-		if (handler->getKey(KeyboardOptions::Move::left)) total -= right;
+		if (handler->getKey(KeyboardOptions::Move::forward)) 
+			total += forward;
+		if (handler->getKey(KeyboardOptions::Move::backward)) 
+			total -= forward;
+		if (handler->getKey(KeyboardOptions::Move::right)) 
+			total += right;
+		if (handler->getKey(KeyboardOptions::Move::left)) 
+			total -= right;
 
 		Vec3 runVector = (lengthSquared(total) >= 0.00005) ? normalize(total) * RUN_SPEED : Vec3(0, 0, 0);
-
 		Vec3 desiredSpeed = runVector;
 		Vec3 actualSpeed = player->parent->getMotion().translation.velocity;
-
 		Vec3 speedToGain = desiredSpeed - actualSpeed;
-
 		speedToGain.y = 0;
 
 		player->parent->mainPhysical->applyForceAtCenterOfMass(speedToGain * player->getMass() * AIR_RUN_SPEED_FACTOR);

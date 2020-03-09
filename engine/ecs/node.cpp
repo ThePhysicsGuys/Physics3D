@@ -19,10 +19,8 @@ Node* Node::getParent() {
 
 void Node::setParent(Node* parent) {
 	if (parent == nullptr) {
-		if (getParent() != nullptr) {
+		if (getParent() != nullptr) 
 			getParent()->removeChild(this);
-			this->parent = nullptr;
-		}
 	} else {
 		parent->addChild(this);
 	}
@@ -33,7 +31,7 @@ std::string Node::getName() {
 }
 
 void Node::setName(const std::string& name) {
-	// todo update tree maybe?
+	// todo update tree
 	this->name = name;
 }
 
@@ -50,7 +48,7 @@ void Node::addChild(Node* child) {
 	if (getParent() == child)
 		return;
 
-	if (containsChild(child))
+	if (containsDeepChild(child))
 		return;
 
 	children.push_back(child);
@@ -62,18 +60,27 @@ void Node::removeChild(Node* child) {
 			// todo update internal parent
 			// todo update constraints
 			children.erase(iterator);
-			child->setParent(nullptr);
+			child->parent = nullptr;
 			return;
 		}
 	}
 }
 
-bool Node::containsChild(Node* query) {
+bool Node::containsDeepChild(Node* query) {
 	for (Node* child : children) {
 		if (child == query)
 			return true;
 
-		if (child->containsChild(query))
+		if (child->containsDeepChild(query))
+			return true;
+	}
+
+	return false;
+}
+
+bool Node::containsChild(Node* query) {
+	for (Node* child : children) {
+		if (child == query)
 			return true;
 	}
 

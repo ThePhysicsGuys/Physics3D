@@ -30,6 +30,8 @@ protected:
 	static Component* defaultComponent;
 
 private:
+	friend Entity;
+
 	/*
 		The parent entity of this Component
 	*/

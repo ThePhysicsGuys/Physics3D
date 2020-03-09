@@ -97,13 +97,6 @@ void ModelLayer::onInit() {
 	using namespace Graphics;
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
-	Attenuation attenuation = { 0, 0, 0.5 };
-	screen->entities.push_back(new Engine::Entity("Light", { new Light(Vec3f(10, 5, -10), Color3(1, 0.84f, 0.69f), 6, attenuation) }));
-	screen->entities.push_back(new Engine::Entity("Light", { new Light(Vec3f(10, 5, 10), Color3(1, 0.84f, 0.69f), 6, attenuation) }));
-	screen->entities.push_back(new Engine::Entity("Light", { new Light(Vec3f(-10, 5, -10), Color3(1, 0.84f, 0.69f), 6, attenuation) }));
-	screen->entities.push_back(new Engine::Entity("Light", { new Light(Vec3f(-10, 5, 10), Color3(1, 0.84f, 0.69f), 6, attenuation) }));
-	screen->entities.push_back(new Engine::Entity("Light", { new Light(Vec3f(0, 5, 0), Color3(1, 0.90f, 0.75f), 10, attenuation) }));
-
 	BufferLayout layout = BufferLayout({
 		BufferElement("pos", BufferDataType::FLOAT3),
 		BufferElement("col", BufferDataType::FLOAT4)
@@ -115,15 +108,13 @@ void ModelLayer::onInit() {
 void ModelLayer::onUpdate() {
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
-	std::vector<Light*> lights;
-	for (Engine::Entity* entity : screen->entities) {
-		Light* light = entity->getComponent<Light>();
-
-		if (light == nullptr)
-			continue;
-
-		lights.push_back(light);
-	}
+	std::vector<Light*> lights;	
+	Attenuation attenuation = { 0, 0, 0.5 };
+	lights.push_back(new Light(Vec3f(10, 5, -10), Color3(1, 0.84f, 0.69f), 6, attenuation));
+	lights.push_back(new Light(Vec3f(10, 5, 10), Color3(1, 0.84f, 0.69f), 6, attenuation));
+	lights.push_back(new Light(Vec3f(-10, 5, -10), Color3(1, 0.84f, 0.69f), 6, attenuation));
+	lights.push_back(new Light(Vec3f(-10, 5, 10), Color3(1, 0.84f, 0.69f), 6, attenuation));
+	lights.push_back(new Light(Vec3f(0, 5, 0), Color3(1, 0.90f, 0.75f), 10, attenuation));
 
 	ApplicationShaders::basicShader.updateLight(lights);
 }

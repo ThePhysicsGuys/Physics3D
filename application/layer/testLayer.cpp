@@ -18,10 +18,13 @@
 #include <sstream>
 #include "shader/shaders.h"
 #include "../graphics/renderer.h"
-
+#include "application.h"
 #include "../graphics/buffers/vertexArray.h"
 #include "../graphics/buffers/vertexBuffer.h"
 #include "../graphics/buffers/bufferLayout.h"
+#include "../engine/ecs/tree.h"
+#include "../engine/ecs/entity.h"
+#include "worlds.h"
 
 namespace Application {
 
@@ -161,6 +164,20 @@ void TestLayer::onInit() {
 	)";
 
 	shader = createShader(vertexShader, fragmentShader);
+
+	Screen* screen = static_cast<Screen*>(this->ptr);
+	Engine::Entity* e1 = new Engine::Entity("Entity 1");
+
+	Engine::Entity* e11 = new Engine::Entity("Entity 1-1");
+	Engine::Entity* e12 = new Engine::Entity("Entity 1-2");
+	
+	Engine::Entity* e111 = new Engine::Entity("Entity 1-1-1");
+
+	Engine::ECSTree* tree = screen->world->ecstree;
+	tree->addNode(tree->getRoot(), e1);
+	tree->addNode(e1, e11);
+	tree->addNode(e1, e12);
+	tree->addNode(e11, e111);
 }
 
 void TestLayer::onUpdate() {

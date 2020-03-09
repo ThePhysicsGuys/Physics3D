@@ -13,7 +13,7 @@ Entity::Entity(const std::string& name) : Node(name) {
 
 Entity::Entity(const std::string& name, std::initializer_list<Component*> components) : Entity(name) {
 	for (Component* component : components)
-		this->components.insert(std::pair<ComponentType, Component*>(component->getType(), component));
+		this->components.insert({ component->getType(), component });
 }
 
 #pragma endregion
@@ -27,9 +27,10 @@ void Entity::addComponent(Component* component) {
 	component->setEntity(this);
 	
 	if (containsComponentOfType(component)) {
-		if (component->isUnique()) {
+		if (component->isUnique()) 
 			overwriteComponent(component);
-		}
+		else
+			components.insert({ component->getType(), component });
 	} else {
 		components.insert({ component->getType(), component });
 
@@ -39,22 +40,29 @@ void Entity::addComponent(Component* component) {
 }
 
 void Entity::removeComponent(Component* component) {
+	if (component == nullptr)
+		return;
+	
 	auto result = components.equal_range(component->getType());
 
 	for (auto iterator = result.first; iterator != result.second; ++iterator) {
 		if (iterator->second == component) {
 			components.erase(iterator);
-			component->setEntity(nullptr);
+			component->entity = nullptr;
 			break;
 		}
 	}
 
-	if (!containsComponentOfType(component))
-		if (tree != nullptr)
+	if (tree != nullptr) {
+		if (!containsComponentOfType(component))
 			tree->onRemoveComponentFromEntity(this, component);
+	}
 }
 
 bool Entity::containsComponent(Component* component) {
+	if (component == nullptr)
+		return false;
+
 	auto result = components.equal_range(component->getType());
 
 	for (auto iterator = result.first; iterator != result.second; ++iterator) {
@@ -65,11 +73,11 @@ bool Entity::containsComponent(Component* component) {
 	return false;
 }
 
-bool Entity::containsComponentOfType(Component* query) {
-	if (query == nullptr)
+bool Entity::containsComponentOfType(Component* component) {
+	if (component == nullptr)
 		return false;
 
-	return containsComponentOfType(query->getType());
+	return containsComponentOfType(component->getType());
 }
 
 bool Entity::containsComponentOfType(const ComponentType& type) {
@@ -77,19 +85,22 @@ bool Entity::containsComponentOfType(const ComponentType& type) {
 }
 
 void Entity::overwriteComponent(Component* query) {
+	if (query == nullptr)
+		return;
 	auto iterator = components.lower_bound(query->getType());
 	
 	if (iterator != components.end()) {
 		Component* component = iterator->second;
+		// todo remove component from memory?
 		components.erase(iterator);
-		component->setEntity(nullptr);
+		component->entity = nullptr;
 		addComponent(query);
 	}
 }
 
 #pragma endregion
 
-#pragma region children
+#pragma region virtual functions
 
 void Entity::addChild(Node* child) {
 	Node::addChild(child);
@@ -99,6 +110,16 @@ void Entity::addChild(Node* child) {
 void Entity::removeChild(Node* child) {
 	Node::removeChild(child);
 	// todo remove constraint
+}
+
+void Entity::setTree(ECSTree* tree) {
+	Node::setTree(tree);
+
+	if (this->tree != nullptr) {
+		for (auto iterator : components) {
+			tree->onAddComponentToEntity(this, iterator.second);
+		}
+	}
 }
 
 #pragma endregion

@@ -8,7 +8,6 @@
 #include "../engine/visualData.h"
 #include "../engine/event/event.h"
 #include "../engine/layer/layerStack.h"
-#include "../engine/ecs/entity.h"
 #include "camera.h"
 
 
@@ -33,7 +32,6 @@ private:
 	std::chrono::time_point<std::chrono::steady_clock> lastUpdate = std::chrono::steady_clock::now();
 
 public:
-	static std::vector<Engine::Entity*> entities;
 	PlayerWorld* world;
 	Vec2i dimension;
 
@@ -45,11 +43,10 @@ public:
 	Graphics::FrameBuffer* screenFrameBuffer = nullptr;
 	Graphics::Quad* quad = nullptr;
 
-	// Picker
 	Vec3f ray;
 	ExtendedPart* intersectedPart = nullptr;
-	Position intersectedPoint;
 	ExtendedPart* selectedPart = nullptr;
+	Position intersectedPoint;
 	Position selectedPoint;
 
 	Screen();

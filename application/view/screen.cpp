@@ -43,8 +43,6 @@
 
 namespace Application {
 
-std::vector<Engine::Entity*> Screen::entities;
-
 bool initGLFW() {
 	// Set window hints
 	//Renderer::setGLFWMultisampleSamples(4);
@@ -196,6 +194,8 @@ void Screen::onInit() {
 	ImGui::StyleColorsDark();
 	ImGui_ImplGlfw_InitForOpenGL(Graphics::Renderer::getGLFWContext(), true);
 	ImGui_ImplOpenGL3_Init("#version 130");
+
+	BigFrame::onInit();
 }
 
 void Screen::onUpdate() {

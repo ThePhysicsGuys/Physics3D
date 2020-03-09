@@ -62,6 +62,7 @@ Entity* ECSTree::addEntity(Node* root, const std::string& name) {
 
 	Entity* entity = new Entity(name);
 	entity->setTree(this);
+
 	root->addChild(entity);
 }
 
@@ -70,6 +71,7 @@ void ECSTree::addNode(Node* root, Node* node) {
 		return;
 
 	node->setTree(this);
+
 	root->addChild(node);
 }
 

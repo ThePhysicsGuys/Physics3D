@@ -67,7 +67,7 @@ public:
 	/*
 		Sets the tree of this node to the given value
 	*/
-	void setTree(ECSTree* tree);
+	virtual void setTree(ECSTree* tree);
 
 	/*
 		Adds the given child to the children
@@ -80,9 +80,14 @@ public:
 	virtual void removeChild(Node* child);
 
 	/*
-		Returns whether the children recursively contain the given node using depth first search
+		Returns whether the children of this node contain the given node
 	*/
 	bool containsChild(Node* child);
+
+	/*
+		Returns whether the children of this node recursively contain the given node using depth first search
+	*/
+	bool containsDeepChild(Node* child);
 
 };
 

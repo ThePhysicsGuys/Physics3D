@@ -101,6 +101,11 @@ public:
 		Removes the given child from the children
 	*/
 	virtual void removeChild(Node* child) override;
+
+	/*
+		Sets the tree of this node to the given value
+	*/
+	virtual void setTree(ECSTree* tree) override;
 #pragma endregion
 };
 
