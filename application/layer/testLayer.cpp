@@ -25,6 +25,7 @@
 #include "../engine/ecs/tree.h"
 #include "../engine/ecs/entity.h"
 #include "worlds.h"
+#include "../graphics/path/path.h"
 
 namespace Application {
 
@@ -73,7 +74,7 @@ static GLuint createShader	(const std::string& vertexShader, const std::string& 
 }
 
 void TestLayer::onInit() {
-	frameBuffer = new Graphics::FrameBuffer(300, 300);
+	/*frameBuffer = new Graphics::FrameBuffer(300, 300);
 
 	float size = 10.0;
 	for (float y = -size; y < size; y += 1.0) {
@@ -157,27 +158,13 @@ void TestLayer::onInit() {
 		#version 330 core
 		in vec3 fColor;
 		out vec4 outColor;
-
+		
 		void main() {
 			outColor = vec4(fColor, 1);
 		}
 	)";
 
-	shader = createShader(vertexShader, fragmentShader);
-
-	Screen* screen = static_cast<Screen*>(this->ptr);
-	Engine::Entity* e1 = new Engine::Entity("Entity 1");
-
-	Engine::Entity* e11 = new Engine::Entity("Entity 1-1");
-	Engine::Entity* e12 = new Engine::Entity("Entity 1-2");
-	
-	Engine::Entity* e111 = new Engine::Entity("Entity 1-1-1");
-
-	Engine::ECSTree* tree = screen->world->ecstree;
-	tree->addNode(tree->getRoot(), e1);
-	tree->addNode(e1, e11);
-	tree->addNode(e1, e12);
-	tree->addNode(e11, e111);
+	shader = createShader(vertexShader, fragmentShader);*/
 }
 
 void TestLayer::onUpdate() {
@@ -189,34 +176,28 @@ void TestLayer::onEvent(Event& event) {
 }
 
 void TestLayer::onRender() {
-	using namespace Graphics;
-	using namespace Graphics::Renderer;
+	/*using namespace Graphics;
+	using namespace Graphics::Renderer;*/
 	
-	beginScene();
-
+	/*beginScene();
+	
 	frameBuffer->bind();
-
-	glUseProgram(shader);
+	bindShader(shader);
+	
 	glBindVertexArray(quadVAO);
-
-	clearColor();
+	
+	//clearColor();
 	clearDepth();
 	enableCulling();
 	enableBlending();
-	enableDepthMask();
 	enableDepthTest();
-	standardBlendFunction();
-	glClearColor(0.1f, 0.1f, 0.7f, 1.0f);
 
 	glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, translations.size());
-
-	frameBuffer->unbind();
-
-	endScene();
 	
-	ImGui::Begin("Test");
-	ImGui::Image((void*) (intptr_t) frameBuffer->texture->getID(), ImVec2(300, 300));
-	ImGui::End();
+	frameBuffer->unbind();
+	
+	endScene();*/
+	
 }
 
 void TestLayer::onClose() {

@@ -97,11 +97,12 @@ Texture::Texture(int width, int height, const void* buffer, int target, int form
 	channels = getChannelsFromFormat(format);
 
 	bind();
-	create(target, 0, internalFormat, width, height, 0, format, type, buffer);
 	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	create(target, 0, internalFormat, width, height, 0, format, type, buffer);
+	glGenerateMipmap(GL_TEXTURE_2D);
 	unbind();
 }
 

@@ -5,6 +5,7 @@
 #include "GL\glew.h"
 #include "GLFW\glfw3.h"
 
+#include "renderer.h"
 #include "renderBuffer.h"
 #include "texture.h"
 
@@ -22,6 +23,7 @@ FrameBuffer::FrameBuffer() {
 FrameBuffer::FrameBuffer(unsigned int width, unsigned int height) : FrameBuffer() {
 	texture = new Texture(width, height);
 	renderBuffer = new RenderBuffer(width, height);
+
 	attach(texture);
 	attach(renderBuffer);
 
@@ -68,11 +70,11 @@ FrameBuffer& FrameBuffer::operator=(FrameBuffer&& other) {
 }
 
 void FrameBuffer::bind() {
-	glBindFramebuffer(GL_FRAMEBUFFER, id);
+	Renderer::bindFramebuffer(id);
 }
 
 void FrameBuffer::unbind() {
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	Renderer::bindFramebuffer(0);
 }
 
 void FrameBuffer::resize(Vec2i dimension) {
@@ -171,11 +173,11 @@ void HDRFrameBuffer::resize(Vec2i dimension) {
 };
 
 void HDRFrameBuffer::bind() {
-	glBindFramebuffer(GL_FRAMEBUFFER, id);
+	Renderer::bindFramebuffer(id);
 };
 
 void HDRFrameBuffer::unbind() {
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	Renderer::bindFramebuffer(0);
 };
 
 void HDRFrameBuffer::close() {
@@ -246,11 +248,11 @@ void MultisampleFrameBuffer::resize(Vec2i dimension) {
 };
 
 void MultisampleFrameBuffer::bind() {
-	glBindFramebuffer(GL_FRAMEBUFFER, id);
+	Renderer::bindFramebuffer(id);
 };
 
 void MultisampleFrameBuffer::unbind() {
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	Renderer::bindFramebuffer(0);
 };
 
 void MultisampleFrameBuffer::close() {
@@ -272,11 +274,11 @@ void MultisampleFrameBuffer::close() {
 DepthFrameBuffer::DepthFrameBuffer(unsigned int width, unsigned int height) {
 	texture = new DepthTexture(width, height);
 	glGenFramebuffers(1, &id);
-	glBindFramebuffer(GL_FRAMEBUFFER, id);
+	Renderer::bindFramebuffer(id);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture->getID(), 0);
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	Renderer::bindFramebuffer(0);
 }
 
 DepthFrameBuffer::~DepthFrameBuffer() {
@@ -302,12 +304,11 @@ DepthFrameBuffer& DepthFrameBuffer::operator=(DepthFrameBuffer&& other) {
 }
 
 void DepthFrameBuffer::bind() {
-	glViewport(0, 0, width, height);
-	glBindFramebuffer(GL_FRAMEBUFFER, id);
+	Renderer::bindFramebuffer(id);
 }
 
 void DepthFrameBuffer::unbind() {
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	Renderer::bindFramebuffer(0);
 }
 
 void DepthFrameBuffer::close() {

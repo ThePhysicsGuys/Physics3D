@@ -54,11 +54,19 @@ extern const unsigned char* getVersion();
 extern const unsigned char* getRenderer();
 extern const unsigned char* getShaderVersion();
 
-extern void bindTexture2D(int id);
+extern void bindShader(GLID id);
+extern void bindTexture2D(GLID id);
+extern void bindFramebuffer(GLID id);
+extern void bindDrawbuffer(GLID id);
+extern void bindReadbuffer(GLID id);
+extern void bindRenderbuffer(GLID id);
+
 extern void polygonMode(int face, int mode);
 extern void scissor(int x, int y, int width, int height);
 extern void drawElements(unsigned int mode, size_t count, unsigned int type, const void* offset);
 extern void drawArrays(unsigned int mode, int first, size_t count);
+
+extern void defaultSettings();
 
 extern void beginScene();
 extern void endScene();

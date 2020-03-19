@@ -93,9 +93,6 @@ void EditTools::onRender(Screen& screen) {
 	GlobalCFrame selFrame = screen.selectedPart->getCFrame();
 	Mat4 modelMatrix(selFrame.getRotation().asRotationMatrix(), selFrame.getPosition() - Position(0,0,0), Vec3(0,0,0), 1);
 
-	Renderer::clearDepth();
-	Renderer::enableDepthTest();
-
 	// Center, only rendered if editMode != EditMode::ROTATE
 	if (center) {
 		ApplicationShaders::basicShader.updateModel(modelMatrix);
@@ -135,8 +132,6 @@ void EditTools::onRender(Screen& screen) {
 	ApplicationShaders::basicShader.updateMaterial(Material(COLOR::B));
 	ApplicationShaders::basicShader.updateModel(modelMatrix * Mat4(Matrix<double, 3, 3>(transformations[2]), 1.0f));
 	shaft->render();
-
-	Renderer::disableDepthTest();
 }
 
 void EditTools::onClose() {

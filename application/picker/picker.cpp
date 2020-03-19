@@ -47,8 +47,6 @@ void onEvent(::Event& event) {
 
 // Render
 void onRender(Screen& screen) {
-	ApplicationShaders::maskShader.updateProjection(screen.camera.viewMatrix, screen.camera.projectionMatrix);
-
 	if (screen.selectedPart) {
 		editTools.onRender(screen);
 	}

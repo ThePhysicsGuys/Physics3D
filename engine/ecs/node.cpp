@@ -50,7 +50,8 @@ void Node::addChild(Node* child) {
 
 	if (containsDeepChild(child))
 		return;
-
+	// todo check for previous parent
+	child->parent = this;
 	children.push_back(child);
 }
 

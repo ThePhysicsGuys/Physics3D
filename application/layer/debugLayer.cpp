@@ -117,14 +117,16 @@ void DebugLayer::onEvent(::Event& event) {
 }
 
 void DebugLayer::onRender() {
-	Screen* screen = static_cast<Screen*>(this->ptr);
-
-	Graphics::Renderer::beginScene();
-
-	Graphics::graphicsMeasure.mark(Graphics::GraphicsProcess::VECTORS);
-
+	using namespace Graphics;
+	using namespace Graphics::Renderer;
 	using namespace Graphics::Debug;
 	using namespace Graphics::AppDebug;
+	Screen* screen = static_cast<Screen*>(this->ptr);
+
+	beginScene();
+
+	graphicsMeasure.mark(GraphicsProcess::VECTORS);
+
 
 	// Initialize vector log buffer
 	AddableBuffer<ColoredVector>& vecLog = getVectorBuffer();
@@ -200,33 +202,30 @@ void DebugLayer::onRender() {
 		}
 		});
 
-	Graphics::Renderer::disableDepthTest();
+
+	disableDepthTest();
 
 	// Update debug meshes
-	Graphics::graphicsMeasure.mark(Graphics::GraphicsProcess::VECTORS);
+	graphicsMeasure.mark(GraphicsProcess::VECTORS);
 	updateVectorMesh(vectorMesh, vecLog.data, vecLog.size);
 	updatePointMesh(pointMesh, pointLog.data, pointLog.size);
 
-
 	// Render vector mesh
-	Graphics::graphicsMeasure.mark(Graphics::GraphicsProcess::VECTORS);
+	graphicsMeasure.mark(GraphicsProcess::VECTORS);
 	ApplicationShaders::vectorShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
 	vectorMesh->render();
 
-
 	// Render point mesh
-	Graphics::graphicsMeasure.mark(Graphics::GraphicsProcess::VECTORS);
+	graphicsMeasure.mark(GraphicsProcess::VECTORS);
 	ApplicationShaders::pointShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
 	pointMesh->render();
 
-	Graphics::Renderer::enableDepthTest();
-
 	// Render origin mesh
-	Graphics::graphicsMeasure.mark(Graphics::GraphicsProcess::ORIGIN);
+	graphicsMeasure.mark(GraphicsProcess::ORIGIN);
 	ApplicationShaders::originShader.updateProjection(screen->camera.viewMatrix, screen->camera.getViewRotation(), screen->camera.projectionMatrix, screen->camera.orthoMatrix, screen->camera.cframe.position);
 	originMesh->render();
 
-	Graphics::Renderer::endScene();
+	endScene();
 }
 
 void DebugLayer::onClose() {

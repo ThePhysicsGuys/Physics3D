@@ -26,8 +26,6 @@ extern WindowInfo windowInfo;
 extern Component* intersectedComponent;
 extern Component* selectedComponent;
 extern Vec2 intersectedPoint;
-extern Graphics::FrameBuffer* guiFrameBuffer;
-extern Graphics::FrameBuffer* blurFrameBuffer;
 
 // Default
 extern double padding;
@@ -110,7 +108,7 @@ void intersect(const Vec2& mouse);
 bool intersectsSquare(const Vec2& point, const Vec2& topleft, const Vec2& dimension);
 
 // State function
-void onInit(const WindowInfo& info, Graphics::FrameBuffer* screenFrameBuffer);
+void onInit(const WindowInfo& info, FrameBuffer* screenFrameBuffer);
 void onUpdate(Mat4f orthoMatrix);
 void onRender(Mat4f orthoMatrix);
 void onClose();

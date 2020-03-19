@@ -43,17 +43,22 @@ public:
 	/*
 		Adds an empty group with the given name to the given root
 	*/
-	Node* addGroup(Node* root, const std::string& name);
+	Node* createGroup(Node* root, const std::string& name = "Empty folder");
 
 	/*
 		Adds an empty entity with the given name to the given root
 	*/
-	Entity* addEntity(Node* root, const std::string& name);
+	Entity* createEntity(Node* root, const std::string& name = "Empty entity");
 
 	/*
 		Adds the given node to the given root
 	*/
 	void addNode(Node* root, Node* node);
+
+	/*
+		Removes the given node from the tree
+	*/
+	void removeNode(Node* node, bool deleteChildren = true);
 
 	/*
 		Returns all entities with a component of the given type

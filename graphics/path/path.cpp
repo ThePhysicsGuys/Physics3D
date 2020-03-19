@@ -23,16 +23,16 @@ namespace Path {
 	}
 
 	// Adds the vertices to the batch with the necessary indices, this does not reserve space on the batch. 
-	//? Expects vertices in clockwise order
-	void pushQuad(const Vec2f& a, const Vec2f& b, const Vec2f& c, const Vec2f& d, const Color& colorA = Color(1), const Color& colorB = Color(1), const Color& colorC = Color(1), const Color& colorD = Color(1), const Vec2f& uvA = Vec2f(1), const Vec2f& uvB = Vec2f(1), const Vec2f& uvC = Vec2f(1), const Vec2f& uvD = Vec2f(1)) {
+	//? Expects vertices in counter-clockwise order
+	void pushQuad(const Vec2f& a, const Vec2f& b, const Vec2f& c, const Vec2f& d, const Color& colorA = Color(1), const Color& colorB = Color(1), const Color& colorC = Color(1), const Color& colorD = Color(1), const Vec2f& uvA = Vec2f(0, 0), const Vec2f& uvB = Vec2f(1, 0), const Vec2f& uvC = Vec2f(1, 1), const Vec2f& uvD = Vec2f(0, 1)) {
 		Path::batch->pushVertices({ { a, uvA, colorA }, { b, uvB, colorB }, { c, uvC, colorC }, { d, uvD, colorD } });
 		Path::batch->pushIndices({ 0, 1, 2, 2, 3, 0 });
 		Path::batch->endIndex();
 	}
 
 	// Adds the vertices to the batch with the necessary indices, this does not reserve space on the batch
-	//? Expects vertices in clockwise order
-	void pushTriangle(const Vec2f& a, const Vec2f& b, const Vec2f& c, const Color& colorA = Color(1), const Color& colorB = Color(1), const Color& colorC = Color(1), const Vec2f& uvA = Vec2f(1), const Vec2f& uvB = Vec2f(1), const Vec2f& uvC = Vec2f(1)) {
+	//? Expects vertices in counter-clockwise order
+	void pushTriangle(const Vec2f& a, const Vec2f& b, const Vec2f& c, const Color& colorA = Color(1), const Color& colorB = Color(1), const Color& colorC = Color(1), const Vec2f& uvA = Vec2f(0, 0), const Vec2f& uvB = Vec2f(1, 0), const Vec2f& uvC = Vec2f(0.5, 1)) {
 		Path::batch->pushVertices({ { a, uvA, colorA }, { b, uvB, colorB }, { c, uvC, colorC } });
 		Path::batch->pushIndices({ 0, 1, 2 });
 		Path::batch->endIndex();
@@ -181,23 +181,23 @@ namespace Path {
 			size_t indexCount = 6;
 			Path::batch->reserve(vertexCount, indexCount);
 
-			pushQuad(pos, pos + Vec2f(dim.x, 0), pos + Vec2f(dim.x, -dim.y), pos + Vec2f(0, -dim.y), color, color, color, color);
+			pushQuad(pos, pos + Vec2f(dim.x, 0), pos + Vec2f(dim.x, dim.y), pos + Vec2f(0, dim.y), color, color, color, color);
 		//}
 		// TODO add rounding
 	}
 
-	void rectUV(unsigned int id, const Vec2f& pos, const Vec2f& dim, const Vec2f& uvMin, const Vec2f& uvMax, const Color& color) {
+	void rectUV(GLID id, const Vec2f& pos, const Vec2f& dim, const Vec2f& uvMin, const Vec2f& uvMax, const Color& color) {
 		size_t vertexCount = 4;
 		size_t indexCount = 6;
 
 		Vec2f a = pos;
 		Vec2f b = Vec2f(pos.x + dim.x, pos.y);
-		Vec2f c = Vec2f(pos.x + dim.x, pos.y - dim.y);
-		Vec2f d = Vec2f(pos.x, pos.y - dim.y);
-		Vec2f uvA = Vec2f(uvMin.x, uvMax.y);
-		Vec2f uvB = uvMax;
-		Vec2f uvC = Vec2f(uvMax.x, uvMin.y);
-		Vec2f uvD = uvMin;
+		Vec2f c = Vec2f(pos.x + dim.x, pos.y + dim.y);
+		Vec2f d = Vec2f(pos.x, pos.y + dim.y);
+		Vec2f uvA = uvMin;
+		Vec2f uvB = Vec2f(uvMax.x, uvMin.y);
+		Vec2f uvC = uvMax;
+		Vec2f uvD = Vec2f(uvMin.x, uvMax.y);
 
 		Path::batch->pushCommand(0);
 		Path::batch->reserve(vertexCount, indexCount);
@@ -205,7 +205,7 @@ namespace Path {
 		Path::batch->pushCommand(id);
 	}
 
-	void rectUVRange(unsigned int id, const Vec2f& pos, const Vec2f& dim, const Vec2f& xRange, const Vec2f& yRange, const Color& color) {
+	void rectUVRange(GLID id, const Vec2f& pos, const Vec2f& dim, const Vec2f& xRange, const Vec2f& yRange, const Color& color) {
 		size_t vertexCount = 4;
 		size_t indexCount = 6;
 		
@@ -251,12 +251,12 @@ namespace Path {
 		pushQuad(a, b, c, d, color, color, color, color);
 	}
 
-	void quadUV(unsigned int id, const Vec2f& a, const Vec2f& b, const Vec2f& c, const Vec2f& d, const Vec2f& uvA, const Vec2f& uvB, const Vec2f& uvC, const Vec2f& uvD) {
+	void quadUV(GLID id, const Vec2f& a, const Vec2f& b, const Vec2f& c, const Vec2f& d, const Vec2f& uvA, const Vec2f& uvB, const Vec2f& uvC, const Vec2f& uvD) {
 		size_t vertexCount = 4;
 		size_t indexCount = 6;
-		Path::batch->pushCommand(0);
+		Path::batch->pushCommand(0); 
 		Path::batch->reserve(vertexCount, indexCount);
-		pushQuad(a, b, c, d, Vec4(1), Vec4(1), Vec4(1), Vec4(1), uvA, uvB, uvC, uvD);
+		pushQuad(a, b, c, d, Color(1), Color(1), Color(1), Color(1), uvA, uvB, uvC, uvD);
 		Path::batch->pushCommand(id);
 	}
 

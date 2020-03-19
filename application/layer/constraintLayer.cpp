@@ -137,8 +137,13 @@ static void recurseRenderHardConstraints(const ConstraintLayer* cl, const Physic
 }
 
 void ConstraintLayer::onRender() {
+	using namespace Graphics;
+	using namespace Graphics::Renderer;
 	Screen* screen = static_cast<Screen*>(this->ptr);
 	PlayerWorld* world = screen->world;
+
+	beginScene();
+
 	ApplicationShaders::basicShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
 	ApplicationShaders::maskShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix);
 
@@ -151,6 +156,8 @@ void ConstraintLayer::onRender() {
 			renderBallConstraint(this, constraint.a->getCFrame(), constraint.b->getCFrame(), CFrame(constraint.attachA), CFrame(constraint.attachB), 0.13f, 0.15f);
 		}
 	}
+
+	endScene();
 }
 void ConstraintLayer::onClose() {
 

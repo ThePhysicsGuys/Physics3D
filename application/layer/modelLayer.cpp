@@ -190,9 +190,10 @@ void ModelLayer::onRender2() {
 
 void ModelLayer::onRender() {
 	using namespace Graphics;
+	using namespace Graphics::Renderer;
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
-	Renderer::beginScene();
+	beginScene();
 
 	graphicsMeasure.mark(GraphicsProcess::UPDATE);
 	ApplicationShaders::basicShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
@@ -238,7 +239,7 @@ void ModelLayer::onRender() {
 		Engine::MeshRegistry::meshes[part->visualData.drawMeshId]->render(part->renderMode);
 	}
 
-	Renderer::endScene();
+	endScene();
 }
 
 void ModelLayer::onClose() {

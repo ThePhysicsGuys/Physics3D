@@ -1,5 +1,5 @@
 #include "core.h"
-
+#include "GL/glew.h"
 #include "skyboxLayer.h"
 
 #include <sstream>
@@ -12,6 +12,7 @@
 #include "../graphics/meshLibrary.h"
 #include "../graphics/debug/visualDebug.h"
 #include "../physics/geometry/boundingBox.h"
+#include "../graphics/buffers/frameBuffer.h"
 
 namespace Application {
 
@@ -28,23 +29,26 @@ void SkyboxLayer::onUpdate() {
 void SkyboxLayer::onEvent(Event& event) {
 
 }
-
 void SkyboxLayer::onRender() {
+	using namespace Graphics;
+	using namespace Graphics::Renderer;
+	graphicsMeasure.mark(GraphicsProcess::SKYBOX);
+
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
-	Graphics::graphicsMeasure.mark(Graphics::GraphicsProcess::SKYBOX);
+	beginScene();
 
-	Graphics::Renderer::beginScene();
+	disableCulling();
+	disableDepthMask();
+	enableBlending();
 
-	Graphics::Renderer::disableDepthMask();
-	Graphics::Renderer::disableCulling();
-	Graphics::Renderer::enableBlending();
 	ApplicationShaders::skyboxShader.updateLightDirection(Vec3());
 	ApplicationShaders::skyboxShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix);
 	skyboxTexture->bind();
-	Graphics::Library::sphere->render();
+	
+	Library::sphere->render();
 
-	Graphics::Renderer::endScene();
+	endScene();
 }
 
 void SkyboxLayer::onClose() {

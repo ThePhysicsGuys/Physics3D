@@ -123,9 +123,9 @@ void BarChart::render() {
 			const WeightValue& dataPoint = data.get(cl, i);
 
 			float height = drawingSize.y * dataPoint.weight / max;
-			Vec2f topLeft = drawingPosition + Vec2f(categoryWidth * i + barWidth * cl, height);
+			Vec2f bottomLeft = drawingPosition + Vec2f(categoryWidth * i + barWidth * cl, 0);
 
-			Path::rectFilled(topLeft, Vec2f(barWidth, height), 0.0f, Color(info.color, 1.0f));
+			Path::rectFilled(bottomLeft, Vec2f(barWidth, height), 0.0f, Color(info.color, 1.0f));
 		}
 	}
 

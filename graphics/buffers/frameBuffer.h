@@ -8,13 +8,15 @@ class Texture;
 class RenderBuffer;
 
 class FrameBuffer : public Bindable {
+private:
+	FrameBuffer();
+
 public:
 	Vec2i dimension;
 
 	Texture* texture = nullptr;
 	RenderBuffer* renderBuffer = nullptr;
 
-	FrameBuffer();
 	FrameBuffer(unsigned int width, unsigned int height);
 	FrameBuffer(Texture* colorAttachment, RenderBuffer* depthStencilAttachment);
 

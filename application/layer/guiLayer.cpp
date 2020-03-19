@@ -60,6 +60,7 @@ void GuiLayer::onInit() {
 
 	// GUI init
 	GUI::onInit({ screen->dimension, screen->camera.aspect }, screen->screenFrameBuffer);
+	GraphicsShaders::guiShader.init(screen->camera.orthoMatrix);
 }
 
 void GuiLayer::onUpdate() {
@@ -85,21 +86,14 @@ void GuiLayer::onEvent(Event& event) {
 
 void GuiLayer::onRender() {
 	using namespace Graphics;
+	using namespace Graphics::Renderer;
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
-	//Renderer::beginScene();
+	beginScene();
 
-	// Render GUI
-	Renderer::disableDepthTest();
-	Renderer::disableCulling();
-	Renderer::enableBlending();
-	//Renderer::
-	graphicsMeasure.mark(GraphicsProcess::OTHER);
-	ApplicationShaders::fontShader.updateProjection(screen->camera.orthoMatrix);
-	GUI::onRender(screen->camera.orthoMatrix);
 	BigFrame::render();
 
-	//Renderer::endScene();
+	endScene();
 }
 
 void GuiLayer::onClose() {

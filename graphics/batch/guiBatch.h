@@ -16,7 +16,7 @@ struct GuiCommand {
 	// Scissor rectangle
 	Vec4f clip;
 	// Optional texture ID
-	int textureID;
+	GLID textureID;
 	// Offset in index buffer
 	size_t indexOffset;
 };
@@ -35,13 +35,13 @@ public:
 				BufferElement("pos", BufferDataType::FLOAT2),
 				BufferElement("uv", BufferDataType::FLOAT2),
 				BufferElement("col", BufferDataType::FLOAT4)
-				}),
+			}),
 			Graphics::Renderer::TRIANGLES
 		)) {
 
 	}
 
-	void pushCommand(int textureID) {
+	void pushCommand(GLID textureID) {
 		size_t count = Batch<GuiVertex>::indexBuffer.size() - currentIndexOffset;
 
 		if (count == 0)
@@ -54,6 +54,8 @@ public:
 	}
 
 	void submit() override {
+		GraphicsShaders::guiShader.bind();
+
 		if (commandBuffer.size() == 0) {
 			pushCommand(0);
 		}
@@ -63,12 +65,12 @@ public:
 		Batch<GuiVertex>::vbo->fill((const void*) Batch<GuiVertex>::vertexBuffer.data(), Batch<GuiVertex>::vertexBuffer.size() * sizeof(GuiVertex), Graphics::Renderer::STREAM_DRAW);
 		Batch<GuiVertex>::ibo->fill((const unsigned int*) Batch<GuiVertex>::indexBuffer.data(), Batch<GuiVertex>::indexBuffer.size(), Graphics::Renderer::STREAM_DRAW);
 
-		int lastID = 0;
+		GLID lastID = 0;
 		int lastCount = 0;
 		size_t lastIndexOffset = 0;
 
 		for (const GuiCommand& command : commandBuffer) {
-			int ID = command.textureID;
+			GLID ID = command.textureID;
 			int count = command.count;
 			size_t indexOffset = command.indexOffset;
 

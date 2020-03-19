@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 
 #include "shader.h"
+#include "renderer.h"
 #include "debug/debug.h"
 
 #include <fstream>
@@ -493,11 +494,11 @@ Shader& Shader::operator=(Shader&& other) {
 #pragma region bindable
 
 void Shader::bind() {
-	glUseProgram(id);
+	Renderer::bindShader(id);
 }
 
 void Shader::unbind() {
-	glUseProgram(0);
+	Renderer::bindShader(0);
 }
 
 void Shader::close() {

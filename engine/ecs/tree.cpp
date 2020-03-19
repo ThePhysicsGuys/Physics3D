@@ -47,16 +47,17 @@ Node* ECSTree::getRoot() {
 	return root;
 }
 
-Node* ECSTree::addGroup(Node* root, const std::string& name) {
+Node* ECSTree::createGroup(Node* root, const std::string& name) {
 	if (root == nullptr)
 		return nullptr;
 
 	Node* group = new Node(name);
 	group->setTree(this);
+
 	root->addChild(group);
 }
 
-Entity* ECSTree::addEntity(Node* root, const std::string& name) {
+Entity* ECSTree::createEntity(Node* root, const std::string& name) {
 	if (root == nullptr)
 		return nullptr;
 
@@ -73,6 +74,21 @@ void ECSTree::addNode(Node* root, Node* node) {
 	node->setTree(this);
 
 	root->addChild(node);
+}
+
+void ECSTree::removeNode(Node* node, bool deleteChildren) {
+	node->setTree(nullptr);
+		
+	if (deleteChildren) {
+		// todo implement
+	} else {
+		for (Node* child : node->getChildren())
+			child->setParent(node->getParent());
+	}
+
+	node->getParent()->removeChild(node);
+
+	// todo remove links in map
 }
 
 std::multimap<std::string, Entity*> ECSTree::getEntitiesWithComponent(const ComponentType& type) {

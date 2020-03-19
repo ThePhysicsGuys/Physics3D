@@ -45,11 +45,11 @@ Resource* BigFrame::selectedResource = nullptr;
 TextureResource* folderIcon;
 TextureResource* objectIcon;
 
-bool MyTreeNode(void* ptr_id, ImGuiTreeNodeFlags flags, const char* label) {
+bool IconTreeNode(void* ptr, ImTextureID texture, ImGuiTreeNodeFlags flags, const char* label) {
 	ImGuiContext& g = *GImGui;
 	ImGuiWindow* window = g.CurrentWindow;
 
-	ImU32 id = window->GetID(ptr_id);
+	ImU32 id = window->GetID(ptr);
 	ImVec2 pos = window->DC.CursorPos;
 	ImRect button(pos, ImVec2(pos.x + ImGui::GetContentRegionAvail().x, pos.y + g.FontSize + g.Style.FramePadding.y * 2));
 	bool opened = ImGui::TreeNodeBehaviorIsOpen(id);
@@ -59,20 +59,20 @@ bool MyTreeNode(void* ptr_id, ImGuiTreeNodeFlags flags, const char* label) {
 	if (ImGui::ButtonBehavior(button, id, &hovered, &held, true))
 		if (!leaf)
 			window->DC.StateStorage->SetInt(id, opened ? 0 : 1);
-	ImU32 color = ImGui::GetColorU32(ImGuiCol_Button);
-	if (held) {
-		color = ImGui::GetColorU32(ImGuiCol_ButtonActive);
-	} else if (hovered) {
-		color = ImGui::GetColorU32(ImGuiCol_ButtonHovered);
-	}
 
+	ImU32 color = ImGui::GetColorU32(ImGuiCol_Button);
+	if (held)
+		color = ImGui::GetColorU32(ImGuiCol_ButtonActive);
+	else if (hovered)
+		color = ImGui::GetColorU32(ImGuiCol_ButtonHovered);
+	
 	if (hovered || held)
 		window->DrawList->AddRectFilled(button.Min, button.Max, color);
 
 	// Icon
 	float arrowWidth = g.FontSize;
 	float buttonSize = g.FontSize + g.Style.FramePadding.y * 2;
-	window->DrawList->AddImage((void*) (intptr_t) (leaf ? objectIcon : folderIcon)->getID(), ImVec2(pos.x + arrowWidth, pos.y), ImVec2(pos.x + buttonSize + arrowWidth, pos.y + buttonSize));
+	window->DrawList->AddImage(texture, ImVec2(pos.x + arrowWidth, pos.y), ImVec2(pos.x + buttonSize + arrowWidth, pos.y + buttonSize));
 
 	// Text
 	ImVec2 textPos = ImVec2(pos.x + buttonSize + arrowWidth + g.Style.ItemInnerSpacing.x, pos.y + g.Style.FramePadding.y);
@@ -89,6 +89,7 @@ bool MyTreeNode(void* ptr_id, ImGuiTreeNodeFlags flags, const char* label) {
 
 	if (opened)
 		ImGui::TreePush(label);
+
 	return opened;
 }
 
@@ -156,6 +157,7 @@ void BigFrame::renderFontInfo(Font* font) {
 			ImGui::Text("Advance: %d", c.advance);
 			ImGui::TreePop();
 		}
+		ImGui::TreePop();
 	}
 }
 
@@ -383,20 +385,106 @@ void BigFrame::renderResourceFrame() {
 }
 
 void BigFrame::renderECSNode(Engine::Node* node) {
-	static ImGuiTreeNodeFlags baseFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
+	if (node == nullptr)
+		return;
+
+	void* id = (void*) node;
 	const auto& children = node->getChildren();
 
-	if (children.size() > 0) {
-		ImGuiTreeNodeFlags flags = baseFlags;
-		bool open = MyTreeNode((void*) (intptr_t) node, flags, node->getName().c_str());
+	bool leaf = children.size() == 0;
+	bool entity = dynamic_cast<Engine::Entity*>(node) != nullptr;
+	ImTextureID texture = (void*) (intptr_t) (entity ? objectIcon : folderIcon)->getID();
+	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth | (leaf ? ImGuiTreeNodeFlags_Leaf : ImGuiTreeNodeFlags_None);
+
+	bool open = IconTreeNode(id, texture, flags, node->getName().c_str());
+		
+	// Render popup
+	if (ImGui::BeginPopupContextItem()) {
+		// Collapse / unfold
+		if (!leaf) {
+			if (open) {
+				if (ImGui::BeginMenu("Collapse")) {
+					if (ImGui::MenuItem("Node")) {
+
+					}
+					if (ImGui::MenuItem("Recursively")) {
+
+					}
+					ImGui::EndMenu();
+				}
+			} else {
+				if (ImGui::MenuItem("Unfold node")) {
+					if (ImGui::MenuItem("Node")) {
+
+					}
+					if (ImGui::MenuItem("Recursively")) {
+
+					}
+					ImGui::EndMenu();
+				}
+			}
+		}
+
+		// Rename
+		if (ImGui::BeginMenu("Rename")) {
+			char* buffer = new char[node->getName().size() + 1];
+			strcpy(buffer, node->getName().c_str());
+			ImGui::Text("Edit name:");
+			ImGui::InputText("##edit", buffer, IM_ARRAYSIZE(buffer));
+			if (ImGui::Button("Apply")) {
+				std::string newName(buffer);
+				node->setName(newName);
+			}
+			ImGui::EndMenu();
+				
+			delete[] buffer;
+		}
+
+		// Add
+		if (ImGui::BeginMenu("Add")) {
+			if (ImGui::MenuItem("Entity")) {
+				node->getTree()->createEntity(node);
+			}
+			if (ImGui::MenuItem("Folder")) {
+				node->getTree()->createGroup(node);
+			}
+			ImGui::EndMenu();
+		}
+
+		// Delete
+		if (ImGui::MenuItem("Delete")) {
+			node->getTree()->removeNode(node, false);
+		}
+
+		ImGui::EndPopup();
+	}
+
+	// Render children
+	if (!leaf) {
 		if (open) {
 			for (Engine::Node* child : children)
 				renderECSNode(child);
 			ImGui::TreePop();
 		}
-	} else {
-		ImGuiTreeNodeFlags flags = baseFlags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
-		MyTreeNode((void*) (intptr_t) node, flags, node->getName().c_str());
+	}
+
+	if (ImGui::BeginDragDropSource()) {
+		ImGui::SetDragDropPayload("ECS_NODE", id, sizeof(id));
+
+		float buttonSize = GImGui->FontSize + GImGui->Style.FramePadding.y * 2;
+
+		ImGui::Image(texture, ImVec2(buttonSize, buttonSize));
+		ImGui::SameLine();
+		ImGui::SetCursorPos(ImVec2(ImGui::GetCursorPosX(), ImGui::GetCursorPosY() + 4));
+		ImGui::Text("Move %s", node->getName().c_str());
+		ImGui::EndDragDropSource();
+	}
+
+	if (ImGui::BeginDragDropTarget()) {
+		if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ECS_NODE")) {
+			Engine::Node* source = static_cast<Engine::Node*>(payload->Data);
+		}
+		ImGui::EndDragDropTarget();
 	}
 }
 
@@ -414,15 +502,12 @@ void BigFrame::renderECSTree() {
 
 void BigFrame::renderPropertiesFrame() {
 	if (ImGui::CollapsingHeader("Properties", ImGuiTreeNodeFlags_DefaultOpen)) {
-		ImGuiInputTextFlags flags = 0;
-
-		
 		ExtendedPart* sp = screen.selectedPart;
 
 		ImGui::SetNextTreeNodeOpen(true);
 		if (ImGui::TreeNode("General")) {
 			ImGui::Text("Name: %s", (sp) ? sp->name.c_str() : "-");
-			ImGui::Text("Mesh ID: %s", (sp) ? str(sp->visualData.drawMeshId) : "-");
+			ImGui::Text("Mesh ID: %s", (sp) ? str(sp->visualData.drawMeshId).c_str() : "-");
 
 			ImGui::TreePop();
 		}
@@ -594,12 +679,12 @@ void BigFrame::renderLayerFrame() {
 }
 
 void BigFrame::render() {
-	ImGui::ShowDemoWindow();
+	//ImGui::ShowDemoWindow();
 
-	ImGui::Begin("Tree");
+	/*ImGui::Begin("Tree");
 	renderECSTree();
-	ImGui::End();
-
+	ImGui::End();*/
+	
 	ImGui::Begin("Inspector");
 	renderPropertiesFrame();
 	renderLayerFrame();

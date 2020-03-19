@@ -103,10 +103,6 @@ Graphics::Font* font = nullptr;
 Color fontColor = COLOR::SILVER;
 double fontSize = 0.0007;
 
-// Blur framebuffer
-Graphics::FrameBuffer* blurFrameBuffer;
-Graphics::FrameBuffer* screenFrameBuffer;
-
 // Batch
 Graphics::GuiBatch* batch;
 
@@ -117,51 +113,35 @@ void onInit(const WindowInfo& info, Graphics::FrameBuffer* screenFrameBuffer) {
 	GUI::windowInfo = info;
 	GUI::batch = new Graphics::GuiBatch();
 	GUI::quad = new Quad();
-	GUI::guiFrameBuffer = new Graphics::FrameBuffer(windowInfo.dimension.x, windowInfo.dimension.y);
-	GUI::blurFrameBuffer = new Graphics::FrameBuffer(windowInfo.dimension.x, windowInfo.dimension.y);
-	GUI::screenFrameBuffer = screenFrameBuffer;
 
 	// font
-	ResourceManager::add<FontResource>("font", "../res/fonts/droid.ttf");
-	GUI::font = ResourceManager::get<FontResource>("font");
+	GUI::font = ResourceManager::add<FontResource>("font", "../res/fonts/droid.ttf");
 
 	// closeButton
-	ResourceManager::add<TextureResource>("closeButtonIdleTexture", "../res/textures/gui/close_idle.png");
-	ResourceManager::add<TextureResource>("closeButtonHoverTexture", "../res/textures/gui/close_hover.png");
-	ResourceManager::add<TextureResource>("closeButtonPressTexture", "../res/textures/gui/close_press.png");
-	GUI::closeButtonIdleTexture = ResourceManager::get<TextureResource>("closeButtonIdleTexture");
-	GUI::closeButtonHoverTexture = ResourceManager::get<TextureResource>("closeButtonHoverTexture");
-	GUI::closeButtonPressTexture = ResourceManager::get<TextureResource>("closeButtonPressTexture");
+	GUI::closeButtonIdleTexture = ResourceManager::add<TextureResource>("closeButtonIdleTexture", "../res/textures/gui/close_idle.png");
+	GUI::closeButtonHoverTexture = ResourceManager::add<TextureResource>("closeButtonHoverTexture", "../res/textures/gui/close_hover.png");
+	GUI::closeButtonPressTexture = ResourceManager::add<TextureResource>("closeButtonPressTexture", "../res/textures/gui/close_press.png");
 
 	// minimizeButton
-	ResourceManager::add<TextureResource>("minimizeButtonIdleTexture", "../res/textures/gui/minimize_idle.png");
-	ResourceManager::add<TextureResource>("minimizeButtonHoverTexture", "../res/textures/gui/minimize_hover.png");
-	ResourceManager::add<TextureResource>("minimizeButtonPressTexture", "../res/textures/gui/minimize_press.png");
-	GUI::minimizeButtonIdleTexture = ResourceManager::get<TextureResource>("minimizeButtonIdleTexture");
-	GUI::minimizeButtonHoverTexture = ResourceManager::get<TextureResource>("minimizeButtonHoverTexture");
-	GUI::minimizeButtonPressTexture = ResourceManager::get<TextureResource>("minimizeButtonPressTexture");
+	GUI::minimizeButtonIdleTexture = ResourceManager::add<TextureResource>("minimizeButtonIdleTexture", "../res/textures/gui/minimize_idle.png");
+	GUI::minimizeButtonHoverTexture = ResourceManager::add<TextureResource>("minimizeButtonHoverTexture", "../res/textures/gui/minimize_hover.png");
+	GUI::minimizeButtonPressTexture = ResourceManager::add<TextureResource>("minimizeButtonPressTexture", "../res/textures/gui/minimize_press.png");
 
 	// Checkbox
-	ResourceManager::add<TextureResource>("checkBoxUncheckedTexture", "../res/textures/gui/unchecked.png");
-	ResourceManager::add<TextureResource>("checkBoxCheckedTexture", "../res/textures/gui/checked.png");
-	GUI::checkBoxUncheckedTexture = ResourceManager::get<TextureResource>("checkBoxUncheckedTexture");
-	GUI::checkBoxCheckedTexture = ResourceManager::get<TextureResource>("checkBoxCheckedTexture");
+	GUI::checkBoxUncheckedTexture = ResourceManager::add<TextureResource>("checkBoxUncheckedTexture", "../res/textures/gui/unchecked.png");
+	GUI::checkBoxCheckedTexture = ResourceManager::add<TextureResource>("checkBoxCheckedTexture", "../res/textures/gui/checked.png");
+
 	GUI::checkBoxPressCheckedTexture = GUI::checkBoxCheckedTexture->colored(Vec3(1.3));
 	GUI::checkBoxPressUncheckedTexture = GUI::checkBoxUncheckedTexture->colored(Vec3(1.3));
 	GUI::checkBoxHoverCheckedTexture = GUI::checkBoxCheckedTexture->colored(Vec3(0.999));
 	GUI::checkBoxHoverUncheckedTexture = GUI::checkBoxUncheckedTexture->colored(Vec3(0.999));
 
 	// ColorPicker
-	ResourceManager::add<TextureResource>("colorPickerHueTexture", "../res/textures/gui/hue.png");
-	ResourceManager::add<TextureResource>("colorPickerAlphaBrightnessTexture", "../res/textures/gui/alphaBrightness.png");
-	ResourceManager::add<TextureResource>("colorPickerAlphaPatternTexture", "../res/textures/gui/alphaPattern.png");
-	ResourceManager::add<TextureResource>("colorPickerBrightnessTexture", "../res/textures/gui/brightness.png");
-	ResourceManager::add<TextureResource>("colorPickerCrosshairTexture", "../res/textures/gui/crosshair.png");
-	GUI::colorPickerHueTexture = ResourceManager::get<TextureResource>("colorPickerHueTexture");
-	GUI::colorPickerAlphaBrightnessTexture = ResourceManager::get<TextureResource>("colorPickerAlphaBrightnessTexture");
-	GUI::colorPickerAlphaPatternTexture = ResourceManager::get<TextureResource>("colorPickerAlphaPatternTexture");
-	GUI::colorPickerBrightnessTexture = ResourceManager::get<TextureResource>("colorPickerBrightnessTexture");
-	GUI::colorPickerCrosshairTexture = ResourceManager::get<TextureResource>("colorPickerCrosshairTexture");
+	GUI::colorPickerHueTexture = ResourceManager::add<TextureResource>("colorPickerHueTexture", "../res/textures/gui/hue.png");
+	GUI::colorPickerAlphaBrightnessTexture = ResourceManager::add<TextureResource>("colorPickerAlphaBrightnessTexture", "../res/textures/gui/alphaBrightness.png");
+	GUI::colorPickerAlphaPatternTexture = ResourceManager::add<TextureResource>("colorPickerAlphaPatternTexture", "../res/textures/gui/alphaPattern.png");
+	GUI::colorPickerBrightnessTexture = ResourceManager::add<TextureResource>("colorPickerBrightnessTexture", "../res/textures/gui/brightness.png");
+	GUI::colorPickerCrosshairTexture = ResourceManager::add<TextureResource>("colorPickerCrosshairTexture", "../res/textures/gui/crosshair.png");
 }
 
 void intersect(const Vec2& mouse) {
@@ -281,9 +261,6 @@ bool onMousePress(int x, int y) {
 bool onWindowResize(const WindowInfo& info) {
 	GUI::windowInfo = info;
 
-	GUI::guiFrameBuffer->resize(info.dimension);
-	GUI::blurFrameBuffer->resize(info.dimension);
-
 	return false;
 }
 
@@ -293,27 +270,11 @@ void onUpdate(Mat4f orthoMatrix) {
 
 void onRender(Mat4f orthoMatrix) {
 
-	// Render gui
-	GUI::blurFrameBuffer->bind();
-	GraphicsShaders::quadShader.updateProjection(orthoMatrix);
-	GraphicsShaders::quadShader.updateTexture(screenFrameBuffer->texture);
-	quad->render();
-	GraphicsShaders::horizontalBlurShader.updateTexture(blurFrameBuffer->texture);
-	GraphicsShaders::horizontalBlurShader.updateWidth(windowInfo.dimension.x);
-	quad->render();
-	GraphicsShaders::verticalBlurShader.updateTexture(blurFrameBuffer->texture);
-	GraphicsShaders::verticalBlurShader.updateWidth(windowInfo.dimension.y);
-	quad->render();
-	blurFrameBuffer->unbind();
 }
 
 void onClose() {
 	// Shaders
 	GraphicsShaders::onClose();
-
-	// Framebuffers
-	guiFrameBuffer->close();
-	blurFrameBuffer->close();
 
 	// Textures
 	closeButtonHoverTexture->close();

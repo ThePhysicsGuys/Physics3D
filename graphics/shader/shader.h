@@ -26,7 +26,7 @@ struct ShaderStage {
 	ShaderStage(const std::string& source, const ShaderInfo& info);
 };
 
-class Shader : public Graphics::Bindable {
+class Shader : public Bindable {
 public:
 	enum ShaderFlag : char {
 		NONE = 0 << 0,

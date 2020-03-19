@@ -4,6 +4,7 @@
 #include "GLFW\glfw3.h"
 
 #include "arrayMesh.h"
+#include "../graphics/renderer.h"
 #include "../physics/math/linalg/vec.h"
 #include "../physics/math/mathUtil.h"
 
@@ -93,17 +94,17 @@ struct Quad : public Primitive {
 	}
 
 	void render(int mode) {
-		glPolygonMode(GL_FRONT_AND_BACK, mode);
-
+		Renderer::polygonMode(Renderer::FRONT_AND_BACK, mode);
+		
 		glBindVertexArray(vao);
 		glDrawArrays(GL_QUADS, 0, 4);
 		glBindVertexArray(0);
 
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		Renderer::polygonMode(Renderer::FRONT_AND_BACK, Renderer::FILL);
 	}
 
 	void render() override {
-		render(GL_FILL);
+		render(Renderer::FILL);
 	}
 };
 

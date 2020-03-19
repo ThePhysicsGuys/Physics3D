@@ -79,22 +79,21 @@ std::string Export::str(double num) {
 
 void saveBinaryObj(std::string filename, const Graphics::VisualShape& shape) {
 	struct stat buffer;
-
 	if (stat(filename.c_str(), &buffer) != -1) {
 		Log::warn("File already exists: %s", filename.c_str());
 	}
 
 	std::ofstream output;
-
 	output.open(filename, std::ios::binary | std::ios::out);
 
-	char V = 0;
-	char VN = 1;
-	char VT = 2;
-	char VNT = 3;
+	enum : char {
+		V,
+		VN,
+		VT,
+		VNT
+	};
 
 	char flag = V;
-
 	if (shape.uvs != nullptr && shape.normals != nullptr) {
 		flag = VNT;
 	} else if (shape.uvs != nullptr) {
@@ -107,11 +106,8 @@ void saveBinaryObj(std::string filename, const Graphics::VisualShape& shape) {
 	Export::write<const int>(output, shape.vertexCount);
 	Export::write<const int>(output, shape.triangleCount);
 
-	int i = 0;
 	for (Vec3f vertex : shape.iterVertices()) {
-
 		Export::write<Vec3f>(output, vertex);
-		i += 1;
 	}
 
 	if (shape.normals != nullptr) {
@@ -139,7 +135,6 @@ void saveBinaryObj(std::string filename, const Graphics::VisualShape& shape) {
 
 void saveNonBinaryObj(const std::string& filename, const Graphics::VisualShape& shape) {
 	struct stat buffer;
-
 	if (stat(filename.c_str(), &buffer) != -1) {
 		Log::warn("File already exists: %s", filename.c_str());
 	}

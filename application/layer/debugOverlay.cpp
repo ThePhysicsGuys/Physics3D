@@ -1,5 +1,5 @@
 #include "core.h"
-
+#include "GL/glew.h"
 #include "debugOverlay.h"
 
 #include "view/screen.h"
@@ -44,19 +44,26 @@ void DebugOverlay::onEvent(Event& event) {
 }
 
 void DebugOverlay::onRender() {
-	Screen* screen = static_cast<Screen*>(this->ptr);
-	
 	using namespace Graphics;
 	using namespace Graphics::Debug;
+	using namespace Graphics::Renderer;
 
-	Renderer::beginScene();
+	Screen* screen = static_cast<Screen*>(this->ptr);
 
-	Path::bind(Graphics::GUI::batch);
+	GraphicsShaders::guiShader.bind();
+	GraphicsShaders::guiShader.setUniform("projectionMatrix", screen->camera.orthoMatrix);
 
-	Renderer::disableDepthTest();
+	beginScene();
+
+	enableBlending();
+	disableDepthTest();
+	disableCulling();
+
+	Path::bind(GUI::batch);
+
 	ApplicationShaders::fontShader.updateProjection(screen->camera.orthoMatrix);
-
-	Graphics::graphicsMeasure.mark(GraphicsProcess::PROFILER);
+	GraphicsShaders::guiShader.setUniform("projectionMatrix", screen->camera.orthoMatrix);
+	graphicsMeasure.mark(GraphicsProcess::PROFILER);
 
 	size_t objectCount = screen->world->getPartCount();
 	addDebugField(screen->dimension, GUI::font, "Screen", str(screen->dimension) + ", [" + std::to_string(screen->camera.aspect) + ":1]", "");
@@ -74,9 +81,9 @@ void DebugOverlay::onRender() {
 
 	if (renderPiesEnabled) {
 		float leftSide = float(screen->dimension.x) / float(screen->dimension.y);
-		Graphics::PieChart graphicsPie = toPieChart(Graphics::graphicsMeasure, "Graphics", Vec2f(-leftSide + 1.5f, -0.7f), 0.2f);
-		Graphics::PieChart physicsPie = toPieChart(physicsMeasure, "Physics", Vec2f(-leftSide + 0.3f, -0.7f), 0.2f);
-		Graphics::PieChart intersectionPie = toPieChart(intersectionStatistics, "Intersections", Vec2f(-leftSide + 2.7f, -0.7f), 0.2f);
+		PieChart graphicsPie = toPieChart(Graphics::graphicsMeasure, "Graphics", Vec2f(-leftSide + 1.5f, -0.7f), 0.2f);
+		PieChart physicsPie = toPieChart(physicsMeasure, "Physics", Vec2f(-leftSide + 0.3f, -0.7f), 0.2f);
+		PieChart intersectionPie = toPieChart(intersectionStatistics, "Intersections", Vec2f(-leftSide + 2.7f, -0.7f), 0.2f);
 
 		physicsPie.renderText(GUI::font);
 		graphicsPie.renderText(GUI::font);
@@ -103,20 +110,19 @@ void DebugOverlay::onRender() {
 		screen->world->syncReadOnlyOperation([this]() {
 			Screen* screen = static_cast<Screen*>(this->ptr);
 
-			Graphics::graphicsMeasure.mark(Graphics::GraphicsProcess::PROFILER);
-			Graphics::renderTreeStructure(screen->world->objectTree, Vec3f(0, 1, 0), Vec2f(1.4, 0.95), 0.7f, screen->selectedPart);
-			Graphics::renderTreeStructure(screen->world->terrainTree, Vec3f(0, 0, 1), Vec2f(0.4, 0.95), 0.7f, screen->selectedPart);
+			graphicsMeasure.mark(Graphics::GraphicsProcess::PROFILER);
+			renderTreeStructure(screen->world->objectTree, Vec3f(0, 1, 0), Vec2f(1.4, 0.95), 0.7f, screen->selectedPart);
+			renderTreeStructure(screen->world->terrainTree, Vec3f(0, 0, 1), Vec2f(0.4, 0.95), 0.7f, screen->selectedPart);
 		});
 
 		fpsSlidingChart.add("Fps 1", Graphics::graphicsMeasure.getAvgTPS());
 		fpsSlidingChart.add("Fps 2", physicsMeasure.getAvgTPS());
 		fpsSlidingChart.render();
-
 	}
 	
 	GUI::batch->submit();
 
-	Graphics::Renderer::endScene();
+	endScene();
 }
 
 void DebugOverlay::onClose() {

@@ -151,10 +151,10 @@ void Screen::onInit() {
 	// Layer creation
 	skyboxLayer = SkyboxLayer(this);
 	modelLayer = ModelLayer(this);
-	testLayer = TestLayer(this);
 	constraintLayer = ConstraintLayer(this, Layer::NoUpdate | Layer::NoEvents);
 	debugLayer = DebugLayer(this);
 	pickerLayer = PickerLayer(this);
+	testLayer = TestLayer(this);
 	postprocessLayer = PostprocessLayer(this);
 	guiLayer = GuiLayer(this);
 	debugOverlay = DebugOverlay(this);
@@ -177,7 +177,6 @@ void Screen::onInit() {
 		screen.camera.onUpdate(((float) dimension.x) / ((float) dimension.y));
 		screen.dimension = dimension;
 		screen.screenFrameBuffer->resize(screen.dimension);
-		Graphics::GUI::blurFrameBuffer->resize(screen.dimension);
 	});
 
 	// Camera init
@@ -257,20 +256,16 @@ void Screen::onEvent(::Event& event) {
 }
 
 void Screen::onRender() {
+	using namespace Graphics;
+	using namespace Graphics::Renderer;
+
 	// Init imgui
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 
-	// Render to screen Framebuffer
 	screenFrameBuffer->bind();
-	Graphics::Renderer::enableBlending();
-	Graphics::Renderer::enableCulling();
-	Graphics::Renderer::enableDepthTest();
-	Graphics::Renderer::enableDepthMask();
-	Graphics::Renderer::standardBlendFunction();
-	Graphics::Renderer::clearColor();
-	Graphics::Renderer::clearDepth();
+	defaultSettings();
 
 	// Render layers
 	layerStack.onRender();
@@ -279,14 +274,14 @@ void Screen::onRender() {
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-	Graphics::graphicsMeasure.mark(Graphics::GraphicsProcess::FINALIZE);
+	graphicsMeasure.mark(GraphicsProcess::FINALIZE);
 
 	// Finalize
-	Graphics::Renderer::swapGLFWInterval(0);
-	Graphics::Renderer::swapGLFWBuffers();
-	Graphics::Renderer::pollGLFWEvents();
+	swapGLFWInterval(0);
+	swapGLFWBuffers();
+	pollGLFWEvents();
 
-	Graphics::graphicsMeasure.mark(Graphics::GraphicsProcess::OTHER);
+	graphicsMeasure.mark(GraphicsProcess::OTHER);
 }
 
 void Screen::onClose() {

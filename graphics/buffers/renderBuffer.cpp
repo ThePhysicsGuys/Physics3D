@@ -5,6 +5,8 @@
 #include "GL\glew.h"
 #include "GLFW\glfw3.h"
 
+#include "renderer.h"
+
 namespace Graphics {
 
 RenderBuffer::RenderBuffer(unsigned int width, unsigned int height) : width(width), height(height) {
@@ -43,11 +45,11 @@ void RenderBuffer::resize(unsigned int width, unsigned int height) {
 }
 
 void RenderBuffer::bind() {
-	glBindRenderbuffer(GL_RENDERBUFFER, id);
+	Renderer::bindRenderbuffer(id);
 }
 
 void RenderBuffer::unbind() {
-	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+	Renderer::bindRenderbuffer(0);
 }
 
 void RenderBuffer::close() {
@@ -93,11 +95,11 @@ void MultisampleRenderBuffer::resize(unsigned int width, unsigned int height) {
 }
 
 void MultisampleRenderBuffer::bind() {
-	glBindRenderbuffer(GL_RENDERBUFFER, id);
+	Renderer::bindRenderbuffer(id);
 }
 
 void MultisampleRenderBuffer::unbind() {
-	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+	Renderer::bindRenderbuffer(0);
 }
 
 void MultisampleRenderBuffer::close() {

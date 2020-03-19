@@ -70,7 +70,7 @@ private:
 			return static_cast<T*>(iterator->second);
 		} else {
 			//Log::debug("Default resource not found: (%s), trying to load default resource", T::getStaticTypeName().c_str());
-			Resource* defaultResource = ResourceManager::add<T>("default_" + T::getStaticTypeName(), T::getDefaultPath();
+			Resource* defaultResource = ResourceManager::add<T>("default_" + T::getStaticTypeName(), T::getDefaultPath());
 
 			if (defaultResource) {
 				//Log::debug("Loaded default resource; (%s)", T::getStaticTypeName().c_str());

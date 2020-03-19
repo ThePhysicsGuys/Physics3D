@@ -1,10 +1,11 @@
 #include "core.h"
 
 #include "pickerLayer.h"
-
 #include "view/screen.h"
-#include "../picker/picker.h"
+#include "picker/picker.h"
 #include "input/standardInputHandler.h"
+
+#include "../graphics/renderer.h"
 #include "../graphics/renderer.h"
 
 namespace Application {
@@ -24,13 +25,18 @@ void PickerLayer::onEvent(Event& event) {
 }
 
 void PickerLayer::onRender() {
+	using namespace Graphics;
+	using namespace Graphics::Renderer;
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
-	Graphics::Renderer::beginScene();
+	beginScene();
+
+	clearDepth();
+	enableDepthTest();
 
 	Picker::onRender(*screen);
 
-	Graphics::Renderer::endScene();
+	endScene();
 }
 
 void PickerLayer::onClose() {
