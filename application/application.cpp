@@ -124,14 +124,14 @@ void setupGL() {
 void setupWorld(int argc, const char** args) {
 	Log::info("Initializing world");
 
-	//world.addExternalForce(new DirectionalGravity(Vec3(0, -10.0, 0.0)));
+	world.addExternalForce(new DirectionalGravity(Vec3(0, -10.0, 0.0)));
 
 	PartProperties basicProperties{1.0, 0.7, 0.3};
 
 	// WorldBuilder init
 
 	// Part factories
-	//WorldBuilder::SpiderFactory spiderFactories[] { {0.5, 4},{0.5, 6},{0.5, 8},{0.5, 10} };
+	WorldBuilder::SpiderFactory spiderFactories[] { {0.5, 4},{0.5, 6},{0.5, 8},{0.5, 10} };
 	//Shape triangle(Library::trianglePyramid);
 
 	WorldBuilder::buildFloorAndWalls(50.0, 50.0, 1.0);
@@ -156,12 +156,12 @@ void setupWorld(int argc, const char** args) {
 
 	world.addPart(new ExtendedPart(Sphere(2.0), GlobalCFrame(10, 3, 10), {1.0, 0.3, 0.7}, "SphereThing"));
 
-	ExtendedPart* conveyor = new ExtendedPart(Box(1.0, 0.3, 50.0), GlobalCFrame(10.0, 0.65, 0.0), {2.0, 1.0, 0.3});
+	/*ExtendedPart* conveyor = new ExtendedPart(Box(1.0, 0.3, 50.0), GlobalCFrame(10.0, 0.65, 0.0), {2.0, 1.0, 0.3});
 
 	conveyor->properties.conveyorEffect = Vec3(0, 0, 2.0);
 	world.addTerrainPart(conveyor);
 
-	world.addPart(new ExtendedPart(Box(0.2, 0.2, 0.2), GlobalCFrame(10, 1.0, 0.0), {1.0, 0.2, 0.3}, "TinyCube"));
+	world.addPart(new ExtendedPart(Box(0.2, 0.2, 0.2), GlobalCFrame(10, 1.0, 0.0), {1.0, 0.2, 0.3}, "TinyCube"));*/
 
 	// hollow box
 	WorldBuilder::HollowBoxParts parts = WorldBuilder::buildHollowBox(Bounds(Position(12.0, 3.0, 14.0), Position(20.0, 8.0, 20.0)), 0.3);
@@ -183,7 +183,7 @@ void setupWorld(int argc, const char** args) {
 		world.addPart(newCube);
 	}*/
 
-	//WorldBuilder::buildCar(GlobalCFrame(5.0, 1.0, 5.0));
+	WorldBuilder::buildCar(GlobalCFrame(5.0, 1.0, 5.0));
 
 
 	WorldBuilder::buildConveyor(1.5, 7.0, GlobalCFrame(-10.0, 1.0, -10.0, Rotation::fromEulerAngles(0.15, 0.0, 0.0)), 1.5);
@@ -200,7 +200,7 @@ void setupWorld(int argc, const char** args) {
 
 	GlobalCFrame rootFrame(Position(0.0, 15.0, 0.0), Rotation::fromEulerAngles(3.1415 / 4, 3.1415 / 4, 0.0));
 
-	/*for (double x = minX; x < maxX; x += 1.00001) {
+	for (double x = minX; x < maxX; x += 1.00001) {
 		for (double y = minY; y < maxY; y += 1.00001) {
 			for (double z = minZ; z < maxZ; z += 1.00001) {
 				ExtendedPart* newCube = new ExtendedPart(Box(1.0, 1.0, 1.0), GlobalCFrame(Position(x - 5, y + 10, z - 5)), { 1.0, 1.0, 0.0 }, "Box");
@@ -210,15 +210,15 @@ void setupWorld(int argc, const char** args) {
 				//spiderFactories[rand() & 0x00000003].buildSpider(GlobalCFrame(Position(x+y*0.1, y+1, z)));
 				//world.addPart(new ExtendedPart(triangle, GlobalCFrame(Position(x - 20, y + 1, z + 20)), { 1.0, 0.2, 0.5 }, "Triangle"));
 
-				world.addPart(new ExtendedPart(Cylinder(0.3, 1.2), GlobalCFrame(x - 5, y + 1, z + 5, rotationMatrixfromEulerAngles(3.1415/4, 3.1415/4, 0.0)), {1.0, 0.2, 0.5}, "Cylinder"));
+				world.addPart(new ExtendedPart(Cylinder(0.3, 1.2), GlobalCFrame(x - 5, y + 1, z + 5, Rotation::fromEulerAngles(3.1415/4, 3.1415/4, 0.0)), {1.0, 0.2, 0.5}, "Cylinder"));
 			}
 		}
-	}*/
+	}
 
-	//WorldBuilder::buildTerrain(200.0, 200.0);
+	//WorldBuilder::buildTerrain(150, 150);
 
 
-	/*ExtendedPart* ropeStart = new ExtendedPart(Box(2.0, 1.5, 0.7), GlobalCFrame(10.0, 2.0, -10.0), {1.0, 0.7, 0.3}, "RopeA");
+	ExtendedPart* ropeStart = new ExtendedPart(Box(2.0, 1.5, 0.7), GlobalCFrame(10.0, 2.0, -10.0), {1.0, 0.7, 0.3}, "RopeA");
 	ExtendedPart* ropeB = new ExtendedPart(Box(1.5, 1.2, 0.9), GlobalCFrame(10.0, 2.0, -14.0), {1.0, 0.7, 0.3}, "RopeB");
 	ExtendedPart* ropeC = new ExtendedPart(Box(2.0, 1.5, 0.7), GlobalCFrame(10.0, 2.0, -18.0), {1.0, 0.7, 0.3}, "RopeC");
 
@@ -231,14 +231,7 @@ void setupWorld(int argc, const char** args) {
 	group.ballConstraints.push_back(BallConstraint{Vec3(0.0, 0.0, -2.0), ropeStart->parent, Vec3(0.0, 0.0, 2.0), ropeB->parent});
 	group.ballConstraints.push_back(BallConstraint{Vec3(0.0, 0.0, -2.0), ropeB->parent, Vec3(0.0, 0.0, 2.0), ropeC->parent});
 
-	world.constraints.push_back(group);//*/
-
-	/*MotorConstraint mmmmmm(Vec3(0.5, -0.5, 0.6));
-
-	std::ofstream file;
-	file.open("motorConstraint.bin", std::ios::binary);
-	hardConstraintRegistry.serialize(mmmmmm, file);
-	file.close();*/
+	world.constraints.push_back(group);
 
 	ExtendedPart* singularPart = new ExtendedPart(Box(1.0, 2.0, 1.0), GlobalCFrame(7.0, 1.0, 5.0), {1.3, 1.2, 1.1}, "SingularPart");
 	world.addPart(singularPart);
@@ -265,7 +258,7 @@ void setupWorld(int argc, const char** args) {
 
 	ep2->parent->mainPhysical->applyAngularImpulse(Vec3(1.0, 0.5, 0.0) * 1);
 
-	Vec3 angularVel(0.0, 0.0, -1.0);
+	/*Vec3 angularVel(0.0, 0.0, -1.0);
 	{
 		ExtendedPart* nativeFixedConstraintGroupMain = new ExtendedPart(Box(1.0, 1.0, 1.0), GlobalCFrame(Position(-3.0, 7.0, 2.0), Rotation::fromEulerAngles(0.0, 0.0, -0.5)), {1.0, 1.0, 1.0}, "MainPart");
 		ExtendedPart* f2 = new ExtendedPart(Box(0.9, 0.9, 0.9), GlobalCFrame(), {1.0, 1.0, 1.0}, "f2");
@@ -298,7 +291,7 @@ void setupWorld(int argc, const char** args) {
 		world.addPart(f2);
 
 		f2->parent->mainPhysical->motionOfCenterOfMass.rotation.angularVelocity = angularVel;
-	}
+	}*/
 
 	{
 		ExtendedPart* fixedConstraintGroupMain = new ExtendedPart(Box(1.0, 1.0, 1.0), GlobalCFrame(-3.0, 3.0, 7.0), {1.0, 1.0, 1.0}, "MainPart");
@@ -349,15 +342,39 @@ void setupWorld(int argc, const char** args) {
 		ExtendedPart* attachedBlock = new ExtendedPart(Box(1.0, 1.0, 1.0), GlobalCFrame(), basicProperties, "Attached Block");
 		ExtendedPart* anotherAttachedBlock = new ExtendedPart(Box(1.0, 1.0, 1.0), GlobalCFrame(), basicProperties, "Another Attached Block");
 
+		ExtendedPart* attachedCylinder = new ExtendedPart(Cylinder(0.5, 1.0), GlobalCFrame(), basicProperties, "Rotating Attached Block");
+
+		ExtendedPart* attachedBall = new ExtendedPart(Sphere(0.5), GlobalCFrame(), basicProperties, "Attached Ball");
 
 		mainBlock->attach(attachedBlock, new SinusoidalPistonConstraint(Vec3(1.0, 0.0, 0.0), 1.0, 3.0, 1.0), CFrame(0.5, 0.0, 0.0), CFrame(-0.5, 0.0, 0.0));
 		attachedBlock->attach(anotherAttachedBlock, new SinusoidalPistonConstraint(Vec3(0.0, 1.0, 0.0), 1.0, 2.0, 0.7), CFrame(0.0, 0.5, 0.0), CFrame(0.0, -0.5, 0.0));
+
+		attachedBlock->attach(attachedCylinder, new MotorConstraint(Vec3(0.0, 0.0, 3.0)), CFrame(0.0, 0.0, 0.55), CFrame(0.0, 0.0, -0.55));
+
+		attachedCylinder->attach(attachedBall, new SinusoidalPistonConstraint(Vec3(0.0, 1.0, 0.0), 0.0, 2.0, 0.7), CFrame(0.0, 0.5, 0.0), CFrame(0.0, -0.5, 0.0));
 
 		world.addPart(mainBlock);
 
 		mainBlock->parent->mainPhysical->motionOfCenterOfMass.rotation.angularVelocity = Vec3(0, 2, 0);
 	}
 
+	{
+		ExtendedPart* box1 = new ExtendedPart(Box(2.0, 1.0, 1.0), GlobalCFrame(-10.0, 5.0, 10.0), basicProperties, "Box1");
+		ExtendedPart* box2 = new ExtendedPart(Box(2.0, 1.0, 1.0), GlobalCFrame(-11.1, 5.0, 11.9, Rotation::rotY(3.1415 * 2 / 3)), basicProperties, "Box2");
+		ExtendedPart* box3 = new ExtendedPart(Box(2.0, 1.0, 1.0), GlobalCFrame(-8.9, 5.0, 11.9, Rotation::rotY(-3.1415 * 2 / 3)), basicProperties, "Box3");
+
+		world.addPart(box1);
+		world.addPart(box2);
+		world.addPart(box3);
+
+		ConstraintGroup group;
+
+		group.ballConstraints.push_back(BallConstraint{Vec3(1.0, 0.0, 0.7), box1->parent, Vec3(-1.0, 0.0, 0.7), box2->parent});
+		group.ballConstraints.push_back(BallConstraint{Vec3(1.0, 0.0, 0.7), box2->parent, Vec3(-1.0, 0.0, 0.7), box3->parent});
+		group.ballConstraints.push_back(BallConstraint{Vec3(1.0, 0.0, 0.7), box3->parent, Vec3(-1.0, 0.0, 0.7), box1->parent});
+
+		world.constraints.push_back(std::move(group));
+	}
 }
 
 void setupPhysics() {

@@ -1,27 +1,29 @@
 #pragma once
 
-template<__int64 N>
+#include <inttypes.h>
+
+template<int64_t N>
 struct Fix;
 
 #define ONE (1ULL << N)
 
-template<__int64 N>
+template<int64_t N>
 struct Fix {
-	__int64 value;
+	int64_t value;
 
 	constexpr Fix() : value(0) {}
 	Fix(double d) : 
 		value() {
 		
-		__int64 uno = ONE;
+		int64_t uno = ONE;
 
 		double newD = d * uno;
 
-		this->value = static_cast<__int64>(newD);
+		this->value = static_cast<int64_t>(newD);
 	}
 	constexpr Fix(float f) : 
-		value(static_cast<__int64>(f * ONE)) {}
-	constexpr explicit Fix(__int64 l) : value(l) {}
+		value(static_cast<int64_t>(f * ONE)) {}
+	constexpr explicit Fix(int64_t l) : value(l) {}
 
 	inline constexpr operator double() const { return static_cast<double>(value) / ONE; }
 	inline constexpr operator float() const { return static_cast<float>(value) / ONE; }
@@ -33,8 +35,8 @@ struct Fix {
 
 	inline Fix<N>& operator+=(const Fix<N>& b) { this->value += b.value; return *this; }
 	inline Fix<N>& operator-=(const Fix<N>& b) { this->value -= b.value; return *this; }
-	inline Fix<N>& operator+=(__int64 b) { this->value += (b << N); return *this; }
-	inline Fix<N>& operator-=(__int64 b) { this->value -= (b << N); return *this; }
+	inline Fix<N>& operator+=(int64_t b) { this->value += (b << N); return *this; }
+	inline Fix<N>& operator-=(int64_t b) { this->value -= (b << N); return *this; }
 
 	static inline constexpr Fix<N> maxValue() {return Fix<N>(0x7FFFFFFF_FFFFFFFF); }
 
@@ -42,56 +44,56 @@ struct Fix {
 };
 
 
-template<__int64 N> inline constexpr Fix<N> operator+(Fix<N> a, Fix<N> b) { return Fix<N>(a.value + b.value); }
-template<__int64 N> inline constexpr Fix<N> operator-(Fix<N> a, Fix<N> b) { return Fix<N>(a.value - b.value); }
-template<__int64 N> inline constexpr Fix<N> operator+(Fix<N> a, __int64 b) { return Fix<N>(a.value + (b << N)); }
-template<__int64 N> inline constexpr Fix<N> operator-(Fix<N> a, __int64 b) { return Fix<N>(a.value - (b << N)); }
-template<__int64 N> inline constexpr Fix<N> operator+(__int64 a, Fix<N> b) { return Fix<N>((a << N) + b.value); }
-template<__int64 N> inline constexpr Fix<N> operator-(__int64 a, Fix<N> b) {return Fix<N>((a << N) - b.value);}
+template<int64_t N> inline constexpr Fix<N> operator+(Fix<N> a, Fix<N> b) { return Fix<N>(a.value + b.value); }
+template<int64_t N> inline constexpr Fix<N> operator-(Fix<N> a, Fix<N> b) { return Fix<N>(a.value - b.value); }
+template<int64_t N> inline constexpr Fix<N> operator+(Fix<N> a, int64_t b) { return Fix<N>(a.value + (b << N)); }
+template<int64_t N> inline constexpr Fix<N> operator-(Fix<N> a, int64_t b) { return Fix<N>(a.value - (b << N)); }
+template<int64_t N> inline constexpr Fix<N> operator+(int64_t a, Fix<N> b) { return Fix<N>((a << N) + b.value); }
+template<int64_t N> inline constexpr Fix<N> operator-(int64_t a, Fix<N> b) {return Fix<N>((a << N) - b.value);}
 
-template<__int64 N> inline constexpr Fix<N> operator+(Fix<N> a, double b) { return a + Fix<N>(b); }
-template<__int64 N> inline constexpr Fix<N> operator+(double a, Fix<N> b) { return Fix<N>(a) + b; }
-template<__int64 N> inline constexpr Fix<N> operator-(Fix<N> a, double b) { return a - Fix<N>(b); }
-template<__int64 N> inline constexpr Fix<N> operator-(double a, Fix<N> b) { return Fix<N>(a) - b; }
+template<int64_t N> inline constexpr Fix<N> operator+(Fix<N> a, double b) { return a + Fix<N>(b); }
+template<int64_t N> inline constexpr Fix<N> operator+(double a, Fix<N> b) { return Fix<N>(a) + b; }
+template<int64_t N> inline constexpr Fix<N> operator-(Fix<N> a, double b) { return a - Fix<N>(b); }
+template<int64_t N> inline constexpr Fix<N> operator-(double a, Fix<N> b) { return Fix<N>(a) - b; }
 
-template<__int64 N> inline constexpr Fix<N> operator*(Fix<N> a, double b) {return Fix<N>(static_cast<__int64>(a.value * b));}
-template<__int64 N> inline constexpr Fix<N> operator*(Fix<N> a, float b) {return Fix<N>(static_cast<__int64>(a.value * b));}
-template<__int64 N> inline constexpr Fix<N> operator*(double a, Fix<N> b) {return Fix<N>(static_cast<__int64>(a * b.value));}
-template<__int64 N> inline constexpr Fix<N> operator*(float a, Fix<N> b) {return Fix<N>(static_cast<__int64>(a * b.value));}
+template<int64_t N> inline constexpr Fix<N> operator*(Fix<N> a, double b) {return Fix<N>(static_cast<int64_t>(a.value * b));}
+template<int64_t N> inline constexpr Fix<N> operator*(Fix<N> a, float b) {return Fix<N>(static_cast<int64_t>(a.value * b));}
+template<int64_t N> inline constexpr Fix<N> operator*(double a, Fix<N> b) {return Fix<N>(static_cast<int64_t>(a * b.value));}
+template<int64_t N> inline constexpr Fix<N> operator*(float a, Fix<N> b) {return Fix<N>(static_cast<int64_t>(a * b.value));}
 
-template<__int64 N> inline constexpr Fix<N> operator/(Fix<N> a, double b) { return Fix<N>(static_cast<__int64>(a.value / b)); }
-template<__int64 N> inline constexpr Fix<N> operator/(Fix<N> a, float b) { return Fix<N>(static_cast<__int64>(a.value / b)); }
-template<__int64 N> inline constexpr Fix<N> operator/(double a, Fix<N> b) { return Fix<N>(static_cast<__int64>(a / b.value)); }
-template<__int64 N> inline constexpr Fix<N> operator/(float a, Fix<N> b) { return Fix<N>(static_cast<__int64>(a / b.value)); }
+template<int64_t N> inline constexpr Fix<N> operator/(Fix<N> a, double b) { return Fix<N>(static_cast<int64_t>(a.value / b)); }
+template<int64_t N> inline constexpr Fix<N> operator/(Fix<N> a, float b) { return Fix<N>(static_cast<int64_t>(a.value / b)); }
+template<int64_t N> inline constexpr Fix<N> operator/(double a, Fix<N> b) { return Fix<N>(static_cast<int64_t>(a / b.value)); }
+template<int64_t N> inline constexpr Fix<N> operator/(float a, Fix<N> b) { return Fix<N>(static_cast<int64_t>(a / b.value)); }
 
-template<__int64 N> inline constexpr Fix<N> operator/(Fix<N> a, int b) { return Fix<N>(a.value / b); }
+template<int64_t N> inline constexpr Fix<N> operator/(Fix<N> a, int b) { return Fix<N>(a.value / b); }
 
-template<__int64 N> inline constexpr Fix<N> operator*(Fix<N> a, __int64 b) { return Fix<N>(a.value * b); }
-template<__int64 N> inline constexpr Fix<N> operator*(__int64 a, Fix<N> b) { return Fix<N>(a * b.value); }
+template<int64_t N> inline constexpr Fix<N> operator*(Fix<N> a, int64_t b) { return Fix<N>(a.value * b); }
+template<int64_t N> inline constexpr Fix<N> operator*(int64_t a, Fix<N> b) { return Fix<N>(a * b.value); }
 
-template<__int64 N> inline constexpr Fix<N> operator/(Fix<N> a, __int64 b) { return Fix<N>(static_cast<__int64>(a.value / b)); }
+template<int64_t N> inline constexpr Fix<N> operator/(Fix<N> a, int64_t b) { return Fix<N>(static_cast<int64_t>(a.value / b)); }
 
-template<__int64 N> inline constexpr Fix<N> operator<<(Fix<N> a, __int64 b) { return Fix<N>(static_cast<__int64>(a.value << b)); }
-template<__int64 N> inline constexpr Fix<N> operator>>(Fix<N> a, __int64 b) { return Fix<N>(static_cast<__int64>(a.value >> b)); }
+template<int64_t N> inline constexpr Fix<N> operator<<(Fix<N> a, int64_t b) { return Fix<N>(static_cast<int64_t>(a.value << b)); }
+template<int64_t N> inline constexpr Fix<N> operator>>(Fix<N> a, int64_t b) { return Fix<N>(static_cast<int64_t>(a.value >> b)); }
 
 
 #define CREATE_COMPARISONS(T1, T2, V1, V2) \
-template<__int64 N> inline constexpr bool operator==(T1 a, T2 b) { return V1 == V2; } \
-template<__int64 N> inline constexpr bool operator!=(T1 a, T2 b) { return V1 != V2; } \
-template<__int64 N> inline constexpr bool operator>=(T1 a, T2 b) { return V1 >= V2; } \
-template<__int64 N> inline constexpr bool operator<=(T1 a, T2 b) { return V1 <= V2; } \
-template<__int64 N> inline constexpr bool operator>(T1 a, T2 b) { return V1 > V2; } \
-template<__int64 N> inline constexpr bool operator<(T1 a, T2 b) { return V1 < V2; }
+template<int64_t N> inline constexpr bool operator==(T1 a, T2 b) { return V1 == V2; } \
+template<int64_t N> inline constexpr bool operator!=(T1 a, T2 b) { return V1 != V2; } \
+template<int64_t N> inline constexpr bool operator>=(T1 a, T2 b) { return V1 >= V2; } \
+template<int64_t N> inline constexpr bool operator<=(T1 a, T2 b) { return V1 <= V2; } \
+template<int64_t N> inline constexpr bool operator>(T1 a, T2 b) { return V1 > V2; } \
+template<int64_t N> inline constexpr bool operator<(T1 a, T2 b) { return V1 < V2; }
 
 CREATE_COMPARISONS(Fix<N>, Fix<N>, a.value, b.value);
 CREATE_COMPARISONS(Fix<N>, double, a, Fix<N>(b));
 CREATE_COMPARISONS(double, Fix<N>, Fix<N>(a), b);
 CREATE_COMPARISONS(Fix<N>, float, a, Fix<N>(b));
 CREATE_COMPARISONS(float, Fix<N>, Fix<N>(a), b);
-CREATE_COMPARISONS(Fix<N>, __int64, a.value, b << N);
-CREATE_COMPARISONS(__int64, Fix<N>, a << N, b.value);
-CREATE_COMPARISONS(Fix<N>, int, a.value, __int64(b) << N);
-CREATE_COMPARISONS(int, Fix<N>, __int64(a) << N, b.value);
+CREATE_COMPARISONS(Fix<N>, int64_t, a.value, b << N);
+CREATE_COMPARISONS(int64_t, Fix<N>, a << N, b.value);
+CREATE_COMPARISONS(Fix<N>, int, a.value, int64_t(b) << N);
+CREATE_COMPARISONS(int, Fix<N>, int64_t(a) << N, b.value);
 #undef CREATE_COMPARISONS
 
 template<int N>
@@ -105,7 +107,7 @@ inline constexpr Fix<N> max(Fix<N> first, Fix<N> second) {
 }
 #undef ONE
 
-template<__int64 N>
+template<int64_t N>
 Fix<N> quickMultiply(Fix<N> a, Fix<N> b) {
 	return Fix<N>((a.value >> (N / 2)) * (b.value >> (N - N / 2)));
 }

@@ -15,6 +15,7 @@
 #include "../constraints/hardConstraint.h"
 #include "../constraints/fixedConstraint.h"
 #include "../constraints/motorConstraint.h"
+#include "../constraints/sinusoidalPistonConstraint.h"
 #include "../misc/gravityForce.h"
 
 
@@ -84,6 +85,26 @@ MotorConstraint* deserializeMotorConstraint(std::istream& istream) {
 	double currentAngle = ::deserialize<double>(istream);
 
 	return new MotorConstraint(angularVelocity, currentAngle);
+}
+
+void serializePistonConstraint(const SinusoidalPistonConstraint& constraint, std::ostream& ostream) {
+	::serialize<Vec3>(constraint.pistonDirection, ostream);
+	::serialize<double>(constraint.minLength, ostream);
+	::serialize<double>(constraint.maxLength, ostream);
+	::serialize<double>(constraint.period, ostream);
+	::serialize<double>(constraint.currentStepInPeriod, ostream);
+}
+SinusoidalPistonConstraint* deserializePistonConstraint(std::istream& istream) {
+	Vec3 pistonDirection = ::deserialize<Vec3>(istream);
+	double minLength = ::deserialize<double>(istream);
+	double maxLength = ::deserialize<double>(istream);
+	double period = ::deserialize<double>(istream);
+	double currentStepInPeriod = ::deserialize<double>(istream);
+
+	SinusoidalPistonConstraint* newConstraint = new SinusoidalPistonConstraint(pistonDirection, minLength, maxLength, period);
+	newConstraint->currentStepInPeriod = currentStepInPeriod;
+
+	return newConstraint;
 }
 
 void serializeNormalizedPolyhedron(const NormalizedPolyhedron& polyhedron, std::ostream& ostream) {
@@ -376,6 +397,8 @@ static DynamicSerializerRegistry<HardConstraint>::ConcreteDynamicSerializer<Fixe
 (serializeFixedConstraint, deserializeFixedConstraint, 0);
 static DynamicSerializerRegistry<HardConstraint>::ConcreteDynamicSerializer<MotorConstraint> motorConstraintSerializer
 (serializeMotorConstraint, deserializeMotorConstraint, 1);
+static DynamicSerializerRegistry<HardConstraint>::ConcreteDynamicSerializer<SinusoidalPistonConstraint> pistonConstraintSerializer
+(serializePistonConstraint, deserializePistonConstraint, 2);
 
 static DynamicSerializerRegistry<ShapeClass>::ConcreteDynamicSerializer<NormalizedPolyhedron> polyhedronSerializer
 (serializeNormalizedPolyhedron, deserializeNormalizedPolyhedron, 0);
@@ -387,7 +410,8 @@ static DynamicSerializerRegistry<ExternalForce>::ConcreteDynamicSerializer<Direc
 
 DynamicSerializerRegistry<HardConstraint> dynamicHardConstraintSerializer{
 	{typeid(FixedConstraint), &fixedConstraintSerializer},
-	{typeid(MotorConstraint), &motorConstraintSerializer}
+	{typeid(MotorConstraint), &motorConstraintSerializer},
+	{typeid(SinusoidalPistonConstraint), &pistonConstraintSerializer}
 };
 DynamicSerializerRegistry<ShapeClass> dynamicShapeClassSerializer{
 	{typeid(NormalizedPolyhedron), &polyhedronSerializer},

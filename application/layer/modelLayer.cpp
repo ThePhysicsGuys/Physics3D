@@ -225,6 +225,7 @@ void ModelLayer::onRender() {
 		Engine::MeshRegistry::meshes[part->visualData.drawMeshId]->render(part->renderMode);
 	}
 
+	Renderer::enableBlending();
 	for (auto iterator = transparentMeshes.rbegin(); iterator != transparentMeshes.rend(); ++iterator) {
 		ExtendedPart* part = (*iterator).second;
 
