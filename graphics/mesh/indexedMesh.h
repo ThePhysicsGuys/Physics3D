@@ -3,6 +3,7 @@
 #include "abstractMesh.h"
 
 #include "../buffers/bufferLayout.h"
+#include "../renderer.h"
 
 namespace Graphics {
 
@@ -21,10 +22,13 @@ public:
 	VertexBuffer* normalBuffer = nullptr;
 	VertexBuffer* uvBuffer = nullptr;
 
+	BufferLayout uniformBufferLayout;
+	VertexBuffer* uniformBuffer = nullptr;
+
 	int vertexCount;
 	int triangleCount;
 
-	IndexedMesh(const Graphics::VisualShape& shape);
+	IndexedMesh(const VisualShape& shape);
 	IndexedMesh(const float* vertices, const float* normals, const float* uvs, const unsigned int* indices, const int vertexCount, const int triangleCount);
 
 	~IndexedMesh();
@@ -33,7 +37,11 @@ public:
 	IndexedMesh& operator=(IndexedMesh&& other);
 	IndexedMesh& operator=(const IndexedMesh&) = delete;
 
-	void render(unsigned int mode);
+	void addUniformBuffer(VertexBuffer* uniformBuffer, const BufferLayout& uniformBufferLayout);
+	void updateUniformBuffer(const void* data, size_t sizeInBytes, int offset);
+
+	void render(GLFLAG mode);
+	void renderInstanced(GLFLAG mode, size_t primitives);
 
 	void render() override;
 	void close() override;

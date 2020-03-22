@@ -12,7 +12,7 @@ VertexBuffer::VertexBuffer() {
 	Log::debug("Created empty vertex buffer");
 };
 
-VertexBuffer::VertexBuffer(const void* data, size_t sizeInBytes, unsigned int mode) : Bindable() {
+VertexBuffer::VertexBuffer(const void* data, size_t sizeInBytes, GLFLAG mode) : Bindable() {
 	glGenBuffers(1, &id);
 	bind();
 	if (sizeInBytes != 0)
@@ -41,14 +41,14 @@ VertexBuffer& VertexBuffer::operator=(VertexBuffer&& other) {
 	return *this;
 }
 
-void VertexBuffer::fill(const void* data, size_t sizeInBytes, unsigned int mode) {
+void VertexBuffer::fill(const void* data, size_t sizeInBytes, GLFLAG mode) {
 	bind();
 	glBufferData(GL_ARRAY_BUFFER, sizeInBytes, data, mode);
 }
 
 void VertexBuffer::update(const void* data, size_t sizeInBytes, int offset) {
 	bind();
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeInBytes, data);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeInBytes, (const void*) (intptr_t) data);
 }
 
 void VertexBuffer::bind() {

@@ -74,6 +74,8 @@ public:
 	void setUniform(const std::string& uniform, const Vec2f& value) const;
 	void setUniform(const std::string& unfiorm, const Vec3f& value) const;
 	void setUniform(const std::string& unfiorm, const Vec4f& value) const;
+	void setUniform(const std::string& uniform, const Mat2f& value) const;
+	void setUniform(const std::string& uniform, const Mat3f& value) const;
 	void setUniform(const std::string& uniform, const Mat4f& value) const;
 	void setUniform(const std::string& uniform, const Position& value) const;
 

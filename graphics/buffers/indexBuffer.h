@@ -1,13 +1,14 @@
 #pragma once
 
 #include "../bindable.h"
+#include "../renderer.h"
 
 namespace Graphics {
 
 class IndexBuffer : public Bindable {
 public:
 	IndexBuffer();
-	IndexBuffer(const unsigned int* data, size_t size, unsigned int mode);
+	IndexBuffer(const unsigned int* data, size_t size, GLFLAG mode);
 	IndexBuffer(const unsigned int* data, size_t size);
 
 	~IndexBuffer();
@@ -16,7 +17,7 @@ public:
 	IndexBuffer& operator=(IndexBuffer&& other);
 	IndexBuffer& operator=(const IndexBuffer&) = delete;
 
-	void fill(const unsigned int* data, size_t size, unsigned int mode);
+	void fill(const unsigned int* data, size_t size, GLFLAG mode);
 	void update(const unsigned int* data, size_t size, int offset);
 
 	void bind() override;

@@ -42,7 +42,6 @@ void SkyboxLayer::onRender() {
 	disableDepthMask();
 	enableBlending();
 
-	ApplicationShaders::skyboxShader.updateLightDirection(Vec3());
 	ApplicationShaders::skyboxShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix);
 	skyboxTexture->bind();
 	

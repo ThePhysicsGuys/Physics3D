@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../buffers/bufferLayout.h"
+#include "../renderer.h"
 
 namespace Graphics {
 
@@ -9,10 +10,9 @@ class VertexArray;
 class AbstractMesh {
 public:
 	VertexArray* vao = nullptr;
-	BufferLayout bufferLayout;
-	unsigned int renderMode;
+	GLFLAG renderMode;
 
-	AbstractMesh(unsigned int rendermode);
+	AbstractMesh(GLFLAG renderMode);
 	AbstractMesh();
 
 	virtual void render() = 0;

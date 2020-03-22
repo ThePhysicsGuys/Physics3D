@@ -2,28 +2,30 @@
 
 #include "bindable.h"
 
+typedef unsigned int GLFLAG;
+
 namespace Graphics {
 
 namespace Renderer {
 
 // GL constants
 
-extern unsigned int WIREFRAME;
-extern unsigned int FILL;
-extern unsigned int POINT;
-extern unsigned int FRONT_AND_BACK;
+extern GLFLAG WIREFRAME;
+extern GLFLAG FILL;
+extern GLFLAG POINT;
+extern GLFLAG FRONT_AND_BACK;
 
-extern unsigned int STATIC_DRAW;
-extern unsigned int DYNAMIC_DRAW;
-extern unsigned int STREAM_DRAW;
+extern GLFLAG STATIC_DRAW;
+extern GLFLAG DYNAMIC_DRAW;
+extern GLFLAG STREAM_DRAW;
 
-extern unsigned int TRIANGLES;
-extern unsigned int PATCHES;
-extern unsigned int QUADS;
-extern unsigned int LINES;
-extern unsigned int POINTS;
+extern GLFLAG TRIANGLES;
+extern GLFLAG PATCHES;
+extern GLFLAG QUADS;
+extern GLFLAG LINES;
+extern GLFLAG POINTS;
 
-extern unsigned int UINT;
+extern GLFLAG UINT;
 
 // GLEW binding
 
@@ -63,8 +65,9 @@ extern void bindRenderbuffer(GLID id);
 
 extern void polygonMode(int face, int mode);
 extern void scissor(int x, int y, int width, int height);
-extern void drawElements(unsigned int mode, size_t count, unsigned int type, const void* offset);
-extern void drawArrays(unsigned int mode, int first, size_t count);
+extern void drawElementsInstanced(GLFLAG mode, size_t count, GLFLAG type, const void* offset, size_t primitives);
+extern void drawElements(GLFLAG mode, size_t count, GLFLAG type, const void* offset);
+extern void drawArrays(GLFLAG mode, int first, size_t count);
 
 extern void defaultSettings();
 

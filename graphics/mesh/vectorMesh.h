@@ -9,6 +9,8 @@ class VertexBuffer;
 class VectorMesh : public AbstractMesh {
 public:
 	VertexBuffer* vertexBuffer = nullptr;
+	BufferLayout vertexBufferLayout;
+
 	size_t vertexCount;
 	size_t capacity;
 

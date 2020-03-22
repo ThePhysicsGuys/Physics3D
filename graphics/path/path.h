@@ -71,16 +71,16 @@ namespace Path {
 	// Adds a filled triangle to the batch
 	void triangleFilled(const Vec2f& a, const Vec2f& b, const Vec2f& c, const Color& color = COLOR::WHITE);
 
-	// Adds a rectangle to the batch, with pos being the topleft corner and dim the dimension
+	// Adds a rectangle to the batch, with pos being the bottomleft corner and dim the dimension
 	void rect(const Vec2f& pos = Vec2f(0, 0), const Vec2f& dim = Vec2f(1, 1), float rounding = 0.0f, const Color& color = COLOR::WHITE, float thickness = 1.0f);
 
-	// Adds a filled rectangle to the batch, with pos being the topleft corner and dim the dimension
+	// Adds a filled rectangle to the batch, with pos being the bottomleft corner and dim the dimension
 	void rectFilled(const Vec2f& pos = Vec2f(0, 0), const Vec2f& dim = Vec2f(1, 1), float rounding = 0.0f, const Color& color = COLOR::WHITE);
 
 	//? Adds a rect with UV coordinates and a texture id to the batch, with pos being the topleft corner and dim the dimension, uvMin starts default at lower left, uvMax at upper right
 	void rectUV(GLID id, const Vec2f& pos = Vec2f(0, 0), const Vec2f& dim = Vec2f(1, 1), const Vec2f& uvMin = Vec2f(0, 0), const Vec2f& uvMax = Vec2f(1, 1), const Color& color = COLOR::WHITE);
 
-	//  Adds a rect with an UV range and a texture id to the batch, with pos being the topleft corner and dim the dimension
+	//  Adds a rect with an UV range and a texture id to the batch, with pos being the bottomleft corner and dim the dimension
 	void rectUVRange(GLID id, const Vec2f& pos, const Vec2f& dim, const Vec2f& xRange, const Vec2f& yRange, const Color& color = COLOR::WHITE);
 
 	// Adds a quad to the batch

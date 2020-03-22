@@ -99,8 +99,6 @@ bool StandardInputHandler::onKeyPress(KeyPressEvent& event) {
 		}
 	} else if (KeyboardOptions::Debug::pies == key) {
 		renderPiesEnabled = !renderPiesEnabled;
-	} else if (KeyboardOptions::Part::anchor == key) {
-		throw "Not implemented!";
 	} else if(KeyboardOptions::Part::makeMainPart == key) {
 		Log::info("Made %s the main part of it's physical", screen.selectedPart->name.c_str());
 		screen.selectedPart->makeMainPart();

@@ -20,7 +20,7 @@ void PostprocessLayer::onUpdate() {
 
 }
 
-void PostprocessLayer::onEvent(::Event& event) {
+void PostprocessLayer::onEvent(Event& event) {
 
 }
 

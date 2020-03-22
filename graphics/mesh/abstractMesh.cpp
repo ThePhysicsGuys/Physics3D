@@ -7,12 +7,10 @@
 
 namespace Graphics {
 
-AbstractMesh::AbstractMesh(unsigned int rendermode) : renderMode(renderMode) {
+AbstractMesh::AbstractMesh(GLFLAG renderMode) : renderMode(renderMode) {
 	vao = new VertexArray();
-};
+}
 
-AbstractMesh::AbstractMesh() : renderMode(Graphics::Renderer::TRIANGLES) {
-	vao = new VertexArray();
-};
+AbstractMesh::AbstractMesh() : AbstractMesh(Renderer::TRIANGLES) {}
 
 };

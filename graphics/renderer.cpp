@@ -9,22 +9,22 @@ namespace Graphics {
 
 namespace Renderer {
 
-unsigned int WIREFRAME = GL_LINE;
-unsigned int FILL = GL_FILL;
-unsigned int POINT = GL_POINT;
-unsigned int FRONT_AND_BACK = GL_FRONT_AND_BACK;
+GLFLAG WIREFRAME = GL_LINE;
+GLFLAG FILL = GL_FILL;
+GLFLAG POINT = GL_POINT;
+GLFLAG FRONT_AND_BACK = GL_FRONT_AND_BACK;
 
-unsigned int STATIC_DRAW = GL_STATIC_DRAW;
-unsigned int STREAM_DRAW = GL_STREAM_DRAW;
-unsigned int DYNAMIC_DRAW = GL_DYNAMIC_DRAW;
+GLFLAG STATIC_DRAW = GL_STATIC_DRAW;
+GLFLAG STREAM_DRAW = GL_STREAM_DRAW;
+GLFLAG DYNAMIC_DRAW = GL_DYNAMIC_DRAW;
 
-unsigned int PATCHES = GL_PATCHES;
-unsigned int QUADS = GL_QUADS;
-unsigned int TRIANGLES = GL_TRIANGLES;
-unsigned int LINES = GL_LINES;
-unsigned int POINTS = GL_POINTS;
+GLFLAG PATCHES = GL_PATCHES;
+GLFLAG QUADS = GL_QUADS;
+GLFLAG TRIANGLES = GL_TRIANGLES;
+GLFLAG LINES = GL_LINES;
+GLFLAG POINTS = GL_POINTS;
 
-unsigned int UINT = GL_UNSIGNED_INT;
+GLFLAG UINT = GL_UNSIGNED_INT;
 
 struct RenderState {
 	GLID dfbo;
@@ -269,15 +269,20 @@ void scissor(int x, int y, int width, int height) {
 	glScissor(x, y, width, height);
 }
 
-void drawElements(unsigned int mode, size_t count, unsigned int type, const void* offset) {
+void drawElements(GLFLAG mode, size_t count, GLFLAG type, const void* offset) {
 	glDrawElements(mode, count, type, offset);
 }
 
-void drawArrays(unsigned int mode, int first, size_t count) {
+void drawElementsInstanced(GLFLAG mode, size_t count, GLFLAG type, const void* offset, size_t primitives) {
+	glDrawElementsInstanced(mode, count, type, offset, primitives);
+}
+
+void drawArrays(GLFLAG mode, int first, size_t count) {
 	glDrawArrays(mode, first, count);
 }
 
 void defaultSettings() {
+	bindFramebuffer(0);
 	standardBlendFunction();
 	enableDepthTest();
 	disableCulling();

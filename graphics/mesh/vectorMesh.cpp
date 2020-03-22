@@ -12,7 +12,7 @@ namespace Graphics {
 VectorMesh::VectorMesh(const float* vertices, const size_t vertexCount, size_t capacity) : AbstractMesh(Graphics::Renderer::POINT), vertexCount(vertexCount), capacity(capacity) {
 	vertexBuffer = new VertexBuffer(vertices, 9 * capacity * sizeof(float), Graphics::Renderer::DYNAMIC_DRAW);
 
-	bufferLayout = {
+	vertexBufferLayout = {
 		{
 			{ "vposition", BufferDataType::FLOAT3 },
 			{ "vdirection", BufferDataType::FLOAT3 },
@@ -20,7 +20,7 @@ VectorMesh::VectorMesh(const float* vertices, const size_t vertexCount, size_t c
 		}
 	};
 
-	vao->addBuffer(vertexBuffer, bufferLayout);
+	vao->addBuffer(vertexBuffer, vertexBufferLayout);
 }
 
 void VectorMesh::render() {
@@ -39,9 +39,9 @@ void VectorMesh::update(const float* vertices, const size_t vertexCount) {
 	if (vertexCount > capacity) {
 		capacity = vertexCount;
 		Log::warn("Vector buffer overflow, creating new buffer with size (%d)", vertexCount);
-		vertexBuffer->fill(vertices, capacity * bufferLayout.stride * sizeof(float), Graphics::Renderer::DYNAMIC_DRAW);
+		vertexBuffer->fill(vertices, capacity * vertexBufferLayout.stride * sizeof(float), Graphics::Renderer::DYNAMIC_DRAW);
 	} else {
-		vertexBuffer->update(vertices, vertexCount * bufferLayout.stride * sizeof(float), 0);
+		vertexBuffer->update(vertices, vertexCount * vertexBufferLayout.stride * sizeof(float), 0);
 	}
 }
 

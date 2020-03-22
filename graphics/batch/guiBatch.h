@@ -36,7 +36,7 @@ public:
 				BufferElement("uv", BufferDataType::FLOAT2),
 				BufferElement("col", BufferDataType::FLOAT4)
 			}),
-			Graphics::Renderer::TRIANGLES
+			Renderer::TRIANGLES
 		)) {
 
 	}
@@ -62,16 +62,16 @@ public:
 
 		Batch<GuiVertex>::vao->bind();
 
-		Batch<GuiVertex>::vbo->fill((const void*) Batch<GuiVertex>::vertexBuffer.data(), Batch<GuiVertex>::vertexBuffer.size() * sizeof(GuiVertex), Graphics::Renderer::STREAM_DRAW);
-		Batch<GuiVertex>::ibo->fill((const unsigned int*) Batch<GuiVertex>::indexBuffer.data(), Batch<GuiVertex>::indexBuffer.size(), Graphics::Renderer::STREAM_DRAW);
+		Batch<GuiVertex>::vbo->fill((const void*) Batch<GuiVertex>::vertexBuffer.data(), Batch<GuiVertex>::vertexBuffer.size() * sizeof(GuiVertex), Renderer::STREAM_DRAW);
+		Batch<GuiVertex>::ibo->fill((const unsigned int*) Batch<GuiVertex>::indexBuffer.data(), Batch<GuiVertex>::indexBuffer.size(), Renderer::STREAM_DRAW);
 
 		GLID lastID = 0;
-		int lastCount = 0;
+		size_t lastCount = 0;
 		size_t lastIndexOffset = 0;
 
 		for (const GuiCommand& command : commandBuffer) {
 			GLID ID = command.textureID;
-			int count = command.count;
+			size_t count = command.count;
 			size_t indexOffset = command.indexOffset;
 
 			if (ID == lastID) {
@@ -79,13 +79,13 @@ public:
 				lastCount += count;
 			} else {
 				// render merged calls, shader update, texture bind, render this call
-				Graphics::Renderer::drawElements(Graphics::Renderer::TRIANGLES, lastCount, Graphics::Renderer::UINT, (const void*) (intptr_t) (lastIndexOffset * sizeof(unsigned int)));
+				Renderer::drawElements(Renderer::TRIANGLES, lastCount, Renderer::UINT, (const void*) (intptr_t) (lastIndexOffset * sizeof(unsigned int)));
 
 				// update shader
 				if (ID == 0) {
 					GraphicsShaders::guiShader.setTextured(false);
 				} else {
-					Graphics::Renderer::bindTexture2D(ID);
+					Renderer::bindTexture2D(ID);
 					GraphicsShaders::guiShader.setTextured(true);
 				}
 
@@ -97,7 +97,7 @@ public:
 			lastID = ID;
 		}
 
-		Graphics::Renderer::drawElements(Graphics::Renderer::TRIANGLES, lastCount, Graphics::Renderer::UINT, (const void*) (intptr_t) (lastIndexOffset * sizeof(unsigned int)));
+		Renderer::drawElements(Renderer::TRIANGLES, lastCount, Renderer::UINT, (const void*) (intptr_t) (lastIndexOffset * sizeof(unsigned int)));
 
 		Batch<GuiVertex>::vbo->unbind();
 		Batch<GuiVertex>::ibo->unbind();

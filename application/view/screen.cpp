@@ -154,9 +154,9 @@ void Screen::onInit() {
 	constraintLayer = ConstraintLayer(this, Layer::NoUpdate | Layer::NoEvents);
 	debugLayer = DebugLayer(this);
 	pickerLayer = PickerLayer(this);
-	testLayer = TestLayer(this);
 	postprocessLayer = PostprocessLayer(this);
 	guiLayer = GuiLayer(this);
+	testLayer = TestLayer(this, Layer::Disabled);
 	debugOverlay = DebugOverlay(this);
 
 	layerStack.pushLayer(&skyboxLayer);
@@ -264,7 +264,6 @@ void Screen::onRender() {
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 
-	screenFrameBuffer->bind();
 	defaultSettings();
 
 	// Render layers
