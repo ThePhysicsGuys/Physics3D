@@ -369,9 +369,9 @@ void setupWorld(int argc, const char** args) {
 
 		ConstraintGroup group;
 
-		group.ballConstraints.push_back(BallConstraint{Vec3(1.0, 0.0, 0.7), box1->parent, Vec3(-1.0, 0.0, 0.7), box2->parent});
-		group.ballConstraints.push_back(BallConstraint{Vec3(1.0, 0.0, 0.7), box2->parent, Vec3(-1.0, 0.0, 0.7), box3->parent});
-		group.ballConstraints.push_back(BallConstraint{Vec3(1.0, 0.0, 0.7), box3->parent, Vec3(-1.0, 0.0, 0.7), box1->parent});
+		group.ballConstraints.push_back(BallConstraint{Vec3(1.0, 0.0, 0.7), box1->parent, Vec3(-1.0, 0.0, 0.7), box3->parent});
+		group.ballConstraints.push_back(BallConstraint{Vec3(1.0, 0.0, 0.7), box2->parent, Vec3(-1.0, 0.0, 0.7), box1->parent});
+		group.ballConstraints.push_back(BallConstraint{Vec3(1.0, 0.0, 0.7), box3->parent, Vec3(-1.0, 0.0, 0.7), box2->parent});
 
 		world.constraints.push_back(std::move(group));
 	}

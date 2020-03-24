@@ -107,8 +107,8 @@ static void renderConstraintBars(const ConstraintLayer* cl, const GlobalCFrame& 
 
 static void renderBallConstraint(const ConstraintLayer* cl, const GlobalCFrame& cframeOfFirst, const GlobalCFrame& cframeOfSecond, const CFrame& attachOnFirst, const CFrame& attachOnSecond, float innerBallThickness, float outerBallThickness) {
 	renderConstraintBars(cl, cframeOfFirst, cframeOfSecond, attachOnFirst, attachOnSecond);
-	renderObject(Engine::MeshRegistry::sphere, cframeOfFirst.localToGlobal(attachOnFirst.getPosition()), DiagonalMat3f::IDENTITY() * innerBallThickness, Material(Color(0.0f, 0.0f, 1.0f, 1.0f)));
-	renderObject(Engine::MeshRegistry::sphere, cframeOfSecond.localToGlobal(attachOnSecond.getPosition()), DiagonalMat3f::IDENTITY() * outerBallThickness, Material(Color(0.0f, 0.0f, 1.0f, 0.7f)));
+	renderObject(Engine::MeshRegistry::sphere, cframeOfFirst.localToGlobal(attachOnFirst), DiagonalMat3f::IDENTITY() * innerBallThickness, Material(Color(0.0f, 0.0f, 1.0f, 1.0f)));
+	renderObject(Engine::MeshRegistry::sphere, cframeOfSecond.localToGlobal(attachOnSecond), DiagonalMat3f::IDENTITY() * outerBallThickness, Material(Color(0.0f, 0.0f, 1.0f, 0.7f)));
 }
 
 static void renderHardConstraint(const ConstraintLayer* cl, const ConnectedPhysical& conPhys) {
@@ -139,10 +139,13 @@ static void recurseRenderHardConstraints(const ConstraintLayer* cl, const Physic
 void ConstraintLayer::onRender() {
 	using namespace Graphics;
 	using namespace Graphics::Renderer;
+
+
 	Screen* screen = static_cast<Screen*>(this->ptr);
 	PlayerWorld* world = screen->world;
 
 	beginScene();
+	Renderer::enableBlending();
 
 	ApplicationShaders::basicShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
 	ApplicationShaders::maskShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix);
