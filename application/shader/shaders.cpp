@@ -29,6 +29,7 @@ TestShader testShader;
 LineShader lineShader;
 MaskShader maskShader;
 InstanceBasicShader instanceBasicShader;
+SkyShader skyShader;
 
 void onInit() {
 	// Shader source init
@@ -44,6 +45,7 @@ void onInit() {
 	ShaderSource lineShaderSource = parseShader("line.shader", (std::istream&) std::istringstream(getResourceAsString(applicationResources, LINE_SHADER)));
 	ShaderSource maskShaderSource = parseShader("mask.shader", (std::istream&) std::istringstream(getResourceAsString(applicationResources, MASK_SHADER)));
 	ShaderSource instanceBasicShaderSource = parseShader("instance_basic.shader", (std::istream&) std::istringstream(getResourceAsString(applicationResources, BASIC_SHADER)));
+	ShaderSource skyShaderSource = parseShader("sky.shader", (std::istream&) std::istringstream(getResourceAsString(applicationResources, SKY_SHADER)));
 
 
 	// Shader init
@@ -59,6 +61,7 @@ void onInit() {
 	new(&lineShader) LineShader(lineShaderSource);
 	new(&maskShader) MaskShader(maskShaderSource);
 	new(&instanceBasicShader) InstanceBasicShader(instanceBasicShaderSource);
+	new(&skyShader) SkyShader(skyShaderSource);
 
 	ResourceManager::add(&basicShader);
 	ResourceManager::add(&depthShader);
@@ -72,6 +75,7 @@ void onInit() {
 	ResourceManager::add(&lineShader);
 	ResourceManager::add(&maskShader);
 	ResourceManager::add(&instanceBasicShader);
+	ResourceManager::add(&skyShader);
 }
 
 void onClose() {
@@ -87,7 +91,9 @@ void onClose() {
 	lineShader.close();
 	maskShader.close();
 	instanceBasicShader.close();
+	skyShader.close();
 }
+
 }
 
 
@@ -442,7 +448,26 @@ void InstanceBasicShader::updateProjection(const Mat4f& viewMatrix, const Mat4f&
 	bind();
 	setUniform("viewMatrix", viewMatrix);
 	setUniform("projectionMatrix", projectionMatrix);
+	//setUniform("viewPosition", viewPosition);
+}
+
+
+
+void SkyShader::updateCamera(const Vec3f& viewPosition, const Vec3f& viewDirection, const Vec2f& resolution) {
+	bind();
 	setUniform("viewPosition", viewPosition);
+	setUniform("viewDirection", viewDirection);
+	setUniform("resolution", resolution);
+}
+
+void SkyShader::updateTexture() {
+	bind();
+	setUniform("image", 0);
+}
+
+void SkyShader::updateTime(float time) {
+	bind();
+	setUniform("time", time);
 }
 
 };

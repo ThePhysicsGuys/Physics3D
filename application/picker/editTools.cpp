@@ -48,15 +48,15 @@ void EditTools::onInit() {
 	line->resize(Vec3f(0, -100000, 0), Vec3f(0, 100000, 0));
 
 	// Rotate shape init
-	rotateMesh = ResourceManager::add<MeshResource>("../res/models/gui/rotate.bobj");
+	rotateMesh = ResourceManager::add<MeshResource>("rotate", "../res/models/gui/rotate.bobj");
 
 	// Scale shape init
-	scaleMesh = ResourceManager::add<MeshResource>("../res/models/gui/scale_shaft.bobj");
-	scaleCenterMesh = ResourceManager::add<MeshResource>("../res/models/gui/scale_center.bobj");
+	scaleMesh = ResourceManager::add<MeshResource>("scale", "../res/models/gui/scale_shaft.bobj");
+	scaleCenterMesh = ResourceManager::add<MeshResource>("scale center", "../res/models/gui/scale_center.bobj");
 
 	// Translate shape init
-	translateMesh = ResourceManager::add<MeshResource>("../res/models/gui/translate_shaft.bobj");
-	translateCenterMesh = ResourceManager::add<MeshResource>("../res/models/gui/translate_center.bobj");
+	translateMesh = ResourceManager::add<MeshResource>("translate", "../res/models/gui/translate_shaft.bobj");
+	translateCenterMesh = ResourceManager::add<MeshResource>("translate center", "../res/models/gui/translate_center.bobj");
 
 	// Intersected tool init
 	intersectedEditDirection = EditDirection::NONE;

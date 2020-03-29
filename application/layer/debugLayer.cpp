@@ -200,7 +200,7 @@ void DebugLayer::onRender() {
 					recursiveColTreeForOneObject(screen->world->objectTree.rootNode, screen->selectedPart, screen->selectedPart->getStrictBounds());
 				break;
 		}
-		});
+	});
 
 
 	disableDepthTest();

@@ -40,10 +40,11 @@ public:
 	void addUniformBuffer(VertexBuffer* uniformBuffer, const BufferLayout& uniformBufferLayout);
 	void updateUniformBuffer(const void* data, size_t sizeInBytes, int offset);
 
+	void render() override;
 	void render(GLFLAG mode);
+	void renderInstanced(size_t primitives);
 	void renderInstanced(GLFLAG mode, size_t primitives);
 
-	void render() override;
 	void close() override;
 };
 

@@ -365,9 +365,20 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\res\shaders\basic.shader" />
+    <None Include="..\res\shaders\blur.shader" />
+    <None Include="..\res\shaders\depth.shader" />
+    <None Include="..\res\shaders\font.shader" />
     <None Include="..\res\shaders\instance.shader" />
     <None Include="..\res\shaders\line.shader" />
+    <None Include="..\res\shaders\mask.shader" />
+    <None Include="..\res\shaders\origin.shader" />
+    <None Include="..\res\shaders\point.shader" />
     <None Include="..\res\shaders\postprocess.shader" />
+    <None Include="..\res\shaders\quad.shader" />
+    <None Include="..\res\shaders\sky.shader" />
+    <None Include="..\res\shaders\skybox.shader" />
+    <None Include="..\res\shaders\test.shader" />
+    <None Include="..\res\shaders\vector.shader" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

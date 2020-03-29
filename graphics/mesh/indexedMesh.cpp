@@ -149,6 +149,10 @@ void IndexedMesh::render(GLFLAG mode) {
 	Renderer::polygonMode(Renderer::FRONT_AND_BACK, Renderer::FILL);
 }
 
+void IndexedMesh::renderInstanced(size_t primitives) {
+	renderInstanced(Renderer::FILL, primitives);
+}
+
 void IndexedMesh::renderInstanced(GLFLAG mode, size_t primitives) {
 	vao->bind();
 	indexBuffer->bind();

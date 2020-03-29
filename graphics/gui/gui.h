@@ -4,9 +4,8 @@
 #include "../batch/batchConfig.h"
 #include "color.h"
 
-struct Quad;
-
 namespace Graphics {
+struct Quad;
 class Component;
 class IndexedMesh;
 class FrameBuffer;

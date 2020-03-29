@@ -1,8 +1,8 @@
 #pragma once
 
 #include "../physics/math/linalg/vec.h"
-
 #include "../engine/ecs/component.h"
+#include "../graphics/gui/color.h"
 
 namespace Application {
 

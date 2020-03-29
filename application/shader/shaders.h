@@ -19,8 +19,8 @@ struct Material;
 struct ExtendedPart;
 
 struct SkyboxShader : public ShaderResource {
-	SkyboxShader() : ShaderResource() {}
-	SkyboxShader(ShaderSource shaderSource) : ShaderResource("skyboxShader", "skybox.shader", shaderSource) {}
+	inline SkyboxShader() : ShaderResource() {}
+	inline SkyboxShader(ShaderSource shaderSource) : ShaderResource("skyboxShader", "skybox.shader", shaderSource) {}
 
 	void updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix);
 	void updateCubeMap(Graphics::CubeMap* skybox);
@@ -28,8 +28,8 @@ struct SkyboxShader : public ShaderResource {
 };
 
 struct MaskShader : public ShaderResource {
-	MaskShader() : ShaderResource() {}
-	MaskShader(ShaderSource shaderSource) : ShaderResource("MaskShader", "mask.shader", shaderSource) {}
+	inline MaskShader() : ShaderResource() {}
+	inline MaskShader(ShaderSource shaderSource) : ShaderResource("MaskShader", "mask.shader", shaderSource) {}
 
 	void updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix);
 	void updateModel(const Mat4f& modelMatrix);
@@ -38,8 +38,8 @@ struct MaskShader : public ShaderResource {
 };
 
 struct BasicShader : public ShaderResource {
-	BasicShader() : ShaderResource() {}
-	BasicShader(ShaderSource shaderSource) : ShaderResource("BasicShader", "basic.shader", shaderSource) {}
+	inline BasicShader() : ShaderResource() {}
+	inline BasicShader(ShaderSource shaderSource) : ShaderResource("BasicShader", "basic.shader", shaderSource) {}
 
 	void updateSunDirection(const Vec3f& sunDirection);
 	void updateSunColor(const Color3& sunColor);
@@ -57,8 +57,8 @@ struct BasicShader : public ShaderResource {
 };
 
 struct DepthShader : public ShaderResource {
-	DepthShader() : ShaderResource() {}
-	DepthShader(ShaderSource shaderSource) : ShaderResource("DepthShader", "depth.shader", shaderSource) {}
+	inline DepthShader() : ShaderResource() {}
+	inline DepthShader(ShaderSource shaderSource) : ShaderResource("DepthShader", "depth.shader", shaderSource) {}
 
 	void updateLight(const Mat4f& lightMatrix);
 	void updateModel(const Mat4f& modelMatrix);
@@ -66,23 +66,23 @@ struct DepthShader : public ShaderResource {
 };
 
 struct PostProcessShader : public ShaderResource {
-	PostProcessShader() : ShaderResource() {}
-	PostProcessShader(ShaderSource shaderSource) : ShaderResource("PostProcessShader", "postprocess.shader", shaderSource) {}
+	inline PostProcessShader() : ShaderResource() {}
+	inline PostProcessShader(ShaderSource shaderSource) : ShaderResource("PostProcessShader", "postprocess.shader", shaderSource) {}
 
 	void updateTexture(Graphics::Texture* texture);
 	void updateTexture(Graphics::HDRTexture* texture);
 };
 
 struct OriginShader : public ShaderResource {
-	OriginShader() : ShaderResource() {}
-	OriginShader(ShaderSource shaderSource) : ShaderResource("OriginShader", "origin.shader", shaderSource) {}
+	inline OriginShader() : ShaderResource() {}
+	inline OriginShader(ShaderSource shaderSource) : ShaderResource("OriginShader", "origin.shader", shaderSource) {}
 
 	void updateProjection(const Mat4f& viewMatrix, const Mat4f& rotatedViewMatrix, const Mat4f& projectionMatrix, const Mat4f& orthoMatrix, const Position& viewPosition);
 };
 
 struct FontShader : public ShaderResource {
-	FontShader() : ShaderResource() {}
-	FontShader(ShaderSource shaderSource) : ShaderResource("FontShader", "font.shader", shaderSource) {}
+	inline FontShader() : ShaderResource() {}
+	inline FontShader(ShaderSource shaderSource) : ShaderResource("FontShader", "font.shader", shaderSource) {}
 
 	void updateColor(const Color& color);
 	void updateProjection(const Mat4f& projectionMatrix);
@@ -90,22 +90,22 @@ struct FontShader : public ShaderResource {
 };
 
 struct VectorShader : public ShaderResource {
-	VectorShader() : ShaderResource() {}
-	VectorShader(ShaderSource shaderSource) : ShaderResource("VectorShader", "vector.shader", shaderSource) {}
+	inline VectorShader() : ShaderResource() {}
+	inline VectorShader(ShaderSource shaderSource) : ShaderResource("VectorShader", "vector.shader", shaderSource) {}
 
 	void updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Position& viewPosition);
 };
 
 struct PointShader : public ShaderResource {
-	PointShader() : ShaderResource() {}
-	PointShader(ShaderSource shaderSource) : ShaderResource("PointShader", "point.shader", shaderSource) {}
+	inline PointShader() : ShaderResource() {}
+	inline PointShader(ShaderSource shaderSource) : ShaderResource("PointShader", "point.shader", shaderSource) {}
 
 	void updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Position& viewPosition);
 };
 
 struct TestShader : public ShaderResource {
-	TestShader() : ShaderResource() {}
-	TestShader(ShaderSource shaderSource) : ShaderResource("TestShader", "test.shader", shaderSource) {}
+	inline TestShader() : ShaderResource() {}
+	inline TestShader(ShaderSource shaderSource) : ShaderResource("TestShader", "test.shader", shaderSource) {}
 
 	void updateProjection(const Mat4f& projectionMatrix);
 	void updateView(const Mat4f& viewMatrix);
@@ -116,15 +116,15 @@ struct TestShader : public ShaderResource {
 };
 
 struct LineShader : public ShaderResource {
-	LineShader() : ShaderResource() {}
-	LineShader(ShaderSource shaderSource) : ShaderResource("LineShader", "line.shader", shaderSource) {}
+	inline LineShader() : ShaderResource() {}
+	inline LineShader(ShaderSource shaderSource) : ShaderResource("LineShader", "line.shader", shaderSource) {}
 
 	void updateProjection(const Mat4f& projectionMatrix, const Mat4f& viewMatrix);
 };
 
 struct InstanceBasicShader : public ShaderResource {
-	InstanceBasicShader() : ShaderResource() {}
-	InstanceBasicShader(ShaderSource shaderSource) : ShaderResource("InstanceBasicShader", "instance_basic.shader", shaderSource) {}
+	inline InstanceBasicShader() : ShaderResource() {}
+	inline InstanceBasicShader(ShaderSource shaderSource) : ShaderResource("InstanceBasicShader", "instance_basic.shader", shaderSource) {}
 
 	void updateSunDirection(const Vec3f& sunDirection);
 	void updateSunColor(const Vec3f& sunColor);
@@ -133,6 +133,15 @@ struct InstanceBasicShader : public ShaderResource {
 	void updateExposure(float exposure);
 	void updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Position& viewPosition);
 	void updateLight(Light lights[], int size);
+};
+
+struct SkyShader : public ShaderResource {
+	inline SkyShader() : ShaderResource() {}
+	inline SkyShader(ShaderSource shaderSource) : ShaderResource("SkyShader", "sky.shader", shaderSource) {}
+
+	void updateCamera(const Vec3f& viewPosition, const Vec3f& viewDirection, const Vec2f& resolution);
+	void updateTexture();
+	void updateTime(float time);
 };
 
 namespace ApplicationShaders {
@@ -148,6 +157,7 @@ extern TestShader testShader;
 extern LineShader lineShader;
 extern InstanceBasicShader instanceBasicShader;
 extern MaskShader maskShader;
+extern SkyShader skyShader;
 
 void onInit();
 void onClose();
