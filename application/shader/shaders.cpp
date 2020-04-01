@@ -452,17 +452,11 @@ void InstanceBasicShader::updateProjection(const Mat4f& viewMatrix, const Mat4f&
 }
 
 
-
-void SkyShader::updateCamera(const Vec3f& viewPosition, const Vec3f& viewDirection, const Vec2f& resolution) {
+void SkyShader::updateCamera(const Vec3f& viewPosition, const Mat4f& projectionMatrix, const Mat4f& viewMatrix) {
 	bind();
-	setUniform("viewPosition", viewPosition);
-	setUniform("viewDirection", viewDirection);
-	setUniform("resolution", resolution);
-}
-
-void SkyShader::updateTexture() {
-	bind();
-	setUniform("image", 0);
+	//setUniform("viewPosition", viewPosition);
+	setUniform("projectionMatrix", projectionMatrix);
+	setUniform("viewMatrix", viewMatrix);
 }
 
 void SkyShader::updateTime(float time) {

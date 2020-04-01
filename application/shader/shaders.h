@@ -139,8 +139,7 @@ struct SkyShader : public ShaderResource {
 	inline SkyShader() : ShaderResource() {}
 	inline SkyShader(ShaderSource shaderSource) : ShaderResource("SkyShader", "sky.shader", shaderSource) {}
 
-	void updateCamera(const Vec3f& viewPosition, const Vec3f& viewDirection, const Vec2f& resolution);
-	void updateTexture();
+	void updateCamera(const Vec3f& viewPosition, const Mat4f& projectionMatrix, const Mat4f& viewMatrix);
 	void updateTime(float time);
 };
 

@@ -28,7 +28,6 @@ void SkyboxLayer::onInit() {
 	skyboxTexture = new Graphics::CubeMap("../res/skybox/right.jpg", "../res/skybox/left.jpg", "../res/skybox/top.jpg", "../res/skybox/bottom.jpg", "../res/skybox/front.jpg", "../res/skybox/back.jpg");
 	ResourceManager::add<TextureResource>("uv", "../res/textures/uv.png");
 	ResourceManager::add<TextureResource>("noise", "../res/textures/noise.png");
-	ApplicationShaders::skyShader.updateTexture();
 }
 
 void SkyboxLayer::onUpdate() {
@@ -53,13 +52,26 @@ void SkyboxLayer::onRender() {
 	ImGui::Begin("Skybox");
 
 	ImGui::Checkbox("New sky", &pressed);
+	/*
+		inclination = 0.49;
+		azimuth = 0.25;
+		var theta = Math.PI * (inclination - 0.5);
+		var phi = 2 * Math.PI * (azimuth - 0.5);
+		
+		var distance = 400000;
+		sunPosition.x = distance * Math.cos(phi);
+		sunPosition.y = distance * Math.sin(phi) * Math.sin(theta);
+		sunPosition.z = distance * Math.sin(phi) * Math.cos(theta);
+	*/
 
 	if (pressed) {
+		disableCulling();
 		disableDepthMask();
-		ResourceManager::get<TextureResource>("noise")->bind();
-		ApplicationShaders::skyShader.updateCamera(fromPosition(screen->camera.cframe.position), Vec3f(screen->camera.viewMatrix * Vec4f(0, 0, 1, 0)), screen->dimension);
-		ApplicationShaders::skyShader.updateTime(glfwGetTime());
-		screen->quad->render();
+		enableBlending();
+		skyboxTexture->bind();
+		ApplicationShaders::skyShader.setUniform("tex", 0);
+		ApplicationShaders::skyShader.updateCamera(fromPosition(screen->camera.cframe.position), screen->camera.projectionMatrix, screen->camera.viewMatrix);
+		Library::sphere->render();
 	} else {
 		disableCulling();
 		disableDepthMask();

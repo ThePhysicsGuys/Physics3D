@@ -21,7 +21,7 @@ void onInit() {
 	cube = new IndexedMesh(VisualShape(::Library::createCube(1)));
 
 	// Sphere
-	sphere = new IndexedMesh(VisualShape(::Library::createSphere(1)));
+	sphere = new IndexedMesh(VisualShape(::Library::createSphere(1,5)));
 }
 
 void onClose() {
