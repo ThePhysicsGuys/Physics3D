@@ -28,7 +28,7 @@ PointShader pointShader;
 TestShader testShader;
 LineShader lineShader;
 MaskShader maskShader;
-InstanceBasicShader instanceBasicShader;
+InstanceShader instanceShader;
 SkyShader skyShader;
 
 void onInit() {
@@ -44,7 +44,7 @@ void onInit() {
 	ShaderSource testShaderSource = parseShader("test.shader", (std::istream&) std::istringstream(getResourceAsString(applicationResources, TEST_SHADER)));
 	ShaderSource lineShaderSource = parseShader("line.shader", (std::istream&) std::istringstream(getResourceAsString(applicationResources, LINE_SHADER)));
 	ShaderSource maskShaderSource = parseShader("mask.shader", (std::istream&) std::istringstream(getResourceAsString(applicationResources, MASK_SHADER)));
-	ShaderSource instanceBasicShaderSource = parseShader("instance_basic.shader", (std::istream&) std::istringstream(getResourceAsString(applicationResources, BASIC_SHADER)));
+	ShaderSource instanceShaderSource = parseShader("instance.shader", (std::istream&) std::istringstream(getResourceAsString(applicationResources, INSTANCE_SHADER)));
 	ShaderSource skyShaderSource = parseShader("sky.shader", (std::istream&) std::istringstream(getResourceAsString(applicationResources, SKY_SHADER)));
 
 
@@ -60,7 +60,7 @@ void onInit() {
 	new(&testShader) TestShader(testShaderSource);
 	new(&lineShader) LineShader(lineShaderSource);
 	new(&maskShader) MaskShader(maskShaderSource);
-	new(&instanceBasicShader) InstanceBasicShader(instanceBasicShaderSource);
+	new(&instanceShader) InstanceShader(instanceShaderSource);
 	new(&skyShader) SkyShader(skyShaderSource);
 
 	ResourceManager::add(&basicShader);
@@ -74,7 +74,7 @@ void onInit() {
 	ResourceManager::add(&testShader);
 	ResourceManager::add(&lineShader);
 	ResourceManager::add(&maskShader);
-	ResourceManager::add(&instanceBasicShader);
+	ResourceManager::add(&instanceShader);
 	ResourceManager::add(&skyShader);
 }
 
@@ -90,7 +90,7 @@ void onClose() {
 	testShader.close();
 	lineShader.close();
 	maskShader.close();
-	instanceBasicShader.close();
+	instanceShader.close();
 	skyShader.close();
 }
 
@@ -385,9 +385,9 @@ void LineShader::updateProjection(const Mat4f& projectionMatrix, const Mat4f& vi
 }
 
 
-// InstanceBasicShader
+// InstanceShader
 
-void InstanceBasicShader::updateLight(Light lights[], int size) {
+void InstanceShader::updateLight(Light lights[], int size) {
 	bind();
 	for (int i = 0; i < size; i++) {
 		std::string uniform;
@@ -419,42 +419,40 @@ void InstanceBasicShader::updateLight(Light lights[], int size) {
 	}
 }
 
-void InstanceBasicShader::updateSunDirection(const Vec3f& sunDirection) {
+void InstanceShader::updateSunDirection(const Vec3f& sunDirection) {
 	bind();
 	setUniform("sunDirection", sunDirection);
 }
 
-void InstanceBasicShader::updateSunColor(const Vec3f& sunColor) {
+void InstanceShader::updateSunColor(const Vec3f& sunColor) {
 	bind();
 	setUniform("sunColor", sunColor);
 }
 
-void InstanceBasicShader::updateGamma(float gamma) {
+void InstanceShader::updateGamma(float gamma) {
 	bind();
 	setUniform("gamma", gamma);
 }
 
-void InstanceBasicShader::updateHDR(bool hdr) {
+void InstanceShader::updateHDR(bool hdr) {
 	bind();
 	setUniform("hdr", hdr);
 }
 
-void InstanceBasicShader::updateExposure(float exposure) {
+void InstanceShader::updateExposure(float exposure) {
 	bind();
 	setUniform("exposure", exposure);
 }
 
-void InstanceBasicShader::updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Position& viewPosition) {
+void InstanceShader::updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Position& viewPosition) {
 	bind();
 	setUniform("viewMatrix", viewMatrix);
 	setUniform("projectionMatrix", projectionMatrix);
-	//setUniform("viewPosition", viewPosition);
 }
 
 
 void SkyShader::updateCamera(const Vec3f& viewPosition, const Mat4f& projectionMatrix, const Mat4f& viewMatrix) {
 	bind();
-	//setUniform("viewPosition", viewPosition);
 	setUniform("projectionMatrix", projectionMatrix);
 	setUniform("viewMatrix", viewMatrix);
 }

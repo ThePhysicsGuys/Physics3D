@@ -122,9 +122,9 @@ struct LineShader : public ShaderResource {
 	void updateProjection(const Mat4f& projectionMatrix, const Mat4f& viewMatrix);
 };
 
-struct InstanceBasicShader : public ShaderResource {
-	inline InstanceBasicShader() : ShaderResource() {}
-	inline InstanceBasicShader(ShaderSource shaderSource) : ShaderResource("InstanceBasicShader", "instance_basic.shader", shaderSource) {}
+struct InstanceShader : public ShaderResource {
+	inline InstanceShader() : ShaderResource() {}
+	inline InstanceShader(ShaderSource shaderSource) : ShaderResource("InstanceBasicShader", "instance_basic.shader", shaderSource) {}
 
 	void updateSunDirection(const Vec3f& sunDirection);
 	void updateSunColor(const Vec3f& sunColor);
@@ -154,7 +154,7 @@ extern SkyboxShader skyboxShader;
 extern PointShader pointShader;
 extern TestShader testShader;
 extern LineShader lineShader;
-extern InstanceBasicShader instanceBasicShader;
+extern InstanceShader instanceShader;
 extern MaskShader maskShader;
 extern SkyShader skyShader;
 

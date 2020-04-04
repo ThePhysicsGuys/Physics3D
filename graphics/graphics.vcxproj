@@ -300,6 +300,7 @@
     <ClInclude Include="debug\profilerUI.h" />
     <ClInclude Include="font.h" />
     <ClInclude Include="gui\color.h" />
+    <ClInclude Include="gui\valueCycle.h" />
     <ClInclude Include="gui\component.h" />
     <ClInclude Include="gui\container.h" />
     <ClInclude Include="gui\gui.h" />

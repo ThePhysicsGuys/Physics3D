@@ -44,7 +44,8 @@ namespace COLOR {
 	Color hsvaToRgba(Color hsva);
 	Color rgbaToHsva(Color rgba);
 
-	Color blend(Color color1, Color color2);
+	Color blend(const Color& color1, const Color& color2, float blend);
+	Color3 blend(const Color3& color1, const Color3& color2, float blend);
 };
 
 };

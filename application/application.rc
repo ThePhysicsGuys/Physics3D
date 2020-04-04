@@ -51,6 +51,8 @@ IDR_SHADER12            SHADER                  "..\\res\\shaders\\blur.shader"
 
 IDR_SHADER13            SHADER                  "..\\res\\shaders\\line.shader"
 
+IDR_SHADER14            SHADER                  "..\\res\\shaders\\instance.shader"
+
 IDR_SHADER15            SHADER                  "..\\res\\shaders\\sky.shader"
 
 

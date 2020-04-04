@@ -5,6 +5,35 @@
 namespace Graphics {
 
 namespace COLOR {
+
+Color DISABLED = get(0xA0A0A0);
+Color ACCENT = get(0x1F6678);
+Color BACK = get(0x4D4D4D);
+Color ALPHA = get(0x0, true);
+
+Color R = get(0xFF0000);
+Color G = get(0x00FF00);
+Color B = get(0x0000FF);
+Color A = get(0x0, true);
+
+Color NAVY = get(0x001F3F);
+Color BLUE = get(0x0074D9);
+Color AQUA = get(0x7FDBFF);
+Color TEAL = get(0x39CCCC);
+Color OLIVE = get(0x3D9970);
+Color GREEN = get(0x2ECC40);
+Color LIME = get(0x01FF70);
+Color YELLOW = get(0xFFDC00);
+Color ORANGE = get(0xFF851B);
+Color RED = get(0xFF4136);
+Color MAROON = get(0x85144b);
+Color FUCHSIA = get(0xF012BE);
+Color PURPLE = get(0xB10DC9);
+Color BLACK = get(0x111111);
+Color GRAY = get(0xAAAAAA);
+Color SILVER = get(0xDDDDDD);
+Color WHITE = get(0xFFFFFF);
+
 Color get(int hex, bool alpha) {
 	Color color;
 	if (!alpha) hex = (hex << 8) | 0xFF;
@@ -109,37 +138,14 @@ Color3 rgbToHsv(Color3 rgb) {
 	return Color3(h, s, v);
 }
 
-Color blend(Color color1, Color color2) {
-	return Color(color1.x * color2.x, color1.y * color2.y, color1.z * color2.z, color1.w * color2.w);
+Color blend(const Color& color1, const Color& color2, float blend) {
+	return (1.0f - blend) * color1 + blend * color2;
 }
 
-Color DISABLED = get(0xA0A0A0);
-Color ACCENT = get(0x1F6678);
-Color BACK = get(0x4D4D4D);
-Color ALPHA = get(0x0, true);
+Color3 blend(const Color3& color1, const Color3& color2, float blend) {
+	return (1.0f - blend) * color1 + blend * color2;
+}
 
-Color R = get(0xFF0000);
-Color G = get(0x00FF00);
-Color B = get(0x0000FF);
-Color A = get(0x0, true);
-
-Color NAVY = get(0x001F3F);
-Color BLUE = get(0x0074D9);
-Color AQUA = get(0x7FDBFF);
-Color TEAL = get(0x39CCCC);
-Color OLIVE = get(0x3D9970);
-Color GREEN = get(0x2ECC40);
-Color LIME = get(0x01FF70);
-Color YELLOW = get(0xFFDC00);
-Color ORANGE = get(0xFF851B);
-Color RED = get(0xFF4136);
-Color MAROON = get(0x85144b);
-Color FUCHSIA = get(0xF012BE);
-Color PURPLE = get(0xB10DC9);
-Color BLACK = get(0x111111);
-Color GRAY = get(0xAAAAAA);
-Color SILVER = get(0xDDDDDD);
-Color WHITE = get(0xFFFFFF);
 };
 
 };

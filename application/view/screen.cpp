@@ -150,13 +150,13 @@ void Screen::onInit() {
 
 	// Layer creation
 	skyboxLayer = SkyboxLayer(this);
-	modelLayer = ModelLayer(this);
-	constraintLayer = ConstraintLayer(this, Layer::NoUpdate | Layer::NoEvents);
-	debugLayer = DebugLayer(this);
-	pickerLayer = PickerLayer(this);
-	postprocessLayer = PostprocessLayer(this);
+	modelLayer = ModelLayer(this, Layer::Disabled);
+	constraintLayer = ConstraintLayer(this, Layer::NoUpdate | Layer::NoEvents | Layer::Disabled);
+	debugLayer = DebugLayer(this, Layer::Disabled);
+	pickerLayer = PickerLayer(this, Layer::Disabled);
+	postprocessLayer = PostprocessLayer(this, Layer::Disabled);
 	guiLayer = GuiLayer(this);
-	testLayer = TestLayer(this, Layer::Disabled);
+	testLayer = TestLayer(this);
 	debugOverlay = DebugOverlay(this);
 
 	layerStack.pushLayer(&skyboxLayer);

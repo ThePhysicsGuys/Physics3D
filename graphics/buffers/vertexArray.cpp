@@ -58,21 +58,16 @@ void VertexArray::addBuffer(VertexBuffer* buffer, const BufferLayout& layout) {
 		int iterations = (element.info == BufferDataType::MAT2 || element.info == BufferDataType::MAT3 || element.info == BufferDataType::MAT4) ? element.info.count : 1;
 
 		for (size_t j = 0; j < iterations; j++) {
-			size_t attribArrayIndex = attributeArrayOffset + i + j;
-			glEnableVertexAttribArray(attribArrayIndex);
-			glVertexAttribPointer(attribArrayIndex, element.info.count, element.info.type, element.normalized, layout.stride, (const void*) offset);
+			glEnableVertexAttribArray(attributeArrayOffset);
+			glVertexAttribPointer(attributeArrayOffset, element.info.count, element.info.type, element.normalized, layout.stride, (const void*) offset);
 
 			if (element.instanced)
-				glVertexAttribDivisor(attribArrayIndex, 1);
+				glVertexAttribDivisor(attributeArrayOffset, 1);
 
 			offset += element.info.size;
-
-			if (j > 0)
-				attributeArrayOffset++;
+			attributeArrayOffset++;
 		}
 	}
-
-	attributeArrayOffset += layout.elements.size();
 }
 
 void VertexArray::close() {

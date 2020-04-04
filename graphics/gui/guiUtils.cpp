@@ -15,6 +15,11 @@ double clamp(double value, double min, double max) {
 	return value;
 }
 
+double smoothstep(double start, double end, double x) {
+	double t = clamp((x - start) / (end - start), 0.0, 1.0);
+	return t * t * (3.0 - 2.0 * t);
+}
+
 double map(double x, double minIn, double maxIn, double minOut, double maxOut) {
 	return (x - minIn) * (maxOut - minOut) / (maxIn - minIn) + minOut;
 }

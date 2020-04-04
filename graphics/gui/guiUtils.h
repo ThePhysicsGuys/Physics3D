@@ -6,6 +6,9 @@ namespace GUI {
 // Clamps a value between a range
 double clamp(double value, double min, double max);
 
+// Performs a smooth Hermite interpolation between 0 and 1 when start < x < end
+double smoothstep(double start, double end, double x);
+
 // Maps a value from an input range to an output range
 double map(double x, double minIn, double maxIn, double minOut, double maxOut);
 

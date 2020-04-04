@@ -145,7 +145,7 @@ void IndexedMesh::render(GLFLAG mode) {
 	indexBuffer->bind();
 
 	Renderer::polygonMode(Renderer::FRONT_AND_BACK, mode);
-	Renderer::drawElements(renderMode, triangleCount * 3, Renderer::UINT, nullptr);
+	Renderer::drawElements(renderMode, triangleCount * 3, Renderer::UINT, 0);
 	Renderer::polygonMode(Renderer::FRONT_AND_BACK, Renderer::FILL);
 }
 
@@ -158,7 +158,7 @@ void IndexedMesh::renderInstanced(GLFLAG mode, size_t primitives) {
 	indexBuffer->bind();
 
 	Renderer::polygonMode(Renderer::FRONT_AND_BACK, mode);
-	Renderer::drawElementsInstanced(renderMode, triangleCount * 3, Renderer::UINT, nullptr, primitives);
+	Renderer::drawElementsInstanced(renderMode, triangleCount * 3, Renderer::UINT, 0, primitives);
 	Renderer::polygonMode(Renderer::FRONT_AND_BACK, Renderer::FILL);
 }
 

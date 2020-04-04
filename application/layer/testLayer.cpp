@@ -20,40 +20,36 @@
 #include "input/standardInputHandler.h"
 #include "worlds.h"
 
+#include "../graphics/gui/valueCycle.h"
+
 namespace Application {
+
+std::vector<Mat4f> models;
 
 void TestLayer::onInit() {
 
-	float uniforms[27] = {
+	models.push_back(Mat4f {
 		1, 0, 0, 0,
 		0, 1, 0, 0,
 		0, 0, 1, 0,
-		0, 0, 0, 0,
-
-		1, 0, 0, 1,
-
-		1, 1, 1,
-
-		1, 1, 1,
-
-		1
-	};
+		0, 0, 0, 1,
+	});
 
 	BufferLayout layout = BufferLayout({
-		BufferElement("vmodelMatrix", BufferDataType::MAT4, true),
-		BufferElement("vambient", BufferDataType::FLOAT4, true),
-		BufferElement("vdiffuse", BufferDataType::FLOAT3, true),
-		BufferElement("vspecular", BufferDataType::FLOAT3, true),
-		BufferElement("vreflectance", BufferDataType::FLOAT, true),
-	});
-	VertexBuffer* vbo = new VertexBuffer(uniforms, 27 * sizeof(float));
+		BufferElement("vModelMatrix", BufferDataType::MAT4, true)
+		//BufferElement("vambient", BufferDataType::FLOAT4, true),
+		//BufferElement("vdiffuse", BufferDataType::FLOAT3, true),
+		//BufferElement("vspecular", BufferDataType::FLOAT3, true),
+		//BufferElement("vreflectance", BufferDataType::FLOAT, true),
+		});
+	VertexBuffer* vbo = new VertexBuffer(models.data(), sizeof(Mat4f));
 
 	IndexedMesh* mesh = ResourceManager::get<MeshResource>("translate")->getMesh();
 	mesh->addUniformBuffer(vbo, layout);
 }
 
 void TestLayer::onUpdate() {
-	
+
 }
 
 void TestLayer::onEvent(Event& event) {
@@ -75,9 +71,8 @@ void TestLayer::onRender() {
 
 	IndexedMesh* mesh = ResourceManager::get<MeshResource>("translate")->getMesh();
 
-	ApplicationShaders::instanceBasicShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
-	ApplicationShaders::instanceBasicShader.updateLight({ new Light(Vec3f(0.3, 0.4, 0.1), Color3(1, 0.84f, 0.69f), 6, {1, 0, 0}) }, 1);
-	ApplicationShaders::instanceBasicShader.updateSunDirection(Vec3f(0.1, -1, 0.1));
+	ApplicationShaders::instanceShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
+	//ApplicationShaders::instanceShader.setUniform("modelMatrix", Mat4f::IDENTITY());
 
 	mesh->renderInstanced(1);
 
