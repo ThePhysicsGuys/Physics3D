@@ -30,6 +30,7 @@
 namespace Application {
 
 // Light uniforms
+std::vector<Light*> lights;
 Vec3f sunDirection;
 Vec3f sunColor;
 
@@ -103,12 +104,7 @@ void ModelLayer::onInit() {
 	});
 	BatchConfig config = BatchConfig(layout, Renderer::LINES);
 	Path3D::batch = new Batch<Path3D::Vertex>(config);
-}
 
-void ModelLayer::onUpdate() {
-	Screen* screen = static_cast<Screen*>(this->ptr);
-
-	std::vector<Light*> lights;	
 	Attenuation attenuation = { 0, 0, 0.5 };
 	lights.push_back(new Light(Vec3f(10, 5, -10), Color3(1, 0.84f, 0.69f), 6, attenuation));
 	lights.push_back(new Light(Vec3f(10, 5, 10), Color3(1, 0.84f, 0.69f), 6, attenuation));
@@ -117,6 +113,10 @@ void ModelLayer::onUpdate() {
 	lights.push_back(new Light(Vec3f(0, 5, 0), Color3(1, 0.90f, 0.75f), 10, attenuation));
 
 	ApplicationShaders::basicShader.updateLight(lights);
+}
+
+void ModelLayer::onUpdate() {
+
 }
 
 void ModelLayer::onEvent(Event& event) {
@@ -197,7 +197,6 @@ void ModelLayer::onRender() {
 
 	graphicsMeasure.mark(GraphicsProcess::UPDATE);
 	ApplicationShaders::basicShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
-	ApplicationShaders::maskShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix);
 
 	std::vector<ExtendedPart*> visibleParts;
 	graphicsMeasure.mark(GraphicsProcess::PHYSICALS);

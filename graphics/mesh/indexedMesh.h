@@ -43,7 +43,7 @@ public:
 	void render() override;
 	void render(GLFLAG mode);
 	void renderInstanced(size_t primitives);
-	void renderInstanced(GLFLAG mode, size_t primitives);
+	void renderInstanced(size_t primitives, GLFLAG mode);
 
 	void close() override;
 };

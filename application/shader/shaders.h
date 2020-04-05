@@ -124,15 +124,17 @@ struct LineShader : public ShaderResource {
 
 struct InstanceShader : public ShaderResource {
 	inline InstanceShader() : ShaderResource() {}
-	inline InstanceShader(ShaderSource shaderSource) : ShaderResource("InstanceBasicShader", "instance_basic.shader", shaderSource) {}
+	inline InstanceShader(ShaderSource shaderSource) : ShaderResource("InstanceShader", "instance.shader", shaderSource) {}
 
 	void updateSunDirection(const Vec3f& sunDirection);
 	void updateSunColor(const Vec3f& sunColor);
 	void updateGamma(float gamma);
 	void updateHDR(bool hdr);
 	void updateExposure(float exposure);
-	void updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Position& viewPosition);
-	void updateLight(Light lights[], int size);
+	void updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix);
+	void updateLight(const std::vector<Light*> lights);
+	void updateIncludeNormalsAndUVs(bool includeNormals, bool includeUVs);
+	void updateTexture(bool textured);
 };
 
 struct SkyShader : public ShaderResource {

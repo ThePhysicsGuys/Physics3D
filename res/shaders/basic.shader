@@ -32,13 +32,7 @@ void main() {
 [geometry]
 
 layout(triangles) in;
-
-//#define DEBUG 
-#ifndef DEBUG
 layout(triangle_strip, max_vertices = 3) out;
-#else
-layout(line_strip, max_vertices = 9) out;
-#endif
 
 uniform int includeUvs;
 uniform int includeNormals;

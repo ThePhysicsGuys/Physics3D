@@ -387,36 +387,53 @@ void LineShader::updateProjection(const Mat4f& projectionMatrix, const Mat4f& vi
 
 // InstanceShader
 
-void InstanceShader::updateLight(Light lights[], int size) {
+void InstanceShader::updateLight(const std::vector<Light*> lights) {
 	bind();
-	for (int i = 0; i < size; i++) {
+
+	int size = lights.size();
+	setUniform("lightCount", size);
+
+	for (int i = 0; i < lights.size(); i++) {
 		std::string uniform;
 		std::string index = std::to_string(i);
+		std::string variable = "lights[" + index + "].";
 
 		// position
-		uniform = "lights[" + index + "].position";
-		setUniform(uniform, lights[i].position);
+		uniform = variable + "position";
+		setUniform(uniform, lights[i]->position);
 
 		// color
-		uniform = "lights[" + index + "].color";
-		setUniform(uniform, lights[i].color);
+		uniform = variable + "color";
+		setUniform(uniform, lights[i]->color);
 
 		// intensity
-		uniform = "lights[" + index + "].intensity";
-		setUniform(uniform, lights[i].intensity);
+		uniform = variable + "intensity";
+		setUniform(uniform, lights[i]->intensity);
 
 		// attenuation.constant
-		uniform = "lights[" + index + "].attenuation.constant";
-		setUniform(uniform, lights[i].attenuation.constant);
+		uniform = variable + "attenuation.constant";
+		setUniform(uniform, lights[i]->attenuation.constant);
 
 		// attenuation.linear
-		uniform = "lights[" + index + "].attenuation.linear";
-		setUniform(uniform, lights[i].attenuation.linear);
+		uniform = variable + "attenuation.linear";
+		setUniform(uniform, lights[i]->attenuation.linear);
 
 		// attenuation.exponent
-		uniform = "lights[" + index + "].attenuation.exponent";
-		setUniform(uniform, lights[i].attenuation.exponent);
+		uniform = variable + "attenuation.exponent";
+		setUniform(uniform, lights[i]->attenuation.exponent);
 	}
+}
+
+void InstanceShader::updateIncludeNormalsAndUVs(bool includeNormals, bool includeUVs) {
+	bind();
+	setUniform("includeNormals", int(includeNormals));
+	setUniform("includeUVs", int(includeUVs));
+}
+
+void InstanceShader::updateTexture(bool textured) {
+	bind();
+	setUniform("textureSampler", 0);
+	setUniform("textured", textured);
 }
 
 void InstanceShader::updateSunDirection(const Vec3f& sunDirection) {
@@ -444,7 +461,7 @@ void InstanceShader::updateExposure(float exposure) {
 	setUniform("exposure", exposure);
 }
 
-void InstanceShader::updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Position& viewPosition) {
+void InstanceShader::updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix) {
 	bind();
 	setUniform("viewMatrix", viewMatrix);
 	setUniform("projectionMatrix", projectionMatrix);

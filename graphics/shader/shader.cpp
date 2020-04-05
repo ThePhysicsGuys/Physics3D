@@ -125,25 +125,25 @@ unsigned int compileShaderWithDebug(const std::string& name, const std::string& 
 	return id;
 }
 
-unsigned int createShader(const std::string& name, const std::string& vertexShader, const std::string& fragmentShader, const std::string& geometryShader, const std::string& tesselationControlShader, const std::string& tesselationEvaluateShader) {
-	unsigned int program = glCreateProgram();
+GLID createShader(const std::string& name, const std::string& vertexShader, const std::string& fragmentShader, const std::string& geometryShader, const std::string& tesselationControlShader, const std::string& tesselationEvaluateShader) {
+	GLID program = glCreateProgram();
 
 	Log::subject s(name);
 
 	Log::info("Compiling shader (%s)", name.c_str());
 
-	unsigned int vs = compileShaderWithDebug("Vertex shader", vertexShader, GL_VERTEX_SHADER);
-	unsigned int fs = compileShaderWithDebug("Fragment shader", fragmentShader, GL_FRAGMENT_SHADER);
+	GLID vs = compileShaderWithDebug("Vertex shader", vertexShader, GL_VERTEX_SHADER);
+	GLID fs = compileShaderWithDebug("Fragment shader", fragmentShader, GL_FRAGMENT_SHADER);
 
-	unsigned int gs;
+	GLID gs;
 	if (!geometryShader.empty())
 		gs = compileShaderWithDebug("Geometry shader", geometryShader, GL_GEOMETRY_SHADER);
 
-	unsigned int tcs;
+	GLID tcs;
 	if (!tesselationControlShader.empty())
 		tcs = compileShaderWithDebug("Tesselation control shader", tesselationControlShader, GL_TESS_CONTROL_SHADER);
 
-	unsigned int tes;
+	GLID tes;
 	if (!tesselationEvaluateShader.empty())
 		tes = compileShaderWithDebug("Tesselation evaluate", tesselationEvaluateShader, GL_TESS_EVALUATION_SHADER);
 
@@ -168,7 +168,7 @@ unsigned int createShader(const std::string& name, const std::string& vertexShad
 	if (!tesselationEvaluateShader.empty())
 		glCall(glDeleteShader(tes));
 
-	Log::info("Created shader with id (%d)", name.c_str(), (int) program);
+	Log::info("Created shader with id (%d)", program);
 
 	return program;
 }

@@ -24,28 +24,64 @@
 
 namespace Application {
 
-std::vector<Mat4f> models;
+struct Uniform {
+	Mat4f model;
+	Vec4f ambient;
+	Vec3f diffuse;
+	Vec3f specular;
+	float reflectance;
+};
+
+std::vector<Uniform> uniforms;
+MeshResource* mesh;
 
 void TestLayer::onInit() {
+	
+	float s = 10.0;
+	frepeat(x, s) {
+		frepeat(y, s) {
+			frepeat(z, s) {
+				uniforms.push_back(
+					{
+						Mat4f {
+							1, 0, 0, x,
+							0, 1, 0, y,
+							0, 0, 1, z,
+							0, 0, 0, 1,
+						},
+						Vec4f(x/s, y/s, z/s, 1.0),
+						Vec3f(z/s, x/s, y/s),
+						Vec3f(y/s, z/s, x/s),
+						1.0f
+					}
+				);
+			}
+		}
+	}
 
-	models.push_back(Mat4f {
-		1, 0, 0, 0,
-		0, 1, 0, 0,
-		0, 0, 1, 0,
-		0, 0, 0, 1,
-	});
+	BufferLayout layout = BufferLayout(
+		{
+			BufferElement("vModelMatrix", BufferDataType::MAT4, true),
+			BufferElement("vAmbient", BufferDataType::FLOAT4, true),
+			BufferElement("vDiffuse", BufferDataType::FLOAT3, true),
+			BufferElement("vSpecular", BufferDataType::FLOAT3, true),
+			BufferElement("vReflectance", BufferDataType::FLOAT, true),
+		}
+	);
+	VertexBuffer* vbo = new VertexBuffer(uniforms.data(), uniforms.size() * sizeof(Uniform));
 
-	BufferLayout layout = BufferLayout({
-		BufferElement("vModelMatrix", BufferDataType::MAT4, true)
-		//BufferElement("vambient", BufferDataType::FLOAT4, true),
-		//BufferElement("vdiffuse", BufferDataType::FLOAT3, true),
-		//BufferElement("vspecular", BufferDataType::FLOAT3, true),
-		//BufferElement("vreflectance", BufferDataType::FLOAT, true),
-		});
-	VertexBuffer* vbo = new VertexBuffer(models.data(), sizeof(Mat4f));
+	mesh = ResourceManager::get<MeshResource>("translate center");
+	mesh->getMesh()->addUniformBuffer(vbo, layout);
 
-	IndexedMesh* mesh = ResourceManager::get<MeshResource>("translate")->getMesh();
-	mesh->addUniformBuffer(vbo, layout);
+	std::vector<Light*> lights;
+	Attenuation attenuation = { 0, 0, 0.5 };
+	lights.push_back(new Light(Vec3f(10, 5, -10), Color3(1, 0.84f, 0.69f), 6, attenuation));
+	lights.push_back(new Light(Vec3f(10, 5, 10), Color3(1, 0.84f, 0.69f), 6, attenuation));
+	lights.push_back(new Light(Vec3f(-10, 5, -10), Color3(1, 0.84f, 0.69f), 6, attenuation));
+	lights.push_back(new Light(Vec3f(-10, 5, 10), Color3(1, 0.84f, 0.69f), 6, attenuation));
+	lights.push_back(new Light(Vec3f(0, 5, 0), Color3(1, 0.90f, 0.75f), 10, attenuation));
+	ApplicationShaders::instanceShader.updateLight(lights);
+	ApplicationShaders::instanceShader.updateIncludeNormalsAndUVs(mesh->getShape().normals != nullptr, mesh->getShape().uvs != nullptr);
 }
 
 void TestLayer::onUpdate() {
@@ -69,12 +105,9 @@ void TestLayer::onRender() {
 	glDisable(GL_CULL_FACE);
 	glDisable(GL_DEPTH_TEST);
 
-	IndexedMesh* mesh = ResourceManager::get<MeshResource>("translate")->getMesh();
+	ApplicationShaders::instanceShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix);
 
-	ApplicationShaders::instanceShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
-	//ApplicationShaders::instanceShader.setUniform("modelMatrix", Mat4f::IDENTITY());
-
-	mesh->renderInstanced(1);
+	mesh->getMesh()->renderInstanced(uniforms.size());
 
 	endScene();
 }

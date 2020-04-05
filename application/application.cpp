@@ -119,8 +119,6 @@ void setupGL() {
 	}
 }
 
-
-
 void setupWorld(int argc, const char** args) {
 	Log::info("Initializing world");
 

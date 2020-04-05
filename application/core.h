@@ -16,3 +16,8 @@
 #include "../physics/math/position.h"
 
 #include "../util/log.h"
+
+#define irepeat(x, n) for (int x = 0; x < n; x++)
+#define frepeat(x, n) for (float x = 0.0f; x < n; x+=1.0f)
+#define isrepeat(x, n, s) for (int x = 0; x < n; x+=s)
+#define fsrepeat(x, n, s) for (float x = 0.0f; x < n; x+=s)

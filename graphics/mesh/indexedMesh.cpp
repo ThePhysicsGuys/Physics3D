@@ -150,10 +150,10 @@ void IndexedMesh::render(GLFLAG mode) {
 }
 
 void IndexedMesh::renderInstanced(size_t primitives) {
-	renderInstanced(Renderer::FILL, primitives);
+	renderInstanced(primitives, Renderer::FILL);
 }
 
-void IndexedMesh::renderInstanced(GLFLAG mode, size_t primitives) {
+void IndexedMesh::renderInstanced(size_t primitives, GLFLAG mode) {
 	vao->bind();
 	indexBuffer->bind();
 
