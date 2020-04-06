@@ -29,6 +29,7 @@ TestShader testShader;
 LineShader lineShader;
 MaskShader maskShader;
 InstanceShader instanceShader;
+LightingShader lightingShader;
 SkyShader skyShader;
 
 void onInit() {
@@ -46,6 +47,7 @@ void onInit() {
 	ShaderSource maskShaderSource = parseShader("mask.shader", (std::istream&) std::istringstream(getResourceAsString(applicationResources, MASK_SHADER)));
 	ShaderSource instanceShaderSource = parseShader("instance.shader", (std::istream&) std::istringstream(getResourceAsString(applicationResources, INSTANCE_SHADER)));
 	ShaderSource skyShaderSource = parseShader("sky.shader", (std::istream&) std::istringstream(getResourceAsString(applicationResources, SKY_SHADER)));
+	ShaderSource lightingShaderSource = parseShader("lighting.shader", (std::istream&) std::istringstream(getResourceAsString(applicationResources, LIGHTING_SHADER)));
 
 
 	// Shader init
@@ -62,6 +64,7 @@ void onInit() {
 	new(&maskShader) MaskShader(maskShaderSource);
 	new(&instanceShader) InstanceShader(instanceShaderSource);
 	new(&skyShader) SkyShader(skyShaderSource);
+	new(&lightingShader) LightingShader(lightingShaderSource);
 
 	ResourceManager::add(&basicShader);
 	ResourceManager::add(&depthShader);
@@ -76,6 +79,7 @@ void onInit() {
 	ResourceManager::add(&maskShader);
 	ResourceManager::add(&instanceShader);
 	ResourceManager::add(&skyShader);
+	ResourceManager::add(&lightingShader);
 }
 
 void onClose() {
@@ -92,6 +96,7 @@ void onClose() {
 	maskShader.close();
 	instanceShader.close();
 	skyShader.close();
+	lightingShader.close();
 }
 
 }
@@ -468,6 +473,8 @@ void InstanceShader::updateProjection(const Mat4f& viewMatrix, const Mat4f& proj
 }
 
 
+// SkyShader
+
 void SkyShader::updateCamera(const Vec3f& viewPosition, const Mat4f& projectionMatrix, const Mat4f& viewMatrix) {
 	bind();
 	setUniform("projectionMatrix", projectionMatrix);
@@ -477,6 +484,58 @@ void SkyShader::updateCamera(const Vec3f& viewPosition, const Mat4f& projectionM
 void SkyShader::updateTime(float time) {
 	bind();
 	setUniform("time", time);
+}
+
+
+// LightingShader
+
+void LightingShader::updateLight(const std::vector<Light*> lights) {
+	bind();
+
+	int size = lights.size();
+	setUniform("lightCount", size);
+
+	for (int i = 0; i < lights.size(); i++) {
+		std::string uniform;
+		std::string index = std::to_string(i);
+		std::string variable = "lights[" + index + "].";
+
+		// position
+		uniform = variable + "position";
+		setUniform(uniform, lights[i]->position);
+
+		// color
+		uniform = variable + "color";
+		setUniform(uniform, lights[i]->color);
+
+		// intensity
+		uniform = variable + "intensity";
+		setUniform(uniform, lights[i]->intensity);
+
+		// attenuation.constant
+		uniform = variable + "attenuation.constant";
+		setUniform(uniform, lights[i]->attenuation.constant);
+
+		// attenuation.linear
+		uniform = variable + "attenuation.linear";
+		setUniform(uniform, lights[i]->attenuation.linear);
+
+		// attenuation.exponent
+		uniform = variable + "attenuation.exponent";
+		setUniform(uniform, lights[i]->attenuation.exponent);
+	}
+}
+
+void LightingShader::updateTexture(bool textured) {
+	bind();
+	setUniform("textureSampler", 0);
+	setUniform("textured", textured);
+}
+
+void LightingShader::updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix) {
+	bind();
+	setUniform("viewMatrix", viewMatrix);
+	setUniform("projectionMatrix", projectionMatrix);
 }
 
 };

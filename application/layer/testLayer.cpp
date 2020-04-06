@@ -36,22 +36,21 @@ std::vector<Uniform> uniforms;
 MeshResource* mesh;
 
 void TestLayer::onInit() {
-	
-	float s = 10.0;
-	frepeat(x, s) {
-		frepeat(y, s) {
-			frepeat(z, s) {
+	float s = 10;
+	fsrepeat(x, s, 2) {
+		fsrepeat(y, s, 2) {
+			frepeat(z, 1) {
 				uniforms.push_back(
 					{
 						Mat4f {
 							1, 0, 0, x,
-							0, 1, 0, y,
-							0, 0, 1, z,
+							0, 1, 0, y+10,
+							0, 0, 1, z+2,
 							0, 0, 0, 1,
 						},
 						Vec4f(x/s, y/s, z/s, 1.0),
-						Vec3f(z/s, x/s, y/s),
-						Vec3f(y/s, z/s, x/s),
+						Vec3f(1, 1, 1),
+						Vec3f(1, 1, 1),
 						1.0f
 					}
 				);
@@ -70,7 +69,7 @@ void TestLayer::onInit() {
 	);
 	VertexBuffer* vbo = new VertexBuffer(uniforms.data(), uniforms.size() * sizeof(Uniform));
 
-	mesh = ResourceManager::get<MeshResource>("translate center");
+	mesh = ResourceManager::add<MeshResource>("sphere", "../res/models/sphere.obj");
 	mesh->getMesh()->addUniformBuffer(vbo, layout);
 
 	std::vector<Light*> lights;
@@ -80,8 +79,7 @@ void TestLayer::onInit() {
 	lights.push_back(new Light(Vec3f(-10, 5, -10), Color3(1, 0.84f, 0.69f), 6, attenuation));
 	lights.push_back(new Light(Vec3f(-10, 5, 10), Color3(1, 0.84f, 0.69f), 6, attenuation));
 	lights.push_back(new Light(Vec3f(0, 5, 0), Color3(1, 0.90f, 0.75f), 10, attenuation));
-	ApplicationShaders::instanceShader.updateLight(lights);
-	ApplicationShaders::instanceShader.updateIncludeNormalsAndUVs(mesh->getShape().normals != nullptr, mesh->getShape().uvs != nullptr);
+	ApplicationShaders::lightingShader.updateLight(lights);
 }
 
 void TestLayer::onUpdate() {
@@ -103,11 +101,11 @@ void TestLayer::onRender() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glEnable(GL_BLEND);
 	glDisable(GL_CULL_FACE);
-	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_DEPTH_TEST);
 
-	ApplicationShaders::instanceShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix);
+	ApplicationShaders::lightingShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix);
 
-	mesh->getMesh()->renderInstanced(uniforms.size());
+	mesh->getMesh()->renderInstanced(uniforms.size(), FILL);
 
 	endScene();
 }

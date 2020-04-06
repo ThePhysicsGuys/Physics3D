@@ -11,8 +11,7 @@ std::vector<std::string> split(const std::string& string, char splitter) {
 
 	for (size_t i = 0; i < length; i++) {
 		if (string[i] == splitter) {
-			if (i != start)
-				elements.push_back(string.substr(start, i - start));
+			elements.push_back(string.substr(start, i - start));
 			start = i + 1;
 		}
 	}

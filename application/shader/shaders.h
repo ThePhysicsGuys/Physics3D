@@ -145,6 +145,15 @@ struct SkyShader : public ShaderResource {
 	void updateTime(float time);
 };
 
+struct LightingShader : public ShaderResource {
+	inline LightingShader() : ShaderResource() {}
+	inline LightingShader(ShaderSource shaderSource) : ShaderResource("LightingShader", "lighting.shader", shaderSource) {}
+
+	void updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix);
+	void updateLight(const std::vector<Light*> lights);
+	void updateTexture(bool textured);
+};
+
 namespace ApplicationShaders {
 extern BasicShader basicShader;
 extern DepthShader depthShader;
@@ -159,6 +168,7 @@ extern LineShader lineShader;
 extern InstanceShader instanceShader;
 extern MaskShader maskShader;
 extern SkyShader skyShader;
+extern LightingShader lightingShader;
 
 void onInit();
 void onClose();

@@ -11,83 +11,82 @@
 	Import
 */
 
-int Import::parseInt(std::string num) {
+int Import::parseInt(const std::string& num) {
 	return std::stoi(num);
 }
 
-long long Import::parseLong(std::string num) {
+long long Import::parseLong(const std::string& num) {
 	return std::stoll(num);
 }
 
-double Import::parseDouble(std::string num) {
+double Import::parseDouble(const std::string& num) {
 	return std::stod(num);
 }
 
-float Import::parseFloat(std::string num) {
+float Import::parseFloat(const std::string& num) {
 	return std::stof(num);
 }
 
-Vec3 Import::parseVec3(std::string vec) {
+Vec3 Import::parseVec3(const std::string& vec) {
 	std::vector<std::string> tokens = split(vec, ' ');
 	Vec3 vector = Vec3();
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 3; i++)
 		vector[i] = Import::parseDouble(tokens[i]);
-	}
+	
 	return vector;
 }
 
-Position Import::parsePosition(std::string vec) {
+Position Import::parsePosition(const std::string& vec) {
 	std::vector<std::string> tokens = split(vec, ' ');
 	Position vector;
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 3; i++)
 		vector[i] = Fix<32>(Import::parseLong(tokens[i]));
-	}
+	
 	return vector;
 }
 
-Vec4 Import::parseVec4(std::string vec) {
+Vec4 Import::parseVec4(const std::string& vec) {
 	std::vector<std::string> tokens = split(vec, ' ');
-	Vec4 vector = Vec4();
-	for (int i = 0; i < 4; i++) {
+	Vec4 vector;
+	for (int i = 0; i < 4; i++)
 		vector[i] = Import::parseDouble(tokens[i]);
-	}
+	
 	return vector;
 }
 
-Vec4f Import::parseVec4f(std::string vec) {
+Vec4f Import::parseVec4f(const std::string& vec) {
 	std::vector<std::string> tokens = split(vec, ' ');
-	Vec4f vector = Vec4f();
-	for (int i = 0; i < 4; i++) {
+	Vec4f vector;
+	for (int i = 0; i < 4; i++)
 		vector[i] = Import::parseFloat(tokens[i]);
-	}
+	
 	return vector;
 }
 
-Vec3f Import::parseVec3f(std::string vec) {
+Vec3f Import::parseVec3f(const std::string& vec) {
 	std::vector<std::string> tokens = split(vec, ' ');
 	Vec3f vector = Vec3f();
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 3; i++)
 		vector[i] = Import::parseFloat(tokens[i]);
-	}
+	
 	return vector;
 }
 
-DiagonalMat3 Import::parseDiagonalMat3(std::string mat) {
+DiagonalMat3 Import::parseDiagonalMat3(const std::string& mat) {
 	std::vector<std::string> tokens = split(mat, ' ');
 	DiagonalMat3 matrix = DiagonalMat3();
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 3; i++)
 		matrix[i] = Import::parseDouble(tokens[i]);
-	}
+	
 	return matrix;
 }
 
-Mat3 Import::parseMat3(std::string mat) {
+Mat3 Import::parseMat3(const std::string& mat) {
 	std::vector<std::string> tokens = split(mat, ' ');
 	double data[9];
 
-	for (int i = 0; i < 9; i++) {
+	for (int i = 0; i < 9; i++)
 		data[i] = Import::parseDouble(tokens[i]);
-	}
 
 	return Matrix<double, 3, 3>::fromColMajorData(data);
 }
@@ -109,15 +108,25 @@ T Import::read(std::istream& input) {
 	OBJImport
 */
 
-struct Group {
-	int position;
-	int normal;
-	int uv;
+struct Vertex {
+	int position = -1;
+	int normal = -1;
+	int uv = -1;
 
-	Group() {
-		position = -1;
-		normal = -1;
-		uv = -1;
+	inline Vertex(const std::string& line) {
+		std::vector<std::string> tokens = split(line, '/');
+		size_t length = tokens.size();
+
+		// Positions
+		position = std::stoi(tokens[0]) - 1;
+
+		// Uvs
+		if (length > 1) 
+			uv = tokens[1].size() > 0 ? std::stoi(tokens[1]) - 1 : -1;
+
+		// Normals
+		if (length > 2)
+			normal = tokens[2].size() > 0 ? std::stoi(tokens[2]) - 1 : -1;
 	}
 };
 
@@ -127,72 +136,72 @@ struct Flags {
 };
 
 struct Face {
-	Group groups[3];
+	Vertex v1;
+	Vertex v2;
+	Vertex v3;
 
-	Face(std::string v1, std::string v2, std::string v3) {
-		groups[0] = parseLine(v1);
-		groups[1] = parseLine(v2);
-		groups[2] = parseLine(v3);
+	inline Face(const Vertex& v1, const Vertex& v2, const Vertex& v3) : v1(v1), v2(v2), v3(v3) {};
+
+	inline Vertex& operator[] (int index) {
+		switch (index) {
+			case 0: return v1;
+			case 1: return v2;
+			case 2: return v3;
+		}
+
+		throw "Subscript out of range";
 	}
 
-	Group parseLine(std::string line) {
-		Group group = Group();
-
-		std::vector<std::string> tokens = split(line, '/');
-		size_t length = tokens.size();
-
-		// Positions
-		group.position = std::stoi(tokens[0]) - 1;
-
-		// Uvs
-		if (length > 1) {
-			std::string uv = tokens[1];
-			group.uv = uv.size() > 0 ? std::stoi(uv) - 1 : -1;
+	inline const Vertex& operator[] (int index) const {
+		switch (index) {
+			case 0: return v1;
+			case 1: return v2;
+			case 2: return v3;
 		}
 
-		// Normals
-		if (length > 2) {
-			group.normal = std::stoi(tokens[2]) - 1;
-		}
-
-		return group;
+		throw "Subscript out of range";
 	}
 };
 
-Graphics::VisualShape reorder(const std::vector<Vec3f>& positions, const std::vector<Vec3f>& normals, const std::vector<Vec2f>& uvs, const std::vector<Face>& faces, Flags flags) {
+Graphics::VisualShape reorder(const std::vector<Vec3f>& positions, const std::vector<Vec3f>& normals, const std::vector<Vec2f>& uvs, const std::vector<Face>& faces, const Flags& flags) {
 	
 	// Positions
 	Vec3f* positionArray = new Vec3f[positions.size()];
-	for (int i = 0; i < positions.size(); i++) {
+	for (int i = 0; i < positions.size(); i++) 
 		positionArray[i] = positions[i];
-	}
-
-	Triangle* triangleArray = new Triangle[faces.size()];
-
+	
+	// Normals
 	Vec3f* normalArray = nullptr;
+	if (flags.normals) 
+		normalArray = new Vec3f[positions.size()];
+
+	// UVs
 	Vec2f* uvArray = nullptr;
-	if (flags.normals) normalArray = new Vec3f[positions.size()];
-	if (flags.uvs) uvArray = new Vec2f[positions.size()];
+	if (flags.uvs) 
+		uvArray = new Vec2f[positions.size()];
 
+	// Triangles
+	Triangle* triangleArray = new Triangle[faces.size()];
 	for (int i = 0; i < faces.size(); i++) {
-		const Group* indices = faces[i].groups;
+		const Face& face = faces[i];
 
-		triangleArray[i] = { indices[0].position, indices[1].position, indices[2].position };
+		// Save triangle
+		triangleArray[i] = { face.v1.position, face.v2.position, face.v3.position };
 
 		for (int i = 0; i < 3; i++) {
-			const Group& index = indices[i];
+			const Vertex& vertex = face[i];
 
-			if (flags.normals && indices->normal != -1) {
-				normalArray[index.position] = normals[index.normal];
-			}
+			// Save normal
+			if (flags.normals && vertex.normal != -1) 
+				normalArray[vertex.position] = normals[vertex.normal];
 
-			if (flags.uvs && indices->uv != -1) {
-				uvArray[index.position] = Vec2(uvs[index.uv].x, 1.0 - uvs[index.uv].y);
-			}
+			// Save uv
+			if (flags.uvs && vertex.uv != -1)
+				uvArray[vertex.position] = Vec2(uvs[vertex.uv].x, 1.0 - uvs[vertex.uv].y);
 		}
 	}
 
-	return Graphics::VisualShape(positionArray, SharedArrayPtr<const Vec3f>(normalArray), SharedArrayPtr<const Vec2f>(uvArray), triangleArray, (int)positions.size(), (int)faces.size());
+	return Graphics::VisualShape(positionArray, SharedArrayPtr<const Vec3f>(normalArray), SharedArrayPtr<const Vec2f>(uvArray), triangleArray, (int) positions.size(), (int) faces.size());
 }
 
 Graphics::VisualShape loadBinaryObj(std::istream& input) {
@@ -254,11 +263,16 @@ Graphics::VisualShape loadNonBinaryObj(std::istream& input) {
 			Vec3f vertex = Vec3f(stof(tokens[1]), stof(tokens[2]), stof(tokens[3]));
 			vertices.push_back(vertex);
 		} else if (tokens[0] == "f") {
-			Face face = Face(tokens[1], tokens[2], tokens[3]);
+			Vertex v1(tokens[1]);
+			Vertex v2(tokens[2]);
+			Vertex v3(tokens[3]);
+
+			Face face = Face(v1, v2, v3);
 			faces.push_back(face);
 
 			if (tokens.size() > 4) {
-				Face face = Face(tokens[1], tokens[3], tokens[4]);
+				Vertex v4 = tokens[4];
+				Face face = Face(v1, v3, v4);
 				faces.push_back(face);
 			}
 		} else if (tokens[0] == "vt") {

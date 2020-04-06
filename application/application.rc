@@ -55,6 +55,8 @@ IDR_SHADER14            SHADER                  "..\\res\\shaders\\instance.shad
 
 IDR_SHADER15            SHADER                  "..\\res\\shaders\\sky.shader"
 
+IDR_SHADER16            SHADER                  "..\\res\\shaders\\lighting.shader"
+
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////

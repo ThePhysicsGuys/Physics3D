@@ -19,5 +19,6 @@ extern ResourceStruct applicationResources[];
 #define LINE_SHADER 12
 #define INSTANCE_SHADER 13
 #define SKY_SHADER 14
-#define SPHERE_MODEL 15
-#define STALL_MODEL 16
+#define LIGHTING_SHADER 15
+#define SPHERE_MODEL 16
+#define STALL_MODEL 17

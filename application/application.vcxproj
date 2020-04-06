@@ -369,6 +369,7 @@
     <None Include="..\res\shaders\depth.shader" />
     <None Include="..\res\shaders\font.shader" />
     <None Include="..\res\shaders\instance.shader" />
+    <None Include="..\res\shaders\lighting.shader" />
     <None Include="..\res\shaders\line.shader" />
     <None Include="..\res\shaders\mask.shader" />
     <None Include="..\res\shaders\origin.shader" />
