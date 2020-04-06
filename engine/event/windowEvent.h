@@ -7,17 +7,18 @@ public:
 	EVENT_CATEGORY(EventCategoryWindow);
 
 protected:
-	WindowEvent() {};
+	inline WindowEvent() {};
 };
 
 class WindowResizeEvent : public WindowEvent {
 private:
 	unsigned int width;
 	unsigned int height;
+
 public:
 	EVENT_TYPE(WindowResize);
 
-	WindowResizeEvent(unsigned int width, unsigned int height) : width(width), height(height) {};
+	inline WindowResizeEvent(unsigned int width, unsigned int height) : WindowEvent(), width(width), height(height) {};
 
 	inline unsigned int getWidth() const {
 		return width;
@@ -28,21 +29,36 @@ public:
 	}
 };
 
-class WindowCloseEvent : public WindowEvent {;
+class WindowCloseEvent : public WindowEvent {
 public:
 	EVENT_TYPE(WindowClose);
 
-	WindowCloseEvent() {};
+	inline WindowCloseEvent() : WindowEvent() {};
+};
+
+class WindowDropEvent : public WindowEvent {
+private:
+	std::string path;
+
+public:
+	EVENT_TYPE(WindowDrop);
+
+	inline WindowDropEvent(const std::string& path) : WindowEvent(), path(path) {};
+
+	inline std::string getPath() const {
+		return path;
+	}
 };
 
 class FrameBufferResizeEvent : public WindowEvent {
 private:
 	unsigned int width;
 	unsigned int height;
+
 public:
 	EVENT_TYPE(FrameBufferResize);
 
-	FrameBufferResizeEvent(unsigned int width, unsigned int height) : width(width), height(height) {};
+	inline FrameBufferResizeEvent(unsigned int width, unsigned int height) : WindowEvent(), width(width), height(height) {};
 
 	inline unsigned int getWidth() const {
 		return width;

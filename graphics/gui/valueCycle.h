@@ -6,28 +6,46 @@
 
 namespace Graphics {
 
-template<typename T>
+float linear(float t);
+float smoothstep(float t);
+float easeInQuad(float t);
+float easeOutQuad(float t);
+float easeInOutQuad(float t);
+float easeInCubic(float t);
+float easeOutCubic(float t);
+float easeInOuCubic(float t);
+
+template<typename T, float (*interpolate)(float)>
 struct ValueCycle {
 private:
-	std::map<float, T> keyFrames;
+	std::map<float, T> keyframes;
 
 public:
 	ValueCycle() {}
-	ValueCycle(std::initializer_list<std::pair<float, T>> keyFrames) : keyFrames(keyFrames) {}
+	ValueCycle(std::initializer_list<std::pair<float, T>> keyframes) : keyframes(keyframes) {}
 
-	void addKeyFrame(float time, const T& frame) {
-		keyFrames[time] = frame;
+	/*
+		Add a keyframe at the given time
+	*/
+	void addKeyframe(float time, const T& frame) {
+		keyframes[time] = frame;
 	}
 
-	void deleteKeyFrame(float time) {
-		keyFrames.erase(time);
+	/*
+		Delete the keyframe at the given time
+	*/
+	void deleteKeyframe(float time) {
+		keyframes.erase(time);
 	}
 
+	/*
+		Sample the keyframe, time should be between 0.0f and 1.0f
+	*/
 	T sample(float time) {
 		std::pair<float, T> previous;
 		std::pair<float, T> next;
 
-		for (const auto& iterator : keyFrames) {
+		for (const auto& iterator : keyframes) {
 			if (iterator.first > time) {
 				next = iterator;
 				break;
@@ -35,16 +53,19 @@ public:
 			previous = iterator;
 		}
 
-		float blend = (time - previous.first) / (next.first - previous.first);
+		float blend = interpolate((time - previous.first) / (next.first - previous.first));
 		return (1.0f - blend) * previous.second + blend * next.second;
 	}
 
-	std::vector<float> getKeys() {
-		std::vector<float> keys;
-		keys.reserve(keyFrames.size());
+	/*
+		Get all timestamps
+	*/
+	std::vector<float> getTimestamps() {
+		std::vector<float> timestamps;
+		timestamps.reserve(keyframes.size());
 
-		for (const auto& key : keyFrames)
-			keys.push_back(key.first);
+		for (const auto& timestamp : keyframes)
+			timestamps.push_back(timestamp.first);
 	}
 };
 

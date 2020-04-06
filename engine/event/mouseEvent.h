@@ -8,7 +8,7 @@ private:
 	int y;
 
 protected:
-	MouseEvent(int x, int y) : x(x), y(y) {};
+	inline MouseEvent(int x, int y) : x(x), y(y) {};
 
 public:
 	EVENT_CATEGORY(EventCategoryMouse | EventCategoryInput);
@@ -32,7 +32,7 @@ private:
 public:
 	EVENT_TYPE(MouseMove);
 
-	MouseMoveEvent(int oldX, int oldY, int newX, int newY) : MouseEvent(oldX, oldY), newX(newX), newY(newY) {}
+	inline MouseMoveEvent(int oldX, int oldY, int newX, int newY) : MouseEvent(oldX, oldY), newX(newX), newY(newY) {}
 
 	inline int getOldX() const {
 		return getX();
@@ -59,7 +59,7 @@ private:
 public:
 	EVENT_TYPE(MouseScroll);
 
-	MouseScrollEvent(int x, int y, int xOffset, int yOffset) : MouseEvent(x, y), xOffset(xOffset), yOffset(yOffset) {}
+	inline MouseScrollEvent(int x, int y, int xOffset, int yOffset) : MouseEvent(x, y), xOffset(xOffset), yOffset(yOffset) {}
 
 	inline int getXOffset() const {
 		return xOffset;
@@ -74,14 +74,14 @@ class MouseEnterEvent : public MouseEvent {
 public:
 	EVENT_TYPE(MouseEnter);
 
-	MouseEnterEvent(int x, int y) : MouseEvent(x, y) {}
+	inline MouseEnterEvent(int x, int y) : MouseEvent(x, y) {}
 };
 
 class MouseExitEvent : public MouseEvent {
 public:
 	EVENT_TYPE(MouseExit);
 
-	MouseExitEvent(int x, int y) : MouseEvent(x, y) {}
+	inline MouseExitEvent(int x, int y) : MouseEvent(x, y) {}
 };
 
 class MouseButtonEvent : public MouseEvent {
@@ -101,21 +101,21 @@ public:
 	}
 
 protected:
-	MouseButtonEvent(int x, int y, int button, int modifiers) : MouseEvent(x, y), button(button), modifiers(modifiers) {}
+	inline MouseButtonEvent(int x, int y, int button, int modifiers) : MouseEvent(x, y), button(button), modifiers(modifiers) {}
 };
 
 class MousePressEvent : public MouseButtonEvent {
 public:
 	EVENT_TYPE(MousePress);
 
-	MousePressEvent(int x, int y, int button, int modifiers = 0) : MouseButtonEvent(x, y, button, modifiers) {}
+	inline MousePressEvent(int x, int y, int button, int modifiers = 0) : MouseButtonEvent(x, y, button, modifiers) {}
 };
 
 class MouseReleaseEvent : public MouseButtonEvent {
 public:
 	EVENT_TYPE(MouseRelease);
 
-	MouseReleaseEvent(int x, int y, int button, int modifiers = 0) : MouseButtonEvent(x, y, button, modifiers) {}
+	inline MouseReleaseEvent(int x, int y, int button, int modifiers = 0) : MouseButtonEvent(x, y, button, modifiers) {}
 };
 
 class MouseDragEvent : public MouseEvent {
@@ -129,7 +129,7 @@ private:
 public:
 	EVENT_TYPE(MouseDrag);
 
-	MouseDragEvent(int oldX, int oldY, int newX, int newY, bool leftDragging, bool middleDragging, bool rightDragging) : MouseEvent(oldX, oldY), newX(newX), newY(newY), leftDragging(leftDragging), middleDragging(middleDragging), rightDragging(rightDragging) {}
+	inline MouseDragEvent(int oldX, int oldY, int newX, int newY, bool leftDragging, bool middleDragging, bool rightDragging) : MouseEvent(oldX, oldY), newX(newX), newY(newY), leftDragging(leftDragging), middleDragging(middleDragging), rightDragging(rightDragging) {}
 
 	inline int getOldX() const {
 		return getX();

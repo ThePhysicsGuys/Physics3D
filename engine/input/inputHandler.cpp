@@ -97,6 +97,12 @@ void InputHandler::windowSizeCallback(int width, int height) {
 	onEvent(event);
 }
 
+void InputHandler::windowDropCallback(const char* path) {
+	std::string stdPath(path);
+	WindowDropEvent event(stdPath);
+	onEvent(event);
+}
+
 void InputHandler::framebufferSizeCallback(int width, int height) {
 	FrameBufferResizeEvent event(width, height);
 	onEvent(event);
@@ -110,7 +116,7 @@ Vec2 InputHandler::getMousePosition() {
 	return Vec2(x, y);
 }
 
-bool InputHandler::getKey(Keyboard::Key key) {
+bool InputHandler::getKey(const Keyboard::Key& key) {
 	if (key.code < Keyboard::KEY_FIRST || key.code > Keyboard::KEY_LAST)
 		return false;
 
@@ -146,5 +152,11 @@ InputHandler::InputHandler(GLFWwindow* window) : window(window) {
 
 	glfwSetFramebufferSizeCallback(window, [] (GLFWwindow* window, int width, int height) {
 		static_cast<InputHandler*>(glfwGetWindowUserPointer(window))->framebufferSizeCallback(width, height);
+	});
+
+	glfwSetDropCallback(window, [] (GLFWwindow* window, int count, const char** paths) {
+		InputHandler* inputHandler = static_cast<InputHandler*>(glfwGetWindowUserPointer(window));
+		for (int i = 0; i < count; i++)
+			inputHandler->windowDropCallback(paths[i]);
 	});
 }

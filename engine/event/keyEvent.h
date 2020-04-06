@@ -19,23 +19,24 @@ public:
 	}
 
 protected:
-	KeyEvent(int key, int modifiers) : key(key), modifiers(modifiers) {}
+	inline KeyEvent(int key, int modifiers) : key(key), modifiers(modifiers) {}
 };
 
 class DoubleKeyPressEvent : public KeyEvent {
 public:
 	EVENT_TYPE(KeyDoublePress);
 
-	DoubleKeyPressEvent(int key, int modifiers) : KeyEvent(key, modifiers) {}
+	inline DoubleKeyPressEvent(int key, int modifiers) : KeyEvent(key, modifiers) {}
 };
 
 class KeyPressEvent : public KeyEvent {
 private:
 	bool repeat;
+
 public:
 	EVENT_TYPE(KeyPress);
 
-	KeyPressEvent(int key, int modifiers = 0, bool repeat = false) : KeyEvent(key, modifiers), repeat(repeat) {}
+	inline KeyPressEvent(int key, int modifiers = 0, bool repeat = false) : KeyEvent(key, modifiers), repeat(repeat) {}
 
 	inline bool isRepeated() const {
 		return repeat;
@@ -46,5 +47,5 @@ class KeyReleaseEvent : public KeyEvent {
 public:
 	EVENT_TYPE(KeyRelease);
 
-	KeyReleaseEvent(int key, int modifiers = 0) : KeyEvent(key, modifiers) {}
+	inline KeyReleaseEvent(int key, int modifiers = 0) : KeyEvent(key, modifiers) {}
 };

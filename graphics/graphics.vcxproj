@@ -253,6 +253,7 @@
     <ClCompile Include="gui\gui.cpp" />
     <ClCompile Include="gui\guiUtils.cpp" />
     <ClCompile Include="gui\layout.cpp" />
+    <ClCompile Include="gui\valueCycle.cpp" />
     <ClCompile Include="meshLibrary.cpp" />
     <ClCompile Include="mesh\abstractMesh.cpp" />
     <ClCompile Include="mesh\arrayMesh.cpp" />

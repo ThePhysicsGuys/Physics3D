@@ -17,6 +17,7 @@ private:
 	void keyCallback(int key, int action, int mods);
 	void cursorCallback(double x, double y);
 	void cursorEnterCallback(int entered);
+	void windowDropCallback(const char* path);
 	void scrollCallback(double xOffset, double yOffset);
 	void mouseButtonCallback(int button, int action, int mods);
 	void windowSizeCallback(int width, int height);
@@ -34,7 +35,7 @@ public:
 
 	InputHandler(GLFWwindow* window);
 
-	bool getKey(Keyboard::Key key);
+	bool getKey(const Keyboard::Key& key);
 	Vec2 getMousePosition();
 
 	virtual void onEvent(Event& event) {};
