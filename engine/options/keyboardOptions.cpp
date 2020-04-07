@@ -59,15 +59,15 @@ namespace KeyboardOptions {
 		Key valid = Keyboard::UNKNOWN;
 	}
 
-	Key loadKey(const Properties& properties, std::string key) {
+	Key loadKey(const Util::Properties& properties, std::string key) {
 		return Keyboard::getKey(properties.get(key));
 	}
 
-	void saveKey(Properties& properties, std::string property, const Key& key) {
+	void saveKey(Util::Properties& properties, std::string property, const Key& key) {
 		properties.set(property, key.name);
 	}
 
-	void load(const Properties& properties) {
+	void load(const Util::Properties& properties) {
 		// Move
 		Move::forward = loadKey(properties, "move.forward");
 		Move::backward = loadKey(properties, "move.backward");
@@ -114,7 +114,7 @@ namespace KeyboardOptions {
 		World::valid = loadKey(properties, "world.valid");
 	}
 
-	void save(Properties properties) {
+	void save(Util::Properties& properties) {
 		// Move
 		saveKey(properties, "move.forward", Move::forward);
 		saveKey(properties, "move.backward", Move::backward);

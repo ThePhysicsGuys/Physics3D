@@ -41,11 +41,13 @@ vec4 rgba(vec3 color) {
 layout(location = 0) in vec3 vPosition;
 layout(location = 1) in vec3 vNormal;
 layout(location = 2) in vec2 vUV;
-layout(location = 3) in mat4 vModelMatrix;
-layout(location = 7) in vec4 vAmbient;
-layout(location = 8) in vec3 vDiffuse;
-layout(location = 9) in vec3 vSpecular;
-layout(location = 10) in float vReflectance;
+layout(location = 3) in vec3 vTangent;
+layout(location = 4) in vec3 vBitangent;
+layout(location = 5) in mat4 vModelMatrix;
+layout(location = 9) in vec4 vAmbient;
+layout(location = 10) in vec3 vDiffuse;
+layout(location = 11) in vec3 vSpecular;
+layout(location = 12) in float vReflectance;
 
 out vec4 fAmbient;
 out vec3 fDiffuse;
@@ -54,7 +56,7 @@ out float fReflectance;
 
 out vec3 fPosition;
 out vec2 fUV;
-flat out vec3 fNormal;
+out vec3 fNormal;
 
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
@@ -78,7 +80,7 @@ out vec4 outColor;
 
 in vec2 fUV;
 in vec3 fPosition;
-flat in vec3 fNormal;
+in vec3 fNormal;
 
 in vec4 fAmbient;
 in vec3 fDiffuse;
@@ -106,7 +108,8 @@ uniform mat4 viewMatrix;
 uniform int lightCount;
 uniform Light lights[maxLights];
 
-uniform sampler2D textureSampler;
+uniform sampler2D textureMap;
+uniform sampler2D normalMap;
 uniform int textured;
 
 // Environment
@@ -170,7 +173,7 @@ void main() {
 	outColor = outColor + vec4(calcDirectionalLight(), 0);
 
 	// Apply texture if present
-	outColor *= textured * texture(textureSampler, fUV) + (1 - textured) * vec4(1);
+	outColor *= textured * texture(textureMap, fUV) + (1 - textured) * vec4(1);
 
 	// HDR correction
 	outColor = hdr * vec4(vec3(1.0) - exp(-outColor.rgb * exposure), outColor.a) + (1 - hdr) * outColor;
@@ -178,6 +181,9 @@ void main() {
 	// Gamma correction
 	outColor = vec4(pow(outColor.rgb, vec3(1.0 / gamma)), outColor.a);
 
-	outColor = rgba(fNormal);
+	//outColor = rgba(fNormal);
+	outColor = texture(normalMap, fUV);
+	//outColor = texture(textureMap, fUV);
+	//outColor = vec4(fUV, 0, 1);
 }
 

@@ -63,6 +63,6 @@ namespace KeyboardOptions {
 		extern Key valid;
 	}
 
-	void load(const Properties& properties);
-	void save(Properties properties);
+	void load(const Util::Properties& properties);
+	void save(Util::Properties& properties);
 }

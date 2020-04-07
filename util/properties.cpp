@@ -5,6 +5,7 @@
 #include "stringUtil.h"
 #include "log.h"
 
+namespace Util {
 
 std::string Properties::get(std::string property) const {
 	try {
@@ -92,3 +93,5 @@ namespace PropertiesParser {
 		outputstream.close();
 	}
 }
+
+};

@@ -127,7 +127,7 @@ void Screen::onInit() {
 	Log::setLogLevel(Log::Level::INFO);
 
 	// Properties init
-	properties = PropertiesParser::read("../res/.properties");
+	properties = Util::PropertiesParser::read("../res/.properties");
 
 	// load options from properties
 	KeyboardOptions::load(properties);
@@ -300,7 +300,7 @@ void Screen::onClose() {
 
 	KeyboardOptions::save(properties);
 
-	PropertiesParser::write("../res/.properties", properties);
+	Util::PropertiesParser::write("../res/.properties", properties);
 
 	terminateGLFW();
 }

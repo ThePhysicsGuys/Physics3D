@@ -3,6 +3,8 @@
 #include <string>
 #include <map>	
 
+namespace Util {
+
 class Properties {
 private:
 	std::map<std::string, std::string> properties;
@@ -21,4 +23,6 @@ public:
 namespace PropertiesParser {
 	Properties read(const std::string& file);
 	void write(const std::string& file, Properties& properties);
+};
+
 };

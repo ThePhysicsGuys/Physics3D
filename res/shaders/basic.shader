@@ -6,25 +6,27 @@
 
 [vertex]
 
-layout(location = 0) in vec3 vposition;
-layout(location = 1) in vec3 vnormal;
-layout(location = 2) in vec2 vuv;
+layout(location = 0) in vec3 vPosition;
+layout(location = 1) in vec3 vNormal;
+layout(location = 2) in vec2 vUV;
+layout(location = 3) in vec3 vTangent;
+layout(location = 4) in vec3 vBitangent;
 
-out vec3 gposition;
-out vec2 guv;
+out vec3 gPosition;
+out vec2 gUV;
 
 out VS_OUT {
 	vec3 value;
-} gnormal;
+} gNormal;
 
 uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
 
 void main() {
-	guv = vuv;
-	gposition = vposition;
-	gnormal.value = (modelMatrix * vec4(vnormal, 0.0)).xyz;
-	gl_Position = modelMatrix * vec4(vposition, 1.0);
+	gUV = vUV;
+	gPosition = vPosition;
+	gNormal.value = (modelMatrix * vec4(vNormal, 0.0)).xyz;
+	gl_Position = modelMatrix * vec4(vPosition, 1.0);
 }
 
 //------------------------------------------------------------------------------//
@@ -40,17 +42,17 @@ uniform int includeNormals;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 
-in vec3 gposition[];
-in vec2 guv[];
+in vec3 gPosition[];
+in vec2 gUV[];
 
 in VS_OUT {
 	vec3 value;
-} gnormal[];
+} gNormal[];
 
-out vec2 fuv;
-out vec3 fposition;
-out vec3 fnormal;
-out vec3 fcenter;
+out vec2 fUV;
+out vec3 fPosition;
+out vec3 fNormal;
+out vec3 fCenter;
 
 vec3 center() {
 	return vec3(gl_in[0].gl_Position + gl_in[1].gl_Position + gl_in[2].gl_Position) / 3;
@@ -72,33 +74,33 @@ vec2 uv(vec3 p, vec3 n, vec3 u, vec3 v) {
 }
 
 void main() {
-	fnormal = normal();
-	fcenter = center();
+	fNormal = normal();
+	fCenter = center();
 
 	mat4 transform = projectionMatrix * viewMatrix;
 
-	vec3 u = gposition[2] - gposition[0];
-	vec3 n = normalize(cross(gposition[0] - gposition[1], gposition[2] - gposition[0]));
+	vec3 u = gPosition[2] - gPosition[0];
+	vec3 n = normalize(cross(gPosition[0] - gPosition[1], gPosition[2] - gPosition[0]));
 	vec3 v = cross(n, u);
 
 	// Vertex 1
-	fposition = gl_in[0].gl_Position.xyz;
-	fuv = includeUvs * guv[0] + (1 - includeUvs) * uv(gposition[0], n, u, v);
-	fnormal = includeNormals * gnormal[0].value + (1 - includeNormals) * fnormal;
+	fPosition = gl_in[0].gl_Position.xyz;
+	fUV = includeUvs * gUV[0] + (1 - includeUvs) * uv(gPosition[0], n, u, v);
+	fNormal = includeNormals * gNormal[0].value + (1 - includeNormals) * fNormal;
 
 	gl_Position = transform * gl_in[0].gl_Position; EmitVertex();
 
 	// Vertex 2
-	fposition = gl_in[1].gl_Position.xyz;
-	fuv = includeUvs * guv[1] + (1 - includeUvs) * uv(gposition[1], n, u, v);
-	fnormal = includeNormals * gnormal[1].value + (1 - includeNormals) * fnormal;
+	fPosition = gl_in[1].gl_Position.xyz;
+	fUV = includeUvs * gUV[1] + (1 - includeUvs) * uv(gPosition[1], n, u, v);
+	fNormal = includeNormals * gNormal[1].value + (1 - includeNormals) * fNormal;
 
 	gl_Position = transform * gl_in[1].gl_Position; EmitVertex();
 
 	// Vertex 3
-	fposition = gl_in[2].gl_Position.xyz;
-	fuv = includeUvs * guv[2] + (1 - includeUvs) * uv(gposition[2], n, u, v);
-	fnormal = includeNormals * gnormal[2].value + (1 - includeNormals) * fnormal;
+	fPosition = gl_in[2].gl_Position.xyz;
+	fUV = includeUvs * gUV[2] + (1 - includeUvs) * uv(gPosition[2], n, u, v);
+	fNormal = includeNormals * gNormal[2].value + (1 - includeNormals) * fNormal;
 
 	gl_Position = transform * gl_in[2].gl_Position; EmitVertex();
 	EndPrimitive();
@@ -110,10 +112,10 @@ void main() {
 
 out vec4 outColor;
 
-in vec2 fuv;
-in vec3 fposition;
-in vec3 fnormal;
-in vec3 fcenter;
+in vec2 fUV;
+in vec3 fPosition;
+in vec3 fNormal;
+in vec3 fCenter;
 
 struct Material {
 	vec4 ambient;
@@ -156,7 +158,7 @@ uniform float gamma = 1.0;
 uniform int hdr = 1;
 
 vec4 fog(vec4 color) {
-	vec3 cameraDirection = -(viewMatrix * vec4(fposition, 1)).xyz;
+	vec3 cameraDirection = -(viewMatrix * vec4(fPosition, 1)).xyz;
 
 	float b = 0.01;
 	float fogAmount = 1.0 - exp(-length(cameraDirection) * b);
@@ -172,7 +174,7 @@ vec4 fog(vec4 color) {
 vec3 calcDirectionalLight() {
 	// Directional light
 	vec3 directionalLight = normalize(sunDirection);
-	float directionalFactor = 0.4 * max(dot(fnormal, directionalLight), 0.0);
+	float directionalFactor = 0.4 * max(dot(fNormal, directionalLight), 0.0);
 	vec3 directional = directionalFactor * sunColor;
 	return directional;
 }
@@ -184,16 +186,16 @@ vec3 calcLightColor(Light light) {
 	vec3 ambient = ambientStrength * light.color;
 
 	// Diffuse light
-	vec3 lightDirection = light.position - fposition;
+	vec3 lightDirection = light.position - fPosition;
 	vec3 toLightSource = normalize(lightDirection);
-	float diffuseFactor = max(dot(fnormal, toLightSource), 0.0);
+	float diffuseFactor = max(dot(fNormal, toLightSource), 0.0);
 	vec3 diffuse = material.diffuse * diffuseFactor * light.color;
 
 	// Specular light
 	float specularPower = 10.0f;
-	vec3 cameraDirection = normalize(-(viewMatrix * vec4(fposition, 1)).xyz);
+	vec3 cameraDirection = normalize(-(viewMatrix * vec4(fPosition, 1)).xyz);
 	vec3 fromLightSource = -toLightSource;
-	vec3 reflectedLight = normalize(reflect(fromLightSource, fnormal));
+	vec3 reflectedLight = normalize(reflect(fromLightSource, fNormal));
 	float specularFactor = max(dot(cameraDirection, (viewMatrix * vec4(reflectedLight, 0)).xyz), 0.0);
 	specularFactor = pow(specularFactor, specularPower);
 	vec3 specular = material.specular * material.reflectance * specularFactor * light.color;
@@ -224,7 +226,7 @@ void main() {
 	outColor = outColor + vec4(calcDirectionalLight(), 0);
 
 	// Apply texture if present
-	outColor *= material.textured * texture(textureSampler, fuv) + (1 - material.textured) * vec4(1);
+	outColor *= material.textured * texture(textureSampler, fUV) + (1 - material.textured) * vec4(1);
 
 	// HDR correction
 	outColor = hdr * vec4(vec3(1.0) - exp(-outColor.rgb * exposure), outColor.a) + (1 - hdr) * outColor;

@@ -4,6 +4,8 @@
 #include <vector>
 #include <string>
 
+namespace Util {
+
 std::vector<std::string> split(const std::string& string, char splitter) {
 	std::vector<std::string> elements;
 	size_t length = string.size();
@@ -53,19 +55,21 @@ bool endsWith(const std::string& string, const std::string& suffix) {
 }
 
 std::string ltrim(std::string string) {
-	string.erase(string.begin(), std::find_if(string.begin(), string.end(), [](int ch) {
+	string.erase(string.begin(), std::find_if(string.begin(), string.end(), [] (int ch) {
 		return ch != ' ' && ch != '\t' && ch != '\n' && ch != '\r';
-	}));
+		}));
 	return string;
 }
 
 std::string rtrim(std::string string) {
-	string.erase(std::find_if(string.rbegin(), string.rend(), [](int ch) {
+	string.erase(std::find_if(string.rbegin(), string.rend(), [] (int ch) {
 		return ch != ' ' && ch != '\t' && ch != '\n' && ch != '\r';
-	}).base(), string.end());
+		}).base(), string.end());
 	return string;
 }
 
 std::string trim(std::string string) {
 	return ltrim(rtrim(string));
 }
+
+};

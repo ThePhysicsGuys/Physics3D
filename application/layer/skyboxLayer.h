@@ -1,11 +1,11 @@
 #pragma once
 
 #include "../engine/layer/layer.h"
-#include "../graphics/gui/valueCycle.h"
+#include "../util/valueCycle.h"
 #include "../graphics/gui/color.h"
 #include "../physics/math/linalg/vec.h"
 
-struct SkyboxCycle : public Graphics::ValueCycle<::Color3, Graphics::linear> {
+struct SkyboxCycle : public Util::ValueCycle<::Color3, Util::linear> {
 public:
 	inline SkyboxCycle() {}
 	inline SkyboxCycle(const ::Color3& night, const ::Color3& day, const ::Color3& dusk, const ::Color3& dawn, float midnightEnd, float middayStart, float middayEnd) {

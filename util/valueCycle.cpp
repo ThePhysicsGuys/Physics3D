@@ -1,8 +1,6 @@
-#include "core.h"
-
 #include "valueCycle.h"
 
-namespace Graphics {
+namespace Util {
 
 float linear(float t) {
 	return t;

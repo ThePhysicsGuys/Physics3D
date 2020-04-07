@@ -14,7 +14,6 @@
 #include "../physics/geometry/boundingBox.h"
 #include "../graphics/buffers/frameBuffer.h"
 #include "../graphics/mesh/primitive.h"
-#include "../graphics/gui/valueCycle.h"
 #include "../graphics/resource/textureResource.h"
 #include "../graphics/gui/guiUtils.h"
 

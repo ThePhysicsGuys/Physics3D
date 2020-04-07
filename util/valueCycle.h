@@ -4,7 +4,7 @@
 #include <vector>
 #include <initializer_list>
 
-namespace Graphics {
+namespace Util {
 
 float linear(float t);
 float smoothstep(float t);

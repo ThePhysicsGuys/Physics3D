@@ -253,7 +253,6 @@
     <ClCompile Include="gui\gui.cpp" />
     <ClCompile Include="gui\guiUtils.cpp" />
     <ClCompile Include="gui\layout.cpp" />
-    <ClCompile Include="gui\valueCycle.cpp" />
     <ClCompile Include="meshLibrary.cpp" />
     <ClCompile Include="mesh\abstractMesh.cpp" />
     <ClCompile Include="mesh\arrayMesh.cpp" />
@@ -301,7 +300,6 @@
     <ClInclude Include="debug\profilerUI.h" />
     <ClInclude Include="font.h" />
     <ClInclude Include="gui\color.h" />
-    <ClInclude Include="gui\valueCycle.h" />
     <ClInclude Include="gui\component.h" />
     <ClInclude Include="gui\container.h" />
     <ClInclude Include="gui\gui.h" />

@@ -70,11 +70,11 @@ void init(int argc, const char** args) {
 		const char* file = args[1];
 		Log::info("Loading file %s", file);
 		auto startTime = high_resolution_clock::now();
-		if(endsWith(file, ".parts")) {
+		if(Util::endsWith(file, ".parts")) {
 			WorldImportExport::loadLoosePartsIntoWorld(file, world);
-		} else if(endsWith(file, ".nativeParts")) {
+		} else if(Util::endsWith(file, ".nativeParts")) {
 			WorldImportExport::loadNativePartsIntoWorld(file, world);
-		} else if(endsWith(file, ".world")) {
+		} else if(Util::endsWith(file, ".world")) {
 			WorldImportExport::loadWorld(file, world);
 		}
 		nanoseconds deltaTime = high_resolution_clock::now() - startTime;

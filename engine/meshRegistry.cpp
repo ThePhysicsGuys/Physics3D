@@ -23,7 +23,7 @@ VisualData cylinder;
 static Graphics::VisualShape createCylinder(int sides, double radius, double height) {
 	assert(sides >= 2);
 	int vertexCount = sides * 4;
-	Vec3f* vecBuf = new Vec3f[vertexCount];
+	Vec3f* vertexBuffer = new Vec3f[vertexCount];
 
 
 	// vertices
@@ -31,31 +31,31 @@ static Graphics::VisualShape createCylinder(int sides, double radius, double hei
 		double angle = i * PI * 2 / sides;
 		Vec3f bottom(cos(angle) * radius, sin(angle) * radius, height / 2);
 		Vec3f top(cos(angle) * radius, sin(angle) * radius, -height / 2);
-		vecBuf[i * 2] = bottom;
-		vecBuf[i * 2 + 1] = top;
-		vecBuf[i * 2 + sides * 2] = bottom;
-		vecBuf[i * 2 + 1 + sides * 2] = top;
+		vertexBuffer[i * 2] = bottom;
+		vertexBuffer[i * 2 + 1] = top;
+		vertexBuffer[i * 2 + sides * 2] = bottom;
+		vertexBuffer[i * 2 + 1 + sides * 2] = top;
 	}
 
 	int triangleCount = sides * 2 + (sides - 2) * 2;
-	Triangle* triangleBuf = new Triangle[triangleCount];
+	Triangle* triangleBuffer = new Triangle[triangleCount];
 
 	// sides
 	for(int i = 0; i < sides; i++) {
-		int botLeft = i * 2;
-		int botRight = ((i + 1) % sides) * 2;
-		triangleBuf[i * 2] = Triangle{botLeft, botLeft + 1, botRight}; // botLeft, botRight, topLeft
-		triangleBuf[i * 2 + 1] = Triangle{botRight + 1, botRight, botLeft + 1}; // topRight, topLeft, botRight
+		int bottomLeft = i * 2;
+		int bottomRight = ((i + 1) % sides) * 2;
+		triangleBuffer[i * 2] = Triangle{bottomLeft, bottomLeft + 1, bottomRight}; // botLeft, botRight, topLeft
+		triangleBuffer[i * 2 + 1] = Triangle{bottomRight + 1, bottomRight, bottomLeft + 1}; // topRight, topLeft, botRight
 	}
 
-	Vec3f* normals = new Vec3f[vertexCount];
+	Vec3f* normalBuffer = new Vec3f[vertexCount];
 
 	for(int i = 0; i < sides * 2; i++) {
-		Vec3f vertex = vecBuf[i];
-		normals[i] = normalize(Vec3(vertex.x, vertex.y, 0));
+		Vec3f vertex = vertexBuffer[i];
+		normalBuffer[i] = normalize(Vec3(vertex.x, vertex.y, 0));
 	}
 
-	Triangle* capOffset = triangleBuf + sides * 2Ui64;
+	Triangle* capOffset = triangleBuffer + sides * 2Ui64;
 	// top and bottom
 	for(int i = 0; i < sides - 2; i++) { // common corner is i=0
 		capOffset[i] = Triangle{sides * 2 + 0, sides * 2 + (i + 1) * 2, sides * 2 + (i + 2) * 2};
@@ -63,11 +63,11 @@ static Graphics::VisualShape createCylinder(int sides, double radius, double hei
 	}
 
 	for(int i = 0; i < sides; i++) {
-		normals[i * 2 + sides * 2] = Vec3f(0, 0, 1);
-		normals[i * 2 + sides * 2 + 1] = Vec3f(0, 0, -1);
+		normalBuffer[i * 2 + sides * 2] = Vec3f(0, 0, 1);
+		normalBuffer[i * 2 + sides * 2 + 1] = Vec3f(0, 0, -1);
 	}
 
-	return Graphics::VisualShape(vecBuf, SharedArrayPtr<const Vec3f>(normals), triangleBuf, vertexCount, triangleCount);
+	return Graphics::VisualShape(vertexBuffer, vertexCount, triangleBuffer, triangleCount, SharedArrayPtr<const Vec3f>(normalBuffer));
 }
 
 Graphics::VisualShape createSphere(double radius, int steps) {

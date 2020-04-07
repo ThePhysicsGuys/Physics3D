@@ -12,6 +12,7 @@
 #include "../graphics/buffers/vertexBuffer.h"
 #include "../graphics/buffers/bufferLayout.h"
 
+#include "../graphics/resource/textureResource.h"
 #include "../engine/resource/meshResource.h"
 #include "../util/resource/resourceManager.h"
 #include "../application/ecs/light.h"
@@ -19,8 +20,6 @@
 #include "shader/shaders.h"
 #include "input/standardInputHandler.h"
 #include "worlds.h"
-
-#include "../graphics/gui/valueCycle.h"
 
 namespace Application {
 
@@ -69,8 +68,12 @@ void TestLayer::onInit() {
 	);
 	VertexBuffer* vbo = new VertexBuffer(uniforms.data(), uniforms.size() * sizeof(Uniform));
 
-	mesh = ResourceManager::add<MeshResource>("sphere", "../res/models/sphere.obj");
+	mesh = ResourceManager::add<MeshResource>("plane", "../res/models/plane.obj");
+	//mesh = ResourceManager::add<MeshResource>("sphere", "../res/models/sphere.obj");
 	mesh->getMesh()->addUniformBuffer(vbo, layout);
+
+	ResourceManager::add<TextureResource>("wall_color", "../res/textures/wall/wall_color.jpg");
+	ResourceManager::add<TextureResource>("wall_normal", "../res/textures/wall/wall_normal.jpg");
 
 	std::vector<Light*> lights;
 	Attenuation attenuation = { 0, 0, 0.5 };
@@ -103,9 +106,16 @@ void TestLayer::onRender() {
 	glDisable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 
+	ResourceManager::get<TextureResource>("wall_color")->bind(0);
+	ApplicationShaders::lightingShader.setUniform("textureMap", 0);
+
+	ResourceManager::get<TextureResource>("wall_normal")->bind(1);
+	ApplicationShaders::lightingShader.setUniform("normalMap", 1);
+
 	ApplicationShaders::lightingShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix);
 
-	mesh->getMesh()->renderInstanced(uniforms.size(), FILL);
+	//mesh->getMesh()->renderInstanced(uniforms.size(), FILL);
+	mesh->getMesh()->render(FILL);
 
 	endScene();
 }

@@ -38,7 +38,7 @@ public:
 	Camera camera;
 	LayerStack layerStack;
 	EventHandler eventHandler;
-	Properties properties;
+	Util::Properties properties;
 	
 	Graphics::FrameBuffer* screenFrameBuffer = nullptr;
 	Graphics::Quad* quad = nullptr;

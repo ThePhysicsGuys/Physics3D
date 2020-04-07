@@ -16,11 +16,15 @@ public:
 	BufferLayout vertexBufferLayout;
 	BufferLayout normalBufferLayout;
 	BufferLayout uvBufferLayout;
+	BufferLayout tangentBufferLayout;
+	BufferLayout bitangentBufferLayout;
 
 	IndexBuffer* indexBuffer = nullptr;
 	VertexBuffer* vertexBuffer = nullptr;
 	VertexBuffer* normalBuffer = nullptr;
 	VertexBuffer* uvBuffer = nullptr;
+	VertexBuffer* tangentBuffer = nullptr;
+	VertexBuffer* bitangentBuffer = nullptr;
 
 	BufferLayout uniformBufferLayout;
 	VertexBuffer* uniformBuffer = nullptr;

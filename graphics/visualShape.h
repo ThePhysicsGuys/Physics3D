@@ -8,19 +8,21 @@
 namespace Graphics {
 
 struct VisualShape : public Polyhedron {
-	SharedArrayPtr<const Vec3f> normals;
-	SharedArrayPtr<const Vec2f> uvs;
+	typedef SharedArrayPtr<const Vec3f> SVec3f;
+	typedef SharedArrayPtr<const Vec2f> SVec2f;
 
-	VisualShape() : Polyhedron(), normals(nullptr), uvs(nullptr) {}
-	VisualShape(Vec3f* vertices, const Triangle* triangles, int vertexCount, int triangleCount) : VisualShape(vertices, SharedArrayPtr<const Vec3f>(), SharedArrayPtr<const Vec2f>(), triangles, vertexCount, triangleCount) {}
-	VisualShape(Vec3f* vertices, SharedArrayPtr<const Vec3f> normals, const Triangle* triangles, int vertexCount, int triangleCount) : VisualShape(vertices, normals, SharedArrayPtr<const Vec2f>(), triangles, vertexCount, triangleCount) {}
-	VisualShape(Vec3f* vertices, SharedArrayPtr<const Vec2f> uvs, const Triangle* triangles, int vertexCount, int triangleCount) : VisualShape(vertices, SharedArrayPtr<const Vec3f>(), uvs, triangles, vertexCount, triangleCount) {}
+	SVec3f normals;
+	SVec2f uvs;
+	SVec3f tangents;
+	SVec3f bitangents;
 
-	explicit VisualShape(const Polyhedron& shape) : VisualShape(shape, SharedArrayPtr<const Vec3f>(), SharedArrayPtr<const Vec2f>()) {}
-	VisualShape(const Polyhedron& shape, SharedArrayPtr<const Vec3f> normals, SharedArrayPtr<const Vec2f> uvs) : Polyhedron(shape), normals(normals), uvs(uvs) {}
+	VisualShape() : Polyhedron(), normals(nullptr), uvs(nullptr), tangents(nullptr), bitangents(nullptr) {}
 
-	VisualShape(Vec3f* vertices, SharedArrayPtr<const Vec3f> normals, SharedArrayPtr<const Vec2f> uvs, const Triangle* triangles, int vertexCount, int triangleCount) :
-		Polyhedron(vertices, triangles, vertexCount, triangleCount), normals(normals), uvs(uvs) {}
+	VisualShape(Vec3f* vertices, int vertexCount, const Triangle* triangles, int triangleCount, SVec3f normals = SVec3f(), SVec2f uvs = SVec2f(), SVec3f tangents = SVec3f(), SVec3f bitangents = SVec3f()) :
+		Polyhedron(vertices, triangles, vertexCount, triangleCount), normals(normals), uvs(uvs), tangents(tangents), bitangents(bitangents) {}
+
+	explicit VisualShape(const Polyhedron& shape, SVec3f normals = SVec3f(), SVec2f uvs = SVec2f(), SVec3f tangents = SVec3f(), SVec3f bitangents = SVec3f()) :
+		Polyhedron(shape), normals(normals), uvs(uvs), tangents(tangents), bitangents(bitangents) {}
 
 	operator Shape() const { return static_cast<Polyhedron>(*this); }
 };

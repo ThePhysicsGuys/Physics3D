@@ -28,7 +28,7 @@ float Import::parseFloat(const std::string& num) {
 }
 
 Vec3 Import::parseVec3(const std::string& vec) {
-	std::vector<std::string> tokens = split(vec, ' ');
+	std::vector<std::string> tokens = Util::split(vec, ' ');
 	Vec3 vector = Vec3();
 	for (int i = 0; i < 3; i++)
 		vector[i] = Import::parseDouble(tokens[i]);
@@ -37,7 +37,7 @@ Vec3 Import::parseVec3(const std::string& vec) {
 }
 
 Position Import::parsePosition(const std::string& vec) {
-	std::vector<std::string> tokens = split(vec, ' ');
+	std::vector<std::string> tokens = Util::split(vec, ' ');
 	Position vector;
 	for (int i = 0; i < 3; i++)
 		vector[i] = Fix<32>(Import::parseLong(tokens[i]));
@@ -46,7 +46,7 @@ Position Import::parsePosition(const std::string& vec) {
 }
 
 Vec4 Import::parseVec4(const std::string& vec) {
-	std::vector<std::string> tokens = split(vec, ' ');
+	std::vector<std::string> tokens = Util::split(vec, ' ');
 	Vec4 vector;
 	for (int i = 0; i < 4; i++)
 		vector[i] = Import::parseDouble(tokens[i]);
@@ -55,7 +55,7 @@ Vec4 Import::parseVec4(const std::string& vec) {
 }
 
 Vec4f Import::parseVec4f(const std::string& vec) {
-	std::vector<std::string> tokens = split(vec, ' ');
+	std::vector<std::string> tokens = Util::split(vec, ' ');
 	Vec4f vector;
 	for (int i = 0; i < 4; i++)
 		vector[i] = Import::parseFloat(tokens[i]);
@@ -64,7 +64,7 @@ Vec4f Import::parseVec4f(const std::string& vec) {
 }
 
 Vec3f Import::parseVec3f(const std::string& vec) {
-	std::vector<std::string> tokens = split(vec, ' ');
+	std::vector<std::string> tokens = Util::split(vec, ' ');
 	Vec3f vector = Vec3f();
 	for (int i = 0; i < 3; i++)
 		vector[i] = Import::parseFloat(tokens[i]);
@@ -73,7 +73,7 @@ Vec3f Import::parseVec3f(const std::string& vec) {
 }
 
 DiagonalMat3 Import::parseDiagonalMat3(const std::string& mat) {
-	std::vector<std::string> tokens = split(mat, ' ');
+	std::vector<std::string> tokens = Util::split(mat, ' ');
 	DiagonalMat3 matrix = DiagonalMat3();
 	for (int i = 0; i < 3; i++)
 		matrix[i] = Import::parseDouble(tokens[i]);
@@ -82,7 +82,7 @@ DiagonalMat3 Import::parseDiagonalMat3(const std::string& mat) {
 }
 
 Mat3 Import::parseMat3(const std::string& mat) {
-	std::vector<std::string> tokens = split(mat, ' ');
+	std::vector<std::string> tokens = Util::split(mat, ' ');
 	double data[9];
 
 	for (int i = 0; i < 9; i++)
@@ -114,7 +114,7 @@ struct Vertex {
 	int uv = -1;
 
 	inline Vertex(const std::string& line) {
-		std::vector<std::string> tokens = split(line, '/');
+		std::vector<std::string> tokens = Util::split(line, '/');
 		size_t length = tokens.size();
 
 		// Positions
@@ -177,9 +177,13 @@ Graphics::VisualShape reorder(const std::vector<Vec3f>& positions, const std::ve
 
 	// UVs
 	Vec2f* uvArray = nullptr;
-	if (flags.uvs) 
+	Vec3f* tangentArray = nullptr;
+	Vec3f* bitangentArray = nullptr;
+	if (flags.uvs) {
 		uvArray = new Vec2f[positions.size()];
-
+		tangentArray = new Vec3f[positions.size()];
+		bitangentArray = new Vec3f[positions.size()];
+	}
 	// Triangles
 	Triangle* triangleArray = new Triangle[faces.size()];
 	for (int i = 0; i < faces.size(); i++) {
@@ -187,6 +191,28 @@ Graphics::VisualShape reorder(const std::vector<Vec3f>& positions, const std::ve
 
 		// Save triangle
 		triangleArray[i] = { face.v1.position, face.v2.position, face.v3.position };
+
+		// Calculate (bi)tangents
+		Vec3f tangent;
+		Vec3f bitangent;
+		if (flags.uvs) {
+			Vec3 edge1 = positions[face.v2.position] - positions[face.v1.position];
+			Vec3 edge2 = positions[face.v3.position] - positions[face.v1.position];
+			Vec2 dUV1 = uvs[face.v2.uv] - uvs[face.v1.uv];
+			Vec2 dUV2 = uvs[face.v3.uv] - uvs[face.v1.uv];
+
+			float f = 1.0f / (dUV1.x * dUV2.y - dUV2.x * dUV1.y);
+
+			tangent.x = f * (dUV2.y * edge1.x - dUV1.y * edge2.x);
+			tangent.y = f * (dUV2.y * edge1.y - dUV1.y * edge2.y);
+			tangent.z = f * (dUV2.y * edge1.z - dUV1.y * edge2.z);
+			tangent = normalize(tangent);
+
+			bitangent.x = f * (-dUV2.x * edge1.x + dUV1.x * edge2.x);
+			bitangent.y = f * (-dUV2.x * edge1.y + dUV1.x * edge2.y);
+			bitangent.z = f * (-dUV2.x * edge1.z + dUV1.x * edge2.z);
+			bitangent = normalize(bitangent);
+		}
 
 		for (int i = 0; i < 3; i++) {
 			const Vertex& vertex = face[i];
@@ -196,12 +222,16 @@ Graphics::VisualShape reorder(const std::vector<Vec3f>& positions, const std::ve
 				normalArray[vertex.position] = normals[vertex.normal];
 
 			// Save uv
-			if (flags.uvs && vertex.uv != -1)
-				uvArray[vertex.position] = Vec2(uvs[vertex.uv].x, 1.0 - uvs[vertex.uv].y);
+			if (flags.uvs && vertex.uv != -1) {
+				Vec2f uv = Vec2f(uvs[vertex.uv].x, 1.0 - uvs[vertex.uv].y);
+				uvArray[vertex.position] = uv;
+				tangentArray[vertex.position] = tangent;
+				bitangentArray[vertex.position] = bitangent;
+			}
 		}
 	}
 
-	return Graphics::VisualShape(positionArray, SharedArrayPtr<const Vec3f>(normalArray), SharedArrayPtr<const Vec2f>(uvArray), triangleArray, (int) positions.size(), (int) faces.size());
+	return Graphics::VisualShape(positionArray, (int) positions.size(), triangleArray, (int) faces.size(), SharedArrayPtr<const Vec3f>(normalArray), SharedArrayPtr<const Vec2f>(uvArray), SharedArrayPtr<const Vec3f>(tangentArray), SharedArrayPtr<const Vec3f>(bitangentArray));
 }
 
 Graphics::VisualShape loadBinaryObj(std::istream& input) {
@@ -216,22 +246,28 @@ Graphics::VisualShape loadBinaryObj(std::istream& input) {
 
 	Vec3f* vertices = new Vec3f[vertexCount];
 	for (int i = 0; i < vertexCount; i++) {
-		Vec3 t = Import::read<Vec3f>(input);
+		Vec3 vertex = Import::read<Vec3f>(input);
 
-		vertices[i] = t;
+		vertices[i] = vertex;
 	}
 
 	Vec3f* normals = nullptr;
 	if (flag == VN || flag == VNT) {
 		normals = new Vec3f[vertexCount];
+
 		for (int i = 0; i < vertexCount; i++) {
 			normals[i] = Import::read<Vec3f>(input);
 		}
 	}
 
 	Vec2f* uvs = nullptr;
+	Vec3f* tangents = nullptr;
+	Vec3f* bitangents = nullptr;
 	if (flag == VT || flag == VNT) {
 		uvs = new Vec2f[vertexCount];
+		tangents = new Vec3f[vertexCount];
+		bitangents = new Vec3f[vertexCount];
+
 		for (int i = 0; i < vertexCount; i++) {
 			uvs[i] = Import::read<Vec2f>(input);
 		}
@@ -239,10 +275,39 @@ Graphics::VisualShape loadBinaryObj(std::istream& input) {
 
 	Triangle* triangles = new Triangle[triangleCount];
 	for (int i = 0; i < triangleCount; i++) {
-		triangles[i] = Import::read<Triangle>(input);
+		Triangle triangle = Import::read<Triangle>(input);
+
+		triangles[i] = triangle;
+
+		// Calculate (bi)tangents
+		if (flag == VT || flag == VNT) {
+			Vec3f tangent;
+			Vec3f bitangent;
+
+			Vec3 edge1 = vertices[triangle.secondIndex] - vertices[triangle.firstIndex];
+			Vec3 edge2 = vertices[triangle.thirdIndex] - vertices[triangle.firstIndex];
+			Vec2 dUV1 = uvs[triangle.secondIndex] - uvs[triangle.firstIndex];
+			Vec2 dUV2 = uvs[triangle.thirdIndex] - uvs[triangle.firstIndex];
+
+			float f = 1.0f / (dUV1.x * dUV2.y - dUV2.x * dUV1.y);
+
+			tangent.x = f * (dUV2.y * edge1.x - dUV1.y * edge2.x);
+			tangent.y = f * (dUV2.y * edge1.y - dUV1.y * edge2.y);
+			tangent.z = f * (dUV2.y * edge1.z - dUV1.y * edge2.z);
+			tangents[triangle.firstIndex] = normalize(tangent);
+			tangents[triangle.secondIndex] = normalize(tangent);
+			tangents[triangle.thirdIndex] = normalize(tangent);
+
+			bitangent.x = f * (-dUV2.x * edge1.x + dUV1.x * edge2.x);
+			bitangent.y = f * (-dUV2.x * edge1.y + dUV1.x * edge2.y);
+			bitangent.z = f * (-dUV2.x * edge1.z + dUV1.x * edge2.z);
+			bitangents[triangle.firstIndex] = normalize(bitangent);
+			bitangents[triangle.secondIndex] = normalize(bitangent);
+			bitangents[triangle.thirdIndex] = normalize(bitangent);
+		}
 	}
 
-	return Graphics::VisualShape(vertices, SharedArrayPtr<const Vec3f>(normals), SharedArrayPtr<const Vec2f>(uvs), triangles, vertexCount, triangleCount);
+	return Graphics::VisualShape(vertices, vertexCount, triangles, triangleCount, SharedArrayPtr<const Vec3f>(normals), SharedArrayPtr<const Vec2f>(uvs), SharedArrayPtr<const Vec3f>(tangents), SharedArrayPtr<const Vec3f>(bitangents));
 }
 
 Graphics::VisualShape loadNonBinaryObj(std::istream& input) {
@@ -254,7 +319,7 @@ Graphics::VisualShape loadNonBinaryObj(std::istream& input) {
 
 	std::string line;
 	while (getline(input, line)) {
-		std::vector<std::string> tokens = split(line, ' ');
+		std::vector<std::string> tokens = Util::split(line, ' ');
 
 		if (tokens.size() == 0)
 			continue;
@@ -298,9 +363,9 @@ Graphics::VisualShape OBJImport::load(std::istream& file, bool binary) {
 
 Graphics::VisualShape OBJImport::load(const std::string& file) {
 	bool binary;
-	if (endsWith(file, ".bobj"))
+	if (Util::endsWith(file, ".bobj"))
 		binary = true;
-	else if (endsWith(file, ".obj"))
+	else if (Util::endsWith(file, ".obj"))
 		binary = false;
 	else
 		return Graphics::VisualShape();

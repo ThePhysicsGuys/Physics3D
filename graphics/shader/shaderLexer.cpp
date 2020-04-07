@@ -68,7 +68,7 @@ Token ShaderLexer::popToken(std::string& input, const TokenType& type, std::stri
 	input.erase(0, value.length());
 
 	// removes all leading whitespaces from the input
-	input = ltrim(input);
+	input = Util::ltrim(input);
 
 	// remove quotes from the value if the type is a string, regex or comment
 	switch (type) {
@@ -219,7 +219,7 @@ TokenStack ShaderLexer::lexDebug(const std::string& input) {
 
 		auto [n5, n6] = next(index, true);
 		std::string array = input.substr(n5 - 1, n6 - n5 + 1);
-		if (!array.empty() && startsWith(array, "[") && endsWith(array, "]")) {
+		if (!array.empty() && Util::startsWith(array, "[") && Util::endsWith(array, "]")) {
 			TokenStack content = lex(array);
 			tokens.addAll(content);
 		}
@@ -235,7 +235,7 @@ TokenStack ShaderLexer::lexDebug(const std::string& input) {
 TokenStack ShaderLexer::lex(const std::string& input) {
 	TokenStack tokens;
 
-	std::string code = trim(input);
+	std::string code = Util::trim(input);
 
 	while (code.length() != 0) {
 		Token token = nextToken(code);

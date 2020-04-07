@@ -5,9 +5,12 @@
 #include "view/screen.h"
 #include "shader/shaders.h"
 
+#include "../util/resource/resourceManager.h"
+
 #include "../graphics/renderer.h"
 #include "../graphics/debug/profilerUI.h"
 #include "../graphics/debug/visualDebug.h"
+#include "../graphics/resource/fontResource.h"
 #include "../graphics/path/path.h"
 #include "../graphics/gui/gui.h"
 
@@ -60,7 +63,7 @@ void DebugOverlay::onRender() {
 	disableCulling();
 
 	Path::bind(GUI::batch);
-
+	ResourceManager::get<FontResource>("font")->getAtlas()->bind();
 	ApplicationShaders::fontShader.updateProjection(screen->camera.orthoMatrix);
 	GraphicsShaders::guiShader.setUniform("projectionMatrix", screen->camera.orthoMatrix);
 	graphicsMeasure.mark(GraphicsProcess::PROFILER);
