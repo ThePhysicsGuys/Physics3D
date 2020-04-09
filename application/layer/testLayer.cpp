@@ -26,10 +26,8 @@ namespace Application {
 
 struct Uniform {
 	Mat4f model;
-	Vec4f ambient;
-	Vec3f diffuse;
-	Vec3f specular;
-	float reflectance;
+	Vec3f albedo;
+	Vec3f mrao;
 };
 
 std::vector<Light*> llights;
@@ -37,22 +35,21 @@ std::vector<Uniform> uniforms;
 MeshResource* mesh;
 
 void TestLayer::onInit() {
-	float s = 2;
-	fsrepeat(x, s, 2) {
-		fsrepeat(y, s, 2) {
+	float size = 7.0f;
+	float space = 2.5f;
+	frepeat(row, size) {
+		frepeat(col, size) {
 			frepeat(z, 1) {
 				uniforms.push_back(
 					{
 						Mat4f {
-							1, 0, 0, x,
-							0, 1, 0, y+10,
-							0, 0, 1, z+2,
+							1, 0, 0, (col - size / 2.0f) * space,
+							0, 1, 0, 20+(row - size / 2.0f) * space,
+							0, 0, 1, 0,
 							0, 0, 0, 1,
 						},
-						Vec4f(1, 1, 1, 1.0),
-						Vec3f(1, 1, 1),
-						Vec3f(1, 1, 1),
-						1.0f
+						Vec3f(0.5, 0, 0),
+						Vec3f(row / size, col / size + 0.05, 1.0f),
 					}
 				);
 			}
@@ -62,22 +59,28 @@ void TestLayer::onInit() {
 	BufferLayout layout = BufferLayout(
 		{
 			BufferElement("vModelMatrix", BufferDataType::MAT4, true),
-			BufferElement("vAmbient", BufferDataType::FLOAT4, true),
-			BufferElement("vDiffuse", BufferDataType::FLOAT3, true),
-			BufferElement("vSpecular", BufferDataType::FLOAT3, true),
-			BufferElement("vReflectance", BufferDataType::FLOAT, true),
+			BufferElement("vAlbedo", BufferDataType::FLOAT3, true),
+			BufferElement("vMRAo", BufferDataType::FLOAT3, true),
 		}
 	);
 	VertexBuffer* vbo = new VertexBuffer(uniforms.data(), uniforms.size() * sizeof(Uniform));
 
-	mesh = ResourceManager::add<MeshResource>("plane", "../res/models/plane.obj");
-	//mesh = ResourceManager::add<MeshResource>("sphere", "../res/models/sphere.obj");
+	//mesh = ResourceManager::add<MeshResource>("plane", "../res/models/plane.obj");
+	mesh = ResourceManager::add<MeshResource>("sphere", "../res/models/sphere.obj");
+	
+	//mesh = ResourceManager::add<MeshResource>("sphere", "../res/models/sphere bot/sphere.obj");
+
 	mesh->getMesh()->addUniformBuffer(vbo, layout);
 
 	ResourceManager::add<TextureResource>("wall_color", "../res/textures/wall/wall_color.jpg");
 	ResourceManager::add<TextureResource>("wall_normal", "../res/textures/wall/wall_normal.jpg");
+	ResourceManager::add<TextureResource>("canvas_color", "../res/textures/canvas/canvas_color.png");
+	ResourceManager::add<TextureResource>("canvas_normal", "../res/textures/canvas/canvas_normal.png");
 
-	llights.push_back(new Light(Vec3f(0, 10, 2), Color3(1, 1, 1), 20, { 1, 1, 1 }));
+	llights.push_back(new Light(Vec3f(-10,10,10), Color3(300), 1, { 1, 1, 1 }));
+	llights.push_back(new Light(Vec3f(10,10,10), Color3(300), 1, { 1, 1, 1 }));
+	llights.push_back(new Light(Vec3f(-10,-10,10), Color3(300), 1, { 1, 1, 1 }));
+	llights.push_back(new Light(Vec3f(10,-10,10), Color3(300), 1, { 1, 1, 1 }));
 	ApplicationShaders::lightingShader.updateLight(llights);
 }
 
@@ -108,14 +111,13 @@ void TestLayer::onRender() {
 	glEnable(GL_DEPTH_TEST);
 	ApplicationShaders::lightingShader.bind();
 
-	ResourceManager::get<TextureResource>("wall_color")->bind(0);
-	ResourceManager::get<TextureResource>("wall_normal")->bind(1);
+	//ResourceManager::get<TextureResource>("canvas_color")->bind(0);
+	//ResourceManager::get<TextureResource>("canvas_normal")->bind(1);
 
-	ApplicationShaders::lightingShader.updateTexture(false);
+	//ApplicationShaders::lightingShader.updateTexture(false);
 	ApplicationShaders::lightingShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
 
 	mesh->getMesh()->renderInstanced(uniforms.size(), FILL);
-	//mesh->getMesh()->render(FILL);
 
 	endScene();
 }
