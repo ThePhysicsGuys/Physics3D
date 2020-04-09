@@ -20,6 +20,7 @@
 #include "shader/shaders.h"
 #include "input/standardInputHandler.h"
 #include "worlds.h"
+#include "../physics/math/mathUtil.h"
 
 namespace Application {
 
@@ -31,11 +32,12 @@ struct Uniform {
 	float reflectance;
 };
 
+std::vector<Light*> llights;
 std::vector<Uniform> uniforms;
 MeshResource* mesh;
 
 void TestLayer::onInit() {
-	float s = 10;
+	float s = 2;
 	fsrepeat(x, s, 2) {
 		fsrepeat(y, s, 2) {
 			frepeat(z, 1) {
@@ -47,7 +49,7 @@ void TestLayer::onInit() {
 							0, 0, 1, z+2,
 							0, 0, 0, 1,
 						},
-						Vec4f(x/s, y/s, z/s, 1.0),
+						Vec4f(1, 1, 1, 1.0),
 						Vec3f(1, 1, 1),
 						Vec3f(1, 1, 1),
 						1.0f
@@ -75,14 +77,8 @@ void TestLayer::onInit() {
 	ResourceManager::add<TextureResource>("wall_color", "../res/textures/wall/wall_color.jpg");
 	ResourceManager::add<TextureResource>("wall_normal", "../res/textures/wall/wall_normal.jpg");
 
-	std::vector<Light*> lights;
-	Attenuation attenuation = { 0, 0, 0.5 };
-	lights.push_back(new Light(Vec3f(10, 5, -10), Color3(1, 0.84f, 0.69f), 6, attenuation));
-	lights.push_back(new Light(Vec3f(10, 5, 10), Color3(1, 0.84f, 0.69f), 6, attenuation));
-	lights.push_back(new Light(Vec3f(-10, 5, -10), Color3(1, 0.84f, 0.69f), 6, attenuation));
-	lights.push_back(new Light(Vec3f(-10, 5, 10), Color3(1, 0.84f, 0.69f), 6, attenuation));
-	lights.push_back(new Light(Vec3f(0, 5, 0), Color3(1, 0.90f, 0.75f), 10, attenuation));
-	ApplicationShaders::lightingShader.updateLight(lights);
+	llights.push_back(new Light(Vec3f(0, 10, 2), Color3(1, 1, 1), 20, { 1, 1, 1 }));
+	ApplicationShaders::lightingShader.updateLight(llights);
 }
 
 void TestLayer::onUpdate() {
@@ -90,7 +86,12 @@ void TestLayer::onUpdate() {
 }
 
 void TestLayer::onEvent(Event& event) {
-
+	if (event.getType() == EventType::KeyPress) {
+		if (static_cast<KeyPressEvent&>(event).getKey() == Keyboard::TAB.code) {
+			llights[0]->position = fromPosition(screen.camera.cframe.position);
+			ApplicationShaders::lightingShader.updateLight(llights);
+		}
+	}
 }
 
 void TestLayer::onRender() {
@@ -105,17 +106,16 @@ void TestLayer::onRender() {
 	glEnable(GL_BLEND);
 	glDisable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
+	ApplicationShaders::lightingShader.bind();
 
 	ResourceManager::get<TextureResource>("wall_color")->bind(0);
-	ApplicationShaders::lightingShader.setUniform("textureMap", 0);
-
 	ResourceManager::get<TextureResource>("wall_normal")->bind(1);
-	ApplicationShaders::lightingShader.setUniform("normalMap", 1);
 
-	ApplicationShaders::lightingShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix);
+	ApplicationShaders::lightingShader.updateTexture(false);
+	ApplicationShaders::lightingShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
 
-	//mesh->getMesh()->renderInstanced(uniforms.size(), FILL);
-	mesh->getMesh()->render(FILL);
+	mesh->getMesh()->renderInstanced(uniforms.size(), FILL);
+	//mesh->getMesh()->render(FILL);
 
 	endScene();
 }

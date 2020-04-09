@@ -6,7 +6,7 @@ vec4 apply(mat4 matrix, vec3 vector) {
 }
 
 vec3 apply3(mat4 matrix, vec3 vector) {
-	return (matrix * vec4(vector, 0.0)).xyz;
+	return mat3(matrix) * vector;
 }
 
 vec4 applyT(mat4 matrix, vec3 vector) {
@@ -22,7 +22,7 @@ vec4 applyN(mat4 matrix, vec3 vector) {
 }
 
 vec3 apply3N(mat4 matrix, vec3 vector) {
-	return normalize((matrix * vec4(vector, 0.0)).xyz);
+	return normalize(mat3(matrix) * vector);
 }
 
 vec4 applyTN(mat4 matrix, vec3 vector) {
@@ -35,6 +35,10 @@ vec3 applyT3N(mat4 matrix, vec3 vector) {
 
 vec4 rgba(vec3 color) {
 	return vec4(color, 1.0);
+}
+
+vec4 rgba(float color) {
+	return vec4(color, color, color, 1.0);
 }
 
 [vertex]
@@ -68,10 +72,10 @@ void main() {
 	fReflectance = vReflectance;
 
 	fUV = vUV;
-	fPosition = applyT3N(vModelMatrix, vPosition);
+	fPosition = applyT3(vModelMatrix, vPosition);
 	fNormal = apply3N(vModelMatrix, vNormal);
 
-	gl_Position = applyT(projectionMatrix * viewMatrix * vModelMatrix, vPosition);
+	gl_Position = applyT(projectionMatrix * viewMatrix, fPosition);
 }
 
 [fragment]
@@ -102,6 +106,7 @@ struct Light {
 
 // Transform
 uniform mat4 viewMatrix;
+uniform vec3 viewPosition;
 
 // Appearance
 #define maxLights 10
@@ -113,7 +118,7 @@ uniform sampler2D normalMap;
 uniform int textured;
 
 // Environment
-uniform vec3 sunDirection = vec3(1, 1, 0);
+uniform vec3 sunDirection = vec3(1, 1, 1);
 uniform vec3 sunColor = vec3(1, 1, 1);
 uniform float exposure = 1.0;
 uniform float gamma = 1.0;
@@ -133,17 +138,17 @@ vec3 calcLightColor(Light light) {
 	vec3 ambient = ambientStrength * light.color;
 
 	// Diffuse light
-	vec3 lightDirection = light.position - fPosition;
-	vec3 toLightSource = normalize(lightDirection);
+	vec3 lightDirection = fPosition - light.position;
+	vec3 toLightSource = -normalize(lightDirection);
 	float diffuseFactor = max(dot(fNormal, toLightSource), 0.0);
 	vec3 diffuse = fDiffuse * diffuseFactor * light.color;
 
-	// Specular light
-	float specularPower = 10.0f;
-	vec3 cameraDirection = -applyT3N(viewMatrix, fPosition);
+	// Specular light  
+	float specularPower = 12.0f;
+	vec3 viewDirection = normalize(fPosition - viewPosition);
 	vec3 fromLightSource = -toLightSource;
 	vec3 reflectedLight = normalize(reflect(fromLightSource, fNormal));
-	float specularFactor = max(dot(cameraDirection, apply3(viewMatrix, reflectedLight)), 0.0);
+	float specularFactor = max(dot(-viewDirection, reflectedLight), 0.0);
 	specularFactor = pow(specularFactor, specularPower);
 	vec3 specular = fSpecular * fReflectance * specularFactor * light.color;
 
@@ -182,7 +187,7 @@ void main() {
 	outColor = vec4(pow(outColor.rgb, vec3(1.0 / gamma)), outColor.a);
 
 	//outColor = rgba(fNormal);
-	outColor = texture(normalMap, fUV);
+	//outColor = texture(normalMap, fUV);
 	//outColor = texture(textureMap, fUV);
 	//outColor = vec4(fUV, 0, 1);
 }

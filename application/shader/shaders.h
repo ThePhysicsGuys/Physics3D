@@ -149,7 +149,7 @@ struct LightingShader : public ShaderResource {
 	inline LightingShader() : ShaderResource() {}
 	inline LightingShader(ShaderSource shaderSource) : ShaderResource("LightingShader", "lighting.shader", shaderSource) {}
 
-	void updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix);
+	void updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Position& viewPosition);
 	void updateLight(const std::vector<Light*> lights);
 	void updateTexture(bool textured);
 };

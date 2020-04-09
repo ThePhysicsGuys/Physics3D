@@ -6,7 +6,7 @@
 
 #include "mesh/indexedMesh.h"
 
-#include "../physics/misc/shapeLibrary.h"
+#include "../engine/meshRegistry.h"
 #include "../engine/io/import.h"
 #include "visualShape.h"
 
@@ -18,10 +18,10 @@ IndexedMesh* sphere = nullptr;
 
 void onInit() {
 	// Cube
-	cube = new IndexedMesh(VisualShape(::Library::createCube(1)));
+	cube = new IndexedMesh(Engine::MeshRegistry::createCube(1));
 
 	// Sphere
-	sphere = new IndexedMesh(VisualShape(::Library::createSphere(1)));
+	sphere = new IndexedMesh(VisualShape(Engine::MeshRegistry::createSphere(1)));
 }
 
 void onClose() {

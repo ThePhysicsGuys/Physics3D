@@ -30,7 +30,8 @@ void ConstraintLayer::onDetach() {
 }
 
 void ConstraintLayer::onInit() {
-	this->hexagon = Engine::MeshRegistry::addMeshShape(Graphics::VisualShape(Library::createPrism(6, 0.5, 1.0)));
+	Graphics::VisualShape prismShape(Library::createPrism(6, 0.5, 1.0));
+	this->hexagon = Engine::MeshRegistry::addMeshShape(prismShape);
 
 }
 void ConstraintLayer::onUpdate() {

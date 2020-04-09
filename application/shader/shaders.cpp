@@ -209,6 +209,7 @@ void BasicShader::updateProjection(const Mat4f& viewMatrix, const Mat4f& project
 	bind();
 	setUniform("viewMatrix", viewMatrix);
 	setUniform("projectionMatrix", projectionMatrix);
+	setUniform("viewPosition", viewPosition);
 }
 
 void BasicShader::updateModel(const Mat4f& modelMatrix) {
@@ -528,14 +529,16 @@ void LightingShader::updateLight(const std::vector<Light*> lights) {
 
 void LightingShader::updateTexture(bool textured) {
 	bind();
-	setUniform("textureSampler", 0);
+	setUniform("textureMap", 0);
+	setUniform("normalMap", 1);
 	setUniform("textured", textured);
 }
 
-void LightingShader::updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix) {
+void LightingShader::updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Position& viewPosition) {
 	bind();
 	setUniform("viewMatrix", viewMatrix);
 	setUniform("projectionMatrix", projectionMatrix);
+	setUniform("viewPosition", viewPosition);
 }
 
 };

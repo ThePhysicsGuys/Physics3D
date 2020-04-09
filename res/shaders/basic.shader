@@ -25,7 +25,7 @@ uniform mat4 viewMatrix;
 void main() {
 	gUV = vUV;
 	gPosition = vPosition;
-	gNormal.value = (modelMatrix * vec4(vNormal, 0.0)).xyz;
+	gNormal.value = normalize(mat3(modelMatrix) * vNormal);
 	gl_Position = modelMatrix * vec4(vPosition, 1.0);
 }
 
@@ -59,11 +59,11 @@ vec3 center() {
 }
 
 vec3 normal() {
-	vec3 a = vec3(gl_in[0].gl_Position) - vec3(gl_in[1].gl_Position);
-	vec3 b = vec3(gl_in[2].gl_Position) - vec3(gl_in[1].gl_Position);
+	vec3 a = normalize(vec3(gl_in[1].gl_Position) - vec3(gl_in[0].gl_Position));
+	vec3 b = normalize(vec3(gl_in[2].gl_Position) - vec3(gl_in[0].gl_Position));
 	
 	vec3 norm = normalize(cross(a, b));
-	return -norm;
+	return norm;
 }
 
 vec2 uv(vec3 p, vec3 n, vec3 u, vec3 v) {
@@ -138,11 +138,10 @@ struct Light {
 	Attenuation attenuation;
 };
 
-uniform sampler2D uniforms;
-
 uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
+uniform vec3 viewPosition;
 
 uniform Material material;
 uniform sampler2D textureSampler;
@@ -186,17 +185,17 @@ vec3 calcLightColor(Light light) {
 	vec3 ambient = ambientStrength * light.color;
 
 	// Diffuse light
-	vec3 lightDirection = light.position - fPosition;
-	vec3 toLightSource = normalize(lightDirection);
+	vec3 lightDirection = fPosition - light.position;
+	vec3 toLightSource = -normalize(lightDirection);
 	float diffuseFactor = max(dot(fNormal, toLightSource), 0.0);
 	vec3 diffuse = material.diffuse * diffuseFactor * light.color;
 
 	// Specular light
 	float specularPower = 10.0f;
-	vec3 cameraDirection = normalize(-(viewMatrix * vec4(fPosition, 1)).xyz);
+	vec3 viewDirection = normalize(fPosition - viewPosition);
 	vec3 fromLightSource = -toLightSource;
 	vec3 reflectedLight = normalize(reflect(fromLightSource, fNormal));
-	float specularFactor = max(dot(cameraDirection, (viewMatrix * vec4(reflectedLight, 0)).xyz), 0.0);
+	float specularFactor = max(dot(-viewDirection, reflectedLight), 0.0);
 	specularFactor = pow(specularFactor, specularPower);
 	vec3 specular = material.specular * material.reflectance * specularFactor * light.color;
 
@@ -236,5 +235,7 @@ void main() {
 
 	// Fog
 	// outColor = fog(outColor);
+
+	//outColor = vec4(fNormal, 1);
 }
 

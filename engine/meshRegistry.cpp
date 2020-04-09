@@ -48,18 +48,17 @@ static Graphics::VisualShape createCylinder(int sides, double radius, double hei
 		triangleBuffer[i * 2 + 1] = Triangle{bottomRight + 1, bottomRight, bottomLeft + 1}; // topRight, topLeft, botRight
 	}
 
-	Vec3f* normalBuffer = new Vec3f[vertexCount];
-
-	for(int i = 0; i < sides * 2; i++) {
-		Vec3f vertex = vertexBuffer[i];
-		normalBuffer[i] = normalize(Vec3(vertex.x, vertex.y, 0));
-	}
-
 	Triangle* capOffset = triangleBuffer + sides * 2Ui64;
 	// top and bottom
 	for(int i = 0; i < sides - 2; i++) { // common corner is i=0
 		capOffset[i] = Triangle{sides * 2 + 0, sides * 2 + (i + 1) * 2, sides * 2 + (i + 2) * 2};
 		capOffset[i + (sides - 2)] = Triangle{sides * 2 + 1, sides * 2 + (i + 2) * 2 + 1, sides * 2 + (i + 1) * 2 + 1};
+	}
+
+	Vec3f* normalBuffer = new Vec3f[vertexCount];
+	for (int i = 0; i < sides * 2; i++) {
+		Vec3f vertex = vertexBuffer[i];
+		normalBuffer[i] = normalize(Vec3(vertex.x, vertex.y, 0));
 	}
 
 	for(int i = 0; i < sides; i++) {
@@ -73,27 +72,54 @@ static Graphics::VisualShape createCylinder(int sides, double radius, double hei
 Graphics::VisualShape createSphere(double radius, int steps) {
 	Polyhedron sphere(Library::createSphere(radius, steps));
 	Graphics::VisualShape sphereShape = Graphics::VisualShape(sphere);
-	Vec3f* normalBuf = new Vec3f[sphereShape.vertexCount];
-	sphereShape.computeNormals(normalBuf);
-	sphereShape.normals = SharedArrayPtr<const Vec3f>(normalBuf);
+
+	Vec3f* normalBuffer = new Vec3f[sphereShape.vertexCount];
+	int i = 0;
+	for (Vec3f vertex : sphereShape.iterVertices())
+		normalBuffer[i++] = normalize(vertex);
+
+	sphereShape.normals = SharedArrayPtr<const Vec3f>(normalBuffer);
 	return sphereShape;
+}
+
+Graphics::VisualShape createBox(float width, float height, float depth) {
+	Polyhedron box(Library::createBox(width, height, depth));
+	Graphics::VisualShape boxShape = Graphics::VisualShape(box);
+
+	Vec3f* normalBuffer = new Vec3f[boxShape.vertexCount];
+	boxShape.computeNormals(normalBuffer);
+
+	boxShape.normals = SharedArrayPtr<const Vec3f>(normalBuffer);
+	return boxShape;
+}
+
+Graphics::VisualShape createCube(float size) {
+	return createBox(size, size, size);
 }
 
 void init() {
 	sphere = registerMeshFor(sphereClass);
 	box = registerMeshFor(boxClass);
-	cylinder = registerMeshFor(cylinderClass, createCylinder(64, 1.0, 2.0));
+	Graphics::VisualShape cylinderShape = createCylinder(64, 1.0, 2.0);
+	cylinder = registerMeshFor(cylinderClass, cylinderShape);
 }
 
 
-VisualData addMeshShape(const Graphics::VisualShape& s) {
+VisualData addMeshShape(Graphics::VisualShape& shape) {
 	int size = (int) meshes.size();
-	//Log::error("Mesh %d added!", size);
-	meshes.push_back(new Graphics::IndexedMesh(s));
-	return VisualData{size, s.uvs != nullptr, s.normals != nullptr};
+	
+	// Generate normals
+	if (shape.normals == nullptr) {
+		Vec3f* normalBuffer = new Vec3f[shape.vertexCount];
+		shape.computeNormals(normalBuffer);
+		shape.normals = SharedArrayPtr<const Vec3f>(normalBuffer);
+	}
+
+	meshes.push_back(new Graphics::IndexedMesh(shape));
+	return VisualData{size, shape.uvs != nullptr, shape.normals != nullptr};
 }
 
-VisualData registerMeshFor(const ShapeClass* shapeClass, const Graphics::VisualShape& mesh) {
+VisualData registerMeshFor(const ShapeClass* shapeClass, Graphics::VisualShape& mesh) {
 	if(shapeClassMeshIds.find(shapeClass) != shapeClassMeshIds.end()) throw "Attempting to re-register existing ShapeClass!";
 
 	VisualData meshData = addMeshShape(mesh);
@@ -105,7 +131,8 @@ VisualData registerMeshFor(const ShapeClass* shapeClass, const Graphics::VisualS
 }
 
 VisualData registerMeshFor(const ShapeClass* shapeClass) {
-	return registerMeshFor(shapeClass, Graphics::VisualShape(shapeClass->asPolyhedron()));
+	Graphics::VisualShape shape(shapeClass->asPolyhedron());
+	return registerMeshFor(shapeClass, shape);
 }
 
 VisualData getOrCreateMeshFor(const ShapeClass* shapeClass) {

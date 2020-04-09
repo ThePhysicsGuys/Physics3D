@@ -259,9 +259,6 @@ namespace Library {
 		return std::pair<Vec3f*, Triangle*>(vecBuf, triangleBuf);
 	}
 
-
-
-
 	Polyhedron createSphere(float radius, int steps) {
 
 		int vertices = 12;

@@ -180,7 +180,7 @@ void Screen::onInit() {
 	});
 
 	// Camera init
-	camera.setPosition(Position(1.0, 1.0, -2.0));
+	camera.setPosition(Position(1.0, 2.0, 3.0));
 	camera.setRotation(Vec3(0, 3.1415, 0.0));
 	camera.onUpdate(1.0, camera.aspect, 0.01, 10000.0);
 
