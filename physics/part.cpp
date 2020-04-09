@@ -199,11 +199,11 @@ bool Part::isFixed() const {
 }
 
 bool Part::isValid() const {
-	assert(isfinite(hitbox.getVolume()));
-	assert(isfinite(maxRadius));
-	assert(isfinite(properties.density));
-	assert(isfinite(properties.friction));
-	assert(isfinite(properties.bouncyness));
+	assert(std::isfinite(hitbox.getVolume()));
+	assert(std::isfinite(maxRadius));
+	assert(std::isfinite(properties.density));
+	assert(std::isfinite(properties.friction));
+	assert(std::isfinite(properties.bouncyness));
 	assert(isVecValid(properties.conveyorEffect));
 
 	return true;

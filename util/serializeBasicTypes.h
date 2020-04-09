@@ -11,7 +11,7 @@ public:
 	SerializationException() = default;
 	SerializationException(std::string message) : message(message) {}
 
-	virtual const char* what() const override {
+	virtual const char* what() const noexcept override {
 		return message.c_str();
 	}
 };

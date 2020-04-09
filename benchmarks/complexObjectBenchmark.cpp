@@ -13,4 +13,4 @@ public:
 		Polyhedron object = Library::icosahedron;
 		world.addPart(new Part(Library::createSphere(1.0, 7), GlobalCFrame(0, 2.0, 0), basicProperties));
 	}
-} complexObject;
+} complexObjectBench;

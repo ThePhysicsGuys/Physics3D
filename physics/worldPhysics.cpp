@@ -5,7 +5,7 @@
 #include <cmath>
 #include <algorithm>
 
-#include "../util/Log.h"
+#include "../util/log.h"
 
 #include "math/mathUtil.h"
 #include "math/linalg/vec.h"

@@ -67,8 +67,9 @@ AttachedPart& RigidBody::getAttachFor(const Part* attachedPart) {
 	throw "Part not in this physical!";
 }
 
-static bool liesInVector(const std::vector<AttachedPart>& vec, const AttachedPart* ptr) {
-	return vec.begin()._Ptr <= ptr && vec.end()._Ptr > ptr;
+template<typename T>
+static inline bool liesInVector(const std::vector<T>& vec, const T* ptr) {
+	return &vec[0] <= ptr && &vec[0]+vec.size() > ptr;
 }
 
 // Not to be used by 
@@ -169,7 +170,7 @@ void RigidBody::setAttachFor(Part* part, const CFrame& attach) {
 }
 
 bool RigidBody::isValid() const {
-	assert(isfinite(mass));
+	assert(std::isfinite(mass));
 	assert(isVecValid(localCenterOfMass));
 	assert(isMatValid(inertia));
 	assert(mainPart->isValid());

@@ -125,8 +125,8 @@ TEST_CASE(testFromRotationVec) {
 	double deltaT = 0.0001;
 
 	Vec3 rotations[]{Vec3(1,0,0), Vec3(0,1,0), Vec3(0,0,1), Vec3(-5.0, 3.0, 9.0), Vec3(3.8, -0.5, 0.4)};
-	for(Vec3 rot : rotations) {
-		Vec3 rotationVec = rot * deltaT;
+	for(Vec3 rotVec : rotations) {
+		Vec3 rotationVec = rotVec * deltaT;
 		Vec3 pointToRotate = Vec3(1.0, 0.0, 0.0);
 
 		Rotation rot = Rotation::fromRotationVec(rotationVec);

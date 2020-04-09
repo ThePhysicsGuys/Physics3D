@@ -101,7 +101,7 @@ unsigned int compileShader(const std::string& source, unsigned int type) {
 		glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
 		char* message = (char*) alloca(length * sizeof(char));
 		glGetShaderInfoLog(id, length, &length, message);
-		Log::print("fail\n", Log::Color::ERROR);
+		Log::print(Log::Color::ERROR, "fail\n");
 		Log::error(message);
 
 		glDeleteShader(id);
@@ -117,8 +117,8 @@ unsigned int compileShaderWithDebug(const std::string& name, const std::string& 
 
 	unsigned int id = compileShader(source, type);
 
-	if (id > 0)
-		Log::print("done\n", Log::Color::DEBUG);
+	if(id > 0)
+		Log::print(Log::Color::DEBUG, "done\n");
 
 	Log::setDelimiter("\n");
 
@@ -186,10 +186,10 @@ std::string parseFile(const std::string& path) {
 
 	Log::info("Reading (%s) ... ", path.c_str());
 
-	if (fileStream.fail())
-		Log::print("Fail", Log::Color::ERROR);
+	if(fileStream.fail())
+		Log::print(Log::Color::ERROR, "Fail");
 	else
-		Log::print("Done", Log::Color::DEBUG);
+		Log::print(Log::Color::DEBUG, "Done");
 
 	Log::setDelimiter("\n");
 
@@ -287,36 +287,36 @@ ShaderSource parseShader(const std::string& name, std::istream& shaderTextStream
 
 	if (!commonSource.empty()) {
 		Log::info("Common file: ");
-		Log::print("done\n", Log::Color::DEBUG);
+		Log::print(Log::Color::DEBUG, "done\n");
 	}
 
 	if (!vertexSource.empty()) {
 		Log::info("Vertex shader: ");
-		Log::print("done\n", Log::Color::DEBUG);
+		Log::print(Log::Color::DEBUG, "done\n");
 		vertexSource = commonSource + vertexSource;
 	}
 
 	if (!fragmentSource.empty()) {
 		Log::info("Fragment shader: ");
-		Log::print("done\n", Log::Color::DEBUG);
+		Log::print(Log::Color::DEBUG, "done\n");
 		fragmentSource = commonSource + fragmentSource;
 	}
 
 	if (!geometrySource.empty()) {
 		Log::info("Geometry shader: ");
-		Log::print("done\n", Log::Color::DEBUG);
+		Log::print(Log::Color::DEBUG, "done\n");
 		geometrySource = commonSource + geometrySource;
 	}
 
 	if (!tesselationControlSource.empty()) {
 		Log::info("Tesselation control shader: ");
-		Log::print("done\n", Log::Color::DEBUG);
+		Log::print(Log::Color::DEBUG, "done\n");
 		tesselationControlSource = commonSource + tesselationControlSource;
 	}
 
 	if (!tesselationEvaluateSource.empty()) {
 		Log::info("Tesselation evaluation shader: ");
-		Log::print("done\n", Log::Color::DEBUG);
+		Log::print(Log::Color::DEBUG, "done\n");
 		tesselationEvaluateSource = commonSource + tesselationEvaluateSource;
 	}
 

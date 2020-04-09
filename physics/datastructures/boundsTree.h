@@ -76,9 +76,9 @@ struct TreeNode {
 
 long long computeCost(const Bounds& bounds);
 
-Bounds computeBoundsOfList(const TreeNode* const* list, size_t count);
+//Bounds computeBoundsOfList(const TreeNode* const* list, size_t count);
 
-Bounds computeBoundsOfList(const TreeNode* list, size_t count);
+//Bounds computeBoundsOfList(const TreeNode* list, size_t count);
 
 struct TreeStackElement {
 	TreeNode* node;
@@ -416,7 +416,7 @@ struct BoundsTree {
 		if(isEmpty()) {
 			return 0;
 		} else {
-			return getNumberOfObjectsInNode(this->rootNode);
+			return this->rootNode.getNumberOfObjectsInNode();
 		}
 	}
 

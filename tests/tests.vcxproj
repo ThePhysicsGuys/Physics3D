@@ -44,7 +44,6 @@
     <ClCompile Include="indexedShapeTests.cpp" />
     <ClCompile Include="mathTests.cpp" />
     <ClCompile Include="motionTests.cpp" />
-    <ClCompile Include="parallelTests.cpp" />
     <ClCompile Include="physicalStructureTests.cpp" />
     <ClCompile Include="physicsTests.cpp" />
     <ClCompile Include="testsMain.cpp" />

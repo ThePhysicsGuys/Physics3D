@@ -10,7 +10,7 @@
 template<typename T, size_t Size>
 inline static bool isVecValid(const Vector<T, Size>& vec) {
 	for(size_t i = 0; i < Size; i++) {
-		if(!isfinite(vec[i])) return false;
+		if(!std::isfinite(vec[i])) return false;
 	}
 	return true;
 }
@@ -19,7 +19,7 @@ template<typename T, size_t Width, size_t Height>
 inline static bool isMatValid(const Matrix<T, Width, Height>& mat) {
 	for(size_t row = 0; row < Height; row++) {
 		for(size_t col = 0; col < Width; col++) {
-			if(!isfinite(mat[row][col])) return false;
+			if(!std::isfinite(mat[row][col])) return false;
 		}
 	}
 	return true;
@@ -29,7 +29,7 @@ template<typename T, size_t Size>
 inline static bool isMatValid(const SymmetricMatrix<T, Size>& mat) {
 	for(size_t row = 0; row < Size; row++) {
 		for(size_t col = row; col < Size; col++) {
-			if(!isfinite(mat[row][col])) return false;
+			if(!std::isfinite(mat[row][col])) return false;
 		}
 	}
 	return true;
@@ -38,7 +38,7 @@ inline static bool isMatValid(const SymmetricMatrix<T, Size>& mat) {
 template<typename T, size_t Size>
 inline static bool isMatValid(const DiagonalMatrix<T, Size>& mat) {
 	for(size_t i = 0; i < Size; i++) {
-		if(!isfinite(mat[i])) return false;
+		if(!std::isfinite(mat[i])) return false;
 	}
 	return true;
 }

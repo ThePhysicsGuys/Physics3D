@@ -265,7 +265,6 @@ bool isValidRotationMatrix(const Matrix<T, 3, 3>& mat) {
 		T colLengthSq = lengthSquared(mat.getCol(i));
 		if(!Comparator::equalsApproximately(rowLengthSq, one)
 		|| !Comparator::equalsApproximately(colLengthSq, one)) {
-			__debugbreak();
 			return false;
 		}
 	}
@@ -276,7 +275,6 @@ bool isValidRotationMatrix(const Matrix<T, 3, 3>& mat) {
 
 			if(!Comparator::equalsApproximately(mat.getRow(i) * mat.getRow(j), zero)
 			|| !Comparator::equalsApproximately(mat.getCol(i) * mat.getCol(j), zero)) {
-				__debugbreak();
 				return false;
 			}
 		}
@@ -284,7 +282,6 @@ bool isValidRotationMatrix(const Matrix<T, 3, 3>& mat) {
 
 	T detMat = det(mat);
 	if(!Comparator::equalsApproximately(detMat, one)) {
-		__debugbreak();
 		return false;
 	}
 	return true;

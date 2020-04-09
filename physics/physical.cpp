@@ -86,8 +86,9 @@ void Physical::makeMainPart(AttachedPart& newMainPart) {
 	}
 }
 
-static inline bool liesInVector(const std::vector<AttachedPart>& vec, const AttachedPart* ptr) {
-	return vec.begin()._Ptr <= ptr && vec.end()._Ptr > ptr;
+template<typename T>
+static inline bool liesInVector(const std::vector<T>& vec, const T* ptr) {
+	return &vec[0] <= ptr && &vec[0]+vec.size() > ptr;
 }
 
 /*
@@ -199,7 +200,7 @@ MotorizedPhysical* Physical::makeMainPhysical() {
 }
 
 void Physical::removeChild(ConnectedPhysical* child) {
-	assert(child >= this->childPhysicals.begin()._Ptr && child < this->childPhysicals.end()._Ptr);
+	assert(liesInVector(this->childPhysicals, child));
 
 	*child = std::move(childPhysicals.back());
 	childPhysicals.pop_back();
@@ -248,7 +249,7 @@ void Physical::attachPart(Part* part, HardConstraint* constraint, const CFrame& 
 
 
 static Physical* findPhysicalParent(Physical* findIn, const ConnectedPhysical* toBeFound) {
-	if(toBeFound >= findIn->childPhysicals.begin()._Ptr && toBeFound < findIn->childPhysicals.end()._Ptr) {
+	if(liesInVector(findIn->childPhysicals, toBeFound)) {
 		return findIn;
 	}
 	for(ConnectedPhysical& p : findIn->childPhysicals) {
@@ -931,7 +932,7 @@ bool MotorizedPhysical::isValid() const {
 	
 	assert(isVecValid(totalForce));
 	assert(isVecValid(totalMoment));
-	assert(isfinite(totalMass));
+	assert(std::isfinite(totalMass));
 	assert(isVecValid(totalCenterOfMass));
 	assert(isMatValid(forceResponse));
 	assert(isMatValid(momentResponse));

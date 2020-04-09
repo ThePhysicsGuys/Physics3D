@@ -13,7 +13,7 @@
 #include "../math/linalg/vec.h"
 #include "../math/linalg/mat.h"
 #include "../math/cframe.h"
-#include "../math/globalcframe.h"
+#include "../math/globalCFrame.h"
 #include "../geometry/polyhedron.h"
 #include "../geometry/shape.h"
 #include "../part.h"

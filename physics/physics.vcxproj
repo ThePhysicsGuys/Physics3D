@@ -256,7 +256,6 @@
     <ClCompile Include="constraints\motorConstraint.cpp" />
     <ClCompile Include="datastructures\alignedPtr.cpp" />
     <ClCompile Include="datastructures\boundsTree.cpp" />
-    <ClCompile Include="datastructures\parallelVector.cpp" />
     <ClCompile Include="debug.cpp" />
     <ClCompile Include="geometry\computationBuffer.cpp" />
     <ClCompile Include="geometry\convexShapeBuilder.cpp" />
@@ -296,7 +295,6 @@
     <ClInclude Include="datastructures\iteratorEnd.h" />
     <ClInclude Include="datastructures\iteratorFactory.h" />
     <ClInclude Include="datastructures\iterators.h" />
-    <ClInclude Include="datastructures\parallelVector.h" />
     <ClInclude Include="datastructures\sharedArray.h" />
     <ClInclude Include="datastructures\unorderedVector.h" />
     <ClInclude Include="debug.h" />

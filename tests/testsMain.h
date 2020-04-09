@@ -25,7 +25,7 @@ class AssertionError {
 public:
 	int line;
 	AssertionError(int line, const char* info);
-	const char* what() const throw();
+	const char* what() const noexcept;
 };
 
 extern std::stringstream logStream;
@@ -93,12 +93,12 @@ public:
 
 	TolerantAssertComparer(int line, const T& arg, Tol tolerance) : line(line), arg(arg), tolerance(tolerance) {}
 
-	template<typename T> bool operator<( const T& other) const { if (!tolerantLessThan(arg, other, tolerance)) { throw AssertionError(line, errMsg(arg, other, "<")); }; return true; }
-	template<typename T> bool operator>( const T& other) const { if (!tolerantGreaterThan(arg, other, tolerance)) { throw AssertionError(line, errMsg(arg, other, ">")); }; return true; }
-	template<typename T> bool operator<=(const T& other) const { if (!tolerantLessOrEqual(arg, other, tolerance)) { throw AssertionError(line, errMsg(arg, other, "<=")); }; return true; }
-	template<typename T> bool operator>=(const T& other) const { if (!tolerantGreaterOrEqual(arg, other, tolerance)) { throw AssertionError(line, errMsg(arg, other, ">=")); }; return true; }
-	template<typename T> bool operator==(const T& other) const { if (!tolerantEquals(arg, other, tolerance)) { throw AssertionError(line, errMsg(arg, other, "==")); }; return true; }
-	template<typename T> bool operator!=(const T& other) const { if (!tolerantNotEquals(arg, other, tolerance)) { throw AssertionError(line, errMsg(arg, other, "!=")); }; return true; }
+	template<typename T2> bool operator<( const T2& other) const { if (!tolerantLessThan(arg, other, tolerance)) { throw AssertionError(line, errMsg(arg, other, "<")); }; return true; }
+	template<typename T2> bool operator>( const T2& other) const { if (!tolerantGreaterThan(arg, other, tolerance)) { throw AssertionError(line, errMsg(arg, other, ">")); }; return true; }
+	template<typename T2> bool operator<=(const T2& other) const { if (!tolerantLessOrEqual(arg, other, tolerance)) { throw AssertionError(line, errMsg(arg, other, "<=")); }; return true; }
+	template<typename T2> bool operator>=(const T2& other) const { if (!tolerantGreaterOrEqual(arg, other, tolerance)) { throw AssertionError(line, errMsg(arg, other, ">=")); }; return true; }
+	template<typename T2> bool operator==(const T2& other) const { if (!tolerantEquals(arg, other, tolerance)) { throw AssertionError(line, errMsg(arg, other, "==")); }; return true; }
+	template<typename T2> bool operator!=(const T2& other) const { if (!tolerantNotEquals(arg, other, tolerance)) { throw AssertionError(line, errMsg(arg, other, "!=")); }; return true; }
 };
 
 struct AssertBuilder {

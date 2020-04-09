@@ -75,7 +75,7 @@ TEST_CASE(shapeCenterOfMass) {
 
 	Polyhedron transformedShape = boxShape.localToGlobal(transform);
 	
-	ASSERT("Center Of Mass Box: %s", transform.localToGlobal(boxShape.getCenterOfMass()) == transformedShape.getCenterOfMass());
+	ASSERT(transform.localToGlobal(boxShape.getCenterOfMass()) == transformedShape.getCenterOfMass());
 }
 
 /*TEST_CASE(shapeInertiaMatrix) {

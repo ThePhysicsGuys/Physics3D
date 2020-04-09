@@ -38,7 +38,7 @@ struct Fix {
 	inline Fix<N>& operator+=(int64_t b) { this->value += (b << N); return *this; }
 	inline Fix<N>& operator-=(int64_t b) { this->value -= (b << N); return *this; }
 
-	static inline constexpr Fix<N> maxValue() {return Fix<N>(0x7FFFFFFF_FFFFFFFF); }
+	static inline constexpr Fix<N> maxValue() {return Fix<N>(0x7FFFFFFFFFFFFFFF); }
 
 	inline constexpr Fix<N> operator-() const { return Fix<N>(-this->value); }
 };

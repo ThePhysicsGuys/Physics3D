@@ -2,6 +2,8 @@
 
 #include <vector>
 #include <iostream>
+#include <cstring>
+#include <stdio.h>
 
 #include <string>
 #include <fstream>
@@ -9,45 +11,23 @@
 
 #include <chrono>
 
+#include "../util/log.h"
+#include "../util/terminalColor.h"
+
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
 const char sepChar = '\\';
 #else
 const char sepChar = '/';
 #endif
 
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-HANDLE console;
 
 using namespace std;
 using namespace chrono;
 
-enum Color {
-	DARK_BLUE = 1,
-	DARK_GREEN = 2,
-	AQUA = 3,
-	DARK_RED = 4,
-	PURPLE = 5,
-	DARK_YELLOW = 6,
-	LIGHT_GRAY = 7,
-	GRAY = 8,
-	BLUE = 9,
-	GREEN = 10,
-	CYAN = 11,
-	RED = 12,
-	MAGENTA = 13,
-	YELLOW = 14,
-	WHITE = 15,
-};
-
-Color SUCCESS_COLOR = GREEN;
-Color FAILURE_COLOR = RED;
-Color ERROR_COLOR = MAGENTA;
-Color SKIP_COLOR = LIGHT_GRAY;
-
-static void color(Color c) {
-	SetConsoleTextAttribute(console, c);
-}
+static const TerminalColor SUCCESS_COLOR = TerminalColor::GREEN;
+static const TerminalColor FAILURE_COLOR = TerminalColor::RED;
+static const TerminalColor ERROR_COLOR = TerminalColor::MAGENTA;
+static const TerminalColor SKIP_COLOR = TerminalColor::LIGHT_GRAY;
 
 stringstream logStream;
 
@@ -62,15 +42,15 @@ void logf(const char* format, ...) {
 	
 	va_list args;
 	va_start(args, format);
-	int length = vsprintf_s(logBuffer, format, args);
+	int length = std::vsnprintf(logBuffer, 1<<16, format, args);
 	va_end(args);
 
 	logStream << logBuffer << '\n';
 }
 
-static void printDeltaTime(time_point<system_clock> startTime, Color c) {
+static void printDeltaTime(time_point<system_clock> startTime, TerminalColor c) {
 	duration<double> delta = system_clock::now() - startTime;
-	color(c);
+	setColor(c);
 	cout << " (" << fixed << delta.count() << "s)\n";
 }
 
@@ -95,31 +75,31 @@ static void printFileSlice(const char* fileName, int line) {
 			getline(inFile, l);
 		}
 
-		color(WHITE);
+		setColor(TerminalColor::WHITE);
 
 		string s;
 		for(int i = 0; i < 5; i++) {
 			if(!getline(inFile, s)) break;
 			printf("%d: %s", line - 2 + i, s.c_str());
 			if(i == 2) {
-				color(YELLOW);
+				setColor(TerminalColor::YELLOW);
 				cout << "  <<<<";
-				color(WHITE);
+				setColor(TerminalColor::WHITE);
 			}
 			cout << endl;
 		}
 	} else {
-		color(WHITE);
+		setColor(TerminalColor::WHITE);
 		printf("Could not open File %s for debugging :(\n", fileName);
 	}
 }
 
 static void dumpLog() {
-	color(GREEN);
+	setColor(TerminalColor::GREEN);
 	cout << logStream.str().c_str();
 }
 
-static class Test {
+class Test {
 public:
 	const char* filePath;
 	const char* fileName;
@@ -128,7 +108,7 @@ public:
 
 	Test() : filePath(nullptr), funcName(nullptr), fileName(nullptr), testFunc(nullptr) {};
 	Test(const char* filePath, const char* funcName, void(*testFunc)(TestInterface&)) : filePath(filePath), funcName(funcName), testFunc(testFunc),
-	fileName(strrchr(this->filePath, sepChar) ? strrchr(this->filePath, sepChar) + 1 : this->filePath) {}
+	fileName(std::strrchr(this->filePath, sepChar) ? std::strrchr(this->filePath, sepChar) + 1 : this->filePath) {}
 	void run() {
 		resetLog();
 		time_point<system_clock> startTime;
@@ -136,14 +116,14 @@ public:
 		TestInterface testInterface;
 
 		try {
-			color(CYAN);
+			setColor(TerminalColor::CYAN);
 			cout << fileName << ":" << funcName;
 
 			startTime = system_clock::now();
 
 			testFunc(testInterface);
 
-			color(GRAY);
+			setColor(TerminalColor::GRAY);
 			cout << " [" << testInterface.getAssertCount() << "]";
 
 			printDeltaTime(startTime, SUCCESS_COLOR);
@@ -152,40 +132,45 @@ public:
 			printDeltaTime(startTime, FAILURE_COLOR);
 			dumpLog();
 			
-			color(RED);
+			setColor(TerminalColor::RED);
 			printf("An assertion was incorrect at line %d:\n", e.line);
 
 			printFileSlice(filePath, e.line);
 
-			color(YELLOW);
+			setColor(TerminalColor::YELLOW);
 			cout << e.what() << endl;
-			color(WHITE);
+			setColor(TerminalColor::WHITE);
 
 		} catch (exception& e) {
 			printDeltaTime(startTime, ERROR_COLOR);
 			dumpLog();
-			color(RED); printf("An general error was thrown: %s\n", e.what());
+			setColor(TerminalColor::RED); printf("An general error was thrown: %s\n", e.what());
 		} catch(string& e) {
 			printDeltaTime(startTime, ERROR_COLOR);
 			dumpLog();
-			color(RED); printf("An string exception was thrown: %s\n", e.c_str());
+			setColor(TerminalColor::RED); printf("An string exception was thrown: %s\n", e.c_str());
 		} catch(const char* ex){
 			printDeltaTime(startTime, ERROR_COLOR);
 			dumpLog();
-			color(RED); printf("A char* exception was thrown: %s\n", ex);
+			setColor(TerminalColor::RED); printf("A char* exception was thrown: %s\n", ex);
 		} catch (...) {
 			printDeltaTime(startTime, ERROR_COLOR);
 			dumpLog();
-			color(RED); printf("An unknown exception was thrown!\n");
+			setColor(TerminalColor::RED); printf("An unknown exception was thrown!\n");
 		}
 	}
 };
 
 AssertionError::AssertionError(int line, const char* info) : line(line), info(info) {}
-const char* AssertionError::what() const { return info; }
+const char* AssertionError::what() const noexcept { return info; }
 
 // For some reason having this in static memory breaks it, a pointer seems to work
 vector<Test>* tests = nullptr;
+
+#ifdef _MSC_VER
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+HANDLE console;
 
 static void initConsole() {
 	console = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -196,16 +181,19 @@ static void initConsole() {
 
 	MoveWindow(consoleWindow, r.left, r.top, 800, 900, TRUE);
 }
+#else
+static void initConsole() {}
+#endif
 
 int main(int argc, char * argv[]) {
 	initConsole();
 
-	color(WHITE); cout << "Starting tests: ";
-	color(SUCCESS_COLOR); cout << "[SUCCESS] ";
-	color(FAILURE_COLOR); cout << "[FAILURE] ";
-	color(ERROR_COLOR); cout << "[ERROR] ";
-	color(SKIP_COLOR); cout << "[SKIP]" << endl;
-	color(WHITE); cout << "Number of tests: " << tests->size() << endl;
+	setColor(TerminalColor::WHITE); cout << "Starting tests: ";
+	setColor(SUCCESS_COLOR); cout << "[SUCCESS] ";
+	setColor(FAILURE_COLOR); cout << "[FAILURE] ";
+	setColor(ERROR_COLOR); cout << "[ERROR] ";
+	setColor(SKIP_COLOR); cout << "[SKIP]" << endl;
+	setColor(TerminalColor::WHITE); cout << "Number of tests: " << tests->size() << endl;
 
 	if(argc == 1 || argc == 2 && std::string("--coverage") == argv[1]) {
 		for(Test& t : *tests) {
@@ -222,14 +210,14 @@ int main(int argc, char * argv[]) {
 			}
 		}
 	}
-	color(WHITE);  cout << "Tests finished" << endl;
+	setColor(TerminalColor::WHITE);  cout << "Tests finished" << endl;
 
 	if(argc == 2 && std::string("--coverage") == argv[1]) return 0;
 
 	while(true) {
 		string input;
 
-		color(WHITE);
+		setColor(TerminalColor::WHITE);
 		cout << "> ";
 		cin >> input;
 
@@ -249,7 +237,7 @@ int main(int argc, char * argv[]) {
 }
 
 static void logAssertError(string text) {
-	color(RED);
+	setColor(TerminalColor::RED);
 	cout << text.c_str();
 }
 
