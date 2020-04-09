@@ -1,4 +1,4 @@
-
+#pragma once
 
 enum class TerminalColor {
 	BLACK = 0,
@@ -19,5 +19,11 @@ enum class TerminalColor {
 	WHITE = 15,
 };
 
+struct TerminalColorPair {
+	TerminalColor foreground;
+	TerminalColor background;
+};
+
 void setColor(TerminalColor foreground);
 void setColor(TerminalColor foreground, TerminalColor background);
+void setColor(TerminalColorPair color);

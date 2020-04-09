@@ -57,9 +57,9 @@ namespace Log {
 	}
 
 	void printSubject(std::string subject) {
-		setColor(TerminalColor::MAGENTA);
+		setColor(Color::SUBJECT);
 		std::cout << subject;
-		setColor(TerminalColor::WHITE);
+		setColor(Color::NORMAL);
 		newSubject = false;
 	}
 
@@ -72,12 +72,12 @@ namespace Log {
 			if (newSubject && !topSubject().empty()) printSubject("\n[" + topSubject() + "]:\n");
 			if (!emptySubject()) printSubject("|\t");
 			std::string message = "[DEBUG]: " + format + delimiter;
-			setColor(TerminalColor::GREEN);
+			setColor(Color::DEBUG);
 			va_list args;
 			va_start(args, format);
 			vprintf(message.c_str(), args);
 			va_end(args);
-			setColor(TerminalColor::WHITE);
+			setColor(Color::NORMAL);
 		}
 	}
 
@@ -86,12 +86,12 @@ namespace Log {
 			if (newSubject && !topSubject().empty()) printSubject("\n[" + topSubject() + "]:\n");
 			if (!emptySubject()) printSubject("|\t");
 			std::string message = "[INFO]: " + format + delimiter;
-			setColor(TerminalColor::AQUA);
+			setColor(Color::INFO);
 			va_list args;
 			va_start(args, format);
 			vprintf(message.c_str(), args);
 			va_end(args);
-			setColor(TerminalColor::WHITE);
+			setColor(Color::NORMAL);
 		}
 	}
 
@@ -100,12 +100,12 @@ namespace Log {
 			if (newSubject && !topSubject().empty()) printSubject("\n[" + topSubject() + "]:\n");
 			if (!emptySubject()) printSubject("|\t");
 			std::string message = "[WARN]: " + format + delimiter;
-			setColor(TerminalColor::YELLOW);
+			setColor(Color::WARNING);
 			va_list args;
 			va_start(args, format);
 			vprintf(message.c_str(), args);
 			va_end(args);
-			setColor(TerminalColor::WHITE);
+			setColor(Color::NORMAL);
 		}
 	}
 
@@ -114,12 +114,12 @@ namespace Log {
 			if (newSubject && !topSubject().empty()) subject("\n[" + topSubject() + "]:\n");
 			if (!emptySubject()) subject("|\t");
 			std::string message = "[ERROR]: " + format + delimiter;
-			setColor(TerminalColor::RED);
+			setColor(Color::ERROR);
 			va_list args;
 			va_start(args, format);
 			vprintf(message.c_str(), args);
 			va_end(args);
-			setColor(TerminalColor::WHITE);
+			setColor(Color::NORMAL);
 		}
 	}
 
@@ -128,17 +128,25 @@ namespace Log {
 			if (newSubject && !topSubject().empty()) printSubject("\n[" + topSubject() + "]:\n");
 			if (!emptySubject()) printSubject("|\t");
 			std::string message = "[FATAL]: " + format + delimiter;
-			setColor(TerminalColor::BLACK, TerminalColor::RED);
+			setColor(Color::FATAL);
 			va_list args;
 			va_start(args, format);
 			vprintf(message.c_str(), args);
 			va_end(args);
-			setColor(TerminalColor::WHITE);
+			setColor(Color::NORMAL);
 		}
 	}
 
 	void print(std::string format,  ...) {
-		setColor(TerminalColor::WHITE);
+		setColor(Color::NORMAL);
+		va_list args;
+		va_start(args, format);
+		vprintf(format.c_str(), args);
+		va_end(args);
+	}
+
+	void print(TerminalColorPair color, std::string format, ...) {
+		setColor(color);
 		va_list args;
 		va_start(args, format);
 		vprintf(format.c_str(), args);

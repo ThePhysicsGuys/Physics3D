@@ -516,9 +516,9 @@ void BigFrame::renderPropertiesFrame() {
 		if (ImGui::TreeNode("Physical")) {
 			if (sp) {
 				// Position
-				position[0] = sp->getPosition()[0];
-				position[1] = sp->getPosition()[1];
-				position[2] = sp->getPosition()[2];
+				position[0] = sp->getPosition().x;
+				position[1] = sp->getPosition().y;
+				position[2] = sp->getPosition().z;
 				if (ImGui::InputFloat3("Position: ", position, 3)) {
 					GlobalCFrame frame = sp->getCFrame();
 					frame.position = Position(position[0], position[1], position[2]);

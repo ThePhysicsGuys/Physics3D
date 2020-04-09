@@ -38,11 +38,7 @@ Vec3 Import::parseVec3(const std::string& vec) {
 
 Position Import::parsePosition(const std::string& vec) {
 	std::vector<std::string> tokens = Util::split(vec, ' ');
-	Position vector;
-	for (int i = 0; i < 3; i++)
-		vector[i] = Fix<32>(Import::parseLong(tokens[i]));
-	
-	return vector;
+	return Position(Fix<32>(Import::parseLong(tokens[0])), Fix<32>(Import::parseLong(tokens[1])), Fix<32>(Import::parseLong(tokens[2])));
 }
 
 Vec4 Import::parseVec4(const std::string& vec) {

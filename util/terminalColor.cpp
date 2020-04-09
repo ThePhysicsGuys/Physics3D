@@ -5,6 +5,10 @@ void setColor(TerminalColor foreground) {
 	setColor(foreground, TerminalColor::BLACK);
 }
 
+void setColor(TerminalColorPair color) {
+	setColor(color.foreground, color.background);
+}
+
 #ifdef _MSC_VER
 
 #include <Windows.h>
