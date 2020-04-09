@@ -3,23 +3,23 @@
 
 #include <cmath>
 
-template<typename N>
-Matrix<N, 4, 4> rotate(const Matrix<N, 4, 4>& mat, N angle, N x, N y, N z) {
-	N s = sin(angle);
-	N c = cos(angle);
-	N C = (1 - c);
+template<typename T>
+Matrix<T, 4, 4> rotate(const Matrix<T, 4, 4>& mat, T angle, T x, T y, T z) {
+	T s = sin(angle);
+	T c = cos(angle);
+	T C = (1 - c);
 
-	Matrix<N, 3, 3> rotator{
+	Matrix<T, 3, 3> rotator{
 		x * x * C + c,			x * y * C - z * s,		x * z * C + y * s,
 		y * x * C + z * s,		y * y * C + c,			y * z * C - x * s,
 		z * x * C - y * s,		z * y * C + x * s,		z * z * C + c
 	};
 
-	Matrix<3, 4> leftSide = mat.getSubMatrix<3, 4>(0, 0);
+	Matrix<T, 3, 4> leftSide = mat.template getSubMatrix<3, 4>(0, 0);
 
-	Matrix<3, 4> rotated = leftSide * rotator;
+	Matrix<T, 3, 4> rotated = leftSide * rotator;
 
-	Matrix<1, 4> translation = mat.getSubMatrix<1, 4>(0, 3);
+	Matrix<T, 1, 4> translation = mat.template getSubMatrix<1, 4>(0, 3);
 
 	return joinHorizontal(rotated, translation);
 }

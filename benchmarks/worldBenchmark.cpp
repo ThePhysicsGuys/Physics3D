@@ -1,6 +1,7 @@
 #include "worldBenchmark.h"
 
 #include "../util/log.h"
+#include "../util/terminalColor.h"
 #include "../physics/physicsProfiler.h"
 #include <iostream>
 #include <sstream>
@@ -54,20 +55,20 @@ static const size_t BAR_LENGTH = 36;
 
 void printToLength(std::string text, size_t length) {
 	std::cout << text;
-	Log::setColor(Log::BLACK);
+	setColor(TerminalColor::BLACK);
 	for (size_t i = text.size(); i < length; i++) {
 		std::cout << ' ';
 	}
 }
 
-static int colors[]{
-	Log::STRONG | Log::BLUE,
-	Log::STRONG | Log::RED,
-	Log::STRONG | Log::YELLOW,
-	Log::STRONG | Log::MAGENTA,
-	Log::STRONG | Log::GREEN,
-	Log::STRONG | Log::AQUA,
-	Log::STRONG | Log::WHITE,
+static TerminalColor colors[]{
+	TerminalColor::BLUE,
+	TerminalColor::RED,
+	TerminalColor::YELLOW,
+	TerminalColor::MAGENTA,
+	TerminalColor::GREEN,
+	TerminalColor::AQUA,
+	TerminalColor::WHITE,
 	/*Log::RED,
 	Log::GREEN,
 	Log::BLUE,
@@ -77,14 +78,14 @@ static int colors[]{
 	Log::WHITE,*/
 };
 
-int getColor(size_t i) {
+TerminalColor getColor(size_t i) {
 	//return (colors[i] >= 0x7) ? colors[i] : colors[i] | (Log::WHITE << 4);
 	return colors[i % 7];
 }
 
-int getBGColor(size_t i) {
+/*int getBGColor(size_t i) {
 	return colors[i % 7] << 4 | colors[i % 7];
-}
+}*/
 
 template<typename T>
 void printBreakdown(const T* values, const char** labels, size_t N, std::string unit) {
@@ -102,7 +103,7 @@ void printBreakdown(const T* values, const char** labels, size_t N, std::string 
 		double fractionOfTotal = double(v) / total;
 		double fractionOfMax = double(v) / max;
 
-		Log::setColor(getColor(i));
+		setColor(getColor(i));
 
 		printToLength(labels[i] + std::string(":"), LABEL_LENGTH);
 
@@ -112,7 +113,7 @@ void printBreakdown(const T* values, const char** labels, size_t N, std::string 
 		ss << v;
 		ss << unit;
 
-		Log::setColor(getColor(i));
+		setColor(getColor(i));
 		printToLength(ss.str(), COUNT_LENGTH);
 
 		std::stringstream ss2;
@@ -121,21 +122,21 @@ void printBreakdown(const T* values, const char** labels, size_t N, std::string 
 		ss2 << (fractionOfTotal * 100);
 		ss2 << "%";
 
-		Log::setColor(getColor(i));
+		setColor(getColor(i));
 		printToLength(ss2.str(), FRACTION_LENGTH);
 
-		Log::setColor(Log::BLACK);
+		setColor(TerminalColor::BLACK);
 		std::cout << ' ';
-		Log::setColor(Log::WHITE << 4);
+		setColor(TerminalColor::WHITE, TerminalColor::WHITE);
 		std::cout << ' ';
 
 		size_t thisBarLength = std::ceil(BAR_LENGTH * fractionOfMax);
 
-		Log::setColor(getBGColor(i));
+		setColor(getColor(i), getColor(i));
 		for (size_t i = 0; i < thisBarLength; i++) {
 			std::cout << '=';
 		}
-		Log::setColor(Log::BLACK);
+		setColor(TerminalColor::BLACK);
 		std::cout << '|';
 
 		std::cout << '\n';
@@ -155,15 +156,15 @@ void WorldBenchmark::printResults(double timeTakenMillis) {
 		millis[i] = physicsBreakdown[i].count() / 1000000.0;
 	}
 
-	Log::setColor(Log::WHITE);
+	setColor(TerminalColor::WHITE);
 	std::cout << "\n";
-	Log::setColor(Log::STRONG | Log::MAGENTA);
+	setColor(TerminalColor::MAGENTA);
 	std::cout << "[Physics Profiler]\n";
 	printBreakdown(millis, physicsMeasure.labels, physicsMeasure.size(), "ms");
 
-	Log::setColor(Log::WHITE);
+	setColor(TerminalColor::WHITE);
 	std::cout << "\n";
-	Log::setColor(Log::STRONG | Log::MAGENTA);
+	setColor(TerminalColor::MAGENTA);
 	std::cout << "[Intersection Statistics]\n";
 	printBreakdown(intersectionStatistics.history.avg().values, intersectionStatistics.labels, intersectionStatistics.size(), "");
 }

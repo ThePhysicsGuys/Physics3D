@@ -5,7 +5,7 @@
 #include <iostream>
 #include <string>
 
-#include "../util/log.h"
+#include "../util/terminalColor.h"
 
 std::vector<Benchmark*>* knownBenchmarks = nullptr;
 
@@ -16,16 +16,16 @@ Benchmark::Benchmark(const char* name) : name(name) {
 
 int main() {
 	std::cout << "The following benchmarks are available:\n";
-	Log::setColor(Log::AQUA);
+	setColor(TerminalColor::AQUA);
 	for(Benchmark* b : *knownBenchmarks) {
 		std::cout << "  " << b->name << "\n";
 	}
 
 	Benchmark* bench;
 	while(true) {
-		Log::setColor(Log::WHITE);
+		setColor(TerminalColor::WHITE);
 		std::cout << "Run> ";
-		Log::setColor(Log::GREEN);
+		setColor(TerminalColor::GREEN);
 		std::string benchName;
 		std::cin >> benchName;
 		for(Benchmark* b : *knownBenchmarks) {
@@ -37,7 +37,7 @@ int main() {
 	}
 	found:
 
-	Log::setColor(Log::WHITE);
+	setColor(TerminalColor::WHITE);
 	
 	std::cout << "creating benchmark\n";
 	auto createStart = std::chrono::high_resolution_clock::now();
@@ -51,6 +51,6 @@ int main() {
 	double deltaTimeMS = (runFinish - runStart).count() / 1000000.0;
 	std::cout << "finished after " << deltaTimeMS << "ms\n";
 	bench->printResults(deltaTimeMS);
-	Log::setColor(Log::WHITE);
+	setColor(TerminalColor::WHITE);
 	return 0;
 }

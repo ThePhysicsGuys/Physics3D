@@ -11,6 +11,12 @@
 #define ASSERT_TREE_VALID(tree)
 #endif
 
+#ifdef _MSC_VER
+	#define DEBUGBREAK __debugbreak()
+#else
+	#define DEBUGBREAK
+#endif
+
 #pragma region worldValidity
 void recursiveTreeValidCheck(const TreeNode & node, bool hasAlreadyPassedGroupHead) {
 	if(hasAlreadyPassedGroupHead && node.isGroupHead) {
@@ -39,13 +45,13 @@ static bool isConnectedPhysicalValid(const ConnectedPhysical * phys, const Motor
 static bool isPhysicalValid(const Physical * phys, const MotorizedPhysical * mainPhys) {
 	if(phys->mainPhysical != mainPhys) {
 		Log::error("Physical's parent is not mainPhys!");
-		__debugbreak();
+		DEBUGBREAK;
 		return false;
 	}
 	for(const Part& part : phys->rigidBody) {
 		if(part.parent != phys) {
 			Log::error("part's parent's child is not part");
-			__debugbreak();
+			DEBUGBREAK;
 			return false;
 		}
 	}
@@ -69,13 +75,13 @@ bool WorldPrototype::isValid() const {
 	for(const MotorizedPhysical* phys : iterPhysicals()) {
 		if(phys->world != this) {
 			Log::error("physicals's world is not correct!");
-			__debugbreak();
+			DEBUGBREAK;
 			return false;
 		}
 
 		if(!isPhysicalValid(phys, phys)) {
 			Log::error("Physical invalid!");
-			__debugbreak();
+			DEBUGBREAK;
 			return false;
 		}
 	}

@@ -33,4 +33,4 @@ public:
 			}
 		}
 	}
-} complexObject;
+} manyCubesBench;

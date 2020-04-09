@@ -4,6 +4,7 @@
 #include <set>
 #include <limits.h>
 #include <string>
+#include <iostream>
 
 #include "../geometry/polyhedron.h"
 #include "../geometry/normalizedPolyhedron.h"

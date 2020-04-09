@@ -7,7 +7,7 @@
 #include "parallelArray.h"
 
 class TimerMeasure {
-	std::chrono::time_point<std::chrono::steady_clock> lastClock = std::chrono::high_resolution_clock::now();
+	std::chrono::high_resolution_clock::time_point lastClock = std::chrono::high_resolution_clock::now();
 public:
 	CircularBuffer<std::chrono::nanoseconds> pastTickLengths;
 	CircularBuffer<std::chrono::nanoseconds> pastBetweenTimes;
@@ -15,7 +15,7 @@ public:
 	TimerMeasure(size_t capacity) : pastTickLengths(capacity), pastBetweenTimes(capacity) {}
 
 	inline void start() {
-		std::chrono::time_point<std::chrono::steady_clock> curTime = std::chrono::high_resolution_clock::now();
+		std::chrono::high_resolution_clock::time_point curTime = std::chrono::high_resolution_clock::now();
 		std::chrono::nanoseconds timeSinceLast = curTime - lastClock;
 		pastBetweenTimes.add(timeSinceLast);
 		lastClock = curTime;
@@ -62,17 +62,17 @@ public:
 
 template<typename ProcessType>
 class BreakdownAverageProfiler : public HistoricTally<std::chrono::nanoseconds, ProcessType> {
-	std::chrono::time_point<std::chrono::steady_clock> startTime = std::chrono::high_resolution_clock::now();
+	std::chrono::high_resolution_clock::time_point startTime = std::chrono::high_resolution_clock::now();
 	ProcessType currentProcess = static_cast<ProcessType>(-1);
 
 
 public:
-	CircularBuffer<std::chrono::time_point<std::chrono::steady_clock>> tickHistory;
+	CircularBuffer<std::chrono::high_resolution_clock::time_point> tickHistory;
 
 	inline BreakdownAverageProfiler(char const * const labels[static_cast<size_t>(ProcessType::COUNT)], size_t capacity) : HistoricTally<std::chrono::nanoseconds, ProcessType>(labels, capacity), tickHistory(capacity) {}
 
 	inline void mark(ProcessType process) {
-		std::chrono::time_point<std::chrono::steady_clock> curTime = std::chrono::high_resolution_clock::now();
+		std::chrono::high_resolution_clock::time_point curTime = std::chrono::high_resolution_clock::now();
 		if(currentProcess != static_cast<ProcessType>(-1)) {
 			HistoricTally<std::chrono::nanoseconds, ProcessType>::addToTally(currentProcess, curTime - startTime);
 		}
@@ -81,7 +81,7 @@ public:
 	}
 
 	inline void mark(ProcessType process, ProcessType overrideOldProcess) {
-		std::chrono::time_point<std::chrono::steady_clock> curTime = std::chrono::high_resolution_clock::now();
+		std::chrono::high_resolution_clock::time_point curTime = std::chrono::high_resolution_clock::now();
 		if (currentProcess != static_cast<ProcessType>(-1)) {
 			HistoricTally<std::chrono::nanoseconds, ProcessType>::addToTally(overrideOldProcess, curTime - startTime);
 		}
@@ -90,7 +90,7 @@ public:
 	}
 
 	inline void end() {
-		std::chrono::time_point<std::chrono::steady_clock> curTime = std::chrono::high_resolution_clock::now();
+		std::chrono::high_resolution_clock::time_point curTime = std::chrono::high_resolution_clock::now();
 		this->addToTally(currentProcess, curTime - startTime);
 		tickHistory.add(curTime);
 
@@ -101,8 +101,8 @@ public:
 	inline double getAvgTPS() {
 		size_t numTicks = tickHistory.size();
 		if(numTicks != 0) {
-			std::chrono::time_point<std::chrono::steady_clock> firstTime = tickHistory.tail();
-			std::chrono::time_point<std::chrono::steady_clock> lastTime = tickHistory.front();
+			std::chrono::high_resolution_clock::time_point firstTime = tickHistory.tail();
+			std::chrono::high_resolution_clock::time_point lastTime = tickHistory.front();
 			std::chrono::nanoseconds delta = lastTime - firstTime;
 
 			double timeTaken = delta.count() * 1E-9;

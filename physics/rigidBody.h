@@ -105,8 +105,8 @@ public:
 		this->forEachAttachedPart(func);
 	}
 
-	PartIter begin() { return PartIter(parts.begin()._Ptr, parts.begin()._Ptr + parts.size(), mainPart); }
-	ConstPartIter begin() const { return ConstPartIter(parts.begin()._Ptr, parts.begin()._Ptr + parts.size(), mainPart); }
+	PartIter begin() { return PartIter(&*parts.begin(), &*parts.begin() + parts.size(), mainPart); }
+	ConstPartIter begin() const { return ConstPartIter(&*parts.begin(), &*parts.begin() + parts.size(), mainPart); }
 
 	IteratorEnd end() const { return IteratorEnd(); }
 

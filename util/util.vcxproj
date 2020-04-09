@@ -237,6 +237,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="log.cpp" />
+    <ClCompile Include="terminalColor.cpp" />
     <ClCompile Include="properties.cpp" />
     <ClCompile Include="resource\resource.cpp" />
     <ClCompile Include="resource\resourceLoader.cpp" />
@@ -248,6 +249,7 @@
   <ItemGroup>
     <ClInclude Include="dynamicSerialize.h" />
     <ClInclude Include="log.h" />
+    <ClCompile Include="terminalColor.h" />
     <ClInclude Include="math\mat3.h" />
     <ClInclude Include="math\mat4.h" />
     <ClInclude Include="math\rot3.h" />

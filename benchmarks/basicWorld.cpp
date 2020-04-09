@@ -8,7 +8,7 @@
 
 class BasicWorldBenchmark : public WorldBenchmark {
 public:
-	BasicWorldBenchmark() : WorldBenchmark("basicWorld", 10000) {}
+	BasicWorldBenchmark() : WorldBenchmark("basicWorld", 1000) {}
 
 	void init() {
 		createFloor(50, 50, 10);

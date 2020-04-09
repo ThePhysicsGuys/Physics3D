@@ -10,7 +10,7 @@
 #include "../math/linalg/trigonometry.h"
 #include "../math/utils.h"
 #include "../math/mathUtil.h"
-#include "../../util/Log.h"
+#include "../../util/log.h"
 #include "../debug.h"
 #include "../physicsProfiler.h"
 #include "normalizedPolyhedron.h"

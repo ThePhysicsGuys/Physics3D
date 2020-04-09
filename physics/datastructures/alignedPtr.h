@@ -1,9 +1,10 @@
 #pragma once
 
 #include <utility>
+#include <cstddef>
 
 void deleteAligned(void* buf);
-void* createAligned(size_t size, size_t align);
+void* createAligned(std::size_t size, std::size_t align);
 
 template<typename T>
 class UniqueAlignedPointer {
@@ -11,7 +12,7 @@ class UniqueAlignedPointer {
 
 public:
 	UniqueAlignedPointer() : data(nullptr) {}
-	UniqueAlignedPointer(size_t size, size_t align = alignof(T)) : 
+	UniqueAlignedPointer(std::size_t size, std::size_t align = alignof(T)) : 
 		data(static_cast<T*>(createAligned(sizeof(T)* size, align))) {}
 	~UniqueAlignedPointer() {
 		deleteAligned(static_cast<void*>(data));
@@ -37,13 +38,13 @@ public:
 template<typename T>
 class SharedAlignedPointer {
 	T* data;
-	size_t* refCount;
+	std::size_t* refCount;
 
 public:
 	SharedAlignedPointer() : data(nullptr), refCount(nullptr) {}
-	SharedAlignedPointer(size_t size, size_t align = alignof(T)) :
+	SharedAlignedPointer(std::size_t size, std::size_t align = alignof(T)) :
 		data(static_cast<T*>(createAligned(sizeof(T)* size, align))),
-		refCount(new size_t(1)) {}
+		refCount(new std::size_t(1)) {}
 	~SharedAlignedPointer() {
 		if (refCount != nullptr && --(*refCount) == 0) {
 			deleteAligned(static_cast<void*>(data));
