@@ -98,28 +98,21 @@ Graphics::VisualShape createCube(float size) {
 }
 
 void init() {
-	sphere = registerMeshFor(sphereClass);
+	sphere = registerMeshFor(sphereClass, Graphics::VisualShape::generateSmoothNormalsShape(sphereClass->asPolyhedron()));
 	box = registerMeshFor(boxClass);
 	Graphics::VisualShape cylinderShape = createCylinder(64, 1.0, 2.0);
 	cylinder = registerMeshFor(cylinderClass, cylinderShape);
 }
 
 
-VisualData addMeshShape(Graphics::VisualShape& shape) {
+VisualData addMeshShape(const Graphics::VisualShape& shape) {
 	int size = (int) meshes.size();
 	
-	// Generate normals
-	if (shape.normals == nullptr) {
-		Vec3f* normalBuffer = new Vec3f[shape.vertexCount];
-		shape.computeNormals(normalBuffer);
-		shape.normals = SharedArrayPtr<const Vec3f>(normalBuffer);
-	}
-
 	meshes.push_back(new Graphics::IndexedMesh(shape));
 	return VisualData{size, shape.uvs != nullptr, shape.normals != nullptr};
 }
 
-VisualData registerMeshFor(const ShapeClass* shapeClass, Graphics::VisualShape& mesh) {
+VisualData registerMeshFor(const ShapeClass* shapeClass, const Graphics::VisualShape& mesh) {
 	if(shapeClassMeshIds.find(shapeClass) != shapeClassMeshIds.end()) throw "Attempting to re-register existing ShapeClass!";
 
 	VisualData meshData = addMeshShape(mesh);
@@ -131,7 +124,7 @@ VisualData registerMeshFor(const ShapeClass* shapeClass, Graphics::VisualShape& 
 }
 
 VisualData registerMeshFor(const ShapeClass* shapeClass) {
-	Graphics::VisualShape shape(shapeClass->asPolyhedron());
+	Graphics::VisualShape shape = Graphics::VisualShape::generateSplitNormalsShape(shapeClass->asPolyhedron());
 	return registerMeshFor(shapeClass, shape);
 }
 

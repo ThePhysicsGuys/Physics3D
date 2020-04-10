@@ -24,7 +24,8 @@ struct VisualShape : public Polyhedron {
 	explicit VisualShape(const Polyhedron& shape, SVec3f normals = SVec3f(), SVec2f uvs = SVec2f(), SVec3f tangents = SVec3f(), SVec3f bitangents = SVec3f()) :
 		Polyhedron(shape), normals(normals), uvs(uvs), tangents(tangents), bitangents(bitangents) {}
 
-	operator Shape() const { return static_cast<Polyhedron>(*this); }
+	static VisualShape generateSmoothNormalsShape(const Polyhedron& underlyingPoly);
+	static VisualShape generateSplitNormalsShape(const Polyhedron& underlyingPoly);
 };
 
 };
