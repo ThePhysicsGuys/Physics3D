@@ -49,7 +49,7 @@ void TestLayer::onInit() {
 							0, 0, 0, 1,
 						},
 						Vec3f(0.5, 0, 0),
-						Vec3f(row / size, col / size + 0.05, 1.0f),
+						Vec3f(row / size, col / size + 0.05f, 1.0f),
 					}
 				);
 			}

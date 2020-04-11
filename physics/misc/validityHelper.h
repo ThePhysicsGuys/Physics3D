@@ -48,11 +48,19 @@ inline static bool isCFrameValid(const CFrameTemplate<T>& cframe) {
 	return isVecValid(cframe.getPosition()) && isMatValid(cframe.getRotation().asRotationMatrix()) && abs(det(cframe.getRotation().asRotationMatrix()) - 1.0) < 0.00002;
 }
 
+template<typename T, std::size_t DerivationCount>
+inline static bool isTaylorExpansionValid(const TaylorExpansion<T, DerivationCount>& taylor) {
+	for(Vec3 v : taylor) {
+		if(!isVecValid(v)) return false;
+	}
+	return true;
+}
+
 inline static bool isTranslationalMotionValid(const TranslationalMotion& motion) {
-	return isVecValid(motion.velocity) && isVecValid(motion.acceleration);
+	return isTaylorExpansionValid(motion.translation);
 }
 inline static bool isRotationalMotionValid(const RotationalMotion& motion) {
-	return isVecValid(motion.angularVelocity) && isVecValid(motion.angularAcceleration);
+	return isTaylorExpansionValid(motion.rotation);
 }
 
 

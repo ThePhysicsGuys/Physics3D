@@ -14,10 +14,22 @@ double clamp(double value, double min, double max) {
 		return max;
 	return value;
 }
+float clamp(float value, float min, float max) {
+	if(value < min)
+		return min;
+	if(value > max)
+		return max;
+	return value;
+}
 
 double smoothstep(double start, double end, double x) {
 	double t = clamp((x - start) / (end - start), 0.0, 1.0);
 	return t * t * (3.0 - 2.0 * t);
+}
+
+float smoothstep(float start, float end, float x) {
+	float t = clamp((x - start) / (end - start), 0.0f, 1.0f);
+	return t * t * (3.0f - 2.0f * t);
 }
 
 double map(double x, double minIn, double maxIn, double minOut, double maxOut) {

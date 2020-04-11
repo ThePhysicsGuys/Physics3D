@@ -40,7 +40,7 @@ void PlayerWorld::applyExternalForces() {
 		Vec3 force = selectedPhysical->totalMass * (delta * PICKER_STRENGTH - relativeSelectedPointSpeed * PICKER_SPEED_STRENGTH);
 		
 		selectedPhysical->applyForceToPhysical(absoluteSelectedPoint - centerOfmass, force);
-		selectedPhysical->motionOfCenterOfMass.rotation.angularVelocity *= 0.8;
+		selectedPhysical->motionOfCenterOfMass.rotation.rotation[0] *= 0.8;
 	}
 
 	// Player movement
@@ -67,7 +67,7 @@ void PlayerWorld::applyExternalForces() {
 
 		Vec3 runVector = (lengthSquared(total) >= 0.00005) ? normalize(total) * RUN_SPEED : Vec3(0, 0, 0);
 		Vec3 desiredSpeed = runVector;
-		Vec3 actualSpeed = player->parent->getMotion().translation.velocity;
+		Vec3 actualSpeed = player->parent->getMotion().getVelocity();
 		Vec3 speedToGain = desiredSpeed - actualSpeed;
 		speedToGain.y = 0;
 

@@ -9,6 +9,7 @@
 #include "../physics/math/cframe.h"
 #include "../physics/math/position.h"
 #include "../physics/math/globalCFrame.h"
+#include "../physics/math/taylorExpansion.h"
 #include "../physics/motion.h"
 #include "../physics/relativeMotion.h"
 
@@ -145,16 +146,22 @@ bool tolerantEquals(const EigenValues<N, 3>& a, const EigenValues<N, 3>& b, Tol 
 		tolerantEquals(a[0], b[2], tolerance) && tolerantEquals(a[1], b[1], tolerance) && tolerantEquals(a[2], b[0], tolerance);
 }
 
+template<typename Tol, typename T, std::size_t DerivationCount>
+bool tolerantEquals(const TaylorExpansion<T, DerivationCount>& first, const TaylorExpansion<T, DerivationCount>& second, Tol tolerance) {
+	for(std::size_t i = 0; i < DerivationCount; i++) {
+		if(!tolerantEquals(first[i], second[i], tolerance)) return false;
+	}
+	return true;
+}
+
 template<typename Tol>
 bool tolerantEquals(const TranslationalMotion& first, const TranslationalMotion& second, Tol tolerance) {
-	return tolerantEquals(first.velocity, second.velocity, tolerance)
-		&& tolerantEquals(first.acceleration, second.acceleration, tolerance);
+	return tolerantEquals(first.translation, second.translation, tolerance);
 }
 
 template<typename Tol>
 bool tolerantEquals(const RotationalMotion& first, const RotationalMotion& second, Tol tolerance) {
-	return tolerantEquals(first.angularVelocity, second.angularVelocity, tolerance)
-		&& tolerantEquals(first.angularAcceleration, second.angularAcceleration, tolerance);
+	return tolerantEquals(first.rotation, second.rotation, tolerance);
 }
 
 template<typename Tol>

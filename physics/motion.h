@@ -3,34 +3,39 @@
 #include "math/linalg/vec.h"
 #include "math/rotation.h"
 
-struct TranslationalMotion {
-	Vec3 velocity;
-	Vec3 acceleration;
+#include "math/taylorExpansion.h"
 
-	inline TranslationalMotion() : velocity(0.0, 0.0, 0.0), acceleration(0.0, 0.0, 0.0) {}
-	inline TranslationalMotion(Vec3 velocity) : velocity(velocity), acceleration(0.0, 0.0, 0.0) {}
-	inline TranslationalMotion(Vec3 velocity, Vec3 acceleration) : velocity(velocity), acceleration(acceleration) {}
+struct TranslationalMotion {
+	TaylorExpansion<Vec3, 2> translation;
+
+	inline TranslationalMotion() : translation{Vec3(0.0, 0.0, 0.0), Vec3(0.0, 0.0, 0.0)} {}
+	inline TranslationalMotion(Vec3 velocity) : translation{velocity, Vec3(0.0, 0.0, 0.0)} {}
+	inline TranslationalMotion(Vec3 velocity, Vec3 acceleration) : translation{velocity, acceleration} {}
+	inline TranslationalMotion(const TaylorExpansion<Vec3, 2> & translation) : translation(translation) {}
+
+	inline Vec3 getVelocity() const { return translation[0]; }
+	inline Vec3 getAcceleration() const { return translation[1]; }
 
 	inline Vec3 getOffsetAfterDeltaT(double deltaT) const {
-		return velocity * deltaT + acceleration * deltaT * deltaT / 2;
+		return translation(deltaT);
 	}
 
 	inline TranslationalMotion operator-() const {
-		return TranslationalMotion(-velocity, -acceleration);
+		return TranslationalMotion{-translation};
 	}
+
 };
 
 inline TranslationalMotion operator+(const TranslationalMotion& first, const TranslationalMotion& second) {
-	return TranslationalMotion(first.velocity + second.velocity, first.acceleration + second.acceleration);
+	return TranslationalMotion(first.translation + second.translation);
 }
 inline TranslationalMotion& operator+=(TranslationalMotion& first, const TranslationalMotion& second) {
-	first.velocity += second.velocity;
-	first.acceleration += second.acceleration;
+	first.translation += second.translation;
 	return first;
 }
 
 inline TranslationalMotion operator*(const TranslationalMotion& motion, double factor) {
-	return TranslationalMotion(motion.velocity * factor, motion.acceleration * factor);
+	return TranslationalMotion(motion.translation * factor);
 }
 inline TranslationalMotion operator*(double factor, const TranslationalMotion& motion) {
 	return motion * factor;
@@ -38,18 +43,21 @@ inline TranslationalMotion operator*(double factor, const TranslationalMotion& m
 
 
 struct RotationalMotion {
-	Vec3 angularVelocity;
-	Vec3 angularAcceleration;
+	TaylorExpansion<Vec3, 2> rotation;
 
-	inline RotationalMotion() : angularVelocity(0.0,0.0,0.0), angularAcceleration(0.0,0.0,0.0) {}
-	inline RotationalMotion(Vec3 angularVelocity) : angularVelocity(angularVelocity), angularAcceleration(0.0, 0.0, 0.0) {}
-	inline RotationalMotion(Vec3 angularVelocity, Vec3 angularAcceleration) : angularVelocity(angularVelocity), angularAcceleration(angularAcceleration) {}
+	inline RotationalMotion() : rotation{Vec3(0.0, 0.0, 0.0), Vec3(0.0, 0.0, 0.0)} {}
+	inline RotationalMotion(Vec3 angularVelocity) : rotation{angularVelocity, Vec3(0.0, 0.0, 0.0)} {}
+	inline RotationalMotion(Vec3 angularVelocity, Vec3 angularAcceleration) : rotation{angularVelocity, angularAcceleration} {}
+	inline RotationalMotion(const TaylorExpansion<Vec3, 2> & rotation) : rotation(rotation) {}
+
+	inline Vec3 getAngularVelocity() const { return rotation[0]; }
+	inline Vec3 getAngularAcceleration() const { return rotation[1]; }
 
 	inline Vec3 getVelocityOfPoint(Vec3 relativePoint) const {
-		return angularVelocity % relativePoint;
+		return getAngularVelocity() % relativePoint;
 	}
 	inline Vec3 getAccelerationOfPoint(Vec3 relativePoint) const {
-		return angularAcceleration % relativePoint + angularVelocity % (angularVelocity % relativePoint);
+		return getAngularAcceleration() % relativePoint + getAngularVelocity() % (getAngularVelocity() % relativePoint);
 	}
 
 	inline TranslationalMotion getTranslationalMotionOfPoint(Vec3 relativePoint) const {
@@ -57,12 +65,12 @@ struct RotationalMotion {
 	}
 
 	inline Vec3 getRotationAfterDeltaT(double deltaT) const {
-		return angularVelocity * deltaT + angularAcceleration * deltaT * deltaT / 2;
+		return rotation(deltaT);
 	}
 };
 
 inline RotationalMotion operator*(const RotationalMotion& motion, double factor) {
-	return RotationalMotion(motion.angularVelocity * factor, motion.angularAcceleration * factor);
+	return RotationalMotion(motion.getAngularVelocity() * factor, motion.getAngularAcceleration() * factor);
 }
 inline RotationalMotion operator*(double factor, const RotationalMotion& motion) {
 	return motion * factor;
@@ -90,10 +98,10 @@ struct Motion {
 		rotation(rotationMotion) {}
 
 	inline Vec3 getVelocityOfPoint(Vec3 relativePoint) const {
-		return translation.velocity + rotation.getVelocityOfPoint(relativePoint);
+		return translation.getVelocity() + rotation.getVelocityOfPoint(relativePoint);
 	}
 	inline Vec3 getAccelerationOfPoint(Vec3 relativePoint) const {
-		return translation.acceleration + rotation.getAccelerationOfPoint(relativePoint);
+		return translation.getAcceleration() + rotation.getAccelerationOfPoint(relativePoint);
 	}
 	inline TranslationalMotion getTranslationalMotionOfPoint(Vec3 relativePoint) const {
 		return translation + rotation.getTranslationalMotionOfPoint(relativePoint);
@@ -108,10 +116,10 @@ struct Motion {
 
 	inline Motion addRelativeMotion(const Motion& relativeMotion) const {
 		return Motion(
-			translation.velocity         + relativeMotion.translation.velocity,
-			rotation.angularVelocity     + relativeMotion.rotation.angularVelocity,
-			translation.acceleration     + relativeMotion.translation.acceleration     + rotation.angularVelocity % relativeMotion.translation.velocity * 2,
-			rotation.angularAcceleration + relativeMotion.rotation.angularAcceleration + rotation.angularVelocity % relativeMotion.rotation.angularVelocity
+			translation.getVelocity()     + relativeMotion.translation.getVelocity(),
+			rotation.getAngularVelocity()      + relativeMotion.rotation.getAngularVelocity(),
+			translation.getAcceleration() + relativeMotion.translation.getAcceleration() + rotation.getAngularVelocity() % relativeMotion.translation.getVelocity() * 2,
+			rotation.getAngularAcceleration() + relativeMotion.rotation.getAngularAcceleration() + rotation.getAngularVelocity() % relativeMotion.rotation.getAngularVelocity()
 		);
 	}
 
@@ -122,6 +130,11 @@ struct Motion {
 	inline Movement getMovementAfterDeltaT(double deltaT) const {
 		return Movement{translation.getOffsetAfterDeltaT(deltaT), rotation.getRotationAfterDeltaT(deltaT)};
 	}
+
+	inline Vec3 getVelocity() const { return translation.getVelocity(); }
+	inline Vec3 getAcceleration() const { return translation.getAcceleration(); }
+	inline Vec3 getAngularVelocity() const { return rotation.getAngularVelocity(); }
+	inline Vec3 getAngularAcceleration() const { return rotation.getAngularAcceleration(); }
 };
 
 inline Motion operator+(const TranslationalMotion& motionOfStart, const Motion& motionToTranslate) {
@@ -129,16 +142,40 @@ inline Motion operator+(const TranslationalMotion& motionOfStart, const Motion& 
 }
 
 inline TranslationalMotion localToGlobal(const Rotation& rot, const TranslationalMotion& motion) {
-	return TranslationalMotion(rot.localToGlobal(motion.velocity), rot.localToGlobal(motion.acceleration));
+	TranslationalMotion result;
+
+	for(std::size_t i = 0; i < motion.translation.size(); i++) {
+		result.translation[i] = rot.localToGlobal(motion.translation[i]);
+	}
+
+	return result;
 }
 inline TranslationalMotion globalToLocal(const Rotation& rot, const TranslationalMotion& motion) {
-	return TranslationalMotion(rot.globalToLocal(motion.velocity), rot.globalToLocal(motion.acceleration));
+	TranslationalMotion result;
+
+	for(std::size_t i = 0; i < motion.translation.size(); i++) {
+		result.translation[i] = rot.globalToLocal(motion.translation[i]);
+	}
+
+	return result;
 }
 inline RotationalMotion localToGlobal(const Rotation& rot, const RotationalMotion& motion) {
-	return RotationalMotion(rot.localToGlobal(motion.angularVelocity), rot.localToGlobal(motion.angularAcceleration));
+	RotationalMotion result;
+
+	for(std::size_t i = 0; i < motion.rotation.size(); i++) {
+		result.rotation[i] = rot.localToGlobal(motion.rotation[i]);
+	}
+
+	return result;
 }
 inline RotationalMotion globalToLocal(const Rotation& rot, const RotationalMotion& motion) {
-	return RotationalMotion(rot.globalToLocal(motion.angularVelocity), rot.globalToLocal(motion.angularAcceleration));
+	RotationalMotion result;
+
+	for(std::size_t i = 0; i < motion.rotation.size(); i++) {
+		result.rotation[i] = rot.globalToLocal(motion.rotation[i]);
+	}
+
+	return result;
 }
 
 inline Motion localToGlobal(const Rotation& rot, const Motion& motion) {

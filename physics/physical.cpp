@@ -630,8 +630,8 @@ void MotorizedPhysical::update(double deltaT) {
 	totalForce = Vec3();
 	totalMoment = Vec3();
 
-	motionOfCenterOfMass.translation.velocity += accel;
-	motionOfCenterOfMass.rotation.angularVelocity += rotAcc;
+	motionOfCenterOfMass.translation.translation[0] += accel;
+	motionOfCenterOfMass.rotation.rotation[0] += rotAcc;
 
 	Vec3 curAngularMomentum = getTotalAngularMomentum();
 
@@ -641,7 +641,7 @@ void MotorizedPhysical::update(double deltaT) {
 
 	Vec3 deltaAngularVelocity = momentResponse * (angularMomentumNow - curAngularMomentum);
 
-	this->motionOfCenterOfMass.rotation.angularVelocity -= deltaAngularVelocity;
+	this->motionOfCenterOfMass.rotation.rotation[0] -= deltaAngularVelocity;
 
 	Vec3 oldCenterOfMass = this->totalCenterOfMass;
 	refreshPhysicalProperties();
@@ -649,9 +649,9 @@ void MotorizedPhysical::update(double deltaT) {
 
 	
 
-	Vec3 movementOfCenterOfMass = motionOfCenterOfMass.translation.velocity * deltaT + accel * deltaT * deltaT / 2 - getCFrame().localToRelative(deltaCOM);
+	Vec3 movementOfCenterOfMass = motionOfCenterOfMass.getVelocity() * deltaT + accel * deltaT * deltaT / 2 - getCFrame().localToRelative(deltaCOM);
 
-	rotateAroundCenterOfMassUnsafe(Rotation::fromRotationVec(motionOfCenterOfMass.rotation.angularVelocity * deltaT));
+	rotateAroundCenterOfMassUnsafe(Rotation::fromRotationVec(motionOfCenterOfMass.getAngularVelocity() * deltaT));
 	translateUnsafeRecursive(movementOfCenterOfMass);
 
 	updateAttachedPhysicals();
@@ -691,13 +691,13 @@ void MotorizedPhysical::applyMoment(Vec3 moment) {
 void MotorizedPhysical::applyImpulseAtCenterOfMass(Vec3 impulse) {
 	assert(isVecValid(impulse));
 	Debug::logVector(getCenterOfMass(), impulse, Debug::IMPULSE);
-	motionOfCenterOfMass.translation.velocity += forceResponse * impulse;
+	motionOfCenterOfMass.translation.translation[0] += forceResponse * impulse;
 }
 void MotorizedPhysical::applyImpulse(Vec3Relative origin, Vec3Relative impulse) {
 	assert(isVecValid(origin));
 	assert(isVecValid(impulse));
 	Debug::logVector(getCenterOfMass() + origin, impulse, Debug::IMPULSE);
-	motionOfCenterOfMass.translation.velocity += forceResponse * impulse;
+	motionOfCenterOfMass.translation.translation[0] += forceResponse * impulse;
 	Vec3 angularImpulse = origin % impulse;
 	applyAngularImpulse(angularImpulse);
 }
@@ -707,7 +707,7 @@ void MotorizedPhysical::applyAngularImpulse(Vec3 angularImpulse) {
 	Vec3 localAngularImpulse = getCFrame().relativeToLocal(angularImpulse);
 	Vec3 localRotAcc = momentResponse * localAngularImpulse;
 	Vec3 rotAcc = getCFrame().localToRelative(localRotAcc);
-	motionOfCenterOfMass.rotation.angularVelocity += rotAcc;
+	motionOfCenterOfMass.rotation.rotation[0] += rotAcc;
 }
 
 void MotorizedPhysical::applyDragAtCenterOfMass(Vec3 drag) {
@@ -751,10 +751,10 @@ void Physical::applyForceToPhysical(Vec3 origin, Vec3 force) {
 #pragma region getters
 
 double Physical::getVelocityKineticEnergy() const {
-	return rigidBody.mass * lengthSquared(getMotionOfCenterOfMass().translation.velocity) / 2;
+	return rigidBody.mass * lengthSquared(getMotionOfCenterOfMass().getVelocity()) / 2;
 }
 double Physical::getAngularKineticEnergy() const {
-	Vec3 localAngularVel = getCFrame().relativeToLocal(getMotionOfCenterOfMass().rotation.angularVelocity);
+	Vec3 localAngularVel = getCFrame().relativeToLocal(getMotionOfCenterOfMass().getAngularVelocity());
 	return (rigidBody.inertia * localAngularVel) * localAngularVel / 2;
 }
 double Physical::getKineticEnergy() const {
@@ -821,11 +821,11 @@ GlobalCFrame MotorizedPhysical::getCenterOfMassCFrame() const {
 }
 
 Vec3 MotorizedPhysical::getTotalImpulse() const {
-	return this->motionOfCenterOfMass.translation.velocity * this->totalMass;
+	return this->motionOfCenterOfMass.getVelocity() * this->totalMass;
 }
 Vec3 MotorizedPhysical::getTotalAngularMomentum() const {
 	SymmetricMat3 totalInertia = getRecursiveInertia(*this, CFrame(0, 0, 0), totalCenterOfMass);
-	return totalInertia * this->motionOfCenterOfMass.rotation.angularVelocity;
+	return totalInertia * this->motionOfCenterOfMass.getAngularVelocity();
 }
 
 Motion Physical::getMotion() const {

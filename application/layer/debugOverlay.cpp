@@ -29,7 +29,7 @@ Graphics::BarChartClassInfo iterChartClasses[] {
 };
 
 Graphics::BarChart iterationChart("Iteration Statistics", "", GJKCollidesIterationStatistics.labels, iterChartClasses, Vec2f(-1.0f + 0.1f, -0.3f), Vec2f(0.8f, 0.6f), 3, 17);
-Graphics::SlidingChart fpsSlidingChart("Fps Fps", Vec2f(-0.3, 0.2), Vec2f(0.7, 0.4));
+Graphics::SlidingChart fpsSlidingChart("Fps Fps", Vec2f(-0.3f, 0.2f), Vec2f(0.7f, 0.4f));
 
 void DebugOverlay::onInit() {
 	using namespace Graphics;
@@ -106,7 +106,7 @@ void DebugOverlay::onRender() {
 			iterationChart.data.get(2, i) = Graphics::WeightValue { (float) epaIter[i], std::to_string(epaIter[i]) };
 		}
 
-		iterationChart.position = Vec2f(-leftSide + 0.1f, -0.3);
+		iterationChart.position = Vec2f(-leftSide + 0.1f, -0.3f);
 		iterationChart.render();
 
 		Graphics::graphicsMeasure.mark(Graphics::GraphicsProcess::WAIT_FOR_LOCK);
@@ -114,8 +114,8 @@ void DebugOverlay::onRender() {
 			Screen* screen = static_cast<Screen*>(this->ptr);
 
 			graphicsMeasure.mark(Graphics::GraphicsProcess::PROFILER);
-			renderTreeStructure(screen->world->objectTree, Vec3f(0, 1, 0), Vec2f(1.4, 0.95), 0.7f, screen->selectedPart);
-			renderTreeStructure(screen->world->terrainTree, Vec3f(0, 0, 1), Vec2f(0.4, 0.95), 0.7f, screen->selectedPart);
+			renderTreeStructure(screen->world->objectTree, Vec3f(0, 1, 0), Vec2f(1.4f, 0.95f), 0.7f, screen->selectedPart);
+			renderTreeStructure(screen->world->terrainTree, Vec3f(0, 0, 1), Vec2f(0.4f, 0.95f), 0.7f, screen->selectedPart);
 		});
 
 		fpsSlidingChart.add("Fps 1", Graphics::graphicsMeasure.getAvgTPS());

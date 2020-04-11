@@ -532,10 +532,10 @@ void BigFrame::renderPropertiesFrame() {
 				ImGui::InputFloat3("Position", position, 3, ImGuiInputTextFlags_ReadOnly);
 			}
 
-			ImGui::Text("Velocity: %s", (sp) ? str(sp->getMotion().translation.velocity).c_str() : "-");
-			ImGui::Text("Acceleration: %s", (sp) ? str(sp->getMotion().translation.acceleration).c_str() : "-");
-			ImGui::Text("Angular velocity: %s", (sp) ? str(sp->getMotion().rotation.angularVelocity).c_str() : "-");
-			ImGui::Text("Angular acceleration: %s", (sp) ? str(sp->getMotion().rotation.angularAcceleration).c_str() : "-");
+			ImGui::Text("Velocity: %s", (sp) ? str(sp->getMotion().getVelocity()).c_str() : "-");
+			ImGui::Text("Acceleration: %s", (sp) ? str(sp->getMotion().getAcceleration()).c_str() : "-");
+			ImGui::Text("Angular velocity: %s", (sp) ? str(sp->getMotion().getAngularVelocity()).c_str() : "-");
+			ImGui::Text("Angular acceleration: %s", (sp) ? str(sp->getMotion().getAngularAcceleration()).c_str() : "-");
 			ImGui::Text("Mass: %s", (sp) ? str(sp->getMass()).c_str() : "-");
 			ImGui::Text("Friction: %s", (sp) ? str(sp->properties.friction).c_str() : "-");
 			ImGui::Text("Density: %s", (sp) ? str(sp->properties.density).c_str() : "-");

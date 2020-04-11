@@ -65,10 +65,10 @@ void SkyboxLayer::onInit() {
 	ResourceManager::add<TextureResource>("night", "../res/textures/night.png");
 	ResourceManager::add<TextureResource>("uv", "../res/textures/uv.png");
 
-	lightColorCycle = SkyboxCycle(Color3(0.42, 0.45, 0.90), Color3(1.0, 0.95, 0.95), Color3(1.0, 0.45, 0.56), Color3(1.0, 0.87, 0.6), 3.0f, 8.0f, 18.0f);
-	skyColorCycle = SkyboxCycle(Color3(0.31, 0.44, 0.64), Color3(0.96, 0.93, 0.9), Color3(0.996, 0.77, 0.57), Color3(1.0, 0.94, 0.67), 3.0f, 8.0f, 18.0f);
-	horizonColorCycle = SkyboxCycle(Color3(0.2, 0.2, 0.42), Color3(0.6, 0.9, 1.0), Color3(0.93, 0.49, 0.57), Color3(1.0, 0.64, 0.47), 3.0f, 8.0f, 18.0f);
-	mistColorCycle = SkyboxCycle(Color3(0.29, 0.41, 0.61), Color3(0.96, 0.9, 0.77), Color3(1.0, 0.68, 0.85), Color3(1.0, 0.87, 0.82), 3.0f, 8.0f, 18.0f);
+	lightColorCycle = SkyboxCycle(Color3(0.42f, 0.45f, 0.90f), Color3(1.0f, 0.95f, 0.95f), Color3(1.0f, 0.45f, 0.56f), Color3(1.0f, 0.87f, 0.6f), 3.0f, 8.0f, 18.0f);
+	skyColorCycle = SkyboxCycle(Color3(0.31f, 0.44f, 0.64f), Color3(0.96f, 0.93f, 0.9f), Color3(0.996f, 0.77f, 0.57f), Color3(1.0f, 0.94f, 0.67f), 3.0f, 8.0f, 18.0f);
+	horizonColorCycle = SkyboxCycle(Color3(0.2f, 0.2f, 0.42f), Color3(0.6f, 0.9f, 1.0f), Color3(0.93f, 0.49f, 0.57f), Color3(1.0f, 0.64f, 0.47f), 3.0f, 8.0f, 18.0f);
+	mistColorCycle = SkyboxCycle(Color3(0.29f, 0.41f, 0.61f), Color3(0.96f, 0.9f, 0.77f), Color3(1.0f, 0.68f, 0.85f), Color3(1.0f, 0.87f, 0.82f), 3.0f, 8.0f, 18.0f);
 }
 
 float time;

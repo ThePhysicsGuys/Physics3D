@@ -64,14 +64,14 @@ public:
 	Matrix(const Matrix<OtherT1, Width - 1, Height - 1>& topLeftMat, const Vector<OtherT2, Height - 1>& rightCol, const Vector<OtherT3, Width - 1>& bottomRow, const OtherT4& bottomLeftVal) : data{} {
 		for (std::size_t row = 0; row < Height - 1; row++) {
 			for (std::size_t col = 0; col < Width - 1; col++) {
-				(*this)[row][col] = topLeftMat[row][col];
+				(*this)[row][col] = T(topLeftMat[row][col]);
 			}
-			(*this)[row][Width - 1] = rightCol[row];
+			(*this)[row][Width - 1] = T(rightCol[row]);
 		}
 		for (std::size_t col = 0; col < Width - 1; col++) {
-			(*this)[Height - 1][col] = bottomRow[col];
+			(*this)[Height - 1][col] = T(bottomRow[col]);
 		}
-		(*this)[Height - 1][Width - 1] = bottomLeftVal;
+		(*this)[Height - 1][Width - 1] = T(bottomLeftVal);
 	}
 
 	template<typename OtherT1, typename OtherT2>
@@ -270,7 +270,7 @@ public:
 		Matrix<T, Width, Height> mat;
 		for (std::size_t row = 0; row < Height; row++) {
 			for (std::size_t col = 0; col < Width; col++) {
-				mat[row][col] = (row == col) ? 1 : 0;
+				mat[row][col] = (row == col) ? T(1) : T(0);
 			}
 		}
 		return mat;

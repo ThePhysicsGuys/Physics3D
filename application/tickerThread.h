@@ -16,11 +16,11 @@ private:
 	milliseconds tickSkipTimeout;
 	void(*tickAction)();
 public:
-	TickerThread() : thread() {};
+	TickerThread() : thread(), TPS(0.0), tickSkipTimeout(0), tickAction(nullptr) {};
 	TickerThread(double targetTPS, milliseconds tickSkipTimeout, void(*tickAction)());
 	~TickerThread();
 
-	TickerThread& operator=(TickerThread&& rhs) {
+	TickerThread& operator=(TickerThread&& rhs) noexcept {
 		this->thread = std::thread();
 		this->stopped = rhs.stopped;
 		this->TPS = rhs.TPS;

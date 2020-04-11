@@ -12,17 +12,8 @@ struct Fix {
 	int64_t value;
 
 	constexpr Fix() : value(0) {}
-	Fix(double d) : 
-		value() {
-		
-		int64_t uno = ONE;
-
-		double newD = d * uno;
-
-		this->value = static_cast<int64_t>(newD);
-	}
-	constexpr Fix(float f) : 
-		value(static_cast<int64_t>(f * ONE)) {}
+	constexpr Fix(double d) : value(static_cast<int64_t>(d * ONE)) {}
+	constexpr Fix(float f) : value(static_cast<int64_t>(double(f) * ONE)) {}
 	constexpr explicit Fix(int64_t l) : value(l) {}
 
 	inline constexpr operator double() const { return static_cast<double>(value) / ONE; }

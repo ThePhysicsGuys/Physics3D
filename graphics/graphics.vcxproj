@@ -170,7 +170,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Lib>
-      <AdditionalDependencies>freetype.lib;glfw3.lib;glew32s.lib;opengl32.lib;physics.lib;util.lib;</AdditionalDependencies>
+      <AdditionalDependencies>freetype.lib;glfw3.lib;glew32s.lib;opengl32.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)lib;$(OutDir)</AdditionalLibraryDirectories>
       <LinkTimeCodeGeneration>true</LinkTimeCodeGeneration>
     </Lib>

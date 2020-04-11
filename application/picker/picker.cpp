@@ -59,7 +59,7 @@ void onClose() {
 
 // Intersections
 // Intersection distance of the given ray with the given shape, transformed with the given cframe. 
-float intersect(const Ray& ray, const Shape& shape, const GlobalCFrame& cframe) {
+double intersect(const Ray& ray, const Shape& shape, const GlobalCFrame& cframe) {
 	return shape.getIntersectionDistance(cframe.globalToLocal(ray.start), cframe.relativeToLocal(ray.direction));
 }
 

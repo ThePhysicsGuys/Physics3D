@@ -9,6 +9,8 @@
 #include "../graphics/mesh/indexedMesh.h"
 #include "../physics/geometry/shapeClass.h"
 
+#include <stdexcept>
+
 #define PI 3.14159265359
 
 namespace Engine::MeshRegistry {
@@ -21,7 +23,7 @@ VisualData cylinder;
 
 // Generates a cylinder with 
 static Graphics::VisualShape createCylinder(int sides, double radius, double height) {
-	assert(sides >= 2);
+	if(sides < 2) { throw std::logic_error("Cannot create cylinder with <2 sides"); }
 	int vertexCount = sides * 4;
 	Vec3f* vertexBuffer = new Vec3f[vertexCount];
 

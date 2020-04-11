@@ -325,6 +325,8 @@
     <ClInclude Include="math\linalg\largeMatrix.h" />
     <ClInclude Include="math\linalg\mat.h" />
     <ClInclude Include="math\linalg\misc.h" />
+    <ClInclude Include="math\predefinedTaylorExpansions.h" />
+    <ClInclude Include="math\taylorExpansion.h" />
     <ClInclude Include="math\rotation.h" />
     <ClInclude Include="math\transform.h" />
     <ClInclude Include="math\linalg\trigonometry.h" />

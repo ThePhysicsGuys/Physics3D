@@ -131,22 +131,22 @@ inline std::ostream& operator<<(std::ostream& os, const GlobalCFrame& cframe) {
 }
 
 inline std::ostream& operator<<(std::ostream& os, const TranslationalMotion& motion) {
-	os << "{vel: " << motion.velocity;
-	os << ", accel: " << motion.acceleration << "}";
+	os << "{vel: " << motion.getVelocity();
+	os << ", accel: " << motion.getAcceleration() << "}";
 	return os;
 }
 
 inline std::ostream& operator<<(std::ostream& os, const RotationalMotion& motion) {
-	os << "{angularVel: " << motion.angularVelocity;
-	os << ", angularAccel: " << motion.angularAcceleration << "}";
+	os << "{angularVel: " << motion.getAngularVelocity();
+	os << ", angularAccel: " << motion.getAngularAcceleration() << "}";
 	return os;
 }
 
 inline std::ostream& operator<<(std::ostream& os, const Motion& motion) {
-	os << "{vel: " << motion.translation.velocity;
-	os << ", angularVel: " << motion.rotation.angularVelocity;
-	os << ", accel: " << motion.translation.acceleration;
-	os << ", angularAccel: " << motion.rotation.angularAcceleration << "}";
+	os << "{vel: " << motion.getVelocity();
+	os << ", angularVel: " << motion.getAngularVelocity();
+	os << ", accel: " << motion.getAcceleration();
+	os << ", angularAccel: " << motion.getAngularAcceleration() << "}";
 
 	return os;
 }

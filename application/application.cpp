@@ -87,7 +87,7 @@ void init(int argc, const char** args) {
 	screen.onInit();
 	
 	// Player
-	screen.camera.attachment = new ExtendedPart(Library::createPrism(50, 0.3, 1.5), GlobalCFrame(), {1.0, 5.0, 0.0}, "Player");
+	screen.camera.attachment = new ExtendedPart(Library::createPrism(50, 0.3f, 1.5f), GlobalCFrame(), {1.0, 5.0, 0.0}, "Player");
 
 	if(!world.isValid()) {
 		throw "World not valid!";
@@ -147,7 +147,7 @@ void setupWorld(int argc, const char** args) {
 
 		world.addPart(sateliteBody);
 
-		sateliteBody->parent->mainPhysical->motionOfCenterOfMass.rotation.angularVelocity = Vec3(0, 2, 0);
+		sateliteBody->parent->mainPhysical->motionOfCenterOfMass.rotation.rotation[0] = Vec3(0, 2, 0);
 	}
 
 
@@ -164,8 +164,8 @@ void setupWorld(int argc, const char** args) {
 	// hollow box
 	WorldBuilder::HollowBoxParts parts = WorldBuilder::buildHollowBox(Bounds(Position(12.0, 3.0, 14.0), Position(20.0, 8.0, 20.0)), 0.3);
 
-	parts.front->material.ambient = Vec4f(0.4, 0.6, 1.0, 0.3);
-	parts.back->material.ambient = Vec4f(0.4, 0.6, 1.0, 0.3);
+	parts.front->material.ambient = Vec4f(0.4f, 0.6f, 1.0f, 0.3f);
+	parts.back->material.ambient = Vec4f(0.4f, 0.6f, 1.0f, 0.3f);
 
 	// Rotating walls
 	/*ExtendedPart* rotatingWall = new ExtendedPart(Box(5.0, 3.0, 0.5), GlobalCFrame(Position(-12.0, 1.7, 0.0)), {1.0, 1.0, 0.7});
@@ -202,7 +202,7 @@ void setupWorld(int argc, const char** args) {
 		for (double y = minY; y < maxY; y += 1.00001) {
 			for (double z = minZ; z < maxZ; z += 1.00001) {
 				ExtendedPart* newCube = new ExtendedPart(Box(1.0, 1.0, 1.0), GlobalCFrame(Position(x - 5, y + 10, z - 5)), { 1.0, 1.0, 0.0 }, "Box");
-				newCube->material.ambient = Vec4f((x-minX)/(maxX-minX), (y-minY)/(maxY-minY), (z-minZ)/(maxZ-minZ), 1.0f);
+				newCube->material.ambient = Vec4f(float((x-minX)/(maxX-minX)), float((y-minY)/(maxY-minY)), float((z-minZ)/(maxZ-minZ)), 1.0f);
 				world.addPart(newCube);
 				world.addPart(new ExtendedPart(Sphere(0.5), GlobalCFrame(Position(x + 5, y + 1, z - 5)), { 1.0, 0.2, 0.5 }, "Sphere"));
 				//spiderFactories[rand() & 0x00000003].buildSpider(GlobalCFrame(Position(x+y*0.1, y+1, z)));
@@ -353,7 +353,7 @@ void setupWorld(int argc, const char** args) {
 
 		world.addPart(mainBlock);
 
-		mainBlock->parent->mainPhysical->motionOfCenterOfMass.rotation.angularVelocity = Vec3(0, 2, 0);
+		mainBlock->parent->mainPhysical->motionOfCenterOfMass.rotation.rotation[0] = Vec3(0, 2, 0);
 	}
 
 	{

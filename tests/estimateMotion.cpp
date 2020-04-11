@@ -4,19 +4,17 @@
 #include "../physics/math/linalg/trigonometry.h"
 
 Vec3 getVelocityBySimulation(const Motion& m, const Vec3& point, double deltaT) {
-	Rotation rotation = Rotation::fromRotationVec(m.rotation.angularVelocity * deltaT);
-	Vec3 delta = m.translation.velocity * deltaT + (rotation * point - point);
+	Rotation rotation = Rotation::fromRotationVec(m.getAngularVelocity() * deltaT);
+	Vec3 delta = m.getVelocity() * deltaT + (rotation * point - point);
 	return delta / deltaT;
 }
 
 Motion getMotionBySimulation(const Motion& m, const Vec3& point, double deltaT) {
-	Motion result;
+	Vec3 mainVel1 = m.getVelocity();
+	Vec3 mainVel2 = mainVel1 + m.getAcceleration() * deltaT;
 
-	Vec3 mainVel1 = m.translation.velocity;
-	Vec3 mainVel2 = mainVel1 + m.translation.acceleration * deltaT;
-
-	Vec3 angularVel2 = m.rotation.angularVelocity + m.rotation.angularAcceleration * deltaT;
-	Vec3 rotVec1 = m.rotation.angularVelocity * deltaT;
+	Vec3 angularVel2 = m.getAngularVelocity() + m.getAngularAcceleration() * deltaT;
+	Vec3 rotVec1 = m.getAngularVelocity() * deltaT;
 	Vec3 rotVec2 = angularVel2 * deltaT;
 	Rotation rotation1 = Rotation::fromRotationVec(rotVec1);
 	Rotation rotation2 = Rotation::fromRotationVec(rotVec2);
@@ -30,13 +28,10 @@ Motion getMotionBySimulation(const Motion& m, const Vec3& point, double deltaT) 
 	Vec3 vel1 = delta1 / deltaT;
 	Vec3 vel2 = delta2 / deltaT;
 
-	result.translation.velocity = vel1;
-	result.translation.acceleration = (vel2 - vel1) / deltaT;
+	TranslationalMotion tResult(vel1, (vel2 - vel1) / deltaT);
+	RotationalMotion rResult(m.getAngularVelocity(), m.getAngularAcceleration());
 
-	result.rotation.angularVelocity = m.rotation.angularVelocity;
-	result.rotation.angularAcceleration = m.rotation.angularAcceleration;
-
-	return result;
+	return Motion(tResult, rResult);
 }
 std::pair<Vec3, Vec3> estimateMotion(const Vec3& startPos, const Vec3& midPos, const Vec3& endPos, double stepT) {
 	Vec3 distance1 = midPos - startPos;

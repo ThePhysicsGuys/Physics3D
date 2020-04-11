@@ -88,7 +88,7 @@ TEST_CASE(testPistonConstraint) {
 
 	CFrame cf2 = relMotion.locationOfRelativeMotion;
 
-	ASSERT((cf2.getPosition() - cf1.getPosition()) == relMotion.relativeMotion.translation.velocity * DELTA_T);
+	ASSERT((cf2.getPosition() - cf1.getPosition()) == relMotion.relativeMotion.getVelocity() * DELTA_T);
 }
 
 TEST_CASE(testExtendingRelativeMotionCVecCommutes) {

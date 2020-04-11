@@ -66,7 +66,7 @@ void buildFloorAndWalls(double width, double depth, double wallHeight) {
 	world.addTerrainPart(new ExtendedPart(Box(width, wallHeight, 0.7), GlobalCFrame(0.0, wallHeight / 2, -depth / 2), wallProperties));
 }
 
-SpiderFactory::SpiderFactory(double spiderSize, int legCount) : spiderSize(spiderSize), legCount(legCount), bodyShape(Library::createPointyPrism(legCount, 0.5, 0.2, 0.1, 0.1)) {}
+SpiderFactory::SpiderFactory(double spiderSize, int legCount) : spiderSize(spiderSize), legCount(legCount), bodyShape(Library::createPointyPrism(legCount, 0.5f, 0.2f, 0.1f, 0.1f)) {}
 
 void SpiderFactory::buildSpider(const GlobalCFrame& spiderPosition) {
 	//ExtendedPart* spiderBody = createUniquePart(screen, createPointyPrism(legCount, 0.5, 0.2, 0.1, 0.1), spiderPosition, 1.0, 0.0, "SpiderBody");
@@ -147,7 +147,7 @@ void buildTree(Position treePos) {
 
 void buildConveyor(double width, double length, const GlobalCFrame& cframe, double speed) {
 	ExtendedPart* conveyor = new ExtendedPart(Box(width, 0.3, length), cframe, { 1.0, 0.8, 0.0, Vec3(0.0, 0.0, speed) }, "Conveyor");
-	conveyor->material.ambient = Vec4f(0.2, 0.2, 0.2, 1.0);
+	conveyor->material.ambient = Vec4f(0.2f, 0.2f, 0.2f, 1.0f);
 	world.addTerrainPart(conveyor);
 	ExtendedPart* leftWall = new ExtendedPart(Box(0.2, 0.6, length), cframe.localToGlobal(CFrame(-width / 2 - 0.1, 0.1, 0.0)), { 1.0, 0.4, 0.3, Vec3(0.0, 0.0, 0.0) }, "Wall");
 	world.addTerrainPart(leftWall);
@@ -221,9 +221,9 @@ void buildCar(const GlobalCFrame& location) {
 	ExtendedPart* wheel3 = new ExtendedPart(Sphere(0.25), location.localToGlobal(CFrame(-0.8, 0.0, 0.8)), wheelProperties, "Wheel");
 	ExtendedPart* wheel4 = new ExtendedPart(Sphere(0.25), location.localToGlobal(CFrame(-0.8, 0.0, -0.8)), wheelProperties, "Wheel");
 
-	carLeftWindow->material.ambient = Vec4f(0.7, 0.7, 1.0, 0.5);
-	carRightWindow->material.ambient = Vec4f(0.7, 0.7, 1.0, 0.5);
-	carWindshield->material.ambient = Vec4f(0.7, 0.7, 1.0, 0.5);
+	carLeftWindow->material.ambient = Vec4f(0.7f, 0.7f, 1.0f, 0.5f);
+	carRightWindow->material.ambient = Vec4f(0.7f, 0.7f, 1.0f, 0.5f);
+	carWindshield->material.ambient = Vec4f(0.7f, 0.7f, 1.0f, 0.5f);
 
 	world.addPart(carBody);
 
