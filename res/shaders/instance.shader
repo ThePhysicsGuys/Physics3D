@@ -37,137 +37,53 @@ vec3 applyT3N(mat4 matrix, vec3 vector) {
 layout(location = 0) in vec3 vPosition;
 layout(location = 1) in vec3 vNormal;
 layout(location = 2) in vec2 vUV;
-layout(location = 3) in mat4 vModelMatrix;
-layout(location = 7) in vec4 vAmbient;
-layout(location = 8) in vec3 vDiffuse;
-layout(location = 9) in vec3 vSpecular;
-layout(location = 10) in float vReflectance;
+layout(location = 3) in vec3 vTangent;
+layout(location = 4) in vec3 vBitangent;
+layout(location = 5) in mat4 vModelMatrix;
+layout(location = 9) in vec4 vAmbient;
+layout(location = 10) in vec3 vDiffuse;
+layout(location = 11) in vec3 vSpecular;
+layout(location = 12) in float vReflectance;
 
-out vec4 gAmbient;
-out vec3 gDiffuse;
-out vec3 gSpecular;
-out float gReflectance;
+smooth out vec3 fPosition;
+smooth out vec2 fUV;
+smooth out vec3 fNormal;
 
-out vec3 gPosition;
-out vec2 gUV;
-out VS_OUT {
-	vec3 value;
-} gNormal;
+flat out vec4 fAmbient;
+flat out vec3 fDiffuse;
+flat out vec3 fSpecular;
+flat out float fReflectance;
 
-uniform mat4 viewMatrix;
-
-void main() {
-	gAmbient = vAmbient;
-	gDiffuse = vDiffuse;
-	gSpecular = vSpecular;
-	gReflectance = vReflectance;
-
-	gUV = vUV;
-	gPosition = vPosition;
-	gNormal.value = apply3(vModelMatrix, vNormal);
-
-	gl_Position = applyT(vModelMatrix, vPosition);
-}  
-
-[geometry]
-layout(triangles) in;
-layout(triangle_strip, max_vertices = 3) out;
-
-uniform int includeUVs;
-uniform int includeNormals;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 
-in vec4 gAmbient[];
-in vec3 gDiffuse[];
-in vec3 gSpecular[];
-in float gReflectance[];
-
-in vec3 gPosition[];
-in vec2 gUV[];
-in VS_OUT {
-	vec3 value;
-} gNormal[];
-
-out vec2 fUV;
-out vec3 fPosition;
-out vec3 fNormal;
-out vec4 fAmbient;
-out vec3 fDiffuse;
-out vec3 fSpecular;
-out float fReflectance;
-
-vec3 normal() {
-	vec3 a = vec3(gl_in[0].gl_Position) - vec3(gl_in[1].gl_Position);
-	vec3 b = vec3(gl_in[2].gl_Position) - vec3(gl_in[1].gl_Position);
-
-	vec3 norm = normalize(cross(a, b));
-	return -norm;
-}
-
-vec2 uv(vec3 p, vec3 n, vec3 u, vec3 v) {
-	u = normalize(u);
-	v = normalize(v);
-	p = p - dot(p, n) * n;
-	return vec2(dot(p, u), dot(p, v));
-}
-
 void main() {
-	fNormal = normal();
+	fAmbient = vAmbient;
+	fDiffuse = vDiffuse;
+	fSpecular = vSpecular;
+	fReflectance = vReflectance;
 
-	mat4 transform = projectionMatrix * viewMatrix;
+	fUV = vUV;
+	fPosition = applyT3(vModelMatrix, vPosition);
+	fNormal = apply3(vModelMatrix, vNormal);
 
-	vec3 u = gPosition[2] - gPosition[0];
-	vec3 n = normalize(cross(gPosition[0] - gPosition[1], gPosition[2] - gPosition[0]));
-	vec3 v = cross(n, u);
-
-	// Vertex 1
-	fPosition = gl_in[0].gl_Position.xyz;
-	fUV = includeUVs * gUV[0] + (1 - includeUVs) * uv(gPosition[0], n, u, v);
-	fNormal = includeNormals * gNormal[0].value + (1 - includeNormals) * fNormal;
-	fAmbient = gAmbient[0];
-	fDiffuse = gDiffuse[0];
-	fSpecular = gSpecular[0];
-	fReflectance = gReflectance[0];
-
-	gl_Position = transform * gl_in[0].gl_Position; EmitVertex();
-
-	// Vertex 2
-	fPosition = gl_in[1].gl_Position.xyz;
-	fUV = includeUVs * gUV[1] + (1 - includeUVs) * uv(gPosition[1], n, u, v);
-	fNormal = includeNormals * gNormal[1].value + (1 - includeNormals) * fNormal;
-	fAmbient = gAmbient[1];
-	fDiffuse = gDiffuse[1];
-	fSpecular = gSpecular[1];
-	fReflectance = gReflectance[1];
-
-	gl_Position = transform * gl_in[1].gl_Position; EmitVertex();
-
-	// Vertex 3
-	fPosition = gl_in[2].gl_Position.xyz;
-	fUV = includeUVs * gUV[2] + (1 - includeUVs) * uv(gPosition[2], n, u, v);
-	fNormal = includeNormals * gNormal[2].value + (1 - includeNormals) * fNormal;
-	fAmbient = gAmbient[2];
-	fDiffuse = gDiffuse[2];
-	fSpecular = gSpecular[2];
-	fReflectance = gReflectance[2];
-
-	gl_Position = transform * gl_in[2].gl_Position; EmitVertex();
-	EndPrimitive();
+	gl_Position = applyT(projectionMatrix * viewMatrix, fPosition);
 }
-
 
 [fragment]
 
+// Out
 out vec4 outColor;
 
-in vec2 fUV;
-in vec3 fPosition;
-in vec3 fNormal;
-in vec4 fAmbient;
-in vec3 fDiffuse;
-in vec3 fSpecular;
-in float fReflectance;
+// In
+smooth in vec2 fUV;
+smooth in vec3 fPosition;
+smooth in vec3 fNormal;
+
+flat in vec4 fAmbient;
+flat in vec3 fDiffuse;
+flat in vec3 fSpecular;
+flat in float fReflectance;
 
 struct Attenuation {
 	float constant;
@@ -260,6 +176,5 @@ void main() {
 
 	// Gamma correction
 	outColor = vec4(pow(outColor.rgb, vec3(1.0 / gamma)), outColor.a);
-
 }
 

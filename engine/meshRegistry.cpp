@@ -5,6 +5,8 @@
 #include "../physics/geometry/basicShapes.h"
 
 #include "../graphics/visualShape.h"
+#include "../graphics/buffers/bufferLayout.h"
+#include "../graphics/buffers/vertexBuffer.h"
 #include "../engine/visualData.h"
 #include "../graphics/mesh/indexedMesh.h"
 #include "../physics/geometry/shapeClass.h"
@@ -108,10 +110,26 @@ void init() {
 
 
 VisualData addMeshShape(const Graphics::VisualShape& shape) {
+	using namespace Graphics;
+
 	int size = (int) meshes.size();
 	
-	meshes.push_back(new Graphics::IndexedMesh(shape));
-	return VisualData{size, shape.uvs != nullptr, shape.normals != nullptr};
+	IndexedMesh* mesh = new IndexedMesh(shape);
+	VertexBuffer* uniformBuffer = new VertexBuffer(nullptr, 0, Graphics::Renderer::STREAM_DRAW);
+	BufferLayout uniformLayout = BufferLayout(
+		{
+			BufferElement("vModelMatrix", BufferDataType::MAT4, true),
+			BufferElement("vAmbient", BufferDataType::FLOAT4, true),
+			BufferElement("vDiffuse", BufferDataType::FLOAT3, true),
+			BufferElement("vSpecular", BufferDataType::FLOAT3, true),
+			BufferElement("vReflectance", BufferDataType::FLOAT, true),
+		}
+	);
+	mesh->addUniformBuffer(uniformBuffer, uniformLayout);
+
+	meshes.push_back(mesh);
+
+	return VisualData { size, shape.uvs != nullptr, shape.normals != nullptr };
 }
 
 VisualData registerMeshFor(const ShapeClass* shapeClass, const Graphics::VisualShape& mesh) {

@@ -276,7 +276,7 @@ void Screen::onRender() {
 	graphicsMeasure.mark(GraphicsProcess::FINALIZE);
 
 	// Finalize
-	swapGLFWInterval(1);
+	swapGLFWInterval(0);
 	swapGLFWBuffers();
 	pollGLFWEvents();
 

@@ -80,6 +80,7 @@ void LayerStack::onRender() {
 }
 
 void LayerStack::onClose() {
+
 	for (auto i = rbegin(); i != rend(); ++i) {
 		(*i)->onClose();
 	}

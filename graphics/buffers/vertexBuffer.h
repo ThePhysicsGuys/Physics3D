@@ -6,6 +6,10 @@
 namespace Graphics {
 
 class VertexBuffer : public Bindable {
+private:
+	size_t _capacity;
+	size_t _size;
+
 public:
 	VertexBuffer();
 	VertexBuffer(const void* data, size_t sizeInBytes, GLFLAG mode);
@@ -19,6 +23,8 @@ public:
 
 	void fill(const void* data, size_t sizeInBytes, GLFLAG mode);
 	void update(const void* data, size_t sizeInBytes, int offset);
+	size_t size() const;
+	size_t capacity() const;
 
 	void bind() override;
 	void unbind() override;

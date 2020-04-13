@@ -7,6 +7,17 @@ namespace Application {
 class Screen;
 
 class ModelLayer : public Layer {
+private:
+	struct Uniform {
+		Mat4f modelMatrix;
+		Vec4f ambient;
+		Vec3f diffuse;
+		Vec3f specular;
+		float reflectance;
+	};
+
+	std::vector<Uniform> uniforms;
+
 public:
 	inline ModelLayer() : Layer() {};
 	inline ModelLayer(Screen* screen, char flags = None) : Layer("Model", screen, flags) {};
