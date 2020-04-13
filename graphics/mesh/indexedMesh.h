@@ -43,6 +43,7 @@ public:
 
 	void addUniformBuffer(VertexBuffer* uniformBuffer, const BufferLayout& uniformBufferLayout);
 	void updateUniformBuffer(const void* data, size_t sizeInBytes, int offset);
+	void fillUniformBuffer(const void* data, size_t sizeInBytes, GLFLAG mode);
 
 	void render() override;
 	void render(GLFLAG mode);

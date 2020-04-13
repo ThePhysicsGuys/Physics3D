@@ -218,8 +218,7 @@ void BasicShader::updateModel(const Mat4f& modelMatrix) {
 }
 
 static Mat4f GlobalCFrameToMat4f(const GlobalCFrame& modelCFrame, DiagonalMat3f scale) {
-	Mat3f rotationScale = Mat3f(modelCFrame.getRotation().asRotationMatrix()) * scale;
-	return Mat4f(rotationScale, Vec3f(modelCFrame.getPosition() - Position(0, 0, 0)), Vec3f(0.0f, 0.0f, 0.0f), 1.0f);
+	return Mat4f(Mat3f(modelCFrame.getRotation().asRotationMatrix()) * scale, Vec3f(modelCFrame.getPosition() - Position(0, 0, 0)), Vec3f(0.0f, 0.0f, 0.0f), 1.0f);
 }
 
 void BasicShader::updateModel(const GlobalCFrame& modelCFrame, DiagonalMat3f scale) {
@@ -529,8 +528,11 @@ void LightingShader::updateLight(const std::vector<Light*> lights) {
 
 void LightingShader::updateTexture(bool textured) {
 	bind();
-	setUniform("textureMap", 0);
+	setUniform("albedoMap", 0);
 	setUniform("normalMap", 1);
+	setUniform("metallicMap", 2);
+	setUniform("roughnessMap", 3);
+	setUniform("ambientOcclusionMap", 4);
 	setUniform("textured", textured);
 }
 

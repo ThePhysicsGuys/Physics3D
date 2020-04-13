@@ -21,7 +21,7 @@
 #include "input/standardInputHandler.h"
 #include "worlds.h"
 #include "../physics/math/mathUtil.h"
-
+#include "../engine/io/export.h"
 namespace Application {
 
 struct Uniform {
@@ -31,16 +31,16 @@ struct Uniform {
 };
 
 std::vector<Light*> llights;
-std::vector<Uniform> uniforms;
+std::vector<Uniform> testUniforms;
 MeshResource* mesh;
 
 void TestLayer::onInit() {
-	float size = 7.0f;
+	float size = 1.0f;
 	float space = 2.5f;
 	frepeat(row, size) {
 		frepeat(col, size) {
 			frepeat(z, 1) {
-				uniforms.push_back(
+				testUniforms.push_back(
 					{
 						Mat4f {
 							1, 0, 0, (col - size / 2.0f) * space,
@@ -63,19 +63,21 @@ void TestLayer::onInit() {
 			BufferElement("vMRAo", BufferDataType::FLOAT3, true),
 		}
 	);
-	VertexBuffer* vbo = new VertexBuffer(uniforms.data(), uniforms.size() * sizeof(Uniform));
+	VertexBuffer* vbo = new VertexBuffer(testUniforms.data(), testUniforms.size() * sizeof(Uniform));
+
+	mesh = ResourceManager::add<MeshResource>("ball", "../res/models/ball.bobj");
 
 	//mesh = ResourceManager::add<MeshResource>("plane", "../res/models/plane.obj");
-	mesh = ResourceManager::add<MeshResource>("sphere", "../res/models/sphere.obj");
+	//mesh = ResourceManager::add<MeshResource>("sphere", "../res/models/sphere.obj");
 	
-	//mesh = ResourceManager::add<MeshResource>("sphere", "../res/models/sphere bot/sphere.obj");
-
 	mesh->getMesh()->addUniformBuffer(vbo, layout);
 
-	ResourceManager::add<TextureResource>("wall_color", "../res/textures/wall/wall_color.jpg");
-	ResourceManager::add<TextureResource>("wall_normal", "../res/textures/wall/wall_normal.jpg");
-	ResourceManager::add<TextureResource>("canvas_color", "../res/textures/canvas/canvas_color.png");
-	ResourceManager::add<TextureResource>("canvas_normal", "../res/textures/canvas/canvas_normal.png");
+	ResourceManager::add<TextureResource>("ball_color", "../res/textures/ball/ball_color.png");
+	ResourceManager::add<TextureResource>("ball_normal", "../res/textures/ball/ball_normal.png");
+	ResourceManager::add<TextureResource>("ball_metallic", "../res/textures/ball/ball_metal.png");
+	ResourceManager::add<TextureResource>("ball_roughness", "../res/textures/ball/ball_gloss.png");
+	ResourceManager::add<TextureResource>("ball_ao", "../res/textures/ball/ball_ao.jpg");
+
 
 	llights.push_back(new Light(Vec3f(-10,10,10), Color3(300), 1, { 1, 1, 1 }));
 	llights.push_back(new Light(Vec3f(10,10,10), Color3(300), 1, { 1, 1, 1 }));
@@ -111,13 +113,16 @@ void TestLayer::onRender() {
 	glEnable(GL_DEPTH_TEST);
 	ApplicationShaders::lightingShader.bind();
 
-	//ResourceManager::get<TextureResource>("canvas_color")->bind(0);
-	//ResourceManager::get<TextureResource>("canvas_normal")->bind(1);
+	ResourceManager::get<TextureResource>("ball_color")->bind(0);
+	ResourceManager::get<TextureResource>("ball_normal")->bind(1);
+	ResourceManager::get<TextureResource>("ball_metallic")->bind(2);
+	ResourceManager::get<TextureResource>("ball_roughness")->bind(3);
+	ResourceManager::get<TextureResource>("ball_ao")->bind(4);
+	ApplicationShaders::lightingShader.updateTexture(true);
 
-	//ApplicationShaders::lightingShader.updateTexture(false);
 	ApplicationShaders::lightingShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
 
-	mesh->getMesh()->renderInstanced(uniforms.size(), FILL);
+	mesh->getMesh()->renderInstanced(testUniforms.size(), FILL);
 
 	endScene();
 }

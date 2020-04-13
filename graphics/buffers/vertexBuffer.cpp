@@ -12,7 +12,7 @@ VertexBuffer::VertexBuffer() {
 	Log::debug("Created empty vertex buffer");
 };
 
-VertexBuffer::VertexBuffer(const void* data, size_t sizeInBytes, GLFLAG mode) : Bindable() {
+VertexBuffer::VertexBuffer(const void* data, size_t sizeInBytes, GLFLAG mode) : Bindable(), _size(sizeInBytes), _capacity(sizeInBytes) {
 	glGenBuffers(1, &id);
 	bind();
 	if (sizeInBytes != 0)
@@ -36,19 +36,39 @@ VertexBuffer& VertexBuffer::operator=(VertexBuffer&& other) {
 	if (this != &other) {
 		close();
 		std::swap(id, other.id);
+		std::swap(_size, other._size);
+		std::swap(_capacity, other._capacity);
 	}
 
 	return *this;
 }
 
 void VertexBuffer::fill(const void* data, size_t sizeInBytes, GLFLAG mode) {
+	_size = sizeInBytes;
+	_capacity = sizeInBytes;
+
 	bind();
 	glBufferData(GL_ARRAY_BUFFER, sizeInBytes, data, mode);
 }
 
 void VertexBuffer::update(const void* data, size_t sizeInBytes, int offset) {
+	size_t newCapacity = offset + sizeInBytes;
+	
 	bind();
+	if (newCapacity > _capacity) {
+		Log::error("Buffer update exceeds buffer capacity: buffer=%d, size=%d, capacity=%d", id, sizeInBytes + offset, _capacity);
+		return;
+	}
+
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeInBytes, (const void*) (intptr_t) data);
+}
+
+size_t VertexBuffer::size() const {
+	return _size;
+}
+
+size_t VertexBuffer::capacity() const {
+	return _capacity;
 }
 
 void VertexBuffer::bind() {

@@ -69,21 +69,23 @@ void main() {
 	fRoughness = vMRAo.y;
 	fAmbientOcclusion = vMRAo.z;
 
-	fUV = vUV;
+	fUV = vec2(vUV.x, 1-vUV.y);
 	fPosition = applyT3(vModelMatrix, vPosition);
-	fNormal = apply3(vModelMatrix, vPosition);
+	fNormal = apply3(vModelMatrix, vNormal);
 
 	gl_Position = applyT(projectionMatrix * viewMatrix, fPosition);
 }
 
 [fragment]
 
+// Out
 out vec4 outColor;
 
 // In
 smooth in vec2 fUV;
 smooth in vec3 fPosition;
 smooth in vec3 fNormal; 
+
 flat in vec3 fAlbedo;
 flat in float fRoughness;
 flat in float fMetallic;
@@ -92,6 +94,10 @@ flat in float fAmbientOcclusion;
 // General
 vec3 N;
 vec3 V;
+vec3 albedo;
+float roughness;
+float metallic;
+float ambientOcclusion;
 
 // Structs
 struct Attenuation {
@@ -116,8 +122,11 @@ uniform int lightCount;
 uniform Light lights[maxLights];
 
 // Textures
-uniform sampler2D textureMap;
+uniform sampler2D albedoMap;
 uniform sampler2D normalMap;
+uniform sampler2D metallicMap;
+uniform sampler2D roughnessMap;
+uniform sampler2D ambientOcclusionMap;
 uniform int textured;
 
 // Environment
@@ -186,13 +195,13 @@ vec3 calcLightColor(Light light) {
 
 	// Fresnel
 	vec3 F0_NM = vec3(0.04); // Non metallic F0
-	vec3 F0 = mix(F0_NM, fAlbedo, fMetallic);
+	vec3 F0 = mix(F0_NM, albedo, metallic);
 	float cosTheta = max(dot(H, V), 0.0);
 	vec3 F = fresnelSchlick(cosTheta, F0);
 
 	// DFG
-	float D = ggxTrowbridgeReitz(N, H, fRoughness);
-	float G = smith(N, V, L, fRoughness);
+	float D = ggxTrowbridgeReitz(N, H, roughness);
+	float G = smith(N, V, L, roughness);
 	vec3 DFG = D * F * G;
 
 	// Cook Torrance
@@ -203,16 +212,44 @@ vec3 calcLightColor(Light light) {
 	// Light contribution constants
 	vec3 kS = F;
 	vec3 kD = vec3(1.0) - kS;
-	kD *= 1.0 - fMetallic;
+	kD *= 1.0 - metallic;
 
 	float NdotL = max(dot(N, L), 0.0);
-	vec3 Lo = (kD * fAlbedo / PI + specular) * radiance * NdotL;
+	vec3 Lo = (kD * albedo / PI + specular) * radiance * NdotL;
 	
 	return Lo;
 }
 
+vec3 getNormalFromMap() {
+	vec3 tangentNormal = texture(normalMap, fUV).xyz * 2.0 - 1.0;
+
+	vec3 Q1 = dFdx(fPosition);
+	vec3 Q2 = dFdy(fPosition);
+	vec2 st1 = dFdx(fUV);
+	vec2 st2 = dFdy(fUV);
+
+	vec3 N = normalize(fNormal);
+	vec3 T = normalize(Q1 * st2.t - Q2 * st1.t);
+	vec3 B = -normalize(cross(N, T));
+	mat3 TBN = mat3(T, B, N);
+
+	return normalize(TBN * tangentNormal);
+}
+
 void main() {
-	N = normalize(fNormal);
+	if (textured == 1) {
+		albedo = texture(albedoMap, fUV).rgb * texture(albedoMap, fUV).rgb;
+		N = getNormalFromMap();
+		roughness = 1-texture(roughnessMap, fUV).r;
+		metallic = texture(metallicMap, fUV).r;
+		ambientOcclusion = texture(ambientOcclusionMap, fUV).r;
+	} else {
+		albedo = fAlbedo;
+		roughness = fRoughness;
+		metallic = fMetallic;
+		ambientOcclusion = fAmbientOcclusion;
+	}
+
 	V = normalize(viewPosition - fPosition);
 
 	// Light calculations
@@ -223,7 +260,7 @@ void main() {
 		}
 	}
 
-	vec3 ambient = vec3(0.03) * fAlbedo * fAmbientOcclusion;
+	vec3 ambient = vec3(0.03) * albedo * ambientOcclusion;
 	vec3 color = ambient + Lo;
 	color = color / (color + vec3(1.0));
 	color = pow(color, vec3(1.0 / 2.2));

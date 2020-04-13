@@ -41,7 +41,7 @@ Physical::Physical(Physical&& other) noexcept :
 	rigidBody(std::move(other.rigidBody)), 
 	mainPhysical(other.mainPhysical),
 	childPhysicals(std::move(other.childPhysicals)) {
-	for(Part& p : this->rigidBody) {
+	for (Part& p : this->rigidBody) {
 		p.parent = this;
 	}
 	for(ConnectedPhysical& p : this->childPhysicals) {
@@ -53,7 +53,7 @@ Physical& Physical::operator=(Physical&& other) noexcept {
 	this->rigidBody = std::move(other.rigidBody);
 	this->mainPhysical = other.mainPhysical;
 	this->childPhysicals = std::move(other.childPhysicals);
-	for(Part& p : this->rigidBody) {
+	for (Part& p : this->rigidBody) {
 		p.parent = this;
 	}
 	for(ConnectedPhysical& p : this->childPhysicals) {

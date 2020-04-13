@@ -174,9 +174,17 @@ void IndexedMesh::addUniformBuffer(VertexBuffer* uniformBuffer, const BufferLayo
 }
 
 void IndexedMesh::updateUniformBuffer(const void* data, size_t sizeInBytes, int offset) {
-	if (uniformBuffer) {
+	if (uniformBuffer)
 		uniformBuffer->update(data, sizeInBytes, offset);
-	}
+	else
+		Log::error("Updating non existing uniform buffer");
+}
+
+void IndexedMesh::fillUniformBuffer(const void* data, size_t sizeInBytes, GLFLAG mode) {
+	if (uniformBuffer) 
+		uniformBuffer->fill(data, sizeInBytes, mode);
+	else
+		Log::error("Filling non existing uniform buffer");
 }
 
 void IndexedMesh::render(GLFLAG mode) {

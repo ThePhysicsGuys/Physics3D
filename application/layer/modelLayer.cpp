@@ -44,7 +44,7 @@ enum class RelationToSelectedPart {
 };
 
 static RelationToSelectedPart getRelationToSelectedPart(const Part* selectedPart, const Part* testPart) {
-	if (selectedPart == nullptr) 
+	if (selectedPart == nullptr)
 		return RelationToSelectedPart::NONE;
 
 	if (testPart == selectedPart)
@@ -52,14 +52,14 @@ static RelationToSelectedPart getRelationToSelectedPart(const Part* selectedPart
 
 	if (selectedPart->parent != nullptr && testPart->parent != nullptr) {
 		if (testPart->parent == selectedPart->parent) {
-			if (testPart->isMainPart()) 
+			if (testPart->isMainPart())
 				return RelationToSelectedPart::MAINPART;
-			else 
+			else
 				return RelationToSelectedPart::DIRECT_ATTACH;
 		} else if (testPart->parent->mainPhysical == selectedPart->parent->mainPhysical) {
-			if (testPart->parent->isMainPhysical()) 
+			if (testPart->parent->isMainPhysical())
 				return RelationToSelectedPart::MAINPHYSICAL_ATTACH;
-			else 
+			else
 				return RelationToSelectedPart::PHYSICAL_ATTACH;
 		}
 	}
@@ -69,17 +69,17 @@ static RelationToSelectedPart getRelationToSelectedPart(const Part* selectedPart
 
 static Color getAmbientForPartForSelected(Screen* screen, Part* part) {
 	switch (getRelationToSelectedPart(screen->selectedPart, part)) {
-		case RelationToSelectedPart::NONE: 
+		case RelationToSelectedPart::NONE:
 			return Color(0.0f, 0, 0, 0);
 		case RelationToSelectedPart::SELF:
 			return Color(0.5f, 0, 0, 0);
-		case RelationToSelectedPart::DIRECT_ATTACH: 
+		case RelationToSelectedPart::DIRECT_ATTACH:
 			return Color(0, 0.25f, 0, 0);
-		case RelationToSelectedPart::MAINPART: 
+		case RelationToSelectedPart::MAINPART:
 			return Color(0, 1.0f, 0, 0);
-		case RelationToSelectedPart::PHYSICAL_ATTACH: 
+		case RelationToSelectedPart::PHYSICAL_ATTACH:
 			return Color(0, 0, 0.25f, 0);
-		case RelationToSelectedPart::MAINPHYSICAL_ATTACH: 
+		case RelationToSelectedPart::MAINPHYSICAL_ATTACH:
 			return Color(0, 0, 1.0f, 0);
 	}
 
@@ -88,9 +88,9 @@ static Color getAmbientForPartForSelected(Screen* screen, Part* part) {
 
 static Color getAmbientForPart(Screen* screen, Part* part) {
 	Color computedAmbient = getAmbientForPartForSelected(screen, part);
-	if (part == screen->intersectedPart) 
+	if (part == screen->intersectedPart)
 		computedAmbient += Vec4f(-0.1f, -0.1f, -0.1f, 0);
-	
+
 	return computedAmbient;
 }
 
@@ -101,7 +101,7 @@ void ModelLayer::onInit() {
 	BufferLayout layout = BufferLayout({
 		BufferElement("pos", BufferDataType::FLOAT3),
 		BufferElement("col", BufferDataType::FLOAT4)
-	});
+		});
 	BatchConfig config = BatchConfig(layout, Renderer::LINES);
 	Path3D::batch = new Batch<Path3D::Vertex>(config);
 
@@ -113,6 +113,7 @@ void ModelLayer::onInit() {
 	lights.push_back(new Light(Vec3f(0, 5, 0), Color3(1, 0.90f, 0.75f), 10, attenuation));
 
 	ApplicationShaders::basicShader.updateLight(lights);
+	ApplicationShaders::instanceShader.updateLight(lights);
 }
 
 void ModelLayer::onUpdate() {
@@ -133,13 +134,13 @@ void ModelLayer::onRender2() {
 	ApplicationShaders::maskShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix);
 
 	// TODO move to update?
-	
+
 	screen->world->syncReadOnlyOperation([this, &visibleParts, screen] () {
 		VisibilityFilter filter = VisibilityFilter::forWindow(screen->camera.cframe.position, screen->camera.getForwardDirection(), screen->camera.getUpDirection(), screen->camera.fov, screen->camera.aspect, screen->camera.zfar);
 		for (ExtendedPart& part : screen->world->iterPartsFiltered(filter, ALL_PARTS))
 			visibleParts.push_back(&part);
 		});
-	
+
 
 	graphicsMeasure.mark(GraphicsProcess::PHYSICALS);
 	std::vector<Engine::Entity*> visibleEntities;
@@ -197,35 +198,71 @@ void ModelLayer::onRender() {
 
 	graphicsMeasure.mark(GraphicsProcess::UPDATE);
 	ApplicationShaders::basicShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
+	ApplicationShaders::instanceShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix);
 
-	std::vector<ExtendedPart*> visibleParts;
+	// Filter on mesh ID and transparency
+	size_t maxMeshCount = 0;
+	std::map<int, size_t> meshCounter;
+	std::multimap<int, ExtendedPart*> visibleParts;
+	std::map<double, ExtendedPart*> transparentParts;
 	graphicsMeasure.mark(GraphicsProcess::PHYSICALS);
-	screen->world->syncReadOnlyOperation([this, &visibleParts, screen] () {
+	screen->world->syncReadOnlyOperation([this, &visibleParts, &transparentParts, &meshCounter, &maxMeshCount, screen] () {
 		VisibilityFilter filter = VisibilityFilter::forWindow(screen->camera.cframe.position, screen->camera.getForwardDirection(), screen->camera.getUpDirection(), screen->camera.fov, screen->camera.aspect, screen->camera.zfar);
-		for (ExtendedPart& part : screen->world->iterPartsFiltered(filter, ALL_PARTS))
-			visibleParts.push_back(&part);
-	});
+		for (ExtendedPart& part : screen->world->iterPartsFiltered(filter, ALL_PARTS)) {
+			if (part.material.ambient.w < 1) {
+				transparentParts.insert({ lengthSquared(Vec3(screen->camera.cframe.position - part.getPosition())), &part });
+			} else {
+				visibleParts.insert({ part.visualData.drawMeshId, &part });
+				maxMeshCount = fmax(maxMeshCount, meshCounter[part.visualData.drawMeshId]++);
+				;
+				if (meshCounter[part.visualData.drawMeshId] > maxMeshCount)
+					maxMeshCount = meshCounter[part.visualData.drawMeshId];
+			}
+		}
+		});
 
-	std::map<double, ExtendedPart*> transparentMeshes;
-	for (ExtendedPart* part : visibleParts) {
-		Material material = part->material;
-		material.ambient += getAmbientForPart(screen, part);
+	// Ensure correct size
+	uniforms.reserve(maxMeshCount);
+	while (uniforms.size() < maxMeshCount)
+		uniforms.push_back(Uniform());
 
-		if (material.ambient.w < 1) {
-			transparentMeshes[lengthSquared(Vec3(screen->camera.cframe.position - part->getPosition()))] = part;
-			continue;
+	// Render normal meshes
+	ApplicationShaders::instanceShader.bind();
+	for (auto iterator : meshCounter) {
+		int meshID = iterator.first;
+		int meshCount = iterator.second;
+
+		if (meshID == -1) continue;
+
+		// Collect uniforms
+		int offset = 0;
+		auto meshes = visibleParts.equal_range(meshID);
+		for (auto mesh = meshes.first; mesh != meshes.second; ++mesh) {
+			ExtendedPart* part = mesh->second;
+			Material material = part->material;
+			material.ambient += getAmbientForPart(screen, part);
+
+			Mat4f modelMatrix = Mat4f(Mat3f(part->getCFrame().getRotation().asRotationMatrix()) * DiagonalMat3f(part->hitbox.scale), Vec3f(part->getCFrame().getPosition() - Position(0, 0, 0)), Vec3f(0.0f, 0.0f, 0.0f), 1.0f);
+
+			uniforms[offset] = Uniform {
+				modelMatrix,
+				part->material.ambient,
+				part->material.diffuse,
+				part->material.specular,
+				part->material.reflectance
+			};
+
+			offset++;
 		}
 
-		if (part->visualData.drawMeshId == -1)
-			continue;
-
-		ApplicationShaders::basicShader.updateMaterial(material);
-		ApplicationShaders::basicShader.updatePart(*part);
-		Engine::MeshRegistry::meshes[part->visualData.drawMeshId]->render(part->renderMode);
+		Engine::MeshRegistry::meshes[meshID]->fillUniformBuffer(uniforms.data(), meshCount * sizeof(Uniform), Renderer::STREAM_DRAW);
+		Engine::MeshRegistry::meshes[meshID]->renderInstanced(meshCount);
 	}
 
+	// Render transparent meshes
+	ApplicationShaders::basicShader.bind();
 	Renderer::enableBlending();
-	for (auto iterator = transparentMeshes.rbegin(); iterator != transparentMeshes.rend(); ++iterator) {
+	for (auto iterator = transparentParts.rbegin(); iterator != transparentParts.rend(); ++iterator) {
 		ExtendedPart* part = (*iterator).second;
 
 		Material material = part->material;
