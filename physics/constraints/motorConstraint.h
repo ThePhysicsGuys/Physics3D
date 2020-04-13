@@ -1,25 +1,22 @@
 #pragma once
 
 #include "hardConstraint.h"
+#include "motorConstraintTemplate.h"
 
-class MotorConstraint : public HardConstraint {
-	NormalizedVec3 direction;
+class ConstantMotorTurner {
+public:
 	double speed;
 	double currentAngle;
 
-	MotorConstraint(NormalizedVec3 motorDirection, double motorSpeed, double currentAngle);
-public:
-	MotorConstraint(Vec3 angularVelocity, double currentAngle);
-	MotorConstraint(Vec3 angularVelocity);
+	inline ConstantMotorTurner(double motorSpeed, double currentAngle) :
+		speed(motorSpeed), currentAngle(currentAngle) {}
+	inline ConstantMotorTurner(double motorSpeed) :
+		speed(motorSpeed), currentAngle(0.0) {}
 
-	inline const NormalizedVec3& getDirection() const { return direction; }
-	inline double getSpeed() const { return speed; }
-	inline Vec3 getAngularVelocity() const { return direction * speed; }
-	inline double getCurrentAngle() const { return currentAngle; }
-
-	virtual void update(double deltaT) override;
-	virtual void invert() override;
-
-	virtual CFrame getRelativeCFrame() const override;
-	virtual RelativeMotion getRelativeMotion() const override;
+	void update(double deltaT);
+	void invert();
+	double getValue() const;
+	FullTaylorExpansion<double, double, NUMBER_OF_DERIVATIVES_IN_MOTION> getFullTaylorExpansion() const;
 };
+
+typedef MotorConstraintTemplate<ConstantMotorTurner> ConstantSpeedMotorConstraint;

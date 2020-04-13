@@ -5,13 +5,15 @@
 
 #include "math/taylorExpansion.h"
 
+#define NUMBER_OF_DERIVATIVES_IN_MOTION 2
+
 struct TranslationalMotion {
-	TaylorExpansion<Vec3, 2> translation;
+	TaylorExpansion<Vec3, NUMBER_OF_DERIVATIVES_IN_MOTION> translation;
 
 	inline TranslationalMotion() : translation{Vec3(0.0, 0.0, 0.0), Vec3(0.0, 0.0, 0.0)} {}
 	inline TranslationalMotion(Vec3 velocity) : translation{velocity, Vec3(0.0, 0.0, 0.0)} {}
 	inline TranslationalMotion(Vec3 velocity, Vec3 acceleration) : translation{velocity, acceleration} {}
-	inline TranslationalMotion(const TaylorExpansion<Vec3, 2> & translation) : translation(translation) {}
+	inline TranslationalMotion(const TaylorExpansion<Vec3, NUMBER_OF_DERIVATIVES_IN_MOTION>& translation) : translation(translation) {}
 
 	inline Vec3 getVelocity() const { return translation[0]; }
 	inline Vec3 getAcceleration() const { return translation[1]; }
@@ -43,12 +45,12 @@ inline TranslationalMotion operator*(double factor, const TranslationalMotion& m
 
 
 struct RotationalMotion {
-	TaylorExpansion<Vec3, 2> rotation;
+	TaylorExpansion<Vec3, NUMBER_OF_DERIVATIVES_IN_MOTION> rotation;
 
 	inline RotationalMotion() : rotation{Vec3(0.0, 0.0, 0.0), Vec3(0.0, 0.0, 0.0)} {}
 	inline RotationalMotion(Vec3 angularVelocity) : rotation{angularVelocity, Vec3(0.0, 0.0, 0.0)} {}
 	inline RotationalMotion(Vec3 angularVelocity, Vec3 angularAcceleration) : rotation{angularVelocity, angularAcceleration} {}
-	inline RotationalMotion(const TaylorExpansion<Vec3, 2> & rotation) : rotation(rotation) {}
+	inline RotationalMotion(const TaylorExpansion<Vec3, NUMBER_OF_DERIVATIVES_IN_MOTION>& rotation) : rotation(rotation) {}
 
 	inline Vec3 getAngularVelocity() const { return rotation[0]; }
 	inline Vec3 getAngularAcceleration() const { return rotation[1]; }

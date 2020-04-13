@@ -20,7 +20,7 @@
 #include "../misc/gravityForce.h"
 
 
-#define CURRENT_VERSION_ID 0
+#define CURRENT_VERSION_ID 1
 
 #pragma region serializeComponents
 
@@ -77,32 +77,30 @@ Shape ShapeDeserializer::deserializeShape(std::istream& istream) const {
 void serializeFixedConstraint(const FixedConstraint& object, std::ostream& ostream) {}
 FixedConstraint* deserializeFixedConstraint(std::istream& istream) { return new FixedConstraint(); }
 
-void serializeMotorConstraint(const MotorConstraint& constraint, std::ostream& ostream) {
-	::serialize<Vec3>(constraint.getAngularVelocity(), ostream);
-	::serialize<double>(constraint.getCurrentAngle(), ostream);
+void serializeMotorConstraint(const ConstantSpeedMotorConstraint& constraint, std::ostream& ostream) {
+	::serialize<double>(constraint.speed, ostream);
+	::serialize<double>(constraint.currentAngle, ostream);
 }
-MotorConstraint* deserializeMotorConstraint(std::istream& istream) {
-	Vec3 angularVelocity = ::deserialize<Vec3>(istream);
+ConstantSpeedMotorConstraint* deserializeMotorConstraint(std::istream& istream) {
+	double speed = ::deserialize<double>(istream);
 	double currentAngle = ::deserialize<double>(istream);
 
-	return new MotorConstraint(angularVelocity, currentAngle);
+	return new ConstantSpeedMotorConstraint(speed, currentAngle);
 }
 
 void serializePistonConstraint(const SinusoidalPistonConstraint& constraint, std::ostream& ostream) {
-	::serialize<Vec3>(constraint.pistonDirection, ostream);
 	::serialize<double>(constraint.minLength, ostream);
 	::serialize<double>(constraint.maxLength, ostream);
 	::serialize<double>(constraint.period, ostream);
 	::serialize<double>(constraint.currentStepInPeriod, ostream);
 }
 SinusoidalPistonConstraint* deserializePistonConstraint(std::istream& istream) {
-	Vec3 pistonDirection = ::deserialize<Vec3>(istream);
 	double minLength = ::deserialize<double>(istream);
 	double maxLength = ::deserialize<double>(istream);
 	double period = ::deserialize<double>(istream);
 	double currentStepInPeriod = ::deserialize<double>(istream);
 
-	SinusoidalPistonConstraint* newConstraint = new SinusoidalPistonConstraint(pistonDirection, minLength, maxLength, period);
+	SinusoidalPistonConstraint* newConstraint = new SinusoidalPistonConstraint(minLength, maxLength, period);
 	newConstraint->currentStepInPeriod = currentStepInPeriod;
 
 	return newConstraint;
@@ -269,7 +267,6 @@ void SerializationSessionPrototype::collectConnectedPhysicalInformation(const Co
 #pragma endregion
 
 void SerializationSessionPrototype::serializeWorld(const WorldPrototype& world, std::ostream& ostream) {
-	
 	::serialize<uint64_t>(world.externalForces.size(), ostream);
 	for(ExternalForce* force : world.externalForces) {
 		dynamicExternalForceSerializer.serialize(*force, ostream);
@@ -396,7 +393,7 @@ DeSerializationSessionPrototype::DeSerializationSessionPrototype(const std::vect
 
 static DynamicSerializerRegistry<HardConstraint>::ConcreteDynamicSerializer<FixedConstraint> fixedConstraintSerializer
 (serializeFixedConstraint, deserializeFixedConstraint, 0);
-static DynamicSerializerRegistry<HardConstraint>::ConcreteDynamicSerializer<MotorConstraint> motorConstraintSerializer
+static DynamicSerializerRegistry<HardConstraint>::ConcreteDynamicSerializer<ConstantSpeedMotorConstraint> motorConstraintSerializer
 (serializeMotorConstraint, deserializeMotorConstraint, 1);
 static DynamicSerializerRegistry<HardConstraint>::ConcreteDynamicSerializer<SinusoidalPistonConstraint> pistonConstraintSerializer
 (serializePistonConstraint, deserializePistonConstraint, 2);
@@ -411,7 +408,7 @@ static DynamicSerializerRegistry<ExternalForce>::ConcreteDynamicSerializer<Direc
 
 DynamicSerializerRegistry<HardConstraint> dynamicHardConstraintSerializer{
 	{typeid(FixedConstraint), &fixedConstraintSerializer},
-	{typeid(MotorConstraint), &motorConstraintSerializer},
+	{typeid(ConstantSpeedMotorConstraint), &motorConstraintSerializer},
 	{typeid(SinusoidalPistonConstraint), &pistonConstraintSerializer}
 };
 DynamicSerializerRegistry<ShapeClass> dynamicShapeClassSerializer{

@@ -16,7 +16,7 @@ namespace Library {
 	Polyhedron createZPrism(int sides, float radius, float height);
 
 	/*
-	Creates a prism with the given number of sides
+	Creates a prism oriented along the Y axis with the given number of sides
 	result.vertices will contain all the corners, grouped 2 by 2 rotating counterclockwise as seen from the top
 	result.triangles will contain all the triangles:
 	- sides*2 triangles for the sides
@@ -30,7 +30,7 @@ namespace Library {
 	}
 	
 	/*
-	Creates a pointed prism with the given number of sides
+	Creates a pointed prism oriented along the Y axis with the given number of sides
 	result.vertices will contain all the corners:
 	- vertices grouped 2 by 2 rotating counterclockwise as seen from the top
 	- top vertex

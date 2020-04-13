@@ -67,7 +67,7 @@ static TerminalColor colors[]{
 	TerminalColor::YELLOW,
 	TerminalColor::MAGENTA,
 	TerminalColor::GREEN,
-	TerminalColor::AQUA,
+	TerminalColor::CYAN,
 	TerminalColor::WHITE,
 	/*Log::RED,
 	Log::GREEN,

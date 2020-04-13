@@ -12,6 +12,7 @@ public:
 	CFrameTemplate(const Vector<T, 3>& position, const RotationTemplate<T>& rotation) : position(position), rotation(rotation) {}
 	explicit CFrameTemplate(const Vector<T, 3>& position) : position(position), rotation() {}
 	explicit CFrameTemplate(const T& x, const T& y, const T& z) : position(x, y, z), rotation() {}
+	explicit CFrameTemplate(const T& x, const T& y, const T& z, const RotationTemplate<T>& rotation) : position(x, y, z), rotation(rotation) {}
 	explicit CFrameTemplate(const RotationTemplate<T>& rotation) : position(0,0,0), rotation(rotation) {}
 	CFrameTemplate() : position(0, 0, 0), rotation() {}
 

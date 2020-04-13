@@ -1,15 +1,33 @@
 #include "hardConstraint.h"
 
-class SinusoidalPistonConstraint : public HardConstraint {
+#include "pistonConstraintTemplate.h"
+
+class PistonSineGenerator {
 public:
-	Vec3 pistonDirection;
 	double currentStepInPeriod;
 	double minLength;
 	double maxLength;
 	double period;
-	SinusoidalPistonConstraint(Vec3 pistonDirection, double minLength, double maxLength, double period);
+
+	PistonSineGenerator(double minLength, double maxLength, double period);
+
+	void update(double deltaT);
+	void invert();
+	double getValue() const;
+	FullTaylorExpansion<double, double, NUMBER_OF_DERIVATIVES_IN_MOTION> getFullTaylorExpansion() const;
+};
+
+typedef PistonConstraintTemplate<PistonSineGenerator> SinusoidalPistonConstraint;
+
+/*class SinusoidalPistonConstraint : public HardConstraint {
+public:
+	double currentStepInPeriod;
+	double minLength;
+	double maxLength;
+	double period;
+	SinusoidalPistonConstraint(double minLength, double maxLength, double period);
 	virtual void update(double deltaT) override;
 	virtual void invert() override;
 	virtual CFrame getRelativeCFrame() const override;
 	virtual RelativeMotion getRelativeMotion() const override;
-};
+};*/

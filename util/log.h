@@ -10,7 +10,7 @@ namespace Log {
 	
 	namespace Color {
 		const TerminalColorPair DEBUG{TerminalColor::GREEN, TerminalColor::BLACK};
-		const TerminalColorPair INFO{TerminalColor::AQUA, TerminalColor::BLACK};
+		const TerminalColorPair INFO{TerminalColor::CYAN, TerminalColor::BLACK};
 		const TerminalColorPair WARNING{TerminalColor::YELLOW, TerminalColor::BLACK};
 		const TerminalColorPair ERROR{TerminalColor::RED, TerminalColor::BLACK};
 		const TerminalColorPair FATAL{TerminalColor::BLACK, TerminalColor::RED};

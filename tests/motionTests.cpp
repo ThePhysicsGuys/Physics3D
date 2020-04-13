@@ -44,7 +44,7 @@ TEST_CASE(testAdvancedMotion) {
 }
 
 TEST_CASE(testMotionOfMotorConstraintCorrect) {
-	HardPhysicalConnection connection(std::unique_ptr<HardConstraint>(new MotorConstraint(createRandomNonzeroVec3())), createRandomCFrame(), createRandomCFrame());
+	HardPhysicalConnection connection(std::unique_ptr<HardConstraint>(new ConstantSpeedMotorConstraint(createRandomDouble())), createRandomCFrame(), createRandomCFrame());
 
 	connection.update(1.23456789);
 
@@ -60,7 +60,7 @@ TEST_CASE(testMotionOfMotorConstraintCorrect) {
 }
 
 TEST_CASE(testMotionOfPistonConstraintCorrect){
-	HardPhysicalConnection connection(std::unique_ptr<HardConstraint>(new SinusoidalPistonConstraint(createRandomNonzeroVec3(), 1.0, 5.0, 1.0)), createRandomCFrame(), createRandomCFrame());
+	HardPhysicalConnection connection(std::unique_ptr<HardConstraint>(new SinusoidalPistonConstraint(1.0, 5.0, 1.0)), createRandomCFrame(), createRandomCFrame());
 
 	connection.update(1.23456789);
 
@@ -76,7 +76,7 @@ TEST_CASE(testMotionOfPistonConstraintCorrect){
 }
 
 TEST_CASE(testPistonConstraint) {
-	SinusoidalPistonConstraint constraint(Vec3(2.0, 1.0, 3.0), 1.0, 2.5, 0.7);
+	SinusoidalPistonConstraint constraint(1.0, 2.5, 0.7);
 
 	constraint.update(1.23456789);
 

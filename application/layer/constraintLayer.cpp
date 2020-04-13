@@ -30,7 +30,7 @@ void ConstraintLayer::onDetach() {
 }
 
 void ConstraintLayer::onInit() {
-	Graphics::VisualShape prismShape(Library::createPrism(6, 0.5, 1.0));
+	Graphics::VisualShape prismShape(Library::createPrism(6, 0.5, 1.0).rotated(Rotationf::Predefined::X_90));
 	this->hexagon = Engine::MeshRegistry::addMeshShape(prismShape);
 
 }
@@ -92,13 +92,9 @@ static void renderPiston(const ConstraintLayer* cl, const SinusoidalPistonConstr
 	renderObject(Engine::MeshRegistry::sphere, end, DiagonalMat3f::IDENTITY() * maxThickness * 1.2f, Material(Color(0.0f, 1.0f, 0.0f, 1.0f)));
 }
 
-static void renderMotor(const ConstraintLayer* cl, const MotorConstraint* motor, const GlobalCFrame& start, const GlobalCFrame& end) {
-	NormalizedVec3 motorDir = motor->getDirection();
-	if (sumElements(motorDir) < 0) 
-		motorDir = -motorDir;
-	Rotation motorRot = Rotation::faceY(motorDir);
-	renderObject(cl->hexagon, start.localToGlobal(CFrame(motorDir * 0.05, motorRot)), DiagonalMat3f{0.2f, 0.1f, 0.2f}, Material(Color(1.0f, 1.0f, 0.0f, 1.0f)));
-	renderObject(cl->hexagon, end.localToGlobal(CFrame(-motorDir * 0.05, motorRot)), DiagonalMat3f{0.2f, 0.1f, 0.2f}, Material(Color(0.7f, 0.7f, 0.0f, 1.0f)));
+static void renderMotor(const ConstraintLayer* cl, const ConstantSpeedMotorConstraint* motor, const GlobalCFrame& start, const GlobalCFrame& end) {
+	renderObject(cl->hexagon, start.localToGlobal(CFrame(Vec3(0, 0, 0.05))), DiagonalMat3f{0.2f, 0.2f, 0.1f}, Material(Color(1.0f, 1.0f, 0.0f, 1.0f)));
+	renderObject(cl->hexagon, end.localToGlobal(CFrame(Vec3(0, 0, -0.05))), DiagonalMat3f{0.2f, 0.2f, 0.1f}, Material(Color(0.7f, 0.7f, 0.0f, 1.0f)));
 }
 
 static void renderConstraintBars(const ConstraintLayer* cl, const GlobalCFrame& cframeOfFirst, const GlobalCFrame& cframeOfSecond, const CFrame& attachOnFirst, const CFrame& attachOnSecond) {
@@ -125,8 +121,8 @@ static void renderHardConstraint(const ConstraintLayer* cl, const ConnectedPhysi
 	auto& info(typeid(*constraint));
 	if (info == typeid(SinusoidalPistonConstraint)) {
 		renderPiston(cl, static_cast<const SinusoidalPistonConstraint*>(constraint), startOfConstraint, endOfConstraint, 3, 0.1f, 0.12f);
-	} else if (info == typeid(MotorConstraint)) {
-		renderMotor(cl, static_cast<const MotorConstraint*>(constraint), startOfConstraint, endOfConstraint);
+	} else if (info == typeid(ConstantSpeedMotorConstraint)) {
+		renderMotor(cl, static_cast<const ConstantSpeedMotorConstraint*>(constraint), startOfConstraint, endOfConstraint);
 	}
 }
 

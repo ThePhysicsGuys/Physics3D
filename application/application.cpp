@@ -141,8 +141,8 @@ void setupWorld(int argc, const char** args) {
 		ExtendedPart* wing2 = new ExtendedPart(Box(1.0, 1.0, 1.0), GlobalCFrame(), basicProperties, "Wing 2");
 
 
-		sateliteBody->attach(wing1, new SinusoidalPistonConstraint(Vec3(1.0, 0.0, 0.0), 1.0, 3.0, 1.0), CFrame(0.5, 0.0, 0.0), CFrame(-0.5, 0.0, 0.0));
-		sateliteBody->attach(wing2, new SinusoidalPistonConstraint(Vec3(1.0, 0.0, 0.0), 1.0, 3.0, 1.0), CFrame(Vec3(-0.5, 0.0, 0.0), Rotation::Predefined::Y_180), CFrame(-0.5, 0.0, 0.0));
+		sateliteBody->attach(wing1, new SinusoidalPistonConstraint(1.0, 3.0, 1.0), CFrame(0.5, 0.0, 0.0, Rotation::Predefined::Y_90), CFrame(-0.5, 0.0, 0.0, Rotation::Predefined::Y_90));
+		sateliteBody->attach(wing2, new SinusoidalPistonConstraint(1.0, 3.0, 1.0), CFrame(-0.5, 0.0, 0.0, Rotation::Predefined::Y_270), CFrame(-0.5, 0.0, 0.0, Rotation::Predefined::Y_90));
 		//sateliteBody->attach(wing2, new SinusoidalPistonConstraint(Vec3(-1.0, 0.0, 0.0), 1.0, 3.0, 1.0), CFrame(-0.5, 0.0, 0.0), CFrame(0.5, 0.0, 0.0));
 
 		world.addPart(sateliteBody);
@@ -316,10 +316,10 @@ void setupWorld(int argc, const char** args) {
 		ExtendedPart* BLWheel = new ExtendedPart(Cylinder(0.5, 0.2), GlobalCFrame(), basicProperties, "Back Left Wheel");
 		ExtendedPart* BRWheel = new ExtendedPart(Cylinder(0.5, 0.2), GlobalCFrame(), basicProperties, "Back Right Wheel");
 
-		poweredCarBody->attach(FLWheel, new MotorConstraint(Vec3(turnSpeed, 0.0, 0.0), 0.0), CFrame(Vec3(0.55, 0.0, 1.0)), CFrame(Vec3(0.0, 0.0, 0.15), Rotation::Predefined::Y_90));
-		poweredCarBody->attach(BLWheel, new MotorConstraint(Vec3(turnSpeed, 0.0, 0.0), 0.0), CFrame(Vec3(0.55, 0.0, -1.0)), CFrame(Vec3(0.0, 0.0, 0.15), Rotation::Predefined::Y_90));
-		poweredCarBody->attach(FRWheel, new MotorConstraint(Vec3(-turnSpeed, 0.0, 0.0), 0.0), CFrame(Vec3(-0.55, 0.0, 1.0), Rotation::Predefined::Y_180), CFrame(Vec3(0.0, 0.0, 0.15), Rotation::Predefined::Y_90));
-		poweredCarBody->attach(BRWheel, new MotorConstraint(Vec3(-turnSpeed, 0.0, 0.0), 0.0), CFrame(Vec3(-0.55, 0.0, -1.0), Rotation::Predefined::Y_180), CFrame(Vec3(0.0, 0.0, 0.15), Rotation::Predefined::Y_90));
+		poweredCarBody->attach(FLWheel, new ConstantSpeedMotorConstraint(turnSpeed), CFrame(Vec3(0.55, 0.0, 1.0), Rotation::Predefined::Y_90), CFrame(Vec3(0.0, 0.0, 0.15), Rotation::Predefined::Y_180));
+		poweredCarBody->attach(BLWheel, new ConstantSpeedMotorConstraint(turnSpeed), CFrame(Vec3(0.55, 0.0, -1.0), Rotation::Predefined::Y_90), CFrame(Vec3(0.0, 0.0, 0.15), Rotation::Predefined::Y_180));
+		poweredCarBody->attach(FRWheel, new ConstantSpeedMotorConstraint(-turnSpeed), CFrame(Vec3(-0.55, 0.0, 1.0), Rotation::Predefined::Y_270), CFrame(Vec3(0.0, 0.0, 0.15), Rotation::Predefined::Y_180));
+		poweredCarBody->attach(BRWheel, new ConstantSpeedMotorConstraint(-turnSpeed), CFrame(Vec3(-0.55, 0.0, -1.0), Rotation::Predefined::Y_270), CFrame(Vec3(0.0, 0.0, 0.15), Rotation::Predefined::Y_180));
 
 		world.addPart(poweredCarBody);
 
@@ -330,7 +330,7 @@ void setupWorld(int argc, const char** args) {
 		ExtendedPart* mainBlock = new ExtendedPart(Box(1.0, 1.0, 1.0), GlobalCFrame(0.0, 5.0, 5.0), basicProperties, "Main Block");
 		ExtendedPart* attachedBlock = new ExtendedPart(Box(1.0, 1.0, 1.0), GlobalCFrame(), basicProperties, "Attached Block");
 
-		mainBlock->attach(attachedBlock, new MotorConstraint(Vec3(1.0, 0.0, 0.0)), CFrame(0.5, 0.0, 0.0), CFrame(-0.5, 0.0, 1.0));
+		mainBlock->attach(attachedBlock, new ConstantSpeedMotorConstraint(1.0), CFrame(Vec3(0.0, 0.0, 0.5)), CFrame(Vec3(1.0, 0.0, -0.5)));
 
 		world.addPart(mainBlock);
 	}
@@ -344,12 +344,12 @@ void setupWorld(int argc, const char** args) {
 
 		ExtendedPart* attachedBall = new ExtendedPart(Sphere(0.5), GlobalCFrame(), basicProperties, "Attached Ball");
 
-		mainBlock->attach(attachedBlock, new SinusoidalPistonConstraint(Vec3(1.0, 0.0, 0.0), 1.0, 3.0, 1.0), CFrame(0.5, 0.0, 0.0), CFrame(-0.5, 0.0, 0.0));
-		attachedBlock->attach(anotherAttachedBlock, new SinusoidalPistonConstraint(Vec3(0.0, 1.0, 0.0), 1.0, 2.0, 0.7), CFrame(0.0, 0.5, 0.0), CFrame(0.0, -0.5, 0.0));
+		mainBlock->attach(attachedBlock, new SinusoidalPistonConstraint(1.0, 3.0, 1.0), CFrame(0.5, 0.0, 0.0, Rotation::Predefined::Y_90), CFrame(-0.5, 0.0, 0.0, Rotation::Predefined::Y_90));
+		attachedBlock->attach(anotherAttachedBlock, new SinusoidalPistonConstraint(1.0, 2.0, 0.7), CFrame(0.0, 0.5, 0.0, Rotation::Predefined::X_270), CFrame(0.0, -0.5, 0.0, Rotation::Predefined::X_270));
 
-		attachedBlock->attach(attachedCylinder, new MotorConstraint(Vec3(0.0, 0.0, 3.0)), CFrame(0.0, 0.0, 0.55), CFrame(0.0, 0.0, -0.55));
+		attachedBlock->attach(attachedCylinder, new ConstantSpeedMotorConstraint(3.0), CFrame(0.0, 0.0, 0.55), CFrame(0.0, 0.0, -0.55));
 
-		attachedCylinder->attach(attachedBall, new SinusoidalPistonConstraint(Vec3(0.0, 1.0, 0.0), 0.0, 2.0, 0.7), CFrame(0.0, 0.5, 0.0), CFrame(0.0, -0.5, 0.0));
+		attachedCylinder->attach(attachedBall, new SinusoidalPistonConstraint(0.0, 2.0, 0.7), CFrame(0.0, 0.5, 0.0, Rotation::Predefined::X_270), CFrame(0.0, -0.5, 0.0, Rotation::Predefined::X_270));
 
 		world.addPart(mainBlock);
 

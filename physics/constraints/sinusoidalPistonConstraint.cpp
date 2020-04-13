@@ -5,8 +5,11 @@
 
 #include <assert.h>
 
-SinusoidalPistonConstraint::SinusoidalPistonConstraint(Vec3 pistonDirection, double minLength, double maxLength, double period) :
-	pistonDirection(pistonDirection),
+#include "pistonConstraintTemplate.h"
+
+#include "../math/predefinedTaylorExpansions.h"
+
+PistonSineGenerator::PistonSineGenerator(double minLength, double maxLength, double period) :
 	minLength(minLength),
 	maxLength(maxLength),
 	period(period),
@@ -15,16 +18,36 @@ SinusoidalPistonConstraint::SinusoidalPistonConstraint(Vec3 pistonDirection, dou
 	assert(maxLength >= minLength);
 }
 
-void SinusoidalPistonConstraint::update(double deltaT) {
+void PistonSineGenerator::update(double deltaT) {
 	currentStepInPeriod += deltaT;
 	if(currentStepInPeriod >= period) currentStepInPeriod -= period;
 }
 
-void SinusoidalPistonConstraint::invert() {
+void PistonSineGenerator::invert() {
 	throw "Not implemented!";
 }
 
-CFrame SinusoidalPistonConstraint::getRelativeCFrame() const {
+double PistonSineGenerator::getValue() const {
+	double multiplier = (maxLength - minLength) / 2;
+	double offset = minLength + multiplier;
+
+	double currentAngle = currentStepInPeriod * (2 * M_PI / period);
+
+	double length = sin(currentAngle) * multiplier + offset;
+
+	return length;
+}
+
+FullTaylorExpansion<double, double, NUMBER_OF_DERIVATIVES_IN_MOTION> PistonSineGenerator::getFullTaylorExpansion() const {
+	double multiplier = (maxLength - minLength) / 2;
+	double offset = minLength + multiplier;
+
+	double currentAngle = currentStepInPeriod * (2 * M_PI / period);
+
+	return generateFullTaylorForSinWave<double, NUMBER_OF_DERIVATIVES_IN_MOTION>(currentAngle, multiplier);
+}
+
+/*CFrame SinusoidalPistonConstraint::getRelativeCFrame() const {
 	double multiplier = (maxLength - minLength) / 2;
 	double offset = minLength + multiplier;
 
@@ -34,7 +57,7 @@ CFrame SinusoidalPistonConstraint::getRelativeCFrame() const {
 
 	double length = sin(currentAngle) * multiplier + offset;
 
-	return CFrame(pistonDirection * length);
+	return CFrame(0.0, 0.0, length);
 }
 
 RelativeMotion SinusoidalPistonConstraint::getRelativeMotion() const {
@@ -51,5 +74,7 @@ RelativeMotion SinusoidalPistonConstraint::getRelativeMotion() const {
 
 	double accel = -sin(currentAngle) * multiplier * divPeriodToRadians * divPeriodToRadians;
 
-	return RelativeMotion(Motion(pistonDirection * speed, Vec3(), pistonDirection * accel, Vec3()), CFrame(pistonDirection * length));
-}
+	
+
+	return RelativeMotion(Motion(Vec3(0.0, 0.0, speed), Vec3(), Vec3(0.0, 0.0, accel), Vec3()), CFrame(0.0, 0.0, length));
+}*/

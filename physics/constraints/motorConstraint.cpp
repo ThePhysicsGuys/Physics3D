@@ -7,26 +7,16 @@
 
 #include "../../util/log.h"
 
-
-MotorConstraint::MotorConstraint(NormalizedVec3 direction, double speed, double currentAngle) :
-	speed(speed), 
-	direction(direction), 
-	currentAngle(currentAngle) {}
-
-MotorConstraint::MotorConstraint(Vec3 angularVelocity, double currentAngle) : MotorConstraint(normalize(angularVelocity), length(angularVelocity), currentAngle) {}
-MotorConstraint::MotorConstraint(Vec3 angularVelocity) : MotorConstraint(angularVelocity, 0.0) {}
-
-void MotorConstraint::update(double deltaT) {
-	this->currentAngle = this->currentAngle + deltaT * speed;
-	this->currentAngle = fmod(fmod(this->currentAngle, 2 * M_PI) + 2*M_PI, 2*M_PI);
+void ConstantMotorTurner::update(double deltaT) {
+	this->currentAngle = fmod(fmod(this->currentAngle + deltaT * speed, 2 * M_PI) + 2*M_PI, 2*M_PI);
 }
 
-void MotorConstraint::invert() { Log::error("MotorConstraint::invert is not implemented!"); }
+void ConstantMotorTurner::invert() { Log::error("ConstantSpeedMotorConstraint::invert is not implemented!"); }
 
-CFrame MotorConstraint::getRelativeCFrame() const {
-	return CFrame(Rotation::fromRotationVec(direction * currentAngle));
+
+double ConstantMotorTurner::getValue() const {
+	return currentAngle;
 }
-
-RelativeMotion MotorConstraint::getRelativeMotion() const {
-	return RelativeMotion(Motion(Vec3(0, 0, 0), direction * speed), CFrame(Rotation::fromRotationVec(direction * currentAngle)));
+FullTaylorExpansion<double, double, NUMBER_OF_DERIVATIVES_IN_MOTION> ConstantMotorTurner::getFullTaylorExpansion() const {
+	return {this->currentAngle, TaylorExpansion<double, NUMBER_OF_DERIVATIVES_IN_MOTION>{speed}};
 }

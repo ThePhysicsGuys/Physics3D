@@ -36,8 +36,8 @@ Polyhedron deserializePolyhedron(std::istream& istream);
 void serializeFixedConstraint(const FixedConstraint& object, std::ostream& ostream);
 FixedConstraint* deserializeFixedConstraint(std::istream& istream);
 
-void serializeMotorConstraint(const MotorConstraint& constraint, std::ostream& ostream);
-MotorConstraint* deserializeMotorConstraint(std::istream& istream);
+void serializeMotorConstraint(const ConstantSpeedMotorConstraint& constraint, std::ostream& ostream);
+ConstantSpeedMotorConstraint* deserializeMotorConstraint(std::istream& istream);
 
 void serializeDirectionalGravity(const DirectionalGravity& gravity, std::ostream& ostream);
 DirectionalGravity* deserializeDirectionalGravity(std::istream& istream);

@@ -16,7 +16,7 @@ Benchmark::Benchmark(const char* name) : name(name) {
 
 int main() {
 	std::cout << "The following benchmarks are available:\n";
-	setColor(TerminalColor::AQUA);
+	setColor(TerminalColor::CYAN);
 	for(Benchmark* b : *knownBenchmarks) {
 		std::cout << "  " << b->name << "\n";
 	}
