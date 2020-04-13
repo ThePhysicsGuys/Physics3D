@@ -8,8 +8,8 @@ template<typename T, std::size_t DerivationCount>
 struct TaylorExpansion {
 	T derivatives[DerivationCount] = {};
 
-	constexpr const T& operator[](std::size_t index) const { return derivatives[index]; }
-	constexpr T& operator[](std::size_t index) { return derivatives[index]; }
+	constexpr const T& operator[](std::size_t index) const { return derivatives[index]; assert(index >= 0 && index < DerivationCount); }
+	constexpr T& operator[](std::size_t index) { return derivatives[index]; assert(index >= 0 && index < DerivationCount);  }
 
 	T* begin() { return derivatives; }
 	const T* begin() const { return derivatives; }

@@ -10,6 +10,9 @@
 #include "../physics/math/linalg/largeMatrix.h"
 #include "../physics/math/linalg/eigen.h"
 #include "../physics/math/mathUtil.h"
+#include "../physics/math/taylorExpansion.h"
+#include "../physics/math/predefinedTaylorExpansions.h"
+
 
 #define ASSERT(condition) ASSERT_TOLERANT(condition, 0.00000001)
 
@@ -279,3 +282,36 @@ TEST_CASE(testFromRotationVecInvertsFromRotationMatrix) {
 
 }
 
+TEST_CASE(testTaylorExpansion) {
+	FullTaylorExpansion<double, double, 4> testTaylor{2.0, {5.0, 2.0, 3.0, -0.7}};
+
+	double x = 0.47;
+
+	double correctResult = 
+		testTaylor.constantValue + 
+		testTaylor.derivatives[0] * x + 
+		testTaylor.derivatives[1] * x * x / 2 + 
+		testTaylor.derivatives[2] * x * x * x / 6 + 
+		testTaylor.derivatives[3] * x * x * x * x / 24;
+
+	ASSERT(correctResult == testTaylor(x));
+}
+
+TEST_CASE(testSinTaylorExpansion) {
+	double curAngle = 0.93;
+	double multiplier = 13.97;
+	// Taylor expansion for sin(x * multiplier) at x=curAngle
+	FullTaylorExpansion<double, double, 4> testTaylor = generateFullTaylorForSinWave<double, 4>(curAngle, multiplier);
+
+	double constTerm = sin(curAngle * multiplier);
+	double firstDerivative = multiplier * cos(curAngle * multiplier);
+	double secondDerivative = multiplier * multiplier * (-sin(curAngle * multiplier));
+	double thirdDerivative = multiplier * multiplier * multiplier * (-cos(curAngle * multiplier));
+	double fourthDerivative = multiplier * multiplier * multiplier * multiplier * sin(curAngle * multiplier);
+
+	ASSERT(testTaylor.constantValue == constTerm);
+	ASSERT(testTaylor.derivatives[0] == firstDerivative);
+	ASSERT(testTaylor.derivatives[1] == secondDerivative);
+	ASSERT(testTaylor.derivatives[2] == thirdDerivative);
+	ASSERT(testTaylor.derivatives[3] == fourthDerivative);
+}

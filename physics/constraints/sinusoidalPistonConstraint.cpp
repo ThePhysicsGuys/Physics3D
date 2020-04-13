@@ -42,9 +42,11 @@ FullTaylorExpansion<double, double, NUMBER_OF_DERIVATIVES_IN_MOTION> PistonSineG
 	double multiplier = (maxLength - minLength) / 2;
 	double offset = minLength + multiplier;
 
-	double currentAngle = currentStepInPeriod * (2 * M_PI / period);
+	double divPeriodToRadians = 2 * M_PI / period;
 
-	return generateFullTaylorForSinWave<double, NUMBER_OF_DERIVATIVES_IN_MOTION>(currentAngle, multiplier);
+	auto result = generateFullTaylorForSinWave<double, NUMBER_OF_DERIVATIVES_IN_MOTION>(currentStepInPeriod, (2 * M_PI / period)) * multiplier;
+	result.constantValue += offset;
+	return result;
 }
 
 /*CFrame SinusoidalPistonConstraint::getRelativeCFrame() const {

@@ -86,7 +86,7 @@ TEST_CASE(testPistonConstraint) {
 
 	constraint.update(DELTA_T);
 
-	CFrame cf2 = relMotion.locationOfRelativeMotion;
+	CFrame cf2 = constraint.getRelativeCFrame();
 
 	ASSERT((cf2.getPosition() - cf1.getPosition()) == relMotion.relativeMotion.getVelocity() * DELTA_T);
 }
