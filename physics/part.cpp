@@ -6,6 +6,8 @@
 
 #include "misc/validityHelper.h"
 
+#include "catchable_assert.h"
+
 namespace {
 	void recalculate(Part& part) {
 		part.maxRadius = part.hitbox.getMaxRadius();
@@ -37,6 +39,7 @@ Part::~Part() {
 }
 
 Part::Part(Part&& other) :
+	cframe(other.cframe),
 	isTerrainPart(other.isTerrainPart),
 	parent(other.parent), 
 	hitbox(std::move(other.hitbox)), 
@@ -48,6 +51,7 @@ Part::Part(Part&& other) :
 	other.parent = nullptr;
 }
 Part& Part::operator=(Part&& other) {
+	this->cframe = other.cframe;
 	this->isTerrainPart = other.isTerrainPart;
 	this->parent = other.parent;
 	this->hitbox = std::move(other.hitbox);
@@ -69,7 +73,7 @@ PartIntersection Part::intersects(const Part& other) const {
 		Vec3 exitVector = this->cframe.localToRelative(result.value().exitVector);
 
 
-		assert(isVecValid(exitVector));
+		catchable_assert(isVecValid(exitVector));
 
 
 		return PartIntersection(intersection, exitVector);

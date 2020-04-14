@@ -7,6 +7,7 @@
 #include "../worlds.h"
 
 #include "../physics/misc/gravityForce.h"
+#include "../physics/misc/toString.h"
 #include "../physics/misc/serialization.h"
 
 #include <fstream>
@@ -96,6 +97,7 @@ void WorldImportExport::loadNativePartsIntoWorld(const char* fileName, World<Ext
 	file.close();
 
 	for(Part* p : result) {
+		Log::debug("Part cframe: %s", str(p->getCFrame()).c_str());
 		world.addPart(new ExtendedPart(std::move(*p)));
 	}
 }

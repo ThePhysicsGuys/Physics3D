@@ -13,6 +13,10 @@
 
 #include "../misc/validityHelper.h"
 
+#include "../catchable_assert.h"
+
+#include <stdexcept>
+
 
 inline static void incDebugTally(HistoricTally<long long, IterationTime>& tally, int iterTime) {
 	if(iterTime >= GJK_MAX_ITER) {
@@ -78,6 +82,12 @@ static MinkPoint getSupport(const ColissionPair& info, const Vec3f& searchDirect
 	Vec3f transformedSearchDirection = -info.transform.relativeToLocal(searchDirection);
 	Vec3f furthest2 = info.scaleSecond * info.second.furthestInDirection(info.scaleSecond * transformedSearchDirection);  // in local space of second
 	Vec3f secondVertex = info.transform.localToGlobal(furthest2);  // converted to local space of first
+
+	/*catchable_assert(isVecValid(furthest1));
+	catchable_assert(isVecValid(transformedSearchDirection));
+	catchable_assert(isVecValid(furthest2));
+	catchable_assert(isVecValid(secondVertex));*/
+
 	return MinkPoint{ furthest1 - secondVertex, furthest1, secondVertex };  // local to first
 }
 
@@ -238,13 +248,18 @@ bool runEPATransformed(const ColissionPair& info, const Tetrahedron& s, Vec3f& i
 		Vec3f b = builder.vertexBuf[closestTriangle[1]];
 		Vec3f c = builder.vertexBuf[closestTriangle[2]];
 
-		assert(isVecValid(a));
-		assert(isVecValid(b));
-		assert(isVecValid(c));
+		catchable_assert(isVecValid(a));
+		catchable_assert(isVecValid(b));
+		catchable_assert(isVecValid(c));
 
 		Vec3f closestTriangleNormal = getNormalVec(closestTriangle, builder.vertexBuf);
 
 		MinkPoint point(getSupport(info, closestTriangleNormal));
+
+		
+		if(!isVecValid(point.p)) {
+			throw std::runtime_error("Bad support point");
+		}
 
 		// point is the new point to be added, check if it's past the current triangle
 		double newPointDistSq = pow(point.p * closestTriangleNormal, 2) / lengthSquared(closestTriangleNormal);
@@ -262,7 +277,7 @@ bool runEPATransformed(const ColissionPair& info, const Tetrahedron& s, Vec3f& i
 
 			exitVector = ri.d * closestTriangleNormal;
 
-			assert(isVecValid(exitVector));
+			catchable_assert(isVecValid(exitVector));
 
 			MinkowskiPointIndices inds[3]{bufs.knownVecs[closestTriangle[0]], bufs.knownVecs[closestTriangle[1]], bufs.knownVecs[closestTriangle[2]]};
 

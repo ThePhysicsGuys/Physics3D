@@ -8,6 +8,9 @@
 #include <chrono>
 #include <sstream>
 
+#include "../util/log.h"
+#include "misc/toString.h"
+
 namespace Debug {
 	void(*logVecAction)(Position, Vec3, VectorType) = [](Position, Vec3, VectorType) {};
 	void(*logPointAction)(Position, PointType) = [](Position, PointType) {};
@@ -26,6 +29,9 @@ namespace Debug {
 
 
 	void saveIntersectionError(const Part* first, const Part* second, const char* reason) {
+		Log::debug("First cframe: %s", str(first->getCFrame()).c_str());
+		Log::debug("Second cframe: %s", str(second->getCFrame()).c_str());
+
 		std::ofstream file;
 		std::stringstream name;
 		name << "../";

@@ -39,6 +39,12 @@
 #include "../engine/io/import.h"
 #include "../engine/meshRegistry.h"
 
+#include "../engine/event/keyEvent.h"
+#include "../engine/input/keyboard.h"
+#include "../engine/event/windowEvent.h"
+
+#include "io/saveDialog.h"
+
 #define TICKS_PER_SECOND 120.0
 #define TICK_SKIP_TIME std::chrono::milliseconds(1000)
 
@@ -54,6 +60,8 @@ void setupWorld(int argc, const char** args);
 void setupGL();
 void setupDebug();
 
+void loadFile(const char* file);
+
 void init(int argc, const char** args) {
 	auto start = high_resolution_clock::now();
 
@@ -67,18 +75,7 @@ void init(int argc, const char** args) {
 	WorldBuilder::init();
 
 	if(argc >= 2) {
-		const char* file = args[1];
-		Log::info("Loading file %s", file);
-		auto startTime = high_resolution_clock::now();
-		if(Util::endsWith(file, ".parts")) {
-			WorldImportExport::loadLoosePartsIntoWorld(file, world);
-		} else if(Util::endsWith(file, ".nativeParts")) {
-			WorldImportExport::loadNativePartsIntoWorld(file, world);
-		} else if(Util::endsWith(file, ".world")) {
-			WorldImportExport::loadWorld(file, world);
-		}
-		nanoseconds deltaTime = high_resolution_clock::now() - startTime;
-		Log::info("File loaded, took %.4f ms", deltaTime.count() / 1E6);
+		loadFile(args[1]);
 	} else {
 		setupWorld(argc, args);
 	}
@@ -130,7 +127,7 @@ void setupWorld(int argc, const char** args) {
 
 	// Part factories
 	WorldBuilder::SpiderFactory spiderFactories[] { {0.5, 4},{0.5, 6},{0.5, 8},{0.5, 10} };
-	//Shape triangle(Library::trianglePyramid);
+	Shape triangle(Library::trianglePyramid);
 
 	WorldBuilder::buildFloorAndWalls(50.0, 50.0, 1.0);
 
@@ -205,10 +202,10 @@ void setupWorld(int argc, const char** args) {
 				newCube->material.ambient = Vec4f(float((x-minX)/(maxX-minX)), float((y-minY)/(maxY-minY)), float((z-minZ)/(maxZ-minZ)), 1.0f);
 				world.addPart(newCube);
 				world.addPart(new ExtendedPart(Sphere(0.5), GlobalCFrame(Position(x + 5, y + 1, z - 5)), { 1.0, 0.2, 0.5 }, "Sphere"));
-				//spiderFactories[rand() & 0x00000003].buildSpider(GlobalCFrame(Position(x+y*0.1, y+1, z)));
-				//world.addPart(new ExtendedPart(triangle, GlobalCFrame(Position(x - 20, y + 1, z + 20)), { 1.0, 0.2, 0.5 }, "Triangle"));
+				spiderFactories[rand() & 0x00000003].buildSpider(GlobalCFrame(Position(x+y*0.1, y+1, z)));
+				world.addPart(new ExtendedPart(triangle, GlobalCFrame(Position(x - 20, y + 1, z + 20)), { 1.0, 0.2, 0.5 }, "Triangle"));
 
-				world.addPart(new ExtendedPart(Cylinder(0.3, 1.2), GlobalCFrame(x - 5, y + 1, z + 5, Rotation::fromEulerAngles(3.1415/4, 3.1415/4, 0.0)), {1.0, 0.2, 0.5}, "Cylinder"));
+				//world.addPart(new ExtendedPart(Cylinder(0.3, 1.2), GlobalCFrame(x - 5, y + 1, z + 5, Rotation::fromEulerAngles(3.1415/4, 3.1415/4, 0.0)), {1.0, 0.2, 0.5}, "Cylinder"));
 			}
 		}
 	}
@@ -394,6 +391,47 @@ void setupPhysics() {
 void setupDebug() {
 	Graphics::AppDebug::setupDebugHooks();
 }
+
+void loadFile(const char* file) {
+	Log::info("Loading file %s", file);
+	auto startTime = high_resolution_clock::now();
+	if(Util::endsWith(file, ".parts")) {
+		WorldImportExport::loadLoosePartsIntoWorld(file, world);
+	} else if(Util::endsWith(file, ".nativeParts")) {
+		WorldImportExport::loadNativePartsIntoWorld(file, world);
+	} else if(Util::endsWith(file, ".world")) {
+		WorldImportExport::loadWorld(file, world);
+	}
+	nanoseconds deltaTime = high_resolution_clock::now() - startTime;
+	Log::info("File loaded, took %.4f ms", deltaTime.count() / 1E6);
+}
+
+bool onFileDrop(::WindowDropEvent& event) {
+	std::string path = event.getPath();
+
+	loadFile(event.getPath().c_str());
+
+	return true;
+}
+
+bool onKeyPress(::KeyPressEvent& keyEvent) {
+	if(keyEvent.getKey() == Keyboard::S.code && keyEvent.getModifiers() == 0x0002) {
+		saveWorld(world);
+		return true;
+	} else {
+		return false;
+	}
+}
+
+void onEvent(::Event& event) {
+	screen.onEvent(event);
+
+	EventDispatcher dispatcher(event);
+
+	dispatcher.dispatch<WindowDropEvent>(onFileDrop);
+	dispatcher.dispatch<KeyPressEvent>(onKeyPress);
+}
+
 
 void stop(int returnCode) {
 	Log::info("Closing physics");

@@ -11,6 +11,8 @@
 #include "../misc/validityHelper.h"
 #include "shapeClass.h"
 
+#include "../catchable_assert.h"
+
 #include <algorithm>
 
 std::optional<Intersection> intersectsTransformed(const Shape& first, const Shape& second, const CFrame& relativeTransform) {
@@ -40,22 +42,22 @@ std::optional<Intersection> intersectsTransformed(const GenericCollidable& first
 			return Intersection(intersection, exitVector);
 		}
 
-		assert(isVecValid(result.A.p));
-		assert(isVecValid(result.A.originFirst));
-		assert(isVecValid(result.A.originSecond));
-		assert(isVecValid(result.B.p));
-		assert(isVecValid(result.B.originFirst));
-		assert(isVecValid(result.B.originSecond));
-		assert(isVecValid(result.C.p));
-		assert(isVecValid(result.C.originFirst));
-		assert(isVecValid(result.C.originSecond));
-		assert(isVecValid(result.D.p));
-		assert(isVecValid(result.D.originFirst));
-		assert(isVecValid(result.D.originSecond));
+		catchable_assert(isVecValid(result.A.p));
+		catchable_assert(isVecValid(result.A.originFirst));
+		catchable_assert(isVecValid(result.A.originSecond));
+		catchable_assert(isVecValid(result.B.p));
+		catchable_assert(isVecValid(result.B.originFirst));
+		catchable_assert(isVecValid(result.B.originSecond));
+		catchable_assert(isVecValid(result.C.p));
+		catchable_assert(isVecValid(result.C.originFirst));
+		catchable_assert(isVecValid(result.C.originSecond));
+		catchable_assert(isVecValid(result.D.p));
+		catchable_assert(isVecValid(result.D.originFirst));
+		catchable_assert(isVecValid(result.D.originSecond));
 
 		bool epaResult = runEPATransformed(info, result, intersection, exitVector, buffers);
 
-		assert(isVecValid(exitVector));
+		catchable_assert(isVecValid(exitVector));
 		if(!epaResult) {
 			return std::optional<Intersection>();
 		} else {

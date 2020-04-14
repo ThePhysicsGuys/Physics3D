@@ -3,7 +3,7 @@
 #include <algorithm>
 
 #include "../misc/validityHelper.h"
-#include <assert.h>
+#include "../catchable_assert.h"
 
 ConvexShapeBuilder::ConvexShapeBuilder(Vec3f * vertBuf, Triangle* triangleBuf, int vertexCount, int triangleCount, TriangleNeighbors* neighborBuf, int* removalBuffer, EdgePiece* newTriangleBuffer)
 	: vertexBuf(vertBuf), triangleBuf(triangleBuf), vertexCount(vertexCount), triangleCount(triangleCount), neighborBuf(neighborBuf), removalBuffer(removalBuffer), newTriangleBuffer(newTriangleBuffer) {
@@ -217,7 +217,7 @@ struct ConvexTriangleIterator {
 };
 
 void ConvexShapeBuilder::addPoint(const Vec3f& point, int oldTriangleIndex) {
-	assert(isVecValid(point));
+	catchable_assert(isVecValid(point));
 
 	ConvexTriangleIterator iter(point, *this, this->removalBuffer, this->newTriangleBuffer);
 

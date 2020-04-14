@@ -24,7 +24,7 @@ namespace Application {
 StandardInputHandler::StandardInputHandler(GLFWwindow* window, Screen& screen) : InputHandler(window), screen(screen) {}
 
 void StandardInputHandler::onEvent(::Event& event) {
-	screen.onEvent(event);
+	Application::onEvent(event);
 
 	EventDispatcher dispatcher(event);
 
