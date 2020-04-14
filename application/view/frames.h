@@ -28,7 +28,7 @@ public:
 	static bool renderSpheres;
 
 	// EnvironmentFrame
-	static bool hdr;
+	static float hdr;
 	static float gamma;
 	static float exposure;
 	static Color3 sunColor;

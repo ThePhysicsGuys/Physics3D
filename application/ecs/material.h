@@ -1,35 +1,43 @@
 #pragma once
 
 #include "../graphics/gui/color.h"
-#include "../engine/ecs/component.h"
-
+#include "../graphics/texture.h"
+#include <array>
 namespace Graphics {
 class Texture;
 };
 
 namespace Application {
 
-struct Material : public Engine::Component {
-	DEFINE_COMPONENT(Material, true);
+struct Material {
+private:
+	Graphics::Texture* maps[8];
 
-	Graphics::Texture* texture = nullptr;
-	Graphics::Texture* normal = nullptr;
+public:
+	enum Map : char {
+		NONE = 0 << 0,
+		ALBEDO = 1 << 0,
+		NORMAL = 1 << 1,
+		METALNESS = 1 << 2,
+		ROUGHNESS = 1 << 3,
+		AO = 1 << 4,
+		GLOSS = 1 << 5,
+		SPECULAR = 1 << 6,
+		DISPLACEMENT = 1 << 7,
+	};
 
-	Color ambient;
-	Color3 diffuse;
-	Color3 specular;
-	float reflectance;
+	char flags = NONE;
+	
+	Color albedo;
+	float metalness;
+	float roughness;
+	float ao;
 
-	Material(Color ambient, Color3 diffuse, Color3 specular, float reflectance, Graphics::Texture* texture, Graphics::Texture* normalMap) : ambient(ambient), diffuse(diffuse), specular(specular), reflectance(reflectance), texture(texture), normal(normalMap) {};
-	Material(Color ambient, Color3 diffuse, Color3 specular, float reflectance, Graphics::Texture* texture) : ambient(ambient), diffuse(diffuse), specular(specular), reflectance(reflectance), texture(texture) {};
-	Material(Color ambient, Color3 diffuse, Color3 specular, float reflectance) : ambient(ambient), diffuse(diffuse), specular(specular), reflectance(reflectance) {};
-	Material(Color ambient) : Material(ambient, Color3(1.0f), Color3(1.0f), 1.0f) {};
-	Material(Graphics::Texture* texture) : Material(Color(1.0), Color3(1.0), Color3(1.0f), 1.0f, texture) {};
-	Material() : Material(Color(1.0f), Color3(1.0f), Color3(1.0f), 1.0f) {};
+	inline Material(const Color& albedo = Color(1), float metalness = 1.0f, float roughness = 1.0f, float ao = 1.0f) : albedo(albedo), metalness(metalness), roughness(roughness), ao(ao) {};
 
-	bool operator==(const Material& other) const;
-	void setTexture(Graphics::Texture* texture);
-	void setNormalMap(Graphics::Texture* normalMap);
+	void reset(Map flag);
+	void set(Map flag, Graphics::Texture* map);
+	Graphics::Texture* get(Map map) const;
 };
 
 };

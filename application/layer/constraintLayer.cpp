@@ -40,7 +40,7 @@ void ConstraintLayer::onUpdate() {
 
 static void renderObject(const VisualData& shape, const GlobalCFrame& cframe, const DiagonalMat3f& scale, const Material& material) {
 	ApplicationShaders::basicShader.updateMaterial(material);
-	ApplicationShaders::basicShader.updateIncludeNormalsAndUVs(false, false);
+	ApplicationShaders::basicShader.updateTexture(false);
 	ApplicationShaders::basicShader.updateModel(cframe, scale);
 	shape.render(Graphics::Renderer::FILL);
 }
@@ -83,7 +83,7 @@ static void renderPiston(const ConstraintLayer* cl, const SinusoidalPistonConstr
 
 		float thickness = i / (segments - 1.0f) * (maxThickness - minThickness) + minThickness;
 
-		Material mat = (i%2 == 0) ? Material(Color(1.0f, 0.8f, 0.1f, 1.0f), Color(1.0f), Color(1.0f), 0.0f) : Material(Color(0.9f, 0.9f, 0.9f, 1.0f), Color(1.0f), Color(1.0f), 1.0f);
+		Material mat = (i%2 == 0) ? Material(Color(1.0f, 0.8f, 0.1f, 1.0f)) : Material(Color(0.9f, 0.9f, 0.9f, 1.0f));
 
 		renderObject(Engine::MeshRegistry::cylinder, start.localToGlobal(CFrame(center, rot)), DiagonalMat3f{thickness, thickness, float(length(step) / 2)}, mat);
 	}

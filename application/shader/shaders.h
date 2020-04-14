@@ -44,16 +44,15 @@ struct BasicShader : public ShaderResource {
 	void updateSunDirection(const Vec3f& sunDirection);
 	void updateSunColor(const Color3& sunColor);
 	void updateGamma(float gamma);
-	void updateHDR(bool hdr);
+	void updateHDR(float hdr);
+	void updateTexture(bool textured);
 	void updateExposure(float exposure);
 	void updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Position& viewPosition);
 	void updateLight(const std::vector<Light*> lights);
 	void updatePart(const ExtendedPart& part);
-	void updateIncludeNormalsAndUVs(bool includeNormals, bool includeUVs);
 	void updateMaterial(const Material& material);
 	void updateModel(const Mat4f& modelMatrix);
 	void updateModel(const GlobalCFrame& modelCFrame, DiagonalMat3f scale);
-	void updateUniforms(int id);
 };
 
 struct DepthShader : public ShaderResource {
@@ -129,11 +128,10 @@ struct InstanceShader : public ShaderResource {
 	void updateSunDirection(const Vec3f& sunDirection);
 	void updateSunColor(const Vec3f& sunColor);
 	void updateGamma(float gamma);
-	void updateHDR(bool hdr);
+	void updateHDR(float hdr);
 	void updateExposure(float exposure);
-	void updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix);
+	void updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Position& viewPosition);
 	void updateLight(const std::vector<Light*> lights);
-	void updateIncludeNormalsAndUVs(bool includeNormals, bool includeUVs);
 	void updateTexture(bool textured);
 };
 

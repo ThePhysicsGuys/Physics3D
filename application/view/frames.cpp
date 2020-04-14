@@ -30,7 +30,7 @@
 namespace Application {
 using namespace Graphics;
 
-bool BigFrame::hdr = true;
+float BigFrame::hdr = 1.0f;
 float BigFrame::gamma = 1.0f;
 float BigFrame::exposure = 1.0f;
 Color3 BigFrame::sunColor = Color3(1);
@@ -569,10 +569,10 @@ void BigFrame::renderPropertiesFrame() {
 		ImGui::SetNextTreeNodeOpen(true);
 		if (ImGui::TreeNode("Material")) {
 			if (sp) {
-				ImGui::ColorEdit4("Ambient", sp->material.ambient.data);
-				ImGui::ColorEdit3("Diffuse", sp->material.diffuse.data);
-				ImGui::ColorEdit3("Specular", sp->material.specular.data);
-				ImGui::SliderFloat("Reflectance", &sp->material.reflectance, 0, 1);
+				ImGui::ColorEdit4("Albedo", sp->material.albedo.data);
+				ImGui::SliderFloat("Metalness", &sp->material.metalness, 0, 1);
+				ImGui::SliderFloat("Roughness", &sp->material.roughness, 0, 1);
+				ImGui::SliderFloat("Ambient occlusion", &sp->material.ao, 0, 1);
 				if (ImGui::Button(sp ? (sp->renderMode == Renderer::FILL ? "Render mode: fill" : "Render mode: wireframe") : "l"))
 					if (sp) sp->renderMode = sp->renderMode == Renderer::FILL ? Renderer::WIREFRAME : Renderer::FILL;
 			} else {
@@ -623,17 +623,21 @@ void BigFrame::renderDebugFrame() {
 
 void BigFrame::renderEnvironmentFrame() {
 	if (ImGui::CollapsingHeader("Environment")) {
-		if (ImGui::Checkbox("HDR", &hdr))
+		if (ImGui::SliderFloat("HDR", &hdr, 0, 1))
 			ApplicationShaders::basicShader.updateHDR(hdr);
+			ApplicationShaders::instanceShader.updateHDR(hdr);
 
 		if (ImGui::SliderFloat("Gamma", &gamma, 0, 3))
 			ApplicationShaders::basicShader.updateGamma(gamma);
+			ApplicationShaders::instanceShader.updateGamma(gamma);
 
 		if (ImGui::SliderFloat("Exposure", &exposure, 0, 2))
 			ApplicationShaders::basicShader.updateExposure(exposure);
+			ApplicationShaders::instanceShader.updateExposure(exposure);
 
 		if (ImGui::ColorEdit3("Sun color", sunColor.data))
 			ApplicationShaders::basicShader.updateSunColor(sunColor);
+			ApplicationShaders::instanceShader.updateSunColor(sunColor);
 	}
 }
 

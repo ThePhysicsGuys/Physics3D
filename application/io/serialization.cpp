@@ -21,23 +21,45 @@ void WorldImportExport::registerTexture(Graphics::Texture* texture) {
 }
 
 static void serializeMaterial(const Material& material, std::ostream& ostream) {
-	textureSerializer.serialize(material.texture, ostream);
-	textureSerializer.serialize(material.normal, ostream);
-	::serialize<Color>(material.ambient, ostream);
-	::serialize<Color3>(material.diffuse, ostream);
-	::serialize<Color3>(material.specular, ostream);
-	::serialize<float>(material.reflectance, ostream);
+	textureSerializer.serialize(material.get(Material::ALBEDO), ostream);
+	textureSerializer.serialize(material.get(Material::NORMAL), ostream);
+	textureSerializer.serialize(material.get(Material::METALNESS), ostream);
+	textureSerializer.serialize(material.get(Material::ROUGHNESS), ostream);
+	textureSerializer.serialize(material.get(Material::AO), ostream);
+	textureSerializer.serialize(material.get(Material::GLOSS), ostream);
+	textureSerializer.serialize(material.get(Material::SPECULAR), ostream);
+	textureSerializer.serialize(material.get(Material::DISPLACEMENT), ostream);
+	::serialize<Color>(material.albedo, ostream);
+	::serialize<float>(material.metalness, ostream);
+	::serialize<float>(material.roughness, ostream);
+	::serialize<float>(material.ao, ostream);
 }
 
 static Material deserializeMaterial(std::istream& istream) {
-	Graphics::Texture* texture = textureSerializer.deserialize(istream);
-	Graphics::Texture* normal = textureSerializer.deserialize(istream);
-	Color ambient = ::deserialize<Color>(istream);
-	Color3 diffuse = ::deserialize<Color3>(istream);
-	Color3 specular = ::deserialize<Color3>(istream);
-	float reflectance = ::deserialize<float>(istream);
+	Graphics::Texture* albedoMap = textureSerializer.deserialize(istream);
+	Graphics::Texture* normalMap = textureSerializer.deserialize(istream);
+	Graphics::Texture* metalnessMap = textureSerializer.deserialize(istream);
+	Graphics::Texture* roughnessMap = textureSerializer.deserialize(istream);
+	Graphics::Texture* aoMap = textureSerializer.deserialize(istream);
+	Graphics::Texture* glossMap = textureSerializer.deserialize(istream);
+	Graphics::Texture* specularMap = textureSerializer.deserialize(istream);
+	Graphics::Texture* displacementrMap = textureSerializer.deserialize(istream);
+	Color albedo = ::deserialize<Color>(istream);
+	float metalness = ::deserialize<float>(istream);
+	float roughness = ::deserialize<float>(istream);
+	float ao = ::deserialize<float>(istream);
 
-	return Material(ambient, diffuse, specular, reflectance, texture, normal);
+	Material material = Material(albedo, metalness, roughness, ao);
+	material.set(Material::ALBEDO, albedoMap);
+	material.set(Material::ALBEDO, normalMap);
+	material.set(Material::ALBEDO, metalnessMap);
+	material.set(Material::ALBEDO, roughnessMap);
+	material.set(Material::ALBEDO, aoMap);
+	material.set(Material::ALBEDO, glossMap);
+	material.set(Material::ALBEDO, specularMap);
+	material.set(Material::ALBEDO, displacementrMap);
+
+	return material;
 }
 
 class Serializer : public SerializationSession<ExtendedPart> {

@@ -3,27 +3,26 @@
 #include "material.h"
 
 #include "../graphics/texture.h"
+#include "../physics/math/mathUtil.h"
 
 namespace Application {
 
-void Material::setTexture(Graphics::Texture* texture) {
-	texture->setUnit(0);
-	this->texture = texture;
+void Material::set(Map map, Graphics::Texture* texture) {
+	assert(powOf2(map));
+	maps[ctz(map)] = texture;
+	bset(flags, map);
 }
 
-void Material::setNormalMap(Graphics::Texture* normalMap) {
-	normalMap->setUnit(1);
-	this->normal = normalMap;
+void Material::reset(Map map) {
+	assert(powOf2(map));
+	maps[ctz(map)] = nullptr;
+	bclear(flags, map);
 }
 
-bool Material::operator==(const Material& other) const {
-	return
-		other.ambient == ambient &&
-		other.diffuse == diffuse &&
-		other.specular == specular &&
-		other.reflectance == reflectance &&
-		other.texture == texture &&
-		other.normal == normal;
+Graphics::Texture* Material::get(Map map) const {
+	assert(powOf2(map));
+
+	return (flags & map) ? maps[ctz(map)] : nullptr;
 }
 
 };

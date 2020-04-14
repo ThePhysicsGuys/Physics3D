@@ -9,11 +9,11 @@ class Screen;
 class ModelLayer : public Layer {
 private:
 	struct Uniform {
-		Mat4f modelMatrix;
-		Vec4f ambient;
-		Vec3f diffuse;
-		Vec3f specular;
-		float reflectance;
+		Mat4f modelMatrix = Mat4f::IDENTITY();
+		Vec4f albedo = Vec4f(1.0f);
+		float metalness = 1.0f;
+		float roughness  = 1.0f;
+		float ao = 1.0f;
 	};
 
 	std::vector<Uniform> uniforms;

@@ -86,7 +86,7 @@ static Color getAmbientForPartForSelected(Screen* screen, Part* part) {
 	return Color(0, 0, 0, 0);
 }
 
-static Color getAmbientForPart(Screen* screen, Part* part) {
+static Color getAlbedoForPart(Screen* screen, Part* part) {
 	Color computedAmbient = getAmbientForPartForSelected(screen, part);
 	if (part == screen->intersectedPart)
 		computedAmbient += Vec4f(-0.1f, -0.1f, -0.1f, 0);
@@ -98,22 +98,16 @@ void ModelLayer::onInit() {
 	using namespace Graphics;
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
-	BufferLayout layout = BufferLayout({
-		BufferElement("pos", BufferDataType::FLOAT3),
-		BufferElement("col", BufferDataType::FLOAT4)
-		});
-	BatchConfig config = BatchConfig(layout, Renderer::LINES);
-	Path3D::batch = new Batch<Path3D::Vertex>(config);
-
-	Attenuation attenuation = { 0, 0, 0.5 };
-	lights.push_back(new Light(Vec3f(10, 5, -10), Color3(1, 0.84f, 0.69f), 6, attenuation));
-	lights.push_back(new Light(Vec3f(10, 5, 10), Color3(1, 0.84f, 0.69f), 6, attenuation));
-	lights.push_back(new Light(Vec3f(-10, 5, -10), Color3(1, 0.84f, 0.69f), 6, attenuation));
-	lights.push_back(new Light(Vec3f(-10, 5, 10), Color3(1, 0.84f, 0.69f), 6, attenuation));
-	lights.push_back(new Light(Vec3f(0, 5, 0), Color3(1, 0.90f, 0.75f), 10, attenuation));
+	Attenuation attenuation = { 1, 1, 1 };
+	lights.push_back(new Light(Vec3f(10, 5, -10), Color3(1, 0.84f, 0.69f), 300, attenuation));
+	lights.push_back(new Light(Vec3f(10, 5, 10), Color3(1, 0.84f, 0.69f), 300, attenuation));
+	lights.push_back(new Light(Vec3f(-10, 5, -10), Color3(1, 0.84f, 0.69f), 200, attenuation));
+	lights.push_back(new Light(Vec3f(-10, 5, 10), Color3(1, 0.84f, 0.69f), 500, attenuation));
+	lights.push_back(new Light(Vec3f(0, 5, 0), Color3(1, 0.90f, 0.75f), 400, attenuation));
 
 	ApplicationShaders::basicShader.updateLight(lights);
 	ApplicationShaders::instanceShader.updateLight(lights);
+	ApplicationShaders::instanceShader.updateTexture(false);
 }
 
 void ModelLayer::onUpdate() {
@@ -124,71 +118,6 @@ void ModelLayer::onEvent(Event& event) {
 
 }
 
-/*
-void ModelLayer::onRender2() {
-	Screen* screen = static_cast<Screen*>(this->ptr);
-
-
-	graphicsMeasure.mark(GraphicsProcess::UPDATE);
-	ApplicationShaders::basicShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
-	ApplicationShaders::maskShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix);
-
-	// TODO move to update?
-
-	screen->world->syncReadOnlyOperation([this, &visibleParts, screen] () {
-		VisibilityFilter filter = VisibilityFilter::forWindow(screen->camera.cframe.position, screen->camera.getForwardDirection(), screen->camera.getUpDirection(), screen->camera.fov, screen->camera.aspect, screen->camera.zfar);
-		for (ExtendedPart& part : screen->world->iterPartsFiltered(filter, ALL_PARTS))
-			visibleParts.push_back(&part);
-		});
-
-
-	graphicsMeasure.mark(GraphicsProcess::PHYSICALS);
-	std::vector<Engine::Entity*> visibleEntities;
-	for (Engine::Entity* entity : screen->entities) {
-		//? filter based on position & camera already done
-
-		Mesh* mesh = entity->getComponent<Mesh>();
-		if (mesh)
-			visibleEntities.push_back(entity);
-
-	}
-
-	std::map<double, Engine::Entity*> transparentEntities;
-	for (Engine::Entity* entity : visibleEntities) {
-		TransformComponent* transform = entity->getComponent<TransformComponent>();
-		Material* material = entity->getComponentOrDefault<Material>();
-		// material.ambient += getAmbientForPart(screen, part);
-
-		if (material->ambient.w < 1) {
-			transparentEntities[lengthSquared(Vec3(screen->camera.cframe.position - transform->getCFrame().getPosition()))] = entity;
-			continue;
-		}
-
-		Mesh* mesh = entity->getComponent<Mesh>();
-		if (mesh)
-			continue;
-
-		ApplicationShaders::basicShader.updateMaterial(*material);
-		//ApplicationShaders::basicShader.updatePart(*part);
-		//mesh->getIndexedMesh()->render(part->renderMode);
-	}
-
-	for (auto iterator = transparentEntities.rbegin(); iterator != transparentEntities.rend(); ++iterator) {
-		Engine::Entity* entity = (*iterator).second;
-
-		Material* material = entity->getComponentOrDefault<Material>();
-		//material.ambient += getAmbientForPart(screen, part);
-
-		Mesh* mesh = entity->getComponent<Mesh>();
-		if (mesh)
-			continue;
-
-		ApplicationShaders::basicShader.updateMaterial(*material);
-		//ApplicationShaders::basicShader.updatePart(*part);
-		//mesh->getIndexedMesh()->render(part->renderMode);
-	}
-}*/
-
 void ModelLayer::onRender() {
 	using namespace Graphics;
 	using namespace Graphics::Renderer;
@@ -198,7 +127,7 @@ void ModelLayer::onRender() {
 
 	graphicsMeasure.mark(GraphicsProcess::UPDATE);
 	ApplicationShaders::basicShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
-	ApplicationShaders::instanceShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix);
+	ApplicationShaders::instanceShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
 
 	// Filter on mesh ID and transparency
 	size_t maxMeshCount = 0;
@@ -209,7 +138,7 @@ void ModelLayer::onRender() {
 	screen->world->syncReadOnlyOperation([this, &visibleParts, &transparentParts, &meshCounter, &maxMeshCount, screen] () {
 		VisibilityFilter filter = VisibilityFilter::forWindow(screen->camera.cframe.position, screen->camera.getForwardDirection(), screen->camera.getUpDirection(), screen->camera.fov, screen->camera.aspect, screen->camera.zfar);
 		for (ExtendedPart& part : screen->world->iterPartsFiltered(filter, ALL_PARTS)) {
-			if (part.material.ambient.w < 1) {
+			if (part.material.albedo.w < 1) {
 				transparentParts.insert({ lengthSquared(Vec3(screen->camera.cframe.position - part.getPosition())), &part });
 			} else {
 				visibleParts.insert({ part.visualData.drawMeshId, &part });
@@ -240,16 +169,16 @@ void ModelLayer::onRender() {
 		for (auto mesh = meshes.first; mesh != meshes.second; ++mesh) {
 			ExtendedPart* part = mesh->second;
 			Material material = part->material;
-			material.ambient += getAmbientForPart(screen, part);
+			material.albedo += getAlbedoForPart(screen, part);
 
 			Mat4f modelMatrix = Mat4f(Mat3f(part->getCFrame().getRotation().asRotationMatrix()) * DiagonalMat3f(part->hitbox.scale), Vec3f(part->getCFrame().getPosition() - Position(0, 0, 0)), Vec3f(0.0f, 0.0f, 0.0f), 1.0f);
 
 			uniforms[offset] = Uniform {
 				modelMatrix,
-				part->material.ambient,
-				part->material.diffuse,
-				part->material.specular,
-				part->material.reflectance
+				part->material.albedo,
+				part->material.metalness,
+				part->material.roughness,
+				part->material.ao
 			};
 
 			offset++;
@@ -266,7 +195,7 @@ void ModelLayer::onRender() {
 		ExtendedPart* part = (*iterator).second;
 
 		Material material = part->material;
-		material.ambient += getAmbientForPart(screen, part);
+		material.albedo += getAlbedoForPart(screen, part);
 
 		if (part->visualData.drawMeshId == -1)
 			continue;
