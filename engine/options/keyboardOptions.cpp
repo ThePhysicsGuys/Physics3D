@@ -64,7 +64,7 @@ namespace KeyboardOptions {
 	}
 
 	void saveKey(Util::Properties& properties, std::string property, const Key& key) {
-		properties.set(property, key.name);
+		properties.set(property, key.getName());
 	}
 
 	void load(const Util::Properties& properties) {

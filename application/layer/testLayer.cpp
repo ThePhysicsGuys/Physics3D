@@ -92,7 +92,7 @@ void TestLayer::onUpdate() {
 
 void TestLayer::onEvent(Event& event) {
 	if (event.getType() == EventType::KeyPress) {
-		if (static_cast<KeyPressEvent&>(event).getKey() == Keyboard::TAB.code) {
+		if (static_cast<KeyPressEvent&>(event).getKey() == Keyboard::TAB) {
 			llights[0]->position = fromPosition(screen.camera.cframe.position);
 			ApplicationShaders::lightingShader.updateLight(llights);
 		}
