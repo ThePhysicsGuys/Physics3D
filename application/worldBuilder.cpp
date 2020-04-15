@@ -51,7 +51,8 @@ void makeDominoTower(int floors, int circumference, Position origin) {
 
 
 void buildFloor(double width, double depth) {
-	Material floorMaterial = Material(ResourceManager::get<Graphics::TextureResource>("floorMaterial"));
+	Material floorMaterial = Material();
+	floorMaterial.set(Material::ALBEDO, ResourceManager::get<Graphics::TextureResource>("floorMaterial"));
 	ExtendedPart* floorExtendedPart = new ExtendedPart(Box(width, 1.0, depth), GlobalCFrame(0.0, 0.0, 0.0), { 2.0, 1.0, 0.3 });
 	floorExtendedPart->material = floorMaterial;
 	world.addTerrainPart(floorExtendedPart);
@@ -71,7 +72,7 @@ SpiderFactory::SpiderFactory(double spiderSize, int legCount) : spiderSize(spide
 void SpiderFactory::buildSpider(const GlobalCFrame& spiderPosition) {
 	//ExtendedPart* spiderBody = createUniquePart(screen, createPointyPrism(legCount, 0.5, 0.2, 0.1, 0.1), spiderPosition, 1.0, 0.0, "SpiderBody");
 	ExtendedPart* spiderBody = new ExtendedPart(bodyShape, spiderPosition, { 1.0, 0.5, 0.3 });
-	spiderBody->material.ambient = Vec4f(0.6f, 0.6f, 0.6f, 1.0f);
+	spiderBody->material.albedo = Color(0.6f, 0.6f, 0.6f, 1.0f);
 
 	//PartFactory legFactory(BoundingBox(0.05, 0.5, 0.05).toShape(), screen, "SpiderLeg");
 
@@ -83,7 +84,7 @@ void SpiderFactory::buildSpider(const GlobalCFrame& spiderPosition) {
 
 	for (int i = 0; i < legCount; i++) {
 		ExtendedPart* leg = new ExtendedPart(Box(0.05, 0.5, 0.05), GlobalCFrame(), { 1.0, 0.5, 0.3 }, "LegPart " + std::to_string(i));
-		leg->material.ambient = Vec4f(0.4f, 0.4f, 0.4f, 1.0f);
+		leg->material.albedo = Color(0.4f, 0.4f, 0.4f, 1.0f);
 
 		double angle = i * PI * 2 / legCount;
 
@@ -129,7 +130,7 @@ void buildTree(Position treePos) {
 	GlobalCFrame trunkCFrame(treePos, Rotation::fromEulerAngles(fRand(-0.1, 0.1), fRand(-3.1415, 3.1415), fRand(-0.1, 0.1)));
 
 	ExtendedPart* trunk = new ExtendedPart(treeTrunk, trunkCFrame, { 1.0, 1.0, 0.3 }, "trunk");
-	trunk->material.ambient = Graphics::COLOR::get(0x654321);
+	trunk->material.albedo = Graphics::COLOR::get(0x654321);
 	world.addTerrainPart(trunk);
 
 	Position treeTop = trunkCFrame.localToGlobal(Vec3(0.0, 5.5, 0.0));
@@ -139,7 +140,7 @@ void buildTree(Position treePos) {
 		GlobalCFrame leavesCFrame(treeTop + Vec3(fRand(-1.0, 1.0), fRand(-1.0, 1.0), fRand(-1.0, 1.0)), Rotation::fromEulerAngles(fRand(0.0, 3.1415), fRand(0.0, 3.1415), fRand(0.0, 3.1415)));
 		ExtendedPart* leaves = new ExtendedPart(icosahedron.scaled(2.1, 1.9, 1.7), leavesCFrame, { 1.0, 1.0, 0.3 }, "trunk");
 
-		leaves->material.ambient = Vec4(fRand(-0.2, 0.2), 0.6 + fRand(-0.2, 0.2), 0.0, 1.0);
+		leaves->material.albedo = Vec4(fRand(-0.2, 0.2), 0.6 + fRand(-0.2, 0.2), 0.0, 1.0);
 
 		world.addTerrainPart(leaves);
 	}
@@ -147,7 +148,7 @@ void buildTree(Position treePos) {
 
 void buildConveyor(double width, double length, const GlobalCFrame& cframe, double speed) {
 	ExtendedPart* conveyor = new ExtendedPart(Box(width, 0.3, length), cframe, { 1.0, 0.8, 0.0, Vec3(0.0, 0.0, speed) }, "Conveyor");
-	conveyor->material.ambient = Vec4f(0.2f, 0.2f, 0.2f, 1.0f);
+	conveyor->material.albedo = Color(0.2f, 0.2f, 0.2f, 1.0f);
 	world.addTerrainPart(conveyor);
 	ExtendedPart* leftWall = new ExtendedPart(Box(0.2, 0.6, length), cframe.localToGlobal(CFrame(-width / 2 - 0.1, 0.1, 0.0)), { 1.0, 0.4, 0.3, Vec3(0.0, 0.0, 0.0) }, "Wall");
 	world.addTerrainPart(leftWall);
@@ -170,7 +171,7 @@ void buildTerrain(double width, double depth) {
 			Position pos((x / 3.0 + fRand(0.0, 1.0)) * 3.0, fRand(0.0, 1.0) + yOffset, (z / 3.0 + fRand(0.0, 1.0)) * 3.0);
 			GlobalCFrame cf(pos, Rotation::fromEulerAngles(fRand(0.0, 3.1415), fRand(0.0, 3.1415), fRand(0.0, 3.1415)));
 			ExtendedPart* newPart = new ExtendedPart(icosahedron.scaled(4.0, 4.0, 4.0), cf, { 1.0, 1.0, 0.3 }, "terrain");
-			newPart->material.ambient = Vec4(0.0, yOffset / 40.0 + 0.5, 0.0, 1.0);
+			newPart->material.albedo = Color(0.0, yOffset / 40.0 + 0.5, 0.0, 1.0);
 			world.addTerrainPart(newPart);
 		}
 
@@ -221,9 +222,9 @@ void buildCar(const GlobalCFrame& location) {
 	ExtendedPart* wheel3 = new ExtendedPart(Sphere(0.25), location.localToGlobal(CFrame(-0.8, 0.0, 0.8)), wheelProperties, "Wheel");
 	ExtendedPart* wheel4 = new ExtendedPart(Sphere(0.25), location.localToGlobal(CFrame(-0.8, 0.0, -0.8)), wheelProperties, "Wheel");
 
-	carLeftWindow->material.ambient = Vec4f(0.7f, 0.7f, 1.0f, 0.5f);
-	carRightWindow->material.ambient = Vec4f(0.7f, 0.7f, 1.0f, 0.5f);
-	carWindshield->material.ambient = Vec4f(0.7f, 0.7f, 1.0f, 0.5f);
+	carLeftWindow->material.albedo = Color(0.7f, 0.7f, 1.0f, 0.5f);
+	carRightWindow->material.albedo = Color(0.7f, 0.7f, 1.0f, 0.5f);
+	carWindshield->material.albedo = Color(0.7f, 0.7f, 1.0f, 0.5f);
 
 	world.addPart(carBody);
 

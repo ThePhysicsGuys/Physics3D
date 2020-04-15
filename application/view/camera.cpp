@@ -153,21 +153,21 @@ void Camera::move(Screen& screen, Vec3 delta, bool leftDragging, bool accelerati
 
 bool Camera::onKeyRelease(::KeyReleaseEvent& event) {
 
-	int key = event.getKey();
+	Keyboard::Key key = event.getKey();
 
-	if (key == KeyboardOptions::Move::forward.code ||
-		key == KeyboardOptions::Move::backward.code ||
-		key == KeyboardOptions::Move::left.code ||
-		key == KeyboardOptions::Move::right.code ||
-		key == KeyboardOptions::Move::ascend.code ||
-		key == KeyboardOptions::Move::descend.code) {
+	if (key == KeyboardOptions::Move::forward ||
+		key == KeyboardOptions::Move::backward ||
+		key == KeyboardOptions::Move::left ||
+		key == KeyboardOptions::Move::right ||
+		key == KeyboardOptions::Move::ascend ||
+		key == KeyboardOptions::Move::descend) {
 		moving = false;
 	}
 
-	if (key == KeyboardOptions::Rotate::left.code ||
-		key == KeyboardOptions::Rotate::right.code ||
-		key == KeyboardOptions::Rotate::up.code ||
-		key == KeyboardOptions::Rotate::down.code) {
+	if (key == KeyboardOptions::Rotate::left ||
+		key == KeyboardOptions::Rotate::right ||
+		key == KeyboardOptions::Rotate::up ||
+		key == KeyboardOptions::Rotate::down) {
 		rotating = false;
 	}
 

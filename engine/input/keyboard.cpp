@@ -133,148 +133,242 @@ namespace Keyboard {
 	const int KEY_FIRST = GLFW_KEY_SPACE;
 	const int KEY_LAST = GLFW_KEY_LAST;
 
-	const int PRESS = GLFW_PRESS;
-	const int RELEASE = GLFW_RELEASE;
-	const int REPEAT = GLFW_REPEAT;
+	const int KEY_PRESS = GLFW_PRESS;
+	const int KEY_RELEASE = GLFW_RELEASE;
+	const int KEY_REPEAT = GLFW_REPEAT;
 
-	std::map<std::string, Key> keymap = {
-		{ UNKNOWN.name, UNKNOWN },
-		{ SPACE.name, SPACE },
-		{ APOSTROPHE.name, APOSTROPHE },
-		{ COMMA.name, COMMA },
-		{ MINUS.name, MINUS },
-		{ PERIOD.name, PERIOD },
-		{ SLASH.name, SLASH },
-		{ NUMBER_0.name, NUMBER_0 },
-		{ NUMBER_1.name, NUMBER_1 },
-		{ NUMBER_2.name, NUMBER_2 },
-		{ NUMBER_3.name, NUMBER_3 },
-		{ NUMBER_4.name, NUMBER_4 },
-		{ NUMBER_5.name, NUMBER_5 },
-		{ NUMBER_6.name, NUMBER_6 },
-		{ NUMBER_7.name, NUMBER_7 },
-		{ NUMBER_8.name, NUMBER_8 },
-		{ NUMBER_9.name, NUMBER_9 },
-		{ SEMICOLON.name, SEMICOLON },
-		{ A.name, A },
-		{ B.name, B},
-		{ C.name, C },
-		{ D.name, D },
-		{ E.name, E },
-		{ F.name, F },
-		{ G.name, G },
-		{ H.name, H },
-		{ I.name, I },
-		{ J.name, J },
-		{ K.name, K },
-		{ L.name, L },
-		{ M.name, M },
-		{ N.name, N },
-		{ O.name, O },
-		{ P.name, P },
-		{ Q.name, Q },
-		{ R.name, R },
-		{ S.name, S },
-		{ T.name, T },
-		{ U.name, U },
-		{ V.name, V },
-		{ W.name, W },
-		{ X.name, X },
-		{ Y.name, Y },
-		{ Z.name, Z },
-		{ LEFT_BRACKET.name, LEFT_BRACKET },
-		{ BACKSLASH.name, BACKSLASH },
-		{ RIGHT_BRACKET.name, RIGHT_BRACKET },
-		{ GRAVE_ACCENT.name, GRAVE_ACCENT },
-		{ WORLD_1.name, WORLD_1 },
-		{ WORLD_2.name, WORLD_2 },
-		{ ESCAPE.name, ESCAPE },
-		{ ENTER.name, ENTER },
-		{ TAB.name, TAB },
-		{ BACKSPACE.name, BACKSPACE },
-		{ INSERT.name, INSERT },
-		{ DELETE.name, DELETE },
-		{ RIGHT.name, RIGHT },
-		{ LEFT.name, LEFT },
-		{ DOWN.name, DOWN },
-		{ UP.name, UP },
-		{ PAGE_UP.name, PAGE_UP },
-		{ PAGE_DOWN.name, PAGE_DOWN },
-		{ HOME.name, HOME },
-		{ END.name, END },
-		{ CAPS_LOCK.name, CAPS_LOCK },
-		{ SCROLL_LOCK.name, SCROLL_LOCK },
-		{ NUM_LOCK.name, NUM_LOCK },
-		{ PRINT_SCREEN.name, PRINT_SCREEN },
-		{ PAUSE.name, PAUSE },
-		{ F1.name, F1 },
-		{ F2.name, F2 },
-		{ F3.name, F3 },
-		{ F4.name, F4 },
-		{ F5.name, F5 },
-		{ F6.name, F6 },
-		{ F7.name, F7 },
-		{ F8.name, F8 },
-		{ F9.name, F9 },
-		{ F10.name, F10 },
-		{ F11.name, F11 },
-		{ F12.name, F12 },
-		{ F13.name, F13 },
-		{ F14.name, F14 },
-		{ F15.name, F15 },
-		{ F16.name, F16 },
-		{ F17.name, F17 },
-		{ F18.name, F18 },
-		{ F19.name, F19 },
-		{ F20.name, F20 },
-		{ F21.name, F21 },
-		{ F22.name, F22 },
-		{ F23.name, F23 },
-		{ F24.name, F24 },
-		{ F25.name, F25 },
-		{ NUMPAD_0.name, NUMPAD_0 },
-		{ NUMPAD_1.name, NUMPAD_1 },
-		{ NUMPAD_2.name, NUMPAD_2 },
-		{ NUMPAD_3.name, NUMPAD_3 },
-		{ NUMPAD_4.name, NUMPAD_4 },
-		{ NUMPAD_5.name, NUMPAD_5 },
-		{ NUMPAD_6.name, NUMPAD_6 },
-		{ NUMPAD_7.name, NUMPAD_7 },
-		{ NUMPAD_8.name, NUMPAD_8 },
-		{ NUMPAD_9.name, NUMPAD_9 },
-		{ NUMPAD_DECIMAL.name, NUMPAD_DECIMAL },
-		{ NUMPAD_DIVIDE.name, NUMPAD_DIVIDE },
-		{ NUMPAD_MULTIPLY.name, NUMPAD_MULTIPLY },
-		{ NUMPAD_SUBTRACT.name, NUMPAD_SUBTRACT },
-		{ NUMPAD_ADD.name, NUMPAD_ADD },
-		{ NUMPAD_ENTER.name, NUMPAD_ENTER },
-		{ NUMPAD_EQUAL.name, NUMPAD_EQUAL },
-		{ LEFT_SHIFT.name, LEFT_SHIFT },
-		{ LEFT_CONTROL.name, LEFT_CONTROL },
-		{ LEFT_ALT.name, NUMPAD_SUBTRACT },
-		{ LEFT_SUPER.name, NUMPAD_SUBTRACT },
-		{ RIGHT_SHIFT.name, NUMPAD_SUBTRACT },
-		{ RIGHT_CONTROL.name, NUMPAD_SUBTRACT },
-		{ RIGHT_ALT.name, NUMPAD_SUBTRACT },
-		{ RIGHT_SUPER.name, NUMPAD_SUBTRACT },
-		{ MENU.name, MENU },
+	const int MOD_SHIFT = GLFW_MOD_SHIFT;
+	const int MOD_CTRL = GLFW_MOD_CONTROL;
+	const int MOD_ALT = GLFW_MOD_ALT;
+	const int MOD_SUPER = GLFW_MOD_SUPER;
+
+	std::map<int, Key> keymap = {
+		{ UNKNOWN.getCode()        , UNKNOWN         },
+		{ SPACE.getCode()          , SPACE           },
+		{ APOSTROPHE.getCode()     , APOSTROPHE      },
+		{ COMMA.getCode()          , COMMA           },
+		{ MINUS.getCode()          , MINUS           },
+		{ PERIOD.getCode()         , PERIOD          },
+		{ SLASH.getCode()          , SLASH           },
+		{ NUMBER_0.getCode()       , NUMBER_0        },
+		{ NUMBER_1.getCode()       , NUMBER_1        },
+		{ NUMBER_2.getCode()       , NUMBER_2        },
+		{ NUMBER_3.getCode()       , NUMBER_3        },
+		{ NUMBER_4.getCode()       , NUMBER_4        },
+		{ NUMBER_5.getCode()       , NUMBER_5        },
+		{ NUMBER_6.getCode()       , NUMBER_6        },
+		{ NUMBER_7.getCode()       , NUMBER_7        },
+		{ NUMBER_8.getCode()       , NUMBER_8        },
+		{ NUMBER_9.getCode()       , NUMBER_9        },
+		{ SEMICOLON.getCode()      , SEMICOLON       },
+		{ A.getCode()              , A               },
+		{ B.getCode()              , B               },
+		{ C.getCode()              , C               },
+		{ D.getCode()              , D               },
+		{ E.getCode()              , E               },
+		{ F.getCode()              , F               },
+		{ G.getCode()              , G               },
+		{ H.getCode()              , H               },
+		{ I.getCode()              , I               },
+		{ J.getCode()              , J               },
+		{ K.getCode()              , K               },
+		{ L.getCode()              , L               },
+		{ M.getCode()              , M               },
+		{ N.getCode()              , N               },
+		{ O.getCode()              , O               },
+		{ P.getCode()              , P               },
+		{ Q.getCode()              , Q               },
+		{ R.getCode()              , R               },
+		{ S.getCode()              , S               },
+		{ T.getCode()              , T               },
+		{ U.getCode()              , U               },
+		{ V.getCode()              , V               },
+		{ W.getCode()              , W               },
+		{ X.getCode()              , X               },
+		{ Y.getCode()              , Y               },
+		{ Z.getCode()              , Z               },
+		{ LEFT_BRACKET.getCode()   , LEFT_BRACKET    },
+		{ BACKSLASH.getCode()      , BACKSLASH       },
+		{ RIGHT_BRACKET.getCode()  , RIGHT_BRACKET   },
+		{ GRAVE_ACCENT.getCode()   , GRAVE_ACCENT    },
+		{ WORLD_1.getCode()        , WORLD_1         },
+		{ WORLD_2.getCode()        , WORLD_2         },
+		{ ESCAPE.getCode()         , ESCAPE          },
+		{ ENTER.getCode()          , ENTER           },
+		{ TAB.getCode()            , TAB             },
+		{ BACKSPACE.getCode()      , BACKSPACE       },
+		{ INSERT.getCode()         , INSERT          },
+		{ DELETE.getCode()         , DELETE          },
+		{ RIGHT.getCode()          , RIGHT           },
+		{ LEFT.getCode()           , LEFT            },
+		{ DOWN.getCode()           , DOWN            },
+		{ UP.getCode()             , UP              },
+		{ PAGE_UP.getCode()        , PAGE_UP         },
+		{ PAGE_DOWN.getCode()      , PAGE_DOWN       },
+		{ HOME.getCode()           , HOME            },
+		{ END.getCode()            , END             },
+		{ CAPS_LOCK.getCode()      , CAPS_LOCK       },
+		{ SCROLL_LOCK.getCode()    , SCROLL_LOCK     },
+		{ NUM_LOCK.getCode()       , NUM_LOCK        },
+		{ PRINT_SCREEN.getCode()   , PRINT_SCREEN    },
+		{ PAUSE.getCode()          , PAUSE           },
+		{ F1.getCode()             , F1              },
+		{ F2.getCode()             , F2              },
+		{ F3.getCode()             , F3              },
+		{ F4.getCode()             , F4              },
+		{ F5.getCode()             , F5              },
+		{ F6.getCode()             , F6              },
+		{ F7.getCode()             , F7              },
+		{ F8.getCode()             , F8              },
+		{ F9.getCode()             , F9              },
+		{ F10.getCode()            , F10             },
+		{ F11.getCode()            , F11             },
+		{ F12.getCode()            , F12             },
+		{ F13.getCode()            , F13             },
+		{ F14.getCode()            , F14             },
+		{ F15.getCode()            , F15             },
+		{ F16.getCode()            , F16             },
+		{ F17.getCode()            , F17             },
+		{ F18.getCode()            , F18             },
+		{ F19.getCode()            , F19             },
+		{ F20.getCode()            , F20             },
+		{ F21.getCode()            , F21             },
+		{ F22.getCode()            , F22             },
+		{ F23.getCode()            , F23             },
+		{ F24.getCode()            , F24             },
+		{ F25.getCode()            , F25             },
+		{ NUMPAD_0.getCode()       , NUMPAD_0        },
+		{ NUMPAD_1.getCode()       , NUMPAD_1        },
+		{ NUMPAD_2.getCode()       , NUMPAD_2        },
+		{ NUMPAD_3.getCode()       , NUMPAD_3        },
+		{ NUMPAD_4.getCode()       , NUMPAD_4        },
+		{ NUMPAD_5.getCode()       , NUMPAD_5        },
+		{ NUMPAD_6.getCode()       , NUMPAD_6        },
+		{ NUMPAD_7.getCode()       , NUMPAD_7        },
+		{ NUMPAD_8.getCode()       , NUMPAD_8        },
+		{ NUMPAD_9.getCode()       , NUMPAD_9        },
+		{ NUMPAD_DECIMAL.getCode() , NUMPAD_DECIMAL  },
+		{ NUMPAD_DIVIDE.getCode()  , NUMPAD_DIVIDE   },
+		{ NUMPAD_MULTIPLY.getCode(), NUMPAD_MULTIPLY },
+		{ NUMPAD_SUBTRACT.getCode(), NUMPAD_SUBTRACT },
+		{ NUMPAD_ADD.getCode()     , NUMPAD_ADD      },
+		{ NUMPAD_ENTER.getCode()   , NUMPAD_ENTER    },
+		{ NUMPAD_EQUAL.getCode()   , NUMPAD_EQUAL    },
+		{ LEFT_SHIFT.getCode()     , LEFT_SHIFT      },
+		{ LEFT_CONTROL.getCode()   , LEFT_CONTROL    },
+		{ LEFT_ALT.getCode()       , NUMPAD_SUBTRACT },
+		{ LEFT_SUPER.getCode()     , NUMPAD_SUBTRACT },
+		{ RIGHT_SHIFT.getCode()    , NUMPAD_SUBTRACT },
+		{ RIGHT_CONTROL.getCode()  , NUMPAD_SUBTRACT },
+		{ RIGHT_ALT.getCode()      , NUMPAD_SUBTRACT },
+		{ RIGHT_SUPER.getCode()    , NUMPAD_SUBTRACT },
+		{ MENU.getCode()           , MENU            },
 	};
 
-	Key getKey(std::string name) {
+	Key getKey(const std::string& name) {
+		for (auto key : keymap) {
+			if (key.second.getName() == name)
+				return key.second;
+		}
+
+		return UNKNOWN;
+	}
+
+	Key getKey(int code) {
 		try {
-			Key& key = keymap.at(name);
+			Key& key = keymap.at(code);
 			return key;
 		} catch (std::out_of_range& const e) {
 			return UNKNOWN;
 		}
 	}
 
-	Key getKey(int code) {
-		for (auto key : keymap) {
-			if (key.second.code == code)
-				return key.second;
-		}
+	std::string Key::getName() const {
+		return name;
+	}
 
-		return UNKNOWN;
+	int Key::getCode() const {
+		return code;
+	}
+
+	// Key <-> Key
+	bool Key::operator==(const Key& other) const {
+		return other.code == code;
+	}
+
+	bool Key::operator!=(const Key& other) const {
+		return other.code != code;
+	}
+
+	bool Key::operator>=(const Key& other) const {
+		return other.code >= code;
+	}
+
+	bool Key::operator>(const Key& other) const {
+		return other.code > code;
+	}
+
+	bool Key::operator<=(const Key& other) const {
+		return other.code <= code;
+	}
+
+	bool Key::operator<(const Key& other) const {
+		return other.code < code;
+	}
+
+	// Key <-> int
+	bool Key::operator==(int other) const {
+		return other == code;
+	}
+
+	bool Key::operator!=(int other) const {
+		return other != code;
+	}
+
+	bool Key::operator>=(int other) const {
+		return other >= code;
+	}
+
+	bool Key::operator>(int other) const {
+		return other > code;
+	}
+
+	bool Key::operator<=(int other) const {
+		return other <= code;
+	}
+
+	bool Key::operator<(int other) const {
+		return other < code;
+	}
+
+	// Key <-> string
+	bool Key::operator==(const std::string& other) const {
+		return other == name;
+	}
+
+	bool Key::operator!=(const std::string& other) const {
+		return other != name;
+	}
+	
+	// Modifiers
+
+	int Modifiers::getModifiers() const {
+		return modifiers;
+	}
+	
+	bool Modifiers::isCtrlPressed() const {
+		return modifiers & MOD_CTRL;
+	}
+	
+	bool Modifiers::isShiftPressed() const {
+		return modifiers & MOD_SHIFT;
+	}
+	
+	bool Modifiers::isSuperPressed() const {
+		return modifiers & MOD_SUPER;
+	}
+	
+	bool Modifiers::isAltPressed() const {
+		return modifiers & MOD_ALT;
 	}
 }

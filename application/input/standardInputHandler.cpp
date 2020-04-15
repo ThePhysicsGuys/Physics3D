@@ -60,17 +60,17 @@ bool StandardInputHandler::onFrameBufferResize(FrameBufferResizeEvent& event) {
 }
 
 bool StandardInputHandler::onKeyPressOrRepeat(KeyPressEvent& event) {
-	int key = event.getKey();
+	Keyboard::Key key = event.getKey();
 
-	if (KeyboardOptions::Tick::Speed::up == key) {
+	if (key == KeyboardOptions::Tick::Speed::up) {
 		setSpeed(getSpeed() * 1.5);
 		Log::info("TPS is now: %f", getSpeed());
-	} else if (KeyboardOptions::Tick::Speed::down == key) {
+	} else if (key == KeyboardOptions::Tick::Speed::down) {
 		setSpeed(getSpeed() / 1.5);
 		Log::info("TPS is now: %f", getSpeed());
-	} else if (KeyboardOptions::Tick::run == key) {
+	} else if (key == KeyboardOptions::Tick::run) {
 		if (isPaused()) runTick();
-	} else if (Keyboard::O == key) {
+	} else if (key == Keyboard::O) {
 		world.asyncModification([]() {
 			Position pos(0.0 + (rand() % 100) * 0.001, 1.0 + (rand() % 100) * 0.001, 0.0 + (rand() % 100) * 0.001);
 
@@ -85,11 +85,11 @@ bool StandardInputHandler::onKeyPressOrRepeat(KeyPressEvent& event) {
 bool StandardInputHandler::onKeyPress(KeyPressEvent& event) {
 	using namespace Graphics::Debug;
 
-	int key = event.getKey();
+	Keyboard::Key key = event.getKey();
 
-	if (KeyboardOptions::Tick::pause == key) {
+	if (key == KeyboardOptions::Tick::pause) {
 		togglePause();
-	} else if (KeyboardOptions::Part::remove == key) {
+	} else if (key == KeyboardOptions::Part::remove) {
 		if (screen.selectedPart != nullptr) {
 			screen.world->asyncModification([world = screen.world, selectedPart = screen.selectedPart]() {
 				world->removePart(selectedPart);
@@ -97,12 +97,12 @@ bool StandardInputHandler::onKeyPress(KeyPressEvent& event) {
 			screen.world->selectedPart = nullptr;
 			screen.selectedPart = nullptr;
 		}
-	} else if (KeyboardOptions::Debug::pies == key) {
+	} else if (key == KeyboardOptions::Debug::pies) {
 		renderPiesEnabled = !renderPiesEnabled;
-	} else if(KeyboardOptions::Part::makeMainPart == key) {
+	} else if(key == KeyboardOptions::Part::makeMainPart) {
 		Log::info("Made %s the main part of it's physical", screen.selectedPart->name.c_str());
 		screen.selectedPart->makeMainPart();
-	} else if(KeyboardOptions::Part::makeMainPhysical == key) {
+	} else if(key == KeyboardOptions::Part::makeMainPhysical) {
 		if(screen.selectedPart->parent != nullptr) {
 			if(!screen.selectedPart->parent->isMainPhysical()) {
 				Log::info("Made %s the main physical", screen.selectedPart->name.c_str());
@@ -113,38 +113,38 @@ bool StandardInputHandler::onKeyPress(KeyPressEvent& event) {
 		} else {
 			Log::warn("This part has no physical!");
 		}
-	} else if (KeyboardOptions::World::valid == key) {
+	} else if (key == KeyboardOptions::World::valid) {
 		Log::debug("Checking World::isValid()");
 		screen.world->asyncReadOnlyOperation([world = screen.world]() {
 			world->isValid();
 		});
-	} else if (KeyboardOptions::Edit::rotate == key) {
+	} else if (key == KeyboardOptions::Edit::rotate) {
 		Picker::editTools.editMode = EditTools::EditMode::ROTATE;
-	} else if (KeyboardOptions::Edit::translate == key) {
+	} else if (key == KeyboardOptions::Edit::translate) {
 		Picker::editTools.editMode = EditTools::EditMode::TRANSLATE;
-	} else if (KeyboardOptions::Edit::scale == key) {
+	} else if (key == KeyboardOptions::Edit::scale) {
 		Picker::editTools.editMode = EditTools::EditMode::SCALE;
-	} else if (KeyboardOptions::Debug::spheres == key) {
+	} else if (key == KeyboardOptions::Debug::spheres) {
 		colissionSpheresMode = static_cast<SphereColissionRenderMode>((static_cast<int>(colissionSpheresMode) + 1) % 3);
-	} else if (KeyboardOptions::Debug::tree == key) {
+	} else if (key == KeyboardOptions::Debug::tree) {
 		colTreeRenderMode = static_cast<ColTreeRenderMode>((static_cast<int>(colTreeRenderMode) + 1) % 5);
 	}
 
-	if (Keyboard::F1 <= key && Keyboard::F9 >= key) {
-		toggleVectorType(static_cast<Debug::VectorType>(key - Keyboard::F1.code));
+	if (key < Keyboard::F9 && key > Keyboard::F1) {
+		toggleVectorType(static_cast<Debug::VectorType>(key.getCode() - Keyboard::F1.getCode()));
 	}
 
-	if (Keyboard::NUMBER_1 <= key && Keyboard::NUMBER_3 >= key) {
-		togglePointType(static_cast<Debug::PointType>(key - Keyboard::NUMBER_1.code));
+	if (key < Keyboard::NUMBER_3 && key > Keyboard::NUMBER_1) {
+		togglePointType(static_cast<Debug::PointType>(key.getCode() - Keyboard::NUMBER_1.getCode()));
 	}
 
 	return onKeyPressOrRepeat(event);
 };
 
 bool StandardInputHandler::onDoubleKeyPress(DoubleKeyPressEvent& event) {
-	int key = event.getKey();
+	Keyboard::Key key = event.getKey();
 
-	if (KeyboardOptions::Move::fly == key) {
+	if (key == KeyboardOptions::Move::fly) {
 		toggleFlying();
 	}
 

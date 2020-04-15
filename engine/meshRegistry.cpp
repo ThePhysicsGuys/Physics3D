@@ -115,14 +115,14 @@ VisualData addMeshShape(const Graphics::VisualShape& shape) {
 	int size = (int) meshes.size();
 	
 	IndexedMesh* mesh = new IndexedMesh(shape);
+
+	// Todo move somewhere else
 	VertexBuffer* uniformBuffer = new VertexBuffer(nullptr, 0, Graphics::Renderer::STREAM_DRAW);
 	BufferLayout uniformLayout = BufferLayout(
 		{
 			BufferElement("vModelMatrix", BufferDataType::MAT4, true),
-			BufferElement("vAmbient", BufferDataType::FLOAT4, true),
-			BufferElement("vDiffuse", BufferDataType::FLOAT3, true),
-			BufferElement("vSpecular", BufferDataType::FLOAT3, true),
-			BufferElement("vReflectance", BufferDataType::FLOAT, true),
+			BufferElement("vAlbedo", BufferDataType::FLOAT4, true),
+			BufferElement("vMRAo", BufferDataType::FLOAT3, true),
 		}
 	);
 	mesh->addUniformBuffer(uniformBuffer, uniformLayout);

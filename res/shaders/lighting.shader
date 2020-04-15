@@ -1,4 +1,5 @@
 [common]
+
 #version 450
 
 vec4 apply(mat4 matrix, vec3 vector) {
@@ -41,21 +42,24 @@ vec4 rgba(float color) {
 	return vec4(color, color, color, 1.0);
 }
 
+//------------------------------------------------------------------------------//
+
 [vertex]
+
 layout(location = 0) in vec3 vPosition;
 layout(location = 1) in vec3 vNormal;
 layout(location = 2) in vec2 vUV;
 layout(location = 3) in vec3 vTangent;
 layout(location = 4) in vec3 vBitangent;
 layout(location = 5) in mat4 vModelMatrix;
-layout(location = 9) in vec3 vAlbedo;
+layout(location = 9) in vec4 vAlbedo;
 layout(location = 10) in vec3 vMRAo;
 
 smooth out vec3 fPosition;
 smooth out vec2 fUV;
 smooth out vec3 fNormal;
  
-flat out vec3 fAlbedo;
+flat out vec4 fAlbedo;
 flat out float fMetallic;
 flat out float fRoughness;
 flat out float fAmbientOcclusion;
@@ -76,6 +80,8 @@ void main() {
 	gl_Position = applyT(projectionMatrix * viewMatrix, fPosition);
 }
 
+//------------------------------------------------------------------------------//
+
 [fragment]
 
 // Out
@@ -86,7 +92,7 @@ smooth in vec2 fUV;
 smooth in vec3 fPosition;
 smooth in vec3 fNormal; 
 
-flat in vec3 fAlbedo;
+flat in vec4 fAlbedo;
 flat in float fRoughness;
 flat in float fMetallic;
 flat in float fAmbientOcclusion;
@@ -94,7 +100,7 @@ flat in float fAmbientOcclusion;
 // General
 vec3 N;
 vec3 V;
-vec3 albedo;
+vec4 albedo;
 float roughness;
 float metallic;
 float ambientOcclusion;
@@ -134,7 +140,7 @@ uniform vec3 sunDirection = vec3(1, 1, 1);
 uniform vec3 sunColor = vec3(1, 1, 1);
 uniform float exposure = 1.0;
 uniform float gamma = 1.0;
-uniform int hdr = 1;
+uniform float hdr = 1.0;
 
 // Constants
 const float PI = 3.14159265359;
@@ -195,7 +201,7 @@ vec3 calcLightColor(Light light) {
 
 	// Fresnel
 	vec3 F0_NM = vec3(0.04); // Non metallic F0
-	vec3 F0 = mix(F0_NM, albedo, metallic);
+	vec3 F0 = mix(F0_NM, albedo.rgb, metallic);
 	float cosTheta = max(dot(H, V), 0.0);
 	vec3 F = fresnelSchlick(cosTheta, F0);
 
@@ -215,7 +221,7 @@ vec3 calcLightColor(Light light) {
 	kD *= 1.0 - metallic;
 
 	float NdotL = max(dot(N, L), 0.0);
-	vec3 Lo = (kD * albedo / PI + specular) * radiance * NdotL;
+	vec3 Lo = (kD * albedo.rgb / PI + specular) * radiance * NdotL;
 	
 	return Lo;
 }
@@ -238,7 +244,7 @@ vec3 getNormalFromMap() {
 
 void main() {
 	if (textured == 1) {
-		albedo = texture(albedoMap, fUV).rgb * texture(albedoMap, fUV).rgb;
+		albedo = texture(albedoMap, fUV) * texture(albedoMap, fUV);
 		N = getNormalFromMap();
 		roughness = 1-texture(roughnessMap, fUV).r;
 		metallic = texture(metallicMap, fUV).r;
@@ -260,12 +266,20 @@ void main() {
 		}
 	}
 
-	vec3 ambient = vec3(0.03) * albedo * ambientOcclusion;
-	vec3 color = ambient + Lo;
-	color = color / (color + vec3(1.0));
-	color = pow(color, vec3(1.0 / 2.2));
+	// Ambient
+	vec3 ambient = vec3(0.03) * albedo.rgb * ambientOcclusion;
 
-	outColor = vec4(color, 1.0);
+	// Combine ambient and lighting
+	vec3 color = ambient + Lo;
+
+	// HDR 
+	color = hdr * (vec3(1.0) - exp(-color * exposure)) + (1.0 - hdr) * color;
+
+	// Gamma
+	color = pow(color, vec3(1.0 / gamma));
+
+	// Outcolor
+	outColor = vec4(color, albedo.a);
 
 	//outColor = rgba(N);
 	//outColor = texture(normalMap, fUV);

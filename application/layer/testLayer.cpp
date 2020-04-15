@@ -26,7 +26,7 @@ namespace Application {
 
 struct Uniform {
 	Mat4f model;
-	Vec3f albedo;
+	Vec4f albedo;
 	Vec3f mrao;
 };
 
@@ -48,7 +48,7 @@ void TestLayer::onInit() {
 							0, 0, 1, 0,
 							0, 0, 0, 1,
 						},
-						Vec3f(0.5, 0, 0),
+						Vec4f(0.5, 0.1, 0.3, 0.7),
 						Vec3f(row / size, col / size + 0.05f, 1.0f),
 					}
 				);
@@ -59,7 +59,7 @@ void TestLayer::onInit() {
 	BufferLayout layout = BufferLayout(
 		{
 			BufferElement("vModelMatrix", BufferDataType::MAT4, true),
-			BufferElement("vAlbedo", BufferDataType::FLOAT3, true),
+			BufferElement("vAlbedo", BufferDataType::FLOAT4, true),
 			BufferElement("vMRAo", BufferDataType::FLOAT3, true),
 		}
 	);
@@ -92,7 +92,7 @@ void TestLayer::onUpdate() {
 
 void TestLayer::onEvent(Event& event) {
 	if (event.getType() == EventType::KeyPress) {
-		if (static_cast<KeyPressEvent&>(event).getKey() == Keyboard::TAB.code) {
+		if (static_cast<KeyPressEvent&>(event).getKey() == Keyboard::TAB) {
 			llights[0]->position = fromPosition(screen.camera.cframe.position);
 			ApplicationShaders::lightingShader.updateLight(llights);
 		}
@@ -109,7 +109,7 @@ void TestLayer::onRender() {
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glEnable(GL_BLEND);
-	glDisable(GL_CULL_FACE);
+	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 	ApplicationShaders::lightingShader.bind();
 

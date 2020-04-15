@@ -104,44 +104,32 @@ void onClose() {
 
 // BasicShader
 
-void BasicShader::updateUniforms(int id) {
-	bind();
-	setUniform("uniforms", id);
-}
-
 void BasicShader::updatePart(const ExtendedPart& part) {
 	bind();
-	BasicShader::updateIncludeNormalsAndUVs(part.visualData.includeNormals, part.visualData.includeUVs);
+	BasicShader::updateTexture(false);
 	BasicShader::updateModel(part.getCFrame(), DiagonalMat3f(part.hitbox.scale));
-}
-void BasicShader::updateIncludeNormalsAndUVs(bool includeNormals, bool includeUVs) {
-	bind();
-	setUniform("includeNormals", int(includeNormals));
-	setUniform("includeUvs", int(includeUVs));
 }
 
 void BasicShader::updateMaterial(const Material& material) {
 	bind();
-	setUniform("material.ambient", material.ambient);
-	setUniform("material.diffuse", material.diffuse);
-	setUniform("material.specular", material.specular);
-	setUniform("material.reflectance", material.reflectance);
+	setUniform("material.albedo", material.albedo);
+	setUniform("material.metalness", material.metalness);
+	setUniform("material.roughness", material.roughness);
+	setUniform("material.ambientOcclusion", material.ao);
 
-	if (material.texture) {
-		material.texture->bind();
-		setUniform("material.textured", 1);
-		setUniform("textureSampler", material.texture->getUnit());
-	} else {
-		setUniform("material.textured", 0);
-		setUniform("textureSampler", 0);
-	}
-
-	if (material.normal) {
-		material.normal->bind();
-		setUniform("material.normalmapped", 1);
-		setUniform("normalSampler", material.normal->getUnit());
-	}
+	// todo Bind textures
 }
+
+void BasicShader::updateTexture(bool textured) {
+	bind();
+	setUniform("material.albedoMap", 0);
+	setUniform("material.normalMap", 1);
+	setUniform("material.metalnessMap", 2);
+	setUniform("material.roughnessMap", 3);
+	setUniform("material.ambientOcclusionMap", 4);
+	setUniform("material.textured", textured);
+}
+
 
 void BasicShader::updateLight(const std::vector<Light*> lights) {
 	bind();
@@ -195,7 +183,7 @@ void BasicShader::updateGamma(float gamma) {
 	setUniform("gamma", gamma);
 }
 
-void BasicShader::updateHDR(bool hdr) {
+void BasicShader::updateHDR(float hdr) {
 	bind();
 	setUniform("hdr", hdr);
 }
@@ -429,15 +417,13 @@ void InstanceShader::updateLight(const std::vector<Light*> lights) {
 	}
 }
 
-void InstanceShader::updateIncludeNormalsAndUVs(bool includeNormals, bool includeUVs) {
-	bind();
-	setUniform("includeNormals", int(includeNormals));
-	setUniform("includeUVs", int(includeUVs));
-}
-
 void InstanceShader::updateTexture(bool textured) {
 	bind();
-	setUniform("textureSampler", 0);
+	setUniform("albedoMap", 0);
+	setUniform("normalMap", 1);
+	setUniform("metalnessMap", 2);
+	setUniform("roughnessMap", 3);
+	setUniform("ambientOcclusionMap", 4);
 	setUniform("textured", textured);
 }
 
@@ -456,7 +442,7 @@ void InstanceShader::updateGamma(float gamma) {
 	setUniform("gamma", gamma);
 }
 
-void InstanceShader::updateHDR(bool hdr) {
+void InstanceShader::updateHDR(float hdr) {
 	bind();
 	setUniform("hdr", hdr);
 }
@@ -466,10 +452,11 @@ void InstanceShader::updateExposure(float exposure) {
 	setUniform("exposure", exposure);
 }
 
-void InstanceShader::updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix) {
+void InstanceShader::updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Position& viewPosition) {
 	bind();
 	setUniform("viewMatrix", viewMatrix);
 	setUniform("projectionMatrix", projectionMatrix);
+	setUniform("viewPosition", viewPosition);
 }
 
 
