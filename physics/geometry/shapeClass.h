@@ -35,6 +35,10 @@ public:
 	virtual double getScaledMaxRadius(DiagonalMat3 scale) const;
 	virtual double getScaledMaxRadiusSq(DiagonalMat3 scale) const = 0;
 
+	/*
+		This must return a valid Vec3f on the surface of the shape, even for 0,0,0
+		Does not need to take account of NaN or infinities in the input argument
+	*/
 	virtual Vec3f furthestInDirection(const Vec3f& direction) const = 0;
 
 	virtual Polyhedron asPolyhedron() const = 0;

@@ -257,9 +257,7 @@ bool runEPATransformed(const ColissionPair& info, const Tetrahedron& s, Vec3f& i
 		MinkPoint point(getSupport(info, closestTriangleNormal));
 
 		
-		if(!isVecValid(point.p)) {
-			throw std::runtime_error("Bad support point");
-		}
+		catchable_assert(isVecValid(point.p));
 
 		// point is the new point to be added, check if it's past the current triangle
 		double newPointDistSq = pow(point.p * closestTriangleNormal, 2) / lengthSquared(closestTriangleNormal);

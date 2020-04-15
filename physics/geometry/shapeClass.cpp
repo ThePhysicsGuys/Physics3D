@@ -109,7 +109,9 @@ struct SphereClass : public ShapeClass {
 	}
 
 	virtual Vec3f furthestInDirection(const Vec3f& direction) const {
-		return normalize(direction);
+		double lenSq = lengthSquared(direction);
+		if(lenSq == 0.0) return Vec3f(1.0f, 0.0f, 0.0f);
+		return direction / sqrt(lenSq);
 	}
 
 	virtual Polyhedron asPolyhedron() const {
@@ -212,8 +214,11 @@ struct CylinderClass : public ShapeClass {
 	}
 
 	virtual Vec3f furthestInDirection(const Vec3f& direction) const {
-		float normalizer = sqrt(direction.x * direction.x + direction.y * direction.y);
-		return Vec3f(direction.x / normalizer, direction.y / normalizer, (direction.z >= 0.0f) ? 1.0f : -1.0f);
+		float z = (direction.z >= 0.0f) ? 1.0f : -1.0f;
+		float lenSq = direction.x * direction.x + direction.y * direction.y;
+		if(lenSq == 0.0) return Vec3f(1.0f, 0.0f, z);
+		float length = sqrt(lenSq);
+		return Vec3f(direction.x / length, direction.y / length, z);
 	}
 
 	virtual Polyhedron asPolyhedron() const {
