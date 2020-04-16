@@ -54,6 +54,16 @@ bool endsWith(const std::string& string, const std::string& suffix) {
 	return true;
 }
 
+std::string until(const std::string& string, char end) {
+	size_t l = string.length();
+	for (size_t i = 0; i < l; i++) {
+		if (string.at(i) == end)
+			return string.substr(0, i);
+	}
+
+	return string;
+}
+
 std::string ltrim(std::string string) {
 	string.erase(string.begin(), std::find_if(string.begin(), string.end(), [] (int ch) {
 		return ch != ' ' && ch != '\t' && ch != '\n' && ch != '\r';

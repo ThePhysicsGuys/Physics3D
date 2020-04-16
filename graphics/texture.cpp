@@ -16,6 +16,8 @@ namespace Graphics {
 
 //! Texture
 
+Texture* Texture::_white = nullptr;
+
 int getChannelsFromFormat(int format) {
 	switch (format) {
 		case GL_RED:
@@ -77,6 +79,15 @@ Texture Texture::load(const std::string& name) {
 
 		return Texture();
 	}
+}
+
+Texture* Texture::white() {
+	if (_white == nullptr) {
+		Color buffer = COLOR::WHITE;
+		_white = new Texture(1, 1, &buffer, GL_RGBA);
+	}
+
+	return _white;
 }
 
 Texture::Texture() : width(0), height(0), internalFormat(0), format(0), target(0), type(0), unit(0), channels(0) {

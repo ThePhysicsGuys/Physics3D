@@ -7,12 +7,14 @@
 
 namespace Util {
 
-std::string Properties::get(std::string property) const {
+std::regex Properties::regex = std::regex(" *.+ *: *.+ *");
+
+std::string Properties::get(const std::string& property) const {
 	try {
 		std::string value = properties.at(property);
 		return value;
 	} catch (const std::out_of_range&) {
-		return NOT_FOUND;
+		return "";
 	}
 }
 
@@ -38,8 +40,6 @@ void Properties::remove(const std::string& property) {
 
 namespace PropertiesParser {
 	Properties read(const std::string& file) {
-		Properties properties;
-
 		Log::subject s(file);
 
 		std::ifstream inputstream;
@@ -47,24 +47,24 @@ namespace PropertiesParser {
 
 		if (!inputstream.is_open()) {
 			Log::error("Properties file can't be found");
-			return properties;
+			return Properties();
 		}
+
+		Properties properties(file);
 
 		std::string line;
 		while (getline(inputstream, line)) {
 			line = trim(line);
+			
 			if (line.empty() || line.at(0) == '#') {
 				continue;
+			} else if (!std::regex_match(line, Properties::regex)) {
+				Log::warn("Incorrect syntax: %s", line.c_str());
 			} else {
 				size_t pos = line.find(":");
-				
-				if (pos == std::string::npos) {
-					Log::warn("Invalid property syntax: %s", line.c_str());
-					continue;
-				}
-
 				std::string property = rtrim(line.substr(0, pos));
-				std::string value = ltrim(line.substr(pos + 1, line.length()));
+				std::string value = until(ltrim(line.substr(pos + 1, line.length())), ' ');
+
 				properties.set(property, value);
 			}
 		}
@@ -74,23 +74,55 @@ namespace PropertiesParser {
 		return properties;
 	}
 
-	void write(const std::string& file, Properties& properties) {
-		Log::subject s(file);
+	void write(const std::string& filename, Properties& properties) {
+		Log::subject s(filename);
 
 		Log::info("Writing %d properties", properties.get().size());
 
-		std::ofstream outputstream;
-		outputstream.open(file.c_str(), std::ofstream::out | std::ofstream::trunc);
+		std::ifstream ifile;
+		ifile.open(filename.c_str(), std::ios::in);
 
-		if (!outputstream.is_open()) {
+		if (!ifile.is_open()) 
 			Log::error("Properties file can't be found, creating new one");
-		}
+		
+		// Read and save
+		std::string line;
+		std::vector<std::string> lines;
+		while (getline(ifile, line)) {
+			std::string trimmedLine = trim(line);
 
-		for (auto property : properties.get()) {
-			outputstream << property.first << ": " << property.second << std::endl;
-		}
+			if (trimmedLine.empty() || trimmedLine.at(0) == '#' || !std::regex_match(trimmedLine, Properties::regex)) { 
+				lines.push_back(line);
+				continue;
+			} else {
+				size_t pos = line.find(":");
+				std::string property = line.substr(0, pos);
+				std::string value = line.substr(pos + 1, line.length());
+				std::string trimmedProperty = rtrim(property);				
+				std::string trimmedValue = until(ltrim(value), ' ');
+				std::string newTrimmedValue = properties.get(trimmedProperty);
 
-		outputstream.close();
+				if (trimmedValue == newTrimmedValue) {
+					lines.push_back(line);
+					continue;
+				}
+
+				auto position = value.find(trimmedValue);
+				std::string newValue = value.replace(position, position + trimmedValue.length(), newTrimmedValue);
+
+				std::string newLine = property + ":" + newValue;
+
+				lines.push_back(newLine);
+			}
+		}
+		ifile.close();
+
+		// Write
+		std::ofstream ofile;
+		ofile.open(filename.c_str(), std::ios::out | std::ios::trunc);
+		for (std::string& line : lines) 
+			ofile << line << std::endl;
+		ofile.close();
 	}
 }
 

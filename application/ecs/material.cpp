@@ -7,6 +7,10 @@
 
 namespace Application {
 
+Material::Material(const Color& albedo, float metalness, float roughness, float ao) : albedo(albedo), metalness(metalness), roughness(roughness), ao(ao) {
+	
+}
+
 void Material::set(Map map, Graphics::Texture* texture) {
 	assert(powOf2(map));
 	maps[ctz(map)] = texture;

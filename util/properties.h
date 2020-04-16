@@ -2,18 +2,22 @@
 
 #include <string>
 #include <map>	
+#include <regex>
 
 namespace Util {
 
 class Properties {
-private:
+private:	
+	std::string filename;
 	std::map<std::string, std::string> properties;
+
 public:
-	Properties() {};
+	static std::regex regex;
+	
+	inline Properties() {};
+	inline Properties(const std::string& filename) : filename(filename) {};
 
-	std::string NOT_FOUND = "";
-
-	std::string get(std::string property) const;
+	std::string get(const std::string& property) const;
 	std::map<std::string, std::string> get();
 	void set(const std::string& property, const std::string& value);
 	void remove(const std::string& property);

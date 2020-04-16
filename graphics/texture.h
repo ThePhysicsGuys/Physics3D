@@ -6,6 +6,9 @@
 namespace Graphics {
 
 class Texture : public Bindable {
+private:
+	static Texture* _white;
+
 protected:
 	int width;
 	int height;
@@ -45,6 +48,7 @@ public:
 	Texture* colored(Color color);
 
 	static Texture load(const std::string& name);
+	static Texture* white();
 
 	float getAspect() const;
 	int getWidth() const;

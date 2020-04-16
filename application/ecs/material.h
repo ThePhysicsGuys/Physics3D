@@ -14,7 +14,7 @@ private:
 	Graphics::Texture* maps[8];
 
 public:
-	enum Map : char {
+	enum Map : unsigned char {
 		NONE = 0 << 0,
 		ALBEDO = 1 << 0,
 		NORMAL = 1 << 1,
@@ -33,7 +33,7 @@ public:
 	float roughness;
 	float ao;
 
-	inline Material(const Color& albedo = Color(1), float metalness = 1.0f, float roughness = 1.0f, float ao = 1.0f) : albedo(albedo), metalness(metalness), roughness(roughness), ao(ao) {};
+	Material(const Color& albedo = Color(1), float metalness = 1.0f, float roughness = 1.0f, float ao = 1.0f);
 
 	void reset(Map flag);
 	void set(Map flag, Graphics::Texture* map);
