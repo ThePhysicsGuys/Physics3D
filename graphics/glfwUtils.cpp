@@ -1,6 +1,8 @@
 #include "core.h"
 
-#include "renderUtils.h"
+#include "glfwUtils.h"
+
+#include <GLFW/glfw3.h>
 
 namespace Graphics {
 

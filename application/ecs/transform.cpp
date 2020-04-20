@@ -6,11 +6,11 @@
 
 namespace Application {
 
-TransformComponent::TransformComponent(const GlobalCFrame& cframe) {
+Transform::Transform(const GlobalCFrame& cframe) {
 	this->cframe = cframe;
 }
 
-GlobalCFrame TransformComponent::getCFrame() const {
+GlobalCFrame Transform::getCFrame() const {
 	Model* model = getEntity()->getComponent<Model>();
 
 	if (model != nullptr)
@@ -19,7 +19,7 @@ GlobalCFrame TransformComponent::getCFrame() const {
 	return cframe;
 }
 
-void TransformComponent::setCFrame(const GlobalCFrame& cframe) {
+void Transform::setCFrame(const GlobalCFrame& cframe) {
 	this->cframe = cframe;
 }
 

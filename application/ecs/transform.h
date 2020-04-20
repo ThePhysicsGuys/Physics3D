@@ -8,7 +8,7 @@ namespace Application {
 /*
 	A Component representing the position, rotation and scale of the parent entity
 */
-class TransformComponent : public Engine::Component {
+class Transform : public Engine::Component {
 private:
 	/*
 		The Cframe of this TransformComp
@@ -16,12 +16,12 @@ private:
 	GlobalCFrame cframe;
 
 public:
-	DEFINE_COMPONENT(TransformComponent, true);
+	DEFINE_COMPONENT(Transform, true);
 
 	/*
 		Created a new TransformComp with the given CFrame
 	*/
-	TransformComponent(const GlobalCFrame& cframe);
+	Transform(const GlobalCFrame& cframe);
 
 	/*
 		Return the cframe of this TransformComp

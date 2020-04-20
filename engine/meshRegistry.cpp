@@ -70,7 +70,24 @@ static Graphics::VisualShape createCylinder(int sides, double radius, double hei
 		normalBuffer[i * 2 + sides * 2 + 1] = Vec3f(0, 0, -1);
 	}
 
-	return Graphics::VisualShape(vertexBuffer, vertexCount, triangleBuffer, triangleCount, SharedArrayPtr<const Vec3f>(normalBuffer));
+	Vec2f* uvBuffer = new Vec2f[vertexCount];
+	for (int i = 0; i < vertexCount; i++) {
+		Vec3f& p = vertexBuffer[i];
+
+		float u = 0;
+		float v = p.y / height;
+		if (p.x >= 0) {
+			if (p.x == 0)
+				u = asin(p.y / sqrt(p.x * p.x + p.y * p.y));
+			else
+				u = atan(p.y / p.x);
+		} else
+			u = -asin(p.y / sqrt(p.x * p.x + p.y * p.y)) + PI;
+
+		uvBuffer[i] = Vec2f(u, v);
+	}
+
+	return Graphics::VisualShape(vertexBuffer, vertexCount, triangleBuffer, triangleCount, SharedArrayPtr<const Vec3f>(normalBuffer), SharedArrayPtr<const Vec2f>(uvBuffer));
 }
 
 Graphics::VisualShape createSphere(double radius, int steps) {
@@ -78,11 +95,20 @@ Graphics::VisualShape createSphere(double radius, int steps) {
 	Graphics::VisualShape sphereShape = Graphics::VisualShape(sphere);
 
 	Vec3f* normalBuffer = new Vec3f[sphereShape.vertexCount];
+	Vec2f* uvBuffer = new Vec2f[sphereShape.vertexCount];
 	int i = 0;
-	for (Vec3f vertex : sphereShape.iterVertices())
-		normalBuffer[i++] = normalize(vertex);
+	for (Vec3f vertex : sphereShape.iterVertices()) {
+		Vec3f normal = normalize(vertex);
+		Vec2f uv = Vec2f(atan2(normal.x, normal.z) / (2 * PI) + 0.5, normal.y * 0.5 + 0.5);
+
+		normalBuffer[i] = normal;
+		uvBuffer[i] = uv;
+
+		i++;
+	}
 
 	sphereShape.normals = SharedArrayPtr<const Vec3f>(normalBuffer);
+	sphereShape.uvs = SharedArrayPtr<const Vec2f>(uvBuffer);
 	return sphereShape;
 }
 

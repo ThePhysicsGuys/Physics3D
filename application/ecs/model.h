@@ -38,12 +38,12 @@ public:
 	/*
 		Returns the transform of this model's extendedPart
 	*/
-	TransformComponent getTransform();
+	Transform getTransform();
 
 	/*
 		Sets the transform of this model's ExtendedPart to the given value
 	*/
-	void setTransform(const TransformComponent& transform);
+	void setTransform(const Transform& transform);
 };
 
 };

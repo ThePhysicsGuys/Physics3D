@@ -417,14 +417,14 @@ void InstanceShader::updateLight(const std::vector<Light*> lights) {
 	}
 }
 
-void InstanceShader::updateTexture(bool textured) {
+void InstanceShader::updateTexture(unsigned char flags) {
 	bind();
 	setUniform("albedoMap", 0);
 	setUniform("normalMap", 1);
 	setUniform("metalnessMap", 2);
 	setUniform("roughnessMap", 3);
 	setUniform("ambientOcclusionMap", 4);
-	setUniform("textured", textured);
+	setUniform("textured", flags);
 }
 
 void InstanceShader::updateSunDirection(const Vec3f& sunDirection) {

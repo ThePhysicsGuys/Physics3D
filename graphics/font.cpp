@@ -5,7 +5,6 @@
 #include "GL\glew.h"
 #include "GLFW\glfw3.h"
 
-#include "renderUtils.h"
 #include "gui/gui.h"
 #include "mesh/primitive.h"
 

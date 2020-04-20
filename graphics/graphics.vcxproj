@@ -262,7 +262,7 @@
     <ClCompile Include="mesh\vectorMesh.cpp" />
     <ClCompile Include="path\path.cpp" />
     <ClCompile Include="path\path3D.cpp" />
-    <ClCompile Include="renderUtils.cpp" />
+    <ClCompile Include="glfwUtils.cpp" />
     <ClCompile Include="resource\fontResource.cpp" />
     <ClCompile Include="resource\shaderResource.cpp" />
     <ClCompile Include="resource\textureResource.cpp" />
@@ -319,7 +319,7 @@
     <ClInclude Include="path\path.h" />
     <ClInclude Include="path\path3D.h" />
     <ClInclude Include="renderer.h" />
-    <ClInclude Include="renderUtils.h" />
+    <ClInclude Include="glfwUtils.h" />
     <ClInclude Include="resource\fontResource.h" />
     <ClInclude Include="resource\shaderResource.h" />
     <ClInclude Include="resource\textureResource.h" />

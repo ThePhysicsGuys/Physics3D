@@ -6,7 +6,7 @@
 #include <GLFW/glfw3.h>
 
 #include "../graphics/renderer.h"
-#include "../graphics/renderUtils.h"
+#include "../graphics/glfwUtils.h"
 #include "../graphics/texture.h"
 #include "shader/shaders.h"
 
@@ -185,7 +185,7 @@ void Screen::onInit() {
 	camera.onUpdate(1.0f, camera.aspect, 0.01f, 10000.0f);
 
 	// Resize
-	FrameBufferResizeEvent event(dimension.x, dimension.y);
+	Engine::FrameBufferResizeEvent event(dimension.x, dimension.y);
 	handler->onFrameBufferResize(event);
 
 	ImGui::CreateContext();
@@ -240,7 +240,8 @@ void Screen::onUpdate() {
 	layerStack.onUpdate();
 }
 
-void Screen::onEvent(::Event& event) {
+void Screen::onEvent(Engine::Event& event) {
+	using namespace Engine;
 
 	// Consume ImGui events
 	if (event.inCategory(EventCategoryKeyboard | EventCategoryMouseButton) || ImGui::IsAnyItemHovered() || ImGui::IsAnyItemActive()) {

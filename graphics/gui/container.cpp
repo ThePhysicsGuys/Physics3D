@@ -3,7 +3,6 @@
 #include "container.h"
 
 #include "layout.h"
-#include "renderUtils.h"
 #include "path/path.h"
 #include "mesh/primitive.h"
 
