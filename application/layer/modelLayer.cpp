@@ -21,11 +21,14 @@
 #include "../graphics/path/path3D.h"
 #include "../graphics/batch/batch.h"
 #include "../graphics/batch/batchConfig.h"
+#include "../graphics/resource/textureResource.h"
 #include "../graphics/gui/color.h"
 
 #include "../physics/math/linalg/vec.h"
 #include "../physics/sharedLockGuard.h"
 #include "../physics/misc/filters/visibilityFilter.h"
+
+#include "../util/resource/resourceManager.h"
 
 namespace Application {
 
@@ -114,7 +117,7 @@ void ModelLayer::onUpdate() {
 
 }
 
-void ModelLayer::onEvent(Event& event) {
+void ModelLayer::onEvent(Engine::Event& event) {
 
 }
 
@@ -183,7 +186,7 @@ void ModelLayer::onRender() {
 
 			offset++;
 		}
-
+		
 		Engine::MeshRegistry::meshes[meshID]->fillUniformBuffer(uniforms.data(), meshCount * sizeof(Uniform), Renderer::STREAM_DRAW);
 		Engine::MeshRegistry::meshes[meshID]->renderInstanced(meshCount);
 	}

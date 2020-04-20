@@ -42,7 +42,7 @@ void DebugOverlay::onUpdate() {
 	fieldIndex = 0;
 }
 
-void DebugOverlay::onEvent(Event& event) {
+void DebugOverlay::onEvent(Engine::Event& event) {
 
 }
 

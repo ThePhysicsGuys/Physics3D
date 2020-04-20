@@ -54,7 +54,7 @@ public:
 
 	void onInit();
 	void onUpdate();
-	void onEvent(Event& event);
+	void onEvent(Engine::Event& event);
 	void onRender();
 	void onClose();
 

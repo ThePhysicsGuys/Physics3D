@@ -11,19 +11,19 @@ namespace Application {
 
 class Screen;
 
-class StandardInputHandler : public InputHandler {
+class StandardInputHandler : public Engine::InputHandler {
 public:
 	Screen& screen;
 
 	StandardInputHandler(GLFWwindow* window, Screen& screen);
 
-	void onEvent(::Event& event) override;
+	void onEvent(Engine::Event& event) override;
 
-	bool onFrameBufferResize(FrameBufferResizeEvent& event);
-	bool onWindowResize(WindowResizeEvent& event);
-	bool onKeyPress(KeyPressEvent& event);
-	bool onKeyPressOrRepeat(KeyPressEvent& event);
-	bool onDoubleKeyPress(DoubleKeyPressEvent& event);
+	bool onFrameBufferResize(Engine::FrameBufferResizeEvent& event);
+	bool onWindowResize(Engine::WindowResizeEvent& event);
+	bool onKeyPress(Engine::KeyPressEvent& event);
+	bool onKeyPressOrRepeat(Engine::KeyPressEvent& event);
+	bool onDoubleKeyPress(Engine::DoubleKeyPressEvent& event);
 };
 
 };

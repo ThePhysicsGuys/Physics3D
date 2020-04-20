@@ -10,11 +10,13 @@
 #include "event/mouseEvent.h"
 #include "event/windowEvent.h"
 
+namespace Engine {
+
 #pragma region callbacks
 
 void InputHandler::keyCallback(int code, int action, int mods) {
-	Keyboard::Key key = Keyboard::getKey(code);
-	Keyboard::Modifiers modifiers = Keyboard::Modifiers(mods);
+	Key key = Keyboard::getKey(code);
+	Modifiers modifiers = Modifiers(mods);
 
 	if (action == Keyboard::KEY_PRESS) {
 		if (keys[key.getCode()] == false && glfwGetTime() - timestamp[key.getCode()] < keyInterval) {
@@ -44,8 +46,18 @@ void InputHandler::cursorCallback(double x, double y) {
 	MouseMoveEvent event(mousePosition.x, mousePosition.y, x, y);
 	onEvent(event);
 
-	if (leftDragging || middleDragging || rightDragging) {
-		MouseDragEvent event(mousePosition.x, mousePosition.y, x, y, leftDragging, middleDragging, rightDragging);
+	if (leftDragging) {
+		MouseDragEvent event(mousePosition.x, mousePosition.y, x, y, Mouse::LEFT, Modifiers(0));
+		onEvent(event);
+	}
+
+	if (middleDragging) {
+		MouseDragEvent event(mousePosition.x, mousePosition.y, x, y, Mouse::MIDDLE, Modifiers(0));
+		onEvent(event);
+	}
+
+	if (rightDragging) {
+		MouseDragEvent event(mousePosition.x, mousePosition.y, x, y, Mouse::RIGHT, Modifiers(0));
 		onEvent(event);
 	}
 
@@ -73,20 +85,19 @@ void InputHandler::scrollCallback(double xOffset, double yOffset) {
 
 void InputHandler::mouseButtonCallback(int button, int action, int mods) {
 	if (action == Mouse::PRESS) {
-
 		if (Mouse::RIGHT == button) rightDragging = true;
 		if (Mouse::MIDDLE == button) middleDragging = true;
 		if (Mouse::LEFT == button) leftDragging = true;
 
-		MousePressEvent event(mousePosition.x, mousePosition.y, button, mods);
+		MousePressEvent event(mousePosition.x, mousePosition.y, Mouse::getButton(button), Modifiers(mods));
 		onEvent(event);
-	} else if (action == Mouse::RELEASE) {
 
+	} else if (action == Mouse::RELEASE) {
 		if (Mouse::RIGHT == button) rightDragging = false;
 		if (Mouse::MIDDLE == button) middleDragging = false;
 		if (Mouse::LEFT == button) leftDragging = false;
 
-		MouseReleaseEvent event(mousePosition.x, mousePosition.y, button, mods);
+		MouseReleaseEvent event(mousePosition.x, mousePosition.y, Mouse::getButton(button), Modifiers(mods));
 		onEvent(event);
 	}
 }
@@ -115,7 +126,7 @@ Vec2 InputHandler::getMousePosition() {
 	return Vec2(x, y);
 }
 
-bool InputHandler::getKey(const Keyboard::Key& key) {
+bool InputHandler::getKey(const Key& key) {
 	if (key.getCode() < Keyboard::KEY_FIRST || key.getCode() > Keyboard::KEY_LAST)
 		return false;
 
@@ -159,3 +170,5 @@ InputHandler::InputHandler(GLFWwindow* window) : window(window) {
 			inputHandler->windowDropCallback(paths[i]);
 	});
 }
+
+};

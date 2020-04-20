@@ -1,9 +1,9 @@
 #pragma once
 
-#include "GL\glew.h"
+#include "keyboard.h"
 #include "GLFW\glfw3.h"
 
-#include "keyboard.h"
+namespace Engine {
 
 class Event;
 
@@ -35,9 +35,10 @@ public:
 
 	InputHandler(GLFWwindow* window);
 
-	bool getKey(const Keyboard::Key& key);
+	bool getKey(const Key& key);
 	Vec2 getMousePosition();
 
 	virtual void onEvent(Event& event) {};
 };
 
+};

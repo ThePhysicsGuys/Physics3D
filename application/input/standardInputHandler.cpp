@@ -23,7 +23,9 @@ namespace Application {
 
 StandardInputHandler::StandardInputHandler(GLFWwindow* window, Screen& screen) : InputHandler(window), screen(screen) {}
 
-void StandardInputHandler::onEvent(::Event& event) {
+void StandardInputHandler::onEvent(Engine::Event& event) {
+	using namespace Engine;
+
 	Application::onEvent(event);
 
 	EventDispatcher dispatcher(event);
@@ -39,7 +41,7 @@ void StandardInputHandler::onEvent(::Event& event) {
 
 }
 
-bool StandardInputHandler::onWindowResize(WindowResizeEvent& event) {
+bool StandardInputHandler::onWindowResize(Engine::WindowResizeEvent& event) {
 	Vec2i dimension = Vec2i(event.getWidth(), event.getHeight());
 
 	Graphics::Renderer::viewport(Vec2i(), dimension);
@@ -49,7 +51,7 @@ bool StandardInputHandler::onWindowResize(WindowResizeEvent& event) {
 	return true;
 }
 
-bool StandardInputHandler::onFrameBufferResize(FrameBufferResizeEvent& event) {
+bool StandardInputHandler::onFrameBufferResize(Engine::FrameBufferResizeEvent& event) {
 	Vec2i dimension = Vec2i(event.getWidth(), event.getHeight());
 
 	Graphics::Renderer::viewport(Vec2i(), dimension);
@@ -59,8 +61,10 @@ bool StandardInputHandler::onFrameBufferResize(FrameBufferResizeEvent& event) {
 	return true;
 }
 
-bool StandardInputHandler::onKeyPressOrRepeat(KeyPressEvent& event) {
-	Keyboard::Key key = event.getKey();
+bool StandardInputHandler::onKeyPressOrRepeat(Engine::KeyPressEvent& event) {
+	using namespace Engine;
+
+	Key key = event.getKey();
 
 	if (key == KeyboardOptions::Tick::Speed::up) {
 		setSpeed(getSpeed() * 1.5);
@@ -82,10 +86,11 @@ bool StandardInputHandler::onKeyPressOrRepeat(KeyPressEvent& event) {
 	return true;
 }
 
-bool StandardInputHandler::onKeyPress(KeyPressEvent& event) {
+bool StandardInputHandler::onKeyPress(Engine::KeyPressEvent& event) {
 	using namespace Graphics::Debug;
+	using namespace Engine;
 
-	Keyboard::Key key = event.getKey();
+	Key key = event.getKey();
 
 	if (key == KeyboardOptions::Tick::pause) {
 		togglePause();
@@ -103,15 +108,17 @@ bool StandardInputHandler::onKeyPress(KeyPressEvent& event) {
 		Log::info("Made %s the main part of it's physical", screen.selectedPart->name.c_str());
 		screen.selectedPart->makeMainPart();
 	} else if(key == KeyboardOptions::Part::makeMainPhysical) {
-		if(screen.selectedPart->parent != nullptr) {
-			if(!screen.selectedPart->parent->isMainPhysical()) {
-				Log::info("Made %s the main physical", screen.selectedPart->name.c_str());
-				((ConnectedPhysical*) screen.selectedPart->parent)->makeMainPhysical();
+		if (screen.selectedPart) {
+			if (screen.selectedPart->parent != nullptr) {
+				if (!screen.selectedPart->parent->isMainPhysical()) {
+					Log::info("Made %s the main physical", screen.selectedPart->name.c_str());
+					((ConnectedPhysical*) screen.selectedPart->parent)->makeMainPhysical();
+				} else {
+					Log::warn("This physical is already the main physical!");
+				}
 			} else {
-				Log::warn("This physical is already the main physical!");
+				Log::warn("This part has no physical!");
 			}
-		} else {
-			Log::warn("This part has no physical!");
 		}
 	} else if (key == KeyboardOptions::World::valid) {
 		Log::debug("Checking World::isValid()");
@@ -141,8 +148,10 @@ bool StandardInputHandler::onKeyPress(KeyPressEvent& event) {
 	return onKeyPressOrRepeat(event);
 };
 
-bool StandardInputHandler::onDoubleKeyPress(DoubleKeyPressEvent& event) {
-	Keyboard::Key key = event.getKey();
+bool StandardInputHandler::onDoubleKeyPress(Engine::DoubleKeyPressEvent& event) {
+	using namespace Engine;
+
+	Key key = event.getKey();
 
 	if (key == KeyboardOptions::Move::fly) {
 		toggleFlying();

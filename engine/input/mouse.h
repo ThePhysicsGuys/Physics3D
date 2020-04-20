@@ -1,39 +1,36 @@
 #pragma once
 
+namespace Engine {
+
+struct Button {
+private:
+	std::string name;
+	int code;
+
+public:
+	inline Button(const std::string& name, int code) : name(name), code(code) {}
+
+	std::string getName() const;
+	int getCode() const;
+
+	// Button <-> Button
+	bool operator==(const Button& other) const;
+	bool operator!=(const Button& other) const;
+
+	// Key <-> int
+	bool operator==(int other) const;
+	bool operator!=(int other) const;
+
+	// Key <-> string
+	bool operator==(const std::string& other) const;
+	bool operator!=(const std::string& other) const;
+};
+							 
 namespace Mouse {
 
-	struct Button {
-		std::string name;
-		int code;
+	Button getButton(std::string name);
+	Button getButton(int code);
 
-		// Button <-> Button
-		bool operator==(const Button& other) const {
-			return other.code == code;
-		}
-
-		bool operator!=(const Button& other) const {
-			return other.code != code;
-		}
-
-		// Key <-> int
-		bool operator==(int other) const {
-			return other == code;
-		}
-
-		bool operator!=(int other) const {
-			return other != code;
-		}
-
-		// Key <-> string
-		bool operator==(const std::string& other) const {
-			return other == name;
-		}
-
-		bool operator!=(const std::string& other) const {
-			return other != name;
-		}
-	};
-							 
 	extern const Button LEFT;
 	extern const Button RIGHT;
 	extern const Button MIDDLE;
@@ -50,8 +47,6 @@ namespace Mouse {
 	extern const int RELEASE;
 	extern const int REPEAT;
 
-	Button getKey(std::string name);
-	Button getKey(int code);
-
+};
 
 };

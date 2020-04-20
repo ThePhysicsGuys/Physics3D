@@ -2,6 +2,8 @@
 
 #include <string>
 
+namespace Engine {
+
 enum class EventType {
 	None = 0,
 	WindowClose, WindowResize, WindowDrop, FrameBufferResize,
@@ -74,4 +76,6 @@ public:
 		}
 		return false;
 	}
+};
+
 };

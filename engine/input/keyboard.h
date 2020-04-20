@@ -1,52 +1,43 @@
 #pragma once
 
+namespace Engine {
+
+struct Key {
+private:
+	std::string name;
+	int code;
+
+public:
+	inline Key(const std::string& name, int code) : name(name), code(code) {}
+
+	std::string getName() const;
+	int getCode() const;
+
+	// Key <-> Key
+	bool operator==(const Key& other) const;
+	bool operator!=(const Key& other) const;
+	bool operator>=(const Key& other) const;
+	bool operator>(const Key& other) const;
+	bool operator<=(const Key& other) const;
+	bool operator<(const Key& other) const;
+
+	// Key <-> int
+	bool operator==(int other) const;
+	bool operator!=(int other) const;
+	bool operator>=(int other) const;
+	bool operator>(int other) const;
+	bool operator<=(int other) const;
+	bool operator<(int other) const;
+
+	// Key <-> string
+	bool operator==(const std::string& other) const;
+	bool operator!=(const std::string& other) const;
+};
+
 namespace Keyboard {
 
-	struct Modifiers {
-	private:
-		int modifiers;
-
-	public:
-		inline Modifiers(int modifiers) : modifiers(modifiers) {}
-
-		int getModifiers() const;
-		bool isCtrlPressed() const;
-		bool isShiftPressed() const;
-		bool isSuperPressed() const;
-		bool isAltPressed() const;
-	};
-
-	struct Key {
-	private:
-		std::string name;
-		int code;
-
-	public:
-		inline Key(const std::string& name, int code) : name(name), code(code) {}
-
-		std::string getName() const;
-		int getCode() const;
-
-		// Key <-> Key
-		bool operator==(const Key& other) const;
-		bool operator!=(const Key& other) const;
-		bool operator>=(const Key& other) const;
-		bool operator>(const Key& other) const;
-		bool operator<=(const Key& other) const;
-		bool operator<(const Key& other) const;
-
-		// Key <-> int
-		bool operator==(int other) const;
-		bool operator!=(int other) const;
-		bool operator>=(int other) const;
-		bool operator>(int other) const;
-		bool operator<=(int other) const;
-		bool operator<(int other) const;
-
-		// Key <-> string
-		bool operator==(const std::string& other) const;
-		bool operator!=(const std::string& other) const;
-	};
+	Key getKey(const std::string& name);
+	Key getKey(int code);
 
 	extern const Key UNKNOWN;
 	extern const Key SPACE;
@@ -176,11 +167,6 @@ namespace Keyboard {
 	extern const int KEY_RELEASE;
 	extern const int KEY_REPEAT;
 
-	extern const int MOD_SHIFT;
-	extern const int MOD_CTRL;
-	extern const int MOD_ALT;
-	extern const int MOD_SUPER;
-
-	Key getKey(const std::string& name);
-	Key getKey(int code);
 }
+
+};

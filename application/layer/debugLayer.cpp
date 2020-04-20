@@ -112,7 +112,7 @@ void DebugLayer::onUpdate() {
 
 }
 
-void DebugLayer::onEvent(::Event& event) {
+void DebugLayer::onEvent(Engine::Event& event) {
 
 }
 

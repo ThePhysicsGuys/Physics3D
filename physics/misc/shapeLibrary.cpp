@@ -61,16 +61,16 @@ namespace Library {
 		{0, 5, 4}, {0, 1, 5}, // back
 		{0, 4, 3}, // left side 
 		{1, 2, 5}, // right side
-		{2, 3, 4}, {2, 4, 5} // diagonalSide
+		{2, 3, 4}, {2, 4, 5} // diagonalSide 
 	};
 
 	Triangle boxTriangles[12] = {
-	{1,0,2},{3,2,0}, // BOTTOM
-	{1,5,0},{4,0,5}, // FRONT
-	{1,2,5},{6,5,2}, // RIGHT
-	{6,2,7},{3,7,2}, // BACK
-	{3,0,7},{4,7,0}, // LEFT
-	{4,5,7},{6,7,5}, // TOP
+		{1,0,2},{3,2,0}, // BOTTOM
+		{1,5,0},{4,0,5}, // FRONT
+		{1,2,5},{6,5,2}, // RIGHT
+		{6,2,7},{3,7,2}, // BACK
+		{3,0,7},{4,7,0}, // LEFT
+		{4,5,7},{6,7,5}, // TOP
 	};
 
 	const Polyhedron icosahedron(icosahedronVertices, icosahedronTriangles, 12, 20);

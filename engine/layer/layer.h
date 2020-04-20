@@ -38,7 +38,7 @@ public:
 	inline virtual void onAttach() {}
 	inline virtual void onDetach() {}
 	inline virtual void onInit() {}
-	inline virtual void onEvent(Event& event) {}
+	inline virtual void onEvent(Engine::Event& event) {}
 	inline virtual void onUpdate() {}
 	inline virtual void onRender() {}
 	inline virtual void onClose() {}

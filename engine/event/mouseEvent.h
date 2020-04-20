@@ -1,6 +1,10 @@
 #pragma once
 
 #include "event.h"
+#include "../input/mouse.h"
+#include "../input/modifiers.h"
+
+namespace Engine {
 
 class MouseEvent : public Event {
 private:
@@ -55,7 +59,7 @@ class MouseScrollEvent : public MouseEvent {
 private:
 	int xOffset;
 	int yOffset;
-	
+
 public:
 	EVENT_TYPE(MouseScroll);
 
@@ -86,50 +90,47 @@ public:
 
 class MouseButtonEvent : public MouseEvent {
 private:
-	int button;
-	int modifiers;
+	Button button;
+	Modifiers modifiers;
+
+protected:
+	inline MouseButtonEvent(int x, int y, const Button& button, const Modifiers& modifiers = Modifier::NONE) : MouseEvent(x, y), button(button), modifiers(modifiers) {}
 
 public:
 	EVENT_CATEGORY(EventCategoryMouse | EventCategoryMouseButton | EventCategoryInput);
 
-	inline int getButton() const {
+	inline Button getButton() const {
 		return button;
 	}
 
-	inline int getModifiers() const {
+	inline Modifiers getModifiers() const {
 		return modifiers;
 	}
-
-protected:
-	inline MouseButtonEvent(int x, int y, int button, int modifiers) : MouseEvent(x, y), button(button), modifiers(modifiers) {}
 };
 
 class MousePressEvent : public MouseButtonEvent {
 public:
 	EVENT_TYPE(MousePress);
 
-	inline MousePressEvent(int x, int y, int button, int modifiers = 0) : MouseButtonEvent(x, y, button, modifiers) {}
+	inline MousePressEvent(int x, int y, const Button& button, const Modifiers& modifiers = Modifier::NONE) : MouseButtonEvent(x, y, button, modifiers) {}
 };
 
 class MouseReleaseEvent : public MouseButtonEvent {
 public:
 	EVENT_TYPE(MouseRelease);
 
-	inline MouseReleaseEvent(int x, int y, int button, int modifiers = 0) : MouseButtonEvent(x, y, button, modifiers) {}
+	inline MouseReleaseEvent(int x, int y, const Button& button, const Modifiers& modifiers = Modifier::NONE) : MouseButtonEvent(x, y, button, modifiers) {}
 };
 
-class MouseDragEvent : public MouseEvent {
+class MouseDragEvent : public MouseButtonEvent {
 private:
 	int newX;
 	int newY;
 
-	bool leftDragging;
-	bool middleDragging;
-	bool rightDragging;
 public:
 	EVENT_TYPE(MouseDrag);
 
-	inline MouseDragEvent(int oldX, int oldY, int newX, int newY, bool leftDragging, bool middleDragging, bool rightDragging) : MouseEvent(oldX, oldY), newX(newX), newY(newY), leftDragging(leftDragging), middleDragging(middleDragging), rightDragging(rightDragging) {}
+	inline MouseDragEvent(int oldX, int oldY, int newX, int newY, const Button& button, const Modifiers& modifiers) : MouseButtonEvent(oldX, oldY, button, modifiers), newX(newX), newY(newY) {}
 
 	inline int getOldX() const {
 		return getX();
@@ -148,14 +149,16 @@ public:
 	}
 
 	inline bool isLeftDragging() const {
-		return leftDragging;
+		return getButton() == Mouse::LEFT;
 	}
 
 	inline bool isMiddleDragging() const {
-		return middleDragging;
+		return getButton() == Mouse::MIDDLE;
 	}
 
 	inline bool isRightDragging() const {
-		return rightDragging;
+		return getButton() == Mouse::RIGHT;
 	}
+};
+
 };

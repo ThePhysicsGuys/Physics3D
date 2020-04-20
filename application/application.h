@@ -1,6 +1,9 @@
 #pragma once
 
+namespace Engine {
 class Event;
+};
+
 namespace Application {
 
 class Screen;
@@ -18,6 +21,6 @@ void setSpeed(double newSpeed);
 double getSpeed();
 void stop(int returnCode);
 void toggleFlying();
-void onEvent(::Event& event);
+void onEvent(Engine::Event& event);
 
 };

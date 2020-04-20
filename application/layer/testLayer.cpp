@@ -90,7 +90,9 @@ void TestLayer::onUpdate() {
 
 }
 
-void TestLayer::onEvent(Event& event) {
+void TestLayer::onEvent(Engine::Event& event) {
+	using namespace Engine;
+
 	if (event.getType() == EventType::KeyPress) {
 		if (static_cast<KeyPressEvent&>(event).getKey() == Keyboard::TAB) {
 			llights[0]->position = fromPosition(screen.camera.cframe.position);

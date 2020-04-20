@@ -2,6 +2,8 @@
 
 #include "event.h"
 
+namespace Engine {
+
 class WindowEvent : public Event {
 public:
 	EVENT_CATEGORY(EventCategoryWindow);
@@ -67,4 +69,6 @@ public:
 	inline unsigned int getHeight() const {
 		return height;
 	}
+};
+
 };

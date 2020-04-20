@@ -5,7 +5,7 @@ namespace Engine {
 class Entity;
 
 enum class ComponentType {
-	TransformComponent,
+	Transform,
 	Material,
 	Mesh,
 	Model,

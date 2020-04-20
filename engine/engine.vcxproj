@@ -213,6 +213,7 @@
     <ClInclude Include="event\windowEvent.h" />
     <ClInclude Include="input\inputHandler.h" />
     <ClInclude Include="input\keyboard.h" />
+    <ClInclude Include="input\modifiers.h" />
     <ClInclude Include="input\mouse.h" />
     <ClInclude Include="io\export.h" />
     <ClInclude Include="io\import.h" />
@@ -237,6 +238,7 @@
     <ClCompile Include="ecs\tree.cpp" />
     <ClCompile Include="input\inputHandler.cpp" />
     <ClCompile Include="input\keyboard.cpp" />
+    <ClCompile Include="input\modifiers.cpp" />
     <ClCompile Include="input\mouse.cpp" />
     <ClCompile Include="io\export.cpp" />
     <ClCompile Include="io\import.cpp" />

@@ -12,7 +12,6 @@
 
 #include "view/screen.h"
 #include "ecs/material.h"
-#include "../graphics/renderUtils.h"
 #include "../graphics/mesh/primitive.h"
 #include "../graphics/mesh/indexedMesh.h"
 #include "../graphics/gui/gui.h"
@@ -37,7 +36,9 @@ void onInit() {
 	editTools.onInit();
 }
 
-void onEvent(::Event& event) {
+void onEvent(Engine::Event& event) {
+	using namespace Engine;
+
 	EventDispatcher dispatcher(event);
 
 	dispatcher.dispatch<MousePressEvent>(onMousePress);
@@ -128,9 +129,9 @@ void onUpdate(Screen& screen, Vec2 mousePosition) {
 
 // Events
 // Mouse press behaviour
-bool onMousePress(::MousePressEvent& event) {
+bool onMousePress(Engine::MousePressEvent& event) {
 	// Check if users pressed on tool
-	if (Mouse::LEFT != event.getButton())
+	if (Engine::Mouse::LEFT != event.getButton())
 		return false;
 
 	if (screen.selectedPart && editTools.intersectedEditDirection != EditTools::EditDirection::NONE) {
@@ -153,8 +154,8 @@ bool onMousePress(::MousePressEvent& event) {
 }
 
 // Mouse release behaviour
-bool onMouseRelease(::MouseReleaseEvent& event) {
-	if (Mouse::LEFT != event.getButton())
+bool onMouseRelease(Engine::MouseReleaseEvent& event) {
+	if (Engine::Mouse::LEFT != event.getButton())
 		return false;
 
 	// Reset selectedpart
@@ -168,7 +169,7 @@ bool onMouseRelease(::MouseReleaseEvent& event) {
 
 
 // Mouse drag behaviour
-bool onMouseDrag(::MouseDragEvent& event) {
+bool onMouseDrag(Engine::MouseDragEvent& event) {
 	if (!event.isLeftDragging())
 		return false;
 

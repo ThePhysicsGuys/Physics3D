@@ -3,8 +3,10 @@
 #include "keyboardOptions.h"
 
 namespace KeyboardOptions {
+	using namespace Engine;
 
 	namespace Move {
+
 		Key forward = Keyboard::UNKNOWN;
 		Key backward = Keyboard::UNKNOWN;
 		Key right = Keyboard::UNKNOWN;

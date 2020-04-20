@@ -406,7 +406,7 @@ void loadFile(const char* file) {
 	Log::info("File loaded, took %.4f ms", deltaTime.count() / 1E6);
 }
 
-bool onFileDrop(::WindowDropEvent& event) {
+bool onFileDrop(Engine::WindowDropEvent& event) {
 	std::string path = event.getPath();
 
 	loadFile(event.getPath().c_str());
@@ -414,8 +414,10 @@ bool onFileDrop(::WindowDropEvent& event) {
 	return true;
 }
 
-bool onKeyPress(::KeyPressEvent& keyEvent) {
-	Keyboard::Key pressedKey = keyEvent.getKey();
+bool onKeyPress(Engine::KeyPressEvent& keyEvent) {
+	using namespace Engine;
+
+	Key pressedKey = keyEvent.getKey();
 	if(pressedKey == Keyboard::S && keyEvent.getModifiers().isCtrlPressed()) {
 		saveWorld(world);
 		return true;
@@ -424,11 +426,12 @@ bool onKeyPress(::KeyPressEvent& keyEvent) {
 	}
 }
 
-void onEvent(::Event& event) {
+void onEvent(Engine::Event& event) {
+	using namespace Engine;
+
 	screen.onEvent(event);
 
 	EventDispatcher dispatcher(event);
-
 	dispatcher.dispatch<WindowDropEvent>(onFileDrop);
 	dispatcher.dispatch<KeyPressEvent>(onKeyPress);
 }

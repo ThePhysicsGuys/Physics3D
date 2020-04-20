@@ -20,7 +20,7 @@ void PickerLayer::onUpdate() {
 	Picker::onUpdate(*screen, handler->mousePosition);
 }
 
-void PickerLayer::onEvent(Event& event) {
+void PickerLayer::onEvent(Engine::Event& event) {
 	Picker::onEvent(event);
 }
 

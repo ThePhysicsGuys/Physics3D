@@ -151,9 +151,9 @@ void Camera::move(Screen& screen, Vec3 delta, bool leftDragging, bool accelerati
 	move(screen, delta.x, delta.y, delta.z, leftDragging, accelerating);
 }
 
-bool Camera::onKeyRelease(::KeyReleaseEvent& event) {
+bool Camera::onKeyRelease(Engine::KeyReleaseEvent& event) {
 
-	Keyboard::Key key = event.getKey();
+	Engine::Key key = event.getKey();
 
 	if (key == KeyboardOptions::Move::forward ||
 		key == KeyboardOptions::Move::backward ||
@@ -174,7 +174,7 @@ bool Camera::onKeyRelease(::KeyReleaseEvent& event) {
 	return false;
 }
 
-bool Camera::onMouseDrag(::MouseDragEvent& event) {
+bool Camera::onMouseDrag(Engine::MouseDragEvent& event) {
 	double dmx = event.getNewX() - event.getOldX();
 	double dmy = event.getNewY() - event.getOldY();
 
@@ -190,7 +190,7 @@ bool Camera::onMouseDrag(::MouseDragEvent& event) {
 	return false;
 }
 
-bool Camera::onMouseScroll(::MouseScrollEvent& event) {
+bool Camera::onMouseScroll(Engine::MouseScrollEvent& event) {
 	velocity = Graphics::GUI::clamp(velocity * (1 + 0.2 * event.getYOffset()), 0.001, 100);
 
 	thirdPersonDistance -= event.getYOffset();
@@ -198,7 +198,9 @@ bool Camera::onMouseScroll(::MouseScrollEvent& event) {
 	return true;
 };
 
-void Camera::onEvent(::Event& event) {
+void Camera::onEvent(Engine::Event& event) {
+	using namespace Engine;
+
 	EventDispatcher dispatcher(event);
 	dispatcher.dispatch<MouseDragEvent>(BIND_EVENT_METHOD(Camera::onMouseDrag));
 	dispatcher.dispatch<MouseScrollEvent>(BIND_EVENT_METHOD(Camera::onMouseScroll));

@@ -17,36 +17,36 @@
 
 namespace Application {
 
-bool onMouseMove(const MouseMoveEvent& event) {
+bool onMouseMove(const Engine::MouseMoveEvent& event) {
 	using namespace Graphics;
 	return GUI::onMouseMove(event.getNewX(), event.getNewY());
 }
 
-bool onMousePress(const MousePressEvent& event) {
+bool onMousePress(const Engine::MousePressEvent& event) {
 	using namespace Graphics;
-	if (Mouse::LEFT == event.getButton()) {
+	if (Engine::Mouse::LEFT == event.getButton()) {
 		return GUI::onMousePress(event.getX(), event.getY());
 	}
 
 	return false;
 }
 
-bool onMouseRelease(const MouseReleaseEvent& event) {
+bool onMouseRelease(const Engine::MouseReleaseEvent& event) {
 	using namespace Graphics;
 
-	if (Mouse::LEFT == event.getButton()) {
+	if (Engine::Mouse::LEFT == event.getButton()) {
 		return GUI::onMouseRelease(event.getX(), event.getY());
 	}
 
 	return false;
 }
 
-bool onMouseDrag(const MouseDragEvent& event) {
+bool onMouseDrag(const Engine::MouseDragEvent& event) {
 	using namespace Graphics;
 	return GUI::onMouseDrag(event.getOldX(), event.getOldY(), event.getNewX(), event.getNewY());
 }
 
-bool onWindowResize(const WindowResizeEvent& event) {
+bool onWindowResize(const Engine::WindowResizeEvent& event) {
 	using namespace Graphics;
 	float aspect = ((float) event.getWidth()) / ((float) event.getHeight());
 	Vec2i dimension = Vec2i(event.getWidth(), event.getHeight());
@@ -75,7 +75,9 @@ void GuiLayer::onUpdate() {
 	GUI::intersect(GUI::map(handler->mousePosition));
 }
 
-void GuiLayer::onEvent(Event& event) {
+void GuiLayer::onEvent(Engine::Event& event) {
+	using namespace Engine;
+
 	EventDispatcher dispatcher(event);
 	dispatcher.dispatch<MouseMoveEvent>(onMouseMove);
 	dispatcher.dispatch<MousePressEvent>(onMousePress);

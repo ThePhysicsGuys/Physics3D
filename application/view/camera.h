@@ -3,10 +3,12 @@
 #include "../physics/math/rotation.h"
 #include "../physics/math/globalCFrame.h"
 
+namespace Engine {
 class Event;
 class MouseDragEvent;
 class MouseScrollEvent;
 class KeyReleaseEvent;
+};
 
 namespace Application {
 
@@ -43,9 +45,9 @@ private:
 
 	bool wasLeftDragging = false;
 
-	bool onMouseScroll(::MouseScrollEvent& event);
-	bool onMouseDrag(::MouseDragEvent& event);
-	bool onKeyRelease(::KeyReleaseEvent& event);
+	bool onMouseScroll(Engine::MouseScrollEvent& event);
+	bool onMouseDrag(Engine::MouseDragEvent& event);
+	bool onKeyRelease(Engine::KeyReleaseEvent& event);
 
 public:
 	GlobalCFrame cframe;
@@ -73,7 +75,7 @@ public:
 	void onUpdate();
 	void onUpdate(float fov, float aspect, float znear, float zfar);
 	void onUpdate(float aspect);
-	void onEvent(Event& event);
+	void onEvent(Engine::Event& event);
 
 	Camera(const Position& position, const Rotation& rotation);
 	Camera();

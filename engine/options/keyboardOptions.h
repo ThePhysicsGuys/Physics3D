@@ -4,8 +4,7 @@
 #include "../util/properties.h"
 
 namespace KeyboardOptions {
-
-	using namespace Keyboard;
+	using Engine::Key;
 
 	namespace Move {
 		extern Key forward;

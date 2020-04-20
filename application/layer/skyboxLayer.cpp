@@ -86,7 +86,7 @@ void SkyboxLayer::onUpdate() {
 	updateStars(time);
 }
 
-void SkyboxLayer::onEvent(Event& event) {
+void SkyboxLayer::onEvent(Engine::Event& event) {
 
 }
 

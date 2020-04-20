@@ -24,7 +24,7 @@ public:
 
 	virtual void onInit() override;
 	virtual void onUpdate() override;
-	virtual void onEvent(Event& event) override;
+	virtual void onEvent(Engine::Event& event) override;
 	virtual void onRender() override;
 	virtual void onClose() override;
 };

@@ -54,7 +54,7 @@ void LayerStack::onUpdate() {
 	}
 }
 
-void LayerStack::onEvent(Event& event) {
+void LayerStack::onEvent(Engine::Event& event) {
 	for (auto i = rbegin(); i != rend(); ++i) {
 		Layer* layer = *i;
 
