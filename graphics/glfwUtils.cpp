@@ -6,82 +6,107 @@
 
 namespace Graphics {
 
-namespace Renderer {
+namespace GLFW {
 
-// GLFW binding
+namespace Cursor {
+	extern int ARROW = GLFW_ARROW_CURSOR;
+	extern int IBEAM = GLFW_IBEAM_CURSOR;
+	extern int CROSSHAIR = GLFW_CROSSHAIR_CURSOR;
+	extern int HAND = GLFW_HAND_CURSOR;
+	extern int HRESIZE = GLFW_HRESIZE_CURSOR;
+	extern int VRESIZE = GLFW_VRESIZE_CURSOR;
+}
 
-GLFWwindow* GLFWContext;
+GLFWwindow* currentContext;
+GLFWcursor* currentCursor;
+int currentCursorType;
 
-bool initGLFW() {
+bool init() {
 	return glfwInit();
 }
 
-void terminateGLFW() {
+void terminate() {
 	glfwTerminate();
 }
 
-void makeGLFWContextCurrent() {
-	glfwMakeContextCurrent(GLFWContext);
+void makeCurrent(GLFWwindow* context) {
+	currentContext = context;
+	glfwMakeContextCurrent(currentContext);
 }
 
-void createGLFWContext(int width, int height, const char* title) {
-	GLFWContext = glfwCreateWindow(width, height, title, nullptr, nullptr);
+GLFWwindow* createContext(int width, int height, const char* title) {
+	GLFWwindow* context = glfwCreateWindow(width, height, title, nullptr, nullptr);
+
+	return context;
 }
 
-bool validGLFWContext() {
-	return GLFWContext;
+bool validContext(GLFWwindow* context) {
+	return context != nullptr;
 }
 
-GLFWwindow* getGLFWContext() {
-	return GLFWContext;
+GLFWwindow* getCurrentContext() {
+	return currentContext;
 }
 
-void swapGLFWInterval(int interval) {
+void swapInterval(int interval) {
 	glfwSwapInterval(interval);
 }
 
-void swapGLFWBuffers() {
-	glfwSwapBuffers(GLFWContext);
+void swapBuffers() {
+	glfwSwapBuffers(currentContext);
 }
 
-void pollGLFWEvents() {
+void pollEvents() {
 	glfwPollEvents();
 }
 
-void closeGLFWWindow() {
-	glfwSetWindowShouldClose(GLFWContext, GLFW_TRUE);
+void closeWindow() {
+	glfwSetWindowShouldClose(currentContext, GLFW_TRUE);
 }
 
-bool isGLFWWindowClosed() {
-	return glfwWindowShouldClose(GLFWContext);
+bool isWindowClosed() {
+	return glfwWindowShouldClose(currentContext);
 }
 
-void setGLFWMultisampleSamples(int samples) {
+void setMultisampleSamples(int samples) {
 	glfwWindowHint(GLFW_SAMPLES, samples);
 };
 
-Vec2i getGLFWWindowSize() {
+Vec2i getWindowSize() {
 	int width;
 	int height;
-	glfwGetWindowSize(GLFWContext, &width, &height);
+	glfwGetWindowSize(currentContext, &width, &height);
 	return Vec2i(width, height);
 }
 
-Vec4i getGLFWFrameSize() {
+Vec4i getFrameSize() {
 	int left;
 	int top;
 	int right;
 	int bottom;
-	glfwGetWindowFrameSize(GLFWContext, &left, &top, &right, &bottom);
+	glfwGetWindowFrameSize(currentContext, &left, &top, &right, &bottom);
 	return Vec4i(left, top, right, bottom);
 }
 
-void enableGLFWCursor() {
-	glfwSetInputMode(GLFWContext, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+void enableCursor() {
+	glfwSetInputMode(currentContext, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 }
 
-void disableGLFWCursor() {
-	glfwSetInputMode(GLFWContext, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+void disableCursor() {
+	glfwSetInputMode(currentContext, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+}
+
+void setCursor(int type) {
+	if (currentCursorType == type)
+		return;
+
+	if (currentCursor)
+		glfwDestroyCursor(currentCursor);
+	
+	currentCursorType = type;
+	currentCursor = glfwCreateStandardCursor(type);
+
+	glfwSetCursor(currentContext, currentCursor);
 }
 
 }

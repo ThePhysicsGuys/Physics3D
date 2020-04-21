@@ -4,32 +4,40 @@ struct GLFWwindow;
 
 namespace Graphics {
 
-namespace Renderer {
+namespace GLFW {
 
-// GLFW binding
+namespace Cursor {
+	extern int ARROW;
+	extern int IBEAM;
+	extern int CROSSHAIR;
+	extern int HAND;
+	extern int HRESIZE;
+	extern int VRESIZE;
+}
 
-extern bool initGLFW();
-extern void terminateGLFW();
+extern bool init();
+extern void terminate();
 
-extern GLFWwindow* getGLFWContext();
-extern void createGLFWContext(int width, int height, const char* title);
-extern void makeGLFWContextCurrent();
-extern bool validGLFWContext();
+extern GLFWwindow* getCurrentContext();
+extern GLFWwindow* createContext(int width, int height, const char* title);
+extern void makeCurrent(GLFWwindow* context);
+extern bool validContext(GLFWwindow* context);
 
-extern void swapGLFWInterval(int interval);
-extern void swapGLFWBuffers();
-extern void pollGLFWEvents();
+extern void swapInterval(int interval);
+extern void swapBuffers();
+extern void pollEvents();
 
-extern void closeGLFWWindow();
-extern bool isGLFWWindowClosed();
+extern void closeWindow();
+extern bool isWindowClosed();
 
-extern Vec2i getGLFWWindowSize();
-extern Vec4i getGLFWFrameSize();
+extern Vec2i getWindowSize();
+extern Vec4i getFrameSize();
 
-extern void enableGLFWCursor();
-extern void disableGLFWCursor();
+extern void enableCursor();
+extern void disableCursor();
+extern void setCursor(int type);
 
-extern void setGLFWMultisampleSamples(int samples);
+extern void setMultisampleSamples(int samples);
 }
 
 };

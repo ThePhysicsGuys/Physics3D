@@ -22,6 +22,7 @@
 #include "worlds.h"
 #include "../physics/math/mathUtil.h"
 #include "../engine/io/export.h"
+
 namespace Application {
 
 struct Uniform {
@@ -111,6 +112,7 @@ void TestLayer::onRender() {
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glEnable(GL_BLEND);
+	
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 	ApplicationShaders::lightingShader.bind();
@@ -130,7 +132,6 @@ void TestLayer::onRender() {
 }
 
 void TestLayer::onClose() {
-
 }
 
 };

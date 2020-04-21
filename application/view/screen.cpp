@@ -41,6 +41,8 @@
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 
+struct GLFWwindow;
+
 namespace Application {
 
 bool initGLFW() {
@@ -48,7 +50,7 @@ bool initGLFW() {
 	//Renderer::setGLFWMultisampleSamples(4);
 
 	// Initialize GLFW
-	if (!Graphics::Renderer::initGLFW()) {
+	if (!Graphics::GLFW::init()) {
 		Log::error("GLFW failed to initialize");
 		return false;
 	}
@@ -76,7 +78,7 @@ bool initGLEW() {
 
 void terminateGLFW() {
 	Log::info("Closing GLFW");
-	Graphics::Renderer::terminateGLFW();
+	Graphics::GLFW::terminate();
 	Log::info("Closed GLFW");
 }
 
@@ -88,16 +90,16 @@ Screen::Screen(int width, int height, PlayerWorld* world) {
 	this->world = world;
 
 	// Create a windowed mode window and its OpenGL context 
-	Graphics::Renderer::createGLFWContext(width, height, "Physics3D");
+	GLFWwindow* context = Graphics::GLFW::createContext(width, height, "Physics3D");
 
-	if (!Graphics::Renderer::validGLFWContext()) {
+	if (!Graphics::GLFW::validContext(context)) {
 		Log::fatal("Invalid rendering context");
 		terminateGLFW();
 		exit(-1);
 	}
 
 	// Make the window's context current 
-	Graphics::Renderer::makeGLFWContextCurrent();
+	Graphics::GLFW::makeCurrent(context);
 
 	Log::info("OpenGL vendor: (%s)", Graphics::Renderer::getVendor());
 	Log::info("OpenGL renderer: (%s)", Graphics::Renderer::getRenderer());
@@ -136,10 +138,10 @@ void Screen::onInit() {
 	Graphics::Library::onInit();
 
 	// InputHandler init
-	handler = new StandardInputHandler(Graphics::Renderer::getGLFWContext(), *this);
+	handler = new StandardInputHandler(Graphics::GLFW::getCurrentContext(), *this);
 
 	// Screen size init
-	dimension = Graphics::Renderer::getGLFWWindowSize();
+	dimension = Graphics::GLFW::getWindowSize();
 
 	// Framebuffer init
 	quad = new Graphics::Quad();
@@ -174,9 +176,13 @@ void Screen::onInit() {
 
 	// Eventhandler init
 	eventHandler.setWindowResizeCallback([] (Screen& screen, Vec2i dimension) {
-		screen.camera.onUpdate(((float) dimension.x) / ((float) dimension.y));
+		float aspect = float(dimension.x) / float(dimension.y);
+		screen.camera.onUpdate(aspect);
 		screen.dimension = dimension;
 		screen.screenFrameBuffer->resize(screen.dimension);
+
+		GUI::windowInfo.aspect = aspect;
+		GUI::windowInfo.dimension = dimension;
 	});
 
 	// Camera init
@@ -191,7 +197,7 @@ void Screen::onInit() {
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void) io;
 	ImGui::StyleColorsDark();
-	ImGui_ImplGlfw_InitForOpenGL(Graphics::Renderer::getGLFWContext(), true);
+	ImGui_ImplGlfw_InitForOpenGL(Graphics::GLFW::getCurrentContext(), true);
 	ImGui_ImplOpenGL3_Init("#version 130");
 
 	BigFrame::onInit();
@@ -230,7 +236,7 @@ void Screen::onUpdate() {
 		if (handler->getKey(KeyboardOptions::Rotate::down))
 			camera.rotate(*this, -1 * speedAdjustment, 0, 0, leftDragging);
 		if (handler->getKey(KeyboardOptions::Application::close))
-			Graphics::Renderer::closeGLFWWindow();
+			Graphics::GLFW::closeWindow();
 	}
 
 	// Update camera
@@ -277,9 +283,9 @@ void Screen::onRender() {
 	graphicsMeasure.mark(GraphicsProcess::FINALIZE);
 
 	// Finalize
-	swapGLFWInterval(1);
-	swapGLFWBuffers();
-	pollGLFWEvents();
+	GLFW::swapInterval(1);
+	GLFW::swapBuffers();
+	GLFW::pollEvents();
 
 	graphicsMeasure.mark(GraphicsProcess::OTHER);
 }
@@ -307,7 +313,7 @@ void Screen::onClose() {
 }
 
 bool Screen::shouldClose() {
-	return Graphics::Renderer::isGLFWWindowClosed();
+	return Graphics::GLFW::isWindowClosed();
 }
 
 };

@@ -7,21 +7,27 @@
 
 #include "../graphics/renderer.h"
 #include "../graphics/renderer.h"
+#include "../picker/selectionTool.h"
 
 namespace Application {
 
+SelectionTool tool;
+
 void PickerLayer::onInit() {
 	Picker::onInit();
+	tool.onInit();
 }
 
 void PickerLayer::onUpdate() {
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
 	Picker::onUpdate(*screen, handler->mousePosition);
+	tool.onUpdate();
 }
 
 void PickerLayer::onEvent(Engine::Event& event) {
 	Picker::onEvent(event);
+	tool.onEvent(event);
 }
 
 void PickerLayer::onRender() {
@@ -36,11 +42,16 @@ void PickerLayer::onRender() {
 
 	Picker::onRender(*screen);
 
+	disableDepthTest();
+
+	tool.onRender();
+
 	endScene();
 }
 
 void PickerLayer::onClose() {
 	Picker::onClose();
+	tool.onClose();
 }
 
 };

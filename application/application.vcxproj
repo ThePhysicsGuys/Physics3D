@@ -298,6 +298,7 @@
     <ClInclude Include="eventHandler.h" />
     <ClInclude Include="extendedPart.h" />
     <ClInclude Include="input\standardInputHandler.h" />
+    <ClInclude Include="picker\selectionTool.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="resources.h" />
     <ClInclude Include="shader\shaders.h" />
@@ -329,6 +330,7 @@
     <ClCompile Include="ecs\model.cpp" />
     <ClCompile Include="io\serialization.cpp" />
     <ClCompile Include="layer\postprocessLayer.cpp" />
+    <ClCompile Include="picker\selectionTool.cpp" />
     <ClCompile Include="resources.cpp" />
     <ClCompile Include="layer\testLayer.cpp" />
     <ClCompile Include="layer\debugLayer.cpp" />

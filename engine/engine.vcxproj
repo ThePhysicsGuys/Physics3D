@@ -222,6 +222,8 @@
     <ClInclude Include="meshRegistry.h" />
     <ClInclude Include="options\keyboardOptions.h" />
     <ClInclude Include="resource\meshResource.h" />
+    <ClInclude Include="tool\stateTool.h" />
+    <ClInclude Include="tool\tool.h" />
     <ClInclude Include="visualData.h" />
   </ItemGroup>
   <ItemGroup>

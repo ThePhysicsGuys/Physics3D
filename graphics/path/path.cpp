@@ -40,7 +40,7 @@ namespace Path {
 
 	// Adds the vertices to the batch with the necessary indices, this does not reserve space on the batch
 	void pushLine(const Vec2f& a, const Vec2f& b, const Color& colorA, const Color& colorB, float thickness) {
-		Vec2f dxy = normalize(Vec2f(b.y - a.y, a.x - b.x)) / GUI::windowInfo.dimension.y * 1.5 * thickness;
+		Vec2f dxy = normalize(Vec2f(b.y - a.y, a.x - b.x)) / GUI::windowInfo.dimension.y * 3 * thickness;
 
 		pushQuad(Vec2f(a + dxy), Vec2f(b + dxy), Vec2f(b - dxy), Vec2f(a - dxy), colorA, colorB, colorB, colorA);
 	}
@@ -51,7 +51,7 @@ namespace Path {
 
 	//! Primitives
 
-	void line(const Vec2f& a, const Vec2f& b, const Vec4f& color, float thickness) {
+	void line(const Vec2f& a, const Vec2f& b, const Color& color, float thickness) {
 		line(a, b, color, color, thickness);
 	}
 
@@ -170,7 +170,7 @@ namespace Path {
 
 	void rect(const Vec2f& pos, const Vec2f& dim, float rounding, const Color& color, float thickness) {
 		//if (rounding == 0.0) {
-			quad(pos, pos + Vec2f(dim.x, 0), pos + Vec2f(dim.x, -dim.y), pos + Vec2f(0, -dim.y), color, thickness);
+			quad(pos, pos + Vec2f(dim.x, 0), pos + Vec2f(dim.x, dim.y), pos + Vec2f(0, dim.y), color, thickness);
 		//}
 		// TODO add rounding
 	}
