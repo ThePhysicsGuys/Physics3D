@@ -7,7 +7,12 @@ message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+#running benchmarks showed this to be a pessimization
+#set(CMAKE_INTERPROCEDURAL_OPTIMIZATION True)
 
+set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -mavx2")
+#surprisingly, also a pessimization
+#set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -ffast-math")
 
 add_library(
 util STATIC 

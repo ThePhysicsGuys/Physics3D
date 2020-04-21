@@ -282,6 +282,12 @@ inline static uint32_t __builtin_ctz(uint32_t x) {
 }
 #endif
 
+#ifdef _MSC_VER
+#define GET_AVX_ELEM(reg, index) reg.m256_f32[index]
+#else
+#define GET_AVX_ELEM(reg, index) reg[index]
+#endif
+
 #define SWAP_2x2 0b01001110
 #define SWAP_1x1 0b10110001
 
@@ -409,7 +415,7 @@ Vec3f Polyhedron::furthestInDirection(const Vec3f& direction) const {
 
 	// a bug occurs here, when mask == 0 the resulting index is undefined
 
-	return Vec3f(bestX.m256_f32[index], bestY.m256_f32[index], bestZ.m256_f32[index]);
+	return Vec3f(GET_AVX_ELEM(bestX, index), GET_AVX_ELEM(bestY, index), GET_AVX_ELEM(bestZ,index));
 }
 
 // compare the remaining 8 elements
@@ -434,7 +440,7 @@ BoundingBox toBounds(__m256 xMin, __m256 xMax, __m256 yMin, __m256 yMax, __m256 
 	zxzyMax = _mm256_max_ps(zxzyMax, _mm256_permute_ps(zxzyMax, SWAP_1x1));
 	// reg structure zzxxzzyy
 
-	return BoundingBox{zxzyMin.m256_f32[2], zxzyMin.m256_f32[6], zxzyMin.m256_f32[0], zxzyMax.m256_f32[2], zxzyMax.m256_f32[6], zxzyMax.m256_f32[0]};
+	return BoundingBox{GET_AVX_ELEM(zxzyMin,2), GET_AVX_ELEM(zxzyMin, 6), GET_AVX_ELEM(zxzyMin, 0), GET_AVX_ELEM(zxzyMax, 2), GET_AVX_ELEM(zxzyMax, 6), GET_AVX_ELEM(zxzyMax, 0)};
 }
 
 BoundingBox Polyhedron::getBounds() const {
