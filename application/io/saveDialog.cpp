@@ -6,9 +6,8 @@
 
 #include "serialization.h"
 
+#ifdef _MSC_VER
 #include <Windows.h>
-//#define GLFW_EXPOSE_NATIVE_WIN32
-//#include "GLFW/glfw3native.h"
 
 namespace Application {
 void saveWorld(const PlayerWorld& world) {
@@ -33,7 +32,17 @@ void saveWorld(const PlayerWorld& world) {
 		});
 	}
 }
-
-
-
 };
+#else
+namespace Application {
+void saveWorld(const PlayerWorld& world) {
+	std::cout << "Where to save to> ";
+	std::string fileName;
+	std::cin >> fileName;
+
+	world.syncReadOnlyOperation([fileName, &world]() {
+		WorldImportExport::saveWorld(fileName.c_str(), world);
+	});
+}
+};
+#endif

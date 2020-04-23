@@ -19,6 +19,11 @@ long long Import::parseLong(const std::string& num) {
 	return std::stoll(num);
 }
 
+Fix<32> Import::parseFix(const std::string& num) {
+	long long v = std::stoll(num);
+	return Fix<32>(static_cast<int64_t>(v));
+}
+
 double Import::parseDouble(const std::string& num) {
 	return std::stod(num);
 }
@@ -38,7 +43,7 @@ Vec3 Import::parseVec3(const std::string& vec) {
 
 Position Import::parsePosition(const std::string& vec) {
 	std::vector<std::string> tokens = Util::split(vec, ' ');
-	return Position(Fix<32>(Import::parseLong(tokens[0])), Fix<32>(Import::parseLong(tokens[1])), Fix<32>(Import::parseLong(tokens[2])));
+	return Position(Import::parseFix(tokens[0]), Import::parseFix(tokens[1]), Import::parseFix(tokens[2]));
 }
 
 Vec4 Import::parseVec4(const std::string& vec) {
@@ -370,13 +375,13 @@ Graphics::VisualShape OBJImport::load(const std::string& file) {
 }
 
 Graphics::VisualShape OBJImport::load(const std::string& file, bool binary) {
-	struct stat buffer;
+	/*struct stat buffer;
 	if (stat(file.c_str(), &buffer) == -1) {
 		Log::subject(file.c_str());
 		Log::error("File not found: %s", file.c_str());
 
 		return Graphics::VisualShape();
-	}
+	}*/
 
 	std::ifstream input;
 

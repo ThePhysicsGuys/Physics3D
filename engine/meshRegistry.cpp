@@ -24,7 +24,7 @@ VisualData sphere;
 VisualData cylinder;
 
 // Generates a cylinder with 
-static Graphics::VisualShape createCylinder(int sides, double radius, double height) {
+Graphics::VisualShape createCylinder(int sides, double radius, double height) {
 	if(sides < 2) { throw std::logic_error("Cannot create cylinder with <2 sides"); }
 	int vertexCount = sides * 4;
 	Vec3f* vertexBuffer = new Vec3f[vertexCount];
@@ -52,7 +52,7 @@ static Graphics::VisualShape createCylinder(int sides, double radius, double hei
 		triangleBuffer[i * 2 + 1] = Triangle{bottomRight + 1, bottomRight, bottomLeft + 1}; // topRight, topLeft, botRight
 	}
 
-	Triangle* capOffset = triangleBuffer + sides * 2Ui64;
+	Triangle* capOffset = triangleBuffer + sides * 2;
 	// top and bottom
 	for(int i = 0; i < sides - 2; i++) { // common corner is i=0
 		capOffset[i] = Triangle{sides * 2 + 0, sides * 2 + (i + 1) * 2, sides * 2 + (i + 2) * 2};

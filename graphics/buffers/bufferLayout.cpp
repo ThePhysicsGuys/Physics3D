@@ -2,7 +2,7 @@
 
 #include "bufferLayout.h"
 
-#include "GL\glew.h"
+#include <GL/glew.h>
 
 namespace Graphics {
 

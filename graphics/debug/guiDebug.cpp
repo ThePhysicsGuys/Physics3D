@@ -1,6 +1,6 @@
 #include "core.h"
 
-#include "debug.h"
+#include "guiDebug.h"
 
 #include <GL/glew.h>
 

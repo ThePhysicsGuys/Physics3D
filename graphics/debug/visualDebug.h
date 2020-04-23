@@ -1,7 +1,7 @@
 #pragma once
 
 #include "profilerUI.h"
-#include "debug.h"
+#include "guiDebug.h"
 #include "../physics/datastructures/buffers.h"
 
 namespace Graphics {

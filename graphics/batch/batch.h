@@ -1,7 +1,5 @@
 #pragma once
 
-#include "core.h"
-
 #include "batchConfig.h"
 
 #include "../buffers/vertexArray.h"

@@ -48,6 +48,14 @@ The Physics3D project consists of 7 projects, each with its own role:
 4. The configuration should already be configured in the provided project and solution files
 5. You are done!
 
+### CMake (For linux only)
+1. Clone the repository
+2. Run [setup.sh](/setup.sh) from the Physics3D directory, this will install the necessary dependencies and create the build folders. It will also run cmake for debug and release. 
+  The dependencies can be installed on their own with [setupDependencies.sh](/setupDependencies.sh)
+  The build directories can be generated on their own with [setupBuild.sh](/setupBuild.sh)
+3. Make the debug and release builds with `make` when inside `Physics3D/build/debug` or `Physics3D/build/release`
+4. To run the application, you must run it from the build directory: `./debug/application`
+
 ## Authors
 * **Lennart Van Hirtum** - [VonTum](https://github.com/VonTum)
 * **Matthias Vandersanden** - [olympus112](https://github.com/olympus112)

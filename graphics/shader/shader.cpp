@@ -5,7 +5,7 @@
 
 #include "shader.h"
 #include "renderer.h"
-#include "debug/debug.h"
+#include "debug/guiDebug.h"
 
 #include <fstream>
 #include <sstream>
@@ -232,6 +232,10 @@ ShaderSource parseShader(const std::string& name, const std::string& vertexPath,
 	return ShaderSource(name, vertexFile, fragmentFile, "", "", "");
 }
 
+ShaderSource parseShader(const std::string& name, const std::string& shaderText) {
+	std::istringstream ss(shaderText);
+	return parseShader(name, ss);
+}
 ShaderSource parseShader(const std::string& name, std::istream& shaderTextStream) {
 	Log::subject s(name);
 

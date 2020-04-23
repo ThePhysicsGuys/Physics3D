@@ -6,7 +6,8 @@
 
 #include <fstream>
 #include <sstream>
-#include <direct.h>
+
+#include "../util/fileUtils.h"
 
 /*
 	Export
@@ -78,10 +79,7 @@ std::string Export::str(double num) {
 */
 
 void saveBinaryObj(std::string filename, const Graphics::VisualShape& shape) {
-	struct stat buffer;
-	if (stat(filename.c_str(), &buffer) != -1) {
-		Log::warn("File already exists: %s", filename.c_str());
-	}
+	FileUtils::warnIfFileExists(filename);
 
 	std::ofstream output;
 	output.open(filename, std::ios::binary | std::ios::out);
@@ -134,10 +132,7 @@ void saveBinaryObj(std::string filename, const Graphics::VisualShape& shape) {
 }
 
 void saveNonBinaryObj(const std::string& filename, const Graphics::VisualShape& shape) {
-	struct stat buffer;
-	if (stat(filename.c_str(), &buffer) != -1) {
-		Log::warn("File already exists: %s", filename.c_str());
-	}
+	FileUtils::warnIfFileExists(filename);
 
 	std::ofstream output;
 	output.open(filename);

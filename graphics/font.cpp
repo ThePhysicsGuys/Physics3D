@@ -2,8 +2,8 @@
 
 #include "font.h"
 
-#include "GL\glew.h"
-#include "GLFW\glfw3.h"
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 
 #include "gui/gui.h"
 #include "mesh/primitive.h"

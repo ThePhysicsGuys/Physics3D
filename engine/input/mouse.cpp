@@ -4,7 +4,7 @@
 
 #include <stdexcept>
 
-#include "GLFW\glfw3.h"
+#include <GLFW/glfw3.h>
 
 namespace Engine {
 
@@ -85,7 +85,7 @@ namespace Mouse {
 		try {
 			Button& key = buttonmap.at(code);
 			return key;
-		} catch (std::out_of_range& const e) {
+		} catch (const std::out_of_range& e) {
 			return UNKNOWN;
 		}
 	}

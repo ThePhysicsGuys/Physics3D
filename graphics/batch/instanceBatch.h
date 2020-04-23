@@ -1,7 +1,5 @@
 #pragma once
 
-#include "core.h"
-
 #include "batch.h"
 #include "../renderUtils.h"
 #include "../mesh/indexedMesh.h"

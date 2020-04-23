@@ -43,12 +43,12 @@ protected:
 	Resource(const std::string& name, const std::string& path);
 
 public:
-	inline virtual ResourceType getType() const = 0;
-	inline virtual std::string getTypeName() const = 0;
-	inline virtual void close() = 0;
+	virtual ResourceType getType() const = 0;
+	virtual std::string getTypeName() const = 0;
+	virtual void close() = 0;
 
-	inline std::string getName() const;
-	inline std::string getPath() const;
+	std::string getName() const;
+	std::string getPath() const;
 
 	void setName(const std::string& name);
 	void setPath(const std::string& path);

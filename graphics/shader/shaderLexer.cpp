@@ -311,14 +311,14 @@ TokenStack TokenStack::until(const TokenType::Type& type, bool popType) {
 	return content;
 }
 
-inline bool TokenStack::available(size_t offset) const {
+bool TokenStack::available(size_t offset) const {
 	if (read)
 		return iterator + offset < stack.end();
 
 	return false;
 }
 
-inline size_t TokenStack::size() const {
+size_t TokenStack::size() const {
 	return stack.size();
 }
 

@@ -5,9 +5,15 @@
 
 #include "threePhaseBuffer.h"
 
+#include <stdexcept>
+
 namespace Graphics {
 
+#ifdef _MSC_VER
 #define ASSERT(x) if (!(x)) __debugbreak();
+#else
+#define ASSERT(x) if (!(x)) throw std::logic_error("Assert failed")
+#endif
 #define glCall(x) {Graphics::clearError(); x; ASSERT(Graphics::logCall(#x, __FILE__, __LINE__));}
 
 void clearError();

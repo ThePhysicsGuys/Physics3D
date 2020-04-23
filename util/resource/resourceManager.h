@@ -5,6 +5,7 @@
 #include <typeinfo>
 #include <unordered_map>
 #include <map>
+#include <vector>
 
 #include "resource.h"
 

@@ -288,8 +288,8 @@ namespace Path {
 
 		Path::batch->pushCommand(0);
 		Path::batch->reserve(vertexCount, indexCount);
-		for (char c : text) {
-			int ascii = (int) c;
+		for (char chr : text) {
+			int ascii = (int) chr;
 			const Character& character = font->getCharacter(ascii);
 			float descend = character.height - character.by;
 			float xpos = x + character.bx * size;

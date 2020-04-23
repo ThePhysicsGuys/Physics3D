@@ -3,7 +3,7 @@
 #include "worlds.h"
 #include "extendedPart.h"
 
-#include "../graphics/debug/debug.h"
+#include "../graphics/debug/guiDebug.h"
 #include "../physics/geometry/shape.h"
 #include "../physics/misc/shapeLibrary.h"
 #include "../physics/geometry/convexShapeBuilder.h"

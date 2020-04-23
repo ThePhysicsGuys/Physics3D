@@ -52,7 +52,7 @@ namespace Path3D {
 		float step = 2.0 * PI / (float) precision;
 		for (size_t i = 1; i < precision; i++) {
 			float angle = i * step;
-			point = center + radius * (cos(angle) * u + sin(angle) * v);
+			point = center + radius * (std::cos(angle) * u + std::sin(angle) * v);
 
 			Path3D::batch->pushVertex({ point, color });
 			Path3D::batch->pushIndices({ i - 1, i });

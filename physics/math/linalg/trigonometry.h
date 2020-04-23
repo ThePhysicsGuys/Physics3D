@@ -289,7 +289,7 @@ template<typename T>
 Matrix<T, 4, 4> translate(const Matrix<T, 4, 4> & mat, T x, T y, T z) {
 	Matrix<T, 1, 4> r{ x, y, z, 1.0 };
 	Matrix<T, 1, 4> rr = mat * r;
-	return joinHorizontal(mat.getSubMatrix<3, 4>(0, 0), rr);
+	return joinHorizontal(mat.template getSubMatrix<3, 4>(0, 0), rr);
 }
 
 template<typename T>

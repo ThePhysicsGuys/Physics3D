@@ -11,7 +11,7 @@
 #include "ecs/material.h"
 
 #include "../graphics/texture.h"
-#include "../graphics/debug/debug.h"
+#include "../graphics/debug/guiDebug.h"
 #include "../graphics/debug/visualDebug.h"
 #include "../physics/geometry/shape.h"
 #include "../physics/geometry/basicShapes.h"

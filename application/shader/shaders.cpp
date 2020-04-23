@@ -34,20 +34,20 @@ SkyShader skyShader;
 
 void onInit() {
 	// Shader source init
-	ShaderSource basicShaderSource = parseShader("basic.shader", (std::istream&) std::istringstream(getResourceAsString(applicationResources, BASIC_SHADER)));
-	ShaderSource depthShaderSource = parseShader("depth.shader", (std::istream&) std::istringstream(getResourceAsString(applicationResources, DEPTH_SHADER)));
-	ShaderSource vectorShaderSource = parseShader("vector.shader", (std::istream&) std::istringstream(getResourceAsString(applicationResources, VECTOR_SHADER)));
-	ShaderSource fontShaderSource = parseShader("font.shader", (std::istream&) std::istringstream(getResourceAsString(applicationResources, FONT_SHADER)));
-	ShaderSource originShaderSource = parseShader("origin.shader", (std::istream&) std::istringstream(getResourceAsString(applicationResources, ORIGIN_SHADER)));
-	ShaderSource postProcessShaderSource = parseShader("postProcess.shader", (std::istream&) std::istringstream(getResourceAsString(applicationResources, POSTPROCESS_SHADER)));
-	ShaderSource skyboxShaderSource = parseShader("skybox.shader", (std::istream&) std::istringstream(getResourceAsString(applicationResources, SKYBOX_SHADER)));
-	ShaderSource pointShaderSource = parseShader("point.shader", (std::istream&) std::istringstream(getResourceAsString(applicationResources, POINT_SHADER)));
-	ShaderSource testShaderSource = parseShader("test.shader", (std::istream&) std::istringstream(getResourceAsString(applicationResources, TEST_SHADER)));
-	ShaderSource lineShaderSource = parseShader("line.shader", (std::istream&) std::istringstream(getResourceAsString(applicationResources, LINE_SHADER)));
-	ShaderSource maskShaderSource = parseShader("mask.shader", (std::istream&) std::istringstream(getResourceAsString(applicationResources, MASK_SHADER)));
-	ShaderSource instanceShaderSource = parseShader("instance.shader", (std::istream&) std::istringstream(getResourceAsString(applicationResources, INSTANCE_SHADER)));
-	ShaderSource skyShaderSource = parseShader("sky.shader", (std::istream&) std::istringstream(getResourceAsString(applicationResources, SKY_SHADER)));
-	ShaderSource lightingShaderSource = parseShader("lighting.shader", (std::istream&) std::istringstream(getResourceAsString(applicationResources, LIGHTING_SHADER)));
+	ShaderSource basicShaderSource = parseShader("basic.shader", getResourceAsString(applicationResources, BASIC_SHADER));
+	ShaderSource depthShaderSource = parseShader("depth.shader", getResourceAsString(applicationResources, DEPTH_SHADER));
+	ShaderSource vectorShaderSource = parseShader("vector.shader", getResourceAsString(applicationResources, VECTOR_SHADER));
+	ShaderSource fontShaderSource = parseShader("font.shader", getResourceAsString(applicationResources, FONT_SHADER));
+	ShaderSource originShaderSource = parseShader("origin.shader", getResourceAsString(applicationResources, ORIGIN_SHADER));
+	ShaderSource postProcessShaderSource = parseShader("postProcess.shader", getResourceAsString(applicationResources, POSTPROCESS_SHADER));
+	ShaderSource skyboxShaderSource = parseShader("skybox.shader", getResourceAsString(applicationResources, SKYBOX_SHADER));
+	ShaderSource pointShaderSource = parseShader("point.shader", getResourceAsString(applicationResources, POINT_SHADER));
+	ShaderSource testShaderSource = parseShader("test.shader", getResourceAsString(applicationResources, TEST_SHADER));
+	ShaderSource lineShaderSource = parseShader("line.shader", getResourceAsString(applicationResources, LINE_SHADER));
+	ShaderSource maskShaderSource = parseShader("mask.shader", getResourceAsString(applicationResources, MASK_SHADER));
+	ShaderSource instanceShaderSource = parseShader("instance.shader", getResourceAsString(applicationResources, INSTANCE_SHADER));
+	ShaderSource skyShaderSource = parseShader("sky.shader", getResourceAsString(applicationResources, SKY_SHADER));
+	ShaderSource lightingShaderSource = parseShader("lighting.shader", getResourceAsString(applicationResources, LIGHTING_SHADER));
 
 
 	// Shader init

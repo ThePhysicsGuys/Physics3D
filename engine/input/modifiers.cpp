@@ -1,6 +1,6 @@
 #include "core.h"
 
-#include "GLFW/glfw3.h"
+#include <GLFW/glfw3.h>
 
 #include "modifiers.h"
 

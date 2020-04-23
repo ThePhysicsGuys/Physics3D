@@ -51,17 +51,17 @@ public:
 	/*
 		Returns the type of this Component
 	*/
-	inline virtual ComponentType getType() const = 0;
+	virtual ComponentType getType() const = 0;
 	
 	/*
 		Returns the typename of this Component
 	*/
-	inline virtual std::string getTypeName() const = 0;
+	virtual std::string getTypeName() const = 0;
 
 	/*
 		Returns whether an Entity can contain multiple instances of this Component
 	*/
-	inline virtual bool isUnique() const = 0;
+	virtual bool isUnique() const = 0;
 };
 
 };

@@ -1,8 +1,8 @@
 #pragma once
 
-struct ResourceStruct;
+struct ResourceDescriptor;
 
-extern ResourceStruct applicationResources[];
+extern ResourceDescriptor applicationResources[];
 
 #define BASIC_SHADER 0
 #define VECTOR_SHADER 1

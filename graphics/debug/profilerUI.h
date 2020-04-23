@@ -9,6 +9,7 @@
 
 template<typename T>
 class BoundsTree;
+class Part;
 struct TreeNode;
 
 namespace Graphics {

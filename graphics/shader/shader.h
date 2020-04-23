@@ -85,6 +85,7 @@ public:
 };
 
 ShaderSource parseShader(const std::string& name, std::istream& shaderTextStream);
+ShaderSource parseShader(const std::string& name, const std::string& shaderText);
 ShaderSource parseShader(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath);
 ShaderSource parseShader(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath);
 ShaderSource parseShader(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath, const std::string& tesselationControlPath, const std::string& tesselationEvaluatePath);

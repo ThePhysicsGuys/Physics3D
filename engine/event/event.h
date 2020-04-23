@@ -33,9 +33,9 @@ class Event {
 public:
 	bool handled = false;
 
-	inline virtual EventType getType() const = 0;	
-	inline virtual char getCategory() const = 0;
-	inline virtual std::string getName() const = 0;
+	virtual EventType getType() const = 0;	
+	virtual char getCategory() const = 0;
+	virtual std::string getName() const = 0;
 
 	inline bool inCategory(char category) const {
 		return (category & getCategory()) != 0;

@@ -2,7 +2,7 @@
 
 #include "eventHandler.h"
 
-#include "view\screen.h"
+#include "view/screen.h"
 #include "extendedPart.h"
 
 namespace Application {

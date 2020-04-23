@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../graphics/glfwUtils.h"
-#include "../engine/tool/StateTool.h"
+#include "../engine/tool/stateTool.h"
 
 namespace Engine {
 class Event;

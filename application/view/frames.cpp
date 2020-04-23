@@ -560,7 +560,11 @@ void BigFrame::renderPropertiesFrame() {
 
 			if(ImGui::Button("Debug This Part")) {
 				Log::debug("Debugging part %d", reinterpret_cast<uint64_t>(selectedPart));
+				#ifdef _MSC_VER
 				__debugbreak();
+				#else
+				Log::warn("Debug breaking is not supported on non-linux platforms");
+				#endif
 			}
 
 			ImGui::TreePop();

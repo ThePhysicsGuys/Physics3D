@@ -14,7 +14,7 @@
 #include "../shader/shaders.h"
 #include "../physics/misc/toString.h"
 
-#include "../graphics/debug/debug.h"
+#include "../graphics/debug/guiDebug.h"
 #include "../graphics/renderer.h"
 
 #include "../physics/constraints/sinusoidalPistonConstraint.h"

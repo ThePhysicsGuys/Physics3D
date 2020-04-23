@@ -151,10 +151,14 @@ void onInit() {
 		)";
 
 	// Shader source init
-	ShaderSource guiShaderSource = parseShader("gui.shader", (std::istream&) std::istringstream(guiShaderSourceFile));
-	ShaderSource quadShaderSource = parseShader("quad.shader", (std::istream&) std::istringstream(quadShaderSourceFile));
-	ShaderSource horizontalBlurShaderSource = parseShader("horizontalBlur.shader", (std::istream&) std::istringstream(horizontalBlurShaderVertexSourceFile + blurShaderFragmentSourceFile));
-	ShaderSource verticalBlurShaderSource = parseShader("verticalBlur.shader", (std::istream&) std::istringstream(verticalBlurShaderVertexSourceFile + blurShaderFragmentSourceFile));
+	std::istringstream guiShaderStream(guiShaderSourceFile);
+	ShaderSource guiShaderSource = parseShader("gui.shader", (std::istream&) guiShaderStream);
+	std::istringstream quadShaderStream(quadShaderSourceFile);
+	ShaderSource quadShaderSource = parseShader("quad.shader", (std::istream&) quadShaderStream);
+	std::istringstream horizontalBlurShaderStream(horizontalBlurShaderVertexSourceFile + blurShaderFragmentSourceFile);
+	ShaderSource horizontalBlurShaderSource = parseShader("horizontalBlur.shader", (std::istream&) horizontalBlurShaderStream);
+	std::istringstream verticalBlurShaderStream(verticalBlurShaderVertexSourceFile + blurShaderFragmentSourceFile);
+	ShaderSource verticalBlurShaderSource = parseShader("verticalBlur.shader", (std::istream&) verticalBlurShaderStream);
 
 	// Shader init
 	new(&guiShader) GuiShader(guiShaderSource);

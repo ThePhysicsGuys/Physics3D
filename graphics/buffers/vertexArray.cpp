@@ -2,8 +2,8 @@
 
 #include "vertexArray.h"
 
-#include "GL\glew.h"
-#include "GLFW\glfw3.h"
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 
 #include "vertexBuffer.h"
 #include "bufferLayout.h"

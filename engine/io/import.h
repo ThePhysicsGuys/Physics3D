@@ -9,6 +9,7 @@ struct VisualShape;
 namespace Import {
 	int parseInt(const std::string& num);
 	long long parseLong(const std::string& num);
+	Fix<32> parseFix(const std::string& num);
 	float parseFloat(const std::string& num);
 	double parseDouble(const std::string& num);
 	Vec3 parseVec3(const std::string& vec);

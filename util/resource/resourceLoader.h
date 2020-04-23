@@ -2,11 +2,6 @@
 
 #include <string>
 
-struct ResourceStruct {
-	const int id;
-	const std::string type;
-};
+struct ResourceDescriptor;
 
-typedef ResourceStruct* ResourceList;
-
-std::string getResourceAsString(ResourceList list, int id);
+std::string getResourceAsString(const ResourceDescriptor* list, int id);

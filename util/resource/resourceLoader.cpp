@@ -1,5 +1,11 @@
 #include "resourceLoader.h"
 
+#include "resourceDescriptor.h"
+
+#include "../log.h"
+
+#ifdef _WIN32
+
 #include <windows.h>
 
 class ResourceLoader {
@@ -16,7 +22,7 @@ private:
 	Parameters parameters;
 
 public:
-	ResourceLoader(int id, const std::string &type) {
+	ResourceLoader(int id, const std::string& type) {
 		hResource = FindResource(nullptr, MAKEINTRESOURCEA(id), type.c_str());
 		hMemory = LoadResource(nullptr, hResource);
 
@@ -32,8 +38,28 @@ public:
 	}
 };
 
-std::string getResourceAsString(ResourceList list, int id) {
-	ResourceStruct resource = list[id];
+std::string getResourceAsString(const ResourceDescriptor* list, int id) {
+	ResourceDescriptor resource = list[id];
 	ResourceLoader manager(resource.id, resource.type);
 	return manager.getResourceString();
 }
+#else
+
+#include <string>
+#include <fstream>
+#include <streambuf>
+
+std::string getResourceAsString(const ResourceDescriptor* list, int id) {
+	const ResourceDescriptor& resource = list[id];
+	std::ifstream file;
+	file.open(resource.fileName, std::ios::in);
+	if(!file){
+		Log::error("Could not open %s", resource.fileName);
+		throw std::runtime_error("Could not open file!");
+	}
+	return std::string(std::istreambuf_iterator<char>(file),
+					   std::istreambuf_iterator<char>());
+}
+
+#endif
+

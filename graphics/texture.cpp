@@ -2,11 +2,11 @@
 
 #include "texture.h"
 
-#include "GL\glew.h"
-#include "GLFW\glfw3.h"
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb\stb_image.h"
+#include <stb/stb_image.h>
 
 #include "debug/debug.h"
 
@@ -190,7 +190,7 @@ Texture* Texture::colored(Color color) {
 			for (int k = 0; k < channels; k++) {
 
 				int index = (i + height * j) * channels + k;
-				unsigned char value = unsigned char(buffer[index] * color[k]);
+				unsigned char value = static_cast<unsigned char>(buffer[index] * color[k]);
 				buffer[index] = value;
 			}
 		}

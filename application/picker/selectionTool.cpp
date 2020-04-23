@@ -7,7 +7,7 @@
 #include "../engine/ecs/entity.h"
 #include "../graphics/gui/gui.h"
 #include "../graphics/gui/guiUtils.h"
-#include "../graphics/path/path.h";
+#include "../graphics/path/path.h"
 #include "../shader/shaders.h"
 
 #include "../view/screen.h"

@@ -5,7 +5,7 @@
 
 VisibilityFilter::VisibilityFilter(Position origin, Vec3 normals[5], double maxDepth) :
 	origin(origin), 
-	boxNormals{normals[0], normals[1], normals[2], normals[3], normals[4]},
+	up(normals[0]), down(normals[1]), left(normals[2]), right(normals[3]), forward(normals[4]),
 	maxDepth(maxDepth) {}
 
 VisibilityFilter VisibilityFilter::fromSteps(Position origin, Vec3 stepForward, Vec3 stepUp, Vec3 stepRight, double maxDepth) {
@@ -65,8 +65,9 @@ VisibilityFilter VisibilityFilter::forSubWindow(Position origin, Vec3 cameraForw
 
 bool VisibilityFilter::operator()(const TreeNode& node) const {
 	double offsets[5]{0,0,0,0,maxDepth};
+	Vec3 normals[5]{up, down, left, right, forward}; 
 	for(int i = 0; i < 5; i++) {
-		Vec3 normal = boxNormals[i];
+		Vec3 normal = normals[i];
 		// we're checking that *a* corner of the TreeNode's bounds is within the viewport, basically similar to rectangle-rectangle colissions, google it!
 		// cornerOfInterest is the corner that is the furthest positive corner relative to the normal, so if it is not visible (eg above the normal) then the whole box must be invisible
 		Position cornerOfInterest(

@@ -1,6 +1,6 @@
 #pragma once
 
-
+#include "../../math/linalg/vec.h"
 #include "../../math/bounds.h"
 #include "../../datastructures/boundsTree.h"
 #include "../../part.h"
@@ -9,16 +9,12 @@ class VisibilityFilter {
 public:
 	Position origin;
 private:
-	union {
-		Vec3 boxNormals[5]; // normals of the viewPort, facing outward
-		struct {
-			Vec3 up;
-			Vec3 down;
-			Vec3 left;
-			Vec3 right;
-			Vec3 forward;
-		};
-	};
+	// normals of the viewPort, facing outward
+	Vec3 up;
+	Vec3 down;
+	Vec3 left;
+	Vec3 right;
+	Vec3 forward;
 	double maxDepth;
 public:
 	VisibilityFilter() : up(), down(), left(), right(), forward() {};

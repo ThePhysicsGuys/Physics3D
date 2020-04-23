@@ -1,7 +1,5 @@
 #pragma once
 
-#include "core.h"
-
 #include "commandBatch.h"
 #include "batchConfig.h"
 #include "../gui/color.h"

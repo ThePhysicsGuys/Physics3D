@@ -2,10 +2,11 @@
 
 #include "resources.h"
 
-#include "resource.h"
-#include "../util/resource/resourceLoader.h"
+#include "../util/resource/resourceDescriptor.h"
 
-ResourceStruct applicationResources[] {
+#ifdef _MSC_VER
+#include "resource.h"
+ResourceDescriptor applicationResources[] {
 	{ IDR_SHADER1, "SHADER" },
 	{ IDR_SHADER2, "SHADER" },
 	{ IDR_SHADER3, "SHADER" },
@@ -25,3 +26,27 @@ ResourceStruct applicationResources[] {
 	{ IDR_OBJ1, "OBJ" },
 	{ IDR_OBJ2, "OBJ" }
 };
+#else
+
+ResourceDescriptor applicationResources[] {
+	{ "../res/shaders/basic.shader"       , "SHADER" },
+	{ "../res/shaders/vector.shader"      , "SHADER" },
+	{ "../res/shaders/origin.shader"      , "SHADER" },
+	{ "../res/shaders/font.shader"        , "SHADER" },
+	{ "../res/shaders/depth.shader"       , "SHADER" },
+	{ "../res/shaders/quad.shader"        , "SHADER" },
+	{ "../res/shaders/postprocess.shader" , "SHADER" },
+	{ "../res/shaders/skybox.shader"      , "SHADER" },
+	{ "../res/shaders/mask.shader"        , "SHADER" },
+	{ "../res/shaders/point.shader"       , "SHADER" },
+	{ "../res/shaders/test.shader"        , "SHADER" },
+	{ "../res/shaders/blur.shader"        , "SHADER" },
+	{ "../res/shaders/line.shader"        , "SHADER" },
+	{ "../res/shaders/instance.shader"    , "SHADER" },
+	{ "../res/shaders/sky.shader"         , "SHADER" },
+	{ "../res/shaders/lighting.shader"    , "SHADER" },
+	{ "../res/models/stall.obj"           , "OBJ" },
+	{ "../res/models/sphere.obj"          , "OBJ" }
+};
+
+#endif

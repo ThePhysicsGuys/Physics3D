@@ -1,7 +1,5 @@
 #pragma once
 
-#include "core.h"
-
 #include "instanceBatch.h"
 #include "../buffers/bufferLayout.h"
 #include "../mesh/indexedMesh.h"
