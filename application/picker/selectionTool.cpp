@@ -33,7 +33,7 @@ void SelectionTool::onRender() {
 		Path::rect(position, dimension);
 	}
 
-	for (Region& region : regions) {
+	for (const Region& region : regions) {
 		Vec2 a = GUI::map(Vec2(region.x, region.y));
 		Vec2 b = GUI::map(Vec2(region.z, region.w));
 		Vec2 position = Vec2f(fmin(a.x, b.x), fmin(a.y, b.y));

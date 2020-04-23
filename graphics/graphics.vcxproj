@@ -246,7 +246,7 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release No AVX|x64'">core.h</PrecompiledHeaderFile>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="debug\debug.cpp" />
+    <ClCompile Include="debug\guiDebug.cpp" />
     <ClCompile Include="debug\profilerUI.cpp" />
     <ClCompile Include="font.cpp" />
     <ClCompile Include="gui\color.cpp" />
@@ -298,7 +298,7 @@
     <ClInclude Include="buffers\vertexArray.h" />
     <ClInclude Include="buffers\vertexBuffer.h" />
     <ClInclude Include="core.h" />
-    <ClInclude Include="debug\debug.h" />
+    <ClInclude Include="debug\guiDebug.h" />
     <ClInclude Include="debug\profilerUI.h" />
     <ClInclude Include="font.h" />
     <ClInclude Include="gui\color.h" />

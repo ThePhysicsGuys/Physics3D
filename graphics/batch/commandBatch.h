@@ -2,7 +2,6 @@
 
 #include "batch.h"
 
-#include "../debug/debug.h"
 #include "../shader/shader.h"
 
 namespace Graphics {

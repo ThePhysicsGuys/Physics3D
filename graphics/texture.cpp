@@ -8,8 +8,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 
-#include "debug/debug.h"
-
 namespace Graphics {
 
 #pragma region Texture
