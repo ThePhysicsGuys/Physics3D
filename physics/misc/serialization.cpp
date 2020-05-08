@@ -89,8 +89,8 @@ ConstantSpeedMotorConstraint* deserializeMotorConstraint(std::istream& istream) 
 }
 
 void serializePistonConstraint(const SinusoidalPistonConstraint& constraint, std::ostream& ostream) {
-	::serialize<double>(constraint.minLength, ostream);
-	::serialize<double>(constraint.maxLength, ostream);
+	::serialize<double>(constraint.minValue, ostream);
+	::serialize<double>(constraint.maxValue, ostream);
 	::serialize<double>(constraint.period, ostream);
 	::serialize<double>(constraint.currentStepInPeriod, ostream);
 }

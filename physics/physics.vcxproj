@@ -251,6 +251,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="constraintGroup.cpp" />
+    <ClCompile Include="constraints\controller\sineWaveController.cpp" />
     <ClCompile Include="constraints\fixedConstraint.cpp" />
     <ClCompile Include="constraints\hardConstraint.cpp" />
     <ClCompile Include="constraints\hardPhysicalConnection.cpp" />
@@ -279,7 +280,6 @@
     <ClCompile Include="physical.cpp" />
     <ClCompile Include="physicsProfiler.cpp" />
     <ClCompile Include="misc\serialization.cpp" />
-    <ClCompile Include="constraints\sinusoidalPistonConstraint.cpp" />
     <ClCompile Include="rigidBody.cpp" />
     <ClCompile Include="world.cpp" />
     <ClCompile Include="worldPhysics.cpp" />
@@ -288,10 +288,12 @@
     <ClInclude Include="catchable_assert.h" />
     <ClInclude Include="constants.h" />
     <ClInclude Include="constraintGroup.h" />
+    <ClInclude Include="constraints\constraintTemplates.h" />
+    <ClInclude Include="constraints\controller\constController.h" />
+    <ClInclude Include="constraints\controller\sineWaveController.h" />
     <ClInclude Include="constraints\fixedConstraint.h" />
     <ClInclude Include="constraints\hardPhysicalConnection.h" />
     <ClInclude Include="constraints\motorConstraint.h" />
-    <ClInclude Include="constraints\pistonConstraintTemplate.h" />
     <ClInclude Include="datastructures\alignedPtr.h" />
     <ClInclude Include="datastructures\boundsTree.h" />
     <ClInclude Include="datastructures\buffers.h" />
@@ -354,7 +356,6 @@
     <ClInclude Include="misc\toString.h" />
     <ClInclude Include="misc\validityHelper.h" />
     <ClInclude Include="motion.h" />
-    <ClInclude Include="constraints\motorConstraintTemplate.h" />
     <ClInclude Include="parallelArray.h" />
     <ClInclude Include="part.h" />
     <ClInclude Include="physical.h" />

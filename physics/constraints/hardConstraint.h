@@ -10,11 +10,12 @@
 */
 class HardConstraint {
 public:
+	bool isInverted = false;
 	virtual void update(double deltaT) = 0;
-	virtual void invert() = 0;
+	virtual void invert() { isInverted = !isInverted; }
 	virtual RelativeMotion getRelativeMotion() const = 0;
 	
-	virtual CFrame getRelativeCFrame() const;
+	virtual CFrame getRelativeCFrame() const = 0;
 	
 	virtual ~HardConstraint() {}
 };

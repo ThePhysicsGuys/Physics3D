@@ -1,7 +1,7 @@
 #pragma once
 
 #include "hardConstraint.h"
-#include "motorConstraintTemplate.h"
+#include "constraintTemplates.h"
 
 class ConstantMotorTurner {
 public:
@@ -16,7 +16,7 @@ public:
 	void update(double deltaT);
 	void invert();
 	double getValue() const;
-	FullTaylorExpansion<double, double, NUMBER_OF_DERIVATIVES_IN_MOTION> getFullTaylorExpansion() const;
+	FullTaylor<double> getFullTaylorExpansion() const;
 };
 
 typedef MotorConstraintTemplate<ConstantMotorTurner> ConstantSpeedMotorConstraint;

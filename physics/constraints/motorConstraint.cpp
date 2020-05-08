@@ -17,6 +17,6 @@ void ConstantMotorTurner::invert() { Log::error("ConstantSpeedMotorConstraint::i
 double ConstantMotorTurner::getValue() const {
 	return currentAngle;
 }
-FullTaylorExpansion<double, double, NUMBER_OF_DERIVATIVES_IN_MOTION> ConstantMotorTurner::getFullTaylorExpansion() const {
-	return {this->currentAngle, TaylorExpansion<double, NUMBER_OF_DERIVATIVES_IN_MOTION>{speed}};
+FullTaylor<double> ConstantMotorTurner::getFullTaylorExpansion() const {
+	return FullTaylor<double>{this->currentAngle, Taylor<double>{speed}};
 }
