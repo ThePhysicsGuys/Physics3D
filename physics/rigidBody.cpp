@@ -111,11 +111,11 @@ void RigidBody::refreshWithNewParts() {
 	}
 	totalCenterOfMass /= totalMass;
 
-	SymmetricMat3 totalInertia = getTranslatedInertiaAroundCenterOfMass(mainPart->getInertia(), mainPart->getLocalCenterOfMass(), totalCenterOfMass, mainPart->getMass());;
+	SymmetricMat3 totalInertia = getTranslatedInertiaAroundCenterOfMass(mainPart->getInertia(), mainPart->getMass(), mainPart->getLocalCenterOfMass() - totalCenterOfMass);;
 
 	for(const AttachedPart& p : parts) {
 		const Part* part = p.part;
-		totalInertia += getTransformedInertiaAroundCenterOfMass(part->getInertia(), part->getLocalCenterOfMass(), p.attachment, totalCenterOfMass, part->getMass());
+		totalInertia += getTransformedInertiaAroundCenterOfMass(part->getInertia(), part->getMass(), part->getLocalCenterOfMass(), p.attachment, totalCenterOfMass);
 	}
 	this->mass = totalMass;
 	this->localCenterOfMass = totalCenterOfMass;

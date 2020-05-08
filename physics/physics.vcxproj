@@ -251,6 +251,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="constraintGroup.cpp" />
+    <ClCompile Include="inertia.cpp" />
     <ClCompile Include="constraints\controller\sineWaveController.cpp" />
     <ClCompile Include="constraints\fixedConstraint.cpp" />
     <ClCompile Include="constraints\hardConstraint.cpp" />

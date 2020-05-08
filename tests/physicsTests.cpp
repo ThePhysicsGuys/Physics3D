@@ -311,26 +311,6 @@ TEST_CASE(testChangeInertialBasis) {
 	ASSERT(getRotatedInertia(triangleInertia, rotation) == rotatedTriangleInertia);
 }
 
-TEST_CASE(movedInertialMatrixForBox) {
-	Polyhedron originalShape = Library::createBox(1.0, 2.0, 3.0);
-	Vec3 translation(3.1, -2.7, 7.9);
-	Polyhedron translatedTriangle = originalShape.translated(translation);
-	SymmetricMat3 triangleInertia = originalShape.getInertia(CFrame());
-	SymmetricMat3 translatedTriangleInertia = translatedTriangle.getInertia(CFrame());
-
-	ASSERT(getTranslatedInertia(triangleInertia, translation, originalShape.getCenterOfMass(), originalShape.getVolume()) == translatedTriangleInertia);
-}
-
-TEST_CASE(movedInertialMatrixForDifficuiltPart) {
-	Polyhedron originalShape = Library::trianglePyramid;
-	Vec3 translation(3.1, -2.7, 7.9);
-	Polyhedron translatedTriangle = originalShape.translated(translation);
-	SymmetricMat3 triangleInertia = originalShape.getInertia(CFrame());
-	SymmetricMat3 translatedTriangleInertia = translatedTriangle.getInertia(CFrame());
-
-	ASSERT(getTranslatedInertia(triangleInertia, translation, originalShape.getCenterOfMass(), originalShape.getVolume()) == translatedTriangleInertia);
-}
-
 TEST_CASE(testMultiPartPhysicalSimple) {
 	Shape box(Box(1.0, 0.5, 0.5));
 	Shape box2(Box(1.0, 0.5, 0.5));

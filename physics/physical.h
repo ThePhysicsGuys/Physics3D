@@ -242,6 +242,9 @@ public:
 
 	TranslationalMotion getInternalMotionOfCenterOfMass() const;
 
+	SymmetricMat3 getRotationalInertia() const;
+	FullTaylor<SymmetricMat3> getRotationalInertiaTaylorExpansion() const;
+
 	Position getCenterOfMass() const;
 	GlobalCFrame getCenterOfMassCFrame() const;
 

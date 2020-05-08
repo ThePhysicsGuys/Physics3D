@@ -58,10 +58,10 @@ TEST_CASE(testMotionOfPhysicalSinglePart) {
 
 	Position p1PosAfter = p1.getCenterOfMass();
 
-	std::pair<Vec3, Vec3> estimatedVelAccel1 = estimateMotion(p1PosBefore, p1PosMid, p1PosAfter, DELTA_T);
+	TranslationalMotion estimatedVelAccel1 = estimateMotion(p1PosBefore, p1PosMid, p1PosAfter, DELTA_T);
 
-	ASSERT(estimatedVelAccel1.first == p1calculatedVelBefore);
-	ASSERT(estimatedVelAccel1.second == p1calculatedAccelBefore);
+	ASSERT(estimatedVelAccel1.getVelocity() == p1calculatedVelBefore);
+	ASSERT(estimatedVelAccel1.getAcceleration() == p1calculatedAccelBefore);
 }
 
 TEST_CASE(testMotionOfPhysicalPartsBasic) {
@@ -92,13 +92,13 @@ TEST_CASE(testMotionOfPhysicalPartsBasic) {
 	Position p1PosAfter = p1.getCenterOfMass();
 	Position p2PosAfter = p2.getCenterOfMass();
 
-	std::pair<Vec3, Vec3> estimatedVelAccel1 = estimateMotion(p1PosBefore, p1PosMid, p1PosAfter, DELTA_T);
-	std::pair<Vec3, Vec3> estimatedVelAccel2 = estimateMotion(p2PosBefore, p2PosMid, p2PosAfter, DELTA_T);
+	TranslationalMotion estimatedVelAccel1 = estimateMotion(p1PosBefore, p1PosMid, p1PosAfter, DELTA_T);
+	TranslationalMotion estimatedVelAccel2 = estimateMotion(p2PosBefore, p2PosMid, p2PosAfter, DELTA_T);
 
-	ASSERT(estimatedVelAccel1.first == p1calculatedVelBefore);
-	ASSERT(estimatedVelAccel2.first == p2calculatedVelBefore);
-	ASSERT(estimatedVelAccel1.second == p1calculatedAccelBefore);
-	ASSERT(estimatedVelAccel2.second == p2calculatedAccelBefore);
+	ASSERT(estimatedVelAccel1.getVelocity() == p1calculatedVelBefore);
+	ASSERT(estimatedVelAccel2.getVelocity() == p2calculatedVelBefore);
+	ASSERT(estimatedVelAccel1.getAcceleration() == p1calculatedAccelBefore);
+	ASSERT(estimatedVelAccel2.getAcceleration() == p2calculatedAccelBefore);
 }
 
 TEST_CASE(testMotionOfPhysicalPartsRotation) {
@@ -171,13 +171,13 @@ TEST_CASE(testMotionOfPhysicalPartsBasicFixedConstraint) {
 	Position p1PosAfter = p1.getCenterOfMass();
 	Position p2PosAfter = p2.getCenterOfMass();
 
-	std::pair<Vec3, Vec3> estimatedVelAccel1 = estimateMotion(p1PosBefore, p1PosMid, p1PosAfter, DELTA_T);
-	std::pair<Vec3, Vec3> estimatedVelAccel2 = estimateMotion(p2PosBefore, p2PosMid, p2PosAfter, DELTA_T);
+	TranslationalMotion estimatedVelAccel1 = estimateMotion(p1PosBefore, p1PosMid, p1PosAfter, DELTA_T);
+	TranslationalMotion estimatedVelAccel2 = estimateMotion(p2PosBefore, p2PosMid, p2PosAfter, DELTA_T);
 
-	ASSERT(estimatedVelAccel1.first == p1calculatedVelBefore);
-	ASSERT(estimatedVelAccel2.first == p2calculatedVelBefore);
-	ASSERT(estimatedVelAccel1.second == p1calculatedAccelBefore);
-	ASSERT(estimatedVelAccel2.second == p2calculatedAccelBefore);
+	ASSERT(estimatedVelAccel1.getVelocity() == p1calculatedVelBefore);
+	ASSERT(estimatedVelAccel2.getVelocity() == p2calculatedVelBefore);
+	ASSERT(estimatedVelAccel1.getAcceleration() == p1calculatedAccelBefore);
+	ASSERT(estimatedVelAccel2.getAcceleration() == p2calculatedAccelBefore);
 }
 
 TEST_CASE(testMotionOfPhysicalPartsRotationFixedConstraint) {
@@ -213,13 +213,13 @@ TEST_CASE(testMotionOfPhysicalPartsRotationFixedConstraint) {
 	Position p1PosAfter = p1.getCenterOfMass();
 	Position p2PosAfter = p2.getCenterOfMass();
 
-	std::pair<Vec3, Vec3> estimatedVelAccel1 = estimateMotion(p1PosBefore, p1PosMid, p1PosAfter, DELTA_T);
-	std::pair<Vec3, Vec3> estimatedVelAccel2 = estimateMotion(p2PosBefore, p2PosMid, p2PosAfter, DELTA_T);
+	TranslationalMotion estimatedVelAccel1 = estimateMotion(p1PosBefore, p1PosMid, p1PosAfter, DELTA_T);
+	TranslationalMotion estimatedVelAccel2 = estimateMotion(p2PosBefore, p2PosMid, p2PosAfter, DELTA_T);
 
-	ASSERT(estimatedVelAccel2.first == p2calculatedVelBefore);
-	ASSERT(estimatedVelAccel1.first == p1calculatedVelBefore);
-	ASSERT(estimatedVelAccel2.second == p2calculatedAccelBefore);
-	ASSERT(estimatedVelAccel1.second == p1calculatedAccelBefore);
+	ASSERT(estimatedVelAccel2.getVelocity() == p2calculatedVelBefore);
+	ASSERT(estimatedVelAccel1.getVelocity() == p1calculatedVelBefore);
+	ASSERT(estimatedVelAccel2.getAcceleration() == p2calculatedAccelBefore);
+	ASSERT(estimatedVelAccel1.getAcceleration() == p1calculatedAccelBefore);
 }
 
 TEST_CASE(testMotionOfPhysicalParts) {
@@ -250,13 +250,13 @@ TEST_CASE(testMotionOfPhysicalParts) {
 	Position p1PosAfter = p1.getCenterOfMass();
 	Position p2PosAfter = p2.getCenterOfMass();
 
-	std::pair<Vec3, Vec3> estimatedVelAccel1 = estimateMotion(p1PosBefore, p1PosMid, p1PosAfter, DELTA_T);
-	std::pair<Vec3, Vec3> estimatedVelAccel2 = estimateMotion(p2PosBefore, p2PosMid, p2PosAfter, DELTA_T);
+	TranslationalMotion estimatedVelAccel1 = estimateMotion(p1PosBefore, p1PosMid, p1PosAfter, DELTA_T);
+	TranslationalMotion estimatedVelAccel2 = estimateMotion(p2PosBefore, p2PosMid, p2PosAfter, DELTA_T);
 
-	ASSERT(estimatedVelAccel1.first == p1calculatedVelBefore);
-	ASSERT(estimatedVelAccel2.first == p2calculatedVelBefore);
-	ASSERT(estimatedVelAccel1.second == p1calculatedAccelBefore);
-	ASSERT(estimatedVelAccel2.second == p2calculatedAccelBefore);
+	ASSERT(estimatedVelAccel1.getVelocity() == p1calculatedVelBefore);
+	ASSERT(estimatedVelAccel2.getVelocity() == p2calculatedVelBefore);
+	ASSERT(estimatedVelAccel1.getAcceleration() == p1calculatedAccelBefore);
+	ASSERT(estimatedVelAccel2.getAcceleration() == p2calculatedAccelBefore);
 }
 
 TEST_CASE(testMotionOfPhysicalJointsBasic) {
@@ -425,4 +425,31 @@ TEST_CASE(testPlainAttachAndFixedConstraintIndistinguishable) {
 
 	ASSERT(main1->motionOfCenterOfMass == main2->motionOfCenterOfMass);
 	ASSERT(main1->getCFrame() == main2->getCFrame());
+}
+
+TEST_CASE(testInternalMotionOfCenterOfMass) {
+	Part firstPart(Box(1.0, 1.0, 1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
+	Part secondPart(Box(0.5, 0.5, 0.5), GlobalCFrame(1.0, 0.0, 0.0), {1.0, 1.0, 1.0});
+
+	SinusoidalPistonConstraint* piston = new SinusoidalPistonConstraint(0.3, 1.0, 1.0);
+
+	piston->currentStepInPeriod = 0.7;
+
+	firstPart.attach(&secondPart, piston, CFrame(0.0, 0.0, 1.0), CFrame(0.0, 0.0, -1.0));
+
+	MotorizedPhysical* phys = firstPart.parent->mainPhysical;
+
+	Vec3 original = phys->totalCenterOfMass;
+
+	TranslationalMotion motionOfCom = phys->getInternalMotionOfCenterOfMass();
+
+	phys->update(DELTA_T);
+	Vec3 v2 = phys->totalCenterOfMass;
+
+	phys->update(DELTA_T);
+	Vec3 v3 = phys->totalCenterOfMass;
+
+	TranslationalMotion estimatedMotion = estimateMotion(original, v2, v3, DELTA_T);
+
+	ASSERT(motionOfCom == estimatedMotion);
 }

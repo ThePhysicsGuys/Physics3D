@@ -42,6 +42,7 @@
     <ClCompile Include="geometryTests.cpp" />
     <ClCompile Include="guiTests.cpp" />
     <ClCompile Include="indexedShapeTests.cpp" />
+    <ClCompile Include="inertiaTests.cpp" />
     <ClCompile Include="mathTests.cpp" />
     <ClCompile Include="motionTests.cpp" />
     <ClCompile Include="physicalStructureTests.cpp" />

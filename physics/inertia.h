@@ -2,31 +2,29 @@
 
 #include "math/linalg/mat.h"
 #include "math/cframe.h"
-#include "math/linalg/misc.h"
+#include "math/taylorExpansion.h"
+#include "motion.h"
 
-inline SymmetricMat3 getRotatedInertia(const SymmetricMat3& originalInertia, const Rotation& rotation) {
-	return rotation.localToGlobal(originalInertia);
-}
-inline SymmetricMat3 getTranslatedInertia(const SymmetricMat3& originalInertia, const Vec3& translation, const Vec3& centerOfMass, double mass) {
-	SymmetricMat3 translationFactor = skewSymmetricSquared(translation + centerOfMass) - skewSymmetricSquared(centerOfMass);
-	return originalInertia + translationFactor * mass;
-}
-inline SymmetricMat3 getTransformedInertia(const SymmetricMat3& originalInertia, const CFrame& cframe, const Vec3& centerOfMass, double mass) {
-	return getTranslatedInertia(cframe.getRotation().localToGlobal(originalInertia), cframe.getPosition(), centerOfMass, mass);
-}
-/* gets a translated inertial matrix, 
+SymmetricMat3 getRotatedInertia(const SymmetricMat3& originalInertia, const Rotation& rotation);
+SymmetricMat3 getTranslatedInertia(const SymmetricMat3& originalInertia, double mass, const Vec3& translation, const Vec3& centerOfMass);
+SymmetricMat3 getTransformedInertia(const SymmetricMat3& originalInertia, double mass, const CFrame& cframe, const Vec3& centerOfMass);
+
+/* 
+computes a translated inertial matrix
+COMOffset is the offset of the object's center of mass from the resulting center of mass
+*/
+SymmetricMat3 getTranslatedInertiaAroundCenterOfMass(const SymmetricMat3& originalInertia, double mass, const Vec3& COMOffset);
+
+/* 
+computes a transformed inertial matrix, where originalInertia is the inertia around the center of mass of the transformed object
 newCenterOfMass is the center around which the new inertia must be calculated
 offsetCFrame is the offset of the object to it's new position*/
-inline SymmetricMat3 getTranslatedInertiaAroundCenterOfMass(const SymmetricMat3& originalInertia, const Vec3& localCenterOfMass, const Vec3& totalCenterOfMass, double mass) {
-	Vec3 resultingOffset = localCenterOfMass - totalCenterOfMass;
-	SymmetricMat3 translationFactor = skewSymmetricSquared(resultingOffset);
-	return originalInertia + translationFactor * mass;
-}
-/* gets a transformed inertial matrix, where originalInertia is the inertia around the center of mass of the transformed object
-newCenterOfMass is the center around which the new inertia must be calculated
-offsetCFrame is the offset of the object to it's new position*/
-inline SymmetricMat3 getTransformedInertiaAroundCenterOfMass(const SymmetricMat3& originalInertia, const Vec3& localCenterOfMass, const CFrame& offsetCFrame, const Vec3& totalCenterOfMass, double mass) {
-	Vec3 resultingOffset = offsetCFrame.localToGlobal(localCenterOfMass) - totalCenterOfMass;
-	SymmetricMat3 translationFactor = skewSymmetricSquared(resultingOffset);
-	return offsetCFrame.getRotation().localToGlobal(originalInertia) + translationFactor * mass;
-}
+SymmetricMat3 getTransformedInertiaAroundCenterOfMass(const SymmetricMat3& originalInertia, double mass, const Vec3& localCenterOfMass, const CFrame& offsetCFrame, const Vec3& totalCenterOfMass);
+
+
+/*
+computes a translated inertial matrix, and it's derivatives
+COMOffset is the offset of the object's center of mass from the resulting center of mass
+motionOfOffset is the change of COMOffset over time, this is relative to the motion of the COM towards which this is computed
+*/
+FullTaylor<SymmetricMat3> getTranslatedInertiaDerivativesAroundCenterOfMass(const SymmetricMat3& originalInertia, double mass, const Vec3& COMOffset, const TranslationalMotion& motionOfOffset);

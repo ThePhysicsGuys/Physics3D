@@ -570,7 +570,7 @@ static std::pair<Vec3, double> getRecursiveCenterOfMass(const Physical& phys) {
 }
 
 static SymmetricMat3 getRecursiveInertia(const Physical& phys, const CFrame& offsetCFrame, const Vec3& localCOMOfMain) {
-	SymmetricMat3 totalInertia = getTransformedInertiaAroundCenterOfMass(phys.rigidBody.inertia, phys.rigidBody.localCenterOfMass, offsetCFrame, localCOMOfMain, phys.rigidBody.mass);
+	SymmetricMat3 totalInertia = getTransformedInertiaAroundCenterOfMass(phys.rigidBody.inertia, phys.rigidBody.mass, phys.rigidBody.localCenterOfMass, offsetCFrame, localCOMOfMain);
 
 	for(const ConnectedPhysical& conPhys : phys.childPhysicals) {
 		CFrame cframeToConPhys = conPhys.getRelativeCFrameToParent();
@@ -581,13 +581,35 @@ static SymmetricMat3 getRecursiveInertia(const Physical& phys, const CFrame& off
 	}
 	return totalInertia;
 }
+SymmetricMat3 MotorizedPhysical::getRotationalInertia() const {
+	return getRecursiveInertia(*this, CFrame(0, 0, 0), totalCenterOfMass);
+}
+
+/*static FullTaylor<SymmetricMat3> getRecursiveInertiaAndDerivatives(const Physical& phys, const CFrame& offsetCFrame, const Vec3& localCOMOfMain, const TranslationalMotion& internalMotionOfCOM) {
+	SymmetricMat3 totalInertia = getTransformedInertiaAroundCenterOfMass(phys.rigidBody.inertia, phys.rigidBody.localCenterOfMass, offsetCFrame, localCOMOfMain, phys.rigidBody.mass);
+
+	for(const ConnectedPhysical& conPhys : phys.childPhysicals) {
+		CFrame cframeToConPhys = conPhys.getRelativeCFrameToParent();
+
+		CFrame offsetOfConPhys = offsetCFrame.localToGlobal(cframeToConPhys);
+
+		totalInertia += getRecursiveInertia(conPhys, offsetOfConPhys, localCOMOfMain);
+	}
+	return totalInertia;
+}*/
+
+FullTaylor<SymmetricMat3> MotorizedPhysical::getRotationalInertiaTaylorExpansion() const {
+	TranslationalMotion motionOfCenterOfMass = this->getInternalMotionOfCenterOfMass();
+
+
+}
 
 void MotorizedPhysical::refreshPhysicalProperties() {
 	std::pair<Vec3, double> result = getRecursiveCenterOfMass(*this);
 	totalCenterOfMass = result.first;
 	totalMass = result.second;
 
-	SymmetricMat3 totalInertia = getRecursiveInertia(*this, CFrame(0, 0, 0), totalCenterOfMass);
+	SymmetricMat3 totalInertia = getRotationalInertia();
 
 	forceResponse = SymmetricMat3::IDENTITY() * (1 / totalMass);
 	momentResponse = ~totalInertia;
@@ -826,7 +848,7 @@ Vec3 MotorizedPhysical::getTotalImpulse() const {
 	return this->motionOfCenterOfMass.getVelocity() * this->totalMass;
 }
 Vec3 MotorizedPhysical::getTotalAngularMomentum() const {
-	SymmetricMat3 totalInertia = getRecursiveInertia(*this, CFrame(0, 0, 0), totalCenterOfMass);
+	SymmetricMat3 totalInertia = getRotationalInertia();
 	return totalInertia * this->motionOfCenterOfMass.getAngularVelocity();
 }
 

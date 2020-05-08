@@ -33,7 +33,7 @@ Motion getMotionBySimulation(const Motion& m, const Vec3& point, double deltaT) 
 
 	return Motion(tResult, rResult);
 }
-std::pair<Vec3, Vec3> estimateMotion(const Vec3& startPos, const Vec3& midPos, const Vec3& endPos, double stepT) {
+TranslationalMotion estimateMotion(const Vec3& startPos, const Vec3& midPos, const Vec3& endPos, double stepT) {
 	Vec3 distance1 = midPos - startPos;
 	Vec3 distance2 = endPos - midPos;
 
@@ -42,9 +42,9 @@ std::pair<Vec3, Vec3> estimateMotion(const Vec3& startPos, const Vec3& midPos, c
 
 	Vec3 acceleration = (velocity2 - velocity1) / stepT;
 
-	return std::make_pair(velocity1, acceleration);
+	return TranslationalMotion(velocity1, acceleration);
 }
-std::pair<Vec3, Vec3> estimateMotion(const Position& startPos, const Position& midPos, const Position& endPos, double stepT) {
+TranslationalMotion estimateMotion(const Position& startPos, const Position& midPos, const Position& endPos, double stepT) {
 	Vec3 distance1 = midPos - startPos;
 	Vec3 distance2 = endPos - midPos;
 
@@ -53,7 +53,7 @@ std::pair<Vec3, Vec3> estimateMotion(const Position& startPos, const Position& m
 
 	Vec3 acceleration = (velocity2 - velocity1) / stepT;
 
-	return std::make_pair(velocity1, acceleration);
+	return TranslationalMotion(velocity1, acceleration);
 }
 
 // secondRot = delta * firstRot

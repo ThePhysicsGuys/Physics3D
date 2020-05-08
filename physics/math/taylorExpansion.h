@@ -207,3 +207,9 @@ FullTaylorExpansion<BaseT1, DeriveT1, DerivationCount>& operator/=(FullTaylorExp
 	first.derivatives /= second;
 	return first;
 }
+
+template<typename T>
+using Taylor = TaylorExpansion<T, 2>;
+
+template<typename T>
+using FullTaylor = FullTaylorExpansion<T, T, 2>;
