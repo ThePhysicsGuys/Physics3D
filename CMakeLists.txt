@@ -44,6 +44,7 @@ add_library(physics STATIC
   physics/rigidBody.cpp
   physics/world.cpp
   physics/worldPhysics.cpp
+  physics/inertia.cpp
 
   physics/math/cframe.cpp
   physics/math/fix.cpp
@@ -70,7 +71,7 @@ add_library(physics STATIC
   physics/constraints/hardConstraint.cpp
   physics/constraints/hardPhysicalConnection.cpp
   physics/constraints/motorConstraint.cpp
-  physics/constraints/sinusoidalPistonConstraint.cpp
+  physics/constraints/controller/sineWaveController.cpp
 
   physics/misc/serialization.cpp
   physics/misc/shapeLibrary.cpp
@@ -106,13 +107,14 @@ add_executable(tests
   tests/indexedShapeTests.cpp
   tests/physicalStructureTests.cpp
   tests/physicsTests.cpp
+  tests/inertiaTests.cpp
 )
 
 target_link_libraries(tests util)
 target_link_libraries(tests physics)
 
 
-find_package(glfw3 3.3 REQUIRED)
+find_package(glfw3 3.2 REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(Freetype REQUIRED)

@@ -22,6 +22,7 @@ The Physics3D project consists of 7 projects, each with its own role:
 - [stb_image](https://github.com/nothings/stb) Verified with stb_image.h v2.22
 - [FreeType](https://www.freetype.org/) Verified with FreeType v2.9.0
 - [ImGui](https://github.com/ocornut/imgui) Verified with ImGui v1.74
+- some OpenGL functionality may not be available on virtual machines, enabling 3D acceleration might solve this
 
 ## Setup Guide
 ### Visual Studio

@@ -1,6 +1,16 @@
 #!/bin/sh
 
-sudo apt-get install libglfw3 libglfw3-dev libglew-dev git cmake
+sudo add-apt-repository universe
+sudo apt-get install build-essential
+sudo apt-get install freeglut3
+sudo apt-get install freeglut3-dev
+sudo apt-get install mesa-common-dev
+sudo apt-get install libglfw3
+sudo apt-get install libglfw3-dev
+sudo apt-get install libglew-dev
+sudo apt-get install git
+sudo apt-get install libfreetype6-dev
+sudo apt install cmake
 
 echo downloading unregistered dependencies
 
