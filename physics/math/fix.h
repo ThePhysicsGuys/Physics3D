@@ -19,10 +19,10 @@ struct Fix {
 	inline constexpr operator double() const { return static_cast<double>(value) / ONE; }
 	inline constexpr operator float() const { return static_cast<float>(value) / ONE; }
 
-	inline Fix<N>& operator++() { value += 1 << N; return *this; }
-	inline Fix<N>& operator++(int) { Fix<N> old = *this; value += ONE; return old; }
-	inline Fix<N>& operator--() { value -= 1 << N; return *this; }
-	inline Fix<N>& operator--(int) { Fix<N> old = *this; value -= ONE; return old; }
+	inline Fix<N>& operator++() { value += ONE; return *this; }
+	inline Fix<N> operator++(int) { Fix<N> old = *this; value += ONE; return old; }
+	inline Fix<N>& operator--() { value -= ONE; return *this; }
+	inline Fix<N> operator--(int) { Fix<N> old = *this; value -= ONE; return old; }
 
 	inline Fix<N>& operator+=(const Fix<N>& b) { this->value += b.value; return *this; }
 	inline Fix<N>& operator-=(const Fix<N>& b) { this->value -= b.value; return *this; }

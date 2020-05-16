@@ -42,7 +42,7 @@ public:
 	char character;
 	bool accepting;
 
-	TokenType(Type type, std::regex regex) : type(type), regex(regex), accepting(false) {}
+	TokenType(Type type, std::regex regex) : type(type), regex(regex), character(), accepting(false) {}
 	TokenType(Type type, char character) : type(type), character(character), accepting(true) {}
 
 	operator Type() const { return type; }

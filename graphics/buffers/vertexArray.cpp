@@ -21,6 +21,9 @@ VertexArray::~VertexArray() {
 }
 
 VertexArray::VertexArray(VertexArray&& other) {
+	attributeArrayOffset = other.attributeArrayOffset;
+	other.attributeArrayOffset = 0;
+
 	id = other.id;
 	other.id = 0;
 }

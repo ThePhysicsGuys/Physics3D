@@ -61,7 +61,7 @@ namespace PropertiesParser {
 			} else if (!std::regex_match(line, Properties::regex)) {
 				Log::warn("Incorrect syntax: %s", line.c_str());
 			} else {
-				size_t pos = line.find(":");
+				size_t pos = line.find(':');
 				std::string property = rtrim(line.substr(0, pos));
 				std::string value = until(ltrim(line.substr(pos + 1, line.length())), ' ');
 
@@ -95,7 +95,7 @@ namespace PropertiesParser {
 				lines.push_back(line);
 				continue;
 			} else {
-				size_t pos = line.find(":");
+				size_t pos = line.find(':');
 				std::string property = line.substr(0, pos);
 				std::string value = line.substr(pos + 1, line.length());
 				std::string trimmedProperty = rtrim(property);				

@@ -161,6 +161,59 @@ void BigFrame::renderFontInfo(Font* font) {
 	}
 }
 
+void renderShaderTypeEditor(Shader* shader, const ShaderUniform& uniform) {
+	ShaderVariableType type = ShaderParser::parseVariableType(uniform.variableType);
+	switch (type) {
+		case ShaderVariableType::NONE:
+		case ShaderVariableType::VOID:
+		case ShaderVariableType::STRUCT:
+		case ShaderVariableType::VS_OUT:
+		case ShaderVariableType::MAT2:
+		case ShaderVariableType::MAT3:
+		case ShaderVariableType::MAT4:
+			ImGui::Text("No editor available");
+			ImGui::Text("No editor available");
+			break;
+		case ShaderVariableType::INT: {
+			int value = 0;
+			if(ImGui::InputInt(uniform.name.c_str(), &value))
+				shader->setUniform(uniform.name, value);
+		} break; 
+		case ShaderVariableType::FLOAT: {
+			float value = 0.0f;
+			if(ImGui::InputFloat(uniform.name.c_str(), &value))
+				shader->setUniform(uniform.name, value);
+		} break; 
+		case ShaderVariableType::VEC2: {
+			Vec2f value = Vec2f(0);
+			if(ImGui::InputFloat2(uniform.name.c_str(), value.data))
+				shader->setUniform(uniform.name, value);
+		} break; 
+		case ShaderVariableType::VEC3: {
+			Vec3f value = Vec3f(0);
+			if(ImGui::InputFloat3(uniform.name.c_str(), value.data))
+				shader->setUniform(uniform.name, value);
+		} break; 
+		case ShaderVariableType::VEC4: {
+			Vec4f value = Vec4f(0);
+			if(ImGui::InputFloat4(uniform.name.c_str(), value.data))
+				shader->setUniform(uniform.name, value);
+		} break; 
+		case ShaderVariableType::SAMPLER2D: {
+			int value = 0;
+			if(ImGui::InputInt(uniform.name.c_str(), &value))
+				shader->setUniform(uniform.name, value);
+		} break;
+		case ShaderVariableType::SAMPLER3D: {
+			int value = 0;
+			if(ImGui::InputInt(uniform.name.c_str(), &value))
+				shader->setUniform(uniform.name, value);
+		} break;
+		default:
+			break;
+	}
+}
+
 void BigFrame::renderShaderStageInfo(Shader* shader, const ShaderStage& stage) {
 	if (ImGui::TreeNode("Code")) {
 		ImGui::TextWrapped(stage.source.c_str());
@@ -170,24 +223,22 @@ void BigFrame::renderShaderStageInfo(Shader* shader, const ShaderStage& stage) {
 
 	if (stage.info.uniforms.size()) {
 		if (ImGui::TreeNode("Uniforms")) {
-			ImGui::Columns(4);
+			ImGui::Columns(5);
 			ImGui::Separator();
 			ImGui::Text("ID"); ImGui::NextColumn();
 			ImGui::Text("Name"); ImGui::NextColumn();
 			ImGui::Text("Type"); ImGui::NextColumn();
 			ImGui::Text("Array"); ImGui::NextColumn();
+			ImGui::Text("Edit"); ImGui::NextColumn();
 			ImGui::Separator();
 
 			for (const ShaderUniform& uniform : stage.info.uniforms) {
 				ImGui::Text("%d", shader->getUniform(uniform.name)); ImGui::NextColumn();
 				ImGui::Text(uniform.name.c_str()); ImGui::NextColumn();
 				ImGui::Text(uniform.variableType.c_str()); ImGui::NextColumn();
-				if (uniform.array)
-					ImGui::Text("yes: %d", uniform.amount);
-				else
-					ImGui::Text("no");
-
-				ImGui::NextColumn();
+				if (uniform.array) ImGui::Text("yes: %d", uniform.amount); else ImGui::Text("no"); ImGui::NextColumn();
+				ImGui::Text("No editor available"); ImGui::NextColumn();
+				//if (!uniform.array) renderShaderTypeEditor(shader, uniform); else ImGui::Text("No editor available"); ImGui::NextColumn();
 			}
 			ImGui::Columns(1);
 			ImGui::Separator();
@@ -469,6 +520,7 @@ void BigFrame::renderECSNode(Engine::Node* node) {
 	}
 
 	if (ImGui::BeginDragDropSource()) {
+		// check sizeof later
 		ImGui::SetDragDropPayload("ECS_NODE", id, sizeof(id));
 
 		float buttonSize = GImGui->FontSize + GImGui->Style.FramePadding.y * 2;

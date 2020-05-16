@@ -100,6 +100,7 @@ struct ShaderInfo {
 
 class ShaderParser {
 public:
+	static ShaderVariableType parseVariableType(const std::string& value);
 	static ShaderInfo parse(const std::string& code);
 	static ShaderInfo parseTokens(TokenStack& tokens);
 };

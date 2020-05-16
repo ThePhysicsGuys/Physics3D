@@ -3,12 +3,12 @@
 #include "../../../util/log.h"
 #include "../../math/linalg/trigonometry.h"
 
-VisibilityFilter::VisibilityFilter(Position origin, Vec3 normals[5], double maxDepth) :
+VisibilityFilter::VisibilityFilter(const Position& origin, Vec3 normals[5], double maxDepth) :
 	origin(origin), 
 	up(normals[0]), down(normals[1]), left(normals[2]), right(normals[3]), forward(normals[4]),
 	maxDepth(maxDepth) {}
 
-VisibilityFilter VisibilityFilter::fromSteps(Position origin, Vec3 stepForward, Vec3 stepUp, Vec3 stepRight, double maxDepth) {
+VisibilityFilter VisibilityFilter::fromSteps(const Position& origin, const Vec3& stepForward, const Vec3& stepUp, const Vec3& stepRight, double maxDepth) {
 	Vec3 upNormal = (stepForward + stepUp) % stepRight;
 	Vec3 downNormal = -(stepForward - stepUp) % stepRight;
 	Vec3 leftNormal = -(stepForward + stepRight) % stepUp;
@@ -19,7 +19,7 @@ VisibilityFilter VisibilityFilter::fromSteps(Position origin, Vec3 stepForward, 
 	return VisibilityFilter(origin, normals, maxDepth);
 }
 
-VisibilityFilter VisibilityFilter::fromSteps(Position origin, Vec3 stepForward, Vec3 stepUp, Vec3 stepRight, double maxDepth, double left, double right, double down, double up) {
+VisibilityFilter VisibilityFilter::fromSteps(const Position& origin, const Vec3& stepForward, const Vec3& stepUp, const Vec3& stepRight, double maxDepth, double left, double right, double down, double up) {
 	Vec3 upNormal = (stepForward + stepUp * up) % stepRight;
 	Vec3 downNormal = -(stepForward + stepUp * down) % stepRight;
 	Vec3 leftNormal = -(stepForward - stepRight * left) % stepUp;
@@ -30,7 +30,7 @@ VisibilityFilter VisibilityFilter::fromSteps(Position origin, Vec3 stepForward, 
 	return VisibilityFilter(origin, normals, maxDepth);
 }
 
-VisibilityFilter VisibilityFilter::forWindow(Position origin, Vec3 cameraForward, Vec3 cameraUp, double fov, double aspect, double maxDepth) {
+VisibilityFilter VisibilityFilter::forWindow(const Position& origin, const Vec3& cameraForward, const Vec3& cameraUp, double fov, double aspect, double maxDepth) {
 	double tanFov = tan(fov / 2);
 	
 	Vec3 stepForward = normalize(cameraForward);
@@ -46,7 +46,7 @@ VisibilityFilter VisibilityFilter::forWindow(Position origin, Vec3 cameraForward
 	);
 }
 
-VisibilityFilter VisibilityFilter::forSubWindow(Position origin, Vec3 cameraForward, Vec3 cameraUp, double fov, double aspect, double maxDepth, double left, double right, double down, double up) {
+VisibilityFilter VisibilityFilter::forSubWindow(const Position& origin, const Vec3& cameraForward, const Vec3& cameraUp, double fov, double aspect, double maxDepth, double left, double right, double down, double up) {
 	double tanFov = tan(fov / 2);
 
 	Vec3 stepForward = normalize(cameraForward);
@@ -67,7 +67,7 @@ bool VisibilityFilter::operator()(const TreeNode& node) const {
 	double offsets[5]{0,0,0,0,maxDepth};
 	Vec3 normals[5]{up, down, left, right, forward}; 
 	for(int i = 0; i < 5; i++) {
-		Vec3 normal = normals[i];
+		Vec3& normal = normals[i];
 		// we're checking that *a* corner of the TreeNode's bounds is within the viewport, basically similar to rectangle-rectangle colissions, google it!
 		// cornerOfInterest is the corner that is the furthest positive corner relative to the normal, so if it is not visible (eg above the normal) then the whole box must be invisible
 		Position cornerOfInterest(
@@ -80,6 +80,23 @@ bool VisibilityFilter::operator()(const TreeNode& node) const {
 		if (relativePos * normal > offsets[i])
 			return false;
 	}
+	return true;
+}
+
+bool VisibilityFilter::operator()(const Position& point) const {
+	double offsets[5] { 0,0,0,0,maxDepth };
+	Vec3 normals[5] { up, down, left, right, forward };
+	for (int i = 0; i < 5; i++) {
+		Vec3& normal = normals[i];
+
+		Vec3 relativePos = point - origin;
+		if (relativePos * normal > offsets[i])
+			return false;
+	}
+	return true;
+}
+
+bool VisibilityFilter::operator()(const Part& part) const {
 	return true;
 }
 

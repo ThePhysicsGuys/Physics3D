@@ -5,29 +5,35 @@
 #include "picker/picker.h"
 #include "input/standardInputHandler.h"
 
+#include "../engine/tool/toolManager.h"
 #include "../graphics/renderer.h"
 #include "../graphics/renderer.h"
 #include "../picker/selectionTool.h"
 
 namespace Application {
 
-SelectionTool tool;
+Engine::ToolManager toolManager;
 
 void PickerLayer::onInit() {
 	Picker::onInit();
-	tool.onInit();
+	
+	toolManager.onInit();
+	toolManager.registerTool<SelectionTool>();
+	toolManager.selectTool<SelectionTool>();
 }
 
 void PickerLayer::onUpdate() {
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
 	Picker::onUpdate(*screen, handler->mousePosition);
-	tool.onUpdate();
+	
+	toolManager.onUpdate();
 }
 
 void PickerLayer::onEvent(Engine::Event& event) {
 	Picker::onEvent(event);
-	tool.onEvent(event);
+
+	toolManager.onEvent(event);
 }
 
 void PickerLayer::onRender() {
@@ -44,14 +50,15 @@ void PickerLayer::onRender() {
 
 	disableDepthTest();
 
-	tool.onRender();
+	toolManager.onRender();
 
 	endScene();
 }
 
 void PickerLayer::onClose() {
 	Picker::onClose();
-	tool.onClose();
+
+	toolManager.onClose();
 }
 
 };

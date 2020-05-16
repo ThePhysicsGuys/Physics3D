@@ -45,7 +45,7 @@ inline Position min(const Position& p1, const Position& p2) {
 }
 inline Position avg(const Position& first, const Position& second) {
 	Vec3Fix delta = second - first;
-	return first + Vec3Fix(delta.x >> 1, delta.y >> 1, delta.z >> 1);
+	return first + Vec3Fix(delta.x >> int64_t(1), delta.y >> int64_t(1), delta.z >> int64_t(1));
 }
 
 // unconventional operator, compares xyz individually, returns true if all are true

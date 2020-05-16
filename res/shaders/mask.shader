@@ -6,14 +6,14 @@
 
 [vertex]
 
-layout(location = 0) in vec3 vposition;
+layout(location = 0) in vec3 vPosition;
 
 uniform mat4 projectionMatrix;
 uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
 
 void main() {
-	gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(vposition, 1.0);
+	gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(vPosition, 1.0);
 }
 
 //------------------------------------------------------------------------------//

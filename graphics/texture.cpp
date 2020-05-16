@@ -73,8 +73,6 @@ Texture Texture::load(const std::string& name) {
 		Log::subject s(name);
 		Log::error("Failed to load texture");
 
-		stbi_image_free(data);
-
 		return Texture();
 	}
 }

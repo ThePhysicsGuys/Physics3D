@@ -1,27 +1,33 @@
 #pragma once
 
 #include "../graphics/glfwUtils.h"
+#include "../engine/event/mouseEvent.h"
 #include "../engine/tool/stateTool.h"
+#include <set>
+
 
 namespace Engine {
 class Event;
 class Entity;
 }
 
+struct ExtendedPart;
+
 namespace Application {
 
 class SelectionTool : public Engine::StateTool {
-private:
+	typedef Vec4i Region;
 
+private:
 	enum SelectionToolStatus : Engine::ToolStatus {
-		idle = 0,
-		active = 1
+		kIdle = 0,
+		kActive = 1
 	};
 
-	typedef Vec4i Region;
 	Region currentRegion;
 	std::vector<Region> regions;
-	std::vector<Engine::Entity*> selection;
+
+	std::set<ExtendedPart*> selection;
 
 public:
 	DEFINE_TOOL("Select", "Selects one or multiple entities.", Graphics::GLFW::Cursor::CROSSHAIR);

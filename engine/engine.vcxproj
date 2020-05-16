@@ -224,6 +224,7 @@
     <ClInclude Include="resource\meshResource.h" />
     <ClInclude Include="tool\stateTool.h" />
     <ClInclude Include="tool\tool.h" />
+    <ClInclude Include="tool\toolManager.h" />
     <ClInclude Include="visualData.h" />
   </ItemGroup>
   <ItemGroup>
@@ -248,6 +249,7 @@
     <ClCompile Include="meshRegistry.cpp" />
     <ClCompile Include="options\keyboardOptions.cpp" />
     <ClCompile Include="resource\meshResource.cpp" />
+    <ClCompile Include="tool\toolManager.cpp" />
     <ClCompile Include="visualData.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

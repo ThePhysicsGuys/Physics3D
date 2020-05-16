@@ -125,12 +125,12 @@ void EditTools::onRender(Screen& screen) {
 
 	// X
 	ApplicationShaders::basicShader.updateMaterial(Material(COLOR::R));
-	ApplicationShaders::basicShader.updateModel(modelMatrix * Mat4(Matrix<double, 3, 3>(transformations[1]), 1.0f));
+	ApplicationShaders::basicShader.updateModel(modelMatrix * Mat4(Mat3(transformations[1]), 1.0f));
 	shaft->render();
 
 	// Z
 	ApplicationShaders::basicShader.updateMaterial(Material(COLOR::B));
-	ApplicationShaders::basicShader.updateModel(modelMatrix * Mat4(Matrix<double, 3, 3>(transformations[2]), 1.0f));
+	ApplicationShaders::basicShader.updateModel(modelMatrix * Mat4(Mat3(transformations[2]), 1.0f));
 	shaft->render();
 }
 

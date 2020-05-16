@@ -247,7 +247,7 @@ RotationMatrix<T, 3> rotationMatrixfromRotationVec(Vector<T, 3> rotVec) {
 template<typename T>
 Vector<T, 3> rotationVectorfromRotationMatrix(const RotationMatrix<T, 3>& m) {
 	Vector<T, 3> axisOfRotation(m[2][1] - m[1][2], m[0][2] - m[2][0], m[1][0] - m[0][1]);
-	if(axisOfRotation[0] == 0 && axisOfRotation[0] == 0 && axisOfRotation[0] == 0) return Vector<T, 3>(0, 0, 0);
+	if(axisOfRotation[0] == 0 && axisOfRotation[1] == 0 && axisOfRotation[2] == 0) return Vector<T, 3>(0, 0, 0);
 	double trace = m[0][0] + m[1][1] + m[2][2];
 
 	double angle = acos((trace - 1) / 2);

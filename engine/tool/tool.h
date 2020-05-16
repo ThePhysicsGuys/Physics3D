@@ -1,12 +1,12 @@
 #pragma once
 
-#include "../engine/event/mouseEvent.h"
-
 namespace Engine {
 
+class Event;
+
 #define DEFINE_TOOL(name, description, cursor) \
-	std::string getName() { return name; } \
-	std::string getDescription() { return description; } \
+	static std::string getName() { return name; } \
+	static std::string getDescription() { return description; } \
 	int getCursorType() { return cursor; }
 
 class Tool {
@@ -17,22 +17,22 @@ public:
 	/*
 		Returns the name of this tool
 	*/
-	virtual std::string getName() = 0;
+	static std::string getName();
 
 	/*
 		Returns the description of this tool
 	*/
-	virtual std::string getDescription() = 0;
+	static std::string getDescription();
 
 	/*
 		When the tool gets registered
 	*/
-	inline virtual void onInit() {}
+	inline virtual void onRegister() {}
 
 	/*
 		When the tool is selected
 	*/
-	inline virtual void onSetUp() {}
+	inline virtual void onSelect() {}
 
 	/*
 		When the tool gets updated
@@ -52,12 +52,12 @@ public:
 	/*
 		Whe the tool is deselected
 	*/
-	inline virtual void onSetDown() {}
+	inline virtual void onDeselect() {}
 
 	/*
-		When the tool gets uregistered
+		When the tool gets deregistered
 	*/
-	inline virtual void onClose() {}
+	inline virtual void onDeregister() {}
 };
 
 };

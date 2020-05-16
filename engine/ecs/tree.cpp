@@ -55,6 +55,8 @@ Node* ECSTree::createGroup(Node* root, const std::string& name) {
 	group->setTree(this);
 
 	root->addChild(group);
+
+	return group;
 }
 
 Entity* ECSTree::createEntity(Node* root, const std::string& name) {
@@ -65,6 +67,8 @@ Entity* ECSTree::createEntity(Node* root, const std::string& name) {
 	entity->setTree(this);
 
 	root->addChild(entity);
+
+	return entity;
 }
 
 void ECSTree::addNode(Node* root, Node* node) {

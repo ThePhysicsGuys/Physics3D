@@ -13,6 +13,10 @@
 #include "../view/screen.h"
 #include "../application.h"
 #include "../input/standardInputHandler.h"
+#include "../application.h"
+#include "../view/screen.h"
+#include "../worlds.h"
+#include "../physics/misc/filters/visibilityFilter.h"
 
 namespace Application {
 
@@ -25,7 +29,7 @@ void SelectionTool::onRender() {
 	GraphicsShaders::guiShader.setUniform("projectionMatrix", screen.camera.orthoMatrix);	
 
 	Path::batch = GUI::batch;
-	if (getToolStatus() == active) {
+	if (getToolStatus() == kActive) {
 		Vec2 a = GUI::map(Vec2(currentRegion.x, currentRegion.y));
 		Vec2 b = GUI::map(handler->getMousePosition());
 		Vec2 position = Vec2f(fmin(a.x, b.x), fmin(a.y, b.y));
@@ -66,9 +70,7 @@ bool SelectionTool::onMousePress(Engine::MousePressEvent& event) {
 		if (!event.getModifiers().isCtrlPressed()) 
 			regions.clear();
 
-		Graphics::GLFW::setCursor(getCursorType());
-
-		setToolStatus(active);
+		setToolStatus(kActive);
 	}
 
 	return false;
@@ -85,9 +87,22 @@ bool SelectionTool::onMouseRelease(Engine::MouseReleaseEvent& event) {
 
 		regions.push_back(currentRegion);
 
-		Graphics::GLFW::setCursor(Graphics::GLFW::Cursor::ARROW);
+		setToolStatus(kIdle);
 
-		setToolStatus(idle);
+		screen.world->syncReadOnlyOperation([this] () {
+			Camera& camera = screen.camera;
+
+			Vec4 mappedRegion = GUI::mapRegion(currentRegion, Vec2(0, screen.dimension.x), Vec2(0, screen.dimension.y), Vec2(-1, 1), Vec2(-1, 1));
+			auto[left, right] = GUI::minmax(mappedRegion.x, mappedRegion.z);
+			auto[down, up] = GUI::minmax(mappedRegion.y, mappedRegion.w);
+
+			VisibilityFilter boundingboxFilter = VisibilityFilter::forSubWindow(camera.cframe.position, camera.getForwardDirection(), camera.getUpDirection(), camera.fov, camera.aspect, camera.zfar, left, right, down, up);
+			for (ExtendedPart& part : screen.world->iterPartsFiltered(boundingboxFilter, ALL_PARTS)) {
+				if (!boundingboxFilter(part.getCenterOfMass()))
+					continue;
+				//selection.insert(&part);
+			}
+		});
 	}
 
 	return false;

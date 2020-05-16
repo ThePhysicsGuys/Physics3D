@@ -156,7 +156,7 @@ void addDebugField(Vec2 dimension, Graphics::Font* font, const char* varName, st
 	std::stringstream string;
 	string.precision(4);
 	string << varName << ": " << value << unit;
-	Path::text(font, string.str().c_str(), 0.001, Vec2(-dimension.x / dimension.y * 0.99, (1 - fieldIndex * 0.05) * 0.95), Vec4(1, 1, 1, 1));
+	Path::text(font, string.str(), 0.001, Vec2(-dimension.x / dimension.y * 0.99, (1 - fieldIndex * 0.05) * 0.95), Vec4(1, 1, 1, 1));
 	fieldIndex++;
 }
 }

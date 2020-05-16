@@ -4,36 +4,28 @@
 
 namespace Graphics {
 
+std::map<std::string, ShaderVariableType> variableTypeMap = {
+	{ "void", ShaderVariableType::VOID },
+	{ "int", ShaderVariableType::INT },
+	{ "float", ShaderVariableType::FLOAT },
+	{ "mat2", ShaderVariableType::MAT2 },
+	{ "mat3", ShaderVariableType::MAT3 },
+	{ "mat4", ShaderVariableType::MAT4 },
+	{ "vec2", ShaderVariableType::VEC2 },
+	{ "vec3", ShaderVariableType::VEC3 },
+	{ "vec4", ShaderVariableType::VEC4 },
+	{ "sampler2D", ShaderVariableType::SAMPLER2D },
+	{ "sampler3D", ShaderVariableType::SAMPLER3D },
+	{ "struct", ShaderVariableType::STRUCT },
+	{ "VS_OUT", ShaderVariableType::VS_OUT },
+};
+
 ShaderLocal parseLocal(TokenStack& tokens, const ShaderDefines& defines);
 
-ShaderVariableType parseVariableType(const std::string& value) {
-
-	if (value == "void")
-		return ShaderVariableType::VOID;
-	if (value == "int")
-		return ShaderVariableType::INT;
-	if (value == "float")
-		return ShaderVariableType::FLOAT;
-	if (value == "mat2")
-		return ShaderVariableType::MAT2;
-	if (value == "mat3")
-		return ShaderVariableType::MAT3;
-	if (value == "mat4")
-		return ShaderVariableType::MAT4;
-	if (value == "vec2")
-		return ShaderVariableType::VEC2;
-	if (value == "vec3")
-		return ShaderVariableType::VEC3;
-	if (value == "vec4")
-		return ShaderVariableType::VEC4;
-	if (value == "sampler2D")
-		return ShaderVariableType::SAMPLER2D;
-	if (value == "sampler3D")
-		return ShaderVariableType::SAMPLER3D;
-	if (value == "struct")
-		return ShaderVariableType::STRUCT;
-	if (value == "VS_OUT")
-		return ShaderVariableType::VS_OUT;
+ShaderVariableType ShaderParser::parseVariableType(const std::string& value) {
+	auto iterator = variableTypeMap.find(value);
+	if (iterator != variableTypeMap.end())
+		return iterator->second;
 
 	return ShaderVariableType::NONE;
 }
@@ -73,7 +65,7 @@ TokenStack nextScope(TokenStack& tokens, const TokenType::Type& ltype, const Tok
 }
 
 bool testFunction(TokenStack& tokens) {
-	if (parseVariableType(tokens.peek().value) == ShaderVariableType::VOID)
+	if (ShaderParser::parseVariableType(tokens.peek().value) == ShaderVariableType::VOID)
 		return true;
 
 	if (tokens.peek(1).type == TokenType::ID)
@@ -170,7 +162,7 @@ ShaderGlobal parseGlobal(TokenStack& tokens, const ShaderDefines& defines) {
 	std::string ioType = tokens.pop().value;
 	std::string variableType = tokens.pop().value;
 
-	switch (parseVariableType(variableType)) {
+	switch (ShaderParser::parseVariableType(variableType)) {
 		case ShaderVariableType::VS_OUT: {
 			ShaderVSOUT vsout = parseVSOUT(tokens, ioType, defines);
 			return vsout;

@@ -271,7 +271,7 @@ void MultisampleFrameBuffer::close() {
 
 //! DepthFrameBuffer
 
-DepthFrameBuffer::DepthFrameBuffer(unsigned int width, unsigned int height) {
+DepthFrameBuffer::DepthFrameBuffer(unsigned int width, unsigned int height) : width(width), height(height) {
 	texture = new DepthTexture(width, height);
 	glGenFramebuffers(1, &id);
 	Renderer::bindFramebuffer(id);
@@ -288,6 +288,12 @@ DepthFrameBuffer::~DepthFrameBuffer() {
 DepthFrameBuffer::DepthFrameBuffer(DepthFrameBuffer&& other) {
 	id = other.id;
 	other.id = 0;
+
+	width = other.width;
+	other.width = 0;
+
+	height = other.height;
+	other.height = 0;
 
 	texture = other.texture;
 	other.texture = nullptr;

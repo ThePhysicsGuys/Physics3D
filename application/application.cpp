@@ -407,8 +407,6 @@ void loadFile(const char* file) {
 }
 
 bool onFileDrop(Engine::WindowDropEvent& event) {
-	std::string path = event.getPath();
-
 	loadFile(event.getPath().c_str());
 
 	return true;
