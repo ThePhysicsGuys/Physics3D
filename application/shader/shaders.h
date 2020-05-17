@@ -132,7 +132,7 @@ struct InstanceShader : public ShaderResource {
 	void updateExposure(float exposure);
 	void updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Position& viewPosition);
 	void updateLight(const std::vector<Light*> lights);
-	void updateTexture(unsigned char flags);
+	void updateTexture(bool textured);
 };
 
 struct SkyShader : public ShaderResource {

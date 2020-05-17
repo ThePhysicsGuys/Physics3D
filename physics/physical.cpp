@@ -601,7 +601,7 @@ SymmetricMat3 MotorizedPhysical::getRotationalInertia() const {
 FullTaylor<SymmetricMat3> MotorizedPhysical::getRotationalInertiaTaylorExpansion() const {
 	TranslationalMotion motionOfCenterOfMass = this->getInternalMotionOfCenterOfMass();
 
-
+	return FullTaylor<SymmetricMat3>();
 }
 
 void MotorizedPhysical::refreshPhysicalProperties() {

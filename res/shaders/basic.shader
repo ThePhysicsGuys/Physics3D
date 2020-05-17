@@ -234,25 +234,25 @@ vec3 getNormalFromMap() {
 	vec3 B = -normalize(cross(N, T));
 	mat3 TBN = mat3(T, B, N);
 
-	return normalize(TBN * tangentNormal);
+	return TBN * tangentNormal;
 }
 
 void main() {
-	if (material.textured == 1) {
-		N = getNormalFromMap();
+	/*if (material.textured == 1) {
+		N = normalize(getNormalFromMap());
 
 		albedo = texture(material.albedoMap, fUV) * texture(material.albedoMap, fUV);
 		roughness = 1 - texture(material.roughnessMap, fUV).r;
 		metalness = texture(material.metalnessMap, fUV).r;
 		ambientOcclusion = texture(material.ambientOcclusionMap, fUV).r;
-	} else {
-		N = fNormal;
+	} else {*/
+		N = normalize(fNormal);
 
 		albedo = material.albedo;
 		roughness = material.roughness;
 		metalness = material.metalness;
 		ambientOcclusion = material.ambientOcclusion;
-	}
+	/*}*/
 
 	V = normalize(viewPosition - fPosition);
 
@@ -280,6 +280,6 @@ void main() {
 	color = pow(color, vec3(1.0 / gamma));
 
 	// Outcolor
-	outColor = vec4(color, albedo.a);
+	outColor = vec4(N, albedo.a);
 }
 

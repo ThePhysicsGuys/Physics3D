@@ -40,7 +40,7 @@ namespace Path {
 
 	// Adds the vertices to the batch with the necessary indices, this does not reserve space on the batch
 	void pushLine(const Vec2f& a, const Vec2f& b, const Color& colorA, const Color& colorB, float thickness) {
-		Vec2f dxy = normalize(Vec2f(b.y - a.y, a.x - b.x)) / GUI::windowInfo.dimension.y * 3 * thickness;
+		Vec2f dxy = normalize(Vec2f(b.y - a.y, a.x - b.x)) / GUI::windowInfo.dimension.y * 3.0 * thickness;
 
 		pushQuad(Vec2f(a + dxy), Vec2f(b + dxy), Vec2f(b - dxy), Vec2f(a - dxy), colorA, colorB, colorB, colorA);
 	}

@@ -110,6 +110,7 @@ void ModelLayer::onInit() {
 
 	ApplicationShaders::basicShader.updateLight(lights);
 	ApplicationShaders::instanceShader.updateLight(lights);
+	ApplicationShaders::basicShader.updateTexture(false);
 	ApplicationShaders::instanceShader.updateTexture(false);
 }
 

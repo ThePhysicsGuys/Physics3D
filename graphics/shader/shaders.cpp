@@ -28,7 +28,8 @@ void onInit() {
 			out vec4 fcolor;out vec2 fuv;
 			void main() {
 				gl_Position = projectionMatrix * vec4(vposition, 0.0, 1.0);
-				fcolor = vcolor;fuv = vuv;
+				fcolor = vcolor;
+				fuv = vuv;
 			}
 			[fragment]
 			out vec4 outColor;

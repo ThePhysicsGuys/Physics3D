@@ -45,11 +45,9 @@ void PickerLayer::onRender() {
 
 	clearDepth();
 	enableDepthTest();
-
 	Picker::onRender(*screen);
 
 	disableDepthTest();
-
 	toolManager.onRender();
 
 	endScene();

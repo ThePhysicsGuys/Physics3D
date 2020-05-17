@@ -128,12 +128,16 @@ uniform int lightCount;
 uniform Light lights[maxLights];
 
 // Textures
-uniform sampler2D albedoMap;
-uniform sampler2D normalMap;
-uniform sampler2D metalnessMap;
-uniform sampler2D roughnessMap;
-uniform sampler2D ambientOcclusionMap;
-uniform int textured;
+struct Material {
+	sampler2D albedoMap;
+	sampler2D normalMap;
+	sampler2D metalnessMap;
+	sampler2D roughnessMap;
+	sampler2D ambientOcclusionMap;
+	int textured;
+};
+
+uniform Material material;
 
 // Environment
 uniform vec3 sunDirection = vec3(1, 1, 1);
@@ -227,7 +231,7 @@ vec3 calcLightColor(Light light) {
 }
 
 vec3 getNormalFromMap() {
-	vec3 tangentNormal = texture(normalMap, fUV).xyz * 2.0 - 1.0;
+	vec3 tangentNormal = texture(material.normalMap, fUV).xyz * 2.0 - 1.0;
 
 	vec3 Q1 = dFdx(fPosition);
 	vec3 Q2 = dFdy(fPosition);
@@ -239,25 +243,25 @@ vec3 getNormalFromMap() {
 	vec3 B = -normalize(cross(N, T));
 	mat3 TBN = mat3(T, B, N);
 
-	return normalize(TBN * tangentNormal);
+	return TBN * tangentNormal;
 }
 
 void main() {
-	if (textured == 1) {
-		N = getNormalFromMap();
+	/*if (material.textured == 1) {
+		N = normalize(getNormalFromMap());
 
-		albedo = texture(albedoMap, fUV) * texture(albedoMap, fUV);
-		roughness =  texture(roughnessMap, fUV).r;
-		metalness = texture(metalnessMap, fUV).r;
-		ambientOcclusion = texture(ambientOcclusionMap, fUV).r;
-	} else {
-		N = fNormal;
+		albedo = texture(material.albedoMap, fUV) * texture(material.albedoMap, fUV);
+		roughness =  texture(material.roughnessMap, fUV).r;
+		metalness = texture(material.metalnessMap, fUV).r;
+		ambientOcclusion = texture(material.ambientOcclusionMap, fUV).r;
+	} else {*/
+		N = normalize(fNormal);
 
 		albedo = fAlbedo;
 		roughness = fRoughness;
 		metalness = fMetalness;
 		ambientOcclusion = fAmbientOcclusion;
-	}
+	/*}*/
 
 	V = normalize(viewPosition - fPosition);
 

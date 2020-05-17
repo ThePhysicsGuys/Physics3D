@@ -11,8 +11,6 @@ namespace Graphics {
 struct GuiCommand {
 	// Amount of indices to render
 	size_t count;
-	// Scissor rectangle
-	Vec4f clip;
 	// Optional texture ID
 	GLID textureID;
 	// Offset in index buffer
@@ -45,8 +43,7 @@ public:
 		if (count == 0)
 			return;
 
-		Vec4f scissor = Vec4f();
-		GuiCommand command = { count, scissor, textureID, currentIndexOffset };
+		GuiCommand command = { count, textureID, currentIndexOffset };
 
 		CommandBatch<GuiVertex, GuiCommand>::pushCommand(command);
 	}
@@ -54,9 +51,8 @@ public:
 	void submit() override {
 		GraphicsShaders::guiShader.bind();
 
-		if (commandBuffer.size() == 0) {
+		if (commandBuffer.size() == 0) 
 			pushCommand(0);
-		}
 
 		Batch<GuiVertex>::vao->bind();
 
