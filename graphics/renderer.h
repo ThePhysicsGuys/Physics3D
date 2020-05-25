@@ -27,6 +27,25 @@ extern GLFLAG POINTS;
 
 extern GLFLAG UINT;
 
+struct RenderState {
+	GLID dfbo;
+	GLID rfbo;
+	GLID rbo;
+	GLID texture;
+	GLID program;
+	GLID vao;
+	GLID vbo;
+	GLID ibo;
+	int activeTexture;
+	int viewport[4];
+	int mode[2];
+	bool blend;
+	bool cull;
+	bool depth;
+	bool scissor;
+	bool depthmask;
+};
+
 // GLEW binding
 
 extern bool initGLEW();
@@ -71,6 +90,7 @@ extern void drawArrays(GLFLAG mode, int first, size_t count);
 
 extern void defaultSettings();
 
+extern RenderState getState();
 extern void beginScene();
 extern void endScene();
 

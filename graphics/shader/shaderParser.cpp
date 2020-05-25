@@ -206,10 +206,15 @@ void parseDefine(TokenStack& tokens, ShaderDefines& defines) {
 	std::string name = tokens.pop().value;
 	float value = 1;
 
-	if (tokens.peek().type == TokenType::NUMBER)
-		value = std::stof(tokens.pop().value);
+	if (tokens.peek().type == TokenType::NUMBER) {
+		try {
+			value = std::stof(tokens.pop().value);
+		} catch (...) {
+			return;
+		}
 
-	defines[name] = value;
+		defines[name] = value;
+	}
 }
 
 void parseUnDef(TokenStack& tokens, ShaderDefines& defines) {

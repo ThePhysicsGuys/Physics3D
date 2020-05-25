@@ -26,25 +26,6 @@ GLFLAG POINTS = GL_POINTS;
 
 GLFLAG UINT = GL_UNSIGNED_INT;
 
-struct RenderState {
-	GLID dfbo;
-	GLID rfbo;
-	GLID rbo;
-	GLID texture;
-	GLID program; 
-	GLID vao;
-	GLID vbo;
-	GLID ibo;
-	int activeTexture;
-	int viewport[4];
-	int mode[2];
-	bool blend;
-	bool cull;
-	bool depth;
-	bool scissor;
-	bool depthmask;
-};
-
 std::stack<RenderState> states;
 RenderState current;
 
@@ -103,6 +84,40 @@ void loadState(const RenderState& state) {
 	//if (state.scissor) glEnable(GL_SCISSOR_TEST); else glDisable(GL_SCISSOR_TEST);
 }
 
+RenderState getState() {
+	RenderState state;
+
+	int intbuffer;
+	unsigned char boolbuffer;
+	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &intbuffer);
+	state.dfbo = intbuffer;
+	glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &intbuffer);
+	state.rfbo = intbuffer;
+	glGetIntegerv(GL_RENDERBUFFER_BINDING, &intbuffer);
+	state.rbo = intbuffer;
+	glGetIntegerv(GL_TEXTURE_BINDING_2D, &intbuffer);
+	state.texture = intbuffer;
+	glGetIntegerv(GL_CURRENT_PROGRAM, &intbuffer);
+	state.program = intbuffer;
+	glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &intbuffer);
+	state.vao = intbuffer;
+	glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &intbuffer);
+	state.vbo = intbuffer;
+	glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, &intbuffer);
+	state.vbo = intbuffer;
+	glGetBooleanv(GL_DEPTH_WRITEMASK, &boolbuffer);
+	state.depthmask = boolbuffer;
+	glGetIntegerv(GL_ACTIVE_TEXTURE, &state.activeTexture);
+	glGetIntegerv(GL_VIEWPORT, state.viewport);
+	glGetIntegerv(GL_POLYGON_MODE, state.mode);
+	state.blend = glIsEnabled(GL_BLEND);
+	state.cull = glIsEnabled(GL_CULL_FACE);
+	state.depth = glIsEnabled(GL_DEPTH_TEST);
+	state.scissor = glIsEnabled(GL_SCISSOR_TEST);
+
+	return state;
+}
+
 void beginScene() {
 	RenderState	backup = saveState();
 	states.push(backup);
@@ -147,54 +162,34 @@ void viewport(Vec2i origin, Vec2i dimension) {
 }
 
 void enableDepthTest() {
-	//if (!current.depth) {
-	//	current.depth = true;
-		glEnable(GL_DEPTH_TEST);
-	//}
+	glEnable(GL_DEPTH_TEST);
 }
 
 void disableDepthTest() {
-	//if (current.depth) {
-	//	current.depth = false;
-		glDisable(GL_DEPTH_TEST);
-	//}
+	glDisable(GL_DEPTH_TEST);
 }
 
 void enableDepthMask() {
-	//if (!current.depthmask) {
-	//	current.depthmask = true;
-		glDepthMask(GL_TRUE);
-	//}
+	glDepthMask(GL_TRUE);
 }
 
 void disableDepthMask() {
-	//if (current.depthmask) {
-	//	current.depthmask = false;
-		glDepthMask(GL_FALSE);
-	//}
+	glDepthMask(GL_FALSE);
 }
 
 void enableCulling() {
-	//if (!current.cull) {
-	//	current.cull = true;
-		glEnable(GL_CULL_FACE);
-	//}
+	glEnable(GL_CULL_FACE);
 }
 
 void disableCulling() {
-	//if (current.cull) {
-	//	current.cull = false;
-		glDisable(GL_CULL_FACE);
-	//}
+	glDisable(GL_CULL_FACE);
 }
 
 void enableBlending() {
-	//current.blend = true;
 	glEnable(GL_BLEND);
 }
 
 void disableBlending() {
-	//current.blend = false;
 	glDisable(GL_BLEND);
 }
 
@@ -207,8 +202,6 @@ void enableMultisampling() {
 }
 
 void polygonMode(int face, int mode) {
-	//current.mode[0] = face;
-	//current.mode[1] = mode;
 	glPolygonMode(face, mode);
 }
 

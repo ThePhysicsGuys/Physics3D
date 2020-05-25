@@ -130,6 +130,7 @@ void ModelLayer::onRender() {
 	beginScene();
 
 	graphicsMeasure.mark(GraphicsProcess::UPDATE);
+	ApplicationShaders::debugShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
 	ApplicationShaders::basicShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
 	ApplicationShaders::instanceShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
 

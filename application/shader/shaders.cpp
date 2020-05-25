@@ -31,6 +31,7 @@ MaskShader maskShader;
 InstanceShader instanceShader;
 LightingShader lightingShader;
 SkyShader skyShader;
+DebugShader debugShader;
 
 void onInit() {
 	// Shader source init
@@ -48,6 +49,7 @@ void onInit() {
 	ShaderSource instanceShaderSource = parseShader("instance.shader", getResourceAsString(applicationResources, INSTANCE_SHADER));
 	ShaderSource skyShaderSource = parseShader("sky.shader", getResourceAsString(applicationResources, SKY_SHADER));
 	ShaderSource lightingShaderSource = parseShader("lighting.shader", getResourceAsString(applicationResources, LIGHTING_SHADER));
+	ShaderSource debugShaderSource = parseShader("debug.shader", getResourceAsString(applicationResources, DEBUG_SHADER));
 
 
 	// Shader init
@@ -65,6 +67,7 @@ void onInit() {
 	new(&instanceShader) InstanceShader(instanceShaderSource);
 	new(&skyShader) SkyShader(skyShaderSource);
 	new(&lightingShader) LightingShader(lightingShaderSource);
+	new(&debugShader) DebugShader(debugShaderSource);
 
 	ResourceManager::add(&basicShader);
 	ResourceManager::add(&depthShader);
@@ -80,6 +83,7 @@ void onInit() {
 	ResourceManager::add(&instanceShader);
 	ResourceManager::add(&skyShader);
 	ResourceManager::add(&lightingShader);
+	ResourceManager::add(&debugShader);
 }
 
 void onClose() {
@@ -97,10 +101,22 @@ void onClose() {
 	instanceShader.close();
 	skyShader.close();
 	lightingShader.close();
+	debugShader.close();
 }
 
 }
 
+void DebugShader::updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Position& viewPosition) {
+	bind();
+	setUniform("viewMatrix", viewMatrix);
+	setUniform("projectionMatrix", projectionMatrix);
+	setUniform("viewPosition", viewPosition);
+}
+
+void DebugShader::updateModel(const Mat4f& modelMatrix) {
+	bind();
+	setUniform("modelMatrix", modelMatrix);
+}
 
 // BasicShader
 

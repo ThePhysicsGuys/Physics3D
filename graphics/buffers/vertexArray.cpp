@@ -39,14 +39,14 @@ VertexArray& VertexArray::operator=(VertexArray&& other) {
 
 void VertexArray::bind() {
 	glBindVertexArray(id);
-	for (unsigned int i = 0; i < attributeArrayOffset; i++)
-		glEnableVertexAttribArray(i);
+	/*for (unsigned int i = 0; i < attributeArrayOffset; i++)
+		glEnableVertexAttribArray(i);*/
 }
 
 void VertexArray::unbind() {
-	glBindVertexArray(id);
+	/*glBindVertexArray(id);
 	for (unsigned int i = 0; i < attributeArrayOffset; i++)
-		glDisableVertexAttribArray(i);
+		glDisableVertexAttribArray(i);*/
 	glBindVertexArray(0);
 }
 

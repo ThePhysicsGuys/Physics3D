@@ -98,6 +98,8 @@ void EditTools::onRender(Screen& screen) {
 		ApplicationShaders::basicShader.updateModel(modelMatrix);
 		ApplicationShaders::basicShader.updateMaterial(Material(COLOR::WHITE));
 		center->render();
+		ApplicationShaders::debugShader.updateModel(modelMatrix);
+		center->render();
 	}
 
 	if (selectedEditDirection != EditDirection::NONE) {
@@ -122,15 +124,21 @@ void EditTools::onRender(Screen& screen) {
 	ApplicationShaders::basicShader.updateModel(modelMatrix);
 	ApplicationShaders::basicShader.updateMaterial(Material(COLOR::G));
 	shaft->render();
+	ApplicationShaders::debugShader.updateModel(modelMatrix);
+	shaft->render();
 
 	// X
 	ApplicationShaders::basicShader.updateMaterial(Material(COLOR::R));
 	ApplicationShaders::basicShader.updateModel(modelMatrix * Mat4(Mat3(transformations[1]), 1.0f));
 	shaft->render();
+	ApplicationShaders::debugShader.updateModel(modelMatrix * Mat4(Mat3(transformations[1]), 1.0f));
+	shaft->render();
 
 	// Z
 	ApplicationShaders::basicShader.updateMaterial(Material(COLOR::B));
 	ApplicationShaders::basicShader.updateModel(modelMatrix * Mat4(Mat3(transformations[2]), 1.0f));
+	shaft->render();
+	ApplicationShaders::debugShader.updateModel(modelMatrix * Mat4(Mat3(transformations[2]), 1.0f));
 	shaft->render();
 }
 

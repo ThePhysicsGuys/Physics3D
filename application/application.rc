@@ -57,6 +57,8 @@ IDR_SHADER15            SHADER                  "..\\res\\shaders\\sky.shader"
 
 IDR_SHADER16            SHADER                  "..\\res\\shaders\\lighting.shader"
 
+IDR_SHADER17            SHADER                  "..\\res\\shaders\\debug.shader"
+
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -105,7 +107,6 @@ MAINICON                ICON                    "..\\res\\icon.ico"
 
 #endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
-
 
 
 #ifndef APSTUDIO_INVOKED

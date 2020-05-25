@@ -442,7 +442,7 @@ Shader::Shader(const ShaderSource& shaderSource) : Shader(shaderSource.name, sha
 Shader::Shader(const std::string& name, const std::string& vertexSource, const std::string& fragmentSource, const std::string& geometrySource, const std::string& tesselationControlSource, const std::string& tesselationEvaluateSource) : name(name) {
 	id = createShader(name, vertexSource, fragmentSource, geometrySource, tesselationControlSource, tesselationEvaluateSource);
 
-	/*std::future<ShaderStage> futureVertexStage = std::async(std::launch::async, parseShaderStage, vertexSource);
+	std::future<ShaderStage> futureVertexStage = std::async(std::launch::async, parseShaderStage, vertexSource);
 	std::future<ShaderStage> futureFragmentStage = std::async(std::launch::async, parseShaderStage, fragmentSource);
 	std::future<ShaderStage> futureGeometryStage = std::async(std::launch::async, parseShaderStage, geometrySource);
 	std::future<ShaderStage> futureTesselationControlStage = std::async(std::launch::async, parseShaderStage, tesselationControlSource);
@@ -452,14 +452,14 @@ Shader::Shader(const std::string& name, const std::string& vertexSource, const s
 	addShaderStage(futureFragmentStage.get(), FRAGMENT);
 	addShaderStage(futureGeometryStage.get(), GEOMETRY);
 	addShaderStage(futureTesselationControlStage.get(), TESSELATION_CONTROL);
-	addShaderStage(futureTesselationEvaluationStage.get(), TESSELATION_EVALUATE);*/
+	addShaderStage(futureTesselationEvaluationStage.get(), TESSELATION_EVALUATE);
 
-	addShaderStage(parseShaderStage(vertexSource), VERTEX);
-	addShaderStage(parseShaderStage(fragmentSource), FRAGMENT);
-	addShaderStage(parseShaderStage(geometrySource), GEOMETRY);
-	addShaderStage(parseShaderStage(tesselationControlSource), TESSELATION_CONTROL);
-	addShaderStage(parseShaderStage(tesselationEvaluateSource), TESSELATION_EVALUATE);
-}
+	//addShaderStage(parseShaderStage(vertexSource), VERTEX);
+	//addShaderStage(parseShaderStage(fragmentSource), FRAGMENT);
+	//addShaderStage(parseShaderStage(geometrySource), GEOMETRY);
+	//addShaderStage(parseShaderStage(tesselationControlSource), TESSELATION_CONTROL);
+	//addShaderStage(parseShaderStage(tesselationEvaluateSource), TESSELATION_EVALUATE);
+}	
 
 Shader::~Shader() {
 	close();

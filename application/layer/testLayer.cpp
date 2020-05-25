@@ -36,7 +36,7 @@ std::vector<Uniform> testUniforms;
 MeshResource* mesh;
 
 void TestLayer::onInit() {
-	float size = 1.0f;
+	/*float size = 1.0f;
 	float space = 2.5f;
 	frepeat(row, size) {
 		frepeat(col, size) {
@@ -77,14 +77,14 @@ void TestLayer::onInit() {
 	ResourceManager::add<TextureResource>("ball_normal", "../res/textures/ball/ball_normal.png");
 	ResourceManager::add<TextureResource>("ball_metallic", "../res/textures/ball/ball_metal.png");
 	ResourceManager::add<TextureResource>("ball_roughness", "../res/textures/ball/ball_gloss.png");
-	ResourceManager::add<TextureResource>("ball_ao", "../res/textures/ball/ball_ao.jpg");
+	ResourceManager::add<TextureResource>("ball_ao", "../res/textures/ball/ball_ao.png");
 
 
 	llights.push_back(new Light(Vec3f(-10,10,10), Color3(300), 1, { 1, 1, 1 }));
 	llights.push_back(new Light(Vec3f(10,10,10), Color3(300), 1, { 1, 1, 1 }));
 	llights.push_back(new Light(Vec3f(-10,-10,10), Color3(300), 1, { 1, 1, 1 }));
 	llights.push_back(new Light(Vec3f(10,-10,10), Color3(300), 1, { 1, 1, 1 }));
-	ApplicationShaders::lightingShader.updateLight(llights);
+	ApplicationShaders::lightingShader.updateLight(llights);*/
 }
 
 void TestLayer::onUpdate() {
@@ -107,26 +107,16 @@ void TestLayer::onRender() {
 	using namespace Graphics::Renderer;
 
 	Screen* screen = static_cast<Screen*>(this->ptr);
-
 	beginScene();
+	enableDepthMask();
+	enableDepthTest();
+	enableCulling();
+	enableBlending();
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glEnable(GL_BLEND);
-	
-	glEnable(GL_CULL_FACE);
-	glEnable(GL_DEPTH_TEST);
-	ApplicationShaders::lightingShader.bind();
-
-	ResourceManager::get<TextureResource>("ball_color")->bind(0);
-	ResourceManager::get<TextureResource>("ball_normal")->bind(1);
-	ResourceManager::get<TextureResource>("ball_metallic")->bind(2);
-	ResourceManager::get<TextureResource>("ball_roughness")->bind(3);
-	ResourceManager::get<TextureResource>("ball_ao")->bind(4);
-	ApplicationShaders::lightingShader.updateTexture(true);
-
-	ApplicationShaders::lightingShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
-
-	mesh->getMesh()->renderInstanced(testUniforms.size(), FILL);
+	ApplicationShaders::debugShader.bind();
+	ApplicationShaders::debugShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.getPosition());
+	ApplicationShaders::debugShader.updateModel(Mat4::IDENTITY());
+	ResourceManager::get<MeshResource>("translate")->getMesh()->render();
 
 	endScene();
 }

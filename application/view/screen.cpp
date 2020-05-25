@@ -197,8 +197,8 @@ void Screen::onInit() {
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void) io;
 	ImGui::StyleColorsDark();
-	ImGui_ImplGlfw_InitForOpenGL(Graphics::GLFW::getCurrentContext(), true);
-	ImGui_ImplOpenGL3_Init("#version 130");
+	ImGuiInitGLFW(Graphics::GLFW::getCurrentContext(), true);
+	ImGuiInitOpenGl("#version 130");
 
 	BigFrame::onInit();
 }
@@ -267,8 +267,8 @@ void Screen::onRender() {
 	using namespace Graphics::Renderer;
 
 	// Init imgui
-	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplGlfw_NewFrame();
+	ImGuiNewFrameOpenGL();
+	ImGuiNewFrameGLFW();
 	ImGui::NewFrame();
 
 	defaultSettings();
@@ -278,7 +278,7 @@ void Screen::onRender() {
 
 	// Render imgui
 	ImGui::Render();
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+	ImGuiRenderDrawData(ImGui::GetDrawData());
 
 	graphicsMeasure.mark(GraphicsProcess::FINALIZE);
 
@@ -291,8 +291,8 @@ void Screen::onRender() {
 }
 
 void Screen::onClose() {
-	ImGui_ImplOpenGL3_Shutdown();
-	ImGui_ImplGlfw_Shutdown();
+	ImGuiShutdownOpenGL();
+	ImGuiShutdownGLFW();
 	ImGui::DestroyContext();
 
 	screenFrameBuffer->close();

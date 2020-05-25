@@ -370,6 +370,7 @@
   <ItemGroup>
     <None Include="..\res\shaders\basic.shader" />
     <None Include="..\res\shaders\blur.shader" />
+    <None Include="..\res\shaders\debug.shader" />
     <None Include="..\res\shaders\depth.shader" />
     <None Include="..\res\shaders\font.shader" />
     <None Include="..\res\shaders\instance.shader" />

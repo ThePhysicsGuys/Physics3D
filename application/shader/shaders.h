@@ -18,6 +18,15 @@ struct Light;
 struct Material;
 struct ExtendedPart;
 
+struct DebugShader : public ShaderResource {
+	inline DebugShader() : ShaderResource() {}
+	inline DebugShader(ShaderSource shaderSource) : ShaderResource("debugShader", "debug.shader", shaderSource) {}
+
+	void updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Position& viewPosition);
+	void updateModel(const Mat4f& modelMatrix);
+};
+
+
 struct SkyboxShader : public ShaderResource {
 	inline SkyboxShader() : ShaderResource() {}
 	inline SkyboxShader(ShaderSource shaderSource) : ShaderResource("skyboxShader", "skybox.shader", shaderSource) {}
@@ -167,6 +176,7 @@ extern InstanceShader instanceShader;
 extern MaskShader maskShader;
 extern SkyShader skyShader;
 extern LightingShader lightingShader;
+extern DebugShader debugShader;
 
 void onInit();
 void onClose();

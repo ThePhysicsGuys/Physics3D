@@ -20,5 +20,6 @@ extern ResourceDescriptor applicationResources[];
 #define INSTANCE_SHADER 13
 #define SKY_SHADER 14
 #define LIGHTING_SHADER 15
-#define SPHERE_MODEL 16
-#define STALL_MODEL 17
+#define DEBUG_SHADER 16
+#define SPHERE_MODEL 17
+#define STALL_MODEL 18
