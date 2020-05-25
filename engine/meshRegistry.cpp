@@ -2,14 +2,14 @@
 #include "meshRegistry.h"
 
 #include "../physics/misc/shapeLibrary.h"
-#include "../physics/geometry/basicShapes.h"
+#include "../physics/geometry/shape.h"
 
 #include "../graphics/visualShape.h"
 #include "../graphics/buffers/bufferLayout.h"
 #include "../graphics/buffers/vertexBuffer.h"
 #include "../engine/visualData.h"
 #include "../graphics/mesh/indexedMesh.h"
-#include "../physics/geometry/shapeClass.h"
+#include "../physics/geometry/builtinShapeClasses.h"
 
 #include <stdexcept>
 
@@ -117,7 +117,7 @@ Graphics::VisualShape createBox(float width, float height, float depth) {
 	Graphics::VisualShape boxShape = Graphics::VisualShape(box);
 
 	Vec3f* normalBuffer = new Vec3f[boxShape.vertexCount];
-	boxShape.computeNormals(normalBuffer);
+	box.computeNormals(normalBuffer);
 
 	boxShape.normals = SharedArrayPtr<const Vec3f>(normalBuffer);
 	return boxShape;
@@ -128,10 +128,10 @@ Graphics::VisualShape createCube(float size) {
 }
 
 void init() {
-	sphere = registerMeshFor(sphereClass, Graphics::VisualShape::generateSmoothNormalsShape(sphereClass->asPolyhedron()));
-	box = registerMeshFor(boxClass);
-	Graphics::VisualShape cylinderShape = createCylinder(64, 1.0, 2.0);
-	cylinder = registerMeshFor(cylinderClass, cylinderShape);
+	sphere = registerMeshFor(&SphereClass::instance, Graphics::VisualShape::generateSmoothNormalsShape(SphereClass::instance.asPolyhedron()));
+	box = registerMeshFor(&CubeClass::instance);
+	Graphics::VisualShape cylinderShapeMesh = createCylinder(64, 1.0, 2.0);
+	cylinder = registerMeshFor(&CylinderClass::instance, cylinderShapeMesh);
 }
 
 

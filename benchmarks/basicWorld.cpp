@@ -4,7 +4,7 @@
 #include "../physics/misc/shapeLibrary.h"
 #include "../physics/math/linalg/commonMatrices.h"
 
-#include "../physics/geometry/basicShapes.h"
+#include "../physics/geometry/shapeCreation.h"
 
 class BasicWorldBenchmark : public WorldBenchmark {
 public:
@@ -17,7 +17,7 @@ public:
 		for (int x = -5; x < 5; x++) {
 			for (int y = 0; y < 5; y++) {
 				for (int z = -5; z < 5; z++) {
-					world.addPart(new Part(Box(0.9, 0.9, 0.9), GlobalCFrame(x, y + 1.0, z), {1.0, 0.7, 0.5}));
+					world.addPart(new Part(boxShape(0.9, 0.9, 0.9), GlobalCFrame(x, y + 1.0, z), {1.0, 0.7, 0.5}));
 				}
 			}
 		}

@@ -251,6 +251,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="constraintGroup.cpp" />
+    <ClCompile Include="geometry\builtinShapeClasses.cpp" />
+    <ClCompile Include="geometry\shapeCreation.cpp" />
+    <ClCompile Include="geometry\triangleMesh.cpp" />
     <ClCompile Include="inertia.cpp" />
     <ClCompile Include="constraints\controller\sineWaveController.cpp" />
     <ClCompile Include="constraints\fixedConstraint.cpp" />
@@ -266,7 +269,6 @@
     <ClCompile Include="geometry\genericIntersection.cpp" />
     <ClCompile Include="geometry\intersection.cpp" />
     <ClCompile Include="geometry\polyhedron.cpp" />
-    <ClCompile Include="geometry\polyhedronInternals.cpp" />
     <ClCompile Include="geometry\shape.cpp" />
     <ClCompile Include="geometry\shapeBuilder.cpp" />
     <ClCompile Include="geometry\shapeClass.cpp" />
@@ -277,6 +279,7 @@
     <ClCompile Include="math\linalg\trigonometry.cpp" />
     <ClCompile Include="misc\filters\visibilityFilter.cpp" />
     <ClCompile Include="misc\shapeLibrary.cpp" />
+    <ClCompile Include="misc\validityHelper.cpp" />
     <ClCompile Include="part.cpp" />
     <ClCompile Include="physical.cpp" />
     <ClCompile Include="physicsProfiler.cpp" />
@@ -304,18 +307,18 @@
     <ClInclude Include="datastructures\sharedArray.h" />
     <ClInclude Include="datastructures\unorderedVector.h" />
     <ClInclude Include="debug.h" />
-    <ClInclude Include="geometry\basicShapes.h" />
     <ClInclude Include="geometry\boundingBox.h" />
     <ClInclude Include="geometry\computationBuffer.h" />
     <ClInclude Include="geometry\convexShapeBuilder.h" />
     <ClInclude Include="geometry\genericCollidable.h" />
     <ClInclude Include="geometry\indexedShape.h" />
     <ClInclude Include="geometry\genericIntersection.h" />
+    <ClInclude Include="geometry\shapeCreation.h" />
+    <ClInclude Include="geometry\triangleMesh.h" />
     <ClInclude Include="inertia.h" />
     <ClInclude Include="geometry\intersection.h" />
-    <ClInclude Include="geometry\normalizedPolyhedron.h" />
+    <ClInclude Include="geometry\builtinShapeClasses.h" />
     <ClInclude Include="geometry\polyhedron.h" />
-    <ClInclude Include="geometry\polyhedronInternals.h" />
     <ClInclude Include="geometry\shape.h" />
     <ClInclude Include="geometry\shapeBuilder.h" />
     <ClInclude Include="geometry\shapeClass.h" />

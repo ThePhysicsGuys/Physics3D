@@ -27,8 +27,6 @@ struct IndexedShape : Polyhedron {
 	TriangleNeighbors * neighbors;
 	
 	IndexedShape(const Vec3f* vertices, const Triangle* triangles, int vertexCount, int triangleCount, TriangleNeighbors * neighborBuf);
-
-	bool isValid() const;
 };
 
 void fillNeighborBuf(const Triangle* triangles, int triangleCount, TriangleNeighbors* neighborBuf);

@@ -6,7 +6,8 @@
 #include "randomValues.h"
 #include "estimateMotion.h"
 
-#include "../physics/geometry/basicShapes.h"
+#include "../physics/geometry/shape.h"
+#include "../physics/geometry/shapeCreation.h"
 #include "../physics/part.h"
 #include "../physics/physical.h"
 #include "../physics/constraints/fixedConstraint.h"
@@ -19,7 +20,7 @@ static CFrame cf() {
 }
 
 static Part* createPart() {
-	return new Part(Box(1.0, 1.0, 1.0), GlobalCFrame(), {1.0, 1.0, 1.0});
+	return new Part(boxShape(1.0, 1.0, 1.0), GlobalCFrame(), {1.0, 1.0, 1.0});
 }
 
 TEST_CASE(testBasicCreateDestroy) {

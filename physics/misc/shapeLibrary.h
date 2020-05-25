@@ -48,4 +48,6 @@ namespace Library {
 
 	Polyhedron createSphere(float radius, int steps = 1);
 	Polyhedron createSpikeBall(float internalRadius, float spikeRadius, int steps, int spikeSteps);
+
+	Polyhedron createZTorus(float ringRadius, float radiusOfTube, int radialFidelity, int tubeFidelity);
 }

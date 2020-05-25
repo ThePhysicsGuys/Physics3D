@@ -14,7 +14,7 @@ ConvexShapeBuilder::ConvexShapeBuilder(const Polyhedron& s, Vec3f * vertBuf, Tri
 	: vertexBuf(vertBuf), triangleBuf(triangleBuf), vertexCount(s.vertexCount), triangleCount(s.triangleCount), neighborBuf(neighborBuf), removalBuffer(removalBuffer), newTriangleBuffer(newTriangleBuffer) {
 
 	for(int i = 0; i < s.vertexCount; i++) {
-		vertBuf[i] = s[i];
+		vertBuf[i] = s.getVertex(i);
 	}
 
 	for (int i = 0; i < s.triangleCount; i++) {

@@ -9,14 +9,11 @@
 #include "../physics/world.h"
 #include "../physics/inertia.h"
 #include "../physics/misc/shapeLibrary.h"
-#include "../physics/math/linalg/trigonometry.h"
 #include "../physics/math/linalg/misc.h"
-#include "../physics/math/linalg/commonMatrices.h"
 #include "../physics/math/linalg/eigen.h"
-#include "../physics/geometry/basicShapes.h"
 #include "../physics/geometry/shape.h"
-#include "../physics/geometry/polyhedron.h"
-#include "../physics/geometry/normalizedPolyhedron.h"
+#include "../physics/geometry/shapeCreation.h"
+#include "../physics/misc/gravityForce.h"
 #include "../util/log.h"
 
 
@@ -25,65 +22,67 @@
 
 static const double DELTA_T = 0.01;
 static const int TICKS = 500;
-/*
+
 TEST_CASE(positionInvariance) {
-	Mat3 rotation = rotationMatrixfromEulerAngles(0.0, 0.0, 0.0);
+	Rotation rotation = Rotation::fromEulerAngles(0.0, 0.0, 0.0);
 
 	Position origins[]{Position(0,0,0), Position(0,0,1), Position(5.3,0,-2.4),Position(0.3,0,0.7),Position(0.0000001,0,0.00000001)};
 
-	CFrame houseRelative(Vec3(0.7, 0.6, 1.6), rotationMatrixfromEulerAngles(0.3, 0.7, 0.9));
-	CFrame icosaRelative(Vec3(0.7, 3.0, 1.6), rotationMatrixfromEulerAngles(0.1, 0.1, 0.1));
+	CFrame houseRelative(Vec3(0.7, 0.6, 1.6), Rotation::fromEulerAngles(0.3, 0.7, 0.9));
+	CFrame icosaRelative(Vec3(0.7, 3.0, 1.6), Rotation::fromEulerAngles(0.1, 0.1, 0.1));
 
 	for(Position o:origins) {
 		GlobalCFrame origin(o, rotation);
 
-		Part housePart(Library::house, origin.localToGlobal(houseRelative), {1.0, 1.0, 0.7});
-		Part icosaPart(Library::icosahedron, origin.localToGlobal(icosaRelative), {10.0, 0.7, 0.7});
-
 		World<Part> world(DELTA_T);
+		world.addExternalForce(new DirectionalGravity(Vec3(0, -1, 0)));
+
+		Part housePart(polyhedronShape(Library::house), origin.localToGlobal(houseRelative), {1.0, 1.0, 0.7});
+		Part icosaPart(polyhedronShape(Library::icosahedron), origin.localToGlobal(icosaRelative), {10.0, 0.7, 0.7});
+		Part flooring(boxShape(200.0, 0.3, 200.0), origin, {1.0, 1.0, 0.7});
 
 		world.addPart(&housePart);
 		world.addPart(&icosaPart);
+		world.addTerrainPart(&flooring);
 
 		for(int i = 0; i < TICKS; i++)
 			world.tick();
 
-		REMAINS_CONSTANT(origin.globalToLocal(housePart.getCFrame()));
-		REMAINS_CONSTANT(origin.globalToLocal(icosaPart.getCFrame()));
+		REMAINS_CONSTANT_TOLERANT(origin.globalToLocal(housePart.getCFrame()), 0.0002);
+		REMAINS_CONSTANT_TOLERANT(origin.globalToLocal(icosaPart.getCFrame()), 0.0002);
 	}
-}*/
-/*
+}
+
 TEST_CASE(rotationInvariance) {
-	//Mat3 origins[]{rotationMatrixfromEulerAngles(0,0,0), rotationMatrixfromEulerAngles(0,1,0), rotationMatrixfromEulerAngles(0,0.5,0), rotationMatrixfromEulerAngles(0,-0.5,0),};
-
-	
-
-	CFrame houseRelative(Vec3(0.7, 0.6, 1.6), rotationMatrixfromEulerAngles(0.3, 0.7, 0.9));
-	CFrame icosaRelative(Vec3(0.7, 3.0, 1.6), rotationMatrixfromEulerAngles(0.1, 0.1, 0.1));
+	CFrame houseRelative(Vec3(0.7, 0.6, 1.6), Rotation::fromEulerAngles(0.3, 0.7, 0.9));
+	CFrame icosaRelative(Vec3(0.7, 3.0, 1.6), Rotation::fromEulerAngles(0.1, 0.1, 0.1));
 
 	for(double rotation = -1.5; rotation < 1.500001; rotation += 0.1) {
 		logStream << rotation << '\n';
 
-		GlobalCFrame origin(0,0,0, rotMatY(rotation));
+		GlobalCFrame origin(Position(0.0,0.0,0.0), Rotation::rotY(rotation));
 
-		Part housePart(Library::house, origin.localToGlobal(houseRelative), {1.0, 1.0, 0.7});
-		Part icosaPart(Library::icosahedron, origin.localToGlobal(icosaRelative), {10.0, 0.7, 0.7});
+		World<Part> world(DELTA_T);
+		world.addExternalForce(new DirectionalGravity(Vec3(0, -1, 0)));
 
-		World<> w(DELTA_T);
+		Part housePart(polyhedronShape(Library::house), origin.localToGlobal(houseRelative), {1.0, 1.0, 0.7});
+		Part icosaPart(polyhedronShape(Library::icosahedron), origin.localToGlobal(icosaRelative), {10.0, 0.7, 0.7});
+		Part flooring(boxShape(200.0, 0.3, 200.0), origin, {1.0, 1.0, 0.7});
 
-		w.addPart(&housePart);
-		w.addPart(&icosaPart);
+		world.addPart(&housePart);
+		world.addPart(&icosaPart);
+		world.addTerrainPart(&flooring);
 
 		for(int i = 0; i < TICKS; i++)
-			w.tick();
+			world.tick();
 
-		REMAINS_CONSTANT(origin.globalToLocal(housePart.getCFrame()));
-		REMAINS_CONSTANT(origin.globalToLocal(icosaPart.getCFrame()));
+		REMAINS_CONSTANT_TOLERANT(origin.globalToLocal(housePart.getCFrame()), 0.02);
+		REMAINS_CONSTANT_TOLERANT(origin.globalToLocal(icosaPart.getCFrame()), 0.02);
 	}
-}*/
+}
 
 TEST_CASE(applyForceToRotate) {
-	Part part(Box(1.0, 1.0, 1.0), GlobalCFrame(0,0,0, Rotation::fromEulerAngles(0.3, 0.7, 0.9)), {1.0, 1.0, 0.7});
+	Part part(boxShape(1.0, 1.0, 1.0), GlobalCFrame(0,0,0, Rotation::fromEulerAngles(0.3, 0.7, 0.9)), {1.0, 1.0, 0.7});
 	part.ensureHasParent();
 
 	Vec3 relAttach = Vec3(1.0, 0.0, 0.0);
@@ -95,7 +94,7 @@ TEST_CASE(applyForceToRotate) {
 }
 
 TEST_CASE(momentToAngularVelocity) {
-	Part part(Box(1.0, 1.0, 1.0), GlobalCFrame(Rotation::rotY(M_PI / 2)), {1.0, 1.0, 0.7});
+	Part part(boxShape(1.0, 1.0, 1.0), GlobalCFrame(Rotation::rotY(M_PI / 2)), {1.0, 1.0, 0.7});
 	part.ensureHasParent();
 	MotorizedPhysical& p = *part.parent->mainPhysical;
 
@@ -110,7 +109,7 @@ TEST_CASE(momentToAngularVelocity) {
 }
 
 TEST_CASE(rotationImpulse) {
-	Part part(Box(0.2, 20.0, 0.2), GlobalCFrame(0,0,0), {1.0, 1.0, 0.7});
+	Part part(boxShape(0.2, 20.0, 0.2), GlobalCFrame(0,0,0), {1.0, 1.0, 0.7});
 	part.ensureHasParent();
 	MotorizedPhysical& veryLongBoxPhysical = *part.parent->mainPhysical;
 
@@ -125,7 +124,7 @@ TEST_CASE(rotationImpulse) {
 }
 
 /*TEST_CASE(testPointAcceleration) {
-	Part testPart(Box(1.0, 2.0, 3.0), GlobalCFrame(0,0,0), {1.0, 1.0, 0.7});
+	Part testPart(boxShape(1.0, 2.0, 3.0), GlobalCFrame(0,0,0), {1.0, 1.0, 0.7});
 	testPart.ensureHasParent();
 	MotorizedPhysical& testPhys = *testPart.parent->mainPhysical;
 	Vec3 localPoint(3, 5, 7);
@@ -150,7 +149,7 @@ TEST_CASE(rotationImpulse) {
 }*/
 
 /*TEST_CASE(testGetPointAccelerationMatrix) {
-	Part testPart(Box(1.0, 2.0, 3.0), GlobalCFrame(0,0,0), {1.0, 1.0, 0.7});
+	Part testPart(boxShape(1.0, 2.0, 3.0), GlobalCFrame(0,0,0), {1.0, 1.0, 0.7});
 	testPart.ensureHasParent();
 	MotorizedPhysical& testPhys = *testPart.parent->mainPhysical;
 	Vec3 localPoint(3, 5, 7);
@@ -167,7 +166,7 @@ TEST_CASE(rotationImpulse) {
 	ASSERT(actualAcceleration == accelMatrix * force);
 }*/
 TEST_CASE(impulseTest) {
-	Part part(Box(1.0, 2.0, 2.5), GlobalCFrame(0,0,0), {1.0, 1.0, 0.7});
+	Part part(boxShape(1.0, 2.0, 2.5), GlobalCFrame(0,0,0), {1.0, 1.0, 0.7});
 	part.ensureHasParent();
 	MotorizedPhysical& p = *part.parent->mainPhysical;
 
@@ -183,7 +182,7 @@ TEST_CASE(impulseTest) {
 }
 
 TEST_CASE(testPointAccelMatrixImpulse) {
-	Part part(Box(1.0, 2.0, 3.0), GlobalCFrame(7.6, 3.4, 3.9, Rotation::fromEulerAngles(1.1, 0.7, 0.9)), {1.0, 1.0, 0.7});
+	Part part(boxShape(1.0, 2.0, 3.0), GlobalCFrame(7.6, 3.4, 3.9, Rotation::fromEulerAngles(1.1, 0.7, 0.9)), {1.0, 1.0, 0.7});
 	part.ensureHasParent();
 	MotorizedPhysical& p = *part.parent->mainPhysical;
 
@@ -200,7 +199,7 @@ TEST_CASE(testPointAccelMatrixImpulse) {
 }
 
 TEST_CASE(inelasticColission) {
-	Part part(Box(1.0, 2.0, 3.0), GlobalCFrame(7.6, 3.4, 3.9, Rotation::fromEulerAngles(1.1, 0.7, 0.9)), {1.0, 1.0, 0.7});
+	Part part(boxShape(1.0, 2.0, 3.0), GlobalCFrame(7.6, 3.4, 3.9, Rotation::fromEulerAngles(1.1, 0.7, 0.9)), {1.0, 1.0, 0.7});
 	part.ensureHasParent();
 	MotorizedPhysical& p = *part.parent->mainPhysical;
 
@@ -247,7 +246,7 @@ TEST_CASE(inelasticColission) {
 }
 
 TEST_CASE(inelasticColission2) {
-	Part part(Box(1.0, 2.0, 3.0), GlobalCFrame(/*Vec3(7.6, 3.4, 3.9), rotationMatrixfromEulerAngles(1.1, 0.7, 0.9)*/), {1.0, 1.0, 0.7});
+	Part part(boxShape(1.0, 2.0, 3.0), GlobalCFrame(/*Vec3(7.6, 3.4, 3.9), rotationMatrixfromEulerAngles(1.1, 0.7, 0.9)*/), {1.0, 1.0, 0.7});
 	part.ensureHasParent();
 	MotorizedPhysical& p = *part.parent->mainPhysical;
 
@@ -286,8 +285,8 @@ TEST_CASE(inelasticColission2) {
 }
 
 /*TEST_CASE(testPointAccelMatrixAndInertiaInDirection) {
-	Part part(Polyhedron(), CFrame(Vec3(7.6, 3.4, 3.9), rotationMatrixfromEulerAngles(1.1, 0.7, 0.9)), {1.0, 1.0, 0.7});
-	MotorizedPhysical p(&part, 5.0, DiagonalMat3(2, 7, 5));
+	Part part(boxShape(1.0, 1.0, 1.0), GlobalCFrame(Position(7.6, 3.4, 3.9), Rotation::fromEulerAngles(1.1, 0.7, 0.9)), {1.0, 1.0, 0.7});
+	MotorizedPhysical p(&part);
 
 	Vec3 localPoint(0.8, 0.6, 0.9);
 	Vec3 localImpulse(0.3, -0.7, 0.6);
@@ -312,9 +311,9 @@ TEST_CASE(testChangeInertialBasis) {
 }
 
 TEST_CASE(testMultiPartPhysicalSimple) {
-	Shape box(Box(1.0, 0.5, 0.5));
-	Shape box2(Box(1.0, 0.5, 0.5));
-	Shape doubleBox(Box(2.0, 0.5, 0.5));
+	Shape box(boxShape(1.0, 0.5, 0.5));
+	Shape box2(boxShape(1.0, 0.5, 0.5));
+	Shape doubleBox(boxShape(2.0, 0.5, 0.5));
 	Part p1(box, GlobalCFrame(), {10.0, 0.5, 0.5});
 	Part p2(box2, GlobalCFrame(), {10.0, 0.5, 0.5});
 	Part doubleP(doubleBox, GlobalCFrame(), {10.0, 0.5, 0.5});
@@ -333,9 +332,9 @@ TEST_CASE(testMultiPartPhysicalSimple) {
 }
 
 TEST_CASE(testMultiPartPhysicalRotated) {
-	Shape box(Box(1.0, 0.5, 0.5));
-	Shape box2(Box(0.5, 0.5, 1.0));
-	Shape doubleBox(Box(2.0, 0.5, 0.5));
+	Shape box(boxShape(1.0, 0.5, 0.5));
+	Shape box2(boxShape(0.5, 0.5, 1.0));
+	Shape doubleBox(boxShape(2.0, 0.5, 0.5));
 	Part* p1 = new Part(box, GlobalCFrame(), {10.0, 0.0, 0.7});
 	Part* p2 = new Part(box2, GlobalCFrame(), {10.0, 0.0, 0.7});
 	Part* doubleP = new Part(doubleBox, GlobalCFrame(), {10.0, 0, 0.7});
@@ -352,12 +351,12 @@ TEST_CASE(testMultiPartPhysicalRotated) {
 }
 
 TEST_CASE(testShapeNativeScaling) {
-	NormalizedPolyhedron testPoly = Library::trianglePyramid.normalized();
+	Polyhedron testPoly = Library::createPointyPrism(4, 1.0f, 1.0f, 0.5f, 0.5f);
 
-	Shape shape1(testPoly);
+	Shape shape1(polyhedronShape(testPoly));
 	Shape shape2 = shape1.scaled(2.0, 4.0, 3.7);
 
-	Polyhedron scaledTestPoly = testPoly.scaled(2.0, 4.0, 3.7);
+	Polyhedron scaledTestPoly = testPoly.scaled(2.0f, 4.0f, 3.7f);
 
 	ASSERT(shape2.getInertia() == scaledTestPoly.getInertiaAroundCenterOfMass());
 }

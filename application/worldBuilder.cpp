@@ -4,7 +4,8 @@
 
 #include "application.h"
 #include "../physics/math/mathUtil.h"
-#include "../physics/geometry/basicShapes.h"
+#include "../physics/geometry/shape.h"
+#include "../physics/geometry/shapeCreation.h"
 
 #include "../graphics/gui/gui.h"
 
@@ -21,13 +22,13 @@ Shape treeTrunk;
 Shape icosahedron;
 
 void init() {
-	wedge = Shape(Library::wedge);
-	treeTrunk = Shape(Library::createPrism(7, 0.5, 11.0));
-	icosahedron = Shape(Library::icosahedron);
+	wedge = polyhedronShape(Library::wedge);
+	treeTrunk = polyhedronShape(Library::createPrism(7, 0.5, 11.0));
+	icosahedron = polyhedronShape(Library::icosahedron);
 }
 
 void createDominoAt(const GlobalCFrame& cframe) {
-	ExtendedPart* domino = new ExtendedPart(Box(0.2, 1.4, 0.6), cframe, { 1, 0.7, 0.3 });
+	ExtendedPart* domino = new ExtendedPart(boxShape(0.2, 1.4, 0.6), cframe, { 1, 0.7, 0.3 });
 	world.addPart(domino);
 }
 
@@ -53,7 +54,7 @@ void makeDominoTower(int floors, int circumference, Position origin) {
 void buildFloor(double width, double depth) {
 	Material floorMaterial = Material();
 	floorMaterial.set(Material::ALBEDO, ResourceManager::get<Graphics::TextureResource>("floorMaterial"));
-	ExtendedPart* floorExtendedPart = new ExtendedPart(Box(width, 1.0, depth), GlobalCFrame(0.0, 0.0, 0.0), { 2.0, 1.0, 0.3 });
+	ExtendedPart* floorExtendedPart = new ExtendedPart(boxShape(width, 1.0, depth), GlobalCFrame(0.0, 0.0, 0.0), { 2.0, 1.0, 0.3 });
 	floorExtendedPart->material = floorMaterial;
 	world.addTerrainPart(floorExtendedPart);
 }
@@ -61,13 +62,13 @@ void buildFloorAndWalls(double width, double depth, double wallHeight) {
 	buildFloor(width, depth);
 
 	PartProperties wallProperties { 2.0, 1.0, 0.3 };
-	world.addTerrainPart(new ExtendedPart(Box(0.7, wallHeight, depth), GlobalCFrame(width / 2, wallHeight / 2, 0.0), wallProperties));
-	world.addTerrainPart(new ExtendedPart(Box(width, wallHeight, 0.7), GlobalCFrame(0.0, wallHeight / 2, depth / 2), wallProperties));
-	world.addTerrainPart(new ExtendedPart(Box(0.7, wallHeight, depth), GlobalCFrame(-width / 2, wallHeight / 2, 0.0), wallProperties));
-	world.addTerrainPart(new ExtendedPart(Box(width, wallHeight, 0.7), GlobalCFrame(0.0, wallHeight / 2, -depth / 2), wallProperties));
+	world.addTerrainPart(new ExtendedPart(boxShape(0.7, wallHeight, depth), GlobalCFrame(width / 2, wallHeight / 2, 0.0), wallProperties));
+	world.addTerrainPart(new ExtendedPart(boxShape(width, wallHeight, 0.7), GlobalCFrame(0.0, wallHeight / 2, depth / 2), wallProperties));
+	world.addTerrainPart(new ExtendedPart(boxShape(0.7, wallHeight, depth), GlobalCFrame(-width / 2, wallHeight / 2, 0.0), wallProperties));
+	world.addTerrainPart(new ExtendedPart(boxShape(width, wallHeight, 0.7), GlobalCFrame(0.0, wallHeight / 2, -depth / 2), wallProperties));
 }
 
-SpiderFactory::SpiderFactory(double spiderSize, int legCount) : spiderSize(spiderSize), legCount(legCount), bodyShape(Library::createPointyPrism(legCount, 0.5f, 0.2f, 0.1f, 0.1f)) {}
+SpiderFactory::SpiderFactory(double spiderSize, int legCount) : spiderSize(spiderSize), legCount(legCount), bodyShape(polyhedronShape(Library::createPointyPrism(legCount, 0.5f, 0.2f, 0.1f, 0.1f))) {}
 
 void SpiderFactory::buildSpider(const GlobalCFrame& spiderPosition) {
 	//ExtendedPart* spiderBody = createUniquePart(screen, createPointyPrism(legCount, 0.5, 0.2, 0.1, 0.1), spiderPosition, 1.0, 0.0, "SpiderBody");
@@ -83,7 +84,7 @@ void SpiderFactory::buildSpider(const GlobalCFrame& spiderPosition) {
 	Physical* spider = spiderBody->parent;
 
 	for (int i = 0; i < legCount; i++) {
-		ExtendedPart* leg = new ExtendedPart(Box(0.05, 0.5, 0.05), GlobalCFrame(), { 1.0, 0.5, 0.3 }, "LegPart " + std::to_string(i));
+		ExtendedPart* leg = new ExtendedPart(boxShape(0.05, 0.5, 0.05), GlobalCFrame(), { 1.0, 0.5, 0.3 }, "LegPart " + std::to_string(i));
 		leg->material.albedo = Color(0.4f, 0.4f, 0.4f, 1.0f);
 
 		double angle = i * PI * 2 / legCount;
@@ -101,9 +102,9 @@ HollowBoxParts buildHollowBox(Bounds box, double wallThickness) {
 	double height = box.getHeight();
 	double depth = box.getDepth();
 
-	Shape XPlate = Box(wallThickness, height - wallThickness * 2, depth);
-	Shape YPlate = Box(width, wallThickness, depth);
-	Shape ZPlate = Box(width - wallThickness * 2, height - wallThickness * 2, wallThickness);
+	Shape XPlate = boxShape(wallThickness, height - wallThickness * 2, depth);
+	Shape YPlate = boxShape(width, wallThickness, depth);
+	Shape ZPlate = boxShape(width - wallThickness * 2, height - wallThickness * 2, wallThickness);
 
 	ExtendedPart* bottom = new ExtendedPart(YPlate, GlobalCFrame(box.getCenter() - Vec3(0, height / 2 - wallThickness / 2, 0)), { 1.0, 0.2, 0.3 }, "BottomPlate");
 	ExtendedPart* top = new ExtendedPart(YPlate, bottom, CFrame(0, height - wallThickness, 0), { 1.0, 0.2, 0.3 }, "TopPlate");
@@ -147,12 +148,12 @@ void buildTree(Position treePos) {
 }
 
 void buildConveyor(double width, double length, const GlobalCFrame& cframe, double speed) {
-	ExtendedPart* conveyor = new ExtendedPart(Box(width, 0.3, length), cframe, { 1.0, 0.8, 0.0, Vec3(0.0, 0.0, speed) }, "Conveyor");
+	ExtendedPart* conveyor = new ExtendedPart(boxShape(width, 0.3, length), cframe, { 1.0, 0.8, 0.0, Vec3(0.0, 0.0, speed) }, "Conveyor");
 	conveyor->material.albedo = Color(0.2f, 0.2f, 0.2f, 1.0f);
 	world.addTerrainPart(conveyor);
-	ExtendedPart* leftWall = new ExtendedPart(Box(0.2, 0.6, length), cframe.localToGlobal(CFrame(-width / 2 - 0.1, 0.1, 0.0)), { 1.0, 0.4, 0.3, Vec3(0.0, 0.0, 0.0) }, "Wall");
+	ExtendedPart* leftWall = new ExtendedPart(boxShape(0.2, 0.6, length), cframe.localToGlobal(CFrame(-width / 2 - 0.1, 0.1, 0.0)), { 1.0, 0.4, 0.3, Vec3(0.0, 0.0, 0.0) }, "Wall");
 	world.addTerrainPart(leftWall);
-	ExtendedPart* rightWall = new ExtendedPart(Box(0.2, 0.6, length), cframe.localToGlobal(CFrame(width / 2 + 0.1, 0.1, 0.0)), { 1.0, 0.4, 0.3, Vec3(0.0, 0.0, 0.0) }, "Wall");
+	ExtendedPart* rightWall = new ExtendedPart(boxShape(0.2, 0.6, length), cframe.localToGlobal(CFrame(width / 2 + 0.1, 0.1, 0.0)), { 1.0, 0.4, 0.3, Vec3(0.0, 0.0, 0.0) }, "Wall");
 	world.addTerrainPart(rightWall);
 }
 
@@ -205,22 +206,22 @@ void buildCar(const GlobalCFrame& location) {
 	PartProperties carProperties { 1.0, 0.7, 0.3 };
 	PartProperties wheelProperties { 1.0, 2.0, 0.7 };
 
-	ExtendedPart* carBody = new ExtendedPart(Box(2.0, 0.1, 1.0), location, carProperties, "CarBody");
-	ExtendedPart* carLeftPanel = new ExtendedPart(Box(2.0, 0.4, 0.1), carBody, CFrame(0.0, 0.25, -0.5), carProperties, "CarLeftSide");
-	ExtendedPart* carRightPanel = new ExtendedPart(Box(2.0, 0.4, 0.1), carBody, CFrame(0.0, 0.25, 0.5), carProperties, "CarRightSide");
-	ExtendedPart* carLeftWindow = new ExtendedPart(Box(1.4, 0.8, 0.05), carLeftPanel, CFrame(-0.3, 0.6, 0.0), carProperties, "WindowLeft");
+	ExtendedPart* carBody = new ExtendedPart(boxShape(2.0, 0.1, 1.0), location, carProperties, "CarBody");
+	ExtendedPart* carLeftPanel = new ExtendedPart(boxShape(2.0, 0.4, 0.1), carBody, CFrame(0.0, 0.25, -0.5), carProperties, "CarLeftSide");
+	ExtendedPart* carRightPanel = new ExtendedPart(boxShape(2.0, 0.4, 0.1), carBody, CFrame(0.0, 0.25, 0.5), carProperties, "CarRightSide");
+	ExtendedPart* carLeftWindow = new ExtendedPart(boxShape(1.4, 0.8, 0.05), carLeftPanel, CFrame(-0.3, 0.6, 0.0), carProperties, "WindowLeft");
 	ExtendedPart* carWedgeLeft = new ExtendedPart(wedge.scaled(0.6, 0.8, 0.1), carLeftWindow, CFrame(1.0, 0.0, 0.0), carProperties, "WedgeLeft");
-	ExtendedPart* carRightWindow = new ExtendedPart(Box(1.4, 0.8, 0.05), carRightPanel, CFrame(-0.3, 0.6, 0.0), carProperties, "WindowRight");
+	ExtendedPart* carRightWindow = new ExtendedPart(boxShape(1.4, 0.8, 0.05), carRightPanel, CFrame(-0.3, 0.6, 0.0), carProperties, "WindowRight");
 	ExtendedPart* carWedgeRight = new ExtendedPart(wedge.scaled(0.6, 0.8, 0.1), carRightWindow, CFrame(1.0, 0.0, 0.0), carProperties, "WedgeRight");
-	ExtendedPart* carFrontPanel = new ExtendedPart(Box(0.1, 0.4, 1.0), carBody, CFrame(1.0, 0.25, 0.0), carProperties, "FrontPanel");
-	ExtendedPart* carTrunkPanel = new ExtendedPart(Box(0.1, 1.2, 1.0), carBody, CFrame(-1.0, 0.65, 0.0), carProperties, "TrunkPanel");
-	ExtendedPart* carRoof = new ExtendedPart(Box(1.4, 0.1, 1.0), carBody, CFrame(-0.3, 1.25, 0.0), carProperties, "Roof");
+	ExtendedPart* carFrontPanel = new ExtendedPart(boxShape(0.1, 0.4, 1.0), carBody, CFrame(1.0, 0.25, 0.0), carProperties, "FrontPanel");
+	ExtendedPart* carTrunkPanel = new ExtendedPart(boxShape(0.1, 1.2, 1.0), carBody, CFrame(-1.0, 0.65, 0.0), carProperties, "TrunkPanel");
+	ExtendedPart* carRoof = new ExtendedPart(boxShape(1.4, 0.1, 1.0), carBody, CFrame(-0.3, 1.25, 0.0), carProperties, "Roof");
 
-	ExtendedPart* carWindshield = new ExtendedPart(Box(1.0, 0.05, 1.0), carBody, CFrame(Vec3(0.7, 0.85, 0.0), Rotation::fromEulerAngles(0.0, 0.0, -0.91)), carProperties, "Windshield");
-	ExtendedPart* wheel1 = new ExtendedPart(Sphere(0.25), location.localToGlobal(CFrame(0.8, 0.0, 0.8)), wheelProperties, "Wheel");
-	ExtendedPart* wheel2 = new ExtendedPart(Sphere(0.25), location.localToGlobal(CFrame(0.8, 0.0, -0.8)), wheelProperties, "Wheel");
-	ExtendedPart* wheel3 = new ExtendedPart(Sphere(0.25), location.localToGlobal(CFrame(-0.8, 0.0, 0.8)), wheelProperties, "Wheel");
-	ExtendedPart* wheel4 = new ExtendedPart(Sphere(0.25), location.localToGlobal(CFrame(-0.8, 0.0, -0.8)), wheelProperties, "Wheel");
+	ExtendedPart* carWindshield = new ExtendedPart(boxShape(1.0, 0.05, 1.0), carBody, CFrame(Vec3(0.7, 0.85, 0.0), Rotation::fromEulerAngles(0.0, 0.0, -0.91)), carProperties, "Windshield");
+	ExtendedPart* wheel1 = new ExtendedPart(sphereShape(0.25), location.localToGlobal(CFrame(0.8, 0.0, 0.8)), wheelProperties, "Wheel");
+	ExtendedPart* wheel2 = new ExtendedPart(sphereShape(0.25), location.localToGlobal(CFrame(0.8, 0.0, -0.8)), wheelProperties, "Wheel");
+	ExtendedPart* wheel3 = new ExtendedPart(sphereShape(0.25), location.localToGlobal(CFrame(-0.8, 0.0, 0.8)), wheelProperties, "Wheel");
+	ExtendedPart* wheel4 = new ExtendedPart(sphereShape(0.25), location.localToGlobal(CFrame(-0.8, 0.0, -0.8)), wheelProperties, "Wheel");
 
 	carLeftWindow->material.albedo = Color(0.7f, 0.7f, 1.0f, 0.5f);
 	carRightWindow->material.albedo = Color(0.7f, 0.7f, 1.0f, 0.5f);

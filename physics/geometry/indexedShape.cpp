@@ -1,6 +1,7 @@
 #include "indexedShape.h"
 
 #include <stdexcept>
+#include "../misc/validityHelper.h"
 
 int& TriangleNeighbors::operator[](int index) {
 	return this->neighbors[index];
@@ -65,31 +66,3 @@ void fillNeighborBuf(const Triangle* triangles, int triangleCount, TriangleNeigh
 }
 
 
-bool IndexedShape::isValid() const {
-	if(!Polyhedron::isValid()) { return false; };
-
-	// Assert that all neighbors are filled in
-	for(int i = 0; i < triangleCount; i++)
-		for(int j = 0; j < 3; j++)
-			if(neighbors[i][j] < 0 || neighbors[i][j] >= triangleCount)
-				return false;
-	
-	// Assert that, every triangle's neighbors have it as one of their neighbors
-	for(int i = 0; i < triangleCount; i++) {
-		TriangleNeighbors thisNeighbors = neighbors[i];
-		for(int j = 0; j < 3; j++) {
-			int other = thisNeighbors[j];
-			if(!neighbors[other].hasNeighbor(i))
-				return false;
-
-			// check that if they ARE neighbors, then they must share vertices
-			int neighborsIndex = neighbors[other].getNeighborIndex(i);
-			Triangle t1 = getTriangle(i);
-			Triangle t2 = getTriangle(other);
-			if(!(t1[(j + 1) % 3] == t2[(neighborsIndex + 2) % 3] && t1[(j + 2) % 3] == t2[(neighborsIndex + 1) % 3]))
-				return false;
-		}
-	}
-
-	return true;
-}

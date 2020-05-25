@@ -2,6 +2,7 @@
 
 #include <utility>
 #include <map>
+#include <stddef.h>
 
 #include "../datastructures/buffers.h"
 
@@ -100,6 +101,56 @@ namespace Library {
 		return Polyhedron(vertBuf, boxTriangles, 8, 12);
 	}
 
+
+	static void createTriangleRing(int ring1Start, int ring2Start, int size, Triangle* triangleBuf) {
+		for(int i = 0; i < size - 1; i++) {
+			triangleBuf[i * 2] = Triangle{ring1Start + i, ring1Start + i + 1, ring2Start + i};
+			triangleBuf[i * 2 + 1] = Triangle{ring1Start + i + 1, ring2Start + i + 1, ring2Start + i};
+		}
+		int last = size - 1;
+		triangleBuf[last * 2] = Triangle{ring1Start + last, ring1Start, ring2Start + last};
+		triangleBuf[last * 2 + 1] = Triangle{ring1Start, ring2Start, ring2Start + last};
+	}
+
+	static void createTriangleRingReverse(int ring1Start, int ring2Start, int size, Triangle* triangleBuf) {
+		for(int i = 0; i < size - 1; i++) {
+			triangleBuf[i * 2] = Triangle{ring1Start + i + 1, ring1Start + i, ring2Start + i};
+			triangleBuf[i * 2 + 1] = Triangle{ring1Start + i + 1, ring2Start + i, ring2Start + i + 1};
+		}
+		int last = size - 1;
+		triangleBuf[last * 2] = Triangle{ring1Start, ring1Start + last, ring2Start + last};
+		triangleBuf[last * 2 + 1] = Triangle{ring1Start, ring2Start + last, ring2Start};
+	}
+
+	static void createTriangleFan(int topIndex, int startFan, int size, Triangle* triangleBuf) {
+		for(int i = 0; i < size-1; i++) {
+			triangleBuf[i] = Triangle{topIndex, i, i + 1};
+		}
+	}
+	static void createTriangleFanReverse(int topIndex, int startFan, int size, Triangle* triangleBuf) {
+		for(int i = 0; i < size - 1; i++) {
+			triangleBuf[i] = Triangle{topIndex, i + 1, i};
+		}
+	}
+
+	static void createTriangleCone(int topIndex, int startFan, int size, Triangle* triangleBuf) {
+		createTriangleFan(topIndex, startFan, size, triangleBuf);
+		triangleBuf[size - 1] = Triangle{topIndex, size - 1, 0};
+	}
+
+	static void createTriangleConeReverse(int topIndex, int startFan, int size, Triangle* triangleBuf) {
+		createTriangleFanReverse(topIndex, startFan, size, triangleBuf);
+		triangleBuf[size - 1] = Triangle{topIndex, 0, size - 1};
+	}
+
+	static void createFlatSurface(int startFan, int size, Triangle* triangleBuf) {
+		createTriangleFan(startFan, startFan + 1, size - 1, triangleBuf);
+	}
+
+	static void createFlatSurfaceReverse(int startFan, int size, Triangle* triangleBuf) {
+		createTriangleFanReverse(startFan, startFan + 1, size - 1, triangleBuf);
+	}
+
 	// Returns a new Triangle[sides * 2 + (sides - 2) * 2]
 	static Triangle* createPrismTriangles(int sides) {
 		if(sides <= 1) throw "invalid number of sides!";
@@ -131,8 +182,11 @@ namespace Library {
 		// vertices
 		for(int i = 0; i < sides; i++) {
 			float angle = i * PI * 2 / sides;
-			vecBuf[i * 2] = Vec3f(height / 2, cos(angle) * radius, sin(angle) * radius);
-			vecBuf[i * 2 + 1] = Vec3f(-height / 2, cos(angle) * radius, sin(angle) * radius);
+			float h = height / 2;
+			float cr = cos(angle) * radius;
+			float sr = sin(angle) * radius;
+			vecBuf[i * 2] = Vec3f(h, cr, sr);
+			vecBuf[i * 2 + 1] = Vec3f(-h, cr, sr);
 		}
 
 		return Polyhedron(vecBuf, createPrismTriangles(sides), vertexCount, sides * 2 + (sides - 2) * 2);
@@ -145,8 +199,11 @@ namespace Library {
 		// vertices
 		for (int i = 0; i < sides; i++) {
 			float angle = i * PI * 2 / sides;
-			vecBuf[i*2] = Vec3f(cos(angle) * radius, -height / 2, sin(angle) * radius);
-			vecBuf[i*2+1] = Vec3f(cos(angle) * radius, height / 2, sin(angle) * radius);
+			float h = height / 2;
+			float cr = cos(angle) * radius;
+			float sr = sin(angle) * radius;
+			vecBuf[i*2] = Vec3f(cr, -h, sr);
+			vecBuf[i*2+1] = Vec3f(cr, h, sr);
 		}
 
 		return Polyhedron(vecBuf, createPrismTriangles(sides), vertexCount, sides * 2 + (sides - 2) * 2);
@@ -159,8 +216,11 @@ namespace Library {
 		// vertices
 		for(int i = 0; i < sides; i++) {
 			float angle = i * PI * 2 / sides;
-			vecBuf[i * 2] = Vec3f(cos(angle) * radius, sin(angle) * radius, height / 2);
-			vecBuf[i * 2 + 1] = Vec3f(cos(angle) * radius, sin(angle) * radius, -height / 2);
+			float h = height / 2;
+			float cr = cos(angle) * radius;
+			float sr = sin(angle) * radius;
+			vecBuf[i * 2] = Vec3f(cr, sr, h);
+			vecBuf[i * 2 + 1] = Vec3f(cr, sr, -h);
 		}
 
 		return Polyhedron(vecBuf, createPrismTriangles(sides), vertexCount, sides * 2 + (sides - 2) * 2);
@@ -357,5 +417,40 @@ namespace Library {
 		delete[] triBuf;
 
 		return poly;
+	}
+
+
+
+	static void generateTorusTriangles(int radialFidelity, int tubeFidelity, Triangle* triangleBuf) {
+		for(int segment = 0; segment < radialFidelity - 1; segment++) {
+			createTriangleRing(segment * tubeFidelity, (segment + 1) * tubeFidelity, tubeFidelity, triangleBuf + std::size_t(2) * segment * tubeFidelity);
+		}
+		createTriangleRing((radialFidelity - 1) * tubeFidelity, 0, tubeFidelity, triangleBuf + std::size_t(2) * (radialFidelity - std::size_t(1)) * tubeFidelity);
+	}
+
+	/*
+		
+	*/
+	Polyhedron createZTorus(float ringRadius, float radiusOfTube, int radialFidelity, int tubeFidelity) {
+		Vec3f* vertices = new Vec3f[radialFidelity * tubeFidelity];
+		Triangle* triangles = new Triangle[std::size_t(2) * radialFidelity * tubeFidelity];
+
+		for(int segment = 0; segment < radialFidelity; segment++) {
+			float angle = (2 * PI * segment) / radialFidelity;
+			float s = sin(angle);
+			float c = cos(angle);
+			
+			for(int partInSegment = 0; partInSegment < tubeFidelity; partInSegment++) {
+				float tubeAngle = (2 * PI * partInSegment) / tubeFidelity;
+				
+				float height = radiusOfTube * sin(tubeAngle);
+				float radius = ringRadius + radiusOfTube * cos(tubeAngle);
+
+				vertices[segment * tubeFidelity + partInSegment] = Vec3f(s * radius, c * radius, height);
+			}
+		}
+		generateTorusTriangles(radialFidelity, tubeFidelity, triangles);
+
+		return Polyhedron(vertices, triangles, radialFidelity * tubeFidelity, 2 * radialFidelity * tubeFidelity);
 	}
 }

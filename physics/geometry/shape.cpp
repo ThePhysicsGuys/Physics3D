@@ -1,7 +1,6 @@
 #include "shape.h"
 
 #include "polyhedron.h"
-#include "normalizedPolyhedron.h"
 #include "shapeClass.h"
 
 Shape::Shape() : baseShape(nullptr), scale{1,1,1} {}

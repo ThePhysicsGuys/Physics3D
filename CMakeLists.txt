@@ -58,11 +58,13 @@ add_library(physics STATIC
   physics/geometry/genericIntersection.cpp
   physics/geometry/indexedShape.cpp
   physics/geometry/intersection.cpp
+  physics/geometry/triangleMesh.cpp
   physics/geometry/polyhedron.cpp
-  physics/geometry/polyhedronInternals.cpp
   physics/geometry/shape.cpp
   physics/geometry/shapeBuilder.cpp
   physics/geometry/shapeClass.cpp
+  physics/geometry/shapeCreation.cpp
+  physics/geometry/builtinShapeClasses.cpp
 
   physics/datastructures/alignedPtr.cpp
   physics/datastructures/boundsTree.cpp
@@ -75,6 +77,7 @@ add_library(physics STATIC
 
   physics/misc/serialization.cpp
   physics/misc/shapeLibrary.cpp
+  physics/misc/validityHelper.cpp
   physics/misc/filters/visibilityFilter.cpp
 )
 target_link_libraries(physics util)

@@ -7,7 +7,8 @@
 
 #include "estimateMotion.h"
 
-#include "../physics/geometry/basicShapes.h"
+#include "../physics/geometry/shape.h"
+#include "../physics/geometry/shapeCreation.h"
 #include "../physics/part.h"
 #include "../physics/physical.h"
 #include "../physics/constraints/fixedConstraint.h"
@@ -20,9 +21,9 @@
 #define DELTA_T 0.0001
 
 /*TEST_CASE(testBallConstraint) {
-	Part part1(Box(2.0, 2.0, 2.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
+	Part part1(boxShape(2.0, 2.0, 2.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
 	part1.ensureHasParent();
-	Part part2(Box(2.0, 2.0, 2.0), GlobalCFrame(6.0, 0.0, 0.0), {1.0, 1.0, 1.0});
+	Part part2(boxShape(2.0, 2.0, 2.0), GlobalCFrame(6.0, 0.0, 0.0), {1.0, 1.0, 1.0});
 	part2.ensureHasParent();
 	ConstraintGroup group;
 	group.ballConstraints.push_back(BallConstraint{Vec3(3.0, 0.0, 0.0), part1.parent->mainPhysical, Vec3(-3.0, 0.0, 0.0), part2.parent->mainPhysical});
@@ -36,7 +37,7 @@
 }*/
 
 TEST_CASE(testMotionOfPhysicalSinglePart) {
-	Part p1(Sphere(1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
+	Part p1(sphereShape(1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
 
 	p1.ensureHasParent();
 
@@ -65,8 +66,8 @@ TEST_CASE(testMotionOfPhysicalSinglePart) {
 }
 
 TEST_CASE(testMotionOfPhysicalPartsBasic) {
-	Part p1(Sphere(1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
-	Part p2(Sphere(1.0), GlobalCFrame(1.0, 0.0, 0.0), {3.0, 1.0, 1.0});
+	Part p1(sphereShape(1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
+	Part p2(sphereShape(1.0), GlobalCFrame(1.0, 0.0, 0.0), {3.0, 1.0, 1.0});
 	p1.attach(&p2, CFrame(1.0, 0.0, 0.0));
 
 	Motion COMMotion(Vec3(1.0, 0.7, 1.3), Vec3(0,0,0));
@@ -102,8 +103,8 @@ TEST_CASE(testMotionOfPhysicalPartsBasic) {
 }
 
 TEST_CASE(testMotionOfPhysicalPartsRotation) {
-	Part p1(Sphere(1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
-	Part p2(Sphere(1.0), GlobalCFrame(1.0, 0.0, 0.0), {3.0, 1.0, 1.0});
+	Part p1(sphereShape(1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
+	Part p2(sphereShape(1.0), GlobalCFrame(1.0, 0.0, 0.0), {3.0, 1.0, 1.0});
 	p1.attach(&p2, CFrame(1.0, 0.0, 0.0));
 
 	Motion COMMotion(Vec3(0, 0, 0), Vec3(-0.3, 1.7, -1.1));
@@ -143,8 +144,8 @@ TEST_CASE(testMotionOfPhysicalPartsRotation) {
 }
 
 TEST_CASE(testMotionOfPhysicalPartsBasicFixedConstraint) {
-	Part p1(Sphere(1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
-	Part p2(Sphere(1.0), GlobalCFrame(1.0, 0.0, 0.0), {3.0, 1.0, 1.0});
+	Part p1(sphereShape(1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
+	Part p2(sphereShape(1.0), GlobalCFrame(1.0, 0.0, 0.0), {3.0, 1.0, 1.0});
 	
 	p1.attach(&p2, new FixedConstraint(), CFrame(1.0, 0.0, 0.0), CFrame(0,0,0));
 
@@ -181,8 +182,8 @@ TEST_CASE(testMotionOfPhysicalPartsBasicFixedConstraint) {
 }
 
 TEST_CASE(testMotionOfPhysicalPartsRotationFixedConstraint) {
-	Part p1(Sphere(1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
-	Part p2(Sphere(1.0), GlobalCFrame(1.0, 0.0, 0.0), {3.0, 1.0, 1.0});
+	Part p1(sphereShape(1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
+	Part p2(sphereShape(1.0), GlobalCFrame(1.0, 0.0, 0.0), {3.0, 1.0, 1.0});
 	
 	p1.attach(&p2, new FixedConstraint(), CFrame(1.0, 0.0, 0.0), CFrame(0, 0, 0));
 
@@ -223,8 +224,8 @@ TEST_CASE(testMotionOfPhysicalPartsRotationFixedConstraint) {
 }
 
 TEST_CASE(testMotionOfPhysicalParts) {
-	Part p1(Sphere(1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
-	Part p2(Sphere(1.0), GlobalCFrame(1.0, 0.0, 0.0), {3.0, 1.0, 1.0});
+	Part p1(sphereShape(1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
+	Part p2(sphereShape(1.0), GlobalCFrame(1.0, 0.0, 0.0), {3.0, 1.0, 1.0});
 	p1.attach(&p2, CFrame(1.0, 0.0, 0.0));
 
 	Motion COMMotion(Vec3(1.0, 0.7, 1.3), Vec3(-0.3, 1.7, -1.1));
@@ -260,12 +261,12 @@ TEST_CASE(testMotionOfPhysicalParts) {
 }
 
 TEST_CASE(testMotionOfPhysicalJointsBasic) {
-	Part p1(Sphere(1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
-	Part p2(Sphere(1.0), GlobalCFrame(1.0, 0.0, 0.0), {3.0, 1.0, 1.0});
+	Part p1(sphereShape(1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
+	Part p2(sphereShape(1.0), GlobalCFrame(1.0, 0.0, 0.0), {3.0, 1.0, 1.0});
 	p1.attach(&p2, CFrame(1.0, 0.0, 0.0));
 
-	Part p1e(Sphere(1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
-	Part p2e(Sphere(1.0), GlobalCFrame(1.0, 0.0, 0.0), {3.0, 1.0, 1.0});
+	Part p1e(sphereShape(1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
+	Part p2e(sphereShape(1.0), GlobalCFrame(1.0, 0.0, 0.0), {3.0, 1.0, 1.0});
 	
 	p1e.attach(&p2e, new FixedConstraint(), CFrame(1.0, 0.0, 0.0), CFrame(0, 0, 0));
 
@@ -279,12 +280,12 @@ TEST_CASE(testMotionOfPhysicalJointsBasic) {
 }
 
 TEST_CASE(testMotionOfPhysicalJointsRotation) {
-	Part p1(Sphere(1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
-	Part p2(Sphere(1.0), GlobalCFrame(1.0, 0.0, 0.0), {3.0, 1.0, 1.0});
+	Part p1(sphereShape(1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
+	Part p2(sphereShape(1.0), GlobalCFrame(1.0, 0.0, 0.0), {3.0, 1.0, 1.0});
 	p1.attach(&p2, CFrame(1.0, 0.0, 0.0));
 
-	Part p1e(Sphere(1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
-	Part p2e(Sphere(1.0), GlobalCFrame(1.0, 0.0, 0.0), {3.0, 1.0, 1.0});
+	Part p1e(sphereShape(1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
+	Part p2e(sphereShape(1.0), GlobalCFrame(1.0, 0.0, 0.0), {3.0, 1.0, 1.0});
 	
 	p1e.attach(&p2e, new FixedConstraint(), CFrame(1.0, 0.0, 0.0), CFrame(0.0, 0.0, 0.0));
 
@@ -305,12 +306,12 @@ TEST_CASE(testMotionOfPhysicalJointsRotation) {
 }
 
 TEST_CASE(testMotionOfPhysicalJoints) {
-	Part p1(Sphere(1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
-	Part p2(Sphere(1.0), GlobalCFrame(1.0, 0.0, 0.0), {3.0, 1.0, 1.0});
+	Part p1(sphereShape(1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
+	Part p2(sphereShape(1.0), GlobalCFrame(1.0, 0.0, 0.0), {3.0, 1.0, 1.0});
 	p1.attach(&p2, CFrame(1.0, 0.0, 0.0));
 
-	Part p1e(Sphere(1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
-	Part p2e(Sphere(1.0), GlobalCFrame(1.0, 0.0, 0.0), {3.0, 1.0, 1.0});
+	Part p1e(sphereShape(1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
+	Part p2e(sphereShape(1.0), GlobalCFrame(1.0, 0.0, 0.0), {3.0, 1.0, 1.0});
 	
 	p1e.attach(&p2e, new FixedConstraint(), CFrame(1.0, 0.0, 0.0), CFrame(0, 0, 0));
 
@@ -331,12 +332,12 @@ TEST_CASE(testMotionOfPhysicalJoints) {
 }
 
 TEST_CASE(testFixedConstraintProperties) {
-	Part p1(Sphere(1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
-	Part p2(Sphere(1.0), GlobalCFrame(), {3.0, 1.0, 1.0});
+	Part p1(sphereShape(1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
+	Part p2(sphereShape(1.0), GlobalCFrame(), {3.0, 1.0, 1.0});
 	p1.attach(&p2, CFrame(1.0, 0.0, 0.0));
 
-	Part p1e(Sphere(1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
-	Part p2e(Sphere(1.0), GlobalCFrame(), {3.0, 1.0, 1.0});
+	Part p1e(sphereShape(1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
+	Part p2e(sphereShape(1.0), GlobalCFrame(), {3.0, 1.0, 1.0});
 	
 	p1e.attach(&p2e, new FixedConstraint(), CFrame(0.3, -0.8, 0.0), CFrame(-0.7, -0.8, 0));
 
@@ -357,14 +358,14 @@ TEST_CASE(testFixedConstraintProperties) {
 TEST_CASE(testApplyForceToFixedConstraint) {
 	CFrame attach(Vec3(1.3, 0.7, 0.9), Rotation::fromEulerAngles(0.3, -0.7, 0.9));
 	
-	Part p1(Box(1.0, 2.0, 3.0), GlobalCFrame(), {1.0, 1.0, 1.0});
-	Part p2(Box(1.5, 2.3, 1.2), GlobalCFrame(), {1.0, 1.0, 1.0});
+	Part p1(boxShape(1.0, 2.0, 3.0), GlobalCFrame(), {1.0, 1.0, 1.0});
+	Part p2(boxShape(1.5, 2.3, 1.2), GlobalCFrame(), {1.0, 1.0, 1.0});
 	
 	p1.attach(&p2, attach);
 
 
-	Part p1e(Box(1.0, 2.0, 3.0), GlobalCFrame(), {1.0, 1.0, 1.0});
-	Part p2e(Box(1.5, 2.3, 1.2), GlobalCFrame(), {1.0, 1.0, 1.0});
+	Part p1e(boxShape(1.0, 2.0, 3.0), GlobalCFrame(), {1.0, 1.0, 1.0});
+	Part p2e(boxShape(1.5, 2.3, 1.2), GlobalCFrame(), {1.0, 1.0, 1.0});
 	
 	p1e.attach(&p2e, new FixedConstraint(), attach, CFrame());
 
@@ -401,13 +402,13 @@ TEST_CASE(testApplyForceToFixedConstraint) {
 }
 
 TEST_CASE(testPlainAttachAndFixedConstraintIndistinguishable) {
-	Part firstPart(Box(1.0, 1.0, 1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
-	Part secondPart(Box(0.5, 0.5, 0.5), GlobalCFrame(1.0, 0.0, 0.0), {1.0, 1.0, 1.0});
+	Part firstPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
+	Part secondPart(boxShape(0.5, 0.5, 0.5), GlobalCFrame(1.0, 0.0, 0.0), {1.0, 1.0, 1.0});
 
 	firstPart.attach(&secondPart, CFrame(1.0, 0.0, 0.0));
 
-	Part firstPart2(Box(1.0, 1.0, 1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
-	Part secondPart2(Box(0.5, 0.5, 0.5), GlobalCFrame(1.0, 0.0, 0.0), {1.0, 1.0, 1.0});
+	Part firstPart2(boxShape(1.0, 1.0, 1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
+	Part secondPart2(boxShape(0.5, 0.5, 0.5), GlobalCFrame(1.0, 0.0, 0.0), {1.0, 1.0, 1.0});
 
 	firstPart2.attach(&secondPart2, new FixedConstraint(), CFrame(0.5, 0.0, 0.0), CFrame(-0.5, 0.0, 0.0));
 
@@ -428,8 +429,8 @@ TEST_CASE(testPlainAttachAndFixedConstraintIndistinguishable) {
 }
 
 TEST_CASE(testInternalMotionOfCenterOfMass) {
-	Part firstPart(Box(1.0, 1.0, 1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
-	Part secondPart(Box(0.5, 0.5, 0.5), GlobalCFrame(1.0, 0.0, 0.0), {1.0, 1.0, 1.0});
+	Part firstPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
+	Part secondPart(boxShape(0.5, 0.5, 0.5), GlobalCFrame(1.0, 0.0, 0.0), {1.0, 1.0, 1.0});
 
 	SinusoidalPistonConstraint* piston = new SinusoidalPistonConstraint(0.3, 1.0, 1.0);
 

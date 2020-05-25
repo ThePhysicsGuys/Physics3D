@@ -1,5 +1,7 @@
 #include "visualShape.h"
 
+#include "../physics/geometry/polyhedron.h"
+
 namespace Graphics {
 VisualShape VisualShape::generateSmoothNormalsShape(const Polyhedron& underlyingPoly) {
 	Vec3f* normalBuffer = new Vec3f[underlyingPoly.vertexCount];
@@ -7,17 +9,17 @@ VisualShape VisualShape::generateSmoothNormalsShape(const Polyhedron& underlying
 
 	return VisualShape(underlyingPoly, SharedArrayPtr<const Vec3f>(normalBuffer));
 }
-VisualShape VisualShape::generateSplitNormalsShape(const Polyhedron& underlyingPoly) {
-	Vec3f* newVertices = new Vec3f[underlyingPoly.triangleCount * 3];
-	Vec3f* newNormals = new Vec3f[underlyingPoly.triangleCount * 3];
-	Triangle* newTriangles = new Triangle[underlyingPoly.triangleCount];
+VisualShape VisualShape::generateSplitNormalsShape(const TriangleMesh& underlyingMesh) {
+	Vec3f* newVertices = new Vec3f[underlyingMesh.triangleCount * 3];
+	Vec3f* newNormals = new Vec3f[underlyingMesh.triangleCount * 3];
+	Triangle* newTriangles = new Triangle[underlyingMesh.triangleCount];
 
-	for(int i = 0; i < underlyingPoly.triangleCount; i++) {
-		Triangle t = underlyingPoly.getTriangle(i);
+	for(int i = 0; i < underlyingMesh.triangleCount; i++) {
+		Triangle t = underlyingMesh.getTriangle(i);
 
-		Vec3f a = underlyingPoly[t.firstIndex];
-		Vec3f b = underlyingPoly[t.secondIndex];
-		Vec3f c = underlyingPoly[t.thirdIndex];
+		Vec3f a = underlyingMesh.getVertex(t.firstIndex);
+		Vec3f b = underlyingMesh.getVertex(t.secondIndex);
+		Vec3f c = underlyingMesh.getVertex(t.thirdIndex);
 
 		Vec3f normal = normalize((b - a) % (c - a));
 
@@ -33,6 +35,6 @@ VisualShape VisualShape::generateSplitNormalsShape(const Polyhedron& underlyingP
 		newTriangles[i] = Triangle{i*3, i*3 + 1, i*3 + 2};
 	}
 
-	return VisualShape(Polyhedron(newVertices, newTriangles, underlyingPoly.triangleCount * 3, underlyingPoly.triangleCount), SharedArrayPtr<const Vec3f>(newNormals));
+	return VisualShape(TriangleMesh(newVertices, newTriangles, underlyingMesh.triangleCount * 3, underlyingMesh.triangleCount), SharedArrayPtr<const Vec3f>(newNormals));
 }
 }

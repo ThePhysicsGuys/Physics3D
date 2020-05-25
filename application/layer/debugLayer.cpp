@@ -11,6 +11,7 @@
 #include "../physics/math/mathUtil.h"
 #include "../physics/math/bounds.h"
 #include "../physics/physical.h"
+#include "../physics/geometry/polyhedron.h"
 
 #include "view/screen.h"
 #include "ecs/material.h"

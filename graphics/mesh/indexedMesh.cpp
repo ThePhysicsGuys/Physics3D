@@ -14,7 +14,7 @@ namespace Graphics {
 IndexedMesh::IndexedMesh(const VisualShape& shape) : AbstractMesh(), vertexCount(shape.vertexCount), triangleCount(shape.triangleCount) {
 	float* vertices = new float[shape.vertexCount * 3];
 	for (int i = 0; i < vertexCount; i++) {
-		Vec3f vertex = shape[i];
+		Vec3f vertex = shape.getVertex(i);
 		vertices[i * 3] = vertex.x;
 		vertices[i * 3 + 1] = vertex.y;
 		vertices[i * 3 + 2] = vertex.z;

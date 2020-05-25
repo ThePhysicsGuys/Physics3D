@@ -7,7 +7,8 @@
 #include <sstream>
 #include "../physics/misc/gravityForce.h"
 
-#include "../physics/geometry/basicShapes.h"
+#include "../physics/geometry/shape.h"
+#include "../physics/geometry/shapeCreation.h"
 #include "../physics/math/linalg/commonMatrices.h"
 
 #include "../physics/misc/shapeLibrary.h"
@@ -171,9 +172,9 @@ void WorldBenchmark::printResults(double timeTakenMillis) {
 
 
 void WorldBenchmark::createFloor(double w, double h, double wallHeight) {
-	world.addTerrainPart(new Part(Library::createBox(w, 1.0, h), GlobalCFrame(0.0, 0.0, 0.0), basicProperties));
-	world.addTerrainPart(new Part(Library::createBox(0.8, wallHeight, h), GlobalCFrame(w, wallHeight/2, 0.0), basicProperties));
-	world.addTerrainPart(new Part(Library::createBox(0.8, wallHeight, h), GlobalCFrame(-w, wallHeight / 2, 0.0), basicProperties));
-	world.addTerrainPart(new Part(Library::createBox(w, wallHeight, 0.8), GlobalCFrame(0.0, wallHeight / 2, h), basicProperties));
-	world.addTerrainPart(new Part(Library::createBox(w, wallHeight, 0.8), GlobalCFrame(0.0, wallHeight / 2, -h), basicProperties));
+	world.addTerrainPart(new Part(polyhedronShape(Library::createBox(w, 1.0, h)), GlobalCFrame(0.0, 0.0, 0.0), basicProperties));
+	world.addTerrainPart(new Part(polyhedronShape(Library::createBox(0.8, wallHeight, h)), GlobalCFrame(w, wallHeight/2, 0.0), basicProperties));
+	world.addTerrainPart(new Part(polyhedronShape(Library::createBox(0.8, wallHeight, h)), GlobalCFrame(-w, wallHeight / 2, 0.0), basicProperties));
+	world.addTerrainPart(new Part(polyhedronShape(Library::createBox(w, wallHeight, 0.8)), GlobalCFrame(0.0, wallHeight / 2, h), basicProperties));
+	world.addTerrainPart(new Part(polyhedronShape(Library::createBox(w, wallHeight, 0.8)), GlobalCFrame(0.0, wallHeight / 2, -h), basicProperties));
 }

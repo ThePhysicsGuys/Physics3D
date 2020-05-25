@@ -7,6 +7,7 @@
 #include "../physics/geometry/shapeBuilder.h"
 #include "../physics/geometry/convexShapeBuilder.h"
 #include "../physics/misc/shapeLibrary.h"
+#include "../physics/misc/validityHelper.h"
 
 TEST_CASE(testIndexedShape) {
 	Vec3f verts[]{Vec3f(0.0, 0.0, 0.0), Vec3f(1.0, 0.0, 0.0), Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 1.0, 0.0)};
@@ -18,7 +19,7 @@ TEST_CASE(testIndexedShape) {
 	
 	IndexedShape s(verts, triangles, 4, 4, neighBuf);
 
-	ASSERT_TRUE(s.isValid());
+	ASSERT_TRUE(isValid(s));
 }
 
 TEST_CASE(buildShape) {
@@ -32,7 +33,7 @@ TEST_CASE(buildShape) {
 
 	IndexedShape result = b.toIndexedShape();
 
-	ASSERT_TRUE(result.isValid());
+	ASSERT_TRUE(isValid(result));
 }
 
 TEST_CASE(buildConvexShape) {
@@ -45,13 +46,13 @@ TEST_CASE(buildConvexShape) {
 
 	Polyhedron simpleTetrahedron(verts, triangles, 4, 4);
 
-	ASSERT_TRUE(simpleTetrahedron.isValid());
+	ASSERT_TRUE(isValid(simpleTetrahedron));
 
 	ConvexShapeBuilder builder(verts, triangles, 4, 4, neighBuf, builderRemovalBuffer, builderAddingBuffer);
 
 	builder.addPoint(Vec3f(-1, 10, -1), 3);
 
-	ASSERT_TRUE(builder.toIndexedShape().isValid());
+	ASSERT_TRUE(isValid(builder.toIndexedShape()));
 
 	Vec3f verts2[10]{Vec3f(0.0, 0.0, 0.0), Vec3f(1.0, 0.0, 0.0), Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 1.0, 0.0)};
 	Triangle triangles2[20]{{0,1,2},{0,3,1},{0,2,3},{1,3,2}};
@@ -59,17 +60,17 @@ TEST_CASE(buildConvexShape) {
 
 	Polyhedron simpleTetrahedron2(verts2, triangles2, 4, 4);
 
-	ASSERT_TRUE(simpleTetrahedron2.isValid());
+	ASSERT_TRUE(isValid(simpleTetrahedron2));
 
 	ConvexShapeBuilder builder2(verts2, triangles2, 4, 4, neighBuf2, builderRemovalBuffer, builderAddingBuffer);
 
-	builder2.addPoint(Vec3f(0.4, 0.4, 0.4), 3);
+	builder2.addPoint(Vec3f(0.4f, 0.4f, 0.4f), 3);
 
-	ASSERT_TRUE(builder2.toIndexedShape().isValid());
+	ASSERT_TRUE(isValid(builder2.toIndexedShape()));
 
-	builder2.addPoint(Vec3f(-0.5, 50, -0.5), 3);
+	builder2.addPoint(Vec3f(-0.5f, 50.0f, -0.5f), 3);
 
-	ASSERT_TRUE(builder2.toIndexedShape().isValid());
+	ASSERT_TRUE(isValid(builder2.toIndexedShape()));
 
 	Vec3f newIcosaVerts[30];
 	Triangle newIcosaTriangles[40];
@@ -77,14 +78,14 @@ TEST_CASE(buildConvexShape) {
 
 	ConvexShapeBuilder icosaBuilder(Library::icosahedron, newIcosaVerts, newIcosaTriangles, icosaNeighBuf, builderRemovalBuffer, builderAddingBuffer);
 
-	ASSERT_TRUE(icosaBuilder.toIndexedShape().isValid());
+	ASSERT_TRUE(isValid(icosaBuilder.toIndexedShape()));
 
-	icosaBuilder.addPoint(Vec3f(0, 1.1, 0));
-	icosaBuilder.addPoint(Vec3f(0, -1.1, 0));
-	icosaBuilder.addPoint(Vec3f(1.1, 0, 0));
-	icosaBuilder.addPoint(Vec3f(-1.1, 0, 0));
-	icosaBuilder.addPoint(Vec3f(0, 0, 1.1));
-	icosaBuilder.addPoint(Vec3f(0, 0, -1.1));
+	icosaBuilder.addPoint(Vec3f(0, 1.1f, 0));
+	icosaBuilder.addPoint(Vec3f(0, -1.1f, 0));
+	icosaBuilder.addPoint(Vec3f(1.1f, 0, 0));
+	icosaBuilder.addPoint(Vec3f(-1.1f, 0, 0));
+	icosaBuilder.addPoint(Vec3f(0, 0, 1.1f));
+	icosaBuilder.addPoint(Vec3f(0, 0, -1.1f));
 
-	ASSERT_TRUE(icosaBuilder.toIndexedShape().isValid());
+	ASSERT_TRUE(isValid(icosaBuilder.toIndexedShape()));
 }

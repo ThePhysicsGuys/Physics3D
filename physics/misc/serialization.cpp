@@ -7,8 +7,7 @@
 #include <iostream>
 
 #include "../geometry/polyhedron.h"
-#include "../geometry/normalizedPolyhedron.h"
-#include "../geometry/polyhedronInternals.h"
+#include "../geometry/builtinShapeClasses.h"
 #include "../geometry/shape.h"
 #include "../geometry/shapeClass.h"
 #include "../part.h"
@@ -29,7 +28,7 @@ void serializePolyhedron(const Polyhedron& poly, std::ostream& ostream) {
 	::serialize<int>(poly.triangleCount, ostream);
 
 	for(int i = 0; i < poly.vertexCount; i++) {
-		::serialize<Vec3f>(poly[i], ostream);
+		::serialize<Vec3f>(poly.getVertex(i), ostream);
 	}
 	for(int i = 0; i < poly.triangleCount; i++) {
 		::serialize<Triangle>(poly.getTriangle(i), ostream);
@@ -106,12 +105,12 @@ SinusoidalPistonConstraint* deserializePistonConstraint(std::istream& istream) {
 	return newConstraint;
 }
 
-void serializeNormalizedPolyhedron(const NormalizedPolyhedron& polyhedron, std::ostream& ostream) {
-	::serializePolyhedron(polyhedron, ostream);
+void serializePolyhedronShapeClass(const PolyhedronShapeClass& polyhedron, std::ostream& ostream) {
+	::serializePolyhedron(polyhedron.asPolyhedron(), ostream);
 }
-NormalizedPolyhedron* deserializeNormalizedPolyhedron(std::istream& istream) {
+PolyhedronShapeClass* deserializePolyhedronShapeClass(std::istream& istream) {
 	Polyhedron poly = ::deserializePolyhedron(istream);
-	NormalizedPolyhedron* result = new NormalizedPolyhedron(poly.normalized());
+	PolyhedronShapeClass* result = new PolyhedronShapeClass(std::move(poly));
 	return result;
 }
 
@@ -374,7 +373,7 @@ void DeSerializationSessionPrototype::deserializeAndCollectHeaderInformation(std
 	shapeDeserializer.sharedShapeClassDeserializer.deserializeRegistry([](std::istream& istream) {return dynamicShapeClassSerializer.deserialize(istream); }, istream);
 }
 
-static const ShapeClass* builtinKnownShapeClasses[]{boxClass, sphereClass, cylinderClass};
+static const ShapeClass* builtinKnownShapeClasses[]{&CubeClass::instance, &SphereClass::instance, &CylinderClass::instance};
 SerializationSessionPrototype::SerializationSessionPrototype(const std::vector<const ShapeClass*>& knownShapeClasses) : shapeSerializer(builtinKnownShapeClasses) {
 	for(const ShapeClass* sc : knownShapeClasses) {
 		shapeSerializer.sharedShapeClassSerializer.addPredefined(sc);
@@ -398,8 +397,8 @@ static DynamicSerializerRegistry<HardConstraint>::ConcreteDynamicSerializer<Cons
 static DynamicSerializerRegistry<HardConstraint>::ConcreteDynamicSerializer<SinusoidalPistonConstraint> pistonConstraintSerializer
 (serializePistonConstraint, deserializePistonConstraint, 2);
 
-static DynamicSerializerRegistry<ShapeClass>::ConcreteDynamicSerializer<NormalizedPolyhedron> polyhedronSerializer
-(serializeNormalizedPolyhedron, deserializeNormalizedPolyhedron, 0);
+static DynamicSerializerRegistry<ShapeClass>::ConcreteDynamicSerializer<PolyhedronShapeClass> polyhedronSerializer
+(serializePolyhedronShapeClass, deserializePolyhedronShapeClass, 0);
 
 static DynamicSerializerRegistry<ExternalForce>::ConcreteDynamicSerializer<DirectionalGravity> gravitySerializer
 (serializeDirectionalGravity, deserializeDirectionalGravity, 0);
@@ -412,7 +411,7 @@ DynamicSerializerRegistry<HardConstraint> dynamicHardConstraintSerializer{
 	{typeid(SinusoidalPistonConstraint), &pistonConstraintSerializer}
 };
 DynamicSerializerRegistry<ShapeClass> dynamicShapeClassSerializer{
-	{typeid(NormalizedPolyhedron), &polyhedronSerializer},
+	{typeid(PolyhedronShapeClass), &polyhedronSerializer},
 };
 DynamicSerializerRegistry<ExternalForce> dynamicExternalForceSerializer{
 	{typeid(DirectionalGravity), &gravitySerializer},
