@@ -66,6 +66,7 @@ inline bool isMotionValid(const Motion& motion) {
 	return isTranslationalMotionValid(motion.translation) && isRotationalMotionValid(motion.rotation);
 }
 
+struct Triangle;
 class TriangleMesh;
 class Polyhedron;
 struct IndexedShape;
@@ -73,3 +74,5 @@ struct IndexedShape;
 bool isValid(const TriangleMesh& mesh);
 bool isValid(const Polyhedron& poly);
 bool isValid(const IndexedShape& shape);
+
+bool isValidTriangle(Triangle t, int vertexCount);

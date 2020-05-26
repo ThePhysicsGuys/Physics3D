@@ -278,6 +278,7 @@ void defaultSettings() {
 	bindFramebuffer(0);
 	standardBlendFunction();
 	enableDepthTest();
+	glLineWidth(1.5);
 	disableCulling();
 	clearColor();
 	clearDepth();

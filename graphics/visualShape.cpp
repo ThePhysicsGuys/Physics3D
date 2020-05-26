@@ -21,7 +21,7 @@ VisualShape VisualShape::generateSplitNormalsShape(const TriangleMesh& underlyin
 		Vec3f b = underlyingMesh.getVertex(t.secondIndex);
 		Vec3f c = underlyingMesh.getVertex(t.thirdIndex);
 
-		Vec3f normal = normalize((b - a) % (c - a));
+		Vec3f normal = normalize(underlyingMesh.getNormalVecOfTriangle(t));
 
 		newVertices[i*3]     = a;
 		newVertices[i*3 + 1] = b;
@@ -35,6 +35,6 @@ VisualShape VisualShape::generateSplitNormalsShape(const TriangleMesh& underlyin
 		newTriangles[i] = Triangle{i*3, i*3 + 1, i*3 + 2};
 	}
 
-	return VisualShape(TriangleMesh(newVertices, newTriangles, underlyingMesh.triangleCount * 3, underlyingMesh.triangleCount), SharedArrayPtr<const Vec3f>(newNormals));
+	return VisualShape(TriangleMesh(underlyingMesh.triangleCount * 3, underlyingMesh.triangleCount, newVertices, newTriangles), SharedArrayPtr<const Vec3f>(newNormals));
 }
 }

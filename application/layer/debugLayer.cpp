@@ -150,7 +150,8 @@ void DebugLayer::onRender() {
 		if (screen->selectedPart != nullptr) {
 			const GlobalCFrame& selectedCFrame = screen->selectedPart->getCFrame();
 			Motion partMotion = screen->selectedPart->getMotion();
-			for (const Vec3f& corner : screen->selectedPart->hitbox.asPolyhedron().iterVertices()) {
+			Polyhedron asPoly = screen->selectedPart->hitbox.asPolyhedron();
+			for (const Vec3f& corner : asPoly.iterVertices()) {
 				vecLog.add(ColoredVector(selectedCFrame.localToGlobal(corner), partMotion.getVelocityOfPoint(selectedCFrame.localToRelative(corner)), ::Debug::VELOCITY));
 			}
 

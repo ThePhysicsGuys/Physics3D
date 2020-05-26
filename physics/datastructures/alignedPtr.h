@@ -28,8 +28,7 @@ public:
 		other.data = nullptr;
 	}
 	UniqueAlignedPointer& operator=(UniqueAlignedPointer&& other) noexcept {
-		this->data = other.data;
-		other.data = nullptr;
+		std::swap(this->data, other.data);
 
 		return *this;
 	}

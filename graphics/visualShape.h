@@ -20,8 +20,8 @@ struct VisualShape : public TriangleMesh {
 
 	VisualShape() : TriangleMesh(), normals(nullptr), uvs(nullptr), tangents(nullptr), bitangents(nullptr) {}
 
-	VisualShape(Vec3f* vertices, int vertexCount, const Triangle* triangles, int triangleCount, SVec3f normals = SVec3f(), SVec2f uvs = SVec2f(), SVec3f tangents = SVec3f(), SVec3f bitangents = SVec3f()) :
-		TriangleMesh(vertices, triangles, vertexCount, triangleCount), normals(normals), uvs(uvs), tangents(tangents), bitangents(bitangents) {}
+	VisualShape(const Vec3f* vertices, int vertexCount, const Triangle* triangles, int triangleCount, SVec3f normals = SVec3f(), SVec2f uvs = SVec2f(), SVec3f tangents = SVec3f(), SVec3f bitangents = SVec3f()) :
+		TriangleMesh(vertexCount, triangleCount, vertices, triangles), normals(normals), uvs(uvs), tangents(tangents), bitangents(bitangents) {}
 
 	explicit VisualShape(const TriangleMesh& shape, SVec3f normals = SVec3f(), SVec2f uvs = SVec2f(), SVec3f tangents = SVec3f(), SVec3f bitangents = SVec3f()) :
 		TriangleMesh(shape), normals(normals), uvs(uvs), tangents(tangents), bitangents(bitangents) {}

@@ -17,20 +17,26 @@
 #include "../misc/validityHelper.h"
 
 Polyhedron::Polyhedron(const Vec3f* vertices, const Triangle* triangles, int vertexCount, int triangleCount) :
-	TriangleMesh(vertices, triangles, vertexCount, triangleCount) {
+	TriangleMesh(vertexCount, triangleCount, vertices, triangles) {
 	assert(isValid(*this));
 }
-
 Polyhedron::Polyhedron(const TriangleMesh& mesh) : 
 	TriangleMesh(mesh) {
 	assert(isValid(*this));
 }
-Polyhedron::Polyhedron(TriangleMesh&& mesh) :
+Polyhedron::Polyhedron(TriangleMesh&& mesh) noexcept :
+	TriangleMesh(std::move(mesh)) {
+	assert(isValid(*this));
+}
+Polyhedron::Polyhedron(const MeshPrototype& mesh) :
+	TriangleMesh(mesh) {
+	assert(isValid(*this));
+}
+Polyhedron::Polyhedron(MeshPrototype&& mesh) noexcept :
 	TriangleMesh(std::move(mesh)) {
 	assert(isValid(*this));
 }
 
-Polyhedron::~Polyhedron() {}
 
 Polyhedron Polyhedron::translated(Vec3f offset) const { return Polyhedron(TriangleMesh::translated(offset)); }
 Polyhedron Polyhedron::rotated(Rotationf rotation) const { return Polyhedron(TriangleMesh::rotated(rotation)); }
@@ -67,14 +73,13 @@ void Polyhedron::computeNormals(Vec3f* buffer) const {
 		Vec3f v1 = this->getVertex(triangle.secondIndex);
 		Vec3f v2 = this->getVertex(triangle.thirdIndex);
 
-		Vec3f D1 = v1 - v0;
-		Vec3f D2 = v2 - v0;
+		Vec3f D10 = normalize(v1 - v0);
+		Vec3f D20 = normalize(v2 - v0);
+		Vec3f D21 = normalize(v2 - v1);
 
-		Vec3f faceNormal = normalize(D1 % D2);
-
-		buffer[triangle.firstIndex] += faceNormal;
-		buffer[triangle.secondIndex] += faceNormal;
-		buffer[triangle.thirdIndex] += faceNormal;
+		buffer[triangle.firstIndex] += D10 % D20;
+		buffer[triangle.secondIndex] += D10 % D21;
+		buffer[triangle.thirdIndex] += D20 % D21;
 	}
 
 	for(int i = 0; i < vertexCount; i++) {

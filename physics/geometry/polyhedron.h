@@ -11,12 +11,11 @@
 class Polyhedron : public TriangleMesh {
 public:
 	Polyhedron() : TriangleMesh() {};
-	Polyhedron(const TriangleMesh& mesh);
-	Polyhedron(TriangleMesh&& mesh);
+	explicit Polyhedron(const TriangleMesh& mesh);
+	explicit Polyhedron(TriangleMesh&& mesh) noexcept;
+	explicit Polyhedron(const MeshPrototype& mesh);
+	explicit Polyhedron(MeshPrototype&& mesh) noexcept;
 	Polyhedron(const Vec3f* vertices, const Triangle* triangles, int vertexCount, int triangleCount);
-
-	~Polyhedron();
-
 
 	Polyhedron translated(Vec3f offset) const;
 	Polyhedron rotated(Rotationf rotation) const;

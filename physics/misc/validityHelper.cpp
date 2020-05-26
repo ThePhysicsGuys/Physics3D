@@ -7,6 +7,13 @@
 #include "../geometry/indexedShape.h"
 #include "../../util/log.h"
 
+bool isValidTriangle(Triangle t, int vertexCount) {
+	return t.firstIndex != t.secondIndex && t.secondIndex != t.thirdIndex && t.thirdIndex != t.firstIndex &&
+		t.firstIndex >= 0 && t.firstIndex < vertexCount &&
+		t.secondIndex >= 0 && t.secondIndex < vertexCount &&
+		t.thirdIndex >= 0 && t.thirdIndex < vertexCount;
+}
+
 // for every edge, of every triangle, check that it coincides with exactly one other triangle, in reverse order, revamped to be O(triangleCount) instead of O(triangleCount^2)
 static bool isComplete(const TriangleMesh& mesh) {
 	struct HitCount {
@@ -61,14 +68,28 @@ static bool isComplete(const TriangleMesh& mesh) {
 bool isValid(const TriangleMesh& mesh) {
 	for(int i = 0; i < mesh.triangleCount; i++) {
 		const Triangle& t = mesh.getTriangle(i);
-		for(const int& index : t.indexes) {
-			if(index < 0 || index >= mesh.vertexCount) {
-				Log::warn("Invalid triangle! Triangle %d points to a nonexistent vertex!", i);
-				return false;
-			}
+		if(!isValidTriangle(t, mesh.vertexCount)) {
+			Log::warn("Invalid triangle! Triangle %d {%d, %d, %d} points to a nonexistent vertex or has a duplicate index!", i, t.firstIndex, t.secondIndex, t.thirdIndex);
+			return false;
 		}
 	}
-
+	int* usageCounts = new int[mesh.vertexCount];
+	for(int i = 0; i < mesh.vertexCount; i++) {
+		usageCounts[i] = 0;
+	}
+	for(int i = 0; i < mesh.triangleCount; i++) {
+		usageCounts[mesh.getTriangle(i).firstIndex]++;
+		usageCounts[mesh.getTriangle(i).secondIndex]++;
+		usageCounts[mesh.getTriangle(i).thirdIndex]++;
+	}
+	for(int i = 0; i < mesh.vertexCount; i++) {
+		if(usageCounts[i] == 0) {
+			Log::warn("Vertex %d unused!", i);
+			delete[] usageCounts;
+			return false;
+		}
+	}
+	delete[] usageCounts;
 	return true;
 }
 

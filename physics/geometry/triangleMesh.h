@@ -54,27 +54,57 @@ struct ShapeTriangleIter {
 	}
 };
 
-class TriangleMesh {
+class TriangleMesh;
+
+class MeshPrototype {
 protected:
 	UniqueAlignedPointer<float> vertices;
 	UniqueAlignedPointer<int> triangles;
-	TriangleMesh(UniqueAlignedPointer<float>&& vertices, UniqueAlignedPointer<int>&& triangles, int vertexCount, int triangleCount);
 public:
 	int vertexCount;
 	int triangleCount;
+	MeshPrototype();
+	MeshPrototype(int vertexCount, int triangleCount);
+	MeshPrototype(int vertexCount, int triangleCount, UniqueAlignedPointer<int>&& triangles);
+	MeshPrototype(int vertexCount, int triangleCount, UniqueAlignedPointer<float>&& vertices, UniqueAlignedPointer<int>&& triangles);
 
-	TriangleMesh() : vertices(), triangles(), vertexCount(0), triangleCount(0) {};
-	~TriangleMesh();
-
-	TriangleMesh(const Vec3f* vertices, const Triangle* triangles, int vertexCount, int triangleCount);
-	TriangleMesh(TriangleMesh&& poly) noexcept;
-	TriangleMesh(const TriangleMesh& poly);
-	TriangleMesh& operator=(TriangleMesh&& poly) noexcept;
-	TriangleMesh& operator=(const TriangleMesh& poly);
+	MeshPrototype(const MeshPrototype& mesh);
+	MeshPrototype& operator=(const MeshPrototype& mesh);
+	MeshPrototype(MeshPrototype&&) noexcept = default;
+	MeshPrototype& operator=(MeshPrototype&&) noexcept = default;
 
 	Vec3f getVertex(int index) const;
 	Triangle getTriangle(int index) const;
+};
 
+class EditableMesh : public MeshPrototype {
+public:
+	EditableMesh(int vertexCount, int triangleCount);
+	EditableMesh(int vertexCount, int triangleCount, const UniqueAlignedPointer<int>& triangles);
+	EditableMesh(int vertexCount, int triangleCount, UniqueAlignedPointer<int>&& triangles);
+
+	explicit EditableMesh(const MeshPrototype& mesh);
+	explicit EditableMesh(MeshPrototype&&) noexcept;
+
+	void setVertex(int index, Vec3f vertex);
+	void setTriangle(int index, Triangle triangle);
+};
+
+class TriangleMesh : public MeshPrototype {
+protected:
+	TriangleMesh(UniqueAlignedPointer<float>&& vertices, UniqueAlignedPointer<int>&& triangles, int vertexCount, int triangleCount);
+public:
+	
+	TriangleMesh() = default;
+	TriangleMesh(int vertexCount, int triangleCount, const Vec3f* vertices, const Triangle* triangles);
+	TriangleMesh(TriangleMesh&&) noexcept = default;
+	TriangleMesh& operator=(TriangleMesh&&) noexcept = default;
+	TriangleMesh(const TriangleMesh&) = default;
+	TriangleMesh& operator=(const TriangleMesh&) = default;
+
+	explicit TriangleMesh(MeshPrototype&& mesh) noexcept;
+	explicit TriangleMesh(const MeshPrototype& mesh);
+	
 	IteratorFactory<ShapeVertexIter> iterVertices() const;
 	IteratorFactory<ShapeTriangleIter> iterTriangles() const;
 

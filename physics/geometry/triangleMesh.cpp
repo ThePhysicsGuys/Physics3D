@@ -9,7 +9,7 @@
 #include <set>
 #include <math.h>
 
-
+#pragma region bufManagement
 inline static size_t getOffset(size_t size) {
 	return (size + 7) & 0xFFFFFFFFFFFFFFF8;
 }
@@ -46,58 +46,8 @@ static void fixFinalBlock(T* buf, size_t size) {
 	}
 }
 
-static UniqueAlignedPointer<float> createAndFillParallelVecBuf(size_t size, const Vec3f* vectors) {
-	UniqueAlignedPointer<float> buf = createParallelVecBuf(size);
-
-	size_t offset = getOffset(size);
-
-	float* xValues = buf;
-	float* yValues = buf + offset;
-	float* zValues = buf + 2 * offset;
-
-	for(size_t i = 0; i < size; i++) {
-		xValues[i] = vectors[i].x;
-		yValues[i] = vectors[i].y;
-		zValues[i] = vectors[i].z;
-	}
-	fixFinalBlock(buf.get(), size);
-
-	return buf;
-}
-
-static UniqueAlignedPointer<int> createAndFillParallelTriangleBuf(size_t size, const Triangle* triangles) {
-	UniqueAlignedPointer<int> buf = createParallelTriangleBuf(size);
-
-	size_t offset = getOffset(size);
-
-	int* aValues = buf;
-	int* bValues = buf + offset;
-	int* cValues = buf + 2 * offset;
-
-	for(size_t i = 0; i < size; i++) {
-		aValues[i] = triangles[i].firstIndex;
-		bValues[i] = triangles[i].secondIndex;
-		cValues[i] = triangles[i].thirdIndex;
-	}
-	fixFinalBlock(buf.get(), size);
-
-	return buf;
-}
-
-static void setInBuf(float* buf, size_t size, size_t index, const Vec3f& value) {
-	size_t offset = getOffset(size);
-
-	float* xValues = buf;
-	float* yValues = buf + offset;
-	float* zValues = buf + 2 * offset;
-
-	xValues[index] = value.x;
-	yValues[index] = value.y;
-	zValues[index] = value.z;
-}
-
-
-
+#pragma endregion
+#pragma region triangle
 bool Triangle::sharesEdgeWith(Triangle other) const {
 	return firstIndex == other.secondIndex && secondIndex == other.firstIndex ||
 		firstIndex == other.thirdIndex && secondIndex == other.secondIndex ||
@@ -117,30 +67,9 @@ bool Triangle::operator==(const Triangle& other) const {
 		firstIndex == other.secondIndex && secondIndex == other.thirdIndex && thirdIndex == other.firstIndex ||
 		firstIndex == other.thirdIndex && secondIndex == other.firstIndex && thirdIndex == other.secondIndex;
 }
-
-
-TriangleMesh::TriangleMesh(UniqueAlignedPointer<float>&& vertices, UniqueAlignedPointer<int>&& triangles, int vertexCount, int triangleCount) :
-	vertices(std::move(vertices)), triangles(std::move(triangles)), vertexCount(vertexCount), triangleCount(triangleCount) {}
-
-TriangleMesh::TriangleMesh(const Vec3f* vertices, const Triangle* triangles, int vertexCount, int triangleCount) :
-	vertices(createAndFillParallelVecBuf(vertexCount, vertices)),
-	triangles(createAndFillParallelTriangleBuf(triangleCount, triangles)),
-	vertexCount(vertexCount),
-	triangleCount(triangleCount) {
-	assert(isValid(*this));
-}
-
-TriangleMesh::~TriangleMesh() {}
-
-TriangleMesh::TriangleMesh(TriangleMesh&& mesh) noexcept :
-	vertices(std::move(mesh.vertices)),
-	triangles(std::move(mesh.triangles)),
-	vertexCount(mesh.vertexCount),
-	triangleCount(mesh.triangleCount) {
-
-}
-
-TriangleMesh::TriangleMesh(const TriangleMesh& mesh) :
+#pragma endregion
+#pragma region MeshPrototype
+MeshPrototype::MeshPrototype(const MeshPrototype& mesh) :
 	vertices(copy(mesh.vertices, mesh.vertexCount)),
 	triangles(copy(mesh.triangles, mesh.triangleCount)),
 	vertexCount(mesh.vertexCount),
@@ -148,16 +77,7 @@ TriangleMesh::TriangleMesh(const TriangleMesh& mesh) :
 
 }
 
-TriangleMesh& TriangleMesh::operator=(TriangleMesh&& mesh) noexcept {
-	this->vertices = std::move(mesh.vertices);
-	this->triangles = std::move(mesh.triangles);
-	this->vertexCount = mesh.vertexCount;
-	this->triangleCount = mesh.triangleCount;
-
-	return *this;
-}
-
-TriangleMesh& TriangleMesh::operator=(const TriangleMesh& mesh) {
+MeshPrototype& MeshPrototype::operator=(const MeshPrototype& mesh) {
 	this->vertices = copy(mesh.vertices, mesh.vertexCount);
 	this->triangles = copy(mesh.triangles, mesh.triangleCount);
 	this->vertexCount = mesh.vertexCount;
@@ -166,13 +86,123 @@ TriangleMesh& TriangleMesh::operator=(const TriangleMesh& mesh) {
 	return *this;
 }
 
-Vec3f TriangleMesh::getVertex(int index) const {
-	return Vec3f(this->vertices[index], this->vertices[index + getOffset(vertexCount)], this->vertices[index + 2 * getOffset(vertexCount)]);
+MeshPrototype::MeshPrototype() :
+	vertices(),
+	triangles(),
+	vertexCount(0),
+	triangleCount(0) {}
+
+MeshPrototype::MeshPrototype(int vertexCount, int triangleCount) :
+	vertices(getOffset(vertexCount) * 3, 32),
+	triangles(getOffset(triangleCount) * 3, 32),
+	vertexCount(vertexCount), 
+	triangleCount(triangleCount) {}
+
+MeshPrototype::MeshPrototype(int vertexCount, int triangleCount, UniqueAlignedPointer<int>&& triangles) :
+	vertices(getOffset(vertexCount) * 3, 32),
+	triangles(std::move(triangles)),
+	vertexCount(vertexCount),
+	triangleCount(triangleCount) {}
+
+MeshPrototype::MeshPrototype(int vertexCount, int triangleCount, UniqueAlignedPointer<float>&& vertices, UniqueAlignedPointer<int>&& triangles) :
+	vertices(std::move(vertices)),
+	triangles(std::move(triangles)),
+	vertexCount(vertexCount),
+	triangleCount(triangleCount) {}
+
+Vec3f MeshPrototype::getVertex(int index) const {
+	assert(index >= 0 && index < vertexCount);
+	size_t offset = getOffset(vertexCount);
+	return Vec3f(this->vertices[index], this->vertices[index + offset], this->vertices[index + 2 * offset]);
 }
 
-Triangle TriangleMesh::getTriangle(int index) const {
+Triangle MeshPrototype::getTriangle(int index) const {
+	assert(index >= 0 && index < triangleCount);
 	size_t offset = getOffset(triangleCount);
 	return Triangle{triangles[index], triangles[index + offset], triangles[index + 2 * offset]};
+}
+#pragma endregion
+#pragma region EditableMesh
+
+EditableMesh::EditableMesh(int vertexCount, int triangleCount) : 
+	MeshPrototype(vertexCount, triangleCount) {}
+EditableMesh::EditableMesh(int vertexCount, int triangleCount, const UniqueAlignedPointer<int>& triangles) :
+	MeshPrototype(vertexCount, triangleCount, copy(triangles, triangleCount)) {}
+EditableMesh::EditableMesh(int vertexCount, int triangleCount, UniqueAlignedPointer<int>&& triangles) :
+	MeshPrototype(vertexCount, triangleCount, std::move(triangles)) {}
+
+EditableMesh::EditableMesh(const MeshPrototype& mesh) : MeshPrototype(mesh) {}
+EditableMesh::EditableMesh(MeshPrototype&& mesh) noexcept : MeshPrototype(std::move(mesh)) {}
+
+void EditableMesh::setVertex(int index, Vec3f newVertex) {
+	assert(index >= 0 && index < vertexCount);
+	size_t offset = getOffset(vertexCount);
+	this->vertices[index] = newVertex.x;
+	this->vertices[index + offset] = newVertex.y;
+	this->vertices[index + 2 * offset] = newVertex.z;
+}
+void EditableMesh::setTriangle(int index, Triangle newTriangle) {
+	assert(index >= 0 && index < triangleCount);
+	assert(isValidTriangle(newTriangle, vertexCount));
+
+	size_t offset = getOffset(triangleCount);
+	this->triangles[index] = newTriangle.firstIndex;
+	this->triangles[index + offset] = newTriangle.secondIndex;
+	this->triangles[index + 2 * offset] = newTriangle.thirdIndex;
+}
+
+#pragma endregion
+#pragma region TriangleMesh
+
+TriangleMesh::TriangleMesh(UniqueAlignedPointer<float>&& vertices, UniqueAlignedPointer<int>&& triangles, int vertexCount, int triangleCount) :
+	MeshPrototype(vertexCount, triangleCount, std::move(vertices), std::move(triangles)) {
+	assert(isValid(*this));
+}
+
+TriangleMesh::TriangleMesh(int vertexCount, int triangleCount, const Vec3f* vertices, const Triangle* triangles) :
+	MeshPrototype(vertexCount, triangleCount) {
+
+	size_t vertexOffset = getOffset(vertexCount);
+
+	float* xValues = this->vertices.get();
+	float* yValues = xValues + vertexOffset;
+	float* zValues = yValues + vertexOffset;
+
+	for(size_t i = 0; i < vertexCount; i++) {
+		xValues[i] = vertices[i].x;
+		yValues[i] = vertices[i].y;
+		zValues[i] = vertices[i].z;
+	}
+	fixFinalBlock(this->vertices.get(), vertexCount);
+
+	size_t triangleOffset = getOffset(triangleCount);
+
+	int* aValues = this->triangles.get();
+	int* bValues = aValues + triangleOffset;
+	int* cValues = bValues + triangleOffset;
+
+	for(size_t i = 0; i < triangleCount; i++) {
+		aValues[i] = triangles[i].firstIndex;
+		bValues[i] = triangles[i].secondIndex;
+		cValues[i] = triangles[i].thirdIndex;
+	}
+	fixFinalBlock(this->triangles.get(), triangleCount);
+
+	assert(isValid(*this));
+}
+
+TriangleMesh::TriangleMesh(const MeshPrototype& mesh) :
+	MeshPrototype(mesh) {
+	fixFinalBlock(this->vertices.get(), vertexCount);
+	fixFinalBlock(this->triangles.get(), triangleCount);
+	assert(isValid(*this));
+}
+
+TriangleMesh::TriangleMesh(MeshPrototype&& mesh) noexcept :
+	MeshPrototype(std::move(mesh)) {
+	fixFinalBlock(this->vertices.get(), vertexCount);
+	fixFinalBlock(this->triangles.get(), triangleCount);
+	assert(isValid(*this));
 }
 
 IteratorFactory<ShapeVertexIter> TriangleMesh::iterVertices() const {
@@ -197,67 +227,55 @@ void TriangleMesh::getVertices(Vec3f* vertexBuf) const {
 
 
 TriangleMesh TriangleMesh::translated(Vec3f offset) const {
-	UniqueAlignedPointer<float> newBuf = createParallelVecBuf(this->vertexCount);
+	EditableMesh result(this->vertexCount, this->triangleCount, this->triangles);
 	for(int i = 0; i < this->vertexCount; i++) {
-		setInBuf(newBuf, vertexCount, i, this->getVertex(i) + offset);
+		result.setVertex(i, this->getVertex(i) + offset);
 	}
-
-	fixFinalBlock(newBuf.get(), this->vertexCount);
-	return TriangleMesh(std::move(newBuf), copy(triangles, triangleCount), vertexCount, triangleCount);
+	return TriangleMesh(std::move(result));
 }
 
 TriangleMesh TriangleMesh::rotated(Rotationf rotation) const {
-	UniqueAlignedPointer<float> newBuf = createParallelVecBuf(this->vertexCount);
+	EditableMesh result(this->vertexCount, this->triangleCount, this->triangles);
 	for(int i = 0; i < this->vertexCount; i++) {
-		setInBuf(newBuf, vertexCount, i, rotation * this->getVertex(i));
+		result.setVertex(i, rotation * this->getVertex(i));
 	}
-
-	fixFinalBlock(newBuf.get(), this->vertexCount);
-	return TriangleMesh(std::move(newBuf), copy(triangles, triangleCount), vertexCount, triangleCount);
+	return TriangleMesh(std::move(result));
 }
 
 TriangleMesh TriangleMesh::localToGlobal(CFramef frame) const {
-	UniqueAlignedPointer<float> newBuf = createParallelVecBuf(this->vertexCount);
+	EditableMesh result(this->vertexCount, this->triangleCount, this->triangles);
 	for(int i = 0; i < this->vertexCount; i++) {
-		setInBuf(newBuf, vertexCount, i, frame.localToGlobal(this->getVertex(i)));
+		result.setVertex(i, frame.localToGlobal(this->getVertex(i)));
 	}
-
-	fixFinalBlock(newBuf.get(), this->vertexCount);
-	return TriangleMesh(std::move(newBuf), copy(triangles, triangleCount), vertexCount, triangleCount);
+	return TriangleMesh(std::move(result));
 }
 
 TriangleMesh TriangleMesh::globalToLocal(CFramef frame) const {
-	UniqueAlignedPointer<float> newBuf = createParallelVecBuf(this->vertexCount);
+	EditableMesh result(this->vertexCount, this->triangleCount, this->triangles);
 	for(int i = 0; i < this->vertexCount; i++) {
-		setInBuf(newBuf, vertexCount, i, frame.globalToLocal(this->getVertex(i)));
+		result.setVertex(i, frame.globalToLocal(this->getVertex(i)));
 	}
-
-	fixFinalBlock(newBuf.get(), this->vertexCount);
-	return TriangleMesh(std::move(newBuf), copy(triangles, triangleCount), vertexCount, triangleCount);
+	return TriangleMesh(std::move(result));
 }
 TriangleMesh TriangleMesh::scaled(float scaleX, float scaleY, float scaleZ) const {
-	UniqueAlignedPointer<float> newBuf = createParallelVecBuf(this->vertexCount);
+	EditableMesh result(this->vertexCount, this->triangleCount, this->triangles);
 	for(int i = 0; i < this->vertexCount; i++) {
 		Vec3f v = this->getVertex(i);
-		setInBuf(newBuf, vertexCount, i, Vec3f(scaleX * v.x, scaleY * v.y, scaleZ * v.z));
+		result.setVertex(i, Vec3f(scaleX * v.x, scaleY * v.y, scaleZ * v.z));
 	}
-
-	fixFinalBlock(newBuf.get(), this->vertexCount);
-	return TriangleMesh(std::move(newBuf), copy(triangles, triangleCount), vertexCount, triangleCount);
+	return TriangleMesh(std::move(result));
 }
 TriangleMesh TriangleMesh::scaled(DiagonalMat3f scale) const { 
 	return scaled(scale[0], scale[1], scale[2]); 
 }
 
 TriangleMesh TriangleMesh::translatedAndScaled(Vec3f translation, DiagonalMat3f scale) const {
-	UniqueAlignedPointer<float> newBuf = createParallelVecBuf(this->vertexCount);
+	EditableMesh result(this->vertexCount, this->triangleCount, this->triangles);
 	for(int i = 0; i < this->vertexCount; i++) {
 		Vec3f cur = this->getVertex(i);
-		setInBuf(newBuf, vertexCount, i, scale * (cur + translation));
+		result.setVertex(i, scale * (cur + translation));
 	}
-
-	fixFinalBlock(newBuf.get(), this->vertexCount);
-	return TriangleMesh(std::move(newBuf), copy(triangles, triangleCount), vertexCount, triangleCount);
+	return TriangleMesh(std::move(result));
 }
 
 
@@ -695,3 +713,4 @@ BoundingBox TriangleMesh::getBounds(const Mat3f& referenceFrame) const {
 }
 
 #endif
+#pragma endregion

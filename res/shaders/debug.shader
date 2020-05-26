@@ -77,7 +77,7 @@ void main() {
 layout(triangles, invocations = VECTOR_TYPES) in;
 layout(line_strip, max_vertices = 54) out;
 
-in int gl_InvocationID;
+//in int gl_InvocationID;
 
 in VS_OUT {
 	vec3 gNormal;
