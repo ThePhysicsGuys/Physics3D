@@ -67,7 +67,6 @@ void EditTools::onInit() {
 	selectedPoint = Vec3f();
 }
 
-
 void EditTools::onRender(Screen& screen) {
 	using namespace Graphics;
 

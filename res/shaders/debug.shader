@@ -11,11 +11,11 @@
 */
 
 // Debug vector type defenitions
-#define FACES		  fColor = vec3(1, 1, 1); gl_Position = transform * gl_in[0].gl_Position; EmitVertex(); gl_Position = transform * gl_in[1].gl_Position; EmitVertex(); gl_Position = transform * gl_in[2].gl_Position; EmitVertex(); EndPrimitive();
-#define VERTEXNORMALS fColor = vec3(0, 0, 1); draw(transform, gl_in[0].gl_Position.xyz, gInput[0].gNormal); draw(transform, gl_in[1].gl_Position.xyz, gInput[1].gNormal); draw(transform, gl_in[2].gl_Position.xyz, gInput[2].gNormal);
-#define FACENORMALS   vec3 center = center(); vec3 faceNormal = faceNormal(); fColor = vec3(1, 0, 1); draw(transform, center, faceNormal);
-#define TANGENTS      fColor = vec3(1, 0, 0); draw(transform, gl_in[0].gl_Position.xyz, gInput[0].gTangent); draw(transform, gl_in[1].gl_Position.xyz, gInput[1].gTangent); draw(transform, gl_in[2].gl_Position.xyz, gInput[2].gTangent);
-#define BITANGENTS    fColor = vec3(0, 1, 0); draw(transform, gl_in[0].gl_Position.xyz, gInput[0].gBitangent); draw(transform, gl_in[1].gl_Position.xyz, gInput[1].gBitangent); draw(transform, gl_in[2].gl_Position.xyz, gInput[2].gBitangent);
+#define FACES		    fColor = vec3(1, 1, 1); gl_Position = transform * gl_in[0].gl_Position; EmitVertex(); gl_Position = transform * gl_in[1].gl_Position; EmitVertex(); gl_Position = transform * gl_in[2].gl_Position; EmitVertex(); EndPrimitive();
+#define VERTEXNORMALS   fColor = vec3(0, 0, 1); draw(transform, gl_in[0].gl_Position.xyz, gInput[0].gNormal); draw(transform, gl_in[1].gl_Position.xyz, gInput[1].gNormal); draw(transform, gl_in[2].gl_Position.xyz, gInput[2].gNormal);
+#define FACENORMALS     vec3 center = center(); vec3 faceNormal = faceNormal(); fColor = vec3(1, 0, 1); draw(transform, center, faceNormal);
+#define TANGENTS        fColor = vec3(1, 0, 0); draw(transform, gl_in[0].gl_Position.xyz, gInput[0].gTangent); draw(transform, gl_in[1].gl_Position.xyz, gInput[1].gTangent); draw(transform, gl_in[2].gl_Position.xyz, gInput[2].gTangent);
+#define BITANGENTS      fColor = vec3(0, 1, 0); draw(transform, gl_in[0].gl_Position.xyz, gInput[0].gBitangent); draw(transform, gl_in[1].gl_Position.xyz, gInput[1].gBitangent); draw(transform, gl_in[2].gl_Position.xyz, gInput[2].gBitangent);
 
 // Amount of different debug vector to show (max 5)
 #define VECTOR_TYPES	3
