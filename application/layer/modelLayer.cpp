@@ -211,6 +211,7 @@ void ModelLayer::onRender() {
 	}
 
 	if (screen->selectedPart) {
+		//disableDepthTest();
 		ApplicationShaders::debugShader.updateModel(Mat4f(Mat3f(screen->selectedPart->getCFrame().getRotation().asRotationMatrix()) * DiagonalMat3f(screen->selectedPart->hitbox.scale), Vec3f(screen->selectedPart->getCFrame().getPosition() - Position(0, 0, 0)), Vec3f(0.0f, 0.0f, 0.0f), 1.0f));
 		Engine::MeshRegistry::meshes[screen->selectedPart->visualData.drawMeshId]->render();
 	}

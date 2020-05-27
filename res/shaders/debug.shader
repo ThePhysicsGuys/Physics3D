@@ -11,14 +11,14 @@
 */
 
 // Debug vector type defenitions
-#define FACES		    fColor = vec3(1, 1, 1); gl_Position = transform * gl_in[0].gl_Position; EmitVertex(); gl_Position = transform * gl_in[1].gl_Position; EmitVertex(); gl_Position = transform * gl_in[2].gl_Position; EmitVertex(); EndPrimitive();
-#define VERTEXNORMALS   fColor = vec3(0, 0, 1); draw(transform, gl_in[0].gl_Position.xyz, gInput[0].gNormal); draw(transform, gl_in[1].gl_Position.xyz, gInput[1].gNormal); draw(transform, gl_in[2].gl_Position.xyz, gInput[2].gNormal);
-#define FACENORMALS     vec3 center = center(); vec3 faceNormal = faceNormal(); fColor = vec3(1, 0, 1); draw(transform, center, faceNormal);
-#define TANGENTS        fColor = vec3(1, 0, 0); draw(transform, gl_in[0].gl_Position.xyz, gInput[0].gTangent); draw(transform, gl_in[1].gl_Position.xyz, gInput[1].gTangent); draw(transform, gl_in[2].gl_Position.xyz, gInput[2].gTangent);
-#define BITANGENTS      fColor = vec3(0, 1, 0); draw(transform, gl_in[0].gl_Position.xyz, gInput[0].gBitangent); draw(transform, gl_in[1].gl_Position.xyz, gInput[1].gBitangent); draw(transform, gl_in[2].gl_Position.xyz, gInput[2].gBitangent);
+#define FACES		    fColor = vec4(0.8, 0.8, 0.8, 0.5); vec3 direction = vec3(viewPosition - center); /*if (dot(faceNormal, direction) < 0.0) return;*/ gl_Position = transform * gl_in[0].gl_Position; EmitVertex(); gl_Position = transform * gl_in[1].gl_Position; EmitVertex(); gl_Position = transform * gl_in[2].gl_Position; EmitVertex(); EndPrimitive();
+#define VERTEXNORMALS   fColor = vec4(0, 0, 1, 1); draw(transform, gl_in[0].gl_Position.xyz, gInput[0].gNormal); draw(transform, gl_in[1].gl_Position.xyz, gInput[1].gNormal); draw(transform, gl_in[2].gl_Position.xyz, gInput[2].gNormal);
+#define FACENORMALS     fColor = vec4(1, 0, 1, 1); draw(transform, center, faceNormal);
+#define TANGENTS        fColor = vec4(1, 0, 0, 1); draw(transform, gl_in[0].gl_Position.xyz, gInput[0].gTangent); draw(transform, gl_in[1].gl_Position.xyz, gInput[1].gTangent); draw(transform, gl_in[2].gl_Position.xyz, gInput[2].gTangent);
+#define BITANGENTS      fColor = vec4(0, 1, 0, 1); draw(transform, gl_in[0].gl_Position.xyz, gInput[0].gBitangent); draw(transform, gl_in[1].gl_Position.xyz, gInput[1].gBitangent); draw(transform, gl_in[2].gl_Position.xyz, gInput[2].gBitangent);
 
 // Amount of different debug vector to show (max 5)
-#define VECTOR_TYPES	3
+#define VECTOR_TYPES	1
 
 // Reorder for different types
 #define TYPE_1			FACES
@@ -84,7 +84,7 @@ in VS_OUT {
 	vec3 gBitangent;
 } gInput[];
 
-out vec3 fColor;
+out vec4 fColor;
 
 uniform vec3 viewPosition;
 uniform mat4 viewMatrix;
@@ -123,6 +123,8 @@ void draw(mat4 transform, vec3 center, vec3 normal) {
 }
 
 void main() {
+	vec3 center = center();
+	vec3 faceNormal = faceNormal();
 	mat4 transform = projectionMatrix * viewMatrix;
 
 	switch (gl_InvocationID) {
@@ -139,10 +141,10 @@ void main() {
 
 [fragment]
 
-in vec3 fColor;
+in vec4 fColor;
 out vec4 outColor;
 
 void main() {
-	outColor = vec4(fColor, 1.0);
+	outColor = fColor;
 }
 

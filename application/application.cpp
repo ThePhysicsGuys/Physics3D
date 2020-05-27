@@ -381,6 +381,7 @@ void setupWorld(int argc, const char** args) {
 	}
 
 	Shape torusShape = polyhedronShape(Library::createZTorus(1.0, 0.6, 80, 80));
+	Engine::MeshRegistry::registerMeshFor(torusShape.baseShape, Graphics::VisualShape::generateSmoothNormalsShape(torusShape.baseShape->asPolyhedron()));
 	world.addPart(new ExtendedPart(torusShape, Position(-10.0, 3.0, 0.0), basicProperties));
 }
 

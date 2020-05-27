@@ -75,7 +75,8 @@ void main() {
 
 	fUV = vUV;
 	fPosition = applyT3(vModelMatrix, vPosition);
-	fNormal = apply3(vModelMatrix, vNormal);
+	mat3 normalMatrix = transpose(inverse(mat3(vModelMatrix)));
+	fNormal = normalMatrix * vNormal;
 
 	gl_Position = applyT(projectionMatrix * viewMatrix, fPosition);
 }

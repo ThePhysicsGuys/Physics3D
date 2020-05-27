@@ -63,7 +63,8 @@ uniform mat4 projectionMatrix;
 void main() {
 	fUV = vUV;
 	fPosition = applyT3(modelMatrix, vPosition);
-	fNormal = apply3(modelMatrix, vNormal);
+	mat3 normalMatrix = transpose(inverse(mat3(modelMatrix)));
+	fNormal = normalMatrix * vNormal;
 
 	gl_Position = applyT(projectionMatrix * viewMatrix, fPosition);
 }
@@ -280,6 +281,6 @@ void main() {
 	color = pow(color, vec3(1.0 / gamma));
 
 	// Outcolor
-	outColor = vec4(N, albedo.a);
+	outColor = vec4(color, albedo.a);
 }
 
