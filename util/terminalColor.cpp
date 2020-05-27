@@ -30,7 +30,7 @@ static char cvtWinColorToUnixColor(int winColor){
 		case 5: return '5';   // MAGENTA
 		case 6: return '3';   // YELLOW
 		case 7: return '7';   // WHITE
-		default: throw "Unknown color!";
+		default: return '7';  // WHITE
 	}
 }
 void setColor(TerminalColor foreground, TerminalColor background) {

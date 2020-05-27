@@ -263,6 +263,7 @@
     <ClInclude Include="serializeBasicTypes.h" />
     <ClInclude Include="sharedObjectSerializer.h" />
     <ClInclude Include="stringUtil.h" />
+    <ClInclude Include="tracker.h" />
     <ClInclude Include="valueCycle.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

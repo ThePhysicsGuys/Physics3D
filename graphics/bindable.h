@@ -1,10 +1,12 @@
 #pragma once
 
+#include "../util/tracker.h"
+
 typedef unsigned int GLID;
 
 namespace Graphics {
 
-class Bindable {
+class Bindable : public Tracker<Bindable> {
 protected:
 	GLID id;
 

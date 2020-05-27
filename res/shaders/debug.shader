@@ -63,7 +63,8 @@ vec3 apply3(mat4 matrix, vec3 vector) {
 }
 
 void main() {
-	vOutput.gNormal = normalize(apply3(modelMatrix, vNormal));
+	mat3 invModelMatrix = transpose(inverse(mat3(modelMatrix)));
+	vOutput.gNormal = normalize(invModelMatrix * vNormal);
 	vOutput.gTangent = normalize(apply3(modelMatrix, vTangent));
 	vOutput.gBitangent = normalize(apply3(modelMatrix, vBitangent));
 
@@ -76,8 +77,6 @@ void main() {
 
 layout(triangles, invocations = VECTOR_TYPES) in;
 layout(line_strip, max_vertices = 54) out;
-
-//in int gl_InvocationID;
 
 in VS_OUT {
 	vec3 gNormal;
