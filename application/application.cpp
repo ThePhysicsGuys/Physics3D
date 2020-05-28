@@ -380,9 +380,18 @@ void setupWorld(int argc, const char** args) {
 		world.constraints.push_back(std::move(group));
 	}
 
-	Shape torusShape = polyhedronShape(Library::createZTorus(1.0, 0.6, 80, 80));
+	Shape torusShape = polyhedronShape(Library::createTorus(1.0, 0.6, 80, 80));
 	Engine::MeshRegistry::registerMeshFor(torusShape.baseShape, Graphics::VisualShape::generateSmoothNormalsShape(torusShape.baseShape->asPolyhedron()));
 	world.addPart(new ExtendedPart(torusShape, Position(-10.0, 3.0, 0.0), basicProperties));
+
+
+	Vec2f toyPoints[]{{0.2f, 0.2f},{0.4f, 0.3f},{0.6f, 0.2f},{0.8f, 0.3f},{0.7f,0.4f},{0.4f,0.5f},{0.2f,0.6f},{0.1f,0.75f},{0.015f,0.9}};
+	Shape toyShape = polyhedronShape(Library::createAxleSweptShape(0.0f, toyPoints, 9, 1.0f, 10));
+	world.addPart(new ExtendedPart(toyShape, Position(-10.0, 3.0, 3.0), basicProperties));
+
+	Vec2f arrowPoints[]{{0.1f,0.3f},{0.04f,0.30f},{ 0.04f,1.0f }};
+	Shape arrorShape = polyhedronShape(Library::createAxleSweptShape(0.0f, arrowPoints, 3, 1.0f, 40));
+	world.addPart(new ExtendedPart(arrorShape, Position(-7.0, 3.0, 0.0), basicProperties));
 }
 
 void setupPhysics() {

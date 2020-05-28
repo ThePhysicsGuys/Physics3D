@@ -87,7 +87,9 @@ public:
 	explicit EditableMesh(MeshPrototype&&) noexcept;
 
 	void setVertex(int index, Vec3f vertex);
+	void setVertex(int index, float x, float y, float z);
 	void setTriangle(int index, Triangle triangle);
+	void setTriangle(int index, int a, int b, int c);
 };
 
 class TriangleMesh : public MeshPrototype {

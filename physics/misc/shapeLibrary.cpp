@@ -2,7 +2,6 @@
 
 #include <utility>
 #include <map>
-#include <stddef.h>
 
 #include "../datastructures/buffers.h"
 
@@ -102,82 +101,57 @@ namespace Library {
 	}
 
 
-	static void createTriangleRing(int ring1Start, int ring2Start, int size, Triangle* triangleBuf) {
+	static void createTriangleRing(int ring1Start, int ring2Start, int size, EditableMesh& mesh, int offset) {
 		for(int i = 0; i < size - 1; i++) {
-			triangleBuf[i * 2] = Triangle{ring1Start + i, ring1Start + i + 1, ring2Start + i};
-			triangleBuf[i * 2 + 1] = Triangle{ring1Start + i + 1, ring2Start + i + 1, ring2Start + i};
+			mesh.setTriangle(offset + i * 2, ring1Start + i, ring1Start + i + 1, ring2Start + i);
+			mesh.setTriangle(offset + i * 2 + 1, ring1Start + i + 1, ring2Start + i + 1, ring2Start + i);
 		}
 		int last = size - 1;
-		triangleBuf[last * 2] = Triangle{ring1Start + last, ring1Start, ring2Start + last};
-		triangleBuf[last * 2 + 1] = Triangle{ring1Start, ring2Start, ring2Start + last};
+		mesh.setTriangle(offset + last * 2, ring1Start + last, ring1Start, ring2Start + last);
+		mesh.setTriangle(offset + last * 2 + 1, ring1Start, ring2Start, ring2Start + last);
 	}
 
-	static void createTriangleRingReverse(int ring1Start, int ring2Start, int size, Triangle* triangleBuf) {
+	static void createTriangleRingReverse(int ring1Start, int ring2Start, int size, EditableMesh& mesh, int offset) {
 		for(int i = 0; i < size - 1; i++) {
-			triangleBuf[i * 2] = Triangle{ring1Start + i + 1, ring1Start + i, ring2Start + i};
-			triangleBuf[i * 2 + 1] = Triangle{ring1Start + i + 1, ring2Start + i, ring2Start + i + 1};
+			mesh.setTriangle(offset + i * 2, ring1Start + i + 1, ring1Start + i, ring2Start + i);
+			mesh.setTriangle(offset + i * 2 + 1, ring1Start + i + 1, ring2Start + i, ring2Start + i + 1);
 		}
 		int last = size - 1;
-		triangleBuf[last * 2] = Triangle{ring1Start, ring1Start + last, ring2Start + last};
-		triangleBuf[last * 2 + 1] = Triangle{ring1Start, ring2Start + last, ring2Start};
+		mesh.setTriangle(offset + last * 2, ring1Start, ring1Start + last, ring2Start + last);
+		mesh.setTriangle(offset + last * 2 + 1, ring1Start, ring2Start + last, ring2Start);
 	}
 
-	static void createTriangleFan(int topIndex, int startFan, int size, Triangle* triangleBuf) {
+	static void createTriangleFan(int topIndex, int startFan, int size, EditableMesh& mesh, int offset) {
 		for(int i = 0; i < size-1; i++) {
-			triangleBuf[i] = Triangle{topIndex, i, i + 1};
+			mesh.setTriangle(offset + i, topIndex, startFan + i, startFan + i + 1);
 		}
 	}
-	static void createTriangleFanReverse(int topIndex, int startFan, int size, Triangle* triangleBuf) {
+	static void createTriangleFanReverse(int topIndex, int startFan, int size, EditableMesh& mesh, int offset) {
 		for(int i = 0; i < size - 1; i++) {
-			triangleBuf[i] = Triangle{topIndex, i + 1, i};
+			mesh.setTriangle(offset + i, topIndex, startFan + i + 1, startFan + i);
 		}
 	}
 
-	static void createTriangleCone(int topIndex, int startFan, int size, Triangle* triangleBuf) {
-		createTriangleFan(topIndex, startFan, size, triangleBuf);
-		triangleBuf[size - 1] = Triangle{topIndex, size - 1, 0};
+	static void createTriangleCone(int topIndex, int startFan, int size, EditableMesh& mesh, int offset) {
+		createTriangleFan(topIndex, startFan, size, mesh, offset);
+		mesh.setTriangle(offset + size - 1, topIndex, startFan + size - 1, startFan);
 	}
 
-	static void createTriangleConeReverse(int topIndex, int startFan, int size, Triangle* triangleBuf) {
-		createTriangleFanReverse(topIndex, startFan, size, triangleBuf);
-		triangleBuf[size - 1] = Triangle{topIndex, 0, size - 1};
+	static void createTriangleConeReverse(int topIndex, int startFan, int size, EditableMesh& mesh, int offset) {
+		createTriangleFanReverse(topIndex, startFan, size, mesh, offset);
+		mesh.setTriangle(offset + size - 1, topIndex, startFan, startFan + size - 1);
 	}
 
-	static void createFlatSurface(int startFan, int size, Triangle* triangleBuf) {
-		createTriangleFan(startFan, startFan + 1, size - 1, triangleBuf);
+	static void createFlatSurface(int startFan, int size, EditableMesh& mesh, int offset) {
+		createTriangleFan(startFan, startFan + 1, size - 1, mesh, offset);
 	}
 
-	static void createFlatSurfaceReverse(int startFan, int size, Triangle* triangleBuf) {
-		createTriangleFanReverse(startFan, startFan + 1, size - 1, triangleBuf);
+	static void createFlatSurfaceReverse(int startFan, int size, EditableMesh& mesh, int offset) {
+		createTriangleFanReverse(startFan, startFan + 1, size - 1, mesh, offset);
 	}
 
-	// Returns a new Triangle[sides * 2 + (sides - 2) * 2]
-	static Triangle* createPrismTriangles(int sides) {
-		if(sides <= 1) throw "invalid number of sides!";
-		int triangleCount = (sides - 1) * 4;
-		Triangle* triangleBuf = new Triangle[triangleCount];
-
-		// sides
-		for(int i = 0; i < sides; i++) {
-			int botLeft = i * 2;
-			int botRight = ((i + 1) % sides) * 2;
-			triangleBuf[i * 2] = Triangle{botLeft, botLeft + 1, botRight}; // botLeft, botRight, topLeft
-			triangleBuf[i * 2 + 1] = Triangle{botRight + 1, botRight, botLeft + 1}; // topRight, topLeft, botRight
-		}
-
-		Triangle* capOffset = triangleBuf + size_t(sides) * 2;
-		// top and bottom
-		for(int i = 0; i < sides - 2; i++) { // common corner is i=0
-			capOffset[i] = Triangle{0, (i + 1) * 2, (i + 2) * 2};
-			capOffset[i + (sides - 2)] = Triangle{1, (i + 2) * 2 + 1, (i + 1) * 2 + 1};
-		}
-
-		return triangleBuf;
-	}
-
-	Polyhedron createXPrism(int sides, float radius, float height) {
-		int vertexCount = sides * 2;
-		Vec3f* vecBuf = new Vec3f[vertexCount];
+	Polyhedron createPrism(int sides, float radius, float height) {
+		EditableMesh result(sides * 2, (sides - 1) * 4);
 
 		// vertices
 		for(int i = 0; i < sides; i++) {
@@ -185,87 +159,59 @@ namespace Library {
 			float h = height / 2;
 			float cr = cos(angle) * radius;
 			float sr = sin(angle) * radius;
-			vecBuf[i * 2] = Vec3f(h, cr, sr);
-			vecBuf[i * 2 + 1] = Vec3f(-h, cr, sr);
+			result.setVertex(i * 2, cr, sr, h);
+			result.setVertex(i * 2 + 1, cr, sr, -h);
 		}
 
-		return Polyhedron(vecBuf, createPrismTriangles(sides), vertexCount, sides * 2 + (sides - 2) * 2);
+		// triangles
+		// sides
+		for(int i = 0; i < sides; i++) {
+			int botLeft = i * 2;
+			int botRight = ((i + 1) % sides) * 2;
+			result.setTriangle(i * 2, botLeft, botLeft + 1, botRight); // botLeft, botRight, topLeft
+			result.setTriangle(i * 2 + 1, botRight + 1, botRight, botLeft + 1); // topRight, topLeft, botRight
+		}
+
+		// top and bottom
+		for(int i = 0; i < sides - 2; i++) { // common corner is i=0
+			result.setTriangle(i + sides * 2, 0, (i + 1) * 2, (i + 2) * 2);
+			result.setTriangle(i + (sides - 2) + sides * 2, 1, (i + 2) * 2 + 1, (i + 1) * 2 + 1);
+		}
+		return Polyhedron(std::move(result));
 	}
 
-	Polyhedron createYPrism(int sides, float radius, float height) {
-		int vertexCount = sides * 2;
-		Vec3f* vecBuf = new Vec3f[vertexCount];
+	Polyhedron createPointyPrism(int sides, float radius, float height, float topOffset, float bottomOffset) {
+		EditableMesh result(sides * 2 + 2, sides * 4);
 
 		// vertices
 		for (int i = 0; i < sides; i++) {
 			float angle = i * PI * 2 / sides;
-			float h = height / 2;
-			float cr = cos(angle) * radius;
-			float sr = sin(angle) * radius;
-			vecBuf[i*2] = Vec3f(cr, -h, sr);
-			vecBuf[i*2+1] = Vec3f(cr, h, sr);
-		}
-
-		return Polyhedron(vecBuf, createPrismTriangles(sides), vertexCount, sides * 2 + (sides - 2) * 2);
-	}
-
-	Polyhedron createZPrism(int sides, float radius, float height) {
-		int vertexCount = sides * 2;
-		Vec3f* vecBuf = new Vec3f[vertexCount];
-
-		// vertices
-		for(int i = 0; i < sides; i++) {
-			float angle = i * PI * 2 / sides;
-			float h = height / 2;
-			float cr = cos(angle) * radius;
-			float sr = sin(angle) * radius;
-			vecBuf[i * 2] = Vec3f(cr, sr, h);
-			vecBuf[i * 2 + 1] = Vec3f(cr, sr, -h);
-		}
-
-		return Polyhedron(vecBuf, createPrismTriangles(sides), vertexCount, sides * 2 + (sides - 2) * 2);
-	}
-
-	Triangle* createPointyPrismTriangles(int sides, int bottomIndex, int topIndex) {
-		int triangleCount = sides * 4;
-		Triangle* triangleBuf = new Triangle[triangleCount];
-		// sides
-		for(int i = 0; i < sides; i++) {
-			int botLeft = i * 2;
-			int botRight = ((i + 1) % sides) * 2;
-			triangleBuf[i * 2] = Triangle{botLeft, botLeft + 1, botRight}; // botLeft, botRight, topLeft
-			triangleBuf[i * 2 + 1] = Triangle{botRight + 1, botRight, botLeft + 1}; // topRight, topLeft, botRight
-		}
-
-		Triangle* capOffset = triangleBuf + size_t(sides) * 2;
-		// top and bottom
-		for(int i = 0; i < sides; i++) { // common corner is i=0
-			capOffset[i] = Triangle{bottomIndex, i * 2, ((i + 1) % sides) * 2};
-			capOffset[i + sides] = Triangle{topIndex, ((i + 1) % sides) * 2 + 1, i * 2 + 1};
-		}
-		return triangleBuf;
-	}
-
-	Polyhedron createPointyPrism(int sides, float radius, float height, float topOffset, float bottomOffset) {
-		int vertexCount = sides * 2 + 2;
-		Vec3f* vecBuf = new Vec3f[vertexCount];
-
-		// vertices
-		for (size_t i = 0; i < sides; i++) {
-			float angle = i * PI * 2 / sides;
-			vecBuf[i * 2] = Vec3f(cos(angle) * radius, -height / 2, sin(angle) * radius);
-			vecBuf[i * 2 + 1] = Vec3f(cos(angle) * radius, height / 2, sin(angle) * radius);
+			result.setVertex(i * 2, cos(angle) * radius, -height / 2, sin(angle) * radius);
+			result.setVertex(i * 2 + 1, cos(angle) * radius, height / 2, sin(angle) * radius);
 		}
 
 		int bottomIndex = sides * 2;
 		int topIndex = sides * 2 + 1;
 
-		vecBuf[bottomIndex] = Vec3f(0, -height / 2 - bottomOffset, 0);
-		vecBuf[topIndex] = Vec3f(0, height / 2 + topOffset, 0);
+		result.setVertex(bottomIndex, 0, -height / 2 - bottomOffset, 0);
+		result.setVertex(topIndex, 0, height / 2 + topOffset, 0);
 
-		Triangle* triangleBuf = createPointyPrismTriangles(sides, bottomIndex, topIndex);
+		// triangles
+		// sides
+		for(int i = 0; i < sides; i++) {
+			int botLeft = i * 2;
+			int botRight = ((i + 1) % sides) * 2;
+			result.setTriangle(i * 2, botLeft, botLeft + 1, botRight); // botLeft, botRight, topLeft
+			result.setTriangle(i * 2 + 1, botRight + 1, botRight, botLeft + 1); // topRight, topLeft, botRight
+		}
 
-		return Polyhedron(vecBuf, triangleBuf, vertexCount, sides * 4);
+		// top and bottom
+		for(int i = 0; i < sides; i++) { // common corner is i=0
+			result.setTriangle(i + sides * 2, bottomIndex, i * 2, ((i + 1) % sides) * 2);
+			result.setTriangle(i + sides + sides * 2, topIndex, ((i + 1) % sides) * 2 + 1, i * 2 + 1);
+		}
+
+		return Polyhedron(std::move(result));
 	}
 
 	// divides every triangle into 4 smaller triangles
@@ -280,7 +226,7 @@ namespace Library {
 
 
 
-		for(size_t i = triangleCount; i-- > 0;) {
+		for(int i = triangleCount; i-- > 0;) {
 			// first collect the 6 new points
 
 			Triangle& curT = triangleBuf[i];
@@ -348,7 +294,7 @@ namespace Library {
 		// size 162 x 320
 		// size 642 x 1280
 
-		for(size_t i = 0; i < vertices; i++) {
+		for(int i = 0; i < vertices; i++) {
 			vecBuf[i] = normalize(vecBuf[i]) * radius;
 		}
 
@@ -400,10 +346,10 @@ namespace Library {
 			spikeTris = spikeTris * 4;
 		}
 
-		for(size_t i = 0; i < spikeVerts; i++) {
+		for(int i = 0; i < spikeVerts; i++) {
 			vecBuf[i] = normalize(vecBuf[i]) * spikeRadius;
 		}
-		for(size_t i = spikeVerts; i < vertices; i++) {
+		for(int i = spikeVerts; i < vertices; i++) {
 			vecBuf[i] = normalize(vecBuf[i]) * internalRadius;
 		}
 
@@ -419,21 +365,8 @@ namespace Library {
 		return poly;
 	}
 
-
-
-	static void generateTorusTriangles(int radialFidelity, int tubeFidelity, Triangle* triangleBuf) {
-		for(int segment = 0; segment < radialFidelity - 1; segment++) {
-			createTriangleRing(segment * tubeFidelity, (segment + 1) * tubeFidelity, tubeFidelity, triangleBuf + std::size_t(2) * segment * tubeFidelity);
-		}
-		createTriangleRing((radialFidelity - 1) * tubeFidelity, 0, tubeFidelity, triangleBuf + std::size_t(2) * (radialFidelity - std::size_t(1)) * tubeFidelity);
-	}
-
-	/*
-		
-	*/
-	Polyhedron createZTorus(float ringRadius, float radiusOfTube, int radialFidelity, int tubeFidelity) {
-		Vec3f* vertices = new Vec3f[radialFidelity * tubeFidelity];
-		Triangle* triangles = new Triangle[std::size_t(2) * radialFidelity * tubeFidelity];
+	Polyhedron createTorus(float ringRadius, float radiusOfTube, int radialFidelity, int tubeFidelity) {
+		EditableMesh result(radialFidelity * tubeFidelity, 2 * radialFidelity * tubeFidelity);
 
 		for(int segment = 0; segment < radialFidelity; segment++) {
 			float angle = (2 * PI * segment) / radialFidelity;
@@ -446,11 +379,44 @@ namespace Library {
 				float height = radiusOfTube * sin(tubeAngle);
 				float radius = ringRadius + radiusOfTube * cos(tubeAngle);
 
-				vertices[segment * tubeFidelity + partInSegment] = Vec3f(s * radius, c * radius, height);
+				result.setVertex(segment * tubeFidelity + partInSegment, Vec3f(s * radius, c * radius, height));
 			}
 		}
-		generateTorusTriangles(radialFidelity, tubeFidelity, triangles);
 
-		return Polyhedron(vertices, triangles, radialFidelity * tubeFidelity, 2 * radialFidelity * tubeFidelity);
+		// triangles
+		for(int segment = 0; segment < radialFidelity - 1; segment++) {
+			createTriangleRing(segment * tubeFidelity, (segment + 1) * tubeFidelity, tubeFidelity, result, 2 * segment * tubeFidelity);
+		}
+		createTriangleRing((radialFidelity - 1) * tubeFidelity, 0, tubeFidelity, result, 2 * (radialFidelity - 1) * tubeFidelity);
+
+		return Polyhedron(std::move(result));
+	}
+
+	Polyhedron createAxleSweptShape(float startZ, Vec2f* inbetweenPoints, int inbetweenPointCount, float endZ, int segmentCount) {
+		EditableMesh result(segmentCount * inbetweenPointCount + 2, segmentCount * 2 * (inbetweenPointCount));
+		
+		result.setVertex(0, 0.0f, 0.0f, startZ);
+		int lastVertex = segmentCount * inbetweenPointCount + 1;
+		result.setVertex(lastVertex, 0.0f, 0.0f, endZ);
+		for(int segmentI = 0; segmentI < segmentCount; segmentI++) {
+			float angle = (2 * PI * segmentI) / segmentCount;
+			float s = sin(angle);
+			float c = cos(angle);
+
+			for(int inbetweenI = 0; inbetweenI < inbetweenPointCount; inbetweenI++) {
+				float zValue = inbetweenPoints[inbetweenI].y;
+				float radius = inbetweenPoints[inbetweenI].x;
+				result.setVertex(inbetweenI * segmentCount + segmentI + 1, -s * radius, c * radius, zValue);
+			}
+		}
+
+		// triangles
+		createTriangleConeReverse(0, 1, segmentCount, result, 0);
+		for(int inbetweenI = 0; inbetweenI < inbetweenPointCount - 1; inbetweenI++) {
+			createTriangleRing(1 + segmentCount * inbetweenI, 1 + segmentCount * (inbetweenI + 1), segmentCount, result, segmentCount + 2 * segmentCount * inbetweenI);
+		}
+		createTriangleCone(lastVertex, 1 + segmentCount * (inbetweenPointCount-1), segmentCount, result, segmentCount + 2 * segmentCount * (inbetweenPointCount-1));
+
+		return Polyhedron(std::move(result));
 	}
 }

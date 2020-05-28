@@ -141,6 +141,13 @@ void EditableMesh::setVertex(int index, Vec3f newVertex) {
 	this->vertices[index + offset] = newVertex.y;
 	this->vertices[index + 2 * offset] = newVertex.z;
 }
+void EditableMesh::setVertex(int index, float x, float y, float z) {
+	assert(index >= 0 && index < vertexCount);
+	size_t offset = getOffset(vertexCount);
+	this->vertices[index] = x;
+	this->vertices[index + offset] = y;
+	this->vertices[index + 2 * offset] = z;
+}
 void EditableMesh::setTriangle(int index, Triangle newTriangle) {
 	assert(index >= 0 && index < triangleCount);
 	assert(isValidTriangle(newTriangle, vertexCount));
@@ -149,6 +156,15 @@ void EditableMesh::setTriangle(int index, Triangle newTriangle) {
 	this->triangles[index] = newTriangle.firstIndex;
 	this->triangles[index + offset] = newTriangle.secondIndex;
 	this->triangles[index + 2 * offset] = newTriangle.thirdIndex;
+}
+void EditableMesh::setTriangle(int index, int a, int b, int c) {
+	assert(index >= 0 && index < triangleCount);
+	assert(isValidTriangle(Triangle{a,b,c}, vertexCount));
+
+	size_t offset = getOffset(triangleCount);
+	this->triangles[index] = a;
+	this->triangles[index + offset] = b;
+	this->triangles[index + 2 * offset] = c;
 }
 
 #pragma endregion

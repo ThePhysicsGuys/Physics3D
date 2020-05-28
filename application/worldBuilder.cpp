@@ -23,7 +23,7 @@ Shape icosahedron;
 
 void init() {
 	wedge = polyhedronShape(Library::wedge);
-	treeTrunk = polyhedronShape(Library::createPrism(7, 0.5, 11.0));
+	treeTrunk = polyhedronShape(Library::createPrism(7, 0.5, 11.0).rotated(Rotation::Predefined::X_270));
 	icosahedron = polyhedronShape(Library::icosahedron);
 }
 

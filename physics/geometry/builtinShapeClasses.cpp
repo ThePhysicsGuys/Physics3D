@@ -220,7 +220,7 @@ Vec3f CylinderClass::furthestInDirection(const Vec3f& direction) const {
 }
 
 Polyhedron CylinderClass::asPolyhedron() const {
-	return Library::createZPrism(64, 1.0, 2.0);
+	return Library::createPrism(64, 1.0, 2.0);
 }
 
 void CylinderClass::setScaleX(double newX, DiagonalMat3& scale) const {

@@ -20,6 +20,7 @@ static bool isComplete(const TriangleMesh& mesh) {
 		int ascendingCount = 0;
 		int descendingCount = 0;
 	};
+	bool verdict = true;
 	// stores number of times two vertices appear as an edge, indexed by the lowest vertex
 	std::vector<std::map<int, HitCount>> hitCounts(mesh.triangleCount);
 	for(int i = 0; i < mesh.triangleCount; i++) {
@@ -28,7 +29,7 @@ static bool isComplete(const TriangleMesh& mesh) {
 		for(std::pair<int, int> indexes : indexPairs) {
 			if(indexes.first == indexes.second) {
 				Log::warn("Invalid triangle! Triangle %d has a duplicate index! {%d, %d, %d}", i, t.firstIndex, t.secondIndex, t.thirdIndex);
-				return false;
+				verdict = false;
 			}
 			bool firstIsSmallerThanSecond = indexes.first < indexes.second;
 			std::pair<int, int> sortedIndexes = firstIsSmallerThanSecond ? indexes : std::pair<int, int>{indexes.second, indexes.first};
@@ -50,7 +51,6 @@ static bool isComplete(const TriangleMesh& mesh) {
 		}
 	}
 
-	bool verdict = true;
 	for(int firstVertex = 0; firstVertex < hitCounts.size(); firstVertex++) {
 		std::map<int, HitCount>& everythingConnected = hitCounts[firstVertex];
 
@@ -66,12 +66,16 @@ static bool isComplete(const TriangleMesh& mesh) {
 }
 
 bool isValid(const TriangleMesh& mesh) {
+	bool verdict = true;
 	for(int i = 0; i < mesh.triangleCount; i++) {
 		const Triangle& t = mesh.getTriangle(i);
 		if(!isValidTriangle(t, mesh.vertexCount)) {
 			Log::warn("Invalid triangle! Triangle %d {%d, %d, %d} points to a nonexistent vertex or has a duplicate index!", i, t.firstIndex, t.secondIndex, t.thirdIndex);
-			return false;
+			verdict = false;
 		}
+	}
+	if(verdict == false) {
+		return false;
 	}
 	int* usageCounts = new int[mesh.vertexCount];
 	for(int i = 0; i < mesh.vertexCount; i++) {
@@ -85,19 +89,28 @@ bool isValid(const TriangleMesh& mesh) {
 	for(int i = 0; i < mesh.vertexCount; i++) {
 		if(usageCounts[i] == 0) {
 			Log::warn("Vertex %d unused!", i);
-			delete[] usageCounts;
-			return false;
+			verdict = false;
 		}
 	}
 	delete[] usageCounts;
-	return true;
+	return verdict;
 }
 
 bool isValid(const Polyhedron& poly) {
-	if(!isValid(static_cast<const TriangleMesh&>(poly))) return false;
+	if(!isValid(static_cast<const TriangleMesh&>(poly))) {
+		Log::warn("Invalid polyhedron: bad TriangleMesh");
+		return false;
+	}
+	if(!isComplete(poly)) {
+		Log::warn("Invalid polyhedron: incomplete");
+		return false;
+	}
 
-	if(!isComplete(poly)) return false;
-	if(poly.getVolume() <= 0) return false;
+	// inverted to catch NaNs
+	if(!(poly.getVolume() > 0)) {
+		Log::warn("Invalid polyhedron: inverted! Volume=%f", poly.getVolume());
+		return false;
+	}
 	return true;
 }
 
