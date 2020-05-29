@@ -8,6 +8,7 @@
 #include "view/screen.h"
 #include "shader/shaders.h"
 
+#include "../physics/misc/shapeLibrary.h"
 #include "../engine/io/import.h"
 #include "../engine/io/export.h"
 
@@ -25,19 +26,33 @@ namespace Application {
 
 Rotation transformations[] {
 	Rotation::Predefined::IDENTITY,
-	Rotation::rotZ(-3.14159265359 / 2.0),
-	Rotation::rotX(3.14159265359 / 2.0),
+	Rotation::Predefined::Z_270,
+	Rotation::Predefined::X_90,
 	Rotation::Predefined::IDENTITY
 };
 
 // Render variables
 Graphics::LinePrimitive* line = nullptr;
 
-MeshResource* rotateMesh = nullptr;
-MeshResource* translateCenterMesh = nullptr;
-MeshResource* translateMesh = nullptr;
-MeshResource* scaleCenterMesh = nullptr;
-MeshResource* scaleMesh = nullptr;
+IndexedMesh* translateCenterMesh;
+VisualShape translateCenterShape;
+IndexedMesh* translateMesh;
+VisualShape translateShape;
+IndexedMesh* rotateMesh;
+VisualShape rotateShape;
+IndexedMesh* scaleMesh;
+VisualShape scaleShape;
+IndexedMesh* scaleCenterMesh;
+VisualShape scaleCenterShape;
+
+static Polyhedron createBoxOnStick(float boxSide, float stickRadius) {
+	Vec2f vecs[]{{0.0f,stickRadius},{1.0f - boxSide,stickRadius},{1.0f - boxSide,boxSide / sqrt(2.0f)},{1.0f,boxSide / sqrt(2.0f)}};
+	return Library::createRevolvedShape(0.0f, vecs, 4, 1.0f, 4).rotated(Rotation::rotZ(3.14159265359 / 4)); // quarter turn to axis-align
+}
+static Polyhedron createArrow(float arrowHeadLength, float arrowHeadRadius, float stickRadius) {
+	Vec2f vecs[]{{0.0f,stickRadius},{1.0f - arrowHeadLength,stickRadius},{1.0f - arrowHeadLength,arrowHeadRadius}};
+	return Library::createRevolvedShape(0.0f, vecs, 3, 1.0f, 24); // quarter turn to axis-align
+}
 
 void EditTools::onInit() {
 
@@ -48,15 +63,22 @@ void EditTools::onInit() {
 	line->resize(Vec3f(0, -100000, 0), Vec3f(0, 100000, 0));
 
 	// Rotate shape init
-	rotateMesh = ResourceManager::add<MeshResource>("rotate", "../res/models/gui/rotate.bobj");
+	rotateShape = VisualShape::generateSmoothNormalsShape(Library::createTorus(1.0f, 0.03f, 80, 12).rotated(Rotationf::Predefined::X_270));
+	rotateMesh = new IndexedMesh(rotateShape);
 
 	// Scale shape init
-	scaleMesh = ResourceManager::add<MeshResource>("scale", "../res/models/gui/scale_shaft.bobj");
-	scaleCenterMesh = ResourceManager::add<MeshResource>("scale center", "../res/models/gui/scale_center.bobj");
+	scaleShape = VisualShape::generateSplitNormalsShape(createBoxOnStick(0.2f, 0.03f).rotated(Rotationf::Predefined::X_270));
+	scaleMesh = new IndexedMesh(scaleShape);
+	scaleCenterShape = VisualShape::generateSplitNormalsShape(Library::createCube(0.2f));
+	scaleCenterMesh = new IndexedMesh(scaleCenterShape);
 
 	// Translate shape init
-	translateMesh = ResourceManager::add<MeshResource>("translate", "../res/models/gui/translate_shaft.bobj");
-	translateCenterMesh = ResourceManager::add<MeshResource>("translate center", "../res/models/gui/translate_center.bobj");
+	translateShape = VisualShape::generateSplitNormalsShape(createArrow(0.3f, 0.07f, 0.03f).rotated(Rotationf::Predefined::X_270));
+	translateMesh = new IndexedMesh(translateShape);
+	translateCenterShape = VisualShape::generateSmoothNormalsShape(Library::createSphere(0.13, 3));
+	translateCenterMesh = new IndexedMesh(translateCenterShape);
+
+	std::vector<int> intList;
 
 	// Intersected tool init
 	intersectedEditDirection = EditDirection::NONE;
@@ -76,16 +98,16 @@ void EditTools::onRender(Screen& screen) {
 	// Select correct render meshes
 	switch (editMode) {
 		case EditMode::TRANSLATE:
-			shaft = translateMesh->getMesh();
-			center = translateCenterMesh->getMesh();
+			shaft = translateMesh;
+			center = translateCenterMesh;
 			break;
 		case EditMode::ROTATE:
-			shaft = rotateMesh->getMesh();
+			shaft = rotateMesh;
 			center = nullptr;
 			break;
 		case EditMode::SCALE:
-			shaft = scaleMesh->getMesh();
-			center = scaleCenterMesh->getMesh();
+			shaft = scaleMesh;
+			center = scaleCenterMesh;
 			break;
 	}
 
@@ -155,16 +177,16 @@ float EditTools::intersect(Screen& screen, const Ray& ray) {
 	// Select correct tools
 	switch (editMode) {
 		case EditMode::TRANSLATE:
-			tool[0] = translateMesh->getShape();
-			tool[1] = translateCenterMesh->getShape();
+			tool[0] = translateShape;
+			tool[1] = translateCenterShape;
 			break;
 		case EditMode::ROTATE:
-			tool[0] = rotateMesh->getShape();
+			tool[0] = rotateShape;
 			tool[1] = Graphics::VisualShape();
 			break;
 		case EditMode::SCALE:
-			tool[0] = scaleMesh->getShape();
-			tool[1] = scaleCenterMesh->getShape();
+			tool[0] = scaleShape;
+			tool[1] = scaleCenterShape;
 			break;
 		default:
 			throw "Error: Impossible!";

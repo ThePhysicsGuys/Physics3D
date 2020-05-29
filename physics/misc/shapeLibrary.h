@@ -59,7 +59,7 @@ Polyhedron createTorus(float ringRadius, float radiusOfTube, int radialFidelity,
 	endZ denotes the ending z-coordinate
 
 	inbetweenPoints is a list of length inbetweenPointsCount, which contains the 2D outline to be swept around. 
-	The x-value denotes the radius at that point, the y value is the z-position along the axis
+	The x-value denotes the z-position alogn the axis, the y value is the radius at that point
 
 	sweepFidelity denotes the number of steps of rotation. 
 
@@ -68,5 +68,5 @@ Polyhedron createTorus(float ringRadius, float radiusOfTube, int radialFidelity,
 	[sweepFidelity .. sweepFidelity + 2*(inbetweenPointCount-1)*sweepFidelity-1] are the rings comprising the inbetweenPoints. Each of these rings is 2*sweepFidelity triangles
 	[sweepFidelity + 2*(inbetweenPointCount-1)*sweepFidelity .. 2*inbetweenPointCount*sweepFidelity - 1] is the triangleFan for endZ
 */
-Polyhedron createAxleSweptShape(float startZ, Vec2f* inbetweenPoints, int inbetweenPointCount, float endZ, int sweepFidelity);
+Polyhedron createRevolvedShape(float startZ, Vec2f* inbetweenPoints, int inbetweenPointCount, float endZ, int sweepFidelity);
 };

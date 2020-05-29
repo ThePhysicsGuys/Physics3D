@@ -392,7 +392,7 @@ namespace Library {
 		return Polyhedron(std::move(result));
 	}
 
-	Polyhedron createAxleSweptShape(float startZ, Vec2f* inbetweenPoints, int inbetweenPointCount, float endZ, int segmentCount) {
+	Polyhedron createRevolvedShape(float startZ, Vec2f* inbetweenPoints, int inbetweenPointCount, float endZ, int segmentCount) {
 		EditableMesh result(segmentCount * inbetweenPointCount + 2, segmentCount * 2 * (inbetweenPointCount));
 		
 		result.setVertex(0, 0.0f, 0.0f, startZ);
@@ -404,8 +404,8 @@ namespace Library {
 			float c = cos(angle);
 
 			for(int inbetweenI = 0; inbetweenI < inbetweenPointCount; inbetweenI++) {
-				float zValue = inbetweenPoints[inbetweenI].y;
-				float radius = inbetweenPoints[inbetweenI].x;
+				float zValue = inbetweenPoints[inbetweenI].x;
+				float radius = inbetweenPoints[inbetweenI].y;
 				result.setVertex(inbetweenI * segmentCount + segmentI + 1, -s * radius, c * radius, zValue);
 			}
 		}
