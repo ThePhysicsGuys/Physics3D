@@ -238,8 +238,6 @@ void Screen::onUpdate() {
 			camera.rotate(*this, 1 * speedAdjustment, 0, 0, leftDragging);
 		if (handler->getKey(KeyboardOptions::Rotate::down))
 			camera.rotate(*this, -1 * speedAdjustment, 0, 0, leftDragging);
-		if (handler->getKey(KeyboardOptions::Application::close))
-			Graphics::GLFW::closeWindow();
 	}
 
 	// Update camera

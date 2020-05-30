@@ -397,6 +397,52 @@ float TriangleMesh::getIntersectionDistance(Vec3f origin, Vec3f direction) const
 }
 
 
+TriangleMesh stripUnusedVertices(const Vec3f* vertices, const Triangle* triangles, int vertexCount, int triangleCount) {
+	bool* vertexIsReferenced = new bool[vertexCount];
+	for(int i = 0; i < vertexCount; i++) {vertexIsReferenced[i] = false;}
+	for(int i = 0; i < triangleCount; i++) {
+		Triangle t = triangles[i];
+		vertexIsReferenced[t.firstIndex] = true;
+		vertexIsReferenced[t.secondIndex] = true;
+		vertexIsReferenced[t.thirdIndex] = true;
+	}
+	int totalUnReferencedCount = 0;
+	for(int i = 0; i < vertexCount; i++) {
+		if(vertexIsReferenced[i] == false) {
+			totalUnReferencedCount++;
+		}
+	}
+	int lastValidVertex = vertexCount - 1;
+	while(vertexIsReferenced[lastValidVertex] == false) {
+		lastValidVertex--;
+	}
+	std::vector<std::pair<int, int>> substitutions(totalUnReferencedCount); // substitute first with second in triangles
+	EditableMesh result(vertexCount - totalUnReferencedCount, triangleCount);
+	// fix vertices
+	for(int i = 0; i <= lastValidVertex; i++) {
+		if(vertexIsReferenced[i] == false) {
+			result.setVertex(i, vertices[lastValidVertex]);
+			substitutions.push_back(std::make_pair(lastValidVertex, i));
+			do {
+				lastValidVertex--;
+			} while(vertexIsReferenced[lastValidVertex] == false && lastValidVertex > i); // the second condition is for the case that the first n vertices are all invalid, which would make lastValidVertex run off 0
+		} else {
+			result.setVertex(i, vertices[i]);
+		}
+	}
+	for(int i = 0; i < triangleCount; i++) {
+		Triangle t = triangles[i];
+		for(std::pair<int, int>& sub : substitutions){
+			if(t.firstIndex == sub.first) t.firstIndex = sub.second;
+			if(t.secondIndex == sub.first) t.secondIndex = sub.second;
+			if(t.thirdIndex == sub.first) t.thirdIndex = sub.second;
+		}
+		result.setTriangle(i, t);
+	}
+	return TriangleMesh(std::move(result));
+}
+
+
 #ifdef __AVX__
 #include <immintrin.h>
 #if defined(_MSC_VER) && _MSC_VER == 1922

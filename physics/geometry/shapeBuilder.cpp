@@ -52,7 +52,7 @@ void ShapeBuilder::addPoint(Vec3f point, int oldTriangleIndex) {
 	
 }
 
-Polyhedron ShapeBuilder::toShape() const {
+Polyhedron ShapeBuilder::toPolyhedron() const {
 	return Polyhedron(vertexBuf, triangleBuf, vertexCount, triangleCount);
 }
 

@@ -46,7 +46,7 @@ IndexedMesh* scaleCenterMesh;
 VisualShape scaleCenterShape;
 
 static Polyhedron createBoxOnStick(float boxSide, float stickRadius) {
-	Vec2f vecs[]{{0.0f,stickRadius},{1.0f - boxSide,stickRadius},{1.0f - boxSide,boxSide / sqrt(2.0f)},{1.0f,boxSide / sqrt(2.0f)}};
+	Vec2f vecs[]{{0.0f,stickRadius},{1.0f - boxSide,stickRadius},{1.0f - boxSide,boxSide / sqrtf(2.0f)},{1.0f,boxSide / sqrtf(2.0f)}};
 	return Library::createRevolvedShape(0.0f, vecs, 4, 1.0f, 4).rotated(Rotation::rotZ(3.14159265359 / 4)); // quarter turn to axis-align
 }
 static Polyhedron createArrow(float arrowHeadLength, float arrowHeadRadius, float stickRadius) {

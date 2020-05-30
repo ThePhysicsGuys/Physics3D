@@ -32,6 +32,7 @@ int TriangleNeighbors::getNeighborIndex(int neighbor) {
 	throw std::runtime_error("Neighbor not found in getNeighborIndex");
 }
 
+IndexedShape::IndexedShape(Polyhedron&& poly, TriangleNeighbors* neighborBuf) : Polyhedron(std::move(poly)), neighbors(neighborBuf){}
 IndexedShape::IndexedShape(const Vec3f* vertices, const Triangle* triangles, int vertexCount, int triangleCount, TriangleNeighbors * neighborBuf) : Polyhedron(vertices, triangles, vertexCount, triangleCount), neighbors(neighborBuf) {}
 
 void fillNeighborBuf(const Triangle* triangles, int triangleCount, TriangleNeighbors* neighborBuf) {

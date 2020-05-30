@@ -134,6 +134,11 @@ bool InputHandler::getKey(const Key& key) {
 }
 
 InputHandler::InputHandler(GLFWwindow* window) : window(window) {
+	for(bool& k : this->keys){
+		k = false;
+	}
+
+
 	glfwSetWindowUserPointer(window, this);
 
 	glfwSetKeyCallback(window, [] (GLFWwindow* window, int key, int scancode, int action, int mods) {

@@ -26,6 +26,7 @@ struct TriangleNeighbors {
 struct IndexedShape : Polyhedron {
 	TriangleNeighbors * neighbors;
 	
+	IndexedShape(Polyhedron&& poly, TriangleNeighbors* neighborBuf);
 	IndexedShape(const Vec3f* vertices, const Triangle* triangles, int vertexCount, int triangleCount, TriangleNeighbors * neighborBuf);
 };
 

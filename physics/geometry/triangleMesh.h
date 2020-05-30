@@ -138,3 +138,5 @@ public:
 
 	float getIntersectionDistance(Vec3f origin, Vec3f direction) const;
 };
+
+TriangleMesh stripUnusedVertices(const Vec3f* vertices, const Triangle* triangles, int vertexCount, int triangleCount);

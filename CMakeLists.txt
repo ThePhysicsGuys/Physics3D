@@ -155,6 +155,9 @@ add_library(graphics STATIC
   graphics/gui/guiUtils.cpp
   graphics/gui/layout.cpp
 
+  graphics/gui/imgui/imgui_impl_glfw.cpp
+  graphics/gui/imgui/imgui_impl_opengl3.cpp
+
   graphics/mesh/abstractMesh.cpp
   graphics/mesh/arrayMesh.cpp
   graphics/mesh/indexedMesh.cpp
@@ -204,6 +207,8 @@ add_library(engine STATIC
   engine/io/import.cpp
 
   engine/layer/layerStack.cpp
+
+  engine/tool/toolManager.cpp
 
   engine/options/keyboardOptions.cpp
 

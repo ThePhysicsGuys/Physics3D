@@ -35,6 +35,6 @@ public:
 	void removeTriangle(int triangleIndex);
 	bool isAbove(const Vec3f& point, Triangle t);
 
-	Polyhedron toShape() const;
+	Polyhedron toPolyhedron() const;
 	IndexedShape toIndexedShape() const;
 };

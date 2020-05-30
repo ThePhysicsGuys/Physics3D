@@ -14,6 +14,7 @@
 #include "../graphics/gui/gui.h"
 #include "../graphics/gui/guiUtils.h"
 #include "../graphics/debug/visualDebug.h"
+#include "../graphics/glfwUtils.h"
 #include "../worlds.h"
 #include "../view/screen.h"
 #include "../view/camera.h"
@@ -135,6 +136,8 @@ bool StandardInputHandler::onKeyPress(Engine::KeyPressEvent& event) {
 		colissionSpheresMode = static_cast<SphereColissionRenderMode>((static_cast<int>(colissionSpheresMode) + 1) % 3);
 	} else if (key == KeyboardOptions::Debug::tree) {
 		colTreeRenderMode = static_cast<ColTreeRenderMode>((static_cast<int>(colTreeRenderMode) + 1) % 5);
+	} else if (key == KeyboardOptions::Application::close) {
+		Graphics::GLFW::closeWindow();
 	}
 
 	if (key < Keyboard::F9 && key > Keyboard::F1) {

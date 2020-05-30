@@ -119,7 +119,7 @@ void setupGL() {
 void setupWorld(int argc, const char** args) {
 	Log::info("Initializing world");
 
-	//world.addExternalForce(new DirectionalGravity(Vec3(0, -10.0, 0.0)));
+	world.addExternalForce(new DirectionalGravity(Vec3(0, -10.0, 0.0)));
 
 	PartProperties basicProperties{1.0, 0.7, 0.3};
 

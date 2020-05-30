@@ -1,6 +1,8 @@
 #include "convexShapeBuilder.h"
 
 #include <algorithm>
+#include <vector>
+#include <utility>
 
 #include "../misc/validityHelper.h"
 #include "../catchable_assert.h"
@@ -243,9 +245,11 @@ bool ConvexShapeBuilder::addPoint(const Vec3f& point) {
 	return false;
 }
 
-Polyhedron ConvexShapeBuilder::toShape() const {
-	return Polyhedron(vertexBuf, triangleBuf, vertexCount, triangleCount);
+
+
+Polyhedron ConvexShapeBuilder::toPolyhedron() const {
+	return Polyhedron(stripUnusedVertices(vertexBuf, triangleBuf, vertexCount, triangleCount));
 }
 IndexedShape ConvexShapeBuilder::toIndexedShape() const {
-	return IndexedShape{vertexBuf, triangleBuf, vertexCount, triangleCount, neighborBuf};
+	return IndexedShape(this->toPolyhedron(), neighborBuf);
 }
