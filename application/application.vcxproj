@@ -301,6 +301,8 @@
     <ClInclude Include="picker\selectionTool.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="resources.h" />
+    <ClInclude Include="shader\basicShader.h" />
+    <ClInclude Include="shader\shaderBase.h" />
     <ClInclude Include="shader\shaders.h" />
     <ClInclude Include="tickerThread.h" />
     <ClInclude Include="picker\pickable.h" />
@@ -344,6 +346,8 @@
     <ClCompile Include="extendedPart.cpp" />
     <ClCompile Include="picker\ray.cpp" />
     <ClCompile Include="input\standardInputHandler.cpp" />
+    <ClCompile Include="shader\basicShader.cpp" />
+    <ClCompile Include="shader\shaderBase.cpp" />
     <ClCompile Include="shader\shaders.cpp" />
     <ClCompile Include="tickerThread.cpp" />
     <ClCompile Include="picker\picker.cpp" />

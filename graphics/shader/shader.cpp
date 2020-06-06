@@ -201,7 +201,7 @@ std::string parseFile(const std::string& path) {
 	return stringStream.str();
 }
 
-ShaderSource parseShader(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath, const std::string& tesselationControlPath, const std::string& tesselationEvaluatePath) {
+ShaderSource parseShader(const std::string& name, const std::string& path, const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath, const std::string& tesselationControlPath, const std::string& tesselationEvaluatePath) {
 	Log::subject s(name);
 
 	std::string vertexFile = parseFile(vertexPath);
@@ -210,33 +210,39 @@ ShaderSource parseShader(const std::string& name, const std::string& vertexPath,
 	std::string tesselationControlFile = parseFile(tesselationControlPath);
 	std::string tesselationEvaluateFile = parseFile(tesselationEvaluatePath);
 
-	return ShaderSource(name, vertexFile, fragmentFile, geometryFile, tesselationControlFile, tesselationEvaluateFile);
+	return ShaderSource(name, path, vertexFile, fragmentFile, geometryFile, tesselationControlFile, tesselationEvaluateFile);
 }
 
-ShaderSource parseShader(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath) {
+ShaderSource parseShader(const std::string& name, const std::string& path, const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath) {
 	Log::subject s(name);
 
 	std::string vertexFile = parseFile(vertexPath);
 	std::string fragmentFile = parseFile(fragmentPath);
 	std::string geometryFile = parseFile(geometryPath);
 
-	return ShaderSource(name, vertexFile, fragmentFile, geometryFile, "", "");
+	return ShaderSource(name, path, vertexFile, fragmentFile, geometryFile, "", "");
 }
 
-ShaderSource parseShader(const std::string& name, const std::string& vertexPath, const std::string& fragmentPath) {
+ShaderSource parseShader(const std::string& name, const std::string& path, const std::string& vertexPath, const std::string& fragmentPath) {
 	Log::subject s(name);
 
 	std::string vertexFile = parseFile(vertexPath);
 	std::string fragmentFile = parseFile(fragmentPath);
 
-	return ShaderSource(name, vertexFile, fragmentFile, "", "", "");
+	return ShaderSource(name, path, vertexFile, fragmentFile, "", "", "");
 }
 
-ShaderSource parseShader(const std::string& name, const std::string& shaderText) {
-	std::istringstream ss(shaderText);
-	return parseShader(name, ss);
+ShaderSource parseShader(const std::string& name, const std::string& path, const std::string& shaderText) {
+	std::istringstream shaderTextStream(shaderText);
+	return parseShader(name, path, shaderTextStream);
 }
-ShaderSource parseShader(const std::string& name, std::istream& shaderTextStream) {
+
+ShaderSource parseShader(const std::string& name, const std::string& path) {
+	// Todo read files
+	return parseShader(name, path, "");
+}
+
+ShaderSource parseShader(const std::string& name, const std::string& path, std::istream& shaderTextStream) {
 	Log::subject s(name);
 
 	Log::info("Reading (%s)", name.c_str());
@@ -326,7 +332,7 @@ ShaderSource parseShader(const std::string& name, std::istream& shaderTextStream
 
 	Log::setDelimiter("\n");
 
-	return ShaderSource(name, vertexSource, fragmentSource, geometrySource, tesselationControlSource, tesselationEvaluateSource);
+	return ShaderSource(name, path, vertexSource, fragmentSource, geometrySource, tesselationControlSource, tesselationEvaluateSource);
 }
 
 void Shader::addUniform(const std::string& uniform) {
@@ -432,7 +438,7 @@ ShaderStage::ShaderStage() {};
 ShaderStage::ShaderStage(const std::string& source, const ShaderInfo& info) : source(source), info(info) {};
 
 ShaderSource::ShaderSource() {};
-ShaderSource::ShaderSource(const std::string& name, const std::string& vertexSource, const std::string& fragmentSource, const std::string& geometrySource, const std::string& tesselationControlSource, const std::string& tesselationEvaluateSource) : name(name), vertexSource(vertexSource), fragmentSource(fragmentSource), geometrySource(geometrySource), tesselationControlSource(tesselationControlSource), tesselationEvaluateSource(tesselationEvaluateSource) {}
+ShaderSource::ShaderSource(const std::string& name, const std::string& path, const std::string& vertexSource, const std::string& fragmentSource, const std::string& geometrySource, const std::string& tesselationControlSource, const std::string& tesselationEvaluateSource) : name(name), path(path), vertexSource(vertexSource), fragmentSource(fragmentSource), geometrySource(geometrySource), tesselationControlSource(tesselationControlSource), tesselationEvaluateSource(tesselationEvaluateSource) {}
 
 Shader::Shader() {};
 Shader::Shader(const std::string& name, const std::string& vertexShader, const std::string& fragmentShader) : Shader(name, vertexShader, fragmentShader, "", "", "") {};

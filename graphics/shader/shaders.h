@@ -9,7 +9,7 @@ class Texture;
 
 struct GuiShader : public ShaderResource {
 	GuiShader() : ShaderResource() {}
-	GuiShader(ShaderSource shaderSource) : ShaderResource("GuiShader", "gui.shader", shaderSource) {}
+	GuiShader(ShaderSource shaderSource) : ShaderResource(shaderSource.name, shaderSource.path, shaderSource) {}
 
 	void init(const Mat4f& orthoMatrix);
 	void setTextured(bool textured);
@@ -17,7 +17,7 @@ struct GuiShader : public ShaderResource {
 
 struct QuadShader : public ShaderResource {
 	QuadShader() : ShaderResource() {}
-	QuadShader(ShaderSource shaderSource) : ShaderResource("QuadShader", "quad.shader", shaderSource) {}
+	QuadShader(ShaderSource shaderSource) : ShaderResource(shaderSource.name, shaderSource.path, shaderSource) {}
 
 	void updateProjection(const Mat4f& orthoMatrix);
 	void updateColor(const Vec4& color);
@@ -27,7 +27,7 @@ struct QuadShader : public ShaderResource {
 
 struct BlurShader : public ShaderResource {
 	BlurShader() : ShaderResource() {}
-	BlurShader(ShaderSource shaderSource) : ShaderResource("BlurShader", "blur.shader", shaderSource) {}
+	BlurShader(ShaderSource shaderSource) : ShaderResource(shaderSource.name, shaderSource.path, shaderSource) {}
 
 	void updateWidth(float width);
 	void updateTexture(Graphics::Texture* texture);

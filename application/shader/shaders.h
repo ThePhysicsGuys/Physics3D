@@ -4,11 +4,13 @@
 #include "../graphics/resource/shaderResource.h"
 #include "../graphics/gui/color.h"
 #include "../physics/math/globalCFrame.h"
+#include "../shader/basicShader.h"
+#include "../shader/shaderBase.h"
 
 namespace Graphics {
-class HDRTexture;
-class Texture;
-class CubeMap;
+	class HDRTexture;
+	class Texture;
+	class CubeMap;
 };
 
 namespace Application {
@@ -18,64 +20,36 @@ struct Light;
 struct Material;
 struct ExtendedPart;
 
-struct DebugShader : public ShaderResource {
+struct DebugShader : public StandardMeshShaderBase {
 	inline DebugShader() : ShaderResource() {}
-	inline DebugShader(ShaderSource shaderSource) : ShaderResource("debugShader", "debug.shader", shaderSource) {}
-
-	void updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Position& viewPosition);
-	void updateModel(const Mat4f& modelMatrix);
+	inline DebugShader(ShaderSource shaderSource) : ShaderResource(shaderSource.name, "debug.shader", shaderSource) {}
 };
 
-
-struct SkyboxShader : public ShaderResource {
+struct SkyboxShader : public ProjectionShaderBase {
 	inline SkyboxShader() : ShaderResource() {}
-	inline SkyboxShader(ShaderSource shaderSource) : ShaderResource("skyboxShader", "skybox.shader", shaderSource) {}
+	inline SkyboxShader(ShaderSource shaderSource) : ShaderResource(shaderSource.name, "skybox.shader", shaderSource) {}
 
-	void updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix);
 	void updateCubeMap(Graphics::CubeMap* skybox);
 	void updateLightDirection(const Vec3f& lightDirection);
 };
 
-struct MaskShader : public ShaderResource {
+struct MaskShader : public StandardMeshShaderBase {
 	inline MaskShader() : ShaderResource() {}
-	inline MaskShader(ShaderSource shaderSource) : ShaderResource("MaskShader", "mask.shader", shaderSource) {}
+	inline MaskShader(ShaderSource shaderSource) : ShaderResource(shaderSource.name, "mask.shader", shaderSource) {}
 
-	void updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix);
-	void updateModel(const Mat4f& modelMatrix);
-	void updateModel(const GlobalCFrame& modelCFrame, DiagonalMat3f scale);
 	void updateColor(const Color& color);
 };
 
-struct BasicShader : public ShaderResource {
-	inline BasicShader() : ShaderResource() {}
-	inline BasicShader(ShaderSource shaderSource) : ShaderResource("BasicShader", "basic.shader", shaderSource) {}
-
-	void updateSunDirection(const Vec3f& sunDirection);
-	void updateSunColor(const Color3& sunColor);
-	void updateGamma(float gamma);
-	void updateHDR(float hdr);
-	void updateTexture(bool textured);
-	void updateExposure(float exposure);
-	void updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Position& viewPosition);
-	void updateLight(const std::vector<Light*> lights);
-	void updatePart(const ExtendedPart& part);
-	void updateMaterial(const Material& material);
-	void updateModel(const Mat4f& modelMatrix);
-	void updateModel(const GlobalCFrame& modelCFrame, DiagonalMat3f scale);
-};
-
-struct DepthShader : public ShaderResource {
+struct DepthShader : public StandardMeshShaderBase {
 	inline DepthShader() : ShaderResource() {}
-	inline DepthShader(ShaderSource shaderSource) : ShaderResource("DepthShader", "depth.shader", shaderSource) {}
+	inline DepthShader(ShaderSource shaderSource) : ShaderResource(shaderSource.name, "depth.shader", shaderSource) {}
 
 	void updateLight(const Mat4f& lightMatrix);
-	void updateModel(const Mat4f& modelMatrix);
-	void updateModel(const GlobalCFrame& modelCFrame, DiagonalMat3f scale);
 };
 
 struct PostProcessShader : public ShaderResource {
 	inline PostProcessShader() : ShaderResource() {}
-	inline PostProcessShader(ShaderSource shaderSource) : ShaderResource("PostProcessShader", "postprocess.shader", shaderSource) {}
+	inline PostProcessShader(ShaderSource shaderSource) : ShaderResource(shaderSource.name, "postprocess.shader", shaderSource) {}
 
 	void updateTexture(Graphics::Texture* texture);
 	void updateTexture(Graphics::HDRTexture* texture);
@@ -83,85 +57,55 @@ struct PostProcessShader : public ShaderResource {
 
 struct OriginShader : public ShaderResource {
 	inline OriginShader() : ShaderResource() {}
-	inline OriginShader(ShaderSource shaderSource) : ShaderResource("OriginShader", "origin.shader", shaderSource) {}
+	inline OriginShader(ShaderSource shaderSource) : ShaderResource(shaderSource.name, "origin.shader", shaderSource) {}
 
 	void updateProjection(const Mat4f& viewMatrix, const Mat4f& rotatedViewMatrix, const Mat4f& projectionMatrix, const Mat4f& orthoMatrix, const Position& viewPosition);
 };
 
 struct FontShader : public ShaderResource {
 	inline FontShader() : ShaderResource() {}
-	inline FontShader(ShaderSource shaderSource) : ShaderResource("FontShader", "font.shader", shaderSource) {}
+	inline FontShader(ShaderSource shaderSource) : ShaderResource(shaderSource.name, "font.shader", shaderSource) {}
 
 	void updateColor(const Color& color);
 	void updateProjection(const Mat4f& projectionMatrix);
 	void updateTexture(Graphics::Texture* texture);
 };
 
-struct VectorShader : public ShaderResource {
+struct VectorShader : public ProjectionShaderBase {
 	inline VectorShader() : ShaderResource() {}
-	inline VectorShader(ShaderSource shaderSource) : ShaderResource("VectorShader", "vector.shader", shaderSource) {}
-
-	void updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Position& viewPosition);
+	inline VectorShader(ShaderSource shaderSource) : ShaderResource(shaderSource.name, "vector.shader", shaderSource) {}
 };
 
-struct PointShader : public ShaderResource {
+struct PointShader : public ProjectionShaderBase {
 	inline PointShader() : ShaderResource() {}
-	inline PointShader(ShaderSource shaderSource) : ShaderResource("PointShader", "point.shader", shaderSource) {}
-
-	void updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Position& viewPosition);
+	inline PointShader(ShaderSource shaderSource) : ShaderResource(shaderSource.name, "point.shader", shaderSource) {}
 };
 
-struct TestShader : public ShaderResource {
+struct TestShader : public StandardMeshShaderBase {
 	inline TestShader() : ShaderResource() {}
-	inline TestShader(ShaderSource shaderSource) : ShaderResource("TestShader", "test.shader", shaderSource) {}
+	inline TestShader(ShaderSource shaderSource) : ShaderResource(shaderSource.name, "test.shader", shaderSource) {}
 
-	void updateProjection(const Mat4f& projectionMatrix);
-	void updateView(const Mat4f& viewMatrix);
-	void updateModel(const Mat4f& modelMatrix);
-	void updateModel(const GlobalCFrame& modelCFrame, DiagonalMat3f scale);
-	void updateViewPosition(const Position& viewPosition);
 	void updateDisplacement(Graphics::Texture* displacementMap);
 };
 
-struct LineShader : public ShaderResource {
+struct LineShader : public ProjectionShaderBase {
 	inline LineShader() : ShaderResource() {}
-	inline LineShader(ShaderSource shaderSource) : ShaderResource("LineShader", "line.shader", shaderSource) {}
-
-	void updateProjection(const Mat4f& projectionMatrix, const Mat4f& viewMatrix);
+	inline LineShader(ShaderSource shaderSource) : ShaderResource(shaderSource.name, "line.shader", shaderSource) {}
 };
 
-struct InstanceShader : public ShaderResource {
-	inline InstanceShader() : ShaderResource() {}
-	inline InstanceShader(ShaderSource shaderSource) : ShaderResource("InstanceShader", "instance.shader", shaderSource) {}
-
-	void updateSunDirection(const Vec3f& sunDirection);
-	void updateSunColor(const Vec3f& sunColor);
-	void updateGamma(float gamma);
-	void updateHDR(float hdr);
-	void updateExposure(float exposure);
-	void updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Position& viewPosition);
-	void updateLight(const std::vector<Light*> lights);
-	void updateTexture(bool textured);
-};
-
-struct SkyShader : public ShaderResource {
+struct SkyShader : public ProjectionShaderBase {
 	inline SkyShader() : ShaderResource() {}
-	inline SkyShader(ShaderSource shaderSource) : ShaderResource("SkyShader", "sky.shader", shaderSource) {}
+	inline SkyShader(ShaderSource shaderSource) : ShaderResource(shaderSource.name, "sky.shader", shaderSource) {}
 
-	void updateCamera(const Vec3f& viewPosition, const Mat4f& projectionMatrix, const Mat4f& viewMatrix);
 	void updateTime(float time);
 };
 
-struct LightingShader : public ShaderResource {
+struct LightingShader : public BasicShaderBase {
 	inline LightingShader() : ShaderResource() {}
-	inline LightingShader(ShaderSource shaderSource) : ShaderResource("LightingShader", "lighting.shader", shaderSource) {}
-
-	void updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Position& viewPosition);
-	void updateLight(const std::vector<Light*> lights);
-	void updateTexture(bool textured);
+	inline LightingShader(ShaderSource shaderSource) : ShaderResource(shaderSource.name, "lighting.shader", shaderSource) {}
 };
 
-namespace ApplicationShaders {
+namespace Shaders {
 extern BasicShader basicShader;
 extern DepthShader depthShader;
 extern VectorShader vectorShader;

@@ -15,6 +15,7 @@ out vec3 ftextureUV;
 uniform mat4 projectionMatrix;
 uniform mat4 viewMatrix;
 uniform vec3 lightDirection;
+uniform vec3 viewPosition;
 
 const float PI = 3.141592654;
 const vec4 Esun = vec4(1.0, 1.0, 1.0, 12.0);
