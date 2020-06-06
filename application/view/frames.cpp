@@ -680,20 +680,20 @@ void BigFrame::renderDebugFrame() {
 void BigFrame::renderEnvironmentFrame() {
 	if (ImGui::CollapsingHeader("Environment")) {
 		if (ImGui::SliderFloat("HDR", &hdr, 0, 1))
-			ApplicationShaders::basicShader.updateHDR(hdr);
-			ApplicationShaders::instanceShader.updateHDR(hdr);
+			Shaders::basicShader.updateHDR(hdr);
+			Shaders::instanceShader.updateHDR(hdr);
 
 		if (ImGui::SliderFloat("Gamma", &gamma, 0, 3))
-			ApplicationShaders::basicShader.updateGamma(gamma);
-			ApplicationShaders::instanceShader.updateGamma(gamma);
+			Shaders::basicShader.updateGamma(gamma);
+			Shaders::instanceShader.updateGamma(gamma);
 
 		if (ImGui::SliderFloat("Exposure", &exposure, 0, 2))
-			ApplicationShaders::basicShader.updateExposure(exposure);
-			ApplicationShaders::instanceShader.updateExposure(exposure);
+			Shaders::basicShader.updateExposure(exposure);
+			Shaders::instanceShader.updateExposure(exposure);
 
 		if (ImGui::ColorEdit3("Sun color", sunColor.data))
-			ApplicationShaders::basicShader.updateSunColor(sunColor);
-			ApplicationShaders::instanceShader.updateSunColor(sunColor);
+			Shaders::basicShader.updateSunColor(sunColor);
+			Shaders::instanceShader.updateSunColor(sunColor);
 	}
 }
 

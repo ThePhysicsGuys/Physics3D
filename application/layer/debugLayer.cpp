@@ -38,15 +38,15 @@ Vec4f colors[] {
 };
 
 void renderSphere(double radius, const Position& position, const Color& color) {
-	ApplicationShaders::basicShader.updateMaterial(Material(color));
-	ApplicationShaders::basicShader.updateModel(Mat4f(Mat3f::IDENTITY() * float(radius), Vec3f(position - Position(0,0,0)), Vec3f(0.0f,0.0f,0.0f),1.0f));
+	Shaders::basicShader.updateMaterial(Material(color));
+	Shaders::basicShader.updateModel(Mat4f(Mat3f::IDENTITY() * float(radius), Vec3f(position - Position(0,0,0)), Vec3f(0.0f,0.0f,0.0f),1.0f));
 
 	Graphics::Library::sphere->render();
 }
 
 void renderBox(const GlobalCFrame& cframe, double width, double height, double depth, const Color& color) {
-	ApplicationShaders::basicShader.updateMaterial(Material(color));
-	ApplicationShaders::basicShader.updateModel(Mat4f(cframe.getRotation().asRotationMatrix() * DiagonalMat3 { width, height, depth }, Vec3f(cframe.getPosition() - Position(0,0,0)), Vec3f(0.0f,0.0f,0.0f), 1.0f));
+	Shaders::basicShader.updateMaterial(Material(color));
+	Shaders::basicShader.updateModel(Mat4f(cframe.getRotation().asRotationMatrix() * DiagonalMat3 { width, height, depth }, Vec3f(cframe.getPosition() - Position(0,0,0)), Vec3f(0.0f,0.0f,0.0f), 1.0f));
 
 	Graphics::Library::cube->render();
 }
@@ -214,17 +214,17 @@ void DebugLayer::onRender() {
 
 	// Render vector mesh
 	graphicsMeasure.mark(GraphicsProcess::VECTORS);
-	ApplicationShaders::vectorShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
+	Shaders::vectorShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
 	vectorMesh->render();
 
 	// Render point mesh
 	graphicsMeasure.mark(GraphicsProcess::VECTORS);
-	ApplicationShaders::pointShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
+	Shaders::pointShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
 	pointMesh->render();
 
 	// Render origin mesh
 	graphicsMeasure.mark(GraphicsProcess::ORIGIN);
-	ApplicationShaders::originShader.updateProjection(screen->camera.viewMatrix, screen->camera.getViewRotation(), screen->camera.projectionMatrix, screen->camera.orthoMatrix, screen->camera.cframe.position);
+	Shaders::originShader.updateProjection(screen->camera.viewMatrix, screen->camera.getViewRotation(), screen->camera.projectionMatrix, screen->camera.orthoMatrix, screen->camera.cframe.position);
 	originMesh->render();
 
 	endScene();

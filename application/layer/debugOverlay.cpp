@@ -64,7 +64,7 @@ void DebugOverlay::onRender() {
 
 	Path::bind(GUI::batch);
 	ResourceManager::get<FontResource>("font")->getAtlas()->bind();
-	ApplicationShaders::fontShader.updateProjection(screen->camera.orthoMatrix);
+	Shaders::fontShader.updateProjection(screen->camera.orthoMatrix);
 	GraphicsShaders::guiShader.setUniform("projectionMatrix", screen->camera.orthoMatrix);
 	graphicsMeasure.mark(GraphicsProcess::PROFILER);
 

@@ -144,14 +144,7 @@ VisualData addMeshShape(const Graphics::VisualShape& shape) {
 
 	// Todo move somewhere else
 	VertexBuffer* uniformBuffer = new VertexBuffer(nullptr, 0, Graphics::Renderer::STREAM_DRAW);
-	BufferLayout uniformLayout = BufferLayout(
-		{
-			BufferElement("vModelMatrix", BufferDataType::MAT4, true),
-			BufferElement("vAlbedo", BufferDataType::FLOAT4, true),
-			BufferElement("vMRAo", BufferDataType::FLOAT3, true),
-		}
-	);
-	mesh->addUniformBuffer(uniformBuffer, uniformLayout);
+	mesh->addUniformBuffer(uniformBuffer, DEFAULT_UNIFORM_BUFFER_LAYOUT);
 
 	meshes.push_back(mesh);
 

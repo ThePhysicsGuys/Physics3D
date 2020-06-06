@@ -11,14 +11,12 @@ namespace Graphics {
 PointMesh::PointMesh(const float* vertices, const size_t vertexCount, size_t capacity) : AbstractMesh(Renderer::POINT), vertexCount(vertexCount), capacity(capacity) {
 	vertexBuffer = new VertexBuffer(nullptr, 10 * capacity * sizeof(float), Renderer::DYNAMIC_DRAW);
 
-	vertexBufferLayout = {
-		{
-			{ "vposition", BufferDataType::FLOAT3 },
-			{ "vsize", BufferDataType::FLOAT },
-			{ "vcolor1", BufferDataType::FLOAT3 },
-			{ "vcolor2", BufferDataType::FLOAT3 }
-		}
-	};
+	vertexBufferLayout = BufferLayout({
+		BufferElement("vposition", BufferDataType::FLOAT3),
+		BufferElement("vsize", BufferDataType::FLOAT),
+		BufferElement("vcolor1", BufferDataType::FLOAT3),
+		BufferElement("vcolor2", BufferDataType::FLOAT3)
+	});
 
 	vao->addBuffer(vertexBuffer, vertexBufferLayout);
 }

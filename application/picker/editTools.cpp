@@ -56,29 +56,31 @@ static Polyhedron createArrow(float arrowHeadLength, float arrowHeadRadius, floa
 
 void EditTools::onInit() {
 
-	// TODO fix duplicate loading
-
 	// Edit line init
 	line = new Graphics::LinePrimitive();
 	line->resize(Vec3f(0, -100000, 0), Vec3f(0, 100000, 0));
 
+
+	VertexBuffer* uniformBuffer = new VertexBuffer(nullptr, 0, Graphics::Renderer::STREAM_DRAW);
+	
 	// Rotate shape init
 	rotateShape = VisualShape::generateSmoothNormalsShape(Library::createTorus(1.0f, 0.03f, 80, 12).rotated(Rotationf::Predefined::X_270));
 	rotateMesh = new IndexedMesh(rotateShape);
+	rotateMesh->addUniformBuffer(uniformBuffer, DEFAULT_UNIFORM_BUFFER_LAYOUT);
 
 	// Scale shape init
 	scaleShape = VisualShape::generateSplitNormalsShape(createBoxOnStick(0.2f, 0.03f).rotated(Rotationf::Predefined::X_270));
 	scaleMesh = new IndexedMesh(scaleShape);
+	scaleMesh->addUniformBuffer(uniformBuffer, DEFAULT_UNIFORM_BUFFER_LAYOUT);
 	scaleCenterShape = VisualShape::generateSplitNormalsShape(Library::createCube(0.2f));
 	scaleCenterMesh = new IndexedMesh(scaleCenterShape);
 
 	// Translate shape init
 	translateShape = VisualShape::generateSplitNormalsShape(createArrow(0.3f, 0.07f, 0.03f).rotated(Rotationf::Predefined::X_270));
 	translateMesh = new IndexedMesh(translateShape);
+	translateMesh->addUniformBuffer(uniformBuffer, DEFAULT_UNIFORM_BUFFER_LAYOUT);
 	translateCenterShape = VisualShape::generateSmoothNormalsShape(Library::createSphere(0.13, 3));
 	translateCenterMesh = new IndexedMesh(translateCenterShape);
-
-	std::vector<int> intList;
 
 	// Intersected tool init
 	intersectedEditDirection = EditDirection::NONE;
@@ -110,56 +112,48 @@ void EditTools::onRender(Screen& screen) {
 			center = scaleCenterMesh;
 			break;
 	}
-
+	
 	GlobalCFrame selFrame = screen.selectedPart->getCFrame();
 	Mat4 modelMatrix(selFrame.getRotation().asRotationMatrix(), selFrame.getPosition() - Position(0,0,0), Vec3(0,0,0), 1);
-
-	// Center, only rendered if editMode != EditMode::ROTATE
-	if (center) {
-		ApplicationShaders::basicShader.updateModel(modelMatrix);
-		ApplicationShaders::basicShader.updateMaterial(Material(COLOR::WHITE));
-		center->render();
-		ApplicationShaders::debugShader.updateModel(modelMatrix);
-		center->render();
-	}
-
+	
 	if (selectedEditDirection != EditDirection::NONE) {
 		switch (selectedEditDirection) {
 			case EditDirection::Y:
-				ApplicationShaders::maskShader.updateModel(modelMatrix);
-				ApplicationShaders::maskShader.updateColor(COLOR::G);
+				Shaders::maskShader.updateModel(modelMatrix);
+				Shaders::maskShader.updateColor(COLOR::G);
 				break;
 			case EditDirection::X:
-				ApplicationShaders::maskShader.updateModel(modelMatrix * Mat4(Matrix<double, 3, 3>(transformations[1]), 1.0f));
-				ApplicationShaders::maskShader.updateColor(COLOR::R);
+				Shaders::maskShader.updateModel(modelMatrix * Mat4(Matrix<double, 3, 3>(transformations[1]), 1.0f));
+				Shaders::maskShader.updateColor(COLOR::R);
 				break;
 			case EditDirection::Z:
-				ApplicationShaders::maskShader.updateModel(modelMatrix * Mat4(Matrix<double, 3, 3>(transformations[2]), 1.0f));
-				ApplicationShaders::maskShader.updateColor(COLOR::B);
+				Shaders::maskShader.updateModel(modelMatrix * Mat4(Matrix<double, 3, 3>(transformations[2]), 1.0f));
+				Shaders::maskShader.updateColor(COLOR::B);
 				break;
 		}
 		line->render();
 	}
 
+	// Center, only rendered if editMode != EditMode::ROTATE
+	if (center) {
+		Shaders::basicShader.updateModel(modelMatrix);
+		Shaders::basicShader.updateMaterial(Material(COLOR::WHITE));
+		center->render();
+	}
+
 	// Y
-	ApplicationShaders::basicShader.updateModel(modelMatrix);
-	ApplicationShaders::basicShader.updateMaterial(Material(COLOR::G));
-	shaft->render();
-	ApplicationShaders::debugShader.updateModel(modelMatrix);
+	Shaders::basicShader.updateModel(modelMatrix);
+	Shaders::basicShader.updateMaterial(Material(COLOR::G));
 	shaft->render();
 
 	// X
-	ApplicationShaders::basicShader.updateMaterial(Material(COLOR::R));
-	ApplicationShaders::basicShader.updateModel(modelMatrix * Mat4(Mat3(transformations[1]), 1.0f));
-	shaft->render();
-	ApplicationShaders::debugShader.updateModel(modelMatrix * Mat4(Mat3(transformations[1]), 1.0f));
+	Shaders::basicShader.updateMaterial(Material(COLOR::R));
+	Shaders::basicShader.updateModel(modelMatrix * Mat4(Mat3(transformations[1]), 1.0f));
 	shaft->render();
 
 	// Z
-	ApplicationShaders::basicShader.updateMaterial(Material(COLOR::B));
-	ApplicationShaders::basicShader.updateModel(modelMatrix * Mat4(Mat3(transformations[2]), 1.0f));
-	shaft->render();
-	ApplicationShaders::debugShader.updateModel(modelMatrix * Mat4(Mat3(transformations[2]), 1.0f));
+	Shaders::basicShader.updateMaterial(Material(COLOR::B));
+	Shaders::basicShader.updateModel(modelMatrix * Mat4(Mat3(transformations[2]), 1.0f));
 	shaft->render();
 }
 

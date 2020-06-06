@@ -2,9 +2,16 @@
 
 namespace Graphics {
 
+#define DEFAULT_UNIFORM_BUFFER_LAYOUT \
+	BufferLayout({ \
+		BufferElement("vModelMatrix", BufferDataType::MAT4, true), \
+		BufferElement("vAlbedo", BufferDataType::FLOAT4, true), \
+		BufferElement("vMRAo", BufferDataType::FLOAT3, true) \
+	})
+
 namespace BufferDataType {
 
-struct BufferDataTypeInfo {
+struct Info {
 	// name of data type
 	std::string name;
 
@@ -17,44 +24,50 @@ struct BufferDataTypeInfo {
 	// size of type in bytes
 	int size;
 
-	BufferDataTypeInfo(std::string name, int type, int count, int size) : name(name), type(type), count(count), size(size) {};
+	Info(const std::string& name, int type, int count, int size) : name(name), type(type), count(count), size(size) {};
 
-	bool operator==(const BufferDataTypeInfo& other) const {
+	bool operator==(const Info& other) const {
 		return other.name == name;
 	}
 };
 
-extern const BufferDataTypeInfo NONE;
-extern const BufferDataTypeInfo BOOL;
-extern const BufferDataTypeInfo INT;
-extern const BufferDataTypeInfo INT2;
-extern const BufferDataTypeInfo INT3;
-extern const BufferDataTypeInfo INT4;
-extern const BufferDataTypeInfo FLOAT;
-extern const BufferDataTypeInfo FLOAT2;
-extern const BufferDataTypeInfo FLOAT3;
-extern const BufferDataTypeInfo FLOAT4;
-extern const BufferDataTypeInfo MAT2;
-extern const BufferDataTypeInfo MAT3;
-extern const BufferDataTypeInfo MAT4;
+extern const Info NONE;
+extern const Info BOOL;
+extern const Info INT;
+extern const Info INT2;
+extern const Info INT3;
+extern const Info INT4;
+extern const Info FLOAT;
+extern const Info FLOAT2;
+extern const Info FLOAT3;
+extern const Info FLOAT4;
+extern const Info MAT2;
+extern const Info MAT3;
+extern const Info MAT4;
+
 };
 
 struct BufferElement {
 	std::string name;
-	BufferDataType::BufferDataTypeInfo info;
+	BufferDataType::Info info;
 	bool instanced;
 	bool normalized;
 
-	BufferElement(std::string name, BufferDataType::BufferDataTypeInfo info, bool instanced = false, bool normalized = false);
+	BufferElement(const std::string& name, BufferDataType::Info info, bool instanced = false, bool normalized = false) : name(name), info(info), instanced(instanced), normalized(normalized) {}
 };
 
 struct BufferLayout {
 	std::vector<BufferElement> elements;
 	int stride;
 
-	BufferLayout();
-	BufferLayout(std::vector<BufferElement> elements);
-	~BufferLayout();
+	BufferLayout(std::vector<BufferElement> elements) : elements(elements), stride(0) {
+		for (BufferElement& element : this->elements) {
+			int multiplier = (element.info == BufferDataType::MAT2 || element.info == BufferDataType::MAT3 || element.info == BufferDataType::MAT4) ? element.info.count : 1;
+			stride += element.info.size * multiplier;
+		}
+	}
+	
+	BufferLayout() : elements({}), stride(0) {};
 };
 
 };

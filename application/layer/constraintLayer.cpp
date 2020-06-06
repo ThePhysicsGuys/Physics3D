@@ -39,9 +39,9 @@ void ConstraintLayer::onUpdate() {
 }
 
 static void renderObject(const VisualData& shape, const GlobalCFrame& cframe, const DiagonalMat3f& scale, const Material& material) {
-	ApplicationShaders::basicShader.updateMaterial(material);
-	ApplicationShaders::basicShader.updateTexture(false);
-	ApplicationShaders::basicShader.updateModel(cframe, scale);
+	Shaders::basicShader.updateMaterial(material);
+	Shaders::basicShader.updateTexture(false);
+	Shaders::basicShader.updateModel(cframe, scale);
 	shape.render(Graphics::Renderer::FILL);
 }
 
@@ -144,8 +144,8 @@ void ConstraintLayer::onRender() {
 	beginScene();
 	Renderer::enableBlending();
 
-	ApplicationShaders::basicShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
-	ApplicationShaders::maskShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix);
+	Shaders::basicShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
+	Shaders::maskShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
 
 	for(MotorizedPhysical* phys : world->iterPhysicals()) {
 		recurseRenderHardConstraints(this, *phys);

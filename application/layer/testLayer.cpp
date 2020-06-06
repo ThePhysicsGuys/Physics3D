@@ -84,7 +84,7 @@ void TestLayer::onInit() {
 	llights.push_back(new Light(Vec3f(10,10,10), Color3(300), 1, { 1, 1, 1 }));
 	llights.push_back(new Light(Vec3f(-10,-10,10), Color3(300), 1, { 1, 1, 1 }));
 	llights.push_back(new Light(Vec3f(10,-10,10), Color3(300), 1, { 1, 1, 1 }));
-	ApplicationShaders::lightingShader.updateLight(llights);*/
+	Shaders::lightingShader.updateLight(llights);*/
 }
 
 void TestLayer::onUpdate() {
@@ -97,7 +97,7 @@ void TestLayer::onEvent(Engine::Event& event) {
 	if (event.getType() == EventType::KeyPress) {
 		if (static_cast<KeyPressEvent&>(event).getKey() == Keyboard::TAB) {
 			llights[0]->position = fromPosition(screen.camera.cframe.position);
-			ApplicationShaders::lightingShader.updateLight(llights);
+			Shaders::lightingShader.updateLight(llights);
 		}
 	}
 }
@@ -113,9 +113,9 @@ void TestLayer::onRender() {
 	enableCulling();
 	enableBlending();
 
-	ApplicationShaders::debugShader.bind();
-	ApplicationShaders::debugShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.getPosition());
-	ApplicationShaders::debugShader.updateModel(Mat4::IDENTITY());
+	Shaders::debugShader.bind();
+	Shaders::debugShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.getPosition());
+	Shaders::debugShader.updateModel(Mat4::IDENTITY());
 	ResourceManager::get<MeshResource>("translate")->getMesh()->render();
 
 	endScene();

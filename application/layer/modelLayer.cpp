@@ -108,10 +108,10 @@ void ModelLayer::onInit() {
 	lights.push_back(new Light(Vec3f(-10, 5, 10), Color3(1, 0.84f, 0.69f), 500, attenuation));
 	lights.push_back(new Light(Vec3f(0, 5, 0), Color3(1, 0.90f, 0.75f), 400, attenuation));
 
-	ApplicationShaders::basicShader.updateLight(lights);
-	ApplicationShaders::instanceShader.updateLight(lights);
-	ApplicationShaders::basicShader.updateTexture(false);
-	ApplicationShaders::instanceShader.updateTexture(false);
+	Shaders::basicShader.updateLight(lights);
+	Shaders::basicShader.updateTexture(false);
+	Shaders::instanceShader.updateLight(lights);
+	Shaders::instanceShader.updateTexture(false);
 }
 
 void ModelLayer::onUpdate() {
@@ -130,9 +130,9 @@ void ModelLayer::onRender() {
 	beginScene();
 
 	graphicsMeasure.mark(GraphicsProcess::UPDATE);
-	ApplicationShaders::debugShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
-	ApplicationShaders::basicShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
-	ApplicationShaders::instanceShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
+	Shaders::debugShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
+	Shaders::basicShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
+	Shaders::instanceShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
 
 	// Filter on mesh ID and transparency
 	size_t maxMeshCount = 0;
@@ -161,7 +161,7 @@ void ModelLayer::onRender() {
 		uniforms.push_back(Uniform());
 
 	// Render normal meshes
-	ApplicationShaders::instanceShader.bind();
+	Shaders::instanceShader.bind();
 	for (auto iterator : meshCounter) {
 		int meshID = iterator.first;
 		int meshCount = iterator.second;
@@ -194,7 +194,7 @@ void ModelLayer::onRender() {
 	}
 
 	// Render transparent meshes
-	ApplicationShaders::basicShader.bind();
+	Shaders::basicShader.bind();
 	Renderer::enableBlending();
 	for (auto iterator = transparentParts.rbegin(); iterator != transparentParts.rend(); ++iterator) {
 		ExtendedPart* part = (*iterator).second;
@@ -205,14 +205,13 @@ void ModelLayer::onRender() {
 		if (part->visualData.drawMeshId == -1)
 			continue;
 
-		ApplicationShaders::basicShader.updateMaterial(material);
-		ApplicationShaders::basicShader.updatePart(*part);
+		Shaders::basicShader.updateMaterial(material);
+		Shaders::basicShader.updatePart(*part);
 		Engine::MeshRegistry::meshes[part->visualData.drawMeshId]->render(part->renderMode);
 	}
 
 	if (screen->selectedPart) {
-		//disableDepthTest();
-		ApplicationShaders::debugShader.updateModel(Mat4f(Mat3f(screen->selectedPart->getCFrame().getRotation().asRotationMatrix()) * DiagonalMat3f(screen->selectedPart->hitbox.scale), Vec3f(screen->selectedPart->getCFrame().getPosition() - Position(0, 0, 0)), Vec3f(0.0f, 0.0f, 0.0f), 1.0f));
+		Shaders::debugShader.updateModel(Mat4f(Mat3f(screen->selectedPart->getCFrame().getRotation().asRotationMatrix()) * DiagonalMat3f(screen->selectedPart->hitbox.scale), Vec3f(screen->selectedPart->getCFrame().getPosition() - Position(0, 0, 0)), Vec3f(0.0f, 0.0f, 0.0f), 1.0f));
 		Engine::MeshRegistry::meshes[screen->selectedPart->visualData.drawMeshId]->render();
 	}
 

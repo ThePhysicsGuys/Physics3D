@@ -110,25 +110,25 @@ void SkyboxLayer::onRender() {
 		enableBlending();
 		ResourceManager::get<TextureResource>("night")->bind();
 
-		ApplicationShaders::skyShader.setUniform("nightTexture", 0);
-		ApplicationShaders::skyShader.updateCamera(fromPosition(screen->camera.cframe.position), screen->camera.projectionMatrix, screen->camera.viewMatrix);
-		ApplicationShaders::skyShader.setUniform("starBrightness", starBrightness);
-		ApplicationShaders::skyShader.setUniform("skyColor", skyColor);
-		ApplicationShaders::skyShader.setUniform("horizonColor", horizonColor);
+		Shaders::skyShader.setUniform("nightTexture", 0);
+		Shaders::skyShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
+		Shaders::skyShader.setUniform("starBrightness", starBrightness);
+		Shaders::skyShader.setUniform("skyColor", skyColor);
+		Shaders::skyShader.setUniform("horizonColor", horizonColor);
 		float scroll = (float) (atan2(screen->camera.viewMatrix[1][0], screen->camera.viewMatrix[0][0]) / screen->camera.fov / 2.0);
 		ImGui::Text("Scroll: %f", scroll);
 
-		ApplicationShaders::skyShader.setUniform("scroll", scroll);
-		ApplicationShaders::skyShader.setUniform("time", time);
-		ApplicationShaders::skyShader.setUniform("skyboxSize", 550.0f);
-		ApplicationShaders::skyShader.setUniform("segmentCount", 25.0f);
+		Shaders::skyShader.setUniform("scroll", scroll);
+		Shaders::skyShader.setUniform("time", time);
+		Shaders::skyShader.setUniform("skyboxSize", 550.0f);
+		Shaders::skyShader.setUniform("segmentCount", 25.0f);
 		Library::sphere->render();
 	} else {
 		disableCulling();
 		disableDepthMask();
 		enableBlending();
 
-		ApplicationShaders::skyboxShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix);
+		Shaders::skyboxShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
 		skyboxTexture->bind();
 
 		Library::sphere->render();

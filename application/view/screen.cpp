@@ -151,7 +151,7 @@ void Screen::onInit() {
 	screenFrameBuffer = new Graphics::FrameBuffer(dimension.x, dimension.y);
 
 	// Shader init
-	ApplicationShaders::onInit();
+	Shaders::onInit();
 
 	// Layer creation
 	skyboxLayer = SkyboxLayer(this);
@@ -304,7 +304,7 @@ void Screen::onClose() {
 
 	ResourceManager::close();
 
-	ApplicationShaders::onClose();
+	Shaders::onClose();
 
 	KeyboardOptions::save(properties);
 
