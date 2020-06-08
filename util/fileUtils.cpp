@@ -30,7 +30,7 @@ bool FileUtils::doesFileExist(const std::string& fileName){
 #endif
 
 
-void FileUtils::warnIfFileExists(const std::string& fileName){
+void FileUtils::warnIfFileExists(const std::string& fileName) {
     if(FileUtils::doesFileExist(fileName)){
         Log::warn("File already exists: %s", fileName.c_str());
     }

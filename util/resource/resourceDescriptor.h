@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include <string>
 
 #ifdef _MSC_VER

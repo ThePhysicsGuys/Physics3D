@@ -10,6 +10,7 @@ layout(location = 0) in vec3 vposition;
 
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
+uniform vec3 viewPosition;
 
 uniform float skyboxSize = 550.0;
 uniform float scroll = 0.0;

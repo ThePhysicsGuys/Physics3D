@@ -214,7 +214,7 @@ void renderShaderTypeEditor(Shader* shader, const ShaderUniform& uniform) {
 	}
 }
 
-void BigFrame::renderShaderStageInfo(Shader* shader, const ShaderStage& stage) {
+void BigFrame::renderShaderStageInfo(ShaderResource* shader, const ShaderStage& stage) {
 	if (ImGui::TreeNode("Code")) {
 		ImGui::TextWrapped(stage.source.c_str());
 
@@ -350,7 +350,7 @@ void BigFrame::renderShaderStageInfo(Shader* shader, const ShaderStage& stage) {
 	}
 }
 
-void BigFrame::renderShaderInfo(Shader* shader) {
+void BigFrame::renderShaderInfo(ShaderResource* shader) {
 	ImGui::BeginChild("Shaders");
 
 	if (ImGui::BeginTabBar("##tabs")) {
@@ -385,6 +385,15 @@ void BigFrame::renderShaderInfo(Shader* shader) {
 			}
 		}
 		ImGui::EndTabBar();
+	}
+
+	if (ImGui::Button("Reload")) {
+		ShaderSource shaderSource = parseShader(shader->getName(), shader->getPath());
+		if (shaderSource.vertexSource.empty() || shaderSource.fragmentSource.empty()) {
+			ImGui::EndChild();
+			return;
+		}
+		shader->reload(shaderSource);
 	}
 	
 	ImGui::EndChild();

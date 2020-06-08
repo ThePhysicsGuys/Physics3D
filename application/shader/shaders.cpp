@@ -33,22 +33,21 @@ DebugShader debugShader;
 
 void onInit() {
 	// Shader source init
-	ShaderSource basicShaderSource       = parseShader("BasicShader", "basic.shader", getResourceAsString(applicationResources, BASIC_SHADER));
-	ShaderSource depthShaderSource       = parseShader("DepthShader", "depth.shader", getResourceAsString(applicationResources, DEPTH_SHADER));
-	ShaderSource vectorShaderSource      = parseShader("VectorShader", "vector.shader", getResourceAsString(applicationResources, VECTOR_SHADER));
-	ShaderSource fontShaderSource        = parseShader("FontShader", "font.shader", getResourceAsString(applicationResources, FONT_SHADER));
-	ShaderSource originShaderSource      = parseShader("OriginShader", "origin.shader", getResourceAsString(applicationResources, ORIGIN_SHADER));
-	ShaderSource postProcessShaderSource = parseShader("PostProcessShader", "postProcess.shader", getResourceAsString(applicationResources, POSTPROCESS_SHADER));
-	ShaderSource skyboxShaderSource      = parseShader("SkyBoxShader", "skybox.shader", getResourceAsString(applicationResources, SKYBOX_SHADER));
-	ShaderSource pointShaderSource       = parseShader("PointShader", "point.shader", getResourceAsString(applicationResources, POINT_SHADER));
-	ShaderSource testShaderSource        = parseShader("TestShader", "test.shader", getResourceAsString(applicationResources, TEST_SHADER));
-	ShaderSource lineShaderSource        = parseShader("LineShader", "line.shader", getResourceAsString(applicationResources, LINE_SHADER));
-	ShaderSource maskShaderSource        = parseShader("MaskShader", "mask.shader", getResourceAsString(applicationResources, MASK_SHADER));
-	ShaderSource instanceShaderSource    = parseShader("InstanceShader", "instance.shader", getResourceAsString(applicationResources, INSTANCE_SHADER));
-	ShaderSource skyShaderSource         = parseShader("SkyShader", "sky.shader", getResourceAsString(applicationResources, SKY_SHADER));
-	ShaderSource lightingShaderSource    = parseShader("LightingShader", "lighting.shader", getResourceAsString(applicationResources, LIGHTING_SHADER));
-	ShaderSource debugShaderSource       = parseShader("DebugShader", "debug.shader", getResourceAsString(applicationResources, DEBUG_SHADER));
-
+	ShaderSource basicShaderSource       = parseShader("BasicShader", "../res/shaders/basic.shader", getResourceAsString(applicationResources, BASIC_SHADER));
+	ShaderSource depthShaderSource       = parseShader("DepthShader", "../res/shaders/depth.shader", getResourceAsString(applicationResources, DEPTH_SHADER));
+	ShaderSource vectorShaderSource      = parseShader("VectorShader", "../res/shaders/vector.shader", getResourceAsString(applicationResources, VECTOR_SHADER));
+	ShaderSource fontShaderSource        = parseShader("FontShader", "../res/shaders/font.shader", getResourceAsString(applicationResources, FONT_SHADER));
+	ShaderSource originShaderSource      = parseShader("OriginShader", "../res/shaders/origin.shader", getResourceAsString(applicationResources, ORIGIN_SHADER));
+	ShaderSource postProcessShaderSource = parseShader("PostProcessShader", "../res/shaders/postProcess.shader", getResourceAsString(applicationResources, POSTPROCESS_SHADER));
+	ShaderSource skyboxShaderSource      = parseShader("SkyBoxShader", "../res/shaders/skybox.shader", getResourceAsString(applicationResources, SKYBOX_SHADER));
+	ShaderSource pointShaderSource       = parseShader("PointShader", "../res/shaders/point.shader", getResourceAsString(applicationResources, POINT_SHADER));
+	ShaderSource testShaderSource        = parseShader("TestShader", "../res/shaders/test.shader", getResourceAsString(applicationResources, TEST_SHADER));
+	ShaderSource lineShaderSource        = parseShader("LineShader", "../res/shaders/line.shader", getResourceAsString(applicationResources, LINE_SHADER));
+	ShaderSource maskShaderSource        = parseShader("MaskShader", "../res/shaders/mask.shader", getResourceAsString(applicationResources, MASK_SHADER));
+	ShaderSource instanceShaderSource    = parseShader("InstanceShader", "../res/shaders/instance.shader"/*, getResourceAsString(applicationResources, INSTANCE_SHADER)*/);
+	ShaderSource skyShaderSource         = parseShader("SkyShader", "../res/shaders/sky.shader", getResourceAsString(applicationResources, SKY_SHADER));
+	ShaderSource lightingShaderSource    = parseShader("LightingShader", "../res/shaders/lighting.shader", getResourceAsString(applicationResources, LIGHTING_SHADER));
+	ShaderSource debugShaderSource       = parseShader("DebugShader", "../res/shaders/debug.shader", getResourceAsString(applicationResources, DEBUG_SHADER));
 
 	// Shader init
 	new(&basicShader) BasicShader(basicShaderSource);
