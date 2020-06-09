@@ -120,15 +120,15 @@ void EditTools::onRender(Screen& screen) {
 		switch (selectedEditDirection) {
 			case EditDirection::Y:
 				Shaders::maskShader.updateModel(modelMatrix);
-				Shaders::maskShader.updateColor(COLOR::G);
+				Shaders::maskShader.updateColor(COLOR::RGB_G);
 				break;
 			case EditDirection::X:
 				Shaders::maskShader.updateModel(modelMatrix * Mat4(Matrix<double, 3, 3>(transformations[1]), 1.0f));
-				Shaders::maskShader.updateColor(COLOR::R);
+				Shaders::maskShader.updateColor(COLOR::RGB_R);
 				break;
 			case EditDirection::Z:
 				Shaders::maskShader.updateModel(modelMatrix * Mat4(Matrix<double, 3, 3>(transformations[2]), 1.0f));
-				Shaders::maskShader.updateColor(COLOR::B);
+				Shaders::maskShader.updateColor(COLOR::RGB_B);
 				break;
 		}
 		line->render();
@@ -143,16 +143,16 @@ void EditTools::onRender(Screen& screen) {
 
 	// Y
 	Shaders::basicShader.updateModel(modelMatrix);
-	Shaders::basicShader.updateMaterial(Material(COLOR::G));
+	Shaders::basicShader.updateMaterial(Material(COLOR::RGB_G));
 	shaft->render();
 
 	// X
-	Shaders::basicShader.updateMaterial(Material(COLOR::R));
+	Shaders::basicShader.updateMaterial(Material(COLOR::RGB_R));
 	Shaders::basicShader.updateModel(modelMatrix * Mat4(Mat3(transformations[1]), 1.0f));
 	shaft->render();
 
 	// Z
-	Shaders::basicShader.updateMaterial(Material(COLOR::B));
+	Shaders::basicShader.updateMaterial(Material(COLOR::RGB_B));
 	Shaders::basicShader.updateModel(modelMatrix * Mat4(Mat3(transformations[2]), 1.0f));
 	shaft->render();
 }

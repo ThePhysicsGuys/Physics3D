@@ -11,9 +11,9 @@ Color ACCENT = get(0x1F6678);
 Color BACK = get(0x4D4D4D);
 Color ALPHA = get(0x0, true);
 
-Color R = get(0xFF0000);
-Color G = get(0x00FF00);
-Color B = get(0x0000FF);
+Color RGB_R = get(0xFF0000);
+Color RGB_G = get(0x00FF00);
+Color RGB_B = get(0x0000FF);
 Color A = get(0x0, true);
 
 Color NAVY = get(0x001F3F);

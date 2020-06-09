@@ -75,7 +75,7 @@ bool StandardInputHandler::onKeyPressOrRepeat(Engine::KeyPressEvent& event) {
 		Log::info("TPS is now: %f", getSpeed());
 	} else if (key == KeyboardOptions::Tick::run) {
 		if (isPaused()) runTick();
-	} else if (key == Keyboard::O) {
+	} else if (key == Keyboard::KEY_O) {
 		world.asyncModification([]() {
 			Position pos(0.0 + (rand() % 100) * 0.001, 1.0 + (rand() % 100) * 0.001, 0.0 + (rand() % 100) * 0.001);
 
@@ -140,12 +140,12 @@ bool StandardInputHandler::onKeyPress(Engine::KeyPressEvent& event) {
 		Graphics::GLFW::closeWindow();
 	}
 
-	if (key < Keyboard::F9 && key > Keyboard::F1) {
-		toggleVectorType(static_cast<Debug::VectorType>(key.getCode() - Keyboard::F1.getCode()));
+	if (key < Keyboard::KEY_F9 && key > Keyboard::KEY_F1) {
+		toggleVectorType(static_cast<Debug::VectorType>(key.getCode() - Keyboard::KEY_F1.getCode()));
 	}
 
-	if (key < Keyboard::NUMBER_3 && key > Keyboard::NUMBER_1) {
-		togglePointType(static_cast<Debug::PointType>(key.getCode() - Keyboard::NUMBER_1.getCode()));
+	if (key < Keyboard::KEY_NUMBER_3 && key > Keyboard::KEY_NUMBER_1) {
+		togglePointType(static_cast<Debug::PointType>(key.getCode() - Keyboard::KEY_NUMBER_1.getCode()));
 	}
 
 	return onKeyPressOrRepeat(event);

@@ -6,15 +6,14 @@
 #include "../datastructures/buffers.h"
 
 #include "../math/linalg/trigonometry.h"
+#include "../math/constants.h"
 
 namespace Library {
-	float g = 1.61803398874989484820458683436563811772030917980576286213544862270526046281890f;
-	float PI = 3.14159265359f;
 
 	Vec3f icosahedronVertices[]{
-		Vec3f(0, 0.5, g / 2), Vec3f(0, 0.5, -g / 2), Vec3f(0, -0.5, -g / 2), Vec3f(0, -0.5, g / 2),
-		Vec3f(0.5, g / 2, 0), Vec3f(0.5, -g / 2, 0), Vec3f(-0.5, -g / 2, 0), Vec3f(-0.5, g / 2, 0),
-		Vec3f(g / 2, 0, 0.5), Vec3f(-g / 2, 0, 0.5), Vec3f(-g / 2, 0, -0.5), Vec3f(g / 2, 0, -0.5),
+		Vec3f(0, 0.5, G / 2), Vec3f(0, 0.5, -G / 2), Vec3f(0, -0.5, -G / 2), Vec3f(0, -0.5, G / 2),
+		Vec3f(0.5, G / 2, 0), Vec3f(0.5, -G / 2, 0), Vec3f(-0.5, -G / 2, 0), Vec3f(-0.5, G / 2, 0),
+		Vec3f(G / 2, 0, 0.5), Vec3f(-G / 2, 0, 0.5), Vec3f(-G / 2, 0, -0.5), Vec3f(G / 2, 0, -0.5),
 	};
 
 	Triangle icosahedronTriangles[]{

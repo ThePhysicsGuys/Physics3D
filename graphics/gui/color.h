@@ -12,9 +12,9 @@ namespace COLOR {
 	extern Color BACK;
 	extern Color ALPHA;
 
-	extern Color R;
-	extern Color G;
-	extern Color B;
+	extern Color RGB_R;
+	extern Color RGB_G;
+	extern Color RGB_B;
 	extern Color A;
 
 	extern Color NAVY;
