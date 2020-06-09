@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stddef.h>
+#include <cmath>
 
 template<typename T, size_t Size>
 struct Vector {
@@ -31,6 +32,8 @@ struct Vector {
 		for(size_t i = 0; i < Size; i++) {
 			result.data[i] = static_cast<OtherT>(this->data[i]);
 		}
+
+		return result;
 	}
 
 	operator Vector<T, Size - 1>() const {
@@ -38,6 +41,8 @@ struct Vector {
 		for(size_t i = 0; i < Size - 1; i++) {
 			result.data[i] = this->data[i];
 		}
+
+		return result;
 	}
 
 	T& operator[](size_t index) {
@@ -155,8 +160,8 @@ typedef Vec2 NormalizedVec2;
 typedef Vec3 NormalizedVec3;
 typedef Vec4 NormalizedVec4;
 
-template<typename T, typename T2, size_t Size>
-auto operator*(const Vector<T, Size>& a, const Vector<T2, Size>& b) -> decltype(a[0]*b[0]+a[1]*b[1]) {
+template<typename T1, typename T2, size_t Size>
+auto operator*(const Vector<T1, Size>& a, const Vector<T2, Size>& b) -> decltype(a[0]*b[0]+a[1]*b[1]) {
 	decltype(a[0] * b[0] + a[1] * b[1]) result = a[0] * b[0];
 	for (size_t i = 1; i < Size; i++) {
 		result += a[i] * b[i];
@@ -164,8 +169,18 @@ auto operator*(const Vector<T, Size>& a, const Vector<T2, Size>& b) -> decltype(
 	return result;
 }
 
-template<typename T, typename T2, size_t Size>
-auto operator+(const Vector<T, Size>& a, const Vector<T2, Size>& b) -> Vector<decltype(a[0] + b[0]), Size> {
+template<typename T1, typename T2, size_t Size>
+auto dot(const Vector<T1, Size>& a, const Vector<T2, Size>& b) -> decltype(a[0] * b[0] + a[1] * b[1]) {
+	return a * b;
+}
+
+template<typename T, size_t Size>
+auto dot(const Vector<T, Size>& vec) -> decltype(vec[0] * vec[0] + vec[1] * vec[1]) {
+	return vec * vec;
+}
+
+template<typename T1, typename T2, size_t Size>
+auto operator+(const Vector<T1, Size>& a, const Vector<T2, Size>& b) -> Vector<decltype(a[0] + b[0]), Size> {
 	Vector<decltype(a[0] + b[0]), Size> result;
 	for (size_t i = 0; i < Size; i++) {
 		result[i] = a[i] + b[i];
@@ -173,8 +188,8 @@ auto operator+(const Vector<T, Size>& a, const Vector<T2, Size>& b) -> Vector<de
 	return result;
 }
 
-template<typename T, typename T2, size_t Size>
-auto operator-(const Vector<T, Size>& a, const Vector<T2, Size>& b) -> Vector<decltype(a[0] - b[0]), Size> {
+template<typename T1, typename T2, size_t Size>
+auto operator-(const Vector<T1, Size>& a, const Vector<T2, Size>& b) -> Vector<decltype(a[0] - b[0]), Size> {
 	Vector<decltype(a[0] - b[0]), Size> result;
 	for (size_t i = 0; i < Size; i++) {
 		result[i] = a[i] - b[i];
@@ -182,8 +197,8 @@ auto operator-(const Vector<T, Size>& a, const Vector<T2, Size>& b) -> Vector<de
 	return result;
 }
 
-template<typename T, typename T2, size_t Size>
-auto operator*(const Vector<T, Size>& vec, const T2& factor) -> Vector<decltype(vec[0] * factor), Size> {
+template<typename T1, typename T2, size_t Size>
+auto operator*(const Vector<T1, Size>& vec, const T2& factor) -> Vector<decltype(vec[0] * factor), Size> {
 	Vector<decltype(vec[0] * factor), Size> result;
 	for (size_t i = 0; i < Size; i++) {
 		result[i] = vec[i] * factor;
@@ -200,8 +215,8 @@ auto operator*(const T& factor, const Vector<T, Size>& vec) -> Vector<decltype(f
 	return result;
 }
 
-template<typename T, typename T2, size_t Size>
-auto operator/(const Vector<T, Size>& vec, const T2& factor) -> Vector<decltype(vec[0] / factor), Size> {
+template<typename T1, typename T2, size_t Size>
+auto operator/(const Vector<T1, Size>& vec, const T2& factor) -> Vector<decltype(vec[0] / factor), Size> {
 	Vector<decltype(vec[0] / factor), Size> result;
 	for (size_t i = 0; i < Size; i++) {
 		result[i] = vec[i] / factor;
@@ -218,50 +233,60 @@ Vector<T, Size> operator-(const Vector<T, Size>& vec) {
 	return result;
 }
 
-template<typename T, typename T2, size_t Size>
-Vector<T, Size>& operator+=(Vector<T, Size>& vec, const Vector<T2, Size>& other) {
+template<typename T1, typename T2, size_t Size>
+Vector<T1, Size>& operator+=(Vector<T1, Size>& vec, const Vector<T2, Size>& other) {
 	for (size_t i = 0; i < Size; i++) {
 		vec[i] += other[i];
 	}
 	return vec;
 }
 
-template<typename T, typename T2, size_t Size>
-Vector<T, Size>& operator-=(Vector<T, Size>& vec, const Vector<T2, Size>& other) {
+template<typename T1, typename T2, size_t Size>
+Vector<T1, Size>& operator-=(Vector<T1, Size>& vec, const Vector<T2, Size>& other) {
 	for (size_t i = 0; i < Size; i++) {
 		vec[i] -= other[i];
 	}
 	return vec;
 }
 
-template<typename T, typename T2, size_t Size>
-Vector<T, Size>& operator*=(Vector<T, Size>& vec, const T2& factor) {
+template<typename T1, typename T2, size_t Size>
+Vector<T1, Size>& operator*=(Vector<T1, Size>& vec, const T2& factor) {
 	for (size_t i = 0; i < Size; i++) {
 		vec[i] *= factor;
 	}
 	return vec;
 }
 
-template<typename T, typename T2, size_t Size>
-Vector<T, Size>& operator/=(Vector<T, Size>& vec, const T2& factor) {
+template<typename T1, typename T2, size_t Size>
+Vector<T1, Size>& operator/=(Vector<T1, Size>& vec, const T2& factor) {
 	for (size_t i = 0; i < Size; i++) {
 		vec[i] /= factor;
 	}
 	return vec;
 }
 
-template<typename T, typename T2>
-auto operator%(const Vector<T, 2>& first, const Vector<T2, 2>& second) -> decltype(first[0] * second[1] - first[1] * second[0]) {
+template<typename T1, typename T2>
+auto operator%(const Vector<T1, 2>& first, const Vector<T2, 2>& second) -> decltype(first[0] * second[1] - first[1] * second[0]) {
 	return first[0] * second[1] - first[1] * second[0];
 }
 
-template<typename T, typename T2>
-auto operator%(const Vector<T, 3>& first, const Vector<T2, 3>& second) -> Vector<decltype(first[1] * second[2] - first[2] * second[1]), 3> {
+template<typename T1, typename T2>
+auto cross(const Vector<T1, 2>& first, const Vector<T2, 2>& second) -> decltype(first[0] * second[1] - first[1] * second[0]) {
+	return first % second;
+}
+
+template<typename T1, typename T2>
+auto operator%(const Vector<T1, 3>& first, const Vector<T2, 3>& second) -> Vector<decltype(first[1] * second[2] - first[2] * second[1]), 3> {
 	return Vector<decltype(first[1] * second[2] - first[2] * second[1]), 3>{
 		first[1] * second[2] - first[2] * second[1],
 			first[2] * second[0] - first[0] * second[2],
 			first[0] * second[1] - first[1] * second[0]
 	};
+}
+
+template<typename T1, typename T2>
+auto cross(const Vector<T1, 3>& first, const Vector<T2, 3>& second)->Vector<decltype(first[1] * second[2] - first[2] * second[1]), 3> {
+	return first % second;
 }
 
 template<typename T, size_t Size>
@@ -289,15 +314,24 @@ T lengthSquared(const Vector<T, Size>& vec) {
 }
 
 template<typename T, size_t Size>
-bool isLongerThan(const Vector<T, Size>& vec, const T& length) {
+auto length(const Vector<T, Size>& vec) {
+	return sqrt(lengthSquared(vec));
+}
+
+template<typename T>
+T length(const Vector<T, 2>& vec) {
+	return hypot(vec[0], vec[1]);
+}
+
+template<typename T1, typename T2, size_t Size>
+bool isLongerThan(const Vector<T1, Size>& vec, const T2& length) {
 	return lengthSquared(vec) > length * length;
 }
 
-template<typename T, size_t Size>
-bool isShorterThan(const Vector<T, Size>& vec, const T& length) {
+template<typename T1, typename T2, size_t Size>
+bool isShorterThan(const Vector<T1, Size>& vec, const T2& length) {
 	return lengthSquared(vec) < length* length;
 }
-
 
 /**
 * used to project the result of a dotproduct back onto the original vector

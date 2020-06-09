@@ -835,6 +835,10 @@ Matrix<T, Size, Size> operator~(const Matrix<T, Size, Size>& matrix) {
 	return result;
 }
 
+template<typename T, std::size_t Size>
+Matrix<T, Size, Size> inverse(const Matrix<T, Size, Size>& matrix) {
+	return ~matrix;
+}
 
 /*
 	===== Everything symmetric matrix ===== 
@@ -1000,6 +1004,11 @@ SymmetricMatrix<T, Size> operator~(const SymmetricMatrix<T, Size>& matrix) {
 	return result;
 }
 
+template<typename T, std::size_t Size>
+SymmetricMatrix<T, Size> inverse(const SymmetricMatrix<T, Size>& matrix) {
+	return ~matrix;
+}
+
 /*
 	===== Everything Diagonal Matrix =====
 */
@@ -1121,6 +1130,11 @@ DiagonalMatrix<T, Size> operator~(const DiagonalMatrix<T, Size>& matrix) {
 		result[i] = 1 / matrix[i];
 	}
 	return result;
+}
+
+template<typename T, std::size_t Size>
+DiagonalMatrix<T, Size> inverse(const DiagonalMatrix<T, Size>& matrix) {
+	return ~matrix;
 }
 
 /*

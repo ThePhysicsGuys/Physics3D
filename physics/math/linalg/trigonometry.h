@@ -5,7 +5,6 @@
 #include <cmath>
 
 
-
 // vec
 template<typename T, size_t Size>
 Vector<T, Size> withLength(const Vector<T, Size>& vec, const T& newLength) {
@@ -26,16 +25,6 @@ Vector<T, Size> minLength(const Vector<T, Size>& vec, const T& minLength) {
 		return withLength(vec, minLength);
 	else
 		return vec;
-}
-
-template<typename T, size_t Size>
-auto length(const Vector<T, Size>& vec) {
-	return sqrt(lengthSquared(vec));
-}
-
-template<typename T>
-T length(const Vector<T, 2> & vec) {
-	return hypot(vec[0], vec[1]);
 }
 
 template<typename T, size_t Size>
