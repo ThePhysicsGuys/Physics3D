@@ -108,6 +108,34 @@ struct Vector<T, 3> {
 	const T& operator[](size_t index) const { 
 		return data[index];
 	}
+	
+	static constexpr Vector<T, 3> X_AXIS() {
+		return Vector<T, 3>(static_cast<T>(1), static_cast<T>(0), static_cast<T>(0));
+	}
+
+	static constexpr Vector<T, 3> Y_AXIS() {
+		return Vector<T, 3>(static_cast<T>(0), static_cast<T>(1), static_cast<T>(0));
+	}
+
+	static constexpr Vector<T, 3> Z_AXIS() {
+		return Vector<T, 3>(static_cast<T>(0), static_cast<T>(0), static_cast<T>(1));
+	}
+
+	static constexpr Vector<T, 3> X_AXIS_NEG() {
+		return Vector<T, 3>(static_cast<T>(1), static_cast<T>(0), static_cast<T>(0));
+	}
+
+	static constexpr Vector<T, 3> Y_AXIS_NEG() {
+		return Vector<T, 3>(static_cast<T>(0), static_cast<T>(-1), static_cast<T>(0));
+	}
+
+	static constexpr Vector<T, 3> Z_AXIS_NEG() {
+		return Vector<T, 3>(static_cast<T>(0), static_cast<T>(0), static_cast<T>(-1));
+	}
+
+	static constexpr Vector<T, 3> ZEROS() {
+		return Vector<T, 3>(static_cast<T>(0), static_cast<T>(0), static_cast<T>(0));
+	}
 };
 
 template<typename T>
@@ -197,7 +225,7 @@ auto operator-(const Vector<T1, Size>& a, const Vector<T2, Size>& b) -> Vector<d
 	return result;
 }
 
-template<typename T1, typename T2, size_t Size>
+template<typename T1, typename T2, size_t Size, typename = typename std::enable_if<std::is_arithmetic<T2>::value, T2>::type>
 auto operator*(const Vector<T1, Size>& vec, const T2& factor) -> Vector<decltype(vec[0] * factor), Size> {
 	Vector<decltype(vec[0] * factor), Size> result;
 	for (size_t i = 0; i < Size; i++) {
@@ -206,8 +234,8 @@ auto operator*(const Vector<T1, Size>& vec, const T2& factor) -> Vector<decltype
 	return result;
 }
 
-template<typename T, size_t Size>
-auto operator*(const T& factor, const Vector<T, Size>& vec) -> Vector<decltype(factor * vec[0]), Size> {
+template<typename T1, typename T2, size_t Size, typename = typename std::enable_if<std::is_arithmetic<T1>::value, T1>::type>
+auto operator*(const T1& factor, const Vector<T2, Size>& vec) -> Vector<decltype(factor * vec[0]), Size> {
 	Vector<decltype(factor * vec[0]), Size> result;
 	for (size_t i = 0; i < Size; i++) {
 		result[i] = factor * vec[i];
@@ -215,7 +243,7 @@ auto operator*(const T& factor, const Vector<T, Size>& vec) -> Vector<decltype(f
 	return result;
 }
 
-template<typename T1, typename T2, size_t Size>
+template<typename T1, typename T2, size_t Size, typename = typename std::enable_if<std::is_arithmetic<T2>::value, T2>::type>
 auto operator/(const Vector<T1, Size>& vec, const T2& factor) -> Vector<decltype(vec[0] / factor), Size> {
 	Vector<decltype(vec[0] / factor), Size> result;
 	for (size_t i = 0; i < Size; i++) {

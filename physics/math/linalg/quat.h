@@ -22,7 +22,7 @@ struct Quaternion {
 	};
 
 	Quaternion() : w(0), i(0), j(0), k(0) {}
-	Quaternion(T w, T i, T j, T l) : w(w), i(i), j(j), k(k) {}
+	Quaternion(T w, T i, T j, T k) : w(w), i(i), j(j), k(k) {}
 	Quaternion(T v) : w(v), i(v), j(v), k(v) {}
 	Quaternion(T w, Vector<T, 3> v) : w(w), v(v) {}
 
@@ -61,18 +61,18 @@ auto operator*(const Quaternion<T1>& a, const Quaternion<T2>& b) -> Quaternion<d
 }
 
 template<typename T1, typename T2>
-auto operator*(const Quaternion<T1>& a, const Vector<T2, 3>& b) -> Vector<decltype(a.w * b.w - a.i * b.i), 3> {
-	auto t = 2 * cross(a.v, b);
+auto operator*(const Quaternion<T1>& a, const Vector<T2, 3>& b) -> Vector<decltype(a.i * b.x + a.j * b.y), 3> {
+	auto t = static_cast<decltype(a.i * b.x + a.j * b.y)>(2) * cross(a.v, b);
 	return b + a.w * t + cross(a.v, t);
 }
 
-template<typename T1, typename T2>
-auto operator*(const Quaternion<T1>& quat, const T2& factor) -> Quaternion<decltype(quat.w* factor)> {
+template<typename T1, typename T2, typename = typename std::enable_if<std::is_arithmetic<T2>::value, T2>::type>
+auto operator*(const Quaternion<T1>& quat, const T2& factor) -> Quaternion<decltype(quat.w * factor)> {
 	return Quaternion<decltype(quat.w * factor)>(quat.w * factor, quat.v * factor);
 }
 
-template<typename T1, typename T2>
-auto operator*(const T1& factor, const Quaternion<T2>& quat) -> Quaternion<decltype(factor* quat.w)> {
+template<typename T1, typename T2, typename = typename std::enable_if<std::is_arithmetic<T1>::value, T1>::type>
+auto operator*(const T1& factor, const Quaternion<T2>& quat) -> Quaternion<decltype(factor * quat.w)> {
 	return Quaternion<decltype(factor * quat.w)>(factor * quat.w, factor * quat.v);
 }
 

@@ -132,8 +132,8 @@ inline SymmetricMatrix<T, 3> RotationTemplate<T>::localToGlobal(const SymmetricM
 	Matrix<T, 3, 3> r = this->rotationMatrix * sm * this->rotationMatrix.transpose();
 	return SymmetricMatrix<T, 3>{
 		r[0][0],
-			r[1][0], r[1][1],
-			r[2][0], r[2][1], r[2][2]
+		r[1][0], r[1][1],
+		r[2][0], r[2][1], r[2][2]
 	};
 }
 
@@ -150,8 +150,8 @@ inline SymmetricMatrix<T, 3> RotationTemplate<T>::globalToLocal(const SymmetricM
 	Matrix<T, 3, 3> r = this->rotationMatrix.transpose() * sm * this->rotationMatrix;
 	return SymmetricMatrix<T, 3>{
 		r[0][0],
-			r[1][0], r[1][1],
-			r[2][0], r[2][1], r[2][2]
+		r[1][0], r[1][1],
+		r[2][0], r[2][1], r[2][2]
 	};
 }
 

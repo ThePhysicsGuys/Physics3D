@@ -488,7 +488,7 @@ void BigFrame::renderECSNode(Engine::Node* node) {
 		// Rename
 		if (ImGui::BeginMenu("Rename")) {
 			char* buffer = new char[node->getName().size() + 1];
-			strcpy(buffer, node->getName().c_str());
+			//strcpy(buffer, node->getName().c_str());
 			ImGui::Text("Edit name:");
 			ImGui::InputText("##edit", buffer, IM_ARRAYSIZE(buffer));
 			if (ImGui::Button("Apply")) {

@@ -2,8 +2,8 @@
 
 #include "compare.h"
 #include "../physics/misc/toString.h"
-
 #include "../physics/math/linalg/vec.h"
+#include "../physics/math/linalg/quat.h"
 #include "../physics/math/linalg/mat.h"
 #include "../physics/math/linalg/trigonometry.h"
 #include "../physics/math/linalg/misc.h"
@@ -12,9 +12,18 @@
 #include "../physics/math/mathUtil.h"
 #include "../physics/math/taylorExpansion.h"
 #include "../physics/math/predefinedTaylorExpansions.h"
-
+#include "../physics/math/linalg/commonMatrices.h"
 
 #define ASSERT(condition) ASSERT_TOLERANT(condition, 0.00000001)
+
+TEST_CASE(quaternionRotations) {
+	Vec3 v = Vec3::Y_AXIS();
+	Quat4 q = QROT_X_180(int);
+
+	Vec3 r = q * v;
+
+	ASSERT(r == Vec3i::Y_AXIS_NEG());
+}
 
 TEST_CASE(subMatrixOperations) {
 	Matrix<int, 3, 5> mat{
