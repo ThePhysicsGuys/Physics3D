@@ -430,6 +430,7 @@ TriangleMesh stripUnusedVertices(const Vec3f* vertices, const Triangle* triangle
 			result.setVertex(i, vertices[i]);
 		}
 	}
+	delete[] vertexIsReferenced;
 	for(int i = 0; i < triangleCount; i++) {
 		Triangle t = triangles[i];
 		for(std::pair<int, int>& sub : substitutions){

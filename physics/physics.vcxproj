@@ -277,6 +277,7 @@
     <ClCompile Include="math\linalg\eigen.cpp" />
     <ClCompile Include="math\linalg\largeMatrix.cpp" />
     <ClCompile Include="math\linalg\trigonometry.cpp" />
+    <ClCompile Include="math\predefinedTaylorExpansions.cpp" />
     <ClCompile Include="misc\filters\visibilityFilter.cpp" />
     <ClCompile Include="misc\shapeLibrary.cpp" />
     <ClCompile Include="misc\validityHelper.cpp" />

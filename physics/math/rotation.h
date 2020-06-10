@@ -129,12 +129,7 @@ rot.localToGlobal(sm * v) == rot.localToGlobal(sm) * rot.localToGlobal(v)
 */
 template<typename T>
 inline SymmetricMatrix<T, 3> RotationTemplate<T>::localToGlobal(const SymmetricMatrix<T, 3>& sm) const {
-	Matrix<T, 3, 3> r = this->rotationMatrix * sm * this->rotationMatrix.transpose();
-	return SymmetricMatrix<T, 3>{
-		r[0][0],
-		r[1][0], r[1][1],
-		r[2][0], r[2][1], r[2][2]
-	};
+	return mulSymmetricLeftRightTranspose(sm, this->rotationMatrix);
 }
 
 /*
@@ -147,12 +142,7 @@ rot.globalToLocal(sm * v) == rot.globalToLocal(sm) * rot.globalToLocal(v)
 */
 template<typename T>
 inline SymmetricMatrix<T, 3> RotationTemplate<T>::globalToLocal(const SymmetricMatrix<T, 3>& sm) const {
-	Matrix<T, 3, 3> r = this->rotationMatrix.transpose() * sm * this->rotationMatrix;
-	return SymmetricMatrix<T, 3>{
-		r[0][0],
-		r[1][0], r[1][1],
-		r[2][0], r[2][1], r[2][2]
-	};
+	return mulSymmetricLeftTransposeRight(sm, this->rotationMatrix);
 }
 
 template<typename T>

@@ -154,6 +154,11 @@ bool tolerantEquals(const TaylorExpansion<T, DerivationCount>& first, const Tayl
 	return true;
 }
 
+template<typename Tol, typename T, typename T2, std::size_t DerivationCount>
+bool tolerantEquals(const FullTaylorExpansion<T, T2, DerivationCount>& first, const FullTaylorExpansion<T, T2, DerivationCount>& second, Tol tolerance) {
+	return tolerantEquals(first.constantValue, second.constantValue, tolerance) && tolerantEquals(first.derivatives, second.derivatives, tolerance);
+}
+
 template<typename Tol>
 bool tolerantEquals(const TranslationalMotion& first, const TranslationalMotion& second, Tol tolerance) {
 	return tolerantEquals(first.translation, second.translation, tolerance);

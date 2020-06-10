@@ -5,7 +5,6 @@
 #include "inertia.h"
 #include "world.h"
 #include "math/linalg/mat.h"
-#include "math/linalg/misc.h"
 #include "math/linalg/trigonometry.h"
 
 #include "debug.h"

@@ -361,6 +361,41 @@ bool isShorterThan(const Vector<T1, Size>& vec, const T2& length) {
 	return lengthSquared(vec) < length* length;
 }
 
+// vec
+template<typename T, size_t Size>
+Vector<T, Size> withLength(const Vector<T, Size>& vec, const T& newLength) {
+	return vec * (newLength / length(vec));
+}
+
+template<typename T, size_t Size>
+Vector<T, Size> maxLength(const Vector<T, Size>& vec, const T& maxLength) {
+	if(isLongerThan(vec, maxLength))
+		return withLength(vec, maxLength);
+	else
+		return vec;
+}
+
+template<typename T, size_t Size>
+Vector<T, Size> minLength(const Vector<T, Size>& vec, const T& minLength) {
+	if(isShorterThan(vec, minLength))
+		return withLength(vec, minLength);
+	else
+		return vec;
+}
+
+template<typename T, size_t Size>
+Vector<T, Size> normalize(const Vector<T, Size>& vec) {
+	return vec / length(vec);
+}
+
+template<typename T, size_t Size>
+Vector<T, Size> abs(const Vector<T, Size>& vec) {
+	Vector<T, Size> result;
+	for(size_t i = 0; i < Size; i++)
+		result[i] = fabs(vec[i]);
+	return result;
+}
+
 /**
 * used to project the result of a dotproduct back onto the original vector
 * @param v the result of dot(onto, otherVec)
@@ -436,4 +471,82 @@ Vector<T, Size> elementWiseCube(const Vector<T, Size>& vec) {
 	for (size_t i = 0; i < Size; i++)
 		result[i] = vec[i] * vec[i] * vec[i];
 	return result;
+}
+
+template<typename T1, typename T2>
+auto mulOppositesBiDir(const Vector<T1, 3> & first, const Vector<T2, 3> & second) -> Vector<decltype(first.x * second.y + first.y * second.y), 3> {
+	return Vector<decltype(first.x * second.y + first.y * second.x), 3>(
+		first.y * second.z + first.z * second.y,
+		first.z * second.x + first.x * second.z,
+		first.x * second.y + first.y * second.x
+	);
+}
+template<typename T>
+Vector<T, 3> mulSelfOpposites(const Vector<T, 3> & vec) {
+	return Vector<T, 3>(vec.y * vec.z, vec.z * vec.x, vec.x * vec.y);
+}
+
+template<typename T, size_t Size>
+size_t getMaxElementIndex(const Vector<T, Size>& vec) {
+	size_t max = 0;
+
+	for(size_t i = 1; i < Size; i++) {
+		if(vec[i] > vec[max]) {
+			max = i;
+		}
+	}
+	return max;
+}
+template<typename T, size_t Size>
+size_t getMinElementIndex(const Vector<T, Size>& vec) {
+	size_t min = 0;
+
+	for(size_t i = 1; i < Size; i++) {
+		if(vec[i] > vec[min]) {
+			min = i;
+		}
+	}
+	return min;
+}
+template<typename T, size_t Size>
+size_t getAbsMaxElementIndex(const Vector<T, Size>& vec) {
+	size_t max = 0;
+
+	for(size_t i = 1; i < Size; i++) {
+		if(std::abs(vec[i]) > std::abs(vec[max])) {
+			max = i;
+		}
+	}
+	return max;
+}
+
+template<typename T, size_t Size>
+size_t getAbsMinElementIndex(const Vector<T, Size>& vec) {
+	size_t min = 0;
+
+	for(size_t i = 1; i < Size; i++) {
+		if(std::abs(vec[i]) < std::abs(vec[min])) {
+			min = i;
+		}
+	}
+	return min;
+}
+
+template<typename T, size_t Size>
+T sumElements(const Vector<T, Size>& vec) {
+	T sum = vec[0];
+	for(size_t i = 1; i < Size; i++) {
+		sum += vec[i];
+	}
+	return sum;
+}
+
+template<typename T, size_t Size>
+auto angleBetween(const Vector<T, Size>& first, const Vector<T, Size>& second) -> decltype(acos(normalize(first)* normalize(second))) {
+	return acos(normalize(first) * normalize(second));
+}
+
+template<typename T, size_t Size>
+Vector<T, Size> bisect(const Vector<T, Size>& first, const Vector<T, Size>& second) {
+	return first * length(second) + second * length(first);
 }

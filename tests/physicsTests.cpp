@@ -9,7 +9,7 @@
 #include "../physics/world.h"
 #include "../physics/inertia.h"
 #include "../physics/misc/shapeLibrary.h"
-#include "../physics/math/linalg/misc.h"
+#include "../physics/math/linalg/trigonometry.h"
 #include "../physics/math/linalg/eigen.h"
 #include "../physics/geometry/shape.h"
 #include "../physics/geometry/shapeCreation.h"

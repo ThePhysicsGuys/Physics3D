@@ -1232,3 +1232,66 @@ Matrix<T, Size, 1> toColMatrix(const Vector<T, Size>& vec) {
 	}
 	return result;
 }
+
+/*
+	computes 
+	m * sym * m.transpose()
+*/
+template<typename T, std::size_t Size>
+SymmetricMatrix<T, Size> mulSymmetricLeftRightTranspose(const SymmetricMatrix<T, Size>& sym, const SquareMatrix<T, Size>& m) {
+	SquareMatrix<T, Size> symResult = m * sym * m.transpose();
+	SymmetricMatrix<T, Size> result;
+	for(std::size_t resultRow = 0; resultRow < Size; resultRow++) {
+		for(std::size_t resultCol = 0; resultCol <= resultRow; resultCol++) {
+			result[resultRow][resultCol] = symResult[resultRow][resultCol];
+		}
+	}
+	return result;
+}
+/*
+	computes
+	m.transpose() * sym * m
+*/
+template<typename T, std::size_t Size>
+SymmetricMatrix<T, Size> mulSymmetricLeftTransposeRight(const SymmetricMatrix<T, Size>& sym, const SquareMatrix<T, Size>& m) {
+	SquareMatrix<T, Size> symResult = m.transpose() * sym * m;
+	SymmetricMatrix<T, Size> result;
+	for(std::size_t resultRow = 0; resultRow < Size; resultRow++) {
+		for(std::size_t resultCol = 0; resultCol <= resultRow; resultCol++) {
+			result[resultRow][resultCol] = symResult[resultRow][resultCol];
+		}
+	}
+	return result;
+}
+
+/*
+	computes
+	m1 * sym * m2.transpose() + m2 * sym * m1.transpose()
+*/
+template<typename T, std::size_t Size>
+SymmetricMatrix<T, Size> mulSymmetricSumRightTransposed(const SymmetricMatrix<T, Size>& sym, const SquareMatrix<T, Size>& m1, const SquareMatrix<T, Size>& m2) {
+	SquareMatrix<T, Size> symResult = m1 * sym * m2.transpose() + m2 * sym * m1.transpose();
+	SymmetricMatrix<T, Size> result;
+	for(std::size_t resultRow = 0; resultRow < Size; resultRow++) {
+		for(std::size_t resultCol = 0; resultCol <= resultRow; resultCol++) {
+			result[resultRow][resultCol] = symResult[resultRow][resultCol];
+		}
+	}
+	return result;
+}
+
+/*
+	computes
+	m1.transpose() * sym * m2 + m2.transpose() * sym * m1
+*/
+template<typename T, std::size_t Size>
+SymmetricMatrix<T, Size> mulSymmetricSumLeftTransposed(const SymmetricMatrix<T, Size>& sym, const SquareMatrix<T, Size>& m1, const SquareMatrix<T, Size>& m2) {
+	SquareMatrix<T, Size> symResult = m1.transpose() * sym * m2 + m2.transpose() * sym * m1;
+	SymmetricMatrix<T, Size> result;
+	for(std::size_t resultRow = 0; resultRow < Size; resultRow++) {
+		for(std::size_t resultCol = 0; resultCol <= resultRow; resultCol++) {
+			result[resultRow][resultCol] = symResult[resultRow][resultCol];
+		}
+	}
+	return result;
+}

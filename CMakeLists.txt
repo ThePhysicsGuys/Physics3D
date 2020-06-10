@@ -48,6 +48,7 @@ add_library(physics STATIC
 
   physics/math/cframe.cpp
   physics/math/fix.cpp
+  physics/math/predefinedTaylorExpansions.cpp
 
   physics/math/linalg/eigen.cpp
   physics/math/linalg/largeMatrix.cpp
@@ -254,6 +255,8 @@ add_executable(application
   application/picker/ray.cpp
 
   application/shader/shaders.cpp
+  application/shader/basicShader.cpp
+  application/shader/shaderBase.cpp
 
   application/view/camera.cpp
   application/view/frames.cpp
