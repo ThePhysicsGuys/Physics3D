@@ -568,39 +568,39 @@ static std::pair<Vec3, double> getRecursiveCenterOfMass(const Physical& phys) {
 	return std::pair<Vec3, double>(totalCOM / totalMass, totalMass);
 }
 
-static SymmetricMat3 getRecursiveInertia(const Physical& phys, const CFrame& offsetCFrame, const Vec3& localCOMOfMain) {
-	SymmetricMat3 totalInertia = getTransformedInertiaAroundCenterOfMass(phys.rigidBody.inertia, phys.rigidBody.mass, phys.rigidBody.localCenterOfMass, offsetCFrame, localCOMOfMain);
+static SymmetricMat3 getRecursiveInertia(const Physical& phys, const CFrame& offsetCFrame) {
+	SymmetricMat3 totalInertia = getTransformedInertiaAroundCenterOfMass(phys.rigidBody.inertia, phys.rigidBody.mass, phys.rigidBody.localCenterOfMass, offsetCFrame);
 
 	for(const ConnectedPhysical& conPhys : phys.childPhysicals) {
 		CFrame cframeToConPhys = conPhys.getRelativeCFrameToParent();
 
 		CFrame offsetOfConPhys = offsetCFrame.localToGlobal(cframeToConPhys);
 
-		totalInertia += getRecursiveInertia(conPhys, offsetOfConPhys, localCOMOfMain);
+		totalInertia += getRecursiveInertia(conPhys, offsetOfConPhys);
 	}
 	return totalInertia;
 }
 SymmetricMat3 MotorizedPhysical::getRotationalInertia() const {
-	return getRecursiveInertia(*this, CFrame(0, 0, 0), totalCenterOfMass);
+	return getRecursiveInertia(*this, CFrame(-totalCenterOfMass));
 }
 
-/*static FullTaylor<SymmetricMat3> getRecursiveInertiaAndDerivatives(const Physical& phys, const CFrame& offsetCFrame, const Vec3& localCOMOfMain, const TranslationalMotion& internalMotionOfCOM) {
-	SymmetricMat3 totalInertia = getTransformedInertiaAroundCenterOfMass(phys.rigidBody.inertia, phys.rigidBody.localCenterOfMass, offsetCFrame, localCOMOfMain, phys.rigidBody.mass);
+static FullTaylor<SymmetricMat3> getRecursiveInertiaAndDerivatives(const Physical& phys, const RelativeMotion& offsetMotion) {
+	FullTaylor<SymmetricMat3> totalInertia = getTransformedInertiaDerivativesAroundCenterOfMass(phys.rigidBody.inertia, phys.rigidBody.mass, phys.rigidBody.localCenterOfMass, offsetMotion.locationOfRelativeMotion, offsetMotion.relativeMotion);
 
 	for(const ConnectedPhysical& conPhys : phys.childPhysicals) {
-		CFrame cframeToConPhys = conPhys.getRelativeCFrameToParent();
+		RelativeMotion conPhysRelativeMotion = conPhys.getRelativeMotionBetweenParentAndSelf();
 
-		CFrame offsetOfConPhys = offsetCFrame.localToGlobal(cframeToConPhys);
+		RelativeMotion motionOfConPhys = offsetMotion + conPhysRelativeMotion;
 
-		totalInertia += getRecursiveInertia(conPhys, offsetOfConPhys, localCOMOfMain);
+		totalInertia += getRecursiveInertiaAndDerivatives(conPhys, motionOfConPhys);
 	}
 	return totalInertia;
-}*/
+}
 
 FullTaylor<SymmetricMat3> MotorizedPhysical::getRotationalInertiaTaylorExpansion() const {
 	TranslationalMotion motionOfCenterOfMass = this->getInternalMotionOfCenterOfMass();
 
-	return FullTaylor<SymmetricMat3>();
+	return getRecursiveInertiaAndDerivatives(*this, RelativeMotion(-motionOfCenterOfMass, CFrame(-totalCenterOfMass)));
 }
 
 void MotorizedPhysical::refreshPhysicalProperties() {

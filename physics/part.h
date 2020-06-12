@@ -60,6 +60,7 @@ public:
 	Part() = default;
 	Part(const Shape& shape, const GlobalCFrame& position, const PartProperties& properties);
 	Part(const Shape& shape, Part& attachTo, const CFrame& attach, const PartProperties& properties);
+	Part(const Shape& shape, Part& attachTo, HardConstraint* constraint, const CFrame& attachToParent, const CFrame& attachToThis, const PartProperties& properties);
 	~Part();
 
 	Part(const Part& other) = delete;

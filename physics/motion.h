@@ -93,6 +93,14 @@ struct Motion {
 		translation(velocity, acceleration),
 		rotation(angularVelocity, angularAcceleration) {}
 
+	inline Motion(TranslationalMotion translationMotion) :
+		translation(translationMotion),
+		rotation() {}
+
+	inline Motion(RotationalMotion rotationMotion) :
+		translation(),
+		rotation(rotationMotion) {}
+
 	inline Motion(TranslationalMotion translationMotion, RotationalMotion rotationMotion) :
 		translation(translationMotion),
 		rotation(rotationMotion) {}

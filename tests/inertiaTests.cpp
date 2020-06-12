@@ -93,3 +93,27 @@ TEST_CASE(inertiaTransformationDerivatives) {
 
 	ASSERT(estimatedTaylor == inertialTaylor);
 }
+TEST_CASE(inertiaTransformationDerivativesForOffsetCenterOfMass) {
+	Vec3 com = Library::trianglePyramid.getCenterOfMass();
+
+	SymmetricMat3 inert = Library::trianglePyramid.getInertia(CFrame());
+	double mass = Library::trianglePyramid.getVolume();
+
+	RotationalMotion rotation(Vec3(0.3, 0.4, 0.5), Vec3(-0.8, 0.5, -0.3));
+	TranslationalMotion translation(Vec3(-0.23, 0.25, -0.7), Vec3(-0.2, -0.7, 0.333));
+	Motion motion(translation, rotation);
+
+	Vec3 startingTranslation(1.2, -0.7, 2.1);
+	Rotation startingRotation = Rotation::fromEulerAngles(0.5, -0.6, 0.7);
+	CFrame start(startingTranslation, startingRotation);
+
+	std::array<CFrame, 3> cframes = computeCFrameOverTime(start, motion, DELTA_T);
+	std::array<SymmetricMat3, 3> inertias;
+	for(int i = 0; i < 3; i++) {
+		inertias[i] = getTransformedInertiaAroundCenterOfMass(inert, mass, com, cframes[i]);
+	}
+	FullTaylor<SymmetricMat3> estimatedTaylor = estimateDerivatives(inertias, DELTA_T);
+	FullTaylor<SymmetricMat3> inertialTaylor = getTransformedInertiaDerivativesAroundCenterOfMass(inert, mass, com, start, motion);
+
+	ASSERT(estimatedTaylor == inertialTaylor);
+}

@@ -25,11 +25,10 @@ SymmetricMat3 getTransformedInertiaAroundCenterOfMass(const SymmetricMat3& origi
 
 /*
 computes a transformed inertial matrix, where originalInertia is the inertia around the center of mass of the transformed object
-totalCenterOfMass is the center around which the new inertia must be calculated
 localCenterOfMass is the center of mass of the transformed object
-offsetCFrame is the offset of the object to it's new position
+offsetCFrame is the offset of the object to it's new position relative to the total Center Of Mass
 */
-SymmetricMat3 getTransformedInertiaAroundCenterOfMass(const SymmetricMat3& originalInertia, double mass, const Vec3& localCenterOfMass, const CFrame& offsetCFrame, const Vec3& totalCenterOfMass);
+SymmetricMat3 getTransformedInertiaAroundCenterOfMass(const SymmetricMat3& originalInertia, double mass, const Vec3& localCenterOfMass, const CFrame& offsetCFrame);
 
 /*
 computes a transformed inertial matrix, where originalInertia is the inertia around the center of mass of the transformed object
@@ -52,8 +51,15 @@ FullTaylor<SymmetricMat3> getTranslatedInertiaDerivativesAroundCenterOfMass(cons
 
 /*
 computes a transformed inertial matrix, where originalInertia is the inertia around the center of mass of the transformed object
-newCenterOfMass is the center around which the new inertia must be calculated
 startingCFrame is the current relative position
 motion is the relative motion of the offset object's center of mass relative to the total center of mass, in the coordinate system of the total center of mass.
 */
 FullTaylor<SymmetricMat3> getTransformedInertiaDerivativesAroundCenterOfMass(const SymmetricMat3& originalInertia, double mass, const CFrame& startingCFrame, const Motion& motion);
+
+/*
+computes the derivatives of a transformed inertial matrix, where originalInertia is the inertia around the center of mass of the transformed object
+localCenterOfMass is the local center of mass in the local coordinate system of startingCFrame
+startingCFrame is the current relative position
+motion is the relative motion of the offset object's center of mass relative to the total center of mass, in the coordinate system of the total center of mass.
+*/
+FullTaylor<SymmetricMat3> getTransformedInertiaDerivativesAroundCenterOfMass(const SymmetricMat3& originalInertia, double mass, const Vec3& localCenterOfMass, const CFrame& startingCFrame, const Motion& motion);

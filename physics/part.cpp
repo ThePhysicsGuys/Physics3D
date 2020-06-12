@@ -21,15 +21,18 @@ namespace {
 	}
 }
 
-Part::Part(const Shape& shape, const GlobalCFrame& position, const PartProperties& properties)
-	: hitbox(shape), cframe(position), properties(properties) {
-	recalculate(*this);
+Part::Part(const Shape& shape, const GlobalCFrame& position, const PartProperties& properties) : 
+	hitbox(shape), properties(properties), maxRadius(shape.getMaxRadius()), cframe(position) {
 }
 
-Part::Part(const Shape& shape, Part& attachTo, const CFrame& attach, const PartProperties& properties)
-	: hitbox(shape), cframe(attachTo.cframe.localToGlobal(attach)), properties(properties) {
+Part::Part(const Shape& shape, Part& attachTo, const CFrame& attach, const PartProperties& properties) : 
+	hitbox(shape), properties(properties), maxRadius(shape.getMaxRadius()), cframe(attachTo.cframe.localToGlobal(attach)) {
 	attachTo.attach(this, attach);
-	recalculate(*this);
+}
+
+Part::Part(const Shape& shape, Part& attachTo, HardConstraint* constraint, const CFrame& attachToParent, const CFrame& attachToThis, const PartProperties& properties) : 
+	hitbox(shape), properties(properties), maxRadius(shape.getMaxRadius()), cframe(attachTo.getCFrame().localToGlobal(attachToParent.localToGlobal(constraint->getRelativeCFrame()).localToGlobal(attachToThis))) {
+	attachTo.attach(this, constraint, attachToParent, attachToThis);
 }
 
 Part::~Part() {
