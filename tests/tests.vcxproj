@@ -54,6 +54,7 @@
     <ClInclude Include="compare.h" />
     <ClInclude Include="estimateMotion.h" />
     <ClInclude Include="randomValues.h" />
+    <ClInclude Include="simulation.h" />
     <ClInclude Include="testsMain.h" />
     <ClInclude Include="testValues.h" />
   </ItemGroup>

@@ -2,6 +2,7 @@
 
 #include "compare.h"
 #include "testValues.h"
+#include "simulation.h"
 #include "../physics/misc/toString.h"
 #include "../physics/math/linalg/vec.h"
 #include "../physics/math/linalg/quat.h"
@@ -441,7 +442,7 @@ TEST_CASE(testGenerateFullTaylorForRotationMatrixFromRotationVectorBehaviourNear
 	}
 }
 
-TEST_CASE(testRotationDerivsEquivalence) {
+TEST_CASE(testRotationDerivs) {
 	double DELTA_T = 0.00001;
 	Mat3 rot0 = rotationMatrixfromEulerAngles(0.3, -0.5, 0.7);
 	for(Vec3 angularVel : vectors) {
@@ -461,4 +462,16 @@ TEST_CASE(testRotationDerivsEquivalence) {
 			ASSERT_TOLERANT((rot2 + rot0 - 2.0 * rot1) / (DELTA_T * DELTA_T) == rotTaylor.derivatives[1], 0.05 * (lengthSquared(angularVel) + lengthSquared(angularAccel)));
 		}
 	}
+}
+
+TEST_CASE(testSimulation) {
+	FullTaylorExpansion<Vec3, Vec3, 2> realDerivs(Vec3(0.4, -0.6, 0.7), {Vec3(-0.2, 0.4, -0.8), Vec3(0.5, -0.35, 0.7)});
+
+	double deltaT = 0.000001;
+
+	std::array<Vec3, 3> computedPoints = computeTranslationOverTime(realDerivs.constantValue, realDerivs.derivatives, deltaT);
+
+	FullTaylorExpansion<Vec3, Vec3, 2> computedDerivs = estimateDerivatives(computedPoints, deltaT);
+
+	ASSERT_TOLERANT(realDerivs == computedDerivs, 0.0005);
 }
