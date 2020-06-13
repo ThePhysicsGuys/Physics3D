@@ -8,14 +8,12 @@
 
 layout (location = 0) in vec3 vposition;
 
-varying vec3 scattering;
-varying vec3 extinction;
 out vec3 ftextureUV;
 
 uniform mat4 projectionMatrix;
 uniform mat4 viewMatrix;
-uniform vec3 lightDirection;
 uniform vec3 viewPosition;
+uniform vec3 lightDirection;
 
 const float PI = 3.141592654;
 const vec4 Esun = vec4(1.0, 1.0, 1.0, 12.0);
@@ -75,15 +73,11 @@ void main() {
 
 out vec4 outColor;
 
-varying vec3 scattering;
-varying vec3 extinction;
 in vec3 ftextureUV;
 
 uniform samplerCube skyboxTexture;
 
 void main() {    
-	//vec4 surface = vec4(0.0, 0.0, 0.0, 1.0);
-	//vec4 sky = (surface * vec4(extinction, 1.0)) + vec4(scattering, 1.0);
 	vec4 skybox = texture(skyboxTexture, ftextureUV);
 	outColor = skybox;
 }

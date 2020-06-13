@@ -39,7 +39,7 @@ void onInit() {
 	ShaderSource fontShaderSource        = parseShader("FontShader", "../res/shaders/font.shader", getResourceAsString(applicationResources, FONT_SHADER));
 	ShaderSource originShaderSource      = parseShader("OriginShader", "../res/shaders/origin.shader", getResourceAsString(applicationResources, ORIGIN_SHADER));
 	ShaderSource postProcessShaderSource = parseShader("PostProcessShader", "../res/shaders/postProcess.shader", getResourceAsString(applicationResources, POSTPROCESS_SHADER));
-	ShaderSource skyboxShaderSource      = parseShader("SkyBoxShader", "../res/shaders/skybox.shader", getResourceAsString(applicationResources, SKYBOX_SHADER));
+	ShaderSource skyboxShaderSource      = parseShader("SkyboxShader", "../res/shaders/skybox.shader", getResourceAsString(applicationResources, SKYBOX_SHADER));
 	ShaderSource pointShaderSource       = parseShader("PointShader", "../res/shaders/point.shader", getResourceAsString(applicationResources, POINT_SHADER));
 	ShaderSource testShaderSource        = parseShader("TestShader", "../res/shaders/test.shader", getResourceAsString(applicationResources, TEST_SHADER));
 	ShaderSource lineShaderSource        = parseShader("LineShader", "../res/shaders/line.shader", getResourceAsString(applicationResources, LINE_SHADER));
@@ -130,6 +130,7 @@ void DepthShader::updateLight(const Mat4f& lightMatrix) {
 	bind();
 	setUniform("lightMatrix", lightMatrix);
 }
+
 
 // PostProcessShader
 

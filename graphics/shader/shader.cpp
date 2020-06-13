@@ -304,7 +304,9 @@ ShaderSource parseShader(const std::string& name, const std::string& path, std::
 	int lineNumber = 0;
 	while (getline(shaderTextStream, line)) {
 		lineNumber++;
-		if (line.find("[vertex]") != std::string::npos) {
+		if (line == "\r") {
+			continue;
+		} if (line.find("[vertex]") != std::string::npos) {
 			type = ShaderType::VERTEX;
 		} else if (line.find("[fragment]") != std::string::npos) {
 			type = ShaderType::FRAGMENT;
