@@ -225,6 +225,10 @@ void bindTexture2D(GLID id) {
 	glBindTexture(GL_TEXTURE_2D, id);
 }
 
+void activeTexture(GLID unit) {
+	glActiveTexture(GL_TEXTURE0 + unit);
+}
+
 void bindShader(GLID id) {
 	//if (current.program != id) {
 	//	current.program = id;

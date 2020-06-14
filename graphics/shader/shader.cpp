@@ -38,6 +38,10 @@ void Shader::createUniform(const std::string& uniform) {
 	uniforms.insert({ uniform, location });
 }
 
+void Shader::setUniform(const std::string& uniform, GLID value) const {
+	glUniform1i(uniforms.at(uniform), value);
+}
+
 void Shader::setUniform(const std::string& uniform, int value) const {
 	glUniform1i(uniforms.at(uniform), value);
 }

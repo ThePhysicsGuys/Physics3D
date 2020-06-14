@@ -4,87 +4,58 @@
 
 #include "testLayer.h"
 #include "view/screen.h"
-
+#include "../graphics/gui/gui.h"
 #include "../graphics/renderer.h"
 #include "../graphics/shader/shader.h"
 #include "../graphics/mesh/indexedMesh.h"
 #include "../graphics/buffers/frameBuffer.h"
-#include "../graphics/buffers/vertexBuffer.h"
-#include "../graphics/buffers/bufferLayout.h"
-
-#include "../graphics/resource/textureResource.h"
 #include "../engine/resource/meshResource.h"
 #include "../util/resource/resourceManager.h"
-#include "../application/ecs/light.h"
+#include "../engine/meshRegistry.h"
+#include "../graphics/mesh/primitive.h"
+#include "worlds.h"
+#include "imgui/imgui.h"
+#include "../physics/misc/filters/visibilityFilter.h"
+
 #include "application.h"
 #include "shader/shaders.h"
-#include "input/standardInputHandler.h"
-#include "worlds.h"
-#include "../physics/math/mathUtil.h"
-#include "../engine/io/export.h"
 
 namespace Application {
 
-struct Uniform {
-	Mat4f model;
-	Vec4f albedo;
-	Vec3f mrao;
-};
+float near = 0.001;
+float far = 100;
+Mat4f lightProjection = ortho(-25.0, 25.0, -25.0, 25.0, near, far);
+Mat4f lightView = lookAt({ -15.0, 15.0, -15.0 }, { 0.0, 0.0, 0.0 }, { 0.0, 1.0, 0.0 });
 
-std::vector<Light*> llights;
-std::vector<Uniform> testUniforms;
-MeshResource* mesh;
+unsigned int TestLayer::depthMap = 0;
+Mat4f TestLayer::lighSpaceMatrix = lightProjection * lightView;
+
+GLID depthMapFBO;
+
+GLID WIDTH = 1024;
+GLID HEIGHT = 1024;
+
+IndexedMesh* mesh = nullptr;
 
 void TestLayer::onInit() {
-	/*float size = 1.0f;
-	float space = 2.5f;
-	frepeat(row, size) {
-		frepeat(col, size) {
-			frepeat(z, 1) {
-				testUniforms.push_back(
-					{
-						Mat4f {
-							1, 0, 0, (col - size / 2.0f) * space,
-							0, 1, 0, 20+(row - size / 2.0f) * space,
-							0, 0, 1, 0,
-							0, 0, 0, 1,
-						},
-						Vec4f(0.5, 0.1, 0.3, 0.7),
-						Vec3f(row / size, col / size + 0.05f, 1.0f),
-					}
-				);
-			}
-		}
-	}
+	glGenFramebuffers(1, &depthMapFBO);
 
-	BufferLayout layout = BufferLayout(
-		{
-			BufferElement("vModelMatrix", BufferDataType::MAT4, true),
-			BufferElement("vAlbedo", BufferDataType::FLOAT4, true),
-			BufferElement("vMRAo", BufferDataType::FLOAT3, true),
-		}
-	);
-	VertexBuffer* vbo = new VertexBuffer(testUniforms.data(), testUniforms.size() * sizeof(Uniform));
+	glGenTextures(1, &depthMap);
+	glBindTexture(GL_TEXTURE_2D, depthMap);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
+		WIDTH, HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 
-	mesh = ResourceManager::add<MeshResource>("ball", "../res/models/ball.bobj");
-
-	//mesh = ResourceManager::add<MeshResource>("plane", "../res/models/plane.obj");
-	//mesh = ResourceManager::add<MeshResource>("sphere", "../res/models/sphere.obj");
-	
-	mesh->getMesh()->addUniformBuffer(vbo, layout);
-
-	ResourceManager::add<TextureResource>("ball_color", "../res/textures/ball/ball_color.png");
-	ResourceManager::add<TextureResource>("ball_normal", "../res/textures/ball/ball_normal.png");
-	ResourceManager::add<TextureResource>("ball_metallic", "../res/textures/ball/ball_metal.png");
-	ResourceManager::add<TextureResource>("ball_roughness", "../res/textures/ball/ball_gloss.png");
-	ResourceManager::add<TextureResource>("ball_ao", "../res/textures/ball/ball_ao.png");
-
-
-	llights.push_back(new Light(Vec3f(-10,10,10), Color3(300), 1, { 1, 1, 1 }));
-	llights.push_back(new Light(Vec3f(10,10,10), Color3(300), 1, { 1, 1, 1 }));
-	llights.push_back(new Light(Vec3f(-10,-10,10), Color3(300), 1, { 1, 1, 1 }));
-	llights.push_back(new Light(Vec3f(10,-10,10), Color3(300), 1, { 1, 1, 1 }));
-	Shaders::lightingShader.updateLight(llights);*/
+	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void TestLayer::onUpdate() {
@@ -94,11 +65,50 @@ void TestLayer::onUpdate() {
 void TestLayer::onEvent(Engine::Event& event) {
 	using namespace Engine;
 
-	if (event.getType() == EventType::KeyPress) {
-		if (static_cast<KeyPressEvent&>(event).getKey() == Keyboard::KEY_TAB) {
-			llights[0]->position = fromPosition(screen.camera.cframe.position);
-			Shaders::lightingShader.updateLight(llights);
-		}
+}
+
+unsigned int quadVAO = 0;
+unsigned int quadVBO;
+void renderQuad() {
+	if (quadVAO == 0) {
+		float quadVertices[] = {
+			// positions        // texture Coords
+			-1.0f,  1.0f, 0.0f, 1.0f,
+			-1.0f, -1.0f, 0.0f, 0.0f,
+			 1.0f,  1.0f, 1.0f, 1.0f,
+			 1.0f, -1.0f, 1.0f, 0.0f,
+		};
+		// setup plane VAO
+		glGenVertexArrays(1, &quadVAO);
+		glGenBuffers(1, &quadVBO);
+		glBindVertexArray(quadVAO);
+		glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*) 0);
+	}
+	glBindVertexArray(quadVAO);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glBindVertexArray(0);
+}
+
+void TestLayer::renderScene() {
+	std::multimap<int, ExtendedPart*> visibleParts;
+	screen.world->syncReadOnlyOperation([&visibleParts] () {
+		for (ExtendedPart& part : screen.world->iterParts(ALL_PARTS)) 
+			visibleParts.insert({ part.visualData.drawMeshId, &part });
+	});
+
+	for (auto iterator = visibleParts.begin(); iterator != visibleParts.end(); ++iterator) {
+		ExtendedPart* part = (*iterator).second;
+
+		if (part->visualData.drawMeshId == -1)
+			continue;
+
+
+		auto mat = Mat4f(Mat3f(part->getCFrame().getRotation().asRotationMatrix()) * DiagonalMat3f(part->hitbox.scale), Vec3f(part->getCFrame().getPosition() - Position(0, 0, 0)), Vec3f(0.0f, 0.0f, 0.0f), 1.0f);
+		Shaders::depthShader.updateModel(mat);
+		Engine::MeshRegistry::meshes[part->visualData.drawMeshId]->render(part->renderMode);
 	}
 }
 
@@ -107,18 +117,22 @@ void TestLayer::onRender() {
 	using namespace Graphics::Renderer;
 
 	Screen* screen = static_cast<Screen*>(this->ptr);
-	beginScene();
-	enableDepthMask();
-	enableDepthTest();
-	enableCulling();
-	enableBlending();
 
-	Shaders::debugShader.bind();
-	Shaders::debugShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.getPosition());
-	Shaders::debugShader.updateModel(Mat4::IDENTITY());
-	ResourceManager::get<MeshResource>("translate")->getMesh()->render();
+	Shaders::depthShader.bind();
+	Shaders::depthShader.updateLight(lighSpaceMatrix);
+	glViewport(0, 0, WIDTH, HEIGHT);
+	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+	glClear(GL_DEPTH_BUFFER_BIT);
+	glCullFace(GL_FRONT);
+	renderScene();
+	glCullFace(GL_BACK);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0, 0, GUI::windowInfo.dimension.x, GUI::windowInfo.dimension.y);
 
-	endScene();
+	/*Shaders::depthBufferShader.bind();
+	Shaders::depthBufferShader.updatePlanes(near, far);
+	Shaders::depthBufferShader.updateDepthMap(0, depthMap);
+	renderQuad();*/
 }
 
 void TestLayer::onClose() {

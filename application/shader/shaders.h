@@ -20,6 +20,14 @@ struct Light;
 struct Material;
 struct ExtendedPart;
 
+struct DepthBufferShader : public ShaderResource {
+	inline DepthBufferShader() : ShaderResource() {}
+	inline DepthBufferShader(const ShaderSource& shaderSource) : ShaderResource(shaderSource.name, shaderSource.path, shaderSource) {}
+
+	void updateDepthMap(GLID unit, GLID id);
+	void updatePlanes(float near, float far);
+};
+
 struct DebugShader : public StandardMeshShaderBase {
 	inline DebugShader() : StandardMeshShaderBase(), ShaderResource() {}
 	inline DebugShader(const ShaderSource& shaderSource) : StandardMeshShaderBase(shaderSource.name, shaderSource.path, shaderSource), ShaderResource(shaderSource.name, shaderSource.path, shaderSource) {}
@@ -121,6 +129,7 @@ extern MaskShader maskShader;
 extern SkyShader skyShader;
 extern LightingShader lightingShader;
 extern DebugShader debugShader;
+extern DepthBufferShader depthBufferShader;
 
 void onInit();
 void onClose();

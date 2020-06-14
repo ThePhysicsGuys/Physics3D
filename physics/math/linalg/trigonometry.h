@@ -221,7 +221,7 @@ Mat4f ortho(float left, float right, float bottom, float top, float zNear, float
 
 Mat4f perspective(float fov, float aspect, float zNear, float zFar);
 
-Mat4f lookAt(Vec3f from, Vec3f to, Vec3f up = Vec3f(0, 1, 0));
+Mat4f lookAt(const Vec3f& from, const Vec3f& to, const Vec3f& up = Vec3f(0, 1.0f, 0));
 
 template<typename T>
 Matrix<T, 4, 4> rotate(const Matrix<T, 4, 4>&, T angle, T x, T y, T z);

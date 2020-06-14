@@ -58,6 +58,7 @@ layout(location = 10) in vec3 vMRAo;
 smooth out vec3 fPosition;
 smooth out vec2 fUV;
 smooth out vec3 fNormal;
+smooth out vec4 fLightSpacePosition;
 
 flat out vec4 fAlbedo;
 flat out float fMetalness;
@@ -66,6 +67,7 @@ flat out float fAmbientOcclusion;
 
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
+uniform mat4 lightMatrix;
 
 void main() {
 	fAlbedo = vAlbedo;
@@ -77,6 +79,7 @@ void main() {
 	fPosition = applyT3(vModelMatrix, vPosition);
 	mat3 normalMatrix = transpose(inverse(mat3(vModelMatrix)));
 	fNormal = normalMatrix * vNormal;
+	fLightSpacePosition = applyT(lightMatrix, fPosition);
 
 	gl_Position = applyT(projectionMatrix * viewMatrix, fPosition);
 }
@@ -92,6 +95,7 @@ out vec4 outColor;
 smooth in vec2 fUV;
 smooth in vec3 fPosition;
 smooth in vec3 fNormal;
+smooth in vec4 fLightSpacePosition;
 
 flat in vec4 fAlbedo;
 flat in float fRoughness;
@@ -120,15 +124,6 @@ struct Light {
 	Attenuation attenuation;
 };
 
-// Transform
-uniform vec3 viewPosition;
-
-// Light
-#define maxLights 10
-uniform int lightCount;
-uniform Light lights[maxLights];
-
-// Textures
 struct Material {
 	sampler2D albedoMap;
 	sampler2D normalMap;
@@ -138,6 +133,18 @@ struct Material {
 	int textured;
 };
 
+// Shadow
+uniform sampler2D shadowMap;
+
+// Transform
+uniform vec3 viewPosition;
+
+// Light
+#define maxLights 10
+uniform int lightCount;
+uniform Light lights[maxLights];
+
+// Material
 uniform Material material;
 
 // Environment
@@ -145,7 +152,7 @@ uniform vec3 sunDirection = vec3(1, 1, 1);
 uniform vec3 sunColor = vec3(1, 1, 1);
 uniform float exposure = 1.0;
 uniform float gamma = 1.0;
-uniform int hdr = 1;
+uniform float hdr = 1.0;
 
 // Constants
 const float PI = 3.14159265359;
@@ -192,6 +199,33 @@ vec3 calcDirectionalLight() {
 	float directionalFactor = 0.4 * max(dot(N, L), 0.0);
 	vec3 directional = directionalFactor * sunColor;
 	return directional;
+}
+
+float calcShadow() {
+	// perform perspective divide
+	vec3 projCoords = fLightSpacePosition.xyz / fLightSpacePosition.w;
+
+	// transform to [0,1] range
+	projCoords = projCoords * 0.5 + 0.5;
+
+	/*if (projCoords.z > 1.0)
+		return 0.0;*/
+
+	// check whether current frag pos is in shadow
+	// float bias = max(0.05 * (1.0 - dot(N, lightDir)), 0.005);
+	float currentDepth = projCoords.z;
+	float bias = 0.005;
+	float shadow = 0.0;
+	vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
+	for (int x = -1; x <= 1; ++x) {
+		for (int y = -1; y <= 1; ++y) {
+			float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
+			shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
+		}
+	}
+	shadow /= 9.0;
+
+	return shadow;
 }
 
 vec3 calcLightColor(Light light) {
@@ -275,13 +309,16 @@ void main() {
 	}
 
 	// Ambient
-	vec3 ambient = vec3(1) * albedo.rgb * ambientOcclusion;
+	vec3 ambient = albedo.rgb * ambientOcclusion;
 
 	// Directional
 	vec3 Ld = calcDirectionalLight();
 
+	// Shadow
+	float shadow = calcShadow();
+
 	// Combine ambient and lighting
-	vec3 color = ambient + Lo + Ld;
+	vec3 color = ambient + (1.0 - shadow) * Lo + Ld;
 
 	// HDR 
 	color = hdr * (vec3(1.0) - exp(-color * exposure)) + (1.0 - hdr) * color;

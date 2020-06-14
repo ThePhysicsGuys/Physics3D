@@ -5,7 +5,7 @@
 #include "extendedPart.h"
 
 #include "../graphics/texture.h"
-
+#include "../graphics/renderer.h"
 #include "../util/resource/resource.h"
 #include "../util/resource/resourceManager.h"
 
@@ -30,6 +30,7 @@ InstanceShader instanceShader;
 LightingShader lightingShader;
 SkyShader skyShader;
 DebugShader debugShader;
+DepthBufferShader depthBufferShader;
 
 void onInit() {
 	// Shader source init
@@ -44,10 +45,11 @@ void onInit() {
 	ShaderSource testShaderSource        = parseShader("TestShader", "../res/shaders/test.shader", getResourceAsString(applicationResources, TEST_SHADER));
 	ShaderSource lineShaderSource        = parseShader("LineShader", "../res/shaders/line.shader", getResourceAsString(applicationResources, LINE_SHADER));
 	ShaderSource maskShaderSource        = parseShader("MaskShader", "../res/shaders/mask.shader", getResourceAsString(applicationResources, MASK_SHADER));
-	ShaderSource instanceShaderSource    = parseShader("InstanceShader", "../res/shaders/instance.shader"/*, getResourceAsString(applicationResources, INSTANCE_SHADER)*/);
+	ShaderSource instanceShaderSource    = parseShader("InstanceShader", "../res/shaders/instance.shader", getResourceAsString(applicationResources, INSTANCE_SHADER));
 	ShaderSource skyShaderSource         = parseShader("SkyShader", "../res/shaders/sky.shader", getResourceAsString(applicationResources, SKY_SHADER));
 	ShaderSource lightingShaderSource    = parseShader("LightingShader", "../res/shaders/lighting.shader", getResourceAsString(applicationResources, LIGHTING_SHADER));
 	ShaderSource debugShaderSource       = parseShader("DebugShader", "../res/shaders/debug.shader", getResourceAsString(applicationResources, DEBUG_SHADER));
+	ShaderSource depthBufferShaderSource = parseShader("DepthBufferShader", "../res/shaders/depthbuffer.shader", getResourceAsString(applicationResources, DEPTHBUFFER_SHADER));
 
 	// Shader init
 	new(&basicShader) BasicShader(basicShaderSource);
@@ -65,6 +67,7 @@ void onInit() {
 	new(&skyShader) SkyShader(skyShaderSource);
 	new(&lightingShader) LightingShader(lightingShaderSource);
 	new(&debugShader) DebugShader(debugShaderSource);
+	new(&depthBufferShader) DepthBufferShader(depthBufferShaderSource);
 
 	ResourceManager::add(&basicShader);
 	ResourceManager::add(&depthShader);
@@ -81,6 +84,7 @@ void onInit() {
 	ResourceManager::add(&skyShader);
 	ResourceManager::add(&lightingShader);
 	ResourceManager::add(&debugShader);
+	ResourceManager::add(&depthBufferShader);
 }
 
 void onClose() {
@@ -99,6 +103,7 @@ void onClose() {
 	skyShader.close();
 	lightingShader.close();
 	debugShader.close();
+	depthBufferShader.close();
 }
 
 }
@@ -190,6 +195,21 @@ void TestShader::updateDisplacement(Graphics::Texture* displacementMap) {
 void SkyShader::updateTime(float time) {
 	bind();
 	setUniform("time", time);
+}
+
+// DepthBufferShader
+
+void DepthBufferShader::updateDepthMap(GLID unit, GLID id) {
+	bind();
+	Renderer::activeTexture(unit);
+	Renderer::bindTexture2D(id);
+	setUniform("depthMap", unit);
+}
+
+void DepthBufferShader::updatePlanes(float near, float far) {
+	bind();
+	setUniform("far", far);
+	setUniform("near", near);
 }
 
 };
