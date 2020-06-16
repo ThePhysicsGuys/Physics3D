@@ -7,19 +7,19 @@ template<typename T, size_t Size>
 struct Vector {
 	T data[Size];
 
-	Vector() : data{} {
+	constexpr Vector() : data{} {
 		for(size_t i = 0; i < Size; i++) {
 			this->data[i] = 0;
 		}
 	}
 
-	explicit Vector(T v) {
+	explicit constexpr Vector(T v) {
 		for (size_t i = 0; i < Size; i++) {
 			this->data[i] = v;
 		}
 	};
 
-	Vector(const Vector<T, Size - 1>& other, T finalVal) {
+	constexpr Vector(const Vector<T, Size - 1>& other, T finalVal) {
 		for (size_t i = 0; i < Size - 1; i++) {
 			this->data[i] = other.data[i];
 		}
@@ -27,7 +27,7 @@ struct Vector {
 	}
 
 	template<typename OtherT>
-	operator Vector<OtherT, Size>() const {
+	constexpr operator Vector<OtherT, Size>() const {
 		Vector<OtherT, Size> result;
 		for(size_t i = 0; i < Size; i++) {
 			result.data[i] = static_cast<OtherT>(this->data[i]);
@@ -36,7 +36,7 @@ struct Vector {
 		return result;
 	}
 
-	operator Vector<T, Size - 1>() const {
+	constexpr operator Vector<T, Size - 1>() const {
 		Vector<T, Size + 1> result;
 		for(size_t i = 0; i < Size - 1; i++) {
 			result.data[i] = this->data[i];
@@ -61,12 +61,12 @@ struct Vector<T, 2> {
 		T data[2];
 	};
 
-	Vector() : Vector(0, 0) {}
-	Vector(T x, T y) : x(x), y(y) {}
-	explicit Vector(T v) : x(v), y(v) {}
+	constexpr Vector() : Vector(0, 0) {}
+	constexpr Vector(T x, T y) : x(x), y(y) {}
+	explicit constexpr Vector(T v) : x(v), y(v) {}
 
 	template<typename OtherT>
-	operator Vector<OtherT, 2>() const {
+	constexpr operator Vector<OtherT, 2>() const {
 		return Vector<OtherT, 2>(static_cast<OtherT>(x), static_cast<OtherT>(y));
 	}
 
@@ -86,18 +86,18 @@ struct Vector<T, 3> {
 		T data[3];
 	};
 
-	Vector() : Vector(0, 0, 0) {}
-	Vector(T x, T y, T z) : x(x), y(y), z(z) {};
-	explicit Vector(T v) : x(v), y(v), z(v) {}
+	constexpr Vector() : Vector(0, 0, 0) {}
+	constexpr Vector(T x, T y, T z) : x(x), y(y), z(z) {};
+	explicit constexpr Vector(T v) : x(v), y(v), z(v) {}
 	
-	Vector(const Vector<T, 2>& other, T finalVal) : x(other.x), y(other.y), z(finalVal) {}
+	constexpr Vector(const Vector<T, 2>& other, T finalVal) : x(other.x), y(other.y), z(finalVal) {}
 
 	template<typename OtherT>
-	operator Vector<OtherT, 3>() const {
+	constexpr operator Vector<OtherT, 3>() const {
 		return Vector<OtherT, 3>(static_cast<OtherT>(x), static_cast<OtherT>(y), static_cast<OtherT>(z));
 	}
 
-	operator Vector<T, 2>() const {
+	constexpr operator Vector<T, 2>() const {
 		return Vector<T, 2>(x, y);
 	}
 
@@ -144,18 +144,18 @@ struct Vector<T, 4> {
 		struct { T x; T y; T z; T w; };
 		T data[4];
 	};
-	Vector() : Vector(0,0,0,0) {}
-	Vector(T x, T y, T z, T w) : x(x), y(y), z(z), w(w) {}
-	explicit Vector(T v) : x(v), y(v), z(v), w(v) {}
+	constexpr Vector() : Vector(0,0,0,0) {}
+	constexpr Vector(T x, T y, T z, T w) : x(x), y(y), z(z), w(w) {}
+	explicit constexpr Vector(T v) : x(v), y(v), z(v), w(v) {}
 	
-	Vector(const Vector<T, 3>& other, T finalVal) : x(other.x), y(other.y), z(other.z), w(finalVal) {}
+	constexpr Vector(const Vector<T, 3>& other, T finalVal) : x(other.x), y(other.y), z(other.z), w(finalVal) {}
 
 	template<typename OtherT>
-	operator Vector<OtherT, 4>() const {
+	constexpr operator Vector<OtherT, 4>() const {
 		return Vector<OtherT, 4>(static_cast<OtherT>(x), static_cast<OtherT>(y), static_cast<OtherT>(z), static_cast<OtherT>(w));
 	}
 
-	operator Vector<T, 3>() const {
+	constexpr operator Vector<T, 3>() const {
 		return Vector<T, 3>(x, y, z);
 	}
 
@@ -392,7 +392,7 @@ template<typename T, size_t Size>
 Vector<T, Size> abs(const Vector<T, Size>& vec) {
 	Vector<T, Size> result;
 	for(size_t i = 0; i < Size; i++)
-		result[i] = fabs(vec[i]);
+		result[i] = std::abs(vec[i]);
 	return result;
 }
 

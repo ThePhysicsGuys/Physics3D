@@ -15,9 +15,9 @@
 #include "../util/terminalColor.h"
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
-const char sepChar = '\\';
+static const char sepChar = '\\';
 #else
-const char sepChar = '/';
+static const char sepChar = '/';
 #endif
 
 
@@ -58,11 +58,19 @@ static ifstream getFileStream(const char* fileName) {
 	ifstream s(fileName);
 	if(s.good()) return s;
 
-	s = ifstream(string("..\\tests\\") + fileName);
+	string path = string("tests") + sepChar + fileName;
+	s = ifstream(path);
 	if(s.good()) return s;
 
-	return ifstream(string("..\\..\\tests\\") + fileName);
+	path = string("..") + sepChar + path;
+	s = ifstream(path);
+	if(s.good()) return s;
+
+	return ifstream(string("..") + sepChar + path);
 }
+
+#define SHOW_LINES_BEFORE 5
+#define SHOW_LINES_AFTER 2
 
 static void printFileSlice(const char* fileName, int line) {
 	ifstream inFile = getFileStream(fileName);
@@ -70,7 +78,8 @@ static void printFileSlice(const char* fileName, int line) {
 	int t = 0;
 
 	if(inFile.good()) {
-		for(int i = 0; i < line - 3; i++) {
+		// skip lines until right before first line to show
+		for(int i = 0; i < line - SHOW_LINES_BEFORE - 1; i++) {
 			string l;
 			getline(inFile, l);
 		}
@@ -78,11 +87,13 @@ static void printFileSlice(const char* fileName, int line) {
 		setColor(TerminalColor::WHITE);
 
 		string s;
-		for(int i = 0; i < 5; i++) {
+		for(int i = -SHOW_LINES_BEFORE; i <= SHOW_LINES_AFTER; i++) {
 			if(!getline(inFile, s)) break;
-			printf("%d: %s", line - 2 + i, s.c_str());
-			if(i == 2) {
+			if(i == 0) {
 				setColor(TerminalColor::YELLOW);
+			}
+			printf("%d: %s", line + i, s.c_str());
+			if(i == 0) {
 				cout << "  <<<<";
 				setColor(TerminalColor::WHITE);
 			}

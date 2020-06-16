@@ -34,20 +34,6 @@ Color GRAY = get(0xAAAAAA);
 Color SILVER = get(0xDDDDDD);
 Color WHITE = get(0xFFFFFF);
 
-Color get(int hex, bool alpha) {
-	Color color;
-	if (!alpha) hex = (hex << 8) | 0xFF;
-	color.x = ((hex >> 24) & 0xFF) / 255.0f;
-	color.y = ((hex >> 16) & 0xFF) / 255.0f;
-	color.z = ((hex >> 8) & 0xFF) / 255.0f;
-	color.w = (hex & 0xFF) / 255.0f;
-	return color;
-}
-
-Color get(int hex) {
-	return get(hex, false);
-}
-
 Color3 hsvToRgb(Color3 hsv) {
 	float h = hsv.x * 360.0f;
 	float s = hsv.y;

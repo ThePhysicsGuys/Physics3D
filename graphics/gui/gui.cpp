@@ -197,7 +197,7 @@ Component* superParent(Component* child) {
 bool intersectsSquare(const Vec2& point, const Vec2& topleft, const Vec2& dimension) {
 	Vec2 halfDimension = dimension / 2;
 	Vec2 center = topleft + Vec2(halfDimension.x, -halfDimension.y);
-	return fabs(point.x - center.x) < halfDimension.x && fabs(point.y - center.y) < halfDimension.y;
+	return std::abs(point.x - center.x) < halfDimension.x && std::abs(point.y - center.y) < halfDimension.y;
 }
 
 void add(Component* component) {

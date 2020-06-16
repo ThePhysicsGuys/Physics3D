@@ -80,7 +80,7 @@ bool IconTreeNode(void* ptr, ImTextureID texture, ImGuiTreeNodeFlags flags, cons
 
 	// Arrow
 	ImVec2 padding = ImVec2(g.Style.FramePadding.x, ImMin(window->DC.CurrLineTextBaseOffset, g.Style.FramePadding.y));
-	float arrowOffset = abs(g.FontSize - arrowWidth) / 2.0f;
+	float arrowOffset = std::abs(g.FontSize - arrowWidth) / 2.0f;
 	if (!leaf)
 		ImGui::RenderArrow(window->DrawList, ImVec2(pos.x + arrowOffset, textPos.y), ImGui::GetColorU32(ImGuiCol_Text), opened ? ImGuiDir_Down : ImGuiDir_Right, 1.0f);
 

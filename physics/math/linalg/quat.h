@@ -8,17 +8,14 @@
 template<typename T>
 struct Quaternion {
 
+	T w;
 	union {
 		struct {
-			T w;
 			T i;
 			T j;
 			T k;
 		};
-		struct {
-			T w;
-			Vector<T, 3> v;
-		};
+		Vector<T, 3> v;
 	};
 
 	Quaternion() : w(0), i(0), j(0), k(0) {}

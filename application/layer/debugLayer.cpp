@@ -57,7 +57,17 @@ void renderBounds(const Bounds& bounds, const Color& color) {
 	renderBox(GlobalCFrame(position), diagonal.x, diagonal.y, diagonal.z, color);
 }
 
-void recursiveRenderColTree(const TreeNode& node, int depth) {
+static Color getCyclingColor(int depth){
+	Color color = colors[depth % 6];
+	color.w = 0.3f;
+	return color;
+}
+
+static void renderBoundsForDepth(const Bounds& bounds, int depth) {
+	renderBounds(bounds.expanded((10 - depth) * 0.002), getCyclingColor(depth));
+}
+
+static void recursiveRenderColTree(const TreeNode& node, int depth) {
 	if (node.isLeafNode()) {
 		//renderBounds(node.bounds, GUI::COLOR::AQUA);
 	} else {
@@ -66,13 +76,10 @@ void recursiveRenderColTree(const TreeNode& node, int depth) {
 		}
 	}
 
-	Vec4f color = colors[depth % 6];
-	color.w = 0.3f;
-
-	renderBounds(node.bounds.expanded((5 - depth) * 0.002), color);
+	renderBoundsForDepth(node.bounds, depth);
 }
 
-bool recursiveColTreeForOneObject(const TreeNode& node, const Part* part, const Bounds& bounds) {
+static bool recursiveColTreeForOneObject(const TreeNode& node, const Part* part, const Bounds& bounds, int depth) {
 	if (node.isLeafNode()) {
 		if (node.object == part)
 			return true;
@@ -84,11 +91,8 @@ bool recursiveColTreeForOneObject(const TreeNode& node, const Part* part, const 
 	} else {
 		//if (!intersects(node.bounds, bounds)) return false;
 		for (const TreeNode& subNode : node) {
-			if (recursiveColTreeForOneObject(subNode, part, bounds)) {
-				Color green = Graphics::COLOR::GREEN;
-				green.w = 0.3f;
-
-				renderBounds(node.bounds, green);
+			if (recursiveColTreeForOneObject(subNode, part, bounds, depth+1)) {
+				renderBoundsForDepth(node.bounds, depth);
 				return true;
 			}
 		}
@@ -125,6 +129,7 @@ void DebugLayer::onRender() {
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
 	beginScene();
+	enableBlending();
 
 	graphicsMeasure.mark(GraphicsProcess::VECTORS);
 
@@ -166,7 +171,7 @@ void DebugLayer::onRender() {
 
 					Color green = Graphics::COLOR::GREEN;
 					green.w = 0.5;
-					renderSphere(part.maxRadius * 2, part.getPosition(), green);
+					renderSphere(part.maxRadius, part.getPosition(), green);
 				}
 			}
 		}
@@ -181,7 +186,7 @@ void DebugLayer::onRender() {
 
 					Color green = Graphics::COLOR::GREEN;
 					green.w = 0.5;
-					renderSphere(part.maxRadius * 2, part.getPosition(), green);
+					renderSphere(part.maxRadius, part.getPosition(), green);
 				}
 			}
 		}
@@ -199,7 +204,7 @@ void DebugLayer::onRender() {
 				break;
 			case ColTreeRenderMode::SELECTED:
 				if (screen->selectedPart != nullptr)
-					recursiveColTreeForOneObject(screen->world->objectTree.rootNode, screen->selectedPart, screen->selectedPart->getStrictBounds());
+					recursiveColTreeForOneObject(screen->world->objectTree.rootNode, screen->selectedPart, screen->selectedPart->getStrictBounds(), 0);
 				break;
 		}
 	});

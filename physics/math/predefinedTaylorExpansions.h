@@ -121,7 +121,7 @@ TaylorExpansion<SymmetricMatrix<T, 3>, Derivs> generateTaylorForSkewSymmetricSqu
 
 template<typename T, int Derivs>
 FullTaylorExpansion<SymmetricMatrix<T, 3>, SymmetricMatrix<T, 3>, Derivs> generateFullTaylorForSkewSymmetricSquared(const FullTaylorExpansion<Vector<T, 3>, Vector<T, 3>, Derivs>& inputVector) {
-	return FullTaylorExpansion<SymmetricMatrix<T, 3>, SymmetricMatrix<T, 3>, Derivs>{skewSymmetricSquared(inputVector.constantValue), generateTaylorForSkewSymmetricSquared(inputVector)};
+	return FullTaylorExpansion<SymmetricMatrix<T, 3>, SymmetricMatrix<T, 3>, Derivs>{skewSymmetricSquared(inputVector.constantValue), generateTaylorForSkewSymmetricSquared<double, 2>(inputVector)};
 }
 
 template<int Derivs>
@@ -129,7 +129,7 @@ TaylorExpansion<Mat3, Derivs> generateTaylorForRotationMatrixFromRotationVector(
 
 template<int Derivs>
 FullTaylorExpansion<Mat3, Mat3, Derivs> generateFullTaylorForRotationMatrixFromRotationVector(const FullTaylorExpansion<Vec3, Vec3, Derivs>& rotationVecTaylor) {
-	return FullTaylorExpansion<Mat3, Mat3, Derivs>{rotationMatrixfromRotationVec(rotationVecTaylor.constantValue), generateTaylorForRotationMatrixFromRotationVector(rotationVecTaylor)};
+	return FullTaylorExpansion<Mat3, Mat3, Derivs>{rotationMatrixfromRotationVec(rotationVecTaylor.constantValue), generateTaylorForRotationMatrixFromRotationVector<2>(rotationVecTaylor)};
 }
 
 template<typename T, int Derivs>

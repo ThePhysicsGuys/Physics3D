@@ -41,16 +41,16 @@ EigenSet<double, 3> getEigenDecomposition(const SymmetricMat3& sm) {
 		1,2
 	};
 	while(changed[0] || changed[1] || changed[2]) {
-		double top = abs(get(copy, 0, 1));
-		double topRight = abs(get(copy, 0, 2));
-		double right = abs(get(copy, 1, 2));
+		double top = std::abs(get(copy, 0, 1));
+		double topRight = std::abs(get(copy, 0, 2));
+		double right = std::abs(get(copy, 1, 2));
 
 		int k, l;
 
 		// find which of the three upper off-diagonal elements is the biggest
-		if(top > topRight&& top > right) { k = 0; l = 1; } 
-		else if(topRight > top&& topRight > right) { k = 0; l = 2; } 
-		else if(right > top&& right > topRight) { k = 1; l = 2; } else {
+		if(top > topRight && top > right) { k = 0; l = 1; } 
+		else if(topRight > top && topRight > right) { k = 0; l = 2; } 
+		else if(right > top && right > topRight) { k = 1; l = 2; } else {
 			// TIEBREAKER
 			k = values[tieBreaker * 2]; l = values[tieBreaker * 2 + 1];
 			tieBreaker = (tieBreaker + 1) % 3;
@@ -64,8 +64,8 @@ EigenSet<double, 3> getEigenDecomposition(const SymmetricMat3& sm) {
 
 
 		double y = (eigenValues[l] - eigenValues[k]) / 2; 
-		double d = abs(y) + sqrt(p * p + y * y);
-		double r = sqrt(p * p + d * d); 
+		double d = std::abs(y) + std::sqrt(p * p + y * y);
+		double r = std::sqrt(p * p + d * d); 
 		double c = d / r; 
 		double s = p / r; 
 		double t = p * p / d;

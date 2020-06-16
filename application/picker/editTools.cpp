@@ -293,7 +293,7 @@ void EditTools::dragRotateTool(Screen& screen) {
 	// Get angle between last intersectionVector and new one
 	double cosa = (selectedPoint * intersectionVector) / sqrt(length1sq * length2sq);
 	
-	if(!(abs(cosa) < 1)) return; // No rotation when vectors coincide
+	if(!(std::abs(cosa) < 1)) return; // No rotation when vectors coincide
 	
 	double a = sign * acos(cosa);
 

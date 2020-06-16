@@ -10,7 +10,7 @@
 CubeClass::CubeClass() : ShapeClass(8, Vec3(0, 0, 0), ScalableInertialMatrix(Vec3(8.0 / 3.0, 8.0 / 3.0, 8.0 / 3.0), Vec3(0, 0, 0)), CUBE_CLASS_ID) {}
 
 bool CubeClass::containsPoint(Vec3 point) const {
-	return abs(point.x) <= 1.0 && abs(point.y) <= 1.0 && abs(point.z) <= 1.0;
+	return std::abs(point.x) <= 1.0 && std::abs(point.y) <= 1.0 && std::abs(point.z) <= 1.0;
 }
 
 double CubeClass::getIntersectionDistance(Vec3 origin, Vec3 direction) const {
@@ -31,26 +31,26 @@ double CubeClass::getIntersectionDistance(Vec3 origin, Vec3 direction) const {
 	double tx = (1 - origin.x) / direction.x;
 
 	Vec3 intersX = origin + tx * direction;
-	if(abs(intersX.y) <= 1.0 && abs(intersX.z) <= 1.0) return tx;
+	if(std::abs(intersX.y) <= 1.0 && std::abs(intersX.z) <= 1.0) return tx;
 
 	double ty = (1 - origin.y) / direction.y;
 
 	Vec3 intersY = origin + ty * direction;
-	if(abs(intersY.x) <= 1.0 && abs(intersY.z) <= 1.0) return ty;
+	if(std::abs(intersY.x) <= 1.0 && std::abs(intersY.z) <= 1.0) return ty;
 
 	double tz = (1 - origin.z) / direction.z;
 
 	Vec3 intersZ = origin + tz * direction;
-	if(abs(intersZ.x) <= 1.0 && abs(intersZ.y) <= 1.0) return tz;
+	if(std::abs(intersZ.x) <= 1.0 && std::abs(intersZ.y) <= 1.0) return tz;
 
 	return INFINITY;
 }
 
 BoundingBox CubeClass::getBounds(const Rotation& rotation, const DiagonalMat3& scale) const {
 	Mat3 referenceFrame = rotation.asRotationMatrix() * scale;
-	double x = abs(referenceFrame[0][0]) + abs(referenceFrame[0][1]) + abs(referenceFrame[0][2]);
-	double y = abs(referenceFrame[1][0]) + abs(referenceFrame[1][1]) + abs(referenceFrame[1][2]);
-	double z = abs(referenceFrame[2][0]) + abs(referenceFrame[2][1]) + abs(referenceFrame[2][2]);
+	double x = std::abs(referenceFrame[0][0]) + std::abs(referenceFrame[0][1]) + std::abs(referenceFrame[0][2]);
+	double y = std::abs(referenceFrame[1][0]) + std::abs(referenceFrame[1][1]) + std::abs(referenceFrame[1][2]);
+	double z = std::abs(referenceFrame[2][0]) + std::abs(referenceFrame[2][1]) + std::abs(referenceFrame[2][2]);
 	BoundingBox result{-x,-y,-z,x,y,z};
 	return result;
 }
@@ -151,7 +151,7 @@ Inertia of cyllinder:
 CylinderClass::CylinderClass() : ShapeClass(M_PI * 2.0, Vec3(0, 0, 0), ScalableInertialMatrix(Vec3(M_PI / 2.0, M_PI / 2.0, M_PI * 2.0 / 3.0), Vec3(0, 0, 0)), CYLINDER_CLASS_ID) {}
 
 bool CylinderClass::containsPoint(Vec3 point) const {
-	return abs(point.z) <= 1.0 && point.x * point.x + point.y + point.y <= 1.0;
+	return std::abs(point.z) <= 1.0 && point.x * point.x + point.y + point.y <= 1.0;
 }
 
 double CylinderClass::getIntersectionDistance(Vec3 origin, Vec3 direction) const {
@@ -168,7 +168,7 @@ double CylinderClass::getIntersectionDistance(Vec3 origin, Vec3 direction) const
 	if(D >= 0) {
 		double t = (-b + -sqrt(D)) / a;
 		double z = origin.z + t * direction.z;
-		if(abs(z) <= 1.0) {
+		if(std::abs(z) <= 1.0) {
 			return t;
 		} else {
 			// origin + t * direction = 1 => t = (1-origin)/direction
@@ -193,16 +193,16 @@ BoundingBox CylinderClass::getBounds(const Rotation& rotation, const DiagonalMat
 	double height = scale[2];
 	double radius = scale[0];
 
-	Vec3 normalizedZVector = abs(rotation.asRotationMatrix().getCol(2));
+	Vec3 normalizedZVector = rotation.asRotationMatrix().getCol(2);
 	Vec3 zVector = normalizedZVector * height;
 
 	double extraX = sqrt(1 - normalizedZVector.x * normalizedZVector.x);
 	double extraY = sqrt(1 - normalizedZVector.y * normalizedZVector.y);
 	double extraZ = sqrt(1 - normalizedZVector.z * normalizedZVector.z);
 
-	double x = zVector.x + extraX * radius;
-	double y = zVector.y + extraY * radius;
-	double z = zVector.z + extraZ * radius;
+	double x = std::abs(zVector.x) + extraX * radius;
+	double y = std::abs(zVector.y) + extraY * radius;
+	double z = std::abs(zVector.z) + extraZ * radius;
 
 	return BoundingBox{-x, -y, -z, x, y, z};
 }

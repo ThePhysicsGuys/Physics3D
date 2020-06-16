@@ -21,7 +21,7 @@ void onInit() {
 	cube = new IndexedMesh(Engine::MeshRegistry::createCube(1));
 
 	// Sphere
-	sphere = new IndexedMesh(Engine::MeshRegistry::createSphere(1));
+	sphere = new IndexedMesh(Engine::MeshRegistry::createSphere(1, 3));
 }
 
 void onClose() {

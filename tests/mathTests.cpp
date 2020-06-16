@@ -352,7 +352,7 @@ TEST_CASE(testSkewSymmetricDerivatives) {
 
 	FullTaylor<Vec3> vecInput{start, {deriv1, deriv2}};
 
-	FullTaylor<SymmetricMat3> skewSymOut = generateFullTaylorForSkewSymmetricSquared(vecInput);
+	FullTaylor<SymmetricMat3> skewSymOut = generateFullTaylorForSkewSymmetricSquared<double, 2>(vecInput);
 
 	double DELTA_T = 0.00001;
 
@@ -368,7 +368,7 @@ TEST_CASE(testSkewSymmetricDerivatives) {
 TEST_CASE(testGenerateFullTaylorForRotationMatrixFromRotationVectorDerivatives) {
 	FullTaylor<Vec3> vecInput{Vec3(0.7, 0.5, -1.3), {Vec3(0.2, 0.1, -0.7), Vec3(0.55, 0.35, -0.2)}};
 
-	FullTaylor<Mat3> taylorDerivs = generateFullTaylorForRotationMatrixFromRotationVector(vecInput);
+	FullTaylor<Mat3> taylorDerivs = generateFullTaylorForRotationMatrixFromRotationVector<2>(vecInput);
 
 	double DELTA_T = 0.00001;
 
@@ -413,13 +413,13 @@ TEST_CASE(testGenerateFullTaylorForRotationMatrixFromRotationVectorBehaviourNear
 			double tolerance = 1.0e-7 * maxTol;
 
 			Taylor<Vec3> diffs{diff1, diff2};
-			FullTaylor<Mat3> taylorDerivsnx = generateFullTaylorForRotationMatrixFromRotationVector(FullTaylor<Vec3>{Vec3(-1.0e-9, 0.0, 0.0), diffs});
-			FullTaylor<Mat3> taylorDerivsx = generateFullTaylorForRotationMatrixFromRotationVector(FullTaylor<Vec3>{Vec3(1.0e-9, 0.0, 0.0), diffs});
-			FullTaylor<Mat3> taylorDerivs0 = generateFullTaylorForRotationMatrixFromRotationVector(FullTaylor<Vec3>{Vec3(0.0, 0.0, 0.0), diffs});
-			FullTaylor<Mat3> taylorDerivs1 = generateFullTaylorForRotationMatrixFromRotationVector(FullTaylor<Vec3>{Vec3(1.0e-9, 0.0, 0.0), diffs});
-			FullTaylor<Mat3> taylorDerivs2 = generateFullTaylorForRotationMatrixFromRotationVector(FullTaylor<Vec3>{Vec3(0.0, 1.0e-9, 0.0), diffs});
-			FullTaylor<Mat3> taylorDerivs3 = generateFullTaylorForRotationMatrixFromRotationVector(FullTaylor<Vec3>{Vec3(0.0, -1.0e-9, 0.0), diffs});
-			FullTaylor<Mat3> taylorDerivs4 = generateFullTaylorForRotationMatrixFromRotationVector(FullTaylor<Vec3>{Vec3(-1.0e-9, -1.0e-9, 0.0), diffs});
+			FullTaylor<Mat3> taylorDerivsnx = generateFullTaylorForRotationMatrixFromRotationVector<2>(FullTaylor<Vec3>{Vec3(-1.0e-9, 0.0, 0.0), diffs});
+			FullTaylor<Mat3> taylorDerivsx = generateFullTaylorForRotationMatrixFromRotationVector<2>(FullTaylor<Vec3>{Vec3(1.0e-9, 0.0, 0.0), diffs});
+			FullTaylor<Mat3> taylorDerivs0 = generateFullTaylorForRotationMatrixFromRotationVector<2>(FullTaylor<Vec3>{Vec3(0.0, 0.0, 0.0), diffs});
+			FullTaylor<Mat3> taylorDerivs1 = generateFullTaylorForRotationMatrixFromRotationVector<2>(FullTaylor<Vec3>{Vec3(1.0e-9, 0.0, 0.0), diffs});
+			FullTaylor<Mat3> taylorDerivs2 = generateFullTaylorForRotationMatrixFromRotationVector<2>(FullTaylor<Vec3>{Vec3(0.0, 1.0e-9, 0.0), diffs});
+			FullTaylor<Mat3> taylorDerivs3 = generateFullTaylorForRotationMatrixFromRotationVector<2>(FullTaylor<Vec3>{Vec3(0.0, -1.0e-9, 0.0), diffs});
+			FullTaylor<Mat3> taylorDerivs4 = generateFullTaylorForRotationMatrixFromRotationVector<2>(FullTaylor<Vec3>{Vec3(-1.0e-9, -1.0e-9, 0.0), diffs});
 
 			ASSERT_TOLERANT(taylorDerivsnx == taylorDerivsx, tolerance);
 			ASSERT_TOLERANT(taylorDerivs0.derivatives[0] == taylorDerivs1.derivatives[0], tolerance);
@@ -427,11 +427,11 @@ TEST_CASE(testGenerateFullTaylorForRotationMatrixFromRotationVectorBehaviourNear
 			ASSERT_TOLERANT(taylorDerivs1.derivatives[0] == taylorDerivs2.derivatives[0], tolerance);
 			ASSERT_TOLERANT(taylorDerivs3.derivatives[0] == taylorDerivs4.derivatives[0], tolerance);
 
-			FullTaylor<Mat3> taylorForInLinePre = generateFullTaylorForRotationMatrixFromRotationVector(FullTaylor<Vec3>{-diff1 * 1e-9, diffs});
-			FullTaylor<Mat3> taylorForInLinePreTiny = generateFullTaylorForRotationMatrixFromRotationVector(FullTaylor<Vec3>{-diff1 * 1e-30, diffs}); // should force the system to switch to the near-zero approx
-			FullTaylor<Mat3> taylorForInLineZero = generateFullTaylorForRotationMatrixFromRotationVector(FullTaylor<Vec3>{Vec3(0.0, 0.0, 0.0), diffs});
-			FullTaylor<Mat3> taylorForInLinePost = generateFullTaylorForRotationMatrixFromRotationVector(FullTaylor<Vec3>{diff1 * 1e-9, diffs});
-			FullTaylor<Mat3> taylorForInLinePostTiny = generateFullTaylorForRotationMatrixFromRotationVector(FullTaylor<Vec3>{diff1 * 1e-30, diffs});
+			FullTaylor<Mat3> taylorForInLinePre = generateFullTaylorForRotationMatrixFromRotationVector<2>(FullTaylor<Vec3>{-diff1 * 1e-9, diffs});
+			FullTaylor<Mat3> taylorForInLinePreTiny = generateFullTaylorForRotationMatrixFromRotationVector<2>(FullTaylor<Vec3>{-diff1 * 1e-30, diffs}); // should force the system to switch to the near-zero approx
+			FullTaylor<Mat3> taylorForInLineZero = generateFullTaylorForRotationMatrixFromRotationVector<2>(FullTaylor<Vec3>{Vec3(0.0, 0.0, 0.0), diffs});
+			FullTaylor<Mat3> taylorForInLinePost = generateFullTaylorForRotationMatrixFromRotationVector<2>(FullTaylor<Vec3>{diff1 * 1e-9, diffs});
+			FullTaylor<Mat3> taylorForInLinePostTiny = generateFullTaylorForRotationMatrixFromRotationVector<2>(FullTaylor<Vec3>{diff1 * 1e-30, diffs});
 
 			ASSERT_TOLERANT(taylorForInLinePre == taylorForInLinePost, tolerance);
 			ASSERT_TOLERANT(taylorForInLinePre == taylorForInLineZero, tolerance);
@@ -449,7 +449,7 @@ TEST_CASE(testRotationDerivs) {
 		for(Vec3 angularAccel : vectors) {
 			logStream << "angularVel: " << angularVel << " accel: " << angularAccel << "\n";
 			TaylorExpansion<Vec3, 2> rotVecTaylor{angularVel, angularAccel};
-			FullTaylorExpansion<Mat3, Mat3, 2> rotTaylor{rot0, generateTaylorForRotationMatrix(rotVecTaylor, rot0)};
+			FullTaylorExpansion<Mat3, Mat3, 2> rotTaylor{rot0, generateTaylorForRotationMatrix<double, 2>(rotVecTaylor, rot0)};
 			
 			Vec3 rotVec1 = rotVecTaylor(DELTA_T);
 			Vec3 rotVec2 = rotVecTaylor(DELTA_T*2);
