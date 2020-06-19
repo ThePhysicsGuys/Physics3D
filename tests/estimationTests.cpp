@@ -6,8 +6,8 @@
 #include "../physics/geometry/shape.h"
 #include "../physics/misc/shapeLibrary.h"
 
-/*TEST_CASE(volumeApproximation) {
-	Polyhedron s = house;
+TEST_CASE_SLOW(volumeApproximation) {
+	Polyhedron s = Library::house;
 
 	BoundingBox b = s.getBounds();
 
@@ -38,8 +38,8 @@
 	ASSERT_TOLERANT(estimatedVolume == s.getVolume(), s.getVolume() * 0.001);
 }
 
-TEST_CASE(centerOfMassApproximation) {
-	Polyhedron s = house;
+TEST_CASE_SLOW(centerOfMassApproximation) {
+	Polyhedron s = Library::house;
 
 	BoundingBox b = s.getBounds();
 
@@ -72,9 +72,9 @@ TEST_CASE(centerOfMassApproximation) {
 	ASSERT_TOLERANT(estimatedCOM == s.getCenterOfMass(), (dx+dy+dz)/3 * 0.01);
 }
 
-TEST_CASE(inertiaApproximation) {
+TEST_CASE_SLOW(inertiaApproximation) {
 
-	Polyhedron s = house;
+	Polyhedron s = Library::house;
 
 	BoundingBox b = s.getBounds();
 
@@ -86,7 +86,7 @@ TEST_CASE(inertiaApproximation) {
 
 	double sampleVolume = dx*dy*dz;
 
-	Mat3 totalInertia = Mat3(0,0,0,0,0,0,0,0,0);
+	SymmetricMat3 totalInertia = SymmetricMat3::ZEROS();
 
 	for(int xi = 0; xi < sampleCount; xi++) {
 		for(int yi = 0; yi < sampleCount; yi++) {
@@ -96,11 +96,11 @@ TEST_CASE(inertiaApproximation) {
 				double z = b.zmin + dz*zi + dz / 2;
 
 				if(s.containsPoint(Vec3(x, y, z))) {
-					Mat3 inertiaOfPoint = Mat3(
-						y*y+z*z,  -x*y,    -x*z,
-						-x*y,    x*x+z*z,  -y*z,
+					SymmetricMat3 inertiaOfPoint{
+						y*y+z*z,
+						-x*y,    x*x+z*z,
 						-x*z,     -y*z,   x*x+y*y
-					);
+					};
 					totalInertia += inertiaOfPoint * sampleVolume;
 				}
 			}
@@ -108,5 +108,5 @@ TEST_CASE(inertiaApproximation) {
 	}
 
 	double v = s.getVolume();
-	ASSERT_TOLERANT(totalInertia == s.getInertia(), v*v * 0.001);
-}*/
+	ASSERT_TOLERANT(totalInertia == s.getInertia(CFrame()), v*v * 0.001);
+}

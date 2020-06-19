@@ -109,27 +109,46 @@ static void dumpLog() {
 	setColor(TerminalColor::GREEN);
 	cout << logStream.str().c_str();
 }
+enum class TestResult {
+	SUCCESS = 0,
+	FAILURE = 1,
+	ERROR = 2,
+	SKIP = 3
+};
 
 class Test {
 public:
 	const char* filePath;
 	const char* fileName;
 	const char* funcName;
+	TestType type;
 	void(*testFunc)(TestInterface&);
 
-	Test() : filePath(nullptr), funcName(nullptr), fileName(nullptr), testFunc(nullptr) {};
-	Test(const char* filePath, const char* funcName, void(*testFunc)(TestInterface&)) : filePath(filePath), funcName(funcName), testFunc(testFunc),
-	fileName(std::strrchr(this->filePath, sepChar) ? std::strrchr(this->filePath, sepChar) + 1 : this->filePath) {}
-	void run() {
+	Test() : 
+		filePath(nullptr), funcName(nullptr), fileName(nullptr), testFunc(nullptr), type(TestType::NORMAL) {};
+	Test(const char* filePath, const char* funcName, void(*testFunc)(TestInterface&), TestType type) : 
+		filePath(filePath), 
+		funcName(funcName), 
+		testFunc(testFunc), 
+		type(type),
+		fileName(std::strrchr(this->filePath, sepChar) ? std::strrchr(this->filePath, sepChar) + 1 : this->filePath) {}
+	TestResult run(bool allowSkip = true) {
 		resetLog();
+
+		setColor(TerminalColor::CYAN);
+		cout << fileName << ":" << funcName;
+
+		if(allowSkip && type == TestType::SLOW) {
+			setColor(SKIP_COLOR);
+			cout << " (skip)\n";
+			return TestResult::SKIP;
+		}
+
 		time_point<system_clock> startTime;
 
 		TestInterface testInterface;
 
 		try {
-			setColor(TerminalColor::CYAN);
-			cout << fileName << ":" << funcName;
-
 			startTime = system_clock::now();
 
 			testFunc(testInterface);
@@ -138,6 +157,8 @@ public:
 			cout << " [" << testInterface.getAssertCount() << "]";
 
 			printDeltaTime(startTime, SUCCESS_COLOR);
+
+			return TestResult::SUCCESS;
 		} catch (AssertionError& e) {
 
 			printDeltaTime(startTime, FAILURE_COLOR);
@@ -152,22 +173,27 @@ public:
 			cout << e.what() << endl;
 			setColor(TerminalColor::WHITE);
 
+			return TestResult::FAILURE;
 		} catch (exception& e) {
 			printDeltaTime(startTime, ERROR_COLOR);
 			dumpLog();
 			setColor(TerminalColor::RED); printf("An general error was thrown: %s\n", e.what());
+			return TestResult::ERROR;
 		} catch(string& e) {
 			printDeltaTime(startTime, ERROR_COLOR);
 			dumpLog();
 			setColor(TerminalColor::RED); printf("An string exception was thrown: %s\n", e.c_str());
+			return TestResult::ERROR;
 		} catch(const char* ex){
 			printDeltaTime(startTime, ERROR_COLOR);
 			dumpLog();
 			setColor(TerminalColor::RED); printf("A char* exception was thrown: %s\n", ex);
+			return TestResult::ERROR;
 		} catch (...) {
 			printDeltaTime(startTime, ERROR_COLOR);
 			dumpLog();
 			setColor(TerminalColor::RED); printf("An unknown exception was thrown!\n");
+			return TestResult::ERROR;
 		}
 	}
 };
@@ -196,34 +222,81 @@ static void initConsole() {
 static void initConsole() {}
 #endif
 
-int main(int argc, char * argv[]) {
-	initConsole();
+static bool isCoveredBy(Test& test, const std::vector<std::string>& filters) {
+	if(filters.size() == 0) {
+		return true;
+	}
+	for(const std::string& filter : filters){
+		if(filter == test.fileName || filter + ".cpp" == test.fileName || filter == test.funcName || filter == test.fileName + std::string(":") + test.funcName) {
+			return true;
+		}
+	}
+	return false;
+}
 
+static void runTests(const std::vector<std::string>& filter, bool allowSkip) {
 	setColor(TerminalColor::WHITE); cout << "Starting tests: ";
 	setColor(SUCCESS_COLOR); cout << "[SUCCESS] ";
 	setColor(FAILURE_COLOR); cout << "[FAILURE] ";
 	setColor(ERROR_COLOR); cout << "[ERROR] ";
-	setColor(SKIP_COLOR); cout << "[SKIP]" << endl;
+	setColor(SKIP_COLOR); cout << "[SKIP]\n";
 	setColor(TerminalColor::WHITE); cout << "Number of tests: " << tests->size() << endl;
 
-	if(argc == 1 || argc == 2 && std::string("--coverage") == argv[1]) {
-		for(Test& t : *tests) {
-			t.run();
-		}
-	} else {
-		for(Test& t : *tests) {
-			for(size_t i = 1; i < argc; i++) {
-				std::string strArg(argv[i]);
-				if(strArg == t.fileName || strArg == t.funcName) {
-					t.run();
-					break;
-				}
-			}
+	int totalTestsRan = 0;
+	int resultCounts[4]{0,0,0,0};
+	for(Test& t : *tests) {
+		if(isCoveredBy(t, filter)){
+			TestResult result = t.run(allowSkip);
+			if(result != TestResult::SKIP) totalTestsRan++;
+			resultCounts[static_cast<int>(result)]++;
 		}
 	}
-	setColor(TerminalColor::WHITE);  cout << "Tests finished" << endl;
+	
+	setColor(TerminalColor::WHITE);
+	cout << "Tests finished! Ran " << totalTestsRan << "/" << tests->size() << " tests\n";
 
-	if(argc == 2 && std::string("--coverage") == argv[1]) return 0;
+	setColor(SUCCESS_COLOR); cout << resultCounts[0] << " SUCCESS\n";
+	setColor(FAILURE_COLOR); cout << resultCounts[1] << " FAILURE\n";
+	setColor(ERROR_COLOR); cout << resultCounts[2] << " ERROR\n";
+	setColor(SKIP_COLOR); cout << resultCounts[3] << " SKIP" << endl;
+}
+
+struct ParsedInput {
+	std::vector<std::string> inputArgs;
+	bool coverageEnabled;
+	bool allowSkip;
+};
+
+ParsedInput parseInput(int argc, char* argv[]) {
+	ParsedInput result;
+	
+	std::vector<std::string> inputFlags;
+	for(int i = 1; i < argc; i++) {
+		if(argv[i][0] == '-' && argv[i][1] == '-') {
+			inputFlags.push_back(argv[i]);
+		} else {
+			result.inputArgs.push_back(argv[i]);
+		}
+	}
+	result.coverageEnabled = false;
+	result.allowSkip = result.inputArgs.size() == 0;
+
+	for(const std::string& flag : inputFlags) {
+		if(flag == "--coverage") result.coverageEnabled = true;
+		if(flag == "--all") result.allowSkip = false;
+	}
+
+	return result;
+}
+
+int main(int argc, char* argv[]) {
+	initConsole();
+
+	ParsedInput input = parseInput(argc, argv);
+
+	runTests(input.inputArgs, input.allowSkip);
+
+	if(input.coverageEnabled) return 0;
 
 	while(true) {
 		string input;
@@ -232,17 +305,12 @@ int main(int argc, char * argv[]) {
 		cout << "> ";
 		cin >> input;
 
-		if(input == "exit") {
+		if(input == "") {
+			continue;
+		} else if(input == "exit") {
 			break;
 		} else {
-			for(Test& t : *tests) {
-				if(input == t.fileName || input + ".cpp" == t.fileName || input == t.funcName) {
-					t.run();
-				} else if(input == string(t.fileName) + ':' + string(t.funcName)) {
-					t.run();
-					break;
-				}
-			}
+			runTests(std::vector<std::string>{input}, false);
 		}
 	}
 }
@@ -252,8 +320,8 @@ static void logAssertError(string text) {
 	cout << text.c_str();
 }
 
-TestAdder::TestAdder(const char* file, const char* name, void(*f)(TestInterface&)) {
+TestAdder::TestAdder(const char* file, const char* name, void(*f)(TestInterface&), TestType isSlow) {
 	if (tests == nullptr) tests = new vector<Test>();
 
-	tests->push_back(Test(file, name, f));
+	tests->push_back(Test(file, name, f, isSlow));
 }

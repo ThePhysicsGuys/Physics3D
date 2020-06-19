@@ -12,12 +12,18 @@ public:
 	inline size_t getAssertCount() const { return assertCount; }
 };
 
+enum class TestType {
+	NORMAL,
+	SLOW
+};
+
 #define __JOIN2(a,b) a##b
 #define __JOIN(a,b) __JOIN2(a,b)
-#define TEST_CASE(func) void func(TestInterface& __testInterface); static TestAdder __JOIN(tAdder, __LINE__)(__FILE__, #func, func); void func(TestInterface& __testInterface)
+#define TEST_CASE(func) void func(TestInterface& __testInterface); static TestAdder __JOIN(tAdder, __LINE__)(__FILE__, #func, func, TestType::NORMAL); void func(TestInterface& __testInterface)
+#define TEST_CASE_SLOW(func) void func(TestInterface& __testInterface); static TestAdder __JOIN(tAdder, __LINE__)(__FILE__, #func, func, TestType::SLOW); void func(TestInterface& __testInterface)
 
 struct TestAdder {
-	TestAdder(const char* filePath, const char* nameName, void(*testFunc)(TestInterface&));
+	TestAdder(const char* filePath, const char* nameName, void(*testFunc)(TestInterface&), TestType isSlow);
 };
 
 class AssertionError {
