@@ -4,119 +4,63 @@
 
 #include <cmath>
 
-
-
-// vec
-template<typename T, size_t Size>
-Vector<T, Size> withLength(const Vector<T, Size>& vec, const T& newLength) {
-	return vec * (newLength / length(vec));
+/*
+	Creates a matrix such that for any vector x:
+	v % x == createCrossProductEquivalent(v) * x
+*/
+template<typename T>
+Matrix<T, 3, 3> createCrossProductEquivalent(const Vector<T, 3> & vec) {
+	return Matrix<T, 3, 3>{
+		0, -vec.z, vec.y,
+		vec.z, 0, -vec.x,
+		-vec.y, vec.x, 0
+	};
 }
 
-template<typename T, size_t Size>
-Vector<T, Size> maxLength(const Vector<T, Size>& vec, const T& maxLength) {
-	if (isLongerThan(vec, maxLength))
-		return withLength(vec, maxLength);
-	else
-		return vec;
-}
-
-template<typename T, size_t Size>
-Vector<T, Size> minLength(const Vector<T, Size>& vec, const T& minLength) {
-	if (isShorterThan(vec, minLength))
-		return withLength(vec, minLength);
-	else
-		return vec;
-}
-
-template<typename T, size_t Size>
-auto length(const Vector<T, Size>& vec) {
-	return sqrt(lengthSquared(vec));
+/*
+	Returns a matrix equivalent to (v % (v % x)) = skewSymmetricSquared(v) * x
+	which is also equal to createCrossProductEquivalent(v)^2 = skewSymmetricSquared(v)
+*/
+template<typename N>
+SymmetricMatrix<N, 3> skewSymmetricSquared(const Vector<N, 3> & v) {
+	N x = v.x, y = v.y, z = v.z;
+	return SymmetricMatrix<N, 3>{
+		-(y * y + z * z),
+		x* y, -(x * x + z * z),
+		x* z, y* z, -(x * x + y * y)
+	};
 }
 
 template<typename T>
-T length(const Vector<T, 2> & vec) {
-	return hypot(vec[0], vec[1]);
+SymmetricMatrix<T, 3> transformBasis(const SymmetricMatrix<T, 3> & sm, const Matrix<T, 3, 3> & rotation) {
+	Matrix<T, 3, 3> r = rotation * sm * ~rotation;
+	return SymmetricMatrix<T, 3>{
+		r[0][0],
+		r[1][0], r[1][1],
+		r[2][0], r[2][1], r[2][2]
+	};
 }
 
-template<typename T, size_t Size>
-Vector<T, Size> normalize(const Vector<T, Size>& vec) {
-	return vec / length(vec);
+template<typename T>
+SymmetricMatrix<T, 3> transformBasis(const DiagonalMatrix<T, 3> & dm, const Matrix<T, 3, 3> & rotation) {
+	Matrix<T, 3, 3> r = rotation * dm * ~rotation;
+	return SymmetricMatrix<T, 3>{
+		r[0][0],
+		r[1][0], r[1][1],
+		r[2][0], r[2][1], r[2][2]
+	};
 }
 
-template<typename T, size_t Size>
-Vector<T, Size> abs(const Vector<T, Size>& vec) {
-	Vector<T, Size> result;
-	for (size_t i = 0; i < Size; i++)
-		result[i] = fabs(vec[i]);
-	return result;
+template<typename T>
+SymmetricMatrix<T, 3> multiplyLeftRight(const SymmetricMatrix<T, 3> & sm, const Matrix<T, 3, 3> & otherMat) {
+	Matrix<T, 3, 3> r = otherMat * sm * otherMat.transpose();
+	return SymmetricMatrix<T, 3>{
+		r[0][0],
+		r[1][0], r[1][1],
+		r[2][0], r[2][1], r[2][2]
+	};
 }
 
-template<typename T, size_t Size>
-auto angleBetween(const Vector<T, Size>& first, const Vector<T, Size>& second) -> decltype(acos(normalize(first)* normalize(second))) {
-	return acos(normalize(first) * normalize(second));
-}
-
-template<typename T, size_t Size>
-Vector<T, Size> bisect(const Vector<T, Size>& first, const Vector<T, Size>& second) {
-	return first * length(second) + second * length(first);
-}
-
-template<typename T, size_t Size>
-size_t getMaxElementIndex(const Vector<T, Size>& vec) {
-	size_t max = 0;
-
-	for(size_t i = 1; i < Size; i++) {
-		if(vec[i] > vec[max]) {
-			max = i;
-		}
-	}
-	return max;
-}
-template<typename T, size_t Size>
-size_t getMinElementIndex(const Vector<T, Size>& vec) {
-	size_t min = 0;
-
-	for(size_t i = 1; i < Size; i++) {
-		if(vec[i] > vec[min]) {
-			min = i;
-		}
-	}
-	return min;
-}
-template<typename T, size_t Size>
-size_t getAbsMaxElementIndex(const Vector<T, Size>& vec) {
-	size_t max = 0;
-
-	for(size_t i = 1; i < Size; i++) {
-		if(std::abs(vec[i]) > std::abs(vec[max])) {
-			max = i;
-		}
-	}
-	return max;
-}
-
-template<typename T, size_t Size>
-size_t getAbsMinElementIndex(const Vector<T, Size>& vec) {
-	size_t min = 0;
-
-	for(size_t i = 1; i < Size; i++) {
-		if(std::abs(vec[i]) < std::abs(vec[min])) {
-			min = i;
-		}
-	}
-	return min;
-}
-
-template<typename T, size_t Size>
-T sumElements(const Vector<T, Size>& vec) {
-	T sum = vec[0];
-	for(size_t i = 1; i < Size; i++) {
-		sum += vec[i];
-	}
-	return sum;
-}
-
-// mat3
 template<typename T>
 UnitaryMatrix<T, 3> rotMatX(T angle) {
 	T sina = sin(angle);
@@ -218,39 +162,36 @@ Matrix<T, 3, 3> rotate(const Matrix<T, 3, 3> & mat, T angle, T x, T y, T z) {
 
 template<typename T>
 RotationMatrix<T, 3> rotationMatrixfromRotationVec(Vector<T, 3> rotVec) {
+	T angleSq = lengthSquared(rotVec);
+	T angle = sqrt(angleSq);
 
-	T angle = length(rotVec);
+	// sinc(angle) = sin(angle) / angle
+	// around angle=0 =~ 1 - angle^2 / 6 + angle^4 / 120 - angle^6 / 5040 
+	T sincAngle = (angleSq > 1E-20) ? sin(angle) / angle : 1.0 - angleSq / 6.0;
 
-	if (angle == 0) {
-		return Matrix<T, 3, 3>::IDENTITY();
-	}
+	T cosAngle = cos(angle);
 
-	Vector<T, 3> normalizedRotVec = rotVec / angle;
+	// cosc(angle) = (cos(angle) - 1) / angle^2
+	// around angle=0 =~ 1/2 - angle^2 / 24 + angle^4 / 720 - angle^6 / 40320
+	T coscAngle = (angleSq > 1E-20) ? (1 - cosAngle) / angleSq : 0.5 - angleSq / 24.0;
 
-	T x = normalizedRotVec.x;
-	T y = normalizedRotVec.y;
-	T z = normalizedRotVec.z;
-	
-	T sinA = sin(angle);
-	T cosA = cos(angle);
-
-	Matrix<T, 3, 3> outerProd = outer(normalizedRotVec, normalizedRotVec);
+	Vector<T, 3> sincVec = rotVec * sincAngle;
 	Matrix<T, 3, 3> rotor{
-		cosA,	    -z * sinA,   y * sinA,
-		z * sinA,   cosA,		-x * sinA,
-		-y * sinA,  x * sinA,	 cosA
+		 cosAngle,   -sincVec.z,   sincVec.y,
+		 sincVec.z,   cosAngle,   -sincVec.x,
+		-sincVec.y,   sincVec.x,   cosAngle
 	};
 
-	return outerProd * (1 - cosA) + rotor;
+	return outer(rotVec, rotVec) * coscAngle + rotor;
 }
 
 template<typename T>
 Vector<T, 3> rotationVectorfromRotationMatrix(const RotationMatrix<T, 3>& m) {
 	Vector<T, 3> axisOfRotation(m[2][1] - m[1][2], m[0][2] - m[2][0], m[1][0] - m[0][1]);
 	if(axisOfRotation[0] == 0 && axisOfRotation[1] == 0 && axisOfRotation[2] == 0) return Vector<T, 3>(0, 0, 0);
-	double trace = m[0][0] + m[1][1] + m[2][2];
+	T trace = m[0][0] + m[1][1] + m[2][2];
 
-	double angle = acos((trace - 1) / 2);
+	T angle = acos((trace - 1) / 2);
 
 	return normalize(axisOfRotation) * angle;
 }
@@ -280,7 +221,7 @@ Mat4f ortho(float left, float right, float bottom, float top, float zNear, float
 
 Mat4f perspective(float fov, float aspect, float zNear, float zFar);
 
-Mat4f lookAt(Vec3f from, Vec3f to, Vec3f up = Vec3f(0, 1, 0));
+Mat4f lookAt(const Vec3f& from, const Vec3f& to, const Vec3f& up = Vec3f(0, 1.0f, 0));
 
 template<typename T>
 Matrix<T, 4, 4> rotate(const Matrix<T, 4, 4>&, T angle, T x, T y, T z);

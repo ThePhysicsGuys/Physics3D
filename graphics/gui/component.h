@@ -93,7 +93,7 @@ public:
 	virtual Component* intersect(Vec2 point) {
 		Vec2 halfDimension = dimension / 2;
 		Vec2 center = position + Vec2(halfDimension.x, -halfDimension.y);
-		if (fabs(point.x - center.x) < halfDimension.x && fabs(point.y - center.y) < halfDimension.y)
+		if (std::abs(point.x - center.x) < halfDimension.x && std::abs(point.y - center.y) < halfDimension.y)
 			return this;
 		return nullptr;
 	}

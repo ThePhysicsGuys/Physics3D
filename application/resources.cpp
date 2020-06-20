@@ -24,6 +24,7 @@ ResourceDescriptor applicationResources[] {
 	{ IDR_SHADER15, "SHADER" },
 	{ IDR_SHADER16, "SHADER" },
 	{ IDR_SHADER17, "SHADER" },
+	{ IDR_SHADER18, "SHADER" },
 	{ IDR_OBJ1, "OBJ" },
 	{ IDR_OBJ2, "OBJ" }
 };
@@ -47,6 +48,7 @@ ResourceDescriptor applicationResources[] {
 	{ "../res/shaders/sky.shader"         , "SHADER" },
 	{ "../res/shaders/lighting.shader"    , "SHADER" },
 	{ "../res/shaders/debug.shader"       , "SHADER" },
+	{ "../res/shaders/depthbuffer.shader" , "SHADER" },
 	{ "../res/models/stall.obj"           , "OBJ" },
 	{ "../res/models/sphere.obj"          , "OBJ" }
 };

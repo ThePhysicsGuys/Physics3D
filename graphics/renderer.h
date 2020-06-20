@@ -82,6 +82,8 @@ extern void bindDrawbuffer(GLID id);
 extern void bindReadbuffer(GLID id);
 extern void bindRenderbuffer(GLID id);
 
+void activeTexture(GLID unit);
+
 extern void polygonMode(int face, int mode);
 extern void scissor(int x, int y, int width, int height);
 extern void drawElementsInstanced(GLFLAG mode, size_t count, GLFLAG type, const void* offset, size_t primitives);

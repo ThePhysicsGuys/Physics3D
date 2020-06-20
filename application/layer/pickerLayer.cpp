@@ -18,8 +18,8 @@ void PickerLayer::onInit() {
 	Picker::onInit();
 	
 	toolManager.onInit();
-	toolManager.registerTool<SelectionTool>();
-	toolManager.selectTool<SelectionTool>();
+	//toolManager.registerTool<SelectionTool>();
+	//toolManager.selectTool<SelectionTool>();
 }
 
 void PickerLayer::onUpdate() {

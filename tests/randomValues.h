@@ -22,7 +22,7 @@ inline double createRandomNonzeroDouble() {
 	tryAgain:
 	double result = createRandomDouble();
 
-	if(abs(result) < 0.3) {
+	if(std::abs(result) < 0.3) {
 		goto tryAgain;
 	}
 

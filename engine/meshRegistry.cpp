@@ -10,10 +10,8 @@
 #include "../engine/visualData.h"
 #include "../graphics/mesh/indexedMesh.h"
 #include "../physics/geometry/builtinShapeClasses.h"
-
+#include "../physics/math/constants.h"
 #include <stdexcept>
-
-#define PI 3.14159265359
 
 namespace Engine::MeshRegistry {
 

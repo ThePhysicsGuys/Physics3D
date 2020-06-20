@@ -5,7 +5,7 @@
 #include "../engine/layer/layerStack.h"
 
 namespace Graphics {
-class Shader;
+class ShaderResource;
 struct ShaderStage;
 class Texture;
 class Font;
@@ -45,10 +45,10 @@ public:
 
 private:
 	static void renderECSNode(Engine::Node* node);
-	static void renderShaderStageInfo(Graphics::Shader* shader, const Graphics::ShaderStage& stage);
+	static void renderShaderStageInfo(Graphics::ShaderResource* shader, const Graphics::ShaderStage& stage);
 	static void renderTextureInfo(Graphics::Texture* texture);
 	static void renderFontInfo(Graphics::Font* font);
-	static void renderShaderInfo(Graphics::Shader* shader);
+	static void renderShaderInfo(Graphics::ShaderResource* shader);
 	
 	static void renderECSTree();
 	static void renderPropertiesFrame();

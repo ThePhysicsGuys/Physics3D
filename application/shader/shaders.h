@@ -20,36 +20,44 @@ struct Light;
 struct Material;
 struct ExtendedPart;
 
+struct DepthBufferShader : public ShaderResource {
+	inline DepthBufferShader() : ShaderResource() {}
+	inline DepthBufferShader(const ShaderSource& shaderSource) : ShaderResource(shaderSource.name, shaderSource.path, shaderSource) {}
+
+	void updateDepthMap(GLID unit, GLID id);
+	void updatePlanes(float near, float far);
+};
+
 struct DebugShader : public StandardMeshShaderBase {
-	inline DebugShader() : ShaderResource() {}
-	inline DebugShader(ShaderSource shaderSource) : ShaderResource(shaderSource.name, "debug.shader", shaderSource) {}
+	inline DebugShader() : StandardMeshShaderBase(), ShaderResource() {}
+	inline DebugShader(const ShaderSource& shaderSource) : StandardMeshShaderBase(shaderSource.name, shaderSource.path, shaderSource), ShaderResource(shaderSource.name, shaderSource.path, shaderSource) {}
 };
 
 struct SkyboxShader : public ProjectionShaderBase {
-	inline SkyboxShader() : ShaderResource() {}
-	inline SkyboxShader(ShaderSource shaderSource) : ShaderResource(shaderSource.name, "skybox.shader", shaderSource) {}
+	inline SkyboxShader() : ProjectionShaderBase(), ShaderResource() {}
+	inline SkyboxShader(const ShaderSource& shaderSource) : ProjectionShaderBase(shaderSource.name, shaderSource.path, shaderSource), ShaderResource(shaderSource.name, shaderSource.path, shaderSource) {}
 
 	void updateCubeMap(Graphics::CubeMap* skybox);
 	void updateLightDirection(const Vec3f& lightDirection);
 };
 
 struct MaskShader : public StandardMeshShaderBase {
-	inline MaskShader() : ShaderResource() {}
-	inline MaskShader(ShaderSource shaderSource) : ShaderResource(shaderSource.name, "mask.shader", shaderSource) {}
+	inline MaskShader() : StandardMeshShaderBase(), ShaderResource() {}
+	inline MaskShader(const ShaderSource& shaderSource) : StandardMeshShaderBase(shaderSource.name, shaderSource.path, shaderSource), ShaderResource(shaderSource.name, shaderSource.path, shaderSource) {}
 
 	void updateColor(const Color& color);
 };
 
 struct DepthShader : public StandardMeshShaderBase {
-	inline DepthShader() : ShaderResource() {}
-	inline DepthShader(ShaderSource shaderSource) : ShaderResource(shaderSource.name, "depth.shader", shaderSource) {}
+	inline DepthShader() : StandardMeshShaderBase(), ShaderResource() {}
+	inline DepthShader(const ShaderSource& shaderSource) : StandardMeshShaderBase(shaderSource.name, shaderSource.path, shaderSource), ShaderResource(shaderSource.name, shaderSource.path, shaderSource) {}
 
 	void updateLight(const Mat4f& lightMatrix);
 };
 
 struct PostProcessShader : public ShaderResource {
 	inline PostProcessShader() : ShaderResource() {}
-	inline PostProcessShader(ShaderSource shaderSource) : ShaderResource(shaderSource.name, "postprocess.shader", shaderSource) {}
+	inline PostProcessShader(const ShaderSource& shaderSource) : ShaderResource(shaderSource.name, shaderSource.path, shaderSource) {}
 
 	void updateTexture(Graphics::Texture* texture);
 	void updateTexture(Graphics::HDRTexture* texture);
@@ -57,14 +65,14 @@ struct PostProcessShader : public ShaderResource {
 
 struct OriginShader : public ShaderResource {
 	inline OriginShader() : ShaderResource() {}
-	inline OriginShader(ShaderSource shaderSource) : ShaderResource(shaderSource.name, "origin.shader", shaderSource) {}
+	inline OriginShader(const ShaderSource& shaderSource) : ShaderResource(shaderSource.name, shaderSource.path, shaderSource) {}
 
 	void updateProjection(const Mat4f& viewMatrix, const Mat4f& rotatedViewMatrix, const Mat4f& projectionMatrix, const Mat4f& orthoMatrix, const Position& viewPosition);
 };
 
 struct FontShader : public ShaderResource {
 	inline FontShader() : ShaderResource() {}
-	inline FontShader(ShaderSource shaderSource) : ShaderResource(shaderSource.name, "font.shader", shaderSource) {}
+	inline FontShader(const ShaderSource& shaderSource) : ShaderResource(shaderSource.name, shaderSource.path, shaderSource) {}
 
 	void updateColor(const Color& color);
 	void updateProjection(const Mat4f& projectionMatrix);
@@ -72,37 +80,37 @@ struct FontShader : public ShaderResource {
 };
 
 struct VectorShader : public ProjectionShaderBase {
-	inline VectorShader() : ShaderResource() {}
-	inline VectorShader(ShaderSource shaderSource) : ShaderResource(shaderSource.name, "vector.shader", shaderSource) {}
+	inline VectorShader() : ProjectionShaderBase(), ShaderResource() {}
+	inline VectorShader(const ShaderSource& shaderSource) : ProjectionShaderBase(shaderSource.name, shaderSource.path, shaderSource), ShaderResource(shaderSource.name, shaderSource.path, shaderSource) {}
 };
 
 struct PointShader : public ProjectionShaderBase {
-	inline PointShader() : ShaderResource() {}
-	inline PointShader(ShaderSource shaderSource) : ShaderResource(shaderSource.name, "point.shader", shaderSource) {}
+	inline PointShader() : ProjectionShaderBase(), ShaderResource() {}
+	inline PointShader(const ShaderSource& shaderSource) : ProjectionShaderBase(shaderSource.name, shaderSource.path, shaderSource), ShaderResource(shaderSource.name, shaderSource.path, shaderSource) {}
 };
 
 struct TestShader : public StandardMeshShaderBase {
-	inline TestShader() : ShaderResource() {}
-	inline TestShader(ShaderSource shaderSource) : ShaderResource(shaderSource.name, "test.shader", shaderSource) {}
+	inline TestShader() : StandardMeshShaderBase(), ShaderResource() {}
+	inline TestShader(const ShaderSource& shaderSource) : StandardMeshShaderBase(shaderSource.name, shaderSource.path, shaderSource), ShaderResource(shaderSource.name, shaderSource.path, shaderSource) {}
 
 	void updateDisplacement(Graphics::Texture* displacementMap);
 };
 
 struct LineShader : public ProjectionShaderBase {
-	inline LineShader() : ShaderResource() {}
-	inline LineShader(ShaderSource shaderSource) : ShaderResource(shaderSource.name, "line.shader", shaderSource) {}
+	inline LineShader() : ProjectionShaderBase(), ShaderResource() {}
+	inline LineShader(const ShaderSource& shaderSource) : ProjectionShaderBase(shaderSource.name, shaderSource.path, shaderSource), ShaderResource(shaderSource.name, shaderSource.path, shaderSource) {}
 };
 
 struct SkyShader : public ProjectionShaderBase {
-	inline SkyShader() : ShaderResource() {}
-	inline SkyShader(ShaderSource shaderSource) : ShaderResource(shaderSource.name, "sky.shader", shaderSource) {}
+	inline SkyShader() : ProjectionShaderBase(), ShaderResource() {}
+	inline SkyShader(const ShaderSource& shaderSource) : ProjectionShaderBase(shaderSource.name, shaderSource.path, shaderSource), ShaderResource(shaderSource.name, shaderSource.path, shaderSource) {}
 
 	void updateTime(float time);
 };
 
 struct LightingShader : public BasicShaderBase {
-	inline LightingShader() : ShaderResource() {}
-	inline LightingShader(ShaderSource shaderSource) : ShaderResource(shaderSource.name, "lighting.shader", shaderSource) {}
+	inline LightingShader() : BasicShaderBase(), ShaderResource() {}
+	inline LightingShader(const ShaderSource& shaderSource) : BasicShaderBase(shaderSource.name, shaderSource.path, shaderSource), ShaderResource(shaderSource.name, shaderSource.path, shaderSource) {}
 };
 
 namespace Shaders {
@@ -121,6 +129,7 @@ extern MaskShader maskShader;
 extern SkyShader skyShader;
 extern LightingShader lightingShader;
 extern DebugShader debugShader;
+extern DepthBufferShader depthBufferShader;
 
 void onInit();
 void onClose();

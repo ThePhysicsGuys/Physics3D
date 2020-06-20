@@ -277,6 +277,7 @@
     <ClCompile Include="math\linalg\eigen.cpp" />
     <ClCompile Include="math\linalg\largeMatrix.cpp" />
     <ClCompile Include="math\linalg\trigonometry.cpp" />
+    <ClCompile Include="math\predefinedTaylorExpansions.cpp" />
     <ClCompile Include="misc\filters\visibilityFilter.cpp" />
     <ClCompile Include="misc\shapeLibrary.cpp" />
     <ClCompile Include="misc\validityHelper.cpp" />
@@ -334,7 +335,9 @@
     <ClInclude Include="math\linalg\largeMatrix.h" />
     <ClInclude Include="math\linalg\mat.h" />
     <ClInclude Include="math\linalg\misc.h" />
+    <ClInclude Include="math\linalg\quat.h" />
     <ClInclude Include="math\predefinedTaylorExpansions.h" />
+    <ClInclude Include="math\constants.h" />
     <ClInclude Include="math\taylorExpansion.h" />
     <ClInclude Include="math\rotation.h" />
     <ClInclude Include="math\transform.h" />

@@ -2,6 +2,7 @@
 
 #include "compare.h"
 #include "../physics/misc/toString.h"
+#include "simulation.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -9,11 +10,13 @@
 #include "../physics/world.h"
 #include "../physics/inertia.h"
 #include "../physics/misc/shapeLibrary.h"
-#include "../physics/math/linalg/misc.h"
+#include "../physics/math/linalg/trigonometry.h"
 #include "../physics/math/linalg/eigen.h"
 #include "../physics/geometry/shape.h"
 #include "../physics/geometry/shapeCreation.h"
 #include "../physics/misc/gravityForce.h"
+#include "../physics/constraints/motorConstraint.h"
+#include "../physics/constraints/sinusoidalPistonConstraint.h"
 #include "../util/log.h"
 
 
@@ -359,4 +362,45 @@ TEST_CASE(testShapeNativeScaling) {
 	Polyhedron scaledTestPoly = testPoly.scaled(2.0f, 4.0f, 3.7f);
 
 	ASSERT(shape2.getInertia() == scaledTestPoly.getInertiaAroundCenterOfMass());
+}
+
+TEST_CASE(testPhysicalInertiaDerivatives) {
+	Polyhedron testPoly = Library::createPointyPrism(4, 1.0f, 1.0f, 0.5f, 0.5f);
+
+	PartProperties basicProperties{0.7, 0.2, 0.6};
+
+	Part mainPart(polyhedronShape(testPoly), GlobalCFrame(), basicProperties);
+	Part part1_mainPart(polyhedronShape(Library::house), mainPart, 
+						new SinusoidalPistonConstraint(0.0, 2.0, 1.3), 
+						CFrame(0.3, 0.7, -0.5, Rotation::fromEulerAngles(0.7, 0.3, 0.7)), 
+						CFrame(0.1, 0.2, -0.5, Rotation::fromEulerAngles(0.2, -0.257, 0.4)), basicProperties);
+	Part part2_mainPart(boxShape(1.0, 0.3, 2.0), mainPart, 
+						new MotorConstraintTemplate<ConstantMotorTurner>(1.7),
+						CFrame(-0.3, 0.7, 0.5, Rotation::fromEulerAngles(0.7, 0.3, 0.7)), 
+						CFrame(0.1, -0.2, -0.5, Rotation::fromEulerAngles(0.2, -0.257, 0.4)), basicProperties);
+	Part part1_part1_mainPart(cylinderShape(1.0, 0.3), part1_mainPart, 
+						new MotorConstraintTemplate<ConstantMotorTurner>(1.3),
+						CFrame(-0.3, 0.7, 0.5, Rotation::fromEulerAngles(0.7, 0.3, 0.7)),
+						CFrame(0.1, -0.2, -0.5, Rotation::fromEulerAngles(0.2, -0.257, 0.4)) , basicProperties);
+	Part part1_part1_part1_mainPart(polyhedronShape(Library::trianglePyramid), part1_part1_mainPart, 
+						new SinusoidalPistonConstraint(0.0, 2.0, 1.3),
+						CFrame(0.3, 0.7, -0.5, Rotation::fromEulerAngles(0.7, 0.3, 0.7)),
+						CFrame(0.1, 0.2, -0.5, Rotation::fromEulerAngles(0.2, -0.257, 0.4)), basicProperties);
+
+	MotorizedPhysical* motorPhys = mainPart.parent->mainPhysical;
+
+	FullTaylorExpansion<SymmetricMat3, SymmetricMat3, 2> inertiaTaylor = motorPhys->getRotationalInertiaTaylorExpansion();
+
+	double deltaT = 0.00001;
+
+	std::array<SymmetricMat3, 3> inertias;
+	inertias[0] = motorPhys->getRotationalInertia();
+	motorPhys->update(deltaT);
+	inertias[1] = motorPhys->getRotationalInertia();
+	motorPhys->update(deltaT);
+	inertias[2] = motorPhys->getRotationalInertia();
+
+	FullTaylorExpansion<SymmetricMat3, SymmetricMat3, 2> estimatedInertiaTaylor = estimateDerivatives(inertias, deltaT);
+
+	ASSERT_TOLERANT(inertiaTaylor == estimatedInertiaTaylor, 0.01);
 }

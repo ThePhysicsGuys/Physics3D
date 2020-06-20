@@ -12,6 +12,7 @@
 #include "../util/resource/resourceLoader.h"
 #include "../util/resource/resourceManager.h"
 #include "../graphics/resource/textureResource.h"
+#include "../physics/math/constants.h"
 
 namespace Application {
 
@@ -193,7 +194,7 @@ void buildTerrain(double width, double depth) {
 		double x = fRand(-width / 2, width / 2);
 		double z = fRand(-depth / 2, depth / 2);
 
-		if (abs(x) < 30.0 && abs(z) < 30.0) continue;
+		if (std::abs(x) < 30.0 && std::abs(z) < 30.0) continue;
 
 		Position treePos(x, getYOffset(x, z) + 8.0, z);
 

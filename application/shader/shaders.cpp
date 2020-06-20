@@ -5,7 +5,7 @@
 #include "extendedPart.h"
 
 #include "../graphics/texture.h"
-
+#include "../graphics/renderer.h"
 #include "../util/resource/resource.h"
 #include "../util/resource/resourceManager.h"
 
@@ -30,25 +30,26 @@ InstanceShader instanceShader;
 LightingShader lightingShader;
 SkyShader skyShader;
 DebugShader debugShader;
+DepthBufferShader depthBufferShader;
 
 void onInit() {
 	// Shader source init
-	ShaderSource basicShaderSource       = parseShader("BasicShader", "basic.shader", getResourceAsString(applicationResources, BASIC_SHADER));
-	ShaderSource depthShaderSource       = parseShader("DepthShader", "depth.shader", getResourceAsString(applicationResources, DEPTH_SHADER));
-	ShaderSource vectorShaderSource      = parseShader("VectorShader", "vector.shader", getResourceAsString(applicationResources, VECTOR_SHADER));
-	ShaderSource fontShaderSource        = parseShader("FontShader", "font.shader", getResourceAsString(applicationResources, FONT_SHADER));
-	ShaderSource originShaderSource      = parseShader("OriginShader", "origin.shader", getResourceAsString(applicationResources, ORIGIN_SHADER));
-	ShaderSource postProcessShaderSource = parseShader("PostProcessShader", "postProcess.shader", getResourceAsString(applicationResources, POSTPROCESS_SHADER));
-	ShaderSource skyboxShaderSource      = parseShader("SkyBoxShader", "skybox.shader", getResourceAsString(applicationResources, SKYBOX_SHADER));
-	ShaderSource pointShaderSource       = parseShader("PointShader", "point.shader", getResourceAsString(applicationResources, POINT_SHADER));
-	ShaderSource testShaderSource        = parseShader("TestShader", "test.shader", getResourceAsString(applicationResources, TEST_SHADER));
-	ShaderSource lineShaderSource        = parseShader("LineShader", "line.shader", getResourceAsString(applicationResources, LINE_SHADER));
-	ShaderSource maskShaderSource        = parseShader("MaskShader", "mask.shader", getResourceAsString(applicationResources, MASK_SHADER));
-	ShaderSource instanceShaderSource    = parseShader("InstanceShader", "instance.shader", getResourceAsString(applicationResources, INSTANCE_SHADER));
-	ShaderSource skyShaderSource         = parseShader("SkyShader", "sky.shader", getResourceAsString(applicationResources, SKY_SHADER));
-	ShaderSource lightingShaderSource    = parseShader("LightingShader", "lighting.shader", getResourceAsString(applicationResources, LIGHTING_SHADER));
-	ShaderSource debugShaderSource       = parseShader("DebugShader", "debug.shader", getResourceAsString(applicationResources, DEBUG_SHADER));
-
+	ShaderSource basicShaderSource       = parseShader("BasicShader", "../res/shaders/basic.shader", getResourceAsString(applicationResources, BASIC_SHADER));
+	ShaderSource depthShaderSource       = parseShader("DepthShader", "../res/shaders/depth.shader", getResourceAsString(applicationResources, DEPTH_SHADER));
+	ShaderSource vectorShaderSource      = parseShader("VectorShader", "../res/shaders/vector.shader", getResourceAsString(applicationResources, VECTOR_SHADER));
+	ShaderSource fontShaderSource        = parseShader("FontShader", "../res/shaders/font.shader", getResourceAsString(applicationResources, FONT_SHADER));
+	ShaderSource originShaderSource      = parseShader("OriginShader", "../res/shaders/origin.shader", getResourceAsString(applicationResources, ORIGIN_SHADER));
+	ShaderSource postProcessShaderSource = parseShader("PostProcessShader", "../res/shaders/postProcess.shader", getResourceAsString(applicationResources, POSTPROCESS_SHADER));
+	ShaderSource skyboxShaderSource      = parseShader("SkyboxShader", "../res/shaders/skybox.shader", getResourceAsString(applicationResources, SKYBOX_SHADER));
+	ShaderSource pointShaderSource       = parseShader("PointShader", "../res/shaders/point.shader", getResourceAsString(applicationResources, POINT_SHADER));
+	ShaderSource testShaderSource        = parseShader("TestShader", "../res/shaders/test.shader", getResourceAsString(applicationResources, TEST_SHADER));
+	ShaderSource lineShaderSource        = parseShader("LineShader", "../res/shaders/line.shader", getResourceAsString(applicationResources, LINE_SHADER));
+	ShaderSource maskShaderSource        = parseShader("MaskShader", "../res/shaders/mask.shader", getResourceAsString(applicationResources, MASK_SHADER));
+	ShaderSource instanceShaderSource    = parseShader("InstanceShader", "../res/shaders/instance.shader", getResourceAsString(applicationResources, INSTANCE_SHADER));
+	ShaderSource skyShaderSource         = parseShader("SkyShader", "../res/shaders/sky.shader", getResourceAsString(applicationResources, SKY_SHADER));
+	ShaderSource lightingShaderSource    = parseShader("LightingShader", "../res/shaders/lighting.shader", getResourceAsString(applicationResources, LIGHTING_SHADER));
+	ShaderSource debugShaderSource       = parseShader("DebugShader", "../res/shaders/debug.shader", getResourceAsString(applicationResources, DEBUG_SHADER));
+	ShaderSource depthBufferShaderSource = parseShader("DepthBufferShader", "../res/shaders/depthbuffer.shader", getResourceAsString(applicationResources, DEPTHBUFFER_SHADER));
 
 	// Shader init
 	new(&basicShader) BasicShader(basicShaderSource);
@@ -66,6 +67,7 @@ void onInit() {
 	new(&skyShader) SkyShader(skyShaderSource);
 	new(&lightingShader) LightingShader(lightingShaderSource);
 	new(&debugShader) DebugShader(debugShaderSource);
+	new(&depthBufferShader) DepthBufferShader(depthBufferShaderSource);
 
 	ResourceManager::add(&basicShader);
 	ResourceManager::add(&depthShader);
@@ -82,6 +84,7 @@ void onInit() {
 	ResourceManager::add(&skyShader);
 	ResourceManager::add(&lightingShader);
 	ResourceManager::add(&debugShader);
+	ResourceManager::add(&depthBufferShader);
 }
 
 void onClose() {
@@ -100,6 +103,7 @@ void onClose() {
 	skyShader.close();
 	lightingShader.close();
 	debugShader.close();
+	depthBufferShader.close();
 }
 
 }
@@ -131,6 +135,7 @@ void DepthShader::updateLight(const Mat4f& lightMatrix) {
 	bind();
 	setUniform("lightMatrix", lightMatrix);
 }
+
 
 // PostProcessShader
 
@@ -190,6 +195,21 @@ void TestShader::updateDisplacement(Graphics::Texture* displacementMap) {
 void SkyShader::updateTime(float time) {
 	bind();
 	setUniform("time", time);
+}
+
+// DepthBufferShader
+
+void DepthBufferShader::updateDepthMap(GLID unit, GLID id) {
+	bind();
+	Renderer::activeTexture(unit);
+	Renderer::bindTexture2D(id);
+	setUniform("depthMap", unit);
+}
+
+void DepthBufferShader::updatePlanes(float near, float far) {
+	bind();
+	setUniform("far", far);
+	setUniform("near", near);
 }
 
 };

@@ -6,15 +6,15 @@
 
 [vertex]
 
-layout(location = 0) in vec4 vposition;
+layout(location = 0) in vec4 vPosition;
 
 uniform mat4 projectionMatrix;
 
 out vec2 fUV;
 
 void main() {
-	gl_Position = projectionMatrix * vec4(vposition.xy, 0.0, 1.0);
-	fUV = vposition.zw;
+	gl_Position = projectionMatrix * vec4(vPosition.xy, 0.0, 1.0);
+	fUV = vPosition.zw;
 }
 
 //------------------------------------------------------------------------------//

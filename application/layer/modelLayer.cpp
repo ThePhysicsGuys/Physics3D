@@ -27,8 +27,10 @@
 #include "../physics/math/linalg/vec.h"
 #include "../physics/sharedLockGuard.h"
 #include "../physics/misc/filters/visibilityFilter.h"
+#include "../physics/math/mathUtil.h"
 
 #include "../util/resource/resourceManager.h"
+#include "../layer/testLayer.h"
 
 namespace Application {
 
@@ -132,7 +134,15 @@ void ModelLayer::onRender() {
 	graphicsMeasure.mark(GraphicsProcess::UPDATE);
 	Shaders::debugShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
 	Shaders::basicShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
+	
+	//Shaders::instanceShader.updateProjection(lookAt(fromPosition(screen->camera.cframe.position), Vec3f(0, 0, 0)), screen->camera.projectionMatrix, screen->camera.cframe.position);
 	Shaders::instanceShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
+	
+	// Shadow
+	Renderer::activeTexture(1);
+	Renderer::bindTexture2D(TestLayer::depthMap);
+	Shaders::instanceShader.setUniform("shadowMap", 1);
+	Shaders::instanceShader.setUniform("lightMatrix", TestLayer::lighSpaceMatrix);
 
 	// Filter on mesh ID and transparency
 	size_t maxMeshCount = 0;
@@ -142,7 +152,8 @@ void ModelLayer::onRender() {
 	graphicsMeasure.mark(GraphicsProcess::PHYSICALS);
 	screen->world->syncReadOnlyOperation([this, &visibleParts, &transparentParts, &meshCounter, &maxMeshCount, screen] () {
 		VisibilityFilter filter = VisibilityFilter::forWindow(screen->camera.cframe.position, screen->camera.getForwardDirection(), screen->camera.getUpDirection(), screen->camera.fov, screen->camera.aspect, screen->camera.zfar);
-		for (ExtendedPart& part : screen->world->iterPartsFiltered(filter, ALL_PARTS)) {
+		//for (ExtendedPart& part : screen->world->iterPartsFiltered(filter, ALL_PARTS)) {
+		for (ExtendedPart& part : screen->world->iterParts(ALL_PARTS)) {
 			if (part.material.albedo.w < 1) {
 				transparentParts.insert({ lengthSquared(Vec3(screen->camera.cframe.position - part.getPosition())), &part });
 			} else {
@@ -153,7 +164,7 @@ void ModelLayer::onRender() {
 					maxMeshCount = meshCounter[part.visualData.drawMeshId];
 			}
 		}
-		});
+	});
 
 	// Ensure correct size
 	uniforms.reserve(maxMeshCount);

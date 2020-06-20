@@ -48,6 +48,16 @@ inline Position avg(const Position& first, const Position& second) {
 	return first + Vec3Fix(delta.x >> int64_t(1), delta.y >> int64_t(1), delta.z >> int64_t(1));
 }
 
+// cast Vec3 to Position, not recommended due to potential loss of precision
+inline Position castVec3ToPosition(const Vec3& vec) {
+	return Position(vec.x, vec.y, vec.z);
+}
+// case Position to Vec3, not recommended due to potential loss of precision
+// If possible, compute relative positions, eg: pos1-pos2 = vec3 delta
+inline Vec3 castPositionToVec3(const Position& pos) {
+	return Vec3(pos.x, pos.y, pos.z);
+}
+
 // unconventional operator, compares xyz individually, returns true if all are true
 inline bool operator>=(const Position& first, const Position& second) { return first.x >= second.x && first.y >= second.y && first.z >= second.z; }
 // unconventional operator, compares xyz individually, returns true if all are true

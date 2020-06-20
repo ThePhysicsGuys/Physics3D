@@ -8,8 +8,6 @@ namespace Application {
 using namespace Graphics;
 
 struct Light;
-struct Material;
-struct ExtendedPart;
 
 struct ProjectionShaderBase : public virtual ShaderResource {
 	inline ProjectionShaderBase() : ShaderResource() {}

@@ -3,8 +3,7 @@
 #include <cstdlib>
 #include "linalg/vec.h"
 #include "position.h"
-
-#define PI 3.14159265358979323846   // this is pi
+#include "constants.h"
 
 /*
 	Returns a random number between fMin and fMax

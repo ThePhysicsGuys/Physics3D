@@ -439,7 +439,7 @@ bool onKeyPress(Engine::KeyPressEvent& keyEvent) {
 	using namespace Engine;
 
 	Key pressedKey = keyEvent.getKey();
-	if(pressedKey == Keyboard::S && keyEvent.getModifiers().isCtrlPressed()) {
+	if(pressedKey == Keyboard::KEY_S && keyEvent.getModifiers().isCtrlPressed()) {
 		saveWorld(world);
 		return true;
 	} else {

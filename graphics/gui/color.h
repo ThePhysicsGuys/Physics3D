@@ -12,9 +12,9 @@ namespace COLOR {
 	extern Color BACK;
 	extern Color ALPHA;
 
-	extern Color R;
-	extern Color G;
-	extern Color B;
+	extern Color RGB_R;
+	extern Color RGB_G;
+	extern Color RGB_B;
 	extern Color A;
 
 	extern Color NAVY;
@@ -36,8 +36,19 @@ namespace COLOR {
 	extern Color WHITE;
 
 	// format: 0xRRGGBBAA
-	Color get(int hex, bool alpha);
-	Color get(int hex);
+	inline constexpr Color get(int hex, bool alpha) {
+		Color color;
+		if (!alpha) hex = (hex << 8) | 0xFF;
+		color.x = ((hex >> 24) & 0xFF) / 255.0f;
+		color.y = ((hex >> 16) & 0xFF) / 255.0f;
+		color.z = ((hex >> 8) & 0xFF) / 255.0f;
+		color.w = (hex & 0xFF) / 255.0f;
+		return color;
+	}
+
+	inline constexpr Color get(int hex) {
+		return get(hex, false);
+	}
 
 	Color3 hsvToRgb(Color3 hsv);
 	Color3 rgbToHsv(Color3 rgb);

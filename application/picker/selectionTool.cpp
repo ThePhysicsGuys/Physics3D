@@ -18,6 +18,8 @@
 #include "../worlds.h"
 #include "../physics/misc/filters/visibilityFilter.h"
 
+#include <cmath>
+
 namespace Application {
 
 void SelectionTool::onRender() {
@@ -33,7 +35,7 @@ void SelectionTool::onRender() {
 		Vec2 a = GUI::map(Vec2(currentRegion.x, currentRegion.y));
 		Vec2 b = GUI::map(handler->getMousePosition());
 		Vec2 position = Vec2f(fmin(a.x, b.x), fmin(a.y, b.y));
-		Vec2 dimension = Vec2f(fabs(a.x - b.x), fabs(a.y - b.y));
+		Vec2 dimension = Vec2f(std::abs(a.x - b.x), std::abs(a.y - b.y));
 		Path::rect(position, dimension);
 	}
 
@@ -41,7 +43,7 @@ void SelectionTool::onRender() {
 		Vec2 a = GUI::map(Vec2(region.x, region.y));
 		Vec2 b = GUI::map(Vec2(region.z, region.w));
 		Vec2 position = Vec2f(fmin(a.x, b.x), fmin(a.y, b.y));
-		Vec2 dimension = Vec2f(fabs(a.x - b.x), fabs(a.y - b.y));
+		Vec2 dimension = Vec2f(std::abs(a.x - b.x), std::abs(a.y - b.y));
 		Path::rect(position, dimension);
 	}
 

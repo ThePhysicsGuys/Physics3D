@@ -2,6 +2,7 @@
 
 #include <string>
 #include <sstream>
+#include <stddef.h>
 
 #include "../math/linalg/vec.h"
 #include "../math/linalg/mat.h"
@@ -10,6 +11,7 @@
 #include "../math/cframe.h"
 #include "../math/position.h"
 #include "../math/globalCFrame.h"
+#include "../math/taylorExpansion.h"
 #include "../motion.h"
 #include "../relativeMotion.h"
 
@@ -127,6 +129,24 @@ inline std::ostream& operator<<(std::ostream& os, const CFrame& cframe) {
 }
 inline std::ostream& operator<<(std::ostream& os, const GlobalCFrame& cframe) {
 	os << "GlobalCFrame(" << cframe.position << ", " << cframe.rotation << ")";
+	return os;
+}
+
+template<typename T, std::size_t Size>
+inline std::ostream& operator<<(std::ostream& os, const TaylorExpansion<T, Size>& taylor) {
+	if constexpr(Size > 0) {
+		os << taylor[0] << "x";
+		for(std::size_t i = 1; i < Size; i++) {
+			os << " + " << taylor[i] << "x^" << (i + 1) << '/' << (i+1) << '!';
+		}
+	}
+	return os;
+}
+
+template<typename T, typename T2, std::size_t Size>
+inline std::ostream& operator<<(std::ostream& os, const FullTaylorExpansion<T, T2, Size>& taylor) {
+	os << taylor.constantValue << " + ";
+	os << taylor.derivatives;
 	return os;
 }
 

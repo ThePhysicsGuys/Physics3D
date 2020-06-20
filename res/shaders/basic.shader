@@ -266,7 +266,7 @@ void main() {
 	}
 
 	// Ambient
-	vec3 ambient = vec3(0.03) * albedo.rgb * ambientOcclusion;
+	vec3 ambient = vec3(1.0) * albedo.rgb * ambientOcclusion;
 
 	// Directional
 	vec3 Ld = calcDirectionalLight();

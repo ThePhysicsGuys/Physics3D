@@ -7,58 +7,58 @@ namespace KeyboardOptions {
 
 	namespace Move {
 
-		Key forward = Keyboard::UNKNOWN;
-		Key backward = Keyboard::UNKNOWN;
-		Key right = Keyboard::UNKNOWN;
-		Key left = Keyboard::UNKNOWN;
-		Key jump = Keyboard::UNKNOWN;
-		Key fly = Keyboard::UNKNOWN;
-		Key ascend = Keyboard::UNKNOWN;
-		Key descend = Keyboard::UNKNOWN;
+		Key forward  = Keyboard::KEY_UNKNOWN;
+		Key backward = Keyboard::KEY_UNKNOWN;
+		Key right    = Keyboard::KEY_UNKNOWN;
+		Key left     = Keyboard::KEY_UNKNOWN;
+		Key jump     = Keyboard::KEY_UNKNOWN;
+		Key fly      = Keyboard::KEY_UNKNOWN;
+		Key ascend   = Keyboard::KEY_UNKNOWN;
+		Key descend  = Keyboard::KEY_UNKNOWN;
 	};
 
 	namespace Rotate {
-		Key up = Keyboard::UNKNOWN;
-		Key down = Keyboard::UNKNOWN;
-		Key left = Keyboard::UNKNOWN;
-		Key right = Keyboard::UNKNOWN;
+		Key up    = Keyboard::KEY_UNKNOWN;
+		Key down  = Keyboard::KEY_UNKNOWN;
+		Key left  = Keyboard::KEY_UNKNOWN;
+		Key right = Keyboard::KEY_UNKNOWN;
 	};
 
 	namespace Tick {
-		Key run = Keyboard::UNKNOWN;
-		Key pause = Keyboard::UNKNOWN;
+		Key run   = Keyboard::KEY_UNKNOWN;
+		Key pause = Keyboard::KEY_UNKNOWN;
 		namespace Speed {
-			Key up = Keyboard::UNKNOWN;
-			Key down = Keyboard::UNKNOWN;
+			Key up   = Keyboard::KEY_UNKNOWN;
+			Key down = Keyboard::KEY_UNKNOWN;
 		};
 	};
 
 	namespace Debug {
-		Key spheres = Keyboard::UNKNOWN;
-		Key tree = Keyboard::UNKNOWN;
-		Key pies = Keyboard::UNKNOWN;
-		Key frame = Keyboard::UNKNOWN;
+		Key spheres = Keyboard::KEY_UNKNOWN;
+		Key tree    = Keyboard::KEY_UNKNOWN;
+		Key pies    = Keyboard::KEY_UNKNOWN;
+		Key frame   = Keyboard::KEY_UNKNOWN;
 	};
 
 	namespace Edit {
-		Key translate = Keyboard::UNKNOWN;
-		Key rotate = Keyboard::UNKNOWN;
-		Key scale = Keyboard::UNKNOWN;
+		Key translate = Keyboard::KEY_UNKNOWN;
+		Key rotate    = Keyboard::KEY_UNKNOWN;
+		Key scale     = Keyboard::KEY_UNKNOWN;
 	};
 
 	namespace Part {
-		Key remove = Keyboard::UNKNOWN;
-		Key anchor = Keyboard::UNKNOWN;
-		Key makeMainPart = Keyboard::UNKNOWN;
-		Key makeMainPhysical = Keyboard::UNKNOWN;
+		Key remove           = Keyboard::KEY_UNKNOWN;
+		Key anchor           = Keyboard::KEY_UNKNOWN;
+		Key makeMainPart     = Keyboard::KEY_UNKNOWN;
+		Key makeMainPhysical = Keyboard::KEY_UNKNOWN;
 	}
 
 	namespace Application {
-		Key close = Keyboard::UNKNOWN;
+		Key close = Keyboard::KEY_UNKNOWN;
 	}
 
 	namespace World {
-		Key valid = Keyboard::UNKNOWN;
+		Key valid = Keyboard::KEY_UNKNOWN;
 	}
 
 	Key loadKey(const Util::Properties& properties, std::string key) {

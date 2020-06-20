@@ -58,8 +58,6 @@ public:
 
 	Shader();
 	Shader(const ShaderSource& shaderSource);
-	Shader(const std::string& name, const std::string& vertexShader, const std::string& fragmentShader);
-	Shader(const std::string& name, const std::string& vertexShader, const std::string& fragmentShader, const std::string& geometryShader);
 	Shader(const std::string& name, const std::string& vertexShader, const std::string& fragmentShader, const std::string& geometryShader, const std::string& tesselationControlSource, const std::string& tesselationEvaluateSource);
 
 	~Shader();
@@ -71,6 +69,7 @@ public:
 	void createUniform(const std::string& uniform);
 	int getUniform(const std::string& uniform) const;
 	void setUniform(const std::string& uniform, int value) const;
+	void setUniform(const std::string& uniform, GLID value) const;
 	void setUniform(const std::string& uniform, float value) const;
 	void setUniform(const std::string& uniform, const Vec2f& value) const;
 	void setUniform(const std::string& unfiorm, const Vec3f& value) const;
@@ -80,6 +79,8 @@ public:
 	void setUniform(const std::string& uniform, const Mat4f& value) const;
 	void setUniform(const std::string& uniform, const Position& value) const;
 
+	void reload(const ShaderSource& shaderSource);
+
 	void bind() override;
 	void unbind() override;
 	void close() override;
@@ -88,8 +89,6 @@ public:
 ShaderSource parseShader(const std::string& name, const std::string& path);
 ShaderSource parseShader(const std::string& name, const std::string& path, std::istream& shaderTextStream);
 ShaderSource parseShader(const std::string& name, const std::string& path, const std::string& shaderText);
-ShaderSource parseShader(const std::string& name, const std::string& path, const std::string& vertexPath, const std::string& fragmentPath);
-ShaderSource parseShader(const std::string& name, const std::string& path, const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath);
-ShaderSource parseShader(const std::string& name, const std::string& path, const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath, const std::string& tesselationControlPath, const std::string& tesselationEvaluatePath);
+ShaderSource parseShader(const std::string& name, const std::string& path, const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath = "", const std::string& tesselationControlPath = "", const std::string& tesselationEvaluatePath = "");
 
 };

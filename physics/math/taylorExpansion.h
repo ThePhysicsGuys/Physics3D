@@ -37,10 +37,13 @@ struct TaylorExpansion {
 };
 
 template<typename BaseT, typename DerivedT, std::size_t DerivationCount>
-class FullTaylorExpansion {
-public:
+struct FullTaylorExpansion {
 	BaseT constantValue;
 	TaylorExpansion<DerivedT, DerivationCount> derivatives;
+
+	FullTaylorExpansion() = default;
+	FullTaylorExpansion(const BaseT& constantValue) : constantValue(constantValue) {}
+	FullTaylorExpansion(const BaseT& constantValue, const TaylorExpansion<DerivedT, DerivationCount>& derivatives) : constantValue(constantValue), derivatives(derivatives) {}
 
 	/*
 		Evaluates the taylor expansion at x

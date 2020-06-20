@@ -11,9 +11,9 @@ Color ACCENT = get(0x1F6678);
 Color BACK = get(0x4D4D4D);
 Color ALPHA = get(0x0, true);
 
-Color R = get(0xFF0000);
-Color G = get(0x00FF00);
-Color B = get(0x0000FF);
+Color RGB_R = get(0xFF0000);
+Color RGB_G = get(0x00FF00);
+Color RGB_B = get(0x0000FF);
 Color A = get(0x0, true);
 
 Color NAVY = get(0x001F3F);
@@ -33,20 +33,6 @@ Color BLACK = get(0x111111);
 Color GRAY = get(0xAAAAAA);
 Color SILVER = get(0xDDDDDD);
 Color WHITE = get(0xFFFFFF);
-
-Color get(int hex, bool alpha) {
-	Color color;
-	if (!alpha) hex = (hex << 8) | 0xFF;
-	color.x = ((hex >> 24) & 0xFF) / 255.0f;
-	color.y = ((hex >> 16) & 0xFF) / 255.0f;
-	color.z = ((hex >> 8) & 0xFF) / 255.0f;
-	color.w = (hex & 0xFF) / 255.0f;
-	return color;
-}
-
-Color get(int hex) {
-	return get(hex, false);
-}
 
 Color3 hsvToRgb(Color3 hsv) {
 	float h = hsv.x * 360.0f;

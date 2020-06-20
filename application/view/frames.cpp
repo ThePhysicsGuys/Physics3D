@@ -80,7 +80,7 @@ bool IconTreeNode(void* ptr, ImTextureID texture, ImGuiTreeNodeFlags flags, cons
 
 	// Arrow
 	ImVec2 padding = ImVec2(g.Style.FramePadding.x, ImMin(window->DC.CurrLineTextBaseOffset, g.Style.FramePadding.y));
-	float arrowOffset = abs(g.FontSize - arrowWidth) / 2.0f;
+	float arrowOffset = std::abs(g.FontSize - arrowWidth) / 2.0f;
 	if (!leaf)
 		ImGui::RenderArrow(window->DrawList, ImVec2(pos.x + arrowOffset, textPos.y), ImGui::GetColorU32(ImGuiCol_Text), opened ? ImGuiDir_Down : ImGuiDir_Right, 1.0f);
 
@@ -214,7 +214,7 @@ void renderShaderTypeEditor(Shader* shader, const ShaderUniform& uniform) {
 	}
 }
 
-void BigFrame::renderShaderStageInfo(Shader* shader, const ShaderStage& stage) {
+void BigFrame::renderShaderStageInfo(ShaderResource* shader, const ShaderStage& stage) {
 	if (ImGui::TreeNode("Code")) {
 		ImGui::TextWrapped(stage.source.c_str());
 
@@ -350,7 +350,7 @@ void BigFrame::renderShaderStageInfo(Shader* shader, const ShaderStage& stage) {
 	}
 }
 
-void BigFrame::renderShaderInfo(Shader* shader) {
+void BigFrame::renderShaderInfo(ShaderResource* shader) {
 	ImGui::BeginChild("Shaders");
 
 	if (ImGui::BeginTabBar("##tabs")) {
@@ -385,6 +385,15 @@ void BigFrame::renderShaderInfo(Shader* shader) {
 			}
 		}
 		ImGui::EndTabBar();
+	}
+
+	if (ImGui::Button("Reload")) {
+		ShaderSource shaderSource = parseShader(shader->getName(), shader->getPath());
+		if (shaderSource.vertexSource.empty() || shaderSource.fragmentSource.empty()) {
+			ImGui::EndChild();
+			return;
+		}
+		shader->reload(shaderSource);
 	}
 	
 	ImGui::EndChild();
@@ -479,7 +488,7 @@ void BigFrame::renderECSNode(Engine::Node* node) {
 		// Rename
 		if (ImGui::BeginMenu("Rename")) {
 			char* buffer = new char[node->getName().size() + 1];
-			strcpy(buffer, node->getName().c_str());
+			//strcpy(buffer, node->getName().c_str());
 			ImGui::Text("Edit name:");
 			ImGui::InputText("##edit", buffer, IM_ARRAYSIZE(buffer));
 			if (ImGui::Button("Apply")) {

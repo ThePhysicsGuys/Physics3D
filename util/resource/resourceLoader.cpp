@@ -53,7 +53,7 @@ std::string getResourceAsString(const ResourceDescriptor* list, int id) {
 	const ResourceDescriptor& resource = list[id];
 	std::ifstream file;
 	file.open(resource.fileName, std::ios::in);
-	if(!file){
+	if(!file) {
 		Log::error("Could not open %s", resource.fileName);
 		throw std::runtime_error("Could not open file!");
 	}

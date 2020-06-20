@@ -115,7 +115,8 @@ void RigidBody::refreshWithNewParts() {
 
 	for(const AttachedPart& p : parts) {
 		const Part* part = p.part;
-		totalInertia += getTransformedInertiaAroundCenterOfMass(part->getInertia(), part->getMass(), part->getLocalCenterOfMass(), p.attachment, totalCenterOfMass);
+		CFrame attachRelativeToCOM = CFrame(p.attachment.getPosition() - totalCenterOfMass, p.attachment.getRotation());
+		totalInertia += getTransformedInertiaAroundCenterOfMass(part->getInertia(), part->getMass(), part->getLocalCenterOfMass(), attachRelativeToCOM);
 	}
 	this->mass = totalMass;
 	this->localCenterOfMass = totalCenterOfMass;

@@ -8,8 +8,13 @@ class Screen;
 
 class TestLayer : public Layer {
 public:
+	static unsigned int depthMap;
+	static Mat4f lighSpaceMatrix;
+
 	inline TestLayer() : Layer() {};
 	inline TestLayer(Screen* screen, char flags = None) : Layer("TestLayer", screen, flags) {};
+
+	void renderScene();
 
 	virtual void onInit() override;
 	virtual void onUpdate() override;
