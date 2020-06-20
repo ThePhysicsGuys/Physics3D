@@ -137,6 +137,10 @@ void WorldImportExport::loadWorld(const char* fileName, World<ExtendedPart>& wor
 	std::ifstream file;
 	file.open(fileName, std::ios::binary);
 
+	if(!file.is_open()) {
+		throw std::exception("File not found!");
+	}
+
 	Deserializer deserializer;
 	deserializer.deserializeWorld(world, file);
 

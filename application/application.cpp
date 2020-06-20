@@ -213,18 +213,18 @@ void setupWorld(int argc, const char** args) {
 	//WorldBuilder::buildTerrain(150, 150);
 
 
-	ExtendedPart* ropeStart = new ExtendedPart(boxShape(2.0, 1.5, 0.7), GlobalCFrame(10.0, 2.0, -10.0), {1.0, 0.7, 0.3}, "RopeA");
+	ExtendedPart* ropeA = new ExtendedPart(boxShape(2.0, 1.5, 0.7), GlobalCFrame(10.0, 2.0, -10.0), {1.0, 0.7, 0.3}, "RopeA");
 	ExtendedPart* ropeB = new ExtendedPart(boxShape(1.5, 1.2, 0.9), GlobalCFrame(10.0, 2.0, -14.0), {1.0, 0.7, 0.3}, "RopeB");
 	ExtendedPart* ropeC = new ExtendedPart(boxShape(2.0, 1.5, 0.7), GlobalCFrame(10.0, 2.0, -18.0), {1.0, 0.7, 0.3}, "RopeC");
 
-	world.addPart(ropeStart);
+	world.addPart(ropeA);
 	world.addPart(ropeB);
 	world.addPart(ropeC);
 
 	ConstraintGroup group;
 
-	group.ballConstraints.push_back(BallConstraint{Vec3(0.0, 0.0, -2.0), ropeStart->parent, Vec3(0.0, 0.0, 2.0), ropeB->parent});
-	group.ballConstraints.push_back(BallConstraint{Vec3(0.0, 0.0, -2.0), ropeB->parent, Vec3(0.0, 0.0, 2.0), ropeC->parent});
+	group.add(ropeA->parent, ropeB->parent, new BallConstraint(Vec3(0.0, 0.0, -2.0), Vec3(0.0, 0.0, 2.0)));
+	group.add(ropeB->parent, ropeC->parent, new BallConstraint(Vec3(0.0, 0.0, -2.0), Vec3(0.0, 0.0, 2.0)));
 
 	world.constraints.push_back(group);
 
@@ -332,14 +332,15 @@ void setupWorld(int argc, const char** args) {
 		world.addPart(mainBlock);
 	}
 
-	{
+	// TODO uncomment, needed for conservation of angular momentum
+	/*{
 		ExtendedPart* mainBlock = new ExtendedPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(0.0, 5.0, -5.0), basicProperties, "Main Block");
 		ExtendedPart* attachedBlock = new ExtendedPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(), basicProperties, "Attached Block");
 
 		mainBlock->attach(attachedBlock, new MotorConstraintTemplate<SineWaveController>(0.0, 6.283, 1.0), CFrame(Vec3(0.0, 0.0, 0.5)), CFrame(Vec3(0.0, 0.0, -0.5)));
 
 		world.addPart(mainBlock);
-	}
+	}*/
 
 	{
 		ExtendedPart* mainBlock = new ExtendedPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(0.0, 5.0, 10.0), basicProperties, "Main Block");
@@ -373,9 +374,9 @@ void setupWorld(int argc, const char** args) {
 
 		ConstraintGroup group;
 
-		group.ballConstraints.push_back(BallConstraint{Vec3(1.0, 0.0, 0.7), box1->parent, Vec3(-1.0, 0.0, 0.7), box3->parent});
-		group.ballConstraints.push_back(BallConstraint{Vec3(1.0, 0.0, 0.7), box2->parent, Vec3(-1.0, 0.0, 0.7), box1->parent});
-		group.ballConstraints.push_back(BallConstraint{Vec3(1.0, 0.0, 0.7), box3->parent, Vec3(-1.0, 0.0, 0.7), box2->parent});
+		group.add(box1->parent, box3->parent, new BallConstraint(Vec3(1.0, 0.0, 0.7), Vec3(-1.0, 0.0, 0.7)));
+		group.add(box2->parent, box1->parent, new BallConstraint(Vec3(1.0, 0.0, 0.7), Vec3(-1.0, 0.0, 0.7)));
+		group.add(box3->parent, box2->parent, new BallConstraint(Vec3(1.0, 0.0, 0.7), Vec3(-1.0, 0.0, 0.7)));
 
 		world.constraints.push_back(std::move(group));
 	}

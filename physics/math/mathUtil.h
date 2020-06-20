@@ -40,7 +40,7 @@ inline uint64_t ctz(uint64_t n) {
 */
 template<typename T>
 inline bool powOf2(T n) {
-	return n && (!(n && (n - 1)));
+	return n && (!(n & (n - 1)));
 }
 
 /*

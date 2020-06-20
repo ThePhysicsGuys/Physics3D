@@ -2,7 +2,8 @@
 
 #include "serializeBasicTypes.h"
 
-template<typename BaseType, typename ClassIDType = uint32_t, typename... ArgsToInstantiate>
+typedef uint32_t ClassIDType;
+template<typename BaseType, typename... ArgsToInstantiate>
 class DynamicSerializerRegistry {
 public:
 	struct DynamicSerializer {

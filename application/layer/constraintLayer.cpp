@@ -152,8 +152,8 @@ void ConstraintLayer::onRender() {
 	}
 
 	for(const ConstraintGroup& g : world->constraints) {
-		for(const BallConstraint& constraint : g.ballConstraints) {
-			renderBallConstraint(this, constraint.a->getCFrame(), constraint.b->getCFrame(), CFrame(constraint.attachA), CFrame(constraint.attachB), 0.13f, 0.15f);
+		for(const PhysicalConstraint& constraint : g.constraints) {
+			renderBallConstraint(this, constraint.physA->getCFrame(), constraint.physB->getCFrame(), CFrame(constraint.constraint->attachA), CFrame(constraint.constraint->attachB), 0.13f, 0.15f);
 		}
 	}
 

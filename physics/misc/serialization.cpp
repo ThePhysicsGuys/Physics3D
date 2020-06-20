@@ -105,6 +105,18 @@ SinusoidalPistonConstraint* deserializePistonConstraint(std::istream& istream) {
 	return newConstraint;
 }
 
+void serializeBallConstraint(const BallConstraint& constraint, std::ostream& ostream) {
+	::serialize<Vec3>(constraint.attachA, ostream);
+	::serialize<Vec3>(constraint.attachB, ostream);
+}
+
+BallConstraint* deserializeBallConstraint(std::istream& istream) {
+	Vec3 attachA = ::deserialize<Vec3>(istream);
+	Vec3 attachB = ::deserialize<Vec3>(istream);
+
+	return new BallConstraint(attachA, attachB);
+}
+
 void serializePolyhedronShapeClass(const PolyhedronShapeClass& polyhedron, std::ostream& ostream) {
 	::serializePolyhedron(polyhedron.asPolyhedron(), ostream);
 }
@@ -175,6 +187,28 @@ RigidBody DeSerializationSessionPrototype::deserializeRigidBodyWithContext(std::
 	return result;
 }
 
+
+void SerializationSessionPrototype::serializeConstraintInContext(const PhysicalConstraint& constraint, std::ostream& ostream) {
+	std::uint32_t indexA = this->physicalIndexMap[constraint.physA];
+	std::uint32_t indexB = this->physicalIndexMap[constraint.physB];
+
+	serialize<std::uint32_t>(indexA, ostream);
+	serialize<std::uint32_t>(indexB, ostream);
+
+	dynamicConstraintSerializer.serialize(*constraint.constraint, ostream);
+}
+
+PhysicalConstraint DeSerializationSessionPrototype::deserializeConstraintInContext(std::istream& istream) {
+	std::uint32_t indexA = deserialize<std::uint32_t>(istream);
+	std::uint32_t indexB = deserialize<std::uint32_t>(istream);
+
+	Physical* physA = indexToPhysicalMap[indexA];
+	Physical* physB = indexToPhysicalMap[indexB];
+
+	return PhysicalConstraint(physA, physB, dynamicConstraintSerializer.deserialize(istream));
+}
+
+
 static void serializeHardPhysicalConnection(const HardPhysicalConnection& connection, std::ostream& ostream) {
 	::serialize<CFrame>(connection.attachOnChild, ostream);
 	::serialize<CFrame>(connection.attachOnParent, ostream);
@@ -191,9 +225,8 @@ static HardPhysicalConnection deserializeHardPhysicalConnection(std::istream& is
 	return HardPhysicalConnection(std::unique_ptr<HardConstraint>(constraint), attachOnChild, attachOnParent);
 }
 
-
-
 void SerializationSessionPrototype::serializePhysicalInContext(const Physical& phys, std::ostream& ostream) {
+	physicalIndexMap.emplace(&phys, currentPhysicalIndex++);
 	serializeRigidBodyInContext(phys.rigidBody, ostream);
 	::serialize<uint32_t>(static_cast<uint32_t>(phys.childPhysicals.size()), ostream);
 	for(const ConnectedPhysical& p : phys.childPhysicals) {
@@ -217,6 +250,7 @@ void DeSerializationSessionPrototype::deserializeConnectionsOfPhysicalWithContex
 		RigidBody b = deserializeRigidBodyWithContext(istream);
 		physToPopulate.childPhysicals.push_back(ConnectedPhysical(std::move(b), &physToPopulate, std::move(connection)));
 		ConnectedPhysical& currentlyWorkingOn = physToPopulate.childPhysicals.back();
+		indexToPhysicalMap.push_back(static_cast<Physical*>(&currentlyWorkingOn));
 		deserializeConnectionsOfPhysicalWithContext(currentlyWorkingOn, istream);
 	}
 }
@@ -227,6 +261,7 @@ MotorizedPhysical* DeSerializationSessionPrototype::deserializeMotorizedPhysical
 	RigidBody r = deserializeRigidBodyWithContext(istream);
 	r.setCFrame(cf);
 	MotorizedPhysical* mainPhys = new MotorizedPhysical(std::move(r));
+	indexToPhysicalMap.push_back(static_cast<Physical*>(mainPhys));
 	mainPhys->motionOfCenterOfMass = motion;
 
 	deserializeConnectionsOfPhysicalWithContext(*mainPhys, istream);
@@ -301,6 +336,14 @@ void SerializationSessionPrototype::serializeWorld(const WorldPrototype& world, 
 		::serialize<GlobalCFrame>(p.getCFrame(), ostream);
 		virtualSerializePart(p, ostream);
 	}
+
+	::serialize<std::uint32_t>(world.constraints.size(), ostream);
+	for(const ConstraintGroup& cg : world.constraints) {
+		::serialize<std::uint32_t>(cg.constraints.size(), ostream);
+		for(const PhysicalConstraint& c : cg.constraints) {
+			this->serializeConstraintInContext(c, ostream);
+		}
+	}
 }
 void DeSerializationSessionPrototype::deserializeWorld(WorldPrototype& world, std::istream& istream) {
 	uint64_t forceCount = ::deserialize<uint64_t>(istream);
@@ -327,6 +370,17 @@ void DeSerializationSessionPrototype::deserializeWorld(WorldPrototype& world, st
 		Part* p = virtualDeserializePart(deserializeRawPart(GlobalCFrame(), istream), istream);
 		p->setCFrame(cf);
 		world.addTerrainPart(p);
+	}
+
+	std::uint32_t constraintCount = ::deserialize<std::uint32_t>(istream);
+	world.constraints.reserve(constraintCount);
+	for(std::uint32_t cg = 0; cg < constraintCount; cg++) {
+		ConstraintGroup group;
+		std::uint32_t numberOfConstraintsInGroup = ::deserialize<std::uint32_t>(istream);
+		for(std::uint32_t c = 0; c < numberOfConstraintsInGroup; c++) {
+			group.constraints.push_back(this->deserializeConstraintInContext(istream));
+		}
+		world.constraints.push_back(std::move(group));
 	}
 }
 
@@ -403,7 +457,8 @@ static DynamicSerializerRegistry<ShapeClass>::ConcreteDynamicSerializer<Polyhedr
 static DynamicSerializerRegistry<ExternalForce>::ConcreteDynamicSerializer<DirectionalGravity> gravitySerializer
 (serializeDirectionalGravity, deserializeDirectionalGravity, 0);
 
-
+static DynamicSerializerRegistry<BallConstraint>::ConcreteDynamicSerializer<BallConstraint> ballConstraintSerializer
+(serializeBallConstraint, deserializeBallConstraint, 0);
 
 DynamicSerializerRegistry<HardConstraint> dynamicHardConstraintSerializer{
 	{typeid(FixedConstraint), &fixedConstraintSerializer},
@@ -415,6 +470,10 @@ DynamicSerializerRegistry<ShapeClass> dynamicShapeClassSerializer{
 };
 DynamicSerializerRegistry<ExternalForce> dynamicExternalForceSerializer{
 	{typeid(DirectionalGravity), &gravitySerializer},
+};
+
+DynamicSerializerRegistry<BallConstraint> dynamicConstraintSerializer{
+	{typeid(BallConstraint), &ballConstraintSerializer}
 };
 
 #pragma endregion

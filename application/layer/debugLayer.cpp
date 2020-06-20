@@ -141,9 +141,9 @@ void DebugLayer::onRender() {
 	screen->world->syncReadOnlyOperation([this, &vecLog]() {
 		Screen* screen = static_cast<Screen*>(this->ptr);
 		for(const ConstraintGroup& constraintGroup : screen->world->constraints) {
-			for(const BallConstraint& ballConstraint : constraintGroup.ballConstraints) {
-				vecLog.add(ColoredVector(ballConstraint.a->getCFrame().getPosition(), ballConstraint.a->getCFrame().localToRelative(ballConstraint.attachA), ::Debug::INFO_VEC));
-				vecLog.add(ColoredVector(ballConstraint.b->getCFrame().getPosition(), ballConstraint.b->getCFrame().localToRelative(ballConstraint.attachB), ::Debug::INFO_VEC));
+			for(const PhysicalConstraint& c : constraintGroup.constraints) {
+				vecLog.add(ColoredVector(c.physA->getCFrame().getPosition(), c.physA->getCFrame().localToRelative(c.constraint->attachA), ::Debug::INFO_VEC));
+				vecLog.add(ColoredVector(c.physB->getCFrame().getPosition(), c.physB->getCFrame().localToRelative(c.constraint->attachB), ::Debug::INFO_VEC));
 			}
 		}
 
