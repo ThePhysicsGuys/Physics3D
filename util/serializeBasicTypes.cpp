@@ -7,8 +7,7 @@ void serialize(const char* data, size_t size, std::ostream& ostream) {
 }
 
 void deserialize(char* buf, size_t size, std::istream& istream) {
-	for(size_t i = 0; i < size; i++)
-		buf[i] = istream.get();
+	istream.read(buf, size);
 }
 
 template<>

@@ -67,6 +67,8 @@ public:
 class SerializationSessionPrototype {
 protected:
 	ShapeSerializer shapeSerializer;
+	std::map<const Physical*, std::uint32_t> physicalIndexMap;
+	std::uint32_t currentPhysicalIndex = 0;
 
 	void serializeRawPartWithoutCFrame(const Part& part, std::ostream& ostream) const;
 	void serializeRawPartWithCFrame(const Part& part, std::ostream& ostream) const;
@@ -79,6 +81,8 @@ private:
 	void serializeMotorizedPhysicalInContext(const MotorizedPhysical& motorizedPhys, std::ostream& ostream);
 	void serializePhysicalInContext(const Physical& phys, std::ostream& ostream);
 	void serializeRigidBodyInContext(const RigidBody& rigidBody, std::ostream& ostream);
+
+	void serializeConstraintInContext(const PhysicalConstraint& constraint, std::ostream& ostream);
 
 protected:
 	virtual void collectPartInformation(const Part& part);
@@ -98,8 +102,10 @@ private:
 	MotorizedPhysical* deserializeMotorizedPhysicalWithContext(std::istream& istream);
 	void deserializeConnectionsOfPhysicalWithContext(Physical& physToPopulate, std::istream& istream);
 	RigidBody deserializeRigidBodyWithContext(std::istream& istream);
+	PhysicalConstraint deserializeConstraintInContext(std::istream& istream);
 protected:
 	ShapeDeserializer shapeDeserializer;
+	std::vector<Physical*> indexToPhysicalMap;
 
 	Part deserializeRawPart(const GlobalCFrame& knownCFrame, std::istream& istream) const;
 	Part deserializeRawPartWithCFrame(std::istream& istream) const;
@@ -128,7 +134,7 @@ protected:
 	virtual void collectExtendedPartInformation(const ExtendedPartType& part) {
 		SerializationSessionPrototype::collectPartInformation(part);
 	}
-
+	
 	virtual void serializeExtendedPart(const ExtendedPartType& part, std::ostream& ostream) = 0;
 
 private:
@@ -199,3 +205,4 @@ public:
 extern DynamicSerializerRegistry<HardConstraint> dynamicHardConstraintSerializer;
 extern DynamicSerializerRegistry<ShapeClass> dynamicShapeClassSerializer;
 extern DynamicSerializerRegistry<ExternalForce> dynamicExternalForceSerializer;
+extern DynamicSerializerRegistry<BallConstraint> dynamicConstraintSerializer;
