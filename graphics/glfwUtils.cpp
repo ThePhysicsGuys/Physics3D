@@ -9,12 +9,12 @@ namespace Graphics {
 namespace GLFW {
 
 namespace Cursor {
-	extern int ARROW = GLFW_ARROW_CURSOR;
-	extern int IBEAM = GLFW_IBEAM_CURSOR;
-	extern int CROSSHAIR = GLFW_CROSSHAIR_CURSOR;
-	extern int HAND = GLFW_HAND_CURSOR;
-	extern int HRESIZE = GLFW_HRESIZE_CURSOR;
-	extern int VRESIZE = GLFW_VRESIZE_CURSOR;
+	int ARROW = GLFW_ARROW_CURSOR;
+	int IBEAM = GLFW_IBEAM_CURSOR;
+	int CROSSHAIR = GLFW_CROSSHAIR_CURSOR;
+	int HAND = GLFW_HAND_CURSOR;
+	int HRESIZE = GLFW_HRESIZE_CURSOR;
+	int VRESIZE = GLFW_VRESIZE_CURSOR;
 }
 
 GLFWwindow* currentContext;

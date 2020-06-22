@@ -164,67 +164,67 @@ void ModelLayer::onRender() {
 					maxMeshCount = meshCounter[part.visualData.drawMeshId];
 			}
 		}
-	});
 
-	// Ensure correct size
-	uniforms.reserve(maxMeshCount);
-	while (uniforms.size() < maxMeshCount)
-		uniforms.push_back(Uniform());
+		// Ensure correct size
+		uniforms.reserve(maxMeshCount);
+		while (uniforms.size() < maxMeshCount)
+			uniforms.push_back(Uniform());
 
-	// Render normal meshes
-	Shaders::instanceShader.bind();
-	for (auto iterator : meshCounter) {
-		int meshID = iterator.first;
-		int meshCount = iterator.second;
+		// Render normal meshes
+		Shaders::instanceShader.bind();
+		for (auto iterator : meshCounter) {
+			int meshID = iterator.first;
+			int meshCount = iterator.second;
 
-		if (meshID == -1) continue;
+			if (meshID == -1) continue;
 
-		// Collect uniforms
-		int offset = 0;
-		auto meshes = visibleParts.equal_range(meshID);
-		for (auto mesh = meshes.first; mesh != meshes.second; ++mesh) {
-			ExtendedPart* part = mesh->second;
+			// Collect uniforms
+			int offset = 0;
+			auto meshes = visibleParts.equal_range(meshID);
+			for (auto mesh = meshes.first; mesh != meshes.second; ++mesh) {
+				ExtendedPart* part = mesh->second;
+				Material material = part->material;
+				material.albedo += getAlbedoForPart(screen, part);
+
+				Mat4f modelMatrix = Mat4f(Mat3f(part->getCFrame().getRotation().asRotationMatrix()) * DiagonalMat3f(part->hitbox.scale), Vec3f(part->getCFrame().getPosition() - Position(0, 0, 0)), Vec3f(0.0f, 0.0f, 0.0f), 1.0f);
+
+				uniforms[offset] = Uniform {
+					modelMatrix,
+					part->material.albedo,
+					part->material.metalness,
+					part->material.roughness,
+					part->material.ao
+				};
+
+				offset++;
+			}
+			
+			Engine::MeshRegistry::meshes[meshID]->fillUniformBuffer(uniforms.data(), meshCount * sizeof(Uniform), Renderer::STREAM_DRAW);
+			Engine::MeshRegistry::meshes[meshID]->renderInstanced(meshCount);
+		}
+
+		// Render transparent meshes
+		Shaders::basicShader.bind();
+		Renderer::enableBlending();
+		for (auto iterator = transparentParts.rbegin(); iterator != transparentParts.rend(); ++iterator) {
+			ExtendedPart* part = (*iterator).second;
+
 			Material material = part->material;
 			material.albedo += getAlbedoForPart(screen, part);
 
-			Mat4f modelMatrix = Mat4f(Mat3f(part->getCFrame().getRotation().asRotationMatrix()) * DiagonalMat3f(part->hitbox.scale), Vec3f(part->getCFrame().getPosition() - Position(0, 0, 0)), Vec3f(0.0f, 0.0f, 0.0f), 1.0f);
+			if (part->visualData.drawMeshId == -1)
+				continue;
 
-			uniforms[offset] = Uniform {
-				modelMatrix,
-				part->material.albedo,
-				part->material.metalness,
-				part->material.roughness,
-				part->material.ao
-			};
-
-			offset++;
+			Shaders::basicShader.updateMaterial(material);
+			Shaders::basicShader.updatePart(*part);
+			Engine::MeshRegistry::meshes[part->visualData.drawMeshId]->render(part->renderMode);
 		}
-		
-		Engine::MeshRegistry::meshes[meshID]->fillUniformBuffer(uniforms.data(), meshCount * sizeof(Uniform), Renderer::STREAM_DRAW);
-		Engine::MeshRegistry::meshes[meshID]->renderInstanced(meshCount);
-	}
 
-	// Render transparent meshes
-	Shaders::basicShader.bind();
-	Renderer::enableBlending();
-	for (auto iterator = transparentParts.rbegin(); iterator != transparentParts.rend(); ++iterator) {
-		ExtendedPart* part = (*iterator).second;
-
-		Material material = part->material;
-		material.albedo += getAlbedoForPart(screen, part);
-
-		if (part->visualData.drawMeshId == -1)
-			continue;
-
-		Shaders::basicShader.updateMaterial(material);
-		Shaders::basicShader.updatePart(*part);
-		Engine::MeshRegistry::meshes[part->visualData.drawMeshId]->render(part->renderMode);
-	}
-
-	if (screen->selectedPart) {
-		Shaders::debugShader.updateModel(Mat4f(Mat3f(screen->selectedPart->getCFrame().getRotation().asRotationMatrix()) * DiagonalMat3f(screen->selectedPart->hitbox.scale), Vec3f(screen->selectedPart->getCFrame().getPosition() - Position(0, 0, 0)), Vec3f(0.0f, 0.0f, 0.0f), 1.0f));
-		Engine::MeshRegistry::meshes[screen->selectedPart->visualData.drawMeshId]->render();
-	}
+		if (screen->selectedPart) {
+			Shaders::debugShader.updateModel(Mat4f(Mat3f(screen->selectedPart->getCFrame().getRotation().asRotationMatrix()) * DiagonalMat3f(screen->selectedPart->hitbox.scale), Vec3f(screen->selectedPart->getCFrame().getPosition() - Position(0, 0, 0)), Vec3f(0.0f, 0.0f, 0.0f), 1.0f));
+			Engine::MeshRegistry::meshes[screen->selectedPart->visualData.drawMeshId]->render();
+		}
+	});
 
 	endScene();
 }

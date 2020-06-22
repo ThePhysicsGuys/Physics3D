@@ -9,6 +9,7 @@
 
 #include "view/screen.h"
 #include "ecs/material.h"
+#include "input/standardInputHandler.h"
 
 #include "../graphics/texture.h"
 #include "../graphics/debug/guiDebug.h"
@@ -440,7 +441,12 @@ bool onKeyPress(Engine::KeyPressEvent& keyEvent) {
 
 	Key pressedKey = keyEvent.getKey();
 	if(pressedKey == Keyboard::KEY_S && keyEvent.getModifiers().isCtrlPressed()) {
+		handler->setKey(Keyboard::KEY_S, false);
 		saveWorld(world);
+		return true;
+	} else if(pressedKey == Keyboard::KEY_O && keyEvent.getModifiers().isCtrlPressed()) {
+		handler->setKey(Keyboard::KEY_O, false);
+		openWorld(world);
 		return true;
 	} else {
 		return false;

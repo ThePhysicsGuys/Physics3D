@@ -80,7 +80,7 @@ void PlayerWorld::applyExternalForces() {
 	}
 }
 
-void PlayerWorld::onPartAdded(Part* part) {
+void PlayerWorld::onPartAdded(ExtendedPart* part) {
 	/*ExtendedPart* extendedPart = static_cast<ExtendedPart*>(part);
 	Engine::Entity* entity = new Engine::Entity(extendedPart->name);
 	Engine::Component* model = new Model(extendedPart);
@@ -88,9 +88,8 @@ void PlayerWorld::onPartAdded(Part* part) {
 	ecstree->addNode(ecstree->getRoot(), entity);*/
 }
 
-void PlayerWorld::onPartRemoved(Part* part) {
-	ExtendedPart* extendedPart = static_cast<ExtendedPart*>(part);
-
+void PlayerWorld::onPartRemoved(ExtendedPart* part) {
+	
 }
 
 };

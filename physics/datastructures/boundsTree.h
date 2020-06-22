@@ -10,6 +10,7 @@
 #include <utility>
 #include <new>
 #include <assert.h>
+#include <stdexcept>
 
 #define MAX_BRANCHES 4
 #define MAX_HEIGHT 64
@@ -55,7 +56,7 @@ struct TreeNode {
 	inline TreeNode* end() const { return subTrees+nodeCount; }
 	inline TreeNode& operator[](int index) { return subTrees[index]; }
 	inline const TreeNode& operator[](int index) const { return subTrees[index]; }
-
+	
 	~TreeNode();
 
 
@@ -282,6 +283,10 @@ struct BoundsTree {
 		return this->rootNode.nodeCount == 0;
 	}
 
+	void clear() {
+		this->rootNode = TreeNode();
+	}
+
 	void add(TreeNode&& node) {
 		if(isEmpty()) {
 			this->rootNode = std::move(node);
@@ -318,6 +323,13 @@ struct BoundsTree {
 		iter.expandBoundsAllTheWayToTop();
 	}
 
+	void addToExistingGroup(TreeNode&& newNode, const Boundable* objInGroup, const Bounds& objInGroupBounds) {
+		NodeStack stack = findGroupFor(objInGroup, objInGroupBounds);
+		TreeNode& group = **stack;
+		group.addInside(std::move(newNode));
+		stack.expandBoundsAllTheWayToTop();
+	}
+
 	void remove(const Boundable* obj, const Bounds& strictBounds) {
 		if (rootNode.isLeafNode()) {
 			if (rootNode.object == obj) {
@@ -325,7 +337,7 @@ struct BoundsTree {
 				rootNode.bounds = Bounds();
 				rootNode.object = nullptr;
 			} else {
-				throw "Attempting to remove nonexistent object!";
+				throw std::logic_error("Attempting to remove nonexistent object!");
 			}
 		} else {
 			NodeStack stack(rootNode, obj, strictBounds);
@@ -333,7 +345,7 @@ struct BoundsTree {
 		}
 	}
 	void remove(const Boundable* obj) {
-		this->remove(obj, obj->getStrictBounds());
+		this->remove(obj, obj->getBounds());
 	}
 	void moveOutOfGroup(const Boundable* obj, const Bounds& strictBounds) {
 		TreeNode node = this->grab(obj, strictBounds);
@@ -343,7 +355,7 @@ struct BoundsTree {
 		this->add(std::move(node));
 	}
 	void moveOutOfGroup(const Boundable* obj) {
-		this->moveOutOfGroup(obj, obj->getStrictBounds());
+		this->moveOutOfGroup(obj, obj->getBounds());
 	}
 
 	// removes and returns the node for the given object
@@ -355,7 +367,7 @@ struct BoundsTree {
 				this->rootNode.nodeCount = 0;
 				return result;
 			} else {
-				throw "Attempting to remove nonexistent object!";
+				throw std::logic_error("Attempting to remove nonexistent object!");
 			}
 		}
 		NodeStack iter(rootNode, obj, objBounds);
@@ -371,7 +383,7 @@ struct BoundsTree {
 				this->rootNode.nodeCount = 0;
 				return result;
 			} else {
-				throw "Attempting to remove nonexistent object!";
+				throw std::logic_error("Attempting to remove nonexistent object!");
 			}
 		}
 		NodeStack iter(rootNode, obj, objBounds);
@@ -383,27 +395,27 @@ struct BoundsTree {
 		if(isEmpty()) return;
 		for (TreeNode* currentNode : *this) {
 			Boundable* obj = static_cast<Boundable*>(currentNode->object);
-			currentNode->bounds = obj->getStrictBounds();
+			currentNode->bounds = obj->getBounds();
 		}
 
 		rootNode.recalculateBoundsRecursive();
 	}
 	
-	void updateObjectBounds(const Boundable* obj, const Bounds& oldBounds) {
+	inline void updateObjectBounds(const Boundable* obj, const Bounds& oldBounds) {
 		assert(!isEmpty());
 		NodeStack stack(rootNode, obj, oldBounds);
-		stack.top->node->bounds = obj->getStrictBounds();
+		stack.top->node->bounds = obj->getBounds();
 		stack.top--;
 		stack.updateBoundsAllTheWayToTop();
 	}
-	void updateObjectGroupBounds(const Boundable* objInGroup, const Bounds& objOldBounds) {
+	inline void updateObjectGroupBounds(const Boundable* objInGroup, const Bounds& objOldBounds) {
 		assert(!isEmpty());
 		NodeStack stack(rootNode, objInGroup, objOldBounds);
 		stack.riseUntilGroupHeadWhile(); // find group obj belongs to
 
 		for (TreeIterator iter(*stack.top->node); iter != IteratorEnd(); ++iter) {
 			TreeNode* node = *iter;
-			node->bounds = static_cast<Boundable*>(node->object)->getStrictBounds();
+			node->bounds = static_cast<Boundable*>(node->object)->getBounds();
 		}
 		stack.top->node->recalculateBoundsRecursive(); // refresh group bounds
 		stack.top--;

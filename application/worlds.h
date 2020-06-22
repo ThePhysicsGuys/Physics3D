@@ -18,8 +18,8 @@ public:
 	Position magnetPoint;
 	
 	virtual void applyExternalForces() override;
-	virtual void onPartAdded(Part* part) override;
-	virtual void onPartRemoved(Part* part) override;
+	virtual void onPartAdded(ExtendedPart* part) override;
+	virtual void onPartRemoved(ExtendedPart* part) override;
 };
 
 };

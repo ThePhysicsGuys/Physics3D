@@ -501,7 +501,7 @@ void ConnectedPhysical::setCFrame(const GlobalCFrame& newCFrame) {
 
 void MotorizedPhysical::setCFrame(const GlobalCFrame& newCFrame) {
 	if(this->mainPhysical->world != nullptr) {
-		Bounds oldMainPartBounds = this->rigidBody.mainPart->getStrictBounds();
+		Bounds oldMainPartBounds = this->rigidBody.mainPart->getBounds();
 
 		rigidBody.setCFrame(newCFrame);
 		for(ConnectedPhysical& conPhys : childPhysicals) {
@@ -546,12 +546,12 @@ void Physical::translateUnsafeRecursive(const Vec3Fix& translation) {
 	}
 }
 void MotorizedPhysical::rotateAroundCenterOfMass(const Rotation& rotation) {
-	Bounds oldBounds = this->rigidBody.mainPart->getStrictBounds();
+	Bounds oldBounds = this->rigidBody.mainPart->getBounds();
 	rotateAroundCenterOfMassUnsafe(rotation);
 	mainPhysical->world->notifyPartGroupBoundsUpdated(this->rigidBody.mainPart, oldBounds);
 }
 void MotorizedPhysical::translate(const Vec3& translation) {
-	Bounds oldBounds = this->rigidBody.mainPart->getStrictBounds();
+	Bounds oldBounds = this->rigidBody.mainPart->getBounds();
 	translateUnsafeRecursive(translation);
 	mainPhysical->world->notifyPartGroupBoundsUpdated(this->rigidBody.mainPart, oldBounds);
 }
@@ -627,7 +627,7 @@ void ConnectedPhysical::refreshCFrameRecursive() {
 }
 
 void MotorizedPhysical::fullRefreshOfConnectedPhysicals() {
-	Bounds oldBounds = this->rigidBody.mainPart->getStrictBounds();
+	Bounds oldBounds = this->rigidBody.mainPart->getBounds();
 	for(ConnectedPhysical& conPhys : childPhysicals) {
 		conPhys.refreshCFrameRecursive();
 	}

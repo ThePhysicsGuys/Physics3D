@@ -89,7 +89,7 @@ BoundingBox Part::getLocalBounds() const {
 	return BoundingBox(-v, v);
 }
 
-Bounds Part::getStrictBounds() const {
+Bounds Part::getBounds() const {
 	BoundingBox boundsOfHitbox = this->hitbox.getBounds(this->cframe.getRotation());
 	
 	assert(isVecValid(boundsOfHitbox.min));
@@ -99,7 +99,7 @@ Bounds Part::getStrictBounds() const {
 }
 
 void Part::scale(double scaleX, double scaleY, double scaleZ) {
-	Bounds oldBounds = this->getStrictBounds();
+	Bounds oldBounds = this->getBounds();
 	this->hitbox = this->hitbox.scaled(scaleX, scaleY, scaleZ);
 	recalculateAndUpdateParent(*this, oldBounds);
 }
@@ -142,17 +142,17 @@ double Part::getDepth() const {
 }
 
 void Part::setWidth(double newWidth) {
-	Bounds oldBounds = this->getStrictBounds();
+	Bounds oldBounds = this->getBounds();
 	this->hitbox.setWidth(newWidth);
 	recalculateAndUpdateParent(*this, oldBounds);
 }
 void Part::setHeight(double newHeight) {
-	Bounds oldBounds = this->getStrictBounds();
+	Bounds oldBounds = this->getBounds();
 	this->hitbox.setHeight(newHeight);
 	recalculateAndUpdateParent(*this, oldBounds);
 }
 void Part::setDepth(double newDepth) {
-	Bounds oldBounds = this->getStrictBounds();
+	Bounds oldBounds = this->getBounds();
 	this->hitbox.setDepth(newDepth);
 	recalculateAndUpdateParent(*this, oldBounds);
 }
@@ -173,7 +173,7 @@ void Part::attach(Part* other, HardConstraint* constraint, const CFrame& attachT
 }
 
 void Part::detach() {
-	if(this->parent == nullptr) throw "No physical to detach from!";
+	if(this->parent == nullptr) throw std::logic_error("No physical to detach from!");
 	this->parent->detachPart(this);
 }
 

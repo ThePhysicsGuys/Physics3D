@@ -5,6 +5,7 @@
 #include <utility>
 #include <new>
 #include <limits>
+#include <stdexcept>
 
 long long computeCost(const Bounds& bounds) {
 	Vec3Fix d = bounds.getDiagonal();
@@ -257,13 +258,13 @@ NodeStack::NodeStack(TreeNode& rootNode) : stack{TreeStackElement{&rootNode, 0}}
 
 NodeStack::NodeStack(TreeNode& rootNode, const void* objToFind, const Bounds& objBounds) : NodeStack(rootNode) {
 	if(top + 1 == stack) {
-		throw "Could not find obj in Tree!";
+		throw std::logic_error("Could not find obj in Tree!");
 	}
 	if(rootNode.isLeafNode()) {
 		if(rootNode.object == objToFind) {
 			return;
 		} else {
-			throw "Could not find obj in Tree!";
+			throw std::logic_error("Could not find obj in Tree!");
 		}
 	}
 	while(true) {
@@ -299,7 +300,7 @@ NodeStack::NodeStack(TreeNode& rootNode, const void* objToFind, const Bounds& ob
 		}
 	}
 
-	throw "Could not find obj in Tree!";
+	throw std::logic_error("Could not find obj in Tree!");
 }
 
 NodeStack::NodeStack(const NodeStack& other) : stack{}, top(this->stack + (other.top - other.stack)) {

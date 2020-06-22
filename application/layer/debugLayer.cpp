@@ -204,7 +204,7 @@ void DebugLayer::onRender() {
 				break;
 			case ColTreeRenderMode::SELECTED:
 				if (screen->selectedPart != nullptr)
-					recursiveColTreeForOneObject(screen->world->objectTree.rootNode, screen->selectedPart, screen->selectedPart->getStrictBounds(), 0);
+					recursiveColTreeForOneObject(screen->world->objectTree.rootNode, screen->selectedPart, screen->selectedPart->getBounds(), 0);
 				break;
 		}
 	});

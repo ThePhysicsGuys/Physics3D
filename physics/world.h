@@ -150,6 +150,9 @@ public:
 	void addTerrainPart(Part* part);
 	void optimizeTerrain();
 
+	// removes everything from this world, parts, physicals, forces, constraints
+	void clear();
+
 	inline size_t getPartCount(int partsMask = ALL_PARTS) const {
 		return objectCount;
 	}
@@ -266,5 +269,14 @@ public:
 				WorldPrototype::iterParts(partsMask).begin()
 			)
 		);
+	}
+
+	virtual void onPartAdded(T* part) {}
+	virtual void onPartRemoved(T* part) {}
+	virtual void onPartAdded(Part* part) final override {
+		this->onPartAdded(static_cast<T*>(part));
+	}
+	virtual void onPartRemoved(Part* part) final override {
+		this->onPartRemoved(static_cast<T*>(part));
 	}
 };

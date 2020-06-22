@@ -35,8 +35,9 @@ public:
 
 	InputHandler(GLFWwindow* window);
 
-	bool getKey(const Key& key);
-	Vec2 getMousePosition();
+	bool getKey(const Key& key) const;
+	void setKey(const Key& key, bool pressed);
+	Vec2 getMousePosition() const;
 
 	virtual void onEvent(Event& event) {};
 };

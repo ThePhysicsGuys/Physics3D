@@ -216,7 +216,7 @@ void renderShaderTypeEditor(Shader* shader, const ShaderUniform& uniform) {
 
 void BigFrame::renderShaderStageInfo(ShaderResource* shader, const ShaderStage& stage) {
 	if (ImGui::TreeNode("Code")) {
-		ImGui::TextWrapped(stage.source.c_str());
+		ImGui::TextWrapped("%s", stage.source.c_str());
 
 		ImGui::TreePop();
 	}
@@ -234,8 +234,8 @@ void BigFrame::renderShaderStageInfo(ShaderResource* shader, const ShaderStage& 
 
 			for (const ShaderUniform& uniform : stage.info.uniforms) {
 				ImGui::Text("%d", shader->getUniform(uniform.name)); ImGui::NextColumn();
-				ImGui::Text(uniform.name.c_str()); ImGui::NextColumn();
-				ImGui::Text(uniform.variableType.c_str()); ImGui::NextColumn();
+				ImGui::Text("%s", uniform.name.c_str()); ImGui::NextColumn();
+				ImGui::Text("%s", uniform.variableType.c_str()); ImGui::NextColumn();
 				if (uniform.array) ImGui::Text("yes: %d", uniform.amount); else ImGui::Text("no"); ImGui::NextColumn();
 				ImGui::Text("No editor available"); ImGui::NextColumn();
 				//if (!uniform.array) renderShaderTypeEditor(shader, uniform); else ImGui::Text("No editor available"); ImGui::NextColumn();
@@ -256,8 +256,8 @@ void BigFrame::renderShaderStageInfo(ShaderResource* shader, const ShaderStage& 
 			ImGui::Separator();
 
 			for (const ShaderLocal& local : stage.info.locals) {
-				ImGui::Text(local.name.c_str()); ImGui::NextColumn();
-				ImGui::Text(local.variableType.c_str()); ImGui::NextColumn();
+				ImGui::Text("%s", local.name.c_str()); ImGui::NextColumn();
+				ImGui::Text("%s", local.variableType.c_str()); ImGui::NextColumn();
 				if (local.array)
 					ImGui::Text("yes: %d", local.amount);
 				else
@@ -282,9 +282,9 @@ void BigFrame::renderShaderStageInfo(ShaderResource* shader, const ShaderStage& 
 			ImGui::Separator();
 
 			for (const ShaderGlobal& global : stage.info.globals) {
-				ImGui::Text(global.name.c_str()); ImGui::NextColumn();
-				ImGui::Text(global.ioType.c_str()); ImGui::NextColumn();
-				ImGui::Text(global.variableType.c_str()); ImGui::NextColumn();
+				ImGui::Text("%s", global.name.c_str()); ImGui::NextColumn();
+				ImGui::Text("%s", global.ioType.c_str()); ImGui::NextColumn();
+				ImGui::Text("%s", global.variableType.c_str()); ImGui::NextColumn();
 				if (global.array)
 					ImGui::Text("yes: %d", global.amount);
 				else
@@ -312,8 +312,8 @@ void BigFrame::renderShaderStageInfo(ShaderResource* shader, const ShaderStage& 
 					ImGui::Separator();
 
 					for (const ShaderLocal& local : strct.locals) {
-						ImGui::Text(local.name.c_str()); ImGui::NextColumn();
-						ImGui::Text(local.variableType.c_str()); ImGui::NextColumn();
+						ImGui::Text("%s", local.name.c_str()); ImGui::NextColumn();
+						ImGui::Text("%s", local.variableType.c_str()); ImGui::NextColumn();
 						if (local.array)
 							ImGui::Text("yes: %d", local.amount);
 						else
@@ -340,7 +340,7 @@ void BigFrame::renderShaderStageInfo(ShaderResource* shader, const ShaderStage& 
 			ImGui::Separator();
 
 			for (const auto& define : stage.info.defines) {
-				ImGui::Text(define.first.c_str()); ImGui::NextColumn();
+				ImGui::Text("%s", define.first.c_str()); ImGui::NextColumn();
 				ImGui::Text("%d", (int) define.second); ImGui::NextColumn();
 			}
 			ImGui::Columns(1);

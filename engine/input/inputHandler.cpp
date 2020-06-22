@@ -19,6 +19,10 @@ void InputHandler::keyCallback(int code, int action, int mods) {
 	Modifiers modifiers = Modifiers(mods);
 
 	if (action == Keyboard::KEY_PRESS) {
+		keys[key.getCode()] = true;
+		timestamp[key.getCode()] = glfwGetTime();
+		anyKey++;
+
 		if (keys[key.getCode()] == false && glfwGetTime() - timestamp[key.getCode()] < keyInterval) {
 			DoubleKeyPressEvent event(key, mods);
 			onEvent(event);
@@ -26,10 +30,6 @@ void InputHandler::keyCallback(int code, int action, int mods) {
 			KeyPressEvent event(key, mods);
 			onEvent(event);
 		}
-
-		keys[key.getCode()] = true;
-		timestamp[key.getCode()] = glfwGetTime();
-		anyKey++;
 	} else if (action == Keyboard::KEY_RELEASE) {
 		keys[key.getCode()] = false;
 		anyKey--;
@@ -120,17 +120,24 @@ void InputHandler::framebufferSizeCallback(int width, int height) {
 
 #pragma endregion
 
-Vec2 InputHandler::getMousePosition() {
+Vec2 InputHandler::getMousePosition() const {
 	double x, y;
 	glfwGetCursorPos(window, &x, &y);
 	return Vec2(x, y);
 }
 
-bool InputHandler::getKey(const Key& key) {
+bool InputHandler::getKey(const Key& key) const {
 	if (key.getCode() < Keyboard::KEY_FIRST || key.getCode() > Keyboard::KEY_LAST)
 		return false;
 
 	return keys[key.getCode()];
+}
+
+void InputHandler::setKey(const Key& key, bool pressed) {
+	if (key.getCode() < Keyboard::KEY_FIRST || key.getCode() > Keyboard::KEY_LAST)
+		return;
+	
+	keys[key.getCode()] = pressed;
 }
 
 InputHandler::InputHandler(GLFWwindow* window) : window(window) {
