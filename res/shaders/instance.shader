@@ -196,7 +196,7 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0) {
 
 vec3 calcDirectionalLight() {
 	vec3 L = normalize(sunDirection);
-	float directionalFactor = 0.4 * max(dot(N, L), 0.0);
+	float directionalFactor = 0.4 * max(dot(N, -L), 0.0);
 	vec3 directional = directionalFactor * sunColor;
 	return directional;
 }
@@ -208,22 +208,22 @@ float calcShadow() {
 	// transform to [0,1] range
 	projCoords = projCoords * 0.5 + 0.5;
 
-	/*if (projCoords.z > 1.0)
-		return 0.0;*/
+	if (projCoords.z > 1.0)
+		return 0.0;
 
 	// check whether current frag pos is in shadow
-	// float bias = max(0.05 * (1.0 - dot(N, lightDir)), 0.005);
+	//float bias = 0.005;
+	float bias = max(0.05 * (1.0 - dot(N, -sunDirection)), 0.005);
 	float currentDepth = projCoords.z;
-	float bias = 0.005;
 	float shadow = 0.0;
-	vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
-	for (int x = -1; x <= 1; ++x) {
-		for (int y = -1; y <= 1; ++y) {
+	vec2 texelSize = 0.5 / textureSize(shadowMap, 0);
+	for (int x = -2; x <= 2; ++x) {
+		for (int y = -2; y <= 2; ++y) {
 			float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
 			shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
 		}
 	}
-	shadow /= 9.0;
+	shadow /= 25.0;
 
 	return shadow;
 }
@@ -318,7 +318,7 @@ void main() {
 	float shadow = calcShadow();
 
 	// Combine ambient and lighting
-	vec3 color = ambient + (1.0 - shadow) * Lo + Ld;
+	vec3 color = ambient + (1.0 - shadow) * Ld + Lo;
 
 	// HDR 
 	color = hdr * (vec3(1.0) - exp(-color * exposure)) + (1.0 - hdr) * color;

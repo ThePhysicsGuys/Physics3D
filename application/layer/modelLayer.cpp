@@ -36,8 +36,6 @@ namespace Application {
 
 // Light uniforms
 std::vector<Light*> lights;
-Vec3f sunDirection;
-Vec3f sunColor;
 
 enum class RelationToSelectedPart {
 	NONE,
@@ -139,10 +137,17 @@ void ModelLayer::onRender() {
 	Shaders::instanceShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
 	
 	// Shadow
+	Vec3f from = { -10, 10, -10 };
+	Vec3f to = { 0, 0, 0 };
+	Vec3f sunDirection = to - from;
+	TestLayer::lightView = lookAt(from, to);
+	TestLayer::lighSpaceMatrix = TestLayer::lightProjection * TestLayer::lightView;
+
 	Renderer::activeTexture(1);
 	Renderer::bindTexture2D(TestLayer::depthMap);
 	Shaders::instanceShader.setUniform("shadowMap", 1);
 	Shaders::instanceShader.setUniform("lightMatrix", TestLayer::lighSpaceMatrix);
+	Shaders::instanceShader.updateSunDirection(sunDirection);
 
 	// Filter on mesh ID and transparency
 	size_t maxMeshCount = 0;

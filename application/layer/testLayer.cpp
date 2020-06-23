@@ -24,16 +24,16 @@ namespace Application {
 
 float near = 0.001;
 float far = 100;
-Mat4f lightProjection = ortho(-25.0, 25.0, -25.0, 25.0, near, far);
-Mat4f lightView = lookAt({ -15.0, 15.0, -15.0 }, { 0.0, 0.0, 0.0 }, { 0.0, 1.0, 0.0 });
 
 unsigned int TestLayer::depthMap = 0;
+Mat4f TestLayer::lightProjection = ortho(-25.0, 25.0, -25.0, 25.0, near, far);
+Mat4f TestLayer::lightView = lookAt({ -15.0, 15.0, -15.0 }, { 0.0, 0.0, 0.0 }, { 0.0, 1.0, 0.0 });
 Mat4f TestLayer::lighSpaceMatrix = lightProjection * lightView;
 
 GLID depthMapFBO;
 
-GLID WIDTH = 1024;
-GLID HEIGHT = 1024;
+GLID WIDTH = 2048;
+GLID HEIGHT = 2048;
 
 IndexedMesh* mesh = nullptr;
 
@@ -122,10 +122,12 @@ void TestLayer::onRender() {
 	Shaders::depthShader.updateLight(lighSpaceMatrix);
 	glViewport(0, 0, WIDTH, HEIGHT);
 	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-	glClear(GL_DEPTH_BUFFER_BIT);
-	glCullFace(GL_FRONT);
+	glClear(GL_DEPTH_BUFFER_BIT);	
+	Renderer::disableCulling();
+	//glCullFace(GL_FRONT_AND_BACK);
 	renderScene();
-	glCullFace(GL_BACK);
+	//glCullFace(GL_BACK);
+	Renderer::enableCulling();
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, GUI::windowInfo.dimension.x, GUI::windowInfo.dimension.y);
 

@@ -7,6 +7,7 @@
 #include "misc/validityHelper.h"
 
 #include "catchable_assert.h"
+#include <stdexcept>
 
 namespace {
 	void recalculate(Part& part) {

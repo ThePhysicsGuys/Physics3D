@@ -1,10 +1,9 @@
 #pragma once
 
 #include "batch.h"
-#include "../renderUtils.h"
+#include "../renderer.h"
 #include "../mesh/indexedMesh.h"
 #include "../buffers/bufferLayout.h"
-#include "../graphics/debug/debug.h"
 
 namespace Graphics {
 
