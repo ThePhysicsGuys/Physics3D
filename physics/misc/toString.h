@@ -118,12 +118,26 @@ inline std::ostream& operator<<(std::ostream& os, const EigenValues<N, Size>& v)
 	return os;
 }
 
-inline std::ostream& operator<<(std::ostream& os, const Rotation& rotation) {
+template<typename T>
+inline std::ostream& operator<<(std::ostream& os, const Quaternion<T>& quat) {
+	os << quat.w;
+	if(quat.i >= 0) os << '+';
+	os << quat.i << 'i';
+	if(quat.j >= 0) os << '+';
+	os << quat.j << 'j';
+	if(quat.k >= 0) os << '+';
+	os << quat.k << 'k';
+	return os;
+}
+
+template<typename T>
+inline std::ostream& operator<<(std::ostream& os, const RotationTemplate<T>& rotation) {
 	os << rotation.asRotationMatrix();
 	return os;
 }
 
-inline std::ostream& operator<<(std::ostream& os, const CFrame& cframe) {
+template<typename T>
+inline std::ostream& operator<<(std::ostream& os, const CFrameTemplate<T>& cframe) {
 	os << "CFrame(" << cframe.position << ", " << cframe.rotation << ")";
 	return os;
 }

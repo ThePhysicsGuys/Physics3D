@@ -175,7 +175,7 @@ ScalableInertialMatrix Polyhedron::getScalableInertia(const CFrame& reference) c
 		//total[2][1] += dFactor.x * xyzIntegral; // sx*sy*sz* sz*sy
 	}
 	
-	return ScalableInertialMatrix(totalDiagElementParts / 60, totalOffDiag / 60);
+	return ScalableInertialMatrix(totalDiagElementParts * (1.0/60.0), totalOffDiag * (1.0/60.0));
 }
 
 ScalableInertialMatrix Polyhedron::getScalableInertiaAroundCenterOfMass() const {

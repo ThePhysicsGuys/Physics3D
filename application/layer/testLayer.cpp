@@ -105,9 +105,7 @@ void TestLayer::renderScene() {
 		if (part->visualData.drawMeshId == -1)
 			continue;
 
-
-		auto mat = Mat4f(Mat3f(part->getCFrame().getRotation().asRotationMatrix()) * DiagonalMat3f(part->hitbox.scale), Vec3f(part->getCFrame().getPosition() - Position(0, 0, 0)), Vec3f(0.0f, 0.0f, 0.0f), 1.0f);
-		Shaders::depthShader.updateModel(mat);
+		Shaders::depthShader.updateModel(part->getCFrame().asMat4WithPreScale(part->hitbox.scale));
 		Engine::MeshRegistry::meshes[part->visualData.drawMeshId]->render(part->renderMode);
 	}
 }

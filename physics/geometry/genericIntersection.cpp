@@ -298,7 +298,7 @@ bool runEPATransformed(const ColissionPair& info, const Tetrahedron& s, Vec3f& i
 			Vec3f avgSecond = B0 * u + B1 * v + B2 * w;
 
 			// intersection = (avgFirst + relativeCFrame.localToGlobal(avgSecond)) / 2;
-			intersection = (avgFirst + avgSecond) / 2;
+			intersection = (avgFirst + avgSecond) * 0.5f;
 			incDebugTally(EPAIterationStatistics, iter);
 			return true;
 		}

@@ -126,8 +126,30 @@ bool tolerantEquals(const Position& a, const Position& b, Tol tolerance) {
 }
 
 template<typename T, typename Tol>
-bool tolerantEquals(const RotationTemplate<T>& a, const RotationTemplate<T>& b, Tol tolerance) {
+bool tolerantEquals(const Quaternion<T>& a, const Quaternion<T>& b, Tol tolerance) {
+	return 
+		tolerantEquals(a.w, b.w, tolerance) && 
+		tolerantEquals(a.i, b.i, tolerance) && 
+		tolerantEquals(a.j, b.j, tolerance) && 
+		tolerantEquals(a.k, b.k, tolerance);
+}
+
+template<typename T, typename Tol>
+bool tolerantEquals(const MatrixRotationTemplate<T>& a, const MatrixRotationTemplate<T>& b, Tol tolerance) {
 	return tolerantEquals(a.asRotationMatrix(), b.asRotationMatrix(), tolerance);
+}
+
+template<typename T, typename Tol>
+bool tolerantEquals(const QuaternionRotationTemplate<T>& a, const QuaternionRotationTemplate<T>& b, Tol tolerance) {
+	Quaternion<T> aq = a.asRotationQuaternion();
+	Quaternion<T> bq = b.asRotationQuaternion();
+	// Quaternions double cover the plane of possible rotations, -q and q express the same rotation. 
+	// Therefore we must make sure we are comparing correctly
+	if(dot(aq, bq) > 0) { // quaternions are aligned
+		return tolerantEquals(aq, bq, tolerance);
+	} else { // quaternions are not aligned
+		return tolerantEquals(aq, -bq, tolerance);
+	}
 }
 
 template<typename Tol>

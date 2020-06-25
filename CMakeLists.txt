@@ -90,6 +90,7 @@ add_executable(benchmarks
   benchmarks/getBoundsPerformance.cpp
   benchmarks/manyCubesBenchmark.cpp
   benchmarks/worldBenchmark.cpp
+  benchmarks/rotationBenchmark.cpp
 )
 
 target_link_libraries(benchmarks util)
@@ -102,6 +103,7 @@ add_executable(tests
   tests/testValues.cpp  
 
   tests/mathTests.cpp
+  tests/rotationTests.cpp
   tests/motionTests.cpp
   tests/geometryTests.cpp
   tests/estimationTests.cpp

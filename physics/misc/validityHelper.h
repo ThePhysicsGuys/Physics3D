@@ -44,8 +44,20 @@ inline bool isMatValid(const DiagonalMatrix<T, Size>& mat) {
 }
 
 template<typename T>
+inline bool isRotationValid(const MatrixRotationTemplate<T>& rotation) {
+	SquareMatrix<T, 3> rotMat = rotation.asRotationMatrix();
+	return isValidRotationMatrix(rotMat);
+}
+
+template<typename T>
+inline bool isRotationValid(const QuaternionRotationTemplate<T>& rotation) {
+	Quaternion<T> rotQuat = rotation.asRotationQuaternion();
+	return isValidRotationQuaternion(rotQuat);
+}
+
+template<typename T>
 inline bool isCFrameValid(const CFrameTemplate<T>& cframe) {
-	return isVecValid(cframe.getPosition()) && isMatValid(cframe.getRotation().asRotationMatrix()) && abs(det(cframe.getRotation().asRotationMatrix()) - 1.0) < 0.00002;
+	return isVecValid(cframe.getPosition()) && isRotationValid(cframe.getRotation());
 }
 
 template<typename T, std::size_t DerivationCount>

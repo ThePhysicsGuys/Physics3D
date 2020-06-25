@@ -58,18 +58,67 @@ public:
 	inline CFrame relativeToLocal(const CFrame& rFrame) const {
 		return CFrame(rotation.globalToLocal(rFrame.position), ~rotation * rFrame.rotation);
 	}
-	
-	inline void translate(const Vec3Fix& offset) {
-		this->position += offset;
-	}
-	inline GlobalCFrame translated(const Vec3Fix& offset) const {
-		return GlobalCFrame(position + offset);
-	}
+
 	inline void rotate(const Rotation& rot) {
 		this->rotation = rot * this->rotation;
 	}
-
 	inline GlobalCFrame rotated(const Rotation& rot) const {
 		return GlobalCFrame(position, rot * rotation);
 	}
+	
+	inline GlobalCFrame& operator+=(const Vec3Fix& offset) {
+		this->position += offset;
+		return *this;
+	}
+	inline GlobalCFrame& operator-=(const Vec3Fix& offset) {
+		this->position -= offset;
+		return *this;
+	}
+	inline GlobalCFrame operator+(const Vec3Fix& offset) const {
+		return GlobalCFrame(position + offset, this->rotation);
+	}
+	inline GlobalCFrame operator-(const Vec3Fix& offset) const {
+		return GlobalCFrame(position - offset, this->rotation);
+	}
+
+	/*
+		Converts this CFrame to a 4x4 matrix, where for any Vec3 p:
+		cframe.asMat4() * Vec4(p, 1.0) == cframe.localToGlobal(p)
+
+		Note: loss of precision for far out positions, it is recommended to first compute the relative position, and then construct this matrix. 
+		This is because the position is unsafely cast to a Vec3. 
+	*/
+	Mat4 asMat4() const {
+		return Mat4(rotation.asRotationMatrix(), castPositionToVec3(this->position), Vec3::ZEROS(), 1.0);
+	}
+
+	/*
+		Converts this CFrame to a 4x4 matrix with given scaling factor, where for any Vec3 p:
+		cframe.asMat4WithPreScale(scale) * Vec4(p, 1.0) == cframe.localToGlobal(scale * p)
+
+		Note: loss of precision for far out positions, it is recommended to first compute the relative position, and then construct this matrix. 
+		This is because the position is unsafely cast to a Vec3. 
+	*/
+	Mat4 asMat4WithPreScale(const DiagonalMat3& scale) const {
+		return Mat4(rotation.asRotationMatrix() * scale, castPositionToVec3(this->position), Vec3::ZEROS(), 1.0);
+	}
+
+	/*
+		Converts this CFrame to a 4x4 matrix with given scaling factor, where for any Vec3 p:
+		cframe.asMat4WithPostScale(scale) * Vec4(p, 1.0) == scale * cframe.localToGlobal(p)
+
+		Note: loss of precision for far out positions, it is recommended to first compute the relative position, and then construct this matrix. 
+		This is because the position is unsafely cast to a Vec3. 
+	*/
+	Mat4 asMat4WithPostScale(const DiagonalMat3& scale) const {
+		return Mat4(scale * rotation.asRotationMatrix(), castPositionToVec3(this->position), Vec3::ZEROS(), 1.0);
+	}
 };
+
+
+inline CFrame operator-(GlobalCFrame cf, Position relativeTo) {
+	return CFrame(cf.getPosition() - relativeTo, cf.getRotation());
+}
+inline GlobalCFrame operator+(Position relativeTo, CFrame cf) {
+	return GlobalCFrame(relativeTo + cf.getPosition(), cf.getRotation());
+}

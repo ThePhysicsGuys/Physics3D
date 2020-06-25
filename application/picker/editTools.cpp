@@ -114,7 +114,7 @@ void EditTools::onRender(Screen& screen) {
 	}
 	
 	GlobalCFrame selFrame = screen.selectedPart->getCFrame();
-	Mat4 modelMatrix(selFrame.getRotation().asRotationMatrix(), selFrame.getPosition() - Position(0,0,0), Vec3(0,0,0), 1);
+	Mat4 modelMatrix = selFrame.asMat4();
 	
 	if (selectedEditDirection != EditDirection::NONE) {
 		switch (selectedEditDirection) {
@@ -123,11 +123,11 @@ void EditTools::onRender(Screen& screen) {
 				Shaders::maskShader.updateColor(COLOR::RGB_G);
 				break;
 			case EditDirection::X:
-				Shaders::maskShader.updateModel(modelMatrix * Mat4(Matrix<double, 3, 3>(transformations[1]), 1.0f));
+				Shaders::maskShader.updateModel(modelMatrix * Mat4(Matrix<double, 3, 3>(transformations[1].asRotationMatrix()), 1.0f));
 				Shaders::maskShader.updateColor(COLOR::RGB_R);
 				break;
 			case EditDirection::Z:
-				Shaders::maskShader.updateModel(modelMatrix * Mat4(Matrix<double, 3, 3>(transformations[2]), 1.0f));
+				Shaders::maskShader.updateModel(modelMatrix * Mat4(Matrix<double, 3, 3>(transformations[2].asRotationMatrix()), 1.0f));
 				Shaders::maskShader.updateColor(COLOR::RGB_B);
 				break;
 		}
@@ -148,12 +148,12 @@ void EditTools::onRender(Screen& screen) {
 
 	// X
 	Shaders::basicShader.updateMaterial(Material(COLOR::RGB_R));
-	Shaders::basicShader.updateModel(modelMatrix * Mat4(Mat3(transformations[1]), 1.0f));
+	Shaders::basicShader.updateModel(modelMatrix * Mat4(Mat3(transformations[1].asRotationMatrix()), 1.0f));
 	shaft->render();
 
 	// Z
 	Shaders::basicShader.updateMaterial(Material(COLOR::RGB_B));
-	Shaders::basicShader.updateModel(modelMatrix * Mat4(Mat3(transformations[2]), 1.0f));
+	Shaders::basicShader.updateModel(modelMatrix * Mat4(Mat3(transformations[2].asRotationMatrix()), 1.0f));
 	shaft->render();
 }
 

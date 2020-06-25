@@ -282,8 +282,10 @@ ParsedInput parseInput(int argc, char* argv[]) {
 	result.allowSkip = result.inputArgs.size() == 0;
 
 	for(const std::string& flag : inputFlags) {
-		if(flag == "--coverage") result.coverageEnabled = true;
-		if(flag == "--all") result.allowSkip = false;
+		if(flag == "--coverage") 
+			result.coverageEnabled = true;
+		if(flag == "--noskip") 
+			result.allowSkip = false;
 	}
 
 	return result;

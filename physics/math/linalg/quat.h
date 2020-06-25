@@ -2,7 +2,6 @@
 
 #include <stddef.h>
 #include <cmath>
-#include <limits>
 #include "vec.h"
 
 template<typename T>
@@ -18,13 +17,12 @@ struct Quaternion {
 		Vector<T, 3> v;
 	};
 
-	Quaternion() : w(0), i(0), j(0), k(0) {}
-	Quaternion(T w, T i, T j, T k) : w(w), i(i), j(j), k(k) {}
-	Quaternion(T v) : w(v), i(v), j(v), k(v) {}
-	Quaternion(T w, Vector<T, 3> v) : w(w), v(v) {}
+	constexpr Quaternion() : w(0), i(0), j(0), k(0) {}
+	constexpr Quaternion(T w, T i, T j, T k) : w(w), i(i), j(j), k(k) {}
+	constexpr Quaternion(T w, Vector<T, 3> v) : w(w), v(v) {}
 
 	template<typename OtherT>
-	operator Quaternion<OtherT>() const {
+	explicit operator Quaternion<OtherT>() const {
 		Quaternion<OtherT> result;
 
 		result.w = static_cast<OtherT>(w);
@@ -49,43 +47,64 @@ typedef Quaternion<float>		Quat4f;
 typedef Quaternion<long long>	Quat4l;
 typedef Quaternion<int>			Quat4i;
 
-template<typename T1, typename T2>
-auto operator*(const Quaternion<T1>& a, const Quaternion<T2>& b) -> Quaternion<decltype(a.w * b.w - a.i * b.i)> {
-	auto w = a.w * b.w - (a.v * b.v);
-	auto v = a.w * b.v + a.v * b.w + (a.v % b.v);
-
-	return Quaternion<decltype(a.w * b.w - a.i * b.i)>(w, v);
+template<typename T>
+Quaternion<T> operator*(const Quaternion<T>& a, const Quaternion<T>& b) {
+	T w = a.w * b.w - (a.v * b.v);
+	Vector<T, 3> v = a.w * b.v + a.v * b.w + (a.v % b.v);
+	return Quaternion<T>(w, v);
 }
 
-template<typename T1, typename T2>
-auto operator*(const Quaternion<T1>& a, const Vector<T2, 3>& b) -> Vector<decltype(a.i * b.x + a.j * b.y), 3> {
-	auto t = static_cast<decltype(a.i * b.x + a.j * b.y)>(2) * cross(a.v, b);
-	return b + a.w * t + cross(a.v, t);
+// computes  q * Quaternion(0, v)
+template<typename T>
+Quaternion<T> operator*(const Quaternion<T>& q, const Vector<T, 3>& v) {
+	return Quaternion<T>(-(v * q.v), q.w * v + q.v % v);
 }
 
-template<typename T1, typename T2, typename = typename std::enable_if<std::is_arithmetic<T2>::value, T2>::type>
-auto operator*(const Quaternion<T1>& quat, const T2& factor) -> Quaternion<decltype(quat.w * factor)> {
-	return Quaternion<decltype(quat.w * factor)>(quat.w * factor, quat.v * factor);
+// computes  Quaternion(0, v) * q
+template<typename T>
+Quaternion<T> operator*(const Vector<T, 3>& v, const Quaternion<T>& q) {
+	return Quaternion<T>(-(v * q.v), q.w * v + v % q.v);
 }
 
-template<typename T1, typename T2, typename = typename std::enable_if<std::is_arithmetic<T1>::value, T1>::type>
-auto operator*(const T1& factor, const Quaternion<T2>& quat) -> Quaternion<decltype(factor * quat.w)> {
-	return Quaternion<decltype(factor * quat.w)>(factor * quat.w, factor * quat.v);
+// computes q * v * conj(q)  if q is a unit quaternion
+template<typename T>
+Vector<T, 3> mulQuaternionLeftRightConj(const Quaternion<T>& q, const Vector<T, 3>& v) {
+	Vector<T, 3> u = q.v;
+	Vector<T, 3> cross_uv = u % v;
+	return v + ((cross_uv * q.w) + u % cross_uv) * static_cast<T>(2);
 }
 
-template<typename T1, typename T2>
-auto operator+(const Quaternion<T1>& a, const Quaternion<T2>& b) -> Quaternion<decltype(a.w + b.w)> {
-	return Quaternion<decltype(a.w + b.w)>(a.w + b.w, a.v + b.v);
+// computes conj(q) * v * q  if q is a unit quaternion
+template<typename T>
+Vector<T, 3> mulQuaternionLeftConjRight(const Quaternion<T>& q, const Vector<T, 3>& v) {
+	Vector<T, 3> u = q.v;
+	Vector<T, 3> cross_uv = v % u;
+	return v + ((cross_uv * q.w) + cross_uv % u) * static_cast<T>(2);
 }
 
-template<typename T1, typename T2>
-auto operator-(const Quaternion<T1>& a, const Quaternion<T2>& b) -> Quaternion<decltype(a.w - b.w)> {
-	return Quaternion<decltype(a.w - b.w)>(a.w - b.w, a.v - b.v);
+template<typename T>
+Quaternion<T> operator*(const Quaternion<T>& quat, T factor) {
+	return Quaternion<T>(quat.w * factor, quat.v * factor);
 }
 
-template<typename T1, typename T2, size_t Size>
-auto operator/(const Quaternion<T1>& quat, const T2& factor) -> Quaternion<decltype(quat.w / factor)> {
-	return Quaternion<decltype(quat.w / factor)>(quat.w / factor, quat.v / factor);
+template<typename T>
+Quaternion<T> operator*(T factor, const Quaternion<T>& quat) {
+	return Quaternion<T>(factor * quat.w, factor * quat.v);
+}
+
+template<typename T>
+Quaternion<T> operator+(const Quaternion<T>& a, const Quaternion<T>& b) {
+	return Quaternion<T>(a.w + b.w, a.v + b.v);
+}
+
+template<typename T>
+Quaternion<T> operator-(const Quaternion<T>& a, const Quaternion<T>& b) {
+	return Quaternion<T>(a.w - b.w, a.v - b.v);
+}
+
+template<typename T>
+Quaternion<T> operator/(const Quaternion<T>& quat, T factor) {
+	return Quaternion<T>(quat.w / factor, quat.v / factor);
 }
 
 template<typename T>
@@ -93,38 +112,31 @@ Quaternion<T> operator-(const Quaternion<T>& quat) {
 	return Quaternion<T>(-quat.w, -quat.v);
 }
 
-template<typename T1, typename T2>
-Quaternion<T1>& operator+=(Quaternion<T1>& quat, const Quaternion<T2>& other) {
+template<typename T>
+Quaternion<T>& operator+=(Quaternion<T>& quat, const Quaternion<T>& other) {
 	quat.w += other.w;
 	quat.v += other.v;
 
 	return quat;
 }
-
-template<typename T1, typename T2>
-Quaternion<T1>& operator-=(Quaternion<T1>& quat, const Quaternion<T2>& other) {
+template<typename T>
+Quaternion<T>& operator-=(Quaternion<T>& quat, const Quaternion<T>& other) {
 	quat.w -= other.w;
 	quat.v -= other.v;
 
 	return quat;
 }
 
-template<typename T1, typename T2>
-Quaternion<T1>& operator*=(Quaternion<T1>& quat, const T2& factor) {
+template<typename T>
+Quaternion<T>& operator*=(Quaternion<T>& quat, T factor) {
 	quat.w *= factor;
 	quat.v *= factor;
 
 	return quat;
 }
-template<typename T1, typename T2>
-Quaternion<T1>& operator*=(Quaternion<T1>& quat, const Quaternion<T2>& other) {
-	quat = quat * other;
 
-	return quat;
-}
-
-template<typename T1, typename T2>
-Quaternion<T1>& operator/=(Quaternion<T1>& quat, const T2& factor) {
+template<typename T>
+Quaternion<T>& operator/=(Quaternion<T>& quat, T factor) {
 	quat.w /= factor;
 	quat.v /= factor;
 
@@ -132,23 +144,8 @@ Quaternion<T1>& operator/=(Quaternion<T1>& quat, const T2& factor) {
 }
 
 template<typename T>
-bool operator!=(const Quaternion<T>& first, const Quaternion<T>& second) {
-	return !(first == second);
-}
-
-template<typename T>
-bool operator==(const Quaternion<T>& first, const Quaternion<T>& second) {
-	return first.w == second.w && first.v == second.v;
-}
-
-template<typename T1, typename T2>
-auto dot(const Quaternion<T1>& a, const Quaternion<T2>& b) -> decltype(a.w * b.w + a.i * b.i) {
+T dot(const Quaternion<T>& a, const Quaternion<T>& b) {
 	return a.w * b.w + a.i * b.i + a.j * b.j + a.k * b.k;
-}
-
-template<typename T>
-Quaternion<T> dot(const Quaternion<T>& quat) {
-	return dot(quat, quat);
 }
 
 template<typename T>
@@ -162,32 +159,26 @@ Quaternion<T> conj(const Quaternion<T>& quat) {
 }
 
 template<typename T>
+T lengthSquared(const Quaternion<T>& q) {
+	return q.w*q.w + q.i*q.i + q.j*q.j + q.k*q.k;
+}
+
+template<typename T>
+T length(const Quaternion<T>& quat) {
+	return std::sqrt(lengthSquared(quat));
+}
+
+template<typename T>
+Quaternion<T> normalize(const Quaternion<T>& quat) {
+	return quat / length(quat);
+}
+
+template<typename T>
 Quaternion<T> operator~(const Quaternion<T>& quat) {
-	return !quat / dot(quat);
+	return !quat / lengthSquared(quat);
 }
 
 template<typename T>
 Quaternion<T> inverse(const Quaternion<T>& quat) {
 	return ~quat;
 }
-
-template<typename T, size_t Size>
-T lengthSquared(const Quaternion<T>& quat) {
-	return dot(quat);
-}
-
-template<typename T>
-auto length(const Quaternion<T>& quat) {
-	return sqrt(lengthSquared(quat));
-}
-
-template<typename T1, typename T2>
-bool isLongerThan(const Quaternion<T1>& vec, const T2& length) {
-	return lengthSquared(vec) > length * length;
-}
-
-template<typename T1, typename T2>
-bool isShorterThan(const Quaternion<T1>& vec, const T2& length) {
-	return lengthSquared(vec) < length * length;
-}
-

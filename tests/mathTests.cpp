@@ -20,15 +20,6 @@
 
 #define ASSERT(condition) ASSERT_TOLERANT(condition, 0.00000001)
 
-TEST_CASE(quaternionRotations) {
-	Vec3 v = Vec3::Y_AXIS();
-	Quat4 q = QROT_X_180(int);
-
-	Vec3 r = q * v;
-
-	ASSERT(r == Vec3i::Y_AXIS_NEG());
-}
-
 TEST_CASE(subMatrixOperations) {
 	Matrix<int, 3, 5> mat{
 		5,7,9,
@@ -137,31 +128,6 @@ TEST_CASE(cframeInverse) {
 	ASSERT(A.localToRelative(B) + A.position == A.localToGlobal(B));
 }
 
-TEST_CASE(testFromRotationVec) {
-	double deltaT = 0.0001;
-
-	Vec3 rotations[]{Vec3(1,0,0), Vec3(0,1,0), Vec3(0,0,1), Vec3(-5.0, 3.0, 9.0), Vec3(3.8, -0.5, 0.4)};
-	for(Vec3 rotVec : rotations) {
-		Vec3 rotationVec = rotVec * deltaT;
-		Vec3 pointToRotate = Vec3(1.0, 0.0, 0.0);
-
-		Rotation rot = Rotation::fromRotationVec(rotationVec);
-
-		Vec3 rotateByRotVec = pointToRotate;
-		Vec3 rotateByRotMat = pointToRotate;
-
-		for(int i = 0; i < 500; i++) {
-			rotateByRotVec = rotateByRotVec + rotationVec % rotateByRotVec;
-			rotateByRotMat = rot * rotateByRotMat;
-		}
-
-		logStream << "rotVec: " << rotationVec << ", rot: " << rot << '\n';
-		logStream << "newPointRotVec: " << rotateByRotVec << "\nnewPointRotMat: " << rotateByRotMat << '\n';
-
-		ASSERT_TOLERANT(rotateByRotVec == rotateByRotMat, 0.01);
-	}
-}
-
 TEST_CASE(matrixAssociativity) {
 
 	Mat3 A3{ 1, 2, 3, 4, 5, 6, 7, 8, 9 };
@@ -224,10 +190,10 @@ TEST_CASE(eigenDecomposition) {
 	for(double x = -1.25; x < 1.5; x += 0.1) {
 		for(double y = -1.35; y < 1.5; y += 0.1) {
 			for(double z = -1.55; z < 1.5; z += 0.1) {
-				Rotation orthoPart = Rotation::fromEulerAngles(0.21, 0.31, 0.41);
+				Mat3 orthoPart = rotationMatrixfromEulerAngles(0.21, 0.31, 0.41);
 				DiagonalMat3 eigenMat{x,y,z};
 
-				SymmetricMat3 testMat = orthoPart.localToGlobal(SymmetricMat3(eigenMat));
+				SymmetricMat3 testMat = mulSymmetricLeftRightTranspose(SymmetricMat3(eigenMat), orthoPart);
 
 				EigenSet<double, 3> v = getEigenDecomposition(testMat);
 
@@ -263,36 +229,6 @@ TEST_CASE(largeMatrixVectorSolve) {
 	destructiveSolve(mat, solutionVector);
 
 	ASSERT(solutionVector == vec);
-}
-
-
-TEST_CASE(testFromRotationVecInvertsFromRotationMatrix) {
-	for(double x = -1.55; x < 1.55; x += 0.17) {
-		for(double y = -1.55; y < 1.55; y += 0.13) {
-			for(double z = -1.55; z < 1.55; z += 0.19) {
-				Vec3 v(x, y, z);
-				Rotation rot = Rotation::fromRotationVec(v);
-
-				Vec3 resultingVec = rot.asRotationVector();
-
-				// logStream << "v = " << v << "\n  rot = " << rot << "  resultingVec = " << resultingVec;
-
-				ASSERT(v == resultingVec);
-
-				Rotation m = Rotation::fromEulerAngles(x, y, z);
-
-				Vec3 rotVec = m.asRotationVector();
-
-				Rotation resultingRot = Rotation::fromRotationVec(rotVec);
-
-				// logStream << "m = " << m << "\n  rotVec = " << rotVec << "  resultingMat = " << resultingMat;
-
-				ASSERT(m == resultingRot);
-			}
-		}
-	}
-
-
 }
 
 TEST_CASE(testTaylorExpansion) {
@@ -365,6 +301,18 @@ TEST_CASE(testSkewSymmetricDerivatives) {
 	ASSERT_TOLERANT((s2 + s0 - 2.0*s1) / (DELTA_T * DELTA_T) == skewSymOut.derivatives[1], 0.00005);
 }
 
+TEST_CASE(testSimulation) {
+	FullTaylorExpansion<Vec3, Vec3, 2> realDerivs(Vec3(0.4, -0.6, 0.7), {Vec3(-0.2, 0.4, -0.8), Vec3(0.5, -0.35, 0.7)});
+
+	double deltaT = 0.000001;
+
+	std::array<Vec3, 3> computedPoints = computeTranslationOverTime(realDerivs.constantValue, realDerivs.derivatives, deltaT);
+
+	FullTaylorExpansion<Vec3, Vec3, 2> computedDerivs = estimateDerivatives(computedPoints, deltaT);
+
+	ASSERT_TOLERANT(realDerivs == computedDerivs, 0.0005);
+}
+
 TEST_CASE(testGenerateFullTaylorForRotationMatrixFromRotationVectorDerivatives) {
 	FullTaylor<Vec3> vecInput{Vec3(0.7, 0.5, -1.3), {Vec3(0.2, 0.1, -0.7), Vec3(0.55, 0.35, -0.2)}};
 
@@ -372,9 +320,9 @@ TEST_CASE(testGenerateFullTaylorForRotationMatrixFromRotationVectorDerivatives) 
 
 	double DELTA_T = 0.00001;
 
-	Mat3 s0 = rotationMatrixfromRotationVec(vecInput(0.0));
-	Mat3 s1 = rotationMatrixfromRotationVec(vecInput(DELTA_T));
-	Mat3 s2 = rotationMatrixfromRotationVec(vecInput(DELTA_T * 2.0));
+	Mat3 s0 = rotationMatrixFromRotationVec(vecInput(0.0));
+	Mat3 s1 = rotationMatrixFromRotationVec(vecInput(DELTA_T));
+	Mat3 s2 = rotationMatrixFromRotationVec(vecInput(DELTA_T * 2.0));
 
 	logStream << taylorDerivs.derivatives[0];
 
@@ -453,8 +401,8 @@ TEST_CASE(testRotationDerivs) {
 			
 			Vec3 rotVec1 = rotVecTaylor(DELTA_T);
 			Vec3 rotVec2 = rotVecTaylor(DELTA_T*2);
-			Mat3 deltaRot1 = rotationMatrixfromRotationVec(rotVec1);
-			Mat3 deltaRot2 = rotationMatrixfromRotationVec(rotVec2);
+			Mat3 deltaRot1 = rotationMatrixFromRotationVec(rotVec1);
+			Mat3 deltaRot2 = rotationMatrixFromRotationVec(rotVec2);
 			Mat3 rot1 = deltaRot1 * rot0;
 			Mat3 rot2 = deltaRot2 * rot0;
 			
@@ -464,14 +412,71 @@ TEST_CASE(testRotationDerivs) {
 	}
 }
 
-TEST_CASE(testSimulation) {
-	FullTaylorExpansion<Vec3, Vec3, 2> realDerivs(Vec3(0.4, -0.6, 0.7), {Vec3(-0.2, 0.4, -0.8), Vec3(0.5, -0.35, 0.7)});
+TEST_CASE(testFromRotationVec) {
+	double deltaT = 0.0001;
 
-	double deltaT = 0.000001;
+	Vec3 rotations[]{Vec3(1,0,0), Vec3(0,1,0), Vec3(0,0,1), Vec3(-5.0, 3.0, 9.0), Vec3(3.8, -0.5, 0.4)};
+	for(Vec3 rotVec : rotations) {
+		Vec3 rotationVec = rotVec * deltaT;
+		Vec3 pointToRotate = Vec3(1.0, 0.0, 0.0);
 
-	std::array<Vec3, 3> computedPoints = computeTranslationOverTime(realDerivs.constantValue, realDerivs.derivatives, deltaT);
+		Mat3 rot = rotationMatrixFromRotationVec(rotationVec);
 
-	FullTaylorExpansion<Vec3, Vec3, 2> computedDerivs = estimateDerivatives(computedPoints, deltaT);
+		Vec3 rotateByRotVec = pointToRotate;
+		Vec3 rotateByRotMat = pointToRotate;
 
-	ASSERT_TOLERANT(realDerivs == computedDerivs, 0.0005);
+		for(int i = 0; i < 500; i++) {
+			rotateByRotVec = rotateByRotVec + rotationVec % rotateByRotVec;
+			rotateByRotMat = rot * rotateByRotMat;
+		}
+
+		logStream << "rotVec: " << rotationVec << ", rot: " << rot << '\n';
+		logStream << "newPointRotVec: " << rotateByRotVec << "\nnewPointRotMat: " << rotateByRotMat << '\n';
+
+		ASSERT_TOLERANT(rotateByRotVec == rotateByRotMat, 0.01);
+	}
+}
+
+// Everything Quaternions
+TEST_CASE(quaternionBasicRotation) {
+	Vec3 v = Vec3::Y_AXIS();
+	Quat4 q = QROT_X_180(double);
+
+	Quat4 r = q * v * conj(q);
+
+	ASSERT(r.w == 0.0);
+	ASSERT(r.v == Vec3::Y_AXIS_NEG());
+}
+
+TEST_CASE(quaternionRotationShorthand) {
+	Vec3 v = Vec3(0.7, 1.0, 0.3);
+	Quat4 q = normalize(Quat4(0.8, 0.4, 0.3, -0.4));
+
+	ASSERT(Quat4(0.0, mulQuaternionLeftRightConj(q, v)) == q * v * conj(q));
+	ASSERT(Quat4(0.0, mulQuaternionLeftConjRight(q, v)) == conj(q) * v * q);
+}
+
+TEST_CASE(quaternionFromRotationVecToRotationMatrix) {
+	for(double x = -1.25; x < 1.5; x += 0.1) {
+		for(double y = -1.35; y < 1.5; y += 0.1) {
+			for(double z = -1.55; z < 1.5; z += 0.1) {
+				Vec3 rotVec(x,y,z);
+				ASSERT(rotationMatrixFromQuaternion(rotationQuaternionFromRotationVec(rotVec)) == rotationMatrixFromRotationVec(rotVec));
+			}
+		}
+	}
+}
+
+TEST_CASE(interchanceQuaternionAndMatrix){
+	for(double x = -1.25; x < 1.5; x += 0.1) {
+		for(double y = -1.35; y < 1.5; y += 0.1) {
+			for(double z = -1.55; z < 1.5; z += 0.1) {
+				Mat3 rotMat = rotationMatrixfromEulerAngles(x, y, z);
+				Quat4 rotQuat = rotationQuaternionFromRotationMatrix(rotMat);
+				Mat3 resultMat = rotationMatrixFromQuaternion(rotQuat);
+
+				ASSERT(rotMat == resultMat);
+			}
+		}
+	}
 }

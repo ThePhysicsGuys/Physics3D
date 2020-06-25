@@ -37,7 +37,7 @@ TEST_CASE(positionInvariance) {
 	for(Position o:origins) {
 		GlobalCFrame origin(o, rotation);
 
-		World<Part> world(DELTA_T);
+		WorldPrototype world(DELTA_T);
 		world.addExternalForce(new DirectionalGravity(Vec3(0, -1, 0)));
 
 		Part housePart(polyhedronShape(Library::house), origin.localToGlobal(houseRelative), {1.0, 1.0, 0.7});
@@ -65,7 +65,7 @@ TEST_CASE(rotationInvariance) {
 
 		GlobalCFrame origin(Position(0.0,0.0,0.0), Rotation::rotY(rotation));
 
-		World<Part> world(DELTA_T);
+		WorldPrototype world(DELTA_T);
 		world.addExternalForce(new DirectionalGravity(Vec3(0, -1, 0)));
 
 		Part housePart(polyhedronShape(Library::house), origin.localToGlobal(houseRelative), {1.0, 1.0, 0.7});
@@ -108,7 +108,7 @@ TEST_CASE(momentToAngularVelocity) {
 		p.update(0.05);
 	}
 
-	ASSERT(p.getMotion().getAngularVelocity() == moment * 50 * 0.05 * p.momentResponse[0][0]);
+	ASSERT(p.getMotion().getAngularVelocity() == moment * (50.0 * 0.05) * p.momentResponse[0][0]);
 }
 
 TEST_CASE(rotationImpulse) {
@@ -305,7 +305,7 @@ TEST_CASE(inelasticColission2) {
 
 TEST_CASE(testChangeInertialBasis) {
 	Rotation rotation = Rotation::fromEulerAngles(0.6, 0.3, 0.7);
-	Polyhedron rotatedTriangle = Library::trianglePyramid.rotated(rotation);
+	Polyhedron rotatedTriangle = Library::trianglePyramid.rotated(static_cast<Rotationf>(rotation));
 	SymmetricMat3 triangleInertia = Library::trianglePyramid.getInertia(CFrame());
 	SymmetricMat3 rotatedTriangleInertia = rotatedTriangle.getInertia(CFrame());
 

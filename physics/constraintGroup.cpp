@@ -64,7 +64,7 @@ LargeMatrix<double> computeInteractionMatrix(const ConstraintGroup& group) {
 			
 			Mat3 response = sharedBody->mainPhysical->getResponseMatrix(sharedBody->localToMain(actorOffset), sharedBody->localToMain(responseOffset));
 
-			const Mat3& rot = sharedBody->mainPhysical->getCFrame().getRotation();
+			Mat3 rot = sharedBody->mainPhysical->getCFrame().getRotation().asRotationMatrix();
 
 			Mat3 globalResponse = rot * response * rot.transpose();
 

@@ -44,7 +44,7 @@ void saveWorld(const PlayerWorld& world) {
 
 	ZeroMemory(&ofn, sizeof(ofn));
 
-	ofn.lStructSize = sizeof(ofn); // SEE NOTE BELOW
+	ofn.lStructSize = sizeof(ofn);
 	//ofn.hwndOwner = hwnd;
 	ofn.lpstrFilter = "World Files (*.world)\0*.world\0All Files (*.*)\0*.*\0";
 	ofn.lpstrFile = szFileName;
@@ -60,11 +60,11 @@ void openWorld(PlayerWorld& world) {
 	//glfwGetWin32Window(window);
 
 	OPENFILENAME ofn;
-	char szFileName[MAX_PATH];
+	char szFileName[MAX_PATH] = "";
 
 	ZeroMemory(&ofn, sizeof(ofn));
 
-	ofn.lStructSize = sizeof(ofn); // SEE NOTE BELOW
+	ofn.lStructSize = sizeof(ofn);
 	//ofn.hwndOwner = hwnd;
 	ofn.lpstrFilter = "World Files (*.world)\0*.world\0All Files (*.*)\0*.*\0";
 	ofn.lpstrFile = szFileName;

@@ -3,7 +3,7 @@
 #define TOO_SMALL_ANGLE_CUTOFF 1.0e-20
 
 /*
-	Computes the full taylor expansion for rotationMatrixfromRotationVec
+	Computes the full taylor expansion for rotationMatrixFromRotationVec
 */
 template<int Derivs>
 TaylorExpansion<Mat3, Derivs> generateTaylorForRotationMatrixFromRotationVector(const FullTaylorExpansion<Vec3, Vec3, Derivs>& rotationVecTaylor) {

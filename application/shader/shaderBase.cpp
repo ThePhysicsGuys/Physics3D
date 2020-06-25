@@ -41,12 +41,8 @@ void StandardMeshShaderBase::updateModel(const Mat4f& modelMatrix) {
 	setUniform("modelMatrix", modelMatrix);
 }
 
-static Mat4f GlobalCFrameToMat4f(const GlobalCFrame& modelCFrame, DiagonalMat3f scale) {
-	return Mat4f(Mat3f(modelCFrame.getRotation().asRotationMatrix()) * scale, Vec3f(modelCFrame.getPosition() - Position(0, 0, 0)), Vec3f(0.0f, 0.0f, 0.0f), 1.0f);
-}
-
 void StandardMeshShaderBase::updateModel(const GlobalCFrame& modelCFrame, const DiagonalMat3f& scale) {
-	updateModel(GlobalCFrameToMat4f(modelCFrame, scale));
+	updateModel(modelCFrame.asMat4WithPreScale(scale));
 }
 
 #pragma endregion

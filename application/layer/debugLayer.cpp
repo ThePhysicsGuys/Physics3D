@@ -46,7 +46,7 @@ void renderSphere(double radius, const Position& position, const Color& color) {
 
 void renderBox(const GlobalCFrame& cframe, double width, double height, double depth, const Color& color) {
 	Shaders::basicShader.updateMaterial(Material(color));
-	Shaders::basicShader.updateModel(Mat4f(cframe.getRotation().asRotationMatrix() * DiagonalMat3 { width, height, depth }, Vec3f(cframe.getPosition() - Position(0,0,0)), Vec3f(0.0f,0.0f,0.0f), 1.0f));
+	Shaders::basicShader.updateModel(Mat4f(cframe.asMat4WithPreScale(DiagonalMat3{width, height, depth})));
 
 	Graphics::Library::cube->render();
 }

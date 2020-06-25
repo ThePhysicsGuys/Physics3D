@@ -128,7 +128,7 @@ void Part::translate(Vec3 translation) {
 	if(this->parent != nullptr) {
 		this->parent->mainPhysical->translate(translation);
 	} else {
-		this->cframe.translate(translation);
+		this->cframe += translation;
 	}
 }
 

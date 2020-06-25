@@ -247,7 +247,7 @@ namespace Library {
 				if(result == newPoints.end()) {
 					index = curMapIndex++;
 					newPoints[edge] = index;
-					vecBuf[index] = (vecBuf[a] + vecBuf[b]) / 2;
+					vecBuf[index] = (vecBuf[a] + vecBuf[b]) * 0.5f;
 				} else {
 					index = newPoints[edge];
 				}

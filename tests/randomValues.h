@@ -69,7 +69,7 @@ inline Vec3 createRandomVec() {
 inline Vec3 createRandomNonzeroVec3() {
 	return createRandomNonzeroVecTemplate<double, 3>();
 }
-inline Mat3 createRandomRotation() {
+inline Rotation createRandomRotation() {
 	return createRandomRotationTemplate<double>();
 }
 inline CFrame createRandomCFrame() {

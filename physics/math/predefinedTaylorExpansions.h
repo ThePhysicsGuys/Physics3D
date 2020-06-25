@@ -107,7 +107,7 @@ TaylorExpansion<SymmetricMatrix<T, 3>, Derivs> generateTaylorForSkewSymmetricSqu
 	
 	if constexpr(Derivs >= 2) {
 		Vector<T, 3> fffxf = elementWiseSquare(ff) + elementWiseMul(fff, f);
-		Vector<T, 3> fffMixed = mulOppositesBiDir(f, fff) + mulSelfOpposites(ff) * 2;
+		Vector<T, 3> fffMixed = mulOppositesBiDir(f, fff) + mulSelfOpposites(ff) * T(2);
 
 		result.derivatives[1] = SymmetricMatrix<T, 3>{
 			-2 * (fffxf.y + fffxf.z),
@@ -129,7 +129,7 @@ TaylorExpansion<Mat3, Derivs> generateTaylorForRotationMatrixFromRotationVector(
 
 template<int Derivs>
 FullTaylorExpansion<Mat3, Mat3, Derivs> generateFullTaylorForRotationMatrixFromRotationVector(const FullTaylorExpansion<Vec3, Vec3, Derivs>& rotationVecTaylor) {
-	return FullTaylorExpansion<Mat3, Mat3, Derivs>{rotationMatrixfromRotationVec(rotationVecTaylor.constantValue), generateTaylorForRotationMatrixFromRotationVector<2>(rotationVecTaylor)};
+	return FullTaylorExpansion<Mat3, Mat3, Derivs>{rotationMatrixFromRotationVec(rotationVecTaylor.constantValue), generateTaylorForRotationMatrixFromRotationVector<2>(rotationVecTaylor)};
 }
 
 template<typename T, int Derivs>

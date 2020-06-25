@@ -342,13 +342,13 @@ T lengthSquared(const Vector<T, Size>& vec) {
 }
 
 template<typename T, size_t Size>
-auto length(const Vector<T, Size>& vec) {
-	return sqrt(lengthSquared(vec));
+T length(const Vector<T, Size>& vec) {
+	return std::sqrt(lengthSquared(vec));
 }
 
 template<typename T>
 T length(const Vector<T, 2>& vec) {
-	return hypot(vec[0], vec[1]);
+	return std::hypot(vec[0], vec[1]);
 }
 
 template<typename T1, typename T2, size_t Size>
@@ -473,17 +473,28 @@ Vector<T, Size> elementWiseCube(const Vector<T, Size>& vec) {
 	return result;
 }
 
+/* computes (
+	a.y * b.z + a.z * b.y,
+	a.z * b.x + a.x * b.z,
+	a.x * b.y + a.y * b.x
+)*/
 template<typename T1, typename T2>
-auto mulOppositesBiDir(const Vector<T1, 3> & first, const Vector<T2, 3> & second) -> Vector<decltype(first.x * second.y + first.y * second.y), 3> {
-	return Vector<decltype(first.x * second.y + first.y * second.x), 3>(
-		first.y * second.z + first.z * second.y,
-		first.z * second.x + first.x * second.z,
-		first.x * second.y + first.y * second.x
+auto mulOppositesBiDir(const Vector<T1, 3> & a, const Vector<T2, 3> & b) -> Vector<decltype(a.x * b.y + a.y * b.x), 3> {
+	return Vector<decltype(a.x * b.y + a.y * b.x), 3>(
+		a.y * b.z + a.z * b.y,
+		a.z * b.x + a.x * b.z,
+		a.x * b.y + a.y * b.x
 	);
 }
+// computes (vec.y * vec.z, vec.z * vec.x, vec.x * vec.y)
 template<typename T>
 Vector<T, 3> mulSelfOpposites(const Vector<T, 3> & vec) {
 	return Vector<T, 3>(vec.y * vec.z, vec.z * vec.x, vec.x * vec.y);
+}
+// computes (vec.y + vec.z, vec.z + vec.x, vec.x + vec.y)
+template<typename T>
+Vector<T, 3> addSelfOpposites(const Vector<T, 3> & vec) {
+	return Vector<T, 3>(vec.y + vec.z, vec.z + vec.x, vec.x + vec.y);
 }
 
 template<typename T, size_t Size>

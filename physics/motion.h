@@ -126,7 +126,7 @@ struct Motion {
 		return Motion(
 			translation.getVelocity()     + relativeMotion.translation.getVelocity(),
 			rotation.getAngularVelocity()      + relativeMotion.rotation.getAngularVelocity(),
-			translation.getAcceleration() + relativeMotion.translation.getAcceleration() + rotation.getAngularVelocity() % relativeMotion.translation.getVelocity() * 2,
+			translation.getAcceleration() + relativeMotion.translation.getAcceleration() + rotation.getAngularVelocity() % relativeMotion.translation.getVelocity() * 2.0,
 			rotation.getAngularAcceleration() + relativeMotion.rotation.getAngularAcceleration() + rotation.getAngularVelocity() % relativeMotion.rotation.getAngularVelocity()
 		);
 	}

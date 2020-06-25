@@ -1233,6 +1233,18 @@ Matrix<T, Size, 1> toColMatrix(const Vector<T, Size>& vec) {
 	return result;
 }
 
+template<typename T, std::size_t Size>
+SymmetricMatrix<T, Size> makeSymmetric(const SquareMatrix<T, Size>& mat) {
+	SymmetricMatrix<T, Size> result;
+	for(std::size_t row = 0; row < Size; row++) {
+		for(std::size_t col = 0; col <= row; col++) {
+			result[row][col] = mat[row][col];
+			assert(std::abs(mat[row][col] - mat[col][row]) < 1E-6);
+		}
+	}
+	return result;
+}
+
 /*
 	Computes mat + mat.transpose()
 */
@@ -1254,13 +1266,7 @@ SymmetricMatrix<T, Size> addTransposed(const SquareMatrix<T, Size>& mat) {
 template<typename T, std::size_t Size>
 SymmetricMatrix<T, Size> mulSymmetricLeftRightTranspose(const SymmetricMatrix<T, Size>& sym, const SquareMatrix<T, Size>& m) {
 	SquareMatrix<T, Size> symResult = m * sym * m.transpose();
-	SymmetricMatrix<T, Size> result;
-	for(std::size_t resultRow = 0; resultRow < Size; resultRow++) {
-		for(std::size_t resultCol = 0; resultCol <= resultRow; resultCol++) {
-			result[resultRow][resultCol] = symResult[resultRow][resultCol];
-		}
-	}
-	return result;
+	return makeSymmetric(symResult);
 }
 /*
 	computes
@@ -1269,11 +1275,5 @@ SymmetricMatrix<T, Size> mulSymmetricLeftRightTranspose(const SymmetricMatrix<T,
 template<typename T, std::size_t Size>
 SymmetricMatrix<T, Size> mulSymmetricLeftTransposeRight(const SymmetricMatrix<T, Size>& sym, const SquareMatrix<T, Size>& m) {
 	SquareMatrix<T, Size> symResult = m.transpose() * sym * m;
-	SymmetricMatrix<T, Size> result;
-	for(std::size_t resultRow = 0; resultRow < Size; resultRow++) {
-		for(std::size_t resultCol = 0; resultCol <= resultRow; resultCol++) {
-			result[resultRow][resultCol] = symResult[resultRow][resultCol];
-		}
-	}
-	return result;
+	return makeSymmetric(symResult);
 }

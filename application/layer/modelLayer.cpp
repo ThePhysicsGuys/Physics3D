@@ -191,7 +191,7 @@ void ModelLayer::onRender() {
 				Material material = part->material;
 				material.albedo += getAlbedoForPart(screen, part);
 
-				Mat4f modelMatrix = Mat4f(Mat3f(part->getCFrame().getRotation().asRotationMatrix()) * DiagonalMat3f(part->hitbox.scale), Vec3f(part->getCFrame().getPosition() - Position(0, 0, 0)), Vec3f(0.0f, 0.0f, 0.0f), 1.0f);
+				Mat4f modelMatrix = part->getCFrame().asMat4WithPreScale(part->hitbox.scale);
 
 				uniforms[offset] = Uniform {
 					modelMatrix,
@@ -226,7 +226,7 @@ void ModelLayer::onRender() {
 		}
 
 		if (screen->selectedPart) {
-			Shaders::debugShader.updateModel(Mat4f(Mat3f(screen->selectedPart->getCFrame().getRotation().asRotationMatrix()) * DiagonalMat3f(screen->selectedPart->hitbox.scale), Vec3f(screen->selectedPart->getCFrame().getPosition() - Position(0, 0, 0)), Vec3f(0.0f, 0.0f, 0.0f), 1.0f));
+			Shaders::debugShader.updateModel(screen->selectedPart->getCFrame().asMat4WithPreScale(screen->selectedPart->hitbox.scale));
 			Engine::MeshRegistry::meshes[screen->selectedPart->visualData.drawMeshId]->render();
 		}
 	});

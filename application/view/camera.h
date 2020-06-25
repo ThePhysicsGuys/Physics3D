@@ -98,12 +98,12 @@ public:
 	double getRightOffsetAtZ1() const;
 	double getTopOffsetAtZ1() const;
 
-	inline Vec3 getForwardDirection() const { return -cframe.rotation.asRotationMatrix().getCol(2); }
-	inline Vec3 getBackwardDirection() const { return cframe.rotation.asRotationMatrix().getCol(2); }
-	inline Vec3 getUpDirection() const { return cframe.rotation.asRotationMatrix().getCol(1); }
-	inline Vec3 getDownDirection() const { return -cframe.rotation.asRotationMatrix().getCol(1); }
-	inline Vec3 getLeftDirection() const { return -cframe.rotation.asRotationMatrix().getCol(0); }
-	inline Vec3 getRightDirection() const { return cframe.rotation.asRotationMatrix().getCol(0); }
+	inline Vec3 getForwardDirection() const { return -cframe.rotation.getZ(); }
+	inline Vec3 getBackwardDirection() const { return cframe.rotation.getZ(); }
+	inline Vec3 getUpDirection() const { return cframe.rotation.getY(); }
+	inline Vec3 getDownDirection() const { return -cframe.rotation.getY(); }
+	inline Vec3 getLeftDirection() const { return -cframe.rotation.getX(); }
+	inline Vec3 getRightDirection() const { return cframe.rotation.getX(); }
 };
 
 };

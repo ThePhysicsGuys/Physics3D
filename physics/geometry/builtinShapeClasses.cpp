@@ -106,9 +106,9 @@ double SphereClass::getScaledMaxRadius(DiagonalMat3 scale) const {
 }
 
 Vec3f SphereClass::furthestInDirection(const Vec3f& direction) const {
-	double lenSq = lengthSquared(direction);
-	if(lenSq == 0.0) return Vec3f(1.0f, 0.0f, 0.0f);
-	return direction / sqrt(lenSq);
+	float lenSq = lengthSquared(direction);
+	if(lenSq == 0.0f) return Vec3f(1.0f, 0.0f, 0.0f);
+	return direction / std::sqrt(lenSq);
 }
 
 Polyhedron SphereClass::asPolyhedron() const {
@@ -193,12 +193,12 @@ BoundingBox CylinderClass::getBounds(const Rotation& rotation, const DiagonalMat
 	double height = scale[2];
 	double radius = scale[0];
 
-	Vec3 normalizedZVector = rotation.asRotationMatrix().getCol(2);
+	Vec3 normalizedZVector = rotation.getZ();
 	Vec3 zVector = normalizedZVector * height;
 
-	double extraX = sqrt(1 - normalizedZVector.x * normalizedZVector.x);
-	double extraY = sqrt(1 - normalizedZVector.y * normalizedZVector.y);
-	double extraZ = sqrt(1 - normalizedZVector.z * normalizedZVector.z);
+	double extraX = std::hypot(normalizedZVector.y, normalizedZVector.z);
+	double extraY = std::hypot(normalizedZVector.x, normalizedZVector.z);
+	double extraZ = std::hypot(normalizedZVector.x, normalizedZVector.y);
 
 	double x = std::abs(zVector.x) + extraX * radius;
 	double y = std::abs(zVector.y) + extraY * radius;

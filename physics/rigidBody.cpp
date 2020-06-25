@@ -142,9 +142,9 @@ void RigidBody::setCFrameOfPart(Part* part, const GlobalCFrame& newCFrame) {
 }
 
 void RigidBody::translate(const Vec3Fix& translation) {
-	mainPart->cframe.translate(translation);
+	mainPart->cframe += translation;
 	for(AttachedPart& atPart : parts) {
-		atPart.part->cframe.translate(translation);
+		atPart.part->cframe += translation;
 	}
 }
 
@@ -152,7 +152,7 @@ void RigidBody::rotateAroundLocalPoint(const Vec3& localPoint, const Rotation& r
 	Vec3 relPoint = getCFrame().localToRelative(localPoint);
 	Vec3 relativeRotationOffset = rotation * relPoint - relPoint;
 	mainPart->cframe.rotate(rotation);
-	mainPart->cframe.translate(-relativeRotationOffset);
+	mainPart->cframe -= relativeRotationOffset;
 	for(AttachedPart& atPart : parts) {
 		atPart.part->cframe = mainPart->cframe.localToGlobal(atPart.attachment);
 	}

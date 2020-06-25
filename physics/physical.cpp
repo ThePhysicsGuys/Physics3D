@@ -672,7 +672,7 @@ void MotorizedPhysical::update(double deltaT) {
 
 	
 
-	Vec3 movementOfCenterOfMass = motionOfCenterOfMass.getVelocity() * deltaT + accel * deltaT * deltaT / 2 - getCFrame().localToRelative(deltaCOM);
+	Vec3 movementOfCenterOfMass = motionOfCenterOfMass.getVelocity() * deltaT + accel * deltaT * deltaT * 0.5 - getCFrame().localToRelative(deltaCOM);
 
 	rotateAroundCenterOfMassUnsafe(Rotation::fromRotationVec(motionOfCenterOfMass.getAngularVelocity() * deltaT));
 	translateUnsafeRecursive(movementOfCenterOfMass);

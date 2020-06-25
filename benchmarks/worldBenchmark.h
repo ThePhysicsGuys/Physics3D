@@ -6,7 +6,7 @@
 static const PartProperties basicProperties{1.0, 0.7, 0.5};
 class WorldBenchmark : public Benchmark {
 protected:
-	World<Part> world;
+	WorldPrototype world;
 	int tickCount;
 
 public:

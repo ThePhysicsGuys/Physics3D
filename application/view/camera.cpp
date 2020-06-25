@@ -130,7 +130,7 @@ void Camera::move(Screen& screen, double dx, double dy, double dz, bool leftDrag
 
 	translation *= currentVelocity;
 
-	cframe.translate(translation);
+	cframe += translation;
 
 	// Accelerate camera movement
 	if (accelerating)
