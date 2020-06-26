@@ -309,9 +309,9 @@ Matrix<T, 4, 4> rotate(const Matrix<T, 4, 4>&, T angle, T x, T y, T z);
 
 template<typename T>
 Matrix<T, 4, 4> translate(const Matrix<T, 4, 4> & mat, T x, T y, T z) {
-	Matrix<T, 1, 4> r{ x, y, z, 1.0 };
-	Matrix<T, 1, 4> rr = mat * r;
-	return joinHorizontal(mat.template getSubMatrix<3, 4>(0, 0), rr);
+	Matrix<T, 4, 1> r{ x, y, z, 1.0 };
+	Matrix<T, 4, 1> rr = mat * r;
+	return joinHorizontal(mat.template getSubMatrix<4, 3>(0, 0), rr);
 }
 
 template<typename T>

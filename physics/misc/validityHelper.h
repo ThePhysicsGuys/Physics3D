@@ -16,7 +16,7 @@ inline bool isVecValid(const Vector<T, Size>& vec) {
 }
 
 template<typename T, size_t Width, size_t Height>
-inline bool isMatValid(const Matrix<T, Width, Height>& mat) {
+inline bool isMatValid(const Matrix<T, Height, Width>& mat) {
 	for(size_t row = 0; row < Height; row++) {
 		for(size_t col = 0; col < Width; col++) {
 			if(!std::isfinite(mat[row][col])) return false;

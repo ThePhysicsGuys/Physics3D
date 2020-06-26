@@ -121,8 +121,8 @@ public:
 		return data[width * row + col];
 	}
 
-	template<size_t Width, size_t Height>
-	void setSubMatrix(size_t topLeftRow, size_t topLeftCol, const Matrix<T, Width, Height>& matrix) {
+	template<size_t Height, size_t Width>
+	void setSubMatrix(size_t topLeftRow, size_t topLeftCol, const Matrix<T, Height, Width>& matrix) {
 		for (size_t row = 0; row < Height; row++) {
 			for (size_t col = 0; col < Width; col++) {
 				this->get(row + topLeftRow, col + topLeftCol) = matrix(row, col);

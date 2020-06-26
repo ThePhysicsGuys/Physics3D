@@ -15,11 +15,11 @@ Matrix<T, 4, 4> rotate(const Matrix<T, 4, 4>& mat, T angle, T x, T y, T z) {
 		z * x * C - y * s,		z * y * C + x * s,		z * z * C + c
 	};
 
-	Matrix<T, 3, 4> leftSide = mat.template getSubMatrix<3, 4>(0, 0);
+	Matrix<T, 4, 3> leftSide = mat.template getSubMatrix<4, 3>(0, 0);
 
-	Matrix<T, 3, 4> rotated = leftSide * rotator;
+	Matrix<T, 4, 3> rotated = leftSide * rotator;
 
-	Matrix<T, 1, 4> translation = mat.template getSubMatrix<1, 4>(0, 3);
+	Matrix<T, 4, 1> translation = mat.template getSubMatrix<4, 1>(0, 3);
 
 	return joinHorizontal(rotated, translation);
 }

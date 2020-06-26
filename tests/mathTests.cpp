@@ -21,7 +21,7 @@
 #define ASSERT(condition) ASSERT_TOLERANT(condition, 0.00000001)
 
 TEST_CASE(subMatrixOperations) {
-	Matrix<int, 3, 5> mat{
+	Matrix<int, 5, 3> mat{
 		5,7,9,
 		6,9,2,
 		3,9,5,
@@ -29,20 +29,20 @@ TEST_CASE(subMatrixOperations) {
 		3,8,1
 	};
 
-	ASSERT((mat.getSubMatrix<2, 3>(1, 0)) == (Matrix<int, 2, 3>{
+	ASSERT((mat.getSubMatrix<3, 2>(1, 0)) == (Matrix<int, 3, 2>{
 		6, 9,
 		3, 9,
 		3, 8
 	}));
 
-	ASSERT((mat.withoutRow(2)) == (Matrix<int, 3, 4>{
+	ASSERT((mat.withoutRow(2)) == (Matrix<int, 4, 3>{
 		5, 7, 9,
 		6, 9, 2,
 		3, 8, 4,
 		3, 8, 1
 	}));
 
-	ASSERT((mat.withoutCol(1)) == (Matrix<int, 2, 5>{
+	ASSERT((mat.withoutCol(1)) == (Matrix<int, 5, 2>{
 		5, 9,
 		6, 2,
 		3, 5,

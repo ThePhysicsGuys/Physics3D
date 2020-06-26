@@ -63,7 +63,7 @@ bool tolerantEquals(const LargeVector<Num1>& first, const LargeVector<Num2>& sec
 	return true;
 }
 template<typename Num1, typename Num2, typename Tol, size_t Width, size_t Height>
-bool tolerantEquals(const Matrix<Num1, Width, Height>& first, const Matrix<Num2, Width, Height>& second, Tol tolerance) {
+bool tolerantEquals(const Matrix<Num1, Height, Width>& first, const Matrix<Num2, Height, Width>& second, Tol tolerance) {
 	for (size_t row = 0; row < Height; row++)
 		for (size_t col = 0; col < Width; col++)
 			if (!tolerantEquals(first(row, col), second(row, col), tolerance))

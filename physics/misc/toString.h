@@ -52,7 +52,7 @@ inline std::ostream& operator<<(std::ostream& os, const Position& position) {
 }
 
 template<typename N, size_t Width, size_t Height>
-inline std::ostream& operator<<(std::ostream& os, const Matrix<N, Width, Height>& matrix) {
+inline std::ostream& operator<<(std::ostream& os, const Matrix<N, Height, Width>& matrix) {
 	os << "(";
 
 	for(size_t row = 0; row < Height; row++) {
@@ -94,7 +94,7 @@ inline std::ostream& operator<<(std::ostream& os, const DiagonalMatrix<N, Size>&
 }
 
 template<typename N, size_t Width, size_t Height>
-inline std::string str(const Matrix<N, Width, Height>& matrix) {
+inline std::string str(const Matrix<N, Height, Width>& matrix) {
 	std::stringstream ss;
 	ss.precision(4);
 	ss << matrix;

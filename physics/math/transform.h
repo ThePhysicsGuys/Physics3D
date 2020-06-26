@@ -105,7 +105,7 @@ public:
 
 template<typename T>
 TransformTemplate<T> Mat4ToTransform(const Matrix<T, 4, 4>& mat) {
-	return TransformTemplate<T>(toVector(mat.getSubMatrix<1, 3>(0, 3)), mat.getSubMatrix<3, 3>(0, 0));
+	return TransformTemplate<T>(toVector(mat.getSubMatrix<3, 1>(0, 3)), mat.getSubMatrix<3, 3>(0, 0));
 	assert(mat[3][0] == 0.0);
 	assert(mat[3][1] == 0.0);
 	assert(mat[3][2] == 0.0);
