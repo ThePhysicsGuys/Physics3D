@@ -118,9 +118,11 @@ void DebugOverlay::onRender() {
 			renderTreeStructure(screen->world->terrainTree, Vec3f(0, 0, 1), Vec2f(0.4f, 0.95f), 0.7f, screen->selectedPart);
 		});
 
-		fpsSlidingChart.add("Fps 1", Graphics::graphicsMeasure.getAvgTPS());
+		/*fpsSlidingChart.add("Fps 1", Graphics::graphicsMeasure.getAvgTPS());
 		fpsSlidingChart.add("Fps 2", physicsMeasure.getAvgTPS());
-		fpsSlidingChart.render();
+		fpsSlidingChart.render();*/
+
+		Path::batch->pushCommand(0); // if this is not here then the trees won't render properly if fpsSlidingChart.render is commented for some reason
 	}
 	
 	GUI::batch->submit();

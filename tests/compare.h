@@ -66,7 +66,7 @@ template<typename Num1, typename Num2, typename Tol, size_t Width, size_t Height
 bool tolerantEquals(const Matrix<Num1, Width, Height>& first, const Matrix<Num2, Width, Height>& second, Tol tolerance) {
 	for (size_t row = 0; row < Height; row++)
 		for (size_t col = 0; col < Width; col++)
-			if (!tolerantEquals(first[row][col], second[row][col], tolerance))
+			if (!tolerantEquals(first(row, col), second(row, col), tolerance))
 				return false;
 	
 	return true;
@@ -76,7 +76,7 @@ template<typename Num1, typename Num2, typename Tol, size_t Size>
 bool tolerantEquals(const SymmetricMatrix<Num1, Size>& first, const SymmetricMatrix<Num2, Size>& second, Tol tolerance) {
 	for (size_t row = 0; row < Size; row++)
 		for (size_t col = 0; col < Size; col++)
-			if (!tolerantEquals(first[row][col], second[row][col], tolerance))
+			if (!tolerantEquals(first(row, col), second(row, col), tolerance))
 				return false;
 
 	return true;

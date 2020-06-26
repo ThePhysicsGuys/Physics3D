@@ -3,14 +3,6 @@
 #include <cmath>
 
 template<typename N>
-N get(Matrix<N, 3, 3>& copy, int row, int col) {
-	return copy[row][col];
-}
-template<typename N>
-void set(Matrix<N, 3, 3>& copy, int row, int col, N value) {
-	copy[row][col] = value;
-}
-template<typename N>
 void update(EigenValues<N, 3>& e, bool* changed, int k, N t) {
 	N y = e[k];
 	e[k] = y + t;
@@ -18,17 +10,17 @@ void update(EigenValues<N, 3>& e, bool* changed, int k, N t) {
 }
 template<typename N>
 void rotateEigen(Matrix<N, 3, 3>& copy, int k, int l, int i, int j, N c, N s) {
-	N SKL = get(copy, k, l);
-	N SIJ = get(copy, i, j);
-	set(copy, k, l, c * SKL - s * SIJ);
-	set(copy, i, j, s * SKL + c * SIJ);
+	N SKL = copy(k, l);
+	N SIJ = copy(i, j);
+	copy(k, l) = c * SKL - s * SIJ;
+	copy(i, j) = s * SKL + c * SIJ;
 }
 
 EigenSet<double, 3> getEigenDecomposition(const SymmetricMat3& sm) {
 
 	Mat3 copy(sm);
 
-	EigenValues<double, 3> eigenValues{sm[0][0],sm[1][1],sm[2][2]};
+	EigenValues<double, 3> eigenValues{sm(0, 0),sm(1, 1),sm(2, 2)};
 	Mat3 eigenVectors = Mat3::IDENTITY();
 
 	bool changed[3]{true, true, true};
@@ -41,9 +33,9 @@ EigenSet<double, 3> getEigenDecomposition(const SymmetricMat3& sm) {
 		1,2
 	};
 	while(changed[0] || changed[1] || changed[2]) {
-		double top = std::abs(get(copy, 0, 1));
-		double topRight = std::abs(get(copy, 0, 2));
-		double right = std::abs(get(copy, 1, 2));
+		double top = std::abs(copy(0, 1));
+		double topRight = std::abs(copy(0, 2));
+		double right = std::abs(copy(1, 2));
 
 		int k, l;
 
@@ -56,7 +48,7 @@ EigenSet<double, 3> getEigenDecomposition(const SymmetricMat3& sm) {
 			tieBreaker = (tieBreaker + 1) % 3;
 		}
 
-		double p = get(copy, k, l);
+		double p = copy(k, l);
 
 		if(p == 0) {
 			return EigenSet<double, 3>(eigenValues, eigenVectors);
@@ -72,17 +64,19 @@ EigenSet<double, 3> getEigenDecomposition(const SymmetricMat3& sm) {
 
 		if(y < 0) { s = -s; t = -t; };
 
-		set(copy, k, l, 0.0); update(eigenValues, changed, k, -t); update(eigenValues, changed, l, t);
+		copy(k, l) =  0.0; 
+		update(eigenValues, changed, k, -t); 
+		update(eigenValues, changed, l, t);
 
 		for(int i = 0; i <= k - 1; i++) rotateEigen(copy, i, k, i, l, c, s);
 		for(int i = k + 1; i <= l - 1; i++) rotateEigen(copy, k, i, i, l, c, s);
 		for(int i = l + 1; i < 3; i++) rotateEigen(copy, k, i, l, i, c, s);
 
 		for(int i = 0; i < 3; i++) {
-			double EIK = get(eigenVectors, i, k);
-			double EIL = get(eigenVectors, i, l);
-			set(eigenVectors, i, k, c * EIK - s * EIL);
-			set(eigenVectors, i, l, s * EIK + c * EIL);
+			double EIK = eigenVectors(i, k);
+			double EIL = eigenVectors(i, l);
+			eigenVectors(i, k) = c * EIK - s * EIL;
+			eigenVectors(i, l) = s * EIK + c * EIL;
 		}
 	}
 	return EigenSet<double, 3>(eigenValues, eigenVectors);

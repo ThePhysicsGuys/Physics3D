@@ -37,9 +37,9 @@ template<typename T>
 SymmetricMatrix<T, 3> transformBasis(const SymmetricMatrix<T, 3> & sm, const Matrix<T, 3, 3> & rotation) {
 	Matrix<T, 3, 3> r = rotation * sm * ~rotation;
 	return SymmetricMatrix<T, 3>{
-		r[0][0],
-		r[1][0], r[1][1],
-		r[2][0], r[2][1], r[2][2]
+		r(0, 0),
+		r(1, 0), r(1, 1),
+		r(2, 0), r(2, 1), r(2, 2)
 	};
 }
 
@@ -47,9 +47,9 @@ template<typename T>
 SymmetricMatrix<T, 3> transformBasis(const DiagonalMatrix<T, 3> & dm, const Matrix<T, 3, 3> & rotation) {
 	Matrix<T, 3, 3> r = rotation * dm * ~rotation;
 	return SymmetricMatrix<T, 3>{
-		r[0][0],
-		r[1][0], r[1][1],
-		r[2][0], r[2][1], r[2][2]
+		r(0, 0),
+		r(1, 0), r(1, 1),
+		r(2, 0), r(2, 1), r(2, 2)
 	};
 }
 
@@ -57,9 +57,9 @@ template<typename T>
 SymmetricMatrix<T, 3> multiplyLeftRight(const SymmetricMatrix<T, 3> & sm, const Matrix<T, 3, 3> & otherMat) {
 	Matrix<T, 3, 3> r = otherMat * sm * otherMat.transpose();
 	return SymmetricMatrix<T, 3>{
-		r[0][0],
-		r[1][0], r[1][1],
-		r[2][0], r[2][1], r[2][2]
+		r(0, 0),
+		r(1, 0), r(1, 1),
+		r(2, 0), r(2, 1), r(2, 2)
 	};
 }
 
@@ -200,9 +200,9 @@ Quaternion<T> rotationQuaternionFromRotationVec(Vector<T, 3> rotVec) {
 template<typename T>
 Vector<T, 3> rotationVectorFromRotationMatrix(const RotationMatrix<T, 3>& m) {
 	assert(isValidRotationMatrix(m));
-	Vector<T, 3> axisOfRotation(m[2][1] - m[1][2], m[0][2] - m[2][0], m[1][0] - m[0][1]);
+	Vector<T, 3> axisOfRotation(m(2, 1) - m(1, 2), m(0, 2) - m(2, 0), m(1, 0) - m(0, 1));
 	if(axisOfRotation[0] == 0 && axisOfRotation[1] == 0 && axisOfRotation[2] == 0) return Vector<T, 3>(0, 0, 0);
-	T trace = m[0][0] + m[1][1] + m[2][2];
+	T trace = m(0, 0) + m(1, 1) + m(2, 2);
 
 	T angle = std::acos((trace - 1) / 2);
 
@@ -246,31 +246,31 @@ Quaternion<T> rotationQuaternionFromRotationMatrix(const Matrix<T, 3, 3>& a) {
 	assert(isValidRotationMatrix(a));
 
 	Quaternion<T> q;
-	T trace = a[0][0] + a[1][1] + a[2][2];
+	T trace = a(0, 0) + a(1, 1) + a(2, 2);
 	if(trace > 0) {
 		T s = T(0.5) / std::sqrt(trace + 1);
 		q.w = T(0.25) / s;
-		q.i = (a[2][1] - a[1][2]) * s;
-		q.j = (a[0][2] - a[2][0]) * s;
-		q.k = (a[1][0] - a[0][1]) * s;
+		q.i = (a(2, 1) - a(1, 2)) * s;
+		q.j = (a(0, 2) - a(2, 0)) * s;
+		q.k = (a(1, 0) - a(0, 1)) * s;
 	} else {
-		if ( a[0][0] > a[1][1] && a[0][0] > a[2][2] ) {
-			T s = T(2.0) * std::sqrt(1 + a[0][0] - a[1][1] - a[2][2]);
-			q.w = (a[2][1] - a[1][2]) / s;
+		if ( a(0, 0) > a(1, 1) && a(0, 0) > a(2, 2) ) {
+			T s = T(2.0) * std::sqrt(1 + a(0, 0) - a(1, 1) - a(2, 2));
+			q.w = (a(2, 1) - a(1, 2)) / s;
 			q.i = T(0.25) * s;
-			q.j = (a[0][1] + a[1][0]) / s;
-			q.k = (a[0][2] + a[2][0]) / s;
-		} else if (a[1][1] > a[2][2]) {
-			T s = T(2.0) * std::sqrt(1 + a[1][1] - a[0][0] - a[2][2]);
-			q.w = (a[0][2] - a[2][0]) / s;
-			q.i = (a[0][1] + a[1][0]) / s;
+			q.j = (a(0, 1) + a(1, 0)) / s;
+			q.k = (a(0, 2) + a(2, 0)) / s;
+		} else if (a(1, 1) > a(2, 2)) {
+			T s = T(2.0) * std::sqrt(1 + a(1, 1) - a(0, 0) - a(2, 2));
+			q.w = (a(0, 2) - a(2, 0)) / s;
+			q.i = (a(0, 1) + a(1, 0)) / s;
 			q.j = T(0.25) * s;
-			q.k = (a[1][2] + a[2][1]) / s;
+			q.k = (a(1, 2) + a(2, 1)) / s;
 		} else {
-			T s = T(2.0) * std::sqrt(1 + a[2][2] - a[0][0] - a[1][1]);
-			q.w = (a[1][0] - a[0][1]) / s;
-			q.i = (a[0][2] + a[2][0]) / s;
-			q.j = (a[1][2] + a[2][1]) / s;
+			T s = T(2.0) * std::sqrt(1 + a(2, 2) - a(0, 0) - a(1, 1));
+			q.w = (a(1, 0) - a(0, 1)) / s;
+			q.i = (a(0, 2) + a(2, 0)) / s;
+			q.j = (a(1, 2) + a(2, 1)) / s;
 			q.k = T(0.25) * s;
 		}
 	}
@@ -320,11 +320,11 @@ Matrix<T, 4, 4> scale(const Matrix<T, 4, 4> & mat, const Vector<T, 3> & scaleVec
 
 	for (int i = 0; i < 3; i++) {
 		for (int j = 0; j < 4; j++) {
-			result[j][i] = mat[j][i] * scaleVec[i];
+			result(j, i) = mat(j, i) * scaleVec[i];
 		}
 	}
 	for (int j = 0; j < 4; j++) {
-		result[j][3] = mat[j][3];
+		result(j, 3) = mat(j, 3);
 	}
 
 	return result;

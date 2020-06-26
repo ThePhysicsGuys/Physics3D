@@ -48,9 +48,9 @@ double CubeClass::getIntersectionDistance(Vec3 origin, Vec3 direction) const {
 
 BoundingBox CubeClass::getBounds(const Rotation& rotation, const DiagonalMat3& scale) const {
 	Mat3 referenceFrame = rotation.asRotationMatrix() * scale;
-	double x = std::abs(referenceFrame[0][0]) + std::abs(referenceFrame[0][1]) + std::abs(referenceFrame[0][2]);
-	double y = std::abs(referenceFrame[1][0]) + std::abs(referenceFrame[1][1]) + std::abs(referenceFrame[1][2]);
-	double z = std::abs(referenceFrame[2][0]) + std::abs(referenceFrame[2][1]) + std::abs(referenceFrame[2][2]);
+	double x = std::abs(referenceFrame(0, 0)) + std::abs(referenceFrame(0, 1)) + std::abs(referenceFrame(0, 2));
+	double y = std::abs(referenceFrame(1, 0)) + std::abs(referenceFrame(1, 1)) + std::abs(referenceFrame(1, 2));
+	double z = std::abs(referenceFrame(2, 0)) + std::abs(referenceFrame(2, 1)) + std::abs(referenceFrame(2, 2));
 	BoundingBox result{-x,-y,-z,x,y,z};
 	return result;
 }

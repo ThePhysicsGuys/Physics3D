@@ -115,7 +115,7 @@ void SkyboxLayer::onRender() {
 		Shaders::skyShader.setUniform("starBrightness", starBrightness);
 		Shaders::skyShader.setUniform("skyColor", skyColor);
 		Shaders::skyShader.setUniform("horizonColor", horizonColor);
-		float scroll = (float) (atan2(screen->camera.viewMatrix[1][0], screen->camera.viewMatrix[0][0]) / screen->camera.fov / 2.0);
+		float scroll = (float) (std::atan2(screen->camera.viewMatrix(1, 0), screen->camera.viewMatrix(0, 0)) / screen->camera.fov / 2.0);
 		ImGui::Text("Scroll: %f", scroll);
 
 		Shaders::skyShader.setUniform("scroll", scroll);

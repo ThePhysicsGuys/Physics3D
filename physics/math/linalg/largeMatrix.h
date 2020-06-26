@@ -125,7 +125,7 @@ public:
 	void setSubMatrix(size_t topLeftRow, size_t topLeftCol, const Matrix<T, Width, Height>& matrix) {
 		for (size_t row = 0; row < Height; row++) {
 			for (size_t col = 0; col < Width; col++) {
-				this->get(row + topLeftRow, col + topLeftCol) = matrix[row][col];
+				this->get(row + topLeftRow, col + topLeftCol) = matrix(row, col);
 			}
 		}
 	}
@@ -133,7 +133,7 @@ public:
 	void setSubMatrix(size_t topLeftRow, size_t topLeftCol, const LargeMatrix& matrix) {
 		for (size_t row = 0; row < matrix.height; row++) {
 			for (size_t col = 0; col < matrix.width; col++) {
-				this->get(row + topLeftRow, col + topLeftCol) = matrix[row][col];
+				this->get(row + topLeftRow, col + topLeftCol) = matrix(row, col);
 			}
 		}
 	}

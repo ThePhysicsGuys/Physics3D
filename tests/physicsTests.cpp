@@ -108,7 +108,7 @@ TEST_CASE(momentToAngularVelocity) {
 		p.update(0.05);
 	}
 
-	ASSERT(p.getMotion().getAngularVelocity() == moment * (50.0 * 0.05) * p.momentResponse[0][0]);
+	ASSERT(p.getMotion().getAngularVelocity() == moment * (50.0 * 0.05) * p.momentResponse(0, 0));
 }
 
 TEST_CASE(rotationImpulse) {

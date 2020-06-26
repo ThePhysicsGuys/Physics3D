@@ -19,7 +19,7 @@ template<typename T>
 inline std::ostream& operator<<(std::ostream& os, const LargeMatrix<T>& matrix) {
 	for(int i = 0; i < matrix.height; i++) {
 		for(int j = 0; j < matrix.width; j++) {
-			os << matrix[i][j] << '\t';
+			os << matrix(i, j) << '\t';
 		}
 		os << '\n';
 	}
@@ -57,9 +57,9 @@ inline std::ostream& operator<<(std::ostream& os, const Matrix<N, Width, Height>
 
 	for(size_t row = 0; row < Height; row++) {
 		for(size_t col = 0; col < Width - 1; col++) {
-			os << matrix[row][col] << ", ";
+			os << matrix(row, col) << ", ";
 		}
-		os << matrix[row][Width - 1] << "; ";
+		os << matrix(row, Width - 1) << "; ";
 	}
 	os << ")";
 
@@ -72,9 +72,9 @@ inline std::ostream& operator<<(std::ostream& os, const SymmetricMatrix<N, Size>
 
 	for(size_t row = 0; row < Size; row++) {
 		for(size_t col = 0; col < Size - 1; col++) {
-			os << matrix[row][col] << ", ";
+			os << matrix(row, col) << ", ";
 		}
-		os << matrix[row][Size - 1] << "; ";
+		os << matrix(row, Size - 1) << "; ";
 	}
 	os << ")";
 
