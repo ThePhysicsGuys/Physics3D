@@ -9,6 +9,7 @@
 
 #include "datastructures/unorderedVector.h"
 #include "datastructures/iteratorEnd.h"
+#include "datastructures/monotonicTree.h"
 
 #include "part.h"
 #include "rigidBody.h"
@@ -22,6 +23,9 @@ class WorldPrototype;
 
 class ConnectedPhysical;
 class MotorizedPhysical;
+
+class InternalMotionTree;
+class NormalizedInternalMotionTree;
 
 class Physical {
 	void makeMainPart(AttachedPart& newMainPart);
@@ -48,13 +52,6 @@ protected:
 	void detachFromRigidBody(AttachedPart&& part);
 
 	void detachPartAssumingMultipleParts(Part* part);
-	
-	/*
-		Returns a representation for the motion of the center of mass within this physical
-
-		To get the actual motion compute (result.second / result.first)
-	*/
-	std::pair<double, TranslationalMotion> getMotionOfCenterOfMassInternally(const RelativeMotion& totalAccumulatedMotion) const;
 
 	// expects a function of type void(const Part&)
 	template<typename Func>
@@ -146,6 +143,7 @@ public:
 	void removePart(Part* part);
 	void attachPart(Part* part, HardConstraint* constraint, const CFrame& attachToThis, const CFrame& attachToThat);
 
+	size_t getNumberOfPhysicalsInThisAndChildren() const;
 	size_t getNumberOfPartsInThisAndChildren() const;
 
 	void notifyPartPropertiesChanged(Part* part);
@@ -240,16 +238,62 @@ public:
 	*/
 	Motion getMotionOfCenterOfMass() const;
 
-	TranslationalMotion getInternalMotionOfCenterOfMass() const;
-
-	SymmetricMat3 getRotationalInertia() const;
-	FullTaylor<SymmetricMat3> getRotationalInertiaTaylorExpansion() const;
-
 	Position getCenterOfMass() const;
 	GlobalCFrame getCenterOfMassCFrame() const;
 
 	Vec3 getTotalImpulse() const;
 	Vec3 getTotalAngularMomentum() const;
+
+	// expects a function of the form T(const T& parentValue, const ConnectedPhysical& conPhys)
+	template<typename T, typename F>
+	MonotonicTree<T> constructMonotonicTree(const T& rootNodeValue, F valueGenerator) const {
+		std::size_t treeSize = this->getNumberOfPhysicalsInThisAndChildren();
+		MonotonicTreeBuilder<T> builder(treeSize);
+		MonotonicTreeNode<T>& rootNode = builder.getRootNode();
+		rootNode.value = rootNodeValue;
+
+		struct NestedRecurse {
+			static void recurse(MonotonicTreeBuilder<T>& builder, MonotonicTreeNode<T>& currentNode, const Physical& currentPhys, F valueGenerator) {
+				std::size_t childCount = currentPhys.childPhysicals.size();
+				if(childCount > 0) {
+					MonotonicTreeNode<RelativeMotion>* childNodes = builder.alloc(childCount);
+					currentNode.children = childNodes;
+					for(std::size_t i = 0; i < childCount; i++) {
+						const ConnectedPhysical& conPhys = currentPhys.childPhysicals[i];
+						MonotonicTreeNode<RelativeMotion>& currentChildNode = childNodes[i];
+						currentChildNode.value = valueGenerator(currentNode.value, conPhys);
+						recurse(builder, currentChildNode, conPhys, valueGenerator);
+					}
+				} else {
+					currentNode.children = nullptr;
+				}
+			}
+		};
+		
+		NestedRecurse::recurse(builder, rootNode, *this, valueGenerator);
+		return MonotonicTree<T>(std::move(builder));
+	}
+
+	// connectedPhysFunc is of the form void(const T& currentValue, const ConnectedPhysical& currentPhysical)
+	template<typename T, typename F>
+	void mutuallyRecurse(const MonotonicTree<T>& tree, F connectedPhysFunc) const {
+		struct NestedRecurse {
+			static void recurse(const MonotonicTreeNode<T>& currentNode, const Physical& currentPhys, F func) {
+				std::size_t childCount = currentPhys.childPhysicals.size();
+				for(std::size_t i = 0; i < childCount; i++) {
+					const ConnectedPhysical& conPhys = currentPhys.childPhysicals[i];
+					MonotonicTreeNode<RelativeMotion>& currentChildNode = currentNode.children[i];
+					func(currentChildNode, conPhys);
+
+					recurse(currentChildNode, conPhys, func);
+				}
+			}
+		};
+		
+		NestedRecurse::recurse(tree.getRootNode(), *this, connectedPhysFunc);
+	}
+	InternalMotionTree getInternalRelativeMotionTree() const;
+	NormalizedInternalMotionTree getNormalizedInternalRelativeMotionTree() const;
 
 	void ensureWorld(WorldPrototype* world);
 
@@ -362,3 +406,54 @@ void Physical::forEachHardConstraintInChildren(const Func& func) {
 		conPhys.forEachHardConstraintInChildren(func);
 	}
 }
+
+// used to precompute all the internal motions in the MotorizedPhysical
+class InternalMotionTree {
+	const MotorizedPhysical* motorPhys;
+	MonotonicTree<RelativeMotion> relativeMotionTree;
+public:
+
+	inline InternalMotionTree(const MotorizedPhysical* motorPhys, MonotonicTree<RelativeMotion>&& relativeMotionTree) : motorPhys(motorPhys), relativeMotionTree(std::move(relativeMotionTree)) {}
+
+	// connectedPhysFunc is of the form void(const T& currentValue, const ConnectedPhysical& currentPhysical)
+	template<typename F>
+	void recurse(F connectedPhysFunc) const {
+		motorPhys->mutuallyRecurse(relativeMotionTree, connectedPhysFunc);
+	}
+
+	// returns the total mass, the center of mass relative to the MotorizedPhysical's CFrame, and the motion of the center of mass in that CFrame
+	std::tuple<double, Vec3, TranslationalMotion> getInternalMotionOfCenterOfMass() const;
+	// normalizes this motion tree relative to this->getInternalMotionOfCenterOfMass()
+	NormalizedInternalMotionTree normalizeCenterOfMass() &&;
+};
+
+// Same as InternalMotionTree, but relative to the position and speed of the center of mass
+class NormalizedInternalMotionTree {
+	friend class InternalMotionTree;
+
+	const MotorizedPhysical* motorPhys;
+	MonotonicTree<RelativeMotion> relativeMotionTree;
+public:
+	double totalMass;
+	Vec3 centerOfMass;
+	TranslationalMotion motionOfCenterOfMass;
+private:
+	inline NormalizedInternalMotionTree(const MotorizedPhysical* motorPhys, MonotonicTree<RelativeMotion>&& relativeMotionTree, double totalMass, Vec3 centerOfMass, TranslationalMotion motionOfCenterOfMass) : 
+		motorPhys(motorPhys), 
+		relativeMotionTree(std::move(relativeMotionTree)),
+		totalMass(totalMass),
+		centerOfMass(centerOfMass),
+		motionOfCenterOfMass(motionOfCenterOfMass) {}
+
+public:
+
+	// connectedPhysFunc is of the form void(const T& currentValue, const ConnectedPhysical& currentPhysical)
+	template<typename F>
+	void recurse(F connectedPhysFunc) const {
+		motorPhys->mutuallyRecurse(relativeMotionTree, connectedPhysFunc);
+	}
+
+	SymmetricMat3 getInertia() const;
+	FullTaylor<SymmetricMat3> getInertiaDerivatives() const;
+};
+

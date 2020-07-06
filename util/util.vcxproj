@@ -238,20 +238,19 @@
   <ItemGroup>
     <ClCompile Include="log.cpp" />
     <ClCompile Include="fileUtils.cpp" />
-    <ClCompile Include="terminalColor.cpp" />
     <ClCompile Include="properties.cpp" />
     <ClCompile Include="resource\resource.cpp" />
     <ClCompile Include="resource\resourceLoader.cpp" />
     <ClCompile Include="resource\resourceManager.cpp" />
     <ClCompile Include="serializeBasicTypes.cpp" />
     <ClCompile Include="stringUtil.cpp" />
+    <ClCompile Include="terminalColor.cpp" />
     <ClCompile Include="valueCycle.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dynamicSerialize.h" />
     <ClInclude Include="log.h" />
     <ClInclude Include="fileUtils.h" />
-    <ClCompile Include="terminalColor.h" />
     <ClInclude Include="math\mat3.h" />
     <ClInclude Include="math\mat4.h" />
     <ClInclude Include="math\rot3.h" />
@@ -263,6 +262,7 @@
     <ClInclude Include="serializeBasicTypes.h" />
     <ClInclude Include="sharedObjectSerializer.h" />
     <ClInclude Include="stringUtil.h" />
+    <ClInclude Include="terminalColor.h" />
     <ClInclude Include="tracker.h" />
     <ClInclude Include="valueCycle.h" />
   </ItemGroup>

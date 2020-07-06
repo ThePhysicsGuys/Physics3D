@@ -34,11 +34,24 @@ inline TranslationalMotion& operator+=(TranslationalMotion& first, const Transla
 	return first;
 }
 
+inline TranslationalMotion operator-(const TranslationalMotion& first, const TranslationalMotion& second) {
+	return TranslationalMotion(first.translation - second.translation);
+}
+inline TranslationalMotion& operator-=(TranslationalMotion& first, const TranslationalMotion& second) {
+	first.translation -= second.translation;
+	return first;
+}
+
 inline TranslationalMotion operator*(const TranslationalMotion& motion, double factor) {
 	return TranslationalMotion(motion.translation * factor);
 }
 inline TranslationalMotion operator*(double factor, const TranslationalMotion& motion) {
 	return motion * factor;
+}
+
+inline TranslationalMotion& operator*=(TranslationalMotion& motion, double factor) {
+	motion.translation *= factor;
+	return motion;
 }
 
 

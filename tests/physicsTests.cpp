@@ -389,16 +389,16 @@ TEST_CASE(testPhysicalInertiaDerivatives) {
 
 	MotorizedPhysical* motorPhys = mainPart.parent->mainPhysical;
 
-	FullTaylorExpansion<SymmetricMat3, SymmetricMat3, 2> inertiaTaylor = motorPhys->getRotationalInertiaTaylorExpansion();
+	FullTaylorExpansion<SymmetricMat3, SymmetricMat3, 2> inertiaTaylor = motorPhys->getNormalizedInternalRelativeMotionTree().getInertiaDerivatives();
 
 	double deltaT = 0.00001;
 
 	std::array<SymmetricMat3, 3> inertias;
-	inertias[0] = motorPhys->getRotationalInertia();
+	inertias[0] = motorPhys->getNormalizedInternalRelativeMotionTree().getInertia();
 	motorPhys->update(deltaT);
-	inertias[1] = motorPhys->getRotationalInertia();
+	inertias[1] = motorPhys->getNormalizedInternalRelativeMotionTree().getInertia();
 	motorPhys->update(deltaT);
-	inertias[2] = motorPhys->getRotationalInertia();
+	inertias[2] = motorPhys->getNormalizedInternalRelativeMotionTree().getInertia();
 
 	FullTaylorExpansion<SymmetricMat3, SymmetricMat3, 2> estimatedInertiaTaylor = estimateDerivatives(inertias, deltaT);
 

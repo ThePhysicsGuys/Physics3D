@@ -337,9 +337,11 @@ void SerializationSessionPrototype::serializeWorld(const WorldPrototype& world, 
 		virtualSerializePart(p, ostream);
 	}
 
-	::serialize<std::uint32_t>(world.constraints.size(), ostream);
+	assert(world.constraints.size() < std::numeric_limits<uint32_t>::max());
+	::serialize<std::uint32_t>(static_cast<std::uint32_t>(world.constraints.size()), ostream);
 	for(const ConstraintGroup& cg : world.constraints) {
-		::serialize<std::uint32_t>(cg.constraints.size(), ostream);
+		assert(cg.constraints.size() < std::numeric_limits<uint32_t>::max());
+		::serialize<std::uint32_t>(static_cast<std::uint32_t>(cg.constraints.size()), ostream);
 		for(const PhysicalConstraint& c : cg.constraints) {
 			this->serializeConstraintInContext(c, ostream);
 		}

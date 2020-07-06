@@ -14,23 +14,15 @@ inline double fRand(double fMin, double fMax) {
 }
 
 /*
-
-	Returns a Vec3f from the given position
-*/
-inline Vec3f fromPosition(const Position& position) {
-	return Vec3f(position.x, position.y, position.z);
-}
-
-/*
 	Returns the amount of leading zeros 
 */
-inline uint64_t ctz(uint64_t n) {
+inline uint32_t ctz(uint32_t n) {
 #ifdef _MSC_VER
 	unsigned long ret;
-	_BitScanForward(&ret, n);
-	return ret;
+	_BitScanForward(&ret, static_cast<unsigned long>(n));
+	return static_cast<uint32_t>(ret);
 #else
-	return __builtin_ctz(n);
+	return static_cast<uint32_t>(__builtin_ctz(n));
 #endif
 }
 
