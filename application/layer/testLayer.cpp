@@ -22,8 +22,8 @@
 
 namespace Application {
 
-float near = 0.001;
-float far = 100;
+float near = 0.001f;
+float far = 100.0f;
 
 unsigned int TestLayer::depthMap = 0;
 Mat4f TestLayer::lightProjection = ortho(-25.0, 25.0, -25.0, 25.0, near, far);

@@ -79,7 +79,7 @@ void EditTools::onInit() {
 	translateShape = VisualShape::generateSplitNormalsShape(createArrow(0.3f, 0.07f, 0.03f).rotated(Rotationf::Predefined::X_270));
 	translateMesh = new IndexedMesh(translateShape);
 	translateMesh->addUniformBuffer(uniformBuffer, DEFAULT_UNIFORM_BUFFER_LAYOUT);
-	translateCenterShape = VisualShape::generateSmoothNormalsShape(Library::createSphere(0.13, 3));
+	translateCenterShape = VisualShape::generateSmoothNormalsShape(Library::createSphere(0.13f, 3));
 	translateCenterMesh = new IndexedMesh(translateCenterShape);
 
 	// Intersected tool init

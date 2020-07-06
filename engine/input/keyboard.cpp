@@ -342,7 +342,7 @@ namespace Keyboard {
 		try {
 			Key& key = keymap.at(code);
 			return key;
-		} catch (const std::out_of_range& e) {
+		} catch (const std::out_of_range&) {
 			return KEY_UNKNOWN;
 		}
 	}

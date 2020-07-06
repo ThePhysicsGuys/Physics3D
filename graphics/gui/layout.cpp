@@ -110,7 +110,7 @@ Vec2 FlowLayout::resize(Container* container, Vec2 minDimension) {
 	contentHeight += rowHeight;
 
 	if (container->resizing) {
-		container->dimension = Vec2(contentWidth, contentHeight);
+		container->dimension = Vec2f(contentWidth, contentHeight);
 	}
 
 	return container->dimension;

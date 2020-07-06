@@ -34,16 +34,16 @@ void SelectionTool::onRender() {
 	if (getToolStatus() == kActive) {
 		Vec2 a = GUI::map(Vec2(currentRegion.x, currentRegion.y));
 		Vec2 b = GUI::map(handler->getMousePosition());
-		Vec2 position = Vec2f(fmin(a.x, b.x), fmin(a.y, b.y));
-		Vec2 dimension = Vec2f(std::abs(a.x - b.x), std::abs(a.y - b.y));
+		Vec2 position(std::min(a.x, b.x), std::min(a.y, b.y));
+		Vec2 dimension(std::abs(a.x - b.x), std::abs(a.y - b.y));
 		Path::rect(position, dimension);
 	}
 
 	for (const Region& region : regions) {
 		Vec2 a = GUI::map(Vec2(region.x, region.y));
 		Vec2 b = GUI::map(Vec2(region.z, region.w));
-		Vec2 position = Vec2f(fmin(a.x, b.x), fmin(a.y, b.y));
-		Vec2 dimension = Vec2f(std::abs(a.x - b.x), std::abs(a.y - b.y));
+		Vec2 position(std::min(a.x, b.x), std::min(a.y, b.y));
+		Vec2 dimension(std::abs(a.x - b.x), std::abs(a.y - b.y));
 		Path::rect(position, dimension);
 	}
 

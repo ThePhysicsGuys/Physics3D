@@ -163,10 +163,11 @@ void ModelLayer::onRender() {
 				transparentParts.insert({ lengthSquared(Vec3(screen->camera.cframe.position - part.getPosition())), &part });
 			} else {
 				visibleParts.insert({ part.visualData.drawMeshId, &part });
-				maxMeshCount = fmax(maxMeshCount, meshCounter[part.visualData.drawMeshId]++);
-				;
-				if (meshCounter[part.visualData.drawMeshId] > maxMeshCount)
+				maxMeshCount = std::max(maxMeshCount, meshCounter[part.visualData.drawMeshId]++);
+
+				if(meshCounter[part.visualData.drawMeshId] > maxMeshCount) {
 					maxMeshCount = meshCounter[part.visualData.drawMeshId];
+				}
 			}
 		}
 
@@ -179,7 +180,7 @@ void ModelLayer::onRender() {
 		Shaders::instanceShader.bind();
 		for (auto iterator : meshCounter) {
 			int meshID = iterator.first;
-			int meshCount = iterator.second;
+			std::size_t meshCount = iterator.second;
 
 			if (meshID == -1) continue;
 

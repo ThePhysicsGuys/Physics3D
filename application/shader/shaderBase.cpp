@@ -52,8 +52,9 @@ void StandardMeshShaderBase::updateModel(const GlobalCFrame& modelCFrame, const 
 void BasicShaderBase::updateLight(const std::vector<Light*> lights) {
 	bind();
 
-	int size = lights.size();
-	setUniform("lightCount", size);
+	std::size_t size = lights.size();
+	assert(size <= std::numeric_limits<int>::max());
+	setUniform("lightCount", static_cast<int>(size));
 
 	for (int i = 0; i < lights.size(); i++) {
 		std::string uniform;
