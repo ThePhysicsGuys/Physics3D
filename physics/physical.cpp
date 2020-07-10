@@ -211,6 +211,10 @@ void ConnectedPhysical::makeMainPhysical() {
 	OP->refreshPhysicalProperties();
 }
 
+std::size_t ConnectedPhysical::getIndexInParent() const {
+	return &this->parent->childPhysicals[0] - this;
+}
+
 RelativeMotion ConnectedPhysical::getRelativeMotionBetweenParentAndSelf() const {
 	return connectionToParent.getRelativeMotion();
 }
@@ -372,14 +376,46 @@ void Physical::detachFromRigidBody(AttachedPart&& part) {
 	rigidBody.detach(std::move(part));
 }
 
-InternalMotionTree MotorizedPhysical::getInternalRelativeMotionTree() const {
-	MonotonicTree<RelativeMotion> t = this->constructMonotonicTree(RelativeMotion(), [](const RelativeMotion& parentMotion, const ConnectedPhysical& conPhys) {
-		return parentMotion + conPhys.getRelativeMotionBetweenParentAndSelf();
-	});
-	return InternalMotionTree(this, std::move(t));
+static void computeInternalRelativeMotionTree(MonotonicTreeBuilder<RelativeMotion>& builder, MonotonicTreeNode<RelativeMotion>& curNode, const ConnectedPhysical& conPhys, const RelativeMotion& motionOfParent) {
+	RelativeMotion motionOfSelf = motionOfParent + conPhys.getRelativeMotionBetweenParentAndSelf();
+
+	curNode.value = motionOfSelf.extendEnd(conPhys.rigidBody.localCenterOfMass);
+
+	std::size_t size = conPhys.childPhysicals.size();
+	
+	if(size == 0) {
+		curNode.children = nullptr;
+	} else { 
+		curNode.children = builder.alloc(size);
+		for(std::size_t i = 0; i < size; i++) {
+			computeInternalRelativeMotionTree(builder, curNode.children[i], conPhys.childPhysicals[i], motionOfSelf);
+		}
+	}
 }
 
-NormalizedInternalMotionTree MotorizedPhysical::getNormalizedInternalRelativeMotionTree() const {
+InternalMotionTree MotorizedPhysical::getInternalRelativeMotionTree() const {
+	std::size_t totalSizeOfBuilder = this->getNumberOfPhysicalsInThisAndChildren();
+	MonotonicTreeBuilder<RelativeMotion> builder(totalSizeOfBuilder);
+
+	std::size_t size = this->childPhysicals.size();
+	MonotonicTreeNode<RelativeMotion>& rootNode = builder.getRootNode();
+
+	RelativeMotion motionOfSelf;
+	rootNode.value = motionOfSelf.extendEnd(this->rigidBody.localCenterOfMass);
+
+	if(size == 0) {
+		rootNode.children = nullptr;
+	} else {
+		rootNode.children = builder.alloc(size);
+		for(std::size_t i = 0; i < size; i++) {
+			computeInternalRelativeMotionTree(builder, rootNode.children[i], this->childPhysicals[i], motionOfSelf);
+		}
+	}
+
+	return InternalMotionTree(this, MonotonicTree<RelativeMotion>(std::move(builder)));
+}
+
+COMMotionTree MotorizedPhysical::getCOMMotionTree() const {
 	return this->getInternalRelativeMotionTree().normalizeCenterOfMass();
 }
 
@@ -580,7 +616,7 @@ void MotorizedPhysical::translate(const Vec3& translation) {
 }
 
 void MotorizedPhysical::refreshPhysicalProperties() {
-	NormalizedInternalMotionTree cache = this->getNormalizedInternalRelativeMotionTree();
+	COMMotionTree cache = this->getCOMMotionTree();
 
 	this->totalCenterOfMass = cache.centerOfMass;
 	this->totalMass = cache.totalMass;
@@ -824,7 +860,7 @@ Vec3 MotorizedPhysical::getTotalImpulse() const {
 	return this->motionOfCenterOfMass.getVelocity() * this->totalMass;
 }
 Vec3 MotorizedPhysical::getTotalAngularMomentum() const {
-	SymmetricMat3 totalInertia = this->getNormalizedInternalRelativeMotionTree().getInertia();
+	SymmetricMat3 totalInertia = this->getCOMMotionTree().getInertia();
 	return totalInertia * this->motionOfCenterOfMass.getAngularVelocity();
 }
 
@@ -837,7 +873,7 @@ Motion Physical::getMotion() const {
 }
 
 Motion MotorizedPhysical::getMotion() const {
-	NormalizedInternalMotionTree cache = this->getInternalRelativeMotionTree().normalizeCenterOfMass();
+	COMMotionTree cache = this->getInternalRelativeMotionTree().normalizeCenterOfMass();
 
 	GlobalCFrame cf = this->getCFrame();
 	TranslationalMotion motionOfCom = localToGlobal(cf.getRotation(), cache.motionOfCenterOfMass);
@@ -892,13 +928,14 @@ void Physical::setMainPhysicalRecursive(MotorizedPhysical* newMainPhysical) {
 }
 
 std::tuple<double, Vec3, TranslationalMotion> InternalMotionTree::getInternalMotionOfCenterOfMass() const {
-	TranslationalMotion totalMotion;
-	Vec3 totalCenterOfMass = motorPhys->rigidBody.localCenterOfMass * motorPhys->rigidBody.mass;
+	const MonotonicTreeNode<RelativeMotion>& rootNode = this->relativeMotionTree.getRootNode();
+	TranslationalMotion totalMotion = rootNode.value.relativeMotion.translation * motorPhys->rigidBody.mass;
+	Vec3 totalCenterOfMass = rootNode.value.locationOfRelativeMotion.getPosition() * motorPhys->rigidBody.mass;
 	double totalMass = motorPhys->rigidBody.mass;
 	motorPhys->mutuallyRecurse(relativeMotionTree, [&totalMass, &totalCenterOfMass, &totalMotion](const MonotonicTreeNode<RelativeMotion>& node, const ConnectedPhysical& conPhys) {
 		double mass = conPhys.rigidBody.mass;
 		totalMotion += node.value.relativeMotion.translation * mass;
-		totalCenterOfMass += node.value.locationOfRelativeMotion.localToGlobal(conPhys.rigidBody.localCenterOfMass) * mass;
+		totalCenterOfMass += node.value.locationOfRelativeMotion.getPosition() * mass;
 		totalMass += mass;
 	});
 
@@ -908,7 +945,7 @@ std::tuple<double, Vec3, TranslationalMotion> InternalMotionTree::getInternalMot
 	return std::make_tuple(totalMass, totalCenterOfMass, totalMotion);
 }
 
-NormalizedInternalMotionTree InternalMotionTree::normalizeCenterOfMass() && {
+COMMotionTree InternalMotionTree::normalizeCenterOfMass() && {
 	std::tuple<double, Vec3, TranslationalMotion> m = this->getInternalMotionOfCenterOfMass();
 
 	for(MonotonicTreeNode<RelativeMotion>& elem : relativeMotionTree) {
@@ -916,10 +953,10 @@ NormalizedInternalMotionTree InternalMotionTree::normalizeCenterOfMass() && {
 		elem.value.relativeMotion.translation -= std::get<2>(m);
 	}
 
-	return NormalizedInternalMotionTree(this->motorPhys, std::move(this->relativeMotionTree), std::get<0>(m), std::get<1>(m), std::get<2>(m));
+	return COMMotionTree(this->motorPhys, std::move(this->relativeMotionTree), std::get<0>(m), std::get<1>(m), std::get<2>(m));
 }
 
-SymmetricMat3 NormalizedInternalMotionTree::getInertia() const {
+SymmetricMat3 COMMotionTree::getInertia() const {
 	SymmetricMat3 totalInertia = getTranslatedInertiaAroundCenterOfMass(motorPhys->rigidBody.inertia, motorPhys->rigidBody.mass, motorPhys->rigidBody.localCenterOfMass - centerOfMass);
 	motorPhys->mutuallyRecurse(relativeMotionTree, [&totalInertia](const MonotonicTreeNode<RelativeMotion>& node, const ConnectedPhysical& conPhys) {
 		totalInertia += getTransformedInertiaAroundCenterOfMass(conPhys.rigidBody.inertia, conPhys.rigidBody.mass, conPhys.rigidBody.localCenterOfMass, node.value.locationOfRelativeMotion);
@@ -928,13 +965,40 @@ SymmetricMat3 NormalizedInternalMotionTree::getInertia() const {
 	return totalInertia;
 }
 
-FullTaylor<SymmetricMat3> NormalizedInternalMotionTree::getInertiaDerivatives() const {
+FullTaylor<SymmetricMat3> COMMotionTree::getInertiaDerivatives() const {
 	FullTaylor<SymmetricMat3> totalInertia = getTranslatedInertiaDerivativesAroundCenterOfMass(motorPhys->rigidBody.inertia, motorPhys->rigidBody.mass, motorPhys->rigidBody.localCenterOfMass - this->centerOfMass, -this->motionOfCenterOfMass);
 	motorPhys->mutuallyRecurse(relativeMotionTree, [&totalInertia](const MonotonicTreeNode<RelativeMotion>& node, const ConnectedPhysical& conPhys) {
 		totalInertia += getTransformedInertiaDerivativesAroundCenterOfMass(conPhys.rigidBody.inertia, conPhys.rigidBody.mass, conPhys.rigidBody.localCenterOfMass, node.value.locationOfRelativeMotion, node.value.relativeMotion);
 	});
 
 	return totalInertia;
+}
+
+Motion COMMotionTree::getMotion() const {
+	GlobalCFrame cf = this->motorPhys->getCFrame();
+	TranslationalMotion motionOfCom = localToGlobal(cf.getRotation(), this->motionOfCenterOfMass);
+
+	return -motionOfCom + this->motorPhys->motionOfCenterOfMass.getMotionOfPoint(cf.localToRelative(-this->centerOfMass));
+}
+
+Vec3 COMMotionTree::getInternalAngularMomentum() const {
+	Vec3 offsetOfMainCOM = -centerOfMass;
+	Vec3 velocityOfMain = -motionOfCenterOfMass.getVelocity();
+	Vec3 totalAngularMomentum = getAngularMomentumFromOffsetOnlyVelocity(offsetOfMainCOM, velocityOfMain, motorPhys->rigidBody.mass);
+
+	motorPhys->mutuallyRecurse(relativeMotionTree, [&totalAngularMomentum](const MonotonicTreeNode<RelativeMotion>& node, const ConnectedPhysical& conPhys) {
+		const RelativeMotion& relMotion = node.value;
+		SymmetricMat3 relativeInertia = relMotion.locationOfRelativeMotion.getRotation().localToGlobal(conPhys.rigidBody.inertia);
+
+		totalAngularMomentum += getAngularMomentumFromOffset(
+			relMotion.locationOfRelativeMotion.getPosition(),
+			relMotion.relativeMotion.getVelocity(),
+			relMotion.relativeMotion.getAngularVelocity(),
+			relativeInertia,
+			conPhys.rigidBody.mass);
+	});
+
+	return totalAngularMomentum;
 }
 
 #pragma endregion

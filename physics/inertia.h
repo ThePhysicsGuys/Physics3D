@@ -63,3 +63,21 @@ startingCFrame is the current relative position
 motion is the relative motion of the offset object's center of mass relative to the total center of mass, in the coordinate system of the total center of mass.
 */
 FullTaylor<SymmetricMat3> getTransformedInertiaDerivativesAroundCenterOfMass(const SymmetricMat3& originalInertia, double mass, const Vec3& localCenterOfMass, const CFrame& startingCFrame, const Motion& motion);
+
+
+inline Vec3 getAngularMomentumFromOffsetOnlyVelocity(const Vec3& offset, const Vec3& velocity, double mass) {
+	return -offset % velocity * mass;
+}
+
+
+// offsetInertia = originalInertia - [ComOffset]x ^ 2 * mass
+// angularMomemtum = (offsetInertia - [ComOffset]x ^ 2 * mass) * angularVel
+// == offsetInertia * angularVel - ComOffset % (ComOffset % angularVel) * mass
+// == offsetInertia * (velocity % ComOffset)/|ComOffset|^2 + ComOffset % velocity * mass
+// leftOverAngularMomentum = 
+
+inline Vec3 getAngularMomentumFromOffset(const Vec3& offset, const Vec3& velocity, const Vec3& angularVelocity, const SymmetricMat3& inertia, double mass) {
+	Vec3 velocityAngularMomentum = -velocity % offset * mass;
+	Vec3 rotationAngularMomentum = inertia * angularVelocity;
+	return velocityAngularMomentum + rotationAngularMomentum;
+}

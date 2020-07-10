@@ -57,6 +57,9 @@ public:
 	MonotonicTreeNode<T>& getRootNode() {return *allocatedMemory.get();}
 	const MonotonicTreeNode<T>& getRootNode() const {return *allocatedMemory.get();}
 
+	MonotonicTreeNode<T>& operator[](std::size_t index) { return allocatedMemory[index]; }
+	const MonotonicTreeNode<T>& operator[](std::size_t index) const {return allocatedMemory[index]; }
+
 	MonotonicTreeNode<T>* begin() { return allocatedMemory.get(); }
 	const MonotonicTreeNode<T>* begin() const { return allocatedMemory.get(); }
 	MonotonicTreeNode<T>* end() { return endOfAlloc; }

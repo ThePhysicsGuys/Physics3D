@@ -17,6 +17,7 @@
 #include "../physics/misc/gravityForce.h"
 #include "../physics/constraints/motorConstraint.h"
 #include "../physics/constraints/sinusoidalPistonConstraint.h"
+#include "../physics/constraints/fixedConstraint.h"
 #include "../util/log.h"
 
 
@@ -24,9 +25,9 @@
 #define ASSERT(v) ASSERT_TOLERANT(v, 0.0005)
 
 static const double DELTA_T = 0.01;
-static const int TICKS = 500;
+static const int TICKS = 300;
 
-TEST_CASE(positionInvariance) {
+TEST_CASE_SLOW(positionInvariance) {
 	Rotation rotation = Rotation::fromEulerAngles(0.0, 0.0, 0.0);
 
 	Position origins[]{Position(0,0,0), Position(0,0,1), Position(5.3,0,-2.4),Position(0.3,0,0.7),Position(0.0000001,0,0.00000001)};
@@ -56,11 +57,11 @@ TEST_CASE(positionInvariance) {
 	}
 }
 
-TEST_CASE(rotationInvariance) {
+TEST_CASE_SLOW(rotationInvariance) {
 	CFrame houseRelative(Vec3(0.7, 0.6, 1.6), Rotation::fromEulerAngles(0.3, 0.7, 0.9));
 	CFrame icosaRelative(Vec3(0.7, 3.0, 1.6), Rotation::fromEulerAngles(0.1, 0.1, 0.1));
 
-	for(double rotation = -1.5; rotation < 1.500001; rotation += 0.1) {
+	for(double rotation = -1.5; rotation < 1.500001; rotation += 0.3) {
 		logStream << rotation << '\n';
 
 		GlobalCFrame origin(Position(0.0,0.0,0.0), Rotation::rotY(rotation));
@@ -389,18 +390,192 @@ TEST_CASE(testPhysicalInertiaDerivatives) {
 
 	MotorizedPhysical* motorPhys = mainPart.parent->mainPhysical;
 
-	FullTaylorExpansion<SymmetricMat3, SymmetricMat3, 2> inertiaTaylor = motorPhys->getNormalizedInternalRelativeMotionTree().getInertiaDerivatives();
+	FullTaylorExpansion<SymmetricMat3, SymmetricMat3, 2> inertiaTaylor = motorPhys->getCOMMotionTree().getInertiaDerivatives();
 
 	double deltaT = 0.00001;
 
 	std::array<SymmetricMat3, 3> inertias;
-	inertias[0] = motorPhys->getNormalizedInternalRelativeMotionTree().getInertia();
+	inertias[0] = motorPhys->getCOMMotionTree().getInertia();
 	motorPhys->update(deltaT);
-	inertias[1] = motorPhys->getNormalizedInternalRelativeMotionTree().getInertia();
+	inertias[1] = motorPhys->getCOMMotionTree().getInertia();
 	motorPhys->update(deltaT);
-	inertias[2] = motorPhys->getNormalizedInternalRelativeMotionTree().getInertia();
+	inertias[2] = motorPhys->getCOMMotionTree().getInertia();
 
 	FullTaylorExpansion<SymmetricMat3, SymmetricMat3, 2> estimatedInertiaTaylor = estimateDerivatives(inertias, deltaT);
 
 	ASSERT_TOLERANT(inertiaTaylor == estimatedInertiaTaylor, 0.01);
+}
+
+TEST_CASE(testCenterOfMassKept) {
+	Polyhedron testPoly = Library::createPointyPrism(4, 1.0f, 1.0f, 0.5f, 0.5f);
+
+	PartProperties basicProperties{0.7, 0.2, 0.6};
+
+	Part mainPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(), basicProperties);
+	Part part1_mainPart(boxShape(1.0, 1.0, 1.0), mainPart,
+						new SinusoidalPistonConstraint(0.0, 2.0, 1.0),
+						CFrame(0.0, 0.0, 0.0, Rotation::Predefined::IDENTITY),
+						CFrame(0.0, 0.0, 0.0, Rotation::Predefined::IDENTITY), basicProperties);
+
+	COMMotionTree t = mainPart.parent->mainPhysical->getCOMMotionTree();
+
+	logStream << t.relativeMotionTree.getRootNode().value.locationOfRelativeMotion.getPosition();
+
+	ASSERT(t.relativeMotionTree.getRootNode().value.locationOfRelativeMotion.getPosition() == -t.relativeMotionTree.getRootNode().children[0].value.locationOfRelativeMotion.getPosition());
+	ASSERT(t.relativeMotionTree.getRootNode().value.relativeMotion.translation == -t.relativeMotionTree.getRootNode().children[0].value.relativeMotion.translation);
+}
+
+TEST_CASE(testBasicAngularMomentum) {
+	PartProperties basicProperties{0.7, 0.2, 0.6};
+
+	double motorSpeed = 1.0;
+	MotorConstraintTemplate<ConstantMotorTurner>* constraint = new MotorConstraintTemplate<ConstantMotorTurner>(motorSpeed);
+
+	Part mainPart(cylinderShape(1.0, 1.0), GlobalCFrame(), basicProperties);
+	Part attachedPart(cylinderShape(1.0, 1.0), mainPart,
+					  constraint,
+						CFrame(0.0, 0.0, 0.0, Rotation::Predefined::IDENTITY),
+						CFrame(0.0, 0.0, 0.0, Rotation::Predefined::IDENTITY), basicProperties);
+
+	COMMotionTree t = mainPart.parent->mainPhysical->getCOMMotionTree();
+
+	SymmetricMat3 inertia = attachedPart.getInertia();
+	Vec3 angularVel = constraint->getRelativeMotion().relativeMotion.getAngularVelocity();
+	Vec3 angularMomentum = inertia * angularVel;
+
+	ASSERT(t.getInternalAngularMomentum() == angularMomentum);
+}
+
+TEST_CASE(testBasicAngularMomentumTurned) {
+	PartProperties basicProperties{0.7, 0.2, 0.6};
+
+	double motorSpeed = 1.0;
+	MotorConstraintTemplate<ConstantMotorTurner>* constraint = new MotorConstraintTemplate<ConstantMotorTurner>(motorSpeed);
+
+	Part mainPart(cylinderShape(1.0, 1.0), GlobalCFrame(), basicProperties);
+	Part attachedPart(cylinderShape(1.0, 1.0), mainPart,
+					  constraint,
+					  CFrame(0.0, 0.0, 0.0, Rotation::Predefined::Y_90),
+					  CFrame(0.0, 0.0, 0.0, Rotation::Predefined::IDENTITY), basicProperties);
+
+	COMMotionTree t = mainPart.parent->mainPhysical->getCOMMotionTree();
+
+	SymmetricMat3 inertia = attachedPart.getInertia();
+	Vec3 angularVel = constraint->getRelativeMotion().relativeMotion.getAngularVelocity();
+	Vec3 angularMomentum = Rotation::Predefined::Y_90.localToGlobal(inertia * angularVel);
+
+	ASSERT(t.getInternalAngularMomentum() == angularMomentum);
+}
+
+TEST_CASE(testFixedConstraintAngularMomentum) {
+	PartProperties basicProperties{0.7, 0.2, 0.6};
+
+	double motorSpeed = 1.0;
+
+	
+	MotorConstraintTemplate<ConstantMotorTurner>* constraint1 = new MotorConstraintTemplate<ConstantMotorTurner>(motorSpeed);
+
+	double offset = 5.0;
+
+	Part mainPart1(cylinderShape(1.0, 1.0), GlobalCFrame(), basicProperties);
+	Part attachedPart1(cylinderShape(1.0, 1.0), mainPart1,
+						constraint1,
+						CFrame(0.0, 0.0, 0.0, Rotation::Predefined::IDENTITY),
+						CFrame(0.0, 0.0, 0.0, Rotation::Predefined::IDENTITY), basicProperties);
+	Part attachedPart1A(boxShape(1.0, 1.0, 1.0), attachedPart1,
+						new FixedConstraint(),
+						CFrame(0.0, 0.0, 0.0, Rotation::Predefined::IDENTITY),
+						CFrame(offset, 0.0, 0.0, Rotation::Predefined::IDENTITY), basicProperties);
+	Part attachedPart1B(boxShape(1.0, 1.0, 1.0), attachedPart1,
+						new FixedConstraint(),
+						CFrame(0.0, 0.0, 0.0, Rotation::Predefined::IDENTITY),
+						CFrame(-offset, 0.0, 0.0, Rotation::Predefined::IDENTITY), basicProperties);
+
+	COMMotionTree t1 = mainPart1.parent->mainPhysical->getCOMMotionTree();
+
+
+
+	MotorConstraintTemplate<ConstantMotorTurner>* constraint2 = new MotorConstraintTemplate<ConstantMotorTurner>(motorSpeed);
+
+	Part mainPart2(cylinderShape(1.0, 1.0), GlobalCFrame(), basicProperties);
+	Part attachedPart2(cylinderShape(1.0, 1.0), mainPart2,
+						constraint2,
+						CFrame(0.0, 0.0, 0.0, Rotation::Predefined::IDENTITY),
+						CFrame(0.0, 0.0, 0.0, Rotation::Predefined::IDENTITY), basicProperties);
+	Part attachedPart2A(boxShape(1.0, 1.0, 1.0), attachedPart2,
+						CFrame(offset, 0.0, 0.0, Rotation::Predefined::IDENTITY), basicProperties);
+	Part attachedPart2B(boxShape(1.0, 1.0, 1.0), attachedPart2,
+						CFrame(-offset, 0.0, 0.0, Rotation::Predefined::IDENTITY), basicProperties);
+
+	COMMotionTree t2 = mainPart2.parent->mainPhysical->getCOMMotionTree();
+	
+
+	ASSERT(t1.totalMass == t2.totalMass);
+	ASSERT(t1.centerOfMass == t2.centerOfMass);
+	ASSERT(t1.motionOfCenterOfMass == t2.motionOfCenterOfMass);
+	ASSERT(t1.getInertia() == t2.getInertia());
+	ASSERT(t1.getInertiaDerivatives() == t2.getInertiaDerivatives());
+	ASSERT(t1.getMotion() == t2.getMotion());
+	ASSERT(t1.getInternalAngularMomentum() == t2.getInternalAngularMomentum());
+}
+
+TEST_CASE(motorizedPhysicalAngularMomentum) {
+	Polyhedron testPoly = Library::createPointyPrism(4, 1.0f, 1.0f, 0.5f, 0.5f);
+
+	PartProperties basicProperties{0.7, 0.2, 0.6};
+
+	Part mainPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(), basicProperties);
+
+	mainPart.ensureHasParent();
+
+	/*Part part1_mainPart(polyhedronShape(Library::house), mainPart,
+						new SinusoidalPistonConstraint(0.0, 2.0, 1.3),
+						CFrame(0.3, 0.7, -0.5, Rotation::fromEulerAngles(0.7, 0.3, 0.7)),
+						CFrame(0.1, 0.2, -0.5, Rotation::fromEulerAngles(0.2, -0.257, 0.4)), basicProperties);*/
+	Part part1_mainPart(polyhedronShape(Library::house), mainPart,
+						new SinusoidalPistonConstraint(0.0, 2.0, 1.0),
+						CFrame(0.0, 0.0, 0.0, Rotation::Predefined::IDENTITY),
+						CFrame(0.0, 0.0, 0.0, Rotation::Predefined::IDENTITY), basicProperties);
+	/*Part part2_mainPart(boxShape(1.0, 0.3, 2.0), mainPart,
+						new MotorConstraintTemplate<ConstantMotorTurner>(1.7),
+						CFrame(-0.3, 0.7, 0.5, Rotation::fromEulerAngles(0.7, 0.3, 0.7)),
+						CFrame(0.1, -0.2, -0.5, Rotation::fromEulerAngles(0.2, -0.257, 0.4)), basicProperties);*/
+	/*Part part2_mainPart(boxShape(1.0, 0.3, 2.0), mainPart,
+						new MotorConstraintTemplate<ConstantMotorTurner>(1.7),
+						CFrame(0.0, 0.0, 0.0, Rotation::Predefined::IDENTITY),
+						CFrame(0.0, 0.0, 0.0, Rotation::Predefined::IDENTITY), basicProperties);*/
+	/*Part part1_part1_mainPart(cylinderShape(1.0, 0.3), part1_mainPart,
+							  new MotorConstraintTemplate<ConstantMotorTurner>(1.3),
+							  CFrame(-0.3, 0.7, 0.5, Rotation::fromEulerAngles(0.7, 0.3, 0.7)),
+							  CFrame(0.1, -0.2, -0.5, Rotation::fromEulerAngles(0.2, -0.257, 0.4)), basicProperties);
+	Part part1_part1_part1_mainPart(polyhedronShape(Library::trianglePyramid), part1_part1_mainPart,
+									new SinusoidalPistonConstraint(0.0, 2.0, 1.3),
+									CFrame(0.3, 0.7, -0.5, Rotation::fromEulerAngles(0.7, 0.3, 0.7)),
+									CFrame(0.1, 0.2, -0.5, Rotation::fromEulerAngles(0.2, -0.257, 0.4)), basicProperties);*/
+
+	MotorizedPhysical* motorPhys = mainPart.parent->mainPhysical;
+
+	Vec3 totalAngularMomentum(0.0, 0.0, 0.0);
+
+	auto tree = motorPhys->getCOMMotionTree();
+
+
+	Position com = motorPhys->getCenterOfMass();
+	Vec3 comVel = motorPhys->getMotionOfCenterOfMass().getVelocity();
+	//Vec3 comVel = tree.motionOfCenterOfMass.getVelocity();
+
+	
+
+	motorPhys->forEachPart([&com, &comVel, &totalAngularMomentum](const Part& p) {
+		SymmetricMat3 i = p.getInertia();
+		const GlobalCFrame& pcf = p.getCFrame();
+		i = pcf.getRotation().localToGlobal(i);
+		Vec3 offset = pcf.getPosition() - com;
+		Vec3 relativePartCOM = pcf.localToRelative(p.getLocalCenterOfMass());
+		Motion m = p.getMotion().getMotionOfPoint(-relativePartCOM);
+		Vec3 relVel = m.getVelocity();
+		totalAngularMomentum += getAngularMomentumFromOffset(offset, relVel, m.getAngularVelocity(), i, p.getMass());
+	});
+
+	ASSERT(tree.getInternalAngularMomentum() == totalAngularMomentum);
 }

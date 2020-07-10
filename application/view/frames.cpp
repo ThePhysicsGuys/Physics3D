@@ -585,33 +585,45 @@ void BigFrame::renderPropertiesFrame() {
 					frame.position = Position(position[0], position[1], position[2]);
 					sp->setCFrame(frame);
 				}
+
+				Motion spMotion = sp->getMotion();
+
+				ImGui::Text("Velocity: %s", str(spMotion.getVelocity()).c_str());
+				ImGui::Text("Acceleration: %s", str(spMotion.getAcceleration()).c_str());
+				ImGui::Text("Angular velocity: %s", str(spMotion.getAngularVelocity()).c_str());
+				ImGui::Text("Angular acceleration: %s", str(spMotion.getAngularAcceleration()).c_str());
+				ImGui::Text("Mass: %s", str(sp->getMass()).c_str());
+				ImGui::Text("Friction: %s", str(sp->properties.friction).c_str());
+				ImGui::Text("Density: %s", str(sp->properties.density).c_str());
+				ImGui::Text("Bouncyness: %s", str(sp->properties.bouncyness).c_str());
+				ImGui::Text("Conveyor: %s", str(sp->properties.conveyorEffect).c_str());
+				ImGui::Text("Inertia: %s", str(sp->getInertia()).c_str());
+
+				if(sp->parent != nullptr) {
+					const MotorizedPhysical* phys = sp->parent->mainPhysical;
+					ImGui::Text("Physical Info");
+
+					ImGui::Text("Total impulse: %s", str(phys->getTotalImpulse()).c_str());
+					ImGui::Text("Total angular momentum: %s", str(phys->getTotalAngularMomentum()).c_str());
+					ImGui::Text("motion of COM: %s", str(phys->getMotionOfCenterOfMass()).c_str());
+				}
 			} else {
 				// Position
 				position[0] = 0;
 				position[1] = 0;
 				position[2] = 0;
 				ImGui::InputFloat3("Position", position, 3, ImGuiInputTextFlags_ReadOnly);
-			}
 
-			ImGui::Text("Velocity: %s", (sp) ? str(sp->getMotion().getVelocity()).c_str() : "-");
-			ImGui::Text("Acceleration: %s", (sp) ? str(sp->getMotion().getAcceleration()).c_str() : "-");
-			ImGui::Text("Angular velocity: %s", (sp) ? str(sp->getMotion().getAngularVelocity()).c_str() : "-");
-			ImGui::Text("Angular acceleration: %s", (sp) ? str(sp->getMotion().getAngularAcceleration()).c_str() : "-");
-			ImGui::Text("Mass: %s", (sp) ? str(sp->getMass()).c_str() : "-");
-			ImGui::Text("Friction: %s", (sp) ? str(sp->properties.friction).c_str() : "-");
-			ImGui::Text("Density: %s", (sp) ? str(sp->properties.density).c_str() : "-");
-			ImGui::Text("Bouncyness: %s", (sp) ? str(sp->properties.bouncyness).c_str() : "-");
-			ImGui::Text("Conveyor: %s", (sp) ? str(sp->properties.conveyorEffect).c_str() : "-");
-			ImGui::Text("Inertia: %s", (sp) ? str(sp->getInertia()).c_str() : "-");
-
-
-			if(sp != nullptr && sp->parent != nullptr) {
-				const MotorizedPhysical* phys = sp->parent->mainPhysical;
-				ImGui::Text("Physical Info");
-
-				ImGui::Text("Total impulse: %s", str(phys->getTotalImpulse()).c_str());
-				ImGui::Text("Total angular momentum: %s", str(phys->getTotalAngularMomentum()).c_str());
-				ImGui::Text("motion of COM: %s", str(phys->getMotionOfCenterOfMass()).c_str());
+				ImGui::Text("Velocity: -");
+				ImGui::Text("Acceleration: -");
+				ImGui::Text("Angular velocity: -");
+				ImGui::Text("Angular acceleration: -");
+				ImGui::Text("Mass: -");
+				ImGui::Text("Friction: -");
+				ImGui::Text("Density: -");
+				ImGui::Text("Bouncyness: -");
+				ImGui::Text("Conveyor: -");
+				ImGui::Text("Inertia: -");
 			}
 
 			static volatile ExtendedPart* selectedPart = nullptr;
@@ -624,7 +636,7 @@ void BigFrame::renderPropertiesFrame() {
 				#ifdef _MSC_VER
 				__debugbreak();
 				#else
-				Log::warn("Debug breaking is not supported on non-linux platforms");
+				Log::warn("Debug breaking is not supported on non-windows platforms");
 				#endif
 			}
 
