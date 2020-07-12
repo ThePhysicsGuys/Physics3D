@@ -56,8 +56,7 @@ public:
 		}
 	}
 
-	template<typename OtherT1, typename OtherT2, typename OtherT3, typename OtherT4>
-	Matrix(const Matrix<OtherT1, Width - 1, Height - 1>& topLeftMat, const Vector<OtherT2, Height - 1>& rightCol, const Vector<OtherT3, Width - 1>& bottomRow, const OtherT4& bottomLeftVal) : data{} {
+	Matrix(const Matrix<T, Width - 1, Height - 1>& topLeftMat, const Vector<T, Height - 1>& rightCol, const Vector<T, Width - 1>& bottomRow, const T& bottomLeftVal) : data{} {
 		for (std::size_t row = 0; row < Height - 1; row++) {
 			for (std::size_t col = 0; col < Width - 1; col++) {
 				(*this)(row, col) = T(topLeftMat(row, col));
@@ -70,8 +69,7 @@ public:
 		(*this)(Height - 1, Width - 1) = T(bottomLeftVal);
 	}
 
-	template<typename OtherT1, typename OtherT2>
-	Matrix(const Matrix<OtherT1, Height - 1, Width - 1> & topLeftMat, const OtherT2& bottomLeftVal) : data{} {
+	Matrix(const Matrix<T, Height - 1, Width - 1> & topLeftMat, const T& bottomLeftVal) : data{} {
 		for (std::size_t row = 0; row < Height - 1; row++) {
 			for (std::size_t col = 0; col < Width - 1; col++) {
 				(*this)(row, col) = topLeftMat(row, col);

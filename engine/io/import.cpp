@@ -197,10 +197,10 @@ Graphics::VisualShape reorder(const std::vector<Vec3f>& positions, const std::ve
 		Vec3f tangent;
 		Vec3f bitangent;
 		if (flags.uvs) {
-			Vec3 edge1 = positions[face.v2.position] - positions[face.v1.position];
-			Vec3 edge2 = positions[face.v3.position] - positions[face.v1.position];
-			Vec2 dUV1 = uvs[face.v2.uv] - uvs[face.v1.uv];
-			Vec2 dUV2 = uvs[face.v3.uv] - uvs[face.v1.uv];
+			Vec3f edge1 = positions[face.v2.position] - positions[face.v1.position];
+			Vec3f edge2 = positions[face.v3.position] - positions[face.v1.position];
+			Vec2f dUV1 = uvs[face.v2.uv] - uvs[face.v1.uv];
+			Vec2f dUV2 = uvs[face.v3.uv] - uvs[face.v1.uv];
 
 			float f = 1.0f / (dUV1.x * dUV2.y - dUV2.x * dUV1.y);
 
@@ -285,10 +285,10 @@ Graphics::VisualShape loadBinaryObj(std::istream& input) {
 			Vec3f tangent;
 			Vec3f bitangent;
 
-			Vec3 edge1 = vertices[triangle.secondIndex] - vertices[triangle.firstIndex];
-			Vec3 edge2 = vertices[triangle.thirdIndex] - vertices[triangle.firstIndex];
-			Vec2 dUV1 = uvs[triangle.secondIndex] - uvs[triangle.firstIndex];
-			Vec2 dUV2 = uvs[triangle.thirdIndex] - uvs[triangle.firstIndex];
+			Vec3f edge1 = vertices[triangle.secondIndex] - vertices[triangle.firstIndex];
+			Vec3f edge2 = vertices[triangle.thirdIndex] - vertices[triangle.firstIndex];
+			Vec2f dUV1 = uvs[triangle.secondIndex] - uvs[triangle.firstIndex];
+			Vec2f dUV2 = uvs[triangle.thirdIndex] - uvs[triangle.firstIndex];
 
 			float f = 1.0f / (dUV1.x * dUV2.y - dUV2.x * dUV1.y);
 

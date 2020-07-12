@@ -12,6 +12,8 @@
 #include "../physics/geometry/builtinShapeClasses.h"
 #include "../physics/math/constants.h"
 #include <stdexcept>
+#include <cmath>
+#include <cstddef>
 
 namespace Engine::MeshRegistry {
 
@@ -27,12 +29,14 @@ Graphics::VisualShape createCylinder(int sides, double radius, double height) {
 	int vertexCount = sides * 4;
 	Vec3f* vertexBuffer = new Vec3f[vertexCount];
 
+	float r = static_cast<float>(radius);
+	float h = static_cast<float>(height);
 
 	// vertices
 	for(int i = 0; i < sides; i++) {
-		double angle = i * PI * 2 / sides;
-		Vec3f bottom(cos(angle) * radius, sin(angle) * radius, height / 2);
-		Vec3f top(cos(angle) * radius, sin(angle) * radius, -height / 2);
+		float angle = i * pi<float>() * 2 / sides;
+		Vec3f bottom(std::cos(angle) * r, std::sin(angle) * r, h / 2);
+		Vec3f top(std::cos(angle) * r, std::sin(angle) * r, -h / 2);
 		vertexBuffer[i * 2] = bottom;
 		vertexBuffer[i * 2 + 1] = top;
 		vertexBuffer[i * 2 + sides * 2] = bottom;
@@ -50,7 +54,7 @@ Graphics::VisualShape createCylinder(int sides, double radius, double height) {
 		triangleBuffer[i * 2 + 1] = Triangle{bottomRight + 1, bottomRight, bottomLeft + 1}; // topRight, topLeft, botRight
 	}
 
-	Triangle* capOffset = triangleBuffer + sides * 2;
+	Triangle* capOffset = triangleBuffer + static_cast<std::size_t>(sides) * 2;
 	// top and bottom
 	for(int i = 0; i < sides - 2; i++) { // common corner is i=0
 		capOffset[i] = Triangle{sides * 2 + 0, sides * 2 + (i + 1) * 2, sides * 2 + (i + 2) * 2};
@@ -72,15 +76,17 @@ Graphics::VisualShape createCylinder(int sides, double radius, double height) {
 	for (int i = 0; i < vertexCount; i++) {
 		Vec3f& p = vertexBuffer[i];
 
-		float u = 0;
-		float v = p.y / height;
+		float u;
+		float v = p.y / h;
 		if (p.x >= 0) {
-			if (p.x == 0)
-				u = asin(p.y / sqrt(p.x * p.x + p.y * p.y));
-			else
-				u = atan(p.y / p.x);
-		} else
-			u = -asin(p.y / sqrt(p.x * p.x + p.y * p.y)) + PI;
+			if(p.x == 0) {
+				u = std::asin(p.y / std::sqrt(p.x * p.x + p.y * p.y));
+			} else {
+				u = std::atan2(p.y, p.x);
+			}
+		} else {
+			u = -std::asin(p.y / std::sqrt(p.x * p.x + p.y * p.y)) + PI;
+		}
 
 		uvBuffer[i] = Vec2f(u, v);
 	}
@@ -89,7 +95,7 @@ Graphics::VisualShape createCylinder(int sides, double radius, double height) {
 }
 
 Graphics::VisualShape createSphere(double radius, int steps) {
-	Polyhedron sphere(Library::createSphere(radius, steps));
+	Polyhedron sphere(Library::createSphere(static_cast<float>(radius), steps));
 	Graphics::VisualShape sphereShape = Graphics::VisualShape(sphere);
 
 	Vec3f* normalBuffer = new Vec3f[sphereShape.vertexCount];

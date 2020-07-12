@@ -43,53 +43,64 @@ void InputHandler::keyCallback(int code, int action, int mods) {
 }
 
 void InputHandler::cursorCallback(double x, double y) {
-	MouseMoveEvent event(mousePosition.x, mousePosition.y, x, y);
+	int oldX = static_cast<int>(this->mousePosition.x);
+	int oldY = static_cast<int>(this->mousePosition.y);
+	int newX = static_cast<int>(x);
+	int newY = static_cast<int>(y);
+
+	MouseMoveEvent event(oldX, oldY, newX, newY);
 	onEvent(event);
 
 	if (leftDragging) {
-		MouseDragEvent event(mousePosition.x, mousePosition.y, x, y, Mouse::LEFT, Modifiers(0));
+		MouseDragEvent event(oldX, oldY, newX, newY, Mouse::LEFT, Modifiers(0));
 		onEvent(event);
 	}
 
 	if (middleDragging) {
-		MouseDragEvent event(mousePosition.x, mousePosition.y, x, y, Mouse::MIDDLE, Modifiers(0));
+		MouseDragEvent event(oldX, oldY, newX, newY, Mouse::MIDDLE, Modifiers(0));
 		onEvent(event);
 	}
 
 	if (rightDragging) {
-		MouseDragEvent event(mousePosition.x, mousePosition.y, x, y, Mouse::RIGHT, Modifiers(0));
+		MouseDragEvent event(oldX, oldY, newX, newY, Mouse::RIGHT, Modifiers(0));
 		onEvent(event);
 	}
 
-	mousePosition = Vec2(x, y);
+	this->mousePosition = Vec2(x, y);
 }
 
 void InputHandler::cursorEnterCallback(int entered) {
+	int oldX = static_cast<int>(this->mousePosition.x);
+	int oldY = static_cast<int>(this->mousePosition.y);
+
 	if (entered) {
-		MouseEnterEvent event(mousePosition.x, mousePosition.y);
+		MouseEnterEvent event(oldX, oldY);
 		onEvent(event);
 	} else {
 		leftDragging = false;
 		middleDragging = false;
 		rightDragging = false;
 
-		MouseExitEvent event(mousePosition.x, mousePosition.y);
+		MouseExitEvent event(oldX, oldY);
 		onEvent(event);
 	}
 }
 
 void InputHandler::scrollCallback(double xOffset, double yOffset) {
-	MouseScrollEvent event(mousePosition.x, mousePosition.y, xOffset, yOffset);
+	MouseScrollEvent event(static_cast<int>(mousePosition.x), static_cast<int>(mousePosition.y), static_cast<int>(xOffset), static_cast<int>(yOffset));
 	onEvent(event);
 }
 
 void InputHandler::mouseButtonCallback(int button, int action, int mods) {
+	int oldX = static_cast<int>(this->mousePosition.x);
+	int oldY = static_cast<int>(this->mousePosition.y);
+
 	if (action == Mouse::PRESS) {
 		if (Mouse::RIGHT == button) rightDragging = true;
 		if (Mouse::MIDDLE == button) middleDragging = true;
 		if (Mouse::LEFT == button) leftDragging = true;
 
-		MousePressEvent event(mousePosition.x, mousePosition.y, Mouse::getButton(button), Modifiers(mods));
+		MousePressEvent event(oldX, oldY, Mouse::getButton(button), Modifiers(mods));
 		onEvent(event);
 
 	} else if (action == Mouse::RELEASE) {
@@ -97,7 +108,7 @@ void InputHandler::mouseButtonCallback(int button, int action, int mods) {
 		if (Mouse::MIDDLE == button) middleDragging = false;
 		if (Mouse::LEFT == button) leftDragging = false;
 
-		MouseReleaseEvent event(mousePosition.x, mousePosition.y, Mouse::getButton(button), Modifiers(mods));
+		MouseReleaseEvent event(oldX, oldY, Mouse::getButton(button), Modifiers(mods));
 		onEvent(event);
 	}
 }

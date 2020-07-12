@@ -80,7 +80,7 @@ void intersectPhysicals(Screen& screen, const Ray& ray) {
 			if (pointToLineDistanceSquared(ray.direction, relPos) > part.maxRadius* part.maxRadius)
 				continue;
 
-			float distance = intersect(ray, part.hitbox, part.getCFrame());
+			double distance = intersect(ray, part.hitbox, part.getCFrame());
 
 			if (distance < closestIntersectDistance && distance > 0) {
 				closestIntersectDistance = distance;

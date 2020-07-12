@@ -15,7 +15,7 @@ inline bool isVecValid(const Vector<T, Size>& vec) {
 	return true;
 }
 
-template<typename T, size_t Width, size_t Height>
+template<typename T, size_t Height, size_t Width>
 inline bool isMatValid(const Matrix<T, Height, Width>& mat) {
 	for(size_t row = 0; row < Height; row++) {
 		for(size_t col = 0; col < Width; col++) {

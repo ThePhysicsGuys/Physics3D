@@ -179,7 +179,7 @@ void buildTerrain(double width, double depth) {
 
 		double progress = (x + width / 2) / width;
 
-		int progressToInt = progress * maxProgress;
+		int progressToInt = static_cast<int>(progress * maxProgress);
 
 		if (progressToInt > lastProgress) {
 			Log::info("%d%%", int(progressToInt * 100.0 / maxProgress));

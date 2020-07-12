@@ -117,3 +117,28 @@ TEST_CASE(inertiaTransformationDerivativesForOffsetCenterOfMass) {
 
 	ASSERT(estimatedTaylor == inertialTaylor);
 }
+
+TEST_CASE(translatedAngularMomentum) {
+	Polyhedron simpleBox = Library::createCube(1.0f);
+
+	SymmetricMat3 inertia = simpleBox.getInertiaAroundCenterOfMass();
+	double mass = simpleBox.getVolume();
+
+	Vec3 offset(1.3, 0.7, -2.1);
+	Vec3 angularVel(3.2, 1.3, -2.1);
+
+	SymmetricMat3 offsetInertia = getTranslatedInertiaAroundCenterOfMass(inertia, mass, offset);
+
+	Vec3 angularMomentumTarget = offsetInertia * angularVel;
+	Vec3 rotationAngularMomentum = inertia * angularVel;
+	Vec3 velocity = offset % angularVel;
+	Vec3 angularMomentumFromVelocity = velocity % offset * mass;
+	Vec3 angularMomentumTest = rotationAngularMomentum + angularMomentumFromVelocity;
+
+	Vec3 computedAngularMomentum = getAngularMomentumFromOffsetOnlyVelocity(offset, velocity, mass);
+	Vec3 computedAngularMomentum2 = getAngularMomentumFromOffset(offset, velocity, angularVel, inertia, mass);
+
+	ASSERT(angularMomentumTarget == angularMomentumTest);
+	ASSERT(angularMomentumTarget == computedAngularMomentum);
+	ASSERT(angularMomentumTarget == computedAngularMomentum2);
+}

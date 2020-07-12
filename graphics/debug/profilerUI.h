@@ -8,7 +8,7 @@
 #include "../physics/math/linalg/largeMatrix.h"
 
 template<typename T>
-class BoundsTree;
+struct BoundsTree;
 class Part;
 struct TreeNode;
 
@@ -61,7 +61,7 @@ struct BarChart : public Component {
 	inline BarChart(const char* title, std::string totalValue, const char** labels, BarChartClassInfo* classes, Vec2f chartPosition, Vec2f chartSize, int classCount, int barCount) :
 		title(title), totalValue(totalValue), classes(classes), labels(labels), data(barCount, classCount), Component(chartPosition, chartSize) {}
 	void render() override;
-	inline Vec2 resize() override { return dimension; };
+	inline Vec2 resize() override { return Vec2(dimension); };
 
 	float getMaxWeight() const;
 };

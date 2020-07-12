@@ -447,7 +447,7 @@ template<typename Boundable, typename Filter>
 struct TreeIterFactory {
 	TreeNode* rootNode;
 	Filter filter;
-	TreeIterFactory() {}
+	TreeIterFactory() : rootNode(nullptr), filter() {}
 	TreeIterFactory(TreeNode* rootNode, const Filter& filter) : rootNode(rootNode), filter(filter) {}
 	FilteredBoundsTreeIter<Filter, Boundable> begin() const {
 		return FilteredBoundsTreeIter<Filter, Boundable>(FilteredTreeIterator<Filter>(*rootNode, filter));

@@ -382,12 +382,12 @@ void setupWorld(int argc, const char** args) {
 		world.constraints.push_back(std::move(group));
 	}
 
-	Shape torusShape = polyhedronShape(Library::createTorus(1.0, 0.6, 80, 80));
+	Shape torusShape = polyhedronShape(Library::createTorus(1.0f, 0.6f, 80, 80));
 	Engine::MeshRegistry::registerMeshFor(torusShape.baseShape, Graphics::VisualShape::generateSmoothNormalsShape(torusShape.baseShape->asPolyhedron()));
 	world.addPart(new ExtendedPart(torusShape, Position(-10.0, 3.0, 0.0), basicProperties));
 
 
-	Vec2f toyPoints[]{{0.2f, 0.2f},{0.3f, 0.4f},{0.2f, 0.6f},{0.3f, 0.8f},{0.4f,0.7f},{0.5f,0.4f},{0.6f,0.2f},{0.75f,0.1f},{0.9f,0.015}};
+	Vec2f toyPoints[]{{0.2f, 0.2f},{0.3f, 0.4f},{0.2f, 0.6f},{0.3f, 0.8f},{0.4f,0.7f},{0.5f,0.4f},{0.6f,0.2f},{0.75f,0.1f},{0.9f,0.015f}};
 	Shape toyShape = polyhedronShape(Library::createRevolvedShape(0.0f, toyPoints, 9, 1.0f, 10));
 	world.addPart(new ExtendedPart(toyShape, Position(-10.0, 3.0, 3.0), basicProperties));
 

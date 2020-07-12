@@ -442,7 +442,7 @@ TEST_CASE(testInternalMotionOfCenterOfMass) {
 
 	Vec3 original = phys->totalCenterOfMass;
 
-	TranslationalMotion motionOfCom = phys->getInternalMotionOfCenterOfMass();
+	TranslationalMotion motionOfCom = std::get<2>(phys->getInternalRelativeMotionTree().getInternalMotionOfCenterOfMass());
 
 	phys->update(DELTA_T);
 	Vec3 v2 = phys->totalCenterOfMass;

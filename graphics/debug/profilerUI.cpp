@@ -104,17 +104,17 @@ float PieChart::getTotal() const {
 //! BarChart
 
 void BarChart::render() {
-	float titleHeight = 0.045;
-	float marginLeft = this->dimension.x * 0.0;
-	float marginBottom = this->dimension.y * 0.045;
-	float marginTop = titleHeight + 0.05;
+	float titleHeight = 0.045f;
+	float marginLeft = 0.0f;
+	float marginBottom = this->dimension.y * 0.045f;
+	float marginTop = titleHeight + 0.05f;
 	float max = getMaxWeight();
 
 	Vec2f drawingPosition = position + Vec2f(marginLeft, marginBottom);
 	Vec2f drawingSize = this->dimension - Vec2f(marginLeft, marginBottom + marginTop);
 
 	float categoryWidth = drawingSize.x / data.width;
-	float barWidth = drawingSize.x / ((data.height + 0.5) * data.width);
+	float barWidth = drawingSize.x / ((data.height + 0.5f) * data.width);
 
 	for (int cl = 0; cl < data.height; cl++) {
 		const BarChartClassInfo& info = classes[cl];
@@ -153,7 +153,7 @@ void BarChart::render() {
 	}
 
 	for (int cl = 0; cl < data.height; cl++)
-		Path::text(GUI::font, classes[cl].name, 0.0007, drawingPosition + Vec2f(this->dimension.x - 0.3, drawingSize.y - 0.035 * cl), Color(classes[cl].color, 1));
+		Path::text(GUI::font, classes[cl].name, 0.0007, drawingPosition + Vec2f(this->dimension.x - 0.3f, drawingSize.y - 0.035f * cl), Color(classes[cl].color, 1));
 }
 
 float BarChart::getMaxWeight() const {
@@ -263,7 +263,7 @@ SlidingChartDataSetInfo SlidingChart::get(const std::string& title) {
 void SlidingChart::render() {
 	float axisOffset = 0.03;
 
-	Path::rect(position, dimension, 0.0f, Vec4f(0.4, 0.4, 0.4, 1));
+	Path::rect(position, dimension, 0.0f, Vec4f(0.4f, 0.4f, 0.4f, 1.0f));
 	Path::line(position + Vec2f(-axisOffset, -dimension.y), position + Vec2f(dimension.x + axisOffset, -dimension.y), COLOR::WHITE, 2.0f);
 	Path::line(position + Vec2f(0, axisOffset), position + Vec2f(0, -dimension.y - axisOffset), COLOR::WHITE, 2.0f);
 
@@ -290,15 +290,15 @@ void SlidingChart::render() {
 
 		float lastValue = dataSet.data.front();
 		float lastY = (lastValue - startY) * stepY;
-		Path::text(GUI::font, std::to_string(lastValue), 0.0008f, Vec2f((bottomLeft.x + dimension.x) * 1.01, bottomLeft.y + lastY), dataSet.color, Path::TextPivotVC);
+		Path::text(GUI::font, std::to_string(lastValue), 0.0008f, Vec2f((bottomLeft.x + dimension.x) * 1.01f, bottomLeft.y + lastY), dataSet.color, Path::TextPivotVC);
 	}
 
 	Vec2f titleSize = GUI::font->size(title, 0.001f);
-	Path::text(GUI::font, title, 0.001f, Vec2f(position.x + dimension.x / 2.0, position.y + axisOffset), COLOR::WHITE, Path::TextPivotHC);
+	Path::text(GUI::font, title, 0.001f, Vec2f(position.x + dimension.x / 2.0f, position.y + axisOffset), COLOR::WHITE, Path::TextPivotHC);
 }
 
 Vec2 SlidingChart::resize() {
-	return dimension;
+	return Vec2(dimension);
 }
 
 #pragma endregion

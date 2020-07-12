@@ -11,9 +11,9 @@
 namespace Library {
 
 	Vec3f icosahedronVertices[]{
-		Vec3f(0, 0.5, G / 2), Vec3f(0, 0.5, -G / 2), Vec3f(0, -0.5, -G / 2), Vec3f(0, -0.5, G / 2),
-		Vec3f(0.5, G / 2, 0), Vec3f(0.5, -G / 2, 0), Vec3f(-0.5, -G / 2, 0), Vec3f(-0.5, G / 2, 0),
-		Vec3f(G / 2, 0, 0.5), Vec3f(-G / 2, 0, 0.5), Vec3f(-G / 2, 0, -0.5), Vec3f(G / 2, 0, -0.5),
+		Vec3f(0, 0.5, g<float>() / 2), Vec3f(0, 0.5, -g<float>() / 2), Vec3f(0, -0.5, -g<float>() / 2), Vec3f(0, -0.5, g<float>() / 2),
+		Vec3f(0.5, g<float>() / 2, 0), Vec3f(0.5, -g<float>() / 2, 0), Vec3f(-0.5, -g<float>() / 2, 0), Vec3f(-0.5, g<float>() / 2, 0),
+		Vec3f(g<float>() / 2, 0, 0.5), Vec3f(-g<float>() / 2, 0, 0.5), Vec3f(-g<float>() / 2, 0, -0.5), Vec3f(g<float>() / 2, 0, -0.5),
 	};
 
 	Triangle icosahedronTriangles[]{
@@ -24,10 +24,10 @@ namespace Library {
 	};
 
 	Vec3f trianglePyramidVertices[]{
-		Vec3f(0.0, 0.0, 0.0),
-		Vec3f(1.0, 0.0, 0.0),
-		Vec3f(0.0, 1.0, 0.0),
-		Vec3f(0.0, 0.0, 1.0)
+		Vec3f(0.0f, 0.0f, 0.0f),
+		Vec3f(1.0f, 0.0f, 0.0f),
+		Vec3f(0.0f, 1.0f, 0.0f),
+		Vec3f(0.0f, 0.0f, 1.0f)
 	};
 
 	Triangle trianglePyramidTriangles[]{
@@ -35,9 +35,9 @@ namespace Library {
 	};
 
 	Vec3f houseVertices[]{
-		Vec3f(-0.5, 0.0, -0.5), Vec3f(-0.5, 0.0, 0.5), Vec3f(0.5, 0.0, 0.5), Vec3f(0.5, 0.0, -0.5),
-		Vec3f(-0.5, 1.0, -0.5), Vec3f(-0.5, 1.0, 0.5), Vec3f(0.5, 1.0, 0.5), Vec3f(0.5, 1.0, -0.5),
-		Vec3f(0.0, 1.5, -0.5), Vec3f(0.0, 1.5, 0.5)
+		Vec3f(-0.5f, 0.0f, -0.5f), Vec3f(-0.5f, 0.0f, 0.5f), Vec3f(0.5f, 0.0f, 0.5f), Vec3f(0.5f, 0.0f, -0.5f),
+		Vec3f(-0.5f, 1.0f, -0.5f), Vec3f(-0.5f, 1.0f, 0.5f), Vec3f(0.5f, 1.0f, 0.5f), Vec3f(0.5f, 1.0f, -0.5f),
+		Vec3f( 0.0f, 1.5f, -0.5f), Vec3f( 0.0f, 1.5f, 0.5f)
 	};
 
 	Triangle houseTriangles[]{
@@ -51,8 +51,8 @@ namespace Library {
 	};
 
 	Vec3f wedgeVertices[]{
-		Vec3f(-0.5, -0.5, -0.5), Vec3f(-0.5, -0.5, 0.5),Vec3f(0.5, -0.5, 0.5),Vec3f(0.5, -0.5, -0.5),
-		Vec3f(-0.5, 0.5, -0.5), Vec3f(-0.5, 0.5, 0.5)
+		Vec3f(-0.5f, -0.5f, -0.5f), Vec3f(-0.5f, -0.5f, 0.5f), Vec3f(0.5f, -0.5f, 0.5f), Vec3f(0.5f, -0.5f, -0.5f),
+		Vec3f(-0.5f,  0.5f, -0.5f), Vec3f(-0.5f,  0.5f, 0.5f)
 	};
 
 	Triangle wedgeTriangles[]{
@@ -154,7 +154,7 @@ namespace Library {
 
 		// vertices
 		for(int i = 0; i < sides; i++) {
-			float angle = i * PI * 2 / sides;
+			float angle = i * pi<float>() * 2 / sides;
 			float h = height / 2;
 			float cr = cos(angle) * radius;
 			float sr = sin(angle) * radius;
@@ -184,7 +184,7 @@ namespace Library {
 
 		// vertices
 		for (int i = 0; i < sides; i++) {
-			float angle = i * PI * 2 / sides;
+			float angle = i * pi<float>() * 2 / sides;
 			result.setVertex(i * 2, cos(angle) * radius, -height / 2, sin(angle) * radius);
 			result.setVertex(i * 2 + 1, cos(angle) * radius, height / 2, sin(angle) * radius);
 		}
@@ -368,12 +368,12 @@ namespace Library {
 		EditableMesh result(radialFidelity * tubeFidelity, 2 * radialFidelity * tubeFidelity);
 
 		for(int segment = 0; segment < radialFidelity; segment++) {
-			float angle = (2 * PI * segment) / radialFidelity;
+			float angle = (2 * pi<float>() * segment) / radialFidelity;
 			float s = sin(angle);
 			float c = cos(angle);
 			
 			for(int partInSegment = 0; partInSegment < tubeFidelity; partInSegment++) {
-				float tubeAngle = (2 * PI * partInSegment) / tubeFidelity;
+				float tubeAngle = (2 * pi<float>() * partInSegment) / tubeFidelity;
 				
 				float height = radiusOfTube * sin(tubeAngle);
 				float radius = ringRadius + radiusOfTube * cos(tubeAngle);
@@ -398,7 +398,7 @@ namespace Library {
 		int lastVertex = segmentCount * inbetweenPointCount + 1;
 		result.setVertex(lastVertex, 0.0f, 0.0f, endZ);
 		for(int segmentI = 0; segmentI < segmentCount; segmentI++) {
-			float angle = (2 * PI * segmentI) / segmentCount;
+			float angle = (2 * pi<float>() * segmentI) / segmentCount;
 			float s = sin(angle);
 			float c = cos(angle);
 

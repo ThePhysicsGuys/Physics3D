@@ -52,10 +52,10 @@ public:
 	*/
 	union {
 		struct {
-			double width;
-			double height;
+			float width;
+			float height;
 		};
-		Vec2 dimension;
+		Vec2f dimension;
 	};
 
 	/*
@@ -81,9 +81,9 @@ public:
 	/*
 		Constructors
 	*/
-	Component(Vec2 position, Vec2 dimension) : position(position), dimension(dimension), resizing(false) {};
-	Component(Vec2 position) : position(position), dimension(Vec2()), resizing(true) {};
-	Component(double x, double y, double width, double height) : Component(Vec2(x, y), Vec2(width, height)) {};
+	Component(Vec2 position, Vec2f dimension) : position(position), dimension(dimension), resizing(false) {};
+	Component(Vec2 position) : position(position), dimension(Vec2f(0.0f, 0.0f)), resizing(true) {};
+	Component(double x, double y, float width, float height) : Component(Vec2(x, y), Vec2f(width, height)) {};
 	Component(double x, double y) : Component(Vec2(x, y)) {};
 
 
@@ -91,8 +91,8 @@ public:
 		Returns this if the component contains the point
 	*/
 	virtual Component* intersect(Vec2 point) {
-		Vec2 halfDimension = dimension / 2;
-		Vec2 center = position + Vec2(halfDimension.x, -halfDimension.y);
+		Vec2f halfDimension = dimension / 2;
+		Vec2 center = position + Vec2f(halfDimension.x, -halfDimension.y);
 		if (std::abs(point.x - center.x) < halfDimension.x && std::abs(point.y - center.y) < halfDimension.y)
 			return this;
 		return nullptr;
