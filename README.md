@@ -21,7 +21,7 @@ The Physics3D project consists of 7 projects, each with its own role:
 - [GLEW](http://glew.sourceforge.net/) Verified with GLEW 2.1.0
 - [stb_image](https://github.com/nothings/stb) Verified with stb_image.h v2.22
 - [FreeType](https://www.freetype.org/) Verified with FreeType v2.9.0
-- [ImGui](https://github.com/ocornut/imgui) Verified with ImGui v1.74
+- [Dear ImGui](https://github.com/ocornut/imgui/tree/docking) Verified with ImGui v1.77. Make sure to grab the files from the experimental docking branch.
 - some OpenGL functionality may not be available on virtual machines, enabling 3D acceleration might solve this
 
 ## Setup Guide
@@ -32,11 +32,25 @@ The Physics3D project consists of 7 projects, each with its own role:
   Your project structure should look like this:  
   Physics3D/  
   | - include/  
-  | | - freetype/ (freetype headers)  
-  | | - GL/ (glew headers)  
-  | | - GLFW/ (glfw3 headers)  
-  | | - imgui/ (imgui headers)  
-  | | - stb/ (stb_image.h)  
+  | | - freetype/  
+  | | | - (freetype headers)  
+  | | - GL  
+  | | | - (glew headers)  
+  | | - GLFW/  
+  | | | - (glfw3 headers)  
+  | | - imgui/  
+  | | | - imconfig.h  
+  | | | - imgui.h & .cpp  
+  | | | - imgui_draw.h  
+  | | | - imgui_internal.h  
+  | | | - imgui_widgets.cpp  
+  | | | - imgui_rectpack.h  
+  | | | - imgui_textedit.h  
+  | | | - imgui_truetype.h  
+  | | | - imgui_impl_glfw.h & .cpp  
+  | | | - imgui_impl_opengl3.h & .cpp  
+  | | - stb/  
+  | | | - stb_image.h  
   | | - ft2build.h  
   | - lib/  
   | | - freetype.lib  

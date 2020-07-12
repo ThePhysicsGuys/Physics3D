@@ -279,7 +279,6 @@
   <ItemGroup>
     <ClInclude Include="application.h" />
     <ClInclude Include="io\saveDialog.h" />
-    <ClInclude Include="layer\cameraLayer.h" />
     <ClInclude Include="layer\constraintLayer.h" />
     <ClInclude Include="core.h" />
     <ClInclude Include="ecs\light.h" />
