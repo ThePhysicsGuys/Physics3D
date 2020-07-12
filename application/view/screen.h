@@ -28,9 +28,6 @@ bool initGLFW();
 void terminateGLFW();
 
 class Screen {
-private:
-	std::chrono::time_point<std::chrono::steady_clock> lastUpdate = std::chrono::steady_clock::now();
-
 public:
 	PlayerWorld* world;
 	Vec2i dimension;

@@ -42,7 +42,7 @@ public:
 	}
 
 	inline bool inCategory(const EventCategory& category) const {
-		return inCategory(category);
+		return inCategory((char) category);
 	}
 };
 

@@ -20,7 +20,7 @@ extern void terminate();
 
 extern GLFWwindow* getCurrentContext();
 extern GLFWwindow* createContext(int width, int height, const char* title);
-extern void makeCurrent(GLFWwindow* context);
+extern void setCurrentContext(GLFWwindow* context);
 extern bool validContext(GLFWwindow* context);
 
 extern void swapInterval(int interval);

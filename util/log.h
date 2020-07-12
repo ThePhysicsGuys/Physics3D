@@ -9,21 +9,21 @@
 namespace Log {
 	
 	namespace Color {
-		const TerminalColorPair DEBUG{TerminalColor::GREEN, TerminalColor::BLACK};
-		const TerminalColorPair INFO{TerminalColor::CYAN, TerminalColor::BLACK};
-		const TerminalColorPair WARNING{TerminalColor::YELLOW, TerminalColor::BLACK};
-		const TerminalColorPair ERROR{TerminalColor::RED, TerminalColor::BLACK};
-		const TerminalColorPair FATAL{TerminalColor::BLACK, TerminalColor::RED};
-		const TerminalColorPair NORMAL{TerminalColor::WHITE, TerminalColor::BLACK};
-		const TerminalColorPair SUBJECT{TerminalColor::MAGENTA, TerminalColor::BLACK};
+		const TerminalColorPair DEBUG   { TerminalColor::GREEN  , TerminalColor::BLACK};
+		const TerminalColorPair INFO    { TerminalColor::CYAN   , TerminalColor::BLACK};
+		const TerminalColorPair WARNING { TerminalColor::YELLOW , TerminalColor::BLACK};
+		const TerminalColorPair ERROR   { TerminalColor::RED    , TerminalColor::BLACK};
+		const TerminalColorPair FATAL   { TerminalColor::BLACK  , TerminalColor::RED  };
+		const TerminalColorPair NORMAL  { TerminalColor::WHITE  , TerminalColor::BLACK};
+		const TerminalColorPair SUBJECT { TerminalColor::MAGENTA, TerminalColor::BLACK};
 	}
 
 	enum class Level : char {
-		INFO = 0,
+		INFO    = 0,
 		WARNING = 1,
-		ERROR = 2,
-		FATAL = 3,
-		NONE = 4
+		ERROR   = 2,
+		FATAL   = 3,
+		NONE    = 4
 	};
 	
 	class subject {

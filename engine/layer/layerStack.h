@@ -12,8 +12,6 @@ public:
 
 	void pushLayer(Layer* layer);
 	void popLayer(Layer* layer);
-	void pushOverlay(Layer* layer);
-	void popOverlay(Layer* layer);
 
 	void onInit();
 	void onUpdate();

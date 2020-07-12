@@ -161,7 +161,7 @@ void BigFrame::renderFontInfo(Font* font) {
 	}
 }
 
-void renderShaderTypeEditor(Shader* shader, const ShaderUniform& uniform) {
+void renderShaderTypeEditor(GShader* shader, const ShaderUniform& uniform) {
 	ShaderVariableType type = ShaderParser::parseVariableType(uniform.variableType);
 	switch (type) {
 		case ShaderVariableType::NONE:
@@ -400,48 +400,46 @@ void BigFrame::renderShaderInfo(ShaderResource* shader) {
 }
 
 void BigFrame::renderResourceFrame() {
-	if (ImGui::CollapsingHeader("Resources")) {
-		ImGui::Columns(2, 0, true);
-		ImGui::Separator();
+	ImGui::Columns(2, 0, true);
+	ImGui::Separator();
 
-		auto map = ResourceManager::getResourceMap();
-		for (auto iterator = map.begin(); iterator != map.end(); ++iterator) {
-			if (ImGui::TreeNodeEx(iterator->first.c_str(), ImGuiTreeNodeFlags_SpanFullWidth)) {
-				for (Resource* resource : iterator->second) {
-					if (ImGui::Selectable(resource->getName().c_str(), resource == selectedResource))
-						selectedResource = resource;
-				}
-				ImGui::TreePop();
+	auto map = ResourceManager::getResourceMap();
+	for (auto iterator = map.begin(); iterator != map.end(); ++iterator) {
+		if (ImGui::TreeNodeEx(iterator->first.c_str(), ImGuiTreeNodeFlags_SpanFullWidth)) {
+			for (Resource* resource : iterator->second) {
+				if (ImGui::Selectable(resource->getName().c_str(), resource == selectedResource))
+					selectedResource = resource;
 			}
+			ImGui::TreePop();
 		}
-
-		ImGui::NextColumn();
-
-		if (selectedResource) {
-			ImGui::Text("Name: %s", selectedResource->getName().c_str());
-			ImGui::Text("Path: %s", selectedResource->getPath().c_str());
-			ImGui::Text("Type: %s", selectedResource->getTypeName().c_str());
-			switch (selectedResource->getType()) {
-				case ResourceType::Texture: 
-					renderTextureInfo(static_cast<TextureResource*>(selectedResource));
-					break;
-				case ResourceType::Font:
-					renderFontInfo(static_cast<FontResource*>(selectedResource));
-					break;
-				case ResourceType::Shader:
-					renderShaderInfo(static_cast<ShaderResource*>(selectedResource));
-					break;
-				default:
-					ImGui::Text("Visual respresentation not supported.");
-					break;
-			}
-		} else {
-			ImGui::Text("No resource selected.");
-		}
-
-		ImGui::Columns(1);
-		ImGui::Separator();
 	}
+
+	ImGui::NextColumn();
+
+	if (selectedResource) {
+		ImGui::Text("Name: %s", selectedResource->getName().c_str());
+		ImGui::Text("Path: %s", selectedResource->getPath().c_str());
+		ImGui::Text("Type: %s", selectedResource->getTypeName().c_str());
+		switch (selectedResource->getType()) {
+			case ResourceType::Texture: 
+				renderTextureInfo(static_cast<TextureResource*>(selectedResource));
+				break;
+			case ResourceType::Font:
+				renderFontInfo(static_cast<FontResource*>(selectedResource));
+				break;
+			case ResourceType::GShader:
+				renderShaderInfo(static_cast<ShaderResource*>(selectedResource));
+				break;
+			default:
+				ImGui::Text("Visual respresentation not supported.");
+				break;
+		}
+	} else {
+		ImGui::Text("No resource selected.");
+	}
+
+	ImGui::Columns(1);
+	ImGui::Separator();
 }
 
 void BigFrame::renderECSNode(Engine::Node* node) {
@@ -562,189 +560,185 @@ void BigFrame::renderECSTree() {
 }
 
 void BigFrame::renderPropertiesFrame() {
-	if (ImGui::CollapsingHeader("Properties", ImGuiTreeNodeFlags_DefaultOpen)) {
-		ExtendedPart* sp = screen.selectedPart;
+	ExtendedPart* sp = screen.selectedPart;
 
-		ImGui::SetNextTreeNodeOpen(true);
-		if (ImGui::TreeNode("General")) {
-			ImGui::Text("Name: %s", (sp) ? sp->name.c_str() : "-");
-			ImGui::Text("Mesh ID: %s", (sp) ? str(sp->visualData.drawMeshId).c_str() : "-");
+	ImGui::SetNextTreeNodeOpen(true);
+	if (ImGui::TreeNode("General")) {
+		ImGui::Text("Name: %s", (sp) ? sp->name.c_str() : "-");
+		ImGui::Text("Mesh ID: %s", (sp) ? str(sp->visualData.drawMeshId).c_str() : "-");
 
-			ImGui::TreePop();
+		ImGui::TreePop();
+	}
+
+	ImGui::SetNextTreeNodeOpen(true);
+	if (ImGui::TreeNode("Physical")) {
+		if (sp) {
+			// Position
+			position[0] = sp->getPosition().x;
+			position[1] = sp->getPosition().y;
+			position[2] = sp->getPosition().z;
+			if (ImGui::InputFloat3("Position: ", position, 3)) {
+				GlobalCFrame frame = sp->getCFrame();
+				frame.position = Position(position[0], position[1], position[2]);
+				sp->setCFrame(frame);
+			}
+		} else {
+			// Position
+			position[0] = 0;
+			position[1] = 0;
+			position[2] = 0;
+			ImGui::InputFloat3("Position", position, 3, ImGuiInputTextFlags_ReadOnly);
 		}
 
-		ImGui::SetNextTreeNodeOpen(true);
-		if (ImGui::TreeNode("Physical")) {
-			if (sp) {
-				// Position
-				position[0] = sp->getPosition().x;
-				position[1] = sp->getPosition().y;
-				position[2] = sp->getPosition().z;
-				if (ImGui::InputFloat3("Position: ", position, 3)) {
-					GlobalCFrame frame = sp->getCFrame();
-					frame.position = Position(position[0], position[1], position[2]);
-					sp->setCFrame(frame);
-				}
-			} else {
-				// Position
-				position[0] = 0;
-				position[1] = 0;
-				position[2] = 0;
-				ImGui::InputFloat3("Position", position, 3, ImGuiInputTextFlags_ReadOnly);
-			}
-
-			ImGui::Text("Velocity: %s", (sp) ? str(sp->getMotion().getVelocity()).c_str() : "-");
-			ImGui::Text("Acceleration: %s", (sp) ? str(sp->getMotion().getAcceleration()).c_str() : "-");
-			ImGui::Text("Angular velocity: %s", (sp) ? str(sp->getMotion().getAngularVelocity()).c_str() : "-");
-			ImGui::Text("Angular acceleration: %s", (sp) ? str(sp->getMotion().getAngularAcceleration()).c_str() : "-");
-			ImGui::Text("Mass: %s", (sp) ? str(sp->getMass()).c_str() : "-");
-			ImGui::Text("Friction: %s", (sp) ? str(sp->properties.friction).c_str() : "-");
-			ImGui::Text("Density: %s", (sp) ? str(sp->properties.density).c_str() : "-");
-			ImGui::Text("Bouncyness: %s", (sp) ? str(sp->properties.bouncyness).c_str() : "-");
-			ImGui::Text("Conveyor: %s", (sp) ? str(sp->properties.conveyorEffect).c_str() : "-");
-			ImGui::Text("Inertia: %s", (sp) ? str(sp->getInertia()).c_str() : "-");
+		ImGui::Text("Velocity: %s", (sp) ? str(sp->getMotion().getVelocity()).c_str() : "-");
+		ImGui::Text("Acceleration: %s", (sp) ? str(sp->getMotion().getAcceleration()).c_str() : "-");
+		ImGui::Text("Angular velocity: %s", (sp) ? str(sp->getMotion().getAngularVelocity()).c_str() : "-");
+		ImGui::Text("Angular acceleration: %s", (sp) ? str(sp->getMotion().getAngularAcceleration()).c_str() : "-");
+		ImGui::Text("Mass: %s", (sp) ? str(sp->getMass()).c_str() : "-");
+		ImGui::Text("Friction: %s", (sp) ? str(sp->properties.friction).c_str() : "-");
+		ImGui::Text("Density: %s", (sp) ? str(sp->properties.density).c_str() : "-");
+		ImGui::Text("Bouncyness: %s", (sp) ? str(sp->properties.bouncyness).c_str() : "-");
+		ImGui::Text("Conveyor: %s", (sp) ? str(sp->properties.conveyorEffect).c_str() : "-");
+		ImGui::Text("Inertia: %s", (sp) ? str(sp->getInertia()).c_str() : "-");
 
 
-			if(sp != nullptr && sp->parent != nullptr) {
-				const MotorizedPhysical* phys = sp->parent->mainPhysical;
-				ImGui::Text("Physical Info");
+		if(sp != nullptr && sp->parent != nullptr) {
+			const MotorizedPhysical* phys = sp->parent->mainPhysical;
+			ImGui::Text("Physical Info");
 
-				ImGui::Text("Total impulse: %s", str(phys->getTotalImpulse()).c_str());
-				ImGui::Text("Total angular momentum: %s", str(phys->getTotalAngularMomentum()).c_str());
-				ImGui::Text("motion of COM: %s", str(phys->getMotionOfCenterOfMass()).c_str());
-			}
-
-			static volatile ExtendedPart* selectedPart = nullptr;
-			if(sp != nullptr) {
-				selectedPart = sp;
-			}
-
-			if(ImGui::Button("Debug This Part")) {
-				Log::debug("Debugging part %d", reinterpret_cast<uint64_t>(selectedPart));
-				#ifdef _MSC_VER
-				__debugbreak();
-				#else
-				Log::warn("Debug breaking is not supported on non-linux platforms");
-				#endif
-			}
-
-			ImGui::TreePop();
+			ImGui::Text("Total impulse: %s", str(phys->getTotalImpulse()).c_str());
+			ImGui::Text("Total angular momentum: %s", str(phys->getTotalAngularMomentum()).c_str());
+			ImGui::Text("motion of COM: %s", str(phys->getMotionOfCenterOfMass()).c_str());
 		}
 
-		ImGui::SetNextTreeNodeOpen(true);
-		if (ImGui::TreeNode("Material")) {
-			if (sp) {
-				ImGui::ColorEdit4("Albedo", sp->material.albedo.data);
-				ImGui::SliderFloat("Metalness", &sp->material.metalness, 0, 1);
-				ImGui::SliderFloat("Roughness", &sp->material.roughness, 0, 1);
-				ImGui::SliderFloat("Ambient occlusion", &sp->material.ao, 0, 1);
-				if (ImGui::Button(sp ? (sp->renderMode == Renderer::FILL ? "Render mode: fill" : "Render mode: wireframe") : "l"))
-					if (sp) sp->renderMode = sp->renderMode == Renderer::FILL ? Renderer::WIREFRAME : Renderer::FILL;
-			} else {
-				ImGui::Text("No part selected");
-			}
-
-			ImGui::TreePop();
+		static volatile ExtendedPart* selectedPart = nullptr;
+		if(sp != nullptr) {
+			selectedPart = sp;
 		}
+
+		if(ImGui::Button("Debug This Part")) {
+			Log::debug("Debugging part %d", reinterpret_cast<uint64_t>(selectedPart));
+			#ifdef _MSC_VER
+			__debugbreak();
+			#else
+			Log::warn("Debug breaking is not supported on non-linux platforms");
+			#endif
+		}
+
+		ImGui::TreePop();
+	}
+
+	ImGui::SetNextTreeNodeOpen(true);
+	if (ImGui::TreeNode("Material")) {
+		if (sp) {
+			ImGui::ColorEdit4("Albedo", sp->material.albedo.data);
+			ImGui::SliderFloat("Metalness", &sp->material.metalness, 0, 1);
+			ImGui::SliderFloat("Roughness", &sp->material.roughness, 0, 1);
+			ImGui::SliderFloat("Ambient occlusion", &sp->material.ao, 0, 1);
+			if (ImGui::Button(sp ? (sp->renderMode == Renderer::FILL ? "Render mode: fill" : "Render mode: wireframe") : "l"))
+				if (sp) sp->renderMode = sp->renderMode == Renderer::FILL ? Renderer::WIREFRAME : Renderer::FILL;
+		} else {
+			ImGui::Text("No part selected");
+		}
+
+		ImGui::TreePop();
 	}
 }
 
 void BigFrame::renderDebugFrame() {
 	using namespace ::Debug;
 	using namespace Graphics::Debug;
-	if (ImGui::CollapsingHeader("Debug", ImGuiTreeNodeFlags_DefaultOpen)) {
-		ImGui::SetNextTreeNodeOpen(true);
-		if (ImGui::TreeNode("Vectors")) {
-			ImGui::Checkbox("Info", &vectorDebugEnabled[INFO_VEC]);
-			ImGui::Checkbox("Position", &vectorDebugEnabled[POSITION]);
-			ImGui::Checkbox("Velocity", &vectorDebugEnabled[VELOCITY]);
-			ImGui::Checkbox("Acceleration", &vectorDebugEnabled[ACCELERATION]);
-			ImGui::Checkbox("Moment", &vectorDebugEnabled[MOMENT]);
-			ImGui::Checkbox("Force", &vectorDebugEnabled[FORCE]);
-			ImGui::Checkbox("Angular impulse", &vectorDebugEnabled[ANGULAR_IMPULSE]);
-			ImGui::Checkbox("Impulse", &vectorDebugEnabled[IMPULSE]);
+	ImGui::SetNextTreeNodeOpen(true);
+	if (ImGui::TreeNode("Vectors")) {
+		ImGui::Checkbox("Info", &vectorDebugEnabled[INFO_VEC]);
+		ImGui::Checkbox("Position", &vectorDebugEnabled[POSITION]);
+		ImGui::Checkbox("Velocity", &vectorDebugEnabled[VELOCITY]);
+		ImGui::Checkbox("Acceleration", &vectorDebugEnabled[ACCELERATION]);
+		ImGui::Checkbox("Moment", &vectorDebugEnabled[MOMENT]);
+		ImGui::Checkbox("Force", &vectorDebugEnabled[FORCE]);
+		ImGui::Checkbox("Angular impulse", &vectorDebugEnabled[ANGULAR_IMPULSE]);
+		ImGui::Checkbox("Impulse", &vectorDebugEnabled[IMPULSE]);
 
-			ImGui::TreePop();
-		}
+		ImGui::TreePop();
+	}
 
-		ImGui::SetNextTreeNodeOpen(true);
-		if (ImGui::TreeNode("Points")) {
-			ImGui::Checkbox("Info", &pointDebugEnabled[INFO_POINT]);
-			ImGui::Checkbox("Center of mass", &pointDebugEnabled[CENTER_OF_MASS]);
-			ImGui::Checkbox("Intersections", &pointDebugEnabled[INTERSECTION]);
+	ImGui::SetNextTreeNodeOpen(true);
+	if (ImGui::TreeNode("Points")) {
+		ImGui::Checkbox("Info", &pointDebugEnabled[INFO_POINT]);
+		ImGui::Checkbox("Center of mass", &pointDebugEnabled[CENTER_OF_MASS]);
+		ImGui::Checkbox("Intersections", &pointDebugEnabled[INTERSECTION]);
 
-			ImGui::TreePop();
-		}
+		ImGui::TreePop();
+	}
 
-		ImGui::SetNextTreeNodeOpen(true);
-		if (ImGui::TreeNode("Render")) {
-			ImGui::Checkbox("Render pies", &renderPiesEnabled);
-			if (ImGui::Button("Switch collision sphere render mode")) colissionSpheresMode = static_cast<SphereColissionRenderMode>((static_cast<int>(colissionSpheresMode) + 1) % 3);
+	ImGui::SetNextTreeNodeOpen(true);
+	if (ImGui::TreeNode("Render")) {
+		ImGui::Checkbox("Render pies", &renderPiesEnabled);
+		if (ImGui::Button("Switch collision sphere render mode")) colissionSpheresMode = static_cast<SphereColissionRenderMode>((static_cast<int>(colissionSpheresMode) + 1) % 3);
 
-			ImGui::TreePop();
-		}
+		ImGui::TreePop();
 	}
 }
 
 void BigFrame::renderEnvironmentFrame() {
-	if (ImGui::CollapsingHeader("Environment")) {
-		if (ImGui::SliderFloat("HDR", &hdr, 0, 1))
-			Shaders::basicShader.updateHDR(hdr);
-			Shaders::instanceShader.updateHDR(hdr);
+	if (ImGui::SliderFloat("HDR", &hdr, 0, 1)) {
+		Shaders::basicShader.updateHDR(hdr);
+		Shaders::instanceShader.updateHDR(hdr);
+	}
 
-		if (ImGui::SliderFloat("Gamma", &gamma, 0, 3))
-			Shaders::basicShader.updateGamma(gamma);
-			Shaders::instanceShader.updateGamma(gamma);
+	if (ImGui::SliderFloat("Gamma", &gamma, 0, 3)) {
+		Shaders::basicShader.updateGamma(gamma);
+		Shaders::instanceShader.updateGamma(gamma);
+	}
 
-		if (ImGui::SliderFloat("Exposure", &exposure, 0, 2))
-			Shaders::basicShader.updateExposure(exposure);
-			Shaders::instanceShader.updateExposure(exposure);
+	if (ImGui::SliderFloat("Exposure", &exposure, 0, 2)) {
+		Shaders::basicShader.updateExposure(exposure);
+		Shaders::instanceShader.updateExposure(exposure);
+	}
 
-		if (ImGui::ColorEdit3("Sun color", sunColor.data))
-			Shaders::basicShader.updateSunColor(sunColor);
-			Shaders::instanceShader.updateSunColor(sunColor);
+	if (ImGui::ColorEdit3("Sun color", sunColor.data)) {
+		Shaders::basicShader.updateSunColor(sunColor);
+		Shaders::instanceShader.updateSunColor(sunColor);
 	}
 }
 
 void BigFrame::renderLayerFrame() {
-	if (ImGui::CollapsingHeader("Layers")) {
-		ImGui::Columns(2, 0, true);
-		ImGui::Separator();
-		for (Layer* layer : screen.layerStack) {
-			if (ImGui::Selectable(layer->name.c_str(), selectedLayer == layer))
-				selectedLayer = layer;
-		}
-
-		ImGui::NextColumn();
-
-		ImGui::Text("Name: %s", (selectedLayer) ? selectedLayer->name.c_str() : "-");
-		if (selectedLayer) {
-			ImGui::SetNextTreeNodeOpen(true);
-			if (ImGui::TreeNode("Flags")) {
-				char& flags = selectedLayer->flags;
-
-				doEvents = !(flags & Layer::NoEvents);
-				doUpdate = !(flags & Layer::NoUpdate);
-				noRender = !(flags & Layer::NoRender);
-				isDisabled = flags & Layer::Disabled;
-
-				ImGui::Checkbox("Disabled", &isDisabled);
-				ImGui::Checkbox("Events", &doEvents);
-				ImGui::Checkbox("Update", &doUpdate);
-				ImGui::Checkbox("Render", &noRender);
-
-				flags = (isDisabled) ? flags | Layer::Disabled : flags & ~Layer::Disabled;
-				flags = (doEvents) ? flags & ~Layer::NoEvents : flags | Layer::NoEvents;
-				flags = (doUpdate) ? flags & ~Layer::NoUpdate : flags | Layer::NoUpdate;
-				flags = (noRender) ? flags & ~Layer::NoRender : flags | Layer::NoRender;
-
-				ImGui::TreePop();
-			}
-		}
-
-		ImGui::Columns(1);
-		ImGui::Separator();
+	ImGui::Columns(2, 0, true);
+	ImGui::Separator();
+	for (Layer* layer : screen.layerStack) {
+		if (ImGui::Selectable(layer->name.c_str(), selectedLayer == layer))
+			selectedLayer = layer;
 	}
+
+	ImGui::NextColumn();
+
+	ImGui::Text("Name: %s", (selectedLayer) ? selectedLayer->name.c_str() : "-");
+	if (selectedLayer) {
+		ImGui::SetNextTreeNodeOpen(true);
+		if (ImGui::TreeNode("Flags")) {
+			char& flags = selectedLayer->flags;
+
+			doEvents = !(flags & Layer::NoEvents);
+			doUpdate = !(flags & Layer::NoUpdate);
+			noRender = !(flags & Layer::NoRender);
+			isDisabled = flags & Layer::Disabled;
+
+			ImGui::Checkbox("Disabled", &isDisabled);
+			ImGui::Checkbox("Events", &doEvents);
+			ImGui::Checkbox("Update", &doUpdate);
+			ImGui::Checkbox("Render", &noRender);
+
+			flags = (isDisabled) ? flags | Layer::Disabled : flags & ~Layer::Disabled;
+			flags = (doEvents) ? flags & ~Layer::NoEvents : flags | Layer::NoEvents;
+			flags = (doUpdate) ? flags & ~Layer::NoUpdate : flags | Layer::NoUpdate;
+			flags = (noRender) ? flags & ~Layer::NoRender : flags | Layer::NoRender;
+
+			ImGui::TreePop();
+		}
+	}
+
+	ImGui::Columns(1);
+	ImGui::Separator();
 }
 
 void BigFrame::render() {
@@ -754,11 +748,19 @@ void BigFrame::render() {
 	renderECSTree();
 	ImGui::End();*/
 	
-	ImGui::Begin("Inspector");
+	ImGui::Begin("Properties");
 	renderPropertiesFrame();
+	ImGui::End();
+	ImGui::Begin("Layers");
 	renderLayerFrame();
+	ImGui::End();
+	ImGui::Begin("Resources");
 	renderResourceFrame();
+	ImGui::End();
+	ImGui::Begin("Environment");
 	renderEnvironmentFrame();
+	ImGui::End();
+	ImGui::Begin("Debug");
 	renderDebugFrame();
 	ImGui::End();
 }

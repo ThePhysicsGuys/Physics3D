@@ -19,7 +19,7 @@ template<typename T, size_t Width, size_t Height>
 inline bool isMatValid(const Matrix<T, Height, Width>& mat) {
 	for(size_t row = 0; row < Height; row++) {
 		for(size_t col = 0; col < Width; col++) {
-			if(!std::isfinite(mat[row][col])) return false;
+			if(!std::isfinite(mat(row, col))) return false;
 		}
 	}
 	return true;
@@ -29,7 +29,7 @@ template<typename T, size_t Size>
 inline bool isMatValid(const SymmetricMatrix<T, Size>& mat) {
 	for(size_t row = 0; row < Size; row++) {
 		for(size_t col = row; col < Size; col++) {
-			if(!std::isfinite(mat[row][col])) return false;
+			if(!std::isfinite(mat(row, col))) return false;
 		}
 	}
 	return true;

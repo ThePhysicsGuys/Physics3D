@@ -1,6 +1,5 @@
 #include "terminalColor.h"
 
-
 void setColor(TerminalColor foreground) {
 	setColor(foreground, TerminalColor::BLACK);
 }

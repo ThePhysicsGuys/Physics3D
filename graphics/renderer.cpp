@@ -34,12 +34,12 @@ RenderState saveState() {
 
 	int intbuffer;
 	unsigned char boolbuffer;
-	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &intbuffer);
+	/*glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &intbuffer);
 	state.dfbo = intbuffer;
 	glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &intbuffer);
 	state.rfbo = intbuffer;
 	glGetIntegerv(GL_RENDERBUFFER_BINDING, &intbuffer);
-	state.rbo = intbuffer;
+	state.rbo = intbuffer;*/
 	// glGetIntegerv(GL_TEXTURE_BINDING_2D, &intbuffer);
 	// state.texture = intbuffer;
 	// glGetIntegerv(GL_CURRENT_PROGRAM, &intbuffer);
@@ -66,9 +66,9 @@ RenderState saveState() {
 void loadState(const RenderState& state) {
 	current = state;
 
-	bindReadbuffer(state.rfbo);
+	/*bindReadbuffer(state.rfbo);
 	bindDrawbuffer(state.dfbo);
-	bindRenderbuffer(state.rbo);
+	bindRenderbuffer(state.rbo);*/
 	// glUseProgram(state.program);
 	// glBindVertexArray(state.vao);
 	// glBindBuffer(GL_ARRAY_BUFFER, state.vbo);
@@ -153,7 +153,7 @@ void lineWidth(float size) {
 	glLineWidth(size);
 }
 
-void viewport(Vec2i origin, Vec2i dimension) {
+void viewport(const Vec2i& origin, const Vec2i& dimension) {
 	current.viewport[0] = origin.x;
 	current.viewport[1] = origin.y;
 	current.viewport[2] = dimension.x;
@@ -237,8 +237,7 @@ void bindShader(GLID id) {
 }
 
 void bindFramebuffer(GLID id) {
-	bindDrawbuffer(id);
-	bindReadbuffer(id);
+	glBindFramebuffer(GL_FRAMEBUFFER, id);
 }
 
 void bindDrawbuffer(GLID id) {
@@ -278,8 +277,8 @@ void drawArrays(GLFLAG mode, int first, size_t count) {
 	glDrawArrays(mode, first, count);
 }
 
-void defaultSettings() {
-	bindFramebuffer(0);
+void defaultSettings(GLID defaultFrameBuffer) {
+	bindFramebuffer(defaultFrameBuffer);
 	standardBlendFunction();
 	enableDepthTest();
 	glLineWidth(1.5);

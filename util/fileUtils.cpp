@@ -1,16 +1,20 @@
 #include "fileUtils.h"
 
 #include "log.h"
+#include <fstream>
+#include <sstream>
+
+namespace Util {
 
 #ifdef _MSC_VER
 #include <direct.h>
 
-bool FileUtils::doesFileExist(const std::string& fileName){
-    struct stat buffer;
+bool doesFileExist(const std::string& fileName) {
+	struct stat buffer;
 	if (stat(fileName.c_str(), &buffer) != -1) {
-        return true;
+		return true;
 	}
-    return false;
+	return false;
 }
 
 #else
@@ -23,15 +27,45 @@ namespace fs = std::filesystem;
 namespace fs = std::experimental::filesystem;
 #endif
 
-bool FileUtils::doesFileExist(const std::string& fileName){
-    return fs::exists(fileName);
+bool doesFileExist(const std::string& fileName) {
+	return fs::exists(fileName);
 }
 
 #endif
 
-
-void FileUtils::warnIfFileExists(const std::string& fileName) {
-    if(FileUtils::doesFileExist(fileName)){
-        Log::warn("File already exists: %s", fileName.c_str());
-    }
+void warnIfFileExists(const std::string& fileName) {
+	if (doesFileExist(fileName)) {
+		Log::warn("File already exists: %s", fileName.c_str());
+	}
 }
+
+std::string parseFile(const std::string& path) {
+	if (path.empty())
+		return std::string();
+
+	std::ifstream fileStream(path);
+
+	Log::setDelimiter("");
+	Log::info("Reading (%s) ... ", path.c_str());
+
+	if (fileStream.fail() || !fileStream.is_open()) {
+		Log::print(Log::Color::ERROR, "Fail");
+		Log::setDelimiter("\n");
+
+		return "";
+	}
+
+	Log::print(Log::Color::DEBUG, "Done");
+	Log::setDelimiter("\n");
+
+	std::string line;
+	std::stringstream stringStream;
+	while (getline(fileStream, line))
+		stringStream << line << "\n";
+
+	fileStream.close();
+
+	return stringStream.str();
+}
+
+};

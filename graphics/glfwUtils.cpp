@@ -29,7 +29,7 @@ void terminate() {
 	glfwTerminate();
 }
 
-void makeCurrent(GLFWwindow* context) {
+void setCurrentContext(GLFWwindow* context) {
 	currentContext = context;
 	glfwMakeContextCurrent(currentContext);
 }

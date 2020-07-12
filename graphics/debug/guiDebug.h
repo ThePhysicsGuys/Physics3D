@@ -43,6 +43,8 @@ void logTickEnd();
 void logFrameStart();
 void logFrameEnd();
 
+void renderQuad();
+
 AddableBuffer<ColoredVector>& getVectorBuffer();
 AddableBuffer<ColoredPoint>& getPointBuffer();
 }

@@ -57,7 +57,7 @@ extern void clearStencil();
 extern void lineStipple(int factor, short pattern);
 extern void lineWidth(float size);
 
-extern void viewport(Vec2i origin, Vec2i dimension);
+extern void viewport(const Vec2i& origin, const Vec2i& dimension);
 
 extern void enableDepthMask();
 extern void disableDepthMask();
@@ -90,7 +90,7 @@ extern void drawElementsInstanced(GLFLAG mode, size_t count, GLFLAG type, const 
 extern void drawElements(GLFLAG mode, size_t count, GLFLAG type, const void* offset);
 extern void drawArrays(GLFLAG mode, int first, size_t count);
 
-extern void defaultSettings();
+extern void defaultSettings(GLID defaultFrameBuffer);
 
 extern RenderState getState();
 extern void beginScene();
