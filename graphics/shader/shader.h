@@ -5,6 +5,14 @@
 
 namespace Graphics {
 
+struct ShaderStage {
+	std::string source;
+	ShaderInfo info;
+
+	ShaderStage();
+	ShaderStage(const std::string& source, const ShaderInfo& info);
+};
+
 struct ShaderSource {
 	std::string name;
 	std::string path;
@@ -14,17 +22,10 @@ struct ShaderSource {
 	std::string geometrySource;
 	std::string tesselationControlSource;
 	std::string tesselationEvaluateSource;
+	std::string computeSource;
 
 	ShaderSource();
-	ShaderSource(const std::string& name, const std::string& path, const std::string& vertexSource, const std::string& fragmentSource, const std::string& geometrySource, const std::string& tesselationControlSource, const std::string& tesselationEvaluateSource);
-};
-
-struct ShaderStage {
-	std::string source;
-	ShaderInfo info;
-
-	ShaderStage();
-	ShaderStage(const std::string& source, const ShaderInfo& info);
+	ShaderSource(const std::string& name, const std::string& path, const std::string& vertexSource, const std::string& fragmentSource, const std::string& geometrySource, const std::string& tesselationControlSource, const std::string& tesselationEvaluateSource, const std::string& computeSource);
 };
 
 class Shader : public Bindable {
@@ -35,39 +36,22 @@ public:
 		FRAGMENT = 1 << 1,
 		GEOMETRY = 1 << 2,
 		TESSELATION_CONTROL = 1 << 3,
-		TESSELATION_EVALUATE = 1 << 4
+		TESSELATION_EVALUATE = 1 << 4,
+		COMPUTE = 1 << 5
 	};
 
-private:
-	std::unordered_map<std::string, int> uniforms;
-
-	void addUniforms(const ShaderStage& stage);
-	void addUniform(const std::string& uniform);
-	void addShaderStage(const ShaderStage& stage, const ShaderFlag& flag);
-
-public:
 	char flags = NONE;
-
 	std::string name;
 
-	ShaderStage vertexStage;
-	ShaderStage fragmentStage;
-	ShaderStage geometryStage;
-	ShaderStage tesselationControlStage;
-	ShaderStage tesselationEvaluationStage;
-
-	Shader();
-	Shader(const ShaderSource& shaderSource);
-	Shader(const std::string& name, const std::string& vertexShader, const std::string& fragmentShader, const std::string& geometryShader, const std::string& tesselationControlSource, const std::string& tesselationEvaluateSource);
-
 	~Shader();
-	Shader(Shader&& other);
 	Shader(const Shader&) = delete;
 	Shader& operator=(Shader&& other);
 	Shader& operator=(const Shader&) = delete;
 
-	void createUniform(const std::string& uniform);
+	static GLID compile(const std::string& name, const std::string& source, unsigned int type);
+
 	int getUniform(const std::string& uniform) const;
+	void createUniform(const std::string& uniform);
 	void setUniform(const std::string& uniform, int value) const;
 	void setUniform(const std::string& uniform, GLID value) const;
 	void setUniform(const std::string& uniform, float value) const;
@@ -79,16 +63,27 @@ public:
 	void setUniform(const std::string& uniform, const Mat4f& value) const;
 	void setUniform(const std::string& uniform, const Position& value) const;
 
-	void reload(const ShaderSource& shaderSource);
-
 	void bind() override;
 	void unbind() override;
 	void close() override;
+
+protected:
+	std::unordered_map<std::string, int> uniforms;
+
+	Shader();
+	Shader(const ShaderSource& shaderSource);
+	Shader(Shader&& other);
+
+	void addUniform(const std::string& uniform);
+	void addUniforms(const ShaderStage& stage);
+
+	virtual void addShaderStage(const ShaderStage& stage, const ShaderFlag& flag) = 0;
 };
 
 ShaderSource parseShader(const std::string& name, const std::string& path);
 ShaderSource parseShader(const std::string& name, const std::string& path, std::istream& shaderTextStream);
 ShaderSource parseShader(const std::string& name, const std::string& path, const std::string& shaderText);
-ShaderSource parseShader(const std::string& name, const std::string& path, const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath = "", const std::string& tesselationControlPath = "", const std::string& tesselationEvaluatePath = "");
+
+ShaderStage parseShaderStage(const std::string& source);
 
 };

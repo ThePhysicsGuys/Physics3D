@@ -4,12 +4,13 @@
 #include "texture.h"
 
 #include "../util/resource/resourceManager.h"
+#include "../graphics/renderer.h"
 
 #include <sstream>
 
 namespace Graphics {
 
-namespace GraphicsShaders {
+namespace Shaders {
 GuiShader guiShader;
 QuadShader quadShader;
 BlurShader horizontalBlurShader;
@@ -151,7 +152,7 @@ void onInit() {
 			}
 		)";
 
-	// Shader source init
+	// GShader source init
 	std::string horizontalBlurShaderSourceFile(horizontalBlurShaderVertexSourceFile + blurShaderFragmentSourceFile);
 	std::string verticalBlurShaderSourceFile(verticalBlurShaderVertexSourceFile + blurShaderFragmentSourceFile);
 	ShaderSource guiShaderSource            = parseShader("GuiShader", "gui.shader", guiShaderSourceFile);
@@ -159,7 +160,7 @@ void onInit() {
 	ShaderSource horizontalBlurShaderSource = parseShader("HorizontalBlurShader", "horizontalBlur.shader", horizontalBlurShaderSourceFile);
 	ShaderSource verticalBlurShaderSource   = parseShader("VerticalBlurShader", "verticalBlur.shader", verticalBlurShaderSourceFile);
 
-	// Shader init
+	// GShader init
 	new(&guiShader) GuiShader(guiShaderSource);
 	new(&quadShader) QuadShader(quadShaderSource);
 	new(&horizontalBlurShader) BlurShader(horizontalBlurShaderSource);
@@ -196,9 +197,9 @@ void GuiShader::setTextured(bool textured) {
 
 // QuadShader
 
-void QuadShader::updateProjection(const Mat4f& orthoMatrix) {
+void QuadShader::updateProjection(const Mat4f& projectionMatrix) {
 	bind();
-	setUniform("projectionMatrix", orthoMatrix);
+	setUniform("projectionMatrix", projectionMatrix);
 }
 
 void QuadShader::updateColor(const Vec4& color) {
@@ -207,15 +208,16 @@ void QuadShader::updateColor(const Vec4& color) {
 	setUniform("color", color);
 }
 
-void QuadShader::updateTexture(Graphics::Texture* texture) {
-	updateTexture(texture, Vec4f(1));
+void QuadShader::updateTexture(GLID texture, GLID unit) {
+	updateTexture(texture, unit, Vec4f(1.0f));
 }
 
-void QuadShader::updateTexture(Graphics::Texture* texture, const Vec4f& color) {
+void QuadShader::updateTexture(GLID texture, GLID unit, const Vec4f& color) {
 	bind();
-	texture->bind();
+	Renderer::activeTexture(unit);
+	Renderer::bindTexture2D(texture);
 	setUniform("textured", true);
-	setUniform("textureSampler", texture->getUnit());
+	setUniform("textureSampler", unit);
 	setUniform("color", color);
 }
 

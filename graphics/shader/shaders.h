@@ -21,8 +21,8 @@ struct QuadShader : public ShaderResource {
 
 	void updateProjection(const Mat4f& orthoMatrix);
 	void updateColor(const Vec4& color);
-	void updateTexture(Graphics::Texture* texture);
-	void updateTexture(Graphics::Texture* texture, const Vec4f& color);
+	void updateTexture(GLID texture, GLID unit);
+	void updateTexture(GLID texture, GLID unit, const Vec4f& color);
 };
 
 struct BlurShader : public ShaderResource {
@@ -33,7 +33,7 @@ struct BlurShader : public ShaderResource {
 	void updateTexture(Graphics::Texture* texture);
 };
 
-namespace GraphicsShaders {
+namespace Shaders {
 extern GuiShader guiShader;
 extern QuadShader quadShader;
 extern BlurShader horizontalBlurShader;

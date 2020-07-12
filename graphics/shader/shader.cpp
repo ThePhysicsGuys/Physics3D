@@ -1,7 +1,6 @@
 ﻿#include "core.h"
 
 #include <GL/glew.h>
-#include <GLFW/glfw3.h>
 
 #include "shader.h"
 #include "renderer.h"
@@ -23,6 +22,11 @@ int Shader::getUniform(const std::string& uniform) const {
 		return iterator->second;
 
 	return -1;
+}
+
+void Shader::addUniform(const std::string& uniform) {
+	if (uniforms.find(uniform) == uniforms.end())
+		createUniform(uniform);
 }
 
 void Shader::createUniform(const std::string& uniform) {
@@ -88,34 +92,7 @@ void Shader::setUniform(const std::string& uniform, const Mat4f& value) const {
 
 #pragma region compile
 
-GLID compileShader(const std::string& source, unsigned int type) {
-	GLID id = glCreateShader(type);
-
-	const char* src = source.c_str();
-
-	glShaderSource(id, 1, &src, nullptr);
-
-	glCall(glCompileShader(id));
-
-	// Error handling
-	int result;
-	glGetShaderiv(id, GL_COMPILE_STATUS, &result);
-	if (result == GL_FALSE) {
-		int length;
-		glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
-		char* message = (char*) alloca(length * sizeof(char));
-		glGetShaderInfoLog(id, length, &length, message);
-		Log::print(Log::Color::ERROR, "fail\n");
-		Log::error(message);
-
-		glDeleteShader(id);
-		return 0;
-	}
-
-	return id;
-}
-
-GLID compileShaderWithDebug(const std::string& name, const std::string& source, unsigned int type) {
+GLID Shader::compile(const std::string& name, const std::string& source, unsigned int type) {
 	Log::setDelimiter("");
 	Log::info("%s: ", name.c_str());
 
@@ -123,19 +100,20 @@ GLID compileShaderWithDebug(const std::string& name, const std::string& source, 
 
 	const char* src = source.c_str();
 
-	glShaderSource(id, 1, &src, nullptr);
-	glCompileShader(id);
+	glShaderSource(id, 1, &src, NULL);
+	glCall(glCompileShader(id));
 
 	int result; glGetShaderiv(id, GL_COMPILE_STATUS, &result);
 	if (result == GL_FALSE) {
 		int length; glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
-		char* message = (char*) alloca(length * sizeof(char)); glGetShaderInfoLog(id, length, &length, message);
+		char* message = (char*) alloca(length * sizeof(char)); 
+		glGetShaderInfoLog(id, length, &length, message);
 		
 		Log::print(Log::Color::ERROR, "fail\n");
 		Log::error(message);
 
 		glDeleteShader(id);
-		return 0;
+		id = 0;
 	} else {
 		Log::print(Log::Color::DEBUG, "done\n");
 	}
@@ -145,127 +123,9 @@ GLID compileShaderWithDebug(const std::string& name, const std::string& source, 
 	return id;
 }
 
-GLID createShader(const std::string& name, const std::string& vertexShader, const std::string& fragmentShader, const std::string& geometryShader, const std::string& tesselationControlShader, const std::string& tesselationEvaluateShader) {
-	GLID program = glCreateProgram();
-
-	Log::subject s(name);
-	Log::info("Compiling shader (%s)", name.c_str());
-
-	GLID vs = 0;
-	GLID fs = 0;
-	GLID gs = 0;
-	GLID tcs = 0;
-	GLID tes = 0;
-
-	vs = compileShaderWithDebug("Vertex shader", vertexShader, GL_VERTEX_SHADER);
-	glAttachShader(program, vs);
-
-	fs = compileShaderWithDebug("Fragment shader", fragmentShader, GL_FRAGMENT_SHADER);
-	glAttachShader(program, fs);
-
-	if (!geometryShader.empty()) {
-		gs = compileShaderWithDebug("Geometry shader", geometryShader, GL_GEOMETRY_SHADER);
-		glAttachShader(program, gs);
-	}
-
-	if (!tesselationControlShader.empty()) {
-		tcs = compileShaderWithDebug("Tesselation control shader", tesselationControlShader, GL_TESS_CONTROL_SHADER);
-		glAttachShader(program, tcs);
-	}
-
-	if (!tesselationEvaluateShader.empty()) {
-		tes = compileShaderWithDebug("Tesselation evaluate", tesselationEvaluateShader, GL_TESS_EVALUATION_SHADER);
-		glAttachShader(program, tes);
-	}
-
-	glCall(glLinkProgram(program));
-	glCall(glValidateProgram(program));
-
-	glDeleteShader(vs);
-	glDeleteShader(fs);
-	if (!geometryShader.empty())
-		glDeleteShader(gs);
-	if (!tesselationControlShader.empty())
-		glDeleteShader(tcs);
-	if (!tesselationEvaluateShader.empty())
-		glDeleteShader(tes);
-
-	Log::info("Created shader with id (%d)", program);
-
-	return program;
-}
-
-void Shader::reload(const ShaderSource& shaderSource) {
-	Log::subject s(name);
-	Log::info("Reloading shader (%s)", name.c_str());
-
-	Shader shader(shaderSource);
-	if (shader.id == 0) {
-		Log::error("Reloading failed");
-		return;
-	}
-
-	unbind();
-	glDeleteProgram(id);
-
-	this->id = shader.id;
-	shader.id = 0; // Avoid deletion
-	this->uniforms = shader.uniforms;
-	this->vertexStage = shader.vertexStage;
-	this->fragmentStage = shader.fragmentStage;
-	this->geometryStage = shader.geometryStage;
-	this->tesselationControlStage = shader.tesselationControlStage;
-	this->tesselationEvaluationStage = shader.tesselationEvaluationStage;
-	this->flags = shader.flags;
-	this->name = shader.name;
-
-	Log::info("Reloading succesful");
-}
-
 #pragma endregion
 
 #pragma region parse
-
-std::string parseFile(const std::string& path) {
-	if (path.empty())
-		return std::string();
-
-	std::ifstream fileStream(path);
-
-	Log::setDelimiter("");
-	Log::info("Reading (%s) ... ", path.c_str());
-
-	if (fileStream.fail() || !fileStream.is_open()) {
-		Log::print(Log::Color::ERROR, "Fail");
-		Log::setDelimiter("\n");
-
-		return "";
-	}
-
-	Log::print(Log::Color::DEBUG, "Done");
-	Log::setDelimiter("\n");
-
-	std::string line;
-	std::stringstream stringStream;
-	while (getline(fileStream, line))
-		stringStream << line << "\n";
-
-	fileStream.close();
-
-	return stringStream.str();
-}
-
-ShaderSource parseShader(const std::string& name, const std::string& path, const std::string& vertexPath, const std::string& fragmentPath, const std::string& geometryPath, const std::string& tesselationControlPath, const std::string& tesselationEvaluatePath) {
-	Log::subject s(name);
-
-	std::string vertexFile = parseFile(vertexPath);
-	std::string fragmentFile = parseFile(fragmentPath);
-	std::string geometryFile = parseFile(geometryPath);
-	std::string tesselationControlFile = parseFile(tesselationControlPath);
-	std::string tesselationEvaluateFile = parseFile(tesselationEvaluatePath);
-
-	return ShaderSource(name, path, vertexFile, fragmentFile, geometryFile, tesselationControlFile, tesselationEvaluateFile);
-}
 
 ShaderSource parseShader(const std::string& name, const std::string& path, const std::string& shaderText) {
 	std::istringstream shaderTextStream(shaderText);
@@ -297,13 +157,14 @@ ShaderSource parseShader(const std::string& name, const std::string& path, std::
 		FRAGMENT = 2,
 		GEOMETRY = 3,
 		TESSELATION_CONTROL = 4,
-		TESSELATION_EVALUATE = 5
+		TESSELATION_EVALUATE = 5,
+		COMPUTE = 6
 	};
 
 	ShaderType type = ShaderType::NONE;
 
 	std::string line;
-	std::stringstream stringStream[6];
+	std::stringstream stringStream[7];
 
 	int lineNumber = 0;
 	while (getline(shaderTextStream, line)) {
@@ -320,6 +181,8 @@ ShaderSource parseShader(const std::string& name, const std::string& path, std::
 			type = ShaderType::TESSELATION_CONTROL;
 		} else if (line.find("[tesselation evaluate]") != std::string::npos) {
 			type = ShaderType::TESSELATION_EVALUATE;
+		} else if (line.find("[compute]") != std::string::npos) {
+			type = ShaderType::COMPUTE;
 		} else if (line.find("[common]") != std::string::npos) {
 			type = ShaderType::COMMON;
 		} else {
@@ -337,6 +200,7 @@ ShaderSource parseShader(const std::string& name, const std::string& path, std::
 	std::string geometrySource = stringStream[(int) ShaderType::GEOMETRY].str();
 	std::string tesselationControlSource = stringStream[(int) ShaderType::TESSELATION_CONTROL].str();
 	std::string tesselationEvaluateSource = stringStream[(int) ShaderType::TESSELATION_EVALUATE].str();
+	std::string computeSource = stringStream[(int) ShaderType::COMPUTE].str();
 
 	Log::setDelimiter("");
 
@@ -375,137 +239,26 @@ ShaderSource parseShader(const std::string& name, const std::string& path, std::
 		tesselationEvaluateSource = commonSource + tesselationEvaluateSource;
 	}
 
+	if (!computeSource.empty()) {
+		Log::info("Tesselation evaluation shader: ");
+		Log::print(Log::Color::DEBUG, "done\n");
+		computeSource = commonSource + computeSource;
+	}
+
 	Log::setDelimiter("\n");
 
-	return ShaderSource(name, path, vertexSource, fragmentSource, geometrySource, tesselationControlSource, tesselationEvaluateSource);
-}
-
-void Shader::addUniform(const std::string& uniform) {
-	if (uniforms.find(uniform) == uniforms.end())
-		createUniform(uniform);
-}
-
-std::vector<std::string> getSuffixes(const ShaderStage& stage, const ShaderLocal& local) {
-	std::vector<std::string> suffixes;
-
-	auto strct = stage.info.structs.find(local.variableType);
-	bool isStruct = strct != stage.info.structs.end();
-	bool isArray = local.array;
-
-	if (isArray) {
-		if (isStruct) { // struct array
-			for (int i = 0; i < local.amount; i++) {
-				std::string variable = local.name + "[" + std::to_string(i) + "].";
-
-				for (const ShaderLocal& local : strct->second.locals) {
-					std::vector<std::string> localSuffixes = getSuffixes(stage, local);
-
-					for (std::string localSuffix : localSuffixes) 
-						suffixes.push_back(variable + localSuffix);
-				}
-			}
-		} else { // normal array
-			for (int i = 0; i < local.amount; i++) 
-				suffixes.push_back(local.name + "[" + std::to_string(i) + "]");
-		}
-	} else {
-		if (isStruct) {
-			std::string variable = local.name + ".";
-
-			for (const ShaderLocal& local : strct->second.locals) {
-				std::vector<std::string> localSuffixes = getSuffixes(stage, local);
-
-				for (std::string localSuffix : localSuffixes) 
-					suffixes.push_back(variable + localSuffix);
-			}
-		} else {
-			suffixes.push_back(local.name);
-		}
-	}
-
-	return suffixes;
-}
-
-void Shader::addUniforms(const ShaderStage& stage) {
-	for (const ShaderUniform& uniform : stage.info.uniforms) {
-		std::vector<std::string> variables = getSuffixes(stage, uniform);
-
-		for (const std::string& variable : variables)
-			addUniform(variable);
-	}
-}
-
-void Shader::addShaderStage(const ShaderStage& stage, const ShaderFlag& flag) {
-	if (!stage.source.empty()) {
-		addUniforms(stage);
-
-		flags |= flag;
-
-		switch (flag) {
-			case VERTEX:
-				vertexStage = stage;
-				break;
-			case FRAGMENT:
-				fragmentStage = stage;
-				break;
-			case GEOMETRY:
-				geometryStage = stage;
-				break;
-			case TESSELATION_CONTROL:
-				tesselationControlStage = stage;
-				break;
-			case TESSELATION_EVALUATE:
-				tesselationEvaluationStage = stage;
-				break;
-			default:
-				break;
-		}
-	}
-}
-
-ShaderStage parseShaderStage(const std::string& source) {
-	if (!source.empty()) {
-		ShaderInfo info = ShaderParser::parse(source);
-		return ShaderStage(source, info);
-	}
-
-	return ShaderStage();
+	return ShaderSource(name, path, vertexSource, fragmentSource, geometrySource, tesselationControlSource, tesselationEvaluateSource, computeSource);
 }
 
 #pragma endregion
 
 #pragma region constructors
 
-ShaderStage::ShaderStage() {};
-ShaderStage::ShaderStage(const std::string& source, const ShaderInfo& info) : source(source), info(info) {};
+ShaderSource::ShaderSource() = default;
+ShaderSource::ShaderSource(const std::string& name, const std::string& path, const std::string& vertexSource, const std::string& fragmentSource, const std::string& geometrySource, const std::string& tesselationControlSource, const std::string& tesselationEvaluateSource, const std::string& computeSource) : name(name), path(path), vertexSource(vertexSource), fragmentSource(fragmentSource), geometrySource(geometrySource), tesselationControlSource(tesselationControlSource), tesselationEvaluateSource(tesselationEvaluateSource), computeSource(computeSource) {}
 
-ShaderSource::ShaderSource() {};
-ShaderSource::ShaderSource(const std::string& name, const std::string& path, const std::string& vertexSource, const std::string& fragmentSource, const std::string& geometrySource, const std::string& tesselationControlSource, const std::string& tesselationEvaluateSource) : name(name), path(path), vertexSource(vertexSource), fragmentSource(fragmentSource), geometrySource(geometrySource), tesselationControlSource(tesselationControlSource), tesselationEvaluateSource(tesselationEvaluateSource) {}
-
-Shader::Shader() {};
-Shader::Shader(const ShaderSource& shaderSource) : Shader(shaderSource.name, shaderSource.vertexSource, shaderSource.fragmentSource, shaderSource.geometrySource, shaderSource.tesselationControlSource, shaderSource.tesselationEvaluateSource) {};
-
-Shader::Shader(const std::string& name, const std::string& vertexSource, const std::string& fragmentSource, const std::string& geometrySource, const std::string& tesselationControlSource, const std::string& tesselationEvaluateSource) : name(name) {
-	id = createShader(name, vertexSource, fragmentSource, geometrySource, tesselationControlSource, tesselationEvaluateSource);
-
-	std::future<ShaderStage> futureVertexStage = std::async(std::launch::async, parseShaderStage, vertexSource);
-	std::future<ShaderStage> futureFragmentStage = std::async(std::launch::async, parseShaderStage, fragmentSource);
-	std::future<ShaderStage> futureGeometryStage = std::async(std::launch::async, parseShaderStage, geometrySource);
-	std::future<ShaderStage> futureTesselationControlStage = std::async(std::launch::async, parseShaderStage, tesselationControlSource);
-	std::future<ShaderStage> futureTesselationEvaluationStage = std::async(std::launch::async, parseShaderStage, tesselationEvaluateSource);
-
-	addShaderStage(futureVertexStage.get(), VERTEX);
-	addShaderStage(futureFragmentStage.get(), FRAGMENT);
-	addShaderStage(futureGeometryStage.get(), GEOMETRY);
-	addShaderStage(futureTesselationControlStage.get(), TESSELATION_CONTROL);
-	addShaderStage(futureTesselationEvaluationStage.get(), TESSELATION_EVALUATE);
-
-	//addShaderStage(parseShaderStage(vertexSource), VERTEX);
-	//addShaderStage(parseShaderStage(fragmentSource), FRAGMENT);
-	//addShaderStage(parseShaderStage(geometrySource), GEOMETRY);
-	//addShaderStage(parseShaderStage(tesselationControlSource), TESSELATION_CONTROL);
-	//addShaderStage(parseShaderStage(tesselationEvaluateSource), TESSELATION_EVALUATE);
-}	
+Shader::Shader() = default;
+Shader::Shader(const ShaderSource& shaderSource) : name(shaderSource.name) {}	
 
 Shader::~Shader() {
 	close();
@@ -517,21 +270,6 @@ Shader::Shader(Shader&& other) {
 
 	uniforms = other.uniforms;
 	other.uniforms = std::unordered_map<std::string, int>();
-
-	vertexStage = other.vertexStage;
-	other.vertexStage = ShaderStage();
-
-	fragmentStage = other.fragmentStage;
-	other.fragmentStage = ShaderStage();
-
-	geometryStage = other.geometryStage;
-	other.geometryStage = ShaderStage();
-
-	tesselationControlStage = other.tesselationControlStage;
-	other.tesselationControlStage = ShaderStage();
-
-	tesselationEvaluationStage = other.tesselationEvaluationStage;
-	other.tesselationEvaluationStage = ShaderStage();
 
 	flags = other.flags;
 	other.flags = NONE;
@@ -573,6 +311,72 @@ void Shader::close() {
 		id = 0;
 
 		Log::info("Closed shader");
+	}
+}
+
+#pragma endregion
+
+#pragma region ShaderStage
+
+ShaderStage::ShaderStage() = default;
+ShaderStage::ShaderStage(const std::string& source, const ShaderInfo& info) : source(source), info(info) {};
+
+ShaderStage parseShaderStage(const std::string& source) {
+	if (!source.empty()) {
+		ShaderInfo info = ShaderParser::parse(source);
+		return ShaderStage(source, info);
+	}
+
+	return ShaderStage();
+}
+
+std::vector<std::string> getSuffixes(const ShaderStage& stage, const ShaderLocal& local) {
+	std::vector<std::string> suffixes;
+
+	auto strct = stage.info.structs.find(local.variableType);
+	bool isStruct = strct != stage.info.structs.end();
+	bool isArray = local.array;
+
+	if (isArray) {
+		if (isStruct) { // struct array
+			for (int i = 0; i < local.amount; i++) {
+				std::string variable = local.name + "[" + std::to_string(i) + "].";
+
+				for (const ShaderLocal& local : strct->second.locals) {
+					std::vector<std::string> localSuffixes = getSuffixes(stage, local);
+
+					for (std::string localSuffix : localSuffixes)
+						suffixes.push_back(variable + localSuffix);
+				}
+			}
+		} else { // normal array
+			for (int i = 0; i < local.amount; i++)
+				suffixes.push_back(local.name + "[" + std::to_string(i) + "]");
+		}
+	} else {
+		if (isStruct) {
+			std::string variable = local.name + ".";
+
+			for (const ShaderLocal& local : strct->second.locals) {
+				std::vector<std::string> localSuffixes = getSuffixes(stage, local);
+
+				for (std::string localSuffix : localSuffixes)
+					suffixes.push_back(variable + localSuffix);
+			}
+		} else {
+			suffixes.push_back(local.name);
+		}
+	}
+
+	return suffixes;
+}
+
+void Shader::addUniforms(const ShaderStage& stage) {
+	for (const ShaderUniform& uniform : stage.info.uniforms) {
+		std::vector<std::string> variables = getSuffixes(stage, uniform);
+
+		for (const std::string& variable : variables)
+			addUniform(variable);
 	}
 }
 
