@@ -27,8 +27,8 @@ void SelectionTool::onRender() {
 
 	Renderer::beginScene();
 
-	GraphicsShaders::guiShader.bind();
-	GraphicsShaders::guiShader.setUniform("projectionMatrix", screen.camera.orthoMatrix);	
+	Graphics::Shaders::guiShader.bind();
+	Graphics::Shaders::guiShader.setUniform("projectionMatrix", screen.camera.orthoMatrix);
 
 	Path::batch = GUI::batch;
 	if (getToolStatus() == kActive) {

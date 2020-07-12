@@ -16,46 +16,47 @@
 #include "worlds.h"
 #include "imgui/imgui.h"
 #include "../physics/misc/filters/visibilityFilter.h"
+#include "../graphics/debug/guiDebug.h"
 
 #include "application.h"
 #include "shader/shaders.h"
+#include "../graphics/shader/shaders.h"
+#include "../graphics/resource/textureResource.h"
 
 namespace Application {
 
-float near = 0.001;
-float far = 100;
-
-unsigned int TestLayer::depthMap = 0;
-Mat4f TestLayer::lightProjection = ortho(-25.0, 25.0, -25.0, 25.0, near, far);
-Mat4f TestLayer::lightView = lookAt({ -15.0, 15.0, -15.0 }, { 0.0, 0.0, 0.0 }, { 0.0, 1.0, 0.0 });
-Mat4f TestLayer::lighSpaceMatrix = lightProjection * lightView;
-
-GLID depthMapFBO;
-
-GLID WIDTH = 2048;
-GLID HEIGHT = 2048;
-
-IndexedMesh* mesh = nullptr;
+GLID texture = 0;
+int textureWidth = 512;
+int textureHeight = 512;
 
 void TestLayer::onInit() {
-	glGenFramebuffers(1, &depthMapFBO);
+	glGenTextures(1, &texture);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	int internalFormat = GL_RGBA32F;
+	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, textureWidth, textureHeight, 0, GL_RGBA, GL_FLOAT, NULL);
+	glBindImageTexture(0, texture, 0, GL_FALSE, 0, GL_WRITE_ONLY, internalFormat);
 
-	glGenTextures(1, &depthMap);
-	glBindTexture(GL_TEXTURE_2D, depthMap);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
-		WIDTH, HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-	float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+	int workGroupCount[3];
+	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0, &workGroupCount[0]);
+	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 1, &workGroupCount[1]);
+	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 2, &workGroupCount[2]);
+	printf("max global (total) work group counts x:%i y:%i z:%i\n", workGroupCount[0], workGroupCount[1], workGroupCount[2]);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
-	glDrawBuffer(GL_NONE);
-	glReadBuffer(GL_NONE);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	int workGroupSize[3];
+	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &workGroupSize[0]);
+	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &workGroupSize[1]);
+	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, &workGroupSize[2]);
+	printf("max local (in one shader) work group sizes x:%i y:%i z:%i\n", workGroupSize[0], workGroupSize[1], workGroupSize[2]);
+
+	int workGroupInvocations;
+	glGetIntegerv(GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS, &workGroupInvocations);
+	printf("max local work group invocations %i\n", workGroupInvocations);
+	shader = CShader(parseShader("ComputeShader", "../res/shaders/compute.shader"));
 }
 
 void TestLayer::onUpdate() {
@@ -67,72 +68,20 @@ void TestLayer::onEvent(Engine::Event& event) {
 
 }
 
-unsigned int quadVAO = 0;
-unsigned int quadVBO;
-void renderQuad() {
-	if (quadVAO == 0) {
-		float quadVertices[] = {
-			// positions        // texture Coords
-			-1.0f,  1.0f, 0.0f, 1.0f,
-			-1.0f, -1.0f, 0.0f, 0.0f,
-			 1.0f,  1.0f, 1.0f, 1.0f,
-			 1.0f, -1.0f, 1.0f, 0.0f,
-		};
-		// setup plane VAO
-		glGenVertexArrays(1, &quadVAO);
-		glGenBuffers(1, &quadVBO);
-		glBindVertexArray(quadVAO);
-		glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*) 0);
-	}
-	glBindVertexArray(quadVAO);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	glBindVertexArray(0);
-}
-
-void TestLayer::renderScene() {
-	std::multimap<int, ExtendedPart*> visibleParts;
-	screen.world->syncReadOnlyOperation([&visibleParts] () {
-		for (ExtendedPart& part : screen.world->iterParts(ALL_PARTS)) 
-			visibleParts.insert({ part.visualData.drawMeshId, &part });
-	});
-
-	for (auto iterator = visibleParts.begin(); iterator != visibleParts.end(); ++iterator) {
-		ExtendedPart* part = (*iterator).second;
-
-		if (part->visualData.drawMeshId == -1)
-			continue;
-
-		Shaders::depthShader.updateModel(part->getCFrame().asMat4WithPreScale(part->hitbox.scale));
-		Engine::MeshRegistry::meshes[part->visualData.drawMeshId]->render(part->renderMode);
-	}
-}
-
 void TestLayer::onRender() {
 	using namespace Graphics;
 	using namespace Graphics::Renderer;
 
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
-	Shaders::depthShader.bind();
-	Shaders::depthShader.updateLight(lighSpaceMatrix);
-	glViewport(0, 0, WIDTH, HEIGHT);
-	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-	glClear(GL_DEPTH_BUFFER_BIT);	
-	Renderer::disableCulling();
-	//glCullFace(GL_FRONT_AND_BACK);
-	renderScene();
-	//glCullFace(GL_BACK);
-	Renderer::enableCulling();
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glViewport(0, 0, GUI::windowInfo.dimension.x, GUI::windowInfo.dimension.y);
-
-	/*Shaders::depthBufferShader.bind();
-	Shaders::depthBufferShader.updatePlanes(near, far);
-	Shaders::depthBufferShader.updateDepthMap(0, depthMap);
-	renderQuad();*/
+	shader.bind();
+	Renderer::bindTexture2D(texture);
+	shader.dispatch(textureWidth, textureHeight, 1);
+	shader.barrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+	
+	ImGui::Begin("Test");
+	ImGui::Image((void*) texture, ImVec2(100, 100));
+	ImGui::End();
 }
 
 void TestLayer::onClose() {

@@ -279,6 +279,7 @@
   <ItemGroup>
     <ClInclude Include="application.h" />
     <ClInclude Include="io\saveDialog.h" />
+    <ClInclude Include="layer\cameraLayer.h" />
     <ClInclude Include="layer\constraintLayer.h" />
     <ClInclude Include="core.h" />
     <ClInclude Include="ecs\light.h" />
@@ -286,6 +287,8 @@
     <ClInclude Include="ecs\mesh.h" />
     <ClInclude Include="ecs\model.h" />
     <ClInclude Include="io\serialization.h" />
+    <ClInclude Include="layer\imguiLayer.h" />
+    <ClInclude Include="layer\shadowLayer.h" />
     <ClInclude Include="layer\testLayer.h" />
     <ClInclude Include="layer\debugLayer.h" />
     <ClInclude Include="layer\debugOverlay.h" />
@@ -318,6 +321,7 @@
   <ItemGroup>
     <ClCompile Include="application.cpp" />
     <ClCompile Include="io\saveDialog.cpp" />
+    <ClCompile Include="layer\cameraLayer.cpp" />
     <ClCompile Include="layer\constraintLayer.cpp" />
     <ClCompile Include="core.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -331,6 +335,8 @@
     <ClCompile Include="ecs\mesh.cpp" />
     <ClCompile Include="ecs\model.cpp" />
     <ClCompile Include="io\serialization.cpp" />
+    <ClCompile Include="layer\shadowLayer.cpp" />
+    <ClCompile Include="layer\imguiLayer.cpp" />
     <ClCompile Include="layer\postprocessLayer.cpp" />
     <ClCompile Include="picker\selectionTool.cpp" />
     <ClCompile Include="resources.cpp" />

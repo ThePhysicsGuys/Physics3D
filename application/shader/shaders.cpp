@@ -33,7 +33,7 @@ DebugShader debugShader;
 DepthBufferShader depthBufferShader;
 
 void onInit() {
-	// Shader source init
+	// GShader source init
 	ShaderSource basicShaderSource       = parseShader("BasicShader", "../res/shaders/basic.shader", getResourceAsString(applicationResources, BASIC_SHADER));
 	ShaderSource depthShaderSource       = parseShader("DepthShader", "../res/shaders/depth.shader", getResourceAsString(applicationResources, DEPTH_SHADER));
 	ShaderSource vectorShaderSource      = parseShader("VectorShader", "../res/shaders/vector.shader", getResourceAsString(applicationResources, VECTOR_SHADER));
@@ -51,7 +51,7 @@ void onInit() {
 	ShaderSource debugShaderSource       = parseShader("DebugShader", "../res/shaders/debug.shader", getResourceAsString(applicationResources, DEBUG_SHADER));
 	ShaderSource depthBufferShaderSource = parseShader("DepthBufferShader", "../res/shaders/depthbuffer.shader", getResourceAsString(applicationResources, DEPTHBUFFER_SHADER));
 
-	// Shader init
+	// GShader init
 	new(&basicShader) BasicShader(basicShaderSource);
 	new(&depthShader) DepthShader(depthShaderSource);
 	new(&vectorShader) VectorShader(vectorShaderSource);

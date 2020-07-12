@@ -14,6 +14,7 @@
 #include "../graphics/gui/gui.h"
 #include "../graphics/gui/guiUtils.h"
 #include "../graphics/debug/visualDebug.h"
+#include "../graphics/buffers/frameBuffer.h"
 #include "../graphics/glfwUtils.h"
 #include "../worlds.h"
 #include "../view/screen.h"
@@ -56,7 +57,15 @@ bool StandardInputHandler::onFrameBufferResize(Engine::FrameBufferResizeEvent& e
 	Vec2i dimension = Vec2i(event.getWidth(), event.getHeight());
 
 	Graphics::Renderer::viewport(Vec2i(), dimension);
-	Log::debug("Framebuffer resize: %s", str(dimension).c_str());
+	
+	float aspect = float(dimension.x) / float(dimension.y);
+	screen.camera.onUpdate(aspect);
+	screen.dimension = dimension;
+	screen.screenFrameBuffer->resize(screen.dimension);
+
+	Graphics::GUI::windowInfo.aspect = aspect;
+	Graphics::GUI::windowInfo.dimension = dimension;
+
 	(*screen.eventHandler.windowResizeHandler) (screen, dimension);
 
 	return true;

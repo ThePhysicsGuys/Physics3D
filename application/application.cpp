@@ -203,7 +203,7 @@ void setupWorld(int argc, const char** args) {
 				newCube->material.albedo = Vec4f(float((x-minX)/(maxX-minX)), float((y-minY)/(maxY-minY)), float((z-minZ)/(maxZ-minZ)), 1.0f);
 				world.addPart(newCube);
 				world.addPart(new ExtendedPart(sphereShape(0.5), GlobalCFrame(Position(x + 5, y + 1, z - 5)), { 1.0, 0.2, 0.5 }, "Sphere"));
-				spiderFactories[rand() & 0x00000003].buildSpider(GlobalCFrame(Position(x+y*0.1, y+1, z)));
+				//spiderFactories[rand() & 0x00000003].buildSpider(GlobalCFrame(Position(x+y*0.1, y+1, z)));
 				world.addPart(new ExtendedPart(triangle, GlobalCFrame(Position(x - 20, y + 1, z + 20)), { 1.0, 0.2, 0.5 }, "Triangle"));
 
 				//world.addPart(new ExtendedPart(cylinderShape(0.3, 1.2), GlobalCFrame(x - 5, y + 1, z + 5, Rotation::fromEulerAngles(3.1415/4, 3.1415/4, 0.0)), {1.0, 0.2, 0.5}, "cylinderShape"));

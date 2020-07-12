@@ -53,8 +53,8 @@ void DebugOverlay::onRender() {
 
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
-	GraphicsShaders::guiShader.bind();
-	GraphicsShaders::guiShader.setUniform("projectionMatrix", screen->camera.orthoMatrix);
+	Graphics::Shaders::guiShader.bind();
+	Graphics::Shaders::guiShader.setUniform("projectionMatrix", screen->camera.orthoMatrix);
 
 	beginScene();
 
@@ -65,7 +65,7 @@ void DebugOverlay::onRender() {
 	Path::bind(GUI::batch);
 	ResourceManager::get<FontResource>("font")->getAtlas()->bind();
 	Shaders::fontShader.updateProjection(screen->camera.orthoMatrix);
-	GraphicsShaders::guiShader.setUniform("projectionMatrix", screen->camera.orthoMatrix);
+	Graphics::Shaders::guiShader.setUniform("projectionMatrix", screen->camera.orthoMatrix);
 	graphicsMeasure.mark(GraphicsProcess::PROFILER);
 
 	size_t objectCount = screen->world->getPartCount();
