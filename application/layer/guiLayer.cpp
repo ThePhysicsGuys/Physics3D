@@ -11,14 +11,15 @@
 #include "../graphics/shader/shaders.h"
 #include "../graphics/gui/guiUtils.h"
 #include "../engine/input/mouse.h"
-#include "../graphics/buffers/frameBuffer.h"
 #include "../graphics/gui/gui.h"
 #include "../graphics/debug/visualDebug.h"
+#include "../graphics/buffers/frameBuffer.h"
 
 namespace Application {
 
 bool onMouseMove(const Engine::MouseMoveEvent& event) {
 	using namespace Graphics;
+	
 	return GUI::onMouseMove(event.getNewX(), event.getNewY());
 }
 
@@ -60,7 +61,7 @@ void GuiLayer::onInit() {
 
 	// GUI init
 	GUI::onInit({ screen->dimension, screen->camera.aspect }, screen->screenFrameBuffer);
-	GraphicsShaders::guiShader.init(screen->camera.orthoMatrix);
+	Graphics::Shaders::guiShader.init(screen->camera.orthoMatrix);
 }
 
 void GuiLayer::onUpdate() {
@@ -90,7 +91,8 @@ void GuiLayer::onRender() {
 	using namespace Graphics;
 	using namespace Graphics::Renderer;
 	Screen* screen = static_cast<Screen*>(this->ptr);
-
+	
+	Renderer::bindFramebuffer(screen->screenFrameBuffer->getID());
 	beginScene();
 
 	BigFrame::render();

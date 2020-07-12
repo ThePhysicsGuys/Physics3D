@@ -108,7 +108,7 @@ Graphics::GuiBatch* batch;
 
 void onInit(const WindowInfo& info, Graphics::FrameBuffer* screenFrameBuffer) {
 	// Init
-	GraphicsShaders::onInit();
+	Shaders::onInit();
 
 	GUI::windowInfo = info;
 	GUI::batch = new Graphics::GuiBatch();
@@ -265,7 +265,7 @@ bool onWindowResize(const WindowInfo& info) {
 }
 
 void onUpdate(Mat4f orthoMatrix) {
-	GraphicsShaders::quadShader.updateProjection(orthoMatrix);
+	Shaders::quadShader.updateProjection(orthoMatrix);
 }
 
 void onRender(Mat4f orthoMatrix) {
@@ -274,7 +274,7 @@ void onRender(Mat4f orthoMatrix) {
 
 void onClose() {
 	// Shaders
-	GraphicsShaders::onClose();
+	Shaders::onClose();
 
 	// Textures
 	closeButtonHoverTexture->close();

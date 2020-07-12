@@ -220,6 +220,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release No AVX|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\include\imgui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="..\include\imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="..\include\imgui\imgui_widgets.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release No AVX|x64'">NotUsing</PrecompiledHeader>
@@ -245,8 +247,6 @@
     <ClCompile Include="gui\container.cpp" />
     <ClCompile Include="gui\gui.cpp" />
     <ClCompile Include="gui\guiUtils.cpp" />
-    <ClCompile Include="gui\imgui\imgui_impl_glfw.cpp" />
-    <ClCompile Include="gui\imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="gui\layout.cpp" />
     <ClCompile Include="meshLibrary.cpp" />
     <ClCompile Include="mesh\abstractMesh.cpp" />
@@ -260,6 +260,8 @@
     <ClCompile Include="resource\fontResource.cpp" />
     <ClCompile Include="resource\shaderResource.cpp" />
     <ClCompile Include="resource\textureResource.cpp" />
+    <ClCompile Include="shader\cshader.cpp" />
+    <ClCompile Include="shader\gshader.cpp" />
     <ClCompile Include="shader\shaderLexer.cpp" />
     <ClCompile Include="shader\shaderParser.cpp" />
     <ClCompile Include="shader\shaders.cpp" />
@@ -272,6 +274,8 @@
   <ItemGroup>
     <ClInclude Include="..\include\imgui\imconfig.h" />
     <ClInclude Include="..\include\imgui\imgui.h" />
+    <ClInclude Include="..\include\imgui\imgui_impl_glfw.h" />
+    <ClInclude Include="..\include\imgui\imgui_impl_opengl3.h" />
     <ClInclude Include="..\include\imgui\imgui_internal.h" />
     <ClInclude Include="..\include\imgui\imstb_rectpack.h" />
     <ClInclude Include="..\include\imgui\imstb_textedit.h" />
@@ -299,8 +303,6 @@
     <ClInclude Include="gui\gui.h" />
     <ClInclude Include="gui\guiUtils.h" />
     <ClInclude Include="gui\imgui\imguiExtension.h" />
-    <ClInclude Include="gui\imgui\imgui_impl_glfw.h" />
-    <ClInclude Include="gui\imgui\imgui_impl_opengl3.h" />
     <ClInclude Include="gui\layout.h" />
     <ClInclude Include="gui\orderedVector.h" />
     <ClInclude Include="meshLibrary.h" />
@@ -317,6 +319,8 @@
     <ClInclude Include="resource\fontResource.h" />
     <ClInclude Include="resource\shaderResource.h" />
     <ClInclude Include="resource\textureResource.h" />
+    <ClInclude Include="shader\cshader.h" />
+    <ClInclude Include="shader\gshader.h" />
     <ClInclude Include="shader\shader.h" />
     <ClInclude Include="shader\shaderLexer.h" />
     <ClInclude Include="shader\shaderParser.h" />
