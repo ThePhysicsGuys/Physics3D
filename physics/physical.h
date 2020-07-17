@@ -294,8 +294,8 @@ public:
 		
 		NestedRecurse::recurse(tree.getRootNode(), *this, connectedPhysFunc);
 	}
-	InternalMotionTree getInternalRelativeMotionTree() const;
-	COMMotionTree getCOMMotionTree() const;
+	InternalMotionTree getInternalRelativeMotionTree(UnmanagedArray<MonotonicTreeNode<RelativeMotion>>&& mem) const noexcept;
+	COMMotionTree getCOMMotionTree(UnmanagedArray<MonotonicTreeNode<RelativeMotion>>&& mem) const noexcept;
 
 	void ensureWorld(WorldPrototype* world);
 
@@ -427,6 +427,10 @@ public:
 	std::tuple<double, Vec3, TranslationalMotion> getInternalMotionOfCenterOfMass() const;
 	// normalizes this motion tree relative to this->getInternalMotionOfCenterOfMass()
 	COMMotionTree normalizeCenterOfMass() &&;
+
+	MonotonicTreeNode<RelativeMotion>* getPtrToFree() {
+		return relativeMotionTree.getPtrToFree();
+	}
 };
 
 // Same as InternalMotionTree, but relative to the position and speed of the center of mass
@@ -461,5 +465,9 @@ public:
 	inline MonotonicTreeNode<RelativeMotion>& getRootNode() { return relativeMotionTree.getRootNode(); }
 	inline const MonotonicTreeNode<RelativeMotion>& getRootNode() const { return relativeMotionTree.getRootNode(); }
 	Vec3 getInternalAngularMomentum() const;
+
+	MonotonicTreeNode<RelativeMotion>* getPtrToFree() {
+		return relativeMotionTree.getPtrToFree();
+	}
 };
 

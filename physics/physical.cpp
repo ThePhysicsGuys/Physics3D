@@ -393,9 +393,9 @@ static void computeInternalRelativeMotionTree(MonotonicTreeBuilder<RelativeMotio
 	}
 }
 
-InternalMotionTree MotorizedPhysical::getInternalRelativeMotionTree() const {
+InternalMotionTree MotorizedPhysical::getInternalRelativeMotionTree(UnmanagedArray<MonotonicTreeNode<RelativeMotion>>&& mem) const noexcept {
 	std::size_t totalSizeOfBuilder = this->getNumberOfPhysicalsInThisAndChildren();
-	MonotonicTreeBuilder<RelativeMotion> builder(totalSizeOfBuilder);
+	MonotonicTreeBuilder<RelativeMotion> builder(std::move(mem));
 
 	std::size_t size = this->childPhysicals.size();
 	MonotonicTreeNode<RelativeMotion>& rootNode = builder.getRootNode();
@@ -415,8 +415,8 @@ InternalMotionTree MotorizedPhysical::getInternalRelativeMotionTree() const {
 	return InternalMotionTree(this, MonotonicTree<RelativeMotion>(std::move(builder)));
 }
 
-COMMotionTree MotorizedPhysical::getCOMMotionTree() const {
-	return this->getInternalRelativeMotionTree().normalizeCenterOfMass();
+COMMotionTree MotorizedPhysical::getCOMMotionTree(UnmanagedArray<MonotonicTreeNode<RelativeMotion>>&& mem) const noexcept {
+	return this->getInternalRelativeMotionTree(std::move(mem)).normalizeCenterOfMass();
 }
 
 void Physical::detachPartAssumingMultipleParts(Part* part) {
@@ -616,12 +616,16 @@ void MotorizedPhysical::translate(const Vec3& translation) {
 }
 
 void MotorizedPhysical::refreshPhysicalProperties() {
-	COMMotionTree cache = this->getCOMMotionTree();
+	std::size_t size = this->getNumberOfPhysicalsInThisAndChildren();
+	UnmanagedArray<MonotonicTreeNode<RelativeMotion>> arr(new MonotonicTreeNode<RelativeMotion>[size], size);
+	COMMotionTree cache = this->getCOMMotionTree(std::move(arr));
 
 	this->totalCenterOfMass = cache.centerOfMass;
 	this->totalMass = cache.totalMass;
 
 	SymmetricMat3 totalInertia = cache.getInertia();
+
+	delete[] cache.getPtrToFree();
 
 	this->forceResponse = SymmetricMat3::IDENTITY() * (1 / cache.totalMass);
 	this->momentResponse = ~totalInertia;
@@ -860,7 +864,11 @@ Vec3 MotorizedPhysical::getTotalImpulse() const {
 	return this->motionOfCenterOfMass.getVelocity() * this->totalMass;
 }
 Vec3 MotorizedPhysical::getTotalAngularMomentum() const {
-	SymmetricMat3 totalInertia = this->getCOMMotionTree().getInertia();
+	std::size_t size = this->getNumberOfPhysicalsInThisAndChildren();
+	UnmanagedArray<MonotonicTreeNode<RelativeMotion>> arr(new MonotonicTreeNode<RelativeMotion>[size], size);
+	COMMotionTree cache = this->getCOMMotionTree(std::move(arr));
+	SymmetricMat3 totalInertia = cache.getInertia();
+	delete[] cache.getPtrToFree();
 	return totalInertia * this->motionOfCenterOfMass.getAngularVelocity();
 }
 
@@ -873,12 +881,15 @@ Motion Physical::getMotion() const {
 }
 
 Motion MotorizedPhysical::getMotion() const {
-	COMMotionTree cache = this->getInternalRelativeMotionTree().normalizeCenterOfMass();
+	std::size_t size = this->getNumberOfPhysicalsInThisAndChildren();
+	UnmanagedArray<MonotonicTreeNode<RelativeMotion>> arr(new MonotonicTreeNode<RelativeMotion>[size], size);
+	COMMotionTree cache = this->getCOMMotionTree(std::move(arr));
 
 	GlobalCFrame cf = this->getCFrame();
 	TranslationalMotion motionOfCom = localToGlobal(cf.getRotation(), cache.motionOfCenterOfMass);
 
 	return -motionOfCom + motionOfCenterOfMass.getMotionOfPoint(cf.localToRelative(-cache.centerOfMass));
+	delete[] cache.getPtrToFree();
 }
 Motion ConnectedPhysical::getMotion() const {
 	// All motion and offset variables here are expressed in the global frame

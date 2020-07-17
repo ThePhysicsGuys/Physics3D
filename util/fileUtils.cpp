@@ -4,34 +4,34 @@
 #include <fstream>
 #include <sstream>
 
-namespace Util {
-
 #ifdef _MSC_VER
-#include <direct.h>
+	#include <direct.h>
 
-bool doesFileExist(const std::string& fileName) {
-	struct stat buffer;
-	if (stat(fileName.c_str(), &buffer) != -1) {
-		return true;
+	bool Util::doesFileExist(const std::string& fileName) {
+		struct stat buffer;
+		if (stat(fileName.c_str(), &buffer) != -1) {
+			return true;
+		}
+		return false;
 	}
-	return false;
-}
 
 #else
-// for some reason gcc still does not support <filesystem>
-#if __GNUC__ >= 8
-#include <filesystem>
-namespace fs = std::filesystem;
-#else
-#include <experimental/filesystem>
-namespace fs = std::experimental::filesystem;
+	// for some reason gcc still does not support <filesystem>
+	#if __GNUC__ >= 8
+	#include <filesystem>
+	namespace fs = std::filesystem;
+	#else
+	#include <experimental/filesystem>
+	namespace fs = std::experimental::filesystem;
+	#endif
+
+	bool Util::doesFileExist(const std::string& fileName) {
+		return fs::exists(fileName);
+	}
+
 #endif
 
-bool doesFileExist(const std::string& fileName) {
-	return fs::exists(fileName);
-}
-
-#endif
+namespace Util {
 
 void warnIfFileExists(const std::string& fileName) {
 	if (doesFileExist(fileName)) {

@@ -390,16 +390,20 @@ TEST_CASE(testPhysicalInertiaDerivatives) {
 
 	MotorizedPhysical* motorPhys = mainPart.parent->mainPhysical;
 
-	FullTaylorExpansion<SymmetricMat3, SymmetricMat3, 2> inertiaTaylor = motorPhys->getCOMMotionTree().getInertiaDerivatives();
+	std::size_t size = motorPhys->getNumberOfPhysicalsInThisAndChildren();
+	UnmanagedArray<MonotonicTreeNode<RelativeMotion>> arr(new MonotonicTreeNode<RelativeMotion>[size], size);
+	FullTaylorExpansion<SymmetricMat3, SymmetricMat3, 2> inertiaTaylor = motorPhys->getCOMMotionTree(std::move(arr)).getInertiaDerivatives();
 
 	double deltaT = 0.00001;
 
 	std::array<SymmetricMat3, 3> inertias;
-	inertias[0] = motorPhys->getCOMMotionTree().getInertia();
+	inertias[0] = motorPhys->getCOMMotionTree(std::move(arr)).getInertia();
 	motorPhys->update(deltaT);
-	inertias[1] = motorPhys->getCOMMotionTree().getInertia();
+	inertias[1] = motorPhys->getCOMMotionTree(std::move(arr)).getInertia();
 	motorPhys->update(deltaT);
-	inertias[2] = motorPhys->getCOMMotionTree().getInertia();
+	inertias[2] = motorPhys->getCOMMotionTree(std::move(arr)).getInertia();
+
+	delete[] arr.getPtrToFree();
 
 	FullTaylorExpansion<SymmetricMat3, SymmetricMat3, 2> estimatedInertiaTaylor = estimateDerivatives(inertias, deltaT);
 
@@ -417,12 +421,17 @@ TEST_CASE(testCenterOfMassKept) {
 						CFrame(0.0, 0.0, 0.0, Rotation::Predefined::IDENTITY),
 						CFrame(0.0, 0.0, 0.0, Rotation::Predefined::IDENTITY), basicProperties);
 
-	COMMotionTree t = mainPart.parent->mainPhysical->getCOMMotionTree();
+
+	std::size_t size = mainPart.parent->mainPhysical->getNumberOfPhysicalsInThisAndChildren();
+	UnmanagedArray<MonotonicTreeNode<RelativeMotion>> arr(new MonotonicTreeNode<RelativeMotion>[size], size);
+	COMMotionTree t = mainPart.parent->mainPhysical->getCOMMotionTree(std::move(arr));
 
 	logStream << t.relativeMotionTree.getRootNode().value.locationOfRelativeMotion.getPosition();
 
 	ASSERT(t.relativeMotionTree.getRootNode().value.locationOfRelativeMotion.getPosition() == -t.relativeMotionTree.getRootNode().children[0].value.locationOfRelativeMotion.getPosition());
 	ASSERT(t.relativeMotionTree.getRootNode().value.relativeMotion.translation == -t.relativeMotionTree.getRootNode().children[0].value.relativeMotion.translation);
+
+	delete[] arr.getPtrToFree();
 }
 
 TEST_CASE(testBasicAngularMomentum) {
@@ -437,13 +446,17 @@ TEST_CASE(testBasicAngularMomentum) {
 						CFrame(0.0, 0.0, 0.0, Rotation::Predefined::IDENTITY),
 						CFrame(0.0, 0.0, 0.0, Rotation::Predefined::IDENTITY), basicProperties);
 
-	COMMotionTree t = mainPart.parent->mainPhysical->getCOMMotionTree();
+	std::size_t size = mainPart.parent->mainPhysical->getNumberOfPhysicalsInThisAndChildren();
+	UnmanagedArray<MonotonicTreeNode<RelativeMotion>> arr(new MonotonicTreeNode<RelativeMotion>[size], size);
+	COMMotionTree t = mainPart.parent->mainPhysical->getCOMMotionTree(std::move(arr));
 
 	SymmetricMat3 inertia = attachedPart.getInertia();
 	Vec3 angularVel = constraint->getRelativeMotion().relativeMotion.getAngularVelocity();
 	Vec3 angularMomentum = inertia * angularVel;
 
 	ASSERT(t.getInternalAngularMomentum() == angularMomentum);
+
+	delete[] arr.getPtrToFree();
 }
 
 TEST_CASE(testBasicAngularMomentumTurned) {
@@ -458,13 +471,18 @@ TEST_CASE(testBasicAngularMomentumTurned) {
 					  CFrame(0.0, 0.0, 0.0, Rotation::Predefined::Y_90),
 					  CFrame(0.0, 0.0, 0.0, Rotation::Predefined::IDENTITY), basicProperties);
 
-	COMMotionTree t = mainPart.parent->mainPhysical->getCOMMotionTree();
+	
+	std::size_t size = mainPart.parent->mainPhysical->getNumberOfPhysicalsInThisAndChildren();
+	UnmanagedArray<MonotonicTreeNode<RelativeMotion>> arr(new MonotonicTreeNode<RelativeMotion>[size], size);
+	COMMotionTree t = mainPart.parent->mainPhysical->getCOMMotionTree(std::move(arr));
 
 	SymmetricMat3 inertia = attachedPart.getInertia();
 	Vec3 angularVel = constraint->getRelativeMotion().relativeMotion.getAngularVelocity();
 	Vec3 angularMomentum = Rotation::Predefined::Y_90.localToGlobal(inertia * angularVel);
 
 	ASSERT(t.getInternalAngularMomentum() == angularMomentum);
+
+	delete[] arr.getPtrToFree();
 }
 
 TEST_CASE(testFixedConstraintAngularMomentum) {
@@ -491,7 +509,10 @@ TEST_CASE(testFixedConstraintAngularMomentum) {
 						CFrame(0.0, 0.0, 0.0, Rotation::Predefined::IDENTITY),
 						CFrame(-offset, 0.0, 0.0, Rotation::Predefined::IDENTITY), basicProperties);
 
-	COMMotionTree t1 = mainPart1.parent->mainPhysical->getCOMMotionTree();
+	
+	std::size_t size1 = mainPart1.parent->mainPhysical->getNumberOfPhysicalsInThisAndChildren();
+	UnmanagedArray<MonotonicTreeNode<RelativeMotion>> arr1(new MonotonicTreeNode<RelativeMotion>[size1], size1);
+	COMMotionTree t1 = mainPart1.parent->mainPhysical->getCOMMotionTree(std::move(arr1));
 
 
 
@@ -507,7 +528,10 @@ TEST_CASE(testFixedConstraintAngularMomentum) {
 	Part attachedPart2B(boxShape(1.0, 1.0, 1.0), attachedPart2,
 						CFrame(-offset, 0.0, 0.0, Rotation::Predefined::IDENTITY), basicProperties);
 
-	COMMotionTree t2 = mainPart2.parent->mainPhysical->getCOMMotionTree();
+	
+	std::size_t size2 = mainPart2.parent->mainPhysical->getNumberOfPhysicalsInThisAndChildren();
+	UnmanagedArray<MonotonicTreeNode<RelativeMotion>> arr2(new MonotonicTreeNode<RelativeMotion>[size2], size2);
+	COMMotionTree t2 = mainPart2.parent->mainPhysical->getCOMMotionTree(std::move(arr2));
 	
 
 	ASSERT(t1.totalMass == t2.totalMass);
@@ -517,6 +541,9 @@ TEST_CASE(testFixedConstraintAngularMomentum) {
 	ASSERT(t1.getInertiaDerivatives() == t2.getInertiaDerivatives());
 	ASSERT(t1.getMotion() == t2.getMotion());
 	ASSERT(t1.getInternalAngularMomentum() == t2.getInternalAngularMomentum());
+
+	delete[] arr1.getPtrToFree();
+	delete[] arr2.getPtrToFree();
 }
 
 TEST_CASE(motorizedPhysicalAngularMomentum) {
@@ -557,7 +584,9 @@ TEST_CASE(motorizedPhysicalAngularMomentum) {
 
 	Vec3 totalAngularMomentum(0.0, 0.0, 0.0);
 
-	auto tree = motorPhys->getCOMMotionTree();
+	std::size_t size = motorPhys->getNumberOfPhysicalsInThisAndChildren();
+	UnmanagedArray<MonotonicTreeNode<RelativeMotion>> arr(new MonotonicTreeNode<RelativeMotion>[size], size);
+	COMMotionTree t = motorPhys->getCOMMotionTree(std::move(arr));
 
 
 	Position com = motorPhys->getCenterOfMass();
@@ -577,5 +606,7 @@ TEST_CASE(motorizedPhysicalAngularMomentum) {
 		totalAngularMomentum += getAngularMomentumFromOffset(offset, relVel, m.getAngularVelocity(), i, p.getMass());
 	});
 
-	ASSERT(tree.getInternalAngularMomentum() == totalAngularMomentum);
+	ASSERT(t.getInternalAngularMomentum() == totalAngularMomentum);
+
+	delete[] arr.getPtrToFree();
 }

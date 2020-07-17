@@ -36,7 +36,7 @@ void PlayerWorld::applyExternalForces() {
 		Position absoluteSelectedPoint = selectedPart->getCFrame().localToGlobal(localSelectedPoint);
 		Position centerOfmass = selectedPhysical->getCenterOfMass();
 		Vec3 delta = magnetPoint - absoluteSelectedPoint;
-		Vec3 relativeSelectedPointSpeed = selectedPhysical->getCOMMotionTree().getMotion().getVelocityOfPoint(absoluteSelectedPoint - centerOfmass);
+		Vec3 relativeSelectedPointSpeed = selectedPart->getMotion().getVelocityOfPoint(absoluteSelectedPoint - centerOfmass);
 		Vec3 force = selectedPhysical->totalMass * (delta * PICKER_STRENGTH - relativeSelectedPointSpeed * PICKER_SPEED_STRENGTH);
 		
 		selectedPhysical->applyForceToPhysical(absoluteSelectedPoint - centerOfmass, force);

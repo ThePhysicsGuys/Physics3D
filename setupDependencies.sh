@@ -21,7 +21,8 @@ cd include
 
 wget -P stb https://raw.githubusercontent.com/nothings/stb/master/stb_image.h
 
-git clone https://github.com/ocornut/imgui.git
+rm -rf imgui
+git clone -b docking https://github.com/ocornut/imgui.git
 cp imgui/examples/imgui_impl_opengl3.cpp imgui
 cp imgui/examples/imgui_impl_opengl3.h imgui
 cp imgui/examples/imgui_impl_glfw.cpp imgui

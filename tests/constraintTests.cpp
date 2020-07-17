@@ -442,7 +442,10 @@ TEST_CASE(testInternalMotionOfCenterOfMass) {
 
 	Vec3 original = phys->totalCenterOfMass;
 
-	TranslationalMotion motionOfCom = std::get<2>(phys->getInternalRelativeMotionTree().getInternalMotionOfCenterOfMass());
+	std::size_t size = phys->getNumberOfPhysicalsInThisAndChildren();
+	UnmanagedArray<MonotonicTreeNode<RelativeMotion>> arr(new MonotonicTreeNode<RelativeMotion>[size], size);
+	TranslationalMotion motionOfCom = std::get<2>(phys->getInternalRelativeMotionTree(std::move(arr)).getInternalMotionOfCenterOfMass());
+	delete[] arr.getPtrToFree();
 
 	phys->update(DELTA_T);
 	Vec3 v2 = phys->totalCenterOfMass;

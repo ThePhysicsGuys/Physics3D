@@ -334,9 +334,7 @@ void EditTools::dragScaleTool(Screen& screen) {
 void EditTools::dragTranslateTool(Screen& screen) {
 	if (selectedEditDirection == EditDirection::CENTER) {
 		screen.selectedPoint = screen.selectedPart->getPosition() + selectedPoint;
-		screen.world->asyncModification([&screen] () {
-			Picker::moveGrabbedPhysicalLateral(screen);
-			});
+		Picker::moveGrabbedPhysicalLateral(screen);
 	} else {
 		// Closest point on ray1 (A + s * a) from ray2 (B + t * b). Ray1 is the ray from the parts' center in the direction of the edit tool, ray2 is the mouse ray. Directions a and b are normalized. Only s is calculated.
 		Position B = screen.camera.cframe.position;

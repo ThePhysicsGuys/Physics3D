@@ -35,6 +35,8 @@ add_library(util STATIC
   util/resource/resourceManager.cpp
 )
 
+target_link_libraries(util stdc++fs)
+
 add_library(physics STATIC 
   physics/constraintGroup.cpp
   physics/debug.cpp
@@ -158,8 +160,8 @@ add_library(graphics STATIC
   graphics/gui/guiUtils.cpp
   graphics/gui/layout.cpp
 
-  graphics/gui/imgui/imgui_impl_glfw.cpp
-  graphics/gui/imgui/imgui_impl_opengl3.cpp
+  #graphics/gui/imgui/imgui_impl_glfw.cpp
+  #graphics/gui/imgui/imgui_impl_opengl3.cpp
 
   graphics/mesh/abstractMesh.cpp
   graphics/mesh/arrayMesh.cpp
@@ -178,6 +180,8 @@ add_library(graphics STATIC
   graphics/shader/shaderLexer.cpp
   graphics/shader/shaderParser.cpp
   graphics/shader/shaders.cpp
+  graphics/shader/cshader.cpp
+  graphics/shader/gshader.cpp
   
   include/imgui/imgui.cpp
   include/imgui/imgui_demo.cpp
@@ -250,6 +254,9 @@ add_executable(application
   application/layer/postprocessLayer.cpp
   application/layer/skyboxLayer.cpp
   application/layer/testLayer.cpp
+  application/layer/cameraLayer.cpp
+  application/layer/shadowLayer.cpp
+  application/layer/imguiLayer.cpp
 
   application/picker/editTools.cpp
   application/picker/selectionTool.cpp
