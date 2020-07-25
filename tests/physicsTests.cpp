@@ -555,30 +555,34 @@ TEST_CASE(motorizedPhysicalAngularMomentum) {
 
 	mainPart.ensureHasParent();
 
-	/*Part part1_mainPart(polyhedronShape(Library::house), mainPart,
+	Part part1_mainPart(polyhedronShape(Library::house), mainPart,
 						new SinusoidalPistonConstraint(0.0, 2.0, 1.3),
 						CFrame(0.3, 0.7, -0.5, Rotation::fromEulerAngles(0.7, 0.3, 0.7)),
-						CFrame(0.1, 0.2, -0.5, Rotation::fromEulerAngles(0.2, -0.257, 0.4)), basicProperties);*/
-	Part part1_mainPart(polyhedronShape(Library::house), mainPart,
+						CFrame(0.1, 0.2, -0.5, Rotation::fromEulerAngles(0.2, -0.257, 0.4)), basicProperties);
+	/*Part part1_mainPart(polyhedronShape(Library::house), mainPart,
 						new SinusoidalPistonConstraint(0.0, 2.0, 1.0),
 						CFrame(0.0, 0.0, 0.0, Rotation::Predefined::IDENTITY),
-						CFrame(0.0, 0.0, 0.0, Rotation::Predefined::IDENTITY), basicProperties);
-	/*Part part2_mainPart(boxShape(1.0, 0.3, 2.0), mainPart,
+						CFrame(0.0, 0.0, 0.0, Rotation::Predefined::IDENTITY), basicProperties);*/
+	/*Part part1_mainPart(boxShape(1.0, 1.0, 1.0), mainPart,
+						new SinusoidalPistonConstraint(0.0, 2.0, 1.0),
+						CFrame(0.0, 0.0, 0.0, Rotation::Predefined::IDENTITY),
+						CFrame(0.0, 0.0, 0.0, Rotation::Predefined::IDENTITY), basicProperties);*/
+	Part part2_mainPart(boxShape(1.0, 0.3, 2.0), mainPart,
 						new MotorConstraintTemplate<ConstantMotorTurner>(1.7),
 						CFrame(-0.3, 0.7, 0.5, Rotation::fromEulerAngles(0.7, 0.3, 0.7)),
-						CFrame(0.1, -0.2, -0.5, Rotation::fromEulerAngles(0.2, -0.257, 0.4)), basicProperties);*/
+						CFrame(0.1, -0.2, -0.5, Rotation::fromEulerAngles(0.2, -0.257, 0.4)), basicProperties);
 	/*Part part2_mainPart(boxShape(1.0, 0.3, 2.0), mainPart,
 						new MotorConstraintTemplate<ConstantMotorTurner>(1.7),
 						CFrame(0.0, 0.0, 0.0, Rotation::Predefined::IDENTITY),
 						CFrame(0.0, 0.0, 0.0, Rotation::Predefined::IDENTITY), basicProperties);*/
-	/*Part part1_part1_mainPart(cylinderShape(1.0, 0.3), part1_mainPart,
+	Part part1_part1_mainPart(cylinderShape(1.0, 0.3), part1_mainPart,
 							  new MotorConstraintTemplate<ConstantMotorTurner>(1.3),
 							  CFrame(-0.3, 0.7, 0.5, Rotation::fromEulerAngles(0.7, 0.3, 0.7)),
 							  CFrame(0.1, -0.2, -0.5, Rotation::fromEulerAngles(0.2, -0.257, 0.4)), basicProperties);
 	Part part1_part1_part1_mainPart(polyhedronShape(Library::trianglePyramid), part1_part1_mainPart,
 									new SinusoidalPistonConstraint(0.0, 2.0, 1.3),
 									CFrame(0.3, 0.7, -0.5, Rotation::fromEulerAngles(0.7, 0.3, 0.7)),
-									CFrame(0.1, 0.2, -0.5, Rotation::fromEulerAngles(0.2, -0.257, 0.4)), basicProperties);*/
+									CFrame(0.1, 0.2, -0.5, Rotation::fromEulerAngles(0.2, -0.257, 0.4)), basicProperties);
 
 	MotorizedPhysical* motorPhys = mainPart.parent->mainPhysical;
 
@@ -596,14 +600,14 @@ TEST_CASE(motorizedPhysicalAngularMomentum) {
 	
 
 	motorPhys->forEachPart([&com, &comVel, &totalAngularMomentum](const Part& p) {
-		SymmetricMat3 i = p.getInertia();
 		const GlobalCFrame& pcf = p.getCFrame();
-		i = pcf.getRotation().localToGlobal(i);
-		Vec3 offset = pcf.getPosition() - com;
+		SymmetricMat3 globalInertia = pcf.getRotation().localToGlobal(p.getInertia());
 		Vec3 relativePartCOM = pcf.localToRelative(p.getLocalCenterOfMass());
-		Motion m = p.getMotion().getMotionOfPoint(-relativePartCOM);
+		Vec3 offset = p.getCenterOfMass() - com;
+		Motion m = p.getMotion().getMotionOfPoint(relativePartCOM);
 		Vec3 relVel = m.getVelocity();
-		totalAngularMomentum += getAngularMomentumFromOffset(offset, relVel, m.getAngularVelocity(), i, p.getMass());
+		Vec3 angMomOfThis = getAngularMomentumFromOffset(offset, relVel, m.getAngularVelocity(), globalInertia, p.getMass());
+		totalAngularMomentum += angMomOfThis;
 	});
 
 	ASSERT(t.getInternalAngularMomentum() == totalAngularMomentum);

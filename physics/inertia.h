@@ -66,7 +66,7 @@ FullTaylor<SymmetricMat3> getTransformedInertiaDerivativesAroundCenterOfMass(con
 
 
 inline Vec3 getAngularMomentumFromOffsetOnlyVelocity(const Vec3& offset, const Vec3& velocity, double mass) {
-	return -offset % velocity * mass;
+	return offset % velocity * mass;
 }
 
 
@@ -77,7 +77,7 @@ inline Vec3 getAngularMomentumFromOffsetOnlyVelocity(const Vec3& offset, const V
 // leftOverAngularMomentum = 
 
 inline Vec3 getAngularMomentumFromOffset(const Vec3& offset, const Vec3& velocity, const Vec3& angularVelocity, const SymmetricMat3& inertia, double mass) {
-	Vec3 velocityAngularMomentum = -velocity % offset * mass;
+	Vec3 velocityAngularMomentum = offset % velocity * mass;
 	Vec3 rotationAngularMomentum = inertia * angularVelocity;
 	return velocityAngularMomentum + rotationAngularMomentum;
 }
