@@ -236,7 +236,6 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release No AVX|x64'">core.h</PrecompiledHeaderFile>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="ecs\registry.cpp" />
     <ClCompile Include="ecs\component.cpp" />
     <ClCompile Include="ecs\entity.cpp" />
     <ClCompile Include="ecs\node.cpp" />

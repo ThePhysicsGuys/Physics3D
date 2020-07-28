@@ -58,13 +58,29 @@ TEST_CASE(viewTest) {
 	Registry8 registry;
 	auto id1 = registry.create();
 	auto id2 = registry.create();
+	auto id3 = registry.create();
+	auto id4 = registry.create();
+	auto id5 = registry.create();
 
 	registry.add<A>(id1);
 	registry.add<A>(id2);
+	registry.add<A>(id3);
+	registry.add<A>(id4);
+
 	registry.add<B>(id1);
+	registry.add<B>(id3);
+	registry.add<B>(id5);
+
 	registry.add<C>(id1);
-
-	for (auto e : registry.view<A>()) {
-
+	registry.add<C>(id2);
+	registry.add<C>(id3);
+	registry.add<C>(id4);
+	registry.add<C>(id5);
+	
+	std::size_t count = 0;
+	for (auto e : registry.view<A, B, C>()) {
+		count++;
 	}
+
+	ASSERT_TRUE(count == 2);
 }
