@@ -118,6 +118,41 @@ TEST_CASE(inertiaTransformationDerivativesForOffsetCenterOfMass) {
 	ASSERT(estimatedTaylor == inertialTaylor);
 }
 
+// test getting angular momentum for 2x2x2 box rotating at omega_x rad/s around the x axis
+// moving at (0, vy, vz), at (0, 0, cz), relative to (0,0,0)
+// answer computed by manually running through the angular momentum integral
+// integrate(dz=1..2, dy=-1..1, dx=-1..1){offset % (angVel % offset + velocity)}
+TEST_CASE(premadeAngularMomentum) {
+	double omega_x = -2.1;
+	double vy = 1.3;
+	double vz = 2.9;
+	double cz = 3.7;
+
+	// 2x2x2 box
+	double boxInertiaXX = 16.0 / 3.0;
+	double boxVolume = 8.0;
+	double selfBoxAngularMomentum = boxInertiaXX * omega_x;
+	double velocityAngularMomentum = -boxVolume * cz * vy;
+	double totalTrueAngularMomentum = selfBoxAngularMomentum + velocityAngularMomentum;
+
+	SymmetricMat3 inertia{
+		boxInertiaXX,
+		0, boxInertiaXX,
+		0, 0, boxInertiaXX
+	};
+	Vec3 angularVel(omega_x, 0, 0);
+	Vec3 vel(0, vy, vz);
+	Vec3 offset(0, 0, cz);
+
+	Vec3 boxNotRotatingAngMom = getAngularMomentumFromOffsetOnlyVelocity(offset, vel, boxVolume);
+	Vec3 boxNotRotatingAngMom2 = getAngularMomentumFromOffset(offset, vel, Vec3(0,0,0), inertia, boxVolume);
+	ASSERT(boxNotRotatingAngMom == Vec3(velocityAngularMomentum, 0, 0));
+	ASSERT(boxNotRotatingAngMom == boxNotRotatingAngMom2);
+
+	Vec3 boxAlsoRotatingAngMom = getAngularMomentumFromOffset(offset, vel, angularVel, inertia, boxVolume);
+	ASSERT(boxAlsoRotatingAngMom == Vec3(totalTrueAngularMomentum, 0, 0));
+}
+
 TEST_CASE(translatedAngularMomentum) {
 	Polyhedron simpleBox = Library::createCube(1.0f);
 
@@ -131,14 +166,14 @@ TEST_CASE(translatedAngularMomentum) {
 
 	Vec3 angularMomentumTarget = offsetInertia * angularVel;
 	Vec3 rotationAngularMomentum = inertia * angularVel;
-	Vec3 velocity = offset % angularVel;
-	Vec3 angularMomentumFromVelocity = velocity % offset * mass;
+	Vec3 velocity = angularVel % offset;
+	Vec3 angularMomentumFromVelocity = offset % velocity * mass;
 	Vec3 angularMomentumTest = rotationAngularMomentum + angularMomentumFromVelocity;
 
-	Vec3 computedAngularMomentum = getAngularMomentumFromOffsetOnlyVelocity(offset, velocity, mass);
-	Vec3 computedAngularMomentum2 = getAngularMomentumFromOffset(offset, velocity, angularVel, inertia, mass);
+	Vec3 computedAngularMomentumFromVelocity = getAngularMomentumFromOffsetOnlyVelocity(offset, velocity, mass);
+	Vec3 computedAngularMomentumFromVelocityAndAngular = getAngularMomentumFromOffset(offset, velocity, angularVel, inertia, mass);
 
 	ASSERT(angularMomentumTarget == angularMomentumTest);
-	ASSERT(angularMomentumTarget == computedAngularMomentum);
-	ASSERT(angularMomentumTarget == computedAngularMomentum2);
+	ASSERT(angularMomentumFromVelocity == computedAngularMomentumFromVelocity);
+	ASSERT(angularMomentumTarget == computedAngularMomentumFromVelocityAndAngular);
 }

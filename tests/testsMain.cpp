@@ -153,8 +153,9 @@ public:
 
 			testFunc(testInterface);
 
-			setColor(TerminalColor::GRAY);
-			cout << " [" << testInterface.getAssertCount() << "]";
+			std::size_t assertCount = testInterface.getAssertCount();
+			setColor(assertCount > 0 ? TerminalColor::GRAY : TerminalColor::RED);
+			cout << " [" << assertCount << "]";
 
 			printDeltaTime(startTime, SUCCESS_COLOR);
 
