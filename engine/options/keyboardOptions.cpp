@@ -6,7 +6,6 @@ namespace KeyboardOptions {
 	using namespace Engine;
 
 	namespace Move {
-
 		Key forward  = Keyboard::KEY_UNKNOWN;
 		Key backward = Keyboard::KEY_UNKNOWN;
 		Key right    = Keyboard::KEY_UNKNOWN;

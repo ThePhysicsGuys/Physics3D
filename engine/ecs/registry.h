@@ -1,8 +1,10 @@
-#pragma once
-	
 #include <cstdint>
 #include <map>
+#include <set>
 #include <stack>
+#include <vector>
+#include <functional>
+#include <type_traits>
 
 namespace Engine {
 
@@ -21,7 +23,7 @@ template<>
 struct registry_traits<std::uint8_t> {
 	using entity_type = std::uint8_t;
 	using version_type = std::uint8_t;
-	using componentmap_type = std::uint8_t;
+	using component_type = std::uint16_t;
 
 	static constexpr entity_type entity_mask = 0x7;
 	static constexpr version_type version_mask = 0x3;
@@ -34,9 +36,9 @@ struct registry_traits<std::uint8_t> {
  */
 template<>
 struct registry_traits<std::uint16_t> {
-	using entity_type = std::uint16_t;
+	using entity_type = std::uint8_t;
 	using version_type = std::uint8_t;
-	using componentmap_type = std::uint16_t;
+	using component_type = std::uint16_t;
 
 	static constexpr entity_type entity_mask = 0x3F;
 	static constexpr version_type version_mask = 0xF;
@@ -49,9 +51,9 @@ struct registry_traits<std::uint16_t> {
  */
 template<>
 struct registry_traits<std::uint32_t> {
-	using entity_type = std::uint32_t;
+	using entity_type = std::uint16_t;
 	using version_type = std::uint8_t;
-	using componentmap_type = std::uint32_t;
+	using component_type = std::uint16_t;
 
 	static constexpr entity_type entity_mask = 0xFFF;
 	static constexpr version_type version_mask = 0xFF;
@@ -64,9 +66,9 @@ struct registry_traits<std::uint32_t> {
  */
 template<>
 struct registry_traits<std::uint64_t> {
-	using entity_type = std::uint64_t;
+	using entity_type = std::uint32_t;
 	using version_type = std::uint8_t;
-	using componentmap_type = std::uint64_t;
+	using component_type = std::uint16_t;
 
 	static constexpr entity_type entity_mask = 0xFFFFFFF;
 	static constexpr version_type version_mask = 0xFF;
@@ -75,35 +77,32 @@ struct registry_traits<std::uint64_t> {
 };
 
 template<typename Entity>
-constexpr auto integral(const Entity& entity) {
-	return static_cast<typename registry_traits<Entity>::entity_type>(entity);
-}
-
-template<typename Entity>
-inline constexpr auto version(const Entity& entity) {
+inline constexpr auto version(const Entity& entity) -> typename registry_traits<Entity>::version_type {
 	using traits_type = registry_traits<Entity>;
 	using version_type = typename traits_type::version_type;
-	return static_cast<version_type>(integral(entity)) & traits_type::version_mask;
+	return static_cast<version_type>(entity) & traits_type::version_mask;
 }
 
 template<typename Entity>
 inline constexpr auto self(const Entity& entity) -> typename registry_traits<Entity>::entity_type {
 	using traits_type = registry_traits<Entity>;
-	return (integral(entity) >> traits_type::self_shift) & traits_type::entity_mask;
+	using entity_type = typename traits_type::entity_type;
+	return static_cast<entity_type>(entity >> traits_type::self_shift) & traits_type::entity_mask;
 }
 
 template<typename Entity>
 inline constexpr auto parent(const Entity& entity) -> typename registry_traits<Entity>::entity_type {
 	using traits_type = registry_traits<Entity>;
-	return integral(entity) >> traits_type::parent_shift;
+	using entity_type = typename traits_type::entity_type;
+	return static_cast<entity_type>(entity >> traits_type::parent_shift) & traits_type::entity_mask;
 }
 
-template<typename Entity, typename Version>
-inline constexpr Entity merge(const Entity& parent, const Entity& entity, const Version& version) {
+template<typename Entity>
+inline constexpr auto merge(const typename registry_traits<Entity>::entity_type& parent, const typename registry_traits<Entity>::entity_type& entity, const typename registry_traits<Entity>::version_type& version) -> Entity {
 	using traits_type = registry_traits<Entity>;
-	return (integral(parent) << traits_type::parent_shift)  | 
-		   (integral(entity) << traits_type::self_shift) | 
-		   static_cast<Entity>(version);
+	return (static_cast<Entity>(parent) << traits_type::parent_shift) |
+		(static_cast<Entity>(parent) << traits_type::self_shift) |
+		static_cast<Entity>(version);
 }
 
 template<typename Type>
@@ -115,50 +114,52 @@ struct type_index {
 };
 
 template<typename Entity, typename Component = void>
-struct componentmap_index {
+struct component_index {
 	using traits_type = registry_traits<Entity>;
-	using componentmap_type = typename traits_type::componentmap_type;
+	using component_type = typename traits_type::component_type;
 
-	static char value() {
-		static const char value = static_cast<char>(type_index<char>::next());
-		return value;
-	}
-
-	static constexpr componentmap_type mask() {
-		const componentmap_type value = static_cast<componentmap_type>(1u << componentmap_index<Entity, Component>::value());
+	static component_type index() {
+		static const component_type value = type_index<component_type>::next();
 		return value;
 	}
 };
 
 template<typename Entity>
-struct componentmap_index<Entity, void> {
+struct component_index<Entity, void> {
 	using traits_type = registry_traits<Entity>;
-	using componentmap_type = typename traits_type::componentmap_type;
+	using component_type = typename traits_type::component_type;
 
-	static componentmap_type count() {
-		static const componentmap_type value = type_index<componentmap_type>::next();
+	static component_type count() {
+		static const component_type value = type_index<component_type>::next();
 		return value;
 	}
 };
 
-
 template<typename Entity>
-struct Registry {
+class Registry {
+	using registry_type = Registry<Entity>;
 	using traits_type = registry_traits<Entity>;
 	using entity_type = typename traits_type::entity_type;
 	using version_type = typename traits_type::version_type;
-	using componentmap_type = typename traits_type::componentmap_type;
+	using component_type = typename traits_type::component_type;
 
-	/*constexpr*/ entity_type null_entity = static_cast<entity_type>(0u);
-	/*constexpr*/ version_type null_version = static_cast<version_type>(0u);
-	/*constexpr*/ componentmap_type null_componentmap = static_cast<componentmap_type>(0u);
+	using entity_stack = std::stack<entity_type>;
+	using entity_set = std::set<entity_type>;
+	using entity_map = std::map<entity_type, void*>;
+	using component_vector = std::vector<entity_map*>;
+
+	using entity_iterator = decltype(std::declval<entity_map>().begin());
+
+	entity_type null_entity = static_cast<entity_type>(0u);
+	version_type null_version = static_cast<version_type>(0u);
 
 private:
 	// Components
-	std::map<entity_type, componentmap_type> entities;
-	
+	entity_set entities;
+	component_vector components;
+
 	// ID
-	std::stack<entity_type> id_stack;
+	entity_stack id_stack;
 	entity_type id_counter = null_entity;
 
 	constexpr entity_type nextID() {
@@ -173,56 +174,229 @@ public:
 	Entity create() {
 		Entity id;
 		if (id_stack.empty()) {
-			id = merge(null_entity, nextID(), null_version);
+			id = merge<Entity>(null_entity, nextID(), null_version);
 		} else {
 			Entity lastID = id_stack.top();
 			version_type lastVersion = version(lastID);
 			version_type newVersion = nextVersion(lastVersion);
 
-			id = merge(null_entity, self(lastID), newVersion);
+			id = merge<Entity>(null_entity, self(lastID), newVersion);
 
 			id_stack.pop();
 		}
 
-		entities.emplace(id, null_componentmap);
+		entities.insert(id);
 
 		return id;
 	}
-	
-	void destroy(const Entity& entity) {
-		auto iterator = entities.find(entity);
 
-		if (iterator != entities.end()) {
-			entities.erase(iterator);
+	void destroy(const Entity& entity) {
+		auto entities_iterator = entities.find(entity);
+
+		if (entities_iterator != entities.end()) {
+			entities.erase(entities_iterator);
 			id_stack.push(entity);
+
+
+			// erase from components
+			// add to destroy stack?
 		}
 	}
 
 	template<typename Component, typename... Args>
 	void add(const Entity& entity, Args&&... args) {
-		auto iterator = entities.find(entity);
-		if (iterator != entities.end()) {
-			Component* component = new Component(std::forward<Args>(args)...);
-			componentmap_type mask = componentmap_index<Entity, Component>::mask();
+		auto entities_iterator = entities.find(self(entity));
+		if (entities_iterator == entities.end())
+			return;
 
-			// Update component bitmap
-			iterator->second |= mask;
+		Component* component = new Component(std::forward<Args>(args)...);
+		component_type index = component_index<Entity, Component>::index();
 
-			// todo add ptr to memory
-		}
+		while (index >= components.size())
+			components.push_back(new entity_map());
+
+		entity_map* map = components[index];
+		if (map == nullptr)
+			return;
+
+		map->insert(std::pair<entity_type, void*>(self(entity), static_cast<void*>(component)));
 	}
 
 	template<typename Component>
 	void remove(const Entity& entity) {
-		auto iterator = entities.find(entity);
-		if (iterator != entities.end()) {
-			componentmap_type mask = componentmap_index<Entity, Component>::mask();
-			
-			// Update component bitmap
-			iterator->second = iterator->second & ~mask;
+		auto entities_iterator = entities.find(entity);
+		if (entities_iterator == entities.end())
+			return;
 
-			// todo remove ptr to memory
+		component_type index = component_index<Entity, Component>::index();
+		if (index > components.size())
+			return;
+
+		entity_map* map = components[index];
+		if (map == nullptr)
+			return;
+
+		auto component_iterator = map->find(self(entity));
+		if (component_iterator == map->end())
+			return;
+
+		map->erase(component_iterator);
+	}
+
+	template<typename Component>
+	Component* get(const Entity& entity) {
+		auto entities_iterator = entities.find(entity);
+		if (entities_iterator == entities.end())
+			return nullptr;
+
+		component_type index = component_index<Entity, Component>::index();
+		if (index > components.size())
+			return nullptr;
+
+		entity_map* map = components[index];
+		if (map == nullptr)
+			return nullptr;
+
+		auto component_iterator = map->find(self(entity));
+		if (component_iterator == map->end())
+			return nullptr;
+
+		return static_cast<Component*>(component_iterator->second);
+	}
+
+	template<typename Component>
+	bool has(const Entity& entity) {
+		auto entities_iterator = entities.find(entity);
+		if (entities_iterator == entities.end())
+			return false;
+
+		component_type index = component_index<Entity, Component>::index();
+		if (index > components.size())
+			return false;
+
+		entity_map* map = components[index];
+		if (map == nullptr)
+			return false;
+
+		auto component_iterator = map->find(self(entity));
+		if (component_iterator == map->end())
+			return false;
+
+		return true;
+	}
+
+
+	struct view_iterator_end {};
+
+	template<typename Iterator, typename IteratorEnd, typename Filter>
+	class view_iterator {
+		friend class Registry<Entity>;
+
+	private:
+		Iterator current;
+		Iterator end;
+		Filter filter;
+
+	public:
+		view_iterator() = default;
+		view_iterator(const Registry<Entity>& registry, const Iterator& start, const Iterator& end, const Filter& filter) : current(start), end(end), filter(filter) {
+			while (current != end && filter(current))
+				++current;
 		}
+
+		view_iterator& operator++() {
+			do {
+				++current;
+			} while (current != end && filter(current));
+
+			return *this;
+		}
+
+		bool operator!=(IteratorEnd) const {
+			return current != end;
+		}
+
+		decltype(*current)& operator*() const {
+			return *current;
+		}
+	};
+
+	template<typename BeginType, typename EndType = BeginType>
+	class basic_view {
+	private:
+		BeginType start;
+		EndType stop;
+
+	public:
+		basic_view() = default;
+		basic_view(const BeginType& start, const EndType& stop) : start(start), stop(stop) {}
+
+		BeginType begin() const {
+			return start;
+		}
+
+		EndType end() const {
+			return stop;
+		}
+	};
+
+	template<typename... Components>
+	typename std::enable_if_t<sizeof...(Components) == 0> collect(component_type& current_component, std::size_t& current_size, std::set<component_type>& components) {}
+
+	template<typename Component, typename... Components>
+	void collect(component_type& current_component, std::size_t& current_size, std::set<component_type>& components) {
+		component_type index = component_index<Entity, Component>::index();
+
+		if (index == current_component) {
+			collect<Components...>(current_component, current_size, components);
+			return;
+		}
+
+		std::size_t size = registry_type::components[index]->size();
+
+		if (size < current_size) {
+			components.insert(current_component);
+			current_component = index;
+			current_size = size;
+		} else {
+			components.insert(index);
+		}
+
+		collect<Components...>(current_component, current_size, components);
+	}
+
+	template<typename Filter>
+	using filtered_view_iterator = view_iterator<entity_iterator, view_iterator_end, Filter>;
+
+	template<typename Filter>
+	using filtered_basic_view = basic_view<filtered_view_iterator<Filter>, view_iterator_end>;
+
+	template<typename Filter>
+	filtered_basic_view<Filter> filter_view(const entity_iterator& first, const entity_iterator& last, const Filter& filter) {
+		filtered_view_iterator<Filter> start(*this, first, last, filter);
+		view_iterator_end stop;
+		return filtered_basic_view<Filter>(start, stop);
+	}
+	
+	template<typename Component, typename... Components>
+	auto view() {
+		std::set<component_type> components;
+		component_type current_component = component_index<Entity, Component>::index();
+		std::size_t current_size = registry_type::components[current_component]->size();
+
+		collect<Components...>(current_component, current_size, components);
+
+		//components.reserve(sizeof...(Components));
+
+		entity_map* map = registry_type::components[current_component];
+		entity_iterator first = map->begin();
+		entity_iterator last = map->end();
+
+		std::function<bool(entity_iterator&)> filter = [] (entity_iterator& iterator) {
+			return false;
+		};
+
+		return filter_view(first, last, filter);
 	}
 
 };
@@ -233,4 +407,3 @@ typedef Registry<std::uint32_t> Registry32;
 typedef Registry<std::uint64_t> Registry64;
 
 };
-
