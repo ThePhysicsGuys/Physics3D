@@ -42,7 +42,6 @@
 
 #include "imgui/imgui.h"
 
-
 struct GLFWwindow;
 
 namespace Application {
@@ -102,6 +101,11 @@ Screen::Screen(int width, int height, PlayerWorld* world) {
 
 	// Make the window's context current 
 	Graphics::GLFW::setCurrentContext(context);
+	
+	// already set using application resources on windows
+#ifndef _WIN32
+	Graphics::GLFW::setWindowIconFromPath("../res/textures/logo128.png");
+#endif
 
 	Log::info("OpenGL vendor: (%s)", Graphics::Renderer::getVendor());
 	Log::info("OpenGL renderer: (%s)", Graphics::Renderer::getRenderer());

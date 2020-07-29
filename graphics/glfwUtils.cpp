@@ -4,6 +4,11 @@
 
 #include <GLFW/glfw3.h>
 
+//#define STB_IMAGE_IMPLEMENTATION
+#include <stb/stb_image.h>
+
+#include <stdexcept>
+
 namespace Graphics {
 
 namespace GLFW {
@@ -107,6 +112,24 @@ void setCursor(int type) {
 	currentCursor = glfwCreateStandardCursor(type);
 
 	glfwSetCursor(currentContext, currentCursor);
+}
+
+
+void setWindowIcon(const GLFWimage* image) {
+	glfwSetWindowIcon(currentContext, 1, image);
+}
+
+void setWindowIconFromPath(const char* path) {
+	GLFWimage img;
+	int channels;
+	img.pixels = stbi_load(path, &img.width, &img.height, &channels, STBI_rgb_alpha);
+
+	if(img.pixels != nullptr) {
+		Graphics::GLFW::setWindowIcon(&img);
+		stbi_image_free(img.pixels);
+	} else {
+		throw std::runtime_error("Logo not found!");
+	}
 }
 
 }

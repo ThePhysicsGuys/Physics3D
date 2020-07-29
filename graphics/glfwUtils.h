@@ -1,6 +1,7 @@
 #pragma once
 
 struct GLFWwindow;
+struct GLFWimage;
 
 namespace Graphics {
 
@@ -38,6 +39,9 @@ extern void disableCursor();
 extern void setCursor(int type);
 
 extern void setMultisampleSamples(int samples);
+
+extern void setWindowIcon(const GLFWimage* image);
+extern void setWindowIconFromPath(const char* path);
 }
 
 };
