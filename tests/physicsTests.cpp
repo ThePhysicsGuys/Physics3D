@@ -27,6 +27,8 @@
 static const double DELTA_T = 0.01;
 static const int TICKS = 300;
 
+static const PartProperties basicProperties{0.7, 0.2, 0.6};
+
 TEST_CASE_SLOW(positionInvariance) {
 	Rotation rotation = Rotation::fromEulerAngles(0.0, 0.0, 0.0);
 
@@ -368,8 +370,6 @@ TEST_CASE(testShapeNativeScaling) {
 TEST_CASE(testPhysicalInertiaDerivatives) {
 	Polyhedron testPoly = Library::createPointyPrism(4, 1.0f, 1.0f, 0.5f, 0.5f);
 
-	PartProperties basicProperties{0.7, 0.2, 0.6};
-
 	Part mainPart(polyhedronShape(testPoly), GlobalCFrame(), basicProperties);
 	Part part1_mainPart(polyhedronShape(Library::house), mainPart, 
 						new SinusoidalPistonConstraint(0.0, 2.0, 1.3), 
@@ -413,8 +413,6 @@ TEST_CASE(testPhysicalInertiaDerivatives) {
 TEST_CASE(testCenterOfMassKept) {
 	Polyhedron testPoly = Library::createPointyPrism(4, 1.0f, 1.0f, 0.5f, 0.5f);
 
-	PartProperties basicProperties{0.7, 0.2, 0.6};
-
 	Part mainPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(), basicProperties);
 	Part part1_mainPart(boxShape(1.0, 1.0, 1.0), mainPart,
 						new SinusoidalPistonConstraint(0.0, 2.0, 1.0),
@@ -435,8 +433,6 @@ TEST_CASE(testCenterOfMassKept) {
 }
 
 TEST_CASE(testBasicAngularMomentum) {
-	PartProperties basicProperties{0.7, 0.2, 0.6};
-
 	double motorSpeed = 1.0;
 	MotorConstraintTemplate<ConstantMotorTurner>* constraint = new MotorConstraintTemplate<ConstantMotorTurner>(motorSpeed);
 
@@ -460,8 +456,6 @@ TEST_CASE(testBasicAngularMomentum) {
 }
 
 TEST_CASE(testBasicAngularMomentumTurned) {
-	PartProperties basicProperties{0.7, 0.2, 0.6};
-
 	double motorSpeed = 1.0;
 	MotorConstraintTemplate<ConstantMotorTurner>* constraint = new MotorConstraintTemplate<ConstantMotorTurner>(motorSpeed);
 
@@ -486,8 +480,6 @@ TEST_CASE(testBasicAngularMomentumTurned) {
 }
 
 TEST_CASE(testFixedConstraintAngularMomentum) {
-	PartProperties basicProperties{0.7, 0.2, 0.6};
-
 	double motorSpeed = 1.0;
 
 	
@@ -546,58 +538,60 @@ TEST_CASE(testFixedConstraintAngularMomentum) {
 	delete[] arr2.getPtrToFree();
 }
 
-TEST_CASE(motorizedPhysicalAngularMomentum) {
-	Polyhedron testPoly = Library::createPointyPrism(4, 1.0f, 1.0f, 0.5f, 0.5f);
+static Position getTotalCenterOfMassOfPhysical(const MotorizedPhysical* motorPhys) {
+	double totalMass = 0.0;
+	Vec3 totalCenterOfMass(0.0, 0.0, 0.0);
 
-	PartProperties basicProperties{0.7, 0.2, 0.6};
+	motorPhys->forEachPart([&totalMass, &totalCenterOfMass](const Part& p) {
+		const GlobalCFrame& pcf = p.getCFrame();
+		const Vec3 pcom = p.getCenterOfMass() - Position(0,0,0);
+		totalCenterOfMass += pcom * p.getMass();
+		totalMass += p.getMass();
+	});
 
-	Part mainPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(), basicProperties);
+	return Position(0, 0, 0) + totalCenterOfMass / totalMass;
+}
 
-	mainPart.ensureHasParent();
+static Vec3 getTotalMotionOfCenterOfMassOfPhysical(const MotorizedPhysical* motorPhys) {
+	double totalMass = 0.0;
+	Vec3 totalVelocityOfCenterOfMass(0.0, 0.0, 0.0);
 
-	Part part1_mainPart(polyhedronShape(Library::house), mainPart,
-						new SinusoidalPistonConstraint(0.0, 2.0, 1.3),
-						CFrame(0.3, 0.7, -0.5, Rotation::fromEulerAngles(0.7, 0.3, 0.7)),
-						CFrame(0.1, 0.2, -0.5, Rotation::fromEulerAngles(0.2, -0.257, 0.4)), basicProperties);
-	/*Part part1_mainPart(polyhedronShape(Library::house), mainPart,
-						new SinusoidalPistonConstraint(0.0, 2.0, 1.0),
-						CFrame(0.0, 0.0, 0.0, Rotation::Predefined::IDENTITY),
-						CFrame(0.0, 0.0, 0.0, Rotation::Predefined::IDENTITY), basicProperties);*/
-	/*Part part1_mainPart(boxShape(1.0, 1.0, 1.0), mainPart,
-						new SinusoidalPistonConstraint(0.0, 2.0, 1.0),
-						CFrame(0.0, 0.0, 0.0, Rotation::Predefined::IDENTITY),
-						CFrame(0.0, 0.0, 0.0, Rotation::Predefined::IDENTITY), basicProperties);*/
-	Part part2_mainPart(boxShape(1.0, 0.3, 2.0), mainPart,
-						new MotorConstraintTemplate<ConstantMotorTurner>(1.7),
-						CFrame(-0.3, 0.7, 0.5, Rotation::fromEulerAngles(0.7, 0.3, 0.7)),
-						CFrame(0.1, -0.2, -0.5, Rotation::fromEulerAngles(0.2, -0.257, 0.4)), basicProperties);
-	/*Part part2_mainPart(boxShape(1.0, 0.3, 2.0), mainPart,
-						new MotorConstraintTemplate<ConstantMotorTurner>(1.7),
-						CFrame(0.0, 0.0, 0.0, Rotation::Predefined::IDENTITY),
-						CFrame(0.0, 0.0, 0.0, Rotation::Predefined::IDENTITY), basicProperties);*/
-	Part part1_part1_mainPart(cylinderShape(1.0, 0.3), part1_mainPart,
-							  new MotorConstraintTemplate<ConstantMotorTurner>(1.3),
-							  CFrame(-0.3, 0.7, 0.5, Rotation::fromEulerAngles(0.7, 0.3, 0.7)),
-							  CFrame(0.1, -0.2, -0.5, Rotation::fromEulerAngles(0.2, -0.257, 0.4)), basicProperties);
-	Part part1_part1_part1_mainPart(polyhedronShape(Library::trianglePyramid), part1_part1_mainPart,
-									new SinusoidalPistonConstraint(0.0, 2.0, 1.3),
-									CFrame(0.3, 0.7, -0.5, Rotation::fromEulerAngles(0.7, 0.3, 0.7)),
-									CFrame(0.1, 0.2, -0.5, Rotation::fromEulerAngles(0.2, -0.257, 0.4)), basicProperties);
+	motorPhys->forEachPart([&totalMass, &totalVelocityOfCenterOfMass](const Part& p) {
+		const GlobalCFrame& pcf = p.getCFrame();
+		Vec3 relativePartCOM = pcf.localToRelative(p.getLocalCenterOfMass());
+		Motion m = p.getMotion().getMotionOfPoint(relativePartCOM);
+		Vec3 relVel = m.getVelocity();
+		totalVelocityOfCenterOfMass += relVel * p.getMass();
+		totalMass += p.getMass();
+	});
 
-	MotorizedPhysical* motorPhys = mainPart.parent->mainPhysical;
+	return totalVelocityOfCenterOfMass / totalMass;
+}
 
+static SymmetricMat3 getTotalInertiaOfPhysical(const MotorizedPhysical* motorPhys) {
+	SymmetricMat3 totalInertia{
+		0.0, 
+		0.0, 0.0, 
+		0.0, 0.0, 0.0
+	};
+	Position com = motorPhys->getCenterOfMass();
+
+	motorPhys->forEachPart([&com, &totalInertia](const Part& p) {
+		const GlobalCFrame& pcf = p.getCFrame();
+		SymmetricMat3 globalInertia = pcf.getRotation().localToGlobal(p.getInertia());
+		Vec3 relativePartCOM = pcf.localToRelative(p.getLocalCenterOfMass());
+		Vec3 offset = p.getCenterOfMass() - com;
+		SymmetricMat3 inertiaOfThis = getTranslatedInertiaAroundCenterOfMass(globalInertia, p.getMass(), offset);
+		totalInertia += inertiaOfThis;
+	});
+
+	return totalInertia;
+}
+
+static Vec3 getTotalAngularMomentumOfPhysical(const MotorizedPhysical* motorPhys) {
 	Vec3 totalAngularMomentum(0.0, 0.0, 0.0);
-
-	std::size_t size = motorPhys->getNumberOfPhysicalsInThisAndChildren();
-	UnmanagedArray<MonotonicTreeNode<RelativeMotion>> arr(new MonotonicTreeNode<RelativeMotion>[size], size);
-	COMMotionTree t = motorPhys->getCOMMotionTree(std::move(arr));
-
-
 	Position com = motorPhys->getCenterOfMass();
 	Vec3 comVel = motorPhys->getMotionOfCenterOfMass().getVelocity();
-	//Vec3 comVel = tree.motionOfCenterOfMass.getVelocity();
-
-	
 
 	motorPhys->forEachPart([&com, &comVel, &totalAngularMomentum](const Part& p) {
 		const GlobalCFrame& pcf = p.getCFrame();
@@ -610,7 +604,462 @@ TEST_CASE(motorizedPhysicalAngularMomentum) {
 		totalAngularMomentum += angMomOfThis;
 	});
 
-	ASSERT(t.getInternalAngularMomentum() == totalAngularMomentum);
+	return totalAngularMomentum;
+}
+
+std::vector<Part> producePhysical() {
+	std::vector<Part> result;
+	result.reserve(10);
+	Part& mainPart = result.emplace_back(boxShape(1.0, 1.0, 1.0), GlobalCFrame(), basicProperties);
+
+	mainPart.ensureHasParent();
+
+	Part& part1_mainPart = result.emplace_back(polyhedronShape(Library::house), mainPart,
+											CFrame(0.3, 0.7, -0.5, Rotation::fromEulerAngles(0.7, 0.3, 0.7)), basicProperties);
+	Part& part2_mainPart = result.emplace_back(boxShape(1.0, 0.3, 2.0), mainPart,
+											CFrame(0.1, -0.2, -0.5, Rotation::fromEulerAngles(0.2, -0.257, 0.4)), basicProperties);
+	Part& part1_part1_mainPart = result.emplace_back(cylinderShape(1.0, 0.3), part1_mainPart,
+											CFrame(0.1, -0.2, -0.5, Rotation::fromEulerAngles(0.2, -0.257, 0.4)), basicProperties);
+	Part& part1_part1_part1_mainPart = result.emplace_back(polyhedronShape(Library::trianglePyramid), part1_part1_mainPart,
+											CFrame(0.1, 0.2, -0.5, Rotation::fromEulerAngles(0.2, -0.257, 0.4)), basicProperties);
+
+	return result;
+}
+
+std::vector<Part> produceMotorizedPhysical() {
+	std::vector<Part> result;
+	result.reserve(10);
+	Part& mainPart = result.emplace_back(boxShape(1.0, 1.0, 1.0), GlobalCFrame(), basicProperties);
+
+	mainPart.ensureHasParent();
+
+	Part& part1_mainPart = result.emplace_back(polyhedronShape(Library::house), mainPart,
+						new SinusoidalPistonConstraint(0.0, 2.0, 1.3),
+						CFrame(0.3, 0.7, -0.5, Rotation::fromEulerAngles(0.7, 0.3, 0.7)),
+						CFrame(0.1, 0.2, -0.5, Rotation::fromEulerAngles(0.2, -0.257, 0.4)), basicProperties);
+	Part& part2_mainPart = result.emplace_back(boxShape(1.0, 0.3, 2.0), mainPart,
+						new MotorConstraintTemplate<ConstantMotorTurner>(1.7),
+						CFrame(-0.3, 0.7, 0.5, Rotation::fromEulerAngles(0.7, 0.3, 0.7)),
+						CFrame(0.1, -0.2, -0.5, Rotation::fromEulerAngles(0.2, -0.257, 0.4)), basicProperties);
+	Part& part1_part1_mainPart = result.emplace_back(cylinderShape(1.0, 0.3), part1_mainPart,
+							  new MotorConstraintTemplate<ConstantMotorTurner>(1.3),
+							  CFrame(-0.3, 0.7, 0.5, Rotation::fromEulerAngles(0.7, 0.3, 0.7)),
+							  CFrame(0.1, -0.2, -0.5, Rotation::fromEulerAngles(0.2, -0.257, 0.4)), basicProperties);
+	Part& part1_part1_part1_mainPart = result.emplace_back(polyhedronShape(Library::trianglePyramid), part1_part1_mainPart,
+									new SinusoidalPistonConstraint(0.0, 2.0, 1.3),
+									CFrame(0.3, 0.7, -0.5, Rotation::fromEulerAngles(0.7, 0.3, 0.7)),
+									CFrame(0.1, 0.2, -0.5, Rotation::fromEulerAngles(0.2, -0.257, 0.4)), basicProperties);
+
+	return result;
+}
+
+struct FullGlobalDiagnostic {
+	Motion motionOfCOM;
+	Vec3 getVelocity;
+	double kineticEnergy;
+	double inertiaInDirection;
+	Vec3 getTotalAngularMomentum;
+	Position positions[TICKS];
+};
+
+template<typename Tol>
+bool tolerantEquals(const FullGlobalDiagnostic& first, const FullGlobalDiagnostic& second, Tol tolerance) {
+	if(tolerantEquals(first.motionOfCOM, second.motionOfCOM, tolerance) &&
+	   tolerantEquals(first.getVelocity, second.getVelocity, tolerance) &&
+	   tolerantEquals(first.kineticEnergy, second.kineticEnergy, tolerance) &&
+	   tolerantEquals(first.inertiaInDirection, second.inertiaInDirection, tolerance) &&
+	   tolerantEquals(first.getTotalAngularMomentum, second.getTotalAngularMomentum, tolerance)) {
+
+		for(std::size_t i = 0; i < TICKS; i++) {
+			if(!tolerantEquals(first.positions[i], second.positions[i], tolerance)) {
+				return false;
+			}
+		}
+		return true;
+	} else {
+		return false;
+	}
+}
+
+std::ostream& operator<<(std::ostream& ostream, const FullGlobalDiagnostic& d) {
+	ostream << "FullGlobalDiagnostic{motionOfCOM: " << d.motionOfCOM << "\n";
+	ostream << "getVelocity: " << d.getVelocity << "\n";
+	ostream << "kineticEnergy: " << d.kineticEnergy << "\n";
+	ostream << "inertiaInDirection: " << d.inertiaInDirection << "\n";
+	ostream << "getTotalAngularMomentum: " << d.getTotalAngularMomentum << "\n";
+	ostream << "lastPosition: " << d.positions[TICKS - 1] << "}";
+	return ostream;
+}
+
+static Vec3 inertiaOfRelativePos = Vec3(2.5, 1.2, -2.0);
+static Vec3 inertiaOfRelativeDir = normalize(Vec3(3.5, -2.0, 1.34));
+
+static FullGlobalDiagnostic doDiagnostic(MotorizedPhysical* p) {
+	FullGlobalDiagnostic result;
+
+	result.motionOfCOM = p->getMotionOfCenterOfMass();
+	result.getVelocity = p->getVelocityOfCenterOfMass();
+	result.kineticEnergy = p->getKineticEnergy();
+	result.inertiaInDirection = p->getInertiaOfPointInDirectionRelative(inertiaOfRelativePos, inertiaOfRelativeDir);
+	result.getTotalAngularMomentum = p->getTotalAngularMomentum();
+
+	for(std::size_t i = 0; i < TICKS; i++) {
+		p->update(DELTA_T);
+		result.positions[i] = p->getCenterOfMass();
+	}
+
+	return result;
+}
+
+static const Motion motionOfCOM = Motion(Vec3(1.3, 0.7, -2.1), Vec3(2.1, 0.7, 3.7));
+
+static FullGlobalDiagnostic runDiagnosticForCFrame(MotorizedPhysical* p, const GlobalCFrame& cframeOfStart) {
+	p->setCFrame(cframeOfStart);
+	p->motionOfCenterOfMass = motionOfCOM;
+
+	for(ConnectedPhysical& c : p->childPhysicals) {
+		SinusoidalPistonConstraint* constraint = dynamic_cast<SinusoidalPistonConstraint*>(c.connectionToParent.constraintWithParent.get());
+		constraint->currentStepInPeriod = 0;
+	}
+
+	p->fullRefreshOfConnectedPhysicals();
+	p->refreshPhysicalProperties();
+
+	return doDiagnostic(p);
+}
+
+TEST_CASE(basicFullRotationSymmetryInvariance) {
+	const int ticksToSim = 10;
+
+	Position origin(-143.3, 700.3, 1000.0);
+	Part centerPart(sphereShape(1.0), GlobalCFrame(origin), basicProperties);
+	Shape box = boxShape(1.0, 1.0, 1.0);
+
+	Part xPart(box, centerPart, CFrame(1.0, 0.0, 0.0), basicProperties);
+	Part yPart(box, centerPart, CFrame(0.0, 1.0, 0.0), basicProperties);
+	Part zPart(box, centerPart, CFrame(0.0, 0.0, 1.0), basicProperties);
+	Part nxPart(box, centerPart, CFrame(-1.0, 0.0, 0.0), basicProperties);
+	Part nyPart(box, centerPart, CFrame(0.0, -1.0, 0.0), basicProperties);
+	Part nzPart(box, centerPart, CFrame(0.0, 0.0, -1.0), basicProperties);
+
+	MotorizedPhysical* motorPhys = centerPart.parent->mainPhysical;
+
+	FullGlobalDiagnostic reference = runDiagnosticForCFrame(motorPhys, GlobalCFrame(origin));
+	logStream << reference;
+
+	FullGlobalDiagnostic tests[9];
+	Rotation rotations[9]{
+		Rotation::Predefined::X_90,
+		Rotation::Predefined::X_180,
+		Rotation::Predefined::X_270,
+		Rotation::Predefined::Y_90,
+		Rotation::Predefined::Y_180,
+		Rotation::Predefined::Y_270,
+		Rotation::Predefined::Z_90,
+		Rotation::Predefined::Z_180,
+		Rotation::Predefined::Z_270,
+	};
+	for(int i = 0; i < 9; i++) {
+		ASSERT(reference == runDiagnosticForCFrame(motorPhys, GlobalCFrame(origin, rotations[i])));
+	}
+}
+
+TEST_CASE(angularMomentumOverLocalToGlobal) {
+	const int ticksToSim = 10;
+
+	Position origin(-143.3, 700.3, 1000.0);
+	
+	std::vector<Part> phys = produceMotorizedPhysical();
+	MotorizedPhysical* motorPhys = phys[0].parent->mainPhysical;
+
+
+	Motion motionOfCOM = Motion(Vec3(1.3, 0.7, -2.1), Vec3(2.1, 0.7, 3.7));
+	Rotation rotation = Rotation::fromEulerAngles(1.0, 0.2, -0.9);
+
+	motorPhys->setCFrame(GlobalCFrame(origin));
+	motorPhys->motionOfCenterOfMass = motionOfCOM;
+
+	Vec3 firstAngularMomentumFromParts = getTotalAngularMomentumOfPhysical(motorPhys);
+	Vec3 firstAngularMomentum = motorPhys->getTotalAngularMomentum();
+
+	motorPhys->setCFrame(GlobalCFrame(origin, rotation));
+	motorPhys->motionOfCenterOfMass = localToGlobal(rotation, motionOfCOM);
+
+	Vec3 secondAngularMomentumFromParts = getTotalAngularMomentumOfPhysical(motorPhys);
+	Vec3 secondAngularMomentum = motorPhys->getTotalAngularMomentum();
+
+	ASSERT(rotation.localToGlobal(firstAngularMomentum) == secondAngularMomentum);
+	ASSERT(rotation.localToGlobal(firstAngularMomentumFromParts) == secondAngularMomentumFromParts);
+}
+
+TEST_CASE(hardConstrainedFullRotationFollowsCorrectly) {
+	const int ticksToSim = 10;
+
+	Position origin(-143.3, 700.3, 1000.0);
+	Part centerPart(sphereShape(1.0), GlobalCFrame(origin), basicProperties);
+	Shape box = boxShape(1.0, 1.0, 1.0);
+
+	Part zPart(box, centerPart, new SinusoidalPistonConstraint(1.0, 3.0, 1.0), CFrame(0.0, 0.0, 0.0, Rotation::Predefined::IDENTITY), CFrame(0.0, 0.0, 0.0), basicProperties);
+	Part yPart(box, centerPart, new SinusoidalPistonConstraint(1.0, 3.0, 1.0), CFrame(0.0, 0.0, 0.0, Rotation::Predefined::X_90), CFrame(0.0, 0.0, 0.0), basicProperties);
+	Part xPart(box, centerPart, new SinusoidalPistonConstraint(1.0, 3.0, 1.0), CFrame(0.0, 0.0, 0.0, Rotation::Predefined::Y_90), CFrame(0.0, 0.0, 0.0), basicProperties);
+	Part nzPart(box, centerPart, new SinusoidalPistonConstraint(1.0, 3.0, 1.0), CFrame(0.0, 0.0, 0.0, Rotation::Predefined::X_180), CFrame(0.0, 0.0, 0.0), basicProperties);
+	Part nyPart(box, centerPart, new SinusoidalPistonConstraint(1.0, 3.0, 1.0), CFrame(0.0, 0.0, 0.0, Rotation::Predefined::X_270), CFrame(0.0, 0.0, 0.0), basicProperties);
+	Part nxPart(box, centerPart, new SinusoidalPistonConstraint(1.0, 3.0, 1.0), CFrame(0.0, 0.0, 0.0, Rotation::Predefined::Y_270), CFrame(0.0, 0.0, 0.0), basicProperties);
+
+	MotorizedPhysical* p = centerPart.parent->mainPhysical;
+
+	FullGlobalDiagnostic reference = runDiagnosticForCFrame(p, GlobalCFrame(origin));
+	logStream << reference;
+
+	FullGlobalDiagnostic tests[9];
+	Rotation rotations[9]{
+		Rotation::Predefined::X_90,
+		Rotation::Predefined::X_180,
+		Rotation::Predefined::X_270,
+		Rotation::Predefined::Y_90,
+		Rotation::Predefined::Y_180,
+		Rotation::Predefined::Y_270,
+		Rotation::Predefined::Z_90,
+		Rotation::Predefined::Z_180,
+		Rotation::Predefined::Z_270,
+	};
+	for(int i = 0; i < 9; i++) {
+		ASSERT(reference == runDiagnosticForCFrame(p, GlobalCFrame(origin, rotations[i])));
+	}
+}
+
+TEST_CASE(basicAngularMomentumOfSinglePart) {
+	Polyhedron testPoly = Library::createPointyPrism(4, 1.0f, 1.0f, 0.5f, 0.5f);
+	Part mainPart(polyhedronShape(testPoly), GlobalCFrame(Position(1.3, 2.7, -2.6), Rotation::fromEulerAngles(0.6, -0.7, -0.3)), basicProperties);
+
+	mainPart.ensureHasParent();
+
+	MotorizedPhysical* motorPhys = mainPart.parent->mainPhysical;
+
+	motorPhys->motionOfCenterOfMass = Motion(Vec3(2.0, 3.0, 1.0), Vec3(-1.7, 3.3, 12.0));
+
+	std::size_t size = motorPhys->getNumberOfPhysicalsInThisAndChildren();
+	UnmanagedArray<MonotonicTreeNode<RelativeMotion>> arr(new MonotonicTreeNode<RelativeMotion>[size], size);
+	COMMotionTree t = motorPhys->getCOMMotionTree(std::move(arr));
+
+	ASSERT(motorPhys->getTotalAngularMomentum() == getTotalAngularMomentumOfPhysical(motorPhys));
 
 	delete[] arr.getPtrToFree();
+}
+
+TEST_CASE(motorizedPhysicalAngularMomentum) {
+	std::vector<Part> phys = produceMotorizedPhysical();
+	MotorizedPhysical* motorPhys = phys[0].parent->mainPhysical;
+
+	std::size_t size = motorPhys->getNumberOfPhysicalsInThisAndChildren();
+	UnmanagedArray<MonotonicTreeNode<RelativeMotion>> arr(new MonotonicTreeNode<RelativeMotion>[size], size);
+	COMMotionTree t = motorPhys->getCOMMotionTree(std::move(arr));
+
+	ASSERT(t.getInternalAngularMomentum() == getTotalAngularMomentumOfPhysical(motorPhys));
+	ASSERT(motorPhys->getTotalAngularMomentum() == getTotalAngularMomentumOfPhysical(motorPhys));
+
+	delete[] arr.getPtrToFree();
+}
+
+TEST_CASE(physicalTotalAngularMomentum) {
+	std::vector<Part> phys = producePhysical();
+	MotorizedPhysical* motorPhys = phys[0].parent->mainPhysical;
+
+	motorPhys->motionOfCenterOfMass = Motion(Vec3(2.0, 3.0, 1.0), Vec3(-1.7, 3.3, 12.0));
+
+	std::size_t size = motorPhys->getNumberOfPhysicalsInThisAndChildren();
+	UnmanagedArray<MonotonicTreeNode<RelativeMotion>> arr(new MonotonicTreeNode<RelativeMotion>[size], size);
+	COMMotionTree t = motorPhys->getCOMMotionTree(std::move(arr));
+
+	ASSERT(motorPhys->getTotalAngularMomentum() == getTotalAngularMomentumOfPhysical(motorPhys));
+
+	delete[] arr.getPtrToFree();
+}
+
+TEST_CASE(basicMotorizedPhysicalTotalAngularMomentum) {
+	std::vector<Part> result;
+	result.reserve(10);
+	Part& mainPart = result.emplace_back(boxShape(1.0, 1.0, 1.0), GlobalCFrame(), basicProperties);
+
+	mainPart.ensureHasParent();
+
+	Part& part1_mainPart = result.emplace_back(polyhedronShape(Library::house), mainPart,
+											   new SinusoidalPistonConstraint(0.0, 2.0, 1.0),
+											   CFrame(0.0, 0.0, 0.0),
+											   CFrame(0.0, 0.0, 0.0), basicProperties);
+	/*Part& part2_mainPart = result.emplace_back(polyhedronShape(Library::house), mainPart,
+											   new MotorConstraintTemplate<ConstantMotorTurner>(1.7),
+											   CFrame(-0.3, 0.7, 0.5, Rotation::fromEulerAngles(0.7, 0.3, 0.7)),
+											   CFrame(0.7, -2.0, -0.5, Rotation::fromEulerAngles(0.2, -0.257, 0.4)), basicProperties);*/
+	/*Part& part3_mainPart = result.emplace_back(boxShape(1.0, 1.0, 1.0), mainPart,
+											   new MotorConstraintTemplate<ConstantMotorTurner>(1.7),
+											   CFrame(-0.3, 0.7, 0.5, Rotation::fromEulerAngles(0.7, 0.3, 0.7)),
+											   CFrame(0.7, -2.0, -0.5, Rotation::fromEulerAngles(0.2, -0.257, 0.4)), basicProperties);*/
+
+	MotorizedPhysical* motorPhys = result[0].parent->mainPhysical;
+
+	motorPhys->motionOfCenterOfMass = Motion(Vec3(0.0, 0.0, 0.0), Vec3(-1.7, 3.3, 12.0));
+
+	std::size_t size = motorPhys->getNumberOfPhysicalsInThisAndChildren();
+	UnmanagedArray<MonotonicTreeNode<RelativeMotion>> arr(new MonotonicTreeNode<RelativeMotion>[size], size);
+	COMMotionTree t = motorPhys->getCOMMotionTree(std::move(arr));
+
+	ASSERT(motorPhys->getTotalAngularMomentum() == getTotalAngularMomentumOfPhysical(motorPhys));
+
+	delete[] arr.getPtrToFree();
+}
+
+TEST_CASE(totalInertiaOfPhysical) {
+	std::vector<Part> phys = producePhysical();
+	MotorizedPhysical* motorPhys = phys[0].parent->mainPhysical;
+
+	std::size_t size = motorPhys->getNumberOfPhysicalsInThisAndChildren();
+	UnmanagedArray<MonotonicTreeNode<RelativeMotion>> arr(new MonotonicTreeNode<RelativeMotion>[size], size);
+	COMMotionTree t = motorPhys->getCOMMotionTree(std::move(arr));
+
+	ASSERT(t.getInertia() == getTotalInertiaOfPhysical(motorPhys));
+
+	delete[] arr.getPtrToFree();
+}
+
+TEST_CASE(totalInertiaOfBasicMotorizedPhysical) {
+	std::vector<Part> result;
+	result.reserve(10);
+	Part& mainPart = result.emplace_back(polyhedronShape(Library::house), GlobalCFrame(), basicProperties);
+
+	mainPart.ensureHasParent();
+
+	/*Part& part1_mainPart = result.emplace_back(polyhedronShape(Library::house), mainPart,
+											   new SinusoidalPistonConstraint(0.0, 2.0, 1.0),
+											   CFrame(0.0, 0.0, 0.0),
+											   CFrame(0.0, 0.0, 0.0), basicProperties);*/
+	Part& part2_mainPart = result.emplace_back(polyhedronShape(Library::house), mainPart,
+											   new MotorConstraintTemplate<ConstantMotorTurner>(1.7),
+											   CFrame(-0.3, 0.7, 0.5, Rotation::fromEulerAngles(0.7, 0.3, 0.7)),
+											   CFrame(0.7, -2.0, -0.5, Rotation::fromEulerAngles(0.2, -0.257, 0.4)), basicProperties);
+	/*Part& part3_mainPart = result.emplace_back(boxShape(1.0, 1.0, 1.0), mainPart,
+												new MotorConstraintTemplate<ConstantMotorTurner>(1.7),
+												CFrame(-0.3, 0.7, 0.5, Rotation::fromEulerAngles(0.7, 0.3, 0.7)),
+												CFrame(0.7, -2.0, -0.5, Rotation::fromEulerAngles(0.2, -0.257, 0.4)), basicProperties);*/
+
+	MotorizedPhysical* motorPhys = result[0].parent->mainPhysical;
+
+	std::size_t size = motorPhys->getNumberOfPhysicalsInThisAndChildren();
+	UnmanagedArray<MonotonicTreeNode<RelativeMotion>> arr(new MonotonicTreeNode<RelativeMotion>[size], size);
+	COMMotionTree t = motorPhys->getCOMMotionTree(std::move(arr));
+
+	ASSERT(t.getInertia() == getTotalInertiaOfPhysical(motorPhys));
+
+	delete[] arr.getPtrToFree();
+}
+
+TEST_CASE(totalCenterOfMassOfPhysical) {
+	std::vector<Part> phys = producePhysical();
+	MotorizedPhysical* motorPhys = phys[0].parent->mainPhysical;
+
+	ASSERT(motorPhys->getCenterOfMass() == getTotalCenterOfMassOfPhysical(motorPhys));
+}
+
+TEST_CASE(totalCenterOfMassOfMotorizedPhysical) {
+	std::vector<Part> phys = produceMotorizedPhysical();
+	MotorizedPhysical* motorPhys = phys[0].parent->mainPhysical;
+
+	ASSERT(motorPhys->getCenterOfMass() == getTotalCenterOfMassOfPhysical(motorPhys));
+}
+
+TEST_CASE(totalVelocityOfCenterOfMassOfPhysical) {
+	std::vector<Part> phys = producePhysical();
+	MotorizedPhysical* motorPhys = phys[0].parent->mainPhysical;
+
+	motorPhys->motionOfCenterOfMass = motionOfCOM;
+
+	ASSERT(motorPhys->getMotionOfCenterOfMass().getVelocity() == getTotalMotionOfCenterOfMassOfPhysical(motorPhys));
+}
+
+TEST_CASE(totalVelocityOfCenterOfMassOfMotorizedPhysical) {
+	std::vector<Part> phys = produceMotorizedPhysical();
+	MotorizedPhysical* motorPhys = phys[0].parent->mainPhysical;
+
+	motorPhys->motionOfCenterOfMass = motionOfCOM;
+
+	ASSERT(motorPhys->getMotionOfCenterOfMass().getVelocity() == getTotalMotionOfCenterOfMassOfPhysical(motorPhys));
+}
+
+TEST_CASE(totalInertiaOfMotorizedPhysical) {
+	std::vector<Part> phys = produceMotorizedPhysical();
+	MotorizedPhysical* motorPhys = phys[0].parent->mainPhysical;
+
+	std::size_t size = motorPhys->getNumberOfPhysicalsInThisAndChildren();
+	UnmanagedArray<MonotonicTreeNode<RelativeMotion>> arr(new MonotonicTreeNode<RelativeMotion>[size], size);
+	COMMotionTree t = motorPhys->getCOMMotionTree(std::move(arr));
+
+	ASSERT(t.getInertia() == getTotalInertiaOfPhysical(motorPhys));
+
+	delete[] arr.getPtrToFree();
+}
+
+TEST_CASE(motorizedPhysicalTotalAngularMomentum) {
+	std::vector<Part> phys = produceMotorizedPhysical();
+	MotorizedPhysical* motorPhys = phys[0].parent->mainPhysical;
+
+	motorPhys->motionOfCenterOfMass = Motion(Vec3(2.0, 3.0, 1.0), Vec3(-1.7, 3.3, 12.0));
+
+	std::size_t size = motorPhys->getNumberOfPhysicalsInThisAndChildren();
+	UnmanagedArray<MonotonicTreeNode<RelativeMotion>> arr(new MonotonicTreeNode<RelativeMotion>[size], size);
+	COMMotionTree t = motorPhys->getCOMMotionTree(std::move(arr));
+
+	ASSERT(motorPhys->getTotalAngularMomentum() == getTotalAngularMomentumOfPhysical(motorPhys));
+
+	delete[] arr.getPtrToFree();
+}
+
+TEST_CASE(conservationOfAngularMomentum) {
+	std::vector<Part> phys = produceMotorizedPhysical();
+
+	MotorizedPhysical* motorPhys = phys[0].parent->mainPhysical;
+
+	motorPhys->motionOfCenterOfMass = Motion(Vec3(2.0, 3.0, 1.0), Vec3(-1.7, 3.3, 12.0));
+
+	Vec3 initialAngularMomentum = motorPhys->getTotalAngularMomentum();
+
+	for(int i = 0; i < TICKS; i++) {
+		motorPhys->update(DELTA_T);
+
+		ASSERT(initialAngularMomentum == motorPhys->getTotalAngularMomentum());
+	}
+}
+
+TEST_CASE(conservationOfCenterOfMass) {
+	std::vector<Part> phys = produceMotorizedPhysical();
+
+	MotorizedPhysical* motorPhys = phys[0].parent->mainPhysical;
+
+	motorPhys->motionOfCenterOfMass = Motion(Vec3(0.0, 0.0, 0.0), Vec3(-1.7, 3.3, 12.0));
+
+	Position initialCenterOfMass = motorPhys->getCenterOfMass();
+
+	for(int i = 0; i < TICKS; i++) {
+		motorPhys->update(DELTA_T);
+
+		ASSERT(initialCenterOfMass == motorPhys->getCenterOfMass());
+	}
+}
+
+TEST_CASE(angularMomentumVelocityInvariance) {
+	std::vector<Part> phys = produceMotorizedPhysical();
+
+	MotorizedPhysical* motorPhys = phys[0].parent->mainPhysical;
+
+	motorPhys->motionOfCenterOfMass = Motion(Vec3(0.0, 0.0, 0.0), Vec3(-1.7, 3.3, 12.0));
+
+	Vec3 stillAngularMomentum = motorPhys->getTotalAngularMomentum();
+	Vec3 stillAngularMomentumPartsBased = getTotalAngularMomentumOfPhysical(motorPhys);
+
+	motorPhys->motionOfCenterOfMass = Motion(Vec3(50.3, 12.3, -74.2), Vec3(-1.7, 3.3, 12.0));
+
+	Vec3 movingAngularMomentum = motorPhys->getTotalAngularMomentum();
+	Vec3 movingAngularMomentumPartsBased = getTotalAngularMomentumOfPhysical(motorPhys);
+
+	ASSERT(stillAngularMomentum == movingAngularMomentum);
+	ASSERT(stillAngularMomentumPartsBased == movingAngularMomentumPartsBased);
 }

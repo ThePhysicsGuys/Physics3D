@@ -91,12 +91,30 @@ TEST_CASE(testPistonConstraint) {
 	ASSERT((cf2.getPosition() - cf1.getPosition()) == relMotion.relativeMotion.getVelocity() * DELTA_T);
 }
 
-TEST_CASE(testExtendingRelativeMotionCVecCommutes) {
+TEST_CASE(testExtendBegin) {
 	RelativeMotion relMotion = createRandomRelativeMotion();
-	Motion motionOfOrigin = createRandomMotion();
 	Vec3 offsetFromBegin = createRandomNonzeroVec3();
+
+	RelativeMotion resultingMotion1 = relMotion.extendBegin(offsetFromBegin);
+	RelativeMotion resultingMotion2 = RelativeMotion(Motion(), CFrame(offsetFromBegin)) + relMotion;
+
+	ASSERT(resultingMotion1 == resultingMotion2);
+}
+
+TEST_CASE(testExtendEnd) {
+	RelativeMotion relMotion = createRandomRelativeMotion();
 	Vec3 offsetFromEnd = createRandomNonzeroVec3();
 
+	RelativeMotion resultingMotion1 = relMotion.extendEnd(offsetFromEnd);
+	RelativeMotion resultingMotion2 = relMotion + RelativeMotion(Motion(), CFrame(offsetFromEnd));
+
+	ASSERT(resultingMotion1 == resultingMotion2);
+}
+
+TEST_CASE(testExtendingRelativeMotionCVecCommutes) {
+	RelativeMotion relMotion = createRandomRelativeMotion();
+	Vec3 offsetFromBegin = createRandomNonzeroVec3();
+	Vec3 offsetFromEnd = createRandomNonzeroVec3();
 
 	RelativeMotion resultingMotion1 = relMotion.extendBegin(offsetFromBegin).extendEnd(offsetFromEnd);
 	RelativeMotion resultingMotion2 = relMotion.extendEnd(offsetFromEnd).extendBegin(offsetFromBegin);
@@ -105,10 +123,8 @@ TEST_CASE(testExtendingRelativeMotionCVecCommutes) {
 }
 TEST_CASE(testExtendingRelativeMotionCFrameCommutes) {
 	RelativeMotion relMotion = createRandomRelativeMotion();
-	Motion motionOfOrigin = createRandomMotion();
 	CFrame offsetFromBegin = createRandomCFrame();
 	CFrame offsetFromEnd = createRandomCFrame();
-
 
 	RelativeMotion resultingMotion1 = relMotion.extendBegin(offsetFromBegin).extendEnd(offsetFromEnd);
 	RelativeMotion resultingMotion2 = relMotion.extendEnd(offsetFromEnd).extendBegin(offsetFromBegin);

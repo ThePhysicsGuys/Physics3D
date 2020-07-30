@@ -239,6 +239,7 @@ public:
 		The motion is oriented globally
 	*/
 	Motion getMotionOfCenterOfMass() const;
+	Vec3 getVelocityOfCenterOfMass() const;
 
 	Position getCenterOfMass() const;
 	GlobalCFrame getCenterOfMassCFrame() const;
@@ -314,6 +315,7 @@ public:
 	void applyDragAtCenterOfMass(Vec3 drag);
 	void applyDrag(Vec3Relative origin, Vec3Relative drag);
 	void applyAngularDrag(Vec3 angularDrag);
+
 
 	SymmetricMat3 getResponseMatrix(const Vec3Local& localPoint) const;
 	Mat3 getResponseMatrix(const Vec3Local& actionPoint, const Vec3Local& responsePoint) const;

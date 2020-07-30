@@ -424,7 +424,7 @@ TEST_CASE(testPlainAttachAndFixedConstraintIndistinguishable) {
 	main1->update(0.5);
 	main2->update(0.5);
 
-	ASSERT(main1->motionOfCenterOfMass == main2->motionOfCenterOfMass);
+	ASSERT(main1->getMotionOfCenterOfMass() == main2->getMotionOfCenterOfMass());
 	ASSERT(main1->getCFrame() == main2->getCFrame());
 }
 
