@@ -50,9 +50,9 @@ class RigidBody {
 public:
 	Part* mainPart;
 	UnorderedVector<AttachedPart> parts;
-	double mass;            // not part of official state, updated at every tick
-	Vec3 localCenterOfMass; // not part of official state, updated at every tick
-	SymmetricMat3 inertia;  // not part of official state, updated at every tick
+	double mass;            // precomputed cached value for this whole physical
+	Vec3 localCenterOfMass; // precomputed cached value for this whole physical
+	SymmetricMat3 inertia;  // precomputed cached value for this whole physical
 
 
 	RigidBody() = default;

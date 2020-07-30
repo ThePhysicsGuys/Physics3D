@@ -134,13 +134,28 @@ void setupWorld(int argc, const char** args) {
 
 
 	{
+		ExtendedPart* centerPart = new ExtendedPart(sphereShape(1.0), GlobalCFrame(-15.0,4.0,13.0), basicProperties);
+		Shape box = boxShape(1.0, 1.0, 1.0);
+
+		new ExtendedPart(Part(box, *centerPart, new SinusoidalPistonConstraint(1.0, 3.0, 1.0), CFrame(0.0, 0.0, 0.0, Rotation::Predefined::IDENTITY), CFrame(0.0, 0.0, 0.0), basicProperties));
+		new ExtendedPart(Part(box, *centerPart, new SinusoidalPistonConstraint(1.0, 3.0, 1.0), CFrame(0.0, 0.0, 0.0, Rotation::Predefined::X_90), CFrame(0.0, 0.0, 0.0), basicProperties));
+		new ExtendedPart(Part(box, *centerPart, new SinusoidalPistonConstraint(1.0, 3.0, 1.0), CFrame(0.0, 0.0, 0.0, Rotation::Predefined::Y_90), CFrame(0.0, 0.0, 0.0), basicProperties));
+		new ExtendedPart(Part(box, *centerPart, new SinusoidalPistonConstraint(1.0, 3.0, 1.0), CFrame(0.0, 0.0, 0.0, Rotation::Predefined::X_180), CFrame(0.0, 0.0, 0.0), basicProperties));
+		new ExtendedPart(Part(box, *centerPart, new SinusoidalPistonConstraint(1.0, 3.0, 1.0), CFrame(0.0, 0.0, 0.0, Rotation::Predefined::X_270), CFrame(0.0, 0.0, 0.0), basicProperties));
+		new ExtendedPart(Part(box, *centerPart, new SinusoidalPistonConstraint(1.0, 3.0, 1.0), CFrame(0.0, 0.0, 0.0, Rotation::Predefined::Y_270), CFrame(0.0, 0.0, 0.0), basicProperties));
+
+		world.addPart(centerPart);
+	}
+	
+
+	{
 		ExtendedPart* sateliteBody = new ExtendedPart(cylinderShape(0.5, 1.0), GlobalCFrame(0.0, 7.0, 0.0, Rotation::Predefined::X_90), basicProperties, "Satelite Body");
 		ExtendedPart* wing1 = new ExtendedPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(), basicProperties, "Wing 1");
 		ExtendedPart* wing2 = new ExtendedPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(), basicProperties, "Wing 2");
 
 
-		sateliteBody->attach(wing1, new SinusoidalPistonConstraint(1.0, 3.0, 1.0), CFrame(0.5, 0.0, 0.0, Rotation::Predefined::Y_90), CFrame(-0.5, 0.0, 0.0, Rotation::Predefined::Y_90));
-		sateliteBody->attach(wing2, new SinusoidalPistonConstraint(1.0, 3.0, 1.0), CFrame(-0.5, 0.0, 0.0, Rotation::Predefined::Y_270), CFrame(-0.5, 0.0, 0.0, Rotation::Predefined::Y_90));
+		sateliteBody->attach(wing1, new SinusoidalPistonConstraint(0.0, 5.0, 1.0), CFrame(0.5, 0.0, 0.0, Rotation::Predefined::Y_90), CFrame(-0.5, 0.0, 0.0, Rotation::Predefined::Y_90));
+		sateliteBody->attach(wing2, new SinusoidalPistonConstraint(0.0, 5.0, 1.0), CFrame(-0.5, 0.0, 0.0, Rotation::Predefined::Y_270), CFrame(-0.5, 0.0, 0.0, Rotation::Predefined::Y_90));
 		//sateliteBody->attach(wing2, new SinusoidalPistonConstraint(Vec3(-1.0, 0.0, 0.0), 1.0, 3.0, 1.0), CFrame(-0.5, 0.0, 0.0), CFrame(0.5, 0.0, 0.0));
 
 		world.addPart(sateliteBody);
@@ -203,10 +218,10 @@ void setupWorld(int argc, const char** args) {
 				newCube->material.albedo = Vec4f(float((x-minX)/(maxX-minX)), float((y-minY)/(maxY-minY)), float((z-minZ)/(maxZ-minZ)), 1.0f);
 				world.addPart(newCube);
 				world.addPart(new ExtendedPart(sphereShape(0.5), GlobalCFrame(Position(x + 5, y + 1, z - 5)), { 1.0, 0.2, 0.5 }, "Sphere"));
-				//spiderFactories[rand() & 0x00000003].buildSpider(GlobalCFrame(Position(x+y*0.1, y+1, z)));
+				spiderFactories[rand() & 0x00000003].buildSpider(GlobalCFrame(Position(x+y*0.1, y+1, z)));
 				world.addPart(new ExtendedPart(triangle, GlobalCFrame(Position(x - 20, y + 1, z + 20)), { 1.0, 0.2, 0.5 }, "Triangle"));
 
-				//world.addPart(new ExtendedPart(cylinderShape(0.3, 1.2), GlobalCFrame(x - 5, y + 1, z + 5, Rotation::fromEulerAngles(3.1415/4, 3.1415/4, 0.0)), {1.0, 0.2, 0.5}, "cylinderShape"));
+				world.addPart(new ExtendedPart(cylinderShape(0.3, 1.2), GlobalCFrame(x - 5, y + 1, z + 5, Rotation::fromEulerAngles(3.1415/4, 3.1415/4, 0.0)), {1.0, 0.2, 0.5}, "cylinderShape"));
 			}
 		}
 	}
@@ -333,15 +348,15 @@ void setupWorld(int argc, const char** args) {
 		world.addPart(mainBlock);
 	}
 
-	// TODO uncomment, needed for conservation of angular momentum
-	/*{
+	// needed for conservation of angular momentum
+	{
 		ExtendedPart* mainBlock = new ExtendedPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(0.0, 5.0, -5.0), basicProperties, "Main Block");
 		ExtendedPart* attachedBlock = new ExtendedPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(), basicProperties, "Attached Block");
 
 		mainBlock->attach(attachedBlock, new MotorConstraintTemplate<SineWaveController>(0.0, 6.283, 1.0), CFrame(Vec3(0.0, 0.0, 0.5)), CFrame(Vec3(0.0, 0.0, -0.5)));
 
 		world.addPart(mainBlock);
-	}*/
+	}
 
 	{
 		ExtendedPart* mainBlock = new ExtendedPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(0.0, 5.0, 10.0), basicProperties, "Main Block");

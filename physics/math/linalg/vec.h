@@ -45,11 +45,11 @@ struct Vector {
 		return result;
 	}
 
-	T& operator[](size_t index) {
+	constexpr T& operator[](size_t index) {
 		return data[index];
 	}
 
-	const T& operator[](size_t index) const {
+	constexpr const T& operator[](size_t index) const {
 		return data[index];
 	}
 };
@@ -70,11 +70,11 @@ struct Vector<T, 2> {
 		return Vector<OtherT, 2>(static_cast<OtherT>(x), static_cast<OtherT>(y));
 	}
 
-	T& operator[](size_t index) {
+	constexpr T& operator[](size_t index) {
 		return data[index]; 
 	}
 
-	const T& operator[](size_t index) const { 
+	constexpr const T& operator[](size_t index) const {
 		return data[index]; 
 	}
 };
@@ -101,11 +101,11 @@ struct Vector<T, 3> {
 		return Vector<T, 2>(x, y);
 	}
 
-	T& operator[](size_t index) { 
+	constexpr T& operator[](size_t index) {
 		return data[index]; 
 	}
 
-	const T& operator[](size_t index) const { 
+	constexpr const T& operator[](size_t index) const {
 		return data[index];
 	}
 	
@@ -159,11 +159,11 @@ struct Vector<T, 4> {
 		return Vector<T, 3>(x, y, z);
 	}
 
-	T& operator[](size_t index) { 
+	constexpr T& operator[](size_t index) {
 		return data[index]; 
 	}
 
-	const T& operator[](size_t index) const { 
+	constexpr const T& operator[](size_t index) const {
 		return data[index]; 
 	}
 }; 
@@ -189,7 +189,7 @@ typedef Vec3 NormalizedVec3;
 typedef Vec4 NormalizedVec4;
 
 template<typename T1, typename T2, size_t Size>
-auto operator*(const Vector<T1, Size>& a, const Vector<T2, Size>& b) -> decltype(a[0]*b[0]+a[1]*b[1]) {
+constexpr auto operator*(const Vector<T1, Size>& a, const Vector<T2, Size>& b) -> decltype(a[0]*b[0]+a[1]*b[1]) {
 	decltype(a[0] * b[0] + a[1] * b[1]) result = a[0] * b[0];
 	for (size_t i = 1; i < Size; i++) {
 		result += a[i] * b[i];
@@ -198,17 +198,17 @@ auto operator*(const Vector<T1, Size>& a, const Vector<T2, Size>& b) -> decltype
 }
 
 template<typename T1, typename T2, size_t Size>
-auto dot(const Vector<T1, Size>& a, const Vector<T2, Size>& b) -> decltype(a[0] * b[0] + a[1] * b[1]) {
+constexpr auto dot(const Vector<T1, Size>& a, const Vector<T2, Size>& b) -> decltype(a[0] * b[0] + a[1] * b[1]) {
 	return a * b;
 }
 
 template<typename T, size_t Size>
-auto dot(const Vector<T, Size>& vec) -> decltype(vec[0] * vec[0] + vec[1] * vec[1]) {
+constexpr auto dot(const Vector<T, Size>& vec) -> decltype(vec[0] * vec[0] + vec[1] * vec[1]) {
 	return vec * vec;
 }
 
 template<typename T1, typename T2, size_t Size>
-auto operator+(const Vector<T1, Size>& a, const Vector<T2, Size>& b) -> Vector<decltype(a[0] + b[0]), Size> {
+constexpr auto operator+(const Vector<T1, Size>& a, const Vector<T2, Size>& b) -> Vector<decltype(a[0] + b[0]), Size> {
 	Vector<decltype(a[0] + b[0]), Size> result;
 	for (size_t i = 0; i < Size; i++) {
 		result[i] = a[i] + b[i];
@@ -217,7 +217,7 @@ auto operator+(const Vector<T1, Size>& a, const Vector<T2, Size>& b) -> Vector<d
 }
 
 template<typename T1, typename T2, size_t Size>
-auto operator-(const Vector<T1, Size>& a, const Vector<T2, Size>& b) -> Vector<decltype(a[0] - b[0]), Size> {
+constexpr auto operator-(const Vector<T1, Size>& a, const Vector<T2, Size>& b) -> Vector<decltype(a[0] - b[0]), Size> {
 	Vector<decltype(a[0] - b[0]), Size> result;
 	for (size_t i = 0; i < Size; i++) {
 		result[i] = a[i] - b[i];
@@ -226,7 +226,7 @@ auto operator-(const Vector<T1, Size>& a, const Vector<T2, Size>& b) -> Vector<d
 }
 
 template<typename T1, typename T2, size_t Size, typename = typename std::enable_if<std::is_arithmetic<T2>::value, T2>::type>
-auto operator*(const Vector<T1, Size>& vec, const T2& factor) -> Vector<decltype(vec[0] * factor), Size> {
+constexpr auto operator*(const Vector<T1, Size>& vec, const T2& factor) -> Vector<decltype(vec[0] * factor), Size> {
 	Vector<decltype(vec[0] * factor), Size> result;
 	for (size_t i = 0; i < Size; i++) {
 		result[i] = vec[i] * factor;
@@ -235,7 +235,7 @@ auto operator*(const Vector<T1, Size>& vec, const T2& factor) -> Vector<decltype
 }
 
 template<typename T1, typename T2, size_t Size, typename = typename std::enable_if<std::is_arithmetic<T1>::value, T1>::type>
-auto operator*(const T1& factor, const Vector<T2, Size>& vec) -> Vector<decltype(factor * vec[0]), Size> {
+constexpr auto operator*(const T1& factor, const Vector<T2, Size>& vec) -> Vector<decltype(factor * vec[0]), Size> {
 	Vector<decltype(factor * vec[0]), Size> result;
 	for (size_t i = 0; i < Size; i++) {
 		result[i] = factor * vec[i];
@@ -244,7 +244,7 @@ auto operator*(const T1& factor, const Vector<T2, Size>& vec) -> Vector<decltype
 }
 
 template<typename T1, typename T2, size_t Size, typename = typename std::enable_if<std::is_arithmetic<T2>::value, T2>::type>
-auto operator/(const Vector<T1, Size>& vec, const T2& factor) -> Vector<decltype(vec[0] / factor), Size> {
+constexpr auto operator/(const Vector<T1, Size>& vec, const T2& factor) -> Vector<decltype(vec[0] / factor), Size> {
 	Vector<decltype(vec[0] / factor), Size> result;
 	for (size_t i = 0; i < Size; i++) {
 		result[i] = vec[i] / factor;
@@ -253,7 +253,7 @@ auto operator/(const Vector<T1, Size>& vec, const T2& factor) -> Vector<decltype
 }
 
 template<typename T, size_t Size>
-Vector<T, Size> operator-(const Vector<T, Size>& vec) {
+constexpr Vector<T, Size> operator-(const Vector<T, Size>& vec) {
 	Vector<T, Size> result;
 	for (size_t i = 0; i < Size; i++) {
 		result[i] = -vec[i];
@@ -262,7 +262,7 @@ Vector<T, Size> operator-(const Vector<T, Size>& vec) {
 }
 
 template<typename T1, typename T2, size_t Size>
-Vector<T1, Size>& operator+=(Vector<T1, Size>& vec, const Vector<T2, Size>& other) {
+constexpr Vector<T1, Size>& operator+=(Vector<T1, Size>& vec, const Vector<T2, Size>& other) {
 	for (size_t i = 0; i < Size; i++) {
 		vec[i] += other[i];
 	}
@@ -270,7 +270,7 @@ Vector<T1, Size>& operator+=(Vector<T1, Size>& vec, const Vector<T2, Size>& othe
 }
 
 template<typename T1, typename T2, size_t Size>
-Vector<T1, Size>& operator-=(Vector<T1, Size>& vec, const Vector<T2, Size>& other) {
+constexpr Vector<T1, Size>& operator-=(Vector<T1, Size>& vec, const Vector<T2, Size>& other) {
 	for (size_t i = 0; i < Size; i++) {
 		vec[i] -= other[i];
 	}
@@ -278,7 +278,7 @@ Vector<T1, Size>& operator-=(Vector<T1, Size>& vec, const Vector<T2, Size>& othe
 }
 
 template<typename T1, typename T2, size_t Size>
-Vector<T1, Size>& operator*=(Vector<T1, Size>& vec, const T2& factor) {
+constexpr Vector<T1, Size>& operator*=(Vector<T1, Size>& vec, const T2& factor) {
 	for (size_t i = 0; i < Size; i++) {
 		vec[i] *= factor;
 	}
@@ -286,7 +286,7 @@ Vector<T1, Size>& operator*=(Vector<T1, Size>& vec, const T2& factor) {
 }
 
 template<typename T1, typename T2, size_t Size>
-Vector<T1, Size>& operator/=(Vector<T1, Size>& vec, const T2& factor) {
+constexpr Vector<T1, Size>& operator/=(Vector<T1, Size>& vec, const T2& factor) {
 	for (size_t i = 0; i < Size; i++) {
 		vec[i] /= factor;
 	}
@@ -294,17 +294,17 @@ Vector<T1, Size>& operator/=(Vector<T1, Size>& vec, const T2& factor) {
 }
 
 template<typename T1, typename T2>
-auto operator%(const Vector<T1, 2>& first, const Vector<T2, 2>& second) -> decltype(first[0] * second[1] - first[1] * second[0]) {
+constexpr auto operator%(const Vector<T1, 2>& first, const Vector<T2, 2>& second) -> decltype(first[0] * second[1] - first[1] * second[0]) {
 	return first[0] * second[1] - first[1] * second[0];
 }
 
 template<typename T1, typename T2>
-auto cross(const Vector<T1, 2>& first, const Vector<T2, 2>& second) -> decltype(first[0] * second[1] - first[1] * second[0]) {
+constexpr auto cross(const Vector<T1, 2>& first, const Vector<T2, 2>& second) -> decltype(first[0] * second[1] - first[1] * second[0]) {
 	return first % second;
 }
 
 template<typename T1, typename T2>
-auto operator%(const Vector<T1, 3>& first, const Vector<T2, 3>& second) -> Vector<decltype(first[1] * second[2] - first[2] * second[1]), 3> {
+constexpr auto operator%(const Vector<T1, 3>& first, const Vector<T2, 3>& second) -> Vector<decltype(first[1] * second[2] - first[2] * second[1]), 3> {
 	return Vector<decltype(first[1] * second[2] - first[2] * second[1]), 3>{
 		first[1] * second[2] - first[2] * second[1],
 			first[2] * second[0] - first[0] * second[2],
@@ -313,12 +313,12 @@ auto operator%(const Vector<T1, 3>& first, const Vector<T2, 3>& second) -> Vecto
 }
 
 template<typename T1, typename T2>
-auto cross(const Vector<T1, 3>& first, const Vector<T2, 3>& second)->Vector<decltype(first[1] * second[2] - first[2] * second[1]), 3> {
+constexpr auto cross(const Vector<T1, 3>& first, const Vector<T2, 3>& second) -> Vector<decltype(first[1] * second[2] - first[2] * second[1]), 3> {
 	return first % second;
 }
 
 template<typename T, size_t Size>
-bool operator==(const Vector<T, Size>& first, const Vector<T, Size>& second) {
+constexpr bool operator==(const Vector<T, Size>& first, const Vector<T, Size>& second) {
 	for(size_t i = 0; i < Size; i++)
 		if(first[i] != second[i])
 			return false;
@@ -327,12 +327,12 @@ bool operator==(const Vector<T, Size>& first, const Vector<T, Size>& second) {
 }
 
 template<typename T, size_t Size>
-bool operator!=(const Vector<T, Size>& first, const Vector<T, Size>& second) {
+constexpr bool operator!=(const Vector<T, Size>& first, const Vector<T, Size>& second) {
 	return !(first == second);
 }
 
 template<typename T, size_t Size>
-T lengthSquared(const Vector<T, Size>& vec) {
+constexpr T lengthSquared(const Vector<T, Size>& vec) {
 	T sum = vec[0] * vec[0];
 
 	for (size_t i = 1; i < Size; i++) {
@@ -342,33 +342,33 @@ T lengthSquared(const Vector<T, Size>& vec) {
 }
 
 template<typename T, size_t Size>
-T length(const Vector<T, Size>& vec) {
+constexpr T length(const Vector<T, Size>& vec) {
 	return std::sqrt(lengthSquared(vec));
 }
 
 template<typename T>
-T length(const Vector<T, 2>& vec) {
+constexpr T length(const Vector<T, 2>& vec) {
 	return std::hypot(vec[0], vec[1]);
 }
 
 template<typename T1, typename T2, size_t Size>
-bool isLongerThan(const Vector<T1, Size>& vec, const T2& length) {
+constexpr bool isLongerThan(const Vector<T1, Size>& vec, const T2& length) {
 	return lengthSquared(vec) > length * length;
 }
 
 template<typename T1, typename T2, size_t Size>
-bool isShorterThan(const Vector<T1, Size>& vec, const T2& length) {
+constexpr bool isShorterThan(const Vector<T1, Size>& vec, const T2& length) {
 	return lengthSquared(vec) < length* length;
 }
 
 // vec
 template<typename T, size_t Size>
-Vector<T, Size> withLength(const Vector<T, Size>& vec, const T& newLength) {
+constexpr Vector<T, Size> withLength(const Vector<T, Size>& vec, const T& newLength) {
 	return vec * (newLength / length(vec));
 }
 
 template<typename T, size_t Size>
-Vector<T, Size> maxLength(const Vector<T, Size>& vec, const T& maxLength) {
+constexpr Vector<T, Size> maxLength(const Vector<T, Size>& vec, const T& maxLength) {
 	if(isLongerThan(vec, maxLength))
 		return withLength(vec, maxLength);
 	else
@@ -376,7 +376,7 @@ Vector<T, Size> maxLength(const Vector<T, Size>& vec, const T& maxLength) {
 }
 
 template<typename T, size_t Size>
-Vector<T, Size> minLength(const Vector<T, Size>& vec, const T& minLength) {
+constexpr Vector<T, Size> minLength(const Vector<T, Size>& vec, const T& minLength) {
 	if(isShorterThan(vec, minLength))
 		return withLength(vec, minLength);
 	else
@@ -384,12 +384,12 @@ Vector<T, Size> minLength(const Vector<T, Size>& vec, const T& minLength) {
 }
 
 template<typename T, size_t Size>
-Vector<T, Size> normalize(const Vector<T, Size>& vec) {
+constexpr Vector<T, Size> normalize(const Vector<T, Size>& vec) {
 	return vec / length(vec);
 }
 
 template<typename T, size_t Size>
-Vector<T, Size> abs(const Vector<T, Size>& vec) {
+constexpr Vector<T, Size> abs(const Vector<T, Size>& vec) {
 	Vector<T, Size> result;
 	for(size_t i = 0; i < Size; i++)
 		result[i] = std::abs(vec[i]);
@@ -402,7 +402,7 @@ Vector<T, Size> abs(const Vector<T, Size>& vec) {
 * @return vec * (v/lengthSquared(vec))
 */
 template<typename T, size_t Size>
-Vector<T, Size> reProject(const Vector<T, Size>& onto, const T& v) {
+constexpr Vector<T, Size> reProject(const Vector<T, Size>& onto, const T& v) {
 	return onto * v / lengthSquared(onto);
 }
 
@@ -413,7 +413,7 @@ Vector<T, Size> reProject(const Vector<T, Size>& onto, const T& v) {
 * @return a projected version of the given vector
 */
 template<typename T, size_t Size>
-Vector<T, Size> project(const Vector<T, Size>& vec, const Vector<T, Size>& onto) {
+constexpr Vector<T, Size> project(const Vector<T, Size>& vec, const Vector<T, Size>& onto) {
 	return onto * ((onto * vec) / lengthSquared(onto));
 }
 
@@ -425,7 +425,7 @@ Vector<T, Size> project(const Vector<T, Size>& vec, const Vector<T, Size>& onto)
 * @return a projected version of the given vector
 */
 template<typename T, size_t Size>
-Vector<T, Size> projectToPlaneNormal(const Vector<T, Size>& vec, const Vector<T, Size>& planeNormal) {
+constexpr Vector<T, Size> projectToPlaneNormal(const Vector<T, Size>& vec, const Vector<T, Size>& planeNormal) {
 	return vec - vec * planeNormal * planeNormal / lengthSquared(planeNormal);
 }
 
@@ -435,7 +435,7 @@ Vector<T, Size> projectToPlaneNormal(const Vector<T, Size>& vec, const Vector<T,
 * @return the distance
 */
 template<typename T, size_t Size>
-T pointToLineDistance(const Vector<T, Size>& line, const Vector<T, Size>& point) {
+constexpr T pointToLineDistance(const Vector<T, Size>& line, const Vector<T, Size>& point) {
 	return length(point - project(point, line));
 }
 
@@ -445,12 +445,12 @@ T pointToLineDistance(const Vector<T, Size>& line, const Vector<T, Size>& point)
 * @return the square of the distance
 */
 template<typename T, size_t Size>
-T pointToLineDistanceSquared(const Vector<T, Size>& line, const Vector<T, Size>& point) {
+constexpr T pointToLineDistanceSquared(const Vector<T, Size>& line, const Vector<T, Size>& point) {
 	return lengthSquared(point - project(point, line));
 }
 
 template<typename T, size_t Size>
-Vector<T, Size> elementWiseMul(const Vector<T, Size>& first, const Vector<T, Size>& second) {
+constexpr Vector<T, Size> elementWiseMul(const Vector<T, Size>& first, const Vector<T, Size>& second) {
 	Vector<T, Size> result;
 	for (size_t i = 0; i < Size; i++)
 		result[i] = first[i] * second[i];
@@ -458,7 +458,7 @@ Vector<T, Size> elementWiseMul(const Vector<T, Size>& first, const Vector<T, Siz
 }
 
 template<typename T, size_t Size>
-Vector<T, Size> elementWiseSquare(const Vector<T, Size>& vec) {
+constexpr Vector<T, Size> elementWiseSquare(const Vector<T, Size>& vec) {
 	Vector<T, Size> result;
 	for (size_t i = 0; i < Size; i++)
 		result[i] = vec[i] * vec[i];
@@ -466,7 +466,7 @@ Vector<T, Size> elementWiseSquare(const Vector<T, Size>& vec) {
 }
 
 template<typename T, size_t Size>
-Vector<T, Size> elementWiseCube(const Vector<T, Size>& vec) {
+constexpr Vector<T, Size> elementWiseCube(const Vector<T, Size>& vec) {
 	Vector<T, Size> result;
 	for (size_t i = 0; i < Size; i++)
 		result[i] = vec[i] * vec[i] * vec[i];
@@ -479,7 +479,7 @@ Vector<T, Size> elementWiseCube(const Vector<T, Size>& vec) {
 	a.x * b.y + a.y * b.x
 )*/
 template<typename T1, typename T2>
-auto mulOppositesBiDir(const Vector<T1, 3> & a, const Vector<T2, 3> & b) -> Vector<decltype(a.x * b.y + a.y * b.x), 3> {
+constexpr auto mulOppositesBiDir(const Vector<T1, 3> & a, const Vector<T2, 3> & b) -> Vector<decltype(a.x * b.y + a.y * b.x), 3> {
 	return Vector<decltype(a.x * b.y + a.y * b.x), 3>(
 		a.y * b.z + a.z * b.y,
 		a.z * b.x + a.x * b.z,
@@ -488,17 +488,17 @@ auto mulOppositesBiDir(const Vector<T1, 3> & a, const Vector<T2, 3> & b) -> Vect
 }
 // computes (vec.y * vec.z, vec.z * vec.x, vec.x * vec.y)
 template<typename T>
-Vector<T, 3> mulSelfOpposites(const Vector<T, 3> & vec) {
+constexpr Vector<T, 3> mulSelfOpposites(const Vector<T, 3> & vec) {
 	return Vector<T, 3>(vec.y * vec.z, vec.z * vec.x, vec.x * vec.y);
 }
 // computes (vec.y + vec.z, vec.z + vec.x, vec.x + vec.y)
 template<typename T>
-Vector<T, 3> addSelfOpposites(const Vector<T, 3> & vec) {
+constexpr Vector<T, 3> addSelfOpposites(const Vector<T, 3> & vec) {
 	return Vector<T, 3>(vec.y + vec.z, vec.z + vec.x, vec.x + vec.y);
 }
 
 template<typename T, size_t Size>
-size_t getMaxElementIndex(const Vector<T, Size>& vec) {
+constexpr size_t getMaxElementIndex(const Vector<T, Size>& vec) {
 	size_t max = 0;
 
 	for(size_t i = 1; i < Size; i++) {
@@ -509,7 +509,7 @@ size_t getMaxElementIndex(const Vector<T, Size>& vec) {
 	return max;
 }
 template<typename T, size_t Size>
-size_t getMinElementIndex(const Vector<T, Size>& vec) {
+constexpr size_t getMinElementIndex(const Vector<T, Size>& vec) {
 	size_t min = 0;
 
 	for(size_t i = 1; i < Size; i++) {
@@ -520,7 +520,7 @@ size_t getMinElementIndex(const Vector<T, Size>& vec) {
 	return min;
 }
 template<typename T, size_t Size>
-size_t getAbsMaxElementIndex(const Vector<T, Size>& vec) {
+constexpr size_t getAbsMaxElementIndex(const Vector<T, Size>& vec) {
 	size_t max = 0;
 
 	for(size_t i = 1; i < Size; i++) {
@@ -532,7 +532,7 @@ size_t getAbsMaxElementIndex(const Vector<T, Size>& vec) {
 }
 
 template<typename T, size_t Size>
-size_t getAbsMinElementIndex(const Vector<T, Size>& vec) {
+constexpr size_t getAbsMinElementIndex(const Vector<T, Size>& vec) {
 	size_t min = 0;
 
 	for(size_t i = 1; i < Size; i++) {
@@ -544,7 +544,7 @@ size_t getAbsMinElementIndex(const Vector<T, Size>& vec) {
 }
 
 template<typename T, size_t Size>
-T sumElements(const Vector<T, Size>& vec) {
+constexpr T sumElements(const Vector<T, Size>& vec) {
 	T sum = vec[0];
 	for(size_t i = 1; i < Size; i++) {
 		sum += vec[i];
@@ -553,11 +553,11 @@ T sumElements(const Vector<T, Size>& vec) {
 }
 
 template<typename T, size_t Size>
-auto angleBetween(const Vector<T, Size>& first, const Vector<T, Size>& second) -> decltype(acos(normalize(first)* normalize(second))) {
+constexpr auto angleBetween(const Vector<T, Size>& first, const Vector<T, Size>& second) -> decltype(acos(normalize(first)* normalize(second))) {
 	return acos(normalize(first) * normalize(second));
 }
 
 template<typename T, size_t Size>
-Vector<T, Size> bisect(const Vector<T, Size>& first, const Vector<T, Size>& second) {
+constexpr Vector<T, Size> bisect(const Vector<T, Size>& first, const Vector<T, Size>& second) {
 	return first * length(second) + second * length(first);
 }

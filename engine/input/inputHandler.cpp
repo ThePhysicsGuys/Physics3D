@@ -19,10 +19,6 @@ void InputHandler::keyCallback(int code, int action, int mods) {
 	Modifiers modifiers = Modifiers(mods);
 
 	if (action == Keyboard::KEY_PRESS) {
-		keys[key.getCode()] = true;
-		timestamp[key.getCode()] = glfwGetTime();
-		anyKey++;
-
 		if (keys[key.getCode()] == false && glfwGetTime() - timestamp[key.getCode()] < keyInterval) {
 			DoubleKeyPressEvent event(key, mods);
 			onEvent(event);
@@ -30,6 +26,10 @@ void InputHandler::keyCallback(int code, int action, int mods) {
 			KeyPressEvent event(key, mods);
 			onEvent(event);
 		}
+
+		keys[key.getCode()] = true;
+		timestamp[key.getCode()] = glfwGetTime();
+		anyKey++;
 	} else if (action == Keyboard::KEY_RELEASE) {
 		keys[key.getCode()] = false;
 		anyKey--;
