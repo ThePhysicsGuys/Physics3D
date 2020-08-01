@@ -25,10 +25,7 @@ class MonotonicTreeBuilder {
 public:
 
 	MonotonicTreeBuilder() : allocatedMemory(), currentAlloc(nullptr) {}
-	MonotonicTreeBuilder(UnmanagedArray<MonotonicTreeNode<T>>&& memory) : allocatedMemory(std::move(memory)), currentAlloc(allocatedMemory.get()+1) {}
-
-	MonotonicTreeNode<T>& getRootNode() { return *allocatedMemory; }
-	const MonotonicTreeNode<T>& getRootNode() const { return *allocatedMemory; }
+	MonotonicTreeBuilder(UnmanagedArray<MonotonicTreeNode<T>>&& memory) : allocatedMemory(std::move(memory)), currentAlloc(allocatedMemory.get()) {}
 
 	MonotonicTreeNode<T>* alloc(std::size_t size) {
 		MonotonicTreeNode<T>* claimedBlock = currentAlloc;
@@ -60,9 +57,6 @@ public:
 		this->allocatedMemory = std::move(builder.allocatedMemory);
 	}
 	
-	MonotonicTreeNode<T>& getRootNode() {return *allocatedMemory;}
-	const MonotonicTreeNode<T>& getRootNode() const {return *allocatedMemory;}
-
 	MonotonicTreeNode<T>& operator[](std::size_t index) { return allocatedMemory[index]; }
 	const MonotonicTreeNode<T>& operator[](std::size_t index) const {return allocatedMemory[index]; }
 

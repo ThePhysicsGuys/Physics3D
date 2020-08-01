@@ -307,6 +307,8 @@
     <ClInclude Include="datastructures\iterators.h" />
     <ClInclude Include="datastructures\monotonicTree.h" />
     <ClInclude Include="datastructures\sharedArray.h" />
+    <ClInclude Include="datastructures\uniqueArrayPtr.h" />
+    <ClInclude Include="datastructures\unmanagedArray.h" />
     <ClInclude Include="datastructures\unorderedVector.h" />
     <ClInclude Include="debug.h" />
     <ClInclude Include="geometry\boundingBox.h" />
