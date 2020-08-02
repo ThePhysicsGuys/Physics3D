@@ -50,7 +50,6 @@ add_library(physics STATIC
 
   physics/math/cframe.cpp
   physics/math/fix.cpp
-  physics/math/predefinedTaylorExpansions.cpp
 
   physics/math/linalg/eigen.cpp
   physics/math/linalg/largeMatrix.cpp
@@ -116,6 +115,7 @@ add_executable(tests
   tests/physicalStructureTests.cpp
   tests/physicsTests.cpp
   tests/inertiaTests.cpp
+  tests/testFrameworkConsistencyTests.cpp
 )
 
 target_link_libraries(tests util)

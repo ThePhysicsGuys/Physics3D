@@ -21,11 +21,8 @@ public:
 	}
 	virtual RelativeMotion getRelativeMotion() const override {
 		FullTaylor<double> speedDerivatives = SpeedController::getFullTaylorExpansion();
-		Taylor<Vec3> motorDerivatives;
-		for(std::size_t i = 0; i < motorDerivatives.size(); i++) {
-			motorDerivatives[i] = Vec3(0, 0, speedDerivatives.derivatives[i]);
-		}
-		return RelativeMotion(Motion(TranslationalMotion(), RotationalMotion(motorDerivatives)), CFrame(Rotation::rotZ(speedDerivatives.constantValue)));
+		RotationalMotion rotationMotion(speedDerivatives.getDerivatives().transform([](double v) {return Vec3(0, 0, v); }));
+		return RelativeMotion(Motion(TranslationalMotion(), rotationMotion), CFrame(Rotation::rotZ(speedDerivatives.getConstantValue())));
 	}
 
 	virtual ~MotorConstraintTemplate() override {}
@@ -50,11 +47,8 @@ public:
 	}
 	virtual RelativeMotion getRelativeMotion() const override {
 		FullTaylor<double> speedDerivatives = LengthController::getFullTaylorExpansion();
-		Taylor<Vec3> pistonDerivatives;
-		for(std::size_t i = 0; i < pistonDerivatives.size(); i++) {
-			pistonDerivatives[i] = Vec3(0, 0, speedDerivatives.derivatives[i]);
-		}
-		return RelativeMotion(Motion(TranslationalMotion(pistonDerivatives), RotationalMotion()), CFrame(0.0, 0.0, speedDerivatives.constantValue));
+		TranslationalMotion translationMotion(speedDerivatives.getDerivatives().transform([](double v) {return Vec3(0, 0, v); }));
+		return RelativeMotion(Motion(translationMotion, RotationalMotion()), CFrame(0.0, 0.0, speedDerivatives.getConstantValue()));
 	}
 
 	virtual ~PistonConstraintTemplate() override {}

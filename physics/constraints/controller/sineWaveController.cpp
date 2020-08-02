@@ -34,7 +34,7 @@ FullTaylor<double> SineWaveController::getFullTaylorExpansion() const {
 
 	double divPeriodToRadians = 2 * M_PI / period;
 
-	FullTaylor<double> result = generateFullTaylorForSinWave<double, 2>(currentStepInPeriod, (2 * M_PI / period)) * multiplier;
-	result.constantValue += offset;
+	FullTaylor<double> result = generateFullTaylorForSinWave<double, 3>(currentStepInPeriod, (2 * M_PI / period)) * multiplier;
+	result += offset;
 	return result;
 }

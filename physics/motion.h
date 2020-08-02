@@ -163,40 +163,16 @@ inline Motion operator+(const TranslationalMotion& motionOfStart, const Motion& 
 }
 
 inline TranslationalMotion localToGlobal(const Rotation& rot, const TranslationalMotion& motion) {
-	TranslationalMotion result;
-
-	for(std::size_t i = 0; i < motion.translation.size(); i++) {
-		result.translation[i] = rot.localToGlobal(motion.translation[i]);
-	}
-
-	return result;
+	return TranslationalMotion(motion.translation.transform([&rot](const Vec3& v) {return rot.localToGlobal(v); }));
 }
 inline TranslationalMotion globalToLocal(const Rotation& rot, const TranslationalMotion& motion) {
-	TranslationalMotion result;
-
-	for(std::size_t i = 0; i < motion.translation.size(); i++) {
-		result.translation[i] = rot.globalToLocal(motion.translation[i]);
-	}
-
-	return result;
+	return TranslationalMotion(motion.translation.transform([&rot](const Vec3& v) {return rot.globalToLocal(v); }));
 }
 inline RotationalMotion localToGlobal(const Rotation& rot, const RotationalMotion& motion) {
-	RotationalMotion result;
-
-	for(std::size_t i = 0; i < motion.rotation.size(); i++) {
-		result.rotation[i] = rot.localToGlobal(motion.rotation[i]);
-	}
-
-	return result;
+	return RotationalMotion(motion.rotation.transform([&rot](const Vec3& v) {return rot.localToGlobal(v); }));
 }
 inline RotationalMotion globalToLocal(const Rotation& rot, const RotationalMotion& motion) {
-	RotationalMotion result;
-
-	for(std::size_t i = 0; i < motion.rotation.size(); i++) {
-		result.rotation[i] = rot.globalToLocal(motion.rotation[i]);
-	}
-
-	return result;
+	return RotationalMotion(motion.rotation.transform([&rot](const Vec3& v) {return rot.globalToLocal(v); }));
 }
 
 inline Motion localToGlobal(const Rotation& rot, const Motion& motion) {

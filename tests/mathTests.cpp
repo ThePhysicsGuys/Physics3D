@@ -2,6 +2,7 @@
 
 #include "compare.h"
 #include "testValues.h"
+#include "randomValues.h"
 #include "simulation.h"
 #include "../physics/misc/toString.h"
 #include "../physics/math/linalg/vec.h"
@@ -19,6 +20,8 @@
 
 
 #define ASSERT(condition) ASSERT_TOLERANT(condition, 0.00000001)
+
+#define DELTA_T 0.00001
 
 TEST_CASE(subMatrixOperations) {
 	Matrix<int, 5, 3> mat{
@@ -232,16 +235,16 @@ TEST_CASE(largeMatrixVectorSolve) {
 }
 
 TEST_CASE(testTaylorExpansion) {
-	FullTaylorExpansion<double, double, 4> testTaylor{2.0, {5.0, 2.0, 3.0, -0.7}};
+	FullTaylorExpansion<double, 5> testTaylor{2.0, 5.0, 2.0, 3.0, -0.7};
 
 	double x = 0.47;
 
 	double correctResult = 
-		testTaylor.constantValue + 
-		testTaylor.derivatives[0] * x + 
-		testTaylor.derivatives[1] * x * x / 2 + 
-		testTaylor.derivatives[2] * x * x * x / 6 + 
-		testTaylor.derivatives[3] * x * x * x * x / 24;
+		testTaylor.getConstantValue() + 
+		testTaylor.getDerivative(0) * x + 
+		testTaylor.getDerivative(1) * x * x / 2 + 
+		testTaylor.getDerivative(2) * x * x * x / 6 + 
+		testTaylor.getDerivative(3) * x * x * x * x / 24;
 
 	ASSERT(correctResult == testTaylor(x));
 }
@@ -250,7 +253,7 @@ TEST_CASE(testSinTaylorExpansion) {
 	double curAngle = 0.93;
 	double multiplier = 13.97;
 	// Taylor expansion for sin(x * multiplier) at x=curAngle
-	FullTaylorExpansion<double, double, 4> testTaylor = generateFullTaylorForSinWave<double, 4>(curAngle, multiplier);
+	FullTaylorExpansion<double, 5> testTaylor = generateFullTaylorForSinWave<double, 5>(curAngle, multiplier);
 
 	double constTerm = sin(curAngle * multiplier);
 	double firstDerivative = multiplier * cos(curAngle * multiplier);
@@ -258,11 +261,36 @@ TEST_CASE(testSinTaylorExpansion) {
 	double thirdDerivative = multiplier * multiplier * multiplier * (-cos(curAngle * multiplier));
 	double fourthDerivative = multiplier * multiplier * multiplier * multiplier * sin(curAngle * multiplier);
 
-	ASSERT(testTaylor.constantValue == constTerm);
-	ASSERT(testTaylor.derivatives[0] == firstDerivative);
-	ASSERT(testTaylor.derivatives[1] == secondDerivative);
-	ASSERT(testTaylor.derivatives[2] == thirdDerivative);
-	ASSERT(testTaylor.derivatives[3] == fourthDerivative);
+	ASSERT(testTaylor.getConstantValue() == constTerm);
+	ASSERT(testTaylor.getDerivative(0) == firstDerivative);
+	ASSERT(testTaylor.getDerivative(1) == secondDerivative);
+	ASSERT(testTaylor.getDerivative(2) == thirdDerivative);
+	ASSERT(testTaylor.getDerivative(3) == fourthDerivative);
+}
+
+TEST_CASE(testMultiplicationDerivatives) {
+	constexpr int COUNT = 4;
+	FullTaylorExpansion<Mat3, COUNT> mats = createRandomFullTaylorExpansion<Mat3, COUNT, createRandomMatrixTemplate<double, 3, 3>>();
+	FullTaylorExpansion<Vec3, COUNT> vecs = createRandomFullTaylorExpansion<Vec3, COUNT, createRandomVecTemplate<double, 3>>();
+
+	FullTaylorExpansion<Vec3, COUNT> resultToTest = derivsOfMultiplication(mats, vecs);
+
+	std::array<Mat3, COUNT> matVals = computeOverTime(mats, DELTA_T);
+	std::array<Vec3, COUNT> vecVals = computeOverTime(vecs, DELTA_T);
+
+	std::array<Vec3, COUNT> targetResults;
+	for(int i = 0; i < COUNT; i++) targetResults[i] = matVals[i] * vecVals[i];
+
+	FullTaylorExpansion<Vec3, COUNT> estimatedRealDerivatives = estimateDerivatives(targetResults, DELTA_T);
+
+	logStream << "resultToTest: " << resultToTest << "\n";
+	logStream << "estimatedRealDerivatives: " << estimatedRealDerivatives << "\n";
+
+	for(int i = 0; i < COUNT; i++) {
+		double tolerance = 0.0000001 * std::exp(10.0*i);
+		logStream << "tolerance: " << tolerance << "\n";
+		ASSERT_TOLERANT(resultToTest.derivs[i] == estimatedRealDerivatives.derivs[i], tolerance);
+	}
 }
 
 TEST_CASE(testCrossProductEquivalent) {
@@ -286,118 +314,38 @@ TEST_CASE(testSkewSymmetricDerivatives) {
 	Vec3 deriv1(-0.2, 0.4, -0.5);
 	Vec3 deriv2(-0.3, 0.2, -0.1);
 
-	FullTaylor<Vec3> vecInput{start, {deriv1, deriv2}};
+	FullTaylor<Vec3> vecInput{start, deriv1, deriv2};
 
-	FullTaylor<SymmetricMat3> skewSymOut = generateFullTaylorForSkewSymmetricSquared<double, 2>(vecInput);
-
-	double DELTA_T = 0.00001;
+	FullTaylor<SymmetricMat3> skewSymOut = generateFullTaylorForSkewSymmetricSquared<double, 3>(vecInput);
 
 	SymmetricMat3 s0 = skewSymmetricSquared(vecInput(0.0));
 	SymmetricMat3 s1 = skewSymmetricSquared(vecInput(DELTA_T));
 	SymmetricMat3 s2 = skewSymmetricSquared(vecInput(DELTA_T * 2.0));
 
-	ASSERT_TOLERANT(s0 == skewSymOut.constantValue, 0.000000001);
-	ASSERT_TOLERANT((s1 - s0) / DELTA_T == skewSymOut.derivatives[0], 0.00005);
-	ASSERT_TOLERANT((s2 + s0 - 2.0*s1) / (DELTA_T * DELTA_T) == skewSymOut.derivatives[1], 0.00005);
+	ASSERT_TOLERANT(s0 == skewSymOut.getConstantValue(), 0.000000001);
+	ASSERT_TOLERANT((s1 - s0) / DELTA_T == skewSymOut.getDerivative(0), 0.00005);
+	ASSERT_TOLERANT((s2 + s0 - 2.0*s1) / (DELTA_T * DELTA_T) == skewSymOut.getDerivative(1), 0.00005);
 }
 
 TEST_CASE(testSimulation) {
-	FullTaylorExpansion<Vec3, Vec3, 2> realDerivs(Vec3(0.4, -0.6, 0.7), {Vec3(-0.2, 0.4, -0.8), Vec3(0.5, -0.35, 0.7)});
+	FullTaylorExpansion<Vec3, 3> realDerivs{Vec3(0.4, -0.6, 0.7), Vec3(-0.2, 0.4, -0.8), Vec3(0.5, -0.35, 0.7)};
 
 	double deltaT = 0.000001;
 
-	std::array<Vec3, 3> computedPoints = computeTranslationOverTime(realDerivs.constantValue, realDerivs.derivatives, deltaT);
+	std::array<Vec3, 3> computedPoints = computeTranslationOverTime(realDerivs.getConstantValue(), realDerivs.getDerivatives(), deltaT);
 
-	FullTaylorExpansion<Vec3, Vec3, 2> computedDerivs = estimateDerivatives(computedPoints, deltaT);
+	FullTaylorExpansion<Vec3, 3> computedDerivs = estimateDerivatives(computedPoints, deltaT);
 
 	ASSERT_TOLERANT(realDerivs == computedDerivs, 0.0005);
 }
 
-TEST_CASE(testGenerateFullTaylorForRotationMatrixFromRotationVectorDerivatives) {
-	FullTaylor<Vec3> vecInput{Vec3(0.7, 0.5, -1.3), {Vec3(0.2, 0.1, -0.7), Vec3(0.55, 0.35, -0.2)}};
-
-	FullTaylor<Mat3> taylorDerivs = generateFullTaylorForRotationMatrixFromRotationVector<2>(vecInput);
-
-	double DELTA_T = 0.00001;
-
-	Mat3 s0 = rotationMatrixFromRotationVec(vecInput(0.0));
-	Mat3 s1 = rotationMatrixFromRotationVec(vecInput(DELTA_T));
-	Mat3 s2 = rotationMatrixFromRotationVec(vecInput(DELTA_T * 2.0));
-
-	logStream << taylorDerivs.derivatives[0];
-
-	ASSERT_TOLERANT(s0 == taylorDerivs.constantValue, 0.000000001);
-	ASSERT_TOLERANT((s1 - s0) / DELTA_T == taylorDerivs.derivatives[0], 0.00005);
-	ASSERT_TOLERANT((s2 + s0 - 2.0 * s1) / (DELTA_T * DELTA_T) == taylorDerivs.derivatives[1], 0.00005);
-
-	Mat3 firstDeriv{
-		-0.6298477185, 0.1204797701, -0.3125367233,
-		-0.03665859891, -0.6843767679, -0.07345168771,
-		-0.1558668836, -0.2158149244, -0.09697539414
-	};
-
-	Mat3 secondDeriv{
-		-0.2981735723, -0.4690697023, -0.2429753035, 
-		0.812559334, -0.445112462, -0.1926283677, 
-		-0.2932703958, -0.1136312767, -0.3745565581
-	};
-
-	ASSERT_TOLERANT(firstDeriv == taylorDerivs.derivatives[0], 0.000000005);
-	ASSERT_TOLERANT(secondDeriv == taylorDerivs.derivatives[1], 0.000000005);
-}
-
-TEST_CASE(testGenerateFullTaylorForRotationMatrixFromRotationVectorBehaviourNearOriginConsistent) {
-	for(Vec3 diff1 : vectors) {
-		for(Vec3 diff2 : vectors) {
-			double ld1 = length(diff1);
-			double ld2 = length(diff2);
-			double tolerances[]{ld1, ld2, ld1*ld1, ld2*ld2, ld1*ld2, ld1*ld1*ld2*ld2, ld1*ld1*ld1};
-			double maxTol = 1.0;
-			for(double t : tolerances) {
-				if(t > maxTol) {
-					maxTol = t;
-				}
-			}
-			double tolerance = 1.0e-7 * maxTol;
-
-			Taylor<Vec3> diffs{diff1, diff2};
-			FullTaylor<Mat3> taylorDerivsnx = generateFullTaylorForRotationMatrixFromRotationVector<2>(FullTaylor<Vec3>{Vec3(-1.0e-9, 0.0, 0.0), diffs});
-			FullTaylor<Mat3> taylorDerivsx = generateFullTaylorForRotationMatrixFromRotationVector<2>(FullTaylor<Vec3>{Vec3(1.0e-9, 0.0, 0.0), diffs});
-			FullTaylor<Mat3> taylorDerivs0 = generateFullTaylorForRotationMatrixFromRotationVector<2>(FullTaylor<Vec3>{Vec3(0.0, 0.0, 0.0), diffs});
-			FullTaylor<Mat3> taylorDerivs1 = generateFullTaylorForRotationMatrixFromRotationVector<2>(FullTaylor<Vec3>{Vec3(1.0e-9, 0.0, 0.0), diffs});
-			FullTaylor<Mat3> taylorDerivs2 = generateFullTaylorForRotationMatrixFromRotationVector<2>(FullTaylor<Vec3>{Vec3(0.0, 1.0e-9, 0.0), diffs});
-			FullTaylor<Mat3> taylorDerivs3 = generateFullTaylorForRotationMatrixFromRotationVector<2>(FullTaylor<Vec3>{Vec3(0.0, -1.0e-9, 0.0), diffs});
-			FullTaylor<Mat3> taylorDerivs4 = generateFullTaylorForRotationMatrixFromRotationVector<2>(FullTaylor<Vec3>{Vec3(-1.0e-9, -1.0e-9, 0.0), diffs});
-
-			ASSERT_TOLERANT(taylorDerivsnx == taylorDerivsx, tolerance);
-			ASSERT_TOLERANT(taylorDerivs0.derivatives[0] == taylorDerivs1.derivatives[0], tolerance);
-			ASSERT_TOLERANT(taylorDerivs2.derivatives[0] == taylorDerivs3.derivatives[0], tolerance);
-			ASSERT_TOLERANT(taylorDerivs1.derivatives[0] == taylorDerivs2.derivatives[0], tolerance);
-			ASSERT_TOLERANT(taylorDerivs3.derivatives[0] == taylorDerivs4.derivatives[0], tolerance);
-
-			FullTaylor<Mat3> taylorForInLinePre = generateFullTaylorForRotationMatrixFromRotationVector<2>(FullTaylor<Vec3>{-diff1 * 1e-9, diffs});
-			FullTaylor<Mat3> taylorForInLinePreTiny = generateFullTaylorForRotationMatrixFromRotationVector<2>(FullTaylor<Vec3>{-diff1 * 1e-30, diffs}); // should force the system to switch to the near-zero approx
-			FullTaylor<Mat3> taylorForInLineZero = generateFullTaylorForRotationMatrixFromRotationVector<2>(FullTaylor<Vec3>{Vec3(0.0, 0.0, 0.0), diffs});
-			FullTaylor<Mat3> taylorForInLinePost = generateFullTaylorForRotationMatrixFromRotationVector<2>(FullTaylor<Vec3>{diff1 * 1e-9, diffs});
-			FullTaylor<Mat3> taylorForInLinePostTiny = generateFullTaylorForRotationMatrixFromRotationVector<2>(FullTaylor<Vec3>{diff1 * 1e-30, diffs});
-
-			ASSERT_TOLERANT(taylorForInLinePre == taylorForInLinePost, tolerance);
-			ASSERT_TOLERANT(taylorForInLinePre == taylorForInLineZero, tolerance);
-			ASSERT_TOLERANT(taylorForInLinePre == taylorForInLinePreTiny, tolerance);
-			ASSERT_TOLERANT(taylorForInLinePost == taylorForInLinePostTiny, tolerance);
-			ASSERT_TOLERANT(taylorForInLineZero == taylorForInLinePost, tolerance);
-		}
-	}
-}
-
 TEST_CASE(testRotationDerivs) {
-	double DELTA_T = 0.00001;
 	Mat3 rot0 = rotationMatrixfromEulerAngles(0.3, -0.5, 0.7);
 	for(Vec3 angularVel : vectors) {
 		for(Vec3 angularAccel : vectors) {
 			logStream << "angularVel: " << angularVel << " accel: " << angularAccel << "\n";
 			TaylorExpansion<Vec3, 2> rotVecTaylor{angularVel, angularAccel};
-			FullTaylorExpansion<Mat3, Mat3, 2> rotTaylor{rot0, generateTaylorForRotationMatrix<double, 2>(rotVecTaylor, rot0)};
+			FullTaylorExpansion<Mat3, 3> rotTaylor = FullTaylorExpansion<Mat3, 3>::fromConstantAndDerivatives(rot0, generateTaylorForRotationMatrix<double, 2>(rotVecTaylor, rot0));
 			
 			Vec3 rotVec1 = rotVecTaylor(DELTA_T);
 			Vec3 rotVec2 = rotVecTaylor(DELTA_T*2);
@@ -406,8 +354,8 @@ TEST_CASE(testRotationDerivs) {
 			Mat3 rot1 = deltaRot1 * rot0;
 			Mat3 rot2 = deltaRot2 * rot0;
 			
-			ASSERT_TOLERANT((rot1 - rot0) / DELTA_T == rotTaylor.derivatives[0], 0.0005 * lengthSquared(angularVel) + lengthSquared(angularAccel));
-			ASSERT_TOLERANT((rot2 + rot0 - 2.0 * rot1) / (DELTA_T * DELTA_T) == rotTaylor.derivatives[1], 0.05 * (lengthSquared(angularVel) + lengthSquared(angularAccel)));
+			ASSERT_TOLERANT((rot1 - rot0) / DELTA_T == rotTaylor.getDerivative(0), 0.0005 * lengthSquared(angularVel) + lengthSquared(angularAccel));
+			ASSERT_TOLERANT((rot2 + rot0 - 2.0 * rot1) / (DELTA_T * DELTA_T) == rotTaylor.getDerivative(1), 0.05 * (lengthSquared(angularVel) + lengthSquared(angularAccel)));
 		}
 	}
 }

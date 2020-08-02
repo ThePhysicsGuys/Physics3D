@@ -18,5 +18,5 @@ double ConstantMotorTurner::getValue() const {
 	return currentAngle;
 }
 FullTaylor<double> ConstantMotorTurner::getFullTaylorExpansion() const {
-	return FullTaylor<double>{this->currentAngle, Taylor<double>{speed}};
+	return FullTaylor<double>::fromConstantAndDerivatives(this->currentAngle, Taylor<double>{speed});
 }

@@ -30,6 +30,7 @@ static const TerminalColor ERROR_COLOR = TerminalColor::MAGENTA;
 static const TerminalColor SKIP_COLOR = TerminalColor::LIGHT_GRAY;
 
 stringstream logStream;
+const bool reffableTrue = true;
 
 static void resetLog() {
 	logStream.str("");

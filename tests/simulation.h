@@ -51,12 +51,50 @@ inline std::array<CFrame, 3> computeCFrameOverTime(CFrame start, Motion motion, 
 
 	return result;
 }
+template<typename T, std::size_t Size>
+std::array<T, Size> computeOverTime(const TaylorExpansion<T, Size>& taylor, double deltaT) {
+	std::array<T, Size> result;
 
-template<typename T>
-inline FullTaylorExpansion<T, T, 2> estimateDerivatives(const std::array<T, 3>& points, double deltaT) {
-	FullTaylorExpansion<T, T, 2> result(points[0]);
-	result.derivatives[0] = (points[1] - points[0]) / deltaT;
-	result.derivatives[1] = (points[0] + points[2] - points[1] * 2.0) / (deltaT * deltaT);
+	for(std::size_t i = 0; i < Size; i++) {
+		result[i] = taylor(deltaT * i);
+	}
 
 	return result;
 }
+
+template<typename T, std::size_t Size>
+std::array<T, Size> computeOverTime(const FullTaylorExpansion<T, Size>& taylor, double deltaT) {
+	std::array<T, Size> result;
+
+	for(std::size_t i = 0; i < Size; i++) {
+		result[i] = taylor(deltaT * i);
+	}
+
+	return result;
+}
+
+template<typename T, std::size_t Size>
+inline FullTaylorExpansion<T, Size> estimateDerivatives(const std::array<T, Size>& points, double deltaT) {
+	struct Recurse {
+		static T estimateLastDerivative(const std::array<T, Size>& points, std::size_t index, std::size_t size, double invDT) {
+			if(size == 0) {
+				return points[index];
+			} else {
+				T delta = estimateLastDerivative(points, index+1, size - 1, invDT) - estimateLastDerivative(points, index, size - 1, invDT);
+				return delta * invDT;
+			}
+		}
+	};
+	FullTaylorExpansion<T, Size> result;
+
+	double invDT = 1.0 / deltaT;
+	for(std::size_t i = 0; i < Size; i++) {
+		result.derivs[i] = Recurse::estimateLastDerivative(points, 0, i, invDT);
+	}
+	return result;
+}
+
+//template<typename T>
+//inline FullTaylorExpansion<T, 3> estimateDerivatives(const std::array<T, 3>& points, double deltaT) {
+//	return FullTaylorExpansion<T, 3>{points[0], (points[1] - points[0]) / deltaT, (points[0] + points[2] - points[1] * 2.0) / (deltaT * deltaT)};
+//}

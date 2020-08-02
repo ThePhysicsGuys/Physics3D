@@ -33,10 +33,10 @@ COMOffset is the offset of the object's center of mass from the resulting center
 motionOfOffset is the change of COMOffset over time, this is relative to the motion of the COM towards which this is computed
 */
 FullTaylor<SymmetricMat3> getTranslatedInertiaDerivativesAroundCenterOfMass(const SymmetricMat3& originalInertia, double mass, const Vec3& COMOffset, const TranslationalMotion& motionOfOffset) {
-	FullTaylor<SymmetricMat3> result = -generateFullTaylorForSkewSymmetricSquared<double, 2>(FullTaylor<Vec3>{COMOffset, motionOfOffset.translation});
+	FullTaylor<SymmetricMat3> result = -generateFullTaylorForSkewSymmetricSquared<double, 3>(FullTaylor<Vec3>::fromConstantAndDerivatives(COMOffset, motionOfOffset.translation));
 
 	result *= mass;
-	result.constantValue += originalInertia;
+	result += originalInertia;
 	return result;
 }
 
@@ -47,17 +47,16 @@ rotation is the starting rotation, and rotationMotion gives the change in rotati
 FullTaylor<SymmetricMat3> getRotatedInertiaTaylor(const SymmetricMat3& originalInertia, const Rotation& rotation, const RotationalMotion& rotationMotion) {
 	Mat3 rotationMat = rotation.asRotationMatrix();
 	Taylor<Mat3> rotationDerivs = generateTaylorForRotationMatrix<double, 2>(rotationMotion.rotation, rotationMat);
-	
-	FullTaylor<SymmetricMat3> result(rotation.localToGlobal(originalInertia));
+
 
 	// rotation(t) * originalInertia * rotation(t).transpose()
 	// diff  => rotation(t) * originalInertia * rotation'(t).transpose() + rotation'(t) * originalInertia * rotation(t).transpose()
 	// diff2 => 2 * rotation'(t) * originalInertia * rotation'(t).transpose() + rotation(t) * originalInertia * rotation''(t).transpose() + rotation''(t) * originalInertia * rotation(t).transpose()
 
-	result.derivatives[0] = addTransposed(rotationMat * originalInertia * rotationDerivs[0].transpose());
-	result.derivatives[1] = addTransposed(rotationMat * originalInertia * rotationDerivs[1].transpose()) + 2.0*mulSymmetricLeftRightTranspose(originalInertia, rotationDerivs[0]);
-	
-	return result;
+	return FullTaylor<SymmetricMat3>{
+		rotation.localToGlobal(originalInertia),
+		addTransposed(rotationMat * originalInertia * rotationDerivs[0].transpose()),
+		addTransposed(rotationMat * originalInertia * rotationDerivs[1].transpose()) + 2.0 * mulSymmetricLeftRightTranspose(originalInertia, rotationDerivs[0])};
 }
 
 /*
@@ -98,11 +97,11 @@ startingCFrame is the current relative position
 motion is the relative motion of the offset object's center of mass relative to the total center of mass, in the coordinate system of the total center of mass.
 */
 FullTaylor<SymmetricMat3> getTransformedInertiaDerivativesAroundCenterOfMass(const SymmetricMat3& originalInertia, double mass, const CFrame& startingCFrame, const Motion& motion) {
-	FullTaylor<Vec3> translation(startingCFrame.getPosition(), motion.translation.translation);
+	FullTaylor<Vec3> translation = FullTaylor<Vec3>::fromConstantAndDerivatives(startingCFrame.getPosition(), motion.translation.translation);
 	Rotation originalRotation = startingCFrame.getRotation();
 	RotationalMotion rotationMotion = motion.rotation;
 	
-	FullTaylor<SymmetricMat3> translationFactor = -generateFullTaylorForSkewSymmetricSquared<double, 2>(translation) * mass;
+	FullTaylor<SymmetricMat3> translationFactor = -generateFullTaylorForSkewSymmetricSquared<double, 3>(translation) * mass;
 	//translationFactor.constantValue += originalInertia;
 
 	FullTaylor<SymmetricMat3> rotationFactor = getRotatedInertiaTaylor(originalInertia, originalRotation, rotationMotion);

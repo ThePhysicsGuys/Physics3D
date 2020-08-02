@@ -14,6 +14,8 @@
 #include "../physics/relativeMotion.h"
 
 #include <utility>
+#include <array>
+#include <vector>
 
 template<typename Num1, typename Num2, typename Tol, IS_ARITHMETIC(Num1), IS_ARITHMETIC(Num2)>
 bool tolerantEquals(const Num1& first, const Num2& second, Tol tolerance) {
@@ -169,16 +171,21 @@ bool tolerantEquals(const EigenValues<N, 3>& a, const EigenValues<N, 3>& b, Tol 
 }
 
 template<typename Tol, typename T, std::size_t DerivationCount>
-bool tolerantEquals(const TaylorExpansion<T, DerivationCount>& first, const TaylorExpansion<T, DerivationCount>& second, Tol tolerance) {
+bool tolerantEquals(const Derivatives<T, DerivationCount>& first, const Derivatives<T, DerivationCount>& second, Tol tolerance) {
 	for(std::size_t i = 0; i < DerivationCount; i++) {
 		if(!tolerantEquals(first[i], second[i], tolerance)) return false;
 	}
 	return true;
 }
 
-template<typename Tol, typename T, typename T2, std::size_t DerivationCount>
-bool tolerantEquals(const FullTaylorExpansion<T, T2, DerivationCount>& first, const FullTaylorExpansion<T, T2, DerivationCount>& second, Tol tolerance) {
-	return tolerantEquals(first.constantValue, second.constantValue, tolerance) && tolerantEquals(first.derivatives, second.derivatives, tolerance);
+template<typename Tol, typename T, std::size_t DerivationCount>
+bool tolerantEquals(const TaylorExpansion<T, DerivationCount>& first, const TaylorExpansion<T, DerivationCount>& second, Tol tolerance) {
+	return tolerantEquals(first.derivs, second.derivs, tolerance);
+}
+
+template<typename Tol, typename T, std::size_t DerivationCount>
+bool tolerantEquals(const FullTaylorExpansion<T, DerivationCount>& first, const FullTaylorExpansion<T, DerivationCount>& second, Tol tolerance) {
+	return tolerantEquals(first.derivs, second.derivs, tolerance);
 }
 
 template<typename Tol>
@@ -207,4 +214,25 @@ template<typename T1, typename T2, typename Tol>
 bool tolerantEquals(const std::pair<T1, T2>& first, const std::pair<T1, T2>& second, Tol tolerance) {
 	return tolerantEquals(first.first, second.first, tolerance) && 
 		tolerantEquals(first.second, second.second, tolerance);
+}
+
+template<typename T, std::size_t Size, typename Tol>
+bool tolerantEquals(const std::array<T, Size>& first, const std::array<T, Size>& second, Tol tolerance) {
+	for(std::size_t i = 0; i < Size; i++) {
+		if(!tolerantEquals(first[i], second[i], tolerance)) {
+			return false;
+		}
+	}
+	return true;
+}
+
+template<typename T, typename Tol>
+bool tolerantEquals(const std::vector<T>& first, const std::vector<T>& second, Tol tolerance) {
+	if(first.size() != second.size()) throw std::logic_error("Incompatible vector sizes!");
+	for(std::size_t i = 0; i < first.size(); i++) {
+		if(!tolerantEquals(first[i], second[i], tolerance)) {
+			return false;
+		}
+	}
+	return true;
 }

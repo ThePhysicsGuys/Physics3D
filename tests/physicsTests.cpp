@@ -392,7 +392,7 @@ TEST_CASE(testPhysicalInertiaDerivatives) {
 
 	std::size_t size = motorPhys->getNumberOfPhysicalsInThisAndChildren() - 1;
 	UnmanagedArray<MonotonicTreeNode<RelativeMotion>> arr(new MonotonicTreeNode<RelativeMotion>[size], size);
-	FullTaylorExpansion<SymmetricMat3, SymmetricMat3, 2> inertiaTaylor = motorPhys->getCOMMotionTree(std::move(arr)).getInertiaDerivatives();
+	FullTaylor<SymmetricMat3> inertiaTaylor = motorPhys->getCOMMotionTree(std::move(arr)).getInertiaDerivatives();
 
 	double deltaT = 0.00001;
 
@@ -405,7 +405,7 @@ TEST_CASE(testPhysicalInertiaDerivatives) {
 
 	delete[] arr.getPtrToFree();
 
-	FullTaylorExpansion<SymmetricMat3, SymmetricMat3, 2> estimatedInertiaTaylor = estimateDerivatives(inertias, deltaT);
+	FullTaylor<SymmetricMat3> estimatedInertiaTaylor = estimateDerivatives(inertias, deltaT);
 
 	ASSERT_TOLERANT(inertiaTaylor == estimatedInertiaTaylor, 0.01);
 }
@@ -585,7 +585,7 @@ static Vec3 getTotalAngularMomentumOfPhysical(const MotorizedPhysical* motorPhys
 std::vector<Part> producePhysical() {
 	std::vector<Part> result;
 	result.reserve(10);
-	Part& mainPart = result.emplace_back(polyhedronShape(Library::house.rotated(Rotationf::fromEulerAngles(1.0, -0.3, 0.5))), GlobalCFrame(), PartProperties{0.7, 0.2, 0.6});
+	Part& mainPart = result.emplace_back(polyhedronShape(Library::house.rotated(Rotationf::fromEulerAngles(1.0f, -0.3f, 0.5f))), GlobalCFrame(), PartProperties{0.7, 0.2, 0.6});
 
 	mainPart.ensureHasParent();
 
@@ -604,7 +604,7 @@ std::vector<Part> producePhysical() {
 std::vector<Part> produceMotorizedPhysical() {
 	std::vector<Part> result;
 	result.reserve(10);
-	Part& mainPart = result.emplace_back(polyhedronShape(Library::house.rotated(Rotationf::fromEulerAngles(1.0, -0.3, 0.5))), GlobalCFrame(), PartProperties{0.7, 0.2, 0.6});
+	Part& mainPart = result.emplace_back(polyhedronShape(Library::house.rotated(Rotationf::fromEulerAngles(1.0f, -0.3f, 0.5f))), GlobalCFrame(), PartProperties{0.7, 0.2, 0.6});
 
 	mainPart.ensureHasParent();
 
@@ -722,7 +722,6 @@ TEST_CASE(basicFullRotationSymmetryInvariance) {
 	FullGlobalDiagnostic reference = runDiagnosticForCFrame(motorPhys, GlobalCFrame(origin));
 	logStream << reference;
 
-	FullGlobalDiagnostic tests[9];
 	Rotation rotations[9]{
 		Rotation::Predefined::X_90,
 		Rotation::Predefined::X_180,
@@ -786,7 +785,6 @@ TEST_CASE(hardConstrainedFullRotationFollowsCorrectly) {
 	FullGlobalDiagnostic reference = runDiagnosticForCFrame(p, GlobalCFrame(origin));
 	logStream << reference;
 
-	FullGlobalDiagnostic tests[9];
 	Rotation rotations[9]{
 		Rotation::Predefined::X_90,
 		Rotation::Predefined::X_180,

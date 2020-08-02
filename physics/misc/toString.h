@@ -157,10 +157,10 @@ inline std::ostream& operator<<(std::ostream& os, const TaylorExpansion<T, Size>
 	return os;
 }
 
-template<typename T, typename T2, std::size_t Size>
-inline std::ostream& operator<<(std::ostream& os, const FullTaylorExpansion<T, T2, Size>& taylor) {
-	os << taylor.constantValue << " + ";
-	os << taylor.derivatives;
+template<typename T, std::size_t Size>
+inline std::ostream& operator<<(std::ostream& os, const FullTaylorExpansion<T, Size>& taylor) {
+	os << taylor.getConstantValue() << " + ";
+	os << taylor.getDerivatives();
 	return os;
 }
 
