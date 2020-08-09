@@ -209,7 +209,7 @@ void QuadShader::updateColor(const Vec4& color) {
 }
 
 void QuadShader::updateTexture(GLID texture, GLID unit) {
-	updateTexture(texture, unit, Vec4f(1.0f));
+	updateTexture(texture, unit, Vec4f::full(1.0f));
 }
 
 void QuadShader::updateTexture(GLID texture, GLID unit, const Vec4f& color) {

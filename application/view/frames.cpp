@@ -33,7 +33,7 @@ using namespace Graphics;
 float BigFrame::hdr = 1.0f;
 float BigFrame::gamma = 1.0f;
 float BigFrame::exposure = 1.0f;
-Color3 BigFrame::sunColor = Color3(1);
+Color3 BigFrame::sunColor = Color3::full(1);
 float BigFrame::position[3] = { 0, 0, 0 };
 bool BigFrame::doEvents;
 bool BigFrame::noRender;
@@ -185,17 +185,17 @@ void renderShaderTypeEditor(GShader* shader, const ShaderUniform& uniform) {
 				shader->setUniform(uniform.name, value);
 		} break; 
 		case ShaderVariableType::VEC2: {
-			Vec2f value = Vec2f(0);
+			Vec2f value = Vec2f(0, 0);
 			if(ImGui::InputFloat2(uniform.name.c_str(), value.data))
 				shader->setUniform(uniform.name, value);
 		} break; 
 		case ShaderVariableType::VEC3: {
-			Vec3f value = Vec3f(0);
+			Vec3f value = Vec3f(0, 0, 0);
 			if(ImGui::InputFloat3(uniform.name.c_str(), value.data))
 				shader->setUniform(uniform.name, value);
 		} break; 
 		case ShaderVariableType::VEC4: {
-			Vec4f value = Vec4f(0);
+			Vec4f value = Vec4f(0, 0, 0, 0);
 			if(ImGui::InputFloat4(uniform.name.c_str(), value.data))
 				shader->setUniform(uniform.name, value);
 		} break; 

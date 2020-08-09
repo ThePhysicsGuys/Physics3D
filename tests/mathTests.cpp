@@ -387,13 +387,13 @@ TEST_CASE(testFromRotationVec) {
 
 // Everything Quaternions
 TEST_CASE(quaternionBasicRotation) {
-	Vec3 v = Vec3::Y_AXIS();
+	Vec3 v = Vec3(0.0, 1.0, 0.0);
 	Quat4 q = QROT_X_180(double);
 
 	Quat4 r = q * v * conj(q);
 
 	ASSERT(r.w == 0.0);
-	ASSERT(r.v == Vec3::Y_AXIS_NEG());
+	ASSERT(r.v == Vec3(0.0, -1.0, 0.0));
 }
 
 TEST_CASE(quaternionRotationShorthand) {

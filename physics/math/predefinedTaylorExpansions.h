@@ -132,9 +132,7 @@ TaylorExpansion<Mat3, Derivs> generateTaylorForRotationMatrix(const TaylorExpans
 		result[1] = (angularAccelEquiv + angularVelEquiv * angularVelEquiv) * rotation;
 	}
 
-	if constexpr(Derivs >= 3) {
-		static_assert(false);
-	}
+	// TODO add further derivatives
 
 	return result;
 }

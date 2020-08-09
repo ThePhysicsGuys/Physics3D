@@ -131,10 +131,10 @@ void onInit(const WindowInfo& info, Graphics::FrameBuffer* screenFrameBuffer) {
 	GUI::checkBoxUncheckedTexture = ResourceManager::add<TextureResource>("checkBoxUncheckedTexture", "../res/textures/gui/unchecked.png");
 	GUI::checkBoxCheckedTexture = ResourceManager::add<TextureResource>("checkBoxCheckedTexture", "../res/textures/gui/checked.png");
 
-	GUI::checkBoxPressCheckedTexture = GUI::checkBoxCheckedTexture->colored(Vec3(1.3));
-	GUI::checkBoxPressUncheckedTexture = GUI::checkBoxUncheckedTexture->colored(Vec3(1.3));
-	GUI::checkBoxHoverCheckedTexture = GUI::checkBoxCheckedTexture->colored(Vec3(0.999));
-	GUI::checkBoxHoverUncheckedTexture = GUI::checkBoxUncheckedTexture->colored(Vec3(0.999));
+	GUI::checkBoxPressCheckedTexture = GUI::checkBoxCheckedTexture->colored(Vec3::full(1.3));
+	GUI::checkBoxPressUncheckedTexture = GUI::checkBoxUncheckedTexture->colored(Vec3::full(1.3));
+	GUI::checkBoxHoverCheckedTexture = GUI::checkBoxCheckedTexture->colored(Vec3::full(0.999));
+	GUI::checkBoxHoverUncheckedTexture = GUI::checkBoxUncheckedTexture->colored(Vec3::full(0.999));
 
 	// ColorPicker
 	GUI::colorPickerHueTexture = ResourceManager::add<TextureResource>("colorPickerHueTexture", "../res/textures/gui/hue.png");

@@ -55,7 +55,7 @@ protected:
 struct Quad : public Primitive {
 
 	Quad() : Primitive(4, 4) {
-		resize(Vec2f(-1, 1), Vec2f(2));
+		resize(Vec2f(-1, 1), Vec2f(2.0f, 2.0f));
 	}
 
 	Quad(Vec2f topLeft, Vec2f dimension) : Primitive(4, 4) {
@@ -132,7 +132,7 @@ struct LinePrimitive : public Primitive {
 	}
 
 	LinePrimitive() : Primitive(3, 2) {
-		resize(Vec3f(-1), Vec3f(1));
+		resize(Vec3f::full(-1.0f), Vec3f::full(1.0f));
 	}
 
 	void render(int mode) {
@@ -159,7 +159,7 @@ struct TrianglePrimitive : public Primitive {
 
 	TrianglePrimitive(bool patched = false) : Primitive(3, 3) {
 		this->patched = patched;
-		resize(Vec3f(-1), Vec3f(1), Vec3f(0, 1, -1));
+		resize(Vec3f::full(-1.0f), Vec3f::full(1.0f), Vec3f(0.0f, 1.0f, -1.0f));
 	}
 
 	void resize(Vec3f p1, Vec3f p2, Vec3f p3) {

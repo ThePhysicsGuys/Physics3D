@@ -24,7 +24,7 @@ namespace Path {
 
 	// Adds the vertices to the batch with the necessary indices, this does not reserve space on the batch. 
 	//? Expects vertices in counter-clockwise order
-	void pushQuad(const Vec2f& a, const Vec2f& b, const Vec2f& c, const Vec2f& d, const Color& colorA = Color(1), const Color& colorB = Color(1), const Color& colorC = Color(1), const Color& colorD = Color(1), const Vec2f& uvA = Vec2f(0, 0), const Vec2f& uvB = Vec2f(1, 0), const Vec2f& uvC = Vec2f(1, 1), const Vec2f& uvD = Vec2f(0, 1)) {
+	void pushQuad(const Vec2f& a, const Vec2f& b, const Vec2f& c, const Vec2f& d, const Color& colorA = Color::full(1), const Color& colorB = Color::full(1), const Color& colorC = Color::full(1), const Color& colorD = Color::full(1), const Vec2f& uvA = Vec2f(0, 0), const Vec2f& uvB = Vec2f(1, 0), const Vec2f& uvC = Vec2f(1, 1), const Vec2f& uvD = Vec2f(0, 1)) {
 		Path::batch->pushVertices({ { a, uvA, colorA }, { b, uvB, colorB }, { c, uvC, colorC }, { d, uvD, colorD } });
 		Path::batch->pushIndices({ 0, 1, 2, 2, 3, 0 });
 		Path::batch->endIndex();
@@ -32,7 +32,7 @@ namespace Path {
 
 	// Adds the vertices to the batch with the necessary indices, this does not reserve space on the batch
 	//? Expects vertices in counter-clockwise order
-	void pushTriangle(const Vec2f& a, const Vec2f& b, const Vec2f& c, const Color& colorA = Color(1), const Color& colorB = Color(1), const Color& colorC = Color(1), const Vec2f& uvA = Vec2f(0, 0), const Vec2f& uvB = Vec2f(1, 0), const Vec2f& uvC = Vec2f(0.5, 1)) {
+	void pushTriangle(const Vec2f& a, const Vec2f& b, const Vec2f& c, const Color& colorA = Color::full(1), const Color& colorB = Color::full(1), const Color& colorC = Color::full(1), const Vec2f& uvA = Vec2f(0, 0), const Vec2f& uvB = Vec2f(1, 0), const Vec2f& uvC = Vec2f(0.5, 1)) {
 		Path::batch->pushVertices({ { a, uvA, colorA }, { b, uvB, colorB }, { c, uvC, colorC } });
 		Path::batch->pushIndices({ 0, 1, 2 });
 		Path::batch->endIndex();
@@ -91,7 +91,7 @@ namespace Path {
 			float angle = i * step;
 
 			Vec2f point = Vec2f(center.x + radius * cos(angle), center.y + radius * sin(angle));
-			Path::batch->pushVertex({ point, Vec2(1), color });
+			Path::batch->pushVertex({ point, Vec2(1.0, 1.0), color });
 		}
 
 		for (size_t i = 1; i < precision - 1; i++)
@@ -132,8 +132,8 @@ namespace Path {
 		
 		Vec2f oldPoint = Vec2f(center.x + radius * cos(minAngle), center.y + radius * sin(minAngle));
 		
-		Path::batch->pushVertex({ center, Vec2f(1.0f), color });
-		Path::batch->pushVertex({ oldPoint, Vec2f(1.0f), color });
+		Path::batch->pushVertex({ center, Vec2f(1.0f, 1.0f), color });
+		Path::batch->pushVertex({ oldPoint, Vec2f(1.0f, 1.0f), color });
 
 		float step = (maxAngle - minAngle) / (float) precision;
 		for (size_t i = 1; i <= precision; i++) {
@@ -141,7 +141,7 @@ namespace Path {
 
 			Vec2f newPoint = Vec2f(center.x + radius * cos(angle), center.y + radius * sin(angle));
 
-			Path::batch->pushVertex({ newPoint, Vec2(1), color });
+			Path::batch->pushVertex({ newPoint, Vec2(1.0, 1.0), color });
 		}
 
 		for (size_t i = 1; i <= precision + 1; i++)
@@ -256,7 +256,7 @@ namespace Path {
 		size_t indexCount = 6;
 		Path::batch->pushCommand(0); 
 		Path::batch->reserve(vertexCount, indexCount);
-		pushQuad(a, b, c, d, Color(1), Color(1), Color(1), Color(1), uvA, uvB, uvC, uvD);
+		pushQuad(a, b, c, d, Color::full(1), Color::full(1), Color::full(1), Color::full(1), uvA, uvB, uvC, uvD);
 		Path::batch->pushCommand(id);
 	}
 
@@ -424,7 +424,7 @@ namespace Path {
 		Path::batch->reserve(vertexCount, indexCount);
 
 		for (size_t i = 0; i < size; i++)
-			Path::batch->pushVertex({ points[i], Vec2f(1), pattern(i, points[i]) });
+			Path::batch->pushVertex({ points[i], Vec2f(1.0f, 1.0f), pattern(i, points[i]) });
 
 		for (size_t i = 0; i < size - 2; i++)
 			Path::batch->pushIndices({ 0, i + 1, i + 2 });

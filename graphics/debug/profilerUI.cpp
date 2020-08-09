@@ -55,7 +55,7 @@ void PieChart::renderPie() const {
 		int subdivisions = int(angle / MAX_ANGLE + 1);
 		newAngle += angle;
 
-		Path::circleSegmentFilled(piePosition, pieSize, oldAngle, newAngle, Vec4f(dataPoint.color, 1.0f), subdivisions);
+		Path::circleSegmentFilled(piePosition, pieSize, oldAngle, newAngle, join(dataPoint.color, 1.0f), subdivisions);
 
 		oldAngle = newAngle;
 	}
@@ -75,14 +75,14 @@ void PieChart::renderText(Graphics::Font* font) const {
 	for (int i = 0; i < parts.size(); i++) {
 		const DataPoint& p = parts[i];
 		Vec2 linePosition = textPosition + Vec2(0, -i * 0.035);
-		Path::text(font, p.label, 0.0006, linePosition, Color(p.color, 1));
+		Path::text(font, p.label, 0.0006, linePosition, join(p.color, 1.0f));
 
 		std::stringstream percent;
 		percent.precision(4);
 		percent << p.weight / totalWeight * 100;
 		percent << "%";
-		Path::text(font, percent.str(), 0.0006, linePosition + Vec2(0.35, 0), Vec4(p.color, 1));
-		Path::text(font, p.value, 0.0006, linePosition + Vec2(0.50, 0), Color(p.color, 1));
+		Path::text(font, percent.str(), 0.0006, linePosition + Vec2(0.35, 0), join(p.color, 1.0f));
+		Path::text(font, p.value, 0.0006, linePosition + Vec2(0.50, 0), join(p.color, 1.0f));
 	}
 }
 
@@ -125,7 +125,7 @@ void BarChart::render() {
 			float height = drawingSize.y * dataPoint.weight / max;
 			Vec2f bottomLeft = drawingPosition + Vec2f(categoryWidth * i + barWidth * cl, 0);
 
-			Path::rectFilled(bottomLeft, Vec2f(barWidth, height), 0.0f, Color(info.color, 1.0f));
+			Path::rectFilled(bottomLeft, Vec2f(barWidth, height), 0.0f, join(info.color, 1.0f));
 		}
 	}
 
@@ -143,7 +143,7 @@ void BarChart::render() {
 			Vec2f topTextPosition = bottomLeft + Vec2(0, height + drawingSize.y * 0.02);
 			//topTextPosition.x *= GUI::screen->dimension.x / GUI::screen->dimension.y;
 
-			Path::text(GUI::font, dataPoint.value, 0.0005, topTextPosition, Color(info.color, 1));
+			Path::text(GUI::font, dataPoint.value, 0.0005, topTextPosition, join(info.color, 1.0f));
 		}
 	}
 
@@ -153,7 +153,7 @@ void BarChart::render() {
 	}
 
 	for (int cl = 0; cl < data.height; cl++)
-		Path::text(GUI::font, classes[cl].name, 0.0007, drawingPosition + Vec2f(this->dimension.x - 0.3f, drawingSize.y - 0.035f * cl), Color(classes[cl].color, 1));
+		Path::text(GUI::font, classes[cl].name, 0.0007, drawingPosition + Vec2f(this->dimension.x - 0.3f, drawingSize.y - 0.035f * cl), join(classes[cl].color, 1.0f));
 }
 
 float BarChart::getMaxWeight() const {
@@ -178,7 +178,7 @@ void recursiveRenderTree(const TreeNode& tree, const Vec3f& treeColor, Vec2f ori
 			float colorDarkning = pow(1.0f * computeCost(tree[i].bounds) / maxCost, 0.25f);
 
 			//Path::bezierVertical(origin, nextStep, 1.0f, Vec4f(treeColor * colorDarkning, 1.0f), 15);
-			Path::line(origin, nextStep, Color(treeColor * colorDarkning, 1.0f), 1.0f);
+			Path::line(origin, nextStep, join(treeColor * colorDarkning, 1.0f), 1.0f);
 
 			recursiveRenderTree(tree[i], treeColor, nextStep, allottedWidth / tree.nodeCount, maxCost, selectedObject);
 		}

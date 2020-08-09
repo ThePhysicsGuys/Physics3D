@@ -13,19 +13,6 @@ struct Vector {
 		}
 	}
 
-	explicit constexpr Vector(T v) {
-		for (size_t i = 0; i < Size; i++) {
-			this->data[i] = v;
-		}
-	};
-
-	constexpr Vector(const Vector<T, Size - 1>& other, T finalVal) {
-		for (size_t i = 0; i < Size - 1; i++) {
-			this->data[i] = other.data[i];
-		}
-		this->data[Size - 1] = finalVal;
-	}
-
 	template<typename OtherT>
 	constexpr operator Vector<OtherT, Size>() const {
 		Vector<OtherT, Size> result;
@@ -36,38 +23,44 @@ struct Vector {
 		return result;
 	}
 
-	constexpr operator Vector<T, Size - 1>() const {
-		Vector<T, Size + 1> result;
-		for(size_t i = 0; i < Size - 1; i++) {
-			result.data[i] = this->data[i];
-		}
-
-		return result;
-	}
-
 	constexpr T& operator[](size_t index) {
 		return data[index];
 	}
 
 	constexpr const T& operator[](size_t index) const {
 		return data[index];
+	}
+
+	static constexpr Vector<T, Size> full(T v) {
+		Vector<T, Size> result;
+		for(size_t i = 0; i < Size; i++) {
+			result[i] = v;
+		}
+		return result;
+	};
+
+	template<size_t SubSize>
+	constexpr Vector<T, SubSize> getSubVector(size_t startingAt = 0) const {
+		Vector<T, SubSize> result;
+		for(size_t i = 0; i < SubSize; i++) {
+			result[i] = this->data[i + startingAt];
+		}
 	}
 };
 
 template<typename T>
 struct Vector<T, 2> {
 	union {
-		struct { T x; T y; };
 		T data[2];
+		struct { T x; T y; };
 	};
 
-	constexpr Vector() : Vector(0, 0) {}
-	constexpr Vector(T x, T y) : x(x), y(y) {}
-	explicit constexpr Vector(T v) : x(v), y(v) {}
+	constexpr Vector() : data{0, 0} {}
+	constexpr Vector(T x, T y) : data{x, y} {}
 
 	template<typename OtherT>
 	constexpr operator Vector<OtherT, 2>() const {
-		return Vector<OtherT, 2>(static_cast<OtherT>(x), static_cast<OtherT>(y));
+		return Vector<OtherT, 2>(static_cast<OtherT>(this->data[0]), static_cast<OtherT>(this->data[1]));
 	}
 
 	constexpr T& operator[](size_t index) {
@@ -77,28 +70,33 @@ struct Vector<T, 2> {
 	constexpr const T& operator[](size_t index) const {
 		return data[index]; 
 	}
+
+	static constexpr Vector<T, 2> full(T v) {
+		return Vector<T, 2>(v, v);
+	};
+
+	template<size_t SubSize>
+	constexpr Vector<T, SubSize> getSubVector(size_t startingAt = 0) const {
+		Vector<T, SubSize> result;
+		for(size_t i = 0; i < SubSize; i++) {
+			result[i] = this->data[i + startingAt];
+		}
+	}
 };
 
 template<typename T>
 struct Vector<T, 3> {
 	union {
-		struct { T x; T y; T z; };
 		T data[3];
+		struct { T x; T y; T z; };
 	};
 
-	constexpr Vector() : Vector(0, 0, 0) {}
-	constexpr Vector(T x, T y, T z) : x(x), y(y), z(z) {};
-	explicit constexpr Vector(T v) : x(v), y(v), z(v) {}
+	constexpr Vector() : data{0, 0, 0} {}
+	constexpr Vector(T x, T y, T z) : data{x, y, z} {};
 	
-	constexpr Vector(const Vector<T, 2>& other, T finalVal) : x(other.x), y(other.y), z(finalVal) {}
-
 	template<typename OtherT>
 	constexpr operator Vector<OtherT, 3>() const {
-		return Vector<OtherT, 3>(static_cast<OtherT>(x), static_cast<OtherT>(y), static_cast<OtherT>(z));
-	}
-
-	constexpr operator Vector<T, 2>() const {
-		return Vector<T, 2>(x, y);
+		return Vector<OtherT, 3>(static_cast<OtherT>(this->data[0]), static_cast<OtherT>(this->data[1]), static_cast<OtherT>(this->data[2]));
 	}
 
 	constexpr T& operator[](size_t index) {
@@ -108,55 +106,32 @@ struct Vector<T, 3> {
 	constexpr const T& operator[](size_t index) const {
 		return data[index];
 	}
+
+	static constexpr Vector<T, 3> full(T v) {
+		return Vector<T, 3>(v, v, v);
+	};
 	
-	static constexpr Vector<T, 3> X_AXIS() {
-		return Vector<T, 3>(static_cast<T>(1), static_cast<T>(0), static_cast<T>(0));
-	}
-
-	static constexpr Vector<T, 3> Y_AXIS() {
-		return Vector<T, 3>(static_cast<T>(0), static_cast<T>(1), static_cast<T>(0));
-	}
-
-	static constexpr Vector<T, 3> Z_AXIS() {
-		return Vector<T, 3>(static_cast<T>(0), static_cast<T>(0), static_cast<T>(1));
-	}
-
-	static constexpr Vector<T, 3> X_AXIS_NEG() {
-		return Vector<T, 3>(static_cast<T>(1), static_cast<T>(0), static_cast<T>(0));
-	}
-
-	static constexpr Vector<T, 3> Y_AXIS_NEG() {
-		return Vector<T, 3>(static_cast<T>(0), static_cast<T>(-1), static_cast<T>(0));
-	}
-
-	static constexpr Vector<T, 3> Z_AXIS_NEG() {
-		return Vector<T, 3>(static_cast<T>(0), static_cast<T>(0), static_cast<T>(-1));
-	}
-
-	static constexpr Vector<T, 3> ZEROS() {
-		return Vector<T, 3>(static_cast<T>(0), static_cast<T>(0), static_cast<T>(0));
+	template<size_t SubSize>
+		constexpr Vector<T, SubSize> getSubVector(size_t startingAt = 0) const {
+		Vector<T, SubSize> result;
+		for(size_t i = 0; i < SubSize; i++) {
+			result[i] = this->data[i + startingAt];
+		}
 	}
 };
 
 template<typename T>
 struct Vector<T, 4> {
 	union {
-		struct { T x; T y; T z; T w; };
 		T data[4];
+		struct { T x; T y; T z; T w; };
 	};
-	constexpr Vector() : Vector(0,0,0,0) {}
-	constexpr Vector(T x, T y, T z, T w) : x(x), y(y), z(z), w(w) {}
-	explicit constexpr Vector(T v) : x(v), y(v), z(v), w(v) {}
+	constexpr Vector() : data{0, 0, 0, 0} {}
+	constexpr Vector(T x, T y, T z, T w) : data{x, y, z, w} {}
 	
-	constexpr Vector(const Vector<T, 3>& other, T finalVal) : x(other.x), y(other.y), z(other.z), w(finalVal) {}
-
 	template<typename OtherT>
 	constexpr operator Vector<OtherT, 4>() const {
-		return Vector<OtherT, 4>(static_cast<OtherT>(x), static_cast<OtherT>(y), static_cast<OtherT>(z), static_cast<OtherT>(w));
-	}
-
-	constexpr operator Vector<T, 3>() const {
-		return Vector<T, 3>(x, y, z);
+		return Vector<OtherT, 4>(static_cast<OtherT>(this->data[0]), static_cast<OtherT>(this->data[1]), static_cast<OtherT>(this->data[2]), static_cast<OtherT>(this->data[3]));
 	}
 
 	constexpr T& operator[](size_t index) {
@@ -165,6 +140,18 @@ struct Vector<T, 4> {
 
 	constexpr const T& operator[](size_t index) const {
 		return data[index]; 
+	}
+
+	static constexpr Vector<T, 4> full(T v) {
+		return Vector<T, 4>(v, v, v, v);
+	};
+
+	template<size_t SubSize>
+	constexpr Vector<T, SubSize> getSubVector(size_t startingAt = 0) const {
+		Vector<T, SubSize> result;
+		for(size_t i = 0; i < SubSize; i++) {
+			result[i] = this->data[i + startingAt];
+		}
 	}
 }; 
 
@@ -331,6 +318,38 @@ constexpr bool operator!=(const Vector<T, Size>& first, const Vector<T, Size>& s
 	return !(first == second);
 }
 
+
+template<typename T, size_t Size1, size_t Size2>
+constexpr Vector<T, Size1 + Size2> join(const Vector<T, Size1>& first, const Vector<T, Size2>& second) {
+	Vector<T, Size1 + Size2> result;
+	for(size_t i = 0; i < Size1; i++) {
+		result[i] = first[i];
+	}
+	for(size_t i = 0; i < Size2; i++) {
+		result[i + Size1] = second[i];
+	}
+	return result;
+}
+template<typename T, size_t Size>
+constexpr Vector<T, Size + 1> join(const Vector<T, Size>& vec, const T& extraValue) {
+	Vector<T, Size + 1> result;
+	for(size_t i = 0; i < Size; i++) {
+		result[i] = vec[i];
+	}
+	result[Size] = extraValue;
+	return result;
+}
+template<typename T, size_t Size>
+constexpr Vector<T, Size + 1> join(const T& extraValue, const Vector<T, Size>& vec) {
+	Vector<T, Size + 1> result;
+	result[0] = extraValue;
+	for(size_t i = 0; i < Size; i++) {
+		result[i+1] = vec[i];
+	}
+	return result;
+}
+
+
 template<typename T, size_t Size>
 constexpr T lengthSquared(const Vector<T, Size>& vec) {
 	T sum = vec[0] * vec[0];
@@ -478,23 +497,23 @@ constexpr Vector<T, Size> elementWiseCube(const Vector<T, Size>& vec) {
 	a.z * b.x + a.x * b.z,
 	a.x * b.y + a.y * b.x
 )*/
-template<typename T1, typename T2>
-constexpr auto mulOppositesBiDir(const Vector<T1, 3> & a, const Vector<T2, 3> & b) -> Vector<decltype(a.x * b.y + a.y * b.x), 3> {
-	return Vector<decltype(a.x * b.y + a.y * b.x), 3>(
-		a.y * b.z + a.z * b.y,
-		a.z * b.x + a.x * b.z,
-		a.x * b.y + a.y * b.x
+template<typename T>
+constexpr Vector<T, 3> mulOppositesBiDir(const Vector<T, 3>& a, const Vector<T, 3>& b) {
+	return Vector<T, 3>(
+		a[1] * b[2] + a[2] * b[1],
+		a[2] * b[0] + a[0] * b[2],
+		a[0] * b[1] + a[1] * b[0]
 	);
 }
 // computes (vec.y * vec.z, vec.z * vec.x, vec.x * vec.y)
 template<typename T>
 constexpr Vector<T, 3> mulSelfOpposites(const Vector<T, 3> & vec) {
-	return Vector<T, 3>(vec.y * vec.z, vec.z * vec.x, vec.x * vec.y);
+	return Vector<T, 3>(vec[1] * vec[2], vec[2] * vec[0], vec[0] * vec[1]);
 }
 // computes (vec.y + vec.z, vec.z + vec.x, vec.x + vec.y)
 template<typename T>
 constexpr Vector<T, 3> addSelfOpposites(const Vector<T, 3> & vec) {
-	return Vector<T, 3>(vec.y + vec.z, vec.z + vec.x, vec.x + vec.y);
+	return Vector<T, 3>(vec[1] + vec[2], vec[2] + vec[0], vec[0] + vec[1]);
 }
 
 template<typename T, size_t Size>

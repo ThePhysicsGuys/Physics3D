@@ -10,7 +10,7 @@ class ModelLayer : public Layer {
 private:
 	struct Uniform {
 		Mat4f modelMatrix = Mat4f::IDENTITY();
-		Vec4f albedo = Vec4f(1.0f);
+		Vec4f albedo = Vec4f::full(1.0f);
 		float metalness = 1.0f;
 		float roughness  = 1.0f;
 		float ao = 1.0f;

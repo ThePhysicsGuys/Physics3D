@@ -67,7 +67,7 @@ std::map<::Debug::VectorType, Vec3f> vectorColors {
 	{ ::Debug::POSITION        , Vec3f(1, 1, 0) },
 	{ ::Debug::MOMENT          , Vec3f(1, 0, 1) },
 	{ ::Debug::IMPULSE         , Vec3f(0.5, 0.7, 1) },
-	{ ::Debug::ANGULAR_VELOCITY, Vec3f(0.75) },
+	{ ::Debug::ANGULAR_VELOCITY, Vec3f(0.75, 0.75, 0.75) },
 	{ ::Debug::ANGULAR_IMPULSE , Vec3f(0.8, 0.1, 0.4) }
 };
 
