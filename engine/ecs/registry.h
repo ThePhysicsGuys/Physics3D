@@ -137,21 +137,13 @@ struct component_index<Entity, void> {
 
 template<typename Entity>
 class Registry {
-	using registry_type = Registry<Entity>;
-	using traits_type = registry_traits<Entity>;
-	using entity_type = typename traits_type::entity_type;
-	using version_type = typename traits_type::version_type;
-	using component_type = typename traits_type::component_type;
-
-	using entity_stack = std::stack<entity_type>;
-	using entity_set = std::set<Entity>;
-	using entity_map = std::map<entity_type, void*>;
-	using component_vector = std::vector<entity_map*>;
-
-	using entity_iterator = decltype(std::declval<entity_map>().begin());
-
-//? Structs
 private:
+	struct entity_compare {
+		bool operator()(const Entity& left, const Entity& right) const {
+			return self(left) < self(right);
+		}
+	};
+
 	template<typename... Components>
 	struct unique_components;
 
@@ -162,12 +154,27 @@ private:
 	struct unique_components<C1, C2, Components...> :
 		unique_components<C1, C2>,
 		unique_components<C1, Components...>,
-		unique_components<C2, Components...> {};
+		unique_components<C2, Components...> {
+	};
 
 	template<typename C1, typename C2>
 	struct unique_components<C1, C2> {
 		static_assert(!std::is_same_v<C1, C2>, "Types must be unique");
 	};
+
+public:
+	using registry_type = Registry<Entity>;
+	using traits_type = registry_traits<Entity>;
+	using entity_type = typename traits_type::entity_type;
+	using version_type = typename traits_type::version_type;
+	using component_type = typename traits_type::component_type;
+
+	using entity_set = std::set<Entity, entity_compare>;
+	using entity_stack = std::stack<entity_type>;
+	using entity_map = std::map<entity_type, void*>;
+	using component_vector = std::vector<entity_map*>;
+
+	using entity_iterator = decltype(std::declval<entity_map>().begin());
 
 //? Functions
 private:
@@ -303,6 +310,7 @@ public:
 			id_stack.pop();
 		}
 
+		
 		entities.insert(id);
 
 		return id;
@@ -419,6 +427,34 @@ public:
 			return false;
 
 		return true;
+	}
+
+	/**
+	* Returns whether the registry contains the given entity
+	*/
+	bool contains(const Entity& entity) {
+		return entities.find(entity) != entities.end();
+	}
+
+	/**
+	* Returns the parent of the given entity
+	*/
+	entity_type getParent(const Entity& entity) {
+		return parent(entity);
+	}
+
+	/**
+	* Returns the version of the given entity
+	*/
+	version_type getVersion(const Entity& entity) {
+		return version(entity);
+	}
+
+	/**
+	* Returns the self id of the given entity
+	*/
+	entity_type getSelf(const Entity& entity) {
+		return self(entity);
 	}
 
 	/**
