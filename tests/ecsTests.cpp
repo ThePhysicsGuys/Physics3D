@@ -12,7 +12,7 @@ TEST_CASE(idGeneration) {
 	registry.destroy(id1);
 	auto id3 = registry.create();
 	
-	ASSERT_TRUE(id3 == id1 + 1);
+	ASSERT_TRUE(id3 == id1);
 }
 
 TEST_CASE(componentGeneration) {
@@ -78,7 +78,38 @@ TEST_CASE(viewTest) {
 	registry.add<C>(id5);
 	
 	std::size_t count = 0;
-	for (auto e : registry.view<A, B, C>()) {
+	for (auto _ : registry.view<A, B, C>()) {
+		count++;
+	}
+
+	ASSERT_TRUE(count == 2);
+}
+
+TEST_CASE(entityParent) {
+	using namespace Engine;
+	Registry8 registry;
+	auto id1 = registry.create();
+	auto parent = registry.create();
+
+	ASSERT_TRUE(registry.getParent(id1) == registry.null_entity);
+
+	id1 = registry.setParent(id1, parent);
+
+	ASSERT_FALSE(registry.getParent(id1) == registry.null_entity);
+}
+
+TEST_CASE(getChildren) {
+	using namespace Engine;
+	Registry8 registry;
+	auto id1 = registry.create();
+	auto id2 = registry.create();
+	auto parent = registry.create();
+
+	id1 = registry.setParent(id1, parent);
+	id2 = registry.setParent(id2, parent);
+
+	std::size_t count = 0;
+	for (auto _ : registry.getChildren(parent)) {
 		count++;
 	}
 
