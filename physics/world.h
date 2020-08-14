@@ -22,7 +22,7 @@ struct Colission {
 };
 
 class ExternalForce;
-class Layer;
+class WorldLayer;
 
 template<typename Filter>
 using DoubleFilterIter = FilteredIterator<IteratorGroup<TreeIterFactory<Part, Filter>, 2>, IteratorEnd, Filter>;
@@ -42,15 +42,6 @@ private:
 
 	std::vector<Colission> currentObjectColissions;
 	std::vector<Colission> currentTerrainColissions;
-
-	/*
-		Called when then bounds of a part are updated
-	*/
-	void notifyPartBoundsUpdated(const Part* updatedPart, const Bounds& oldBounds);
-	/*
-		Called when then bounds of a group of parts are updated
-	*/
-	void notifyPartGroupBoundsUpdated(const Part* mainPart, const Bounds& oldMainPartBounds);
 
 	/*
 		This method is called by World or Physical when new MotorizedPhysicals are created which need to be added to the list
@@ -74,12 +65,6 @@ private:
 	void notifyNewPartAddedToPhysical(const MotorizedPhysical* physical, Part* newPart);
 
 	/*
-		When a part is std::move'd to a different location, this function is called to update any pointers
-		This is something that in general should not be performed when the part is already in a world, but this function is provided for completeness
-	*/
-	void notifyPartStdMoved(Part* oldPartPtr, Part* newPartPtr);
-
-	/*
 		Called when a MainPhysical has become obsolete
 		This usually happens right before the physical is deleted
 	*/
@@ -98,10 +83,7 @@ private:
 private: // actually private fields and methods, not to be used by any friends
 	void mergePhysicalGroups(const MotorizedPhysical* first, MotorizedPhysical* second);
 
-	BoundsTree<Part>& getTreeForPart(const Part* part);
-	const BoundsTree<Part>& getTreeForPart(const Part* part) const;
-
-	std::vector<Layer> layers;
+	std::vector<WorldLayer> layers;
 	/*
 		Signifies which layers collide
 	*/
@@ -125,8 +107,8 @@ public:
 	std::vector<MotorizedPhysical*> physicals;
 	std::vector<ConstraintGroup> constraints;
 
-	BoundsTree<Part> objectTree;
-	BoundsTree<Part> terrainTree;
+	BoundsTree<Part>& objectTree;
+	BoundsTree<Part>& terrainTree;
 
 	size_t age = 0;
 	size_t objectCount = 0;
@@ -137,8 +119,8 @@ public:
 	~WorldPrototype();
 
 	WorldPrototype(const WorldPrototype&) = delete;
-	WorldPrototype(WorldPrototype&&) = delete;
 	WorldPrototype& operator=(const WorldPrototype&) = delete;
+	WorldPrototype(WorldPrototype&&) = delete;
 	WorldPrototype& operator=(WorldPrototype&&) = delete;
 
 

@@ -69,6 +69,8 @@ struct TreeNode {
 	void recalculateBoundsFromSubBounds();
 	void recalculateBoundsRecursive();
 
+	bool recursiveFindAndReplaceObject(const void* find, void* replaceWith, const Bounds& bounds) noexcept;
+
 	void improveStructure();
 
 	size_t getNumberOfObjectsInNode() const;
@@ -103,7 +105,7 @@ struct NodeStack {
 	inline bool operator!=(IteratorEnd) const {
 		return top + 1 != stack;
 	}
-	inline TreeNode* operator*() const {
+	inline TreeNode* operator*() const noexcept {
 		return top->node;
 	}
 	void riseUntilAvailableWhile();
@@ -279,6 +281,13 @@ struct BoundsTree {
 
 	}
 
+	BoundsTree(const BoundsTree&) = delete;
+	BoundsTree& operator=(const BoundsTree&) = delete;
+
+	BoundsTree(BoundsTree&&) = default;
+	BoundsTree& operator=(BoundsTree&&) = default;
+
+
 	inline bool isEmpty() const {
 		return this->rootNode.nodeCount == 0;
 	}
@@ -314,6 +323,10 @@ struct BoundsTree {
 		NodeStack iter(rootNode, obj, objBounds);
 		iter.riseUntilGroupHeadWhile();
 		return iter;
+	}
+
+	bool findAndReplaceObject(const Boundable* find, Boundable* replaceWith, const Bounds& objBounds) noexcept {
+		return rootNode.recursiveFindAndReplaceObject(find, replaceWith, objBounds);
 	}
 
 	void addToExistingGroup(Boundable* obj, const Bounds& bounds, const Boundable* objInGroup, const Bounds& objInGroupBounds) {

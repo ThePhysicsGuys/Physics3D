@@ -6,6 +6,8 @@
 
 #include "misc/validityHelper.h"
 
+#include <assert.h>
+
 RigidBody::RigidBody(Part* mainPart) : 
 	mainPart(mainPart), 
 	mass(mainPart->getMass()),
@@ -94,11 +96,17 @@ CFrame RigidBody::makeMainPart(AttachedPart& newMainPart) {
 	}
 }
 
-void RigidBody::notifyPartStdMoved(Part* oldPartPtr, Part* newPartPtr) {
+void RigidBody::notifyPartStdMoved(Part* oldPartPtr, Part* newPartPtr) noexcept {
 	if(this->mainPart == oldPartPtr) {
 		this->mainPart = newPartPtr;
 	} else {
-		getAttachFor(oldPartPtr).part = newPartPtr;
+		for(AttachedPart& atPart : this->parts) {
+			if(atPart.part == oldPartPtr) {
+				atPart.part = newPartPtr;
+				return;
+			}
+		}
+		assert(false); // cannot happen, part must be in this rigidbody
 	}
 }
 

@@ -182,6 +182,24 @@ void TreeNode::recalculateBoundsRecursive() {
 	recalculateBounds();
 }
 
+bool TreeNode::recursiveFindAndReplaceObject(const void* find, void* replaceWith, const Bounds& objBounds) noexcept {
+	if(isLeafNode()) {
+		if(object == find) {
+			object = replaceWith;
+			return true;
+		}
+	} else {
+		for(size_t i = 0; i < nodeCount; i++) {
+			if(this->bounds.contains(objBounds)) {
+				if(subTrees[i].recursiveFindAndReplaceObject(find, replaceWith, objBounds)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+}
+
 size_t TreeNode::getNumberOfObjectsInNode() const {
 	if(this->isLeafNode()) return 1;
 

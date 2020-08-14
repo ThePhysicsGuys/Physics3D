@@ -272,6 +272,7 @@
     <ClCompile Include="geometry\shape.cpp" />
     <ClCompile Include="geometry\shapeBuilder.cpp" />
     <ClCompile Include="geometry\shapeClass.cpp" />
+    <ClCompile Include="layer.cpp" />
     <ClCompile Include="math\cframe.cpp" />
     <ClCompile Include="math\fix.cpp" />
     <ClCompile Include="math\linalg\eigen.cpp" />
@@ -304,7 +305,9 @@
     <ClInclude Include="datastructures\iteratorEnd.h" />
     <ClInclude Include="datastructures\iteratorFactory.h" />
     <ClInclude Include="datastructures\iterators.h" />
+    <ClInclude Include="layer.h" />
     <ClInclude Include="datastructures\monotonicTree.h" />
+    <ClInclude Include="datastructures\compactPtrDataPair.h" />
     <ClInclude Include="datastructures\sharedArray.h" />
     <ClInclude Include="datastructures\uniqueArrayPtr.h" />
     <ClInclude Include="datastructures\unmanagedArray.h" />
@@ -326,6 +329,7 @@
     <ClInclude Include="geometry\shapeBuilder.h" />
     <ClInclude Include="geometry\shapeClass.h" />
     <ClInclude Include="constraints\hardConstraint.h" />
+    <ClInclude Include="layerType.h" />
     <ClInclude Include="math\bounds.h" />
     <ClInclude Include="math\cframe.h" />
     <ClInclude Include="math\fix.h" />

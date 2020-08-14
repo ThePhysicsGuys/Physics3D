@@ -185,9 +185,6 @@ bool boundsSphereEarlyEnd(const DiagonalMat3& scale, const Vec3& sphereCenter, d
 }
 
 inline void runColissionTests(Part& p1, Part& p2, WorldPrototype& world, std::vector<Colission>& colissions) {
-	if (p1.isTerrainPart && p2.isTerrainPart) return; // TODO Unneccecary test?
-
-	
 	double maxRadiusBetween = p1.maxRadius + p2.maxRadius;
 
 	Vec3 deltaPosition = p1.getPosition() - p2.getPosition();

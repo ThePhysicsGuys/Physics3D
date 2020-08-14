@@ -7,6 +7,11 @@
 #include "../geometry/indexedShape.h"
 #include "../../util/log.h"
 
+#include "../datastructures/boundsTree.h"
+#include "../part.h"
+#include "../physical.h"
+
+
 bool isValidTriangle(Triangle t, int vertexCount) {
 	return t.firstIndex != t.secondIndex && t.secondIndex != t.thirdIndex && t.thirdIndex != t.firstIndex &&
 		t.firstIndex >= 0 && t.firstIndex < vertexCount &&
@@ -142,3 +147,64 @@ bool isValid(const IndexedShape& shape) {
 
 	return true;
 }
+
+
+static void recursiveTreeValidCheck(const TreeNode& node, bool hasAlreadyPassedGroupHead) {
+	if(hasAlreadyPassedGroupHead && node.isGroupHead) {
+		throw "Another group head found below one!";
+	}
+	if(node.isLeafNode()) {
+		if(!hasAlreadyPassedGroupHead && !node.isGroupHead) {
+			throw "No group head found in this subtree!";
+		}
+	} else {
+		Bounds bounds = node[0].bounds;
+		for(int i = 1; i < node.nodeCount; i++) {
+			bounds = unionOfBounds(bounds, node[i].bounds);
+		}
+		if(bounds != node.bounds) {
+			throw "A node in the tree does not have valid bounds!";
+		}
+
+		for(TreeNode& n : node) {
+			recursiveTreeValidCheck(n, node.isGroupHead || hasAlreadyPassedGroupHead);
+		}
+	}
+}
+
+void treeValidCheck(const BoundsTree<Part>& tree) {
+	if(!tree.isEmpty()) {
+		recursiveTreeValidCheck(tree.rootNode, false);
+	}
+}
+
+
+static bool isConnectedPhysicalValid(const ConnectedPhysical* phys, const MotorizedPhysical* mainPhys);
+
+static bool isPhysicalValid(const Physical* phys, const MotorizedPhysical* mainPhys) {
+	if(phys->mainPhysical != mainPhys) {
+		Log::error("Physical's parent is not mainPhys!");
+		DEBUGBREAK;
+		return false;
+	}
+	for(const Part& part : phys->rigidBody) {
+		if(part.parent != phys) {
+			Log::error("part's parent's child is not part");
+			DEBUGBREAK;
+			return false;
+		}
+	}
+	for(const ConnectedPhysical& subPhys : phys->childPhysicals) {
+		if(!isConnectedPhysicalValid(&subPhys, mainPhys)) return false;
+	}
+	return true;
+}
+
+static bool isConnectedPhysicalValid(const ConnectedPhysical* phys, const MotorizedPhysical* mainPhys) {
+	return isPhysicalValid(phys, mainPhys);
+}
+
+bool isMotorizedPhysicalValid(const MotorizedPhysical* mainPhys) {
+	return isPhysicalValid(mainPhys, mainPhys);
+}
+
