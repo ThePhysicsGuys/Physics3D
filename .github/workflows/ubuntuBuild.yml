@@ -15,6 +15,7 @@ jobs:
     - name: setup dependencies
       run: ./setupDependencies.sh
     - name: cmake
-      run: cmake .
+      run: cmake -B build
     - name: make
-      run: make
+      run: make --directory build
+
