@@ -21,9 +21,7 @@ namespace {
 		if(part->parent != nullptr) {
 			part->parent->notifyPartPropertiesChanged(part);
 		}
-		if(part->layer != nullptr) {
-			part->layer->notifyPartGroupBoundsUpdated(part, oldBounds);
-		}
+		part->layer.notifyPartGroupBoundsUpdated(part, oldBounds);
 	}
 }
 
@@ -56,7 +54,7 @@ Part::Part(Part&& other) noexcept :
 	properties(std::move(other.properties)) {
 
 	if(parent != nullptr) parent->notifyPartStdMoved(&other, this);
-	if(layer != nullptr) layer->notifyPartStdMoved(&other, this);
+	layer.notifyPartStdMoved(&other, this);
 
 	other.parent = nullptr;
 }
@@ -69,7 +67,7 @@ Part& Part::operator=(Part&& other) noexcept {
 	this->properties = std::move(other.properties);
 
 	if(parent != nullptr) parent->notifyPartStdMoved(&other, this);
-	if(layer != nullptr) layer->notifyPartStdMoved(&other, this);
+	layer.notifyPartStdMoved(&other, this);
 
 	other.parent = nullptr;
 
@@ -119,9 +117,7 @@ void Part::setCFrame(const GlobalCFrame& newCFrame) {
 	} else {
 		this->parent->setPartCFrame(this, newCFrame);
 	}
-	if(this->layer != nullptr) {
-		this->layer->notifyPartGroupBoundsUpdated(this, oldBounds);
-	}
+	this->layer.notifyPartGroupBoundsUpdated(this, oldBounds);
 }
 
 Motion Part::getMotion() const {
@@ -142,9 +138,7 @@ void Part::translate(Vec3 translation) {
 	} else {
 		this->cframe += translation;
 	}
-	if(this->layer != nullptr) {
-		this->layer->notifyPartGroupBoundsUpdated(this, oldBounds);
-	}
+	this->layer.notifyPartGroupBoundsUpdated(this, oldBounds);
 }
 
 double Part::getWidth() const {

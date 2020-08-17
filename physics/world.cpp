@@ -3,6 +3,7 @@
 #include <algorithm>
 #include "../util/log.h"
 #include "layer.h"
+#include "layerRef.h"
 #include "misc/validityHelper.h"
 
 #ifndef NDEBUG
@@ -31,7 +32,9 @@ bool WorldPrototype::isValid() const {
 	}
 
 	for(const WorldLayer& l : layers) {
-		treeValidCheck(l.tree);
+		for(const BoundsTree<Part>& t : l.trees) {
+			treeValidCheck(t);
+		}
 	}
 	return true;
 }
@@ -40,10 +43,10 @@ bool WorldPrototype::isValid() const {
 
 WorldPrototype::WorldPrototype(double deltaT) : 
 	deltaT(deltaT), 
-	layers(2),
+	layers(1),
 	colissionMatrix(2),
-	objectTree(layers[0].tree), 
-	terrainTree(layers[1].tree) {
+	objectTree(layers[0].getObjectTree()), 
+	terrainTree(layers[0].getTerrainTree()) {
 	colissionMatrix.get(0, 0) = true; // free-free
 	colissionMatrix.get(1, 0) = true; // free-terrain
 	colissionMatrix.get(1, 1) = false; // terrain-terrain
@@ -61,34 +64,54 @@ static TreeNode createNodeFor(MotorizedPhysical* phys) {
 	return newNode;
 }
 
-void WorldPrototype::addPart(Part* part) {
+void WorldPrototype::addPart(Part* part, int layerIndex) {
 	ASSERT_VALID;
-	part->layer = &layers[0];
-	part->ensureHasParent();
-	if (part->parent->mainPhysical->world == this) {
-		Log::warn("Attempting to readd part to world");
+	
+	if(part->layer) {
+		Log::warn("This part is already in a world");
 		ASSERT_VALID;
 		return;
 	}
-	
-	objectTree.add(createNodeFor(part->parent->mainPhysical));
+
+	part->ensureHasParent();
 	physicals.push_back(part->parent->mainPhysical);
+	part->parent->mainPhysical->world = this;
+
+	WorldLayer* worldLayer = &layers[layerIndex];
+	BoundsTree<Part>& objTree = worldLayer->getObjectTree();
+	LayerRef ref(worldLayer, SubLayer::OBJECT);
+	part->parent->mainPhysical->forEachPart([ref](Part& p) {
+		p.layer = ref;
+	});
+	objTree.add(createNodeFor(part->parent->mainPhysical));
+
 
 	objectCount += part->parent->mainPhysical->getNumberOfPartsInThisAndChildren();
 	
-	part->parent->mainPhysical->world = this;
+	ASSERT_VALID;
+
+	part->parent->mainPhysical->forEachPart([this](Part& p) {
+		this->onPartAdded(&p);
+	});
+}
+void WorldPrototype::addTerrainPart(Part* part, int layerIndex) {
+	objectCount++;
+
+	WorldLayer* worldLayer = &layers[layerIndex];
+	part->layer = LayerRef(worldLayer, SubLayer::TERRAIN);
+	worldLayer->getTerrainTree().add(part, part->getBounds());
 
 	ASSERT_VALID;
 
-	part->parent->mainPhysical->forEachPart([this](Part& part) {
-		this->onPartAdded(&part);
-	});
+	this->onPartAdded(part);
 }
 void WorldPrototype::removePart(Part* part) {
 	ASSERT_VALID;
 	
+	WorldLayer::getTree(part->layer).remove(part, part->getBounds());
+
 	if(part->parent == nullptr) {
-		this->terrainTree.remove(part);
+		this->terrainTree.remove(part, part->getBounds());
 		this->onPartRemoved(part);
 	} else {
 		part->parent->removePart(part);
@@ -111,7 +134,9 @@ void WorldPrototype::clear() {
 	}
 	this->objectCount = 0;
 	for(WorldLayer& layer : this->layers) {
-		layer.tree.clear();
+		for(BoundsTree<Part>& t : layer.trees) {
+			t.clear();
+		}
 	}
 	for(Part* p : partsToDelete) {
 		this->onPartRemoved(p);
@@ -122,18 +147,6 @@ void WorldPrototype::notifyMainPhysicalObsolete(MotorizedPhysical* motorPhys) {
 	physicals.erase(std::remove(physicals.begin(), physicals.end(), motorPhys));
 
 	ASSERT_VALID;
-}
-void WorldPrototype::addTerrainPart(Part* part) {
-	objectCount++;
-
-	WorldLayer* layer = &layers[1];
-
-	layer->tree.add(part, part->getBounds());
-	part->layer = layer;
-
-	ASSERT_VALID;
-
-	this->onPartAdded(part);
 }
 void WorldPrototype::optimizeTerrain() {
 	for(int i = 0; i < 5; i++) {
@@ -212,7 +225,7 @@ void WorldPrototype::mergePhysicalGroups(const MotorizedPhysical* firstPhysical,
 
 		newNode = createNodeFor(secondPhysical);
 	}
-		
+	
 	const Part* main = firstPhysical->getMainPart();
 	objectTree.addToExistingGroup(std::move(newNode), main, main->getBounds());
 
@@ -246,7 +259,7 @@ void WorldPrototype::notifyPartDetachedFromPhysical(Part* part) {
 void WorldPrototype::notifyPartRemovedFromPhysical(Part* part) {
 	assert(part->parent == nullptr);
 
-	objectTree.remove(part);
+	objectTree.remove(part, part->getBounds());
 	objectCount--;
 	ASSERT_TREE_VALID(objectTree);
 

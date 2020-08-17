@@ -116,7 +116,9 @@ struct NodeStack {
 	void expandBoundsAllTheWayToTop();
 
 	// removes the object currently pointed to
-	TreeNode remove();
+	void remove();
+	// removes and returns the object currently pointed to
+	TreeNode grab();
 };
 
 struct ConstTreeIterator : public NodeStack {
@@ -152,7 +154,7 @@ struct ConstTreeIterator : public NodeStack {
 		delveDown();
 	}
 	inline TreeNode remove() {
-		TreeNode result = NodeStack::remove();
+		TreeNode result = NodeStack::grab();
 		if(top >= stack) {
 			delveDown();
 		}
@@ -357,9 +359,6 @@ struct BoundsTree {
 			stack.remove();
 		}
 	}
-	void remove(const Boundable* obj) {
-		this->remove(obj, obj->getBounds());
-	}
 	void moveOutOfGroup(const Boundable* obj, const Bounds& strictBounds) {
 		TreeNode node = this->grab(obj, strictBounds);
 
@@ -384,7 +383,7 @@ struct BoundsTree {
 			}
 		}
 		NodeStack iter(rootNode, obj, objBounds);
-		return iter.remove();
+		return iter.grab();
 	}
 
 	// removes and returns the group node for the given object
@@ -401,7 +400,7 @@ struct BoundsTree {
 		}
 		NodeStack iter(rootNode, obj, objBounds);
 		iter.riseUntilGroupHeadWhile();
-		return iter.remove();
+		return iter.grab();
 	}
 
 	inline void recalculateBounds() {

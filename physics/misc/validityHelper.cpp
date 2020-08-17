@@ -158,6 +158,14 @@ static void recursiveTreeValidCheck(const TreeNode& node, bool hasAlreadyPassedG
 			throw "No group head found in this subtree!";
 		}
 	} else {
+		for(TreeNode& n : node) {
+			recursiveTreeValidCheck(n, node.isGroupHead || hasAlreadyPassedGroupHead);
+		}
+	}
+}
+
+static void recursiveCheckTreeBounds(const TreeNode& node) {
+	if(!node.isLeafNode()) {
 		Bounds bounds = node[0].bounds;
 		for(int i = 1; i < node.nodeCount; i++) {
 			bounds = unionOfBounds(bounds, node[i].bounds);
@@ -165,9 +173,33 @@ static void recursiveTreeValidCheck(const TreeNode& node, bool hasAlreadyPassedG
 		if(bounds != node.bounds) {
 			throw "A node in the tree does not have valid bounds!";
 		}
-
 		for(TreeNode& n : node) {
-			recursiveTreeValidCheck(n, node.isGroupHead || hasAlreadyPassedGroupHead);
+			recursiveCheckTreeBounds(n);
+		}
+	}
+}
+
+static int countOccurences(const void* obj, const TreeNode& node) {
+	if(node.isLeafNode()) {
+		return (node.object == obj) ? 1 : 0;
+	} else {
+		int total = 0;
+		for(TreeNode& n : node) {
+			total += countOccurences(obj, n);
+		}
+		return total;
+	}
+}
+
+static void recursiveCheckNoDuplicates(const TreeNode& rootNode, const TreeNode& node) {
+	if(node.isLeafNode()) {
+		int occur = countOccurences(node.object, rootNode);
+		if(occur != 1) {
+			throw "Duplicate object in tree!";
+		}
+	} else {
+		for(TreeNode& n : node) {
+			recursiveCheckNoDuplicates(rootNode, n);
 		}
 	}
 }
@@ -175,6 +207,8 @@ static void recursiveTreeValidCheck(const TreeNode& node, bool hasAlreadyPassedG
 void treeValidCheck(const BoundsTree<Part>& tree) {
 	if(!tree.isEmpty()) {
 		recursiveTreeValidCheck(tree.rootNode, false);
+		recursiveCheckTreeBounds(tree.rootNode);
+		recursiveCheckNoDuplicates(tree.rootNode, tree.rootNode);
 	}
 }
 

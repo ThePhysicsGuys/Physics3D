@@ -399,7 +399,21 @@ void NodeStack::expandBoundsAllTheWayToTop() {
 }
 
 // removes the object currently pointed to
-TreeNode NodeStack::remove() {
+void NodeStack::remove() {
+	assert(top != stack);
+
+	top--;
+
+	TreeNode result = top->node->remove(top->index);
+
+	updateBoundsAllTheWayToTop();
+	if(!top->node->isLeafNode()) {
+		riseUntilAvailableWhile();
+	}
+}
+
+// removes and returns the object currently pointed to
+TreeNode NodeStack::grab() {
 	assert(top != stack);
 
 	top--;

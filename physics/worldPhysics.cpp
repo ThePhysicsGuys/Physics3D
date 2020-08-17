@@ -1,11 +1,6 @@
 
 #include "world.h"
-
-#include <iostream>
-#include <cmath>
-#include <algorithm>
-
-#include "../util/log.h"
+#include "layer.h"
 
 #include "math/mathUtil.h"
 #include "math/linalg/vec.h"
@@ -14,8 +9,11 @@
 #include "debug.h"
 #include "constants.h"
 #include "physicsProfiler.h"
+#include "../util/log.h"
 
 #include <vector>
+#include <cmath>
+#include <algorithm>
 
 /*
 	exitVector is the distance p2 must travel so that the shapes are no longer colliding
@@ -331,10 +329,13 @@ void WorldPrototype::update() {
 		physical->update(this->deltaT);
 	}
 
-	physicsMeasure.mark(PhysicsProcess::UPDATE_TREE_BOUNDS);
-	objectTree.recalculateBounds();
-	physicsMeasure.mark(PhysicsProcess::UPDATE_TREE_STRUCTURE);
-	objectTree.improveStructure();
+	for(WorldLayer& layer : layers) {
+		physicsMeasure.mark(PhysicsProcess::UPDATE_TREE_BOUNDS);
+		BoundsTree<Part>& tree = layer.getObjectTree();
+		tree.recalculateBounds();
+		physicsMeasure.mark(PhysicsProcess::UPDATE_TREE_STRUCTURE);
+		tree.improveStructure();
+	}
 	age++;
 }
 

@@ -272,7 +272,7 @@
     <ClCompile Include="geometry\shape.cpp" />
     <ClCompile Include="geometry\shapeBuilder.cpp" />
     <ClCompile Include="geometry\shapeClass.cpp" />
-    <ClCompile Include="layer.cpp" />
+    <ClCompile Include="layerRef.cpp" />
     <ClCompile Include="math\cframe.cpp" />
     <ClCompile Include="math\fix.cpp" />
     <ClCompile Include="math\linalg\eigen.cpp" />
@@ -329,7 +329,7 @@
     <ClInclude Include="geometry\shapeBuilder.h" />
     <ClInclude Include="geometry\shapeClass.h" />
     <ClInclude Include="constraints\hardConstraint.h" />
-    <ClInclude Include="layerType.h" />
+    <ClInclude Include="layerRef.h" />
     <ClInclude Include="math\bounds.h" />
     <ClInclude Include="math\cframe.h" />
     <ClInclude Include="math\fix.h" />

@@ -126,10 +126,10 @@ public:
 
 	virtual void tick();
 
-	void addPart(Part* part);
+	void addPart(Part* part, int layerIndex = 0);
 	void removePart(Part* part);
 
-	void addTerrainPart(Part* part);
+	void addTerrainPart(Part* part, int layerIndex = 0);
 	void optimizeTerrain();
 
 	// removes everything from this world, parts, physicals, forces, constraints
