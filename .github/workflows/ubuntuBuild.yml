@@ -1,4 +1,4 @@
-name: Build Ubuntu-18.04
+name: Build
 on:
   push:
     branches: [ master ]
@@ -6,15 +6,15 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
+  buildUbuntu:
 
     runs-on: ubuntu-18.04
 
     steps:
     - uses: actions/checkout@v2
-    - name: setup
-      run: ./setup.sh
-    - name: goto debug
-      run: cd build/debug
+    - name: setup dependencies
+      run: ./setupDependencies.sh
+    - name: cmake
+      run: cmake .
     - name: make
       run: make

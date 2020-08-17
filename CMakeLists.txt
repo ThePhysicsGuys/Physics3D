@@ -44,6 +44,7 @@ add_library(physics STATIC
   physics/physical.cpp
   physics/physicsProfiler.cpp
   physics/rigidBody.cpp
+  physics/layerRef.cpp
   physics/world.cpp
   physics/worldPhysics.cpp
   physics/inertia.cpp
