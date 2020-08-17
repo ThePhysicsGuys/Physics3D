@@ -1,0 +1,20 @@
+name: Build Ubuntu-18.04
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-18.04
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: setup
+      run: ./setup.sh
+    - name: goto debug
+      run: cd build/debug
+    - name: make
+      run: make
