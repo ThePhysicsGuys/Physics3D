@@ -1,4 +1,6 @@
 # Physics3D
+![GitHub CI Badge](https://github.com/ThePhysicsGuys/Physics3D/workflows/Build/badge.svg)
+
 A 3D physics engine, written in C++
 
 ![Many Shapes](https://media.discordapp.net/attachments/378983421936140300/638494259452051480/unknown.png?width=1152&height=664)

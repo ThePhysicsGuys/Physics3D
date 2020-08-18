@@ -76,7 +76,7 @@ public:
 	// returns the offset CFrame from the original mainPart, can be used for syncing calling function
 	CFrame makeMainPart(AttachedPart& newMainPart);
 	
-	void notifyPartStdMoved(Part* oldPartPtr, Part* newPartPtr);
+	void notifyPartStdMoved(Part* oldPartPtr, Part* newPartPtr) noexcept;
 
 	// expects a function of type void(const Part&)
 	template<typename Func>

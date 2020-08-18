@@ -169,6 +169,7 @@ void WorldBenchmark::printResults(double timeTakenMillis) {
 	setColor(TerminalColor::MAGENTA);
 	std::cout << "[Intersection Statistics]\n";
 	printBreakdown(intersectionStatistics.history.avg().values, intersectionStatistics.labels, intersectionStatistics.size(), "");
+	setColor(TerminalColor::WHITE);
 }
 
 

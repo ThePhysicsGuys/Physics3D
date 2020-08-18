@@ -69,6 +69,8 @@ struct TreeNode {
 	void recalculateBoundsFromSubBounds();
 	void recalculateBoundsRecursive();
 
+	bool recursiveFindAndReplaceObject(const void* find, void* replaceWith, const Bounds& bounds) noexcept;
+
 	void improveStructure();
 
 	size_t getNumberOfObjectsInNode() const;
@@ -103,7 +105,7 @@ struct NodeStack {
 	inline bool operator!=(IteratorEnd) const {
 		return top + 1 != stack;
 	}
-	inline TreeNode* operator*() const {
+	inline TreeNode* operator*() const noexcept {
 		return top->node;
 	}
 	void riseUntilAvailableWhile();
@@ -114,7 +116,9 @@ struct NodeStack {
 	void expandBoundsAllTheWayToTop();
 
 	// removes the object currently pointed to
-	TreeNode remove();
+	void remove();
+	// removes and returns the object currently pointed to
+	TreeNode grab();
 };
 
 struct ConstTreeIterator : public NodeStack {
@@ -150,7 +154,7 @@ struct ConstTreeIterator : public NodeStack {
 		delveDown();
 	}
 	inline TreeNode remove() {
-		TreeNode result = NodeStack::remove();
+		TreeNode result = NodeStack::grab();
 		if(top >= stack) {
 			delveDown();
 		}
@@ -279,6 +283,13 @@ struct BoundsTree {
 
 	}
 
+	BoundsTree(const BoundsTree&) = delete;
+	BoundsTree& operator=(const BoundsTree&) = delete;
+
+	BoundsTree(BoundsTree&&) = default;
+	BoundsTree& operator=(BoundsTree&&) = default;
+
+
 	inline bool isEmpty() const {
 		return this->rootNode.nodeCount == 0;
 	}
@@ -316,6 +327,10 @@ struct BoundsTree {
 		return iter;
 	}
 
+	bool findAndReplaceObject(const Boundable* find, Boundable* replaceWith, const Bounds& objBounds) noexcept {
+		return rootNode.recursiveFindAndReplaceObject(find, replaceWith, objBounds);
+	}
+
 	void addToExistingGroup(Boundable* obj, const Bounds& bounds, const Boundable* objInGroup, const Bounds& objInGroupBounds) {
 		NodeStack iter(rootNode, objInGroup, objInGroupBounds);
 		iter.riseUntilGroupHeadWhile();
@@ -344,9 +359,6 @@ struct BoundsTree {
 			stack.remove();
 		}
 	}
-	void remove(const Boundable* obj) {
-		this->remove(obj, obj->getBounds());
-	}
 	void moveOutOfGroup(const Boundable* obj, const Bounds& strictBounds) {
 		TreeNode node = this->grab(obj, strictBounds);
 
@@ -371,7 +383,7 @@ struct BoundsTree {
 			}
 		}
 		NodeStack iter(rootNode, obj, objBounds);
-		return iter.remove();
+		return iter.grab();
 	}
 
 	// removes and returns the group node for the given object
@@ -388,7 +400,7 @@ struct BoundsTree {
 		}
 		NodeStack iter(rootNode, obj, objBounds);
 		iter.riseUntilGroupHeadWhile();
-		return iter.remove();
+		return iter.grab();
 	}
 
 	inline void recalculateBounds() {

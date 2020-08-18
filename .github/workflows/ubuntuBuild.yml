@@ -1,0 +1,21 @@
+name: Build
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  buildUbuntu:
+
+    runs-on: ubuntu-18.04
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: setup dependencies
+      run: ./setupDependencies.sh
+    - name: cmake
+      run: cmake -B build
+    - name: make
+      run: make --directory build
+

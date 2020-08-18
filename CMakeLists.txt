@@ -11,7 +11,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 #set(CMAKE_INTERPROCEDURAL_OPTIMIZATION True)
 
 #enable debug
-if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -g")
 endif()
 
@@ -44,6 +44,7 @@ add_library(physics STATIC
   physics/physical.cpp
   physics/physicsProfiler.cpp
   physics/rigidBody.cpp
+  physics/layerRef.cpp
   physics/world.cpp
   physics/worldPhysics.cpp
   physics/inertia.cpp

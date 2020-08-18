@@ -9,16 +9,19 @@
 #include "catchable_assert.h"
 #include <stdexcept>
 
+#include "layer.h"
+
 namespace {
-	void recalculate(Part& part) {
-		part.maxRadius = part.hitbox.getMaxRadius();
+	void recalculate(Part* part) {
+		part->maxRadius = part->hitbox.getMaxRadius();
 	}
 
-	void recalculateAndUpdateParent(Part& part, const Bounds& oldBounds) {
+	void recalculateAndUpdateParent(Part* part, const Bounds& oldBounds) {
 		recalculate(part);
-		if (part.parent != nullptr) {
-			part.parent->notifyPartPropertiesAndBoundsChanged(&part, oldBounds);
+		if(part->parent != nullptr) {
+			part->parent->notifyPartPropertiesChanged(part);
 		}
+		part->layer.notifyPartGroupBoundsUpdated(part, oldBounds);
 	}
 }
 
@@ -42,27 +45,29 @@ Part::~Part() {
 	}
 }
 
-Part::Part(Part&& other) :
+Part::Part(Part&& other) noexcept :
 	cframe(other.cframe),
-	isTerrainPart(other.isTerrainPart),
+	layer(other.layer),
 	parent(other.parent), 
 	hitbox(std::move(other.hitbox)), 
 	maxRadius(other.maxRadius), 
 	properties(std::move(other.properties)) {
 
 	if(parent != nullptr) parent->notifyPartStdMoved(&other, this);
+	layer.notifyPartStdMoved(&other, this);
 
 	other.parent = nullptr;
 }
-Part& Part::operator=(Part&& other) {
+Part& Part::operator=(Part&& other) noexcept {
 	this->cframe = other.cframe;
-	this->isTerrainPart = other.isTerrainPart;
+	this->layer = other.layer;
 	this->parent = other.parent;
 	this->hitbox = std::move(other.hitbox);
 	this->maxRadius = other.maxRadius;
 	this->properties = std::move(other.properties);
 
 	if(parent != nullptr) parent->notifyPartStdMoved(&other, this);
+	layer.notifyPartStdMoved(&other, this);
 
 	other.parent = nullptr;
 
@@ -102,15 +107,17 @@ Bounds Part::getBounds() const {
 void Part::scale(double scaleX, double scaleY, double scaleZ) {
 	Bounds oldBounds = this->getBounds();
 	this->hitbox = this->hitbox.scaled(scaleX, scaleY, scaleZ);
-	recalculateAndUpdateParent(*this, oldBounds);
+	recalculateAndUpdateParent(this, oldBounds);
 }
 
 void Part::setCFrame(const GlobalCFrame& newCFrame) {
+	Bounds oldBounds = this->getBounds();
 	if(this->parent == nullptr) {
 		this->cframe = newCFrame;
 	} else {
 		this->parent->setPartCFrame(this, newCFrame);
 	}
+	this->layer.notifyPartGroupBoundsUpdated(this, oldBounds);
 }
 
 Motion Part::getMotion() const {
@@ -125,11 +132,13 @@ Motion Part::getMotion() const {
 }
 
 void Part::translate(Vec3 translation) {
+	Bounds oldBounds = this->getBounds();
 	if(this->parent != nullptr) {
 		this->parent->mainPhysical->translate(translation);
 	} else {
 		this->cframe += translation;
 	}
+	this->layer.notifyPartGroupBoundsUpdated(this, oldBounds);
 }
 
 double Part::getWidth() const {
@@ -145,17 +154,17 @@ double Part::getDepth() const {
 void Part::setWidth(double newWidth) {
 	Bounds oldBounds = this->getBounds();
 	this->hitbox.setWidth(newWidth);
-	recalculateAndUpdateParent(*this, oldBounds);
+	recalculateAndUpdateParent(this, oldBounds);
 }
 void Part::setHeight(double newHeight) {
 	Bounds oldBounds = this->getBounds();
 	this->hitbox.setHeight(newHeight);
-	recalculateAndUpdateParent(*this, oldBounds);
+	recalculateAndUpdateParent(this, oldBounds);
 }
 void Part::setDepth(double newDepth) {
 	Bounds oldBounds = this->getBounds();
 	this->hitbox.setDepth(newDepth);
-	recalculateAndUpdateParent(*this, oldBounds);
+	recalculateAndUpdateParent(this, oldBounds);
 }
 
 

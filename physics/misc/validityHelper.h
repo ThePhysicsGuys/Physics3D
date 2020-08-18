@@ -7,6 +7,13 @@
 
 #include <cmath>
 
+#ifdef _MSC_VER
+#define DEBUGBREAK __debugbreak()
+#else
+#define DEBUGBREAK
+#endif
+
+
 template<typename T, size_t Size>
 inline bool isVecValid(const Vector<T, Size>& vec) {
 	for(size_t i = 0; i < Size; i++) {
@@ -88,3 +95,14 @@ bool isValid(const Polyhedron& poly);
 bool isValid(const IndexedShape& shape);
 
 bool isValidTriangle(Triangle t, int vertexCount);
+
+
+template<typename T>
+struct BoundsTree;
+class Part;
+
+void treeValidCheck(const BoundsTree<Part>& tree);
+
+class MotorizedPhysical;
+
+bool isMotorizedPhysicalValid(const MotorizedPhysical* mainPhys);

@@ -13,6 +13,7 @@ class WorldPrototype;
 #include "math/globalCFrame.h"
 #include "math/bounds.h"
 #include "motion.h"
+#include "layerRef.h"
 
 struct PartProperties {
 	double density;
@@ -40,7 +41,6 @@ struct PartIntersection {
 		exitVector(exitVector) {}
 };
 
-
 class Part {
 	friend class RigidBody;
 	friend class Physical;
@@ -51,7 +51,7 @@ class Part {
 	GlobalCFrame cframe;
 
 public:
-	bool isTerrainPart = false;
+	LayerRef layer;
 	Physical* parent = nullptr;
 	Shape hitbox;
 	double maxRadius;
@@ -65,8 +65,8 @@ public:
 
 	Part(const Part& other) = delete;
 	Part& operator=(const Part& other) = delete;
-	Part(Part&& other);
-	Part& operator=(Part&& other);
+	Part(Part&& other) noexcept;
+	Part& operator=(Part&& other) noexcept;
 
 
 	PartIntersection intersects(const Part& other) const;

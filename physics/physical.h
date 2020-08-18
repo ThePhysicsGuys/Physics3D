@@ -147,8 +147,7 @@ public:
 	size_t getNumberOfPartsInThisAndChildren() const;
 
 	void notifyPartPropertiesChanged(Part* part);
-	void notifyPartPropertiesAndBoundsChanged(Part* part, const Bounds& oldBounds);
-	void notifyPartStdMoved(Part* oldPartPtr, Part* newPartPtr);
+	void notifyPartStdMoved(Part* oldPartPtr, Part* newPartPtr) noexcept;
 
 	bool isValid() const;
 
@@ -207,7 +206,6 @@ public:
 class MotorizedPhysical : public Physical {
 	friend class Physical;
 	friend class ConnectedPhysical;
-	void rotateAroundCenterOfMassUnsafe(const Rotation& rotation);
 public:
 	void refreshPhysicalProperties();
 	Vec3 totalForce = Vec3(0.0, 0.0, 0.0);
@@ -280,8 +278,9 @@ public:
 	void update(double deltaT);
 
 	void setCFrame(const GlobalCFrame& newCFrame);
-	void rotateAroundCenterOfMass(const Rotation& rotation);
+	
 	void translate(const Vec3& translation);
+	void rotateAroundCenterOfMass(const Rotation& rotation);
 
 	void applyForceAtCenterOfMass(Vec3 force);
 	void applyForce(Vec3Relative origin, Vec3 force);

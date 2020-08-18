@@ -517,19 +517,8 @@ void Physical::removePart(Part* part) {
 void Physical::notifyPartPropertiesChanged(Part* part) {
 	rigidBody.refreshWithNewParts();
 }
-void Physical::notifyPartPropertiesAndBoundsChanged(Part* part, const Bounds& oldBounds) {
-	notifyPartPropertiesChanged(part);
-	if(this->mainPhysical->world != nullptr) {
-		this->mainPhysical->world->notifyPartBoundsUpdated(part, oldBounds);
-	}
-}
-void Physical::notifyPartStdMoved(Part* oldPartPtr, Part* newPartPtr) {
+void Physical::notifyPartStdMoved(Part* oldPartPtr, Part* newPartPtr) noexcept {
 	rigidBody.notifyPartStdMoved(oldPartPtr, newPartPtr);
-
-	WorldPrototype* world = this->mainPhysical->world;
-	if(world != nullptr) {
-		world->notifyPartStdMoved(oldPartPtr, newPartPtr);
-	}
 }
 
 void Physical::updateConstraints(double deltaT) {
@@ -565,20 +554,9 @@ void ConnectedPhysical::setCFrame(const GlobalCFrame& newCFrame) {
 }
 
 void MotorizedPhysical::setCFrame(const GlobalCFrame& newCFrame) {
-	if(this->mainPhysical->world != nullptr) {
-		Bounds oldMainPartBounds = this->rigidBody.mainPart->getBounds();
-
-		rigidBody.setCFrame(newCFrame);
-		for(ConnectedPhysical& conPhys : childPhysicals) {
-			conPhys.refreshCFrameRecursive();
-		}
-
-		this->mainPhysical->world->notifyPartGroupBoundsUpdated(this->rigidBody.mainPart, oldMainPartBounds);
-	} else {
-		rigidBody.setCFrame(newCFrame);
-		for(ConnectedPhysical& conPhys : childPhysicals) {
-			conPhys.refreshCFrameRecursive();
-		}
+	rigidBody.setCFrame(newCFrame);
+	for(ConnectedPhysical& conPhys : childPhysicals) {
+		conPhys.refreshCFrameRecursive();
 	}
 }
 
@@ -601,7 +579,7 @@ void Physical::setPartCFrame(Part* part, const GlobalCFrame& newCFrame) {
 
 #pragma region refresh
 
-void MotorizedPhysical::rotateAroundCenterOfMassUnsafe(const Rotation& rotation) {
+void MotorizedPhysical::rotateAroundCenterOfMass(const Rotation& rotation) {
 	rigidBody.rotateAroundLocalPoint(totalCenterOfMass, rotation);
 }
 void Physical::translateUnsafeRecursive(const Vec3Fix& translation) {
@@ -610,15 +588,8 @@ void Physical::translateUnsafeRecursive(const Vec3Fix& translation) {
 		conPhys.translateUnsafeRecursive(translation);
 	}
 }
-void MotorizedPhysical::rotateAroundCenterOfMass(const Rotation& rotation) {
-	Bounds oldBounds = this->rigidBody.mainPart->getBounds();
-	rotateAroundCenterOfMassUnsafe(rotation);
-	mainPhysical->world->notifyPartGroupBoundsUpdated(this->rigidBody.mainPart, oldBounds);
-}
 void MotorizedPhysical::translate(const Vec3& translation) {
-	Bounds oldBounds = this->rigidBody.mainPart->getBounds();
 	translateUnsafeRecursive(translation);
-	mainPhysical->world->notifyPartGroupBoundsUpdated(this->rigidBody.mainPart, oldBounds);
 }
 
 void MotorizedPhysical::refreshPhysicalProperties() {
@@ -646,11 +617,9 @@ void ConnectedPhysical::refreshCFrameRecursive() {
 }
 
 void MotorizedPhysical::fullRefreshOfConnectedPhysicals() {
-	Bounds oldBounds = this->rigidBody.mainPart->getBounds();
 	for(ConnectedPhysical& conPhys : childPhysicals) {
 		conPhys.refreshCFrameRecursive();
 	}
-	if(this->world != nullptr) this->world->notifyPartGroupBoundsUpdated(this->rigidBody.mainPart, oldBounds);
 }
 
 #pragma endregion
@@ -684,7 +653,7 @@ void MotorizedPhysical::update(double deltaT) {
 	Vec3 deltaCOM = this->totalCenterOfMass - oldCenterOfMass;
 	Vec3 movementOfCenterOfMass = motionOfCenterOfMass.getVelocity() * deltaT + accel * deltaT * deltaT * 0.5 - getCFrame().localToRelative(deltaCOM);
 
-	rotateAroundCenterOfMassUnsafe(Rotation::fromRotationVec(motionOfCenterOfMass.getAngularVelocity() * deltaT));
+	rotateAroundCenterOfMass(Rotation::fromRotationVec(motionOfCenterOfMass.getAngularVelocity() * deltaT));
 	translateUnsafeRecursive(movementOfCenterOfMass);
 
 	Vec3 angularMomentumAfter = getTotalAngularMomentum();
@@ -769,7 +738,7 @@ void MotorizedPhysical::applyAngularDrag(Vec3 angularDrag) {
 	Vec3 localAngularDrag = getCFrame().relativeToLocal(angularDrag);
 	Vec3 localRotAcc = momentResponse * localAngularDrag;
 	Vec3 rotAcc = getCFrame().localToRelative(localRotAcc);
-	rotateAroundCenterOfMassUnsafe(Rotation::fromRotationVec(rotAcc));
+	rotateAroundCenterOfMass(Rotation::fromRotationVec(rotAcc));
 }
 
 
