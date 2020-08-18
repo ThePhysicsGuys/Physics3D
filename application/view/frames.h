@@ -17,7 +17,7 @@ class Node;
 
 class Resource;
 
-namespace Application {
+namespace P3D::Application {
 
 struct BigFrame {
 public:

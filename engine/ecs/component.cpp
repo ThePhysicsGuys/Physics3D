@@ -3,7 +3,7 @@
 
 #include "../engine/ecs/entity.h"
 
-namespace Engine {
+namespace P3D::Engine {
 
 Component* Component::defaultComponent;
 

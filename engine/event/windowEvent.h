@@ -2,7 +2,7 @@
 
 #include "event.h"
 
-namespace Engine {
+namespace P3D::Engine {
 
 class WindowEvent : public Event {
 public:

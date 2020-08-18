@@ -2,11 +2,11 @@
 
 #include "../engine/layer/layer.h"
 
-namespace Application {
+namespace P3D::Application {
 
 class Screen;
 
-class DebugOverlay : public Layer {
+class DebugOverlay : public Engine::Layer {
 public:
 	inline DebugOverlay() : Layer() {};
 	inline DebugOverlay(Screen* screen, char flags = NoEvents) : Layer("Debug overlay", screen, flags) {};

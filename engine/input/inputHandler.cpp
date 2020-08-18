@@ -10,7 +10,7 @@
 #include "event/mouseEvent.h"
 #include "event/windowEvent.h"
 
-namespace Engine {
+namespace P3D::Engine {
 
 #pragma region callbacks
 
@@ -152,10 +152,8 @@ void InputHandler::setKey(const Key& key, bool pressed) {
 }
 
 InputHandler::InputHandler(GLFWwindow* window) : window(window) {
-	for(bool& k : this->keys){
+	for (bool& k : this->keys)
 		k = false;
-	}
-
 
 	glfwSetWindowUserPointer(window, this);
 

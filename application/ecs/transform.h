@@ -3,7 +3,7 @@
 #include "../engine/ecs/component.h"
 #include "../physics/math/globalCFrame.h"
 
-namespace Application {
+namespace P3D::Application {
 
 /*
 	A Component representing the position, rotation and scale of the parent entity

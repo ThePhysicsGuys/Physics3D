@@ -2,7 +2,7 @@
 
 #include "../engine/ecs/component.h"
 
-namespace Application {
+namespace P3D::Application {
 
 class IndexedMesh;
 

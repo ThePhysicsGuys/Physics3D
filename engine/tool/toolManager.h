@@ -2,7 +2,7 @@
 
 #include "tool.h"
 
-namespace Engine {
+namespace P3D::Engine {
 
 class ToolManager {
 private:

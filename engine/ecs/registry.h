@@ -6,7 +6,7 @@
 #include <functional>
 #include <type_traits>
 
-namespace Engine {
+namespace P3D::Engine {
 
 template<typename, typename = void>
 struct registry_traits;

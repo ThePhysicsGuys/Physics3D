@@ -3,7 +3,7 @@
 
 #include "extendedPart.h"
 
-namespace Application {
+namespace P3D::Application {
 
 Model::Model(ExtendedPart* ExtendedPart) {
 	this->extendedPart = ExtendedPart;

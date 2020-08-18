@@ -4,7 +4,7 @@
 #include "../input/keyboard.h"
 #include "../input/modifiers.h"
 
-namespace Engine {
+namespace P3D::Engine {
 
 class KeyEvent : public Event {
 private:

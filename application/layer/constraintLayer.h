@@ -3,11 +3,11 @@
 #include "../engine/layer/layer.h"
 #include "../engine/visualData.h"
 
-namespace Application {
+namespace P3D::Application {
 
 class Screen;
 
-class ConstraintLayer : public Layer {
+class ConstraintLayer : public Engine::Layer {
 public:
 	VisualData hexagon;
 	inline ConstraintLayer() {};

@@ -4,7 +4,7 @@ namespace Engine {
 class Event;
 };
 
-namespace Application {
+namespace P3D::Application {
 
 class Screen;
 class PlayerWorld;

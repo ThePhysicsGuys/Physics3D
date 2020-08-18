@@ -22,7 +22,7 @@
 
 #include "imgui/imgui.h"
 
-namespace Application {
+namespace P3D::Application {
 
 SkyboxCycle lightColorCycle;
 SkyboxCycle skyColorCycle;

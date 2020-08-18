@@ -6,7 +6,7 @@
 #include "../application/input/standardInputHandler.h"
 #include "../engine/options/keyboardOptions.h"
 
-namespace Application {
+namespace P3D::Application {
 
 void CameraLayer::onInit() {
 	Screen* screen = static_cast<Screen*>(this->ptr);
@@ -18,6 +18,7 @@ void CameraLayer::onInit() {
 }
 
 void CameraLayer::onUpdate() {
+	using namespace Engine;
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
 	std::chrono::time_point<std::chrono::steady_clock> curUpdate = std::chrono::steady_clock::now();

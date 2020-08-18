@@ -2,7 +2,7 @@
 
 #include "pickable.h"
 
-namespace Application {
+namespace P3D::Application {
 
 struct EditTools : public Pickable {
 

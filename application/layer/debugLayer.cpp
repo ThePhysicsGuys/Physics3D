@@ -26,7 +26,7 @@
 #include "worlds.h"
 #include "../graphics/meshLibrary.h"
 
-namespace Application {
+namespace P3D::Application {
 
 Vec4f colors[] {
 	Graphics::COLOR::BLUE,

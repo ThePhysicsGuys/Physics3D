@@ -2,8 +2,9 @@
 
 #include "keyboardOptions.h"
 
+namespace P3D::Engine {
+
 namespace KeyboardOptions {
-	using namespace Engine;
 
 	namespace Move {
 		Key forward  = Keyboard::KEY_UNKNOWN;
@@ -160,3 +161,5 @@ namespace KeyboardOptions {
 		saveKey(properties, "world.valid", World::valid);
 	}
 }
+
+};

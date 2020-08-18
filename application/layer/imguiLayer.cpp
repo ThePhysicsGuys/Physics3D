@@ -19,7 +19,7 @@
 #include "../graphics/gui/gui.h"
 #include "../physics/misc/toString.h"
 
-namespace Application {
+namespace P3D::Application {
 
 void ImGuiLayer::onInit() {
 	IMGUI_CHECKVERSION();
@@ -51,8 +51,9 @@ void ImGuiLayer::onUpdate() {
 }
 
 void ImGuiLayer::onEvent(Engine::Event& event) {
-	if (!sceneHovered) 
+	if (!sceneHovered) {
 		event.handled = event.inCategory(Engine::EventCategoryMouse) && ImGui::GetIO().WantCaptureMouse;
+	}
 }
 
 void ImGuiLayer::onRender() {
@@ -63,10 +64,14 @@ void ImGuiLayer::onRender() {
 	ImVec2 pos = ImGui::GetWindowPos();
 	ImVec2 min = ImGui::GetWindowContentRegionMin();
 	ImVec2 max = ImGui::GetWindowContentRegionMax();
+	
+	
+	Log::debug("%f, %f,	     %f, %f,	     %f, %f", handler->mousePosition.x, handler->mousePosition.y, min.x, min.y, ImGui::GetIO().MousePos.x, ImGui::GetIO().MousePos.y);
 	ImVec2 size = ImVec2(max.x - min.x, max.y - min.y);
-	//min = ImVec2(min.x + pos.x, min.y + pos.y);
-	//max = ImVec2(max.x + pos.x, max.y + pos.y);
-	//ImGui::GetForegroundDrawList()->AddRect(min, max, IM_COL32(255, 255, 0, 255));
+	min = ImVec2(min.x + pos.x, min.y + pos.y);
+	max = ImVec2(max.x + pos.x, max.y + pos.y);
+	ImGui::GetForegroundDrawList()->AddRect(min, max, IM_COL32(255, 255, 0, 255));
+	//handler->viewport = Vec4(min.x, )
 
 	Graphics::Texture* texture = screen->screenFrameBuffer->texture;
 	ImGui::Image((void*) texture->getID(), size, ImVec2(0, 1), ImVec2(1, 0));

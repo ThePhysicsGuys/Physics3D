@@ -2,7 +2,7 @@
 
 #include "shaderBase.h"
 
-namespace Application {
+namespace P3D::Application {
 using namespace Graphics;
 
 struct Material;

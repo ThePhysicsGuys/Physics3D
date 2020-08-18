@@ -3,7 +3,7 @@
 #include "node.h"
 #include "component.h"
 
-namespace Engine {
+namespace P3D::Engine {
 
 class Entity : public Node {
 protected:

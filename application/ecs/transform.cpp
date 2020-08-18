@@ -4,7 +4,7 @@
 #include "../engine/ecs/entity.h"
 #include "model.h"
 
-namespace Application {
+namespace P3D::Application {
 
 Transform::Transform(const GlobalCFrame& cframe) {
 	this->cframe = cframe;

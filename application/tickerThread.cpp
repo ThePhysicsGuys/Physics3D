@@ -2,7 +2,7 @@
 
 #include "tickerThread.h"
 
-namespace Application {
+namespace P3D::Application {
 
 using namespace std::chrono;
 TickerThread::TickerThread(double targetTPS, milliseconds tickSkipTimeout, void(*tickAction)()) {

@@ -4,7 +4,7 @@
 #include "../input/mouse.h"
 #include "../input/modifiers.h"
 
-namespace Engine {
+namespace P3D::Engine {
 
 class MouseEvent : public Event {
 private:

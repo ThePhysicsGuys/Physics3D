@@ -2,11 +2,11 @@
 
 #include "../engine/layer/layer.h"
 
-namespace Application {
+namespace P3D::Application {
 	
 class Screen;
 
-class GuiLayer : public Layer {
+class GuiLayer : public Engine::Layer {
 public:
 	inline GuiLayer() : Layer() {};
 	inline GuiLayer(Screen* screen, char flags = None) : Layer("Gui", screen, flags) {};

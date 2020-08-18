@@ -13,7 +13,7 @@ namespace Graphics {
 	class CubeMap;
 };
 
-namespace Application {
+namespace P3D::Application {
 using namespace Graphics;
 
 struct Light;

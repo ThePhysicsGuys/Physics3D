@@ -2,6 +2,8 @@
 
 #include "layerStack.h"
 
+namespace P3D::Engine {
+
 LayerStack::LayerStack() {
 	insert = 0;
 }
@@ -13,7 +15,7 @@ void LayerStack::pushLayer(Layer* layer) {
 
 void LayerStack::popLayer(Layer* layer) {
 	std::vector<Layer*>::iterator where = std::find(begin(), end(), layer);
-		
+
 	if (where != end()) {
 		stack.erase(where);
 		insert--;
@@ -31,7 +33,7 @@ void LayerStack::onInit() {
 void LayerStack::onUpdate() {
 	for (auto i = begin(); i != end(); ++i) {
 		Layer* layer = *i;
-		
+
 		if (layer->flags & (Layer::Disabled | Layer::NoUpdate))
 			continue;
 
@@ -47,7 +49,7 @@ void LayerStack::onEvent(Engine::Event& event) {
 			continue;
 
 		layer->onEvent(event);
-		
+
 		if (event.handled)
 			return;
 	}
@@ -86,3 +88,5 @@ std::vector<Layer*>::reverse_iterator LayerStack::rbegin() {
 std::vector<Layer*>::reverse_iterator LayerStack::rend() {
 	return stack.rend();
 }
+
+};

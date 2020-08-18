@@ -10,7 +10,7 @@ class MouseScrollEvent;
 class KeyReleaseEvent;
 };
 
-namespace Application {
+namespace P3D::Application {
 
 struct ExtendedPart;
 struct Camera;

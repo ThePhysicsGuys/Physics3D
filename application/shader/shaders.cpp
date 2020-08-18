@@ -11,7 +11,7 @@
 
 #include <sstream>
 
-namespace Application {
+namespace P3D::Application {
 
 namespace Shaders {
 	

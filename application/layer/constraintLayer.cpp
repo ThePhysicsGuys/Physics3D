@@ -21,13 +21,7 @@
 #include "../physics/constraints/motorConstraint.h"
 #include "../physics/constraints/fixedConstraint.h"
 
-namespace Application {
-void ConstraintLayer::onAttach() {
-	
-}
-void ConstraintLayer::onDetach() {
-
-}
+namespace P3D::Application {
 
 void ConstraintLayer::onInit() {
 	Graphics::VisualShape prismShape(Library::createPrism(6, 0.5, 1.0));

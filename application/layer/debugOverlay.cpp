@@ -20,7 +20,7 @@
 
 #include "worlds.h"
 
-namespace Application {
+namespace P3D::Application {
 
 Graphics::BarChartClassInfo iterChartClasses[] {
 	{ "GJK Collide"   , Vec3f(0.2f, 0.2f, 1.0f) },

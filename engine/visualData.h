@@ -1,5 +1,7 @@
 #pragma once
 
+namespace P3D {
+
 struct VisualData {
 	int drawMeshId;
 	bool includeUVs;
@@ -7,3 +9,5 @@ struct VisualData {
 
 	void render(int renderMode) const;
 };
+
+}

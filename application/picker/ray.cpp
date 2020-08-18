@@ -3,7 +3,7 @@
 #include "ray.h"
 #include "view/screen.h"
 
-namespace Application {
+namespace P3D::Application {
 
 Vec2f getNormalizedDeviceSpacePosition(Vec2f viewportSpacePosition, Vec2f screenSize) {
 	float x = 2 * viewportSpacePosition.x / screenSize.x - 1;

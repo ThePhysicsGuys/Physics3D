@@ -19,7 +19,7 @@
 #define JUMP_SPEED 6
 #define AIR_RUN_SPEED_FACTOR 2
 
-namespace Application {
+namespace P3D::Application {
 
 PlayerWorld::PlayerWorld(double deltaT) : SynchronizedWorld<ExtendedPart>(deltaT) {
 	ecstree = new Engine::ECSTree();

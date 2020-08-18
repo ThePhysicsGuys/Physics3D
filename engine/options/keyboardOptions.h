@@ -3,6 +3,8 @@
 #include "../input/keyboard.h"
 #include "../util/properties.h"
 
+namespace P3D::Engine {
+
 namespace KeyboardOptions {
 	using Engine::Key;
 
@@ -65,3 +67,5 @@ namespace KeyboardOptions {
 	void load(const Util::Properties& properties);
 	void save(Util::Properties& properties);
 }
+
+};

@@ -5,7 +5,7 @@
 #include "../physics/math/position.h"
 #include "../physics/synchonizedWorld.h"
 
-namespace Application {
+namespace P3D::Application {
 
 class PlayerWorld : public SynchronizedWorld<ExtendedPart> {
 public:

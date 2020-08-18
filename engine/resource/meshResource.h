@@ -5,6 +5,8 @@
 #include "../graphics/mesh/indexedMesh.h"
 #include "../graphics/visualShape.h"
 
+namespace P3D::Engine {
+
 class MeshResource;
 
 class MeshAllocator : public ResourceAllocator<MeshResource> {
@@ -44,3 +46,4 @@ public:
 	}
 };
 
+};

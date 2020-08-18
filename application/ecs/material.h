@@ -3,11 +3,12 @@
 #include "../graphics/gui/color.h"
 #include "../graphics/texture.h"
 #include <array>
+
 namespace Graphics {
 class Texture;
 };
 
-namespace Application {
+namespace P3D::Application {
 
 struct Material {
 private:

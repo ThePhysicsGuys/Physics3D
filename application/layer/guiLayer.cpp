@@ -15,7 +15,7 @@
 #include "../graphics/debug/visualDebug.h"
 #include "../graphics/buffers/frameBuffer.h"
 
-namespace Application {
+namespace P3D::Application {
 
 bool onMouseMove(const Engine::MouseMoveEvent& event) {
 	using namespace Graphics;

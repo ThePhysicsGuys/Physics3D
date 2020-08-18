@@ -2,7 +2,7 @@
 
 #include "tree.h"
 
-namespace Engine {
+namespace P3D::Engine {
 
 void ECSTree::onAddComponentToEntity(Entity* entity, Component* component) {
 	if (component == nullptr || entity == nullptr)

@@ -32,7 +32,7 @@
 #include "../util/resource/resourceManager.h"
 #include "../layer/shadowLayer.h"
 
-namespace Application {
+namespace P3D::Application {
 
 // Light uniforms
 std::vector<Light*> lights;

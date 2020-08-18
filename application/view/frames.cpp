@@ -27,7 +27,7 @@
 #include "../util/resource/resource.h"
 #include "../util/resource/resourceManager.h"
 
-namespace Application {
+namespace P3D::Application {
 using namespace Graphics;
 
 float BigFrame::hdr = 1.0f;

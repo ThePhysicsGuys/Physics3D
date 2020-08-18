@@ -13,7 +13,7 @@ class Entity;
 
 struct ExtendedPart;
 
-namespace Application {
+namespace P3D::Application {
 
 class SelectionTool : public Engine::StateTool {
 	typedef Vec4i Region;

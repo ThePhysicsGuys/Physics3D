@@ -6,6 +6,8 @@ namespace Graphics {
 struct VisualShape;
 };
 
+namespace P3D {
+
 namespace Import {
 	int parseInt(const std::string& num);
 	long long parseLong(const std::string& num);
@@ -28,4 +30,6 @@ namespace OBJImport {
 	Graphics::VisualShape load(std::istream& file, bool binary = false);
 	Graphics::VisualShape load(const std::string& file, bool binary);
 	Graphics::VisualShape load(const std::string& file);
+};
+
 };

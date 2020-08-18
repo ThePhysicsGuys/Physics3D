@@ -3,7 +3,7 @@
 #include "node.h"
 #include "tree.h"
 
-namespace Engine {
+namespace P3D::Engine {
 
 Node::Node(const std::string& name) {
 	this->name = name;

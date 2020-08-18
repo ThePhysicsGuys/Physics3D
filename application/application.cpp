@@ -49,7 +49,7 @@
 #define TICKS_PER_SECOND 120.0
 #define TICK_SKIP_TIME std::chrono::milliseconds(1000)
 
-namespace Application {
+namespace P3D::Application {
 
 TickerThread physicsThread;
 PlayerWorld world(1 / TICKS_PER_SECOND);
@@ -226,7 +226,7 @@ void setupWorld(int argc, const char** args) {
 		}
 	}
 
-	//WorldBuilder::buildTerrain(150, 150);
+	WorldBuilder::buildTerrain(150, 150);
 
 
 	ExtendedPart* ropeA = new ExtendedPart(boxShape(2.0, 1.5, 0.7), GlobalCFrame(10.0, 2.0, -10.0), {1.0, 0.7, 0.3}, "RopeA");
@@ -547,6 +547,8 @@ void toggleFlying() {
 };
 
 int main(int argc, const char** args) {
+	using namespace P3D;
+
 	Application::init(argc, args);
 
 	Log::info("Started rendering");

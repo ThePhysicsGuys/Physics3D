@@ -4,6 +4,8 @@ namespace Graphics {
 struct VisualShape;
 };
 
+namespace P3D {
+
 namespace Export {
 	template<typename T>
 	void write(std::ostream& output, T const * buffer, int size);
@@ -22,4 +24,6 @@ namespace Export {
 
 namespace OBJExport {
 	void save(const std::string& file, const Graphics::VisualShape&, bool binary = false);
+};
+
 };

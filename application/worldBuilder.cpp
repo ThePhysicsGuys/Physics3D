@@ -14,7 +14,7 @@
 #include "../graphics/resource/textureResource.h"
 #include "../physics/math/constants.h"
 
-namespace Application {
+namespace P3D::Application {
 
 namespace WorldBuilder {
 

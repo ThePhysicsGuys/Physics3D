@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace Engine {
+namespace P3D::Engine {
 
 enum class EventType {
 	None = 0,

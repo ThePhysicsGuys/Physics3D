@@ -44,7 +44,7 @@
 
 struct GLFWwindow;
 
-namespace Application {
+namespace P3D::Application {
 
 bool initGLFW() {
 	// Set window hints

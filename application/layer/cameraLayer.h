@@ -3,11 +3,11 @@
 #include "../engine/layer/layer.h"
 #include <chrono>
 
-namespace Application {
+namespace P3D::Application {
 
 class Screen;
 
-class CameraLayer : public Layer {
+class CameraLayer : public Engine::Layer {
 private:
 	std::chrono::time_point<std::chrono::steady_clock> lastUpdate = std::chrono::steady_clock::now();
 

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Application {
+namespace P3D::Application {
 
 class Screen;
 struct Camera;

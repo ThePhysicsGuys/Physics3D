@@ -8,7 +8,7 @@
 #include "../physics/misc/shapeLibrary.h"
 #include "../physics/geometry/convexShapeBuilder.h"
 
-namespace Application {
+namespace P3D::Application {
 
 namespace WorldBuilder {
 void init();

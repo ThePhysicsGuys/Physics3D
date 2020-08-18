@@ -4,7 +4,7 @@
 #include "../engine/ecs/component.h"
 #include "../graphics/gui/color.h"
 
-namespace Application {
+namespace P3D::Application {
 
 struct Attenuation {
 	float constant;

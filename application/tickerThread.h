@@ -3,7 +3,7 @@
 #include <chrono>
 #include <thread>
 
-namespace Application {
+namespace P3D::Application {
 
 using namespace std::chrono;
 

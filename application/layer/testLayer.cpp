@@ -23,7 +23,7 @@
 #include "../graphics/shader/shaders.h"
 #include "../graphics/resource/textureResource.h"
 
-namespace Application {
+namespace P3D::Application {
 
 GLID texture = 0;
 int textureWidth = 512;

@@ -13,7 +13,7 @@
 #include <fstream>
 #include <sstream>
 
-namespace Application {
+namespace P3D::Application {
 
 FixedSharedObjectSerializerDeserializer<Graphics::Texture*> textureSerializer{nullptr};
 

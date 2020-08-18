@@ -6,7 +6,7 @@
 
 #include "../engine/meshRegistry.h"
 
-namespace Application {
+namespace P3D::Application {
 
 ExtendedPart::ExtendedPart(Part&& part, VisualData visualData, std::string name) :
 	Part(std::move(part)), visualData(visualData), name(name) {

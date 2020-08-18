@@ -4,7 +4,7 @@
 #include "entity.h"
 #include "node.h"
 
-namespace Engine {
+namespace P3D::Engine {
 	
 class ECSTree {
 	friend Entity;

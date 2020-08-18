@@ -17,7 +17,7 @@
 #include "picker/picker.h"
 #include "worlds.h"
 
-namespace Application {
+namespace P3D::Application {
 
 Camera::Camera(const Position& position, const Rotation& rotation) : cframe(GlobalCFrame(position, rotation)), velocity(0.35), angularVelocity(0.04), flying(true) {
 	onUpdate();
@@ -152,8 +152,8 @@ void Camera::move(Screen& screen, Vec3 delta, bool leftDragging, bool accelerati
 }
 
 bool Camera::onKeyRelease(Engine::KeyReleaseEvent& event) {
-
-	Engine::Key key = event.getKey();
+	using namespace Engine;
+	Key key = event.getKey();
 
 	if (key == KeyboardOptions::Move::forward ||
 		key == KeyboardOptions::Move::backward ||

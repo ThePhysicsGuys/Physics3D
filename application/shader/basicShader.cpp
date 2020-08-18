@@ -5,7 +5,7 @@
 #include "ecs/material.h"
 #include "extendedPart.h"
 
-namespace Application {
+namespace P3D::Application {
 
 void BasicShader::updatePart(const ExtendedPart& part) {
 	bind();

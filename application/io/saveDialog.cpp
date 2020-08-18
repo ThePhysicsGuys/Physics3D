@@ -8,7 +8,8 @@
 
 #include "serialization.h"
 
-namespace Application {
+namespace P3D::Application {
+
 static void saveWorld(const char* file, const PlayerWorld& world) {
 	Log::info("Saving world to: %s", file);
 	world.syncReadOnlyOperation([file, &world]() {

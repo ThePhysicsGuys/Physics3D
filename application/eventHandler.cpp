@@ -5,7 +5,7 @@
 #include "view/screen.h"
 #include "extendedPart.h"
 
-namespace Application {
+namespace P3D::Application {
 
 void* EventHandler::getPtr() const {
 	return pointer;

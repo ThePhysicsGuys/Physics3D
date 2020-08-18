@@ -2,7 +2,7 @@
 
 #include "ray.h"
 
-namespace Application {
+namespace P3D::Application {
 
 class Screen;
 

@@ -5,6 +5,8 @@
 #include "../graphics/gui/color.h"
 #include "../physics/math/linalg/vec.h"
 
+namespace P3D::Application {
+
 struct SkyboxCycle : public Util::ValueCycle<::Color3, Util::linear> {
 public:
 	inline SkyboxCycle() {}
@@ -22,8 +24,6 @@ public:
 		addKeyframe(1.0f, night);
 	}
 };
-
-namespace Application {
 
 class Screen;
 

@@ -3,7 +3,7 @@
 #include "component.h"
 #include <vector>
 
-namespace Engine {
+namespace P3D::Engine {
 
 class ECSTree;
 

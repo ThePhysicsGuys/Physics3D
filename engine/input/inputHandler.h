@@ -3,7 +3,7 @@
 #include "keyboard.h"
 #include <GLFW/glfw3.h>
 
-namespace Engine {
+namespace P3D::Engine {
 
 class Event;
 
@@ -32,6 +32,7 @@ public:
 	bool leftDragging = false;
 
 	Vec2 mousePosition;
+	Vec4 viewport;
 
 	InputHandler(GLFWwindow* window);
 

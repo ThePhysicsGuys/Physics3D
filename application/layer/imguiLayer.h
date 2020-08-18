@@ -2,11 +2,11 @@
 
 #include "../engine/layer/layer.h"
 
-namespace Application {
+namespace P3D::Application {
 
 class Screen;
 
-class ImGuiLayer : public Layer {
+class ImGuiLayer : public Engine::Layer {
 public:
 	bool sceneHovered = false;
 

@@ -21,7 +21,7 @@
 #include "../view/camera.h"
 #include <random>
 
-namespace Application {
+namespace P3D::Application {
 
 StandardInputHandler::StandardInputHandler(GLFWwindow* window, Screen& screen) : InputHandler(window), screen(screen) {}
 

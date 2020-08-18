@@ -4,7 +4,7 @@
 
 #include "modifiers.h"
 
-namespace Engine {
+namespace P3D::Engine {
 	
 int Modifiers::getModifiers() const {
 	return modifiers;

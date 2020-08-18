@@ -2,7 +2,7 @@
 
 #include "toolManager.h"
 
-namespace Engine {
+namespace P3D::Engine {
 
 void ToolManager::onInit() {
 

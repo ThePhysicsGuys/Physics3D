@@ -3,7 +3,7 @@
 #include "../engine/ecs/component.h"
 #include "transform.h"
 
-namespace Application {
+namespace P3D::Application {
 
 struct ExtendedPart;
 

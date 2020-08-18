@@ -2,7 +2,7 @@
 
 #include "../engine/layer/layer.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
 class ArrayMesh;
 class PointMesh;
 class VectorMesh;
@@ -10,9 +10,9 @@ class VectorMesh;
 
 class Screen;
 
-namespace Application {
+namespace P3D::Application {
 
-class DebugLayer : public Layer {
+class DebugLayer : public Engine::Layer {
 private:
 	Graphics::VectorMesh* vectorMesh = nullptr;
 	Graphics::PointMesh* pointMesh = nullptr;

@@ -9,6 +9,8 @@
 
 #include "../util/fileUtils.h"
 
+namespace P3D {
+
 /*
 	Export
 */
@@ -16,13 +18,13 @@
 template<typename T>
 void Export::write(std::ostream& output, T const* buffer, int size) {
 	for (int i = 0; i < size; i++) {
-		output.write((T*)(buffer + i * sizeof(T)), 1);
+		output.write((T*) (buffer + i * sizeof(T)), 1);
 	}
 }
 
 template<typename T>
 void Export::write(std::ostream& output, const T& value) {
-	char const * v = reinterpret_cast<char const *>(&value);
+	char const* v = reinterpret_cast<char const*>(&value);
 	write<char>(output, v, sizeof(T));
 }
 
@@ -187,3 +189,5 @@ void OBJExport::save(const std::string& filename, const Graphics::VisualShape& s
 /*
 	End of OBJExport
 */
+
+};

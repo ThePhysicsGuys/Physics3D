@@ -7,6 +7,9 @@
 #include "../util/stringUtil.h"
 #include "../physics/physical.h"
 #include "../graphics/visualShape.h"
+
+namespace P3D {
+
 /*
 	Import
 */
@@ -400,3 +403,5 @@ Graphics::VisualShape OBJImport::load(const std::string& file, bool binary) {
 /*
 	End of OBJImport
 */
+
+};

@@ -20,7 +20,7 @@
 
 #include <cmath>
 
-namespace Application {
+namespace P3D::Application {
 
 void SelectionTool::onRender() {
 	using namespace Graphics;

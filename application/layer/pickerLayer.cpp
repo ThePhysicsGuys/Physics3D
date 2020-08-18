@@ -10,7 +10,7 @@
 #include "../graphics/renderer.h"
 #include "../picker/selectionTool.h"
 
-namespace Application {
+namespace P3D::Application {
 
 Engine::ToolManager toolManager;
 

@@ -22,7 +22,7 @@
 #include "../util/resource/resourceManager.h"
 #include "../engine/resource/meshResource.h"
 
-namespace Application {
+namespace P3D::Application {
 
 Rotation transformations[] {
 	Rotation::Predefined::IDENTITY,

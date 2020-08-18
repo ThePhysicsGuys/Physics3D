@@ -25,7 +25,7 @@
 #include "../physics/geometry/shape.h"
 #include "../physics/misc/filters/rayIntersectsBoundsFilter.h"
 
-namespace Application {
+namespace P3D::Application {
 
 namespace Picker {
 

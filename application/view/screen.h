@@ -18,7 +18,7 @@ class HDRFrameBuffer;
 class IndexedMesh;
 };
 
-namespace Application {
+namespace P3D::Application {
 
 class StandardInputHandler;
 class PlayerWorld;

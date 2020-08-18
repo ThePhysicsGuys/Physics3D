@@ -20,7 +20,7 @@
 #include "application.h"
 #include "shader/shaders.h"
 
-namespace Application {
+namespace P3D::Application {
 
 float near = 0.001;
 float far = 100;

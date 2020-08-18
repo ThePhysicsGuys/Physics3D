@@ -6,7 +6,7 @@
 
 #include <GLFW/glfw3.h>
 
-namespace Engine {
+namespace P3D::Engine {
 
 std::string Key::getName() const {
 	return name;

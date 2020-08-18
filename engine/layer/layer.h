@@ -4,6 +4,8 @@
 
 #include <string>
 
+namespace P3D::Engine {
+
 class Layer {
 protected:
 	void* ptr = nullptr;
@@ -12,7 +14,7 @@ public:
 
 	enum LayerFlags : char {
 		// No flags, update, render and events are called
-		None =	   0 << 0,
+		None = 0 << 0,
 
 		// Whether the layer is disabled, no update, render or event calls
 		Disabled = 1 << 0,
@@ -42,4 +44,6 @@ public:
 	inline virtual void onUpdate() {}
 	inline virtual void onRender() {}
 	inline virtual void onClose() {}
+};
+
 };

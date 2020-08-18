@@ -7,7 +7,7 @@
 #include "../engine/event/mouseEvent.h"
 #include "../engine/event/windowEvent.h"
 
-namespace Application {
+namespace P3D::Application {
 
 class Screen;
 

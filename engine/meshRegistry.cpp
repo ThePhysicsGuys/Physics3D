@@ -15,7 +15,7 @@
 #include <cmath>
 #include <cstddef>
 
-namespace Engine::MeshRegistry {
+namespace P3D::Engine::MeshRegistry {
 
 std::vector<Graphics::IndexedMesh*> meshes;
 std::map<const ShapeClass*, VisualData> shapeClassMeshIds;

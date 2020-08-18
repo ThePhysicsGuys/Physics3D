@@ -2,6 +2,8 @@
 
 #include "layer.h"
 
+namespace P3D::Engine {
+
 class LayerStack {
 private:
 	std::vector<Layer*> stack;
@@ -24,4 +26,6 @@ public:
 
 	std::vector<Layer*>::reverse_iterator rbegin();
 	std::vector<Layer*>::reverse_iterator rend();
+};
+
 };

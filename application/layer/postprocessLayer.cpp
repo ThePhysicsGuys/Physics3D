@@ -10,7 +10,7 @@
 #include "../application/shader/shaders.h"
 #include "../view/screen.h"
 
-namespace Application {
+namespace P3D::Application {
 
 void PostprocessLayer::onInit() {
 

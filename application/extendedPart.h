@@ -5,7 +5,7 @@
 #include "../graphics/visualShape.h"
 #include "../physics/part.h"
 
-namespace Application {
+namespace P3D::Application {
 
 struct ExtendedPart : public Part {
 

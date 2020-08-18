@@ -1,7 +1,7 @@
 #include "core.h"
 #include "mesh.h"
 
-namespace Application {
+namespace P3D::Application {
 
 Mesh::Mesh(IndexedMesh* indexedMesh) {
 	setIndexedMesh(indexedMesh);
