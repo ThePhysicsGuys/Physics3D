@@ -16,7 +16,7 @@
 
 #include <sstream>
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 const char* const graphicsDebugLabels[] {
 		"Update",

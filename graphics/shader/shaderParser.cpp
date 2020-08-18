@@ -2,7 +2,7 @@
 
 #include "shaderParser.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 std::map<std::string, ShaderVariableType> variableTypeMap = {
 	{ "void", ShaderVariableType::VOID },

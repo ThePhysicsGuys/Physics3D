@@ -6,7 +6,7 @@ namespace P3D::Application {
 
 class Screen;
 
-class PostprocessLayer : public Layer {
+class PostprocessLayer : public Engine::Layer {
 public:
 	inline PostprocessLayer() : Layer() {};
 	inline PostprocessLayer(Screen* screen, char flags = NoUpdate | NoEvents) : Layer("Postprocess", screen, flags) {};

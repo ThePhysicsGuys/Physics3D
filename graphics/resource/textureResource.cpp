@@ -2,7 +2,7 @@
 
 #include "textureResource.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 TextureResource* TextureAllocator::load(const std::string& name, const std::string& path) {
 	Texture texture = Texture::load(path);

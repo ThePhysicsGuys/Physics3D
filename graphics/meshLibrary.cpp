@@ -10,7 +10,7 @@
 #include "../engine/io/import.h"
 #include "visualShape.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 namespace Library {
 IndexedMesh* cube = nullptr;

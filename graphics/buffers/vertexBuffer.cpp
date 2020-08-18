@@ -5,7 +5,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 VertexBuffer::VertexBuffer() {
 	id = 0;

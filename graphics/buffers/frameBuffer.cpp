@@ -9,7 +9,7 @@
 #include "renderBuffer.h"
 #include "texture.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 #pragma region FrameBuffer
 

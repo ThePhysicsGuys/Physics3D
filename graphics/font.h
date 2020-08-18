@@ -7,7 +7,7 @@
 
 #define CHARACTER_COUNT 128
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 struct Character {
 	union {

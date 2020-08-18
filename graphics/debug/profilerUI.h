@@ -12,7 +12,7 @@ struct BoundsTree;
 class Part;
 struct TreeNode;
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 class Font;
 

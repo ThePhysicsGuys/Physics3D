@@ -3,7 +3,7 @@
 #include "../bindable.h"
 #include "shaderParser.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 struct ShaderStage {
 	std::string source;

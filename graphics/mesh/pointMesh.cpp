@@ -6,7 +6,7 @@
 #include "buffers/vertexBuffer.h"
 #include "renderer.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 PointMesh::PointMesh(const float* vertices, const size_t vertexCount, size_t capacity) : AbstractMesh(Renderer::POINT), vertexCount(vertexCount), capacity(capacity) {
 	vertexBuffer = new VertexBuffer(nullptr, 10 * capacity * sizeof(float), Renderer::DYNAMIC_DRAW);

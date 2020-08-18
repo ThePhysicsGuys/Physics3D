@@ -11,7 +11,7 @@
 #include "camera.h"
 
 
-namespace Graphics {
+namespace P3D::Graphics {
 struct Quad;
 class FrameBuffer;
 class HDRFrameBuffer;
@@ -33,7 +33,7 @@ public:
 	Vec2i dimension;
 
 	Camera camera;
-	LayerStack layerStack;
+	Engine::LayerStack layerStack;
 	EventHandler eventHandler;
 	Util::Properties properties;
 	

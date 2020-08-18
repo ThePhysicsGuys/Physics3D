@@ -12,7 +12,7 @@
 
 #include <string>
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 #pragma region Character
 

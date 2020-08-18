@@ -4,7 +4,7 @@
 
 #define DEFAULT_SCISSOR Vec4f(0, 0, GUI::windowInfo.dimension.x, GUI::windowInfo.dimension.y);
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 namespace Path {
 

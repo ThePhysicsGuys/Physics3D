@@ -14,7 +14,7 @@
 #include "../physics/datastructures/boundsTree.h"
 #include "../physics/math/mathUtil.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 #pragma region PieChart
 

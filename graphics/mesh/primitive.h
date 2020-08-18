@@ -8,7 +8,7 @@
 #include "../physics/math/linalg/vec.h"
 #include "../physics/math/mathUtil.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 struct Primitive {
 	unsigned int vao;

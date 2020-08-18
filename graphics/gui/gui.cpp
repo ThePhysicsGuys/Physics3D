@@ -21,7 +21,7 @@
 #include "../resource/textureResource.h"
 #include "../resource/fontResource.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 namespace GUI {
 

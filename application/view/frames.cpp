@@ -39,7 +39,7 @@ bool BigFrame::doEvents;
 bool BigFrame::noRender;
 bool BigFrame::doUpdate;
 bool BigFrame::isDisabled;
-Layer* BigFrame::selectedLayer = nullptr;
+Engine::Layer* BigFrame::selectedLayer = nullptr;
 Resource* BigFrame::selectedResource = nullptr;
 
 TextureResource* folderIcon;
@@ -703,6 +703,8 @@ void BigFrame::renderEnvironmentFrame() {
 }
 
 void BigFrame::renderLayerFrame() {
+	using namespace Engine;
+
 	ImGui::Columns(2, 0, true);
 	ImGui::Separator();
 	for (Layer* layer : screen.layerStack) {

@@ -4,7 +4,7 @@
 
 #include "../shader/shader.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 template<typename Vertex, typename Command>
 class CommandBatch : public Batch<Vertex> {

@@ -3,7 +3,7 @@
 #include "../bindable.h"
 #include "../renderer.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 class IndexBuffer : public Bindable {
 public:

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 #define DEFAULT_UNIFORM_BUFFER_LAYOUT \
 	BufferLayout({ \

@@ -12,7 +12,7 @@
 
 #include "../physics/geometry/polyhedron.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 void renderQuad() {
 	static unsigned int VAO = 0;

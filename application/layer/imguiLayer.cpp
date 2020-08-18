@@ -66,7 +66,7 @@ void ImGuiLayer::onRender() {
 	ImVec2 max = ImGui::GetWindowContentRegionMax();
 	
 	
-	Log::debug("%f, %f,	     %f, %f,	     %f, %f", handler->mousePosition.x, handler->mousePosition.y, min.x, min.y, ImGui::GetIO().MousePos.x, ImGui::GetIO().MousePos.y);
+	//Log::debug("%f, %f,	     %f, %f,	     %f, %f", handler->mousePosition.x, handler->mousePosition.y, min.x, min.y, ImGui::GetIO().MousePos.x, ImGui::GetIO().MousePos.y);
 	ImVec2 size = ImVec2(max.x - min.x, max.y - min.y);
 	min = ImVec2(min.x + pos.x, min.y + pos.y);
 	max = ImVec2(max.x + pos.x, max.y + pos.y);

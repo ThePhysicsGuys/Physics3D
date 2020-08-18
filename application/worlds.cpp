@@ -45,6 +45,7 @@ void PlayerWorld::applyExternalForces() {
 
 	// Player movement
 	if (!screen.camera.flying) {
+		using namespace Engine;
 		ExtendedPart* player = screen.camera.attachment;
 
 		Vec3f playerX = screen.camera.cframe.rotation * Vec3(1, 0, 0);

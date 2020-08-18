@@ -2,7 +2,7 @@
 
 #include <istream>
 
-namespace Graphics {
+namespace P3D::Graphics {
 struct VisualShape;
 };
 

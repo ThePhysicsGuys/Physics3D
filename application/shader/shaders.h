@@ -7,7 +7,7 @@
 #include "../shader/basicShader.h"
 #include "../shader/shaderBase.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
 	class HDRTexture;
 	class Texture;
 	class CubeMap;

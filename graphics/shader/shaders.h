@@ -4,7 +4,7 @@
 #include "../graphics/resource/shaderResource.h"
 #include "../physics/math/linalg/mat.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
 class Texture;
 
 struct GuiShader : public ShaderResource {

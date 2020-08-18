@@ -4,7 +4,7 @@
 
 typedef unsigned int GLID;
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 class Bindable : public Tracker<Bindable> {
 protected:

@@ -7,7 +7,7 @@
 
 #include <stdexcept>
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 #ifdef _MSC_VER
 #define ASSERT(x) if (!(x)) __debugbreak();

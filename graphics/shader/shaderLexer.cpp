@@ -3,7 +3,7 @@
 #include "shaderLexer.h"
 #include "../util/stringUtil.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 std::vector<TokenType> ShaderLexer::types = {
 	TokenType(TokenType::NONE, std::regex("(.*?)")),

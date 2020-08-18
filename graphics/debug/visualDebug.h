@@ -4,7 +4,7 @@
 #include "guiDebug.h"
 #include "../physics/datastructures/buffers.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 class PointMesh;
 class VectorMesh;

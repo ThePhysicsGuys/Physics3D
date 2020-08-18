@@ -3,7 +3,7 @@
 #include "../batch/batch.h"
 #include "../gui/gui.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 namespace Path3D {
 

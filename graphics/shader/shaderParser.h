@@ -3,7 +3,7 @@
 #include <stack>
 #include "shaderLexer.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 enum class ShaderVariableType {
 	NONE,

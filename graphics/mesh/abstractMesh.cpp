@@ -5,7 +5,7 @@
 #include "buffers/vertexArray.h"
 #include "renderer.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 AbstractMesh::AbstractMesh(GLFLAG renderMode) : renderMode(renderMode) {
 	vao = new VertexArray();

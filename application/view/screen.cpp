@@ -140,7 +140,7 @@ void Screen::onInit() {
 	properties = Util::PropertiesParser::read("../res/.properties");
 
 	// load options from properties
-	KeyboardOptions::load(properties);
+	Engine::KeyboardOptions::load(properties);
 
 	// Library init
 	Graphics::Library::onInit();
@@ -163,7 +163,7 @@ void Screen::onInit() {
 	cameraLayer = CameraLayer(this);
 	skyboxLayer = SkyboxLayer(this);
 	modelLayer = ModelLayer(this);
-	constraintLayer = ConstraintLayer(this, Layer::NoUpdate | Layer::NoEvents);
+	constraintLayer = ConstraintLayer(this, Engine::Layer::NoUpdate | Engine::Layer::NoEvents);
 	shadowLayer = ShadowLayer(this);
 	debugLayer = DebugLayer(this);
 	pickerLayer = PickerLayer(this);
@@ -257,7 +257,7 @@ void Screen::onClose() {
 
 	Shaders::onClose();
 
-	KeyboardOptions::save(properties);
+	Engine::KeyboardOptions::save(properties);
 
 	Util::PropertiesParser::write("../res/.properties", properties);
 

@@ -5,7 +5,7 @@
 #include <fstream>
 #include <istream>
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 ShaderResource* ShaderAllocator::load(const std::string& name, const std::string& path) {
 	std::ifstream ifstream(path);

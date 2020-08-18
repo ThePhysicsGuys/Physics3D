@@ -2,7 +2,7 @@
 
 #include "fontResource.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 FontResource* FontAllocator::load(const std::string& name, const std::string& path) {
 	Font font(path);

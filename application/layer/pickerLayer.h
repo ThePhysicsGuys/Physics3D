@@ -6,7 +6,7 @@ namespace P3D::Application {
 
 class Screen;
 
-class PickerLayer : public Layer {
+class PickerLayer : public Engine::Layer {
 public:
 	inline PickerLayer() : Layer() {};
 	inline PickerLayer(Screen* screen, char flags = None) : Layer("Picker", screen, flags) {};

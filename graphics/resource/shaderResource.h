@@ -4,7 +4,7 @@
 #include "../util/resource/resource.h"
 #include "../shader/gshader.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 class ShaderResource;
 

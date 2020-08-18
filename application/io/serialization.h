@@ -7,7 +7,8 @@
 #include "../extendedPart.h"
 
 namespace P3D::Application {
-namespace P3D::WorldImportExport {
+
+namespace WorldImportExport {
 
 void registerTexture(Graphics::Texture* texture);
 
@@ -20,4 +21,5 @@ void loadLoosePartsIntoWorld(const char* fileName, World<ExtendedPart>& world);
 void loadNativePartsIntoWorld(const char* fileName, World<ExtendedPart>& world);
 
 };
+
 };

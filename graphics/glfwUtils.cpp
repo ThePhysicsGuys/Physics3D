@@ -9,7 +9,7 @@
 
 #include <stdexcept>
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 namespace GLFW {
 

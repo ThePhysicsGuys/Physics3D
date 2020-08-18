@@ -4,7 +4,7 @@
 
 #include "../font.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 class FontResource;
 

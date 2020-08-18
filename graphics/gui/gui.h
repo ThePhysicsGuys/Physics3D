@@ -4,7 +4,7 @@
 #include "../batch/batchConfig.h"
 #include "color.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
 struct Quad;
 class Component;
 class IndexedMesh;

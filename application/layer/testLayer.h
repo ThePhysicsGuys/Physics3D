@@ -7,7 +7,7 @@ namespace P3D::Application {
 
 class Screen;
 
-class TestLayer : public Layer {
+class TestLayer : public Engine::Layer {
 private:
 	Graphics::CShader shader;
 

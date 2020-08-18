@@ -4,7 +4,7 @@
 
 #include "container.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 Vec2 FlowLayout::resize(Container* container, Vec2 minDimension) {
 	// Resulting width of the container

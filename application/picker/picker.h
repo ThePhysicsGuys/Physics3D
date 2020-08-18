@@ -2,7 +2,7 @@
 
 #include "editTools.h"
 
-namespace Engine {
+namespace P3D::Engine {
 class Event;
 class MousePressEvent;
 class MouseReleaseEvent;

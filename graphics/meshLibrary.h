@@ -1,7 +1,7 @@
 #pragma once
 
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 class IndexedMesh;
 

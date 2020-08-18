@@ -4,7 +4,7 @@
 
 typedef unsigned int GLFLAG;
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 namespace Renderer {
 

@@ -3,7 +3,7 @@
 #include "bindable.h"
 #include "gui/color.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 class Texture : public Bindable {
 private:

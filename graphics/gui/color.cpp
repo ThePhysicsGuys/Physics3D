@@ -2,7 +2,7 @@
 
 #include "color.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 namespace COLOR {
 

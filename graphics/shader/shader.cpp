@@ -12,7 +12,7 @@
 
 #include "../util/stringUtil.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 #pragma region uniforms
 

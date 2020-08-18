@@ -8,7 +8,7 @@
 
 #include <sstream>
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 namespace Shaders {
 GuiShader guiShader;

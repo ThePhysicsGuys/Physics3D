@@ -7,7 +7,7 @@
 
 #include "renderer.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 ArrayMesh::ArrayMesh(Vec3f* positions, const unsigned int vertexCount) : ArrayMesh(reinterpret_cast<float const*>(positions), vertexCount * 3, 3) {
 

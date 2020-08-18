@@ -5,7 +5,7 @@
 #include "renderer.h"
 #include <stack>
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 namespace Renderer {
 

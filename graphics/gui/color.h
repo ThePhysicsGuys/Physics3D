@@ -3,7 +3,7 @@
 typedef Vec4f Color;
 typedef Vec3f Color3;
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 // Colors
 namespace COLOR {

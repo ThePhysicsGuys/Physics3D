@@ -7,7 +7,7 @@
 
 #include "renderer.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 RenderBuffer::RenderBuffer(unsigned int width, unsigned int height) : width(width), height(height) {
 	glGenRenderbuffers(1, &id);

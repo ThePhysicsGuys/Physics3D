@@ -2,7 +2,7 @@
 
 #include "../bindable.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 class Texture;
 class RenderBuffer;

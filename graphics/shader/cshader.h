@@ -2,7 +2,7 @@
 
 #include "shader.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 class CShader : public Shader {
 private:

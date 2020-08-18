@@ -6,7 +6,7 @@ namespace P3D::Application {
 
 class Screen;
 
-class ShadowLayer : public Layer {
+class ShadowLayer : public Engine::Layer {
 public:
 	static unsigned int depthMap;
 	static Mat4f lightProjection;

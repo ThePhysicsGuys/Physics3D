@@ -4,7 +4,7 @@
 #include "../buffers/bufferLayout.h"
 #include "../mesh/indexedMesh.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 struct UniformLayout {
 	Mat4f transform;

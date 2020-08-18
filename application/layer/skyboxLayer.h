@@ -27,7 +27,7 @@ public:
 
 class Screen;
 
-class SkyboxLayer : public Layer {
+class SkyboxLayer : public Engine::Layer {
 public:
 	inline SkyboxLayer() : Layer() {};
 	inline SkyboxLayer(Screen* screen, char flags = NoEvents) : Layer("Skybox", screen, flags) {};

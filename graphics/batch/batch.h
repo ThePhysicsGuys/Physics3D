@@ -8,7 +8,7 @@
 
 #include "../renderer.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 template<typename Vertex>
 class Batch {

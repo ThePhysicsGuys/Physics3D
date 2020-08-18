@@ -4,14 +4,14 @@
 #include "../engine/layer/layer.h"
 #include "../engine/layer/layerStack.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
 class ShaderResource;
 struct ShaderStage;
 class Texture;
 class Font;
 }
 
-namespace Engine {
+namespace P3D::Engine {
 class Node;
 }
 
@@ -38,7 +38,7 @@ public:
 	static bool noRender;
 	static bool doUpdate;
 	static bool isDisabled;
-	static Layer* selectedLayer;
+	static Engine::Layer* selectedLayer;
 
 	// ResourceFrame
 	static Resource* selectedResource;

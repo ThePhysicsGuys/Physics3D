@@ -3,7 +3,7 @@
 #include "../util/stringUtil.h"
 #include <regex>
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 struct TokenType {
 

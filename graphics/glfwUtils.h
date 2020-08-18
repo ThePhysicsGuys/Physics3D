@@ -3,7 +3,7 @@
 struct GLFWwindow;
 struct GLFWimage;
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 namespace GLFW {
 

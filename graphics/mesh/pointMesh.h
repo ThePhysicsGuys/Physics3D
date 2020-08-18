@@ -2,7 +2,7 @@
 
 #include "abstractMesh.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 class VertexBuffer;
 

@@ -5,7 +5,7 @@
 #include "../mesh/indexedMesh.h"
 #include "../buffers/bufferLayout.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 template<typename UniformLayout>
 class InstanceBatch {

@@ -7,7 +7,7 @@
 
 class Polyhedron;
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 struct VisualShape : public TriangleMesh {
 	typedef SharedArrayPtr<const Vec3f> SVec3f;

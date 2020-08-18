@@ -9,7 +9,7 @@
 #include "renderer.h"
 #include "../physics/geometry/shape.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 IndexedMesh::IndexedMesh(const VisualShape& shape) : AbstractMesh(), vertexCount(shape.vertexCount), triangleCount(shape.triangleCount) {
 	float* vertices = new float[shape.vertexCount * 3];

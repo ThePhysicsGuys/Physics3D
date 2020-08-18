@@ -6,7 +6,7 @@
 #include "../buffers/bufferLayout.h"
 #include "../shader/shaders.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 struct GuiCommand {
 	// Amount of indices to render

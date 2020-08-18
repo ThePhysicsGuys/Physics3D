@@ -3,7 +3,7 @@
 #include "orderedVector.h"
 #include "component.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 class Container : public Component {
 public:

@@ -6,7 +6,7 @@
 
 #define DEFAULT_PATTERN_3D(color) [color] (int i, const Vec3f& p) { return color; }
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 namespace Path3D {
 

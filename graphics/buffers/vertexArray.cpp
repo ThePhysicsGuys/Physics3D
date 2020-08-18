@@ -8,7 +8,7 @@
 #include "vertexBuffer.h"
 #include "bufferLayout.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 VertexArray::VertexArray() : attributeArrayOffset(0) {
 	glGenVertexArrays(1, &id);

@@ -2,7 +2,7 @@
 
 #include "../buffers/bufferLayout.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 struct BatchConfig {
 	// Layout of the vertex buffer

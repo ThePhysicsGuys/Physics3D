@@ -5,7 +5,7 @@
 #include "layout.h"
 #include "gui.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 class Component {
 public:

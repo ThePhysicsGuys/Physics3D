@@ -3,7 +3,7 @@
 #include "../physics/math/rotation.h"
 #include "../physics/math/globalCFrame.h"
 
-namespace Engine {
+namespace P3D::Engine {
 class Event;
 class MouseDragEvent;
 class MouseScrollEvent;

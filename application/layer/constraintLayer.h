@@ -13,8 +13,6 @@ public:
 	inline ConstraintLayer() {};
 	inline ConstraintLayer(Screen* screen, char flags = None) : Layer("Constraint layer", screen, flags) {}
 
-	virtual void onAttach() override;
-	virtual void onDetach() override;
 	virtual void onInit() override;
 	virtual void onUpdate() override;
 	virtual void onRender() override;

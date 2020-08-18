@@ -13,7 +13,7 @@
 #include "../util/stringUtil.h"
 #include "../util/fileUtils.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 #pragma region compile
 

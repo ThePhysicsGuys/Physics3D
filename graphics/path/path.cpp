@@ -8,7 +8,7 @@
 
 #define DEFAULT_PATTERN_2D(color) [color] (int i, const Vec2f& p) { return color; }
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 namespace Path {
 

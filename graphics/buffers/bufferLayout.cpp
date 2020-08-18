@@ -4,7 +4,7 @@
 
 #include <GL/glew.h>
 
-namespace Graphics {
+namespace P3D::Graphics {
 
 namespace BufferDataType {
 

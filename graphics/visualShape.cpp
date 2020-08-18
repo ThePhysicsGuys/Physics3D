@@ -2,13 +2,15 @@
 
 #include "../physics/geometry/polyhedron.h"
 
-namespace Graphics {
+namespace P3D::Graphics {
+
 VisualShape VisualShape::generateSmoothNormalsShape(const Polyhedron& underlyingPoly) {
 	Vec3f* normalBuffer = new Vec3f[underlyingPoly.vertexCount];
 	underlyingPoly.computeNormals(normalBuffer);
 
 	return VisualShape(underlyingPoly, SharedArrayPtr<const Vec3f>(normalBuffer));
 }
+
 VisualShape VisualShape::generateSplitNormalsShape(const TriangleMesh& underlyingMesh) {
 	Vec3f* newVertices = new Vec3f[underlyingMesh.triangleCount * 3];
 	Vec3f* newNormals = new Vec3f[underlyingMesh.triangleCount * 3];
@@ -37,4 +39,5 @@ VisualShape VisualShape::generateSplitNormalsShape(const TriangleMesh& underlyin
 
 	return VisualShape(TriangleMesh(underlyingMesh.triangleCount * 3, underlyingMesh.triangleCount, newVertices, newTriangles), SharedArrayPtr<const Vec3f>(newNormals));
 }
+
 }
