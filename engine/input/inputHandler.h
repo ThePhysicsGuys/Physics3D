@@ -8,6 +8,9 @@ namespace P3D::Engine {
 class Event;
 
 class InputHandler {
+private:
+	void setCallBacks(GLFWwindow* window);
+
 protected:
 	GLFWwindow* window;
 

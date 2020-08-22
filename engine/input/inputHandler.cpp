@@ -45,8 +45,8 @@ void InputHandler::keyCallback(int code, int action, int mods) {
 void InputHandler::cursorCallback(double x, double y) {
 	int oldX = static_cast<int>(this->mousePosition.x);
 	int oldY = static_cast<int>(this->mousePosition.y);
-	int newX = static_cast<int>(x);
-	int newY = static_cast<int>(y);
+	int newX = static_cast<int>(x - viewport.x);
+	int newY = static_cast<int>(y - viewport.y);
 
 	MouseMoveEvent event(oldX, oldY, newX, newY);
 	onEvent(event);
@@ -66,7 +66,7 @@ void InputHandler::cursorCallback(double x, double y) {
 		onEvent(event);
 	}
 
-	this->mousePosition = Vec2(x, y);
+	this->mousePosition = Vec2(newX, newY);
 }
 
 void InputHandler::cursorEnterCallback(int entered) {
@@ -134,7 +134,7 @@ void InputHandler::framebufferSizeCallback(int width, int height) {
 Vec2 InputHandler::getMousePosition() const {
 	double x, y;
 	glfwGetCursorPos(window, &x, &y);
-	return Vec2(x, y);
+	return Vec2(x - viewport.x, y - viewport.y);
 }
 
 bool InputHandler::getKey(const Key& key) const {
@@ -151,10 +151,7 @@ void InputHandler::setKey(const Key& key, bool pressed) {
 	keys[key.getCode()] = pressed;
 }
 
-InputHandler::InputHandler(GLFWwindow* window) : window(window) {
-	for (bool& k : this->keys)
-		k = false;
-
+void InputHandler::setCallBacks(GLFWwindow* window) {
 	glfwSetWindowUserPointer(window, this);
 
 	glfwSetKeyCallback(window, [] (GLFWwindow* window, int key, int scancode, int action, int mods) {
@@ -190,6 +187,13 @@ InputHandler::InputHandler(GLFWwindow* window) : window(window) {
 		for (int i = 0; i < count; i++)
 			inputHandler->windowDropCallback(paths[i]);
 	});
+}
+
+InputHandler::InputHandler(GLFWwindow* window) : window(window) {
+	for (bool& k : this->keys)
+		k = false;
+
+	setCallBacks(window);
 }
 
 };

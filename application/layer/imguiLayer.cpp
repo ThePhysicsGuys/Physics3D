@@ -28,7 +28,7 @@ void ImGuiLayer::onInit() {
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
 	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
-	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
+	//io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
 	//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoTaskBarIcons;
 	//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
 
@@ -43,11 +43,12 @@ void ImGuiLayer::onInit() {
 	GLFWwindow* window = Graphics::GLFW::getCurrentContext();
 
 	// Setup Platform/Renderer bindings
-	ImGui_ImplGlfw_InitForOpenGL(Graphics::GLFW::getCurrentContext(), true);
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 410");
 }
 
 void ImGuiLayer::onUpdate() {
+
 }
 
 void ImGuiLayer::onEvent(Engine::Event& event) {
@@ -71,7 +72,7 @@ void ImGuiLayer::onRender() {
 	min = ImVec2(min.x + pos.x, min.y + pos.y);
 	max = ImVec2(max.x + pos.x, max.y + pos.y);
 	ImGui::GetForegroundDrawList()->AddRect(min, max, IM_COL32(255, 255, 0, 255));
-	//handler->viewport = Vec4(min.x, )
+	handler->viewport = Vec4(min.x, min.y, size.x, size.y);
 
 	Graphics::Texture* texture = screen->screenFrameBuffer->texture;
 	ImGui::Image((void*) texture->getID(), size, ImVec2(0, 1), ImVec2(1, 0));

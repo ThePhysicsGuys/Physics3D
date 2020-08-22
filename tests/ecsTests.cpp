@@ -5,7 +5,7 @@
 #include "../util/log.h"
 
 TEST_CASE(idGeneration) {
-	using namespace Engine;
+	using namespace P3D::Engine;
 	Registry8 registry;
 	auto id1 = registry.create();
 	auto id2 = registry.create();
@@ -16,7 +16,7 @@ TEST_CASE(idGeneration) {
 }
 
 TEST_CASE(componentGeneration) {
-	using namespace Engine;
+	using namespace P3D::Engine;
 	Registry8 registry;
 	auto id = registry.create();
 
@@ -32,7 +32,7 @@ TEST_CASE(componentGeneration) {
 }
 
 TEST_CASE(componentAccess) {
-	using namespace Engine;
+	using namespace P3D::Engine;
 	Registry8 registry;
 	auto id = registry.create();
 
@@ -54,7 +54,7 @@ TEST_CASE(viewTest) {
 	struct B {};
 	struct C {};
 
-	using namespace Engine;
+	using namespace P3D::Engine;
 	Registry8 registry;
 	auto id1 = registry.create();
 	auto id2 = registry.create();
@@ -86,7 +86,7 @@ TEST_CASE(viewTest) {
 }
 
 TEST_CASE(entityParent) {
-	using namespace Engine;
+	using namespace P3D::Engine;
 	Registry8 registry;
 	auto id1 = registry.create();
 	auto parent = registry.create();
@@ -99,7 +99,7 @@ TEST_CASE(entityParent) {
 }
 
 TEST_CASE(getChildren) {
-	using namespace Engine;
+	using namespace P3D::Engine;
 	Registry8 registry;
 	auto id1 = registry.create();
 	auto id2 = registry.create();
