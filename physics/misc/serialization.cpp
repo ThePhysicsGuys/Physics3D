@@ -310,7 +310,7 @@ void SerializationSessionPrototype::serializeWorld(const WorldPrototype& world, 
 	for(const MotorizedPhysical* p : world.physicals) {
 		collectMotorizedPhysicalInformation(*p);
 	}
-	for(const Part& p : world.iterParts(TERRAIN_PARTS)) {
+	for(const Part& p : world.terrainTree) {
 		collectPartInformation(p);
 	}
 
@@ -322,7 +322,7 @@ void SerializationSessionPrototype::serializeWorld(const WorldPrototype& world, 
 	::serialize<uint64_t>(physicalCount, ostream);
 
 	size_t partCount = 0;
-	for(const Part& p : world.iterParts(TERRAIN_PARTS)) {
+	for(const Part& p : world.terrainTree) {
 		partCount++;
 	}
 
@@ -332,7 +332,7 @@ void SerializationSessionPrototype::serializeWorld(const WorldPrototype& world, 
 		serializeMotorizedPhysicalInContext(*p, ostream);
 	}
 
-	for(const Part& p : world.iterParts(TERRAIN_PARTS)) {
+	for(const Part& p : world.terrainTree) {
 		::serialize<GlobalCFrame>(p.getCFrame(), ostream);
 		virtualSerializePart(p, ostream);
 	}

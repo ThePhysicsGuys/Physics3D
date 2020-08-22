@@ -11,6 +11,7 @@
 #include "../physics/math/mathUtil.h"
 #include "../physics/math/bounds.h"
 #include "../physics/physical.h"
+#include "../physics/layer.h"
 #include "../physics/geometry/polyhedron.h"
 
 #include "view/screen.h"
@@ -191,21 +192,12 @@ void DebugLayer::onRender() {
 			}
 		}
 
-		switch (colTreeRenderMode) {
-			case ColTreeRenderMode::FREE:
-				recursiveRenderColTree(screen->world->objectTree.rootNode, 0);
-				break;
-			case ColTreeRenderMode::TERRAIN:
-				recursiveRenderColTree(screen->world->terrainTree.rootNode, 0);
-				break;
-			case ColTreeRenderMode::ALL:
-				recursiveRenderColTree(screen->world->objectTree.rootNode, 0);
-				recursiveRenderColTree(screen->world->terrainTree.rootNode, 0);
-				break;
-			case ColTreeRenderMode::SELECTED:
-				if (screen->selectedPart != nullptr)
-					recursiveColTreeForOneObject(screen->world->objectTree.rootNode, screen->selectedPart, screen->selectedPart->getBounds(), 0);
-				break;
+		std::cout << "colTreeRenderMode: " << colTreeRenderMode;
+		if(colTreeRenderMode == -2) {
+			if(screen->selectedPart != nullptr)
+				recursiveColTreeForOneObject(screen->selectedPart->layer->tree.rootNode, screen->selectedPart, screen->selectedPart->getBounds(), 0);
+		} else if(colTreeRenderMode >= 0) {
+			recursiveRenderColTree(screen->world->getTree(colTreeRenderMode).rootNode, 0);
 		}
 	});
 

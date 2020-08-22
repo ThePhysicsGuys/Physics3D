@@ -8,11 +8,8 @@
 #include "datastructures/iterators.h"
 #include "datastructures/iteratorEnd.h"
 #include "datastructures/boundsTree.h"
+#include "layer.h"
 #include "math/linalg/largeMatrix.h"
-
-#define FREE_PARTS 0x1
-#define TERRAIN_PARTS 0x2
-#define ALL_PARTS FREE_PARTS | TERRAIN_PARTS
 
 struct Colission {
 	Part* p1;
@@ -24,14 +21,114 @@ struct Colission {
 class ExternalForce;
 class WorldLayer;
 
-template<typename Filter>
-using DoubleFilterIter = FilteredIterator<IteratorGroup<TreeIterFactory<Part, Filter>, 2>, IteratorEnd, Filter>;
+template<typename Type, bool IsConst>
+struct const_if_tmp {
+	using type = Type;
+};
+
+template<typename Type>
+struct const_if_tmp<Type, true> {
+	using type = const Type;
+};
+
+template<typename Type, bool IsConst>
+using const_if = typename const_if_tmp<Type, IsConst>::type;
+
+template<bool IsConst>
+class WorldIteratorTemplate {
+protected:
+	const_if<WorldLayer, IsConst>* curLayer;
+	const_if<WorldLayer, IsConst>* finalLayer;
+	decltype(curLayer->tree.begin()) curIter;
+
+	inline void checkMoveToNextLayer() {
+		while(!(curIter != IteratorEnd())) {
+			++curLayer;
+			if(curLayer == finalLayer) return;
+			curIter = curLayer->tree.begin();
+		}
+	}
+
+public:
+	WorldIteratorTemplate() = default;
+
+	WorldIteratorTemplate(const_if<WorldLayer, IsConst>* firstLayer, const_if<WorldLayer, IsConst>* finalLayer) :
+		curLayer(firstLayer), 
+		finalLayer(finalLayer), 
+		curIter(firstLayer->tree.begin()) {
+
+		assert(firstLayer != finalLayer);
+
+		checkMoveToNextLayer();
+	}
+
+	WorldIteratorTemplate& operator++() {
+		++curIter;
+		checkMoveToNextLayer();
+		return *this;
+	}
+
+	bool operator!=(IteratorEnd) const {
+		return this->curIter != IteratorEnd() || this->curLayer != finalLayer;
+	}
+
+	const_if<Part, IsConst>& operator*() const {
+		return *curIter;
+	}
+};
+
+template<bool IsConst, typename Filter>
+class FilteredWorldIteratorTemplate {
+protected:
+	const_if<WorldLayer, IsConst>* curLayer;
+	const_if<WorldLayer, IsConst>* finalLayer;
+	Filter filter;
+	decltype(curLayer->tree.iterFiltered(filter).begin()) curIter;
+
+	inline void checkMoveToNextLayer() {
+		while(!(curIter != IteratorEnd())) {
+			++curLayer;
+			if(curLayer == finalLayer) return;
+			curIter = curLayer->tree.iterFiltered(this->filter).begin();
+		}
+	}
+
+public:
+	FilteredWorldIteratorTemplate() = default;
+
+	FilteredWorldIteratorTemplate(const_if<WorldLayer, IsConst>* firstLayer, const_if<WorldLayer, IsConst>* finalLayer, const Filter& filter) :
+		curLayer(firstLayer), 
+		finalLayer(finalLayer), 
+		filter(filter),
+		curIter(firstLayer->tree.iterFiltered(this->filter).begin()) {
+
+		assert(firstLayer != finalLayer);
+
+		checkMoveToNextLayer();
+	}
+
+	FilteredWorldIteratorTemplate& operator++() {
+		++curIter;
+		checkMoveToNextLayer();
+		return *this;
+	}
+
+	bool operator!=(IteratorEnd) const {
+		return this->curIter != IteratorEnd() || this->curLayer != finalLayer;
+	}
+
+	const_if<Part, IsConst>& operator*() const {
+		return *curIter;
+	}
+};
+
+typedef WorldIteratorTemplate<false> WorldIterator;
+typedef WorldIteratorTemplate<true> ConstWorldIterator;
 
 template<typename Filter>
-using ConstDoubleFilterIter = FilteredIterator<IteratorGroup<TreeIterFactory<const Part, Filter>, 2>, IteratorEnd, Filter>;
-
-using WorldPartIter = IteratorGroup<IteratorFactoryWithEnd<BoundsTreeIter<TreeIterator, Part>>, 2>;
-using ConstWorldPartIter = IteratorGroup<IteratorFactoryWithEnd<BoundsTreeIter<ConstTreeIterator, const Part>>, 2>;
+using FilteredWorldIterator = FilteredWorldIteratorTemplate<false, Filter>;
+template<typename Filter>
+using FilteredConstWorldIterator = FilteredWorldIteratorTemplate<true, Filter>;
 
 class WorldPrototype {
 private:
@@ -83,12 +180,6 @@ private:
 private: // actually private fields and methods, not to be used by any friends
 	void mergePhysicalGroups(const MotorizedPhysical* first, MotorizedPhysical* second);
 
-	std::vector<WorldLayer> layers;
-	/*
-		Signifies which layers collide
-	*/
-	LargeSymmetricMatrix<bool> colissionMatrix;
-
 protected:
 	// World tick steps
 	virtual void applyExternalForces();
@@ -107,9 +198,16 @@ public:
 	std::vector<MotorizedPhysical*> physicals;
 	std::vector<ConstraintGroup> constraints;
 
+	std::vector<WorldLayer> layers;
+	std::vector<WorldLayer*> layersToRefresh;
+	/*
+		Signifies which layers collide
+	*/
+	LargeSymmetricMatrix<bool> colissionMatrix;
+
 	BoundsTree<Part>& objectTree;
 	BoundsTree<Part>& terrainTree;
-
+	
 	size_t age = 0;
 	size_t objectCount = 0;
 	double deltaT;
@@ -129,15 +227,20 @@ public:
 	void addPart(Part* part, int layerIndex = 0);
 	void removePart(Part* part);
 
-	void addTerrainPart(Part* part, int layerIndex = 0);
+	void addTerrainPart(Part* part, int layerIndex = 1);
 	void optimizeTerrain();
 
 	// removes everything from this world, parts, physicals, forces, constraints
 	void clear();
 
-	inline size_t getPartCount(int partsMask = ALL_PARTS) const {
+	inline size_t getPartCount() const {
 		return objectCount;
 	}
+
+	size_t getLayerCount() const;
+
+	BoundsTree<Part>& getTree(int index);
+	const BoundsTree<Part>& getTree(int index) const;
 
 	virtual double getTotalKineticEnergy() const;
 	virtual double getTotalPotentialEnergy() const;
@@ -154,44 +257,25 @@ public:
 	IteratorFactory<std::vector<MotorizedPhysical*>::const_iterator> iterPhysicals() const { return IteratorFactory<std::vector<MotorizedPhysical*>::const_iterator>(physicals.begin(), physicals.end()); }
 
 	template<typename Filter>
-	IteratorFactoryWithEnd<DoubleFilterIter<Filter>> iterPartsFiltered(const Filter& filter, int partsMask = ALL_PARTS) {
-		size_t size = 0;
-		TreeIterFactory<Part, Filter> iters[2];
-		if (partsMask & FREE_PARTS) {
-			iters[size++] = objectTree.iterFiltered(filter);
-		}
-		if (partsMask & TERRAIN_PARTS) {
-			iters[size++] = terrainTree.iterFiltered(filter);
-		}
-
-		IteratorGroup<TreeIterFactory<Part, Filter>, 2> group(iters, size);
-
-		DoubleFilterIter<Filter> doubleFilter(group, IteratorEnd(), filter);
-		
-		return IteratorFactoryWithEnd<DoubleFilterIter<Filter>>(std::move(doubleFilter));
+	IteratorFactoryWithEnd<FilteredWorldIterator<Filter>> iterPartsFiltered(const Filter& filter) {
+		WorldLayer* fst = &layers[0];
+		return IteratorFactoryWithEnd<FilteredWorldIterator<Filter>>(FilteredWorldIterator<Filter>(fst, fst + layers.size(), filter));
 	}
 
 	template<typename Filter>
-	IteratorFactoryWithEnd<ConstDoubleFilterIter<Filter>> iterPartsFiltered(const Filter& filter, int partsMask = ALL_PARTS) const {
-
-		size_t size = 0;
-		TreeIterFactory<Part, Filter> iters[2];
-		if (partsMask & FREE_PARTS) {
-			iters[size++] = objectTree.iterFiltered(filter);
-		}
-		if (partsMask & TERRAIN_PARTS) {
-			iters[size++] = terrainTree.iterFiltered(filter);
-		}
-
-		IteratorGroup<TreeIterFactory<Part, Filter>, 2> group(iters, size);
-
-		ConstDoubleFilterIter<Filter> doubleFilter(group, IteratorEnd(), filter);
-
-		return IteratorFactoryWithEnd<ConstDoubleFilterIter<Filter>>(std::move(doubleFilter));
+	IteratorFactoryWithEnd<FilteredConstWorldIterator<Filter>> iterPartsFiltered(const Filter& filter) const {
+		const WorldLayer* fst = &layers[0];
+		return IteratorFactoryWithEnd<FilteredConstWorldIterator<Filter>>(FilteredConstWorldIterator<Filter>(fst, fst + layers.size(), filter));
 	}
 
-	IteratorFactoryWithEnd<WorldPartIter> iterParts(int partsMask = ALL_PARTS);
-	IteratorFactoryWithEnd<ConstWorldPartIter> iterParts(int partsMask = ALL_PARTS) const;
+	inline IteratorFactoryWithEnd<WorldIterator> iterParts() {
+		WorldLayer* fst = &layers[0];
+		return IteratorFactoryWithEnd<WorldIterator>(WorldIterator(fst, fst + layers.size()));
+	}
+	inline IteratorFactoryWithEnd<ConstWorldIterator> iterParts() const {
+		const WorldLayer* fst = &layers[0];
+		return IteratorFactoryWithEnd<ConstWorldIterator>(ConstWorldIterator(fst, fst + layers.size()));
+	}
 };
 
 class ExternalForce {
@@ -220,35 +304,35 @@ public:
 	World(double deltaT) : WorldPrototype(deltaT) {}
 
 	template<typename Filter>
-	IteratorFactoryWithEnd<CastingIterator<DoubleFilterIter<Filter>, T&>> iterPartsFiltered(const Filter& filter, int partsMask = ALL_PARTS) {
-		return IteratorFactoryWithEnd<CastingIterator<DoubleFilterIter<Filter>, T&>>(
-			CastingIterator<DoubleFilterIter<Filter>, T&>(
-				WorldPrototype::iterPartsFiltered(filter, partsMask).begin()
+	IteratorFactoryWithEnd<CastingIterator<FilteredWorldIterator<Filter>, T&>> iterPartsFiltered(const Filter& filter) {
+		return IteratorFactoryWithEnd<CastingIterator<FilteredWorldIterator<Filter>, T&>>(
+			CastingIterator<FilteredWorldIterator<Filter>, T&>(
+				WorldPrototype::iterPartsFiltered(filter).begin()
 			)
 		);
 	}
 
 	template<typename Filter>
-	IteratorFactoryWithEnd<CastingIterator<ConstDoubleFilterIter<Filter>, const T&>> iterPartsFiltered(const Filter& filter, int partsMask = ALL_PARTS) const {
-		return IteratorFactoryWithEnd<CastingIterator<ConstDoubleFilterIter<Filter>, const T&>>(
-			CastingIterator<ConstDoubleFilterIter<Filter>, const T&>(
-				WorldPrototype::iterPartsFiltered(filter, partsMask).begin()
+	IteratorFactoryWithEnd<CastingIterator<FilteredConstWorldIterator<Filter>, const T&>> iterPartsFiltered(const Filter& filter) const {
+		return IteratorFactoryWithEnd<CastingIterator<FilteredConstWorldIterator<Filter>, const T&>>(
+			CastingIterator<FilteredConstWorldIterator<Filter>, const T&>(
+				WorldPrototype::iterPartsFiltered(filter).begin()
 			)
 		);
 	}
 
-	IteratorFactoryWithEnd<CastingIterator<WorldPartIter, T&>> iterParts(int partsMask = ALL_PARTS) {
-		return IteratorFactoryWithEnd<CastingIterator<WorldPartIter, T&>>(
-			CastingIterator<WorldPartIter, T&>(
-				WorldPrototype::iterParts(partsMask).begin()
+	IteratorFactoryWithEnd<CastingIterator<WorldIterator, T&>> iterParts() {
+		return IteratorFactoryWithEnd<CastingIterator<WorldIterator, T&>>(
+			CastingIterator<WorldIterator, T&>(
+				WorldPrototype::iterParts().begin()
 			)
 		);
 	}
 
-	IteratorFactoryWithEnd<CastingIterator<ConstWorldPartIter, const T&>> iterParts(int partsMask = ALL_PARTS) const {
-		return IteratorFactoryWithEnd<CastingIterator<ConstWorldPartIter, const T&>>(
-			CastingIterator<ConstWorldPartIter, const T&>(
-				WorldPrototype::iterParts(partsMask).begin()
+	IteratorFactoryWithEnd<CastingIterator<ConstWorldIterator, const T&>> iterParts() const {
+		return IteratorFactoryWithEnd<CastingIterator<ConstWorldIterator, const T&>>(
+			CastingIterator<ConstWorldIterator, const T&>(
+				WorldPrototype::iterParts().begin()
 			)
 		);
 	}

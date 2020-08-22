@@ -329,9 +329,9 @@ void WorldPrototype::update() {
 		physical->update(this->deltaT);
 	}
 
-	for(WorldLayer& layer : layers) {
+	for(WorldLayer* layer : layersToRefresh) {
 		physicsMeasure.mark(PhysicsProcess::UPDATE_TREE_BOUNDS);
-		BoundsTree<Part>& tree = layer.getObjectTree();
+		BoundsTree<Part>& tree = layer->tree;
 		tree.recalculateBounds();
 		physicsMeasure.mark(PhysicsProcess::UPDATE_TREE_STRUCTURE);
 		tree.improveStructure();

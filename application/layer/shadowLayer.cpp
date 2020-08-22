@@ -69,7 +69,7 @@ void ShadowLayer::onEvent(Engine::Event& event) {
 void ShadowLayer::renderScene() {
 	std::multimap<int, ExtendedPart*> visibleParts;
 	screen.world->syncReadOnlyOperation([&visibleParts] () {
-		for (ExtendedPart& part : screen.world->iterParts(ALL_PARTS))
+		for (ExtendedPart& part : screen.world->iterParts())
 			visibleParts.insert({ part.visualData.drawMeshId, &part });
 		});
 

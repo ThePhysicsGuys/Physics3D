@@ -144,7 +144,11 @@ bool StandardInputHandler::onKeyPress(Engine::KeyPressEvent& event) {
 	} else if (key == KeyboardOptions::Debug::spheres) {
 		colissionSpheresMode = static_cast<SphereColissionRenderMode>((static_cast<int>(colissionSpheresMode) + 1) % 3);
 	} else if (key == KeyboardOptions::Debug::tree) {
-		colTreeRenderMode = static_cast<ColTreeRenderMode>((static_cast<int>(colTreeRenderMode) + 1) % 5);
+		colTreeRenderMode++;
+		int worldLayerCount = static_cast<int>(world.getLayerCount()); // must be a signed int, because size_t comparison makes the comparison unsigned
+		if(colTreeRenderMode >= worldLayerCount) {
+			colTreeRenderMode = -2;
+		}
 	} else if (key == KeyboardOptions::Application::close) {
 		Graphics::GLFW::closeWindow();
 	}

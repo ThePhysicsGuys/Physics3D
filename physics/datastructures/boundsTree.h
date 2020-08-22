@@ -248,15 +248,13 @@ struct FilteredTreeIterator : public NodeStack {
 template<typename Iter, typename Boundable>
 struct BoundsTreeIter : public Iter {
 	BoundsTreeIter() = default;
-	BoundsTreeIter(const Iter& iter) : Iter(iter) {}
+	inline BoundsTreeIter(Iter&& it) : Iter(std::move(it)) {}
+	inline BoundsTreeIter(const Iter& it) : Iter(it) {}
 
 	Boundable& operator*() const {
 		return *static_cast<Boundable*>(Iter::operator*()->object);
 	}
 };
-
-template<typename Filter, typename Boundable>
-using FilteredBoundsTreeIter = BoundsTreeIter<FilteredTreeIterator<Filter>, Boundable>;
 
 template<typename Boundable>
 struct DoNothingFilter {
@@ -271,9 +269,6 @@ struct FinderFilter {
 
 	bool operator()(const TreeNode& b) const { return b.bounds.contains(filterBounds); }
 };
-
-template<typename Boundable, typename Filter>
-struct TreeIterFactory;
 
 template<typename Boundable>
 struct BoundsTree {
@@ -403,14 +398,21 @@ struct BoundsTree {
 		return iter.grab();
 	}
 
+	inline void recursivelyRecalculateBoundsOfNode(TreeNode& node) {
+		if(node.isLeafNode()) {
+			node.bounds = static_cast<Boundable*>(node.object)->getBounds();
+		} else {
+			for(TreeNode& subNode : node){
+				recursivelyRecalculateBoundsOfNode(subNode);
+			}
+			node.recalculateBoundsFromSubBounds();
+		}
+	}
+
 	inline void recalculateBounds() {
 		if(isEmpty()) return;
-		for (TreeNode* currentNode : *this) {
-			Boundable* obj = static_cast<Boundable*>(currentNode->object);
-			currentNode->bounds = obj->getBounds();
-		}
 
-		rootNode.recalculateBoundsRecursive();
+		recursivelyRecalculateBoundsOfNode(rootNode);
 	}
 	
 	inline void updateObjectBounds(const Boundable* obj, const Bounds& oldBounds) {
@@ -444,37 +446,21 @@ struct BoundsTree {
 		}
 	}
 
-	inline TreeIterator begin() { return TreeIterator(rootNode); };
-	inline ConstTreeIterator begin() const { return ConstTreeIterator(const_cast<TreeNode&>(rootNode)); };
+	inline BoundsTreeIter<TreeIterator, Boundable> begin() {
+		return BoundsTreeIter<TreeIterator, Boundable>(rootNode);
+	}
+	inline BoundsTreeIter<ConstTreeIterator, Boundable> begin() const {
+		return BoundsTreeIter<ConstTreeIterator, Boundable>(const_cast<TreeNode&>(rootNode));
+	}
 	inline IteratorEnd end() const { return IteratorEnd(); };
 
 	template<typename Filter>
-	inline TreeIterFactory<Boundable, Filter> iterFiltered(const Filter& filter);
+	inline IteratorFactoryWithEnd<BoundsTreeIter<FilteredTreeIterator<Filter>, Boundable>> iterFiltered(const Filter& filter) {
+		return {BoundsTreeIter<FilteredTreeIterator<Filter>, Boundable>(FilteredTreeIterator<Filter>(rootNode, filter))};
+	}
 
 	template<typename Filter>
-	inline TreeIterFactory<const Boundable, Filter> iterFiltered(const Filter& filter) const;
-};
-
-template<typename Boundable, typename Filter>
-struct TreeIterFactory {
-	TreeNode* rootNode;
-	Filter filter;
-	TreeIterFactory() : rootNode(nullptr), filter() {}
-	TreeIterFactory(TreeNode* rootNode, const Filter& filter) : rootNode(rootNode), filter(filter) {}
-	FilteredBoundsTreeIter<Filter, Boundable> begin() const {
-		return FilteredBoundsTreeIter<Filter, Boundable>(FilteredTreeIterator<Filter>(*rootNode, filter));
+	inline IteratorFactoryWithEnd<BoundsTreeIter<FilteredTreeIterator<Filter>, const Boundable>> iterFiltered(const Filter& filter) const {
+		return {BoundsTreeIter<FilteredTreeIterator<Filter>, const Boundable>(FilteredTreeIterator<Filter>(const_cast<TreeNode&>(rootNode), filter))};
 	}
-	constexpr IteratorEnd end() const { return IteratorEnd(); }
 };
-
-template<typename Boundable>
-template<typename Filter>
-inline TreeIterFactory<Boundable, Filter> BoundsTree<Boundable>::iterFiltered(const Filter& filter) {
-	return TreeIterFactory<Boundable, Filter>(&this->rootNode, filter);
-}
-
-template<typename Boundable>
-template<typename Filter>
-inline TreeIterFactory<const Boundable, Filter> BoundsTree<Boundable>::iterFiltered(const Filter& filter) const {
-	return TreeIterFactory<const Boundable, Filter>(&this->rootNode, filter);
-}

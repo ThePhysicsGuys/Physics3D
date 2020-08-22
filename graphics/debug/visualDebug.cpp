@@ -81,7 +81,8 @@ AddableBuffer<float> visibleVectors(900);
 AddableBuffer<float> visiblePoints(1000);
 
 SphereColissionRenderMode colissionSpheresMode;
-ColTreeRenderMode colTreeRenderMode;
+int colTreeRenderMode = -1; // -2 for selected, -1 for none, n >= 0 for layer tree n
+
 
 bool renderPiesEnabled = false;
 int fieldIndex = 0;

@@ -3,7 +3,6 @@
 #include <algorithm>
 #include "../util/log.h"
 #include "layer.h"
-#include "layerRef.h"
 #include "misc/validityHelper.h"
 
 #ifndef NDEBUG
@@ -32,9 +31,7 @@ bool WorldPrototype::isValid() const {
 	}
 
 	for(const WorldLayer& l : layers) {
-		for(const BoundsTree<Part>& t : l.trees) {
-			treeValidCheck(t);
-		}
+		treeValidCheck(l.tree);
 	}
 	return true;
 }
@@ -43,10 +40,11 @@ bool WorldPrototype::isValid() const {
 
 WorldPrototype::WorldPrototype(double deltaT) : 
 	deltaT(deltaT), 
-	layers(1),
+	layers(2),
 	colissionMatrix(2),
-	objectTree(layers[0].getObjectTree()), 
-	terrainTree(layers[0].getTerrainTree()) {
+	objectTree(layers[0].tree), 
+	terrainTree(layers[1].tree),
+	layersToRefresh{&layers[0]} {
 	colissionMatrix.get(0, 0) = true; // free-free
 	colissionMatrix.get(1, 0) = true; // free-terrain
 	colissionMatrix.get(1, 1) = false; // terrain-terrain
@@ -78,12 +76,10 @@ void WorldPrototype::addPart(Part* part, int layerIndex) {
 	part->parent->mainPhysical->world = this;
 
 	WorldLayer* worldLayer = &layers[layerIndex];
-	BoundsTree<Part>& objTree = worldLayer->getObjectTree();
-	LayerRef ref(worldLayer, SubLayer::OBJECT);
-	part->parent->mainPhysical->forEachPart([ref](Part& p) {
-		p.layer = ref;
+	part->parent->mainPhysical->forEachPart([worldLayer](Part& p) {
+		p.layer = worldLayer;
 	});
-	objTree.add(createNodeFor(part->parent->mainPhysical));
+	worldLayer->tree.add(createNodeFor(part->parent->mainPhysical));
 
 
 	objectCount += part->parent->mainPhysical->getNumberOfPartsInThisAndChildren();
@@ -98,8 +94,8 @@ void WorldPrototype::addTerrainPart(Part* part, int layerIndex) {
 	objectCount++;
 
 	WorldLayer* worldLayer = &layers[layerIndex];
-	part->layer = LayerRef(worldLayer, SubLayer::TERRAIN);
-	worldLayer->getTerrainTree().add(part, part->getBounds());
+	part->layer = worldLayer;
+	worldLayer->addPart(part);
 
 	ASSERT_VALID;
 
@@ -108,10 +104,9 @@ void WorldPrototype::addTerrainPart(Part* part, int layerIndex) {
 void WorldPrototype::removePart(Part* part) {
 	ASSERT_VALID;
 	
-	WorldLayer::getTree(part->layer).remove(part, part->getBounds());
+	part->layer->removePart(part);
 
 	if(part->parent == nullptr) {
-		this->terrainTree.remove(part, part->getBounds());
 		this->onPartRemoved(part);
 	} else {
 		part->parent->removePart(part);
@@ -128,19 +123,29 @@ void WorldPrototype::clear() {
 	}
 	this->physicals.clear();
 	std::vector<Part*> partsToDelete;
-	for(Part& p : this->iterParts(ALL_PARTS)) {
+	for(Part& p : this->iterParts()) {
 		p.parent = nullptr;
 		partsToDelete.push_back(&p);
 	}
 	this->objectCount = 0;
 	for(WorldLayer& layer : this->layers) {
-		for(BoundsTree<Part>& t : layer.trees) {
-			t.clear();
-		}
+		layer.tree.clear();
 	}
 	for(Part* p : partsToDelete) {
 		this->onPartRemoved(p);
 	}
+}
+
+size_t WorldPrototype::getLayerCount() const {
+	return this->layers.size();
+}
+
+BoundsTree<Part>& WorldPrototype::getTree(int index) {
+	return layers[index].tree;
+}
+
+const BoundsTree<Part>& WorldPrototype::getTree(int index) const {
+	return layers[index].tree;
 }
 
 void WorldPrototype::notifyMainPhysicalObsolete(MotorizedPhysical* motorPhys) {
@@ -277,39 +282,3 @@ void WorldPrototype::addExternalForce(ExternalForce* force) {
 void WorldPrototype::removeExternalForce(ExternalForce* force) {
 	externalForces.erase(std::remove(externalForces.begin(), externalForces.end(), force));
 }
-
-IteratorFactoryWithEnd<WorldPartIter> WorldPrototype::iterParts(int partsMask) {
-	size_t size = 0;
-	IteratorFactoryWithEnd<BoundsTreeIter<TreeIterator, Part>> iters[2]{};
-	if(partsMask & FREE_PARTS) {
-		BoundsTreeIter<TreeIterator, Part> i(objectTree.begin());
-		iters[size++] = IteratorFactoryWithEnd<BoundsTreeIter<TreeIterator, Part>>(i);
-	}
-	if(partsMask & TERRAIN_PARTS) {
-		BoundsTreeIter<TreeIterator, Part> i(terrainTree.begin());
-		iters[size++] = IteratorFactoryWithEnd<BoundsTreeIter<TreeIterator, Part>>(i);
-	}
-
-	WorldPartIter group(iters, size);
-
-	return IteratorFactoryWithEnd<WorldPartIter>(std::move(group));
-}
-IteratorFactoryWithEnd<ConstWorldPartIter> WorldPrototype::iterParts(int partsMask) const {
-	size_t size = 0;
-	IteratorFactoryWithEnd<BoundsTreeIter<ConstTreeIterator, const Part>> iters[2]{};
-	if(partsMask & FREE_PARTS) {
-		BoundsTreeIter<ConstTreeIterator, const Part> i(objectTree.begin());
-		iters[size++] = IteratorFactoryWithEnd<BoundsTreeIter<ConstTreeIterator, const Part>>(i);
-	}
-	if(partsMask & TERRAIN_PARTS) {
-		BoundsTreeIter<ConstTreeIterator, const Part> i(terrainTree.begin());
-		iters[size++] = IteratorFactoryWithEnd<BoundsTreeIter<ConstTreeIterator, const Part>>(i);
-	}
-
-	ConstWorldPartIter group(iters, size);
-
-	return IteratorFactoryWithEnd<ConstWorldPartIter>(std::move(group));
-}
-
-
-

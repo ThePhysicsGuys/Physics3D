@@ -36,21 +36,13 @@ enum class SphereColissionRenderMode : int {
 	ALL
 };
 
-enum class ColTreeRenderMode : int {
-	NONE,
-	SELECTED,
-	FREE,
-	TERRAIN,
-	ALL
-};
-
 extern bool renderPiesEnabled;
 extern AddableBuffer<float> visibleVectors;
 extern std::map<::Debug::VectorType, bool> vectorDebugEnabled;
 extern std::map<::Debug::PointType, bool> pointDebugEnabled;
 
 extern SphereColissionRenderMode colissionSpheresMode;
-extern ColTreeRenderMode colTreeRenderMode;
+extern int colTreeRenderMode;
 extern int fieldIndex;
 
 void toggleVectorType(::Debug::VectorType type);

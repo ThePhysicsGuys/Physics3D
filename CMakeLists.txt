@@ -44,7 +44,7 @@ add_library(physics STATIC
   physics/physical.cpp
   physics/physicsProfiler.cpp
   physics/rigidBody.cpp
-  physics/layerRef.cpp
+  physics/layer.cpp
   physics/world.cpp
   physics/worldPhysics.cpp
   physics/inertia.cpp
@@ -117,6 +117,7 @@ add_executable(tests
   tests/physicsTests.cpp
   tests/inertiaTests.cpp
   tests/testFrameworkConsistencyTests.cpp
+  tests/ecsTests.cpp
 )
 
 target_link_libraries(tests util)

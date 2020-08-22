@@ -28,7 +28,7 @@ PlayerWorld::PlayerWorld(double deltaT) : SynchronizedWorld<ExtendedPart>(deltaT
 void PlayerWorld::applyExternalForces() {
 	SynchronizedWorld<ExtendedPart>::applyExternalForces();
 
-	if (selectedPart != nullptr && !selectedPart->isFixed()) {
+	if (selectedPart != nullptr && selectedPart->parent != nullptr) {
 		MotorizedPhysical* selectedPhysical = selectedPart->parent->mainPhysical;
 		GlobalCFrame cframe = selectedPhysical->getCFrame();
 

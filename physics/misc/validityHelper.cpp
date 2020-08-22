@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <map>
+#include <set>
 
 #include "../geometry/polyhedron.h"
 #include "../geometry/indexedShape.h"
@@ -191,24 +192,32 @@ static int countOccurences(const void* obj, const TreeNode& node) {
 	}
 }
 
-static void recursiveCheckNoDuplicates(const TreeNode& rootNode, const TreeNode& node) {
+static void recursiveCheckNoDuplicates(const TreeNode& node, std::set<const void*>& foundObjects, std::set<const TreeNode*>& foundNodes) {
+	foundNodes.insert(&node);
 	if(node.isLeafNode()) {
-		int occur = countOccurences(node.object, rootNode);
-		if(occur != 1) {
-			throw "Duplicate object in tree!";
+		if(foundObjects.find(node.object) != foundObjects.end()) {
+			throw "Duplicate object found!";
+		} else {
+			foundObjects.insert(node.object);
 		}
 	} else {
-		for(TreeNode& n : node) {
-			recursiveCheckNoDuplicates(rootNode, n);
+		for(const TreeNode& subNode : node) {
+			recursiveCheckNoDuplicates(subNode, foundObjects, foundNodes);
 		}
 	}
 }
 
+void treeValidCheck(const TreeNode& rootNode) {
+	recursiveTreeValidCheck(rootNode, false);
+	recursiveCheckTreeBounds(rootNode);
+	std::set<const void*> foundObjects;
+	std::set<const TreeNode*> foundNodes;
+	recursiveCheckNoDuplicates(rootNode, foundObjects, foundNodes);
+}
+
 void treeValidCheck(const BoundsTree<Part>& tree) {
 	if(!tree.isEmpty()) {
-		recursiveTreeValidCheck(tree.rootNode, false);
-		recursiveCheckTreeBounds(tree.rootNode);
-		recursiveCheckNoDuplicates(tree.rootNode, tree.rootNode);
+		treeValidCheck(tree.rootNode);
 	}
 }
 

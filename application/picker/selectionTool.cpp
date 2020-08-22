@@ -99,7 +99,7 @@ bool SelectionTool::onMouseRelease(Engine::MouseReleaseEvent& event) {
 			auto[down, up] = GUI::minmax(mappedRegion.y, mappedRegion.w);
 
 			VisibilityFilter boundingboxFilter = VisibilityFilter::forSubWindow(camera.cframe.position, camera.getForwardDirection(), camera.getUpDirection(), camera.fov, camera.aspect, camera.zfar, left, right, down, up);
-			for (ExtendedPart& part : screen.world->iterPartsFiltered(boundingboxFilter, ALL_PARTS)) {
+			for (ExtendedPart& part : screen.world->iterPartsFiltered(boundingboxFilter)) {
 				if (!boundingboxFilter(part.getCenterOfMass()))
 					continue;
 				//selection.insert(&part);

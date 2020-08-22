@@ -21,7 +21,7 @@ static void openWorld(const char* file, PlayerWorld& world) {
 	world.syncModification([file, &world]() {
 		std::vector<ExtendedPart*> partsToDelete;
 		partsToDelete.reserve(world.getPartCount());
-		for(ExtendedPart& p : world.iterParts(ALL_PARTS)) {
+		for(ExtendedPart& p : world.iterParts()) {
 			partsToDelete.push_back(&p);
 		}
 		world.clear();

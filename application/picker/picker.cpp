@@ -74,7 +74,7 @@ void intersectPhysicals(Screen& screen, const Ray& ray) {
 	//TODO graphicsMeasure.mark(GraphicsProcess::WAIT_FOR_LOCK);
 	screen.world->syncReadOnlyOperation([&screen, &closestIntersectDistance, &closestIntersectedPart, &closestIntersectedPoint, &ray] () {
 		//TODO graphicsMeasure.mark(GraphicsProcess::PICKER);
-		for (ExtendedPart& part : screen.world->iterPartsFiltered(RayIntersectBoundsFilter(ray), FREE_PARTS)) {
+		for (ExtendedPart& part : screen.world->iterPartsFiltered(RayIntersectBoundsFilter(ray))) {
 			if (&part == screen.camera.attachment) continue;
 			Vec3 relPos = part.getPosition() - ray.start;
 			if (pointToLineDistanceSquared(ray.direction, relPos) > part.maxRadius* part.maxRadius)
