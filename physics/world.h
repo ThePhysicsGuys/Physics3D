@@ -9,7 +9,6 @@
 #include "datastructures/iteratorEnd.h"
 #include "datastructures/boundsTree.h"
 #include "layer.h"
-#include "math/linalg/largeMatrix.h"
 
 struct Colission {
 	Part* p1;
@@ -136,6 +135,7 @@ private:
 	friend class MotorizedPhysical;
 	friend class ConnectedPhysical;
 	friend class Part;
+	friend class WorldLayer;
 
 	std::vector<Colission> currentObjectColissions;
 	std::vector<Colission> currentTerrainColissions;
@@ -200,11 +200,14 @@ public:
 
 	std::vector<WorldLayer> layers;
 	std::vector<WorldLayer*> layersToRefresh;
+	
 	/*
-		Signifies which layers collide
+		These lists signify which layers collide
 	*/
-	LargeSymmetricMatrix<bool> colissionMatrix;
-
+	std::vector<std::pair<WorldLayer*, WorldLayer*>> freePartColissions;
+	std::vector<std::pair<WorldLayer*, WorldLayer*>> freeTerrainColissions; // first is free, second is terrain
+	std::vector<WorldLayer*> internalColissions;
+	
 	BoundsTree<Part>& objectTree;
 	BoundsTree<Part>& terrainTree;
 	

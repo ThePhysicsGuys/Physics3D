@@ -6,7 +6,7 @@ on:
     branches: [ master ]
 
 jobs:
-  buildUbuntu:
+  buildMSVC:
 
     runs-on: windows-latest
 

@@ -13,7 +13,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: setup
-      run: install/setupUbuntu.sh
+      run: sh install/setupUbuntu.sh
     - name: make
       run: cmake --build build/debug
 

@@ -305,8 +305,15 @@ void WorldPrototype::findColissions() {
 	currentObjectColissions.clear();
 	currentTerrainColissions.clear();
 
-	recursiveFindColissionsInternal(*this, currentObjectColissions, objectTree.rootNode);
-	recursiveFindColissionsBetween(*this, currentTerrainColissions, objectTree.rootNode, terrainTree.rootNode);
+	for(WorldLayer* internalCollidingLayer : internalColissions) {
+		recursiveFindColissionsInternal(*this, currentObjectColissions, internalCollidingLayer->tree.rootNode);
+	}
+	for(std::pair<WorldLayer*, WorldLayer*> freePartCol : freePartColissions) {
+		recursiveFindColissionsBetween(*this, currentObjectColissions, freePartCol.first->tree.rootNode, freePartCol.second->tree.rootNode);
+	}
+	for(std::pair<WorldLayer*, WorldLayer*> freeTerrainCol : freeTerrainColissions) {
+		recursiveFindColissionsBetween(*this, currentTerrainColissions, freeTerrainCol.first->tree.rootNode, freeTerrainCol.second->tree.rootNode);
+	}
 }
 void WorldPrototype::handleColissions() {
 	physicsMeasure.mark(PhysicsProcess::COLISSION_HANDLING);

@@ -481,8 +481,6 @@ void Physical::detachPart(Part* part) {
 void Physical::removePart(Part* part) {
 	assert(part->parent == this);
 
-	WorldPrototype* world = this->mainPhysical->world;
-
 	if(rigidBody.getPartCount() == 1) {
 		assert(part == rigidBody.getMainPart());
 
@@ -507,10 +505,6 @@ void Physical::removePart(Part* part) {
 		detachPartAssumingMultipleParts(part);
 	}
 	part->parent = nullptr;
-
-	if(world != nullptr) {
-		world->notifyPartRemovedFromPhysical(part);
-	}
 }
 
 // TODO: this seems to need to update the encompassing MotorizedPhysical as well

@@ -106,6 +106,7 @@ public:
 	void attach(Part* other, const CFrame& relativeCFrame);
 	void attach(Part* other, HardConstraint* constraint, const CFrame& attachToThis, const CFrame& attachToThat);
 	void detach();
+	void removeFromWorld();
 
 	bool isValid() const;
 };

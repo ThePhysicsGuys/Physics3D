@@ -114,8 +114,18 @@ void DebugOverlay::onRender() {
 			Screen* screen = static_cast<Screen*>(this->ptr);
 
 			graphicsMeasure.mark(Graphics::GraphicsProcess::PROFILER);
-			renderTreeStructure(screen->world->objectTree, Vec3f(0, 1, 0), Vec2f(1.4f, 0.95f), 0.7f, screen->selectedPart);
-			renderTreeStructure(screen->world->terrainTree, Vec3f(0, 0, 1), Vec2f(0.4f, 0.95f), 0.7f, screen->selectedPart);
+			
+			size_t layerCount = screen->world->layers.size();
+			Vec2i d = screen->dimension;
+			float availableSpace = float(d.x) / float(d.y);
+			float widthPerTree = availableSpace / (layerCount);
+			for(size_t i = 0; i < layerCount; i++) {
+				const WorldLayer& layer = screen->world->layers[i];
+
+				float xPos = widthPerTree / 2 + widthPerTree * i;
+
+				renderTreeStructure(layer.tree, pieColors[i], Vec2f(xPos, 0.95f), widthPerTree * 0.7f, screen->selectedPart);
+			}
 		});
 
 		/*fpsSlidingChart.add("Fps 1", Graphics::graphicsMeasure.getAvgTPS());

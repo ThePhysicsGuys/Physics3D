@@ -3,9 +3,14 @@
 #include "datastructures/boundsTree.h"
 #include "part.h"
 
+class WorldPrototype;
+
 class WorldLayer {
 public:
 	BoundsTree<Part> tree;
+	WorldPrototype* world;
+
+	explicit WorldLayer(WorldPrototype* world);
 
 	void addPart(Part* newPart);
 	void removePart(Part* partToRemove);

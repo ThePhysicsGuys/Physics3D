@@ -1,7 +1,10 @@
 #include "layer.h"
+#include "world.h"
 
 #include <assert.h>
 
+
+WorldLayer::WorldLayer(WorldPrototype* world) : world(world) {}
 
 void WorldLayer::addPart(Part* newPart) {
 	tree.add(newPart, newPart->getBounds());
@@ -9,6 +12,7 @@ void WorldLayer::addPart(Part* newPart) {
 
 void WorldLayer::removePart(Part* partToRemove) {
 	tree.remove(partToRemove, partToRemove->getBounds());
+	world->onPartRemoved(partToRemove);
 }
 
 void WorldLayer::notifyPartBoundsUpdated(const Part* updatedPart, const Bounds& oldBounds) {

@@ -37,17 +37,26 @@ bool WorldPrototype::isValid() const {
 }
 #pragma endregion
 
+static std::vector<WorldLayer> produceLayerVector(WorldPrototype* world, size_t count) {
+	std::vector<WorldLayer> result;
+
+	for(size_t i = 0; i < count; i++) {
+		result.emplace_back(world);
+	}
+
+	return result;
+}
 
 WorldPrototype::WorldPrototype(double deltaT) : 
 	deltaT(deltaT), 
-	layers(2),
-	colissionMatrix(2),
+	layers(produceLayerVector(this, 2)),
+	freePartColissions(),
+	freeTerrainColissions{std::make_pair(&layers[0], &layers[1])}, // free-terrain
+	internalColissions{&layers[0]}, // free-free
 	objectTree(layers[0].tree), 
 	terrainTree(layers[1].tree),
 	layersToRefresh{&layers[0]} {
-	colissionMatrix.get(0, 0) = true; // free-free
-	colissionMatrix.get(1, 0) = true; // free-terrain
-	colissionMatrix.get(1, 1) = false; // terrain-terrain
+
 }
 
 WorldPrototype::~WorldPrototype() {
@@ -104,13 +113,7 @@ void WorldPrototype::addTerrainPart(Part* part, int layerIndex) {
 void WorldPrototype::removePart(Part* part) {
 	ASSERT_VALID;
 	
-	part->layer->removePart(part);
-
-	if(part->parent == nullptr) {
-		this->onPartRemoved(part);
-	} else {
-		part->parent->removePart(part);
-	}
+	part->removeFromWorld();
 
 	ASSERT_VALID;
 }

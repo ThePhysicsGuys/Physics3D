@@ -39,12 +39,6 @@ Part::Part(const Shape& shape, Part& attachTo, HardConstraint* constraint, const
 	attachTo.attach(this, constraint, attachToParent, attachToThis);
 }
 
-Part::~Part() {
-	if (parent != nullptr) {
-		parent->removePart(this);
-	}
-}
-
 Part::Part(Part&& other) noexcept :
 	cframe(other.cframe),
 	layer(other.layer),
@@ -72,6 +66,15 @@ Part& Part::operator=(Part&& other) noexcept {
 	other.parent = nullptr;
 
 	return *this;
+}
+
+Part::~Part() {
+	this->removeFromWorld();
+}
+
+void Part::removeFromWorld() {
+	if(this->parent) this->parent->removePart(this);
+	if(this->layer) this->layer->removePart(this);
 }
 
 PartIntersection Part::intersects(const Part& other) const {
