@@ -1,6 +1,8 @@
 #!/bin/sh
 
-cd ..
+# gets directory of this file to find the others
+INSTALLPATH="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+cd $INSTALLPATH/..
 
 git clone https://github.com/microsoft/vcpkg
 ./vcpkg/bootstrap-vcpkg.sh
