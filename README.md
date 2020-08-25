@@ -1,5 +1,6 @@
 # Physics3D
-![GitHub CI Badge](https://github.com/ThePhysicsGuys/Physics3D/workflows/Build/badge.svg)
+![Ubuntu CI Badge](https://github.com/ThePhysicsGuys/Physics3D/workflows/Ubuntu/badge.svg)
+![MSVC CI Badge](https://github.com/ThePhysicsGuys/Physics3D/workflows/MSVC/badge.svg)
 
 A 3D physics engine, written in C++
 
@@ -27,6 +28,31 @@ The Physics3D project consists of 7 projects, each with its own role:
 - some OpenGL functionality may not be available on virtual machines, enabling 3D acceleration might solve this
 
 ## Setup Guide
+
+### CMake
+If you suddenly can't build the project anymore after pulling, perhaps one of the dependencies has changed. Try running [install/clean.sh](/install/clean.sh) (Unix) or [install/clean.bat](/install/clean.bat) (Windows) and rerun the setup script in the steps below. 
+
+If you still have build problems, please create an issue as we want setting up to be as easy as possible. 
+
+#### Platform independent using vcpkg
+1. Clone the repository
+2. If you do not have cmake already: download it from [cmake.org/download/](https://cmake.org/download/)
+3. Run [install/setup.sh](/install/setup.sh) (Unix) or [install/setup.bat](/install/setup.bat) (Windows) from the Physics3D directory, this will install the necessary dependencies using [vcpkg](https://github.com/microsoft/vcpkg) and create the build folders. It will also run cmake for debug and release. 
+  The dependencies can be installed on their own with [install/setupDependencies.sh](/install/setupDependencies.sh) (Unix) or [install/setupDependencies.bat](/install/setupDependencies.bat) (Windows)
+  The build directories can be generated on their own with [install/setupBuild.sh](/install/setupBuild.sh) (Unix) or [install/setupBuild.bat](/install/setupBuild.bat) (Windows)
+4. Make the debug and release builds with `cmake --build debug` or `cmake --build release` in directory `Physics3D/build`
+5. To run the application, you must also run it from the build directory: `./debug/application`
+
+#### Ubuntu specific using apt-get
+If you are using Ubuntu, we recommend using this installation method instead, as setting up using vcpkg can take a very long time. This method should get you a working version of the engine starting from a clean Ubuntu 18.04. 
+
+1. Clone the repository
+2. Run [install/setupUbuntu.sh](/install/setupUbuntu.sh) from the Physics3D directory, this will install the necessary dependencies and create the build folders. It will also run cmake for debug and release. 
+  The dependencies can be installed on their own with [install/setupDependenciesUbuntu.sh](/install/setupDependenciesUbuntu.sh)
+  The build directories can be generated on their own with [install/setupBuildUbuntu.sh](/install/setupBuildUbuntu.sh)
+3. Make the debug and release builds with `cmake --build debug` or `cmake --build release` in directory `Physics3D/build`
+4. To run the application, you must also run it from the build directory: `./debug/application`
+
 ### Visual Studio
 1. Clone the repository
 2. The physics project on its own does not depend on any libraries, so if you wish to only build it then you may skip step 3.
@@ -51,8 +77,7 @@ The Physics3D project consists of 7 projects, each with its own role:
   | | | - imgui_truetype.h  
   | | | - imgui_impl_glfw.h & .cpp  
   | | | - imgui_impl_opengl3.h & .cpp  
-  | | - stb/  
-  | | | - stb_image.h  
+  | | - stb_image.h  
   | | - ft2build.h  
   | - lib/  
   | | - freetype.lib  
@@ -64,14 +89,6 @@ The Physics3D project consists of 7 projects, each with its own role:
   | - (Project and other files)  
 4. The configuration should already be configured in the provided project and solution files
 5. You are done!
-
-### CMake (For linux only)
-1. Clone the repository
-2. Run [setup.sh](/setup.sh) from the Physics3D directory, this will install the necessary dependencies and create the build folders. It will also run cmake for debug and release. 
-  The dependencies can be installed on their own with [setupDependencies.sh](/setupDependencies.sh)
-  The build directories can be generated on their own with [setupBuild.sh](/setupBuild.sh)
-3. Make the debug and release builds with `make` when inside `Physics3D/build/debug` or `Physics3D/build/release`
-4. To run the application, you must run it from the build directory: `./debug/application`
 
 ## Authors
 * **Lennart Van Hirtum** - [VonTum](https://github.com/VonTum)

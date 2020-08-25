@@ -1,4 +1,4 @@
-name: Ubuntu
+name: MSVC
 on:
   push:
     branches: [ master ]
@@ -8,12 +8,12 @@ on:
 jobs:
   buildUbuntu:
 
-    runs-on: ubuntu-18.04
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v2
     - name: setup
-      run: install/setupUbuntu.sh
+      run: install\setup.bat
     - name: make
       run: cmake --build build/debug
 

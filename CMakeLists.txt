@@ -3,23 +3,26 @@ cmake_minimum_required(VERSION 3.10)
 project(Physics3D VERSION 1.9)
 
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+message(STATUS "Building with: ${CMAKE_CXX_COMPILER_ID}")
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-#running benchmarks showed this to be a pessimization
-#set(CMAKE_INTERPROCEDURAL_OPTIMIZATION True)
 
-#enable debug
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -g")
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /arch:AVX2")
+	
+	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2 /Oi /ot /GL")
+else()
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx2")
+	
+	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
+	
+	#running benchmarks showed this to be a pessimization
+	#set(CMAKE_INTERPROCEDURAL_OPTIMIZATION True)
+	#surprisingly, also a pessimization
+	#set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -ffast-math")
 endif()
-
-set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -mavx2")
-#surprisingly, also a pessimization
-#set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -ffast-math")
-
-#
 
 add_library(util STATIC 
   util/terminalColor.cpp
@@ -35,7 +38,9 @@ add_library(util STATIC
   util/resource/resourceManager.cpp
 )
 
-target_link_libraries(util stdc++fs)
+if (CMAKE_CXX_COMPILER_ID STREQUAL GNU)
+	target_link_libraries(util stdc++fs)
+endif()
 
 add_library(physics STATIC 
   physics/constraintGroup.cpp
@@ -135,6 +140,15 @@ include_directories(PRIVATE "${GLEW_DIR}/include")
 include_directories(PRIVATE "${FREETYPE_INCLUDE_DIRS}")
 include_directories(PRIVATE "include")
 
+add_library(imguiInclude STATIC
+  include/imgui/imgui.cpp
+  include/imgui/imgui_demo.cpp
+  include/imgui/imgui_draw.cpp
+  include/imgui/imgui_impl_glfw.cpp
+  include/imgui/imgui_impl_opengl3.cpp
+  include/imgui/imgui_widgets.cpp
+)
+
 add_library(graphics STATIC
   graphics/glfwUtils.cpp
   graphics/bindable.cpp
@@ -162,9 +176,6 @@ add_library(graphics STATIC
   graphics/gui/guiUtils.cpp
   graphics/gui/layout.cpp
 
-  #graphics/gui/imgui/imgui_impl_glfw.cpp
-  #graphics/gui/imgui/imgui_impl_opengl3.cpp
-
   graphics/mesh/abstractMesh.cpp
   graphics/mesh/arrayMesh.cpp
   graphics/mesh/indexedMesh.cpp
@@ -184,16 +195,9 @@ add_library(graphics STATIC
   graphics/shader/shaders.cpp
   graphics/shader/cshader.cpp
   graphics/shader/gshader.cpp
-  
-  include/imgui/imgui.cpp
-  include/imgui/imgui_demo.cpp
-  include/imgui/imgui_draw.cpp
-  include/imgui/imgui_impl_glfw.cpp
-  include/imgui/imgui_impl_opengl3.cpp
-  include/imgui/imgui_widgets.cpp
 )
 
-#target_link_libraries(graphics ${GL_LIBRARIES})
+target_link_libraries(graphics imguiInclude)
 
 target_include_directories(graphics PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/graphics")
 
