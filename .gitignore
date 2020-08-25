@@ -5,6 +5,8 @@ imgui.ini
 *.parts
 *.nativeParts
 *.world
+*.obj
+*.bobj
 
 # Visual Studio
 **.vcxproj.filters
@@ -23,6 +25,10 @@ ipch/
 
 # Visual studio code
 .vscode/
+
+# CLion
+.idea/
+cmake-build-debug/
 
 # Other build systems
 include/
