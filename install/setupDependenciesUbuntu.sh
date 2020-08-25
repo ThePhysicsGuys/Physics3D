@@ -1,6 +1,7 @@
 #!/bin/sh
 
-cd ..
+INSTALLPATH="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+cd $INSTALLPATH/..
 
 sudo add-apt-repository universe
 sudo apt-get install build-essential
