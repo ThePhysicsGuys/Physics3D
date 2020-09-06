@@ -428,3 +428,19 @@ TEST_CASE(interchanceQuaternionAndMatrix){
 		}
 	}
 }
+
+TEST_CASE(testFixCastToInt) {
+	for(int i = 0; i < 10000; i++) {
+		int64_t a = rand() - RAND_MAX/2;
+		Fix<32> f(a);
+		logStream << a << '\n';
+		ASSERT_STRICT(static_cast<int64_t>(f) == a);
+	}
+	for(int i = 0; i < 10000; i++) {
+		double d = double(rand()) / RAND_MAX * 100000.0;
+		Fix<32> f(d);
+		logStream << d << '\n';
+
+		ASSERT_STRICT(static_cast<int64_t>(f) == static_cast<int64_t>(d));
+	}
+}

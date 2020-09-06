@@ -40,7 +40,7 @@ Vec4f colors[] {
 
 void renderSphere(double radius, const Position& position, const Color& color) {
 	Shaders::basicShader.updateMaterial(Material(color));
-	Shaders::basicShader.updateModel(Mat4f(Mat3f::IDENTITY() * float(radius), Vec3f(position - Position(0,0,0)), Vec3f(0.0f,0.0f,0.0f),1.0f));
+	Shaders::basicShader.updateModel(Mat4f(Mat3f::IDENTITY() * float(radius), castPositionToVec3f(position), Vec3f(0.0f,0.0f,0.0f),1.0f));
 
 	Graphics::Library::sphere->render();
 }
@@ -55,7 +55,7 @@ void renderBox(const GlobalCFrame& cframe, double width, double height, double d
 void renderBounds(const Bounds& bounds, const Color& color) {
 	Vec3Fix diagonal = bounds.getDiagonal();
 	Position position = bounds.getCenter();
-	renderBox(GlobalCFrame(position), diagonal.x, diagonal.y, diagonal.z, color);
+	renderBox(GlobalCFrame(position), static_cast<double>(diagonal.x), static_cast<double>(diagonal.y), static_cast<double>(diagonal.z), color);
 }
 
 static Color getCyclingColor(int depth){

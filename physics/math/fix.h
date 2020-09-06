@@ -3,69 +3,72 @@
 #include <inttypes.h>
 
 template<int64_t N>
-struct Fix;
-
-#define ONE (1ULL << N)
-
-template<int64_t N>
 struct Fix {
 	int64_t value;
 
 	constexpr Fix() noexcept : value(0) {}
-	constexpr Fix(double d) noexcept : value(static_cast<int64_t>(d * ONE)) {}
-	constexpr Fix(float f) noexcept : value(static_cast<int64_t>(double(f) * ONE)) {}
-	constexpr explicit Fix(int64_t l) noexcept : value(l) {}
+	constexpr Fix(double d) noexcept : value(static_cast<int64_t>(d * (1ULL << N))) {}
+	constexpr Fix(float f) noexcept : value(static_cast<int64_t>(double(f) * (1ULL << N))) {}
+	constexpr Fix(int64_t l) noexcept : value(l << N) {}
 
-	inline constexpr operator double() const noexcept { return static_cast<double>(value) / ONE; }
-	inline constexpr operator float() const noexcept { return static_cast<float>(value) / ONE; }
+	inline constexpr operator double() const noexcept { return static_cast<double>(value) / (1ULL << N); }
+	inline constexpr operator float() const noexcept { return static_cast<float>(value) / (1ULL << N); }
+	inline explicit constexpr operator int64_t() const noexcept {
+		if(value >= 0 || (value & ((1ULL << N)-1)) == 0) {
+			return value >> N;
+		} else {
+			return (value >> N) + 1;
+		}
+	}
 
-	inline Fix<N>& operator++() noexcept { value += ONE; return *this; }
-	inline Fix<N> operator++(int) noexcept { Fix<N> old = *this; value += ONE; return old; }
-	inline Fix<N>& operator--() noexcept { value -= ONE; return *this; }
-	inline Fix<N> operator--(int) noexcept { Fix<N> old = *this; value -= ONE; return old; }
+	inline Fix<N>& operator++() noexcept { value += (1ULL << N); return *this; }
+	inline Fix<N> operator++(int) noexcept { Fix<N> old = *this; value += (1ULL << N); return old; }
+	inline Fix<N>& operator--() noexcept { value -= (1ULL << N); return *this; }
+	inline Fix<N> operator--(int) noexcept { Fix<N> old = *this; value -= (1ULL << N); return old; }
 
 	inline Fix<N>& operator+=(const Fix<N>& b) noexcept { this->value += b.value; return *this; }
 	inline Fix<N>& operator-=(const Fix<N>& b) noexcept { this->value -= b.value; return *this; }
 	inline Fix<N>& operator+=(int64_t b) noexcept { this->value += (b << N); return *this; }
 	inline Fix<N>& operator-=(int64_t b) noexcept { this->value -= (b << N); return *this; }
 
-	static inline constexpr Fix<N> maxValue() noexcept {return Fix<N>(0x7FFFFFFFFFFFFFFF); }
-
-	inline constexpr Fix<N> operator-() const noexcept { return Fix<N>(-this->value); }
+	inline constexpr Fix<N> operator-() const noexcept {Fix<N> result; result.value = -this->value; return result;}
 };
 
 
-template<int64_t N> inline constexpr Fix<N> operator+(Fix<N> a, Fix<N> b) noexcept { return Fix<N>(a.value + b.value); }
-template<int64_t N> inline constexpr Fix<N> operator-(Fix<N> a, Fix<N> b) noexcept { return Fix<N>(a.value - b.value); }
-template<int64_t N> inline constexpr Fix<N> operator+(Fix<N> a, int64_t b) noexcept { return Fix<N>(a.value + (b << N)); }
-template<int64_t N> inline constexpr Fix<N> operator-(Fix<N> a, int64_t b) noexcept { return Fix<N>(a.value - (b << N)); }
-template<int64_t N> inline constexpr Fix<N> operator+(int64_t a, Fix<N> b) noexcept { return Fix<N>((a << N) + b.value); }
-template<int64_t N> inline constexpr Fix<N> operator-(int64_t a, Fix<N> b) noexcept {return Fix<N>((a << N) - b.value);}
+template<int64_t N> inline constexpr Fix<N> operator+(Fix<N> a, Fix<N> b)   noexcept {Fix<N> result; result.value = a.value + b.value;  return result;}
+template<int64_t N> inline constexpr Fix<N> operator-(Fix<N> a, Fix<N> b)   noexcept {Fix<N> result; result.value = a.value - b.value;  return result;}
+template<int64_t N> inline constexpr Fix<N> operator+(Fix<N> a, int64_t b)  noexcept {Fix<N> result; result.value = a.value + (b << N); return result;}
+template<int64_t N> inline constexpr Fix<N> operator-(Fix<N> a, int64_t b)  noexcept {Fix<N> result; result.value = a.value - (b << N); return result;}
+template<int64_t N> inline constexpr Fix<N> operator+(int64_t a, Fix<N> b)  noexcept {Fix<N> result; result.value = (a << N) + b.value; return result;}
+template<int64_t N> inline constexpr Fix<N> operator-(int64_t a, Fix<N> b)  noexcept {Fix<N> result; result.value = (a << N) - b.value; return result;}
 
-template<int64_t N> inline constexpr Fix<N> operator+(Fix<N> a, double b) noexcept { return a + Fix<N>(b); }
-template<int64_t N> inline constexpr Fix<N> operator+(double a, Fix<N> b) noexcept { return Fix<N>(a) + b; }
-template<int64_t N> inline constexpr Fix<N> operator-(Fix<N> a, double b) noexcept { return a - Fix<N>(b); }
-template<int64_t N> inline constexpr Fix<N> operator-(double a, Fix<N> b) noexcept { return Fix<N>(a) - b; }
+template<int64_t N> inline constexpr Fix<N> operator+(Fix<N> a, double b)   noexcept {return a + Fix<N>(b);}
+template<int64_t N> inline constexpr Fix<N> operator+(double a, Fix<N> b)   noexcept {return Fix<N>(a) + b;}
+template<int64_t N> inline constexpr Fix<N> operator-(Fix<N> a, double b)   noexcept {return a - Fix<N>(b);}
+template<int64_t N> inline constexpr Fix<N> operator-(double a, Fix<N> b)   noexcept {return Fix<N>(a) - b;}
 
-template<int64_t N> inline constexpr Fix<N> operator*(Fix<N> a, double b) noexcept {return Fix<N>(static_cast<int64_t>(a.value * b));}
-template<int64_t N> inline constexpr Fix<N> operator*(Fix<N> a, float b)  noexcept {return Fix<N>(static_cast<int64_t>(a.value * b));}
-template<int64_t N> inline constexpr Fix<N> operator*(double a, Fix<N> b) noexcept {return Fix<N>(static_cast<int64_t>(a * b.value));}
-template<int64_t N> inline constexpr Fix<N> operator*(float a, Fix<N> b)  noexcept {return Fix<N>(static_cast<int64_t>(a * b.value));}
+template<int64_t N> inline constexpr Fix<N> operator+(Fix<N> a, float b)    noexcept {return a + Fix<N>(b);}
+template<int64_t N> inline constexpr Fix<N> operator+(float a, Fix<N> b)    noexcept {return Fix<N>(a) + b;}
+template<int64_t N> inline constexpr Fix<N> operator-(Fix<N> a, float b)    noexcept {return a - Fix<N>(b);}
+template<int64_t N> inline constexpr Fix<N> operator-(float a, Fix<N> b)    noexcept {return Fix<N>(a) - b;}
 
-template<int64_t N> inline constexpr Fix<N> operator/(Fix<N> a, double b) noexcept { return Fix<N>(static_cast<int64_t>(a.value / b)); }
-template<int64_t N> inline constexpr Fix<N> operator/(Fix<N> a, float b)  noexcept { return Fix<N>(static_cast<int64_t>(a.value / b)); }
-template<int64_t N> inline constexpr Fix<N> operator/(double a, Fix<N> b) noexcept { return Fix<N>(static_cast<int64_t>(a / b.value)); }
-template<int64_t N> inline constexpr Fix<N> operator/(float a, Fix<N> b)  noexcept { return Fix<N>(static_cast<int64_t>(a / b.value)); }
+template<int64_t N> inline constexpr Fix<N> operator*(Fix<N> a, int64_t b)  noexcept {Fix<N> result; result.value = a.value * b; return result;}
+template<int64_t N> inline constexpr Fix<N> operator*(int64_t a, Fix<N> b)  noexcept {Fix<N> result; result.value = a * b.value; return result;}
 
-template<int64_t N> inline constexpr Fix<N> operator/(Fix<N> a, int b) noexcept { return Fix<N>(a.value / b); }
+template<int64_t N> inline constexpr Fix<N> operator*(Fix<N> a, double b)   noexcept {Fix<N> result; result.value = static_cast<int64_t>(a.value * b); return result;}
+template<int64_t N> inline constexpr Fix<N> operator*(Fix<N> a, float b)    noexcept {Fix<N> result; result.value = static_cast<int64_t>(a.value * b); return result;}
+template<int64_t N> inline constexpr Fix<N> operator*(double a, Fix<N> b)   noexcept {Fix<N> result; result.value = static_cast<int64_t>(a * b.value); return result;}
+template<int64_t N> inline constexpr Fix<N> operator*(float a, Fix<N> b)    noexcept {Fix<N> result; result.value = static_cast<int64_t>(a * b.value); return result;}
 
-template<int64_t N> inline constexpr Fix<N> operator*(Fix<N> a, int64_t b) noexcept { return Fix<N>(a.value * b); }
-template<int64_t N> inline constexpr Fix<N> operator*(int64_t a, Fix<N> b) noexcept { return Fix<N>(a * b.value); }
+template<int64_t N> inline constexpr Fix<N> operator/(Fix<N> a, double b)   noexcept {Fix<N> result; result.value = static_cast<int64_t>(a.value / b); return result;}
+template<int64_t N> inline constexpr Fix<N> operator/(Fix<N> a, float b)    noexcept {Fix<N> result; result.value = static_cast<int64_t>(a.value / b); return result;}
+template<int64_t N> inline constexpr Fix<N> operator/(double a, Fix<N> b)   noexcept {Fix<N> result; result.value = static_cast<int64_t>(a / b.value); return result;}
+template<int64_t N> inline constexpr Fix<N> operator/(float a, Fix<N> b)    noexcept {Fix<N> result; result.value = static_cast<int64_t>(a / b.value); return result;}
 
-template<int64_t N> inline constexpr Fix<N> operator/(Fix<N> a, int64_t b) noexcept { return Fix<N>(static_cast<int64_t>(a.value / b)); }
+template<int64_t N> inline constexpr Fix<N> operator/(Fix<N> a, int64_t b)  noexcept {Fix<N> result; result.value = static_cast<int64_t>(a.value / b); return result;}
 
-template<int64_t N> inline constexpr Fix<N> operator<<(Fix<N> a, int64_t b) noexcept { return Fix<N>(static_cast<int64_t>(a.value << b)); }
-template<int64_t N> inline constexpr Fix<N> operator>>(Fix<N> a, int64_t b) noexcept { return Fix<N>(static_cast<int64_t>(a.value >> b)); }
+template<int64_t N> inline constexpr Fix<N> operator<<(Fix<N> a, int64_t b) noexcept {Fix<N> result; result.value = static_cast<int64_t>(a.value << b); return result;}
+template<int64_t N> inline constexpr Fix<N> operator>>(Fix<N> a, int64_t b) noexcept {Fix<N> result; result.value = static_cast<int64_t>(a.value >> b); return result;}
 
 
 #define CREATE_COMPARISONS(T1, T2, V1, V2) \
@@ -89,16 +92,10 @@ CREATE_COMPARISONS(int, Fix<N>, int64_t(a) << N, b.value);
 
 template<int N>
 inline constexpr Fix<N> min(Fix<N> first, Fix<N> second) noexcept {
-	return (first.value <= second.value)? first : second;
+	return (first.value <= second.value) ? first : second;
 }
 
 template<int N>
 inline constexpr Fix<N> max(Fix<N> first, Fix<N> second) noexcept {
 	return (first.value >= second.value) ? first : second;
-}
-#undef ONE
-
-template<int64_t N>
-Fix<N> quickMultiply(Fix<N> a, Fix<N> b) noexcept {
-	return Fix<N>((a.value >> (N / 2)) * (b.value >> (N - N / 2)));
 }

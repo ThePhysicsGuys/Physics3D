@@ -11,9 +11,7 @@ struct RayIntersectBoundsFilter {
 	RayIntersectBoundsFilter(const Ray& ray) : ray(ray) {}
 
 	bool operator()(const TreeNode& node) const {
-		Position p;
-		double d;
-		return doRayAndBoundsIntersect(node.bounds, ray, p, d);
+		return doRayAndBoundsIntersect(node.bounds, ray);
 	}
 	bool operator()(const Part& part) const {
 		return true;

@@ -54,9 +54,6 @@ add_library(physics STATIC
   physics/worldPhysics.cpp
   physics/inertia.cpp
 
-  physics/math/cframe.cpp
-  physics/math/fix.cpp
-
   physics/math/linalg/eigen.cpp
   physics/math/linalg/largeMatrix.cpp
   physics/math/linalg/trigonometry.cpp

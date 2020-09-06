@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../physics/math/linalg/vec.h"
 #include "../graphics/gui/color.h"
 #include "../engine/layer/layer.h"
 #include "../engine/layer/layerStack.h"
@@ -22,7 +23,7 @@ namespace P3D::Application {
 struct BigFrame {
 public:
 	// PropertiesFrame
-	static float position[3];
+	static Vec3f position;
 
 	// DebugFrame
 	static bool renderSpheres;

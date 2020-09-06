@@ -56,10 +56,19 @@ inline Position avg(const Position& first, const Position& second) noexcept {
 inline Position castVec3ToPosition(const Vec3& vec) noexcept {
 	return Position(vec.x, vec.y, vec.z);
 }
-// case Position to Vec3, not recommended due to potential loss of precision
+// cast Vec3f to Position, not recommended due to potential loss of precision
+inline Position castVec3fToPosition(const Vec3f& vec) noexcept {
+	return Position(vec.x, vec.y, vec.z);
+}
+// cast Position to Vec3, not recommended due to potential loss of precision
 // If possible, compute relative positions, eg: pos1-pos2 = vec3 delta
 inline Vec3 castPositionToVec3(const Position& pos) noexcept {
-	return Vec3(pos.x, pos.y, pos.z);
+	return Vec3(static_cast<double>(pos.x), static_cast<double>(pos.y), static_cast<double>(pos.z));
+}
+// cast Position to Vec3f, not recommended due to potential loss of precision
+// If possible, compute relative positions, eg: pos1-pos2 = vec3f delta
+inline Vec3f castPositionToVec3f(const Position& pos) noexcept {
+	return Vec3f(static_cast<float>(pos.x), static_cast<float>(pos.y), static_cast<float>(pos.z));
 }
 
 // unconventional operator, compares xyz individually, returns true if all are true

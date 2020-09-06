@@ -99,9 +99,9 @@ void SpiderFactory::buildSpider(const GlobalCFrame& spiderPosition) {
 
 
 HollowBoxParts buildHollowBox(Bounds box, double wallThickness) {
-	double width = box.getWidth();
-	double height = box.getHeight();
-	double depth = box.getDepth();
+	double width = static_cast<double>(box.getWidth());
+	double height = static_cast<double>(box.getHeight());
+	double depth = static_cast<double>(box.getDepth());
 
 	Shape XPlate = boxShape(wallThickness, height - wallThickness * 2, depth);
 	Shape YPlate = boxShape(width, wallThickness, depth);

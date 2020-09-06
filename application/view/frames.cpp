@@ -34,7 +34,7 @@ float BigFrame::hdr = 1.0f;
 float BigFrame::gamma = 1.0f;
 float BigFrame::exposure = 1.0f;
 Color3 BigFrame::sunColor = Color3::full(1);
-float BigFrame::position[3] = { 0, 0, 0 };
+Vec3f BigFrame::position = Vec3f(0, 0, 0);
 bool BigFrame::doEvents;
 bool BigFrame::noRender;
 bool BigFrame::doUpdate;
@@ -574,20 +574,16 @@ void BigFrame::renderPropertiesFrame() {
 	if (ImGui::TreeNode("Physical")) {
 		if (sp) {
 			// Position
-			position[0] = sp->getPosition().x;
-			position[1] = sp->getPosition().y;
-			position[2] = sp->getPosition().z;
-			if (ImGui::InputFloat3("Position: ", position, 3)) {
+			position = castPositionToVec3(sp->getPosition());
+			if (ImGui::InputFloat3("Position: ", position.data, 3)) {
 				GlobalCFrame frame = sp->getCFrame();
-				frame.position = Position(position[0], position[1], position[2]);
+				frame.position = castVec3fToPosition(position);
 				sp->setCFrame(frame);
 			}
 		} else {
 			// Position
-			position[0] = 0;
-			position[1] = 0;
-			position[2] = 0;
-			ImGui::InputFloat3("Position", position, 3, ImGuiInputTextFlags_ReadOnly);
+			position = Vec3f(0, 0, 0);
+			ImGui::InputFloat3("Position", position.data, 3, ImGuiInputTextFlags_ReadOnly);
 		}
 
 		ImGui::Text("Velocity: %s", (sp) ? str(sp->getMotion().getVelocity()).c_str() : "-");

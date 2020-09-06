@@ -46,8 +46,78 @@ inline std::ostream& operator<<(std::ostream& os, const Vector<T, Size>& vector)
 	return os;
 }
 
-inline std::ostream& operator<<(std::ostream& os, const Position& position) {
-	os << "(" << double(position.x) << ", " << double(position.y) << ", " << double(position.z) << ")";
+template<int64_t N>
+inline std::ostream& operator<<(std::ostream& os, Fix<N> f) {
+	int64_t intPart = f.value >> N;
+	int64_t frac = f.value & ((1ULL << N) - 1);
+
+	if(intPart < 0) {
+		if(frac == 0) {
+			intPart = -intPart;
+		} else {
+			intPart = -intPart-1;
+			frac = (1ULL << N) - frac;
+		}
+		os << '-';
+	}
+	std::streamsize prec = os.precision();
+	
+	for(int i = 0; i < prec; i++) {
+		frac *= 5; // multiply by powers of 10, dividing out the /2 with the shifts
+		// multiply by 5 instead of 10, to stay away from the integer limit just a little longer
+	}
+
+	frac = frac >> (N - prec - 1); // shift right, but minus the divisions previously done, except for last bit, which is used for rounding
+	if(frac & 1 == 1) {
+		frac = (frac >> 1) + 1;
+
+		int64_t maxFrac = 1;
+		for(int i = 0; i < prec; i++) {
+			maxFrac *= 10;
+		}
+		if(frac >= maxFrac) {
+			frac = 0;
+			intPart++;
+		}
+	} else {
+		frac = frac >> 1;
+	}
+
+	bool fixed = os.flags() & std::ios::fixed;
+
+	os << intPart;
+	if(frac == 0) {
+		if(fixed) {
+			os << '.';
+			for(int i = 0; i < prec; i++) {
+				os << '0';
+			}
+		}
+	} else {
+		os << '.';
+		std::streamsize digits = 1;
+		int64_t digitCounter = 10;
+		while(frac >= digitCounter) {
+			digitCounter *= 10;
+			digits++;
+		}
+		std::streamsize leadingZeros = prec - digits;
+		for(int i = 0; i < leadingZeros; i++) {
+			os << '0';
+		}
+		if(!fixed) {
+			while(frac % 10 == 0) {
+				frac /= 10;
+			}
+		}
+		os << frac;
+	}
+
+	return os;
+}
+
+inline std::ostream& operator<<(std::ostream& os, Position position) {
+	os << "(" << position.x << ", " << position.y << ", " << position.z << ")";
 	return os;
 }
 

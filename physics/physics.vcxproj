@@ -272,8 +272,6 @@
     <ClCompile Include="geometry\shape.cpp" />
     <ClCompile Include="geometry\shapeBuilder.cpp" />
     <ClCompile Include="geometry\shapeClass.cpp" />
-    <ClCompile Include="math\cframe.cpp" />
-    <ClCompile Include="math\fix.cpp" />
     <ClCompile Include="math\linalg\eigen.cpp" />
     <ClCompile Include="math\linalg\largeMatrix.cpp" />
     <ClCompile Include="math\linalg\trigonometry.cpp" />
