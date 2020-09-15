@@ -159,6 +159,19 @@ TreeNode TreeNode::remove(int index) {
 	return result;
 }
 
+bool TreeNode::containsObject(void* object, const Bounds& objBounds) const {
+	if(this->isLeafNode()) {
+		return object == this->object;
+	} else {
+		for(TreeNode& subNode : *this) {
+			if(intersects(subNode.bounds, objBounds) && subNode.containsObject(object, objBounds)) {
+				return true;
+			}
+		}
+		return false;
+	}
+}
+
 void TreeNode::recalculateBoundsFromSubBounds() {
 	this->bounds = subTrees[0].bounds;
 	for (int i = 1; i < nodeCount; i++) {

@@ -40,6 +40,7 @@
     <ClCompile Include="ecsTests.cpp" />
     <ClCompile Include="estimateMotion.cpp" />
     <ClCompile Include="estimationTests.cpp" />
+    <ClCompile Include="generators.cpp" />
     <ClCompile Include="geometryTests.cpp" />
     <ClCompile Include="guiTests.cpp" />
     <ClCompile Include="indexedShapeTests.cpp" />
@@ -56,6 +57,7 @@
   <ItemGroup>
     <ClInclude Include="compare.h" />
     <ClInclude Include="estimateMotion.h" />
+    <ClInclude Include="generators.h" />
     <ClInclude Include="randomValues.h" />
     <ClInclude Include="simulation.h" />
     <ClInclude Include="testsMain.h" />

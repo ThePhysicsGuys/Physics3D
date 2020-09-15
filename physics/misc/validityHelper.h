@@ -4,6 +4,7 @@
 #include "../math/linalg/mat.h"
 #include "../math/cframe.h"
 #include "../motion.h"
+#include "../datastructures/boundsTree.h"
 
 #include <cmath>
 
@@ -96,12 +97,15 @@ bool isValid(const IndexedShape& shape);
 
 bool isValidTriangle(Triangle t, int vertexCount);
 
-
-template<typename T>
-struct BoundsTree;
 class Part;
 
-void treeValidCheck(const BoundsTree<Part>& tree);
+void treeValidCheck(const TreeNode& rootNode);
+template<typename Boundable>
+inline void treeValidCheck(const BoundsTree<Boundable>& tree) {
+	if(!tree.isEmpty()) {
+		treeValidCheck(tree.rootNode);
+	}
+}
 
 class MotorizedPhysical;
 

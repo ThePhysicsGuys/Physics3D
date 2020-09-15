@@ -215,13 +215,6 @@ void treeValidCheck(const TreeNode& rootNode) {
 	recursiveCheckNoDuplicates(rootNode, foundObjects, foundNodes);
 }
 
-void treeValidCheck(const BoundsTree<Part>& tree) {
-	if(!tree.isEmpty()) {
-		treeValidCheck(tree.rootNode);
-	}
-}
-
-
 static bool isConnectedPhysicalValid(const ConnectedPhysical* phys, const MotorizedPhysical* mainPhys);
 
 static bool isPhysicalValid(const Physical* phys, const MotorizedPhysical* mainPhys) {

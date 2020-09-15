@@ -104,7 +104,8 @@ add_executable(tests
   tests/testsMain.cpp
 
   tests/estimateMotion.cpp
-  tests/testValues.cpp  
+  tests/testValues.cpp
+  tests/generators.cpp
 
   tests/mathTests.cpp
   tests/rotationTests.cpp

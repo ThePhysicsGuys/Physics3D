@@ -39,6 +39,7 @@ bool WorldPrototype::isValid() const {
 
 static std::vector<WorldLayer> produceLayerVector(WorldPrototype* world, size_t count) {
 	std::vector<WorldLayer> result;
+	result.reserve(count);
 
 	for(size_t i = 0; i < count; i++) {
 		result.emplace_back(world);
@@ -216,40 +217,21 @@ static void removePhysicalFromList(std::vector<MotorizedPhysical*>& physicals, M
 	throw std::logic_error("No physical found to remove!");
 }
 
-void WorldPrototype::mergePhysicalGroups(const MotorizedPhysical* firstPhysical, MotorizedPhysical* secondPhysical) {
+void WorldPrototype::notifyPhysicalsMerged(const MotorizedPhysical* firstPhysical, MotorizedPhysical* secondPhysical) {
 	assert(firstPhysical->world == this);
-
-	TreeNode newNode;
 
 	if(secondPhysical->world != nullptr) {
 		assert(secondPhysical->world == this);
 		removePhysicalFromList(this->physicals, secondPhysical);
-
-		newNode = objectTree.grabGroupFor(secondPhysical->getMainPart(), secondPhysical->getMainPart()->getBounds());
-	} else {
-		secondPhysical->forEachPart([this](Part& part) {
-			this->onPartAdded(&part);
-		});
-
-		newNode = createNodeFor(secondPhysical);
 	}
-	
-	const Part* main = firstPhysical->getMainPart();
-	objectTree.addToExistingGroup(std::move(newNode), main, main->getBounds());
-
-	ASSERT_TREE_VALID(objectTree);
-}
-
-void WorldPrototype::notifyPhysicalsMerged(const MotorizedPhysical* firstPhysical, MotorizedPhysical* secondPhysical) {
-	mergePhysicalGroups(firstPhysical, secondPhysical);
 }
 
 void WorldPrototype::notifyNewPartAddedToPhysical(const MotorizedPhysical* physical, Part* newPart) {
 	assert(physical->world == this);
 
-	this->objectTree.addToExistingGroup(newPart, newPart->getBounds(), physical->getMainPart(), physical->getMainPart()->getBounds());
+	/*this->objectTree.addToExistingGroup(newPart, newPart->getBounds(), physical->getMainPart(), physical->getMainPart()->getBounds());
 	objectCount++;
-	ASSERT_TREE_VALID(objectTree);
+	ASSERT_TREE_VALID(objectTree);*/
 
 	onPartAdded(newPart);
 }
@@ -262,16 +244,6 @@ void WorldPrototype::notifyPartDetachedFromPhysical(Part* part) {
 
 	objectTree.moveOutOfGroup(part);
 	ASSERT_TREE_VALID(objectTree);
-}
-
-void WorldPrototype::notifyPartRemovedFromPhysical(Part* part) {
-	assert(part->parent == nullptr);
-
-	objectTree.remove(part, part->getBounds());
-	objectCount--;
-	ASSERT_TREE_VALID(objectTree);
-
-	this->onPartRemoved(part);
 }
 
 

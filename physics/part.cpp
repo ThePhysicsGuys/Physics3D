@@ -8,6 +8,9 @@
 
 #include "catchable_assert.h"
 #include <stdexcept>
+#include <set>
+#include <utility>
+
 
 #include "layer.h"
 
@@ -171,7 +174,94 @@ void Part::setDepth(double newDepth) {
 }
 
 
+
+struct PairLess {
+	inline bool operator()(std::pair<WorldLayer*, Part*> first, std::pair<WorldLayer*, Part*> snd) const {
+		return first.first < snd.first;
+	}
+};
+
+static std::set<std::pair<WorldLayer*, Part*>, PairLess> getLayersInPhysical(MotorizedPhysical* phys) {
+	std::set<std::pair<WorldLayer*, Part*>, PairLess> result;
+
+	phys->forEachPart([&result](Part& part) {
+		result.insert(std::make_pair(part.layer, &part));
+	});
+
+	return result;
+}
+
+static Part* getPartOfLayerInPhysical(MotorizedPhysical* phys, const WorldLayer* layer) {
+	return phys->findFirst([layer](Part& part) {return part.layer == layer; });
+}
+
+static void mergePhysicalLayers(MotorizedPhysical* first, MotorizedPhysical* second) {
+	std::set<std::pair<WorldLayer*, Part*>, PairLess> layersOfFirst = getLayersInPhysical(first);
+	std::set<std::pair<WorldLayer*, Part*>, PairLess> layersOfSecond = getLayersInPhysical(second);
+
+	for(std::pair<WorldLayer*, Part*> lSecond : layersOfSecond) {
+		auto found = layersOfFirst.find(lSecond);
+		if(found != layersOfFirst.end()) {
+			// merge layers
+			std::pair<WorldLayer*, Part*> lFirst = *found;
+
+			assert(lFirst.first == lSecond.first);
+
+			lFirst.first->mergeGroupsOf(lFirst.second, lSecond.second);
+		}
+	}
+}
+
+
+static void mergePartLayers(Part* first, Part* second) {
+	if(first->parent != nullptr) {
+		if(second->parent != nullptr) {
+			mergePhysicalLayers(first->parent->mainPhysical, second->parent->mainPhysical);
+		} else {
+			Part* foundPartInLayer = getPartOfLayerInPhysical(first->parent->mainPhysical, second->layer);
+			// add second part into first
+			if(foundPartInLayer != nullptr) {
+				second->layer->moveIntoGroup(second, foundPartInLayer);
+			}
+		}
+	} else {
+		if(second->parent != nullptr) {
+			Part* foundPartInLayer = getPartOfLayerInPhysical(second->parent->mainPhysical, first->layer);
+			// add second part into first
+			if(foundPartInLayer != nullptr) {
+				first->layer->moveIntoGroup(first, foundPartInLayer);
+			}
+		} else {
+			if(first->layer == second->layer) {
+				first->layer->joinPartsIntoNewGroup(first, second);
+			}
+		}
+	}
+}
+
+static void moveWholePhysIntoLayer(Part* part, Part* layerOwner) {
+	assert(layerOwner->layer != nullptr);
+	assert(part->layer == nullptr);
+
+	layerOwner->layer->addIntoGroup(part, layerOwner);
+}
+
+static void joinLayers(Part* main, Part* other) {
+	if(main->layer != nullptr) {
+		if(other->layer != nullptr) {
+			mergePartLayers(main, other);
+		} else {
+			moveWholePhysIntoLayer(other, main);
+		}
+	} else {
+		if(other->layer != nullptr) {
+			moveWholePhysIntoLayer(main, other);
+		}
+	}
+}
+
 void Part::attach(Part* other, const CFrame& relativeCFrame) {
+	joinLayers(this, other);
 	if(this->parent == nullptr) {
 		this->parent = new MotorizedPhysical(this);
 		this->parent->attachPart(other, relativeCFrame);

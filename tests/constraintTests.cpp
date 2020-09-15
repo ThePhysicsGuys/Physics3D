@@ -1,20 +1,23 @@
 #include "testsMain.h"
 
 #include "compare.h"
+#include "generators.h"
+#include "estimateMotion.h"
 #include "../physics/misc/toString.h"
 
 #include "../physics/constraintGroup.h"
-
-#include "estimateMotion.h"
 
 #include "../physics/geometry/shape.h"
 #include "../physics/geometry/shapeCreation.h"
 #include "../physics/part.h"
 #include "../physics/physical.h"
+#include "../physics/layer.h"
 #include "../physics/constraints/fixedConstraint.h"
 #include "../physics/constraints/motorConstraint.h"
 #include "../physics/constraints/sinusoidalPistonConstraint.h"
 #include "../physics/math/linalg/trigonometry.h"
+
+#include <functional>
 
 #define ASSERT(cond) ASSERT_TOLERANT(cond, 0.05)
 
@@ -455,4 +458,99 @@ TEST_CASE(testInternalMotionOfCenterOfMass) {
 	TranslationalMotion estimatedMotion = estimateMotion(original, v2, v3, DELTA_T);
 
 	ASSERT(motionOfCom == estimatedMotion);
+}
+
+bool areInSameGroup(Part& a, Part& b) {
+	return a.layer->tree.areInSameGroup(&a, a.getBounds(), &b, b.getBounds());
+}
+
+TEST_CASE(attachPhysicalsNoLayers) {
+	for(int iter = 0; iter < 100; iter++) {
+		auto [firstPhys, firstPhysParts, firstPhysSize] = generateMotorizedPhysical();
+		auto [secondPhys, secondPhysParts, secondPhysSize] = generateMotorizedPhysical();
+
+		ASSERT_FALSE(firstPhysParts->parent->mainPhysical == secondPhysParts->parent->mainPhysical);
+
+		generateAttachment(firstPhysParts[rand() % firstPhysSize], secondPhysParts[rand() % secondPhysSize]);
+
+		ASSERT_TRUE(firstPhysParts->parent->mainPhysical == secondPhysParts->parent->mainPhysical);
+
+		delete[] firstPhysParts;
+		delete[] secondPhysParts;
+	}
+}
+
+TEST_CASE(attachPhysicalsWithLayers) {
+	for(int iter = 0; iter < 100; iter++) {
+		WorldLayer layers[3]{WorldLayer(nullptr), WorldLayer(nullptr), WorldLayer(nullptr)};
+		auto [firstPhys, firstPhysParts, firstPhysSize] = generateMotorizedPhysical();
+		generateLayerAssignment(firstPhysParts, firstPhysSize, layers, 3);
+		auto [secondPhys, secondPhysParts, secondPhysSize] = generateMotorizedPhysical();
+		generateLayerAssignment(secondPhysParts, secondPhysSize, layers, 3);
+
+		ASSERT_FALSE(firstPhysParts->parent->mainPhysical == secondPhysParts->parent->mainPhysical);
+
+		for(int f = 0; f < firstPhysSize; f++) {
+			for(int s = 0; s < secondPhysSize; s++) {
+				Part& a = firstPhysParts[f];
+				Part& b = secondPhysParts[s];
+				if(a.layer == b.layer) {
+					ASSERT_FALSE(areInSameGroup(a, b));
+				}
+			}
+		}
+		for(int f = 0; f < firstPhysSize; f++) {
+			for(int s = 0; s < firstPhysSize; s++) {
+				Part& a = firstPhysParts[f];
+				Part& b = firstPhysParts[s];
+				if(a.layer == b.layer) {
+					ASSERT_TRUE(areInSameGroup(a, b));
+				}
+			}
+		}
+		for(int f = 0; f < secondPhysSize; f++) {
+			for(int s = 0; s < secondPhysSize; s++) {
+				Part& a = secondPhysParts[f];
+				Part& b = secondPhysParts[s];
+				if(a.layer == b.layer) {
+					ASSERT_TRUE(areInSameGroup(a, b));
+				}
+			}
+		}
+
+		generateAttachment(firstPhysParts[rand() % firstPhysSize], secondPhysParts[rand() % secondPhysSize]);
+
+		ASSERT_TRUE(firstPhysParts->parent->mainPhysical == secondPhysParts->parent->mainPhysical);
+
+		for(int f = 0; f < firstPhysSize; f++) {
+			for(int s = 0; s < secondPhysSize; s++) {
+				Part& a = firstPhysParts[f];
+				Part& b = secondPhysParts[s];
+				if(a.layer == b.layer) {
+					ASSERT_TRUE(areInSameGroup(a, b));
+				}
+			}
+		}
+		for(int f = 0; f < firstPhysSize; f++) {
+			for(int s = 0; s < firstPhysSize; s++) {
+				Part& a = firstPhysParts[f];
+				Part& b = firstPhysParts[s];
+				if(a.layer == b.layer) {
+					ASSERT_TRUE(areInSameGroup(a, b));
+				}
+			}
+		}
+		for(int f = 0; f < secondPhysSize; f++) {
+			for(int s = 0; s < secondPhysSize; s++) {
+				Part& a = secondPhysParts[f];
+				Part& b = secondPhysParts[s];
+				if(a.layer == b.layer) {
+					ASSERT_TRUE(areInSameGroup(a, b));
+				}
+			}
+		}
+
+		delete[] firstPhysParts;
+		delete[] secondPhysParts;
+	}
 }

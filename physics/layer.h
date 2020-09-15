@@ -14,6 +14,8 @@ public:
 
 	void addPart(Part* newPart);
 	void removePart(Part* partToRemove);
+	void addIntoGroup(Part* newPart, Part* group);
+	//void addIntoGroup(MotorizedPhysical* newPhys, Part* group);
 
 	void notifyPartBoundsUpdated(const Part* updatedPart, const Bounds& oldBounds);
 	void notifyPartGroupBoundsUpdated(const Part* mainPart, const Bounds& oldMainPartBounds);
@@ -22,5 +24,9 @@ public:
 		This is something that in general should not be performed when the part is already in a world, but this function is provided for completeness
 	*/
 	void notifyPartStdMoved(Part* oldPartPtr, Part* newPartPtr) noexcept;
+
+	void mergeGroupsOf(Part* first, Part* second);
+	void moveIntoGroup(Part* partToMove, Part* group);
+	void joinPartsIntoNewGroup(Part* p1, Part* p2);
 };
 

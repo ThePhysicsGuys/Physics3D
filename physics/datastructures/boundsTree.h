@@ -64,6 +64,7 @@ struct TreeNode {
 	void addInside(TreeNode&& newNode);
 	TreeNode remove(int index);
 	
+	bool containsObject(void* object, const Bounds& objBounds) const;
 
 	void recalculateBounds();
 	void recalculateBoundsFromSubBounds();
@@ -307,7 +308,11 @@ struct BoundsTree {
 	void add(Boundable* obj, const Bounds& bounds) {
 		this->add(TreeNode(obj, bounds, true));
 	}
-	
+	void add(Boundable* obj) {
+		this->add(TreeNode(obj, obj->getBounds(), true));
+	}
+
+
 	void addToExistingGroup(Boundable* obj, const Bounds& bounds, TreeNode& groupNode) {
 		groupNode.addInside(TreeNode(obj, bounds, false));
 	}
@@ -340,6 +345,16 @@ struct BoundsTree {
 		stack.expandBoundsAllTheWayToTop();
 	}
 
+	// merges the groupNode of second into the groupNode of first
+	void mergeGroupsOf(Boundable* first, const Bounds& firstBounds, Boundable* second, const Bounds& secondBounds) {
+		NodeStack firstStack = findGroupFor(first, firstBounds);
+		TreeNode secondGroup = grabGroupFor(second, secondBounds);
+		assert(secondGroup.isGroupHead);
+		secondGroup.isGroupHead = false;
+		(*firstStack)->addInside(std::move(secondGroup));
+		firstStack.expandBoundsAllTheWayToTop();
+	}
+
 	void remove(const Boundable* obj, const Bounds& strictBounds) {
 		if (rootNode.isLeafNode()) {
 			if (rootNode.object == obj) {
@@ -353,6 +368,9 @@ struct BoundsTree {
 			NodeStack stack(rootNode, obj, strictBounds);
 			stack.remove();
 		}
+	}
+	void remove(const Boundable* obj) {
+		this->remove(obj, obj->getBounds());
 	}
 	void moveOutOfGroup(const Boundable* obj, const Bounds& strictBounds) {
 		TreeNode node = this->grab(obj, strictBounds);
@@ -444,6 +462,23 @@ struct BoundsTree {
 		} else {
 			return this->rootNode.getNumberOfObjectsInNode();
 		}
+	}
+
+	inline bool areInSameGroup(Boundable* first, Bounds firstBounds, Boundable* second, Bounds secondBounds) {
+		TreeNode* firstGroup = *findGroupFor(first, firstBounds);
+		TreeNode* secondGroup = *findGroupFor(second, secondBounds);
+		return firstGroup == secondGroup;
+	}
+
+	inline bool contains(Boundable* obj, Bounds objBounds) {
+		if(isEmpty()) {
+			return false;
+		} else {
+			return rootNode.containsObject(obj, objBounds);
+		}
+	}
+	inline bool contains(Boundable* obj) {
+		return contains(obj, obj->getBounds());
 	}
 
 	inline BoundsTreeIter<TreeIterator, Boundable> begin() {

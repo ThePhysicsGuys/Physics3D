@@ -171,14 +171,6 @@ private:
 		Called when a part gets detached from a physical
 	*/
 	void notifyPartDetachedFromPhysical(Part* part);
-	/*
-		Called when a part gets removed from a physical
-	*/
-	void notifyPartRemovedFromPhysical(Part* part);
-
-
-private: // actually private fields and methods, not to be used by any friends
-	void mergePhysicalGroups(const MotorizedPhysical* first, MotorizedPhysical* second);
 
 protected:
 	// World tick steps

@@ -76,6 +76,14 @@ protected:
 	// expects a function of type void(HardPhysicalConnection&, Physical& parent, Physical& child)
 	template<typename Func>
 	void forEachHardConstraintInChildren(const Func& func);
+
+	// expects a predicate of type bool(const Part& p)
+	template<typename Pred>
+	const Part* findFirstInThisAndChildren(const Pred& pred) const;
+
+	// expects a predicate of type bool(Part& p)
+	template<typename Pred>
+	Part* findFirstInThisAndChildren(const Pred& pred);
 public:
 	RigidBody rigidBody;
 
@@ -336,6 +344,18 @@ public:
 		this->forEachHardConstraintInChildren(func);
 	}
 
+	// expects a predicate of type bool(const Part& p)
+	template<typename Pred>
+	const Part* findFirst(const Pred& pred) const {
+		return this->findFirstInThisAndChildren(pred);
+	}
+
+	// expects a predicate of type bool(Part& p)
+	template<typename Pred>
+	Part* findFirst(const Pred& pred) {
+		return this->findFirstInThisAndChildren(pred);
+	}
+
 	bool isValid() const;
 };
 
@@ -384,6 +404,49 @@ void Physical::forEachHardConstraintInChildren(const Func& func) {
 	for(ConnectedPhysical& conPhys : this->childPhysicals) {
 		func(*this, conPhys);
 		conPhys.forEachHardConstraintInChildren(func);
+	}
+}
+
+
+// expects a function of type bool(const Part& p)
+template<typename Pred>
+const Part* Physical::findFirstInThisAndChildren(const Pred& pred) const {
+	if(pred(this->rigidBody.mainPart)) {
+		return this->rigidBody.mainPart;
+	} else {
+		for(const AttachedPart& p : this->rigidBody.parts) {
+			if(pred(p.part)) {
+				return p.part;
+			}
+		}
+		for(const ConnectedPhysical& conPhys : childPhysicals) {
+			const Part* found = conPhys.findFirstInThisAndChildren(pred);
+			if(found != nullptr) {
+				return found;
+			}
+		}
+		return nullptr;
+	}
+}
+
+// expects a function of type bool(Part& p)
+template<typename Pred>
+Part* Physical::findFirstInThisAndChildren(const Pred& pred) {
+	if(pred(*this->rigidBody.mainPart)) {
+		return this->rigidBody.mainPart;
+	} else {
+		for(const AttachedPart& p : this->rigidBody.parts) {
+			if(pred(*p.part)) {
+				return p.part;
+			}
+		}
+		for(ConnectedPhysical& conPhys : childPhysicals) {
+			Part* found = conPhys.findFirstInThisAndChildren(pred);
+			if(found != nullptr) {
+				return found;
+			}
+		}
+		return nullptr;
 	}
 }
 
