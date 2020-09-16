@@ -22,7 +22,7 @@
 namespace P3D::Application {
 
 PlayerWorld::PlayerWorld(double deltaT) : SynchronizedWorld<ExtendedPart>(deltaT) {
-	ecstree = new Engine::ECSTree();
+
 }
 
 void PlayerWorld::applyExternalForces() {
@@ -82,11 +82,7 @@ void PlayerWorld::applyExternalForces() {
 }
 
 void PlayerWorld::onPartAdded(ExtendedPart* part) {
-	/*ExtendedPart* extendedPart = static_cast<ExtendedPart*>(part);
-	Engine::Entity* entity = new Engine::Entity(extendedPart->name);
-	Engine::Component* model = new Model(extendedPart);
-	entity->addComponent(model);
-	ecstree->addNode(ecstree->getRoot(), entity);*/
+	auto entity = registry.create();
 }
 
 void PlayerWorld::onPartRemoved(ExtendedPart* part) {

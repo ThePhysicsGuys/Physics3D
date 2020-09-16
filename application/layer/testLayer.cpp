@@ -29,7 +29,7 @@ GLID texture = 0;
 int textureWidth = 512;
 int textureHeight = 512;
 
-void TestLayer::onInit() {
+void TestLayer::onInit(Engine::Registry64& registry) {
 	glGenTextures(1, &texture);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture);
@@ -59,16 +59,16 @@ void TestLayer::onInit() {
 	shader = CShader(parseShader("ComputeShader", "../res/shaders/compute.shader"));
 }
 
-void TestLayer::onUpdate() {
+void TestLayer::onUpdate(Engine::Registry64& registry) {
 
 }
 
-void TestLayer::onEvent(Engine::Event& event) {
+void TestLayer::onEvent(Engine::Registry64& registry, Engine::Event& event) {
 	using namespace Engine;
 
 }
 
-void TestLayer::onRender() {
+void TestLayer::onRender(Engine::Registry64& registry) {
 	using namespace Graphics;
 	using namespace Graphics::Renderer;
 
@@ -84,7 +84,7 @@ void TestLayer::onRender() {
 	ImGui::End();
 }
 
-void TestLayer::onClose() {
+void TestLayer::onClose(Engine::Registry64& registry) {
 }
 
 };

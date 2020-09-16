@@ -39,10 +39,11 @@
 #include "../graphics/resource/textureResource.h"
 #include "../engine/io/import.h"
 #include "../engine/meshRegistry.h"
-
+#include "../engine/ecs/registry.h"
 #include "../engine/event/keyEvent.h"
 #include "../engine/input/keyboard.h"
 #include "../engine/event/windowEvent.h"
+
 
 #include "io/saveDialog.h"
 
@@ -75,11 +76,10 @@ void init(int argc, const char** args) {
 
 	WorldBuilder::init();
 
-	if(argc >= 2) {
+	if(argc >= 2) 
 		loadFile(args[1]);
-	} else {
+	else 
 		setupWorld(argc, args);
-	}
 	
 	Log::info("Initializing screen");
 	screen.onInit();
@@ -478,7 +478,6 @@ void onEvent(Engine::Event& event) {
 	dispatcher.dispatch<KeyPressEvent>(onKeyPress);
 }
 
-
 void stop(int returnCode) {
 	Log::info("Closing physics");
 	physicsThread.stop();
@@ -528,9 +527,6 @@ void runTick() {
 	physicsThread.runTick();
 }
 
-
-// Flying
-
 void toggleFlying() {
 	world.asyncModification([] () {
 		if (screen.camera.flying) {
@@ -547,17 +543,20 @@ void toggleFlying() {
 };
 
 int main(int argc, const char** args) {
-	using namespace P3D;
+	using namespace P3D::Application;
+	using namespace P3D::Graphics;
 
-	Application::init(argc, args);
+	init(argc, args);
 
 	Log::info("Started rendering");
-	while (!Application::screen.shouldClose()) {
-		Graphics::graphicsMeasure.mark(Graphics::GraphicsProcess::UPDATE);
-		Application::screen.onUpdate();
-		Application::screen.onRender();
-		Graphics::graphicsMeasure.end();
+	while (!screen.shouldClose()) {
+		graphicsMeasure.mark(GraphicsProcess::UPDATE);
+
+		screen.onUpdate();
+		screen.onRender();
+
+		graphicsMeasure.end();
 	}
 
-	Application::stop(0);
+	stop(0);
 }

@@ -21,7 +21,7 @@
 
 namespace P3D::Application {
 
-void ImGuiLayer::onInit() {
+void ImGuiLayer::onInit(Engine::Registry64& registry) {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void) io;
@@ -47,17 +47,17 @@ void ImGuiLayer::onInit() {
 	ImGui_ImplOpenGL3_Init("#version 410");
 }
 
-void ImGuiLayer::onUpdate() {
+void ImGuiLayer::onUpdate(Engine::Registry64& registry) {
 
 }
 
-void ImGuiLayer::onEvent(Engine::Event& event) {
+void ImGuiLayer::onEvent(Engine::Registry64& registry, Engine::Event& event) {
 	if (!sceneHovered) {
 		event.handled = event.inCategory(Engine::EventCategoryMouse) && ImGui::GetIO().WantCaptureMouse;
 	}
 }
 
-void ImGuiLayer::onRender() {
+void ImGuiLayer::onRender(Engine::Registry64& registry) {
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
 	ImGui::Begin("Scene", (bool*)0, ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar /*| ImGuiWindowFlags_NoInputs*/);
@@ -84,7 +84,7 @@ void ImGuiLayer::onRender() {
 	}
 }
 
-void ImGuiLayer::onClose() {
+void ImGuiLayer::onClose(Engine::Registry64& registry) {
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();

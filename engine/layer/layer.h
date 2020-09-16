@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../event/event.h"
+#include "../ecs/registry.h"
 
 #include <string>
 
@@ -39,11 +40,11 @@ public:
 
 	inline virtual void onAttach() {}
 	inline virtual void onDetach() {}
-	inline virtual void onInit() {}
-	inline virtual void onEvent(Engine::Event& event) {}
-	inline virtual void onUpdate() {}
-	inline virtual void onRender() {}
-	inline virtual void onClose() {}
+	inline virtual void onInit(Registry64& registry) {}
+	inline virtual void onEvent(Registry64& registry, Event& event) {}
+	inline virtual void onUpdate(Registry64& registry) {}
+	inline virtual void onRender(Registry64& registry) {}
+	inline virtual void onClose(Registry64& registry) {}
 };
 
 };

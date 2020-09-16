@@ -8,7 +8,7 @@
 
 namespace P3D::Application {
 
-void CameraLayer::onInit() {
+void CameraLayer::onInit(Engine::Registry64& registry) {
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
 	// Camera init
@@ -17,7 +17,7 @@ void CameraLayer::onInit() {
 	screen->camera.onUpdate(1.0f, screen->camera.aspect, 0.01f, 10000.0f);
 }
 
-void CameraLayer::onUpdate() {
+void CameraLayer::onUpdate(Engine::Registry64& registry) {
 	using namespace Engine;
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
@@ -57,17 +57,17 @@ void CameraLayer::onUpdate() {
 	screen->camera.onUpdate();
 }
 
-void CameraLayer::onEvent(Engine::Event& event) {
+void CameraLayer::onEvent(Engine::Registry64& registry, Engine::Event& event) {
 	Screen* screen = static_cast<Screen*>(this->ptr);
 	screen->camera.onEvent(event);
 }
 
-void CameraLayer::onRender() {
+void CameraLayer::onRender(Engine::Registry64& registry) {
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
 }
 
-void CameraLayer::onClose() {
+void CameraLayer::onClose(Engine::Registry64& registry) {
 
 }
 };

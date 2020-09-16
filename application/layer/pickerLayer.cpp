@@ -14,7 +14,7 @@ namespace P3D::Application {
 
 Engine::ToolManager toolManager;
 
-void PickerLayer::onInit() {
+void PickerLayer::onInit(Engine::Registry64& registry) {
 	Picker::onInit();
 	
 	toolManager.onInit();
@@ -22,7 +22,7 @@ void PickerLayer::onInit() {
 	//toolManager.selectTool<SelectionTool>();
 }
 
-void PickerLayer::onUpdate() {
+void PickerLayer::onUpdate(Engine::Registry64& registry) {
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
 	Picker::onUpdate(*screen, handler->mousePosition);
@@ -30,13 +30,13 @@ void PickerLayer::onUpdate() {
 	toolManager.onUpdate();
 }
 
-void PickerLayer::onEvent(Engine::Event& event) {
+void PickerLayer::onEvent(Engine::Registry64& registry, Engine::Event& event) {
 	Picker::onEvent(event);
 
 	toolManager.onEvent(event);
 }
 
-void PickerLayer::onRender() {
+void PickerLayer::onRender(Engine::Registry64& registry) {
 	using namespace Graphics;
 	using namespace Graphics::Renderer;
 	Screen* screen = static_cast<Screen*>(this->ptr);
@@ -53,7 +53,7 @@ void PickerLayer::onRender() {
 	endScene();
 }
 
-void PickerLayer::onClose() {
+void PickerLayer::onClose(Engine::Registry64& registry) {
 	Picker::onClose();
 
 	toolManager.onClose();

@@ -97,7 +97,7 @@ static Color getAlbedoForPart(Screen* screen, Part* part) {
 	return computedAmbient;
 }
 
-void ModelLayer::onInit() {
+void ModelLayer::onInit(Engine::Registry64& registry) {
 	using namespace Graphics;
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
@@ -114,15 +114,15 @@ void ModelLayer::onInit() {
 	Shaders::instanceShader.updateTexture(false);
 }
 
-void ModelLayer::onUpdate() {
+void ModelLayer::onUpdate(Engine::Registry64& registry) {
 
 }
 
-void ModelLayer::onEvent(Engine::Event& event) {
+void ModelLayer::onEvent(Engine::Registry64& registry, Engine::Event& event) {
 
 }
 
-void ModelLayer::onRender() {
+void ModelLayer::onRender(Engine::Registry64& registry) {
 	using namespace Graphics;
 	using namespace Graphics::Renderer;
 	Screen* screen = static_cast<Screen*>(this->ptr);
@@ -235,7 +235,7 @@ void ModelLayer::onRender() {
 	endScene();
 }
 
-void ModelLayer::onClose() {
+void ModelLayer::onClose(Engine::Registry64& registry) {
 
 }
 

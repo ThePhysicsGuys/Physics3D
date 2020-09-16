@@ -12,25 +12,25 @@
 
 namespace P3D::Application {
 
-void PostprocessLayer::onInit() {
+void PostprocessLayer::onInit(Engine::Registry64& registry) {
 
 }
 
-void PostprocessLayer::onUpdate() {
+void PostprocessLayer::onUpdate(Engine::Registry64& registry) {
 
 }
 
-void PostprocessLayer::onEvent(Engine::Event& event) {
+void PostprocessLayer::onEvent(Engine::Registry64& registry, Engine::Event& event) {
 
 }
 
-void PostprocessLayer::onRender() {
+void PostprocessLayer::onRender(Engine::Registry64& registry) {
 	using namespace Graphics;
 	using namespace Graphics::Renderer;
 	Screen* screen = static_cast<Screen*>(this->ptr);
 }
 
-void PostprocessLayer::onClose() {
+void PostprocessLayer::onClose(Engine::Registry64& registry) {
 
 }
 

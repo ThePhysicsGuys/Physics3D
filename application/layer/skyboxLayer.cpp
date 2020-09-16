@@ -59,7 +59,7 @@ void updateStars(float time) {
 
 }
 
-void SkyboxLayer::onInit() {
+void SkyboxLayer::onInit(Engine::Registry64& registry) {
 	skyboxTexture = new CubeMap("../res/skybox/right.jpg", "../res/skybox/left.jpg", "../res/skybox/top.jpg", "../res/skybox/bottom.jpg", "../res/skybox/front.jpg", "../res/skybox/back.jpg");
 
 	ResourceManager::add<TextureResource>("night", "../res/textures/night.png");
@@ -73,7 +73,7 @@ void SkyboxLayer::onInit() {
 
 float time;
 
-void SkyboxLayer::onUpdate() {
+void SkyboxLayer::onUpdate(Engine::Registry64& registry) {
 	if (!pauze)
 		time = fmod((float) (glfwGetTime() / 30.0), 1.0f);
 
@@ -86,11 +86,11 @@ void SkyboxLayer::onUpdate() {
 	updateStars(time);
 }
 
-void SkyboxLayer::onEvent(Engine::Event& event) {
+void SkyboxLayer::onEvent(Engine::Registry64& registry, Engine::Event& event) {
 
 }
 
-void SkyboxLayer::onRender() {
+void SkyboxLayer::onRender(Engine::Registry64& registry) {
 	using namespace Graphics;
 	using namespace Graphics::Renderer;
 	graphicsMeasure.mark(GraphicsProcess::SKYBOX);
@@ -139,7 +139,7 @@ void SkyboxLayer::onRender() {
 	endScene();
 }
 
-void SkyboxLayer::onClose() {
+void SkyboxLayer::onClose(Engine::Registry64& registry) {
 	skyboxTexture->close();
 }
 

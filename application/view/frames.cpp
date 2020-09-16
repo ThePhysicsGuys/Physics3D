@@ -550,7 +550,7 @@ void BigFrame::renderECSNode(Engine::Node* node) {
 void BigFrame::renderECSTree() {
 	using namespace Engine;
 
-	ECSTree* tree = world.ecstree;
+	ECSTree* tree = nullptr;
 
 	if (tree == nullptr)
 		return;

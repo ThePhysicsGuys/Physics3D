@@ -1,6 +1,7 @@
 #pragma once
 
 #include "layer.h"
+#include "../engine/ecs/registry.h"
 
 namespace P3D::Engine {
 
@@ -15,11 +16,11 @@ public:
 	void pushLayer(Layer* layer);
 	void popLayer(Layer* layer);
 
-	void onInit();
-	void onUpdate();
-	void onEvent(Engine::Event& event);
-	void onRender();
-	void onClose();
+	void onInit(Engine::Registry64& registry);
+	void onUpdate(Engine::Registry64& registry);
+	void onEvent(Engine::Registry64& registry, Engine::Event& event);
+	void onRender(Engine::Registry64& registry);
+	void onClose(Engine::Registry64& registry);
 
 	std::vector<Layer*>::iterator begin();
 	std::vector<Layer*>::iterator end();

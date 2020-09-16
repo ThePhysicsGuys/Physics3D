@@ -4,6 +4,7 @@
 #include "../engine/ecs/tree.h"
 #include "../physics/math/position.h"
 #include "../physics/synchonizedWorld.h"
+#include "../engine/ecs/registry.h"
 
 namespace P3D::Application {
 
@@ -11,7 +12,7 @@ class PlayerWorld : public SynchronizedWorld<ExtendedPart> {
 public:
 	PlayerWorld(double deltaT);
 
-	Engine::ECSTree* ecstree;
+	Engine::Registry64 registry;
 
 	Part* selectedPart = nullptr;
 	Vec3 localSelectedPoint;

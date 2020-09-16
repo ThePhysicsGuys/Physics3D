@@ -23,12 +23,12 @@
 
 namespace P3D::Application {
 
-void ConstraintLayer::onInit() {
+void ConstraintLayer::onInit(Engine::Registry64& registry) {
 	Graphics::VisualShape prismShape(Library::createPrism(6, 0.5, 1.0));
 	this->hexagon = Engine::MeshRegistry::addMeshShape(prismShape);
 
 }
-void ConstraintLayer::onUpdate() {
+void ConstraintLayer::onUpdate(Engine::Registry64& registry) {
 
 }
 
@@ -127,7 +127,7 @@ static void recurseRenderHardConstraints(const ConstraintLayer* cl, const Physic
 	}
 }
 
-void ConstraintLayer::onRender() {
+void ConstraintLayer::onRender(Engine::Registry64& registry) {
 	using namespace Graphics;
 	using namespace Graphics::Renderer;
 
@@ -153,11 +153,13 @@ void ConstraintLayer::onRender() {
 
 	endScene();
 }
-void ConstraintLayer::onClose() {
+
+void ConstraintLayer::onEvent(Engine::Registry64& registry, Engine::Event& event) {
 
 }
 
-void ConstraintLayer::onEvent(Engine::Event& event) {
+void ConstraintLayer::onClose(Engine::Registry64& registry) {
 
 }
+
 };

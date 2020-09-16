@@ -36,7 +36,7 @@
 
 #include "../physics/geometry/shapeClass.h"
 #include "../engine/meshRegistry.h"
-#include "../engine/ecs/tree.h"
+#include "../engine/ecs/registry.h"
 
 #include "frames.h"
 
@@ -186,7 +186,7 @@ void Screen::onInit() {
 	layerStack.pushLayer(&imguiLayer);
 
 	// Layer init
-	layerStack.onInit();
+	layerStack.onInit(world->registry);
 
 	// Resize
 	Engine::FrameBufferResizeEvent event(dimension.x, dimension.y);
@@ -197,10 +197,8 @@ void Screen::onInit() {
 }
 
 void Screen::onUpdate() {
-	Engine::ECSTree* tree = this->world->ecstree;
-
 	// Update layers
-	layerStack.onUpdate();
+	layerStack.onUpdate(world->registry);
 }
 
 void Screen::onEvent(Engine::Event& event) {
@@ -215,7 +213,7 @@ void Screen::onEvent(Engine::Event& event) {
 		}
 	}*/
 
-	layerStack.onEvent(event);
+	layerStack.onEvent(world->registry, event);
 }
 
 void Screen::onRender() {
@@ -231,7 +229,7 @@ void Screen::onRender() {
 	defaultSettings(screenFrameBuffer->getID());
 
 	// Render layers
-	layerStack.onRender();
+	layerStack.onRender(world->registry);
 
 	// Render imgui
 	imguiLayer.end();
@@ -249,7 +247,7 @@ void Screen::onRender() {
 void Screen::onClose() {
 	screenFrameBuffer->close();
 
-	layerStack.onClose();
+	layerStack.onClose(world->registry);
 
 	Graphics::Library::onClose();
 

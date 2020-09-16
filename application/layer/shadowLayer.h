@@ -18,11 +18,11 @@ public:
 
 	void renderScene();
 
-	virtual void onInit() override;
-	virtual void onUpdate() override;
-	virtual void onEvent(Engine::Event& event) override;
-	virtual void onRender() override;
-	virtual void onClose() override;
+	virtual void onInit(Engine::Registry64& registry) override;
+	virtual void onUpdate(Engine::Registry64& registry) override;
+	virtual void onEvent(Engine::Registry64& registry, Engine::Event& event) override;
+	virtual void onRender(Engine::Registry64& registry) override;
+	virtual void onClose(Engine::Registry64& registry) override;
 };
 
 };

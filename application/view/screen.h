@@ -10,7 +10,6 @@
 #include "../engine/layer/layerStack.h"
 #include "camera.h"
 
-
 namespace P3D::Graphics {
 struct Quad;
 class FrameBuffer;

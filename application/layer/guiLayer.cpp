@@ -54,7 +54,7 @@ bool onWindowResize(const Engine::WindowResizeEvent& event) {
 	return GUI::onWindowResize({ dimension, aspect });
 }
 
-void GuiLayer::onInit() {
+void GuiLayer::onInit(Engine::Registry64& registry) {
 	using namespace Graphics;
 
 	Screen* screen = static_cast<Screen*>(this->ptr);
@@ -64,7 +64,7 @@ void GuiLayer::onInit() {
 	Graphics::Shaders::guiShader.init(screen->camera.orthoMatrix);
 }
 
-void GuiLayer::onUpdate() {
+void GuiLayer::onUpdate(Engine::Registry64& registry) {
 	using namespace Graphics;
 
 	Screen* screen = static_cast<Screen*>(this->ptr);
@@ -76,7 +76,7 @@ void GuiLayer::onUpdate() {
 	GUI::intersect(GUI::map(handler->mousePosition));
 }
 
-void GuiLayer::onEvent(Engine::Event& event) {
+void GuiLayer::onEvent(Engine::Registry64& registry, Engine::Event& event) {
 	using namespace Engine;
 
 	EventDispatcher dispatcher(event);
@@ -87,7 +87,7 @@ void GuiLayer::onEvent(Engine::Event& event) {
 	dispatcher.dispatch<WindowResizeEvent>(onWindowResize);
 }
 
-void GuiLayer::onRender() {
+void GuiLayer::onRender(Engine::Registry64& registry) {
 	using namespace Graphics;
 	using namespace Graphics::Renderer;
 	Screen* screen = static_cast<Screen*>(this->ptr);
@@ -100,7 +100,7 @@ void GuiLayer::onRender() {
 	endScene();
 }
 
-void GuiLayer::onClose() {
+void GuiLayer::onClose(Engine::Registry64& registry) {
 	using namespace Graphics;
 	GUI::onClose();
 }

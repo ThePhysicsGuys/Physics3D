@@ -101,7 +101,7 @@ static bool recursiveColTreeForOneObject(const TreeNode& node, const Part* part,
 	return false;
 }
 
-void DebugLayer::onInit() {
+void DebugLayer::onInit(Engine::Registry64& registry) {
 
 	// Origin init
 	originMesh = new Graphics::ArrayMesh(nullptr, 1, 3, Graphics::Renderer::POINT);
@@ -114,15 +114,15 @@ void DebugLayer::onInit() {
 
 }
 
-void DebugLayer::onUpdate() {
+void DebugLayer::onUpdate(Engine::Registry64& registry) {
 
 }
 
-void DebugLayer::onEvent(Engine::Event& event) {
+void DebugLayer::onEvent(Engine::Registry64& registry, Engine::Event& event) {
 
 }
 
-void DebugLayer::onRender() {
+void DebugLayer::onRender(Engine::Registry64& registry) {
 	using namespace Graphics;
 	using namespace Graphics::Renderer;
 	using namespace Graphics::Debug;
@@ -227,7 +227,7 @@ void DebugLayer::onRender() {
 	endScene();
 }
 
-void DebugLayer::onClose() {
+void DebugLayer::onClose(Engine::Registry64& registry) {
 
 }
 

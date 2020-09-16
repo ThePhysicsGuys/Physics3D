@@ -31,22 +31,22 @@ Graphics::BarChartClassInfo iterChartClasses[] {
 Graphics::BarChart iterationChart("Iteration Statistics", "", GJKCollidesIterationStatistics.labels, iterChartClasses, Vec2f(-1.0f + 0.1f, -0.3f), Vec2f(0.8f, 0.6f), 3, 17);
 Graphics::SlidingChart fpsSlidingChart("Fps Fps", Vec2f(-0.3f, 0.2f), Vec2f(0.7f, 0.4f));
 
-void DebugOverlay::onInit() {
+void DebugOverlay::onInit(Engine::Registry64& registry) {
 	using namespace Graphics;
 	fpsSlidingChart.add(SlidingChartDataSetInfo("Fps 1", 100, COLOR::ORANGE, 2.0));
 	fpsSlidingChart.add(SlidingChartDataSetInfo("Fps 2", 50, COLOR::BLUE, 1.0));
 }
 
-void DebugOverlay::onUpdate() {
+void DebugOverlay::onUpdate(Engine::Registry64& registry) {
 	using namespace Graphics::Debug;
 	fieldIndex = 0;
 }
 
-void DebugOverlay::onEvent(Engine::Event& event) {
+void DebugOverlay::onEvent(Engine::Registry64& registry, Engine::Event& event) {
 
 }
 
-void DebugOverlay::onRender() {
+void DebugOverlay::onRender(Engine::Registry64& registry) {
 	using namespace Graphics;
 	using namespace Graphics::Debug;
 	using namespace Graphics::Renderer;
@@ -140,7 +140,7 @@ void DebugOverlay::onRender() {
 	endScene();
 }
 
-void DebugOverlay::onClose() {
+void DebugOverlay::onClose(Engine::Registry64& registry) {
 
 }
 

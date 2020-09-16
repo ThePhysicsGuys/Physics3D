@@ -24,52 +24,52 @@ void LayerStack::popLayer(Layer* layer) {
 	}
 }
 
-void LayerStack::onInit() {
+void LayerStack::onInit(Engine::Registry64& registry) {
 	for (auto i = begin(); i != end(); ++i) {
-		(*i)->onInit();
+		(*i)->onInit(registry);
 	}
 }
 
-void LayerStack::onUpdate() {
+void LayerStack::onUpdate(Engine::Registry64& registry) {
 	for (auto i = begin(); i != end(); ++i) {
 		Layer* layer = *i;
 
 		if (layer->flags & (Layer::Disabled | Layer::NoUpdate))
 			continue;
 
-		layer->onUpdate();
+		layer->onUpdate(registry);
 	}
 }
 
-void LayerStack::onEvent(Engine::Event& event) {
+void LayerStack::onEvent(Engine::Registry64& registry, Engine::Event& event) {
 	for (auto i = rbegin(); i != rend(); ++i) {
 		Layer* layer = *i;
 
 		if (layer->flags & (Layer::Disabled | Layer::NoEvents))
 			continue;
 
-		layer->onEvent(event);
+		layer->onEvent(registry, event);
 
 		if (event.handled)
 			return;
 	}
 }
 
-void LayerStack::onRender() {
+void LayerStack::onRender(Engine::Registry64& registry) {
 	for (auto i = begin(); i != end(); ++i) {
 		Layer* layer = *i;
 
 		if (layer->flags & (Layer::Disabled | Layer::NoRender))
 			continue;
 
-		layer->onRender();
+		layer->onRender(registry);
 	}
 }
 
-void LayerStack::onClose() {
+void LayerStack::onClose(Engine::Registry64& registry) {
 
 	for (auto i = rbegin(); i != rend(); ++i) {
-		(*i)->onClose();
+		(*i)->onClose(registry);
 	}
 }
 

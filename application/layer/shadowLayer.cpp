@@ -36,7 +36,7 @@ GLID HEIGHT = 2048;
 
 IndexedMesh* mesh = nullptr;
 
-void ShadowLayer::onInit() {
+void ShadowLayer::onInit(Engine::Registry64& registry) {
 	glGenFramebuffers(1, &depthMapFBO);
 
 	glGenTextures(1, &depthMap);
@@ -57,11 +57,11 @@ void ShadowLayer::onInit() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0/*screen->screenFrameBuffer->getID()*/);
 }
 
-void ShadowLayer::onUpdate() {
+void ShadowLayer::onUpdate(Engine::Registry64& registry) {
 
 }
 
-void ShadowLayer::onEvent(Engine::Event& event) {
+void ShadowLayer::onEvent(Engine::Registry64& registry, Engine::Event& event) {
 	using namespace Engine;
 
 }
@@ -84,7 +84,7 @@ void ShadowLayer::renderScene() {
 	}
 }
 
-void ShadowLayer::onRender() {
+void ShadowLayer::onRender(Engine::Registry64& registry) {
 	using namespace Graphics;
 	using namespace Graphics::Renderer;
 
@@ -109,7 +109,7 @@ void ShadowLayer::onRender() {
 	Graphics::renderQuad();*/
 }
 
-void ShadowLayer::onClose() {
+void ShadowLayer::onClose(Engine::Registry64& registry) {
 }
 
 };
