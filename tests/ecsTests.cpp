@@ -115,3 +115,26 @@ TEST_CASE(getChildren) {
 
 	ASSERT_TRUE(count == 2);
 }
+
+TEST_CASE(getFromView) {
+	using namespace P3D::Engine;
+	Registry8 registry;
+	auto id = registry.create();
+
+	struct A {
+		int idx;
+		A(int idx) : idx(idx) {}
+	};
+
+	registry.add<A>(id, 1);
+	registry.add<A>(id, 2);
+	registry.add<A>(id, 3);
+
+	auto view = registry.view<A>();
+	int idx = 0;
+	for (auto entity : view) {
+		idx++;
+		A& component = view.get<A>(entity);
+		ASSERT_TRUE(idx == component.idx);
+	}
+}
