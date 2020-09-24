@@ -90,12 +90,12 @@ CREATE_COMPARISONS(Fix<N>, int, a.value, int64_t(b) << N);
 CREATE_COMPARISONS(int, Fix<N>, int64_t(a) << N, b.value);
 #undef CREATE_COMPARISONS
 
-template<int N>
+template<int64_t N>
 inline constexpr Fix<N> min(Fix<N> first, Fix<N> second) noexcept {
 	return (first.value <= second.value) ? first : second;
 }
 
-template<int N>
+template<int64_t N>
 inline constexpr Fix<N> max(Fix<N> first, Fix<N> second) noexcept {
 	return (first.value >= second.value) ? first : second;
 }
