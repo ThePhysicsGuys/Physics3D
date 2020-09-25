@@ -159,7 +159,7 @@ TreeNode TreeNode::remove(int index) {
 	return result;
 }
 
-bool TreeNode::containsObject(void* object, const Bounds& objBounds) const {
+bool TreeNode::containsObject(const void* object, const Bounds& objBounds) const {
 	if(this->isLeafNode()) {
 		return object == this->object;
 	} else {

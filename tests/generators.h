@@ -1,6 +1,6 @@
 #pragma once
 
-#include <tuple>
+#include <utility>
 
 #include "../physics/math/linalg/vec.h"
 #include "../physics/math/linalg/mat.h"
@@ -26,6 +26,8 @@ struct BasicBounded {
 	inline Bounds getBounds() const { return bounds; }
 };
 
+int generateInt(int max);
+size_t generateSize_t(size_t max);
 double generateDouble();
 bool generateBool();
 Shape generateShape();
@@ -41,8 +43,8 @@ Part generatePart(Part& attachTo);
 Part generatePart(Part& attachTo, HardConstraint* constraint);
 HardConstraint* generateHardConstraint();
 void generateAttachment(Part& first, Part& second);
-std::tuple<MotorizedPhysical*, Part*, int> generateMotorizedPhysical();
-void generateLayerAssignment(Part* parts, int partCount, WorldLayer* layers, int layerCount);
+std::pair<MotorizedPhysical*, std::vector<Part>> generateMotorizedPhysical();
+void generateLayerAssignment(std::vector<Part>& parts, WorldLayer* layers, int layerCount);
 TreeNode generateTreeNode(int branchInhibition);
 BoundsTree<BasicBounded> generateFilledBoundsTree();
 BoundsTree<BasicBounded> generateBoundsTree();
@@ -50,4 +52,12 @@ void* getRandomLeafObject(const TreeNode& node);
 template<typename Boundable>
 Boundable* getRandomObjectFromTree(const BoundsTree<Boundable>& tree) {
 	return static_cast<Boundable*>(getRandomLeafObject(tree.rootNode));
+}
+template<typename T>
+const T& oneOf(const std::vector<T>& vec) {
+	return vec[generateSize_t(vec.size())];
+}
+template<typename T>
+T& oneOf(std::vector<T>& vec) {
+	return vec[generateSize_t(vec.size())];
 }

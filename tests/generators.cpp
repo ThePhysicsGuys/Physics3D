@@ -20,6 +20,12 @@ auto oneof(Funcs... generators) {
 	return generators[rand() % sizeof...(Funcs)]();
 }*/
 
+int generateInt(int max) {
+	return rand() % max;
+}
+size_t generateSize_t(size_t max) {
+	return rand() % max;
+}
 double generateDouble() {
 	return rand() * 2.0 / RAND_MAX;
 }
@@ -87,11 +93,11 @@ void generateAttachment(Part& first, Part& second) {
 	}
 }
 
-std::tuple<MotorizedPhysical*, Part*, int> generateMotorizedPhysical() {
+std::pair<MotorizedPhysical*, std::vector<Part>> generateMotorizedPhysical() {
 	//int size = int(std::sqrt(rand() % 1000)) + 1;
 
-	int size = rand() % 50 + 1;
-	Part* parts = new Part[size];
+	int size = rand() % 5 + 1;
+	std::vector<Part> parts(size);
 	parts[0] = generatePart();
 	parts[0].ensureHasParent();
 
@@ -100,14 +106,13 @@ std::tuple<MotorizedPhysical*, Part*, int> generateMotorizedPhysical() {
 		generateAttachment(parts[i], parts[rand() % i]);
 	}
 
-	return {parts[0].parent->mainPhysical, parts, size};
+	return {parts[0].parent->mainPhysical, std::move(parts)};
 }
 
-void generateLayerAssignment(Part* parts, int partCount, WorldLayer* layers, int layerCount) {
+void generateLayerAssignment(std::vector<Part>& parts, WorldLayer* layers, int layerCount) {
 	std::vector<Part*> layerParts(layerCount, nullptr);
 
-	for(int i = 0; i < partCount; i++) {
-		Part& curPart = parts[i];
+	for(Part& curPart : parts) {
 		int selectedLayer = rand() % layerCount;
 		WorldLayer& addTo = layers[selectedLayer];
 		if(layerParts[selectedLayer] == nullptr) {

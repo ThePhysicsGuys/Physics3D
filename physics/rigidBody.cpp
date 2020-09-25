@@ -15,7 +15,6 @@ RigidBody::RigidBody(Part* mainPart) :
 	inertia(mainPart->getInertia()) {}
 
 void RigidBody::attach(RigidBody&& otherBody, const CFrame& attachment) {
-	size_t originalAttachCount = this->parts.size();
 	const GlobalCFrame& cf = this->getCFrame();
 	otherBody.mainPart->cframe = cf.localToGlobal(attachment);
 	this->parts.push_back(AttachedPart{attachment, otherBody.mainPart});

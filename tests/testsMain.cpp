@@ -117,6 +117,12 @@ enum class TestResult {
 	SKIP = 3
 };
 
+struct TestFlags {
+	bool coverageEnabled;
+	bool allowSkip;
+	bool catchErrors;
+};
+
 class Test {
 public:
 	const char* filePath;
@@ -133,20 +139,8 @@ public:
 		testFunc(testFunc), 
 		type(type),
 		fileName(std::strrchr(this->filePath, sepChar) ? std::strrchr(this->filePath, sepChar) + 1 : this->filePath) {}
-	TestResult run(bool allowSkip = true) {
-		resetLog();
-
-		setColor(TerminalColor::CYAN);
-		cout << fileName << ":" << funcName;
-
-		if(allowSkip && type == TestType::SLOW) {
-			setColor(SKIP_COLOR);
-			cout << " (skip)\n";
-			return TestResult::SKIP;
-		}
-
-		time_point<system_clock> startTime;
-
+private:
+	TestResult runNoErrorChecking(TestFlags flags, time_point<system_clock>& startTime) {
 		TestInterface testInterface;
 
 		try {
@@ -161,11 +155,11 @@ public:
 			printDeltaTime(startTime, SUCCESS_COLOR);
 
 			return TestResult::SUCCESS;
-		} catch (AssertionError& e) {
+		} catch(AssertionError& e) {
 
 			printDeltaTime(startTime, FAILURE_COLOR);
 			dumpLog();
-			
+
 			setColor(TerminalColor::RED);
 			printf("An assertion was incorrect at line %d:\n", e.line);
 
@@ -176,26 +170,49 @@ public:
 			setColor(TerminalColor::WHITE);
 
 			return TestResult::FAILURE;
-		} catch (exception& e) {
-			printDeltaTime(startTime, ERROR_COLOR);
-			dumpLog();
-			setColor(TerminalColor::RED); printf("An general error was thrown: %s\n", e.what());
-			return TestResult::ERROR;
-		} catch(string& e) {
-			printDeltaTime(startTime, ERROR_COLOR);
-			dumpLog();
-			setColor(TerminalColor::RED); printf("An string exception was thrown: %s\n", e.c_str());
-			return TestResult::ERROR;
-		} catch(const char* ex){
-			printDeltaTime(startTime, ERROR_COLOR);
-			dumpLog();
-			setColor(TerminalColor::RED); printf("A char* exception was thrown: %s\n", ex);
-			return TestResult::ERROR;
-		} catch (...) {
-			printDeltaTime(startTime, ERROR_COLOR);
-			dumpLog();
-			setColor(TerminalColor::RED); printf("An unknown exception was thrown!\n");
-			return TestResult::ERROR;
+		}
+	}
+public:
+	TestResult run(TestFlags flags) {
+		resetLog();
+
+		setColor(TerminalColor::CYAN);
+		cout << fileName << ":" << funcName;
+
+		if(flags.allowSkip && type == TestType::SLOW) {
+			setColor(SKIP_COLOR);
+			cout << " (skip)\n";
+			return TestResult::SKIP;
+		}
+
+		time_point<system_clock> startTime;
+
+		if(!flags.catchErrors) {
+			runNoErrorChecking(flags, startTime);
+		} else {
+			try {
+				runNoErrorChecking(flags, startTime);
+			} catch(exception& e) {
+				printDeltaTime(startTime, ERROR_COLOR);
+				dumpLog();
+				setColor(TerminalColor::RED); printf("An general error was thrown: %s\n", e.what());
+				return TestResult::ERROR;
+			} catch(string& e) {
+				printDeltaTime(startTime, ERROR_COLOR);
+				dumpLog();
+				setColor(TerminalColor::RED); printf("An string exception was thrown: %s\n", e.c_str());
+				return TestResult::ERROR;
+			} catch(const char* ex) {
+				printDeltaTime(startTime, ERROR_COLOR);
+				dumpLog();
+				setColor(TerminalColor::RED); printf("A char* exception was thrown: %s\n", ex);
+				return TestResult::ERROR;
+			} catch(...) {
+				printDeltaTime(startTime, ERROR_COLOR);
+				dumpLog();
+				setColor(TerminalColor::RED); printf("An unknown exception was thrown\n");
+				return TestResult::ERROR;
+			}
 		}
 	}
 };
@@ -236,7 +253,7 @@ static bool isCoveredBy(Test& test, const std::vector<std::string>& filters) {
 	return false;
 }
 
-static void runTests(const std::vector<std::string>& filter, bool allowSkip) {
+static void runTests(const std::vector<std::string>& filter, TestFlags flags) {
 	setColor(TerminalColor::WHITE); cout << "Starting tests: ";
 	setColor(SUCCESS_COLOR); cout << "[SUCCESS] ";
 	setColor(FAILURE_COLOR); cout << "[FAILURE] ";
@@ -248,7 +265,7 @@ static void runTests(const std::vector<std::string>& filter, bool allowSkip) {
 	int resultCounts[4]{0,0,0,0};
 	for(Test& t : *tests) {
 		if(isCoveredBy(t, filter)){
-			TestResult result = t.run(allowSkip);
+			TestResult result = t.run(flags);
 			if(result != TestResult::SKIP) totalTestsRan++;
 			resultCounts[static_cast<int>(result)]++;
 		}
@@ -265,8 +282,7 @@ static void runTests(const std::vector<std::string>& filter, bool allowSkip) {
 
 struct ParsedInput {
 	std::vector<std::string> inputArgs;
-	bool coverageEnabled;
-	bool allowSkip;
+	TestFlags flags;
 };
 
 ParsedInput parseInput(int argc, char* argv[]) {
@@ -280,27 +296,29 @@ ParsedInput parseInput(int argc, char* argv[]) {
 			result.inputArgs.push_back(argv[i]);
 		}
 	}
-	result.coverageEnabled = false;
-	result.allowSkip = result.inputArgs.size() == 0;
+	result.flags.coverageEnabled = false;
+	result.flags.catchErrors = true;
+	result.flags.allowSkip = result.inputArgs.size() == 0;
 
 	for(const std::string& flag : inputFlags) {
 		if(flag == "--coverage") 
-			result.coverageEnabled = true;
+			result.flags.coverageEnabled = true;
 		if(flag == "--noskip") 
-			result.allowSkip = false;
+			result.flags.allowSkip = false;
+		if(flag == "--nocatch")
+			result.flags.catchErrors = false;
 	}
-
 	return result;
 }
 
 int main(int argc, char* argv[]) {
 	initConsole();
 
-	ParsedInput input = parseInput(argc, argv);
+	ParsedInput parameters = parseInput(argc, argv);
 
-	runTests(input.inputArgs, input.allowSkip);
+	runTests(parameters.inputArgs, parameters.flags);
 
-	if(input.coverageEnabled) return 0;
+	if(parameters.flags.coverageEnabled) return 0;
 
 	while(true) {
 		string input;
@@ -314,7 +332,9 @@ int main(int argc, char* argv[]) {
 		} else if(input == "exit") {
 			break;
 		} else {
-			runTests(std::vector<std::string>{input}, false);
+			TestFlags flags = parameters.flags;
+			flags.allowSkip = false;
+			runTests(std::vector<std::string>{input}, flags);
 		}
 	}
 }

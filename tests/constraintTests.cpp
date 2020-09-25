@@ -460,97 +460,56 @@ TEST_CASE(testInternalMotionOfCenterOfMass) {
 	ASSERT(motionOfCom == estimatedMotion);
 }
 
-bool areInSameGroup(Part& a, Part& b) {
-	return a.layer->tree.areInSameGroup(&a, a.getBounds(), &b, b.getBounds());
-}
-
 TEST_CASE(attachPhysicalsNoLayers) {
 	for(int iter = 0; iter < 100; iter++) {
-		auto [firstPhys, firstPhysParts, firstPhysSize] = generateMotorizedPhysical();
-		auto [secondPhys, secondPhysParts, secondPhysSize] = generateMotorizedPhysical();
+		auto [firstPhys, firstPhysParts] = generateMotorizedPhysical();
+		auto [secondPhys, secondPhysParts] = generateMotorizedPhysical();
 
-		ASSERT_FALSE(firstPhysParts->parent->mainPhysical == secondPhysParts->parent->mainPhysical);
+		ASSERT_FALSE(firstPhysParts[0].parent->mainPhysical == secondPhysParts[0].parent->mainPhysical);
 
-		generateAttachment(firstPhysParts[rand() % firstPhysSize], secondPhysParts[rand() % secondPhysSize]);
+		generateAttachment(oneOf(firstPhysParts), oneOf(secondPhysParts));
 
-		ASSERT_TRUE(firstPhysParts->parent->mainPhysical == secondPhysParts->parent->mainPhysical);
-
-		delete[] firstPhysParts;
-		delete[] secondPhysParts;
+		ASSERT_TRUE(firstPhysParts[0].parent->mainPhysical == secondPhysParts[0].parent->mainPhysical);
 	}
+}
+
+bool areInSameGroup(const Part& a, const Part& b) {
+	return a.layer->tree.areInSameGroup(&a, &b);
+}
+
+static bool pairwiseCorrectlyGrouped(const std::vector<Part>& la, const std::vector<Part>& lb, bool expectedAreInSameGroup) {
+	for(const Part& a : la) {
+		for(const Part& b : lb) {
+			if(a.layer == b.layer) {
+				if(areInSameGroup(a, b) != expectedAreInSameGroup) {
+					return false;
+				}
+			}
+		}
+	}
+	return true;
 }
 
 TEST_CASE(attachPhysicalsWithLayers) {
 	for(int iter = 0; iter < 100; iter++) {
 		WorldLayer layers[3]{WorldLayer(nullptr), WorldLayer(nullptr), WorldLayer(nullptr)};
-		auto [firstPhys, firstPhysParts, firstPhysSize] = generateMotorizedPhysical();
-		generateLayerAssignment(firstPhysParts, firstPhysSize, layers, 3);
-		auto [secondPhys, secondPhysParts, secondPhysSize] = generateMotorizedPhysical();
-		generateLayerAssignment(secondPhysParts, secondPhysSize, layers, 3);
+		auto [firstPhys, firstPhysParts] = generateMotorizedPhysical();
+		generateLayerAssignment(firstPhysParts, layers, 3);
+		auto [secondPhys, secondPhysParts] = generateMotorizedPhysical();
+		generateLayerAssignment(secondPhysParts, layers, 3);
 
-		ASSERT_FALSE(firstPhysParts->parent->mainPhysical == secondPhysParts->parent->mainPhysical);
+		ASSERT_FALSE(firstPhysParts[0].parent->mainPhysical == secondPhysParts[0].parent->mainPhysical);
 
-		for(int f = 0; f < firstPhysSize; f++) {
-			for(int s = 0; s < secondPhysSize; s++) {
-				Part& a = firstPhysParts[f];
-				Part& b = secondPhysParts[s];
-				if(a.layer == b.layer) {
-					ASSERT_FALSE(areInSameGroup(a, b));
-				}
-			}
-		}
-		for(int f = 0; f < firstPhysSize; f++) {
-			for(int s = 0; s < firstPhysSize; s++) {
-				Part& a = firstPhysParts[f];
-				Part& b = firstPhysParts[s];
-				if(a.layer == b.layer) {
-					ASSERT_TRUE(areInSameGroup(a, b));
-				}
-			}
-		}
-		for(int f = 0; f < secondPhysSize; f++) {
-			for(int s = 0; s < secondPhysSize; s++) {
-				Part& a = secondPhysParts[f];
-				Part& b = secondPhysParts[s];
-				if(a.layer == b.layer) {
-					ASSERT_TRUE(areInSameGroup(a, b));
-				}
-			}
-		}
+		ASSERT_TRUE(pairwiseCorrectlyGrouped(firstPhysParts, firstPhysParts, true));
+		ASSERT_TRUE(pairwiseCorrectlyGrouped(secondPhysParts, secondPhysParts, true));
+		ASSERT_TRUE(pairwiseCorrectlyGrouped(firstPhysParts, secondPhysParts, false));
 
-		generateAttachment(firstPhysParts[rand() % firstPhysSize], secondPhysParts[rand() % secondPhysSize]);
+		generateAttachment(oneOf(firstPhysParts), oneOf(secondPhysParts));
 
-		ASSERT_TRUE(firstPhysParts->parent->mainPhysical == secondPhysParts->parent->mainPhysical);
+		ASSERT_TRUE(firstPhysParts[0].parent->mainPhysical == secondPhysParts[0].parent->mainPhysical);
 
-		for(int f = 0; f < firstPhysSize; f++) {
-			for(int s = 0; s < secondPhysSize; s++) {
-				Part& a = firstPhysParts[f];
-				Part& b = secondPhysParts[s];
-				if(a.layer == b.layer) {
-					ASSERT_TRUE(areInSameGroup(a, b));
-				}
-			}
-		}
-		for(int f = 0; f < firstPhysSize; f++) {
-			for(int s = 0; s < firstPhysSize; s++) {
-				Part& a = firstPhysParts[f];
-				Part& b = firstPhysParts[s];
-				if(a.layer == b.layer) {
-					ASSERT_TRUE(areInSameGroup(a, b));
-				}
-			}
-		}
-		for(int f = 0; f < secondPhysSize; f++) {
-			for(int s = 0; s < secondPhysSize; s++) {
-				Part& a = secondPhysParts[f];
-				Part& b = secondPhysParts[s];
-				if(a.layer == b.layer) {
-					ASSERT_TRUE(areInSameGroup(a, b));
-				}
-			}
-		}
-
-		delete[] firstPhysParts;
-		delete[] secondPhysParts;
+		ASSERT_TRUE(pairwiseCorrectlyGrouped(firstPhysParts, firstPhysParts, true));
+		ASSERT_TRUE(pairwiseCorrectlyGrouped(secondPhysParts, secondPhysParts, true));
+		ASSERT_TRUE(pairwiseCorrectlyGrouped(firstPhysParts, secondPhysParts, true));
 	}
 }

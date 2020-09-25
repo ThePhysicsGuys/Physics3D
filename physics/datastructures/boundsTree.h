@@ -64,7 +64,7 @@ struct TreeNode {
 	void addInside(TreeNode&& newNode);
 	TreeNode remove(int index);
 	
-	bool containsObject(void* object, const Bounds& objBounds) const;
+	bool containsObject(const void* object, const Bounds& objBounds) const;
 
 	void recalculateBounds();
 	void recalculateBoundsFromSubBounds();
@@ -317,12 +317,12 @@ struct BoundsTree {
 		groupNode.addInside(TreeNode(obj, bounds, false));
 	}
 
-	NodeStack find(const Boundable* obj, const Bounds& objBounds) {
-		return NodeStack(rootNode, obj, objBounds);
+	NodeStack find(const Boundable* obj, const Bounds& objBounds) const {
+		return NodeStack(const_cast<TreeNode&>(rootNode), obj, objBounds);
 	}
 
-	NodeStack findGroupFor(const Boundable* obj, const Bounds& objBounds) {
-		NodeStack iter(rootNode, obj, objBounds);
+	NodeStack findGroupFor(const Boundable* obj, const Bounds& objBounds) const {
+		NodeStack iter(const_cast<TreeNode&>(rootNode), obj, objBounds);
 		iter.riseUntilGroupHeadWhile();
 		return iter;
 	}
@@ -332,8 +332,7 @@ struct BoundsTree {
 	}
 
 	void addToExistingGroup(Boundable* obj, const Bounds& bounds, const Boundable* objInGroup, const Bounds& objInGroupBounds) {
-		NodeStack iter(rootNode, objInGroup, objInGroupBounds);
-		iter.riseUntilGroupHeadWhile();
+		NodeStack iter = findGroupFor(objInGroup, objInGroupBounds);
 		addToExistingGroup(obj, bounds, **iter);
 		iter.expandBoundsAllTheWayToTop();
 	}
@@ -347,12 +346,17 @@ struct BoundsTree {
 
 	// merges the groupNode of second into the groupNode of first
 	void mergeGroupsOf(Boundable* first, const Bounds& firstBounds, Boundable* second, const Bounds& secondBounds) {
-		NodeStack firstStack = findGroupFor(first, firstBounds);
 		TreeNode secondGroup = grabGroupFor(second, secondBounds);
+		NodeStack firstStack = findGroupFor(first, firstBounds); // grab first, because the nodestack might be invalidated by the grab
 		assert(secondGroup.isGroupHead);
 		secondGroup.isGroupHead = false;
-		(*firstStack)->addInside(std::move(secondGroup));
+		TreeNode* firstStackNode = *firstStack;
+		firstStackNode->addInside(std::move(secondGroup));
 		firstStack.expandBoundsAllTheWayToTop();
+	}
+
+	void mergeGroupsOf(Boundable* first, Boundable* second) {
+		this->mergeGroupsOf(first, first->getBounds(), second, second->getBounds());
 	}
 
 	void remove(const Boundable* obj, const Bounds& strictBounds) {
@@ -416,7 +420,7 @@ struct BoundsTree {
 		return iter.grab();
 	}
 
-	inline void recursivelyRecalculateBoundsOfNode(TreeNode& node) {
+	inline static void recursivelyRecalculateBoundsOfNode(TreeNode& node) {
 		if(node.isLeafNode()) {
 			node.bounds = static_cast<Boundable*>(node.object)->getBounds();
 		} else {
@@ -464,20 +468,24 @@ struct BoundsTree {
 		}
 	}
 
-	inline bool areInSameGroup(Boundable* first, Bounds firstBounds, Boundable* second, Bounds secondBounds) {
+	inline bool areInSameGroup(const Boundable* first, Bounds firstBounds, const Boundable* second, Bounds secondBounds) const {
 		TreeNode* firstGroup = *findGroupFor(first, firstBounds);
 		TreeNode* secondGroup = *findGroupFor(second, secondBounds);
 		return firstGroup == secondGroup;
 	}
 
-	inline bool contains(Boundable* obj, Bounds objBounds) {
+	inline bool areInSameGroup(const Boundable* first, const Boundable* second) const {
+		return this->areInSameGroup(first, first->getBounds(), second, second->getBounds());
+	}
+
+	inline bool contains(const Boundable* obj, Bounds objBounds) {
 		if(isEmpty()) {
 			return false;
 		} else {
 			return rootNode.containsObject(obj, objBounds);
 		}
 	}
-	inline bool contains(Boundable* obj) {
+	inline bool contains(const Boundable* obj) {
 		return contains(obj, obj->getBounds());
 	}
 
@@ -498,4 +506,10 @@ struct BoundsTree {
 	inline IteratorFactoryWithEnd<BoundsTreeIter<FilteredTreeIterator<Filter>, const Boundable>> iterFiltered(const Filter& filter) const {
 		return {BoundsTreeIter<FilteredTreeIterator<Filter>, const Boundable>(FilteredTreeIterator<Filter>(const_cast<TreeNode&>(rootNode), filter))};
 	}
+
+	inline IteratorFactoryWithEnd<BoundsTreeIter<TreeIterator, Boundable>> iterAllInGroup(Boundable* objInGroup, Bounds objBounds) {
+		TreeNode* group = *findGroupFor(objInGroup, objBounds);
+		return {BoundsTreeIter<TreeIterator, Boundable>(*group)};
+	}
+	inline IteratorFactoryWithEnd<BoundsTreeIter<TreeIterator, Boundable>> iterAllInGroup(Boundable* objInGroup) {return iterAllInGroup(objInGroup, objInGroup->getBounds());}
 };
