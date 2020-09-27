@@ -8,7 +8,6 @@ message(STATUS "Building with: ${CMAKE_CXX_COMPILER_ID}")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /arch:AVX2")
 	
@@ -95,6 +94,7 @@ add_executable(benchmarks
   benchmarks/manyCubesBenchmark.cpp
   benchmarks/worldBenchmark.cpp
   benchmarks/rotationBenchmark.cpp
+  benchmarks/ecsBenchmark.cpp
 )
 
 target_link_libraries(benchmarks util)
@@ -243,6 +243,7 @@ add_executable(application
   application/ecs/mesh.cpp
   application/ecs/model.cpp
   application/ecs/transform.cpp
+  application/ecs/components.h
 
   application/input/standardInputHandler.cpp
 

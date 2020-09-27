@@ -2,15 +2,14 @@
 
 #include "worlds.h"
 
-#include "ecs/model.h"
 #include "application.h"
 #include "view/screen.h"
 #include "input/standardInputHandler.h"
 #include "../physics/debug.h"
 #include "../physics/constants.h"
 #include "../engine/options/keyboardOptions.h"
-#include "../engine/ecs/entity.h"
-#include "../engine/ecs/component.h"
+
+#include "ecs/components.h"
 
 #define PICKER_STRENGTH 100
 #define PICKER_SPEED_STRENGTH 12
@@ -20,6 +19,7 @@
 #define AIR_RUN_SPEED_FACTOR 2
 
 namespace P3D::Application {
+
 
 PlayerWorld::PlayerWorld(double deltaT) : SynchronizedWorld<ExtendedPart>(deltaT) {
 
@@ -82,11 +82,16 @@ void PlayerWorld::applyExternalForces() {
 }
 
 void PlayerWorld::onPartAdded(ExtendedPart* part) {
-	auto entity = registry.create();
+	if (part->entity == 0) {
+		auto entity = registry.create();
+		part->entity = entity;
+	}
+
+	registry.add<Comp::Model>(part->entity, part);
 }
 
 void PlayerWorld::onPartRemoved(ExtendedPart* part) {
-	
+	registry.destroy(part->entity);
 }
 
 };

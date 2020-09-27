@@ -27,4 +27,11 @@ ExtendedPart::ExtendedPart(const Shape& hitbox, ExtendedPart* attachTo, const CF
 	Part(hitbox, *attachTo, attach, properties), visualData(Engine::MeshRegistry::getOrCreateMeshFor(hitbox.baseShape)), name(name) {
 }
 
+// Transition
+ExtendedPart::ExtendedPart(Part&& part, Entity entity) : Part(std::move(part)), entity(entity) {}
+ExtendedPart::ExtendedPart(const Shape& hitbox, const GlobalCFrame& position, const PartProperties& properties, Entity entity) : Part(hitbox, position, properties), entity(entity) {}
+ExtendedPart::ExtendedPart(const Shape& hitbox, ExtendedPart* attachTo, const CFrame& attach, const PartProperties& properties, Entity entity) : Part(hitbox, *attachTo, attach, properties), entity(entity) {}
+
+
+
 };

@@ -178,6 +178,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -204,6 +205,7 @@
     <ClCompile Include="basicWorld.cpp" />
     <ClCompile Include="benchmark.cpp" />
     <ClCompile Include="complexObjectBenchmark.cpp" />
+    <ClCompile Include="ecsBenchmark.cpp" />
     <ClCompile Include="getBoundsPerformance.cpp" />
     <ClCompile Include="manyCubesBenchmark.cpp" />
     <ClCompile Include="worldBenchmark.cpp" />

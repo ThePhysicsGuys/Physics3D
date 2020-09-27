@@ -317,6 +317,9 @@ public:
 	* Removes the given entity from the registry
 	*/
 	void destroy(const Entity& entity) noexcept {
+		if (entity == null_entity)
+			return;
+
 		auto entities_iterator = entities.find(entity);
 		if (entities_iterator != entities.end()) {
 			entities.erase(entities_iterator);
