@@ -45,13 +45,13 @@ public:
 	static Resource* selectedResource;
 
 private:
-	static void renderECSNode(Engine::Node* node);
+	static void renderECSNode(Engine::Registry64& registry, Engine::Registry64::entity_type entity);
 	static void renderShaderStageInfo(Graphics::ShaderResource* shader, const Graphics::ShaderStage& stage);
 	static void renderTextureInfo(Graphics::Texture* texture);
 	static void renderFontInfo(Graphics::Font* font);
 	static void renderShaderInfo(Graphics::ShaderResource* shader);
 	
-	static void renderECSTree();
+	static void renderECSTree(Engine::Registry64& registry);
 	static void renderPropertiesFrame();
 	static void renderDebugFrame();
 	static void renderEnvironmentFrame();
@@ -59,8 +59,8 @@ private:
 	static void renderResourceFrame();
 
 public:
-	static void onInit();
-	static void render();
+	static void onInit(Engine::Registry64& registry);
+	static void render(Engine::Registry64& registry);
 
 };
 

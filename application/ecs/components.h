@@ -11,6 +11,8 @@ namespace Comp {
 // The name of an entity
 struct Tag {
 	std::string name;
+
+	Tag(const std::string& name) : name(name) {}
 };
 
 // The model of the entity, as it is being physicsed in the engine 

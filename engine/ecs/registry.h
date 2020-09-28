@@ -221,6 +221,10 @@ public:
 		decltype(*current)& operator*() const {
 			return *current;
 		}
+
+		bool operator==(Iterator iterator) const {
+			return current == iterator;
+		}
 	};
 
 	template<typename BeginType, typename EndType = BeginType>
@@ -255,6 +259,14 @@ public:
 			return *static_cast<Component*>(component_iterator->second);
 		}
 	};
+
+	entity_map_iterator begin() noexcept {
+		return entities.begin();
+	}
+
+	entity_map_iterator end() noexcept {
+		return entities.end();
+	}
 
 	//? Functions
 private:
@@ -391,7 +403,7 @@ public:
 			return nullptr;
 
 		component_type index = component_index<Entity, Component>::index();
-		if (index > components.size())
+		if (index >= components.size())
 			return nullptr;
 
 		entity_map* map = components[index];
@@ -403,6 +415,30 @@ public:
 			return nullptr;
 
 		return static_cast<Component*>(component_iterator->second);
+	}
+
+	/**
+	* Returns the component of the given type from the given entity, the default value if no such component exists
+	*/
+	template<typename Component>
+	[[nodiscard]] Component& getOr(const Entity& entity, Component& component) {
+		Component* result = get<Component>(entity);
+		if (result == nullptr)
+			return component;
+		else
+			return *result;
+	}
+
+	/**
+	* Returns the component of the given type from the given entity, the default value if no such component exists
+	*/
+	template<typename Component>
+	[[nodiscard]] Component& getOr(const Entity& entity, Component&& component) {
+		Component* result = get<Component>(entity);
+		if (result == nullptr)
+			return component;
+		else
+			return *result;
 	}
 
 	/**

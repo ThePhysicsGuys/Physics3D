@@ -193,7 +193,7 @@ void Screen::onInit() {
 	handler->onFrameBufferResize(event);
 
 	// Init frames
-	BigFrame::onInit();
+	BigFrame::onInit(world->registry);
 }
 
 void Screen::onUpdate() {

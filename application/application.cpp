@@ -44,6 +44,7 @@
 #include "../engine/input/keyboard.h"
 #include "../engine/event/windowEvent.h"
 
+#include "ecs/components.h" // TODO remove
 
 #include "io/saveDialog.h"
 
@@ -159,6 +160,7 @@ void setupWorld(int argc, const char** args) {
 		//sateliteBody->attach(wing2, new SinusoidalPistonConstraint(Vec3(-1.0, 0.0, 0.0), 1.0, 3.0, 1.0), CFrame(-0.5, 0.0, 0.0), CFrame(0.5, 0.0, 0.0));
 
 		world.addPart(sateliteBody);
+		world.registry.add<Comp::Tag>(sateliteBody->entity, "Satelite body");
 
 		sateliteBody->parent->mainPhysical->motionOfCenterOfMass.rotation.rotation[0] = Vec3(0, 2, 0);
 	}
@@ -226,7 +228,7 @@ void setupWorld(int argc, const char** args) {
 		}
 	}
 
-	WorldBuilder::buildTerrain(150, 150);
+	//WorldBuilder::buildTerrain(150, 150);
 
 
 	ExtendedPart* ropeA = new ExtendedPart(boxShape(2.0, 1.5, 0.7), GlobalCFrame(10.0, 2.0, -10.0), {1.0, 0.7, 0.3}, "RopeA");

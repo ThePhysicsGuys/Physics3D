@@ -23,6 +23,8 @@
 
 #include "../engine/ecs/tree.h"
 #include "../engine/ecs/node.h"
+#include "../engine/ecs/registry.h"
+#include "../application/ecs/components.h"
 
 #include "../util/resource/resource.h"
 #include "../util/resource/resourceManager.h"
@@ -93,7 +95,7 @@ bool IconTreeNode(void* ptr, ImTextureID texture, ImGuiTreeNodeFlags flags, cons
 	return opened;
 }
 
-void BigFrame::onInit() {
+void BigFrame::onInit(Engine::Registry64& registry) {
 	folderIcon = ResourceManager::add<TextureResource>("folder", "../res/textures/gui/folder.png");
 	objectIcon = ResourceManager::add<TextureResource>("object", "../res/textures/gui/object.png");
 }
@@ -442,19 +444,16 @@ void BigFrame::renderResourceFrame() {
 	ImGui::Separator();
 }
 
-void BigFrame::renderECSNode(Engine::Node* node) {
-	if (node == nullptr)
-		return;
-
-	void* id = (void*) node;
-	const auto& children = node->getChildren();
-
-	bool leaf = children.size() == 0;
-	bool entity = dynamic_cast<Engine::Entity*>(node) != nullptr;
-	ImTextureID texture = (void*) (intptr_t) (entity ? objectIcon : folderIcon)->getID();
+void BigFrame::renderECSNode(Engine::Registry64& registry, Engine::Registry64::entity_type entity) {
+	void* id = (void*) entity;
+	const auto& children = registry.getChildren(entity);
+	
+	bool leaf = children.begin() == registry.end();
+	ImTextureID texture = (void*) (intptr_t) objectIcon->getID();
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth | (leaf ? ImGuiTreeNodeFlags_Leaf : ImGuiTreeNodeFlags_None);
 
-	bool open = IconTreeNode(id, texture, flags, node->getName().c_str());
+	std::string name = registry.getOr<Comp::Tag>(entity, Comp::Tag("Part")).name;
+	bool open = IconTreeNode(id, texture, flags, name.c_str());
 		
 	// Render popup
 	if (ImGui::BeginPopupContextItem()) {
@@ -485,13 +484,13 @@ void BigFrame::renderECSNode(Engine::Node* node) {
 
 		// Rename
 		if (ImGui::BeginMenu("Rename")) {
-			char* buffer = new char[node->getName().size() + 1];
+			char* buffer = new char[name.size() + 1];
 			//strcpy(buffer, node->getName().c_str());
 			ImGui::Text("Edit name:");
 			ImGui::InputText("##edit", buffer, IM_ARRAYSIZE(buffer));
 			if (ImGui::Button("Apply")) {
 				std::string newName(buffer);
-				node->setName(newName);
+				registry.get<Comp::Tag>(entity)->name = newName;
 			}
 			ImGui::EndMenu();
 				
@@ -501,17 +500,17 @@ void BigFrame::renderECSNode(Engine::Node* node) {
 		// Add
 		if (ImGui::BeginMenu("Add")) {
 			if (ImGui::MenuItem("Entity")) {
-				node->getTree()->createEntity(node);
+				//node->getTree()->createEntity(node);
 			}
 			if (ImGui::MenuItem("Folder")) {
-				node->getTree()->createGroup(node);
+				//node->getTree()->createGroup(node);
 			}
 			ImGui::EndMenu();
 		}
 
 		// Delete
 		if (ImGui::MenuItem("Delete")) {
-			node->getTree()->removeNode(node, false);
+			//node->getTree()->removeNode(node, false);
 		}
 
 		ImGui::EndPopup();
@@ -520,8 +519,8 @@ void BigFrame::renderECSNode(Engine::Node* node) {
 	// Render children
 	if (!leaf) {
 		if (open) {
-			for (Engine::Node* child : children)
-				renderECSNode(child);
+			for (auto child : children)
+				renderECSNode(registry, child);
 			ImGui::TreePop();
 		}
 	}
@@ -535,7 +534,7 @@ void BigFrame::renderECSNode(Engine::Node* node) {
 		ImGui::Image(texture, ImVec2(buttonSize, buttonSize));
 		ImGui::SameLine();
 		ImGui::SetCursorPos(ImVec2(ImGui::GetCursorPosX(), ImGui::GetCursorPosY() + 4));
-		ImGui::Text("Move %s", node->getName().c_str());
+		ImGui::Text("Move %s", name.c_str());
 		ImGui::EndDragDropSource();
 	}
 
@@ -547,16 +546,13 @@ void BigFrame::renderECSNode(Engine::Node* node) {
 	}
 }
 
-void BigFrame::renderECSTree() {
+void BigFrame::renderECSTree(Engine::Registry64& registry) {
 	using namespace Engine;
 
-	ECSTree* tree = nullptr;
-
-	if (tree == nullptr)
-		return;
-
-	Node* root = tree->getRoot();
-	renderECSNode(root);
+	for (auto entity : registry) {
+		if (parent(entity) == registry.null_entity)
+			renderECSNode(registry, entity);
+	}
 }
 
 void BigFrame::renderPropertiesFrame() {
@@ -739,12 +735,12 @@ void BigFrame::renderLayerFrame() {
 	ImGui::Separator();
 }
 
-void BigFrame::render() {
+void BigFrame::render(Engine::Registry64& registry) {
 	//ImGui::ShowDemoWindow();
-
-	/*ImGui::Begin("Tree");
-	renderECSTree();
-	ImGui::End();*/
+	
+	ImGui::Begin("Tree");
+	renderECSTree(registry);
+	ImGui::End();
 	
 	ImGui::Begin("Properties");
 	renderPropertiesFrame();
