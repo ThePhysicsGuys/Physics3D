@@ -491,20 +491,14 @@ int TriangleMesh::furthestIndexInDirection(const Vec3f& direction) const {
 	const float* yValues = this->vertices + offset;
 	const float* zValues = this->vertices + 2 * offset;
 
-	__m256 xTxd = _mm256_mul_ps(dx, _mm256_load_ps(xValues));
-	__m256 yTyd = _mm256_mul_ps(dy, _mm256_load_ps(yValues));
-	__m256 zTzd = _mm256_mul_ps(dz, _mm256_load_ps(zValues));
+	__m256 bestDot = _mm256_fmadd_ps(dz, _mm256_load_ps(zValues), _mm256_fmadd_ps(dy, _mm256_load_ps(yValues), _mm256_mul_ps(dx, _mm256_load_ps(xValues))));
 
-	__m256 bestDot = _mm256_add_ps(_mm256_add_ps(xTxd, yTyd), zTzd);
 	__m256i bestIndices = _mm256_set1_epi32(0);
 
 	for(size_t blockI = 1; blockI < (vertexCount + 7) / 8; blockI++) {
 		__m256i indices = _mm256_set1_epi32(int(blockI));
 
-		__m256 xTxd = _mm256_mul_ps(dx, _mm256_load_ps(xValues + blockI * 8));
-		__m256 yTyd = _mm256_mul_ps(dy, _mm256_load_ps(yValues + blockI * 8));
-		__m256 zTzd = _mm256_mul_ps(dz, _mm256_load_ps(zValues + blockI * 8));
-		__m256 dot = _mm256_add_ps(_mm256_add_ps(xTxd, yTyd), zTzd);
+		__m256 dot = _mm256_fmadd_ps(dz, _mm256_load_ps(zValues + blockI * 8), _mm256_fmadd_ps(dy, _mm256_load_ps(yValues + blockI * 8), _mm256_mul_ps(dx, _mm256_load_ps(xValues + blockI * 8))));
 
 		__m256 whichAreMax = _mm256_cmp_ps(dot, bestDot, _CMP_GT_OQ); // Greater than, false if dot == NaN
 		bestDot = _mm256_blendv_ps(bestDot, dot, whichAreMax);
@@ -544,11 +538,7 @@ Vec3f TriangleMesh::furthestInDirection(const Vec3f& direction) const {
 	__m256 bestY = _mm256_load_ps(yValues);
 	__m256 bestZ = _mm256_load_ps(zValues);
 
-	__m256 xTxd = _mm256_mul_ps(dx, bestX);
-	__m256 yTyd = _mm256_mul_ps(dy, bestY);
-	__m256 zTzd = _mm256_mul_ps(dz, bestZ);
-
-	__m256 bestDot = _mm256_add_ps(_mm256_add_ps(xTxd, yTyd), zTzd);
+	__m256 bestDot = _mm256_fmadd_ps(dz, bestZ, _mm256_fmadd_ps(dy, bestY, _mm256_mul_ps(dx, bestX)));
 
 	for(size_t blockI = 1; blockI < (vertexCount + 7) / 8; blockI++) {
 		__m256i indices = _mm256_set1_epi32(int(blockI));
@@ -557,10 +547,7 @@ Vec3f TriangleMesh::furthestInDirection(const Vec3f& direction) const {
 		__m256 yVal = _mm256_load_ps(yValues + blockI * 8);
 		__m256 zVal = _mm256_load_ps(zValues + blockI * 8);
 
-		__m256 xTxd = _mm256_mul_ps(dx, xVal);
-		__m256 yTyd = _mm256_mul_ps(dy, yVal);
-		__m256 zTzd = _mm256_mul_ps(dz, zVal);
-		__m256 dot = _mm256_add_ps(_mm256_add_ps(xTxd, yTyd), zTzd);
+		__m256 dot = _mm256_fmadd_ps(dz, zVal, _mm256_fmadd_ps(dy, yVal, _mm256_mul_ps(dx, xVal)));
 
 		__m256 whichAreMax = _mm256_cmp_ps(dot, bestDot, _CMP_GT_OQ); // Greater than, false if dot == NaN
 		bestDot = _mm256_blendv_ps(bestDot, dot, whichAreMax);
@@ -656,30 +643,26 @@ BoundingBox TriangleMesh::getBounds(const Mat3f& referenceFrame) const {
 	const float* yValues = this->vertices + offset;
 	const float* zValues = this->vertices + 2 * offset;
 
-	Vec3f xDir = referenceFrame.getRow(0);
-	Vec3f yDir = referenceFrame.getRow(1);
-	Vec3f zDir = referenceFrame.getRow(2);
+	float mxx = referenceFrame(0, 0);
+	float mxy = referenceFrame(0, 1);
+	float mxz = referenceFrame(0, 2);
+	float myx = referenceFrame(1, 0);
+	float myy = referenceFrame(1, 1);
+	float myz = referenceFrame(1, 2);
+	float mzx = referenceFrame(2, 0);
+	float mzy = referenceFrame(2, 1);
+	float mzz = referenceFrame(2, 2);
 
 	__m256 xVal = _mm256_load_ps(xValues);
 	__m256 yVal = _mm256_load_ps(yValues);
 	__m256 zVal = _mm256_load_ps(zValues);
 
-	__m256 xTx = _mm256_mul_ps(_mm256_set1_ps(xDir.x), xVal);
-	__m256 xTy = _mm256_mul_ps(_mm256_set1_ps(xDir.y), yVal);
-	__m256 xTz = _mm256_mul_ps(_mm256_set1_ps(xDir.z), zVal);
-	__m256 xMin = _mm256_add_ps(_mm256_add_ps(xTx, xTy), xTz);
+	__m256 xMin = _mm256_fmadd_ps(_mm256_set1_ps(mxz), zVal, _mm256_fmadd_ps(_mm256_set1_ps(mxy), yVal, _mm256_mul_ps(_mm256_set1_ps(mxx), xVal)));
+	__m256 yMin = _mm256_fmadd_ps(_mm256_set1_ps(myz), zVal, _mm256_fmadd_ps(_mm256_set1_ps(myy), yVal, _mm256_mul_ps(_mm256_set1_ps(myx), xVal)));
+	__m256 zMin = _mm256_fmadd_ps(_mm256_set1_ps(mzz), zVal, _mm256_fmadd_ps(_mm256_set1_ps(mzy), yVal, _mm256_mul_ps(_mm256_set1_ps(mzx), xVal)));
+	
 	__m256 xMax = xMin;
-
-	__m256 yTx = _mm256_mul_ps(_mm256_set1_ps(yDir.x), xVal);
-	__m256 yTy = _mm256_mul_ps(_mm256_set1_ps(yDir.y), yVal);
-	__m256 yTz = _mm256_mul_ps(_mm256_set1_ps(yDir.z), zVal);
-	__m256 yMin = _mm256_add_ps(_mm256_add_ps(yTx, yTy), yTz);
 	__m256 yMax = yMin;
-
-	__m256 zTx = _mm256_mul_ps(_mm256_set1_ps(zDir.x), xVal);
-	__m256 zTy = _mm256_mul_ps(_mm256_set1_ps(zDir.y), yVal);
-	__m256 zTz = _mm256_mul_ps(_mm256_set1_ps(zDir.z), zVal);
-	__m256 zMin = _mm256_add_ps(_mm256_add_ps(zTx, zTy), zTz);
 	__m256 zMax = zMin;
 
 	for(size_t blockI = 1; blockI < (vertexCount + 7) / 8; blockI++) {
@@ -687,25 +670,13 @@ BoundingBox TriangleMesh::getBounds(const Mat3f& referenceFrame) const {
 		__m256 yVal = _mm256_load_ps(yValues + blockI * 8);
 		__m256 zVal = _mm256_load_ps(zValues + blockI * 8);
 
-		__m256 xTx = _mm256_mul_ps(_mm256_set1_ps(xDir.x), xVal);
-		__m256 xTy = _mm256_mul_ps(_mm256_set1_ps(xDir.y), yVal);
-		__m256 xTz = _mm256_mul_ps(_mm256_set1_ps(xDir.z), zVal);
-		__m256 dotX = _mm256_add_ps(_mm256_add_ps(xTx, xTy), xTz);
-
-		__m256 yTx = _mm256_mul_ps(_mm256_set1_ps(yDir.x), xVal);
-		__m256 yTy = _mm256_mul_ps(_mm256_set1_ps(yDir.y), yVal);
-		__m256 yTz = _mm256_mul_ps(_mm256_set1_ps(yDir.z), zVal);
-		__m256 dotY = _mm256_add_ps(_mm256_add_ps(yTx, yTy), yTz);
-
-		__m256 zTx = _mm256_mul_ps(_mm256_set1_ps(zDir.x), xVal);
-		__m256 zTy = _mm256_mul_ps(_mm256_set1_ps(zDir.y), yVal);
-		__m256 zTz = _mm256_mul_ps(_mm256_set1_ps(zDir.z), zVal);
-		__m256 dotZ = _mm256_add_ps(_mm256_add_ps(zTx, zTy), zTz);
-
+		__m256 dotX = _mm256_fmadd_ps(_mm256_set1_ps(mxz), zVal, _mm256_fmadd_ps(_mm256_set1_ps(mxy), yVal, _mm256_mul_ps(_mm256_set1_ps(mxx), xVal)));
 		xMin = _mm256_min_ps(xMin, dotX);
 		xMax = _mm256_max_ps(xMax, dotX);
+		__m256 dotY = _mm256_fmadd_ps(_mm256_set1_ps(myz), zVal, _mm256_fmadd_ps(_mm256_set1_ps(myy), yVal, _mm256_mul_ps(_mm256_set1_ps(myx), xVal)));
 		yMin = _mm256_min_ps(yMin, dotY);
 		yMax = _mm256_max_ps(yMax, dotY);
+		__m256 dotZ = _mm256_fmadd_ps(_mm256_set1_ps(mzz), zVal, _mm256_fmadd_ps(_mm256_set1_ps(mzy), yVal, _mm256_mul_ps(_mm256_set1_ps(mzx), xVal)));
 		zMin = _mm256_min_ps(zMin, dotZ);
 		zMax = _mm256_max_ps(zMax, dotZ);
 	}
