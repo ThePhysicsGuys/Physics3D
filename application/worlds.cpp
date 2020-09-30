@@ -82,16 +82,11 @@ void PlayerWorld::applyExternalForces() {
 }
 
 void PlayerWorld::onPartAdded(ExtendedPart* part) {
-	if (part->entity == 0) {
-		auto entity = registry.create();
-		part->entity = entity;
-	}
-
-	registry.add<Comp::Model>(part->entity, part);
+	
 }
 
 void PlayerWorld::onPartRemoved(ExtendedPart* part) {
-	registry.destroy(part->entity);
+	screen.registry.destroy(part->entity);
 }
 
 };

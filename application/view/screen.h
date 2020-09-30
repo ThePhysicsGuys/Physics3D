@@ -8,6 +8,8 @@
 #include "../engine/visualData.h"
 #include "../engine/event/event.h"
 #include "../engine/layer/layerStack.h"
+#include "../engine/ecs/registry.h"
+
 #include "camera.h"
 
 namespace P3D::Graphics {
@@ -28,6 +30,8 @@ void terminateGLFW();
 
 class Screen {
 public:
+	Engine::Registry64 registry;
+
 	PlayerWorld* world;
 	Vec2i dimension;
 

@@ -19,18 +19,14 @@ struct ExtendedPart : public Part {
 
 	VisualData visualData;
 
-	// Transition
 	Entity entity = 0;
-	ExtendedPart(Part&& part, Entity entity/* = 0*/); 
-	ExtendedPart(const Shape& hitbox, const GlobalCFrame& position, const PartProperties& properties, Entity entity/* = 0*/);
-	ExtendedPart(const Shape& hitbox, ExtendedPart* attachTo, const CFrame& attach, const PartProperties& properties, Entity entity/* = 0*/);
 
 	ExtendedPart() = default;
-	ExtendedPart(Part&& part, std::string name = "Part");
-	ExtendedPart(Part&& part, VisualData visualData, std::string name = "Part");
-	ExtendedPart(const Shape& hitbox, const GlobalCFrame& position, const PartProperties& properties, std::string name = "Part");
-	ExtendedPart(const Shape& hitbox, const GlobalCFrame& position, const PartProperties& properties, VisualData visualData, std::string name = "Part");
-	ExtendedPart(const Shape& hitbox, ExtendedPart* attachTo, const CFrame& attach, const PartProperties& properties, std::string name = "Part");
+	ExtendedPart(Part&& part, const std::string& name = "", Entity entity = 0);
+	ExtendedPart(Part&& part, VisualData visualData, const std::string& name = "", Entity entity = 0);
+	ExtendedPart(const Shape& hitbox, const GlobalCFrame& position, const PartProperties& properties, const std::string& name = "", Entity entity = 0);
+	ExtendedPart(const Shape& hitbox, const GlobalCFrame& position, const PartProperties& properties, VisualData visualData, const std::string& name = "", Entity entity = 0);
+	ExtendedPart(const Shape& hitbox, ExtendedPart* attachTo, const CFrame& attach, const PartProperties& properties, const std::string& name = "", Entity entity = 0);
 };
 
 };

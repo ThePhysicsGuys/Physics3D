@@ -160,7 +160,6 @@ void setupWorld(int argc, const char** args) {
 		//sateliteBody->attach(wing2, new SinusoidalPistonConstraint(Vec3(-1.0, 0.0, 0.0), 1.0, 3.0, 1.0), CFrame(-0.5, 0.0, 0.0), CFrame(0.5, 0.0, 0.0));
 
 		world.addPart(sateliteBody);
-		world.registry.add<Comp::Tag>(sateliteBody->entity, "Satelite body");
 
 		sateliteBody->parent->mainPhysical->motionOfCenterOfMass.rotation.rotation[0] = Vec3(0, 2, 0);
 	}

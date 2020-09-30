@@ -186,19 +186,19 @@ void Screen::onInit() {
 	layerStack.pushLayer(&imguiLayer);
 
 	// Layer init
-	layerStack.onInit(world->registry);
+	layerStack.onInit(registry);
 
 	// Resize
 	Engine::FrameBufferResizeEvent event(dimension.x, dimension.y);
 	handler->onFrameBufferResize(event);
 
 	// Init frames
-	BigFrame::onInit(world->registry);
+	BigFrame::onInit(registry);
 }
 
 void Screen::onUpdate() {
 	// Update layers
-	layerStack.onUpdate(world->registry);
+	layerStack.onUpdate(registry);
 }
 
 void Screen::onEvent(Engine::Event& event) {
@@ -213,7 +213,7 @@ void Screen::onEvent(Engine::Event& event) {
 		}
 	}*/
 
-	layerStack.onEvent(world->registry, event);
+	layerStack.onEvent(registry, event);
 }
 
 void Screen::onRender() {
@@ -229,7 +229,7 @@ void Screen::onRender() {
 	defaultSettings(screenFrameBuffer->getID());
 
 	// Render layers
-	layerStack.onRender(world->registry);
+	layerStack.onRender(registry);
 
 	// Render imgui
 	imguiLayer.end();
@@ -247,7 +247,7 @@ void Screen::onRender() {
 void Screen::onClose() {
 	screenFrameBuffer->close();
 
-	layerStack.onClose(world->registry);
+	layerStack.onClose(registry);
 
 	Graphics::Library::onClose();
 

@@ -452,7 +452,7 @@ void BigFrame::renderECSNode(Engine::Registry64& registry, Engine::Registry64::e
 	ImTextureID texture = (void*) (intptr_t) objectIcon->getID();
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth | (leaf ? ImGuiTreeNodeFlags_Leaf : ImGuiTreeNodeFlags_None);
 
-	std::string name = registry.getOr<Comp::Tag>(entity, Comp::Tag("Part")).name;
+	std::string name = registry.getOr<Comp::Tag>(entity, Comp::Tag(std::to_string(entity))).name;
 	bool open = IconTreeNode(id, texture, flags, name.c_str());
 		
 	// Render popup
