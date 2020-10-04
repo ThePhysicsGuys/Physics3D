@@ -44,6 +44,10 @@ TreeNode::TreeNode(TreeNode* subTrees, int nodeCount) :
 	isGroupHead(false), 
 	bounds(computeBoundsOfList(subTrees, nodeCount)) {}
 
+TreeNode TreeNode::withEmptySubNodes() {
+	TreeNode* subNodes = new TreeNode[MAX_BRANCHES];
+	return TreeNode(subNodes, 0);
+}
 
 TreeNode::TreeNode(const TreeNode& original) :
 	nodeCount(original.nodeCount),

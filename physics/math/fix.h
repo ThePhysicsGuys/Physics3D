@@ -9,6 +9,7 @@ struct Fix {
 	constexpr Fix() noexcept : value(0) {}
 	constexpr Fix(double d) noexcept : value(static_cast<int64_t>(d * (1ULL << N))) {}
 	constexpr Fix(float f) noexcept : value(static_cast<int64_t>(double(f) * (1ULL << N))) {}
+	constexpr Fix(int l) noexcept : value(int64_t(l) << N) {}
 	constexpr Fix(int64_t l) noexcept : value(l << N) {}
 
 	inline constexpr operator double() const noexcept { return static_cast<double>(value) / (1ULL << N); }
@@ -55,6 +56,9 @@ template<int64_t N> inline constexpr Fix<N> operator-(float a, Fix<N> b)    noex
 template<int64_t N> inline constexpr Fix<N> operator*(Fix<N> a, int64_t b)  noexcept {Fix<N> result; result.value = a.value * b; return result;}
 template<int64_t N> inline constexpr Fix<N> operator*(int64_t a, Fix<N> b)  noexcept {Fix<N> result; result.value = a * b.value; return result;}
 
+template<int64_t N> inline constexpr Fix<N> operator*(Fix<N> a, int b)  noexcept { Fix<N> result; result.value = a.value * b; return result; }
+template<int64_t N> inline constexpr Fix<N> operator*(int a, Fix<N> b)  noexcept { Fix<N> result; result.value = a * b.value; return result; }
+
 template<int64_t N> inline constexpr Fix<N> operator*(Fix<N> a, double b)   noexcept {Fix<N> result; result.value = static_cast<int64_t>(a.value * b); return result;}
 template<int64_t N> inline constexpr Fix<N> operator*(Fix<N> a, float b)    noexcept {Fix<N> result; result.value = static_cast<int64_t>(a.value * b); return result;}
 template<int64_t N> inline constexpr Fix<N> operator*(double a, Fix<N> b)   noexcept {Fix<N> result; result.value = static_cast<int64_t>(a * b.value); return result;}
@@ -65,10 +69,14 @@ template<int64_t N> inline constexpr Fix<N> operator/(Fix<N> a, float b)    noex
 template<int64_t N> inline constexpr Fix<N> operator/(double a, Fix<N> b)   noexcept {Fix<N> result; result.value = static_cast<int64_t>(a / b.value); return result;}
 template<int64_t N> inline constexpr Fix<N> operator/(float a, Fix<N> b)    noexcept {Fix<N> result; result.value = static_cast<int64_t>(a / b.value); return result;}
 
-template<int64_t N> inline constexpr Fix<N> operator/(Fix<N> a, int64_t b)  noexcept {Fix<N> result; result.value = static_cast<int64_t>(a.value / b); return result;}
+template<int64_t N> inline constexpr Fix<N> operator/(Fix<N> a, int64_t b)  noexcept {Fix<N> result; result.value = a.value / b; return result;}
+template<int64_t N> inline constexpr Fix<N> operator/(Fix<N> a, int b)  noexcept { Fix<N> result; result.value = a.value / b; return result; }
 
-template<int64_t N> inline constexpr Fix<N> operator<<(Fix<N> a, int64_t b) noexcept {Fix<N> result; result.value = static_cast<int64_t>(a.value << b); return result;}
-template<int64_t N> inline constexpr Fix<N> operator>>(Fix<N> a, int64_t b) noexcept {Fix<N> result; result.value = static_cast<int64_t>(a.value >> b); return result;}
+template<int64_t N> inline constexpr Fix<N> operator<<(Fix<N> a, int64_t b) noexcept {Fix<N> result; result.value = a.value << b; return result;}
+template<int64_t N> inline constexpr Fix<N> operator>>(Fix<N> a, int64_t b) noexcept {Fix<N> result; result.value = a.value >> b; return result;}
+
+template<int64_t N> inline constexpr Fix<N> operator<<(Fix<N> a, int b) noexcept { Fix<N> result; result.value = a.value << b; return result; }
+template<int64_t N> inline constexpr Fix<N> operator>>(Fix<N> a, int b) noexcept { Fix<N> result; result.value = a.value >> b; return result; }
 
 
 #define CREATE_COMPARISONS(T1, T2, V1, V2) \

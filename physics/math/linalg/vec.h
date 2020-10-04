@@ -212,7 +212,7 @@ constexpr auto operator-(const Vector<T1, Size>& a, const Vector<T2, Size>& b) n
 	return result;
 }
 
-template<typename T1, typename T2, size_t Size, typename = typename std::enable_if<std::is_arithmetic<T2>::value, T2>::type>
+template<typename T1, typename T2, size_t Size>
 constexpr auto operator*(const Vector<T1, Size>& vec, const T2& factor) noexcept -> Vector<decltype(vec[0] * factor), Size> {
 	Vector<decltype(vec[0] * factor), Size> result;
 	for (size_t i = 0; i < Size; i++) {
@@ -221,7 +221,7 @@ constexpr auto operator*(const Vector<T1, Size>& vec, const T2& factor) noexcept
 	return result;
 }
 
-template<typename T1, typename T2, size_t Size, typename = typename std::enable_if<std::is_arithmetic<T1>::value, T1>::type>
+template<typename T1, typename T2, size_t Size>
 constexpr auto operator*(const T1& factor, const Vector<T2, Size>& vec) noexcept -> Vector<decltype(factor * vec[0]), Size> {
 	Vector<decltype(factor * vec[0]), Size> result;
 	for (size_t i = 0; i < Size; i++) {
@@ -230,7 +230,7 @@ constexpr auto operator*(const T1& factor, const Vector<T2, Size>& vec) noexcept
 	return result;
 }
 
-template<typename T1, typename T2, size_t Size, typename = typename std::enable_if<std::is_arithmetic<T2>::value, T2>::type>
+template<typename T1, typename T2, size_t Size>
 constexpr auto operator/(const Vector<T1, Size>& vec, const T2& factor) noexcept -> Vector<decltype(vec[0] / factor), Size> {
 	Vector<decltype(vec[0] / factor), Size> result;
 	for (size_t i = 0; i < Size; i++) {

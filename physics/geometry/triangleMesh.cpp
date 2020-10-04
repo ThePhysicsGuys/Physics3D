@@ -444,7 +444,7 @@ TriangleMesh stripUnusedVertices(const Vec3f* vertices, const Triangle* triangle
 }
 
 
-#ifdef __AVX__
+#ifdef __AVX2__
 #include <immintrin.h>
 #if defined(_MSC_VER) && _MSC_VER == 1922
 inline static uint32_t __builtin_ctz(uint32_t x) {

@@ -129,11 +129,12 @@ TreeNode generateTreeNode(int branchInhibition) {
 	if(rand() % branchInhibition == 0) {
 		// generate branching node
 		int branches = (rand() % (MAX_BRANCHES - 2) + 2); // generate >=2 branches
-		TreeNode* subTrees = new TreeNode[MAX_BRANCHES];
+		TreeNode result = TreeNode::withEmptySubNodes();
+		result.nodeCount = branches;
 		for(int i = 0; i < branches; i++) {
-			subTrees[i] = generateTreeNode(branchInhibition + 1); // to generate reasonably sized trees but not too big
+			result[i] = generateTreeNode(branchInhibition + 1); // to generate reasonably sized trees but not too big
 		}
-		return TreeNode(subTrees, branches);
+		return result;
 	} else {
 		// generate leaf node
 		BasicBounded* newBasicBounded = new BasicBounded{generateBounds()};

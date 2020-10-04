@@ -52,17 +52,17 @@ static void runBenchmark(Benchmark* bench) {
 	bench->init();
 	auto createFinish = std::chrono::high_resolution_clock::now();
 	std::cout << bench->name << ": ";
-	std::cout. flush();
+	std::cout.flush();
 	setColor(TerminalColor::YELLOW);
 	std::cout << '(' << (createFinish - createStart).count() / 1000000.0 << "ms)";
-	std::cout. flush();
+	std::cout.flush();
 	auto runStart = std::chrono::high_resolution_clock::now();
 	bench->run();
 	auto runFinish = std::chrono::high_resolution_clock::now();
 	double deltaTimeMS = (runFinish - runStart).count() / 1000000.0;
 	setColor(TerminalColor::GREEN);
 	std::cout << "  (" << deltaTimeMS << "ms)\n";
-	std::cout. flush();
+	std::cout.flush();
 	bench->printResults(deltaTimeMS);
 }
 
