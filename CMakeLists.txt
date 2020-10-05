@@ -208,6 +208,7 @@ add_library(engine STATIC
   engine/ecs/entity.cpp
   engine/ecs/node.cpp
   engine/ecs/tree.cpp
+  engine/ecs/registry.cpp
 
   engine/input/inputHandler.cpp
   engine/input/keyboard.cpp

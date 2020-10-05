@@ -3,6 +3,7 @@
 #include "compare.h"
 #include "../engine/ecs/registry.h"
 #include "../util/log.h"
+#include "../util/intrusivePointer.h"
 
 TEST_CASE(idGeneration) {
 	using namespace P3D::Engine;
@@ -20,8 +21,8 @@ TEST_CASE(componentGeneration) {
 	Registry8 registry;
 	auto id = registry.create();
 
-	struct A {};
-	struct B {};
+	struct A : public RefCountable {};
+	struct B : public RefCountable {};
 
 	registry.add<A>(id);
 	registry.add<B>(id);
@@ -36,7 +37,7 @@ TEST_CASE(componentAccess) {
 	Registry8 registry;
 	auto id = registry.create();
 
-	struct A {
+	struct A : public RefCountable {
 		int a;
 		float b;
 
@@ -50,9 +51,9 @@ TEST_CASE(componentAccess) {
 
 
 TEST_CASE(viewTest) {
-	struct A {};
-	struct B {};
-	struct C {};
+	struct A : public RefCountable {};
+	struct B : public RefCountable {};
+	struct C : public RefCountable {};
 
 	using namespace P3D::Engine;
 	Registry8 registry;
@@ -121,7 +122,7 @@ TEST_CASE(getFromView) {
 	Registry8 registry;
 	auto id = registry.create();
 
-	struct A {
+	struct A : public RefCountable {
 		int idx;
 		A(int idx) : idx(idx) {}
 	};
@@ -134,7 +135,7 @@ TEST_CASE(getFromView) {
 	int idx = 0;
 	for (auto entity : view) {
 		idx++;
-		A& component = view.get<A>(entity);
-		ASSERT_TRUE(idx == component.idx);
+		intrusive_ptr<A> component = view.get<A>(entity);
+		ASSERT_TRUE(idx == component->idx);
 	}
 }

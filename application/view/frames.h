@@ -52,7 +52,7 @@ private:
 	static void renderShaderInfo(Graphics::ShaderResource* shader);
 	
 	static void renderECSTree(Engine::Registry64& registry);
-	static void renderPropertiesFrame();
+	static void renderPropertiesFrame(Engine::Registry64& registry);
 	static void renderDebugFrame();
 	static void renderEnvironmentFrame();
 	static void renderLayerFrame();

@@ -137,22 +137,22 @@ void EditTools::onRender(Screen& screen) {
 	// Center, only rendered if editMode != EditMode::ROTATE
 	if (center) {
 		Shaders::basicShader.updateModel(modelMatrix);
-		Shaders::basicShader.updateMaterial(Material(COLOR::WHITE));
+		Shaders::basicShader.updateMaterial(Comp::Material(COLOR::WHITE));
 		center->render();
 	}
 
 	// Y
 	Shaders::basicShader.updateModel(modelMatrix);
-	Shaders::basicShader.updateMaterial(Material(COLOR::RGB_G));
+	Shaders::basicShader.updateMaterial(Comp::Material(COLOR::RGB_G));
 	shaft->render();
 
 	// X
-	Shaders::basicShader.updateMaterial(Material(COLOR::RGB_R));
+	Shaders::basicShader.updateMaterial(Comp::Material(COLOR::RGB_R));
 	Shaders::basicShader.updateModel(modelMatrix * Mat4(Mat3(transformations[1].asRotationMatrix()), 1.0f));
 	shaft->render();
 
 	// Z
-	Shaders::basicShader.updateMaterial(Material(COLOR::RGB_B));
+	Shaders::basicShader.updateMaterial(Comp::Material(COLOR::RGB_B));
 	Shaders::basicShader.updateModel(modelMatrix * Mat4(Mat3(transformations[2].asRotationMatrix()), 1.0f));
 	shaft->render();
 }

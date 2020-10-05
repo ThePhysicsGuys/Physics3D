@@ -13,7 +13,7 @@ void BasicShader::updatePart(const ExtendedPart& part) {
 	BasicShader::updateModel(part.getCFrame(), DiagonalMat3f(part.hitbox.scale));
 }
 
-void BasicShader::updateMaterial(const Material& material) {
+void BasicShader::updateMaterial(const Comp::Material& material) {
 	bind();
 	setUniform("material.albedo", material.albedo);
 	setUniform("material.metalness", material.metalness);

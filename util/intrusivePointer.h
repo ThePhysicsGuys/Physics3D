@@ -1,3 +1,5 @@
+#pragma once
+
 struct RefCountable {
     std::size_t count = 0;
 
@@ -151,6 +153,26 @@ bool operator!=(T* ptr, const intrusive_ptr<T>& iptr) {
     return (ptr != iptr.get());
 }
 
+template <typename T>
+bool operator==(std::nullptr_t nptr, const intrusive_ptr<T>& iptr) {
+    return (nullptr == iptr.get());
+}
+
+template <typename T>
+bool operator!=(std::nullptr_t nptr, const intrusive_ptr<T>& iptr) {
+    return (nullptr != iptr.get());
+}
+
+template <typename T>
+bool operator==(const intrusive_ptr<T>& iptr, std::nullptr_t nptr) {
+    return (iptr.get() == nullptr);
+}
+
+template <typename T>
+bool operator!=(const intrusive_ptr<T>& iptr, std::nullptr_t nptr) {
+    return (iptr.get() != nullptr);
+}
+
 template<typename T>
 intrusive_ptr<T> make_intrusive(T* ptr) {
     return intrusive_ptr<T>(ptr);
@@ -160,3 +182,6 @@ template <class T, class U>
 intrusive_ptr<T> intrusive_cast(const intrusive_ptr<U>& iptr) {
     return make_intrusive(static_cast<T*>(iptr.get()));
 }
+
+template<typename T>
+using Ref = intrusive_ptr<T>;

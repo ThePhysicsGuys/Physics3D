@@ -260,6 +260,7 @@
     <ClInclude Include="math\rot3.h" />
     <ClInclude Include="math\vec3.h" />
     <ClInclude Include="properties.h" />
+    <ClInclude Include="intrusivePointer.h" />
     <ClInclude Include="resource\resource.h" />
     <ClInclude Include="resource\resourceLoader.h" />
     <ClInclude Include="resource\resourceManager.h" />

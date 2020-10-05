@@ -11,10 +11,6 @@ namespace P3D::Application {
 struct ExtendedPart : public Part {
 	using Entity = typename Engine::Registry64::entity_type;
 
-	Material material;
-
-	std::string name;
-
 	int renderMode = 0x1B02; // GL_FILL
 
 	VisualData visualData;
@@ -27,6 +23,8 @@ struct ExtendedPart : public Part {
 	ExtendedPart(const Shape& hitbox, const GlobalCFrame& position, const PartProperties& properties, const std::string& name = "", Entity entity = 0);
 	ExtendedPart(const Shape& hitbox, const GlobalCFrame& position, const PartProperties& properties, VisualData visualData, const std::string& name = "", Entity entity = 0);
 	ExtendedPart(const Shape& hitbox, ExtendedPart* attachTo, const CFrame& attach, const PartProperties& properties, const std::string& name = "", Entity entity = 0);
+
+	void setMaterial(const Comp::Material& material);
 };
 
 };

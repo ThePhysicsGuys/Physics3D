@@ -7,6 +7,8 @@
 #include "extendedPart.h"
 #include "worlds.h"
 
+#include "../engine/ecs/registry.h"
+#include "ecs/components.h"
 #include "ecs/light.h"
 #include "ecs/material.h"
 #include "ecs/model.h"
@@ -155,11 +157,12 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 	std::multimap<int, ExtendedPart*> visibleParts;
 	std::map<double, ExtendedPart*> transparentParts;
 	graphicsMeasure.mark(GraphicsProcess::PHYSICALS);
-	screen->world->syncReadOnlyOperation([this, &visibleParts, &transparentParts, &meshCounter, &maxMeshCount, screen] () {
+	screen->world->syncReadOnlyOperation([this, &visibleParts, &transparentParts, &meshCounter, &maxMeshCount, screen, &registry] () {
 		VisibilityFilter filter = VisibilityFilter::forWindow(screen->camera.cframe.position, screen->camera.getForwardDirection(), screen->camera.getUpDirection(), screen->camera.fov, screen->camera.aspect, screen->camera.zfar);
 		for (ExtendedPart& part : screen->world->iterPartsFiltered(filter)) {
 		//for (ExtendedPart& part : screen->world->iterParts(ALL_PARTS)) {
-			if (part.material.albedo.w < 1) {
+			Comp::Material material = registry.getOr<Comp::Material>(part.entity, Comp::Material());
+			if (material.albedo.w < 1) {
 				transparentParts.insert({ lengthSquared(Vec3(screen->camera.cframe.position - part.getPosition())), &part });
 			} else {
 				visibleParts.insert({ part.visualData.drawMeshId, &part });
@@ -189,17 +192,17 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 			auto meshes = visibleParts.equal_range(meshID);
 			for (auto mesh = meshes.first; mesh != meshes.second; ++mesh) {
 				ExtendedPart* part = mesh->second;
-				Material material = part->material;
+				Comp::Material material = registry.getOr<Comp::Material>(part->entity, Comp::Material());
 				material.albedo += getAlbedoForPart(screen, part);
 
 				Mat4f modelMatrix = part->getCFrame().asMat4WithPreScale(part->hitbox.scale);
 
 				uniforms[offset] = Uniform {
 					modelMatrix,
-					part->material.albedo,
-					part->material.metalness,
-					part->material.roughness,
-					part->material.ao
+					material.albedo,
+					material.metalness,
+					material.roughness,
+					material.ao
 				};
 
 				offset++;
@@ -215,7 +218,7 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 		for (auto iterator = transparentParts.rbegin(); iterator != transparentParts.rend(); ++iterator) {
 			ExtendedPart* part = (*iterator).second;
 
-			Material material = part->material;
+			Comp::Material material = registry.getOr<Comp::Material>(part->entity, Comp::Material());
 			material.albedo += getAlbedoForPart(screen, part);
 
 			if (part->visualData.drawMeshId == -1)
