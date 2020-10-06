@@ -88,6 +88,10 @@ public:
         return ptr;
     }
 
+    bool valid() {
+        return ptr != nullptr;
+    }
+
     void reset() {
         T* const tmp = ptr;
         ptr = nullptr;

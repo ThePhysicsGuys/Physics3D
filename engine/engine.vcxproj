@@ -257,7 +257,6 @@
     <ClCompile Include="options\keyboardOptions.cpp" />
     <ClCompile Include="resource\meshResource.cpp" />
     <ClCompile Include="tool\toolManager.cpp" />
-    <ClCompile Include="visualData.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

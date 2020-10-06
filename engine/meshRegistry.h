@@ -1,3 +1,4 @@
+#pragma once
 
 #include "../engine/visualData.h"
 #include "../graphics/visualShape.h"

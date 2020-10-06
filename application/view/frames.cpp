@@ -562,7 +562,7 @@ void BigFrame::renderPropertiesFrame(Engine::Registry64& registry) {
 	if (ImGui::TreeNode("General")) {
 		std::string name = registry.getOr<Comp::Tag>((sp)? sp->entity : 0, (sp)? std::to_string(sp->entity) : "-").name;
 		ImGui::Text("Name: %s", name.c_str());
-		ImGui::Text("Mesh ID: %s", (sp) ? str(sp->visualData.drawMeshId).c_str() : "-");
+		//ImGui::Text("Mesh ID: %s", (sp) ? str(sp->visualData.id).c_str() : "-");
 
 		ImGui::TreePop();
 	}
@@ -629,8 +629,8 @@ void BigFrame::renderPropertiesFrame(Engine::Registry64& registry) {
 			ImGui::SliderFloat("Metalness", &material->metalness, 0, 1);
 			ImGui::SliderFloat("Roughness", &material->roughness, 0, 1);
 			ImGui::SliderFloat("Ambient occlusion", &material->ao, 0, 1);
-			if (ImGui::Button(sp ? (sp->renderMode == Renderer::FILL ? "Render mode: fill" : "Render mode: wireframe") : "l"))
-				if (sp) sp->renderMode = sp->renderMode == Renderer::FILL ? Renderer::WIREFRAME : Renderer::FILL;
+			//if (ImGui::Button(sp ? (sp->renderMode == Renderer::FILL ? "Render mode: fill" : "Render mode: wireframe") : "l"))
+			//	if (sp) sp->renderMode = sp->renderMode == Renderer::FILL ? Renderer::WIREFRAME : Renderer::FILL;
 		} else {
 			ImGui::Text("No part selected");
 		}

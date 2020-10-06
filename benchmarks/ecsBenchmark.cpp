@@ -10,7 +10,7 @@ public:
 	std::vector<int> v { 1, 2, 3, 4, 5, 6 };
 	int errors = 0;
 	
-	struct A {
+	struct A : public RefCountable {
 		int i; 
 		
 		A(int i) : i(i) {}
@@ -48,7 +48,7 @@ public:
 	P3D::Engine::Registry64 registry;
 	int errors = 0;
 
-	struct A { int i; A(int i) : i(i) {} };
+	struct A : public RefCountable { int i; A(int i) : i(i) {} };
 
 	void init() override {
 		int amount = 1000000;
@@ -62,8 +62,8 @@ public:
 		int i = 0;
 		auto view = registry.view<A>();
 		for (auto entity : view) {
-			auto& comp = view.get<A>(entity);
-			if (comp.i != i)
+			auto comp = view.get<A>(entity);
+			if (comp->i != i)
 				errors++;
 			i++;
 		}

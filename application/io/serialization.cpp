@@ -73,7 +73,6 @@ public:
 	virtual void serializeExtendedPart(const ExtendedPart& part, std::ostream& ostream) override {
 		// TODO integrate components into serialization
 		serializeMaterial(screen.registry.getOr<Comp::Material>(part.entity, Comp::Material()), ostream);
-		::serialize<int>(part.renderMode, ostream);
 		::serializeString(screen.registry.getOr<Comp::Tag>(part.entity, Comp::Tag("")).name, ostream);
 	}
 };
@@ -83,11 +82,9 @@ public:
 	using DeSerializationSession<ExtendedPart>::DeSerializationSession;
 	virtual ExtendedPart* deserializeExtendedPart(Part&& partPhysicalData, std::istream& istream) override {
 		Comp::Material material = deserializeMaterial(istream);
-		int renderMode = ::deserialize<int>(istream);
 		ExtendedPart* result = new ExtendedPart(std::move(partPhysicalData), ::deserializeString(istream));
 
 		result->setMaterial(material);
-		result->renderMode = renderMode;
 
 		return result;
 	}

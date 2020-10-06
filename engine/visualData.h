@@ -3,11 +3,17 @@
 namespace P3D {
 
 struct VisualData {
-	int drawMeshId;
-	bool includeUVs;
-	bool includeNormals;
+	// The render mode, default is fill
+	int mode = 0x1B02;
 
-	void render(int renderMode) const;
+	// The mesh id in the mesh registry
+	int id;
+
+	// Whether the mesh has UV coordinates
+	bool hasUVs;
+
+	// Whether the mesh has normal vectors
+	bool hasNormals;
 };
 
 }

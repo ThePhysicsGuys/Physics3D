@@ -161,15 +161,18 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 		VisibilityFilter filter = VisibilityFilter::forWindow(screen->camera.cframe.position, screen->camera.getForwardDirection(), screen->camera.getUpDirection(), screen->camera.fov, screen->camera.aspect, screen->camera.zfar);
 		for (ExtendedPart& part : screen->world->iterPartsFiltered(filter)) {
 		//for (ExtendedPart& part : screen->world->iterParts(ALL_PARTS)) {
-			Comp::Material material = registry.getOr<Comp::Material>(part.entity, Comp::Material());
-			if (material.albedo.w < 1) {
-				transparentParts.insert({ lengthSquared(Vec3(screen->camera.cframe.position - part.getPosition())), &part });
-			} else {
-				visibleParts.insert({ part.visualData.drawMeshId, &part });
-				maxMeshCount = std::max(maxMeshCount, meshCounter[part.visualData.drawMeshId]++);
+			Ref<Comp::Mesh> mesh = registry.get<Comp::Mesh>(part.entity);
+			if (mesh.valid()) {
+				Comp::Material material = registry.getOr<Comp::Material>(part.entity, Comp::Material());
+				if (material.albedo.w < 1) {
+					transparentParts.insert({ lengthSquared(Vec3(screen->camera.cframe.position - part.getPosition())), &part });
+				} else {
+					visibleParts.insert({ mesh->id, &part });
+					maxMeshCount = std::max(maxMeshCount, meshCounter[mesh->id]++);
 
-				if(meshCounter[part.visualData.drawMeshId] > maxMeshCount) {
-					maxMeshCount = meshCounter[part.visualData.drawMeshId];
+					if (meshCounter[mesh->id] > maxMeshCount) {
+						maxMeshCount = meshCounter[mesh->id];
+					}
 				}
 			}
 		}
@@ -217,21 +220,28 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 		Renderer::enableBlending();
 		for (auto iterator = transparentParts.rbegin(); iterator != transparentParts.rend(); ++iterator) {
 			ExtendedPart* part = (*iterator).second;
-
+			
+			Ref<Comp::Mesh> mesh = registry.get<Comp::Mesh>(part->entity);
 			Comp::Material material = registry.getOr<Comp::Material>(part->entity, Comp::Material());
 			material.albedo += getAlbedoForPart(screen, part);
 
-			if (part->visualData.drawMeshId == -1)
+			if (!mesh.valid())
+				continue;
+
+			if (mesh->id == -1)
 				continue;
 
 			Shaders::basicShader.updateMaterial(material);
 			Shaders::basicShader.updatePart(*part);
-			Engine::MeshRegistry::meshes[part->visualData.drawMeshId]->render(part->renderMode);
+			Engine::MeshRegistry::meshes[mesh->id]->render(mesh->mode);
+			
 		}
 
 		if (screen->selectedPart) {
 			Shaders::debugShader.updateModel(screen->selectedPart->getCFrame().asMat4WithPreScale(screen->selectedPart->hitbox.scale));
-			Engine::MeshRegistry::meshes[screen->selectedPart->visualData.drawMeshId]->render();
+			Ref<Comp::Mesh> mesh = registry.get<Comp::Mesh>(screen->selectedPart->entity);
+			if (mesh.valid())
+				Engine::MeshRegistry::meshes[mesh->id]->render();
 		}
 	});
 

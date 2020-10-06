@@ -16,7 +16,7 @@
 #include "worlds.h"
 #include "imgui/imgui.h"
 #include "../physics/misc/filters/visibilityFilter.h"
-
+#include "ecs/components.h"
 #include "application.h"
 #include "shader/shaders.h"
 
@@ -66,21 +66,24 @@ void ShadowLayer::onEvent(Engine::Registry64& registry, Engine::Event& event) {
 
 }
 
-void ShadowLayer::renderScene() {
-	std::multimap<int, ExtendedPart*> visibleParts;
-	screen.world->syncReadOnlyOperation([&visibleParts] () {
+void ShadowLayer::renderScene(Engine::Registry64& registry) {
+	std::vector<ExtendedPart*> visibleParts;
+	screen.world->syncReadOnlyOperation([&visibleParts, &registry] () {
 		for (ExtendedPart& part : screen.world->iterParts())
-			visibleParts.insert({ part.visualData.drawMeshId, &part });
+			visibleParts.push_back(&part);
 		});
 
-	for (auto& iterator : visibleParts) {
-		ExtendedPart* part = iterator.second;
+	for (ExtendedPart* part : visibleParts) {
+		Ref<Comp::Mesh> mesh = registry.get<Comp::Mesh>(part->entity);
 
-		if (part->visualData.drawMeshId == -1)
+		if (!mesh.valid())
+			continue;
+
+		if (mesh->id == -1)
 			continue;
 
 		Shaders::depthShader.updateModel(part->getCFrame().asMat4WithPreScale(part->hitbox.scale));
-		Engine::MeshRegistry::meshes[part->visualData.drawMeshId]->render(part->renderMode);
+		Engine::MeshRegistry::meshes[mesh->id]->render(mesh->mode);
 	}
 }
 
@@ -97,7 +100,7 @@ void ShadowLayer::onRender(Engine::Registry64& registry) {
 	glClear(GL_DEPTH_BUFFER_BIT);
 	Renderer::disableCulling();
 	//glCullFace(GL_FRONT_AND_BACK);
-	renderScene();
+	renderScene(registry);
 	//glCullFace(GL_BACK);
 	Renderer::enableCulling();
 	glBindFramebuffer(GL_FRAMEBUFFER, screen->screenFrameBuffer->getID());

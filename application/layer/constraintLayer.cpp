@@ -20,6 +20,7 @@
 #include "../physics/constraints/sinusoidalPistonConstraint.h"
 #include "../physics/constraints/motorConstraint.h"
 #include "../physics/constraints/fixedConstraint.h"
+#include "../engine/meshRegistry.h"
 
 namespace P3D::Application {
 
@@ -36,7 +37,7 @@ static void renderObject(const VisualData& shape, const GlobalCFrame& cframe, co
 	Shaders::basicShader.updateMaterial(material);
 	Shaders::basicShader.updateTexture(false);
 	Shaders::basicShader.updateModel(cframe, scale);
-	shape.render(Graphics::Renderer::FILL);
+	Engine::MeshRegistry::meshes[shape.id]->render();
 }
 
 static void renderConstraintLineBetween(Position p1, Position p2) {
