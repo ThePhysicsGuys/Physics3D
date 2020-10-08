@@ -34,3 +34,6 @@ cmake-build-debug/
 include/
 vcpkg/
 build/
+
+
+*.log

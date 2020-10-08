@@ -134,10 +134,10 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 	graphicsMeasure.mark(GraphicsProcess::UPDATE);
 	Shaders::debugShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
 	Shaders::basicShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
-	
+
 	//Shaders::instanceShader.updateProjection(lookAt(fromPosition(screen->camera.cframe.position), Vec3f(0, 0, 0)), screen->camera.projectionMatrix, screen->camera.cframe.position);
 	Shaders::instanceShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
-	
+
 	// Shadow
 	Vec3f from = { -10, 10, -10 };
 	Vec3f to = { 0, 0, 0 };
@@ -159,22 +159,26 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 	graphicsMeasure.mark(GraphicsProcess::PHYSICALS);
 	screen->world->syncReadOnlyOperation([this, &visibleParts, &transparentParts, &meshCounter, &maxMeshCount, screen, &registry] () {
 		VisibilityFilter filter = VisibilityFilter::forWindow(screen->camera.cframe.position, screen->camera.getForwardDirection(), screen->camera.getUpDirection(), screen->camera.fov, screen->camera.aspect, screen->camera.zfar);
-		for (ExtendedPart& part : screen->world->iterPartsFiltered(filter)) {
-		//for (ExtendedPart& part : screen->world->iterParts(ALL_PARTS)) {
-			Ref<Comp::Mesh> mesh = registry.get<Comp::Mesh>(part.entity);
-			if (mesh.valid()) {
-				Comp::Material material = registry.getOr<Comp::Material>(part.entity, Comp::Material());
-				if (material.albedo.w < 1) {
-					transparentParts.insert({ lengthSquared(Vec3(screen->camera.cframe.position - part.getPosition())), &part });
-				} else {
-					visibleParts.insert({ mesh->id, &part });
-					maxMeshCount = std::max(maxMeshCount, meshCounter[mesh->id]++);
 
-					if (meshCounter[mesh->id] > maxMeshCount) {
-						maxMeshCount = meshCounter[mesh->id];
-					}
-				}
+		auto view = registry.view<Comp::Model>();
+		for (auto& entity : view) {
+			Ref<Comp::Model> model = view.get<Comp::Model>(entity);
+			if (!filter(*model->part))
+				continue;	
+			
+			Ref<Comp::Mesh> mesh = registry.get<Comp::Mesh>(entity);
+			if (!mesh.valid())
+				continue;
+
+			Comp::Material material = registry.getOr<Comp::Material>(entity, Comp::Material());
+			if (material.albedo.w < 1.0f) {
+				double distance = lengthSquared(Vec3(screen->camera.cframe.position - model->part->getPosition()));
+				transparentParts.insert(std::make_pair(distance , model->part));
+			} else {
+				visibleParts.insert(std::make_pair(mesh->id, model->part));
+				maxMeshCount = std::max(maxMeshCount, ++meshCounter[mesh->id]);
 			}
+			
 		}
 
 		// Ensure correct size
@@ -184,21 +188,19 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 
 		// Render normal meshes
 		Shaders::instanceShader.bind();
-		for (auto iterator : meshCounter) {
-			int meshID = iterator.first;
-			std::size_t meshCount = iterator.second;
-
-			if (meshID == -1) continue;
+		for (const auto& [id, count] : meshCounter) {
+			if (id == -1) 
+				continue;
 
 			// Collect uniforms
 			int offset = 0;
-			auto meshes = visibleParts.equal_range(meshID);
+			auto meshes = visibleParts.equal_range(id);
 			for (auto mesh = meshes.first; mesh != meshes.second; ++mesh) {
 				ExtendedPart* part = mesh->second;
-				Comp::Material material = registry.getOr<Comp::Material>(part->entity, Comp::Material());
-				material.albedo += getAlbedoForPart(screen, part);
 
 				Mat4f modelMatrix = part->getCFrame().asMat4WithPreScale(part->hitbox.scale);
+				Comp::Material material = registry.getOr<Comp::Material>(part->entity, Comp::Material());
+				material.albedo += getAlbedoForPart(screen, part);
 
 				uniforms[offset] = Uniform {
 					modelMatrix,
@@ -210,31 +212,31 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 
 				offset++;
 			}
-			
-			Engine::MeshRegistry::meshes[meshID]->fillUniformBuffer(uniforms.data(), meshCount * sizeof(Uniform), Renderer::STREAM_DRAW);
-			Engine::MeshRegistry::meshes[meshID]->renderInstanced(meshCount);
+
+			Engine::MeshRegistry::meshes[id]->fillUniformBuffer(uniforms.data(), count * sizeof(Uniform), Renderer::STREAM_DRAW);
+			Engine::MeshRegistry::meshes[id]->renderInstanced(count);
 		}
 
 		// Render transparent meshes
 		Shaders::basicShader.bind();
 		Renderer::enableBlending();
 		for (auto iterator = transparentParts.rbegin(); iterator != transparentParts.rend(); ++iterator) {
-			ExtendedPart* part = (*iterator).second;
-			
-			Ref<Comp::Mesh> mesh = registry.get<Comp::Mesh>(part->entity);
-			Comp::Material material = registry.getOr<Comp::Material>(part->entity, Comp::Material());
-			material.albedo += getAlbedoForPart(screen, part);
+			ExtendedPart* part = iterator->second;
 
+			Ref<Comp::Mesh> mesh = registry.get<Comp::Mesh>(part->entity);
 			if (!mesh.valid())
 				continue;
 
 			if (mesh->id == -1)
 				continue;
 
+			Comp::Material material = registry.getOr<Comp::Material>(part->entity, Comp::Material());
+			material.albedo += getAlbedoForPart(screen, part);
+
 			Shaders::basicShader.updateMaterial(material);
 			Shaders::basicShader.updatePart(*part);
 			Engine::MeshRegistry::meshes[mesh->id]->render(mesh->mode);
-			
+
 		}
 
 		if (screen->selectedPart) {

@@ -22,7 +22,7 @@ struct Model : RefCountable {
 
 	Model(ExtendedPart* part) : part(part) {}
 
-	ExtendedPart* operator->() {
+	ExtendedPart* operator->() const {
 		return part;
 	}
 };

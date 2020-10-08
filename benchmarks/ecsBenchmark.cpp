@@ -41,9 +41,9 @@ public:
 
 } ecsGetFromRegistryBenchmark;
 
-class ECSGetFromViewBenchmark : public Benchmark {
+class ECSGetFromViewConjunctionBenchmark : public Benchmark {
 public:
-	ECSGetFromViewBenchmark() : Benchmark("ecsGetFromViewBenchmark") {}
+	ECSGetFromViewConjunctionBenchmark() : Benchmark("ecsGetFromViewConjunctionBenchmark") {}
 
 	P3D::Engine::Registry64 registry;
 	int errors = 0;
@@ -60,7 +60,7 @@ public:
 
 	void run() override {
 		int i = 0;
-		auto view = registry.view<A>();
+		auto view = registry.view(P3D::Engine::Registry64::conjunction<A>());
 		for (auto entity : view) {
 			auto comp = view.get<A>(entity);
 			if (comp->i != i)
@@ -73,4 +73,38 @@ public:
 		Log::error("Amount of errors: %d\n", errors);
 	}
 
-} ecsGetFromViewBenchmark;
+} ecsGetFromViewConjunctionBenchmark;
+
+class ECSGetFromViewDisjunctionBenchmark : public Benchmark {
+public:
+	ECSGetFromViewDisjunctionBenchmark() : Benchmark("ecsGetFromViewDisjunctionBenchmark") {}
+
+	P3D::Engine::Registry64 registry;
+	int errors = 0;
+
+	struct A : public RefCountable { int i; A(int i) : i(i) {} };
+
+	void init() override {
+		int amount = 1000000;
+		for (int i = 0; i < amount; i++) {
+			auto id = registry.create();
+			registry.add<A>(id, i);
+		}
+	}
+
+	void run() override {
+		int i = 0;
+		auto view = registry.view(P3D::Engine::Registry64::disjunction<A>());
+		for (auto entity : view) {
+			auto comp = view.get<A>(entity);
+			if (comp->i != i)
+				errors++;
+			i++;
+		}
+	}
+
+	void printResults(double timeTaken) override {
+		Log::error("Amount of errors: %d\n", errors);
+	}
+
+} ecsGetFromViewDisjunctionBenchmark;

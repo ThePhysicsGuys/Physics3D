@@ -3,8 +3,6 @@
 namespace P3D {
 
 struct VisualData {
-	// The render mode, default is fill
-	int mode = 0x1B02;
 
 	// The mesh id in the mesh registry
 	int id;
@@ -14,6 +12,9 @@ struct VisualData {
 
 	// Whether the mesh has normal vectors
 	bool hasNormals;
+
+	// The render mode, default is fill
+	int mode = 0x1B02;
 };
 
 }
