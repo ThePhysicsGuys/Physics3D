@@ -68,6 +68,8 @@ void loadFile(const char* file);
 void init(int argc, const char** args) {
 	auto start = high_resolution_clock::now();
 
+	Log::init("latest.log");
+
 	setupGL();
 	Engine::MeshRegistry::init();
 
@@ -487,6 +489,7 @@ void stop(int returnCode) {
 	Log::info("Closing screen");
 	screen.onClose();
 
+	Log::stop();
 	exit(returnCode);
 }
 
