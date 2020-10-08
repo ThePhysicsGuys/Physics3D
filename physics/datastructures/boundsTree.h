@@ -37,6 +37,8 @@ struct TreeNode {
 	inline TreeNode(void* object, const Bounds& bounds, bool isGroupHead) : nodeCount(LEAF_NODE_SIGNIFIER), object(object), bounds(bounds), isGroupHead(isGroupHead) {}
 	inline TreeNode(const Bounds& bounds, TreeNode* subTrees, int nodeCount) : bounds(bounds), subTrees(subTrees), nodeCount(nodeCount) {}
 
+	static TreeNode withEmptySubNodes();
+
 	explicit TreeNode(const TreeNode& original);
 	TreeNode& operator=(const TreeNode& original);
 
@@ -120,6 +122,10 @@ struct NodeStack {
 	void remove();
 	// removes and returns the object currently pointed to
 	TreeNode grab();
+
+	int getSize() const {
+		return top - stack;
+	}
 };
 
 struct ConstTreeIterator : public NodeStack {
@@ -459,6 +465,7 @@ struct BoundsTree {
 	}
 
 	inline void improveStructure() { if(!isEmpty()) rootNode.improveStructure(); }
+	inline void maxImproveStructure() { for(int i = 0; i < 5; i++) improveStructure(); }
 	
 	inline size_t getNumberOfObjects() const {
 		if(isEmpty()) {
@@ -512,4 +519,11 @@ struct BoundsTree {
 		return {BoundsTreeIter<TreeIterator, Boundable>(*group)};
 	}
 	inline IteratorFactoryWithEnd<BoundsTreeIter<TreeIterator, Boundable>> iterAllInGroup(Boundable* objInGroup) {return iterAllInGroup(objInGroup, objInGroup->getBounds());}
+};
+
+// simple object of which the bounds can be requested
+// used for testing and debugging
+struct BasicBounded {
+	Bounds bounds;
+	inline Bounds getBounds() const { return bounds; }
 };

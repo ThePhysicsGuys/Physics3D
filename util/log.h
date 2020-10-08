@@ -37,6 +37,9 @@ namespace Log {
 		subject& operator=(const subject&) = delete;
 	};
 
+	void init(const char* logFile);
+	void stop();
+
 	void setDelimiter(std::string delimiter);
 
 	void debug(std::string format, ...);

@@ -158,9 +158,7 @@ void WorldPrototype::notifyMainPhysicalObsolete(MotorizedPhysical* motorPhys) {
 	ASSERT_VALID;
 }
 void WorldPrototype::optimizeTerrain() {
-	for(int i = 0; i < 5; i++) {
-		terrainTree.improveStructure();
-	}
+	terrainTree.maxImproveStructure();
 	ASSERT_VALID;
 }
 

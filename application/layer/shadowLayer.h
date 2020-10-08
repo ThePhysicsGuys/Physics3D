@@ -16,7 +16,7 @@ public:
 	inline ShadowLayer() : Layer() {};
 	inline ShadowLayer(Screen* screen, char flags = None) : Layer("ShadowLayer", screen, flags) {};
 
-	void renderScene();
+	void renderScene(Engine::Registry64& registry);
 
 	virtual void onInit(Engine::Registry64& registry) override;
 	virtual void onUpdate(Engine::Registry64& registry) override;

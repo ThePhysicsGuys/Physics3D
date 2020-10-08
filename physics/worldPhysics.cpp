@@ -212,24 +212,6 @@ inline void runColissionTests(Part& p1, Part& p2, WorldPrototype& world, std::ve
 	physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
 }
 
-void recursiveFindColissionsInternal(WorldPrototype& world, std::vector<Colission>& colissions, TreeNode& trunkNode);
-void recursiveFindColissionsBetween(WorldPrototype& world, std::vector<Colission>& colissions, TreeNode& first, TreeNode& second);
-
-void recursiveFindColissionsInternal(WorldPrototype& world, std::vector<Colission>& colissions, TreeNode& trunkNode) {
-	// within the same node
-	if (trunkNode.isLeafNode() || trunkNode.isGroupHead)
-		return;
-
-	for (int i = 0; i < trunkNode.nodeCount; i++) {
-		TreeNode& A = trunkNode[i];
-		recursiveFindColissionsInternal(world, colissions, A);
-		for (int j = i + 1; j < trunkNode.nodeCount; j++) {
-			TreeNode& B = trunkNode[j];
-			recursiveFindColissionsBetween(world, colissions, A, B);
-		}
-	}
-}
-
 void recursiveFindColissionsBetween(WorldPrototype& world, std::vector<Colission>& colissions, TreeNode& first, TreeNode& second) {
 	if (!intersects(first.bounds, second.bounds)) return;
 	
@@ -269,6 +251,20 @@ void recursiveFindColissionsBetween(WorldPrototype& world, std::vector<Colission
 			for (TreeNode& node : second) {
 				recursiveFindColissionsBetween(world, colissions, first, node);
 			}
+		}
+	}
+}
+void recursiveFindColissionsInternal(WorldPrototype& world, std::vector<Colission>& colissions, TreeNode& trunkNode) {
+	// within the same node
+	if(trunkNode.isLeafNode() || trunkNode.isGroupHead)
+		return;
+
+	for(int i = 0; i < trunkNode.nodeCount; i++) {
+		TreeNode& A = trunkNode[i];
+		recursiveFindColissionsInternal(world, colissions, A);
+		for(int j = i + 1; j < trunkNode.nodeCount; j++) {
+			TreeNode& B = trunkNode[j];
+			recursiveFindColissionsBetween(world, colissions, A, B);
 		}
 	}
 }

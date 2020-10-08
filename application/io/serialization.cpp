@@ -3,6 +3,10 @@
 #include "serialization.h"
 
 #include "extendedPart.h"
+#include "application.h"
+#include "view/screen.h"
+#include "ecs/components.h"
+#include "../engine/ecs/registry.h"
 #include "../physics/world.h"
 #include "../worlds.h"
 
@@ -21,22 +25,22 @@ void WorldImportExport::registerTexture(Graphics::Texture* texture) {
 	textureSerializer.registerObject(texture);
 }
 
-static void serializeMaterial(const Material& material, std::ostream& ostream) {
-	textureSerializer.serialize(material.get(Material::ALBEDO), ostream);
-	textureSerializer.serialize(material.get(Material::NORMAL), ostream);
-	textureSerializer.serialize(material.get(Material::METALNESS), ostream);
-	textureSerializer.serialize(material.get(Material::ROUGHNESS), ostream);
-	textureSerializer.serialize(material.get(Material::AO), ostream);
-	textureSerializer.serialize(material.get(Material::GLOSS), ostream);
-	textureSerializer.serialize(material.get(Material::SPECULAR), ostream);
-	textureSerializer.serialize(material.get(Material::DISPLACEMENT), ostream);
+static void serializeMaterial(const Comp::Material& material, std::ostream& ostream) {
+	textureSerializer.serialize(material.get(Comp::Material::ALBEDO), ostream);
+	textureSerializer.serialize(material.get(Comp::Material::NORMAL), ostream);
+	textureSerializer.serialize(material.get(Comp::Material::METALNESS), ostream);
+	textureSerializer.serialize(material.get(Comp::Material::ROUGHNESS), ostream);
+	textureSerializer.serialize(material.get(Comp::Material::AO), ostream);
+	textureSerializer.serialize(material.get(Comp::Material::GLOSS), ostream);
+	textureSerializer.serialize(material.get(Comp::Material::SPECULAR), ostream);
+	textureSerializer.serialize(material.get(Comp::Material::DISPLACEMENT), ostream);
 	::serialize<Color>(material.albedo, ostream);
 	::serialize<float>(material.metalness, ostream);
 	::serialize<float>(material.roughness, ostream);
 	::serialize<float>(material.ao, ostream);
 }
 
-static Material deserializeMaterial(std::istream& istream) {
+static Comp::Material deserializeMaterial(std::istream& istream) {
 	Graphics::Texture* albedoMap = textureSerializer.deserialize(istream);
 	Graphics::Texture* normalMap = textureSerializer.deserialize(istream);
 	Graphics::Texture* metalnessMap = textureSerializer.deserialize(istream);
@@ -50,15 +54,15 @@ static Material deserializeMaterial(std::istream& istream) {
 	float roughness = ::deserialize<float>(istream);
 	float ao = ::deserialize<float>(istream);
 
-	Material material = Material(albedo, metalness, roughness, ao);
-	material.set(Material::ALBEDO, albedoMap);
-	material.set(Material::ALBEDO, normalMap);
-	material.set(Material::ALBEDO, metalnessMap);
-	material.set(Material::ALBEDO, roughnessMap);
-	material.set(Material::ALBEDO, aoMap);
-	material.set(Material::ALBEDO, glossMap);
-	material.set(Material::ALBEDO, specularMap);
-	material.set(Material::ALBEDO, displacementrMap);
+	Comp::Material material = Comp::Material(albedo, metalness, roughness, ao);
+	material.set(Comp::Material::ALBEDO, albedoMap);
+	material.set(Comp::Material::ALBEDO, normalMap);
+	material.set(Comp::Material::ALBEDO, metalnessMap);
+	material.set(Comp::Material::ALBEDO, roughnessMap);
+	material.set(Comp::Material::ALBEDO, aoMap);
+	material.set(Comp::Material::ALBEDO, glossMap);
+	material.set(Comp::Material::ALBEDO, specularMap);
+	material.set(Comp::Material::ALBEDO, displacementrMap);
 
 	return material;
 }
@@ -67,9 +71,9 @@ class Serializer : public SerializationSession<ExtendedPart> {
 public:
 	using SerializationSession<ExtendedPart>::SerializationSession;
 	virtual void serializeExtendedPart(const ExtendedPart& part, std::ostream& ostream) override {
-		serializeMaterial(part.material, ostream);
-		::serialize<int>(part.renderMode, ostream);
-		::serializeString(part.name, ostream);
+		// TODO integrate components into serialization
+		serializeMaterial(screen.registry.getOr<Comp::Material>(part.entity, Comp::Material()), ostream);
+		::serializeString(screen.registry.getOr<Comp::Tag>(part.entity, Comp::Tag("")).name, ostream);
 	}
 };
 
@@ -77,12 +81,10 @@ class Deserializer : public DeSerializationSession<ExtendedPart> {
 public:
 	using DeSerializationSession<ExtendedPart>::DeSerializationSession;
 	virtual ExtendedPart* deserializeExtendedPart(Part&& partPhysicalData, std::istream& istream) override {
-		Material mat = deserializeMaterial(istream);
-		int renderMode = ::deserialize<int>(istream);
+		Comp::Material material = deserializeMaterial(istream);
 		ExtendedPart* result = new ExtendedPart(std::move(partPhysicalData), ::deserializeString(istream));
 
-		result->material = mat;
-		result->renderMode = renderMode;
+		result->setMaterial(material);
 
 		return result;
 	}

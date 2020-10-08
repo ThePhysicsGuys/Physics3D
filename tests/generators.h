@@ -21,11 +21,6 @@
 
 #include "../physics/datastructures/boundsTree.h"
 
-struct BasicBounded {
-	Bounds bounds;
-	inline Bounds getBounds() const { return bounds; }
-};
-
 int generateInt(int max);
 size_t generateSize_t(size_t max);
 double generateDouble();

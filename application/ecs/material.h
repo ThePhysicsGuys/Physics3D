@@ -8,9 +8,9 @@ namespace P3D::Graphics {
 class Texture;
 };
 
-namespace P3D::Application {
+namespace P3D::Application::Comp {
 
-struct Material {
+struct Material : public RefCountable {
 private:
 	Graphics::Texture* maps[8];
 

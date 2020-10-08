@@ -7,6 +7,8 @@
 #include "extendedPart.h"
 #include "worlds.h"
 
+#include "../engine/ecs/registry.h"
+#include "ecs/components.h"
 #include "ecs/light.h"
 #include "ecs/material.h"
 #include "ecs/model.h"
@@ -132,10 +134,10 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 	graphicsMeasure.mark(GraphicsProcess::UPDATE);
 	Shaders::debugShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
 	Shaders::basicShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
-	
+
 	//Shaders::instanceShader.updateProjection(lookAt(fromPosition(screen->camera.cframe.position), Vec3f(0, 0, 0)), screen->camera.projectionMatrix, screen->camera.cframe.position);
 	Shaders::instanceShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
-	
+
 	// Shadow
 	Vec3f from = { -10, 10, -10 };
 	Vec3f to = { 0, 0, 0 };
@@ -155,20 +157,28 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 	std::multimap<int, ExtendedPart*> visibleParts;
 	std::map<double, ExtendedPart*> transparentParts;
 	graphicsMeasure.mark(GraphicsProcess::PHYSICALS);
-	screen->world->syncReadOnlyOperation([this, &visibleParts, &transparentParts, &meshCounter, &maxMeshCount, screen] () {
+	screen->world->syncReadOnlyOperation([this, &visibleParts, &transparentParts, &meshCounter, &maxMeshCount, screen, &registry] () {
 		VisibilityFilter filter = VisibilityFilter::forWindow(screen->camera.cframe.position, screen->camera.getForwardDirection(), screen->camera.getUpDirection(), screen->camera.fov, screen->camera.aspect, screen->camera.zfar);
-		for (ExtendedPart& part : screen->world->iterPartsFiltered(filter)) {
-		//for (ExtendedPart& part : screen->world->iterParts(ALL_PARTS)) {
-			if (part.material.albedo.w < 1) {
-				transparentParts.insert({ lengthSquared(Vec3(screen->camera.cframe.position - part.getPosition())), &part });
-			} else {
-				visibleParts.insert({ part.visualData.drawMeshId, &part });
-				maxMeshCount = std::max(maxMeshCount, meshCounter[part.visualData.drawMeshId]++);
 
-				if(meshCounter[part.visualData.drawMeshId] > maxMeshCount) {
-					maxMeshCount = meshCounter[part.visualData.drawMeshId];
-				}
+		auto view = registry.view<Comp::Model>();
+		for (auto& entity : view) {
+			Ref<Comp::Model> model = view.get<Comp::Model>(entity);
+			if (!filter(*model->part))
+				continue;	
+			
+			Ref<Comp::Mesh> mesh = registry.get<Comp::Mesh>(entity);
+			if (!mesh.valid())
+				continue;
+
+			Comp::Material material = registry.getOr<Comp::Material>(entity, Comp::Material());
+			if (material.albedo.w < 1.0f) {
+				double distance = lengthSquared(Vec3(screen->camera.cframe.position - model->part->getPosition()));
+				transparentParts.insert(std::make_pair(distance , model->part));
+			} else {
+				visibleParts.insert(std::make_pair(mesh->id, model->part));
+				maxMeshCount = std::max(maxMeshCount, ++meshCounter[mesh->id]);
 			}
+			
 		}
 
 		// Ensure correct size
@@ -178,57 +188,62 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 
 		// Render normal meshes
 		Shaders::instanceShader.bind();
-		for (auto iterator : meshCounter) {
-			int meshID = iterator.first;
-			std::size_t meshCount = iterator.second;
-
-			if (meshID == -1) continue;
+		for (const auto& [id, count] : meshCounter) {
+			if (id == -1) 
+				continue;
 
 			// Collect uniforms
 			int offset = 0;
-			auto meshes = visibleParts.equal_range(meshID);
+			auto meshes = visibleParts.equal_range(id);
 			for (auto mesh = meshes.first; mesh != meshes.second; ++mesh) {
 				ExtendedPart* part = mesh->second;
-				Material material = part->material;
-				material.albedo += getAlbedoForPart(screen, part);
 
 				Mat4f modelMatrix = part->getCFrame().asMat4WithPreScale(part->hitbox.scale);
+				Comp::Material material = registry.getOr<Comp::Material>(part->entity, Comp::Material());
+				material.albedo += getAlbedoForPart(screen, part);
 
 				uniforms[offset] = Uniform {
 					modelMatrix,
-					part->material.albedo,
-					part->material.metalness,
-					part->material.roughness,
-					part->material.ao
+					material.albedo,
+					material.metalness,
+					material.roughness,
+					material.ao
 				};
 
 				offset++;
 			}
-			
-			Engine::MeshRegistry::meshes[meshID]->fillUniformBuffer(uniforms.data(), meshCount * sizeof(Uniform), Renderer::STREAM_DRAW);
-			Engine::MeshRegistry::meshes[meshID]->renderInstanced(meshCount);
+
+			Engine::MeshRegistry::meshes[id]->fillUniformBuffer(uniforms.data(), count * sizeof(Uniform), Renderer::STREAM_DRAW);
+			Engine::MeshRegistry::meshes[id]->renderInstanced(count);
 		}
 
 		// Render transparent meshes
 		Shaders::basicShader.bind();
 		Renderer::enableBlending();
 		for (auto iterator = transparentParts.rbegin(); iterator != transparentParts.rend(); ++iterator) {
-			ExtendedPart* part = (*iterator).second;
+			ExtendedPart* part = iterator->second;
 
-			Material material = part->material;
-			material.albedo += getAlbedoForPart(screen, part);
-
-			if (part->visualData.drawMeshId == -1)
+			Ref<Comp::Mesh> mesh = registry.get<Comp::Mesh>(part->entity);
+			if (!mesh.valid())
 				continue;
+
+			if (mesh->id == -1)
+				continue;
+
+			Comp::Material material = registry.getOr<Comp::Material>(part->entity, Comp::Material());
+			material.albedo += getAlbedoForPart(screen, part);
 
 			Shaders::basicShader.updateMaterial(material);
 			Shaders::basicShader.updatePart(*part);
-			Engine::MeshRegistry::meshes[part->visualData.drawMeshId]->render(part->renderMode);
+			Engine::MeshRegistry::meshes[mesh->id]->render(mesh->mode);
+
 		}
 
 		if (screen->selectedPart) {
 			Shaders::debugShader.updateModel(screen->selectedPart->getCFrame().asMat4WithPreScale(screen->selectedPart->hitbox.scale));
-			Engine::MeshRegistry::meshes[screen->selectedPart->visualData.drawMeshId]->render();
+			Ref<Comp::Mesh> mesh = registry.get<Comp::Mesh>(screen->selectedPart->entity);
+			if (mesh.valid())
+				Engine::MeshRegistry::meshes[mesh->id]->render();
 		}
 	});
 

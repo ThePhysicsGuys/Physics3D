@@ -13,7 +13,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 	
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2 /Oi /ot /GL")
 else()
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx2")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
 	
 	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
 	
@@ -208,6 +208,7 @@ add_library(engine STATIC
   engine/ecs/entity.cpp
   engine/ecs/node.cpp
   engine/ecs/tree.cpp
+  engine/ecs/registry.cpp
 
   engine/input/inputHandler.cpp
   engine/input/keyboard.cpp

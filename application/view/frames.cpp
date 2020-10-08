@@ -555,13 +555,14 @@ void BigFrame::renderECSTree(Engine::Registry64& registry) {
 	}
 }
 
-void BigFrame::renderPropertiesFrame() {
+void BigFrame::renderPropertiesFrame(Engine::Registry64& registry) {
 	ExtendedPart* sp = screen.selectedPart;
 
 	ImGui::SetNextTreeNodeOpen(true);
 	if (ImGui::TreeNode("General")) {
-		ImGui::Text("Name: %s", (sp) ? sp->name.c_str() : "-");
-		ImGui::Text("Mesh ID: %s", (sp) ? str(sp->visualData.drawMeshId).c_str() : "-");
+		std::string name = registry.getOr<Comp::Tag>((sp)? sp->entity : 0, (sp)? std::to_string(sp->entity) : "-").name;
+		ImGui::Text("Name: %s", name.c_str());
+		//ImGui::Text("Mesh ID: %s", (sp) ? str(sp->visualData.id).c_str() : "-");
 
 		ImGui::TreePop();
 	}
@@ -623,12 +624,13 @@ void BigFrame::renderPropertiesFrame() {
 	ImGui::SetNextTreeNodeOpen(true);
 	if (ImGui::TreeNode("Material")) {
 		if (sp) {
-			ImGui::ColorEdit4("Albedo", sp->material.albedo.data);
-			ImGui::SliderFloat("Metalness", &sp->material.metalness, 0, 1);
-			ImGui::SliderFloat("Roughness", &sp->material.roughness, 0, 1);
-			ImGui::SliderFloat("Ambient occlusion", &sp->material.ao, 0, 1);
-			if (ImGui::Button(sp ? (sp->renderMode == Renderer::FILL ? "Render mode: fill" : "Render mode: wireframe") : "l"))
-				if (sp) sp->renderMode = sp->renderMode == Renderer::FILL ? Renderer::WIREFRAME : Renderer::FILL;
+			Ref<Comp::Material> material = registry.getOrAdd<Comp::Material>(sp->entity);
+			ImGui::ColorEdit4("Albedo", material->albedo.data);
+			ImGui::SliderFloat("Metalness", &material->metalness, 0, 1);
+			ImGui::SliderFloat("Roughness", &material->roughness, 0, 1);
+			ImGui::SliderFloat("Ambient occlusion", &material->ao, 0, 1);
+			//if (ImGui::Button(sp ? (sp->renderMode == Renderer::FILL ? "Render mode: fill" : "Render mode: wireframe") : "l"))
+			//	if (sp) sp->renderMode = sp->renderMode == Renderer::FILL ? Renderer::WIREFRAME : Renderer::FILL;
 		} else {
 			ImGui::Text("No part selected");
 		}
@@ -743,7 +745,7 @@ void BigFrame::render(Engine::Registry64& registry) {
 	ImGui::End();
 	
 	ImGui::Begin("Properties");
-	renderPropertiesFrame();
+	renderPropertiesFrame(registry);
 	ImGui::End();
 	ImGui::Begin("Layers");
 	renderLayerFrame();

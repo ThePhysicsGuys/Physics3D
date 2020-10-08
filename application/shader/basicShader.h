@@ -5,7 +5,10 @@
 namespace P3D::Application {
 using namespace Graphics;
 
+namespace Comp {
 struct Material;
+};
+
 struct ExtendedPart;
 
 struct BasicShader : public StandardMeshShaderBase, public BasicShaderBase {
@@ -14,7 +17,7 @@ struct BasicShader : public StandardMeshShaderBase, public BasicShaderBase {
 
 	void updatePart(const ExtendedPart& part);
 	void updateTexture(bool textured);
-	void updateMaterial(const Material& material);
+	void updateMaterial(const Comp::Material& material);
 };
 
 struct InstanceShader : public InstancedMeshShaderBase, public BasicShaderBase {

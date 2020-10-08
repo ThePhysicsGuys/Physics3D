@@ -7,6 +7,7 @@
 #include <vector>
 #include <functional>
 #include <type_traits>
+#include "../util/intrusivePointer.h"
 
 namespace P3D::Engine {
 
@@ -150,7 +151,7 @@ public:
 
 	using entity_set = std::set<Entity, entity_compare>;
 	using entity_queue = std::queue<entity_type>;
-	using entity_map = std::map<entity_type, void*>;
+	using entity_map = std::map<entity_type, Ref<RefCountable>>;
 	using component_vector = std::vector<entity_map*>;
 
 	using component_map_iterator = decltype(std::declval<entity_map>().begin());
@@ -250,13 +251,13 @@ public:
 		* Returns the component of the given type from the given entity from the view, passing an entity or component which is not within the view results in undefined behaviour
 		*/
 		template<typename Component>
-		Component& get(const Entity& entity) {
+		Ref<Component> get(const Entity& entity) {
 			component_type index = component_index<Entity, Component>::index();
 			entity_map* map = registry->components[index];
 
 			auto component_iterator = map->find(self(entity));
 
-			return *static_cast<Component*>(component_iterator->second);
+			return intrusive_cast<Component>(component_iterator->second);
 		}
 	};
 
@@ -340,7 +341,7 @@ public:
 			for (auto map : components) {
 				auto component_iterator = map->find(self(entity));
 				if (component_iterator != map->end()) {
-					delete component_iterator->second;
+					delete component_iterator->second.get();
 					map->erase(component_iterator);
 				}
 			}
@@ -351,22 +352,25 @@ public:
 	* Instantiates a component using the given type and arguments and adds it to the given entity
 	*/
 	template<typename Component, typename... Args>
-	void add(const Entity& entity, Args&&... args) noexcept {
+	Ref<Component> add(const Entity& entity, Args&&... args) noexcept {
 		auto entities_iterator = entities.find(entity);
 		if (entities_iterator == entities.end())
-			return;
+			return Ref<Component>();
 
-		Component* component = new Component(std::forward<Args>(args)...);
+		Ref<Component> component = make_intrusive(new Component(std::forward<Args>(args)...));
 		component_type index = component_index<Entity, Component>::index();
 
 		while (index >= components.size())
 			components.push_back(new entity_map());
 
 		entity_map* map = components[index];
-		if (map == nullptr)
-			return;
+		auto result = map->insert(std::make_pair(self(entity), intrusive_cast<RefCountable>(component)));
 
-		map->insert(std::pair<entity_type, void*>(self(entity), static_cast<void*>(component)));
+		if (!result.second)
+			result.first->second = intrusive_cast<RefCountable>(component);
+
+
+		return component;
 	}
 
 	/**
@@ -383,9 +387,6 @@ public:
 			return;
 
 		entity_map* map = components[index];
-		if (map == nullptr)
-			return;
-
 		auto component_iterator = map->find(self(entity));
 		if (component_iterator == map->end())
 			return;
@@ -397,44 +398,57 @@ public:
 	* Returns the component of the given type from the given entity, nullptr if no such component exists
 	*/
 	template<typename Component>
-	[[nodiscard]] Component* get(const Entity& entity) noexcept {
+	[[nodiscard]] Ref<Component> get(const Entity& entity) noexcept {
 		auto entities_iterator = entities.find(entity);
 		if (entities_iterator == entities.end())
-			return nullptr;
+			return Ref<Component>();
 
 		component_type index = component_index<Entity, Component>::index();
 		if (index >= components.size())
-			return nullptr;
+			return Ref<Component>();
 
 		entity_map* map = components[index];
-		if (map == nullptr)
-			return nullptr;
-
 		auto component_iterator = map->find(self(entity));
 		if (component_iterator == map->end())
-			return nullptr;
+			return Ref<Component>();
 
-		return static_cast<Component*>(component_iterator->second);
+		return intrusive_cast<Component>(component_iterator->second);
 	}
 
 	/**
-	* Returns the component of the given type from the given entity, the default value if no such component exists
+	* Returns the component of the given type from the given entity, or creates one using the provides arguments and returns it
 	*/
-	template<typename Component>
-	[[nodiscard]] Component& getOr(const Entity& entity, Component& component) {
-		Component* result = get<Component>(entity);
-		if (result == nullptr)
+	template<typename Component, typename... Args>
+	[[nodiscard]] Ref<Component> getOrAdd(const Entity& entity, Args&&... args) {
+		auto entities_iterator = entities.find(entity);
+		if (entities_iterator == entities.end())
+			return Ref<Component>();
+
+		component_type index = component_index<Entity, Component>::index();
+		while (index >= components.size())
+			components.push_back(new entity_map());
+		
+		
+		entity_map* map = components[index];
+		auto component_iterator = map->find(self(entity));
+		if (component_iterator == map->end()) {
+			Ref<Component> component = make_intrusive(new Component(std::forward<Args>(args)...));
+			component_type index = component_index<Entity, Component>::index();
+
+			map->insert(std::make_pair(self(entity), intrusive_cast<RefCountable>(component)));
+
 			return component;
-		else
-			return *result;
+		}
+
+		return intrusive_cast<Component>(component_iterator->second);
 	}
 
 	/**
-	* Returns the component of the given type from the given entity, the default value if no such component exists
+	* Returns the component of the given type from the given entity, the default value if no such component exists, note that the component will be copied
 	*/
 	template<typename Component>
-	[[nodiscard]] Component& getOr(const Entity& entity, Component&& component) {
-		Component* result = get<Component>(entity);
+	[[nodiscard]] Component getOr(const Entity& entity, const Component& component) {
+		Ref<Component> result = get<Component>(entity);
 		if (result == nullptr)
 			return component;
 		else
@@ -455,9 +469,6 @@ public:
 			return false;
 
 		entity_map* map = components[index];
-		if (map == nullptr)
-			return false;
-
 		auto component_iterator = map->find(self(entity));
 		if (component_iterator == map->end())
 			return false;

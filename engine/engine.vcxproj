@@ -297,10 +297,14 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release No AVX|x64'">core.h</PrecompiledHeaderFile>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug no AVX|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">core.h</PrecompiledHeaderFile>
+
     </ClCompile>
     <ClCompile Include="ecs\component.cpp" />
     <ClCompile Include="ecs\entity.cpp" />
     <ClCompile Include="ecs\node.cpp" />
+    <ClCompile Include="ecs\registry.cpp" />
     <ClCompile Include="ecs\tree.cpp" />
     <ClCompile Include="input\inputHandler.cpp" />
     <ClCompile Include="input\keyboard.cpp" />
@@ -313,7 +317,6 @@
     <ClCompile Include="options\keyboardOptions.cpp" />
     <ClCompile Include="resource\meshResource.cpp" />
     <ClCompile Include="tool\toolManager.cpp" />
-    <ClCompile Include="visualData.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

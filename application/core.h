@@ -16,6 +16,7 @@
 #include "../physics/math/position.h"
 
 #include "../util/log.h"
+#include "../util/intrusivePointer.h"
 
 #define irepeat(x, n) for (int x = 0; x < n; x++)
 #define frepeat(x, n) for (float x = 0.0f; x < n; x+=1.0f)
