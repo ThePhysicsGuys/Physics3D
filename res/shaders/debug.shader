@@ -1,6 +1,6 @@
 [common]
 
-#version 400
+#version 330 core
 
 /* Usage:
 	// Once

@@ -1,6 +1,6 @@
 [common]
 
-#version 400
+#version 330 core
 
 vec4 apply(mat4 matrix, vec3 vector) {
 	return matrix * vec4(vector, 0.0);
