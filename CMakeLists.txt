@@ -31,6 +31,7 @@ add_library(util STATIC
   util/stringUtil.cpp
   util/fileUtils.cpp
   util/valueCycle.cpp
+  util/systemVariables.cpp
 
   util/resource/resource.cpp
   util/resource/resourceLoader.cpp
@@ -202,7 +203,6 @@ target_include_directories(graphics PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/graphic
 add_library(engine STATIC
   engine/core.cpp
   engine/meshRegistry.cpp
-  engine/visualData.cpp
   
   engine/ecs/component.cpp
   engine/ecs/entity.cpp

@@ -11,6 +11,7 @@
 #include <future>
 
 #include "../util/stringUtil.h"
+#include "../util/systemVariables.h"
 
 namespace P3D::Graphics {
 
@@ -96,6 +97,12 @@ GLID Shader::compile(const std::string& name, const std::string& source, unsigne
 	Log::setDelimiter("");
 	Log::info("%s: ", name.c_str());
 
+	if (SystemVariables::get("OPENGL_SHADER_VERSION") < 330) {
+		Log::print(Log::Color::ERROR, "shader version not supported\n");
+		Log::setDelimiter("\n");
+		return 0;
+	}
+
 	GLID id = glCreateShader(type);
 
 	const char* src = source.c_str();
@@ -113,7 +120,9 @@ GLID Shader::compile(const std::string& name, const std::string& source, unsigne
 		Log::error(message);
 
 		glDeleteShader(id);
-		id = 0;
+		Log::setDelimiter("\n");
+
+		return 0;
 	} else {
 		Log::print(Log::Color::DEBUG, "done\n");
 	}

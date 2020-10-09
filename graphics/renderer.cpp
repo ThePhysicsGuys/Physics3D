@@ -221,6 +221,10 @@ const unsigned char* getShaderVersion() {
 	return glGetString(GL_SHADING_LANGUAGE_VERSION);
 }
 
+int parseShaderVersion(const unsigned char* version) {
+	return 100 * (version[0] - '0') + 10 * (version[2] - '0');
+}
+
 void bindTexture2D(GLID id) {
 	glBindTexture(GL_TEXTURE_2D, id);
 }

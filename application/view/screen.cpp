@@ -39,6 +39,7 @@
 #include "../engine/ecs/registry.h"
 
 #include "frames.h"
+#include "../util/systemVariables.h"
 
 #include "imgui/imgui.h"
 
@@ -88,12 +89,14 @@ Screen::Screen() {
 };
 
 Screen::Screen(int width, int height, PlayerWorld* world) {
+	using namespace Graphics;
+
 	this->world = world;
 
 	// Create a windowed mode window and its OpenGL context 
 	GLFWwindow* context = Graphics::GLFW::createContext(width, height, "Physics3D");
 
-	if (!Graphics::GLFW::validContext(context)) {
+	if (!GLFW::validContext(context)) {
 		Log::fatal("Invalid rendering context");
 		terminateGLFW();
 		exit(-1);
@@ -107,10 +110,12 @@ Screen::Screen(int width, int height, PlayerWorld* world) {
 	Graphics::GLFW::setWindowIconFromPath("../res/textures/logo128.png");
 #endif
 
-	Log::info("OpenGL vendor: (%s)", Graphics::Renderer::getVendor());
-	Log::info("OpenGL renderer: (%s)", Graphics::Renderer::getRenderer());
-	Log::info("OpenGL version: (%s)", Graphics::Renderer::getVersion());
-	Log::info("OpenGL shader version: (%s)", Graphics::Renderer::getShaderVersion());
+	Log::info("OpenGL vendor: (%s)", Renderer::getVendor());
+	Log::info("OpenGL renderer: (%s)", Renderer::getRenderer());
+	Log::info("OpenGL version: (%s)", Renderer::getVersion());
+	Log::info("OpenGL shader version: (%s)", Renderer::getShaderVersion());
+
+	SystemVariables::set("OPENGL_SHADER_VERSION", Renderer::parseShaderVersion(Renderer::getShaderVersion()));
 }
 
 

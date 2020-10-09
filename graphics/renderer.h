@@ -74,6 +74,7 @@ extern const unsigned char* getVendor();
 extern const unsigned char* getVersion();
 extern const unsigned char* getRenderer();
 extern const unsigned char* getShaderVersion();
+extern int parseShaderVersion(const unsigned char* version);
 
 extern void bindShader(GLID id);
 extern void bindTexture2D(GLID id);

@@ -248,6 +248,7 @@
     <ClCompile Include="resource\resourceManager.cpp" />
     <ClCompile Include="serializeBasicTypes.cpp" />
     <ClCompile Include="stringUtil.cpp" />
+    <ClCompile Include="systemVariables.cpp" />
     <ClCompile Include="terminalColor.cpp" />
     <ClCompile Include="valueCycle.cpp" />
   </ItemGroup>
@@ -267,6 +268,7 @@
     <ClInclude Include="serializeBasicTypes.h" />
     <ClInclude Include="sharedObjectSerializer.h" />
     <ClInclude Include="stringUtil.h" />
+    <ClInclude Include="systemVariables.h" />
     <ClInclude Include="terminalColor.h" />
     <ClInclude Include="tracker.h" />
     <ClInclude Include="valueCycle.h" />
