@@ -9,7 +9,6 @@
 
 #include "debug.h"
 #include <algorithm>
-#include <limits>
 
 #include "misc/validityHelper.h"
 

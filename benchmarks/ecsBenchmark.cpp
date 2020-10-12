@@ -2,11 +2,13 @@
 #include "../engine/ecs/registry.h"
 #include "../util/log.h"
 
+using namespace P3D::Engine;
+
 class ECSGetFromRegistryBenchmark : public Benchmark {
 public:
 	ECSGetFromRegistryBenchmark() : Benchmark("ecsGetFromRegistryBenchmark") {}
 
-	P3D::Engine::Registry64 registry;
+	Registry64 registry;
 	std::vector<int> v { 1, 2, 3, 4, 5, 6 };
 	int errors = 0;
 	
@@ -45,7 +47,7 @@ class ECSGetFromViewConjunctionBenchmark : public Benchmark {
 public:
 	ECSGetFromViewConjunctionBenchmark() : Benchmark("ecsGetFromViewConjunctionBenchmark") {}
 
-	P3D::Engine::Registry64 registry;
+	Registry64 registry;
 	int errors = 0;
 
 	struct A : public RefCountable { int i; A(int i) : i(i) {} };
@@ -60,7 +62,7 @@ public:
 
 	void run() override {
 		int i = 0;
-		auto view = registry.view(P3D::Engine::Registry64::conjunction<A>());
+		auto view = registry.view<Registry64::conjunction<A>>();
 		for (auto entity : view) {
 			auto comp = view.get<A>(entity);
 			if (comp->i != i)
@@ -75,11 +77,11 @@ public:
 
 } ecsGetFromViewConjunctionBenchmark;
 
-class ECSGetFromViewDisjunctionBenchmark : public Benchmark {
+/*class ECSGetFromViewDisjunctionBenchmark : public Benchmark {
 public:
 	ECSGetFromViewDisjunctionBenchmark() : Benchmark("ecsGetFromViewDisjunctionBenchmark") {}
 
-	P3D::Engine::Registry64 registry;
+	Registry64 registry;
 	int errors = 0;
 
 	struct A : public RefCountable { int i; A(int i) : i(i) {} };
@@ -94,7 +96,7 @@ public:
 
 	void run() override {
 		int i = 0;
-		auto view = registry.view(P3D::Engine::Registry64::disjunction<A>());
+		auto view = registry.view(Registry64::disjunction<A>());
 		for (auto entity : view) {
 			auto comp = view.get<A>(entity);
 			if (comp->i != i)
@@ -106,5 +108,5 @@ public:
 	void printResults(double timeTaken) override {
 		Log::error("Amount of errors: %d\n", errors);
 	}
-
-} ecsGetFromViewDisjunctionBenchmark;
+	
+} ecsGetFromViewDisjunctionBenchmark;*/

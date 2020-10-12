@@ -44,7 +44,7 @@ void ImGuiLayer::onInit(Engine::Registry64& registry) {
 
 	// Setup Platform/Renderer bindings
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
-	ImGui_ImplOpenGL3_Init("#version 410");
+	ImGui_ImplOpenGL3_Init("#version 330");
 }
 
 void ImGuiLayer::onUpdate(Engine::Registry64& registry) {

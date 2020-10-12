@@ -550,7 +550,7 @@ void BigFrame::renderECSTree(Engine::Registry64& registry) {
 	using namespace Engine;
 
 	for (auto entity : registry) {
-		if (parent(entity) == registry.null_entity)
+		if (registry.getParent(entity) == registry.null_entity)
 			renderECSNode(registry, entity);
 	}
 }

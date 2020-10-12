@@ -1,11 +1,10 @@
 #pragma once
 
 #include <cstdint>
-#include <map>
+#include <unordered_map>
 #include <set>
 #include <queue>
 #include <vector>
-#include <functional>
 #include <type_traits>
 #include "../util/intrusivePointer.h"
 
@@ -66,26 +65,6 @@ struct registry_traits<std::uint64_t> {
 	static constexpr std::size_t parent_shift = 32u;
 };
 
-template<typename Entity>
-inline constexpr auto self(const Entity& entity) noexcept -> typename registry_traits<Entity>::entity_type {
-	using traits_type = registry_traits<Entity>;
-	using entity_type = typename traits_type::entity_type;
-	return static_cast<entity_type>(entity & traits_type::entity_mask);
-}
-
-template<typename Entity>
-inline constexpr auto parent(const Entity& entity) noexcept -> typename registry_traits<Entity>::entity_type {
-	using traits_type = registry_traits<Entity>;
-	using entity_type = typename traits_type::entity_type;
-	return static_cast<entity_type>(entity >> traits_type::parent_shift) & traits_type::entity_mask;
-}
-
-template<typename Entity>
-inline constexpr auto merge(const typename registry_traits<Entity>::entity_type& parent, const typename registry_traits<Entity>::entity_type& entity) noexcept -> Entity {
-	using traits_type = registry_traits<Entity>;
-	return (static_cast<Entity>(parent) << traits_type::parent_shift) | static_cast<Entity>(entity);
-}
-
 template<typename Type>
 struct type_index {
 	static Type next() noexcept {
@@ -118,13 +97,43 @@ struct component_index<Entity, void> {
 
 template<typename Entity>
 class Registry {
-private:
-	struct entity_compare {
-		bool operator()(const Entity& left, const Entity& right) const noexcept {
-			return self(left) < self(right);
-		}
-	};
 
+	//-------------------------------------------------------------------------------------//
+	// Types                                                                               //
+	//-------------------------------------------------------------------------------------//
+
+public:
+	using registry_type = Registry<Entity>;
+	using traits_type = registry_traits<Entity>;
+	using entity_type = typename traits_type::entity_type;
+	using component_type = typename traits_type::component_type;
+
+
+	//-------------------------------------------------------------------------------------//
+	// Member types                                                                        //
+	//-------------------------------------------------------------------------------------//
+
+private:
+	struct entity_compare { bool operator()(const entity_type& left, const entity_type& right) const noexcept { return self(left) < self(right); } };
+
+public:
+	using entity_set = std::set<entity_type, entity_compare>;
+	using entity_queue = std::queue<entity_type>;
+	using entity_map = std::unordered_map<entity_type, Ref<RefCountable>>;
+	using component_vector = std::vector<entity_map*>;
+
+	using component_map_iterator = decltype(std::declval<entity_map>().begin());
+	using entity_map_iterator = decltype(std::declval<entity_set>().begin());
+
+	// Null entity
+	entity_type null_entity = static_cast<entity_type>(0u);
+
+
+	//-------------------------------------------------------------------------------------//
+	// Helper structs                                                                      //
+	//-------------------------------------------------------------------------------------//
+
+private:
 	template<typename... Components>
 	struct unique_components;
 
@@ -143,39 +152,45 @@ private:
 		static_assert(!std::is_same_v<C1, C2>, "Types must be unique");
 	};
 
-public:
-	using registry_type = Registry<Entity>;
-	using traits_type = registry_traits<Entity>;
-	using entity_type = typename traits_type::entity_type;
-	using component_type = typename traits_type::component_type;
+	template<typename>
+	struct is_template_type : std::false_type {};
 
-	using entity_set = std::set<Entity, entity_compare>;
-	using entity_queue = std::queue<entity_type>;
-	using entity_map = std::map<entity_type, Ref<RefCountable>>;
-	using component_vector = std::vector<entity_map*>;
+	template<template<typename...> typename Type, typename... Components>
+	struct is_template_type<Type<Components...>> : std::true_type {};
 
-	using component_map_iterator = decltype(std::declval<entity_map>().begin());
-	using entity_map_iterator = decltype(std::declval<entity_set>().begin());
+	static constexpr entity_type self(const entity_type& entity) noexcept {
+		return static_cast<entity_type>(entity & traits_type::entity_mask);
+	}
 
-	// Null
-	entity_type null_entity = static_cast<entity_type>(0u);
+	static constexpr entity_type parent(const entity_type& entity) noexcept {
+		return static_cast<entity_type>(entity >> traits_type::parent_shift) & traits_type::entity_mask;
+	}
 
-	//? Functions
+	static constexpr entity_type merge(const entity_type& parent, const entity_type& entity) noexcept {
+		return (static_cast<entity_type>(parent) << traits_type::parent_shift) | static_cast<entity_type>(entity);
+	}
+
+	
+	//-------------------------------------------------------------------------------------//
+	// Members                                                                             //
+	//-------------------------------------------------------------------------------------//
+
 private:
+	entity_set entities;
+	component_vector components;
+
+	entity_queue id_queue;
+	entity_type id_counter = null_entity;
+
 	constexpr entity_type nextID() noexcept {
 		return ++id_counter;
 	}
 
-	// Components
-	entity_set entities;
-	component_vector components;
 
-	// ID
-	entity_queue id_queue;
-	entity_type id_counter = null_entity;
+	//-------------------------------------------------------------------------------------//
+	// View iterators                                                                      //
+	//-------------------------------------------------------------------------------------//
 
-
-	//? Iterators
 public:
 	struct view_iterator_end {};
 
@@ -183,8 +198,7 @@ public:
 	public:
 		component_iterator() = default;
 
-		template<typename MapIterator>
-		component_iterator(MapIterator&& iterator) : component_map_iterator(std::forward<MapIterator>(iterator)) {}
+		explicit component_iterator(component_map_iterator&& iterator) : component_map_iterator(std::move(iterator)) {}
 
 		auto& operator*() const {
 			return component_map_iterator::operator*().first;
@@ -228,7 +242,52 @@ public:
 		}
 	};
 
-	template<typename BeginType, typename EndType = BeginType>
+
+	//-------------------------------------------------------------------------------------//
+	// View types                                                                          //
+	//-------------------------------------------------------------------------------------//
+
+private:
+	// Separate wrapper type to ensure zero cost when overloading view(view_type<T>)
+	template<typename T>
+	struct view_type {};
+
+public:
+	template<typename...>
+	struct conjunction {
+		template<typename Component>
+		static Ref<Component> get(Registry<Entity>* registry, const entity_type& entity) {
+			component_type index = component_index<Entity, Component>::index();
+			entity_map* map = registry->components[index];
+
+			auto component_iterator = map->find(self(entity));
+
+			return intrusive_cast<Component>(component_iterator->second);
+		}
+	};
+
+	template<typename...>
+	struct disjunction {
+		template<typename Component>
+		static Ref<Component> get(Registry<Entity>* registry, const entity_type& entity) {
+			return registry->get<Component>(entity);
+		}
+	};
+
+	struct no_type {
+		template<typename Component>
+		static Ref<Component> get(Registry<Entity>* registry, const entity_type& entity) {
+			return registry->get<Component>(entity);
+		}
+	};
+
+
+	//-------------------------------------------------------------------------------------//
+	// Basic view                                                                          //
+	//-------------------------------------------------------------------------------------//
+
+public:
+	template<typename ViewType, typename BeginType, typename EndType = BeginType>
 	class basic_view {
 	private:
 		Registry<Entity>* registry;
@@ -247,17 +306,9 @@ public:
 			return stop;
 		}
 
-		/**
-		* Returns the component of the given type from the given entity from the view, passing an entity or component which is not within the view results in undefined behaviour
-		*/
 		template<typename Component>
-		Ref<Component> get(const Entity& entity) {
-			component_type index = component_index<Entity, Component>::index();
-			entity_map* map = registry->components[index];
-
-			auto component_iterator = map->find(self(entity));
-
-			return intrusive_cast<Component>(component_iterator->second);
+		Ref<Component> get(const entity_type& entity) {
+			return ViewType::template get<Component>(this->registry, entity);
 		}
 	};
 
@@ -269,54 +320,79 @@ public:
 		return entities.end();
 	}
 
-	//? Functions
+
+	//-------------------------------------------------------------------------------------//
+	// Views helper Functions                                                              //
+	//-------------------------------------------------------------------------------------//
+
 private:
 	template<typename... Components>
-	typename std::enable_if_t<sizeof...(Components) == 0> collect(component_type& current_component, std::size_t& current_size, std::vector<component_type>& components) {}
+	typename std::enable_if_t<sizeof...(Components) == 0> extract_smallest_component(component_type& smallest_component, std::size_t& smallest_size, std::vector<component_type>& other_components) {}
 
 	template<typename Component, typename... Components>
-	void collect(component_type& current_component, std::size_t& current_size, std::vector<component_type>& components) noexcept {
-		component_type index = component_index<Entity, Component>::index();
+	void extract_smallest_component(component_type& smallest_component, std::size_t& smallest_size, std::vector<component_type>& other_components) noexcept {
+		component_type current_component = component_index<Entity, Component>::index();
+		const std::size_t current_size = this->components[current_component]->size();
 
-		std::size_t size = registry_type::components[index]->size();
+		if (current_size < smallest_size) {
+			other_components.push_back(smallest_component);
+			smallest_component = current_component;
+			smallest_size = current_size;
+		} else
+			other_components.push_back(current_component);
 
-		if (size < current_size) {
-			components.push_back(current_component);
-			current_component = index;
-			current_size = size;
-		} else {
-			components.push_back(index);
-		}
-
-		collect<Components...>(current_component, current_size, components);
+		extract_smallest_component<Components...>(smallest_component, smallest_size, other_components);
 	}
 
-	template<typename Filter, typename Iterator>
+	template<typename... Components>
+	typename std::enable_if_t<sizeof...(Components) == 0> insert_entities(entity_set& entities) {}
+
+	template<typename Component, typename... Components>
+	void insert_entities(entity_set& entities) noexcept {
+		std::size_t component = component_index<Entity, Component>::index();
+		component_iterator first(this->components[component]->begin());
+		component_iterator last(this->components[component]->end());
+
+		entities.insert(first, last);
+
+		insert_entities<Components...>(entities);
+	}
+
+	template<typename Iterator, typename Filter>
 	using filtered_view_iterator = view_iterator<Iterator, view_iterator_end, Filter>;
 
-	template<typename Filter, typename Iterator>
-	using filtered_basic_view = basic_view<filtered_view_iterator<Filter, Iterator>, view_iterator_end>;
+	template<typename ViewType, typename Iterator, typename Filter>
+	using filtered_basic_view = basic_view<ViewType, filtered_view_iterator<Iterator, Filter>, view_iterator_end>;
 
-	template<typename Filter, typename Iterator>
-	filtered_basic_view<Filter, Iterator> filter_view(const Iterator& first, const Iterator& last, const Filter& filter) noexcept {
-		filtered_view_iterator<Filter, Iterator> start(first, last, filter);
+	template<typename ViewType, typename Iterator, typename Filter>
+	filtered_basic_view<ViewType, Iterator, Filter> filter_view(const Iterator& first, const Iterator& last, const Filter& filter) noexcept {
+		filtered_view_iterator<Iterator, Filter> start(first, last, filter);
 		view_iterator_end stop;
-		return filtered_basic_view<Filter, Iterator>(this, start, stop);
+		return filtered_basic_view<ViewType, Iterator, Filter>(this, start, stop);
 	}
 
-	//? Functions
+	template<typename ViewType, typename Iterator>
+	auto default_view(const Iterator& first, const Iterator& last) noexcept {
+		return filter_view<ViewType>(first, last, [] (const Iterator&) { return false; });
+	}
+
+
+	//-------------------------------------------------------------------------------------//
+	// Mutators                                                                            //
+	//-------------------------------------------------------------------------------------//
+
 public:
 	/**
 	* Creates a new entity with an empty parent and adds it to the registry
 	*/
-	[[nodiscard]] Entity create() noexcept {
-		Entity id;
+	[[nodiscard]] entity_type create() noexcept {
+		entity_type id;
 		if (id_queue.empty()) {
-			id = merge<Entity>(null_entity, nextID());
+			id = merge(null_entity, nextID());
 		} else {
 			entity_type lastID = id_queue.front();
 
-			id = merge<Entity>(null_entity, lastID);
+			id = merge(null_entity, lastID);
 
 			id_queue.pop();
 		}
@@ -329,7 +405,7 @@ public:
 	/**
 	* Removes the given entity from the registry
 	*/
-	void destroy(const Entity& entity) noexcept {
+	void destroy(const entity_type& entity) noexcept {
 		if (entity == null_entity)
 			return;
 
@@ -352,7 +428,7 @@ public:
 	* Instantiates a component using the given type and arguments and adds it to the given entity
 	*/
 	template<typename Component, typename... Args>
-	Ref<Component> add(const Entity& entity, Args&&... args) noexcept {
+	Ref<Component> add(const entity_type& entity, Args&&... args) noexcept {
 		auto entities_iterator = entities.find(entity);
 		if (entities_iterator == entities.end())
 			return Ref<Component>();
@@ -377,7 +453,7 @@ public:
 	* Removes the components of the given type from the given entity
 	*/
 	template<typename Component>
-	void remove(const Entity& entity) noexcept {
+	void remove(const entity_type& entity) noexcept {
 		auto entities_iterator = entities.find(entity);
 		if (entities_iterator == entities.end())
 			return;
@@ -394,11 +470,16 @@ public:
 		map->erase(component_iterator);
 	}
 
+
+	//-------------------------------------------------------------------------------------//
+	// Getters                                                                               //
+	//-------------------------------------------------------------------------------------//
+
 	/**
 	* Returns the component of the given type from the given entity, nullptr if no such component exists
 	*/
 	template<typename Component>
-	[[nodiscard]] Ref<Component> get(const Entity& entity) noexcept {
+	[[nodiscard]] Ref<Component> get(const entity_type& entity) noexcept {
 		auto entities_iterator = entities.find(entity);
 		if (entities_iterator == entities.end())
 			return Ref<Component>();
@@ -419,7 +500,7 @@ public:
 	* Returns the component of the given type from the given entity, or creates one using the provides arguments and returns it
 	*/
 	template<typename Component, typename... Args>
-	[[nodiscard]] Ref<Component> getOrAdd(const Entity& entity, Args&&... args) {
+	[[nodiscard]] Ref<Component> getOrAdd(const entity_type& entity, Args&&... args) {
 		auto entities_iterator = entities.find(entity);
 		if (entities_iterator == entities.end())
 			return Ref<Component>();
@@ -427,13 +508,11 @@ public:
 		component_type index = component_index<Entity, Component>::index();
 		while (index >= components.size())
 			components.push_back(new entity_map());
-		
-		
+
 		entity_map* map = components[index];
 		auto component_iterator = map->find(self(entity));
 		if (component_iterator == map->end()) {
 			Ref<Component> component = make_intrusive(new Component(std::forward<Args>(args)...));
-			component_type index = component_index<Entity, Component>::index();
 
 			map->insert(std::make_pair(self(entity), intrusive_cast<RefCountable>(component)));
 
@@ -447,7 +526,7 @@ public:
 	* Returns the component of the given type from the given entity, the default value if no such component exists, note that the component will be copied
 	*/
 	template<typename Component>
-	[[nodiscard]] Component getOr(const Entity& entity, const Component& component) {
+	[[nodiscard]] Component getOr(const entity_type& entity, const Component& component) {
 		Ref<Component> result = get<Component>(entity);
 		if (result == nullptr)
 			return component;
@@ -459,7 +538,7 @@ public:
 	* Returns whether the given entity has a component of the given type
 	*/
 	template<typename Component>
-	[[nodiscard]] bool has(const Entity& entity) noexcept {
+	[[nodiscard]] bool has(const entity_type& entity) noexcept {
 		auto entities_iterator = entities.find(entity);
 		if (entities_iterator == entities.end())
 			return false;
@@ -479,28 +558,33 @@ public:
 	/**
 	* Returns whether the registry contains the given entity
 	*/
-	[[nodiscard]] bool contains(const Entity& entity) noexcept {
+	[[nodiscard]] bool contains(const entity_type& entity) noexcept {
 		return entities.find(entity) != entities.end();
 	}
+
+
+	//-------------------------------------------------------------------------------------//
+	// Parent & self                                                                       //
+	//-------------------------------------------------------------------------------------//    
 
 	/**
 	* Returns the parent of the given entity
 	*/
-	[[nodiscard]] constexpr entity_type getParent(const Entity& entity) {
+	[[nodiscard]] constexpr entity_type getParent(const entity_type& entity) {
 		return parent(entity);
 	}
 
 	/**
 	* Returns the self id of the given entity
 	*/
-	[[nodiscard]] constexpr entity_type getSelf(const Entity& entity) {
+	[[nodiscard]] constexpr entity_type getSelf(const entity_type& entity) {
 		return self(entity);
 	}
 
 	/**
 	* Sets the parent of the given entity to the given parent, returns the updated entity if successful, returns the old entity if the parent does not exist, return the null entity if the entity does not exists
 	*/
-	[[nodiscard]] Entity setParent(const Entity& entity, const Entity& parent) noexcept {
+	[[nodiscard]] entity_type setParent(const entity_type& entity, const entity_type& parent) noexcept {
 		auto entity_iterator = entities.find(entity);
 		if (entity_iterator == entities.end())
 			return null_entity;
@@ -511,7 +595,7 @@ public:
 				return entity;
 		}
 
-		Entity newEntity = merge<Entity>(self(parent), self(entity));
+		entity_type newEntity = merge(self(parent), self(entity));
 		auto hint_iterator = entity_iterator;
 		hint_iterator++;
 		entities.erase(entity_iterator);
@@ -523,7 +607,7 @@ public:
 	/**
 	* Returns the children of the given parent entity
 	*/
-	[[nodiscard]] auto getChildren(const Entity& entity) noexcept {
+	[[nodiscard]] auto getChildren(const entity_type& entity) noexcept {
 		entity_map_iterator first = entities.begin();
 		entity_map_iterator last = entities.end();
 
@@ -535,32 +619,38 @@ public:
 		};
 
 		if (!contains(entity))
-			return filter_view(last, last, filter);
+			return filter_view<no_type>(last, last, filter);
 
-		return filter_view(first, last, filter);
+		return filter_view<no_type>(first, last, filter);
 	}
 
+
+	//-------------------------------------------------------------------------------------//
+	// Views                                                                               //
+	//-------------------------------------------------------------------------------------//
+
 	/**
-	* Returns an iterator which iterators over all entities having all the given components
+	* Returns an iterator which iterates over all entities having all the given components
 	*/
+private:
 	template<typename Component, typename... Components>
-	[[nodiscard]] auto view() noexcept {
+	[[nodiscard]] auto view(view_type<conjunction<Component, Components...>>) noexcept {
 		constexpr unique_components<Component, Components...>_;
 
-		std::vector<component_type> components;
-		components.reserve(sizeof...(Components));
+		std::vector<component_type> other_components;
+		other_components.reserve(sizeof...(Components));
 
-		component_type current_component = component_index<Entity, Component>::index();
-		std::size_t current_size = registry_type::components[current_component]->size();
+		component_type smallest_component = component_index<Entity, Component>::index();
+		std::size_t smallest_size = this->components[smallest_component]->size();
 
-		collect<Components...>(current_component, current_size, components);
+		extract_smallest_component<Components...>(smallest_component, smallest_size, other_components);
 
-		entity_map* map = registry_type::components[current_component];
+		entity_map* map = this->components[smallest_component];
 		component_iterator first(map->begin());
 		component_iterator last(map->end());
 
-		auto filter = [this, components] (const component_map_iterator& iterator) {
-			for (component_type component : components) {
+		auto filter = [this, other_components] (const component_iterator& iterator) {
+			for (component_type component : other_components) {
 				auto component_iterator = this->components[component]->find(iterator->first);
 				if (component_iterator == this->components[component]->end())
 					return true;
@@ -569,14 +659,44 @@ public:
 			return false;
 		};
 
-		return filter_view(first, last, filter);
+		return filter_view<conjunction<>>(first, last, filter);
 	}
 
+	/**
+	* Returns an iterator which iterates over all entities having any of the given components
+	*/
+	template<typename... Components>
+	[[nodiscard]] auto view(view_type<disjunction<Components...>>) noexcept {
+		constexpr unique_components<Components...>_;
+
+		entity_set entities = *new entity_set();
+		insert_entities<Components...>(entities);
+
+		auto filter = [] (const decltype(entities.begin())&) {
+			return false;
+		};
+
+		return filter_view<disjunction<>>(entities.begin(), entities.end(), filter);
+	}
+
+public:
+	/**
+	* Returns an iterator which iterates over all entities which satisfy the view type
+	*/
+	template<typename... Type>
+	[[nodiscard]] auto view() noexcept {
+		if constexpr (sizeof...(Type) == 1)
+			if constexpr (is_template_type<Type...>::value)
+				return view(view_type<Type...>{});
+			else
+				return view(view_type<conjunction<Type...>>{});
+		else
+			return view(view_type<conjunction<Type...>>{});
+	}
 };
 
 typedef Registry<std::uint8_t>  Registry8;
 typedef Registry<std::uint16_t> Registry16;
 typedef Registry<std::uint32_t> Registry32;
 typedef Registry<std::uint64_t> Registry64;
-
 };

@@ -45,6 +45,7 @@ struct Vector {
 		for(size_t i = 0; i < SubSize; i++) {
 			result[i] = this->data[i + startingAt];
 		}
+		return result;
 	}
 };
 
@@ -81,6 +82,7 @@ struct Vector<T, 2> {
 		for(size_t i = 0; i < SubSize; i++) {
 			result[i] = this->data[i + startingAt];
 		}
+		return result;
 	}
 };
 
@@ -109,7 +111,7 @@ struct Vector<T, 3> {
 
 	static constexpr Vector<T, 3> full(T v) noexcept {
 		return Vector<T, 3>(v, v, v);
-	};
+	}
 	
 	template<size_t SubSize>
 		constexpr Vector<T, SubSize> getSubVector(size_t startingAt = 0) const noexcept {
@@ -117,6 +119,7 @@ struct Vector<T, 3> {
 		for(size_t i = 0; i < SubSize; i++) {
 			result[i] = this->data[i + startingAt];
 		}
+		return result;
 	}
 };
 
@@ -152,6 +155,7 @@ struct Vector<T, 4> {
 		for(size_t i = 0; i < SubSize; i++) {
 			result[i] = this->data[i + startingAt];
 		}
+		return result;
 	}
 }; 
 

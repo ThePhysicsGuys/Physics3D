@@ -36,7 +36,6 @@ public:
 
 	inline Layer() : name(""), ptr(nullptr), flags(None) {};
 	inline Layer(const std::string& name, void* ptr, char flags = None) : name(name), ptr(ptr), flags(flags) {};
-	inline ~Layer() {}
 
 	inline virtual void onAttach() {}
 	inline virtual void onDetach() {}

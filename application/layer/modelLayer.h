@@ -20,7 +20,7 @@ private:
 
 public:
 	inline ModelLayer() : Layer() {};
-	inline ModelLayer(Screen* screen, char flags = None) : Layer("Model", screen, flags) {};
+	inline ModelLayer(Screen* screen, char flags = None) : Layer("Model", screen, flags) {}
 
 	virtual void onInit(Engine::Registry64& registry) override;
 	virtual void onUpdate(Engine::Registry64& registry) override;

@@ -2,7 +2,6 @@
 
 #include "compare.h"
 #include "../engine/ecs/registry.h"
-#include "../util/log.h"
 #include "../util/intrusivePointer.h"
 
 TEST_CASE(idGeneration) {
@@ -123,7 +122,7 @@ TEST_CASE(getFromView) {
 	auto id = registry.create();
 
 	struct A : public RefCountable {
-		int idx;
+		int idx = 0;
 		A(int idx) : idx(idx) {}
 	};
 
@@ -132,10 +131,8 @@ TEST_CASE(getFromView) {
 	registry.add<A>(id, 3);
 
 	auto view = registry.view<A>();
-	int idx = 0;
 	for (auto entity : view) {
-		idx++;
 		intrusive_ptr<A> component = view.get<A>(entity);
-		ASSERT_TRUE(idx == component->idx);
+		ASSERT_TRUE(component->idx > 0 && component->idx < 4);
 	}
 }

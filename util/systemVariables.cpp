@@ -6,7 +6,7 @@
 static std::unordered_map<std::string, int> variables;
 
 int SystemVariables::get(const std::string& key) {
-	auto iterator = variables.find(key);
+	const auto iterator = variables.find(key);
 
 	if (iterator == variables.end())
 		throw std::runtime_error("System variable \"" + key + "\" not found");

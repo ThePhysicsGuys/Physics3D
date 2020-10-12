@@ -11,16 +11,11 @@
 #include "ray.h"
 
 #include "view/screen.h"
-#include "ecs/material.h"
-#include "../graphics/mesh/primitive.h"
-#include "../graphics/mesh/indexedMesh.h"
-#include "../graphics/gui/gui.h"
 
 #include "application.h"
 #include "shader/shaders.h"
 
 #include "worlds.h"
-#include "../physics/physical.h"
 #include "../physics/sharedLockGuard.h"
 #include "../physics/geometry/shape.h"
 #include "../physics/misc/filters/rayIntersectsBoundsFilter.h"
