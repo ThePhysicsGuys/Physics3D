@@ -278,6 +278,9 @@ void Part::attach(Part* other, HardConstraint* constraint, const CFrame& attachT
 void Part::detach() {
 	if(this->parent == nullptr) throw std::logic_error("No physical to detach from!");
 	this->parent->detachPart(this);
+	if(this->layer != nullptr) {
+		this->layer->moveOutOfGroup(this);
+	}
 }
 
 void Part::ensureHasParent() {

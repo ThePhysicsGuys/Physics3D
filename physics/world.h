@@ -167,11 +167,6 @@ private:
 	*/
 	void notifyMainPhysicalObsolete(MotorizedPhysical* part);
 
-	/*
-		Called when a part gets detached from a physical
-	*/
-	void notifyPartDetachedFromPhysical(Part* part);
-
 protected:
 	// World tick steps
 	virtual void applyExternalForces();

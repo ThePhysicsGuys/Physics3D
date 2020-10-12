@@ -31,6 +31,10 @@ void WorldLayer::addIntoGroup(Part* newPart, Part* group) {
 	}
 }
 
+void WorldLayer::moveOutOfGroup(Part* part) {
+	this->tree.moveOutOfGroup(part, part->getBounds());
+}
+
 void WorldLayer::removePart(Part* partToRemove) {
 	tree.remove(partToRemove, partToRemove->getBounds());
 	world->onPartRemoved(partToRemove);

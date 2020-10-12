@@ -393,6 +393,19 @@ struct BoundsTree {
 		this->moveOutOfGroup(obj, obj->getBounds());
 	}
 
+	template<typename BoundableIterBegin, typename BoundableIterEnd>
+	void moveAllOutOfGroup(BoundableIterBegin begin, BoundableIterEnd end) {
+		assert(begin != end);
+		Boundable* first = *begin;
+		++begin;
+
+		NodeStack pathToFirst(this->rootNode, first, first->getBounds());
+
+		while(begin != end) {
+
+		}
+	}
+
 	// removes and returns the node for the given object
 	inline TreeNode grab(const Boundable* obj, const Bounds& objBounds) {
 		if(this->rootNode.isLeafNode()) {

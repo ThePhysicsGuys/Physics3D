@@ -472,10 +472,6 @@ void Physical::detachPart(Part* part) {
 			world->notifyNewPhysicalCreatedWhenSplitting(newPhys);
 		}
 	}
-
-	if(world != nullptr) {
-		world->notifyPartDetachedFromPhysical(part);
-	}
 }
 
 void Physical::removePart(Part* part) {

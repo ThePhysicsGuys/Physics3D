@@ -27,6 +27,9 @@ public:
 
 	void mergeGroupsOf(Part* first, Part* second);
 	void moveIntoGroup(Part* partToMove, Part* group);
+	void moveOutOfGroup(Part* part);
 	void joinPartsIntoNewGroup(Part* p1, Part* p2);
+
+
 };
 

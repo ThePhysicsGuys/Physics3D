@@ -188,10 +188,10 @@ public:
 		time_point<system_clock> startTime;
 
 		if(!flags.catchErrors) {
-			runNoErrorChecking(flags, startTime);
+			return runNoErrorChecking(flags, startTime);
 		} else {
 			try {
-				runNoErrorChecking(flags, startTime);
+				return runNoErrorChecking(flags, startTime);
 			} catch(exception& e) {
 				printDeltaTime(startTime, ERROR_COLOR);
 				dumpLog();

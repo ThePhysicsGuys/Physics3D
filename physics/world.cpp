@@ -234,17 +234,6 @@ void WorldPrototype::notifyNewPartAddedToPhysical(const MotorizedPhysical* physi
 	onPartAdded(newPart);
 }
 
-void WorldPrototype::notifyPartDetachedFromPhysical(Part* part) {
-	assert(part->parent != nullptr);
-	assert(part->parent->childPhysicals.size() == 0);
-	assert(part->parent->rigidBody.getPartCount() == 1);
-	assert(part->parent->isMainPhysical());
-
-	objectTree.moveOutOfGroup(part);
-	ASSERT_TREE_VALID(objectTree);
-}
-
-
 void WorldPrototype::onPartAdded(Part* newPart) {}
 void WorldPrototype::onPartRemoved(Part* removedPart) {}
 
