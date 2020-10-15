@@ -16,11 +16,11 @@ public:
 	void pushLayer(Layer* layer);
 	void popLayer(Layer* layer);
 
-	void onInit(Engine::Registry64& registry);
-	void onUpdate(Engine::Registry64& registry);
-	void onEvent(Engine::Registry64& registry, Engine::Event& event);
-	void onRender(Engine::Registry64& registry);
-	void onClose(Engine::Registry64& registry);
+	void onInit(Registry64& registry);
+	void onUpdate(Registry64& registry);
+	void onEvent(Registry64& registry, Event& event);
+	void onRender(Registry64& registry);
+	void onClose(Registry64& registry);
 
 	std::vector<Layer*>::iterator begin();
 	std::vector<Layer*>::iterator end();

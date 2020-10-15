@@ -11,8 +11,6 @@
 #include "ecs/components.h"
 #include "ecs/light.h"
 #include "ecs/material.h"
-#include "ecs/model.h"
-#include "ecs/mesh.h"
 
 #include "../engine/meshRegistry.h"
 

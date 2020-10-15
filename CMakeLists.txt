@@ -203,12 +203,6 @@ target_include_directories(graphics PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/graphic
 add_library(engine STATIC
   engine/core.cpp
   engine/meshRegistry.cpp
-  
-  engine/ecs/component.cpp
-  engine/ecs/entity.cpp
-  engine/ecs/node.cpp
-  engine/ecs/tree.cpp
-  engine/ecs/registry.cpp
 
   engine/input/inputHandler.cpp
   engine/input/keyboard.cpp
@@ -241,9 +235,6 @@ add_executable(application
   application/worlds.cpp
 
   application/ecs/material.cpp
-  application/ecs/mesh.cpp
-  application/ecs/model.cpp
-  application/ecs/transform.cpp
   application/ecs/components.h
 
   application/input/standardInputHandler.cpp

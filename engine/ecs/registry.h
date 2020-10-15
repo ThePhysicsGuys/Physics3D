@@ -1,11 +1,11 @@
 #pragma once
 
-#include <cstdint>
-#include <unordered_map>
 #include <set>
 #include <queue>
 #include <vector>
+#include <cstdint>
 #include <type_traits>
+#include <unordered_map>
 #include "../util/intrusivePointer.h"
 
 namespace P3D::Engine {
@@ -253,7 +253,7 @@ private:
 	struct view_type {};
 
 public:
-	template<typename...>
+	template<typename... Components>
 	struct conjunction {
 		template<typename Component>
 		static Ref<Component> get(Registry<Entity>* registry, const entity_type& entity) {
@@ -266,13 +266,13 @@ public:
 		}
 	};
 
-	template<typename...>
+	/*template<typename... Components>
 	struct disjunction {
 		template<typename Component>
 		static Ref<Component> get(Registry<Entity>* registry, const entity_type& entity) {
 			return registry->get<Component>(entity);
 		}
-	};
+	};*/
 
 	struct no_type {
 		template<typename Component>
@@ -296,7 +296,7 @@ public:
 
 	public:
 		basic_view() = default;
-		basic_view(Registry<Entity>* registry, const BeginType& start, const EndType& stop) : start(start), stop(stop), registry(registry) {}
+		basic_view(Registry<Entity>* registry, const BeginType& start, const EndType& stop) : registry(registry), start(start), stop(stop) {}
 
 		BeginType begin() const {
 			return start;
@@ -327,7 +327,7 @@ public:
 
 private:
 	template<typename... Components>
-	typename std::enable_if_t<sizeof...(Components) == 0> extract_smallest_component(component_type& smallest_component, std::size_t& smallest_size, std::vector<component_type>& other_components) {}
+	std::enable_if_t<sizeof...(Components) == 0> extract_smallest_component(component_type& smallest_component, std::size_t& smallest_size, std::vector<component_type>& other_components) {}
 
 	template<typename Component, typename... Components>
 	void extract_smallest_component(component_type& smallest_component, std::size_t& smallest_size, std::vector<component_type>& other_components) noexcept {
@@ -345,7 +345,7 @@ private:
 	}
 
 	template<typename... Components>
-	typename std::enable_if_t<sizeof...(Components) == 0> insert_entities(entity_set& entities) {}
+	std::enable_if_t<sizeof...(Components) == 0> insert_entities(entity_set& entities) {}
 
 	template<typename Component, typename... Components>
 	void insert_entities(entity_set& entities) noexcept {
@@ -597,7 +597,7 @@ public:
 
 		entity_type newEntity = merge(self(parent), self(entity));
 		auto hint_iterator = entity_iterator;
-		hint_iterator++;
+		++hint_iterator;
 		entities.erase(entity_iterator);
 		entities.insert(hint_iterator, newEntity);
 
@@ -659,13 +659,13 @@ private:
 			return false;
 		};
 
-		return filter_view<conjunction<>>(first, last, filter);
+		return filter_view<conjunction<Component, Components...>>(first, last, filter);
 	}
 
 	/**
 	* Returns an iterator which iterates over all entities having any of the given components
 	*/
-	template<typename... Components>
+	/*template<typename... Components>
 	[[nodiscard]] auto view(view_type<disjunction<Components...>>) noexcept {
 		constexpr unique_components<Components...>_;
 
@@ -676,8 +676,8 @@ private:
 			return false;
 		};
 
-		return filter_view<disjunction<>>(entities.begin(), entities.end(), filter);
-	}
+		return filter_view<disjunction<Components...>>>(entities.begin(), entities.end(), filter);
+	}*/
 
 public:
 	/**

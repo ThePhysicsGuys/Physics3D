@@ -14,7 +14,7 @@ void LayerStack::pushLayer(Layer* layer) {
 }
 
 void LayerStack::popLayer(Layer* layer) {
-	std::vector<Layer*>::iterator where = std::find(begin(), end(), layer);
+	const auto where = std::find(begin(), end(), layer);
 
 	if (where != end()) {
 		stack.erase(where);
@@ -24,16 +24,13 @@ void LayerStack::popLayer(Layer* layer) {
 	}
 }
 
-void LayerStack::onInit(Engine::Registry64& registry) {
-	for (auto i = begin(); i != end(); ++i) {
-		(*i)->onInit(registry);
-	}
+void LayerStack::onInit(Registry64& registry) {
+	for (auto* layer : *this) 
+		layer->onInit(registry);
 }
 
-void LayerStack::onUpdate(Engine::Registry64& registry) {
-	for (auto i = begin(); i != end(); ++i) {
-		Layer* layer = *i;
-
+void LayerStack::onUpdate(Registry64& registry) {
+	for (auto* layer : *this) {
 		if (layer->flags & (Layer::Disabled | Layer::NoUpdate))
 			continue;
 
@@ -41,9 +38,9 @@ void LayerStack::onUpdate(Engine::Registry64& registry) {
 	}
 }
 
-void LayerStack::onEvent(Engine::Registry64& registry, Engine::Event& event) {
+void LayerStack::onEvent(Registry64& registry, Event& event) {
 	for (auto i = rbegin(); i != rend(); ++i) {
-		Layer* layer = *i;
+		auto* layer = *i;
 
 		if (layer->flags & (Layer::Disabled | Layer::NoEvents))
 			continue;
@@ -55,10 +52,8 @@ void LayerStack::onEvent(Engine::Registry64& registry, Engine::Event& event) {
 	}
 }
 
-void LayerStack::onRender(Engine::Registry64& registry) {
-	for (auto i = begin(); i != end(); ++i) {
-		Layer* layer = *i;
-
+void LayerStack::onRender(Registry64& registry) {
+	for (auto* layer : *this) {
 		if (layer->flags & (Layer::Disabled | Layer::NoRender))
 			continue;
 
@@ -66,11 +61,10 @@ void LayerStack::onRender(Engine::Registry64& registry) {
 	}
 }
 
-void LayerStack::onClose(Engine::Registry64& registry) {
-
-	for (auto i = rbegin(); i != rend(); ++i) {
+void LayerStack::onClose(Registry64& registry) {
+	for (auto i = rbegin(); i != rend(); ++i)
 		(*i)->onClose(registry);
-	}
+	
 }
 
 std::vector<Layer*>::iterator LayerStack::begin() {

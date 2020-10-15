@@ -1,9 +1,14 @@
 #include "core.h"
 
 #include "toolManager.h"
+#include "event/event.h"
 
 namespace P3D::Engine {
+	
+Tool* ToolManager::activeTool = nullptr;
+std::map<std::string, Tool*> ToolManager::tools;
 
+	
 void ToolManager::onInit() {
 
 }
@@ -33,7 +38,7 @@ void ToolManager::onClose() {
 	if (activeTool != nullptr)
 		activeTool->onDeselect();
 
-	for (auto iterator : tools) {
+	for (const auto& iterator : tools) {
 		Tool* tool = iterator.second;
 
 		tool->onDeregister();

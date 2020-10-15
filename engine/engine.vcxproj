@@ -265,10 +265,6 @@
   <ItemGroup>
     <ClInclude Include="core.h" />
     <ClInclude Include="ecs\registry.h" />
-    <ClInclude Include="ecs\component.h" />
-    <ClInclude Include="ecs\entity.h" />
-    <ClInclude Include="ecs\node.h" />
-    <ClInclude Include="ecs\tree.h" />
     <ClInclude Include="event\event.h" />
     <ClInclude Include="event\keyEvent.h" />
     <ClInclude Include="event\mouseEvent.h" />
@@ -299,13 +295,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug no AVX|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">core.h</PrecompiledHeaderFile>
-
     </ClCompile>
-    <ClCompile Include="ecs\component.cpp" />
-    <ClCompile Include="ecs\entity.cpp" />
-    <ClCompile Include="ecs\node.cpp" />
-    <ClCompile Include="ecs\registry.cpp" />
-    <ClCompile Include="ecs\tree.cpp" />
     <ClCompile Include="input\inputHandler.cpp" />
     <ClCompile Include="input\keyboard.cpp" />
     <ClCompile Include="input\modifiers.cpp" />

@@ -4,7 +4,6 @@
 
 #include "../engine/event/event.h"
 #include "../engine/event/mouseEvent.h"
-#include "../engine/ecs/entity.h"
 #include "../graphics/gui/gui.h"
 #include "../graphics/gui/guiUtils.h"
 #include "../graphics/path/path.h"
@@ -13,8 +12,6 @@
 #include "../view/screen.h"
 #include "../application.h"
 #include "../input/standardInputHandler.h"
-#include "../application.h"
-#include "../view/screen.h"
 #include "../worlds.h"
 #include "../physics/misc/filters/visibilityFilter.h"
 

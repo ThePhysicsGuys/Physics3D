@@ -13,7 +13,6 @@
 #include "../physics/misc/toString.h"
 
 #include "../graphics/debug/visualDebug.h"
-#include "../graphics/renderer.h"
 #include "../graphics/texture.h"
 #include "../graphics/resource/shaderResource.h"
 #include "../graphics/resource/textureResource.h"
@@ -21,8 +20,6 @@
 #include "../graphics/font.h"
 #include "../graphics/shader/shader.h"
 
-#include "../engine/ecs/tree.h"
-#include "../engine/ecs/node.h"
 #include "../engine/ecs/registry.h"
 #include "../application/ecs/components.h"
 
@@ -444,9 +441,9 @@ void BigFrame::renderResourceFrame() {
 	ImGui::Separator();
 }
 
-void BigFrame::renderECSNode(Engine::Registry64& registry, Engine::Registry64::entity_type entity) {
+void BigFrame::renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity) {
 	void* id = (void*) entity;
-	const auto& children = registry.getChildren(entity);
+	auto children = registry.getChildren(entity);
 	
 	bool leaf = children.begin() == registry.end();
 	ImTextureID texture = (void*) (intptr_t) objectIcon->getID();
@@ -520,7 +517,7 @@ void BigFrame::renderECSNode(Engine::Registry64& registry, Engine::Registry64::e
 	if (!leaf) {
 		if (open) {
 			for (auto child : children)
-				renderECSNode(registry, child);
+				renderEntity(registry, child);
 			ImGui::TreePop();
 		}
 	}
@@ -551,7 +548,7 @@ void BigFrame::renderECSTree(Engine::Registry64& registry) {
 
 	for (auto entity : registry) {
 		if (registry.getParent(entity) == registry.null_entity)
-			renderECSNode(registry, entity);
+			renderEntity(registry, entity);
 	}
 }
 

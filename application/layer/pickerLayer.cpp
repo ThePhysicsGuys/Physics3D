@@ -12,14 +12,14 @@
 
 namespace P3D::Application {
 
-Engine::ToolManager toolManager;
-
+using Engine::ToolManager;
+	
 void PickerLayer::onInit(Engine::Registry64& registry) {
 	Picker::onInit();
 	
-	toolManager.onInit();
-	//toolManager.registerTool<SelectionTool>();
-	//toolManager.selectTool<SelectionTool>();
+	ToolManager::onInit();
+	//ToolManager::registerTool<SelectionTool>();
+	//ToolManager::selectTool<SelectionTool>();
 }
 
 void PickerLayer::onUpdate(Engine::Registry64& registry) {
@@ -27,18 +27,18 @@ void PickerLayer::onUpdate(Engine::Registry64& registry) {
 
 	Picker::onUpdate(*screen, handler->mousePosition);
 	
-	toolManager.onUpdate();
+	ToolManager::onUpdate();
 }
 
 void PickerLayer::onEvent(Engine::Registry64& registry, Engine::Event& event) {
 	Picker::onEvent(event);
 
-	toolManager.onEvent(event);
+	ToolManager::onEvent(event);
 }
 
 void PickerLayer::onRender(Engine::Registry64& registry) {
 	using namespace Graphics;
-	using namespace Graphics::Renderer;
+	using namespace Renderer;
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
 	beginScene();
@@ -48,7 +48,7 @@ void PickerLayer::onRender(Engine::Registry64& registry) {
 	Picker::onRender(*screen);
 
 	disableDepthTest();
-	toolManager.onRender();
+	ToolManager::onRender();
 
 	endScene();
 }
@@ -56,7 +56,7 @@ void PickerLayer::onRender(Engine::Registry64& registry) {
 void PickerLayer::onClose(Engine::Registry64& registry) {
 	Picker::onClose();
 
-	toolManager.onClose();
+	ToolManager::onClose();
 }
 
 };

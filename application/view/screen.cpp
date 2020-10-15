@@ -186,7 +186,7 @@ void Screen::onInit() {
 	layerStack.pushLayer(&postprocessLayer);
 	layerStack.pushLayer(&guiLayer);
 	layerStack.pushLayer(&debugOverlay);
-	layerStack.pushLayer(&testLayer);
+	//layerStack.pushLayer(&testLayer);
 	layerStack.pushLayer(&cameraLayer);
 	layerStack.pushLayer(&imguiLayer);
 

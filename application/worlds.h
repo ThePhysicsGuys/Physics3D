@@ -1,7 +1,6 @@
 #pragma once
 
 #include "extendedPart.h"
-#include "../engine/ecs/tree.h"
 #include "../physics/math/position.h"
 #include "../physics/synchonizedWorld.h"
 

@@ -2,7 +2,6 @@
 #include "meshRegistry.h"
 
 #include "../physics/misc/shapeLibrary.h"
-#include "../physics/geometry/shape.h"
 
 #include "../graphics/visualShape.h"
 #include "../graphics/buffers/bufferLayout.h"

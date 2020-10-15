@@ -31,11 +31,10 @@ public:
 	};
 
 	std::string name;
-
 	char flags;
 
-	inline Layer() : name(""), ptr(nullptr), flags(None) {};
-	inline Layer(const std::string& name, void* ptr, char flags = None) : name(name), ptr(ptr), flags(flags) {};
+	inline Layer() : ptr(nullptr), name(), flags(None) {};
+	inline Layer(const std::string& name, void* ptr, char flags = None) : ptr(ptr), name(name), flags(flags) {}
 
 	inline virtual void onAttach() {}
 	inline virtual void onDetach() {}

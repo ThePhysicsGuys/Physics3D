@@ -344,8 +344,6 @@
     <ClInclude Include="core.h" />
     <ClInclude Include="ecs\light.h" />
     <ClInclude Include="ecs\material.h" />
-    <ClInclude Include="ecs\mesh.h" />
-    <ClInclude Include="ecs\model.h" />
     <ClInclude Include="io\serialization.h" />
     <ClInclude Include="layer\imguiLayer.h" />
     <ClInclude Include="layer\shadowLayer.h" />
@@ -371,7 +369,6 @@
     <ClInclude Include="picker\pickable.h" />
     <ClInclude Include="picker\ray.h" />
     <ClInclude Include="picker\picker.h" />
-    <ClInclude Include="ecs\transform.h" />
     <ClInclude Include="view\camera.h" />
     <ClInclude Include="view\frames.h" />
     <ClInclude Include="view\screen.h" />
@@ -394,8 +391,6 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug no AVX|x64'">core.h</PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="ecs\material.cpp" />
-    <ClCompile Include="ecs\mesh.cpp" />
-    <ClCompile Include="ecs\model.cpp" />
     <ClCompile Include="io\serialization.cpp" />
     <ClCompile Include="layer\shadowLayer.cpp" />
     <ClCompile Include="layer\imguiLayer.cpp" />
@@ -419,7 +414,6 @@
     <ClCompile Include="shader\shaders.cpp" />
     <ClCompile Include="tickerThread.cpp" />
     <ClCompile Include="picker\picker.cpp" />
-    <ClCompile Include="ecs\transform.cpp" />
     <ClCompile Include="view\camera.cpp" />
     <ClCompile Include="view\frames.cpp" />
     <ClCompile Include="view\screen.cpp" />

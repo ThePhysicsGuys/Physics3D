@@ -45,7 +45,7 @@ public:
 	static Resource* selectedResource;
 
 private:
-	static void renderECSNode(Engine::Registry64& registry, Engine::Registry64::entity_type entity);
+	static void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity);
 	static void renderShaderStageInfo(Graphics::ShaderResource* shader, const Graphics::ShaderStage& stage);
 	static void renderTextureInfo(Graphics::Texture* texture);
 	static void renderFontInfo(Graphics::Font* font);

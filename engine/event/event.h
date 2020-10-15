@@ -29,20 +29,20 @@ enum EventCategory : char {
 #define EVENT_CATEGORY(category) \
 	virtual char getCategory() const override { return category; }
 
-class Event {
+struct Event {
 public:
 	bool handled = false;
 
-	virtual EventType getType() const = 0;	
-	virtual char getCategory() const = 0;
-	virtual std::string getName() const = 0;
+	[[nodiscard]] virtual EventType getType() const = 0;
+	[[nodiscard]] virtual char getCategory() const = 0;
+	[[nodiscard]] virtual std::string getName() const = 0;
 
-	inline bool inCategory(char category) const {
+	[[nodiscard]] inline bool inCategory(char category) const {
 		return (category & getCategory()) != 0;
 	}
 
-	inline bool inCategory(const EventCategory& category) const {
-		return inCategory((char) category);
+	[[nodiscard]] inline bool inCategory(const EventCategory& category) const {
+		return inCategory(static_cast<char>(category));
 	}
 };
 
