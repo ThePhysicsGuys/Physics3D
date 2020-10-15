@@ -445,7 +445,6 @@ public:
 		if (!result.second)
 			result.first->second = intrusive_cast<RefCountable>(component);
 
-
 		return component;
 	}
 

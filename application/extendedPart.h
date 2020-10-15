@@ -22,6 +22,7 @@ public:
 	ExtendedPart(const Shape& hitbox, ExtendedPart* attachTo, const CFrame& attach, const PartProperties& properties, const std::string& name = "", const Entity& entity = 0);
 
 	void setMaterial(const Comp::Material& material);
+	void setName(const std::string& name);
 };
 
 };

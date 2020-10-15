@@ -2,18 +2,62 @@
 
 #include <string>
 #include "extendedPart.h"
-#include "../graphics/mesh/indexedMesh.h"
 #include "../engine/visualData.h"
+#include "../physics/math/cframe.h"
 
 namespace P3D::Application {
 
 namespace Comp {
+
+struct Transform : RefCountable {
+	union {
+		ExtendedPart* part;
+		GlobalCFrame* cframe;
+	};
+
+	bool isPartAttached;
+
+	Transform(ExtendedPart* part) : part(part), isPartAttached(true) {
+
+	}
+	
+	template<typename... Args>
+	Transform(Args&&... args) : isPartAttached(false) {
+		this->cframe = new GlobalCFrame(std::forward<Args>(args)...);
+	}
+
+	~Transform() {
+		if (!isPartAttached) {
+			delete cframe;
+		}
+	}
+	
+	void setCFrame(const GlobalCFrame& cframe) {
+		if (isPartAttached) {
+			part->setCFrame(cframe);
+		} else {
+			*this->cframe = cframe;
+		}
+	}
+
+	GlobalCFrame getCFrame() {
+		if (isPartAttached) {
+			return part->getCFrame();
+		} else {
+			return *this->cframe;
+		}
+	}
+};
 
 // The name of an entity
 struct Tag : RefCountable {
 	std::string name;
 
 	Tag(const std::string& name) : name(name) {}
+
+	void setName(const std::string& name) {
+		this->name = name;
+	}
 };
 
 // The model of the entity, as it is being physicsed in the engine 
