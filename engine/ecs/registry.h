@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <type_traits>
 #include <unordered_map>
+#include "../util/typetraits.h"
 #include "../util/intrusivePointer.h"
 
 namespace P3D::Engine {
@@ -42,7 +43,7 @@ struct registry_traits<std::uint16_t> {
 };
 
 /**
- * entity = 16 parent bits, 1§ self bits
+ * entity = 16 parent bits, 16 self bits
  */
 template<>
 struct registry_traits<std::uint32_t> {
@@ -63,36 +64,6 @@ struct registry_traits<std::uint64_t> {
 
 	static constexpr entity_type entity_mask = 0xFFFFFFFF;
 	static constexpr std::size_t parent_shift = 32u;
-};
-
-template<typename Type>
-struct type_index {
-	static Type next() noexcept {
-		static Type value {};
-		return value++;
-	}
-};
-
-template<typename Entity, typename Component = void>
-struct component_index {
-	using traits_type = registry_traits<Entity>;
-	using component_type = typename traits_type::component_type;
-
-	static component_type index() {
-		static const component_type value = type_index<component_type>::next();
-		return value;
-	}
-};
-
-template<typename Entity>
-struct component_index<Entity, void> {
-	using traits_type = registry_traits<Entity>;
-	using component_type = typename traits_type::component_type;
-
-	static component_type count() noexcept {
-		static const component_type value = type_index<component_type>::next();
-		return value;
-	}
 };
 
 template<typename Entity>
@@ -120,6 +91,7 @@ public:
 	using entity_set = std::set<entity_type, entity_compare>;
 	using entity_queue = std::queue<entity_type>;
 	using entity_map = std::unordered_map<entity_type, Ref<RefCountable>>;
+	using type_map = std::unordered_map<component_type, std::string>;
 	using component_vector = std::vector<entity_map*>;
 
 	using component_map_iterator = decltype(std::declval<entity_map>().begin());
@@ -130,33 +102,45 @@ public:
 
 
 	//-------------------------------------------------------------------------------------//
+	// Members                                                                             //
+	//-------------------------------------------------------------------------------------//
+
+private:
+	entity_set entities;
+	component_vector components;
+	type_map type_mapping;
+
+	entity_queue id_queue;
+	entity_type id_counter = null_entity;
+
+	constexpr entity_type nextID() noexcept {
+		return ++id_counter;
+	}
+
+
+	//-------------------------------------------------------------------------------------//
 	// Helper structs                                                                      //
 	//-------------------------------------------------------------------------------------//
 
 private:
-	template<typename... Components>
-	struct unique_components;
-
-	template<typename Component>
-	struct unique_components<Component> {};
-
-	template<typename C1, typename C2, typename... Components>
-	struct unique_components<C1, C2, Components...> :
-		unique_components<C1, C2>,
-		unique_components<C1, Components...>,
-		unique_components<C2, Components...> {
+	template<typename Type>
+	struct type_index {
+		static Type next() noexcept {
+			static Type value {};
+			return value++;
+		}
 	};
 
-	template<typename C1, typename C2>
-	struct unique_components<C1, C2> {
-		static_assert(!std::is_same_v<C1, C2>, "Types must be unique");
+	template<typename Component = void>
+	struct component_index {
+		using traits_type = registry_traits<Entity>;
+		using component_type = typename traits_type::component_type;
+
+		static component_type index() {
+			static const component_type value = type_index<component_type>::next();
+			return value;
+		}
 	};
-
-	template<typename>
-	struct is_template_type : std::false_type {};
-
-	template<template<typename...> typename Type, typename... Components>
-	struct is_template_type<Type<Components...>> : std::true_type {};
 
 	static constexpr entity_type self(const entity_type& entity) noexcept {
 		return static_cast<entity_type>(entity & traits_type::entity_mask);
@@ -168,22 +152,6 @@ private:
 
 	static constexpr entity_type merge(const entity_type& parent, const entity_type& entity) noexcept {
 		return (static_cast<entity_type>(parent) << traits_type::parent_shift) | static_cast<entity_type>(entity);
-	}
-
-	
-	//-------------------------------------------------------------------------------------//
-	// Members                                                                             //
-	//-------------------------------------------------------------------------------------//
-
-private:
-	entity_set entities;
-	component_vector components;
-
-	entity_queue id_queue;
-	entity_type id_counter = null_entity;
-
-	constexpr entity_type nextID() noexcept {
-		return ++id_counter;
 	}
 
 
@@ -248,16 +216,15 @@ public:
 	//-------------------------------------------------------------------------------------//
 
 private:
-	// Separate wrapper type to ensure zero cost when overloading view(view_type<T>)
-	template<typename T>
-	struct view_type {};
+	template<typename Type>
+	struct type {};
 
 public:
 	template<typename... Components>
 	struct conjunction {
 		template<typename Component>
 		static Ref<Component> get(Registry<Entity>* registry, const entity_type& entity) {
-			component_type index = component_index<Entity, Component>::index();
+			component_type index = registry->getComponentIndex<Component>();
 			entity_map* map = registry->components[index];
 
 			auto component_iterator = map->find(self(entity));
@@ -331,7 +298,7 @@ private:
 
 	template<typename Component, typename... Components>
 	void extract_smallest_component(component_type& smallest_component, std::size_t& smallest_size, std::vector<component_type>& other_components) noexcept {
-		component_type current_component = component_index<Entity, Component>::index();
+		component_type current_component = getComponentIndex<Component>();
 		const std::size_t current_size = this->components[current_component]->size();
 
 		if (current_size < smallest_size) {
@@ -349,7 +316,7 @@ private:
 
 	template<typename Component, typename... Components>
 	void insert_entities(entity_set& entities) noexcept {
-		std::size_t component = component_index<Entity, Component>::index();
+		std::size_t component = getComponentIndex<Component>();
 		component_iterator first(this->components[component]->begin());
 		component_iterator last(this->components[component]->end());
 
@@ -382,6 +349,34 @@ private:
 	//-------------------------------------------------------------------------------------//
 
 public:
+
+	/**
+	* Returns the index of the given component
+	*/
+	template<typename Component>
+	[[nodiscard]] component_type getComponentIndex() {
+		component_type index = component_index<Component>::index();
+		if (index >= type_mapping.size())
+			type_mapping.insert(std::make_pair(index, typeid(Component).name()));
+
+		return index;
+	}
+
+	/**
+	* Returns a string view of name of the component corresponding to the given component id
+	*/
+	[[nodiscard]] std::string_view getComponentName(const component_type& component) {
+		return type_mapping.at(component);
+	}
+
+	/**
+	* Returns a string view of the name of the given component
+	*/
+	template<typename Component>
+	[[nodiscard]] std::string_view getComponentName() {
+		return type_mapping.at(getComponentIndex<Component>());
+	}
+
 	/**
 	* Creates a new entity with an empty parent and adds it to the registry
 	*/
@@ -434,7 +429,7 @@ public:
 			return Ref<Component>();
 
 		Ref<Component> component = make_intrusive(new Component(std::forward<Args>(args)...));
-		component_type index = component_index<Entity, Component>::index();
+		component_type index = getComponentIndex<Component>();
 
 		while (index >= components.size())
 			components.push_back(new entity_map());
@@ -457,7 +452,7 @@ public:
 		if (entities_iterator == entities.end())
 			return;
 
-		component_type index = component_index<Entity, Component>::index();
+		component_type index = getComponentIndex<Component>();
 		if (index >= components.size())
 			return;
 
@@ -483,7 +478,7 @@ public:
 		if (entities_iterator == entities.end())
 			return Ref<Component>();
 
-		component_type index = component_index<Entity, Component>::index();
+		component_type index = getComponentIndex<Component>();
 		if (index >= components.size())
 			return Ref<Component>();
 
@@ -504,7 +499,7 @@ public:
 		if (entities_iterator == entities.end())
 			return Ref<Component>();
 
-		component_type index = component_index<Entity, Component>::index();
+		component_type index = getComponentIndex<Component>();
 		while (index >= components.size())
 			components.push_back(new entity_map());
 
@@ -542,7 +537,7 @@ public:
 		if (entities_iterator == entities.end())
 			return false;
 
-		component_type index = component_index<Entity, Component>::index();
+		component_type index = getComponentIndex<Component>();
 		if (index >= components.size())
 			return false;
 
@@ -623,6 +618,10 @@ public:
 		return filter_view<no_type>(first, last, filter);
 	}
 
+	[[nodiscard]] auto getComponents(const entity_type& entity) noexcept {
+		//component_iterator
+	}
+
 
 	//-------------------------------------------------------------------------------------//
 	// Views                                                                               //
@@ -633,13 +632,13 @@ public:
 	*/
 private:
 	template<typename Component, typename... Components>
-	[[nodiscard]] auto view(view_type<conjunction<Component, Components...>>) noexcept {
-		constexpr unique_components<Component, Components...>_;
+	[[nodiscard]] auto view(type<conjunction<Component, Components...>>) noexcept {
+		static_assert(unique_types<Component, Components...>);
 
 		std::vector<component_type> other_components;
 		other_components.reserve(sizeof...(Components));
 
-		component_type smallest_component = component_index<Entity, Component>::index();
+		component_type smallest_component = getComponentIndex<Component>();
 		std::size_t smallest_size = this->components[smallest_component]->size();
 
 		extract_smallest_component<Components...>(smallest_component, smallest_size, other_components);
@@ -665,9 +664,8 @@ private:
 	* Returns an iterator which iterates over all entities having any of the given components
 	*/
 	/*template<typename... Components>
-	[[nodiscard]] auto view(view_type<disjunction<Components...>>) noexcept {
-		constexpr unique_components<Components...>_;
-
+	[[nodiscard]] auto view(type<disjunction<Components...>>) noexcept {
+		static_assert(unique_types<Components...>);
 		entity_set entities = *new entity_set();
 		insert_entities<Components...>(entities);
 
@@ -685,12 +683,13 @@ public:
 	template<typename... Type>
 	[[nodiscard]] auto view() noexcept {
 		if constexpr (sizeof...(Type) == 1)
-			if constexpr (is_template_type<Type...>::value)
-				return view(view_type<Type...>{});
-			else
-				return view(view_type<conjunction<Type...>>{});
-		else
-			return view(view_type<conjunction<Type...>>{});
+			if constexpr (std::is_base_of<RefCountable, Type...>::value)
+				return view(type<conjunction<Type...>>{});
+			else 
+				return view(type<Type...>{});
+		else 
+			return view(type<conjunction<Type...>>{});
+		
 	}
 };
 
@@ -698,4 +697,5 @@ typedef Registry<std::uint8_t>  Registry8;
 typedef Registry<std::uint16_t> Registry16;
 typedef Registry<std::uint32_t> Registry32;
 typedef Registry<std::uint64_t> Registry64;
+	
 };

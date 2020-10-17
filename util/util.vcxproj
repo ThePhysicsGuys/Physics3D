@@ -317,6 +317,7 @@
     <ClInclude Include="systemVariables.h" />
     <ClInclude Include="terminalColor.h" />
     <ClInclude Include="tracker.h" />
+    <ClInclude Include="typetraits.h" />
     <ClInclude Include="valueCycle.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
