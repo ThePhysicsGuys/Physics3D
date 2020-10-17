@@ -13,6 +13,9 @@ mkdir include
 cd include
 
 git clone -b docking https://github.com/ocornut/imgui.git
+cd imgui
+git checkout 95c99aaa4be611716093edcb6b01146ab9483f30
+cd ..
 cp imgui/examples/imgui_impl_opengl3.cpp imgui
 cp imgui/examples/imgui_impl_opengl3.h imgui
 cp imgui/examples/imgui_impl_glfw.cpp imgui
