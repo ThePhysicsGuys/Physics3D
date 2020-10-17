@@ -95,7 +95,7 @@ void GuiLayer::onRender(Engine::Registry64& registry) {
 	Renderer::bindFramebuffer(screen->screenFrameBuffer->getID());
 	beginScene();
 
-	BigFrame::render(registry);
+	Frames::onRender(registry);
 
 	endScene();
 }

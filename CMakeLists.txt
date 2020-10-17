@@ -267,6 +267,11 @@ add_executable(application
   application/view/camera.cpp
   application/view/frames.cpp
   application/view/screen.cpp
+  application/view/debugFrame.cpp
+  application/view/ecsFrame.cpp
+  application/view/propertiesFrame.cpp
+  application/view/resourceFrame.cpp
+  application/view/environmentFrame.cpp
 )
 target_include_directories(application PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/application")
 

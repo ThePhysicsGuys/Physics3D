@@ -10,14 +10,12 @@
 #include "../graphics/texture.h"
 #include "shader/shaders.h"
 
-#include "../graphics/mesh/indexedMesh.h"
 #include "../graphics/mesh/primitive.h"
 #include "../graphics/debug/visualDebug.h"
 #include "../graphics/buffers/frameBuffer.h"
 #include "../engine/options/keyboardOptions.h"
 #include "../input/standardInputHandler.h"
 #include "../graphics/meshLibrary.h"
-#include "../graphics/visualShape.h"
 #include "../worlds.h"
 #include "../engine/event/windowEvent.h"
 #include "../util/resource/resourceManager.h"
@@ -198,7 +196,7 @@ void Screen::onInit() {
 	handler->onFrameBufferResize(event);
 
 	// Init frames
-	BigFrame::onInit(registry);
+	Frames::onInit(registry);
 }
 
 void Screen::onUpdate() {

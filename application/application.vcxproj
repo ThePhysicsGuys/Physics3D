@@ -370,7 +370,13 @@
     <ClInclude Include="picker\ray.h" />
     <ClInclude Include="picker\picker.h" />
     <ClInclude Include="view\camera.h" />
+    <ClInclude Include="view\debugFrame.h" />
+    <ClInclude Include="view\ecsFrame.h" />
+    <ClInclude Include="view\environmentFrame.h" />
     <ClInclude Include="view\frames.h" />
+    <ClInclude Include="view\layerFrame.h" />
+    <ClInclude Include="view\propertiesFrame.h" />
+    <ClInclude Include="view\resourceFrame.h" />
     <ClInclude Include="view\screen.h" />
     <ClInclude Include="worldBuilder.h" />
     <ClInclude Include="worlds.h" />
@@ -415,7 +421,13 @@
     <ClCompile Include="tickerThread.cpp" />
     <ClCompile Include="picker\picker.cpp" />
     <ClCompile Include="view\camera.cpp" />
+    <ClCompile Include="view\debugFrame.cpp" />
+    <ClCompile Include="view\ecsFrame.cpp" />
+    <ClCompile Include="view\environmentFrame.cpp" />
     <ClCompile Include="view\frames.cpp" />
+    <ClCompile Include="view\layerFrame.cpp" />
+    <ClCompile Include="view\propertiesFrame.cpp" />
+    <ClCompile Include="view\resourceFrame.cpp" />
     <ClCompile Include="view\screen.cpp" />
     <ClCompile Include="worldBuilder.cpp" />
     <ClCompile Include="worlds.cpp" />

@@ -1,11 +1,8 @@
 #pragma once
 
-#include <chrono>
-
 #include "../eventHandler.h"
 #include "../util/properties.h"
 #include "../graphics/visualShape.h"
-#include "../engine/visualData.h"
 #include "../engine/event/event.h"
 #include "../engine/layer/layerStack.h"
 #include "../engine/ecs/registry.h"
@@ -44,6 +41,8 @@ public:
 	Graphics::Quad* quad = nullptr;
 
 	Vec3f ray;
+	Engine::Registry64::entity_type intersectedEntity;
+	Engine::Registry64::entity_type selectedEntity;
 	ExtendedPart* intersectedPart = nullptr;
 	ExtendedPart* selectedPart = nullptr;
 	Position intersectedPoint;

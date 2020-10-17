@@ -89,8 +89,9 @@ static Color getAmbientForPartForSelected(Screen* screen, Part* part) {
 	return Color(0, 0, 0, 0);
 }
 
-static Color getAlbedoForPart(Screen* screen, Part* part) {
+static Color getAlbedoForPart(Screen* screen, ExtendedPart* part) {
 	Color computedAmbient = getAmbientForPartForSelected(screen, part);
+	// REPLACE if (part->entity == screen->intersectedEntity)
 	if (part == screen->intersectedPart)
 		computedAmbient += Vec4f(-0.1f, -0.1f, -0.1f, 0);
 

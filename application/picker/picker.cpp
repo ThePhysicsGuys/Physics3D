@@ -92,6 +92,7 @@ void intersectPhysicals(Screen& screen, const Ray& ray) {
 	}
 
 	// Update intersected part
+	// REPLACE screen.intersectedEntity = ...
 	screen.intersectedPart = closestIntersectedPart;
 	screen.intersectedPoint = closestIntersectedPoint;
 
@@ -133,15 +134,17 @@ bool onMousePress(Engine::MousePressEvent& event) {
 		editTools.onMousePress(screen);
 	} else { // Keep current part selected as long as tool is being used
 		// Update selected part
+		// REPLACE screen.selectedEntity = screen.intersectedEntity
 		screen.selectedPart = screen.intersectedPart;
 		screen.selectedPoint = screen.intersectedPoint;
 
 		// Update intersected point if a physical has been intersected and move physical
+		// REPLACE if (screen.intersectedEntity)
 		if (screen.intersectedPart) {
 			screen.world->asyncModification([] () {
 				screen.world->localSelectedPoint = screen.selectedPart->getCFrame().globalToLocal(screen.intersectedPoint);
 				moveGrabbedPhysicalLateral(screen);
-				});
+			});
 		}
 	}
 
