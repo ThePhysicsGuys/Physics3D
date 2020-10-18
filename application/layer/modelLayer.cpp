@@ -160,7 +160,7 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 		VisibilityFilter filter = VisibilityFilter::forWindow(screen->camera.cframe.position, screen->camera.getForwardDirection(), screen->camera.getUpDirection(), screen->camera.fov, screen->camera.aspect, screen->camera.zfar);
 
 		auto view = registry.view<Comp::Model>();
-		for (auto& entity : view) {
+		for (auto entity : view) {
 			Ref<Comp::Model> model = view.get<Comp::Model>(entity);
 			if (!filter(*model->part))
 				continue;	

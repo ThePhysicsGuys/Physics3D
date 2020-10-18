@@ -41,8 +41,8 @@ public:
 	Graphics::Quad* quad = nullptr;
 
 	Vec3f ray;
-	Engine::Registry64::entity_type intersectedEntity;
-	Engine::Registry64::entity_type selectedEntity;
+	Engine::Registry64::entity_type intersectedEntity = 0;
+	Engine::Registry64::entity_type selectedEntity = 0;
 	ExtendedPart* intersectedPart = nullptr;
 	ExtendedPart* selectedPart = nullptr;
 	Position intersectedPoint;

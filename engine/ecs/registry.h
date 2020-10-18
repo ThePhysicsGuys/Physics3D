@@ -7,6 +7,7 @@
 #include <type_traits>
 #include <unordered_map>
 #include "../util/typetraits.h"
+#include "../util/iteratorUtils.h"
 #include "../util/intrusivePointer.h"
 
 namespace P3D::Engine {
@@ -94,8 +95,9 @@ public:
 	using type_map = std::unordered_map<component_type, std::string>;
 	using component_vector = std::vector<entity_map*>;
 
+	using component_vector_iterator = decltype(std::declval<component_vector>().begin());
 	using component_map_iterator = decltype(std::declval<entity_map>().begin());
-	using entity_map_iterator = decltype(std::declval<entity_set>().begin());
+	using entity_set_iterator = decltype(std::declval<entity_set>().begin());
 
 	// Null entity
 	entity_type null_entity = static_cast<entity_type>(0u);
@@ -160,8 +162,6 @@ private:
 	//-------------------------------------------------------------------------------------//
 
 public:
-	struct view_iterator_end {};
-
 	struct component_iterator : component_map_iterator {
 	public:
 		component_iterator() = default;
@@ -173,44 +173,7 @@ public:
 		}
 	};
 
-	template<typename Iterator, typename IteratorEnd, typename Filter>
-	class view_iterator {
-		friend class Registry<Entity>;
-
-	private:
-		Iterator current;
-		Iterator end;
-		Filter filter;
-
-	public:
-		view_iterator() = default;
-		view_iterator(const Iterator& start, const Iterator& end, const Filter& filter) : current(start), end(end), filter(filter) {
-			while (current != end && filter(current))
-				++current;
-		}
-
-		view_iterator& operator++() {
-			do {
-				++current;
-			} while (current != end && filter(current));
-
-			return *this;
-		}
-
-		bool operator!=(IteratorEnd) const {
-			return current != end;
-		}
-
-		decltype(*current)& operator*() const {
-			return *current;
-		}
-
-		bool operator==(Iterator iterator) const {
-			return current == iterator;
-		}
-	};
-
-
+	
 	//-------------------------------------------------------------------------------------//
 	// View types                                                                          //
 	//-------------------------------------------------------------------------------------//
@@ -254,7 +217,7 @@ public:
 	//-------------------------------------------------------------------------------------//
 
 public:
-	template<typename ViewType, typename BeginType, typename EndType = BeginType>
+	template<typename ViewType, typename BeginType, typename EndType = iterator_end>
 	class basic_view {
 	private:
 		Registry<Entity>* registry;
@@ -279,11 +242,11 @@ public:
 		}
 	};
 
-	entity_map_iterator begin() noexcept {
+	entity_set_iterator begin() noexcept {
 		return entities.begin();
 	}
 
-	entity_map_iterator end() noexcept {
+	entity_set_iterator end() noexcept {
 		return entities.end();
 	}
 
@@ -317,6 +280,7 @@ private:
 	template<typename Component, typename... Components>
 	void insert_entities(entity_set& entities) noexcept {
 		std::size_t component = getComponentIndex<Component>();
+
 		component_iterator first(this->components[component]->begin());
 		component_iterator last(this->components[component]->end());
 
@@ -324,23 +288,37 @@ private:
 
 		insert_entities<Components...>(entities);
 	}
-
-	template<typename Iterator, typename Filter>
-	using filtered_view_iterator = view_iterator<Iterator, view_iterator_end, Filter>;
-
+	
 	template<typename ViewType, typename Iterator, typename Filter>
-	using filtered_basic_view = basic_view<ViewType, filtered_view_iterator<Iterator, Filter>, view_iterator_end>;
-
-	template<typename ViewType, typename Iterator, typename Filter>
-	filtered_basic_view<ViewType, Iterator, Filter> filter_view(const Iterator& first, const Iterator& last, const Filter& filter) noexcept {
-		filtered_view_iterator<Iterator, Filter> start(first, last, filter);
-		view_iterator_end stop;
-		return filtered_basic_view<ViewType, Iterator, Filter>(this, start, stop);
+	auto filter_view(const Iterator& first, const Iterator& last, const Filter& filter) noexcept {
+		using iterator_type = filter_iterator<Iterator, iterator_end, Filter>;
+		iterator_type start(first, last, filter);
+		iterator_end stop;
+		return basic_view<ViewType, iterator_type>(this, start, stop);
 	}
 
+	template<typename ViewType, typename Iterator, typename Transform>
+	auto transform_view(const Iterator& first, const Iterator& last, const Transform& transform) noexcept {
+		using iterator_type = transform_iterator<Iterator, iterator_end, Transform>;
+		iterator_type start(first, last, transform);
+		iterator_end stop;
+		return basic_view<ViewType, iterator_type>(this, start, stop);
+	}
+
+	template<typename ViewType, typename Iterator, typename Filter, typename Transform>
+	auto filter_transform_view(const Iterator& first, const Iterator& last, const Filter& filter, const Transform& transform) noexcept {
+		using iterator_type = filter_transform_iterator<Iterator, iterator_end, Filter, Transform>;
+		iterator_type start(first, last, filter, transform);
+		iterator_end stop;
+		return basic_view<ViewType, iterator_type>(this, start, stop);
+	}
+	
 	template<typename ViewType, typename Iterator>
 	auto default_view(const Iterator& first, const Iterator& last) noexcept {
-		return filter_view<ViewType>(first, last, [] (const Iterator&) { return false; });
+		using iterator_type = default_iterator<Iterator, iterator_end>;
+		iterator_type start(first, last);
+		iterator_end stop;
+		return basic_view<ViewType, iterator_type>(this, start, stop);
 	}
 
 
@@ -602,10 +580,10 @@ public:
 	* Returns the children of the given parent entity
 	*/
 	[[nodiscard]] auto getChildren(const entity_type& entity) noexcept {
-		entity_map_iterator first = entities.begin();
-		entity_map_iterator last = entities.end();
+		entity_set_iterator first = entities.begin();
+		entity_set_iterator last = entities.end();
 
-		auto filter = [this, entity] (const entity_map_iterator& iterator) {
+		auto filter = [this, entity] (const entity_set_iterator& iterator) {
 			if (parent(*iterator) != entity)
 				return true;
 
@@ -618,15 +596,10 @@ public:
 		return filter_view<no_type>(first, last, filter);
 	}
 
-	[[nodiscard]] auto getComponents(const entity_type& entity) noexcept {
-		//component_iterator
-	}
-
-
 	//-------------------------------------------------------------------------------------//
 	// Views                                                                               //
 	//-------------------------------------------------------------------------------------//
-
+	
 	/**
 	* Returns an iterator which iterates over all entities having all the given components
 	*/
@@ -644,10 +617,10 @@ private:
 		extract_smallest_component<Components...>(smallest_component, smallest_size, other_components);
 
 		entity_map* map = this->components[smallest_component];
-		component_iterator first(map->begin());
-		component_iterator last(map->end());
+		component_map_iterator first(map->begin());
+		component_map_iterator last(map->end());
 
-		auto filter = [this, other_components] (const component_iterator& iterator) {
+		auto filter = [this, other_components] (const component_map_iterator& iterator) {
 			for (component_type component : other_components) {
 				auto component_iterator = this->components[component]->find(iterator->first);
 				if (component_iterator == this->components[component]->end())
@@ -657,7 +630,11 @@ private:
 			return false;
 		};
 
-		return filter_view<conjunction<Component, Components...>>(first, last, filter);
+		auto transform = [] (const component_map_iterator& iterator) {
+			return iterator->first;
+		};
+
+		return filter_transform_view<conjunction<Component, Components...>>(first, last, filter, transform);
 	}
 
 	/**
@@ -677,6 +654,38 @@ private:
 	}*/
 
 public:
+	/**
+	* Returns a view which iterates over the components of the given entity 
+	*/
+	[[nodiscard]] auto getComponents(const entity_type& entity) noexcept {
+		component_vector_iterator first = components.begin();
+		component_vector_iterator last = components.end();
+
+		auto filter = [entity] (const component_vector_iterator& iterator) {
+			entity_map* map = *iterator;
+
+			return map->find(entity) == map->end();
+		};
+
+		auto transform = [first, entity] (const component_vector_iterator& iterator) {
+			entity_map* map = *iterator;
+			return std::make_pair(std::distance(first, iterator), map->at(entity));
+		};
+
+		return filter_transform_view<no_type>(first, last, filter, transform);
+	}
+
+	/**
+	* Returns a view that iterates over all entities which satisfy the given filter 
+	*/
+	template<typename Filter>
+	[[nodiscard]] auto filter(const Filter& filter) {
+		entity_set_iterator first = entities.begin();
+		entity_set_iterator last = entities.end();
+
+		return filter_view<no_type, entity_set_iterator, Filter>(first, last, filter);
+	}
+	
 	/**
 	* Returns an iterator which iterates over all entities which satisfy the view type
 	*/

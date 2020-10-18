@@ -2,6 +2,8 @@
 
 #include "ecsFrame.h"
 
+#include "application.h"
+#include "screen.h"
 #include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"
 #include "ecs/components.h"
@@ -61,15 +63,14 @@ bool IconTreeNode(void* ptr, ImTextureID texture, ImGuiTreeNodeFlags flags, cons
 	return opened;
 }
 	
-void ECSFrame::renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity) {
-	void* id = (void*) entity;
+void ECSFrame::renderEntity(Engine::Registry64& registry, const Engine::Registry64::entity_type& entity) {
+	void* id = reinterpret_cast<void*>(entity);
 	auto children = registry.getChildren(entity);
-
 	bool leaf = children.begin() == registry.end();
-	ImTextureID texture = (void*) (intptr_t) objectIcon->getID();
-	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth | (leaf ? ImGuiTreeNodeFlags_Leaf : ImGuiTreeNodeFlags_None);
 
 	std::string name = registry.getOr<Comp::Tag>(entity, Comp::Tag(std::to_string(entity))).name;
+	ImTextureID texture = reinterpret_cast<void*>(objectIcon->getID());
+	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth | (leaf ? ImGuiTreeNodeFlags_Leaf : ImGuiTreeNodeFlags_None);
 	bool open = IconTreeNode(id, texture, flags, name.c_str());
 
 	// Render popup
@@ -104,7 +105,7 @@ void ECSFrame::renderEntity(Engine::Registry64& registry, Engine::Registry64::en
 			char* buffer = new char[name.size() + 1];
 			//strcpy(buffer, node->getName().c_str());
 			ImGui::Text("Edit name:");
-			ImGui::InputText("##edit", buffer, IM_ARRAYSIZE(buffer));
+			ImGui::InputText("##edit", buffer, name.size() + 1);
 			if (ImGui::Button("Apply")) {
 				std::string newName(buffer);
 				registry.get<Comp::Tag>(entity)->name = newName;
@@ -117,29 +118,27 @@ void ECSFrame::renderEntity(Engine::Registry64& registry, Engine::Registry64::en
 		// Add
 		if (ImGui::BeginMenu("Add")) {
 			if (ImGui::MenuItem("Entity")) {
-				//node->getTree()->createEntity(node);
+
 			}
 			if (ImGui::MenuItem("Folder")) {
-				//node->getTree()->createGroup(node);
+
 			}
 			ImGui::EndMenu();
 		}
 
 		// Delete
 		if (ImGui::MenuItem("Delete")) {
-			//node->getTree()->removeNode(node, false);
+
 		}
 
 		ImGui::EndPopup();
 	}
 
 	// Render children
-	if (!leaf) {
-		if (open) {
-			for (auto child : children)
-				renderEntity(registry, child);
-			ImGui::TreePop();
-		}
+	if (!leaf && open) {
+		for (auto child : children)
+			renderEntity(registry, child);
+		ImGui::TreePop();
 	}
 
 	if (ImGui::BeginDragDropSource()) {
@@ -173,12 +172,11 @@ void ECSFrame::onRender(Engine::Registry64& registry) {
 	using namespace Engine;
 
 	ImGui::Begin("Tree");
-	
-	for (auto entity : registry) {
-		if (registry.getParent(entity) == registry.null_entity)
-			renderEntity(registry, entity);
-	}
 
+	auto filter = [&registry] (const auto& iterator) { return registry.getParent(*iterator) != 0; };
+	for (auto entity : registry.filter(filter))
+		renderEntity(registry, entity);
+	
 	ImGui::End();
 }
 	

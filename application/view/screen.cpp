@@ -32,10 +32,6 @@
 #include "layer/shadowLayer.h"
 #include "layer/cameraLayer.h"
 
-#include "../physics/geometry/shapeClass.h"
-#include "../engine/meshRegistry.h"
-#include "../engine/ecs/registry.h"
-
 #include "frames.h"
 #include "../util/systemVariables.h"
 

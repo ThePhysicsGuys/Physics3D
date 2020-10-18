@@ -300,6 +300,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="dynamicSerialize.h" />
+    <ClInclude Include="iteratorUtils.h" />
     <ClInclude Include="log.h" />
     <ClInclude Include="fileUtils.h" />
     <ClInclude Include="math\mat3.h" />

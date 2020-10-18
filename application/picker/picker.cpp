@@ -92,7 +92,11 @@ void intersectPhysicals(Screen& screen, const Ray& ray) {
 	}
 
 	// Update intersected part
-	// REPLACE screen.intersectedEntity = ...
+	// REPLACE
+	if (closestIntersectedPart)
+		screen.intersectedEntity = closestIntersectedPart->entity;
+	else
+		screen.intersectedEntity = 0;
 	screen.intersectedPart = closestIntersectedPart;
 	screen.intersectedPoint = closestIntersectedPoint;
 
@@ -134,7 +138,8 @@ bool onMousePress(Engine::MousePressEvent& event) {
 		editTools.onMousePress(screen);
 	} else { // Keep current part selected as long as tool is being used
 		// Update selected part
-		// REPLACE screen.selectedEntity = screen.intersectedEntity
+		// REPLACE
+		screen.selectedEntity = screen.intersectedEntity;
 		screen.selectedPart = screen.intersectedPart;
 		screen.selectedPoint = screen.intersectedPoint;
 
