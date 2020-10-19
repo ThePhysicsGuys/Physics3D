@@ -174,6 +174,18 @@ void Part::setDepth(double newDepth) {
 }
 
 
+void Part::applyForce(Vec3 relativeOrigin, Vec3 force) {
+	Vec3 originOffset = this->getPosition() - this->parent->mainPhysical->getPosition();
+	this->parent->mainPhysical->applyForce(originOffset + relativeOrigin, force);
+}
+void Part::applyForceAtCenterOfMass(Vec3 force) {
+	Vec3 originOffset = this->getCenterOfMass() - this->parent->mainPhysical->getPosition();
+	this->parent->mainPhysical->applyForce(originOffset, force);
+}
+void Part::applyMoment(Vec3 moment) {
+	this->parent->mainPhysical->applyMoment(moment);
+}
+
 
 struct PairLess {
 	inline bool operator()(std::pair<WorldLayer*, Part*> first, std::pair<WorldLayer*, Part*> snd) const {

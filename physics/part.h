@@ -101,6 +101,10 @@ public:
 	void setHeight(double newHeight);
 	void setDepth(double newDepth);
 
+	void applyForce(Vec3 relativeOrigin, Vec3 force);
+	void applyForceAtCenterOfMass(Vec3 force);
+	void applyMoment(Vec3 moment);
+
 	void ensureHasParent();
 
 	void attach(Part* other, const CFrame& relativeCFrame);
