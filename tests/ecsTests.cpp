@@ -6,7 +6,7 @@
 
 TEST_CASE(idGeneration) {
 	using namespace P3D::Engine;
-	Registry8 registry;
+	Registry16 registry;
 	auto id1 = registry.create();
 	auto id2 = registry.create();
 	registry.destroy(id1);
@@ -17,7 +17,7 @@ TEST_CASE(idGeneration) {
 
 TEST_CASE(componentGeneration) {
 	using namespace P3D::Engine;
-	Registry8 registry;
+	Registry16 registry;
 	auto id = registry.create();
 
 	struct A : public RefCountable {};
@@ -33,7 +33,7 @@ TEST_CASE(componentGeneration) {
 
 TEST_CASE(componentAccess) {
 	using namespace P3D::Engine;
-	Registry8 registry;
+	Registry16 registry;
 	auto id = registry.create();
 
 	struct A : public RefCountable {
@@ -55,7 +55,7 @@ TEST_CASE(viewTest) {
 	struct C : public RefCountable {};
 
 	using namespace P3D::Engine;
-	Registry8 registry;
+	Registry16 registry;
 	auto id1 = registry.create();
 	auto id2 = registry.create();
 	auto id3 = registry.create();
@@ -87,7 +87,7 @@ TEST_CASE(viewTest) {
 
 TEST_CASE(entityParent) {
 	using namespace P3D::Engine;
-	Registry8 registry;
+	Registry16 registry;
 	auto id1 = registry.create();
 	auto parent = registry.create();
 
@@ -100,7 +100,7 @@ TEST_CASE(entityParent) {
 
 TEST_CASE(getChildren) {
 	using namespace P3D::Engine;
-	Registry8 registry;
+	Registry16 registry;
 	auto id1 = registry.create();
 	auto id2 = registry.create();
 	auto parent = registry.create();
@@ -118,7 +118,7 @@ TEST_CASE(getChildren) {
 
 TEST_CASE(getFromView) {
 	using namespace P3D::Engine;
-	Registry8 registry;
+	Registry16 registry;
 	auto id = registry.create();
 
 	struct A : public RefCountable {

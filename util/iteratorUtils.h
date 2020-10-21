@@ -43,14 +43,14 @@ private:
 public:
 	filter_iterator() = default;
 	filter_iterator(const Iterator& start, const Iterator& end, const Filter& filter) : current(start), end(end), filter(filter) {
-		while (current != end && filter(current))
+		while (current != end && !filter(current))
 			++current;
 	}
 
 	filter_iterator& operator++() {
 		do {
 			++current;
-		} while (current != end && filter(current));
+		} while (current != end && !filter(current));
 
 		return *this;
 	}
@@ -111,14 +111,14 @@ private:
 public:
 	filter_transform_iterator() = default;
 	filter_transform_iterator(const Iterator& start, const Iterator& end, const Filter& filter, const Transform& transform) : current(start), end(end), filter(filter), transform(transform) {
-		while (current != end && filter(current))
+		while (current != end && !filter(current))
 			++current;
 	}
 
 	filter_transform_iterator& operator++() {
 		do {
 			++current;
-		} while (current != end && filter(current));
+		} while (current != end && !filter(current));
 
 		return *this;
 	}
