@@ -311,6 +311,7 @@
     <ClCompile Include="gui\container.cpp" />
     <ClCompile Include="gui\gui.cpp" />
     <ClCompile Include="gui\guiUtils.cpp" />
+    <ClCompile Include="gui\imgui\imguiStyle.cpp" />
     <ClCompile Include="gui\layout.cpp" />
     <ClCompile Include="meshLibrary.cpp" />
     <ClCompile Include="mesh\abstractMesh.cpp" />
@@ -366,6 +367,7 @@
     <ClInclude Include="gui\container.h" />
     <ClInclude Include="gui\gui.h" />
     <ClInclude Include="gui\guiUtils.h" />
+    <ClInclude Include="gui\imgui\imguiStyle.h" />
     <ClInclude Include="gui\imgui\imguiExtension.h" />
     <ClInclude Include="gui\layout.h" />
     <ClInclude Include="gui\orderedVector.h" />

@@ -7,6 +7,7 @@
 #include "extendedPart.h"
 #include "ecs/components.h"
 #include "imgui/imgui.h"
+#include "../graphics/gui/imgui/imguiExtension.h"
 #include "../physics/misc/toString.h"
 #include "../physics/physical.h"
 
@@ -14,95 +15,185 @@ namespace P3D::Application {
 
 Vec3f PropertiesFrame::position = Vec3f(0, 0, 0);
 
+#define ENTITY_DISPATCH_START(index) \
+	if ((index) == -1) \
+		continue
+	
+#define ENTITY_DISPATCH(index, type, registry, component) \
+	else if ((index) == (registry).getComponentIndex<type>()) \
+		renderEntity(registry, index, intrusive_cast<type>(component))
+	
+#define ENTITY_DISPATCH_END(index, registry, component) \
+	else \
+		renderEntity(registry, index, component)
+
+#define ECS_PROPERTY_FRAME_START(registry, index) \
+	std::string label((registry).getComponentName(index)); \
+	if (ImGui::CollapsingHeader(label.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) { \
+		ImGui::Columns(2)
+
+#define ECS_PROPERTY_FRAME_END \
+		ImGui::Columns(1); \
+	}
+	
+#define ECS_PROPERTY_IF(text, widget, code) \
+	ImGui::TextUnformatted(text); \
+	ImGui::NextColumn(); \
+	ImGui::SetNextItemWidth(-1); \
+	if (widget) { \
+		code \
+	}; \
+	ImGui::NextColumn()
+
+#define ECS_PROPERTY(text, widget) \
+	ImGui::TextUnformatted(text); \
+	ImGui::NextColumn(); \
+	ImGui::SetNextItemWidth(-1); \
+	widget; \
+	ImGui::NextColumn()
+
+#define ECS_TITLE(text, newline) \
+	if (newline) { \
+		ECS_PROPERTY("", ); \
+	} \
+	ImGui::TextColored(ImVec4(0.28f, 0.56f, 1.00f, 1.00f), text); \
+	ImGui::NextColumn(); \
+	ImGui::SetNextItemWidth(-1); \
+	ImGui::NextColumn()
+	
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const Ref<RefCountable>& component) {
+	std::string label(registry.getComponentName(index));
+
+	ImGui::CollapsingHeader(label.c_str(), ImGuiTreeNodeFlags_Leaf);
+}
+
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const Ref<Comp::Model>& component) {
+	ECS_PROPERTY_FRAME_START(registry, index);
+
+	ExtendedPart* selectedPart = component->part;
+	
+	ECS_PROPERTY("Velocity:", ImGui::Text(str(selectedPart->getMotion().getVelocity()).c_str()));
+	ECS_PROPERTY("Acceleration:", ImGui::Text(str(selectedPart->getMotion().getAcceleration()).c_str()));
+	ECS_PROPERTY("Angular velocity:", ImGui::Text(str(selectedPart->getMotion().getAngularVelocity()).c_str()));
+	ECS_PROPERTY("Angular acceleration:", ImGui::Text(str(selectedPart->getMotion().getAngularAcceleration()).c_str()));
+	ECS_PROPERTY("Mass:", ImGui::Text(str(selectedPart->getMass()).c_str()));
+	ECS_PROPERTY("Friction:", ImGui::Text(str(selectedPart->properties.friction).c_str()));
+	ECS_PROPERTY("Density:", ImGui::Text(str(selectedPart->properties.density).c_str()));
+	ECS_PROPERTY("Bouncyness:", ImGui::Text(str(selectedPart->properties.bouncyness).c_str()));
+	ECS_PROPERTY("Conveyor:", ImGui::Text(str(selectedPart->properties.conveyorEffect).c_str()));
+	ECS_PROPERTY("Inertia:", ImGui::Text(str(selectedPart->getInertia()).c_str()));
+
+	if (selectedPart->parent != nullptr) {
+		const MotorizedPhysical* physical = selectedPart->parent->mainPhysical;
+		
+		ECS_TITLE("Physical Info:", true);
+		ECS_PROPERTY("Total impulse:", ImGui::Text(str(physical->getTotalImpulse()).c_str()));
+		ECS_PROPERTY("Total angular momentum:", ImGui::Text(str(physical->getTotalAngularMomentum()).c_str()));
+		ECS_PROPERTY("Motion of COM:", ImGui::Text(str(physical->getMotionOfCenterOfMass()).c_str()));
+	}
+
+	static volatile ExtendedPart* sp = nullptr;
+	if (sp != nullptr) sp = selectedPart;
+
+	ECS_PROPERTY_IF("Debug part:", ImGui::Button("Debug"), 
+		Log::debug("Debugging part %d", reinterpret_cast<uint64_t>(sp));
+		P3D_DEBUGBREAK;
+	);
+	
+	ECS_PROPERTY_FRAME_END;
+}
+
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const Ref<Comp::Tag>& component) {
+	ECS_PROPERTY_FRAME_START(registry, index);
+	
+	ECS_PROPERTY("Name:", ImGui::Text(component->name.c_str()));
+	
+	ECS_PROPERTY_FRAME_END;
+}
+
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const Ref<Comp::Mesh>& component) {
+	ECS_PROPERTY_FRAME_START(registry, index);
+
+	ECS_PROPERTY("ID:", ImGui::Text(str(component->id).c_str()));
+	ECS_PROPERTY("Mode:", ImGui::Text(str(component->mode).c_str()));
+	ECS_PROPERTY("Normals:", ImGui::Text(component->hasNormals ? "Yes" : "No"));
+	ECS_PROPERTY("UVs:", ImGui::Text(component->hasUVs ? "Yes" : "No"));
+
+	ECS_PROPERTY_FRAME_END;
+}
+
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const Ref<Comp::Material>& component) {
+	ECS_PROPERTY_FRAME_START(registry, index);
+
+	ECS_PROPERTY("Albedo", ImGui::ColorEdit4("##Albedo", component->albedo.data));
+	ECS_PROPERTY("Metalness", ImGui::SliderFloat("##Metalness", &component->metalness, 0, 1));
+	ECS_PROPERTY("Roughness", ImGui::SliderFloat("##Roughness", &component->roughness, 0, 1));
+	ECS_PROPERTY("Ambient occlusion", ImGui::SliderFloat("##AO", &component->ao, 0, 1));
+
+	ECS_PROPERTY_FRAME_END;
+}
+
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const Ref<Comp::Transform>& component) {
+
+	ECS_PROPERTY_FRAME_START(registry, index);
+	
+	GlobalCFrame frame = component->getCFrame();
+	Vec3f position = castPositionToVec3f(frame.getPosition());
+	Mat3f rotation = frame.getRotation().asRotationMatrix();
+	
+	ECS_PROPERTY_IF("Position:", ImGui::InputFloat3("##Position", position.data, 3),
+		frame.position = castVec3fToPosition(position);
+		component->setCFrame(frame);
+	);
+
+	ECS_PROPERTY_IF("Rotation:", ImGui::InputFloat3("##Rotation1", rotation.data, 0),
+		//frame.rotation = Rotation(rotation);
+		component->setCFrame(frame);
+	);
+
+	ECS_PROPERTY_IF("", ImGui::InputFloat3("##Rotation2", rotation.data + 3, 0),
+		//frame.rotation = Rotation(rotation);
+		component->setCFrame(frame);
+	);
+
+	ECS_PROPERTY_IF("", ImGui::InputFloat3("##Rotation3", rotation.data + 6, 0),
+		//frame.rotation = Rotation(rotation);
+		component->setCFrame(frame);
+	);
+	
+	//ImGui::GetWindowDrawList()->AddRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), IM_COL32(255, 255, 255, 255));
+	ECS_PROPERTY_FRAME_END;
+
+}
+	
 void PropertiesFrame::onInit(Engine::Registry64& registry) {
 	
 }
 
 void PropertiesFrame::onRender(Engine::Registry64& registry) {
 	ImGui::Begin("Properties");
+
+	if (screen.selectedEntity) {
+		auto components = registry.getComponents(screen.selectedEntity);
+		for (auto [index, component] : components) {
+			ENTITY_DISPATCH_START(index);
+			ENTITY_DISPATCH(index, Comp::Tag, registry, component);
+			ENTITY_DISPATCH(index, Comp::Transform, registry, component);
+			ENTITY_DISPATCH(index, Comp::Model, registry, component);
+			ENTITY_DISPATCH(index, Comp::Mesh, registry, component);
+			ENTITY_DISPATCH(index, Comp::Material, registry, component);
+			ENTITY_DISPATCH_END(index, registry, component);
+		}
+	} else {
+		std::string label = "Select an entity to see properties";
+		auto [wx, wy] = ImGui::GetContentRegionAvail();
+		auto [tx, ty] = ImGui::CalcTextSize(label.c_str());
+		auto [cx, cy] = ImGui::GetCursorPos();
+		ImVec2 cursor = ImVec2(cx + (wx - tx) / 2.0f, cy + (wy - ty) / 2.0f);
+		ImGui::SetCursorPos(cursor);
+		ImGui::Text(label.c_str());
+	}
 	
-	ExtendedPart* sp = screen.selectedPart;
-
-	ImGui::SetNextTreeNodeOpen(true);
-	if (ImGui::TreeNode("General")) {
-		std::string name = registry.getOr<Comp::Tag>((sp) ? sp->entity : 0, (sp) ? std::to_string(sp->entity) : "-").name;
-		ImGui::Text("Name: %s", name.c_str());
-		//ImGui::Text("Mesh ID: %s", (sp) ? str(sp->visualData.id).c_str() : "-");
-
-		ImGui::TreePop();
-	}
-
-	ImGui::SetNextTreeNodeOpen(true);
-	if (ImGui::TreeNode("Physical")) {
-		if (sp) {
-			// Position
-			position = castPositionToVec3(sp->getPosition());
-			if (ImGui::InputFloat3("Position: ", position.data, 3)) {
-				GlobalCFrame frame = sp->getCFrame();
-				frame.position = castVec3fToPosition(position);
-				sp->setCFrame(frame);
-			}
-		} else {
-			// Position
-			position = Vec3f(0, 0, 0);
-			ImGui::InputFloat3("Position", position.data, 3, ImGuiInputTextFlags_ReadOnly);
-		}
-
-		ImGui::Text("Velocity: %s", (sp) ? str(sp->getMotion().getVelocity()).c_str() : "-");
-		ImGui::Text("Acceleration: %s", (sp) ? str(sp->getMotion().getAcceleration()).c_str() : "-");
-		ImGui::Text("Angular velocity: %s", (sp) ? str(sp->getMotion().getAngularVelocity()).c_str() : "-");
-		ImGui::Text("Angular acceleration: %s", (sp) ? str(sp->getMotion().getAngularAcceleration()).c_str() : "-");
-		ImGui::Text("Mass: %s", (sp) ? str(sp->getMass()).c_str() : "-");
-		ImGui::Text("Friction: %s", (sp) ? str(sp->properties.friction).c_str() : "-");
-		ImGui::Text("Density: %s", (sp) ? str(sp->properties.density).c_str() : "-");
-		ImGui::Text("Bouncyness: %s", (sp) ? str(sp->properties.bouncyness).c_str() : "-");
-		ImGui::Text("Conveyor: %s", (sp) ? str(sp->properties.conveyorEffect).c_str() : "-");
-		ImGui::Text("Inertia: %s", (sp) ? str(sp->getInertia()).c_str() : "-");
-
-
-		if (sp != nullptr && sp->parent != nullptr) {
-			const MotorizedPhysical* phys = sp->parent->mainPhysical;
-			ImGui::Text("Physical Info");
-
-			ImGui::Text("Total impulse: %s", str(phys->getTotalImpulse()).c_str());
-			ImGui::Text("Total angular momentum: %s", str(phys->getTotalAngularMomentum()).c_str());
-			ImGui::Text("motion of COM: %s", str(phys->getMotionOfCenterOfMass()).c_str());
-		}
-
-		static volatile ExtendedPart* selectedPart = nullptr;
-		if (sp != nullptr) {
-			selectedPart = sp;
-		}
-
-		if (ImGui::Button("Debug This Part")) {
-			Log::debug("Debugging part %d", reinterpret_cast<uint64_t>(selectedPart));
-#ifdef _MSC_VER
-			__debugbreak();
-#else
-			Log::warn("Debug breaking is not supported on non-linux platforms");
-#endif
-		}
-
-		ImGui::TreePop();
-		}
-
-	ImGui::SetNextTreeNodeOpen(true);
-	if (ImGui::TreeNode("Material")) {
-		if (sp) {
-			Ref<Comp::Material> material = registry.getOrAdd<Comp::Material>(sp->entity);
-			ImGui::ColorEdit4("Albedo", material->albedo.data);
-			ImGui::SliderFloat("Metalness", &material->metalness, 0, 1);
-			ImGui::SliderFloat("Roughness", &material->roughness, 0, 1);
-			ImGui::SliderFloat("Ambient occlusion", &material->ao, 0, 1);
-			//if (ImGui::Button(sp ? (sp->renderMode == Renderer::FILL ? "Render mode: fill" : "Render mode: wireframe") : "l"))
-			//	if (sp) sp->renderMode = sp->renderMode == Renderer::FILL ? Renderer::WIREFRAME : Renderer::FILL;
-		} else {
-			ImGui::Text("No part selected");
-		}
-
-		ImGui::TreePop();
-	}
-
 	ImGui::End();
 }
 	

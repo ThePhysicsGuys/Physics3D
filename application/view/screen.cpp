@@ -142,17 +142,17 @@ void Screen::onInit() {
 	Engine::KeyboardOptions::load(properties);
 
 	// Library init
-	Graphics::Library::onInit();
+	Library::onInit();
 
 	// InputHandler init
-	handler = new StandardInputHandler(Graphics::GLFW::getCurrentContext(), *this);
+	handler = new StandardInputHandler(GLFW::getCurrentContext(), *this);
 
 	// Screen size init
-	dimension = Graphics::GLFW::getWindowSize();
+	dimension = GLFW::getWindowSize();
 
 	// Framebuffer init
-	quad = new Graphics::Quad();
-	screenFrameBuffer = new Graphics::FrameBuffer(dimension.x, dimension.y);
+	quad = new Quad();
+	screenFrameBuffer = new FrameBuffer(dimension.x, dimension.y);
 
 	// GShader init
 	Shaders::onInit();
@@ -217,7 +217,7 @@ void Screen::onEvent(Engine::Event& event) {
 
 void Screen::onRender() {
 	using namespace Graphics;
-	using namespace Graphics::Renderer;
+	using namespace Renderer;
 
 	// Set default settings
 	//defaultSettings(0);

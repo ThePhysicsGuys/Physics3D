@@ -89,10 +89,10 @@ void GuiLayer::onEvent(Engine::Registry64& registry, Engine::Event& event) {
 
 void GuiLayer::onRender(Engine::Registry64& registry) {
 	using namespace Graphics;
-	using namespace Graphics::Renderer;
+	using namespace Renderer;
 	Screen* screen = static_cast<Screen*>(this->ptr);
 	
-	Renderer::bindFramebuffer(screen->screenFrameBuffer->getID());
+	bindFramebuffer(screen->screenFrameBuffer->getID());
 	beginScene();
 
 	Frames::onRender(registry);

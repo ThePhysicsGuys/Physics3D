@@ -15,28 +15,37 @@ namespace P3D::Application {
 Graphics::TextureResource* folderIcon;
 Graphics::TextureResource* objectIcon;
 
-bool IconTreeNode(void* ptr, ImTextureID texture, ImGuiTreeNodeFlags flags, const char* label) {
+bool IconTreeNode(Engine::Registry64& registry, Engine::Registry64::entity_type entity, ImTextureID texture, ImGuiTreeNodeFlags flags, const char* label) {
 	ImGuiContext& g = *GImGui;
 	ImGuiWindow* window = g.CurrentWindow;
 
-	ImU32 id = window->GetID(ptr);
+	ImU32 id = window->GetID(entity);
 	ImVec2 pos = window->DC.CursorPos;
 	ImRect button(pos, ImVec2(pos.x + ImGui::GetContentRegionAvail().x, pos.y + g.FontSize + g.Style.FramePadding.y * 2));
+
 	bool opened = ImGui::TreeNodeBehaviorIsOpen(id);
 	bool leaf = (flags & ImGuiTreeNodeFlags_Leaf) != 0;
 
 	bool hovered, held;
-	if (ImGui::ButtonBehavior(button, id, &hovered, &held, true))
+	if (ImGui::ButtonBehavior(button, id, &hovered, &held, true)) {
+		screen.selectedEntity = entity;
+		
+		Ref<Comp::Model> model = registry.get<Comp::Model>(entity);
+		if (model.valid())
+			screen.selectedPart = model->part;
+		
 		if (!leaf)
 			window->DC.StateStorage->SetInt(id, opened ? 0 : 1);
+	}
 
+	bool selected = screen.selectedEntity == entity;
 	ImU32 color = ImGui::GetColorU32(ImGuiCol_Button);
-	if (held)
+	if (held || selected)
 		color = ImGui::GetColorU32(ImGuiCol_ButtonActive);
 	else if (hovered)
 		color = ImGui::GetColorU32(ImGuiCol_ButtonHovered);
 
-	if (hovered || held)
+	if (hovered || held || selected)
 		window->DrawList->AddRectFilled(button.Min, button.Max, color);
 
 	// Icon
@@ -64,14 +73,13 @@ bool IconTreeNode(void* ptr, ImTextureID texture, ImGuiTreeNodeFlags flags, cons
 }
 	
 void ECSFrame::renderEntity(Engine::Registry64& registry, const Engine::Registry64::entity_type& entity) {
-	void* id = reinterpret_cast<void*>(entity);
 	auto children = registry.getChildren(entity);
 	bool leaf = children.begin() == registry.end();
 
 	std::string name = registry.getOr<Comp::Tag>(entity, Comp::Tag(std::to_string(entity))).name;
 	ImTextureID texture = reinterpret_cast<void*>(objectIcon->getID());
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth | (leaf ? ImGuiTreeNodeFlags_Leaf : ImGuiTreeNodeFlags_None);
-	bool open = IconTreeNode(id, texture, flags, name.c_str());
+	bool open = IconTreeNode(registry, entity, texture, flags, name.c_str());
 
 	// Render popup
 	if (ImGui::BeginPopupContextItem()) {
@@ -141,7 +149,7 @@ void ECSFrame::renderEntity(Engine::Registry64& registry, const Engine::Registry
 		ImGui::TreePop();
 	}
 
-	if (ImGui::BeginDragDropSource()) {
+	/*if (ImGui::BeginDragDropSource()) {
 		// check sizeof later
 		ImGui::SetDragDropPayload("ECS_NODE", id, sizeof(id));
 
@@ -159,7 +167,7 @@ void ECSFrame::renderEntity(Engine::Registry64& registry, const Engine::Registry
 			//Engine::Node* source = static_cast<Engine::Node*>(payload->Data);
 		}
 		ImGui::EndDragDropTarget();
-	}
+	}*/
 }
 
 void ECSFrame::onInit(Engine::Registry64& registry) {
@@ -173,9 +181,12 @@ void ECSFrame::onRender(Engine::Registry64& registry) {
 
 	ImGui::Begin("Tree");
 
-	auto filter = [&registry] (const auto& iterator) { return registry.getParent(*iterator) != 0; };
+	auto filter = [&registry] (const Registry64::entity_set_iterator& iterator) {
+		return registry.getParent(*iterator) == 0;
+	};
+	
 	for (auto entity : registry.filter(filter))
-		renderEntity(registry, entity);
+		renderEntity(registry, registry.getSelf(entity));
 	
 	ImGui::End();
 }

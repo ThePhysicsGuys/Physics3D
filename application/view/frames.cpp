@@ -7,6 +7,7 @@
 #include "debugFrame.h"
 #include "environmentFrame.h"
 #include "propertiesFrame.h"
+#include "imgui/imgui.h"
 
 namespace P3D::Application {
 
