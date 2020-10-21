@@ -13,11 +13,11 @@
 #include "../graphics/buffers/frameBuffer.h"
 #include "../graphics/renderer.h"
 #include "../util/resource/resourceManager.h"
-#include "../graphics/resource/textureResource.h"
 #include "../engine/event/windowEvent.h"
 #include "../application/input/standardInputHandler.h"
 #include "../graphics/gui/gui.h"
 #include "../physics/misc/toString.h"
+#include "../graphics/gui/imgui/imguiStyle.h"
 
 namespace P3D::Application {
 
@@ -32,14 +32,8 @@ void ImGuiLayer::onInit(Engine::Registry64& registry) {
 	//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoTaskBarIcons;
 	//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
 
-	ImGui::StyleColorsDark();
-
-	ImGuiStyle& style = ImGui::GetStyle();
-	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-		style.WindowRounding = 0.0f;
-		style.Colors[ImGuiCol_WindowBg].w = 1.0f;
-	}
-
+	Graphics::setupImGuiStyle();
+	
 	GLFWwindow* window = Graphics::GLFW::getCurrentContext();
 
 	// Setup Platform/Renderer bindings
@@ -71,12 +65,14 @@ void ImGuiLayer::onRender(Engine::Registry64& registry) {
 	ImVec2 size = ImVec2(max.x - min.x, max.y - min.y);
 	min = ImVec2(min.x + pos.x, min.y + pos.y);
 	max = ImVec2(max.x + pos.x, max.y + pos.y);
-	ImGui::GetForegroundDrawList()->AddRect(min, max, IM_COL32(255, 255, 0, 255));
+	//ImGui::GetForegroundDrawList()->AddRect(min, max, IM_COL32(255, 255, 0, 255));
 	handler->viewport = Vec4(min.x, min.y, size.x, size.y);
 
 	Graphics::Texture* texture = screen->screenFrameBuffer->texture;
 	ImGui::Image((void*) texture->getID(), size, ImVec2(0, 1), ImVec2(1, 0));
 	ImGui::End();
+
+	Graphics::renderImGuiStyleEditor();
 
 	if (Graphics::GUI::windowInfo.dimension.x != size.x || Graphics::GUI::windowInfo.dimension.y != size.y) {
 		Engine::FrameBufferResizeEvent event(size.x, size.y);

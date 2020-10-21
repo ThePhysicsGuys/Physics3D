@@ -174,6 +174,7 @@ add_library(graphics STATIC
   graphics/gui/gui.cpp
   graphics/gui/guiUtils.cpp
   graphics/gui/layout.cpp
+  graphics/gui/imgui/imguiStyle.cpp
 
   graphics/mesh/abstractMesh.cpp
   graphics/mesh/arrayMesh.cpp
@@ -268,6 +269,7 @@ add_executable(application
   application/view/frames.cpp
   application/view/screen.cpp
   application/view/debugFrame.cpp
+  application/view/layerFrame.cpp
   application/view/ecsFrame.cpp
   application/view/propertiesFrame.cpp
   application/view/resourceFrame.cpp
