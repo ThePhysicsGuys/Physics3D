@@ -101,7 +101,7 @@ public:
 	using entity_set_iterator = decltype(std::declval<entity_set>().begin());
 
 	// Null entity
-	entity_type null_entity = static_cast<entity_type>(0u);
+	inline static entity_type null_entity = static_cast<entity_type>(0u);
 
 
 	//-------------------------------------------------------------------------------------//
@@ -379,14 +379,14 @@ public:
 	/**
 	 * Creates a new entity with an empty parent and adds it to the registry
 	 */
-	[[nodiscard]] entity_type create() noexcept {
+	[[nodiscard]] entity_type create(const entity_type& parent = null_entity) noexcept {
 		representation_type id;
 		if (id_queue.empty()) {
-			id = merge(null_entity, nextID());
+			id = merge(parent, nextID());
 		} else {
 			entity_type lastID = id_queue.front();
 
-			id = merge(null_entity, lastID);
+			id = merge(parent, lastID);
 
 			id_queue.pop();
 		}
@@ -595,7 +595,7 @@ public:
 	/**
 	 * Sets the parent of the given entity to the given parent, returns true if successful, returns false if the entity does not exist.
 	 */
-	[[nodiscard]] bool setParent(const entity_type& entity, const entity_type& parent) noexcept {
+	bool setParent(const entity_type& entity, const entity_type& parent) noexcept {
 		auto entity_iterator = entities.find(static_cast<representation_type>(entity));
 		if (entity_iterator == entities.end())
 			return false;

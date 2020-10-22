@@ -16,11 +16,11 @@ void init();
 void createDominoAt(const GlobalCFrame& cframe);
 void makeDominoStrip(int dominoCount, Position dominoStart, Vec3 dominoOffset);
 void makeDominoTower(int floors, int circumference, Position origin);
-void buildTerrain(double width, double depth);
-void buildCar(const GlobalCFrame& location);
-void buildFloor(double width, double depth);
-void buildFloorAndWalls(double width, double depth, double wallHeight);
-void buildConveyor(double width, double length, const GlobalCFrame& cframe, double speed);
+void buildTerrain(double width, double depth, int folder = 0);
+void buildCar(const GlobalCFrame& location, int folder = 0);
+void buildFloor(double width, double depth, int folder = 0);
+void buildFloorAndWalls(double width, double depth, double wallHeight, int folder = 0);
+void buildConveyor(double width, double length, const GlobalCFrame& cframe, double speed, int folder = 0);
 
 struct HollowBoxParts {
 	ExtendedPart* bottom;
@@ -40,7 +40,7 @@ struct SpiderFactory {
 
 	SpiderFactory(double spiderSize, int legCount);
 
-	void buildSpider(const GlobalCFrame& spiderPosition);
+	void buildSpider(const GlobalCFrame& spiderPosition, int folder = 0);
 };
 }
 
