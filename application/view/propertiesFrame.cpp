@@ -29,7 +29,11 @@ Vec3f PropertiesFrame::position = Vec3f(0, 0, 0);
 
 #define ECS_PROPERTY_FRAME_START(registry, index) \
 	std::string label((registry).getComponentName(index)); \
-	if (ImGui::CollapsingHeader(label.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) { \
+	bool open = ImGui::CollapsingHeader(label.c_str(), ImGuiTreeNodeFlags_DefaultOpen); \
+	/*ImGui::SameLine(ImGui::GetWindowWidth() - 25.0f);*/ \
+	/*if (ImGui::Button("+", ImVec2(25.0f, 0)))*/ \
+		/*ImGui::OpenPopup("ComponentSettings");*/ \
+	if (open) { \
 		ImGui::Columns(2)
 
 #define ECS_PROPERTY_FRAME_END \
@@ -136,32 +140,30 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_ty
 void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const Ref<Comp::Transform>& component) {
 
 	ECS_PROPERTY_FRAME_START(registry, index);
-	
+
 	GlobalCFrame frame = component->getCFrame();
 	Vec3f position = castPositionToVec3f(frame.getPosition());
-	Mat3f rotation = frame.getRotation().asRotationMatrix();
+	Vec3f rotation = frame.getRotation().asRotationVector();
+	bool part_attached = component->isPartAttached;
+	ExtendedPart* part = component->isPartAttached ? component->part : nullptr;
+	DiagonalMat3f scale = part->hitbox.scale;
 	
-	ECS_PROPERTY_IF("Position:", ImGui::InputFloat3("##Position", position.data, 3),
+	ECS_PROPERTY_IF("Position:", ImGui::InputVec3("Position", position.data, 0),
 		frame.position = castVec3fToPosition(position);
 		component->setCFrame(frame);
 	);
 
-	ECS_PROPERTY_IF("Rotation:", ImGui::InputFloat3("##Rotation1", rotation.data, 0),
-		//frame.rotation = Rotation(rotation);
+	ECS_PROPERTY_IF("Rotation:", ImGui::InputVec3("Rotation", rotation.data, 0, 0.01f),
+		frame.rotation = Rotation::fromRotationVec(rotation);
 		component->setCFrame(frame);
 	);
 
-	ECS_PROPERTY_IF("", ImGui::InputFloat3("##Rotation2", rotation.data + 3, 0),
-		//frame.rotation = Rotation(rotation);
-		component->setCFrame(frame);
-	);
-
-	ECS_PROPERTY_IF("", ImGui::InputFloat3("##Rotation3", rotation.data + 6, 0),
-		//frame.rotation = Rotation(rotation);
-		component->setCFrame(frame);
-	);
+	if (part_attached) {
+		ECS_PROPERTY_IF("Scale:", ImGui::InputVec3("Scale", scale.data, 0, 0.01f),
+			part->hitbox.scale = scale;
+		);
+	}
 	
-	//ImGui::GetWindowDrawList()->AddRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), IM_COL32(255, 255, 255, 255));
 	ECS_PROPERTY_FRAME_END;
 
 }
@@ -172,7 +174,7 @@ void PropertiesFrame::onInit(Engine::Registry64& registry) {
 
 void PropertiesFrame::onRender(Engine::Registry64& registry) {
 	ImGui::Begin("Properties");
-
+	
 	if (screen.selectedEntity) {
 		auto components = registry.getComponents(screen.selectedEntity);
 		for (auto [index, component] : components) {
@@ -184,6 +186,30 @@ void PropertiesFrame::onRender(Engine::Registry64& registry) {
 			ENTITY_DISPATCH(index, Comp::Material, registry, component);
 			ENTITY_DISPATCH_END(index, registry, component);
 		}
+
+		if (ImGui::Button("Add new component...", ImVec2(-1, 0)))
+			ImGui::OpenPopup("Add component");
+		
+		if (ImGui::BeginPopupModal("Add component")) {
+			std::vector<const char*> components;
+			for (Engine::Registry64::component_type index = 0; index < Engine::Registry64::component_index<void>::index(); index++)
+				components.push_back(registry.getComponentName(index).data());
+			
+			static int item_current = 0;
+			ImGui::SetNextItemWidth(-1);
+			ImGui::ListBox("##ComponentsModal", &item_current, components.data(), components.size(), 6);
+			
+			if (ImGui::Button("Cancel", ImVec2(-1, 0)))
+				ImGui::CloseCurrentPopup();
+			
+			ImGui::EndPopup();
+		}
+
+		if (ImGui::BeginPopup("ComponentSettings")) {
+			if (ImGui::MenuItem("Remove component"));
+			ImGui::EndPopup();
+		}
+		
 	} else {
 		std::string label = "Select an entity to see properties";
 		auto [wx, wy] = ImGui::GetContentRegionAvail();

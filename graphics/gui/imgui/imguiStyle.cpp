@@ -4,10 +4,11 @@
 namespace P3D::Graphics {
 
 ImGuiColors theme = Dark;
+ImVec4 text = ImVec4(0.80f, 0.80f, 0.83f, 1.00f);
 ImVec4 idle = ImVec4(0.28f, 0.56f, 1.00f, 1.00f);
 ImVec4 hover = ImVec4(0.10f, 0.40f, 0.75f, 0.75f);
 ImVec4 active = ImVec4(0.10f, 0.40f, 0.75f, 1.00f);
-ImVec4 disabled = ImVec4(0.176f, 0.228f, 0.435f, 1.00f);
+ImVec4 dark = ImVec4(0.176f, 0.228f, 0.435f, 1.00f);
 
 void renderImGuiStyleEditor() {
     ImGui::Begin("Style");
@@ -36,10 +37,11 @@ void renderImGuiStyleEditor() {
     bool edited = false;
     if (theme >= 3) {
         ImGui::Text("Accent");
+        edited |= ImGui::ColorEdit4("Text", (float*) &text, ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_AlphaBar);
         edited |= ImGui::ColorEdit4("Idle", (float*) &idle, ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_AlphaBar);
         edited |= ImGui::ColorEdit4("Hover", (float*) &hover, ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_AlphaBar);
         edited |= ImGui::ColorEdit4("Active", (float*) &active, ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_AlphaBar);
-        edited |= ImGui::ColorEdit4("Disabled", (float*) &disabled, ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_AlphaBar);
+        edited |= ImGui::ColorEdit4("Dark", (float*) &dark, ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_AlphaBar);
 
         if (edited)
             setupImGuiAccent(style);
@@ -79,6 +81,7 @@ void setupImGuiLayoutStyle(ImGuiStyle* style) {
 }
 
 void setupImGuiAccent(ImGuiStyle* style) {
+	style->Colors[ImGuiCol_Text] = text;
 	style->Colors[ImGuiCol_FrameBgHovered] = idle;
     style->Colors[ImGuiCol_CheckMark] = active;
     style->Colors[ImGuiCol_SliderGrab] = active;
@@ -99,7 +102,7 @@ void setupImGuiAccent(ImGuiStyle* style) {
     style->Colors[ImGuiCol_TextSelectedBg] = hover;
     style->Colors[ImGuiCol_NavHighlight] = active;
     style->Colors[ImGuiCol_Tab] = idle;
-    style->Colors[ImGuiCol_TabUnfocusedActive] = disabled;
+    style->Colors[ImGuiCol_TabUnfocusedActive] = dark;
     style->Colors[ImGuiCol_TabUnfocused] = active;
 }
 
@@ -109,7 +112,6 @@ void setupImGuiColors(ImGuiStyle* style, ImGuiColors colors) {
 
             break;
         case Gray:
-            style->Colors[ImGuiCol_Text] = ImVec4(0.95f, 0.96f, 0.98f, 1.00f);
             style->Colors[ImGuiCol_TextDisabled] = ImVec4(0.36f, 0.42f, 0.47f, 1.00f);
             style->Colors[ImGuiCol_WindowBg] = ImVec4(0.11f, 0.15f, 0.17f, 1.00f);
             style->Colors[ImGuiCol_ChildBg] = ImVec4(0.15f, 0.18f, 0.22f, 1.00f);
@@ -138,7 +140,6 @@ void setupImGuiColors(ImGuiStyle* style, ImGuiColors colors) {
             style->Colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
             break;
         case Dark:
-            style->Colors[ImGuiCol_Text] = ImVec4(0.80f, 0.80f, 0.83f, 1.00f);
             style->Colors[ImGuiCol_TextDisabled] = ImVec4(0.24f, 0.23f, 0.29f, 1.00f);
             style->Colors[ImGuiCol_WindowBg] = ImVec4(0.06f, 0.05f, 0.07f, 1.00f);
             style->Colors[ImGuiCol_ChildBg] = ImVec4(0.07f, 0.07f, 0.09f, 1.00f);
@@ -160,7 +161,7 @@ void setupImGuiColors(ImGuiStyle* style, ImGuiColors colors) {
             style->Colors[ImGuiCol_PlotLinesHovered] = ImVec4(0.25f, 1.00f, 0.00f, 1.00f);
             style->Colors[ImGuiCol_PlotHistogram] = ImVec4(0.40f, 0.39f, 0.38f, 0.63f);
             style->Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(0.25f, 1.00f, 0.00f, 1.00f);
-            style->Colors[ImGuiCol_ModalWindowDarkening] = ImVec4(1.00f, 0.98f, 0.95f, 0.73f);
+            style->Colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.2f, 0.2f, 0.2f, 0.75f);
             break;
         case ClassicLight:
             ImGui::StyleColorsLight(style);

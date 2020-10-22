@@ -110,7 +110,7 @@ void setupGL() {
 		stop(-1);
 	}
 
-	screen = Screen(1800, 900, &world);
+	new(&screen) Screen(1800, 900, &world);
 
 	Log::info("Initializing GLEW");
 	if (!initGLEW()) {

@@ -31,7 +31,7 @@
 #include "layer/imguiLayer.h"
 #include "layer/shadowLayer.h"
 #include "layer/cameraLayer.h"
-
+#include "ecs/components.h"
 #include "frames.h"
 #include "../util/systemVariables.h"
 
@@ -79,12 +79,15 @@ void terminateGLFW() {
 }
 
 Screen::Screen() {
-
+	
 };
 
 Screen::Screen(int width, int height, PlayerWorld* world) {
 	using namespace Graphics;
 
+	// Init registry component order
+	registry.init<Comp::Tag, Comp::Transform, Comp::Model>();
+	
 	this->world = world;
 
 	// Create a windowed mode window and its OpenGL context 

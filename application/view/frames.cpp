@@ -22,7 +22,7 @@ void Frames::onInit(Engine::Registry64& registry) {
 }
 
 void Frames::onRender(Engine::Registry64& registry) {
-	//ImGui::ShowDemoWindow();
+	ImGui::ShowDemoWindow();
 
 	ECSFrame::onRender(registry);
 	PropertiesFrame::onRender(registry);

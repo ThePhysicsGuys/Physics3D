@@ -57,11 +57,19 @@ struct registry_traits<std::uint64_t> {
 	static constexpr entity_type entity_mask = 0xFFFFFFFF;
 	static constexpr std::size_t parent_shift = 32u;
 };
-
 	
 template<typename Entity>
 class Registry {
 
+	//-------------------------------------------------------------------------------------//
+	// Contructor                                                                          //
+	//-------------------------------------------------------------------------------------//
+	
+public:
+	Registry() = default;
+	Registry(const Registry&) = delete;
+	Registry& operator=(const Registry&) = delete;
+	
 	//-------------------------------------------------------------------------------------//
 	// Types                                                                               //
 	//-------------------------------------------------------------------------------------//
@@ -120,7 +128,7 @@ private:
 private:
 	template<typename Type>
 	struct type_index {
-		constexpr static Type next() noexcept {
+		static Type next() noexcept {
 			static Type value {};
 			return value++;
 		}
@@ -132,7 +140,7 @@ public:
 		using traits_type = registry_traits<Entity>;
 		using component_type = typename traits_type::component_type;
 
-		constexpr static component_type index() {
+		static component_type index() {
 			static const component_type value = type_index<component_type>::next();
 			return value;
 		}
@@ -252,6 +260,9 @@ public:
 
 private:
 	template<typename... Components>
+	std::enable_if_t<sizeof...(Components) == 0> init() {}
+	
+	template<typename... Components>
 	std::enable_if_t<sizeof...(Components) == 0> extract_smallest_component(component_type& smallest_component, std::size_t& smallest_size, std::vector<component_type>& other_components) {}
 
 	template<typename Component, typename... Components>
@@ -348,16 +359,26 @@ public:
 	}
 
 	/**
-	* Returns a string view of the name of the given component
-	*/
+	 * Returns a string view of the name of the given component
+	 */
 	template<typename Component>
 	[[nodiscard]] std::string_view getComponentName() {
 		return type_mapping.at(getComponentIndex<Component>());
 	}
-
+	
 	/**
-	* Creates a new entity with an empty parent and adds it to the registry
-	*/
+	 * Initializes the component vector to create an order in the components
+	 */
+	template<typename Component, typename... Components>
+	void init() {
+		component_type index = getComponentIndex<Component>();
+		components.push_back(new entity_map());
+		init<Components...>();
+	}
+	
+	/**
+	 * Creates a new entity with an empty parent and adds it to the registry
+	 */
 	[[nodiscard]] entity_type create() noexcept {
 		representation_type id;
 		if (id_queue.empty()) {

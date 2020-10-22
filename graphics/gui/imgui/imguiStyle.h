@@ -13,10 +13,11 @@ enum ImGuiColors {
 };
 
 extern ImGuiColors theme;
+extern ImVec4 text;
 extern ImVec4 idle;
 extern ImVec4 hover;
 extern ImVec4 active;
-extern ImVec4 disabled;
+extern ImVec4 dark;
 
 void setupImGuiLayoutStyle(ImGuiStyle* style);
 void setupImGuiAccent(ImGuiStyle* style);

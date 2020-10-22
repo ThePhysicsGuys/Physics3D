@@ -434,8 +434,9 @@ public:
 
 template<typename T, std::size_t Size>
 class DiagonalMatrix {
-	T data[Size];
 public:
+	T data[Size];
+	
 	inline constexpr T& operator[](std::size_t index) { assert(index >= 0 && index < Size); return data[index]; }
 	inline constexpr const T& operator[](std::size_t index) const { assert(index >= 0 && index < Size); return data[index]; }
 
