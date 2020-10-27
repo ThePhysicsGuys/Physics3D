@@ -15,6 +15,10 @@ public:
 	void addPart(Part* newPart);
 	void removePart(Part* partToRemove);
 	void addIntoGroup(Part* newPart, Part* group);
+	template<typename PartIterBegin, typename PartIterEnd>
+	void addAllToGroup(PartIterBegin begin, PartIterEnd end, Part* group) {
+		tree.addAllToExistingGroup(begin, end, group);
+	}
 	//void addIntoGroup(MotorizedPhysical* newPhys, Part* group);
 
 	void notifyPartBoundsUpdated(const Part* updatedPart, const Bounds& oldBounds);
@@ -30,6 +34,9 @@ public:
 	void moveOutOfGroup(Part* part);
 	void joinPartsIntoNewGroup(Part* p1, Part* p2);
 
-
+	template<typename PartIterBegin, typename PartIterEnd>
+	void moveAllOutOfGroup(PartIterBegin begin, PartIterEnd end) {
+		tree.moveAllOutOfGroup(begin, end);
+	}
 };
 

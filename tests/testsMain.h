@@ -137,10 +137,10 @@ struct TolerantAssertBuilder {
 	TolerantAssertComparer<T, Tol> operator<(const T& other) const { return TolerantAssertComparer<T, Tol>(line, other, tolerance); }
 };
 
-#define ASSERT_STRICT(condition) do {__testInterface.markAssert(); if(!(AssertBuilder(__LINE__) < condition).arg) {throw AssertionError(__LINE__, "false");}}while(false)
-#define ASSERT_TOLERANT(condition, tolerance) do {__testInterface.markAssert(); if(!(TolerantAssertBuilder<decltype(tolerance)>(__LINE__, tolerance) < condition).arg) {throw AssertionError(__LINE__, "false");}}while(false)
-#define ASSERT_TRUE(condition) do {__testInterface.markAssert(); if(!(condition)) throw AssertionError(__LINE__, "false");}while(false)
-#define ASSERT_FALSE(condition) do {__testInterface.markAssert(); if(condition) throw AssertionError(__LINE__, "true");}while(false)
+#define ASSERT_STRICT(condition) do {if(!(AssertBuilder(__LINE__) < condition).arg) {throw AssertionError(__LINE__, "false");}__testInterface.markAssert(); }while(false)
+#define ASSERT_TOLERANT(condition, tolerance) do {if(!(TolerantAssertBuilder<decltype(tolerance)>(__LINE__, tolerance) < condition).arg) {throw AssertionError(__LINE__, "false");} __testInterface.markAssert(); }while(false)
+#define ASSERT_TRUE(condition) do {if(!(condition)) throw AssertionError(__LINE__, "false");__testInterface.markAssert(); }while(false)
+#define ASSERT_FALSE(condition) do {if(condition) throw AssertionError(__LINE__, "true");__testInterface.markAssert(); }while(false)
 
 #define PREV_VAL_NAME __JOIN(____previousValue, __LINE__)
 #define ISFILLED_NAME __JOIN(____isFilled, __LINE__)

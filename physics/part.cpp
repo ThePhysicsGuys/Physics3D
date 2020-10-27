@@ -187,104 +187,114 @@ void Part::applyMoment(Vec3 moment) {
 }
 
 
-struct PairLess {
-	inline bool operator()(std::pair<WorldLayer*, Part*> first, std::pair<WorldLayer*, Part*> snd) const {
-		return first.first < snd.first;
-	}
+
+struct FoundLayerRepresentative {
+	WorldLayer* layer;
+	Part* part;
 };
 
-static std::set<std::pair<WorldLayer*, Part*>, PairLess> getLayersInPhysical(MotorizedPhysical* phys) {
-	std::set<std::pair<WorldLayer*, Part*>, PairLess> result;
+static std::vector<FoundLayerRepresentative> findAllLayersIn(Part* part) {
+	std::vector<FoundLayerRepresentative> result;
 
-	phys->forEachPart([&result](Part& part) {
-		result.insert(std::make_pair(part.layer, &part));
-	});
-
+	if(part->layer != nullptr) {
+		if(part->parent != nullptr) {
+			part->parent->mainPhysical->forEachPart([&result](Part& p) {
+				for(FoundLayerRepresentative& item : result) {
+					if(item.layer == p.layer) {
+						return;
+					}
+				}
+				result.push_back(FoundLayerRepresentative{p.layer, &p});
+			});
+		} else {
+			result.push_back(FoundLayerRepresentative{part->layer, part});
+		}
+	}
 	return result;
 }
 
-static Part* getPartOfLayerInPhysical(MotorizedPhysical* phys, const WorldLayer* layer) {
-	return phys->findFirst([layer](Part& part) {return part.layer == layer; });
-}
-
-static void mergePhysicalLayers(MotorizedPhysical* first, MotorizedPhysical* second) {
-	std::set<std::pair<WorldLayer*, Part*>, PairLess> layersOfFirst = getLayersInPhysical(first);
-	std::set<std::pair<WorldLayer*, Part*>, PairLess> layersOfSecond = getLayersInPhysical(second);
-
-	for(std::pair<WorldLayer*, Part*> lSecond : layersOfSecond) {
-		auto found = layersOfFirst.find(lSecond);
-		if(found != layersOfFirst.end()) {
-			// merge layers
-			std::pair<WorldLayer*, Part*> lFirst = *found;
-
-			assert(lFirst.first == lSecond.first);
-
-			lFirst.first->mergeGroupsOf(lFirst.second, lSecond.second);
-		}
-	}
-}
-
-
-static void mergePartLayers(Part* first, Part* second) {
-	if(first->parent != nullptr) {
-		if(second->parent != nullptr) {
-			mergePhysicalLayers(first->parent->mainPhysical, second->parent->mainPhysical);
-		} else {
-			Part* foundPartInLayer = getPartOfLayerInPhysical(first->parent->mainPhysical, second->layer);
-			// add second part into first
-			if(foundPartInLayer != nullptr) {
-				second->layer->moveIntoGroup(second, foundPartInLayer);
-			}
-		}
-	} else {
-		if(second->parent != nullptr) {
-			Part* foundPartInLayer = getPartOfLayerInPhysical(second->parent->mainPhysical, first->layer);
-			// add second part into first
-			if(foundPartInLayer != nullptr) {
-				first->layer->moveIntoGroup(first, foundPartInLayer);
-			}
-		} else {
-			if(first->layer == second->layer) {
-				first->layer->joinPartsIntoNewGroup(first, second);
+static void mergePartLayers(Part* first, Part* second, const std::vector<FoundLayerRepresentative>& layersOfFirst, const std::vector<FoundLayerRepresentative>& layersOfSecond) {
+	for(const FoundLayerRepresentative& l1 : layersOfFirst) {
+		for(const FoundLayerRepresentative& l2 : layersOfSecond) {
+			if(l1.layer == l2.layer) {
+				l1.layer->mergeGroupsOf(l1.part, l2.part);
+				break;
 			}
 		}
 	}
 }
 
-static void moveWholePhysIntoLayer(Part* part, Part* layerOwner) {
-	assert(layerOwner->layer != nullptr);
-	assert(part->layer == nullptr);
-
-	layerOwner->layer->addIntoGroup(part, layerOwner);
+static void updateGroupBounds(std::vector<FoundLayerRepresentative>& layers, std::vector<Bounds>& bounds) {
+	for(size_t i = 0; i < layers.size(); i++) {
+		layers[i].layer->notifyPartGroupBoundsUpdated(layers[i].part, bounds[i]);
+	}
 }
 
-static void joinLayers(Part* main, Part* other) {
-	if(main->layer != nullptr) {
-		if(other->layer != nullptr) {
-			mergePartLayers(main, other);
+static std::vector<Part*> getAllPartsInPhysical(Part* rep) {
+	std::vector<Part*> result;
+	if(rep->parent != nullptr) {
+		rep->parent->mainPhysical->forEachPart([&result](Part& part) {
+			result.push_back(&part);
+		});
+	} else {
+		result.push_back(rep);
+	}
+	return result;
+}
+
+template<typename PhysicalMergeFunc>
+static void mergeLayersAround(Part* first, Part* second, PhysicalMergeFunc mergeFunc) {
+	if(second->layer != nullptr) {
+		std::vector<FoundLayerRepresentative> layersOfSecond = findAllLayersIn(second);
+		std::vector<Bounds> boundsOfSecondParts(layersOfSecond.size());
+		for(size_t i = 0; i < layersOfSecond.size(); i++) {
+			boundsOfSecondParts[i] = layersOfSecond[i].part->getBounds();
+		}
+
+		if(first->layer != nullptr) {
+			std::vector<FoundLayerRepresentative> layersOfFirst = findAllLayersIn(first);
+		
+			mergeFunc();
+			updateGroupBounds(layersOfSecond, boundsOfSecondParts);
+
+			mergePartLayers(first, second, layersOfFirst, layersOfSecond);
 		} else {
-			moveWholePhysIntoLayer(other, main);
+			std::vector<Part*> partsInFirst = getAllPartsInPhysical(first);
+			
+			mergeFunc();
+			updateGroupBounds(layersOfSecond, boundsOfSecondParts);
+			
+			second->layer->addAllToGroup(partsInFirst.begin(), partsInFirst.end(), second);
 		}
 	} else {
-		if(other->layer != nullptr) {
-			moveWholePhysIntoLayer(main, other);
+		if(first->layer != nullptr) {
+			std::vector<Part*> partsInSecond = getAllPartsInPhysical(second);
+
+			mergeFunc();
+
+			first->layer->addAllToGroup(partsInSecond.begin(), partsInSecond.end(), first);
+		} else {
+			mergeFunc();
 		}
 	}
 }
 
 void Part::attach(Part* other, const CFrame& relativeCFrame) {
-	joinLayers(this, other);
-	if(this->parent == nullptr) {
-		this->parent = new MotorizedPhysical(this);
-		this->parent->attachPart(other, relativeCFrame);
-	} else {
-		this->parent->attachPart(other, this->transformCFrameToParent(relativeCFrame));
-	}
+	mergeLayersAround(this, other, [&]() {
+		if(this->parent == nullptr) {
+			this->parent = new MotorizedPhysical(this);
+			this->parent->attachPart(other, relativeCFrame);
+		} else {
+			this->parent->attachPart(other, this->transformCFrameToParent(relativeCFrame));
+		}
+	});
 }
 
 void Part::attach(Part* other, HardConstraint* constraint, const CFrame& attachToThis, const CFrame& attachToThat) {
-	this->ensureHasParent();
-	this->parent->attachPart(other, constraint, attachToThis, attachToThat);
+	mergeLayersAround(this, other, [&]() {
+		this->ensureHasParent();
+		this->parent->attachPart(other, constraint, attachToThis, attachToThat);
+	});
 }
 
 void Part::detach() {

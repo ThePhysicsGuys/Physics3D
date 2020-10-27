@@ -344,10 +344,24 @@ struct BoundsTree {
 	}
 
 	void addToExistingGroup(TreeNode&& newNode, const Boundable* objInGroup, const Bounds& objInGroupBounds) {
+		assert(newNode.isGroupHead == false);
 		NodeStack stack = findGroupFor(objInGroup, objInGroupBounds);
 		TreeNode& group = **stack;
 		group.addInside(std::move(newNode));
-		stack.expandBoundsAllTheWayToTop();
+		stack.updateBoundsAllTheWayToTop();
+	}
+	template<typename BoundableIterBegin, typename BoundableIterEnd>
+	void addAllToExistingGroup(BoundableIterBegin begin, BoundableIterEnd end, Boundable* objInGroup, const Bounds& objInGroupBounds) {
+		NodeStack iter = findGroupFor(objInGroup, objInGroupBounds);
+		for(; begin != end; ++begin) {
+			Boundable* obj = *begin;
+			addToExistingGroup(obj, obj->getBounds(), **iter);
+		}
+		iter.expandBoundsAllTheWayToTop();
+	}
+	template<typename BoundableIterBegin, typename BoundableIterEnd>
+	void addAllToExistingGroup(BoundableIterBegin begin, BoundableIterEnd end, Boundable* objInGroup) {
+		addAllToExistingGroup(begin, end, objInGroup, objInGroup->getBounds());
 	}
 
 	// merges the groupNode of second into the groupNode of first
@@ -396,13 +410,20 @@ struct BoundsTree {
 	template<typename BoundableIterBegin, typename BoundableIterEnd>
 	void moveAllOutOfGroup(BoundableIterBegin begin, BoundableIterEnd end) {
 		assert(begin != end);
-		Boundable* first = *begin;
+		const Boundable* first = *begin;
 		++begin;
 
 		NodeStack pathToFirst(this->rootNode, first, first->getBounds());
-
-		while(begin != end) {
-
+		if((*pathToFirst)->isGroupHead) {
+			this->add(pathToFirst.grab());
+		} else {
+			TreeNode newNode = pathToFirst.grab();
+			pathToFirst.riseUntilGroupHeadWhile();
+			for(; begin != end; ++begin) {
+				const Boundable* obj = *begin;
+				newNode.addInside(this->grab(obj, obj->getBounds()));
+			}
+			add(std::move(newNode));
 		}
 	}
 

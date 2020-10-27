@@ -460,16 +460,20 @@ TEST_CASE(testInternalMotionOfCenterOfMass) {
 	ASSERT(motionOfCom == estimatedMotion);
 }
 
+static bool haveSameMotorPhys(const Part& first, const Part& second) {
+	return first.parent != nullptr && second.parent != nullptr && first.parent->mainPhysical == second.parent->mainPhysical;
+}
+
 TEST_CASE(attachPhysicalsNoLayers) {
 	for(int iter = 0; iter < 100; iter++) {
-		auto [firstPhys, firstPhysParts] = generateMotorizedPhysical();
-		auto [secondPhys, secondPhysParts] = generateMotorizedPhysical();
+		std::vector<Part> firstPhysParts = generateMotorizedPhysicalParts();
+		std::vector<Part> secondPhysParts = generateMotorizedPhysicalParts();
 
-		ASSERT_FALSE(firstPhysParts[0].parent->mainPhysical == secondPhysParts[0].parent->mainPhysical);
+		ASSERT_FALSE(haveSameMotorPhys(firstPhysParts[0], secondPhysParts[0]));
 
 		generateAttachment(oneOf(firstPhysParts), oneOf(secondPhysParts));
 
-		ASSERT_TRUE(firstPhysParts[0].parent->mainPhysical == secondPhysParts[0].parent->mainPhysical);
+		ASSERT_TRUE(haveSameMotorPhys(firstPhysParts[0], secondPhysParts[0]));
 	}
 }
 
@@ -493,20 +497,23 @@ static bool pairwiseCorrectlyGrouped(const std::vector<Part>& la, const std::vec
 TEST_CASE(attachPhysicalsWithLayers) {
 	for(int iter = 0; iter < 100; iter++) {
 		WorldLayer layers[3]{WorldLayer(nullptr), WorldLayer(nullptr), WorldLayer(nullptr)};
-		auto [firstPhys, firstPhysParts] = generateMotorizedPhysical();
+		std::vector<Part> firstPhysParts = generateMotorizedPhysicalParts();
+		std::vector<Part> secondPhysParts = generateMotorizedPhysicalParts();
 		generateLayerAssignment(firstPhysParts, layers, 3);
-		auto [secondPhys, secondPhysParts] = generateMotorizedPhysical();
 		generateLayerAssignment(secondPhysParts, layers, 3);
 
-		ASSERT_FALSE(firstPhysParts[0].parent->mainPhysical == secondPhysParts[0].parent->mainPhysical);
+		ASSERT_FALSE(haveSameMotorPhys(firstPhysParts[0], secondPhysParts[0]));
 
 		ASSERT_TRUE(pairwiseCorrectlyGrouped(firstPhysParts, firstPhysParts, true));
 		ASSERT_TRUE(pairwiseCorrectlyGrouped(secondPhysParts, secondPhysParts, true));
 		ASSERT_TRUE(pairwiseCorrectlyGrouped(firstPhysParts, secondPhysParts, false));
 
-		generateAttachment(oneOf(firstPhysParts), oneOf(secondPhysParts));
+		Part& attachedPart1 = oneOf(firstPhysParts);
+		Part& attachedPart2 = oneOf(secondPhysParts);
 
-		ASSERT_TRUE(firstPhysParts[0].parent->mainPhysical == secondPhysParts[0].parent->mainPhysical);
+		generateAttachment(attachedPart1, attachedPart2);
+
+		ASSERT_TRUE(haveSameMotorPhys(firstPhysParts[0], secondPhysParts[0]));
 
 		ASSERT_TRUE(pairwiseCorrectlyGrouped(firstPhysParts, firstPhysParts, true));
 		ASSERT_TRUE(pairwiseCorrectlyGrouped(secondPhysParts, secondPhysParts, true));

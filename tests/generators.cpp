@@ -93,20 +93,20 @@ void generateAttachment(Part& first, Part& second) {
 	}
 }
 
-std::pair<MotorizedPhysical*, std::vector<Part>> generateMotorizedPhysical() {
+std::vector<Part> generateMotorizedPhysicalParts() {
 	//int size = int(std::sqrt(rand() % 1000)) + 1;
 
 	int size = rand() % 5 + 1;
 	std::vector<Part> parts(size);
 	parts[0] = generatePart();
-	parts[0].ensureHasParent();
+	if(generateBool()) parts[0].ensureHasParent();
 
 	for(int i = 1; i < size; i++) {
 		parts[i] = generatePart();
 		generateAttachment(parts[i], parts[rand() % i]);
 	}
 
-	return {parts[0].parent->mainPhysical, std::move(parts)};
+	return parts;
 }
 
 void generateLayerAssignment(std::vector<Part>& parts, WorldLayer* layers, int layerCount) {
