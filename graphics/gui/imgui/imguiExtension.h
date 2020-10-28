@@ -6,6 +6,11 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 
 namespace ImGui {
+
+	ImVec2 operator+(const ImVec2& lhs, const ImVec2& rhs) {
+        return ImVec2(lhs.x + rhs.x, lhs.y + rhs.y);
+	}
+	
     bool InputDouble3(const char* label, double v[3], ImGuiInputTextFlags flags) {
         char format[16] = "%f";
         // TODO add format
@@ -21,54 +26,58 @@ namespace ImGui {
         return i1 | i2 | i3;
     }
 
-    bool InputVec3(const char* id, float value[3], float resetValue = 0.0f, float speed = 0.1f) {
-        PushID(id);
-    	
-        PushMultiItemsWidths(4, CalcItemWidth());
-        PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, GImGui->Style.ItemSpacing.y));
-        PushStyleVar(ImGuiStyleVar_FrameRounding, 0);
-
-        float lineHeight = GImGui->FontSize + GImGui->Style.FramePadding.y * 2.0f;
-        ImVec2 buttonSize = ImVec2(lineHeight + 3.0f, lineHeight);
+    bool DragVecN(const char* id, const char** labels, float* data, int components, float resetValue = 0.0f, float speed = 0.1f) {
+        ImGuiWindow* window = GetCurrentWindow();
+        if (window->SkipItems)
+            return false;
 
         bool result = false;
     	
-    	// X
-        if (Button("X", buttonSize)) {
-            result = true;
-            value[0] = resetValue;
+        float size = 0;
+        for (int i = 0; i < components; i++) {
+            float label_size = CalcTextSize(labels[i], NULL, true).x;
+            float padding_size = GImGui->Style.FramePadding.x * 2.0f;
+            float spacing_size = GImGui->Style.ItemInnerSpacing.x * 2.0f;
+            size += label_size + padding_size + spacing_size;
         }
+    	
+        BeginGroup();
+    	
+        PushMultiItemsWidths(components, GetColumnWidth() - size);
 
-        SameLine();
-        result |= DragFloat("##X", value, speed, 0, 0, "%.2f");
-        PopItemWidth();
-        SameLine();
+        PushID(id);
 
-    	// Y
-        if (Button("Y", buttonSize)) {
-            result = true;
-            value[1] = resetValue;
-        }
+    	for (int i = 0; i < components; i++) {
 
-        SameLine();
-        result |= DragFloat("##Y", value + 1, speed, 0, 0, "%.2f");
-        PopItemWidth();
-        SameLine();
+            if (i > 0)
+                SameLine(0, GImGui->Style.ItemInnerSpacing.x);
 
-    	// Z
-        if (Button("Z", buttonSize)) {
-            result = true;
-            value[2] = resetValue;
-        }
+            if(Button(labels[i])) {
+                *data = resetValue;
+                result = true;
+            }    		
+    		
+			SameLine(0, GImGui->Style.ItemInnerSpacing.x);
+    		
+            PushID(i);
+            result |= DragScalar("", ImGuiDataType_Float, data, speed, 0, 0, "%.2f");
+            PopID();
+    		
+            PopItemWidth();
 
-        SameLine();
-        result |= DragFloat("##Z", value + 2, speed, 0, 0, "%.2f");
-        PopItemWidth();
+            data += 1;
+    	}
 
-        PopStyleVar(2);
         PopID();
+
+        EndGroup();
     	
         return result;
+    }
+
+    bool DragVec3(const char* id, float values[3], float resetValue = 0.0f, float speed = 0.1f) {
+        const char* labels[] = { "X", "Y", "Z" };
+        return DragVecN(id, labels, values, 3, resetValue, speed);
     }
 	
 }

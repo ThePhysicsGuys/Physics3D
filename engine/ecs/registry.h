@@ -443,24 +443,27 @@ public:
 	}
 
 	/**
-	 * Removes the components of the given type from the given entity
+	 * Removes the component of the given type from the given entity, returns whether the erasure was successful
 	 */
 	template<typename Component>
-	void remove(const entity_type& entity) noexcept {
+	bool remove(const entity_type& entity) noexcept {
 		auto entities_iterator = entities.find(static_cast<representation_type>(entity));
 		if (entities_iterator == entities.end())
-			return;
+			return false;
 
 		component_type index = getComponentIndex<Component>();
 		if (index >= components.size())
-			return;
+			return false;
 
 		entity_map* map = components[index];
 		auto component_iterator = map->find(entity);
 		if (component_iterator == map->end())
-			return;
+			return false;
 
 		map->erase(component_iterator);
+		// Todo check if really destroyed
+		
+		return true;
 	}
 
 
@@ -490,7 +493,7 @@ public:
 	}
 
 	/**
-	 * Returns the component of the given type from the given entity, or creates one using the provides arguments and returns it
+	 * Returns the component of the given type from the given entity, or creates one using the provides arguments and returns it.
 	 */
 	template<typename Component, typename... Args>
 	[[nodiscard]] Ref<Component> getOrAdd(const entity_type& entity, Args&&... args) {
@@ -635,6 +638,14 @@ public:
 
 		return filter_transform_view<no_type>(first, last, filter, transform);
 	}
+
+	/**
+	 * Returns the children of the given parent entity
+	 */
+	[[nodiscard]] auto getChildren(const representation_type& entity) noexcept {
+		return getChildren(self(entity));
+	}
+
 
 	//-------------------------------------------------------------------------------------//
 	// Views                                                                               //

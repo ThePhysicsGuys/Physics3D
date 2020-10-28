@@ -239,9 +239,9 @@ void setupWorld(int argc, const char** args) {
 		}
 	}
 
-	auto terrainFolder = screen.registry.create();
-	screen.registry.add<Comp::Tag>(terrainFolder, "Terrain");
-	WorldBuilder::buildTerrain(150, 150, terrainFolder);
+	//auto terrainFolder = screen.registry.create();
+	//screen.registry.add<Comp::Tag>(terrainFolder, "Terrain");
+	//WorldBuilder::buildTerrain(150, 150, terrainFolder);
 
 	auto ropeFolder = screen.registry.create();
 	screen.registry.add<Comp::Tag>(ropeFolder, "Ropes");

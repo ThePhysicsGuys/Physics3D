@@ -30,7 +30,7 @@ Vec3f PropertiesFrame::position = Vec3f(0, 0, 0);
 #define ECS_PROPERTY_FRAME_START(registry, index) \
 	std::string label((registry).getComponentName(index)); \
 	bool open = ImGui::CollapsingHeader(label.c_str(), ImGuiTreeNodeFlags_DefaultOpen); \
-	/*ImGui::SameLine(ImGui::GetWindowWidth() - 25.0f);*/ \
+	/*ImGui::SameLine(ImGui::GetWindowWidth() - 25.0f); \
 	/*if (ImGui::Button("+", ImVec2(25.0f, 0)))*/ \
 		/*ImGui::OpenPopup("ComponentSettings");*/ \
 	if (open) { \
@@ -148,18 +148,18 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_ty
 	ExtendedPart* part = component->isPartAttached ? component->part : nullptr;
 	DiagonalMat3f scale = part->hitbox.scale;
 	
-	ECS_PROPERTY_IF("Position:", ImGui::InputVec3("Position", position.data, 0),
+	ECS_PROPERTY_IF("Position:", ImGui::DragVec3("Position", position.data, 0),
 		frame.position = castVec3fToPosition(position);
 		component->setCFrame(frame);
 	);
 
-	ECS_PROPERTY_IF("Rotation:", ImGui::InputVec3("Rotation", rotation.data, 0, 0.01f),
+	ECS_PROPERTY_IF("Rotation:", ImGui::DragVec3("Rotation", rotation.data, 0.01f),
 		frame.rotation = Rotation::fromRotationVec(rotation);
 		component->setCFrame(frame);
 	);
 
 	if (part_attached) {
-		ECS_PROPERTY_IF("Scale:", ImGui::InputVec3("Scale", scale.data, 0, 0.01f),
+		ECS_PROPERTY_IF("Scale:", ImGui::DragVec3("Scale", scale.data, 0, 0.01f),
 			part->hitbox.scale = scale;
 		);
 	}
