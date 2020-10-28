@@ -38,7 +38,7 @@ Part generatePart(Part& attachTo);
 Part generatePart(Part& attachTo, HardConstraint* constraint);
 HardConstraint* generateHardConstraint();
 void generateAttachment(Part& first, Part& second);
-std::pair<MotorizedPhysical*, std::vector<Part>> generateMotorizedPhysical();
+std::vector<Part> generateMotorizedPhysicalParts();
 void generateLayerAssignment(std::vector<Part>& parts, WorldLayer* layers, int layerCount);
 TreeNode generateTreeNode(int branchInhibition);
 BoundsTree<BasicBounded> generateFilledBoundsTree();

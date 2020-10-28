@@ -99,6 +99,8 @@ void WorldPrototype::addPart(Part* part, int layerIndex) {
 	part->parent->mainPhysical->forEachPart([this](Part& p) {
 		this->onPartAdded(&p);
 	});
+
+	ASSERT_VALID;
 }
 void WorldPrototype::addTerrainPart(Part* part, int layerIndex) {
 	objectCount++;
@@ -167,16 +169,37 @@ void WorldPrototype::notifyNewPhysicalCreatedWhenSplitting(MotorizedPhysical* ne
 	newPhysical->world = this;
 }
 
+static void assignLayersForPhysicalRecurse(const Physical& phys, std::vector<std::pair<WorldLayer*, std::vector<const Part*>>>& foundLayers) {
+	phys.rigidBody.forEachPart([&foundLayers](const Part& part) {
+		for(std::pair<WorldLayer*, std::vector<const Part*>>& knownLayer : foundLayers) {
+			if(part.layer == knownLayer.first) {
+				knownLayer.second.push_back(&part);
+				return;
+			}
+		}
+		foundLayers.emplace_back(part.layer, std::vector<const Part*>{&part});
+	});
+	for(const ConnectedPhysical& conPhys : phys.childPhysicals) {
+		assignLayersForPhysicalRecurse(conPhys, foundLayers);
+	}
+}
+
 void WorldPrototype::notifyPhysicalHasBeenSplit(const MotorizedPhysical* mainPhysical, MotorizedPhysical* newlySplitPhysical) {
 	assert(mainPhysical->world == this);
 	assert(newlySplitPhysical->world == nullptr);
 	this->notifyNewPhysicalCreatedWhenSplitting(newlySplitPhysical);
 	
-	ASSERT_TREE_VALID(objectTree);
+	std::vector<std::pair<WorldLayer*, std::vector<const Part*>>> layersThatNeedToBeSplit;
+	assignLayersForPhysicalRecurse(*newlySplitPhysical, layersThatNeedToBeSplit);
+
+	for(const std::pair<WorldLayer*, std::vector<const Part*>>& layer : layersThatNeedToBeSplit) {
+		layer.first->moveAllOutOfGroup(layer.second.begin(), layer.second.end());
+	}
+
 
 	// split object tree
 	// TODO: The findGroupFor and grap calls can be merged as an optimization
-	NodeStack stack = objectTree.findGroupFor(newlySplitPhysical->getMainPart(), newlySplitPhysical->getMainPart()->getBounds());
+	/*NodeStack stack = objectTree.findGroupFor(newlySplitPhysical->getMainPart(), newlySplitPhysical->getMainPart()->getBounds());
 
 	TreeNode* node = *stack;
 
@@ -200,7 +223,9 @@ void WorldPrototype::notifyPhysicalHasBeenSplit(const MotorizedPhysical* mainPhy
 
 	objectTree.add(std::move(newNode));
 
-	ASSERT_TREE_VALID(objectTree);
+	assert(this->isValid());*/
+
+
 }
 
 static void removePhysicalFromList(std::vector<MotorizedPhysical*>& physicals, MotorizedPhysical* physToRemove) {

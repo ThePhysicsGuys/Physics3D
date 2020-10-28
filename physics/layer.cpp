@@ -1,6 +1,8 @@
 #include "layer.h"
 #include "world.h"
 
+#include "misc/validityHelper.h"
+
 #include <assert.h>
 
 
@@ -10,8 +12,8 @@ void WorldLayer::addPart(Part* newPart) {
 	tree.add(newPart, newPart->getBounds());
 }
 
-static TreeNode createNodeFor(MotorizedPhysical* phys) {
-	TreeNode newNode(phys->rigidBody.mainPart, phys->rigidBody.mainPart->getBounds(), true);
+static TreeNode createNodeFor(MotorizedPhysical* phys, bool makeGroupHead) {
+	TreeNode newNode(phys->rigidBody.mainPart, phys->rigidBody.mainPart->getBounds(), makeGroupHead);
 	phys->forEachPartExceptMainPart([&newNode](Part& part) {
 		newNode.addInside(TreeNode(&part, part.getBounds(), false));
 	});
@@ -21,13 +23,22 @@ static TreeNode createNodeFor(MotorizedPhysical* phys) {
 void WorldLayer::addIntoGroup(Part* newPart, Part* group) {
 	assert(newPart->layer == nullptr);
 	assert(group->layer == this);
+#ifndef NDEBUG
+	treeValidCheck(tree);
+#endif
 	if(newPart->parent != nullptr) {
 		MotorizedPhysical* mainPhys = newPart->parent->mainPhysical;
-		tree.addToExistingGroup(createNodeFor(mainPhys), group, group->getBounds());
+		tree.addToExistingGroup(createNodeFor(mainPhys, false), group, group->getBounds());
 		mainPhys->forEachPart([this](Part& p) {p.layer = this; });
+#ifndef NDEBUG
+		treeValidCheck(tree);
+#endif
 	} else {
 		tree.addToExistingGroup(TreeNode(newPart, newPart->getBounds()), group, group->getBounds());
 		newPart->layer = this;
+#ifndef NDEBUG
+		treeValidCheck(tree);
+#endif
 	}
 }
 
@@ -37,7 +48,7 @@ void WorldLayer::moveOutOfGroup(Part* part) {
 
 void WorldLayer::removePart(Part* partToRemove) {
 	tree.remove(partToRemove, partToRemove->getBounds());
-	world->onPartRemoved(partToRemove);
+	if(world) world->onPartRemoved(partToRemove);
 }
 
 void WorldLayer::notifyPartBoundsUpdated(const Part* updatedPart, const Bounds& oldBounds) {

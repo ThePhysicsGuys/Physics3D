@@ -8,8 +8,8 @@ struct Fix {
 
 	constexpr Fix() noexcept : value(0) {}
 	constexpr Fix(double d) noexcept : value(static_cast<int64_t>(d * (1ULL << N))) {}
-	constexpr Fix(float f) noexcept : value(static_cast<int64_t>(double(f) * (1ULL << N))) {}
-	constexpr Fix(int l) noexcept : value(int64_t(l) << N) {}
+	constexpr Fix(float f) noexcept : value(static_cast<int64_t>(static_cast<double>(f) * (1ULL << N))) {}
+	constexpr Fix(int l) noexcept : value(static_cast<int64_t>(l) << N) {}
 	constexpr Fix(int64_t l) noexcept : value(l << N) {}
 
 	inline constexpr operator double() const noexcept { return static_cast<double>(value) / (1ULL << N); }
