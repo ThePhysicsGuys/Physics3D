@@ -2,7 +2,6 @@
 
 #include "../graphics/gui/color.h"
 #include "../graphics/texture.h"
-#include <array>
 
 namespace P3D::Graphics {
 class Texture;
@@ -15,7 +14,7 @@ private:
 	Graphics::Texture* maps[8];
 
 public:
-	enum Map : unsigned char {
+	enum Map : char {
 		NONE = 0 << 0,
 		ALBEDO = 1 << 0,
 		NORMAL = 1 << 1,
@@ -38,7 +37,9 @@ public:
 
 	void reset(Map flag);
 	void set(Map flag, Graphics::Texture* map);
-	Graphics::Texture* get(Map map) const;
+	
+	[[nodiscard]] Graphics::Texture* get(Map map) const;
+	[[nodiscard]] bool has(Map map) const;
 };
 
 };

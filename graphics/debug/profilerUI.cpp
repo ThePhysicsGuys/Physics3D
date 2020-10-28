@@ -4,15 +4,12 @@
 
 #include <GL/glew.h>
 
-#include "buffers/frameBuffer.h"
-#include "batch/commandBatch.h"
 #include "texture.h"
 #include "path/path.h"
 #include "gui/gui.h"
 #include "font.h"
-
+#include "../physics/math/constants.h"
 #include "../physics/datastructures/boundsTree.h"
-#include "../physics/math/mathUtil.h"
 
 namespace P3D::Graphics {
 

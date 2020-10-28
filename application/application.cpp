@@ -134,7 +134,7 @@ void setupWorld(int argc, const char** args) {
 
 	{
 		auto pistonFolder = screen.registry.create();
-		screen.registry.add<Comp::Tag>(pistonFolder, "PistonPart");
+		screen.registry.add<Comp::Name>(pistonFolder, "PistonPart");
 		
 		ExtendedPart* centerPart = new ExtendedPart(sphereShape(1.0), GlobalCFrame(-15.0,4.0,13.0), basicProperties, "Center", pistonFolder);
 		Shape box = boxShape(1.0, 1.0, 1.0);
@@ -212,15 +212,15 @@ void setupWorld(int argc, const char** args) {
 	int maxZ = 3;
 
 	auto cubeFolder = screen.registry.create();
-	screen.registry.add<Comp::Tag>(cubeFolder, "Cubes");
+	screen.registry.add<Comp::Name>(cubeFolder, "Cubes");
 	auto cylinderFolder = screen.registry.create();
-	screen.registry.add<Comp::Tag>(cylinderFolder, "Cylinders");
+	screen.registry.add<Comp::Name>(cylinderFolder, "Cylinders");
 	auto triangleFolder = screen.registry.create();
-	screen.registry.add<Comp::Tag>(triangleFolder, "Triangles");
+	screen.registry.add<Comp::Name>(triangleFolder, "Triangles");
 	auto sphereFolder = screen.registry.create();
-	screen.registry.add<Comp::Tag>(sphereFolder, "Spheres");
+	screen.registry.add<Comp::Name>(sphereFolder, "Spheres");
 	auto spiderFolder = screen.registry.create();
-	screen.registry.add<Comp::Tag>(spiderFolder, "Spiders");
+	screen.registry.add<Comp::Name>(spiderFolder, "Spiders");
 	
 	GlobalCFrame rootFrame(Position(0.0, 15.0, 0.0), Rotation::fromEulerAngles(3.1415 / 4, 3.1415 / 4, 0.0));
 	for (double x = minX; x < maxX; x += 1.00001) {
@@ -244,7 +244,7 @@ void setupWorld(int argc, const char** args) {
 	//WorldBuilder::buildTerrain(150, 150, terrainFolder);
 
 	auto ropeFolder = screen.registry.create();
-	screen.registry.add<Comp::Tag>(ropeFolder, "Ropes");
+	screen.registry.add<Comp::Name>(ropeFolder, "Ropes");
 	ExtendedPart* ropeA = new ExtendedPart(boxShape(2.0, 1.5, 0.7), GlobalCFrame(10.0, 2.0, -10.0), {1.0, 0.7, 0.3}, "RopeA", ropeFolder);
 	ExtendedPart* ropeB = new ExtendedPart(boxShape(1.5, 1.2, 0.9), GlobalCFrame(10.0, 2.0, -14.0), {1.0, 0.7, 0.3}, "RopeB", ropeFolder);
 	ExtendedPart* ropeC = new ExtendedPart(boxShape(2.0, 1.5, 0.7), GlobalCFrame(10.0, 2.0, -18.0), {1.0, 0.7, 0.3}, "RopeC", ropeFolder);
@@ -339,7 +339,7 @@ void setupWorld(int argc, const char** args) {
 		double turnSpeed = 10.0;
 
 		auto poweredCarFolder = screen.registry.create();
-		screen.registry.add<Comp::Tag>(poweredCarFolder, "Powered Car");
+		screen.registry.add<Comp::Name>(poweredCarFolder, "Powered Car");
 		
 		ExtendedPart* poweredCarBody = new ExtendedPart(boxShape(1.0, 0.4, 2.0), GlobalCFrame(-6.0, 1.0, 0.0), basicProperties, "Chassis", poweredCarFolder);
 		ExtendedPart* FLWheel = new ExtendedPart(cylinderShape(0.5, 0.2), GlobalCFrame(), basicProperties, "Front Left Wheel", poweredCarFolder);

@@ -116,13 +116,13 @@ bool StandardInputHandler::onKeyPress(Engine::KeyPressEvent& event) {
 	} else if (key == KeyboardOptions::Debug::pies) {
 		renderPiesEnabled = !renderPiesEnabled;
 	} else if(key == KeyboardOptions::Part::makeMainPart) {
-		Log::info("Made %s the main part of it's physical", screen.registry.getOr<Comp::Tag>(screen.selectedPart->entity, Comp::Tag("")).name.c_str());
+		Log::info("Made %s the main part of it's physical", screen.registry.getOr<Comp::Name>(screen.selectedPart->entity, Comp::Name("")).name.c_str());
 		screen.selectedPart->makeMainPart();
 	} else if(key == KeyboardOptions::Part::makeMainPhysical) {
 		if (screen.selectedPart) {
 			if (screen.selectedPart->parent != nullptr) {
 				if (!screen.selectedPart->parent->isMainPhysical()) {
-					Log::info("Made %s the main physical", screen.registry.getOr<Comp::Tag>(screen.selectedPart->entity, Comp::Tag("")).name.c_str());
+					Log::info("Made %s the main physical", screen.registry.getOr<Comp::Name>(screen.selectedPart->entity, Comp::Name("")).name.c_str());
 					((ConnectedPhysical*) screen.selectedPart->parent)->makeMainPhysical();
 				} else {
 					Log::warn("This physical is already the main physical!");

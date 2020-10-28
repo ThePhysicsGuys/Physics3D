@@ -51,7 +51,7 @@ bool IconTreeNode(Engine::Registry64& registry, Engine::Registry64::entity_type 
 	// Icon
 	float arrowWidth = g.FontSize;
 	float buttonSize = g.FontSize + g.Style.FramePadding.y * 2;
-	window->DrawList->AddImage(texture, ImVec2(pos.x + arrowWidth, pos.y), ImVec2(pos.x + buttonSize + arrowWidth, pos.y + buttonSize));
+	window->DrawList->AddImage(texture, ImVec2(pos.x + arrowWidth, pos.y), ImVec2(pos.x + buttonSize + arrowWidth, pos.y + buttonSize), ImVec2(1, 1), ImVec2(0, 0));
 
 	// Text
 	ImVec2 textPos = ImVec2(pos.x + buttonSize + arrowWidth + g.Style.ItemInnerSpacing.x, pos.y + g.Style.FramePadding.y);
@@ -76,8 +76,8 @@ void ECSFrame::renderEntity(Engine::Registry64& registry, const Engine::Registry
 	auto children = registry.getChildren(entity);
 	bool leaf = children.begin() == registry.end();
 
-	std::string name = registry.getOr<Comp::Tag>(entity, Comp::Tag(std::to_string(entity))).name;
-	ImTextureID texture = reinterpret_cast<void*>(objectIcon->getID());
+	std::string name = registry.getOr<Comp::Name>(entity, Comp::Name(std::to_string(entity))).name;
+	ImTextureID texture = reinterpret_cast<void*>((leaf ? objectIcon : folderIcon)->getID());
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth | (leaf ? ImGuiTreeNodeFlags_Leaf : ImGuiTreeNodeFlags_None);
 	bool open = IconTreeNode(registry, entity, texture, flags, name.c_str());
 
@@ -116,7 +116,7 @@ void ECSFrame::renderEntity(Engine::Registry64& registry, const Engine::Registry
 			ImGui::InputText("##edit", buffer, name.size() + 1);
 			if (ImGui::Button("Apply")) {
 				std::string newName(buffer);
-				registry.get<Comp::Tag>(entity)->name = newName;
+				registry.get<Comp::Name>(entity)->name = newName;
 			}
 			ImGui::EndMenu();
 

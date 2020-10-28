@@ -61,7 +61,7 @@ void buildFloor(double width, double depth, int folder) {
 }
 void buildFloorAndWalls(double width, double depth, double wallHeight, int folder) {
 	auto floorWallFolder = screen.registry.create(folder);
-	screen.registry.add<Comp::Tag>(floorWallFolder, "Floor and walls");
+	screen.registry.add<Comp::Name>(floorWallFolder, "Floor and walls");
 	
 	buildFloor(width, depth, floorWallFolder);
 
@@ -78,7 +78,7 @@ void SpiderFactory::buildSpider(const GlobalCFrame& spiderPosition, int folder) 
 	//ExtendedPart* spiderBody = createUniquePart(screen, createPointyPrism(legCount, 0.5, 0.2, 0.1, 0.1), spiderPosition, 1.0, 0.0, "SpiderBody");
 
 	auto spiderID = screen.registry.create();
-	screen.registry.add<Comp::Tag>(spiderID, "Spider");
+	screen.registry.add<Comp::Name>(spiderID, "Spider");
 
 	if (folder != 0)
 		screen.registry.setParent(spiderID, folder);
@@ -118,7 +118,7 @@ HollowBoxParts buildHollowBox(Bounds box, double wallThickness) {
 	Shape ZPlate = boxShape(width - wallThickness * 2, height - wallThickness * 2, wallThickness);
 
 	auto hollowBoxFolder = screen.registry.create();
-	screen.registry.add<Comp::Tag>(hollowBoxFolder, "Hollow Box");
+	screen.registry.add<Comp::Name>(hollowBoxFolder, "Hollow Box");
 	
 	ExtendedPart* bottom = new ExtendedPart(YPlate, GlobalCFrame(box.getCenter() - Vec3(0, height / 2 - wallThickness / 2, 0)), { 1.0, 0.2, 0.3 }, "BottomPlate", hollowBoxFolder);
 	ExtendedPart* top = new ExtendedPart(YPlate, bottom, CFrame(0, height - wallThickness, 0), { 1.0, 0.2, 0.3 }, "TopPlate");
@@ -151,7 +151,7 @@ void buildTree(Position treePos, int treeFolder) {
 	Position treeTop = trunkCFrame.localToGlobal(Vec3(0.0, 5.5, 0.0));
 
 	auto leavesFolder = screen.registry.create(treeFolder);
-	screen.registry.add<Comp::Tag>(leavesFolder, "Leaves");
+	screen.registry.add<Comp::Name>(leavesFolder, "Leaves");
 
 	for (int j = 0; j < 15; j++) {
 		GlobalCFrame leavesCFrame(treeTop + Vec3(fRand(-1.0, 1.0), fRand(-1.0, 1.0), fRand(-1.0, 1.0)), Rotation::fromEulerAngles(fRand(0.0, 3.1415), fRand(0.0, 3.1415), fRand(0.0, 3.1415)));
@@ -165,7 +165,7 @@ void buildTree(Position treePos, int treeFolder) {
 
 void buildConveyor(double width, double length, const GlobalCFrame& cframe, double speed, int folder) {
 	auto conveyorFolder = screen.registry.create(folder);
-	screen.registry.add<Comp::Tag>(conveyorFolder, "Conveyor");
+	screen.registry.add<Comp::Name>(conveyorFolder, "Conveyor");
 	
 	ExtendedPart* conveyor = new ExtendedPart(boxShape(width, 0.3, length), cframe, { 1.0, 0.8, 0.0, Vec3(0.0, 0.0, speed) }, "Conveyor", conveyorFolder);
 	screen.registry.getOrAdd<Comp::Material>(conveyor->entity)->albedo = Color(0.2f, 0.2f, 0.2f, 1.0f);
@@ -184,7 +184,7 @@ void buildTerrain(double width, double depth, int folder) {
 	int lastProgress = 0;
 
 	auto groundFolder = screen.registry.create(folder);
-	screen.registry.add<Comp::Tag>(groundFolder, "Ground");
+	screen.registry.add<Comp::Name>(groundFolder, "Ground");
 	
 	Log::info("0%%");
 	for (double x = -width / 2; x < width / 2; x += 3.0) {
@@ -208,7 +208,7 @@ void buildTerrain(double width, double depth, int folder) {
 	Log::info("100%%");
 
 	auto treeFolder = screen.registry.create(folder);
-	screen.registry.add<Comp::Tag>(treeFolder, "Tree");
+	screen.registry.add<Comp::Name>(treeFolder, "Tree");
 	
 	Log::info("Finished terrain, adding trees!");
 	for (int i = 0; i < width * depth / 70; i++) {
@@ -230,7 +230,7 @@ void buildCar(const GlobalCFrame& location, int folder) {
 	PartProperties wheelProperties { 1.0, 2.0, 0.7 };
 
 	auto carFolder = screen.registry.create(folder);
-	screen.registry.add<Comp::Tag>(carFolder, "Car");
+	screen.registry.add<Comp::Name>(carFolder, "Car");
 
 	ExtendedPart* carBody = new ExtendedPart(boxShape(2.0, 0.1, 1.0), location, carProperties, "CarBody", carFolder);
 	ExtendedPart* carLeftPanel = new ExtendedPart(boxShape(2.0, 0.4, 0.1), carBody, CFrame(0.0, 0.25, -0.5), carProperties, "CarLeftSide", carFolder);

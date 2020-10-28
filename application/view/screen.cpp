@@ -86,7 +86,7 @@ Screen::Screen(int width, int height, PlayerWorld* world) {
 	using namespace Graphics;
 
 	// Init registry component order
-	registry.init<Comp::Tag, Comp::Transform, Comp::Model>();
+	registry.init<Comp::Name, Comp::Transform, Comp::Model>();
 	
 	this->world = world;
 

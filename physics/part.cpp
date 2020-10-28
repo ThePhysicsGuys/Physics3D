@@ -173,6 +173,46 @@ void Part::setDepth(double newDepth) {
 	recalculateAndUpdateParent(this, oldBounds);
 }
 
+double Part::getFriction() {
+	return this->properties.friction;
+}
+
+double Part::getDensity() {
+	return this->properties.density;
+}
+
+double Part::getBouncyness() {
+	return this->properties.bouncyness;
+}
+
+Vec3 Part::getConveyorEffect() {
+	return this->properties.conveyorEffect;
+}
+
+void Part::setMass(double mass) {
+	setDensity(mass / hitbox.getVolume());
+	// TODO update necessary?
+}
+
+void Part::setFriction(double friction) {
+	this->properties.friction = friction;
+	// TODO update necessary?
+}
+
+void Part::setDensity(double density) {
+	this->properties.density = density;
+	// TODO update necessary?
+}
+
+void Part::setBouncyness(double bouncyness) {
+	this->properties.bouncyness = bouncyness;
+	// TODO update necessary?
+}
+
+void Part::setConveyorEffect(const Vec3& conveyorEffect) {
+	this->properties.conveyorEffect = conveyorEffect;
+	// TODO update necessary?
+}
 
 void Part::applyForce(Vec3 relativeOrigin, Vec3 force) {
 	Vec3 originOffset = this->getPosition() - this->parent->mainPhysical->getPosition();

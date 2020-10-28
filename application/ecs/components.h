@@ -50,10 +50,10 @@ struct Transform : RefCountable {
 };
 
 // The name of an entity
-struct Tag : RefCountable {
+struct Name : RefCountable {
 	std::string name;
 
-	Tag(const std::string& name) : name(name) {}
+	Name(const std::string& name) : name(name) {}
 
 	void setName(const std::string& name) {
 		this->name = name;

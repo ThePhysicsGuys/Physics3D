@@ -33,7 +33,7 @@ namespace ImGui {
 
         bool result = false;
     	
-        float size = 0;
+        float size = GImGui->Style.ItemInnerSpacing.x * 2.0f;
         for (int i = 0; i < components; i++) {
             float label_size = CalcTextSize(labels[i], NULL, true).x;
             float padding_size = GImGui->Style.FramePadding.x * 2.0f;

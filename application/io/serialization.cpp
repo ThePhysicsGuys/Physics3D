@@ -73,7 +73,7 @@ public:
 	virtual void serializeExtendedPart(const ExtendedPart& part, std::ostream& ostream) override {
 		// TODO integrate components into serialization
 		serializeMaterial(screen.registry.getOr<Comp::Material>(part.entity, Comp::Material()), ostream);
-		::serializeString(screen.registry.getOr<Comp::Tag>(part.entity, Comp::Tag("")).name, ostream);
+		::serializeString(screen.registry.getOr<Comp::Name>(part.entity, Comp::Name("")).name, ostream);
 	}
 };
 

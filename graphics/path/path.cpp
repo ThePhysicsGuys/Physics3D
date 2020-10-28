@@ -3,8 +3,8 @@
 #include "path.h"
 
 #include "font.h"
+#include "../physics/math/constants.h"
 #include "../batch/guiBatch.h"
-#include "../physics/math/mathUtil.h"
 
 #define DEFAULT_PATTERN_2D(color) [color] (int i, const Vec2f& p) { return color; }
 

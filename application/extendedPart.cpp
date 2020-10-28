@@ -21,7 +21,7 @@ ExtendedPart::ExtendedPart(Part&& part, const VisualData& visualData, const std:
 	screen.registry.add<Comp::Model>(this->entity, this);
 	screen.registry.add<Comp::Transform>(this->entity, this);
 	if (!name.empty()) 
-		screen.registry.add<Comp::Tag>(this->entity, name);
+		screen.registry.add<Comp::Name>(this->entity, name);
 }
 
 ExtendedPart::ExtendedPart(const Shape& hitbox, const GlobalCFrame& position, const PartProperties& properties, const VisualData& visualData, const std::string& name, const Entity& parent) : Part(hitbox, position, properties) {
@@ -35,7 +35,7 @@ ExtendedPart::ExtendedPart(const Shape& hitbox, const GlobalCFrame& position, co
 	screen.registry.add<Comp::Model>(this->entity, this);
 	screen.registry.add<Comp::Transform>(this->entity, this);
 	if (!name.empty())
-		screen.registry.add<Comp::Tag>(this->entity, name);
+		screen.registry.add<Comp::Name>(this->entity, name);
 }
 
 ExtendedPart::ExtendedPart(Part&& part, const std::string& name, const Entity& parent) : Part(std::move(part)) {
@@ -49,7 +49,7 @@ ExtendedPart::ExtendedPart(Part&& part, const std::string& name, const Entity& p
 	screen.registry.add<Comp::Model>(this->entity, this);
 	screen.registry.add<Comp::Transform>(this->entity, this);
 	if (!name.empty())
-		screen.registry.add<Comp::Tag>(this->entity, name);
+		screen.registry.add<Comp::Name>(this->entity, name);
 }
 ExtendedPart::ExtendedPart(const Shape& hitbox, const GlobalCFrame& position, const PartProperties& properties, const std::string& name, const Entity& parent) : Part(hitbox, position, properties) {
 	if (this->entity == screen.registry.null_entity)
@@ -62,7 +62,7 @@ ExtendedPart::ExtendedPart(const Shape& hitbox, const GlobalCFrame& position, co
 	screen.registry.add<Comp::Model>(this->entity, this);
 	screen.registry.add<Comp::Transform>(this->entity, this);
 	if (!name.empty())
-		screen.registry.add<Comp::Tag>(this->entity, name);
+		screen.registry.add<Comp::Name>(this->entity, name);
 }
 
 ExtendedPart::ExtendedPart(const Shape& hitbox, ExtendedPart* attachTo, const CFrame& attach, const PartProperties& properties, const std::string& name, const Entity& parent) : Part(hitbox, *attachTo, attach, properties) {
@@ -76,7 +76,7 @@ ExtendedPart::ExtendedPart(const Shape& hitbox, ExtendedPart* attachTo, const CF
 	screen.registry.add<Comp::Model>(this->entity, this);
 	screen.registry.add<Comp::Transform>(this->entity, this);
 	if (!name.empty())
-		screen.registry.add<Comp::Tag>(this->entity, name);
+		screen.registry.add<Comp::Name>(this->entity, name);
 }
 
 void ExtendedPart::setMaterial(const Comp::Material& material) {
@@ -84,7 +84,7 @@ void ExtendedPart::setMaterial(const Comp::Material& material) {
 }
 
 void ExtendedPart::setName(const std::string& name) {
-	screen.registry.add<Comp::Tag>(this->entity, name);
+	screen.registry.add<Comp::Name>(this->entity, name);
 }
 	
 };

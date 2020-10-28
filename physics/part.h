@@ -73,11 +73,11 @@ public:
 	void scale(double scaleX, double scaleY, double scaleZ);
 
 	Bounds getBounds() const;
-
 	BoundingBox getLocalBounds() const;
 
 	Position getPosition() const { return cframe.getPosition(); }
 	double getMass() const { return hitbox.getVolume() * properties.density; }
+	void setMass(double mass);
 	Vec3 getLocalCenterOfMass() const { return hitbox.getCenterOfMass(); }
 	Position getCenterOfMass() const { return cframe.localToGlobal(this->getLocalCenterOfMass()); }
 	SymmetricMat3 getInertia() const { return hitbox.getInertia() * properties.density; }
@@ -101,6 +101,16 @@ public:
 	void setHeight(double newHeight);
 	void setDepth(double newDepth);
 
+	double getFriction();
+	double getDensity();
+	double getBouncyness();
+	Vec3 getConveyorEffect();
+	
+	void setFriction(double friction);
+	void setDensity(double density);
+	void setBouncyness(double bouncyness);
+	void setConveyorEffect(const Vec3& conveyorEffect);
+	
 	void applyForce(Vec3 relativeOrigin, Vec3 force);
 	void applyForceAtCenterOfMass(Vec3 force);
 	void applyMoment(Vec3 moment);
