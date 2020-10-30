@@ -33,7 +33,7 @@ void Shader::addUniform(const std::string& uniform) {
 void Shader::createUniform(const std::string& uniform) {
 	bind();
 	Log::subject s(name);
-	int location = glGetUniformLocation(id, uniform.c_str());
+	int location = id != 0 ? glGetUniformLocation(id, uniform.c_str()) : -1;
 
 	if (location < 0)
 		Log::error("Could not find uniform (%s) in shader (%s)", uniform.c_str(), name.c_str());

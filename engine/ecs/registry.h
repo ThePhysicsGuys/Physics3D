@@ -443,16 +443,14 @@ public:
 	}
 
 	/**
-	 * Removes the component of the given type from the given entity, returns whether the erasure was successful
+	 * Removes the component with the given component id from the given entity, returns whether the erasure was successful
 	 */
-	template<typename Component>
-	bool remove(const entity_type& entity) noexcept {
+	bool remove(const entity_type& entity, const component_type& index) noexcept {
+		if (index >= components.size())
+			return false;
+		
 		auto entities_iterator = entities.find(static_cast<representation_type>(entity));
 		if (entities_iterator == entities.end())
-			return false;
-
-		component_type index = getComponentIndex<Component>();
-		if (index >= components.size())
 			return false;
 
 		entity_map* map = components[index];
@@ -467,6 +465,16 @@ public:
 	}
 
 
+	/**
+	 * Removes the component of the given type from the given entity, returns whether the erasure was successful
+	 */
+	template<typename Component>
+	bool remove(const entity_type& entity) noexcept {
+		component_type index = getComponentIndex<Component>();
+
+		return remove(entity, index);
+	}
+	
 	//-------------------------------------------------------------------------------------//
 	// Getters                                                                               //
 	//-------------------------------------------------------------------------------------//
