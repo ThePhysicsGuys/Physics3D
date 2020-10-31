@@ -152,6 +152,8 @@ bool StandardInputHandler::onKeyPress(Engine::KeyPressEvent& event) {
 		}
 	} else if (key == KeyboardOptions::Application::close) {
 		Graphics::GLFW::closeWindow();
+	} else if (key == Keyboard::KEY_F11) {
+		Graphics::GLFW::swapFullScreen();
 	}
 
 	if (key < Keyboard::KEY_F9 && key > Keyboard::KEY_F1) {

@@ -28,6 +28,10 @@ extern void swapInterval(int interval);
 extern void swapBuffers();
 extern void pollEvents();
 
+extern bool isFullScreen();
+extern void setFullScreen(bool fullscreen);
+extern void swapFullScreen();
+	
 extern void closeWindow();
 extern bool isWindowClosed();
 

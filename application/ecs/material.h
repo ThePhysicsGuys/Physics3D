@@ -14,7 +14,7 @@ private:
 	Graphics::Texture* maps[8];
 
 public:
-	enum Map : char {
+	enum Map : short {
 		NONE = 0 << 0,
 		ALBEDO = 1 << 0,
 		NORMAL = 1 << 1,
@@ -26,7 +26,7 @@ public:
 		DISPLACEMENT = 1 << 7,
 	};
 
-	char flags = NONE;
+	short flags = NONE;
 	
 	Color albedo;
 	float metalness;
