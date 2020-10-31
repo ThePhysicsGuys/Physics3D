@@ -340,6 +340,11 @@ void WorldPrototype::update() {
 		tree.improveStructure();
 	}
 	age++;
+
+	for (SoftLink* link : softLinks) {
+		link->update();
+	}
+	
 }
 
 

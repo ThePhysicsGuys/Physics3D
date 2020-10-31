@@ -9,6 +9,7 @@
 #include "datastructures/iteratorEnd.h"
 #include "datastructures/boundsTree.h"
 #include "layer.h"
+#include "softLink.h"
 
 struct Colission {
 	Part* p1;
@@ -140,6 +141,8 @@ private:
 	std::vector<Colission> currentObjectColissions;
 	std::vector<Colission> currentTerrainColissions;
 
+	
+
 	/*
 		This method is called by World or Physical when new MotorizedPhysicals are created which need to be added to the list
 	*/
@@ -187,6 +190,8 @@ public:
 
 	std::vector<WorldLayer> layers;
 	std::vector<WorldLayer*> layersToRefresh;
+
+	std::vector<SoftLink*> softLinks;
 	
 	/*
 		These lists signify which layers collide
@@ -210,6 +215,8 @@ public:
 	WorldPrototype& operator=(const WorldPrototype&) = delete;
 	WorldPrototype(WorldPrototype&&) = delete;
 	WorldPrototype& operator=(WorldPrototype&&) = delete;
+
+	void addLink(SoftLink* sofLink);
 
 
 	virtual void tick();
