@@ -39,9 +39,6 @@ TEST_CASE(testRemoveObjFromBoundsTree) {
 		}
 	}
 }
-TEST_CASE(testAddObjToBoundsTreeGroup) {
-
-}
 static bool areGroupedCorrectly(const BoundsTree<BasicBounded>& tree, const std::vector<BasicBounded*>& lstA, const std::vector<BasicBounded*>& lstB, bool sameGroup) {
 	for(BasicBounded* a : lstA) {
 		for(BasicBounded* b : lstB) {

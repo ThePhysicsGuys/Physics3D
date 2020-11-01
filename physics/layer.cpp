@@ -77,3 +77,6 @@ void WorldLayer::joinPartsIntoNewGroup(Part* p1, Part* p2) {
 	this->tree.mergeGroupsOf(p1, p1->getBounds(), p2, p2->getBounds());
 }
 
+int WorldLayer::getID() const {
+	return this - &world->layers[0];
+}

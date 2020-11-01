@@ -9,8 +9,8 @@
 
 template<typename T, typename SerializeID = uint32_t>
 class SharedObjectSerializer {
-	SerializeID curPredefinedID = 0;
-	SerializeID curDynamicID = std::numeric_limits<SerializeID>::max();
+	SerializeID curPredefinedID = std::numeric_limits<SerializeID>::max();
+	SerializeID curDynamicID = 0;
 
 	std::vector<T> itemsYetToSerialize;
 public:
@@ -27,14 +27,14 @@ public:
 	void addPredefined(const T& obj) {
 		assert(objectToIDMap.find(obj) == objectToIDMap.end());
 		objectToIDMap.emplace(obj, curPredefinedID);
-		curPredefinedID++;
+		curPredefinedID--;
 	}
 
 	void include(const T& obj) {
 		if(objectToIDMap.find(obj) == objectToIDMap.end()) {
 			itemsYetToSerialize.push_back(obj);
 			objectToIDMap.emplace(obj, curDynamicID);
-			curDynamicID--;
+			curDynamicID++;
 		}
 	}
 
@@ -58,8 +58,8 @@ public:
 
 template<typename T, typename SerializeID = uint32_t>
 class SharedObjectDeserializer {
-	SerializeID curPredefinedID = 0;
-	SerializeID curDynamicID = std::numeric_limits<SerializeID>::max();
+	SerializeID curPredefinedID = std::numeric_limits<SerializeID>::max();
+	SerializeID curDynamicID = 0;
 
 public:
 	std::map<SerializeID, T> IDToObjectMap;
@@ -74,7 +74,7 @@ public:
 
 	void addPredefined(const T& obj) {
 		IDToObjectMap.emplace(curPredefinedID, obj);
-		curPredefinedID++;
+		curPredefinedID--;
 	}
 
 	// The given deserializer must be of the form 'T deserialize(std::istream&)', it may return references or const refs. 
@@ -84,7 +84,7 @@ public:
 		for(size_t i = 0; i < numberOfObjectsToDeserialize; i++) {
 			T object = deserialize(istream);
 			IDToObjectMap.emplace(curDynamicID, object);
-			curDynamicID--;
+			curDynamicID++;
 		}
 	}
 

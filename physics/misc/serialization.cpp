@@ -104,6 +104,23 @@ SinusoidalPistonConstraint* deserializePistonConstraint(std::istream& istream) {
 
 	return newConstraint;
 }
+void serializeSinusoidalMotorConstraint(const MotorConstraintTemplate<SineWaveController>& constraint, std::ostream& ostream) {
+	::serialize<double>(constraint.minValue, ostream);
+	::serialize<double>(constraint.maxValue, ostream);
+	::serialize<double>(constraint.period, ostream);
+	::serialize<double>(constraint.currentStepInPeriod, ostream);
+}
+MotorConstraintTemplate<SineWaveController>* deserializeSinusoidalMotorConstraint(std::istream& istream) {
+	double minLength = ::deserialize<double>(istream);
+	double maxLength = ::deserialize<double>(istream);
+	double period = ::deserialize<double>(istream);
+	double currentStepInPeriod = ::deserialize<double>(istream);
+
+	MotorConstraintTemplate<SineWaveController>* newConstraint = new MotorConstraintTemplate<SineWaveController>(minLength, maxLength, period);
+	newConstraint->currentStepInPeriod = currentStepInPeriod;
+
+	return newConstraint;
+}
 
 void serializeBallConstraint(const BallConstraint& constraint, std::ostream& ostream) {
 	::serialize<Vec3>(constraint.attachA, ostream);
@@ -452,6 +469,8 @@ static DynamicSerializerRegistry<HardConstraint>::ConcreteDynamicSerializer<Cons
 (serializeMotorConstraint, deserializeMotorConstraint, 1);
 static DynamicSerializerRegistry<HardConstraint>::ConcreteDynamicSerializer<SinusoidalPistonConstraint> pistonConstraintSerializer
 (serializePistonConstraint, deserializePistonConstraint, 2);
+static DynamicSerializerRegistry<HardConstraint>::ConcreteDynamicSerializer<MotorConstraintTemplate<SineWaveController>> sinusiodalMotorConstraintSerializer
+(serializeSinusoidalMotorConstraint, deserializeSinusoidalMotorConstraint, 3);
 
 static DynamicSerializerRegistry<ShapeClass>::ConcreteDynamicSerializer<PolyhedronShapeClass> polyhedronSerializer
 (serializePolyhedronShapeClass, deserializePolyhedronShapeClass, 0);
@@ -465,7 +484,8 @@ static DynamicSerializerRegistry<BallConstraint>::ConcreteDynamicSerializer<Ball
 DynamicSerializerRegistry<HardConstraint> dynamicHardConstraintSerializer{
 	{typeid(FixedConstraint), &fixedConstraintSerializer},
 	{typeid(ConstantSpeedMotorConstraint), &motorConstraintSerializer},
-	{typeid(SinusoidalPistonConstraint), &pistonConstraintSerializer}
+	{typeid(SinusoidalPistonConstraint), &pistonConstraintSerializer},
+	{typeid(MotorConstraintTemplate<SineWaveController>), &sinusiodalMotorConstraintSerializer}
 };
 DynamicSerializerRegistry<ShapeClass> dynamicShapeClassSerializer{
 	{typeid(PolyhedronShapeClass), &polyhedronSerializer},

@@ -38,5 +38,10 @@ public:
 	void moveAllOutOfGroup(PartIterBegin begin, PartIterEnd end) {
 		tree.moveAllOutOfGroup(begin, end);
 	}
+	void optimize() {
+		tree.maxImproveStructure();
+	}
+
+	int getID() const;
 };
 

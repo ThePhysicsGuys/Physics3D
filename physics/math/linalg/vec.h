@@ -37,7 +37,7 @@ struct Vector {
 			result[i] = v;
 		}
 		return result;
-	};
+	}
 
 	template<size_t SubSize>
 	constexpr Vector<T, SubSize> getSubVector(size_t startingAt = 0) const noexcept {
@@ -74,7 +74,7 @@ struct Vector<T, 2> {
 
 	static constexpr Vector<T, 2> full(T v) noexcept {
 		return Vector<T, 2>(v, v);
-	};
+	}
 
 	template<size_t SubSize>
 	constexpr Vector<T, SubSize> getSubVector(size_t startingAt = 0) const noexcept {
@@ -147,7 +147,7 @@ struct Vector<T, 4> {
 
 	static constexpr Vector<T, 4> full(T v) noexcept {
 		return Vector<T, 4>(v, v, v, v);
-	};
+	}
 
 	template<size_t SubSize>
 	constexpr Vector<T, SubSize> getSubVector(size_t startingAt = 0) const noexcept {
