@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ufwb version="1.17">
+    <grammar name="Physics3D World File Format" start="id:273" author="" fileextension="world">
+        <structure name="Physics3D world" id="273" length="0" alignment="0" repeatmin="0" repeatmax="-1" encoding="ISO_8859-1:1987" endian="little" signed="yes">
+            <number name="externalForceCount" id="274" fillcolor="FF0000" type="integer" length="8"/>
+            <structure name="ExternalForce" id="275" repeat="id:274" repeatmin="0" repeatmax="-1" fillcolor="FF9500" order="variable">
+                <structref name="&lt;GravityForce&gt;" id="277" repeatmin="0" structure="id:276"/>
+            </structure>
+            <number name="worldAge" id="279" fillcolor="11FF00" type="integer" length="8"/>
+            <structure name="fileHeader" id="280" encoding="ISO_8859-1:1987" endian="little" signed="yes">
+                <number name="version" id="281" fillcolor="00FF00" type="integer" length="4"/>
+                <number name="shapeClassCount" id="282" fillcolor="FF0000" type="integer" length="4"/>
+                <structure name="ShapeClass" id="283" repeat="id:282" repeatmin="0" repeatmax="-1" endian="little" signed="yes" order="variable">
+                    <structref name="&lt;ConvexPolyhedron&gt;" id="285" structure="id:284"/>
+                </structure>
+            </structure>
+            <number name="physicalCount" id="288" fillcolor="FF0000" type="integer" length="8"/>
+            <number name="terrainPartCount" id="289" fillcolor="FF0000" type="integer" length="8"/>
+            <structure name="MotorizedPhysical" id="290" repeat="id:288" repeatmin="0" repeatmax="-1">
+                <structref name="motionOfCOM" id="292" structure="id:291"/>
+                <structref name="cframe" id="294" structure="id:293"/>
+                <structref name="underlyingPhysical" id="296" structure="id:295"/>
+            </structure>
+            <structure name="TerrainPart" id="298" repeat="id:289" repeatmin="0" repeatmax="-1">
+                <structref name="cframe" id="299" structure="id:293"/>
+                <structref name="part" id="301" structure="id:300"/>
+            </structure>
+            <number name="constraintGroups" id="303" fillcolor="FF0000" type="integer" length="4"/>
+            <structure name="ConstraintGroup" id="304" repeat="id:303" repeatmin="0" repeatmax="-1">
+                <number name="constraintsInGroup" id="305" fillcolor="FF0000" type="integer" length="4"/>
+                <structure name="Constraint" id="306" repeatmin="0" repeatmax="-1">
+                    <number name="physicalIndex1" id="307" fillcolor="FFFF00" type="integer" length="4"/>
+                    <number name="physicalIndex2" id="308" fillcolor="FFFF00" type="integer" length="4"/>
+                    <structure name="ConstraintData" id="309" order="variable">
+                        <structref name="&lt;BallConstraint&gt;" id="311" structure="id:310"/>
+                    </structure>
+                </structure>
+            </structure>
+        </structure>
+        <structure name="Vec3" id="316" alignment="0" encoding="ISO_8859-1:1987" endian="little" signed="yes" fillcolor="00FFE2">
+            <number name="x" id="317" fillcolor="55FFFF" type="float" length="8"/>
+            <number name="y" id="318" fillcolor="55FFFF" type="float" length="8"/>
+            <number name="z" id="319" fillcolor="55FFFF" type="float" length="8"/>
+        </structure>
+        <structure name="CFrame" id="321" encoding="ISO_8859-1:1987" endian="little" signed="yes">
+            <structref name="position" id="322" structure="id:316"/>
+            <structref name="rotation" id="324" structure="id:323"/>
+        </structure>
+        <structure name="GlobalCFrame" id="293" encoding="ISO_8859-1:1987" endian="little" signed="yes">
+            <structref name="position" id="327" structure="id:326"/>
+            <structref name="rotation" id="328" structure="id:323"/>
+        </structure>
+        <structure name="Position" id="326" encoding="ISO_8859-1:1987" endian="little" signed="yes">
+            <number name="x" id="330" fillcolor="0000FF" type="integer" length="8"/>
+            <number name="y" id="331" fillcolor="0000FF" type="integer" length="8"/>
+            <number name="z" id="332" fillcolor="0000FF" type="integer" length="8"/>
+        </structure>
+        <structure name="Rotation" id="323" encoding="ISO_8859-1:1987" endian="little" signed="yes">
+            <number name="r00" id="334" fillcolor="55FFFF" type="float" length="8"/>
+            <number name="r01" id="335" fillcolor="55FFFF" type="float" length="8"/>
+            <number name="r02" id="336" fillcolor="55FFFF" type="float" length="8"/>
+            <number name="r10" id="337" fillcolor="55FFFF" type="float" length="8"/>
+            <number name="r11" id="338" fillcolor="55FFFF" type="float" length="8"/>
+            <number name="r12" id="339" fillcolor="55FFFF" type="float" length="8"/>
+            <number name="r20" id="340" fillcolor="55FFFF" type="float" length="8"/>
+            <number name="r21" id="341" fillcolor="55FFFF" type="float" length="8"/>
+            <number name="r22" id="342" fillcolor="55FFFF" type="float" length="8"/>
+        </structure>
+        <structure name="Motion" id="291" encoding="ISO_8859-1:1987" endian="little" signed="yes">
+            <structref name="velocity" id="344" structure="id:316"/>
+            <structref name="acceleration" id="345" structure="id:316"/>
+            <structref name="angularVelocity" id="346" structure="id:316"/>
+            <structref name="angularAcceleration" id="347" structure="id:316"/>
+        </structure>
+        <structure name="Physical" id="295" encoding="ISO_8859-1:1987" endian="little" signed="yes">
+            <structure name="RigidBody" id="349">
+                <structref name="mainPart" id="350" structure="id:300"/>
+                <number name="attachedPartCount" id="351" fillcolor="FF0000" type="integer" length="4"/>
+                <structure name="AttachedPart" id="352" repeat="id:351" repeatmin="0" repeatmax="-1">
+                    <structref name="attachment" id="353" structure="id:321"/>
+                    <structref name="part" id="354" structure="id:300"/>
+                </structure>
+            </structure>
+            <number name="connectedPhysicalCount" id="357" fillcolor="FF0000" type="integer" length="4"/>
+            <structure name="ConnectedPhysical" id="358" repeat="id:357" repeatmin="0" repeatmax="-1">
+                <structure name="HardPhysicalConnection" id="359">
+                    <structref name="attachOnChild" id="360" structure="id:321"/>
+                    <structref name="attachOnParent" id="361" structure="id:321"/>
+                    <structure name="Constraint" id="362" order="variable">
+                        <structref name="&lt;FixedConstraint&gt;" id="364" repeatmin="0" structure="id:363"/>
+                        <structref name="&lt;MotorConstraint&gt;" id="366" repeatmin="0" structure="id:365"/>
+                        <structref name="&lt;SinusoidalPistonConstraint&gt;" id="368" repeatmin="0" structure="id:367"/>
+                        <structref name="&lt;SinusoidalMotorConstraint&gt;" id="370" repeatmin="0" structure="id:369"/>
+                    </structure>
+                </structure>
+                <structref name="childPhys" id="373" structure="id:295"/>
+            </structure>
+        </structure>
+        <structure name="Part" id="300" encoding="ISO_8859-1:1987" endian="little" signed="yes">
+            <structure name="Shape" id="376" fillcolor="FFAA00">
+                <number name="shapeClassID" id="377" fillcolor="FFFF00" type="integer" length="4" minval="0">
+                    <fixedvalues>
+                        <fixedvalue name="box" value="18446744073709551615"/>
+                        <fixedvalue name="sphere" value="18446744073709551614"/>
+                        <fixedvalue name="cylinder" value="18446744073709551613"/>
+                    </fixedvalues>
+                </number>
+                <number name="width" id="378" fillcolor="55FFFF" type="float" length="8"/>
+                <number name="height" id="379" fillcolor="55FFFF" type="float" length="8"/>
+                <number name="depth" id="380" fillcolor="55FFFF" type="float" length="8"/>
+            </structure>
+            <structure name="PartProperties" id="382">
+                <number name="density" id="383" fillcolor="55FFFF" type="float" length="8"/>
+                <number name="friction" id="384" fillcolor="55FFFF" type="float" length="8"/>
+                <number name="bouncyness" id="385" fillcolor="55FFFF" type="float" length="8"/>
+                <structref name="conveyorEffect" id="386" structure="id:316"/>
+            </structure>
+            <structref name="applicationExtention" id="389" structure="id:388"/>
+        </structure>
+        <structure name="PartExtention" id="388" encoding="ISO_8859-1:1987" endian="little" signed="yes">
+            <structure name="Material" id="391">
+                <structure name="TextureIDs" id="392">
+                    <number name="albedo" id="393" fillcolor="AAAA7F" type="integer" length="4"/>
+                    <number name="normal" id="394" fillcolor="AAAA7F" type="integer" length="4"/>
+                    <number name="metalness" id="395" fillcolor="AAAA7F" type="integer" length="4"/>
+                    <number name="roughness" id="396" fillcolor="AAAA7F" type="integer" length="4"/>
+                    <number name="ao" id="397" fillcolor="AAAA7F" type="integer" length="4"/>
+                    <number name="gloss" id="398" fillcolor="AAAA7F" type="integer" length="4"/>
+                    <number name="specular" id="399" fillcolor="AAAA7F" type="integer" length="4"/>
+                    <number name="displacement" id="400" fillcolor="AAAA7F" type="integer" length="4"/>
+                </structure>
+                <structure name="Color" id="402">
+                    <number name="r" id="403" fillcolor="AAAA00" type="float" length="4"/>
+                    <number name="g" id="404" fillcolor="AAAA00" type="float" length="4"/>
+                    <number name="b" id="405" fillcolor="AAAA00" type="float" length="4"/>
+                    <number name="a" id="406" fillcolor="AAAA00" type="float" length="4"/>
+                </structure>
+                <number name="metalness" id="408" fillcolor="AAAA00" type="float" length="4"/>
+                <number name="roughness" id="409" fillcolor="AAAA00" type="float" length="4"/>
+                <number name="ao" id="410" fillcolor="AAAA00" type="float" length="4"/>
+            </structure>
+            <string name="name" id="412" fillcolor="C1775E" type="zero-terminated"/>
+        </structure>
+        <structure name="ExternalForce" id="414" encoding="ISO_8859-1:1987" endian="little" signed="yes">
+            <number name="forceType" id="415" fillcolor="FFAA00" type="integer" length="4"/>
+        </structure>
+        <structure name="GravityForce" id="276" extends="id:414">
+            <number name="forceType" id="417" type="integer">
+                <fixedvalues>
+                    <fixedvalue name="gravity" value="0"/>
+                </fixedvalues>
+            </number>
+            <structref name="gravity" id="418" structure="id:316"/>
+        </structure>
+        <structure name="ShapeClass" id="420" encoding="ISO_8859-1:1987" endian="little" signed="yes">
+            <number name="classType" id="421" fillcolor="FFAA00" type="integer" length="4"/>
+        </structure>
+        <structure name="ConvexPolyhedron" id="284" extends="id:420">
+            <number name="classType" id="423" type="integer">
+                <fixedvalues>
+                    <fixedvalue name="convexPolyhedron" value="0"/>
+                </fixedvalues>
+            </number>
+            <number name="vertexCount" id="424" fillcolor="FF0000" type="integer" length="4"/>
+            <number name="triangleCount" id="425" fillcolor="FF0000" type="integer" length="4"/>
+            <structure name="Vec3f" id="426" repeat="id:424" repeatmin="0" repeatmax="-1">
+                <number name="x" id="427" fillcolor="55FFFF" type="float" length="4"/>
+                <number name="y" id="428" fillcolor="55FFFF" type="float" length="4"/>
+                <number name="z" id="429" fillcolor="55FFFF" type="float" length="4"/>
+            </structure>
+            <structure name="Triangle" id="431" repeat="id:425" repeatmin="0" repeatmax="-1">
+                <number name="a" id="432" fillcolor="55FF7F" type="integer" length="4"/>
+                <number name="b" id="433" fillcolor="55FF7F" type="integer" length="4"/>
+                <number name="c" id="434" fillcolor="55FF7F" type="integer" length="4"/>
+            </structure>
+        </structure>
+        <structure name="HardConstraint" id="437" encoding="ISO_8859-1:1987" endian="little" signed="yes">
+            <number name="constraintType" id="438" fillcolor="FFAA00" type="integer" length="4"/>
+        </structure>
+        <structure name="FixedConstraint" id="363" length="0" alignment="0" extends="id:437" encoding="ISO_8859-1:1987" endian="little" signed="yes">
+            <number name="constraintType" mustmatch="yes" id="440" type="integer">
+                <fixedvalues>
+                    <fixedvalue name="fixed" value="0"/>
+                </fixedvalues>
+            </number>
+        </structure>
+        <structure name="MotorConstraint" id="365" length="0" alignment="0" extends="id:437" encoding="ISO_8859-1:1987" endian="little" signed="yes">
+            <number name="constraintType" mustmatch="yes" id="442" type="integer">
+                <fixedvalues>
+                    <fixedvalue name="motor" value="1"/>
+                </fixedvalues>
+            </number>
+            <number name="speed" id="443" type="float" length="8"/>
+            <number name="currentAngle" id="444" type="float" length="8"/>
+        </structure>
+        <structure name="SinusoidalPistonConstraint" id="367" length="0" alignment="0" extends="id:437" encoding="ISO_8859-1:1987" endian="little" signed="yes">
+            <number name="constraintType" mustmatch="yes" id="446" type="integer">
+                <fixedvalues>
+                    <fixedvalue name="piston" value="2"/>
+                </fixedvalues>
+            </number>
+            <number name="minValue" id="447" type="float" length="8"/>
+            <number name="maxValue" id="448" type="float" length="8"/>
+            <number name="period" id="449" type="float" length="8"/>
+            <number name="currentStepInPeriod" id="450" type="float" length="8"/>
+        </structure>
+        <structure name="SinusoidalMotorConstraint" id="369" length="0" alignment="0" extends="id:437" encoding="ISO_8859-1:1987" endian="little" signed="yes">
+            <number name="constraintType" mustmatch="yes" id="452" type="integer">
+                <fixedvalues>
+                    <fixedvalue name="sinusoidalMotor" value="3"/>
+                </fixedvalues>
+            </number>
+            <number name="minValue" id="453" type="float" length="8"/>
+            <number name="maxValue" id="454" type="float" length="8"/>
+            <number name="period" id="455" type="float" length="8"/>
+            <number name="currentStepInPeriod" id="456" type="float" length="8"/>
+        </structure>
+        <structure name="Constraint" id="458" encoding="ISO_8859-1:1987" endian="little" signed="yes">
+            <number name="constraintType" id="459" fillcolor="FFAA00" type="integer" length="4"/>
+        </structure>
+        <structure name="BallConstraint" id="310" extends="id:458" endian="little" signed="yes">
+            <number name="constraintType" mustmatch="yes" id="461" type="integer">
+                <fixedvalues>
+                    <fixedvalue name="ball" value="0"/>
+                </fixedvalues>
+            </number>
+            <structref name="offsetOfPhys1" id="462" structure="id:316"/>
+            <structref name="offsetOfPhys2" id="463" structure="id:316"/>
+        </structure>
+    </grammar>
+</ufwb>

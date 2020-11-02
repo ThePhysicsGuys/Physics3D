@@ -3,6 +3,7 @@
 #include <string>
 #include <sstream>
 #include <stddef.h>
+#include <iomanip>
 
 #include "../math/linalg/vec.h"
 #include "../math/linalg/mat.h"
@@ -38,10 +39,17 @@ inline std::ostream& operator<<(std::ostream& os, const LargeVector<T>& vector) 
 
 template<typename T, size_t Size>
 inline std::ostream& operator<<(std::ostream& os, const Vector<T, Size>& vector) {
+	os << std::fixed << std::setw(4) << std::setprecision(4);
 	os << '(';
 	for(size_t i = 0; i < Size - 1; i++) {
+		if (vector[i] > 0)
+			os << "+";
 		os << vector[i] << ", ";
 	}
+
+	if (vector[Size - 1] > 0)
+		os << "+";
+	
 	os << vector[Size - 1] << ")";
 	return os;
 }

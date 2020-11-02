@@ -22,7 +22,11 @@ namespace Cursor {
 	int VRESIZE = GLFW_VRESIZE_CURSOR;
 }
 
-GLFWwindow* currentContext;
+GLFWwindow* currentContext = nullptr;
+GLFWmonitor* currentMonitor = nullptr;
+int windowPosition[2] { 0, 0 };
+int windowSize[2] { 0, 0 };
+	
 GLFWcursor* currentCursor;
 int currentCursorType;
 
@@ -37,11 +41,15 @@ void terminate() {
 void setCurrentContext(GLFWwindow* context) {
 	currentContext = context;
 	glfwMakeContextCurrent(currentContext);
+
+	currentMonitor = glfwGetPrimaryMonitor();
+	glfwGetWindowPos(currentContext, &windowPosition[0], &windowPosition[1]);
+	glfwGetWindowSize(currentContext, &windowSize[0], &windowSize[1]);
 }
 
 GLFWwindow* createContext(int width, int height, const char* title) {
 	GLFWwindow* context = glfwCreateWindow(width, height, title, nullptr, nullptr);
-
+	
 	return context;
 }
 
@@ -51,6 +59,29 @@ bool validContext(GLFWwindow* context) {
 
 GLFWwindow* getCurrentContext() {
 	return currentContext;
+}
+
+bool isFullScreen() {
+	return glfwGetWindowMonitor(currentContext) != nullptr;
+}
+
+void setFullScreen(bool fullscreen) {
+	if (isFullScreen() == fullscreen)
+		return;
+
+	if (fullscreen) {
+		glfwGetWindowPos(currentContext, &windowPosition[0], &windowPosition[1]);
+		glfwGetWindowSize(currentContext, &windowSize[0], &windowSize[1]);
+
+		const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+		glfwSetWindowMonitor(currentContext, currentMonitor, 0, 0, mode->width, mode->height, 0);
+	} else {
+		glfwSetWindowMonitor(currentContext, nullptr, windowPosition[0], windowPosition[1], windowSize[0], windowSize[1], 0);
+	}
+}
+
+void swapFullScreen() {
+	setFullScreen(!isFullScreen());
 }
 
 void swapInterval(int interval) {

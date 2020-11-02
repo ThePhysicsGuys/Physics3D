@@ -134,6 +134,7 @@ TreeNode generateTreeNode(int branchInhibition) {
 		for(int i = 0; i < branches; i++) {
 			result[i] = generateTreeNode(branchInhibition + 1); // to generate reasonably sized trees but not too big
 		}
+		result.recalculateBoundsFromSubBounds();
 		return result;
 	} else {
 		// generate leaf node

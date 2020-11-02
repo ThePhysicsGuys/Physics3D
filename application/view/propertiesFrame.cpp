@@ -10,30 +10,49 @@
 #include "../graphics/gui/imgui/imguiExtension.h"
 #include "../physics/misc/toString.h"
 #include "../physics/physical.h"
+#include "../graphics/renderer.h"
 
 namespace P3D::Application {
 
-Vec3f PropertiesFrame::position = Vec3f(0, 0, 0);
+Engine::Registry64::component_type deletedComponentIndex = static_cast<Engine::Registry64::component_type>(-1);
+std::string errorModalMessage = "";
+bool showErrorModal = false;
+
+bool _ecs_property_frame_start(Engine::Registry64& registry, Engine::Registry64::component_type index) {
+	std::string label((registry).getComponentName(index));
+	bool open = ImGui::CollapsingHeader(label.c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap);
+	ImGui::SameLine(ImGui::GetColumnWidth() - 40.0f);
+	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0, 0.0, 0.0, 0.0));
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, GImGui->Style.Colors[ImGuiCol_HeaderActive]);
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, GImGui->Style.Colors[ImGuiCol_HeaderHovered]);
+	ImGui::AlignTextToFramePadding();
+	std::string buttonLabel = "...##button_" + label;
+	if (ImGui::Button(buttonLabel.c_str())) {
+		ImGui::OpenPopup("ComponentSettings");
+		deletedComponentIndex = index;
+	}
+
+	ImGui::PopStyleColor(3);
+	if (ImGui::IsItemHovered())
+		ImGui::SetTooltip("Settings");
+
+	return open;
+}
 
 #define ENTITY_DISPATCH_START(index) \
 	if ((index) == -1) \
 		continue
-	
+
 #define ENTITY_DISPATCH(index, type, registry, component) \
 	else if ((index) == (registry).getComponentIndex<type>()) \
 		renderEntity(registry, index, intrusive_cast<type>(component))
-	
+
 #define ENTITY_DISPATCH_END(index, registry, component) \
 	else \
 		renderEntity(registry, index, component)
-
+	
 #define ECS_PROPERTY_FRAME_START(registry, index) \
-	std::string label((registry).getComponentName(index)); \
-	bool open = ImGui::CollapsingHeader(label.c_str(), ImGuiTreeNodeFlags_DefaultOpen); \
-	/*ImGui::SameLine(ImGui::GetWindowWidth() - 25.0f); \
-	/*if (ImGui::Button("+", ImVec2(25.0f, 0)))*/ \
-		/*ImGui::OpenPopup("ComponentSettings");*/ \
-	if (open) { \
+	if (_ecs_property_frame_start(registry, index)) { \
 		ImGui::Columns(2)
 
 #define ECS_PROPERTY_FRAME_END \
@@ -79,7 +98,7 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_ty
 
 void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const Ref<Comp::Model>& component) {
 	ECS_PROPERTY_FRAME_START(registry, index);
-
+	
 	ExtendedPart* selectedPart = component->part;
 	Motion motion = selectedPart->getMotion();
 
@@ -153,7 +172,7 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_ty
 	ECS_PROPERTY_FRAME_START(registry, index);
 
 	ECS_PROPERTY("ID:", ImGui::Text(str(component->id).c_str()));
-	ECS_PROPERTY("Mode:", ImGui::Text(str(component->mode).c_str()));
+	ECS_PROPERTY("Mode:", ImGui::Text(component->mode == Graphics::Renderer::FILL ? "Fill" : "Wireframe"));
 	ECS_PROPERTY("Normals:", ImGui::Text(component->hasNormals ? "Yes" : "No"));
 	ECS_PROPERTY("UVs:", ImGui::Text(component->hasUVs ? "Yes" : "No"));
 
@@ -163,7 +182,7 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_ty
 void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const Ref<Comp::Material>& component) {
 	ECS_PROPERTY_FRAME_START(registry, index);
 
-	ECS_PROPERTY("Albedo", ImGui::ColorEdit4("##Albedo", component->albedo.data));
+	ECS_PROPERTY("Albedo", ImGui::ColorEdit4("##Albedo", component->albedo.data, ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_AlphaBar));
 	ECS_PROPERTY("Metalness", ImGui::SliderFloat("##Metalness", &component->metalness, 0, 1));
 	ECS_PROPERTY("Roughness", ImGui::SliderFloat("##Roughness", &component->roughness, 0, 1));
 	ECS_PROPERTY("Ambient occlusion", ImGui::SliderFloat("##AO", &component->ao, 0, 1));
@@ -223,7 +242,7 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_ty
 		component->setCFrame(frame);
 	);
 
-	ECS_PROPERTY_IF("Rotation:", ImGui::DragVec3("Rotation", rotation.data, 0.01f),
+	ECS_PROPERTY_IF("Rotation:", ImGui::DragVec3("Rotation", rotation.data, 0.01f, 0.02f),
 		frame.rotation = Rotation::fromRotationVec(rotation);
 		component->setCFrame(frame);
 	);
@@ -245,42 +264,7 @@ void PropertiesFrame::onInit(Engine::Registry64& registry) {
 void PropertiesFrame::onRender(Engine::Registry64& registry) {
 	ImGui::Begin("Properties");
 	
-	if (screen.selectedEntity) {
-		auto components = registry.getComponents(screen.selectedEntity);
-		for (auto [index, component] : components) {
-			ENTITY_DISPATCH_START(index);
-			ENTITY_DISPATCH(index, Comp::Name, registry, component);
-			ENTITY_DISPATCH(index, Comp::Transform, registry, component);
-			ENTITY_DISPATCH(index, Comp::Model, registry, component);
-			ENTITY_DISPATCH(index, Comp::Mesh, registry, component);
-			ENTITY_DISPATCH(index, Comp::Material, registry, component);
-			ENTITY_DISPATCH_END(index, registry, component);
-		}
-
-		if (ImGui::Button("Add new component...", ImVec2(-1, 0)))
-			ImGui::OpenPopup("Add component");
-		
-		if (ImGui::BeginPopupModal("Add component")) {
-			std::vector<const char*> components;
-			for (Engine::Registry64::component_type index = 0; index < Engine::Registry64::component_index<void>::index(); index++)
-				components.push_back(registry.getComponentName(index).data());
-			
-			static int item_current = 0;
-			ImGui::SetNextItemWidth(-1);
-			ImGui::ListBox("##ComponentsModal", &item_current, components.data(), components.size(), 6);
-			
-			if (ImGui::Button("Cancel", ImVec2(-1, 0)))
-				ImGui::CloseCurrentPopup();
-			
-			ImGui::EndPopup();
-		}
-
-		if (ImGui::BeginPopup("ComponentSettings")) {
-			if (ImGui::MenuItem("Remove component"));
-			ImGui::EndPopup();
-		}
-		
-	} else {
+	if (screen.selectedEntity == Engine::Registry64::null_entity) {
 		std::string label = "Select an entity to see properties";
 		auto [wx, wy] = ImGui::GetContentRegionAvail();
 		auto [tx, ty] = ImGui::CalcTextSize(label.c_str());
@@ -288,6 +272,69 @@ void PropertiesFrame::onRender(Engine::Registry64& registry) {
 		ImVec2 cursor = ImVec2(cx + (wx - tx) / 2.0f, cy + (wy - ty) / 2.0f);
 		ImGui::SetCursorPos(cursor);
 		ImGui::Text(label.c_str());
+
+		ImGui::End();
+		return;
+	}
+
+	// Dispatch component frames
+	auto components = registry.getComponents(screen.selectedEntity);
+	for (auto [index, component] : components) {
+		ENTITY_DISPATCH_START(index);
+		ENTITY_DISPATCH(index, Comp::Name, registry, component);
+		ENTITY_DISPATCH(index, Comp::Transform, registry, component);
+		ENTITY_DISPATCH(index, Comp::Model, registry, component);
+		ENTITY_DISPATCH(index, Comp::Mesh, registry, component);
+		ENTITY_DISPATCH(index, Comp::Material, registry, component);
+		ENTITY_DISPATCH_END(index, registry, component);
+	}
+
+	// Add new Component
+	if (ImGui::Button("Add new component...", ImVec2(-1, 0)))
+		ImGui::OpenPopup("Add component");
+	if (ImGui::BeginPopupModal("Add component")) {
+		std::vector<const char*> components;
+		for (Engine::Registry64::component_type index = 0; index < Engine::Registry64::component_index<void>::index(); index++)
+			components.push_back(registry.getComponentName(index).data());
+		
+		static int item_current = 0;
+		ImGui::SetNextItemWidth(-1);
+		ImGui::ListBox("##ComponentsModal", &item_current, components.data(), components.size(), 6);
+		
+		if (ImGui::Button("Cancel", ImVec2(-1, 0)))
+			ImGui::CloseCurrentPopup();
+		
+		ImGui::EndPopup();
+	}
+
+	// Component Settings
+	if (ImGui::BeginPopup("ComponentSettings")) {
+		if (ImGui::MenuItem("Delete component")) {
+			if (deletedComponentIndex != static_cast<Engine::Registry64::component_type>(-1)) {
+				if (deletedComponentIndex == registry.getComponentIndex<Comp::Transform>()) {
+					errorModalMessage = "This component can not be deleted.";
+					showErrorModal = true;
+				} else {
+					registry.remove(screen.selectedEntity, deletedComponentIndex);
+				}
+			}
+		}
+		if (ImGui::MenuItem("Component info")) {
+			
+		}
+		ImGui::EndPopup();
+	}
+
+	// Error Modal
+	if (showErrorModal) 
+		ImGui::OpenPopup("Error##ErrorModal");
+	if (ImGui::BeginPopupModal("Error##ErrorModal", 0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize)) {
+		ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), errorModalMessage.c_str());
+		if (ImGui::Button("Ok##ErrorModalClose", ImVec2(-1, 0))) {
+			ImGui::CloseCurrentPopup();
+			showErrorModal = false;
+		}
+		ImGui::EndPopup();
 	}
 	
 	ImGui::End();

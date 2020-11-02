@@ -223,7 +223,7 @@ void buildTerrain(double width, double depth, int folder) {
 	}
 	
 	Log::info("Optimizing terrain! (This will take around 1.5x the time it took to build the world)");
-	world.optimizeTerrain();
+	world.optimizeLayers();
 }
 void buildCar(const GlobalCFrame& location, int folder) {
 	PartProperties carProperties { 1.0, 0.7, 0.3 };

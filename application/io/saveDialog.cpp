@@ -19,16 +19,7 @@ static void saveWorld(const char* file, const PlayerWorld& world) {
 static void openWorld(const char* file, PlayerWorld& world) {
 	Log::info("Opening world: %s", file);
 	world.syncModification([file, &world]() {
-		std::vector<ExtendedPart*> partsToDelete;
-		partsToDelete.reserve(world.getPartCount());
-		for(ExtendedPart& p : world.iterParts()) {
-			partsToDelete.push_back(&p);
-		}
 		world.clear();
-
-		for(ExtendedPart* p : partsToDelete) {
-			delete p;
-		}
 
 		WorldImportExport::loadWorld(file, world);
 	});

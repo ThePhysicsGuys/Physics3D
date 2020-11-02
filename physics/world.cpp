@@ -125,6 +125,10 @@ void WorldPrototype::removePart(Part* part) {
 	ASSERT_VALID;
 }
 
+void WorldPrototype::deletePart(Part* partToDelete) const {
+	delete partToDelete;
+}
+
 void WorldPrototype::clear() {
 	this->constraints.clear();
 	this->externalForces.clear();
@@ -135,6 +139,7 @@ void WorldPrototype::clear() {
 	std::vector<Part*> partsToDelete;
 	for(Part& p : this->iterParts()) {
 		p.parent = nullptr;
+		p.layer = nullptr;
 		partsToDelete.push_back(&p);
 	}
 	this->objectCount = 0;
@@ -143,6 +148,7 @@ void WorldPrototype::clear() {
 	}
 	for(Part* p : partsToDelete) {
 		this->onPartRemoved(p);
+		this->deletePart(p);
 	}
 }
 
@@ -163,12 +169,14 @@ void WorldPrototype::notifyMainPhysicalObsolete(MotorizedPhysical* motorPhys) {
 
 	ASSERT_VALID;
 }
-void WorldPrototype::optimizeTerrain() {
-	terrainTree.maxImproveStructure();
+void WorldPrototype::optimizeLayers() {
+	for(WorldLayer& layer : layers) {
+		layer.optimize();
+	}
 	ASSERT_VALID;
 }
 
-void WorldPrototype::notifyNewPhysicalCreatedWhenSplitting(MotorizedPhysical* newPhysical) {
+void WorldPrototype::notifyNewPhysicalCreated(MotorizedPhysical* newPhysical) {
 	physicals.push_back(newPhysical);
 	newPhysical->world = this;
 }
@@ -191,7 +199,7 @@ static void assignLayersForPhysicalRecurse(const Physical& phys, std::vector<std
 void WorldPrototype::notifyPhysicalHasBeenSplit(const MotorizedPhysical* mainPhysical, MotorizedPhysical* newlySplitPhysical) {
 	assert(mainPhysical->world == this);
 	assert(newlySplitPhysical->world == nullptr);
-	this->notifyNewPhysicalCreatedWhenSplitting(newlySplitPhysical);
+	this->notifyNewPhysicalCreated(newlySplitPhysical);
 	
 	std::vector<std::pair<WorldLayer*, std::vector<const Part*>>> layersThatNeedToBeSplit;
 	assignLayersForPhysicalRecurse(*newlySplitPhysical, layersThatNeedToBeSplit);

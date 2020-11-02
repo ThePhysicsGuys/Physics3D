@@ -146,7 +146,7 @@ private:
 	/*
 		This method is called by World or Physical when new MotorizedPhysicals are created which need to be added to the list
 	*/
-	void notifyNewPhysicalCreatedWhenSplitting(MotorizedPhysical* newPhysical);
+	void notifyNewPhysicalCreated(MotorizedPhysical* newPhysical);
 
 	/*
 		Splits newlySplitPhysical from mainPhysical in the world tree, also adds the new physical to the list of physicals
@@ -182,6 +182,9 @@ protected:
 	// event handlers
 	virtual void onPartAdded(Part* newPart);
 	virtual void onPartRemoved(Part* removedPart); 
+
+	// called when the part has already been removed from the world
+	virtual void deletePart(Part* partToDelete) const;
 
 public:
 	std::vector<ExternalForce*> externalForces;
@@ -225,7 +228,7 @@ public:
 	void removePart(Part* part);
 
 	void addTerrainPart(Part* part, int layerIndex = 1);
-	void optimizeTerrain();
+	void optimizeLayers();
 
 	// removes everything from this world, parts, physicals, forces, constraints
 	void clear();
@@ -336,10 +339,17 @@ public:
 
 	virtual void onPartAdded(T* part) {}
 	virtual void onPartRemoved(T* part) {}
+	virtual void deletePart(T* part) const {
+		delete part;
+	}
 	virtual void onPartAdded(Part* part) final override {
 		this->onPartAdded(static_cast<T*>(part));
 	}
 	virtual void onPartRemoved(Part* part) final override {
 		this->onPartRemoved(static_cast<T*>(part));
+	}
+	// called when the part has already been removed from the world
+	virtual void deletePart(Part* partToDelete) const final override {
+		this->deletePart(static_cast<T*>(partToDelete));
 	}
 };

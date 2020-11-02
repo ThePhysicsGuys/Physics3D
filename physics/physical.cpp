@@ -468,7 +468,7 @@ void Physical::detachPart(Part* part) {
 		MotorizedPhysical* newPhys = new MotorizedPhysical(part);
 		part->parent = newPhys;
 		if(world != nullptr) {
-			world->notifyNewPhysicalCreatedWhenSplitting(newPhys);
+			world->notifyNewPhysicalCreated(newPhys);
 		}
 	}
 }

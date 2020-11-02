@@ -54,6 +54,7 @@ Part::Part(Part&& other) noexcept :
 	if(layer != nullptr) layer->notifyPartStdMoved(&other, this);
 
 	other.parent = nullptr;
+	other.layer = nullptr;
 }
 Part& Part::operator=(Part&& other) noexcept {
 	this->cframe = other.cframe;
@@ -67,6 +68,7 @@ Part& Part::operator=(Part&& other) noexcept {
 	if(layer != nullptr) layer->notifyPartStdMoved(&other, this);
 
 	other.parent = nullptr;
+	other.layer = nullptr;
 
 	return *this;
 }
