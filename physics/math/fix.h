@@ -23,9 +23,9 @@ struct Fix {
 	}
 
 	inline Fix<N>& operator++() noexcept { value += (1ULL << N); return *this; }
-	inline Fix<N> operator++(int) noexcept & { Fix<N> old = *this; value += (1ULL << N); return old; }
+	inline Fix<N> operator++(int) & noexcept  { Fix<N> old = *this; value += (1ULL << N); return old; }
 	inline Fix<N>& operator--() noexcept { value -= (1ULL << N); return *this; }
-	inline Fix<N> operator--(int) noexcept & { Fix<N> old = *this; value -= (1ULL << N); return old; }
+	inline Fix<N> operator--(int) & noexcept  { Fix<N> old = *this; value -= (1ULL << N); return old; }
 
 	inline Fix<N>& operator+=(const Fix<N>& b) noexcept { this->value += b.value; return *this; }
 	inline Fix<N>& operator-=(const Fix<N>& b) noexcept { this->value -= b.value; return *this; }
