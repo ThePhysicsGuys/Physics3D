@@ -83,6 +83,10 @@ WorldPrototype::~WorldPrototype() {
 
 }
 
+void WorldPrototype::addLink(SoftLink* softLink) {
+	softLinks.push_back(softLink);
+}
+
 static TreeNode createNodeFor(MotorizedPhysical* phys) {
 	TreeNode newNode(phys->rigidBody.mainPart, phys->rigidBody.mainPart->getBounds(), true);
 	phys->forEachPartExceptMainPart([&newNode](Part& part) {

@@ -284,6 +284,28 @@ void setupWorld(int argc, const char** args) {
 
 	ep2->parent->mainPhysical->applyAngularImpulse(Vec3(1.0, 0.5, 0.0) * 1);
 
+	//SoftLink.
+	{
+		ExtendedPart* a = new ExtendedPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(3.0, 3.0, 0.0), { 1.0, 1.0, 1.0 }, "SoftLinkMain");
+		ExtendedPart* b = new ExtendedPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(), { 1.0, 1.0, 1.0 }, "SoftLinkPart");
+		
+
+		world.addPart(a);
+		world.addPart(b);
+
+		world.addLink(new SoftLink{100000.0, 15.0, 10, {CFrame{1.0, 0.0, 0.0}, a}, {CFrame{0.0, 0.0, 0.0}, b } });
+	}
+	{
+
+		ExtendedPart* a = new ExtendedPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(3.0, 3.0, 0.0), { 1.0, 1.0, 1.0 }, "SoftLinkMain1");
+		ExtendedPart* b = new ExtendedPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(), { 1.0, 1.0, 1.0 }, "SoftLinkPart1");
+
+		world.addPart(a);
+		world.addPart(b);
+
+		world.addLink(new SoftLink{100000.0, 15.0, 10, {CFrame{1.0, 0.0, 0.0}, a}, {CFrame{0.0, 0.0, 0.0}, b } });
+	}
+
 	/*Vec3 angularVel(0.0, 0.0, -1.0);
 	{
 		ExtendedPart* nativeFixedConstraintGroupMain = new ExtendedPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(Position(-3.0, 7.0, 2.0), Rotation::fromEulerAngles(0.0, 0.0, -0.5)), {1.0, 1.0, 1.0}, "MainPart");
