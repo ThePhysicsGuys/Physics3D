@@ -8,6 +8,10 @@
 
 WorldLayer::WorldLayer(WorldPrototype* world) : world(world) {}
 
+
+void WorldLayer::addNode(TreeNode&& newNode) {
+	tree.add(std::move(newNode));
+}
 void WorldLayer::addPart(Part* newPart) {
 	tree.add(newPart, newPart->getBounds());
 }

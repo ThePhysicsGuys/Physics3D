@@ -535,3 +535,11 @@ public:
 	InternalMotionTree resultName = motorPhysName->getInternalRelativeMotionTree(UnmanagedArray<MonotonicTreeNode<RelativeMotion>>(\
 		static_cast<MonotonicTreeNode<RelativeMotion>*>(alloca(sizeof(MonotonicTreeNode<RelativeMotion>) * sizeName)), sizeName)\
 	);
+
+
+struct FoundLayerRepresentative {
+	WorldLayer* layer;
+	Part* part;
+};
+std::vector<FoundLayerRepresentative> findAllLayersIn(MotorizedPhysical* phys);
+std::vector<FoundLayerRepresentative> findAllLayersIn(Part* part);

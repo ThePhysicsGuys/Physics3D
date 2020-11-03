@@ -12,6 +12,7 @@ public:
 
 	explicit WorldLayer(WorldPrototype* world);
 
+	void addNode(TreeNode&& newNode);
 	void addPart(Part* newPart);
 	void removePart(Part* partToRemove);
 	void addIntoGroup(Part* newPart, Part* group);

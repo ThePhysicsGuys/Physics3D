@@ -1017,3 +1017,30 @@ bool ConnectedPhysical::isValid() const {
 }
 
 #pragma endregion
+
+std::vector<FoundLayerRepresentative> findAllLayersIn(MotorizedPhysical* phys) {
+	std::vector<FoundLayerRepresentative> result;
+
+	phys->forEachPart([&result](Part& p) {
+		for(FoundLayerRepresentative& item : result) {
+			if(item.layer == p.layer) {
+				return;
+			}
+		}
+		result.push_back(FoundLayerRepresentative{p.layer, &p});
+	});
+
+	return result;
+}
+
+std::vector<FoundLayerRepresentative> findAllLayersIn(Part* part) {
+	if(part->layer != nullptr) {
+		if(part->parent != nullptr) {
+			return findAllLayersIn(part->parent->mainPhysical);
+		} else {
+			return std::vector<FoundLayerRepresentative>{FoundLayerRepresentative{part->layer, part}};
+		}
+	} else {
+		std::vector<FoundLayerRepresentative>{};
+	}
+}

@@ -175,7 +175,7 @@ void recursiveRenderTree(const TreeNode& tree, const Vec3f& treeColor, Vec2f ori
 			float colorDarkning = pow(1.0f * computeCost(tree[i].bounds) / maxCost, 0.25f);
 
 			//Path::bezierVertical(origin, nextStep, 1.0f, Vec4f(treeColor * colorDarkning, 1.0f), 15);
-			Path::line(origin, nextStep, join(treeColor * colorDarkning, 1.0f), 1.0f);
+			Path::line(origin, nextStep, join(treeColor * colorDarkning, 1.0f), 0.5f);
 
 			recursiveRenderTree(tree[i], treeColor, nextStep, allottedWidth / tree.nodeCount, maxCost, selectedObject);
 		}

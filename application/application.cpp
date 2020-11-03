@@ -575,5 +575,7 @@ int main(int argc, const char** args) {
 		graphicsMeasure.end();
 	}
 
+	Log::info("Closing by screen.shouldClose()");
+
 	stop(0);
 }

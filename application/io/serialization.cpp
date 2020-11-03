@@ -70,7 +70,7 @@ static Comp::Material deserializeMaterial(std::istream& istream) {
 class Serializer : public SerializationSession<ExtendedPart> {
 public:
 	using SerializationSession<ExtendedPart>::SerializationSession;
-	virtual void serializeExtendedPart(const ExtendedPart& part, std::ostream& ostream) override {
+	virtual void serializePartExternalData(const ExtendedPart& part, std::ostream& ostream) override {
 		// TODO integrate components into serialization
 		serializeMaterial(screen.registry.getOr<Comp::Material>(part.entity, Comp::Material()), ostream);
 		::serializeString(screen.registry.getOr<Comp::Name>(part.entity, Comp::Name("")).name, ostream);
@@ -145,6 +145,8 @@ void WorldImportExport::loadWorld(const char* fileName, World<ExtendedPart>& wor
 
 	Deserializer deserializer;
 	deserializer.deserializeWorld(world, file);
+
+	assert(world.isValid());
 
 	file.close();
 }

@@ -7,7 +7,6 @@
 #include "constraintGroup.h"
 #include "datastructures/iterators.h"
 #include "datastructures/iteratorEnd.h"
-#include "datastructures/boundsTree.h"
 #include "layer.h"
 
 struct Colission {
@@ -198,9 +197,6 @@ public:
 	std::vector<std::pair<WorldLayer*, WorldLayer*>> freeTerrainColissions; // first is free, second is terrain
 	std::vector<WorldLayer*> internalColissions;
 	
-	BoundsTree<Part>& objectTree;
-	BoundsTree<Part>& terrainTree;
-	
 	size_t age = 0;
 	size_t objectCount = 0;
 	double deltaT;
@@ -219,6 +215,8 @@ public:
 
 	void addPart(Part* part, int layerIndex = 0);
 	void removePart(Part* part);
+
+	void addPhysicalWithExistingLayers(MotorizedPhysical* motorPhys);
 
 	void addTerrainPart(Part* part, int layerIndex = 1);
 	void optimizeLayers();

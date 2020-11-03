@@ -77,6 +77,10 @@ Part::~Part() {
 	this->removeFromWorld();
 }
 
+int Part::getLayerID() const {
+	return layer->getID();
+}
+
 void Part::removeFromWorld() {
 	if(this->parent) this->parent->removePart(this);
 	if(this->layer) this->layer->removePart(this);
@@ -228,33 +232,6 @@ void Part::applyMoment(Vec3 moment) {
 	this->parent->mainPhysical->applyMoment(moment);
 }
 
-
-
-struct FoundLayerRepresentative {
-	WorldLayer* layer;
-	Part* part;
-};
-
-static std::vector<FoundLayerRepresentative> findAllLayersIn(Part* part) {
-	std::vector<FoundLayerRepresentative> result;
-
-	if(part->layer != nullptr) {
-		if(part->parent != nullptr) {
-			part->parent->mainPhysical->forEachPart([&result](Part& p) {
-				for(FoundLayerRepresentative& item : result) {
-					if(item.layer == p.layer) {
-						return;
-					}
-				}
-				result.push_back(FoundLayerRepresentative{p.layer, &p});
-			});
-		} else {
-			result.push_back(FoundLayerRepresentative{part->layer, part});
-		}
-	}
-	return result;
-}
-
 static void mergePartLayers(Part* first, Part* second, const std::vector<FoundLayerRepresentative>& layersOfFirst, const std::vector<FoundLayerRepresentative>& layersOfSecond) {
 	for(const FoundLayerRepresentative& l1 : layersOfFirst) {
 		for(const FoundLayerRepresentative& l2 : layersOfSecond) {
@@ -284,6 +261,13 @@ static std::vector<Part*> getAllPartsInPhysical(Part* rep) {
 	return result;
 }
 
+static void addAllToGroupLayer(Part* layerOwner, const std::vector<Part*>& partsToAdd) {
+	layerOwner->layer->addAllToGroup(partsToAdd.begin(), partsToAdd.end(), layerOwner);
+	for(Part* p : partsToAdd) {
+		p->layer = layerOwner->layer;
+	}
+}
+
 template<typename PhysicalMergeFunc>
 static void mergeLayersAround(Part* first, Part* second, PhysicalMergeFunc mergeFunc) {
 	if(second->layer != nullptr) {
@@ -306,7 +290,7 @@ static void mergeLayersAround(Part* first, Part* second, PhysicalMergeFunc merge
 			mergeFunc();
 			updateGroupBounds(layersOfSecond, boundsOfSecondParts);
 			
-			second->layer->addAllToGroup(partsInFirst.begin(), partsInFirst.end(), second);
+			addAllToGroupLayer(second, partsInFirst);
 		}
 	} else {
 		if(first->layer != nullptr) {
@@ -314,7 +298,7 @@ static void mergeLayersAround(Part* first, Part* second, PhysicalMergeFunc merge
 
 			mergeFunc();
 
-			first->layer->addAllToGroup(partsInSecond.begin(), partsInSecond.end(), first);
+			addAllToGroupLayer(first, partsInSecond);
 		} else {
 			mergeFunc();
 		}

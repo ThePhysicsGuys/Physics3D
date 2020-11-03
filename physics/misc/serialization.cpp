@@ -19,7 +19,7 @@
 #include "../misc/gravityForce.h"
 
 
-#define CURRENT_VERSION_ID 1
+#define CURRENT_VERSION_ID 2
 
 #pragma region serializeComponents
 
@@ -155,50 +155,55 @@ DirectionalGravity* deserializeDirectionalGravity(std::istream& istream) {
 
 #pragma region serializePartPhysicalAndRelated
 
-
-void SerializationSessionPrototype::serializeRawPartWithCFrame(const Part& part, std::ostream& ostream) const {
-	::serialize<GlobalCFrame>(part.getCFrame(), ostream);
-	this->serializeRawPartWithoutCFrame(part, ostream);
+static void serializeLayer(const Part& part, std::ostream& ostream) {
+	::serialize<uint32_t>(part.getLayerID(), ostream);
 }
-void SerializationSessionPrototype::serializeRawPartWithoutCFrame(const Part& part, std::ostream& ostream) const {
+static WorldLayer* deserializeLayer(std::vector<WorldLayer>& knownLayers, std::istream& istream) {
+	uint32_t id = ::deserialize<uint32_t>(istream);
+	return &knownLayers[id];
+}
+
+
+void SerializationSessionPrototype::serializePartData(const Part& part, std::ostream& ostream) {
 	shapeSerializer.serializeShape(part.hitbox, ostream);
 	::serialize<PartProperties>(part.properties, ostream);
+	this->serializePartExternalData(part, ostream);
 }
-Part DeSerializationSessionPrototype::deserializeRawPart(const GlobalCFrame& cframe, std::istream& istream) const {
+void SerializationSessionPrototype::serializePartExternalData(const Part& part, std::ostream& ostream) {
+	// no extra data by default
+}
+Part* DeSerializationSessionPrototype::deserializePartData(const GlobalCFrame& cframe, WorldLayer* layer, std::istream& istream) {
 	Shape shape = shapeDeserializer.deserializeShape(istream);
 	PartProperties properties = ::deserialize<PartProperties>(istream);
-	return Part(shape, cframe, properties);
+	Part* result = this->deserializePartExternalData(Part(shape, cframe, properties), istream);
+	result->layer = layer;
+	return result;
 }
-
-Part DeSerializationSessionPrototype::deserializeRawPartWithCFrame(std::istream& istream) const {
-	GlobalCFrame cframe = ::deserialize<GlobalCFrame>(istream);
-	return deserializeRawPart(cframe, istream);
-}
-
-void SerializationSessionPrototype::virtualSerializePart(const Part& part, std::ostream& ostream) {
-	this->serializeRawPartWithoutCFrame(part, ostream);
-}
-Part* DeSerializationSessionPrototype::virtualDeserializePart(Part&& partPhysicalData, std::istream& istream) {
-	return new Part(std::move(partPhysicalData));
+Part* DeSerializationSessionPrototype::deserializePartExternalData(Part&& part, std::istream& istream) {
+	return new Part(std::move(part));
 }
 
 void SerializationSessionPrototype::serializeRigidBodyInContext(const RigidBody& rigidBody, std::ostream& ostream) {
-	virtualSerializePart(*rigidBody.mainPart, ostream);
+	serializeLayer(*rigidBody.mainPart, ostream);
+	serializePartData(*rigidBody.mainPart, ostream);
 	::serialize<uint32_t>(static_cast<uint32_t>(rigidBody.parts.size()), ostream);
 	for(const AttachedPart& atPart : rigidBody.parts) {
 		::serialize<CFrame>(atPart.attachment, ostream);
-		virtualSerializePart(*atPart.part, ostream);
+		serializeLayer(*atPart.part, ostream);
+		serializePartData(*atPart.part, ostream);
 	}
 }
 
-RigidBody DeSerializationSessionPrototype::deserializeRigidBodyWithContext(std::istream& istream) {
-	Part* mainPart = virtualDeserializePart(deserializeRawPart(GlobalCFrame(), istream), istream);
-	uint32_t size = ::deserialize<uint32_t>(istream);
+RigidBody DeSerializationSessionPrototype::deserializeRigidBodyWithContext(const GlobalCFrame& cframeOfMain, std::vector<WorldLayer>& layers, std::istream& istream) {
+	WorldLayer* layer = deserializeLayer(layers, istream);
+	Part* mainPart = deserializePartData(cframeOfMain, layer, istream);
 	RigidBody result(mainPart);
+	uint32_t size = ::deserialize<uint32_t>(istream);
 	result.parts.reserve(size);
 	for(uint32_t i = 0; i < size; i++) {
 		CFrame attach = ::deserialize<CFrame>(istream);
-		Part* newPart = virtualDeserializePart(deserializeRawPart(GlobalCFrame(), istream), istream);
+		WorldLayer* layer = deserializeLayer(layers, istream); 
+		Part* newPart = deserializePartData(cframeOfMain.localToGlobal(attach), layer, istream);
 		result.parts.push_back(AttachedPart{attach, newPart});
 	}
 	return result;
@@ -259,31 +264,29 @@ void SerializationSessionPrototype::serializeMotorizedPhysicalInContext(const Mo
 	serializePhysicalInContext(phys, ostream);
 }
 
-void DeSerializationSessionPrototype::deserializeConnectionsOfPhysicalWithContext(Physical& physToPopulate, std::istream& istream) {
+void DeSerializationSessionPrototype::deserializeConnectionsOfPhysicalWithContext(std::vector<WorldLayer>& layers, Physical& physToPopulate, std::istream& istream) {
 	uint32_t childrenCount = ::deserialize<uint32_t>(istream);
 	physToPopulate.childPhysicals.reserve(childrenCount);
 	for(uint32_t i = 0; i < childrenCount; i++) {
 		HardPhysicalConnection connection = deserializeHardPhysicalConnection(istream);
-		RigidBody b = deserializeRigidBodyWithContext(istream);
-		physToPopulate.childPhysicals.push_back(ConnectedPhysical(std::move(b), &physToPopulate, std::move(connection)));
+		GlobalCFrame cframeOfConnectedPhys = physToPopulate.getCFrame().localToGlobal(connection.getRelativeCFrameToParent());
+		RigidBody b = deserializeRigidBodyWithContext(cframeOfConnectedPhys, layers, istream);
+		physToPopulate.childPhysicals.emplace_back(std::move(b), &physToPopulate, std::move(connection));
 		ConnectedPhysical& currentlyWorkingOn = physToPopulate.childPhysicals.back();
 		indexToPhysicalMap.push_back(static_cast<Physical*>(&currentlyWorkingOn));
-		deserializeConnectionsOfPhysicalWithContext(currentlyWorkingOn, istream);
+		deserializeConnectionsOfPhysicalWithContext(layers, currentlyWorkingOn, istream);
 	}
 }
 
-MotorizedPhysical* DeSerializationSessionPrototype::deserializeMotorizedPhysicalWithContext(std::istream& istream) {
+MotorizedPhysical* DeSerializationSessionPrototype::deserializeMotorizedPhysicalWithContext(std::vector<WorldLayer>& layers, std::istream& istream) {
 	Motion motion = ::deserialize<Motion>(istream);
 	GlobalCFrame cf = ::deserialize<GlobalCFrame>(istream);
-	RigidBody r = deserializeRigidBodyWithContext(istream);
-	r.setCFrame(cf);
-	MotorizedPhysical* mainPhys = new MotorizedPhysical(std::move(r));
+	MotorizedPhysical* mainPhys = new MotorizedPhysical(deserializeRigidBodyWithContext(cf, layers, istream));
 	indexToPhysicalMap.push_back(static_cast<Physical*>(mainPhys));
 	mainPhys->motionOfCenterOfMass = motion;
 
-	deserializeConnectionsOfPhysicalWithContext(*mainPhys, istream);
+	deserializeConnectionsOfPhysicalWithContext(layers, *mainPhys, istream);
 
-	mainPhys->fullRefreshOfConnectedPhysicals();
 	mainPhys->refreshPhysicalProperties();
 	return mainPhys;
 }
@@ -317,78 +320,95 @@ void SerializationSessionPrototype::collectConnectedPhysicalInformation(const Co
 
 #pragma endregion
 
-void SerializationSessionPrototype::serializeWorld(const WorldPrototype& world, std::ostream& ostream) {
-	::serialize<uint64_t>(world.externalForces.size(), ostream);
-	for(ExternalForce* force : world.externalForces) {
-		dynamicExternalForceSerializer.serialize(*force, ostream);
+static void assertVersionCorrect(std::istream& istream) {
+	uint32_t readVersionID = ::deserialize<uint32_t>(istream);
+	if(readVersionID != CURRENT_VERSION_ID) {
+		throw SerializationException(
+			"This serialization version is outdated and cannot be read! Current " +
+			std::to_string(CURRENT_VERSION_ID) +
+			" version from stream: " +
+			std::to_string(readVersionID)
+		);
 	}
-	::serialize<uint64_t>(world.age, ostream);
+}
 
+void SerializationSessionPrototype::serializeWorld(const WorldPrototype& world, std::ostream& ostream) {
 	for(const MotorizedPhysical* p : world.physicals) {
 		collectMotorizedPhysicalInformation(*p);
 	}
-	for(const Part& p : world.terrainTree) {
-		collectPartInformation(p);
+	for(const WorldLayer& layer : world.layers) {
+		for(const Part& p : layer.tree) {
+			if(p.parent == nullptr) {
+				collectPartInformation(p);
+			}
+		}
 	}
 
 	serializeCollectedHeaderInformation(ostream);
-
+	
 
 	// actually serialize the world
-	size_t physicalCount = world.physicals.size();
-	::serialize<uint64_t>(physicalCount, ostream);
 
-	size_t partCount = 0;
-	for(const Part& p : world.terrainTree) {
-		partCount++;
+	::serialize<uint64_t>(world.age, ostream);
+
+	::serialize<uint32_t>(world.layers.size(), ostream);
+	for(const WorldLayer& layer : world.layers) {
+		uint32_t numberOfUnPhysicaledPartsInLayer = 0;
+		for(const Part& p : layer.tree) {
+			if(p.parent == nullptr) {
+				numberOfUnPhysicaledPartsInLayer++;
+			}
+		}
+
+		::serialize<uint32_t>(numberOfUnPhysicaledPartsInLayer, ostream);
+		for(const Part& p : layer.tree) {
+			if(p.parent == nullptr) {
+				::serialize<GlobalCFrame>(p.getCFrame(), ostream);
+				serializePartData(p, ostream);
+			}
+		}
 	}
 
-	::serialize<uint64_t>(partCount, ostream);
-
+	::serialize<uint32_t>(world.physicals.size(), ostream);
 	for(const MotorizedPhysical* p : world.physicals) {
 		serializeMotorizedPhysicalInContext(*p, ostream);
 	}
 
-	for(const Part& p : world.terrainTree) {
-		::serialize<GlobalCFrame>(p.getCFrame(), ostream);
-		virtualSerializePart(p, ostream);
-	}
-
-	assert(world.constraints.size() < std::numeric_limits<uint32_t>::max());
 	::serialize<std::uint32_t>(static_cast<std::uint32_t>(world.constraints.size()), ostream);
 	for(const ConstraintGroup& cg : world.constraints) {
-		assert(cg.constraints.size() < std::numeric_limits<uint32_t>::max());
 		::serialize<std::uint32_t>(static_cast<std::uint32_t>(cg.constraints.size()), ostream);
 		for(const PhysicalConstraint& c : cg.constraints) {
 			this->serializeConstraintInContext(c, ostream);
 		}
 	}
+	::serialize<uint32_t>(world.externalForces.size(), ostream);
+	for(ExternalForce* force : world.externalForces) {
+		dynamicExternalForceSerializer.serialize(*force, ostream);
+	}
 }
 void DeSerializationSessionPrototype::deserializeWorld(WorldPrototype& world, std::istream& istream) {
-	uint64_t forceCount = ::deserialize<uint64_t>(istream);
-	world.externalForces.reserve(forceCount);
-	for(uint64_t i = 0; i < forceCount; i++) {
-		ExternalForce* force = dynamicExternalForceSerializer.deserialize(istream);
-		world.externalForces.push_back(force);
-	}
-	world.age = ::deserialize<uint64_t>(istream);
-
 	this->deserializeAndCollectHeaderInformation(istream);
 
-	uint64_t numberOfPhysicals = ::deserialize<uint64_t>(istream);
-	uint64_t numberOfTerrainParts = ::deserialize<uint64_t>(istream);
-	world.physicals.reserve(numberOfPhysicals);
+	world.age = ::deserialize<uint64_t>(istream);
 
-	for(uint64_t i = 0; i < numberOfPhysicals; i++) {
-		MotorizedPhysical* p = deserializeMotorizedPhysicalWithContext(istream);
-		world.addPart(p->getMainPart());
+	world.layers.clear();
+	uint32_t layerCount = ::deserialize<uint32_t>(istream);
+	world.layers.reserve(layerCount);
+	for(uint32_t i = 0; i < layerCount; i++) {
+		world.layers.emplace_back(&world);
+	}
+	for(WorldLayer& layer : world.layers) {
+		uint32_t extraPartsInLayer = ::deserialize<uint32_t>(istream);
+		for(uint32_t i = 0; i < extraPartsInLayer; i++) {
+			GlobalCFrame cf = ::deserialize<GlobalCFrame>(istream);
+			layer.tree.add(deserializePartData(cf, &layer, istream));
+		}
 	}
 
-	for(uint64_t i = 0; i < numberOfTerrainParts; i++) {
-		GlobalCFrame cf = ::deserialize<GlobalCFrame>(istream);
-		Part* p = virtualDeserializePart(deserializeRawPart(GlobalCFrame(), istream), istream);
-		p->setCFrame(cf);
-		world.addTerrainPart(p);
+	uint32_t numberOfPhysicals = ::deserialize<uint32_t>(istream);
+	world.physicals.reserve(numberOfPhysicals);
+	for(uint32_t i = 0; i < numberOfPhysicals; i++) {
+		world.addPhysicalWithExistingLayers(deserializeMotorizedPhysicalWithContext(world.layers, istream));
 	}
 
 	std::uint32_t constraintCount = ::deserialize<std::uint32_t>(istream);
@@ -401,6 +421,12 @@ void DeSerializationSessionPrototype::deserializeWorld(WorldPrototype& world, st
 		}
 		world.constraints.push_back(std::move(group));
 	}
+	uint32_t forceCount = ::deserialize<uint32_t>(istream);
+	world.externalForces.reserve(forceCount);
+	for(uint32_t i = 0; i < forceCount; i++) {
+		ExternalForce* force = dynamicExternalForceSerializer.deserialize(istream);
+		world.externalForces.push_back(force);
+	}
 }
 
 void SerializationSessionPrototype::serializeParts(const Part* const parts[], size_t partCount, std::ostream& ostream) {
@@ -408,20 +434,21 @@ void SerializationSessionPrototype::serializeParts(const Part* const parts[], si
 		collectPartInformation(*(parts[i]));
 	}
 	serializeCollectedHeaderInformation(ostream);
-	::serialize<uint64_t>(static_cast<uint64_t>(partCount), ostream);
+	::serialize<uint32_t>(static_cast<uint32_t>(partCount), ostream);
 	for(size_t i = 0; i < partCount; i++) {
 		::serialize<GlobalCFrame>(parts[i]->getCFrame(), ostream);
-		virtualSerializePart(*(parts[i]), ostream);
+		serializePartData(*(parts[i]), ostream);
 	}
 }
 
 std::vector<Part*> DeSerializationSessionPrototype::deserializeParts(std::istream& istream) {
 	deserializeAndCollectHeaderInformation(istream);
-	size_t numberOfParts = ::deserialize<uint64_t>(istream);
+	size_t numberOfParts = ::deserialize<uint32_t>(istream);
 	std::vector<Part*> result;
 	result.reserve(numberOfParts);
 	for(size_t i = 0; i < numberOfParts; i++) {
-		Part* newPart = virtualDeserializePart(deserializeRawPartWithCFrame(istream), istream);
+		GlobalCFrame cframeOfPart = ::deserialize<GlobalCFrame>(istream);
+		Part* newPart = deserializePartData(cframeOfPart, nullptr, istream);
 		result.push_back(newPart);
 	}
 	return result;
@@ -434,15 +461,7 @@ void SerializationSessionPrototype::serializeCollectedHeaderInformation(std::ost
 }
 
 void DeSerializationSessionPrototype::deserializeAndCollectHeaderInformation(std::istream& istream) {
-	uint32_t readVersionID = ::deserialize<uint32_t>(istream);
-	if(readVersionID != CURRENT_VERSION_ID) {
-		throw SerializationException(
-			"This serialization version is outdated and cannot be read! Current " + 
-			std::to_string(CURRENT_VERSION_ID) + 
-			" version from stream: " + 
-			std::to_string(readVersionID)
-		);
-	}
+	assertVersionCorrect(istream);
 	shapeDeserializer.sharedShapeClassDeserializer.deserializeRegistry([](std::istream& istream) {return dynamicShapeClassSerializer.deserialize(istream); }, istream);
 }
 

@@ -92,8 +92,6 @@ void SpiderFactory::buildSpider(const GlobalCFrame& spiderPosition, int folder) 
 
 	world.addPart(spiderBody);
 
-	Physical* spider = spiderBody->parent;
-
 	for (int i = 0; i < legCount; i++) {
 		ExtendedPart* leg = new ExtendedPart(boxShape(0.05, 0.5, 0.05), GlobalCFrame(), { 1.0, 0.5, 0.3 }, "LegPart " + std::to_string(i), spiderID);
 		screen.registry.getOrAdd<Comp::Material>(leg->entity)->albedo = Color(0.4f, 0.4f, 0.4f, 1.0f);
@@ -103,7 +101,7 @@ void SpiderFactory::buildSpider(const GlobalCFrame& spiderPosition, int folder) 
 		CFrame attachPointOnBody(Rotation::rotY(angle) * Vec3(0.5, 0.0, 0.0), Rotation::rotY(angle + PI / 2));
 		CFrame attach = attachPointOnBody.localToGlobal(~topOfLeg);
 
-		spider->attachPart(leg, attach);
+		spiderBody->attach(leg, attach);
 	}
 }
 

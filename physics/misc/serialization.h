@@ -70,9 +70,6 @@ protected:
 	std::map<const Physical*, std::uint32_t> physicalIndexMap;
 	std::uint32_t currentPhysicalIndex = 0;
 
-	void serializeRawPartWithoutCFrame(const Part& part, std::ostream& ostream) const;
-	void serializeRawPartWithCFrame(const Part& part, std::ostream& ostream) const;
-
 private:
 	void collectMotorizedPhysicalInformation(const MotorizedPhysical& motorizedPhys);
 	void collectConnectedPhysicalInformation(const ConnectedPhysical& connectedPhys);
@@ -87,7 +84,11 @@ private:
 protected:
 	virtual void collectPartInformation(const Part& part);
 	virtual void serializeCollectedHeaderInformation(std::ostream& ostream);
-	virtual void virtualSerializePart(const Part& part, std::ostream& ostream);
+
+	// serializes everything but the part's cframe and layer index, to be done by the calling code as needed
+	// calls serializePartExternalData for extending this serialization
+	void serializePartData(const Part& part, std::ostream& ostream);
+	virtual void serializePartExternalData(const Part& part, std::ostream& ostream);
 public:
 	/*initializes the SerializationSession with the given ShapeClasses as "known" at deserialization, making it unneccecary to serialize them. 
 	Implicitly the builtin ShapeClasses from the physics engine, such as cubeClass and sphereClass are also included in this list */
@@ -99,20 +100,21 @@ public:
 
 class DeSerializationSessionPrototype {
 private:
-	MotorizedPhysical* deserializeMotorizedPhysicalWithContext(std::istream& istream);
-	void deserializeConnectionsOfPhysicalWithContext(Physical& physToPopulate, std::istream& istream);
-	RigidBody deserializeRigidBodyWithContext(std::istream& istream);
+	MotorizedPhysical* deserializeMotorizedPhysicalWithContext(std::vector<WorldLayer>& layers, std::istream& istream);
+	void deserializeConnectionsOfPhysicalWithContext(std::vector<WorldLayer>& layers, Physical& physToPopulate, std::istream& istream);
+	RigidBody deserializeRigidBodyWithContext(const GlobalCFrame& cframeOfMain, std::vector<WorldLayer>& layers, std::istream& istream);
 	PhysicalConstraint deserializeConstraintInContext(std::istream& istream);
+
 protected:
 	ShapeDeserializer shapeDeserializer;
 	std::vector<Physical*> indexToPhysicalMap;
 
-	Part deserializeRawPart(const GlobalCFrame& knownCFrame, std::istream& istream) const;
-	Part deserializeRawPartWithCFrame(std::istream& istream) const;
+	// creates a part with the given cframe, layer, and extra data it deserializes
+	// calls deserializePartExternalData for extending this deserialization
+	Part* deserializePartData(const GlobalCFrame& cframe, WorldLayer* layer, std::istream& istream);
+	virtual Part* deserializePartExternalData(Part&& part, std::istream& istream);
 
 	virtual void deserializeAndCollectHeaderInformation(std::istream& istream);
-
-	virtual Part* virtualDeserializePart(Part&& partPhysicalData, std::istream& istream);
 
 public:
 	/*initializes the DeSerializationSession with the given ShapeClasses as "known" at deserialization, these are used along with the deserialized ShapeClasses
@@ -131,22 +133,19 @@ protected:
 	using SerializationSessionPrototype::shapeSerializer;
 	using SerializationSessionPrototype::serializeCollectedHeaderInformation;
 
-	virtual void collectExtendedPartInformation(const ExtendedPartType& part) {
-		SerializationSessionPrototype::collectPartInformation(part);
-	}
-	
-	virtual void serializeExtendedPart(const ExtendedPartType& part, std::ostream& ostream) = 0;
+	virtual void collectExtendedPartInformation(const ExtendedPartType& part) {}
+	virtual void serializePartExternalData(const ExtendedPartType& part, std::ostream& ostream) {}
 
 private:
 	virtual void collectPartInformation(const Part& part) final override {
+		SerializationSessionPrototype::collectPartInformation(part);
 		const ExtendedPartType& p = static_cast<const ExtendedPartType&>(part);
 		collectExtendedPartInformation(p);
 	}
 
-	virtual void virtualSerializePart(const Part& part, std::ostream& ostream) final override {
-		this->serializeRawPartWithoutCFrame(part, ostream);
+	virtual void serializePartExternalData(const Part& part, std::ostream& ostream) final override {
 		const ExtendedPartType& p = static_cast<const ExtendedPartType&>(part);
-		serializeExtendedPart(p, ostream);
+		serializePartExternalData(p, ostream);
 	}
 public:
 	using SerializationSessionPrototype::SerializationSessionPrototype;
@@ -164,7 +163,7 @@ public:
 		::serialize<size_t>(partCount, ostream);
 		for(size_t i = 0; i < partCount; i++) {
 			::serialize<GlobalCFrame>(parts[i]->getCFrame(), ostream);
-			virtualSerializePart(*(parts[i]), ostream);
+			serializePartData(*(parts[i]), ostream);
 		}
 	}
 };
@@ -175,26 +174,23 @@ protected:
 	using DeSerializationSessionPrototype::shapeDeserializer;
 	using DeSerializationSessionPrototype::deserializeAndCollectHeaderInformation;
 	
-	virtual ExtendedPartType* deserializeExtendedPart(Part&& partPhysicalData, std::istream& istream) = 0;
+	virtual ExtendedPartType* deserializeExtendedPart(Part&& partPrototype, std::istream& istream) = 0;
 
 private:
-	virtual Part* virtualDeserializePart(Part&& partPhysicalData, std::istream& istream) final override {
-		return deserializeExtendedPart(std::move(partPhysicalData), istream);
-	}
+	inline virtual Part* deserializePartExternalData(Part&& part, std::istream& istream) final override { return deserializeExtendedPart(std::move(part), istream); }
 
 public:
 	using DeSerializationSessionPrototype::DeSerializationSessionPrototype;
 
-	void deserializeWorld(World<ExtendedPartType>& world, std::istream& istream) {
-		DeSerializationSessionPrototype::deserializeWorld(world, istream);
-	}
+	void deserializeWorld(World<ExtendedPartType>& world, std::istream& istream) { DeSerializationSessionPrototype::deserializeWorld(world, istream); }
 	std::vector<ExtendedPartType*> deserializeParts(std::istream& istream) {
 		deserializeAndCollectHeaderInformation(istream);
 		size_t numberOfParts = ::deserialize<size_t>(istream);
 		std::vector<ExtendedPartType*> result;
 		result.reserve(numberOfParts);
 		for(size_t i = 0; i < numberOfParts; i++) {
-			ExtendedPartType* newPart = static_cast<ExtendedPartType*>(virtualDeserializePart(deserializeRawPartWithCFrame(istream), istream));
+			GlobalCFrame cframe = ::deserialize<GlobalCFrame>(istream);
+			ExtendedPartType* newPart = static_cast<ExtendedPartType*>(deserializePartData(cframe, nullptr, istream));
 			result.push_back(newPart);
 		}
 		return result;

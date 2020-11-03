@@ -7,10 +7,8 @@
 
 #ifndef NDEBUG
 #define ASSERT_VALID if (!isValid()) throw "World not valid!";
-#define ASSERT_TREE_VALID(tree) treeValidCheck(tree)
 #else
 #define ASSERT_VALID
-#define ASSERT_TREE_VALID(tree)
 #endif
 
 #pragma region worldValidity
@@ -28,10 +26,33 @@ bool WorldPrototype::isValid() const {
 			DEBUGBREAK;
 			return false;
 		}
+
+		bool result = true;
+		phys->forEachPart([&result](const Part& part) {
+			if(part.layer == nullptr) {
+				Log::error("Part in physical has no layer!");
+				DEBUGBREAK;
+				result = false;
+			} else {
+				if(!part.layer->tree.contains(&part)) {
+					Log::error("Part not in tree!");
+					DEBUGBREAK;
+					result = false;
+				}
+			}
+		});
+		if(result == false) return false;
 	}
 
 	for(const WorldLayer& l : layers) {
 		treeValidCheck(l.tree);
+		for(const Part& p : l.tree) {
+			if(p.layer != &l) {
+				Log::error("Part contained in layer, but it's layer field is not the layer");
+				DEBUGBREAK;
+				return false;
+			}
+		}
 	}
 	return true;
 }
@@ -54,8 +75,6 @@ WorldPrototype::WorldPrototype(double deltaT) :
 	freePartColissions(),
 	freeTerrainColissions{std::make_pair(&layers[0], &layers[1])}, // free-terrain
 	internalColissions{&layers[0]}, // free-free
-	objectTree(layers[0].tree), 
-	terrainTree(layers[1].tree),
 	layersToRefresh{&layers[0]} {
 
 }
@@ -102,6 +121,26 @@ void WorldPrototype::addPart(Part* part, int layerIndex) {
 
 	ASSERT_VALID;
 }
+
+void WorldPrototype::addPhysicalWithExistingLayers(MotorizedPhysical* motorPhys) {
+	physicals.push_back(motorPhys);
+	motorPhys->world = this;
+
+	std::vector<FoundLayerRepresentative> foundLayers = findAllLayersIn(motorPhys);
+
+	for(const FoundLayerRepresentative& l : foundLayers) {
+		TreeNode newNode(l.part, l.part->getBounds(), true);
+		motorPhys->forEachPart([&newNode, &l](Part& part) {
+			if(part.layer == l.layer && &part != l.part) {
+				newNode.addInside(TreeNode(&part, part.getBounds()));
+			}
+		});
+		l.layer->addNode(std::move(newNode));
+	}
+
+	ASSERT_VALID;
+}
+
 void WorldPrototype::addTerrainPart(Part* part, int layerIndex) {
 	objectCount++;
 
@@ -112,6 +151,8 @@ void WorldPrototype::addTerrainPart(Part* part, int layerIndex) {
 	ASSERT_VALID;
 
 	this->onPartAdded(part);
+
+	ASSERT_VALID;
 }
 void WorldPrototype::removePart(Part* part) {
 	ASSERT_VALID;
