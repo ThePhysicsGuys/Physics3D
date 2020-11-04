@@ -3,6 +3,7 @@
 #include "compare.h"
 #include "../physics/misc/toString.h"
 #include "simulation.h"
+#include "generators.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -1003,4 +1004,38 @@ TEST_CASE(angularMomentumVelocityInvariance) {
 
 	ASSERT(stillAngularMomentum == movingAngularMomentum);
 	ASSERT(stillAngularMomentumPartsBased == movingAngularMomentumPartsBased);
+}
+
+TEST_CASE(setVelocity) {
+	for(int iter = 0; iter < 100; iter++) {
+		std::vector<Part> phys = produceMotorizedPhysical();
+
+		MotorizedPhysical* motorPhys = phys[0].parent->mainPhysical;
+		motorPhys->motionOfCenterOfMass = generateMotion();
+
+		Part& p = oneOf(phys);
+
+		{
+			Vec3 chosenVelocity = generateVec3();
+			Vec3 prevAngularVelocity = p.getAngularVelocity();
+			p.setVelocity(chosenVelocity);
+			ASSERT(p.getVelocity() == chosenVelocity);
+			ASSERT(p.getAngularVelocity() == prevAngularVelocity); // angular velocity is maintained
+		}
+		{
+			Vec3 chosenAngularVelocity = generateVec3();
+			p.setAngularVelocity(chosenAngularVelocity);
+			ASSERT(p.getAngularVelocity() == chosenAngularVelocity);
+		}
+		{
+			Vec3 chosenMotionVel = generateVec3();
+			Vec3 chosenMotionAngularVel = generateVec3();
+			p.setMotion(chosenMotionVel, chosenMotionAngularVel);
+
+			ASSERT(p.getVelocity() == chosenMotionVel);
+			ASSERT(p.getAngularVelocity() == chosenMotionAngularVel);
+			ASSERT(p.getMotion().getVelocity() == chosenMotionVel);
+			ASSERT(p.getMotion().getAngularVelocity() == chosenMotionAngularVel);
+		}
+	}
 }
