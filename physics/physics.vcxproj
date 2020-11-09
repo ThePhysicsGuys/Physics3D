@@ -338,6 +338,7 @@
     <ClCompile Include="rigidBody.cpp" />
     <ClCompile Include="layer.cpp" />
     <ClCompile Include="softLink.cpp" />
+    <ClCompile Include="springLink.cpp" />
     <ClCompile Include="world.cpp" />
     <ClCompile Include="worldPhysics.cpp" />
   </ItemGroup>
@@ -433,6 +434,7 @@
     <ClInclude Include="rigidBody.h" />
     <ClInclude Include="sharedLockGuard.h" />
     <ClInclude Include="softLink.h" />
+    <ClInclude Include="springLink.h" />
     <ClInclude Include="synchonizedWorld.h" />
     <ClInclude Include="templateUtils.h" />
     <ClInclude Include="world.h" />
