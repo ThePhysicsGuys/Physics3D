@@ -14,13 +14,6 @@
 #include "springLink.h"
 #include <memory>
 
-struct Colission {
-	Part* p1;
-	Part* p2;
-	Position intersection;
-	Vec3 exitVector;
-};
-
 class ExternalForce;
 class WorldLayer;
 
@@ -161,7 +154,7 @@ private:
 	friend class ConnectedPhysical;
 	friend class Part;
 	friend class WorldLayer;
-  friend class ColissionLayer;
+	friend class ColissionLayer;
 
 
 	/*
@@ -213,10 +206,10 @@ public:
 	std::vector<ConstraintGroup> constraints;
 
 	std::vector<ColissionLayer> layers;
-  std::vector<Colission> currentObjectColissions;
-  std::vector<Colission> currentTerrainColissions;
+	std::vector<Colission> currentObjectColissions;
+	std::vector<Colission> currentTerrainColissions;
 
-  std::vector<SoftLink*> springLinks;
+	std::vector<SoftLink*> springLinks;
   
 	void addLink(SoftLink* link);
 
