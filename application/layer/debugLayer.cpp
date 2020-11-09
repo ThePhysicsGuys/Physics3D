@@ -197,7 +197,7 @@ void DebugLayer::onRender(Engine::Registry64& registry) {
 				recursiveColTreeForOneObject(screen->selectedPart->layer->tree.rootNode, screen->selectedPart, screen->selectedPart->getBounds(), 0);
 			}
 		} else if(colTreeRenderMode >= 0) {
-			recursiveRenderColTree(screen->world->getTree(colTreeRenderMode).rootNode, 0);
+			recursiveRenderColTree(getLayerByID(screen->world->layers, colTreeRenderMode)->tree.rootNode, 0);
 		}
 	});
 

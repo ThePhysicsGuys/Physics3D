@@ -21,6 +21,7 @@
 #include "../physics/physical.h"
 #include "../physics/constraints/hardConstraint.h"
 #include "../physics/layer.h"
+#include "../physics/world.h"
 
 #include "../physics/datastructures/boundsTree.h"
 
@@ -66,7 +67,7 @@ Part generatePart(Part& attachTo, HardConstraint* constraint);
 HardConstraint* generateHardConstraint();
 void generateAttachment(Part& first, Part& second);
 std::vector<Part> generateMotorizedPhysicalParts();
-void generateLayerAssignment(std::vector<Part>& parts, WorldLayer* layers, int layerCount);
+void generateLayerAssignment(std::vector<Part>& parts, WorldPrototype& world);
 TreeNode generateTreeNode(int branchInhibition);
 BoundsTree<BasicBounded> generateFilledBoundsTree();
 BoundsTree<BasicBounded> generateBoundsTree();

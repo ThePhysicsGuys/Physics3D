@@ -146,7 +146,7 @@ bool StandardInputHandler::onKeyPress(Engine::KeyPressEvent& event) {
 		colissionSpheresMode = static_cast<SphereColissionRenderMode>((static_cast<int>(colissionSpheresMode) + 1) % 3);
 	} else if (key == KeyboardOptions::Debug::tree) {
 		colTreeRenderMode++;
-		int worldLayerCount = static_cast<int>(world.getLayerCount()); // must be a signed int, because size_t comparison makes the comparison unsigned
+		int worldLayerCount = getMaxLayerID(world.layers); // must be a signed int, because size_t comparison makes the comparison unsigned
 		if(colTreeRenderMode >= worldLayerCount) {
 			colTreeRenderMode = -2;
 		}

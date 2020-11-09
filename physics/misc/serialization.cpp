@@ -158,9 +158,9 @@ DirectionalGravity* deserializeDirectionalGravity(std::istream& istream) {
 static void serializeLayer(const Part& part, std::ostream& ostream) {
 	::serialize<uint32_t>(part.getLayerID(), ostream);
 }
-static WorldLayer* deserializeLayer(std::vector<WorldLayer>& knownLayers, std::istream& istream) {
+static WorldLayer* deserializeLayer(std::vector<ColissionLayer>& knownLayers, std::istream& istream) {
 	uint32_t id = ::deserialize<uint32_t>(istream);
-	return &knownLayers[id];
+	return getLayerByID(knownLayers, id);
 }
 
 
@@ -194,7 +194,7 @@ void SerializationSessionPrototype::serializeRigidBodyInContext(const RigidBody&
 	}
 }
 
-RigidBody DeSerializationSessionPrototype::deserializeRigidBodyWithContext(const GlobalCFrame& cframeOfMain, std::vector<WorldLayer>& layers, std::istream& istream) {
+RigidBody DeSerializationSessionPrototype::deserializeRigidBodyWithContext(const GlobalCFrame& cframeOfMain, std::vector<ColissionLayer>& layers, std::istream& istream) {
 	WorldLayer* layer = deserializeLayer(layers, istream);
 	Part* mainPart = deserializePartData(cframeOfMain, layer, istream);
 	RigidBody result(mainPart);
@@ -264,7 +264,7 @@ void SerializationSessionPrototype::serializeMotorizedPhysicalInContext(const Mo
 	serializePhysicalInContext(phys, ostream);
 }
 
-void DeSerializationSessionPrototype::deserializeConnectionsOfPhysicalWithContext(std::vector<WorldLayer>& layers, Physical& physToPopulate, std::istream& istream) {
+void DeSerializationSessionPrototype::deserializeConnectionsOfPhysicalWithContext(std::vector<ColissionLayer>& layers, Physical& physToPopulate, std::istream& istream) {
 	uint32_t childrenCount = ::deserialize<uint32_t>(istream);
 	physToPopulate.childPhysicals.reserve(childrenCount);
 	for(uint32_t i = 0; i < childrenCount; i++) {
@@ -278,7 +278,7 @@ void DeSerializationSessionPrototype::deserializeConnectionsOfPhysicalWithContex
 	}
 }
 
-MotorizedPhysical* DeSerializationSessionPrototype::deserializeMotorizedPhysicalWithContext(std::vector<WorldLayer>& layers, std::istream& istream) {
+MotorizedPhysical* DeSerializationSessionPrototype::deserializeMotorizedPhysicalWithContext(std::vector<ColissionLayer>& layers, std::istream& istream) {
 	Motion motion = ::deserialize<Motion>(istream);
 	GlobalCFrame cf = ::deserialize<GlobalCFrame>(istream);
 	MotorizedPhysical* mainPhys = new MotorizedPhysical(deserializeRigidBodyWithContext(cf, layers, istream));
@@ -320,6 +320,10 @@ void SerializationSessionPrototype::collectConnectedPhysicalInformation(const Co
 
 #pragma endregion
 
+static void serializeVersion(std::ostream& ostream) {
+	::serialize<int32_t>(CURRENT_VERSION_ID, ostream);
+}
+
 static void assertVersionCorrect(std::istream& istream) {
 	uint32_t readVersionID = ::deserialize<uint32_t>(istream);
 	if(readVersionID != CURRENT_VERSION_ID) {
@@ -332,14 +336,34 @@ static void assertVersionCorrect(std::istream& istream) {
 	}
 }
 
+
+void SerializationSessionPrototype::serializeWorldLayer(const WorldLayer& layer, std::ostream& ostream) {
+	uint32_t numberOfUnPhysicaledPartsInLayer = 0;
+	for(const Part& p : layer.tree) {
+		if(p.parent == nullptr) {
+			numberOfUnPhysicaledPartsInLayer++;
+		}
+	}
+
+	::serialize<uint32_t>(numberOfUnPhysicaledPartsInLayer, ostream);
+	for(const Part& p : layer.tree) {
+		if(p.parent == nullptr) {
+			::serialize<GlobalCFrame>(p.getCFrame(), ostream);
+			serializePartData(p, ostream);
+		}
+	}
+}
+
 void SerializationSessionPrototype::serializeWorld(const WorldPrototype& world, std::ostream& ostream) {
 	for(const MotorizedPhysical* p : world.physicals) {
 		collectMotorizedPhysicalInformation(*p);
 	}
-	for(const WorldLayer& layer : world.layers) {
-		for(const Part& p : layer.tree) {
-			if(p.parent == nullptr) {
-				collectPartInformation(p);
+	for(const ColissionLayer& clayer : world.layers) {
+		for(const WorldLayer& layer : clayer.subLayers) {
+			for(const Part& p : layer.tree) {
+				if(p.parent == nullptr) {
+					collectPartInformation(p);
+				}
 			}
 		}
 	}
@@ -351,22 +375,15 @@ void SerializationSessionPrototype::serializeWorld(const WorldPrototype& world, 
 
 	::serialize<uint64_t>(world.age, ostream);
 
-	::serialize<uint32_t>(world.layers.size(), ostream);
-	for(const WorldLayer& layer : world.layers) {
-		uint32_t numberOfUnPhysicaledPartsInLayer = 0;
-		for(const Part& p : layer.tree) {
-			if(p.parent == nullptr) {
-				numberOfUnPhysicaledPartsInLayer++;
-			}
+	::serialize<uint32_t>(world.getLayerCount(), ostream);
+	for(int i = 0; i < world.getLayerCount(); i++) {
+		for(int j = 0; j <= i; j++) {
+			::serialize<bool>(world.doLayersCollide(i, j), ostream);
 		}
+	}
 
-		::serialize<uint32_t>(numberOfUnPhysicaledPartsInLayer, ostream);
-		for(const Part& p : layer.tree) {
-			if(p.parent == nullptr) {
-				::serialize<GlobalCFrame>(p.getCFrame(), ostream);
-				serializePartData(p, ostream);
-			}
-		}
+	for(const ColissionLayer& layer : world.layers) {
+		serializeWorldLayer(layer.subLayers[ColissionLayer::TERRAIN_PARTS_LAYER], ostream);
 	}
 
 	::serialize<uint32_t>(world.physicals.size(), ostream);
@@ -386,6 +403,15 @@ void SerializationSessionPrototype::serializeWorld(const WorldPrototype& world, 
 		dynamicExternalForceSerializer.serialize(*force, ostream);
 	}
 }
+
+void DeSerializationSessionPrototype::deserializeWorldLayer(WorldLayer& layer, std::istream& istream) {
+	uint32_t extraPartsInLayer = ::deserialize<uint32_t>(istream);
+	for(uint32_t i = 0; i < extraPartsInLayer; i++) {
+		GlobalCFrame cf = ::deserialize<GlobalCFrame>(istream);
+		layer.tree.add(deserializePartData(cf, &layer, istream));
+	}
+}
+
 void DeSerializationSessionPrototype::deserializeWorld(WorldPrototype& world, std::istream& istream) {
 	this->deserializeAndCollectHeaderInformation(istream);
 
@@ -395,14 +421,16 @@ void DeSerializationSessionPrototype::deserializeWorld(WorldPrototype& world, st
 	uint32_t layerCount = ::deserialize<uint32_t>(istream);
 	world.layers.reserve(layerCount);
 	for(uint32_t i = 0; i < layerCount; i++) {
-		world.layers.emplace_back(&world);
+		world.layers.emplace_back(&world, false);
 	}
-	for(WorldLayer& layer : world.layers) {
-		uint32_t extraPartsInLayer = ::deserialize<uint32_t>(istream);
-		for(uint32_t i = 0; i < extraPartsInLayer; i++) {
-			GlobalCFrame cf = ::deserialize<GlobalCFrame>(istream);
-			layer.tree.add(deserializePartData(cf, &layer, istream));
+	for(int i = 0; i < world.getLayerCount(); i++) {
+		for(int j = 0; j <= i; j++) {
+			bool layersCollide = ::deserialize<bool>(istream);
+			world.setLayersCollide(i, j, layersCollide);
 		}
+	}
+	for(ColissionLayer& layer : world.layers) {
+		deserializeWorldLayer(layer.subLayers[ColissionLayer::TERRAIN_PARTS_LAYER], istream);
 	}
 
 	uint32_t numberOfPhysicals = ::deserialize<uint32_t>(istream);
@@ -456,7 +484,7 @@ std::vector<Part*> DeSerializationSessionPrototype::deserializeParts(std::istrea
 
 
 void SerializationSessionPrototype::serializeCollectedHeaderInformation(std::ostream& ostream) {
-	::serialize<uint32_t>(CURRENT_VERSION_ID, ostream);
+	serializeVersion(ostream);
 	this->shapeSerializer.sharedShapeClassSerializer.serializeRegistry([](const ShapeClass* sc, std::ostream& ostream) {dynamicShapeClassSerializer.serialize(*sc, ostream); }, ostream);
 }
 

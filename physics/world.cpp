@@ -5,7 +5,7 @@
 #include "layer.h"
 #include "misc/validityHelper.h"
 
-#ifndef NDEBUG
+#ifdef CHECK_WORLD_VALIDITY
 #define ASSERT_VALID if (!isValid()) throw "World not valid!";
 #else
 #define ASSERT_VALID
@@ -44,13 +44,15 @@ bool WorldPrototype::isValid() const {
 		if(result == false) return false;
 	}
 
-	for(const WorldLayer& l : layers) {
-		treeValidCheck(l.tree);
-		for(const Part& p : l.tree) {
-			if(p.layer != &l) {
-				Log::error("Part contained in layer, but it's layer field is not the layer");
-				DEBUGBREAK;
-				return false;
+	for(const ColissionLayer& cl : layers) {
+		for(const WorldLayer& l : cl.subLayers) {
+			treeValidCheck(l.tree);
+			for(const Part& p : l.tree) {
+				if(p.layer != &l) {
+					Log::error("Part contained in layer, but it's layer field is not the layer");
+					DEBUGBREAK;
+					return false;
+				}
 			}
 		}
 	}
@@ -58,28 +60,72 @@ bool WorldPrototype::isValid() const {
 }
 #pragma endregion
 
-static std::vector<WorldLayer> produceLayerVector(WorldPrototype* world, size_t count) {
-	std::vector<WorldLayer> result;
-	result.reserve(count);
-
-	for(size_t i = 0; i < count; i++) {
-		result.emplace_back(world);
-	}
-
-	return result;
-}
-
 WorldPrototype::WorldPrototype(double deltaT) : 
 	deltaT(deltaT), 
-	layers(produceLayerVector(this, 2)),
-	freePartColissions(),
-	freeTerrainColissions{std::make_pair(&layers[0], &layers[1])}, // free-terrain
-	internalColissions{&layers[0]}, // free-free
-	layersToRefresh{&layers[0]} {
+	layers(),
+	colissionMask() {
 
+	layers.emplace_back(this, true);
 }
 
 WorldPrototype::~WorldPrototype() {
+
+}
+
+static std::pair<int, int> pairLayers(int layer1, int layer2) {
+	if(layer1 < layer2) {
+		return std::make_pair(layer1, layer2);
+	} else {
+		return std::make_pair(layer2, layer1);
+	}
+}
+
+bool WorldPrototype::doLayersCollide(int layer1, int layer2) const {
+	if(layer1 == layer2) {
+		return layers[layer1].collidesInternally;
+	} else {
+		std::pair<int, int> checkPair = pairLayers(layer1, layer2);
+		for(std::pair<int, int> itemInColissionMask : colissionMask) {
+			if(itemInColissionMask == checkPair) {
+				return true;
+			}
+		}
+		return false;
+	}
+}
+void WorldPrototype::setLayersCollide(int layer1, int layer2, bool collide) {
+	if(layer1 == layer2) {
+		layers[layer1].collidesInternally = collide;
+	} else {
+		std::pair<int, int> checkAddPair = pairLayers(layer1, layer2);
+		for(std::pair<int, int>& itemInColissionMask : colissionMask) {
+			if(itemInColissionMask == checkAddPair) {
+				if(!collide) {
+					// remove for no collide
+					itemInColissionMask = colissionMask.back();
+					colissionMask.pop_back();
+				}
+				return;
+			}
+		}
+		if(collide) {
+			colissionMask.push_back(checkAddPair);
+		}
+	}
+}
+
+int WorldPrototype::createLayer(bool collidesInternally, bool collidesWithOthers) {
+	int layerIndex = layers.size();
+	layers.emplace_back(this, collidesInternally);
+	if(collidesInternally) {
+		for(int i = 0; i < layerIndex; i++) {
+			colissionMask.emplace_back(i, layerIndex);
+			// add layer to colission mask
+		}
+	}
+	return layerIndex;
+}
+void WorldPrototype::deleteLayer(int layerIndex, int layerToMoveTo) {
 
 }
 
@@ -108,7 +154,8 @@ void WorldPrototype::addPart(Part* part, int layerIndex) {
 	physicals.push_back(part->parent->mainPhysical);
 	part->parent->mainPhysical->world = this;
 
-	WorldLayer* worldLayer = &layers[layerIndex];
+
+	WorldLayer* worldLayer = &layers[layerIndex].subLayers[ColissionLayer::FREE_PARTS_LAYER];
 	part->parent->mainPhysical->forEachPart([worldLayer](Part& p) {
 		p.layer = worldLayer;
 	});
@@ -148,7 +195,7 @@ void WorldPrototype::addPhysicalWithExistingLayers(MotorizedPhysical* motorPhys)
 void WorldPrototype::addTerrainPart(Part* part, int layerIndex) {
 	objectCount++;
 
-	WorldLayer* worldLayer = &layers[layerIndex];
+	WorldLayer* worldLayer = &layers[layerIndex].subLayers[ColissionLayer::TERRAIN_PARTS_LAYER];
 	part->layer = worldLayer;
 	worldLayer->addPart(part);
 
@@ -184,8 +231,10 @@ void WorldPrototype::clear() {
 		partsToDelete.push_back(&p);
 	}
 	this->objectCount = 0;
-	for(WorldLayer& layer : this->layers) {
-		layer.tree.clear();
+	for(ColissionLayer& cl : this->layers) {
+		for(WorldLayer& layer : cl.subLayers) {
+			layer.tree.clear();
+		}
 	}
 	for(Part* p : partsToDelete) {
 		this->onPartRemoved(p);
@@ -197,22 +246,14 @@ size_t WorldPrototype::getLayerCount() const {
 	return this->layers.size();
 }
 
-BoundsTree<Part>& WorldPrototype::getTree(int index) {
-	return layers[index].tree;
-}
-
-const BoundsTree<Part>& WorldPrototype::getTree(int index) const {
-	return layers[index].tree;
-}
-
 void WorldPrototype::notifyMainPhysicalObsolete(MotorizedPhysical* motorPhys) {
 	physicals.erase(std::remove(physicals.begin(), physicals.end(), motorPhys));
 
 	ASSERT_VALID;
 }
 void WorldPrototype::optimizeLayers() {
-	for(WorldLayer& layer : layers) {
-		layer.optimize();
+	for(ColissionLayer& layer : layers) {
+		layer.subLayers[ColissionLayer::TERRAIN_PARTS_LAYER].optimize();
 	}
 	ASSERT_VALID;
 }
@@ -304,10 +345,6 @@ void WorldPrototype::notifyPhysicalsMerged(const MotorizedPhysical* firstPhysica
 
 void WorldPrototype::notifyNewPartAddedToPhysical(const MotorizedPhysical* physical, Part* newPart) {
 	assert(physical->world == this);
-
-	/*this->objectTree.addToExistingGroup(newPart, newPart->getBounds(), physical->getMainPart(), physical->getMainPart()->getBounds());
-	objectCount++;
-	ASSERT_TREE_VALID(objectTree);*/
 
 	onPartAdded(newPart);
 }

@@ -178,97 +178,6 @@ void handleTerrainCollision(Part& part1, Part& part2, Position collisionPoint, V
 	assert(phys1.isValid());
 }
 
-bool boundsSphereEarlyEnd(const DiagonalMat3& scale, const Vec3& sphereCenter, double sphereRadius) {
-	return std::abs(sphereCenter.x) > scale[0] + sphereRadius || std::abs(sphereCenter.y) > scale[1] + sphereRadius || std::abs(sphereCenter.z) > scale[2] + sphereRadius;
-}
-
-inline void runColissionTests(Part& p1, Part& p2, WorldPrototype& world, std::vector<Colission>& colissions) {
-	double maxRadiusBetween = p1.maxRadius + p2.maxRadius;
-
-	Vec3 deltaPosition = p1.getPosition() - p2.getPosition();
-	double distanceSqBetween = lengthSquared(deltaPosition);
-
-	if (distanceSqBetween > maxRadiusBetween * maxRadiusBetween) {
-		intersectionStatistics.addToTally(IntersectionResult::PART_DISTANCE_REJECT, 1);
-		return;
-	}
-	if (boundsSphereEarlyEnd(p1.hitbox.scale, p1.getCFrame().globalToLocal(p2.getPosition()), p2.maxRadius)) {
-		intersectionStatistics.addToTally(IntersectionResult::PART_BOUNDS_REJECT, 1);
-		return;
-	}
-	if (boundsSphereEarlyEnd(p2.hitbox.scale, p2.getCFrame().globalToLocal(p1.getPosition()), p1.maxRadius)) {
-		intersectionStatistics.addToTally(IntersectionResult::PART_BOUNDS_REJECT, 1);
-		return;
-	}
-
-	PartIntersection result = p1.intersects(p2);
-	if (result.intersects) {
-		intersectionStatistics.addToTally(IntersectionResult::COLISSION, 1);
-
-		colissions.push_back(Colission{ &p1, &p2, result.intersection, result.exitVector });
-	} else {
-		intersectionStatistics.addToTally(IntersectionResult::GJK_REJECT, 1);
-	}
-	physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
-}
-
-void recursiveFindColissionsBetween(WorldPrototype& world, std::vector<Colission>& colissions, TreeNode& first, TreeNode& second) {
-	if (!intersects(first.bounds, second.bounds)) return;
-	
-	if (first.isLeafNode() && second.isLeafNode()) {
-		Part* firstObj = static_cast<Part*>(first.object);
-		Part* secondObj = static_cast<Part*>(second.object);
-#ifdef CATCH_INTERSECTION_ERRORS
-		try {
-			runColissionTests(*firstObj, *secondObj, world, colissions);
-		} catch(const std::exception& err) {
-			Log::fatal("Error occurred during intersection: %s", err.what());
-
-			Debug::saveIntersectionError(firstObj, secondObj, "colError");
-
-			throw err;
-		} catch(...) {
-			Log::fatal("Unknown error occured during intersection");
-
-			Debug::saveIntersectionError(firstObj, secondObj, "colError");
-
-			throw "exit";
-		}
-#else
-		runColissionTests(*firstObj, *secondObj, world, colissions);
-#endif
-	} else {
-		bool preferFirst = computeCost(first.bounds) <= computeCost(second.bounds);
-		if (preferFirst && !first.isLeafNode() || second.isLeafNode()) {
-			// split first
-
-			for (TreeNode& node : first) {
-				recursiveFindColissionsBetween(world, colissions, node, second);
-			}
-		} else {
-			// split second
-
-			for (TreeNode& node : second) {
-				recursiveFindColissionsBetween(world, colissions, first, node);
-			}
-		}
-	}
-}
-void recursiveFindColissionsInternal(WorldPrototype& world, std::vector<Colission>& colissions, TreeNode& trunkNode) {
-	// within the same node
-	if(trunkNode.isLeafNode() || trunkNode.isGroupHead)
-		return;
-
-	for(int i = 0; i < trunkNode.nodeCount; i++) {
-		TreeNode& A = trunkNode[i];
-		recursiveFindColissionsInternal(world, colissions, A);
-		for(int j = i + 1; j < trunkNode.nodeCount; j++) {
-			TreeNode& B = trunkNode[j];
-			recursiveFindColissionsBetween(world, colissions, A, B);
-		}
-	}
-}
-
 /*
 	===== World Tick =====
 */
@@ -298,25 +207,23 @@ void WorldPrototype::applyExternalForces() {
 void WorldPrototype::findColissions() {
 	physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
 
-	currentObjectColissions.clear();
-	currentTerrainColissions.clear();
+	curColissions.clear();
 
-	for(WorldLayer* internalCollidingLayer : internalColissions) {
-		recursiveFindColissionsInternal(*this, currentObjectColissions, internalCollidingLayer->tree.rootNode);
+	for(const ColissionLayer& layer : layers) {
+		if(layer.collidesInternally) {
+			layer.getInternalColissions(curColissions);
+		}
 	}
-	for(std::pair<WorldLayer*, WorldLayer*> freePartCol : freePartColissions) {
-		recursiveFindColissionsBetween(*this, currentObjectColissions, freePartCol.first->tree.rootNode, freePartCol.second->tree.rootNode);
-	}
-	for(std::pair<WorldLayer*, WorldLayer*> freeTerrainCol : freeTerrainColissions) {
-		recursiveFindColissionsBetween(*this, currentTerrainColissions, freeTerrainCol.first->tree.rootNode, freeTerrainCol.second->tree.rootNode);
+	for(std::pair<int, int> collidingLayers : colissionMask) {
+		getColissionsBetween(layers[collidingLayers.first], layers[collidingLayers.second], curColissions);
 	}
 }
 void WorldPrototype::handleColissions() {
 	physicsMeasure.mark(PhysicsProcess::COLISSION_HANDLING);
-	for (Colission c : currentObjectColissions) {
+	for (Colission c : curColissions.freePartColissions) {
 		handleCollision(*c.p1, *c.p2, c.intersection, c.exitVector);
 	}
-	for (Colission c : currentTerrainColissions) {
+	for (Colission c : curColissions.freeTerrainColissions) {
 		handleTerrainCollision(*c.p1, *c.p2, c.intersection, c.exitVector);
 	}
 }
@@ -332,12 +239,8 @@ void WorldPrototype::update() {
 		physical->update(this->deltaT);
 	}
 
-	for(WorldLayer* layer : layersToRefresh) {
-		physicsMeasure.mark(PhysicsProcess::UPDATE_TREE_BOUNDS);
-		BoundsTree<Part>& tree = layer->tree;
-		tree.recalculateBounds();
-		physicsMeasure.mark(PhysicsProcess::UPDATE_TREE_STRUCTURE);
-		tree.improveStructure();
+	for(ColissionLayer& layer : layers) {
+		layer.refresh();
 	}
 	age++;
 

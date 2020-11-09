@@ -2,12 +2,50 @@
 #include "world.h"
 
 #include "misc/validityHelper.h"
+#include "physicsProfiler.h"
+#include "debug.h"
 
 #include <assert.h>
 
 
-WorldLayer::WorldLayer(WorldPrototype* world) : world(world) {}
+WorldLayer::WorldLayer(ColissionLayer* parent) : parent(parent) {}
 
+WorldLayer::~WorldLayer() {
+	for(Part& p : tree) {
+		p.layer = nullptr;
+	}
+}
+
+WorldLayer::WorldLayer(WorldLayer&& other) noexcept :
+	tree(std::move(other.tree)),
+	parent(other.parent) {
+
+	for(Part& p : tree) {
+		assert(p.layer = &other);
+		p.layer = this;
+	}
+}
+WorldLayer& WorldLayer::operator=(WorldLayer&& other) noexcept {
+	std::swap(tree, other.tree);
+	std::swap(parent, other.parent);
+
+	for(Part& p : tree) {
+		assert(p.layer = &other);
+		p.layer = this;
+	}
+	for(Part& p : other.tree) {
+		assert(p.layer = this);
+		p.layer = &other;
+	}
+	return *this;
+}
+
+void WorldLayer::refresh() {
+	physicsMeasure.mark(PhysicsProcess::UPDATE_TREE_BOUNDS);
+	tree.recalculateBounds();
+	physicsMeasure.mark(PhysicsProcess::UPDATE_TREE_STRUCTURE);
+	tree.improveStructure();
+}
 
 void WorldLayer::addNode(TreeNode&& newNode) {
 	tree.add(std::move(newNode));
@@ -52,7 +90,7 @@ void WorldLayer::moveOutOfGroup(Part* part) {
 
 void WorldLayer::removePart(Part* partToRemove) {
 	tree.remove(partToRemove, partToRemove->getBounds());
-	if(world) world->onPartRemoved(partToRemove);
+	parent->world->onPartRemoved(partToRemove);
 }
 
 void WorldLayer::notifyPartBoundsUpdated(const Part* updatedPart, const Bounds& oldBounds) {
@@ -82,5 +120,149 @@ void WorldLayer::joinPartsIntoNewGroup(Part* p1, Part* p2) {
 }
 
 int WorldLayer::getID() const {
+	return (parent->getID() * ColissionLayer::NUMBER_OF_SUBLAYERS) + (this - parent->subLayers);
+}
+WorldLayer* getLayerByID(std::vector<ColissionLayer>& knownLayers, int id) {
+	return &knownLayers[id / ColissionLayer::NUMBER_OF_SUBLAYERS].subLayers[id % ColissionLayer::NUMBER_OF_SUBLAYERS];
+}
+const WorldLayer* getLayerByID(const std::vector<ColissionLayer>& knownLayers, int id) {
+	return &knownLayers[id / ColissionLayer::NUMBER_OF_SUBLAYERS].subLayers[id % ColissionLayer::NUMBER_OF_SUBLAYERS];
+}
+int getMaxLayerID(const std::vector<ColissionLayer>& knownLayers) {
+	return knownLayers.size() * ColissionLayer::NUMBER_OF_SUBLAYERS;
+}
+
+int ColissionLayer::getID() const {
 	return this - &world->layers[0];
+}
+
+ColissionLayer::ColissionLayer() : world(nullptr), collidesInternally(true), subLayers{WorldLayer(this), WorldLayer(this)} {}
+ColissionLayer::ColissionLayer(WorldPrototype* world, bool collidesInternally) : world(world), collidesInternally(collidesInternally), subLayers{WorldLayer(this), WorldLayer(this)} {}
+
+ColissionLayer::ColissionLayer(ColissionLayer&& other) noexcept : world(other.world), collidesInternally(other.collidesInternally), subLayers{std::move(other.subLayers[0]), std::move(other.subLayers[1])} {
+	other.world = nullptr;
+
+	for(WorldLayer& l : subLayers) {
+		l.parent = this;
+	}
+}
+ColissionLayer& ColissionLayer::operator=(ColissionLayer&& other) noexcept {
+	std::swap(this->world, other.world);
+	std::swap(this->subLayers, other.subLayers);
+	std::swap(this->collidesInternally, other.collidesInternally);
+
+	for(WorldLayer& l : subLayers) {
+		l.parent = this;
+	}
+	for(WorldLayer& l : other.subLayers) {
+		l.parent = &other;
+	}
+	return *this;
+}
+
+void ColissionLayer::refresh() {
+	subLayers[FREE_PARTS_LAYER].refresh();
+}
+
+
+
+static bool boundsSphereEarlyEnd(const DiagonalMat3& scale, const Vec3& sphereCenter, double sphereRadius) {
+	return std::abs(sphereCenter.x) > scale[0] + sphereRadius || std::abs(sphereCenter.y) > scale[1] + sphereRadius || std::abs(sphereCenter.z) > scale[2] + sphereRadius;
+}
+
+static void runColissionTests(Part& p1, Part& p2, std::vector<Colission>& colissions) {
+	double maxRadiusBetween = p1.maxRadius + p2.maxRadius;
+
+	Vec3 deltaPosition = p1.getPosition() - p2.getPosition();
+	double distanceSqBetween = lengthSquared(deltaPosition);
+
+	if(distanceSqBetween > maxRadiusBetween * maxRadiusBetween) {
+		intersectionStatistics.addToTally(IntersectionResult::PART_DISTANCE_REJECT, 1);
+		return;
+	}
+	if(boundsSphereEarlyEnd(p1.hitbox.scale, p1.getCFrame().globalToLocal(p2.getPosition()), p2.maxRadius)) {
+		intersectionStatistics.addToTally(IntersectionResult::PART_BOUNDS_REJECT, 1);
+		return;
+	}
+	if(boundsSphereEarlyEnd(p2.hitbox.scale, p2.getCFrame().globalToLocal(p1.getPosition()), p1.maxRadius)) {
+		intersectionStatistics.addToTally(IntersectionResult::PART_BOUNDS_REJECT, 1);
+		return;
+	}
+
+	PartIntersection result = p1.intersects(p2);
+	if(result.intersects) {
+		intersectionStatistics.addToTally(IntersectionResult::COLISSION, 1);
+
+		colissions.push_back(Colission{&p1, &p2, result.intersection, result.exitVector});
+	} else {
+		intersectionStatistics.addToTally(IntersectionResult::GJK_REJECT, 1);
+	}
+	physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
+}
+
+static void recursiveFindColissionsBetween(std::vector<Colission>& colissions, const TreeNode& first, const TreeNode& second) {
+	if(!intersects(first.bounds, second.bounds)) return;
+
+	if(first.isLeafNode() && second.isLeafNode()) {
+		Part* firstObj = static_cast<Part*>(first.object);
+		Part* secondObj = static_cast<Part*>(second.object);
+#ifdef CATCH_INTERSECTION_ERRORS
+		try {
+			runColissionTests(*firstObj, *secondObj, colissions);
+		} catch(const std::exception& err) {
+			Log::fatal("Error occurred during intersection: %s", err.what());
+
+			Debug::saveIntersectionError(firstObj, secondObj, "colError");
+
+			throw err;
+		} catch(...) {
+			Log::fatal("Unknown error occured during intersection");
+
+			Debug::saveIntersectionError(firstObj, secondObj, "colError");
+
+			throw "exit";
+		}
+#else
+		runColissionTests(*firstObj, *secondObj, colissions);
+#endif
+	} else {
+		bool preferFirst = computeCost(first.bounds) <= computeCost(second.bounds);
+		if(preferFirst && !first.isLeafNode() || second.isLeafNode()) {
+			// split first
+
+			for(const TreeNode& node : first) {
+				recursiveFindColissionsBetween(colissions, node, second);
+			}
+		} else {
+			// split second
+
+			for(const TreeNode& node : second) {
+				recursiveFindColissionsBetween(colissions, first, node);
+			}
+		}
+	}
+}
+static void recursiveFindColissionsInternal(std::vector<Colission>& colissions, const TreeNode& trunkNode) {
+	// within the same node
+	if(trunkNode.isLeafNode() || trunkNode.isGroupHead)
+		return;
+
+	for(int i = 0; i < trunkNode.nodeCount; i++) {
+		const TreeNode& A = trunkNode[i];
+		recursiveFindColissionsInternal(colissions, A);
+		for(int j = i + 1; j < trunkNode.nodeCount; j++) {
+			const TreeNode& B = trunkNode[j];
+			recursiveFindColissionsBetween(colissions, A, B);
+		}
+	}
+}
+
+void ColissionLayer::getInternalColissions(ColissionBuffer& curColissions) const {
+	recursiveFindColissionsInternal(curColissions.freePartColissions, subLayers[0].tree.rootNode);
+	recursiveFindColissionsBetween(curColissions.freeTerrainColissions, subLayers[0].tree.rootNode, subLayers[1].tree.rootNode);
+}
+void getColissionsBetween(const ColissionLayer& a, const ColissionLayer& b, ColissionBuffer& curColissions) {
+	recursiveFindColissionsBetween(curColissions.freePartColissions, a.subLayers[0].tree.rootNode, b.subLayers[0].tree.rootNode);
+	recursiveFindColissionsBetween(curColissions.freeTerrainColissions, a.subLayers[0].tree.rootNode, b.subLayers[1].tree.rootNode);
+	recursiveFindColissionsBetween(curColissions.freeTerrainColissions, b.subLayers[0].tree.rootNode, a.subLayers[1].tree.rootNode);
 }

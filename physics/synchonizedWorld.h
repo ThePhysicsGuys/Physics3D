@@ -18,13 +18,15 @@ class SynchronizedWorld : public World<T> {
 	std::queue<std::function<void()>> waitingOperations;
 	mutable std::queue<std::function<void()>> waitingReadOnlyOperations;
 
-	void pushOperation(const std::function<void()>& func) {
+	template<typename Func>
+	void pushOperation(const Func& func) {
 		std::lock_guard<std::mutex> lg(queueLock);
-		waitingOperations.push(func);
+		waitingOperations.emplace(func);
 	}
-	void pushReadOnlyOperation(const std::function<void()>& func) const {
+	template<typename Func>
+	void pushReadOnlyOperation(const Func& func) const {
 		std::lock_guard<std::mutex> lg(readQueueLock);
-		waitingReadOnlyOperations.push(func);
+		waitingReadOnlyOperations.emplace(func);
 	}
 
 	void processQueue() {
@@ -51,11 +53,13 @@ public:
 
 	SynchronizedWorld<T>(double deltaT) : World<T>(deltaT) {}
 
-	void syncModification(const std::function<void()>& function) {
+	template<typename Func>
+	void syncModification(const Func& function) {
 		std::lock_guard<std::shared_mutex> lg(lock);
 		function();
 	}
-	void asyncModification(const std::function<void()>& function) {
+	template<typename Func>
+	void asyncModification(const Func& function) {
 		if (lock.try_lock()) {
 			UnlockOnDestroy lg(lock);
 			function();
@@ -63,11 +67,13 @@ public:
 			pushOperation(function);
 		}
 	}
-	void syncReadOnlyOperation(const std::function<void()>& function) const {
+	template<typename Func>
+	void syncReadOnlyOperation(const Func& function) const {
 		SharedLockGuard lg(lock);
 		function();
 	}
-	void asyncReadOnlyOperation(const std::function<void()>& function) const {
+	template<typename Func>
+	void asyncReadOnlyOperation(const Func& function) const {
 		if (lock.try_lock_shared()) {
 			UnlockSharedOnDestroy lg(lock);
 			function();

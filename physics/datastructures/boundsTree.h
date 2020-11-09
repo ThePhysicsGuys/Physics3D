@@ -200,6 +200,7 @@ struct TreeIterator : public ConstTreeIterator {
 template<typename Filter>
 struct FilteredTreeIterator : public NodeStack {
 	Filter filter;
+	FilteredTreeIterator() = default;
 	FilteredTreeIterator(TreeNode& rootNode, const Filter& filter) : NodeStack(rootNode), filter(filter) {
 		// the very first element is a dummy, in order to detect when the tree is done
 		if (rootNode.nodeCount == 0) return;
@@ -288,8 +289,18 @@ struct BoundsTree {
 	BoundsTree(const BoundsTree&) = delete;
 	BoundsTree& operator=(const BoundsTree&) = delete;
 
-	BoundsTree(BoundsTree&&) = default;
-	BoundsTree& operator=(BoundsTree&&) = default;
+	BoundsTree(BoundsTree&& other) noexcept : rootNode(std::move(other.rootNode)) {
+		other.rootNode.nodeCount = 0;
+		other.rootNode.object = nullptr;
+		other.rootNode.isGroupHead = false;
+	}
+	BoundsTree& operator=(BoundsTree&& other) noexcept {
+		std::swap(rootNode.bounds, other.rootNode.bounds);
+		std::swap(rootNode.object, other.rootNode.object);
+		std::swap(rootNode.isGroupHead, other.rootNode.isGroupHead);
+		std::swap(rootNode.nodeCount, other.rootNode.nodeCount);
+		return *this;
+	}
 
 
 	inline bool isEmpty() const {

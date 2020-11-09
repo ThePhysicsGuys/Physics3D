@@ -2,6 +2,8 @@
 
 #include "serialization.h"
 
+#include "../util/fileUtils.h"
+
 #include "extendedPart.h"
 #include "application.h"
 #include "view/screen.h"
@@ -90,18 +92,36 @@ public:
 	}
 };
 
+static void openWriteFile(std::ofstream& fstream, const char* fileName) {
+	std::string fullPath = Util::getFullPath(fileName);
+	Log::info("Writing to file %s", fullPath.c_str());
+	fstream.open(fullPath, std::ios::binary);
+	if(!fstream.is_open()) {
+		throw "File not opened!";
+	}
+}
+
+static void openReadFile(std::ifstream& fstream, const char* fileName) {
+	std::string fullPath = Util::getFullPath(fileName);
+	Log::info("Reading file %s", fullPath.c_str());
+	fstream.open(fullPath, std::ios::binary);
+	if(!fstream.is_open()) {
+		throw "File not opened!";
+	}
+}
+
 void WorldImportExport::saveLooseParts(const char* fileName, size_t numberOfParts, const ExtendedPart* const parts[]) {
-	std::ofstream partFile;
-	partFile.open(fileName, std::ios::binary);
+	std::ofstream file;
+	openWriteFile(file, fileName);
 
 	Serializer serializer;
-	serializer.serializeParts(parts, numberOfParts, partFile);
+	serializer.serializeParts(parts, numberOfParts, file);
 
-	partFile.close();
+	file.close();
 }
 void WorldImportExport::loadLoosePartsIntoWorld(const char* fileName, World<ExtendedPart>& world) {
 	std::ifstream file;
-	file.open(fileName, std::ios::binary);
+	openReadFile(file, fileName);
 
 	Deserializer d;
 	std::vector<ExtendedPart*> result = d.deserializeParts(file);
@@ -114,7 +134,7 @@ void WorldImportExport::loadLoosePartsIntoWorld(const char* fileName, World<Exte
 
 void WorldImportExport::loadNativePartsIntoWorld(const char* fileName, World<ExtendedPart>& world) {
 	std::ifstream file;
-	file.open(fileName, std::ios::binary);
+	openReadFile(file, fileName);
 
 	DeSerializationSessionPrototype d;
 	std::vector<Part*> result = d.deserializeParts(file);
@@ -128,7 +148,7 @@ void WorldImportExport::loadNativePartsIntoWorld(const char* fileName, World<Ext
 
 void WorldImportExport::saveWorld(const char* fileName, const World<ExtendedPart>& world) {
 	std::ofstream file;
-	file.open(fileName, std::ios::binary);
+	openWriteFile(file, fileName);
 
 	Serializer serializer;
 	serializer.serializeWorld(world, file);
@@ -137,7 +157,7 @@ void WorldImportExport::saveWorld(const char* fileName, const World<ExtendedPart
 }
 void WorldImportExport::loadWorld(const char* fileName, World<ExtendedPart>& world) {
 	std::ifstream file;
-	file.open(fileName, std::ios::binary);
+	openReadFile(file, fileName);
 
 	if(!file.is_open()) {
 		throw std::runtime_error("Could not open file!");

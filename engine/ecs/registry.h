@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <type_traits>
 #include <unordered_map>
+#include <typeinfo>
 #include "../util/typetraits.h"
 #include "../util/iteratorUtils.h"
 #include "../util/intrusivePointer.h"

@@ -171,3 +171,19 @@ struct DereferencingIterator {
 	bool operator==(const DereferencingIterator& other) const { return this->baseIter == other.baseIter; }
 	bool operator==(const Iter& other) const { return this->baseIter == other; }
 };
+
+// utility for constructing both const and nonconst iterator simultaneously
+
+template<typename Type, bool IsConst>
+struct const_if_tmp {
+	using type = Type;
+};
+
+template<typename Type>
+struct const_if_tmp<Type, true> {
+	using type = const Type;
+};
+
+template<typename Type, bool IsConst>
+using const_if = typename const_if_tmp<Type, IsConst>::type;
+
