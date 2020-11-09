@@ -5,39 +5,44 @@
 
 
 class SoftLink{
-private:
+protected:
 	struct AttachedPart {
 		AttachedPart(CFrame attachment, Part* part);
 		CFrame attachment = CFrame{};
 		Part* part{ nullptr };
 	};
 
-	Vec3 forceAppliedToTheLink();
+	AttachedPart attachedPart1;
+	AttachedPart attachedPart2;
 
 public:
 	SoftLink(const SoftLink& other) = delete;
 	SoftLink& operator=(const SoftLink& other) = delete;
-	SoftLink(SoftLink&& other) = default;
-	SoftLink& operator=(SoftLink&& other) = default;
+	SoftLink(SoftLink&& other) = delete;
+	SoftLink& operator=(SoftLink&& other) = delete;
 
-	SoftLink(double stiffness, double length, double preferredLength, AttachedPart part1, AttachedPart part2);
-	void update();
-	
-	GlobalCFrame getCFrameOfPart1() const;
-	GlobalCFrame getCFrameOfPart2() const;
+	virtual ~SoftLink();
+	virtual void update() = 0;
 
-	Position getPosition1() const;
-	Position getPosition2() const;
+	SoftLink(AttachedPart part1, AttachedPart part2);
 
-	const GlobalCFrame& getGlobalLocationOfAttach1() const;
-	const GlobalCFrame& getGlobalLocationOfAttach2() const;
+	GlobalCFrame getGlobalLocationOfAttach1() const;
+	GlobalCFrame getGlobalLocationOfAttach2() const;
 
+	inline GlobalCFrame getCFrameOfPart1() const {
+		return this->attachedPart1.part->getCFrame();
+	}
 
-private:
-	double stiffness;
-	double length;
-	double preferredLength;
-	AttachedPart attachedPart1;
-	AttachedPart attachedPart2;
-	
+	inline GlobalCFrame getCFrameOfPart2() const {
+		return this->attachedPart2.part->getCFrame();
+	}
+
+	inline Position getPosition2() const {
+		return getCFrameOfPart2().getPosition();
+	}
+
+	inline Position getPosition1() const {
+		return getCFrameOfPart1().getPosition();
+	}
+
 };

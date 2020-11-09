@@ -8,7 +8,10 @@
 #include "datastructures/iterators.h"
 #include "datastructures/iteratorEnd.h"
 #include "layer.h"
-#include "softLink.h"
+
+#include "springLink.h"
+#include <memory>
+
 
 struct Colission {
 	Part* p1;
@@ -140,6 +143,10 @@ private:
 	std::vector<Colission> currentObjectColissions;
 	std::vector<Colission> currentTerrainColissions;
 
+	std::vector<SoftLink*> springLinks;
+
+	
+
 	
 
 	/*
@@ -193,7 +200,8 @@ public:
 	std::vector<WorldLayer> layers;
 	std::vector<WorldLayer*> layersToRefresh;
 
-	std::vector<SoftLink*> softLinks;
+	void addLink(SoftLink* link);
+
 	
 	/*
 		These lists signify which layers collide
@@ -215,7 +223,7 @@ public:
 	WorldPrototype(WorldPrototype&&) = delete;
 	WorldPrototype& operator=(WorldPrototype&&) = delete;
 
-	void addLink(SoftLink* sofLink);
+
 
 
 	virtual void tick();

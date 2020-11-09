@@ -44,6 +44,7 @@
 
 #include "io/saveDialog.h"
 
+
 #define TICKS_PER_SECOND 120.0
 #define TICK_SKIP_TIME std::chrono::milliseconds(1000)
 
@@ -130,7 +131,7 @@ void setupWorld(int argc, const char** args) {
 	Shape triangle = polyhedronShape(Library::trianglePyramid);
 
 	WorldBuilder::buildFloorAndWalls(50.0, 50.0, 1.0);
-
+	
 
 	{
 		auto pistonFolder = screen.registry.create();
@@ -286,26 +287,33 @@ void setupWorld(int argc, const char** args) {
 
 	//SoftLink.
 	{
-		ExtendedPart* a = new ExtendedPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(3.0, 3.0, 0.0), { 1.0, 1.0, 1.0 }, "SoftLinkMain");
-		ExtendedPart* b = new ExtendedPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(), { 1.0, 1.0, 1.0 }, "SoftLinkPart");
-		
+		ExtendedPart* a = new ExtendedPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(3.0, 3.0, 0.0), { 1.0, 1.0, 1.0 }, "SpringLinkMain1");
+		ExtendedPart* b = new ExtendedPart(boxShape(1.0, 2.0, 1.0), GlobalCFrame(), { 1.0, 1.0, 1.0 }, "SpringLinkPart1");
 
 		world.addPart(a);
 		world.addPart(b);
 
-		world.addLink(new SoftLink{100000.0, 15.0, 10, {CFrame{1.0, 0.0, 0.0}, a}, {CFrame{0.0, 0.0, 0.0}, b } });
+		world.addLink(new SpringLink( {CFrame{1.0, 0.0, 0.0}, a}, {CFrame{0.0, 0.0, 0.0}, b}, 100.0, 15.0, 10.0 ));
 	}
 	{
-
-		ExtendedPart* a = new ExtendedPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(3.0, 3.0, 0.0), { 1.0, 1.0, 1.0 }, "SoftLinkMain1");
-		ExtendedPart* b = new ExtendedPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(), { 1.0, 1.0, 1.0 }, "SoftLinkPart1");
+		ExtendedPart* a = new ExtendedPart(boxShape(2.0, 0.5, 1.0), GlobalCFrame(3.0, 3.0, 0.0), { 1.0, 1.0, 1.0 }, "SpringLinkMain2");
+		ExtendedPart* b = new ExtendedPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(), { 2.0, 1.0, 1.0 }, "SpringLinkPart2");
 
 		world.addPart(a);
 		world.addPart(b);
 
-		world.addLink(new SoftLink{100000.0, 15.0, 10, {CFrame{1.0, 0.0, 0.0}, a}, {CFrame{0.0, 0.0, 0.0}, b } });
+		world.addLink(new SpringLink({ CFrame{1.0, 0.0, 0.0}, a }, { CFrame{0.0, 0.0, 0.0}, b }, 100.0, 15.0, 10.0));
 	}
+	{
+		ExtendedPart* a = new ExtendedPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(3.0, 3.0, 0.0), { 1.0, 1.0, 1.0 }, "SpringLinkMain3");
+		ExtendedPart* b = new ExtendedPart(boxShape(2.0, 2.0, 2.0), GlobalCFrame(), { 1.0, 0.5, 1.0 }, "SpringLinkPart3");
 
+		world.addPart(a);
+		world.addPart(b);
+
+		world.addLink(new SpringLink({ CFrame{1.0, 0.0, 0.0}, a }, { CFrame{0.0, 0.0, 0.0}, b }, 100.0, 15.0, 10.0));
+	}
+	
 	/*Vec3 angularVel(0.0, 0.0, -1.0);
 	{
 		ExtendedPart* nativeFixedConstraintGroupMain = new ExtendedPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(Position(-3.0, 7.0, 2.0), Rotation::fromEulerAngles(0.0, 0.0, -0.5)), {1.0, 1.0, 1.0}, "MainPart");
