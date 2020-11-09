@@ -244,10 +244,10 @@ void WorldPrototype::update() {
 	}
 	age++;
 
-	for (SoftLink* link : softLinks) {
-		link->update();
+	for (SoftLink* springLink : springLinks) {
+		springLink->update();
 	}
-	
+
 }
 
 

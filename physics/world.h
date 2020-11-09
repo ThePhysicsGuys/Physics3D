@@ -11,6 +11,9 @@
 #include "softLink.h"
 #include "colissionBuffer.h"
 
+#include "springLink.h"
+#include <memory>
+
 class ExternalForce;
 class WorldLayer;
 
@@ -153,6 +156,7 @@ private:
 	friend class WorldLayer;
 	friend class ColissionLayer;
 
+
 	/*
 		This method is called by World or Physical when new MotorizedPhysicals are created which need to be added to the list
 	*/
@@ -202,8 +206,13 @@ public:
 	std::vector<ConstraintGroup> constraints;
 
 	std::vector<ColissionLayer> layers;
+	std::vector<Colission> currentObjectColissions;
+	std::vector<Colission> currentTerrainColissions;
 
-	std::vector<SoftLink*> softLinks;
+	std::vector<SoftLink*> springLinks;
+  
+	void addLink(SoftLink* link);
+
 	
 	ColissionBuffer curColissions;
 
@@ -225,7 +234,7 @@ public:
 	WorldPrototype(WorldPrototype&&) = delete;
 	WorldPrototype& operator=(WorldPrototype&&) = delete;
 
-	void addLink(SoftLink* sofLink);
+
 
 
 	virtual void tick();

@@ -50,10 +50,12 @@ add_library(physics STATIC
   physics/physicsProfiler.cpp
   physics/rigidBody.cpp
   physics/softLink.cpp
+  physics/springLink.cpp
   physics/layer.cpp
   physics/world.cpp
   physics/worldPhysics.cpp
   physics/inertia.cpp
+  
 
   physics/math/linalg/eigen.cpp
   physics/math/linalg/largeMatrix.cpp
