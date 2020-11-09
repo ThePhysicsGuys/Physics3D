@@ -65,10 +65,24 @@ GlobalCFrame generateGlobalCFrame() {
 	return GlobalCFrame(generatePosition(), generateRotation());
 }
 
+
+TranslationalMotion generateTranslationalMotion() {
+	return TranslationalMotion(generateTaylor<2>(generateVec3));
+}
+RotationalMotion generateRotationalMotion() {
+	return RotationalMotion(generateTaylor<2>(generateVec3));
+}
+Motion generateMotion() {
+	return Motion(generateTranslationalMotion(), generateRotationalMotion());
+}
+RelativeMotion generateRelativeMotion() {
+	return RelativeMotion(generateMotion(), generateCFrame());
+}
+
+
 PartProperties generatePartProperties() {
 	return PartProperties{generateDouble(),generateDouble(),generateDouble()};
 }
-
 Part generatePart() {
 	return Part(generateShape(), generateGlobalCFrame(), generatePartProperties());
 }

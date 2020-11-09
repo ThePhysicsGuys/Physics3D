@@ -39,15 +39,15 @@ inline std::ostream& operator<<(std::ostream& os, const LargeVector<T>& vector) 
 
 template<typename T, size_t Size>
 inline std::ostream& operator<<(std::ostream& os, const Vector<T, Size>& vector) {
-	os << std::fixed << std::setw(4) << std::setprecision(4);
+	os << std::fixed << std::setprecision(4);
 	os << '(';
 	for(size_t i = 0; i < Size - 1; i++) {
-		if (vector[i] > 0)
+		if (vector[i] >= 0)
 			os << "+";
 		os << vector[i] << ", ";
 	}
 
-	if (vector[Size - 1] > 0)
+	if (vector[Size - 1] >= 0)
 		os << "+";
 	
 	os << vector[Size - 1] << ")";
@@ -76,7 +76,7 @@ inline std::ostream& operator<<(std::ostream& os, Fix<N> f) {
 	}
 
 	frac = frac >> (N - prec - 1); // shift right, but minus the divisions previously done, except for last bit, which is used for rounding
-	if(frac & 1 == 1) {
+	if(frac & 1) {
 		frac = (frac >> 1) + 1;
 
 		int64_t maxFrac = 1;
@@ -85,7 +85,7 @@ inline std::ostream& operator<<(std::ostream& os, Fix<N> f) {
 		}
 		if(frac >= maxFrac) {
 			frac = 0;
-			intPart++;
+			++intPart;
 		}
 	} else {
 		frac = frac >> 1;

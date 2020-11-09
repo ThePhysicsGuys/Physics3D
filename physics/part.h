@@ -86,7 +86,16 @@ public:
 
 	CFrame transformCFrameToParent(const CFrame& cframeRelativeToPart);
 
+	Vec3 getVelocity() const;
+	Vec3 getAngularVelocity() const;
 	Motion getMotion() const;
+
+	// does not modify angular velocity
+	void setVelocity(Vec3 velocity);
+	// modifies velocity
+	void setAngularVelocity(Vec3 angularVelocity);
+	void setMotion(Vec3 velocity, Vec3 angularVelocity);
+
 
 	bool isMainPart() const;
 	void makeMainPart();

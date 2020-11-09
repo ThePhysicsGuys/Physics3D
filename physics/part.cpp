@@ -132,6 +132,12 @@ void Part::setCFrame(const GlobalCFrame& newCFrame) {
 	if(this->layer != nullptr) this->layer->notifyPartGroupBoundsUpdated(this, oldBounds);
 }
 
+Vec3 Part::getVelocity() const {
+	return this->getMotion().getVelocity();
+}
+Vec3 Part::getAngularVelocity() const {
+	return this->getMotion().getAngularVelocity();
+}
 Motion Part::getMotion() const {
 	if(parent == nullptr) return Motion();
 	Motion parentsMotion = parent->getMotion();
@@ -141,6 +147,19 @@ Motion Part::getMotion() const {
 		Vec3 offset = parent->rigidBody.getAttachFor(this).attachment.getPosition();
 		return parentsMotion.getMotionOfPoint(offset);
 	}
+}
+
+void Part::setVelocity(Vec3 velocity) {
+	Vec3 oldVel = this->getVelocity();
+	parent->mainPhysical->motionOfCenterOfMass.translation.translation[0] += (velocity - oldVel);
+}
+void Part::setAngularVelocity(Vec3 angularVelocity) {
+	Vec3 oldAngularVel = this->getAngularVelocity();
+	parent->mainPhysical->motionOfCenterOfMass.rotation.rotation[0] += (angularVelocity - oldAngularVel);
+}
+void Part::setMotion(Vec3 velocity, Vec3 angularVelocity) {
+	setAngularVelocity(angularVelocity); // angular velocity must come first, as it affects the velocity that setVelocity() uses
+	setVelocity(velocity);
 }
 
 void Part::translate(Vec3 translation) {

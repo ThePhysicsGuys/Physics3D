@@ -101,6 +101,8 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_ty
 	
 	ExtendedPart* selectedPart = component->part;
 	Motion motion = selectedPart->getMotion();
+	Vec3f velocity = motion.getVelocity();
+	Vec3f angularVelocity = motion.getAngularVelocity();
 
 	float mass = selectedPart->getMass();
 	float friction = selectedPart->getFriction();
@@ -109,9 +111,13 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_ty
 	Vec3f conveyorEffect = selectedPart->getConveyorEffect();
 
 	ECS_TITLE("Part Info", false);
-	ECS_PROPERTY("Velocity:", ImGui::Text(str(motion.getVelocity()).c_str()));
+	ECS_PROPERTY_IF("Velocity:", ImGui::DragVec3("##Velocity", velocity.data, 0, 0.1, true),
+		selectedPart->setVelocity(velocity);
+	);
+	ECS_PROPERTY_IF("Angular velocity:", ImGui::DragVec3("##AngularVelocity", angularVelocity.data, 0, 0.1, true),
+		selectedPart->setAngularVelocity(angularVelocity);
+	);
 	ECS_PROPERTY("Acceleration:", ImGui::Text(str(motion.getAcceleration()).c_str()));
-	ECS_PROPERTY("Angular velocity:", ImGui::Text(str(motion.getAngularVelocity()).c_str()));
 	ECS_PROPERTY("Angular acceleration:", ImGui::Text(str(motion.getAngularAcceleration()).c_str()));
 	
 	ECS_PROPERTY_IF("Mass:", ImGui::DragFloat("##Mass", &mass, 0.05f),
@@ -128,7 +134,7 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_ty
 	ECS_PROPERTY_IF("Bouncyness:", ImGui::DragFloat("##Bouncyness", &bouncyness, 0.05f),
 		selectedPart->setBouncyness(bouncyness);
 	);
-	ECS_PROPERTY_IF("Conveyor effect:", ImGui::DragVec3("##ConveyorEffect", conveyorEffect.data),
+	ECS_PROPERTY_IF("Conveyor effect:", ImGui::DragVec3("##ConveyorEffect", conveyorEffect.data, 0, 0.1, true),
 		selectedPart->setConveyorEffect(conveyorEffect);
 	);
 	
@@ -237,18 +243,18 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_ty
 	ExtendedPart* part = component->isPartAttached ? component->part : nullptr;
 	DiagonalMat3f scale = part->hitbox.scale;
 	
-	ECS_PROPERTY_IF("Position:", ImGui::DragVec3("Position", position.data, 0),
+	ECS_PROPERTY_IF("Position:", ImGui::DragVec3("Position", position.data, 0, 0.1, true),
 		frame.position = castVec3fToPosition(position);
 		component->setCFrame(frame);
 	);
 
-	ECS_PROPERTY_IF("Rotation:", ImGui::DragVec3("Rotation", rotation.data, 0.01f, 0.02f),
+	ECS_PROPERTY_IF("Rotation:", ImGui::DragVec3("Rotation", rotation.data, 0.01f, 0.02f, true),
 		frame.rotation = Rotation::fromRotationVec(rotation);
 		component->setCFrame(frame);
 	);
 
 	if (part_attached) {
-		ECS_PROPERTY_IF("Scale:", ImGui::DragVec3("Scale", scale.data, 0, 0.01f),
+		ECS_PROPERTY_IF("Scale:", ImGui::DragVec3("Scale", scale.data, 1, 0.01f, true),
 			part->hitbox.scale = scale;
 		);
 	}

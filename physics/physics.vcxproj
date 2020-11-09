@@ -337,6 +337,7 @@
     <ClCompile Include="misc\serialization.cpp" />
     <ClCompile Include="rigidBody.cpp" />
     <ClCompile Include="layer.cpp" />
+    <ClCompile Include="softLink.cpp" />
     <ClCompile Include="world.cpp" />
     <ClCompile Include="worldPhysics.cpp" />
   </ItemGroup>
@@ -431,6 +432,7 @@
     <ClInclude Include="relativeMotion.h" />
     <ClInclude Include="rigidBody.h" />
     <ClInclude Include="sharedLockGuard.h" />
+    <ClInclude Include="softLink.h" />
     <ClInclude Include="synchonizedWorld.h" />
     <ClInclude Include="templateUtils.h" />
     <ClInclude Include="world.h" />

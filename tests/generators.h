@@ -10,9 +10,12 @@
 #include "../physics/math/position.h"
 #include "../physics/math/bounds.h"
 #include "../physics/math/fix.h"
+#include "../physics/math/taylorExpansion.h"
 #include "../physics/geometry/shape.h"
 #include "../physics/geometry/shapeCreation.h"
 #include "../physics/geometry/polyhedron.h"
+#include "../physics/motion.h"
+#include "../physics/relativeMotion.h"
 
 #include "../physics/part.h"
 #include "../physics/physical.h"
@@ -32,6 +35,30 @@ Bounds generateBounds();
 Rotation generateRotation();
 CFrame generateCFrame();
 GlobalCFrame generateGlobalCFrame();
+template<int Derivatives, typename ItemGenerator>
+auto generateTaylor(ItemGenerator itemGenerator) -> TaylorExpansion<decltype(itemGenerator()), Derivatives> {
+	TaylorExpansion<decltype(itemGenerator()), Derivatives> result;
+
+	for(auto& item : result) {
+		item = itemGenerator();
+	}
+
+	return result;
+}
+template<int Derivatives, typename ItemGenerator>
+auto generateFullTaylor(ItemGenerator itemGenerator) -> FullTaylorExpansion<decltype(itemGenerator()), Derivatives> {
+	FullTaylorExpansion<decltype(itemGenerator()), Derivatives> result;
+
+	for(auto& item : result) {
+		item = itemGenerator();
+	}
+
+	return result;
+}
+TranslationalMotion generateTranslationalMotion();
+RotationalMotion generateRotationalMotion();
+Motion generateMotion();
+RelativeMotion generateRelativeMotion();
 PartProperties generatePartProperties();
 Part generatePart();
 Part generatePart(Part& attachTo);
@@ -48,11 +75,11 @@ template<typename Boundable>
 Boundable* getRandomObjectFromTree(const BoundsTree<Boundable>& tree) {
 	return static_cast<Boundable*>(getRandomLeafObject(tree.rootNode));
 }
-template<typename T>
-const T& oneOf(const std::vector<T>& vec) {
-	return vec[generateSize_t(vec.size())];
+template<typename Collection>
+auto oneOf(const Collection& collection) -> decltype(collection[0]) {
+	return collection[generateSize_t(collection.size())];
 }
-template<typename T>
-T& oneOf(std::vector<T>& vec) {
-	return vec[generateSize_t(vec.size())];
+template<typename Collection>
+auto oneOf(Collection& collection) -> decltype(collection[0]) {
+	return collection[generateSize_t(collection.size())];
 }

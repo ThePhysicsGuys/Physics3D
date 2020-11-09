@@ -49,6 +49,7 @@ add_library(physics STATIC
   physics/physical.cpp
   physics/physicsProfiler.cpp
   physics/rigidBody.cpp
+  physics/softLink.cpp
   physics/layer.cpp
   physics/world.cpp
   physics/worldPhysics.cpp
