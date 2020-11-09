@@ -47,6 +47,11 @@ void serialize<char>(const char& c, std::ostream& ostream);
 template<>
 char deserialize<char>(std::istream& istream);
 
+template<>
+void serialize<bool>(const bool& b, std::ostream& ostream);
+template<>
+bool deserialize<bool>(std::istream& istream);
+
 void serializeString(const std::string& str, std::ostream& ostream);
 std::string deserializeString(std::istream& istream);
 

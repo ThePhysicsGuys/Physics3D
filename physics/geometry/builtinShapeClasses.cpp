@@ -60,9 +60,7 @@ double CubeClass::getScaledMaxRadiusSq(DiagonalMat3 scale) const {
 }
 
 Vec3f CubeClass::furthestInDirection(const Vec3f& direction) const {
-	Vec3f polyresult = asPolyhedron().furthestInDirection(direction);
-	Vec3f result(direction.x < 0 ? -1.0f : 1.0f, direction.y < 0 ? -1.0f : 1.0f, direction.z < 0 ? -1.0f : 1.0f);
-	return polyresult;
+	return Vec3f(direction.x < 0 ? -1.0f : 1.0f, direction.y < 0 ? -1.0f : 1.0f, direction.z < 0 ? -1.0f : 1.0f);
 }
 
 Polyhedron CubeClass::asPolyhedron() const {

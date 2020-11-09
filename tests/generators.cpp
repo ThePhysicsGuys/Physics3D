@@ -123,19 +123,20 @@ std::vector<Part> generateMotorizedPhysicalParts() {
 	return parts;
 }
 
-void generateLayerAssignment(std::vector<Part>& parts, WorldLayer* layers, int layerCount) {
-	std::vector<Part*> layerParts(layerCount, nullptr);
+void generateLayerAssignment(std::vector<Part>& parts, WorldPrototype& world) {
+	std::vector<Part*> layerParts(world.layers.size(), nullptr);
 
+	int selectedSubLayer = rand() % ColissionLayer::NUMBER_OF_SUBLAYERS;
 	for(Part& curPart : parts) {
-		int selectedLayer = rand() % layerCount;
-		WorldLayer& addTo = layers[selectedLayer];
+		int selectedLayer = rand() % world.layers.size();
+		WorldLayer& addTo = world.layers[selectedLayer].subLayers[selectedSubLayer];
 		if(layerParts[selectedLayer] == nullptr) {
 			addTo.tree.add(&curPart, curPart.getBounds());
 			layerParts[selectedLayer] = &curPart;
 		} else {
 			addTo.tree.addToExistingGroup(&curPart, curPart.getBounds(), layerParts[selectedLayer], layerParts[selectedLayer]->getBounds());
 		}
-		curPart.layer = &layers[selectedLayer];
+		curPart.layer = &addTo;
 	}
 }
 

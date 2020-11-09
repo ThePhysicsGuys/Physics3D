@@ -115,16 +115,18 @@ void DebugOverlay::onRender(Engine::Registry64& registry) {
 
 			graphicsMeasure.mark(Graphics::GraphicsProcess::PROFILER);
 			
-			size_t layerCount = screen->world->layers.size();
+			size_t layerCount = getMaxLayerID(screen->world->layers);
 			Vec2i d = screen->dimension;
 			float availableSpace = float(d.x) / float(d.y);
-			float widthPerTree = availableSpace / (layerCount);
-			for(size_t i = 0; i < layerCount; i++) {
-				const WorldLayer& layer = screen->world->layers[i];
+			float widthPerTree = availableSpace / layerCount;
+			int i = 0;
+			for(const ColissionLayer& clayer : screen->world->layers) {
+				for(const WorldLayer& layer : clayer.subLayers) {
+					float xPos = widthPerTree / 2 + widthPerTree * i;
 
-				float xPos = widthPerTree / 2 + widthPerTree * i;
-
-				renderTreeStructure(layer.tree, pieColors[i], Vec2f(xPos, 0.95f), widthPerTree * 0.7f, screen->selectedPart);
+					renderTreeStructure(layer.tree, pieColors[i], Vec2f(xPos, 0.95f), widthPerTree * 0.7f, screen->selectedPart);
+					i++;
+				}
 			}
 		});
 

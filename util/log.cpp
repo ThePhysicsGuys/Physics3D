@@ -15,9 +15,9 @@ namespace Log {
 
 	static std::string delimiter = "\n";
 
-	static FILE* logFile;
+	static FILE* logFile = nullptr;
 
-#define va_logf(format, message) va_list args; va_start(args, format); vprintf(message.c_str(), args); vfprintf(logFile, message.c_str(), args); fflush(logFile); va_end(args)
+#define va_logf(format, message) va_list args; va_start(args, format); vprintf(message.c_str(), args); if(logFile) {vfprintf(logFile, message.c_str(), args); fflush(logFile);} va_end(args)
 
 	void init(const char* logFileName) {
 #ifdef _MSC_VER

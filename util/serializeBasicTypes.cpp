@@ -19,6 +19,15 @@ char deserialize<char>(std::istream& istream) {
 	return istream.get();
 }
 
+template<>
+void serialize<bool>(const bool& b, std::ostream& ostream) {
+	serialize<char>(b ? 255 : 0, ostream);
+}
+template<>
+bool deserialize<bool>(std::istream& istream) {
+	return deserialize<char>(istream) != 0;
+}
+
 void serializeString(const std::string& str, std::ostream& ostream) {
 	::serialize(str.c_str(), str.length(), ostream);
 	::serialize<char>('\0', ostream);

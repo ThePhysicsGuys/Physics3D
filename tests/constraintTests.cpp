@@ -12,6 +12,7 @@
 #include "../physics/part.h"
 #include "../physics/physical.h"
 #include "../physics/layer.h"
+#include "../physics/world.h"
 #include "../physics/constraints/fixedConstraint.h"
 #include "../physics/constraints/motorConstraint.h"
 #include "../physics/constraints/sinusoidalPistonConstraint.h"
@@ -496,11 +497,13 @@ static bool pairwiseCorrectlyGrouped(const std::vector<Part>& la, const std::vec
 
 TEST_CASE(attachPhysicalsWithLayers) {
 	for(int iter = 0; iter < 100; iter++) {
-		WorldLayer layers[3]{WorldLayer(nullptr), WorldLayer(nullptr), WorldLayer(nullptr)};
+		WorldPrototype testWorld(0.005);
+		testWorld.createLayer(true, true);
+		testWorld.createLayer(false, false);
 		std::vector<Part> firstPhysParts = generateMotorizedPhysicalParts();
 		std::vector<Part> secondPhysParts = generateMotorizedPhysicalParts();
-		generateLayerAssignment(firstPhysParts, layers, 3);
-		generateLayerAssignment(secondPhysParts, layers, 3);
+		generateLayerAssignment(firstPhysParts, testWorld);
+		generateLayerAssignment(secondPhysParts, testWorld);
 
 		ASSERT_FALSE(haveSameMotorPhys(firstPhysParts[0], secondPhysParts[0]));
 

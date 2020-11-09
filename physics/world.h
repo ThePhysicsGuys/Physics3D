@@ -8,10 +8,11 @@
 #include "datastructures/iterators.h"
 #include "datastructures/iteratorEnd.h"
 #include "layer.h"
+#include "softLink.h"
+#include "colissionBuffer.h"
 
 #include "springLink.h"
 #include <memory>
-
 
 struct Colission {
 	Part* p1;
@@ -23,41 +24,64 @@ struct Colission {
 class ExternalForce;
 class WorldLayer;
 
-template<typename Type, bool IsConst>
-struct const_if_tmp {
-	using type = Type;
-};
+template<bool IsConst>
+class WorldLayerIter {
+protected:
+	const_if<ColissionLayer, IsConst>* curLayer;
+	const_if<ColissionLayer, IsConst>* finalLayer;
+	const_if<WorldLayer, IsConst>* curWorldLayer;
 
-template<typename Type>
-struct const_if_tmp<Type, true> {
-	using type = const Type;
-};
+public:
+	// this ctor creates an iter which is immediately at it's end
+	WorldLayerIter() : curLayer(nullptr), finalLayer(nullptr), curWorldLayer(nullptr) {}
 
-template<typename Type, bool IsConst>
-using const_if = typename const_if_tmp<Type, IsConst>::type;
+	WorldLayerIter(const_if<ColissionLayer, IsConst>* firstLayer, const_if<ColissionLayer, IsConst>* finalLayer) :
+		curLayer(firstLayer),
+		finalLayer(finalLayer),
+		curWorldLayer(curLayer->subLayers) {}
+
+	bool operator!=(IteratorEnd) const {
+		return curLayer != finalLayer;
+	}
+	bool operator==(IteratorEnd) const {
+		return curLayer == finalLayer;
+	}
+
+	WorldLayerIter& operator++() {
+		++curWorldLayer;
+		if(curWorldLayer == curLayer->subLayers + ColissionLayer::NUMBER_OF_SUBLAYERS) {
+			++curLayer;
+			if(curLayer == finalLayer) return *this;
+			curWorldLayer = curLayer->subLayers;
+		}
+		return *this;
+	}
+
+	const_if<WorldLayer, IsConst>* operator*() const {
+		return curWorldLayer;
+	}
+};
 
 template<bool IsConst>
 class WorldIteratorTemplate {
 protected:
-	const_if<WorldLayer, IsConst>* curLayer;
-	const_if<WorldLayer, IsConst>* finalLayer;
-	decltype(curLayer->tree.begin()) curIter;
-
+	WorldLayerIter<IsConst> worldLayerIter;
+	decltype((*worldLayerIter)->tree.begin()) curIter;
+	
 	inline void checkMoveToNextLayer() {
 		while(!(curIter != IteratorEnd())) {
-			++curLayer;
-			if(curLayer == finalLayer) return;
-			curIter = curLayer->tree.begin();
+			++worldLayerIter;
+			if(worldLayerIter == IteratorEnd()) return;
+			curIter = (*worldLayerIter)->tree.begin();
 		}
 	}
 
 public:
 	WorldIteratorTemplate() = default;
 
-	WorldIteratorTemplate(const_if<WorldLayer, IsConst>* firstLayer, const_if<WorldLayer, IsConst>* finalLayer) :
-		curLayer(firstLayer), 
-		finalLayer(finalLayer), 
-		curIter(firstLayer->tree.begin()) {
+	WorldIteratorTemplate(const_if<ColissionLayer, IsConst>* firstLayer, const_if<ColissionLayer, IsConst>* finalLayer) :
+		worldLayerIter(firstLayer, finalLayer),
+		curIter((*worldLayerIter)->tree.begin()) {
 
 		assert(firstLayer != finalLayer);
 
@@ -71,7 +95,7 @@ public:
 	}
 
 	bool operator!=(IteratorEnd) const {
-		return this->curIter != IteratorEnd() || this->curLayer != finalLayer;
+		return this->worldLayerIter != IteratorEnd();
 	}
 
 	const_if<Part, IsConst>& operator*() const {
@@ -82,27 +106,25 @@ public:
 template<bool IsConst, typename Filter>
 class FilteredWorldIteratorTemplate {
 protected:
-	const_if<WorldLayer, IsConst>* curLayer;
-	const_if<WorldLayer, IsConst>* finalLayer;
+	WorldLayerIter<IsConst> worldLayerIter;
 	Filter filter;
-	decltype(curLayer->tree.iterFiltered(filter).begin()) curIter;
+	decltype((*worldLayerIter)->tree.iterFiltered(filter).begin()) curIter;
 
 	inline void checkMoveToNextLayer() {
 		while(!(curIter != IteratorEnd())) {
-			++curLayer;
-			if(curLayer == finalLayer) return;
-			curIter = curLayer->tree.iterFiltered(this->filter).begin();
+			++worldLayerIter;
+			if(worldLayerIter == IteratorEnd()) return;
+			curIter = (*worldLayerIter)->tree.iterFiltered(this->filter).begin();
 		}
 	}
 
 public:
 	FilteredWorldIteratorTemplate() = default;
 
-	FilteredWorldIteratorTemplate(const_if<WorldLayer, IsConst>* firstLayer, const_if<WorldLayer, IsConst>* finalLayer, const Filter& filter) :
-		curLayer(firstLayer), 
-		finalLayer(finalLayer), 
+	FilteredWorldIteratorTemplate(const_if<ColissionLayer, IsConst>* firstLayer, const_if<ColissionLayer, IsConst>* finalLayer, const Filter& filter) :
+		worldLayerIter(firstLayer, finalLayer),
 		filter(filter),
-		curIter(firstLayer->tree.iterFiltered(this->filter).begin()) {
+		curIter((*worldLayerIter)->tree.iterFiltered(this->filter).begin()) {
 
 		assert(firstLayer != finalLayer);
 
@@ -116,7 +138,7 @@ public:
 	}
 
 	bool operator!=(IteratorEnd) const {
-		return this->curIter != IteratorEnd() || this->curLayer != finalLayer;
+		return this->worldLayerIter != IteratorEnd();
 	}
 
 	const_if<Part, IsConst>& operator*() const {
@@ -139,15 +161,8 @@ private:
 	friend class ConnectedPhysical;
 	friend class Part;
 	friend class WorldLayer;
+  friend class ColissionLayer;
 
-	std::vector<Colission> currentObjectColissions;
-	std::vector<Colission> currentTerrainColissions;
-
-	std::vector<SoftLink*> springLinks;
-
-	
-
-	
 
 	/*
 		This method is called by World or Physical when new MotorizedPhysicals are created which need to be added to the list
@@ -197,18 +212,21 @@ public:
 	std::vector<MotorizedPhysical*> physicals;
 	std::vector<ConstraintGroup> constraints;
 
-	std::vector<WorldLayer> layers;
-	std::vector<WorldLayer*> layersToRefresh;
+	std::vector<ColissionLayer> layers;
+  std::vector<Colission> currentObjectColissions;
+  std::vector<Colission> currentTerrainColissions;
 
+  std::vector<SoftLink*> springLinks;
+  
 	void addLink(SoftLink* link);
 
 	
+	ColissionBuffer curColissions;
+
 	/*
 		These lists signify which layers collide
 	*/
-	std::vector<std::pair<WorldLayer*, WorldLayer*>> freePartColissions;
-	std::vector<std::pair<WorldLayer*, WorldLayer*>> freeTerrainColissions; // first is free, second is terrain
-	std::vector<WorldLayer*> internalColissions;
+	std::vector<std::pair<int, int>> colissionMask;
 	
 	size_t age = 0;
 	size_t objectCount = 0;
@@ -229,11 +247,18 @@ public:
 	virtual void tick();
 
 	void addPart(Part* part, int layerIndex = 0);
+	void addTerrainPart(Part* part, int layerIndex = 0);
 	void removePart(Part* part);
+
+	bool doLayersCollide(int layer1, int layer2) const;
+	void setLayersCollide(int layer1, int layer2, bool collide);
+
+	int createLayer(bool collidesInternally, bool collidesWithOthers);
+	void deleteLayer(int layerIndex, int layerToMoveTo);
+
 
 	void addPhysicalWithExistingLayers(MotorizedPhysical* motorPhys);
 
-	void addTerrainPart(Part* part, int layerIndex = 1);
 	void optimizeLayers();
 
 	// removes everything from this world, parts, physicals, forces, constraints
@@ -244,9 +269,6 @@ public:
 	}
 
 	size_t getLayerCount() const;
-
-	BoundsTree<Part>& getTree(int index);
-	const BoundsTree<Part>& getTree(int index) const;
 
 	virtual double getTotalKineticEnergy() const;
 	virtual double getTotalPotentialEnergy() const;
@@ -264,23 +286,39 @@ public:
 
 	template<typename Filter>
 	IteratorFactoryWithEnd<FilteredWorldIterator<Filter>> iterPartsFiltered(const Filter& filter) {
-		WorldLayer* fst = &layers[0];
-		return IteratorFactoryWithEnd<FilteredWorldIterator<Filter>>(FilteredWorldIterator<Filter>(fst, fst + layers.size(), filter));
+		if(layers.size() > 0) {
+			ColissionLayer* fst = &layers[0];
+			return IteratorFactoryWithEnd<FilteredWorldIterator<Filter>>(FilteredWorldIterator<Filter>(fst, fst + layers.size(), filter));
+		} else {
+			return IteratorFactoryWithEnd<FilteredWorldIterator<Filter>>(FilteredWorldIterator<Filter>());
+		}
 	}
 
 	template<typename Filter>
 	IteratorFactoryWithEnd<FilteredConstWorldIterator<Filter>> iterPartsFiltered(const Filter& filter) const {
-		const WorldLayer* fst = &layers[0];
-		return IteratorFactoryWithEnd<FilteredConstWorldIterator<Filter>>(FilteredConstWorldIterator<Filter>(fst, fst + layers.size(), filter));
+		if(layers.size() > 0) {
+			const ColissionLayer* fst = &layers[0];
+			return IteratorFactoryWithEnd<FilteredConstWorldIterator<Filter>>(FilteredConstWorldIterator<Filter>(fst, fst + layers.size(), filter));
+		} else {
+			return IteratorFactoryWithEnd<FilteredConstWorldIterator<Filter>>(FilteredConstWorldIterator<Filter>());
+		}
 	}
 
 	inline IteratorFactoryWithEnd<WorldIterator> iterParts() {
-		WorldLayer* fst = &layers[0];
-		return IteratorFactoryWithEnd<WorldIterator>(WorldIterator(fst, fst + layers.size()));
+		if(layers.size() > 0) {
+			ColissionLayer* fst = &layers[0];
+			return IteratorFactoryWithEnd<WorldIterator>(WorldIterator(fst, fst + layers.size()));
+		} else {
+			return IteratorFactoryWithEnd<WorldIterator>(WorldIterator());
+		}
 	}
 	inline IteratorFactoryWithEnd<ConstWorldIterator> iterParts() const {
-		const WorldLayer* fst = &layers[0];
-		return IteratorFactoryWithEnd<ConstWorldIterator>(ConstWorldIterator(fst, fst + layers.size()));
+		if(layers.size() > 0) {
+			const ColissionLayer* fst = &layers[0];
+			return IteratorFactoryWithEnd<ConstWorldIterator>(ConstWorldIterator(fst, fst + layers.size()));
+		} else {
+			return IteratorFactoryWithEnd<ConstWorldIterator>(ConstWorldIterator());
+		}
 	}
 };
 

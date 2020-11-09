@@ -4,8 +4,9 @@
 #include <fstream>
 #include <sstream>
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 	#include <direct.h>
+	#include <Windows.h>
 
 	bool Util::doesFileExist(const std::string& fileName) {
 		struct stat buffer;
@@ -14,8 +15,16 @@
 		}
 		return false;
 	}
+	
+	std::string Util::getFullPath(const std::string& fileName) {
+		TCHAR buf[MAX_PATH] = TEXT("");
+		TCHAR** lppPart = {NULL};
+		GetFullPathName(fileName.c_str(), MAX_PATH, buf, lppPart);
+		return std::string(buf);
+	}
 
 #else
+	#include <stdlib.h>
 	// for some reason gcc still does not support <filesystem>
 	#if __GNUC__ >= 8
 	#include <filesystem>
@@ -29,6 +38,12 @@
 		return fs::exists(fileName);
 	}
 
+	std::string Util::getFullPath(const std::string& fileName) {
+		char* path = realpath(fileName.c_str(), NULL);
+		std::string result(path);
+		free(path);
+		return result;
+	}
 #endif
 
 namespace Util {
@@ -49,13 +64,13 @@ std::string parseFile(const std::string& path) {
 	Log::info("Reading (%s) ... ", path.c_str());
 
 	if (fileStream.fail() || !fileStream.is_open()) {
-		Log::print(Log::Color::ERROR, "Fail");
+		Log::error("Fail");
 		Log::setDelimiter("\n");
 
 		return "";
 	}
 
-	Log::print(Log::Color::DEBUG, "Done");
+	Log::debug("Done");
 	Log::setDelimiter("\n");
 
 	std::string line;

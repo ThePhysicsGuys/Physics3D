@@ -79,6 +79,7 @@ private:
 	void serializePhysicalInContext(const Physical& phys, std::ostream& ostream);
 	void serializeRigidBodyInContext(const RigidBody& rigidBody, std::ostream& ostream);
 
+	void serializeWorldLayer(const WorldLayer& layer, std::ostream& ostream);
 	void serializeConstraintInContext(const PhysicalConstraint& constraint, std::ostream& ostream);
 
 protected:
@@ -100,11 +101,11 @@ public:
 
 class DeSerializationSessionPrototype {
 private:
-	MotorizedPhysical* deserializeMotorizedPhysicalWithContext(std::vector<WorldLayer>& layers, std::istream& istream);
-	void deserializeConnectionsOfPhysicalWithContext(std::vector<WorldLayer>& layers, Physical& physToPopulate, std::istream& istream);
-	RigidBody deserializeRigidBodyWithContext(const GlobalCFrame& cframeOfMain, std::vector<WorldLayer>& layers, std::istream& istream);
+	MotorizedPhysical* deserializeMotorizedPhysicalWithContext(std::vector<ColissionLayer>& layers, std::istream& istream);
+	void deserializeConnectionsOfPhysicalWithContext(std::vector<ColissionLayer>& layers, Physical& physToPopulate, std::istream& istream);
+	RigidBody deserializeRigidBodyWithContext(const GlobalCFrame& cframeOfMain, std::vector<ColissionLayer>& layers, std::istream& istream);
 	PhysicalConstraint deserializeConstraintInContext(std::istream& istream);
-
+	void deserializeWorldLayer(WorldLayer& layer, std::istream& istream);
 protected:
 	ShapeDeserializer shapeDeserializer;
 	std::vector<Physical*> indexToPhysicalMap;
@@ -126,6 +127,14 @@ public:
 	std::vector<Part*> deserializeParts(std::istream& istream);
 };
 
+template<typename NewType, typename OriginalType>
+std::vector<NewType*> castVector(std::vector<OriginalType*>&& old) {
+	std::vector<NewType*> result(old.size());
+	for(size_t i = 0; i < old.size(); i++) {
+		result[i] = static_cast<NewType*>(old[i]);
+	}
+	return result;
+}
 
 template<typename ExtendedPartType>
 class SerializationSession : private SerializationSessionPrototype {
@@ -156,15 +165,12 @@ public:
 	}
 
 	void serializeParts(const ExtendedPartType* const parts[], size_t partCount, std::ostream& ostream) {
+		std::vector<const Part*> baseParts(partCount);
 		for(size_t i = 0; i < partCount; i++) {
-			collectPartInformation(*(parts[i]));
+			baseParts[i] = parts[i];
 		}
-		serializeCollectedHeaderInformation(ostream);
-		::serialize<size_t>(partCount, ostream);
-		for(size_t i = 0; i < partCount; i++) {
-			::serialize<GlobalCFrame>(parts[i]->getCFrame(), ostream);
-			serializePartData(*(parts[i]), ostream);
-		}
+
+		SerializationSessionPrototype::serializeParts(&baseParts[0], partCount, ostream);
 	}
 };
 
@@ -184,19 +190,9 @@ public:
 
 	void deserializeWorld(World<ExtendedPartType>& world, std::istream& istream) { DeSerializationSessionPrototype::deserializeWorld(world, istream); }
 	std::vector<ExtendedPartType*> deserializeParts(std::istream& istream) {
-		deserializeAndCollectHeaderInformation(istream);
-		size_t numberOfParts = ::deserialize<size_t>(istream);
-		std::vector<ExtendedPartType*> result;
-		result.reserve(numberOfParts);
-		for(size_t i = 0; i < numberOfParts; i++) {
-			GlobalCFrame cframe = ::deserialize<GlobalCFrame>(istream);
-			ExtendedPartType* newPart = static_cast<ExtendedPartType*>(deserializePartData(cframe, nullptr, istream));
-			result.push_back(newPart);
-		}
-		return result;
+		return castVector<ExtendedPartType>(DeSerializationSessionPrototype::deserializeParts(istream));
 	}
 };
-
 
 extern DynamicSerializerRegistry<HardConstraint> dynamicHardConstraintSerializer;
 extern DynamicSerializerRegistry<ShapeClass> dynamicShapeClassSerializer;

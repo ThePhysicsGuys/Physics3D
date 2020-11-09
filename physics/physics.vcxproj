@@ -344,6 +344,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="catchable_assert.h" />
+    <ClInclude Include="colissionBuffer.h" />
     <ClInclude Include="constants.h" />
     <ClInclude Include="constraintGroup.h" />
     <ClInclude Include="constraints\constraintTemplates.h" />
