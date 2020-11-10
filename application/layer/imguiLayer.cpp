@@ -23,20 +23,15 @@ namespace P3D::Application {
 
 void ImGuiLayer::onInit(Engine::Registry64& registry) {
 	IMGUI_CHECKVERSION();
+	
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void) io;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
-	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
-	//io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
-	//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoTaskBarIcons;
-	//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
 
 	Graphics::setupImGuiStyle();
-	
 	GLFWwindow* window = Graphics::GLFW::getCurrentContext();
 
-	// Setup Platform/Renderer bindings
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 330");
 }
@@ -60,12 +55,9 @@ void ImGuiLayer::onRender(Engine::Registry64& registry) {
 	ImVec2 min = ImGui::GetWindowContentRegionMin();
 	ImVec2 max = ImGui::GetWindowContentRegionMax();
 	
-	
-	//Log::debug("%f, %f,	     %f, %f,	     %f, %f", handler->mousePosition.x, handler->mousePosition.y, min.x, min.y, ImGui::GetIO().MousePos.x, ImGui::GetIO().MousePos.y);
 	ImVec2 size = ImVec2(max.x - min.x, max.y - min.y);
 	min = ImVec2(min.x + pos.x, min.y + pos.y);
 	max = ImVec2(max.x + pos.x, max.y + pos.y);
-	//ImGui::GetForegroundDrawList()->AddRect(min, max, IM_COL32(255, 255, 0, 255));
 	handler->viewport = Vec4(min.x, min.y, size.x, size.y);
 
 	Graphics::Texture* texture = screen->screenFrameBuffer->texture;
@@ -125,24 +117,48 @@ void ImGuiLayer::begin() {
 
 	if (ImGui::BeginMenuBar()) {
 		if (ImGui::BeginMenu("File")) {
-			if (ImGui::MenuItem("Save world", "CTRL-S"));
-			if (ImGui::MenuItem("Load world", "CTRL-O"));
-			if (ImGui::MenuItem("Exit", "esc"));
+			if (ImGui::MenuItem("Save world", "CTRL-S")) {
+				Engine::KeyPressEvent event(Engine::Keyboard::KEY_S, Engine::Modifier::CTRL);
+				handler->onEvent(event);
+			}
+			if (ImGui::MenuItem("Load world", "CTRL-O")) {
+				Engine::KeyPressEvent event(Engine::Keyboard::KEY_O, Engine::Modifier::CTRL);
+				handler->onEvent(event);
+			}
+			if (ImGui::MenuItem("Exit", "esc")) {
+				Engine::KeyPressEvent event(Engine::Keyboard::KEY_ESCAPE);
+				handler->onEvent(event);
+			}
 
 			ImGui::EndMenu();
 		}
 
 		if (ImGui::BeginMenu("Edit")) {
-			if (ImGui::MenuItem("Play / pause", "P"));
-			if (ImGui::MenuItem("Tick", "T"));
-			if (ImGui::MenuItem("New part", "O"));
-			if (ImGui::MenuItem("Delete part", "DELETE"));
+			if (ImGui::MenuItem("Play / pause", "P")) {
+				Engine::KeyPressEvent event(Engine::Keyboard::KEY_P);
+				handler->onEvent(event);
+			}
+			if (ImGui::MenuItem("Tick", "T")) {
+				Engine::KeyPressEvent event(Engine::Keyboard::KEY_T);
+				handler->onEvent(event);
+			}
+			if (ImGui::MenuItem("New part", "O")) {
+				Engine::KeyPressEvent event(Engine::Keyboard::KEY_O);
+				handler->onEvent(event);
+			}
+			if (ImGui::MenuItem("Delete part", "DELETE")) {
+				Engine::KeyPressEvent event(Engine::Keyboard::KEY_DELETE);
+				handler->onEvent(event);
+			}
 
 			ImGui::EndMenu();
 		}
 
 		if (ImGui::BeginMenu("Debug")) {
-			if (ImGui::MenuItem("Debug info", "F"));
+			if (ImGui::MenuItem("Debug info", "F")) {
+				Engine::KeyPressEvent event(Engine::Keyboard::KEY_F);
+				handler->onEvent(event);
+			}
 
 			ImGui::EndMenu();
 		}

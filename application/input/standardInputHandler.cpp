@@ -24,6 +24,12 @@
 
 namespace P3D::Application {
 
+#define KEY_BIND(name) \
+	if (key == name)
+
+#define KEY_RANGE(first, second) \
+	if (key > first && key < second)
+	
 StandardInputHandler::StandardInputHandler(GLFWwindow* window, Screen& screen) : InputHandler(window), screen(screen) {}
 
 void StandardInputHandler::onEvent(Engine::Event& event) {
@@ -48,7 +54,7 @@ bool StandardInputHandler::onWindowResize(Engine::WindowResizeEvent& event) {
 	Vec2i dimension = Vec2i(event.getWidth(), event.getHeight());
 
 	Graphics::Renderer::viewport(Vec2i(), dimension);
-	Log::debug("Window resize: %s", str(dimension).c_str());
+
 	(*screen.eventHandler.windowResizeHandler) (screen, dimension);
 
 	return true;
@@ -77,15 +83,21 @@ bool StandardInputHandler::onKeyPressOrRepeat(Engine::KeyPressEvent& event) {
 
 	Key key = event.getKey();
 
-	if (key == KeyboardOptions::Tick::Speed::up) {
+	KEY_BIND(KeyboardOptions::Tick::Speed::up) {
 		setSpeed(getSpeed() * 1.5);
 		Log::info("TPS is now: %f", getSpeed());
-	} else if (key == KeyboardOptions::Tick::Speed::down) {
+	}
+	
+	KEY_BIND(KeyboardOptions::Tick::Speed::down) {
 		setSpeed(getSpeed() / 1.5);
 		Log::info("TPS is now: %f", getSpeed());
-	} else if (key == KeyboardOptions::Tick::run) {
+	}
+
+	KEY_BIND(KeyboardOptions::Tick::run) {
 		if (isPaused()) runTick();
-	} else if (key == Keyboard::KEY_O) {
+	}
+
+	KEY_BIND(Keyboard::KEY_O) {
 		world.asyncModification([]() {
 			Position pos(0.0 + (rand() % 100) * 0.001, 1.0 + (rand() % 100) * 0.001, 0.0 + (rand() % 100) * 0.001);
 
@@ -103,9 +115,11 @@ bool StandardInputHandler::onKeyPress(Engine::KeyPressEvent& event) {
 
 	Key key = event.getKey();
 
-	if (key == KeyboardOptions::Tick::pause) {
+	KEY_BIND(KeyboardOptions::Tick::pause) {
 		togglePause();
-	} else if (key == KeyboardOptions::Part::remove) {
+	}
+
+	KEY_BIND(KeyboardOptions::Part::remove) {
 		if (screen.selectedPart != nullptr) {
 			screen.world->asyncModification([world = screen.world, selectedPart = screen.selectedPart]() {
 				world->removePart(selectedPart);
@@ -113,12 +127,18 @@ bool StandardInputHandler::onKeyPress(Engine::KeyPressEvent& event) {
 			screen.world->selectedPart = nullptr;
 			screen.selectedPart = nullptr;
 		}
-	} else if (key == KeyboardOptions::Debug::pies) {
+	}
+
+	KEY_BIND(KeyboardOptions::Debug::pies) {
 		renderPiesEnabled = !renderPiesEnabled;
-	} else if(key == KeyboardOptions::Part::makeMainPart) {
+	}
+	
+	KEY_BIND(KeyboardOptions::Part::makeMainPart) {
 		Log::info("Made %s the main part of it's physical", screen.registry.getOr<Comp::Name>(screen.selectedPart->entity, Comp::Name("")).name.c_str());
 		screen.selectedPart->makeMainPart();
-	} else if(key == KeyboardOptions::Part::makeMainPhysical) {
+	}
+	
+	KEY_BIND(KeyboardOptions::Part::makeMainPhysical) {
 		if (screen.selectedPart) {
 			if (screen.selectedPart->parent != nullptr) {
 				if (!screen.selectedPart->parent->isMainPhysical()) {
@@ -131,36 +151,50 @@ bool StandardInputHandler::onKeyPress(Engine::KeyPressEvent& event) {
 				Log::warn("This part has no physical!");
 			}
 		}
-	} else if (key == KeyboardOptions::World::valid) {
+	}
+	
+	KEY_BIND(KeyboardOptions::World::valid) {
 		Log::debug("Checking World::isValid()");
 		screen.world->asyncReadOnlyOperation([world = screen.world]() {
 			world->isValid();
 		});
-	} else if (key == KeyboardOptions::Edit::rotate) {
+	}
+	
+	KEY_BIND(KeyboardOptions::Edit::rotate) {
 		Picker::editTools.editMode = EditTools::EditMode::ROTATE;
-	} else if (key == KeyboardOptions::Edit::translate) {
+	}
+	
+	KEY_BIND(KeyboardOptions::Edit::translate) {
 		Picker::editTools.editMode = EditTools::EditMode::TRANSLATE;
-	} else if (key == KeyboardOptions::Edit::scale) {
+	}
+	
+	KEY_BIND(KeyboardOptions::Edit::scale) {
 		Picker::editTools.editMode = EditTools::EditMode::SCALE;
-	} else if (key == KeyboardOptions::Debug::spheres) {
+	}
+	
+	KEY_BIND(KeyboardOptions::Debug::spheres) {
 		colissionSpheresMode = static_cast<SphereColissionRenderMode>((static_cast<int>(colissionSpheresMode) + 1) % 3);
-	} else if (key == KeyboardOptions::Debug::tree) {
+	}
+	
+	KEY_BIND(KeyboardOptions::Debug::tree) {
 		colTreeRenderMode++;
 		int worldLayerCount = getMaxLayerID(world.layers); // must be a signed int, because size_t comparison makes the comparison unsigned
 		if(colTreeRenderMode >= worldLayerCount) {
 			colTreeRenderMode = -2;
 		}
-	} else if (key == KeyboardOptions::Application::close) {
+	}
+	
+	KEY_BIND(KeyboardOptions::Application::close) {
 		Graphics::GLFW::closeWindow();
 	} else if (key == Keyboard::KEY_F11) {
 		Graphics::GLFW::swapFullScreen();
 	}
 
-	if (key < Keyboard::KEY_F9 && key > Keyboard::KEY_F1) {
+	KEY_RANGE(Keyboard::KEY_F1, Keyboard::KEY_F9) {
 		toggleVectorType(static_cast<Debug::VectorType>(key.getCode() - Keyboard::KEY_F1.getCode()));
 	}
 
-	if (key < Keyboard::KEY_NUMBER_3 && key > Keyboard::KEY_NUMBER_1) {
+	KEY_RANGE(Keyboard::KEY_NUMBER_1, Keyboard::KEY_NUMBER_3) {
 		togglePointType(static_cast<Debug::PointType>(key.getCode() - Keyboard::KEY_NUMBER_1.getCode()));
 	}
 
@@ -172,7 +206,7 @@ bool StandardInputHandler::onDoubleKeyPress(Engine::DoubleKeyPressEvent& event) 
 
 	Key key = event.getKey();
 
-	if (key == KeyboardOptions::Move::fly) {
+	KEY_BIND(KeyboardOptions::Move::fly) {
 		toggleFlying();
 	}
 
