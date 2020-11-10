@@ -293,7 +293,7 @@ void setupWorld(int argc, const char** args) {
 		world.addPart(a);
 		world.addPart(b);
 
-		world.addLink(new SpringLink( {CFrame{1.0, 0.0, 0.0}, a}, {CFrame{0.0, 0.0, 0.0}, b}, 100.0, 15.0, 10.0 ));
+		world.addLink(new SpringLink( {CFrame{1.0, 0.0, 0.0}, a}, {CFrame{0.0, 0.0, 0.0}, b}, 15.0, 0.5));
 	}
 	{
 		ExtendedPart* a = new ExtendedPart(boxShape(2.0, 0.5, 1.0), GlobalCFrame(3.0, 3.0, 0.0), { 1.0, 1.0, 1.0 }, "SpringLinkMain2");
@@ -302,7 +302,7 @@ void setupWorld(int argc, const char** args) {
 		world.addPart(a);
 		world.addPart(b);
 
-		world.addLink(new SpringLink({ CFrame{1.0, 0.0, 0.0}, a }, { CFrame{0.0, 0.0, 0.0}, b }, 100.0, 15.0, 10.0));
+		world.addLink(new SpringLink({ CFrame{1.0, 0.0, 0.0}, a }, { CFrame{0.0, 0.0, 0.0}, b }, 15.0, 0.5));
 	}
 	{
 		ExtendedPart* a = new ExtendedPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(3.0, 3.0, 0.0), { 1.0, 1.0, 1.0 }, "SpringLinkMain3");
@@ -311,7 +311,7 @@ void setupWorld(int argc, const char** args) {
 		world.addPart(a);
 		world.addPart(b);
 
-		world.addLink(new SpringLink({ CFrame{1.0, 0.0, 0.0}, a }, { CFrame{0.0, 0.0, 0.0}, b }, 100.0, 15.0, 10.0));
+		world.addLink(new SpringLink({ CFrame{1.0, 0.0, 0.0}, a }, { CFrame{0.0, 0.0, 0.0}, b }, 15.0, 0.5));
 	}
 	
 	/*Vec3 angularVel(0.0, 0.0, -1.0);
