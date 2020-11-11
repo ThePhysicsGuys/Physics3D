@@ -4,7 +4,7 @@
 #include "part.h"
 
 
-class SoftLink{
+class SoftLink {
 protected:
 	struct AttachedPart {
 		AttachedPart(CFrame attachment, Part* part);
@@ -26,23 +26,22 @@ public:
 
 	SoftLink(AttachedPart part1, AttachedPart part2);
 
-	GlobalCFrame getGlobalLocationOfAttach1() const;
-	GlobalCFrame getGlobalLocationOfAttach2() const;
+	GlobalCFrame getGlobalCFrameOfAttach1() const;
+	GlobalCFrame getGlobalCFrameOfAttach2() const;
 
-	inline GlobalCFrame getCFrameOfPart1() const {
-		return this->attachedPart1.part->getCFrame();
-	}
+	CFrame getLocalCFrameOfAttach1() const;
+	CFrame getLocalCFrameOfAttach2() const;
 
-	inline GlobalCFrame getCFrameOfPart2() const {
-		return this->attachedPart2.part->getCFrame();
-	}
+	CFrame getRelativeOfAttach1() const;
+	CFrame getRelativeOfAttach2() const;
 
-	inline Position getPosition2() const {
-		return getCFrameOfPart2().getPosition();
-	}
+	Position getGlobalPositionOfAttach1() const;
+	Position getGlobalPositionOfAttach2() const;
 
-	inline Position getPosition1() const {
-		return getCFrameOfPart1().getPosition();
-	}
+	Vec3 getLocalPositionOfAttach1() const;
+	Vec3 getLocalPositionOfAttach2() const;
+
+	Vec3 getRelativePositionOfAttach1() const;
+	Vec3 getRelativePositionOfAttach2() const;
 
 };
