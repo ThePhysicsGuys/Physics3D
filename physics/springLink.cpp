@@ -1,6 +1,7 @@
 
 
 #include "springLink.h"
+#include <cstdlib>
 
 
 SpringLink::SpringLink(AttachedPart part1, AttachedPart part2, double restLength, double stiffness) :
@@ -12,15 +13,17 @@ SpringLink::SpringLink(AttachedPart part1, AttachedPart part2, double restLength
 
 void SpringLink::update() {
 	Vec3 force = forceAppliedToTheLink();
-	this->attachedPart1.part->applyForce(this->getRelativePositionOfAttach1(), force);
-	this->attachedPart2.part->applyForce(this->getRelativePositionOfAttach2(), -force);
+	this->attachedPart2.part->applyForce(this->getRelativePositionOfAttach1(), force);
+	this->attachedPart1.part->applyForce(this->getRelativePositionOfAttach2(), -force);
 }
 
 Vec3 SpringLink::forceAppliedToTheLink() noexcept {
-	Vec3 position = this->getLocalPositionOfAttach1() - this->getLocalPositionOfAttach2();
-	double magnitude = length(position);
-	double force = (magnitude - this->restLength) * this->stiffness;
-
-	Vec3 direction = normalize(position);
-	return direction * force;
+	Vec3 force = this->getGlobalPositionOfAttach2() - this->getGlobalPositionOfAttach1();
+	double magnitude = length(force);
+	magnitude = std::abs(magnitude - this->restLength);
+	magnitude *= this->stiffness;
+	force = normalize(force);
+	force *= -magnitude;
+	return force;
+	
 }
