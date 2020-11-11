@@ -131,6 +131,18 @@ void setupWorld(int argc, const char** args) {
 	Shape triangle = polyhedronShape(Library::trianglePyramid);
 
 	WorldBuilder::buildFloorAndWalls(50.0, 50.0, 1.0);
+
+	{
+		ExtendedPart* a = new ExtendedPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(3.0, 3.0, 0.0), { 1.0, 1.0, 1.0 }, "SpringLinkMain1");
+		ExtendedPart* b = new ExtendedPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(2.0, 2.0, 2.0), { 1.0, 1.0, 1.0 }, "SpringLinkPart1");
+
+		world.addPart(a);
+		world.addPart(b);
+
+		world.addLink(new SpringLink({ CFrame{1.0, 0.0, 0.0}, a }, { CFrame{0.0, 0.0, 0.0}, b }, 5.0, 3.0));
+	}
+
+	return;
 	
 
 	{
@@ -286,33 +298,7 @@ void setupWorld(int argc, const char** args) {
 	ep2->parent->mainPhysical->applyAngularImpulse(Vec3(1.0, 0.5, 0.0) * 1);
 
 	//SoftLink.
-	{
-		ExtendedPart* a = new ExtendedPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(3.0, 3.0, 0.0), { 1.0, 1.0, 1.0 }, "SpringLinkMain1");
-		ExtendedPart* b = new ExtendedPart(boxShape(1.0, 2.0, 1.0), GlobalCFrame(), { 1.0, 1.0, 1.0 }, "SpringLinkPart1");
 
-		world.addPart(a);
-		world.addPart(b);
-
-		world.addLink(new SpringLink( {CFrame{1.0, 0.0, 0.0}, a}, {CFrame{0.0, 0.0, 0.0}, b}, 15.0, 0.5));
-	}
-	{
-		ExtendedPart* a = new ExtendedPart(boxShape(2.0, 0.5, 1.0), GlobalCFrame(3.0, 3.0, 0.0), { 1.0, 1.0, 1.0 }, "SpringLinkMain2");
-		ExtendedPart* b = new ExtendedPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(), { 2.0, 1.0, 1.0 }, "SpringLinkPart2");
-
-		world.addPart(a);
-		world.addPart(b);
-
-		world.addLink(new SpringLink({ CFrame{1.0, 0.0, 0.0}, a }, { CFrame{0.0, 0.0, 0.0}, b }, 15.0, 0.5));
-	}
-	{
-		ExtendedPart* a = new ExtendedPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(3.0, 3.0, 0.0), { 1.0, 1.0, 1.0 }, "SpringLinkMain3");
-		ExtendedPart* b = new ExtendedPart(boxShape(2.0, 2.0, 2.0), GlobalCFrame(), { 1.0, 0.5, 1.0 }, "SpringLinkPart3");
-
-		world.addPart(a);
-		world.addPart(b);
-
-		world.addLink(new SpringLink({ CFrame{1.0, 0.0, 0.0}, a }, { CFrame{0.0, 0.0, 0.0}, b }, 15.0, 0.5));
-	}
 	
 	/*Vec3 angularVel(0.0, 0.0, -1.0);
 	{
