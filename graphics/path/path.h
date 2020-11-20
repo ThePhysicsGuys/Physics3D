@@ -44,6 +44,8 @@ namespace Path {
 	// Binds the given batch
 	void bind(GuiBatch* batch);
 
+	// Submits the current batch
+	void submit();
 
 	//! Primitives
 

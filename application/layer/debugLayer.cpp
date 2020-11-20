@@ -2,40 +2,34 @@
 
 #include "debugLayer.h"
 
+#include "../graphics/renderer.h"
+#include "../graphics/meshLibrary.h"
 #include "../graphics/mesh/arrayMesh.h"
 #include "../graphics/mesh/pointMesh.h"
 #include "../graphics/mesh/vectorMesh.h"
 #include "../graphics/mesh/indexedMesh.h"
+#include "../graphics/debug/visualDebug.h"
 
 #include "../physics/datastructures/boundsTree.h"
-#include "../physics/math/mathUtil.h"
+#include "../physics/geometry/polyhedron.h"
 #include "../physics/math/bounds.h"
 #include "../physics/physical.h"
 #include "../physics/layer.h"
-#include "../physics/geometry/polyhedron.h"
-
-#include "view/screen.h"
-#include "ecs/material.h"
-#include "../graphics/renderer.h"
-#include "shader/shaders.h"
-
-#include "../graphics/debug/profilerUI.h"
-#include "../graphics/debug/visualDebug.h"
-
-#include "../graphics/gui/gui.h"
 
 #include "worlds.h"
-#include "../graphics/meshLibrary.h"
+#include "view/screen.h"
+#include "ecs/material.h"
+#include "shader/shaders.h"
 
 namespace P3D::Application {
 
 Vec4f colors[] {
-	Graphics::COLOR::BLUE,
-	Graphics::COLOR::GREEN,
-	Graphics::COLOR::YELLOW,
-	Graphics::COLOR::ORANGE,
-	Graphics::COLOR::RED,
-	Graphics::COLOR::PURPLE
+	COLOR::BLUE,
+	COLOR::GREEN,
+	COLOR::YELLOW,
+	COLOR::ORANGE,
+	COLOR::RED,
+	COLOR::PURPLE
 };
 
 void renderSphere(double radius, const Position& position, const Color& color) {

@@ -4,24 +4,12 @@
 
 #include "testLayer.h"
 #include "view/screen.h"
-#include "../graphics/gui/gui.h"
 #include "../graphics/renderer.h"
 #include "../graphics/shader/shader.h"
-#include "../graphics/mesh/indexedMesh.h"
 #include "../graphics/buffers/frameBuffer.h"
-#include "../engine/resource/meshResource.h"
 #include "../util/resource/resourceManager.h"
-#include "../engine/meshRegistry.h"
-#include "../graphics/mesh/primitive.h"
-#include "worlds.h"
 #include "imgui/imgui.h"
-#include "../physics/misc/filters/visibilityFilter.h"
-#include "../graphics/debug/guiDebug.h"
-
-#include "application.h"
-#include "shader/shaders.h"
-#include "../graphics/shader/shaders.h"
-#include "../graphics/resource/textureResource.h"
+#include "../graphics/path/path.h"
 
 namespace P3D::Application {
 
@@ -30,7 +18,7 @@ int textureWidth = 512;
 int textureHeight = 512;
 
 void TestLayer::onInit(Engine::Registry64& registry) {
-	glGenTextures(1, &texture);
+	/*glGenTextures(1, &texture);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -56,7 +44,7 @@ void TestLayer::onInit(Engine::Registry64& registry) {
 	int workGroupInvocations;
 	glGetIntegerv(GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS, &workGroupInvocations);
 	printf("max local work group invocations %i\n", workGroupInvocations);
-	shader = CShader(parseShader("ComputeShader", "../res/shaders/compute.shader"));
+	shader = Graphics::CShader(Graphics::parseShader("ComputeShader", "../res/shaders/compute.shader"));*/
 }
 
 void TestLayer::onUpdate(Engine::Registry64& registry) {
@@ -70,18 +58,18 @@ void TestLayer::onEvent(Engine::Registry64& registry, Engine::Event& event) {
 
 void TestLayer::onRender(Engine::Registry64& registry) {
 	using namespace Graphics;
-	using namespace Graphics::Renderer;
+	using namespace Renderer;
 
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
-	shader.bind();
-	Renderer::bindTexture2D(texture);
+	/*shader.bind();
+	bindTexture2D(texture);
 	shader.dispatch(textureWidth, textureHeight, 1);
 	shader.barrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 	
 	ImGui::Begin("Test");
 	ImGui::Image((void*) texture, ImVec2(100, 100));
-	ImGui::End();
+	ImGui::End();*/
 }
 
 void TestLayer::onClose(Engine::Registry64& registry) {
