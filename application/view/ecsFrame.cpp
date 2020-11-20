@@ -172,7 +172,7 @@ void ECSFrame::renderEntity(Engine::Registry64& registry, const Engine::Registry
 }
 
 void ECSFrame::onInit(Engine::Registry64& registry) {
-	closedFolderIcon = ResourceManager::add<Graphics::TextureResource>("folder_closed", "../res/textures/icons/folder.png");
+	closedFolderIcon = ResourceManager::add<Graphics::TextureResource>("folder_closed", "../res/textures/icons/folder_closed.png");
 	openFolderIcon = ResourceManager::add<Graphics::TextureResource>("folder_open", "../res/textures/icons/folder_open.png");
 	objectIcon = ResourceManager::add<Graphics::TextureResource>("object", "../res/textures/icons/box.png");
 }
