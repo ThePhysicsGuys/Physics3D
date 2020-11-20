@@ -378,6 +378,7 @@
     <ClInclude Include="view\propertiesFrame.h" />
     <ClInclude Include="view\resourceFrame.h" />
     <ClInclude Include="view\screen.h" />
+    <ClInclude Include="view\toolbarFrame.h" />
     <ClInclude Include="worldBuilder.h" />
     <ClInclude Include="worlds.h" />
   </ItemGroup>
@@ -429,6 +430,7 @@
     <ClCompile Include="view\propertiesFrame.cpp" />
     <ClCompile Include="view\resourceFrame.cpp" />
     <ClCompile Include="view\screen.cpp" />
+    <ClCompile Include="view\toolbarFrame.cpp" />
     <ClCompile Include="worldBuilder.cpp" />
     <ClCompile Include="worlds.cpp" />
   </ItemGroup>

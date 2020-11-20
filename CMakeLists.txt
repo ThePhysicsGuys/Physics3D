@@ -277,6 +277,7 @@ add_executable(application
   application/view/propertiesFrame.cpp
   application/view/resourceFrame.cpp
   application/view/environmentFrame.cpp
+  application/view/toolbarFrame.cpp
 )
 target_include_directories(application PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/application")
 

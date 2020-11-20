@@ -12,10 +12,11 @@
 
 namespace P3D::Application {
 
-Graphics::TextureResource* folderIcon;
+Graphics::TextureResource* openFolderIcon;
+Graphics::TextureResource* closedFolderIcon;
 Graphics::TextureResource* objectIcon;
 
-bool IconTreeNode(Engine::Registry64& registry, Engine::Registry64::entity_type entity, ImTextureID texture, ImGuiTreeNodeFlags flags, const char* label) {
+bool IconTreeNode(Engine::Registry64& registry, Engine::Registry64::entity_type entity, ImGuiTreeNodeFlags flags, const char* label) {
 	ImGuiContext& g = *GImGui;
 	ImGuiWindow* window = g.CurrentWindow;
 
@@ -25,7 +26,7 @@ bool IconTreeNode(Engine::Registry64& registry, Engine::Registry64::entity_type 
 
 	bool opened = ImGui::TreeNodeBehaviorIsOpen(id);
 	bool leaf = (flags & ImGuiTreeNodeFlags_Leaf) != 0;
-
+	
 	bool hovered, held;
 	if (ImGui::ButtonBehavior(button, id, &hovered, &held, true)) {
 		screen.selectedEntity = entity;
@@ -51,6 +52,7 @@ bool IconTreeNode(Engine::Registry64& registry, Engine::Registry64::entity_type 
 	// Icon
 	float arrowWidth = g.FontSize;
 	float buttonSize = g.FontSize + g.Style.FramePadding.y * 2;
+	ImTextureID texture = (ImTextureID) (leaf ? objectIcon : (opened ? openFolderIcon : closedFolderIcon))->getID();
 	window->DrawList->AddImage(texture, ImVec2(pos.x + arrowWidth, pos.y), ImVec2(pos.x + buttonSize + arrowWidth, pos.y + buttonSize), ImVec2(1, 1), ImVec2(0, 0));
 
 	// Text
@@ -77,9 +79,8 @@ void ECSFrame::renderEntity(Engine::Registry64& registry, const Engine::Registry
 	bool leaf = children.begin() == registry.end();
 
 	std::string name = registry.getOr<Comp::Name>(entity, Comp::Name(std::to_string(entity))).name;
-	ImTextureID texture = reinterpret_cast<void*>((leaf ? objectIcon : folderIcon)->getID());
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth | (leaf ? ImGuiTreeNodeFlags_Leaf : ImGuiTreeNodeFlags_None);
-	bool open = IconTreeNode(registry, entity, texture, flags, name.c_str());
+	bool open = IconTreeNode(registry, entity, flags, name.c_str());
 
 	// Render popup
 	if (ImGui::BeginPopupContextItem()) {
@@ -171,8 +172,9 @@ void ECSFrame::renderEntity(Engine::Registry64& registry, const Engine::Registry
 }
 
 void ECSFrame::onInit(Engine::Registry64& registry) {
-	folderIcon = ResourceManager::add<Graphics::TextureResource>("folder", "../res/textures/gui/folder.png");
-	objectIcon = ResourceManager::add<Graphics::TextureResource>("object", "../res/textures/gui/object.png");
+	closedFolderIcon = ResourceManager::add<Graphics::TextureResource>("folder_closed", "../res/textures/icons/folder.png");
+	openFolderIcon = ResourceManager::add<Graphics::TextureResource>("folder_open", "../res/textures/icons/folder_open.png");
+	objectIcon = ResourceManager::add<Graphics::TextureResource>("object", "../res/textures/icons/box.png");
 }
 
 

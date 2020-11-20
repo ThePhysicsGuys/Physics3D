@@ -5,24 +5,28 @@ namespace P3D::Engine {
 class Event;
 
 #define DEFINE_TOOL(name, description, cursor) \
-	static std::string getName() { return name; } \
-	static std::string getDescription() { return description; } \
-	int getCursorType() { return cursor; }
+	inline std::string getName() { return getStaticName(); } \
+	inline std::string getDescription() { return getStaticDescription(); } \
+	inline static std::string getStaticName() { return name; } \
+	inline static std::string getStaticDescription() { return description; } \
+	inline int getCursorType() { return cursor; }
 
 class Tool {
 
 public:
-	inline Tool() {}
+	Tool() = default;
 
 	/*
 		Returns the name of this tool
 	*/
-	static std::string getName();
+	virtual std::string getName() = 0;
+	static std::string getStaticName();
 
 	/*
 		Returns the description of this tool
 	*/
-	static std::string getDescription();
+	virtual std::string getDescription() = 0;
+	static std::string getStaticDescription();
 
 	/*
 		When the tool gets registered

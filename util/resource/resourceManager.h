@@ -120,7 +120,7 @@ public:
 		}
 	}
 
-	template<typename T, typename = std::enable_if<std::is_base_of<Resource, T>::value>>
+	template<typename T, typename = std::enable_if_t<std::is_base_of<Resource, T>::value>>
 	static T* add(const std::string& name, const std::string& path) {
 		Log::subject s("ADD");
 		//Log::debug("Adding resource: (%s, %s)", name.c_str(), path.c_str());

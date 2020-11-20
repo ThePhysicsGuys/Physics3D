@@ -7,6 +7,7 @@
 #include "debugFrame.h"
 #include "environmentFrame.h"
 #include "propertiesFrame.h"
+#include "toolbarFrame.h"
 #include "imgui/imgui.h"
 
 namespace P3D::Application {
@@ -19,6 +20,7 @@ void Frames::onInit(Engine::Registry64& registry) {
 	ResourceFrame::onInit(registry);
 	EnvironmentFrame::onInit(registry);
 	DebugFrame::onInit(registry);
+	ToolbarFrame::onInit(registry);
 }
 
 void Frames::onRender(Engine::Registry64& registry) {
@@ -30,6 +32,7 @@ void Frames::onRender(Engine::Registry64& registry) {
 	ResourceFrame::onRender(registry);
 	EnvironmentFrame::onRender(registry);
 	DebugFrame::onRender(registry);
+	ToolbarFrame::onRender(registry);
 }
 
 }

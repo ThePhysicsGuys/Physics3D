@@ -32,8 +32,11 @@ private:
 public:
 	DEFINE_TOOL("Select", "Selects one or multiple entities.", Graphics::GLFW::Cursor::CROSSHAIR);
 
-	virtual void onRender() override;
-	virtual void onEvent(Engine::Event& event) override;
+	void onDeselect() override;
+	void onRegister() override;
+	void onDeregister() override;
+	void onRender() override;
+	void onEvent(Engine::Event& event) override;
 
 	bool onMousePress(Engine::MousePressEvent& event);
 	bool onMouseRelease(Engine::MouseReleaseEvent& event);
