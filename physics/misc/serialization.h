@@ -23,6 +23,8 @@
 #include "../constraints/fixedConstraint.h"
 #include "../constraints/motorConstraint.h"
 
+#include "../softconstraints/ballConstraint.h"
+
 #include "../misc/gravityForce.h"
 
 #include "../../util/serializeBasicTypes.h"
@@ -197,4 +199,4 @@ public:
 extern DynamicSerializerRegistry<HardConstraint> dynamicHardConstraintSerializer;
 extern DynamicSerializerRegistry<ShapeClass> dynamicShapeClassSerializer;
 extern DynamicSerializerRegistry<ExternalForce> dynamicExternalForceSerializer;
-extern DynamicSerializerRegistry<BallConstraint> dynamicConstraintSerializer;
+extern DynamicSerializerRegistry<Constraint> dynamicConstraintSerializer;

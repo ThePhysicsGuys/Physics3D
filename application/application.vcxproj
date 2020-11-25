@@ -337,6 +337,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
+    <ClInclude Include="builtinWorlds.h" />
     <ClInclude Include="ecs\components.h" />
     <ClInclude Include="io\saveDialog.h" />
     <ClInclude Include="layer\cameraLayer.h" />
@@ -384,6 +385,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="application.cpp" />
+    <ClCompile Include="builtinWorlds.cpp" />
     <ClCompile Include="io\saveDialog.cpp" />
     <ClCompile Include="layer\cameraLayer.cpp" />
     <ClCompile Include="layer\constraintLayer.cpp" />

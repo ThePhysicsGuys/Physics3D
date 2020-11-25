@@ -17,9 +17,33 @@
 #include "../relativeMotion.h"
 
 template<typename T>
-inline std::ostream& operator<<(std::ostream& os, const LargeMatrix<T>& matrix) {
-	for(int i = 0; i < matrix.height; i++) {
-		for(int j = 0; j < matrix.width; j++) {
+inline std::ostream& operator<<(std::ostream& os, const UnmanagedLargeMatrix<T>& matrix) {
+	for(int i = 0; i < matrix.h; i++) {
+		for(int j = 0; j < matrix.w; j++) {
+			os << matrix(i, j) << '\t';
+		}
+		os << '\n';
+	}
+
+	return os;
+}
+
+template<typename T, size_t Rows>
+inline std::ostream& operator<<(std::ostream& os, const UnmanagedVerticalFixedMatrix<T, Rows>& matrix) {
+	for(int i = 0; i < Rows; i++) {
+		for(int j = 0; j < matrix.cols; j++) {
+			os << matrix(i, j) << '\t';
+		}
+		os << '\n';
+	}
+
+	return os;
+}
+
+template<typename T, size_t Cols>
+inline std::ostream& operator<<(std::ostream& os, const UnmanagedHorizontalFixedMatrix<T, Cols>& matrix) {
+	for(int i = 0; i < matrix.rows; i++) {
+		for(int j = 0; j < Cols; j++) {
 			os << matrix(i, j) << '\t';
 		}
 		os << '\n';
@@ -29,8 +53,8 @@ inline std::ostream& operator<<(std::ostream& os, const LargeMatrix<T>& matrix) 
 }
 
 template<typename T>
-inline std::ostream& operator<<(std::ostream& os, const LargeVector<T>& vector) {
-	for(int i = 0; i < vector.size; i++) {
+inline std::ostream& operator<<(std::ostream& os, const UnmanagedLargeVector<T>& vector) {
+	for(int i = 0; i < vector.n; i++) {
 		os << vector[i] << ',';
 	}
 

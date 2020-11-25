@@ -17,6 +17,11 @@
 #include "../graphics/debug/guiDebug.h"
 #include "../graphics/renderer.h"
 
+
+#include "../physics/softconstraints/softConstraint.h"
+#include "../physics/softconstraints/ballConstraint.h"
+
+
 #include "../physics/constraints/sinusoidalPistonConstraint.h"
 #include "../physics/constraints/motorConstraint.h"
 #include "../physics/constraints/fixedConstraint.h"
@@ -97,10 +102,10 @@ static void renderConstraintBars(const ConstraintLayer* cl, const GlobalCFrame& 
 	renderBar(cframeOfSecond, attachOnSecond.getPosition(), 0.02f, Color(1.0f, 0.0f, 0.0f, 1.0f));
 }
 
-static void renderBallConstraint(const ConstraintLayer* cl, const GlobalCFrame& cframeOfFirst, const GlobalCFrame& cframeOfSecond, const CFrame& attachOnFirst, const CFrame& attachOnSecond, float innerBallThickness, float outerBallThickness) {
-	renderConstraintBars(cl, cframeOfFirst, cframeOfSecond, attachOnFirst, attachOnSecond);
-	renderObject(Engine::MeshRegistry::sphere, cframeOfFirst.localToGlobal(attachOnFirst), DiagonalMat3f::IDENTITY() * innerBallThickness, Comp::Material(Color(0.0f, 0.0f, 1.0f, 1.0f)));
-	renderObject(Engine::MeshRegistry::sphere, cframeOfSecond.localToGlobal(attachOnSecond), DiagonalMat3f::IDENTITY() * outerBallThickness, Comp::Material(Color(0.0f, 0.0f, 1.0f, 0.7f)));
+static void renderBallConstraint(const ConstraintLayer* cl, const Physical* physA, const Physical* physB, const BallConstraint* bc, float innerBallThickness, float outerBallThickness) {
+	renderConstraintBars(cl, physA->getCFrame(), physB->getCFrame(), CFrame(bc->attachA), CFrame(bc->attachB));
+	renderObject(Engine::MeshRegistry::sphere, physA->getCFrame().localToGlobal(bc->attachA), DiagonalMat3f::IDENTITY() * innerBallThickness, Comp::Material(Color(0.0f, 0.0f, 1.0f, 1.0f)));
+	renderObject(Engine::MeshRegistry::sphere, physB->getCFrame().localToGlobal(bc->attachB), DiagonalMat3f::IDENTITY() * outerBallThickness, Comp::Material(Color(0.0f, 0.0f, 1.0f, 0.7f)));
 }
 
 static void renderHardConstraint(const ConstraintLayer* cl, const ConnectedPhysical& conPhys) {
@@ -128,6 +133,13 @@ static void recurseRenderHardConstraints(const ConstraintLayer* cl, const Physic
 	}
 }
 
+static void renderConstraint(const ConstraintLayer* cl, const PhysicalConstraint& constraint) {
+	auto& info(typeid(*constraint.constraint));
+	if(info == typeid(BallConstraint)) {
+		renderBallConstraint(cl, constraint.physA, constraint.physB, static_cast<const BallConstraint*>(constraint.constraint), 0.13f, 0.15f);
+	}
+}
+
 void ConstraintLayer::onRender(Engine::Registry64& registry) {
 	using namespace Graphics;
 	using namespace Graphics::Renderer;
@@ -148,7 +160,7 @@ void ConstraintLayer::onRender(Engine::Registry64& registry) {
 
 	for(const ConstraintGroup& g : world->constraints) {
 		for(const PhysicalConstraint& constraint : g.constraints) {
-			renderBallConstraint(this, constraint.physA->getCFrame(), constraint.physB->getCFrame(), CFrame(constraint.constraint->attachA), CFrame(constraint.constraint->attachB), 0.13f, 0.15f);
+			renderConstraint(this, constraint);
 		}
 	}
 

@@ -37,6 +37,14 @@ public:
 		return rotation.globalToLocal(rVec);
 	}
 
+	Vector<T, 3> globalToRelative(const Vector<T, 3> & gVec) const {
+		return gVec - position;
+	}
+
+	Vector<T, 3> relativeToGlobal(const Vector<T, 3> & rVec) const {
+		return rVec + position;
+	}
+
 	CFrameTemplate<T> localToGlobal(const CFrameTemplate<T>& lFrame) const {
 		return CFrameTemplate<T>(position + rotation.localToGlobal(lFrame.position), rotation.localToGlobal(lFrame.rotation));
 	}
@@ -51,6 +59,14 @@ public:
 
 	CFrameTemplate<T> relativeToLocal(const CFrameTemplate<T>& rFrame) const {
 		return CFrameTemplate<T>(rotation.globalToLocal(rFrame.position), rotation.globalToLocal(rFrame.rotation));
+	}
+
+	CFrameTemplate<T> globalToRelative(const CFrameTemplate<T>& gFrame) const {
+		return CFrameTemplate<T>(gFrame.position - this->position, gFrame.rotation);
+	}
+
+	CFrameTemplate<T> relativeToGlobal(const CFrameTemplate<T>& gFrame) const {
+		return CFrameTemplate<T>(gFrame.position + this->position, gFrame.rotation);
 	}
 
 	RotationTemplate<T> localToGlobal(const RotationTemplate<T>& localRot) const {

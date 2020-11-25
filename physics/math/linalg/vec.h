@@ -23,6 +23,8 @@ struct Vector {
 		return result;
 	}
 
+	constexpr size_t size() const { return Size; }
+
 	constexpr T& operator[](size_t index) noexcept {
 		return data[index];
 	}
@@ -64,6 +66,8 @@ struct Vector<T, 2> {
 		return Vector<OtherT, 2>(static_cast<OtherT>(this->data[0]), static_cast<OtherT>(this->data[1]));
 	}
 
+	constexpr size_t size() const { return 2; }
+
 	constexpr T& operator[](size_t index) noexcept {
 		return data[index]; 
 	}
@@ -101,6 +105,8 @@ struct Vector<T, 3> {
 		return Vector<OtherT, 3>(static_cast<OtherT>(this->data[0]), static_cast<OtherT>(this->data[1]), static_cast<OtherT>(this->data[2]));
 	}
 
+	constexpr size_t size() const { return 3; }
+
 	constexpr T& operator[](size_t index) noexcept {
 		return data[index]; 
 	}
@@ -136,6 +142,8 @@ struct Vector<T, 4> {
 	constexpr operator Vector<OtherT, 4>() const noexcept {
 		return Vector<OtherT, 4>(static_cast<OtherT>(this->data[0]), static_cast<OtherT>(this->data[1]), static_cast<OtherT>(this->data[2]), static_cast<OtherT>(this->data[3]));
 	}
+
+	constexpr size_t size() const { return 4; }
 
 	constexpr T& operator[](size_t index) noexcept {
 		return data[index]; 

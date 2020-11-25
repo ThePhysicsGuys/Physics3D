@@ -140,13 +140,6 @@ void DebugLayer::onRender(Engine::Registry64& registry) {
 
 	screen->world->syncReadOnlyOperation([this, &vecLog]() {
 		Screen* screen = static_cast<Screen*>(this->ptr);
-		for(const ConstraintGroup& constraintGroup : screen->world->constraints) {
-			for(const PhysicalConstraint& c : constraintGroup.constraints) {
-				vecLog.add(ColoredVector(c.physA->getCFrame().getPosition(), c.physA->getCFrame().localToRelative(c.constraint->attachA), ::Debug::INFO_VEC));
-				vecLog.add(ColoredVector(c.physB->getCFrame().getPosition(), c.physB->getCFrame().localToRelative(c.constraint->attachB), ::Debug::INFO_VEC));
-			}
-		}
-
 		if (screen->selectedPart != nullptr) {
 			const GlobalCFrame& selectedCFrame = screen->selectedPart->getCFrame();
 			Motion partMotion = screen->selectedPart->getMotion();

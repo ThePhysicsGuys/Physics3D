@@ -10,6 +10,7 @@
 #include "../physics/math/linalg/mat.h"
 #include "../physics/math/linalg/trigonometry.h"
 #include "../physics/math/linalg/largeMatrix.h"
+#include "../physics/math/linalg/largeMatrixAlgorithms.h"
 #include "../physics/math/linalg/eigen.h"
 #include "../physics/math/mathUtil.h"
 #include "../physics/math/taylorExpansion.h"
@@ -219,11 +220,11 @@ TEST_CASE(largeMatrixVectorSolve) {
 
 	for (int i = 0; i < 5; i++) {
 		for (int j = 0; j < 5; j++) {
-			mat.get(i,j) = fRand(-1.0, 1.0);
+			mat(i,j) = fRand(-1.0, 1.0);
 		}
 	}
 
-	mat.get(0,0) = 0;
+	mat(0,0) = 0;
 
 	LargeVector<double> newVector = mat * vec;
 

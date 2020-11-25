@@ -525,7 +525,7 @@ static DynamicSerializerRegistry<ShapeClass>::ConcreteDynamicSerializer<Polyhedr
 static DynamicSerializerRegistry<ExternalForce>::ConcreteDynamicSerializer<DirectionalGravity> gravitySerializer
 (serializeDirectionalGravity, deserializeDirectionalGravity, 0);
 
-static DynamicSerializerRegistry<BallConstraint>::ConcreteDynamicSerializer<BallConstraint> ballConstraintSerializer
+static DynamicSerializerRegistry<Constraint>::ConcreteDynamicSerializer<BallConstraint> ballConstraintSerializer
 (serializeBallConstraint, deserializeBallConstraint, 0);
 
 DynamicSerializerRegistry<HardConstraint> dynamicHardConstraintSerializer{
@@ -535,13 +535,12 @@ DynamicSerializerRegistry<HardConstraint> dynamicHardConstraintSerializer{
 	{typeid(MotorConstraintTemplate<SineWaveController>), &sinusiodalMotorConstraintSerializer}
 };
 DynamicSerializerRegistry<ShapeClass> dynamicShapeClassSerializer{
-	{typeid(PolyhedronShapeClass), &polyhedronSerializer},
+	{typeid(PolyhedronShapeClass), &polyhedronSerializer}
 };
 DynamicSerializerRegistry<ExternalForce> dynamicExternalForceSerializer{
-	{typeid(DirectionalGravity), &gravitySerializer},
+	{typeid(DirectionalGravity), &gravitySerializer}
 };
-
-DynamicSerializerRegistry<BallConstraint> dynamicConstraintSerializer{
+DynamicSerializerRegistry<Constraint> dynamicConstraintSerializer{
 	{typeid(BallConstraint), &ballConstraintSerializer}
 };
 

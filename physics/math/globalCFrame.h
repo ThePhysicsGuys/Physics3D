@@ -35,6 +35,14 @@ public:
 		return rotation.globalToLocal(relativeVec);
 	}
 
+	inline Vec3 globalToRelative(const Position& gPos) const {
+		return gPos - position;
+	}
+
+	inline Position relativeToGlobal(const Vec3& rVec) const {
+		return position + rVec;
+	}
+
 	inline GlobalCFrame localToGlobal(const CFrame& localFrame) const {
 		return GlobalCFrame(position + rotation.localToGlobal(localFrame.getPosition()), rotation * localFrame.getRotation());
 	}

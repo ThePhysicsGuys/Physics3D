@@ -4,7 +4,7 @@
 
 #include "part.h"
 #include "physical.h"
-#include "constraintGroup.h"
+#include "softconstraints/constraintGroup.h"
 #include "datastructures/iterators.h"
 #include "datastructures/iteratorEnd.h"
 #include "layer.h"

@@ -765,7 +765,10 @@ Vec3 Physical::localToMain(const Vec3Local& vec) const {
 	Position globalPos = this->getCFrame().localToGlobal(vec);
 	return mainPhysical->getCFrame().globalToLocal(globalPos);
 }
-
+Vec3 Physical::localToMainCOMRelative(const Vec3Local& vec) const {
+	Position globalPos = this->getCFrame().localToGlobal(vec);
+	return mainPhysical->getCFrame().globalToRelative(globalPos) - mainPhysical->totalCenterOfMass;
+}
 
 /*Motion MotorizedPhysical::getMotionOfCenterOfMass() const {
 	return this->motionOfCenterOfMass;

@@ -130,6 +130,7 @@ public:
 
 	CFrame getRelativeCFrameToMain() const;
 	Vec3 localToMain(const Vec3Local& vec) const;
+	Vec3 localToMainCOMRelative(const Vec3Local& vec) const;
 
 	void makeMainPart(Part* newMainPart);
 	void attachPart(Part* part, const CFrame& attachment);
