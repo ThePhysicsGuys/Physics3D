@@ -11,6 +11,12 @@
 namespace P3D::Application {
 
 namespace WorldBuilder {
+extern Shape wedge;
+extern Shape treeTrunk;
+extern Shape icosahedron;
+extern Shape triangle;
+extern PartProperties basicProperties;
+
 void init();
 
 void createDominoAt(const GlobalCFrame& cframe);

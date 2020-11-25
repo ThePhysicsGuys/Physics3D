@@ -16,6 +16,8 @@
 #include "view/screen.h"
 #include "ecs/components.h"
 
+#include "../physics/softconstraints/ballConstraint.h"
+
 namespace P3D::Application {
 
 namespace WorldBuilder {
@@ -23,11 +25,14 @@ namespace WorldBuilder {
 Shape wedge;
 Shape treeTrunk;
 Shape icosahedron;
+Shape triangle;
+PartProperties basicProperties{1.0, 0.7, 0.3};
 
 void init() {
 	wedge = polyhedronShape(Library::wedge);
 	treeTrunk = polyhedronShape(Library::createPrism(7, 0.5, 11.0).rotated(Rotation::Predefined::X_270));
 	icosahedron = polyhedronShape(Library::icosahedron);
+	triangle = polyhedronShape(Library::trianglePyramid);
 }
 
 void createDominoAt(const GlobalCFrame& cframe) {

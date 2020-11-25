@@ -58,8 +58,8 @@ bool tolerantEquals(const Vector<Num1, Size> & first, const Vector<Num2, Size>& 
 }
 template<typename Num1, typename Num2, typename Tol>
 bool tolerantEquals(const LargeVector<Num1>& first, const LargeVector<Num2>& second, Tol tolerance) {
-	if(first.size != second.size) throw "Dimensions must match!";
-	for(size_t i = 0; i < first.size; i++) {
+	if(first.n != second.n) throw "Dimensions must match!";
+	for(size_t i = 0; i < first.n; i++) {
 		if(!tolerantEquals(first[i], second[i], tolerance)) return false;
 	}
 	return true;
@@ -95,9 +95,9 @@ bool tolerantEquals(const DiagonalMatrix<Num1, Size>& first, const DiagonalMatri
 
 template<typename Num1, typename Num2, typename Tol>
 bool tolerantEquals(const LargeMatrix<Num1>& first, const LargeMatrix<Num2>& second, Tol tolerance) {
-	if(first.width != second.width || first.height != second.height) throw "Dimensions must match!";
-	for(size_t row = 0; row < first.height; row++)
-		for(size_t col = 0; col < first.width; col++)
+	if(first.w != second.w || first.h != second.h) throw "Dimensions must match!";
+	for(size_t row = 0; row < first.h; row++)
+		for(size_t col = 0; col < first.w; col++)
 			if(!tolerantEquals(first.get(row, col), second.get(row, col), tolerance))
 				return false;
 

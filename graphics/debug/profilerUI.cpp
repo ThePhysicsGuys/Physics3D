@@ -110,14 +110,14 @@ void BarChart::render() {
 	Vec2f drawingPosition = position + Vec2f(marginLeft, marginBottom);
 	Vec2f drawingSize = this->dimension - Vec2f(marginLeft, marginBottom + marginTop);
 
-	float categoryWidth = drawingSize.x / data.width;
-	float barWidth = drawingSize.x / ((data.height + 0.5f) * data.width);
+	float categoryWidth = drawingSize.x / data.w;
+	float barWidth = drawingSize.x / ((data.h + 0.5f) * data.w);
 
-	for (int cl = 0; cl < data.height; cl++) {
+	for (int cl = 0; cl < data.h; cl++) {
 		const BarChartClassInfo& info = classes[cl];
 
-		for (int i = 0; i < data.width; i++) {
-			const WeightValue& dataPoint = data.get(cl, i);
+		for (int i = 0; i < data.w; i++) {
+			const WeightValue& dataPoint = data(cl, i);
 
 			float height = drawingSize.y * dataPoint.weight / max;
 			Vec2f bottomLeft = drawingPosition + Vec2f(categoryWidth * i + barWidth * cl, 0);
@@ -128,11 +128,11 @@ void BarChart::render() {
 
 	Path::text(GUI::font, title, 0.001, position + Vec2f(0, this->dimension.y - titleHeight), COLOR::WHITE);
 
-	for (int cl = 0; cl < data.height; cl++) {
+	for (int cl = 0; cl < data.h; cl++) {
 		const BarChartClassInfo& info = classes[cl];
 
-		for (int i = 0; i < data.width; i++) {
-			const WeightValue& dataPoint = data.get(cl, i);
+		for (int i = 0; i < data.w; i++) {
+			const WeightValue& dataPoint = data(cl, i);
 
 			Vec2f bottomLeft = drawingPosition + Vec2f(categoryWidth * i + barWidth * cl, 0);
 			float height = drawingSize.y * dataPoint.weight / max;
@@ -144,12 +144,12 @@ void BarChart::render() {
 		}
 	}
 
-	for (int i = 0; i < data.width; i++) {
+	for (int i = 0; i < data.w; i++) {
 		Vec2f botLeft = position + Vec2f(marginLeft, 0) + Vec2f(categoryWidth * i, 0);
 		Path::text(GUI::font, labels[i], 0.0005, botLeft, COLOR::WHITE);
 	}
 
-	for (int cl = 0; cl < data.height; cl++)
+	for (int cl = 0; cl < data.h; cl++)
 		Path::text(GUI::font, classes[cl].name, 0.0007, drawingPosition + Vec2f(this->dimension.x - 0.3f, drawingSize.y - 0.035f * cl), join(classes[cl].color, 1.0f));
 }
 

@@ -51,7 +51,7 @@ public:
 	void submit() override {
 		Shaders::guiShader.bind();
 
-		if (commandBuffer.size() == 0) 
+		if (commandBuffer.empty()) 
 			pushCommand(0);
 
 		Batch<GuiVertex>::vao->bind();
@@ -59,7 +59,7 @@ public:
 		Batch<GuiVertex>::vbo->fill((const void*) Batch<GuiVertex>::vertexBuffer.data(), Batch<GuiVertex>::vertexBuffer.size() * sizeof(GuiVertex), Renderer::STREAM_DRAW);
 		Batch<GuiVertex>::ibo->fill((const unsigned int*) Batch<GuiVertex>::indexBuffer.data(), Batch<GuiVertex>::indexBuffer.size(), Renderer::STREAM_DRAW);
 
-		GLID lastID = 0;
+		GLID lastID = -1;
 		size_t lastCount = 0;
 		size_t lastIndexOffset = 0;
 

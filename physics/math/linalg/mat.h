@@ -5,6 +5,8 @@
 #include <assert.h>
 #include <stddef.h>
 #include <cstddef>
+#include <utility>
+#include <type_traits>
 
 template<typename T, std::size_t Height, std::size_t Width>
 class Matrix {
@@ -109,6 +111,9 @@ public:
 		}
 		return result;
 	}
+
+	constexpr size_t width() const { return Width; }
+	constexpr size_t height() const { return Height; }
 
 	void setDataRowMajor(const T* data) {
 		for (std::size_t row = 0; row < Height; row++) {
@@ -379,6 +384,9 @@ public:
 		}
 	}
 
+	constexpr size_t width() const { return Size; }
+	constexpr size_t height() const { return Size; }
+
 	static inline constexpr SymmetricMatrix<T, Size> ZEROS() {
 		SymmetricMatrix<T, Size> mat;
 		for (std::size_t row = 0; row < Size; row++) {
@@ -481,6 +489,9 @@ public:
 			(*this)[i] = static_cast<T>(m[i]);
 		}
 	}
+
+	constexpr size_t width() const { return Size; }
+	constexpr size_t height() const { return Size; }
 
 	static inline constexpr DiagonalMatrix<T, Size> ZEROS() {
 		DiagonalMatrix<T, Size> mat;
@@ -1277,3 +1288,64 @@ SymmetricMatrix<T, Size> mulSymmetricLeftTransposeRight(const SymmetricMatrix<T,
 	SquareMatrix<T, Size> symResult = m.transpose() * sym * m;
 	return makeSymmetric(symResult);
 }
+
+
+/*
+	Generic matrix functions
+*/
+
+
+
+template<size_t R, size_t C, typename MatrixT>
+auto getSubMatrix(const MatrixT& matrix, size_t rowOffset = 0, size_t colOffset = 0) -> Matrix<typename std::remove_reference<decltype(matrix(0,0))>::type, R, C> {
+	assert(rowOffset >= 0 && rowOffset + R <= matrix.height() && colOffset >= 0 && colOffset + C <= matrix.width());
+
+	Matrix<decltype(matrix(0, 0)), R, C> result;
+
+	for(size_t r = 0; r < R; r++) {
+		for(size_t c = 0; c < C; c++) {
+			result(r, c) = matrix(r + rowOffset, c + colOffset);
+		}
+	}
+
+	return result;
+}
+
+template<size_t R, size_t C, typename MatrixT>
+void setSubMatrix(MatrixT& matrix, const Matrix<typename std::remove_reference<decltype(std::declval<MatrixT>()(0,0))>::type, R, C>& value, size_t rowOffset = 0, size_t colOffset = 0) {
+	assert(rowOffset >= 0 && rowOffset + value.height() <= matrix.height() && colOffset >= 0 && colOffset + value.width() <= matrix.width());
+	for(size_t r = 0; r < R; r++) {
+		for(size_t c = 0; c < C; c++) {
+			matrix(r + rowOffset, c + colOffset) = value(r, c);
+		}
+	}
+}
+
+template<size_t Size, typename MatrixT>
+void setSubMatrix(MatrixT& matrix, const SymmetricMatrix<typename std::remove_reference<decltype(std::declval<MatrixT>()(0, 0))>::type, Size>& value, size_t rowOffset = 0, size_t colOffset = 0) {
+	assert(rowOffset >= 0 && rowOffset + value.height() <= matrix.height() && colOffset >= 0 && colOffset + value.width() <= matrix.width());
+	for(size_t r = 0; r < Size; r++) {
+		for(size_t c = 0; c < r; c++) {
+			const auto& v = value(r, c);
+			matrix(r + rowOffset, c + colOffset) = v;
+			matrix(c + colOffset, r + rowOffset) = v;
+		}
+		matrix(r + rowOffset, r + colOffset) = value(r, r);
+	}
+}
+
+template<size_t Size, typename MatrixT>
+void setSubMatrix(MatrixT& matrix, const DiagonalMatrix<typename std::remove_reference<decltype(std::declval<MatrixT>()(0, 0))>::type, Size>& value, size_t rowOffset = 0, size_t colOffset = 0) {
+	assert(rowOffset >= 0 && rowOffset + value.height() <= matrix.height() && colOffset >= 0 && colOffset + value.width() <= matrix.width());
+	for(size_t r = 0; r < Size; r++) {
+		for(size_t c = 0; c < Size; c++) {
+			matrix(r + rowOffset, c + colOffset) = (r == c)? value[r] : 0;
+		}
+	}
+}
+
+
+
+
+
+

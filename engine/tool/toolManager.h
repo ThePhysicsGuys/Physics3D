@@ -5,27 +5,26 @@
 namespace P3D::Engine {
 
 class ToolManager {
-private:
+public:
 	static Tool* activeTool;
 	static std::map<std::string, Tool*> tools;
 
-public:
 	template<typename T, typename... Args>
 	static bool registerTool(Args&&... args) {
-		auto iterator = tools.find(T::getName());
+		auto iterator = tools.find(T::getStaticName());
 		if (iterator != tools.end())
 			return false;
 
 		T* tool = new T(std::forward<Args>(args)...);
 		tool->onRegister();
-		tools.insert({ T::getName(), tool });
+		tools.insert({ T::getStaticName(), tool });
 
 		return true;
 	}
 
 	template<typename T>
 	static bool deregisterTool() {
-		auto iterator = tools.find(T::getName());
+		auto iterator = tools.find(T::getStaticName());
 		if (iterator == tools.end())
 			return false;
 
@@ -44,10 +43,19 @@ public:
 	static void onClose();
 
 	static bool deselectTool();
+	
+	static bool isSelected(Tool* tool);
+	static bool isSelected(const std::string& name);
+	template<typename T>
+	static bool isSelected() {
+		return isSelected(T::getStaticName());
+	}
+	
 	static bool selectTool(const std::string& name);
+	static bool selectTool(Tool* tool);
 	template<typename T>
 	static bool selectTool() { 
-		return selectTool(T::getName());
+		return selectTool(T::getStaticName());
 	}
 
 };

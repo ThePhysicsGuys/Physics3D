@@ -17,9 +17,14 @@ namespace Path {
 	//! Batch
 
 	GuiBatch* batch = nullptr;
-
+	
 	void bind(GuiBatch* batch) {
 		Path::batch = batch;
+	}
+
+	void submit() {
+		if (batch)
+			batch->submit();
 	}
 
 	// Adds the vertices to the batch with the necessary indices, this does not reserve space on the batch. 

@@ -5,7 +5,7 @@
 #include "estimateMotion.h"
 #include "../physics/misc/toString.h"
 
-#include "../physics/constraintGroup.h"
+#include "../physics/softconstraints/constraintGroup.h"
 
 #include "../physics/geometry/shape.h"
 #include "../physics/geometry/shapeCreation.h"

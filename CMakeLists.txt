@@ -43,7 +43,6 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL GNU)
 endif()
 
 add_library(physics STATIC 
-  physics/constraintGroup.cpp
   physics/debug.cpp
   physics/part.cpp
   physics/physical.cpp
@@ -82,6 +81,9 @@ add_library(physics STATIC
   physics/constraints/hardPhysicalConnection.cpp
   physics/constraints/motorConstraint.cpp
   physics/constraints/controller/sineWaveController.cpp
+  
+  physics/softconstraints/constraintGroup.cpp
+  physics/softconstraints/ballConstraint.cpp
 
   physics/misc/serialization.cpp
   physics/misc/shapeLibrary.cpp
@@ -236,6 +238,7 @@ add_executable(application
   application/resources.cpp
   application/tickerThread.cpp
   application/worldBuilder.cpp
+  application/builtinWorlds.cpp
   application/worlds.cpp
 
   application/ecs/material.cpp
@@ -277,6 +280,7 @@ add_executable(application
   application/view/propertiesFrame.cpp
   application/view/resourceFrame.cpp
   application/view/environmentFrame.cpp
+  application/view/toolbarFrame.cpp
 )
 target_include_directories(application PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/application")
 

@@ -1,158 +1,66 @@
 #include "core.h"
 
-#include "application.h"
-
-#include <thread>
-#include <chrono>
-#include <iostream>
-#include <fstream>
-
-#include "view/screen.h"
-#include "ecs/material.h"
-#include "input/standardInputHandler.h"
-#include "ecs/components.h"
-#include "../graphics/texture.h"
-#include "../graphics/debug/guiDebug.h"
-#include "../graphics/debug/visualDebug.h"
-#include "../physics/geometry/shape.h"
-#include "../physics/geometry/shapeCreation.h"
-#include "../physics/math/mathUtil.h"
-#include "../physics/math/linalg/commonMatrices.h"
-#include "../physics/part.h"
-#include "../physics/world.h"
-#include "../physics/misc/gravityForce.h"
-#include "../physics/physicsProfiler.h"
-#include "../physics/constraints/motorConstraint.h"
-#include "../physics/constraints/sinusoidalPistonConstraint.h"
-#include "../physics/constraints/fixedConstraint.h"
-
-#include "../physics/misc/serialization.h"
-
-#include "worlds.h"
-#include "tickerThread.h"
-#include "worldBuilder.h"
-
-#include "io/serialization.h"
-#include "io/saveDialog.h"
-
-#include "../util/resource/resourceManager.h"
-#include "../graphics/resource/textureResource.h"
-#include "../engine/meshRegistry.h"
-#include "../engine/ecs/registry.h"
-#include "../engine/event/keyEvent.h"
-#include "../engine/input/keyboard.h"
-#include "../engine/event/windowEvent.h"
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 #include "builtinWorlds.h"
 
-#define TICKS_PER_SECOND 120.0
-#define TICK_SKIP_TIME std::chrono::milliseconds(1000)
+#include "worldBuilder.h"
+
+#include "extendedPart.h"
+
+#include "ecs/components.h"
+#include "../engine/meshRegistry.h"
+
+#include "../physics/geometry/shapeCreation.h"
+#include "../physics/constraints/motorConstraint.h"
+#include "../physics/constraints/sinusoidalPistonConstraint.h"
+#include "../physics/constraints/fixedConstraint.h"
+#include "../physics/softconstraints/ballConstraint.h"
+#include "../physics/geometry/shapeClass.h"
+
 
 namespace P3D::Application {
 
-TickerThread physicsThread;
-PlayerWorld world(1 / TICKS_PER_SECOND);
-Screen screen;
+using namespace WorldBuilder;
 
-void init(int argc, const char** args);
-void setupPhysics();
-void setupWorld(int argc, const char** args);
-void setupGL();
-void setupDebug();
+void buildBenchmarkWorld(PlayerWorld& world) {
+	WorldBuilder::buildFloor(150.0, 150.0);
 
-void loadFile(const char* file);
 
-void init(int argc, const char** args) {
-	auto start = high_resolution_clock::now();
 
-	Log::init("latest.log");
-
-	setupGL();
-	Engine::MeshRegistry::init();
-
-	ResourceManager::add<Graphics::TextureResource>("floorMaterial", "../res/textures/floor/floor_color.jpg");
-
-	WorldImportExport::registerTexture(ResourceManager::get<Graphics::TextureResource>("floorMaterial"));
-
-	WorldBuilder::init();
-
-	if(argc >= 2) 
-		loadFile(args[1]);
-	else 
-		setupWorld(argc, args);
-	
-	Log::info("Initializing screen");
-	screen.onInit();
-	
-	// Player
-	screen.camera.attachment = new ExtendedPart(polyhedronShape(Library::createPrism(50, 0.3f, 1.5f)), GlobalCFrame(), {1.0, 5.0, 0.0}, "Player");
-
-	if(!world.isValid()) {
-		throw "World not valid!";
-	}
-
-	setupPhysics();
-	setupDebug();
-
-	auto stop = high_resolution_clock::now();
-	auto duration = duration_cast<milliseconds>(stop - start);
-	Log::info("Init Physics3D in %.4f ms", duration.count() / 1.0f);
-}
-
-void setupGL() {
-	Log::info("Initializing GLFW");
-	if (!initGLFW()) {
-		Log::error("GLFW not initialised");
-		std::cin.get();
-		stop(-1);
-	}
-
-	new(&screen) Screen(1800, 900, &world);
-
-	Log::info("Initializing GLEW");
-	if (!initGLEW()) {
-		Log::error("GLEW not initialised");
-		std::cin.get();
-		stop(-1);
+	GlobalCFrame origin(0, 20, 0, Rotation::fromEulerAngles(0, M_PI / 4, M_PI / 4));
+	for(int i = 0; i < 10; i++) {
+		for(int j = 0; j < 10; j++) {
+			for(int k = 0; k < 10; k++) {
+				world.addPart(new ExtendedPart(boxShape(1.0, 1.0, 1.0), origin.localToGlobal(CFrame(i * 1.00001, j * 1.00001, k * 1.0001)), basicProperties));
+			}
+		}
 	}
 }
 
-void setupWorld(int argc, const char** args) {
-	Log::info("Initializing world");
-
-	world.addExternalForce(new DirectionalGravity(Vec3(0, -10.0, 0.0)));
-
-	PartProperties basicProperties{1.0, 0.7, 0.3};
-
-<<<<<<< HEAD
-	//buildBenchmarkWorld(world);
-=======
-	// WorldBuilder init
-
+void buildShowcaseWorld(Screen& screen, PlayerWorld& world) {
 	// Part factories
-	WorldBuilder::SpiderFactory spiderFactories[] { {0.5, 4},{0.5, 6},{0.5, 8},{0.5, 10} };
-	Shape triangle = polyhedronShape(Library::trianglePyramid);
+	WorldBuilder::SpiderFactory spiderFactories[]{{0.5, 4},{0.5, 6},{0.5, 8},{0.5, 10}};
 
 	WorldBuilder::buildFloorAndWalls(50.0, 50.0, 1.0);
-
-	{
-		ExtendedPart* a = new ExtendedPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(3.0, 3.0, 0.0), { 1.0, 1.0, 1.0 }, "SpringLinkMain1");
-		ExtendedPart* b = new ExtendedPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(2.0, 2.0, 2.0), { 1.0, 1.0, 1.0 }, "SpringLinkPart1");
+	/*{
+		ExtendedPart* a = new ExtendedPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(3.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "SpringLinkMain1");
+		ExtendedPart* b = new ExtendedPart(boxShape(1.0, 2.0, 1.0), GlobalCFrame(2.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "SpringLinkPart1");
 
 		world.addPart(a);
 		world.addPart(b);
 
-		world.addLink(new SpringLink({ CFrame{1.0, 0.0, 0.0}, a }, { CFrame{0.0, 0.0, 0.0}, b }, 5.0, 3.0));
+		world.addLink(new SpringLink({CFrame{1.0, 0.0, 0.0}, a}, {CFrame{0.0, 0.0, 0.0}, b}, 5.0, 5.0));
 	}
 
-	return;
-	
+	return;*/
 
 	{
 		auto pistonFolder = screen.registry.create();
 		screen.registry.add<Comp::Name>(pistonFolder, "PistonPart");
-		
-		ExtendedPart* centerPart = new ExtendedPart(sphereShape(1.0), GlobalCFrame(-15.0,4.0,13.0), basicProperties, "Center", pistonFolder);
+
+		ExtendedPart* centerPart = new ExtendedPart(sphereShape(1.0), GlobalCFrame(-15.0, 4.0, 13.0), basicProperties, "Center", pistonFolder);
 		Shape box = boxShape(1.0, 1.0, 1.0);
 
 		new ExtendedPart(Part(box, *centerPart, new SinusoidalPistonConstraint(1.0, 3.0, 1.0), CFrame(0.0, 0.0, 0.0, Rotation::Predefined::IDENTITY), CFrame(0.0, 0.0, 0.0), basicProperties), "IDENTITY", pistonFolder);
@@ -164,7 +72,7 @@ void setupWorld(int argc, const char** args) {
 
 		world.addPart(centerPart);
 	}
-	
+
 
 	{
 		ExtendedPart* sateliteBody = new ExtendedPart(cylinderShape(0.5, 1.0), GlobalCFrame(0.0, 7.0, 0.0, Rotation::Predefined::X_90), basicProperties, "Satelite Body");
@@ -237,20 +145,20 @@ void setupWorld(int argc, const char** args) {
 	screen.registry.add<Comp::Name>(sphereFolder, "Spheres");
 	auto spiderFolder = screen.registry.create();
 	screen.registry.add<Comp::Name>(spiderFolder, "Spiders");
-	
+
 	GlobalCFrame rootFrame(Position(0.0, 15.0, 0.0), Rotation::fromEulerAngles(3.1415 / 4, 3.1415 / 4, 0.0));
-	for (double x = minX; x < maxX; x += 1.00001) {
-		for (double y = minY; y < maxY; y += 1.00001) {
-			for (double z = minZ; z < maxZ; z += 1.00001) {
-				ExtendedPart* newCube = new ExtendedPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(Position(x - 5, y + 10, z - 5)), { 1.0, 1.0, 0.0 }, "Box", cubeFolder);
+	for(double x = minX; x < maxX; x += 1.00001) {
+		for(double y = minY; y < maxY; y += 1.00001) {
+			for(double z = minZ; z < maxZ; z += 1.00001) {
+				ExtendedPart* newCube = new ExtendedPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(Position(x - 5, y + 10, z - 5)), {1.0, 1.0, 0.0}, "Box", cubeFolder);
 				newCube->setMaterial(Comp::Material(Vec4f(float((x - minX) / (maxX - minX)), float((y - minY) / (maxY - minY)), float((z - minZ) / (maxZ - minZ)), 1.0f)));
 
 				world.addPart(newCube);
-				world.addPart(new ExtendedPart(sphereShape(0.5), GlobalCFrame(Position(x + 5, y + 1, z - 5)), { 1.0, 0.2, 0.5 }, "Sphere", sphereFolder));
-				spiderFactories[rand() & 0x00000003].buildSpider(GlobalCFrame(Position(x+y*0.1, y+1, z)), spiderFolder);
-				world.addPart(new ExtendedPart(triangle, GlobalCFrame(Position(x - 20, y + 1, z + 20)), { 1.0, 0.2, 0.5 }, "Triangle", triangleFolder));
+				world.addPart(new ExtendedPart(sphereShape(0.5), GlobalCFrame(Position(x + 5, y + 1, z - 5)), {1.0, 0.2, 0.5}, "Sphere", sphereFolder));
+				spiderFactories[rand() & 0x00000003].buildSpider(GlobalCFrame(Position(x + y * 0.1, y + 1, z)), spiderFolder);
+				world.addPart(new ExtendedPart(WorldBuilder::triangle, GlobalCFrame(Position(x - 20, y + 1, z + 20)), {1.0, 0.2, 0.5}, "Triangle", triangleFolder));
 
-				world.addPart(new ExtendedPart(cylinderShape(0.3, 1.2), GlobalCFrame(x - 5, y + 1, z + 5, Rotation::fromEulerAngles(3.1415/4, 3.1415/4, 0.0)), {1.0, 0.2, 0.5}, "cylinderShape", cylinderFolder));
+				world.addPart(new ExtendedPart(cylinderShape(0.3, 1.2), GlobalCFrame(x - 5, y + 1, z + 5, Rotation::fromEulerAngles(3.1415 / 4, 3.1415 / 4, 0.0)), {1.0, 0.2, 0.5}, "cylinderShape", cylinderFolder));
 			}
 		}
 	}
@@ -279,8 +187,8 @@ void setupWorld(int argc, const char** args) {
 	ExtendedPart* singularPart = new ExtendedPart(boxShape(1.0, 2.0, 1.0), GlobalCFrame(7.0, 1.0, 5.0), {1.3, 1.2, 1.1}, "SingularPart");
 	world.addPart(singularPart);
 
-	ExtendedPart* ep1 = new ExtendedPart(boxShape(1.0, 2.0, 1.0), GlobalCFrame(3.0, 3.0, 0.0), { 1.0, 1.0, 1.0 }, "MainPart");
-	ExtendedPart* ap1 = new ExtendedPart(boxShape(1.0, 2.0, 1.0), GlobalCFrame(), { 1.0, 1.0, 1.0 }, "AttachedPart");
+	ExtendedPart* ep1 = new ExtendedPart(boxShape(1.0, 2.0, 1.0), GlobalCFrame(3.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "MainPart");
+	ExtendedPart* ap1 = new ExtendedPart(boxShape(1.0, 2.0, 1.0), GlobalCFrame(), {1.0, 1.0, 1.0}, "AttachedPart");
 
 	ep1->attach(ap1, new FixedConstraint(), CFrame(1.0, 0.0, 0.0), CFrame(0.0, 0.0, 0.0));
 
@@ -297,16 +205,38 @@ void setupWorld(int argc, const char** args) {
 
 	world.addPart(ep2);
 	world.addPart(ap2);
->>>>>>> c512ee95401873d567cb220fbf51b28bbf99c10e
 
-	//buildShowcaseWorld(screen, world);
+	ep2->parent->mainPhysical->applyAngularImpulse(Vec3(1.0, 0.5, 0.0) * 1);
 
-<<<<<<< HEAD
-	WorldBuilder::buildFloor(50.0, 50.0);
-=======
 	//SoftLink.
+	{
+		ExtendedPart* a = new ExtendedPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(3.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "SpringLinkMain1");
+		ExtendedPart* b = new ExtendedPart(boxShape(1.0, 2.0, 1.0), GlobalCFrame(), {1.0, 1.0, 1.0}, "SpringLinkPart1");
 
-	
+		world.addPart(a);
+		world.addPart(b);
+
+		world.addLink(new SpringLink({CFrame{1.0, 0.0, 0.0}, a}, {CFrame{0.0, 0.0, 0.0}, b}, 15.0, 0.5));
+	}
+	{
+		ExtendedPart* a = new ExtendedPart(boxShape(2.0, 0.5, 1.0), GlobalCFrame(3.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "SpringLinkMain2");
+		ExtendedPart* b = new ExtendedPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(), {2.0, 1.0, 1.0}, "SpringLinkPart2");
+
+		world.addPart(a);
+		world.addPart(b);
+
+		world.addLink(new SpringLink({CFrame{1.0, 0.0, 0.0}, a}, {CFrame{0.0, 0.0, 0.0}, b}, 15.0, 0.5));
+	}
+	{
+		ExtendedPart* a = new ExtendedPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(3.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "SpringLinkMain3");
+		ExtendedPart* b = new ExtendedPart(boxShape(2.0, 2.0, 2.0), GlobalCFrame(), {1.0, 0.5, 1.0}, "SpringLinkPart3");
+
+		world.addPart(a);
+		world.addPart(b);
+
+		world.addLink(new SpringLink({CFrame{1.0, 0.0, 0.0}, a}, {CFrame{0.0, 0.0, 0.0}, b}, 15.0, 0.5));
+	}
+
 	/*Vec3 angularVel(0.0, 0.0, -1.0);
 	{
 		ExtendedPart* nativeFixedConstraintGroupMain = new ExtendedPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(Position(-3.0, 7.0, 2.0), Rotation::fromEulerAngles(0.0, 0.0, -0.5)), {1.0, 1.0, 1.0}, "MainPart");
@@ -363,7 +293,7 @@ void setupWorld(int argc, const char** args) {
 
 		auto poweredCarFolder = screen.registry.create();
 		screen.registry.add<Comp::Name>(poweredCarFolder, "Powered Car");
-		
+
 		ExtendedPart* poweredCarBody = new ExtendedPart(boxShape(1.0, 0.4, 2.0), GlobalCFrame(-6.0, 1.0, 0.0), basicProperties, "Chassis", poweredCarFolder);
 		ExtendedPart* FLWheel = new ExtendedPart(cylinderShape(0.5, 0.2), GlobalCFrame(), basicProperties, "Front Left Wheel", poweredCarFolder);
 		ExtendedPart* FRWheel = new ExtendedPart(cylinderShape(0.5, 0.2), GlobalCFrame(), basicProperties, "Front Right Wheel", poweredCarFolder);
@@ -435,179 +365,19 @@ void setupWorld(int argc, const char** args) {
 
 		world.constraints.push_back(std::move(group));
 	}
->>>>>>> c512ee95401873d567cb220fbf51b28bbf99c10e
 
-	ExtendedPart* partA = new ExtendedPart(boxShape(5.0, 10.0, 5.0), GlobalCFrame(0.0, 6.0, 0.0), WorldBuilder::basicProperties);
-	ExtendedPart* partB = new ExtendedPart(sphereShape(0.45), GlobalCFrame(8.0, 6.0, 0.0), WorldBuilder::basicProperties);
-	ExtendedPart* partC = new ExtendedPart(boxShape(0.9, 0.15, 0.15), GlobalCFrame(9.0, 6.0, 0.0), WorldBuilder::basicProperties);
-	ExtendedPart* partD = new ExtendedPart(boxShape(0.9, 0.15, 0.15), GlobalCFrame(10.0, 6.0, 0.0), WorldBuilder::basicProperties);
-	ExtendedPart* partE = new ExtendedPart(cylinderShape(0.3, 1.3), GlobalCFrame(11.0, 6.0, 0.0), WorldBuilder::basicProperties);
+	Shape torusShape = polyhedronShape(Library::createTorus(1.0f, 0.6f, 80, 80));
+	Engine::MeshRegistry::registerMeshFor(torusShape.baseShape, Graphics::VisualShape::generateSmoothNormalsShape(torusShape.baseShape->asPolyhedron()));
+	world.addPart(new ExtendedPart(torusShape, Position(-10.0, 3.0, 0.0), basicProperties, "Torus"));
 
-	world.createLayer(false, true);
 
-	world.addPart(partA, 1);
-	world.addPart(partB, 1);
-	world.addPart(partC, 1);
-	world.addPart(partD, 1);
-	world.addPart(partE, 1);
+	Vec2f toyPoints[]{{0.2f, 0.2f},{0.3f, 0.4f},{0.2f, 0.6f},{0.3f, 0.8f},{0.4f,0.7f},{0.5f,0.4f},{0.6f,0.2f},{0.75f,0.1f},{0.9f,0.015f}};
+	Shape toyShape = polyhedronShape(Library::createRevolvedShape(0.0f, toyPoints, 9, 1.0f, 10));
+	world.addPart(new ExtendedPart(toyShape, Position(-10.0, 3.0, 3.0), basicProperties, "ToyPoints"));
 
-	ConstraintGroup cg;
-	cg.add(partA->parent, partB->parent, new BallConstraint(Vec3(7.0, 0.0, 0.0), Vec3(-1.0, 0.0, 0.0)));
-	cg.add(partB->parent, partC->parent, new BallConstraint(Vec3(0.5, 0.0, 0.0), Vec3(-0.5, 0.0, 0.0)));
-	cg.add(partC->parent, partD->parent, new BallConstraint(Vec3(0.5, 0.0, 0.0), Vec3(-0.5, 0.0, 0.0)));
-	cg.add(partD->parent, partE->parent, new BallConstraint(Vec3(0.5, 0.0, 0.0), Vec3(-0.5, 0.0, 0.0)));
-	world.constraints.push_back(std::move(cg));
+	Vec2f arrowPoints[]{{0.3f,0.1f},{0.3f,0.04f},{1.0f,0.04f}};
+	Shape arrorShape = polyhedronShape(Library::createRevolvedShape(0.0f, arrowPoints, 3, 1.0f, 40));
+	world.addPart(new ExtendedPart(arrorShape, Position(-7.0, 3.0, 0.0), basicProperties, "ArrowPoints"));
 }
 
-void setupPhysics() {
-	physicsThread = TickerThread(TICKS_PER_SECOND, TICK_SKIP_TIME, [] () {
-		physicsMeasure.mark(PhysicsProcess::OTHER);
-
-		Graphics::AppDebug::logTickStart();
-		world.tick();
-		Graphics::AppDebug::logTickEnd();
-
-		physicsMeasure.end();
-
-		GJKCollidesIterationStatistics.nextTally();
-		GJKNoCollidesIterationStatistics.nextTally();
-		EPAIterationStatistics.nextTally();
-	});
-}
-
-void setupDebug() {
-	Graphics::AppDebug::setupDebugHooks();
-}
-
-void loadFile(const char* file) {
-	Log::info("Loading file %s", file);
-	auto startTime = high_resolution_clock::now();
-	if(Util::endsWith(file, ".parts")) {
-		WorldImportExport::loadLoosePartsIntoWorld(file, world);
-	} else if(Util::endsWith(file, ".nativeParts")) {
-		WorldImportExport::loadNativePartsIntoWorld(file, world);
-	} else if(Util::endsWith(file, ".world")) {
-		WorldImportExport::loadWorld(file, world);
-	}
-	nanoseconds deltaTime = high_resolution_clock::now() - startTime;
-	Log::info("File loaded, took %.4f ms", deltaTime.count() / 1E6);
-}
-
-bool onFileDrop(Engine::WindowDropEvent& event) {
-	loadFile(event.getPath().c_str());
-
-	return true;
-}
-
-bool onKeyPress(Engine::KeyPressEvent& keyEvent) {
-	using namespace Engine;
-
-	Key pressedKey = keyEvent.getKey();
-	if(pressedKey == Keyboard::KEY_S && keyEvent.getModifiers().isCtrlPressed()) {
-		handler->setKey(Keyboard::KEY_S, false);
-		saveWorld(world);
-		return true;
-	} else if(pressedKey == Keyboard::KEY_O && keyEvent.getModifiers().isCtrlPressed()) {
-		handler->setKey(Keyboard::KEY_O, false);
-		openWorld(world);
-		return true;
-	} else {
-		return false;
-	}
-}
-
-void onEvent(Engine::Event& event) {
-	using namespace Engine;
-
-	screen.onEvent(event);
-
-	EventDispatcher dispatcher(event);
-	dispatcher.dispatch<WindowDropEvent>(onFileDrop);
-	dispatcher.dispatch<KeyPressEvent>(onKeyPress);
-}
-
-void stop(int returnCode) {
-	Log::info("Closing physics");
-	physicsThread.stop();
-
-	Log::info("Closing screen");
-	screen.onClose();
-
-	Log::stop();
-	exit(returnCode);
-}
-
-
-// Ticks
-
-bool paused = true;
-
-void togglePause() {
-	if (paused) {
-		unpause();
-	} else {
-		pause();
-	}
-}
-
-void pause() {
-	physicsThread.stop();
-	paused = true;
-}
-
-void unpause() {
-	physicsThread.start();
-	paused = false;
-}
-
-bool isPaused() {
-	return paused;
-}
-
-void setSpeed(double newSpeed) {
-	physicsThread.setSpeed(newSpeed);
-}
-
-double getSpeed() {
-	return physicsThread.getSpeed();
-}
-
-void runTick() {
-	physicsThread.runTick();
-}
-
-void toggleFlying() {
-	world.asyncModification([] () {
-		if (screen.camera.flying) {
-			screen.camera.flying = false;
-			screen.camera.attachment->setCFrame(GlobalCFrame(screen.camera.cframe.getPosition()));
-			screen.world->addPart(screen.camera.attachment);
-			screen.camera.attachment->parent->mainPhysical->momentResponse = SymmetricMat3::ZEROS();
-		} else {
-			screen.world->removePart(screen.camera.attachment);
-			screen.camera.flying = true;
-		}
-		});
-	}
 };
-
-int main(int argc, const char** args) {
-	using namespace P3D::Application;
-	using namespace P3D::Graphics;
-
-	init(argc, args);
-
-	Log::info("Started rendering");
-	while (!screen.shouldClose()) {
-		graphicsMeasure.mark(GraphicsProcess::UPDATE);
-
-		screen.onUpdate();
-		screen.onRender();
-
-		graphicsMeasure.end();
-	}
-
-	Log::info("Closing by screen.shouldClose()");
-
-	stop(0);
-}

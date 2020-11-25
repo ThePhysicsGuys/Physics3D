@@ -303,7 +303,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="constraintGroup.cpp" />
+    <ClCompile Include="softconstraints\ballConstraint.cpp" />
+    <ClCompile Include="softconstraints\constraintGroup.cpp" />
     <ClCompile Include="geometry\builtinShapeClasses.cpp" />
     <ClCompile Include="geometry\shapeCreation.cpp" />
     <ClCompile Include="geometry\triangleMesh.cpp" />
@@ -346,7 +347,9 @@
     <ClInclude Include="catchable_assert.h" />
     <ClInclude Include="colissionBuffer.h" />
     <ClInclude Include="constants.h" />
-    <ClInclude Include="constraintGroup.h" />
+    <ClInclude Include="math\linalg\largeMatrixAlgorithms.h" />
+    <ClInclude Include="softconstraints\ballConstraint.h" />
+    <ClInclude Include="softconstraints\constraintGroup.h" />
     <ClInclude Include="constraints\constraintTemplates.h" />
     <ClInclude Include="constraints\controller\constController.h" />
     <ClInclude Include="constraints\controller\sineWaveController.h" />
@@ -434,6 +437,7 @@
     <ClInclude Include="relativeMotion.h" />
     <ClInclude Include="rigidBody.h" />
     <ClInclude Include="sharedLockGuard.h" />
+    <ClInclude Include="softconstraints\softConstraint.h" />
     <ClInclude Include="softLink.h" />
     <ClInclude Include="springLink.h" />
     <ClInclude Include="synchonizedWorld.h" />

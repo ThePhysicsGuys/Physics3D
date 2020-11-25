@@ -1,23 +1,25 @@
 #pragma once
 
+#include "../../resource/textureResource.h"
+#include "../util/resource/resourceManager.h"
 #include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"
+#include "../engine/tool/tool.h"
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 
 namespace ImGui {
 
-	ImVec2 operator+(const ImVec2& lhs, const ImVec2& rhs) {
+	inline ImVec2 operator+(const ImVec2& lhs, const ImVec2& rhs) {
         return ImVec2(lhs.x + rhs.x, lhs.y + rhs.y);
 	}
 	
-    bool InputDouble3(const char* label, double v[3], ImGuiInputTextFlags flags) {
+    inline bool InputDouble3(const char* label, double v[3], ImGuiInputTextFlags flags) {
         char format[16] = "%f";
-        // TODO add format
         return InputScalarN(label, ImGuiDataType_Double, v, 3, NULL, NULL, format, flags);
     }
 
-	bool InputFloat9(const char* label, float v[9], ImGuiInputTextFlags flags) {
+    inline bool InputFloat9(const char* label, float v[9], ImGuiInputTextFlags flags) {
         char format[16] = "%f";
         bool i1 = InputFloat3("", v);
         bool i2 = InputFloat3("", v + 3);
@@ -26,7 +28,7 @@ namespace ImGui {
         return i1 | i2 | i3;
     }
 
-    bool DragVecN(const char* id, const char** labels, float* data, int components, float resetValue = 0.0f, float speed = 0.1f, bool resetAll = false) {
+    inline bool DragVecN(const char* id, const char** labels, float* data, int components, float resetValue = 0.0f, float speed = 0.1f, bool resetAll = false) {
         ImGuiWindow* window = GetCurrentWindow();
         if (window->SkipItems)
             return false;
@@ -89,9 +91,49 @@ namespace ImGui {
         return result;
     }
 
-    bool DragVec3(const char* id, float values[3], float resetValue = 0.0f, float speed = 0.1f, bool resetAll = false) {
+    inline bool DragVec3(const char* id, float values[3], float resetValue = 0.0f, float speed = 0.1f, bool resetAll = false) {
         const char* labels[] = { "X", "Y", "Z" };
         return DragVecN(id, labels, values, 3, resetValue, speed, resetAll);
     }
+
+    inline void BeginToolbar(const char* name) {
+        Begin(name, 0, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize);
+	}
+
+    inline bool ToolBarButton(const char* name, const char* description, const char* resource, bool selected = false) {
+        P3D::Graphics::TextureResource* image = ResourceManager::get<P3D::Graphics::TextureResource>(resource);
+        if (image == nullptr)
+            return false;
+
+        PushStyleVar(ImGuiStyleVar_FrameRounding, 0);
+        PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, -1));
+
+		SameLine();
+        ImVec4 bg = selected ? ImVec4(0.2, 0.2, 0.2, 0.5) : ImVec4(0, 0, 0, 0);
+        bool result = ImageButton((ImTextureID) image->getID(), ImVec2(25, 25), ImVec2(0, 1), ImVec2(1, 0), 2, bg);
+
+		PopStyleVar(2);
+		
+        if (IsItemHovered()) {
+            BeginTooltip();
+            Text(name);
+            TextDisabled(description);
+            EndTooltip();
+        }
+
+        return result;
+    }
+
+    inline bool ToolBarButton(P3D::Engine::Tool* tool, bool selected = false) {
+        return ToolBarButton(tool->getName().c_str(), tool->getDescription().c_str(), tool->getName().c_str(), selected);
+    }
+
+    inline void ToolBarSpacing() {
+        SameLine();
+        Spacing();
+	}
 	
+    inline void EndToolBar() {
+        End();
+	}
 }

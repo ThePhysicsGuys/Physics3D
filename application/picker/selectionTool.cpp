@@ -14,10 +14,29 @@
 #include "../input/standardInputHandler.h"
 #include "../worlds.h"
 #include "../physics/misc/filters/visibilityFilter.h"
-
+#include "../util/resource/resourceManager.h"
+#include "../graphics/resource/textureResource.h"
 #include <cmath>
 
+
+namespace P3D::Graphics {
+class TextureResource;
+}
+
 namespace P3D::Application {
+
+void SelectionTool::onDeselect() {
+	regions.clear();
+}
+
+void SelectionTool::onRegister() {
+	auto path = "../res/textures/icons/" + getName() + ".png";
+	ResourceManager::add<TextureResource>(getName(), path);
+}
+
+void SelectionTool::onDeregister() {
+	// Remove texture
+}
 
 void SelectionTool::onRender() {
 	using namespace Graphics;

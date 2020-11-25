@@ -38,9 +38,7 @@ void ToolManager::onClose() {
 	if (activeTool != nullptr)
 		activeTool->onDeselect();
 
-	for (const auto& iterator : tools) {
-		Tool* tool = iterator.second;
-
+	for (auto& [name, tool] : tools) {
 		tool->onDeregister();
 		delete tool;
 	}
@@ -65,6 +63,19 @@ bool ToolManager::selectTool(const std::string& name) {
 	return true;
 }
 
+bool ToolManager::selectTool(Tool* tool) {
+	if (tool == nullptr)
+		return deselectTool();
+
+	if (activeTool != nullptr)
+		activeTool->onDeselect();
+
+	activeTool = tool;
+	activeTool->onSelect();
+
+	return true;
+}
+
 bool ToolManager::deselectTool() {
 	if (activeTool == nullptr)
 		return false;
@@ -73,6 +84,14 @@ bool ToolManager::deselectTool() {
 	activeTool = nullptr;
 
 	return true;
+}
+
+bool ToolManager::isSelected(Tool* tool) {
+	return activeTool == tool;
+}
+
+bool ToolManager::isSelected(const std::string& name) {
+	return activeTool->getName() == name;
 }
 
 }

@@ -337,6 +337,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
+    <ClInclude Include="builtinWorlds.h" />
     <ClInclude Include="ecs\components.h" />
     <ClInclude Include="io\saveDialog.h" />
     <ClInclude Include="layer\cameraLayer.h" />
@@ -378,11 +379,13 @@
     <ClInclude Include="view\propertiesFrame.h" />
     <ClInclude Include="view\resourceFrame.h" />
     <ClInclude Include="view\screen.h" />
+    <ClInclude Include="view\toolbarFrame.h" />
     <ClInclude Include="worldBuilder.h" />
     <ClInclude Include="worlds.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="application.cpp" />
+    <ClCompile Include="builtinWorlds.cpp" />
     <ClCompile Include="io\saveDialog.cpp" />
     <ClCompile Include="layer\cameraLayer.cpp" />
     <ClCompile Include="layer\constraintLayer.cpp" />
@@ -429,6 +432,7 @@
     <ClCompile Include="view\propertiesFrame.cpp" />
     <ClCompile Include="view\resourceFrame.cpp" />
     <ClCompile Include="view\screen.cpp" />
+    <ClCompile Include="view\toolbarFrame.cpp" />
     <ClCompile Include="worldBuilder.cpp" />
     <ClCompile Include="worlds.cpp" />
   </ItemGroup>

@@ -31,26 +31,48 @@ constexpr bool powOf2(T n) {
 	return n && !(n & n - 1);
 }
 
-/*
-	Sets the xth bit of the given whole number
-*/
+template<typename T>
+constexpr T bmask(char x) {
+	return static_cast<T>(1) << x;
+}
+
+template<typename T, typename M>
+constexpr void bmset(T& n, M mask) {
+	n |= mask;
+}
+
 template<typename T>
 constexpr void bset(T& n, char x) {
-	n |= 1 << x;
+	bmset(n, bmask<T>(x));
 }
 
-/*
-	Clears the xth bit of the given whole number
-*/
+template<typename T, typename M>
+constexpr void bmclear(T& n, M mask) {
+	n &= ~mask;
+}
+
 template<typename T>
 constexpr void bclear(T& n, char x) {
-	n &= ~(1 << x);
+	bmclear(n, bmask<T>(x));
 }
 
-/*
-	Flips the xth bit of the given whole number
-*/
-template<typename T>
-constexpr bool bflip(T& n, char x) {
-	n ^= 1 << x;
+template<typename T, typename M>
+constexpr void bmflip(T& n, M mask) {
+	n ^= mask;
 }
+
+template<typename T>
+constexpr void bflip(T& n, char x) {
+	bmflip(n, bmask<T>(x));
+}
+
+template<typename T, typename M>
+constexpr bool bmtest(T n, M mask) {
+	return n & mask;
+}
+
+template<typename T>
+constexpr bool btest(T n, char x) {
+	return bmtest(n, bmask<T>(x));
+}
+

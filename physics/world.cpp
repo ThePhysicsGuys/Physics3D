@@ -117,10 +117,9 @@ void WorldPrototype::setLayersCollide(int layer1, int layer2, bool collide) {
 int WorldPrototype::createLayer(bool collidesInternally, bool collidesWithOthers) {
 	int layerIndex = layers.size();
 	layers.emplace_back(this, collidesInternally);
-	if(collidesInternally) {
+	if(collidesWithOthers) {
 		for(int i = 0; i < layerIndex; i++) {
 			colissionMask.emplace_back(i, layerIndex);
-			// add layer to colission mask
 		}
 	}
 	return layerIndex;

@@ -446,11 +446,15 @@ TriangleMesh stripUnusedVertices(const Vec3f* vertices, const Triangle* triangle
 
 #ifdef __AVX2__
 #include <immintrin.h>
-#if defined(_MSC_VER) && _MSC_VER == 1922
-inline static uint32_t __builtin_ctz(uint32_t x) {
+#ifdef _MSC_VER
+inline static uint32_t countZeros(uint32_t x) {
 	unsigned long ret;
 	_BitScanForward(&ret, x);
 	return ( int) ret;
+}
+#else
+inline static uint32_t countZeros(uint32_t x) {
+	return __builtin_ctz(x);
 }
 #endif
 
@@ -517,7 +521,7 @@ int TriangleMesh::furthestIndexInDirection(const Vec3f& direction) const {
 
 	assert(mask != 0);
 
-	uint32_t index = __builtin_ctz(mask);
+	uint32_t index = countZeros(mask);
 	uint32_t block = mm256_extract_epi32_var_indx(bestIndices, index);
 	return block * 8 + index;
 }
@@ -569,7 +573,7 @@ Vec3f TriangleMesh::furthestInDirection(const Vec3f& direction) const {
 
 	assert(mask != 0);
 
-	uint32_t index = __builtin_ctz(mask);
+	uint32_t index = countZeros(mask);
 
 	// a bug occurs here, when mask == 0 the resulting index is undefined
 

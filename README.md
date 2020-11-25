@@ -6,7 +6,7 @@ A 3D physics engine, written in C++
 
 ![Many Shapes](https://media.discordapp.net/attachments/378983421936140300/638494259452051480/unknown.png?width=1152&height=664)
 ![Different Shapes](https://i.imgur.com/h62AI58.jpg)
-![Editor](https://media.discordapp.net/attachments/378983421936140300/662330290894798879/unknown.png?width=1239&height=664)
+![Editor](https://cdn.discordapp.com/attachments/378983421936140300/779017688650743828/Screenshot_1.png)
 
 ## Project structure
 The Physics3D project consists of 7 projects, each with its own role:

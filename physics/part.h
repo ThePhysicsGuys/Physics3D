@@ -47,6 +47,7 @@ class Part {
 	friend class ConnectedPhysical;
 	friend class MotorizedPhysical;
 	friend class WorldPrototype;
+	friend class ConstraintGroup;
 
 	GlobalCFrame cframe;
 

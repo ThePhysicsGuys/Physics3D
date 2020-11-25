@@ -7,7 +7,6 @@
 
 #include "../engine/tool/toolManager.h"
 #include "../graphics/renderer.h"
-#include "../graphics/renderer.h"
 #include "../picker/selectionTool.h"
 
 namespace P3D::Application {
@@ -18,8 +17,8 @@ void PickerLayer::onInit(Engine::Registry64& registry) {
 	Picker::onInit();
 	
 	ToolManager::onInit();
-	//ToolManager::registerTool<SelectionTool>();
-	//ToolManager::selectTool<SelectionTool>();
+	ToolManager::registerTool<SelectionTool>();
+	ToolManager::selectTool<SelectionTool>();
 }
 
 void PickerLayer::onUpdate(Engine::Registry64& registry) {
