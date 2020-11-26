@@ -10,7 +10,7 @@
 #include <sstream>
 #include <future>
 
-#include "../util/stringUtil.h"
+#include "../../util/systemVariables.h"
 #include "../util/fileUtils.h"
 
 namespace P3D::Graphics {
@@ -18,6 +18,12 @@ namespace P3D::Graphics {
 #pragma region compile
 
 GLID GShader::createShader(const ShaderSource& shaderSource) {
+	if (SystemVariables::get("OPENGL_SHADER_VERSION") < 330) {
+		Log::print(Log::Color::ERROR, "shader version not supported\n");
+		Log::setDelimiter("\n");
+		return 0;
+	}
+	
 	GLID program = glCreateProgram();
 
 	Log::subject s(shaderSource.name);
@@ -110,7 +116,12 @@ ShaderSource parseShader(const std::string& name, const std::string& path, const
 	return ShaderSource(name, path, vertexFile, fragmentFile, geometryFile, tesselationControlFile, tesselationEvaluateFile, "");
 }
 
-void GShader::addShaderStage(const ShaderStage& stage, const ShaderFlag& flag) {
+bool GShader::addShaderStage(const ShaderStage& stage, const ShaderFlag& flag) {
+	if (SystemVariables::get("OPENGL_SHADER_VERSION") < stage.info.version.version) {
+		Log::error("Shader version %d %snot supported for shader %s", stage.info.version.version, stage.info.version.core ? "core " : "", name.c_str());
+		return false;
+	}
+	
 	if (!stage.source.empty()) {
 		addUniforms(stage);
 
@@ -136,6 +147,8 @@ void GShader::addShaderStage(const ShaderStage& stage, const ShaderFlag& flag) {
 				break;
 		}
 	}
+
+	return true;
 }
 
 #pragma endregion
@@ -152,17 +165,23 @@ GShader::GShader(const ShaderSource& shaderSource) : Shader(shaderSource) {
 	std::future<ShaderStage> futureTesselationControlStage = std::async(std::launch::async, parseShaderStage, shaderSource.tesselationControlSource);
 	std::future<ShaderStage> futureTesselationEvaluationStage = std::async(std::launch::async, parseShaderStage, shaderSource.tesselationEvaluateSource);
 
-	addShaderStage(futureVertexStage.get(), VERTEX);
-	addShaderStage(futureFragmentStage.get(), FRAGMENT);
-	addShaderStage(futureGeometryStage.get(), GEOMETRY);
-	addShaderStage(futureTesselationControlStage.get(), TESSELATION_CONTROL);
-	addShaderStage(futureTesselationEvaluationStage.get(), TESSELATION_EVALUATE);
+	bool succes = true;
+	succes &= addShaderStage(futureVertexStage.get(), VERTEX);
+	succes &= addShaderStage(futureFragmentStage.get(), FRAGMENT);
+	succes &= addShaderStage(futureGeometryStage.get(), GEOMETRY);
+	succes &= addShaderStage(futureTesselationControlStage.get(), TESSELATION_CONTROL);
+	succes &= addShaderStage(futureTesselationEvaluationStage.get(), TESSELATION_EVALUATE);
 
 	//addShaderStage(parseShaderStage(vertexSource), VERTEX);
 	//addShaderStage(parseShaderStage(fragmentSource), FRAGMENT);
 	//addShaderStage(parseShaderStage(geometrySource), GEOMETRY);
 	//addShaderStage(parseShaderStage(tesselationControlSource), TESSELATION_CONTROL);
 	//addShaderStage(parseShaderStage(tesselationEvaluateSource), TESSELATION_EVALUATE);
+
+	if (!succes) {
+		Log::error("Error during shader stage initialization, closing shader");
+		close();
+	}
 };
 
 GShader::GShader(const std::string& name, const std::string& path, const std::string& vertexSource, const std::string& fragmentSource, const std::string& geometrySource, const std::string& tesselationControlSource, const std::string& tesselationEvaluateSource) : GShader(ShaderSource(name, path, vertexSource, fragmentSource, geometrySource, tesselationControlSource, tesselationEvaluateSource, "")) {}

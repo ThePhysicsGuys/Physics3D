@@ -10,9 +10,6 @@
 #include <sstream>
 #include <future>
 
-#include "../util/stringUtil.h"
-#include "../util/systemVariables.h"
-
 namespace P3D::Graphics {
 
 #pragma region uniforms
@@ -44,46 +41,76 @@ void Shader::createUniform(const std::string& uniform) {
 }
 
 void Shader::setUniform(const std::string& uniform, GLID value) const {
+	if (id == 0)
+		return;
+	
 	glUniform1i(uniforms.at(uniform), value);
 }
 
 void Shader::setUniform(const std::string& uniform, int value) const {
+	if (id == 0)
+		return;
+
 	glUniform1i(uniforms.at(uniform), value);
 }
 
 void Shader::setUniform(const std::string& uniform, float value) const {
+	if (id == 0)
+		return;
+
 	glUniform1f(uniforms.at(uniform), value);
 }
 
 void Shader::setUniform(const std::string& uniform, const Vec2f& value) const {
-	glUniform2d(uniforms.at(uniform), value.x, value.y);
+	if (id == 0)
+		return;
+
+	glUniform2f(uniforms.at(uniform), value.x, value.y);
 }
 
 void Shader::setUniform(const std::string& uniform, const Vec3f& value) const {
+	if (id == 0)
+		return;
+
 	glUniform3f(uniforms.at(uniform), value.x, value.y, value.z);
 }
 
 void Shader::setUniform(const std::string& uniform, const Position& value) const {
+	if (id == 0)
+		return;
+
 	glUniform3f(uniforms.at(uniform), float(value.x), float(value.y), float(value.z));
 }
 
 void Shader::setUniform(const std::string& uniform, const Vec4f& value) const {
+	if (id == 0)
+		return;
+
 	glUniform4f(uniforms.at(uniform), value.x, value.y, value.z, value.w);
 }
 
 void Shader::setUniform(const std::string& uniform, const Mat2f& value) const {
+	if (id == 0)
+		return;
+
 	float buf[4];
 	value.toColMajorData(buf);
 	glUniformMatrix2fv(uniforms.at(uniform), 1, GL_FALSE, buf);
 }
 
 void Shader::setUniform(const std::string& uniform, const Mat3f& value) const {
+	if (id == 0)
+		return;
+
 	float buf[9];
 	value.toColMajorData(buf);
 	glUniformMatrix3fv(uniforms.at(uniform), 1, GL_FALSE, buf);
 }
 
 void Shader::setUniform(const std::string& uniform, const Mat4f& value) const {
+	if (id == 0)
+		return;
+
 	float buf[16];
 	value.toColMajorData(buf);
 	glUniformMatrix4fv(uniforms.at(uniform), 1, GL_FALSE, buf);
@@ -96,12 +123,6 @@ void Shader::setUniform(const std::string& uniform, const Mat4f& value) const {
 GLID Shader::compile(const std::string& name, const std::string& source, unsigned int type) {
 	Log::setDelimiter("");
 	Log::info("%s: ", name.c_str());
-
-	if (SystemVariables::get("OPENGL_SHADER_VERSION") < 330) {
-		Log::print(Log::Color::ERROR, "shader version not supported\n");
-		Log::setDelimiter("\n");
-		return 0;
-	}
 
 	GLID id = glCreateShader(type);
 

@@ -258,6 +258,23 @@ void parseIfBody() {
 
 }
 
+ShaderVersion parseVersion(TokenStack& tokens) {
+	ShaderVersion version;
+	
+	tokens.discard();
+
+	if (tokens.peek().type == TokenType::NUMBER) {
+		version.version = std::stoi(tokens.pop().value);
+
+		if (tokens.peek().type == TokenType::ID && tokens.peek().value == "core") {
+			version.core = true;
+			tokens.pop();
+		}
+	}
+
+	return version;
+}
+
 void parsePreprocessor(TokenStack& tokens, ShaderDefines& defines) {
 	std::string preprocessor = tokens.pop().value;
 
@@ -284,6 +301,7 @@ ShaderInfo ShaderParser::parse(const std::string& code) {
 }
 
 ShaderInfo ShaderParser::parseTokens(TokenStack& tokens) {
+	ShaderVersion version;
 	ShaderLayout layout;
 	ShaderUniforms uniforms;
 	ShaderGlobals globals;
@@ -316,6 +334,9 @@ ShaderInfo ShaderParser::parseTokens(TokenStack& tokens) {
 				ShaderLayoutItem layoutItem = parseLayoutItem(tokens);
 				layout.push_back(layoutItem);
 				break;
+			} case TokenType::VERSION: {
+				version = parseVersion(tokens);
+				break;
 			} case TokenType::PREP: {
 				parsePreprocessor(tokens, defines);
 				break;
@@ -335,7 +356,7 @@ ShaderInfo ShaderParser::parseTokens(TokenStack& tokens) {
 		}
 	}
 
-	return ShaderInfo(layout, uniforms, globals, locals, defines, structs);
+	return ShaderInfo(version, layout, uniforms, globals, locals, defines, structs);
 }
 
 };
