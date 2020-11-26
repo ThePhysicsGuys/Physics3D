@@ -77,7 +77,7 @@ protected:
 	void addUniform(const std::string& uniform);
 	void addUniforms(const ShaderStage& stage);
 
-	virtual void addShaderStage(const ShaderStage& stage, const ShaderFlag& flag) = 0;
+	virtual bool addShaderStage(const ShaderStage& stage, const ShaderFlag& flag) = 0;
 };
 
 ShaderSource parseShader(const std::string& name, const std::string& path);

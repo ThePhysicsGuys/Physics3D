@@ -12,8 +12,7 @@
 
 namespace P3D::Application {
 
-Graphics::TextureResource* openFolderIcon;
-Graphics::TextureResource* closedFolderIcon;
+Graphics::TextureResource* folderIcon;
 Graphics::TextureResource* objectIcon;
 
 bool IconTreeNode(Engine::Registry64& registry, Engine::Registry64::entity_type entity, ImGuiTreeNodeFlags flags, const char* label) {
@@ -52,7 +51,7 @@ bool IconTreeNode(Engine::Registry64& registry, Engine::Registry64::entity_type 
 	// Icon
 	float arrowWidth = g.FontSize;
 	float buttonSize = g.FontSize + g.Style.FramePadding.y * 2;
-	ImTextureID texture = (ImTextureID) (leaf ? objectIcon : (opened ? openFolderIcon : closedFolderIcon))->getID();
+	ImTextureID texture = (ImTextureID) (leaf ? objectIcon : folderIcon)->getID();
 	window->DrawList->AddImage(texture, ImVec2(pos.x + arrowWidth, pos.y), ImVec2(pos.x + buttonSize + arrowWidth, pos.y + buttonSize), ImVec2(1, 1), ImVec2(0, 0));
 
 	// Text
@@ -172,9 +171,8 @@ void ECSFrame::renderEntity(Engine::Registry64& registry, const Engine::Registry
 }
 
 void ECSFrame::onInit(Engine::Registry64& registry) {
-	closedFolderIcon = ResourceManager::add<Graphics::TextureResource>("folder_closed", "../res/textures/icons/folder_closed.png");
-	openFolderIcon = ResourceManager::add<Graphics::TextureResource>("folder_open", "../res/textures/icons/folder_open.png");
-	objectIcon = ResourceManager::add<Graphics::TextureResource>("object", "../res/textures/icons/box.png");
+	folderIcon = ResourceManager::add<Graphics::TextureResource>("folder", "../res/textures/icons/folder.png");
+	objectIcon = ResourceManager::add<Graphics::TextureResource>("object", "../res/textures/icons/cube.png");
 }
 
 

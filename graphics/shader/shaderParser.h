@@ -73,6 +73,11 @@ struct ShaderVSOUT : public ShaderGlobal {
 	ShaderVSOUT(const std::string& name, const std::string& ioType, const std::string& variableType, bool array, int amount, const ShaderLocals& locals) : ShaderGlobal(name, ioType, variableType, array, amount), locals(locals) {}
 };
 
+struct ShaderVersion {
+	int version;
+	bool core;
+};
+	
 struct ShaderStruct {
 	std::string name;
 	ShaderLocals locals;
@@ -87,6 +92,7 @@ typedef std::vector<ShaderUniform> ShaderUniforms;
 typedef std::unordered_map<std::string, float> ShaderDefines;
 
 struct ShaderInfo {
+	ShaderVersion version;
 	ShaderLayout layout;
 	ShaderUniforms uniforms;
 	ShaderGlobals globals;
@@ -95,7 +101,7 @@ struct ShaderInfo {
 	ShaderStructs structs;
 
 	ShaderInfo() {}
-	ShaderInfo(const ShaderLayout& layout, const ShaderUniforms& uniforms, const ShaderGlobals& globals, const ShaderLocals& locals, const ShaderDefines& defines, const ShaderStructs& structs) : layout(layout), uniforms(uniforms), globals(globals), locals(locals), defines(defines), structs(structs) {}
+	ShaderInfo(const ShaderVersion& version, const ShaderLayout& layout, const ShaderUniforms& uniforms, const ShaderGlobals& globals, const ShaderLocals& locals, const ShaderDefines& defines, const ShaderStructs& structs) : version(version), layout(layout), uniforms(uniforms), globals(globals), locals(locals), defines(defines), structs(structs) {}
 };
 
 class ShaderParser {
