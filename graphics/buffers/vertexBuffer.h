@@ -2,18 +2,21 @@
 
 #include "../bindable.h"
 #include "../renderer.h"
+#include "bufferLayout.h"
 
 namespace P3D::Graphics {
 
 class VertexBuffer : public Bindable {
 private:
-	size_t _capacity;
-	size_t _size;
+	std::size_t currentCapacity;
+	size_t currentSize;
 
 public:
+	BufferLayout layout;
+	
 	VertexBuffer();
-	VertexBuffer(const void* data, size_t sizeInBytes, GLFLAG mode);
-	VertexBuffer(const void* data, size_t sizeInBytes);
+	VertexBuffer(const BufferLayout& layout, const void* data, std::size_t sizeInBytes, GLFLAG mode);
+	VertexBuffer(const BufferLayout& layout, const void* data, std::size_t sizeInBytes);
 
 	~VertexBuffer();
 	VertexBuffer(VertexBuffer&& other);
@@ -21,10 +24,10 @@ public:
 	VertexBuffer& operator=(VertexBuffer&& other);
 	VertexBuffer& operator=(const VertexBuffer&) = delete;
 
-	void fill(const void* data, size_t sizeInBytes, GLFLAG mode);
-	void update(const void* data, size_t sizeInBytes, int offset);
-	size_t size() const;
-	size_t capacity() const;
+	void fill(const void* data, std::size_t sizeInBytes, GLFLAG mode);
+	void update(const void* data, std::size_t sizeInBytes, std::size_t offset);
+	std::size_t size() const;
+	std::size_t capacity() const;
 
 	void bind() override;
 	void unbind() override;

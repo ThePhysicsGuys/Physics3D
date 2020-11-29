@@ -1,25 +1,25 @@
 #pragma once
 
+#include <vector>
 #include "batch.h"
 #include "../renderer.h"
 #include "../mesh/indexedMesh.h"
 #include "../buffers/bufferLayout.h"
+#include "../meshRegistry.h"
 
 namespace P3D::Graphics {
 
 template<typename UniformLayout>
 class InstanceBatch {
 private:
-	IndexedMesh* mesh;
-
-	BufferLayout uniformBufferLayout;
+	GLID mesh;
 	VertexBuffer* ubo = nullptr;
 	std::vector<UniformLayout> uniformBuffer;
 
 public:
-	InstanceBatch(IndexedMesh* mesh, const BufferLayout& uniformBufferLayout) : mesh(mesh), uniformBufferLayout(uniformBufferLayout) {
-		ubo = new VertexBuffer(nullptr, 0);
-		mesh->vao->addBuffer(ubo, uniformBufferLayout);
+	InstanceBatch(GLID mesh, const BufferLayout& uniformBufferLayout) : mesh(mesh) {
+		ubo = new VertexBuffer(uniformBufferLayout, nullptr, 0);
+		Graphics::MeshRegistry::meshes[mesh]->vao->addBuffer(ubo);
 	}
 
 	void add(const UniformLayout& uniform) {

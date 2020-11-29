@@ -61,24 +61,24 @@ void EditTools::onInit() {
 	line->resize(Vec3f(0, -100000, 0), Vec3f(0, 100000, 0));
 
 
-	VertexBuffer* uniformBuffer = new VertexBuffer(nullptr, 0, Graphics::Renderer::STREAM_DRAW);
+	VertexBuffer* uniformBuffer = new VertexBuffer(DEFAULT_UNIFORM_BUFFER_LAYOUT, nullptr, 0, Graphics::Renderer::STREAM_DRAW);
 	
 	// Rotate shape init
 	rotateShape = VisualShape::generateSmoothNormalsShape(Library::createTorus(1.0f, 0.03f, 80, 12).rotated(Rotationf::Predefined::X_270));
 	rotateMesh = new IndexedMesh(rotateShape);
-	rotateMesh->addUniformBuffer(uniformBuffer, DEFAULT_UNIFORM_BUFFER_LAYOUT);
+	rotateMesh->addUniformBuffer(uniformBuffer);
 
 	// Scale shape init
 	scaleShape = VisualShape::generateSplitNormalsShape(createBoxOnStick(0.2f, 0.03f).rotated(Rotationf::Predefined::X_270));
 	scaleMesh = new IndexedMesh(scaleShape);
-	scaleMesh->addUniformBuffer(uniformBuffer, DEFAULT_UNIFORM_BUFFER_LAYOUT);
+	scaleMesh->addUniformBuffer(uniformBuffer);
 	scaleCenterShape = VisualShape::generateSplitNormalsShape(Library::createCube(0.2f));
 	scaleCenterMesh = new IndexedMesh(scaleCenterShape);
 
 	// Translate shape init
 	translateShape = VisualShape::generateSplitNormalsShape(createArrow(0.3f, 0.07f, 0.03f).rotated(Rotationf::Predefined::X_270));
 	translateMesh = new IndexedMesh(translateShape);
-	translateMesh->addUniformBuffer(uniformBuffer, DEFAULT_UNIFORM_BUFFER_LAYOUT);
+	translateMesh->addUniformBuffer(uniformBuffer);
 	translateCenterShape = VisualShape::generateSmoothNormalsShape(Library::createSphere(0.13f, 3));
 	translateCenterMesh = new IndexedMesh(translateCenterShape);
 

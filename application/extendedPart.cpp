@@ -6,7 +6,7 @@
 #include "view/screen.h"
 #include "../engine/ecs/registry.h"
 #include "../physics/misc/serialization.h"
-#include "../engine/meshRegistry.h"
+#include "../graphics/meshRegistry.h"
 
 namespace P3D::Application {
 
@@ -45,7 +45,7 @@ ExtendedPart::ExtendedPart(Part&& part, const std::string& name, const Entity& p
 	if (parent != screen.registry.null_entity)
 		screen.registry.setParent(this->entity, parent);
 	
-	screen.registry.add<Comp::Mesh>(this->entity, Engine::MeshRegistry::getOrCreateMeshFor(part.hitbox.baseShape));
+	screen.registry.add<Comp::Mesh>(this->entity, Graphics::MeshRegistry::getOrCreateMeshFor(part.hitbox.baseShape));
 	screen.registry.add<Comp::Model>(this->entity, this);
 	screen.registry.add<Comp::Transform>(this->entity, this);
 	if (!name.empty())
@@ -58,7 +58,7 @@ ExtendedPart::ExtendedPart(const Shape& hitbox, const GlobalCFrame& position, co
 	if (parent != screen.registry.null_entity)
 		screen.registry.setParent(this->entity, parent);
 	
-	screen.registry.add<Comp::Mesh>(this->entity, Engine::MeshRegistry::getOrCreateMeshFor(hitbox.baseShape));
+	screen.registry.add<Comp::Mesh>(this->entity, Graphics::MeshRegistry::getOrCreateMeshFor(hitbox.baseShape));
 	screen.registry.add<Comp::Model>(this->entity, this);
 	screen.registry.add<Comp::Transform>(this->entity, this);
 	if (!name.empty())
@@ -72,7 +72,7 @@ ExtendedPart::ExtendedPart(const Shape& hitbox, ExtendedPart* attachTo, const CF
 	if (parent != screen.registry.null_entity)
 		screen.registry.setParent(this->entity, parent);
 
-	screen.registry.add<Comp::Mesh>(this->entity, Engine::MeshRegistry::getOrCreateMeshFor(hitbox.baseShape));
+	screen.registry.add<Comp::Mesh>(this->entity, Graphics::MeshRegistry::getOrCreateMeshFor(hitbox.baseShape));
 	screen.registry.add<Comp::Model>(this->entity, this);
 	screen.registry.add<Comp::Transform>(this->entity, this);
 	if (!name.empty())

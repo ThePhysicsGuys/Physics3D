@@ -2,7 +2,7 @@
 
 #include <string>
 #include "extendedPart.h"
-#include "../engine/visualData.h"
+#include "../graphics/visualData.h"
 #include "../physics/math/cframe.h"
 
 namespace P3D::Application {

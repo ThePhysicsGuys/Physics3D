@@ -10,7 +10,7 @@
 #include "extendedPart.h"
 
 #include "ecs/components.h"
-#include "../engine/meshRegistry.h"
+#include "../graphics/meshRegistry.h"
 
 #include "../physics/geometry/shapeCreation.h"
 #include "../physics/constraints/motorConstraint.h"
@@ -367,7 +367,7 @@ void buildShowcaseWorld(Screen& screen, PlayerWorld& world) {
 	}
 
 	Shape torusShape = polyhedronShape(Library::createTorus(1.0f, 0.6f, 80, 80));
-	Engine::MeshRegistry::registerMeshFor(torusShape.baseShape, Graphics::VisualShape::generateSmoothNormalsShape(torusShape.baseShape->asPolyhedron()));
+	Graphics::MeshRegistry::registerMeshFor(torusShape.baseShape, Graphics::VisualShape::generateSmoothNormalsShape(torusShape.baseShape->asPolyhedron()));
 	world.addPart(new ExtendedPart(torusShape, Position(-10.0, 3.0, 0.0), basicProperties, "Torus"));
 
 

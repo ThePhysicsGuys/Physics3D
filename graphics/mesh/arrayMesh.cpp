@@ -22,29 +22,27 @@ ArrayMesh::ArrayMesh(const float* positions, const unsigned int vertexCount, con
 };
 
 ArrayMesh::ArrayMesh(const float* vertices, const float* uv, const unsigned int vertexCount, const unsigned int dimensions) : AbstractMesh(), vertexCount(vertexCount) {
-	vertexBuffer = new VertexBuffer(vertices, dimensions * vertexCount * sizeof(float));
-	uvBuffer = new VertexBuffer(uv, 2 * vertexCount * sizeof(float));
-
 	vertexBufferLayout = {
 		{{ "vposition", (dimensions == 2) ? BufferDataType::FLOAT2 : BufferDataType::FLOAT3 }}
 	};
+	vertexBuffer = new VertexBuffer(vertexBufferLayout, vertices, dimensions * vertexCount * sizeof(float));
 
 	uvBufferLayout = {
 		{{ "vUV", BufferDataType::FLOAT2 }}
 	};
+	uvBuffer = new VertexBuffer(uvBufferLayout, uv, 2 * vertexCount * sizeof(float));
 
-	vao->addBuffer(vertexBuffer, vertexBufferLayout);
-	vao->addBuffer(uvBuffer, uvBufferLayout);
+	vao->addBuffer(vertexBuffer);
+	vao->addBuffer(uvBuffer);
 }
 
 ArrayMesh::ArrayMesh(const float* vertices, const unsigned int vertexCount, const unsigned int dimensions, unsigned int renderMode) : AbstractMesh(renderMode), vertexCount(vertexCount) {
-	vertexBuffer = new VertexBuffer(vertices, dimensions * vertexCount * sizeof(float));
-
 	vertexBufferLayout = {
 		{{ "vposition", (dimensions == 2) ? BufferDataType::FLOAT2 : BufferDataType::FLOAT3 }}
 	};
+	vertexBuffer = new VertexBuffer(vertexBufferLayout, vertices, dimensions * vertexCount * sizeof(float));
 
-	vao->addBuffer(vertexBuffer, vertexBufferLayout);
+	vao->addBuffer(vertexBuffer);
 }
 
 void ArrayMesh::render() {

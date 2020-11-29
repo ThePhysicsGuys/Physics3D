@@ -3,7 +3,7 @@
 
 #include <typeindex>
 
-#include "../engine/meshRegistry.h"
+#include "../graphics/meshRegistry.h"
 
 #include "worlds.h"
 #include "../view/screen.h"
@@ -25,13 +25,13 @@
 #include "../physics/constraints/sinusoidalPistonConstraint.h"
 #include "../physics/constraints/motorConstraint.h"
 #include "../physics/constraints/fixedConstraint.h"
-#include "../engine/meshRegistry.h"
+#include "../graphics/meshRegistry.h"
 
 namespace P3D::Application {
 
 void ConstraintLayer::onInit(Engine::Registry64& registry) {
 	Graphics::VisualShape prismShape(Library::createPrism(6, 0.5, 1.0));
-	this->hexagon = Engine::MeshRegistry::addMeshShape(prismShape);
+	this->hexagon = Graphics::MeshRegistry::addMeshShape(prismShape);
 
 }
 void ConstraintLayer::onUpdate(Engine::Registry64& registry) {
@@ -42,7 +42,7 @@ static void renderObject(const VisualData& shape, const GlobalCFrame& cframe, co
 	Shaders::basicShader.updateMaterial(material);
 	Shaders::basicShader.updateTexture(false);
 	Shaders::basicShader.updateModel(cframe, scale);
-	Engine::MeshRegistry::meshes[shape.id]->render();
+	Graphics::MeshRegistry::meshes[shape.id]->render();
 }
 
 static void renderConstraintLineBetween(Position p1, Position p2) {
@@ -55,9 +55,9 @@ static void renderConstraintLineBetween(Position p1, Position p2) {
 
 	Rotation rot = Rotation::faceY(delta);
 
-	renderObject(Engine::MeshRegistry::box, GlobalCFrame(center, rot), DiagonalMat3f{0.2f, float(length(delta) / 2), 0.2f}, Comp::Material(Color(1.0f, 0.0f, 0.0f, 1.0f)));
-	renderObject(Engine::MeshRegistry::box, GlobalCFrame(p1, rot), DiagonalMat3f{0.25f, 0.25f, 0.25f}, Comp::Material(Color(0.0f, 1.0f, 0.0f, 1.0f)));
-	renderObject(Engine::MeshRegistry::box, GlobalCFrame(p2, rot), DiagonalMat3f{0.25f, 0.25f, 0.25f}, Comp::Material(Color(0.0f, 1.0f, 0.0f, 1.0f)));
+	renderObject(Graphics::MeshRegistry::box, GlobalCFrame(center, rot), DiagonalMat3f{0.2f, float(length(delta) / 2), 0.2f}, Comp::Material(Color(1.0f, 0.0f, 0.0f, 1.0f)));
+	renderObject(Graphics::MeshRegistry::box, GlobalCFrame(p1, rot), DiagonalMat3f{0.25f, 0.25f, 0.25f}, Comp::Material(Color(0.0f, 1.0f, 0.0f, 1.0f)));
+	renderObject(Graphics::MeshRegistry::box, GlobalCFrame(p2, rot), DiagonalMat3f{0.25f, 0.25f, 0.25f}, Comp::Material(Color(0.0f, 1.0f, 0.0f, 1.0f)));
 }
 
 static void renderBar(GlobalCFrame cframe, Vec3 delta, float thickness, Color color) {
@@ -66,7 +66,7 @@ static void renderBar(GlobalCFrame cframe, Vec3 delta, float thickness, Color co
 
 	Rotation rotation = Rotation::faceZ(delta);
 
-	renderObject(Engine::MeshRegistry::box, cframe.localToGlobal(CFrame(delta/2, rotation)), DiagonalMat3f{thickness, thickness, float(length(delta) / 2)}, Comp::Material(color));
+	renderObject(Graphics::MeshRegistry::box, cframe.localToGlobal(CFrame(delta/2, rotation)), DiagonalMat3f{thickness, thickness, float(length(delta) / 2)}, Comp::Material(color));
 }
 
 static void renderPiston(const ConstraintLayer* cl, const SinusoidalPistonConstraint* piston, const GlobalCFrame& start, const GlobalCFrame& end, int segments, float minThickness, float maxThickness) {
@@ -85,11 +85,11 @@ static void renderPiston(const ConstraintLayer* cl, const SinusoidalPistonConstr
 
 		Comp::Material mat = (i%2 == 0) ? Comp::Material(Color(1.0f, 0.8f, 0.1f, 1.0f)) : Comp::Material(Color(0.9f, 0.9f, 0.9f, 1.0f));
 
-		renderObject(Engine::MeshRegistry::cylinder, start.localToGlobal(CFrame(center, rot)), DiagonalMat3f{thickness, thickness, float(length(step) / 2)}, mat);
+		renderObject(Graphics::MeshRegistry::cylinder, start.localToGlobal(CFrame(center, rot)), DiagonalMat3f{thickness, thickness, float(length(step) / 2)}, mat);
 	}
 
-	renderObject(Engine::MeshRegistry::sphere, start, DiagonalMat3f::IDENTITY() * minThickness * 1.2f, Comp::Material(Color(0.0f, 1.0f, 0.0f, 1.0f)));
-	renderObject(Engine::MeshRegistry::sphere, end, DiagonalMat3f::IDENTITY() * maxThickness * 1.2f, Comp::Material(Color(0.0f, 1.0f, 0.0f, 1.0f)));
+	renderObject(Graphics::MeshRegistry::sphere, start, DiagonalMat3f::IDENTITY() * minThickness * 1.2f, Comp::Material(Color(0.0f, 1.0f, 0.0f, 1.0f)));
+	renderObject(Graphics::MeshRegistry::sphere, end, DiagonalMat3f::IDENTITY() * maxThickness * 1.2f, Comp::Material(Color(0.0f, 1.0f, 0.0f, 1.0f)));
 }
 
 static void renderMotor(const ConstraintLayer* cl, const ConstantSpeedMotorConstraint* motor, const GlobalCFrame& start, const GlobalCFrame& end) {
@@ -104,8 +104,8 @@ static void renderConstraintBars(const ConstraintLayer* cl, const GlobalCFrame& 
 
 static void renderBallConstraint(const ConstraintLayer* cl, const Physical* physA, const Physical* physB, const BallConstraint* bc, float innerBallThickness, float outerBallThickness) {
 	renderConstraintBars(cl, physA->getCFrame(), physB->getCFrame(), CFrame(bc->attachA), CFrame(bc->attachB));
-	renderObject(Engine::MeshRegistry::sphere, physA->getCFrame().localToGlobal(bc->attachA), DiagonalMat3f::IDENTITY() * innerBallThickness, Comp::Material(Color(0.0f, 0.0f, 1.0f, 1.0f)));
-	renderObject(Engine::MeshRegistry::sphere, physB->getCFrame().localToGlobal(bc->attachB), DiagonalMat3f::IDENTITY() * outerBallThickness, Comp::Material(Color(0.0f, 0.0f, 1.0f, 0.7f)));
+	renderObject(Graphics::MeshRegistry::sphere, physA->getCFrame().localToGlobal(bc->attachA), DiagonalMat3f::IDENTITY() * innerBallThickness, Comp::Material(Color(0.0f, 0.0f, 1.0f, 1.0f)));
+	renderObject(Graphics::MeshRegistry::sphere, physB->getCFrame().localToGlobal(bc->attachB), DiagonalMat3f::IDENTITY() * outerBallThickness, Comp::Material(Color(0.0f, 0.0f, 1.0f, 0.7f)));
 }
 
 static void renderHardConstraint(const ConstraintLayer* cl, const ConnectedPhysical& conPhys) {
@@ -144,21 +144,20 @@ void ConstraintLayer::onRender(Engine::Registry64& registry) {
 	using namespace Graphics;
 	using namespace Graphics::Renderer;
 
-
 	Screen* screen = static_cast<Screen*>(this->ptr);
 	PlayerWorld* world = screen->world;
-
+	
 	beginScene();
 	Renderer::enableBlending();
 
 	Shaders::basicShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
 	Shaders::maskShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
 
-	for(MotorizedPhysical* phys : world->iterPhysicals()) {
+	for (MotorizedPhysical* phys : world->iterPhysicals()) {
 		recurseRenderHardConstraints(this, *phys);
 	}
 
-	for(const ConstraintGroup& g : world->constraints) {
+	for (const ConstraintGroup& g : world->constraints) {
 		for(const PhysicalConstraint& constraint : g.constraints) {
 			renderConstraint(this, constraint);
 		}

@@ -9,8 +9,6 @@
 namespace P3D::Graphics {
 
 PointMesh::PointMesh(const float* vertices, const size_t vertexCount, size_t capacity) : AbstractMesh(Renderer::POINT), vertexCount(vertexCount), capacity(capacity) {
-	vertexBuffer = new VertexBuffer(nullptr, 10 * capacity * sizeof(float), Renderer::DYNAMIC_DRAW);
-
 	vertexBufferLayout = BufferLayout({
 		BufferElement("vposition", BufferDataType::FLOAT3),
 		BufferElement("vsize", BufferDataType::FLOAT),
@@ -18,7 +16,9 @@ PointMesh::PointMesh(const float* vertices, const size_t vertexCount, size_t cap
 		BufferElement("vcolor2", BufferDataType::FLOAT3)
 	});
 
-	vao->addBuffer(vertexBuffer, vertexBufferLayout);
+	vertexBuffer = new VertexBuffer(vertexBufferLayout, nullptr, 10 * capacity * sizeof(float), Renderer::DYNAMIC_DRAW);
+	
+	vao->addBuffer(vertexBuffer);
 }
 
 void PointMesh::render() {

@@ -1,11 +1,11 @@
 #pragma once
 
-#include "../engine/visualData.h"
-#include "../graphics/visualShape.h"
-#include "../graphics/mesh/indexedMesh.h"
+#include "visualData.h"
+#include "visualShape.h"
+#include "mesh/indexedMesh.h"
 #include "../physics/geometry/shapeClass.h"
 
-namespace P3D::Engine::MeshRegistry {
+namespace P3D::Graphics::MeshRegistry {
 
 extern std::vector<Graphics::IndexedMesh*> meshes;
 extern std::map<const ShapeClass*, VisualData> shapeClassMeshIds;

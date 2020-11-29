@@ -3,7 +3,6 @@
 #include "vertexArray.h"
 
 #include <GL/glew.h>
-#include <GLFW/glfw3.h>
 
 #include "vertexBuffer.h"
 #include "bufferLayout.h"
@@ -50,19 +49,19 @@ void VertexArray::unbind() {
 	glBindVertexArray(0);
 }
 
-void VertexArray::addBuffer(VertexBuffer* buffer, const BufferLayout& layout) {
+void VertexArray::addBuffer(VertexBuffer* buffer) {
 	bind();
 	buffer->bind();
 
 	size_t offset = 0;
-	for (size_t i = 0; i < layout.elements.size(); i++) {
-		auto& element = layout.elements[i];
+	for (size_t i = 0; i < buffer->layout.elements.size(); i++) {
+		auto& element = buffer->layout.elements[i];
 
 		int iterations = (element.info == BufferDataType::MAT2 || element.info == BufferDataType::MAT3 || element.info == BufferDataType::MAT4) ? element.info.count : 1;
 
 		for (size_t j = 0; j < iterations; j++) {
 			glEnableVertexAttribArray(attributeArrayOffset);
-			glVertexAttribPointer(attributeArrayOffset, element.info.count, element.info.type, element.normalized, layout.stride, (const void*) offset);
+			glVertexAttribPointer(attributeArrayOffset, element.info.count, element.info.type, element.normalized, buffer->layout.stride, (const void*) offset);
 
 			if (element.instanced)
 				glVertexAttribDivisor(attributeArrayOffset, 1);

@@ -1,12 +1,10 @@
 #pragma once
 
-#include "../util/tracker.h"
-
 typedef unsigned int GLID;
 
 namespace P3D::Graphics {
 
-class Bindable : public Tracker<Bindable> {
+class Bindable {
 protected:
 	GLID id;
 
