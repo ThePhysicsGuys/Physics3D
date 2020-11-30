@@ -303,6 +303,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="elasticLink.cpp" />
     <ClCompile Include="softconstraints\ballConstraint.cpp" />
     <ClCompile Include="softconstraints\constraintGroup.cpp" />
     <ClCompile Include="geometry\builtinShapeClasses.cpp" />
@@ -347,6 +348,7 @@
     <ClInclude Include="catchable_assert.h" />
     <ClInclude Include="colissionBuffer.h" />
     <ClInclude Include="constants.h" />
+    <ClInclude Include="elasticLink.h" />
     <ClInclude Include="math\linalg\largeMatrixAlgorithms.h" />
     <ClInclude Include="softconstraints\ballConstraint.h" />
     <ClInclude Include="softconstraints\constraintGroup.h" />

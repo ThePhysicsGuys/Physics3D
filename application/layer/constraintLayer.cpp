@@ -27,6 +27,9 @@
 #include "../physics/constraints/fixedConstraint.h"
 #include "../engine/meshRegistry.h"
 
+
+
+
 namespace P3D::Application {
 
 void ConstraintLayer::onInit(Engine::Registry64& registry) {
@@ -118,7 +121,7 @@ static void renderHardConstraint(const ConstraintLayer* cl, const ConnectedPhysi
 
 	GlobalCFrame startOfConstraint = cframeOfConPhys.localToGlobal(conPhys.connectionToParent.attachOnChild);
 	GlobalCFrame endOfConstraint = cframeOfParent.localToGlobal(conPhys.connectionToParent.attachOnParent);
-	auto& info(typeid(*constraint));
+	const auto& info(typeid(*constraint));
 	if (info == typeid(SinusoidalPistonConstraint)) {
 		renderPiston(cl, static_cast<const SinusoidalPistonConstraint*>(constraint), startOfConstraint, endOfConstraint, 3, 0.1f, 0.12f);
 	} else if (info == typeid(ConstantSpeedMotorConstraint)) {
@@ -134,10 +137,19 @@ static void recurseRenderHardConstraints(const ConstraintLayer* cl, const Physic
 }
 
 static void renderConstraint(const ConstraintLayer* cl, const PhysicalConstraint& constraint) {
-	auto& info(typeid(*constraint.constraint));
+	const auto& info(typeid(*constraint.constraint));
 	if(info == typeid(BallConstraint)) {
 		renderBallConstraint(cl, constraint.physA, constraint.physB, static_cast<const BallConstraint*>(constraint.constraint), 0.13f, 0.15f);
 	}
+}
+
+static void renderSpringLink(const GlobalCFrame& start) {
+	renderObject(Engine::MeshRegistry::sphere, start.localToGlobal(CFrame(Vec3(0, 0, 0.05))), DiagonalMat3f{ 0.2f, 0.2f, 0.1f }, Comp::Material(Color(1.0f, 1.0f, 0.0f, 1.0f)));
+	
+}
+
+static void renderSoftLinkConstraint(const ConstraintLayer* cl, const SoftLink* link) {
+	renderConstraintLineBetween(link->getGlobalPositionOfAttach2(), link->getGlobalPositionOfAttach1());
 }
 
 void ConstraintLayer::onRender(Engine::Registry64& registry) {
@@ -162,6 +174,10 @@ void ConstraintLayer::onRender(Engine::Registry64& registry) {
 		for(const PhysicalConstraint& constraint : g.constraints) {
 			renderConstraint(this, constraint);
 		}
+	}
+	
+	for (const SoftLink* springLink : world->springLinks) {
+		renderSoftLinkConstraint(this, springLink);
 	}
 
 	endScene();

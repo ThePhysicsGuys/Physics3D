@@ -50,6 +50,7 @@ add_library(physics STATIC
   physics/rigidBody.cpp
   physics/softLink.cpp
   physics/springLink.cpp
+  physics/elasticLink.cpp
   physics/layer.cpp
   physics/world.cpp
   physics/worldPhysics.cpp

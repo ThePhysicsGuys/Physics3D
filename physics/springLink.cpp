@@ -20,8 +20,8 @@ void SpringLink::update() {
 Vec3 SpringLink::forceAppliedToTheLink() noexcept {
 	Vec3 force = this->getGlobalPositionOfAttach2() - this->getGlobalPositionOfAttach1();
 	double magnitude = length(force);
-	const double magnitudeTimeStiffness = std::abs(magnitude - this->restLength) * this->stiffness;
+	const double magnitudeTimesStiffness = std::abs(magnitude - this->restLength) * this->stiffness;
 	const Vec3 forceDirection = normalize(force);
-	return forceDirection * -magnitudeTimeStiffness;
+	return forceDirection * -magnitudeTimesStiffness;
 	
 }

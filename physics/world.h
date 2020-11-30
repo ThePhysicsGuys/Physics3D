@@ -12,6 +12,8 @@
 #include "colissionBuffer.h"
 
 #include "springLink.h"
+#include "elasticLink.h"
+
 #include <memory>
 
 class ExternalForce;
