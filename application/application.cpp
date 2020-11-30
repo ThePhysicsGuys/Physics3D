@@ -126,7 +126,19 @@ void setupWorld(int argc, const char** args) {
 
 	WorldBuilder::buildFloorAndWalls(50.0, 50.0, 1.0);
 
-	ExtendedPart* partA = new ExtendedPart(boxShape(5.0, 10.0, 5.0), GlobalCFrame(0.0, 6.0, 0.0), WorldBuilder::basicProperties);
+	ExtendedPart* partA = new ExtendedPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(3.0, 3.0, 0.0), { 1.0, 1.0, 1.0 }, "partA");
+	ExtendedPart* partB = new ExtendedPart(boxShape(1.0, 2.0, 1.0), GlobalCFrame(2.0, 3.0, 0.0), { 1.0, 1.0, 1.0 }, "partA");
+
+	world.addPart(partA);
+	world.addPart(partB);
+
+	//world.addLink(new SpringLink({ CFrame{1.0, 0.0, 0.0}, partA }, { CFrame{0.0, 0.0, 0.0}, partB }, 5.0, 5.0));
+
+	world.addLink(new ElasticLink({ CFrame{1.0, 0.0, 0.0}, partA }, { CFrame{0.0, 0.0, 0.0}, partB }, 5.0, 5.0));
+	
+	return;
+	
+	/*ExtendedPart* partA = new ExtendedPart(boxShape(5.0, 10.0, 5.0), GlobalCFrame(0.0, 6.0, 0.0), WorldBuilder::basicProperties);
 	ExtendedPart* partB = new ExtendedPart(sphereShape(0.45), GlobalCFrame(8.0, 6.0, 0.0), WorldBuilder::basicProperties);
 	ExtendedPart* partC = new ExtendedPart(boxShape(0.9, 0.15, 0.15), GlobalCFrame(9.0, 6.0, 0.0), WorldBuilder::basicProperties);
 	ExtendedPart* partD = new ExtendedPart(boxShape(0.9, 0.15, 0.15), GlobalCFrame(10.0, 6.0, 0.0), WorldBuilder::basicProperties);
@@ -145,7 +157,7 @@ void setupWorld(int argc, const char** args) {
 	cg.add(partB->parent, partC->parent, new BallConstraint(Vec3(0.5, 0.0, 0.0), Vec3(-0.5, 0.0, 0.0)));
 	cg.add(partC->parent, partD->parent, new BallConstraint(Vec3(0.5, 0.0, 0.0), Vec3(-0.5, 0.0, 0.0)));
 	cg.add(partD->parent, partE->parent, new BallConstraint(Vec3(0.5, 0.0, 0.0), Vec3(-0.5, 0.0, 0.0)));
-	world.constraints.push_back(std::move(cg));
+	world.constraints.push_back(std::move(cg));*/
 }
 
 void setupPhysics() {
