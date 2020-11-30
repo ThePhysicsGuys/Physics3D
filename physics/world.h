@@ -13,6 +13,7 @@
 
 #include "springLink.h"
 #include "elasticLink.h"
+#include "magneticLink.h"
 
 #include <memory>
 
