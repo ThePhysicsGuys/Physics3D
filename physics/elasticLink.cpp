@@ -19,7 +19,7 @@ void ElasticLink::update() {
 
 	Vec3 force = optionalVec3.value();
 	this->attachedPart1.part->applyForce(this->getRelativePositionOfAttach2(), force);
-	this->attachedPart2.part->applyForce(this->getRelativePositionOfAttach2(), -force);
+	this->attachedPart2.part->applyForce(this->getRelativePositionOfAttach1(), -force);
 }
 
 std::optional<Vec3> ElasticLink::forceAppliedToTheLink() {
