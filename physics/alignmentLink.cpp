@@ -24,7 +24,7 @@ Vec3 AlignmentLink::getGlobalMoment() {
 
 	Rotation deltRot = rot2.globalToLocal(rot1);
 	Vec3 momentDir = deltRot.asRotationVector();
-
+	rot2.localToGlobal(momentDir);
 	return momentDir;
 	
 }
