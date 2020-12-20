@@ -11,7 +11,7 @@
 #include "../graphics/buffers/frameBuffer.h"
 #include "../engine/resource/meshResource.h"
 #include "../util/resource/resourceManager.h"
-#include "../engine/meshRegistry.h"
+#include "../graphics/meshRegistry.h"
 #include "../graphics/mesh/primitive.h"
 #include "worlds.h"
 #include "imgui/imgui.h"
@@ -83,7 +83,7 @@ void ShadowLayer::renderScene(Engine::Registry64& registry) {
 			continue;
 
 		Shaders::depthShader.updateModel(part->getCFrame().asMat4WithPreScale(part->hitbox.scale));
-		Engine::MeshRegistry::meshes[mesh->id]->render(mesh->mode);
+		Graphics::MeshRegistry::meshes[mesh->id]->render(mesh->mode);
 	}
 }
 

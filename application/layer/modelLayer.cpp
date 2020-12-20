@@ -12,7 +12,7 @@
 #include "ecs/light.h"
 #include "ecs/material.h"
 
-#include "../engine/meshRegistry.h"
+#include "../graphics/meshRegistry.h"
 
 #include "../graphics/mesh/indexedMesh.h"
 #include "../graphics/meshLibrary.h"
@@ -212,8 +212,8 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 				offset++;
 			}
 
-			Engine::MeshRegistry::meshes[id]->fillUniformBuffer(uniforms.data(), count * sizeof(Uniform), Renderer::STREAM_DRAW);
-			Engine::MeshRegistry::meshes[id]->renderInstanced(count);
+			Graphics::MeshRegistry::meshes[id]->fillUniformBuffer(uniforms.data(), count * sizeof(Uniform), Renderer::STREAM_DRAW);
+			Graphics::MeshRegistry::meshes[id]->renderInstanced(count);
 		}
 
 		// Render transparent meshes
@@ -234,7 +234,7 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 
 			Shaders::basicShader.updateMaterial(material);
 			Shaders::basicShader.updatePart(*part);
-			Engine::MeshRegistry::meshes[mesh->id]->render(mesh->mode);
+			Graphics::MeshRegistry::meshes[mesh->id]->render(mesh->mode);
 
 		}
 
@@ -242,7 +242,7 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 			Shaders::debugShader.updateModel(screen->selectedPart->getCFrame().asMat4WithPreScale(screen->selectedPart->hitbox.scale));
 			Ref<Comp::Mesh> mesh = registry.get<Comp::Mesh>(screen->selectedPart->entity);
 			if (mesh.valid())
-				Engine::MeshRegistry::meshes[mesh->id]->render();
+				Graphics::MeshRegistry::meshes[mesh->id]->render();
 		}
 	});
 

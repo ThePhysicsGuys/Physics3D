@@ -165,6 +165,7 @@ add_library(graphics STATIC
   graphics/renderer.cpp
   graphics/texture.cpp
   graphics/visualShape.cpp
+  graphics/meshRegistry.cpp
 
   graphics/buffers/bufferLayout.cpp
   graphics/buffers/frameBuffer.cpp
@@ -211,7 +212,6 @@ target_include_directories(graphics PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/graphic
 
 add_library(engine STATIC
   engine/core.cpp
-  engine/meshRegistry.cpp
 
   engine/input/inputHandler.cpp
   engine/input/keyboard.cpp

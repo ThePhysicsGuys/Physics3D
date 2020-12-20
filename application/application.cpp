@@ -37,7 +37,7 @@
 
 #include "../util/resource/resourceManager.h"
 #include "../graphics/resource/textureResource.h"
-#include "../engine/meshRegistry.h"
+#include "../graphics/meshRegistry.h"
 #include "../engine/ecs/registry.h"
 #include "../engine/event/keyEvent.h"
 #include "../engine/input/keyboard.h"
@@ -68,7 +68,7 @@ void init(int argc, const char** args) {
 	Log::init("latest.log");
 
 	setupGL();
-	Engine::MeshRegistry::init();
+	Graphics::MeshRegistry::init();
 
 	ResourceManager::add<Graphics::TextureResource>("floorMaterial", "../res/textures/floor/floor_color.jpg");
 

@@ -31,10 +31,10 @@ public:
 
 	Batch(const BatchConfig& config) : config(config) {
 		vao = new VertexArray();
-		vbo = new VertexBuffer(nullptr, 0);
+		vbo = new VertexBuffer(config.bufferLayout, nullptr, 0);
 		ibo = new IndexBuffer(nullptr, 0);
 
-		vao->addBuffer(vbo, config.bufferLayout);
+		vao->addBuffer(vbo);
 
 		vertexPointer = vertexBuffer.data();
 		indexPointer = indexBuffer.data();

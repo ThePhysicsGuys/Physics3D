@@ -314,6 +314,7 @@
     <ClCompile Include="gui\imgui\imguiStyle.cpp" />
     <ClCompile Include="gui\layout.cpp" />
     <ClCompile Include="meshLibrary.cpp" />
+    <ClCompile Include="meshRegistry.cpp" />
     <ClCompile Include="mesh\abstractMesh.cpp" />
     <ClCompile Include="mesh\arrayMesh.cpp" />
     <ClCompile Include="mesh\indexedMesh.cpp" />
@@ -372,6 +373,7 @@
     <ClInclude Include="gui\layout.h" />
     <ClInclude Include="gui\orderedVector.h" />
     <ClInclude Include="meshLibrary.h" />
+    <ClInclude Include="meshRegistry.h" />
     <ClInclude Include="mesh\abstractMesh.h" />
     <ClInclude Include="mesh\arrayMesh.h" />
     <ClInclude Include="mesh\indexedMesh.h" />
@@ -394,6 +396,7 @@
     <ClInclude Include="texture.h" />
     <ClInclude Include="debug\threePhaseBuffer.h" />
     <ClInclude Include="debug\visualDebug.h" />
+    <ClInclude Include="visualData.h" />
     <ClInclude Include="visualShape.h" />
   </ItemGroup>
   <ItemGroup>

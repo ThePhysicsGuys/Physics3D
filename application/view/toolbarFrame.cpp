@@ -15,6 +15,7 @@ void ToolbarFrame::onInit(Engine::Registry64& registry) {
 	ResourceManager::add<Graphics::TextureResource>("play", path + "play.png");
 	ResourceManager::add<Graphics::TextureResource>("pause", path + "pause.png");
 	ResourceManager::add<Graphics::TextureResource>("tick", path + "tick.png");
+	ResourceManager::add<Graphics::TextureResource>("reset", path + "reset.png");
 }
 
 void ToolbarFrame::onRender(Engine::Registry64& registry) {

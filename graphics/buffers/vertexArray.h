@@ -23,7 +23,7 @@ public:
 	void unbind() override;
 	void close() override;
 
-	void addBuffer(VertexBuffer* buffer, const BufferLayout& layout);
+	void addBuffer(VertexBuffer* buffer);
 };
 
 };

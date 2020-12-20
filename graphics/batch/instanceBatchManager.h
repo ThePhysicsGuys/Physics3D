@@ -1,61 +1,46 @@
 #pragma once
 
+#include <unordered_map>
+
 #include "instanceBatch.h"
 #include "../buffers/bufferLayout.h"
-#include "../mesh/indexedMesh.h"
 
 namespace P3D::Graphics {
 
-struct UniformLayout {
-	Mat4f transform;
-	Vec4f ambient;
-	Vec3f diffuse;
-	Vec3f specular;
-	float reflectance;
-
-	UniformLayout(Mat4f transform, Vec4f ambient, Vec3f diffuse, Vec3f specular, float reflectance) : transform(transform), ambient(ambient), diffuse(diffuse), specular(specular), reflectance(reflectance) {};
-};
-
+template<typename UniformLayout>
 class InstanceBatchManager {
 private:
-	std::unordered_map<IndexedMesh*, InstanceBatch<UniformLayout>*> batches;
-
-	BufferLayout uniformBufferLayout = BufferLayout({
-		BufferElement("transform", BufferDataType::MAT4, true),
-		BufferElement("ambient", BufferDataType::FLOAT4, true),
-		BufferElement("diffuse", BufferDataType::FLOAT3, true),
-		BufferElement("specular", BufferDataType::FLOAT3, true),
-		BufferElement("reflectance", BufferDataType::FLOAT, true)
-		});
+	BufferLayout uniformBufferLayout;
+	std::unordered_map<GLID, InstanceBatch<UniformLayout>> batches;
 
 public:
-	void add(IndexedMesh* mesh, const UniformLayout& uniform) {
-		if (batches.count(mesh) == 0) {
-			InstanceBatch<UniformLayout>* batch = new InstanceBatch<UniformLayout>(mesh, uniformBufferLayout);
-			batches[mesh] = batch;
-		}
+	InstanceBatchManager(const BufferLayout& uniformBufferLayout) : uniformBufferLayout(uniformBufferLayout) {}
+	
+	void add(GLID mesh, const UniformLayout& uniform) {
+		if (batches.count(mesh) == 0) 
+			batches.emplace(mesh, InstanceBatch<UniformLayout>(mesh, uniformBufferLayout));
 
 		batches.at(mesh)->add(uniform);
 	}
 
-	void submit(IndexedMesh* mesh) {
+	void submit(GLID mesh) {
 		if (batches.count(mesh) != 0)
 			batches.at(mesh)->submit();
-	};
+	}
 
 	void submit() {
-		for (auto batchIterator : batches)
-			batchIterator.second->submit();
-	};
+		for (auto& [mesh, batch] : batches)
+			batch->submit();
+	}
 
 	void clear() {
-		for (auto batchIterator : batches)
-			batchIterator.second->clear();
+		for (auto& [mesh, batch] : batches)
+			batch->clear();
 	}
 
 	void close() {
-		for (auto batchIterator : batches)
-			batchIterator.second->close();
+		for (auto& [mesh, batch] : batches)
+			batch->close();
 	}
 };
 

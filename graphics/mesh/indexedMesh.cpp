@@ -7,7 +7,6 @@
 #include "buffers/vertexArray.h"
 #include "visualShape.h"
 #include "renderer.h"
-#include "../physics/geometry/shape.h"
 
 namespace P3D::Graphics {
 
@@ -27,88 +26,83 @@ IndexedMesh::IndexedMesh(const VisualShape& shape) : AbstractMesh(), vertexCount
 		triangles[i * 3 + 2] = triangle.thirdIndex;
 	}
 
-	vertexBuffer = new VertexBuffer(vertices, 3 * vertexCount * sizeof(float));
-	normalBuffer = new VertexBuffer(reinterpret_cast<float const*>(shape.normals.get()), 3 * vertexCount * sizeof(float));
-	uvBuffer = new VertexBuffer(reinterpret_cast<float const*>(shape.uvs.get()), 2 * vertexCount * sizeof(float));
-	tangentBuffer = new VertexBuffer(reinterpret_cast<float const*>(shape.tangents.get()), 3 * vertexCount * sizeof(float));
-	bitangentBuffer = new VertexBuffer(reinterpret_cast<float const*>(shape.bitangents.get()), 3 * vertexCount * sizeof(float));
+	BufferLayout vertexBufferLayout = {
+	{{ "vPosition", BufferDataType::FLOAT3 }}
+	};
+	vertexBuffer = new VertexBuffer(vertexBufferLayout, vertices, 3 * vertexCount * sizeof(float));
+
+	BufferLayout normalBufferLayout = {
+		{{ "vNormal", BufferDataType::FLOAT3 }}
+	};
+	normalBuffer = new VertexBuffer(normalBufferLayout, reinterpret_cast<float const*>(shape.normals.get()), 3 * vertexCount * sizeof(float));
+
+	BufferLayout uvBufferLayout = {
+		{{ "vUV", BufferDataType::FLOAT2 }}
+	};
+	uvBuffer = new VertexBuffer(uvBufferLayout, reinterpret_cast<float const*>(shape.uvs.get()), 2 * vertexCount * sizeof(float));
+
+	BufferLayout tangentBufferLayout = {
+		{{ "vTangent", BufferDataType::FLOAT3 }}
+	};
+	tangentBuffer = new VertexBuffer(tangentBufferLayout, reinterpret_cast<float const*>(shape.tangents.get()), 3 * vertexCount * sizeof(float));
+
+	BufferLayout bitangentBufferLayout = {
+		{{ "vBitangent", BufferDataType::FLOAT3 }}
+	};
+	bitangentBuffer = new VertexBuffer(bitangentBufferLayout, reinterpret_cast<float const*>(shape.bitangents.get()), 3 * vertexCount * sizeof(float));
 
 	indexBuffer = new IndexBuffer(triangles, 3 * triangleCount);
 
-	vertexBufferLayout = {
-		{{ "vPosition", BufferDataType::FLOAT3 }}
-	};
-
-	normalBufferLayout = {
-		{{ "vNormal", BufferDataType::FLOAT3 }}
-	};
-
-	uvBufferLayout = {
-		{{ "vUV", BufferDataType::FLOAT2 }}
-	};
-
-	tangentBufferLayout = {
-		{{ "vTangent", BufferDataType::FLOAT3 }}
-	};
-
-	bitangentBufferLayout = {
-		{{ "vBitangent", BufferDataType::FLOAT3 }}
-	};
-
-	vao->addBuffer(vertexBuffer, vertexBufferLayout);
-	vao->addBuffer(normalBuffer, normalBufferLayout);
-	vao->addBuffer(uvBuffer, uvBufferLayout);
-	vao->addBuffer(tangentBuffer, tangentBufferLayout);
-	vao->addBuffer(bitangentBuffer, bitangentBufferLayout);
+	vao->addBuffer(vertexBuffer);
+	vao->addBuffer(normalBuffer);
+	vao->addBuffer(uvBuffer);
+	vao->addBuffer(tangentBuffer);
+	vao->addBuffer(bitangentBuffer);
 }
 
 IndexedMesh::IndexedMesh(const float* vertices, const float* normals, const float* uvs, const unsigned int* indices, const int vertexCount, const int triangleCount) : AbstractMesh(), vertexCount(vertexCount), triangleCount(triangleCount) {
-	vertexBuffer = new VertexBuffer(vertices, 3 * vertexCount * sizeof(float));
-	normalBuffer = new VertexBuffer(normals, 3 * vertexCount * sizeof(float));
-	uvBuffer = new VertexBuffer(uvs, 2 * vertexCount * sizeof(float));
+	BufferLayout vertexBufferLayout = {
+		{{ "vposition", BufferDataType::FLOAT3 }}
+	};
+	vertexBuffer = new VertexBuffer(vertexBufferLayout, vertices, 3 * vertexCount * sizeof(float));
+
+	BufferLayout normalBufferLayout = {
+		{{ "vnormal", BufferDataType::FLOAT3 }}
+	};
+	normalBuffer = new VertexBuffer(normalBufferLayout, normals, 3 * vertexCount * sizeof(float));
+
+	BufferLayout uvBufferLayout = {
+		{{ "vUV", BufferDataType::FLOAT2 }}
+	};
+	uvBuffer = new VertexBuffer(uvBufferLayout, uvs, 2 * vertexCount * sizeof(float));
 
 	indexBuffer = new IndexBuffer(indices, 3 * triangleCount);
 
-	vertexBufferLayout = {
-		{{ "vposition", BufferDataType::FLOAT3 }}
-	};
-
-	normalBufferLayout = {
-		{{ "vnormal", BufferDataType::FLOAT3 }}
-	};
-
-	uvBufferLayout = {
-		{{ "vUV", BufferDataType::FLOAT2 }}
-	};
-
-	tangentBufferLayout = {
+	// TODO Generate tangents and bitangents
+	BufferLayout tangentBufferLayout = {
 		{{ "vTangent", BufferDataType::FLOAT3 }}
 	};
+	tangentBuffer = new VertexBuffer(tangentBufferLayout, nullptr, 0);
 
-	bitangentBufferLayout = {
+	BufferLayout bitangentBufferLayout = {
 		{{ "vBitangent", BufferDataType::FLOAT3 }}
 	};
+	bitangentBuffer = new VertexBuffer(bitangentBufferLayout, nullptr, 0);
 
-	vao->addBuffer(vertexBuffer, vertexBufferLayout);
-	vao->addBuffer(normalBuffer, normalBufferLayout);
-	vao->addBuffer(uvBuffer, uvBufferLayout);
-	vao->addBuffer(tangentBuffer, tangentBufferLayout);
-	vao->addBuffer(bitangentBuffer, bitangentBufferLayout);
+	vao->addBuffer(vertexBuffer);
+	vao->addBuffer(normalBuffer);
+	vao->addBuffer(uvBuffer);
+	vao->addBuffer(tangentBuffer);
+	vao->addBuffer(bitangentBuffer);
 }
 
 IndexedMesh::~IndexedMesh() {
 	close();
+	Log::debug("Closed indexed mesh");
 }
 
 IndexedMesh::IndexedMesh(IndexedMesh&& other) {
 	vao = other.vao;
-
-	vertexBufferLayout = other.vertexBufferLayout;
-	normalBufferLayout = other.normalBufferLayout;
-	uvBufferLayout = other.uvBufferLayout;
-	tangentBufferLayout = other.tangentBufferLayout;
-	bitangentBufferLayout = other.bitangentBufferLayout;
-	uniformBufferLayout = other.uniformBufferLayout;
 
 	indexBuffer = other.indexBuffer;
 	vertexBuffer = other.vertexBuffer;
@@ -140,13 +134,6 @@ IndexedMesh& IndexedMesh::operator=(IndexedMesh&& other) {
 		close();
 		std::swap(vao, other.vao);
 
-		std::swap(vertexBufferLayout, other.vertexBufferLayout);
-		std::swap(normalBufferLayout, other.normalBufferLayout);
-		std::swap(uvBufferLayout, other.uvBufferLayout);
-		std::swap(tangentBufferLayout, other.tangentBufferLayout);
-		std::swap(bitangentBufferLayout, other.bitangentBufferLayout);
-		std::swap(uniformBufferLayout, other.uniformBufferLayout);
-
 		std::swap(indexBuffer, other.indexBuffer);
 		std::swap(vertexBuffer, other.vertexBuffer);
 		std::swap(normalBuffer, other.normalBuffer);
@@ -166,11 +153,10 @@ void IndexedMesh::render() {
 	render(Renderer::FILL);
 }
 
-void IndexedMesh::addUniformBuffer(VertexBuffer* uniformBuffer, const BufferLayout& uniformBufferLayout) {
+void IndexedMesh::addUniformBuffer(VertexBuffer* uniformBuffer) {
 	this->uniformBuffer = uniformBuffer;
-	this->uniformBufferLayout = uniformBufferLayout;
 
-	vao->addBuffer(uniformBuffer, uniformBufferLayout);
+	vao->addBuffer(uniformBuffer);
 }
 
 void IndexedMesh::updateUniformBuffer(const void* data, size_t sizeInBytes, int offset) {
@@ -236,13 +222,6 @@ void IndexedMesh::close() {
 	tangentBuffer = nullptr;
 	bitangentBuffer = nullptr;
 	uniformBuffer = nullptr;
-
-	vertexBufferLayout = BufferLayout();
-	normalBufferLayout = BufferLayout();
-	uvBufferLayout = BufferLayout();
-	tangentBufferLayout = BufferLayout();
-	bitangentBufferLayout = BufferLayout();
-	uniformBufferLayout = BufferLayout();
 
 	triangleCount = 0;
 	vertexCount = 0;

@@ -77,11 +77,17 @@ namespace ImGui {
 
 		if (resetAll) {
             SameLine(0, GImGui->Style.ItemInnerSpacing.x);
-			if (Button("Reset")) {
+			//if (Button("Reset")) {
+			
+            //PushStyleVar(ImGuiStyleVar_FrameRounding, 0);
+            PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, -1));
+			if (ImageButton((ImTextureID) ResourceManager::get<P3D::Graphics::TextureResource>("reset")->getID(), ImVec2(20, 20), ImVec2(0, 1), ImVec2(1, 0))) {
 				for (int i = 0; i < components; i++)
                     *(data + i) = resetValue;
                 result = true;
 			}
+			
+            PopStyleVar(1);
 		}
 
         PopID();

@@ -1,29 +1,28 @@
 #include "core.h"
 #include "meshRegistry.h"
 
-#include "../physics/misc/shapeLibrary.h"
-
-#include "../graphics/visualShape.h"
-#include "../graphics/buffers/bufferLayout.h"
-#include "../graphics/buffers/vertexBuffer.h"
-#include "../engine/visualData.h"
-#include "../graphics/mesh/indexedMesh.h"
-#include "../physics/geometry/builtinShapeClasses.h"
 #include "../physics/math/constants.h"
+#include "../physics/misc/shapeLibrary.h"
+#include "../physics/geometry/builtinShapeClasses.h"
+
+#include "buffers/bufferLayout.h"
+#include "buffers/vertexBuffer.h"
+#include "mesh/indexedMesh.h"
+
 #include <stdexcept>
 #include <cmath>
 #include <cstddef>
 
-namespace P3D::Engine::MeshRegistry {
+namespace P3D::Graphics::MeshRegistry {
 
-std::vector<Graphics::IndexedMesh*> meshes;
+std::vector<IndexedMesh*> meshes;
 std::map<const ShapeClass*, VisualData> shapeClassMeshIds;
 VisualData box;
 VisualData sphere;
 VisualData cylinder;
 
 // Generates a cylinder with 
-Graphics::VisualShape createCylinder(int sides, double radius, double height) {
+VisualShape createCylinder(int sides, double radius, double height) {
 	if(sides < 2) { throw std::logic_error("Cannot create cylinder with <2 sides"); }
 	int vertexCount = sides * 4;
 	Vec3f* vertexBuffer = new Vec3f[vertexCount];
@@ -90,12 +89,12 @@ Graphics::VisualShape createCylinder(int sides, double radius, double height) {
 		uvBuffer[i] = Vec2f(u, v);
 	}
 
-	return Graphics::VisualShape(vertexBuffer, vertexCount, triangleBuffer, triangleCount, SharedArrayPtr<const Vec3f>(normalBuffer), SharedArrayPtr<const Vec2f>(uvBuffer));
+	return VisualShape(vertexBuffer, vertexCount, triangleBuffer, triangleCount, SharedArrayPtr<const Vec3f>(normalBuffer), SharedArrayPtr<const Vec2f>(uvBuffer));
 }
 
-Graphics::VisualShape createSphere(double radius, int steps) {
+VisualShape createSphere(double radius, int steps) {
 	Polyhedron sphere(Library::createSphere(static_cast<float>(radius), steps));
-	Graphics::VisualShape sphereShape = Graphics::VisualShape(sphere);
+	VisualShape sphereShape = VisualShape(sphere);
 
 	Vec3f* normalBuffer = new Vec3f[sphereShape.vertexCount];
 	Vec2f* uvBuffer = new Vec2f[sphereShape.vertexCount];
@@ -115,9 +114,9 @@ Graphics::VisualShape createSphere(double radius, int steps) {
 	return sphereShape;
 }
 
-Graphics::VisualShape createBox(float width, float height, float depth) {
+VisualShape createBox(float width, float height, float depth) {
 	Polyhedron box(Library::createBox(width, height, depth));
-	Graphics::VisualShape boxShape = Graphics::VisualShape(box);
+	VisualShape boxShape = VisualShape(box);
 
 	Vec3f* normalBuffer = new Vec3f[boxShape.vertexCount];
 	box.computeNormals(normalBuffer);
@@ -126,28 +125,26 @@ Graphics::VisualShape createBox(float width, float height, float depth) {
 	return boxShape;
 }
 
-Graphics::VisualShape createCube(float size) {
+VisualShape createCube(float size) {
 	return createBox(size, size, size);
 }
 
 void init() {
-	sphere = registerMeshFor(&SphereClass::instance, Graphics::VisualShape::generateSmoothNormalsShape(SphereClass::instance.asPolyhedron()));
+	sphere = registerMeshFor(&SphereClass::instance, VisualShape::generateSmoothNormalsShape(SphereClass::instance.asPolyhedron()));
 	box = registerMeshFor(&CubeClass::instance);
-	Graphics::VisualShape cylinderShapeMesh = createCylinder(64, 1.0, 2.0);
+	VisualShape cylinderShapeMesh = createCylinder(64, 1.0, 2.0);
 	cylinder = registerMeshFor(&CylinderClass::instance, cylinderShapeMesh);
 }
 
 
-VisualData addMeshShape(const Graphics::VisualShape& shape) {
-	using namespace Graphics;
-
+VisualData addMeshShape(const VisualShape& shape) {
 	int size = (int) meshes.size();
 	
 	IndexedMesh* mesh = new IndexedMesh(shape);
 
 	// Todo move somewhere else
-	VertexBuffer* uniformBuffer = new VertexBuffer(nullptr, 0, Graphics::Renderer::STREAM_DRAW);
-	mesh->addUniformBuffer(uniformBuffer, DEFAULT_UNIFORM_BUFFER_LAYOUT);
+	VertexBuffer* uniformBuffer = new VertexBuffer(DEFAULT_UNIFORM_BUFFER_LAYOUT, nullptr, 0, Renderer::STREAM_DRAW);
+	mesh->addUniformBuffer(uniformBuffer);
 
 	meshes.push_back(mesh);
 
@@ -166,7 +163,7 @@ VisualData registerMeshFor(const ShapeClass* shapeClass, const Graphics::VisualS
 }
 
 VisualData registerMeshFor(const ShapeClass* shapeClass) {
-	Graphics::VisualShape shape = Graphics::VisualShape::generateSplitNormalsShape(shapeClass->asPolyhedron());
+	VisualShape shape = VisualShape::generateSplitNormalsShape(shapeClass->asPolyhedron());
 	return registerMeshFor(shapeClass, shape);
 }
 
