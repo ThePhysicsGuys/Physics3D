@@ -52,6 +52,7 @@ add_library(physics STATIC
   physics/springLink.cpp
   physics/elasticLink.cpp
   physics/magneticLink.cpp
+  physics/alignmentLink.cpp
   physics/layer.cpp
   physics/world.cpp
   physics/worldPhysics.cpp

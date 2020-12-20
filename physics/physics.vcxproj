@@ -303,8 +303,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="alignmentLink.cpp" />
     <ClCompile Include="elasticLink.cpp" />
     <ClCompile Include="magneticLink.cpp" />
+    <ClCompile Include="orientationConstraint.cpp" />
     <ClCompile Include="softconstraints\ballConstraint.cpp" />
     <ClCompile Include="softconstraints\constraintGroup.cpp" />
     <ClCompile Include="geometry\builtinShapeClasses.cpp" />
@@ -341,17 +343,20 @@
     <ClCompile Include="rigidBody.cpp" />
     <ClCompile Include="layer.cpp" />
     <ClCompile Include="softLink.cpp" />
+    <ClCompile Include="springAlike.cpp" />
     <ClCompile Include="springLink.cpp" />
     <ClCompile Include="world.cpp" />
     <ClCompile Include="worldPhysics.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="alignmentLink.h" />
     <ClInclude Include="catchable_assert.h" />
     <ClInclude Include="colissionBuffer.h" />
     <ClInclude Include="constants.h" />
     <ClInclude Include="elasticLink.h" />
     <ClInclude Include="magneticLink.h" />
     <ClInclude Include="math\linalg\largeMatrixAlgorithms.h" />
+    <ClInclude Include="orientationConstraint.h" />
     <ClInclude Include="softconstraints\ballConstraint.h" />
     <ClInclude Include="softconstraints\constraintGroup.h" />
     <ClInclude Include="constraints\constraintTemplates.h" />
@@ -443,6 +448,7 @@
     <ClInclude Include="sharedLockGuard.h" />
     <ClInclude Include="softconstraints\softConstraint.h" />
     <ClInclude Include="softLink.h" />
+    <ClInclude Include="springAlike.h" />
     <ClInclude Include="springLink.h" />
     <ClInclude Include="synchonizedWorld.h" />
     <ClInclude Include="templateUtils.h" />
