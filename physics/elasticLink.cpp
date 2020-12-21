@@ -4,7 +4,7 @@
 
 
 ElasticLink::ElasticLink(AttachedPart part1, AttachedPart part2, const double restLength, const double stiffness) :
-	SoftLink{ part1, part2 },
+	SoftLink{ part1, part2},
 	restLength{ restLength },
 	stiffness{ stiffness } {
 

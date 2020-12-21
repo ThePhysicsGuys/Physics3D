@@ -143,14 +143,10 @@ static void renderConstraint(const ConstraintLayer* cl, const PhysicalConstraint
 	}
 }
 
-static void renderSpringLink(const GlobalCFrame& start) {
-	renderObject(Engine::MeshRegistry::sphere, start.localToGlobal(CFrame(Vec3(0, 0, 0.05))), DiagonalMat3f{ 0.2f, 0.2f, 0.1f }, Comp::Material(Color(1.0f, 1.0f, 0.0f, 1.0f)));
-	
-}
 
-static void renderSoftLinkConstraint(const ConstraintLayer* cl, const SoftLink* link) {
+/*static void renderSoftLinkConstraint(const ConstraintLayer* cl, const SoftLink* link) {
 	renderConstraintLineBetween(link->getGlobalPositionOfAttach2(), link->getGlobalPositionOfAttach1());
-}
+}*/
 
 void ConstraintLayer::onRender(Engine::Registry64& registry) {
 	using namespace Graphics;
@@ -175,9 +171,9 @@ void ConstraintLayer::onRender(Engine::Registry64& registry) {
 		}
 	}
 	
-	for (const SoftLink* springLink : world->springLinks) {
+	/*for (const SoftLink* springLink : world->springLinks) {
 		renderSoftLinkConstraint(this, springLink);
-	}
+	}*/
 
 	endScene();
 }

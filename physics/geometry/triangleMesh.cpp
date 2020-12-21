@@ -45,8 +45,8 @@ static void fixFinalBlock(T* buf, size_t size) {
 		zValues[i] = zValues[size - 1];
 	}
 }
-
 #pragma endregion
+
 #pragma region triangle
 bool Triangle::sharesEdgeWith(Triangle other) const {
 	return firstIndex == other.secondIndex && secondIndex == other.firstIndex ||
@@ -68,6 +68,7 @@ bool Triangle::operator==(const Triangle& other) const {
 		firstIndex == other.thirdIndex && secondIndex == other.firstIndex && thirdIndex == other.secondIndex;
 }
 #pragma endregion
+
 #pragma region MeshPrototype
 MeshPrototype::MeshPrototype(const MeshPrototype& mesh) :
 	vertices(copy(mesh.vertices, mesh.vertexCount)),
@@ -122,8 +123,8 @@ Triangle MeshPrototype::getTriangle(int index) const {
 	return Triangle{triangles[index], triangles[index + offset], triangles[index + 2 * offset]};
 }
 #pragma endregion
-#pragma region EditableMesh
 
+#pragma region EditableMesh
 EditableMesh::EditableMesh(int vertexCount, int triangleCount) : 
 	MeshPrototype(vertexCount, triangleCount) {}
 EditableMesh::EditableMesh(int vertexCount, int triangleCount, const UniqueAlignedPointer<int>& triangles) :
@@ -166,10 +167,9 @@ void EditableMesh::setTriangle(int index, int a, int b, int c) {
 	this->triangles[index + offset] = b;
 	this->triangles[index + 2 * offset] = c;
 }
-
 #pragma endregion
-#pragma region TriangleMesh
 
+#pragma region TriangleMesh
 TriangleMesh::TriangleMesh(UniqueAlignedPointer<float>&& vertices, UniqueAlignedPointer<int>&& triangles, int vertexCount, int triangleCount) :
 	MeshPrototype(vertexCount, triangleCount, std::move(vertices), std::move(triangles)) {
 	assert(isValid(*this));
@@ -460,8 +460,10 @@ inline static uint32_t countZeros(uint32_t x) {
 
 #ifdef _MSC_VER
 #define GET_AVX_ELEM(reg, index) reg.m256_f32[index]
+#define GET_SSE_ELEM(reg, index) reg.mm[index]
 #else
 #define GET_AVX_ELEM(reg, index) reg[index]
+#define GET_SSE_ELEM(reg, index) reg[index]
 #endif
 
 #define SWAP_2x2 0b01001110
@@ -621,7 +623,6 @@ BoundingBox TriangleMesh::getBounds() const {
 	__m256 zMin = zMax;
 
 	for(size_t blockI = 1; blockI < (vertexCount + 7) / 8; blockI++) {
-		__m256i indices = _mm256_set1_epi32(int(blockI));
 
 		__m256 xVal = _mm256_load_ps(xValues + blockI * 8);
 		__m256 yVal = _mm256_load_ps(yValues + blockI * 8);
@@ -685,6 +686,75 @@ BoundingBox TriangleMesh::getBounds(const Mat3f& referenceFrame) const {
 		zMax = _mm256_max_ps(zMax, dotZ);
 	}
 
+	return toBounds(xMin, xMax, yMin, yMax, zMin, zMax);
+}
+
+
+
+#elif defined(__SSE__) || defined(__SSE2__)
+BoundingBox toBound(__m128 xMin, __m128 xMax, __m128 yMin, __m128 yMax, __m128 zMin, __m128 zMax) {
+
+	__m128 xShuf = _mm_shuffle_ps(xMax, xMax, 0x98);
+	__m128 xMax2 = _mm_max_ps(xMax, xShuf);
+	__m128 xShuf2 = _mm_shuffle_ps(xMax2, xMax2, 0x98);
+	__m128 xMax3 = _mm_max_ps(xMax2, xShuf2);
+
+	__m128 yShuf = _mm_shuffle_ps(yMax, yMax, 0x98);
+	__m128 yMax2 = _mm_max_ps(yMax, yShuf);
+	__m128 yShuf2 = _mm_shuffle_ps(yMax2, yMax2, 0x98);
+	__m128 yMax3 = _mm_max_ps(yMax2, yShuf2);
+
+	__m128 zShuf = _mm_shuffle_ps(zMax, zMax, 0x98);
+	__m128 zMax2 = _mm_max_ps(zMax, zShuf);
+	__m128 zShuf2 = _mm_shuffle_ps(zMax2, zMax2, 0x98);
+	__m128 zMax3 = _mm_max_ps(zMax2, zShuf2);
+
+	__m128 xMinShuf = _mm_shuffle_ps(xMin, xMin, 0x98);
+	__m128 xMin2 = _mm_max_ps(xMin, xMinShuf);
+	__m128 xMinShuf2 = _mm_shuffle_ps(xMin2, xMin2, 0x98);
+	__m128 xMin3 = _mm_max_ps(xMin2, xMinShuf2);
+
+	__m128 yMinShuf = _mm_shuffle_ps(yMin, xMin, 0x98);
+	__m128 yMin2 = _mm_max_ps(yMin, yMinShuf);
+	__m128 yMinShuf2 = _mm_shuffle_ps(yMin2, yMin2, 0x98);
+	__m128 yMin3 = _mm_max_ps(yMin2, yMinShuf2);
+
+	__m128 zMinShuf = _mm_shuffle_ps(zMin, xMin, 0x98);
+	__m128 zMin2 = _mm_max_ps(zMin, xMinShuf);
+	__m128 zMinShuf2 = _mm_shuffle_ps(zMin2, xMin2, 0x98);
+	__m128 zMin3 = _mm_max_ps(zMin2, zMinShuf2);
+
+	return BoundingBox{ GET_SSE_ELEM(xMin,0), GET_SSE_ELEM(yMin, 0), GET_SSE_ELEM(zMin, 0), GET_SSE_ELEM(xMax, 0), GET_SSE_ELEM(yMax, 0), GET_SSE_ELEM(zMax, 0) };
+}
+
+BoundingBox TriangleMesh::getBounds() const {
+	size_t vertexCount = this->vertexCount();
+
+	size_t offset = getOffset(vertexCount);
+	const float* xValues = this->vertices;
+	const float* yValues = this->vertices + offset;
+	const float* zValues = this->vertices + 2 * offset;
+
+	__m128 xMax = _mm_load_ps(xValues);
+	__m128 xMin = xMax;
+	__m128 yMax = _mm_load_ps(yValues);
+	__m128 yMin = yMax;
+	__m128 zMax = _mm_load_ps(zValues);
+	__m128 zMin = zMax;
+
+	for (size_t blockI = 1; blockI < (vertexCount + 3) / 4; blockI++) {
+		__m128 xVal = _mm_load_ps(xValues + blockI * 4);
+		__m128 yVal = _mm_load_ps(yValues + blockI * 4);
+		__m128 zVal = _mm_load_ps(zValues + blockI * 4);
+
+		xMax = _mm_max_ps(xMax, xVal);
+		yMax = _mm_max_ps(yMax, yVal);
+		zMax = _mm_max_ps(zMax, zVal);
+
+		xMin = _mm_min_ps(xMin, xVal);
+		yMin = _mm_min_ps(yMin, yVal);
+		zMin = _mm_min_ps(zMin, zVal);
+	}
 	return toBounds(xMin, xMax, yMin, yMax, zMin, zMax);
 }
 

@@ -1,9 +1,8 @@
 #include "magneticLink.h"
 
 
-MagneticLink::MagneticLink(AttachedPart part1, AttachedPart part2,  const double magneticStrength):
+MagneticLink::MagneticLink(const AttachedPart& part1, const AttachedPart& part2,  const double magneticStrength):
 	SoftLink{ part1, part2 },
-	//restLength{ restLength },
 	magneticStrength{ magneticStrength } {
 
 }

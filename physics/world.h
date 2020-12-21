@@ -14,6 +14,7 @@
 #include "springLink.h"
 #include "elasticLink.h"
 #include "magneticLink.h"
+#include "alignmentLink.h"
 
 #include <memory>
 

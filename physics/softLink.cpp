@@ -1,16 +1,19 @@
 #include "softLink.h"
 
 
-SoftLink::AttachedPart::AttachedPart(CFrame attachment, Part* part) : 
-	attachment{attachment},
-	part{part} { 
+
+SoftLink::AttachedPart::AttachedPart(CFrame attachment, Part* part):
+	attachment{ attachment },
+	part{ part }{
 
 }
 
-SoftLink::SoftLink(AttachedPart part1, AttachedPart part2) :
-	attachedPart1{part1}, 
-	attachedPart2{part2} {
+SoftLink::SoftLink(const AttachedPart& partA, const AttachedPart& partB):
+	attachedPart1{ partA },
+	attachedPart2{ partB }{
+
 }
+
 
 SoftLink::~SoftLink() {
 }

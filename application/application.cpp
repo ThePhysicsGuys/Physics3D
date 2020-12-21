@@ -126,16 +126,17 @@ void setupWorld(int argc, const char** args) {
 
 	WorldBuilder::buildFloorAndWalls(50.0, 50.0, 1.0);
 
-	ExtendedPart* partA = new ExtendedPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(3.0, 3.0, 0.0), { 1.0, 1.0, 1.0 }, "partA");
-	ExtendedPart* partB = new ExtendedPart(boxShape(1.0, 2.0, 1.0), GlobalCFrame(2.0, 3.0, 0.0), { 1.0, 1.0, 1.0 }, "partA");
+	ExtendedPart* partA = new ExtendedPart(boxShape(1.0, 0.49, 3.0), GlobalCFrame(3.0, 3.0, 0.0), { 1.0, 1.0, 1.0 }, "partA");
+	ExtendedPart* partB = new ExtendedPart(boxShape(1.0, 0.5, 3.0), GlobalCFrame(2.0, 3.0, 0.0), { 1.0, 1.0, 1.0 }, "partA");
 
 	world.addPart(partA);
 	world.addPart(partB);
 
 	//world.addLink(new SpringLink({ CFrame{1.0, 0.0, 0.0}, partA }, { CFrame{0.0, 0.0, 0.0}, partB }, 5.0, 5.0));
+	world.addLink(new ElasticLink({ CFrame{1.0, 0.0, 0.0}, partA }, { CFrame{0.0, 0.0, 0.0}, partB }, 5.0, 5.0));
 
-	world.addLink(new MagneticLink({ CFrame{1.0, 0.0, 0.0}, partA }, { CFrame{0.0, 0.0, 0.0}, partB }, -3.0));
-	
+	//world.addLink(new MagneticLink({ CFrame{1.0, 0.0, 0.0}, partA }, { CFrame{0.0, 0.0, 0.0}, partB }, +8.0));
+	//world.addLink(new AlignmentLink({ CFrame{1.0, 0.0, 0.0}, partA}, { CFrame{0.0, 0.0, 0.0}, partB }));
 	return;
 	
 	/*ExtendedPart* partA = new ExtendedPart(boxShape(5.0, 10.0, 5.0), GlobalCFrame(0.0, 6.0, 0.0), WorldBuilder::basicProperties);

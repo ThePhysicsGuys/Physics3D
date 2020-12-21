@@ -21,10 +21,11 @@ public:
 	SoftLink(SoftLink&& other) = delete;
 	SoftLink& operator=(SoftLink&& other) = delete;
 
+
 	virtual ~SoftLink();
 	virtual void update() = 0;
 
-	SoftLink(AttachedPart part1, AttachedPart part2);
+	SoftLink(const AttachedPart& part1, const AttachedPart& part2);
 
 	GlobalCFrame getGlobalCFrameOfAttach1() const;
 	GlobalCFrame getGlobalCFrameOfAttach2() const;

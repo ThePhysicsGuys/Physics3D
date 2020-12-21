@@ -303,6 +303,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="alignmentLink.cpp" />
     <ClCompile Include="elasticLink.cpp" />
     <ClCompile Include="magneticLink.cpp" />
     <ClCompile Include="softconstraints\ballConstraint.cpp" />
@@ -346,6 +347,7 @@
     <ClCompile Include="worldPhysics.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="alignmentLink.h" />
     <ClInclude Include="catchable_assert.h" />
     <ClInclude Include="colissionBuffer.h" />
     <ClInclude Include="constants.h" />
