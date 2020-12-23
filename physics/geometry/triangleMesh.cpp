@@ -690,45 +690,83 @@ BoundingBox TriangleMesh::getBounds(const Mat3f& referenceFrame) const {
 }
 
 
+#elif _M_IX86_FP <= 2
 
-#elif defined(__SSE__) || defined(__SSE2__)
-BoundingBox toBound(__m128 xMin, __m128 xMax, __m128 yMin, __m128 yMax, __m128 zMin, __m128 zMax) {
+#include <immintrin.h>
+#ifdef _MSC_VER
+#define GET_SSE_ELEM(reg, index) reg.m128_f32[index]
+#else
+#define GET_SSE_ELEM(reg, index) reg[index]
+#endif
 
-	__m128 xShuf = _mm_shuffle_ps(xMax, xMax, 0x98);
-	__m128 xMax2 = _mm_max_ps(xMax, xShuf);
-	__m128 xShuf2 = _mm_shuffle_ps(xMax2, xMax2, 0x98);
-	__m128 xMax3 = _mm_max_ps(xMax2, xShuf2);
+#define SWAP_2x2 0b01001110
+#define SWAP_1x1 0b10110001
 
-	__m128 yShuf = _mm_shuffle_ps(yMax, yMax, 0x98);
-	__m128 yMax2 = _mm_max_ps(yMax, yShuf);
-	__m128 yShuf2 = _mm_shuffle_ps(yMax2, yMax2, 0x98);
-	__m128 yMax3 = _mm_max_ps(yMax2, yShuf2);
+#ifdef _MSC_VER
+inline static uint32_t countZeros(uint32_t mask) {
+	unsigned long ret = 0;
+	_BitScanForward(&ret, mask);
+	return static_cast<int>(ret);
+}
+#else
+inline static uint32_t countZeros(uint32_t mask) {
+	return __builtin_ctz(mask);
+}
+#endif
 
-	__m128 zShuf = _mm_shuffle_ps(zMax, zMax, 0x98);
-	__m128 zMax2 = _mm_max_ps(zMax, zShuf);
-	__m128 zShuf2 = _mm_shuffle_ps(zMax2, zMax2, 0x98);
-	__m128 zMax3 = _mm_max_ps(zMax2, zShuf2);
+inline __m128i _mm_blendv_epi32(__m128i a, __m128i b,__m128 mask) {
+	return _mm_castps_si128(
+		_mm_blendv_ps(
+			_mm_castsi128_ps(a),
+			_mm_castsi128_ps(b),
+			mask
+		)
+	);
+}
 
-	__m128 xMinShuf = _mm_shuffle_ps(xMin, xMin, 0x98);
-	__m128 xMin2 = _mm_max_ps(xMin, xMinShuf);
-	__m128 xMinShuf2 = _mm_shuffle_ps(xMin2, xMin2, 0x98);
-	__m128 xMin3 = _mm_max_ps(xMin2, xMinShuf2);
+inline uint32_t mm_extract_epi32_var_indx(__m128i vec, int i) {
+	__m128i indx = _mm_cvtsi32_si128(i);
+	__m128i val = _mm_castps_si128(_mm_permutevar_ps(_mm_castsi128_ps(vec), indx));
+	return         _mm_cvtsi128_si32(val);
+}
 
-	__m128 yMinShuf = _mm_shuffle_ps(yMin, xMin, 0x98);
-	__m128 yMin2 = _mm_max_ps(yMin, yMinShuf);
-	__m128 yMinShuf2 = _mm_shuffle_ps(yMin2, yMin2, 0x98);
-	__m128 yMin3 = _mm_max_ps(yMin2, yMinShuf2);
+BoundingBox toBounds(__m128 xMin, __m128 xMax, __m128 yMin, __m128 yMax, __m128 zMin, __m128 zMax) {
 
-	__m128 zMinShuf = _mm_shuffle_ps(zMin, xMin, 0x98);
-	__m128 zMin2 = _mm_max_ps(zMin, xMinShuf);
-	__m128 zMinShuf2 = _mm_shuffle_ps(zMin2, xMin2, 0x98);
-	__m128 zMin3 = _mm_max_ps(zMin2, zMinShuf2);
+	for (int i = 0; i < 3; i++) {
+		__m128 xShuf = _mm_shuffle_ps(xMax, xMax, 0x93);
+		xMax = _mm_max_ps(xMax, xShuf);
+	}
+
+	for (int i = 0; i < 3; i++) {
+		__m128 yShuf = _mm_shuffle_ps(yMax, yMax, 0x93);
+		yMax = _mm_max_ps(yMax, yShuf);
+	}
+
+	for (int i = 0; i < 3; i++) {
+		__m128 zShuf = _mm_shuffle_ps(zMax, zMax, 0x93);
+		xMax = _mm_max_ps(zMax, zShuf);
+	}
+
+	for (int i = 0; i < 3; i++) {
+		__m128 xShuf = _mm_shuffle_ps(xMin, xMin, 0x93);
+		xMin = _mm_min_ps(xMax, xShuf);
+	}
+	
+	for (int i = 0; i < 3; i++) {
+		__m128 yShuf = _mm_shuffle_ps(yMin, yMin, 0x93);
+		yMin = _mm_min_ps(yMin, yShuf);
+	}
+
+	for (int i = 0; i < 3; i++) {
+		__m128 zShuf = _mm_shuffle_ps(zMin, zMin, 0x93);
+		zMin = _mm_min_ps(zMin, zShuf);
+	}
 
 	return BoundingBox{ GET_SSE_ELEM(xMin,0), GET_SSE_ELEM(yMin, 0), GET_SSE_ELEM(zMin, 0), GET_SSE_ELEM(xMax, 0), GET_SSE_ELEM(yMax, 0), GET_SSE_ELEM(zMax, 0) };
 }
 
 BoundingBox TriangleMesh::getBounds() const {
-	size_t vertexCount = this->vertexCount();
+	size_t vertexCount = this->vertexCount;
 
 	size_t offset = getOffset(vertexCount);
 	const float* xValues = this->vertices;
@@ -758,6 +796,153 @@ BoundingBox TriangleMesh::getBounds() const {
 	return toBounds(xMin, xMax, yMin, yMax, zMin, zMax);
 }
 
+BoundingBox TriangleMesh::getBounds(const Mat3f& referenceFrame) const {
+	size_t vertexCount = this->vertexCount;
+
+	size_t offset = getOffset(vertexCount);
+	const float* xValues = this->vertices;
+	const float* yValues = this->vertices + offset;
+	const float* zValues = this->vertices + 2 * offset;
+
+	float mxx = referenceFrame(0, 0);
+	float mxy = referenceFrame(0, 1);
+	float mxz = referenceFrame(0, 2);
+	float myx = referenceFrame(1, 0);
+	float myy = referenceFrame(1, 1);
+	float myz = referenceFrame(1, 2);
+	float mzx = referenceFrame(2, 0);
+	float mzy = referenceFrame(2, 1);
+	float mzz = referenceFrame(2, 2);
+
+	__m128 xVal = _mm_load_ps(xValues);
+	__m128 yVal = _mm_load_ps(yValues);
+	__m128 zVal = _mm_load_ps(zValues);
+
+	__m128 xMin = _mm_fmadd_ps(_mm_set1_ps(mxz), zVal, _mm_fmadd_ps(_mm_set1_ps(mxy), yVal, _mm_mul_ps(_mm_set1_ps(mxx), xVal)));
+	__m128 yMin = _mm_fmadd_ps(_mm_set1_ps(myz), zVal, _mm_fmadd_ps(_mm_set1_ps(myy), yVal, _mm_mul_ps(_mm_set1_ps(myx), xVal)));
+	__m128 zMin = _mm_fmadd_ps(_mm_set1_ps(mzz), zVal, _mm_fmadd_ps(_mm_set1_ps(mzy), yVal, _mm_mul_ps(_mm_set1_ps(mzx), xVal)));
+
+	__m128 xMax = xMin;
+	__m128 yMax = yMin;
+	__m128 zMax = zMin;
+
+	for (size_t blockI = 1; blockI < (vertexCount + 3) / 4; blockI++) {
+		__m128 xVal = _mm_load_ps(xValues + blockI * 4);
+		__m128 yVal = _mm_load_ps(yValues + blockI * 4);
+		__m128 zVal = _mm_load_ps(zValues + blockI * 4);
+
+		__m128 dotX = _mm_fmadd_ps(_mm_set1_ps(mxz), zVal, _mm_fmadd_ps(_mm_set1_ps(mxy), yVal, _mm_mul_ps(_mm_set1_ps(mxx), xVal)));
+		xMin = _mm_min_ps(xMin, dotX);
+		xMax = _mm_max_ps(xMax, dotX);
+		__m128 dotY = _mm_fmadd_ps(_mm_set1_ps(myz), zVal, _mm_fmadd_ps(_mm_set1_ps(myy), yVal, _mm_mul_ps(_mm_set1_ps(myx), xVal)));
+		yMin = _mm_min_ps(yMin, dotY);
+		yMax = _mm_max_ps(yMax, dotY);
+		__m128 dotZ = _mm_fmadd_ps(_mm_set1_ps(mzz), zVal, _mm_fmadd_ps(_mm_set1_ps(mzy), yVal, _mm_mul_ps(_mm_set1_ps(mzx), xVal)));
+		zMin = _mm_min_ps(zMin, dotZ);
+		zMax = _mm_max_ps(zMax, dotZ);
+	}
+
+	return toBounds(xMin, xMax, yMin, yMax, zMin, zMax);
+}
+
+int TriangleMesh::furthestIndexInDirection(const Vec3f& direction) const {
+	size_t vertexCount = this->vertexCount;
+
+	__m128 dx = _mm_set1_ps(direction.x);
+	__m128 dy = _mm_set1_ps(direction.y);
+	__m128 dz = _mm_set1_ps(direction.z);
+
+	size_t offset = getOffset(vertexCount);
+	const float* xValues = this->vertices;
+	const float* yValues = this->vertices + offset;
+	const float* zValues = this->vertices + 2 * offset;
+
+	__m128 bestDot = _mm_fmadd_ps(dz, _mm_load_ps(zValues), _mm_fmadd_ps(dy, _mm_load_ps(yValues), _mm_mul_ps(dx, _mm_load_ps(xValues))));
+
+	__m128i bestIndices = _mm_set1_epi32(0);
+
+	for (size_t blockI = 1; blockI < (vertexCount + 3) / 4; blockI++) {
+		__m128i indices = _mm_set1_epi32(int(blockI));
+
+		__m128 dot = _mm_fmadd_ps(dz, _mm_load_ps(zValues + blockI * 4), _mm_fmadd_ps(dy, _mm_load_ps(yValues + blockI * 4), _mm_mul_ps(dx, _mm_load_ps(xValues + blockI * 4))));
+
+		__m128 whichAreMax = _mm_cmpgt_ps(dot, bestDot); 
+
+		bestDot = _mm_blendv_ps(bestDot, dot, whichAreMax);
+		bestIndices = _mm_blendv_epi32(bestIndices, indices, whichAreMax);
+	}
+
+	// find max of our 8 left candidates
+	__m128 swap4x4 = _mm_shuffle_ps(bestDot, bestDot, 0x1);
+	__m128 bestDotInternalMax = _mm_max_ps(bestDot, swap4x4);
+	__m128 swap2x2 = _mm_shuffle_ps(bestDotInternalMax, bestDotInternalMax, SWAP_2x2);
+	bestDotInternalMax = _mm_max_ps(bestDotInternalMax, swap2x2);
+	__m128 swap1x1 = _mm_shuffle_ps(bestDotInternalMax, bestDotInternalMax, SWAP_1x1);
+	bestDotInternalMax = _mm_max_ps(bestDotInternalMax, swap1x1);
+
+	__m128 compare = _mm_cmp_ps(bestDotInternalMax, bestDot, _CMP_EQ_UQ);
+	uint32_t mask = _mm_movemask_ps(compare);
+
+	assert(mask != 0);
+
+	uint32_t index = countZeros(mask);
+	uint32_t block = mm_extract_epi32_var_indx(bestIndices, index);
+	return block * 8 + index;
+}
+
+Vec3f TriangleMesh::furthestInDirection(const Vec3f& direction) const {
+	size_t vertexCount = this->vertexCount;
+
+	__m128 dx = _mm_set1_ps(direction.x);
+	__m128 dy = _mm_set1_ps(direction.y);
+	__m128 dz = _mm_set1_ps(direction.z);
+
+	size_t offset = getOffset(vertexCount);
+	const float* xValues = this->vertices;
+	const float* yValues = this->vertices + offset;
+	const float* zValues = this->vertices + 2 * offset;
+
+	__m128 bestX = _mm_load_ps(xValues);
+	__m128 bestY = _mm_load_ps(yValues);
+	__m128 bestZ = _mm_load_ps(zValues);
+
+	__m128 bestDot = _mm_fmadd_ps(dz, bestZ, _mm_fmadd_ps(dy, bestY, _mm_mul_ps(dx, bestX)));
+
+	for (size_t blockI = 1; blockI < (vertexCount + 3) / 4; blockI++) {
+		__m128i indices = _mm_set1_epi32(int(blockI));
+
+		__m128 xVal = _mm_load_ps(xValues + blockI * 4);
+		__m128 yVal = _mm_load_ps(yValues + blockI * 4);
+		__m128 zVal = _mm_load_ps(zValues + blockI * 4);
+
+		__m128 dot = _mm_fmadd_ps(dz, zVal, _mm_fmadd_ps(dy, yVal, _mm_mul_ps(dx, xVal)));
+
+		__m128 whichAreMax = _mm_cmp_ps(dot, bestDot, _CMP_GT_OQ); // Greater than, false if dot == NaN
+		bestDot = _mm_blendv_ps(bestDot, dot, whichAreMax);
+		bestX = _mm_blendv_ps(bestX, xVal, whichAreMax);
+		bestY = _mm_blendv_ps(bestY, yVal, whichAreMax);
+		bestZ = _mm_blendv_ps(bestZ, zVal, whichAreMax);
+	}
+
+	// now we find the max of the remaining 8 elements
+	__m128 swap4x4 = _mm_shuffle_ps(bestDot, bestDot, 1);
+	__m128 bestDotInternalMax = _mm_max_ps(bestDot, swap4x4);
+	__m128 swap2x2 = _mm_shuffle_ps(bestDotInternalMax, bestDotInternalMax, SWAP_2x2);
+	bestDotInternalMax = _mm_max_ps(bestDotInternalMax, swap2x2);
+	__m128 swap1x1 = _mm_shuffle_ps(bestDotInternalMax, bestDotInternalMax, SWAP_1x1);
+	bestDotInternalMax = _mm_max_ps(bestDotInternalMax, swap1x1);
+
+	__m128 compare = _mm_cmp_ps(bestDotInternalMax, bestDot, _CMP_EQ_UQ);
+	uint32_t mask = _mm_movemask_ps(compare);
+
+	assert(mask != 0);
+
+	uint32_t index = countZeros(mask);
+
+	// a bug occurs here, when mask == 0 the resulting index is undefined
+
+	return Vec3f(GET_SSE_ELEM(bestX, index), GET_SSE_ELEM(bestY, index), GET_SSE_ELEM(bestZ, index));
+}
 
 #else
 int TriangleMesh::furthestIndexInDirection(const Vec3f& direction) const {
