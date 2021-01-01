@@ -26,13 +26,18 @@ Shape wedge;
 Shape treeTrunk;
 Shape icosahedron;
 Shape triangle;
+Shape arrow;
 PartProperties basicProperties{1.0, 0.7, 0.3};
+
 
 void init() {
 	wedge = polyhedronShape(Library::wedge);
 	treeTrunk = polyhedronShape(Library::createPrism(7, 0.5, 11.0).rotated(Rotation::Predefined::X_270));
 	icosahedron = polyhedronShape(Library::icosahedron);
 	triangle = polyhedronShape(Library::trianglePyramid);
+
+	Vec2f inbetweenPoints[3]{Vec2f(0.0f, 0.03f), Vec2f(0.7f, 0.03f), Vec2f(0.7f, 0.06f)};
+	arrow = polyhedronShape(Library::createRevolvedShape(0.0f, inbetweenPoints, 3, 1.0f, 50));
 }
 
 void createDominoAt(const GlobalCFrame& cframe) {
@@ -177,6 +182,26 @@ void buildConveyor(double width, double length, const GlobalCFrame& cframe, doub
 	world.addTerrainPart(leftWall);
 	ExtendedPart* rightWall = new ExtendedPart(boxShape(0.2, 0.6, length), cframe.localToGlobal(CFrame(width / 2 + 0.1, 0.1, 0.0)), { 1.0, 0.4, 0.3, Vec3(0.0, 0.0, 0.0) }, "Right Wall", conveyorFolder);
 	world.addTerrainPart(rightWall);
+}
+
+std::array<ExtendedPart*, 3> produceAxes(const GlobalCFrame& cf, const PartProperties& properties, double scale) {
+	ExtendedPart* zAxis = new ExtendedPart(arrow.scaled(scale, scale, scale), cf.extendLocal(Vec3(0.0, 0.0, 0.5 * scale)), properties, "zAxis");
+	ExtendedPart* xAxis = new ExtendedPart(arrow.scaled(scale, scale, scale), zAxis, CFrame(0.5 * scale, 0.0, -0.5 * scale, Rotation::Predefined::Y_90), properties, "xAxis");
+	ExtendedPart* yAxis = new ExtendedPart(arrow.scaled(scale, scale, scale), zAxis, CFrame(0.0, 0.5 * scale, -0.5 * scale, Rotation::Predefined::X_270), properties, "yAxis");
+	xAxis->setColor(Color(1.0f, 0.0f, 0.0f, 1.0f));
+	yAxis->setColor(Color(0.0f, 1.0f, 0.0f, 1.0f));
+	zAxis->setColor(Color(0.0f, 0.0f, 1.0f, 1.0f));
+	return std::array<ExtendedPart*, 3>{xAxis, yAxis, zAxis};
+}
+
+void attachAxes(ExtendedPart* part, double scale) {
+	ExtendedPart* xAxis = new ExtendedPart(arrow.scaled(scale, scale, scale), part, CFrame(0.5 * scale, 0.0, 0.0, Rotation::Predefined::Y_90), part->properties, "xAxis");
+	ExtendedPart* yAxis = new ExtendedPart(arrow.scaled(scale, scale, scale), part, CFrame(0.0, 0.5 * scale, 0.0, Rotation::Predefined::X_270), part->properties, "yAxis");
+	ExtendedPart* zAxis = new ExtendedPart(arrow.scaled(scale, scale, scale), part, CFrame(0.0, 0.0, 0.5 * scale), part->properties, "zAxis");
+
+	xAxis->setColor(Color(1.0f, 0.0f, 0.0f, 1.0f));
+	yAxis->setColor(Color(0.0f, 1.0f, 0.0f, 1.0f));
+	zAxis->setColor(Color(0.0f, 0.0f, 1.0f, 1.0f));
 }
 
 void buildTerrain(double width, double depth, int folder) {

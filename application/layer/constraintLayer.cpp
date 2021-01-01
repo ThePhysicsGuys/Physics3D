@@ -139,7 +139,7 @@ static void recurseRenderHardConstraints(const ConstraintLayer* cl, const Physic
 static void renderConstraint(const ConstraintLayer* cl, const PhysicalConstraint& constraint) {
 	const auto& info(typeid(*constraint.constraint));
 	if(info == typeid(BallConstraint)) {
-		renderBallConstraint(cl, constraint.physA, constraint.physB, static_cast<const BallConstraint*>(constraint.constraint), 0.13f, 0.15f);
+		renderBallConstraint(cl, constraint.physA, constraint.physB, static_cast<const BallConstraint*>(constraint.constraint), 0.06f, 0.07f);
 	}
 }
 

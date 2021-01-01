@@ -89,6 +89,10 @@ public:
 		return GlobalCFrame(position - offset, this->rotation);
 	}
 
+	inline GlobalCFrame extendLocal(const Vec3& offset) const {
+		return GlobalCFrame(this->localToGlobal(offset), this->rotation);
+	}
+
 	/*
 		Converts this CFrame to a 4x4 matrix, where for any Vec3 p:
 		cframe.asMat4() * Vec4(p, 1.0) == cframe.localToGlobal(p)

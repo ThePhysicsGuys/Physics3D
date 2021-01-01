@@ -107,6 +107,10 @@ public:
 		return CFrameTemplate<T>(this->position - delta, this->rotation);
 	}
 
+	CFrameTemplate<T> extendLocal(const Vector<T, 3>& delta) const {
+		return CFrameTemplate<T>(this->localToGlobal(delta), this->rotation);
+	}
+
 	/*
 		Converts this CFrame to a 4x4 matrix, where for any Vec3 p:
 		cframe.asMat4() * Vec4(p, 1.0) == cframe.localToGlobal(p)

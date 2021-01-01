@@ -23,6 +23,9 @@ public:
 
 	void setMaterial(const Comp::Material& material);
 	void setName(const std::string& name);
+
+	void setColor(const Color& color);
+	Color getColor() const;
 };
 
 };
