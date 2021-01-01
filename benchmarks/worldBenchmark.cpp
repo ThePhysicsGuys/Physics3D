@@ -102,8 +102,8 @@ void printBreakdown(const T* values, const char** labels, std::size_t N, std::st
 
 	for (std::size_t i = 0; i < N; i++) {
 		T v = values[i];
-		double fractionOfTotal = double(v) / total;
-		double fractionOfMax = double(v) / max;
+		double fractionOfTotal = total != 0 ? double(v) / total : 0.0;
+		double fractionOfMax = total != 0 ? double(v) / max : 0.0;
 
 		setColor(getColor(i));
 

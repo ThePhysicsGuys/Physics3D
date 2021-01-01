@@ -690,7 +690,7 @@ BoundingBox TriangleMesh::getBounds(const Mat3f& referenceFrame) const {
 }
 
 
-#elif _M_IX86_FP <= 2
+#elif defined(__SSE2__) || (defined _M_IX86_FP) && _M_IX86_FP >= 1
 #include <immintrin.h>
 #ifdef _MSC_VER
 #define GET_SSE_ELEM(reg, index) reg.m128_f32[index]
