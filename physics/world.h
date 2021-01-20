@@ -378,8 +378,12 @@ public:
 		);
 	}
 
+	virtual void onCollide(Part* partA, Part* partB) {}
+	virtual void onCollide(T* partA, T* partB) {}
+
 	virtual void onPartAdded(T* part) {}
 	virtual void onPartRemoved(T* part) {}
+
 	virtual void deletePart(T* part) const {
 		delete part;
 	}

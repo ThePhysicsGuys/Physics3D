@@ -139,7 +139,7 @@
       <PrecompiledHeaderFile>core.h</PrecompiledHeaderFile>
       <PreprocessorDefinitions>FT2_BUILD_LIBRARY;GLEW_STATIC;_MBCS;NDEBUG;%(PreprocessorDefinitions);</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -167,7 +167,7 @@
       <PreprocessorDefinitions>FT2_BUILD_LIBRARY;GLEW_STATIC;_MBCS;NDEBUG;%(PreprocessorDefinitions);</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -208,7 +208,7 @@
       <PrecompiledHeaderFile>core.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
     <Lib>
       <AdditionalDependencies>freetype.lib;glfw3.lib;glew32s.lib;opengl32.lib;</AdditionalDependencies>
@@ -231,7 +231,7 @@
       <PrecompiledHeaderFile>core.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
     <Lib>
       <AdditionalDependencies>freetype.lib;glfw3.lib;glew32s.lib;opengl32.lib;</AdditionalDependencies>

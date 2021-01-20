@@ -767,24 +767,7 @@ BoundingBox toBounds(__m128 xMin, __m128 xMax, __m128 yMin, __m128 yMax, __m128 
 		zMin = _mm_min_ps(zMin, zShuf);
 	}
 
-	float xFinMin = GET_SSE_ELEM(xMin, 0);
-	float yFinMin = GET_SSE_ELEM(yMin, 0);
-	float zFinMin = GET_SSE_ELEM(zMin, 0);
-
-	float xFinMax = GET_SSE_ELEM(xMax, 0);
-	float yFinMax = GET_SSE_ELEM(yMax, 0);
-	float zFinMax = GET_SSE_ELEM(zMax, 0);
-
-	assert(std::isfinite(xFinMin));
-	assert(std::isfinite(yFinMin));
-	assert(std::isfinite(zFinMin));
-	
-	assert(std::isfinite(xFinMax));
-	assert(std::isfinite(xFinMax));
-	assert(std::isfinite(xFinMax));
-
-
-	return BoundingBox{ xFinMin, yFinMin, zFinMin, xFinMax, yFinMax, zFinMax };
+	return BoundingBox{ GET_SSE_ELEM(xMin, 0), GET_SSE_ELEM(yMin, 0), GET_SSE_ELEM(zMin, 0), GET_SSE_ELEM(xMax, 0), GET_SSE_ELEM(yMax, 0), GET_SSE_ELEM(zMax, 0) };
 }
 
 BoundingBox TriangleMesh::getBounds() const {

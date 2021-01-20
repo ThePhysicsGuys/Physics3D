@@ -349,6 +349,8 @@ void WorldPrototype::notifyNewPartAddedToPhysical(const MotorizedPhysical* physi
 	onPartAdded(newPart);
 }
 
+
+
 void WorldPrototype::onPartAdded(Part* newPart) {}
 void WorldPrototype::onPartRemoved(Part* removedPart) {}
 
