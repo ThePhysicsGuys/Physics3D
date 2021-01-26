@@ -210,8 +210,6 @@ public:
 	std::vector<ConstraintGroup> constraints;
 
 	std::vector<ColissionLayer> layers;
-	std::vector<Colission> currentObjectColissions;
-	std::vector<Colission> currentTerrainColissions;
 
 	std::vector<SoftLink*> springLinks;
   

@@ -28,9 +28,9 @@ namespace Debug {
 	void setShapeLogAction(void(*logger)(const Polyhedron& shape, const GlobalCFrame& location)) { logShapeAction = logger; }
 
 
-	void saveIntersectionError(const Part* first, const Part* second, const char* reason) {
-		Log::debug("First cframe: %s", str(first->getCFrame()).c_str());
-		Log::debug("Second cframe: %s", str(second->getCFrame()).c_str());
+	void saveIntersectionError(const Part& first, const Part& second, const char* reason) {
+		Log::debug("First cframe: %s", str(first.getCFrame()).c_str());
+		Log::debug("Second cframe: %s", str(second.getCFrame()).c_str());
 
 		std::ofstream file;
 		std::stringstream name;
@@ -40,7 +40,7 @@ namespace Debug {
 		file.open(name.str().c_str(), std::ios::binary | std::ios::out);
 
 		SerializationSessionPrototype session;
-		const Part* parts[2]{first, second};
+		const Part* parts[2]{&first, &second};
 		session.serializeParts(parts, 2, file);
 		
 		file.close();

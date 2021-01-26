@@ -204,6 +204,51 @@ void WorldPrototype::applyExternalForces() {
 	}
 }
 
+static PartIntersection safeIntersects(const Part& p1, const Part& p2) {
+#ifdef CATCH_INTERSECTION_ERRORS
+	try {
+		return p1.intersects(p2);
+	} catch(const std::exception& err) {
+		Log::fatal("Error occurred during intersection: %s", err.what());
+
+		Debug::saveIntersectionError(p1, p2, "colError");
+
+		throw err;
+	} catch(...) {
+		Log::fatal("Unknown error occured during intersection");
+
+		Debug::saveIntersectionError(p1, p2, "colError");
+
+		throw "exit";
+	}
+#else
+	return p1.intersects(p2);
+#endif
+}
+
+static void refineColission(std::vector<Colission>& colissions) {
+	for(size_t i = 0; i < colissions.size(); ) {
+		Colission& col = colissions[i];
+
+		PartIntersection result = safeIntersects(*col.p1, *col.p2);
+		if(result.intersects) {
+			intersectionStatistics.addToTally(IntersectionResult::COLISSION, 1);
+
+			// add extra information
+			col.intersection = result.intersection;
+			col.exitVector = result.exitVector;
+
+			i++;
+		} else {
+			intersectionStatistics.addToTally(IntersectionResult::GJK_REJECT, 1);
+
+			// remove if no colission
+			col = std::move(colissions.back());
+			colissions.pop_back();
+		}
+	}
+}
+
 void WorldPrototype::findColissions() {
 	physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
 
@@ -214,6 +259,10 @@ void WorldPrototype::findColissions() {
 			layer.getInternalColissions(curColissions);
 		}
 	}
+
+	refineColission(curColissions.freePartColissions);
+	refineColission(curColissions.freeTerrainColissions);
+
 	for(std::pair<int, int> collidingLayers : colissionMask) {
 		getColissionsBetween(layers[collidingLayers.first], layers[collidingLayers.second], curColissions);
 	}
@@ -247,7 +296,6 @@ void WorldPrototype::update() {
 	for (SoftLink* springLink : springLinks) {
 		springLink->update();
 	}
-
 }
 
 
