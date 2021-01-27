@@ -242,6 +242,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="alignmentLink.cpp" />
+    <ClCompile Include="cpuid.cpp" />
     <ClCompile Include="elasticLink.cpp" />
     <ClCompile Include="magneticLink.cpp" />
     <ClCompile Include="softconstraints\ballConstraint.cpp" />
@@ -289,6 +290,7 @@
     <ClInclude Include="catchable_assert.h" />
     <ClInclude Include="colissionBuffer.h" />
     <ClInclude Include="constants.h" />
+    <ClInclude Include="cpuid.h" />
     <ClInclude Include="elasticLink.h" />
     <ClInclude Include="magneticLink.h" />
     <ClInclude Include="math\linalg\largeMatrixAlgorithms.h" />

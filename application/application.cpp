@@ -28,6 +28,8 @@
 
 #include "../physics/misc/serialization.h"
 
+#include "../physics/cpuid.h"
+
 #include "worlds.h"
 #include "tickerThread.h"
 #include "worldBuilder.h"
@@ -62,10 +64,30 @@ void setupDebug();
 
 void loadFile(const char* file);
 
+void printSystemInfo() {
+	std::string message("Detected CPU Technologies: ");
+
+	if(CPUIDCheck::hasTechnology(CPUIDCheck::MMX)) message.append("MMX ");
+	if(CPUIDCheck::hasTechnology(CPUIDCheck::SSE)) message.append("SSE ");
+	if(CPUIDCheck::hasTechnology(CPUIDCheck::SSE2)) message.append("SSE2 ");
+	if(CPUIDCheck::hasTechnology(CPUIDCheck::SSE3)) message.append("SSE3 ");
+	if(CPUIDCheck::hasTechnology(CPUIDCheck::SSSE3)) message.append("SSSE3 ");
+	if(CPUIDCheck::hasTechnology(CPUIDCheck::SSE4_1)) message.append("SSE4.1 ");
+	if(CPUIDCheck::hasTechnology(CPUIDCheck::SSE4_2)) message.append("SSE4.2 ");
+	if(CPUIDCheck::hasTechnology(CPUIDCheck::AVX)) message.append("AVX ");
+	if(CPUIDCheck::hasTechnology(CPUIDCheck::AVX2)) message.append("AVX2 ");
+	if(CPUIDCheck::hasTechnology(CPUIDCheck::FMA)) message.append("FMA ");
+	if(CPUIDCheck::hasTechnology(CPUIDCheck::AVX512_F)) message.append("AVX512_F ");
+
+	Log::info(message);
+}
+
 void init(int argc, const char** args) {
 	auto start = high_resolution_clock::now();
 
 	Log::init("latest.log");
+
+	printSystemInfo();
 
 	setupGL();
 	Graphics::MeshRegistry::init();

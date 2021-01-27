@@ -57,7 +57,7 @@ add_library(physics STATIC
   physics/world.cpp
   physics/worldPhysics.cpp
   physics/inertia.cpp
-  
+  physics/cpuid.cpp
 
   physics/math/linalg/eigen.cpp
   physics/math/linalg/largeMatrix.cpp
