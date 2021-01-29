@@ -123,8 +123,6 @@ public:
 
 	Vec3f getNormalVecOfTriangle(Triangle triangle) const;
 
-	BoundingBox getBounds() const;
-	BoundingBox getBounds(const Mat3f& referenceFrame) const;
 	CircumscribingSphere getCircumscribingSphere() const;
 	double getMaxRadius() const;
 	double getMaxRadius(Vec3f reference) const;
@@ -133,6 +131,24 @@ public:
 	double getScaledMaxRadius(DiagonalMat3 scale) const;
 	double getScaledMaxRadiusSq(DiagonalMat3 scale) const;
 
+
+	BoundingBox getBoundsFallback() const;
+	BoundingBox getBoundsFallback(const Mat3f& referenceFrame) const;
+	int furthestIndexInDirectionFallback(const Vec3f& direction) const;
+	Vec3f furthestInDirectionFallback(const Vec3f& direction) const;
+
+	BoundingBox getBoundsSSE() const;
+	BoundingBox getBoundsSSE(const Mat3f& referenceFrame) const;
+	int furthestIndexInDirectionSSE(const Vec3f& direction) const;
+	Vec3f furthestInDirectionSSE(const Vec3f& direction) const;
+
+	BoundingBox getBoundsAVX() const;
+	BoundingBox getBoundsAVX(const Mat3f& referenceFrame) const;
+	int furthestIndexInDirectionAVX(const Vec3f& direction) const;
+	Vec3f furthestInDirectionAVX(const Vec3f& direction) const;
+
+	BoundingBox getBounds() const;
+	BoundingBox getBounds(const Mat3f& referenceFrame) const;
 	int furthestIndexInDirection(const Vec3f& direction) const;
 	Vec3f furthestInDirection(const Vec3f& direction) const;
 

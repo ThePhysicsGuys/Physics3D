@@ -69,6 +69,8 @@ add_library(physics STATIC
   physics/geometry/indexedShape.cpp
   physics/geometry/intersection.cpp
   physics/geometry/triangleMesh.cpp
+  physics/geometry/triangleMeshSSE.cpp
+  physics/geometry/triangleMeshAVX.cpp
   physics/geometry/polyhedron.cpp
   physics/geometry/shape.cpp
   physics/geometry/shapeBuilder.cpp
