@@ -21,7 +21,7 @@
 
 #include "../physics/part.h"
 #include "../physics/physical.h"
-#include "../physics/constraints/hardConstraint.h"
+#include "../physics/hardconstraints/hardConstraint.h"
 #include "../physics/layer.h"
 #include "../physics/world.h"
 

@@ -1,15 +1,16 @@
 #include "debug.h"
 
-#include "geometry/shape.h"
-#include "part.h"
-#include "misc/serialization.h"
+#include "../geometry/shape.h"
+#include "../part.h"
+
+#include "../../util/log.h"
+
+#include "serialization.h"
+#include "toString.h"
 
 #include <fstream>
 #include <chrono>
 #include <sstream>
-
-#include "../util/log.h"
-#include "misc/toString.h"
 
 namespace Debug {
 	void(*logVecAction)(Position, Vec3, VectorType) = [](Position, Vec3, VectorType) {};

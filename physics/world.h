@@ -4,17 +4,12 @@
 
 #include "part.h"
 #include "physical.h"
-#include "softconstraints/constraintGroup.h"
+#include "constraints/constraintGroup.h"
+#include "softlinks/softLink.h"
 #include "datastructures/iterators.h"
 #include "datastructures/iteratorEnd.h"
 #include "layer.h"
-#include "softLink.h"
 #include "colissionBuffer.h"
-
-#include "springLink.h"
-#include "elasticLink.h"
-#include "magneticLink.h"
-#include "alignmentLink.h"
 
 #include <memory>
 

@@ -20,11 +20,11 @@
 #include "../physics/math/linalg/commonMatrices.h"
 #include "../physics/part.h"
 #include "../physics/world.h"
-#include "../physics/misc/gravityForce.h"
-#include "../physics/physicsProfiler.h"
-#include "../physics/constraints/motorConstraint.h"
-#include "../physics/constraints/sinusoidalPistonConstraint.h"
-#include "../physics/constraints/fixedConstraint.h"
+#include "../physics/externalforces/gravityForce.h"
+#include "../physics/misc/physicsProfiler.h"
+#include "../physics/hardconstraints/motorConstraint.h"
+#include "../physics/hardconstraints/sinusoidalPistonConstraint.h"
+#include "../physics/hardconstraints/fixedConstraint.h"
 
 
 #include "../physics/misc/serialization.h"

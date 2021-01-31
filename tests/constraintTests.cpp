@@ -5,17 +5,16 @@
 #include "estimateMotion.h"
 #include "../physics/misc/toString.h"
 
-#include "../physics/softconstraints/constraintGroup.h"
-
 #include "../physics/geometry/shape.h"
 #include "../physics/geometry/shapeCreation.h"
 #include "../physics/part.h"
 #include "../physics/physical.h"
 #include "../physics/layer.h"
 #include "../physics/world.h"
-#include "../physics/constraints/fixedConstraint.h"
-#include "../physics/constraints/motorConstraint.h"
-#include "../physics/constraints/sinusoidalPistonConstraint.h"
+#include "../physics/hardconstraints/fixedConstraint.h"
+#include "../physics/hardconstraints/motorConstraint.h"
+#include "../physics/hardconstraints/sinusoidalPistonConstraint.h"
+#include "../physics/constraints/constraintGroup.h"
 #include "../physics/math/linalg/trigonometry.h"
 
 #include <functional>

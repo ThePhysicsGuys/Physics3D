@@ -1,16 +1,15 @@
 #include "core.h"
 
 #include "guiDebug.h"
+#include "threePhaseBuffer.h"
+#include "../physics/misc/debug.h"
+#include "../physics/geometry/shape.h"
+#include "../physics/math/mathUtil.h"
+#include "../physics/geometry/polyhedron.h"
+#include "../util/log.h"
 
 #include <GL/glew.h>
 
-#include "../util/log.h"
-#include "../physics/geometry/shape.h"
-#include "../physics/debug.h"
-#include "../physics/math/mathUtil.h"
-#include "threePhaseBuffer.h"
-
-#include "../physics/geometry/polyhedron.h"
 
 namespace P3D::Graphics {
 

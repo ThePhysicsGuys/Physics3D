@@ -2,8 +2,8 @@
 
 #include <vector>
 
-#include "../physics/constraints/motorConstraint.h"
-#include "../physics/constraints/sinusoidalPistonConstraint.h"
+#include "../physics/hardconstraints/motorConstraint.h"
+#include "../physics/hardconstraints/sinusoidalPistonConstraint.h"
 
 #include "../physics/geometry/convexShapeBuilder.h"
 #include "../physics/misc/toString.h"

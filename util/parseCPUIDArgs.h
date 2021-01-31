@@ -20,7 +20,7 @@ inline std::string printAndParseCPUIDArgs(int argc, const char** args) {
 
 		if(curArg[0] == '-') {
 			for(int techI = 0; techI < CPUIDCheck::TECHNOLOGY_COUNT; techI++) {
-				if(strcmp(curArg + 1, CPUIDCheck::NAMES[techI]) == 0) {
+				if(std::string(curArg + 1) == CPUIDCheck::NAMES[techI]) {
 					CPUIDCheck::disableTechnology(1 << techI);
 					message.append("\nDisabled technology -").append(CPUIDCheck::NAMES[techI]);
 					disabledSomething = true;

@@ -10,7 +10,7 @@
 #include "../physics/geometry/shapeCreation.h"
 #include "../physics/part.h"
 #include "../physics/physical.h"
-#include "../physics/constraints/fixedConstraint.h"
+#include "../physics/hardconstraints/fixedConstraint.h"
 
 
 #define ASSERT(x) ASSERT_STRICT(x)

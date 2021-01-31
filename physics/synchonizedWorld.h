@@ -7,7 +7,7 @@
 
 #include "world.h"
 #include "sharedLockGuard.h"
-#include "physicsProfiler.h"
+#include "misc/physicsProfiler.h"
 
 template<typename T = Part>
 class SynchronizedWorld : public World<T> {

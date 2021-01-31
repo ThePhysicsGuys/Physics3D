@@ -6,9 +6,9 @@
 #include "math/linalg/vec.h"
 #include "math/linalg/trigonometry.h"
 
-#include "debug.h"
+#include "misc/debug.h"
+#include "misc/physicsProfiler.h"
 #include "constants.h"
-#include "physicsProfiler.h"
 #include "../util/log.h"
 
 #include <vector>

@@ -2,8 +2,8 @@
 #include "world.h"
 
 #include "misc/validityHelper.h"
-#include "physicsProfiler.h"
-#include "debug.h"
+#include "misc/debug.h"
+#include "misc/physicsProfiler.h"
 
 #include <assert.h>
 
