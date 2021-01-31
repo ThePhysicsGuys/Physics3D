@@ -12,6 +12,7 @@
 #include <chrono>
 
 #include "../util/terminalColor.h"
+#include "../util/parseCPUIDArgs.h"
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
 static const char sepChar = '\\';
@@ -284,12 +285,12 @@ struct ParsedInput {
 	TestFlags flags;
 };
 
-ParsedInput parseInput(int argc, char* argv[]) {
+ParsedInput parseInput(int argc, const char** argv) {
 	ParsedInput result;
 	
 	std::vector<std::string> inputFlags;
 	for(int i = 1; i < argc; i++) {
-		if(argv[i][0] == '-' && argv[i][1] == '-') {
+		if(argv[i][0] == '-') {
 			inputFlags.push_back(argv[i]);
 		} else {
 			result.inputArgs.push_back(argv[i]);
@@ -310,8 +311,12 @@ ParsedInput parseInput(int argc, char* argv[]) {
 	return result;
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, const char** argv) {
 	initConsole();
+
+	std::cout << Util::printAndParseCPUIDArgs(argc, argv).c_str();
+
+
 
 	ParsedInput parameters = parseInput(argc, argv);
 

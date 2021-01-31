@@ -6,7 +6,7 @@
 #include "../math/linalg/trigonometry.h"
 #include "builtinShapeClasses.h"
 
-#include "../cpuid.h"
+#include "../../util/cpuid.h"
 
 Shape sphereShape(double radius) {
 	return Shape(&SphereClass::instance, radius * 2, radius * 2, radius * 2);
@@ -27,9 +27,9 @@ Shape polyhedronShape(const Polyhedron& poly) {
 
 	PolyhedronShapeClass* shapeClass;
 
-	if(CPUIDCheck::hasTechnology(CPUIDCheck::AVX | CPUIDCheck::AVX2 | CPUIDCheck::FMA)) {
+	if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::AVX | Util::CPUIDCheck::AVX2 | Util::CPUIDCheck::FMA)) {
 		shapeClass = new PolyhedronShapeClassAVX(poly.translatedAndScaled(-center, scale));
-	} else if(CPUIDCheck::hasTechnology(CPUIDCheck::SSE2)) {
+	} else if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::SSE | Util::CPUIDCheck::SSE2)) {
 		shapeClass = new PolyhedronShapeClassSSE(poly.translatedAndScaled(-center, scale));
 	} else {
 		shapeClass = new PolyhedronShapeClassFallback(poly.translatedAndScaled(-center, scale));

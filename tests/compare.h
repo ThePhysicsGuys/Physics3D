@@ -13,6 +13,8 @@
 #include "../physics/motion.h"
 #include "../physics/relativeMotion.h"
 
+#include "../physics/geometry/boundingBox.h"
+
 #include <utility>
 #include <array>
 #include <vector>
@@ -208,6 +210,12 @@ template<typename Tol>
 bool tolerantEquals(const RelativeMotion& first, const RelativeMotion& second, Tol tolerance) {
 	return tolerantEquals(first.relativeMotion, second.relativeMotion, tolerance) && 
 		tolerantEquals(first.locationOfRelativeMotion, second.locationOfRelativeMotion, tolerance);
+}
+
+template<typename Tol>
+bool tolerantEquals(const BoundingBox& first, const BoundingBox& second, Tol tolerance) {
+	return tolerantEquals(first.min, second.min, tolerance) &&
+		tolerantEquals(first.max, second.max, tolerance);
 }
 
 template<typename T1, typename T2, typename Tol>

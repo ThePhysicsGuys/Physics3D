@@ -122,6 +122,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="cpuid.cpp" />
     <ClCompile Include="log.cpp" />
     <ClCompile Include="fileUtils.cpp" />
     <ClCompile Include="properties.cpp" />
@@ -135,6 +136,7 @@
     <ClCompile Include="valueCycle.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="cpuid.h" />
     <ClInclude Include="dynamicSerialize.h" />
     <ClInclude Include="iteratorUtils.h" />
     <ClInclude Include="log.h" />
@@ -143,6 +145,7 @@
     <ClInclude Include="math\mat4.h" />
     <ClInclude Include="math\rot3.h" />
     <ClInclude Include="math\vec3.h" />
+    <ClInclude Include="parseCPUIDArgs.h" />
     <ClInclude Include="properties.h" />
     <ClInclude Include="intrusivePointer.h" />
     <ClInclude Include="resource\resource.h" />

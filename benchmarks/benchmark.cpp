@@ -7,6 +7,7 @@
 #include <sstream>
 
 #include "../util/terminalColor.h"
+#include "../util/parseCPUIDArgs.h"
 
 std::vector<Benchmark*>* knownBenchmarks = nullptr;
 
@@ -66,7 +67,9 @@ static void runBenchmark(Benchmark* bench) {
 	bench->printResults(deltaTimeMS);
 }
 
-int main() {
+int main(int argc, const char** args) {
+	std::cout << Util::printAndParseCPUIDArgs(argc, args).c_str();
+
 	std::cout << "The following benchmarks are available:\n";
 	setColor(TerminalColor::CYAN);
 	
@@ -89,6 +92,7 @@ int main() {
 	std::cout << " [INITIALIZATION]";
 	setColor(TerminalColor::GREEN);
 	std::cout << " [RUNTIME]\n";
+	setColor(TerminalColor::WHITE);
 
 	for(const std::string& c : commands) {
 		Benchmark* b = getBenchFor(c);

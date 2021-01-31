@@ -1,11 +1,13 @@
 #pragma once
 
+namespace Util {
+
 class CPUIDCheck {
 	unsigned int available;
 
 	CPUIDCheck();
 
-	static const CPUIDCheck availableCPUHardware; // statically initialized
+	static CPUIDCheck availableCPUHardware; // statically initialized
 
 public:
 	static constexpr unsigned int MMX = 1 << 0;
@@ -20,9 +22,22 @@ public:
 	static constexpr unsigned int FMA = 1 << 9;
 	static constexpr unsigned int AVX512_F = 1 << 10;
 
+	static constexpr size_t TECHNOLOGY_COUNT = 11;
+	static constexpr const char* NAMES[TECHNOLOGY_COUNT]{"MMX", "SSE", "SSE2", "SSE3", "SSSE3", "SSE4_1", "SSE4_2", "AVX", "AVX2", "FMA", "AVX512_F"};
+
 	// usage: hasTechnology(SSE | SSE2 | AVX | FMA)
 	// returns true if all given technologies are available
 	inline static bool hasTechnology(unsigned int technologies) {
 		return (availableCPUHardware.available & technologies) == technologies;
 	}
+
+	inline static void enableTechnology(unsigned int technologies) {
+		availableCPUHardware.available |= technologies;
+	}
+
+	inline static void disableTechnology(unsigned int technologies) {
+		availableCPUHardware.available &= ~technologies;
+	}
+};
+
 };

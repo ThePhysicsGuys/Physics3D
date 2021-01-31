@@ -130,7 +130,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="alignmentLink.cpp" />
-    <ClCompile Include="cpuid.cpp" />
     <ClCompile Include="elasticLink.cpp" />
     <ClCompile Include="geometry\triangleMeshAVX.cpp">
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
@@ -183,7 +182,6 @@
     <ClInclude Include="catchable_assert.h" />
     <ClInclude Include="colissionBuffer.h" />
     <ClInclude Include="constants.h" />
-    <ClInclude Include="cpuid.h" />
     <ClInclude Include="elasticLink.h" />
     <ClInclude Include="magneticLink.h" />
     <ClInclude Include="math\linalg\largeMatrixAlgorithms.h" />

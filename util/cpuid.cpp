@@ -1,14 +1,14 @@
 #include "cpuid.h"
 
 
-#ifdef _WIN32
-#include <limits.h>
-#include <intrin.h>
-typedef unsigned __int32  uint32_t;
 
-#else
-#include <stdint.h>
+#ifdef _WIN32
+#include <intrin.h>
 #endif
+
+#include <stdint.h>
+
+namespace Util {
 
 class CPUID {
 	uint32_t regs[4];
@@ -16,7 +16,7 @@ class CPUID {
 public:
 	explicit CPUID(unsigned i, unsigned ecx) {
 #ifdef _WIN32
-		__cpuidex((int*) regs, (int) i, (int) ecx);
+		__cpuidex(( int*) regs, ( int) i, ( int) ecx);
 
 #else
 		asm volatile
@@ -55,4 +55,5 @@ CPUIDCheck::CPUIDCheck() : available(0) {
 	}
 }
 
-const CPUIDCheck CPUIDCheck::availableCPUHardware;
+CPUIDCheck CPUIDCheck::availableCPUHardware;
+};

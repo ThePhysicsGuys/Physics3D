@@ -26,9 +26,8 @@
 #include "../physics/constraints/sinusoidalPistonConstraint.h"
 #include "../physics/constraints/fixedConstraint.h"
 
-#include "../physics/misc/serialization.h"
 
-#include "../physics/cpuid.h"
+#include "../physics/misc/serialization.h"
 
 #include "worlds.h"
 #include "tickerThread.h"
@@ -38,6 +37,7 @@
 #include "io/saveDialog.h"
 
 #include "../util/resource/resourceManager.h"
+#include "../util/parseCPUIDArgs.h"
 #include "../graphics/resource/textureResource.h"
 #include "../graphics/meshRegistry.h"
 #include "../engine/ecs/registry.h"
@@ -64,30 +64,12 @@ void setupDebug();
 
 void loadFile(const char* file);
 
-void printSystemInfo() {
-	std::string message("Detected CPU Technologies: ");
-
-	if(CPUIDCheck::hasTechnology(CPUIDCheck::MMX)) message.append("MMX ");
-	if(CPUIDCheck::hasTechnology(CPUIDCheck::SSE)) message.append("SSE ");
-	if(CPUIDCheck::hasTechnology(CPUIDCheck::SSE2)) message.append("SSE2 ");
-	if(CPUIDCheck::hasTechnology(CPUIDCheck::SSE3)) message.append("SSE3 ");
-	if(CPUIDCheck::hasTechnology(CPUIDCheck::SSSE3)) message.append("SSSE3 ");
-	if(CPUIDCheck::hasTechnology(CPUIDCheck::SSE4_1)) message.append("SSE4.1 ");
-	if(CPUIDCheck::hasTechnology(CPUIDCheck::SSE4_2)) message.append("SSE4.2 ");
-	if(CPUIDCheck::hasTechnology(CPUIDCheck::AVX)) message.append("AVX ");
-	if(CPUIDCheck::hasTechnology(CPUIDCheck::AVX2)) message.append("AVX2 ");
-	if(CPUIDCheck::hasTechnology(CPUIDCheck::FMA)) message.append("FMA ");
-	if(CPUIDCheck::hasTechnology(CPUIDCheck::AVX512_F)) message.append("AVX512_F ");
-
-	Log::info(message);
-}
-
 void init(int argc, const char** args) {
 	auto start = high_resolution_clock::now();
 
 	Log::init("latest.log");
 
-	printSystemInfo();
+	Log::info(Util::printAndParseCPUIDArgs(argc, args));
 
 	setupGL();
 	Graphics::MeshRegistry::init();
@@ -98,11 +80,16 @@ void init(int argc, const char** args) {
 
 	WorldBuilder::init();
 
-	if(argc >= 2) 
-		loadFile(args[1]);
-	else 
-		setupWorld(argc, args);
-	
+	for(int curWorldArg = 1; curWorldArg < argc; curWorldArg++) {
+		if(args[curWorldArg][0] != '-') { // skip flags
+			loadFile(args[curWorldArg]);
+			goto fileLoaded;
+		}
+	}
+
+	setupWorld(argc, args);
+	fileLoaded:;
+
 	Log::info("Initializing screen");
 	screen.onInit();
 	

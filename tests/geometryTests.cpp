@@ -15,6 +15,9 @@
 #include "../physics/misc/shapeLibrary.h"
 
 #include "testValues.h"
+#include "generators.h"
+
+#include "../util/cpuid.h"
 
 #define ASSERT(condition) ASSERT_TOLERANT(condition, 0.00001)
 
@@ -153,5 +156,83 @@ TEST_CASE(testRayIntersection) {
 TEST_CASE(testGetFurthestPointInDirection) {
 	for (Vec3f vertex : Library::icosahedron.iterVertices()) {
 		ASSERT(Library::icosahedron.furthestInDirection(vertex) == vertex);
+	}
+}
+
+TEST_CASE(testTriangleMeshOptimizedGetBounds) {
+	for(int iter = 0; iter < 1000; iter++) {
+		TriangleMesh mesh = generateTriangleMesh();
+		logStream << "NewPoly: " << mesh.vertexCount << " vertices, " << mesh.triangleCount << " triangles\n";
+		for(int i = 0; i < mesh.vertexCount; i++) {
+			logStream << mesh.getVertex(i) << "\n";
+		}
+		BoundingBox reference = mesh.getBoundsFallback();
+
+		if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::SSE | Util::CPUIDCheck::SSE2)) {
+			ASSERT(reference == mesh.getBoundsSSE());
+		}
+
+		if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::AVX | Util::CPUIDCheck::AVX2 | Util::CPUIDCheck::FMA)) {
+			ASSERT(reference == mesh.getBoundsAVX());
+		}
+	}
+}
+
+TEST_CASE(testTriangleMeshOptimizedGetBoundsRotated) {
+	for(int iter = 0; iter < 1000; iter++) {
+		TriangleMesh mesh = generateTriangleMesh();
+		logStream << "NewPoly: " << mesh.vertexCount << " vertices, " << mesh.triangleCount << " triangles\n";
+		for(int i = 0; i < mesh.vertexCount; i++) {
+			logStream << mesh.getVertex(i) << "\n";
+		}
+		Mat3f rot = generateMatrix<float, 3, 3>();
+		BoundingBox reference = mesh.getBoundsFallback(rot);
+
+		if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::SSE | Util::CPUIDCheck::SSE2)) {
+			ASSERT(reference == mesh.getBoundsSSE(rot));
+		}
+
+		if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::AVX | Util::CPUIDCheck::AVX2 | Util::CPUIDCheck::FMA)) {
+			ASSERT(reference == mesh.getBoundsAVX(rot));
+		}
+	}
+}
+
+TEST_CASE(testTriangleMeshOptimizedFurthestIndexInDirection) {
+	for(int iter = 0; iter < 1000; iter++) {
+		TriangleMesh mesh = generateTriangleMesh();
+		logStream << "NewPoly: " << mesh.vertexCount << " vertices, " << mesh.triangleCount << " triangles\n";
+		for(int i = 0; i < mesh.vertexCount; i++) {
+			logStream << mesh.getVertex(i) << "\n";
+		}
+		Vec3 dir = generateVec3();
+		int reference = mesh.furthestIndexInDirectionFallback(dir);
+
+		if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::SSE | Util::CPUIDCheck::SSE2)) {
+			ASSERT(mesh.getVertex(reference) * dir == mesh.getVertex(mesh.furthestIndexInDirectionSSE(dir)) * dir);
+		}
+
+		if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::AVX | Util::CPUIDCheck::AVX2 | Util::CPUIDCheck::FMA)) {
+			ASSERT(mesh.getVertex(reference) * dir == mesh.getVertex(mesh.furthestIndexInDirectionAVX(dir)) * dir);
+		}
+	}
+}
+TEST_CASE(testTriangleMeshOptimizedFurthestInDirection) {
+	for(int iter = 0; iter < 1000; iter++) {
+		TriangleMesh mesh = generateTriangleMesh();
+		logStream << "NewPoly: " << mesh.vertexCount << " vertices, " << mesh.triangleCount << " triangles\n";
+		for(int i = 0; i < mesh.vertexCount; i++) {
+			logStream << mesh.getVertex(i) << "\n";
+		}
+		Vec3 dir = generateVec3();
+		Vec3 reference = mesh.furthestInDirectionFallback(dir);
+
+		if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::SSE | Util::CPUIDCheck::SSE2)) {
+			ASSERT(reference * dir == mesh.furthestInDirectionSSE(dir) * dir); // dot with dir as we don't really care for the exact vertex in a tie
+		}
+
+		if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::AVX | Util::CPUIDCheck::AVX2 | Util::CPUIDCheck::FMA)) {
+			ASSERT(reference * dir == mesh.furthestInDirectionAVX(dir) * dir); // dot with dir as we don't really care for the exact vertex in a tie
+		}
 	}
 }
