@@ -107,20 +107,7 @@ Matrix<T, Height, Width> generateMatrix() {
 }
 inline Vec3 generateVec3() { return generateVector<double, 3>(); }
 inline Vec3f generateVec3f() { return generateVector<float, 3>(); }
-inline Triangle generateTriangle(int maxIndex) {
-	int firstIndex = generateInt(maxIndex);
-	int secondIndex, thirdIndex;
-	
-	do {
-		secondIndex = generateInt(maxIndex);
-	} while(secondIndex == firstIndex);
-
-	do {
-		thirdIndex = generateInt(maxIndex);
-	} while(thirdIndex == firstIndex || thirdIndex == secondIndex);
-
-	return Triangle{firstIndex, secondIndex, thirdIndex};
-}
+Triangle generateTriangle(int maxIndex);
 Position generatePosition();
 Bounds generateBounds();
 Rotation generateRotation();

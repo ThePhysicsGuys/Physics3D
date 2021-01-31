@@ -52,19 +52,43 @@ Polyhedron generateConvexPolyhedron() {
 	return builder.toPolyhedron();
 }
 
+static Triangle finishTriangle(int maxIndex, int firstIndex) {
+	int secondIndex, thirdIndex;
+
+	do {
+		secondIndex = generateInt(maxIndex);
+	} while(secondIndex == firstIndex);
+
+	do {
+		thirdIndex = generateInt(maxIndex);
+	} while(thirdIndex == firstIndex || thirdIndex == secondIndex);
+
+	return Triangle{firstIndex, secondIndex, thirdIndex};
+}
+
+Triangle generateTriangle(int maxIndex) {
+	int firstIndex = generateInt(maxIndex);
+
+	return finishTriangle(maxIndex, firstIndex);
+}
+
 TriangleMesh generateTriangleMesh() {
 	int numVertices = generateInt(46) + 4;
-	int numTriangles = generateInt(50);
+	int numTriangles = generateInt(100) + numVertices;
 	EditableMesh mesh(numVertices, numTriangles);
 
 	for(int i = 0; i < numVertices; i++) {
 		mesh.setVertex(i, generateVec3f());
 	}
 
-	for(int i = 0; i < numTriangles; i++) {
-		mesh.setTriangle(i, generateTriangle(numVertices));
+	for(int i = 0; i < numVertices; i++) {
+		mesh.setTriangle(i, finishTriangle(numVertices, i)); // ensure one triangle per vertex
 	}
 
+	for(int i = numVertices; i < numTriangles; i++) {
+		mesh.setTriangle(i, generateTriangle(numVertices)); // extra triangles
+	}
+	
 	return TriangleMesh(std::move(mesh));
 }
 
