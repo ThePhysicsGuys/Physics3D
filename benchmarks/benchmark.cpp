@@ -68,8 +68,9 @@ static void runBenchmark(Benchmark* bench) {
 }
 
 int main(int argc, const char** args) {
-	std::cout << Util::printAndParseCPUIDArgs(argc, args).c_str();
+	std::cout << Util::printAndParseCPUIDArgs(argc, args).c_str() << "\n";
 
+	setColor(TerminalColor::WHITE);
 	std::cout << "The following benchmarks are available:\n";
 	setColor(TerminalColor::CYAN);
 	
@@ -82,6 +83,10 @@ int main(int argc, const char** args) {
 	setColor(TerminalColor::GREEN);
 	std::string cmd;
 	std::cin >> cmd;
+	if(cmd.empty()) {
+		setColor(TerminalColor::WHITE);
+		return 0;
+	}
 	cmd.append(";");
 	
 	std::vector<std::string> commands = split(cmd, ';');

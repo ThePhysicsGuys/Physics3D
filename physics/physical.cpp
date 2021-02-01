@@ -1044,6 +1044,6 @@ std::vector<FoundLayerRepresentative> findAllLayersIn(Part* part) {
 			return std::vector<FoundLayerRepresentative>{FoundLayerRepresentative{part->layer, part}};
 		}
 	} else {
-		std::vector<FoundLayerRepresentative>{};
+		return std::vector<FoundLayerRepresentative>{};
 	}
 }

@@ -134,7 +134,7 @@ TestLayer testLayer;
 DebugOverlay debugOverlay;
 
 
-void Screen::onInit() {
+void Screen::onInit(bool quickBoot) {
 	// Log init
 	Log::setLogLevel(Log::Level::INFO);
 
@@ -163,7 +163,7 @@ void Screen::onInit() {
 	// Layer creation
 	imguiLayer = ImGuiLayer(this);
 	cameraLayer = CameraLayer(this);
-	skyboxLayer = SkyboxLayer(this);
+	if(!quickBoot) skyboxLayer = SkyboxLayer(this);
 	modelLayer = ModelLayer(this);
 	constraintLayer = ConstraintLayer(this, Engine::Layer::NoUpdate | Engine::Layer::NoEvents);
 	shadowLayer = ShadowLayer(this);
@@ -171,10 +171,10 @@ void Screen::onInit() {
 	pickerLayer = PickerLayer(this);
 	postprocessLayer = PostprocessLayer(this);
 	guiLayer = GuiLayer(this);
-	testLayer = TestLayer(this);
+	//testLayer = TestLayer(this);
 	debugOverlay = DebugOverlay(this);
 
-	layerStack.pushLayer(&skyboxLayer);
+	if(!quickBoot) layerStack.pushLayer(&skyboxLayer);
 	layerStack.pushLayer(&modelLayer);
 	layerStack.pushLayer(&constraintLayer);
 	layerStack.pushLayer(&shadowLayer);

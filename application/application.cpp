@@ -39,6 +39,7 @@
 
 #include "../util/resource/resourceManager.h"
 #include "../util/parseCPUIDArgs.h"
+#include "../util/cmdParser.h"
 #include "../graphics/resource/textureResource.h"
 #include "../graphics/meshRegistry.h"
 #include "../engine/ecs/registry.h"
@@ -57,46 +58,43 @@ TickerThread physicsThread;
 PlayerWorld world(1 / TICKS_PER_SECOND);
 Screen screen;
 
-void init(int argc, const char** args);
+void init(const Util::ParsedArgs& cmdArgs);
 void setupPhysics();
-void setupWorld(int argc, const char** args);
+void setupWorld(const Util::ParsedArgs& cmdArgs);
 void setupGL();
 void setupDebug();
 
 void loadFile(const char* file);
 
-void init(int argc, const char** args) {
+void init(const Util::ParsedArgs& cmdArgs) {
 	auto start = high_resolution_clock::now();
 
 	Log::init("latest.log");
 
-	Log::info(Util::printAndParseCPUIDArgs(argc, args));
+	Log::info(Util::printAndParseCPUIDArgs(cmdArgs));
+	bool quickBoot = cmdArgs.hasFlag("quickBoot");
 
 	setupGL();
 
 	Log::info("Init MeshRegistry");
 	Graphics::MeshRegistry::init();
 
-	ResourceManager::add<Graphics::TextureResource>("floorMaterial", "../res/textures/floor/floor_color.jpg");
+	//ResourceManager::add<Graphics::TextureResource>("floorMaterial", "../res/textures/floor/floor_color.jpg");
 
-	WorldImportExport::registerTexture(ResourceManager::get<Graphics::TextureResource>("floorMaterial"));
+	//WorldImportExport::registerTexture(ResourceManager::get<Graphics::TextureResource>("floorMaterial"));
 
 	Log::info("Initializing world");
 	WorldBuilder::init();
 
-	for(int curWorldArg = 1; curWorldArg < argc; curWorldArg++) {
-		if(args[curWorldArg][0] != '-') { // skip flags
-			loadFile(args[curWorldArg]);
-			goto fileLoaded;
-		}
+	if(cmdArgs.argCount() >= 1) {
+		loadFile(cmdArgs[0].c_str());
+	} else {
+		Log::info("Creating default world");
+		setupWorld(cmdArgs);
 	}
 
-	Log::info("Creating default world");
-	setupWorld(argc, args);
-	fileLoaded:;
-
 	Log::info("Initializing screen");
-	screen.onInit();
+	screen.onInit(quickBoot);
 	
 	Log::info("Creating player");
 	// Player
@@ -134,7 +132,7 @@ void setupGL() {
 	}
 }
 
-void setupWorld(int argc, const char** args) {
+void setupWorld(const Util::ParsedArgs& cmdArgs) {
 	Log::info("Initializing world");
 
 	world.addExternalForce(new DirectionalGravity(Vec3(0, -10.0, 0.0)));
@@ -314,7 +312,9 @@ int main(int argc, const char** args) {
 	using namespace P3D::Application;
 	using namespace P3D::Graphics;
 
-	init(argc, args);
+	Util::ParsedArgs inputArgs(argc, args);
+
+	init(inputArgs);
 
 	Log::info("Started rendering");
 	while (!screen.shouldClose()) {

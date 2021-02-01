@@ -213,8 +213,8 @@ bool TreeNode::recursiveFindAndReplaceObject(const void* find, void* replaceWith
 				}
 			}
 		}
-		return false;
 	}
+	return false;
 }
 
 size_t TreeNode::getNumberOfObjectsInNode() const {
