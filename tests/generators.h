@@ -29,7 +29,7 @@
 
 template<typename T>
 T generate() {
-	static_assert(false, "Unsupported generate type!");
+	throw "Unsupported generate type!";
 }
 
 // generates between -2.0 and 2.0

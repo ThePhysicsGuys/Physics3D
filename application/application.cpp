@@ -25,6 +25,7 @@
 #include "../physics/hardconstraints/motorConstraint.h"
 #include "../physics/hardconstraints/sinusoidalPistonConstraint.h"
 #include "../physics/hardconstraints/fixedConstraint.h"
+#include "../physics/softlinks/elasticLink.h"
 
 
 #include "../physics/misc/serialization.h"
@@ -72,12 +73,15 @@ void init(int argc, const char** args) {
 	Log::info(Util::printAndParseCPUIDArgs(argc, args));
 
 	setupGL();
+
+	Log::info("Init MeshRegistry");
 	Graphics::MeshRegistry::init();
 
 	ResourceManager::add<Graphics::TextureResource>("floorMaterial", "../res/textures/floor/floor_color.jpg");
 
 	WorldImportExport::registerTexture(ResourceManager::get<Graphics::TextureResource>("floorMaterial"));
 
+	Log::info("Initializing world");
 	WorldBuilder::init();
 
 	for(int curWorldArg = 1; curWorldArg < argc; curWorldArg++) {
@@ -87,12 +91,14 @@ void init(int argc, const char** args) {
 		}
 	}
 
+	Log::info("Creating default world");
 	setupWorld(argc, args);
 	fileLoaded:;
 
 	Log::info("Initializing screen");
 	screen.onInit();
 	
+	Log::info("Creating player");
 	// Player
 	screen.camera.attachment = new ExtendedPart(polyhedronShape(Library::createPrism(50, 0.3f, 1.5f)), GlobalCFrame(), {1.0, 5.0, 0.0}, "Player");
 
@@ -100,7 +106,9 @@ void init(int argc, const char** args) {
 		throw "World not valid!";
 	}
 
+	Log::info("Initializing physics");
 	setupPhysics();
+	Log::info("Initializing debug");
 	setupDebug();
 
 	auto stop = high_resolution_clock::now();
