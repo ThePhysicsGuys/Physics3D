@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GL/glew.h"
 #include <vector>
 #include "batch.h"
 #include "../renderer.h"
@@ -9,31 +10,48 @@
 
 namespace P3D::Graphics {
 
-template<typename UniformLayout>
+template<typename Uniform>
 class InstanceBatch {
 private:
-	GLID mesh;
-	VertexBuffer* ubo = nullptr;
-	std::vector<UniformLayout> uniformBuffer;
+	GLID mesh = -1;
+	std::vector<Uniform> uniformBuffer;
 
 public:
 	InstanceBatch(GLID mesh, const BufferLayout& uniformBufferLayout) : mesh(mesh) {
-		ubo = new VertexBuffer(uniformBufferLayout, nullptr, 0);
-		Graphics::MeshRegistry::meshes[mesh]->vao->addBuffer(ubo);
+		if (mesh < 0 || MeshRegistry::meshes.size() <= mesh) {
+			Log::error("Creating an instance batch for an invalid mesh: %d", mesh);
+			__debugbreak();
+			return;
+		}
+
+		if (MeshRegistry::meshes[mesh]->uniformBuffer == nullptr) {
+			VertexBuffer* uniformBuffer = new VertexBuffer(uniformBufferLayout, nullptr, 0);
+			MeshRegistry::meshes[mesh]->addUniformBuffer(uniformBuffer);
+		}	
 	}
 
-	void add(const UniformLayout& uniform) {
-		uniformBuffer.push_back(uniform);
+	~InstanceBatch() {
+		Log::error("Deleted instance batch");
+		close();
+	}
+
+	template<typename... Args>
+	void add(Args&&... uniform) {
+		uniformBuffer.emplace_back(std::forward<Args>(uniform)...);
 	}
 
 	void submit() {
-		mesh->vao->bind();
+		if (mesh < 0 || mesh >= MeshRegistry::meshes.size()) {
+			Log::error("Trying to sumbit a mesh that has not been registered in the mesh registry");
+			return;
+		}
 
-		glCall(ubo->fill((const void*) uniformBuffer.data(), uniformBuffer.size() * sizeof(UniformLayout), Renderer::STREAM_DRAW));
+		if (uniformBuffer.empty())
+			return;
+		
+		MeshRegistry::meshes[mesh]->fillUniformBuffer((const void*) uniformBuffer.data(), uniformBuffer.size() * sizeof(Uniform), Renderer::STREAM_DRAW);
 
-		glDrawElementsInstanced(Renderer::TRIANGLES, mesh->triangleCount * 3, Renderer::UINT, 0, uniformBuffer.size());
-
-		mesh->vao->unbind();
+		MeshRegistry::meshes[mesh]->renderInstanced(uniformBuffer.size());
 
 		clear();
 	}
@@ -44,9 +62,8 @@ public:
 
 	void close() {
 		clear();
-
-		ubo->close();
-		mesh = nullptr;
+		
+		mesh = -1;
 	}
 };
 

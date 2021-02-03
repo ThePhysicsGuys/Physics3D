@@ -265,6 +265,7 @@ ShaderVersion parseVersion(TokenStack& tokens) {
 
 	if (tokens.peek().type == TokenType::NUMBER) {
 		version.version = std::stoi(tokens.pop().value);
+		version.version = std::clamp(version.version, 300, 450); // Todo check correctness
 
 		if (tokens.peek().type == TokenType::ID && tokens.peek().value == "core") {
 			version.core = true;

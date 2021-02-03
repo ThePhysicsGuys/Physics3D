@@ -66,19 +66,16 @@ void EditTools::onInit() {
 	// Rotate shape init
 	rotateShape = VisualShape::generateSmoothNormalsShape(Library::createTorus(1.0f, 0.03f, 80, 12).rotated(Rotationf::Predefined::X_270));
 	rotateMesh = new IndexedMesh(rotateShape);
-	rotateMesh->addUniformBuffer(uniformBuffer);
 
 	// Scale shape init
 	scaleShape = VisualShape::generateSplitNormalsShape(createBoxOnStick(0.2f, 0.03f).rotated(Rotationf::Predefined::X_270));
 	scaleMesh = new IndexedMesh(scaleShape);
-	scaleMesh->addUniformBuffer(uniformBuffer);
 	scaleCenterShape = VisualShape::generateSplitNormalsShape(Library::createCube(0.2f));
 	scaleCenterMesh = new IndexedMesh(scaleCenterShape);
 
 	// Translate shape init
 	translateShape = VisualShape::generateSplitNormalsShape(createArrow(0.3f, 0.07f, 0.03f).rotated(Rotationf::Predefined::X_270));
 	translateMesh = new IndexedMesh(translateShape);
-	translateMesh->addUniformBuffer(uniformBuffer);
 	translateCenterShape = VisualShape::generateSmoothNormalsShape(Library::createSphere(0.13f, 3));
 	translateCenterMesh = new IndexedMesh(translateCenterShape);
 

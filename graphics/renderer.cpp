@@ -269,15 +269,15 @@ void scissor(int x, int y, int width, int height) {
 	glScissor(x, y, width, height);
 }
 
-void drawElements(GLFLAG mode, size_t count, GLFLAG type, const void* offset) {
+void drawElements(GLFLAG mode, std::size_t count, GLFLAG type, const void* offset) {
 	glDrawElements(mode, count, type, offset);
 }
 
-void drawElementsInstanced(GLFLAG mode, size_t count, GLFLAG type, const void* offset, size_t primitives) {
+void drawElementsInstanced(GLFLAG mode, std::size_t count, GLFLAG type, const void* offset, std::size_t primitives) {
 	glDrawElementsInstanced(mode, count, type, offset, primitives);
 }
 
-void drawArrays(GLFLAG mode, int first, size_t count) {
+void drawArrays(GLFLAG mode, int first, std::size_t count) {
 	glDrawArrays(mode, first, count);
 }
 

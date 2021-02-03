@@ -138,14 +138,9 @@ void init() {
 
 
 VisualData addMeshShape(const VisualShape& shape) {
-	int size = (int) meshes.size();
+	std::size_t size = meshes.size();
 	
 	IndexedMesh* mesh = new IndexedMesh(shape);
-
-	// Todo move somewhere else
-	VertexBuffer* uniformBuffer = new VertexBuffer(DEFAULT_UNIFORM_BUFFER_LAYOUT, nullptr, 0, Renderer::STREAM_DRAW);
-	mesh->addUniformBuffer(uniformBuffer);
-
 	meshes.push_back(mesh);
 
 	return VisualData { size, shape.uvs != nullptr, shape.normals != nullptr };

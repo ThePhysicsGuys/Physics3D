@@ -8,8 +8,8 @@ namespace P3D::Graphics {
 
 class VertexBuffer : public Bindable {
 private:
+	std::size_t currentSize;
 	std::size_t currentCapacity;
-	size_t currentSize;
 
 public:
 	BufferLayout layout;

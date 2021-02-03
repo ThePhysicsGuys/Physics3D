@@ -68,8 +68,11 @@ class Registry {
 	
 public:
 	Registry() = default;
+	~Registry() = default;
+	Registry(Registry&&) = delete;
 	Registry(const Registry&) = delete;
 	Registry& operator=(const Registry&) = delete;
+	Registry& operator=(Registry&&) = delete;
 	
 	//-------------------------------------------------------------------------------------//
 	// Types                                                                               //

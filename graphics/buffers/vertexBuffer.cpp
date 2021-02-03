@@ -6,12 +6,13 @@
 
 namespace P3D::Graphics {
 
-VertexBuffer::VertexBuffer() : Bindable(0) {
+VertexBuffer::VertexBuffer() : Bindable(), currentSize(0), currentCapacity(0), layout(BufferLayout()) {
 	Log::debug("Created empty vertex buffer");
 };
 
-VertexBuffer::VertexBuffer(const BufferLayout& layout, const void* data, size_t sizeInBytes, GLFLAG mode) : Bindable(), currentCapacity(sizeInBytes), currentSize(sizeInBytes), layout(layout) {
+VertexBuffer::VertexBuffer(const BufferLayout& layout, const void* data, size_t sizeInBytes, GLFLAG mode) : Bindable(), currentSize(sizeInBytes), currentCapacity(sizeInBytes), layout(layout) {
 	glGenBuffers(1, &id);
+
 	bind();
 	if (sizeInBytes != 0)
 		fill(data, sizeInBytes, mode);
@@ -27,8 +28,8 @@ VertexBuffer::~VertexBuffer() {
 
 VertexBuffer::VertexBuffer(VertexBuffer&& other) :
 	Bindable(other.id),
-	currentCapacity(other.currentCapacity),
 	currentSize(other.currentSize), 
+	currentCapacity(other.currentCapacity),
 	layout(std::move(other.layout)) {
 
 	// Reset to prevent destruction by rvalue
@@ -50,6 +51,9 @@ VertexBuffer& VertexBuffer::operator=(VertexBuffer&& other) {
 void VertexBuffer::fill(const void* data, std::size_t sizeInBytes, GLFLAG mode) {
 	currentSize = sizeInBytes;
 	currentCapacity = sizeInBytes;
+
+	if (currentSize == 0)
+		return;
 
 	bind();
 	glBufferData(GL_ARRAY_BUFFER, sizeInBytes, data, mode);

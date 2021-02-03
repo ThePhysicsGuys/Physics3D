@@ -15,22 +15,18 @@
 #include "../graphics/meshRegistry.h"
 
 #include "../graphics/mesh/indexedMesh.h"
-#include "../graphics/meshLibrary.h"
 #include "../graphics/debug/visualDebug.h"
 
-#include "../graphics/path/path3D.h"
-#include "../graphics/batch/batch.h"
-#include "../graphics/batch/batchConfig.h"
-#include "../graphics/resource/textureResource.h"
 #include "../graphics/gui/color.h"
 
 #include "../physics/math/linalg/vec.h"
 #include "../physics/sharedLockGuard.h"
 #include "../physics/misc/filters/visibilityFilter.h"
-#include "../physics/math/mathUtil.h"
 
 #include "../util/resource/resourceManager.h"
 #include "../layer/shadowLayer.h"
+
+#include "../graphics/batch/instanceBatchManager.h"
 
 namespace P3D::Application {
 
@@ -98,6 +94,8 @@ static Color getAlbedoForPart(Screen* screen, ExtendedPart* part) {
 	return computedAmbient;
 }
 
+InstanceBatchManager<ModelLayer::Uniform>* manager = nullptr;
+
 void ModelLayer::onInit(Engine::Registry64& registry) {
 	using namespace Graphics;
 	Screen* screen = static_cast<Screen*>(this->ptr);
@@ -113,6 +111,8 @@ void ModelLayer::onInit(Engine::Registry64& registry) {
 	Shaders::basicShader.updateTexture(false);
 	Shaders::instanceShader.updateLight(lights);
 	Shaders::instanceShader.updateTexture(false);
+
+	manager = new InstanceBatchManager<ModelLayer::Uniform>(DEFAULT_UNIFORM_BUFFER_LAYOUT);
 }
 
 void ModelLayer::onUpdate(Engine::Registry64& registry) {
@@ -122,10 +122,10 @@ void ModelLayer::onUpdate(Engine::Registry64& registry) {
 void ModelLayer::onEvent(Engine::Registry64& registry, Engine::Event& event) {
 
 }
-
+/*
 void ModelLayer::onRender(Engine::Registry64& registry) {
 	using namespace Graphics;
-	using namespace Graphics::Renderer;
+	using namespace Renderer;
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
 	beginScene();
@@ -144,8 +144,8 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 	ShadowLayer::lightView = lookAt(from, to);
 	ShadowLayer::lighSpaceMatrix = ShadowLayer::lightProjection * ShadowLayer::lightView;
 
-	Renderer::activeTexture(1);
-	Renderer::bindTexture2D(ShadowLayer::depthMap);
+	activeTexture(1);
+	bindTexture2D(ShadowLayer::depthMap);
 	Shaders::instanceShader.setUniform("shadowMap", 1);
 	Shaders::instanceShader.setUniform("lightMatrix", ShadowLayer::lighSpaceMatrix);
 	Shaders::instanceShader.updateSunDirection(sunDirection);
@@ -163,8 +163,8 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 		for (auto entity : view) {
 			Ref<Comp::Model> model = view.get<Comp::Model>(entity);
 			if (!filter(*model->part))
-				continue;	
-			
+				continue;
+
 			Ref<Comp::Mesh> mesh = registry.get<Comp::Mesh>(entity);
 			if (!mesh.valid())
 				continue;
@@ -172,12 +172,12 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 			Comp::Material material = registry.getOr<Comp::Material>(entity, Comp::Material());
 			if (material.albedo.w < 1.0f) {
 				double distance = lengthSquared(Vec3(screen->camera.cframe.position - model->part->getPosition()));
-				transparentParts.insert(std::make_pair(distance , model->part));
+				transparentParts.insert(std::make_pair(distance, model->part));
 			} else {
 				visibleParts.insert(std::make_pair(mesh->id, model->part));
 				maxMeshCount = std::max(maxMeshCount, ++meshCounter[mesh->id]);
 			}
-			
+
 		}
 
 		// Ensure correct size
@@ -188,7 +188,7 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 		// Render normal meshes
 		Shaders::instanceShader.bind();
 		for (const auto& [id, count] : meshCounter) {
-			if (id == -1) 
+			if (id == -1)
 				continue;
 
 			// Collect uniforms
@@ -243,6 +243,112 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 			Ref<Comp::Mesh> mesh = registry.get<Comp::Mesh>(screen->selectedPart->entity);
 			if (mesh.valid())
 				Graphics::MeshRegistry::meshes[mesh->id]->render();
+		}
+		});
+
+	endScene();
+}
+*/
+		
+void ModelLayer::onRender(Engine::Registry64& registry) {
+	using namespace Graphics;
+	using namespace Renderer;
+	Screen* screen = static_cast<Screen*>(this->ptr);
+
+	beginScene();
+
+	graphicsMeasure.mark(UPDATE);
+	Shaders::debugShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
+	Shaders::basicShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
+	Shaders::instanceShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
+
+	// Shadow
+	Vec3f from = { -10, 10, -10 };
+	Vec3f to = { 0, 0, 0 };
+	Vec3f sunDirection = to - from;
+	ShadowLayer::lightView = lookAt(from, to);
+	ShadowLayer::lighSpaceMatrix = ShadowLayer::lightProjection * ShadowLayer::lightView;
+
+	activeTexture(1);
+	bindTexture2D(ShadowLayer::depthMap);
+	Shaders::instanceShader.setUniform("shadowMap", 1);
+	Shaders::instanceShader.setUniform("lightMatrix", ShadowLayer::lighSpaceMatrix);
+	Shaders::instanceShader.updateSunDirection(sunDirection);
+
+	// Filter on mesh ID and transparency
+	size_t maxMeshCount = 0;
+	std::map<int, size_t> meshCounter;
+	std::multimap<int, ExtendedPart*> visibleParts;
+	std::map<double, ExtendedPart*> transparentParts;
+	graphicsMeasure.mark(PHYSICALS);
+	screen->world->syncReadOnlyOperation([this, &visibleParts, &transparentParts, &meshCounter, &maxMeshCount, screen, &registry] () {
+		VisibilityFilter filter = VisibilityFilter::forWindow(screen->camera.cframe.position, screen->camera.getForwardDirection(), screen->camera.getUpDirection(), screen->camera.fov, screen->camera.aspect, screen->camera.zfar);
+
+		auto view = registry.view<Comp::Model>();
+		for (auto entity : view) {
+			Ref<Comp::Model> model = view.get<Comp::Model>(entity);
+			if (!filter(*model->part))
+				continue;	
+			
+			Ref<Comp::Mesh> mesh = registry.get<Comp::Mesh>(entity);
+			if (!mesh.valid())
+				continue;
+
+			Comp::Material material = registry.getOr<Comp::Material>(entity, Comp::Material());
+			if (material.albedo.w < 1.0f) {
+				double distance = lengthSquared(Vec3(screen->camera.cframe.position - model->part->getPosition()));
+				transparentParts.insert(std::make_pair(distance , model->part));
+			} else {
+				visibleParts.insert(std::make_pair(mesh->id, model->part));
+				maxMeshCount = std::max(maxMeshCount, ++meshCounter[mesh->id]);
+
+				Mat4f modelMatrix = model->part->getCFrame().asMat4WithPreScale(model->part->hitbox.scale);
+				Comp::Material material = registry.getOr<Comp::Material>(model->part->entity, Comp::Material());
+				material.albedo += getAlbedoForPart(screen, model->part);
+
+				Uniform uniform {
+					modelMatrix,
+					material.albedo,
+					material.metalness,
+					material.roughness,
+					material.ao
+				};
+				
+				manager->add(mesh->id, uniform);
+			}
+			
+		}
+
+		Shaders::instanceShader.bind();
+		manager->submit();
+		
+
+		// Render transparent meshes
+		Shaders::basicShader.bind();
+		enableBlending();
+		for (auto iterator = transparentParts.rbegin(); iterator != transparentParts.rend(); ++iterator) {
+			ExtendedPart* part = iterator->second;
+
+			Ref<Comp::Mesh> mesh = registry.get<Comp::Mesh>(part->entity);
+			if (!mesh.valid())
+				continue;
+
+			if (mesh->id == -1)
+				continue;
+
+			Comp::Material material = registry.getOr<Comp::Material>(part->entity, Comp::Material());
+			material.albedo += getAlbedoForPart(screen, part);
+
+			Shaders::basicShader.updateMaterial(material);
+			Shaders::basicShader.updatePart(*part);
+			MeshRegistry::meshes[mesh->id]->render(mesh->mode);
+		}
+
+		if (screen->selectedPart) {
+			Shaders::debugShader.updateModel(screen->selectedPart->getCFrame().asMat4WithPreScale(screen->selectedPart->hitbox.scale));
+			Ref<Comp::Mesh> mesh = registry.get<Comp::Mesh>(screen->selectedPart->entity);
+			if (mesh.valid())
+				MeshRegistry::meshes[mesh->id]->render();
 		}
 	});
 

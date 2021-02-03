@@ -5,7 +5,7 @@ namespace P3D {
 struct VisualData {
 
 	// The mesh id in the mesh registry
-	int id;
+	std::size_t id;
 
 	// Whether the mesh has UV coordinates
 	bool hasUVs;

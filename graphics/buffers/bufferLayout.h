@@ -24,7 +24,7 @@ struct Info {
 	// size of type in bytes
 	int size;
 
-	Info(const std::string& name, int type, int count, int size) : name(name), type(type), count(count), size(size) {};
+	Info(const std::string& name, int type, int count, int size) : name(name), type(type), count(count), size(size) {}
 
 	bool operator==(const Info& other) const {
 		return other.name == name;
@@ -53,21 +53,21 @@ struct BufferElement {
 	bool instanced;
 	bool normalized;
 
-	BufferElement(const std::string& name, BufferDataType::Info info, bool instanced = false, bool normalized = false) : name(name), info(info), instanced(instanced), normalized(normalized) {}
+	BufferElement(const std::string& name, const BufferDataType::Info& info, bool instanced = false, bool normalized = false) : name(name), info(info), instanced(instanced), normalized(normalized) {}
 };
 
 struct BufferLayout {
 	std::vector<BufferElement> elements;
 	int stride;
 
-	BufferLayout(std::vector<BufferElement> elements) : elements(elements), stride(0) {
+	BufferLayout(const std::vector<BufferElement>& elements) : elements(elements), stride(0) {
 		for (BufferElement& element : this->elements) {
 			int multiplier = (element.info == BufferDataType::MAT2 || element.info == BufferDataType::MAT3 || element.info == BufferDataType::MAT4) ? element.info.count : 1;
 			stride += element.info.size * multiplier;
 		}
 	}
 	
-	BufferLayout() : elements({}), stride(0) {};
+	BufferLayout() : elements({}), stride(0) {}
 };
 
 };

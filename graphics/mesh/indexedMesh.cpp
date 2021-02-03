@@ -103,7 +103,7 @@ IndexedMesh::~IndexedMesh() {
 
 IndexedMesh::IndexedMesh(IndexedMesh&& other) {
 	vao = other.vao;
-
+	
 	indexBuffer = other.indexBuffer;
 	vertexBuffer = other.vertexBuffer;
 	normalBuffer = other.normalBuffer;
