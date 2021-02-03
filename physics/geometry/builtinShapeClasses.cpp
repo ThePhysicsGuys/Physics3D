@@ -255,6 +255,26 @@ Polyhedron PolyhedronShapeClass::asPolyhedron() const {
 	return poly;
 }
 
+BoundingBox PolyhedronShapeClassAVX::getBounds(const Rotation& rotation, const DiagonalMat3& scale) const {
+	return poly.getBoundsAVX(Mat3f(rotation.asRotationMatrix() * scale));
+}
+Vec3f PolyhedronShapeClassAVX::furthestInDirection(const Vec3f& direction) const {
+	return poly.furthestInDirectionAVX(direction);
+}
+
+BoundingBox PolyhedronShapeClassSSE::getBounds(const Rotation& rotation, const DiagonalMat3& scale) const {
+	return poly.getBoundsSSE(Mat3f(rotation.asRotationMatrix() * scale));
+}
+Vec3f PolyhedronShapeClassSSE::furthestInDirection(const Vec3f& direction) const {
+	return poly.furthestInDirectionSSE(direction);
+}
+
+BoundingBox PolyhedronShapeClassFallback::getBounds(const Rotation& rotation, const DiagonalMat3& scale) const {
+	return poly.getBoundsFallback(Mat3f(rotation.asRotationMatrix() * scale));
+}
+Vec3f PolyhedronShapeClassFallback::furthestInDirection(const Vec3f& direction) const {
+	return poly.furthestInDirectionFallback(direction);
+}
 
 const CubeClass CubeClass::instance;
 const SphereClass SphereClass::instance;

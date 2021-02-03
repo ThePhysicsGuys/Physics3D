@@ -13,6 +13,8 @@
 #include "../physics/motion.h"
 #include "../physics/relativeMotion.h"
 
+#include "../physics/geometry/boundingBox.h"
+
 #include <utility>
 #include <array>
 #include <vector>
@@ -210,6 +212,12 @@ bool tolerantEquals(const RelativeMotion& first, const RelativeMotion& second, T
 		tolerantEquals(first.locationOfRelativeMotion, second.locationOfRelativeMotion, tolerance);
 }
 
+template<typename Tol>
+bool tolerantEquals(const BoundingBox& first, const BoundingBox& second, Tol tolerance) {
+	return tolerantEquals(first.min, second.min, tolerance) &&
+		tolerantEquals(first.max, second.max, tolerance);
+}
+
 template<typename T1, typename T2, typename Tol>
 bool tolerantEquals(const std::pair<T1, T2>& first, const std::pair<T1, T2>& second, Tol tolerance) {
 	return tolerantEquals(first.first, second.first, tolerance) && 
@@ -235,4 +243,33 @@ bool tolerantEquals(const std::vector<T>& first, const std::vector<T>& second, T
 		}
 	}
 	return true;
+}
+
+template<typename T, int Height, int Width, typename Tol>
+bool tolerantEquals(const Matrix<T, Height, Width>& first, const UnmanagedHorizontalFixedMatrix<T, Width>& second, Tol tolerance) {
+	assert(first.height() == second.height());
+	for(size_t row = 0; row < Height; row++)
+		for(size_t col = 0; col < Width; col++)
+			if(!tolerantEquals(first(row, col), second(row, col), tolerance))
+				return false;
+
+	return true;
+}
+template<typename T, int Height, int Width, typename Tol>
+bool tolerantEquals(const UnmanagedHorizontalFixedMatrix<T, Width>& second, const Matrix<T, Height, Width>& first, Tol tolerance) {
+	return tolerantEquals(first, second, tolerance);
+}
+template<typename T, int Height, int Width, typename Tol>
+bool tolerantEquals(const Matrix<T, Height, Width>& first, const UnmanagedVerticalFixedMatrix<T, Height>& second, Tol tolerance) {
+	assert(first.width() == second.width());
+	for(size_t row = 0; row < Height; row++)
+		for(size_t col = 0; col < Width; col++)
+			if(!tolerantEquals(first(row, col), second(row, col), tolerance))
+				return false;
+
+	return true;
+}
+template<typename T, int Height, int Width, typename Tol>
+bool tolerantEquals(const UnmanagedVerticalFixedMatrix<T, Height>& second, const Matrix<T, Height, Width>& first, Tol tolerance) {
+	return tolerantEquals(first, second, tolerance);
 }

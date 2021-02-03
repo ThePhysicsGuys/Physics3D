@@ -52,7 +52,7 @@ void Camera::setRotation(Vec3 rotation) {
 }
 
 Mat4f Camera::getViewRotation() {
-	return Mat4f(cframe.rotation.asRotationMatrix().transpose(), 1.0f);
+	return joinDiagonal(Mat3f(cframe.rotation.asRotationMatrix().transpose()), 1.0f);
 }
 
 void Camera::rotate(Screen& screen, double dalpha, double dbeta, double dgamma, bool leftDragging, bool accelerating) {

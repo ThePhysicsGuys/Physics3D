@@ -1,12 +1,16 @@
 #pragma once
 
+
+// this is a central class to everything else, but applications using the library don't need to include all these, as they are implementation details. 
 class Part;
 class HardConstraint;
 class RigidBody;
 class Physical;
 class ConnectedPhysical;
 class MotorizedPhysical;
+class WorldLayer;
 class WorldPrototype;
+
 #include "geometry/shape.h"
 #include "math/linalg/mat.h"
 #include "math/position.h"
@@ -40,7 +44,6 @@ struct PartIntersection {
 		exitVector(exitVector) {}
 };
 
-class WorldLayer;
 class Part {
 	friend class RigidBody;
 	friend class Physical;

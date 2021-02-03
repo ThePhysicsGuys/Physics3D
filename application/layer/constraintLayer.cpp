@@ -1,34 +1,28 @@
 #include "core.h"
 #include "constraintLayer.h"
 
-#include <typeindex>
-
-#include "../graphics/meshRegistry.h"
-
 #include "worlds.h"
 #include "../view/screen.h"
-#include "../physics/physical.h"
-#include "../physics/geometry/shapeClass.h"
-#include "../physics/misc/shapeLibrary.h"
 
 #include "../shader/shaders.h"
-#include "../physics/misc/toString.h"
 
 #include "../graphics/debug/guiDebug.h"
 #include "../graphics/renderer.h"
-
-
-#include "../physics/softconstraints/softConstraint.h"
-#include "../physics/softconstraints/ballConstraint.h"
-
-
-#include "../physics/constraints/sinusoidalPistonConstraint.h"
-#include "../physics/constraints/motorConstraint.h"
-#include "../physics/constraints/fixedConstraint.h"
 #include "../graphics/meshRegistry.h"
 
+#include "../physics/constraints/softConstraint.h"
+#include "../physics/constraints/ballConstraint.h"
+#include "../physics/hardconstraints/sinusoidalPistonConstraint.h"
+#include "../physics/hardconstraints/motorConstraint.h"
+#include "../physics/hardconstraints/fixedConstraint.h"
 
+#include "../physics/misc/toString.h"
+#include "../physics/misc/shapeLibrary.h"
 
+#include "../physics/physical.h"
+#include "../physics/geometry/shapeClass.h"
+
+#include <typeindex>
 
 namespace P3D::Application {
 

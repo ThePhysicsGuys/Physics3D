@@ -2,8 +2,8 @@
 #include "world.h"
 
 #include "misc/validityHelper.h"
-#include "physicsProfiler.h"
-#include "debug.h"
+#include "misc/debug.h"
+#include "misc/physicsProfiler.h"
 
 #include <assert.h>
 
@@ -170,61 +170,33 @@ static bool boundsSphereEarlyEnd(const DiagonalMat3& scale, const Vec3& sphereCe
 	return std::abs(sphereCenter.x) > scale[0] + sphereRadius || std::abs(sphereCenter.y) > scale[1] + sphereRadius || std::abs(sphereCenter.z) > scale[2] + sphereRadius;
 }
 
-static void runColissionTests(Part& p1, Part& p2, std::vector<Colission>& colissions) {
-	double maxRadiusBetween = p1.maxRadius + p2.maxRadius;
-
-	Vec3 deltaPosition = p1.getPosition() - p2.getPosition();
-	double distanceSqBetween = lengthSquared(deltaPosition);
-
-	if(distanceSqBetween > maxRadiusBetween * maxRadiusBetween) {
+static bool runColissionPreTests(const Part& p1, const Part& p2) {
+	Vec3 offset = p1.getPosition() - p2.getPosition();
+	if(isLongerThan(offset, p1.maxRadius + p2.maxRadius)) {
 		intersectionStatistics.addToTally(IntersectionResult::PART_DISTANCE_REJECT, 1);
-		return;
+		return false;
 	}
 	if(boundsSphereEarlyEnd(p1.hitbox.scale, p1.getCFrame().globalToLocal(p2.getPosition()), p2.maxRadius)) {
 		intersectionStatistics.addToTally(IntersectionResult::PART_BOUNDS_REJECT, 1);
-		return;
+		return false;
 	}
 	if(boundsSphereEarlyEnd(p2.hitbox.scale, p2.getCFrame().globalToLocal(p1.getPosition()), p1.maxRadius)) {
 		intersectionStatistics.addToTally(IntersectionResult::PART_BOUNDS_REJECT, 1);
-		return;
+		return false;
 	}
 
-	PartIntersection result = p1.intersects(p2);
-	if(result.intersects) {
-		intersectionStatistics.addToTally(IntersectionResult::COLISSION, 1);
-
-		colissions.push_back(Colission{&p1, &p2, result.intersection, result.exitVector});
-	} else {
-		intersectionStatistics.addToTally(IntersectionResult::GJK_REJECT, 1);
-	}
-	physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
+	return true;
 }
 
 static void recursiveFindColissionsBetween(std::vector<Colission>& colissions, const TreeNode& first, const TreeNode& second) {
 	if(!intersects(first.bounds, second.bounds)) return;
 
 	if(first.isLeafNode() && second.isLeafNode()) {
-		Part* firstObj = static_cast<Part*>(first.object);
-		Part* secondObj = static_cast<Part*>(second.object);
-#ifdef CATCH_INTERSECTION_ERRORS
-		try {
-			runColissionTests(*firstObj, *secondObj, colissions);
-		} catch(const std::exception& err) {
-			Log::fatal("Error occurred during intersection: %s", err.what());
-
-			Debug::saveIntersectionError(firstObj, secondObj, "colError");
-
-			throw err;
-		} catch(...) {
-			Log::fatal("Unknown error occured during intersection");
-
-			Debug::saveIntersectionError(firstObj, secondObj, "colError");
-
-			throw "exit";
+		Part* p1 = static_cast<Part*>(first.object);
+		Part* p2 = static_cast<Part*>(second.object);
+		if(runColissionPreTests(*p1, *p2)) {
+			colissions.push_back(Colission{p1, p2, Position(), Vec3()});
 		}
-#else
-		runColissionTests(*firstObj, *secondObj, colissions);
-#endif
 	} else {
 		bool preferFirst = computeCost(first.bounds) <= computeCost(second.bounds);
 		if(preferFirst && !first.isLeafNode() || second.isLeafNode()) {

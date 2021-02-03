@@ -6,6 +6,8 @@
 #include "../math/linalg/trigonometry.h"
 #include "builtinShapeClasses.h"
 
+#include "../../util/cpuid.h"
+
 Shape sphereShape(double radius) {
 	return Shape(&SphereClass::instance, radius * 2, radius * 2, radius * 2);
 }
@@ -23,7 +25,15 @@ Shape polyhedronShape(const Polyhedron& poly) {
 	Vec3 center = bounds.getCenter();
 	DiagonalMat3 scale{2 / bounds.getWidth(), 2 / bounds.getHeight(), 2 / bounds.getDepth()};
 
-	PolyhedronShapeClass* shapeClass = new PolyhedronShapeClass(poly.translatedAndScaled(-center, scale));
+	PolyhedronShapeClass* shapeClass;
+
+	if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::AVX | Util::CPUIDCheck::AVX2 | Util::CPUIDCheck::FMA)) {
+		shapeClass = new PolyhedronShapeClassAVX(poly.translatedAndScaled(-center, scale));
+	} else if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::SSE | Util::CPUIDCheck::SSE2)) {
+		shapeClass = new PolyhedronShapeClassSSE(poly.translatedAndScaled(-center, scale));
+	} else {
+		shapeClass = new PolyhedronShapeClassFallback(poly.translatedAndScaled(-center, scale));
+	}
 
 	return Shape(shapeClass, bounds.getWidth(), bounds.getHeight(), bounds.getDepth());
 }

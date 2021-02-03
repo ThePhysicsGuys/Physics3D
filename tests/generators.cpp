@@ -1,24 +1,12 @@
 #include "generators.h"
 
-#include <random>
 #include <vector>
 
-#include "../physics/constraints/motorConstraint.h"
-#include "../physics/constraints/sinusoidalPistonConstraint.h"
+#include "../physics/hardconstraints/motorConstraint.h"
+#include "../physics/hardconstraints/sinusoidalPistonConstraint.h"
 
-/*template<std::size_t i, typename FirstFunc, typename... Funcs>
-auto getAndRun(FirstFunc item, Funcs... generators) {
-	if constexpr(i == 0) {
-		return item();
-	} else {
-		return getAndRun<
-	}
-}
-
-template<typename... Funcs>
-auto oneof(Funcs... generators) {
-	return generators[rand() % sizeof...(Funcs)]();
-}*/
+#include "../physics/geometry/convexShapeBuilder.h"
+#include "../physics/misc/toString.h"
 
 int generateInt(int max) {
 	return rand() % max;
@@ -29,6 +17,9 @@ size_t generateSize_t(size_t max) {
 double generateDouble() {
 	return rand() * 2.0 / RAND_MAX;
 }
+float generateFloat() {
+	return rand() * 2.0f / RAND_MAX;
+}
 
 bool generateBool() {
 	return rand() % 2 == 0;
@@ -38,8 +29,67 @@ Shape generateShape() {
 	return boxShape(generateDouble(), generateDouble(), generateDouble());
 }
 
-Vec3 generateVec3() {
-	return Vec3(generateDouble(), generateDouble(), generateDouble());
+Polyhedron generateConvexPolyhedron() {
+	constexpr size_t MAX_POINT_COINT = 50;
+	Vec3f vecBuf[MAX_POINT_COINT * 10]{generateVec3f(), generateVec3f(), generateVec3f(), generateVec3f()};
+	if((vecBuf[1] - vecBuf[0]) % (vecBuf[2] - vecBuf[0]) * vecBuf[3] > 0) {
+		for(int i = 0; i < 4; i++) {
+			vecBuf[i].z = -vecBuf[i].z;
+		}
+	}
+	Triangle triangleBuf[MAX_POINT_COINT*2 * 10]{{0,1,2}, {0,2,3}, {0,3,1}, {3,2,1}};
+	TriangleNeighbors neighborBuf[MAX_POINT_COINT * 2 * 10];
+	int removalBuf[MAX_POINT_COINT * 2 * 10];
+	EdgePiece edgeBuf[MAX_POINT_COINT * 4 * 10];
+
+	ConvexShapeBuilder builder(vecBuf, triangleBuf, 4, 4, neighborBuf, removalBuf, edgeBuf);
+
+	int numExtraPoints = rand() % (MAX_POINT_COINT - 4);
+	for(int i = 0; i < numExtraPoints; i++) {
+		builder.addPoint(generateVec3f());
+	}
+
+	return builder.toPolyhedron();
+}
+
+static Triangle finishTriangle(int maxIndex, int firstIndex) {
+	int secondIndex, thirdIndex;
+
+	do {
+		secondIndex = generateInt(maxIndex);
+	} while(secondIndex == firstIndex);
+
+	do {
+		thirdIndex = generateInt(maxIndex);
+	} while(thirdIndex == firstIndex || thirdIndex == secondIndex);
+
+	return Triangle{firstIndex, secondIndex, thirdIndex};
+}
+
+Triangle generateTriangle(int maxIndex) {
+	int firstIndex = generateInt(maxIndex);
+
+	return finishTriangle(maxIndex, firstIndex);
+}
+
+TriangleMesh generateTriangleMesh() {
+	int numVertices = generateInt(46) + 4;
+	int numTriangles = generateInt(100) + numVertices;
+	EditableMesh mesh(numVertices, numTriangles);
+
+	for(int i = 0; i < numVertices; i++) {
+		mesh.setVertex(i, generateVec3f());
+	}
+
+	for(int i = 0; i < numVertices; i++) {
+		mesh.setTriangle(i, finishTriangle(numVertices, i)); // ensure one triangle per vertex
+	}
+
+	for(int i = numVertices; i < numTriangles; i++) {
+		mesh.setTriangle(i, generateTriangle(numVertices)); // extra triangles
+	}
+	
+	return TriangleMesh(std::move(mesh));
 }
 
 Position generatePosition() {

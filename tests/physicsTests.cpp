@@ -15,10 +15,10 @@
 #include "../physics/math/linalg/eigen.h"
 #include "../physics/geometry/shape.h"
 #include "../physics/geometry/shapeCreation.h"
-#include "../physics/misc/gravityForce.h"
-#include "../physics/constraints/motorConstraint.h"
-#include "../physics/constraints/sinusoidalPistonConstraint.h"
-#include "../physics/constraints/fixedConstraint.h"
+#include "../physics/externalforces/gravityForce.h"
+#include "../physics/hardconstraints/motorConstraint.h"
+#include "../physics/hardconstraints/sinusoidalPistonConstraint.h"
+#include "../physics/hardconstraints/fixedConstraint.h"
 #include "../util/log.h"
 
 

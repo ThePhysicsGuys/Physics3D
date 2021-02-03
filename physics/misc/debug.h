@@ -1,9 +1,9 @@
 #pragma once
 
-#include "math/linalg/vec.h"
-#include "math/position.h"
-#include "math/cframe.h"
-#include "math/globalCFrame.h"
+#include "../math/linalg/vec.h"
+#include "../math/position.h"
+#include "../math/cframe.h"
+#include "../math/globalCFrame.h"
 
 class Part;
 
@@ -44,5 +44,5 @@ namespace Debug {
 	void setCFrameLogAction(void(*logger)(CFrame frame, CFrameType type));
 	void setShapeLogAction(void(*logger)(const Polyhedron& shape, const GlobalCFrame& location));
 
-	void saveIntersectionError(const Part* first, const Part* second, const char* reason);
+	void saveIntersectionError(const Part& first, const Part& second, const char* reason);
 }

@@ -4,7 +4,7 @@
 #include <queue>
 
 #include "../gui/component.h"
-#include "../physics/profiling.h"
+#include "../physics/misc/profiling.h"
 #include "../physics/math/linalg/largeMatrix.h"
 
 template<typename T>

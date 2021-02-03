@@ -1,8 +1,6 @@
 
 
 #include "springLink.h"
-#include <cstdlib>
-
 
 SpringLink::SpringLink(AttachedPart part1, AttachedPart part2, double restLength, double stiffness) :
 	SoftLink{ part1, part2 },

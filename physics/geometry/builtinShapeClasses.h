@@ -59,6 +59,7 @@ public:
 
 
 class PolyhedronShapeClass : public ShapeClass {
+protected:
 	Polyhedron poly;
 public:
 	PolyhedronShapeClass(Polyhedron&& poly);
@@ -70,4 +71,28 @@ public:
 	virtual double getScaledMaxRadiusSq(DiagonalMat3 scale) const override;
 	virtual Vec3f furthestInDirection(const Vec3f& direction) const override;
 	virtual Polyhedron asPolyhedron() const override;
+};
+
+class PolyhedronShapeClassAVX : public PolyhedronShapeClass {
+public:
+	using PolyhedronShapeClass::PolyhedronShapeClass;
+
+	virtual BoundingBox getBounds(const Rotation& rotation, const DiagonalMat3& scale) const override;
+	virtual Vec3f furthestInDirection(const Vec3f& direction) const override;
+};
+
+class PolyhedronShapeClassSSE : public PolyhedronShapeClass {
+public:
+	using PolyhedronShapeClass::PolyhedronShapeClass;
+
+	virtual BoundingBox getBounds(const Rotation& rotation, const DiagonalMat3& scale) const override;
+	virtual Vec3f furthestInDirection(const Vec3f& direction) const override;
+};
+
+class PolyhedronShapeClassFallback : public PolyhedronShapeClass {
+public:
+	using PolyhedronShapeClass::PolyhedronShapeClass;
+
+	virtual BoundingBox getBounds(const Rotation& rotation, const DiagonalMat3& scale) const override;
+	virtual Vec3f furthestInDirection(const Vec3f& direction) const override;
 };

@@ -14,9 +14,9 @@ struct PhysicalConstraint {
 	
 	Physical* physA;
 	Physical* physB;
-
-	void getMatrices(UnmanagedVerticalFixedMatrix<double, 6>& parameterToMotionMatrixA, UnmanagedVerticalFixedMatrix<double, 6> &parameterToMotionMatrixB, UnmanagedHorizontalFixedMatrix<double, 6>& motionToEquationMatrixA, UnmanagedHorizontalFixedMatrix<double, 6>& motionToEquationMatrixB, UnmanagedHorizontalFixedMatrix<double, NUMBER_OF_ERROR_DERIVATIVES>& errorValue) const;
-
+	
+	int maxNumberOfParameters() const;
+	ConstraintMatrixPack getMatrices(double* matrixBuf, double* errorBuf) const;
 };
 
 struct ConstraintGroup {

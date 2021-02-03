@@ -16,7 +16,7 @@
 #include "view/screen.h"
 #include "ecs/components.h"
 
-#include "../physics/softconstraints/ballConstraint.h"
+#include "../physics/constraints/ballConstraint.h"
 
 namespace P3D::Application {
 

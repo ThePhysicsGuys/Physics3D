@@ -101,7 +101,7 @@ public:
 		This is because the position is unsafely cast to a Vec3. 
 	*/
 	Mat4 asMat4() const {
-		return Mat4(rotation.asRotationMatrix(), castPositionToVec3(this->position), Vec3(0.0, 0.0, 0.0), 1.0);
+		return join(rotation.asRotationMatrix(), castPositionToVec3(this->position), Vec3(0.0, 0.0, 0.0), 1.0);
 	}
 
 	/*
@@ -112,7 +112,7 @@ public:
 		This is because the position is unsafely cast to a Vec3. 
 	*/
 	Mat4 asMat4WithPreScale(const DiagonalMat3& scale) const {
-		return Mat4(rotation.asRotationMatrix() * scale, castPositionToVec3(this->position), Vec3(0.0, 0.0, 0.0), 1.0);
+		return join(rotation.asRotationMatrix() * scale, castPositionToVec3(this->position), Vec3(0.0, 0.0, 0.0), 1.0);
 	}
 
 	/*
@@ -123,7 +123,7 @@ public:
 		This is because the position is unsafely cast to a Vec3. 
 	*/
 	Mat4 asMat4WithPostScale(const DiagonalMat3& scale) const {
-		return Mat4(scale * rotation.asRotationMatrix(), castPositionToVec3(this->position), Vec3(0.0, 0.0, 0.0), 1.0);
+		return join(scale * rotation.asRotationMatrix(), castPositionToVec3(this->position), Vec3(0.0, 0.0, 0.0), 1.0);
 	}
 };
 

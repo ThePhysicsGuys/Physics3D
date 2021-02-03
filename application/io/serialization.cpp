@@ -12,7 +12,7 @@
 #include "../physics/world.h"
 #include "../worlds.h"
 
-#include "../physics/misc/gravityForce.h"
+#include "../physics/externalforces/gravityForce.h"
 #include "../physics/misc/toString.h"
 #include "../physics/misc/serialization.h"
 

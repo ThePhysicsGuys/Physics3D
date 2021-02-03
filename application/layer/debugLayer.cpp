@@ -34,7 +34,7 @@ Vec4f colors[] {
 
 void renderSphere(double radius, const Position& position, const Color& color) {
 	Shaders::basicShader.updateMaterial(Comp::Material(color));
-	Shaders::basicShader.updateModel(Mat4f(Mat3f::IDENTITY() * float(radius), castPositionToVec3f(position), Vec3f(0.0f,0.0f,0.0f),1.0f));
+	Shaders::basicShader.updateModel(join(Mat3f::IDENTITY() * float(radius), castPositionToVec3f(position), Vec3f(0.0f,0.0f,0.0f),1.0f));
 
 	Graphics::Library::sphere->render();
 }

@@ -11,82 +11,71 @@
 #include "../../util/log.h"
 
 #include <fstream>
+#include <cstddef>
 
 #include <map>
 
-
-void PhysicalConstraint::getMatrices(UnmanagedVerticalFixedMatrix<double, 6>& parameterToMotionMatrixA, UnmanagedVerticalFixedMatrix<double, 6>& parameterToMotionMatrixB, UnmanagedHorizontalFixedMatrix<double, 6>& motionToEquationMatrixA, UnmanagedHorizontalFixedMatrix<double, 6>& motionToEquationMatrixB, UnmanagedHorizontalFixedMatrix<double, NUMBER_OF_ERROR_DERIVATIVES>& errorValue) const {
-	constraint->getMatrices(*physA, *physB, parameterToMotionMatrixA, parameterToMotionMatrixB, motionToEquationMatrixA, motionToEquationMatrixB, errorValue);	
+int PhysicalConstraint::maxNumberOfParameters() const {
+	return constraint->maxNumberOfParameters();
 }
-
+static PhysicalInfo getInfo(const Physical& phys) {
+	GlobalCFrame cf = phys.getCFrame();
+	Vec3 relativeCOM = phys.mainPhysical->totalCenterOfMass - (cf.getPosition() - phys.mainPhysical->getCFrame().getPosition());
+	return PhysicalInfo{cf, phys.getMotion(), 1 / phys.mainPhysical->totalMass, phys.mainPhysical->momentResponse, relativeCOM};
+}
+ConstraintMatrixPack PhysicalConstraint::getMatrices(double* matrixBuf, double* errorBuf) const {
+	return constraint->getMatrices(getInfo(*physA), getInfo(*physB), matrixBuf, errorBuf);
+}
 
 void ConstraintGroup::add(Physical* first, Physical* second, Constraint* constraint) {
 	this->constraints.push_back(PhysicalConstraint(first, second, constraint));
 }
 
-
 void ConstraintGroup::apply() const {
-	size_t numberOfParameters = 0;
-	UnmanagedVerticalFixedMatrix<double, 6>* parameterToMotion = new UnmanagedVerticalFixedMatrix<double, 6>[constraints.size() * 2];
-	UnmanagedHorizontalFixedMatrix<double, 6>* motionToEquation = new UnmanagedHorizontalFixedMatrix<double, 6>[constraints.size() * 2];
-	for(size_t i = 0; i < constraints.size(); i++) {
-		int numParameters = constraints[i].constraint->numberOfParameters();
-		parameterToMotion[i * 2].cols = numParameters;
-		parameterToMotion[i * 2 + 1].cols = numParameters;
-		motionToEquation[i * 2].rows = numParameters;
-		motionToEquation[i * 2 + 1].rows = numParameters;
-		numberOfParameters += numParameters;
+	std::size_t maxNumberOfParameters = 0;
+	ConstraintMatrixPack* constraintMatrices = new ConstraintMatrixPack[constraints.size()];
+
+	for(std::size_t i = 0; i < constraints.size(); i++) {
+		maxNumberOfParameters += constraints[i].constraint->maxNumberOfParameters();
 	}
 
-	double* matrixBuffer = new double[6 * numberOfParameters * 4];
-	HorizontalFixedMatrix<double, NUMBER_OF_ERROR_DERIVATIVES> vectorToSolve(numberOfParameters);
+	double* matrixBuffer = new double[std::size_t(24) * maxNumberOfParameters];
+	double* errorBuffer = new double[std::size_t(NUMBER_OF_ERROR_DERIVATIVES) * maxNumberOfParameters];
 
-	{
-		size_t curParameterIndex = 0;
-		for(size_t i = 0; i < constraints.size(); i++) {
-			size_t curSize = parameterToMotion[i].cols;
-			parameterToMotion[i * 2].data = matrixBuffer + 6 * 4 * curParameterIndex;
-			parameterToMotion[i * 2 + 1].data = matrixBuffer + 6 * (4 * curParameterIndex + curSize);
-			motionToEquation[i * 2].data = matrixBuffer + 6 * (4 * curParameterIndex + 2 * curSize);
-			motionToEquation[i * 2 + 1].data = matrixBuffer + 6 * (4 * curParameterIndex + 3 * curSize);
+	std::size_t numberOfParams = 0;
+	for(std::size_t i = 0; i < constraints.size(); i++) {
+		constraintMatrices[i] = constraints[i].getMatrices(matrixBuffer + std::size_t(24) * numberOfParams, errorBuffer + std::size_t(NUMBER_OF_ERROR_DERIVATIVES) * numberOfParams);
 
-			// writing to errorVec which writes to vectorToSolve
-			UnmanagedHorizontalFixedMatrix<double, NUMBER_OF_ERROR_DERIVATIVES> errorVec = vectorToSolve.subRows(curParameterIndex, curSize);
-			constraints[i].getMatrices(parameterToMotion[i * 2], parameterToMotion[i * 2 + 1], motionToEquation[i * 2], motionToEquation[i * 2 + 1], errorVec);
-
-			curParameterIndex += curSize;
-		}
-		assert(curParameterIndex == numberOfParameters);
+		numberOfParams += constraintMatrices[i].getSize();
 	}
 
-	LargeMatrix<double> systemToSolve(numberOfParameters, numberOfParameters);
+	UnmanagedHorizontalFixedMatrix<double, NUMBER_OF_ERROR_DERIVATIVES> vectorToSolve(errorBuffer, maxNumberOfParameters);
 
+	LargeMatrix<double> systemToSolve(numberOfParams, numberOfParams);
 	{
-		size_t curColIndex = 0;
-		for(size_t blockCol = 0; blockCol < constraints.size(); blockCol++) {
-			int colSize = parameterToMotion[blockCol * 2].cols;
+		std::size_t curColIndex = 0;
+		for(std::size_t blockCol = 0; blockCol < constraints.size(); blockCol++) {
+			int colSize = constraintMatrices[blockCol].getSize();
 
 			MotorizedPhysical* mPhysA = constraints[blockCol].physA->mainPhysical;
 			MotorizedPhysical* mPhysB = constraints[blockCol].physB->mainPhysical;
 
-			const UnmanagedHorizontalFixedMatrix<double, 6> & motionToEq1 = motionToEquation[blockCol * 2];
-			const UnmanagedHorizontalFixedMatrix<double, 6> & motionToEq2 = motionToEquation[blockCol * 2 + 1];
+			const UnmanagedHorizontalFixedMatrix<double, 6> motionToEq1 = constraintMatrices[blockCol].getMotionToEquationMatrixA();
+			const UnmanagedHorizontalFixedMatrix<double, 6> motionToEq2 = constraintMatrices[blockCol].getMotionToEquationMatrixB();
 
-			size_t curRowIndex = 0;
-			for(size_t blockRow = 0; blockRow < constraints.size(); blockRow++) {
-				int rowSize = motionToEquation[blockRow * 2].rows;
+			std::size_t curRowIndex = 0;
+			for(std::size_t blockRow = 0; blockRow < constraints.size(); blockRow++) {
+				int rowSize = constraintMatrices[blockRow].getSize();
 
 				MotorizedPhysical* cPhysA = constraints[blockRow].physA->mainPhysical;
 				MotorizedPhysical* cPhysB = constraints[blockRow].physB->mainPhysical;
 
-				const UnmanagedVerticalFixedMatrix<double, 6> & paramToMotion1 = parameterToMotion[blockRow * 2];
-				const UnmanagedVerticalFixedMatrix<double, 6> & paramToMotion2 = parameterToMotion[blockRow * 2 + 1];
+				const UnmanagedVerticalFixedMatrix<double, 6> paramToMotion1 = constraintMatrices[blockRow].getParameterToMotionMatrixA();
+				const UnmanagedVerticalFixedMatrix<double, 6> paramToMotion2 = constraintMatrices[blockRow].getParameterToMotionMatrixB();
 
-				double resultBuf1[6 * 6];
-				UnmanagedLargeMatrix<double> resultMat1(resultBuf1, rowSize, colSize);
+				double resultBuf1[6 * 6]; UnmanagedLargeMatrix<double> resultMat1(resultBuf1, rowSize, colSize);
 				for(double& d : resultMat1) d = 0.0;
-				double resultBuf2[6 * 6];
-				UnmanagedLargeMatrix<double> resultMat2(resultBuf2, rowSize, colSize);
+				double resultBuf2[6 * 6]; UnmanagedLargeMatrix<double> resultMat2(resultBuf2, rowSize, colSize);
 				for(double& d : resultMat2) d = 0.0;
 				if(mPhysA == cPhysA) {
 					inMemoryMatrixMultiply(motionToEq1, paramToMotion1, resultMat1);
@@ -116,11 +105,11 @@ void ConstraintGroup::apply() const {
 	destructiveSolve(systemToSolve, vectorToSolve);
 
 	{
-		size_t curParameterIndex = 0;
-		for(size_t i = 0; i < constraints.size(); i++) {
-			const UnmanagedVerticalFixedMatrix<double, 6>& curP2MA = parameterToMotion[i * 2];
-			const UnmanagedVerticalFixedMatrix<double, 6>& curP2MB = parameterToMotion[i * 2 + 1];
-			size_t curSize = curP2MA.cols;
+		std::size_t curParameterIndex = 0;
+		for(std::size_t i = 0; i < constraints.size(); i++) {
+			const UnmanagedVerticalFixedMatrix<double, 6> curP2MA = constraintMatrices[i].getParameterToMotionMatrixA();
+			const UnmanagedVerticalFixedMatrix<double, 6> curP2MB = constraintMatrices[i].getParameterToMotionMatrixB();
+			std::size_t curSize = curP2MA.cols;
 
 			UnmanagedHorizontalFixedMatrix<double, NUMBER_OF_ERROR_DERIVATIVES> parameterVec = vectorToSolve.subRows(curParameterIndex, curSize);
 			Matrix<double, 6, NUMBER_OF_ERROR_DERIVATIVES> effectOnA = curP2MA * parameterVec;
@@ -155,6 +144,6 @@ void ConstraintGroup::apply() const {
 
 			curParameterIndex += curSize;
 		}
-		assert(curParameterIndex == numberOfParameters);
+		assert(curParameterIndex == numberOfParams);
 	}
 }

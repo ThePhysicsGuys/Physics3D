@@ -16,6 +16,8 @@
 #include "../motion.h"
 #include "../relativeMotion.h"
 
+#include "../geometry/boundingBox.h"
+
 template<typename T>
 inline std::ostream& operator<<(std::ostream& os, const UnmanagedLargeMatrix<T>& matrix) {
 	for(int i = 0; i < matrix.h; i++) {
@@ -150,6 +152,11 @@ inline std::ostream& operator<<(std::ostream& os, Fix<N> f) {
 
 inline std::ostream& operator<<(std::ostream& os, Position position) {
 	os << "(" << position.x << ", " << position.y << ", " << position.z << ")";
+	return os;
+}
+
+inline std::ostream& operator<<(std::ostream& os, BoundingBox box) {
+	os << "BoundingBox(" << box.min << ", " << box.max << ")";
 	return os;
 }
 

@@ -1,22 +1,22 @@
 #include "serialization.h"
 
-#include <map>
-#include <set>
-#include <limits.h>
-#include <string>
-#include <iostream>
-
 #include "../geometry/polyhedron.h"
 #include "../geometry/builtinShapeClasses.h"
 #include "../geometry/shape.h"
 #include "../geometry/shapeClass.h"
 #include "../part.h"
 #include "../world.h"
-#include "../constraints/hardConstraint.h"
-#include "../constraints/fixedConstraint.h"
-#include "../constraints/motorConstraint.h"
-#include "../constraints/sinusoidalPistonConstraint.h"
-#include "../misc/gravityForce.h"
+#include "../hardconstraints/hardConstraint.h"
+#include "../hardconstraints/fixedConstraint.h"
+#include "../hardconstraints/motorConstraint.h"
+#include "../hardconstraints/sinusoidalPistonConstraint.h"
+#include "../externalforces/gravityForce.h"
+
+#include <map>
+#include <set>
+#include <limits.h>
+#include <string>
+#include <iostream>
 
 
 #define CURRENT_VERSION_ID 2

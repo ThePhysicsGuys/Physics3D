@@ -4,17 +4,12 @@
 
 #include "part.h"
 #include "physical.h"
-#include "softconstraints/constraintGroup.h"
+#include "constraints/constraintGroup.h"
+#include "softlinks/softLink.h"
 #include "datastructures/iterators.h"
 #include "datastructures/iteratorEnd.h"
 #include "layer.h"
-#include "softLink.h"
 #include "colissionBuffer.h"
-
-#include "springLink.h"
-#include "elasticLink.h"
-#include "magneticLink.h"
-#include "alignmentLink.h"
 
 #include <memory>
 
@@ -210,8 +205,6 @@ public:
 	std::vector<ConstraintGroup> constraints;
 
 	std::vector<ColissionLayer> layers;
-	std::vector<Colission> currentObjectColissions;
-	std::vector<Colission> currentTerrainColissions;
 
 	std::vector<SoftLink*> springLinks;
   
@@ -378,8 +371,12 @@ public:
 		);
 	}
 
+	virtual void onCollide(Part* partA, Part* partB) {}
+	virtual void onCollide(T* partA, T* partB) {}
+
 	virtual void onPartAdded(T* part) {}
 	virtual void onPartRemoved(T* part) {}
+
 	virtual void deletePart(T* part) const {
 		delete part;
 	}

@@ -11,10 +11,10 @@
 #include "../math/utils.h"
 #include "../math/mathUtil.h"
 #include "../../util/log.h"
-#include "../debug.h"
-#include "../physicsProfiler.h"
-#include "shape.h"
+#include "../misc/debug.h"
+#include "../misc/physicsProfiler.h"
 #include "../misc/validityHelper.h"
+#include "shape.h"
 
 Polyhedron::Polyhedron(const Vec3f* vertices, const Triangle* triangles, int vertexCount, int triangleCount) :
 	TriangleMesh(vertexCount, triangleCount, vertices, triangles) {

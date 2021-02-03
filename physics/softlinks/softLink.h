@@ -1,7 +1,7 @@
 #pragma once
 
-#include "math/linalg/vec.h"
-#include "part.h"
+#include "../math/linalg/vec.h"
+#include "../part.h"
 
 
 class SoftLink {
