@@ -12,7 +12,7 @@ protected:
 	Bindable(GLID id);
 
 public:
-	GLID getID() const;
+	[[nodiscard]] GLID getID() const;
 
 	virtual void bind() = 0;
 	virtual void unbind() = 0;

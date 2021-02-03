@@ -19,13 +19,13 @@
 #include "../part.h"
 #include "../world.h"
 #include "../physical.h"
-#include "../constraints/hardConstraint.h"
-#include "../constraints/fixedConstraint.h"
-#include "../constraints/motorConstraint.h"
+#include "../hardconstraints/hardConstraint.h"
+#include "../hardconstraints/fixedConstraint.h"
+#include "../hardconstraints/motorConstraint.h"
 
-#include "../softconstraints/ballConstraint.h"
+#include "../constraints/ballConstraint.h"
 
-#include "../misc/gravityForce.h"
+#include "../externalforces/gravityForce.h"
 
 #include "../../util/serializeBasicTypes.h"
 #include "../../util/sharedObjectSerializer.h"

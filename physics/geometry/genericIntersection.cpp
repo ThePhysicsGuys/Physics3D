@@ -5,9 +5,9 @@
 #include "computationBuffer.h"
 #include "../math/utils.h"
 #include "../../util/log.h"
-#include "../debug.h"
-#include "../physicsProfiler.h"
-#include "../profiling.h"
+#include "../misc/debug.h"
+#include "../misc/physicsProfiler.h"
+#include "../misc/profiling.h"
 #include "../constants.h"
 #include "polyhedron.h"
 

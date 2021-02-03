@@ -2,19 +2,18 @@
 
 #include "../util/log.h"
 #include "../util/terminalColor.h"
-#include "../physics/physicsProfiler.h"
 #include <iostream>
 #include <sstream>
 #include <cstddef>
-#include "../physics/misc/gravityForce.h"
+#include "../physics/externalforces/gravityForce.h"
 
 #include "../physics/geometry/shape.h"
 #include "../physics/geometry/shapeCreation.h"
 #include "../physics/math/linalg/commonMatrices.h"
 
 #include "../physics/misc/shapeLibrary.h"
-
 #include "../physics/misc/filters/outOfBoundsFilter.h"
+#include "../physics/misc/physicsProfiler.h"
 
 WorldBenchmark::WorldBenchmark(const char* name, int tickCount) : Benchmark(name), world(0.005), tickCount(tickCount) {
 	world.addExternalForce(new DirectionalGravity(Vec3(0, -10, 0)));

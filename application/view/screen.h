@@ -51,7 +51,7 @@ public:
 	Screen();
 	Screen(int width, int height, PlayerWorld* world);
 
-	void onInit();
+	void onInit(bool quickBoot);
 	void onUpdate();
 	void onEvent(Engine::Event& event);
 	void onRender();

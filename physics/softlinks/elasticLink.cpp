@@ -1,7 +1,4 @@
 #include "elasticLink.h"
-#include <cstdlib>
-
-
 
 ElasticLink::ElasticLink(AttachedPart part1, AttachedPart part2, const double restLength, const double stiffness) :
 	SoftLink{ part1, part2},

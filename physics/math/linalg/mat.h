@@ -49,8 +49,13 @@ public:
 		}
 	}
 
+	inline constexpr Matrix(const Matrix&) = default;
+	inline constexpr Matrix& operator=(const Matrix&) = default;
+	inline constexpr Matrix(Matrix&&) = default;
+	inline constexpr Matrix& operator=(Matrix&&) = default;
+
 	template<typename OtherT>
-	inline constexpr Matrix(const Matrix<OtherT, Width, Height>& m) : data{} {
+	inline constexpr Matrix(const Matrix<OtherT, Height, Width>& m) : data{} {
 		for(std::size_t row = 0; row < Height; row++) {
 			for(std::size_t col = 0; col < Width; col++) {
 				(*this)(row, col) = static_cast<T>(m(row, col));
@@ -58,32 +63,6 @@ public:
 		}
 	}
 
-	Matrix(const Matrix<T, Width - 1, Height - 1>& topLeftMat, const Vector<T, Height - 1>& rightCol, const Vector<T, Width - 1>& bottomRow, const T& bottomLeftVal) : data{} {
-		for (std::size_t row = 0; row < Height - 1; row++) {
-			for (std::size_t col = 0; col < Width - 1; col++) {
-				(*this)(row, col) = T(topLeftMat(row, col));
-			}
-			(*this)(row, Width - 1) = T(rightCol[row]);
-		}
-		for (std::size_t col = 0; col < Width - 1; col++) {
-			(*this)(Height - 1, col) = T(bottomRow[col]);
-		}
-		(*this)(Height - 1, Width - 1) = T(bottomLeftVal);
-	}
-
-	Matrix(const Matrix<T, Height - 1, Width - 1> & topLeftMat, const T& bottomLeftVal) : data{} {
-		for (std::size_t row = 0; row < Height - 1; row++) {
-			for (std::size_t col = 0; col < Width - 1; col++) {
-				(*this)(row, col) = topLeftMat(row, col);
-			}
-			(*this)(row, Width - 1) = 0.0;
-		}
-		for (std::size_t col = 0; col < Width - 1; col++) {
-			(*this)(Height - 1, col) = 0.0;
-		}
-		(*this)(Height - 1, Width - 1) = bottomLeftVal;
-	}
-	
 	inline static Matrix<T, Height, Width> fromRows(std::initializer_list<Vector<T, Width>> rows) {
 		assert(rows.size() == Height);
 		Matrix<T, Height, Width> result;
@@ -651,6 +630,85 @@ Matrix<T, Height1 + Height2, Width> joinVertical(const Matrix<T, Height1, Width>
 			result(row + Height1, col) = mat2(row, col);
 		}
 	}
+	return result;
+}
+
+template<typename T, std::size_t Height1, std::size_t Height2, std::size_t Width1, std::size_t Width2>
+Matrix<T, Height1 + Height2, Width1 + Width2> join(const Matrix<T, Height1, Width1>& topLeft, const Matrix<T, Height1, Width2>& topRight, 
+												   const Matrix<T, Height2, Width1>& botLeft, const Matrix<T, Height2, Width2>& botRight) {
+
+	Matrix<T, Height1 + Height2, Width1 + Width2> result;
+	for(std::size_t row = 0; row < Height1; row++) {
+		for(std::size_t col = 0; col < Width1; col++) {
+			result(row, col) = topLeft(row, col);
+		}
+		for(std::size_t col = 0; col < Width2; col++) {
+			result(row, col + Width1) = topRight(row, col);
+		}
+	}
+	for(std::size_t row = 0; row < Height2; row++) {
+		for(std::size_t col = 0; col < Width1; col++) {
+			result(row + Height1, col) = botLeft(row, col);
+		}
+		for(std::size_t col = 0; col < Width2; col++) {
+			result(row + Height1, col + Width1) = botRight(row, col);
+		}
+	}
+	return result;
+}
+
+template<typename T, std::size_t Height, std::size_t Width>
+Matrix<T, Height + 1, Width + 1> join(const Matrix<T, Height, Width> & topLeft, const Vector<T, Height> & topRight, const Vector<T, Width> & botLeft, const T & botRight) {
+	Matrix<T, Height + 1, Width + 1> result;
+	for(std::size_t row = 0; row < Height; row++) {
+		for(std::size_t col = 0; col < Width; col++) {
+			result(row, col) = topLeft(row, col);
+		}
+		result(row, Width) = topRight[row];
+	}
+	for(std::size_t col = 0; col < Width; col++) {
+		result(Height, col) = botLeft[col];
+	}
+	result(Height, Width) = botRight;
+	return result;
+}
+
+template<typename T, std::size_t Height1, std::size_t Height2, std::size_t Width1, std::size_t Width2>
+Matrix<T, Height1 + Height2, Width1 + Width2> joinDiagonal(const Matrix<T, Height1, Width1>& topLeft, const Matrix<T, Height1, Width2>& botRight) {
+
+	Matrix<T, Height1 + Height2, Width1 + Width2> result;
+	for(std::size_t row = 0; row < Height1; row++) {
+		for(std::size_t col = 0; col < Width1; col++) {
+			result(row, col) = topLeft(row, col);
+		}
+		for(std::size_t col = 0; col < Width2; col++) {
+			result(row, col + Width1) = 0;
+		}
+	}
+	for(std::size_t row = 0; row < Height2; row++) {
+		for(std::size_t col = 0; col < Width1; col++) {
+			result(row + Height1, col) = 0;
+		}
+		for(std::size_t col = 0; col < Width2; col++) {
+			result(row + Height1, col + Width1) = botRight(row, col);
+		}
+	}
+	return result;
+}
+
+template<typename T, std::size_t Height, std::size_t Width>
+Matrix<T, Height + 1, Width + 1> joinDiagonal(const Matrix<T, Height, Width>& topLeft, const T& botRight) {
+	Matrix<T, Height + 1, Width + 1> result;
+	for(std::size_t row = 0; row < Height; row++) {
+		for(std::size_t col = 0; col < Width; col++) {
+			result(row, col) = topLeft(row, col);
+		}
+		result(row, Width) = 0;
+	}
+	for(std::size_t col = 0; col < Width; col++) {
+		result(Height, col) = 0;
+	}
+	result(Height, Width) = botRight;
 	return result;
 }
 

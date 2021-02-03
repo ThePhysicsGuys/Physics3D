@@ -14,7 +14,7 @@
 #include "../graphics/path/path.h"
 #include "../graphics/gui/gui.h"
 
-#include "../physics/physicsProfiler.h"
+#include "../physics/misc/physicsProfiler.h"
 #include "../physics/misc/toString.h"
 #include "../physics/sharedLockGuard.h"
 

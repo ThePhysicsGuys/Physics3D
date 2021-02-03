@@ -207,13 +207,18 @@ TEST_CASE(testTriangleMeshOptimizedFurthestIndexInDirection) {
 		}
 		Vec3 dir = generateVec3();
 		int reference = mesh.furthestIndexInDirectionFallback(dir);
+		logStream << "reference: " << reference << "\n";
 
 		if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::SSE | Util::CPUIDCheck::SSE2)) {
-			ASSERT(mesh.getVertex(reference) * dir == mesh.getVertex(mesh.furthestIndexInDirectionSSE(dir)) * dir);
+			int sseVertex = mesh.furthestIndexInDirectionSSE(dir);
+			logStream << "sseVertex: " << sseVertex << "\n";
+			ASSERT(mesh.getVertex(reference) * dir == mesh.getVertex(sseVertex) * dir);
 		}
 
 		if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::AVX | Util::CPUIDCheck::AVX2 | Util::CPUIDCheck::FMA)) {
-			ASSERT(mesh.getVertex(reference) * dir == mesh.getVertex(mesh.furthestIndexInDirectionAVX(dir)) * dir);
+			int avxVertex = mesh.furthestIndexInDirectionAVX(dir);
+			logStream << "avxVertex: " << avxVertex << "\n";
+			ASSERT(mesh.getVertex(reference) * dir == mesh.getVertex(avxVertex) * dir);
 		}
 	}
 }
@@ -226,13 +231,18 @@ TEST_CASE(testTriangleMeshOptimizedFurthestInDirection) {
 		}
 		Vec3 dir = generateVec3();
 		Vec3 reference = mesh.furthestInDirectionFallback(dir);
+		logStream << "reference: " << reference << "\n";
 
 		if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::SSE | Util::CPUIDCheck::SSE2)) {
-			ASSERT(reference * dir == mesh.furthestInDirectionSSE(dir) * dir); // dot with dir as we don't really care for the exact vertex in a tie
+			Vec3f sseVertex = mesh.furthestInDirectionSSE(dir);
+			logStream << "sseVertex: " << sseVertex << "\n";
+			ASSERT(reference * dir == sseVertex * dir); // dot with dir as we don't really care for the exact vertex in a tie
 		}
 
 		if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::AVX | Util::CPUIDCheck::AVX2 | Util::CPUIDCheck::FMA)) {
-			ASSERT(reference * dir == mesh.furthestInDirectionAVX(dir) * dir); // dot with dir as we don't really care for the exact vertex in a tie
+			Vec3f avxVertex = mesh.furthestInDirectionAVX(dir);
+			logStream << "avxVertex: " << avxVertex << "\n";
+			ASSERT(reference * dir == avxVertex * dir); // dot with dir as we don't really care for the exact vertex in a tie
 		}
 	}
 }

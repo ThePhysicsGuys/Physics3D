@@ -3,8 +3,8 @@
 #include <chrono>
 #include <map>
 
-#include "datastructures/buffers.h"
-#include "parallelArray.h"
+#include "../datastructures/buffers.h"
+#include "../datastructures/parallelArray.h"
 
 class TimerMeasure {
 	std::chrono::high_resolution_clock::time_point lastClock = std::chrono::high_resolution_clock::now();

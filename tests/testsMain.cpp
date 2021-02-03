@@ -13,6 +13,7 @@
 
 #include "../util/terminalColor.h"
 #include "../util/parseCPUIDArgs.h"
+#include "../util/cmdParser.h"
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
 static const char sepChar = '\\';
@@ -280,49 +281,29 @@ static void runTests(const std::vector<std::string>& filter, TestFlags flags) {
 	setColor(SKIP_COLOR); cout << resultCounts[3] << " SKIP" << endl;
 }
 
-struct ParsedInput {
-	std::vector<std::string> inputArgs;
-	TestFlags flags;
-};
-
-ParsedInput parseInput(int argc, const char** argv) {
-	ParsedInput result;
+TestFlags getTestFlags(const Util::ParsedArgs& cmdArgs) {
+	TestFlags result;
 	
-	std::vector<std::string> inputFlags;
-	for(int i = 1; i < argc; i++) {
-		if(argv[i][0] == '-') {
-			inputFlags.push_back(argv[i]);
-		} else {
-			result.inputArgs.push_back(argv[i]);
-		}
-	}
-	result.flags.coverageEnabled = false;
-	result.flags.catchErrors = true;
-	result.flags.allowSkip = result.inputArgs.size() == 0;
+	result.coverageEnabled = cmdArgs.hasFlag("coverage");
+	result.catchErrors = !cmdArgs.hasFlag("nocatch");
+	result.allowSkip = cmdArgs.argCount() == 0;
 
-	for(const std::string& flag : inputFlags) {
-		if(flag == "--coverage") 
-			result.flags.coverageEnabled = true;
-		if(flag == "--noskip") 
-			result.flags.allowSkip = false;
-		if(flag == "--nocatch")
-			result.flags.catchErrors = false;
-	}
+	if(cmdArgs.hasFlag("noskip")) result.allowSkip = false;
+
 	return result;
 }
 
 int main(int argc, const char** argv) {
 	initConsole();
 
-	std::cout << Util::printAndParseCPUIDArgs(argc, argv).c_str();
+	Util::ParsedArgs cmdArgs(argc, argv);
 
+	std::cout << Util::printAndParseCPUIDArgs(cmdArgs).c_str() << "\n";
+	TestFlags flags = getTestFlags(cmdArgs);
 
+	runTests(cmdArgs.args(), flags);
 
-	ParsedInput parameters = parseInput(argc, argv);
-
-	runTests(parameters.inputArgs, parameters.flags);
-
-	if(parameters.flags.coverageEnabled) return 0;
+	if(flags.coverageEnabled) return 0;
 
 	while(true) {
 		string input;
@@ -336,7 +317,6 @@ int main(int argc, const char** argv) {
 		} else if(input == "exit") {
 			break;
 		} else {
-			TestFlags flags = parameters.flags;
 			flags.allowSkip = false;
 			runTests(std::vector<std::string>{input}, flags);
 		}

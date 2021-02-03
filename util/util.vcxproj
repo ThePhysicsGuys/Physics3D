@@ -136,6 +136,7 @@
     <ClCompile Include="valueCycle.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="cmdParser.h" />
     <ClInclude Include="cpuid.h" />
     <ClInclude Include="dynamicSerialize.h" />
     <ClInclude Include="iteratorUtils.h" />

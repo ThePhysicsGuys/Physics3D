@@ -13,8 +13,8 @@
 
 #include "part.h"
 #include "rigidBody.h"
-#include "constraints/hardConstraint.h"
-#include "constraints/hardPhysicalConnection.h"
+#include "hardconstraints/hardConstraint.h"
+#include "hardconstraints/hardPhysicalConnection.h"
 
 typedef Vec3 Vec3Local;
 typedef Vec3 Vec3Relative;

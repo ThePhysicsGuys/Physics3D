@@ -3,12 +3,10 @@
 #include "indexBuffer.h"
 
 #include <GL/glew.h>
-#include <GLFW/glfw3.h>
 
 namespace P3D::Graphics {
 
-IndexBuffer::IndexBuffer() {
-	id = 0;
+IndexBuffer::IndexBuffer() : Bindable() {
 	Log::debug("Created empty index buffer");
 };
 

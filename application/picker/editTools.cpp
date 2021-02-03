@@ -66,19 +66,16 @@ void EditTools::onInit() {
 	// Rotate shape init
 	rotateShape = VisualShape::generateSmoothNormalsShape(Library::createTorus(1.0f, 0.03f, 80, 12).rotated(Rotationf::Predefined::X_270));
 	rotateMesh = new IndexedMesh(rotateShape);
-	rotateMesh->addUniformBuffer(uniformBuffer);
 
 	// Scale shape init
 	scaleShape = VisualShape::generateSplitNormalsShape(createBoxOnStick(0.2f, 0.03f).rotated(Rotationf::Predefined::X_270));
 	scaleMesh = new IndexedMesh(scaleShape);
-	scaleMesh->addUniformBuffer(uniformBuffer);
 	scaleCenterShape = VisualShape::generateSplitNormalsShape(Library::createCube(0.2f));
 	scaleCenterMesh = new IndexedMesh(scaleCenterShape);
 
 	// Translate shape init
 	translateShape = VisualShape::generateSplitNormalsShape(createArrow(0.3f, 0.07f, 0.03f).rotated(Rotationf::Predefined::X_270));
 	translateMesh = new IndexedMesh(translateShape);
-	translateMesh->addUniformBuffer(uniformBuffer);
 	translateCenterShape = VisualShape::generateSmoothNormalsShape(Library::createSphere(0.13f, 3));
 	translateCenterMesh = new IndexedMesh(translateCenterShape);
 
@@ -123,11 +120,11 @@ void EditTools::onRender(Screen& screen) {
 				Shaders::maskShader.updateColor(COLOR::RGB_G);
 				break;
 			case EditDirection::X:
-				Shaders::maskShader.updateModel(modelMatrix * Mat4(Matrix<double, 3, 3>(transformations[1].asRotationMatrix()), 1.0f));
+				Shaders::maskShader.updateModel(Mat4f(modelMatrix) * joinDiagonal(Mat3f(transformations[1].asRotationMatrix()), 1.0f));
 				Shaders::maskShader.updateColor(COLOR::RGB_R);
 				break;
 			case EditDirection::Z:
-				Shaders::maskShader.updateModel(modelMatrix * Mat4(Matrix<double, 3, 3>(transformations[2].asRotationMatrix()), 1.0f));
+				Shaders::maskShader.updateModel(Mat4f(modelMatrix) * joinDiagonal(Mat3f(transformations[2].asRotationMatrix()), 1.0f));
 				Shaders::maskShader.updateColor(COLOR::RGB_B);
 				break;
 		}
@@ -148,12 +145,12 @@ void EditTools::onRender(Screen& screen) {
 
 	// X
 	Shaders::basicShader.updateMaterial(Comp::Material(COLOR::RGB_R));
-	Shaders::basicShader.updateModel(modelMatrix * Mat4(Mat3(transformations[1].asRotationMatrix()), 1.0f));
+	Shaders::basicShader.updateModel(Mat4f(modelMatrix) * joinDiagonal(Mat3f(transformations[1].asRotationMatrix()), 1.0f));
 	shaft->render();
 
 	// Z
 	Shaders::basicShader.updateMaterial(Comp::Material(COLOR::RGB_B));
-	Shaders::basicShader.updateModel(modelMatrix * Mat4(Mat3(transformations[2].asRotationMatrix()), 1.0f));
+	Shaders::basicShader.updateModel(Mat4f(modelMatrix) * joinDiagonal(Mat3f(transformations[2].asRotationMatrix()), 1.0f));
 	shaft->render();
 }
 

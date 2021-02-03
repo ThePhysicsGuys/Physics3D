@@ -44,16 +44,9 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL GNU)
 endif()
 
 add_library(physics STATIC 
-  physics/debug.cpp
   physics/part.cpp
   physics/physical.cpp
-  physics/physicsProfiler.cpp
   physics/rigidBody.cpp
-  physics/softLink.cpp
-  physics/springLink.cpp
-  physics/elasticLink.cpp
-  physics/magneticLink.cpp
-  physics/alignmentLink.cpp
   physics/layer.cpp
   physics/world.cpp
   physics/worldPhysics.cpp
@@ -81,19 +74,27 @@ add_library(physics STATIC
   physics/datastructures/alignedPtr.cpp
   physics/datastructures/boundsTree.cpp
 
-  physics/constraints/fixedConstraint.cpp
-  physics/constraints/hardConstraint.cpp
-  physics/constraints/hardPhysicalConnection.cpp
-  physics/constraints/motorConstraint.cpp
-  physics/constraints/controller/sineWaveController.cpp
+  physics/hardconstraints/fixedConstraint.cpp
+  physics/hardconstraints/hardConstraint.cpp
+  physics/hardconstraints/hardPhysicalConnection.cpp
+  physics/hardconstraints/motorConstraint.cpp
+  physics/hardconstraints/controller/sineWaveController.cpp
   
-  physics/softconstraints/constraintGroup.cpp
-  physics/softconstraints/ballConstraint.cpp
+  physics/constraints/constraintGroup.cpp
+  physics/constraints/ballConstraint.cpp
+  
+  physics/softlinks/softLink.cpp
+  physics/softlinks/springLink.cpp
+  physics/softlinks/elasticLink.cpp
+  physics/softlinks/magneticLink.cpp
+  physics/softlinks/alignmentLink.cpp
 
   physics/misc/serialization.cpp
   physics/misc/shapeLibrary.cpp
   physics/misc/validityHelper.cpp
   physics/misc/filters/visibilityFilter.cpp
+  physics/misc/debug.cpp
+  physics/misc/physicsProfiler.cpp
 )
 target_link_libraries(physics util)
 

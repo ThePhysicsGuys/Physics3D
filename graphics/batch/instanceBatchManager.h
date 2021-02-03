@@ -1,26 +1,33 @@
 #pragma once
 
 #include <unordered_map>
-
+#include "../util/log.h"
 #include "instanceBatch.h"
 #include "../buffers/bufferLayout.h"
 
 namespace P3D::Graphics {
 
-template<typename UniformLayout>
+template<typename Uniform>
 class InstanceBatchManager {
 private:
 	BufferLayout uniformBufferLayout;
-	std::unordered_map<GLID, InstanceBatch<UniformLayout>> batches;
+	std::unordered_map<GLID, InstanceBatch<Uniform>*> batches;
 
 public:
 	InstanceBatchManager(const BufferLayout& uniformBufferLayout) : uniformBufferLayout(uniformBufferLayout) {}
-	
-	void add(GLID mesh, const UniformLayout& uniform) {
-		if (batches.count(mesh) == 0) 
-			batches.emplace(mesh, InstanceBatch<UniformLayout>(mesh, uniformBufferLayout));
 
-		batches.at(mesh)->add(uniform);
+	template<typename... Args>
+	void add(GLID mesh, Args&&... uniform) {
+		if (mesh >= MeshRegistry::meshes.size()) {
+			Log::error("Trying to add a mesh that has not been registered in the mesh registry");
+			return;
+		}
+
+		auto iterator = batches.find(mesh);
+		if (iterator == batches.end()) 
+			iterator = batches.insert(std::make_pair(mesh, new InstanceBatch<Uniform>(mesh, uniformBufferLayout))).first;
+
+		iterator->second->add(std::forward<Args>(uniform)...);
 	}
 
 	void submit(GLID mesh) {

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "math/linalg/vec.h"
-#include "math/position.h"
-#include "math/cframe.h"
-#include "math/globalCFrame.h"
+#include "../math/linalg/vec.h"
+#include "../math/position.h"
+#include "../math/cframe.h"
+#include "../math/globalCFrame.h"
 
 class Part;
 

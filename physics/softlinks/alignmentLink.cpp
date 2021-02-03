@@ -1,9 +1,5 @@
 #include "alignmentLink.h"
 
-#include "../util/log.h"
-#include "misc/toString.h"
-
-
 AlignmentLink::AlignmentLink(const AttachedPart& part1, const AttachedPart& part2) :
 	SoftLink{ part1, part2 } {
 

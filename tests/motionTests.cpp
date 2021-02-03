@@ -8,10 +8,9 @@
 #include "../physics/motion.h"
 #include "../physics/relativeMotion.h"
 
-#include "../physics/constraints/hardPhysicalConnection.h"
-
-#include "../physics/constraints/motorConstraint.h"
-#include "../physics/constraints/sinusoidalPistonConstraint.h"
+#include "../physics/hardconstraints/hardPhysicalConnection.h"
+#include "../physics/hardconstraints/motorConstraint.h"
+#include "../physics/hardconstraints/sinusoidalPistonConstraint.h"
 
 
 #define REMAINS_CONSTANT(v) REMAINS_CONSTANT_TOLERANT(v, 0.005)

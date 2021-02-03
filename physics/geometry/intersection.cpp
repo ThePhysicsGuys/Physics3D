@@ -1,8 +1,8 @@
 #include "intersection.h"
 
 #include "genericIntersection.h"
-#include "../physicsProfiler.h"
-#include "../profiling.h"
+#include "../misc/physicsProfiler.h"
+#include "../misc/profiling.h"
 #include "computationBuffer.h"
 
 #include "shape.h"

@@ -7,10 +7,10 @@
 #include "math/linalg/mat.h"
 #include "math/linalg/trigonometry.h"
 
-#include "debug.h"
-#include <algorithm>
-
+#include "misc/debug.h"
 #include "misc/validityHelper.h"
+
+#include <algorithm>
 
 
 /*
@@ -1044,6 +1044,6 @@ std::vector<FoundLayerRepresentative> findAllLayersIn(Part* part) {
 			return std::vector<FoundLayerRepresentative>{FoundLayerRepresentative{part->layer, part}};
 		}
 	} else {
-		std::vector<FoundLayerRepresentative>{};
+		return std::vector<FoundLayerRepresentative>{};
 	}
 }
