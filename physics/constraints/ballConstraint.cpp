@@ -1,45 +1,36 @@
 #include "ballConstraint.h"
 
-#include "../physical.h"
-
-int BallConstraint::numberOfParameters() const {
+int BallConstraint::maxNumberOfParameters() const {
 	return 3;
 }
 
-static void makeMatrices(const Physical& phys, const Vec3& attach, UnmanagedVerticalFixedMatrix<double, 6>& parameterToMotionMatrix, UnmanagedHorizontalFixedMatrix<double, 6>& motionToEquationMatrix) {
-	Vec3 attachRelativeToCOM = phys.localToMainCOMRelative(attach);
+static ConstraintMatrixPair<3> makeMatrices(const PhysicalInfo& phys, const Vec3& attach) {
+	Vec3 attachRelativeToCOM = phys.cframe.localToRelative(attach) - phys.relativeCenterOfMass;
 	
 	Mat3 crossEquivAttach = createCrossProductEquivalent(attachRelativeToCOM);
 
-	setSubMatrix(parameterToMotionMatrix, DiagonalMat3::IDENTITY() * (1 / phys.mainPhysical->totalMass), 0, 0);
-	setSubMatrix(parameterToMotionMatrix, phys.mainPhysical->momentResponse * crossEquivAttach, 3, 0);
-
-	setSubMatrix(motionToEquationMatrix, DiagonalMat3::IDENTITY(), 0, 0);
-	setSubMatrix(motionToEquationMatrix, -crossEquivAttach, 0, 3);
+	Matrix<double, 6, 3> parameterToMotion = joinVertical(Mat3::IDENTITY() * phys.forceResponse, phys.momentResponse * crossEquivAttach);
+	Matrix<double, 3, 6> motionToEquation = joinHorizontal(Mat3::IDENTITY(), -crossEquivAttach);
+	
+	return ConstraintMatrixPair<3>{parameterToMotion, motionToEquation};
 }
 
-static Vector<double, 6> getMotionVecForDeriv(const Motion& motion, int deriv) {
-	return join(motion.translation.translation[deriv], motion.rotation.rotation[deriv]);
-}
+ConstraintMatrixPack BallConstraint::getMatrices(const PhysicalInfo& physA, const PhysicalInfo& physB, double* matrixBuf, double* errorBuf) const {
+	ConstraintMatrixPair<3> cA = makeMatrices(physA, attachA);
+	ConstraintMatrixPair<3> cB = makeMatrices(physB, attachB);
 
-void BallConstraint::getMatrices(const Physical& physA, const Physical& physB, UnmanagedVerticalFixedMatrix<double, 6>& parameterToMotionMatrixA, UnmanagedVerticalFixedMatrix<double, 6>& parameterToMotionMatrixB, UnmanagedHorizontalFixedMatrix<double, 6>& motionToEquationMatrixA, UnmanagedHorizontalFixedMatrix<double, 6>& motionToEquationMatrixB, UnmanagedHorizontalFixedMatrix<double, NUMBER_OF_ERROR_DERIVATIVES>& errorValue) const {
-	makeMatrices(physA, attachA, parameterToMotionMatrixA, motionToEquationMatrixA);
-	makeMatrices(physB, attachB, parameterToMotionMatrixB, motionToEquationMatrixB);
+	Vec3 error0 = physB.cframe.localToGlobal(attachB) - physA.cframe.localToGlobal(attachA);
 
-	double bufA[3]; UnmanagedLargeVector<double> mA(bufA, 3);
-	double bufB[3]; UnmanagedLargeVector<double> mB(bufB, 3);
+	Vec3 velocityA = cA.motionToEquation * physA.getMotionVecForDeriv(0);
+	Vec3 velocityB = cB.motionToEquation * physB.getMotionVecForDeriv(0);
+	Vec3 error1 = velocityB - velocityA;
 
-
-
-	errorValue.setCol(0, Vec3(physB.getCFrame().localToGlobal(attachB) - physA.getCFrame().localToGlobal(attachA)));
-
-	inMemoryMatrixVectorMultiply(motionToEquationMatrixA, getMotionVecForDeriv(physA.mainPhysical->motionOfCenterOfMass, 0), mA);
-	inMemoryMatrixVectorMultiply(motionToEquationMatrixB, getMotionVecForDeriv(physB.mainPhysical->motionOfCenterOfMass, 0), mB);
-	mB -= mA;
-	errorValue.setCol(1, mB);
+	Matrix<double, 3, NUMBER_OF_ERROR_DERIVATIVES> error = Matrix<double, 3, NUMBER_OF_ERROR_DERIVATIVES>::fromColumns({error0, error1});
 
 	/*inMemoryMatrixVectorMultiply(motionToEquationMatrixA, getMotionVecForDeriv(physA.mainPhysical->motionOfCenterOfMass, 1), mA);
 	inMemoryMatrixVectorMultiply(motionToEquationMatrixB, getMotionVecForDeriv(physB.mainPhysical->motionOfCenterOfMass, 1), mB);
 	mB -= mA;
 	errorValue.setCol(2, mB);*/
+
+	return ConstraintMatrixPack(matrixBuf, errorBuf, cA, cB, error);
 }
