@@ -3,7 +3,6 @@
 #include <string>
 #include "extendedPart.h"
 #include "../graphics/visualData.h"
-#include "../physics/math/cframe.h"
 
 namespace P3D::Application {
 
@@ -17,12 +16,10 @@ struct Transform : RefCountable {
 
 	bool isPartAttached;
 
-	Transform(ExtendedPart* part) : part(part), isPartAttached(true) {
-
-	}
+	explicit Transform(ExtendedPart* part) : part(part), isPartAttached(true) {}
 	
 	template<typename... Args>
-	Transform(Args&&... args) : isPartAttached(false) {
+	explicit Transform(Args&&... args) : isPartAttached(false) {
 		this->cframe = new GlobalCFrame(std::forward<Args>(args)...);
 	}
 
@@ -90,6 +87,21 @@ struct Mesh : public RefCountable {
 	Mesh(int id, bool hasUVs, bool hasNormals) : id(id), hasUVs(hasUVs), hasNormals(hasNormals) {}
 };
 
+struct Light : public RefCountable {
+	struct Attenuation {
+		float constant;
+		float linear;
+		float exponent;
+	};
+	
+	Color3 color;
+	float intensity;
+	Attenuation attenuation;
+
+	Light(const Color3& color, float intensity, const Attenuation& attenuation) : color(color), intensity(intensity), attenuation(attenuation) {}
+};
+
+	
 }
 
 };

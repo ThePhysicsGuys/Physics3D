@@ -151,7 +151,6 @@
     <ClInclude Include="layer\cameraLayer.h" />
     <ClInclude Include="layer\constraintLayer.h" />
     <ClInclude Include="core.h" />
-    <ClInclude Include="ecs\light.h" />
     <ClInclude Include="ecs\material.h" />
     <ClInclude Include="io\serialization.h" />
     <ClInclude Include="layer\imguiLayer.h" />

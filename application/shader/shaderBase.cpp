@@ -3,8 +3,7 @@
 #include "shaderBase.h"
 
 #include "../physics/math/globalCFrame.h"
-#include "../ecs/light.h"
-#include "../graphics/gui/color.h"
+#include "ecs/components.h"
 
 namespace P3D::Application {
 
@@ -49,42 +48,34 @@ void StandardMeshShaderBase::updateModel(const GlobalCFrame& modelCFrame, const 
 
 #pragma region BasicShaderBase
 
-void BasicShaderBase::updateLight(const std::vector<Light*> lights) {
+void BasicShaderBase::updateLightCount(std::size_t lightCount) {
 	bind();
 
-	std::size_t size = lights.size();
-	assert(size <= std::numeric_limits<int>::max());
-	setUniform("lightCount", static_cast<int>(size));
+	setUniform("lightCount", static_cast<int>(lightCount));
+}
+	
+void BasicShaderBase::updateLight(std::size_t index, const Position& position, const Comp::Light& light) {
+	bind();
 
-	for (int i = 0; i < lights.size(); i++) {
-		std::string uniform;
-		std::string index = std::to_string(i);
-		std::string variable = "lights[" + index + "].";
+	std::string variable = "lights[" + std::to_string(static_cast<int>(index)) + "].";
 
-		// position
-		uniform = variable + "position";
-		setUniform(uniform, lights[i]->position);
+	// position
+	setUniform(variable + "position", position);
 
-		// color
-		uniform = variable + "color";
-		setUniform(uniform, lights[i]->color);
+	// color
+	setUniform(variable + "color", light.color);
 
-		// intensity
-		uniform = variable + "intensity";
-		setUniform(uniform, lights[i]->intensity);
+	// intensity
+	setUniform(variable + "intensity", light.intensity);
 
-		// attenuation.constant
-		uniform = variable + "attenuation.constant";
-		setUniform(uniform, lights[i]->attenuation.constant);
+	// attenuation.constant
+	setUniform(variable + "attenuation.constant", light.attenuation.constant);
 
-		// attenuation.linear
-		uniform = variable + "attenuation.linear";
-		setUniform(uniform, lights[i]->attenuation.linear);
+	// attenuation.linear
+	setUniform(variable + "attenuation.linear", light.attenuation.linear);
 
-		// attenuation.exponent
-		uniform = variable + "attenuation.exponent";
-		setUniform(uniform, lights[i]->attenuation.exponent);
-	}
+	// attenuation.exponent
+	setUniform(variable + "attenuation.exponent", light.attenuation.exponent);
 }
 
 void BasicShaderBase::updateSunDirection(const Vec3f& sunDirection) {

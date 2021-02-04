@@ -5,7 +5,11 @@
 class GlobalCFrame;
 
 namespace P3D::Application {
-using namespace Graphics;
+	namespace Comp {
+		struct Light;
+	}
+
+	using namespace Graphics;
 
 struct Light;
 
@@ -41,7 +45,8 @@ struct BasicShaderBase : public virtual ShaderResource {
 	void updateGamma(float gamma);
 	void updateHDR(float hdr);
 	void updateExposure(float exposure);
-	void updateLight(const std::vector<Light*> lights);
+	void updateLightCount(std::size_t lightCount);
+	void updateLight(std::size_t index, const Position& position, const Comp::Light& light);
 };
 
 }

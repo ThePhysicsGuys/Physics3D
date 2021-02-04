@@ -241,7 +241,7 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_ty
 	Vec3f rotation = frame.getRotation().asRotationVector();
 	bool part_attached = component->isPartAttached;
 	ExtendedPart* part = component->isPartAttached ? component->part : nullptr;
-	DiagonalMat3f scale = part->hitbox.scale;
+	DiagonalMat3f scale = component->isPartAttached ? part->hitbox.scale : DiagonalMat3();
 	
 	ECS_PROPERTY_IF("Position:", ImGui::DragVec3("Position", position.data, 0, 0.1, true),
 		frame.position = castVec3fToPosition(position);

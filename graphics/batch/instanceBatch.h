@@ -50,7 +50,6 @@ public:
 			return;
 		
 		MeshRegistry::meshes[mesh]->fillUniformBuffer((const void*) uniformBuffer.data(), uniformBuffer.size() * sizeof(Uniform), Renderer::STREAM_DRAW);
-
 		MeshRegistry::meshes[mesh]->renderInstanced(uniformBuffer.size());
 
 		clear();

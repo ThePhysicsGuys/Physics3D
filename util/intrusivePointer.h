@@ -92,6 +92,10 @@ public:
         return ptr != nullptr;
     }
 
+    bool invalid() {
+        return ptr == nullptr;
+    }
+
     void reset() {
         T* const tmp = ptr;
         ptr = nullptr;

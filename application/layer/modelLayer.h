@@ -1,12 +1,13 @@
 #pragma once
 
+#include "../graphics/batch/instanceBatchManager.h"
 #include "../engine/layer/layer.h"
 
 namespace P3D::Application {
 
 class Screen;
 
-class ModelLayer : public Engine::Layer {
+class ModelLayer final : public Engine::Layer {
 public:
 	struct Uniform {
 		Mat4f modelMatrix = Mat4f::IDENTITY();
@@ -16,17 +17,19 @@ public:
 		float ao = 1.0f;
 	};
 
-	std::vector<Uniform> uniforms;
-
+	Graphics::InstanceBatchManager<Uniform>* manager = nullptr;
+	
 public:
-	inline ModelLayer() : Layer() {};
-	inline ModelLayer(Screen* screen, char flags = None) : Layer("Model", screen, flags) {}
+	ModelLayer() : Layer() {}
+	ModelLayer(Screen* screen, char flags = None) : Layer("Model", screen, flags) {}
 
-	virtual void onInit(Engine::Registry64& registry) override;
-	virtual void onUpdate(Engine::Registry64& registry) override;
-	virtual void onEvent(Engine::Registry64& registry, Engine::Event& event) override;
-	virtual void onRender(Engine::Registry64& registry) override;
-	virtual void onClose(Engine::Registry64& registry) override;
+	virtual ~ModelLayer() = default;
+	
+	void onInit(Engine::Registry64& registry) override;
+	void onUpdate(Engine::Registry64& registry) override;
+	void onEvent(Engine::Registry64& registry, Engine::Event& event) override;
+	void onRender(Engine::Registry64& registry) override;
+	void onClose(Engine::Registry64& registry) override;
 };
 
 };
