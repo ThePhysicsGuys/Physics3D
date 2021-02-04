@@ -15,6 +15,14 @@ inline  size_t getOffset(size_t size) {
 #define GET_SSE_ELEMi(reg, index) reg.m128i_i32[index]
 #else
 #define GET_SSE_ELEM(reg, index) reg[index]
+
+int mm_extractv_epi32(__m128i a, int b){
+    alignas(16) int buf[4];
+    _mm_storeu_si128(reinterpret_cast<__m128i*>(buf), a);
+    return buf[b];
+}
+
+#define GET_SSE_ELEMi(reg, index) mm_extractv_epi32(reg, index)
 #endif
 
 #define SWAP_2x2 0b01001110
@@ -94,7 +102,7 @@ int TriangleMesh::furthestIndexInDirectionSSE(const Vec3f& direction) const {
 	uint32_t mask = _mm_movemask_ps(compare);
 	assert(mask != 0);
 	uint32_t index = countZeros(mask);
-	uint32_t block = GET_SSE_ELEMi(bestIndices, index);
+	auto block = GET_SSE_ELEMi(bestIndices, index);
 	return block * 4 + index;
 }
 

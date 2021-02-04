@@ -20,7 +20,11 @@ public:
 	InstanceBatch(GLID mesh, const BufferLayout& uniformBufferLayout) : mesh(mesh) {
 		if (mesh < 0 || MeshRegistry::meshes.size() <= mesh) {
 			Log::error("Creating an instance batch for an invalid mesh: %d", mesh);
+#ifdef _MSC_VER
 			__debugbreak();
+#else
+			throw "Creating an instance batch for an invalid mesh";
+#endif
 			return;
 		}
 

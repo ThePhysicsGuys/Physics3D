@@ -245,7 +245,7 @@ bool tolerantEquals(const std::vector<T>& first, const std::vector<T>& second, T
 	return true;
 }
 
-template<typename T, int Height, int Width, typename Tol>
+template<typename T, std::size_t Height, std::size_t Width, typename Tol>
 bool tolerantEquals(const Matrix<T, Height, Width>& first, const UnmanagedHorizontalFixedMatrix<T, Width>& second, Tol tolerance) {
 	assert(first.height() == second.height());
 	for(size_t row = 0; row < Height; row++)
@@ -255,11 +255,11 @@ bool tolerantEquals(const Matrix<T, Height, Width>& first, const UnmanagedHorizo
 
 	return true;
 }
-template<typename T, int Height, int Width, typename Tol>
+template<typename T, std::size_t Height, std::size_t Width, typename Tol>
 bool tolerantEquals(const UnmanagedHorizontalFixedMatrix<T, Width>& second, const Matrix<T, Height, Width>& first, Tol tolerance) {
 	return tolerantEquals(first, second, tolerance);
 }
-template<typename T, int Height, int Width, typename Tol>
+template<typename T, std::size_t Height, std::size_t Width, typename Tol>
 bool tolerantEquals(const Matrix<T, Height, Width>& first, const UnmanagedVerticalFixedMatrix<T, Height>& second, Tol tolerance) {
 	assert(first.width() == second.width());
 	for(size_t row = 0; row < Height; row++)
@@ -269,7 +269,7 @@ bool tolerantEquals(const Matrix<T, Height, Width>& first, const UnmanagedVertic
 
 	return true;
 }
-template<typename T, int Height, int Width, typename Tol>
+template<typename T, std::size_t Height, std::size_t Width, typename Tol>
 bool tolerantEquals(const UnmanagedVerticalFixedMatrix<T, Height>& second, const Matrix<T, Height, Width>& first, Tol tolerance) {
 	return tolerantEquals(first, second, tolerance);
 }

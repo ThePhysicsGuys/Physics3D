@@ -8,7 +8,7 @@
 
 #define NUMBER_OF_ERROR_DERIVATIVES 2
 
-template<int Size>
+template<std::size_t Size>
 struct ConstraintMatrixPair {
 	Matrix<double, 6, Size> paramToMotion;
 	Matrix<double, Size, 6> motionToEquation;
@@ -37,7 +37,7 @@ class ConstraintMatrixPack {
 
 public:
 	ConstraintMatrixPack() = default;
-	template<int Size>
+	template<std::size_t Size>
 	ConstraintMatrixPack(double* matrixBuf, double* errorBuf, 
 						 const Matrix<double, 6, Size>& paramToMotionA, 
 						 const Matrix<double, 6, Size>& paramToMotionB, 
@@ -51,7 +51,7 @@ public:
 		motionToEqB.toRowMajorData(matrixData + 18 * Size);
 		errorMat.toRowMajorData(errorData);
 	}
-	template<int Size>
+	template<std::size_t Size>
 	ConstraintMatrixPack(double* matrixBuf, double* errorBuf,
 						 const ConstraintMatrixPair<Size>& mA,
 						 const ConstraintMatrixPair<Size>& mB,
