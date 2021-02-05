@@ -14,7 +14,6 @@
 #include "../physics/hardconstraints/fixedConstraint.h"
 #include "../physics/hardconstraints/motorConstraint.h"
 #include "../physics/hardconstraints/sinusoidalPistonConstraint.h"
-#include "../physics/constraints/constraintGroup.h"
 #include "../physics/math/linalg/trigonometry.h"
 
 #include <functional>
@@ -41,22 +40,6 @@ TEST_CASE(testConstraintMatrixPack) {
 	ASSERT(cmp.getMotionToEquationMatrixB() == motionToEqB);
 	ASSERT(cmp.getErrorMatrix() == errorMat);
 }
-
-/*TEST_CASE(testBallConstraint) {
-	Part part1(boxShape(2.0, 2.0, 2.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
-	part1.ensureHasParent();
-	Part part2(boxShape(2.0, 2.0, 2.0), GlobalCFrame(6.0, 0.0, 0.0), {1.0, 1.0, 1.0});
-	part2.ensureHasParent();
-	ConstraintGroup group;
-	group.ballConstraints.push_back(BallConstraint{Vec3(3.0, 0.0, 0.0), part1.parent->mainPhysical, Vec3(-3.0, 0.0, 0.0), part2.parent->mainPhysical});
-
-	part1.parent->mainPhysical->applyForceAtCenterOfMass(Vec3(2, 0, 0));
-
-	group.apply();
-
-	ASSERT(part1.getMotion().getAcceleration() == Vec3(0.125, 0.0, 0.0));
-	ASSERT(part2.getMotion().getAcceleration() == Vec3(0.125, 0.0, 0.0));
-}*/
 
 TEST_CASE(testMotionOfPhysicalSinglePart) {
 	Part p1(sphereShape(1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});

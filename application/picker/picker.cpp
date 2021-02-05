@@ -142,6 +142,7 @@ bool onMousePress(Engine::MousePressEvent& event) {
 		screen.selectedEntity = screen.intersectedEntity;
 		screen.selectedPart = screen.intersectedPart;
 		screen.selectedPoint = screen.intersectedPoint;
+		screen.world->selectedPart = screen.intersectedPart;
 
 		// Update intersected point if a physical has been intersected and move physical
 		// REPLACE if (screen.intersectedEntity)
@@ -190,7 +191,7 @@ bool onMouseDrag(Engine::MouseDragEvent& event) {
 }
 
 void moveGrabbedPhysicalLateral(Screen& screen) {
-	if (screen.selectedPart == nullptr) return;
+	if (screen.world->selectedPart == nullptr) return;
 
 	Vec3 cameraDirection = screen.camera.cframe.rotation * Vec3(0, 0, 1);
 
@@ -208,7 +209,7 @@ void moveGrabbedPhysicalLateral(Screen& screen) {
 }
 
 void moveGrabbedPhysicalTransversal(Screen& screen, double dz) {
-	if (screen.selectedPart == nullptr) return;
+	if (screen.world->selectedPart == nullptr) return;
 
 	Vec3 cameraDirection = screen.camera.cframe.rotation * Vec3(0, 0, 1);
 	Vec3 cameraYDirection = normalize(Vec3(cameraDirection.x, 0, cameraDirection.z));

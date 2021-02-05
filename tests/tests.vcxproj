@@ -29,6 +29,7 @@
     <ClCompile Include="guiTests.cpp" />
     <ClCompile Include="indexedShapeTests.cpp" />
     <ClCompile Include="inertiaTests.cpp" />
+    <ClCompile Include="jointTests.cpp" />
     <ClCompile Include="mathTests.cpp" />
     <ClCompile Include="rotationTests.cpp" />
     <ClCompile Include="motionTests.cpp" />

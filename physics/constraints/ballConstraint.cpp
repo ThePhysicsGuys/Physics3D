@@ -21,8 +21,8 @@ ConstraintMatrixPack BallConstraint::getMatrices(const PhysicalInfo& physA, cons
 
 	Vec3 error0 = physB.cframe.localToGlobal(attachB) - physA.cframe.localToGlobal(attachA);
 
-	Vec3 velocityA = cA.motionToEquation * physA.getMotionVecForDeriv(0);
-	Vec3 velocityB = cB.motionToEquation * physB.getMotionVecForDeriv(0);
+	Vec3 velocityA = cA.motionToEquation * physA.motion.getDerivAsVec6(0);
+	Vec3 velocityB = cB.motionToEquation * physB.motion.getDerivAsVec6(0);
 	Vec3 error1 = velocityB - velocityA;
 
 	Matrix<double, 3, NUMBER_OF_ERROR_DERIVATIVES> error = Matrix<double, 3, NUMBER_OF_ERROR_DERIVATIVES>::fromColumns({error0, error1});

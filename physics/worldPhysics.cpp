@@ -267,14 +267,13 @@ void WorldPrototype::findColissions() {
 			layer.getInternalColissions(curColissions);
 		}
 	}
-	
-
-	refineColission(curColissions.freePartColissions);
-	refineColission(curColissions.freeTerrainColissions);
 
 	for(std::pair<int, int> collidingLayers : colissionMask) {
 		getColissionsBetween(layers[collidingLayers.first], layers[collidingLayers.second], curColissions);
 	}
+
+	refineColission(curColissions.freePartColissions);
+	refineColission(curColissions.freeTerrainColissions);
 }
 
 void WorldPrototype::handleColissions() {

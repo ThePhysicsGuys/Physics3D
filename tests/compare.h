@@ -273,3 +273,23 @@ template<typename T, std::size_t Height, std::size_t Width, typename Tol>
 bool tolerantEquals(const UnmanagedVerticalFixedMatrix<T, Height>& second, const Matrix<T, Height, Width>& first, Tol tolerance) {
 	return tolerantEquals(first, second, tolerance);
 }
+template<typename T, std::size_t Size, typename Tol>
+bool tolerantEquals(const UnmanagedVerticalFixedMatrix<T, Size>& first, const UnmanagedVerticalFixedMatrix<T, Size>& second, Tol tolerance) {
+	assert(first.width() == second.width());
+	for(size_t row = 0; row < first.height(); row++)
+		for(size_t col = 0; col < first.width(); col++)
+			if(!tolerantEquals(first(row, col), second(row, col), tolerance))
+				return false;
+
+	return true;
+}
+template<typename T, std::size_t Size, typename Tol>
+bool tolerantEquals(const UnmanagedHorizontalFixedMatrix<T, Size>& first, const UnmanagedHorizontalFixedMatrix<T, Size>& second, Tol tolerance) {
+	assert(first.width() == second.width());
+	for(size_t row = 0; row < first.height(); row++)
+		for(size_t col = 0; col < first.width(); col++)
+			if(!tolerantEquals(first(row, col), second(row, col), tolerance))
+				return false;
+
+	return true;
+}

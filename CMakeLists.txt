@@ -125,6 +125,7 @@ add_executable(tests
   tests/geometryTests.cpp
   tests/estimationTests.cpp
   tests/constraintTests.cpp
+  tests/jointTests.cpp
   tests/dataStructureTests.cpp
   tests/guiTests.cpp
   tests/indexedShapeTests.cpp

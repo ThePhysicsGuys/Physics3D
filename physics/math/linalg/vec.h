@@ -183,9 +183,16 @@ typedef Vector<float, 4>		Vec4f;
 typedef Vector<long long, 4>	Vec4l;
 typedef Vector<int, 4>			Vec4i;
 
-typedef Vec2 NormalizedVec2;
-typedef Vec3 NormalizedVec3;
-typedef Vec4 NormalizedVec4;
+typedef Vector<double, 5>		Vec5;
+typedef Vector<float, 5>		Vec5f;
+typedef Vector<long long, 5>	Vec5l;
+typedef Vector<int, 5>			Vec5i;
+
+typedef Vector<double, 6>		Vec6;
+typedef Vector<float, 6>		Vec6f;
+typedef Vector<long long, 6>	Vec6l;
+typedef Vector<int, 6>			Vec6i;
+
 
 template<typename T1, typename T2, size_t Size>
 constexpr auto operator*(const Vector<T1, Size>& a, const Vector<T2, Size>& b) noexcept -> decltype(a[0]*b[0]+a[1]*b[1]) {

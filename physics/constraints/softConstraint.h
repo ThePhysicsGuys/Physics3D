@@ -24,10 +24,6 @@ struct PhysicalInfo {
 	double forceResponse; // 1/mass
 	Mat3 momentResponse;
 	Vec3 relativeCenterOfMass;
-
-	inline Vector<double, 6> getMotionVecForDeriv(int deriv) const {
-		return join(motion.translation.translation[deriv], motion.rotation.rotation[deriv]);
-	}
 };
 
 class ConstraintMatrixPack {
@@ -60,7 +56,7 @@ public:
 		mA.paramToMotion.toColMajorData(matrixData);
 		mB.paramToMotion.toColMajorData(matrixData + 6 * Size);
 		mA.motionToEquation.toRowMajorData(matrixData + 12 * Size);
-		mA.motionToEquation.toRowMajorData(matrixData + 18 * Size);
+		mB.motionToEquation.toRowMajorData(matrixData + 18 * Size);
 		errorMat.toRowMajorData(errorData);
 	}
 	int getSize() const { return size; }

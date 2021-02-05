@@ -175,8 +175,8 @@ void Screen::onInit(bool quickBoot) {
 	debugOverlay = DebugOverlay(this);
 
 	if(!quickBoot) layerStack.pushLayer(&skyboxLayer);
-	layerStack.pushLayer(&modelLayer);
 	layerStack.pushLayer(&constraintLayer);
+	layerStack.pushLayer(&modelLayer);
 	layerStack.pushLayer(&shadowLayer);
 	layerStack.pushLayer(&debugLayer);
 	layerStack.pushLayer(&pickerLayer);

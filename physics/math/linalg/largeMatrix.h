@@ -219,13 +219,12 @@ public:
 	~LargeMatrix() {
 		delete[] this->data;
 	}
-
 	LargeMatrix(const LargeMatrix& other) : UnmanagedLargeMatrix<T>(new T[other.w * other.h], other.w, other.h) {
 		for(size_t i = 0; i < other.w * other.h; i++) {
 			this->data[i] = other.data[i];
 		}
 	}
-	inline LargeMatrix& operator=(const LargeMatrix& other) {
+	LargeMatrix& operator=(const LargeMatrix& other) {
 		delete[] this->data;
 		this->h = other.h;
 		this->w = other.w;
@@ -234,6 +233,25 @@ public:
 			this->data[i] = other.data[i];
 		}
 		return *this;
+	}
+	LargeMatrix(LargeMatrix&& other) noexcept : UnmanagedLargeMatrix<T>(other.data, other.w, other.h) {
+		other.data = nullptr;
+		other.w = 0;
+		other.h = 0;
+	}
+	LargeMatrix& operator=(LargeMatrix&& other) noexcept {
+		std::swap(this->data, other.data);
+		std::swap(this->w, other.w);
+		std::swap(this->h, other.h);
+		return *this;
+	}
+
+	static LargeMatrix zero(size_t width, size_t height) {
+		LargeMatrix result(width, height);
+		for(size_t i = 0; i < width * height; i++) {
+			result.data[i] = 0;
+		}
+		return result;
 	}
 };
 

@@ -156,6 +156,10 @@ struct Motion {
 	inline Vec3 getAcceleration() const { return translation.getAcceleration(); }
 	inline Vec3 getAngularVelocity() const { return rotation.getAngularVelocity(); }
 	inline Vec3 getAngularAcceleration() const { return rotation.getAngularAcceleration(); }
+
+	inline Vec6 getDerivAsVec6(int deriv) const {
+		return join(translation.translation[deriv], rotation.rotation[deriv]);
+	}
 };
 
 inline Motion operator+(const TranslationalMotion& motionOfStart, const Motion& motionToTranslate) {

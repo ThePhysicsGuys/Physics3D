@@ -2,6 +2,7 @@
 
 #include "../math/linalg/vec.h"
 #include "../math/linalg/mat.h"
+#include "../math/linalg/largeMatrix.h"
 #include "../math/cframe.h"
 #include "../motion.h"
 #include "../datastructures/boundsTree.h"
@@ -14,11 +15,17 @@
 #define DEBUGBREAK
 #endif
 
+inline bool isValid(double d) {
+	return std::isfinite(d) && std::abs(d) < 100000.0;
+}
+inline bool isValid(float f) {
+	return std::isfinite(f) && std::abs(f) < 100000.0; // sanity check
+}
 
 template<typename T, size_t Size>
 inline bool isVecValid(const Vector<T, Size>& vec) {
 	for(size_t i = 0; i < Size; i++) {
-		if(!std::isfinite(vec[i])) return false;
+		if(!isValid(vec[i])) return false;
 	}
 	return true;
 }
@@ -27,7 +34,7 @@ template<typename T, size_t Height, size_t Width>
 inline bool isMatValid(const Matrix<T, Height, Width>& mat) {
 	for(size_t row = 0; row < Height; row++) {
 		for(size_t col = 0; col < Width; col++) {
-			if(!std::isfinite(mat(row, col))) return false;
+			if(!isValid(mat(row, col))) return false;
 		}
 	}
 	return true;
@@ -37,7 +44,7 @@ template<typename T, size_t Size>
 inline bool isMatValid(const SymmetricMatrix<T, Size>& mat) {
 	for(size_t row = 0; row < Size; row++) {
 		for(size_t col = row; col < Size; col++) {
-			if(!std::isfinite(mat(row, col))) return false;
+			if(!isValid(mat(row, col))) return false;
 		}
 	}
 	return true;
@@ -46,7 +53,45 @@ inline bool isMatValid(const SymmetricMatrix<T, Size>& mat) {
 template<typename T, size_t Size>
 inline bool isMatValid(const DiagonalMatrix<T, Size>& mat) {
 	for(size_t i = 0; i < Size; i++) {
-		if(!std::isfinite(mat[i])) return false;
+		if(!isValid(mat[i])) return false;
+	}
+	return true;
+}
+
+template<typename T>
+inline bool isVecValid(const UnmanagedLargeVector<T>& vec) {
+	for(size_t i = 0; i < vec.size(); i++) {
+		if(!isValid(vec[i])) return false;
+	}
+	return true;
+}
+
+template<typename T>
+inline bool isMatValid(const UnmanagedLargeMatrix<T>& mat) {
+	for(size_t row = 0; row < mat.height(); row++) {
+		for(size_t col = 0; col < mat.width(); col++) {
+			if(!isValid(mat(row, col))) return false;
+		}
+	}
+	return true;
+}
+
+template<typename T, size_t Size>
+inline bool isMatValid(const UnmanagedHorizontalFixedMatrix<T, Size>& mat) {
+	for(size_t row = 0; row < mat.height(); row++) {
+		for(size_t col = 0; col < mat.width(); col++) {
+			if(!isValid(mat(row, col))) return false;
+		}
+	}
+	return true;
+}
+
+template<typename T, size_t Size>
+inline bool isMatValid(const UnmanagedVerticalFixedMatrix<T, Size>& mat) {
+	for(size_t row = 0; row < mat.height(); row++) {
+		for(size_t col = 0; col < mat.width(); col++) {
+			if(!isValid(mat(row, col))) return false;
+		}
 	}
 	return true;
 }

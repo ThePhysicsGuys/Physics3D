@@ -7,8 +7,7 @@
 
 #include "../math/mathUtil.h"
 
-#include "../misc/toString.h"
-#include "../../util/log.h"
+#include "../misc/validityHelper.h"
 
 #include <fstream>
 #include <cstddef>
@@ -24,7 +23,10 @@ static PhysicalInfo getInfo(const Physical& phys) {
 	return PhysicalInfo{cf, phys.getMotion(), 1 / phys.mainPhysical->totalMass, phys.mainPhysical->momentResponse, relativeCOM};
 }
 ConstraintMatrixPack PhysicalConstraint::getMatrices(double* matrixBuf, double* errorBuf) const {
-	return constraint->getMatrices(getInfo(*physA), getInfo(*physB), matrixBuf, errorBuf);
+	PhysicalInfo infoA = getInfo(*physA);
+	PhysicalInfo infoB = getInfo(*physB);
+
+	return constraint->getMatrices(infoA, infoB, matrixBuf, errorBuf);
 }
 
 void ConstraintGroup::add(Physical* first, Physical* second, Constraint* constraint) {
@@ -92,7 +94,7 @@ void ConstraintGroup::apply() const {
 
 				resultMat1 += resultMat2;
 
-				systemToSolve.setSubMatrix(curRowIndex, curColIndex, resultMat1);
+				systemToSolve.setSubMatrix(curColIndex, curRowIndex, resultMat1);
 
 				curRowIndex += rowSize;
 			}
@@ -100,9 +102,11 @@ void ConstraintGroup::apply() const {
 		}
 	}
 
-	Log::debug("System matrix: %s\nvector: %s", str(systemToSolve).c_str(), str(vectorToSolve).c_str());
+	assert(isMatValid(vectorToSolve));
 
 	destructiveSolve(systemToSolve, vectorToSolve);
+
+	assert(isMatValid(vectorToSolve));
 
 	{
 		std::size_t curParameterIndex = 0;
@@ -119,6 +123,9 @@ void ConstraintGroup::apply() const {
 			Vector<double, 6> offsetAngularEffectOnA = effectOnA.getCol(0);
 			Vector<double, 6> offsetAngularEffectOnB = effectOnB.getCol(0);
 
+			assert(isVecValid(offsetAngularEffectOnA));
+			assert(isVecValid(offsetAngularEffectOnB));
+
 			GlobalCFrame& mainPACF = constraints[i].physA->mainPhysical->rigidBody.mainPart->cframe;
 			GlobalCFrame& mainPBCF = constraints[i].physB->mainPhysical->rigidBody.mainPart->cframe;
 			mainPACF.position += offsetAngularEffectOnA.getSubVector<3>(0);
@@ -128,6 +135,8 @@ void ConstraintGroup::apply() const {
 
 			Vector<double, 6> velAngularEffectOnA = effectOnA.getCol(1);
 			Vector<double, 6> velAngularEffectOnB = effectOnB.getCol(1);
+			assert(isVecValid(velAngularEffectOnA));
+			assert(isVecValid(velAngularEffectOnB));
 			constraints[i].physA->mainPhysical->motionOfCenterOfMass.translation.translation[0] += velAngularEffectOnA.getSubVector<3>(0);
 			constraints[i].physA->mainPhysical->motionOfCenterOfMass.rotation.rotation[0] += velAngularEffectOnA.getSubVector<3>(3);
 			constraints[i].physB->mainPhysical->motionOfCenterOfMass.translation.translation[0] += velAngularEffectOnB.getSubVector<3>(0);
