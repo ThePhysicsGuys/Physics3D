@@ -249,7 +249,6 @@ add_executable(application
   application/worlds.cpp
 
   application/ecs/material.cpp
-  application/ecs/components.h
 
   application/input/standardInputHandler.cpp
 

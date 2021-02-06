@@ -150,8 +150,8 @@ uniform Material material;
 // Environment
 uniform vec3 sunDirection = vec3(1, 1, 1);
 uniform vec3 sunColor = vec3(1, 1, 1);
-uniform float exposure = 1.0;
-uniform float gamma = 1.0;
+uniform float exposure = 0.8;
+uniform float gamma = 0.8;
 uniform float hdr = 1.0;
 
 // Constants
@@ -233,9 +233,9 @@ vec3 calcLightColor(Light light) {
 	vec3 L = normalize(light.position - fPosition);
 	vec3 H = normalize(V + L);
 	float distance = length(light.position - fPosition);
-	//float scaledDistance = distance / light.intensity;
-	//float attenuation = 1.0 / (light.attenuation.constant + light.attenuation.linear * scaledDistance + light.attenuation.exponent * scaledDistance * scaledDistance);
-	float attenuation = 1.0 / (distance * distance);
+	float scaledDistance = distance/* / light.intensity*/;
+	float attenuation = 1.0 / (light.attenuation.constant + light.attenuation.linear * scaledDistance + light.attenuation.exponent * scaledDistance * scaledDistance);
+	//float attenuation = 1.0 / (distance * distance);
 	vec3 radiance = light.color * attenuation * light.intensity;
 
 	// Fresnel
@@ -283,12 +283,18 @@ vec3 getNormalFromMap() {
 
 void main() {
 	/*if (material.textured == 1) {
-		N = normalize(getNormalFromMap());
+		N = normalize(fNormal);
+		//N = normalize(getNormalFromMap());
 
-		albedo = texture(material.albedoMap, fUV) * texture(material.albedoMap, fUV);
-		roughness =  texture(material.roughnessMap, fUV).r;
+		albedo = vec3(fUV, 1, 1); 
+		//albedo = texture(material.albedoMap, fUV);
+		//albedo = albedo * albedo;
+		/*roughness =  texture(material.roughnessMap, fUV).r;
 		metalness = texture(material.metalnessMap, fUV).r;
-		ambientOcclusion = texture(material.ambientOcclusionMap, fUV).r;
+		ambientOcclusion = texture(material.ambientOcclusionMap, fUV).r;*/
+		/*roughness = fRoughness;
+		metalness = fMetalness;
+		ambientOcclusion = fAmbientOcclusion;
 	} else {*/
 		N = normalize(fNormal);
 

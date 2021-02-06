@@ -18,7 +18,7 @@ void PickerLayer::onInit(Engine::Registry64& registry) {
 	
 	ToolManager::onInit();
 	ToolManager::registerTool<SelectionTool>();
-	ToolManager::selectTool<SelectionTool>();
+	// ToolManager::selectTool<SelectionTool>();
 }
 
 void PickerLayer::onUpdate(Engine::Registry64& registry) {

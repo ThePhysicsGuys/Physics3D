@@ -9,6 +9,7 @@
 
 #include "extendedPart.h"
 
+#include "ecs/entityBuilder.h"
 #include "ecs/components.h"
 #include "../graphics/meshRegistry.h"
 
@@ -27,8 +28,6 @@ using namespace WorldBuilder;
 
 void buildBenchmarkWorld(PlayerWorld& world) {
 	WorldBuilder::buildFloor(150.0, 150.0);
-
-
 
 	GlobalCFrame origin(0, 20, 0, Rotation::fromEulerAngles(0, M_PI / 4, M_PI / 4));
 	for(int i = 0; i < 10; i++) {
@@ -58,8 +57,8 @@ void buildShowcaseWorld(Screen& screen, PlayerWorld& world) {
 	return;*/
 
 	{
-		auto pistonFolder = screen.registry.create();
-		screen.registry.add<Comp::Name>(pistonFolder, "PistonPart");
+		
+		auto pistonFolder = EntityBuilder(screen.registry).name("PistonPart").get();
 
 		ExtendedPart* centerPart = new ExtendedPart(sphereShape(1.0), GlobalCFrame(-15.0, 4.0, 13.0), basicProperties, "Center", pistonFolder);
 		Shape box = boxShape(1.0, 1.0, 1.0);
@@ -136,16 +135,11 @@ void buildShowcaseWorld(Screen& screen, PlayerWorld& world) {
 	int minZ = 0;
 	int maxZ = 3;
 
-	auto cubeFolder = screen.registry.create();
-	screen.registry.add<Comp::Name>(cubeFolder, "Cubes");
-	auto cylinderFolder = screen.registry.create();
-	screen.registry.add<Comp::Name>(cylinderFolder, "Cylinders");
-	auto triangleFolder = screen.registry.create();
-	screen.registry.add<Comp::Name>(triangleFolder, "Triangles");
-	auto sphereFolder = screen.registry.create();
-	screen.registry.add<Comp::Name>(sphereFolder, "Spheres");
-	auto spiderFolder = screen.registry.create();
-	screen.registry.add<Comp::Name>(spiderFolder, "Spiders");
+	auto cubeFolder = EntityBuilder(screen.registry).name("Cubes").get();
+	auto cylinderFolder = EntityBuilder(screen.registry).name("Cylinders").get();
+	auto triangleFolder = EntityBuilder(screen.registry).name("Triangles").get();
+	auto sphereFolder = EntityBuilder(screen.registry).name("Spheres").get();
+	auto spiderFolder = EntityBuilder(screen.registry).name("Spiders").get();
 
 	GlobalCFrame rootFrame(Position(0.0, 15.0, 0.0), Rotation::fromEulerAngles(3.1415 / 4, 3.1415 / 4, 0.0));
 	for(double x = minX; x < maxX; x += 1.00001) {
@@ -168,8 +162,7 @@ void buildShowcaseWorld(Screen& screen, PlayerWorld& world) {
 	//screen.registry.add<Comp::Tag>(terrainFolder, "Terrain");
 	//WorldBuilder::buildTerrain(150, 150, terrainFolder);
 
-	auto ropeFolder = screen.registry.create();
-	screen.registry.add<Comp::Name>(ropeFolder, "Ropes");
+	auto ropeFolder = EntityBuilder(screen.registry).name("Ropes").get();
 	ExtendedPart* ropeA = new ExtendedPart(boxShape(2.0, 1.5, 0.7), GlobalCFrame(10.0, 2.0, -10.0), {1.0, 0.7, 0.3}, "RopeA", ropeFolder);
 	ExtendedPart* ropeB = new ExtendedPart(boxShape(1.5, 1.2, 0.9), GlobalCFrame(10.0, 2.0, -14.0), {1.0, 0.7, 0.3}, "RopeB", ropeFolder);
 	ExtendedPart* ropeC = new ExtendedPart(boxShape(2.0, 1.5, 0.7), GlobalCFrame(10.0, 2.0, -18.0), {1.0, 0.7, 0.3}, "RopeC", ropeFolder);

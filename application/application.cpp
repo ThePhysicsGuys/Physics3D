@@ -9,6 +9,7 @@
 
 #include "view/screen.h"
 #include "ecs/material.h"
+#include "ecs/entityBuilder.h"
 #include "input/standardInputHandler.h"
 #include "ecs/components.h"
 #include "../graphics/texture.h"
@@ -79,9 +80,8 @@ void init(const Util::ParsedArgs& cmdArgs) {
 	Log::info("Init MeshRegistry");
 	Graphics::MeshRegistry::init();
 
-	//ResourceManager::add<Graphics::TextureResource>("floorMaterial", "../res/textures/floor/floor_color.jpg");
-
-	//WorldImportExport::registerTexture(ResourceManager::get<Graphics::TextureResource>("floorMaterial"));
+	ResourceManager::add<Graphics::TextureResource>("floorMaterial", "../res/textures/floor/floor_color.jpg");
+	WorldImportExport::registerTexture(ResourceManager::get<Graphics::TextureResource>("floorMaterial"));
 
 	Log::info("Initializing world");
 	WorldBuilder::init();
@@ -141,9 +141,20 @@ void setupWorld(const Util::ParsedArgs& cmdArgs) {
 
 	WorldBuilder::buildFloorAndWalls(50.0, 50.0, 1.0);
 
+
+	// Lights
+	Comp::Light::Attenuation attenuation = { 1, 1, 1 };
+	auto lights = EntityBuilder(screen.registry).name("Lights").get();
+	EntityBuilder(screen.registry).parent(lights).transform(Position(10, 5, -10)).light(Color3(1, 0.84f, 0.69f), 300, attenuation);
+	EntityBuilder(screen.registry).parent(lights).transform(Position(10, 5, 10)).light(Color3(1, 0.84f, 0.69f), 300, attenuation);
+	EntityBuilder(screen.registry).parent(lights).transform(Position(-10, 5, -10)).light(Color3(1, 0.84f, 0.69f), 200, attenuation);
+	EntityBuilder(screen.registry).parent(lights).transform(Position(-10, 5, 10)).light(Color3(1, 0.84f, 0.69f), 500, attenuation);
+	EntityBuilder(screen.registry).parent(lights).transform(Position(0, 5, 0)).light(Color3(1, 0.90f, 0.75f), 400, attenuation);
+	
 	ExtendedPart* partA = new ExtendedPart(boxShape(1.0, 0.49, 3.0), GlobalCFrame(3.0, 3.0, 0.0), { 1.0, 1.0, 1.0 }, "partA");
 	ExtendedPart* partB = new ExtendedPart(boxShape(1.0, 0.5, 3.0), GlobalCFrame(2.0, 3.0, 0.0), { 1.0, 1.0, 1.0 }, "partA");
-
+	EntityBuilder(screen.registry, partA->entity).light(Color3(0.1, 0.94f, 0.49f), 500, Comp::Light::Attenuation { 0.8, 0.5, 0.2 });
+	
 	world.addPart(partA);
 	world.addPart(partB);
 

@@ -6,6 +6,7 @@
 #include "shader/shaders.h"
 #include "extendedPart.h"
 #include "worlds.h"
+#include "../../graphics/resource/textureResource.h"
 
 #include "../engine/ecs/registry.h"
 #include "ecs/components.h"
@@ -93,30 +94,6 @@ static Color getAlbedoForPart(Screen* screen, ExtendedPart* part) {
 void ModelLayer::onInit(Engine::Registry64& registry) {
 	using namespace Graphics;
 	Screen* screen = static_cast<Screen*>(this->ptr);
-
-	// Lights
-	auto lights = registry.create();
-	registry.add<Comp::Name>(lights, "Lights");
-
-	auto light1 = registry.create(lights);
-	auto light2 = registry.create(lights);
-	auto light3 = registry.create(lights);
-	auto light4 = registry.create(lights);
-	auto light5 = registry.create(lights);
-
-	Comp::Light::Attenuation attenuation = { 1, 1, 1 };
-	
-	registry.add<Comp::Light>(light1, Color3(1, 0.84f, 0.69f), 300, attenuation);
-	registry.add<Comp::Light>(light2, Color3(1, 0.84f, 0.69f), 300, attenuation);
-	registry.add<Comp::Light>(light3, Color3(1, 0.84f, 0.69f), 200, attenuation);
-	registry.add<Comp::Light>(light4, Color3(1, 0.84f, 0.69f), 500, attenuation);
-	registry.add<Comp::Light>(light5, Color3(1, 0.90f, 0.75f), 400, attenuation);
-	
-	registry.add<Comp::Transform>(light1, Position(10, 5, -10));
-	registry.add<Comp::Transform>(light2, Position(10, 5, 10));
-	registry.add<Comp::Transform>(light3, Position(-10, 5, -10));
-	registry.add<Comp::Transform>(light4, Position(-10, 5, 10));
-	registry.add<Comp::Transform>(light5, Position(0, 5, 0));
 
 	// Dont know anymore
 	Shaders::basicShader.updateTexture(false);
@@ -212,6 +189,10 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 			}
 		}
 
+		/*Shaders::instanceShader.updateTexture(false);
+		/*activeTexture(0);
+		ResourceManager::get<TextureResource>("floorMaterial")->bind();*/
+		
 		Shaders::instanceShader.bind();
 		manager->submit();
 		

@@ -8,8 +8,8 @@
 namespace P3D::Application {
 
 float EnvironmentFrame::hdr = 1.0f;
-float EnvironmentFrame::gamma = 1.0f;
-float EnvironmentFrame::exposure = 1.0f;
+float EnvironmentFrame::gamma = 0.8f;
+float EnvironmentFrame::exposure = 0.8f;
 Color3 EnvironmentFrame::sunColor = Color3::full(1);
 
 void EnvironmentFrame::onInit(Engine::Registry64& registry) {

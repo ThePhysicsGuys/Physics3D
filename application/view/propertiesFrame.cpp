@@ -232,6 +232,20 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_ty
 	ECS_PROPERTY_FRAME_END;
 }
 
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const Ref<Comp::Light>& component) {
+	ECS_PROPERTY_FRAME_START(registry, index);
+
+	ECS_PROPERTY("Color", ImGui::ColorEdit3("##Color", component->color.data, ImGuiColorEditFlags_PickerHueWheel));
+	ECS_PROPERTY("Intensity", ImGui::DragFloat("##Intensity", &component->intensity));
+
+	ECS_TITLE("Attenuation", true);
+	ECS_PROPERTY("Constant", ImGui::SliderFloat("##Constant", &component->attenuation.constant, 0, 2));
+	ECS_PROPERTY("Linear", ImGui::SliderFloat("##Linear", &component->attenuation.linear, 0, 2));
+	ECS_PROPERTY("Exponent", ImGui::SliderFloat("##Exponent", &component->attenuation.exponent, 0, 2));
+
+	ECS_PROPERTY_FRAME_END;
+}
+
 void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const Ref<Comp::Transform>& component) {
 
 	ECS_PROPERTY_FRAME_START(registry, index);
@@ -292,6 +306,7 @@ void PropertiesFrame::onRender(Engine::Registry64& registry) {
 		ENTITY_DISPATCH(index, Comp::Model, registry, component);
 		ENTITY_DISPATCH(index, Comp::Mesh, registry, component);
 		ENTITY_DISPATCH(index, Comp::Material, registry, component);
+		ENTITY_DISPATCH(index, Comp::Light, registry, component);
 		ENTITY_DISPATCH_END(index, registry, component);
 	}
 
