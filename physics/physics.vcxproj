@@ -172,6 +172,7 @@
     <ClCompile Include="misc\serialization.cpp" />
     <ClCompile Include="rigidBody.cpp" />
     <ClCompile Include="layer.cpp" />
+    <ClCompile Include="constraints\hingeConstraint.cpp" />
     <ClCompile Include="softlinks\softLink.cpp" />
     <ClCompile Include="softlinks\springLink.cpp" />
     <ClCompile Include="world.cpp" />
@@ -274,6 +275,7 @@
     <ClInclude Include="relativeMotion.h" />
     <ClInclude Include="rigidBody.h" />
     <ClInclude Include="sharedLockGuard.h" />
+    <ClInclude Include="constraints\hingeConstraint.h" />
     <ClInclude Include="constraints\softConstraint.h" />
     <ClInclude Include="softlinks\softLink.h" />
     <ClInclude Include="softlinks\springLink.h" />

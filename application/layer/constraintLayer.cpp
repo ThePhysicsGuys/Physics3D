@@ -12,6 +12,7 @@
 
 #include "../physics/constraints/softConstraint.h"
 #include "../physics/constraints/ballConstraint.h"
+#include "../physics/constraints/hingeConstraint.h"
 #include "../physics/hardconstraints/sinusoidalPistonConstraint.h"
 #include "../physics/hardconstraints/motorConstraint.h"
 #include "../physics/hardconstraints/fixedConstraint.h"
@@ -101,8 +102,16 @@ static void renderConstraintBars(const ConstraintLayer* cl, const GlobalCFrame& 
 
 static void renderBallConstraint(const ConstraintLayer* cl, const Physical* physA, const Physical* physB, const BallConstraint* bc, float innerBallThickness, float outerBallThickness) {
 	renderConstraintBars(cl, physA->getCFrame(), physB->getCFrame(), CFrame(bc->attachA), CFrame(bc->attachB));
-	renderObject(Graphics::MeshRegistry::sphere, physA->getCFrame().localToGlobal(bc->attachA), DiagonalMat3f::IDENTITY() * innerBallThickness, Comp::Material(Color(0.0f, 0.0f, 1.0f, 1.0f)));
-	renderObject(Graphics::MeshRegistry::sphere, physB->getCFrame().localToGlobal(bc->attachB), DiagonalMat3f::IDENTITY() * outerBallThickness, Comp::Material(Color(0.0f, 0.0f, 1.0f, 0.7f)));
+	renderObject(Graphics::MeshRegistry::sphere, GlobalCFrame(physA->getCFrame().localToGlobal(bc->attachA)), DiagonalMat3f::IDENTITY() * innerBallThickness, Comp::Material(Color(0.0f, 0.0f, 1.0f, 1.0f)));
+	renderObject(Graphics::MeshRegistry::sphere, GlobalCFrame(physB->getCFrame().localToGlobal(bc->attachB)), DiagonalMat3f::IDENTITY() * outerBallThickness, Comp::Material(Color(0.0f, 0.0f, 1.0f, 0.7f)));
+}
+
+static void renderHingeConstraint(const ConstraintLayer* cl, const Physical* physA, const Physical* physB, const HingeConstraint* hc, float innerBallThickness, float outerBallThickness) {
+	renderConstraintBars(cl, physA->getCFrame(), physB->getCFrame(), CFrame(hc->attachA), CFrame(hc->attachB));
+	CFrame atA(hc->attachA, Rotation::faceZ(hc->axisA));
+	CFrame atB(hc->attachB, Rotation::faceZ(hc->axisB));
+	renderObject(Graphics::MeshRegistry::cylinder, physA->getCFrame().localToGlobal(atA), DiagonalMat3f::IDENTITY() * innerBallThickness, Comp::Material(Color(0.0f, 0.0f, 1.0f, 1.0f)));
+	renderObject(Graphics::MeshRegistry::cylinder, physB->getCFrame().localToGlobal(atB), DiagonalMat3f::IDENTITY() * outerBallThickness, Comp::Material(Color(0.0f, 0.0f, 1.0f, 0.7f)));
 }
 
 static void renderHardConstraint(const ConstraintLayer* cl, const ConnectedPhysical& conPhys) {
@@ -134,6 +143,8 @@ static void renderConstraint(const ConstraintLayer* cl, const PhysicalConstraint
 	const auto& info(typeid(*constraint.constraint));
 	if(info == typeid(BallConstraint)) {
 		renderBallConstraint(cl, constraint.physA, constraint.physB, static_cast<const BallConstraint*>(constraint.constraint), 0.06f, 0.07f);
+	} else if(info == typeid(HingeConstraint)) {
+		renderHingeConstraint(cl, constraint.physA, constraint.physB, static_cast<const HingeConstraint*>(constraint.constraint), 0.06f, 0.07f);
 	}
 }
 

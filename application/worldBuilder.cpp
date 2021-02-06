@@ -17,6 +17,7 @@
 #include "ecs/components.h"
 
 #include "../physics/constraints/ballConstraint.h"
+#include "../physics/constraints/hingeConstraint.h"
 
 namespace P3D::Application {
 
@@ -182,6 +183,39 @@ void buildConveyor(double width, double length, const GlobalCFrame& cframe, doub
 	world.addTerrainPart(leftWall);
 	ExtendedPart* rightWall = new ExtendedPart(boxShape(0.2, 0.6, length), cframe.localToGlobal(CFrame(width / 2 + 0.1, 0.1, 0.0)), { 1.0, 0.4, 0.3, Vec3(0.0, 0.0, 0.0) }, "Right Wall", conveyorFolder);
 	world.addTerrainPart(rightWall);
+}
+
+void buildTrebuchet(const GlobalCFrame& cframe, double baseWidth, double baseLength, double wheelRadius, double wheelThickness, double armLength, double armThickness, int folder) {
+	PartProperties wheelproperties;
+	wheelproperties.friction = 2.0;
+	wheelproperties.bouncyness = 0.2;
+	wheelproperties.density = 1.0;
+	ExtendedPart* base = new ExtendedPart(boxShape(baseWidth, 0.2, baseLength), cframe, {1.0, 0.8, 0.0}, "Base", folder);
+	ExtendedPart* FLWheel = new ExtendedPart(cylinderShape(wheelRadius, wheelThickness), cframe, wheelproperties, "FLWheel", folder); FLWheel->setColor(Graphics::COLOR::BLACK);
+	ExtendedPart* FRWheel = new ExtendedPart(cylinderShape(wheelRadius, wheelThickness), cframe, wheelproperties, "FRWheel", folder); FRWheel->setColor(Graphics::COLOR::BLACK);
+	ExtendedPart* BLWheel = new ExtendedPart(cylinderShape(wheelRadius, wheelThickness), cframe, wheelproperties, "BLWheel", folder); BLWheel->setColor(Graphics::COLOR::BLACK);
+	ExtendedPart* BRWheel = new ExtendedPart(cylinderShape(wheelRadius, wheelThickness), cframe, wheelproperties, "BRWheel", folder); BRWheel->setColor(Graphics::COLOR::BLACK);
+	ExtendedPart* arm = new ExtendedPart(boxShape(armThickness, armThickness, armLength), cframe, {1.0, 0.8, 0.0}, "Arm", folder);
+	ExtendedPart* weight = new ExtendedPart(boxShape(armThickness * 4, armThickness * 4, armThickness * 4), cframe, {1.0, 0.8, 0.0}, "Weight", folder); weight->setColor(Graphics::COLOR::GRAY);
+	arm->attach(weight, CFrame(0.0, 0.0, armLength / 2));
+	
+	
+	ConstraintGroup cg;
+
+	cg.add(base, FLWheel, new HingeConstraint(Vec3(baseWidth / 2, 0.0, baseLength / 2), Vec3(1.0, 0.0, 0.0), Vec3(0.0, 0.0, -wheelThickness / 2 * 1.1), Vec3(0.0, 0.0, 1.0)));
+	cg.add(base, FRWheel, new HingeConstraint(Vec3(-baseWidth / 2, 0.0, baseLength / 2), Vec3(-1.0, 0.0, 0.0), Vec3(0.0, 0.0, -wheelThickness / 2 * 1.1), Vec3(0.0, 0.0, 1.0)));
+	cg.add(base, BLWheel, new HingeConstraint(Vec3(baseWidth / 2, 0.0, -baseLength / 2), Vec3(1.0, 0.0, 0.0), Vec3(0.0, 0.0, -wheelThickness / 2 * 1.1), Vec3(0.0, 0.0, 1.0)));
+	cg.add(base, BRWheel, new HingeConstraint(Vec3(-baseWidth / 2, 0.0, -baseLength / 2), Vec3(-1.0, 0.0, 0.0), Vec3(0.0, 0.0, -wheelThickness / 2 * 1.1), Vec3(0.0, 0.0, 1.0)));
+	cg.add(base, arm, new HingeConstraint(Vec3(0.0, armLength * 1.5, 0.0), Vec3(1.0, 0.0, 0.0), Vec3(0.0, 0.0, armLength * 0.2), Vec3(1.0, 0.0, 0.0)));
+
+	world.constraints.push_back(cg);
+
+	world.addPart(FLWheel);
+	world.addPart(FRWheel);
+	world.addPart(BLWheel);
+	world.addPart(BRWheel);
+	world.addPart(base);
+	world.addPart(arm);
 }
 
 std::array<ExtendedPart*, 3> produceAxes(const GlobalCFrame& cf, const PartProperties& properties, double scale) {

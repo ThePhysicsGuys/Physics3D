@@ -30,6 +30,7 @@ void buildCar(const GlobalCFrame& location, int folder = 0);
 void buildFloor(double width, double depth, int folder = 0);
 void buildFloorAndWalls(double width, double depth, double wallHeight, int folder = 0);
 void buildConveyor(double width, double length, const GlobalCFrame& cframe, double speed, int folder = 0);
+void buildTrebuchet(const GlobalCFrame& cframe, double baseWidth, double baseLength, double wheelRadius, double wheelThickness, double armLength, double armThickness, int folder);
 
 std::array<ExtendedPart*, 3> produceAxes(const GlobalCFrame & cf, const PartProperties& properties, double scale = 1.0);
 void attachAxes(ExtendedPart* part, double scale = 1.0);

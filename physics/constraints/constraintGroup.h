@@ -5,6 +5,7 @@
 #include "softConstraint.h"
 
 class Physical;
+class Part;
 
 struct PhysicalConstraint {
 	inline PhysicalConstraint(Physical* physA, Physical* physB, Constraint* constraint) :
@@ -23,6 +24,7 @@ struct ConstraintGroup {
 	std::vector<PhysicalConstraint> constraints;
 
 	void add(Physical* first, Physical* second, Constraint* constraint);
+	void add(Part* first, Part* second, Constraint* constraint);
 	
 	void apply() const;
 };

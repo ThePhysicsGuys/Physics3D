@@ -32,6 +32,11 @@ ConstraintMatrixPack PhysicalConstraint::getMatrices(double* matrixBuf, double* 
 void ConstraintGroup::add(Physical* first, Physical* second, Constraint* constraint) {
 	this->constraints.push_back(PhysicalConstraint(first, second, constraint));
 }
+void ConstraintGroup::add(Part* first, Part* second, Constraint* constraint) {
+	first->ensureHasParent();
+	second->ensureHasParent();
+	this->constraints.push_back(PhysicalConstraint(first->parent, second->parent, constraint));
+}
 
 void ConstraintGroup::apply() const {
 	std::size_t maxNumberOfParameters = 0;

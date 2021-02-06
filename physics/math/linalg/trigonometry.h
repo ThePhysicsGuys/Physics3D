@@ -108,6 +108,13 @@ Quaternion<T> rotQuatZ(T angle) {
 }
 
 template<typename T>
+Vector<T, 3> getPerpendicular(Vector<T, 3> v) {
+	Vector<T, 3> notInline(0, 0, 0);
+	notInline[getAbsMinElementIndex(v)] = 1;
+	return v % notInline;
+}
+
+template<typename T>
 UnitaryMatrix<T, 3> faceMatX(Vector<T, 3> x, Vector<T, 3> yHint) {
 	x = normalize(x);
 	Vector<T, 3> z = normalize(x % yHint);

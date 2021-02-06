@@ -18,6 +18,7 @@
 #include "../physics/hardconstraints/sinusoidalPistonConstraint.h"
 #include "../physics/hardconstraints/fixedConstraint.h"
 #include "../physics/constraints/ballConstraint.h"
+#include "../physics/constraints/hingeConstraint.h"
 #include "../physics/softlinks/springLink.h"
 #include "../physics/geometry/shapeClass.h"
 
@@ -44,17 +45,23 @@ void buildShowcaseWorld(Screen& screen, PlayerWorld& world) {
 	WorldBuilder::SpiderFactory spiderFactories[]{{0.5, 4},{0.5, 6},{0.5, 8},{0.5, 10}};
 
 	WorldBuilder::buildFloorAndWalls(50.0, 50.0, 1.0);
-	/*{
-		ExtendedPart* a = new ExtendedPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(3.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "SpringLinkMain1");
-		ExtendedPart* b = new ExtendedPart(boxShape(1.0, 2.0, 1.0), GlobalCFrame(2.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "SpringLinkPart1");
+	
+	{ // Lights
+		Comp::Light::Attenuation attenuation = {1, 1, 1};
+		auto lights = EntityBuilder(screen.registry).name("Lights").get();
+		EntityBuilder(screen.registry).parent(lights).transform(Position(10, 5, -10)).light(Color3(1, 0.84f, 0.69f), 300, attenuation);
+		EntityBuilder(screen.registry).parent(lights).transform(Position(10, 5, 10)).light(Color3(1, 0.84f, 0.69f), 300, attenuation);
+		EntityBuilder(screen.registry).parent(lights).transform(Position(-10, 5, -10)).light(Color3(1, 0.84f, 0.69f), 200, attenuation);
+		EntityBuilder(screen.registry).parent(lights).transform(Position(-10, 5, 10)).light(Color3(1, 0.84f, 0.69f), 500, attenuation);
+		EntityBuilder(screen.registry).parent(lights).transform(Position(0, 5, 0)).light(Color3(1, 0.90f, 0.75f), 400, attenuation);
 
-		world.addPart(a);
-		world.addPart(b);
+		ExtendedPart* partA = new ExtendedPart(boxShape(1.0, 0.49, 3.0), GlobalCFrame(3.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "partA");
+		ExtendedPart* partB = new ExtendedPart(boxShape(1.0, 0.5, 3.0), GlobalCFrame(2.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "partA");
+		EntityBuilder(screen.registry, partA->entity).light(Color3(0.1, 0.94f, 0.49f), 500, Comp::Light::Attenuation{0.8, 0.5, 0.2});
 
-		world.addLink(new SpringLink({CFrame{1.0, 0.0, 0.0}, a}, {CFrame{0.0, 0.0, 0.0}, b}, 5.0, 5.0));
+		world.addPart(partA);
+		world.addPart(partB);
 	}
-
-	return;*/
 
 	{
 		
@@ -340,6 +347,28 @@ void buildShowcaseWorld(Screen& screen, PlayerWorld& world) {
 		world.addPart(mainBlock);
 
 		mainBlock->parent->mainPhysical->motionOfCenterOfMass.rotation.rotation[0] = Vec3(0, 2, 0);
+	}
+
+	{
+		//WorldBuilder::buildTrebuchet(GlobalCFrame(0, 2, -20), 1.0, 2.0, 0.6, 0.2, 2.4, 0.15, 0);
+	}
+
+	{
+		ExtendedPart* box1 = new ExtendedPart(boxShape(2.0, 1.0, 1.0), GlobalCFrame(-10.0, 5.0, -10.0), basicProperties, "Box1");
+		ExtendedPart* box2 = new ExtendedPart(boxShape(2.0, 1.0, 1.0), GlobalCFrame(-11.1, 5.0, -8.1, Rotation::rotY(3.1415 * 2 / 3)), basicProperties, "Box2");
+		ExtendedPart* box3 = new ExtendedPart(boxShape(2.0, 1.0, 1.0), GlobalCFrame(-8.9, 5.0, -8.1, Rotation::rotY(-3.1415 * 2 / 3)), basicProperties, "Box3");
+
+		world.addPart(box1);
+		world.addPart(box2);
+		world.addPart(box3);
+
+		ConstraintGroup group;
+
+		group.add(box1->parent, box3->parent, new HingeConstraint(Vec3(1.5, 0.0, 0.0), Vec3(0.0, 1.0, 0.0), Vec3(-1.5, 0.0, 0.0), Vec3(0.0, 1.0, 0.0)));
+		group.add(box2->parent, box1->parent, new HingeConstraint(Vec3(1.5, 0.0, 0.0), Vec3(0.0, 1.0, 0.0), Vec3(-1.5, 0.0, 0.0), Vec3(0.0, 1.0, 0.0)));
+		//group.add(box3->parent, box2->parent, new HingeConstraint(Vec3(1.5, 0.0, 0.0), Vec3(0.0, 1.0, 0.0), Vec3(-1.5, 0.0, 0.0), Vec3(0.0, 1.0, 0.0)));
+
+		world.constraints.push_back(std::move(group));
 	}
 
 	{

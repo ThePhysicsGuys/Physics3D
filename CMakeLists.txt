@@ -82,6 +82,7 @@ add_library(physics STATIC
   
   physics/constraints/constraintGroup.cpp
   physics/constraints/ballConstraint.cpp
+  physics/constraints/hingeConstraint.cpp
   
   physics/softlinks/softLink.cpp
   physics/softlinks/springLink.cpp

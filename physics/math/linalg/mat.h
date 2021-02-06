@@ -254,6 +254,15 @@ public:
 		return mat;
 	}
 
+	static inline constexpr Matrix<T, Height, Width> DIAGONAL(const T& diagonalVal) {
+		Matrix<T, Height, Width> mat;
+		for(std::size_t row = 0; row < Height; row++) {
+			for(std::size_t col = 0; col < Width; col++) {
+				mat(row, col) = (row == col) ? diagonalVal : T(0);
+			}
+		}
+		return mat;
+	}
 
 	static Matrix<T, Height, Width> fromColMajorData(const T* data) {
 		Matrix<T, Height, Width> mat;
@@ -380,7 +389,17 @@ public:
 		SymmetricMatrix<T, Size> mat;
 		for (std::size_t row = 0; row < Size; row++) {
 			for (std::size_t col = 0; col <= row; col++) {
-				mat(row, col) = (row == col) ? 1 : 0;
+				mat(row, col) = (row == col) ? T(1) : T(0);
+			}
+		}
+		return mat;
+	}
+
+	static inline constexpr SymmetricMatrix<T, Size> DIAGONAL(const T& diagonalVal) {
+		SymmetricMatrix<T, Size> mat;
+		for(std::size_t row = 0; row < Size; row++) {
+			for(std::size_t col = 0; col <= row; col++) {
+				mat(row, col) = (row == col) ? diagonalVal : T(0);
 			}
 		}
 		return mat;
@@ -483,7 +502,15 @@ public:
 	static inline constexpr DiagonalMatrix<T, Size> IDENTITY() {
 		DiagonalMatrix<T, Size> mat;
 		for (std::size_t i = 0; i < Size; i++) {
-			mat[i] = 1;
+			mat[i] = T(1);
+		}
+		return mat;
+	}
+
+	static inline constexpr DiagonalMatrix<T, Size> DIAGONAL(const T& diagonalVal) {
+		DiagonalMatrix<T, Size> mat;
+		for(std::size_t i = 0; i < Size; i++) {
+			mat[i] = diagonalVal;
 		}
 		return mat;
 	}
