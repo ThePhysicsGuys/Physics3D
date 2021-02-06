@@ -2,6 +2,7 @@
 
 #include <stddef.h>
 #include <cmath>
+#include <assert.h>
 
 template<typename T, size_t Size>
 struct Vector {
@@ -367,6 +368,19 @@ constexpr Vector<T, Size + 1> join(const T& extraValue, const Vector<T, Size>& v
 	}
 	return result;
 }
+template<typename T, size_t Size>
+constexpr Vector<T, Size - 1> withoutIndex(const Vector<T, Size> & vec, size_t indexToRemove) {
+	assert(indexToRemove < Size);
+	Vector<T, Size - 1> result;
+	for(size_t i = 0; i < indexToRemove; i++) {
+		result[i] = vec[i];
+	}
+	for(size_t i = indexToRemove+1; i < Size; i++) {
+		result[i-1] = vec[i];
+	}
+	return result;
+}
+
 
 
 template<typename T, size_t Size>
@@ -599,3 +613,4 @@ template<typename T, size_t Size>
 constexpr Vector<T, Size> bisect(const Vector<T, Size>& first, const Vector<T, Size>& second) noexcept {
 	return first * length(second) + second * length(first);
 }
+
