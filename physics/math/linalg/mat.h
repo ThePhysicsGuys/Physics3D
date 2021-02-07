@@ -569,8 +569,8 @@ typedef SymmetricMatrix<float, 3>		SymmetricMat3f;
 typedef SymmetricMatrix<long long, 3>	SymmetricMat3l;
 
 typedef DiagonalMatrix<double, 3>		DiagonalMat3;
-typedef DiagonalMatrix<float, 3>			DiagonalMat3f;
-typedef DiagonalMatrix<long long, 3>		DiagonalMat3l;
+typedef DiagonalMatrix<float, 3>		DiagonalMat3f;
+typedef DiagonalMatrix<long long, 3>	DiagonalMat3l;
 
 // Mat4
 typedef Matrix<double, 4, 4>	Mat4;

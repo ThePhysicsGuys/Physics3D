@@ -250,28 +250,21 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_ty
 
 	ECS_PROPERTY_FRAME_START(registry, index);
 
-	GlobalCFrame frame = component->getCFrame();
-	Vec3f position = castPositionToVec3f(frame.getPosition());
-	Vec3f rotation = frame.getRotation().asRotationVector();
-	bool part_attached = component->isPartAttached;
-	ExtendedPart* part = component->isPartAttached ? component->part : nullptr;
-	DiagonalMat3f scale = component->isPartAttached ? part->hitbox.scale : DiagonalMat3();
+	Vec3f position = castPositionToVec3f(component->getPosition());
+	Vec3f rotation = component->getRotation().asRotationVector();
+	DiagonalMat3f scale = component->getScale();
 	
 	ECS_PROPERTY_IF("Position:", ImGui::DragVec3("Position", position.data, 0, 0.1, true),
-		frame.position = castVec3fToPosition(position);
-		component->setCFrame(frame);
+		component->setPosition(castVec3fToPosition(position));
 	);
 
 	ECS_PROPERTY_IF("Rotation:", ImGui::DragVec3("Rotation", rotation.data, 0.01f, 0.02f, true),
-		frame.rotation = Rotation::fromRotationVec(rotation);
-		component->setCFrame(frame);
+		component->setRotation(Rotation::fromRotationVec(rotation));
 	);
 
-	if (part_attached) {
-		ECS_PROPERTY_IF("Scale:", ImGui::DragVec3("Scale", scale.data, 1, 0.01f, true),
-			part->hitbox.scale = scale;
-		);
-	}
+	ECS_PROPERTY_IF("Scale:", ImGui::DragVec3("Scale", scale.data, 1, 0.01f, true),
+		component->setScale(scale);
+	);
 	
 	ECS_PROPERTY_FRAME_END;
 

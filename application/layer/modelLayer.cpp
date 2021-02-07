@@ -115,7 +115,7 @@ void ModelLayer::onUpdate(Engine::Registry64& registry) {
 		if (transform.valid()) 
 			position = transform->getCFrame().getPosition();
 		
-		Shaders::basicShader.updateLight(index, position , *light);
+		Shaders::basicShader.updateLight(index, position, *light);
 		Shaders::instanceShader.updateLight(index, position, *light);
 		
 		index += 1;
@@ -153,45 +153,61 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 	Shaders::instanceShader.setUniform("lightMatrix", ShadowLayer::lighSpaceMatrix);
 	Shaders::instanceShader.updateSunDirection(sunDirection);
 
-	// Filter on mesh ID and transparency
-	std::map<double, ExtendedPart*> transparentParts;
 	graphicsMeasure.mark(PHYSICALS);
-	screen->world->syncReadOnlyOperation([this, &transparentParts, screen, &registry] () {
+	
+	// Filter on mesh ID and transparency
+	struct EntityInfo {
+		Engine::Registry64::entity_type entity = 0;
+		Comp::Transform transform;
+		Comp::Material material;
+		Ref<Comp::Mesh> mesh;
+		Ref<Comp::Model> model;
+	};
+	
+	std::map<double, EntityInfo> transparentEntities;
+	screen->world->syncReadOnlyOperation([this, &transparentEntities, screen, &registry] () {
 		VisibilityFilter filter = VisibilityFilter::forWindow(screen->camera.cframe.position, screen->camera.getForwardDirection(), screen->camera.getUpDirection(), screen->camera.fov, screen->camera.aspect, screen->camera.zfar);
 
-		auto view = registry.view<Comp::Model>();
+		auto view = registry.view<Comp::Mesh>();
 		for (auto entity : view) {
-			Ref<Comp::Model> model = view.get<Comp::Model>(entity);
-			if (!filter(*model->part))
-				continue;	
+			EntityInfo info;
+			info.entity = entity;
 			
-			Ref<Comp::Mesh> mesh = registry.get<Comp::Mesh>(entity);
-			if (!mesh.valid())
+			info.mesh = view.get<Comp::Mesh>(entity);
+			if (!info.mesh.valid())
 				continue;
 
-			Comp::Material material = registry.getOr<Comp::Material>(entity, Comp::Material());
-			if (material.albedo.w < 1.0f) {
-				double distance = lengthSquared(Vec3(screen->camera.cframe.position - model->part->getPosition()));
-				transparentParts.insert(std::make_pair(distance , model->part));
+			if (info.mesh->id == -1)
+				continue;
+			
+			info.model = registry.get<Comp::Model>(entity);
+			if (info.model.valid())
+				if (!filter(*info.model->part))
+					continue;
+
+			info.transform = registry.getOr<Comp::Transform>(entity);
+			info.material = registry.getOr<Comp::Material>(entity);
+			
+			if (info.material.albedo.w < 1.0f) {
+				double distance = lengthSquared(Vec3(screen->camera.cframe.position - info.transform.getPosition()));
+				transparentEntities.insert(std::make_pair(distance, info));
 			} else {
-				Mat4f modelMatrix = model->part->getCFrame().asMat4WithPreScale(model->part->hitbox.scale);
-				material.albedo += getAlbedoForPart(screen, model->part);
+				Mat4f modelMatrix = info.transform.getModelMatrix();
+
+				if (info.model.valid())
+					info.material.albedo += getAlbedoForPart(screen, info.model->part);
 
 				Uniform uniform {
 					modelMatrix,
-					material.albedo,
-					material.metalness,
-					material.roughness,
-					material.ao
+					info.material.albedo,
+					info.material.metalness,
+					info.material.roughness,
+					info.material.ao
 				};
 				
-				manager->add(mesh->id, uniform);
+				manager->add(info.mesh->id, uniform);
 			}
 		}
-
-		/*Shaders::instanceShader.updateTexture(false);
-		/*activeTexture(0);
-		ResourceManager::get<TextureResource>("floorMaterial")->bind();*/
 		
 		Shaders::instanceShader.bind();
 		manager->submit();
@@ -200,27 +216,25 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 		// Render transparent meshes
 		Shaders::basicShader.bind();
 		enableBlending();
-		for (auto iterator = transparentParts.rbegin(); iterator != transparentParts.rend(); ++iterator) {
-			ExtendedPart* part = iterator->second;
+		for (auto iterator = transparentEntities.rbegin(); iterator != transparentEntities.rend(); ++iterator) {
+			EntityInfo info = iterator->second;
 
-			Ref<Comp::Mesh> mesh = registry.get<Comp::Mesh>(part->entity);
-			if (!mesh.valid())
+			if (info.mesh->id == -1)
 				continue;
 
-			if (mesh->id == -1)
-				continue;
+			if (info.model.valid())
+				info.material.albedo += getAlbedoForPart(screen, info.model->part);
 
-			Comp::Material material = registry.getOr<Comp::Material>(part->entity, Comp::Material());
-			material.albedo += getAlbedoForPart(screen, part);
-
-			Shaders::basicShader.updateMaterial(material);
-			Shaders::basicShader.updatePart(*part);
-			MeshRegistry::meshes[mesh->id]->render(mesh->mode);
+			Shaders::basicShader.updateMaterial(info.material);
+			Shaders::basicShader.updateModel(info.transform.getModelMatrix());
+			MeshRegistry::meshes[info.mesh->id]->render(info.mesh->mode);
 		}
 
 		if (screen->selectedPart) {
-			Shaders::debugShader.updateModel(screen->selectedPart->getCFrame().asMat4WithPreScale(screen->selectedPart->hitbox.scale));
-			Ref<Comp::Mesh> mesh = registry.get<Comp::Mesh>(screen->selectedPart->entity);
+			Comp::Transform transform = registry.getOr<Comp::Transform>(screen->selectedEntity);
+			Ref<Comp::Mesh> mesh = registry.get<Comp::Mesh>(screen->selectedEntity);
+			
+			Shaders::debugShader.updateModel(transform.getModelMatrix());
 			if (mesh.valid())
 				MeshRegistry::meshes[mesh->id]->render();
 		}

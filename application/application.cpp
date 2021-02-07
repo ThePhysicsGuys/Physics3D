@@ -80,8 +80,8 @@ void init(const Util::ParsedArgs& cmdArgs) {
 	Log::info("Init MeshRegistry");
 	Graphics::MeshRegistry::init();
 
-	ResourceManager::add<Graphics::TextureResource>("floorMaterial", "../res/textures/floor/floor_color.jpg");
-	WorldImportExport::registerTexture(ResourceManager::get<Graphics::TextureResource>("floorMaterial"));
+	/*ResourceManager::add<Graphics::TextureResource>("floorMaterial", "../res/textures/floor/floor_color.jpg");
+	WorldImportExport::registerTexture(ResourceManager::get<Graphics::TextureResource>("floorMaterial"));*/
 
 	Log::info("Initializing world");
 	WorldBuilder::init();

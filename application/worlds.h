@@ -14,9 +14,10 @@ public:
 	Vec3 localSelectedPoint;
 	Position magnetPoint;
 	
-	virtual void applyExternalForces() override;
-	virtual void onPartAdded(ExtendedPart* part) override;
-	virtual void onPartRemoved(ExtendedPart* part) override;
+	void applyExternalForces() override;
+
+	void onPartAdded(ExtendedPart* part) override;
+	void onPartRemoved(ExtendedPart* part) override;
 };
 
 };

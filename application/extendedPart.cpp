@@ -18,7 +18,6 @@ ExtendedPart::ExtendedPart(Part&& part, const VisualData& visualData, const std:
 		screen.registry.setParent(this->entity, parent);
 	
 	screen.registry.add<Comp::Mesh>(this->entity, visualData);
-	screen.registry.add<Comp::Model>(this->entity, this);
 	screen.registry.add<Comp::Transform>(this->entity, this);
 	if (!name.empty()) 
 		screen.registry.add<Comp::Name>(this->entity, name);
@@ -32,7 +31,6 @@ ExtendedPart::ExtendedPart(const Shape& hitbox, const GlobalCFrame& position, co
 		screen.registry.setParent(this->entity, parent);
 	
 	screen.registry.add<Comp::Mesh>(this->entity, visualData);
-	screen.registry.add<Comp::Model>(this->entity, this);
 	screen.registry.add<Comp::Transform>(this->entity, this);
 	if (!name.empty())
 		screen.registry.add<Comp::Name>(this->entity, name);
@@ -46,7 +44,6 @@ ExtendedPart::ExtendedPart(Part&& part, const std::string& name, const Entity& p
 		screen.registry.setParent(this->entity, parent);
 	
 	screen.registry.add<Comp::Mesh>(this->entity, Graphics::MeshRegistry::getOrCreateMeshFor(part.hitbox.baseShape));
-	screen.registry.add<Comp::Model>(this->entity, this);
 	screen.registry.add<Comp::Transform>(this->entity, this);
 	if (!name.empty())
 		screen.registry.add<Comp::Name>(this->entity, name);
@@ -59,7 +56,6 @@ ExtendedPart::ExtendedPart(const Shape& hitbox, const GlobalCFrame& position, co
 		screen.registry.setParent(this->entity, parent);
 	
 	screen.registry.add<Comp::Mesh>(this->entity, Graphics::MeshRegistry::getOrCreateMeshFor(hitbox.baseShape));
-	screen.registry.add<Comp::Model>(this->entity, this);
 	screen.registry.add<Comp::Transform>(this->entity, this);
 	if (!name.empty())
 		screen.registry.add<Comp::Name>(this->entity, name);
@@ -73,7 +69,6 @@ ExtendedPart::ExtendedPart(const Shape& hitbox, ExtendedPart* attachTo, const CF
 		screen.registry.setParent(this->entity, parent);
 
 	screen.registry.add<Comp::Mesh>(this->entity, Graphics::MeshRegistry::getOrCreateMeshFor(hitbox.baseShape));
-	screen.registry.add<Comp::Model>(this->entity, this);
 	screen.registry.add<Comp::Transform>(this->entity, this);
 	if (!name.empty())
 		screen.registry.add<Comp::Name>(this->entity, name);

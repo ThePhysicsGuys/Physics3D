@@ -236,9 +236,9 @@ public:
 
 	virtual void tick();
 
-	void addPart(Part* part, int layerIndex = 0);
+	virtual void addPart(Part* part, int layerIndex = 0);
+	virtual void removePart(Part* part);
 	void addTerrainPart(Part* part, int layerIndex = 0);
-	void removePart(Part* part);
 
 	bool doLayersCollide(int layer1, int layer2) const;
 	void setLayersCollide(int layer1, int layer2, bool collide);
@@ -376,18 +376,18 @@ public:
 
 	virtual void onPartAdded(T* part) {}
 	virtual void onPartRemoved(T* part) {}
-
+	
 	virtual void deletePart(T* part) const {
 		delete part;
 	}
-	virtual void onPartAdded(Part* part) final override {
+	void onPartAdded(Part* part) final override {
 		this->onPartAdded(static_cast<T*>(part));
 	}
-	virtual void onPartRemoved(Part* part) final override {
+	void onPartRemoved(Part* part) final override {
 		this->onPartRemoved(static_cast<T*>(part));
 	}
 	// called when the part has already been removed from the world
-	virtual void deletePart(Part* partToDelete) const final override {
+	void deletePart(Part* partToDelete) const final override {
 		this->deletePart(static_cast<T*>(partToDelete));
 	}
 };
