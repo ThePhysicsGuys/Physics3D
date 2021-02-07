@@ -134,7 +134,7 @@ bool StandardInputHandler::onKeyPress(Engine::KeyPressEvent& event) {
 	}
 	
 	KEY_BIND(KeyboardOptions::Part::makeMainPart) {
-		Log::info("Made %s the main part of it's physical", screen.registry.getOr<Comp::Name>(screen.selectedPart->entity, Comp::Name("")).name.c_str());
+		Log::info("Made %s the main part of it's physical", screen.registry.getOr<Comp::Name>(screen.selectedPart->entity, "").name.c_str());
 		screen.selectedPart->makeMainPart();
 	}
 	
@@ -142,7 +142,7 @@ bool StandardInputHandler::onKeyPress(Engine::KeyPressEvent& event) {
 		if (screen.selectedPart) {
 			if (screen.selectedPart->parent != nullptr) {
 				if (!screen.selectedPart->parent->isMainPhysical()) {
-					Log::info("Made %s the main physical", screen.registry.getOr<Comp::Name>(screen.selectedPart->entity, Comp::Name("")).name.c_str());
+					Log::info("Made %s the main physical", screen.registry.getOr<Comp::Name>(screen.selectedPart->entity, "").name.c_str());
 					((ConnectedPhysical*) screen.selectedPart->parent)->makeMainPhysical();
 				} else {
 					Log::warn("This physical is already the main physical!");

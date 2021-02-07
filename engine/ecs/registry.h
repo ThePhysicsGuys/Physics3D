@@ -533,11 +533,11 @@ public:
 	/**
 	 * Returns the component of the given type from the given entity, the default value if no such component exists, note that the component will be copied
 	 */
-	template<typename Component>
-	[[nodiscard]] Component getOr(const entity_type& entity, const Component& component) {
+	template<typename Component, typename... Args>
+	[[nodiscard]] Component getOr(const entity_type& entity, Args&&... args) {
 		Ref<Component> result = get<Component>(entity);
 		if (result == nullptr)
-			return component;
+			return Component(std::forward<Args>(args)...);
 		else
 			return *result;
 	}

@@ -74,8 +74,8 @@ public:
 	using SerializationSession<ExtendedPart>::SerializationSession;
 	virtual void serializePartExternalData(const ExtendedPart& part, std::ostream& ostream) override {
 		// TODO integrate components into serialization
-		serializeMaterial(screen.registry.getOr<Comp::Material>(part.entity, Comp::Material()), ostream);
-		::serializeString(screen.registry.getOr<Comp::Name>(part.entity, Comp::Name("")).name, ostream);
+		serializeMaterial(screen.registry.getOr<Comp::Material>(part.entity), ostream);
+		::serializeString(screen.registry.getOr<Comp::Name>(part.entity, "").name, ostream);
 	}
 };
 

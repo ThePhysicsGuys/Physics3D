@@ -77,7 +77,7 @@ void ECSFrame::renderEntity(Engine::Registry64& registry, const Engine::Registry
 	auto children = registry.getChildren(entity);
 	bool leaf = children.begin() == registry.end();
 
-	std::string name = registry.getOr<Comp::Name>(entity, Comp::Name(std::to_string(entity))).name;
+	std::string name = registry.getOr<Comp::Name>(entity, std::to_string(entity)).name;
 	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth | (leaf ? ImGuiTreeNodeFlags_Leaf : ImGuiTreeNodeFlags_None);
 	bool open = IconTreeNode(registry, entity, flags, name.c_str());
 

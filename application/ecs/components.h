@@ -2,6 +2,7 @@
 
 #include <string>
 #include "extendedPart.h"
+#include <variant>
 #include "../graphics/visualData.h"
 
 namespace P3D::Application {
@@ -9,40 +10,102 @@ namespace P3D::Application {
 namespace Comp {
 
 struct Transform : RefCountable {
-	union {
-		ExtendedPart* part;
-		GlobalCFrame* cframe;
+	struct ScaledCFrame {
+		GlobalCFrame cframe;
+		DiagonalMat3 scale;
+
+		ScaledCFrame() : scale(DiagonalMat3::IDENTITY()) {}
+		ScaledCFrame(const Position& position) : cframe(position), scale(DiagonalMat3::IDENTITY()) {}
+		ScaledCFrame(const GlobalCFrame& cframe) : cframe(cframe), scale(DiagonalMat3::IDENTITY()) {}
+		ScaledCFrame(const GlobalCFrame& cframe, const DiagonalMat3& scale) : cframe(cframe), scale(scale) {}
 	};
-
-	bool isPartAttached;
-
-	explicit Transform(ExtendedPart* part) : part(part), isPartAttached(true) {}
 	
-	template<typename... Args>
-	explicit Transform(Args&&... args) : isPartAttached(false) {
-		this->cframe = new GlobalCFrame(std::forward<Args>(args)...);
+	std::variant<ScaledCFrame, ExtendedPart*> cframe;
+
+	Transform() = default;
+	Transform(ExtendedPart* part) : cframe(part) {}
+	Transform(const Position& position) : cframe(position) {}
+	Transform(const GlobalCFrame& cframe) : cframe(cframe) {}
+	Transform(const GlobalCFrame& cframe, const DiagonalMat3& scale) : cframe(ScaledCFrame(cframe, scale)) {}
+
+	bool isPartAttached() {
+		return std::holds_alternative<ExtendedPart*>(this->cframe);
 	}
 
-	~Transform() {
-		if (!isPartAttached) {
-			delete cframe;
-		}
+	void setPart(ExtendedPart* part) {
+		this->cframe = part;
+	}
+	
+	ExtendedPart* getPart() {
+		return std::get<ExtendedPart*>(this->cframe);
 	}
 	
 	void setCFrame(const GlobalCFrame& cframe) {
-		if (isPartAttached) {
-			part->setCFrame(cframe);
+		if (std::holds_alternative<ExtendedPart*>(this->cframe)) {
+			std::get<ExtendedPart*>(this->cframe)->setCFrame(cframe);
 		} else {
-			*this->cframe = cframe;
+			std::get<ScaledCFrame>(this->cframe).cframe = cframe;
 		}
 	}
 
-	GlobalCFrame getCFrame() {
-		if (isPartAttached) {
-			return part->getCFrame();
+	void setScale(const DiagonalMat3& scale) {
+		if (std::holds_alternative<ExtendedPart*>(this->cframe)) {
+			std::get<ExtendedPart*>(this->cframe)->scale(scale[0], scale[1], scale[2]);
 		} else {
-			return *this->cframe;
+			std::get<ScaledCFrame>(this->cframe).scale = scale;
 		}
+	}
+
+	void setPosition(const Position& position) {
+		if (std::holds_alternative<ExtendedPart*>(this->cframe)) {
+			ExtendedPart* part = std::get<ExtendedPart*>(this->cframe);
+			GlobalCFrame cframe = part->getCFrame();
+			cframe.position = position;
+			
+			part->setCFrame(cframe);
+		} else {
+			std::get<ScaledCFrame>(this->cframe).cframe.position = position;
+		}
+	}
+
+	void setRotation(const Rotation& rotation) {
+		if (std::holds_alternative<ExtendedPart*>(this->cframe)) {
+			ExtendedPart* part = std::get<ExtendedPart*>(this->cframe);
+			GlobalCFrame cframe = part->getCFrame();
+			cframe.rotation = rotation;
+
+			part->setCFrame(cframe);
+		} else {
+			std::get<ScaledCFrame>(this->cframe).cframe.rotation = rotation;
+		}
+	}
+	
+	GlobalCFrame getCFrame() {
+		if (std::holds_alternative<ExtendedPart*>(this->cframe)) {
+			return std::get<ExtendedPart*>(this->cframe)->getCFrame();
+		} else {
+			return std::get<ScaledCFrame>(this->cframe).cframe;
+		}
+	}
+
+	DiagonalMat3 getScale() {
+		if (std::holds_alternative<ExtendedPart*>(this->cframe)) {
+			return std::get<ExtendedPart*>(this->cframe)->hitbox.scale;
+		} else {
+			return std::get<ScaledCFrame>(this->cframe).scale;
+		}
+	}
+
+	Position getPosition() {
+		return getCFrame().getPosition();
+	}
+
+	Rotation getRotation() {
+		return getCFrame().getRotation();
+	}
+
+	Mat4f getModelMatrix() {
+		return getCFrame().asMat4WithPreScale(getScale());
 	}
 };
 
