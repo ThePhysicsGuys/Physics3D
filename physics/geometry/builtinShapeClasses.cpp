@@ -269,6 +269,13 @@ Vec3f PolyhedronShapeClassSSE::furthestInDirection(const Vec3f& direction) const
 	return poly.furthestInDirectionSSE(direction);
 }
 
+BoundingBox PolyhedronShapeClassSSE4::getBounds(const Rotation& rotation, const DiagonalMat3& scale) const {
+	return poly.getBoundsSSE(Mat3f(rotation.asRotationMatrix() * scale));
+}
+Vec3f PolyhedronShapeClassSSE4::furthestInDirection(const Vec3f& direction) const {
+	return poly.furthestInDirectionSSE4(direction);
+}
+
 BoundingBox PolyhedronShapeClassFallback::getBounds(const Rotation& rotation, const DiagonalMat3& scale) const {
 	return poly.getBoundsFallback(Mat3f(rotation.asRotationMatrix() * scale));
 }

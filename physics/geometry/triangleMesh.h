@@ -142,6 +142,9 @@ public:
 	int furthestIndexInDirectionSSE(const Vec3f& direction) const;
 	Vec3f furthestInDirectionSSE(const Vec3f& direction) const;
 
+	int furthestIndexInDirectionSSE4(const Vec3f& direction) const;
+	Vec3f furthestInDirectionSSE4(const Vec3f& direction) const;
+
 	BoundingBox getBoundsAVX() const;
 	BoundingBox getBoundsAVX(const Mat3f& referenceFrame) const;
 	int furthestIndexInDirectionAVX(const Vec3f& direction) const;

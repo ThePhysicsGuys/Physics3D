@@ -30,7 +30,11 @@ Shape polyhedronShape(const Polyhedron& poly) {
 	if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::AVX | Util::CPUIDCheck::AVX2 | Util::CPUIDCheck::FMA)) {
 		shapeClass = new PolyhedronShapeClassAVX(poly.translatedAndScaled(-center, scale));
 	} else if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::SSE | Util::CPUIDCheck::SSE2)) {
-		shapeClass = new PolyhedronShapeClassSSE(poly.translatedAndScaled(-center, scale));
+		if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::SSE4_1)) {
+			shapeClass = new PolyhedronShapeClassSSE4(poly.translatedAndScaled(-center, scale));
+		} else {
+			shapeClass = new PolyhedronShapeClassSSE(poly.translatedAndScaled(-center, scale));
+		}
 	} else {
 		shapeClass = new PolyhedronShapeClassFallback(poly.translatedAndScaled(-center, scale));
 	}

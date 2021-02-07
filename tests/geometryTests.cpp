@@ -215,6 +215,12 @@ TEST_CASE(testTriangleMeshOptimizedFurthestIndexInDirection) {
 			ASSERT(mesh.getVertex(reference) * dir == mesh.getVertex(sseVertex) * dir);
 		}
 
+		if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::SSE | Util::CPUIDCheck::SSE2 | Util::CPUIDCheck::SSE4_1)) {
+			int sse4Vertex = mesh.furthestIndexInDirectionSSE4(dir);
+			logStream << "sse4Vertex: " << sse4Vertex << "\n";
+			ASSERT(mesh.getVertex(reference) * dir == mesh.getVertex(sse4Vertex) * dir);
+		}
+
 		if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::AVX | Util::CPUIDCheck::AVX2 | Util::CPUIDCheck::FMA)) {
 			int avxVertex = mesh.furthestIndexInDirectionAVX(dir);
 			logStream << "avxVertex: " << avxVertex << "\n";
@@ -237,6 +243,12 @@ TEST_CASE(testTriangleMeshOptimizedFurthestInDirection) {
 			Vec3f sseVertex = mesh.furthestInDirectionSSE(dir);
 			logStream << "sseVertex: " << sseVertex << "\n";
 			ASSERT(reference * dir == sseVertex * dir); // dot with dir as we don't really care for the exact vertex in a tie
+		}
+
+		if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::SSE | Util::CPUIDCheck::SSE2 | Util::CPUIDCheck::SSE4_1)) {
+			Vec3f sse4Vertex = mesh.furthestInDirectionSSE4(dir);
+			logStream << "sse4Vertex: " << sse4Vertex << "\n";
+			ASSERT(reference * dir == sse4Vertex * dir); // dot with dir as we don't really care for the exact vertex in a tie
 		}
 
 		if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::AVX | Util::CPUIDCheck::AVX2 | Util::CPUIDCheck::FMA)) {

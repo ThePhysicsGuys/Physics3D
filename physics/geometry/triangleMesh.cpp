@@ -509,7 +509,11 @@ int TriangleMesh::furthestIndexInDirection(const Vec3f& direction) const {
 	if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::AVX | Util::CPUIDCheck::AVX2 | Util::CPUIDCheck::FMA)) {
 		return furthestIndexInDirectionAVX(direction);
 	} else if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::SSE | Util::CPUIDCheck::SSE2)) {
-		return furthestIndexInDirectionSSE(direction);
+		if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::SSE4_1)) {
+			return furthestIndexInDirectionSSE4(direction);
+		} else {
+			return furthestIndexInDirectionSSE(direction);
+		}
 	} else {
 		return furthestIndexInDirectionFallback(direction);
 	}
@@ -519,7 +523,11 @@ Vec3f TriangleMesh::furthestInDirection(const Vec3f& direction) const {
 	if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::AVX | Util::CPUIDCheck::AVX2 | Util::CPUIDCheck::FMA)) {
 		return furthestInDirectionAVX(direction);
 	} else if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::SSE | Util::CPUIDCheck::SSE2)) {
-		return furthestInDirectionSSE(direction);
+		if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::SSE4_1)) {
+			return furthestInDirectionSSE4(direction);
+		} else {
+			return furthestInDirectionSSE(direction);
+		}
 	} else {
 		return furthestInDirectionFallback(direction);
 	}

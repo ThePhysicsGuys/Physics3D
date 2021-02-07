@@ -89,6 +89,14 @@ public:
 	virtual Vec3f furthestInDirection(const Vec3f& direction) const override;
 };
 
+class PolyhedronShapeClassSSE4 : public PolyhedronShapeClass {
+public:
+	using PolyhedronShapeClass::PolyhedronShapeClass;
+
+	virtual BoundingBox getBounds(const Rotation& rotation, const DiagonalMat3& scale) const override;
+	virtual Vec3f furthestInDirection(const Vec3f& direction) const override;
+};
+
 class PolyhedronShapeClassFallback : public PolyhedronShapeClass {
 public:
 	using PolyhedronShapeClass::PolyhedronShapeClass;
