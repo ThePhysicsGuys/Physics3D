@@ -292,17 +292,17 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_ty
 	DiagonalMat3f scale = component->getScale();
 	bool standalone = component->isPartAttached();
 	
-	ECS_PROPERTY_DESC("Standalone", "Whether the hitbox is coming from the part", ImGui::Checkbox("", &standalone));
-	ECS_PROPERTY_IF("Position:", ImGui::DragVec3("Position", position.data, 0, 0.1, true),
+	ECS_PROPERTY_DESC("Standalone", "Whether the transform and scale is coming from the part", ImGui::Checkbox("##TransformHitbox", &standalone));
+	ECS_PROPERTY_IF("Position:", ImGui::DragVec3("TransformPosition", position.data, 0, 0.1, true),
 		component->setPosition(castVec3fToPosition(position));
 	);
 
-	ECS_PROPERTY_IF("Rotation:", ImGui::DragVec3("Rotation", rotation.data, 0.01f, 0.02f, true),
+	ECS_PROPERTY_IF("Rotation:", ImGui::DragVec3("TransformRotation", rotation.data, 0.01f, 0.02f, true),
 		component->setRotation(Rotation::fromRotationVec(rotation));
 	);
 
 	float min = 0.01f;
-	ECS_PROPERTY_IF("Scale:", ImGui::DragVec3("Scale", scale.data, 1.0f, 0.01f, true, &min),
+	ECS_PROPERTY_IF("Scale:", ImGui::DragVec3("TransformScale", scale.data, 1.0f, 0.01f, true, &min),
 		component->setScale(scale);
 	);
 	
@@ -313,17 +313,16 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_ty
 void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const Ref<Comp::Hitbox>& component) {
 	ECS_PROPERTY_FRAME_START(registry, index);
 
-
 	bool standalone = component->isPartAttached();
 	Shape shape = component->getShape();
 	DiagonalMat3f scale = shape.scale;
 
 	ECS_TITLE("Hitbox", false);
-	ECS_PROPERTY_DESC("Standalone", "Whether the hitbox is coming from the part", ImGui::Checkbox("", &standalone));
+	ECS_PROPERTY_DESC("Standalone", "Whether the hitbox is coming from the part", ImGui::Checkbox("##HitboxStandalone", &standalone));
 	ECS_PROPERTY("Volume:", ImGui::Text(str(shape.getVolume()).c_str()));
 	ECS_PROPERTY("Center of mass:", ImGui::Text(str(shape.getCenterOfMass()).c_str()));
 	float min = 0.01f;
-	ECS_PROPERTY_IF("Scale:", ImGui::DragVec3("Scale", scale.data, 1, 0.01f, true, &min),
+	ECS_PROPERTY_IF("Scale:", ImGui::DragVec3("HitboxScale", scale.data, 1, 0.01f, true, &min),
 		component->setScale(scale);
 	);
 

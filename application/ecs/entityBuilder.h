@@ -46,7 +46,7 @@ public:
 	}
 
 	template<typename... Args>
-	EntityBuilder& model(Args&&... args) {
+	EntityBuilder& collider(Args&&... args) {
 		this->registry.add<Comp::Collider>(this->entity, std::forward<Args>(args)...);
 
 		return *this;
@@ -62,6 +62,13 @@ public:
 	template<typename... Args>
 	EntityBuilder& material(Args&&... args) {
 		this->registry.add<Comp::Material>(this->entity, std::forward<Args>(args)...);
+
+		return *this;
+	}
+
+	template<typename... Args>
+	EntityBuilder& hitbox(Args&&... args) {
+		this->registry.add<Comp::Hitbox>(this->entity, std::forward<Args>(args)...);
 
 		return *this;
 	}

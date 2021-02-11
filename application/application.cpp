@@ -145,14 +145,14 @@ void setupWorld(const Util::ParsedArgs& cmdArgs) {
 	// Lights
 	Comp::Light::Attenuation attenuation = { 1, 1, 1 };
 	auto lights = EntityBuilder(screen.registry).name("Lights").get();
-	EntityBuilder(screen.registry).parent(lights).transform(Position(10, 5, -10)).light(Color3(1, 0.84f, 0.69f), 300, attenuation);
-	EntityBuilder(screen.registry).parent(lights).transform(Position(10, 5, 10)).light(Color3(1, 0.84f, 0.69f), 300, attenuation);
-	EntityBuilder(screen.registry).parent(lights).transform(Position(-10, 5, -10)).light(Color3(1, 0.84f, 0.69f), 200, attenuation);
-	EntityBuilder(screen.registry).parent(lights).transform(Position(-10, 5, 10)).light(Color3(1, 0.84f, 0.69f), 500, attenuation);
-	EntityBuilder(screen.registry).parent(lights).transform(Position(0, 5, 0)).light(Color3(1, 0.90f, 0.75f), 400, attenuation);
+	EntityBuilder(screen.registry).parent(lights).transform(Position(10, 5, -10)).light(Color3(1, 0.84f, 0.69f), 300, attenuation).hitbox(&CubeClass::instance);
+	EntityBuilder(screen.registry).parent(lights).transform(Position(10, 5, 10)).light(Color3(1, 0.84f, 0.69f), 300, attenuation).hitbox(&CubeClass::instance);
+	EntityBuilder(screen.registry).parent(lights).transform(Position(-10, 5, -10)).light(Color3(1, 0.84f, 0.69f), 200, attenuation).hitbox(&CubeClass::instance);
+	EntityBuilder(screen.registry).parent(lights).transform(Position(-10, 5, 10)).light(Color3(1, 0.84f, 0.69f), 500, attenuation).hitbox(&SphereClass::instance).mesh(Graphics::MeshRegistry::getOrCreateMeshFor(&SphereClass::instance));
+	EntityBuilder(screen.registry).parent(lights).transform(Position(0, 5, 0)).light(Color3(1, 0.90f, 0.75f), 400, attenuation).hitbox(&CubeClass::instance).mesh(Graphics::MeshRegistry::getOrCreateMeshFor(&CubeClass::instance));
 	
 	ExtendedPart* partA = new ExtendedPart(boxShape(1.0, 0.49, 3.0), GlobalCFrame(3.0, 3.0, 0.0), { 1.0, 1.0, 1.0 }, "partA");
-	ExtendedPart* partB = new ExtendedPart(boxShape(1.0, 0.5, 3.0), GlobalCFrame(2.0, 3.0, 0.0), { 1.0, 1.0, 1.0 }, "partA");
+	ExtendedPart* partB = new ExtendedPart(boxShape(1.0, 0.5, 3.0), GlobalCFrame(2.0, 3.0, 0.0), { 1.0, 1.0, 1.0 }, "partB");
 	EntityBuilder(screen.registry, partA->entity).light(Color3(0.1, 0.94f, 0.49f), 500, Comp::Light::Attenuation { 0.8, 0.5, 0.2 });
 	
 	world.addPart(partA);

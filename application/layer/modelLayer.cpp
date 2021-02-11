@@ -231,13 +231,25 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 			MeshRegistry::meshes[info.mesh->id]->render(info.mesh->mode);
 		}
 
-		if (screen->selectedPart) {
-			Comp::Transform transform = registry.getOr<Comp::Transform>(screen->selectedEntity);
-			Ref<Comp::Mesh> mesh = registry.get<Comp::Mesh>(screen->selectedEntity);
-			
-			Shaders::debugShader.updateModel(transform.getModelMatrix());
-			if (mesh.valid())
-				MeshRegistry::meshes[mesh->id]->render();
+		// Hitbox drawing
+		if (screen->selectedEntity) {
+			Ref<Comp::Transform> transform = registry.get<Comp::Transform>(screen->selectedEntity);
+			if (transform.valid()) {
+				Ref<Comp::Hitbox> hitbox = registry.get<Comp::Hitbox>(screen->selectedEntity);
+
+				if (hitbox.valid()) {
+					Shape shape = hitbox->getShape();
+					DiagonalMat3 scale = transform->getScale();
+
+					if (!hitbox->isPartAttached())
+						scale = scale * hitbox->getScale();		
+					
+					VisualData data = MeshRegistry::getOrCreateMeshFor(shape.baseShape);
+
+					Shaders::debugShader.updateModel(transform->getCFrame().asMat4WithPreScale(scale));
+					MeshRegistry::meshes[data.id]->render();
+				}
+			}
 		}
 	});
 
