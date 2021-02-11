@@ -286,7 +286,7 @@ void main() {
 		N = normalize(fNormal);
 		//N = normalize(getNormalFromMap());
 
-		albedo = vec3(fUV, 1, 1); 
+		albedo = vec4(fUV, 1, 1); 
 		//albedo = texture(material.albedoMap, fUV);
 		//albedo = albedo * albedo;
 		/*roughness =  texture(material.roughnessMap, fUV).r;
@@ -298,6 +298,7 @@ void main() {
 	} else {*/
 		N = normalize(fNormal);
 
+		//albedo = vec4(fUV, 0, 1);
 		albedo = fAlbedo;
 		roughness = fRoughness;
 		metalness = fMetalness;

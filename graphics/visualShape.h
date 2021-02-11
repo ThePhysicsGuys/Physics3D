@@ -26,7 +26,7 @@ struct VisualShape : public TriangleMesh {
 	explicit VisualShape(const TriangleMesh& shape, SVec3f normals = SVec3f(), SVec2f uvs = SVec2f(), SVec3f tangents = SVec3f(), SVec3f bitangents = SVec3f()) :
 		TriangleMesh(shape), normals(normals), uvs(uvs), tangents(tangents), bitangents(bitangents) {}
 
-	static VisualShape generateSmoothNormalsShape(const Polyhedron& underlyingPoly);
+	static VisualShape generateSmoothNormalsShape(const Polyhedron& underlyingMesh);
 	static VisualShape generateSplitNormalsShape(const TriangleMesh& underlyingMesh);
 };
 

@@ -75,7 +75,8 @@ public:
 
 	PartIntersection intersects(const Part& other) const;
 	void scale(double scaleX, double scaleY, double scaleZ);
-
+	void setScale(const DiagonalMat3& scale);
+	
 	Bounds getBounds() const;
 	BoundingBox getLocalBounds() const;
 

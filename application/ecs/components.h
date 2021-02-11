@@ -1,13 +1,52 @@
 #pragma once
 
 #include <string>
-#include "extendedPart.h"
 #include <variant>
+#include "extendedPart.h"
+
+#include "../physics/geometry/builtinShapeClasses.h"
 #include "../graphics/visualData.h"
 
 namespace P3D::Application {
 
 namespace Comp {
+
+struct Hitbox : RefCountable {
+	std::variant<Shape, ExtendedPart*> hitbox;
+
+	Hitbox() : hitbox(Shape(&CubeClass::instance)) {}
+	Hitbox(ExtendedPart* part) : hitbox(part) {}
+	Hitbox(const ShapeClass* shapeClass) : hitbox(Shape(shapeClass)) {}
+	Hitbox(const Shape& shape) : hitbox(shape) {}
+
+	Shape getShape() {
+		if (std::holds_alternative<Shape>(this->hitbox)) {
+			return std::get<Shape>(hitbox);
+		} else {
+			return std::get<ExtendedPart*>(this->hitbox)->hitbox;
+		}
+	}
+
+	bool isPartAttached() {
+		return std::holds_alternative<ExtendedPart*>(this->hitbox);
+	}
+
+	ExtendedPart* getPart() {
+		return std::get<ExtendedPart*>(this->hitbox);
+	}
+
+	DiagonalMat3 getScale() {
+		return this->getShape().scale;
+	}
+
+	void setScale(const DiagonalMat3& scale) {
+		if (std::holds_alternative<ExtendedPart*>(this->hitbox)) {
+			std::get<ExtendedPart*>(this->hitbox)->setScale(scale);
+		} else {
+			std::get<Shape>(this->hitbox).scale = scale;
+		}
+	}
+};
 
 struct Transform : RefCountable {
 	struct ScaledCFrame {
@@ -22,7 +61,7 @@ struct Transform : RefCountable {
 	
 	std::variant<ScaledCFrame, ExtendedPart*> cframe;
 
-	Transform() = default;
+	Transform() : cframe(ScaledCFrame()) {}
 	Transform(ExtendedPart* part) : cframe(part) {}
 	Transform(const Position& position) : cframe(position) {}
 	Transform(const GlobalCFrame& cframe) : cframe(cframe) {}
@@ -50,7 +89,7 @@ struct Transform : RefCountable {
 
 	void setScale(const DiagonalMat3& scale) {
 		if (std::holds_alternative<ExtendedPart*>(this->cframe)) {
-			std::get<ExtendedPart*>(this->cframe)->scale(scale[0], scale[1], scale[2]);
+			std::get<ExtendedPart*>(this->cframe)->setScale(scale);
 		} else {
 			std::get<ScaledCFrame>(this->cframe).scale = scale;
 		}
@@ -120,11 +159,11 @@ struct Name : RefCountable {
 	}
 };
 
-// The model of the entity, as it is being physicsed in the engine 
-struct Model : RefCountable {
+// The collider of the entity, as it is being physicsed in the engine 
+struct Collider : RefCountable {
 	ExtendedPart* part;
 
-	Model(ExtendedPart* part) : part(part) {}
+	Collider(ExtendedPart* part) : part(part) {}
 
 	ExtendedPart* operator->() const {
 		return part;

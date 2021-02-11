@@ -125,7 +125,7 @@ VisualShape createBox(float width, float height, float depth) {
 	
 	Vec2f* uvBuffer = new Vec2f[boxShape.triangleCount * 3];
 
-	for(int ti = 0; ti < boxShape.triangleCount; ti++) {
+	for(std::size_t ti = 0; ti < boxShape.triangleCount; ti++) {
 		Triangle t = boxShape.getTriangle(ti);
 		Vec3f v[3];
 		v[0] = boxShape.getVertex(t.firstIndex);
@@ -135,11 +135,13 @@ VisualShape createBox(float width, float height, float depth) {
 		Vec3f normalVec = boxShape.getNormalVecOfTriangle(t);
 
 		int side = getAbsMaxElementIndex(normalVec);
-
-		for(int i = 0; i < 3; i++) {
-			 Vec2f vec = withoutIndex(v[i], side);
-			 vec.x = (vec.x + 1.0) / 2;
-			 vec.y = (vec.y + 1.0) / 2;
+		Vec3f sizes { width, height, depth };
+		
+		for(std::size_t i = 0; i < 3; i++) {
+			Vec2f vec = withoutIndex(v[i], side);
+			Vec2f dim = withoutIndex(sizes, side);
+			 vec.x = (vec.x + dim.x / 2.0) / dim.x;
+			 vec.y = (vec.y + dim.y / 2.0) / dim.y;
 			 uvBuffer[ti * 3 + i] = vec;
 		}
 	}

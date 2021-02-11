@@ -122,6 +122,12 @@ void Part::scale(double scaleX, double scaleY, double scaleZ) {
 	recalculateAndUpdateParent(this, oldBounds);
 }
 
+void Part::setScale(const DiagonalMat3& scale) {
+	Bounds oldBounds = this->getBounds();
+	this->hitbox.scale = scale;
+	recalculateAndUpdateParent(this, oldBounds);
+}
+
 void Part::setCFrame(const GlobalCFrame& newCFrame) {
 	Bounds oldBounds = this->getBounds();
 	if(this->parent == nullptr) {

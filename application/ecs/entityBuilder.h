@@ -47,7 +47,7 @@ public:
 
 	template<typename... Args>
 	EntityBuilder& model(Args&&... args) {
-		this->registry.add<Comp::Model>(this->entity, std::forward<Args>(args)...);
+		this->registry.add<Comp::Collider>(this->entity, std::forward<Args>(args)...);
 
 		return *this;
 	}

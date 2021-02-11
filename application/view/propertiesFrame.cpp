@@ -59,6 +59,19 @@ bool _ecs_property_frame_start(Engine::Registry64& registry, Engine::Registry64:
 		ImGui::Columns(1); \
 	}
 	
+#define ECS_PROPERTY_DESC_IF(text, desc, widget, code) \
+	{ \
+		ImGui::TextUnformatted(text); \
+		ImGui::SameLine(); \
+		ImGui::HelpMarker(desc); \
+		ImGui::NextColumn(); \
+		ImGui::SetNextItemWidth(-1); \
+		if (widget) { \
+			code \
+		}; \
+		ImGui::NextColumn(); \
+	}
+
 #define ECS_PROPERTY_IF(text, widget, code) \
 	{ \
 		ImGui::TextUnformatted(text); \
@@ -70,6 +83,17 @@ bool _ecs_property_frame_start(Engine::Registry64& registry, Engine::Registry64:
 		ImGui::NextColumn(); \
 	}
 
+#define ECS_PROPERTY_DESC(text, desc, widget) \
+	{ \
+		ImGui::TextUnformatted(text); \
+		ImGui::SameLine(); \
+		ImGui::HelpMarker(desc); \
+		ImGui::NextColumn(); \
+		ImGui::SetNextItemWidth(-1); \
+		widget; \
+		ImGui::NextColumn(); \
+	} 
+	
 #define ECS_PROPERTY(text, widget) \
 	{ \
 		ImGui::TextUnformatted(text); \
@@ -78,6 +102,19 @@ bool _ecs_property_frame_start(Engine::Registry64& registry, Engine::Registry64:
 		widget; \
 		ImGui::NextColumn(); \
 	} 
+
+#define ECS_TITLE_DESC(text, desc, newline) \
+	{ \
+		if (newline) { \
+			ECS_PROPERTY("", ); \
+		} \
+		ImGui::TextColored(GImGui->Style.Colors[ImGuiCol_ButtonActive], text); \
+		ImGui::SameLine(); \
+		ImGui::HelpMarker(desc); \
+		ImGui::NextColumn(); \
+		ImGui::SetNextItemWidth(-1); \
+		ImGui::NextColumn(); \
+	}
 
 #define ECS_TITLE(text, newline) \
 	{ \
@@ -96,7 +133,7 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_ty
 	ImGui::CollapsingHeader(label.c_str(), ImGuiTreeNodeFlags_Leaf);
 }
 
-void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const Ref<Comp::Model>& component) {
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const Ref<Comp::Collider>& component) {
 	ECS_PROPERTY_FRAME_START(registry, index);
 	
 	ExtendedPart* selectedPart = component->part;
@@ -253,7 +290,9 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_ty
 	Vec3f position = castPositionToVec3f(component->getPosition());
 	Vec3f rotation = component->getRotation().asRotationVector();
 	DiagonalMat3f scale = component->getScale();
+	bool standalone = component->isPartAttached();
 	
+	ECS_PROPERTY_DESC("Standalone", "Whether the hitbox is coming from the part", ImGui::Checkbox("", &standalone));
 	ECS_PROPERTY_IF("Position:", ImGui::DragVec3("Position", position.data, 0, 0.1, true),
 		component->setPosition(castVec3fToPosition(position));
 	);
@@ -262,12 +301,39 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_ty
 		component->setRotation(Rotation::fromRotationVec(rotation));
 	);
 
-	ECS_PROPERTY_IF("Scale:", ImGui::DragVec3("Scale", scale.data, 1, 0.01f, true),
+	float min = 0.01f;
+	ECS_PROPERTY_IF("Scale:", ImGui::DragVec3("Scale", scale.data, 1.0f, 0.01f, true, &min),
 		component->setScale(scale);
 	);
 	
 	ECS_PROPERTY_FRAME_END;
 
+}
+
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const Ref<Comp::Hitbox>& component) {
+	ECS_PROPERTY_FRAME_START(registry, index);
+
+
+	bool standalone = component->isPartAttached();
+	Shape shape = component->getShape();
+	DiagonalMat3f scale = shape.scale;
+
+	ECS_TITLE("Hitbox", false);
+	ECS_PROPERTY_DESC("Standalone", "Whether the hitbox is coming from the part", ImGui::Checkbox("", &standalone));
+	ECS_PROPERTY("Volume:", ImGui::Text(str(shape.getVolume()).c_str()));
+	ECS_PROPERTY("Center of mass:", ImGui::Text(str(shape.getCenterOfMass()).c_str()));
+	float min = 0.01f;
+	ECS_PROPERTY_IF("Scale:", ImGui::DragVec3("Scale", scale.data, 1, 0.01f, true, &min),
+		component->setScale(scale);
+	);
+
+	ECS_TITLE("Bounding box", true);
+	ECS_PROPERTY("Width:", ImGui::Text(str(shape.getWidth()).c_str()));
+	ECS_PROPERTY("Height:", ImGui::Text(str(shape.getHeight()).c_str()));
+	ECS_PROPERTY("Depth:", ImGui::Text(str(shape.getHeight()).c_str()));
+	ECS_PROPERTY("Max radius:", ImGui::Text(str(shape.getMaxRadius()).c_str()));
+
+	ECS_PROPERTY_FRAME_END;
 }
 	
 void PropertiesFrame::onInit(Engine::Registry64& registry) {
@@ -296,10 +362,11 @@ void PropertiesFrame::onRender(Engine::Registry64& registry) {
 		ENTITY_DISPATCH_START(index);
 		ENTITY_DISPATCH(index, Comp::Name, registry, component);
 		ENTITY_DISPATCH(index, Comp::Transform, registry, component);
-		ENTITY_DISPATCH(index, Comp::Model, registry, component);
+		ENTITY_DISPATCH(index, Comp::Collider, registry, component);
 		ENTITY_DISPATCH(index, Comp::Mesh, registry, component);
 		ENTITY_DISPATCH(index, Comp::Material, registry, component);
 		ENTITY_DISPATCH(index, Comp::Light, registry, component);
+		ENTITY_DISPATCH(index, Comp::Hitbox, registry, component);
 		ENTITY_DISPATCH_END(index, registry, component);
 	}
 

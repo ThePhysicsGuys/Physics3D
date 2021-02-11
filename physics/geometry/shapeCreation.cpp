@@ -2,8 +2,6 @@
 
 #include "shapeClass.h"
 #include "polyhedron.h"
-#include "../misc/shapeLibrary.h"
-#include "../math/linalg/trigonometry.h"
 #include "builtinShapeClasses.h"
 
 #include "../../util/cpuid.h"

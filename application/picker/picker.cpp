@@ -14,8 +14,10 @@
 
 #include "application.h"
 #include "shader/shaders.h"
+#include "ecs/components.h"
 
 #include "worlds.h"
+#include "../../graphics/debug/visualDebug.h"
 #include "../physics/sharedLockGuard.h"
 #include "../physics/geometry/shape.h"
 #include "../physics/misc/filters/rayIntersectsBoundsFilter.h"
@@ -60,29 +62,27 @@ double intersect(const Ray& ray, const Shape& shape, const GlobalCFrame& cframe)
 }
 
 // Calculates the closest intersection of the given ray with the physicals in the world
-void intersectPhysicals(Screen& screen, const Ray& ray) {
+void intersectPhysicalss(Screen& screen, const Ray& ray) {
 
 	ExtendedPart* closestIntersectedPart = nullptr;
 	Position closestIntersectedPoint = Position();
 	float closestIntersectDistance = INFINITY;
 
-	//TODO graphicsMeasure.mark(GraphicsProcess::WAIT_FOR_LOCK);
-	screen.world->syncReadOnlyOperation([&screen, &closestIntersectDistance, &closestIntersectedPart, &closestIntersectedPoint, &ray] () {
-		//TODO graphicsMeasure.mark(GraphicsProcess::PICKER);
-		for (ExtendedPart& part : screen.world->iterPartsFiltered(RayIntersectBoundsFilter(ray))) {
-			if (&part == screen.camera.attachment) continue;
-			Vec3 relPos = part.getPosition() - ray.start;
-			if (pointToLineDistanceSquared(ray.direction, relPos) > part.maxRadius* part.maxRadius)
-				continue;
+	for (ExtendedPart& part : screen.world->iterPartsFiltered(RayIntersectBoundsFilter(ray))) {
+		if (&part == screen.camera.attachment) 
+			continue;
+		
+		Vec3 relativePosition = part.getPosition() - ray.start;
+		if (pointToLineDistanceSquared(ray.direction, relativePosition) > part.maxRadius * part.maxRadius)
+			continue;
 
-			double distance = intersect(ray, part.hitbox, part.getCFrame());
+		double distance = intersect(ray, part.hitbox, part.getCFrame());
 
-			if (distance < closestIntersectDistance && distance > 0) {
-				closestIntersectDistance = distance;
-				closestIntersectedPart = &part;
-			}
+		if (distance < closestIntersectDistance && distance > 0) {
+			closestIntersectDistance = distance;
+			closestIntersectedPart = &part;
 		}
-		});
+	}
 
 	if (closestIntersectDistance == INFINITY) {
 		closestIntersectedPart = nullptr;
@@ -104,10 +104,59 @@ void intersectPhysicals(Screen& screen, const Ray& ray) {
 	(*screen.eventHandler.partRayIntersectHandler) (screen, closestIntersectedPart, closestIntersectedPoint);
 }
 
+void intersectPhysicals(Screen& screen, const Ray& ray) {
+
+	Engine::Registry64::entity_type closestIntersectedEntity = 0;
+	Position closestIntersectedPoint = Position();
+	double closestIntersectDistance = std::numeric_limits<double>::max();
+
+	RayIntersectBoundsFilter filter(ray);
+	
+	auto view = screen.registry.view<Comp::Hitbox>();
+	for (auto entity : view) {
+		Ref<Comp::Hitbox> hitbox = view.get<Comp::Hitbox>(entity);
+		if (hitbox->isPartAttached())
+			if (!filter(*hitbox->getPart()))
+				continue;
+
+		Ref<Comp::Transform> transform = screen.registry.get<Comp::Transform>(entity);
+		if (transform.invalid())
+			continue;
+
+		Shape shape = hitbox->getShape();
+		Vec3 relativePosition = transform->getPosition() - ray.start;
+		if (pointToLineDistanceSquared(ray.direction, relativePosition) > shape.getMaxRadius() * shape.getMaxRadius())
+			continue;
+
+		double distance = intersect(ray, shape, transform->getCFrame());
+		
+		if (distance < closestIntersectDistance && distance > 0) {
+			closestIntersectDistance = distance;
+			closestIntersectedEntity = entity;
+		}
+	}
+
+	if (closestIntersectDistance == std::numeric_limits<double>::max()) {
+		closestIntersectedEntity = 0;
+		closestIntersectedPoint = ray.start;
+	} else {
+		closestIntersectedPoint = ray.start + ray.direction * closestIntersectDistance;
+	}
+
+	// Update intersection variables
+	screen.intersectedEntity = closestIntersectedEntity;
+	screen.intersectedPoint = closestIntersectedPoint;
+	auto collider = screen.registry.get<Comp::Collider>(screen.intersectedEntity);
+	screen.intersectedPart = collider.valid() ? collider->part : nullptr;
+
+	// Call callback
+	(*screen.eventHandler.partRayIntersectHandler) (screen, screen.intersectedPart, screen.intersectedPoint);
+}
+
 // Update
 // Calculates the mouse ray and the tool & physical intersections
 void onUpdate(Screen& screen, Vec2 mousePosition) {
-	//TODO graphicsMeasure.mark(GraphicsProcess::PICKER);
+	graphicsMeasure.mark(GraphicsProcess::PICKER);
 	// Calculate ray
 	Ray ray = getMouseRay(screen, mousePosition);
 

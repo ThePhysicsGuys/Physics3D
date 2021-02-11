@@ -60,7 +60,7 @@ IndexedMesh::IndexedMesh(const VisualShape& shape) : AbstractMesh(), vertexCount
 	vao->addBuffer(bitangentBuffer);
 }
 
-IndexedMesh::IndexedMesh(const float* vertices, const float* normals, const float* uvs, const unsigned int* indices, const int vertexCount, const int triangleCount) : AbstractMesh(), vertexCount(vertexCount), triangleCount(triangleCount) {
+IndexedMesh::IndexedMesh(const float* vertices, const float* normals, const float* uvs, const unsigned int* indices, std::size_t vertexCount, std::size_t triangleCount) : AbstractMesh(), vertexCount(vertexCount), triangleCount(triangleCount) {
 	BufferLayout vertexBufferLayout = {
 		{{ "vposition", BufferDataType::FLOAT3 }}
 	};

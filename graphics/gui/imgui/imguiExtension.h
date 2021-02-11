@@ -28,7 +28,7 @@ namespace ImGui {
         return i1 | i2 | i3;
     }
 
-    inline bool DragVecN(const char* id, const char** labels, float* data, int components, float resetValue = 0.0f, float speed = 0.1f, bool resetAll = false) {
+    inline bool DragVecN(const char* id, const char** labels, float* data, int components, float resetValue = 0.0f, float speed = 0.1f, bool resetAll = false, float* min = nullptr, float* max = nullptr) {
         ImGuiWindow* window = GetCurrentWindow();
         if (window->SkipItems)
             return false;
@@ -69,7 +69,7 @@ namespace ImGui {
 			SameLine(0, GImGui->Style.ItemInnerSpacing.x);
     		
             PushID(i);
-            result |= DragScalar("", ImGuiDataType_Float, data + i, speed, 0, 0, "%.2f");
+            result |= DragScalar("", ImGuiDataType_Float, data + i, speed, min, max, "%.2f");
             PopID();
     		
             PopItemWidth();
@@ -97,9 +97,20 @@ namespace ImGui {
         return result;
     }
 
-    inline bool DragVec3(const char* id, float values[3], float resetValue = 0.0f, float speed = 0.1f, bool resetAll = false) {
+    inline bool DragVec3(const char* id, float values[3], float resetValue = 0.0f, float speed = 0.1f, bool resetAll = false, float* min = nullptr, float* max = nullptr) {
         const char* labels[] = { "X", "Y", "Z" };
-        return DragVecN(id, labels, values, 3, resetValue, speed, resetAll);
+        return DragVecN(id, labels, values, 3, resetValue, speed, resetAll, min, max);
+    }
+
+    inline void HelpMarker(const char* description) {
+        TextDisabled("(?)");
+        if (IsItemHovered()) {
+            BeginTooltip();
+            PushTextWrapPos(GetFontSize() * 35.0f);
+            TextUnformatted(description);
+            PopTextWrapPos();
+            EndTooltip();
+        }
     }
 
     inline void BeginToolbar(const char* name) {

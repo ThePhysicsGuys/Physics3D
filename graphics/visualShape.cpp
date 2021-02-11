@@ -4,6 +4,7 @@
 
 namespace P3D::Graphics {
 
+// Todo change to TriangleMesh
 VisualShape VisualShape::generateSmoothNormalsShape(const Polyhedron& underlyingPoly) {
 	Vec3f* normalBuffer = new Vec3f[underlyingPoly.vertexCount];
 	underlyingPoly.computeNormals(normalBuffer);
@@ -11,6 +12,7 @@ VisualShape VisualShape::generateSmoothNormalsShape(const Polyhedron& underlying
 	return VisualShape(underlyingPoly, SharedArrayPtr<const Vec3f>(normalBuffer));
 }
 
+// Todo move to TriangleMesh
 VisualShape VisualShape::generateSplitNormalsShape(const TriangleMesh& underlyingMesh) {
 	Vec3f* newVertices = new Vec3f[underlyingMesh.triangleCount * 3];
 	Vec3f* newNormals = new Vec3f[underlyingMesh.triangleCount * 3];

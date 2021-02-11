@@ -82,11 +82,11 @@ void PlayerWorld::applyExternalForces() {
 }
 
 void PlayerWorld::onPartAdded(ExtendedPart* part) {
-	screen.registry.add<Comp::Model>(part->entity, part);
+	screen.registry.add<Comp::Collider>(part->entity, part);
 }
 
 void PlayerWorld::onPartRemoved(ExtendedPart* part) {
-	screen.registry.remove<Comp::Model>(part->entity);
+	screen.registry.remove<Comp::Collider>(part->entity);
 	screen.registry.get<Comp::Transform>(part->entity)->cframe = Comp::Transform::ScaledCFrame { part->getCFrame(), part->hitbox.scale };
 }
 

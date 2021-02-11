@@ -21,11 +21,11 @@ public:
 	VertexBuffer* bitangentBuffer = nullptr;
 	VertexBuffer* uniformBuffer = nullptr;
 
-	int vertexCount;
-	int triangleCount;
+	std::size_t vertexCount;
+	std::size_t triangleCount;
 
 	IndexedMesh(const VisualShape& shape);
-	IndexedMesh(const float* vertices, const float* normals, const float* uvs, const unsigned int* indices, const int vertexCount, const int triangleCount);
+	IndexedMesh(const float* vertices, const float* normals, const float* uvs, const unsigned int* indices, std::size_t vertexCount, std::size_t triangleCount);
 
 	~IndexedMesh();
 	IndexedMesh(IndexedMesh&& other);

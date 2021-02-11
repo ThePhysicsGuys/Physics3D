@@ -148,6 +148,7 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 	ShadowLayer::lightView = lookAt(from, to);
 	ShadowLayer::lighSpaceMatrix = ShadowLayer::lightProjection * ShadowLayer::lightView;
 	activeTexture(1);
+	activeTexture(1);
 	bindTexture2D(ShadowLayer::depthMap);
 	Shaders::instanceShader.setUniform("shadowMap", 1);
 	Shaders::instanceShader.setUniform("lightMatrix", ShadowLayer::lighSpaceMatrix);
@@ -161,7 +162,7 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 		Comp::Transform transform;
 		Comp::Material material;
 		Ref<Comp::Mesh> mesh;
-		Ref<Comp::Model> model;
+		Ref<Comp::Collider> collider;
 	};
 	
 	std::map<double, EntityInfo> transparentEntities;
@@ -180,9 +181,9 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 			if (info.mesh->id == -1)
 				continue;
 			
-			info.model = registry.get<Comp::Model>(entity);
-			if (info.model.valid())
-				if (!filter(*info.model->part))
+			info.collider = registry.get<Comp::Collider>(entity);
+			if (info.collider.valid())
+				if (!filter(*info.collider->part))
 					continue;
 
 			info.transform = registry.getOr<Comp::Transform>(entity);
@@ -194,8 +195,8 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 			} else {
 				Mat4f modelMatrix = info.transform.getModelMatrix();
 
-				if (info.model.valid())
-					info.material.albedo += getAlbedoForPart(screen, info.model->part);
+				if (info.collider.valid())
+					info.material.albedo += getAlbedoForPart(screen, info.collider->part);
 
 				Uniform uniform {
 					modelMatrix,
@@ -222,8 +223,8 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 			if (info.mesh->id == -1)
 				continue;
 
-			if (info.model.valid())
-				info.material.albedo += getAlbedoForPart(screen, info.model->part);
+			if (info.collider.valid())
+				info.material.albedo += getAlbedoForPart(screen, info.collider->part);
 
 			Shaders::basicShader.updateMaterial(info.material);
 			Shaders::basicShader.updateModel(info.transform.getModelMatrix());

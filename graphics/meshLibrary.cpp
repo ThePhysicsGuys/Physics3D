@@ -10,6 +10,7 @@
 namespace P3D::Graphics {
 
 namespace Library {
+	
 IndexedMesh* cube = nullptr;
 IndexedMesh* sphere = nullptr;
 
@@ -25,6 +26,7 @@ void onClose() {
 	cube->close();
 	sphere->close();
 }
+	
 }
 
 };
