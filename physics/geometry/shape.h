@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "boundingBox.h"
+#include "../math/boundingBox.h"
 #include "../math/linalg/vec.h"
 #include "../math/linalg/mat.h"
 #include "../math/cframe.h"

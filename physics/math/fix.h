@@ -1,36 +1,42 @@
 #pragma once
 
-#include <inttypes.h>
+#include <stdint.h>
 
 template<int64_t N>
 struct Fix {
 	int64_t value;
 
+	static constexpr int64_t ONE = int64_t(1) << N;
+
 	constexpr Fix() noexcept : value(0) {}
-	constexpr Fix(double d) noexcept : value(static_cast<int64_t>(d * (1ULL << N))) {}
-	constexpr Fix(float f) noexcept : value(static_cast<int64_t>(static_cast<double>(f) * (1ULL << N))) {}
+	constexpr Fix(double d) noexcept : value(static_cast<int64_t>(d * ONE)) {}
+	constexpr Fix(float f) noexcept : value(static_cast<int64_t>(static_cast<double>(f) * ONE)) {}
 	constexpr Fix(int l) noexcept : value(static_cast<int64_t>(l) << N) {}
 	constexpr Fix(int64_t l) noexcept : value(l << N) {}
 
-	inline constexpr operator double() const noexcept { return static_cast<double>(value) / (1ULL << N); }
-	inline constexpr operator float() const noexcept { return static_cast<float>(value) / (1ULL << N); }
+	inline constexpr operator double() const noexcept { return static_cast<double>(value) / ONE; }
+	inline constexpr operator float() const noexcept { return static_cast<float>(value) / ONE; }
 	inline explicit constexpr operator int64_t() const noexcept {
-		if(value >= 0 || (value & ((1ULL << N)-1)) == 0) {
+		if(value >= 0 || (value & (ONE-1)) == 0) {
 			return value >> N;
 		} else {
 			return (value >> N) + 1;
 		}
 	}
 
-	inline Fix<N>& operator++() noexcept { value += (1ULL << N); return *this; }
-	inline Fix<N> operator++(int) & noexcept  { Fix<N> old = *this; value += (1ULL << N); return old; }
-	inline Fix<N>& operator--() noexcept { value -= (1ULL << N); return *this; }
-	inline Fix<N> operator--(int) & noexcept  { Fix<N> old = *this; value -= (1ULL << N); return old; }
+	inline Fix<N>& operator++() noexcept { value += ONE; return *this; }
+	inline Fix<N> operator++(int) & noexcept  { Fix<N> old = *this; value += ONE; return old; }
+	inline Fix<N>& operator--() noexcept { value -= ONE; return *this; }
+	inline Fix<N> operator--(int) & noexcept  { Fix<N> old = *this; value -= ONE; return old; }
 
 	inline Fix<N>& operator+=(const Fix<N>& b) noexcept { this->value += b.value; return *this; }
 	inline Fix<N>& operator-=(const Fix<N>& b) noexcept { this->value -= b.value; return *this; }
 	inline Fix<N>& operator+=(int64_t b) noexcept { this->value += (b << N); return *this; }
 	inline Fix<N>& operator-=(int64_t b) noexcept { this->value -= (b << N); return *this; }
+	inline Fix<N>& operator+=(double b) noexcept { this->value += static_cast<int64_t>(ONE * b); return *this; }
+	inline Fix<N>& operator-=(double b) noexcept { this->value -= static_cast<int64_t>(ONE * b); return *this; }
+	inline Fix<N>& operator+=(float b) noexcept { this->value += static_cast<int64_t>(ONE * static_cast<double>(b)); return *this; }
+	inline Fix<N>& operator-=(float b) noexcept { this->value -= static_cast<int64_t>(ONE * static_cast<double>(b)); return *this; }
 
 	inline constexpr Fix<N> operator-() const noexcept {Fix<N> result; result.value = -this->value; return result;}
 };

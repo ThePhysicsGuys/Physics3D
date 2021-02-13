@@ -6,12 +6,12 @@
 
 #include "shader/shaders.h"
 #include "view/screen.h"
+#include "../physics/math/boundingBox.h"
 #include "../graphics/renderer.h"
 #include "../graphics/texture.h"
 #include "../graphics/mesh/indexedMesh.h"
 #include "../graphics/meshLibrary.h"
 #include "../graphics/debug/visualDebug.h"
-#include "../physics/geometry/boundingBox.h"
 #include "../graphics/buffers/frameBuffer.h"
 #include "../graphics/mesh/primitive.h"
 #include "../graphics/resource/textureResource.h"

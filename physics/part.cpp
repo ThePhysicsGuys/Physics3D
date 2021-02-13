@@ -24,7 +24,7 @@ namespace {
 		if(part->parent != nullptr) {
 			part->parent->notifyPartPropertiesChanged(part);
 		}
-		if(part->layer != nullptr) part->layer->notifyPartGroupBoundsUpdated(part, oldBounds);
+		if(part->layer != nullptr) part->layer->notifyPartBoundsUpdated(part, oldBounds);
 	}
 }
 

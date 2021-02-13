@@ -3,8 +3,7 @@
 #include <utility>
 #include <cstddef>
 
-void deleteAligned(void* buf);
-void* createAligned(std::size_t size, std::size_t align);
+#include "aligned_alloc.h"
 
 template<typename T>
 class UniqueAlignedPointer {
@@ -13,9 +12,9 @@ class UniqueAlignedPointer {
 public:
 	UniqueAlignedPointer() : data(nullptr) {}
 	UniqueAlignedPointer(std::size_t size, std::size_t align = alignof(T)) : 
-		data(static_cast<T*>(createAligned(sizeof(T)* size, align))) {}
+		data(static_cast<T*>(aligned_malloc(sizeof(T)* size, align))) {}
 	~UniqueAlignedPointer() {
-		deleteAligned(static_cast<void*>(data));
+		aligned_free(static_cast<void*>(data));
 	}
 
 	inline T* get() const { return data; }

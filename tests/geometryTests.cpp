@@ -8,9 +8,9 @@
 #include "../physics/math/linalg/trigonometry.h"
 #include "../physics/math/linalg/eigen.h"
 #include "../physics/math/utils.h"
+#include "../physics/math/boundingBox.h"
 
 #include "../physics/geometry/shape.h"
-#include "../physics/geometry/boundingBox.h"
 
 #include "../physics/misc/shapeLibrary.h"
 

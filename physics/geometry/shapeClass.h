@@ -3,7 +3,7 @@
 #include "../math/linalg/vec.h"
 #include "../math/linalg/mat.h"
 #include "../math/rotation.h"
-#include "boundingBox.h"
+#include "../math/boundingBox.h"
 #include "genericCollidable.h"
 #include "scalableInertialMatrix.h"
 

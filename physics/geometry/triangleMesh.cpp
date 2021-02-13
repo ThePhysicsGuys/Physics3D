@@ -304,7 +304,7 @@ Vec3f TriangleMesh::getNormalVecOfTriangle(Triangle triangle) const {
 
 CircumscribingSphere TriangleMesh::getCircumscribingSphere() const {
 	BoundingBox bounds = getBounds();
-	Vec3 center = Vec3(bounds.xmax + bounds.xmin, bounds.ymax + bounds.ymin, bounds.zmax + bounds.zmin) / 2.0;
+	Vec3 center = bounds.getCenter();
 	double radius = getMaxRadius(center);
 	return CircumscribingSphere{center, radius};
 }

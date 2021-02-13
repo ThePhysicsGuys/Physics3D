@@ -129,6 +129,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="datastructures\aligned_alloc.cpp" />
     <ClCompile Include="softlinks\alignmentLink.cpp" />
     <ClCompile Include="softlinks\elasticLink.cpp" />
     <ClCompile Include="geometry\triangleMeshAVX.cpp">
@@ -148,7 +149,6 @@
     <ClCompile Include="hardconstraints\hardConstraint.cpp" />
     <ClCompile Include="hardconstraints\hardPhysicalConnection.cpp" />
     <ClCompile Include="hardconstraints\motorConstraint.cpp" />
-    <ClCompile Include="datastructures\alignedPtr.cpp" />
     <ClCompile Include="datastructures\boundsTree.cpp" />
     <ClCompile Include="misc\debug.cpp" />
     <ClCompile Include="geometry\computationBuffer.cpp" />
@@ -179,6 +179,7 @@
     <ClCompile Include="worldPhysics.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="datastructures\aligned_alloc.h" />
     <ClInclude Include="softlinks\alignmentLink.h" />
     <ClInclude Include="catchable_assert.h" />
     <ClInclude Include="colissionBuffer.h" />
@@ -208,7 +209,7 @@
     <ClInclude Include="datastructures\unmanagedArray.h" />
     <ClInclude Include="datastructures\unorderedVector.h" />
     <ClInclude Include="misc\debug.h" />
-    <ClInclude Include="geometry\boundingBox.h" />
+    <ClInclude Include="math\boundingBox.h" />
     <ClInclude Include="geometry\computationBuffer.h" />
     <ClInclude Include="geometry\convexShapeBuilder.h" />
     <ClInclude Include="geometry\genericCollidable.h" />

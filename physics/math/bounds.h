@@ -1,64 +1,73 @@
 #pragma once
 
 #include "position.h"
-#include "../geometry/boundingBox.h"
+#include "boundingBox.h"
 
-struct Bounds {
-	Position min;
-	Position max;
+template<typename T>
+struct BoundsTemplate {
+	PositionTemplate<T> min;
+	PositionTemplate<T> max;
 
-	inline Bounds() = default;
-	inline Bounds(const Position& min, const Position& max) noexcept : min(min), max(max) {}
+	constexpr BoundsTemplate() = default;
+	constexpr BoundsTemplate(const PositionTemplate<T>& min, const PositionTemplate<T>& max) noexcept : min(min), max(max) {}
 
-	inline Vec3Fix getDiagonal() const noexcept {
+	constexpr Vector<T, 3> getDiagonal() const noexcept {
 		return max - min;
 	}
 
-	inline bool contains(const Position& p) const noexcept {
+	constexpr bool contains(const PositionTemplate<T>& p) const noexcept {
 		return p >= min && p <= max;
 	}
 
-	inline bool contains(const Bounds& other) const noexcept {
+	constexpr bool contains(const BoundsTemplate& other) const noexcept {
 		return other.min >= this->min && other.max <= this->max;
 	}
 
-	inline Position getCenter() const noexcept {
+	constexpr PositionTemplate<T> getCenter() const noexcept {
 		return avg(min, max);
 	}
 
-	inline Bounds expanded(Fix<32> amount) const noexcept {
-		return Bounds(min - Vec3Fix(amount, amount, amount), max + Vec3Fix(amount, amount, amount));
+	constexpr BoundsTemplate expanded(T amount) const noexcept {
+		return BoundsTemplate(min - Vector<T, 3>(amount, amount, amount), max + Vector<T, 3>(amount, amount, amount));
 	}
 
-	inline Bounds expanded(Vec3Fix amount) const noexcept {
-		return Bounds(min - amount, max + amount);
+	constexpr BoundsTemplate expanded(Vector<T, 3> amount) const noexcept {
+		return BoundsTemplate(min - amount, max + amount);
 	}
 
-	inline Fix<32> getWidth()  const noexcept { return max.x - min.x; }
-	inline Fix<32> getHeight() const noexcept { return max.y - min.y; }
-	inline Fix<32> getDepth()  const noexcept { return max.z - min.z; }
+	constexpr T getWidth()  const noexcept { return max.x - min.x; }
+	constexpr T getHeight() const noexcept { return max.y - min.y; }
+	constexpr T getDepth()  const noexcept { return max.z - min.z; }
 };
 
-inline bool intersects(const Bounds& first, const Bounds& second) noexcept {
+template<typename T>
+constexpr bool intersects(const BoundsTemplate<T>& first, const BoundsTemplate<T>& second) noexcept {
 	return first.max >= second.min && first.min <= second.max;
 }
-inline Bounds unionOfBounds(const Bounds& first, const Bounds& second) noexcept {
-	return Bounds(min(first.min, second.min), max(first.max, second.max));
+template<typename T>
+constexpr BoundsTemplate<T> unionOfBounds(const BoundsTemplate<T>& first, const BoundsTemplate<T>& second) noexcept {
+	return BoundsTemplate<T>(min(first.min, second.min), max(first.max, second.max));
 }
-inline bool operator==(const Bounds& first, const Bounds& second) noexcept {
+template<typename T>
+constexpr bool operator==(const BoundsTemplate<T>& first, const BoundsTemplate<T>& second) noexcept {
 	return first.min == second.min && first.max == second.max;
 }
-inline bool operator!=(const Bounds& first, const Bounds& second) noexcept {
+template<typename T>
+constexpr bool operator!=(const BoundsTemplate<T>& first, const BoundsTemplate<T>& second) noexcept {
 	return first.min != second.min || first.max != second.max;
 }
 
-inline Bounds operator+(const BoundingBox& localBox, const Position& pos) noexcept {
-	Position min = pos + localBox.min;
-	Position max = pos + localBox.max;
-	return Bounds(min, max);
+template<typename PT, typename VT>
+constexpr BoundsTemplate<PT> operator+(const BoundingBoxTemplate<VT>& localBox, const PositionTemplate<PT>& pos) noexcept {
+	PositionTemplate<PT> min = pos + localBox.min;
+	PositionTemplate<PT> max = pos + localBox.max;
+	return BoundsTemplate<PT>(min, max);
 }
-inline BoundingBox operator-(const Bounds& box, const Position& pos) noexcept {
-	Vec3 min = box.min - pos;
-	Vec3 max = box.max - pos;
-	return BoundingBox(min, max);
+template<typename T>
+constexpr BoundingBoxTemplate<T> operator-(const BoundsTemplate<T>& box, const PositionTemplate<T>& pos) noexcept {
+	Vector<T, 3> min = box.min - pos;
+	Vector<T, 3> max = box.max - pos;
+	return BoundingBoxTemplate<T>(min, max);
 }
+
+typedef BoundsTemplate<Fix<32>> Bounds;

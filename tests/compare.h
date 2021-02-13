@@ -10,10 +10,10 @@
 #include "../physics/math/position.h"
 #include "../physics/math/globalCFrame.h"
 #include "../physics/math/taylorExpansion.h"
+#include "../physics/math/boundingBox.h"
+
 #include "../physics/motion.h"
 #include "../physics/relativeMotion.h"
-
-#include "../physics/geometry/boundingBox.h"
 
 #include <utility>
 #include <array>

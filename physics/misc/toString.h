@@ -13,10 +13,10 @@
 #include "../math/position.h"
 #include "../math/globalCFrame.h"
 #include "../math/taylorExpansion.h"
+#include "../math/boundingBox.h"
 #include "../motion.h"
 #include "../relativeMotion.h"
 
-#include "../geometry/boundingBox.h"
 
 template<typename T>
 inline std::ostream& operator<<(std::ostream& os, const UnmanagedLargeMatrix<T>& matrix) {

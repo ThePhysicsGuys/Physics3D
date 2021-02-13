@@ -13,9 +13,9 @@ TEST_CASE_SLOW(volumeApproximation) {
 
 	int sampleCount = 100;
 
-	double dx = (b.xmax - b.xmin) / sampleCount;
-	double dy = (b.ymax - b.ymin) / sampleCount;
-	double dz = (b.zmax - b.zmin) / sampleCount;
+	double dx = (b.max.x - b.min.x) / sampleCount;
+	double dy = (b.max.y - b.min.y) / sampleCount;
+	double dz = (b.max.z - b.min.z) / sampleCount;
 
 	double sampleVolume = dx*dy*dz;
 
@@ -24,9 +24,9 @@ TEST_CASE_SLOW(volumeApproximation) {
 	for(int xi = 0; xi < sampleCount; xi++) {
 		for(int yi = 0; yi < sampleCount; yi++) {
 			for(int zi = 0; zi < sampleCount; zi++) {
-				double x = b.xmin + dx*xi + dx/2;
-				double y = b.ymin + dy*yi + dy/2;
-				double z = b.zmin + dz*zi + dz/2;
+				double x = b.min.x + dx*xi + dx/2;
+				double y = b.min.y + dy*yi + dy/2;
+				double z = b.min.z + dz*zi + dz/2;
 
 				if(s.containsPoint(Vec3(x, y, z))) totalContainedCubes++;
 			}
@@ -45,9 +45,9 @@ TEST_CASE_SLOW(centerOfMassApproximation) {
 
 	int sampleCount = 100;
 
-	double dx = (b.xmax - b.xmin) / sampleCount;
-	double dy = (b.ymax - b.ymin) / sampleCount;
-	double dz = (b.zmax - b.zmin) / sampleCount;
+	double dx = (b.max.x - b.min.x) / sampleCount;
+	double dy = (b.max.y - b.min.y) / sampleCount;
+	double dz = (b.max.z - b.min.z) / sampleCount;
 
 	double sampleVolume = dx*dy*dz;
 
@@ -56,9 +56,9 @@ TEST_CASE_SLOW(centerOfMassApproximation) {
 	for(int xi = 0; xi < sampleCount; xi++) {
 		for(int yi = 0; yi < sampleCount; yi++) {
 			for(int zi = 0; zi < sampleCount; zi++) {
-				double x = b.xmin + dx*xi + dx / 2;
-				double y = b.ymin + dy*yi + dy / 2;
-				double z = b.zmin + dz*zi + dz / 2;
+				double x = b.min.x + dx*xi + dx / 2;
+				double y = b.min.y + dy*yi + dy / 2;
+				double z = b.min.z + dz*zi + dz / 2;
 
 				if(s.containsPoint(Vec3(x, y, z))) {
 					total += Vec3(x,y,z) * sampleVolume;
@@ -80,9 +80,9 @@ TEST_CASE_SLOW(inertiaApproximation) {
 
 	int sampleCount = 100;
 
-	double dx = (b.xmax - b.xmin) / sampleCount;
-	double dy = (b.ymax - b.ymin) / sampleCount;
-	double dz = (b.zmax - b.zmin) / sampleCount;
+	double dx = (b.max.x - b.min.x) / sampleCount;
+	double dy = (b.max.y - b.min.y) / sampleCount;
+	double dz = (b.max.z - b.min.z) / sampleCount;
 
 	double sampleVolume = dx*dy*dz;
 
@@ -91,9 +91,9 @@ TEST_CASE_SLOW(inertiaApproximation) {
 	for(int xi = 0; xi < sampleCount; xi++) {
 		for(int yi = 0; yi < sampleCount; yi++) {
 			for(int zi = 0; zi < sampleCount; zi++) {
-				double x = b.xmin + dx*xi + dx / 2;
-				double y = b.ymin + dy*yi + dy / 2;
-				double z = b.zmin + dz*zi + dz / 2;
+				double x = b.min.x + dx*xi + dx / 2;
+				double y = b.min.y + dy*yi + dy / 2;
+				double z = b.min.z + dz*zi + dz / 2;
 
 				if(s.containsPoint(Vec3(x, y, z))) {
 					SymmetricMat3 inertiaOfPoint{

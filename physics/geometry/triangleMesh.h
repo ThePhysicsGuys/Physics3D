@@ -2,7 +2,7 @@
 
 #include "../math/linalg/vec.h"
 #include "../math/cframe.h"
-#include "boundingBox.h"
+#include "../math/boundingBox.h"
 #include "../datastructures/alignedPtr.h"
 #include "../datastructures/iteratorFactory.h"
 
