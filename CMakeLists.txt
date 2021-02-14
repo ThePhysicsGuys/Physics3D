@@ -71,7 +71,7 @@ add_library(physics STATIC
   physics/geometry/shapeCreation.cpp
   physics/geometry/builtinShapeClasses.cpp
 
-  physics/datastructures/alignedPtr.cpp
+  physics/datastructures/aligned_alloc.cpp
   physics/datastructures/boundsTree.cpp
 
   physics/hardconstraints/fixedConstraint.cpp

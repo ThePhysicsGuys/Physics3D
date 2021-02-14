@@ -35,9 +35,10 @@ struct BoundsTemplate {
 		return BoundsTemplate(min - amount, max + amount);
 	}
 
-	constexpr T getWidth()  const noexcept { return max.x - min.x; }
+	constexpr T getWidth() const noexcept { return max.x - min.x; }
 	constexpr T getHeight() const noexcept { return max.y - min.y; }
-	constexpr T getDepth()  const noexcept { return max.z - min.z; }
+	constexpr T getDepth() const noexcept { return max.z - min.z; }
+	constexpr T getVolume() const noexcept { Vector<T, 3> diag = max - min; return diag.x * diag.y * diag.z; }
 };
 
 template<typename T>
