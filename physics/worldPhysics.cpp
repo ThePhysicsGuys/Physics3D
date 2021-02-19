@@ -228,34 +228,69 @@ static PartIntersection safeIntersects(const Part& p1, const Part& p2) {
 #endif
 }
 
-//Multithread.
+
 static void refineColission(std::vector<Colission>& colissions) {
+
+	std::mutex colMutex, vecMutex, statsMutex;
+
+	std::vector<Colission> wantedColissions;
 	
-	unsigned int threadCount = std::thread::hardware_concurrency();
+
+	size_t threadCount = std::thread::hardware_concurrency();
 	std::vector<std::thread> threads;
-	std::mutex mt; 
+	size_t size = colissions.size() / threadCount;
+	size_t first = 0;
+	size_t last = first;
 
-	for(size_t i = 0; i < colissions.size(); ) {
-
-		Colission& col = colissions[i];
-		PartIntersection result = safeIntersects(*col.p1, *col.p2);
-		if(result.intersects) {
-			intersectionStatistics.addToTally(IntersectionResult::COLISSION, 1);
-			// add extra information
-				
-			col.intersection = result.intersection;
-			col.exitVector = result.exitVector;
-			i++;
-
-		} else {
-			
-			intersectionStatistics.addToTally(IntersectionResult::GJK_REJECT, 1);
-			// remove if no colission
-			col = std::move(colissions.back());
-			colissions.pop_back();
+	for (unsigned int i = 0; i < threadCount; i++) {
+		first = last;
+		if (i == threadCount - 1) {
+			last = colissions.size();
 		}
+		else {
+			last += size;
+		}
+
+		threads.emplace_back([&, first, last] {
+			for (size_t j = first; j < last; j++) {
+				
+			
+					colMutex.lock();
+					Colission& col = colissions[j];
+					PartIntersection result = safeIntersects(*col.p1, *col.p2);
+					colMutex.unlock();
+
+					if (result.intersects) {
+						statsMutex.lock();
+						intersectionStatistics.addToTally(IntersectionResult::COLISSION, 1);
+						statsMutex.unlock();
+
+						colMutex.lock();
+						col.intersection = result.intersection;
+						col.exitVector = result.exitVector;
+						colMutex.unlock();
+
+						vecMutex.lock();
+						wantedColissions.push_back(col);
+						vecMutex.unlock();
+
+					}
+					else {
+						statsMutex.lock();
+						intersectionStatistics.addToTally(IntersectionResult::GJK_REJECT, 1);
+						statsMutex.unlock();
+
+					}
+				
+				
+			}
+		});
 	}
-	
+
+	for (std::thread& t : threads) {
+		t.join();
+	}
+	colissions.swap(wantedColissions);
 }
 
 void WorldPrototype::findColissions() {
