@@ -24,7 +24,19 @@ struct Derivatives {
 		}
 		return result;
 	}
+
+	template<std::size_t SubDerivationCount>
+	Derivatives<T, SubDerivationCount> getSubDerivatives() const {
+		Derivatives<T, SubDerivationCount> result;
+		for(std::size_t i = 0; i < SubDerivationCount; i++) {
+			result[i] = (*this)[i];
+		}
+		return result;
+	}
 };
+
+template<typename T, std::size_t DerivationCount>
+struct FullTaylorExpansion;
 
 template<typename T, std::size_t DerivationCount>
 struct TaylorExpansion {
@@ -58,6 +70,15 @@ struct TaylorExpansion {
 	template<typename Func>
 	auto transform(const Func& transformFunc) const -> TaylorExpansion<decltype(transformFunc(this->derivs[0])), DerivationCount> {
 		return TaylorExpansion<decltype(transformFunc(this->derivs[0])), DerivationCount>{this->derivs.transform(transformFunc)};
+	}
+
+	template<std::size_t SubDerivationCount>
+	TaylorExpansion<T, SubDerivationCount> getSubTaylor() const {
+		return TaylorExpansion<T, SubDerivationCount>{this->derivs.getSubDerivatives<SubDerivationCount>()};
+	}
+
+	FullTaylorExpansion<T, DerivationCount> asFullTaylor() const {
+		return FullTaylorExpansion<T, DerivationCount>{this->derivs};
 	}
 };
 
@@ -110,6 +131,15 @@ struct FullTaylorExpansion {
 	template<typename Func>
 	auto transform(const Func& transformFunc) const -> FullTaylorExpansion<decltype(transformFunc(this->derivs[0])), DerivationCount> {
 		return FullTaylorExpansion<decltype(transformFunc(this->derivs[0])), DerivationCount>{this->derivs.transform(transformFunc)};
+	}
+
+	template<std::size_t SubDerivationCount>
+	FullTaylorExpansion<T, SubDerivationCount> getSubTaylor() const {
+		return FullTaylorExpansion<T, SubDerivationCount>{this->derivs.getSubDerivatives<SubDerivationCount>()};
+	}
+
+	TaylorExpansion<T, DerivationCount> asTaylor() const {
+		return TaylorExpansion<T, DerivationCount>{this->derivs};
 	}
 };
 
@@ -345,79 +375,6 @@ template<typename T, typename T2, std::size_t DerivationCount>
 FullTaylorExpansion<T, DerivationCount>& operator/=(FullTaylorExpansion<T, DerivationCount>& first, const T2& second) {
 	first.derivs /= second;
 	return first;
-}
-
-/*
-	Pascal indices for constructing derivatives of multiplications
-	     1
-		1 1
-	   1 2 1
-	  1 3 3 1
-	 1 4 6 4 1
-*/
-template<int Layer, int Index>
-struct PascalIndex {
-	enum { value = PascalIndex<Layer-1,Index-1>::value + PascalIndex<Layer - 1, Index>::value};
-};
-
-template<int Index>
-struct PascalIndex<0, Index> {
-	enum { value = 1 };
-};
-
-template<int Layer>
-struct PascalIndex<Layer, 0> {
-	enum { value = 1 };
-};
-
-template<int Layer>
-struct PascalIndex<Layer, Layer> {
-	enum { value = 1 };
-};
-
-// get the pascal triangle index of this layer and index
-// should always get optimized to a constant expression
-constexpr int pascalIndex(int layer, int index) {
-	if (layer == 0 || index == 0 || index == layer) {
-		return 1;
-	} else {
-		return pascalIndex(layer - 1, index - 1) + pascalIndex(layer - 1, index);
-	}
-}
-
-template<typename T1, typename T2, std::size_t Size, std::size_t Layer, std::size_t Index>
-auto computeDerivativeForIndex(const Derivatives<T1, Size>& first, const Derivatives<T2, Size>& second) -> decltype(first[0] * second[0]) {
-	decltype(first[0] * second[0]) thisStepResult = first[Index] * second[Layer - Index];
-	if constexpr(Index == 0) {
-		return thisStepResult;
-	} else if constexpr(Index == Layer) {
-		return thisStepResult + computeDerivativeForIndex<T1, T2, Size, Layer, Index - 1>(first, second);
-	} else {
-		return static_cast<int>(PascalIndex<Layer, Index>::value) * thisStepResult + computeDerivativeForIndex<T1, T2, Size, Layer, Index - 1>(first, second);
-	}
-}
-
-template<typename T1, typename T2, std::size_t Size, std::size_t CurDerivative>
-void computeDerivatives(const Derivatives<T1, Size>& first, const Derivatives<T2, Size>& second, Derivatives<decltype(first[0] * second[0]), Size>& result) {
-	if constexpr(CurDerivative > 0) {
-		computeDerivatives<T1, T2, Size, CurDerivative - 1>(first, second, result);
-	}
-	result[CurDerivative] = computeDerivativeForIndex<T1, T2, Size, CurDerivative, CurDerivative>(first, second);
-}
-
-// multiplication-like derivatives
-template<typename T1, typename T2, std::size_t Size>
-auto derivsOfMultiplication(const Derivatives<T1, Size>& first, const Derivatives<T2, Size>& second) -> Derivatives<decltype(first[0] * second[0]), Size> {
-	Derivatives<decltype(first[0] * second[0]), Size> result;
-
-	computeDerivatives<T1, T2, Size, Size - 1>(first, second, result);
-
-	return result;
-}
-// multiplication-like derivatives
-template<typename T1, typename T2, std::size_t Size>
-auto derivsOfMultiplication(const FullTaylorExpansion<T1, Size>& first, const FullTaylorExpansion<T2, Size>& second) -> FullTaylorExpansion<decltype(first.derivs[0] * second.derivs[0]), Size> {
-	return FullTaylorExpansion<decltype(first.derivs[0] * second.derivs[0]), Size>{derivsOfMultiplication(first.derivs, second.derivs)};
 }
 
 #define DEFAULT_TAYLOR_LENGTH 2

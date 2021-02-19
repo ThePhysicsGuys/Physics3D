@@ -44,20 +44,39 @@ FullTaylor<SymmetricMat3> getTranslatedInertiaDerivativesAroundCenterOfMass(cons
 computes a rotated inertial matrix, where originalInertia is the inertia around the center of mass of the transformed object
 rotation is the starting rotation, and rotationMotion gives the change in rotation, both expressed in global space
 */
-FullTaylor<SymmetricMat3> getRotatedInertiaTaylor(const SymmetricMat3& originalInertia, const Rotation& rotation, const RotationalMotion& rotationMotion) {
-	Mat3 rotationMat = rotation.asRotationMatrix();
-	Taylor<Mat3> rotationDerivs = generateTaylorForRotationMatrix<double, 2>(rotationMotion.rotation, rotationMat);
+template<int Derivs>
+TaylorExpansion<SymmetricMat3, Derivs> getRotatedInertiaTaylorTemplate(const SymmetricMat3& globalInertia, const TaylorExpansion<Vec3, Derivs>& rotationMotion) {
+	TaylorExpansion<Mat3, Derivs> rotationDerivs = generateRotationTaylor<double, Derivs>(rotationMotion);
+
+	TaylorExpansion<SymmetricMat3, Derivs> result;
 
 
 	// rotation(t) * originalInertia * rotation(t).transpose()
 	// diff  => rotation(t) * originalInertia * rotation'(t).transpose() + rotation'(t) * originalInertia * rotation(t).transpose()
 	// diff2 => 2 * rotation'(t) * originalInertia * rotation'(t).transpose() + rotation(t) * originalInertia * rotation''(t).transpose() + rotation''(t) * originalInertia * rotation(t).transpose()
 
-	return FullTaylor<SymmetricMat3>{
-		rotation.localToGlobal(originalInertia),
-		addTransposed(rotationMat * originalInertia * rotationDerivs[0].transpose()),
-		addTransposed(rotationMat * originalInertia * rotationDerivs[1].transpose()) + 2.0 * mulSymmetricLeftRightTranspose(originalInertia, rotationDerivs[0])};
+	if constexpr(Derivs >= 1) {
+		result[0] = addTransposed(globalInertia * rotationDerivs[0].transpose());
+		if constexpr(Derivs >= 2) {
+			result[1] = addTransposed(globalInertia * rotationDerivs[1].transpose()) + 2.0 * mulSymmetricLeftRightTranspose(globalInertia, rotationDerivs[0]);
+			if constexpr(Derivs >= 3) {
+				throw "TODO add more derivatives to getRotatedInertiaTaylor";
+			}
+		}
+	}
+
+	return result;
 }
+
+/*
+computes a rotated inertial matrix, where originalInertia is the inertia around the center of mass of the transformed object
+rotation is the starting rotation, and rotationMotion gives the change in rotation, both expressed in global space
+*/
+FullTaylor<SymmetricMat3> getRotatedInertiaTaylor(const SymmetricMat3& originalInertia, const Rotation& rotation, const RotationalMotion& rotationMotion) {
+	SymmetricMat3 globalInertia = rotation.localToGlobal(originalInertia);
+	return FullTaylor<SymmetricMat3>::fromConstantAndDerivatives(globalInertia, getRotatedInertiaTaylorTemplate<2>(globalInertia, rotationMotion.rotation));
+}
+
 
 /*
 computes a transformed inertial matrix, where originalInertia is the inertia around the center of mass of the transformed object
@@ -104,7 +123,25 @@ FullTaylor<SymmetricMat3> getTransformedInertiaDerivativesAroundCenterOfMass(con
 	FullTaylor<SymmetricMat3> translationFactor = -generateFullTaylorForSkewSymmetricSquared<double, 3>(translation) * mass;
 	//translationFactor.constantValue += originalInertia;
 
-	FullTaylor<SymmetricMat3> rotationFactor = getRotatedInertiaTaylor(originalInertia, originalRotation, rotationMotion);
+	FullTaylor<SymmetricMat3> rotationFactor = getRotatedInertiaTaylor(originalInertia, originalRotation, rotationMotion.rotation);
 
 	return translationFactor + rotationFactor;
+}
+
+template<int Derivs>
+FullTaylorExpansion<Vec3, Derivs> getRotationAngularMomentumDerivs(const SymmetricMat3& globalInertia, const TaylorExpansion<Vec3, Derivs>& rotation) {
+	// d(inertia * angularVelocity)/dt = inertia' * angularVelocity + inertia * angularAcceleration
+	TaylorExpansion<SymmetricMat3, Derivs - 1> inertiaTaylor = getRotatedInertiaTaylorTemplate<Derivs - 1>(globalInertia, rotation.getSubTaylor<Derivs - 1>());
+	FullTaylorExpansion<SymmetricMat3, Derivs> fullInertiaTaylor = FullTaylorExpansion<SymmetricMat3, Derivs>::fromConstantAndDerivatives(globalInertia, inertiaTaylor);
+	return derivsOfMultiplication(fullInertiaTaylor, rotation.asFullTaylor());
+}
+
+// we lose one derivative because angular momentum is already in the velocity domain, but this is no problem, as we only need this derivative to compute acceleration terms
+FullTaylorExpansion<Vec3, 2> getRotationAngularMomentumDerivsOnlyRotation(const SymmetricMat3& globalInertia, const TaylorExpansion<Vec3, 2>& rotation) {
+	return getRotationAngularMomentumDerivs(globalInertia, rotation);
+}
+
+// we lose one derivative because angular momentum is already in the velocity domain, but this is no problem, as we only need this derivative to compute acceleration terms
+FullTaylorExpansion<Vec3, 2> getAngularMomentumDerivativesFromOffset(const Vec3& offset, const Motion& motion, const SymmetricMat3& inertia, double mass) {
+	return getAngularMomentumDerivativesFromOffsetOnlyVelocity(offset, motion.translation.translation, mass) + getRotationAngularMomentumDerivs(inertia, motion.rotation.rotation);
 }

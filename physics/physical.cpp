@@ -13,6 +13,9 @@
 
 #include "misc/validityHelper.h"
 
+#include "math/predefinedTaylorExpansions.h"
+
+#include "misc/toString.h"
 
 /*
 	===== Physical Structure =====
@@ -896,12 +899,38 @@ Motion Physical::getMotion() const {
 }
 
 Motion MotorizedPhysical::getMotion() const {
+	Rotation selfRot = this->getCFrame().getRotation();
+
 	ALLOCA_COMMotionTree(cache, this, size);
 
 	GlobalCFrame cf = this->getCFrame();
-	TranslationalMotion motionOfCom = localToGlobal(cf.getRotation(), cache.motionOfCenterOfMass);
+	TranslationalMotion motionOfCom = localToGlobal(cf.getRotation(), cache.localMotionOfCenterOfMass);
 
-	return -motionOfCom + motionOfCenterOfMass.getMotionOfPoint(cf.localToRelative(-cache.centerOfMass));
+	Motion motionOfMainNoCOM = this->motionOfCenterOfMass.getMotionOfPoint(cf.localToRelative(-cache.centerOfMass));
+
+	FullTaylorExpansion<Vec3, 2> internalAngMomDerivs = cache.getInternalAngularMomentumDerivatives();
+	FullTaylorExpansion<Vec3, 2> globalInternalAngMomDerivs;
+	for(int i = 0; i < 2; i++) {
+		globalInternalAngMomDerivs.derivs[i] = selfRot.localToGlobal(internalAngMomDerivs.derivs[i]); // TODO Derive selfRot.localToGlobal too
+	}
+
+	FullTaylorExpansion<SymmetricMat3, 3> inertiaDerivs = cache.getInertiaDerivatives();
+	FullTaylorExpansion<SymmetricMat3, 2> globalInertiaDerivs;
+	for(int i = 0; i < 2; i++) {
+		globalInertiaDerivs.derivs[i] = selfRot.localToGlobal(inertiaDerivs.derivs[i]); // TODO Derive selfRot.localToGlobal too
+	}
+
+	Vec3 externalAngularMomentumDerivChangeDueToInertiaChange = globalInertiaDerivs.derivs[1] * this->motionOfCenterOfMass.getAngularVelocity();
+	Vec3 internalAngularMomentumChange = globalInternalAngMomDerivs.derivs[1];
+	Vec3 deltaAngularMomentumDeriv = -(externalAngularMomentumDerivChangeDueToInertiaChange + internalAngularMomentumChange);
+	// these three must sum to 0 for preservation of angular momentum
+
+
+	Vec3 angularAccel = ~globalInertiaDerivs.getConstantValue() * deltaAngularMomentumDeriv;
+
+	Log::info("angularAccel = %s", str(angularAccel).c_str());
+
+	return Motion(-motionOfCom, RotationalMotion(Vec3(0,0,0), angularAccel)).addRelativeMotion(motionOfMainNoCOM);
 }
 Motion ConnectedPhysical::getMotion() const {
 	// All motion and offset variables here are expressed in the global frame
@@ -988,7 +1017,7 @@ SymmetricMat3 COMMotionTree::getInertia() const {
 }
 
 FullTaylor<SymmetricMat3> COMMotionTree::getInertiaDerivatives() const {
-	FullTaylor<SymmetricMat3> totalInertia = getTranslatedInertiaDerivativesAroundCenterOfMass(motorPhys->rigidBody.inertia, motorPhys->rigidBody.mass, this->mainCOMOffset, -this->motionOfCenterOfMass);
+	FullTaylor<SymmetricMat3> totalInertia = getTranslatedInertiaDerivativesAroundCenterOfMass(motorPhys->rigidBody.inertia, motorPhys->rigidBody.mass, this->mainCOMOffset, -this->localMotionOfCenterOfMass);
 	motorPhys->mutuallyRecurse(relativeMotionTree, [&totalInertia](const MonotonicTreeNode<RelativeMotion>& node, const ConnectedPhysical& conPhys) {
 		totalInertia += getTransformedInertiaDerivativesAroundCenterOfMass(conPhys.rigidBody.inertia, conPhys.rigidBody.mass, node.value.locationOfRelativeMotion, node.value.relativeMotion);
 	});
@@ -996,15 +1025,8 @@ FullTaylor<SymmetricMat3> COMMotionTree::getInertiaDerivatives() const {
 	return totalInertia;
 }
 
-Motion COMMotionTree::getMotion() const {
-	GlobalCFrame cf = this->motorPhys->getCFrame();
-	TranslationalMotion motionOfCom = localToGlobal(cf.getRotation(), this->motionOfCenterOfMass);
-
-	return -motionOfCom + this->motorPhys->motionOfCenterOfMass.getMotionOfPoint(cf.localToRelative(-this->centerOfMass));
-}
-
 Vec3 COMMotionTree::getInternalAngularMomentum() const {
-	Vec3 velocityOfMain = -motionOfCenterOfMass.getVelocity();
+	Vec3 velocityOfMain = -localMotionOfCenterOfMass.getVelocity();
 	Vec3 totalAngularMomentum = getAngularMomentumFromOffsetOnlyVelocity(this->mainCOMOffset, velocityOfMain, motorPhys->rigidBody.mass);
 
 	motorPhys->mutuallyRecurse(relativeMotionTree, [&totalAngularMomentum](const MonotonicTreeNode<RelativeMotion>& node, const ConnectedPhysical& conPhys) {
@@ -1020,6 +1042,24 @@ Vec3 COMMotionTree::getInternalAngularMomentum() const {
 	});
 
 	return totalAngularMomentum;
+}
+
+FullTaylorExpansion<Vec3, DEFAULT_TAYLOR_LENGTH> COMMotionTree::getInternalAngularMomentumDerivatives() const {
+	Motion motionOfMain = -localMotionOfCenterOfMass;
+	FullTaylorExpansion<Vec3, DEFAULT_TAYLOR_LENGTH> totalAngularMomentumDerivatives = getAngularMomentumDerivativesFromOffsetOnlyVelocity(this->mainCOMOffset, motionOfMain.translation.translation, motorPhys->rigidBody.mass);
+
+	motorPhys->mutuallyRecurse(relativeMotionTree, [&totalAngularMomentumDerivatives](const MonotonicTreeNode<RelativeMotion>& node, const ConnectedPhysical& conPhys) {
+		const RelativeMotion& relMotion = node.value;
+		SymmetricMat3 relativeInertia = relMotion.locationOfRelativeMotion.getRotation().localToGlobal(conPhys.rigidBody.inertia);
+
+		totalAngularMomentumDerivatives += getAngularMomentumDerivativesFromOffset(
+			relMotion.locationOfRelativeMotion.getPosition(),
+			relMotion.relativeMotion,
+			relativeInertia,
+			conPhys.rigidBody.mass);
+	});
+
+	return totalAngularMomentumDerivatives;
 }
 
 #pragma endregion

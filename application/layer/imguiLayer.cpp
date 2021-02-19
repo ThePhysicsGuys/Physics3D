@@ -19,6 +19,9 @@
 #include "../graphics/gui/gui.h"
 #include "../physics/misc/toString.h"
 
+#include "application.h"
+#include "io/saveDialog.h"
+
 namespace Application {
 
 void ImGuiLayer::onInit() {
@@ -123,18 +126,18 @@ void ImGuiLayer::begin() {
 
 	if (ImGui::BeginMenuBar()) {
 		if (ImGui::BeginMenu("File")) {
-			if (ImGui::MenuItem("Save world", "CTRL-S"));
-			if (ImGui::MenuItem("Load world", "CTRL-O"));
-			if (ImGui::MenuItem("Exit", "esc"));
+			if(ImGui::MenuItem("Save world", "CTRL-S")) Application::saveWorld(Application::world);
+			if(ImGui::MenuItem("Load world", "CTRL-O")) Application::openWorld(Application::world);
+			if(ImGui::MenuItem("Exit", "esc")) Application::stop(0);
 
 			ImGui::EndMenu();
 		}
 
 		if (ImGui::BeginMenu("Edit")) {
-			if (ImGui::MenuItem("Play / pause", "P"));
-			if (ImGui::MenuItem("Tick", "T"));
-			if (ImGui::MenuItem("New part", "O"));
-			if (ImGui::MenuItem("Delete part", "DELETE"));
+			if(ImGui::MenuItem("Play / pause", "P")) Application::togglePause();
+			if(ImGui::MenuItem("Tick", "T", false, Application::isPaused()) && Application::isPaused()) Application::runTick();
+			if(ImGui::MenuItem("New part", "O"));
+			if(ImGui::MenuItem("Delete part", "DELETE"));
 
 			ImGui::EndMenu();
 		}

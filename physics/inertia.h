@@ -69,6 +69,16 @@ inline Vec3 getAngularMomentumFromOffsetOnlyVelocity(const Vec3& offset, const V
 	return offset % velocity * mass;
 }
 
+// we lose one derivative because angular momentum is already in the velocity domain, as opposed to the position domain, we don't have the 3rd derivative of position
+inline FullTaylorExpansion<Vec3, 2> getAngularMomentumDerivativesFromOffsetOnlyVelocity(const Vec3& offset, const TaylorExpansion<Vec3, 2>& translation, double mass) {
+	// d(offset % velocity * mass)/dt == d(offset % velocity)/dt * mass
+	// == (offset' % velocity + offset % velocity') * mass == (velocity % velocity + offset % acceleration) * mass
+	// == (offset % acceleration) * mass
+
+	Vec3 offsetTimesMass = offset * mass;
+	return FullTaylorExpansion<Vec3, 2>{offsetTimesMass % translation[0], offsetTimesMass % translation[1]};
+}
+
 
 // offsetInertia = originalInertia - [ComOffset]x ^ 2 * mass
 // angularMomemtum = (offsetInertia - [ComOffset]x ^ 2 * mass) * angularVel
@@ -81,3 +91,9 @@ inline Vec3 getAngularMomentumFromOffset(const Vec3& offset, const Vec3& velocit
 	Vec3 rotationAngularMomentum = inertia * angularVelocity;
 	return velocityAngularMomentum + rotationAngularMomentum;
 }
+
+// we lose one derivative because angular momentum is already in the velocity domain, but this is no problem, as we only need this derivative to compute acceleration terms
+FullTaylorExpansion<Vec3, 2> getRotationAngularMomentumDerivsOnlyRotation(const SymmetricMat3 & globalInertia, const TaylorExpansion<Vec3, 2> & rotation);
+
+// we lose one derivative because angular momentum is already in the velocity domain, but this is no problem, as we only need this derivative to compute acceleration terms
+FullTaylorExpansion<Vec3, 2> getAngularMomentumDerivativesFromOffset(const Vec3& offset, const Motion& motion, const SymmetricMat3& inertia, double mass);

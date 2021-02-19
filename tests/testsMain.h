@@ -37,6 +37,8 @@ public:
 extern std::stringstream logStream;
 void logf(const char* format, ...);
 
+#define LOG_VAR(var) logStream << #var << ": " << var << std::endl
+
 // Testing utils:
 
 template<typename T, std::size_t Size>

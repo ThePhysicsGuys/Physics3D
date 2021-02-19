@@ -209,19 +209,20 @@ class MotorizedPhysical : public Physical {
 	friend class ConnectedPhysical;
 	void rotateAroundCenterOfMassUnsafe(const Rotation& rotation);
 public:
+	WorldPrototype* world = nullptr;
+	Motion motionOfCenterOfMass;
+
 	void refreshPhysicalProperties();
+
 	Vec3 totalForce = Vec3(0.0, 0.0, 0.0);
 	Vec3 totalMoment = Vec3(0.0, 0.0, 0.0);
 
 	double totalMass;
 	Vec3 totalCenterOfMass;
 
-	WorldPrototype* world = nullptr;
-	
 	SymmetricMat3 forceResponse;
 	SymmetricMat3 momentResponse;
 
-	Motion motionOfCenterOfMass;
 	
 	explicit MotorizedPhysical(Part* mainPart);
 	explicit MotorizedPhysical(RigidBody&& rigidBody);
@@ -421,15 +422,15 @@ public:
 	MonotonicTree<RelativeMotion> relativeMotionTree;
 	double totalMass;
 	Vec3 centerOfMass;
-	TranslationalMotion motionOfCenterOfMass;
+	TranslationalMotion localMotionOfCenterOfMass;
 	Vec3 mainCOMOffset;
 private:
-	inline COMMotionTree(const MotorizedPhysical* motorPhys, MonotonicTree<RelativeMotion>&& relativeMotionTree, double totalMass, Vec3 centerOfMass, TranslationalMotion motionOfCenterOfMass) :
+	inline COMMotionTree(const MotorizedPhysical* motorPhys, MonotonicTree<RelativeMotion>&& relativeMotionTree, double totalMass, Vec3 centerOfMass, TranslationalMotion localMotionOfCenterOfMass) :
 		motorPhys(motorPhys), 
 		relativeMotionTree(std::move(relativeMotionTree)),
 		totalMass(totalMass),
 		centerOfMass(centerOfMass),
-		motionOfCenterOfMass(motionOfCenterOfMass),
+		localMotionOfCenterOfMass(localMotionOfCenterOfMass),
 		mainCOMOffset(motorPhys->rigidBody.localCenterOfMass - centerOfMass) {}
 
 public:
@@ -442,15 +443,15 @@ public:
 
 	SymmetricMat3 getInertia() const;
 	FullTaylor<SymmetricMat3> getInertiaDerivatives() const;
-	Motion getMotion() const;
 	Vec3 getInternalAngularMomentum() const;
+	FullTaylorExpansion<Vec3, 2> getInternalAngularMomentumDerivatives() const;
 
 	inline Vec3 getRelativePosOfMain() const {
 		return motorPhys->rigidBody.localCenterOfMass - centerOfMass;
 	}
 
-	inline TranslationalMotion getMotionOfMain() const {
-		return -motionOfCenterOfMass;
+	inline TranslationalMotion getLocalMotionOfMain() const {
+		return -localMotionOfCenterOfMass;
 	}
 
 	inline MonotonicTreeNode<RelativeMotion>* getPtrToFree() {

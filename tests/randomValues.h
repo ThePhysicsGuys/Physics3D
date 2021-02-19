@@ -40,12 +40,23 @@ Vector<T, Size> createRandomVecTemplate() {
 	}
 	return result;
 }
-// creates a random vector with elements between -1.0 and 1.0
+// creates a random matrix with elements between -1.0 and 1.0
 template<typename T, std::size_t Height, std::size_t Width>
 Matrix<T, Height, Width> createRandomMatrixTemplate() {
 	Matrix<T, Height, Width> result;
 	for(std::size_t y = 0; y < Height; y++) {
 		for(std::size_t x = 0; x < Width; x++) {
+			result(x, y) = createRandomDouble();
+		}
+	}
+	return result;
+}
+// creates a random symmetric matrix with elements between -1.0 and 1.0
+template<typename T, std::size_t Size>
+SymmetricMatrix<T, Size> createRandomSymmetricMatrixTemplate() {
+	SymmetricMatrix<T, Size> result;
+	for(std::size_t y = 0; y < Size; y++) {
+		for(std::size_t x = y; x < Size; x++) {
 			result(x, y) = createRandomDouble();
 		}
 	}

@@ -80,25 +80,100 @@ FullTaylorExpansion<T, N> generateFullTaylorForCosWave(T currentAngle, T frequen
 	return result;
 }
 
+/*
+	Pascal indices for constructing derivatives of multiplications
+		 1
+		1 1
+	   1 2 1
+	  1 3 3 1
+	 1 4 6 4 1
+*/
+template<int Layer, int Index>
+struct PascalIndex {
+	enum { value = PascalIndex<Layer - 1, Index - 1>::value + PascalIndex<Layer - 1, Index>::value };
+};
+
+template<int Index>
+struct PascalIndex<0, Index> {
+	enum { value = 1 };
+};
+
+template<int Layer>
+struct PascalIndex<Layer, 0> {
+	enum { value = 1 };
+};
+
+template<int Layer>
+struct PascalIndex<Layer, Layer> {
+	enum { value = 1 };
+};
+
+// get the pascal triangle index of this layer and index
+// should always get optimized to a constant expression
+constexpr int pascalIndex(int layer, int index) {
+	if(layer == 0 || index == 0 || index == layer) {
+		return 1;
+	} else {
+		return pascalIndex(layer - 1, index - 1) + pascalIndex(layer - 1, index);
+	}
+}
+
+template<typename T1, typename T2, std::size_t Size, std::size_t Layer, std::size_t Index>
+auto computeDerivativeForIndex(const Derivatives<T1, Size>& first, const Derivatives<T2, Size>& second) -> decltype(first[0] * second[0]) {
+	decltype(first[0] * second[0]) thisStepResult = first[Index] * second[Layer - Index];
+	if constexpr(Index == 0) {
+		return thisStepResult;
+	} else if constexpr(Index == Layer) {
+		return thisStepResult + computeDerivativeForIndex<T1, T2, Size, Layer, Index - 1>(first, second);
+	} else {
+		return static_cast<int>(PascalIndex<Layer, Index>::value) * thisStepResult + computeDerivativeForIndex<T1, T2, Size, Layer, Index - 1>(first, second);
+	}
+}
+
+template<typename T1, typename T2, std::size_t Size, std::size_t CurDerivative>
+void computeDerivatives(const Derivatives<T1, Size>& first, const Derivatives<T2, Size>& second, Derivatives<decltype(first[0] * second[0]), Size>& result) {
+	if constexpr(CurDerivative > 0) {
+		computeDerivatives<T1, T2, Size, CurDerivative - 1>(first, second, result);
+	}
+	result[CurDerivative] = computeDerivativeForIndex<T1, T2, Size, CurDerivative, CurDerivative>(first, second);
+}
+
+// multiplication-like derivatives
+template<typename T1, typename T2, std::size_t Size>
+auto derivsOfMultiplication(const Derivatives<T1, Size>& first, const Derivatives<T2, Size>& second) -> Derivatives<decltype(first[0] * second[0]), Size> {
+	Derivatives<decltype(first[0] * second[0]), Size> result;
+
+	computeDerivatives<T1, T2, Size, Size - 1>(first, second, result);
+
+	return result;
+}
+// multiplication-like derivatives
+template<typename T1, typename T2, std::size_t Size>
+auto derivsOfMultiplication(const FullTaylorExpansion<T1, Size>& first, const FullTaylorExpansion<T2, Size>& second) -> FullTaylorExpansion<decltype(first.derivs[0] * second.derivs[0]), Size> {
+	return FullTaylorExpansion<decltype(first.derivs[0] * second.derivs[0]), Size>{derivsOfMultiplication(first.derivs, second.derivs)};
+}
+
+
+
 template<typename T, int Derivs>
-TaylorExpansion<SymmetricMatrix<T, 3>, Derivs-1> generateTaylorForSkewSymmetricSquared(const FullTaylorExpansion<Vector<T, 3>, Derivs>& inputVector) {
+TaylorExpansion<SymmetricMatrix<T, 3>, Derivs - 1> generateTaylorForSkewSymmetricSquared(const FullTaylorExpansion<Vector<T, 3>, Derivs> & inputVector) {
 	static_assert(Derivs >= 2 && Derivs <= 3);
-	
+
 	Vector<T, 3> f = inputVector.getConstantValue();
-	
-	TaylorExpansion<SymmetricMatrix<T, 3>, Derivs-1> result;
+
+	TaylorExpansion<SymmetricMatrix<T, 3>, Derivs - 1> result;
 
 	if constexpr(Derivs >= 2) {
 		Vector<T, 3> ff = inputVector.getDerivative(0);
 		Vector<T, 3> ffxf = elementWiseMul(ff, f);
 		Vector<T, 3> ffMixed = mulOppositesBiDir(ff, f);
-		
+
 		result[0] = SymmetricMatrix<T, 3>{
 			-2 * (ffxf.y + ffxf.z),
 			ffMixed.z, -2 * (ffxf.x + ffxf.z),
 			ffMixed.y, ffMixed.x, -2 * (ffxf.x + ffxf.y)
 		};
-		
+
 		if constexpr(Derivs >= 3) {
 			Vector<T, 3> fff = inputVector.getDerivative(1);
 			Vector<T, 3> fffxf = elementWiseSquare(ff) + elementWiseMul(fff, f);
@@ -120,19 +195,36 @@ FullTaylorExpansion<SymmetricMatrix<T, 3>, Derivs> generateFullTaylorForSkewSymm
 	return FullTaylorExpansion<SymmetricMatrix<T, 3>, Derivs>::fromConstantAndDerivatives(skewSymmetricSquared(inputVector.getConstantValue()), generateTaylorForSkewSymmetricSquared<double, Derivs>(inputVector));
 }
 
+// the result still has to be multiplied by the rotation (result * rotation) == realResult, but since the rotation factors out so nicely, it is left out
 template<typename T, int Derivs>
-TaylorExpansion<Mat3, Derivs> generateTaylorForRotationMatrix(const TaylorExpansion<Vec3, Derivs>& rotationVecTaylor, const Matrix<T, 3, 3>& rotation) {
+TaylorExpansion<Mat3, Derivs> generateRotationTaylor(const TaylorExpansion<Vec3, Derivs>& rotationVecTaylor) {
 	Mat3 angularVelEquiv = createCrossProductEquivalent(rotationVecTaylor[0]);
 
 	TaylorExpansion<Mat3, Derivs> result;
-	result[0] = angularVelEquiv * rotation;
+	result[0] = angularVelEquiv;
 
 	if constexpr(Derivs >= 2) {
 		Mat3 angularAccelEquiv = createCrossProductEquivalent(rotationVecTaylor[1]);
-		result[1] = (angularAccelEquiv + angularVelEquiv * angularVelEquiv) * rotation;
+		result[1] = angularAccelEquiv + angularVelEquiv * angularVelEquiv;
+
+		if constexpr(Derivs >= 3) {
+			Mat3 angularJerkEquiv = createCrossProductEquivalent(rotationVecTaylor[2]);
+			Mat3 velAccel = angularVelEquiv * angularAccelEquiv;
+			result[2] = angularJerkEquiv + (velAccel + velAccel) + result[1] * angularVelEquiv;
+		}
 	}
 
-	// TODO add further derivatives
+	// extending this function with more derivatives must always keep in mind the implicit rotation
+	// result[i] * rotation
+	// and deriving rotation yields: rotation' = angularVelEquiv * rotation
+	// so this gives result[i+1]*rotation == (result[i]*rotation)' == (result[i]' * rotation + result[i] * rotation') == (result[i]' * rotation + result[i] * angularVelEquiv * rotation) == (result[i]' + result[i] * angularVelEquiv) * rotation
 
 	return result;
 }
+
+template<typename T, int Derivs>
+TaylorExpansion<Mat3, Derivs> generateTaylorForRotationMatrix(const TaylorExpansion<Vec3, Derivs>& rotationVecTaylor, const Matrix<T, 3, 3> & rotation) {
+	return generateRotationTaylor<double, Derivs>(rotationVecTaylor) * rotation;
+}
+
+

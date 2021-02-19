@@ -424,7 +424,7 @@ TEST_CASE(testCenterOfMassKept) {
 	logStream << t.getRelativePosOfMain();
 
 	ASSERT(t.getRelativePosOfMain() == -t.relativeMotionTree[0].value.locationOfRelativeMotion.getPosition());
-	ASSERT(t.getMotionOfMain() == -t.relativeMotionTree[0].value.relativeMotion.translation);
+	ASSERT(t.getLocalMotionOfMain() == -t.relativeMotionTree[0].value.relativeMotion.translation);
 }
 
 TEST_CASE(testBasicAngularMomentum) {
@@ -506,10 +506,9 @@ TEST_CASE(testFixedConstraintAngularMomentum) {
 	
 	ASSERT(t1.totalMass == t2.totalMass);
 	ASSERT(t1.centerOfMass == t2.centerOfMass);
-	ASSERT(t1.motionOfCenterOfMass == t2.motionOfCenterOfMass);
+	ASSERT(t1.localMotionOfCenterOfMass == t2.localMotionOfCenterOfMass);
 	ASSERT(t1.getInertia() == t2.getInertia());
 	ASSERT(t1.getInertiaDerivatives() == t2.getInertiaDerivatives());
-	ASSERT(t1.getMotion() == t2.getMotion());
 	ASSERT(t1.getInternalAngularMomentum() == t2.getInternalAngularMomentum());
 }
 

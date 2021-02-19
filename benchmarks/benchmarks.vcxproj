@@ -203,6 +203,7 @@
     <ClCompile Include="complexObjectBenchmark.cpp" />
     <ClCompile Include="getBoundsPerformance.cpp" />
     <ClCompile Include="manyCubesBenchmark.cpp" />
+    <ClCompile Include="physicalBenchmarks.cpp" />
     <ClCompile Include="worldBenchmark.cpp" />
     <ClCompile Include="rotationBenchmark.cpp" />
   </ItemGroup>

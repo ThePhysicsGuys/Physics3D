@@ -64,7 +64,7 @@ TEST_CASE(inertiaRotationDerivatives) {
 		inertias[i] = getRotatedInertia(inert, rotations[i]);
 	}
 	FullTaylor<SymmetricMat3> estimatedTaylor = estimateDerivatives(inertias, DELTA_T);
-	FullTaylor<SymmetricMat3> inertialTaylor = getRotatedInertiaTaylor(inert, start, motion);
+	FullTaylor<SymmetricMat3> inertialTaylor = getRotatedInertiaTaylor(inert, start, motion.rotation);
 
 	ASSERT(estimatedTaylor == inertialTaylor);
 }
@@ -176,4 +176,51 @@ TEST_CASE(translatedAngularMomentum) {
 	ASSERT(angularMomentumTarget == angularMomentumTest);
 	ASSERT(angularMomentumFromVelocity == computedAngularMomentumFromVelocity);
 	ASSERT(angularMomentumTarget == computedAngularMomentumFromVelocityAndAngular);
+}
+
+TEST_CASE(angularMomentumDerivatives) {
+	Vec3 offset = createRandomNonzeroVec3();
+	Motion m = createRandomMotion();
+	Polyhedron p = Library::house.rotated(createRandomRotationTemplate<float>());
+	double mass = p.getVolume();
+	SymmetricMat3 inertia = p.getInertiaAroundCenterOfMass();
+
+	Vec3 offset2 = offset + m.getVelocity() * DELTA_T + m.getAcceleration() * DELTA_T * DELTA_T / 2;
+	Vec3 vel2 = m.getVelocity() + m.getAcceleration() * DELTA_T;
+	Vec3 angularVel2 = m.getAngularVelocity() + m.getAngularAcceleration() * DELTA_T;
+	Vec3 angularOffset2 = m.getAngularVelocity() * DELTA_T + m.getAngularAcceleration() * DELTA_T * DELTA_T / 2;
+	SymmetricMat3 inertia2 = Rotation::fromRotationVec(angularOffset2).localToGlobal(inertia);
+
+	Vec3 angMom1 = getAngularMomentumFromOffset(offset, m.getVelocity(), m.getAngularVelocity(), inertia, mass);
+	Vec3 angMom2 = getAngularMomentumFromOffset(offset2, vel2, angularVel2, inertia2, mass);
+
+	FullTaylorExpansion<Vec3, 2> angTaylor = getAngularMomentumDerivativesFromOffset(offset, m, inertia, mass);
+
+	Vec3 computedAngTaylor = (angMom2 - angMom1) / DELTA_T;
+
+	Vec3 angMom1OnlyVel = getAngularMomentumFromOffsetOnlyVelocity(offset, m.getVelocity(), mass);
+	Vec3 angMom2OnlyVel = getAngularMomentumFromOffsetOnlyVelocity(offset2, vel2, mass);
+
+	FullTaylorExpansion<Vec3, 2> angTaylorOnlyVel = getAngularMomentumDerivativesFromOffsetOnlyVelocity(offset, m.translation.translation, mass);
+
+	Vec3 computedAngTaylorOnlyVel = (angMom2OnlyVel - angMom1OnlyVel) / DELTA_T;
+	
+	LOG_VAR(offset);
+	LOG_VAR(m);
+	LOG_VAR(mass);
+	LOG_VAR(inertia);
+	LOG_VAR(angMom1);
+	LOG_VAR(angMom2);
+	LOG_VAR(angTaylor);
+	LOG_VAR(computedAngTaylor);
+	LOG_VAR(angMom1OnlyVel);
+	LOG_VAR(angMom2OnlyVel);
+	LOG_VAR(angTaylorOnlyVel);
+	LOG_VAR(computedAngTaylorOnlyVel);
+
+	ASSERT(angTaylorOnlyVel.getConstantValue() == angMom1OnlyVel);
+	ASSERT(angTaylorOnlyVel.getDerivative(0) == computedAngTaylorOnlyVel);
+
+	ASSERT(angTaylor.getConstantValue() == angMom1);
+	ASSERT(angTaylor.getDerivative(0) == computedAngTaylor);
 }

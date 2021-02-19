@@ -111,15 +111,12 @@ TEST_CASE(testMotionOfPhysicalPartsRotation) {
 
 	p1.parent->mainPhysical->motionOfCenterOfMass = COMMotion;
 
-	Vec3 p1calculatedVelBefore = p1.getMotion().getVelocity();
-	Vec3 p2calculatedVelBefore = p2.getMotion().getVelocity();
+	Motion p1BeforeMotion = p1.getMotion();
+	Motion p2BeforeMotion = p2.getMotion();
 
 	logStream << p1.parent->getMotion() << "\n";
-	logStream << p1.getMotion() << "\n";
-	logStream << p2.getMotion() << "\n";
-
-	Vec3 p1calculatedAccelBefore = p1.getMotion().getAcceleration();
-	Vec3 p2calculatedAccelBefore = p2.getMotion().getAcceleration();
+	logStream << p1BeforeMotion << "\n";
+	logStream << p2BeforeMotion << "\n";
 
 	GlobalCFrame p1CFrameBefore = p1.getCFrame();
 	GlobalCFrame p2CFrameBefore = p2.getCFrame();
@@ -137,10 +134,10 @@ TEST_CASE(testMotionOfPhysicalPartsRotation) {
 	Motion estimatedMotion1 = estimateMotion(p1CFrameBefore, p1CFrameMid, p1CFrameAfter, DELTA_T);
 	Motion estimatedMotion2 = estimateMotion(p2CFrameBefore, p2CFrameMid, p2CFrameAfter, DELTA_T);
 
-	ASSERT(estimatedMotion1.getVelocity() == p1calculatedVelBefore);
-	ASSERT(estimatedMotion2.getVelocity() == p2calculatedVelBefore);
-	ASSERT(estimatedMotion1.getAcceleration() == p1calculatedAccelBefore);
-	ASSERT(estimatedMotion2.getAcceleration() == p2calculatedAccelBefore);
+	ASSERT(estimatedMotion1.getVelocity() == p1BeforeMotion.getVelocity());
+	ASSERT(estimatedMotion2.getVelocity() == p2BeforeMotion.getVelocity());
+	ASSERT(estimatedMotion1.getAcceleration() == p1BeforeMotion.getAcceleration());
+	ASSERT(estimatedMotion2.getAcceleration() == p2BeforeMotion.getAcceleration());
 }
 
 TEST_CASE(testMotionOfPhysicalPartsBasicFixedConstraint) {
