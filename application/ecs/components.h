@@ -4,6 +4,7 @@
 #include <variant>
 #include "extendedPart.h"
 
+#include "../physics/synchonizedWorld.h"
 #include "../physics/geometry/builtinShapeClasses.h"
 #include "../graphics/visualData.h"
 
@@ -55,7 +56,9 @@ struct Transform : RefCountable {
 
 		ScaledCFrame() : scale(DiagonalMat3::IDENTITY()) {}
 		ScaledCFrame(const Position& position) : cframe(position), scale(DiagonalMat3::IDENTITY()) {}
+		ScaledCFrame(const Position& position, double scale) : cframe(position), scale(DiagonalMat3::DIAGONAL(scale)) {}
 		ScaledCFrame(const GlobalCFrame& cframe) : cframe(cframe), scale(DiagonalMat3::IDENTITY()) {}
+		ScaledCFrame(const GlobalCFrame& cframe, double scale) : cframe(cframe), scale(DiagonalMat3::DIAGONAL(scale)) {}
 		ScaledCFrame(const GlobalCFrame& cframe, const DiagonalMat3& scale) : cframe(cframe), scale(scale) {}
 	};
 	
@@ -64,11 +67,29 @@ struct Transform : RefCountable {
 	Transform() : cframe(ScaledCFrame()) {}
 	Transform(ExtendedPart* part) : cframe(part) {}
 	Transform(const Position& position) : cframe(position) {}
+	Transform(const Position& position, double scale) : cframe(ScaledCFrame(position, scale)) {}
 	Transform(const GlobalCFrame& cframe) : cframe(cframe) {}
+	Transform(const GlobalCFrame& cframe, double scale) : cframe(ScaledCFrame(cframe, scale)) {}
 	Transform(const GlobalCFrame& cframe, const DiagonalMat3& scale) : cframe(ScaledCFrame(cframe, scale)) {}
 
 	bool isPartAttached() {
 		return std::holds_alternative<ExtendedPart*>(this->cframe);
+	}
+
+	template<typename Function>
+	void asyncModify(SynchronizedWorld<ExtendedPart>* world, const Function& function) {
+		if (isPartAttached()) 
+			world->asyncModification(function);
+		else
+			function();
+	}
+
+	template<typename Function>
+	void syncRead(SynchronizedWorld<ExtendedPart>* world, const Function& function) {
+		if (isPartAttached())
+			world->syncReadOnlyOperation(function);
+		else
+			function();
 	}
 
 	void setPart(ExtendedPart* part) {
@@ -78,7 +99,33 @@ struct Transform : RefCountable {
 	ExtendedPart* getPart() {
 		return std::get<ExtendedPart*>(this->cframe);
 	}
+
+	void translate(const Vec3& translation) {
+		if (std::holds_alternative<ExtendedPart*>(this->cframe)) {
+			std::get<ExtendedPart*>(this->cframe)->translate(translation);
+		} else {
+			std::get<ScaledCFrame>(this->cframe).cframe.position += translation;
+		}
+	}
+
+	void scale(double scaleX, double scaleY, double scaleZ) {
+		if (std::holds_alternative<ExtendedPart*>(this->cframe)) {
+			std::get<ExtendedPart*>(this->cframe)->scale(scaleX, scaleY, scaleZ);
+		} else {
+			std::get<ScaledCFrame>(this->cframe).scale[0] *= scaleX;
+			std::get<ScaledCFrame>(this->cframe).scale[1] *= scaleY;
+			std::get<ScaledCFrame>(this->cframe).scale[2] *= scaleZ;
+		}
+	}
 	
+	GlobalCFrame getCFrame() {
+		if (std::holds_alternative<ExtendedPart*>(this->cframe)) {
+			return std::get<ExtendedPart*>(this->cframe)->getCFrame();
+		} else {
+			return std::get<ScaledCFrame>(this->cframe).cframe;
+		}
+	}
+
 	void setCFrame(const GlobalCFrame& cframe) {
 		if (std::holds_alternative<ExtendedPart*>(this->cframe)) {
 			std::get<ExtendedPart*>(this->cframe)->setCFrame(cframe);
@@ -87,12 +134,8 @@ struct Transform : RefCountable {
 		}
 	}
 
-	void setScale(const DiagonalMat3& scale) {
-		if (std::holds_alternative<ExtendedPart*>(this->cframe)) {
-			std::get<ExtendedPart*>(this->cframe)->setScale(scale);
-		} else {
-			std::get<ScaledCFrame>(this->cframe).scale = scale;
-		}
+	Position getPosition() {
+		return getCFrame().getPosition();
 	}
 
 	void setPosition(const Position& position) {
@@ -100,11 +143,15 @@ struct Transform : RefCountable {
 			ExtendedPart* part = std::get<ExtendedPart*>(this->cframe);
 			GlobalCFrame cframe = part->getCFrame();
 			cframe.position = position;
-			
+
 			part->setCFrame(cframe);
 		} else {
 			std::get<ScaledCFrame>(this->cframe).cframe.position = position;
 		}
+	}
+
+	Rotation getRotation() {
+		return getCFrame().getRotation();
 	}
 
 	void setRotation(const Rotation& rotation) {
@@ -118,14 +165,6 @@ struct Transform : RefCountable {
 			std::get<ScaledCFrame>(this->cframe).cframe.rotation = rotation;
 		}
 	}
-	
-	GlobalCFrame getCFrame() {
-		if (std::holds_alternative<ExtendedPart*>(this->cframe)) {
-			return std::get<ExtendedPart*>(this->cframe)->getCFrame();
-		} else {
-			return std::get<ScaledCFrame>(this->cframe).cframe;
-		}
-	}
 
 	DiagonalMat3 getScale() {
 		if (std::holds_alternative<ExtendedPart*>(this->cframe)) {
@@ -135,16 +174,76 @@ struct Transform : RefCountable {
 		}
 	}
 
-	Position getPosition() {
-		return getCFrame().getPosition();
+	void setScale(const DiagonalMat3& scale) {
+		if (std::holds_alternative<ExtendedPart*>(this->cframe)) {
+			std::get<ExtendedPart*>(this->cframe)->setScale(scale);
+		} else {
+			std::get<ScaledCFrame>(this->cframe).scale = scale;
+		}
 	}
 
-	Rotation getRotation() {
-		return getCFrame().getRotation();
+	double getWidth() {
+		if (std::holds_alternative<ExtendedPart*>(this->cframe)) {
+			return std::get<ExtendedPart*>(this->cframe)->hitbox.getWidth();
+		} else {
+			return std::get<ScaledCFrame>(this->cframe).scale[0];
+		}
 	}
 
-	Mat4f getModelMatrix() {
-		return getCFrame().asMat4WithPreScale(getScale());
+	void setWidth(double width) {
+		if (std::holds_alternative<ExtendedPart*>(this->cframe)) {
+			std::get<ExtendedPart*>(this->cframe)->hitbox.setWidth(width);
+		} else {
+			std::get<ScaledCFrame>(this->cframe).scale[0] = width;
+		}
+	}
+
+	double getHeight() {
+		if (std::holds_alternative<ExtendedPart*>(this->cframe)) {
+			return std::get<ExtendedPart*>(this->cframe)->hitbox.getHeight();
+		} else {
+			return std::get<ScaledCFrame>(this->cframe).scale[1];
+		}
+	}
+	
+	void setHeight(double height) {
+		if (std::holds_alternative<ExtendedPart*>(this->cframe)) {
+			std::get<ExtendedPart*>(this->cframe)->hitbox.setHeight(height);
+		} else {
+			std::get<ScaledCFrame>(this->cframe).scale[1] = height;
+		}
+	}
+
+	double getDepth() {
+		if (std::holds_alternative<ExtendedPart*>(this->cframe)) {
+			return std::get<ExtendedPart*>(this->cframe)->hitbox.getDepth();
+		} else {
+			return std::get<ScaledCFrame>(this->cframe).scale[2];
+		}
+	}
+
+	void setDepth(double depth) {
+		if (std::holds_alternative<ExtendedPart*>(this->cframe)) {
+			std::get<ExtendedPart*>(this->cframe)->hitbox.setDepth(depth);
+		} else {
+			std::get<ScaledCFrame>(this->cframe).scale[2] = depth;
+		}
+	}
+
+	double getMaxRadius() {
+		if (std::holds_alternative<ExtendedPart*>(this->cframe)) {
+			return std::get<ExtendedPart*>(this->cframe)->hitbox.getMaxRadius();
+		} else {
+			DiagonalMat3 scale = std::get<ScaledCFrame>(this->cframe).scale;
+			return length(Vec3 { scale[0], scale[1], scale[2] });
+		}
+	}
+
+	Mat4f getModelMatrix(bool scaled = true) {
+		if (scaled)
+			return getCFrame().asMat4WithPreScale(getScale());
+		else
+			return getCFrame().asMat4();
 	}
 };
 

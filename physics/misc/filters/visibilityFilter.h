@@ -66,10 +66,11 @@ public:
 	bool operator()(const TreeNode& node) const;
 	bool operator()(const Position& point) const;
 	bool operator()(const Part& part) const;
+	bool operator()(const Bounds& bounds) const;
 
-	inline Vec3 getForwardStep() const { return forward; }
-	inline Vec3 getTopOfViewPort() const { return projectToPlaneNormal(forward, up); }
-	inline Vec3 getBottomOfViewPort() const { return projectToPlaneNormal(forward, down); }
-	inline Vec3 getLeftOfViewPort() const { return projectToPlaneNormal(forward, left); }
-	inline Vec3 getRightOfViewPort() const { return projectToPlaneNormal(forward, right); }
+	Vec3 getForwardStep() const { return forward; }
+	Vec3 getTopOfViewPort() const { return projectToPlaneNormal(forward, up); }
+	Vec3 getBottomOfViewPort() const { return projectToPlaneNormal(forward, down); }
+	Vec3 getLeftOfViewPort() const { return projectToPlaneNormal(forward, left); }
+	Vec3 getRightOfViewPort() const { return projectToPlaneNormal(forward, right); }
 };

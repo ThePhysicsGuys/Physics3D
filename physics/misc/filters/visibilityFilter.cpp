@@ -64,23 +64,7 @@ VisibilityFilter VisibilityFilter::forSubWindow(const Position& origin, const Ve
 }
 
 bool VisibilityFilter::operator()(const TreeNode& node) const {
-	double offsets[5]{0,0,0,0,maxDepth};
-	Vec3 normals[5]{up, down, left, right, forward}; 
-	for(int i = 0; i < 5; i++) {
-		Vec3& normal = normals[i];
-		// we're checking that *a* corner of the TreeNode's bounds is within the viewport, basically similar to rectangle-rectangle colissions, google it!
-		// cornerOfInterest is the corner that is the furthest positive corner relative to the normal, so if it is not visible (eg above the normal) then the whole box must be invisible
-		Position cornerOfInterest(
-			(normal.x >= 0) ? node.bounds.min.x : node.bounds.max.x,
-			(normal.y >= 0) ? node.bounds.min.y : node.bounds.max.y, // let's look at the top of the viewport, if the bottom of the box is above this then the whole box must be above it. 
-			(normal.z >= 0) ? node.bounds.min.z : node.bounds.max.z
-		);
-
-		Vec3 relativePos = cornerOfInterest - origin;
-		if (relativePos * normal > offsets[i])
-			return false;
-	}
-	return true;
+	return operator()(node.bounds);
 }
 
 bool VisibilityFilter::operator()(const Position& point) const {
@@ -95,6 +79,27 @@ bool VisibilityFilter::operator()(const Position& point) const {
 	}
 	return true;
 }
+
+bool VisibilityFilter::operator()(const Bounds& bounds) const {
+	double offsets[5] { 0,0,0,0,maxDepth };
+	Vec3 normals[5] { up, down, left, right, forward };
+	for (int i = 0; i < 5; i++) {
+		Vec3& normal = normals[i];
+		// we're checking that *a* corner of the TreeNode's bounds is within the viewport, basically similar to rectangle-rectangle colissions, google it!
+		// cornerOfInterest is the corner that is the furthest positive corner relative to the normal, so if it is not visible (eg above the normal) then the whole box must be invisible
+		Position cornerOfInterest(
+			(normal.x >= 0) ? bounds.min.x : bounds.max.x,
+			(normal.y >= 0) ? bounds.min.y : bounds.max.y, // let's look at the top of the viewport, if the bottom of the box is above this then the whole box must be above it. 
+			(normal.z >= 0) ? bounds.min.z : bounds.max.z
+		);
+
+		Vec3 relativePos = cornerOfInterest - origin;
+		if (relativePos * normal > offsets[i])
+			return false;
+	}
+	return true;
+}
+
 
 bool VisibilityFilter::operator()(const Part& part) const {
 	return true;

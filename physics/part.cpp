@@ -50,8 +50,8 @@ Part::Part(Part&& other) noexcept :
 	maxRadius(other.maxRadius), 
 	properties(std::move(other.properties)) {
 
-	if(parent != nullptr) parent->notifyPartStdMoved(&other, this);
-	if(layer != nullptr) layer->notifyPartStdMoved(&other, this);
+	if (parent != nullptr) parent->notifyPartStdMoved(&other, this);
+	if (layer != nullptr) layer->notifyPartStdMoved(&other, this);
 
 	other.parent = nullptr;
 	other.layer = nullptr;
@@ -64,13 +64,20 @@ Part& Part::operator=(Part&& other) noexcept {
 	this->maxRadius = other.maxRadius;
 	this->properties = std::move(other.properties);
 
-	if(parent != nullptr) parent->notifyPartStdMoved(&other, this);
-	if(layer != nullptr) layer->notifyPartStdMoved(&other, this);
+	if (parent != nullptr) parent->notifyPartStdMoved(&other, this);
+	if (layer != nullptr) layer->notifyPartStdMoved(&other, this);
 
 	other.parent = nullptr;
 	other.layer = nullptr;
 
 	return *this;
+}
+
+WorldPrototype* Part::getWorld() {
+	if (layer == nullptr)
+		return nullptr;
+	
+	return layer->parent->world;
 }
 
 Part::~Part() {

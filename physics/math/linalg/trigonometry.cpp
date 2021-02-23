@@ -37,7 +37,7 @@ Mat4f ortho(float left, float right, float bottom, float top, float zNear, float
 		r00, 0, 0, r30,
 		0, r11, 0, r31,
 		0, 0, r22, r32,
-		0, 0, 0, r33
+		0, 0, 0,   r33
 	};
 }
 

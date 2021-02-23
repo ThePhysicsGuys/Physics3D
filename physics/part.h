@@ -72,6 +72,7 @@ public:
 	Part(Part&& other) noexcept;
 	Part& operator=(Part&& other) noexcept;
 
+	WorldPrototype* getWorld();
 
 	PartIntersection intersects(const Part& other) const;
 	void scale(double scaleX, double scaleY, double scaleZ);

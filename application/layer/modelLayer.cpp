@@ -251,6 +251,26 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 				}
 			}
 		}
+
+		// Hitbox drawing
+		for (auto entity : screen->selectionContext.selection) {
+			Ref<Comp::Transform> transform = registry.get<Comp::Transform>(entity);
+			if (transform.valid()) {
+				Ref<Comp::Hitbox> hitbox = registry.get<Comp::Hitbox>(entity);
+
+				if (hitbox.valid()) {
+					Shape shape = hitbox->getShape();
+
+					if (!hitbox->isPartAttached())
+						shape = shape.scaled(transform->getScale());
+
+					VisualData data = MeshRegistry::getOrCreateMeshFor(shape.baseShape);
+
+					Shaders::debugShader.updateModel(transform->getCFrame().asMat4WithPreScale(shape.scale));
+					MeshRegistry::meshes[data.id]->render();
+				}
+			}
+		}
 	});
 
 	endScene();

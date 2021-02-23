@@ -17,6 +17,10 @@ double Shape::getIntersectionDistance(Vec3 origin, Vec3 direction) const {
 double Shape::getVolume() const {
 	return baseShape->volume * det(scale);
 }
+
+Shape Shape::scaled(const DiagonalMat3& scale) const {
+	return Shape(baseShape, this->scale * scale);
+}
 Shape Shape::scaled(double scaleX, double scaleY, double scaleZ) const {
 	return Shape(baseShape, scale * DiagonalMat3{scaleX, scaleY, scaleZ});
 }
