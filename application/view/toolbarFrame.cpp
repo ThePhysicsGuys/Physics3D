@@ -1,6 +1,7 @@
 #include "core.h"
 #include "toolbarFrame.h"
 
+#include "../layer/pickerLayer.h"
 #include "../engine/tool/toolManager.h"
 #include "../graphics/gui/imgui/imguiExtension.h"
 #include "../input/standardInputHandler.h"
@@ -20,13 +21,16 @@ void ToolbarFrame::onInit(Engine::Registry64& registry) {
 
 void ToolbarFrame::onRender(Engine::Registry64& registry) {
 	ImGui::BeginToolbar("Toolbar");
-	for (auto& [name, tool] : Engine::ToolManager::tools) {
-		bool selected = Engine::ToolManager::isSelected(tool);
-		if (ImGui::ToolBarButton(tool, selected)) {
-			if (selected)
-				Engine::ToolManager::deselectTool();
-			else
-				Engine::ToolManager::selectTool(tool);
+	
+	for (Engine::ToolManager& toolManager : PickerLayer::toolManagers) {
+		for (Engine::Tool* tool : toolManager) {
+			bool selected = toolManager.isSelected(tool);
+			if (ImGui::ToolBarButton(tool, selected)) {
+				if (selected)
+					toolManager.deselectTool();
+				else
+					toolManager.selectTool(tool);
+			}
 		}
 	}
 

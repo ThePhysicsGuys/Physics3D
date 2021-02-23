@@ -7,32 +7,41 @@
 
 #include "../engine/tool/toolManager.h"
 #include "../graphics/renderer.h"
-#include "../picker/selectionTool.h"
+#include "../picker/tools/selectionTool.h"
+#include "../picker/tools/translationTool.h"
 
 namespace P3D::Application {
 
-using Engine::ToolManager;
+std::vector<Engine::ToolManager> PickerLayer::toolManagers;
 	
 void PickerLayer::onInit(Engine::Registry64& registry) {
 	Picker::onInit();
-	
-	ToolManager::onInit();
-	ToolManager::registerTool<SelectionTool>();
-	// ToolManager::selectTool<SelectionTool>();
+
+	Engine::ToolManager toolManager;
+	toolManager.registerTool<SelectionTool>();
+	toolManager.registerTool<TranslationTool>();
+
+	toolManagers.push_back(std::move(toolManager));
 }
 
 void PickerLayer::onUpdate(Engine::Registry64& registry) {
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
+	// Update selection context
+	screen->selectionContext.mouse = handler->mousePosition;
+	screen->selectionContext.ray = getMouseRay(*screen, handler->mousePosition);
+
 	Picker::onUpdate(*screen, handler->mousePosition);
-	
-	ToolManager::onUpdate();
+
+	for (Engine::ToolManager& toolManager : toolManagers)
+		toolManager.onUpdate();
 }
 
 void PickerLayer::onEvent(Engine::Registry64& registry, Engine::Event& event) {
 	Picker::onEvent(event);
 
-	ToolManager::onEvent(event);
+	for (Engine::ToolManager& toolManager : toolManagers)
+		toolManager.onEvent(event);
 }
 
 void PickerLayer::onRender(Engine::Registry64& registry) {
@@ -47,7 +56,8 @@ void PickerLayer::onRender(Engine::Registry64& registry) {
 	Picker::onRender(*screen);
 
 	disableDepthTest();
-	ToolManager::onRender();
+	for (Engine::ToolManager& toolManager : toolManagers)
+		toolManager.onRender();
 
 	endScene();
 }
@@ -55,7 +65,8 @@ void PickerLayer::onRender(Engine::Registry64& registry) {
 void PickerLayer::onClose(Engine::Registry64& registry) {
 	Picker::onClose();
 
-	ToolManager::onClose();
+	for (Engine::ToolManager& toolManager : toolManagers)
+		toolManager.onClose();
 }
 
 };

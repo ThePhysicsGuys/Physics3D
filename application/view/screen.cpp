@@ -32,9 +32,8 @@
 #include "layer/shadowLayer.h"
 #include "layer/cameraLayer.h"
 #include "ecs/components.h"
-#include "frames.h"
 #include "../util/systemVariables.h"
-
+#include "frames.h"
 #include "imgui/imgui.h"
 
 struct GLFWwindow;
@@ -251,7 +250,7 @@ void Screen::onClose() {
 
 	layerStack.onClose(registry);
 
-	Graphics::Library::onClose();
+	Library::onClose();
 
 	ResourceManager::close();
 
@@ -265,7 +264,7 @@ void Screen::onClose() {
 }
 
 bool Screen::shouldClose() {
-	return Graphics::GLFW::isWindowClosed();
+	return GLFW::isWindowClosed();
 }
 
 };

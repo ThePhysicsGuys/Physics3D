@@ -270,9 +270,11 @@ add_executable(application
   application/layer/imguiLayer.cpp
 
   application/picker/editTools.cpp
-  application/picker/selectionTool.cpp
   application/picker/picker.cpp
   application/picker/ray.cpp
+  application/picker/selection.cpp
+  application/picker/tool/selectionTool.cpp
+  application/picker/tool/translationTool.cpp
 
   application/shader/shaders.cpp
   application/shader/basicShader.cpp

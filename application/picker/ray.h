@@ -6,6 +6,6 @@ namespace P3D::Application {
 
 class Screen;
 
-Ray getMouseRay(Screen& screen, Vec2f mouse);
+Ray getMouseRay(const Screen& screen, const Vec2f& mouse);
 
 };

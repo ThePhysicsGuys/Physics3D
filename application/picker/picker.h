@@ -27,8 +27,8 @@ bool onMousePress(Engine::MousePressEvent& event);
 bool onMouseRelease(Engine::MouseReleaseEvent& event);
 bool onMouseDrag(Engine::MouseDragEvent& event);
 
-void moveGrabbedPhysicalTransversal(Screen& screen, double dz);
-void moveGrabbedPhysicalLateral(Screen& screen);
+void moveGrabbedEntityTransversal(Screen& screen, double dz);
+void moveGrabbedEntityLateral(Screen& screen);
 }
 
 };

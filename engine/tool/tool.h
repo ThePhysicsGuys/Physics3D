@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 namespace P3D::Engine {
 
 class Event;
@@ -31,37 +33,38 @@ public:
 	/*
 		When the tool gets registered
 	*/
-	inline virtual void onRegister() {}
-
-	/*
-		When the tool is selected
-	*/
-	inline virtual void onSelect() {}
-
-	/*
-		When the tool gets updated
-	*/
-	inline virtual void onUpdate() {}
-
-	/*
-		When the tool gets rendered
-	*/
-	inline virtual void onRender() {}
-
-	/*
-		When the tool receives an event
-	*/
-	inline virtual void onEvent(Event& event) {}
-
-	/*
-		Whe the tool is deselected
-	*/
-	inline virtual void onDeselect() {}
+	virtual void onRegister() {}
 
 	/*
 		When the tool gets deregistered
 	*/
-	inline virtual void onDeregister() {}
+	virtual void onDeregister() {}
+	
+	/*
+		When the tool is selected
+	*/
+	virtual void onSelect() {}
+
+	/*
+		When the tool is deselected
+	*/
+	virtual void onDeselect() {}
+
+	/*
+		When the tool gets updated
+	*/
+	virtual void onUpdate() {}
+
+	/*
+		When the tool gets rendered
+	*/
+	virtual void onRender() {}
+
+	/*
+		When the tool receives an event
+	*/
+	virtual void onEvent(Event& event) {}
+	
 };
 
 };

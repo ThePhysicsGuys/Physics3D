@@ -6,8 +6,9 @@
 #include "../engine/event/event.h"
 #include "../engine/layer/layerStack.h"
 #include "../engine/ecs/registry.h"
-
+#include "picker/selectionContext.h"
 #include "camera.h"
+#include "../../engine/tool/toolManager.h"
 
 namespace P3D::Graphics {
 struct Quad;
@@ -40,13 +41,13 @@ public:
 	Graphics::FrameBuffer* screenFrameBuffer = nullptr;
 	Graphics::Quad* quad = nullptr;
 
-	Vec3f ray;
 	Engine::Registry64::entity_type intersectedEntity = 0;
 	Engine::Registry64::entity_type selectedEntity = 0;
 	ExtendedPart* intersectedPart = nullptr;
 	ExtendedPart* selectedPart = nullptr;
 	Position intersectedPoint;
 	Position selectedPoint;
+	SelectionContext selectionContext;
 
 	Screen();
 	Screen(int width, int height, PlayerWorld* world);

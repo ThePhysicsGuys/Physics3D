@@ -1,6 +1,7 @@
 #pragma once
 
 #include "pickable.h"
+#include "ecs/components.h"
 
 namespace P3D::Application {
 
@@ -25,15 +26,15 @@ struct EditTools : public Pickable {
 
 	// Selected tool
 	EditDirection selectedEditDirection;
-	Vec3f selectedPoint;
+	Vec3 selectedPoint;
 
 	// Intersected tool
 	EditDirection intersectedEditDirection;
-	Vec3f intersectedPoint;
+	Vec3 intersectedPoint;
 
 	void onInit() override;
 	void onRender(Screen& screen) override;
-	void onClose();
+	void onClose() override;
 
 	float intersect(Screen& screen, const Ray& ray) override;
 
@@ -41,9 +42,9 @@ struct EditTools : public Pickable {
 	void onMouseRelease(Screen& screen) override;
 	void onMouseDrag(Screen& screen) override;
 
-	void dragTranslateTool(Screen& screen);
-	void dragRotateTool(Screen& screen);
-	void dragScaleTool(Screen& screen);
+	void dragTranslateTool(Screen& screen, Ref<Comp::Transform> transform);
+	void dragRotateTool(Screen& screen, Ref<Comp::Transform> transform);
+	void dragScaleTool(Screen& screen, Ref<Comp::Transform> transform);
 };
 
 };

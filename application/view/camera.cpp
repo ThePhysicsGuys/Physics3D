@@ -63,7 +63,7 @@ void Camera::rotate(Screen& screen, double dalpha, double dbeta, double dgamma, 
 
 	if (leftDragging) {
 		screen.world->asyncModification([&screen] () {
-			Picker::moveGrabbedPhysicalLateral(screen);
+			Picker::moveGrabbedEntityLateral(screen);
 			});
 	}
 	// Accelerate camera rotation
@@ -100,7 +100,7 @@ void Camera::move(Screen& screen, double dx, double dy, double dz, bool leftDrag
 
 		if (leftDragging) {
 			screen.world->asyncModification([&screen] () {
-				Picker::moveGrabbedPhysicalLateral(screen);
+				Picker::moveGrabbedEntityLateral(screen);
 				});
 		}
 	}
@@ -111,7 +111,7 @@ void Camera::move(Screen& screen, double dx, double dy, double dz, bool leftDrag
 
 		if (leftDragging) {
 			screen.world->asyncModification([&screen] () {
-				Picker::moveGrabbedPhysicalLateral(screen);
+				Picker::moveGrabbedEntityLateral(screen);
 				});
 		}
 	}
@@ -123,7 +123,7 @@ void Camera::move(Screen& screen, double dx, double dy, double dz, bool leftDrag
 
 		if (leftDragging) {
 			screen.world->asyncModification([&screen, dz, this] () {
-				Picker::moveGrabbedPhysicalTransversal(screen, -currentVelocity * dz);
+				Picker::moveGrabbedEntityTransversal(screen, -currentVelocity * dz);
 				});
 		}
 	}

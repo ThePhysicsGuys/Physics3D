@@ -4,31 +4,43 @@
 
 namespace P3D::Engine {
 
+class Event;
+
 class ToolManager {
 public:
-	static Tool* activeTool;
-	static std::map<std::string, Tool*> tools;
+	Tool* activeTool;
+	std::vector<Tool*> tools;
 
-	template<typename T, typename... Args>
-	static bool registerTool(Args&&... args) {
-		auto iterator = tools.find(T::getStaticName());
+	ToolManager();
+	virtual ~ToolManager();
+
+	ToolManager(ToolManager&& other) noexcept;
+	ToolManager& operator=(ToolManager&& other) noexcept;
+
+	ToolManager(const ToolManager& other) = delete;
+	ToolManager& operator=(const ToolManager& other) = delete;
+
+	template<typename DerivedTool, typename... Args>
+	std::enable_if_t<std::is_base_of_v<Tool, DerivedTool>, bool> registerTool(Args&&... args) {
+		auto iterator = std::find_if(tools.begin(), tools.end(), [] (Tool* tool) { return tool->getName() == DerivedTool::getStaticName(); });
 		if (iterator != tools.end())
 			return false;
 
-		T* tool = new T(std::forward<Args>(args)...);
+		DerivedTool* tool = new DerivedTool(std::forward<Args>(args)...);
+		tools.push_back(tool);
 		tool->onRegister();
-		tools.insert({ T::getStaticName(), tool });
-
+		
 		return true;
 	}
 
-	template<typename T>
-	static bool deregisterTool() {
-		auto iterator = tools.find(T::getStaticName());
+	template<typename DerivedTool>
+	std::enable_if_t<std::is_base_of_v<Tool, DerivedTool>, bool> deregisterTool() {
+		auto iterator = std::find_if(tools.begin(), tools.end(), [] (Tool* tool) { return tool->getName() == DerivedTool::getStaticName(); });
 		if (iterator == tools.end())
 			return false;
 
-		T* tool = iterator->second;
+		DerivedTool* tool = *iterator;
+		
 		tools.erase(iterator);
 		tool->onDeregister();
 		delete tool;
@@ -36,28 +48,31 @@ public:
 		return true;
 	}
 
-	static void onInit();
-	static void onEvent(Event& event);
-	static void onUpdate();
-	static void onRender();
-	static void onClose();
+	virtual void onEvent(Event& event);
+	virtual void onUpdate();
+	virtual void onRender();
+	virtual void onClose();
 
-	static bool deselectTool();
-	
-	static bool isSelected(Tool* tool);
-	static bool isSelected(const std::string& name);
+	bool deselectTool();
+
+	bool selectTool(const std::string& name);
+	bool selectTool(Tool* tool);
+
+	bool isSelected(Tool* tool);
+	bool isSelected(const std::string& name);
+
 	template<typename T>
-	static bool isSelected() {
-		return isSelected(T::getStaticName());
-	}
-	
-	static bool selectTool(const std::string& name);
-	static bool selectTool(Tool* tool);
-	template<typename T>
-	static bool selectTool() { 
+	bool selectTool() {
 		return selectTool(T::getStaticName());
 	}
+	
+	template<typename T>
+	bool isSelected() {
+		return isSelected(T::getStaticName());
+	}
 
+	std::vector<Tool*>::iterator begin();
+	std::vector<Tool*>::iterator end();
 };
 
 };

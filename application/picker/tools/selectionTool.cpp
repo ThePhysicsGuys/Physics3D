@@ -7,15 +7,17 @@
 #include "../graphics/gui/gui.h"
 #include "../graphics/gui/guiUtils.h"
 #include "../graphics/path/path.h"
-#include "../shader/shaders.h"
-
-#include "../view/screen.h"
-#include "../application.h"
-#include "../input/standardInputHandler.h"
-#include "../worlds.h"
+#include "../graphics/resource/textureResource.h"
 #include "../physics/misc/filters/visibilityFilter.h"
 #include "../util/resource/resourceManager.h"
-#include "../graphics/resource/textureResource.h"
+
+#include "../../view/screen.h"
+#include "../../application.h"
+#include "../../shader/shaders.h"
+#include "../../input/standardInputHandler.h"
+#include "../../ecs/components.h"
+#include "../../worlds.h"
+#include "../selectionContext.h"
 #include <cmath>
 
 
@@ -24,10 +26,6 @@ class TextureResource;
 }
 
 namespace P3D::Application {
-
-void SelectionTool::onDeselect() {
-	regions.clear();
-}
 
 void SelectionTool::onRegister() {
 	auto path = "../res/textures/icons/" + getName() + ".png";
@@ -48,22 +46,13 @@ void SelectionTool::onRender() {
 
 	Path::batch = GUI::batch;
 	if (getToolStatus() == kActive) {
-		Vec2 a = GUI::map(Vec2(currentRegion.x, currentRegion.y));
+		Vec2 a = GUI::map(Vec2(region.x, region.y));
 		Vec2 b = GUI::map(handler->getMousePosition());
 		Vec2 position(std::min(a.x, b.x), std::min(a.y, b.y));
 		Vec2 dimension(std::abs(a.x - b.x), std::abs(a.y - b.y));
 		Path::rect(position, dimension);
+		Path::batch->submit();
 	}
-
-	for (const Region& region : regions) {
-		Vec2 a = GUI::map(Vec2(region.x, region.y));
-		Vec2 b = GUI::map(Vec2(region.z, region.w));
-		Vec2 position(std::min(a.x, b.x), std::min(a.y, b.y));
-		Vec2 dimension(std::abs(a.x - b.x), std::abs(a.y - b.y));
-		Path::rect(position, dimension);
-	}
-
-	Path::batch->submit();
 
 	Renderer::endScene();
 }
@@ -82,11 +71,11 @@ bool SelectionTool::onMousePress(Engine::MousePressEvent& event) {
 	if (event.getButton() == Mouse::LEFT) {
 		Vec2i position = Vec2i(event.getX(), event.getY());
 
-		currentRegion.x = position.x;
-		currentRegion.y = position.y;
+		region.x = position.x;
+		region.y = position.y;
 
 		if (!event.getModifiers().isCtrlPressed()) 
-			regions.clear();
+			screen.selectionContext.selection.clear();
 
 		setToolStatus(kActive);
 	}
@@ -100,27 +89,33 @@ bool SelectionTool::onMouseRelease(Engine::MouseReleaseEvent& event) {
 	if (event.getButton() == Mouse::LEFT) {
 		Vec2i position = Vec2i(event.getX(), event.getY());
 		
-		currentRegion.z = position.x;
-		currentRegion.w = position.y;
-
-		regions.push_back(currentRegion);
+		region.z = position.x;
+		region.w = position.y;
 
 		setToolStatus(kIdle);
 
-		screen.world->syncReadOnlyOperation([this] () {
-			Camera& camera = screen.camera;
+		Vec4 mappedRegion = GUI::mapRegion(region, Vec2(0, screen.dimension.x), Vec2(screen.dimension.y, 0), Vec2(-1, 1), Vec2(-1, 1));
+		auto[left, right] = GUI::minmax(mappedRegion.x, mappedRegion.z);
+		auto[down, up] = GUI::minmax(mappedRegion.y, mappedRegion.w);
+		//VisibilityFilter visibilityFilter = VisibilityFilter::forWindow(screen.camera.cframe.position, screen.camera.getForwardDirection(), screen.camera.getUpDirection(), screen.camera.fov, screen.camera.aspect, screen.camera.zfar);
+		VisibilityFilter visibilityFilter = VisibilityFilter::forSubWindow(screen.camera.cframe.position, screen.camera.getForwardDirection(), screen.camera.getUpDirection(), screen.camera.fov, screen.camera.aspect, screen.camera.zfar, left, right, down, up);
 
-			Vec4 mappedRegion = GUI::mapRegion(currentRegion, Vec2(0, screen.dimension.x), Vec2(0, screen.dimension.y), Vec2(-1, 1), Vec2(-1, 1));
-			auto[left, right] = GUI::minmax(mappedRegion.x, mappedRegion.z);
-			auto[down, up] = GUI::minmax(mappedRegion.y, mappedRegion.w);
+		auto view = screen.registry.view<Comp::Hitbox, Comp::Transform>();
+		for (auto entity : view) {
+			Ref<Comp::Hitbox> hitbox = view.get<Comp::Hitbox>(entity);
+			Ref<Comp::Transform> transform = view.get<Comp::Transform>(entity);
+			screen.world->syncReadOnlyOperation([&] () {
+				Shape shape = hitbox->getShape();
+				if (!transform->isPartAttached())
+					shape = shape.scaled(transform->getScale());
+				
+				Bounds bounds = shape.getBounds(transform->getRotation()) + transform->getPosition();
+				if (!visibilityFilter(bounds))
+					return;
 
-			VisibilityFilter boundingboxFilter = VisibilityFilter::forSubWindow(camera.cframe.position, camera.getForwardDirection(), camera.getUpDirection(), camera.fov, camera.aspect, camera.zfar, left, right, down, up);
-			for (ExtendedPart& part : screen.world->iterPartsFiltered(boundingboxFilter)) {
-				if (!boundingboxFilter(part.getCenterOfMass()))
-					continue;
-				//selection.insert(&part);
-			}
-		});
+				screen.selectionContext.selection.add(entity);
+			});
+		}
 	}
 
 	return false;

@@ -2,23 +2,17 @@
 
 #include "picker.h"
 
-#include "../physics/math/mathUtil.h"
+#include "ray.h"
+#include "view/screen.h"
+#include "application.h"
+#include "shader/shaders.h"
+#include "ecs/components.h"
+#include "worlds.h"
 
 #include "../engine/event/event.h"
 #include "../engine/event/mouseEvent.h"
 #include "../engine/input/mouse.h"
-
-#include "ray.h"
-
-#include "view/screen.h"
-
-#include "application.h"
-#include "shader/shaders.h"
-#include "ecs/components.h"
-
-#include "worlds.h"
-#include "../../graphics/debug/visualDebug.h"
-#include "../physics/sharedLockGuard.h"
+#include "../graphics/debug/visualDebug.h"
 #include "../physics/geometry/shape.h"
 #include "../physics/misc/filters/rayIntersectsBoundsFilter.h"
 
@@ -45,9 +39,8 @@ void onEvent(Engine::Event& event) {
 
 // Render
 void onRender(Screen& screen) {
-	if (screen.selectedPart) {
+	if (screen.selectedEntity)
 		editTools.onRender(screen);
-	}
 }
 
 // Close
@@ -61,56 +54,10 @@ double intersect(const Ray& ray, const Shape& shape, const GlobalCFrame& cframe)
 	return shape.getIntersectionDistance(cframe.globalToLocal(ray.start), cframe.relativeToLocal(ray.direction));
 }
 
-// Calculates the closest intersection of the given ray with the physicals in the world
-void intersectPhysicalss(Screen& screen, const Ray& ray) {
-
-	ExtendedPart* closestIntersectedPart = nullptr;
-	Position closestIntersectedPoint = Position();
-	float closestIntersectDistance = INFINITY;
-
-	for (ExtendedPart& part : screen.world->iterPartsFiltered(RayIntersectBoundsFilter(ray))) {
-		if (&part == screen.camera.attachment) 
-			continue;
-		
-		Vec3 relativePosition = part.getPosition() - ray.start;
-		if (pointToLineDistanceSquared(ray.direction, relativePosition) > part.maxRadius * part.maxRadius)
-			continue;
-
-		double distance = intersect(ray, part.hitbox, part.getCFrame());
-
-		if (distance < closestIntersectDistance && distance > 0) {
-			closestIntersectDistance = distance;
-			closestIntersectedPart = &part;
-		}
-	}
-
-	if (closestIntersectDistance == INFINITY) {
-		closestIntersectedPart = nullptr;
-		closestIntersectedPoint = ray.start;
-	} else {
-		closestIntersectedPoint = ray.start + ray.direction * closestIntersectDistance;
-	}
-
-	// Update intersected part
-	// REPLACE
-	if (closestIntersectedPart)
-		screen.intersectedEntity = closestIntersectedPart->entity;
-	else
-		screen.intersectedEntity = 0;
-	screen.intersectedPart = closestIntersectedPart;
-	screen.intersectedPoint = closestIntersectedPoint;
-
-	// Call callback
-	(*screen.eventHandler.partRayIntersectHandler) (screen, closestIntersectedPart, closestIntersectedPoint);
-}
-
-void intersectPhysicals(Screen& screen, const Ray& ray) {
-
-	Engine::Registry64::entity_type closestIntersectedEntity = 0;
-	Position closestIntersectedPoint = Position();
-	double closestIntersectDistance = std::numeric_limits<double>::max();
-
+void intersectEntities(Screen& screen, const Ray& ray) {
 	RayIntersectBoundsFilter filter(ray);
+	Engine::Registry64::entity_type closestIntersectedEntity = 0;
+	double closestIntersectDistance = std::numeric_limits<double>::max();
 	
 	auto view = screen.registry.view<Comp::Hitbox>();
 	for (auto entity : view) {
@@ -129,13 +76,13 @@ void intersectPhysicals(Screen& screen, const Ray& ray) {
 			continue;
 
 		double distance = intersect(ray, shape, transform->getCFrame());
-		
-		if (distance < closestIntersectDistance && distance > 0) {
+		if (distance < closestIntersectDistance && distance > 0.0) {
 			closestIntersectDistance = distance;
 			closestIntersectedEntity = entity;
 		}
 	}
 
+	Position closestIntersectedPoint;
 	if (closestIntersectDistance == std::numeric_limits<double>::max()) {
 		closestIntersectedEntity = 0;
 		closestIntersectedPoint = ray.start;
@@ -161,7 +108,7 @@ void onUpdate(Screen& screen, Vec2 mousePosition) {
 	Ray ray = getMouseRay(screen, mousePosition);
 
 	// Update screen ray
-	screen.ray = ray.direction;
+	screen.selectionContext.ray.direction = ray.direction;
 
 	// Intersect edit tools
 	if (screen.selectedPart) {
@@ -172,7 +119,7 @@ void onUpdate(Screen& screen, Vec2 mousePosition) {
 	}
 
 	// Intersect physcials
-	intersectPhysicals(screen, ray);
+	intersectEntities(screen, ray);
 }
 
 
@@ -187,19 +134,25 @@ bool onMousePress(Engine::MousePressEvent& event) {
 		editTools.onMousePress(screen);
 	} else { // Keep current part selected as long as tool is being used
 		// Update selected part
-		// REPLACE
 		screen.selectedEntity = screen.intersectedEntity;
 		screen.selectedPart = screen.intersectedPart;
 		screen.selectedPoint = screen.intersectedPoint;
 		screen.world->selectedPart = screen.intersectedPart;
 
 		// Update intersected point if a physical has been intersected and move physical
-		// REPLACE if (screen.intersectedEntity)
-		if (screen.intersectedPart) {
-			screen.world->asyncModification([] () {
-				screen.world->localSelectedPoint = screen.selectedPart->getCFrame().globalToLocal(screen.intersectedPoint);
-				moveGrabbedPhysicalLateral(screen);
-			});
+		if (screen.intersectedEntity) {
+			Ref<Comp::Transform> transform = screen.registry.get<Comp::Transform>(screen.selectedEntity);
+			if (transform.valid()) {
+				auto function = [&] () {
+					screen.world->localSelectedPoint = transform->getCFrame().globalToLocal(screen.intersectedPoint);
+					moveGrabbedEntityLateral(screen);
+				};
+				
+				if (transform->isPartAttached())
+					screen.world->asyncModification(function);
+				else
+					function();
+			}
 		}
 	}
 
@@ -229,47 +182,57 @@ bool onMouseDrag(Engine::MouseDragEvent& event) {
 	if (editTools.selectedEditDirection != EditTools::EditDirection::NONE) {
 		editTools.onMouseDrag(screen);
 	} else {
-		if (screen.selectedPart) {
+		if (screen.selectedEntity) {
 			screen.world->asyncModification([] () {
-				moveGrabbedPhysicalLateral(screen);
-				});
+				moveGrabbedEntityLateral(screen);
+			});
 		}
 	}
 
 	return true;
 }
 
-void moveGrabbedPhysicalLateral(Screen& screen) {
-	if (screen.world->selectedPart == nullptr) return;
+void moveGrabbedEntityLateral(Screen& screen) {
+	/*if (screen.world->selectedPart == nullptr)
+		return;*/
+	if (!screen.selectedEntity)
+		return;
 
 	Vec3 cameraDirection = screen.camera.cframe.rotation * Vec3(0, 0, 1);
 
-	double distance = Vec3(screen.selectedPoint - screen.camera.cframe.position) * cameraDirection / (screen.ray * cameraDirection);
-	Position planeIntersection = screen.camera.cframe.position + screen.ray * distance;
+	double distance = Vec3(screen.selectedPoint - screen.camera.cframe.position) * cameraDirection / (screen.selectionContext.ray.direction * cameraDirection);
+	Position planeIntersection = screen.camera.cframe.position + screen.selectionContext.ray.direction * distance;
 
 	if (isPaused()) {
 		Vec3 translation = planeIntersection - screen.selectedPoint;
 		screen.selectedPoint += translation;
-		screen.selectedPart->translate(translation);
+		Ref<Comp::Transform> transform = screen.registry.get<Comp::Transform>(screen.selectedEntity);
+		if (transform.valid())
+			transform->translate(translation);
 	} else {
 		screen.world->selectedPart = screen.selectedPart;
 		screen.world->magnetPoint = planeIntersection;
 	}
 }
 
-void moveGrabbedPhysicalTransversal(Screen& screen, double dz) {
-	if (screen.world->selectedPart == nullptr) return;
+void moveGrabbedEntityTransversal(Screen& screen, double dz) {
+	/*if (screen.world->selectedPart == nullptr) 
+		return;*/
+	if (!screen.selectedEntity)
+		return;
 
 	Vec3 cameraDirection = screen.camera.cframe.rotation * Vec3(0, 0, 1);
 	Vec3 cameraYDirection = normalize(Vec3(cameraDirection.x, 0, cameraDirection.z));
 
-	double distance = Vec3(screen.selectedPoint - screen.camera.cframe.position) * cameraDirection / (screen.ray * cameraDirection);
-	Position planeIntersection = screen.camera.cframe.position + screen.ray * distance;
+	double distance = Vec3(screen.selectedPoint - screen.camera.cframe.position) * cameraDirection / (screen.selectionContext.ray.direction * cameraDirection);
+	Position planeIntersection = screen.camera.cframe.position + screen.selectionContext.ray.direction * distance;
 
 	Vec3 translation = -cameraYDirection * dz;
 	if (isPaused()) {
 		screen.selectedPoint += translation;
-		screen.selectedPart->translate(translation);
+		Ref<Comp::Transform> transform = screen.registry.get<Comp::Transform>(screen.selectedEntity);
+		if (transform.valid())
+			transform->translate(translation);
 	} else {
 		screen.world->selectedPart = screen.selectedPart;
 		screen.world->magnetPoint += translation;

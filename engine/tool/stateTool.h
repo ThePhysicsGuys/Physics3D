@@ -11,16 +11,16 @@ private:
 	ToolStatus toolStatus = 0;
 
 protected:
-	inline void setToolStatus(ToolStatus toolStatus) {
+	void setToolStatus(ToolStatus toolStatus) {
 		this->toolStatus = toolStatus;
 	}
 
-	inline StateTool() : Tool() {}
+	StateTool() : Tool() {}
 
 public:
-	inline ToolStatus getToolStatus() const {
+	ToolStatus getToolStatus() const {
 		return toolStatus;
-	};
+	}
 };
 
 };
