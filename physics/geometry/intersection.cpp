@@ -20,7 +20,7 @@ std::optional<Intersection> intersectsTransformed(const Shape& first, const Shap
 }
 
 
-ComputationBuffers buffers(1000, 2000);
+thread_local ComputationBuffers buffers(1000, 2000);
 
 std::optional<Intersection> intersectsTransformed(const GenericCollidable& first, const GenericCollidable& second, const CFrame& relativeTransform, const DiagonalMat3& scaleFirst, const DiagonalMat3& scaleSecond) {
 	ColissionPair info{first, second, relativeTransform, scaleFirst, scaleSecond};

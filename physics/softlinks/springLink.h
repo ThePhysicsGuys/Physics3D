@@ -15,7 +15,7 @@ public:
 	void update() override;
 
 private:
-	Vec3 forceAppliedToTheLink() noexcept;
+	[[nodiscard]] Vec3 forceAppliedToTheLink() noexcept;
 
 private:
 	double restLength;

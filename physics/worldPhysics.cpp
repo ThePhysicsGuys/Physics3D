@@ -16,6 +16,8 @@
 #include <algorithm>
 #include <thread>
 #include <mutex>
+#include <future>
+#include <atomic>
 
 /*
 	exitVector is the distance p2 must travel so that the shapes are no longer colliding
@@ -228,21 +230,47 @@ static PartIntersection safeIntersects(const Part& p1, const Part& p2) {
 #endif
 }
 
-
 static void refineColission(std::vector<Colission>& colissions) {
 
-	std::mutex colMutex, vecMutex, statsMutex;
+	for (size_t i = 0; i <  colissions.size();) {
 
-	std::vector<Colission> wantedColissions;
-	
+		Colission& col = colissions[i];
+		PartIntersection result = safeIntersects(*col.p1, *col.p2);
 
+		if (result.intersects) {
+			
+			intersectionStatistics.addToTally(IntersectionResult::COLISSION, 1);
+			
+			col.intersection = result.intersection;
+			col.exitVector = result.exitVector;
+
+			i++;
+		}
+		else {
+
+			intersectionStatistics.addToTally(IntersectionResult::GJK_REJECT, 1);
+			col = std::move(colissions.back());
+			colissions.pop_back();
+			
+		}
+	}
+}
+
+static void parallelRefineColission(std::vector<Colission>& colissions) {
+	std::mutex vecMutex, statsMutex, colMutex;
+
+	size_t colSize = std::distance(colissions.begin(), colissions.end());
 	size_t threadCount = std::thread::hardware_concurrency();
-	std::vector<std::thread> threads;
-	size_t size = colissions.size() / threadCount;
-	size_t first = 0;
-	size_t last = first;
 
-	for (unsigned int i = 0; i < threadCount; i++) {
+	std::vector<std::thread> threads(threadCount - 1);
+	std::vector<Colission> wantedColissions;
+
+	size_t first = 0;
+	size_t blockStart = first;
+	size_t last = first;
+	size_t size = colSize / threadCount;
+
+	for (size_t i = 0; i < threadCount - 1; i++) {
 		first = last;
 		if (i == threadCount - 1) {
 			last = colissions.size();
@@ -250,42 +278,66 @@ static void refineColission(std::vector<Colission>& colissions) {
 		else {
 			last += size;
 		}
+		
+		threads[i] = std::thread([&, first, last] {
 
-		threads.emplace_back([&, first, last] {
 			for (size_t j = first; j < last; j++) {
-				
-			
-					colMutex.lock();
-					Colission& col = colissions[j];
-					PartIntersection result = safeIntersects(*col.p1, *col.p2);
-					colMutex.unlock();
 
-					if (result.intersects) {
-						statsMutex.lock();
-						intersectionStatistics.addToTally(IntersectionResult::COLISSION, 1);
-						statsMutex.unlock();
+				Colission& col = colissions[j];
+				PartIntersection result = safeIntersects(*col.p1, *col.p2);
 
-						colMutex.lock();
-						col.intersection = result.intersection;
-						col.exitVector = result.exitVector;
-						colMutex.unlock();
+				if (result.intersects) {
 
-						vecMutex.lock();
-						wantedColissions.push_back(col);
-						vecMutex.unlock();
+					statsMutex.lock();
+					intersectionStatistics.addToTally(IntersectionResult::COLISSION, 1);
+					statsMutex.unlock();
 
-					}
-					else {
-						statsMutex.lock();
-						intersectionStatistics.addToTally(IntersectionResult::GJK_REJECT, 1);
-						statsMutex.unlock();
+					col.intersection = result.intersection;
+					col.exitVector = result.exitVector;
 
-					}
-				
-				
+					vecMutex.lock();
+					wantedColissions.push_back(col);
+					vecMutex.unlock();
+				}
+				else {
+
+					statsMutex.lock();
+					intersectionStatistics.addToTally(IntersectionResult::GJK_REJECT, 1);
+					statsMutex.unlock();
+
+				}
 			}
-		});
+		});	
 	}
+
+	[&, blockStart, colSize] {
+		for (size_t j = blockStart; j < colSize; j++) {
+
+			Colission& col = colissions[j];
+			PartIntersection result = safeIntersects(*col.p1, *col.p2);
+
+			if (result.intersects) {
+
+				statsMutex.lock();
+				intersectionStatistics.addToTally(IntersectionResult::COLISSION, 1);
+				statsMutex.unlock();
+
+				col.intersection = result.intersection;
+				col.exitVector = result.exitVector;
+
+				vecMutex.lock();
+				wantedColissions.push_back(col);
+				vecMutex.unlock();
+			}
+			else {
+
+				statsMutex.lock();
+				intersectionStatistics.addToTally(IntersectionResult::GJK_REJECT, 1);
+				statsMutex.unlock();
+
+			}
+		}
+	}();
 
 	for (std::thread& t : threads) {
 		t.join();
@@ -306,9 +358,13 @@ void WorldPrototype::findColissions() {
 	for(std::pair<int, int> collidingLayers : colissionMask) {
 		getColissionsBetween(layers[collidingLayers.first], layers[collidingLayers.second], curColissions);
 	}
+	
+	parallelRefineColission(curColissions.freePartColissions);
+	parallelRefineColission(curColissions.freeTerrainColissions);
 
-	refineColission(curColissions.freePartColissions);
-	refineColission(curColissions.freeTerrainColissions);
+	//refineColission(curColissions.freePartColissions);
+	//refineColission(curColissions.freeTerrainColissions);
+
 }
 
 void WorldPrototype::handleColissions() {
