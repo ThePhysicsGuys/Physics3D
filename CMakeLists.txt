@@ -73,6 +73,7 @@ add_library(physics STATIC
 
   physics/datastructures/aligned_alloc.cpp
   physics/datastructures/boundsTree.cpp
+  physics/datastructures/boundsTree2.cpp
 
   physics/hardconstraints/fixedConstraint.cpp
   physics/hardconstraints/hardConstraint.cpp
@@ -129,6 +130,7 @@ add_executable(tests
   tests/constraintTests.cpp
   tests/jointTests.cpp
   tests/dataStructureTests.cpp
+  tests/boundsTree2Tests.cpp
   tests/guiTests.cpp
   tests/indexedShapeTests.cpp
   tests/physicalStructureTests.cpp

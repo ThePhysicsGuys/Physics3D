@@ -110,6 +110,8 @@ inline Vec3f generateVec3f() { return generateVector<float, 3>(); }
 Triangle generateTriangle(int maxIndex);
 Position generatePosition();
 Bounds generateBounds();
+BoundsTemplate<float> generateBoundsf();
+PositionTemplate<float> generatePositionf();
 Rotation generateRotation();
 CFrame generateCFrame();
 GlobalCFrame generateGlobalCFrame();

@@ -131,6 +131,7 @@
   <ItemGroup>
     <ClCompile Include="constraints\barConstraint.cpp" />
     <ClCompile Include="datastructures\aligned_alloc.cpp" />
+    <ClCompile Include="datastructures\boundsTree2.cpp" />
     <ClCompile Include="softlinks\alignmentLink.cpp" />
     <ClCompile Include="softlinks\elasticLink.cpp" />
     <ClCompile Include="geometry\triangleMeshAVX.cpp">

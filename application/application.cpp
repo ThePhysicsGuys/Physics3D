@@ -171,12 +171,16 @@ void setupWorld(const Util::ParsedArgs& cmdArgs) {
 	{
 		ExtendedPart* partA = new ExtendedPart(boxShape(1.0, 0.49, 1.0), GlobalCFrame(12.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "partA");
 		ExtendedPart* partB = new ExtendedPart(boxShape(1.0, 0.5, 1.0), GlobalCFrame(14.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "partB");
+		ExtendedPart* partC = new ExtendedPart(boxShape(1.0, 0.5, 1.0), GlobalCFrame(16.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "partC");
 
 		ConstraintGroup cg;
 		cg.add(partA, partB, new BarConstraint(Vec3(0.5, 0.0, 0.0), Vec3(-0.5, 0.0, 0.0), 1.0));
+		cg.add(partB, partC, new BallConstraint(Vec3(1, 0.0, 0.0), Vec3(-1, 0.0, 0.0)));
+		cg.add(partC, partA, new HingeConstraint(Vec3(-2, 2.0, 0.0), Vec3(0,0,1), Vec3(2, 2.0, 0.0), Vec3(0, 0, 1)));
 		world.constraints.push_back(cg);
 		world.addPart(partA);
 		world.addPart(partB);
+		world.addPart(partC);
 	}
 
 	//world.addLink(new MagneticLink({ CFrame{1.0, 0.0, 0.0}, partA }, { CFrame{0.0, 0.0, 0.0}, partB }, +8.0));
