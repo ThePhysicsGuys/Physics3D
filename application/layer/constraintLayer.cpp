@@ -13,6 +13,7 @@
 #include "../physics/constraints/softConstraint.h"
 #include "../physics/constraints/ballConstraint.h"
 #include "../physics/constraints/hingeConstraint.h"
+#include "../physics/constraints/barConstraint.h"
 #include "../physics/hardconstraints/sinusoidalPistonConstraint.h"
 #include "../physics/hardconstraints/motorConstraint.h"
 #include "../physics/hardconstraints/fixedConstraint.h"
@@ -58,6 +59,14 @@ static void renderConstraintLineBetween(Position p1, Position p2) {
 	renderObject(Graphics::MeshRegistry::box, GlobalCFrame(p2, rot), DiagonalMat3f{0.25f, 0.25f, 0.25f}, Comp::Material(Color(0.0f, 1.0f, 0.0f, 1.0f)));
 }
 
+static Color constraintBarColor = COLOR::RGB_R;
+constexpr static float constraintBarThickness = 0.02f;
+constexpr static float innerBallThickness = 0.06f;
+constexpr static float outerBallThickness = 0.07f;
+static Comp::Material innerConstraintColor = Comp::Material(Color(0.0f, 0.0f, 1.0f, 1.0f));
+static Comp::Material outerConstraintColor = Comp::Material(Color(0.0f, 0.0f, 1.0f, 0.7f));
+
+
 static void renderBar(GlobalCFrame cframe, Vec3 delta, float thickness, Color color) {
 	if (lengthSquared(delta) < 0.0001) 
 		return;
@@ -95,30 +104,54 @@ static void renderMotor(const ConstraintLayer* cl, const ConstantSpeedMotorConst
 	renderObject(cl->hexagon, end.localToGlobal(CFrame(Vec3(0, 0, -0.05))), DiagonalMat3f{0.2f, 0.2f, 0.1f}, Comp::Material(Color(0.7f, 0.7f, 0.0f, 1.0f)));
 }
 
-static void renderConstraintBars(const ConstraintLayer* cl, const GlobalCFrame& cframeOfFirst, const GlobalCFrame& cframeOfSecond, const CFrame& attachOnFirst, const CFrame& attachOnSecond) {
-	renderBar(cframeOfFirst, attachOnFirst.getPosition(), 0.02f, Color(1.0f, 0.0f, 0.0f, 1.0f));
-	renderBar(cframeOfSecond, attachOnSecond.getPosition(), 0.02f, Color(1.0f, 0.0f, 0.0f, 1.0f));
+static void renderBallConstraint(const ConstraintLayer* cl, const GlobalCFrame& cframeA, const GlobalCFrame& cframeB, const BallConstraint* bc) {
+	renderBar(cframeA, bc->attachA, constraintBarThickness, constraintBarColor);
+	renderBar(cframeB, bc->attachB, constraintBarThickness, constraintBarColor);
+
+	renderObject(Graphics::MeshRegistry::sphere, cframeA.localToGlobal(CFrame(bc->attachA)), DiagonalMat3f::IDENTITY() * innerBallThickness, innerConstraintColor);
+	renderObject(Graphics::MeshRegistry::sphere, cframeB.localToGlobal(CFrame(bc->attachB)), DiagonalMat3f::IDENTITY() * outerBallThickness, outerConstraintColor);
 }
 
-static void renderBallConstraint(const ConstraintLayer* cl, const Physical* physA, const Physical* physB, const BallConstraint* bc, float innerBallThickness, float outerBallThickness) {
-	renderConstraintBars(cl, physA->getCFrame(), physB->getCFrame(), CFrame(bc->attachA), CFrame(bc->attachB));
-	renderObject(Graphics::MeshRegistry::sphere, GlobalCFrame(physA->getCFrame().localToGlobal(bc->attachA)), DiagonalMat3f::IDENTITY() * innerBallThickness, Comp::Material(Color(0.0f, 0.0f, 1.0f, 1.0f)));
-	renderObject(Graphics::MeshRegistry::sphere, GlobalCFrame(physB->getCFrame().localToGlobal(bc->attachB)), DiagonalMat3f::IDENTITY() * outerBallThickness, Comp::Material(Color(0.0f, 0.0f, 1.0f, 0.7f)));
-}
+static void renderHingeConstraint(const ConstraintLayer* cl, const GlobalCFrame& cframeA, const GlobalCFrame& cframeB, const HingeConstraint* hc) {
+	renderBar(cframeA, hc->attachA, constraintBarThickness, constraintBarColor);
+	renderBar(cframeB, hc->attachB, constraintBarThickness, constraintBarColor);
 
-static void renderHingeConstraint(const ConstraintLayer* cl, const Physical* physA, const Physical* physB, const HingeConstraint* hc, float innerBallThickness, float outerBallThickness) {
-	renderConstraintBars(cl, physA->getCFrame(), physB->getCFrame(), CFrame(hc->attachA), CFrame(hc->attachB));
 	CFrame atA(hc->attachA, Rotation::faceZ(hc->axisA));
 	CFrame atB(hc->attachB, Rotation::faceZ(hc->axisB));
-	renderObject(Graphics::MeshRegistry::cylinder, physA->getCFrame().localToGlobal(atA), DiagonalMat3f::IDENTITY() * innerBallThickness, Comp::Material(Color(0.0f, 0.0f, 1.0f, 1.0f)));
-	renderObject(Graphics::MeshRegistry::cylinder, physB->getCFrame().localToGlobal(atB), DiagonalMat3f::IDENTITY() * outerBallThickness, Comp::Material(Color(0.0f, 0.0f, 1.0f, 0.7f)));
+	renderObject(Graphics::MeshRegistry::cylinder, cframeA.localToGlobal(atA), DiagonalMat3f::IDENTITY() * innerBallThickness, innerConstraintColor);
+	renderObject(Graphics::MeshRegistry::cylinder, cframeB.localToGlobal(atB), DiagonalMat3f::IDENTITY() * outerBallThickness, outerConstraintColor);
+}
+
+static void renderBarConstraint(const ConstraintLayer* cl, const GlobalCFrame& cframeA, const GlobalCFrame& cframeB, const BarConstraint* bc) {
+	renderBar(cframeA, bc->attachA, constraintBarThickness, constraintBarColor);
+	renderBar(cframeB, bc->attachB, constraintBarThickness, constraintBarColor);
+	Position globalA = cframeA.localToGlobal(bc->attachA);
+	Position globalB = cframeB.localToGlobal(bc->attachB);
+
+	Position barCenter = avg(globalA, globalB);
+	Vec3 bar;
+	if(globalA != globalB) {
+		bar = withLength(Vec3(globalB - globalA), bc->length);
+	} else {
+		bar = Vec3(bc->length, 0, 0);
+	}
+
+	renderBar(barCenter - bar/2, bar, constraintBarThickness, constraintBarColor);
+
+	renderObject(Graphics::MeshRegistry::sphere, cframeA.localToGlobal(CFrame(bc->attachA)), DiagonalMat3f::IDENTITY() * innerBallThickness, innerConstraintColor);
+	renderObject(Graphics::MeshRegistry::sphere, cframeB.localToGlobal(CFrame(bc->attachB)), DiagonalMat3f::IDENTITY() * outerBallThickness, outerConstraintColor);
+
+	renderObject(Graphics::MeshRegistry::sphere, barCenter - bar / 2, DiagonalMat3f::IDENTITY() * innerBallThickness, innerConstraintColor);
+	renderObject(Graphics::MeshRegistry::sphere, barCenter + bar / 2, DiagonalMat3f::IDENTITY() * outerBallThickness, outerConstraintColor);
 }
 
 static void renderHardConstraint(const ConstraintLayer* cl, const ConnectedPhysical& conPhys) {
 	GlobalCFrame cframeOfConPhys = conPhys.getCFrame();
 	GlobalCFrame cframeOfParent = conPhys.parent->getCFrame();
 
-	renderConstraintBars(cl, cframeOfConPhys, cframeOfParent, conPhys.connectionToParent.attachOnChild, conPhys.connectionToParent.attachOnParent);
+
+	renderBar(cframeOfConPhys, conPhys.connectionToParent.attachOnChild.position, constraintBarThickness, constraintBarColor);
+	renderBar(cframeOfParent, conPhys.connectionToParent.attachOnParent.position, constraintBarThickness, constraintBarColor);
 
 	const HardConstraint* constraint = conPhys.connectionToParent.constraintWithParent.get();
 
@@ -141,10 +174,14 @@ static void recurseRenderHardConstraints(const ConstraintLayer* cl, const Physic
 
 static void renderConstraint(const ConstraintLayer* cl, const PhysicalConstraint& constraint) {
 	const auto& info(typeid(*constraint.constraint));
+	GlobalCFrame cfA = constraint.physA->getCFrame();
+	GlobalCFrame cfB = constraint.physB->getCFrame();
 	if(info == typeid(BallConstraint)) {
-		renderBallConstraint(cl, constraint.physA, constraint.physB, static_cast<const BallConstraint*>(constraint.constraint), 0.06f, 0.07f);
+		renderBallConstraint(cl, cfA, cfB, static_cast<const BallConstraint*>(constraint.constraint));
 	} else if(info == typeid(HingeConstraint)) {
-		renderHingeConstraint(cl, constraint.physA, constraint.physB, static_cast<const HingeConstraint*>(constraint.constraint), 0.06f, 0.07f);
+		renderHingeConstraint(cl, cfA, cfB, static_cast<const HingeConstraint*>(constraint.constraint));
+	} else if(info == typeid(BarConstraint)) {
+		renderBarConstraint(cl, cfA, cfB, static_cast<const BarConstraint*>(constraint.constraint));
 	}
 }
 

@@ -9,7 +9,7 @@ static ConstraintMatrixPair<3> makeMatrices(const PhysicalInfo& phys, const Vec3
 	
 	Mat3 crossEquivAttach = createCrossProductEquivalent(attachRelativeToCOM);
 
-	Matrix<double, 6, 3> parameterToMotion = joinVertical(Mat3::IDENTITY() * phys.forceResponse, phys.momentResponse * crossEquivAttach);
+	Matrix<double, 6, 3> parameterToMotion = joinVertical(Mat3::DIAGONAL(phys.forceResponse), phys.momentResponse * crossEquivAttach);
 	Matrix<double, 3, 6> motionToEquation = joinHorizontal(Mat3::IDENTITY(), -crossEquivAttach);
 	
 	return ConstraintMatrixPair<3>{parameterToMotion, motionToEquation};

@@ -53,6 +53,47 @@ struct Vector {
 };
 
 template<typename T>
+struct Vector<T, 1> {
+	union {
+		T data[1];
+		struct { T x; };
+	};
+
+	constexpr Vector() noexcept : data{0} {}
+	constexpr Vector(T x) noexcept : data{x} {}
+
+	template<typename OtherT>
+	constexpr operator Vector<OtherT, 1>() const noexcept {
+		return Vector<OtherT, 1>(static_cast<OtherT>(this->data[0]));
+	}
+
+	constexpr size_t size() const { return 1; }
+
+	constexpr T& operator[](size_t index) noexcept {
+		return data[index];
+	}
+
+	constexpr const T& operator[](size_t index) const noexcept {
+		return data[index];
+	}
+
+	static constexpr Vector<T, 1> full(T v) noexcept {
+		return Vector<T, 1>(v);
+	}
+
+	template<size_t SubSize>
+	constexpr Vector<T, SubSize> getSubVector(size_t startingAt = 0) const noexcept {
+		Vector<T, SubSize> result;
+		for(size_t i = 0; i < SubSize; i++) {
+			result[i] = this->data[i + startingAt];
+		}
+		return result;
+	}
+
+	constexpr operator T() const { return data[0]; }
+};
+
+template<typename T>
 struct Vector<T, 2> {
 	union {
 		T data[2];
@@ -168,6 +209,10 @@ struct Vector<T, 4> {
 	}
 }; 
 
+typedef Vector<double, 1>		Vec1;
+typedef Vector<float, 1>		Vec1f;
+typedef Vector<long long, 1>	Vec1l;
+typedef Vector<int, 1>			Vec1i;
 
 typedef Vector<double, 2>		Vec2;
 typedef Vector<float, 2>		Vec2f;

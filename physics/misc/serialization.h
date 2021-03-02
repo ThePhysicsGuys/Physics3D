@@ -196,7 +196,7 @@ public:
 	}
 };
 
+extern DynamicSerializerRegistry<Constraint> dynamicConstraintSerializer;
 extern DynamicSerializerRegistry<HardConstraint> dynamicHardConstraintSerializer;
 extern DynamicSerializerRegistry<ShapeClass> dynamicShapeClassSerializer;
 extern DynamicSerializerRegistry<ExternalForce> dynamicExternalForceSerializer;
-extern DynamicSerializerRegistry<Constraint> dynamicConstraintSerializer;

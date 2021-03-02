@@ -83,6 +83,7 @@ add_library(physics STATIC
   physics/constraints/constraintGroup.cpp
   physics/constraints/ballConstraint.cpp
   physics/constraints/hingeConstraint.cpp
+  physics/constraints/barConstraint.cpp
   
   physics/softlinks/softLink.cpp
   physics/softlinks/springLink.cpp
@@ -273,8 +274,8 @@ add_executable(application
   application/picker/picker.cpp
   application/picker/ray.cpp
   application/picker/selection.cpp
-  application/picker/tool/selectionTool.cpp
-  application/picker/tool/translationTool.cpp
+  application/picker/tools/selectionTool.cpp
+  application/picker/tools/translationTool.cpp
 
   application/shader/shaders.cpp
   application/shader/basicShader.cpp

@@ -129,6 +129,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="constraints\barConstraint.cpp" />
     <ClCompile Include="datastructures\aligned_alloc.cpp" />
     <ClCompile Include="softlinks\alignmentLink.cpp" />
     <ClCompile Include="softlinks\elasticLink.cpp" />
@@ -179,6 +180,7 @@
     <ClCompile Include="worldPhysics.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="constraints\barConstraint.h" />
     <ClInclude Include="datastructures\aligned_alloc.h" />
     <ClInclude Include="datastructures\boundsTree2.h" />
     <ClInclude Include="softlinks\alignmentLink.h" />
