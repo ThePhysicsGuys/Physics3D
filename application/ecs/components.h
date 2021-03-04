@@ -4,7 +4,7 @@
 #include <variant>
 #include "extendedPart.h"
 
-#include "../physics/synchonizedWorld.h"
+#include "../physics/threading/synchonizedWorld.h"
 #include "../physics/geometry/builtinShapeClasses.h"
 #include "../graphics/visualData.h"
 

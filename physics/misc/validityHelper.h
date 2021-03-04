@@ -6,6 +6,7 @@
 #include "../math/cframe.h"
 #include "../motion.h"
 #include "../datastructures/boundsTree.h"
+#include "../datastructures/boundsTree2.h"
 
 #include <cmath>
 
@@ -155,3 +156,5 @@ inline void treeValidCheck(const BoundsTree<Boundable>& tree) {
 class MotorizedPhysical;
 
 bool isMotorizedPhysicalValid(const MotorizedPhysical* mainPhys);
+
+bool isBoundsTreeValid(const P3D::NewBoundsTree::BoundsTree& tree);

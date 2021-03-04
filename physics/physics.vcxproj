@@ -279,13 +279,14 @@
     <ClInclude Include="misc\serialization.h" />
     <ClInclude Include="relativeMotion.h" />
     <ClInclude Include="rigidBody.h" />
-    <ClInclude Include="sharedLockGuard.h" />
+    <ClInclude Include="threading\sharedLockGuard.h" />
     <ClInclude Include="constraints\hingeConstraint.h" />
     <ClInclude Include="constraints\softConstraint.h" />
     <ClInclude Include="softlinks\softLink.h" />
     <ClInclude Include="softlinks\springLink.h" />
-    <ClInclude Include="synchonizedWorld.h" />
+    <ClInclude Include="threading\synchonizedWorld.h" />
     <ClInclude Include="templateUtils.h" />
+    <ClInclude Include="threading\threadPool.h" />
     <ClInclude Include="world.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

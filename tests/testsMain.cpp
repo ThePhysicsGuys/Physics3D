@@ -31,6 +31,9 @@ static const TerminalColor ERROR_COLOR = TerminalColor::MAGENTA;
 static const TerminalColor SKIP_COLOR = TerminalColor::LIGHT_GRAY;
 
 stringstream logStream;
+thread_local TestInterface __testInterface;
+// a referenceable boolean, for use in AssertComparer and TolerantAssertComparer
+// using just a literal true would cause bugs as the literal falls out of scope after the return, leading to unpredictable results
 const bool reffableTrue = true;
 
 static void resetLog() {
@@ -122,6 +125,7 @@ struct TestFlags {
 	bool coverageEnabled;
 	bool allowSkip;
 	bool catchErrors;
+	bool debugOnFailure;
 };
 
 class Test {
@@ -130,11 +134,11 @@ public:
 	const char* fileName;
 	const char* funcName;
 	TestType type;
-	void(*testFunc)(TestInterface&);
+	void(*testFunc)();
 
 	Test() : 
 		filePath(nullptr), funcName(nullptr), fileName(nullptr), testFunc(nullptr), type(TestType::NORMAL) {};
-	Test(const char* filePath, const char* funcName, void(*testFunc)(TestInterface&), TestType type) : 
+	Test(const char* filePath, const char* funcName, void(*testFunc)(), TestType type) : 
 		filePath(filePath), 
 		funcName(funcName), 
 		testFunc(testFunc), 
@@ -142,14 +146,14 @@ public:
 		fileName(std::strrchr(this->filePath, sepChar) ? std::strrchr(this->filePath, sepChar) + 1 : this->filePath) {}
 private:
 	TestResult runNoErrorChecking(TestFlags flags, time_point<system_clock>& startTime) {
-		TestInterface testInterface;
+		__testInterface = TestInterface(flags.debugOnFailure);
 
 		try {
 			startTime = system_clock::now();
 
-			testFunc(testInterface);
+			testFunc();
 
-			std::size_t assertCount = testInterface.getAssertCount();
+			std::size_t assertCount = __testInterface.getAssertCount();
 			setColor(assertCount > 0 ? TerminalColor::GRAY : TerminalColor::RED);
 			cout << " [" << assertCount << "]";
 
@@ -236,7 +240,7 @@ static void initConsole() {
 	RECT r;
 	GetWindowRect(consoleWindow, &r);
 
-	MoveWindow(consoleWindow, r.left, r.top, 800, 900, TRUE);
+	MoveWindow(consoleWindow, r.left, r.top, 800, 800, TRUE);
 }
 #else
 static void initConsole() {}
@@ -287,6 +291,7 @@ TestFlags getTestFlags(const Util::ParsedArgs& cmdArgs) {
 	result.coverageEnabled = cmdArgs.hasFlag("coverage");
 	result.catchErrors = !cmdArgs.hasFlag("nocatch");
 	result.allowSkip = cmdArgs.argCount() == 0;
+	result.debugOnFailure = cmdArgs.hasFlag("debug");
 
 	if(cmdArgs.hasFlag("noskip")) result.allowSkip = false;
 
@@ -328,7 +333,7 @@ static void logAssertError(string text) {
 	cout << text.c_str();
 }
 
-TestAdder::TestAdder(const char* file, const char* name, void(*f)(TestInterface&), TestType isSlow) {
+TestAdder::TestAdder(const char* file, const char* name, void(*f)(), TestType isSlow) {
 	if (tests == nullptr) tests = new vector<Test>();
 
 	tests->push_back(Test(file, name, f, isSlow));

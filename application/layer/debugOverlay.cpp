@@ -16,7 +16,7 @@
 
 #include "../physics/misc/physicsProfiler.h"
 #include "../physics/misc/toString.h"
-#include "../physics/sharedLockGuard.h"
+#include "../physics/threading/sharedLockGuard.h"
 
 #include "worlds.h"
 

@@ -2,7 +2,7 @@
 
 #include "extendedPart.h"
 #include "../physics/math/position.h"
-#include "../physics/synchonizedWorld.h"
+#include "../physics/threading/synchonizedWorld.h"
 
 namespace P3D::Application {
 
