@@ -243,38 +243,3 @@ static bool isConnectedPhysicalValid(const ConnectedPhysical* phys, const Motori
 bool isMotorizedPhysicalValid(const MotorizedPhysical* mainPhys) {
 	return isPhysicalValid(mainPhys, mainPhys);
 }
-
-
-static bool isBoundsTreeValidRecursive(const P3D::NewBoundsTree::TreeTrunk& curNode, int curNodeSize) {
-	for(int i = 0; i < curNodeSize; i++) {
-		const P3D::NewBoundsTree::TreeNodeRef& subNode = curNode.subNodes[i];
-
-		BoundsTemplate<float> foundBounds = curNode.getBoundsOfSubNode(i);
-		if(foundBounds.min.x < -10000 || foundBounds.min.y < -10000 || foundBounds.min.z < -10000 || 
-		   foundBounds.max.x > 10000 || foundBounds.max.y > 10000 || foundBounds.max.z > 10000) {
-			return false;
-		}
-
-		if(subNode.isTrunkNode()) {
-			const P3D::NewBoundsTree::TreeTrunk& subTrunk = subNode.asTrunk();
-			int subTrunkSize = subNode.getTrunkSize();
-
-			BoundsTemplate<float> realBounds = subTrunk.getTotalBounds(subTrunkSize);
-
-			if(realBounds != foundBounds) return false;
-
-			if(!isBoundsTreeValidRecursive(subTrunk, subTrunkSize)) return false;
-		}
-	}
-	return true;
-}
-bool isBoundsTreeValid(const P3D::NewBoundsTree::BoundsTree& tree) {
-	struct TreePublicificator {
-		P3D::NewBoundsTree::TreeTrunk baseTrunk;
-		int baseTrunkSize;
-		P3D::NewBoundsTree::TrunkAllocator allocator;
-	};
-	const TreePublicificator* publicified = reinterpret_cast<const TreePublicificator*>(&tree);
-	return isBoundsTreeValidRecursive(publicified->baseTrunk, publicified->baseTrunkSize);
-}
-

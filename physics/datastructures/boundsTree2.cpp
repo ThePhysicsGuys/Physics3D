@@ -135,16 +135,16 @@ bool containsObjectRecursive(const TreeTrunk& trunk, int trunkSize, const void* 
 	assert(trunkSize >= 0 && trunkSize <= BRANCH_FACTOR);
 	std::array<bool, BRANCH_FACTOR> couldContain = trunk.getAllContainsBounds(bounds);
 	for(int i = 0; i < trunkSize; i++) {
-		if(couldContain[i]) {
-			const TreeNodeRef& subNode = trunk.subNodes[i];
-			if(subNode.isTrunkNode()) {
-				if(containsObjectRecursive(subNode.asTrunk(), subNode.getTrunkSize(), object, bounds)) {
-					return true;
-				}
-			} else {
-				if(subNode.asObject() == object) {
-					return true;
-				}
+		if(!couldContain[i]) continue; 
+
+		const TreeNodeRef& subNode = trunk.subNodes[i];
+		if(subNode.isTrunkNode()) {
+			if(containsObjectRecursive(subNode.asTrunk(), subNode.getTrunkSize(), object, bounds)) {
+				return true;
+			}
+		} else {
+			if(subNode.asObject() == object) {
+				return true;
 			}
 		}
 	}
@@ -156,30 +156,35 @@ int removeRecursive(TrunkAllocator& allocator, TreeTrunk& curTrunk, int curTrunk
 	assert(curTrunkSize >= 0 && curTrunkSize <= BRANCH_FACTOR);
 	std::array<bool, BRANCH_FACTOR> couldContain = curTrunk.getAllContainsBounds(bounds);
 	for(int i = 0; i < curTrunkSize; i++) {
-		if(couldContain[i]) {
-			TreeNodeRef& subNode = curTrunk.subNodes[i];
-			if(subNode.isTrunkNode()) {
-				TreeTrunk& subNodeTrunk = subNode.asTrunk();
-				assert(subNode.getTrunkSize() >= 2);
-				int newSubNodeTrunkSize = removeRecursive(allocator, subNodeTrunk, subNode.getTrunkSize(), objectToRemove, bounds);
-				assert(newSubNodeTrunkSize >= 1 || newSubNodeTrunkSize == -1);
-				if(newSubNodeTrunkSize != -1) {
-					if(newSubNodeTrunkSize == 1) {
-						// remove reduntant trunk
-						curTrunk.setSubNode(i, std::move(subNodeTrunk.subNodes[0]), subNodeTrunk.getBoundsOfSubNode(0));
-						allocator.freeTrunk(&subNodeTrunk);
-					} else {
-						curTrunk.setBoundsOfSubNode(i, subNodeTrunk.getTotalBounds(newSubNodeTrunkSize));
-						subNode.setTrunkSize(newSubNodeTrunkSize);
-					}
+		if(!couldContain[i]) continue;
 
-					return curTrunkSize;
+		TreeNodeRef& subNode = curTrunk.subNodes[i];
+		if(subNode.isTrunkNode()) {
+			TreeTrunk& subNodeTrunk = subNode.asTrunk();
+			assert(subNode.getTrunkSize() >= 2);
+			int newSubNodeTrunkSize = removeRecursive(allocator, subNodeTrunk, subNode.getTrunkSize(), objectToRemove, bounds);
+			assert(newSubNodeTrunkSize >= 1 || newSubNodeTrunkSize == -1);
+			if(newSubNodeTrunkSize != -1) {
+				if(newSubNodeTrunkSize == 1) {
+					// remove reduntant trunk
+					bool wasGroupHead = subNode.isGroupHead();
+					subNode = std::move(subNodeTrunk.subNodes[0]);
+					curTrunk.setBoundsOfSubNode(i, subNodeTrunk.getBoundsOfSubNode(0));
+					if(wasGroupHead && subNode.isTrunkNode()) {
+						subNode.makeGroupHead(); // in the rare case that it removes Z in a node that is a group like this: GH[TN[X,Y],Z]. Without this the grouping would be lost
+					}
+					allocator.freeTrunk(&subNodeTrunk);
+				} else {
+					curTrunk.setBoundsOfSubNode(i, subNodeTrunk.getTotalBounds(newSubNodeTrunkSize));
+					subNode.setTrunkSize(newSubNodeTrunkSize);
 				}
-			} else {
-				if(subNode.asObject() == objectToRemove) {
-					curTrunk.moveSubNode(curTrunkSize - 1, i);
-					return curTrunkSize - 1;
-				}
+					
+				return curTrunkSize;
+			}
+		} else {
+			if(subNode.asObject() == objectToRemove) {
+				curTrunk.moveSubNode(curTrunkSize - 1, i);
+				return curTrunkSize - 1;
 			}
 		}
 	}
@@ -203,46 +208,47 @@ static TreeGrab grabGroupRecursive(TrunkAllocator& allocator, TreeTrunk& curTrun
 	assert(curTrunkSize >= 0 && curTrunkSize <= BRANCH_FACTOR);
 	std::array<bool, BRANCH_FACTOR> couldContain = curTrunk.getAllContainsBounds(representativeBounds);
 	for(int i = 0; i < curTrunkSize; i++) {
-		if(couldContain[i]) {
-			TreeNodeRef& subNode = curTrunk.subNodes[i];
-			if(subNode.isTrunkNode()) {
-				TreeTrunk& subNodeTrunk = subNode.asTrunk();
-				size_t trunkSize = subNode.getTrunkSize();
-				assert(trunkSize >= 2);
+		if(!couldContain[i]) continue;
 
-				if(subNode.isGroupHead()) {
-					if(containsObjectRecursive(subNodeTrunk, trunkSize, groupRepresentative, representativeBounds)) {
-						// found group, now remove it
-						TreeNodeRef subNodeCopy = std::move(subNode);
-						curTrunk.moveSubNode(curTrunkSize - 1, i);
-						return TreeGrab(curTrunkSize - 1, std::move(subNodeCopy), curTrunk.getBoundsOfSubNode(i));
-					} else {
-						// try 
-						TreeGrab recursiveResult = grabGroupRecursive(allocator, subNodeTrunk, subNode.getTrunkSize(), groupRepresentative, representativeBounds);
-						int newSubNodeTrunkSize = recursiveResult.resultingGroupSize;
-						assert(newSubNodeTrunkSize >= 1 || newSubNodeTrunkSize == -1);
-						if(newSubNodeTrunkSize != -1) {
-							if(newSubNodeTrunkSize == 1) {
-								// remove reduntant trunk
-								curTrunk.setSubNode(i, std::move(subNodeTrunk.subNodes[0]), subNodeTrunk.getBoundsOfSubNode(0));
-								allocator.freeTrunk(&subNodeTrunk);
-							} else {
-								curTrunk.setBoundsOfSubNode(i, subNodeTrunk.getTotalBounds(newSubNodeTrunkSize));
-								subNode.setTrunkSize(newSubNodeTrunkSize);
-							}
+		TreeNodeRef& subNode = curTrunk.subNodes[i];
+		if(subNode.isTrunkNode()) {
+			TreeTrunk& subNodeTrunk = subNode.asTrunk();
+			size_t trunkSize = subNode.getTrunkSize();
+			assert(trunkSize >= 2);
 
-							recursiveResult.resultingGroupSize = curTrunkSize;
-							return recursiveResult;
-						}
-					}
-				}
-
-			} else {
-				if(subNode.asObject() == groupRepresentative) {
+			if(subNode.isGroupHead()) {
+				if(containsObjectRecursive(subNodeTrunk, trunkSize, groupRepresentative, representativeBounds)) {
+					// found group, now remove it
 					TreeNodeRef subNodeCopy = std::move(subNode);
 					curTrunk.moveSubNode(curTrunkSize - 1, i);
 					return TreeGrab(curTrunkSize - 1, std::move(subNodeCopy), curTrunk.getBoundsOfSubNode(i));
 				}
+			} else {
+				// try 
+				TreeGrab recursiveResult = grabGroupRecursive(allocator, subNodeTrunk, subNode.getTrunkSize(), groupRepresentative, representativeBounds);
+				int newSubNodeTrunkSize = recursiveResult.resultingGroupSize;
+				assert(newSubNodeTrunkSize >= 1 || newSubNodeTrunkSize == -1);
+				if(newSubNodeTrunkSize != -1) {
+					if(newSubNodeTrunkSize == 1) {
+						// remove reduntant trunk
+						curTrunk.setSubNode(i, std::move(subNodeTrunk.subNodes[0]), subNodeTrunk.getBoundsOfSubNode(0));
+						allocator.freeTrunk(&subNodeTrunk);
+					} else {
+						curTrunk.setBoundsOfSubNode(i, subNodeTrunk.getTotalBounds(newSubNodeTrunkSize));
+						subNode.setTrunkSize(newSubNodeTrunkSize);
+					}
+
+					recursiveResult.resultingGroupSize = curTrunkSize;
+					return recursiveResult;
+				}
+			}
+
+		} else {
+			if(subNode.asObject() == groupRepresentative) {
+				TreeNodeRef subNodeCopy = std::move(subNode);
+				BoundsTemplate<float> subNodeBounds = curTrunk.getBoundsOfSubNode(i);
+				curTrunk.moveSubNode(curTrunkSize - 1, i);
+				return TreeGrab(curTrunkSize - 1, std::move(subNodeCopy), subNodeBounds);
 			}
 		}
 	}
@@ -253,31 +259,43 @@ const TreeNodeRef* getGroupRecursive(const TreeTrunk& curTrunk, int curTrunkSize
 	assert(curTrunkSize >= 0 && curTrunkSize <= BRANCH_FACTOR);
 	std::array<bool, BRANCH_FACTOR> couldContain = curTrunk.getAllContainsBounds(representativeBounds);
 	for(int i = 0; i < curTrunkSize; i++) {
-		if(couldContain[i]) {
-			const TreeNodeRef& subNode = curTrunk.subNodes[i];
-			if(subNode.isTrunkNode()) {
-				const TreeTrunk& subNodeTrunk = subNode.asTrunk();
-				size_t subTrunkSize = subNode.getTrunkSize();
-				assert(subTrunkSize >= 2);
+		if(!couldContain[i]) continue;
 
-				if(subNode.isGroupHead()) {
-					if(containsObjectRecursive(subNodeTrunk, subTrunkSize, groupRepresentative, representativeBounds)) {
-						return &subNode;
-					}
-				} else {
-					const TreeNodeRef* recursiveFound = getGroupRecursive(subNodeTrunk, subTrunkSize, groupRepresentative, representativeBounds);
-					if(recursiveFound != nullptr) {
-						return recursiveFound;
-					}
-				}
-			} else {
-				if(subNode.asObject() == groupRepresentative) {
+		const TreeNodeRef& subNode = curTrunk.subNodes[i];
+		if(subNode.isTrunkNode()) {
+			const TreeTrunk& subNodeTrunk = subNode.asTrunk();
+			size_t subTrunkSize = subNode.getTrunkSize();
+			assert(subTrunkSize >= 2);
+
+			if(subNode.isGroupHead()) {
+				if(containsObjectRecursive(subNodeTrunk, subTrunkSize, groupRepresentative, representativeBounds)) {
 					return &subNode;
 				}
+			} else {
+				const TreeNodeRef* recursiveFound = getGroupRecursive(subNodeTrunk, subTrunkSize, groupRepresentative, representativeBounds);
+				if(recursiveFound != nullptr) {
+					return recursiveFound;
+				}
+			}
+		} else {
+			if(subNode.asObject() == groupRepresentative) {
+				return &subNode;
 			}
 		}
 	}
 	return nullptr;
+}
+
+// also frees starting trunk
+static void freeTrunksRecursive(TrunkAllocator& alloc, TreeTrunk& curTrunk, int curTrunkSize) {
+	for(int i = 0; i < curTrunkSize; i++) {
+		TreeNodeRef& subNode = curTrunk.subNodes[i];
+		if(subNode.isTrunkNode()) {
+			TreeTrunk& subTrunk = subNode.asTrunk();
+			freeTrunksRecursive(alloc, subTrunk, subNode.getTrunkSize());
+		}
+	}
+	alloc.freeTrunk(&curTrunk);
 }
 
 // returns true if the group that is inserted into is found
@@ -306,9 +324,8 @@ static bool insertGroupIntoGroup(TrunkAllocator& sourceAlloc, TrunkAllocator& de
 		group = TreeNodeRef(trunk, trunkSize, true);
 
 		if(groupToDestroy.isTrunkNode()) {
-			forEachTrunkRecurse(groupToDestroy.asTrunk(), groupToDestroy.getTrunkSize(), [&sourceAlloc](TreeTrunk& t) {
-				sourceAlloc.freeTrunk(&t);
-			});
+			TreeTrunk& destroyTrunk = groupToDestroy.asTrunk();
+			freeTrunksRecursive(sourceAlloc, destroyTrunk, groupToDestroy.getTrunkSize());
 		}
 
 		return trunk->getTotalBounds(trunkSize);
@@ -318,21 +335,34 @@ static bool insertGroupIntoGroup(TrunkAllocator& sourceAlloc, TrunkAllocator& de
 
 
 
-TreeTrunk* TrunkAllocator::allocTrunk() const {
+TrunkAllocator::~TrunkAllocator() {
+	if(this->allocationCount != 0) __debugbreak();
+}
+TreeTrunk* TrunkAllocator::allocTrunk() {
+	this->allocationCount++;
 	return static_cast<TreeTrunk*>(aligned_malloc(sizeof(TreeTrunk), alignof(TreeTrunk)));
 }
-void TrunkAllocator::freeTrunk(TreeTrunk* trunk) const {
+void TrunkAllocator::freeTrunk(TreeTrunk* trunk) {
+	this->allocationCount--;
 	aligned_free(trunk);
 }
+void TrunkAllocator::freeAllTrunks(TreeTrunk& baseTrunk, int baseTrunkSize) {
+	for(int i = 0; i < baseTrunkSize; i++) {
+		TreeNodeRef& subNode = baseTrunk.subNodes[i];
+		if(subNode.isTrunkNode()) {
+			freeTrunksRecursive(*this, subNode.asTrunk(), subNode.getTrunkSize());
+		}
+	}
+}
 
-BoundsTree::BoundsTree() : baseTrunk(), baseTrunkSize(0) {}
-BoundsTree::~BoundsTree() {
+BoundsTreePrototype::BoundsTreePrototype() : baseTrunk(), baseTrunkSize(0) {}
+BoundsTreePrototype::~BoundsTreePrototype() {
 	this->clear();
 }
-void BoundsTree::add(void* newObject, const BoundsTemplate<float>& bounds) {
+void BoundsTreePrototype::add(void* newObject, const BoundsTemplate<float>& bounds) {
 	this->baseTrunkSize = P3D::NewBoundsTree::addRecursive(allocator, baseTrunk, baseTrunkSize, TreeNodeRef(newObject), bounds);
 }
-void BoundsTree::addToGroup(void* newObject, const BoundsTemplate<float>& newObjectBounds, void* groupRepresentative, const BoundsTemplate<float>& groupRepBounds) {
+void BoundsTreePrototype::addToGroup(void* newObject, const BoundsTemplate<float>& newObjectBounds, const void* groupRepresentative, const BoundsTemplate<float>& groupRepBounds) {
 	bool foundGroup = modifyGroupRecursive(allocator, baseTrunk, baseTrunkSize, groupRepresentative, groupRepBounds, [this, newObject, &newObjectBounds](TreeNodeRef& groupNode, const BoundsTemplate<float>& groupNodeBounds) {
 		assert(groupNode.isGroupHeadOrLeaf());
 		if(groupNode.isTrunkNode()) {
@@ -352,7 +382,7 @@ void BoundsTree::addToGroup(void* newObject, const BoundsTemplate<float>& newObj
 		throw "Group not found!";
 	}
 }
-void BoundsTree::mergeGroups(const void* groupRepA, const BoundsTemplate<float>& repABounds, const void* groupRepB, const BoundsTemplate<float>& repBBounds) {
+void BoundsTreePrototype::mergeGroups(const void* groupRepA, const BoundsTemplate<float>& repABounds, const void* groupRepB, const BoundsTemplate<float>& repBBounds) {
 	TreeGrab grabbed = grabGroupRecursive(this->allocator, this->baseTrunk, this->baseTrunkSize, groupRepA, repABounds);
 	if(grabbed.resultingGroupSize == -1) {
 		throw "groupRepA not found!";
@@ -366,7 +396,7 @@ void BoundsTree::mergeGroups(const void* groupRepA, const BoundsTemplate<float>&
 	}
 }
 
-void BoundsTree::transferGroupTo(const void* groupRep, const BoundsTemplate<float>& groupRepBounds, BoundsTree& destinationTree) {
+void BoundsTreePrototype::transferGroupTo(const void* groupRep, const BoundsTemplate<float>& groupRepBounds, BoundsTreePrototype& destinationTree) {
 	TreeGrab grabbed = grabGroupRecursive(this->allocator, this->baseTrunk, this->baseTrunkSize, groupRep, groupRepBounds);
 	if(grabbed.resultingGroupSize == -1) {
 		throw "groupRep not found!";
@@ -375,7 +405,7 @@ void BoundsTree::transferGroupTo(const void* groupRep, const BoundsTemplate<floa
 
 	bool groupBWasFound = addRecursive(destinationTree.allocator, destinationTree.baseTrunk, destinationTree.baseTrunkSize, std::move(grabbed.nodeRef), grabbed.nodeBounds);
 }
-void BoundsTree::remove(const void* objectToRemove, const BoundsTemplate<float>& bounds) {
+void BoundsTreePrototype::remove(const void* objectToRemove, const BoundsTemplate<float>& bounds) {
 	int resultingBaseSize = removeRecursive(allocator, baseTrunk, baseTrunkSize, objectToRemove, bounds);
 	if(resultingBaseSize != -1) {
 		this->baseTrunkSize = resultingBaseSize;
@@ -383,11 +413,11 @@ void BoundsTree::remove(const void* objectToRemove, const BoundsTemplate<float>&
 		throw "Object not found!";
 	}
 }
-bool BoundsTree::contains(const void* object, const BoundsTemplate<float>& bounds) const {
+bool BoundsTreePrototype::contains(const void* object, const BoundsTemplate<float>& bounds) const {
 	return containsObjectRecursive(baseTrunk, baseTrunkSize, object, bounds);
 }
 
-bool BoundsTree::groupContains(const void* object, const BoundsTemplate<float>& bounds, const void* groupRep, const BoundsTemplate<float>& groupRepBounds) const {
+bool BoundsTreePrototype::groupContains(const void* object, const BoundsTemplate<float>& bounds, const void* groupRep, const BoundsTemplate<float>& groupRepBounds) const {
 	const TreeNodeRef* groupFound = getGroupRecursive(this->baseTrunk, this->baseTrunkSize, groupRep, groupRepBounds);
 	if(!groupFound) {
 		throw "Group not found!";
@@ -399,14 +429,14 @@ bool BoundsTree::groupContains(const void* object, const BoundsTemplate<float>& 
 	}
 }
 
-size_t BoundsTree::size() const {
+size_t BoundsTreePrototype::size() const {
 	size_t total = 0;
 	this->forEach([&total](const void* item) {
 		total++;
 	});
 	return total;
 }
-size_t BoundsTree::groupSize(const void* groupRep, const BoundsTemplate<float>& groupRepBounds) const {
+size_t BoundsTreePrototype::groupSize(const void* groupRep, const BoundsTemplate<float>& groupRepBounds) const {
 	size_t total = 0;
 	this->forEachInGroup(groupRep, groupRepBounds, [&total](const void* item) {
 		total++;
@@ -414,10 +444,9 @@ size_t BoundsTree::groupSize(const void* groupRep, const BoundsTemplate<float>& 
 	return total;
 }
 
-void BoundsTree::clear() {
-	forEachTrunkRecurse(this->baseTrunk, this->baseTrunkSize, [this](TreeTrunk& trunk) {
-		allocator.freeTrunk(&trunk);
-	});
+void BoundsTreePrototype::clear() {
+	this->allocator.freeAllTrunks(this->baseTrunk, this->baseTrunkSize);
+	this->baseTrunkSize = 0;
 }
 
 };

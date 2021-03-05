@@ -44,4 +44,14 @@
       <Item Name="TreeTrunk" ExcludeView="simple" Condition="(ptr &amp; 0b111) != 0">(TreeTrunk*) (ptr &amp; 0xFFFFFFFFFFFFFFF0)</Item>
     </Expand>
   </Type>
+  <Type Name="P3D::NewBoundsTree::BoundsTreePrototype">
+    <DisplayString>BoundsTree {{baseTrunkSize: {baseTrunkSize}}}</DisplayString>
+    <Expand>
+      <ArrayItems>
+        <Size>baseTrunkSize</Size>
+        <ValuePointer>baseTrunk.subNodes</ValuePointer>
+      </ArrayItems>
+      <Item Name="TreeTrunk" ExcludeView="simple">baseTrunk</Item>
+    </Expand>
+  </Type>
 </AutoVisualizer>

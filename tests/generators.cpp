@@ -8,21 +8,23 @@
 #include "../physics/geometry/convexShapeBuilder.h"
 #include "../physics/misc/toString.h"
 
+static std::default_random_engine generator;
+
 int generateInt(int max) {
-	return rand() % max;
+	return std::uniform_int_distribution<int>(0, max - 1)(generator);
 }
 size_t generateSize_t(size_t max) {
-	return rand() % max;
+	return std::uniform_int_distribution<size_t>(0, max - 1)(generator);
 }
 double generateDouble() {
-	return rand() * 2.0 / RAND_MAX;
+	return std::uniform_real_distribution<double>(0.0, 2.0)(generator);
 }
 float generateFloat() {
-	return rand() * 2.0f / RAND_MAX;
+	return std::uniform_real_distribution<float>(0.0f, 2.0f)(generator);
 }
 
 bool generateBool() {
-	return rand() % 2 == 0;
+	return std::uniform_int_distribution<int>(0, 1)(generator) == 1;
 }
 
 Shape generateShape() {
@@ -44,7 +46,7 @@ Polyhedron generateConvexPolyhedron() {
 
 	ConvexShapeBuilder builder(vecBuf, triangleBuf, 4, 4, neighborBuf, removalBuf, edgeBuf);
 
-	int numExtraPoints = rand() % (MAX_POINT_COINT - 4);
+	int numExtraPoints = generateInt(MAX_POINT_COINT - 4);
 	for(int i = 0; i < numExtraPoints; i++) {
 		builder.addPoint(generateVec3f());
 	}

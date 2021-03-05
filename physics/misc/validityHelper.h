@@ -157,4 +157,3 @@ class MotorizedPhysical;
 
 bool isMotorizedPhysicalValid(const MotorizedPhysical* mainPhys);
 
-bool isBoundsTreeValid(const P3D::NewBoundsTree::BoundsTree& tree);
