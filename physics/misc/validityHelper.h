@@ -157,3 +157,51 @@ class MotorizedPhysical;
 
 bool isMotorizedPhysicalValid(const MotorizedPhysical* mainPhys);
 
+
+namespace P3D::NewBoundsTree {
+
+template<typename Boundable>
+inline bool isBoundsTreeValidRecursive(const TreeTrunk& curNode, int curNodeSize, int depth = 0) {
+	for(int i = 0; i < curNodeSize; i++) {
+		const TreeNodeRef& subNode = curNode.subNodes[i];
+
+		BoundsTemplate<float> foundBounds = curNode.getBoundsOfSubNode(i);
+
+		if(subNode.isTrunkNode()) {
+			const TreeTrunk& subTrunk = subNode.asTrunk();
+			int subTrunkSize = subNode.getTrunkSize();
+
+			BoundsTemplate<float> realBounds = TrunkSIMDHelperFallback::getTotalBounds(subTrunk, subTrunkSize);
+
+			if(realBounds != foundBounds) {
+				std::cout << "(" << i << "/" << curNodeSize << ") Trunk bounds not up to date\n";
+				return false;
+			}
+
+			if(!isBoundsTreeValidRecursive<Boundable>(subTrunk, subTrunkSize, depth + 1)) {
+				std::cout << "(" << i << "/" << curNodeSize << ")\n";
+				return false;
+			}
+		} else {
+			const Boundable* itemB = static_cast<const Boundable*>(subNode.asObject());
+			if(foundBounds != itemB->getBounds()) {
+				std::cout << "(" << i << "/" << curNodeSize << ") Leaf not up to date\n";
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+template<typename Boundable>
+bool isBoundsTreeValid(const BoundsTreePrototype& tree) {
+	std::pair<const TreeTrunk&, int> baseTrunk = tree.getBaseTrunk();
+	return isBoundsTreeValidRecursive<Boundable>(baseTrunk.first, baseTrunk.second);
+}
+
+template<typename Boundable>
+bool isBoundsTreeValid(const BoundsTree<Boundable>& tree) {
+	return isBoundsTreeValid<Boundable>(tree.getPrototype());
+}
+
+};

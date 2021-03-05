@@ -79,6 +79,8 @@ int generateInt(int max);
 size_t generateSize_t(size_t max);
 double generateDouble(); 
 float generateFloat();
+double generateDouble(double min, double max);
+float generateFloat(float min, float max);
 bool generateBool();
 Shape generateShape();
 Polyhedron generateConvexPolyhedron();

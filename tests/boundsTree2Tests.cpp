@@ -9,7 +9,59 @@
 #include "../physics/misc/toString.h"
 #include "../physics/misc/validityHelper.h"
 
+#include <vector>
+#include <set>
+
 namespace P3D::NewBoundsTree {
+
+static void shuffleTreeRecursive(TreeTrunk& curTrunk, int curTrunkSize) {
+	for(int iter = 0; iter < (curTrunkSize - 1) * curTrunkSize; iter++) {
+		int index1 = generateInt(curTrunkSize);
+		int index2;
+		do {
+			index2 = generateInt(curTrunkSize);
+		} while(index1 == index2);
+
+		BoundsTemplate<float> tmpBounds = curTrunk.getBoundsOfSubNode(index1);
+		TreeNodeRef tmpNode = std::move(curTrunk.subNodes[index1]);
+
+		curTrunk.setSubNode(index1, std::move(curTrunk.subNodes[index2]), curTrunk.getBoundsOfSubNode(index2));
+		curTrunk.setSubNode(index2, std::move(tmpNode), tmpBounds);
+	}
+
+	for(int i = 0; i < curTrunkSize; i++) {
+		TreeNodeRef& subNode = curTrunk.subNodes[i];
+		if(subNode.isTrunkNode()) {
+			shuffleTreeRecursive(subNode.asTrunk(), subNode.getTrunkSize());
+		}
+	}
+}
+static void shuffleTree(BoundsTreePrototype& tree) {
+	std::pair<TreeTrunk&, int> baseTrunk = tree.getBaseTrunk();
+	shuffleTreeRecursive(baseTrunk.first, baseTrunk.second);
+}
+template<typename Boundable>
+static void shuffleTree(BoundsTree<Boundable>& tree) {
+	shuffleTree(tree.getPrototype());
+}
+
+static std::vector<BasicBounded> generateBoundsTreeItems(int size) {
+	std::vector<BasicBounded> allItems;
+
+	for(int i = 0; i < size; i++) {
+		float x = generateFloat(-100.0f, 100.0f);
+		float y = generateFloat(-100.0f, 100.0f);
+		float z = generateFloat(-100.0f, 100.0f);
+
+		float w = generateFloat(0.2f, 50.0f);
+		float h = generateFloat(0.2f, 50.0f);
+		float d = generateFloat(0.2f, 50.0f);
+
+		allItems.push_back(BasicBounded{BoundsTemplate<float>(PositionTemplate<float>(x - w, y - h, z - d), PositionTemplate<float>(x + w, y + h, z + d))});
+	}
+
+	return allItems;
+}
 
 TEST_CASE(testAddRemoveToBoundsTree) {
 	BoundsTree<BasicBounded> tree;
@@ -17,11 +69,8 @@ TEST_CASE(testAddRemoveToBoundsTree) {
 
 	constexpr int itemCount = 1000;
 
-	std::vector<BasicBounded> itemsInTree;
+	std::vector<BasicBounded> itemsInTree = generateBoundsTreeItems(itemCount);
 
-	for(int i = 0; i < itemCount; i++) {
-		itemsInTree.push_back(BasicBounded{generateBoundsf()});
-	}
 	// add all to tree
 	for(int i = 0; i < itemCount; i++) {
 		BasicBounded& cur = itemsInTree[i];
@@ -105,16 +154,11 @@ TEST_CASE(testBoundsTreeGroupCreation) {
 	constexpr int itemCount = 50;
 	//constexpr int itemCount = 20;
 
-	std::vector<BasicBounded> allItems;
+	std::vector<BasicBounded> allItems = generateBoundsTreeItems(itemCount);
 
 	std::vector<std::vector<BasicBounded*>> groups;
 
 	ASSERT_TRUE(isBoundsTreeValid(tree));
-
-	for(int i = 0; i < itemCount; i++) {
-		BasicBounded newObj{generateBoundsf()};
-		allItems.push_back(newObj);
-	}
 
 	for(int i = 0; i < itemCount; i++) {
 		BasicBounded* newObj = &allItems[i];
@@ -137,25 +181,13 @@ TEST_CASE(testBoundsTreeGroupCreation) {
 	ASSERT_TRUE(isBoundsTreeValid(tree));
 }
 
-TEST_CASE(testBoundsTreeGroupMerging) {
-	BoundsTree<BasicBounded> tree;
-	ASSERT_TRUE(isBoundsTreeValid(tree));
-
-	constexpr int itemCount = 50;
-	//constexpr int itemCount = 20;
-
-	std::vector<BasicBounded> allItems;
+static std::vector<std::vector<BasicBounded*>> createGroups(BoundsTree<BasicBounded>& tree, std::vector<BasicBounded>& allItems) {
+	assert(tree.isEmpty());
 
 	std::vector<std::vector<BasicBounded*>> groups;
 
-	ASSERT_TRUE(isBoundsTreeValid(tree));
-
-	for(int i = 0; i < itemCount; i++) {
-		BasicBounded newObj{generateBoundsf()};
-		allItems.push_back(newObj);
-	}
-
-	for(int i = 0; i < itemCount; i++) {
+	// add to groups
+	for(int i = 0; i < allItems.size() / 2; i++) {
 		BasicBounded* newObj = &allItems[i];
 		int groupToAddTo = generateInt(groups.size() + 1) - 1;
 		if(groupToAddTo == -1) {
@@ -167,14 +199,35 @@ TEST_CASE(testBoundsTreeGroupMerging) {
 			grp.push_back(newObj);
 			BasicBounded* grpRep = grp[0];
 			tree.addToGroup(newObj, grpRep);
-			ASSERT_TRUE(tree.groupContains(newObj, grpRep));
 		}
-		ASSERT_TRUE(isBoundsTreeValid(tree));
 	}
-	
-	ASSERT_TRUE(groupsMatchTree(groups, tree));
+
+	// also add some loose objects
+	for(int i = allItems.size() / 2; i < allItems.size(); i++) {
+		BasicBounded* newObj = &allItems[i];
+		std::vector<BasicBounded*> newGroup{newObj};
+		groups.push_back(std::move(newGroup));
+		tree.add(newObj);
+	}
+
+	shuffleTree(tree);
+
+	return groups;
+}
+
+TEST_CASE(testBoundsTreeGroupMerging) {
+	BoundsTree<BasicBounded> tree;
 	ASSERT_TRUE(isBoundsTreeValid(tree));
 
+	constexpr int itemCount = 50;
+	//constexpr int itemCount = 20;
+
+	std::vector<BasicBounded> allItems = generateBoundsTreeItems(itemCount);
+
+	std::vector<std::vector<BasicBounded*>> groups = createGroups(tree, allItems);
+
+	ASSERT_TRUE(groupsMatchTree(groups, tree));
+	ASSERT_TRUE(isBoundsTreeValid(tree));
 
 	while(groups.size() > 1) {
 		int mergeIdxA = generateInt(groups.size());
@@ -189,21 +242,17 @@ TEST_CASE(testBoundsTreeGroupMerging) {
 	}
 }
 
-TEST_CASE(testBoundsTreeGroupMergingSplitting) {
+TEST_CASE_SLOW(testBoundsTreeGroupMergingSplitting) {
 	std::vector<int> itemCounts{5, 15, 30, 50};
 	for(int& itemCount : itemCounts) {
 		//printf("\n");
 		BoundsTree<BasicBounded> tree;
 		ASSERT_TRUE(isBoundsTreeValid(tree));
 
-		std::vector<BasicBounded> allItems;
+		std::vector<BasicBounded> allItems = generateBoundsTreeItems(itemCount);
 
 		std::vector<std::vector<BasicBounded*>> groups;
 
-		for(int i = 0; i < itemCount; i++) {
-			BasicBounded newObj{generateBoundsf()};
-			allItems.push_back(newObj);
-		}
 		tree.add(&allItems[0]);
 		ASSERT_TRUE(isBoundsTreeValid(tree));
 		groups.push_back(std::vector<BasicBounded*>{&allItems[0]});
@@ -264,6 +313,107 @@ TEST_CASE(testBoundsTreeGroupMergingSplitting) {
 
 			ASSERT_TRUE(isBoundsTreeValid(tree));
 			ASSERT_TRUE(groupsMatchTree(groups, tree));
+		}
+	}
+}
+
+TEST_CASE(testForEachColission) {
+	BoundsTree<BasicBounded> tree;
+
+	constexpr int itemCount = 100;
+
+	std::vector<BasicBounded> allItems = generateBoundsTreeItems(itemCount);
+
+	std::vector<std::vector<BasicBounded*>> groups = createGroups(tree, allItems);
+
+	std::set<std::pair<BasicBounded*, BasicBounded*>> foundColissions;
+
+	ASSERT_TRUE(isBoundsTreeValid(tree));
+
+	tree.forEachColission([&](BasicBounded* a, BasicBounded* b) {
+		ASSERT_STRICT(a != b);
+		if(b < a) std::swap(a, b);
+		std::pair<BasicBounded*, BasicBounded*> col(a, b);
+		ASSERT_FALSE(foundColissions.find(col) != foundColissions.end()); // no duplicate colissions
+		foundColissions.insert(col);
+	});
+
+	for(size_t i = 0; i < groups.size(); i++) {
+		std::vector<BasicBounded*>& grp = groups[i];
+
+		for(size_t aIndex = 0; aIndex < grp.size(); aIndex++) {
+			BasicBounded* a = grp[aIndex];
+			for(size_t bIndex = aIndex + 1; bIndex < grp.size(); bIndex++) {
+				BasicBounded* b = grp[bIndex];
+				if(a > b) std::swap(a, b);
+				std::pair<BasicBounded*, BasicBounded*> col(a, b);
+
+				ASSERT_FALSE(foundColissions.find(col) != foundColissions.end());
+			}
+		}
+	}
+
+	for(size_t i = 0; i < groups.size(); i++) {
+		std::vector<BasicBounded*>& groupA = groups[i];
+
+		for(size_t j = i+1; j < groups.size(); j++) {
+			std::vector<BasicBounded*>& groupB = groups[j];
+
+			for(int ai = 0; ai < groupA.size(); ai++) {
+				for(int bi = 0; bi < groupB.size(); bi++) {
+					BasicBounded* a = groupA[ai];
+					BasicBounded* b = groupB[bi];
+					if(a > b) std::swap(a, b);
+					std::pair<BasicBounded*, BasicBounded*> col(a, b);
+
+					bool wasFound = foundColissions.find(col) != foundColissions.end();
+
+					bool shouldBeFound = intersects(a->bounds, b->bounds);
+
+					ASSERT_STRICT(wasFound == shouldBeFound);
+				}
+			}
+		}
+	}
+}
+
+TEST_CASE(testForEachColissionBetween) {
+	BoundsTree<BasicBounded> tree1;
+	BoundsTree<BasicBounded> tree2;
+
+	constexpr int itemCount = 100;
+
+	std::vector<BasicBounded> allItems1 = generateBoundsTreeItems(itemCount);
+	std::vector<BasicBounded> allItems2 = generateBoundsTreeItems(itemCount);
+
+	std::vector<std::vector<BasicBounded*>> groups1 = createGroups(tree1, allItems1);
+	std::vector<std::vector<BasicBounded*>> groups2 = createGroups(tree2, allItems2);
+
+	std::set<std::pair<BasicBounded*, BasicBounded*>> foundColissions;
+
+	tree1.forEachColissionWith(tree2, [&](BasicBounded* a, BasicBounded* b) {
+		std::pair<BasicBounded*, BasicBounded*> col(a, b);
+		ASSERT_FALSE(foundColissions.find(col) != foundColissions.end()); // no duplicate colissions
+		foundColissions.insert(col);
+	});
+
+	for(size_t i = 0; i < groups1.size(); i++) {
+		std::vector<BasicBounded*>& groupA = groups1[i];
+
+		for(size_t j = i + 1; j < groups2.size(); j++) {
+			std::vector<BasicBounded*>& groupB = groups2[i];
+
+			for(BasicBounded* a : groupA) {
+				for(BasicBounded* b : groupB) {
+					std::pair<BasicBounded*, BasicBounded*> col(a, b);
+
+					bool wasFound = foundColissions.find(col) != foundColissions.end();
+
+					bool shouldBeFound = intersects(a->bounds, b->bounds);
+
+					ASSERT_STRICT(wasFound == shouldBeFound);
+				}
+			}
 		}
 	}
 }

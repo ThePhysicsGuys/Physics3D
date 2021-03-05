@@ -45,8 +45,6 @@ class TreeNodeRef {
 		return static_cast<int>(ptr & SIZE_DATA_MASK);
 	}
 
-	inline BoundsTemplate<float> getTrunkBounds() const;
-
 public:
 #ifndef NDEBUG
 	TreeNodeRef() noexcept : ptr(INVALID_REF) {}
@@ -113,6 +111,8 @@ public:
 	inline BoundsTemplate<float> recalculateBoundsRecursive(const GetObjectBoundsFunc& getObjBounds);
 };
 
+struct TrunkSIMDHelperFallback;
+
 class alignas(64) TreeTrunk {
 private:
 	float xMin[BRANCH_FACTOR];
@@ -124,15 +124,23 @@ private:
 public:
 	TreeNodeRef subNodes[BRANCH_FACTOR];
 	BoundsTemplate<float> getBoundsOfSubNode(int subNode) const;
-	BoundsTemplate<float> getTotalBounds(int upTo) const;
-
 	void setBoundsOfSubNode(int subNode, const BoundsTemplate<float>& newBounds);
 	void setSubNode(int subNode, TreeNodeRef&& newNode, const BoundsTemplate<float>& newBounds);
 	void moveSubNode(int from, int to);
+};
 
-	std::array<bool, BRANCH_FACTOR> getAllContainsBounds(const BoundsTemplate<float>& boundsToContain) const;
-	std::array<float, BRANCH_FACTOR> computeAllCombinationCosts(const BoundsTemplate<float>& boundsExtention) const;
-	int getLowestCombinationCost(const BoundsTemplate<float>& boundsExtention, int nodeSize) const;
+typedef std::array<std::array<bool, BRANCH_FACTOR>, BRANCH_FACTOR> OverlapMatrix;
+
+struct TrunkSIMDHelperFallback {
+	static BoundsTemplate<float> getTotalBounds(const TreeTrunk& trunk, int upTo);
+	static std::array<bool, BRANCH_FACTOR> getAllContainsBounds(const TreeTrunk& trunk, const BoundsTemplate<float>& boundsToContain);
+	static std::array<float, BRANCH_FACTOR> computeAllCombinationCosts(const TreeTrunk& trunk, const BoundsTemplate<float>& boundsExtention);
+	static int getLowestCombinationCost(const TreeTrunk& trunk, const BoundsTemplate<float>& boundsExtention, int nodeSize);
+	static std::array<bool, BRANCH_FACTOR> computeOverlapsWith(const TreeTrunk& trunk, int trunkSize, const BoundsTemplate<float>& bounds);
+	// indexed result[a][b]
+	static std::array<std::array<bool, BRANCH_FACTOR>, BRANCH_FACTOR> computeBoundsOverlapMatrix(const TreeTrunk& trunkA, int trunkASize, const TreeTrunk& trunkB, int trunkBSize);
+	// indexed result[i][j] with j >= i+1
+	static std::array<std::array<bool, BRANCH_FACTOR>, BRANCH_FACTOR> computeInternalBoundsOverlapMatrix(const TreeTrunk& trunk, int trunkSize);
 };
 
 template<typename CastTo, typename GetObjectBoundsFunc>
@@ -149,7 +157,7 @@ inline BoundsTemplate<float> TreeNodeRef::recalculateBoundsRecursive(const GetOb
 			trunk->setBoundsOfSubNode(i, trunk->subNodes[i].recalculateBoundsRecursive(getObjBounds));
 		}
 
-		return trunk->getTotalBounds(trunkSize);
+		return TrunkSIMDHelperFallback::getTotalBounds(*trunk, trunkSize);
 	}
 }
 
@@ -177,7 +185,7 @@ const TreeNodeRef* getGroupRecursive(const TreeTrunk& curTrunk, int curTrunkSize
 template<typename Func>
 inline bool modifyGroupRecursive(TrunkAllocator& allocator, TreeTrunk& curTrunk, int curTrunkSize, const void* groupRepresentative, const BoundsTemplate<float>& groupRepresentativeBounds, const Func& modification) {
 	assert(curTrunkSize >= 0 && curTrunkSize <= BRANCH_FACTOR);
-	std::array<bool, BRANCH_FACTOR> couldContain = curTrunk.getAllContainsBounds(groupRepresentativeBounds);
+	std::array<bool, BRANCH_FACTOR> couldContain = TrunkSIMDHelperFallback::getAllContainsBounds(curTrunk, groupRepresentativeBounds);
 	for(int i = 0; i < curTrunkSize; i++) {
 		if(!couldContain[i]) continue;
 
@@ -194,7 +202,7 @@ inline bool modifyGroupRecursive(TrunkAllocator& allocator, TreeTrunk& curTrunk,
 				}
 			} else {
 				if(modifyGroupRecursive(allocator, subTrunk, subTrunkSize, groupRepresentative, groupRepresentativeBounds, modification)) {
-					curTrunk.setBoundsOfSubNode(i, subTrunk.getTotalBounds(subTrunkSize));
+					curTrunk.setBoundsOfSubNode(i, TrunkSIMDHelperFallback::getTotalBounds(subTrunk, subTrunkSize));
 					return true;
 				}
 			}
@@ -219,7 +227,7 @@ inline bool modifyGroupRecursive(TrunkAllocator& allocator, TreeTrunk& curTrunk,
 template<typename Func>
 inline int contractGroupRecursive(TrunkAllocator& allocator, TreeTrunk& curTrunk, int curTrunkSize, const void* groupRepresentative, const BoundsTemplate<float>& groupRepresentativeBounds, const Func& modification) {
 	assert(curTrunkSize >= 0 && curTrunkSize <= BRANCH_FACTOR);
-	std::array<bool, BRANCH_FACTOR> couldContain = curTrunk.getAllContainsBounds(groupRepresentativeBounds);
+	std::array<bool, BRANCH_FACTOR> couldContain = TrunkSIMDHelperFallback::getAllContainsBounds(curTrunk, groupRepresentativeBounds);
 	for(int i = 0; i < curTrunkSize; i++) {
 		if(!couldContain[i]) continue;
 
@@ -248,7 +256,7 @@ inline int contractGroupRecursive(TrunkAllocator& allocator, TreeTrunk& curTrunk
 						allocator.freeTrunk(&subTrunk);
 					} else {
 						subNode.setTrunkSize(newSubSize);
-						curTrunk.setBoundsOfSubNode(i, subTrunk.getTotalBounds(newSubSize));
+						curTrunk.setBoundsOfSubNode(i, TrunkSIMDHelperFallback::getTotalBounds(subTrunk, newSubSize));
 					}
 					return curTrunkSize;
 				}
@@ -270,120 +278,150 @@ inline int contractGroupRecursive(TrunkAllocator& allocator, TreeTrunk& curTrunk
 	return -1;
 }
 
-// expects a function of the form void(void* object, const BoundsTemplate<float>& bounds)
-template<typename Func>
-inline void forEachRecurseWithBounds(const TreeTrunk& curTrunk, int curTrunkSize, const Func& func) {
-	for(int i = 0; i < curTrunkSize; i++) {
-		const TreeNodeRef& subNode = curTrunk.subNodes[i];
-		if(subNode.isTrunkNode()) {
-			forEachRecurseWithBounds(subNode.asTrunk(), subNode.getTrunkSize(), func);
-		} else {
-			func(subNode.asObject(), curTrunk.getBoundsOfSubNode(i));
-		}
-	}
-}
-
-// expects a function of the form void(void* object, const BoundsTemplate<float>& bounds)
-template<typename Func>
+// expects a function of the form void(Boundable* object, const BoundsTemplate<float>& bounds)
+template<typename Boundable, typename Func>
 inline void forEachRecurse(const TreeTrunk& curTrunk, int curTrunkSize, const Func& func) {
 	for(int i = 0; i < curTrunkSize; i++) {
 		const TreeNodeRef& subNode = curTrunk.subNodes[i];
 		if(subNode.isTrunkNode()) {
-			forEachRecurse(subNode.asTrunk(), subNode.getTrunkSize(), func);
+			forEachRecurse<Boundable, Func>(subNode.asTrunk(), subNode.getTrunkSize(), func);
 		} else {
-			func(subNode.asObject());
+			func(static_cast<Boundable*>(subNode.asObject()));
 		}
 	}
 }
-// expects a function of the form void(TrunkNode& trunk)
-// runs first for leaf trunks
-/*template<typename Func>
-inline void forEachLeafAndTrunkRecurse(TreeTrunk& curTrunk, int curTrunkSize, const Func& leafFunc, const Func& trunkFunc) {
+
+// expects a function of the form void(Boundable*, Boundable*)
+// Calls the given function for each pair of leaf nodes from the two trunks 
+template<typename Boundable, typename SIMDHelper, typename Func>
+void forEachColissionWithRecursive(Boundable* obj, const BoundsTemplate<float>& objBounds, const TreeTrunk& trunk, int trunkSize, const Func& func) {
+	std::array<bool, BRANCH_FACTOR> collidesWith = SIMDHelper::computeOverlapsWith(trunk, trunkSize, objBounds);
+
+	for(int i = 0; i < trunkSize; i++) {
+		if(!collidesWith[i]) continue;
+
+		const TreeNodeRef& subNode = trunk.subNodes[i];
+
+		if(subNode.isTrunkNode()) {
+			forEachColissionWithRecursive<Boundable, SIMDHelper, Func>(obj, objBounds, subNode.asTrunk(), subNode.getTrunkSize(), func);
+		} else {
+			func(obj, static_cast<Boundable*>(subNode.asObject()));
+		}
+	}
+}
+
+// expects a function of the form void(Boundable*, Boundable*)
+// Calls the given function for each pair of leaf nodes from the two trunks 
+template<typename Boundable, typename SIMDHelper, typename Func>
+void forEachColissionWithRecursive(const TreeTrunk& trunk, int trunkSize, Boundable* obj, const BoundsTemplate<float>& objBounds, const Func& func) {
+	std::array<bool, BRANCH_FACTOR> collidesWith = SIMDHelper::computeOverlapsWith(trunk, trunkSize, objBounds);
+
+	for(int i = 0; i < trunkSize; i++) {
+		if(!collidesWith[i]) continue;
+
+		const TreeNodeRef& subNode = trunk.subNodes[i];
+
+		if(subNode.isTrunkNode()) {
+			forEachColissionWithRecursive<Boundable, SIMDHelper, Func>(subNode.asTrunk(), subNode.getTrunkSize(), obj, objBounds, func);
+		} else {
+			func(static_cast<Boundable*>(subNode.asObject()), obj);
+		}
+	}
+}
+
+// expects a function of the form void(Boundable*, Boundable*)
+// Calls the given function for each pair of leaf nodes from the two trunks 
+template<typename Boundable, typename SIMDHelper, typename Func>
+void forEachColissionBetweenRecursive(const TreeTrunk& trunkA, int trunkASize, const TreeTrunk& trunkB, int trunkBSize, const Func& func) {
+	OverlapMatrix overlapBetween = SIMDHelper::computeBoundsOverlapMatrix(trunkA, trunkASize, trunkB, trunkBSize);
+
+	for(int a = 0; a < trunkASize; a++) {
+		const TreeNodeRef& aNode = trunkA.subNodes[a];
+		bool aIsTrunk = aNode.isTrunkNode();
+		for(int b = 0; b < trunkBSize; b++) {
+			if(!overlapBetween[a][b]) continue;
+
+			const TreeNodeRef& bNode = trunkB.subNodes[b];
+			bool bIsTrunk = bNode.isTrunkNode();
+			
+			if(aIsTrunk) {
+				if(bIsTrunk) {
+					// both trunk nodes
+					// split both
+					forEachColissionBetweenRecursive<Boundable, SIMDHelper, Func>(aNode.asTrunk(), aNode.getTrunkSize(), bNode.asTrunk(), bNode.getTrunkSize(), func);
+				} else {
+					// a is trunk, b is not
+					// split a
+					forEachColissionWithRecursive<Boundable, SIMDHelper, Func>(aNode.asTrunk(), aNode.getTrunkSize(), static_cast<Boundable*>(bNode.asObject()), trunkB.getBoundsOfSubNode(b), func);
+				}
+			} else {
+				if(bIsTrunk) {
+					// b is trunk, a is not
+					// split b
+					forEachColissionWithRecursive<Boundable, SIMDHelper, Func>(static_cast<Boundable*>(aNode.asObject()), trunkA.getBoundsOfSubNode(a), bNode.asTrunk(), bNode.getTrunkSize(), func);
+				} else {
+					// both leaf nodes
+					func(static_cast<Boundable*>(aNode.asObject()), static_cast<Boundable*>(bNode.asObject()));
+				}
+			}
+		}
+	}
+}
+
+// expects a function of the form void(Boundable*, Boundable*)
+// Calls the given function for each pair of leaf nodes that are not in the same group and have overlapping bounds
+template<typename Boundable, typename SIMDHelper, typename Func>
+void forEachColissionInternalRecursive(const TreeTrunk& curTrunk, int curTrunkSize, const Func& func) {
+	OverlapMatrix internalOverlap = SIMDHelper::computeInternalBoundsOverlapMatrix(curTrunk, curTrunkSize);
+
+	for(int a = 0; a < curTrunkSize; a++) {
+		const TreeNodeRef& aNode = curTrunk.subNodes[a];
+		bool aIsTrunk = aNode.isTrunkNode();
+		for(int b = a+1; b < curTrunkSize; b++) {
+			if(!internalOverlap[a][b]) continue;
+
+			const TreeNodeRef& bNode = curTrunk.subNodes[b];
+			bool bIsTrunk = bNode.isTrunkNode();
+
+			if(aIsTrunk) {
+				if(bIsTrunk) {
+					// both trunk nodes
+					// split both
+					forEachColissionBetweenRecursive<Boundable, SIMDHelper, Func>(aNode.asTrunk(), aNode.getTrunkSize(), bNode.asTrunk(), bNode.getTrunkSize(), func);
+				} else {
+					// a is trunk, b is not
+					// split a
+					forEachColissionWithRecursive<Boundable, SIMDHelper, Func>(aNode.asTrunk(), aNode.getTrunkSize(), static_cast<Boundable*>(bNode.asObject()), curTrunk.getBoundsOfSubNode(b), func);
+				}
+			} else {
+				if(bIsTrunk) {
+					// b is trunk, a is not
+					// split b
+					forEachColissionWithRecursive<Boundable, SIMDHelper, Func>(static_cast<Boundable*>(aNode.asObject()), curTrunk.getBoundsOfSubNode(a), bNode.asTrunk(), bNode.getTrunkSize(), func);
+				} else {
+					// both leaf nodes
+					func(static_cast<Boundable*>(aNode.asObject()), static_cast<Boundable*>(bNode.asObject()));
+				}
+			}
+		}
+	}
+
 	for(int i = 0; i < curTrunkSize; i++) {
-		TreeNodeRef& subNode = curTrunk.subNodes[i];
-		if(subNode.isTrunkNode()) {
-			TreeTrunk& subTrunk = subNode.asTrunk();
-			forEachTrunkRecurse(subTrunk, subNode.getTrunkSize(), func);
-			func(subTrunk);
+		const TreeNodeRef& subNode = curTrunk.subNodes[i];
+
+		if(subNode.isTrunkNode() && !subNode.isGroupHead()) {
+			forEachColissionInternalRecursive<Boundable, SIMDHelper, Func>(subNode.asTrunk(), subNode.getTrunkSize(), func);
 		}
 	}
-}*/
-
-
-/*TODO MOVE TO VALIDITY*/
-
-template<typename Boundable>
-class BoundsTree;
-
-class BoundsTreePrototype;
-class BasicBounded;
-
-template<typename Boundable>
-inline bool isBoundsTreeValidRecursive(const TreeTrunk& curNode, int curNodeSize, int depth = 0) {
-	for(int i = 0; i < curNodeSize; i++) {
-		const TreeNodeRef& subNode = curNode.subNodes[i];
-
-		BoundsTemplate<float> foundBounds = curNode.getBoundsOfSubNode(i);
-
-		if(subNode.isTrunkNode()) {
-			const TreeTrunk& subTrunk = subNode.asTrunk();
-			int subTrunkSize = subNode.getTrunkSize();
-
-			BoundsTemplate<float> realBounds = subTrunk.getTotalBounds(subTrunkSize);
-
-			if(realBounds != foundBounds) {
-				std::cout << "(" << i << "/" << curNodeSize << ") Trunk bounds not up to date\n";
-				return false;
-			}
-
-			if(!isBoundsTreeValidRecursive<Boundable>(subTrunk, subTrunkSize, depth + 1)) {
-				std::cout << "(" << i << "/" << curNodeSize << ")\n";
-				return false;
-			}
-		} else {
-			const Boundable* itemB = static_cast<const Boundable*>(subNode.asObject());
-			if(foundBounds != itemB->getBounds()) {
-				std::cout << "(" << i << "/" << curNodeSize << ") Leaf not up to date\n";
-				return false;
-			}
-		}
-
-		if(foundBounds.min.x < -10000 || foundBounds.min.y < -10000 || foundBounds.min.z < -10000 ||
-		   foundBounds.max.x > 10000 || foundBounds.max.y > 10000 || foundBounds.max.z > 10000) {
-			std::cout << "(" << i << "/" << curNodeSize << ") Extreme bounds\n";
-			return false;
-		}
-	}
-	return true;
 }
-
-template<typename Boundable>
-bool isBoundsTreeValid(const BoundsTreePrototype& tree) {
-	struct Publicizer {
-		TreeTrunk baseTrunk;
-		int baseTrunkSize;
-		TrunkAllocator allocator;
-	};
-	const Publicizer* publicTree = reinterpret_cast<const Publicizer*>(&tree);
-	return isBoundsTreeValidRecursive<Boundable>(publicTree->baseTrunk, publicTree->baseTrunkSize);
-}
-
-template<typename Boundable>
-bool isBoundsTreeValid(const BoundsTree<Boundable>& tree) {
-	struct Publicizer {
-		BoundsTreePrototype tree;
-	};
-	const Publicizer* publicTree = reinterpret_cast<const Publicizer*>(&tree);
-	return isBoundsTreeValid<Boundable>(publicTree->tree);
-}
-
-/*^^^^^TODO MOVE TO VALIDITY*/
-
 
 class BoundsTreePrototype {
 	TreeTrunk baseTrunk;
 	int baseTrunkSize;
 	TrunkAllocator allocator;
+
+	template<typename Boundable>
+	friend class BoundsTree;
 
 public:
 	BoundsTreePrototype();
@@ -394,6 +432,7 @@ public:
 
 	void addToGroup(void* newObject, const BoundsTemplate<float>& newObjectBounds, const void* groupRepresentative, const BoundsTemplate<float>& groupRepBounds);
 	void mergeGroups(const void* groupRepA, const BoundsTemplate<float>& repABounds, const void* groupRepB, const BoundsTemplate<float>& repBBounds);
+	void transferGroupTo(const void* groupRep, const BoundsTemplate<float>& groupRepBounds, BoundsTreePrototype& destinationTree);
 	
 	bool contains(const void* object, const BoundsTemplate<float>& bounds) const;
 	bool groupContains(const void* groupRep, const BoundsTemplate<float>& groupRepBounds, const void* object, const BoundsTemplate<float>& bounds) const;
@@ -406,7 +445,6 @@ public:
 
 	void clear();
 
-	void transferGroupTo(const void* groupRep, const BoundsTemplate<float>& groupRepBounds, BoundsTreePrototype& destinationTree);
 
 	template<typename GroupIter, typename GroupIterEnd>
 	void removeSubGroup(GroupIter iter, const GroupIterEnd& iterEnd) {
@@ -437,7 +475,7 @@ public:
 
 				if(groupTrunkSize >= 2) {
 					group.setTrunkSize(groupTrunkSize);
-					return std::optional<BoundsTemplate<float>>(groupTrunk.getTotalBounds(groupTrunkSize));
+					return std::optional<BoundsTemplate<float>>(TrunkSIMDHelperFallback::getTotalBounds(groupTrunk, groupTrunkSize));
 				} else if(groupTrunkSize == 1) {
 					BoundsTemplate<float> resultingBounds = groupTrunk.getBoundsOfSubNode(0);
 					group = std::move(groupTrunk.subNodes[0]);
@@ -461,7 +499,6 @@ public:
 		if(!(iter != iterEnd)) return; // no items
 
 		this->removeSubGroup(iter, iterEnd);
-		assert(isBoundsTreeValid<BasicBounded>(*this));
 
 		std::pair<void*, BoundsTemplate<float>> firstObject = *iter;
 		++iter;
@@ -477,11 +514,9 @@ public:
 				++iter;
 			} while(iter != iterEnd);
 
-			destinationTree.baseTrunkSize = addRecursive(destinationTree.allocator, destinationTree.baseTrunk, destinationTree.baseTrunkSize, TreeNodeRef(newGroupTrunk, newGroupTrunkSize, true), newGroupTrunk->getTotalBounds(newGroupTrunkSize));
-			assert(isBoundsTreeValid<BasicBounded>(*this));
+			destinationTree.baseTrunkSize = addRecursive(destinationTree.allocator, destinationTree.baseTrunk, destinationTree.baseTrunkSize, TreeNodeRef(newGroupTrunk, newGroupTrunkSize, true), TrunkSIMDHelperFallback::getTotalBounds(*newGroupTrunk, newGroupTrunkSize));
 		} else {
 			destinationTree.add(firstObject.first, firstObject.second);
-			assert(isBoundsTreeValid<BasicBounded>(*this));
 		}
 	}
 
@@ -491,33 +526,35 @@ public:
 		this->transferSplitGroupTo(iter, iterEnd, *this);
 	}
 
-	// expects a function of the form void(void* object)
-	template<typename Func>
-	inline void forEach(const Func& func) const {
-		forEachRecurse(this->baseTrunk, this->baseTrunkSize, func);
-	}
-
-	// expects a function of the form void(void* object)
-	template<typename Func>
-	inline void forEachInGroup(const void* groupRepresentative, const BoundsTemplate<float>& groupRepBounds, const Func& func) const {
-		const TreeNodeRef* group = getGroupRecursive(this->baseTrunk, this->baseTrunkSize, groupRepresentative, groupRepBounds);
-		if(group == nullptr) {
-			throw "Group not found!";
-		}
-		if(group->isTrunkNode()) {
-			forEachRecurse(group->asTrunk(), group->getTrunkSize(), func);
-		} else {
-			func(group->asObject());
-		}
-	}
+	inline std::pair<TreeTrunk&, int> getBaseTrunk() { return std::pair<TreeTrunk&, int>(this->baseTrunk, this->baseTrunkSize); }
+	inline std::pair<const TreeTrunk&, int> getBaseTrunk() const { return std::pair<const TreeTrunk&, int>(this->baseTrunk, this->baseTrunkSize); }
 };
 
+template<typename Boundable>
+void recalculateBoundsRecursive(TreeTrunk& curTrunk, int curTrunkSize) {
+	for(int i = 0; i < curTrunkSize; i++) {
+		TreeNodeRef& subNode = curTrunk.subNodes[i];
+
+		if(subNode.isTrunkNode()) {
+			TreeTrunk& subTrunk = subNode.asTrunk();
+			int subTrunkSize = subNode.getTrunkSize();
+			recalculateBoundsRecursive<Boundable>(subTrunk, subTrunkSize);
+			curTrunk.setBoundsOfSubNode(i, TrunkSIMDHelperFallback::getTotalBounds(subTrunk, subTrunkSize));
+		} else {
+			Boundable* object = static_cast<Boundable*>(subNode.asObject());
+			curTrunk.setBoundsOfSubNode(i, object->getBounds());
+		}
+	}
+}
 
 template<typename Boundable>
 class BoundsTree {
 	BoundsTreePrototype tree;
 
 public:
+	inline const BoundsTreePrototype& getPrototype() const { return tree; }
+	inline BoundsTreePrototype& getPrototype() { return tree; }
+
 	template<typename BoundableIter>
 	struct BoundableIteratorAdapter {
 		BoundableIter iter;
@@ -567,13 +604,13 @@ public:
 		tree.clear();
 	}
 
-	void transferGroupTo(const Boundable* groupRep, BoundsTree<Boundable>& destinationTree) {
+	void transferGroupTo(const Boundable* groupRep, BoundsTree& destinationTree) {
 		tree.transferGroupTo(static_cast<const void*>(groupRep), groupRep->getBounds(), destinationTree.tree);
 	}
 
 	// the given iterator should return objects of type Boundable*
 	template<typename GroupIter, typename GroupIterEnd>
-	void transferSplitGroupTo(GroupIter&& iter, const GroupIterEnd& iterEnd, BoundsTree<Boundable>& destinationTree) {
+	void transferSplitGroupTo(GroupIter&& iter, const GroupIterEnd& iterEnd, BoundsTree& destinationTree) {
 		tree.transferSplitGroupTo(BoundableIteratorAdapter<GroupIter>{std::move(iter)}, iterEnd, destinationTree.tree);
 	}
 
@@ -585,18 +622,36 @@ public:
 
 	// expects a function of the form void(Boundable* object)
 	template<typename Func>
-	inline void forEach(const Func& func) const {
-		tree.forEach([&func](void* object) {
-			func(static_cast<Boundable*>(object));
-		});
+	void forEach(const Func& func) const {
+		forEachRecurse<Boundable, Func>(this->tree.baseTrunk, this->tree.baseTrunkSize, func);
 	}
 
-	// expects a function of the form void(void* object)
+	// expects a function of the form void(Boundable* object)
 	template<typename Func>
-	inline void forEachInGroup(const Boundable* groupRep, const Func& func) const {
-		tree.forEachInGroup(static_cast<const void*>(groupRep), groupRep->getBounds(), [&func](void* object) {
-			func(static_cast<Boundable*>(object));
-		});
+	void forEachInGroup(const void* groupRepresentative, const BoundsTemplate<float>& groupRepBounds, const Func& func) const {
+		const TreeNodeRef* group = getGroupRecursive(this->tree.baseTrunk, this->tree.baseTrunkSize, groupRepresentative, groupRepBounds);
+		if(group == nullptr) {
+			throw "Group not found!";
+		}
+		if(group->isTrunkNode()) {
+			forEachRecurse<Boundable, Func>(group->asTrunk(), group->getTrunkSize(), func);
+		} else {
+			func(static_cast<Boundable*>(group->asObject()));
+		}
+	}
+
+	template<typename Func>
+	void forEachColission(const Func& func) {
+		forEachColissionInternalRecursive<Boundable, TrunkSIMDHelperFallback, Func>(this->tree.baseTrunk, this->tree.baseTrunkSize, func);
+	}
+
+	template<typename Func>
+	void forEachColissionWith(const BoundsTree& other, const Func& func) {
+		forEachColissionBetweenRecursive<Boundable, TrunkSIMDHelperFallback, Func>(this->tree.baseTrunk, this->tree.baseTrunkSize, other.tree.baseTrunk, other.tree.baseTrunkSize, func);
+	}
+
+	void recalculateBounds() {
+		recalculateBoundsRecursive<Boundable>(this->tree.baseTrunk, this->tree.baseTrunkSize);
 	}
 };
 

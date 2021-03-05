@@ -34,35 +34,35 @@ void TreeTrunk::setSubNode(int subNode, TreeNodeRef&& newNode, const BoundsTempl
 }
 
 // naive implementation, to be optimized
-BoundsTemplate<float> TreeTrunk::getTotalBounds(int upTo) const {
+BoundsTemplate<float> TrunkSIMDHelperFallback::getTotalBounds(const TreeTrunk& trunk, int upTo) {
 	assert(upTo > 1 && upTo <= BRANCH_FACTOR);
-	BoundsTemplate<float> totalBounds = getBoundsOfSubNode(0);
+	BoundsTemplate<float> totalBounds = trunk.getBoundsOfSubNode(0);
 	for(int i = 1; i < upTo; i++) {
-		totalBounds = unionOfBounds(totalBounds, getBoundsOfSubNode(i));
+		totalBounds = unionOfBounds(totalBounds, trunk.getBoundsOfSubNode(i));
 	}
 	return totalBounds;
 }
 
-std::array<bool, BRANCH_FACTOR> TreeTrunk::getAllContainsBounds(const BoundsTemplate<float>& boundsToContain) const {
+std::array<bool, BRANCH_FACTOR> TrunkSIMDHelperFallback::getAllContainsBounds(const TreeTrunk& trunk, const BoundsTemplate<float>& boundsToContain) {
 	std::array<bool, BRANCH_FACTOR> contained;
 	for(int i = 0; i < BRANCH_FACTOR; i++) {
-		BoundsTemplate<float> subNodeBounds = this->getBoundsOfSubNode(i);
+		BoundsTemplate<float> subNodeBounds = trunk.getBoundsOfSubNode(i);
 		contained[i] = subNodeBounds.contains(boundsToContain);
 	}
 	return contained;
 }
 
-std::array<float, BRANCH_FACTOR> TreeTrunk::computeAllCombinationCosts(const BoundsTemplate<float>& boundsExtention) const {
+std::array<float, BRANCH_FACTOR> TrunkSIMDHelperFallback::computeAllCombinationCosts(const TreeTrunk& trunk, const BoundsTemplate<float>& boundsExtention) {
 	std::array<float, BRANCH_FACTOR> costs;
 	for(int i = 0; i < BRANCH_FACTOR; i++) {
-		BoundsTemplate<float> subNodeBounds = this->getBoundsOfSubNode(i);
+		BoundsTemplate<float> subNodeBounds = trunk.getBoundsOfSubNode(i);
 		costs[i] = unionOfBounds(boundsExtention, subNodeBounds).getVolume() - subNodeBounds.getVolume();
 	}
 	return costs;
 }
 
-int TreeTrunk::getLowestCombinationCost(const BoundsTemplate<float>& boundsExtention, int nodeSize) const {
-	std::array<float, BRANCH_FACTOR> costs = this->computeAllCombinationCosts(boundsExtention);
+int TrunkSIMDHelperFallback::getLowestCombinationCost(const TreeTrunk& trunk, const BoundsTemplate<float>& boundsExtention, int nodeSize) {
+	std::array<float, BRANCH_FACTOR> costs = TrunkSIMDHelperFallback::computeAllCombinationCosts(trunk, boundsExtention);
 	float bestCost = costs[0];
 	int bestIndex = 0;
 	for(int i = 1; i < nodeSize; i++) {
@@ -74,6 +74,42 @@ int TreeTrunk::getLowestCombinationCost(const BoundsTemplate<float>& boundsExten
 	return bestIndex;
 }
 
+std::array<bool, BRANCH_FACTOR> TrunkSIMDHelperFallback::computeOverlapsWith(const TreeTrunk& trunk, int trunkSize, const BoundsTemplate<float>& bounds) {
+	std::array<bool, BRANCH_FACTOR> result;
+
+	for(int i = 0; i < trunkSize; i++) {
+		result[i] = intersects(trunk.getBoundsOfSubNode(i), bounds);
+	}
+
+	return result;
+}
+
+std::array<std::array<bool, BRANCH_FACTOR>, BRANCH_FACTOR> TrunkSIMDHelperFallback::computeBoundsOverlapMatrix(const TreeTrunk& trunkA, int trunkASize, const TreeTrunk& trunkB, int trunkBSize) {
+	std::array<std::array<bool, BRANCH_FACTOR>, BRANCH_FACTOR> result;
+	for(int a = 0; a < trunkASize; a++) {
+		BoundsTemplate<float> aBounds = trunkA.getBoundsOfSubNode(a);
+		for(int b = 0; b < trunkBSize; b++) {
+			BoundsTemplate<float> bBounds = trunkB.getBoundsOfSubNode(b);
+			result[a][b] = intersects(aBounds, bBounds);
+		}
+	}
+	return result;
+}
+
+std::array<std::array<bool, BRANCH_FACTOR>, BRANCH_FACTOR> TrunkSIMDHelperFallback::computeInternalBoundsOverlapMatrix(const TreeTrunk& trunk, int trunkSize) {
+	std::array<std::array<bool, BRANCH_FACTOR>, BRANCH_FACTOR> result;
+
+	for(int a = 0; a < trunkSize; a++) {
+		BoundsTemplate<float> aBounds = trunk.getBoundsOfSubNode(a);
+		for(int b = a+1; b < trunkSize; b++) {
+			BoundsTemplate<float> bBounds = trunk.getBoundsOfSubNode(b);
+			result[a][b] = intersects(aBounds, bBounds);
+		}
+	}
+
+	return result;
+}
+
 void TreeTrunk::moveSubNode(int from, int to) {
 	this->setSubNode(to, std::move(this->subNodes[from]), this->getBoundsOfSubNode(from));
 }
@@ -81,11 +117,6 @@ void TreeTrunk::moveSubNode(int from, int to) {
 TreeNodeRef::TreeNodeRef(TreeTrunk* trunk, int trunkSize, bool isGroupHead) noexcept : ptr(reinterpret_cast<std::uintptr_t>(trunk) | (static_cast<std::uintptr_t>(trunkSize) - 1) | (isGroupHead ? BRANCH_FACTOR : 0)) {
 	assert(trunkSize >= 2 && trunkSize <= BRANCH_FACTOR); // trunkSize must be between 2-BRANCH_FACTOR
 	assert((reinterpret_cast<std::uintptr_t>(trunk) & (BRANCH_FACTOR * sizeof(int64_t) - 1)) == 0); // check trunk is aligned correctly
-}
-BoundsTemplate<float> TreeNodeRef::getTrunkBounds() const {
-	assert(this->ptr != INVALID_REF);
-	assert(isTrunkNode());
-	return this->asTrunk().getTotalBounds(this->getTrunkSize());
 }
 const TreeTrunk& TreeNodeRef::asTrunk() const {
 	assert(this->ptr != INVALID_REF);
@@ -107,7 +138,7 @@ void* TreeNodeRef::asObject() const {
 int addRecursive(TrunkAllocator& allocator, TreeTrunk& curTrunk, int curTrunkSize, TreeNodeRef&& newNode, const BoundsTemplate<float>& bounds) {
 	assert(curTrunkSize >= 0 && curTrunkSize <= BRANCH_FACTOR);
 	if(curTrunkSize == BRANCH_FACTOR) {
-		int chosenNode = curTrunk.getLowestCombinationCost(bounds, curTrunkSize);
+		int chosenNode = TrunkSIMDHelperFallback::getLowestCombinationCost(curTrunk, bounds, curTrunkSize);
 
 		TreeNodeRef& chosen = curTrunk.subNodes[chosenNode];
 		BoundsTemplate<float> oldSubNodeBounds = curTrunk.getBoundsOfSubNode(chosenNode);
@@ -133,7 +164,7 @@ int addRecursive(TrunkAllocator& allocator, TreeTrunk& curTrunk, int curTrunkSiz
 
 bool containsObjectRecursive(const TreeTrunk& trunk, int trunkSize, const void* object, const BoundsTemplate<float>& bounds) {
 	assert(trunkSize >= 0 && trunkSize <= BRANCH_FACTOR);
-	std::array<bool, BRANCH_FACTOR> couldContain = trunk.getAllContainsBounds(bounds);
+	std::array<bool, BRANCH_FACTOR> couldContain = TrunkSIMDHelperFallback::getAllContainsBounds(trunk, bounds);
 	for(int i = 0; i < trunkSize; i++) {
 		if(!couldContain[i]) continue; 
 
@@ -154,7 +185,7 @@ bool containsObjectRecursive(const TreeTrunk& trunk, int trunkSize, const void* 
 // returns new trunkSize if removed, -1 if not removed
 int removeRecursive(TrunkAllocator& allocator, TreeTrunk& curTrunk, int curTrunkSize, const void* objectToRemove, const BoundsTemplate<float>& bounds) {
 	assert(curTrunkSize >= 0 && curTrunkSize <= BRANCH_FACTOR);
-	std::array<bool, BRANCH_FACTOR> couldContain = curTrunk.getAllContainsBounds(bounds);
+	std::array<bool, BRANCH_FACTOR> couldContain = TrunkSIMDHelperFallback::getAllContainsBounds(curTrunk, bounds);
 	for(int i = 0; i < curTrunkSize; i++) {
 		if(!couldContain[i]) continue;
 
@@ -175,7 +206,7 @@ int removeRecursive(TrunkAllocator& allocator, TreeTrunk& curTrunk, int curTrunk
 					}
 					allocator.freeTrunk(&subNodeTrunk);
 				} else {
-					curTrunk.setBoundsOfSubNode(i, subNodeTrunk.getTotalBounds(newSubNodeTrunkSize));
+					curTrunk.setBoundsOfSubNode(i, TrunkSIMDHelperFallback::getTotalBounds(subNodeTrunk, newSubNodeTrunkSize));
 					subNode.setTrunkSize(newSubNodeTrunkSize);
 				}
 					
@@ -206,7 +237,7 @@ struct TreeGrab {
 // returns new trunkSize if removed, -1 if not removed
 static TreeGrab grabGroupRecursive(TrunkAllocator& allocator, TreeTrunk& curTrunk, int curTrunkSize, const void* groupRepresentative, const BoundsTemplate<float>& representativeBounds) {
 	assert(curTrunkSize >= 0 && curTrunkSize <= BRANCH_FACTOR);
-	std::array<bool, BRANCH_FACTOR> couldContain = curTrunk.getAllContainsBounds(representativeBounds);
+	std::array<bool, BRANCH_FACTOR> couldContain = TrunkSIMDHelperFallback::getAllContainsBounds(curTrunk, representativeBounds);
 	for(int i = 0; i < curTrunkSize; i++) {
 		if(!couldContain[i]) continue;
 
@@ -234,7 +265,7 @@ static TreeGrab grabGroupRecursive(TrunkAllocator& allocator, TreeTrunk& curTrun
 						curTrunk.setSubNode(i, std::move(subNodeTrunk.subNodes[0]), subNodeTrunk.getBoundsOfSubNode(0));
 						allocator.freeTrunk(&subNodeTrunk);
 					} else {
-						curTrunk.setBoundsOfSubNode(i, subNodeTrunk.getTotalBounds(newSubNodeTrunkSize));
+						curTrunk.setBoundsOfSubNode(i, TrunkSIMDHelperFallback::getTotalBounds(subNodeTrunk, newSubNodeTrunkSize));
 						subNode.setTrunkSize(newSubNodeTrunkSize);
 					}
 
@@ -257,7 +288,7 @@ static TreeGrab grabGroupRecursive(TrunkAllocator& allocator, TreeTrunk& curTrun
 
 const TreeNodeRef* getGroupRecursive(const TreeTrunk& curTrunk, int curTrunkSize, const void* groupRepresentative, const BoundsTemplate<float>& representativeBounds) {
 	assert(curTrunkSize >= 0 && curTrunkSize <= BRANCH_FACTOR);
-	std::array<bool, BRANCH_FACTOR> couldContain = curTrunk.getAllContainsBounds(representativeBounds);
+	std::array<bool, BRANCH_FACTOR> couldContain = TrunkSIMDHelperFallback::getAllContainsBounds(curTrunk, representativeBounds);
 	for(int i = 0; i < curTrunkSize; i++) {
 		if(!couldContain[i]) continue;
 
@@ -298,6 +329,19 @@ static void freeTrunksRecursive(TrunkAllocator& alloc, TreeTrunk& curTrunk, int 
 	alloc.freeTrunk(&curTrunk);
 }
 
+// expects a function of the form void(void* object, const BoundsTemplate<float>& bounds)
+template<typename Func>
+static void forEachRecurseWithBounds(const TreeTrunk& curTrunk, int curTrunkSize, const Func& func) {
+	for(int i = 0; i < curTrunkSize; i++) {
+		const TreeNodeRef& subNode = curTrunk.subNodes[i];
+		if(subNode.isTrunkNode()) {
+			forEachRecurseWithBounds(subNode.asTrunk(), subNode.getTrunkSize(), func);
+		} else {
+			func(subNode.asObject(), curTrunk.getBoundsOfSubNode(i));
+		}
+	}
+}
+
 // returns true if the group that is inserted into is found
 // deletes all trunknodes of the destroyed group with the provided allocator
 static bool insertGroupIntoGroup(TrunkAllocator& sourceAlloc, TrunkAllocator& destinationAlloc, TreeTrunk& baseTrunk, int baseTrunkSize, const void* groupToAddToRep, const BoundsTemplate<float>& groupToAddToRepBounds, TreeNodeRef&& groupToDestroy, const BoundsTemplate<float>& groupToDestroyBounds) {
@@ -328,7 +372,7 @@ static bool insertGroupIntoGroup(TrunkAllocator& sourceAlloc, TrunkAllocator& de
 			freeTrunksRecursive(sourceAlloc, destroyTrunk, groupToDestroy.getTrunkSize());
 		}
 
-		return trunk->getTotalBounds(trunkSize);
+		return TrunkSIMDHelperFallback::getTotalBounds(*trunk, trunkSize);
 	});
 	return groupWasFound;
 }
@@ -369,13 +413,13 @@ void BoundsTreePrototype::addToGroup(void* newObject, const BoundsTemplate<float
 			TreeTrunk& groupTrunk = groupNode.asTrunk();
 			int resultingSize = addRecursive(allocator, groupTrunk, groupNode.getTrunkSize(), TreeNodeRef(newObject), newObjectBounds);
 			groupNode.setTrunkSize(resultingSize);
-			return groupTrunk.getTotalBounds(resultingSize);
+			return TrunkSIMDHelperFallback::getTotalBounds(groupTrunk, resultingSize);
 		} else {
 			TreeTrunk* newTrunkNode = allocator.allocTrunk();
 			newTrunkNode->setSubNode(0, std::move(groupNode), groupNodeBounds);
 			newTrunkNode->setSubNode(1, TreeNodeRef(newObject), newObjectBounds);
 			groupNode = TreeNodeRef(newTrunkNode, 2, true);
-			return newTrunkNode->getTotalBounds(2);
+			return TrunkSIMDHelperFallback::getTotalBounds(*newTrunkNode, 2);
 		}
 	});
 	if(!foundGroup) {
@@ -429,19 +473,32 @@ bool BoundsTreePrototype::groupContains(const void* object, const BoundsTemplate
 	}
 }
 
-size_t BoundsTreePrototype::size() const {
+static size_t getSizeRecursive(const TreeTrunk& curTrunk, int curTrunkSize) {
 	size_t total = 0;
-	this->forEach([&total](const void* item) {
-		total++;
-	});
+	for(int i = 0; i < curTrunkSize; i++) {
+		const TreeNodeRef& subNode = curTrunk.subNodes[i];
+		if(subNode.isTrunkNode()) {
+			total += getSizeRecursive(subNode.asTrunk(), subNode.getTrunkSize());
+		} else {
+			total++;
+		}
+	}
 	return total;
 }
+
+size_t BoundsTreePrototype::size() const {
+	return getSizeRecursive(baseTrunk, baseTrunkSize);
+}
 size_t BoundsTreePrototype::groupSize(const void* groupRep, const BoundsTemplate<float>& groupRepBounds) const {
-	size_t total = 0;
-	this->forEachInGroup(groupRep, groupRepBounds, [&total](const void* item) {
-		total++;
-	});
-	return total;
+	const TreeNodeRef* groupFound = getGroupRecursive(this->baseTrunk, this->baseTrunkSize, groupRep, groupRepBounds);
+	if(!groupFound) {
+		throw "Group not found!";
+	}
+	if(groupFound->isTrunkNode()) {
+		return getSizeRecursive(groupFound->asTrunk(), groupFound->getTrunkSize());
+	} else {
+		return 1;
+	}
 }
 
 void BoundsTreePrototype::clear() {

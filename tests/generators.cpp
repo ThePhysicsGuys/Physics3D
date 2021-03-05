@@ -22,6 +22,12 @@ double generateDouble() {
 float generateFloat() {
 	return std::uniform_real_distribution<float>(0.0f, 2.0f)(generator);
 }
+double generateDouble(double min, double max) {
+	return std::uniform_real_distribution<double>(min, max)(generator);
+}
+float generateFloat(float min, float max) {
+	return std::uniform_real_distribution<float>(min, max)(generator);
+}
 
 bool generateBool() {
 	return std::uniform_int_distribution<int>(0, 1)(generator) == 1;
