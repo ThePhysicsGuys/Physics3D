@@ -1,37 +1,48 @@
 #pragma once
 
-#include <shared_mutex>
 #include <functional>
 #include <vector>
 #include <thread>
-
-struct shared_lock_guard {
-	std::shared_mutex& mut;
-	shared_lock_guard(std::shared_mutex& mut) : mut(mut) { mut.lock_shared(); }
-	~shared_lock_guard() { mut.unlock_shared(); }
-};
-
-struct inverse_lock_guard {
-	std::shared_mutex& mut;
-	inverse_lock_guard(std::shared_mutex& mut) : mut(mut) { mut.unlock(); }
-	~inverse_lock_guard() { mut.lock(); }
-};
+#include <mutex>
+#include <condition_variable>
 
 class ThreadPool {
-	std::vector<std::thread> threads;
-	std::shared_mutex threadsDone;
 	std::function<void()> funcToRun = []() {};
+	std::vector<std::thread> threads{};
+
+	// protects shouldStart, threadsWorking and their condition variables
+	std::mutex mtx;
+
+	// this tells the threads to start working
+	std::condition_variable threadStarter;
+	bool shouldStart = false;
+
+	// this keeps track of the number of threads that are currently performing work, main thread may only return once all threads have finished working. 
+	std::condition_variable threadsFinished;
+	int threadsWorking = 0; 
+
+	// No explicit protection required since only the main thread may write to it and only in the destructor, so not when a new job is presented
 	bool shouldExit = false;
 
 public:
 	ThreadPool() : threads(std::thread::hardware_concurrency() - 1) {
-		threadsDone.lock();
 		for(std::thread& t : threads) {
 			t = std::thread([this]() {
+				std::unique_lock<std::mutex> selfLock(mtx); // locks mtx
 				while(true) {
-					shared_lock_guard lg(threadsDone); // wait for work
+					threadStarter.wait(selfLock, [this]() -> bool {return shouldStart; }); // this unlocks the mutex. And relocks when exiting
+					threadsWorking++;
+					selfLock.unlock();
+
 					if(shouldExit) break;
 					funcToRun();
+
+					selfLock.lock();
+					shouldStart = false; // once any thread finishes we assume we've reached the end, keep all threads from 
+					threadsWorking--;
+					if(threadsWorking == 0) {
+						threadsFinished.notify_one();
+					}
 				}
 			});
 		}
@@ -40,15 +51,24 @@ public:
 	// cleanup
 	~ThreadPool() {
 		shouldExit = true;
-		threadsDone.unlock(); // let threads exit
-		for(std::thread& t : threads) t.join();
+		mtx.lock();
+		shouldStart = true;
+		mtx.unlock();
+		threadStarter.notify_all();// all threads start running
+		for(std::thread& t : threads) t.join(); // let threads exit
 	}
 
 	// this work function may only return once all work has been completed
 	void doInParallel(std::function<void()>&& work) {
 		funcToRun = std::move(work);
-		inverse_lock_guard lg(threadsDone); // all threads start running
+		std::unique_lock<std::mutex> selfLock(mtx); // locks mtx
+		shouldStart = true;
+		selfLock.unlock();
+		threadStarter.notify_all();// all threads start running
 		funcToRun();
-		// lg destructor: wait for all threads to finish
+		selfLock.lock();
+		shouldStart = false;
+		threadsFinished.wait(selfLock, [this]() -> bool {return threadsWorking == 0; });
+		selfLock.unlock();
 	}
 };

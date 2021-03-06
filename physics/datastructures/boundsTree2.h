@@ -129,6 +129,26 @@ public:
 	void moveSubNode(int from, int to);
 };
 
+TreeNodeRef::TreeNodeRef(TreeTrunk* trunk, int trunkSize, bool isGroupHead) noexcept : ptr(reinterpret_cast<std::uintptr_t>(trunk) | (static_cast<std::uintptr_t>(trunkSize) - 1) | (isGroupHead ? BRANCH_FACTOR : 0)) {
+	assert(trunkSize >= 2 && trunkSize <= BRANCH_FACTOR); // trunkSize must be between 2-BRANCH_FACTOR
+	assert((reinterpret_cast<std::uintptr_t>(trunk) & (BRANCH_FACTOR * sizeof(int64_t) - 1)) == 0); // check trunk is aligned correctly
+}
+const TreeTrunk& TreeNodeRef::asTrunk() const {
+	assert(this->ptr != INVALID_REF);
+	assert(isTrunkNode());
+	return *reinterpret_cast<TreeTrunk*>(ptr & PTR_MASK);
+}
+TreeTrunk& TreeNodeRef::asTrunk() {
+	assert(this->ptr != INVALID_REF);
+	assert(isTrunkNode());
+	return *reinterpret_cast<TreeTrunk*>(ptr & PTR_MASK);
+}
+void* TreeNodeRef::asObject() const {
+	assert(this->ptr != INVALID_REF);
+	assert(isLeafNode());
+	return reinterpret_cast<TreeTrunk*>(ptr & ~SIZE_DATA_MASK);
+}
+
 typedef std::array<std::array<bool, BRANCH_FACTOR>, BRANCH_FACTOR> OverlapMatrix;
 
 struct TrunkSIMDHelperFallback {

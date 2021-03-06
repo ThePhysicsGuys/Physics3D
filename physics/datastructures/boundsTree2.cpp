@@ -114,26 +114,6 @@ void TreeTrunk::moveSubNode(int from, int to) {
 	this->setSubNode(to, std::move(this->subNodes[from]), this->getBoundsOfSubNode(from));
 }
 
-TreeNodeRef::TreeNodeRef(TreeTrunk* trunk, int trunkSize, bool isGroupHead) noexcept : ptr(reinterpret_cast<std::uintptr_t>(trunk) | (static_cast<std::uintptr_t>(trunkSize) - 1) | (isGroupHead ? BRANCH_FACTOR : 0)) {
-	assert(trunkSize >= 2 && trunkSize <= BRANCH_FACTOR); // trunkSize must be between 2-BRANCH_FACTOR
-	assert((reinterpret_cast<std::uintptr_t>(trunk) & (BRANCH_FACTOR * sizeof(int64_t) - 1)) == 0); // check trunk is aligned correctly
-}
-const TreeTrunk& TreeNodeRef::asTrunk() const {
-	assert(this->ptr != INVALID_REF);
-	assert(isTrunkNode());
-	return *reinterpret_cast<TreeTrunk*>(ptr & PTR_MASK);
-}
-TreeTrunk& TreeNodeRef::asTrunk() {
-	assert(this->ptr != INVALID_REF);
-	assert(isTrunkNode());
-	return *reinterpret_cast<TreeTrunk*>(ptr & PTR_MASK);
-}
-void* TreeNodeRef::asObject() const {
-	assert(this->ptr != INVALID_REF);
-	assert(isLeafNode());
-	return reinterpret_cast<TreeTrunk*>(ptr & ~SIZE_DATA_MASK);
-}
-
 // returns the new size of this node, to be applied to the caller
 int addRecursive(TrunkAllocator& allocator, TreeTrunk& curTrunk, int curTrunkSize, TreeNodeRef&& newNode, const BoundsTemplate<float>& bounds) {
 	assert(curTrunkSize >= 0 && curTrunkSize <= BRANCH_FACTOR);
@@ -380,7 +360,7 @@ static bool insertGroupIntoGroup(TrunkAllocator& sourceAlloc, TrunkAllocator& de
 
 
 TrunkAllocator::~TrunkAllocator() {
-	if(this->allocationCount != 0) __debugbreak();
+	if(this->allocationCount != 0) throw "Not all nodes were deallocated!";
 }
 TreeTrunk* TrunkAllocator::allocTrunk() {
 	this->allocationCount++;

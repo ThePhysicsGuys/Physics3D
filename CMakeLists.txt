@@ -110,6 +110,7 @@ add_executable(benchmarks
   benchmarks/worldBenchmark.cpp
   benchmarks/rotationBenchmark.cpp
   benchmarks/ecsBenchmark.cpp
+  benchmarks/threadResponseTime.cpp
 )
 
 target_link_libraries(benchmarks util)
