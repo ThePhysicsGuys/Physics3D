@@ -15,13 +15,27 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 else()
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
 	
-	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
+	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g  -fsanitize=address")
+
+	set(OpenGL_GL_PREFERENCE "GLVND")
 	
 	#running benchmarks showed this to be a pessimization
 	#set(CMAKE_INTERPROCEDURAL_OPTIMIZATION True)
 	#surprisingly, also a pessimization
 	#set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -ffast-math")
 endif()
+
+find_package(glfw3 3.2 REQUIRED)
+find_package(OpenGL REQUIRED)
+find_package(GLEW REQUIRED)
+find_package(Freetype REQUIRED)
+find_package(Threads REQUIRED)
+
+include_directories(PRIVATE "${GLFW_DIR}/include")
+include_directories(PRIVATE "${GLEW_DIR}/include")
+include_directories(PRIVATE "${FREETYPE_INCLUDE_DIRS}")
+include_directories(PRIVATE "include")
+
 
 add_library(util STATIC 
   util/terminalColor.cpp
@@ -115,6 +129,7 @@ add_executable(benchmarks
 
 target_link_libraries(benchmarks util)
 target_link_libraries(benchmarks physics)
+target_link_libraries(benchmarks Threads::Threads)
 
 add_executable(tests 
   tests/testsMain.cpp
@@ -143,18 +158,7 @@ add_executable(tests
 
 target_link_libraries(tests util)
 target_link_libraries(tests physics)
-
-
-find_package(glfw3 3.2 REQUIRED)
-find_package(OpenGL REQUIRED)
-find_package(GLEW REQUIRED)
-find_package(Freetype REQUIRED)
-find_package(Threads REQUIRED)
-
-include_directories(PRIVATE "${GLFW_DIR}/include")
-include_directories(PRIVATE "${GLEW_DIR}/include")
-include_directories(PRIVATE "${FREETYPE_INCLUDE_DIRS}")
-include_directories(PRIVATE "include")
+target_link_libraries(tests Threads::Threads)
 
 add_library(imguiInclude STATIC
   include/imgui/imgui.cpp

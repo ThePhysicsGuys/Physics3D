@@ -17,13 +17,13 @@ public:
 	virtual void init() override {}
 
 	virtual void run() override {
-		steady_clock::time_point start;
+		decltype(high_resolution_clock::now()) start;
 
 		std::mutex coutMutex;
 
 		std::cout << "\n";
 		auto work = [&start,&coutMutex]() {
-			steady_clock::time_point response = std::chrono::high_resolution_clock::now();
+			auto response = high_resolution_clock::now();
 
 			nanoseconds delay = response - start;
 
@@ -37,7 +37,7 @@ public:
 
 		for(int iter = 0; iter < 5; iter++) {
 			std::cout << "Run " << iter << "\n";
-			start = std::chrono::high_resolution_clock::now();
+			start = high_resolution_clock::now();
 			for(std::thread& t : threads) t = std::thread(work);
 			work();
 			for(std::thread& t : threads) t.join();
@@ -55,13 +55,13 @@ public:
 	virtual void init() override {}
 
 	virtual void run() override {
-		steady_clock::time_point start;
+		decltype(high_resolution_clock::now()) start;
 
 		std::mutex coutMutex;
 
 		std::cout << "\n";
 		auto work = [&start, &coutMutex]() {
-			steady_clock::time_point response = std::chrono::high_resolution_clock::now();
+			auto response = high_resolution_clock::now();
 
 			nanoseconds delay = response - start;
 
@@ -77,7 +77,7 @@ public:
 
 		for(int iter = 0; iter < 5; iter++) {
 			std::cout << "Run " << iter << "\n";
-			start = std::chrono::high_resolution_clock::now();
+			start = high_resolution_clock::now();
 			threadPool.doInParallel(work);
 		}
 	}

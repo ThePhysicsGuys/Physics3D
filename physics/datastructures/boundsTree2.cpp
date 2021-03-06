@@ -360,7 +360,7 @@ static bool insertGroupIntoGroup(TrunkAllocator& sourceAlloc, TrunkAllocator& de
 
 
 TrunkAllocator::~TrunkAllocator() {
-	if(this->allocationCount != 0) throw "Not all nodes were deallocated!";
+	assert(this->allocationCount == 0);
 }
 TreeTrunk* TrunkAllocator::allocTrunk() {
 	this->allocationCount++;

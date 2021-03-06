@@ -70,11 +70,11 @@ extern void disableBlending();
 extern void standardBlendFunction();
 extern void enableMultisampling();
 
-extern const unsigned char* getVendor();
-extern const unsigned char* getVersion();
-extern const unsigned char* getRenderer();
-extern const unsigned char* getShaderVersion();
-extern int parseShaderVersion(const unsigned char* version);
+extern const char* getVendor();
+extern const char* getVersion();
+extern const char* getRenderer();
+extern const char* getShaderVersion();
+extern int parseShaderVersion(const char* version);
 
 extern void bindShader(GLID id);
 extern void bindTexture2D(GLID id);
