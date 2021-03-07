@@ -140,10 +140,36 @@ void setupWorld(const Util::ParsedArgs& cmdArgs) {
 
 	world.addExternalForce(new DirectionalGravity(Vec3(0, -10.0, 0.0)));
 
+
+	//buildShowcaseWorld(screen, world); return;
+
 	PartProperties basicProperties{1.0, 0.7, 0.3};
 
 	WorldBuilder::buildFloorAndWalls(50.0, 50.0, 1.0);
 
+	GlobalCFrame origin(0.0, 5.0, 0.0, Rotation::fromEulerAngles(-3.14 / 4, 3.14 / 4, 0.0));
+
+	for(int x = 0; x < 3; x++) {
+		for(int y = 0; y < 3; y++) {
+			for(int z = 0; z < 3; z++) {
+				GlobalCFrame cf = origin.localToGlobal(CFrame(x, y, z));
+				world.addPart(new ExtendedPart(boxShape(0.5, 0.5, 0.5), cf, basicProperties, "part"));
+			}
+		}
+	}
+
+	{
+		ExtendedPart* partA = new ExtendedPart(boxShape(1.0, 0.49, 3.0), GlobalCFrame(3.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "partA");
+		ExtendedPart* partB = new ExtendedPart(boxShape(1.0, 0.5, 3.0), GlobalCFrame(2.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "partB");
+		world.addPart(partA);
+		partA->attach(partB, CFrame(0.0, 1.0, 0.0));
+	}
+	{
+		ExtendedPart* partA = new ExtendedPart(boxShape(1.0, 0.49, 3.0), GlobalCFrame(-3.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "partA");
+		ExtendedPart* partB = new ExtendedPart(boxShape(1.0, 0.5, 3.0), GlobalCFrame(-2.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "partB");
+		world.addPart(partA);
+		partA->attach(partB, new MotorConstraintTemplate<ConstantMotorTurner>(0.5), CFrame(0.0, 1.0, 0.0), CFrame(1.0, 0.0, 0.0));
+	}
 
 	// Lights
 	{
@@ -156,6 +182,8 @@ void setupWorld(const Util::ParsedArgs& cmdArgs) {
 		EntityBuilder(screen.registry).parent(lights).transform(Position(-10, 5, 10), 0.2).light(Color3(1, 0.84f, 0.69f), 500, attenuation).hitbox(&SphereClass::instance).mesh(sphereData);
 		EntityBuilder(screen.registry).parent(lights).transform(Position(0, 5, 0), 0.2).light(Color3(1, 0.90f, 0.75f), 400, attenuation).hitbox(&SphereClass::instance).mesh(sphereData);
 	}
+
+	return;
 	{
 		ExtendedPart* partA = new ExtendedPart(boxShape(1.0, 0.49, 3.0), GlobalCFrame(3.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "partA");
 		ExtendedPart* partB = new ExtendedPart(boxShape(1.0, 0.5, 3.0), GlobalCFrame(2.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "partB");

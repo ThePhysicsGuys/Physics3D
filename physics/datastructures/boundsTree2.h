@@ -3,6 +3,7 @@
 #include "../math/fix.h"
 #include "../math/position.h"
 #include "../math/bounds.h"
+#include "iteratorEnd.h"
 
 #include <cstdint>
 #include <utility>
@@ -11,6 +12,7 @@
 #include <array>
 #include <optional>
 #include <iostream>
+#include <stack>
 
 namespace P3D::NewBoundsTree {
 
@@ -18,7 +20,12 @@ constexpr int BRANCH_FACTOR = 8;
 static_assert((BRANCH_FACTOR & (BRANCH_FACTOR - 1)) == 0, "Branch factor must be power of 2");
 
 class TreeTrunk;
-class TreeNodeRef;
+
+inline float computeCost(const BoundsTemplate<float>& bounds) {
+	Vec3f d = bounds.getDiagonal();
+	return d.x + d.y + d.z;
+}
+
 
 class TreeNodeRef {
 	friend class TreeTrunk;
@@ -82,6 +89,11 @@ public:
 		assert(isTrunkNode());
 		assert(newSize >= 2 && newSize <= BRANCH_FACTOR);
 		this->ptr = this->ptr & ~SIZE_DATA_MASK | (newSize - 1);
+	}
+	inline void setObject(void* newObject) {
+		assert(isLeafNode());
+		this->ptr = reinterpret_cast<std::uintptr_t>(newObject);
+		assert((this->ptr & SIZE_DATA_MASK) == 0);
 	}
 	inline void makeGroupHead() {
 		assert(isTrunkNode());
@@ -298,7 +310,7 @@ inline int contractGroupRecursive(TrunkAllocator& allocator, TreeTrunk& curTrunk
 	return -1;
 }
 
-// expects a function of the form void(Boundable* object, const BoundsTemplate<float>& bounds)
+// expects a function of the form void(Boundable& object)
 template<typename Boundable, typename Func>
 inline void forEachRecurse(const TreeTrunk& curTrunk, int curTrunkSize, const Func& func) {
 	for(int i = 0; i < curTrunkSize; i++) {
@@ -306,7 +318,7 @@ inline void forEachRecurse(const TreeTrunk& curTrunk, int curTrunkSize, const Fu
 		if(subNode.isTrunkNode()) {
 			forEachRecurse<Boundable, Func>(subNode.asTrunk(), subNode.getTrunkSize(), func);
 		} else {
-			func(static_cast<Boundable*>(subNode.asObject()));
+			func(*static_cast<Boundable*>(subNode.asObject()));
 		}
 	}
 }
@@ -435,6 +447,62 @@ void forEachColissionInternalRecursive(const TreeTrunk& curTrunk, int curTrunkSi
 	}
 }
 
+class BoundsTreeIteratorPrototype {
+	struct StackElement {
+		const TreeTrunk* trunk;
+		int trunkSize;
+		int curIndex;
+	};
+
+	std::stack<StackElement> trunkStack;
+
+public:
+	BoundsTreeIteratorPrototype() = default;
+	BoundsTreeIteratorPrototype(const TreeTrunk& baseTrunk, int baseTrunkSize) : trunkStack() {
+		if(baseTrunkSize == 0) return;
+		trunkStack.push(StackElement{&baseTrunk, baseTrunkSize, 0});
+		while(trunkStack.top().trunk->subNodes[0].isTrunkNode()) {
+			const TreeNodeRef& nextNode = trunkStack.top().trunk->subNodes[0];
+			trunkStack.push(StackElement{&nextNode.asTrunk(), nextNode.getTrunkSize(), 0});
+		}
+	}
+
+	void* operator*() const {
+		const StackElement& top = trunkStack.top();
+		return top.trunk->subNodes[top.curIndex].asObject();
+	}
+
+	BoundsTreeIteratorPrototype& operator++() {
+		StackElement& top = trunkStack.top();
+		top.curIndex++;
+		if(top.curIndex < top.trunkSize) {
+			const TreeNodeRef& nextNode = trunkStack.top().trunk->subNodes[top.curIndex];
+			if(nextNode.isTrunkNode()) {
+				// rise until hitting non trunk node
+				trunkStack.push(StackElement{&nextNode.asTrunk(), nextNode.getTrunkSize(), 0});
+				while(trunkStack.top().trunk->subNodes[0].isTrunkNode()) {
+					const TreeNodeRef& nextNode = trunkStack.top().trunk->subNodes[0];
+					trunkStack.push(StackElement{&nextNode.asTrunk(), nextNode.getTrunkSize(), 0});
+				}
+			}
+		} else {
+			// drop down until next available
+			do {
+				trunkStack.pop();
+				if(trunkStack.size() == 0) break; // iteration done
+				StackElement& top = trunkStack.top();
+				top.curIndex++;
+				assert(top.curIndex <= top.trunkSize);
+			} while(top.curIndex == top.trunkSize); // keep popping
+		}
+		return *this;
+	}
+
+	bool operator!=(IteratorEnd) const {
+		return trunkStack.size() != 0;
+	}
+};
+
 class BoundsTreePrototype {
 	TreeTrunk baseTrunk;
 	int baseTrunkSize;
@@ -447,6 +515,19 @@ public:
 	BoundsTreePrototype();
 	~BoundsTreePrototype();
 
+	inline BoundsTreePrototype(BoundsTreePrototype&& other) noexcept : baseTrunk(std::move(other.baseTrunk)), baseTrunkSize(other.baseTrunkSize), allocator(std::move(other.allocator)) {
+		other.baseTrunkSize = 0;
+	}
+	inline BoundsTreePrototype& operator=(BoundsTreePrototype&& other) noexcept {
+		this->baseTrunk = std::move(other.baseTrunk);
+		this->baseTrunkSize = other.baseTrunkSize;
+		this->allocator = std::move(other.allocator);
+
+		other.baseTrunkSize = 0;
+
+		return *this;
+	}
+
 	void add(void* newObject, const BoundsTemplate<float>& bounds);
 	void remove(const void* objectToRemove, const BoundsTemplate<float>& bounds);
 
@@ -454,6 +535,12 @@ public:
 	void mergeGroups(const void* groupRepA, const BoundsTemplate<float>& repABounds, const void* groupRepB, const BoundsTemplate<float>& repBBounds);
 	void transferGroupTo(const void* groupRep, const BoundsTemplate<float>& groupRepBounds, BoundsTreePrototype& destinationTree);
 	
+	void updateObjectBounds(const void* object, const BoundsTemplate<float>& originalBounds, const BoundsTemplate<float>& newBounds);
+	// oldObject and newObject should have the same bounds
+	void findAndReplaceObject(const void* oldObject, void* newObject, const BoundsTemplate<float>& bounds);
+
+	void disbandGroup(const void* groupRep, const BoundsTemplate<float>& groupRepBounds);
+
 	bool contains(const void* object, const BoundsTemplate<float>& bounds) const;
 	bool groupContains(const void* groupRep, const BoundsTemplate<float>& groupRepBounds, const void* object, const BoundsTemplate<float>& bounds) const;
 	size_t size() const;
@@ -469,7 +556,7 @@ public:
 	template<typename GroupIter, typename GroupIterEnd>
 	void removeSubGroup(GroupIter iter, const GroupIterEnd& iterEnd) {
 		if(!(iter != iterEnd)) return;
-		std::pair<void*, BoundsTemplate<float>> firstObject = *iter;
+		std::pair<const void*, BoundsTemplate<float>> firstObject = *iter;
 		++iter;
 		if(!(iter != iterEnd)) { // just one item
 			this->remove(firstObject.first, firstObject.second);
@@ -485,7 +572,7 @@ public:
 				assert(groupTrunkSize != -1); // should have been verified 
 
 				do {
-					std::pair<void*, BoundsTemplate<float>> currentlyMoving = *iter;
+					std::pair<const void*, BoundsTemplate<float>> currentlyMoving = *iter;
 					groupTrunkSize = removeRecursive(this->allocator, groupTrunk, groupTrunkSize, currentlyMoving.first, currentlyMoving.second);
 					if(groupTrunkSize == -1) {
 						throw "Iterator provided an object which could not be found in this group!";
@@ -520,23 +607,23 @@ public:
 
 		this->removeSubGroup(iter, iterEnd);
 
-		std::pair<void*, BoundsTemplate<float>> firstObject = *iter;
+		std::pair<const void*, BoundsTemplate<float>> firstObject = *iter;
 		++iter;
 		
 		if(iter != iterEnd) {
 			TreeTrunk* newGroupTrunk = destinationTree.allocator.allocTrunk();
-			newGroupTrunk->setSubNode(0, TreeNodeRef(firstObject.first), firstObject.second);
+			newGroupTrunk->setSubNode(0, TreeNodeRef(const_cast<void*>(firstObject.first)), firstObject.second);
 			int newGroupTrunkSize = 1;
 
 			do {
-				std::pair<void*, BoundsTemplate<float>> obj = *iter;
-				newGroupTrunkSize = addRecursive(destinationTree.allocator, *newGroupTrunk, newGroupTrunkSize, TreeNodeRef(obj.first), obj.second);
+				std::pair<const void*, BoundsTemplate<float>> obj = *iter;
+				newGroupTrunkSize = addRecursive(destinationTree.allocator, *newGroupTrunk, newGroupTrunkSize, TreeNodeRef(const_cast<void*>(obj.first)), obj.second);
 				++iter;
 			} while(iter != iterEnd);
 
 			destinationTree.baseTrunkSize = addRecursive(destinationTree.allocator, destinationTree.baseTrunk, destinationTree.baseTrunkSize, TreeNodeRef(newGroupTrunk, newGroupTrunkSize, true), TrunkSIMDHelperFallback::getTotalBounds(*newGroupTrunk, newGroupTrunkSize));
 		} else {
-			destinationTree.add(firstObject.first, firstObject.second);
+			destinationTree.add(const_cast<void*>(firstObject.first), firstObject.second);
 		}
 	}
 
@@ -546,8 +633,20 @@ public:
 		this->transferSplitGroupTo(iter, iterEnd, *this);
 	}
 
+	inline void improveStructure() {/*TODO*/}
+	inline void maxImproveStructure() {/*TODO*/ }
+
+	BoundsTreeIteratorPrototype begin() const { return BoundsTreeIteratorPrototype(baseTrunk, baseTrunkSize); }
+	IteratorEnd end() const { return IteratorEnd(); }
+
+	// unsafe functions
 	inline std::pair<TreeTrunk&, int> getBaseTrunk() { return std::pair<TreeTrunk&, int>(this->baseTrunk, this->baseTrunkSize); }
 	inline std::pair<const TreeTrunk&, int> getBaseTrunk() const { return std::pair<const TreeTrunk&, int>(this->baseTrunk, this->baseTrunkSize); }
+
+	inline TrunkAllocator& getAllocator() { return allocator; }
+	inline const TrunkAllocator& getAllocator() const { return allocator; }
+
+	void addGroupTrunk(TreeTrunk* newNode, int newNodeSize);
 };
 
 template<typename Boundable>
@@ -568,6 +667,52 @@ void recalculateBoundsRecursive(TreeTrunk& curTrunk, int curTrunkSize) {
 }
 
 template<typename Boundable>
+bool updateGroupBoundsRecursive(TreeTrunk& curTrunk, int curTrunkSize, const Boundable* groupRep, const BoundsTemplate<float>& originalGroupRepBounds) {
+	assert(curTrunkSize >= 0 && curTrunkSize <= BRANCH_FACTOR);
+	std::array<bool, BRANCH_FACTOR> couldContain = TrunkSIMDHelperFallback::getAllContainsBounds(curTrunk, originalGroupRepBounds);
+	for(int i = 0; i < curTrunkSize; i++) {
+		if(!couldContain[i]) continue;
+
+		TreeNodeRef& subNode = curTrunk.subNodes[i];
+		if(subNode.isTrunkNode()) {
+			TreeTrunk& subTrunk = subNode.asTrunk();
+			int subTrunkSize = subNode.getTrunkSize();
+			if(subNode.isGroupHead()) {
+				if(containsObjectRecursive(subTrunk, subTrunkSize, groupRep, originalGroupRepBounds)) {
+					recalculateBoundsRecursive<Boundable>(subTrunk, subTrunkSize);
+					curTrunk.setBoundsOfSubNode(i, TrunkSIMDHelperFallback::getTotalBounds(subTrunk, subTrunkSize));
+					return true;
+				}
+			} else {
+				if(updateGroupBoundsRecursive<Boundable>(subTrunk, subTrunkSize, groupRep, originalGroupRepBounds)) {
+					curTrunk.setBoundsOfSubNode(i, TrunkSIMDHelperFallback::getTotalBounds(subTrunk, subTrunkSize));
+					return true;
+				}
+			}
+		} else {
+			if(subNode.asObject() == groupRep) {
+				curTrunk.setBoundsOfSubNode(i, groupRep->getBounds());
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+template<typename Boundable>
+class BoundableCastIterator {
+	BoundsTreeIteratorPrototype iter;
+public:
+	BoundableCastIterator() = default;
+	BoundableCastIterator(BoundsTreeIteratorPrototype&& iter) : iter(std::move(iter)) {}
+	BoundableCastIterator(const TreeTrunk& baseTrunk, int baseTrunkSize) : iter(baseTrunk, baseTrunkSize) {}
+
+	BoundableCastIterator& operator++() { ++iter; return *this; }
+	Boundable& operator*() const { return *static_cast<Boundable*>(*iter); }
+	bool operator!=(IteratorEnd) const { return iter != IteratorEnd{}; }
+};
+
+template<typename Boundable>
 class BoundsTree {
 	BoundsTreePrototype tree;
 
@@ -579,9 +724,9 @@ public:
 	struct BoundableIteratorAdapter {
 		BoundableIter iter;
 
-		std::pair<void*, BoundsTemplate<float>> operator*() const {
-			Boundable* item = *iter;
-			return std::pair<void*, BoundsTemplate<float>>(static_cast<void*>(item), item->getBounds());
+		std::pair<const void*, BoundsTemplate<float>> operator*() const {
+			const Boundable* item = *iter;
+			return std::pair<const void*, BoundsTemplate<float>>(static_cast<const void*>(item), item->getBounds());
 		}
 		BoundableIteratorAdapter& operator++() {
 			++iter;
@@ -602,6 +747,34 @@ public:
 	void addToGroup(Boundable* newObject, const Boundable* groupRepresentative) {
 		tree.addToGroup(static_cast<void*>(newObject), newObject->getBounds(), static_cast<const void*>(groupRepresentative), groupRepresentative->getBounds());
 	}
+	template<typename BoundableIter, typename BoundableIterEnd>
+	void addAllToGroup(BoundableIter iter, const BoundableIterEnd& iterEnd, const Boundable* groupRep) {
+		if(!(iter != iterEnd)) return;
+		modifyGroupRecursive(tree.allocator, tree.baseTrunk, tree.baseTrunkSize, groupRep, groupRep->getBounds(), [this, &iter, &iterEnd](TreeNodeRef& groupNode, BoundsTemplate<float> groupBounds) {
+			if(groupNode.isLeafNode()) {
+				TreeTrunk* newTrunk = this->tree.allocator.allocTrunk();
+				newTrunk->setSubNode(0, std::move(groupNode), groupBounds);
+
+				Boundable* newObj = *iter;
+				BoundsTemplate<float> newObjBounds = newObj->getBounds();
+				newTrunk->setSubNode(1, TreeNodeRef(newObj), newObjBounds);
+
+				groupNode = TreeNodeRef(newTrunk, 2, true);
+				++iter;
+			}
+			TreeTrunk& trunk = groupNode.asTrunk();
+			int curTrunkSize = groupNode.getTrunkSize();
+			while(iter != iterEnd) {
+				Boundable* curObj = *iter;
+				BoundsTemplate<float> curObjBounds = curObj->getBounds();
+
+				curTrunkSize = addRecursive(this->tree.allocator, trunk, curTrunkSize, TreeNodeRef(curObj), curObjBounds);
+
+				++iter;
+			}
+			return TrunkSIMDHelperFallback::getTotalBounds(trunk, curTrunkSize);
+		});
+	}
 	void mergeGroups(const Boundable* groupRepA, const Boundable* groupRepB) {
 		tree.mergeGroups(static_cast<const void*>(groupRepA), groupRepA->getBounds(), static_cast<const void*>(groupRepB), groupRepB->getBounds());
 	}
@@ -609,7 +782,24 @@ public:
 		return tree.contains(static_cast<const void*>(object), object->getBounds());
 	}
 	bool groupContains(const Boundable* groupRep, const Boundable* object) const {
+		assert(this->contains(groupRep));
 		return tree.groupContains(static_cast<const void*>(groupRep), groupRep->getBounds(), static_cast<const void*>(object), object->getBounds());
+	}
+	void updateObjectBounds(const Boundable* object, const BoundsTemplate<float>& originalBounds) {
+		tree.updateObjectBounds(static_cast<const void*>(object), originalBounds, object->getBounds());
+	}
+	void updateObjectGroupBounds(const Boundable* groupRep, const BoundsTemplate<float>& originalGroupRepBounds) {
+		bool success = updateGroupBoundsRecursive<Boundable>(tree.baseTrunk, tree.baseTrunkSize, groupRep, originalGroupRepBounds);
+		if(!success) throw "groupRep was not found in tree!";
+	}
+	// oldObject and newObject should have the same bounds
+	void findAndReplaceObject(const Boundable* oldObject, Boundable* newObject, const BoundsTemplate<float>& bounds) {
+		assert(this->tree.contains(oldObject, bounds));
+		tree.findAndReplaceObject(static_cast<const void*>(oldObject), static_cast<void*>(newObject), bounds);
+	}
+	void disbandGroup(const Boundable* groupRep) {
+		assert(this->contains(groupRep));
+		tree.disbandGroup(static_cast<const void*>(groupRep), groupRep->getBounds());
 	}
 	size_t size() const {
 		return tree.size();
@@ -617,7 +807,7 @@ public:
 	size_t groupSize(const Boundable* groupRep) const {
 		return tree.groupSize(static_cast<const void*>(groupRep), groupRep->getBounds());
 	}
-	inline bool isEmpty() const {
+	bool isEmpty() const {
 		return tree.isEmpty();
 	}
 	void clear() {
@@ -634,19 +824,31 @@ public:
 		tree.transferSplitGroupTo(BoundableIteratorAdapter<GroupIter>{std::move(iter)}, iterEnd, destinationTree.tree);
 	}
 
+	void transferTo(Boundable* obj, BoundsTree& destinationTree) {
+		BoundsTemplate<float> bounds = obj->getBounds();
+		tree.remove(static_cast<void*>(obj), bounds);
+		destinationTree.tree.add(static_cast<void*>(obj), bounds);
+	}
+
+	void moveOutOfGroup(Boundable* obj) {
+		BoundsTemplate<float> bounds = obj->getBounds();
+		tree.remove(static_cast<void*>(obj), bounds);
+		tree.add(static_cast<void*>(obj), bounds);
+	}
+
 	// the given iterator should return objects of type Boundable*
 	template<typename GroupIter, typename GroupIterEnd>
 	void splitGroup(GroupIter iter, const GroupIterEnd& iterEnd) {
 		tree.splitGroup(BoundableIteratorAdapter<GroupIter>{std::move(iter)}, iterEnd);
 	}
 
-	// expects a function of the form void(Boundable* object)
+	// expects a function of the form void(Boundable& object)
 	template<typename Func>
 	void forEach(const Func& func) const {
 		forEachRecurse<Boundable, Func>(this->tree.baseTrunk, this->tree.baseTrunkSize, func);
 	}
 
-	// expects a function of the form void(Boundable* object)
+	// expects a function of the form void(Boundable& object)
 	template<typename Func>
 	void forEachInGroup(const void* groupRepresentative, const BoundsTemplate<float>& groupRepBounds, const Func& func) const {
 		const TreeNodeRef* group = getGroupRecursive(this->tree.baseTrunk, this->tree.baseTrunkSize, groupRepresentative, groupRepBounds);
@@ -656,23 +858,29 @@ public:
 		if(group->isTrunkNode()) {
 			forEachRecurse<Boundable, Func>(group->asTrunk(), group->getTrunkSize(), func);
 		} else {
-			func(static_cast<Boundable*>(group->asObject()));
+			func(*static_cast<Boundable*>(group->asObject()));
 		}
 	}
 
+	BoundableCastIterator<Boundable> begin() const { return BoundableCastIterator<Boundable>(this->tree.begin()); }
+	IteratorEnd end() const { return IteratorEnd(); }
+
 	template<typename Func>
-	void forEachColission(const Func& func) {
+	void forEachColission(const Func& func) const {
 		forEachColissionInternalRecursive<Boundable, TrunkSIMDHelperFallback, Func>(this->tree.baseTrunk, this->tree.baseTrunkSize, func);
 	}
 
 	template<typename Func>
-	void forEachColissionWith(const BoundsTree& other, const Func& func) {
+	void forEachColissionWith(const BoundsTree& other, const Func& func) const {
 		forEachColissionBetweenRecursive<Boundable, TrunkSIMDHelperFallback, Func>(this->tree.baseTrunk, this->tree.baseTrunkSize, other.tree.baseTrunk, other.tree.baseTrunkSize, func);
 	}
 
 	void recalculateBounds() {
 		recalculateBoundsRecursive<Boundable>(this->tree.baseTrunk, this->tree.baseTrunkSize);
 	}
+
+	void improveStructure() {/*TODO*/ }
+	void maxImproveStructure() {/*TODO*/ }
 };
 
 struct BasicBounded {

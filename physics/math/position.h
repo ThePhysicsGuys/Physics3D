@@ -13,6 +13,15 @@ struct PositionTemplate {
 	constexpr PositionTemplate() noexcept : x(), y(), z() {}
 	constexpr PositionTemplate(const PositionTemplate&) = default;
 	constexpr PositionTemplate& operator=(const PositionTemplate&) = default;
+	template<typename OtherT>
+	constexpr PositionTemplate(const PositionTemplate<OtherT>& other) : x(static_cast<T>(other.x)), y(static_cast<T>(other.y)), z(static_cast<T>(other.z)) {}
+	template<typename OtherT>
+	constexpr PositionTemplate& operator=(const PositionTemplate<OtherT>& other) {
+		this->x = static_cast<T>(other.x);
+		this->y = static_cast<T>(other.y);
+		this->z = static_cast<T>(other.z);
+		return *this;
+	}
 	constexpr PositionTemplate(T x, T y, T z) noexcept : x(x), y(y), z(z) {}
 	constexpr PositionTemplate(double x, double y, double z) noexcept : x(T(x)), y(T(y)), z(T(z)) {}
 };

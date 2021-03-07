@@ -480,7 +480,7 @@ TEST_CASE(attachPhysicalsNoLayers) {
 }
 
 bool areInSameGroup(const Part& a, const Part& b) {
-	return a.layer->tree.areInSameGroup(&a, &b);
+	return a.layer->tree.groupContains(&a, &b);
 }
 
 static bool pairwiseCorrectlyGrouped(const std::vector<Part>& la, const std::vector<Part>& lb, bool expectedAreInSameGroup) {

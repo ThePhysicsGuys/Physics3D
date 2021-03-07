@@ -207,19 +207,21 @@ void ConstraintLayer::onRender(Engine::Registry64& registry) {
 	Shaders::basicShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
 	Shaders::maskShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
 
-	for (MotorizedPhysical* phys : world->iterPhysicals()) {
-		recurseRenderHardConstraints(this, *phys);
-	}
-
-	for (const ConstraintGroup& g : world->constraints) {
-		for(const PhysicalConstraint& constraint : g.constraints) {
-			renderConstraint(this, constraint);
+	world->syncReadOnlyOperation([&]() {
+		for(MotorizedPhysical* phys : world->iterPhysicals()) {
+			recurseRenderHardConstraints(this, *phys);
 		}
-	}
-	
-	/*for (const SoftLink* springLink : world->springLinks) {
-		renderSoftLinkConstraint(this, springLink);
-	}*/
+
+		for(const ConstraintGroup& g : world->constraints) {
+			for(const PhysicalConstraint& constraint : g.constraints) {
+				renderConstraint(this, constraint);
+			}
+		}
+
+		/*for (const SoftLink* springLink : world->springLinks) {
+			renderSoftLinkConstraint(this, springLink);
+		}*/
+	});
 
 	endScene();
 }

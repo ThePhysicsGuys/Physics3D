@@ -10,7 +10,7 @@ struct RayIntersectBoundsFilter {
 	RayIntersectBoundsFilter() = default;
 	RayIntersectBoundsFilter(const Ray& ray) : ray(ray) {}
 
-	bool operator()(const TreeNode& node) const {
+	bool operator()(const P3D::OldBoundsTree::TreeNode& node) const {
 		return doRayAndBoundsIntersect(node.bounds, ray);
 	}
 	bool operator()(const Part& part) const {

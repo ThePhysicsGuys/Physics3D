@@ -3,6 +3,8 @@
 #include "../../../util/log.h"
 #include "../../math/linalg/trigonometry.h"
 
+using namespace P3D::OldBoundsTree;
+
 VisibilityFilter::VisibilityFilter(const Position& origin, Vec3 normals[5], double maxDepth) :
 	origin(origin), 
 	up(normals[0]), down(normals[1]), left(normals[2]), right(normals[3]), forward(normals[4]),

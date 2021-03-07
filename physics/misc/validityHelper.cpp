@@ -150,7 +150,7 @@ bool isValid(const IndexedShape& shape) {
 }
 
 
-static void recursiveTreeValidCheck(const TreeNode& node, bool hasAlreadyPassedGroupHead) {
+static void recursiveTreeValidCheck(const P3D::OldBoundsTree::TreeNode& node, bool hasAlreadyPassedGroupHead) {
 	if(hasAlreadyPassedGroupHead && node.isGroupHead) {
 		throw "Another group head found below one!";
 	}
@@ -159,13 +159,13 @@ static void recursiveTreeValidCheck(const TreeNode& node, bool hasAlreadyPassedG
 			throw "No group head found in this subtree!";
 		}
 	} else {
-		for(TreeNode& n : node) {
+		for(P3D::OldBoundsTree::TreeNode& n : node) {
 			recursiveTreeValidCheck(n, node.isGroupHead || hasAlreadyPassedGroupHead);
 		}
 	}
 }
 
-static void recursiveCheckTreeBounds(const TreeNode& node) {
+static void recursiveCheckTreeBounds(const P3D::OldBoundsTree::TreeNode& node) {
 	if(!node.isLeafNode()) {
 		Bounds bounds = node[0].bounds;
 		for(int i = 1; i < node.nodeCount; i++) {
@@ -174,25 +174,25 @@ static void recursiveCheckTreeBounds(const TreeNode& node) {
 		if(bounds != node.bounds) {
 			throw "A node in the tree does not have valid bounds!";
 		}
-		for(TreeNode& n : node) {
+		for(P3D::OldBoundsTree::TreeNode& n : node) {
 			recursiveCheckTreeBounds(n);
 		}
 	}
 }
 
-static int countOccurences(const void* obj, const TreeNode& node) {
+static int countOccurences(const void* obj, const P3D::OldBoundsTree::TreeNode& node) {
 	if(node.isLeafNode()) {
 		return (node.object == obj) ? 1 : 0;
 	} else {
 		int total = 0;
-		for(TreeNode& n : node) {
+		for(P3D::OldBoundsTree::TreeNode& n : node) {
 			total += countOccurences(obj, n);
 		}
 		return total;
 	}
 }
 
-static void recursiveCheckNoDuplicates(const TreeNode& node, std::set<const void*>& foundObjects, std::set<const TreeNode*>& foundNodes) {
+static void recursiveCheckNoDuplicates(const P3D::OldBoundsTree::TreeNode& node, std::set<const void*>& foundObjects, std::set<const P3D::OldBoundsTree::TreeNode*>& foundNodes) {
 	foundNodes.insert(&node);
 	if(node.isLeafNode()) {
 		if(foundObjects.find(node.object) != foundObjects.end()) {
@@ -201,17 +201,17 @@ static void recursiveCheckNoDuplicates(const TreeNode& node, std::set<const void
 			foundObjects.insert(node.object);
 		}
 	} else {
-		for(const TreeNode& subNode : node) {
+		for(const P3D::OldBoundsTree::TreeNode& subNode : node) {
 			recursiveCheckNoDuplicates(subNode, foundObjects, foundNodes);
 		}
 	}
 }
 
-void treeValidCheck(const TreeNode& rootNode) {
+void treeValidCheck(const P3D::OldBoundsTree::TreeNode& rootNode) {
 	recursiveTreeValidCheck(rootNode, false);
 	recursiveCheckTreeBounds(rootNode);
 	std::set<const void*> foundObjects;
-	std::set<const TreeNode*> foundNodes;
+	std::set<const P3D::OldBoundsTree::TreeNode*> foundNodes;
 	recursiveCheckNoDuplicates(rootNode, foundObjects, foundNodes);
 }
 

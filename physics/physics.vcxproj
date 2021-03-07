@@ -154,7 +154,7 @@
     <ClCompile Include="hardconstraints\hardConstraint.cpp" />
     <ClCompile Include="hardconstraints\hardPhysicalConnection.cpp" />
     <ClCompile Include="hardconstraints\motorConstraint.cpp" />
-    <ClCompile Include="datastructures\boundsTree.cpp" />
+    <ClCompile Include="datastructures\boundsTreeOld.cpp" />
     <ClCompile Include="misc\debug.cpp" />
     <ClCompile Include="geometry\computationBuffer.cpp" />
     <ClCompile Include="geometry\convexShapeBuilder.cpp" />
@@ -186,6 +186,7 @@
   <ItemGroup>
     <ClInclude Include="constraints\barConstraint.h" />
     <ClInclude Include="datastructures\aligned_alloc.h" />
+    <ClInclude Include="datastructures\boundsTree.h" />
     <ClInclude Include="datastructures\boundsTree2.h" />
     <ClInclude Include="softlinks\alignmentLink.h" />
     <ClInclude Include="catchable_assert.h" />
@@ -203,7 +204,7 @@
     <ClInclude Include="hardconstraints\hardPhysicalConnection.h" />
     <ClInclude Include="hardconstraints\motorConstraint.h" />
     <ClInclude Include="datastructures\alignedPtr.h" />
-    <ClInclude Include="datastructures\boundsTree.h" />
+    <ClInclude Include="datastructures\boundsTreeOld.h" />
     <ClInclude Include="datastructures\buffers.h" />
     <ClInclude Include="datastructures\iteratorEnd.h" />
     <ClInclude Include="datastructures\iteratorFactory.h" />
