@@ -45,7 +45,7 @@ TEST_CASE(testRemoveObjFromBoundsTree) {
 static bool areGroupedCorrectly(const BoundsTree<BasicBounded>& tree, const std::vector<BasicBounded*>& lstA, const std::vector<BasicBounded*>& lstB, bool sameGroup) {
 	for(BasicBounded* a : lstA) {
 		for(BasicBounded* b : lstB) {
-			if(tree.areInSameGroup(a, b) != sameGroup) {
+			if(tree.groupContains(a, b) != sameGroup) {
 				return false;
 			}
 		}
@@ -59,7 +59,7 @@ TEST_CASE(testMergeGroups) {
 		BasicBounded* first = getRandomObjectFromTree(tree);
 		BasicBounded* second = getRandomObjectFromTree(tree);
 
-		if(!tree.areInSameGroup(first, second)) {
+		if(!tree.groupContains(first, second)) {
 			std::vector<BasicBounded*> firstGroup;
 			auto iter = tree.iterAllInGroup(first);
 			for(BasicBounded& firstGroupItem : iter) {

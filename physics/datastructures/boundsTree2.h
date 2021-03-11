@@ -4,6 +4,7 @@
 #include "../math/position.h"
 #include "../math/bounds.h"
 #include "iteratorEnd.h"
+#include "iteratorFactory.h"
 
 #include <cstdint>
 #include <utility>
@@ -503,6 +504,76 @@ public:
 	}
 };
 
+template<typename Filter>
+class FilteredTreeIteratorPrototype {
+	struct StackElement {
+		const TreeTrunk* trunk;
+		int trunkSize;
+		int curIndex;
+		std::array<bool, BRANCH_FACTOR> filterResults;
+	};
+
+	Filter filter;
+	std::stack<StackElement> trunkStack;
+
+public:
+	FilteredTreeIteratorPrototype() = default;
+
+	void delveDown() {
+		while(true) {
+			again:
+			StackElement& top = trunkStack.top();
+			for(; top.curIndex < top.trunkSize; top.curIndex++) {
+				if(top.filterResults[top.curIndex]) {
+					const TreeNodeRef& subNode = top.trunk->subNodes[top.curIndex];
+					if(!subNode.isTrunkNode()) break;
+					StackElement newElem{&subNode.asTrunk(), subNode.getTrunkSize(), 0};
+					newElem.filterResults = this->filter(*newElem.trunk, newElem.trunkSize);
+					trunkStack.push(newElem);
+					goto again;
+				}
+			}
+			// no available node found, go back up a level
+			trunkStack.pop();
+			if(trunkStack.empty()) return; // end of iteration
+			StackElement& newTop = trunkStack.top();
+			newTop.curIndex++;
+		}
+	}
+
+	FilteredTreeIteratorPrototype(const TreeTrunk& baseTrunk, int baseTrunkSize, const Filter& filter) : trunkStack(), filter(filter) {
+		if(baseTrunkSize == 0) return;
+		StackElement newElement{&baseTrunk, baseTrunkSize};
+		newElement.filterResults = this->filter(baseTrunk, baseTrunkSize);
+		for(int i = 0; i < baseTrunkSize; i++){
+			if(newElement.filterResults[i]) {
+				newElement.curIndex = i;
+				trunkStack.push(newElement);
+				goto found;
+			}
+		}
+		return; // none of the nodes are suitable
+		found:;
+		this->delveDown();
+	}
+
+	void* operator*() const {
+		const StackElement& top = trunkStack.top();
+		return top.trunk->subNodes[top.curIndex].asObject();
+	}
+
+	FilteredTreeIteratorPrototype& operator++() {
+		StackElement& top = trunkStack.top();
+		top.curIndex++;
+		this->delveDown();
+		return *this;
+	}
+
+	bool operator!=(IteratorEnd) const {
+		return trunkStack.size() != 0;
+	}
+};
+
 class BoundsTreePrototype {
 	TreeTrunk baseTrunk;
 	int baseTrunkSize;
@@ -639,6 +710,11 @@ public:
 	BoundsTreeIteratorPrototype begin() const { return BoundsTreeIteratorPrototype(baseTrunk, baseTrunkSize); }
 	IteratorEnd end() const { return IteratorEnd(); }
 
+	template<typename Filter>
+	IteratorFactoryWithEnd<FilteredTreeIteratorPrototype<Filter>> iterFiltered(const Filter& filter) const { 
+		return IteratorFactoryWithEnd<FilteredTreeIteratorPrototype<Filter>>{FilteredTreeIteratorPrototype<Filter>(baseTrunk, baseTrunkSize, filter)}; 
+	}
+
 	// unsafe functions
 	inline std::pair<TreeTrunk&, int> getBaseTrunk() { return std::pair<TreeTrunk&, int>(this->baseTrunk, this->baseTrunkSize); }
 	inline std::pair<const TreeTrunk&, int> getBaseTrunk() const { return std::pair<const TreeTrunk&, int>(this->baseTrunk, this->baseTrunkSize); }
@@ -699,12 +775,12 @@ bool updateGroupBoundsRecursive(TreeTrunk& curTrunk, int curTrunkSize, const Bou
 	return false;
 }
 
-template<typename Boundable>
+template<typename Boundable, typename UnderlyingIter>
 class BoundableCastIterator {
-	BoundsTreeIteratorPrototype iter;
+	UnderlyingIter iter;
 public:
 	BoundableCastIterator() = default;
-	BoundableCastIterator(BoundsTreeIteratorPrototype&& iter) : iter(std::move(iter)) {}
+	BoundableCastIterator(const UnderlyingIter& iter) : iter(iter) {}
 	BoundableCastIterator(const TreeTrunk& baseTrunk, int baseTrunkSize) : iter(baseTrunk, baseTrunkSize) {}
 
 	BoundableCastIterator& operator++() { ++iter; return *this; }
@@ -862,8 +938,17 @@ public:
 		}
 	}
 
-	BoundableCastIterator<Boundable> begin() const { return BoundableCastIterator<Boundable>(this->tree.begin()); }
+	BoundableCastIterator<Boundable, BoundsTreeIteratorPrototype> begin() const { return BoundableCastIterator<Boundable, BoundsTreeIteratorPrototype>(this->tree.begin()); }
 	IteratorEnd end() const { return IteratorEnd(); }
+
+	template<typename Filter>
+	IteratorFactoryWithEnd<BoundableCastIterator<Boundable, FilteredTreeIteratorPrototype<Filter>>> iterFiltered(const Filter& filter) const { 
+		return IteratorFactoryWithEnd<BoundableCastIterator<Boundable, FilteredTreeIteratorPrototype<Filter>>>{
+			BoundableCastIterator<Boundable, FilteredTreeIteratorPrototype<Filter>>(
+				FilteredTreeIteratorPrototype<Filter>(this->tree.baseTrunk, this->tree.baseTrunkSize, filter)
+			)
+		};
+	}
 
 	template<typename Func>
 	void forEachColission(const Func& func) const {

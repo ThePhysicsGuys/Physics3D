@@ -526,14 +526,14 @@ struct BoundsTree {
 		}
 	}
 
-	inline bool areInSameGroup(const Boundable* first, Bounds firstBounds, const Boundable* second, Bounds secondBounds) const {
+	inline bool groupContains(const Boundable* first, Bounds firstBounds, const Boundable* second, Bounds secondBounds) const {
 		TreeNode* firstGroup = *findGroupFor(first, firstBounds);
 		TreeNode* secondGroup = *findGroupFor(second, secondBounds);
 		return firstGroup == secondGroup;
 	}
 
-	inline bool areInSameGroup(const Boundable* first, const Boundable* second) const {
-		return this->areInSameGroup(first, first->getBounds(), second, second->getBounds());
+	inline bool groupContains(const Boundable* first, const Boundable* second) const {
+		return this->groupContains(first, first->getBounds(), second, second->getBounds());
 	}
 
 	inline bool contains(const Boundable* obj, Bounds objBounds) {
