@@ -145,9 +145,9 @@ bool isValidTriangle(Triangle t, int vertexCount);
 
 class Part;
 
-void treeValidCheck(const TreeNode& rootNode);
+void treeValidCheck(const P3D::OldBoundsTree::TreeNode& rootNode);
 template<typename Boundable>
-inline void treeValidCheck(const BoundsTree<Boundable>& tree) {
+inline void treeValidCheck(const P3D::OldBoundsTree::BoundsTree<Boundable>& tree) {
 	if(!tree.isEmpty()) {
 		treeValidCheck(tree.rootNode);
 	}
@@ -202,6 +202,11 @@ bool isBoundsTreeValid(const BoundsTreePrototype& tree) {
 template<typename Boundable>
 bool isBoundsTreeValid(const BoundsTree<Boundable>& tree) {
 	return isBoundsTreeValid<Boundable>(tree.getPrototype());
+}
+
+template<typename Boundable>
+inline void treeValidCheck(const P3D::NewBoundsTree::BoundsTree<Boundable>& tree) {
+	if(!isBoundsTreeValid(tree)) throw "tree invalid!";
 }
 
 };

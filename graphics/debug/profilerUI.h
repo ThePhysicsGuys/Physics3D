@@ -7,10 +7,15 @@
 #include "../physics/misc/profiling.h"
 #include "../physics/math/linalg/largeMatrix.h"
 
+namespace P3D::OldBoundsTree {
 template<typename T>
 struct BoundsTree;
+}
+namespace P3D::NewBoundsTree {
+template<typename T>
+struct BoundsTree;
+}
 class Part;
-struct TreeNode;
 
 namespace P3D::Graphics {
 
@@ -97,6 +102,7 @@ struct SlidingChart : public Component {
 	Vec2 resize() override;
 };
 
-void renderTreeStructure(const BoundsTree<Part>& tree, const Color3& treeColor, Vec2f origin, float allottedWidth, const void* selectedObject);
+void renderTreeStructure(const P3D::OldBoundsTree::BoundsTree<Part>& tree, const Vec3f& treeColor, Vec2f origin, float allottedWidth, const void* selectedObject);
+void renderTreeStructure(const P3D::NewBoundsTree::BoundsTree<Part>& tree, const Vec3f& treeColor, Vec2f origin, float allottedWidth, const void* selectedObject);
 
 };

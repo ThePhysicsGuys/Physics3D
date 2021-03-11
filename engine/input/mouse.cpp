@@ -79,6 +79,8 @@ namespace Mouse {
 			if (button.second.getName() == name)
 				return button.second;
 		}
+
+		throw "Unreachable";
 	}
 
 	Button getButton(int code) {

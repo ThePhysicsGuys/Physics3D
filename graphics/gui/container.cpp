@@ -36,6 +36,8 @@ std::pair<Component*, Align> Container::get(Component* child) {
 		if (child == iterator->first)
 			return *iterator;
 	}
+
+	throw "Unreachable";
 }
 
 void Container::remove(Component* child) {

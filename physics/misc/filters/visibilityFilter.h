@@ -63,7 +63,7 @@ public:
 	*/
 	static VisibilityFilter forSubWindow(const Position& origin, const Vec3& cameraForward, const Vec3& cameraUp, double fov, double aspect, double maxDepth, double left, double right, double down, double up);
 	
-	bool operator()(const TreeNode& node) const;
+	bool operator()(const P3D::OldBoundsTree::TreeNode& node) const;
 	bool operator()(const Position& point) const;
 	bool operator()(const Part& part) const;
 	bool operator()(const Bounds& bounds) const;

@@ -192,6 +192,8 @@ std::vector<Part> generateMotorizedPhysicalParts() {
 	return parts;
 }
 
+using namespace P3D::OldBoundsTree;
+
 void generateLayerAssignment(std::vector<Part>& parts, WorldPrototype& world) {
 	std::vector<Part*> layerParts(world.layers.size(), nullptr);
 
@@ -200,10 +202,10 @@ void generateLayerAssignment(std::vector<Part>& parts, WorldPrototype& world) {
 		int selectedLayer = rand() % world.layers.size();
 		WorldLayer& addTo = world.layers[selectedLayer].subLayers[selectedSubLayer];
 		if(layerParts[selectedLayer] == nullptr) {
-			addTo.tree.add(&curPart, curPart.getBounds());
+			addTo.tree.add(&curPart);
 			layerParts[selectedLayer] = &curPart;
 		} else {
-			addTo.tree.addToExistingGroup(&curPart, curPart.getBounds(), layerParts[selectedLayer], layerParts[selectedLayer]->getBounds());
+			addTo.tree.addToGroup(&curPart, layerParts[selectedLayer]);
 		}
 		curPart.layer = &addTo;
 	}

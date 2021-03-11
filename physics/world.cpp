@@ -5,6 +5,11 @@
 #include "layer.h"
 #include "misc/validityHelper.h"
 
+//using namespace P3D::OldBoundsTree;
+//using namespace P3D::NewBoundsTree;
+
+#define CHECK_WORLD_VALIDITY
+
 #ifdef CHECK_WORLD_VALIDITY
 #define ASSERT_VALID if (!isValid()) throw "World not valid!";
 #else
@@ -133,12 +138,26 @@ void WorldPrototype::addLink(SoftLink* link) {
 }
 
 
-static TreeNode createNodeFor(MotorizedPhysical* phys) {
-	TreeNode newNode(phys->rigidBody.mainPart, phys->rigidBody.mainPart->getBounds(), true);
+static void createNodeFor(P3D::OldBoundsTree::BoundsTree<Part>& tree, MotorizedPhysical* phys) {
+	P3D::OldBoundsTree::TreeNode newNode(phys->rigidBody.mainPart, phys->rigidBody.mainPart->getBounds(), true);
 	phys->forEachPartExceptMainPart([&newNode](Part& part) {
-		newNode.addInside(TreeNode(&part, part.getBounds(), false));
+		newNode.addInside(P3D::OldBoundsTree::TreeNode(&part, part.getBounds(), false));
 	});
-	return newNode;
+	tree.add(std::move(newNode));
+}
+static void createNodeFor(P3D::NewBoundsTree::BoundsTree<Part>& tree, MotorizedPhysical* phys) {
+	if(phys->isSinglePart()) {
+		tree.add(phys->getMainPart());
+	} else {
+		P3D::NewBoundsTree::TrunkAllocator& alloc = tree.getPrototype().getAllocator();
+		P3D::NewBoundsTree::TreeTrunk* newNode = alloc.allocTrunk();
+		int newNodeSize = 0;
+
+		phys->forEachPart([&alloc, &newNode, &newNodeSize, &tree](Part& p) {
+			newNodeSize = P3D::NewBoundsTree::addRecursive(alloc, *newNode, newNodeSize, P3D::NewBoundsTree::TreeNodeRef(static_cast<void*>(&p)), p.getBounds());
+		});
+		tree.getPrototype().addGroupTrunk(newNode, newNodeSize);
+	}
 }
 
 void WorldPrototype::addPart(Part* part, int layerIndex) {
@@ -159,7 +178,7 @@ void WorldPrototype::addPart(Part* part, int layerIndex) {
 	part->parent->mainPhysical->forEachPart([worldLayer](Part& p) {
 		p.layer = worldLayer;
 	});
-	worldLayer->tree.add(createNodeFor(part->parent->mainPhysical));
+	createNodeFor(worldLayer->tree, part->parent->mainPhysical);
 
 
 	objectCount += part->parent->mainPhysical->getNumberOfPartsInThisAndChildren();
@@ -173,6 +192,43 @@ void WorldPrototype::addPart(Part* part, int layerIndex) {
 	ASSERT_VALID;
 }
 
+#ifdef USE_NEW_BOUNDSTREE
+static void createNewNodeFor(MotorizedPhysical* motorPhys, P3D::NewBoundsTree::BoundsTree<Part>& layer, Part* repPart) {
+	size_t totalParts = 0;
+	motorPhys->forEachPart([&layer, &totalParts](Part& p) {
+		if(&p.layer->tree == &layer) {
+			totalParts++;
+		}
+	});
+
+	assert(totalParts >= 1);
+	if(totalParts == 1) {
+		layer.add(repPart);
+	} else {
+		P3D::NewBoundsTree::TrunkAllocator& alloc = layer.getPrototype().getAllocator();
+		P3D::NewBoundsTree::TreeTrunk* newNode = alloc.allocTrunk();
+		int newNodeSize = 0;
+
+		motorPhys->forEachPart([&alloc, &newNode, &newNodeSize, &layer, repPart](Part& p) {
+			if(&p.layer->tree == &layer) {
+				newNodeSize = P3D::NewBoundsTree::addRecursive(alloc, *newNode, newNodeSize, P3D::NewBoundsTree::TreeNodeRef(static_cast<void*>(&p)), p.getBounds());
+			}
+		});
+		layer.getPrototype().addGroupTrunk(newNode, newNodeSize);
+	}
+}
+#else
+static void createNewNodeFor(MotorizedPhysical* motorPhys, P3D::OldBoundsTree::BoundsTree<Part>& layer, Part* repPart) {
+	P3D::OldBoundsTree::TreeNode newNode(repPart, repPart->getBounds(), true);
+	motorPhys->forEachPart([&newNode, &layer, repPart](Part& p) {
+		if(&p.layer->tree == &layer && &p != repPart) {
+			newNode.addInside(P3D::OldBoundsTree::TreeNode(&p, p.getBounds()));
+		}
+	});
+	layer.add(std::move(newNode));
+}
+#endif
+
 void WorldPrototype::addPhysicalWithExistingLayers(MotorizedPhysical* motorPhys) {
 	physicals.push_back(motorPhys);
 	motorPhys->world = this;
@@ -180,13 +236,7 @@ void WorldPrototype::addPhysicalWithExistingLayers(MotorizedPhysical* motorPhys)
 	std::vector<FoundLayerRepresentative> foundLayers = findAllLayersIn(motorPhys);
 
 	for(const FoundLayerRepresentative& l : foundLayers) {
-		TreeNode newNode(l.part, l.part->getBounds(), true);
-		motorPhys->forEachPart([&newNode, &l](Part& part) {
-			if(part.layer == l.layer && &part != l.part) {
-				newNode.addInside(TreeNode(&part, part.getBounds()));
-			}
-		});
-		l.layer->addNode(std::move(newNode));
+		createNewNodeFor(motorPhys, l.layer->tree, l.part);
 	}
 
 	ASSERT_VALID;
@@ -287,7 +337,7 @@ void WorldPrototype::notifyPhysicalHasBeenSplit(const MotorizedPhysical* mainPhy
 	assignLayersForPhysicalRecurse(*newlySplitPhysical, layersThatNeedToBeSplit);
 
 	for(const std::pair<WorldLayer*, std::vector<const Part*>>& layer : layersThatNeedToBeSplit) {
-		layer.first->moveAllOutOfGroup(layer.second.begin(), layer.second.end());
+		layer.first->splitGroup(layer.second.begin(), layer.second.end());
 	}
 
 
