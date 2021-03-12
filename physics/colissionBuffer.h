@@ -9,7 +9,7 @@ struct Colission {
 	Vec3 exitVector;
 };
 
-struct ColissionBuffer {
+ struct ColissionBuffer {
 	std::vector<Colission> freePartColissions;
 	std::vector<Colission> freeTerrainColissions;
 
