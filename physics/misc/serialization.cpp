@@ -374,19 +374,19 @@ static void assertVersionCorrect(std::istream& istream) {
 
 void SerializationSessionPrototype::serializeWorldLayer(const WorldLayer& layer, std::ostream& ostream) {
 	uint32_t numberOfUnPhysicaledPartsInLayer = 0;
-	for(const Part& p : layer.tree) {
+	layer.tree.forEach([&numberOfUnPhysicaledPartsInLayer](const Part& p) {
 		if(p.parent == nullptr) {
 			numberOfUnPhysicaledPartsInLayer++;
 		}
-	}
+	});
 
 	::serialize<uint32_t>(numberOfUnPhysicaledPartsInLayer, ostream);
-	for(const Part& p : layer.tree) {
+	layer.tree.forEach([this, &ostream](const Part& p) {
 		if(p.parent == nullptr) {
 			::serialize<GlobalCFrame>(p.getCFrame(), ostream);
-			serializePartData(p, ostream);
+			this->serializePartData(p, ostream);
 		}
-	}
+	});
 }
 
 void SerializationSessionPrototype::serializeWorld(const WorldPrototype& world, std::ostream& ostream) {
@@ -395,11 +395,11 @@ void SerializationSessionPrototype::serializeWorld(const WorldPrototype& world, 
 	}
 	for(const ColissionLayer& clayer : world.layers) {
 		for(const WorldLayer& layer : clayer.subLayers) {
-			for(const Part& p : layer.tree) {
+			layer.tree.forEach([this](const Part& p) {
 				if(p.parent == nullptr) {
 					collectPartInformation(p);
 				}
-			}
+			});
 		}
 	}
 

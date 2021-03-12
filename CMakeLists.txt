@@ -10,15 +10,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /arch:AVX2")
-	
+
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2 /Oi /ot /GL")
 else()
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
-	
+
 	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g  -fsanitize=address")
 
 	set(OpenGL_GL_PREFERENCE "GLVND")
-	
+
 	#running benchmarks showed this to be a pessimization
 	#set(CMAKE_INTERPROCEDURAL_OPTIMIZATION True)
 	#surprisingly, also a pessimization
@@ -86,7 +86,7 @@ add_library(physics STATIC
   physics/geometry/builtinShapeClasses.cpp
 
   physics/datastructures/aligned_alloc.cpp
-  physics/datastructures/boundsTree.cpp
+  physics/datastructures/boundsTreeOld.cpp
   physics/datastructures/boundsTree2.cpp
 
   physics/hardconstraints/fixedConstraint.cpp
@@ -220,6 +220,7 @@ add_library(graphics STATIC
 )
 
 target_link_libraries(graphics imguiInclude)
+target_link_libraries(graphics physics)
 
 target_include_directories(graphics PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/graphics")
 

@@ -5,6 +5,8 @@
 
 #include <fenv.h>
 
+#define USE_NEW_BOUNDSTREE
+
 template<typename T>
 struct BoundsTemplate {
 	PositionTemplate<T> min;
@@ -42,6 +44,7 @@ struct BoundsTemplate {
 		this->max.y = static_cast<T>(from.max.y);
 		this->max.z = static_cast<T>(from.max.z);
 		fesetround(curRound);
+		return *this;
 	}
 
 	constexpr Vector<T, 3> getDiagonal() const noexcept {

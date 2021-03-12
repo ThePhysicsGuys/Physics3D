@@ -66,6 +66,8 @@ public:
 
 		for (const auto& timestamp : keyframes)
 			timestamps.push_back(timestamp.first);
+		
+		return timestamps;
 	}
 };
 

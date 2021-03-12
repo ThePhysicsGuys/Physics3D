@@ -45,19 +45,23 @@ static void shuffleTree(BoundsTree<Boundable>& tree) {
 	shuffleTree(tree.getPrototype());
 }
 
+static BoundsTemplate<float> generateBoundsTreeBounds() {
+	float x = generateFloat(-100.0f, 100.0f);
+	float y = generateFloat(-100.0f, 100.0f);
+	float z = generateFloat(-100.0f, 100.0f);
+
+	float w = generateFloat(0.2f, 50.0f);
+	float h = generateFloat(0.2f, 50.0f);
+	float d = generateFloat(0.2f, 50.0f);
+
+	return BoundsTemplate<float>(PositionTemplate<float>(x - w, y - h, z - d), PositionTemplate<float>(x + w, y + h, z + d));
+}
+
 static std::vector<BasicBounded> generateBoundsTreeItems(int size) {
 	std::vector<BasicBounded> allItems;
 
 	for(int i = 0; i < size; i++) {
-		float x = generateFloat(-100.0f, 100.0f);
-		float y = generateFloat(-100.0f, 100.0f);
-		float z = generateFloat(-100.0f, 100.0f);
-
-		float w = generateFloat(0.2f, 50.0f);
-		float h = generateFloat(0.2f, 50.0f);
-		float d = generateFloat(0.2f, 50.0f);
-
-		allItems.push_back(BasicBounded{BoundsTemplate<float>(PositionTemplate<float>(x - w, y - h, z - d), PositionTemplate<float>(x + w, y + h, z + d))});
+		allItems.push_back(BasicBounded{generateBoundsTreeBounds()});
 	}
 
 	return allItems;
@@ -118,12 +122,12 @@ static bool groupsMatchTree(const std::vector<std::vector<BasicBounded*>>& group
 	}
 	// verify that all groups in the tree match a group in the lists
 	bool result = true;
-	tree.forEach([&](const BasicBounded* obj) {
-		size_t groupSize = tree.groupSize(obj);
+	tree.forEach([&](const BasicBounded& obj) {
+		size_t groupSize = tree.groupSize(&obj);
 
 		for(const std::vector<BasicBounded*>& g : groups) {
 			for(BasicBounded* item : g) {
-				if(obj == item) {
+				if(&obj == item) {
 					if(groupSize != g.size()) {
 						std::cout << "Tree item's group not same size as in groups list!\n";
 						result = false;
@@ -417,5 +421,54 @@ TEST_CASE(testForEachColissionBetween) {
 		}
 	}
 }
+
+TEST_CASE(testUpdatePartBounds) {
+	BoundsTree<BasicBounded> tree;
+
+	constexpr int itemCount = 100;
+
+	std::vector<BasicBounded> allItems = generateBoundsTreeItems(itemCount);
+
+	std::vector<std::vector<BasicBounded*>> groups = createGroups(tree, allItems);
+
+	ASSERT_TRUE(isBoundsTreeValid(tree));
+
+	for(int iter = 0; iter < 500; iter++) {
+		BasicBounded& selectedItem = allItems[generateSize_t(allItems.size())];
+		BoundsTemplate<float> oldBounds = selectedItem.getBounds();
+		selectedItem.bounds = generateBoundsTreeBounds();
+
+		tree.updateObjectBounds(&selectedItem, oldBounds);
+		ASSERT_TRUE(tree.contains(&selectedItem));
+		ASSERT_TRUE(isBoundsTreeValid(tree));
+	}
+}
+
+TEST_CASE(testUpdateGroupBounds) {
+	BoundsTree<BasicBounded> tree;
+
+	constexpr int itemCount = 10;
+
+	std::vector<BasicBounded> allItems = generateBoundsTreeItems(itemCount);
+
+	std::vector<std::vector<BasicBounded*>> groups = createGroups(tree, allItems);
+
+	ASSERT_TRUE(isBoundsTreeValid(tree));
+
+	for(int iter = 0; iter < 500; iter++) {
+		std::vector<BasicBounded*>& selectedGroup = groups[generateSize_t(groups.size())];
+		size_t selectedGroupSize = selectedGroup.size();
+		BasicBounded& selectedItem = *selectedGroup[generateSize_t(selectedGroupSize)];
+		BoundsTemplate<float> oldBounds = selectedItem.getBounds();
+		for(BasicBounded* item : selectedGroup) {
+			item->bounds = generateBoundsTreeBounds();
+		}
+
+		tree.updateObjectGroupBounds(&selectedItem, oldBounds);
+		ASSERT_TRUE(tree.contains(&selectedItem));
+		ASSERT_TRUE(isBoundsTreeValid(tree));
+	}
+}
+
 
 };
