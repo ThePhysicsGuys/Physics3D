@@ -13,7 +13,7 @@ void AlignmentLink::update() {
 	this->attachedPart2.part->applyMoment(momentDir);
 }
 
-Vec3 AlignmentLink::getGlobalMoment() {
+Vec3 AlignmentLink::getGlobalMoment() noexcept {
 
 	Rotation rot1 = this->attachedPart1.part->getCFrame().getRotation().localToGlobal(this->offset);
 	Rotation rot2 = this->attachedPart2.part->getCFrame().getRotation();

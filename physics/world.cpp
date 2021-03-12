@@ -128,9 +128,6 @@ void WorldPrototype::deleteLayer(int layerIndex, int layerToMoveTo) {
 
 }
 
-void WorldPrototype::addLink(SoftLink* link) {
-	springLinks.push_back(link);
-}
 
 
 static TreeNode createNodeFor(MotorizedPhysical* phys) {

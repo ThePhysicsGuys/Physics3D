@@ -11,11 +11,12 @@
 #include "constants.h"
 #include "../util/log.h"
 
+
 #include <vector>
 #include <cmath>
 #include <algorithm>
-#include <thread>
-#include <mutex>
+
+
 
 /*
 	exitVector is the distance p2 must travel so that the shapes are no longer colliding
@@ -228,34 +229,84 @@ static PartIntersection safeIntersects(const Part& p1, const Part& p2) {
 #endif
 }
 
-//Multithread.
-static void refineColission(std::vector<Colission>& colissions) {
+/*static void refineColission(std::vector<Colission>& colissions) {
+
+	for (size_t i = 0; i < colissions.size();) {
 	
-	unsigned int threadCount = std::thread::hardware_concurrency();
-	std::vector<std::thread> threads;
-	std::mutex mt; 
-
-	for(size_t i = 0; i < colissions.size(); ) {
-
 		Colission& col = colissions[i];
+	
 		PartIntersection result = safeIntersects(*col.p1, *col.p2);
-		if(result.intersects) {
+	
+		if (result.intersects) {
+
 			intersectionStatistics.addToTally(IntersectionResult::COLISSION, 1);
+			
 			// add extra information
-				
 			col.intersection = result.intersection;
 			col.exitVector = result.exitVector;
-			i++;
 
-		} else {
-			
+			i++;
+		}
+		else {
+
 			intersectionStatistics.addToTally(IntersectionResult::GJK_REJECT, 1);
-			// remove if no colission
+			
 			col = std::move(colissions.back());
 			colissions.pop_back();
+			
 		}
-	}
-	
+	}	
+}*/
+
+
+void WorldPrototype::parallelRefineColission(std::vector<Colission>& colissions) {
+
+	std::vector<Colission> wantedColission;
+	const size_t workEnd = colissions.size();
+	size_t currIndex = 0;
+	std::mutex colissionMutex, statsMutex, indexMutex, vecMutex;
+
+	this->pool.doInParallel([&]{
+		while (true) {
+
+			indexMutex.lock();
+			size_t claimedWork = currIndex;
+			currIndex++;
+			indexMutex.unlock();
+
+			if (claimedWork >= workEnd) {
+				break;
+			}
+
+			Colission& col = colissions[claimedWork];
+			PartIntersection result = safeIntersects(*col.p1, *col.p2);
+
+			if (result.intersects) {
+				{
+					std::lock_guard lck(statsMutex);
+					intersectionStatistics.addToTally(IntersectionResult::COLISSION, 1);
+				}
+
+				// add extra information
+				col.intersection = result.intersection;
+				col.exitVector = result.exitVector;
+				
+				{
+					std::lock_guard lck(vecMutex);
+					wantedColission.push_back(col);
+				}
+
+			}
+			else {
+				{
+					std::lock_guard lck(statsMutex);
+					intersectionStatistics.addToTally(IntersectionResult::GJK_REJECT, 1);
+				}
+
+			}
+		}	
+	});
+	colissions.swap(wantedColission);
 }
 
 void WorldPrototype::findColissions() {
@@ -272,8 +323,11 @@ void WorldPrototype::findColissions() {
 		getColissionsBetween(layers[collidingLayers.first], layers[collidingLayers.second], curColissions);
 	}
 
-	refineColission(curColissions.freePartColissions);
-	refineColission(curColissions.freeTerrainColissions);
+	std::mutex cMx, sMx;
+
+	parallelRefineColission(curColissions.freePartColissions);
+	parallelRefineColission(curColissions.freeTerrainColissions);
+
 }
 
 void WorldPrototype::handleColissions() {
@@ -285,6 +339,7 @@ void WorldPrototype::handleColissions() {
 		handleTerrainCollision(*c.p1, *c.p2, c.intersection, c.exitVector);
 	}
 }
+
 void WorldPrototype::handleConstraints() {
 	physicsMeasure.mark(PhysicsProcess::CONSTRAINTS);
 	for (const ConstraintGroup& group : constraints) {
@@ -330,4 +385,8 @@ double WorldPrototype::getPotentialEnergyOfPhysical(const MotorizedPhysical& p) 
 }
 double WorldPrototype::getTotalEnergy() const {
 	return getTotalKineticEnergy() + getTotalPotentialEnergy();
+}
+
+void WorldPrototype::addLink(SoftLink* link) {
+	springLinks.push_back(link);
 }
