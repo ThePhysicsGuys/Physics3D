@@ -133,9 +133,6 @@ void WorldPrototype::deleteLayer(int layerIndex, int layerToMoveTo) {
 
 }
 
-void WorldPrototype::addLink(SoftLink* link) {
-	springLinks.push_back(link);
-}
 
 
 static void createNodeFor(P3D::OldBoundsTree::BoundsTree<Part>& tree, MotorizedPhysical* phys) {
