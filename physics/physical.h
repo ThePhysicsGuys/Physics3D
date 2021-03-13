@@ -311,6 +311,8 @@ public:
 
 	void fullRefreshOfConnectedPhysicals();
 
+	bool isSinglePart() const { return this->childPhysicals.size() == 0 && this->rigidBody.getPartCount() == 1; }
+
 	// expects a function of type void(const Part&)
 	template<typename Func>
 	void forEachPart(const Func& func) const { this->forEachPartInThisAndChildren(func); }

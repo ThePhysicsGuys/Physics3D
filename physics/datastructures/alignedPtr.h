@@ -41,11 +41,11 @@ class SharedAlignedPointer {
 public:
 	SharedAlignedPointer() : data(nullptr), refCount(nullptr) {}
 	SharedAlignedPointer(std::size_t size, std::size_t align = alignof(T)) :
-		data(static_cast<T*>(createAligned(sizeof(T)* size, align))),
+		data(static_cast<T*>(aligned_malloc(sizeof(T)* size, align))),
 		refCount(new std::size_t(1)) {}
 	~SharedAlignedPointer() {
 		if (refCount != nullptr && --(*refCount) == 0) {
-			deleteAligned(static_cast<void*>(data));
+			aligned_free(static_cast<void*>(data));
 			delete refCount;
 		}
 	}

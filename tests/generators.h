@@ -79,6 +79,8 @@ int generateInt(int max);
 size_t generateSize_t(size_t max);
 double generateDouble(); 
 float generateFloat();
+double generateDouble(double min, double max);
+float generateFloat(float min, float max);
 bool generateBool();
 Shape generateShape();
 Polyhedron generateConvexPolyhedron();
@@ -110,6 +112,8 @@ inline Vec3f generateVec3f() { return generateVector<float, 3>(); }
 Triangle generateTriangle(int maxIndex);
 Position generatePosition();
 Bounds generateBounds();
+BoundsTemplate<float> generateBoundsf();
+PositionTemplate<float> generatePositionf();
 Rotation generateRotation();
 CFrame generateCFrame();
 GlobalCFrame generateGlobalCFrame();
@@ -145,12 +149,12 @@ HardConstraint* generateHardConstraint();
 void generateAttachment(Part& first, Part& second);
 std::vector<Part> generateMotorizedPhysicalParts();
 void generateLayerAssignment(std::vector<Part>& parts, WorldPrototype& world);
-TreeNode generateTreeNode(int branchInhibition);
-BoundsTree<BasicBounded> generateFilledBoundsTree();
-BoundsTree<BasicBounded> generateBoundsTree();
-void* getRandomLeafObject(const TreeNode& node);
+P3D::OldBoundsTree::TreeNode generateTreeNode(int branchInhibition);
+P3D::OldBoundsTree::BoundsTree<P3D::OldBoundsTree::BasicBounded> generateFilledBoundsTree();
+P3D::OldBoundsTree::BoundsTree<P3D::OldBoundsTree::BasicBounded> generateBoundsTree();
+void* getRandomLeafObject(const P3D::OldBoundsTree::TreeNode& node);
 template<typename Boundable>
-Boundable* getRandomObjectFromTree(const BoundsTree<Boundable>& tree) {
+Boundable* getRandomObjectFromTree(const P3D::OldBoundsTree::BoundsTree<Boundable>& tree) {
 	return static_cast<Boundable*>(getRandomLeafObject(tree.rootNode));
 }
 template<typename Collection>

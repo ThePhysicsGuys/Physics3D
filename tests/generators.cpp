@@ -8,21 +8,29 @@
 #include "../physics/geometry/convexShapeBuilder.h"
 #include "../physics/misc/toString.h"
 
+static std::default_random_engine generator;
+
 int generateInt(int max) {
-	return rand() % max;
+	return std::uniform_int_distribution<int>(0, max - 1)(generator);
 }
 size_t generateSize_t(size_t max) {
-	return rand() % max;
+	return std::uniform_int_distribution<size_t>(0, max - 1)(generator);
 }
 double generateDouble() {
-	return rand() * 2.0 / RAND_MAX;
+	return std::uniform_real_distribution<double>(0.0, 2.0)(generator);
 }
 float generateFloat() {
-	return rand() * 2.0f / RAND_MAX;
+	return std::uniform_real_distribution<float>(0.0f, 2.0f)(generator);
+}
+double generateDouble(double min, double max) {
+	return std::uniform_real_distribution<double>(min, max)(generator);
+}
+float generateFloat(float min, float max) {
+	return std::uniform_real_distribution<float>(min, max)(generator);
 }
 
 bool generateBool() {
-	return rand() % 2 == 0;
+	return std::uniform_int_distribution<int>(0, 1)(generator) == 1;
 }
 
 Shape generateShape() {
@@ -44,7 +52,7 @@ Polyhedron generateConvexPolyhedron() {
 
 	ConvexShapeBuilder builder(vecBuf, triangleBuf, 4, 4, neighborBuf, removalBuf, edgeBuf);
 
-	int numExtraPoints = rand() % (MAX_POINT_COINT - 4);
+	int numExtraPoints = generateInt(MAX_POINT_COINT - 4);
 	for(int i = 0; i < numExtraPoints; i++) {
 		builder.addPoint(generateVec3f());
 	}
@@ -92,8 +100,19 @@ TriangleMesh generateTriangleMesh() {
 	return TriangleMesh(std::move(mesh));
 }
 
+PositionTemplate<float> generatePositionf() {
+	return PositionTemplate<float>(generateFloat(), generateFloat(), generateFloat());
+}
+
 Position generatePosition() {
 	return Position(generateDouble(), generateDouble(), generateDouble());
+}
+
+BoundsTemplate<float> generateBoundsf() {
+	PositionTemplate<float> a = generatePositionf();
+	PositionTemplate<float> b = generatePositionf();
+
+	return BoundsTemplate<float>(PositionTemplate<float>(std::min(a.x, b.x), std::min(a.y, b.y), std::min(a.z, b.z)), PositionTemplate<float>(std::max(a.x, b.x), std::max(a.y, b.y), std::max(a.z, b.z)));
 }
 
 Bounds generateBounds() {
@@ -173,6 +192,8 @@ std::vector<Part> generateMotorizedPhysicalParts() {
 	return parts;
 }
 
+using namespace P3D::OldBoundsTree;
+
 void generateLayerAssignment(std::vector<Part>& parts, WorldPrototype& world) {
 	std::vector<Part*> layerParts(world.layers.size(), nullptr);
 
@@ -181,10 +202,10 @@ void generateLayerAssignment(std::vector<Part>& parts, WorldPrototype& world) {
 		int selectedLayer = rand() % world.layers.size();
 		WorldLayer& addTo = world.layers[selectedLayer].subLayers[selectedSubLayer];
 		if(layerParts[selectedLayer] == nullptr) {
-			addTo.tree.add(&curPart, curPart.getBounds());
+			addTo.tree.add(&curPart);
 			layerParts[selectedLayer] = &curPart;
 		} else {
-			addTo.tree.addToExistingGroup(&curPart, curPart.getBounds(), layerParts[selectedLayer], layerParts[selectedLayer]->getBounds());
+			addTo.tree.addToGroup(&curPart, layerParts[selectedLayer]);
 		}
 		curPart.layer = &addTo;
 	}

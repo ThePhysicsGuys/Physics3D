@@ -5,9 +5,9 @@
 #include <shared_mutex>
 #include <functional>
 
-#include "world.h"
+#include "../world.h"
 #include "sharedLockGuard.h"
-#include "misc/physicsProfiler.h"
+#include "../misc/physicsProfiler.h"
 
 template<typename T = Part>
 class SynchronizedWorld : public World<T> {

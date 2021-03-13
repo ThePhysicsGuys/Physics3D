@@ -7,36 +7,37 @@
 
 #include <assert.h>
 
+//using namespace P3D::OldBoundsTree;
 
 WorldLayer::WorldLayer(ColissionLayer* parent) : parent(parent) {}
 
 WorldLayer::~WorldLayer() {
-	for(Part& p : tree) {
+	tree.forEach([](Part& p) {
 		p.layer = nullptr;
-	}
+	});
 }
 
 WorldLayer::WorldLayer(WorldLayer&& other) noexcept :
 	tree(std::move(other.tree)),
 	parent(other.parent) {
 
-	for(Part& p : tree) {
+	tree.forEach([this, &other](Part& p) {
 		assert(p.layer = &other);
 		p.layer = this;
-	}
+	});
 }
 WorldLayer& WorldLayer::operator=(WorldLayer&& other) noexcept {
 	std::swap(tree, other.tree);
 	std::swap(parent, other.parent);
 
-	for(Part& p : tree) {
+	tree.forEach([this, &other](Part& p) {
 		assert(p.layer = &other);
 		p.layer = this;
-	}
-	for(Part& p : other.tree) {
+	});
+	other.tree.forEach([this, &other](Part& p) {
 		assert(p.layer = this);
 		p.layer = &other;
-	}
+	});
 	return *this;
 }
 
@@ -47,49 +48,65 @@ void WorldLayer::refresh() {
 	tree.improveStructure();
 }
 
-void WorldLayer::addNode(TreeNode&& newNode) {
-	tree.add(std::move(newNode));
-}
 void WorldLayer::addPart(Part* newPart) {
-	tree.add(newPart, newPart->getBounds());
+	tree.add(newPart);
 }
 
-static TreeNode createNodeFor(MotorizedPhysical* phys, bool makeGroupHead) {
-	TreeNode newNode(phys->rigidBody.mainPart, phys->rigidBody.mainPart->getBounds(), makeGroupHead);
+static P3D::OldBoundsTree::TreeNode createNodeFor(MotorizedPhysical* phys, bool makeGroupHead) {
+	P3D::OldBoundsTree::TreeNode newNode(phys->rigidBody.mainPart, phys->rigidBody.mainPart->getBounds(), makeGroupHead);
 	phys->forEachPartExceptMainPart([&newNode](Part& part) {
-		newNode.addInside(TreeNode(&part, part.getBounds(), false));
+		newNode.addInside(P3D::OldBoundsTree::TreeNode(&part, part.getBounds(), false));
 	});
 	return newNode;
+}
+
+static void addMotorPhysToGroup(P3D::OldBoundsTree::BoundsTree<Part>& tree, MotorizedPhysical* phys, Part* group) {
+	tree.addToGroup(createNodeFor(phys, false), group, group->getBounds());
+}
+
+static void addMotorPhysToGroup(P3D::NewBoundsTree::BoundsTree<Part>& tree, MotorizedPhysical* phys, Part* group) {
+	auto base = tree.getPrototype().getBaseTrunk();
+	P3D::NewBoundsTree::TrunkAllocator& alloc = tree.getPrototype().getAllocator();
+	P3D::NewBoundsTree::modifyGroupRecursive(alloc, base.first, base.second, group, group->getBounds(), [&](P3D::NewBoundsTree::TreeNodeRef& groupNode, const BoundsTemplate<float>& groupNodeBounds) {
+		Part* mp = phys->getMainPart();
+		if(groupNode.isLeafNode()) {
+			P3D::NewBoundsTree::TreeTrunk* newTrunk = alloc.allocTrunk();
+			newTrunk->setSubNode(0, std::move(groupNode), groupNodeBounds);
+			newTrunk->setSubNode(1, P3D::NewBoundsTree::TreeNodeRef(mp), mp->getBounds());
+			groupNode = P3D::NewBoundsTree::TreeNodeRef(newTrunk, 2, true);
+		} else {
+			P3D::NewBoundsTree::addRecursive(alloc, groupNode.asTrunk(), groupNode.getTrunkSize(), P3D::NewBoundsTree::TreeNodeRef(mp), mp->getBounds());
+		}
+		P3D::NewBoundsTree::TreeTrunk& curTrunk = groupNode.asTrunk();
+		int curTrunkSize = groupNode.getTrunkSize();
+		phys->forEachPartExceptMainPart([&](Part& part) {
+			curTrunkSize = P3D::NewBoundsTree::addRecursive(alloc, curTrunk, curTrunkSize, P3D::NewBoundsTree::TreeNodeRef(&part), part.getBounds());
+		});
+		groupNode.setTrunkSize(curTrunkSize);
+		return P3D::NewBoundsTree::TrunkSIMDHelperFallback::getTotalBounds(curTrunk, curTrunkSize);
+	});
 }
 
 void WorldLayer::addIntoGroup(Part* newPart, Part* group) {
 	assert(newPart->layer == nullptr);
 	assert(group->layer == this);
-#ifndef NDEBUG
-	treeValidCheck(tree);
-#endif
+
 	if(newPart->parent != nullptr) {
 		MotorizedPhysical* mainPhys = newPart->parent->mainPhysical;
-		tree.addToExistingGroup(createNodeFor(mainPhys, false), group, group->getBounds());
+		addMotorPhysToGroup(tree, mainPhys, group);
 		mainPhys->forEachPart([this](Part& p) {p.layer = this; });
-#ifndef NDEBUG
-		treeValidCheck(tree);
-#endif
 	} else {
-		tree.addToExistingGroup(TreeNode(newPart, newPart->getBounds()), group, group->getBounds());
+		tree.addToGroup(newPart, group);
 		newPart->layer = this;
-#ifndef NDEBUG
-		treeValidCheck(tree);
-#endif
 	}
 }
 
 void WorldLayer::moveOutOfGroup(Part* part) {
-	this->tree.moveOutOfGroup(part, part->getBounds());
+	this->tree.moveOutOfGroup(part);
 }
 
 void WorldLayer::removePart(Part* partToRemove) {
-	tree.remove(partToRemove, partToRemove->getBounds());
+	tree.remove(partToRemove);
 	parent->world->onPartRemoved(partToRemove);
 }
 
@@ -101,22 +118,21 @@ void WorldLayer::notifyPartGroupBoundsUpdated(const Part* mainPart, const Bounds
 }
 
 void WorldLayer::notifyPartStdMoved(Part* oldPartPtr, Part* newPartPtr) noexcept {
-	bool success = tree.findAndReplaceObject(oldPartPtr, newPartPtr, newPartPtr->getBounds());
-	assert(success);
+	tree.findAndReplaceObject(oldPartPtr, newPartPtr, newPartPtr->getBounds());
 }
 
-void WorldLayer::mergeGroupsOf(Part* first, Part* second) {
-	this->tree.mergeGroupsOf(first, first->getBounds(), second, second->getBounds());
+void WorldLayer::mergeGroups(Part* first, Part* second) {
+	this->tree.mergeGroups(first, second);
 }
 
 // TODO can be optimized, this only needs to move the single partToMove node
 void WorldLayer::moveIntoGroup(Part* partToMove, Part* group) {
-	this->tree.mergeGroupsOf(partToMove, partToMove->getBounds(), group, group->getBounds());
+	this->tree.mergeGroups(partToMove, group);
 }
 
 // TODO can be optimized, this only needs to move the single part nodes
 void WorldLayer::joinPartsIntoNewGroup(Part* p1, Part* p2) {
-	this->tree.mergeGroupsOf(p1, p1->getBounds(), p2, p2->getBounds());
+	this->tree.mergeGroups(p1, p2);
 }
 
 int WorldLayer::getID() const {
@@ -188,7 +204,7 @@ static bool runColissionPreTests(const Part& p1, const Part& p2) {
 	return true;
 }
 
-static void recursiveFindColissionsBetween(std::vector<Colission>& colissions, const TreeNode& first, const TreeNode& second) {
+static void recursiveFindColissionsBetween(std::vector<Colission>& colissions, const P3D::OldBoundsTree::TreeNode& first, const P3D::OldBoundsTree::TreeNode& second) {
 	if(!intersects(first.bounds, second.bounds)) return;
 
 	if(first.isLeafNode() && second.isLeafNode()) {
@@ -198,43 +214,61 @@ static void recursiveFindColissionsBetween(std::vector<Colission>& colissions, c
 			colissions.push_back(Colission{p1, p2, Position(), Vec3()});
 		}
 	} else {
-		bool preferFirst = computeCost(first.bounds) <= computeCost(second.bounds);
+		bool preferFirst = P3D::OldBoundsTree::computeCost(first.bounds) <= P3D::OldBoundsTree::computeCost(second.bounds);
 		if(preferFirst && !first.isLeafNode() || second.isLeafNode()) {
 			// split first
 
-			for(const TreeNode& node : first) {
+			for(const P3D::OldBoundsTree::TreeNode& node : first) {
 				recursiveFindColissionsBetween(colissions, node, second);
 			}
 		} else {
 			// split second
 
-			for(const TreeNode& node : second) {
+			for(const P3D::OldBoundsTree::TreeNode& node : second) {
 				recursiveFindColissionsBetween(colissions, first, node);
 			}
 		}
 	}
 }
-static void recursiveFindColissionsInternal(std::vector<Colission>& colissions, const TreeNode& trunkNode) {
+static void recursiveFindColissionsInternal(std::vector<Colission>& colissions, const P3D::OldBoundsTree::TreeNode& trunkNode) {
 	// within the same node
 	if(trunkNode.isLeafNode() || trunkNode.isGroupHead)
 		return;
 
 	for(int i = 0; i < trunkNode.nodeCount; i++) {
-		const TreeNode& A = trunkNode[i];
+		const P3D::OldBoundsTree::TreeNode& A = trunkNode[i];
 		recursiveFindColissionsInternal(colissions, A);
 		for(int j = i + 1; j < trunkNode.nodeCount; j++) {
-			const TreeNode& B = trunkNode[j];
+			const P3D::OldBoundsTree::TreeNode& B = trunkNode[j];
 			recursiveFindColissionsBetween(colissions, A, B);
 		}
 	}
 }
 
+static void findColissionsBetween(std::vector<Colission>& colissions, const P3D::OldBoundsTree::BoundsTree<Part>& treeA, const P3D::OldBoundsTree::BoundsTree<Part>& treeB) {
+	recursiveFindColissionsBetween(colissions, treeA.rootNode, treeB.rootNode);
+}
+static void findColissionsInternal(std::vector<Colission>& colissions, const P3D::OldBoundsTree::BoundsTree<Part>& tree) {
+	recursiveFindColissionsInternal(colissions, tree.rootNode);
+}
+
+static void findColissionsBetween(std::vector<Colission>& colissions, const P3D::NewBoundsTree::BoundsTree<Part>& treeA, const P3D::NewBoundsTree::BoundsTree<Part>& treeB) {
+	treeA.forEachColissionWith(treeB, [&colissions](Part* a, Part* b) {
+		colissions.push_back(Colission{a, b});
+	});
+}
+static void findColissionsInternal(std::vector<Colission>& colissions, const P3D::NewBoundsTree::BoundsTree<Part>& tree) {
+	tree.forEachColission([&colissions](Part* a, Part* b) {
+		colissions.push_back(Colission{a, b});
+	});
+}
+
 void ColissionLayer::getInternalColissions(ColissionBuffer& curColissions) const {
-	recursiveFindColissionsInternal(curColissions.freePartColissions, subLayers[0].tree.rootNode);
-	recursiveFindColissionsBetween(curColissions.freeTerrainColissions, subLayers[0].tree.rootNode, subLayers[1].tree.rootNode);
+	findColissionsInternal(curColissions.freePartColissions, subLayers[0].tree);
+	findColissionsBetween(curColissions.freeTerrainColissions, subLayers[0].tree, subLayers[1].tree);
 }
 void getColissionsBetween(const ColissionLayer& a, const ColissionLayer& b, ColissionBuffer& curColissions) {
-	recursiveFindColissionsBetween(curColissions.freePartColissions, a.subLayers[0].tree.rootNode, b.subLayers[0].tree.rootNode);
-	recursiveFindColissionsBetween(curColissions.freeTerrainColissions, a.subLayers[0].tree.rootNode, b.subLayers[1].tree.rootNode);
-	recursiveFindColissionsBetween(curColissions.freeTerrainColissions, b.subLayers[0].tree.rootNode, a.subLayers[1].tree.rootNode);
+	findColissionsBetween(curColissions.freePartColissions, a.subLayers[0].tree, b.subLayers[0].tree);
+	findColissionsBetween(curColissions.freeTerrainColissions, a.subLayers[0].tree, b.subLayers[1].tree);
+	findColissionsBetween(curColissions.freeTerrainColissions, b.subLayers[0].tree, a.subLayers[1].tree);
 }

@@ -3,6 +3,9 @@
   <Type Name="Fix&lt;*&gt;">
     <DisplayString>{double(value) / (1ULL &lt;&lt; $T1),g}</DisplayString>
   </Type>
+  <Type Name="Part">
+    <DisplayString>parent={(void*) parent} mainPhys={(void*) parent->mainPhysical}</DisplayString>
+  </Type>
   <Type Name="TreeNode">
     <DisplayString Condition="nodeCount != 0x7FFFFFFF">TrunkNode Size={nodeCount} isGroupHead={isGroupHead}</DisplayString>
     <DisplayString Condition="nodeCount == 0x7FFFFFFF">LeafNode {object} isGroupHead={isGroupHead}</DisplayString>
@@ -28,7 +31,27 @@
       </ArrayItems>
     </Expand>
   </Type>
-  <Type Name="Part">
-    <DisplayString>parent={(void*) parent} mainPhys={(void*) parent->mainPhysical}</DisplayString>
+  <Type Name="P3D::NewBoundsTree::TreeNodeRef">
+    <DisplayString Condition="ptr == 0xADADADADADADADAD">Invalid</DisplayString>
+    <DisplayString Condition="(ptr &amp; 0b111) == 0">LeafNode {(void*) ptr}</DisplayString>
+    <DisplayString Condition="(ptr &amp; 0b111) != 0 &amp;&amp; (ptr &amp; 0b1000) == 0">TreeTrunk {{Size: {(ptr &amp; 0b111) + 1}}}</DisplayString>
+    <DisplayString Condition="(ptr &amp; 0b111) != 0 &amp;&amp; (ptr &amp; 0b1000) == 0b1000">Grouphead {{Size: {(ptr &amp; 0b111) + 1}}}</DisplayString>
+    <Expand>
+      <ArrayItems Condition="(ptr &amp; 0b111) != 0">
+        <Size>(ptr &amp; 0b111) + 1</Size>
+        <ValuePointer>((TreeTrunk*) (ptr &amp; 0xFFFFFFFFFFFFFFF0))->subNodes</ValuePointer>
+      </ArrayItems>
+      <Item Name="TreeTrunk" ExcludeView="simple" Condition="(ptr &amp; 0b111) != 0">(TreeTrunk*) (ptr &amp; 0xFFFFFFFFFFFFFFF0)</Item>
+    </Expand>
+  </Type>
+  <Type Name="P3D::NewBoundsTree::BoundsTreePrototype">
+    <DisplayString>BoundsTree {{baseTrunkSize: {baseTrunkSize}}}</DisplayString>
+    <Expand>
+      <ArrayItems>
+        <Size>baseTrunkSize</Size>
+        <ValuePointer>baseTrunk.subNodes</ValuePointer>
+      </ArrayItems>
+      <Item Name="TreeTrunk" ExcludeView="simple">baseTrunk</Item>
+    </Expand>
   </Type>
 </AutoVisualizer>

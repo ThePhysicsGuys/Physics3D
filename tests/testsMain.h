@@ -6,6 +6,9 @@
 class TestInterface {
 	size_t assertCount = 0;
 public:
+	bool debugOnFailure;
+	TestInterface() : debugOnFailure(false) {}
+	TestInterface(bool debugOnFailure) : debugOnFailure(debugOnFailure) {}
 	inline void markAssert() {
 		assertCount++;
 	}
@@ -19,11 +22,11 @@ enum class TestType {
 
 #define __JOIN2(a,b) a##b
 #define __JOIN(a,b) __JOIN2(a,b)
-#define TEST_CASE(func) void func(TestInterface& __testInterface); static TestAdder __JOIN(tAdder, __LINE__)(__FILE__, #func, func, TestType::NORMAL); void func(TestInterface& __testInterface)
-#define TEST_CASE_SLOW(func) void func(TestInterface& __testInterface); static TestAdder __JOIN(tAdder, __LINE__)(__FILE__, #func, func, TestType::SLOW); void func(TestInterface& __testInterface)
+#define TEST_CASE(func) void func(); static TestAdder __JOIN(tAdder, __LINE__)(__FILE__, #func, func, TestType::NORMAL); void func()
+#define TEST_CASE_SLOW(func) void func(); static TestAdder __JOIN(tAdder, __LINE__)(__FILE__, #func, func, TestType::SLOW); void func()
 
 struct TestAdder {
-	TestAdder(const char* filePath, const char* nameName, void(*testFunc)(TestInterface&), TestType isSlow);
+	TestAdder(const char* filePath, const char* nameName, void(*testFunc)(), TestType isSlow);
 };
 
 class AssertionError {
@@ -34,8 +37,10 @@ public:
 	const char* what() const noexcept;
 };
 
-extern std::stringstream logStream;
 void logf(const char* format, ...);
+extern std::stringstream logStream;
+extern thread_local TestInterface __testInterface;
+extern const bool reffableTrue;
 
 // Testing utils:
 
@@ -84,9 +89,13 @@ const char* errMsg(const R& first) {
 	return dataBuf;
 }
 
-// a referenceable boolean, for use in AssertComparer and TolerantAssertComparer
-// using just a literal true would cause bugs as the literal falls out of scope after the return, leading to unpredictable results
-extern const bool reffableTrue;
+
+#ifdef _MSC_VER
+#define __DEBUG_BREAK __debugbreak();
+#else
+#define __DEBUG_BREAK
+#endif
+#define __ASSERT_FAILURE(line, printText) if(__testInterface.debugOnFailure) {__DEBUG_BREAK} throw AssertionError(line, printText)
 
 template<typename T>
 class AssertComparer {
@@ -96,12 +105,12 @@ public:
 
 	AssertComparer(int line, const T& arg) : line(line), arg(arg) {}
 
-	template<typename P> AssertComparer<bool> operator<(const P& other) const { if (!(arg < other)) { throw AssertionError(line, errMsg(arg, other, "<")); }; return AssertComparer<bool>(this->line, reffableTrue); }
-	template<typename P> AssertComparer<bool> operator>(const P& other) const { if (!(arg > other)) { throw AssertionError(line, errMsg(arg, other, ">")); }; return AssertComparer<bool>(this->line, reffableTrue); }
-	template<typename P> AssertComparer<bool> operator<=(const P& other) const { if (!(arg <= other)) { throw AssertionError(line, errMsg(arg, other, "<=")); }; return AssertComparer<bool>(this->line, reffableTrue); }
-	template<typename P> AssertComparer<bool> operator>=(const P& other) const { if (!(arg >= other)) { throw AssertionError(line, errMsg(arg, other, ">=")); }; return AssertComparer<bool>(this->line, reffableTrue); }
-	template<typename P> AssertComparer<bool> operator==(const P& other) const { if (!(arg == other)) { throw AssertionError(line, errMsg(arg, other, "==")); }; return AssertComparer<bool>(this->line, reffableTrue); }
-	template<typename P> AssertComparer<bool> operator!=(const P& other) const { if (!(arg != other)) { throw AssertionError(line, errMsg(arg, other, "!=")); }; return AssertComparer<bool>(this->line, reffableTrue); }
+	template<typename P> AssertComparer<bool> operator<(const P& other) const { if (!(arg < other)) { __ASSERT_FAILURE(line, errMsg(arg, other, "<")); }; return AssertComparer<bool>(this->line, reffableTrue); }
+	template<typename P> AssertComparer<bool> operator>(const P& other) const { if (!(arg > other)) { __ASSERT_FAILURE(line, errMsg(arg, other, ">")); }; return AssertComparer<bool>(this->line, reffableTrue); }
+	template<typename P> AssertComparer<bool> operator<=(const P& other) const { if (!(arg <= other)) { __ASSERT_FAILURE(line, errMsg(arg, other, "<=")); }; return AssertComparer<bool>(this->line, reffableTrue); }
+	template<typename P> AssertComparer<bool> operator>=(const P& other) const { if (!(arg >= other)) { __ASSERT_FAILURE(line, errMsg(arg, other, ">=")); }; return AssertComparer<bool>(this->line, reffableTrue); }
+	template<typename P> AssertComparer<bool> operator==(const P& other) const { if (!(arg == other)) { __ASSERT_FAILURE(line, errMsg(arg, other, "==")); }; return AssertComparer<bool>(this->line, reffableTrue); }
+	template<typename P> AssertComparer<bool> operator!=(const P& other) const { if (!(arg != other)) { __ASSERT_FAILURE(line, errMsg(arg, other, "!=")); }; return AssertComparer<bool>(this->line, reffableTrue); }
 };
 
 template<typename T, typename Tol>
@@ -113,12 +122,12 @@ public:
 
 	TolerantAssertComparer(int line, const T& arg, Tol tolerance) : line(line), arg(arg), tolerance(tolerance) {}
 
-	template<typename T2> TolerantAssertComparer<bool, Tol> operator<(const T2& other) const { if(!tolerantLessThan(arg, other, tolerance)) { throw AssertionError(line, errMsg(arg, other, "<")); }; return TolerantAssertComparer<bool, Tol>(this->line, reffableTrue, this->tolerance); }
-	template<typename T2> TolerantAssertComparer<bool, Tol> operator>(const T2& other) const { if (!tolerantGreaterThan(arg, other, tolerance)) { throw AssertionError(line, errMsg(arg, other, ">")); }; return TolerantAssertComparer<bool, Tol>(this->line, reffableTrue, this->tolerance); }
-	template<typename T2> TolerantAssertComparer<bool, Tol> operator<=(const T2& other) const { if (!tolerantLessOrEqual(arg, other, tolerance)) { throw AssertionError(line, errMsg(arg, other, "<=")); }; return TolerantAssertComparer<bool, Tol>(this->line, reffableTrue, this->tolerance); }
-	template<typename T2> TolerantAssertComparer<bool, Tol> operator>=(const T2& other) const { if (!tolerantGreaterOrEqual(arg, other, tolerance)) { throw AssertionError(line, errMsg(arg, other, ">=")); }; return TolerantAssertComparer<bool, Tol>(this->line, reffableTrue, this->tolerance); }
-	template<typename T2> TolerantAssertComparer<bool, Tol> operator==(const T2& other) const { if (!tolerantEquals(arg, other, tolerance)) { throw AssertionError(line, errMsg(arg, other, "==")); }; return TolerantAssertComparer<bool, Tol>(this->line, reffableTrue, this->tolerance); }
-	template<typename T2> TolerantAssertComparer<bool, Tol> operator!=(const T2& other) const { if (!tolerantNotEquals(arg, other, tolerance)) { throw AssertionError(line, errMsg(arg, other, "!=")); }; return TolerantAssertComparer<bool, Tol>(this->line, reffableTrue, this->tolerance); }
+	template<typename T2> TolerantAssertComparer<bool, Tol> operator<(const T2& other) const { if(!tolerantLessThan(arg, other, tolerance)) { __ASSERT_FAILURE(line, errMsg(arg, other, "<")); }; return TolerantAssertComparer<bool, Tol>(this->line, reffableTrue, this->tolerance); }
+	template<typename T2> TolerantAssertComparer<bool, Tol> operator>(const T2& other) const { if (!tolerantGreaterThan(arg, other, tolerance)) { __ASSERT_FAILURE(line, errMsg(arg, other, ">")); }; return TolerantAssertComparer<bool, Tol>(this->line, reffableTrue, this->tolerance); }
+	template<typename T2> TolerantAssertComparer<bool, Tol> operator<=(const T2& other) const { if (!tolerantLessOrEqual(arg, other, tolerance)) { __ASSERT_FAILURE(line, errMsg(arg, other, "<=")); }; return TolerantAssertComparer<bool, Tol>(this->line, reffableTrue, this->tolerance); }
+	template<typename T2> TolerantAssertComparer<bool, Tol> operator>=(const T2& other) const { if (!tolerantGreaterOrEqual(arg, other, tolerance)) { __ASSERT_FAILURE(line, errMsg(arg, other, ">=")); }; return TolerantAssertComparer<bool, Tol>(this->line, reffableTrue, this->tolerance); }
+	template<typename T2> TolerantAssertComparer<bool, Tol> operator==(const T2& other) const { if (!tolerantEquals(arg, other, tolerance)) { __ASSERT_FAILURE(line, errMsg(arg, other, "==")); }; return TolerantAssertComparer<bool, Tol>(this->line, reffableTrue, this->tolerance); }
+	template<typename T2> TolerantAssertComparer<bool, Tol> operator!=(const T2& other) const { if (!tolerantNotEquals(arg, other, tolerance)) { __ASSERT_FAILURE(line, errMsg(arg, other, "!=")); }; return TolerantAssertComparer<bool, Tol>(this->line, reffableTrue, this->tolerance); }
 };
 
 struct AssertBuilder {
@@ -137,10 +146,10 @@ struct TolerantAssertBuilder {
 	TolerantAssertComparer<T, Tol> operator<(const T& other) const { return TolerantAssertComparer<T, Tol>(line, other, tolerance); }
 };
 
-#define ASSERT_STRICT(condition) do {if(!(AssertBuilder(__LINE__) < condition).arg) {throw AssertionError(__LINE__, "false");}__testInterface.markAssert(); }while(false)
-#define ASSERT_TOLERANT(condition, tolerance) do {if(!(TolerantAssertBuilder<decltype(tolerance)>(__LINE__, tolerance) < condition).arg) {throw AssertionError(__LINE__, "false");} __testInterface.markAssert(); }while(false)
-#define ASSERT_TRUE(condition) do {if(!(condition)) throw AssertionError(__LINE__, "false");__testInterface.markAssert(); }while(false)
-#define ASSERT_FALSE(condition) do {if(condition) throw AssertionError(__LINE__, "true");__testInterface.markAssert(); }while(false)
+#define ASSERT_STRICT(condition) do {if(!(AssertBuilder(__LINE__) < condition).arg) {__ASSERT_FAILURE(__LINE__, "false");}__testInterface.markAssert(); }while(false)
+#define ASSERT_TOLERANT(condition, tolerance) do {if(!(TolerantAssertBuilder<decltype(tolerance)>(__LINE__, tolerance) < condition).arg) {__ASSERT_FAILURE(__LINE__, "false");} __testInterface.markAssert(); }while(false)
+#define ASSERT_TRUE(condition) do {if(!(condition)) {__ASSERT_FAILURE(__LINE__, "false");}__testInterface.markAssert(); }while(false)
+#define ASSERT_FALSE(condition) do {if(condition) {__ASSERT_FAILURE(__LINE__, "true");}__testInterface.markAssert(); }while(false)
 
 #define PREV_VAL_NAME __JOIN(____previousValue, __LINE__)
 #define ISFILLED_NAME __JOIN(____isFilled, __LINE__)

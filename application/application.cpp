@@ -26,6 +26,9 @@
 #include "../physics/hardconstraints/motorConstraint.h"
 #include "../physics/hardconstraints/sinusoidalPistonConstraint.h"
 #include "../physics/hardconstraints/fixedConstraint.h"
+#include "../physics/constraints/ballConstraint.h"
+#include "../physics/constraints/hingeConstraint.h"
+#include "../physics/constraints/barConstraint.h"
 #include "../physics/softlinks/elasticLink.h"
 
 
@@ -137,30 +140,76 @@ void setupWorld(const Util::ParsedArgs& cmdArgs) {
 
 	world.addExternalForce(new DirectionalGravity(Vec3(0, -10.0, 0.0)));
 
+
+	//buildShowcaseWorld(screen, world); return;
+
 	PartProperties basicProperties{1.0, 0.7, 0.3};
 
 	WorldBuilder::buildFloorAndWalls(50.0, 50.0, 1.0);
 
+	GlobalCFrame origin(0.0, 5.0, 0.0, Rotation::fromEulerAngles(-3.14 / 4, 3.14 / 4, 0.0));
+
+	for(int x = 0; x < 3; x++) {
+		for(int y = 0; y < 3; y++) {
+			for(int z = 0; z < 3; z++) {
+				GlobalCFrame cf = origin.localToGlobal(CFrame(x, y, z));
+				world.addPart(new ExtendedPart(boxShape(0.5, 0.5, 0.5), cf, basicProperties, "part"));
+			}
+		}
+	}
+
+	{
+		ExtendedPart* partA = new ExtendedPart(boxShape(1.0, 0.49, 3.0), GlobalCFrame(3.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "partA");
+		ExtendedPart* partB = new ExtendedPart(boxShape(1.0, 0.5, 3.0), GlobalCFrame(2.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "partB");
+		world.addPart(partA);
+		partA->attach(partB, CFrame(0.0, 1.0, 0.0));
+	}
+	{
+		ExtendedPart* partA = new ExtendedPart(boxShape(1.0, 0.49, 3.0), GlobalCFrame(-3.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "partA");
+		ExtendedPart* partB = new ExtendedPart(boxShape(1.0, 0.5, 3.0), GlobalCFrame(-2.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "partB");
+		world.addPart(partA);
+		partA->attach(partB, new MotorConstraintTemplate<ConstantMotorTurner>(0.5), CFrame(0.0, 1.0, 0.0), CFrame(1.0, 0.0, 0.0));
+	}
 
 	// Lights
-	Comp::Light::Attenuation attenuation = { 1, 1, 1 };
-	auto lights = EntityBuilder(screen.registry).name("Lights").get();
-	auto sphereData = Graphics::MeshRegistry::getOrCreateMeshFor(&SphereClass::instance);
-	EntityBuilder(screen.registry).parent(lights).transform(Position(10, 5, -10), 0.2).light(Color3(1, 0.84f, 0.69f), 300, attenuation).hitbox(&SphereClass::instance).mesh(sphereData);
-	EntityBuilder(screen.registry).parent(lights).transform(Position(10, 5, 10), 0.2).light(Color3(1, 0.84f, 0.69f), 300, attenuation).hitbox(&SphereClass::instance).mesh(sphereData);
-	EntityBuilder(screen.registry).parent(lights).transform(Position(-10, 5, -10), 0.2).light(Color3(1, 0.84f, 0.69f), 200, attenuation).hitbox(&SphereClass::instance).mesh(sphereData);
-	EntityBuilder(screen.registry).parent(lights).transform(Position(-10, 5, 10), 0.2).light(Color3(1, 0.84f, 0.69f), 500, attenuation).hitbox(&SphereClass::instance).mesh(sphereData);
-	EntityBuilder(screen.registry).parent(lights).transform(Position(0, 5, 0), 0.2).light(Color3(1, 0.90f, 0.75f), 400, attenuation).hitbox(&SphereClass::instance).mesh(sphereData);
-	
-	ExtendedPart* partA = new ExtendedPart(boxShape(1.0, 0.49, 3.0), GlobalCFrame(3.0, 3.0, 0.0), { 1.0, 1.0, 1.0 }, "partA");
-	ExtendedPart* partB = new ExtendedPart(boxShape(1.0, 0.5, 3.0), GlobalCFrame(2.0, 3.0, 0.0), { 1.0, 1.0, 1.0 }, "partB");
-	EntityBuilder(screen.registry, partA->entity).light(Color3(0.1, 0.94f, 0.49f), 500, Comp::Light::Attenuation { 0.8, 0.5, 0.2 });
-	
-	world.addPart(partA);
-	world.addPart(partB);
+	{
+		Comp::Light::Attenuation attenuation = {1, 1, 1};
+		auto lights = EntityBuilder(screen.registry).name("Lights").get();
+		auto sphereData = Graphics::MeshRegistry::getOrCreateMeshFor(&SphereClass::instance);
+		EntityBuilder(screen.registry).parent(lights).transform(Position(10, 5, -10), 0.2).light(Color3(1, 0.84f, 0.69f), 300, attenuation).hitbox(&SphereClass::instance).mesh(sphereData);
+		EntityBuilder(screen.registry).parent(lights).transform(Position(10, 5, 10), 0.2).light(Color3(1, 0.84f, 0.69f), 300, attenuation).hitbox(&SphereClass::instance).mesh(sphereData);
+		EntityBuilder(screen.registry).parent(lights).transform(Position(-10, 5, -10), 0.2).light(Color3(1, 0.84f, 0.69f), 200, attenuation).hitbox(&SphereClass::instance).mesh(sphereData);
+		EntityBuilder(screen.registry).parent(lights).transform(Position(-10, 5, 10), 0.2).light(Color3(1, 0.84f, 0.69f), 500, attenuation).hitbox(&SphereClass::instance).mesh(sphereData);
+		EntityBuilder(screen.registry).parent(lights).transform(Position(0, 5, 0), 0.2).light(Color3(1, 0.90f, 0.75f), 400, attenuation).hitbox(&SphereClass::instance).mesh(sphereData);
+	}
 
-	//world.addLink(new SpringLink({ CFrame{1.0, 0.0, 0.0}, partA }, { CFrame{0.0, 0.0, 0.0}, partB }, 5.0, 5.0));
-	world.addLink(new ElasticLink({ CFrame{1.0, 0.0, 0.0}, partA }, { CFrame{0.0, 0.0, 0.0}, partB }, 5.0, 5.0));
+	return;
+	{
+		ExtendedPart* partA = new ExtendedPart(boxShape(1.0, 0.49, 3.0), GlobalCFrame(3.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "partA");
+		ExtendedPart* partB = new ExtendedPart(boxShape(1.0, 0.5, 3.0), GlobalCFrame(2.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "partB");
+		EntityBuilder(screen.registry, partA->entity).light(Color3(0.1, 0.94f, 0.49f), 500, Comp::Light::Attenuation{0.8, 0.5, 0.2});
+
+		world.addPart(partA);
+		world.addPart(partB);
+
+		//world.addLink(new SpringLink({ CFrame{1.0, 0.0, 0.0}, partA }, { CFrame{0.0, 0.0, 0.0}, partB }, 5.0, 5.0));
+		world.addLink(new ElasticLink({CFrame{1.0, 0.0, 0.0}, partA}, {CFrame{0.0, 0.0, 0.0}, partB}, 5.0, 5.0));
+	}
+
+	{
+		ExtendedPart* partA = new ExtendedPart(boxShape(1.0, 0.49, 1.0), GlobalCFrame(12.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "partA");
+		ExtendedPart* partB = new ExtendedPart(boxShape(1.0, 0.5, 1.0), GlobalCFrame(14.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "partB");
+		ExtendedPart* partC = new ExtendedPart(boxShape(1.0, 0.5, 1.0), GlobalCFrame(16.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "partC");
+
+		ConstraintGroup cg;
+		cg.add(partA, partB, new BarConstraint(Vec3(0.5, 0.0, 0.0), Vec3(-0.5, 0.0, 0.0), 1.0));
+		cg.add(partB, partC, new BallConstraint(Vec3(1, 0.0, 0.0), Vec3(-1, 0.0, 0.0)));
+		cg.add(partC, partA, new HingeConstraint(Vec3(-2, 2.0, 0.0), Vec3(0,0,1), Vec3(2, 2.0, 0.0), Vec3(0, 0, 1)));
+		world.constraints.push_back(cg);
+		world.addPart(partA);
+		world.addPart(partB);
+		world.addPart(partC);
+	}
 
 	//world.addLink(new MagneticLink({ CFrame{1.0, 0.0, 0.0}, partA }, { CFrame{0.0, 0.0, 0.0}, partB }, +8.0));
 	//world.addLink(new AlignmentLink({ CFrame{1.0, 0.0, 0.0}, partA}, { CFrame{0.0, 0.0, 0.0}, partB }));

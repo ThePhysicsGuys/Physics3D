@@ -205,23 +205,23 @@ void polygonMode(int face, int mode) {
 	glPolygonMode(face, mode);
 }
 
-const unsigned char* getVendor() {
-	return glGetString(GL_VENDOR);
+const char* getVendor() {
+	return reinterpret_cast<const char*>(glGetString(GL_VENDOR));
 }
 
-const unsigned char* getVersion() {
-	return glGetString(GL_VERSION);
+const char* getVersion() {
+	return reinterpret_cast<const char*>(glGetString(GL_VERSION));
 }
 
-const unsigned char* getRenderer() {
-	return glGetString(GL_RENDERER);
+const char* getRenderer() {
+	return reinterpret_cast<const char*>(glGetString(GL_RENDERER));
 }
 
-const unsigned char* getShaderVersion() {
-	return glGetString(GL_SHADING_LANGUAGE_VERSION);
+const char* getShaderVersion() {
+	return reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION));
 }
 
-int parseShaderVersion(const unsigned char* version) {
+int parseShaderVersion(const char* version) {
 	return 100 * (version[0] - '0') + 10 * (version[2] - '0');
 }
 

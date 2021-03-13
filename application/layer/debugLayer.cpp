@@ -62,11 +62,11 @@ static void renderBoundsForDepth(const Bounds& bounds, int depth) {
 	renderBounds(bounds.expanded((10 - depth) * 0.002), getCyclingColor(depth));
 }
 
-static void recursiveRenderColTree(const TreeNode& node, int depth) {
+static void recursiveRenderColTree(const P3D::OldBoundsTree::TreeNode& node, int depth) {
 	if (node.isLeafNode()) {
 		//renderBounds(node.bounds, GUI::COLOR::AQUA);
 	} else {
-		for (const TreeNode& node : node) {
+		for (const P3D::OldBoundsTree::TreeNode& node : node) {
 			recursiveRenderColTree(node, depth + 1);
 		}
 	}
@@ -74,7 +74,7 @@ static void recursiveRenderColTree(const TreeNode& node, int depth) {
 	renderBoundsForDepth(node.bounds, depth);
 }
 
-static bool recursiveColTreeForOneObject(const TreeNode& node, const Part* part, const Bounds& bounds, int depth) {
+static bool recursiveColTreeForOneObject(const P3D::OldBoundsTree::TreeNode& node, const Part* part, const Bounds& bounds, int depth) {
 	if (node.isLeafNode()) {
 		if (node.object == part)
 			return true;
@@ -85,7 +85,7 @@ static bool recursiveColTreeForOneObject(const TreeNode& node, const Part* part,
 		}*/
 	} else {
 		//if (!intersects(node.bounds, bounds)) return false;
-		for (const TreeNode& subNode : node) {
+		for (const P3D::OldBoundsTree::TreeNode& subNode : node) {
 			if (recursiveColTreeForOneObject(subNode, part, bounds, depth+1)) {
 				renderBoundsForDepth(node.bounds, depth);
 				return true;
@@ -94,6 +94,56 @@ static bool recursiveColTreeForOneObject(const TreeNode& node, const Part* part,
 	}
 	return false;
 }
+
+static void renderTree(const P3D::OldBoundsTree::BoundsTree<Part>& tree) {
+	recursiveRenderColTree(tree.rootNode, 0);
+}
+static void renderTreeForOneObject(const P3D::OldBoundsTree::BoundsTree<Part>& tree, const Part& part) {
+	recursiveColTreeForOneObject(tree.rootNode, &part, part.getBounds(), 0);
+}
+
+
+
+static void recursiveRenderColTree(const P3D::NewBoundsTree::TreeTrunk& curTrunk, int curTrunkSize, int depth) {
+	for(int i = 0; i < curTrunkSize; i++) {
+		const P3D::NewBoundsTree::TreeNodeRef& subNode = curTrunk.subNodes[i];
+
+		if(subNode.isTrunkNode()) {
+			recursiveRenderColTree(subNode.asTrunk(), subNode.getTrunkSize(), depth + 1);
+		}
+
+		renderBoundsForDepth(curTrunk.getBoundsOfSubNode(i), depth);
+	}
+}
+
+static bool recursiveColTreeForOneObject(const P3D::NewBoundsTree::TreeTrunk& curTrunk, int curTrunkSize, const Part* part, const Bounds& bounds, int depth) {
+	for(int i = 0; i < curTrunkSize; i++) {
+		const P3D::NewBoundsTree::TreeNodeRef& subNode = curTrunk.subNodes[i];
+
+		if(subNode.isTrunkNode()) {
+			if(recursiveColTreeForOneObject(subNode.asTrunk(), subNode.getTrunkSize(), part, bounds, depth + 1)) {
+				renderBoundsForDepth(curTrunk.getBoundsOfSubNode(i), depth);
+				return true;
+			}
+		} else {
+			if(subNode.asObject() == part) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+static void renderTree(const P3D::NewBoundsTree::BoundsTree<Part>& tree) {
+	auto baseTrunk = tree.getPrototype().getBaseTrunk();
+	recursiveRenderColTree(baseTrunk.first, baseTrunk.second, 0);
+}
+static void renderTreeForOneObject(const P3D::NewBoundsTree::BoundsTree<Part>& tree, const Part& part) {
+	auto baseTrunk = tree.getPrototype().getBaseTrunk();
+	recursiveColTreeForOneObject(baseTrunk.first, baseTrunk.second, &part, part.getBounds(), 0);
+}
+
+
 
 void DebugLayer::onInit(Engine::Registry64& registry) {
 
@@ -181,10 +231,10 @@ void DebugLayer::onRender(Engine::Registry64& registry) {
 
 		if(colTreeRenderMode == -2) {
 			if(screen->selectedPart != nullptr) {
-				recursiveColTreeForOneObject(screen->selectedPart->layer->tree.rootNode, screen->selectedPart, screen->selectedPart->getBounds(), 0);
+				renderTreeForOneObject(screen->selectedPart->layer->tree, *screen->selectedPart);
 			}
 		} else if(colTreeRenderMode >= 0) {
-			recursiveRenderColTree(getLayerByID(screen->world->layers, colTreeRenderMode)->tree.rootNode, 0);
+			renderTree(getLayerByID(screen->world->layers, colTreeRenderMode)->tree);
 		}
 	});
 

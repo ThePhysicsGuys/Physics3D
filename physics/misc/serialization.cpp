@@ -10,6 +10,11 @@
 #include "../hardconstraints/fixedConstraint.h"
 #include "../hardconstraints/motorConstraint.h"
 #include "../hardconstraints/sinusoidalPistonConstraint.h"
+
+#include "../constraints/ballConstraint.h"
+#include "../constraints/hingeConstraint.h"
+#include "../constraints/barConstraint.h"
+
 #include "../externalforces/gravityForce.h"
 
 #include <map>
@@ -132,6 +137,36 @@ BallConstraint* deserializeBallConstraint(std::istream& istream) {
 	Vec3 attachB = ::deserialize<Vec3>(istream);
 
 	return new BallConstraint(attachA, attachB);
+}
+
+void serializeHingeConstraint(const HingeConstraint& constraint, std::ostream& ostream) {
+	::serialize<Vec3>(constraint.attachA, ostream);
+	::serialize<Vec3>(constraint.axisA, ostream);
+	::serialize<Vec3>(constraint.attachB, ostream);
+	::serialize<Vec3>(constraint.axisB, ostream);
+}
+
+HingeConstraint* deserializeHingeConstraint(std::istream& istream) {
+	Vec3 attachA = ::deserialize<Vec3>(istream);
+	Vec3 axisA = ::deserialize<Vec3>(istream);
+	Vec3 attachB = ::deserialize<Vec3>(istream);
+	Vec3 axisB = ::deserialize<Vec3>(istream);
+
+	return new HingeConstraint(attachA, axisA, attachB, axisB);
+}
+
+void serializeBarConstraint(const BarConstraint& constraint, std::ostream& ostream) {
+	::serialize<Vec3>(constraint.attachA, ostream);
+	::serialize<Vec3>(constraint.attachB, ostream);
+	::serialize<double>(constraint.length, ostream);
+}
+
+BarConstraint* deserializeBarConstraint(std::istream& istream) {
+	Vec3 attachA = ::deserialize<Vec3>(istream);
+	Vec3 attachB = ::deserialize<Vec3>(istream);
+	double length = ::deserialize<double>(istream);
+
+	return new BarConstraint(attachA, attachB, length);
 }
 
 void serializePolyhedronShapeClass(const PolyhedronShapeClass& polyhedron, std::ostream& ostream) {
@@ -339,19 +374,19 @@ static void assertVersionCorrect(std::istream& istream) {
 
 void SerializationSessionPrototype::serializeWorldLayer(const WorldLayer& layer, std::ostream& ostream) {
 	uint32_t numberOfUnPhysicaledPartsInLayer = 0;
-	for(const Part& p : layer.tree) {
+	layer.tree.forEach([&numberOfUnPhysicaledPartsInLayer](const Part& p) {
 		if(p.parent == nullptr) {
 			numberOfUnPhysicaledPartsInLayer++;
 		}
-	}
+	});
 
 	::serialize<uint32_t>(numberOfUnPhysicaledPartsInLayer, ostream);
-	for(const Part& p : layer.tree) {
+	layer.tree.forEach([this, &ostream](const Part& p) {
 		if(p.parent == nullptr) {
 			::serialize<GlobalCFrame>(p.getCFrame(), ostream);
-			serializePartData(p, ostream);
+			this->serializePartData(p, ostream);
 		}
-	}
+	});
 }
 
 void SerializationSessionPrototype::serializeWorld(const WorldPrototype& world, std::ostream& ostream) {
@@ -360,11 +395,11 @@ void SerializationSessionPrototype::serializeWorld(const WorldPrototype& world, 
 	}
 	for(const ColissionLayer& clayer : world.layers) {
 		for(const WorldLayer& layer : clayer.subLayers) {
-			for(const Part& p : layer.tree) {
+			layer.tree.forEach([this](const Part& p) {
 				if(p.parent == nullptr) {
 					collectPartInformation(p);
 				}
-			}
+			});
 		}
 	}
 
@@ -519,15 +554,24 @@ static DynamicSerializerRegistry<HardConstraint>::ConcreteDynamicSerializer<Sinu
 static DynamicSerializerRegistry<HardConstraint>::ConcreteDynamicSerializer<MotorConstraintTemplate<SineWaveController>> sinusiodalMotorConstraintSerializer
 (serializeSinusoidalMotorConstraint, deserializeSinusoidalMotorConstraint, 3);
 
+static DynamicSerializerRegistry<Constraint>::ConcreteDynamicSerializer<BallConstraint> ballConstraintSerializer
+(serializeBallConstraint, deserializeBallConstraint, 0);
+static DynamicSerializerRegistry<Constraint>::ConcreteDynamicSerializer<HingeConstraint> hingeConstraintSerializer
+(serializeHingeConstraint, deserializeHingeConstraint, 1);
+static DynamicSerializerRegistry<Constraint>::ConcreteDynamicSerializer<BarConstraint> barConstraintSerializer
+(serializeBarConstraint, deserializeBarConstraint, 2);
+
 static DynamicSerializerRegistry<ShapeClass>::ConcreteDynamicSerializer<PolyhedronShapeClass> polyhedronSerializer
 (serializePolyhedronShapeClass, deserializePolyhedronShapeClass, 0);
 
 static DynamicSerializerRegistry<ExternalForce>::ConcreteDynamicSerializer<DirectionalGravity> gravitySerializer
 (serializeDirectionalGravity, deserializeDirectionalGravity, 0);
 
-static DynamicSerializerRegistry<Constraint>::ConcreteDynamicSerializer<BallConstraint> ballConstraintSerializer
-(serializeBallConstraint, deserializeBallConstraint, 0);
-
+DynamicSerializerRegistry<Constraint> dynamicConstraintSerializer{
+	{typeid(BallConstraint), &ballConstraintSerializer},
+	{typeid(HingeConstraint), &hingeConstraintSerializer},
+	{typeid(BarConstraint), &barConstraintSerializer}
+};
 DynamicSerializerRegistry<HardConstraint> dynamicHardConstraintSerializer{
 	{typeid(FixedConstraint), &fixedConstraintSerializer},
 	{typeid(ConstantSpeedMotorConstraint), &motorConstraintSerializer},
@@ -539,9 +583,6 @@ DynamicSerializerRegistry<ShapeClass> dynamicShapeClassSerializer{
 };
 DynamicSerializerRegistry<ExternalForce> dynamicExternalForceSerializer{
 	{typeid(DirectionalGravity), &gravitySerializer}
-};
-DynamicSerializerRegistry<Constraint> dynamicConstraintSerializer{
-	{typeid(BallConstraint), &ballConstraintSerializer}
 };
 
 #pragma endregion

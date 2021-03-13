@@ -3,6 +3,10 @@
 #include "position.h"
 #include "boundingBox.h"
 
+#include <fenv.h>
+
+#define USE_NEW_BOUNDSTREE
+
 template<typename T>
 struct BoundsTemplate {
 	PositionTemplate<T> min;
@@ -10,6 +14,38 @@ struct BoundsTemplate {
 
 	constexpr BoundsTemplate() = default;
 	constexpr BoundsTemplate(const PositionTemplate<T>& min, const PositionTemplate<T>& max) noexcept : min(min), max(max) {}
+
+	BoundsTemplate(const BoundsTemplate<T>&) = default;
+	BoundsTemplate& operator=(const BoundsTemplate<T>&) = default;
+
+	// conversion constructors. Bounds should expand with rounding errors, bounds must always be at least as large as the object they're bounding
+	template<typename OtherT>
+	constexpr BoundsTemplate(const BoundsTemplate<OtherT>& from) noexcept : min(), max() {
+		int curRound = fegetround();
+		fesetround(FE_UPWARD);
+		this->min.x = static_cast<T>(from.min.x);
+		this->min.y = static_cast<T>(from.min.y);
+		this->min.z = static_cast<T>(from.min.z);
+		fesetround(FE_DOWNWARD);
+		this->max.x = static_cast<T>(from.max.x);
+		this->max.y = static_cast<T>(from.max.y);
+		this->max.z = static_cast<T>(from.max.z);
+		fesetround(curRound);
+	}
+	template<typename OtherT>
+	constexpr BoundsTemplate& operator=(const BoundsTemplate<OtherT>& from) noexcept {
+		int curRound = fegetround();
+		fesetround(FE_UPWARD);
+		this->min.x = static_cast<T>(from.min.x);
+		this->min.y = static_cast<T>(from.min.y);
+		this->min.z = static_cast<T>(from.min.z);
+		fesetround(FE_DOWNWARD);
+		this->max.x = static_cast<T>(from.max.x);
+		this->max.y = static_cast<T>(from.max.y);
+		this->max.z = static_cast<T>(from.max.z);
+		fesetround(curRound);
+		return *this;
+	}
 
 	constexpr Vector<T, 3> getDiagonal() const noexcept {
 		return max - min;

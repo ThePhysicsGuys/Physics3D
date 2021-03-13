@@ -11,7 +11,7 @@ class ColissionLayer;
 
 class WorldLayer {
 public:
-	BoundsTree<Part> tree;
+	ChosenBoundsTree tree;
 	ColissionLayer* parent;
 
 	explicit WorldLayer(ColissionLayer* parent);
@@ -25,13 +25,12 @@ public:
 
 	void refresh();
 
-	void addNode(TreeNode&& newNode);
 	void addPart(Part* newPart);
 	void removePart(Part* partToRemove);
 	void addIntoGroup(Part* newPart, Part* group);
 	template<typename PartIterBegin, typename PartIterEnd>
 	void addAllToGroup(PartIterBegin begin, PartIterEnd end, Part* group) {
-		tree.addAllToExistingGroup(begin, end, group);
+		tree.addAllToGroup(begin, end, group);
 	}
 	//void addIntoGroup(MotorizedPhysical* newPhys, Part* group);
 
@@ -43,14 +42,14 @@ public:
 	*/
 	void notifyPartStdMoved(Part* oldPartPtr, Part* newPartPtr) noexcept;
 
-	void mergeGroupsOf(Part* first, Part* second);
+	void mergeGroups(Part* first, Part* second);
 	void moveIntoGroup(Part* partToMove, Part* group);
 	void moveOutOfGroup(Part* part);
 	void joinPartsIntoNewGroup(Part* p1, Part* p2);
 
 	template<typename PartIterBegin, typename PartIterEnd>
-	void moveAllOutOfGroup(PartIterBegin begin, PartIterEnd end) {
-		tree.moveAllOutOfGroup(begin, end);
+	void splitGroup(PartIterBegin begin, PartIterEnd end) {
+		tree.splitGroup(begin, end);
 	}
 	void optimize() {
 		tree.maxImproveStructure();

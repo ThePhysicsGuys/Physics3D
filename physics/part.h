@@ -78,7 +78,11 @@ public:
 	void scale(double scaleX, double scaleY, double scaleZ);
 	void setScale(const DiagonalMat3& scale);
 	
+#ifdef USE_NEW_BOUNDSTREE
+	BoundsTemplate<float> getBounds() const;
+#else
 	Bounds getBounds() const;
+#endif
 	BoundingBox getLocalBounds() const;
 
 	Position getPosition() const { return cframe.getPosition(); }

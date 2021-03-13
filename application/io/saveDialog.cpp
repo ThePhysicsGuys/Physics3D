@@ -80,7 +80,7 @@ void saveWorld(const PlayerWorld& world) {
 	FILE* fileDialog = popen("zenity --file-selection --save --confirm-overwrite --file-filter=*.world  2>/dev/null", "r");
 	if(fileDialog != NULL) {
 		char fileName[1024];
-		fgets(fileName, sizeof(fileName), fileDialog);
+		if(!fgets(fileName, sizeof(fileName), fileDialog)) throw "fgets error!";
 		if(pclose(fileDialog) == 0) { // OK save file
 			stripFinalNewlines(fileName);
 			saveWorld(fileName, world);
@@ -97,7 +97,7 @@ void openWorld(PlayerWorld& world) {
 	FILE* fileDialog = popen("zenity --file-selection --file-filter=*.world  2>/dev/null", "r");
 	if(fileDialog != NULL) {
 		char fileName[1024];
-		fgets(fileName, sizeof(fileName), fileDialog);
+		if(!fgets(fileName, sizeof(fileName), fileDialog)) throw "fgets error!";
 		if(pclose(fileDialog) == 0) { // OK save file
 			stripFinalNewlines(fileName);
 			openWorld(fileName, world);

@@ -90,7 +90,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -118,7 +118,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <PreprocessorDefinitions>_MBCS;NDEBUG;CATCH_INTERSECTION_ERRORS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -129,14 +129,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="constraints\barConstraint.cpp" />
     <ClCompile Include="datastructures\aligned_alloc.cpp" />
+    <ClCompile Include="datastructures\boundsTree2.cpp" />
     <ClCompile Include="softlinks\alignmentLink.cpp" />
     <ClCompile Include="softlinks\elasticLink.cpp" />
     <ClCompile Include="geometry\triangleMeshAVX.cpp">
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
-    <ClCompile Include="geometry\triangleMeshSSE.cpp" />
+    <ClCompile Include="geometry\triangleMeshSSE.cpp">
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+    </ClCompile>
     <ClCompile Include="softlinks\magneticLink.cpp" />
     <ClCompile Include="constraints\ballConstraint.cpp" />
     <ClCompile Include="constraints\constraintGroup.cpp" />
@@ -149,7 +154,7 @@
     <ClCompile Include="hardconstraints\hardConstraint.cpp" />
     <ClCompile Include="hardconstraints\hardPhysicalConnection.cpp" />
     <ClCompile Include="hardconstraints\motorConstraint.cpp" />
-    <ClCompile Include="datastructures\boundsTree.cpp" />
+    <ClCompile Include="datastructures\boundsTreeOld.cpp" />
     <ClCompile Include="misc\debug.cpp" />
     <ClCompile Include="geometry\computationBuffer.cpp" />
     <ClCompile Include="geometry\convexShapeBuilder.cpp" />
@@ -179,7 +184,9 @@
     <ClCompile Include="worldPhysics.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="constraints\barConstraint.h" />
     <ClInclude Include="datastructures\aligned_alloc.h" />
+    <ClInclude Include="datastructures\boundsTree.h" />
     <ClInclude Include="datastructures\boundsTree2.h" />
     <ClInclude Include="softlinks\alignmentLink.h" />
     <ClInclude Include="catchable_assert.h" />
@@ -197,7 +204,7 @@
     <ClInclude Include="hardconstraints\hardPhysicalConnection.h" />
     <ClInclude Include="hardconstraints\motorConstraint.h" />
     <ClInclude Include="datastructures\alignedPtr.h" />
-    <ClInclude Include="datastructures\boundsTree.h" />
+    <ClInclude Include="datastructures\boundsTreeOld.h" />
     <ClInclude Include="datastructures\buffers.h" />
     <ClInclude Include="datastructures\iteratorEnd.h" />
     <ClInclude Include="datastructures\iteratorFactory.h" />
@@ -276,13 +283,14 @@
     <ClInclude Include="misc\serialization.h" />
     <ClInclude Include="relativeMotion.h" />
     <ClInclude Include="rigidBody.h" />
-    <ClInclude Include="sharedLockGuard.h" />
+    <ClInclude Include="threading\sharedLockGuard.h" />
     <ClInclude Include="constraints\hingeConstraint.h" />
     <ClInclude Include="constraints\softConstraint.h" />
     <ClInclude Include="softlinks\softLink.h" />
     <ClInclude Include="softlinks\springLink.h" />
-    <ClInclude Include="synchonizedWorld.h" />
+    <ClInclude Include="threading\synchonizedWorld.h" />
     <ClInclude Include="templateUtils.h" />
+    <ClInclude Include="threading\threadPool.h" />
     <ClInclude Include="world.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

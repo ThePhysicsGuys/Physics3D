@@ -19,6 +19,7 @@
 #include "../graphics/gui/color.h"
 
 #include "../physics/math/linalg/vec.h"
+#include "../physics/threading/sharedLockGuard.h"
 #include "../physics/misc/filters/visibilityFilter.h"
 
 #include "../util/resource/resourceManager.h"

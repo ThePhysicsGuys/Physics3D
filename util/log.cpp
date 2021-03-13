@@ -17,7 +17,15 @@ namespace Log {
 
 	static FILE* logFile = nullptr;
 
-#define va_logf(format, message) va_list args; va_start(args, format); vprintf(message.c_str(), args); if(logFile) {vfprintf(logFile, message.c_str(), args); fflush(logFile);} va_end(args)
+	static void logTogether(const char* message, va_list args) {
+		vprintf(message, args);
+		if(logFile) {
+			vfprintf(logFile, message, args);
+			fflush(logFile);
+		}
+	}
+
+#define va_logf(format, message) va_list args; va_start(args, format); vprintf(message.c_str(), args); va_end(args); if(logFile) {va_start(args, format); vfprintf(logFile, message.c_str(), args); va_end(args); fflush(logFile);}
 
 	void init(const char* logFileName) {
 #ifdef _MSC_VER

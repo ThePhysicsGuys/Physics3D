@@ -10,18 +10,32 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /arch:AVX2")
-	
+
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2 /Oi /ot /GL")
 else()
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
-	
-	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
-	
+
+	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g  -fsanitize=address")
+
+	set(OpenGL_GL_PREFERENCE "GLVND")
+
 	#running benchmarks showed this to be a pessimization
 	#set(CMAKE_INTERPROCEDURAL_OPTIMIZATION True)
 	#surprisingly, also a pessimization
 	#set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -ffast-math")
 endif()
+
+find_package(glfw3 3.2 REQUIRED)
+find_package(OpenGL REQUIRED)
+find_package(GLEW REQUIRED)
+find_package(Freetype REQUIRED)
+find_package(Threads REQUIRED)
+
+include_directories(PRIVATE "${GLFW_DIR}/include")
+include_directories(PRIVATE "${GLEW_DIR}/include")
+include_directories(PRIVATE "${FREETYPE_INCLUDE_DIRS}")
+include_directories(PRIVATE "include")
+
 
 add_library(util STATIC 
   util/terminalColor.cpp
@@ -72,7 +86,8 @@ add_library(physics STATIC
   physics/geometry/builtinShapeClasses.cpp
 
   physics/datastructures/aligned_alloc.cpp
-  physics/datastructures/boundsTree.cpp
+  physics/datastructures/boundsTreeOld.cpp
+  physics/datastructures/boundsTree2.cpp
 
   physics/hardconstraints/fixedConstraint.cpp
   physics/hardconstraints/hardConstraint.cpp
@@ -83,6 +98,7 @@ add_library(physics STATIC
   physics/constraints/constraintGroup.cpp
   physics/constraints/ballConstraint.cpp
   physics/constraints/hingeConstraint.cpp
+  physics/constraints/barConstraint.cpp
   
   physics/softlinks/softLink.cpp
   physics/softlinks/springLink.cpp
@@ -108,10 +124,12 @@ add_executable(benchmarks
   benchmarks/worldBenchmark.cpp
   benchmarks/rotationBenchmark.cpp
   benchmarks/ecsBenchmark.cpp
+  benchmarks/threadResponseTime.cpp
 )
 
 target_link_libraries(benchmarks util)
 target_link_libraries(benchmarks physics)
+target_link_libraries(benchmarks Threads::Threads)
 
 add_executable(tests 
   tests/testsMain.cpp
@@ -128,6 +146,7 @@ add_executable(tests
   tests/constraintTests.cpp
   tests/jointTests.cpp
   tests/dataStructureTests.cpp
+  tests/boundsTree2Tests.cpp
   tests/guiTests.cpp
   tests/indexedShapeTests.cpp
   tests/physicalStructureTests.cpp
@@ -139,18 +158,7 @@ add_executable(tests
 
 target_link_libraries(tests util)
 target_link_libraries(tests physics)
-
-
-find_package(glfw3 3.2 REQUIRED)
-find_package(OpenGL REQUIRED)
-find_package(GLEW REQUIRED)
-find_package(Freetype REQUIRED)
-find_package(Threads REQUIRED)
-
-include_directories(PRIVATE "${GLFW_DIR}/include")
-include_directories(PRIVATE "${GLEW_DIR}/include")
-include_directories(PRIVATE "${FREETYPE_INCLUDE_DIRS}")
-include_directories(PRIVATE "include")
+target_link_libraries(tests Threads::Threads)
 
 add_library(imguiInclude STATIC
   include/imgui/imgui.cpp
@@ -212,6 +220,7 @@ add_library(graphics STATIC
 )
 
 target_link_libraries(graphics imguiInclude)
+target_link_libraries(graphics physics)
 
 target_include_directories(graphics PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/graphics")
 

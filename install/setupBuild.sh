@@ -9,6 +9,6 @@ mkdir build_debug
 
 toolpath="$PWD/vcpkg/scripts/buildsystems/vcpkg.cmake"
 
-cmake -DCMAKE_TOOLCHAIN_FILE=$toolpath -DCMAKE_BUILD_TYPE=Release -S . -B build
-cmake -DCMAKE_TOOLCHAIN_FILE=$toolpath -DCMAKE_BUILD_TYPE=Debug -S . -B build_debug
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=$toolpath -S . -B build
+cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=$toolpath -S . -B build_debug
 

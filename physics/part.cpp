@@ -114,6 +114,16 @@ BoundingBox Part::getLocalBounds() const {
 	return BoundingBox(-v, v);
 }
 
+#ifdef USE_NEW_BOUNDSTREE
+BoundsTemplate<float> Part::getBounds() const {
+	BoundingBox boundsOfHitbox = this->hitbox.getBounds(this->cframe.getRotation());
+
+	assert(isVecValid(boundsOfHitbox.min));
+	assert(isVecValid(boundsOfHitbox.max));
+
+	return BoundsTemplate<float>(boundsOfHitbox + getPosition());
+}
+#else
 Bounds Part::getBounds() const {
 	BoundingBox boundsOfHitbox = this->hitbox.getBounds(this->cframe.getRotation());
 	
@@ -122,6 +132,7 @@ Bounds Part::getBounds() const {
 
 	return boundsOfHitbox + getPosition();
 }
+#endif
 
 void Part::scale(double scaleX, double scaleY, double scaleZ) {
 	Bounds oldBounds = this->getBounds();
@@ -268,7 +279,7 @@ static void mergePartLayers(Part* first, Part* second, const std::vector<FoundLa
 	for(const FoundLayerRepresentative& l1 : layersOfFirst) {
 		for(const FoundLayerRepresentative& l2 : layersOfSecond) {
 			if(l1.layer == l2.layer) {
-				l1.layer->mergeGroupsOf(l1.part, l2.part);
+				l1.layer->mergeGroups(l1.part, l2.part);
 				break;
 			}
 		}
