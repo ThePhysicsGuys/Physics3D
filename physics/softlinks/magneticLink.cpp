@@ -15,7 +15,7 @@ void MagneticLink::update() {
 	this->attachedPart1.part->applyForce(this->getRelativePositionOfAttach2(), -force);
 }
 
-Vec3 MagneticLink::forceAppliedToTheLink() {
+Vec3 MagneticLink::forceAppliedToTheLink() noexcept {
 	Vec3 forceVector = this->getGlobalPositionOfAttach1() - this->getGlobalPositionOfAttach2();
 
 	Vec3 forceDirection = normalize(forceVector);

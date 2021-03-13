@@ -10,6 +10,8 @@
 #include "datastructures/iteratorEnd.h"
 #include "layer.h"
 #include "colissionBuffer.h"
+#include "threading/threadPool.h"
+#include <mutex>
 
 #include <memory>
 
@@ -183,6 +185,8 @@ private:
 	*/
 	void notifyMainPhysicalObsolete(MotorizedPhysical* part);
 
+	void parallelRefineColission(std::vector<Colission>& colissions);
+
 protected:
 	// World tick steps
 	virtual void applyExternalForces();
@@ -212,6 +216,7 @@ public:
 
 	
 	ColissionBuffer curColissions;
+	ThreadPool pool;
 
 	/*
 		These lists signify which layers collide

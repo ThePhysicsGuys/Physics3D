@@ -14,7 +14,7 @@ public:
 	void update() override;
 
 private:
-	Vec3 getGlobalMoment();
+	[[nodiscard]] Vec3 getGlobalMoment() noexcept;
 	Rotation offset;
 	
 };
