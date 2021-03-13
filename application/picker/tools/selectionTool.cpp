@@ -4,9 +4,6 @@
 
 #include "../engine/event/event.h"
 #include "../engine/event/mouseEvent.h"
-#include "../graphics/gui/gui.h"
-#include "../graphics/gui/guiUtils.h"
-#include "../graphics/path/path.h"
 #include "../graphics/resource/textureResource.h"
 #include "../physics/misc/filters/visibilityFilter.h"
 #include "../util/resource/resourceManager.h"
@@ -17,15 +14,22 @@
 #include "../../input/standardInputHandler.h"
 #include "../../ecs/components.h"
 #include "../../worlds.h"
-#include "../selectionContext.h"
-#include <cmath>
 
+#include "../physics/misc/filters/rayIntersectsBoundsFilter.h"
+
+#include <optional>
 
 namespace P3D::Graphics {
 class TextureResource;
 }
 
 namespace P3D::Application {
+
+Ray SelectionTool::ray;
+Vec2 SelectionTool::mouse;
+Selection SelectionTool::selection;
+std::optional<Position> SelectionTool::selectedPoint;
+std::optional<Position> SelectionTool::intersectedPoint;
 
 void SelectionTool::onRegister() {
 	auto path = "../res/textures/icons/" + getName() + ".png";
@@ -38,87 +42,114 @@ void SelectionTool::onDeregister() {
 
 void SelectionTool::onRender() {
 	using namespace Graphics;
-
-	Renderer::beginScene();
-
-	Graphics::Shaders::guiShader.bind();
-	Graphics::Shaders::guiShader.setUniform("projectionMatrix", screen.camera.orthoMatrix);
-
-	Path::batch = GUI::batch;
-	if (getToolStatus() == kActive) {
-		Vec2 a = GUI::map(Vec2(region.x, region.y));
-		Vec2 b = GUI::map(handler->getMousePosition());
-		Vec2 position(std::min(a.x, b.x), std::min(a.y, b.y));
-		Vec2 dimension(std::abs(a.x - b.x), std::abs(a.y - b.y));
-		Path::rect(position, dimension);
-		Path::batch->submit();
-	}
-
-	Renderer::endScene();
 }
 
 void SelectionTool::onEvent(Engine::Event& event) {
 	using namespace Engine;
 
 	EventDispatcher dispatcher(event);
-	dispatcher.dispatch<MousePressEvent>(BIND_EVENT_METHOD(SelectionTool::onMousePress));
-	dispatcher.dispatch<MouseReleaseEvent>(BIND_EVENT_METHOD(SelectionTool::onMouseRelease));
+	dispatcher.dispatch<MousePressEvent>(EVENT_BIND(SelectionTool::onMousePress));
 }
 
 bool SelectionTool::onMousePress(Engine::MousePressEvent& event) {
 	using namespace Engine;
 
-	if (event.getButton() == Mouse::LEFT) {
-		Vec2i position = Vec2i(event.getX(), event.getY());
+	if (event.getButton() != Mouse::LEFT)
+		return false;
 
-		region.x = position.x;
-		region.y = position.y;
+	// Multi selection check
+	if (!event.getModifiers().isCtrlPressed())
+		clear();
 
-		if (!event.getModifiers().isCtrlPressed()) 
-			screen.selectionContext.selection.clear();
+	// Single selection
+	auto intersectedEntity = getIntersectedEntity();
 
-		setToolStatus(kActive);
-	}
-
+	if (intersectedEntity.has_value())
+		toggle(intersectedEntity->first);
+	
 	return false;
 }
 
-bool SelectionTool::onMouseRelease(Engine::MouseReleaseEvent& event) {
-	using namespace Engine;
+void SelectionTool::clear() {
+	selection.clear();
+}
 
-	if (event.getButton() == Mouse::LEFT) {
-		Vec2i position = Vec2i(event.getX(), event.getY());
-		
-		region.z = position.x;
-		region.w = position.y;
+void SelectionTool::toggle(const Engine::Registry64::entity_type& entity) {
+	selection.toggle(entity);
+}
 
-		setToolStatus(kIdle);
+void SelectionTool::select(const Engine::Registry64::entity_type& entity) {
+	selection.add(entity);
+}
 
-		Vec4 mappedRegion = GUI::mapRegion(region, Vec2(0, screen.dimension.x), Vec2(screen.dimension.y, 0), Vec2(-1, 1), Vec2(-1, 1));
-		auto[left, right] = GUI::minmax(mappedRegion.x, mappedRegion.z);
-		auto[down, up] = GUI::minmax(mappedRegion.y, mappedRegion.w);
-		//VisibilityFilter visibilityFilter = VisibilityFilter::forWindow(screen.camera.cframe.position, screen.camera.getForwardDirection(), screen.camera.getUpDirection(), screen.camera.fov, screen.camera.aspect, screen.camera.zfar);
-		VisibilityFilter visibilityFilter = VisibilityFilter::forSubWindow(screen.camera.cframe.position, screen.camera.getForwardDirection(), screen.camera.getUpDirection(), screen.camera.fov, screen.camera.aspect, screen.camera.zfar, left, right, down, up);
-
-		auto view = screen.registry.view<Comp::Hitbox, Comp::Transform>();
-		for (auto entity : view) {
-			Ref<Comp::Hitbox> hitbox = view.get<Comp::Hitbox>(entity);
-			Ref<Comp::Transform> transform = view.get<Comp::Transform>(entity);
-			screen.world->syncReadOnlyOperation([&] () {
-				Shape shape = hitbox->getShape();
-				if (!transform->isPartAttached())
-					shape = shape.scaled(transform->getScale());
-				
-				Bounds bounds = shape.getBounds(transform->getRotation()) + transform->getPosition();
-				if (!visibilityFilter(bounds))
-					return;
-
-				screen.selectionContext.selection.add(entity);
-			});
-		}
+std::optional<std::pair<Engine::Registry64::entity_type, Position>> SelectionTool::getIntersectedEntity() {
+	Engine::Registry64::entity_type intersectedEntity = 0;
+	double closestIntersectionDistance = std::numeric_limits<double>::max();
+	auto view = screen.registry.view<Comp::Hitbox, Comp::Transform>();
+	for (auto entity : view) {
+		Ref<Comp::Hitbox> hitbox = view.get<Comp::Hitbox>(entity);
+		Ref<Comp::Transform> transform = view.get<Comp::Transform>(entity);
+		screen.world->syncReadOnlyOperation([&] () {
+			std::optional<double> distance = intersect(transform->getCFrame(), hitbox);
+			if (distance.has_value() && distance < closestIntersectionDistance) {
+				closestIntersectionDistance = *distance;
+				intersectedEntity = entity;
+			}
+		});
 	}
 
-	return false;
-};
+	if (intersectedEntity == 0)
+		return std::nullopt;
+
+	Position intersection = ray.origin + ray.direction * closestIntersectionDistance;
+	
+	return std::make_pair(intersectedEntity, intersection);
+}
+
+std::optional<double> SelectionTool::intersect(const GlobalCFrame& cframe, Ref<Comp::Hitbox> hitbox) {
+	Shape shape = hitbox->getShape();
+	Vec3 relativePosition = cframe.getPosition() - ray.origin;
+	double maxRadius = shape.getMaxRadius();
+	if (pointToLineDistanceSquared(ray.direction, relativePosition) > maxRadius * maxRadius)
+		return std::nullopt;
+
+	RayIntersectBoundsFilter filter(ray);
+	if (hitbox->isPartAttached())
+		if (!filter(*hitbox->getPart()))
+			return std::nullopt;
+
+	double distance = shape.getIntersectionDistance(cframe.globalToLocal(ray.origin), cframe.relativeToLocal(ray.direction));
+
+	if (distance == 0.0 || distance == std::numeric_limits<double>::max())
+		return std::nullopt;
+
+	return distance;
+}
+
+std::optional<double> SelectionTool::intersect(const GlobalCFrame& cframe, const Shape& shape) {
+	Vec3 relativePosition = cframe.getPosition() - ray.origin;
+	double maxRadius = shape.getMaxRadius();
+	if (pointToLineDistanceSquared(ray.direction, relativePosition) > maxRadius * maxRadius)
+		return std::nullopt;
+
+	double distance = shape.getIntersectionDistance(cframe.globalToLocal(ray.origin), cframe.relativeToLocal(ray.direction));
+	if (distance == 0.0 || distance == std::numeric_limits<double>::max())
+		return std::nullopt;
+
+	return distance;
+}
+
+std::optional<double> SelectionTool::intersect(const GlobalCFrame& cframe, const VisualShape& shape) {
+	Vec3 relativePosition = cframe.getPosition() - ray.origin;
+	//double maxRadius = shape.getMaxRadius();
+	//if (pointToLineDistanceSquared(ray.direction, relativePosition) > maxRadius * maxRadius)
+	//	return std::nullopt;
+	
+	double distance = shape.getIntersectionDistance(cframe.globalToLocal(ray.origin), cframe.relativeToLocal(ray.direction));
+	if (distance == 0.0 || distance == std::numeric_limits<double>::max())
+		return std::nullopt;
+
+	return distance;
+}
 
 };

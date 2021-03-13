@@ -8,23 +8,24 @@
 
 namespace P3D::Application {
 
-class TranslationTool : public Engine::StateTool {
+class ScaleTool : public Engine::StateTool {
 private:
 	enum SelectionToolStatus : Engine::ToolStatus {
-		kIdle        = 0,
-		kTranslateX  = 1,
-		kTranslateY  = 2,
-		kTranslateZ  = 3,
-		kTranslateC  = 4,
-		kTranslateXY = 5,
-		kTranslateXZ = 6,
-		kTranslateYZ = 7,
+		kIdle    = 0,
+		kScaleX = 1,
+		kScaleY = 2,
+		kScaleZ = 3,
+		kScaleXYZ = 4,
+		kScaleXY = 5,
+		kScaleXZ = 6,
+		kScaleYZ = 7,
+		kTranslateC = 8
 	};
 
 	bool active = false;
-	
+
 public:
-	DEFINE_TOOL("Translate", "Translate entities by clicking and dragging or using the handles", Graphics::GLFW::Cursor::ARROW);
+	DEFINE_TOOL("Scale", "Scale entities by using the handles", Graphics::GLFW::Cursor::ARROW);
 
 	void onRegister() override;
 	void onDeregister() override;
@@ -35,9 +36,10 @@ public:
 	bool onMousePress(Engine::MousePressEvent& event);
 	bool onMouseRelease(Engine::MouseReleaseEvent& event);
 	bool onMouseDrag(Engine::MouseDragEvent& event);
-	
-	static void translateInPlane(const Vec3& normal, bool local = true);
-	static void translateAlongLine(const Vec3& direction, bool local = true);
+
+	void scaleAlongLine(const Vec3& direction);
+	void scaleInPlane(const Vec3& normal);
+	void scaleXYZ();
 };
 
 };

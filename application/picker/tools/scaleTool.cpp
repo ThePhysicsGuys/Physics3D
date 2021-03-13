@@ -1,11 +1,12 @@
 #include "core.h"
 
-#include "translationTool.h"
+#include "scaleTool.h"
 
 #include "worlds.h"
 #include "application.h"
 #include "selectionTool.h"
-#include "../../../physics/misc/toString.h"
+#include "translationTool.h"
+#include "../physics/misc/toString.h"
 #include "view/screen.h"
 #include "shader/shaders.h"
 
@@ -39,22 +40,17 @@ namespace P3D::Application {
 	static LinePrimitive* line = nullptr;
 	static IndexedMesh* quadMesh;
 	static VisualShape quadShape;
-	static IndexedMesh* centerMesh;
-	static VisualShape centerShape;
 	static IndexedMesh* handleMesh;
 	static VisualShape handleShape;
+	static IndexedMesh* centerMesh;
+	static VisualShape centerShape;
 
-	static Polyhedron createArrow(float arrowHeadLength, float arrowHeadRadius, float stickRadius) {
-		Vec2f contour[] {
-			{ 0.0f, stickRadius },
-			{ 1.0f - arrowHeadLength, stickRadius },
-			{ 1.0f - arrowHeadLength, arrowHeadRadius }
-		};
-		
-		return Library::createRevolvedShape(0.0f, contour, 3, 1.0f, 24);
+	static Polyhedron createBoxOnStick(float boxSide, float stickRadius) {
+		Vec2f vecs[] { { 0.0f, stickRadius }, { 1.0f - boxSide, stickRadius }, { 1.0f - boxSide, boxSide / sqrtf(2.0f) }, { 1.0f, boxSide / sqrtf(2.0f) }};
+		return Library::createRevolvedShape(0.0f, vecs, 4, 1.0f, 4).rotated(Rotation::rotZ(3.14159265359 / 4));
 	}
 	
-	void TranslationTool::onRegister() {
+	void ScaleTool::onRegister() {
 		using namespace Graphics;
 
 		// Load icon
@@ -66,27 +62,27 @@ namespace P3D::Application {
 		line->resize(Vec3f(0, 0, -100000), Vec3f(0, 0, 100000));
 		
 		// Create handle shapes
-		handleShape = VisualShape::generateSplitNormalsShape(createArrow(0.3f, 0.07f, 0.03f));
+		handleShape = VisualShape::generateSplitNormalsShape(createBoxOnStick(0.2f, 0.03f));
 		handleMesh = new IndexedMesh(handleShape);
-		centerShape = VisualShape::generateSmoothNormalsShape(Library::createSphere(0.13f, 3));
+		centerShape = VisualShape::generateSplitNormalsShape(Library::createCube(0.2f));
 		centerMesh = new IndexedMesh(centerShape);
-		quadShape = VisualShape::generateSplitNormalsShape(Library::createBox(0.02, 0.25, 0.25).translated({0, 0.5, 0.5}));
+		quadShape = VisualShape::generateSplitNormalsShape(Library::createBox(0.02, 0.25, 0.25).translated({ 0, 0.5, 0.5 }));
 		quadMesh = new IndexedMesh(quadShape);
-
+		
 		// Set idle status
 		setToolStatus(kIdle);
 	}
 
-	void TranslationTool::onDeregister() {
+	void ScaleTool::onDeregister() {
 		// Todo remove icon
 		// Todo remove line
 
-		centerMesh->close();
 		handleMesh->close();
+		centerMesh->close();
 		quadMesh->close();
 	}
 
-	void TranslationTool::onRender() {
+	void ScaleTool::onRender() {
 		using namespace Graphics;
 		
 		std::optional<GlobalCFrame> cframe = SelectionTool::selection.getCFrame();
@@ -100,19 +96,19 @@ namespace P3D::Application {
 		Mat4f modelXZ = model * joinDiagonal(Mat3f(transformations[3].asRotationMatrix()), 1.0f);
 
 		auto status = getToolStatus();		
-		if (status == kTranslateX || status == kTranslateXY || status == kTranslateXZ) {
+		if (status == kScaleX || status == kScaleXY || status == kScaleXZ || status == kScaleXYZ) {
 			Shaders::maskShader.updateModel(modelX);
 			Shaders::maskShader.updateColor(COLOR::RGB_R);
 			line->render();
 		}
 
-		if (status == kTranslateY || status == kTranslateXY || status == kTranslateYZ) {
+		if (status == kScaleY || status == kScaleXY || status == kScaleYZ || status == kScaleXYZ) {
 			Shaders::maskShader.updateModel(modelY);
 			Shaders::maskShader.updateColor(COLOR::RGB_G);
 			line->render();
 		}
 
-		if (status == kTranslateZ || status == kTranslateXZ || status == kTranslateYZ) {
+		if (status == kScaleZ || status == kScaleXZ || status == kScaleYZ || status == kScaleXYZ) {
 			Shaders::maskShader.updateModel(modelZ);
 			Shaders::maskShader.updateColor(COLOR::RGB_B);
 			line->render();
@@ -124,11 +120,11 @@ namespace P3D::Application {
 
 		// X, XY
 		Shaders::basicShader.updateMaterial(Comp::Material(COLOR::RGB_R));
-		Shaders::basicShader.updateModel(modelX);   
+		Shaders::basicShader.updateModel(modelX);
 		handleMesh->render();
 		Shaders::basicShader.updateMaterial(Comp::Material(COLOR::RGB_B));
 		quadMesh->render();
-		
+
 		// Y, XZ
 		Shaders::basicShader.updateModel(modelY);
 		Shaders::basicShader.updateMaterial(Comp::Material(COLOR::RGB_G));
@@ -142,10 +138,9 @@ namespace P3D::Application {
 		handleMesh->render();
 		Shaders::basicShader.updateMaterial(Comp::Material(COLOR::RGB_R));
 		quadMesh->render();
-		
 	}
 
-	void TranslationTool::onUpdate() {
+	void ScaleTool::onUpdate() {
 		// Keep the tool status if the tool is active
 		if (this->active)
 			return;
@@ -163,26 +158,26 @@ namespace P3D::Application {
 			return;
 		
 		GlobalCFrame frame = *cframe;
-		for (char status = kTranslateX; status <= kTranslateYZ; status++) {
+		for (char status = kScaleX; status <= kScaleYZ; status++) {
 			VisualShape shape;
 			switch (status) {
-				case kTranslateC:
+				case kScaleXYZ:
 					shape = centerShape;
 					break;
-				case kTranslateX:
-				case kTranslateY:
-				case kTranslateZ:
+				case kScaleX:
+				case kScaleY:
+				case kScaleZ:
 					shape = handleShape;
 					break;
-				case kTranslateXY:
-				case kTranslateXZ:
-				case kTranslateYZ:
+				case kScaleXY:
+				case kScaleXZ:
+				case kScaleYZ:
 					shape = quadShape;
 					break;
 				default:
 					continue;
 			}
-
+			
 			frame.rotation = cframe->getRotation() * transformations[mapping[status - 1]];
 			std::optional<double> distance = SelectionTool::intersect(frame, shape);
 
@@ -199,16 +194,16 @@ namespace P3D::Application {
 			SelectionTool::intersectedPoint = SelectionTool::ray.origin + SelectionTool::ray.direction * *closestIntersectionDistance;
 	}
 
-	void TranslationTool::onEvent(Engine::Event& event) {
+	void ScaleTool::onEvent(Engine::Event& event) {
 		using namespace Engine;
 
 		EventDispatcher dispatcher(event);
-		dispatcher.dispatch<MousePressEvent>(EVENT_BIND(TranslationTool::onMousePress));
-		dispatcher.dispatch<MouseReleaseEvent>(EVENT_BIND(TranslationTool::onMouseRelease));
-		dispatcher.dispatch<MouseDragEvent>(EVENT_BIND(TranslationTool::onMouseDrag));
+		dispatcher.dispatch<MousePressEvent>(EVENT_BIND(ScaleTool::onMousePress));
+		dispatcher.dispatch<MouseReleaseEvent>(EVENT_BIND(ScaleTool::onMouseRelease));
+		dispatcher.dispatch<MouseDragEvent>(EVENT_BIND(ScaleTool::onMouseDrag));
 	}
 
-	bool TranslationTool::onMousePress(Engine::MousePressEvent& event) {
+	bool ScaleTool::onMousePress(Engine::MousePressEvent& event) {
 		using namespace Engine;
 		if (event.getButton() != Mouse::LEFT)
 			return false;
@@ -231,7 +226,7 @@ namespace P3D::Application {
 				// No intersection causes only deselection
 				if (!intersectedEntity.has_value())
 					return false;
-				
+
 				// If an intersection is found, select it and behave like center edit
 				setToolStatus(kTranslateC);
 				SelectionTool::intersectedPoint = intersectedEntity->second;
@@ -249,20 +244,20 @@ namespace P3D::Application {
 		return false;
 	}
 
-	bool TranslationTool::onMouseRelease(Engine::MouseReleaseEvent& event) {
+	bool ScaleTool::onMouseRelease(Engine::MouseReleaseEvent& event) {
 		using namespace Engine;
 		if (event.getButton() != Mouse::LEFT)
 			return false;
 
 		// Reset magnet point
 		screen.world->selectedPart = nullptr;
-
+		
 		this->active = false;
 
 		return false;
-	}
+	};
 
-	bool TranslationTool::onMouseDrag(Engine::MouseDragEvent& event) {
+	bool ScaleTool::onMouseDrag(Engine::MouseDragEvent& event) {
 		if (!this->active)
 			return false;
 		
@@ -272,26 +267,29 @@ namespace P3D::Application {
 
 		screen.world->asyncModification([&] () {
 			switch (status) {
-				case kTranslateX:
-					translateAlongLine({ 1, 0, 0 });
+				case kScaleX:
+					scaleAlongLine({ 1, 0, 0 });
 					break;
-				case kTranslateY:
-					translateAlongLine({ 0, 1, 0 });
+				case kScaleY:
+					scaleAlongLine({ 0, 1, 0 });
 					break;
-				case kTranslateZ:
-					translateAlongLine({ 0, 0, 1 });
+				case kScaleZ:
+					scaleAlongLine({ 0, 0, 1 });
+					break;
+				case kScaleXYZ:
+					scaleXYZ();
+					break;
+				case kScaleXY:
+					scaleInPlane({ 0, 0, 1 });
+					break;
+				case kScaleXZ:
+					scaleInPlane({ 0, 1, 0 });
+					break;
+				case kScaleYZ:
+					scaleInPlane({ 1, 0, 0 });
 					break;
 				case kTranslateC:
-					translateInPlane(screen.camera.cframe.rotation * Vec3(0, 0, 1), false);
-					break;
-				case kTranslateXY:
-					translateInPlane({ 0, 0, 1 });
-					break;
-				case kTranslateXZ:
-					translateInPlane({ 0, 1, 0 });
-					break;
-				case kTranslateYZ:
-					translateInPlane({ 1, 0, 0 });
+					TranslationTool::translateInPlane(screen.camera.cframe.rotation * Vec3(0, 0, 1), false);
 					break;
 				default:
 					return false;
@@ -303,56 +301,17 @@ namespace P3D::Application {
 		return false;
 	}
 
-	void TranslationTool::translateInPlane(const Vec3& normal, bool local) {
-		if (SelectionTool::selection.empty())
-			return;
-
-		Vec3 direction;
-		if (local) {
-			std::optional<GlobalCFrame> cframe = SelectionTool::selection.getCFrame();
-			if (!cframe.has_value())
-				return;
-
-			direction = cframe->localToRelative(normal);
-		} else {
-			direction = normal;
-		}
-		
-		double distance = (*SelectionTool::selectedPoint - SelectionTool::ray.origin) * direction / (SelectionTool::ray.direction * direction);
-		Position planeIntersection = SelectionTool::ray.origin + SelectionTool::ray.direction * distance;
-
-		if (isPaused()) {
-			Vec3 translation = planeIntersection - *SelectionTool::selectedPoint;
-			*SelectionTool::selectedPoint += translation;
-			
-			SelectionTool::selection.translate(translation);
-		} else {
-			// Only allow single selection
-			if (SelectionTool::selection.size() > 1)
-				return;
-
-			Ref<Comp::Transform> transform = screen.registry.get<Comp::Transform>(SelectionTool::selection[0]);
-			if (transform.invalid())
-				return;
-			if (!transform->isPartAttached())
-				return;
-			
-			screen.world->selectedPart = transform->getPart();
-			screen.world->magnetPoint = planeIntersection;
-		}
-	}
-
-	void TranslationTool::translateAlongLine(const Vec3& direction, bool local) {
+	void ScaleTool::scaleAlongLine(const Vec3& direction) {
 		// Closest point on ray1 (A + s * a) from ray2 (B + t * b). Ray1 is the ray from the parts' center in the direction of the edit tool, ray2 is the mouse ray. Directions a and b are normalized. Only s is calculated.
 		if (SelectionTool::selection.empty())
 			return;
-		
+
 		std::optional<GlobalCFrame> cframe = SelectionTool::selection.getCFrame();
 		if (!cframe.has_value())
 			return;
-		
+
 		// Rotate direction according to model rotation
-		Ray ray1 = { cframe->getPosition(), local ? cframe->localToRelative(direction) : direction };
+		Ray ray1 = { cframe->getPosition(), cframe->localToRelative(direction) };
 		Ray ray2 = SelectionTool::ray;
 
 		// Calculate s
@@ -367,7 +326,50 @@ namespace P3D::Application {
 		Vec3 translation = s * ray1.direction - translationCorrection;
 
 		*SelectionTool::selectedPoint += translation;
-		SelectionTool::selection.translate(translation);
+		SelectionTool::selection.scale(Vec3(1.0, 1.0, 1.0) + translation);
 	}
+
+	void ScaleTool::scaleInPlane(const Vec3& normal) {
+		if (SelectionTool::selection.empty())
+			return;
+		
+		std::optional<GlobalCFrame> cframe = SelectionTool::selection.getCFrame();
+		if (!cframe.has_value())
+			return;
+
+		Vec3 direction = cframe->localToRelative(normal);
+		double distance = (*SelectionTool::selectedPoint - SelectionTool::ray.origin) * direction / (SelectionTool::ray.direction * direction);
+		Position planeIntersection = SelectionTool::ray.origin + SelectionTool::ray.direction * distance;
+
+		Vec3 translation = planeIntersection - *SelectionTool::selectedPoint;
+		*SelectionTool::selectedPoint += translation;
+
+		SelectionTool::selection.scale(Vec3(1.0, 1.0, 1.0) + translation);
+		
+	}
+
+	void ScaleTool::scaleXYZ() {
+		if (SelectionTool::selection.empty())
+			return;
+
+		std::optional<GlobalCFrame> cframe = SelectionTool::selection.getCFrame();
+		if (!cframe.has_value())
+			return;
+
+		std::optional<Shape> hitbox = SelectionTool::selection.getHitbox();
+		if (!hitbox.has_value())
+			return;
+		
+		Vec3 direction = normalize(Vec3(screen.camera.cframe.position - cframe->getPosition()));
+		double distance = (*SelectionTool::selectedPoint - SelectionTool::ray.origin) * direction / (SelectionTool::ray.direction * direction);
+		Position planeIntersection = SelectionTool::ray.origin + SelectionTool::ray.direction * distance;
+
+		double amount = lengthSquared(castPositionToVec3(*SelectionTool::selectedPoint)) - lengthSquared(castPositionToVec3(planeIntersection));
+		*SelectionTool::selectedPoint = planeIntersection;
+		
+		
+		SelectionTool::selection.scale({ 1.0 + amount, 1.0 + amount, 1.0 + amount });
+	}
+
 
 }

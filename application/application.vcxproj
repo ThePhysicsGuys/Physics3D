@@ -171,7 +171,9 @@
     <ClInclude Include="extendedPart.h" />
     <ClInclude Include="input\standardInputHandler.h" />
     <ClInclude Include="picker\selection.h" />
-    <ClInclude Include="picker\selectionContext.h" />
+    <ClInclude Include="picker\tools\regionSelectionTool.h" />
+    <ClInclude Include="picker\tools\rotationTool.h" />
+    <ClInclude Include="picker\tools\scaleTool.h" />
     <ClInclude Include="picker\tools\selectionTool.h" />
     <ClInclude Include="picker\tools\translationTool.h" />
     <ClInclude Include="resource.h" />
@@ -214,6 +216,9 @@
     <ClCompile Include="layer\imguiLayer.cpp" />
     <ClCompile Include="layer\postprocessLayer.cpp" />
     <ClCompile Include="picker\selection.cpp" />
+    <ClCompile Include="picker\tools\regionSelectionTool.cpp" />
+    <ClCompile Include="picker\tools\rotationTool.cpp" />
+    <ClCompile Include="picker\tools\scaleTool.cpp" />
     <ClCompile Include="picker\tools\selectionTool.cpp" />
     <ClCompile Include="picker\tools\translationTool.cpp" />
     <ClCompile Include="resources.cpp" />
