@@ -37,30 +37,18 @@ public:
 	[[nodiscard]] virtual char getCategory() const = 0;
 	[[nodiscard]] virtual std::string getName() const = 0;
 
-	[[nodiscard]] inline bool inCategory(char category) const {
+	[[nodiscard]] bool inCategory(char category) const {
 		return (category & getCategory()) != 0;
 	}
 
-	[[nodiscard]] inline bool inCategory(const EventCategory& category) const {
+	[[nodiscard]] bool inCategory(const EventCategory& category) const {
 		return inCategory(static_cast<char>(category));
 	}
 };
 
-// For class methods only
-
-#define BIND_EVENT_METHOD(function) \
-	std::bind(&function, this, std::placeholders::_1)
-
-#define DISPATCH_EVENT_METHOD(event, type, function) \
-	{ EventDispatcher dispatch(event); \
-	dispatch.dispatch<type>(BIND_EVENT_METHOD(function)); }
-
-// For free functions only
-
-#define DISPATCH_EVENT_FUNCTION(event, type, function) \
-	{ EventDispatcher dispatch(event); \
-	dispatch.dispatch<type>(function); }
-
+#define EVENT_BIND(function) \
+	[&] (auto& event) -> bool { return function(event); }
+	
 class EventDispatcher {
 private:
 	Event& event;

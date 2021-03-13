@@ -166,7 +166,6 @@
     <ClInclude Include="layer\pickerLayer.h" />
     <ClInclude Include="layer\postprocessLayer.h" />
     <ClInclude Include="layer\skyboxLayer.h" />
-    <ClInclude Include="picker\editTools.h" />
     <ClInclude Include="eventHandler.h" />
     <ClInclude Include="extendedPart.h" />
     <ClInclude Include="input\standardInputHandler.h" />
@@ -182,9 +181,7 @@
     <ClInclude Include="shader\shaderBase.h" />
     <ClInclude Include="shader\shaders.h" />
     <ClInclude Include="tickerThread.h" />
-    <ClInclude Include="picker\pickable.h" />
     <ClInclude Include="picker\ray.h" />
-    <ClInclude Include="picker\picker.h" />
     <ClInclude Include="view\camera.h" />
     <ClInclude Include="view\debugFrame.h" />
     <ClInclude Include="view\ecsFrame.h" />
@@ -229,7 +226,6 @@
     <ClCompile Include="layer\modelLayer.cpp" />
     <ClCompile Include="layer\pickerLayer.cpp" />
     <ClCompile Include="layer\skyboxLayer.cpp" />
-    <ClCompile Include="picker\editTools.cpp" />
     <ClCompile Include="eventHandler.cpp" />
     <ClCompile Include="extendedPart.cpp" />
     <ClCompile Include="picker\ray.cpp" />
@@ -238,7 +234,6 @@
     <ClCompile Include="shader\shaderBase.cpp" />
     <ClCompile Include="shader\shaders.cpp" />
     <ClCompile Include="tickerThread.cpp" />
-    <ClCompile Include="picker\picker.cpp" />
     <ClCompile Include="view\camera.cpp" />
     <ClCompile Include="view\debugFrame.cpp" />
     <ClCompile Include="view\ecsFrame.cpp" />

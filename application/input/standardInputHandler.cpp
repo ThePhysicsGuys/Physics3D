@@ -22,6 +22,8 @@
 #include "../view/camera.h"
 #include <random>
 
+#include "layer/pickerLayer.h"
+
 namespace P3D::Application {
 
 #define KEY_BIND(name) \
@@ -39,13 +41,13 @@ void StandardInputHandler::onEvent(Engine::Event& event) {
 
 	EventDispatcher dispatcher(event);
 
-	if (dispatcher.dispatch<KeyPressEvent>(BIND_EVENT_METHOD(StandardInputHandler::onKeyPress)))
+	if (dispatcher.dispatch<KeyPressEvent>(EVENT_BIND(StandardInputHandler::onKeyPress)))
 		return;
 
-	if (dispatcher.dispatch<DoubleKeyPressEvent>(BIND_EVENT_METHOD(StandardInputHandler::onDoubleKeyPress)))
+	if (dispatcher.dispatch<DoubleKeyPressEvent>(EVENT_BIND(StandardInputHandler::onDoubleKeyPress)))
 		return;
 
-	if (dispatcher.dispatch<WindowResizeEvent>(BIND_EVENT_METHOD(StandardInputHandler::onWindowResize)))
+	if (dispatcher.dispatch<WindowResizeEvent>(EVENT_BIND(StandardInputHandler::onWindowResize)))
 		return;
 
 }
@@ -161,15 +163,23 @@ bool StandardInputHandler::onKeyPress(Engine::KeyPressEvent& event) {
 	}
 	
 	KEY_BIND(KeyboardOptions::Edit::rotate) {
-		Picker::editTools.editMode = EditTools::EditMode::ROTATE;
+		PickerLayer::toolManagers[0].selectTool("Rotate");
 	}
 	
 	KEY_BIND(KeyboardOptions::Edit::translate) {
-		Picker::editTools.editMode = EditTools::EditMode::TRANSLATE;
+		PickerLayer::toolManagers[0].selectTool("Translate");
 	}
 	
 	KEY_BIND(KeyboardOptions::Edit::scale) {
-		Picker::editTools.editMode = EditTools::EditMode::SCALE;
+		PickerLayer::toolManagers[0].selectTool("Scale");
+	}
+
+	KEY_BIND(KeyboardOptions::Edit::select) {
+		PickerLayer::toolManagers[0].selectTool("Select");
+	}
+
+	KEY_BIND(KeyboardOptions::Edit::region) {
+		PickerLayer::toolManagers[0].selectTool("Select region");
 	}
 	
 	KEY_BIND(KeyboardOptions::Debug::spheres) {

@@ -2,8 +2,8 @@
 
 #include <string>
 #include <variant>
-#include "extendedPart.h"
 
+#include "../application/extendedPart.h"
 #include "../physics/synchonizedWorld.h"
 #include "../physics/geometry/builtinShapeClasses.h"
 #include "../graphics/visualData.h"
@@ -105,6 +105,15 @@ struct Transform : RefCountable {
 			std::get<ExtendedPart*>(this->cframe)->translate(translation);
 		} else {
 			std::get<ScaledCFrame>(this->cframe).cframe.position += translation;
+		}
+	}
+
+	void rotate(const Rotation& rotation) {
+		if (std::holds_alternative<ExtendedPart*>(this->cframe)) {
+			ExtendedPart* part = std::get<ExtendedPart*>(this->cframe);
+			part->setCFrame(part->getCFrame().rotated(rotation));
+		} else {
+			std::get<ScaledCFrame>(this->cframe).cframe.rotate(rotation);
 		}
 	}
 

@@ -87,7 +87,6 @@ void ImGuiLayer::begin() {
 	bool opt_fullscreen = opt_fullscreen_persistant;
 	ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
 	ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
-
 	if (opt_fullscreen) {
 		ImGuiViewport* viewport = ImGui::GetMainViewport();
 		ImGui::SetNextWindowPos(viewport->GetWorkPos());

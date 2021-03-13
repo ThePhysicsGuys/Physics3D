@@ -12,7 +12,7 @@
 template<typename T>
 class MatrixRotationTemplate {
 	Matrix<T, 3, 3> rotationMatrix;
-	constexpr explicit MatrixRotationTemplate(const Matrix<T, 3, 3>& rotationMatrix) : rotationMatrix(rotationMatrix) {};
+	constexpr explicit MatrixRotationTemplate(const Matrix<T, 3, 3>& rotationMatrix) : rotationMatrix(rotationMatrix) {}
 public:
 
 	constexpr MatrixRotationTemplate();
@@ -67,6 +67,7 @@ public:
 	static MatrixRotationTemplate fromEulerAngles(T alpha, T beta, T gamma) {
 		return MatrixRotationTemplate<T>::rotZ(gamma) * MatrixRotationTemplate<T>::rotX(alpha) * MatrixRotationTemplate<T>::rotY(beta);
 	}
+	static MatrixRotationTemplate fromDirection(const Vector<T, 3>& direction, const Vector<T, 3>& up = { 0, 1, 0 });
 	static MatrixRotationTemplate fromRotationVec(const Vector<T, 3>& rotationVector);
 	static MatrixRotationTemplate fromRotationMatrix(const Matrix<T, 3, 3>& rotationMatrix);
 	static MatrixRotationTemplate fromRotationQuaternion(const Quaternion<T>& rotationQuaternion);
@@ -294,6 +295,19 @@ Quaternion<T> MatrixRotationTemplate<T>::asRotationQuaternion() const {
 template<typename T>
 Vector<T, 3> MatrixRotationTemplate<T>::asRotationVector() const {
 	return rotationVectorFromRotationMatrix(this->rotationMatrix);
+}
+
+template<typename T>
+MatrixRotationTemplate<T> MatrixRotationTemplate<T>::fromDirection(const Vector<T, 3>& direction, const Vector<T, 3>& up) {
+	Vector<T, 3> z = normalize(direction);
+	Vector<T, 3> x = normalize(z % up);
+	Vector<T, 3> y = normalize(x % z);
+
+	return fromRotationMatrix(Matrix<T, 3, 3> {
+		x.x, y.x, -z.x,
+		x.y, y.y, -z.y,
+		x.z, y.z, -z.z
+	});
 }
 
 template<typename T>

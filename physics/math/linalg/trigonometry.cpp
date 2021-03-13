@@ -56,7 +56,6 @@ Mat4f perspective(float fov, float aspect, float zNear, float zFar) {
 	};
 }
 
-
 Mat4f lookAt(const Vec3f& from, const Vec3f& to, const Vec3f& up) {
 	
 	/*Vec3f z = normalize(to - from);

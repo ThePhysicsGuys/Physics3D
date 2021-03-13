@@ -269,12 +269,13 @@ add_executable(application
   application/layer/shadowLayer.cpp
   application/layer/imguiLayer.cpp
 
-  application/picker/editTools.cpp
-  application/picker/picker.cpp
   application/picker/ray.cpp
   application/picker/selection.cpp
   application/picker/tool/selectionTool.cpp
   application/picker/tool/translationTool.cpp
+  application/picker/tool/rotationTool.cpp
+  application/picker/tool/scaleTool.cpp
+  application/picker/tool/regionSelectionTool.cpp
 
   application/shader/shaders.cpp
   application/shader/basicShader.cpp

@@ -2,7 +2,6 @@
 
 #include "../engine/tool/toolManager.h"
 #include "../engine/layer/layer.h"
-#include "picker/selectionContext.h"
 
 namespace P3D::Application {
 

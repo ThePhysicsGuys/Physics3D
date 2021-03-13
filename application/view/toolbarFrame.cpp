@@ -47,11 +47,11 @@ void ToolbarFrame::onRender(Engine::Registry64& registry) {
 		handler->onEvent(event);
 	}
 
-	ImGui::ToolBarButton("Play / Pause", "Play / Pause the simulation", "object");
+	/*ImGui::ToolBarButton("Play / Pause", "Play / Pause the simulation", "object");
 	ImGui::ToolBarButton("Play / Pause", "Play / Pause the simulation", "folder_open");
 	ImGui::ToolBarButton("Play / Pause", "Play / Pause the simulation", "folder_closed");
 	ImGui::ToolBarSpacing();
-	ImGui::ToolBarButton("Play / Pause", "Play / Pause the simulation", "default");
+	ImGui::ToolBarButton("Play / Pause", "Play / Pause the simulation", "default");*/
 	
 	ImGui::EndToolBar();
 }

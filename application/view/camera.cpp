@@ -202,9 +202,9 @@ void Camera::onEvent(Engine::Event& event) {
 	using namespace Engine;
 
 	EventDispatcher dispatcher(event);
-	dispatcher.dispatch<MouseDragEvent>(BIND_EVENT_METHOD(Camera::onMouseDrag));
-	dispatcher.dispatch<MouseScrollEvent>(BIND_EVENT_METHOD(Camera::onMouseScroll));
-	dispatcher.dispatch<KeyReleaseEvent>(BIND_EVENT_METHOD(Camera::onKeyRelease));
+	dispatcher.dispatch<MouseDragEvent>(EVENT_BIND(Camera::onMouseDrag));
+	dispatcher.dispatch<MouseScrollEvent>(EVENT_BIND(Camera::onMouseScroll));
+	dispatcher.dispatch<KeyReleaseEvent>(EVENT_BIND(Camera::onKeyRelease));
 }
 
 void Camera::onUpdate(float fov, float aspect, float znear, float zfar) {

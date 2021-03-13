@@ -7,7 +7,7 @@
 //#include <optional>
 
 struct Ray {
-	Position start;
+	Position origin;
 	Vec3 direction;
 };
 
@@ -67,8 +67,8 @@ inline std::optional<RayBoundsIntersection> computeRayBoundsIntersection(const B
 inline bool doRayAndBoundsIntersect(const Bounds& bounds, const Ray& ray) {
 	// everything is computed relative to the ray origin
 
-	Vec3Fix lMin = bounds.min - ray.start;
-	Vec3Fix lMax = bounds.max - ray.start;
+	Vec3Fix lMin = bounds.min - ray.origin;
+	Vec3Fix lMax = bounds.max - ray.origin;
 
 	Vec3 dir = ray.direction;
 

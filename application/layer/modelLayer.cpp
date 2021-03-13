@@ -6,7 +6,6 @@
 #include "shader/shaders.h"
 #include "extendedPart.h"
 #include "worlds.h"
-#include "../../graphics/resource/textureResource.h"
 
 #include "../engine/ecs/registry.h"
 #include "ecs/components.h"
@@ -20,13 +19,13 @@
 #include "../graphics/gui/color.h"
 
 #include "../physics/math/linalg/vec.h"
-#include "../physics/sharedLockGuard.h"
 #include "../physics/misc/filters/visibilityFilter.h"
 
 #include "../util/resource/resourceManager.h"
 #include "../layer/shadowLayer.h"
 
 #include "../graphics/batch/instanceBatchManager.h"
+#include "picker/tools/selectionTool.h"
 
 namespace P3D::Application {
 
@@ -251,9 +250,16 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 				}
 			}
 		}
-
+		auto scf = SelectionTool::selection.getCFrame();
+		auto shb = SelectionTool::selection.getHitbox();
+		if (scf.has_value() && shb.has_value()) {
+			VisualData data = MeshRegistry::getOrCreateMeshFor(shb->baseShape);
+			Shaders::debugShader.updateModel(scf.value().asMat4WithPreScale(shb->scale));
+			MeshRegistry::meshes[data.id]->render();
+		}
+		
 		// Hitbox drawing
-		for (auto entity : screen->selectionContext.selection) {
+		for (auto entity : SelectionTool::selection) {
 			Ref<Comp::Transform> transform = registry.get<Comp::Transform>(entity);
 			if (transform.valid()) {
 				Ref<Comp::Hitbox> hitbox = registry.get<Comp::Hitbox>(entity);
