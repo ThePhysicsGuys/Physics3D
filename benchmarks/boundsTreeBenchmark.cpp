@@ -1,6 +1,9 @@
 #include "benchmark.h"
 
 #include "../physics/datastructures/boundsTree.h"
+#include "../physics/datastructures/boundsTreeOld.h"
+
+using namespace P3D::OldBoundsTree;
 
 #define BENCH_TREE_BRANCH_FACTOR 4
 static void fillTreeNodeRecursive(TreeNode& node, BasicBounded* curItemList, size_t numberOfItems) {

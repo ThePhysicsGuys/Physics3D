@@ -11,16 +11,14 @@
 #include "constants.h"
 #include "../util/log.h"
 
-
 #include <vector>
 #include <cmath>
 #include <algorithm>
 
-
-
 /*
 	exitVector is the distance p2 must travel so that the shapes are no longer colliding
 */
+
 void handleCollision(Part& part1, Part& part2, Position collisionPoint, Vec3 exitVector) {
 	Debug::logPoint(collisionPoint, Debug::INTERSECTION);
 	Physical& parent1 = *part1.parent;
@@ -139,7 +137,6 @@ void handleTerrainCollision(Part& part1, Part& part2, Position collisionPoint, V
 	bool isImpulseColission = relativeVelocity * exitVector > 0;
 
 	Vec3 impulse;
-
 
 	double combinedBouncyness = part1.properties.bouncyness * part2.properties.bouncyness;
 
@@ -278,30 +275,31 @@ void WorldPrototype::parallelRefineColission(std::vector<Colission>& colissions)
 				break;
 			}
 
-			Colission& col = colissions[claimedWork];
+			Colission col = colissions[claimedWork];
 			PartIntersection result = safeIntersects(*col.p1, *col.p2);
 
 			if (result.intersects) {
-				{
-					std::lock_guard lck(statsMutex);
-					intersectionStatistics.addToTally(IntersectionResult::COLISSION, 1);
-				}
+				
+				statsMutex.lock();
+				intersectionStatistics.addToTally(IntersectionResult::COLISSION, 1);
+				statsMutex.unlock();
+				
 
 				// add extra information
 				col.intersection = result.intersection;
 				col.exitVector = result.exitVector;
 				
-				{
-					std::lock_guard lck(vecMutex);
-					wantedColission.push_back(col);
-				}
-
+				
+				vecMutex.lock();
+				wantedColission.push_back(col);
+				vecMutex.unlock();
 			}
 			else {
-				{
-					std::lock_guard lck(statsMutex);
-					intersectionStatistics.addToTally(IntersectionResult::GJK_REJECT, 1);
-				}
+				
+				statsMutex.lock();
+				intersectionStatistics.addToTally(IntersectionResult::GJK_REJECT, 1);
+				statsMutex.unlock();
+				
 
 			}
 		}	
@@ -322,8 +320,6 @@ void WorldPrototype::findColissions() {
 	for(std::pair<int, int> collidingLayers : colissionMask) {
 		getColissionsBetween(layers[collidingLayers.first], layers[collidingLayers.second], curColissions);
 	}
-
-	std::mutex cMx, sMx;
 
 	parallelRefineColission(curColissions.freePartColissions);
 	parallelRefineColission(curColissions.freeTerrainColissions);
