@@ -5,7 +5,6 @@
 #include "../application.h"
 #include "../graphics/debug/visualDebug.h"
 #include "view/screen.h"
-#include "picker/picker.h"
 #include "input/standardInputHandler.h"
 
 #include "../engine/tool/toolManager.h"

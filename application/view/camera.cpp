@@ -2,19 +2,16 @@
 
 #include "camera.h"
 #include "screen.h"
-#include "input/standardInputHandler.h"
 #include "application.h"
 #include "../graphics/gui/guiUtils.h"
 
 #include "../engine/event/event.h"
 #include "../engine/event/mouseEvent.h"
 #include "../engine/event/keyEvent.h"
-#include "../engine/input/mouse.h"
 #include "../engine/input/keyboard.h"
 #include "../engine/options/keyboardOptions.h"
 
 #include "../extendedPart.h"
-#include "picker/picker.h"
 #include "worlds.h"
 
 namespace P3D::Application {
@@ -63,8 +60,8 @@ void Camera::rotate(Screen& screen, double dalpha, double dbeta, double dgamma, 
 
 	if (leftDragging) {
 		screen.world->asyncModification([&screen] () {
-			Picker::moveGrabbedEntityLateral(screen);
-			});
+			// TODO Picker::moveGrabbedEntityLateral(screen);
+		});
 	}
 	// Accelerate camera rotation
 	if (accelerating)
@@ -100,8 +97,8 @@ void Camera::move(Screen& screen, double dx, double dy, double dz, bool leftDrag
 
 		if (leftDragging) {
 			screen.world->asyncModification([&screen] () {
-				Picker::moveGrabbedEntityLateral(screen);
-				});
+				// TODO Picker::moveGrabbedEntityLateral(screen);
+			});
 		}
 	}
 
@@ -111,8 +108,8 @@ void Camera::move(Screen& screen, double dx, double dy, double dz, bool leftDrag
 
 		if (leftDragging) {
 			screen.world->asyncModification([&screen] () {
-				Picker::moveGrabbedEntityLateral(screen);
-				});
+				// TODO Picker::moveGrabbedEntityLateral(screen);
+			});
 		}
 	}
 
@@ -123,8 +120,8 @@ void Camera::move(Screen& screen, double dx, double dy, double dz, bool leftDrag
 
 		if (leftDragging) {
 			screen.world->asyncModification([&screen, dz, this] () {
-				Picker::moveGrabbedEntityTransversal(screen, -currentVelocity * dz);
-				});
+				// TODO Picker::moveGrabbedEntityTransversal(screen, -currentVelocity * dz);
+			});
 		}
 	}
 

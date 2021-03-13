@@ -3,16 +3,13 @@
 #include "standardInputHandler.h"
 
 #include "../engine/input/keyboard.h"
-#include "../engine/input/mouse.h"
 
 #include "../application/worldBuilder.h"
 #include "../engine/options/keyboardOptions.h"
 #include "../graphics/renderer.h"
 #include "../physics/misc/toString.h"
 #include "../application.h"
-#include "../picker/picker.h"
 #include "../graphics/gui/gui.h"
-#include "../graphics/gui/guiUtils.h"
 #include "../graphics/debug/visualDebug.h"
 #include "../graphics/buffers/frameBuffer.h"
 #include "../graphics/glfwUtils.h"

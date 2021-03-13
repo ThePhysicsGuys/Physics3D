@@ -3,8 +3,8 @@
 #include <string>
 #include <variant>
 
+#include "../../physics/threading/synchonizedWorld.h"
 #include "../application/extendedPart.h"
-#include "../physics/synchonizedWorld.h"
 #include "../physics/geometry/builtinShapeClasses.h"
 #include "../graphics/visualData.h"
 
