@@ -14,13 +14,13 @@ struct Triangle {
 		int indexes[3];
 	};
 
-	bool sharesEdgeWith(Triangle other) const;
-	inline Triangle rightShift() const { return Triangle{thirdIndex, firstIndex, secondIndex}; }
-	inline Triangle leftShift() const { return Triangle{secondIndex, thirdIndex, firstIndex}; }
-	inline Triangle operator~() const { return Triangle{firstIndex, thirdIndex, secondIndex}; }
+	[[nodiscard]] bool sharesEdgeWith(Triangle other) const;
+	[[nodiscard]] Triangle rightShift() const { return Triangle{thirdIndex, firstIndex, secondIndex}; }
+	[[nodiscard]] Triangle leftShift() const { return Triangle{secondIndex, thirdIndex, firstIndex}; }
+	Triangle operator~() const { return Triangle{firstIndex, thirdIndex, secondIndex}; }
 	bool operator==(const Triangle& other) const;
-	inline int& operator[](int i) {return indexes[i];};
-	inline const int& operator[](int i) const {return indexes[i];};
+	int& operator[](int i) { return indexes[i]; }
+	const int& operator[](int i) const { return indexes[i];}
 };
 
 struct ShapeVertexIter {
@@ -40,16 +40,16 @@ struct ShapeVertexIter {
 struct ShapeTriangleIter {
 	int* curTriangle;
 	size_t offset;
-	inline Triangle operator*() const {
+	Triangle operator*() const {
 		return Triangle{*curTriangle, *(curTriangle + offset), *(curTriangle + 2 * offset)};
 	}
-	inline void operator++() {
+	void operator++() {
 		++curTriangle;
 	}
-	inline bool operator!=(const ShapeTriangleIter& other) const {
+	bool operator!=(const ShapeTriangleIter& other) const {
 		return curTriangle != other.curTriangle;
 	}
-	inline bool operator==(const ShapeTriangleIter& other) const {
+	bool operator==(const ShapeTriangleIter& other) const {
 		return curTriangle == other.curTriangle;
 	}
 };
@@ -73,8 +73,8 @@ public:
 	MeshPrototype(MeshPrototype&&) noexcept = default;
 	MeshPrototype& operator=(MeshPrototype&&) noexcept = default;
 
-	Vec3f getVertex(int index) const;
-	Triangle getTriangle(int index) const;
+	[[nodiscard]] Vec3f getVertex(int index) const;
+	[[nodiscard]] Triangle getTriangle(int index) const;
 };
 
 class EditableMesh : public MeshPrototype {
@@ -106,56 +106,56 @@ public:
 
 	explicit TriangleMesh(MeshPrototype&& mesh) noexcept;
 	explicit TriangleMesh(const MeshPrototype& mesh);
-	
-	IteratorFactory<ShapeVertexIter> iterVertices() const;
-	IteratorFactory<ShapeTriangleIter> iterTriangles() const;
+
+	[[nodiscard]] IteratorFactory<ShapeVertexIter> iterVertices() const;
+	[[nodiscard]] IteratorFactory<ShapeTriangleIter> iterTriangles() const;
 
 	void getTriangles(Triangle* triangleBuf) const;
 	void getVertices(Vec3f* vertexBuf) const;
 
-	TriangleMesh translated(Vec3f offset) const;
-	TriangleMesh rotated(Rotationf rotation) const;
-	TriangleMesh localToGlobal(CFramef frame) const;
-	TriangleMesh globalToLocal(CFramef frame) const;
-	TriangleMesh scaled(float scaleX, float scaleY, float scaleZ) const;
-	TriangleMesh scaled(DiagonalMat3f scale) const;
-	TriangleMesh translatedAndScaled(Vec3f translation, DiagonalMat3f scale) const;
+	[[nodiscard]] TriangleMesh translated(Vec3f offset) const;
+	[[nodiscard]] TriangleMesh rotated(Rotationf rotation) const;
+	[[nodiscard]] TriangleMesh localToGlobal(CFramef frame) const;
+	[[nodiscard]] TriangleMesh globalToLocal(CFramef frame) const;
+	[[nodiscard]] TriangleMesh scaled(float scaleX, float scaleY, float scaleZ) const;
+	[[nodiscard]] TriangleMesh scaled(DiagonalMat3f scale) const;
+	[[nodiscard]] TriangleMesh translatedAndScaled(Vec3f translation, DiagonalMat3f scale) const;
 
-	Vec3f getNormalVecOfTriangle(Triangle triangle) const;
+	[[nodiscard]] Vec3f getNormalVecOfTriangle(Triangle triangle) const;
 
-	CircumscribingSphere getCircumscribingSphere() const;
-	double getMaxRadius() const;
-	double getMaxRadius(Vec3f reference) const;
-	double getMaxRadiusSq() const;
-	double getMaxRadiusSq(Vec3f reference) const;
-	double getScaledMaxRadius(DiagonalMat3 scale) const;
-	double getScaledMaxRadiusSq(DiagonalMat3 scale) const;
+	[[nodiscard]] CircumscribingSphere getCircumscribingSphere() const;
+	[[nodiscard]] double getMaxRadius() const;
+	[[nodiscard]] double getMaxRadius(Vec3f reference) const;
+	[[nodiscard]] double getMaxRadiusSq() const;
+	[[nodiscard]] double getMaxRadiusSq(Vec3f reference) const;
+	[[nodiscard]] double getScaledMaxRadius(DiagonalMat3 scale) const;
+	[[nodiscard]] double getScaledMaxRadiusSq(DiagonalMat3 scale) const;
 
 
-	BoundingBox getBoundsFallback() const;
-	BoundingBox getBoundsFallback(const Mat3f& referenceFrame) const;
-	int furthestIndexInDirectionFallback(const Vec3f& direction) const;
-	Vec3f furthestInDirectionFallback(const Vec3f& direction) const;
+	[[nodiscard]] BoundingBox getBoundsFallback() const;
+	[[nodiscard]] BoundingBox getBoundsFallback(const Mat3f& referenceFrame) const;
+	[[nodiscard]] int furthestIndexInDirectionFallback(const Vec3f& direction) const;
+	[[nodiscard]] Vec3f furthestInDirectionFallback(const Vec3f& direction) const;
 
-	BoundingBox getBoundsSSE() const;
-	BoundingBox getBoundsSSE(const Mat3f& referenceFrame) const;
-	int furthestIndexInDirectionSSE(const Vec3f& direction) const;
-	Vec3f furthestInDirectionSSE(const Vec3f& direction) const;
+	[[nodiscard]] BoundingBox getBoundsSSE() const;
+	[[nodiscard]] BoundingBox getBoundsSSE(const Mat3f& referenceFrame) const;
+	[[nodiscard]] int furthestIndexInDirectionSSE(const Vec3f& direction) const;
+	[[nodiscard]] Vec3f furthestInDirectionSSE(const Vec3f& direction) const;
 
-	int furthestIndexInDirectionSSE4(const Vec3f& direction) const;
-	Vec3f furthestInDirectionSSE4(const Vec3f& direction) const;
+	[[nodiscard]] int furthestIndexInDirectionSSE4(const Vec3f& direction) const;
+	[[nodiscard]] Vec3f furthestInDirectionSSE4(const Vec3f& direction) const;
 
-	BoundingBox getBoundsAVX() const;
-	BoundingBox getBoundsAVX(const Mat3f& referenceFrame) const;
-	int furthestIndexInDirectionAVX(const Vec3f& direction) const;
-	Vec3f furthestInDirectionAVX(const Vec3f& direction) const;
+	[[nodiscard]] BoundingBox getBoundsAVX() const;
+	[[nodiscard]] BoundingBox getBoundsAVX(const Mat3f& referenceFrame) const;
+	[[nodiscard]] int furthestIndexInDirectionAVX(const Vec3f& direction) const;
+	[[nodiscard]] Vec3f furthestInDirectionAVX(const Vec3f& direction) const;
 
-	BoundingBox getBounds() const;
-	BoundingBox getBounds(const Mat3f& referenceFrame) const;
-	int furthestIndexInDirection(const Vec3f& direction) const;
-	Vec3f furthestInDirection(const Vec3f& direction) const;
+	[[nodiscard]] BoundingBox getBounds() const;
+	[[nodiscard]] BoundingBox getBounds(const Mat3f& referenceFrame) const;
+	[[nodiscard]] int furthestIndexInDirection(const Vec3f& direction) const;
+	[[nodiscard]] Vec3f furthestInDirection(const Vec3f& direction) const;
 
-	float getIntersectionDistance(Vec3f origin, Vec3f direction) const;
+	[[nodiscard]] double getIntersectionDistance(const Vec3& origin, const Vec3& direction) const;
 };
 
 TriangleMesh stripUnusedVertices(const Vec3f* vertices, const Triangle* triangles, int vertexCount, int triangleCount);

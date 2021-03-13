@@ -5,7 +5,7 @@ struct RefCountable {
 
     void addRef() {
         count++;
-    };
+    }
 
     void release() {
         count--;
@@ -24,6 +24,9 @@ void intrusive_ptr_add_ref(T* iptr) {
 template<typename T>
 void intrusive_ptr_release(T* iptr) {
     iptr->release();
+
+    if (iptr->count == 0)
+        delete iptr;
 }
 
 template<typename T>
@@ -69,10 +72,10 @@ public:
         if (ptr != this->ptr) {
             const T* tmp = this->ptr;
             if (ptr)
-                onIntrusiveAddRef(ptr);
+                intrusive_ptr_add_ref(ptr);
             this->ptr = ptr;
             if (tmp)
-                onIntrusiveRelease(tmp);
+                intrusive_ptr_release(tmp);
         }
     }
 

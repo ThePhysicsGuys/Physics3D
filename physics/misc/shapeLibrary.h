@@ -9,7 +9,7 @@ extern const Polyhedron house;
 extern const Polyhedron wedge;
 
 Polyhedron createCube(float side);
-Polyhedron createBox(float width, float height, float length);
+Polyhedron createBox(float width, float height, float depth);
 
 /*
 Creates a prism oriented along the Z axis with the given number of sides

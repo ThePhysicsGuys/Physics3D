@@ -36,24 +36,27 @@ namespace COLOR {
 	extern Color WHITE;
 
 	// format: 0xRRGGBBAA
-	inline constexpr Color get(int hex, bool alpha) {
+	constexpr Color get(int hex, bool alpha) {
+		if (!alpha) 
+			hex = hex << 8 | 0xFF;
+		
 		Color color;
-		if (!alpha) hex = (hex << 8) | 0xFF;
-		color.x = ((hex >> 24) & 0xFF) / 255.0f;
-		color.y = ((hex >> 16) & 0xFF) / 255.0f;
-		color.z = ((hex >> 8) & 0xFF) / 255.0f;
-		color.w = (hex & 0xFF) / 255.0f;
+		color.x = static_cast<float>(hex >> 24 & 0xFF) / 255.0f;
+		color.y = static_cast<float>(hex >> 16 & 0xFF) / 255.0f;
+		color.z = static_cast<float>(hex >> 8 & 0xFF) / 255.0f;
+		color.w = static_cast<float>(hex & 0xFF) / 255.0f;
+		
 		return color;
 	}
 
-	inline constexpr Color get(int hex) {
+	constexpr Color get(int hex) {
 		return get(hex, false);
 	}
 
-	Color3 hsvToRgb(Color3 hsv);
-	Color3 rgbToHsv(Color3 rgb);
-	Color hsvaToRgba(Color hsva);
-	Color rgbaToHsva(Color rgba);
+	Color3 hsvToRgb(const Color3& hsv);
+	Color3 rgbToHsv(const Color3& rgb);
+	Color hsvaToRgba(const Color& hsva);
+	Color rgbaToHsva(const Color& rgba);
 
 	Color blend(const Color& color1, const Color& color2, float blend);
 	Color3 blend(const Color3& color1, const Color3& color2, float blend);

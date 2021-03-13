@@ -354,39 +354,39 @@ double TriangleMesh::getScaledMaxRadius(DiagonalMat3 scale) const {
 	return sqrt(getScaledMaxRadiusSq(scale));
 }
 
-float TriangleMesh::getIntersectionDistance(Vec3f origin, Vec3f direction) const {
-	const float EPSILON = 0.0000001f;
-	float t = INFINITY;
-	for(Triangle triangle : iterTriangles()) {
-		Vec3f v0 = this->getVertex(triangle.firstIndex);
-		Vec3f v1 = this->getVertex(triangle.secondIndex);
-		Vec3f v2 = this->getVertex(triangle.thirdIndex);
+double TriangleMesh::getIntersectionDistance(const Vec3& origin, const Vec3& direction) const {
+	const double EPSILON = 0.0000001;
+	double t = std::numeric_limits<double>::max();
+	for (Triangle triangle : iterTriangles()) {
+		Vec3 v0 = this->getVertex(triangle.firstIndex);
+		Vec3 v1 = this->getVertex(triangle.secondIndex);
+		Vec3 v2 = this->getVertex(triangle.thirdIndex);
 
-		Vec3f edge1, edge2, h, s, q;
-		float a, f, u, v;
+		Vec3 edge1 = v1 - v0;
+		Vec3 edge2 = v2 - v0;
+		Vec3 h = direction % edge2;
 
-		edge1 = v1 - v0;
-		edge2 = v2 - v0;
+		double a = edge1 * h;
+		if (a > -EPSILON && a < EPSILON) 
+			continue;
 
-		h = direction % edge2;
-		a = edge1 * h;
+		Vec3 s = origin - v0;
+		double f = 1.0 / a;
+		double u = f * (s * h);
 
-		if(a > -EPSILON && a < EPSILON) continue;
+		if (u < 0.0 || u > 1.0) 
+			continue;
 
-		f = 1.0f / a;
-		s = origin - v0;
-		u = f * (s * h);
+		Vec3 q = s % edge1;
+		double v = direction * f * q;
 
-		if(u < 0.0 || u > 1.0) continue;
+		if (v < 0.0 || u + v > 1.0) 
+			continue;
 
-		q = s % edge1;
-		v = direction * f * q;
-
-		if(v < 0.0f || u + v > 1.0f) continue;
-
-		float r = edge2 * f * q;
-		if(r > EPSILON) {
-			if(r < t) t = r;
+		double r = edge2 * f * q;
+		if (r > EPSILON) {
+			if (r < t) 
+				t = r;
 		} else {
 			//Log::debug("Line intersection but not a ray intersection");
 			continue;

@@ -44,6 +44,8 @@ namespace KeyboardOptions {
 		Key translate = Keyboard::KEY_UNKNOWN;
 		Key rotate    = Keyboard::KEY_UNKNOWN;
 		Key scale     = Keyboard::KEY_UNKNOWN;
+		Key select    = Keyboard::KEY_UNKNOWN;
+		Key region    = Keyboard::KEY_UNKNOWN;
 	};
 
 	namespace Part {
@@ -108,6 +110,8 @@ namespace KeyboardOptions {
 		Edit::translate = loadKey(properties, "edit.translate");
 		Edit::rotate = loadKey(properties, "edit.rotate");
 		Edit::scale = loadKey(properties, "edit.scale");
+		Edit::select = loadKey(properties, "edit.select");
+		Edit::region = loadKey(properties, "edit.region");
 
 		// Application
 		Application::close = loadKey(properties, "application.close");
@@ -153,6 +157,8 @@ namespace KeyboardOptions {
 		saveKey(properties, "edit.translate", Edit::translate);
 		saveKey(properties, "edit.rotate", Edit::rotate);
 		saveKey(properties, "edit.scale", Edit::scale);
+		saveKey(properties, "edit.select", Edit::select);
+		saveKey(properties, "edit.region", Edit::region);
 
 		// Application
 		saveKey(properties, "application.close", Application::close);

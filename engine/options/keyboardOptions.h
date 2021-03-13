@@ -47,6 +47,8 @@ namespace KeyboardOptions {
 		extern Key translate;
 		extern Key rotate;
 		extern Key scale;
+		extern Key select;
+		extern Key region;
 	};
 
 	namespace Part {

@@ -88,13 +88,13 @@ namespace Library {
 
 		Vec3f vertBuf[8]{
 			Vec3f(-dx, -dy, -dz),
-			Vec3f(dx, -dy, -dz),
-			Vec3f(dx, dy, -dz),
-			Vec3f(-dx, dy, -dz),
-			Vec3f(-dx, -dy, dz),
-			Vec3f(dx, -dy, dz),
-			Vec3f(dx, dy, dz),
-			Vec3f(-dx, dy, dz)
+			Vec3f(+dx, -dy, -dz),
+			Vec3f(+dx, +dy, -dz),
+			Vec3f(-dx, +dy, -dz),
+			Vec3f(-dx, -dy, +dz),
+			Vec3f(+dx, -dy, +dz),
+			Vec3f(+dx, +dy, +dz),
+			Vec3f(-dx, +dy, +dz)
 		};
 		return Polyhedron(vertBuf, boxTriangles, 8, 12);
 	}
