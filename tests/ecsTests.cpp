@@ -2,74 +2,7 @@
 
 #include "../engine/ecs/registry.h"
 #include "../util/intrusivePointer.h"
-#include "../application/picker/selection.h"
-#include "../application/ecs/entityBuilder.h"
 #include "../application/ecs/components.h"
-
-template<typename T, std::size_t Size>
-std::ostream& operator<<(std::ostream& ostream, const P3D::Application::Selection& selection) {
-	ostream << "{ ";
-
-	for (auto& entity : selection) {
-		ostream << entity << " ";
-	}
-	
-	ostream << '}';
-	return ostream;
-}
-
-TEST_CASE(selection) {
-	using namespace P3D;
-	using namespace Engine;
-	using namespace Application;
-
-	Registry64 registry;
-	auto id1 = EntityBuilder(registry).transform(Position(1, 1, 1)).get();
-	auto id2 = EntityBuilder(registry).transform(Position(-1, -1, -1)).get();
-
-	Selection selection;
-	ASSERT_TRUE(selection.empty());
-	ASSERT_FALSE(selection.isMultiSelection());
-	ASSERT_FALSE(selection.getBoundingBox().has_value());
-	//ASSERT_TRUE(selection.getTransform().invalid());
-
-	selection.add(id1);
-	ASSERT_TRUE(selection.size() == 1);
-	ASSERT_FALSE(selection.isMultiSelection());
-	ASSERT_TRUE(selection.getBoundingBox().has_value());
-	ASSERT_TOLERANT(selection.getBoundingBox()->max == Vec3(1.5, 1.5, 1.5), 0.000001);
-	ASSERT_TOLERANT(selection.getBoundingBox()->min == Vec3(0.5, 0.5, 0.5), 0.000001);
-	//ASSERT_TRUE(selection.getTransform().valid());
-	//ASSERT_TOLERANT(selection.getTransform()->getPosition() == Position(0, 0, 0), 0.00001);
-
-	selection.add(id1);
-	ASSERT_TRUE(selection.size() == 1);
-	
-	selection.add(id2);
-	ASSERT_TRUE(selection.size() == 2);
-	ASSERT_TRUE(selection.isMultiSelection());
-	ASSERT_TRUE(selection.getBoundingBox().has_value());
-	ASSERT_TOLERANT(selection.getBoundingBox()->max == Vec3(1, 1, 1), 0.000001);
-	ASSERT_TOLERANT(selection.getBoundingBox()->min == Vec3(-1, -1, -1), 0.000001);
-	//ASSERT_TRUE(selection.getTransform().valid());
-
-	selection.remove(id1);
-	ASSERT_TRUE(selection.size() == 1);
-	ASSERT_FALSE(selection.isMultiSelection());
-	ASSERT_TRUE(selection.getBoundingBox().has_value());
-	ASSERT_TOLERANT(selection.getBoundingBox()->max == Vec3(-0.5, -0.5, -0.5), 0.000001);
-	ASSERT_TOLERANT(selection.getBoundingBox()->min == Vec3(-1.5, -1.5, -1.5), 0.000001);
-	//ASSERT_TRUE(selection.getTransform().valid());
-
-	selection.remove(id1);
-	ASSERT_TRUE(selection.size() == 1);
-
-	selection.remove(id2);
-	ASSERT_TRUE(selection.empty());
-	ASSERT_FALSE(selection.getBoundingBox().has_value());
-	//ASSERT_TRUE(selection.getTransform().invalid());
-	
-}
 
 TEST_CASE(idGeneration) {
 	using namespace P3D::Engine;

@@ -33,6 +33,7 @@ void ImGuiLayer::onInit(Engine::Registry64& registry) {
 
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 330");
+	io.IniFilename = "../res/imgui.ini";
 }
 
 void ImGuiLayer::onUpdate(Engine::Registry64& registry) {
