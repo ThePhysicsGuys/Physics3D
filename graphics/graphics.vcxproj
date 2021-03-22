@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -173,12 +173,9 @@
     <ClCompile Include="debug\guiDebug.cpp" />
     <ClCompile Include="debug\profilerUI.cpp" />
     <ClCompile Include="font.cpp" />
-    <ClCompile Include="gui\color.cpp" />
-    <ClCompile Include="gui\container.cpp" />
     <ClCompile Include="gui\gui.cpp" />
     <ClCompile Include="gui\guiUtils.cpp" />
     <ClCompile Include="gui\imgui\imguiStyle.cpp" />
-    <ClCompile Include="gui\layout.cpp" />
     <ClCompile Include="meshLibrary.cpp" />
     <ClCompile Include="meshRegistry.cpp" />
     <ClCompile Include="mesh\abstractMesh.cpp" />
@@ -230,13 +227,10 @@
     <ClInclude Include="debug\profilerUI.h" />
     <ClInclude Include="font.h" />
     <ClInclude Include="gui\color.h" />
-    <ClInclude Include="gui\component.h" />
-    <ClInclude Include="gui\container.h" />
     <ClInclude Include="gui\gui.h" />
     <ClInclude Include="gui\guiUtils.h" />
     <ClInclude Include="gui\imgui\imguiStyle.h" />
     <ClInclude Include="gui\imgui\imguiExtension.h" />
-    <ClInclude Include="gui\layout.h" />
     <ClInclude Include="gui\orderedVector.h" />
     <ClInclude Include="meshLibrary.h" />
     <ClInclude Include="meshRegistry.h" />

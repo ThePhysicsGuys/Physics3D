@@ -1,24 +1,19 @@
 #include "core.h"
-#include "GL/glew.h"
 #include "skyboxLayer.h"
 
+#include <GLFW/glfw3.h>
 #include <sstream>
-
 #include "shader/shaders.h"
 #include "view/screen.h"
-#include "../physics/math/boundingBox.h"
 #include "../graphics/renderer.h"
 #include "../graphics/texture.h"
 #include "../graphics/mesh/indexedMesh.h"
 #include "../graphics/meshLibrary.h"
 #include "../graphics/debug/visualDebug.h"
-#include "../graphics/buffers/frameBuffer.h"
-#include "../graphics/mesh/primitive.h"
 #include "../graphics/resource/textureResource.h"
 #include "../graphics/gui/guiUtils.h"
-
-#include "../physics/math/mathUtil.h"
 #include "../util/resource/resourceManager.h"
+#include "../graphics/mesh/primitive.h"
 
 #include "imgui/imgui.h"
 
@@ -29,10 +24,10 @@ SkyboxCycle skyColorCycle;
 SkyboxCycle horizonColorCycle;
 SkyboxCycle mistColorCycle;
 
-Color3 lightColor;
-Color3 skyColor;
-Color3 mistColor;
-Color3 horizonColor;
+Color lightColor;
+Color skyColor;
+Color mistColor;
+Color horizonColor;
 Vec2f mist;
 float starBrightness;
 
@@ -65,10 +60,10 @@ void SkyboxLayer::onInit(Engine::Registry64& registry) {
 	ResourceManager::add<TextureResource>("night", "../res/textures/night.png");
 	ResourceManager::add<TextureResource>("uv", "../res/textures/uv.png");
 
-	lightColorCycle = SkyboxCycle(Color3(0.42f, 0.45f, 0.90f), Color3(1.0f, 0.95f, 0.95f), Color3(1.0f, 0.45f, 0.56f), Color3(1.0f, 0.87f, 0.6f), 3.0f, 8.0f, 18.0f);
-	skyColorCycle = SkyboxCycle(Color3(0.31f, 0.44f, 0.64f), Color3(0.96f, 0.93f, 0.9f), Color3(0.996f, 0.77f, 0.57f), Color3(1.0f, 0.94f, 0.67f), 3.0f, 8.0f, 18.0f);
-	horizonColorCycle = SkyboxCycle(Color3(0.2f, 0.2f, 0.42f), Color3(0.6f, 0.9f, 1.0f), Color3(0.93f, 0.49f, 0.57f), Color3(1.0f, 0.64f, 0.47f), 3.0f, 8.0f, 18.0f);
-	mistColorCycle = SkyboxCycle(Color3(0.29f, 0.41f, 0.61f), Color3(0.96f, 0.9f, 0.77f), Color3(1.0f, 0.68f, 0.85f), Color3(1.0f, 0.87f, 0.82f), 3.0f, 8.0f, 18.0f);
+	lightColorCycle = SkyboxCycle(Color(0.42f, 0.45f, 0.90f), Color(1.0f, 0.95f, 0.95f), Color(1.0f, 0.45f, 0.56f), Color(1.0f, 0.87f, 0.6f), 3.0f, 8.0f, 18.0f);
+	skyColorCycle = SkyboxCycle(Color(0.31f, 0.44f, 0.64f), Color(0.96f, 0.93f, 0.9f), Color(0.996f, 0.77f, 0.57f), Color(1.0f, 0.94f, 0.67f), 3.0f, 8.0f, 18.0f);
+	horizonColorCycle = SkyboxCycle(Color(0.2f, 0.2f, 0.42f), Color(0.6f, 0.9f, 1.0f), Color(0.93f, 0.49f, 0.57f), Color(1.0f, 0.64f, 0.47f), 3.0f, 8.0f, 18.0f);
+	mistColorCycle = SkyboxCycle(Color(0.29f, 0.41f, 0.61f), Color(0.96f, 0.9f, 0.77f), Color(1.0f, 0.68f, 0.85f), Color(1.0f, 0.87f, 0.82f), 3.0f, 8.0f, 18.0f);
 }
 
 float time;
@@ -113,8 +108,8 @@ void SkyboxLayer::onRender(Engine::Registry64& registry) {
 		Shaders::skyShader.setUniform("nightTexture", 0);
 		Shaders::skyShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
 		Shaders::skyShader.setUniform("starBrightness", starBrightness);
-		Shaders::skyShader.setUniform("skyColor", skyColor);
-		Shaders::skyShader.setUniform("horizonColor", horizonColor);
+		Shaders::skyShader.setUniform("skyColor", Vec3f(skyColor));
+		Shaders::skyShader.setUniform("horizonColor", Vec3f(horizonColor));
 		float scroll = (float) (std::atan2(screen->camera.viewMatrix(1, 0), screen->camera.viewMatrix(0, 0)) / screen->camera.fov / 2.0);
 		ImGui::Text("Scroll: %f", scroll);
 

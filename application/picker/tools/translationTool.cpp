@@ -102,45 +102,45 @@ namespace P3D::Application {
 		auto status = getToolStatus();		
 		if (status == kTranslateX || status == kTranslateXY || status == kTranslateXZ) {
 			Shaders::maskShader.updateModel(modelX);
-			Shaders::maskShader.updateColor(COLOR::RGB_R);
+			Shaders::maskShader.updateColor(Colors::RGB_R);
 			line->render();
 		}
 
 		if (status == kTranslateY || status == kTranslateXY || status == kTranslateYZ) {
 			Shaders::maskShader.updateModel(modelY);
-			Shaders::maskShader.updateColor(COLOR::RGB_G);
+			Shaders::maskShader.updateColor(Colors::RGB_G);
 			line->render();
 		}
 
 		if (status == kTranslateZ || status == kTranslateXZ || status == kTranslateYZ) {
 			Shaders::maskShader.updateModel(modelZ);
-			Shaders::maskShader.updateColor(COLOR::RGB_B);
+			Shaders::maskShader.updateColor(Colors::RGB_B);
 			line->render();
 		}
 
 		Shaders::basicShader.updateModel(model);
-		Shaders::basicShader.updateMaterial(Comp::Material(COLOR::WHITE));
+		Shaders::basicShader.updateMaterial(Comp::Material(Colors::WHITE));
 		centerMesh->render();
 
 		// X, XY
-		Shaders::basicShader.updateMaterial(Comp::Material(COLOR::RGB_R));
+		Shaders::basicShader.updateMaterial(Comp::Material(Colors::RGB_R));
 		Shaders::basicShader.updateModel(modelX);   
 		handleMesh->render();
-		Shaders::basicShader.updateMaterial(Comp::Material(COLOR::RGB_B));
+		Shaders::basicShader.updateMaterial(Comp::Material(Colors::RGB_B));
 		quadMesh->render();
 		
 		// Y, XZ
 		Shaders::basicShader.updateModel(modelY);
-		Shaders::basicShader.updateMaterial(Comp::Material(COLOR::RGB_G));
+		Shaders::basicShader.updateMaterial(Comp::Material(Colors::RGB_G));
 		handleMesh->render();
 		Shaders::basicShader.updateModel(modelXZ);
 		quadMesh->render();
 
 		// Z, YZ
-		Shaders::basicShader.updateMaterial(Comp::Material(COLOR::RGB_B));
+		Shaders::basicShader.updateMaterial(Comp::Material(Colors::RGB_B));
 		Shaders::basicShader.updateModel(modelZ);
 		handleMesh->render();
-		Shaders::basicShader.updateMaterial(Comp::Material(COLOR::RGB_R));
+		Shaders::basicShader.updateMaterial(Comp::Material(Colors::RGB_R));
 		quadMesh->render();
 		
 	}

@@ -1,6 +1,5 @@
 #include "core.h"
 
-#include "GL/glew.h"
 #include "imguiLayer.h"
 
 #include <imgui/imgui.h>
@@ -176,15 +175,6 @@ void ImGuiLayer::end() {
 	Screen* screen = static_cast<Screen*>(this->ptr);
 	io.DisplaySize = ImVec2((float) screen->dimension.x, (float) screen->dimension.y);
 	ImGui::Render();
-	
-	struct {
-		int draw;
-		int read;
-		int render;
-	} info;
-	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &info.draw);
-	glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &info.read);
-	glGetIntegerv(GL_RENDERBUFFER_BINDING, &info.render);
 
 	Graphics::Renderer::bindFramebuffer(0);
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

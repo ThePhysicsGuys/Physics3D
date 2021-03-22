@@ -18,12 +18,16 @@ GLFLAG STATIC_DRAW = GL_STATIC_DRAW;
 GLFLAG STREAM_DRAW = GL_STREAM_DRAW;
 GLFLAG DYNAMIC_DRAW = GL_DYNAMIC_DRAW;
 
+GLFLAG ARRAY_BUFFER = GL_ARRAY_BUFFER;
+
 GLFLAG PATCHES = GL_PATCHES;
 GLFLAG QUADS = GL_QUADS;
+GLFLAG LINE_STRIP = GL_LINE_STRIP;
 GLFLAG TRIANGLES = GL_TRIANGLES;
 GLFLAG LINES = GL_LINES;
 GLFLAG POINTS = GL_POINTS;
 
+GLFLAG FLOAT = GL_FLOAT;
 GLFLAG UINT = GL_UNSIGNED_INT;
 
 std::stack<RenderState> states;
@@ -225,12 +229,40 @@ int parseShaderVersion(const char* version) {
 	return 100 * (version[0] - '0') + 10 * (version[2] - '0');
 }
 
+void genBuffers(int count, GLID* id) {
+	glGenBuffers(count, id);
+}
+
+void genVertexArrays(int count, GLID* id) {
+	glGenVertexArrays(count, id);
+}
+
+void bindBuffer(GLFLAG target, GLID id) {
+	glBindBuffer(target, id);
+}
+
+void bufferData(GLFLAG target, int size, int offset, GLFLAG type) {
+	glBufferData(target, size, reinterpret_cast<const void*>(offset), type);
+}
+
+void bufferSubData(GLFLAG target, int offset, int size, const void* pointer) {
+	glBufferSubData(target, offset, size, pointer);
+}
+
+void enableVertexAttribArray(GLID id) {
+	glEnableVertexAttribArray(id);
+}
+
 void bindTexture2D(GLID id) {
 	glBindTexture(GL_TEXTURE_2D, id);
 }
 
 void activeTexture(GLID unit) {
 	glActiveTexture(GL_TEXTURE0 + unit);
+}
+
+void vertexAttribPointer(GLID id, int size, GLFLAG type, bool normalized, int stride, const void* pointer) {
+	glVertexAttribPointer(id, size, type, normalized, stride, pointer);
 }
 
 void bindShader(GLID id) {
@@ -263,6 +295,10 @@ void bindRenderbuffer(GLID id) {
 	//	current.rbo = id;
 		glBindRenderbuffer(GL_RENDERBUFFER, id);
 	//}
+}
+
+void bindVertexArray(GLID id) {
+	glBindVertexArray(id);
 }
 
 void scissor(int x, int y, int width, int height) {

@@ -15,7 +15,7 @@ void BasicShader::updatePart(const ExtendedPart& part) {
 
 void BasicShader::updateMaterial(const Comp::Material& material) {
 	bind();
-	setUniform("material.albedo", material.albedo);
+	setUniform("material.albedo", Vec4f(material.albedo));
 	setUniform("material.metalness", material.metalness);
 	setUniform("material.roughness", material.roughness);
 	setUniform("material.ambientOcclusion", material.ao);

@@ -5,7 +5,6 @@
 #include "../engine/event/event.h"
 #include "../engine/event/mouseEvent.h"
 #include "../graphics/resource/textureResource.h"
-#include "../physics/misc/filters/visibilityFilter.h"
 #include "../util/resource/resourceManager.h"
 
 #include "../../view/screen.h"

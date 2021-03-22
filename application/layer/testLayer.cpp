@@ -1,15 +1,8 @@
 #include "core.h"
 
-#include "GL/glew.h"
-
 #include "testLayer.h"
 #include "view/screen.h"
 #include "../graphics/renderer.h"
-#include "../graphics/shader/shader.h"
-#include "../graphics/buffers/frameBuffer.h"
-#include "../util/resource/resourceManager.h"
-#include "imgui/imgui.h"
-#include "../graphics/path/path.h"
 
 namespace P3D::Application {
 

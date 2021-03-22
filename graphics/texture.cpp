@@ -79,7 +79,7 @@ Texture Texture::load(const std::string& name) {
 
 Texture* Texture::white() {
 	if (_white == nullptr) {
-		Color buffer = COLOR::WHITE;
+		Color buffer = Colors::WHITE;
 		_white = new Texture(1, 1, &buffer, GL_RGBA);
 	}
 
@@ -170,11 +170,7 @@ void Texture::resize(int width, int height, const void* buffer) {
 	glTexImage2D(target, 0, internalFormat, width, height, 0, format, type, buffer);
 	unbind();
 }
-
-Texture* Texture::colored(Color3 color) {
-	return colored(Color(color.x, color.y, color.z, 1));
-}
-
+	
 Texture* Texture::colored(Color color) {
 	bind();
 	unsigned char* buffer = (unsigned char*) malloc(width * height * channels);

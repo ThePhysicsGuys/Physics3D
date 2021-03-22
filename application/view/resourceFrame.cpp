@@ -33,7 +33,7 @@ void ResourceFrame::renderTextureInfo(Texture* texture) {
 		else
 			size = ImVec2(cw, th);
 
-		Vec4f c = COLOR::ACCENT;
+		Vec4f c = Colors::ACCENT;
 		ImGui::Unindent(ImGui::GetTreeNodeToLabelSpacing());
 		ImGui::Image((void*) (intptr_t) texture->getID(), size, ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 1, 1, 1), ImVec4(c.x, c.y, c.z, c.w));
 

@@ -36,7 +36,7 @@ static void serializeMaterial(const Comp::Material& material, std::ostream& ostr
 	textureSerializer.serialize(material.get(Comp::Material::GLOSS), ostream);
 	textureSerializer.serialize(material.get(Comp::Material::SPECULAR), ostream);
 	textureSerializer.serialize(material.get(Comp::Material::DISPLACEMENT), ostream);
-	::serialize<Color>(material.albedo, ostream);
+	::serialize<Graphics::Color>(material.albedo, ostream);
 	::serialize<float>(material.metalness, ostream);
 	::serialize<float>(material.roughness, ostream);
 	::serialize<float>(material.ao, ostream);
@@ -51,7 +51,7 @@ static Comp::Material deserializeMaterial(std::istream& istream) {
 	Graphics::Texture* glossMap = textureSerializer.deserialize(istream);
 	Graphics::Texture* specularMap = textureSerializer.deserialize(istream);
 	Graphics::Texture* displacementrMap = textureSerializer.deserialize(istream);
-	Color albedo = ::deserialize<Color>(istream);
+	Graphics::Color albedo = ::deserialize<Graphics::Color>(istream);
 	float metalness = ::deserialize<float>(istream);
 	float roughness = ::deserialize<float>(istream);
 	float ao = ::deserialize<float>(istream);

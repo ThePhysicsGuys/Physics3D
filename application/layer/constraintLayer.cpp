@@ -3,26 +3,17 @@
 
 #include "worlds.h"
 #include "../view/screen.h"
-
 #include "../shader/shaders.h"
-
-#include "../graphics/debug/guiDebug.h"
 #include "../graphics/renderer.h"
 #include "../graphics/meshRegistry.h"
-
-#include "../physics/constraints/softConstraint.h"
 #include "../physics/constraints/ballConstraint.h"
 #include "../physics/constraints/hingeConstraint.h"
 #include "../physics/constraints/barConstraint.h"
 #include "../physics/hardconstraints/sinusoidalPistonConstraint.h"
 #include "../physics/hardconstraints/motorConstraint.h"
-#include "../physics/hardconstraints/fixedConstraint.h"
-
 #include "../physics/misc/toString.h"
 #include "../physics/misc/shapeLibrary.h"
-
 #include "../physics/physical.h"
-#include "../physics/geometry/shapeClass.h"
 
 #include <typeindex>
 
@@ -59,7 +50,7 @@ static void renderConstraintLineBetween(Position p1, Position p2) {
 	renderObject(Graphics::MeshRegistry::box, GlobalCFrame(p2, rot), DiagonalMat3f{0.25f, 0.25f, 0.25f}, Comp::Material(Color(0.0f, 1.0f, 0.0f, 1.0f)));
 }
 
-static Color constraintBarColor = COLOR::RGB_R;
+static Color constraintBarColor = Colors::RGB_R;
 constexpr static float constraintBarThickness = 0.02f;
 constexpr static float innerBallThickness = 0.06f;
 constexpr static float outerBallThickness = 0.07f;

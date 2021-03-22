@@ -191,7 +191,6 @@ add_library(graphics STATIC
   graphics/debug/profilerUI.cpp
   graphics/debug/visualDebug.cpp
 
-  graphics/gui/color.cpp
   graphics/gui/container.cpp
   graphics/gui/gui.cpp
   graphics/gui/guiUtils.cpp
@@ -280,11 +279,11 @@ add_executable(application
 
   application/picker/ray.cpp
   application/picker/selection.cpp
-  application/picker/tool/selectionTool.cpp
-  application/picker/tool/translationTool.cpp
-  application/picker/tool/rotationTool.cpp
-  application/picker/tool/scaleTool.cpp
-  application/picker/tool/regionSelectionTool.cpp
+  application/picker/tools/selectionTool.cpp
+  application/picker/tools/translationTool.cpp
+  application/picker/tools/rotationTool.cpp
+  application/picker/tools/scaleTool.cpp
+  application/picker/tools/regionSelectionTool.cpp
 
   application/shader/shaders.cpp
   application/shader/basicShader.cpp

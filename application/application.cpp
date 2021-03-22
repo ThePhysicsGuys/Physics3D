@@ -15,9 +15,7 @@
 #include "../graphics/texture.h"
 #include "../graphics/debug/guiDebug.h"
 #include "../graphics/debug/visualDebug.h"
-#include "../physics/geometry/shape.h"
 #include "../physics/geometry/shapeCreation.h"
-#include "../physics/math/mathUtil.h"
 #include "../physics/math/linalg/commonMatrices.h"
 #include "../physics/part.h"
 #include "../physics/world.h"
@@ -41,17 +39,14 @@
 #include "io/serialization.h"
 #include "io/saveDialog.h"
 
-#include "../util/resource/resourceManager.h"
 #include "../util/parseCPUIDArgs.h"
 #include "../util/cmdParser.h"
-#include "../graphics/resource/textureResource.h"
 #include "../graphics/meshRegistry.h"
-#include "../engine/ecs/registry.h"
 #include "../engine/event/keyEvent.h"
 #include "../engine/input/keyboard.h"
 #include "../engine/event/windowEvent.h"
 
-#include "builtinWorlds.h"
+#include "../util/stringUtil.h"
 
 #define TICKS_PER_SECOND 120.0
 #define TICK_SKIP_TIME std::chrono::milliseconds(1000)
@@ -176,18 +171,18 @@ void setupWorld(const Util::ParsedArgs& cmdArgs) {
 		Comp::Light::Attenuation attenuation = {1, 1, 1};
 		auto lights = EntityBuilder(screen.registry).name("Lights").get();
 		auto sphereData = Graphics::MeshRegistry::getOrCreateMeshFor(&SphereClass::instance);
-		EntityBuilder(screen.registry).parent(lights).transform(Position(10, 5, -10), 0.2).light(Color3(1, 0.84f, 0.69f), 300, attenuation).hitbox(&SphereClass::instance).mesh(sphereData);
-		EntityBuilder(screen.registry).parent(lights).transform(Position(10, 5, 10), 0.2).light(Color3(1, 0.84f, 0.69f), 300, attenuation).hitbox(&SphereClass::instance).mesh(sphereData);
-		EntityBuilder(screen.registry).parent(lights).transform(Position(-10, 5, -10), 0.2).light(Color3(1, 0.84f, 0.69f), 200, attenuation).hitbox(&SphereClass::instance).mesh(sphereData);
-		EntityBuilder(screen.registry).parent(lights).transform(Position(-10, 5, 10), 0.2).light(Color3(1, 0.84f, 0.69f), 500, attenuation).hitbox(&SphereClass::instance).mesh(sphereData);
-		EntityBuilder(screen.registry).parent(lights).transform(Position(0, 5, 0), 0.2).light(Color3(1, 0.90f, 0.75f), 400, attenuation).hitbox(&SphereClass::instance).mesh(sphereData);
+		EntityBuilder(screen.registry).parent(lights).transform(Position(10, 5, -10), 0.2).light(Graphics::Color(1, 0.84f, 0.69f), 300, attenuation).hitbox(&SphereClass::instance).mesh(sphereData);
+		EntityBuilder(screen.registry).parent(lights).transform(Position(10, 5, 10), 0.2).light(Graphics::Color(1, 0.84f, 0.69f), 300, attenuation).hitbox(&SphereClass::instance).mesh(sphereData);
+		EntityBuilder(screen.registry).parent(lights).transform(Position(-10, 5, -10), 0.2).light(Graphics::Color(1, 0.84f, 0.69f), 200, attenuation).hitbox(&SphereClass::instance).mesh(sphereData);
+		EntityBuilder(screen.registry).parent(lights).transform(Position(-10, 5, 10), 0.2).light(Graphics::Color(1, 0.84f, 0.69f), 500, attenuation).hitbox(&SphereClass::instance).mesh(sphereData);
+		EntityBuilder(screen.registry).parent(lights).transform(Position(0, 5, 0), 0.2).light(Graphics::Color(1, 0.90f, 0.75f), 400, attenuation).hitbox(&SphereClass::instance).mesh(sphereData);
 	}
 
 	return;
 	{
 		ExtendedPart* partA = new ExtendedPart(boxShape(1.0, 0.49, 3.0), GlobalCFrame(3.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "partA");
 		ExtendedPart* partB = new ExtendedPart(boxShape(1.0, 0.5, 3.0), GlobalCFrame(2.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "partB");
-		EntityBuilder(screen.registry, partA->entity).light(Color3(0.1, 0.94f, 0.49f), 500, Comp::Light::Attenuation{0.8, 0.5, 0.2});
+		EntityBuilder(screen.registry, partA->entity).light(Graphics::Color(0.1, 0.94f, 0.49f), 500, Comp::Light::Attenuation{0.8, 0.5, 0.2});
 
 		world.addPart(partA);
 		world.addPart(partB);

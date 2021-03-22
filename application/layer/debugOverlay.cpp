@@ -1,5 +1,4 @@
 #include "core.h"
-#include "GL/glew.h"
 #include "debugOverlay.h"
 
 #include "view/screen.h"
@@ -16,7 +15,6 @@
 
 #include "../physics/misc/physicsProfiler.h"
 #include "../physics/misc/toString.h"
-#include "../physics/threading/sharedLockGuard.h"
 
 #include "worlds.h"
 
@@ -33,8 +31,8 @@ Graphics::SlidingChart fpsSlidingChart("Fps Fps", Vec2f(-0.3f, 0.2f), Vec2f(0.7f
 
 void DebugOverlay::onInit(Engine::Registry64& registry) {
 	using namespace Graphics;
-	fpsSlidingChart.add(SlidingChartDataSetInfo("Fps 1", 100, COLOR::ORANGE, 2.0));
-	fpsSlidingChart.add(SlidingChartDataSetInfo("Fps 2", 50, COLOR::BLUE, 1.0));
+	fpsSlidingChart.add(SlidingChartDataSetInfo("Fps 1", 100, Colors::ORANGE, 2.0));
+	fpsSlidingChart.add(SlidingChartDataSetInfo("Fps 2", 50, Colors::BLUE, 1.0));
 }
 
 void DebugOverlay::onUpdate(Engine::Registry64& registry) {

@@ -1,12 +1,7 @@
 #pragma once
 
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-
-#include "arrayMesh.h"
 #include "../graphics/renderer.h"
 #include "../physics/math/linalg/vec.h"
-#include "../physics/math/mathUtil.h"
 
 namespace P3D::Graphics {
 
@@ -18,11 +13,13 @@ struct Primitive {
 
 	template<int M, int N>
 	void resize(float(&vertices)[M][N]) {
-		glBindVertexArray(vao);
-		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, M * N * sizeof(float), vertices);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
+		using namespace Renderer;
+		
+		bindVertexArray(vao);
+		bindBuffer(ARRAY_BUFFER, vbo);
+		bufferSubData(ARRAY_BUFFER, 0, M * N * sizeof(float), vertices);
+		bindBuffer(ARRAY_BUFFER, 0);
+		bindVertexArray(0);
 	}
 
 	virtual void render() = 0;
@@ -30,22 +27,24 @@ struct Primitive {
 protected:
 	// M is size of vertex, N is amount of vertices
 	Primitive(int M, int N) {
+		using namespace Renderer;
+		
 		this->M = M;
 		this->N = N;
 
-		glGenVertexArrays(1, &vao);
-		glGenBuffers(1, &vbo);
+		genVertexArrays(1, &vao);
+		genBuffers(1, &vbo);
 
-		glBindVertexArray(vao);
-		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		bindVertexArray(vao);
+		bindBuffer(ARRAY_BUFFER, vbo);
 
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * M * N, NULL, GL_DYNAMIC_DRAW);
+		bufferData(ARRAY_BUFFER, sizeof(float) * M * N, 0, DYNAMIC_DRAW);
 
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, M, GL_FLOAT, GL_FALSE, 0, 0);
+		enableVertexAttribArray(0);
+		vertexAttribPointer(0, M, FLOAT, false, 0, 0);
 
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
+		bindBuffer(ARRAY_BUFFER, 0);
+		bindVertexArray(0);
 	};
 };
 
@@ -94,13 +93,15 @@ struct Quad : public Primitive {
 	}
 
 	void render(int mode) {
-		Renderer::polygonMode(Renderer::FRONT_AND_BACK, mode);
-		
-		glBindVertexArray(vao);
-		glDrawArrays(GL_QUADS, 0, 4);
-		glBindVertexArray(0);
+		using namespace Renderer;
 
-		Renderer::polygonMode(Renderer::FRONT_AND_BACK, Renderer::FILL);
+		polygonMode(FRONT_AND_BACK, mode);
+
+		bindVertexArray(vao);
+		drawArrays(QUADS, 0, 4);
+		bindVertexArray(0);
+
+		polygonMode(FRONT_AND_BACK, FILL);
 	}
 
 	void render() override {
@@ -136,17 +137,19 @@ struct LinePrimitive : public Primitive {
 	}
 
 	void render(int mode) {
-		glPolygonMode(GL_FRONT_AND_BACK, mode);
+		using namespace Renderer;
+		
+		polygonMode(FRONT_AND_BACK, mode);
 
-		glBindVertexArray(vao);
-		glDrawArrays(GL_LINE_STRIP, 0, 2);
-		glBindVertexArray(0);
+		bindVertexArray(vao);
+		drawArrays(LINE_STRIP, 0, 2);
+		bindVertexArray(0);
 
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		polygonMode(FRONT_AND_BACK, FILL);
 	}
 
 	void render() override {
-		render(GL_FILL);
+		render(Renderer::FILL);
 	}
 };
 
@@ -184,17 +187,19 @@ struct TrianglePrimitive : public Primitive {
 	}
 
 	void render(int mode) {
-		glPolygonMode(GL_FRONT_AND_BACK, mode);
+		using namespace Renderer;
 
-		glBindVertexArray(vao);
-		glDrawArrays((patched) ? GL_PATCHES : GL_TRIANGLES, 0, 3);
-		glBindVertexArray(0);
+		polygonMode(FRONT_AND_BACK, mode);
 
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		bindVertexArray(vao);
+		drawArrays(patched ? PATCHES : TRIANGLES, 0, 3);
+		bindVertexArray(0);
+
+		polygonMode(FRONT_AND_BACK, FILL);
 	}
 
 	void render() override {
-		render(GL_FILL);
+		render(Renderer::FILL);
 	}
 };
 

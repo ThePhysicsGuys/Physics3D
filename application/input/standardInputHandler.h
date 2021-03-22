@@ -1,10 +1,7 @@
 #pragma once
 
 #include "../engine/input/inputHandler.h"
-
-#include "../engine/event/event.h"
 #include "../engine/event/keyEvent.h"
-#include "../engine/event/mouseEvent.h"
 #include "../engine/event/windowEvent.h"
 
 namespace P3D::Application {

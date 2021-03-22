@@ -27,13 +27,13 @@ public:
 	};
 
 	short flags = NONE;
-	
-	Color albedo;
+
+	Graphics::Color albedo;
 	float metalness;
 	float roughness;
 	float ao;
 
-	Material(const Color& albedo = Color::full(1), float metalness = 1.0f, float roughness = 1.0f, float ao = 1.0f);
+	Material(const Graphics::Color& albedo = Graphics::Color(1), float metalness = 1.0f, float roughness = 1.0f, float ao = 1.0f);
 
 	void reset(Map flag);
 	void set(Map flag, Graphics::Texture* map);

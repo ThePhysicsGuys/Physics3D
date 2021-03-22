@@ -44,7 +44,6 @@ public:
 
 	void loadFrameBufferTexture(int width, int height);
 
-	Texture* colored(Color3 color);
 	Texture* colored(Color color);
 
 	static Texture load(const std::string& name);

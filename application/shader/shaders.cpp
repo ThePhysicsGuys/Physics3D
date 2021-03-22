@@ -1,12 +1,10 @@
 #include "core.h"
 
 #include "shaders.h"
-#include "resources.h"
 #include "extendedPart.h"
 
 #include "../graphics/texture.h"
 #include "../graphics/renderer.h"
-#include "../util/resource/resource.h"
 #include "../util/resource/resourceManager.h"
 
 #include <sstream>
@@ -125,7 +123,7 @@ void SkyboxShader::updateLightDirection(const Vec3f& lightDirection) {
 
 void MaskShader::updateColor(const Color& color) {
 	bind();
-	setUniform("color", color);
+	setUniform("color", Vec4f(color));
 }
 
 
@@ -168,7 +166,7 @@ void OriginShader::updateProjection(const Mat4f& viewMatrix, const Mat4f& rotate
 
 void FontShader::updateColor(const Color& color) {
 	bind();
-	setUniform("color", color);
+	setUniform("color", Vec4f(color));
 }
 
 void FontShader::updateProjection(const Mat4f& projectionMatrix) {

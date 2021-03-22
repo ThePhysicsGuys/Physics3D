@@ -10,7 +10,7 @@ struct EnvironmentFrame {
 	static float hdr;
 	static float gamma;
 	static float exposure;
-	static Color3 sunColor;
+	static Graphics::Color sunColor;
 
 	static void onInit(Engine::Registry64& registry);
 	static void onRender(Engine::Registry64& registry);
