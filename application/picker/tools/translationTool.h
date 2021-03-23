@@ -25,6 +25,8 @@ private:
 	
 public:
 	DEFINE_TOOL("Translate", "Translate entities by clicking and dragging or using the handles", Graphics::GLFW::Cursor::ARROW);
+	
+	~TranslationTool() = default;
 
 	void onRegister() override;
 	void onDeregister() override;

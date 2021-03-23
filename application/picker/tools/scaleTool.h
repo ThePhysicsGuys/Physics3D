@@ -26,6 +26,8 @@ private:
 public:
 	DEFINE_TOOL("Scale", "Scale entities by using the handles", Graphics::GLFW::Cursor::ARROW);
 
+	~ScaleTool() = default;	
+
 	void onRegister() override;
 	void onDeregister() override;
 	void onRender() override;

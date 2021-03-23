@@ -27,6 +27,8 @@ public:
 	static std::optional<Position> selectedPoint;
 	static std::optional<Position> intersectedPoint;
 
+	~SelectionTool() = default;	
+
 	void onRegister() override;
 	void onDeregister() override;
 	void onRender() override;

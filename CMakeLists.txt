@@ -191,10 +191,8 @@ add_library(graphics STATIC
   graphics/debug/profilerUI.cpp
   graphics/debug/visualDebug.cpp
 
-  graphics/gui/container.cpp
   graphics/gui/gui.cpp
   graphics/gui/guiUtils.cpp
-  graphics/gui/layout.cpp
   graphics/gui/imgui/imguiStyle.cpp
 
   graphics/mesh/abstractMesh.cpp
