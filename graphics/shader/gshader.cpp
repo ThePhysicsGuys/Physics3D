@@ -116,7 +116,9 @@ ShaderSource parseShader(const std::string& name, const std::string& path, const
 	return ShaderSource(name, path, vertexFile, fragmentFile, geometryFile, tesselationControlFile, tesselationEvaluateFile, "");
 }
 
-bool GShader::addShaderStage(const ShaderStage& stage, const ShaderFlag& flag) {
+bool GShader::addShaderStage(const std::string& source, const ShaderFlag& flag) {
+	ShaderStage stage(source);
+	
 	if (SystemVariables::get("OPENGL_SHADER_VERSION") < stage.info.version.version) {
 		Log::error("Shader version %d %snot supported for shader %s", stage.info.version.version, stage.info.version.core ? "core " : "", name.c_str());
 		return false;
@@ -159,25 +161,12 @@ GShader::GShader() {};
 GShader::GShader(const ShaderSource& shaderSource) : Shader(shaderSource) {
 	id = createShader(shaderSource);
 
-	/*ShaderStage futureVertexStage = std::async(std::launch::async, parseShaderStage, shaderSource.vertexSource);
-	std::future<ShaderStage> futureFragmentStage = std::async(std::launch::async, parseShaderStage, shaderSource.fragmentSource);
-	std::future<ShaderStage> futureGeometryStage = std::async(std::launch::async, parseShaderStage, shaderSource.geometrySource);
-	std::future<ShaderStage> futureTesselationControlStage = std::async(std::launch::async, parseShaderStage, shaderSource.tesselationControlSource);
-	std::future<ShaderStage> futureTesselationEvaluationStage = std::async(std::launch::async, parseShaderStage, shaderSource.tesselationEvaluateSource);
-
 	bool succes = true;
-	succes &= addShaderStage(futureVertexStage.get(), VERTEX);
-	succes &= addShaderStage(futureFragmentStage.get(), FRAGMENT);
-	succes &= addShaderStage(futureGeometryStage.get(), GEOMETRY);
-	succes &= addShaderStage(futureTesselationControlStage.get(), TESSELATION_CONTROL);
-	succes &= addShaderStage(futureTesselationEvaluationStage.get(), TESSELATION_EVALUATE);*/
-
-	bool succes = true;
-	succes &= addShaderStage(parseShaderStage(shaderSource.vertexSource), VERTEX);
-	succes &= addShaderStage(parseShaderStage(shaderSource.fragmentSource), FRAGMENT);
-	succes &= addShaderStage(parseShaderStage(shaderSource.geometrySource), GEOMETRY);
-	succes &= addShaderStage(parseShaderStage(shaderSource.tesselationControlSource), TESSELATION_CONTROL);
-	succes &= addShaderStage(parseShaderStage(shaderSource.tesselationEvaluateSource), TESSELATION_EVALUATE);
+	succes &= addShaderStage(shaderSource.vertexSource, VERTEX);
+	succes &= addShaderStage(shaderSource.fragmentSource, FRAGMENT);
+	succes &= addShaderStage(shaderSource.geometrySource, GEOMETRY);
+	succes &= addShaderStage(shaderSource.tesselationControlSource, TESSELATION_CONTROL);
+	succes &= addShaderStage(shaderSource.tesselationEvaluateSource, TESSELATION_EVALUATE);
 
 	if (!succes) {
 		Log::error("Error during shader stage initialization, closing shader");

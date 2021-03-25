@@ -154,6 +154,7 @@ add_executable(tests
   tests/inertiaTests.cpp
   tests/testFrameworkConsistencyTests.cpp
   tests/ecsTests.cpp
+  tests/lexerTests.cpp
 )
 
 target_link_libraries(tests util)
@@ -209,8 +210,8 @@ add_library(graphics STATIC
   graphics/resource/textureResource.cpp
 
   graphics/shader/shader.cpp
-  graphics/shader/shaderLexer.cpp
-  graphics/shader/shaderParser.cpp
+  graphics/shader/lexer.cpp
+  graphics/shader/parser.cpp
   graphics/shader/shaders.cpp
   graphics/shader/cshader.cpp
   graphics/shader/gshader.cpp

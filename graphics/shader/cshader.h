@@ -9,7 +9,7 @@ private:
 	GLID createShader(const ShaderSource& shaderSource);
 
 protected:
-	bool addShaderStage(const ShaderStage& stage, const ShaderFlag& flag) override;
+	bool addShaderStage(const std::string& source, const ShaderFlag& flag) override;
 
 public:
 	ShaderStage computeStage;

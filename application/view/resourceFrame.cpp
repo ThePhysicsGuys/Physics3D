@@ -77,59 +77,61 @@ void ResourceFrame::renderFontInfo(Font* font) {
 	}
 }
 
-
-void renderShaderTypeEditor(GShader* shader, const ShaderUniform& uniform) {
-	ShaderVariableType type = ShaderParser::parseVariableType(uniform.variableType);
+/*
+void renderShaderTypeEditor(GShader* shader, const Parser::Local& uniform) {
+	Parser::Type type = Parser::parseType(uniform.type);
+	std::string name(uniform.name);
 	switch (type) {
-		case ShaderVariableType::NONE:
-		case ShaderVariableType::VOID:
-		case ShaderVariableType::STRUCT:
-		case ShaderVariableType::VS_OUT:
-		case ShaderVariableType::MAT2:
-		case ShaderVariableType::MAT3:
-		case ShaderVariableType::MAT4:
+		case Parser::Type::None:
+		case Parser::Type::Void:
+		case Parser::Type::Struct:
+		case Parser::Type::VSOut:
+		case Parser::Type::Mat2:
+		case Parser::Type::Mat3:
+		case Parser::Type::Mat4:
 			ImGui::Text("No editor available");
 			ImGui::Text("No editor available");
 			break;
-		case ShaderVariableType::INT: {
+		case Parser::Type::Int: {
 				int value = 0;
-				if (ImGui::InputInt(uniform.name.c_str(), &value))
-					shader->setUniform(uniform.name, value);
+				if (ImGui::InputInt(name.c_str(), &value))
+					shader->setUniform(name, value);
 			} break;
-		case ShaderVariableType::FLOAT: {
+		case Parser::Type::Float: {
 				float value = 0.0f;
-				if (ImGui::InputFloat(uniform.name.c_str(), &value))
-					shader->setUniform(uniform.name, value);
+				if (ImGui::InputFloat(name.c_str(), &value))
+					shader->setUniform(name, value);
 			} break;
-		case ShaderVariableType::VEC2: {
+		case Parser::Type::Vec2: {
 				Vec2f value = Vec2f(0, 0);
-				if (ImGui::InputFloat2(uniform.name.c_str(), value.data))
-					shader->setUniform(uniform.name, value);
+				if (ImGui::InputFloat2(name.c_str(), value.data))
+					shader->setUniform(name, value);
 			} break;
-		case ShaderVariableType::VEC3: {
+		case Parser::Type::Vec3: {
 				Vec3f value = Vec3f(0, 0, 0);
-				if (ImGui::InputFloat3(uniform.name.c_str(), value.data))
-					shader->setUniform(uniform.name, value);
+				if (ImGui::InputFloat3(name.c_str(), value.data))
+					shader->setUniform(name, value);
 			} break;
-		case ShaderVariableType::VEC4: {
+		case Parser::Type::Vec4: {
 				Vec4f value = Vec4f(0, 0, 0, 0);
-				if (ImGui::InputFloat4(uniform.name.c_str(), value.data))
-					shader->setUniform(uniform.name, value);
+				if (ImGui::InputFloat4(name.c_str(), value.data))
+					shader->setUniform(name, value);
 			} break;
-		case ShaderVariableType::SAMPLER2D: {
+		case Parser::Type::Sampler2D: {
 				int value = 0;
-				if (ImGui::InputInt(uniform.name.c_str(), &value))
-					shader->setUniform(uniform.name, value);
+				if (ImGui::InputInt(name.c_str(), &value))
+					shader->setUniform(name, value);
 			} break;
-		case ShaderVariableType::SAMPLER3D: {
+		case Parser::Type::Sampler3D: {
 				int value = 0;
-				if (ImGui::InputInt(uniform.name.c_str(), &value))
-					shader->setUniform(uniform.name, value);
+				if (ImGui::InputInt(name.c_str(), &value))
+					shader->setUniform(name, value);
 			} break;
 		default:
 			break;
 	}
 }
+*/
 	
 void ResourceFrame::renderShaderStageInfo(ShaderResource* shader, const ShaderStage& stage) {
 	if (ImGui::TreeNode("Code")) {
@@ -149,11 +151,13 @@ void ResourceFrame::renderShaderStageInfo(ShaderResource* shader, const ShaderSt
 			ImGui::Text("Edit"); ImGui::NextColumn();
 			ImGui::Separator();
 
-			for (const ShaderUniform& uniform : stage.info.uniforms) {
-				ImGui::Text("%d", shader->getUniform(uniform.name)); ImGui::NextColumn();
-				ImGui::Text("%s", uniform.name.c_str()); ImGui::NextColumn();
-				ImGui::Text("%s", uniform.variableType.c_str()); ImGui::NextColumn();
-				if (uniform.array) ImGui::Text("yes: %d", uniform.amount); else ImGui::Text("no"); ImGui::NextColumn();
+			for (const Parser::Local& uniform : stage.info.uniforms) {
+				std::string name(uniform.name.view(stage.source.c_str()));
+				std::string type(uniform.type.view(stage.source.c_str()));
+				ImGui::Text("%d", shader->getUniform(name)); ImGui::NextColumn();
+				ImGui::Text("%s", name.c_str()); ImGui::NextColumn();
+				ImGui::Text("%s", type.c_str()); ImGui::NextColumn();
+				if (uniform.amount != 0) ImGui::Text("yes: %d", uniform.amount); else ImGui::Text("no"); ImGui::NextColumn();
 				ImGui::Text("No editor available"); ImGui::NextColumn();
 				//if (!uniform.array) renderShaderTypeEditor(shader, uniform); else ImGui::Text("No editor available"); ImGui::NextColumn();
 			}
@@ -172,10 +176,12 @@ void ResourceFrame::renderShaderStageInfo(ShaderResource* shader, const ShaderSt
 			ImGui::Text("Array"); ImGui::NextColumn();
 			ImGui::Separator();
 
-			for (const ShaderLocal& local : stage.info.locals) {
-				ImGui::Text("%s", local.name.c_str()); ImGui::NextColumn();
-				ImGui::Text("%s", local.variableType.c_str()); ImGui::NextColumn();
-				if (local.array)
+			for (const Parser::Local& local : stage.info.locals) {
+				std::string name(local.name.view(stage.source.c_str()));
+				std::string type(local.type.view(stage.source.c_str()));
+				ImGui::Text("%s", name.c_str()); ImGui::NextColumn();
+				ImGui::Text("%s", type.c_str()); ImGui::NextColumn();
+				if (local.amount != 0)
 					ImGui::Text("yes: %d", local.amount);
 				else
 					ImGui::Text("no");
@@ -198,11 +204,13 @@ void ResourceFrame::renderShaderStageInfo(ShaderResource* shader, const ShaderSt
 			ImGui::Text("Array"); ImGui::NextColumn();
 			ImGui::Separator();
 
-			for (const ShaderGlobal& global : stage.info.globals) {
-				ImGui::Text("%s", global.name.c_str()); ImGui::NextColumn();
-				ImGui::Text("%s", global.ioType.c_str()); ImGui::NextColumn();
-				ImGui::Text("%s", global.variableType.c_str()); ImGui::NextColumn();
-				if (global.array)
+			for (const Parser::Global& global : stage.info.globals) {
+				std::string name(global.name.view(stage.source.c_str()));
+				std::string type(global.type.view(stage.source.c_str()));
+				ImGui::Text("%s", name.c_str()); ImGui::NextColumn();
+				ImGui::Text("%s", global.io == Parser::IO::In ? "in" : "out"); ImGui::NextColumn();
+				ImGui::Text("%s", type.c_str()); ImGui::NextColumn();
+				if (global.amount != 0)
 					ImGui::Text("yes: %d", global.amount);
 				else
 					ImGui::Text("no");
@@ -218,9 +226,9 @@ void ResourceFrame::renderShaderStageInfo(ShaderResource* shader, const ShaderSt
 	if (stage.info.structs.size()) {
 		if (ImGui::TreeNode("Structs")) {
 			for (const auto& strctit : stage.info.structs) {
-				const ShaderStruct& strct = strctit.second;
+				const Parser::Struct& strct = strctit.second;
 
-				if (ImGui::TreeNode(strct.name.c_str())) {
+				if (ImGui::TreeNode(strct.name.string(stage.source.c_str()).c_str())) {
 					ImGui::Columns(3);
 					ImGui::Separator();
 					ImGui::Text("Name"); ImGui::NextColumn();
@@ -228,10 +236,12 @@ void ResourceFrame::renderShaderStageInfo(ShaderResource* shader, const ShaderSt
 					ImGui::Text("Array"); ImGui::NextColumn();
 					ImGui::Separator();
 
-					for (const ShaderLocal& local : strct.locals) {
-						ImGui::Text("%s", local.name.c_str()); ImGui::NextColumn();
-						ImGui::Text("%s", local.variableType.c_str()); ImGui::NextColumn();
-						if (local.array)
+					for (const Parser::Local& local : strct.locals) {
+						std::string name(local.name.view(stage.source.c_str()));
+						std::string type(local.type.view(stage.source.c_str()));
+						ImGui::Text("%s", name.c_str()); ImGui::NextColumn();
+						ImGui::Text("%s", type.c_str()); ImGui::NextColumn();
+						if (local.amount != 0)
 							ImGui::Text("yes: %d", local.amount);
 						else
 							ImGui::Text("no");
@@ -257,7 +267,7 @@ void ResourceFrame::renderShaderStageInfo(ShaderResource* shader, const ShaderSt
 			ImGui::Separator();
 
 			for (const auto& define : stage.info.defines) {
-				ImGui::Text("%s", define.first.c_str()); ImGui::NextColumn();
+				ImGui::Text("%s", std::string(define.first).c_str()); ImGui::NextColumn();
 				ImGui::Text("%d", (int) define.second); ImGui::NextColumn();
 			}
 			ImGui::Columns(1);

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -191,8 +191,8 @@
     <ClCompile Include="resource\textureResource.cpp" />
     <ClCompile Include="shader\cshader.cpp" />
     <ClCompile Include="shader\gshader.cpp" />
-    <ClCompile Include="shader\shaderLexer.cpp" />
-    <ClCompile Include="shader\shaderParser.cpp" />
+    <ClCompile Include="shader\lexer.cpp" />
+    <ClCompile Include="shader\parser.cpp" />
     <ClCompile Include="shader\shaders.cpp" />
     <ClCompile Include="shader\shader.cpp" />
     <ClCompile Include="renderer.cpp" />
@@ -250,8 +250,8 @@
     <ClInclude Include="shader\cshader.h" />
     <ClInclude Include="shader\gshader.h" />
     <ClInclude Include="shader\shader.h" />
-    <ClInclude Include="shader\shaderLexer.h" />
-    <ClInclude Include="shader\shaderParser.h" />
+    <ClInclude Include="shader\lexer.h" />
+    <ClInclude Include="shader\parser.h" />
     <ClInclude Include="shader\shaders.h" />
     <ClInclude Include="texture.h" />
     <ClInclude Include="debug\threePhaseBuffer.h" />

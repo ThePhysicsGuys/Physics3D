@@ -349,52 +349,38 @@ void Shader::close() {
 #pragma region ShaderStage
 
 ShaderStage::ShaderStage() = default;
-ShaderStage::ShaderStage(const std::string& source, const ShaderInfo& info) : source(source), info(info) {};
-
-ShaderStage parseShaderStage(const std::string& source) {
-	if (!source.empty()) {
-		ShaderInfo info = ShaderParser::parse(source);
-		return ShaderStage(source, info);
-	}
-
-	return ShaderStage();
+ShaderStage::ShaderStage(const std::string& source) : source(source) {
+	this->info = Parser::parse(this->source.c_str());
 }
 
-std::vector<std::string> getSuffixes(const ShaderStage& stage, const ShaderLocal& local) {
+std::vector<std::string> getSuffixes(const ShaderStage& stage, const Parser::Local& local) {
 	std::vector<std::string> suffixes;
 
-	auto strct = stage.info.structs.find(local.variableType);
+	auto strct = stage.info.structs.find(local.type.string(stage.source.c_str()));
 	bool isStruct = strct != stage.info.structs.end();
-	bool isArray = local.array;
-
-	if (isArray) {
+	std::string localName(local.name.view(stage.source.c_str()));
+	if (local.amount != 0) {
 		if (isStruct) { // struct array
 			for (int i = 0; i < local.amount; i++) {
-				std::string variable = local.name + "[" + std::to_string(i) + "].";
+				std::string variable = localName + "[" + std::to_string(i) + "].";
 
-				for (const ShaderLocal& local : strct->second.locals) {
-					std::vector<std::string> localSuffixes = getSuffixes(stage, local);
-
-					for (std::string localSuffix : localSuffixes)
+				for (const Parser::Local& local : strct->second.locals)
+					for (const std::string& localSuffix : getSuffixes(stage, local))
 						suffixes.push_back(variable + localSuffix);
-				}
 			}
 		} else { // normal array
 			for (int i = 0; i < local.amount; i++)
-				suffixes.push_back(local.name + "[" + std::to_string(i) + "]");
+				suffixes.push_back(localName + "[" + std::to_string(i) + "]");
 		}
 	} else {
 		if (isStruct) {
-			std::string variable = local.name + ".";
+			std::string variable = localName + ".";
 
-			for (const ShaderLocal& local : strct->second.locals) {
-				std::vector<std::string> localSuffixes = getSuffixes(stage, local);
-
-				for (std::string localSuffix : localSuffixes)
+			for (const Parser::Local& local : strct->second.locals) 
+				for (const std::string& localSuffix : getSuffixes(stage, local))
 					suffixes.push_back(variable + localSuffix);
-			}
 		} else {
-			suffixes.push_back(local.name);
+			suffixes.push_back(localName);
 		}
 	}
 
@@ -402,7 +388,7 @@ std::vector<std::string> getSuffixes(const ShaderStage& stage, const ShaderLocal
 }
 
 void Shader::addUniforms(const ShaderStage& stage) {
-	for (const ShaderUniform& uniform : stage.info.uniforms) {
+	for (const Parser::Local& uniform : stage.info.uniforms) {
 		std::vector<std::string> variables = getSuffixes(stage, uniform);
 
 		for (const std::string& variable : variables)
