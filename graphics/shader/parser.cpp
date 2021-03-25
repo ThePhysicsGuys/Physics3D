@@ -234,7 +234,7 @@ namespace P3D::Graphics {
 		if (name.type != Lexer::Token::Identifier)
 			return;
 
-		float number = 1.0;
+		int number = 1;
 		Lexer::Token numberToken = lexer.next();
 		if (numberToken.type == Lexer::Token::Number) {
 			if (auto [ptr, error] = std::from_chars(numberToken.first(lexer.code), numberToken.last(lexer.code), number); error != std::errc())

@@ -83,7 +83,7 @@ public:
 	};
 	
 	typedef std::unordered_map<std::string, Struct> Structs;
-	typedef std::unordered_map<std::string, float> Defines;
+	typedef std::unordered_map<std::string, int> Defines;
 
 	struct Parse {
 		Version version;
