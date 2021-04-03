@@ -95,7 +95,7 @@ void SpiderFactory::buildSpider(const GlobalCFrame& spiderPosition, int folder) 
 		screen.registry.setParent(spiderID, folder);
 	
 	ExtendedPart* spiderBody = new ExtendedPart(bodyShape, spiderPosition, { 1.0, 0.5, 0.3 }, "Body", spiderID);
-	screen.registry.getOrAdd<Comp::Material>(spiderBody->entity)->albedo = Color(0.6f, 0.6f, 0.6f, 1.0f);
+	screen.registry.getOrAdd<Comp::Material>(spiderBody->entity)->albedo = Graphics::Color(0.6f, 0.6f, 0.6f, 1.0f);
 
 	//PartFactory legFactory(BoundingBox(0.05, 0.5, 0.05).toShape(), screen, "SpiderLeg");
 
@@ -105,7 +105,7 @@ void SpiderFactory::buildSpider(const GlobalCFrame& spiderPosition, int folder) 
 
 	for (int i = 0; i < legCount; i++) {
 		ExtendedPart* leg = new ExtendedPart(boxShape(0.05, 0.5, 0.05), GlobalCFrame(), { 1.0, 0.5, 0.3 }, "LegPart " + std::to_string(i), spiderID);
-		screen.registry.getOrAdd<Comp::Material>(leg->entity)->albedo = Color(0.4f, 0.4f, 0.4f, 1.0f);
+		screen.registry.getOrAdd<Comp::Material>(leg->entity)->albedo = Graphics::Color(0.4f, 0.4f, 0.4f, 1.0f);
 
 		double angle = i * PI * 2 / legCount;
 
@@ -154,7 +154,7 @@ void buildTree(Position treePos, int treeFolder) {
 	GlobalCFrame trunkCFrame(treePos, Rotation::fromEulerAngles(fRand(-0.1, 0.1), fRand(-3.1415, 3.1415), fRand(-0.1, 0.1)));
 
 	ExtendedPart* trunk = new ExtendedPart(treeTrunk, trunkCFrame, { 1.0, 1.0, 0.3 }, "Trunk", treeFolder);
-	screen.registry.getOrAdd<Comp::Material>(trunk->entity)->albedo = Graphics::COLOR::get(0x654321);
+	screen.registry.getOrAdd<Comp::Material>(trunk->entity)->albedo = Graphics::Color::get<0x654321>();
 	world.addTerrainPart(trunk);
 
 	Position treeTop = trunkCFrame.localToGlobal(Vec3(0.0, 5.5, 0.0));
@@ -166,7 +166,7 @@ void buildTree(Position treePos, int treeFolder) {
 		GlobalCFrame leavesCFrame(treeTop + Vec3(fRand(-1.0, 1.0), fRand(-1.0, 1.0), fRand(-1.0, 1.0)), Rotation::fromEulerAngles(fRand(0.0, 3.1415), fRand(0.0, 3.1415), fRand(0.0, 3.1415)));
 		ExtendedPart* leaves = new ExtendedPart(icosahedron.scaled(2.1, 1.9, 1.7), leavesCFrame, { 1.0, 1.0, 0.3 }, "Leaf", leavesFolder);
 
-		screen.registry.getOrAdd<Comp::Material>(leaves->entity)->albedo = Vec4(fRand(-0.2, 0.2), 0.6 + fRand(-0.2, 0.2), 0.0, 1.0);
+		screen.registry.getOrAdd<Comp::Material>(leaves->entity)->albedo = Graphics::Color(fRand(-0.2, 0.2), 0.6 + fRand(-0.2, 0.2), 0.0, 1.0);
 
 		world.addTerrainPart(leaves);
 	}
@@ -177,7 +177,7 @@ void buildConveyor(double width, double length, const GlobalCFrame& cframe, doub
 	screen.registry.add<Comp::Name>(conveyorFolder, "Conveyor");
 	
 	ExtendedPart* conveyor = new ExtendedPart(boxShape(width, 0.3, length), cframe, { 1.0, 0.8, 0.0, Vec3(0.0, 0.0, speed) }, "Conveyor", conveyorFolder);
-	screen.registry.getOrAdd<Comp::Material>(conveyor->entity)->albedo = Color(0.2f, 0.2f, 0.2f, 1.0f);
+	screen.registry.getOrAdd<Comp::Material>(conveyor->entity)->albedo = Graphics::Color(0.2f, 0.2f, 0.2f, 1.0f);
 	world.addTerrainPart(conveyor);
 	ExtendedPart* leftWall = new ExtendedPart(boxShape(0.2, 0.6, length), cframe.localToGlobal(CFrame(-width / 2 - 0.1, 0.1, 0.0)), { 1.0, 0.4, 0.3, Vec3(0.0, 0.0, 0.0) }, "Left Wall", conveyorFolder);
 	world.addTerrainPart(leftWall);
@@ -191,12 +191,12 @@ void buildTrebuchet(const GlobalCFrame& cframe, double baseWidth, double baseLen
 	wheelproperties.bouncyness = 0.2;
 	wheelproperties.density = 1.0;
 	ExtendedPart* base = new ExtendedPart(boxShape(baseWidth, 0.2, baseLength), cframe, {1.0, 0.8, 0.0}, "Base", folder);
-	ExtendedPart* FLWheel = new ExtendedPart(cylinderShape(wheelRadius, wheelThickness), cframe, wheelproperties, "FLWheel", folder); FLWheel->setColor(Graphics::COLOR::BLACK);
-	ExtendedPart* FRWheel = new ExtendedPart(cylinderShape(wheelRadius, wheelThickness), cframe, wheelproperties, "FRWheel", folder); FRWheel->setColor(Graphics::COLOR::BLACK);
-	ExtendedPart* BLWheel = new ExtendedPart(cylinderShape(wheelRadius, wheelThickness), cframe, wheelproperties, "BLWheel", folder); BLWheel->setColor(Graphics::COLOR::BLACK);
-	ExtendedPart* BRWheel = new ExtendedPart(cylinderShape(wheelRadius, wheelThickness), cframe, wheelproperties, "BRWheel", folder); BRWheel->setColor(Graphics::COLOR::BLACK);
+	ExtendedPart* FLWheel = new ExtendedPart(cylinderShape(wheelRadius, wheelThickness), cframe, wheelproperties, "FLWheel", folder); FLWheel->setColor(Graphics::Colors::BLACK);
+	ExtendedPart* FRWheel = new ExtendedPart(cylinderShape(wheelRadius, wheelThickness), cframe, wheelproperties, "FRWheel", folder); FRWheel->setColor(Graphics::Colors::BLACK);
+	ExtendedPart* BLWheel = new ExtendedPart(cylinderShape(wheelRadius, wheelThickness), cframe, wheelproperties, "BLWheel", folder); BLWheel->setColor(Graphics::Colors::BLACK);
+	ExtendedPart* BRWheel = new ExtendedPart(cylinderShape(wheelRadius, wheelThickness), cframe, wheelproperties, "BRWheel", folder); BRWheel->setColor(Graphics::Colors::BLACK);
 	ExtendedPart* arm = new ExtendedPart(boxShape(armThickness, armThickness, armLength), cframe, {1.0, 0.8, 0.0}, "Arm", folder);
-	ExtendedPart* weight = new ExtendedPart(boxShape(armThickness * 4, armThickness * 4, armThickness * 4), cframe, {1.0, 0.8, 0.0}, "Weight", folder); weight->setColor(Graphics::COLOR::GRAY);
+	ExtendedPart* weight = new ExtendedPart(boxShape(armThickness * 4, armThickness * 4, armThickness * 4), cframe, {1.0, 0.8, 0.0}, "Weight", folder); weight->setColor(Graphics::Colors::GRAY);
 	arm->attach(weight, CFrame(0.0, 0.0, armLength / 2));
 	
 	
@@ -222,9 +222,9 @@ std::array<ExtendedPart*, 3> produceAxes(const GlobalCFrame& cf, const PartPrope
 	ExtendedPart* zAxis = new ExtendedPart(arrow.scaled(scale, scale, scale), cf.extendLocal(Vec3(0.0, 0.0, 0.5 * scale)), properties, "zAxis");
 	ExtendedPart* xAxis = new ExtendedPart(arrow.scaled(scale, scale, scale), zAxis, CFrame(0.5 * scale, 0.0, -0.5 * scale, Rotation::Predefined::Y_90), properties, "xAxis");
 	ExtendedPart* yAxis = new ExtendedPart(arrow.scaled(scale, scale, scale), zAxis, CFrame(0.0, 0.5 * scale, -0.5 * scale, Rotation::Predefined::X_270), properties, "yAxis");
-	xAxis->setColor(Color(1.0f, 0.0f, 0.0f, 1.0f));
-	yAxis->setColor(Color(0.0f, 1.0f, 0.0f, 1.0f));
-	zAxis->setColor(Color(0.0f, 0.0f, 1.0f, 1.0f));
+	xAxis->setColor(Graphics::Color(1.0f, 0.0f, 0.0f, 1.0f));
+	yAxis->setColor(Graphics::Color(0.0f, 1.0f, 0.0f, 1.0f));
+	zAxis->setColor(Graphics::Color(0.0f, 0.0f, 1.0f, 1.0f));
 	return std::array<ExtendedPart*, 3>{xAxis, yAxis, zAxis};
 }
 
@@ -233,9 +233,9 @@ void attachAxes(ExtendedPart* part, double scale) {
 	ExtendedPart* yAxis = new ExtendedPart(arrow.scaled(scale, scale, scale), part, CFrame(0.0, 0.5 * scale, 0.0, Rotation::Predefined::X_270), part->properties, "yAxis");
 	ExtendedPart* zAxis = new ExtendedPart(arrow.scaled(scale, scale, scale), part, CFrame(0.0, 0.0, 0.5 * scale), part->properties, "zAxis");
 
-	xAxis->setColor(Color(1.0f, 0.0f, 0.0f, 1.0f));
-	yAxis->setColor(Color(0.0f, 1.0f, 0.0f, 1.0f));
-	zAxis->setColor(Color(0.0f, 0.0f, 1.0f, 1.0f));
+	xAxis->setColor(Graphics::Color(1.0f, 0.0f, 0.0f, 1.0f));
+	yAxis->setColor(Graphics::Color(0.0f, 1.0f, 0.0f, 1.0f));
+	zAxis->setColor(Graphics::Color(0.0f, 0.0f, 1.0f, 1.0f));
 }
 
 void buildTerrain(double width, double depth, int folder) {
@@ -255,7 +255,7 @@ void buildTerrain(double width, double depth, int folder) {
 			Position pos((x / 3.0 + fRand(0.0, 1.0)) * 3.0, fRand(0.0, 1.0) + yOffset, (z / 3.0 + fRand(0.0, 1.0)) * 3.0);
 			GlobalCFrame cf(pos, Rotation::fromEulerAngles(fRand(0.0, 3.1415), fRand(0.0, 3.1415), fRand(0.0, 3.1415)));
 			ExtendedPart* newPart = new ExtendedPart(icosahedron.scaled(4.0, 4.0, 4.0), cf, { 1.0, 1.0, 0.3 }, "Ground", groundFolder);
-			screen.registry.getOrAdd<Comp::Material>(newPart->entity)->albedo = Color(0.0, yOffset / 40.0 + 0.5, 0.0, 1.0);
+			screen.registry.getOrAdd<Comp::Material>(newPart->entity)->albedo = Graphics::Color(0.0, yOffset / 40.0 + 0.5, 0.0, 1.0);
 			world.addTerrainPart(newPart);
 		}
 
@@ -312,9 +312,9 @@ void buildCar(const GlobalCFrame& location, int folder) {
 	ExtendedPart* wheel3 = new ExtendedPart(sphereShape(0.25), location.localToGlobal(CFrame(-0.8, 0.0, 0.8)), wheelProperties, "Wheel", carFolder);
 	ExtendedPart* wheel4 = new ExtendedPart(sphereShape(0.25), location.localToGlobal(CFrame(-0.8, 0.0, -0.8)), wheelProperties, "Wheel", carFolder);
 
-	screen.registry.getOrAdd<Comp::Material>(carLeftWindow->entity)->albedo = Color(0.7f, 0.7f, 1.0f, 0.5f);
-	screen.registry.getOrAdd<Comp::Material>(carRightWindow->entity)->albedo = Color(0.7f, 0.7f, 1.0f, 0.5f);
-	screen.registry.getOrAdd<Comp::Material>(carWindshield->entity)->albedo = Color(0.7f, 0.7f, 1.0f, 0.5f);
+	screen.registry.getOrAdd<Comp::Material>(carLeftWindow->entity)->albedo = Graphics::Color(0.7f, 0.7f, 1.0f, 0.5f);
+	screen.registry.getOrAdd<Comp::Material>(carRightWindow->entity)->albedo = Graphics::Color(0.7f, 0.7f, 1.0f, 0.5f);
+	screen.registry.getOrAdd<Comp::Material>(carWindshield->entity)->albedo = Graphics::Color(0.7f, 0.7f, 1.0f, 0.5f);
 
 	world.addPart(carBody);
 

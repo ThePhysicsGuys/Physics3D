@@ -46,8 +46,7 @@ CShader::CShader() {};
 CShader::CShader(const ShaderSource& shaderSource) : Shader(shaderSource) {
 	id = createShader(shaderSource);
 
-	std::future<ShaderStage> futureComputeStage = std::async(std::launch::async, parseShaderStage, shaderSource.computeSource);
-	bool result = addShaderStage(futureComputeStage.get(), COMPUTE);
+	bool result = addShaderStage(shaderSource.computeSource, COMPUTE);
 };
 
 CShader::CShader(const std::string& name, const std::string& path, const std::string& computeSource) : CShader(ShaderSource(name, path, "", "", "", "", "", computeSource)) {}
@@ -71,7 +70,9 @@ CShader& CShader::operator=(CShader&& other) {
 #pragma endregion
 
 
-bool CShader::addShaderStage(const ShaderStage& stage, const ShaderFlag& flag) {
+bool CShader::addShaderStage(const std::string& source, const ShaderFlag& flag) {
+	ShaderStage stage(source);
+	
 	if (!stage.source.empty()) {
 		addUniforms(stage);
 

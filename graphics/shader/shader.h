@@ -1,16 +1,16 @@
 #pragma once
 
 #include "../bindable.h"
-#include "shaderParser.h"
+#include "parser.h"
 
 namespace P3D::Graphics {
 
 struct ShaderStage {
 	std::string source;
-	ShaderInfo info;
+	Parser::Parse info;
 
 	ShaderStage();
-	ShaderStage(const std::string& source, const ShaderInfo& info);
+	ShaderStage(const std::string& source);
 };
 
 struct ShaderSource {
@@ -77,13 +77,10 @@ protected:
 	void addUniform(const std::string& uniform);
 	void addUniforms(const ShaderStage& stage);
 
-	virtual bool addShaderStage(const ShaderStage& stage, const ShaderFlag& flag) = 0;
+	virtual bool addShaderStage(const std::string& source, const ShaderFlag& flag) = 0;
 };
 
 ShaderSource parseShader(const std::string& name, const std::string& path);
 ShaderSource parseShader(const std::string& name, const std::string& path, std::istream& shaderTextStream);
 ShaderSource parseShader(const std::string& name, const std::string& path, const std::string& shaderText);
-
-ShaderStage parseShaderStage(const std::string& source);
-
 };

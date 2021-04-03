@@ -4,7 +4,6 @@
 #include "../engine/event/mouseEvent.h"
 #include "../engine/tool/stateTool.h"
 #include "ecs/components.h"
-#include <optional>
 
 namespace P3D::Application {
 
@@ -26,6 +25,8 @@ private:
 
 public:
 	DEFINE_TOOL("Scale", "Scale entities by using the handles", Graphics::GLFW::Cursor::ARROW);
+
+	~ScaleTool() = default;	
 
 	void onRegister() override;
 	void onDeregister() override;

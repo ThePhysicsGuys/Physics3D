@@ -49,15 +49,15 @@ void buildShowcaseWorld(Screen& screen, PlayerWorld& world) {
 	{ // Lights
 		Comp::Light::Attenuation attenuation = {1, 1, 1};
 		auto lights = EntityBuilder(screen.registry).name("Lights").get();
-		EntityBuilder(screen.registry).parent(lights).transform(Position(10, 5, -10)).light(Color3(1, 0.84f, 0.69f), 300, attenuation);
-		EntityBuilder(screen.registry).parent(lights).transform(Position(10, 5, 10)).light(Color3(1, 0.84f, 0.69f), 300, attenuation);
-		EntityBuilder(screen.registry).parent(lights).transform(Position(-10, 5, -10)).light(Color3(1, 0.84f, 0.69f), 200, attenuation);
-		EntityBuilder(screen.registry).parent(lights).transform(Position(-10, 5, 10)).light(Color3(1, 0.84f, 0.69f), 500, attenuation);
-		EntityBuilder(screen.registry).parent(lights).transform(Position(0, 5, 0)).light(Color3(1, 0.90f, 0.75f), 400, attenuation);
+		EntityBuilder(screen.registry).parent(lights).transform(Position(10, 5, -10)).light(Graphics::Color(1, 0.84f, 0.69f), 300, attenuation);
+		EntityBuilder(screen.registry).parent(lights).transform(Position(10, 5, 10)).light(Graphics::Color(1, 0.84f, 0.69f), 300, attenuation);
+		EntityBuilder(screen.registry).parent(lights).transform(Position(-10, 5, -10)).light(Graphics::Color(1, 0.84f, 0.69f), 200, attenuation);
+		EntityBuilder(screen.registry).parent(lights).transform(Position(-10, 5, 10)).light(Graphics::Color(1, 0.84f, 0.69f), 500, attenuation);
+		EntityBuilder(screen.registry).parent(lights).transform(Position(0, 5, 0)).light(Graphics::Color(1, 0.90f, 0.75f), 400, attenuation);
 
 		ExtendedPart* partA = new ExtendedPart(boxShape(1.0, 0.49, 3.0), GlobalCFrame(3.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "partA");
 		ExtendedPart* partB = new ExtendedPart(boxShape(1.0, 0.5, 3.0), GlobalCFrame(2.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "partA");
-		EntityBuilder(screen.registry, partA->entity).light(Color3(0.1, 0.94f, 0.49f), 500, Comp::Light::Attenuation{0.8, 0.5, 0.2});
+		EntityBuilder(screen.registry, partA->entity).light(Graphics::Color(0.1, 0.94f, 0.49f), 500, Comp::Light::Attenuation{0.8, 0.5, 0.2});
 
 		world.addPart(partA);
 		world.addPart(partB);
@@ -110,8 +110,8 @@ void buildShowcaseWorld(Screen& screen, PlayerWorld& world) {
 	// hollow box
 	WorldBuilder::HollowBoxParts parts = WorldBuilder::buildHollowBox(Bounds(Position(12.0, 3.0, 14.0), Position(20.0, 8.0, 20.0)), 0.3);
 
-	parts.front->setMaterial(Comp::Material(Color(0.4f, 0.6f, 1.0f, 0.3f)));
-	parts.back->setMaterial(Comp::Material(Color(0.4f, 0.6f, 1.0f, 0.3f)));
+	parts.front->setMaterial(Comp::Material(Graphics::Color(0.4f, 0.6f, 1.0f, 0.3f)));
+	parts.back->setMaterial(Comp::Material(Graphics::Color(0.4f, 0.6f, 1.0f, 0.3f)));
 
 	// Rotating walls
 	/*ExtendedPart* rotatingWall = new ExtendedPart(boxShape(5.0, 3.0, 0.5), GlobalCFrame(Position(-12.0, 1.7, 0.0)), {1.0, 1.0, 0.7});

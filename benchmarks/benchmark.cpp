@@ -114,5 +114,6 @@ int main(int argc, const char** args) {
 
 		runBenchmarks(commands);
 	}
+	
 	return 0;
 }

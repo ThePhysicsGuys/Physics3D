@@ -23,6 +23,8 @@ private:
 public:
 	DEFINE_TOOL("Rotate", "Rotate entities by using the handles", Graphics::GLFW::Cursor::ARROW);
 
+	~RotationTool() = default;	
+
 	void onRegister() override;
 	void onDeregister() override;
 	void onRender() override;

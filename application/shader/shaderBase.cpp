@@ -63,7 +63,7 @@ void BasicShaderBase::updateLight(std::size_t index, const Position& position, c
 	setUniform(variable + "position", position);
 
 	// color
-	setUniform(variable + "color", light.color);
+	setUniform(variable + "color", Vec3f(light.color));
 
 	// intensity
 	setUniform(variable + "intensity", light.intensity);

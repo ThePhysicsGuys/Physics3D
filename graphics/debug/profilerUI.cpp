@@ -2,6 +2,8 @@
 
 #include "profilerUI.h"
 
+
+#include <sstream>
 #include <GL/glew.h>
 
 #include "texture.h"
@@ -19,22 +21,22 @@ namespace P3D::Graphics {
 
 #define MAX_ANGLE 0.1f
 
-const Color3 pieColors[30] {
-	Color3(0.2f,0.2f,1),
-	Color3(1,0.5f,0),
-	Color3(1,1,0),
-	Color3(1,0,1),
-	Color3(0,1,0),
-	Color3(0,1,1),
-	Color3(1,1,1),
-	Color3(1,0,0),
-	Color3(0.5f,0,0),
-	Color3(0,0.5f,0),
-	Color3(0,0,0.5f),
-	Color3(0.5f,0.5f,0),
-	Color3(0.5f,0,0.5f),
-	Color3(0,0.5f,0.5f),
-	Color3(0.5f,0.5f,0.5f),
+const Color pieColors[30] {
+	Color(0.2f,0.2f,1),
+	Color(1,0.5f,0),
+	Color(1,1,0),
+	Color(1,0,1),
+	Color(0,1,0),
+	Color(0,1,1),
+	Color(1,1,1),
+	Color(1,0,0),
+	Color(0.5f,0,0),
+	Color(0,0.5f,0),
+	Color(0,0,0.5f),
+	Color(0.5f,0.5f,0),
+	Color(0.5f,0,0.5f),
+	Color(0,0.5f,0.5f),
+	Color(0.5f,0.5f,0.5f),
 };
 
 void PieChart::renderPie() const {
@@ -52,7 +54,7 @@ void PieChart::renderPie() const {
 		int subdivisions = int(angle / MAX_ANGLE + 1);
 		newAngle += angle;
 
-		Path::circleSegmentFilled(piePosition, pieSize, oldAngle, newAngle, join(dataPoint.color, 1.0f), subdivisions);
+		Path::circleSegmentFilled(piePosition, pieSize, oldAngle, newAngle, dataPoint.color, subdivisions);
 
 		oldAngle = newAngle;
 	}
@@ -72,14 +74,14 @@ void PieChart::renderText(Graphics::Font* font) const {
 	for (int i = 0; i < parts.size(); i++) {
 		const DataPoint& p = parts[i];
 		Vec2 linePosition = textPosition + Vec2(0, -i * 0.035);
-		Path::text(font, p.label, 0.0006, linePosition, join(p.color, 1.0f));
+		Path::text(font, p.label, 0.0006, linePosition, p.color);
 
 		std::stringstream percent;
 		percent.precision(4);
 		percent << p.weight / totalWeight * 100;
 		percent << "%";
-		Path::text(font, percent.str(), 0.0006, linePosition + Vec2(0.35, 0), join(p.color, 1.0f));
-		Path::text(font, p.value, 0.0006, linePosition + Vec2(0.50, 0), join(p.color, 1.0f));
+		Path::text(font, percent.str(), 0.0006, linePosition + Vec2(0.35, 0), p.color);
+		Path::text(font, p.value, 0.0006, linePosition + Vec2(0.50, 0), p.color);
 	}
 }
 
@@ -122,11 +124,11 @@ void BarChart::render() {
 			float height = drawingSize.y * dataPoint.weight / max;
 			Vec2f bottomLeft = drawingPosition + Vec2f(categoryWidth * i + barWidth * cl, 0);
 
-			Path::rectFilled(bottomLeft, Vec2f(barWidth, height), 0.0f, join(info.color, 1.0f));
+			Path::rectFilled(bottomLeft, Vec2f(barWidth, height), 0.0f, info.color);
 		}
 	}
 
-	Path::text(GUI::font, title, 0.001, position + Vec2f(0, this->dimension.y - titleHeight), COLOR::WHITE);
+	Path::text(GUI::font, title, 0.001, position + Vec2f(0, this->dimension.y - titleHeight), Colors::WHITE);
 
 	for (int cl = 0; cl < data.h; cl++) {
 		const BarChartClassInfo& info = classes[cl];
@@ -140,17 +142,17 @@ void BarChart::render() {
 			Vec2f topTextPosition = bottomLeft + Vec2(0, height + drawingSize.y * 0.02);
 			//topTextPosition.x *= GUI::screen->dimension.x / GUI::screen->dimension.y;
 
-			Path::text(GUI::font, dataPoint.value, 0.0005, topTextPosition, join(info.color, 1.0f));
+			Path::text(GUI::font, dataPoint.value, 0.0005, topTextPosition, info.color);
 		}
 	}
 
 	for (int i = 0; i < data.w; i++) {
 		Vec2f botLeft = position + Vec2f(marginLeft, 0) + Vec2f(categoryWidth * i, 0);
-		Path::text(GUI::font, labels[i], 0.0005, botLeft, COLOR::WHITE);
+		Path::text(GUI::font, labels[i], 0.0005, botLeft, Colors::WHITE);
 	}
 
 	for (int cl = 0; cl < data.h; cl++)
-		Path::text(GUI::font, classes[cl].name, 0.0007, drawingPosition + Vec2f(this->dimension.x - 0.3f, drawingSize.y - 0.035f * cl), join(classes[cl].color, 1.0f));
+		Path::text(GUI::font, classes[cl].name, 0.0007, drawingPosition + Vec2f(this->dimension.x - 0.3f, drawingSize.y - 0.035f * cl), classes[cl].color);
 }
 
 float BarChart::getMaxWeight() const {
@@ -182,11 +184,11 @@ static void recursiveRenderTree(const P3D::OldBoundsTree::TreeNode& tree, const 
 	}
 
 	if (tree.object == selectedObject) {
-		Path::circleFilled(origin, 0.012f, COLOR::YELLOW, 8);
+		Path::circleFilled(origin, 0.012f, Colors::YELLOW, 8);
 	}
 
 	if (tree.isGroupHead) {
-		Path::circleFilled(origin, 0.006f, COLOR::RED, 8);
+		Path::circleFilled(origin, 0.006f, Colors::RED, 8);
 	}
 }
 
@@ -213,11 +215,11 @@ static void recursiveRenderTree(const P3D::NewBoundsTree::TreeTrunk& curTrunk, i
 			recursiveRenderTree(subNode.asTrunk(), subNode.getTrunkSize(), treeColor, nextStep, allottedWidth / curTrunkSize, maxCost, selectedObject);
 
 			if(subNode.isGroupHead()) {
-				Path::circleFilled(nextStep, 0.006f, COLOR::RED, 8);
+				Path::circleFilled(nextStep, 0.006f, Colors::RED, 8);
 			}
 		} else {
 			if(subNode.asObject() == selectedObject) {
-				Path::circleFilled(nextStep, 0.012f, COLOR::YELLOW, 8);
+				Path::circleFilled(nextStep, 0.012f, Colors::YELLOW, 8);
 			}
 		}
 	}
@@ -282,7 +284,7 @@ void SlidingChartDataSetInfo::add(float value) {
 	deviation = sqrt(newVariance);
 }
 
-SlidingChart::SlidingChart(const std::string& title, const Vec2& position, const Vec2& dimension) : title(title), Component(position, dimension) {}
+SlidingChart::SlidingChart(const std::string& title, const Vec2& position, const Vec2& dimension) : title(title), position(position), dimension(dimension) {}
 
 void SlidingChart::add(const SlidingChartDataSetInfo& dataSet) {
 	dataSets[dataSet.title] = dataSet;
@@ -300,8 +302,8 @@ void SlidingChart::render() {
 	float axisOffset = 0.03;
 
 	Path::rect(position, dimension, 0.0f, Vec4f(0.4f, 0.4f, 0.4f, 1.0f));
-	Path::line(position + Vec2f(-axisOffset, -dimension.y), position + Vec2f(dimension.x + axisOffset, -dimension.y), COLOR::WHITE, 2.0f);
-	Path::line(position + Vec2f(0, axisOffset), position + Vec2f(0, -dimension.y - axisOffset), COLOR::WHITE, 2.0f);
+	Path::line(position + Vec2f(-axisOffset, -dimension.y), position + Vec2f(dimension.x + axisOffset, -dimension.y), Colors::WHITE, 2.0f);
+	Path::line(position + Vec2f(0, axisOffset), position + Vec2f(0, -dimension.y - axisOffset), Colors::WHITE, 2.0f);
 
 	for (auto dataSetIterator : dataSets) {
 		SlidingChartDataSetInfo& dataSet = dataSetIterator.second;
@@ -330,7 +332,7 @@ void SlidingChart::render() {
 	}
 
 	Vec2f titleSize = GUI::font->size(title, 0.001f);
-	Path::text(GUI::font, title, 0.001f, Vec2f(position.x + dimension.x / 2.0f, position.y + axisOffset), COLOR::WHITE, Path::TextPivotHC);
+	Path::text(GUI::font, title, 0.001f, Vec2f(position.x + dimension.x / 2.0f, position.y + axisOffset), Colors::WHITE, Path::TextPivotHC);
 }
 
 Vec2 SlidingChart::resize() {

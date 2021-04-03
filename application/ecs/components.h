@@ -303,12 +303,12 @@ struct Light : public RefCountable {
 		float linear;
 		float exponent;
 	};
-	
-	Color3 color;
+
+	Graphics::Color color;
 	float intensity;
 	Attenuation attenuation;
 
-	Light(const Color3& color, float intensity, const Attenuation& attenuation) : color(color), intensity(intensity), attenuation(attenuation) {}
+	Light(const Graphics::Color& color, float intensity, const Attenuation& attenuation) : color(color), intensity(intensity), attenuation(attenuation) {}
 };
 
 	

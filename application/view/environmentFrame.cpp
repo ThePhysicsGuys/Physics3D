@@ -10,7 +10,7 @@ namespace P3D::Application {
 float EnvironmentFrame::hdr = 1.0f;
 float EnvironmentFrame::gamma = 0.8f;
 float EnvironmentFrame::exposure = 0.8f;
-Color3 EnvironmentFrame::sunColor = Color3::full(1);
+Color EnvironmentFrame::sunColor = Color(1);
 
 void EnvironmentFrame::onInit(Engine::Registry64& registry) {
 	
@@ -31,7 +31,7 @@ void EnvironmentFrame::onRender(Engine::Registry64& registry) {
 
 	if (ImGui::SliderFloat("Exposure", &exposure, 0, 2)) {
 		Shaders::basicShader.updateExposure(exposure);
-		Shaders::instanceShader.updateExposure(exposure);
+		;
 	}
 
 	if (ImGui::ColorEdit3("Sun color", sunColor.data)) {

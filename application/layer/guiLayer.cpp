@@ -4,30 +4,23 @@
 
 #include "view/screen.h"
 #include "view/frames.h"
-#include "shader/shaders.h"
 #include "input/standardInputHandler.h"
-#include "../graphics/font.h"
+#include "../engine/event/mouseEvent.h"
 #include "../graphics/renderer.h"
 #include "../graphics/shader/shaders.h"
-#include "../graphics/gui/guiUtils.h"
-#include "../engine/input/mouse.h"
 #include "../graphics/gui/gui.h"
-#include "../graphics/debug/visualDebug.h"
 #include "../graphics/buffers/frameBuffer.h"
 
 namespace P3D::Application {
 
 bool onMouseMove(const Engine::MouseMoveEvent& event) {
 	using namespace Graphics;
-	
-	return GUI::onMouseMove(event.getNewX(), event.getNewY());
+
+	return false;
 }
 
 bool onMousePress(const Engine::MousePressEvent& event) {
 	using namespace Graphics;
-	if (Engine::Mouse::LEFT == event.getButton()) {
-		return GUI::onMousePress(event.getX(), event.getY());
-	}
 
 	return false;
 }
@@ -35,16 +28,13 @@ bool onMousePress(const Engine::MousePressEvent& event) {
 bool onMouseRelease(const Engine::MouseReleaseEvent& event) {
 	using namespace Graphics;
 
-	if (Engine::Mouse::LEFT == event.getButton()) {
-		return GUI::onMouseRelease(event.getX(), event.getY());
-	}
-
 	return false;
 }
 
 bool onMouseDrag(const Engine::MouseDragEvent& event) {
 	using namespace Graphics;
-	return GUI::onMouseDrag(event.getOldX(), event.getOldY(), event.getNewX(), event.getNewY());
+	
+	return false;
 }
 
 bool onWindowResize(const Engine::WindowResizeEvent& event) {
@@ -71,9 +61,6 @@ void GuiLayer::onUpdate(Engine::Registry64& registry) {
 
 	// Update GUI
 	GUI::onUpdate(screen->camera.orthoMatrix);
-
-	// Update GUI intersection
-	GUI::intersect(GUI::map(handler->mousePosition));
 }
 
 void GuiLayer::onEvent(Engine::Registry64& registry, Engine::Event& event) {

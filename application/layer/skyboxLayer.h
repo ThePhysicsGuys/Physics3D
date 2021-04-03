@@ -3,14 +3,13 @@
 #include "../engine/layer/layer.h"
 #include "../util/valueCycle.h"
 #include "../graphics/gui/color.h"
-#include "../physics/math/linalg/vec.h"
 
 namespace P3D::Application {
 
-struct SkyboxCycle : public Util::ValueCycle<::Color3, Util::linear> {
+struct SkyboxCycle : public Util::ValueCycle<Graphics::Color, Util::linear> {
 public:
-	inline SkyboxCycle() {}
-	inline SkyboxCycle(const ::Color3& night, const ::Color3& day, const ::Color3& dusk, const ::Color3& dawn, float midnightEnd, float middayStart, float middayEnd) {
+	SkyboxCycle() {}
+	SkyboxCycle(const Graphics::Color& night, const Graphics::Color& day, const Graphics::Color& dusk, const Graphics::Color& dawn, float midnightEnd, float middayStart, float middayEnd) {
 		float _midnightEnd = midnightEnd / 24.0f;
 		float _middayStart = middayStart / 24.0f;
 		float _middayEnd = middayEnd / 24.0f;
@@ -29,14 +28,14 @@ class Screen;
 
 class SkyboxLayer : public Engine::Layer {
 public:
-	inline SkyboxLayer() : Layer() {};
-	inline SkyboxLayer(Screen* screen, char flags = NoEvents) : Layer("Skybox", screen, flags) {};
+	SkyboxLayer() : Layer() {}
+	SkyboxLayer(Screen* screen, char flags = NoEvents) : Layer("Skybox", screen, flags) {}
 
-	virtual void onInit(Engine::Registry64& registry) override;
-	virtual void onUpdate(Engine::Registry64& registry) override;
-	virtual void onEvent(Engine::Registry64& registry, Engine::Event& event) override;
-	virtual void onRender(Engine::Registry64& registry) override;
-	virtual void onClose(Engine::Registry64& registry) override;
+	void onInit(Engine::Registry64& registry) override;
+	void onUpdate(Engine::Registry64& registry) override;
+	void onEvent(Engine::Registry64& registry, Engine::Event& event) override;
+	void onRender(Engine::Registry64& registry) override;
+	void onClose(Engine::Registry64& registry) override;
 };
 
 };

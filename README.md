@@ -40,7 +40,7 @@ If you still have build problems, please create an issue as we want setting up t
 3. Run [install/setup.sh](/install/setup.sh) (Unix) or [install/setup.bat](/install/setup.bat) (Windows) from the Physics3D directory, this will install the necessary dependencies using [vcpkg](https://github.com/microsoft/vcpkg) and create the build folders. It will also run cmake for debug and release. 
   The dependencies can be installed on their own with [install/setupDependencies.sh](/install/setupDependencies.sh) (Unix) or [install/setupDependencies.bat](/install/setupDependencies.bat) (Windows)
   The build directories can be generated on their own with [install/setupBuild.sh](/install/setupBuild.sh) (Unix) or [install/setupBuild.bat](/install/setupBuild.bat) (Windows)
-4. Make the build from the build directory `cd build` with `cmake --build .`
+4. Make the build from the build directory `cd build` with `cmake --build .`. To speed up the build, multithreaded building can be enabled by addding `--parallel` or `-- -j 5` to the end of the build command.
 5. To run the application, you must also run it from the build directory: `cd build` `Debug\.\application`. Tests and benchmarks can be run from anywhere. 
 
 #### Ubuntu specific using apt-get
@@ -50,7 +50,7 @@ If you are using Ubuntu, we recommend using this installation method instead, as
 2. Run [install/setupUbuntu.sh](/install/setupUbuntu.sh) from the Physics3D directory, this will install the necessary dependencies and create the build folders. It will also run cmake for debug and release. 
   The dependencies can be installed on their own with [install/setupDependenciesUbuntu.sh](/install/setupDependenciesUbuntu.sh)
   The build directories can be generated on their own with [install/setupBuildUbuntu.sh](/install/setupBuildUbuntu.sh)
-3. Make the build from the build directory `cd build` with `cmake --build .`
+3. Make the build from the build directory `cd build` with `cmake --build .`. To speed up the build, multithreaded building can be enabled by addding `--parallel` or `-- -j 5` to the end of the build command.
 4. To run the application, you must also run it from the build directory: `./application`. Tests and benchmarks can be run from anywhere. 
 
 ### Visual Studio

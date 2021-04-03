@@ -9,7 +9,7 @@ private:
 	GLID createShader(const ShaderSource& shaderSource);
 
 protected:
-	virtual bool addShaderStage(const ShaderStage& stage, const ShaderFlag& flag) override;
+	virtual bool addShaderStage(const std::string& source, const ShaderFlag& flag) override;
 
 public:
 	ShaderStage vertexStage;

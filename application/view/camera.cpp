@@ -13,6 +13,7 @@
 
 #include "../extendedPart.h"
 #include "worlds.h"
+#include "picker/tools/selectionTool.h"
 
 namespace P3D::Application {
 
@@ -94,40 +95,25 @@ void Camera::move(Screen& screen, double dx, double dy, double dz, bool leftDrag
 		Vec3 cameraRotationX = cframe.rotation * Vec3(1, 0, 0);
 		Vec3 translationX = normalize(Vec3(cameraRotationX.x, 0, cameraRotationX.z)) * dx;
 		translation += translationX;
-
-		if (leftDragging) {
-			screen.world->asyncModification([&screen] () {
-				// TODO Picker::moveGrabbedEntityLateral(screen);
-			});
-		}
 	}
 
 	if (dy != 0) {
 		Vec3 translationY = Vec3(0, dy, 0);
 		translation += translationY;
-
-		if (leftDragging) {
-			screen.world->asyncModification([&screen] () {
-				// TODO Picker::moveGrabbedEntityLateral(screen);
-			});
-		}
 	}
 
 	if (dz != 0) {
 		Vec3 cameraRotationZ = cframe.rotation * Vec3(0, 0, 1);
 		Vec3 translationZ = normalize(Vec3(cameraRotationZ.x, 0, cameraRotationZ.z)) * dz;
 		translation += translationZ;
-
-		if (leftDragging) {
-			screen.world->asyncModification([&screen, dz, this] () {
-				// TODO Picker::moveGrabbedEntityTransversal(screen, -currentVelocity * dz);
-			});
-		}
 	}
 
 	translation *= currentVelocity;
 
 	cframe += translation;
+
+	if (wasLeftDragging)
+		SelectionTool::selection.translate(translation);
 
 	// Accelerate camera movement
 	if (accelerating)

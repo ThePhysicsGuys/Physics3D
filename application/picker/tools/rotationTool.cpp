@@ -6,10 +6,10 @@
 #include "application.h"
 #include "selectionTool.h"
 #include "translationTool.h"
-#include "../../../physics/misc/toString.h"
 #include "view/screen.h"
 #include "shader/shaders.h"
 
+#include "../physics/misc/toString.h"
 #include "../physics/misc/shapeLibrary.h"
 #include "../physics/math/rotation.h"
 #include "../graphics/visualShape.h"
@@ -72,38 +72,38 @@ namespace P3D::Application {
 		auto status = getToolStatus();		
 		if (status == kRotateX) {
 			Shaders::maskShader.updateModel(modelX);
-			Shaders::maskShader.updateColor(COLOR::RGB_R);
+			Shaders::maskShader.updateColor(Colors::RGB_R);
 			line->render();
 		}
 
 		if (status == kRotateY) {
 			Shaders::maskShader.updateModel(modelY);
-			Shaders::maskShader.updateColor(COLOR::RGB_G);
+			Shaders::maskShader.updateColor(Colors::RGB_G);
 			line->render();
 		}
 
 		if (status == kRotateZ) {
 			Shaders::maskShader.updateModel(modelZ);
-			Shaders::maskShader.updateColor(COLOR::RGB_B);
+			Shaders::maskShader.updateColor(Colors::RGB_B);
 			line->render();
 		}
 
 		Shaders::basicShader.updateModel(modelC);
-		Shaders::basicShader.updateMaterial(Comp::Material(COLOR::YELLOW));
+		Shaders::basicShader.updateMaterial(Comp::Material(Colors::YELLOW));
 		handleMesh->render();
 
 		// X
-		Shaders::basicShader.updateMaterial(Comp::Material(COLOR::RGB_R));
+		Shaders::basicShader.updateMaterial(Comp::Material(Colors::RGB_R));
 		Shaders::basicShader.updateModel(modelX);   
 		handleMesh->render();
 		
 		// Y
 		Shaders::basicShader.updateModel(modelY);
-		Shaders::basicShader.updateMaterial(Comp::Material(COLOR::RGB_G));
+		Shaders::basicShader.updateMaterial(Comp::Material(Colors::RGB_G));
 		handleMesh->render();
 
 		// Z
-		Shaders::basicShader.updateMaterial(Comp::Material(COLOR::RGB_B));
+		Shaders::basicShader.updateMaterial(Comp::Material(Colors::RGB_B));
 		Shaders::basicShader.updateModel(modelZ);
 		handleMesh->render();
 		

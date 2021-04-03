@@ -87,10 +87,11 @@ void ExtendedPart::setName(const std::string& name) {
 	screen.registry.add<Comp::Name>(this->entity, name);
 }
 
-void ExtendedPart::setColor(const Color& color) {
+void ExtendedPart::setColor(const Graphics::Color& color) {
 	screen.registry.getOrAdd<Comp::Material>(this->entity)->albedo = color;
 }
-Color ExtendedPart::getColor() const {
+
+Graphics::Color ExtendedPart::getColor() const {
 	return screen.registry.get<Comp::Material>(this->entity)->albedo;
 }
 	

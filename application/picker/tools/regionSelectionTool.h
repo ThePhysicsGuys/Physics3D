@@ -22,6 +22,8 @@ private:
 public:
 	DEFINE_TOOL("Select region", "Selects one or multiple entities within a region.", Graphics::GLFW::Cursor::CROSSHAIR);
 
+	~RegionSelectionTool() = default;
+
 	void onRegister() override;
 	void onDeregister() override;
 	void onRender() override;

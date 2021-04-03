@@ -24,12 +24,12 @@
 namespace P3D::Application {
 
 Vec4f colors[] {
-	COLOR::BLUE,
-	COLOR::GREEN,
-	COLOR::YELLOW,
-	COLOR::ORANGE,
-	COLOR::RED,
-	COLOR::PURPLE
+	Colors::BLUE,
+	Colors::GREEN,
+	Colors::YELLOW,
+	Colors::ORANGE,
+	Colors::RED,
+	Colors::PURPLE
 };
 
 void renderSphere(double radius, const Position& position, const Color& color) {
@@ -52,9 +52,9 @@ void renderBounds(const Bounds& bounds, const Color& color) {
 	renderBox(GlobalCFrame(position), static_cast<double>(diagonal.x), static_cast<double>(diagonal.y), static_cast<double>(diagonal.z), color);
 }
 
-static Color getCyclingColor(int depth){
+static Color getCyclingColor(int depth) {
 	Color color = colors[depth % 6];
-	color.w = 0.3f;
+	color.a = 0.3f;
 	return color;
 }
 
@@ -202,13 +202,13 @@ void DebugLayer::onRender(Engine::Registry64& registry) {
 				Physical& selectedPhys = *screen->selectedPart->parent;
 
 				for(Part& part : selectedPhys.rigidBody) {
-					Color yellow = Graphics::COLOR::YELLOW;
-					yellow.w = 0.5;
+					Color yellow = Graphics::Colors::YELLOW;
+					yellow.a = 0.5;
 					BoundingBox localBounds = screen->selectedPart->getLocalBounds();
 					renderBox(screen->selectedPart->getCFrame().localToGlobal(CFrame(localBounds.getCenter())), localBounds.getWidth(), localBounds.getHeight(), localBounds.getDepth(), yellow);
 
-					Color green = Graphics::COLOR::GREEN;
-					green.w = 0.5;
+					Color green = Graphics::Colors::GREEN;
+					green.a = 0.5;
 					renderSphere(part.maxRadius, part.getPosition(), green);
 				}
 			}
@@ -217,13 +217,13 @@ void DebugLayer::onRender(Engine::Registry64& registry) {
 		if(colissionSpheresMode == SphereColissionRenderMode::ALL) {
 			for(MotorizedPhysical* phys : screen->world->iterPhysicals()) {
 				for(Part& part : phys->rigidBody) {
-					Color yellow = Graphics::COLOR::YELLOW;
-					yellow.w = 0.5;
+					Color yellow = Graphics::Colors::YELLOW;
+					yellow.a = 0.5;
 					BoundingBox localBounds = part.getLocalBounds();
 					renderBox(part.getCFrame().localToGlobal(CFrame(localBounds.getCenter())), localBounds.getWidth(), localBounds.getHeight(), localBounds.getDepth(), yellow);
 
-					Color green = Graphics::COLOR::GREEN;
-					green.w = 0.5;
+					Color green = Graphics::Colors::GREEN;
+					green.a = 0.5;
 					renderSphere(part.maxRadius, part.getPosition(), green);
 				}
 			}

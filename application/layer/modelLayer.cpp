@@ -19,7 +19,6 @@
 #include "../graphics/gui/color.h"
 
 #include "../physics/math/linalg/vec.h"
-#include "../physics/threading/sharedLockGuard.h"
 #include "../physics/misc/filters/visibilityFilter.h"
 
 #include "../util/resource/resourceManager.h"
@@ -86,7 +85,7 @@ static Color getAlbedoForPart(Screen* screen, ExtendedPart* part) {
 	Color computedAmbient = getAmbientForPartForSelected(screen, part);
 
 	if (part->entity == screen->intersectedEntity)
-		computedAmbient += Vec4f(-0.1f, -0.1f, -0.1f, 0);
+		computedAmbient = Vec4f(computedAmbient) + Vec4f(-0.1f, -0.1f, -0.1f, 0);
 
 	return computedAmbient;
 }
@@ -189,7 +188,7 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 			info.transform = registry.getOr<Comp::Transform>(entity);
 			info.material = registry.getOr<Comp::Material>(entity);
 			
-			if (info.material.albedo.w < 1.0f) {
+			if (info.material.albedo.a < 1.0f) {
 				double distance = lengthSquared(Vec3(screen->camera.cframe.position - info.transform.getPosition()));
 				transparentEntities.insert(std::make_pair(distance, info));
 			} else {

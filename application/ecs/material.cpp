@@ -7,7 +7,7 @@
 
 namespace P3D::Application::Comp {
 
-Material::Material(const Color& albedo, float metalness, float roughness, float ao) : albedo(albedo), metalness(metalness), roughness(roughness), ao(ao) {
+Material::Material(const Graphics::Color& albedo, float metalness, float roughness, float ao) : albedo(albedo), metalness(metalness), roughness(roughness), ao(ao) {
 	
 }
 
