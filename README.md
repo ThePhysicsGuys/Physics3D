@@ -41,7 +41,7 @@ If you still have build problems, please create an issue as we want setting up t
   The dependencies can be installed on their own with [install/setupDependencies.sh](/install/setupDependencies.sh) (Unix) or [install/setupDependencies.bat](/install/setupDependencies.bat) (Windows)
   The build directories can be generated on their own with [install/setupBuild.sh](/install/setupBuild.sh) (Unix) or [install/setupBuild.bat](/install/setupBuild.bat) (Windows)
 4. Make the build from the build directory `cd build` with `cmake --build .`
-5. To run the application, you must also run it from the build directory: `cd build` `./application`. Tests and benchmarks can be run from anywhere. 
+5. To run the application, you must also run it from the build directory: `cd build` `Debug\.\application`. Tests and benchmarks can be run from anywhere. 
 
 #### Ubuntu specific using apt-get
 If you are using Ubuntu, we recommend using this installation method instead, as setting up using vcpkg can take a very long time. This method should get you a working version of the engine starting from a clean Ubuntu 18.04. 
