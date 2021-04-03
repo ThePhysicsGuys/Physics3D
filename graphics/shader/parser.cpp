@@ -3,7 +3,7 @@
 #include "parser.h"
 #include "lexer.h"
 
-#include <charconv>
+#include <sstream>
 
 namespace P3D::Graphics {
 
@@ -89,8 +89,12 @@ namespace P3D::Graphics {
 			switch (next.type) {
 				case Lexer::Token::Number: {
 					std::size_t amount;
-					if (auto [ptr, error] = std::from_chars(next.first(lexer.code), next.last(lexer.code), amount); error != std::errc())
+					std::stringstream stream(std::string(next.first(lexer.code), next.size()));
+					stream >> amount;
+
+					if (stream.fail())
 						return static_cast<std::size_t>(-1);
+					
 					return amount;
 				} case Lexer::Token::Identifier: {
 					std::string define(next.string(lexer.code));
@@ -216,9 +220,12 @@ namespace P3D::Graphics {
 			return;
 
 		std::size_t version;
-		if (auto [ptr, error] = std::from_chars(versionToken.first(lexer.code), versionToken.last(lexer.code), version); error != std::errc()) 
-			return;
+		std::stringstream stream(std::string(versionToken.first(lexer.code), versionToken.size()));
+		stream >> version;
 
+		if (stream.fail())
+			return;
+		
 		bool core = false;
 		Lexer::Token coreToken = lexer.peek();
 		if (coreToken.type == Lexer::Token::Identifier && coreToken.view(lexer.code) == "core") {
@@ -237,7 +244,10 @@ namespace P3D::Graphics {
 		int number = 1;
 		Lexer::Token numberToken = lexer.next();
 		if (numberToken.type == Lexer::Token::Number) {
-			if (auto [ptr, error] = std::from_chars(numberToken.first(lexer.code), numberToken.last(lexer.code), number); error != std::errc())
+			std::stringstream stream(std::string(numberToken.first(lexer.code), numberToken.size()));
+			stream >> number;
+
+			if (stream.fail())
 				return;
 		}
 
