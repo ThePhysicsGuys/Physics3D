@@ -131,36 +131,6 @@ target_link_libraries(benchmarks util)
 target_link_libraries(benchmarks physics)
 target_link_libraries(benchmarks Threads::Threads)
 
-add_executable(tests 
-  tests/testsMain.cpp
-
-  tests/estimateMotion.cpp
-  tests/testValues.cpp
-  tests/generators.cpp
-
-  tests/mathTests.cpp
-  tests/rotationTests.cpp
-  tests/motionTests.cpp
-  tests/geometryTests.cpp
-  tests/estimationTests.cpp
-  tests/constraintTests.cpp
-  tests/jointTests.cpp
-  tests/dataStructureTests.cpp
-  tests/boundsTree2Tests.cpp
-  tests/guiTests.cpp
-  tests/indexedShapeTests.cpp
-  tests/physicalStructureTests.cpp
-  tests/physicsTests.cpp
-  tests/inertiaTests.cpp
-  tests/testFrameworkConsistencyTests.cpp
-  tests/ecsTests.cpp
-  tests/lexerTests.cpp
-)
-
-target_link_libraries(tests util)
-target_link_libraries(tests physics)
-target_link_libraries(tests Threads::Threads)
-
 add_library(imguiInclude STATIC
   include/imgui/imgui.cpp
   include/imgui/imgui_demo.cpp
@@ -244,6 +214,38 @@ add_library(engine STATIC
 target_include_directories(engine PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/engine")
 
 target_link_libraries(engine graphics)
+
+add_executable(tests 
+  tests/testsMain.cpp
+
+  tests/estimateMotion.cpp
+  tests/testValues.cpp
+  tests/generators.cpp
+
+  tests/mathTests.cpp
+  tests/rotationTests.cpp
+  tests/motionTests.cpp
+  tests/geometryTests.cpp
+  tests/estimationTests.cpp
+  tests/constraintTests.cpp
+  tests/jointTests.cpp
+  tests/dataStructureTests.cpp
+  tests/boundsTree2Tests.cpp
+  tests/guiTests.cpp
+  tests/indexedShapeTests.cpp
+  tests/physicalStructureTests.cpp
+  tests/physicsTests.cpp
+  tests/inertiaTests.cpp
+  tests/testFrameworkConsistencyTests.cpp
+  tests/ecsTests.cpp
+  tests/lexerTests.cpp
+)
+
+target_link_libraries(tests util)
+target_link_libraries(tests physics)
+target_link_libraries(tests graphics)
+target_link_libraries(tests engine)
+target_link_libraries(tests Threads::Threads)
 
 add_executable(application
   application/core.cpp
