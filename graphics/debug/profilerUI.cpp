@@ -2,6 +2,9 @@
 
 #include "profilerUI.h"
 
+#include "../application/picker/selection.h" // reverse dependency -- BAAAAD
+#include "../application/picker/tools/selectionTool.h" // reverse dependency -- BAAAAD
+#include "../application/extendedPart.h" // reverse dependency -- BAAAAD
 
 #include <sstream>
 #include <GL/glew.h>
@@ -218,12 +221,12 @@ static void recursiveRenderTree(const P3D::NewBoundsTree::TreeTrunk& curTrunk, i
 				Path::circleFilled(nextStep, 0.006f, Colors::RED, 8);
 			}
 		} else {
-			if(subNode.asObject() == selectedObject) {
+			P3D::Application::ExtendedPart* extPart = reinterpret_cast<Application::ExtendedPart*>(subNode.asObject());
+			if(P3D::Application::SelectionTool::selection.contains(extPart->entity)) {
 				Path::circleFilled(nextStep, 0.012f, Colors::YELLOW, 8);
 			}
 		}
 	}
-
 }
 
 void renderTreeStructure(const P3D::NewBoundsTree::BoundsTree<Part>& tree, const Vec3f& treeColor, Vec2f origin, float allottedWidth, const void* selectedObject) {

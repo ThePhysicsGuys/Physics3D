@@ -47,6 +47,14 @@ namespace P3D::Application {
 		return this->selection.size();
 	}
 
+	bool Selection::contains(const Engine::Registry64::entity_type& entity) const {
+		for(const Engine::Registry64::entity_type& found : selection)
+			if(found == entity)
+				return true;
+
+		return false;
+	}
+
 	bool Selection::isMultiSelection() const {
 		return size() > 1;
 	}

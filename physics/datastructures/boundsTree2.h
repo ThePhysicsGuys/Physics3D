@@ -27,6 +27,9 @@ inline float computeCost(const BoundsTemplate<float>& bounds) {
 	return d.x + d.y + d.z;
 }
 
+inline float computeAdditionCost(const BoundsTemplate<float>& oldBounds, const BoundsTemplate<float>& extraBounds) {
+	return computeCost(unionOfBounds(oldBounds, extraBounds)) - computeCost(oldBounds);
+}
 
 class TreeNodeRef {
 	friend class TreeTrunk;
@@ -126,20 +129,68 @@ public:
 
 struct TrunkSIMDHelperFallback;
 
-class alignas(64) TreeTrunk {
-private:
-	float xMin[BRANCH_FACTOR];
-	float yMin[BRANCH_FACTOR];
-	float zMin[BRANCH_FACTOR];
-	float xMax[BRANCH_FACTOR];
-	float yMax[BRANCH_FACTOR];
-	float zMax[BRANCH_FACTOR];
-public:
+template<size_t Size>
+struct alignas(64) BoundsArray {
+	float xMin[Size];
+	float yMin[Size];
+	float zMin[Size];
+	float xMax[Size];
+	float yMax[Size];
+	float zMax[Size];
+
+	inline BoundsTemplate<float> getBounds(int index) const {
+		assert(index >= 0 && index < Size);
+		BoundsTemplate<float> result;
+		result.min.x = xMin[index];
+		result.min.y = yMin[index];
+		result.min.z = zMin[index];
+		result.max.x = xMax[index];
+		result.max.y = yMax[index];
+		result.max.z = zMax[index];
+		return result;
+	}
+	inline void setBounds(int index, const BoundsTemplate<float>& newBounds) {
+		assert(index >= 0 && index < Size);
+		xMin[index] = newBounds.min.x;
+		yMin[index] = newBounds.min.y;
+		zMin[index] = newBounds.min.z;
+		xMax[index] = newBounds.max.x;
+		yMax[index] = newBounds.max.y;
+		zMax[index] = newBounds.max.z;
+	}
+	inline void move(int from, int to) {
+		assert(from >= 0 && from < Size);
+		assert(to >= 0 && to < Size);
+		xMin[to] = xMin[from];
+		yMin[to] = yMin[from];
+		zMin[to] = zMin[from];
+		xMax[to] = xMax[from];
+		yMax[to] = yMax[from];
+		zMax[to] = zMax[from];
+	}
+};
+
+struct alignas(64) TreeTrunk {
+	BoundsArray<BRANCH_FACTOR> subNodeBounds;
 	TreeNodeRef subNodes[BRANCH_FACTOR];
-	BoundsTemplate<float> getBoundsOfSubNode(int subNode) const;
-	void setBoundsOfSubNode(int subNode, const BoundsTemplate<float>& newBounds);
-	void setSubNode(int subNode, TreeNodeRef&& newNode, const BoundsTemplate<float>& newBounds);
-	void moveSubNode(int from, int to);
+
+	inline BoundsTemplate<float> getBoundsOfSubNode(int subNode) const {
+		return this->subNodeBounds.getBounds(subNode);
+	}
+
+	inline void setBoundsOfSubNode(int subNode, const BoundsTemplate<float>& newBounds) {
+		this->subNodeBounds.setBounds(subNode, newBounds);
+	}
+
+	inline void moveSubNode(int from, int to) {
+		this->subNodeBounds.move(from, to);
+		this->subNodes[to] = std::move(this->subNodes[from]);
+	}
+
+	inline void setSubNode(int subNode, TreeNodeRef&& newNode, const BoundsTemplate<float>& newBounds) {
+		this->subNodeBounds.setBounds(subNode, newBounds);
+		subNodes[subNode] = std::move(newNode);
+	}
 };
 
 TreeNodeRef::TreeNodeRef(TreeTrunk* trunk, int trunkSize, bool isGroupHead) noexcept : ptr(reinterpret_cast<std::uintptr_t>(trunk) | (static_cast<std::uintptr_t>(trunkSize) - 1) | (isGroupHead ? BRANCH_FACTOR : 0)) {
@@ -166,14 +217,29 @@ typedef std::array<std::array<bool, BRANCH_FACTOR>, BRANCH_FACTOR> OverlapMatrix
 
 struct TrunkSIMDHelperFallback {
 	static BoundsTemplate<float> getTotalBounds(const TreeTrunk& trunk, int upTo);
+	static BoundsTemplate<float> getTotalBoundsWithout(const TreeTrunk& trunk, int upTo, int without);
+	// returns a list of bounds, every index contains the total bounds without that subNode
+	static BoundsArray<BRANCH_FACTOR> getAllTotalBoundsWithout(const TreeTrunk& trunk, int upTo);
 	static std::array<bool, BRANCH_FACTOR> getAllContainsBounds(const TreeTrunk& trunk, const BoundsTemplate<float>& boundsToContain);
-	static std::array<float, BRANCH_FACTOR> computeAllCombinationCosts(const TreeTrunk& trunk, const BoundsTemplate<float>& boundsExtention);
+	static std::array<float, BRANCH_FACTOR> computeAllCosts(const TreeTrunk& trunk);
+	static std::array<float, BRANCH_FACTOR> computeAllCombinationCosts(const BoundsArray<BRANCH_FACTOR>& boundsArr, const BoundsTemplate<float>& boundsExtention);
+	static std::pair<int, int> computeFurthestObjects(const BoundsArray<BRANCH_FACTOR * 2>& boundsArray, int size);
 	static int getLowestCombinationCost(const TreeTrunk& trunk, const BoundsTemplate<float>& boundsExtention, int nodeSize);
 	static std::array<bool, BRANCH_FACTOR> computeOverlapsWith(const TreeTrunk& trunk, int trunkSize, const BoundsTemplate<float>& bounds);
 	// indexed result[a][b]
-	static std::array<std::array<bool, BRANCH_FACTOR>, BRANCH_FACTOR> computeBoundsOverlapMatrix(const TreeTrunk& trunkA, int trunkASize, const TreeTrunk& trunkB, int trunkBSize);
+	static OverlapMatrix computeBoundsOverlapMatrix(const TreeTrunk& trunkA, int trunkASize, const TreeTrunk& trunkB, int trunkBSize);
 	// indexed result[i][j] with j >= i+1
-	static std::array<std::array<bool, BRANCH_FACTOR>, BRANCH_FACTOR> computeInternalBoundsOverlapMatrix(const TreeTrunk& trunk, int trunkSize);
+	static OverlapMatrix computeInternalBoundsOverlapMatrix(const TreeTrunk& trunk, int trunkSize);
+
+	static std::array<float, BRANCH_FACTOR> computeAllExtentionCosts(const TreeTrunk& trunk, int trunkSize, const BoundsTemplate<float>& extraBounds);
+
+	// returns resulting destTrunk size
+	static int transferNodes(TreeTrunk& srcTrunk, int srcTrunkStart, int srcTrunkEnd, TreeTrunk& destTrunk, int destTrunkSize);
+	
+	static BoundsArray<BRANCH_FACTOR * 2> combineBoundsArrays(const TreeTrunk& trunkA, int trunkASize, const TreeTrunk& trunkB, int trunkBSize);
+
+	// returns true if modified
+	static bool exchangeNodesBetween(TreeTrunk& trunkA, int& trunkASize, TreeTrunk& trunkB, int& trunkBSize);
 };
 
 template<typename CastTo, typename GetObjectBoundsFunc>
@@ -704,8 +770,8 @@ public:
 		this->transferSplitGroupTo(iter, iterEnd, *this);
 	}
 
-	inline void improveStructure() {/*TODO*/}
-	inline void maxImproveStructure() {/*TODO*/ }
+	void improveStructure();
+	void maxImproveStructure();
 
 	BoundsTreeIteratorPrototype begin() const { return BoundsTreeIteratorPrototype(baseTrunk, baseTrunkSize); }
 	IteratorEnd end() const { return IteratorEnd(); }
@@ -952,11 +1018,13 @@ public:
 
 	template<typename Func>
 	void forEachColission(const Func& func) const {
+		if(this->tree.baseTrunkSize == 0) return;
 		forEachColissionInternalRecursive<Boundable, TrunkSIMDHelperFallback, Func>(this->tree.baseTrunk, this->tree.baseTrunkSize, func);
 	}
 
 	template<typename Func>
 	void forEachColissionWith(const BoundsTree& other, const Func& func) const {
+		if(this->tree.baseTrunkSize == 0 || other.tree.baseTrunkSize == 0) return;
 		forEachColissionBetweenRecursive<Boundable, TrunkSIMDHelperFallback, Func>(this->tree.baseTrunk, this->tree.baseTrunkSize, other.tree.baseTrunk, other.tree.baseTrunkSize, func);
 	}
 
@@ -964,8 +1032,8 @@ public:
 		recalculateBoundsRecursive<Boundable>(this->tree.baseTrunk, this->tree.baseTrunkSize);
 	}
 
-	void improveStructure() {/*TODO*/ }
-	void maxImproveStructure() {/*TODO*/ }
+	void improveStructure() { tree.improveStructure(); }
+	void maxImproveStructure() { tree.maxImproveStructure(); }
 };
 
 struct BasicBounded {

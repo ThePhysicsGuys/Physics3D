@@ -28,8 +28,8 @@ SymmetricMatrix<N, 3> skewSymmetricSquared(const Vector<N, 3> & v) {
 	N x = v.x, y = v.y, z = v.z;
 	return SymmetricMatrix<N, 3>{
 		-(y * y + z * z),
-		x* y, -(x * x + z * z),
-		x* z, y* z, -(x * x + y * y)
+		x * y, -(x * x + z * z),
+		x * z, y * z, -(x * x + y * y)
 	};
 }
 

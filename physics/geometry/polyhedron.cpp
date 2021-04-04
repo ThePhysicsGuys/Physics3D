@@ -90,35 +90,34 @@ void Polyhedron::computeNormals(Vec3f* buffer) const {
 double Polyhedron::getVolume() const {
 	double total = 0;
 	for (Triangle triangle : iterTriangles()) {
-		Vec3f v0 = this->getVertex(triangle.firstIndex);
-		Vec3f v1 = this->getVertex(triangle.secondIndex);
-		Vec3f v2 = this->getVertex(triangle.thirdIndex);
+		Vec3 v0 = this->getVertex(triangle.firstIndex);
+		Vec3 v1 = this->getVertex(triangle.secondIndex);
+		Vec3 v2 = this->getVertex(triangle.thirdIndex);
 
-		Vec3 D1 = v1 - v0; 
-		Vec3 D2 = v2 - v0;
+		double D1x = v1.x - v0.x; 
+		double D1y = v1.y - v0.y;
+		double D2x = v2.x - v0.x;
+		double D2y = v2.y - v0.y;
 		
-		double Tf = (D1.x * D2.y - D1.y * D2.x);
+		double nz = D1x * D2y - D1y * D2x;
 
-		total += Tf * ((D1.z + D2.z) / 6 + v0.z / 2);
+		total += nz * (v0.z + v1.z + v2.z);
 	}
 
-	return total;
+	return total / 6;
 }
 
 Vec3 Polyhedron::getCenterOfMass() const {
 	Vec3 total(0,0,0);
 	for (Triangle triangle : iterTriangles()) {
-		Vec3f v0 = this->getVertex(triangle.firstIndex);
-		Vec3f v1 = this->getVertex(triangle.secondIndex);
-		Vec3f v2 = this->getVertex(triangle.thirdIndex);
+		Vec3 v0 = this->getVertex(triangle.firstIndex);
+		Vec3 v1 = this->getVertex(triangle.secondIndex);
+		Vec3 v2 = this->getVertex(triangle.thirdIndex);
 
-		Vec3f D1 = v1 - v0;
-		Vec3f D2 = v2 - v0;
+		Vec3 normalVec = (v1 - v0) % (v2 - v0);
+		Vec3 vFactor = elementWiseSquare(v0) + elementWiseSquare(v1) + elementWiseSquare(v2) + elementWiseMul(v0, v1) + elementWiseMul(v1, v2) + elementWiseMul(v2, v0);
 
-		Vec3f dFactor = D1 % D2;
-		Vec3f vFactor = elementWiseSquare(v0) + elementWiseSquare(v1) + elementWiseSquare(v2) + elementWiseMul(v0, v1) + elementWiseMul(v1, v2) + elementWiseMul(v2, v0);
-
-		total += Vec3(elementWiseMul(dFactor, vFactor));
+		total += elementWiseMul(normalVec, vFactor);
 	}
 	
 	return total / (24 * getVolume());
@@ -144,14 +143,11 @@ ScalableInertialMatrix Polyhedron::getScalableInertia(const CFrame& reference) c
 		Vec3 v1 = reference.globalToLocal(Vec3(this->getVertex(triangle.secondIndex)));
 		Vec3 v2 = reference.globalToLocal(Vec3(this->getVertex(triangle.thirdIndex)));
 
-		Vec3 D1 = v1 - v0; // scales x:sx y:sy z:sz
-		Vec3 D2 = v2 - v0; // scales x:sx y:sy z:sz
-
-		Vec3 dFactor = D1 % D2;   // scales x: sy*sz,  y:  sx*sz    z: sx*sy
+		Vec3 normalVec = (v1 - v0) % (v2 - v0);  // scales x: sy*sz,  y:  sx*sz    z: sx*sy
 
 		// Diagonal Elements      // sx*sx*sx,  sy*sy*sy,  sz*sz*sz
 		Vec3 squaredIntegral = elementWiseCube(v0) + elementWiseCube(v1) + elementWiseCube(v2) + elementWiseMul(elementWiseSquare(v0), v1 + v2) + elementWiseMul(elementWiseSquare(v1), v0 + v2) + elementWiseMul(elementWiseSquare(v2), v0 + v1) + elementWiseMul(elementWiseMul(v0, v1), v2);
-		Vec3 diagonalElementParts = elementWiseMul(dFactor, squaredIntegral); // (sx^3)*sy*sz, sx*(sy^3)*sz, sx*sy*(sz^3)
+		Vec3 diagonalElementParts = elementWiseMul(normalVec, squaredIntegral); // (sx^3)*sy*sz, sx*(sy^3)*sz, sx*sy*(sz^3)
 
 		totalDiagElementParts += diagonalElementParts;
 
@@ -166,9 +162,9 @@ ScalableInertialMatrix Polyhedron::getScalableInertia(const CFrame& reference) c
 								v2.x*v0.y*v0.z + v2.x*v1.y*v2.z + v2.x*v0.y*v2.z + v2.x*v1.y*v1.z + v2.x*v2.y*v0.z + v2.x*v2.y*v1.z;
 		double allDifferents =	v0.x*v1.y*v2.z + v0.x*v2.y*v1.z + v1.x*v0.y*v2.z + v1.x*v2.y*v0.z + v2.x*v0.y*v1.z + v2.x*v1.y*v0.z;
 
-		double xyzIntegral = -(3 * selfProducts + twoSames + allDifferents / 2); // scales linearly by sx*sy*sz
+		double xyzIntegral = -(3.0 * selfProducts + twoSames + 0.5 * allDifferents); // scales linearly by sx*sy*sz
 
-		totalOffDiag += dFactor * xyzIntegral;
+		totalOffDiag += normalVec * xyzIntegral;
 
 		//total[1][0] += dFactor.z * xyzIntegral; // sx*sy*sz* sx*sy
 		//total[2][0] += dFactor.y * xyzIntegral; // sx*sy*sz* sx*sz

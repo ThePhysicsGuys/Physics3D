@@ -5,42 +5,55 @@
 
 namespace P3D::NewBoundsTree {
 
-BoundsTemplate<float> TreeTrunk::getBoundsOfSubNode(int subNode) const {
-	assert(subNode >= 0 && subNode < BRANCH_FACTOR);
-	BoundsTemplate<float> result;
-	result.min.x = xMin[subNode];
-	result.min.y = yMin[subNode];
-	result.min.z = zMin[subNode];
-	result.max.x = xMax[subNode];
-	result.max.y = yMax[subNode];
-	result.max.z = zMax[subNode];
-	return result;
-}
-
-void TreeTrunk::setBoundsOfSubNode(int subNode, const BoundsTemplate<float>& newBounds) {
-	assert(subNode >= 0 && subNode < BRANCH_FACTOR);
-	xMin[subNode] = newBounds.min.x;
-	yMin[subNode] = newBounds.min.y;
-	zMin[subNode] = newBounds.min.z;
-	xMax[subNode] = newBounds.max.x;
-	yMax[subNode] = newBounds.max.y;
-	zMax[subNode] = newBounds.max.z;
-}
-
-void TreeTrunk::setSubNode(int subNode, TreeNodeRef&& newNode, const BoundsTemplate<float>& newBounds) {
-	assert(subNode >= 0 && subNode < BRANCH_FACTOR);
-	subNodes[subNode] = std::move(newNode);
-	setBoundsOfSubNode(subNode, newBounds);
-}
-
 // naive implementation, to be optimized
 BoundsTemplate<float> TrunkSIMDHelperFallback::getTotalBounds(const TreeTrunk& trunk, int upTo) {
-	assert(upTo > 1 && upTo <= BRANCH_FACTOR);
+	assert(upTo >= 1 && upTo <= BRANCH_FACTOR);
 	BoundsTemplate<float> totalBounds = trunk.getBoundsOfSubNode(0);
 	for(int i = 1; i < upTo; i++) {
 		totalBounds = unionOfBounds(totalBounds, trunk.getBoundsOfSubNode(i));
 	}
 	return totalBounds;
+}
+// naive implementation, to be optimized
+BoundsTemplate<float> TrunkSIMDHelperFallback::getTotalBoundsWithout(const TreeTrunk& trunk, int upTo, int without) {
+	assert(upTo >= 2 && upTo <= BRANCH_FACTOR); // size must be at least 2, can't compute otherwise
+	assert(without >= 0 && without < BRANCH_FACTOR);
+	if(without == 0) {
+		BoundsTemplate<float> totalBounds = trunk.getBoundsOfSubNode(1);
+		for(int i = 2; i < upTo; i++) {
+			totalBounds = unionOfBounds(totalBounds, trunk.getBoundsOfSubNode(i));
+		}
+		return totalBounds;
+	} else {
+		BoundsTemplate<float> totalBounds = trunk.getBoundsOfSubNode(0);
+		for(int i = 1; i < upTo; i++) {
+			if(i == without) continue;
+			totalBounds = unionOfBounds(totalBounds, trunk.getBoundsOfSubNode(i));
+		}
+		return totalBounds;
+	}
+}
+
+BoundsArray<BRANCH_FACTOR> TrunkSIMDHelperFallback::getAllTotalBoundsWithout(const TreeTrunk& trunk, int upTo) {
+	assert(upTo >= 2 && upTo <= BRANCH_FACTOR); // size must be at least 2, can't compute otherwise
+	BoundsArray<BRANCH_FACTOR> result;
+	{
+		BoundsTemplate<float> totalBounds0 = trunk.getBoundsOfSubNode(1);
+		for(int i = 2; i < upTo; i++) {
+			totalBounds0 = unionOfBounds(totalBounds0, trunk.getBoundsOfSubNode(i));
+		}
+		result.setBounds(0, totalBounds0);
+	}
+	for(int without = 1; without < upTo; without++) {
+		BoundsTemplate<float> totalBounds = trunk.getBoundsOfSubNode(0);
+		for(int i = 2; i < upTo; i++) {
+			if(i == without) continue;
+			totalBounds = unionOfBounds(totalBounds, trunk.getBoundsOfSubNode(i));
+		}
+		result.setBounds(without, totalBounds);
+	}
+
+	return result;
 }
 
 std::array<bool, BRANCH_FACTOR> TrunkSIMDHelperFallback::getAllContainsBounds(const TreeTrunk& trunk, const BoundsTemplate<float>& boundsToContain) {
@@ -52,17 +65,46 @@ std::array<bool, BRANCH_FACTOR> TrunkSIMDHelperFallback::getAllContainsBounds(co
 	return contained;
 }
 
-std::array<float, BRANCH_FACTOR> TrunkSIMDHelperFallback::computeAllCombinationCosts(const TreeTrunk& trunk, const BoundsTemplate<float>& boundsExtention) {
+std::array<float, BRANCH_FACTOR> TrunkSIMDHelperFallback::computeAllCosts(const TreeTrunk& trunk) {
 	std::array<float, BRANCH_FACTOR> costs;
 	for(int i = 0; i < BRANCH_FACTOR; i++) {
 		BoundsTemplate<float> subNodeBounds = trunk.getBoundsOfSubNode(i);
+		costs[i] = computeCost(subNodeBounds);
+	}
+	return costs;
+}
+
+std::array<float, BRANCH_FACTOR> TrunkSIMDHelperFallback::computeAllCombinationCosts(const BoundsArray<BRANCH_FACTOR>& boundsArr, const BoundsTemplate<float>& boundsExtention) {
+	std::array<float, BRANCH_FACTOR> costs;
+	for(int i = 0; i < BRANCH_FACTOR; i++) {
+		BoundsTemplate<float> subNodeBounds = boundsArr.getBounds(i);
 		costs[i] = computeCost(unionOfBounds(boundsExtention, subNodeBounds));
 	}
 	return costs;
 }
 
+std::pair<int, int> TrunkSIMDHelperFallback::computeFurthestObjects(const BoundsArray<BRANCH_FACTOR * 2>& boundsArray, int size) {
+	std::pair<int, int> furthestObjects{0, 1};
+	float biggestCost = -std::numeric_limits<float>::infinity();
+	for(int i = 0; i < size - 1; i++) {
+		BoundsTemplate<float> iBounds = boundsArray.getBounds(i);
+		for(int j = i + 1; j < size; j++) {
+			BoundsTemplate<float> jBounds = boundsArray.getBounds(j);
+
+			float cost = computeCost(unionOfBounds(iBounds, jBounds));
+			if(cost > biggestCost) {
+				biggestCost = cost;
+				furthestObjects.first = i;
+				furthestObjects.second = j;
+			}
+		}
+	}
+
+	return furthestObjects;
+}
+
 int TrunkSIMDHelperFallback::getLowestCombinationCost(const TreeTrunk& trunk, const BoundsTemplate<float>& boundsExtention, int nodeSize) {
-	std::array<float, BRANCH_FACTOR> costs = TrunkSIMDHelperFallback::computeAllCombinationCosts(trunk, boundsExtention);
+	std::array<float, BRANCH_FACTOR> costs = TrunkSIMDHelperFallback::computeAllCombinationCosts(trunk.subNodeBounds, boundsExtention);
 	float bestCost = costs[0];
 	int bestIndex = 0;
 	for(int i = 1; i < nodeSize; i++) {
@@ -84,8 +126,8 @@ std::array<bool, BRANCH_FACTOR> TrunkSIMDHelperFallback::computeOverlapsWith(con
 	return result;
 }
 
-std::array<std::array<bool, BRANCH_FACTOR>, BRANCH_FACTOR> TrunkSIMDHelperFallback::computeBoundsOverlapMatrix(const TreeTrunk& trunkA, int trunkASize, const TreeTrunk& trunkB, int trunkBSize) {
-	std::array<std::array<bool, BRANCH_FACTOR>, BRANCH_FACTOR> result;
+OverlapMatrix TrunkSIMDHelperFallback::computeBoundsOverlapMatrix(const TreeTrunk& trunkA, int trunkASize, const TreeTrunk& trunkB, int trunkBSize) {
+	OverlapMatrix result;
 	for(int a = 0; a < trunkASize; a++) {
 		BoundsTemplate<float> aBounds = trunkA.getBoundsOfSubNode(a);
 		for(int b = 0; b < trunkBSize; b++) {
@@ -96,9 +138,8 @@ std::array<std::array<bool, BRANCH_FACTOR>, BRANCH_FACTOR> TrunkSIMDHelperFallba
 	return result;
 }
 
-std::array<std::array<bool, BRANCH_FACTOR>, BRANCH_FACTOR> TrunkSIMDHelperFallback::computeInternalBoundsOverlapMatrix(const TreeTrunk& trunk, int trunkSize) {
-	std::array<std::array<bool, BRANCH_FACTOR>, BRANCH_FACTOR> result;
-
+OverlapMatrix TrunkSIMDHelperFallback::computeInternalBoundsOverlapMatrix(const TreeTrunk& trunk, int trunkSize) {
+	OverlapMatrix result;
 	for(int a = 0; a < trunkSize; a++) {
 		BoundsTemplate<float> aBounds = trunk.getBoundsOfSubNode(a);
 		for(int b = a+1; b < trunkSize; b++) {
@@ -106,12 +147,147 @@ std::array<std::array<bool, BRANCH_FACTOR>, BRANCH_FACTOR> TrunkSIMDHelperFallba
 			result[a][b] = intersects(aBounds, bBounds);
 		}
 	}
-
 	return result;
 }
 
-void TreeTrunk::moveSubNode(int from, int to) {
-	this->setSubNode(to, std::move(this->subNodes[from]), this->getBoundsOfSubNode(from));
+std::array<float, BRANCH_FACTOR> TrunkSIMDHelperFallback::computeAllExtentionCosts(const TreeTrunk& trunk, int trunkSize, const BoundsTemplate<float>& extraBounds) {
+	std::array<float, BRANCH_FACTOR> resultingCosts;
+	for(int i = 0; i < trunkSize; i++) {
+		resultingCosts[i] = computeAdditionCost(trunk.getBoundsOfSubNode(i), extraBounds);
+	}
+	return resultingCosts;
+}
+
+int TrunkSIMDHelperFallback::transferNodes(TreeTrunk& srcTrunk, int srcTrunkStart, int srcTrunkEnd, TreeTrunk& destTrunk, int destTrunkSize) {
+	for(int i = srcTrunkStart; i < srcTrunkEnd; i++) {
+		destTrunk.setSubNode(destTrunkSize, std::move(srcTrunk.subNodes[i]), srcTrunk.getBoundsOfSubNode(i));
+		destTrunkSize++;
+	}
+	return destTrunkSize;
+}
+
+BoundsArray<BRANCH_FACTOR * 2> TrunkSIMDHelperFallback::combineBoundsArrays(const TreeTrunk& trunkA, int trunkASize, const TreeTrunk& trunkB, int trunkBSize) {
+	BoundsArray<BRANCH_FACTOR * 2> result;
+	for(int i = 0; i < trunkASize; i++) {
+		result.setBounds(i, trunkA.getBoundsOfSubNode(i));
+	}
+	for(int i = 0; i < trunkBSize; i++) {
+		result.setBounds(trunkASize + i, trunkB.getBoundsOfSubNode(i));
+	}
+	return result;
+}
+
+// returns true if modified
+bool TrunkSIMDHelperFallback::exchangeNodesBetween(TreeTrunk& trunkA, int& trunkASize, TreeTrunk& trunkB, int& trunkBSize) {
+	int totalSize = trunkASize + trunkBSize;
+	// if this is not the case, we could've just merged the nodes, this is handled in another function
+	// if totalSize was BRANCH_FACTOR + 1 we could've moved all but one node from one trunk to the other, also handled elsewhere
+	assert(totalSize >= BRANCH_FACTOR + 2); 
+	BoundsArray<BRANCH_FACTOR * 2> allBounds = TrunkSIMDHelperFallback::combineBoundsArrays(trunkA, trunkASize, trunkB, trunkBSize);
+	std::pair<int, int> furthestObjects = TrunkSIMDHelperFallback::computeFurthestObjects(allBounds, totalSize);
+
+	BoundsTemplate<float> aBounds = allBounds.getBounds(furthestObjects.first);
+	BoundsTemplate<float> bBounds = allBounds.getBounds(furthestObjects.second);
+
+	int aResultSize = 0; 
+	int bResultSize = 0; 
+	int aResult[BRANCH_FACTOR * 2];
+	int bResult[BRANCH_FACTOR * 2];
+
+	// positive if costA < costB
+	float allDeltaCosts[BRANCH_FACTOR * 2];
+	for(int i = 0; i < totalSize; i++) {
+		BoundsTemplate<float> bounds = allBounds.getBounds(i);
+		float costA = computeCost(unionOfBounds(aBounds, bounds));
+		float costB = computeCost(unionOfBounds(bBounds, bounds));
+
+		allDeltaCosts[i] = costB - costA;
+	}
+
+	for(int i = 0; i < totalSize; i++) {
+		if(allDeltaCosts[i] >= 0.0) {
+			aResult[aResultSize++] = i;
+		} else {
+			bResult[bResultSize++] = i;
+		}
+	}
+
+	if(aResultSize > BRANCH_FACTOR) {
+		// move least costly elements from a to b (least costly cost is closest to 0)
+		do {
+			int worstIndex = 0; 
+			float worstCost = allDeltaCosts[aResult[0]];
+			for(int i = 1; i < aResultSize; i++) {
+				float cost = allDeltaCosts[aResult[i]];
+				if(cost < worstCost) {
+					worstIndex = i;
+					worstCost = cost;
+				}
+			}
+			bResult[bResultSize++] = aResult[worstIndex];
+			aResult[worstIndex] = aResult[--aResultSize];
+		} while(aResultSize > BRANCH_FACTOR);
+	} else if(bResultSize > BRANCH_FACTOR) {
+		// move least costly elements from b to a (least costly cost is closest to 0)
+		do {
+			int worstIndex = 0;
+			float worstCost = allDeltaCosts[bResult[0]];
+			for(int i = 1; i < bResultSize; i++) {
+				float cost = allDeltaCosts[bResult[i]];
+				if(cost > worstCost) { // these costs are all negative
+					worstIndex = i;
+					worstCost = cost;
+				}
+			}
+			aResult[aResultSize++] = bResult[worstIndex];
+			bResult[worstIndex] = bResult[--bResultSize];
+		} while(bResultSize > BRANCH_FACTOR);
+	}
+
+	assert(aResultSize + bResultSize == totalSize);
+	assert(aResultSize <= BRANCH_FACTOR && bResultSize <= BRANCH_FACTOR);
+	assert(aResultSize >= 2 && bResultSize >= 2); // Guaranteed by totalSize >= BRANCH_FACTOR + 2 && aResultSize <= BRANCH_FACTOR && bResultSize <= BRANCH_FACTOR
+
+	// checks to see if a change needs to be made
+	bool a0ComesFromA = aResult[0] < trunkASize; 
+	bool b0ComesFromA = bResult[0] < trunkASize;
+	if(a0ComesFromA != b0ComesFromA) {// they differ in origin
+		for(int i = 1; i < aResultSize; i++) {
+			bool comesFromA = aResult[i] < trunkASize;
+			if(comesFromA != a0ComesFromA) {
+				goto wasChanged;
+			}
+		}
+		for(int i = 1; i < bResultSize; i++) {
+			bool comesFromA = bResult[i] < trunkASize;
+			if(comesFromA != b0ComesFromA) {
+				goto wasChanged;
+			}
+		}
+		return false;
+	}
+	wasChanged:;
+
+	TreeNodeRef allSubNodes[BRANCH_FACTOR * 2];
+	for(int i = 0; i < trunkASize; i++) {
+		allSubNodes[i] = std::move(trunkA.subNodes[i]);
+	}
+	for(int i = 0; i < trunkBSize; i++) {
+		allSubNodes[i+trunkASize] = std::move(trunkB.subNodes[i]);
+	}
+
+	for(int i = 0; i < aResultSize; i++) {
+		int from = aResult[i];
+		trunkA.setSubNode(i, std::move(allSubNodes[from]), allBounds.getBounds(from));
+	}
+	for(int i = 0; i < bResultSize; i++) {
+		int from = bResult[i];
+		trunkB.setSubNode(i, std::move(allSubNodes[from]), allBounds.getBounds(from));
+	}
+
+	trunkASize = aResultSize;
+	trunkBSize = bResultSize;
+	return true;
 }
 
 // returns the new size of this node, to be applied to the caller
@@ -576,6 +752,245 @@ size_t BoundsTreePrototype::groupSize(const void* groupRep, const BoundsTemplate
 void BoundsTreePrototype::clear() {
 	this->allocator.freeAllTrunks(this->baseTrunk, this->baseTrunkSize);
 	this->baseTrunkSize = 0;
+}
+
+static void improveTrunkHorizontalOld(TreeTrunk& trunk, int trunkSize) {
+	TreeNodeRef allSubSubNodes[BRANCH_FACTOR * BRANCH_FACTOR];
+	BoundsArray<BRANCH_FACTOR* BRANCH_FACTOR> allSubNodeBounds;
+	int subSubNodeCount = 0;
+
+	for(int i = 0; i < trunkSize; i++) {
+		TreeNodeRef& subNode = trunk.subNodes[i];
+
+		if(subNode.isTrunkNode() && !subNode.isGroupHead()) { // no redistributing groups
+			TreeTrunk& subTrunk = subNode.asTrunk();
+			int subNodeSize = subNode.getTrunkSize();
+
+			for(int subI = 0; subI < subNodeSize; subI++) {
+				allSubSubNodes[subSubNodeCount] = std::move(subTrunk.subNodes[subI]);
+				allSubNodeBounds.setBounds(subSubNodeCount, subTrunk.getBoundsOfSubNode(i));
+				subSubNodeCount++;
+			}
+		} else {
+			allSubSubNodes[subSubNodeCount] = std::move(subNode);
+			allSubNodeBounds.setBounds(subSubNodeCount, trunk.getBoundsOfSubNode(i));
+			subSubNodeCount++;
+		}
+	}
+
+	// 0 - 1  - 2  - 3  - 4  - 5  - 6  - 7  - 8  Num TrunkNodes
+	// 0 - 9  - 16 - 23 - 30 - 37 - 44 - 51 - 58 Min to trunk
+	// 8 - 15 - 22 - 29 - 36 - 43 - 50 - 57 - 64 Max to trunk
+
+	// 0 - 1 - 2  - 3  - 4
+	// 0 - 5 - 8  - 11 - 14
+	// 4 - 7 - 10 - 13 - 16
+	int numberOfResultingTrunks = (subSubNodeCount - 2) / (BRANCH_FACTOR - 1);
+	int numberOfFreeNodes = subSubNodeCount - numberOfResultingTrunks * BRANCH_FACTOR;
+
+
+}
+
+// means that this trunk and it's subtrunks cannot be improved
+static bool isLeafTrunk(TreeTrunk& trunk, int trunkSize) {
+	for(int subNodeI = 0; subNodeI < trunkSize; subNodeI++) {
+		TreeNodeRef& subNode = trunk.subNodes[subNodeI];
+		if(!subNode.isGroupHeadOrLeaf()) return false;
+	}
+	return true;
+}
+
+static std::pair<int, float> findBestMovingCost(TreeTrunk& trunk, int trunkSize, TreeTrunk& subTrunk, int subTrunkSize, int subNodeI, int subSubNodeI) {
+	BoundsTemplate<float> extraBounds = subTrunk.getBoundsOfSubNode(subSubNodeI);
+
+	int wantsToMoveTo = -1;
+	float bestCost = computeAdditionCost(TrunkSIMDHelperFallback::getTotalBoundsWithout(subTrunk, subTrunkSize, subSubNodeI), extraBounds);
+
+	std::array<float, BRANCH_FACTOR> allCosts = TrunkSIMDHelperFallback::computeAllExtentionCosts(trunk, trunkSize, extraBounds);
+
+	for(int i = 0; i < trunkSize; i++) {
+		if(i == subNodeI) continue;
+		if(allCosts[i] < bestCost) {
+			bestCost = allCosts[i];
+			wantsToMoveTo = i;
+		}
+	}
+
+	return std::pair<int, float>(wantsToMoveTo, bestCost);
+}
+
+static void improveTrunkHorizontal(TrunkAllocator& alloc, TreeTrunk& trunk, int trunkSize) {
+	assert(!isLeafTrunk(trunk, trunkSize));
+
+	// indexed overlaps[i][j] with j >= i+1
+	OverlapMatrix overlaps = TrunkSIMDHelperFallback::computeInternalBoundsOverlapMatrix(trunk, trunkSize);
+
+	for(int subNodeAI = 0; subNodeAI < trunkSize-1; subNodeAI++) {
+		TreeNodeRef& subNodeA = trunk.subNodes[subNodeAI];
+
+		if(subNodeA.isGroupHeadOrLeaf()) continue; // no breaking up groups
+
+		TreeTrunk& subTrunkA = subNodeA.asTrunk();
+		int subTrunkSizeA = subNodeA.getTrunkSize();
+
+		for(int subNodeBI = subNodeAI+1; subNodeBI < trunkSize - 1; subNodeBI++) {
+			TreeNodeRef& subNodeB = trunk.subNodes[subNodeBI];
+
+			if(subNodeB.isGroupHeadOrLeaf()) continue; // no breaking up groups
+
+			TreeTrunk& subTrunkB = subNodeB.asTrunk();
+			int subTrunkSizeB = subNodeB.getTrunkSize();
+
+			if(!overlaps[subNodeAI][subNodeBI]) continue;
+
+			if(subTrunkSizeA + subTrunkSizeB >= BRANCH_FACTOR + 2) {
+				// if true, this updates subTrunkSizeA and subTrunkSizeB
+				if(TrunkSIMDHelperFallback::exchangeNodesBetween(subTrunkA, subTrunkSizeA, subTrunkB, subTrunkSizeB)) {
+					// update treenoderefs
+					subNodeA.setTrunkSize(subTrunkSizeA);
+					subNodeB.setTrunkSize(subTrunkSizeB);
+
+					trunk.setBoundsOfSubNode(subNodeAI, TrunkSIMDHelperFallback::getTotalBounds(subTrunkA, subTrunkSizeA));
+					trunk.setBoundsOfSubNode(subNodeBI, TrunkSIMDHelperFallback::getTotalBounds(subTrunkB, subTrunkSizeB));
+					// just return, changing trunkNodes invalidated overlaps matrix, more improvements can be done in future calls
+					return;
+				}
+			} else {
+				// can just merge out a Trunk
+				// move all but first element from B to A
+				subTrunkSizeA = TrunkSIMDHelperFallback::transferNodes(subTrunkB, 1, subTrunkSizeB, subTrunkA, subTrunkSizeA);
+				subNodeA.setTrunkSize(subTrunkSizeA);
+				trunk.setBoundsOfSubNode(subNodeAI, TrunkSIMDHelperFallback::getTotalBounds(subTrunkA, subTrunkSizeA));
+				trunk.setSubNode(subNodeBI, std::move(subTrunkB.subNodes[0]), subTrunkB.getBoundsOfSubNode(0));
+				alloc.freeTrunk(&subTrunkB);
+
+				// just return, changing trunkNodes invalidated overlaps matrix, more improvements can be done in future calls
+				return;
+			}
+		}
+	}
+}
+
+static void improveTrunkVertical(TreeTrunk& trunk, int trunkSize) {
+	if(isLeafTrunk(trunk, trunkSize)) return; // no improvement possible
+
+	std::array<float, BRANCH_FACTOR> allExistingSizes = TrunkSIMDHelperFallback::computeAllCosts(trunk);
+
+	for(int subTrunkI = 0; subTrunkI < trunkSize; subTrunkI++) {
+		TreeNodeRef& subNode = trunk.subNodes[subTrunkI];
+
+		// find a node, and try to swap it with an element from a group
+		if(subNode.isGroupHeadOrLeaf()) continue;
+
+		TreeTrunk& subTrunk = subNode.asTrunk();
+		int subTrunkSize = subNode.getTrunkSize();
+
+		std::array<float, BRANCH_FACTOR> removeableSizes = TrunkSIMDHelperFallback::computeAllCosts(subTrunk);
+		BoundsArray<BRANCH_FACTOR> existingBoundsWithout = TrunkSIMDHelperFallback::getAllTotalBoundsWithout(subTrunk, subTrunkSize);
+
+		for(int itemToSwapI = 0; itemToSwapI < trunkSize; itemToSwapI++) {
+			if(itemToSwapI == subTrunkI) continue; // can't store a trunknode into itself
+
+			BoundsTemplate<float> itemToSwapBounds = subTrunk.getBoundsOfSubNode(itemToSwapI);
+			std::array<float, BRANCH_FACTOR> expandedTrunkSizes = TrunkSIMDHelperFallback::computeAllCombinationCosts(existingBoundsWithout, itemToSwapBounds);
+
+
+			int bestSubTrunkSwapI = -1;
+			float bestSwapCost = allExistingSizes[subTrunkI]; // this is the baseline cost, the cost if we swapped nothing, compare this to the cost if we were to swap
+
+			for(int i = 0; i < subTrunkSize; i++) {
+				float cost = expandedTrunkSizes[i];
+
+				if(cost < bestSwapCost) {
+					bestSwapCost = cost;
+					bestSubTrunkSwapI = i;
+				}
+			}
+
+			if(bestSubTrunkSwapI != -1) {
+				// an improvement can be made by swapping
+				std::swap(trunk.subNodes[itemToSwapI], subTrunk.subNodes[bestSubTrunkSwapI]);
+				trunk.setBoundsOfSubNode(itemToSwapI, subTrunk.getBoundsOfSubNode(bestSubTrunkSwapI));
+				subTrunk.setBoundsOfSubNode(bestSubTrunkSwapI, itemToSwapBounds);
+				trunk.setBoundsOfSubNode(subTrunkI, TrunkSIMDHelperFallback::getTotalBounds(subTrunk, subTrunkSize));
+
+				return; // exit here, further improvements can be made in future iterations
+			}
+		}
+	}
+}
+
+static int moveElementsOutOfGroup(TrunkAllocator& alloc, TreeTrunk& trunk, int trunkSize) {
+	assert(!isLeafTrunk(trunk, trunkSize));
+	if(trunkSize >= BRANCH_FACTOR) return trunkSize;
+	int freeSlots = BRANCH_FACTOR - trunkSize;
+
+	for(int subNodeI = 0; subNodeI < trunkSize; subNodeI++) {
+		TreeNodeRef& subNode = trunk.subNodes[subNodeI];
+
+		// find a node, and try to swap it with an element from a group
+		if(!subNode.isGroupHeadOrLeaf()) { // no breaking up groups
+			TreeTrunk& subTrunk = subNode.asTrunk();
+			int subTrunkSize = subNode.getTrunkSize();
+
+			if(subTrunkSize <= freeSlots + 1) {
+				// whole trunk is consumed, can use an extra slot since 
+
+				trunk.setSubNode(subNodeI, std::move(subTrunk.subNodes[0]), subTrunk.getBoundsOfSubNode(0));
+
+				trunkSize = TrunkSIMDHelperFallback::transferNodes(subTrunk, 1, subTrunkSize, trunk, trunkSize);
+				alloc.freeTrunk(&subTrunk);
+
+				if(trunkSize >= BRANCH_FACTOR) return trunkSize;
+				freeSlots = BRANCH_FACTOR - trunkSize;
+			} else {
+				// not consuming the whole trunk add what we can
+				int resultingSubTrunkSize = subTrunkSize - freeSlots;
+				int resultingSize = TrunkSIMDHelperFallback::transferNodes(subTrunk, resultingSubTrunkSize, subTrunkSize, trunk, trunkSize);
+				subNode.setTrunkSize(resultingSubTrunkSize);
+				trunk.setBoundsOfSubNode(subNodeI, TrunkSIMDHelperFallback::getTotalBounds(subTrunk, resultingSubTrunkSize));
+				assert(resultingSize == BRANCH_FACTOR);
+				return resultingSize;
+			}
+		}
+	}
+
+	return trunkSize;
+}
+
+static int improveStructureRecursive(TrunkAllocator& alloc, TreeTrunk& trunk, int trunkSize) {
+	bool isLeafTrunk = true;
+	for(int i = 0; i < trunkSize; i++) {
+		TreeNodeRef& subNode = trunk.subNodes[i];
+		if(subNode.isTrunkNode()) {
+			TreeTrunk& subTrunk = subNode.asTrunk();
+			int subTrunkSize = subNode.getTrunkSize();
+
+			subTrunkSize = improveStructureRecursive(alloc, subTrunk, subTrunkSize);
+
+			subNode.setTrunkSize(subTrunkSize);
+
+			if(!subNode.isGroupHead()) isLeafTrunk = false;
+		}
+	}
+	if(isLeafTrunk) return trunkSize;
+
+	trunkSize = moveElementsOutOfGroup(alloc, trunk, trunkSize);
+
+	if(trunkSize != BRANCH_FACTOR) return trunkSize;
+
+	improveTrunkHorizontal(alloc, trunk, trunkSize);
+	improveTrunkVertical(trunk, trunkSize);
+
+	return trunkSize;
+}
+void BoundsTreePrototype::improveStructure() {
+	improveStructureRecursive(this->allocator, this->baseTrunk, this->baseTrunkSize);
+}
+void BoundsTreePrototype::maxImproveStructure() {
+	for(int i = 0; i < 5; i++) {
+		this->improveStructure();
+	}
 }
 
 };

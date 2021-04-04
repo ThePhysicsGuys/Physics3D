@@ -18,6 +18,7 @@ namespace P3D::Application {
 	public:
 		[[nodiscard]] bool empty() const;
 		[[nodiscard]] std::size_t size() const;
+		[[nodiscard]] bool contains(const Engine::Registry64::entity_type& entity) const;
 		[[nodiscard]] bool isMultiSelection() const;
 		[[nodiscard]] Engine::Registry64::entity_type& operator[](int index);
 		

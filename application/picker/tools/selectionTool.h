@@ -6,7 +6,7 @@
 #include "../engine/ecs/registry.h"
 #include "../physics/math/ray.h"
 #include "../physics/math/linalg/vec.h"
-#include "ecs/components.h"
+#include "../../ecs/components.h"
 #include "../selection.h"
 #include <optional>
 
