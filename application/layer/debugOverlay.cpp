@@ -122,7 +122,7 @@ void DebugOverlay::onRender(Engine::Registry64& registry) {
 				for(const WorldLayer& layer : clayer.subLayers) {
 					float xPos = widthPerTree / 2 + widthPerTree * i;
 
-					renderTreeStructure(layer.tree, pieColors[i], Vec2f(xPos, 0.95f), widthPerTree * 0.7f, screen->selectedPart);
+					renderTreeStructure(layer.tree, pieColors[i], Vec2f(xPos, 0.95f), widthPerTree * 0.7f);
 					i++;
 				}
 			}

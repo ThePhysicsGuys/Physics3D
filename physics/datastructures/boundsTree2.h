@@ -17,7 +17,7 @@
 
 namespace P3D::NewBoundsTree {
 
-constexpr int BRANCH_FACTOR = 8;
+constexpr int BRANCH_FACTOR = 4;
 static_assert((BRANCH_FACTOR & (BRANCH_FACTOR - 1)) == 0, "Branch factor must be power of 2");
 
 class TreeTrunk;

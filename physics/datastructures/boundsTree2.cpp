@@ -819,7 +819,9 @@ static std::pair<int, float> findBestMovingCost(TreeTrunk& trunk, int trunkSize,
 	return std::pair<int, float>(wantsToMoveTo, bestCost);
 }
 
-static void improveTrunkHorizontal(TrunkAllocator& alloc, TreeTrunk& trunk, int trunkSize) {
+static void improveTrunkHorizontal(TrunkAllocator& alloc, TreeTrunk& trunk) {
+	constexpr int trunkSize = BRANCH_FACTOR; // required by the interface, allows for small SIMD optimizations
+
 	assert(!isLeafTrunk(trunk, trunkSize));
 
 	// indexed overlaps[i][j] with j >= i+1
@@ -871,12 +873,39 @@ static void improveTrunkHorizontal(TrunkAllocator& alloc, TreeTrunk& trunk, int 
 	}
 }
 
-static void improveTrunkVertical(TreeTrunk& trunk, int trunkSize) {
+inline static void swapNodesBetweenTrunks(TreeTrunk& trunkA, int indexInTrunkA, TreeTrunk& trunkB, int indexInTrunkB) {
+	BoundsTemplate<float> boundsA = trunkA.getBoundsOfSubNode(indexInTrunkA);
+	BoundsTemplate<float> boundsB = trunkB.getBoundsOfSubNode(indexInTrunkB);
+
+	trunkA.setBoundsOfSubNode(indexInTrunkA, boundsB);
+	trunkB.setBoundsOfSubNode(indexInTrunkB, boundsA);
+
+	std::swap(trunkA.subNodes[indexInTrunkA], trunkB.subNodes[indexInTrunkB]);
+}
+
+static void improveTrunkVertical(TreeTrunk& trunk) {
+	constexpr int trunkSize = BRANCH_FACTOR; // required by the interface, allows for small SIMD optimizations
+
 	if(isLeafTrunk(trunk, trunkSize)) return; // no improvement possible
 
 	std::array<float, BRANCH_FACTOR> allExistingSizes = TrunkSIMDHelperFallback::computeAllCosts(trunk);
 
+	int smallestSubNodeI = 0;
+	float smallestSubNodeSize = allExistingSizes[0];
+
+	for(int i = 1; i < trunkSize; i++) {
+		if(allExistingSizes[i] < smallestSubNodeSize) {
+			smallestSubNodeSize = allExistingSizes[i];
+			smallestSubNodeI = i;
+		}
+	}
+
+	int largestItemSubTrunkI = -1;
+	int largestItemI = -1;
+	float largestItemInSubTrunkISize = smallestSubNodeSize; // try to beat this, if we can't then there's no swap
+
 	for(int subTrunkI = 0; subTrunkI < trunkSize; subTrunkI++) {
+		if(subTrunkI == smallestSubNodeI) continue; // the smallest node cannot contain a node larger than itself, also, trying to swap these would store this node in itself, leading to memory leak and objects disappearing
 		TreeNodeRef& subNode = trunk.subNodes[subTrunkI];
 
 		// find a node, and try to swap it with an element from a group
@@ -885,38 +914,23 @@ static void improveTrunkVertical(TreeTrunk& trunk, int trunkSize) {
 		TreeTrunk& subTrunk = subNode.asTrunk();
 		int subTrunkSize = subNode.getTrunkSize();
 
-		std::array<float, BRANCH_FACTOR> removeableSizes = TrunkSIMDHelperFallback::computeAllCosts(subTrunk);
-		BoundsArray<BRANCH_FACTOR> existingBoundsWithout = TrunkSIMDHelperFallback::getAllTotalBoundsWithout(subTrunk, subTrunkSize);
-
-		for(int itemToSwapI = 0; itemToSwapI < trunkSize; itemToSwapI++) {
-			if(itemToSwapI == subTrunkI) continue; // can't store a trunknode into itself
-
-			BoundsTemplate<float> itemToSwapBounds = subTrunk.getBoundsOfSubNode(itemToSwapI);
-			std::array<float, BRANCH_FACTOR> expandedTrunkSizes = TrunkSIMDHelperFallback::computeAllCombinationCosts(existingBoundsWithout, itemToSwapBounds);
-
-
-			int bestSubTrunkSwapI = -1;
-			float bestSwapCost = allExistingSizes[subTrunkI]; // this is the baseline cost, the cost if we swapped nothing, compare this to the cost if we were to swap
-
-			for(int i = 0; i < subTrunkSize; i++) {
-				float cost = expandedTrunkSizes[i];
-
-				if(cost < bestSwapCost) {
-					bestSwapCost = cost;
-					bestSubTrunkSwapI = i;
-				}
-			}
-
-			if(bestSubTrunkSwapI != -1) {
-				// an improvement can be made by swapping
-				std::swap(trunk.subNodes[itemToSwapI], subTrunk.subNodes[bestSubTrunkSwapI]);
-				trunk.setBoundsOfSubNode(itemToSwapI, subTrunk.getBoundsOfSubNode(bestSubTrunkSwapI));
-				subTrunk.setBoundsOfSubNode(bestSubTrunkSwapI, itemToSwapBounds);
-				trunk.setBoundsOfSubNode(subTrunkI, TrunkSIMDHelperFallback::getTotalBounds(subTrunk, subTrunkSize));
-
-				return; // exit here, further improvements can be made in future iterations
+		std::array<float, BRANCH_FACTOR> subTrunkSizes = TrunkSIMDHelperFallback::computeAllCosts(subTrunk);
+		
+		for(int i = 0; i < subTrunkSize; i++) {
+			if(subTrunkSizes[i] > largestItemInSubTrunkISize) {
+				largestItemInSubTrunkISize = subTrunkSizes[i];
+				largestItemSubTrunkI = subTrunkI;
+				largestItemI = i;
 			}
 		}
+	}
+
+	if(largestItemI != -1) {
+		// an improvement can be made by swapping
+		TreeTrunk& chosenSubTrunk = trunk.subNodes[largestItemSubTrunkI].asTrunk();
+		int chosenSubTrunkSize = trunk.subNodes[largestItemSubTrunkI].getTrunkSize();
+		swapNodesBetweenTrunks(trunk, smallestSubNodeI, chosenSubTrunk, largestItemI);
+		trunk.setBoundsOfSubNode(largestItemSubTrunkI, TrunkSIMDHelperFallback::getTotalBounds(chosenSubTrunk, chosenSubTrunkSize));
 	}
 }
 
@@ -959,7 +973,7 @@ static int moveElementsOutOfGroup(TrunkAllocator& alloc, TreeTrunk& trunk, int t
 }
 
 static int improveStructureRecursive(TrunkAllocator& alloc, TreeTrunk& trunk, int trunkSize) {
-	bool isLeafTrunk = true;
+	bool givenTrunkIsLeafTrunk = true;
 	for(int i = 0; i < trunkSize; i++) {
 		TreeNodeRef& subNode = trunk.subNodes[i];
 		if(subNode.isTrunkNode()) {
@@ -970,17 +984,18 @@ static int improveStructureRecursive(TrunkAllocator& alloc, TreeTrunk& trunk, in
 
 			subNode.setTrunkSize(subTrunkSize);
 
-			if(!subNode.isGroupHead()) isLeafTrunk = false;
+			if(!subNode.isGroupHead()) givenTrunkIsLeafTrunk = false;
 		}
 	}
-	if(isLeafTrunk) return trunkSize;
+	if(givenTrunkIsLeafTrunk) return trunkSize;
 
 	trunkSize = moveElementsOutOfGroup(alloc, trunk, trunkSize);
 
 	if(trunkSize != BRANCH_FACTOR) return trunkSize;
+	if(isLeafTrunk(trunk, trunkSize)) return trunkSize;
 
-	improveTrunkHorizontal(alloc, trunk, trunkSize);
-	improveTrunkVertical(trunk, trunkSize);
+	improveTrunkVertical(trunk); // trunkSize == BRANCH_FACTOR
+	improveTrunkHorizontal(alloc, trunk); // trunkSize == BRANCH_FACTOR
 
 	return trunkSize;
 }

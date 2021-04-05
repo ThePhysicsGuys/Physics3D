@@ -15,5 +15,5 @@ jobs:
     - name: setup
       run: install\setup.bat
     - name: make
-      run: cmake --build build
+      run: cmake --build build --parallel
 

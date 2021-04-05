@@ -173,7 +173,7 @@ float BarChart::getMaxWeight() const {
 
 //! Tree
 
-static void recursiveRenderTree(const P3D::OldBoundsTree::TreeNode& tree, const Vec3f& treeColor, Vec2f origin, float allottedWidth, long long maxCost, const void* selectedObject) {
+static void recursiveRenderTree(const P3D::OldBoundsTree::TreeNode& tree, const Vec3f& treeColor, Vec2f origin, float allottedWidth, long long maxCost) {
 	if (!tree.isLeafNode()) {
 		for (int i = 0; i < tree.nodeCount; i++) {
 			Vec2f nextStep = origin + Vec2f(-allottedWidth / 2 + allottedWidth * ((tree.nodeCount != 1) ? (float(i) / (tree.nodeCount - 1)) : 0.5f), -0.1f);
@@ -182,29 +182,30 @@ static void recursiveRenderTree(const P3D::OldBoundsTree::TreeNode& tree, const 
 			//Path::bezierVertical(origin, nextStep, 1.0f, Vec4f(treeColor * colorDarkning, 1.0f), 15);
 			Path::line(origin, nextStep, join(treeColor * colorDarkning, 1.0f), 0.5f);
 
-			recursiveRenderTree(tree[i], treeColor, nextStep, allottedWidth / tree.nodeCount, maxCost, selectedObject);
+			recursiveRenderTree(tree[i], treeColor, nextStep, allottedWidth / tree.nodeCount, maxCost);
 		}
-	}
-
-	if (tree.object == selectedObject) {
-		Path::circleFilled(origin, 0.012f, Colors::YELLOW, 8);
 	}
 
 	if (tree.isGroupHead) {
 		Path::circleFilled(origin, 0.006f, Colors::RED, 8);
 	}
+
+	P3D::Application::ExtendedPart* extPart = reinterpret_cast<Application::ExtendedPart*>(tree.object);
+	if(P3D::Application::SelectionTool::selection.contains(extPart->entity)) {
+		Path::circleFilled(origin, 0.012f, Colors::YELLOW, 8);
+	}
 }
 
-void renderTreeStructure(const P3D::OldBoundsTree::BoundsTree<Part>& tree, const Vec3f& treeColor, Vec2f origin, float allottedWidth, const void* selectedObject) {
+void renderTreeStructure(const P3D::OldBoundsTree::BoundsTree<Part>& tree, const Vec3f& treeColor, Vec2f origin, float allottedWidth) {
 	if (tree.isEmpty()) {
 		return;
 	}
 	long long maxCost = P3D::OldBoundsTree::computeCost(tree.rootNode.bounds);
 
-	recursiveRenderTree(tree.rootNode, treeColor, origin, allottedWidth, maxCost, selectedObject);
+	recursiveRenderTree(tree.rootNode, treeColor, origin, allottedWidth, maxCost);
 }
 
-static void recursiveRenderTree(const P3D::NewBoundsTree::TreeTrunk& curTrunk, int curTrunkSize, const Vec3f& treeColor, Vec2f origin, float allottedWidth, float maxCost, const void* selectedObject) {
+static void recursiveRenderTree(const P3D::NewBoundsTree::TreeTrunk& curTrunk, int curTrunkSize, const Vec3f& treeColor, Vec2f origin, float allottedWidth, float maxCost) {
 	for(int i = 0; i < curTrunkSize; i++) {
 		const P3D::NewBoundsTree::TreeNodeRef& subNode = curTrunk.subNodes[i];
 
@@ -215,7 +216,7 @@ static void recursiveRenderTree(const P3D::NewBoundsTree::TreeTrunk& curTrunk, i
 		Path::line(origin, nextStep, join(treeColor * colorDarkning, 1.0f), 0.5f);
 
 		if(subNode.isTrunkNode()) {
-			recursiveRenderTree(subNode.asTrunk(), subNode.getTrunkSize(), treeColor, nextStep, allottedWidth / curTrunkSize, maxCost, selectedObject);
+			recursiveRenderTree(subNode.asTrunk(), subNode.getTrunkSize(), treeColor, nextStep, allottedWidth / curTrunkSize, maxCost);
 
 			if(subNode.isGroupHead()) {
 				Path::circleFilled(nextStep, 0.006f, Colors::RED, 8);
@@ -229,7 +230,7 @@ static void recursiveRenderTree(const P3D::NewBoundsTree::TreeTrunk& curTrunk, i
 	}
 }
 
-void renderTreeStructure(const P3D::NewBoundsTree::BoundsTree<Part>& tree, const Vec3f& treeColor, Vec2f origin, float allottedWidth, const void* selectedObject) {
+void renderTreeStructure(const P3D::NewBoundsTree::BoundsTree<Part>& tree, const Vec3f& treeColor, Vec2f origin, float allottedWidth) {
 	if(tree.isEmpty()) {
 		return;
 	}
@@ -240,7 +241,7 @@ void renderTreeStructure(const P3D::NewBoundsTree::BoundsTree<Part>& tree, const
 		if(subCost > maxCost) maxCost = subCost;
 	}
 
-	recursiveRenderTree(base.first, base.second, treeColor, origin, allottedWidth, maxCost, selectedObject);
+	recursiveRenderTree(base.first, base.second, treeColor, origin, allottedWidth, maxCost);
 }
 
 #pragma endregion

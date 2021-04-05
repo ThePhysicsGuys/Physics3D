@@ -470,5 +470,34 @@ TEST_CASE(testUpdateGroupBounds) {
 	}
 }
 
+TEST_CASE(testImproveStructureValidity) {
+	BoundsTree<BasicBounded> tree;
+
+	constexpr int itemCount = 100;
+
+	std::vector<BasicBounded> allItems = generateBoundsTreeItems(itemCount);
+
+	std::vector<std::vector<BasicBounded*>> groups = createGroups(tree, allItems);
+
+	ASSERT_TRUE(groupsMatchTree(groups, tree));
+	ASSERT_TRUE(isBoundsTreeValid(tree));
+
+	for(int iter = 0; iter < 10; iter++) {
+		for(BasicBounded& bb : allItems) {
+			bb.bounds = generateBoundsTreeBounds();
+		}
+		tree.recalculateBounds();
+
+		ASSERT_TRUE(groupsMatchTree(groups, tree));
+		ASSERT_TRUE(isBoundsTreeValid(tree));
+
+		for(int i = 0; i < 5; i++) {
+			tree.improveStructure();
+			ASSERT_TRUE(groupsMatchTree(groups, tree));
+			ASSERT_TRUE(isBoundsTreeValid(tree));
+		}
+	}
+}
+
 
 };

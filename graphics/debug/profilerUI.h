@@ -102,7 +102,7 @@ struct SlidingChart {
 	Vec2 resize();
 };
 
-void renderTreeStructure(const P3D::OldBoundsTree::BoundsTree<Part>& tree, const Vec3f& treeColor, Vec2f origin, float allottedWidth, const void* selectedObject);
-void renderTreeStructure(const P3D::NewBoundsTree::BoundsTree<Part>& tree, const Vec3f& treeColor, Vec2f origin, float allottedWidth, const void* selectedObject);
+void renderTreeStructure(const P3D::OldBoundsTree::BoundsTree<Part>& tree, const Vec3f& treeColor, Vec2f origin, float allottedWidth);
+void renderTreeStructure(const P3D::NewBoundsTree::BoundsTree<Part>& tree, const Vec3f& treeColor, Vec2f origin, float allottedWidth);
 
 };
