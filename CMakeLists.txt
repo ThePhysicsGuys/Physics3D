@@ -87,7 +87,7 @@ add_library(physics STATIC
 
   physics/datastructures/aligned_alloc.cpp
   physics/datastructures/boundsTreeOld.cpp
-  physics/datastructures/boundsTree2.cpp
+  physics/datastructures/boundsTree.cpp
 
   physics/hardconstraints/fixedConstraint.cpp
   physics/hardconstraints/hardConstraint.cpp

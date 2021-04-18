@@ -8,7 +8,7 @@
 //using namespace P3D::OldBoundsTree;
 //using namespace P3D::NewBoundsTree;
 
-#define CHECK_WORLD_VALIDITY
+// #define CHECK_WORLD_VALIDITY
 
 #ifdef CHECK_WORLD_VALIDITY
 #define ASSERT_VALID if (!isValid()) throw "World not valid!";

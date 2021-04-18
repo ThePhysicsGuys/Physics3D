@@ -6,7 +6,6 @@
 #include "../math/cframe.h"
 #include "../motion.h"
 #include "../datastructures/boundsTree.h"
-#include "../datastructures/boundsTree2.h"
 
 #include <cmath>
 
