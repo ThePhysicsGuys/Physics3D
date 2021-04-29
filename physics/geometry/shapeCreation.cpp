@@ -18,6 +18,10 @@ Shape boxShape(double width, double height, double depth) {
 	return Shape(&CubeClass::instance, width, height, depth);
 }
 
+Shape wedgeShape() {
+	return Shape{&WedgeClass::instance};
+}
+
 Shape polyhedronShape(const Polyhedron& poly) {
 	BoundingBox bounds = poly.getBounds();
 	Vec3 center = bounds.getCenter();
