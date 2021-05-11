@@ -19,6 +19,7 @@
 #include <array>
 #include <vector>
 
+namespace P3D {
 template<typename Num1, typename Num2, typename Tol, IS_ARITHMETIC(Num1), IS_ARITHMETIC(Num2)>
 bool tolerantEquals(const Num1& first, const Num2& second, Tol tolerance) {
 	auto diff = first - second;
@@ -52,9 +53,9 @@ bool tolerantGreaterOrEqual(const Num1& first, const Num2& second, Tol tolerance
 }
 
 template<typename Num1, typename Num2, typename Tol, size_t Size>
-bool tolerantEquals(const Vector<Num1, Size> & first, const Vector<Num2, Size>& second, Tol tolerance) {
-	for (size_t i = 0; i < Size; i++) {
-		if (!tolerantEquals(first[i], second[i], tolerance)) return false;
+bool tolerantEquals(const Vector<Num1, Size>& first, const Vector<Num2, Size>& second, Tol tolerance) {
+	for(size_t i = 0; i < Size; i++) {
+		if(!tolerantEquals(first[i], second[i], tolerance)) return false;
 	}
 	return true;
 }
@@ -68,19 +69,19 @@ bool tolerantEquals(const LargeVector<Num1>& first, const LargeVector<Num2>& sec
 }
 template<typename Num1, typename Num2, typename Tol, size_t Width, size_t Height>
 bool tolerantEquals(const Matrix<Num1, Height, Width>& first, const Matrix<Num2, Height, Width>& second, Tol tolerance) {
-	for (size_t row = 0; row < Height; row++)
-		for (size_t col = 0; col < Width; col++)
-			if (!tolerantEquals(first(row, col), second(row, col), tolerance))
+	for(size_t row = 0; row < Height; row++)
+		for(size_t col = 0; col < Width; col++)
+			if(!tolerantEquals(first(row, col), second(row, col), tolerance))
 				return false;
-	
+
 	return true;
 }
 
 template<typename Num1, typename Num2, typename Tol, size_t Size>
 bool tolerantEquals(const SymmetricMatrix<Num1, Size>& first, const SymmetricMatrix<Num2, Size>& second, Tol tolerance) {
-	for (size_t row = 0; row < Size; row++)
-		for (size_t col = 0; col < Size; col++)
-			if (!tolerantEquals(first(row, col), second(row, col), tolerance))
+	for(size_t row = 0; row < Size; row++)
+		for(size_t col = 0; col < Size; col++)
+			if(!tolerantEquals(first(row, col), second(row, col), tolerance))
 				return false;
 
 	return true;
@@ -88,8 +89,8 @@ bool tolerantEquals(const SymmetricMatrix<Num1, Size>& first, const SymmetricMat
 
 template<typename Num1, typename Num2, typename Tol, size_t Size>
 bool tolerantEquals(const DiagonalMatrix<Num1, Size>& first, const DiagonalMatrix<Num2, Size>& second, Tol tolerance) {
-	for (size_t i = 0; i < Size; i++)
-		if (!tolerantEquals(first[i], second[i], tolerance))
+	for(size_t i = 0; i < Size; i++)
+		if(!tolerantEquals(first[i], second[i], tolerance))
 			return false;
 
 	return true;
@@ -131,10 +132,10 @@ bool tolerantEquals(const Position& a, const Position& b, Tol tolerance) {
 
 template<typename T, typename Tol>
 bool tolerantEquals(const Quaternion<T>& a, const Quaternion<T>& b, Tol tolerance) {
-	return 
-		tolerantEquals(a.w, b.w, tolerance) && 
-		tolerantEquals(a.i, b.i, tolerance) && 
-		tolerantEquals(a.j, b.j, tolerance) && 
+	return
+		tolerantEquals(a.w, b.w, tolerance) &&
+		tolerantEquals(a.i, b.i, tolerance) &&
+		tolerantEquals(a.j, b.j, tolerance) &&
 		tolerantEquals(a.k, b.k, tolerance);
 }
 
@@ -208,7 +209,7 @@ bool tolerantEquals(const Motion& first, const Motion& second, Tol tolerance) {
 
 template<typename Tol>
 bool tolerantEquals(const RelativeMotion& first, const RelativeMotion& second, Tol tolerance) {
-	return tolerantEquals(first.relativeMotion, second.relativeMotion, tolerance) && 
+	return tolerantEquals(first.relativeMotion, second.relativeMotion, tolerance) &&
 		tolerantEquals(first.locationOfRelativeMotion, second.locationOfRelativeMotion, tolerance);
 }
 
@@ -220,7 +221,7 @@ bool tolerantEquals(const BoundingBox& first, const BoundingBox& second, Tol tol
 
 template<typename T1, typename T2, typename Tol>
 bool tolerantEquals(const std::pair<T1, T2>& first, const std::pair<T1, T2>& second, Tol tolerance) {
-	return tolerantEquals(first.first, second.first, tolerance) && 
+	return tolerantEquals(first.first, second.first, tolerance) &&
 		tolerantEquals(first.second, second.second, tolerance);
 }
 
@@ -293,3 +294,4 @@ bool tolerantEquals(const UnmanagedHorizontalFixedMatrix<T, Size>& first, const 
 
 	return true;
 }
+};

@@ -22,6 +22,7 @@
 #include "../util/log.h"
 
 
+namespace P3D {
 #define REMAINS_CONSTANT(v) REMAINS_CONSTANT_TOLERANT(v, 0.0005)
 #define ASSERT(v) ASSERT_TOLERANT(v, 0.0005)
 
@@ -1039,3 +1040,4 @@ TEST_CASE(setVelocity) {
 		}
 	}
 }
+};

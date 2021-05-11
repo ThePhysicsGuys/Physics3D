@@ -16,6 +16,7 @@
 #include "../physics/motion.h"
 #include "../physics/relativeMotion.h"
 
+namespace P3D {
 inline double createRandomDouble() {
 	return 2.0 * rand() / RAND_MAX - 1.0;
 }
@@ -103,7 +104,7 @@ inline RelativeMotion createRandomRelativeMotion() {
 	return RelativeMotion(createRandomMotion(), createRandomCFrame());
 }
 
-template<typename T, std::size_t Size, T (*createFunc)()>
+template<typename T, std::size_t Size, T(*createFunc)()>
 inline Derivatives<T, Size> createRandomDerivatives() {
 	Derivatives<T, Size> result;
 
@@ -131,3 +132,4 @@ inline std::array<T, Size> createRandomArray() {
 
 	return result;
 }
+};

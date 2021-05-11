@@ -9,6 +9,7 @@
 
 #include "randomValues.h"
 
+namespace P3D {
 #define REMAINS_CONSTANT(v) REMAINS_CONSTANT_TOLERANT(v, 0.0001)
 #define ASSERT(v) ASSERT_TOLERANT(v, 0.0001)
 
@@ -78,7 +79,7 @@ TEST_CASE(inertiaTransformationDerivatives) {
 	RotationalMotion rotation(Vec3(0.3, 0.4, 0.5), Vec3(-0.8, 0.5, -0.3));
 	TranslationalMotion translation(Vec3(-0.23, 0.25, -0.7), Vec3(-0.2, -0.7, 0.333));
 	Motion motion(translation, rotation);
-	
+
 	Vec3 startingTranslation(1.2, -0.7, 2.1);
 	Rotation startingRotation = Rotation::fromEulerAngles(0.5, -0.6, 0.7);
 	CFrame start(startingTranslation, startingRotation);
@@ -145,7 +146,7 @@ TEST_CASE(premadeAngularMomentum) {
 	Vec3 offset(0, 0, cz);
 
 	Vec3 boxNotRotatingAngMom = getAngularMomentumFromOffsetOnlyVelocity(offset, vel, boxVolume);
-	Vec3 boxNotRotatingAngMom2 = getAngularMomentumFromOffset(offset, vel, Vec3(0,0,0), inertia, boxVolume);
+	Vec3 boxNotRotatingAngMom2 = getAngularMomentumFromOffset(offset, vel, Vec3(0, 0, 0), inertia, boxVolume);
 	ASSERT(boxNotRotatingAngMom == Vec3(velocityAngularMomentum, 0, 0));
 	ASSERT(boxNotRotatingAngMom == boxNotRotatingAngMom2);
 
@@ -177,3 +178,4 @@ TEST_CASE(translatedAngularMomentum) {
 	ASSERT(angularMomentumFromVelocity == computedAngularMomentumFromVelocity);
 	ASSERT(angularMomentumTarget == computedAngularMomentumFromVelocityAndAngular);
 }
+};

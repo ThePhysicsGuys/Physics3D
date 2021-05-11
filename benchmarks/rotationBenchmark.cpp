@@ -3,6 +3,7 @@
 #include "../physics/math/rotation.h"
 #include <random>
 
+namespace P3D {
 static double randomDouble() {
 	return double(rand()) / RAND_MAX;
 }
@@ -70,7 +71,7 @@ public:
 
 	void init() override {
 		if(rot == nullptr) this->rot = new Rotation[ROTATION_BENCH_SIZE];
-		for(int round = 0; round < ROTATION_BENCH_SIZE; round++){
+		for(int round = 0; round < ROTATION_BENCH_SIZE; round++) {
 			this->rot[round] = Rotation::fromEulerAngles(randomDouble(), randomDouble(), randomDouble());
 		}
 		curValue = Vec3(randomDouble(), randomDouble(), randomDouble());
@@ -93,7 +94,7 @@ public:
 
 	void init() override {
 		if(rot == nullptr) this->rot = new Rotation[ROTATION_BENCH_SIZE];
-		for(int round = 0; round < ROTATION_BENCH_SIZE; round++){
+		for(int round = 0; round < ROTATION_BENCH_SIZE; round++) {
 			this->rot[round] = Rotation::fromEulerAngles(randomDouble(), randomDouble(), randomDouble());
 		}
 		curValue = SymmetricMat3{randomDouble(), randomDouble(), randomDouble(), randomDouble(), randomDouble(), randomDouble()};
@@ -116,7 +117,7 @@ public:
 
 	void init() override {
 		if(rot == nullptr) this->rot = new Rotation[ROTATION_BENCH_SIZE];
-		for(int round = 0; round < ROTATION_BENCH_SIZE; round++){
+		for(int round = 0; round < ROTATION_BENCH_SIZE; round++) {
 			this->rot[round] = Rotation::fromEulerAngles(randomDouble(), randomDouble(), randomDouble());
 		}
 		curValue = Rotation::fromEulerAngles(randomDouble(), randomDouble(), randomDouble());
@@ -130,3 +131,4 @@ public:
 		}
 	}
 } rotationLocalToGlobalRotMem;
+};

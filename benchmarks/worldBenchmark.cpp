@@ -15,6 +15,7 @@
 #include "../physics/misc/filters/outOfBoundsFilter.h"
 #include "../physics/misc/physicsProfiler.h"
 
+namespace P3D {
 WorldBenchmark::WorldBenchmark(const char* name, int tickCount) : Benchmark(name), world(0.005), tickCount(tickCount) {
 	world.addExternalForce(new DirectionalGravity(Vec3(0, -10, 0)));
 }
@@ -22,8 +23,8 @@ WorldBenchmark::WorldBenchmark(const char* name, int tickCount) : Benchmark(name
 void WorldBenchmark::run() {
 	world.isValid();
 	Part& partToTrack = *world.physicals[0]->getMainPart();
-	for (int i = 0; i < tickCount; i++) {
-		if (i % (tickCount / 8) == 0) {
+	for(int i = 0; i < tickCount; i++) {
+		if(i % (tickCount / 8) == 0) {
 			Log::print("Tick %d\n", i);
 			Position pos = partToTrack.getCFrame().getPosition();
 			Log::print("Location of object: %.5f %.5f %.5f\n", double(pos.x), double(pos.y), double(pos.z));
@@ -57,7 +58,7 @@ static const std::size_t BAR_LENGTH = 36;
 void printToLength(std::string text, std::size_t length) {
 	std::cout << text;
 	setColor(TerminalColor::BLACK);
-	for (std::size_t i = text.size(); i < length; i++) {
+	for(std::size_t i = text.size(); i < length; i++) {
 		std::cout << ' ';
 	}
 }
@@ -90,16 +91,16 @@ TerminalColor getColor(std::size_t i) {
 
 template<typename T>
 void printBreakdown(const T* values, const char** labels, std::size_t N, std::string unit) {
-	
+
 	T total = values[0];
 	T max = values[0];
 
-	for (std::size_t i = 1; i < N; i++) {
+	for(std::size_t i = 1; i < N; i++) {
 		total += values[i];
 		max = (values[i] > max) ? values[i] : max;
 	}
 
-	for (std::size_t i = 0; i < N; i++) {
+	for(std::size_t i = 0; i < N; i++) {
 		T v = values[i];
 		double fractionOfTotal = total != 0 ? double(v) / total : 0.0;
 		double fractionOfMax = total != 0 ? double(v) / max : 0.0;
@@ -134,7 +135,7 @@ void printBreakdown(const T* values, const char** labels, std::size_t N, std::st
 		std::size_t thisBarLength = static_cast<std::size_t>(std::ceil(BAR_LENGTH * fractionOfMax));
 
 		setColor(getColor(i), getColor(i));
-		for (std::size_t i = 0; i < thisBarLength; i++) {
+		for(std::size_t i = 0; i < thisBarLength; i++) {
 			std::cout << '=';
 		}
 		setColor(TerminalColor::BLACK);
@@ -153,7 +154,7 @@ void WorldBenchmark::printResults(double timeTakenMillis) {
 
 	double millis[physicsMeasure.size()];
 
-	for (std::size_t i = 0; i < physicsMeasure.size(); i++) {
+	for(std::size_t i = 0; i < physicsMeasure.size(); i++) {
 		millis[i] = physicsBreakdown[i].count() / 1000000.0;
 	}
 
@@ -174,8 +175,9 @@ void WorldBenchmark::printResults(double timeTakenMillis) {
 
 void WorldBenchmark::createFloor(double w, double h, double wallHeight) {
 	world.addTerrainPart(new Part(boxShape(w, 1.0, h), GlobalCFrame(0.0, 0.0, 0.0), basicProperties));
-	world.addTerrainPart(new Part(boxShape(0.8, wallHeight, h), GlobalCFrame(w, wallHeight/2, 0.0), basicProperties));
+	world.addTerrainPart(new Part(boxShape(0.8, wallHeight, h), GlobalCFrame(w, wallHeight / 2, 0.0), basicProperties));
 	world.addTerrainPart(new Part(boxShape(0.8, wallHeight, h), GlobalCFrame(-w, wallHeight / 2, 0.0), basicProperties));
 	world.addTerrainPart(new Part(boxShape(w, wallHeight, 0.8), GlobalCFrame(0.0, wallHeight / 2, h), basicProperties));
 	world.addTerrainPart(new Part(boxShape(w, wallHeight, 0.8), GlobalCFrame(0.0, wallHeight / 2, -h), basicProperties));
 }
+};

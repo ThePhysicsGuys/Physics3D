@@ -27,6 +27,7 @@
 
 #include "../physics/datastructures/boundsTree.h"
 
+namespace P3D {
 template<typename T>
 T generate() {
 	throw "Unsupported generate type!";
@@ -77,7 +78,7 @@ inline uint64_t generate() {
 
 int generateInt(int max);
 size_t generateSize_t(size_t max);
-double generateDouble(); 
+double generateDouble();
 float generateFloat();
 double generateDouble(double min, double max);
 float generateFloat(float min, float max);
@@ -165,3 +166,4 @@ template<typename Collection>
 auto oneOf(Collection& collection) -> decltype(collection[0]) {
 	return collection[generateSize_t(collection.size())];
 }
+};

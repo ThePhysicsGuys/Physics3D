@@ -9,6 +9,7 @@
 #include "../physics/misc/shapeLibrary.h"
 #include "../physics/misc/validityHelper.h"
 
+namespace P3D {
 TEST_CASE(testIndexedShape) {
 	Vec3f verts[]{Vec3f(0.0, 0.0, 0.0), Vec3f(1.0, 0.0, 0.0), Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 1.0, 0.0)};
 	Triangle triangles[]{{0,1,2},{0,3,1},{0,2,3},{1,3,2}};
@@ -16,7 +17,7 @@ TEST_CASE(testIndexedShape) {
 	TriangleNeighbors neighBuf[4];
 
 	fillNeighborBuf(triangles, 4, neighBuf);
-	
+
 	IndexedShape s(verts, triangles, 4, 4, neighBuf);
 
 	ASSERT_TRUE(isValid(s));
@@ -89,3 +90,4 @@ TEST_CASE(buildConvexShape) {
 
 	ASSERT_TRUE(isValid(icosaBuilder.toIndexedShape()));
 }
+};

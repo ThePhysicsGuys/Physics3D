@@ -3,6 +3,7 @@
 #include "../physics/math/linalg/mat.h"
 #include "../physics/math/linalg/trigonometry.h"
 
+namespace P3D {
 Vec3 getVelocityBySimulation(const Motion& m, const Vec3& point, double deltaT) {
 	Rotation rotation = Rotation::fromRotationVec(m.getAngularVelocity() * deltaT);
 	Vec3 delta = m.getVelocity() * deltaT + (rotation * point - point);
@@ -103,3 +104,4 @@ CFrame simulateForTime(const Motion& motion, const CFrame& startingCFrame, doubl
 
 	return CFrame(startingCFrame.getPosition() + mov.translation, Rotation::fromRotationVec(mov.rotation) * startingCFrame.getRotation());
 }
+};

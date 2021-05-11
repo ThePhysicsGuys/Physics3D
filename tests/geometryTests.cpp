@@ -19,6 +19,7 @@
 
 #include "../util/cpuid.h"
 
+namespace P3D {
 #define ASSERT(condition) ASSERT_TOLERANT(condition, 0.00001)
 
 template<typename T, typename Tol, size_t Size>
@@ -35,8 +36,8 @@ bool isDiagonalTolerant(const Matrix<T, Size, Size>& m, Tol tolerance) {
 }
 template<typename T, typename Tol, size_t Size>
 bool isDiagonalTolerant(const SymmetricMatrix<T, Size>& m, Tol tolerance) {
-	for(size_t row = 0; row < Size-1; row++) {
-		for(size_t col = row+1; col < Size; col++) {
+	for(size_t row = 0; row < Size - 1; row++) {
+		for(size_t col = row + 1; col < Size; col++) {
 			if(!tolerantEquals<T>(m[row][col], 0, tolerance)) {
 				return false;
 			}
@@ -77,7 +78,7 @@ TEST_CASE(shapeCenterOfMass) {
 	CFramef transform(Vec3f(0.3f, 0.7f, -3.5f), Rotationf::fromEulerAngles(0.7f, 0.2f, 0.3f));
 
 	Polyhedron transformedShape = boxShape.localToGlobal(transform);
-	
+
 	ASSERT(transform.localToGlobal(boxShape.getCenterOfMass()) == transformedShape.getCenterOfMass());
 }
 
@@ -111,12 +112,12 @@ TEST_CASE(shapeInertiaRotationInvariance) {
 	logStream << "Inertial eigenValues: " << getEigenDecomposition(testShape.getInertiaAroundCenterOfMass()).eigenValues.asDiagonalMatrix() << "\n";
 
 	for(const Rotation& testRotation : rotations) {
-		
+
 
 		Polyhedron rotatedShape = testShape.rotated(static_cast<Rotationf>(testRotation));
 
 		Vec3 rotatedTestMoment = testRotation * testMoment;
-		
+
 		SymmetricMat3 inertia = rotatedShape.getInertiaAroundCenterOfMass();
 
 		Vec3 rotatedMomentResult = ~inertia * rotatedTestMoment;
@@ -154,7 +155,7 @@ TEST_CASE(testRayIntersection) {
 }
 
 TEST_CASE(testGetFurthestPointInDirection) {
-	for (Vec3f vertex : Library::icosahedron.iterVertices()) {
+	for(Vec3f vertex : Library::icosahedron.iterVertices()) {
 		ASSERT(Library::icosahedron.furthestInDirection(vertex) == vertex);
 	}
 }
@@ -258,3 +259,4 @@ TEST_CASE(testTriangleMeshOptimizedFurthestInDirection) {
 		}
 	}
 }
+};

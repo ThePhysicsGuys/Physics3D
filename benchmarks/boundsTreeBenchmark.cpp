@@ -3,8 +3,7 @@
 #include "../physics/datastructures/boundsTree.h"
 #include "../physics/datastructures/boundsTreeOld.h"
 
-using namespace P3D::OldBoundsTree;
-
+namespace P3D::OldBoundsTree {
 #define BENCH_TREE_BRANCH_FACTOR 4
 static void fillTreeNodeRecursive(TreeNode& node, BasicBounded* curItemList, size_t numberOfItems) {
 	if(numberOfItems == 1) {
@@ -27,7 +26,7 @@ struct FindInBoundsTreeBenchmark : public Benchmark {
 	BasicBounded objects[BENCH_TREE_NODECOUNT];
 
 	int total = 0;
-	
+
 	virtual void init() override {
 		Position curPos(0, 0, 0);
 		Vec3Fix delta(0.1, 0.1, 0.1);
@@ -48,3 +47,4 @@ struct FindInBoundsTreeBenchmark : public Benchmark {
 		}
 	}
 } boundsTreeBenchmark;
+};

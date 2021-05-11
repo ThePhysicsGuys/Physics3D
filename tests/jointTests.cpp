@@ -15,6 +15,7 @@
 #include "../physics/constraints/constraintGroup.h"
 #include "../physics/constraints/ballConstraint.h"
 
+namespace P3D {
 #define ASSERT(cond) ASSERT_TOLERANT(cond, 0.05)
 
 #define DELTA_T 0.0001
@@ -102,3 +103,4 @@ TEST_CASE(testBallConstraintSymmetric) {
 	ASSERT(part1.getMotion().getAcceleration() == Vec3(0.125, 0.0, 0.0));
 	ASSERT(part2.getMotion().getAcceleration() == Vec3(0.125, 0.0, 0.0));
 }*/
+};

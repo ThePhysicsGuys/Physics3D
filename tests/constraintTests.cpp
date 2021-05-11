@@ -18,6 +18,7 @@
 
 #include <functional>
 
+namespace P3D {
 #define ASSERT(cond) ASSERT_TOLERANT(cond, 0.05)
 
 #define DELTA_T 0.0001
@@ -29,7 +30,7 @@ TEST_CASE(testConstraintMatrixPack) {
 	Matrix<double, 4, 6> motionToEqB = generateMatrix<double, 4, 6>();
 	Matrix<double, 4, NUMBER_OF_ERROR_DERIVATIVES> errorMat = generateMatrix<double, 4, NUMBER_OF_ERROR_DERIVATIVES>();
 
-	double matrixBuf[6*4*4];
+	double matrixBuf[6 * 4 * 4];
 	double errorBuf[6 * NUMBER_OF_ERROR_DERIVATIVES];
 
 	ConstraintMatrixPack cmp(matrixBuf, errorBuf, paramToMotionA, paramToMotionB, motionToEqA, motionToEqB, errorMat);
@@ -75,7 +76,7 @@ TEST_CASE(testMotionOfPhysicalPartsBasic) {
 	Part p2(sphereShape(1.0), GlobalCFrame(1.0, 0.0, 0.0), {3.0, 1.0, 1.0});
 	p1.attach(&p2, CFrame(1.0, 0.0, 0.0));
 
-	Motion COMMotion(Vec3(1.0, 0.7, 1.3), Vec3(0,0,0));
+	Motion COMMotion(Vec3(1.0, 0.7, 1.3), Vec3(0, 0, 0));
 
 	p1.parent->mainPhysical->motionOfCenterOfMass = COMMotion;
 
@@ -151,8 +152,8 @@ TEST_CASE(testMotionOfPhysicalPartsRotation) {
 TEST_CASE(testMotionOfPhysicalPartsBasicFixedConstraint) {
 	Part p1(sphereShape(1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
 	Part p2(sphereShape(1.0), GlobalCFrame(1.0, 0.0, 0.0), {3.0, 1.0, 1.0});
-	
-	p1.attach(&p2, new FixedConstraint(), CFrame(1.0, 0.0, 0.0), CFrame(0,0,0));
+
+	p1.attach(&p2, new FixedConstraint(), CFrame(1.0, 0.0, 0.0), CFrame(0, 0, 0));
 
 	Motion COMMotion(Vec3(1.0, 0.7, 1.3), Vec3(0, 0, 0));
 
@@ -189,7 +190,7 @@ TEST_CASE(testMotionOfPhysicalPartsBasicFixedConstraint) {
 TEST_CASE(testMotionOfPhysicalPartsRotationFixedConstraint) {
 	Part p1(sphereShape(1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
 	Part p2(sphereShape(1.0), GlobalCFrame(1.0, 0.0, 0.0), {3.0, 1.0, 1.0});
-	
+
 	p1.attach(&p2, new FixedConstraint(), CFrame(1.0, 0.0, 0.0), CFrame(0, 0, 0));
 
 	Motion COMMotion(Vec3(0, 0, 0), Vec3(-0.3, 1.7, -1.1));
@@ -272,10 +273,10 @@ TEST_CASE(testMotionOfPhysicalJointsBasic) {
 
 	Part p1e(sphereShape(1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
 	Part p2e(sphereShape(1.0), GlobalCFrame(1.0, 0.0, 0.0), {3.0, 1.0, 1.0});
-	
+
 	p1e.attach(&p2e, new FixedConstraint(), CFrame(1.0, 0.0, 0.0), CFrame(0, 0, 0));
 
-	Motion COMMotion(Vec3(1.0, 0.7, 1.3), Vec3(0,0,0));
+	Motion COMMotion(Vec3(1.0, 0.7, 1.3), Vec3(0, 0, 0));
 
 	p1.parent->mainPhysical->motionOfCenterOfMass = COMMotion;
 	p1e.parent->mainPhysical->motionOfCenterOfMass = COMMotion;
@@ -291,10 +292,10 @@ TEST_CASE(testMotionOfPhysicalJointsRotation) {
 
 	Part p1e(sphereShape(1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
 	Part p2e(sphereShape(1.0), GlobalCFrame(1.0, 0.0, 0.0), {3.0, 1.0, 1.0});
-	
+
 	p1e.attach(&p2e, new FixedConstraint(), CFrame(1.0, 0.0, 0.0), CFrame(0.0, 0.0, 0.0));
 
-	Motion COMMotion(Vec3(0,0,0), Vec3(-0.3, 1.7, -1.1));
+	Motion COMMotion(Vec3(0, 0, 0), Vec3(-0.3, 1.7, -1.1));
 
 	p1.parent->mainPhysical->motionOfCenterOfMass = COMMotion;
 	p1e.parent->mainPhysical->motionOfCenterOfMass = COMMotion;
@@ -317,7 +318,7 @@ TEST_CASE(testMotionOfPhysicalJoints) {
 
 	Part p1e(sphereShape(1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
 	Part p2e(sphereShape(1.0), GlobalCFrame(1.0, 0.0, 0.0), {3.0, 1.0, 1.0});
-	
+
 	p1e.attach(&p2e, new FixedConstraint(), CFrame(1.0, 0.0, 0.0), CFrame(0, 0, 0));
 
 	Motion COMMotion(Vec3(1.0, 0.7, 1.3), Vec3(-0.3, 1.7, -1.1));
@@ -343,7 +344,7 @@ TEST_CASE(testFixedConstraintProperties) {
 
 	Part p1e(sphereShape(1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
 	Part p2e(sphereShape(1.0), GlobalCFrame(), {3.0, 1.0, 1.0});
-	
+
 	p1e.attach(&p2e, new FixedConstraint(), CFrame(0.3, -0.8, 0.0), CFrame(-0.7, -0.8, 0));
 
 	MotorizedPhysical* phys1 = p1.parent->mainPhysical;
@@ -362,16 +363,16 @@ TEST_CASE(testFixedConstraintProperties) {
 
 TEST_CASE(testApplyForceToFixedConstraint) {
 	CFrame attach(Vec3(1.3, 0.7, 0.9), Rotation::fromEulerAngles(0.3, -0.7, 0.9));
-	
+
 	Part p1(boxShape(1.0, 2.0, 3.0), GlobalCFrame(), {1.0, 1.0, 1.0});
 	Part p2(boxShape(1.5, 2.3, 1.2), GlobalCFrame(), {1.0, 1.0, 1.0});
-	
+
 	p1.attach(&p2, attach);
 
 
 	Part p1e(boxShape(1.0, 2.0, 3.0), GlobalCFrame(), {1.0, 1.0, 1.0});
 	Part p2e(boxShape(1.5, 2.3, 1.2), GlobalCFrame(), {1.0, 1.0, 1.0});
-	
+
 	p1e.attach(&p2e, new FixedConstraint(), attach, CFrame());
 
 	MotorizedPhysical* phys1 = p1.parent->mainPhysical;
@@ -524,3 +525,4 @@ TEST_CASE(attachPhysicalsWithLayers) {
 		ASSERT_TRUE(pairwiseCorrectlyGrouped(firstPhysParts, secondPhysParts, true));
 	}
 }
+};

@@ -10,6 +10,7 @@
 #include "../physics/misc/toString.h"
 #include "../physics/math/taylorExpansion.h"
 
+namespace P3D {
 #define DELTA_T 0.005
 
 TEST_CASE(testEstimateDerivativesOfComputeOverTime) {
@@ -17,5 +18,6 @@ TEST_CASE(testEstimateDerivativesOfComputeOverTime) {
 	logStream << "startTaylor: " << startTaylor << "\n";
 	std::array<double, 5> points = computeOverTime(startTaylor, DELTA_T);
 	FullTaylorExpansion<double, 5> endTaylor = estimateDerivatives(points, DELTA_T);
-	ASSERT_TOLERANT(startTaylor == endTaylor, 0.01);	
+	ASSERT_TOLERANT(startTaylor == endTaylor, 0.01);
 }
+};

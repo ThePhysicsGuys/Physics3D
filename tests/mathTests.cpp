@@ -19,7 +19,7 @@
 
 #include <algorithm>
 
-
+namespace P3D {
 #define ASSERT(condition) ASSERT_TOLERANT(condition, 0.00000001)
 
 #define DELTA_T 0.00001
@@ -35,30 +35,30 @@ TEST_CASE(subMatrixOperations) {
 
 	ASSERT((mat.getSubMatrix<3, 2>(1, 0)) == (Matrix<int, 3, 2>{
 		6, 9,
-		3, 9,
-		3, 8
+			3, 9,
+			3, 8
 	}));
 
 	ASSERT((mat.withoutRow(2)) == (Matrix<int, 4, 3>{
 		5, 7, 9,
-		6, 9, 2,
-		3, 8, 4,
-		3, 8, 1
+			6, 9, 2,
+			3, 8, 4,
+			3, 8, 1
 	}));
 
 	ASSERT((mat.withoutCol(1)) == (Matrix<int, 5, 2>{
 		5, 9,
-		6, 2,
-		3, 5,
-		3, 4,
-		3, 1
+			6, 2,
+			3, 5,
+			3, 4,
+			3, 1
 	}));
 }
 
 TEST_CASE(determinant) {
 	Matrix<double, 3, 3> m3{
 		1, 7, 21,
-		7, 6, 9, 
+		7, 6, 9,
 		1, 3, 8
 	};
 
@@ -68,9 +68,9 @@ TEST_CASE(determinant) {
 
 
 	Mat4 m4{
-		1, 7, 21, 6, 
-		7, 6, 9, 8, 
-		1, 3, 8, 4, 
+		1, 7, 21, 6,
+		7, 6, 9, 8,
+		1, 3, 8, 4,
 		2, 9, 7, 3
 	};
 
@@ -80,7 +80,7 @@ TEST_CASE(determinant) {
 
 
 TEST_CASE(matrixInverse2) {
-	Mat2 m{ 4,7,9,3};
+	Mat2 m{4,7,9,3};
 
 	logf("m=%s\n~m=%s\nm.inverse()=%s\nm.det()=%f", str(m).c_str(), str(~m).c_str(), str(~m).c_str(), det(m));
 
@@ -90,9 +90,9 @@ TEST_CASE(matrixInverse2) {
 }
 
 TEST_CASE(matrixInverse3) {
-	Mat3 m{ 1,3,4,7,6,9,5,3,2 };
+	Mat3 m{1,3,4,7,6,9,5,3,2};
 	SymmetricMat3 s{1, 4, 7, 6, 9, 8};
-	DiagonalMat3 d{ 7, 5, 3 };
+	DiagonalMat3 d{7, 5, 3};
 
 	logf("m=%s\n~m=%s\nm.det()=%f", str(m).c_str(), str(~m).c_str(), det(m));
 
@@ -105,10 +105,10 @@ TEST_CASE(matrixInverse3) {
 }
 
 TEST_CASE(matrixInverse4) {
-	Mat4 m{ 
-		1, 3, 4, 7, 
-		7, 9, 3, 5, 
-		4, 9, 1, 2, 
+	Mat4 m{
+		1, 3, 4, 7,
+		7, 9, 3, 5,
+		4, 9, 1, 2,
 		6, 7, 6, 9};
 
 	logf("m=%s\n~m=%s\nm.inverse()=%s\nm.det()=%f", str(m).c_str(), str(~m).c_str(), str(~m).c_str(), det(m));
@@ -134,26 +134,26 @@ TEST_CASE(cframeInverse) {
 
 TEST_CASE(matrixAssociativity) {
 
-	Mat3 A3{ 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-	Mat3 B3{ 11, 13, 17, 19, 23, 29, 31, 37, 41 };
-	Mat3 C3{ 0.1, 0.2, 0.7, 0.9, -0.3, -0.5, 0.9, 0.1, -0.3 };
+	Mat3 A3{1, 2, 3, 4, 5, 6, 7, 8, 9};
+	Mat3 B3{11, 13, 17, 19, 23, 29, 31, 37, 41};
+	Mat3 C3{0.1, 0.2, 0.7, 0.9, -0.3, -0.5, 0.9, 0.1, -0.3};
 
-	ASSERT((A3*B3)*C3 == A3*(B3*C3));
+	ASSERT((A3 * B3) * C3 == A3 * (B3 * C3));
 
 	Vec3 v3(17, -0.7, 9.4);
 
-	ASSERT((A3*B3)*v3 == (A3*(B3*v3)));
+	ASSERT((A3 * B3) * v3 == (A3 * (B3 * v3)));
 
 
-	Mat4 A4{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
-	Mat4 B4{ 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 57, 61, 67, 71 };
-	Mat4 C4{ 0.1, 0.2, 0.7, 0.9, -0.3, -0.5, 0.9, 0.1, -0.3, -0.8, 1.6, 0.4, 0.7, 0.3, 0.1, 0.1 };
+	Mat4 A4{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+	Mat4 B4{11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 57, 61, 67, 71};
+	Mat4 C4{0.1, 0.2, 0.7, 0.9, -0.3, -0.5, 0.9, 0.1, -0.3, -0.8, 1.6, 0.4, 0.7, 0.3, 0.1, 0.1};
 
-	ASSERT((A4*B4)*C4 == A4*(B4*C4));
+	ASSERT((A4 * B4) * C4 == A4 * (B4 * C4));
 
 	Vec4 v4(17, -0.7, 9.4, 0.888);
 
-	ASSERT((A4*B4)*v4 == (A4*(B4*v4)));
+	ASSERT((A4 * B4) * v4 == (A4 * (B4 * v4)));
 }
 
 TEST_CASE(cframeAssociativity) {
@@ -169,7 +169,7 @@ TEST_CASE(cframeAssociativity) {
 }
 
 TEST_CASE(fromEuler) {
-	ASSERT(rotMatZ(0.5)*rotMatX(0.3)*rotMatY(0.7) == rotationMatrixfromEulerAngles(0.3, 0.7, 0.5));
+	ASSERT(rotMatZ(0.5) * rotMatX(0.3) * rotMatY(0.7) == rotationMatrixfromEulerAngles(0.3, 0.7, 0.5));
 }
 
 TEST_CASE(crossProduct) {
@@ -214,17 +214,17 @@ TEST_CASE(largeMatrixVectorSolve) {
 	LargeMatrix<double> mat(5, 5);
 	LargeVector<double> vec(5);
 
-	for (int i = 0; i < 5; i++) {
+	for(int i = 0; i < 5; i++) {
 		vec[i] = fRand(-1.0, 1.0);
 	}
 
-	for (int i = 0; i < 5; i++) {
-		for (int j = 0; j < 5; j++) {
-			mat(i,j) = fRand(-1.0, 1.0);
+	for(int i = 0; i < 5; i++) {
+		for(int j = 0; j < 5; j++) {
+			mat(i, j) = fRand(-1.0, 1.0);
 		}
 	}
 
-	mat(0,0) = 0;
+	mat(0, 0) = 0;
 
 	LargeVector<double> newVector = mat * vec;
 
@@ -240,11 +240,11 @@ TEST_CASE(testTaylorExpansion) {
 
 	double x = 0.47;
 
-	double correctResult = 
-		testTaylor.getConstantValue() + 
-		testTaylor.getDerivative(0) * x + 
-		testTaylor.getDerivative(1) * x * x / 2 + 
-		testTaylor.getDerivative(2) * x * x * x / 6 + 
+	double correctResult =
+		testTaylor.getConstantValue() +
+		testTaylor.getDerivative(0) * x +
+		testTaylor.getDerivative(1) * x * x / 2 +
+		testTaylor.getDerivative(2) * x * x * x / 6 +
 		testTaylor.getDerivative(3) * x * x * x * x / 24;
 
 	ASSERT(correctResult == testTaylor(x));
@@ -288,7 +288,7 @@ TEST_CASE(testMultiplicationDerivatives) {
 	logStream << "estimatedRealDerivatives: " << estimatedRealDerivatives << "\n";
 
 	for(int i = 0; i < COUNT; i++) {
-		double tolerance = 0.0000001 * std::exp(10.0*i);
+		double tolerance = 0.0000001 * std::exp(10.0 * i);
 		logStream << "tolerance: " << tolerance << "\n";
 		ASSERT_TOLERANT(resultToTest.derivs[i] == estimatedRealDerivatives.derivs[i], tolerance);
 	}
@@ -325,7 +325,7 @@ TEST_CASE(testSkewSymmetricDerivatives) {
 
 	ASSERT_TOLERANT(s0 == skewSymOut.getConstantValue(), 0.000000001);
 	ASSERT_TOLERANT((s1 - s0) / DELTA_T == skewSymOut.getDerivative(0), 0.00005);
-	ASSERT_TOLERANT((s2 + s0 - 2.0*s1) / (DELTA_T * DELTA_T) == skewSymOut.getDerivative(1), 0.00005);
+	ASSERT_TOLERANT((s2 + s0 - 2.0 * s1) / (DELTA_T * DELTA_T) == skewSymOut.getDerivative(1), 0.00005);
 }
 
 TEST_CASE(testSimulation) {
@@ -347,14 +347,14 @@ TEST_CASE(testRotationDerivs) {
 			logStream << "angularVel: " << angularVel << " accel: " << angularAccel << "\n";
 			TaylorExpansion<Vec3, 2> rotVecTaylor{angularVel, angularAccel};
 			FullTaylorExpansion<Mat3, 3> rotTaylor = FullTaylorExpansion<Mat3, 3>::fromConstantAndDerivatives(rot0, generateTaylorForRotationMatrix<double, 2>(rotVecTaylor, rot0));
-			
+
 			Vec3 rotVec1 = rotVecTaylor(DELTA_T);
-			Vec3 rotVec2 = rotVecTaylor(DELTA_T*2);
+			Vec3 rotVec2 = rotVecTaylor(DELTA_T * 2);
 			Mat3 deltaRot1 = rotationMatrixFromRotationVec(rotVec1);
 			Mat3 deltaRot2 = rotationMatrixFromRotationVec(rotVec2);
 			Mat3 rot1 = deltaRot1 * rot0;
 			Mat3 rot2 = deltaRot2 * rot0;
-			
+
 			ASSERT_TOLERANT((rot1 - rot0) / DELTA_T == rotTaylor.getDerivative(0), 0.0005 * lengthSquared(angularVel) + lengthSquared(angularAccel));
 			ASSERT_TOLERANT((rot2 + rot0 - 2.0 * rot1) / (DELTA_T * DELTA_T) == rotTaylor.getDerivative(1), 0.05 * (lengthSquared(angularVel) + lengthSquared(angularAccel)));
 		}
@@ -409,14 +409,14 @@ TEST_CASE(quaternionFromRotationVecToRotationMatrix) {
 	for(double x = -1.25; x < 1.5; x += 0.1) {
 		for(double y = -1.35; y < 1.5; y += 0.1) {
 			for(double z = -1.55; z < 1.5; z += 0.1) {
-				Vec3 rotVec(x,y,z);
+				Vec3 rotVec(x, y, z);
 				ASSERT(rotationMatrixFromQuaternion(rotationQuaternionFromRotationVec(rotVec)) == rotationMatrixFromRotationVec(rotVec));
 			}
 		}
 	}
 }
 
-TEST_CASE(interchanceQuaternionAndMatrix){
+TEST_CASE(interchanceQuaternionAndMatrix) {
 	for(double x = -1.25; x < 1.5; x += 0.1) {
 		for(double y = -1.35; y < 1.5; y += 0.1) {
 			for(double z = -1.55; z < 1.5; z += 0.1) {
@@ -432,7 +432,7 @@ TEST_CASE(interchanceQuaternionAndMatrix){
 
 TEST_CASE(testFixCastToInt) {
 	for(int i = 0; i < 10000; i++) {
-		int64_t a = rand() - RAND_MAX/2;
+		int64_t a = rand() - RAND_MAX / 2;
 		Fix<32> f(a);
 		logStream << a << '\n';
 		ASSERT_STRICT(static_cast<int64_t>(f) == a);
@@ -445,3 +445,4 @@ TEST_CASE(testFixCastToInt) {
 		ASSERT_STRICT(static_cast<int64_t>(f) == static_cast<int64_t>(d));
 	}
 }
+};

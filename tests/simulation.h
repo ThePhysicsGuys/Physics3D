@@ -10,11 +10,12 @@
 #include <array>
 
 
+namespace P3D {
 template<std::size_t Size>
 std::array<Vec3, Size + 1> computeTranslationOverTime(Vec3 start, TaylorExpansion<Vec3, Size> derivatives, double deltaT) {
 	std::array<Vec3, Size + 1> result;
 
-	for(std::size_t i = 0; i < Size+1; i++) {
+	for(std::size_t i = 0; i < Size + 1; i++) {
 		result[i] = start + derivatives(deltaT * i);
 	}
 
@@ -40,7 +41,7 @@ inline std::array<Rotation, 3> computeRotationOverTime(Rotation start, Rotationa
 }
 inline std::array<CFrame, 3> computeCFrameOverTime(CFrame start, Motion motion, double deltaT) {
 	std::array<CFrame, 3> result;
-	
+
 	for(std::size_t i = 0; i < 3; i++) {
 		double t = deltaT * i;
 		Vec3 offset = start.getPosition() + motion.translation.getOffsetAfterDeltaT(t);
@@ -80,7 +81,7 @@ inline FullTaylorExpansion<T, Size> estimateDerivatives(const std::array<T, Size
 			if(size == 0) {
 				return points[index];
 			} else {
-				T delta = estimateLastDerivative(points, index+1, size - 1, invDT) - estimateLastDerivative(points, index, size - 1, invDT);
+				T delta = estimateLastDerivative(points, index + 1, size - 1, invDT) - estimateLastDerivative(points, index, size - 1, invDT);
 				return delta * invDT;
 			}
 		}
@@ -98,3 +99,4 @@ inline FullTaylorExpansion<T, Size> estimateDerivatives(const std::array<T, Size
 //inline FullTaylorExpansion<T, 3> estimateDerivatives(const std::array<T, 3>& points, double deltaT) {
 //	return FullTaylorExpansion<T, 3>{points[0], (points[1] - points[0]) / deltaT, (points[0] + points[2] - points[1] * 2.0) / (deltaT * deltaT)};
 //}
+};

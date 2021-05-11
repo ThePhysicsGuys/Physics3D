@@ -9,6 +9,7 @@
 #include "../util/terminalColor.h"
 #include "../util/parseCPUIDArgs.h"
 
+namespace P3D {
 std::vector<Benchmark*>* knownBenchmarks = nullptr;
 
 Benchmark::Benchmark(const char* name) : name(name) {
@@ -35,7 +36,7 @@ std::vector<std::string> split(std::string str, char splitChar) {
 
 	int lastIndex = 0;
 	int index = 0;
-	while(index < str.length()){
+	while(index < str.length()) {
 		while(str[index] != splitChar) {
 			index++;
 		}
@@ -48,7 +49,7 @@ std::vector<std::string> split(std::string str, char splitChar) {
 
 static void runBenchmark(Benchmark* bench) {
 	setColor(TerminalColor::CYAN);
-	
+
 	auto createStart = std::chrono::high_resolution_clock::now();
 	bench->init();
 	auto createFinish = std::chrono::high_resolution_clock::now();
@@ -114,6 +115,7 @@ int main(int argc, const char** args) {
 
 		runBenchmarks(commands);
 	}
-	
+
 	return 0;
 }
+};

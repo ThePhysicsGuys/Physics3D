@@ -8,6 +8,7 @@
 #include "../physics/geometry/convexShapeBuilder.h"
 #include "../physics/misc/toString.h"
 
+namespace P3D {
 static std::default_random_engine generator;
 
 int generateInt(int max) {
@@ -45,7 +46,7 @@ Polyhedron generateConvexPolyhedron() {
 			vecBuf[i].z = -vecBuf[i].z;
 		}
 	}
-	Triangle triangleBuf[MAX_POINT_COINT*2 * 10]{{0,1,2}, {0,2,3}, {0,3,1}, {3,2,1}};
+	Triangle triangleBuf[MAX_POINT_COINT * 2 * 10]{{0,1,2}, {0,2,3}, {0,3,1}, {3,2,1}};
 	TriangleNeighbors neighborBuf[MAX_POINT_COINT * 2 * 10];
 	int removalBuf[MAX_POINT_COINT * 2 * 10];
 	EdgePiece edgeBuf[MAX_POINT_COINT * 4 * 10];
@@ -96,7 +97,7 @@ TriangleMesh generateTriangleMesh() {
 	for(int i = numVertices; i < numTriangles; i++) {
 		mesh.setTriangle(i, generateTriangle(numVertices)); // extra triangles
 	}
-	
+
 	return TriangleMesh(std::move(mesh));
 }
 
@@ -192,7 +193,7 @@ std::vector<Part> generateMotorizedPhysicalParts() {
 	return parts;
 }
 
-using namespace P3D::OldBoundsTree;
+using namespace OldBoundsTree;
 
 void generateLayerAssignment(std::vector<Part>& parts, WorldPrototype& world) {
 	std::vector<Part*> layerParts(world.layers.size(), nullptr);
@@ -261,3 +262,4 @@ void* getRandomLeafObject(const TreeNode& node) {
 		return getRandomLeafObject(node.subTrees[rand() % node.nodeCount]);
 	}
 }
+};

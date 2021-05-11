@@ -12,10 +12,11 @@
 #include <string>
 #include <vector>
 
+namespace P3D {
 TEST_CASE(transformationTest) {
 	Mat4f viewMatrix = Mat4f::IDENTITY();
 	Mat4f projectionMatrix = perspective(1, 2, 0.1f, 100);
-	
+
 	Mat4f inverseViewMatrix = ~viewMatrix;
 	Mat4f inverseProjectionMatrix = ~projectionMatrix;
 
@@ -25,3 +26,4 @@ TEST_CASE(transformationTest) {
 
 	ASSERT_TOLERANT(point == transformedBack, 0.000001);
 }
+};

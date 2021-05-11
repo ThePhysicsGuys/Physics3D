@@ -15,6 +15,7 @@
 #include "../util/parseCPUIDArgs.h"
 #include "../util/cmdParser.h"
 
+namespace P3D {
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
 static const char sepChar = '\\';
 #else
@@ -41,13 +42,13 @@ static void resetLog() {
 	logStream.clear();
 }
 
-char logBuffer[1<<16];
+char logBuffer[1 << 16];
 
 void logf(const char* format, ...) {
-	
+
 	va_list args;
 	va_start(args, format);
-	int length = std::vsnprintf(logBuffer, 1<<16, format, args);
+	int length = std::vsnprintf(logBuffer, 1 << 16, format, args);
 	va_end(args);
 
 	logStream << logBuffer << '\n';
@@ -136,12 +137,12 @@ public:
 	TestType type;
 	void(*testFunc)();
 
-	Test() : 
+	Test() :
 		filePath(nullptr), funcName(nullptr), fileName(nullptr), testFunc(nullptr), type(TestType::NORMAL) {};
-	Test(const char* filePath, const char* funcName, void(*testFunc)(), TestType type) : 
-		filePath(filePath), 
-		funcName(funcName), 
-		testFunc(testFunc), 
+	Test(const char* filePath, const char* funcName, void(*testFunc)(), TestType type) :
+		filePath(filePath),
+		funcName(funcName),
+		testFunc(testFunc),
 		type(type),
 		fileName(std::strrchr(this->filePath, sepChar) ? std::strrchr(this->filePath, sepChar) + 1 : this->filePath) {}
 private:
@@ -250,7 +251,7 @@ static bool isCoveredBy(Test& test, const std::vector<std::string>& filters) {
 	if(filters.size() == 0) {
 		return true;
 	}
-	for(const std::string& filter : filters){
+	for(const std::string& filter : filters) {
 		if(filter == test.fileName || filter + ".cpp" == test.fileName || filter == test.funcName || filter == test.fileName + std::string(":") + test.funcName) {
 			return true;
 		}
@@ -269,13 +270,13 @@ static void runTests(const std::vector<std::string>& filter, TestFlags flags) {
 	int totalTestsRan = 0;
 	int resultCounts[4]{0,0,0,0};
 	for(Test& t : *tests) {
-		if(isCoveredBy(t, filter)){
+		if(isCoveredBy(t, filter)) {
 			TestResult result = t.run(flags);
 			if(result != TestResult::SKIP) totalTestsRan++;
 			resultCounts[static_cast<int>(result)]++;
 		}
 	}
-	
+
 	setColor(TerminalColor::WHITE);
 	cout << "Tests finished! Ran " << totalTestsRan << "/" << tests->size() << " tests\n";
 
@@ -287,7 +288,7 @@ static void runTests(const std::vector<std::string>& filter, TestFlags flags) {
 
 TestFlags getTestFlags(const Util::ParsedArgs& cmdArgs) {
 	TestFlags result;
-	
+
 	result.coverageEnabled = cmdArgs.hasFlag("coverage");
 	result.catchErrors = !cmdArgs.hasFlag("nocatch");
 	result.allowSkip = cmdArgs.argCount() == 0;
@@ -334,7 +335,8 @@ static void logAssertError(string text) {
 }
 
 TestAdder::TestAdder(const char* file, const char* name, void(*f)(), TestType isSlow) {
-	if (tests == nullptr) tests = new vector<Test>();
+	if(tests == nullptr) tests = new vector<Test>();
 
 	tests->push_back(Test(file, name, f, isSlow));
 }
+};

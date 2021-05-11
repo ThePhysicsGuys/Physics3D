@@ -12,7 +12,7 @@
 #include "../physics/hardconstraints/motorConstraint.h"
 #include "../physics/hardconstraints/sinusoidalPistonConstraint.h"
 
-
+namespace P3D {
 #define REMAINS_CONSTANT(v) REMAINS_CONSTANT_TOLERANT(v, 0.005)
 #define ASSERT(v) ASSERT_TOLERANT(v, 0.005)
 
@@ -58,7 +58,7 @@ TEST_CASE(testMotionOfMotorConstraintCorrect) {
 	ASSERT(calculatedMotion.relativeMotion == estimateMotion(cf1, cf2, cf3, DELTA_T));
 }
 
-TEST_CASE(testMotionOfPistonConstraintCorrect){
+TEST_CASE(testMotionOfPistonConstraintCorrect) {
 	HardPhysicalConnection connection(std::unique_ptr<HardConstraint>(new SinusoidalPistonConstraint(1.0, 5.0, 1.0)), createRandomCFrame(), createRandomCFrame());
 
 	connection.update(1.23456789);
@@ -130,7 +130,7 @@ TEST_CASE(testExtendingRelativeMotionCFrameCommutes) {
 
 	ASSERT(resultingMotion1 == resultingMotion2);
 }
-TEST_CASE(testExtendingRelativeMotionVecCorrect){
+TEST_CASE(testExtendingRelativeMotionVecCorrect) {
 	RelativeMotion relMotion = createRandomRelativeMotion();
 	Motion motionOfOrigin = createRandomMotion();
 	Vec3 offsetFromBegin = createRandomNonzeroVec3();
@@ -169,7 +169,7 @@ TEST_CASE(testJoiningRelativeMotionCorrect) {
 
 	Motion secondMotionInNewSpace = localToGlobal(r1.locationOfRelativeMotion.getRotation(), r2.relativeMotion);
 
-	Motion motionOfSecondEndPoint = 
+	Motion motionOfSecondEndPoint =
 		motionOfEndPoint.getMotionOfPoint(offsetForSecondEndPoint.getPosition())
 		.addRelativeMotion(secondMotionInNewSpace);
 
@@ -216,11 +216,11 @@ TEST_CASE(testSimulateRelativeMotion) {
 
 	CFrame origin1 = CFrame();
 	CFrame origin2 = simulateForTime(motionOfOrigin, CFrame(), DELTA_T);
-	CFrame origin3 = simulateForTime(motionOfOrigin, CFrame(), 2*DELTA_T);
+	CFrame origin3 = simulateForTime(motionOfOrigin, CFrame(), 2 * DELTA_T);
 
 	CFrame relative1 = relMotion.locationOfRelativeMotion;
 	CFrame relative2 = simulateForTime(relMotion.relativeMotion, relMotion.locationOfRelativeMotion, DELTA_T);
-	CFrame relative3 = simulateForTime(relMotion.relativeMotion, relMotion.locationOfRelativeMotion, 2*DELTA_T);
+	CFrame relative3 = simulateForTime(relMotion.relativeMotion, relMotion.locationOfRelativeMotion, 2 * DELTA_T);
 
 	CFrame p1 = origin1.localToGlobal(relative1);
 	CFrame p2 = origin2.localToGlobal(relative2);
@@ -259,8 +259,9 @@ TEST_CASE(testSimulateRelativeToRelativeMotion) {
 	Motion estimatedMotion = estimateMotion(p1, p2, p3, DELTA_T);
 
 	RelativeMotion calculatedMotion = motionOfOrigin + relMotion;
-	
+
 
 	ASSERT(estimatedMotion == calculatedMotion.relativeMotion);
 	ASSERT(p1 == calculatedMotion.locationOfRelativeMotion);
 }
+};

@@ -13,7 +13,6 @@
 #include <set>
 
 namespace P3D::NewBoundsTree {
-
 static void shuffleTreeRecursive(TreeTrunk& curTrunk, int curTrunkSize) {
 	for(int iter = 0; iter < (curTrunkSize - 1) * curTrunkSize; iter++) {
 		int index1 = generateInt(curTrunkSize);
@@ -113,7 +112,7 @@ static bool groupsMatchTree(const std::vector<std::vector<BasicBounded*>>& group
 			for(const BasicBounded* objA : groupA) {
 				for(const BasicBounded* objB : groupB) {
 					if(tree.groupContains(objA, objB) != isSameGroup) {
-						std::cout << (isSameGroup? "Objects should be in same group but aren't!" : "Objects shouldn't be in same group but are!");
+						std::cout << (isSameGroup ? "Objects should be in same group but aren't!" : "Objects shouldn't be in same group but are!");
 						return false;
 					}
 				}
@@ -360,7 +359,7 @@ TEST_CASE(testForEachColission) {
 	for(size_t i = 0; i < groups.size(); i++) {
 		std::vector<BasicBounded*>& groupA = groups[i];
 
-		for(size_t j = i+1; j < groups.size(); j++) {
+		for(size_t j = i + 1; j < groups.size(); j++) {
 			std::vector<BasicBounded*>& groupB = groups[j];
 
 			for(int ai = 0; ai < groupA.size(); ai++) {
@@ -500,4 +499,5 @@ TEST_CASE(testImproveStructureValidity) {
 }
 
 
+};
 };

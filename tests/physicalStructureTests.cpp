@@ -12,7 +12,7 @@
 #include "../physics/physical.h"
 #include "../physics/hardconstraints/fixedConstraint.h"
 
-
+namespace P3D {
 #define ASSERT(x) ASSERT_STRICT(x)
 
 static CFrame cf() {
@@ -38,7 +38,7 @@ TEST_CASE(testManyAttachBasic) {
 	a->attach(b, cf());
 	a->attach(c, cf());
 	c->attach(d, cf());
-		
+
 	// a should be mainPart
 	ASSERT_TRUE(a->isMainPart());
 	ASSERT_FALSE(b->isMainPart());
@@ -105,7 +105,7 @@ TEST_CASE(testManyAttachComplex) {
 	a->attach(e1, cf());
 	a->attach(f2, cf());
 	g1->attach(a, cf());
-		
+
 	ASSERT_TRUE(a->parent->rigidBody.getPartCount() == 10);
 
 	Part* parts[]{a,b,c,d,e1,e2,f1,f2,g1,g2};
@@ -238,4 +238,4 @@ TEST_CASE(testAttachConnectedPhysicalToConnectedPhysical) {
 		delete p;
 	}
 }
-
+};

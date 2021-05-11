@@ -14,7 +14,7 @@
 
 #include <cmath>
 
-
+namespace P3D {
 #define ASSERT(condition) ASSERT_TOLERANT(condition, 0.00000001)
 
 #define FOR_XYZ(start, end, delta) for(auto x = start; x < end; x += delta) for(auto y = start; y < end; y += delta) for(auto z = start; z < end; z += delta) 
@@ -94,7 +94,7 @@ TEST_CASE(rotationAssociative) {
 		};
 
 		ASSERT(rotToTest1.localToGlobal(rotToTest2.localToGlobal(testVec)) == rotToTest1.localToGlobal(rotToTest2).localToGlobal(testVec));
-		
+
 		ASSERT(rotToTest1.localToGlobal(rotToTest2.localToGlobal(testRot)) == rotToTest1.localToGlobal(rotToTest2).localToGlobal(testRot));
 
 		ASSERT(rotToTest1.localToGlobal(rotToTest2.localToGlobal(testMat)) == rotToTest1.localToGlobal(rotToTest2).localToGlobal(testMat));
@@ -104,10 +104,10 @@ TEST_CASE(rotationAssociative) {
 TEST_CASE(rotXrotYrotZ) {
 	FOR_XYZ(-1.5, 1.5, 0.1) {
 		double angle = x;
-		
+
 		Vec2 a(y, z);
 		Mat2 rotMat{
-			std::cos(angle), -std::sin(angle), 
+			std::cos(angle), -std::sin(angle),
 			std::sin(angle), std::cos(angle)
 		};
 		Vec2 b = rotMat * a;
@@ -133,8 +133,8 @@ TEST_CASE(faceDirection) {
 
 TEST_CASE(rotationMatrix) {
 	FOR_XYZ(-1.55, 1.55, 0.1) {
-		Mat3 mat = rotationMatrixfromEulerAngles(x,y,z);
-		Rotation rot = Rotation::fromEulerAngles(x,y,z);
+		Mat3 mat = rotationMatrixfromEulerAngles(x, y, z);
+		Rotation rot = Rotation::fromEulerAngles(x, y, z);
 		ASSERT(rot == Rotation::fromRotationMatrix(mat));
 		ASSERT(mat == rot.asRotationMatrix());
 	}
@@ -157,7 +157,7 @@ TEST_CASE(rotationQuaternionNegative) {
 TEST_CASE(quaternionFromRotVecInverse) {
 	// 1.55 to try to stay below a length of PI, since otherwise duplicate vectors will emerge
 	FOR_XYZ(-1.55, 1.55, 0.1) {
-		Vec3 rotVec = Vec3(x,y,z);
+		Vec3 rotVec = Vec3(x, y, z);
 		ASSERT(rotVec == rotationVectorFromRotationQuaternion(rotationQuaternionFromRotationVec(rotVec)));
 	}
 }
@@ -192,8 +192,8 @@ TEST_CASE(rotationImplementationIdenticalLocalGlobal) {
 			ASSERT((quatRot * quatRot2).asRotationMatrix() == (matRot * matRot2).asRotationMatrix());
 		}
 		SymmetricMat3 mat{
-			1.3, 
-			0.4, -2.1, 
+			1.3,
+			0.4, -2.1,
 			-1.2, 0.1, 0.7
 		};
 
@@ -213,8 +213,8 @@ TEST_CASE(rotationImplementationIdenticalInverse) {
 
 TEST_CASE(rotationImplementationIdenticalFaceMatrices) {
 	FOR_XYZ(1.5, 1.5, 0.5) {
-		Vec3 faceDir = Vec3(x,y,z);
-		
+		Vec3 faceDir = Vec3(x, y, z);
+
 
 		ASSERT(MatrixRotationTemplate<double>::faceX(faceDir).asRotationMatrix() == QuaternionRotationTemplate<double>::faceX(faceDir).asRotationMatrix());
 		ASSERT(MatrixRotationTemplate<double>::faceY(faceDir).asRotationMatrix() == QuaternionRotationTemplate<double>::faceY(faceDir).asRotationMatrix());
@@ -226,17 +226,18 @@ TEST_CASE(rotationImplementationIdenticalGetXYZ) {
 	FOR_XYZ(1.5, 1.5, 0.5) {
 		MatrixRotationTemplate<double> matRot = MatrixRotationTemplate<double>::fromEulerAngles(x, y, z);
 		QuaternionRotationTemplate<double> quatRot = QuaternionRotationTemplate<double>::fromEulerAngles(x, y, z);
-		
+
 		ASSERT(matRot.getX() == quatRot.getX());
 		ASSERT(matRot.getY() == quatRot.getY());
 		ASSERT(matRot.getZ() == quatRot.getZ());
 
-		ASSERT(matRot.getX() == matRot.localToGlobal(Vec3(1,0,0)));
-		ASSERT(matRot.getY() == matRot.localToGlobal(Vec3(0,1,0)));
-		ASSERT(matRot.getZ() == matRot.localToGlobal(Vec3(0,0,1)));
+		ASSERT(matRot.getX() == matRot.localToGlobal(Vec3(1, 0, 0)));
+		ASSERT(matRot.getY() == matRot.localToGlobal(Vec3(0, 1, 0)));
+		ASSERT(matRot.getZ() == matRot.localToGlobal(Vec3(0, 0, 1)));
 
-		ASSERT(quatRot.getX() == quatRot.localToGlobal(Vec3(1,0,0)));
-		ASSERT(quatRot.getY() == quatRot.localToGlobal(Vec3(0,1,0)));
-		ASSERT(quatRot.getZ() == quatRot.localToGlobal(Vec3(0,0,1)));
+		ASSERT(quatRot.getX() == quatRot.localToGlobal(Vec3(1, 0, 0)));
+		ASSERT(quatRot.getY() == quatRot.localToGlobal(Vec3(0, 1, 0)));
+		ASSERT(quatRot.getZ() == quatRot.localToGlobal(Vec3(0, 0, 1)));
 	}
 }
+};

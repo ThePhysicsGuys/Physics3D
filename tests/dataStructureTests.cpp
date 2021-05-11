@@ -7,9 +7,7 @@
 
 #include "../physics/datastructures/boundsTree.h"
 
-using namespace P3D::OldBoundsTree;
-
-
+namespace P3D::OldBoundsTree {
 TEST_CASE(testBoundsTreeGenerationValid) {
 	for(int iter = 0; iter < 1000; iter++) {
 		BoundsTree<BasicBounded> tree = generateBoundsTree();
@@ -85,3 +83,4 @@ TEST_CASE(testMergeGroups) {
 		}
 	}
 }
+};

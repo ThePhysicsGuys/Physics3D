@@ -6,6 +6,7 @@
 #include "../physics/math/linalg/commonMatrices.h"
 #include "../physics/math/linalg/trigonometry.h"
 
+namespace P3D {
 class ManyCubesBenchmark : public WorldBenchmark {
 public:
 	ManyCubesBenchmark() : WorldBenchmark("manyCubes", 10000) {}
@@ -35,3 +36,4 @@ public:
 		}
 	}
 } manyCubesBench;
+};

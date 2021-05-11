@@ -4,6 +4,7 @@
 #include "../physics/misc/shapeLibrary.h"
 #include "../physics/math/linalg/trigonometry.h"
 
+namespace P3D {
 class GetBounds : public Benchmark {
 	Polyhedron poly;
 	double result = 0;
@@ -21,6 +22,7 @@ public:
 		}
 	}
 } getBounds;
+};
 
 
 
