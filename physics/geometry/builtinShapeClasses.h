@@ -3,6 +3,7 @@
 #include "polyhedron.h"
 #include "shapeClass.h"
 
+namespace P3D {
 #define CUBE_CLASS_ID 0
 #define SPHERE_CLASS_ID 1
 #define CYLINDER_CLASS_ID 2
@@ -103,4 +104,5 @@ public:
 
 	virtual BoundingBox getBounds(const Rotation& rotation, const DiagonalMat3& scale) const override;
 	virtual Vec3f furthestInDirection(const Vec3f& direction) const override;
+};
 };

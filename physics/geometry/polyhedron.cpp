@@ -16,11 +16,12 @@
 #include "../misc/validityHelper.h"
 #include "shape.h"
 
+namespace P3D {
 Polyhedron::Polyhedron(const Vec3f* vertices, const Triangle* triangles, int vertexCount, int triangleCount) :
 	TriangleMesh(vertexCount, triangleCount, vertices, triangles) {
 	assert(isValid(*this));
 }
-Polyhedron::Polyhedron(const TriangleMesh& mesh) : 
+Polyhedron::Polyhedron(const TriangleMesh& mesh) :
 	TriangleMesh(mesh) {
 	assert(isValid(*this));
 }
@@ -89,16 +90,16 @@ void Polyhedron::computeNormals(Vec3f* buffer) const {
 
 double Polyhedron::getVolume() const {
 	double total = 0;
-	for (Triangle triangle : iterTriangles()) {
+	for(Triangle triangle : iterTriangles()) {
 		Vec3 v0 = this->getVertex(triangle.firstIndex);
 		Vec3 v1 = this->getVertex(triangle.secondIndex);
 		Vec3 v2 = this->getVertex(triangle.thirdIndex);
 
-		double D1x = v1.x - v0.x; 
+		double D1x = v1.x - v0.x;
 		double D1y = v1.y - v0.y;
 		double D2x = v2.x - v0.x;
 		double D2y = v2.y - v0.y;
-		
+
 		double nz = D1x * D2y - D1y * D2x;
 
 		total += nz * (v0.z + v1.z + v2.z);
@@ -108,8 +109,8 @@ double Polyhedron::getVolume() const {
 }
 
 Vec3 Polyhedron::getCenterOfMass() const {
-	Vec3 total(0,0,0);
-	for (Triangle triangle : iterTriangles()) {
+	Vec3 total(0, 0, 0);
+	for(Triangle triangle : iterTriangles()) {
 		Vec3 v0 = this->getVertex(triangle.firstIndex);
 		Vec3 v1 = this->getVertex(triangle.secondIndex);
 		Vec3 v2 = this->getVertex(triangle.thirdIndex);
@@ -119,7 +120,7 @@ Vec3 Polyhedron::getCenterOfMass() const {
 
 		total += elementWiseMul(normalVec, vFactor);
 	}
-	
+
 	return total / (24 * getVolume());
 }
 
@@ -138,7 +139,7 @@ Vec3 Polyhedron::getCenterOfMass() const {
 ScalableInertialMatrix Polyhedron::getScalableInertia(const CFrame& reference) const {
 	Vec3 totalDiagElementParts(0, 0, 0);
 	Vec3 totalOffDiag(0, 0, 0);
-	for (Triangle triangle : iterTriangles()) {
+	for(Triangle triangle : iterTriangles()) {
 		Vec3 v0 = reference.globalToLocal(Vec3(this->getVertex(triangle.firstIndex)));
 		Vec3 v1 = reference.globalToLocal(Vec3(this->getVertex(triangle.secondIndex)));
 		Vec3 v2 = reference.globalToLocal(Vec3(this->getVertex(triangle.thirdIndex)));
@@ -156,11 +157,11 @@ ScalableInertialMatrix Polyhedron::getScalableInertia(const CFrame& reference) c
 		//total[2][2] += diagonalElementParts.x + diagonalElementParts.y; // sx*sy*sz*(sx^2+sy^2)
 
 		// Other Elements
-		double selfProducts  =	v0.x*v0.y*v0.z + v1.x*v1.y*v1.z + v2.x*v2.y*v2.z;
-		double twoSames      =	v0.x*v0.y*v1.z + v0.x*v1.y*v0.z + v0.x*v1.y*v1.z + v0.x*v0.y*v2.z + v0.x*v2.y*v0.z + v0.x*v2.y*v2.z +
-								v1.x*v0.y*v0.z + v1.x*v1.y*v0.z + v1.x*v0.y*v1.z + v1.x*v1.y*v2.z + v1.x*v2.y*v1.z + v1.x*v2.y*v2.z +
-								v2.x*v0.y*v0.z + v2.x*v1.y*v2.z + v2.x*v0.y*v2.z + v2.x*v1.y*v1.z + v2.x*v2.y*v0.z + v2.x*v2.y*v1.z;
-		double allDifferents =	v0.x*v1.y*v2.z + v0.x*v2.y*v1.z + v1.x*v0.y*v2.z + v1.x*v2.y*v0.z + v2.x*v0.y*v1.z + v2.x*v1.y*v0.z;
+		double selfProducts = v0.x * v0.y * v0.z + v1.x * v1.y * v1.z + v2.x * v2.y * v2.z;
+		double twoSames = v0.x * v0.y * v1.z + v0.x * v1.y * v0.z + v0.x * v1.y * v1.z + v0.x * v0.y * v2.z + v0.x * v2.y * v0.z + v0.x * v2.y * v2.z +
+			v1.x * v0.y * v0.z + v1.x * v1.y * v0.z + v1.x * v0.y * v1.z + v1.x * v1.y * v2.z + v1.x * v2.y * v1.z + v1.x * v2.y * v2.z +
+			v2.x * v0.y * v0.z + v2.x * v1.y * v2.z + v2.x * v0.y * v2.z + v2.x * v1.y * v1.z + v2.x * v2.y * v0.z + v2.x * v2.y * v1.z;
+		double allDifferents = v0.x * v1.y * v2.z + v0.x * v2.y * v1.z + v1.x * v0.y * v2.z + v1.x * v2.y * v0.z + v2.x * v0.y * v1.z + v2.x * v1.y * v0.z;
 
 		double xyzIntegral = -(3.0 * selfProducts + twoSames + 0.5 * allDifferents); // scales linearly by sx*sy*sz
 
@@ -170,8 +171,8 @@ ScalableInertialMatrix Polyhedron::getScalableInertia(const CFrame& reference) c
 		//total[2][0] += dFactor.y * xyzIntegral; // sx*sy*sz* sx*sz
 		//total[2][1] += dFactor.x * xyzIntegral; // sx*sy*sz* sz*sy
 	}
-	
-	return ScalableInertialMatrix(totalDiagElementParts * (1.0/60.0), totalOffDiag * (1.0/60.0));
+
+	return ScalableInertialMatrix(totalDiagElementParts * (1.0 / 60.0), totalOffDiag * (1.0 / 60.0));
 }
 
 ScalableInertialMatrix Polyhedron::getScalableInertiaAroundCenterOfMass() const {
@@ -195,3 +196,4 @@ SymmetricMat3 Polyhedron::getInertia(const CFrame& reference) const {
 SymmetricMat3 Polyhedron::getInertiaAroundCenterOfMass() const {
 	return getScalableInertiaAroundCenterOfMass().toMatrix();
 }
+};

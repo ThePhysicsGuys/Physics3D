@@ -5,6 +5,7 @@
 #include "../../datastructures/boundsTree.h"
 #include "../../part.h"
 
+namespace P3D {
 class VisibilityFilter {
 public:
 	Position origin;
@@ -19,7 +20,7 @@ private:
 public:
 	VisibilityFilter() : up(), down(), left(), right(), forward(), maxDepth() {};
 	VisibilityFilter(const Position& origin, Vec3 normals[5], double maxDepth);
-	
+
 	/*
 		Creates a VisibilityFilter from the values derived from usual camera parameters.
 
@@ -53,7 +54,7 @@ public:
 		aspect: aspect ratio of the camera, == width / height
 	*/
 	static VisibilityFilter forWindow(const Position& origin, const Vec3& cameraForward, const Vec3& cameraUp, double fov, double aspect, double maxDepth);
-	
+
 	/*
 		Creates a VisibilityFilter for a subregion of the screen. Useful for selection and stuff
 
@@ -62,7 +63,7 @@ public:
 		down-up goes from -1..1
 	*/
 	static VisibilityFilter forSubWindow(const Position& origin, const Vec3& cameraForward, const Vec3& cameraUp, double fov, double aspect, double maxDepth, double left, double right, double down, double up);
-	
+
 	bool operator()(const P3D::OldBoundsTree::TreeNode& node) const;
 	bool operator()(const Position& point) const;
 	bool operator()(const Part& part) const;
@@ -73,4 +74,5 @@ public:
 	Vec3 getBottomOfViewPort() const { return projectToPlaneNormal(forward, down); }
 	Vec3 getLeftOfViewPort() const { return projectToPlaneNormal(forward, left); }
 	Vec3 getRightOfViewPort() const { return projectToPlaneNormal(forward, right); }
+};
 };

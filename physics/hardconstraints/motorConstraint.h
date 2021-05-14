@@ -3,6 +3,7 @@
 #include "hardConstraint.h"
 #include "constraintTemplates.h"
 
+namespace P3D {
 class ConstantMotorTurner {
 public:
 	double speed;
@@ -20,3 +21,4 @@ public:
 };
 
 typedef MotorConstraintTemplate<ConstantMotorTurner> ConstantSpeedMotorConstraint;
+};

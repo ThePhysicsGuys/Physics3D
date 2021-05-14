@@ -2,6 +2,7 @@
 
 
 // this is a central class to everything else, but applications using the library don't need to include all these, as they are implementation details. 
+namespace P3D {
 class Part;
 class HardConstraint;
 class RigidBody;
@@ -10,6 +11,7 @@ class ConnectedPhysical;
 class MotorizedPhysical;
 class WorldLayer;
 class WorldPrototype;
+};
 
 #include "geometry/shape.h"
 #include "math/linalg/mat.h"
@@ -18,6 +20,7 @@ class WorldPrototype;
 #include "math/bounds.h"
 #include "motion.h"
 
+namespace P3D {
 struct PartProperties {
 	double density;
 	double friction;
@@ -144,4 +147,5 @@ public:
 	void removeFromWorld();
 
 	bool isValid() const;
+};
 };

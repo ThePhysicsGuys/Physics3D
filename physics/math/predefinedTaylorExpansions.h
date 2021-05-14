@@ -6,6 +6,7 @@
 #include "taylorExpansion.h"
 #include "linalg/trigonometry.h"
 
+namespace P3D {
 template<typename T, std::size_t N>
 TaylorExpansion<T, N> generateTaylorForSinWave(T currentAngle, T frequencyMultiplier) {
 	TaylorExpansion<T, N> result;
@@ -54,7 +55,7 @@ FullTaylorExpansion<T, N> generateFullTaylorForSinWave(T currentAngle, T frequen
 	T values[4]{cosValue, -sinValue, -cosValue, sinValue};
 
 	T totalMultiplier = frequencyMultiplier;
-	for(std::size_t i = 0; i < N-1; i++) {
+	for(std::size_t i = 0; i < N - 1; i++) {
 		result.setDerivative(i, values[i % 4] * totalMultiplier);
 		totalMultiplier *= frequencyMultiplier;
 	}
@@ -72,7 +73,7 @@ FullTaylorExpansion<T, N> generateFullTaylorForCosWave(T currentAngle, T frequen
 	T values[4]{-sinValue, -cosValue, sinValue, cosValue};
 
 	T totalMultiplier = frequencyMultiplier;
-	for(std::size_t i = 0; i < N-1; i++) {
+	for(std::size_t i = 0; i < N - 1; i++) {
 		result.setDerivative(i, values[i % 4] * totalMultiplier);
 		totalMultiplier *= frequencyMultiplier;
 	}
@@ -81,24 +82,24 @@ FullTaylorExpansion<T, N> generateFullTaylorForCosWave(T currentAngle, T frequen
 }
 
 template<typename T, int Derivs>
-TaylorExpansion<SymmetricMatrix<T, 3>, Derivs-1> generateTaylorForSkewSymmetricSquared(const FullTaylorExpansion<Vector<T, 3>, Derivs>& inputVector) {
+TaylorExpansion<SymmetricMatrix<T, 3>, Derivs - 1> generateTaylorForSkewSymmetricSquared(const FullTaylorExpansion<Vector<T, 3>, Derivs>& inputVector) {
 	static_assert(Derivs >= 2 && Derivs <= 3);
-	
+
 	Vector<T, 3> f = inputVector.getConstantValue();
-	
-	TaylorExpansion<SymmetricMatrix<T, 3>, Derivs-1> result;
+
+	TaylorExpansion<SymmetricMatrix<T, 3>, Derivs - 1> result;
 
 	if constexpr(Derivs >= 2) {
 		Vector<T, 3> ff = inputVector.getDerivative(0);
 		Vector<T, 3> ffxf = elementWiseMul(ff, f);
 		Vector<T, 3> ffMixed = mulOppositesBiDir(ff, f);
-		
+
 		result[0] = SymmetricMatrix<T, 3>{
 			-2 * (ffxf.y + ffxf.z),
 			ffMixed.z, -2 * (ffxf.x + ffxf.z),
 			ffMixed.y, ffMixed.x, -2 * (ffxf.x + ffxf.y)
 		};
-		
+
 		if constexpr(Derivs >= 3) {
 			Vector<T, 3> fff = inputVector.getDerivative(1);
 			Vector<T, 3> fffxf = elementWiseSquare(ff) + elementWiseMul(fff, f);
@@ -136,3 +137,4 @@ TaylorExpansion<Mat3, Derivs> generateTaylorForRotationMatrix(const TaylorExpans
 
 	return result;
 }
+};

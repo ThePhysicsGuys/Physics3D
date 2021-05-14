@@ -6,6 +6,7 @@
 #include "../math/globalCFrame.h"
 #include "../motion.h"
 
+namespace P3D {
 #define NUMBER_OF_ERROR_DERIVATIVES 2
 
 template<std::size_t Size>
@@ -34,11 +35,11 @@ class ConstraintMatrixPack {
 public:
 	ConstraintMatrixPack() = default;
 	template<std::size_t Size>
-	ConstraintMatrixPack(double* matrixBuf, double* errorBuf, 
-						 const Matrix<double, 6, Size>& paramToMotionA, 
-						 const Matrix<double, 6, Size>& paramToMotionB, 
-						 const Matrix<double, Size, 6>& motionToEqA, 
-						 const Matrix<double, Size, 6>& motionToEqB, 
+	ConstraintMatrixPack(double* matrixBuf, double* errorBuf,
+						 const Matrix<double, 6, Size>& paramToMotionA,
+						 const Matrix<double, 6, Size>& paramToMotionB,
+						 const Matrix<double, Size, 6>& motionToEqA,
+						 const Matrix<double, Size, 6>& motionToEqB,
 						 const Matrix<double, Size, NUMBER_OF_ERROR_DERIVATIVES>& errorMat) : matrixData(matrixBuf), errorData(errorBuf), size(Size) {
 
 		paramToMotionA.toColMajorData(matrixData);
@@ -80,4 +81,5 @@ public:
 struct Constraint {
 	virtual int maxNumberOfParameters() const = 0;
 	virtual ConstraintMatrixPack getMatrices(const PhysicalInfo& physA, const PhysicalInfo& physB, double* matrixBuf, double* errorBuf) const = 0;
+};
 };

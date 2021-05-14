@@ -2,6 +2,7 @@
 
 #include <cmath>
 
+namespace P3D {
 template<typename N>
 void update(EigenValues<N, 3>& e, bool* changed, int k, N t) {
 	N y = e[k];
@@ -81,3 +82,4 @@ EigenSet<double, 3> getEigenDecomposition(const SymmetricMat3& sm) {
 	}
 	return EigenSet<double, 3>(eigenValues, eigenVectors);
 }
+};

@@ -2,6 +2,7 @@
 
 #include "../../math/taylorExpansion.h"
 
+namespace P3D {
 class ConstController {
 public:
 	double value;
@@ -11,4 +12,5 @@ public:
 	inline FullTaylor<double> getFullTaylorExpansion() const {
 		return FullTaylor<double>{value};
 	}
+};
 };

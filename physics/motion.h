@@ -5,6 +5,7 @@
 
 #include "math/taylorExpansion.h"
 
+namespace P3D {
 struct TranslationalMotion {
 	Taylor<Vec3> translation;
 
@@ -137,8 +138,8 @@ struct Motion {
 
 	inline Motion addRelativeMotion(const Motion& relativeMotion) const {
 		return Motion(
-			translation.getVelocity()     + relativeMotion.translation.getVelocity(),
-			rotation.getAngularVelocity()      + relativeMotion.rotation.getAngularVelocity(),
+			translation.getVelocity() + relativeMotion.translation.getVelocity(),
+			rotation.getAngularVelocity() + relativeMotion.rotation.getAngularVelocity(),
 			translation.getAcceleration() + relativeMotion.translation.getAcceleration() + rotation.getAngularVelocity() % relativeMotion.translation.getVelocity() * 2.0,
 			rotation.getAngularAcceleration() + relativeMotion.rotation.getAngularAcceleration() + rotation.getAngularVelocity() % relativeMotion.rotation.getAngularVelocity()
 		);
@@ -188,3 +189,4 @@ inline Motion globalToLocal(const Rotation& rot, const Motion& motion) {
 	return Motion(globalToLocal(rot, motion.translation),
 				  globalToLocal(rot, motion.rotation));
 }
+};

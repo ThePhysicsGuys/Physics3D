@@ -4,6 +4,7 @@
 #include "datastructures/iteratorEnd.h"
 #include "part.h"
 
+namespace P3D {
 struct AttachedPart {
 	CFrame attachment = CFrame();
 	Part* part = nullptr;
@@ -151,4 +152,5 @@ public:
 
 	void refreshWithNewParts();
 private:
+};
 };

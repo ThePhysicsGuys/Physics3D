@@ -5,6 +5,7 @@
 
 #include <fenv.h>
 
+namespace P3D {
 #define USE_NEW_BOUNDSTREE
 
 template<typename T>
@@ -108,3 +109,4 @@ constexpr BoundingBoxTemplate<T> operator-(const BoundsTemplate<T>& box, const P
 }
 
 typedef BoundsTemplate<Fix<32>> Bounds;
+};

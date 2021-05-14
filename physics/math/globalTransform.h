@@ -7,6 +7,7 @@
 #include "transform.h"
 #include "globalCFrame.h"
 
+namespace P3D {
 class GlobalTransform {
 public:
 	Position position;
@@ -77,4 +78,5 @@ public:
 	inline GlobalTransform rotated(const Mat3& rot) const {
 		return GlobalTransform(position, rot * transform);
 	}
+};
 };

@@ -6,6 +6,7 @@
 #include "../datastructures/alignedPtr.h"
 #include "../datastructures/iteratorFactory.h"
 
+namespace P3D {
 struct Triangle {
 	union {
 		struct {
@@ -20,7 +21,7 @@ struct Triangle {
 	Triangle operator~() const { return Triangle{firstIndex, thirdIndex, secondIndex}; }
 	bool operator==(const Triangle& other) const;
 	int& operator[](int i) { return indexes[i]; }
-	const int& operator[](int i) const { return indexes[i];}
+	const int& operator[](int i) const { return indexes[i]; }
 };
 
 struct ShapeVertexIter {
@@ -96,7 +97,7 @@ class TriangleMesh : public MeshPrototype {
 protected:
 	TriangleMesh(UniqueAlignedPointer<float>&& vertices, UniqueAlignedPointer<int>&& triangles, int vertexCount, int triangleCount);
 public:
-	
+
 	TriangleMesh() = default;
 	TriangleMesh(int vertexCount, int triangleCount, const Vec3f* vertices, const Triangle* triangles);
 	TriangleMesh(TriangleMesh&&) noexcept = default;
@@ -159,3 +160,4 @@ public:
 };
 
 TriangleMesh stripUnusedVertices(const Vec3f* vertices, const Triangle* triangles, int vertexCount, int triangleCount);
+};

@@ -17,7 +17,7 @@
 
 #include <stdexcept>
 
-
+namespace P3D {
 inline static void incDebugTally(HistoricTally<long long, IterationTime>& tally, int iterTime) {
 	if(iterTime >= GJK_MAX_ITER) {
 		tally.addToTally(IterationTime::LIMIT_REACHED, 1);
@@ -308,3 +308,4 @@ bool runEPATransformed(const ColissionPair& info, const Tetrahedron& s, Vec3f& i
 	incDebugTally(EPAIterationStatistics, EPA_MAX_ITER);
 	return false;
 }
+};

@@ -3,6 +3,7 @@
 #include "../../util/log.h"
 #include "iteratorEnd.h"
 
+namespace P3D {
 inline unsigned long long nextPowerOf2(unsigned long long v) {
 	v--;
 	v |= v >> 1;
@@ -71,12 +72,12 @@ struct ListOfPtrIter {
 
 template<typename T>
 struct ListOfPtrIterFactory {
-	T* const * start;
-	T* const * fin;
+	T* const* start;
+	T* const* fin;
 	ListOfPtrIterFactory() {}
-	ListOfPtrIterFactory(T* const * start, T* const * fin) : start(start), fin(fin) {}
-	ListOfPtrIterFactory(const ListIter<T * const>& iter) : start(iter.start), fin(iter.fin) {}
-	ListOfPtrIterFactory(const ListIter<T *>& iter) : start(iter.start), fin(iter.fin) {}
+	ListOfPtrIterFactory(T* const* start, T* const* fin) : start(start), fin(fin) {}
+	ListOfPtrIterFactory(const ListIter<T* const>& iter) : start(iter.start), fin(iter.fin) {}
+	ListOfPtrIterFactory(const ListIter<T*>& iter) : start(iter.start), fin(iter.fin) {}
 
 	ListOfPtrIter<T> begin() const { return ListOfPtrIter<T>{start}; }
 	ListOfPtrIter<T> end() const { return ListOfPtrIter<T>{fin}; }
@@ -112,16 +113,16 @@ struct BufferWithCapacity {
 
 	void resize(size_t newCapacity, size_t sizeToCopy) {
 		T* newBuf = new T[newCapacity];
-		for (size_t i = 0; i < sizeToCopy; i++) 
+		for(size_t i = 0; i < sizeToCopy; i++)
 			newBuf[i] = std::move(data[i]);
-		
+
 		delete[] data;
 		data = newBuf;
 		capacity = newCapacity;
 	}
 
 	size_t ensureCapacity(size_t newCapacity, size_t sizeToCopy) {
-		if (newCapacity > this->capacity) {
+		if(newCapacity > this->capacity) {
 			size_t nextPower = nextPowerOf2(newCapacity);
 			resize(nextPower, sizeToCopy);
 			return nextPower;
@@ -142,10 +143,10 @@ struct AddableBuffer : public BufferWithCapacity<T> {
 	AddableBuffer(size_t initialCapacity) : BufferWithCapacity<T>(initialCapacity) {}
 
 	AddableBuffer(T* data, size_t dataSize, size_t initialCapacity) : BufferWithCapacity<T>(initialCapacity), size(dataSize) {
-		if (data == nullptr)
+		if(data == nullptr)
 			Log::fatal("Could not create AddableBuffer of size: %d", initialCapacity);
-		
-		for (size_t i = 0; i < dataSize; i++)
+
+		for(size_t i = 0; i < dataSize; i++)
 			this->data[i] = data[i];
 	}
 
@@ -256,9 +257,9 @@ private:
 	bool hasComeAround = false;
 public:
 	CircularBuffer() : buf(nullptr), capacity(0) {}
-	CircularBuffer(size_t capacity) : buf(new T[capacity+1]), capacity(capacity) {}
+	CircularBuffer(size_t capacity) : buf(new T[capacity + 1]), capacity(capacity) {}
 	~CircularBuffer() { delete[] buf; }
-	
+
 	inline size_t size() const {
 		if(hasComeAround)
 			return capacity;
@@ -266,7 +267,7 @@ public:
 			return curI;
 	}
 
-	CircularBuffer(const CircularBuffer<T>& other) : buf(new T[other.capacity+1]), curI(other.curI), capacity(other.capacity), hasComeAround(other.hasComeAround) {
+	CircularBuffer(const CircularBuffer<T>& other) : buf(new T[other.capacity + 1]), curI(other.curI), capacity(other.capacity), hasComeAround(other.hasComeAround) {
 		for(size_t i = 0; i < other.capacity; i++) {
 			this->buf[i] = other.buf[i];
 		}
@@ -288,7 +289,7 @@ public:
 	CircularBuffer(CircularBuffer<T>&& other) : buf(other.buf), curI(other.curI), capacity(other.capacity), hasComeAround(other.hasComeAround) {
 		other.buf = nullptr;
 		other.capacity = 0;
-		other.curI = 0; 
+		other.curI = 0;
 		other.hasComeAround = false;
 	}
 	CircularBuffer& operator=(CircularBuffer<T>&& other) {
@@ -303,7 +304,7 @@ public:
 		buf[curI] = newObj;
 		curI++;
 
-		if (curI >= capacity) {
+		if(curI >= capacity) {
 			curI = 0;
 			hasComeAround = true;
 		}
@@ -312,12 +313,12 @@ public:
 	inline T sum() const {
 		size_t limit = size();
 
-		if (limit == 0)
+		if(limit == 0)
 			return T();
 
 		T total = buf[0];
 
-		for (size_t i = 1; i < limit; i++)
+		for(size_t i = 1; i < limit; i++)
 			total += buf[i];
 
 		return total;
@@ -326,7 +327,7 @@ public:
 	inline T avg() const {
 		size_t limit = size();
 
-		if (limit == 0)
+		if(limit == 0)
 			return T();
 
 		T total = sum();
@@ -361,7 +362,7 @@ public:
 	}
 
 	T& front() {
-		return (curI == 0) ? buf[capacity-1] : buf[curI-1];
+		return (curI == 0) ? buf[capacity - 1] : buf[curI - 1];
 	}
 
 	const T& front() const {
@@ -377,7 +378,7 @@ public:
 	}
 
 	inline CircularIter<T> begin() {
-		return CircularIter<T>{hasComeAround? buf + curI : buf, buf, buf+capacity, size()};
+		return CircularIter<T>{hasComeAround ? buf + curI : buf, buf, buf + capacity, size()};
 	}
 
 	inline CircularIter<const T> begin() const {
@@ -387,4 +388,5 @@ public:
 	inline IteratorEnd end() {
 		return IteratorEnd();
 	}
+};
 };

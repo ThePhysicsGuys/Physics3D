@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 
+namespace P3D {
 template<int64_t N>
 struct Fix {
 	int64_t value;
@@ -113,3 +114,4 @@ template<int64_t N>
 inline constexpr Fix<N> max(Fix<N> first, Fix<N> second) noexcept {
 	return (first.value >= second.value) ? first : second;
 }
+};

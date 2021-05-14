@@ -7,6 +7,7 @@
 #include "genericCollidable.h"
 #include "scalableInertialMatrix.h"
 
+namespace P3D {
 class Polyhedron;
 
 // a ShapeClass is defined as a shape with dimentions -1..1 in all axes. All functions work on scaled versions of the shape. 
@@ -43,4 +44,5 @@ public:
 	virtual void setScaleX(double newX, DiagonalMat3& scale) const;
 	virtual void setScaleY(double newY, DiagonalMat3& scale) const;
 	virtual void setScaleZ(double newZ, DiagonalMat3& scale) const;
+};
 };

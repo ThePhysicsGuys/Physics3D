@@ -2,6 +2,7 @@
 
 #include <cstddef>
 
+namespace P3D {
 template<typename T, std::size_t C>
 struct ParallelArray {
 	T values[C];
@@ -79,4 +80,5 @@ struct ParallelArray {
 		}
 		return total;
 	}
+};
 };

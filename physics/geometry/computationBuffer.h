@@ -1,10 +1,12 @@
 #pragma once
-
+namespace P3D {
 struct ComputationBuffers;
+};
 
 #include "../math/linalg/vec.h"
 #include "convexShapeBuilder.h"
 
+namespace P3D {
 struct MinkowskiPointIndices;
 
 struct ComputationBuffers {
@@ -33,4 +35,5 @@ private:
 	void createTriangleBuffersUnsafe(int triangleCapacity);
 	void deleteVertexBuffers();
 	void deleteTriangleBuffers();
+};
 };

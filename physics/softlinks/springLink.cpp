@@ -2,11 +2,11 @@
 
 #include "springLink.h"
 
+namespace P3D {
 SpringLink::SpringLink(AttachedPart part1, AttachedPart part2, double restLength, double stiffness) :
 	SoftLink{ part1, part2 },
 	restLength{ restLength },
 	stiffness{ stiffness } {
-
 }
 
 void SpringLink::update() {
@@ -21,5 +21,5 @@ Vec3 SpringLink::forceAppliedToTheLink() noexcept {
 	const double magnitudeTimesStiffness = std::abs(magnitude - this->restLength) * this->stiffness;
 	const Vec3 forceDirection = normalize(force);
 	return forceDirection * -magnitudeTimesStiffness;
-	
 }
+};

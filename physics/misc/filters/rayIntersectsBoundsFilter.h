@@ -4,6 +4,7 @@
 #include "../../datastructures/boundsTree.h"
 #include "../../part.h"
 
+namespace P3D {
 struct RayIntersectBoundsFilter {
 	Ray ray;
 
@@ -23,4 +24,5 @@ struct RayIntersectBoundsFilter {
 	bool operator()(const Part& part) const {
 		return true;
 	}
+};
 };

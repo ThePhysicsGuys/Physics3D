@@ -17,7 +17,6 @@
 #define LEAF_NODE_SIGNIFIER 0x7FFFFFFF
 
 namespace P3D::OldBoundsTree {
-
 struct TreeNode {
 	Bounds bounds;
 	union {

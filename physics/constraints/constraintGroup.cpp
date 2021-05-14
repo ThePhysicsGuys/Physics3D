@@ -14,6 +14,7 @@
 
 #include <map>
 
+namespace P3D {
 int PhysicalConstraint::maxNumberOfParameters() const {
 	return constraint->maxNumberOfParameters();
 }
@@ -161,3 +162,4 @@ void ConstraintGroup::apply() const {
 		assert(curParameterIndex == numberOfParams);
 	}
 }
+};

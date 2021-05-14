@@ -1,17 +1,18 @@
 #include "ballConstraint.h"
 
+namespace P3D {
 int BallConstraint::maxNumberOfParameters() const {
 	return 3;
 }
 
 static ConstraintMatrixPair<3> makeMatrices(const PhysicalInfo& phys, const Vec3& attach) {
 	Vec3 attachRelativeToCOM = phys.cframe.localToRelative(attach) - phys.relativeCenterOfMass;
-	
+
 	Mat3 crossEquivAttach = createCrossProductEquivalent(attachRelativeToCOM);
 
 	Matrix<double, 6, 3> parameterToMotion = joinVertical(Mat3::DIAGONAL(phys.forceResponse), phys.momentResponse * crossEquivAttach);
 	Matrix<double, 3, 6> motionToEquation = joinHorizontal(Mat3::IDENTITY(), -crossEquivAttach);
-	
+
 	return ConstraintMatrixPair<3>{parameterToMotion, motionToEquation};
 }
 
@@ -34,3 +35,4 @@ ConstraintMatrixPack BallConstraint::getMatrices(const PhysicalInfo& physA, cons
 
 	return ConstraintMatrixPack(matrixBuf, errorBuf, cA, cB, error);
 }
+};

@@ -1,14 +1,12 @@
 #include "magneticLink.h"
 
-
+namespace P3D {
 MagneticLink::MagneticLink(const AttachedPart& part1, const AttachedPart& part2,  const double magneticStrength):
 	SoftLink{ part1, part2 },
 	magneticStrength{ magneticStrength } {
-
 }
 
 void MagneticLink::update() {
-
 	Vec3 force = forceAppliedToTheLink();
 
 	this->attachedPart2.part->applyForce(this->getRelativePositionOfAttach1(), force);
@@ -26,3 +24,4 @@ Vec3 MagneticLink::forceAppliedToTheLink() noexcept {
 	return  this->magneticStrength * forceDirection / distanceBetweenParts;
 
 }
+};

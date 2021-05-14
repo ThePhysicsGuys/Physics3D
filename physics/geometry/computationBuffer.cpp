@@ -3,6 +3,7 @@
 #include "../../util/log.h"
 #include "genericIntersection.h"
 
+namespace P3D {
 ComputationBuffers::ComputationBuffers(int initialVertCount, int initialTriangleCount) :
 	vertexCapacity(initialVertCount), triangleCapacity(initialTriangleCount) {
 	createVertexBuffersUnsafe(initialVertCount);
@@ -52,3 +53,4 @@ void ComputationBuffers::deleteTriangleBuffers() {
 	delete[] edgeBuf;
 	delete[] removalBuf;
 }
+};

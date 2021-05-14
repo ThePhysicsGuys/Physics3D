@@ -2,7 +2,7 @@
 
 #include "../geometry/polyhedron.h"
 
-namespace Library {
+namespace P3D::Library {
 extern const Polyhedron icosahedron;
 extern const Polyhedron trianglePyramid;
 extern const Polyhedron house;

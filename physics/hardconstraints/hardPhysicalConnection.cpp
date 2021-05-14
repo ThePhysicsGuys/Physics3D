@@ -1,8 +1,9 @@
 #include "hardPhysicalConnection.h"
 
+namespace P3D {
 HardPhysicalConnection::HardPhysicalConnection(std::unique_ptr<HardConstraint> constraintWithParent, const CFrame& attachOnChild, const CFrame& attachOnParent) :
-	attachOnChild(attachOnChild), 
-	attachOnParent(attachOnParent), 
+	attachOnChild(attachOnChild),
+	attachOnParent(attachOnParent),
 	constraintWithParent(std::move(constraintWithParent)) {}
 
 
@@ -20,8 +21,9 @@ void HardPhysicalConnection::update(double deltaT) {
 	constraintWithParent->update(deltaT);
 }
 
-HardPhysicalConnection HardPhysicalConnection::inverted() && {
+HardPhysicalConnection HardPhysicalConnection::inverted()&& {
 	this->constraintWithParent->invert();
-	
+
 	return HardPhysicalConnection(std::move(this->constraintWithParent), this->attachOnParent, this->attachOnChild);
 }
+};

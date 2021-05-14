@@ -2,6 +2,7 @@
 
 #include "profiling.h"
 
+namespace P3D {
 enum class PhysicsProcess {
 	GJK_COL,
 	GJK_NO_COL,
@@ -42,3 +43,4 @@ extern CircularBuffer<int> gjkNoCollideIterStats;
 extern HistoricTally<long long, IterationTime> GJKCollidesIterationStatistics;
 extern HistoricTally<long long, IterationTime> GJKNoCollidesIterationStatistics;
 extern HistoricTally<long long, IterationTime> EPAIterationStatistics;
+};

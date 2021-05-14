@@ -8,7 +8,7 @@
 #include "../math/linalg/trigonometry.h"
 #include "../math/constants.h"
 
-namespace Library {
+namespace P3D::Library {
 
 	Vec3f icosahedronVertices[]{
 		Vec3f(0, 0.5, g<float>() / 2), Vec3f(0, 0.5, -g<float>() / 2), Vec3f(0, -0.5, -g<float>() / 2), Vec3f(0, -0.5, g<float>() / 2),

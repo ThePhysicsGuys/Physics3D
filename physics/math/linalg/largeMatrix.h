@@ -4,6 +4,7 @@
 #include <utility>
 #include <assert.h>
 
+namespace P3D {
 template<typename T>
 class UnmanagedLargeVector {
 public:
@@ -704,3 +705,4 @@ void inMemoryMatrixNegate(M& m) {
 		}
 	}
 }
+};

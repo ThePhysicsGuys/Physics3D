@@ -2,6 +2,7 @@
 
 #include "linalg/vec.h"
 
+namespace P3D {
 /*
 	Computes the intersection of a line along <r> starting at r0
 	and the surface with normalvec n starting at s0
@@ -97,3 +98,4 @@ inline CrossOverPoint getNearestCrossoverOfRays(Vec3 U, Vec3 V, Vec3 W0) {
 
 	return CrossOverPoint{s, t};
 }
+};

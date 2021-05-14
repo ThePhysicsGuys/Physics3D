@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <initializer_list>
 
+namespace P3D {
 template<typename T, std::size_t DerivationCount>
 struct Derivatives {
 	T data[DerivationCount];
@@ -427,3 +428,4 @@ using Taylor = TaylorExpansion<T, DEFAULT_TAYLOR_LENGTH>;
 
 template<typename T>
 using FullTaylor = FullTaylorExpansion<T, DEFAULT_TAYLOR_LENGTH + 1>;
+};

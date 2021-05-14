@@ -3,6 +3,7 @@
 #include "polyhedron.h"
 #include "shapeClass.h"
 
+namespace P3D {
 Shape::Shape() : baseShape(nullptr), scale{1,1,1} {}
 Shape::Shape(const ShapeClass* baseShape, DiagonalMat3 scale) : baseShape(baseShape), scale(scale) {}
 Shape::Shape(const ShapeClass* baseShape) : baseShape(baseShape), scale{1,1,1} {}
@@ -59,3 +60,4 @@ void Shape::setHeight(double newHeight) {
 void Shape::setDepth(double newDepth) {
 	baseShape->setScaleZ(newDepth / 2, scale);
 }
+};

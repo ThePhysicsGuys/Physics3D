@@ -6,6 +6,7 @@
 
 //#include <optional>
 
+namespace P3D {
 struct Ray {
 	Position origin;
 	Vec3 direction;
@@ -98,4 +99,4 @@ inline bool doRayAndBoundsIntersect(const Bounds& bounds, const Ray& ray) {
 	}
 	return false;
 }
-
+};

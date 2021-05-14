@@ -9,6 +9,7 @@
 	These can be stacked, for example, to iterate over all the parts in all the physicals of all the worlds use
 	CompositeIterator<CompositeIterator<Iterator<World>>>
 */
+namespace P3D {
 template<typename GroupIterator, typename GroupIteratorEnd = GroupIterator>
 class CompositeIterator {
 public:
@@ -26,9 +27,9 @@ public:
 
 	inline CompositeIterator<GroupIterator>& operator++() {
 		++currentItem;
-		if (currentItem == (*currentGroup).end()) {
+		if(currentItem == (*currentGroup).end()) {
 			++currentGroup;
-			if (currentGroup != groupIterEnd) {
+			if(currentGroup != groupIterEnd) {
 				currentItem = (*currentGroup).begin();
 			}
 		}
@@ -93,16 +94,16 @@ public:
 	Iter iter;
 	IterEnd iterEnd;
 	Filter filter;
-	
+
 	FilteredIterator(const Iter& iter, const IterEnd& iterEnd, const Filter& filter) : iter(iter), filter(filter) {
-		while (this->iter != this->iterEnd && !this->filter(*this->iter)) {
+		while(this->iter != this->iterEnd && !this->filter(*this->iter)) {
 			++this->iter;
 		}
 	}
 	void operator++() {
 		do {
 			++iter;
-		} while (iter != iterEnd && !filter(*iter));
+		} while(iter != iterEnd && !filter(*iter));
 	}
 	decltype(*std::declval<Iter>())& operator*() const {
 		return *iter;
@@ -116,7 +117,7 @@ template<typename IterFactory, size_t BufferSize>
 class IteratorGroup {
 	IterFactory factories[BufferSize];
 	size_t size = 0;
-	
+
 	decltype(std::declval<IterFactory>().begin()) curIter;
 	decltype(std::declval<IterFactory>().end())  curEnd;
 
@@ -125,15 +126,15 @@ public:
 
 	IteratorGroup() = default;
 
-	IteratorGroup(IterFactory (&list)[BufferSize], size_t count) : size(count), curIter(list[0].begin()), curEnd(list[0].end()), factories{} {
+	IteratorGroup(IterFactory(&list)[BufferSize], size_t count) : size(count), curIter(list[0].begin()), curEnd(list[0].end()), factories{} {
 		if(count > BufferSize) throw "Invalid count!";
-		for (size_t i = 0; i < count; i++) {
+		for(size_t i = 0; i < count; i++) {
 			factories[i] = list[i];
 		}
 
-		while (!(curIter != curEnd)) {
+		while(!(curIter != curEnd)) {
 			++curFactoryIndex;
-			if (curFactoryIndex == size) break;
+			if(curFactoryIndex == size) break;
 			curIter = factories[curFactoryIndex].begin();
 			curEnd = factories[curFactoryIndex].end();
 		}
@@ -141,9 +142,9 @@ public:
 
 	void operator++() {
 		++curIter;
-		while (!(curIter != curEnd)) {
+		while(!(curIter != curEnd)) {
 			++curFactoryIndex;
-			if (curFactoryIndex == size) return;
+			if(curFactoryIndex == size) return;
 			curIter = factories[curFactoryIndex].begin();
 			curEnd = factories[curFactoryIndex].end();
 		}
@@ -162,7 +163,7 @@ struct DereferencingIterator {
 
 	DereferencingIterator(const Iter& baseIter) : baseIter(baseIter) {}
 	DereferencingIterator(Iter&& baseIter) : baseIter(std::move(baseIter)) {}
-	
+
 	void operator++() { ++baseIter; }
 	void operator++(int) { baseIter++; }
 	decltype(**baseIter)& operator*() const { return **baseIter; }
@@ -186,4 +187,4 @@ struct const_if_tmp<Type, true> {
 
 template<typename Type, bool IsConst>
 using const_if = typename const_if_tmp<Type, IsConst>::type;
-
+};

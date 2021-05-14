@@ -9,6 +9,7 @@
 	double getValue() const;  // returns the current speed of the motor
 	FullTaylor<double> getFullTaylorExpansion() const; // returns the current speed and it's derivatives, being acceleration, jerk etc
 */
+namespace P3D {
 template<typename SpeedController>
 class MotorConstraintTemplate : public HardConstraint, public SpeedController {
 public:
@@ -33,7 +34,7 @@ public:
 
 	void update(double deltaT);
 	double getValue() const; // The current length of the piston
-	FullTaylor<double> getFullTaylorExpansion() const; // The current length and its derivatives of the piston 
+	FullTaylor<double> getFullTaylorExpansion() const; // The current length and its derivatives of the piston
 */
 template<typename LengthController>
 class PistonConstraintTemplate : public HardConstraint, public LengthController {
@@ -52,4 +53,5 @@ public:
 	}
 
 	virtual ~PistonConstraintTemplate() override {}
+};
 };

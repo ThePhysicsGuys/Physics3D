@@ -3,6 +3,7 @@
 #include "../math/linalg/vec.h"
 #include "../world.h"
 
+namespace P3D {
 class DirectionalGravity : public ExternalForce {
 public:
 	Vec3 gravity;
@@ -10,7 +11,7 @@ public:
 	DirectionalGravity(Vec3 gravity) : gravity(gravity) {}
 
 	virtual void apply(WorldPrototype* world) override {
-		for (MotorizedPhysical* p : world->iterPhysicals()) {
+		for(MotorizedPhysical* p : world->iterPhysicals()) {
 			p->applyForceAtCenterOfMass(gravity * p->totalMass);
 		}
 	}
@@ -20,4 +21,5 @@ public:
 	virtual double getPotentialEnergyForObject(const WorldPrototype* world, const MotorizedPhysical& phys) const override {
 		return Vec3(Position() - phys.getCenterOfMass()) * gravity * phys.totalMass;
 	}
+};
 };

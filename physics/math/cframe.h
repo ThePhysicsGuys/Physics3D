@@ -3,6 +3,7 @@
 #include "linalg/vec.h"
 #include "rotation.h"
 
+namespace P3D {
 template<typename T>
 struct CFrameTemplate {
 public:
@@ -138,3 +139,4 @@ public:
 
 typedef CFrameTemplate<double> CFrame;
 typedef CFrameTemplate<float> CFramef;
+};

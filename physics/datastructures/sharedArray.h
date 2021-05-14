@@ -1,5 +1,6 @@
 #pragma once
 
+namespace P3D {
 template<typename T>
 class SharedArrayPtr {
 	T* ptr;
@@ -18,11 +19,11 @@ public:
 		this->~SharedArrayPtr();
 		this->ptr = other.ptr;
 		this->refCount = other.refCount;
-		if (refCount != nullptr) ++(*refCount);
+		if(refCount != nullptr) ++(*refCount);
 		return *this;
 	}
 
-	inline SharedArrayPtr(SharedArrayPtr<T>&& other) noexcept : ptr(other.ptr), refCount(other.refCount)  {
+	inline SharedArrayPtr(SharedArrayPtr<T>&& other) noexcept : ptr(other.ptr), refCount(other.refCount) {
 		other.ptr = nullptr;
 		other.refCount = nullptr;
 	}
@@ -39,8 +40,8 @@ public:
 	inline static SharedArrayPtr<T> staticSharedArrayPtr(T* data) { return SharedArrayPtr<T>(data, nullptr); }
 
 	inline ~SharedArrayPtr() {
-		if (refCount != nullptr) {
-			if (*refCount == 0) {
+		if(refCount != nullptr) {
+			if(*refCount == 0) {
 				delete refCount;
 				delete[] ptr;
 			} else {
@@ -61,4 +62,4 @@ public:
 	inline bool operator<(T* other) const { return ptr < other; }
 	inline bool operator>(T* other) const { return ptr > other; }
 };
-
+};

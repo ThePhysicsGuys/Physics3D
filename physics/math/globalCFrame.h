@@ -4,6 +4,7 @@
 #include "rotation.h"
 #include "cframe.h"
 
+namespace P3D {
 class GlobalCFrame {
 public:
 	Position position;
@@ -134,3 +135,4 @@ inline CFrame operator-(GlobalCFrame cf, Position relativeTo) {
 inline GlobalCFrame operator+(Position relativeTo, CFrame cf) {
 	return GlobalCFrame(relativeTo + cf.getPosition(), cf.getRotation());
 }
+};

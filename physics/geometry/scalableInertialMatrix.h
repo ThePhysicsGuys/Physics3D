@@ -3,6 +3,7 @@
 #include "../math/linalg/vec.h"
 #include "../math/linalg/mat.h"
 
+namespace P3D {
 class ScalableInertialMatrix {
 	// not the exact diagonal components, they must still be added like: m[0][0] = diagonal.y + diagonal.z
 	Vec3 diagonal; // scales (sx^3)*sy*sz, sx*(sy^3)*sz, sx*sy*(sz^3)
@@ -37,4 +38,5 @@ public:
 	SymmetricMat3 toMatrix(DiagonalMat3 scale) const {
 		return toMatrix(scale[0], scale[1], scale[2]);
 	}
+};
 };

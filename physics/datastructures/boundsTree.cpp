@@ -4,7 +4,6 @@
 #include "aligned_alloc.h"
 
 namespace P3D::NewBoundsTree {
-
 // naive implementation, to be optimized
 BoundsTemplate<float> TrunkSIMDHelperFallback::getTotalBounds(const TreeTrunk& trunk, int upTo) {
 	assert(upTo >= 1 && upTo <= BRANCH_FACTOR);

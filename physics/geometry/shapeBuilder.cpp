@@ -1,6 +1,7 @@
 #include "shapeBuilder.h"
 
-ShapeBuilder::ShapeBuilder(Vec3f * vertBuf, Triangle* triangleBuf, int vertexCount, int triangleCount, TriangleNeighbors* neighborBuf)
+namespace P3D {
+ShapeBuilder::ShapeBuilder(Vec3f* vertBuf, Triangle* triangleBuf, int vertexCount, int triangleCount, TriangleNeighbors* neighborBuf)
 	: vertexBuf(vertBuf), triangleBuf(triangleBuf), vertexCount(vertexCount), triangleCount(triangleCount), neighborBuf(neighborBuf) {
 	fillNeighborBuf(triangleBuf, triangleCount, neighborBuf);
 }
@@ -22,7 +23,7 @@ void ShapeBuilder::addPoint(Vec3f point, int oldTriangleIndex) {
 
 	// add extra point
 	vertexBuf[newPointIndex] = point;
-	
+
 	int t0Index = oldTriangleIndex;
 	int t1Index = triangleCount;
 	int t2Index = triangleCount + 1;
@@ -49,7 +50,7 @@ void ShapeBuilder::addPoint(Vec3f point, int oldTriangleIndex) {
 	neighborBuf[oldNeighbors.AB_Neighbor].replaceNeighbor(oldTriangleIndex, t0Index);
 	neighborBuf[oldNeighbors.BC_Neighbor].replaceNeighbor(oldTriangleIndex, t1Index);
 	neighborBuf[oldNeighbors.CA_Neighbor].replaceNeighbor(oldTriangleIndex, t2Index);
-	
+
 }
 
 Polyhedron ShapeBuilder::toPolyhedron() const {
@@ -59,3 +60,4 @@ Polyhedron ShapeBuilder::toPolyhedron() const {
 IndexedShape ShapeBuilder::toIndexedShape() const {
 	return IndexedShape(vertexBuf, triangleBuf, vertexCount, triangleCount, neighborBuf);
 }
+};

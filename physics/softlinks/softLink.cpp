@@ -1,18 +1,17 @@
 #include "softLink.h"
 
-
-SoftLink::AttachedPart::AttachedPart(CFrame attachment, Part* part):
-	attachment{ attachment },
-	part{ part }{
+namespace P3D {
+SoftLink::AttachedPart::AttachedPart(CFrame attachment, Part* part) :
+	attachment{attachment},
+	part{part}{
 }
 
-SoftLink::SoftLink(const AttachedPart& partA, const AttachedPart& partB):
-	attachedPart1{ partA },
-	attachedPart2{ partB }{
+SoftLink::SoftLink(const AttachedPart& partA, const AttachedPart& partB) :
+	attachedPart1{partA},
+	attachedPart2{partB}{
 }
 
-SoftLink::~SoftLink() {
-}
+SoftLink::~SoftLink() {}
 
 GlobalCFrame SoftLink::getGlobalCFrameOfAttach1() const {
 	return this->attachedPart1.part->getCFrame();
@@ -62,7 +61,7 @@ Vec3 SoftLink::getRelativePositionOfAttach1() const {
 Vec3 SoftLink::getRelativePositionOfAttach2() const {
 	return this->getRelativeOfAttach1().getPosition();
 }
-
+};
 
 
 

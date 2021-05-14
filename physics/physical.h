@@ -16,6 +16,7 @@
 #include "hardconstraints/hardConstraint.h"
 #include "hardconstraints/hardPhysicalConnection.h"
 
+namespace P3D {
 typedef Vec3 Vec3Local;
 typedef Vec3 Vec3Relative;
 
@@ -182,7 +183,7 @@ public:
 	ConnectedPhysical(RigidBody&& rigidBody, Physical* parent, HardPhysicalConnection&& connectionToParent);
 	ConnectedPhysical(Physical&& phys, Physical* parent, HardPhysicalConnection&& connectionToParent);
 	ConnectedPhysical(Physical&& phys, Physical* parent, HardConstraint* constraintWithParent, const CFrame& attachOnThis, const CFrame& attachOnParent);
-	
+
 	void setCFrame(const GlobalCFrame& newCFrame);
 	CFrame getRelativeCFrameToParent() const;
 
@@ -224,12 +225,12 @@ public:
 	Vec3 totalCenterOfMass;
 
 	WorldPrototype* world = nullptr;
-	
+
 	SymmetricMat3 forceResponse;
 	SymmetricMat3 momentResponse;
 
 	Motion motionOfCenterOfMass;
-	
+
 	explicit MotorizedPhysical(Part* mainPart);
 	explicit MotorizedPhysical(RigidBody&& rigidBody);
 	explicit MotorizedPhysical(Physical&& movedPhys);
@@ -269,7 +270,7 @@ public:
 				}
 			}
 		};
-		
+
 		std::size_t childCount = this->childPhysicals.size();
 		for(std::size_t i = 0; i < childCount; i++) {
 			const ConnectedPhysical& conPhys = this->childPhysicals[i];
@@ -287,7 +288,7 @@ public:
 	void update(double deltaT);
 
 	void setCFrame(const GlobalCFrame& newCFrame);
-	
+
 	void translate(const Vec3& translation);
 	void rotateAroundCenterOfMass(const Rotation& rotation);
 
@@ -325,14 +326,14 @@ public:
 	template<typename Func>
 	void forEachPartExceptMainPart(const Func& func) const {
 		this->rigidBody.forEachAttachedPart(func);
-		this->forEachPartInChildren(func); 
+		this->forEachPartInChildren(func);
 	}
 
 	// expects a function of type void(Part&)
 	template<typename Func>
 	void forEachPartExceptMainPart(const Func& func) {
 		this->rigidBody.forEachAttachedPart(func);
-		this->forEachPartInChildren(func); 
+		this->forEachPartInChildren(func);
 	}
 
 	// expects a function of type void(const Physical& parent, const ConnectedPhysical& child)
@@ -470,7 +471,7 @@ public:
 	// returns the total mass, the center of mass relative to the MotorizedPhysical's CFrame, and the motion of the center of mass in that CFrame
 	std::tuple<double, Vec3, TranslationalMotion> getInternalMotionOfCenterOfMass() const;
 	// normalizes this motion tree relative to this->getInternalMotionOfCenterOfMass()
-	COMMotionTree normalizeCenterOfMass() &&;
+	COMMotionTree normalizeCenterOfMass()&&;
 
 	MonotonicTreeNode<RelativeMotion>* getPtrToFree() {
 		return relativeMotionTree.getPtrToFree();
@@ -490,7 +491,7 @@ public:
 	Vec3 mainCOMOffset;
 private:
 	inline COMMotionTree(const MotorizedPhysical* motorPhys, MonotonicTree<RelativeMotion>&& relativeMotionTree, double totalMass, Vec3 centerOfMass, TranslationalMotion motionOfCenterOfMass) :
-		motorPhys(motorPhys), 
+		motorPhys(motorPhys),
 		relativeMotionTree(std::move(relativeMotionTree)),
 		totalMass(totalMass),
 		centerOfMass(centerOfMass),
@@ -546,3 +547,4 @@ struct FoundLayerRepresentative {
 };
 std::vector<FoundLayerRepresentative> findAllLayersIn(MotorizedPhysical* phys);
 std::vector<FoundLayerRepresentative> findAllLayersIn(Part* part);
+};

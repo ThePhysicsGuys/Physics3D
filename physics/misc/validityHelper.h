@@ -9,6 +9,7 @@
 
 #include <cmath>
 
+namespace P3D {
 #ifdef _MSC_VER
 #define DEBUGBREAK __debugbreak()
 #else
@@ -144,9 +145,9 @@ bool isValidTriangle(Triangle t, int vertexCount);
 
 class Part;
 
-void treeValidCheck(const P3D::OldBoundsTree::TreeNode& rootNode);
+void treeValidCheck(const OldBoundsTree::TreeNode& rootNode);
 template<typename Boundable>
-inline void treeValidCheck(const P3D::OldBoundsTree::BoundsTree<Boundable>& tree) {
+inline void treeValidCheck(const OldBoundsTree::BoundsTree<Boundable>& tree) {
 	if(!tree.isEmpty()) {
 		treeValidCheck(tree.rootNode);
 	}
@@ -155,6 +156,7 @@ inline void treeValidCheck(const P3D::OldBoundsTree::BoundsTree<Boundable>& tree
 class MotorizedPhysical;
 
 bool isMotorizedPhysicalValid(const MotorizedPhysical* mainPhys);
+};
 
 
 namespace P3D::NewBoundsTree {
@@ -204,7 +206,7 @@ bool isBoundsTreeValid(const BoundsTree<Boundable>& tree) {
 }
 
 template<typename Boundable>
-inline void treeValidCheck(const P3D::NewBoundsTree::BoundsTree<Boundable>& tree) {
+inline void treeValidCheck(const NewBoundsTree::BoundsTree<Boundable>& tree) {
 	if(!isBoundsTreeValid(tree)) throw "tree invalid!";
 }
 

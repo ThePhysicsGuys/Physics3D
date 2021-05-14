@@ -3,6 +3,7 @@
 #include <exception>
 #include <string>
 
+namespace P3D {
 class assertion_error : public std::exception {
 	const char* file;
 	int line;
@@ -15,3 +16,4 @@ public:
 #else
 #define catchable_assert(condition)
 #endif
+};

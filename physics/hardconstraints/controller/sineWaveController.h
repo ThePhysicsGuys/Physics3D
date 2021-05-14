@@ -3,6 +3,7 @@
 #include "../../math/taylorExpansion.h"
 #include "../../motion.h"
 
+namespace P3D {
 class SineWaveController {
 public:
 	double currentStepInPeriod;
@@ -15,4 +16,5 @@ public:
 	void update(double deltaT);
 	double getValue() const;
 	FullTaylor<double> getFullTaylorExpansion() const;
+};
 };

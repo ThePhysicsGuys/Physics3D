@@ -9,6 +9,7 @@
 #include "sharedLockGuard.h"
 #include "../misc/physicsProfiler.h"
 
+namespace P3D {
 template<typename T = Part>
 class SynchronizedWorld : public World<T> {
 	mutable std::shared_mutex lock;
@@ -32,7 +33,7 @@ class SynchronizedWorld : public World<T> {
 	void processQueue() {
 		std::lock_guard<std::mutex> lg(queueLock);
 
-		while (!waitingOperations.empty()) {
+		while(!waitingOperations.empty()) {
 			std::function<void()>& operation = waitingOperations.front();
 			operation();
 			waitingOperations.pop();
@@ -42,7 +43,7 @@ class SynchronizedWorld : public World<T> {
 	void processReadQueue() const {
 		std::lock_guard<std::mutex> lg(readQueueLock);
 
-		while (!waitingReadOnlyOperations.empty()) {
+		while(!waitingReadOnlyOperations.empty()) {
 			std::function<void()>& operation = waitingReadOnlyOperations.front();
 			operation();
 			waitingReadOnlyOperations.pop();
@@ -60,7 +61,7 @@ public:
 	}
 	template<typename Func>
 	void asyncModification(const Func& function) {
-		if (lock.try_lock()) {
+		if(lock.try_lock()) {
 			UnlockOnDestroy lg(lock);
 			function();
 		} else {
@@ -74,7 +75,7 @@ public:
 	}
 	template<typename Func>
 	void asyncReadOnlyOperation(const Func& function) const {
-		if (lock.try_lock_shared()) {
+		if(lock.try_lock_shared()) {
 			UnlockSharedOnDestroy lg(lock);
 			function();
 		} else {
@@ -84,9 +85,9 @@ public:
 
 	virtual void tick() override {
 		SharedLockGuard mutLock(lock);
-		
+
 		this->findColissions();
-		
+
 		physicsMeasure.mark(PhysicsProcess::EXTERNALS);
 		this->applyExternalForces();
 
@@ -102,11 +103,12 @@ public:
 
 		physicsMeasure.mark(PhysicsProcess::QUEUE);
 		processQueue();
-		
+
 		physicsMeasure.mark(PhysicsProcess::WAIT_FOR_LOCK);
 		mutLock.downgrade();
 
 		physicsMeasure.mark(PhysicsProcess::QUEUE);
 		processReadQueue();
 	}
+};
 };

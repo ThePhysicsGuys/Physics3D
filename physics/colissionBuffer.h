@@ -2,6 +2,7 @@
 
 #include <vector>
 
+namespace P3D {
 struct Colission {
 	Part* p1;
 	Part* p2;
@@ -9,7 +10,7 @@ struct Colission {
 	Vec3 exitVector;
 };
 
- struct ColissionBuffer {
+struct ColissionBuffer {
 	std::vector<Colission> freePartColissions;
 	std::vector<Colission> freeTerrainColissions;
 
@@ -23,5 +24,6 @@ struct Colission {
 		freePartColissions.clear();
 		freeTerrainColissions.clear();
 	}
+};
 };
 

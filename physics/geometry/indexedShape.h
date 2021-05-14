@@ -3,6 +3,7 @@
 #include "polyhedron.h"
 #include "../datastructures/sharedArray.h"
 
+namespace P3D {
 struct TriangleNeighbors {
 	union {
 		struct {
@@ -24,10 +25,11 @@ struct TriangleNeighbors {
 };*/
 
 struct IndexedShape : Polyhedron {
-	TriangleNeighbors * neighbors;
-	
+	TriangleNeighbors* neighbors;
+
 	IndexedShape(Polyhedron&& poly, TriangleNeighbors* neighborBuf);
-	IndexedShape(const Vec3f* vertices, const Triangle* triangles, int vertexCount, int triangleCount, TriangleNeighbors * neighborBuf);
+	IndexedShape(const Vec3f* vertices, const Triangle* triangles, int vertexCount, int triangleCount, TriangleNeighbors* neighborBuf);
 };
 
 void fillNeighborBuf(const Triangle* triangles, int triangleCount, TriangleNeighbors* neighborBuf);
+};

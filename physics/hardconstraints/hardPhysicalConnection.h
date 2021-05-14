@@ -7,6 +7,7 @@
 #include "../math/cframe.h"
 #include "../relativeMotion.h"
 
+namespace P3D {
 struct HardPhysicalConnection {
 	CFrame attachOnChild;
 	CFrame attachOnParent;
@@ -18,5 +19,6 @@ struct HardPhysicalConnection {
 	RelativeMotion getRelativeMotion() const;
 
 	void update(double deltaT);
-	HardPhysicalConnection inverted() &&;
+	HardPhysicalConnection inverted()&&;
+};
 };

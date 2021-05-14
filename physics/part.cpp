@@ -14,19 +14,20 @@
 
 #include "layer.h"
 
+namespace P3D {
 namespace {
-	void recalculate(Part* part) {
-		part->maxRadius = part->hitbox.getMaxRadius();
-	}
-
-	void recalculateAndUpdateParent(Part* part, const Bounds& oldBounds) {
-		recalculate(part);
-		if(part->parent != nullptr) {
-			part->parent->notifyPartPropertiesChanged(part);
-		}
-		if(part->layer != nullptr) part->layer->notifyPartBoundsUpdated(part, oldBounds);
-	}
+void recalculate(Part* part) {
+	part->maxRadius = part->hitbox.getMaxRadius();
 }
+
+void recalculateAndUpdateParent(Part* part, const Bounds& oldBounds) {
+	recalculate(part);
+	if(part->parent != nullptr) {
+		part->parent->notifyPartPropertiesChanged(part);
+	}
+	if(part->layer != nullptr) part->layer->notifyPartBoundsUpdated(part, oldBounds);
+}
+};
 
 Part::Part(const Shape& shape, const GlobalCFrame& position, const PartProperties& properties) : 
 	hitbox(shape), properties(properties), maxRadius(shape.getMaxRadius()), cframe(position) {
@@ -408,3 +409,4 @@ bool Part::isValid() const {
 
 	return true;
 }
+};

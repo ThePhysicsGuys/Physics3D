@@ -2,6 +2,7 @@
 
 #include "softLink.h"
 
+namespace P3D {
 class MagneticLink : public SoftLink {
 
 public:
@@ -20,4 +21,5 @@ private:
 private:
 	double magneticStrength;
 
+};
 };

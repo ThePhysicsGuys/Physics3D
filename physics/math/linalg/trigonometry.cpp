@@ -3,6 +3,7 @@
 
 #include <cmath>
 
+namespace P3D {
 template<typename T>
 Matrix<T, 4, 4> rotate(const Matrix<T, 4, 4>& mat, T angle, T x, T y, T z) {
 	T s = sin(angle);
@@ -57,7 +58,7 @@ Mat4f perspective(float fov, float aspect, float zNear, float zFar) {
 }
 
 Mat4f lookAt(const Vec3f& from, const Vec3f& to, const Vec3f& up) {
-	
+
 	/*Vec3f z = normalize(to - from);
 	Vec3f x = normalize(up) % z;
 	Vec3f y = z % x;
@@ -74,10 +75,11 @@ Mat4f lookAt(const Vec3f& from, const Vec3f& to, const Vec3f& up) {
 	Vec3f s = normalize(f % u);
 	u = s % f;
 
-	return Mat4f {
+	return Mat4f{
 		 s.x,  s.y,  s.z, -dot(s, from),
 		 u.x,  u.y,  u.z, -dot(u, from),
 		-f.x, -f.y, -f.z,  dot(f, from),
 		 0.0f, 0.0f, 0.0f, 1.0f
 	};
 }
+};

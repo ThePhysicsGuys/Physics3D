@@ -8,8 +8,8 @@
 //using namespace P3D::OldBoundsTree;
 //using namespace P3D::NewBoundsTree;
 
+namespace P3D {
 // #define CHECK_WORLD_VALIDITY
-
 #ifdef CHECK_WORLD_VALIDITY
 #define ASSERT_VALID if (!isValid()) throw "World not valid!";
 #else
@@ -65,8 +65,8 @@ bool WorldPrototype::isValid() const {
 }
 #pragma endregion
 
-WorldPrototype::WorldPrototype(double deltaT) : 
-	deltaT(deltaT), 
+WorldPrototype::WorldPrototype(double deltaT) :
+	deltaT(deltaT),
 	layers(),
 	colissionMask() {
 
@@ -159,7 +159,7 @@ static void createNodeFor(P3D::NewBoundsTree::BoundsTree<Part>& tree, MotorizedP
 
 void WorldPrototype::addPart(Part* part, int layerIndex) {
 	ASSERT_VALID;
-	
+
 	if(part->layer) {
 		Log::warn("This part is already in a world");
 		ASSERT_VALID;
@@ -179,7 +179,7 @@ void WorldPrototype::addPart(Part* part, int layerIndex) {
 
 
 	objectCount += part->parent->mainPhysical->getNumberOfPartsInThisAndChildren();
-	
+
 	ASSERT_VALID;
 
 	part->parent->mainPhysical->forEachPart([this](Part& p) {
@@ -254,7 +254,7 @@ void WorldPrototype::addTerrainPart(Part* part, int layerIndex) {
 }
 void WorldPrototype::removePart(Part* part) {
 	ASSERT_VALID;
-	
+
 	part->removeFromWorld();
 
 	ASSERT_VALID;
@@ -329,7 +329,7 @@ void WorldPrototype::notifyPhysicalHasBeenSplit(const MotorizedPhysical* mainPhy
 	assert(mainPhysical->world == this);
 	assert(newlySplitPhysical->world == nullptr);
 	this->notifyNewPhysicalCreated(newlySplitPhysical);
-	
+
 	std::vector<std::pair<WorldLayer*, std::vector<const Part*>>> layersThatNeedToBeSplit;
 	assignLayersForPhysicalRecurse(*newlySplitPhysical, layersThatNeedToBeSplit);
 
@@ -406,3 +406,4 @@ void WorldPrototype::addExternalForce(ExternalForce* force) {
 void WorldPrototype::removeExternalForce(ExternalForce* force) {
 	externalForces.erase(std::remove(externalForces.begin(), externalForces.end(), force));
 }
+};

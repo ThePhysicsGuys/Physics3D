@@ -5,20 +5,21 @@
 
 #include "aligned_alloc.h"
 
+namespace P3D {
 template<typename T>
 class UniqueAlignedPointer {
 	T* data;
 
 public:
 	UniqueAlignedPointer() : data(nullptr) {}
-	UniqueAlignedPointer(std::size_t size, std::size_t align = alignof(T)) : 
+	UniqueAlignedPointer(std::size_t size, std::size_t align = alignof(T)) :
 		data(static_cast<T*>(aligned_malloc(sizeof(T)* size, align))) {}
 	~UniqueAlignedPointer() {
 		aligned_free(static_cast<void*>(data));
 	}
 
 	inline T* get() const { return data; }
-	operator T*() const { return data; }
+	operator T* () const { return data; }
 
 	UniqueAlignedPointer(const UniqueAlignedPointer& other) = delete;
 	UniqueAlignedPointer& operator=(const UniqueAlignedPointer& other) = delete;
@@ -44,7 +45,7 @@ public:
 		data(static_cast<T*>(aligned_malloc(sizeof(T)* size, align))),
 		refCount(new std::size_t(1)) {}
 	~SharedAlignedPointer() {
-		if (refCount != nullptr && --(*refCount) == 0) {
+		if(refCount != nullptr && --(*refCount) == 0) {
 			aligned_free(static_cast<void*>(data));
 			delete refCount;
 		}
@@ -78,4 +79,4 @@ public:
 		return *this;
 	}
 };
-
+};

@@ -31,7 +31,7 @@
 #include "../../util/sharedObjectSerializer.h"
 #include "../../util/dynamicSerialize.h"
 
-
+namespace P3D {
 void serializePolyhedron(const Polyhedron& poly, std::ostream& ostream);
 Polyhedron deserializePolyhedron(std::istream& istream);
 
@@ -93,7 +93,7 @@ protected:
 	void serializePartData(const Part& part, std::ostream& ostream);
 	virtual void serializePartExternalData(const Part& part, std::ostream& ostream);
 public:
-	/*initializes the SerializationSession with the given ShapeClasses as "known" at deserialization, making it unneccecary to serialize them. 
+	/*initializes the SerializationSession with the given ShapeClasses as "known" at deserialization, making it unneccecary to serialize them.
 	Implicitly the builtin ShapeClasses from the physics engine, such as cubeClass and sphereClass are also included in this list */
 	SerializationSessionPrototype(const std::vector<const ShapeClass*>& knownShapeClasses = std::vector<const ShapeClass*>());
 
@@ -181,7 +181,7 @@ class DeSerializationSession : private DeSerializationSessionPrototype {
 protected:
 	using DeSerializationSessionPrototype::shapeDeserializer;
 	using DeSerializationSessionPrototype::deserializeAndCollectHeaderInformation;
-	
+
 	virtual ExtendedPartType* deserializeExtendedPart(Part&& partPrototype, std::istream& istream) = 0;
 
 private:
@@ -200,3 +200,4 @@ extern DynamicSerializerRegistry<Constraint> dynamicConstraintSerializer;
 extern DynamicSerializerRegistry<HardConstraint> dynamicHardConstraintSerializer;
 extern DynamicSerializerRegistry<ShapeClass> dynamicShapeClassSerializer;
 extern DynamicSerializerRegistry<ExternalForce> dynamicExternalForceSerializer;
+};

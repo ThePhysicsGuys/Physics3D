@@ -2,6 +2,7 @@
 
 #include "linalg/vec.h"
 
+namespace P3D {
 template<typename T>
 struct BoundingBoxTemplate {
 	Vector<T, 3> min;
@@ -60,4 +61,5 @@ typedef BoundingBoxTemplate<double> BoundingBox;
 struct CircumscribingSphere {
 	Vec3 origin = Vec3();
 	double radius = 0;
+};
 };

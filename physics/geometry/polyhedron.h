@@ -8,6 +8,7 @@
 
 #include "triangleMesh.h"
 
+namespace P3D {
 class Polyhedron : public TriangleMesh {
 public:
 	Polyhedron() : TriangleMesh() {};
@@ -35,4 +36,5 @@ public:
 	SymmetricMat3 getInertia(const CFrame& reference) const;
 	ScalableInertialMatrix getScalableInertia(const CFrame& reference) const;
 	ScalableInertialMatrix getScalableInertiaAroundCenterOfMass() const;
+};
 };

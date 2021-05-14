@@ -15,6 +15,7 @@
 #include <cmath>
 #include <algorithm>
 
+namespace P3D {
 /*
 	exitVector is the distance p2 must travel so that the shapes are no longer colliding
 */
@@ -28,7 +29,7 @@ void handleCollision(Part& part1, Part& part2, Position collisionPoint, Vec3 exi
 	MotorizedPhysical& phys2 = *parent2.mainPhysical;
 
 	double sizeOrder = std::min(part1.maxRadius, part2.maxRadius);
-	if(lengthSquared(exitVector) <= 1E-8 * sizeOrder*sizeOrder) {
+	if(lengthSquared(exitVector) <= 1E-8 * sizeOrder * sizeOrder) {
 		return; // don't do anything for very small colissions
 	}
 
@@ -43,7 +44,7 @@ void handleCollision(Part& part1, Part& part2, Position collisionPoint, Vec3 exi
 	double staticFriction = part1.properties.friction * part2.properties.friction;
 	double dynamicFriction = part1.properties.friction * part2.properties.friction;
 
-	
+
 	Vec3 depthForce = -exitVector * (COLLISSION_DEPTH_FORCE_MULTIPLIER * combinedInertia);
 
 	phys1.applyForce(collissionRelP1, depthForce);
@@ -76,7 +77,7 @@ void handleCollision(Part& part1, Part& part2, Position collisionPoint, Vec3 exi
 	double inertia2B = phys2.getInertiaOfPointInDirectionRelative(collissionRelP2, slidingVelocity);
 	double combinedHorizontalInertia = 1 / (1 / inertia1B + 1 / inertia2B);
 
-	if (isImpulseColission) {
+	if(isImpulseColission) {
 		Vec3 maxFrictionImpulse = -exitVector % impulse % exitVector / lengthSquared(exitVector) * staticFriction;
 		Vec3 stopFricImpulse = -slidingVelocity * combinedHorizontalInertia;
 
@@ -91,7 +92,7 @@ void handleCollision(Part& part1, Part& part2, Position collisionPoint, Vec3 exi
 	double slidingSpeed = length(slidingVelocity) + 1E-100;
 	Vec3 dynamicFricForce;
 	double dynamicSaturationSpeed = sizeOrder * 0.01;
-	if (slidingSpeed > dynamicSaturationSpeed) {
+	if(slidingSpeed > dynamicSaturationSpeed) {
 		dynamicFricForce = -slidingVelocity / slidingSpeed * frictionForce;
 	} else {
 		double effectFactor = slidingSpeed / (dynamicSaturationSpeed);
@@ -113,7 +114,7 @@ void handleTerrainCollision(Part& part1, Part& part2, Position collisionPoint, V
 	MotorizedPhysical& phys1 = *parent1.mainPhysical;
 
 	double sizeOrder = std::min(part1.maxRadius, part2.maxRadius);
-	if (lengthSquared(exitVector) <= 1E-8 * sizeOrder * sizeOrder) {
+	if(lengthSquared(exitVector) <= 1E-8 * sizeOrder * sizeOrder) {
 		return; // don't do anything for very small colissions
 	}
 
@@ -140,7 +141,7 @@ void handleTerrainCollision(Part& part1, Part& part2, Position collisionPoint, V
 
 	double combinedBouncyness = part1.properties.bouncyness * part2.properties.bouncyness;
 
-	if (isImpulseColission) { // moving towards the other object
+	if(isImpulseColission) { // moving towards the other object
 		Vec3 desiredAccel = -exitVector * (relativeVelocity * exitVector) / lengthSquared(exitVector) * (1.0 + combinedBouncyness);
 		Vec3 zeroRelVelImpulse = desiredAccel * inertia;
 		impulse = zeroRelVelImpulse;
@@ -153,7 +154,7 @@ void handleTerrainCollision(Part& part1, Part& part2, Position collisionPoint, V
 	// Compute combined inertia in the horizontal direction
 	double combinedHorizontalInertia = phys1.getInertiaOfPointInDirectionRelative(collissionRelP1, slidingVelocity);
 
-	if (isImpulseColission) {
+	if(isImpulseColission) {
 		Vec3 maxFrictionImpulse = -exitVector % impulse % exitVector / lengthSquared(exitVector) * staticFriction;
 		Vec3 stopFricImpulse = -slidingVelocity * combinedHorizontalInertia;
 
@@ -167,7 +168,7 @@ void handleTerrainCollision(Part& part1, Part& part2, Position collisionPoint, V
 	double slidingSpeed = length(slidingVelocity) + 1E-100;
 	Vec3 dynamicFricForce;
 	double dynamicSaturationSpeed = sizeOrder * 0.01;
-	if (slidingSpeed > dynamicSaturationSpeed) {
+	if(slidingSpeed > dynamicSaturationSpeed) {
 		dynamicFricForce = -slidingVelocity / slidingSpeed * frictionForce;
 	} else {
 		double effectFactor = slidingSpeed / (dynamicSaturationSpeed);
@@ -183,7 +184,7 @@ void handleTerrainCollision(Part& part1, Part& part2, Position collisionPoint, V
 */
 
 void WorldPrototype::tick() {
-	
+
 	findColissions();
 
 	physicsMeasure.mark(PhysicsProcess::EXTERNALS);
@@ -192,14 +193,14 @@ void WorldPrototype::tick() {
 	handleColissions();
 
 	intersectionStatistics.nextTally();
-	
+
 	handleConstraints();
 
 	update();
 }
 
 void WorldPrototype::applyExternalForces() {
-	for (ExternalForce* force : externalForces) {
+	for(ExternalForce* force : externalForces) {
 		force->apply(this);
 	}
 }
@@ -229,15 +230,15 @@ static PartIntersection safeIntersects(const Part& p1, const Part& p2) {
 /*static void refineColission(std::vector<Colission>& colissions) {
 
 	for (size_t i = 0; i < colissions.size();) {
-	
+
 		Colission& col = colissions[i];
-	
+
 		PartIntersection result = safeIntersects(*col.p1, *col.p2);
-	
+
 		if (result.intersects) {
 
 			intersectionStatistics.addToTally(IntersectionResult::COLISSION, 1);
-			
+
 			// add extra information
 			col.intersection = result.intersection;
 			col.exitVector = result.exitVector;
@@ -247,12 +248,12 @@ static PartIntersection safeIntersects(const Part& p1, const Part& p2) {
 		else {
 
 			intersectionStatistics.addToTally(IntersectionResult::GJK_REJECT, 1);
-			
+
 			col = std::move(colissions.back());
 			colissions.pop_back();
-			
+
 		}
-	}	
+	}
 }*/
 
 
@@ -263,46 +264,45 @@ void WorldPrototype::parallelRefineColission(std::vector<Colission>& colissions)
 	size_t currIndex = 0;
 	std::mutex colissionMutex, statsMutex, indexMutex, vecMutex;
 
-	this->pool.doInParallel([&]{
-		while (true) {
+	this->pool.doInParallel([&] {
+		while(true) {
 
 			indexMutex.lock();
 			size_t claimedWork = currIndex;
 			currIndex++;
 			indexMutex.unlock();
 
-			if (claimedWork >= workEnd) {
+			if(claimedWork >= workEnd) {
 				break;
 			}
 
 			Colission col = colissions[claimedWork];
 			PartIntersection result = safeIntersects(*col.p1, *col.p2);
 
-			if (result.intersects) {
-				
+			if(result.intersects) {
+
 				statsMutex.lock();
 				intersectionStatistics.addToTally(IntersectionResult::COLISSION, 1);
 				statsMutex.unlock();
-				
+
 
 				// add extra information
 				col.intersection = result.intersection;
 				col.exitVector = result.exitVector;
-				
-				
+
+
 				vecMutex.lock();
 				wantedColission.push_back(col);
 				vecMutex.unlock();
-			}
-			else {
-				
+			} 			else {
+
 				statsMutex.lock();
 				intersectionStatistics.addToTally(IntersectionResult::GJK_REJECT, 1);
 				statsMutex.unlock();
-				
+
 
 			}
-		}	
+		}
 	});
 	colissions.swap(wantedColission);
 }
@@ -328,23 +328,23 @@ void WorldPrototype::findColissions() {
 
 void WorldPrototype::handleColissions() {
 	physicsMeasure.mark(PhysicsProcess::COLISSION_HANDLING);
-	for (Colission c : curColissions.freePartColissions) {
+	for(Colission c : curColissions.freePartColissions) {
 		handleCollision(*c.p1, *c.p2, c.intersection, c.exitVector);
 	}
-	for (Colission c : curColissions.freeTerrainColissions) {
+	for(Colission c : curColissions.freeTerrainColissions) {
 		handleTerrainCollision(*c.p1, *c.p2, c.intersection, c.exitVector);
 	}
 }
 
 void WorldPrototype::handleConstraints() {
 	physicsMeasure.mark(PhysicsProcess::CONSTRAINTS);
-	for (const ConstraintGroup& group : constraints) {
+	for(const ConstraintGroup& group : constraints) {
 		group.apply();
 	}
 }
 void WorldPrototype::update() {
 	physicsMeasure.mark(PhysicsProcess::UPDATING);
-	for (MotorizedPhysical* physical : iterPhysicals()) {
+	for(MotorizedPhysical* physical : iterPhysicals()) {
 		physical->update(this->deltaT);
 	}
 
@@ -353,7 +353,7 @@ void WorldPrototype::update() {
 	}
 	age++;
 
-	for (SoftLink* springLink : springLinks) {
+	for(SoftLink* springLink : springLinks) {
 		springLink->update();
 	}
 }
@@ -374,7 +374,7 @@ double WorldPrototype::getTotalPotentialEnergy() const {
 }
 double WorldPrototype::getPotentialEnergyOfPhysical(const MotorizedPhysical& p) const {
 	double total = 0.0;
-	for (ExternalForce* force : externalForces) {
+	for(ExternalForce* force : externalForces) {
 		total += force->getPotentialEnergyForObject(this, p);
 	}
 	return total;
@@ -386,3 +386,4 @@ double WorldPrototype::getTotalEnergy() const {
 void WorldPrototype::addLink(SoftLink* link) {
 	springLinks.push_back(link);
 }
+};

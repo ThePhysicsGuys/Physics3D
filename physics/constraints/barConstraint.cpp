@@ -1,6 +1,6 @@
 #include "barConstraint.h"
 
-
+namespace P3D {
 int BarConstraint::maxNumberOfParameters() const {
 	return 1;
 }
@@ -37,3 +37,4 @@ ConstraintMatrixPack BarConstraint::getMatrices(const PhysicalInfo& physA, const
 
 	return ConstraintMatrixPack(matrixBuf, errorBuf, cA, cB, error);
 }
+};

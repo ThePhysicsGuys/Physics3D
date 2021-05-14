@@ -6,6 +6,7 @@
 #include "../math/cframe.h"
 #include "genericCollidable.h"
 
+namespace P3D {
 class Shape;
 class Polyhedron;
 
@@ -22,5 +23,4 @@ struct Intersection {
 
 std::optional<Intersection> intersectsTransformed(const Shape& first, const Shape& second, const CFrame& relativeTransform);
 std::optional<Intersection> intersectsTransformed(const GenericCollidable& first, const GenericCollidable& second, const CFrame& relativeTransform, const DiagonalMat3& scaleFirst, const DiagonalMat3& scaleSecond);
-
-
+};

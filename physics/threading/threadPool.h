@@ -6,6 +6,7 @@
 #include <mutex>
 #include <condition_variable>
 
+namespace P3D {
 class ThreadPool {
 	std::function<void()> funcToRun = []() {};
 	std::vector<std::thread> threads{};
@@ -19,7 +20,7 @@ class ThreadPool {
 
 	// this keeps track of the number of threads that are currently performing work, main thread may only return once all threads have finished working. 
 	std::condition_variable threadsFinished;
-	int threadsWorking = 0; 
+	int threadsWorking = 0;
 
 	// No explicit protection required since only the main thread may write to it and only in the destructor, so not when a new job is presented
 	bool shouldExit = false;
@@ -71,4 +72,5 @@ public:
 		threadsFinished.wait(selfLock, [this]() -> bool {return threadsWorking == 0; });
 		selfLock.unlock();
 	}
+};
 };

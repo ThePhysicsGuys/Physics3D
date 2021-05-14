@@ -4,7 +4,7 @@
 #include "softLink.h"
 #include <optional>
 
-
+namespace P3D {
 class ElasticLink : public SoftLink {
 
 public:
@@ -22,4 +22,5 @@ private:
 private:
 	double restLength;
 	double stiffness;
+};
 };

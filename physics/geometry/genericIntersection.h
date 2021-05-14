@@ -6,6 +6,7 @@
 #include "../math/transform.h"
 #include "genericCollidable.h"
 
+namespace P3D {
 struct ComputationBuffers;
 struct Simplex;
 
@@ -57,3 +58,4 @@ struct ColissionPair {
 
 std::optional<Tetrahedron> runGJKTransformed(const ColissionPair& colissionPair, Vec3f initialSearchDirection);
 bool runEPATransformed(const ColissionPair& colissionPair, const Tetrahedron& s, Vec3f& intersection, Vec3f& exitVector, ComputationBuffers& bufs);
+};

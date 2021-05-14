@@ -4,6 +4,7 @@
 #include "shapeBuilder.h"
 #include "../datastructures/sharedArray.h"
 
+namespace P3D {
 // used in building shape
 struct EdgePiece {
 	int vertexIndex;
@@ -20,13 +21,13 @@ public:
 	int vertexCount;
 	int triangleCount;
 	TriangleNeighbors* neighborBuf;
-	
+
 	// temporary buffers
 	int* removalBuffer;
 	EdgePiece* newTriangleBuffer;
 
-	ConvexShapeBuilder(Vec3f * vertBuf, Triangle* triangleBuf, int vertexCount, int triangleCount, TriangleNeighbors* neighborBuf, int* removalBuffer, EdgePiece* newTriangleBuffer);
-	ConvexShapeBuilder(const Polyhedron& s, Vec3f * newVertBuf, Triangle* newTriangleBuf, TriangleNeighbors* neighborBuf, int* removalBuffer, EdgePiece* newTriangleBuffer);
+	ConvexShapeBuilder(Vec3f* vertBuf, Triangle* triangleBuf, int vertexCount, int triangleCount, TriangleNeighbors* neighborBuf, int* removalBuffer, EdgePiece* newTriangleBuffer);
+	ConvexShapeBuilder(const Polyhedron& s, Vec3f* newVertBuf, Triangle* newTriangleBuf, TriangleNeighbors* neighborBuf, int* removalBuffer, EdgePiece* newTriangleBuffer);
 
 	void addPoint(const Vec3f& point, int oldTriangleIndex);
 	// returns true if successful
@@ -37,4 +38,5 @@ public:
 
 	Polyhedron toPolyhedron() const;
 	IndexedShape toIndexedShape() const;
+};
 };

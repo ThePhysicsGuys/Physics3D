@@ -8,6 +8,7 @@
 #include <utility>
 #include <type_traits>
 
+namespace P3D {
 template<typename T, std::size_t Height, std::size_t Width>
 class Matrix {
 public:
@@ -1429,7 +1430,7 @@ void setSubMatrix(MatrixT& matrix, const DiagonalMatrix<typename std::remove_ref
 	}
 }
 
-
+};
 
 
 

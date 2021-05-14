@@ -2,7 +2,7 @@
 
 #include "softLink.h"
 
-
+namespace P3D {
 class AlignmentLink : public SoftLink {
 public:
 	AlignmentLink(const AlignmentLink& other) = delete;
@@ -16,5 +16,5 @@ public:
 private:
 	[[nodiscard]] Vec3 getGlobalMoment() noexcept;
 	Rotation offset;
-	
+};
 };

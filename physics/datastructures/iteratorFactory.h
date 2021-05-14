@@ -2,6 +2,7 @@
 #include <utility>
 #include "iteratorEnd.h"
 
+namespace P3D {
 template<typename BeginType, typename EndType = BeginType>
 class IteratorFactory {
 	BeginType start;
@@ -25,4 +26,5 @@ public:
 
 	BeginType begin() const { return iter; }
 	IteratorEnd end() const { return IteratorEnd(); }
+};
 };

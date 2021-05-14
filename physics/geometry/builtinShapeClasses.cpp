@@ -6,7 +6,7 @@
 #include "shapeCreation.h"
 #include "../misc/shapeLibrary.h"
 
-
+namespace P3D {
 CubeClass::CubeClass() : ShapeClass(8, Vec3(0, 0, 0), ScalableInertialMatrix(Vec3(8.0 / 3.0, 8.0 / 3.0, 8.0 / 3.0), Vec3(0, 0, 0)), CUBE_CLASS_ID) {}
 
 bool CubeClass::containsPoint(Vec3 point) const {
@@ -286,4 +286,4 @@ Vec3f PolyhedronShapeClassFallback::furthestInDirection(const Vec3f& direction) 
 const CubeClass CubeClass::instance;
 const SphereClass SphereClass::instance;
 const CylinderClass CylinderClass::instance;
-
+};

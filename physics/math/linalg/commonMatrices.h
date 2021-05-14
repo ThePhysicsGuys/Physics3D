@@ -4,6 +4,7 @@
 #include "quat.h"
 #include "../constants.h"
 
+namespace P3D {
 #define QROT_X_90(Type) Quaternion<Type> {\
 SQ2_2, SQ2_2, 0, 0}
 
@@ -76,3 +77,4 @@ SQ2_2, 0, 0, SQ2_2}
 0, 1, 0,\
 -1, 0, 0,\
 0, 0, 1}
+};

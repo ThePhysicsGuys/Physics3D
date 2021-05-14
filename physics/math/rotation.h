@@ -8,7 +8,7 @@
 #include <assert.h>
 #include <cmath>
 
-
+namespace P3D {
 template<typename T>
 class MatrixRotationTemplate {
 	Matrix<T, 3, 3> rotationMatrix;
@@ -272,15 +272,15 @@ Vector<T, 3> MatrixRotationTemplate<T>::getZ() const {
 
 template<typename T>
 MatrixRotationTemplate<T> MatrixRotationTemplate<T>::rotX(T angle) {
-	return MatrixRotationTemplate<T>(::rotMatX(angle));
+	return MatrixRotationTemplate<T>(rotMatX(angle));
 }
 template<typename T>
 MatrixRotationTemplate<T> MatrixRotationTemplate<T>::rotY(T angle) {
-	return MatrixRotationTemplate<T>(::rotMatY(angle));
+	return MatrixRotationTemplate<T>(rotMatY(angle));
 }
 template<typename T>
 MatrixRotationTemplate<T> MatrixRotationTemplate<T>::rotZ(T angle) {
-	return MatrixRotationTemplate<T>(::rotMatZ(angle));
+	return MatrixRotationTemplate<T>(rotMatZ(angle));
 }
 
 
@@ -322,33 +322,33 @@ MatrixRotationTemplate<T> MatrixRotationTemplate<T>::fromRotationQuaternion(cons
 }
 template<typename T>
 MatrixRotationTemplate<T> MatrixRotationTemplate<T>::fromRotationVec(const Vector<T, 3>& rotationVector) {
-	return MatrixRotationTemplate<T>(::rotationMatrixFromRotationVec(rotationVector));
+	return MatrixRotationTemplate<T>(rotationMatrixFromRotationVec(rotationVector));
 }
 
 
 template<typename T>
 MatrixRotationTemplate<T> MatrixRotationTemplate<T>::faceX(Vector<T, 3> xDirection) {
-	return MatrixRotationTemplate<T>::fromRotationMatrix(::faceMatX(xDirection));
+	return MatrixRotationTemplate<T>::fromRotationMatrix(faceMatX(xDirection));
 }
 template<typename T>
 MatrixRotationTemplate<T> MatrixRotationTemplate<T>::faceX(Vector<T, 3> xDirection, Vector<T, 3> yHint) {
-	return MatrixRotationTemplate<T>::fromRotationMatrix(::faceMatX(xDirection, yHint));
+	return MatrixRotationTemplate<T>::fromRotationMatrix(faceMatX(xDirection, yHint));
 }
 template<typename T>
 MatrixRotationTemplate<T> MatrixRotationTemplate<T>::faceY(Vector<T, 3> yDirection) {
-	return MatrixRotationTemplate<T>::fromRotationMatrix(::faceMatY(yDirection));
+	return MatrixRotationTemplate<T>::fromRotationMatrix(faceMatY(yDirection));
 }
 template<typename T>
 MatrixRotationTemplate<T> MatrixRotationTemplate<T>::faceY(Vector<T, 3> yDirection, Vector<T, 3> zHint) {
-	return MatrixRotationTemplate<T>::fromRotationMatrix(::faceMatY(yDirection, zHint));
+	return MatrixRotationTemplate<T>::fromRotationMatrix(faceMatY(yDirection, zHint));
 }
 template<typename T>
 MatrixRotationTemplate<T> MatrixRotationTemplate<T>::faceZ(Vector<T, 3> zDirection) {
-	return MatrixRotationTemplate<T>::fromRotationMatrix(::faceMatZ(zDirection));
+	return MatrixRotationTemplate<T>::fromRotationMatrix(faceMatZ(zDirection));
 }
 template<typename T>
 MatrixRotationTemplate<T> MatrixRotationTemplate<T>::faceZ(Vector<T, 3> zDirection, Vector<T, 3> xHint) {
-	return MatrixRotationTemplate<T>::fromRotationMatrix(::faceMatZ(zDirection, xHint));
+	return MatrixRotationTemplate<T>::fromRotationMatrix(faceMatZ(zDirection, xHint));
 }
 
 template<typename T>
@@ -447,15 +447,15 @@ Vector<T, 3> QuaternionRotationTemplate<T>::getZ() const {
 
 template<typename T>
 QuaternionRotationTemplate<T> QuaternionRotationTemplate<T>::rotX(T angle) {
-	return QuaternionRotationTemplate<T>(::rotQuatX(angle));
+	return QuaternionRotationTemplate<T>(rotQuatX(angle));
 }
 template<typename T>
 QuaternionRotationTemplate<T> QuaternionRotationTemplate<T>::rotY(T angle) {
-	return QuaternionRotationTemplate<T>(::rotQuatY(angle));
+	return QuaternionRotationTemplate<T>(rotQuatY(angle));
 }
 template<typename T>
 QuaternionRotationTemplate<T> QuaternionRotationTemplate<T>::rotZ(T angle) {
-	return QuaternionRotationTemplate<T>(::rotQuatZ(angle));
+	return QuaternionRotationTemplate<T>(rotQuatZ(angle));
 }
 
 
@@ -491,27 +491,27 @@ QuaternionRotationTemplate<T> QuaternionRotationTemplate<T>::fromRotationVec(con
 
 template<typename T>
 QuaternionRotationTemplate<T> QuaternionRotationTemplate<T>::faceX(Vector<T, 3> xDirection) {
-	return QuaternionRotationTemplate<T>::fromRotationMatrix(::faceMatX(xDirection));
+	return QuaternionRotationTemplate<T>::fromRotationMatrix(faceMatX(xDirection));
 }
 template<typename T>
 QuaternionRotationTemplate<T> QuaternionRotationTemplate<T>::faceX(Vector<T, 3> xDirection, Vector<T, 3> yHint) {
-	return QuaternionRotationTemplate<T>::fromRotationMatrix(::faceMatX(xDirection, yHint));
+	return QuaternionRotationTemplate<T>::fromRotationMatrix(faceMatX(xDirection, yHint));
 }
 template<typename T>
 QuaternionRotationTemplate<T> QuaternionRotationTemplate<T>::faceY(Vector<T, 3> yDirection) {
-	return QuaternionRotationTemplate<T>::fromRotationMatrix(::faceMatY(yDirection));
+	return QuaternionRotationTemplate<T>::fromRotationMatrix(faceMatY(yDirection));
 }
 template<typename T>
 QuaternionRotationTemplate<T> QuaternionRotationTemplate<T>::faceY(Vector<T, 3> yDirection, Vector<T, 3> zHint) {
-	return QuaternionRotationTemplate<T>::fromRotationMatrix(::faceMatY(yDirection, zHint));
+	return QuaternionRotationTemplate<T>::fromRotationMatrix(faceMatY(yDirection, zHint));
 }
 template<typename T>
 QuaternionRotationTemplate<T> QuaternionRotationTemplate<T>::faceZ(Vector<T, 3> zDirection) {
-	return QuaternionRotationTemplate<T>::fromRotationMatrix(::faceMatZ(zDirection));
+	return QuaternionRotationTemplate<T>::fromRotationMatrix(faceMatZ(zDirection));
 }
 template<typename T>
 QuaternionRotationTemplate<T> QuaternionRotationTemplate<T>::faceZ(Vector<T, 3> zDirection, Vector<T, 3> xHint) {
-	return QuaternionRotationTemplate<T>::fromRotationMatrix(::faceMatZ(zDirection, xHint));
+	return QuaternionRotationTemplate<T>::fromRotationMatrix(faceMatZ(zDirection, xHint));
 }
 
 template<typename T>
@@ -525,3 +525,4 @@ template<typename T>
 using RotationTemplate = MatrixRotationTemplate<T>;
 typedef RotationTemplate<double> Rotation;
 typedef RotationTemplate<float> Rotationf;
+};

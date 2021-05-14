@@ -8,6 +8,7 @@
 
 #include <assert.h>
 
+namespace P3D {
 RigidBody::RigidBody(Part* mainPart) : 
 	mainPart(mainPart), 
 	mass(mainPart->getMass()),
@@ -188,3 +189,4 @@ bool RigidBody::isValid() const {
 	}
 	return true;
 }
+};

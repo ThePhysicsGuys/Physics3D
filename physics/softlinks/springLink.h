@@ -2,7 +2,7 @@
 
 #include "softLink.h"
 
-
+namespace P3D {
 class SpringLink : public SoftLink {
 public:
 	SpringLink(const SpringLink& other) = delete;
@@ -10,7 +10,7 @@ public:
 	SpringLink(SpringLink&& other) = default;
 	SpringLink& operator=(SpringLink&& other) = default;
 
-	SpringLink(AttachedPart part1, AttachedPart part2,  double restLength, double stiffness);
+	SpringLink(AttachedPart part1, AttachedPart part2, double restLength, double stiffness);
 
 	void update() override;
 
@@ -20,4 +20,5 @@ private:
 private:
 	double restLength;
 	double stiffness;
+};
 };

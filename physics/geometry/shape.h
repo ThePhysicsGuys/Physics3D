@@ -7,6 +7,7 @@
 #include "../math/cframe.h"
 #include "../math/transform.h"
 
+namespace P3D {
 class ShapeClass;
 class Polyhedron;
 
@@ -34,7 +35,7 @@ public:
 
 	[[nodiscard]] Shape scaled(const DiagonalMat3& scale) const;
 	[[nodiscard]] Shape scaled(double scaleX, double scaleY, double scaleZ) const;
-	
+
 	[[nodiscard]] BoundingBox getBounds() const;
 	[[nodiscard]] BoundingBox getBounds(const Rotation& referenceFrame) const;
 	[[nodiscard]] Vec3 getCenterOfMass() const;
@@ -47,5 +48,5 @@ public:
 
 	[[nodiscard]] Polyhedron asPolyhedron() const;
 };
-
+};
 

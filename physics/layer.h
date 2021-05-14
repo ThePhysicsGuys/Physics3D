@@ -6,6 +6,7 @@
 #include "part.h"
 #include "colissionBuffer.h"
 
+namespace P3D {
 class WorldPrototype;
 class ColissionLayer;
 
@@ -87,4 +88,4 @@ public:
 	int getID() const;
 };
 void getColissionsBetween(const ColissionLayer& a, const ColissionLayer& b, ColissionBuffer& curColissions);
-
+};

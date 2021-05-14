@@ -4,6 +4,7 @@
 #include "linalg/mat.h"
 #include "cframe.h"
 
+namespace P3D {
 template<typename T>
 class TransformTemplate {
 public:
@@ -118,3 +119,4 @@ Matrix<T, 4, 4> TransformToMat4(const TransformTemplate<T>& transform) {
 
 typedef TransformTemplate<double> Transform;
 typedef TransformTemplate<float> Transformf;
+};

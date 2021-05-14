@@ -7,19 +7,20 @@
 #include "../misc/validityHelper.h"
 #include "../catchable_assert.h"
 
-ConvexShapeBuilder::ConvexShapeBuilder(Vec3f * vertBuf, Triangle* triangleBuf, int vertexCount, int triangleCount, TriangleNeighbors* neighborBuf, int* removalBuffer, EdgePiece* newTriangleBuffer)
+namespace P3D {
+ConvexShapeBuilder::ConvexShapeBuilder(Vec3f* vertBuf, Triangle* triangleBuf, int vertexCount, int triangleCount, TriangleNeighbors* neighborBuf, int* removalBuffer, EdgePiece* newTriangleBuffer)
 	: vertexBuf(vertBuf), triangleBuf(triangleBuf), vertexCount(vertexCount), triangleCount(triangleCount), neighborBuf(neighborBuf), removalBuffer(removalBuffer), newTriangleBuffer(newTriangleBuffer) {
 	fillNeighborBuf(triangleBuf, triangleCount, neighborBuf);
 }
 
-ConvexShapeBuilder::ConvexShapeBuilder(const Polyhedron& s, Vec3f * vertBuf, Triangle* triangleBuf, TriangleNeighbors* neighborBuf, int* removalBuffer, EdgePiece* newTriangleBuffer)
+ConvexShapeBuilder::ConvexShapeBuilder(const Polyhedron& s, Vec3f* vertBuf, Triangle* triangleBuf, TriangleNeighbors* neighborBuf, int* removalBuffer, EdgePiece* newTriangleBuffer)
 	: vertexBuf(vertBuf), triangleBuf(triangleBuf), vertexCount(s.vertexCount), triangleCount(s.triangleCount), neighborBuf(neighborBuf), removalBuffer(removalBuffer), newTriangleBuffer(newTriangleBuffer) {
 
 	for(int i = 0; i < s.vertexCount; i++) {
 		vertBuf[i] = s.getVertex(i);
 	}
 
-	for (int i = 0; i < s.triangleCount; i++) {
+	for(int i = 0; i < s.triangleCount; i++) {
 		triangleBuf[i] = s.getTriangle(i);
 	}
 
@@ -115,7 +116,7 @@ struct ConvexTriangleIterator {
 			recurseTriangle(currentNeighbors[leftSide], currentTriangle, leftSide);
 		} else {
 			// this triangle is an edge, add it to the list
-			
+
 			int vertexInTriangleIndex = (previousTriangleSide + 2) % 3;
 			int vertex = shapeBuilder.triangleBuf[previousTriangle][vertexInTriangleIndex];
 
@@ -135,7 +136,7 @@ struct ConvexTriangleIterator {
 		int edgeTriangle = replacingInfo.edgeTriangle;
 
 		shapeBuilder.triangleBuf[triangleToBeReplaced] = Triangle{newPointVertex, previousVertex, replacingInfo.vertexIndex};
-		
+
 		shapeBuilder.neighborBuf[triangleToBeReplaced].BC_Neighbor = edgeTriangle;
 		shapeBuilder.neighborBuf[edgeTriangle][replacingInfo.neighborIndexOfEdgeTriangle] = triangleToBeReplaced;
 	}
@@ -143,9 +144,9 @@ struct ConvexTriangleIterator {
 	void applyUpdates(int newPointVertex) {
 		int easilyMovableTriangles = std::min(newTriangleCount, removalCount);
 
-		int previousVertex = newTrianglesList[newTriangleCount-1].vertexIndex;
+		int previousVertex = newTrianglesList[newTriangleCount - 1].vertexIndex;
 		int previousTriangle = -1;
-		
+
 		{
 			int toBeReplaced = removalList[0];
 			EdgePiece replacingInfo = newTrianglesList[0];
@@ -226,13 +227,13 @@ void ConvexShapeBuilder::addPoint(const Vec3f& point, int oldTriangleIndex) {
 	TriangleNeighbors neighbors = neighborBuf[oldTriangleIndex];
 
 	iter.markTriangleRemoved(oldTriangleIndex);
-	
+
 	iter.recurseTriangle(neighbors[0], oldTriangleIndex, 0);
 	iter.recurseTriangle(neighbors[1], oldTriangleIndex, 1);
 	iter.recurseTriangle(neighbors[2], oldTriangleIndex, 2);
 
 	vertexBuf[vertexCount++] = point;
-	iter.applyUpdates(vertexCount-1);
+	iter.applyUpdates(vertexCount - 1);
 }
 
 bool ConvexShapeBuilder::addPoint(const Vec3f& point) {
@@ -253,3 +254,4 @@ Polyhedron ConvexShapeBuilder::toPolyhedron() const {
 IndexedShape ConvexShapeBuilder::toIndexedShape() const {
 	return IndexedShape(this->toPolyhedron(), neighborBuf);
 }
+};

@@ -6,6 +6,7 @@
 
 #include "unmanagedArray.h"
 
+namespace P3D {
 template<typename T>
 struct MonotonicTreeNode {
 	MonotonicTreeNode* children;
@@ -56,9 +57,9 @@ public:
 
 		this->allocatedMemory = std::move(builder.allocatedMemory);
 	}
-	
+
 	MonotonicTreeNode<T>& operator[](std::size_t index) { return allocatedMemory[index]; }
-	const MonotonicTreeNode<T>& operator[](std::size_t index) const {return allocatedMemory[index]; }
+	const MonotonicTreeNode<T>& operator[](std::size_t index) const { return allocatedMemory[index]; }
 
 	MonotonicTreeNode<T>* begin() { return allocatedMemory.begin(); }
 	const MonotonicTreeNode<T>* begin() const { return allocatedMemory.begin(); }
@@ -68,4 +69,5 @@ public:
 	MonotonicTreeNode<T>* getPtrToFree() {
 		return allocatedMemory.getPtrToFree();
 	}
+};
 };

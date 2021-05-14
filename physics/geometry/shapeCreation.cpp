@@ -6,6 +6,7 @@
 
 #include "../../util/cpuid.h"
 
+namespace P3D {
 Shape sphereShape(double radius) {
 	return Shape(&SphereClass::instance, radius * 2, radius * 2, radius * 2);
 }
@@ -39,3 +40,4 @@ Shape polyhedronShape(const Polyhedron& poly) {
 
 	return Shape(shapeClass, bounds.getWidth(), bounds.getHeight(), bounds.getDepth());
 }
+};

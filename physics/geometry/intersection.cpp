@@ -15,6 +15,7 @@
 
 #include <algorithm>
 
+namespace P3D {
 std::optional<Intersection> intersectsTransformed(const Shape& first, const Shape& second, const CFrame& relativeTransform) {
 	return intersectsTransformed(*first.baseShape, *second.baseShape, relativeTransform, first.scale, second.scale);
 }
@@ -67,3 +68,4 @@ std::optional<Intersection> intersectsTransformed(const GenericCollidable& first
 		return std::optional<Intersection>();
 	}
 }
+};

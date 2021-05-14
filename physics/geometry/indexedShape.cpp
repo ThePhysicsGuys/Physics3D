@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include "../misc/validityHelper.h"
 
+namespace P3D {
 int& TriangleNeighbors::operator[](int index) {
 	return this->neighbors[index];
 }
@@ -32,8 +33,8 @@ int TriangleNeighbors::getNeighborIndex(int neighbor) {
 	throw std::runtime_error("Neighbor not found in getNeighborIndex");
 }
 
-IndexedShape::IndexedShape(Polyhedron&& poly, TriangleNeighbors* neighborBuf) : Polyhedron(std::move(poly)), neighbors(neighborBuf){}
-IndexedShape::IndexedShape(const Vec3f* vertices, const Triangle* triangles, int vertexCount, int triangleCount, TriangleNeighbors * neighborBuf) : Polyhedron(vertices, triangles, vertexCount, triangleCount), neighbors(neighborBuf) {}
+IndexedShape::IndexedShape(Polyhedron&& poly, TriangleNeighbors* neighborBuf) : Polyhedron(std::move(poly)), neighbors(neighborBuf) {}
+IndexedShape::IndexedShape(const Vec3f* vertices, const Triangle* triangles, int vertexCount, int triangleCount, TriangleNeighbors* neighborBuf) : Polyhedron(vertices, triangles, vertexCount, triangleCount), neighbors(neighborBuf) {}
 
 void fillNeighborBuf(const Triangle* triangles, int triangleCount, TriangleNeighbors* neighborBuf) {
 	for(int i = 0; i < triangleCount; i++) {
@@ -65,5 +66,6 @@ void fillNeighborBuf(const Triangle* triangles, int triangleCount, TriangleNeigh
 		}
 	}
 }
+};
 
 

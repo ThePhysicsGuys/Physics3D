@@ -17,7 +17,7 @@
 #include "../motion.h"
 #include "../relativeMotion.h"
 
-
+namespace P3D {
 template<typename T>
 inline std::ostream& operator<<(std::ostream& os, const UnmanagedLargeMatrix<T>& matrix) {
 	for(int i = 0; i < matrix.h; i++) {
@@ -308,3 +308,4 @@ inline std::string str(const T& obj) {
 	ss << obj;
 	return ss.str();
 }
+};

@@ -6,6 +6,7 @@
 #include "motion.h"
 #include "relativeMotion.h"
 
+namespace P3D {
 SymmetricMat3 getRotatedInertia(const SymmetricMat3& originalInertia, const Rotation& rotation);
 SymmetricMat3 getTranslatedInertia(const SymmetricMat3& originalInertia, double mass, const Vec3& translation, const Vec3& centerOfMass);
 SymmetricMat3 getTransformedInertia(const SymmetricMat3& originalInertia, double mass, const CFrame& cframe, const Vec3& centerOfMass);
@@ -81,3 +82,4 @@ inline Vec3 getAngularMomentumFromOffset(const Vec3& offset, const Vec3& velocit
 	Vec3 rotationAngularMomentum = inertia * angularVelocity;
 	return velocityAngularMomentum + rotationAngularMomentum;
 }
+};

@@ -3,6 +3,7 @@
 #include "math/linalg/trigonometry.h"
 #include "math/predefinedTaylorExpansions.h"
 
+namespace P3D {
 SymmetricMat3 getRotatedInertia(const SymmetricMat3& originalInertia, const Rotation& rotation) {
 	return rotation.localToGlobal(originalInertia);
 }
@@ -108,3 +109,4 @@ FullTaylor<SymmetricMat3> getTransformedInertiaDerivativesAroundCenterOfMass(con
 
 	return translationFactor + rotationFactor;
 }
+};

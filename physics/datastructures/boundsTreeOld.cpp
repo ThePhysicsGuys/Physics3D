@@ -8,7 +8,6 @@
 #include <stdexcept>
 
 namespace P3D::OldBoundsTree {
-
 long long computeCost(const Bounds& bounds) {
 	Vec3Fix d = bounds.getDiagonal();
 	return (d.x + d.y + d.z).value;

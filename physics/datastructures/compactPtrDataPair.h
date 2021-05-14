@@ -12,6 +12,7 @@
 
 	0bPPP...PPPPP000 | 0b000...00000DDD = 0bPPP...PPPPPDDD
 */
+namespace P3D {
 template<typename PtrT, intptr_t BitWidth, typename DataType = unsigned int>
 class CompactPtrDataPair {
 public:
@@ -88,3 +89,4 @@ template<typename PtrT, intptr_t BitWidth, typename DataType>
 bool operator!=(CompactPtrDataPair<PtrT, BitWidth, DataType> first, CompactPtrDataPair<PtrT, BitWidth, DataType> second) {
 	return first.value != second.value;
 }
+};

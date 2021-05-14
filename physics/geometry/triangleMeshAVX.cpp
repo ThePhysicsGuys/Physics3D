@@ -1,17 +1,18 @@
 #include "triangleMesh.h"
 
 // AVX2 implementation for TriangleMesh functions
-
+namespace P3D {
 inline static size_t getOffset(size_t size) {
 	return (size + 7) & 0xFFFFFFFFFFFFFFF8;
 }
-
+};
 #include <immintrin.h>
+namespace P3D {
 #ifdef _MSC_VER
 inline static uint32_t countZeros(uint32_t x) {
 	unsigned long ret;
 	_BitScanForward(&ret, x);
-	return ( int) ret;
+	return (int) ret;
 }
 #else
 inline static uint32_t countZeros(uint32_t x) {
@@ -247,3 +248,4 @@ BoundingBox TriangleMesh::getBoundsAVX(const Mat3f& referenceFrame) const {
 
 	return toBounds(xMin, xMax, yMin, yMax, zMin, zMax);
 }
+};

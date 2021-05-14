@@ -4,6 +4,7 @@
 #include <initializer_list>
 #include <stddef.h>
 
+namespace P3D {
 template<typename T, std::size_t Size>
 struct EigenValues {
 	T values[Size];
@@ -32,3 +33,4 @@ struct EigenSet {
 };
 
 EigenSet<double, 3> getEigenDecomposition(const SymmetricMat3& sm);
+};

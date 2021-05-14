@@ -3,6 +3,7 @@
 #include "fix.h"
 #include "linalg/vec.h"
 
+namespace P3D {
 typedef Vector<Fix<32>, 3> Vec3Fix;
 
 template<typename T>
@@ -110,3 +111,4 @@ constexpr Vec3 castPositionToVec3(const Position& pos) noexcept {
 constexpr Vec3f castPositionToVec3f(const Position& pos) noexcept {
 	return Vec3f(static_cast<float>(pos.x), static_cast<float>(pos.y), static_cast<float>(pos.z));
 }
+};

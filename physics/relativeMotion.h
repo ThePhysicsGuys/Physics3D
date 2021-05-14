@@ -3,6 +3,7 @@
 #include "math/cframe.h"
 #include "motion.h"
 
+namespace P3D {
 struct RelativeMotion {
 	Motion relativeMotion;
 	CFrame locationOfRelativeMotion;
@@ -77,3 +78,4 @@ inline RelativeMotion& operator+=(RelativeMotion& first, const RelativeMotion& s
 	first = first + second;
 	return first;
 }
+};

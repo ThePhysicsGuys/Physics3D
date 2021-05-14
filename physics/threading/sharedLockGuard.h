@@ -2,6 +2,7 @@
 
 #include <shared_mutex>
 
+namespace P3D {
 class SharedLockGuard {
 	std::shared_mutex& mutex;
 	bool isHard = false;
@@ -54,4 +55,5 @@ public:
 	Unlocks when destroyed*/
 	inline UnlockSharedOnDestroy(std::shared_mutex& mutex) : mutex(mutex) {}
 	~UnlockSharedOnDestroy() { mutex.unlock_shared(); }
+};
 };

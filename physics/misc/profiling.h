@@ -6,6 +6,7 @@
 #include "../datastructures/buffers.h"
 #include "../datastructures/parallelArray.h"
 
+namespace P3D {
 class TimerMeasure {
 	std::chrono::high_resolution_clock::time_point lastClock = std::chrono::high_resolution_clock::now();
 public:
@@ -30,7 +31,7 @@ template<typename Unit, typename Category>
 class HistoricTally {
 	ParallelArray<Unit, static_cast<size_t>(Category::COUNT)> currentTally;
 public:
-	char const * labels[static_cast<size_t>(Category::COUNT)];
+	char const* labels[static_cast<size_t>(Category::COUNT)];
 	CircularBuffer<ParallelArray<Unit, static_cast<size_t>(Category::COUNT)>> history;
 
 	inline HistoricTally(char const* const labels[static_cast<size_t>(Category::COUNT)], size_t size) : history(size) {
@@ -69,7 +70,7 @@ class BreakdownAverageProfiler : public HistoricTally<std::chrono::nanoseconds, 
 public:
 	CircularBuffer<std::chrono::high_resolution_clock::time_point> tickHistory;
 
-	inline BreakdownAverageProfiler(char const * const labels[static_cast<size_t>(ProcessType::COUNT)], size_t capacity) : HistoricTally<std::chrono::nanoseconds, ProcessType>(labels, capacity), tickHistory(capacity) {}
+	inline BreakdownAverageProfiler(char const* const labels[static_cast<size_t>(ProcessType::COUNT)], size_t capacity) : HistoricTally<std::chrono::nanoseconds, ProcessType>(labels, capacity), tickHistory(capacity) {}
 
 	inline void mark(ProcessType process) {
 		std::chrono::high_resolution_clock::time_point curTime = std::chrono::high_resolution_clock::now();
@@ -82,7 +83,7 @@ public:
 
 	inline void mark(ProcessType process, ProcessType overrideOldProcess) {
 		std::chrono::high_resolution_clock::time_point curTime = std::chrono::high_resolution_clock::now();
-		if (currentProcess != static_cast<ProcessType>(-1)) {
+		if(currentProcess != static_cast<ProcessType>(-1)) {
 			HistoricTally<std::chrono::nanoseconds, ProcessType>::addToTally(overrideOldProcess, curTime - startTime);
 		}
 		startTime = curTime;
@@ -107,8 +108,9 @@ public:
 
 			double timeTaken = delta.count() * 1E-9;
 
-			return (numTicks-1) / timeTaken;
+			return (numTicks - 1) / timeTaken;
 		}
 		return 0.0;
 	}
+};
 };

@@ -15,6 +15,7 @@
 
 #include <memory>
 
+namespace P3D {
 class ExternalForce;
 class WorldLayer;
 
@@ -61,7 +62,7 @@ class WorldIteratorTemplate {
 protected:
 	WorldLayerIter<IsConst> worldLayerIter;
 	decltype((*worldLayerIter)->tree.begin()) curIter;
-	
+
 	inline void checkMoveToNextLayer() {
 		while(!(curIter != IteratorEnd())) {
 			++worldLayerIter;
@@ -169,8 +170,8 @@ private:
 	void notifyPhysicalHasBeenSplit(const MotorizedPhysical* mainPhysical, MotorizedPhysical* newlySplitPhysical);
 
 	/*
-		Merges the trees for two physicals. 
-		firstPhysical must be part of this world, 
+		Merges the trees for two physicals.
+		firstPhysical must be part of this world,
 		secondPhysical may or may not be in the world, but is not allowed to be in a different world
 	*/
 	void notifyPhysicalsMerged(const MotorizedPhysical* firstPhysical, MotorizedPhysical* secondPhysical);
@@ -198,7 +199,7 @@ protected:
 
 	// event handlers
 	virtual void onPartAdded(Part* newPart);
-	virtual void onPartRemoved(Part* removedPart); 
+	virtual void onPartRemoved(Part* removedPart);
 
 	// called when the part has already been removed from the world
 	virtual void deletePart(Part* partToDelete) const;
@@ -211,10 +212,10 @@ public:
 	std::vector<ColissionLayer> layers;
 
 	std::vector<SoftLink*> springLinks;
-  
+
 	void addLink(SoftLink* link);
 
-	
+
 	ColissionBuffer curColissions;
 	ThreadPool pool;
 
@@ -222,7 +223,7 @@ public:
 		These lists signify which layers collide
 	*/
 	std::vector<std::pair<int, int>> colissionMask;
-	
+
 	size_t age = 0;
 	size_t objectCount = 0;
 	double deltaT;
@@ -323,14 +324,14 @@ public:
 	virtual double getPotentialEnergyForObject(const WorldPrototype* world, const Part&) const = 0;
 	virtual double getPotentialEnergyForObject(const WorldPrototype* world, const MotorizedPhysical& phys) const {
 		double total = 0.0;
-		for (const Part& p : phys.rigidBody) {
+		for(const Part& p : phys.rigidBody) {
 			total += this->getPotentialEnergyForObject(world, p);
 		}
 		return total;
 	}
 	virtual double getTotalPotentialEnergyForThisForce(const WorldPrototype* world) const {
 		double total = 0.0;
-		for (MotorizedPhysical* p : world->iterPhysicals()) {
+		for(MotorizedPhysical* p : world->iterPhysicals()) {
 			total += this->getPotentialEnergyForObject(world, *p);
 		}
 		return total;
@@ -346,34 +347,34 @@ public:
 	IteratorFactoryWithEnd<CastingIterator<FilteredWorldIterator<Filter>, T&>> iterPartsFiltered(const Filter& filter) {
 		return IteratorFactoryWithEnd<CastingIterator<FilteredWorldIterator<Filter>, T&>>(
 			CastingIterator<FilteredWorldIterator<Filter>, T&>(
-				WorldPrototype::iterPartsFiltered(filter).begin()
+			WorldPrototype::iterPartsFiltered(filter).begin()
 			)
-		);
+			);
 	}
 
 	template<typename Filter>
 	IteratorFactoryWithEnd<CastingIterator<FilteredConstWorldIterator<Filter>, const T&>> iterPartsFiltered(const Filter& filter) const {
 		return IteratorFactoryWithEnd<CastingIterator<FilteredConstWorldIterator<Filter>, const T&>>(
 			CastingIterator<FilteredConstWorldIterator<Filter>, const T&>(
-				WorldPrototype::iterPartsFiltered(filter).begin()
+			WorldPrototype::iterPartsFiltered(filter).begin()
 			)
-		);
+			);
 	}
 
 	IteratorFactoryWithEnd<CastingIterator<WorldIterator, T&>> iterParts() {
 		return IteratorFactoryWithEnd<CastingIterator<WorldIterator, T&>>(
 			CastingIterator<WorldIterator, T&>(
-				WorldPrototype::iterParts().begin()
+			WorldPrototype::iterParts().begin()
 			)
-		);
+			);
 	}
 
 	IteratorFactoryWithEnd<CastingIterator<ConstWorldIterator, const T&>> iterParts() const {
 		return IteratorFactoryWithEnd<CastingIterator<ConstWorldIterator, const T&>>(
 			CastingIterator<ConstWorldIterator, const T&>(
-				WorldPrototype::iterParts().begin()
+			WorldPrototype::iterParts().begin()
 			)
-		);
+			);
 	}
 
 	virtual void onCollide(Part* partA, Part* partB) {}
@@ -381,7 +382,7 @@ public:
 
 	virtual void onPartAdded(T* part) {}
 	virtual void onPartRemoved(T* part) {}
-	
+
 	virtual void deletePart(T* part) const {
 		delete part;
 	}
@@ -395,4 +396,5 @@ public:
 	void deletePart(Part* partToDelete) const final override {
 		this->deletePart(static_cast<T*>(partToDelete));
 	}
+};
 };

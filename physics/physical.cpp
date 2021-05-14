@@ -17,6 +17,7 @@
 	===== Physical Structure =====
 */
 
+namespace P3D {
 #pragma region structure
 
 Physical::Physical(Part* part, MotorizedPhysical* mainPhysical) : rigidBody(part), mainPhysical(mainPhysical) {
@@ -1047,3 +1048,4 @@ std::vector<FoundLayerRepresentative> findAllLayersIn(Part* part) {
 		return std::vector<FoundLayerRepresentative>{};
 	}
 }
+};

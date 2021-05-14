@@ -3,7 +3,7 @@
 #include "../math/linalg/vec.h"
 #include "../part.h"
 
-
+namespace P3D {
 class SoftLink {
 protected:
 	struct AttachedPart {
@@ -44,5 +44,5 @@ public:
 
 	Vec3 getRelativePositionOfAttach1() const;
 	Vec3 getRelativePositionOfAttach2() const;
-
+};
 };

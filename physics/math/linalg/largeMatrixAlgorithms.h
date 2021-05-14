@@ -8,6 +8,7 @@
 #include <assert.h>
 #include <stddef.h>
 
+namespace P3D {
 template<typename T>
 static void swapRows(UnmanagedLargeVector<T>& v, std::size_t rowA, std::size_t rowB) {
 	std::swap(v[rowA], v[rowB]);
@@ -138,3 +139,4 @@ void destructiveSolve(System& m, SolutionType& v) {
 		}
 	}
 }
+};

@@ -1,5 +1,6 @@
 #include "hingeConstraint.h"
 
+namespace P3D {
 int HingeConstraint::maxNumberOfParameters() const {
 	return 5;
 }
@@ -22,14 +23,14 @@ ConstraintMatrixPack HingeConstraint::getMatrices(const PhysicalInfo& physA, con
 	Vec3 localMainAxis = normalize(this->axisA);
 	Vec3 localP1 = normalize(getPerpendicular(localMainAxis));
 	Vec3 localP2 = normalize(localMainAxis % localP1);
-	
+
 	Vec3 localMainOffsetAxis = normalize(this->axisB);
 
 	Vec3 mainAxis = physA.cframe.localToRelative(localMainAxis);
 	Vec3 p1 = physA.cframe.localToRelative(localP1);
 	Vec3 p2 = physA.cframe.localToRelative(localP2);
 	Vec3 mainOffsetAxis = physB.cframe.localToRelative(localMainOffsetAxis);
-	
+
 	// rotationOffset will be in the plane defined by p1 and p2, as it is perpendicular to mainAxis
 	Vec3 rotationOffset = mainAxis % mainOffsetAxis;
 	double rotationOffsetP1 = p1 * rotationOffset;
@@ -48,3 +49,4 @@ ConstraintMatrixPack HingeConstraint::getMatrices(const PhysicalInfo& physA, con
 
 	return ConstraintMatrixPack(matrixBuf, errorBuf, cA, cB, error);
 }
+};

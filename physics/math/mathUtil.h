@@ -2,6 +2,7 @@
 
 #include <cstdlib>
 
+namespace P3D {
 /*
 	Returns a random number between fMin and fMax
 */
@@ -75,4 +76,4 @@ template<typename T>
 constexpr bool btest(T n, char x) {
 	return bmtest(n, bmask<T>(x));
 }
-
+};

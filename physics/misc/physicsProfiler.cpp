@@ -1,5 +1,6 @@
 #include "physicsProfiler.h"
 
+namespace P3D {
 const char * physicsLabels[]{
 	"GJK Col",
 	"GJK No Col",
@@ -51,3 +52,4 @@ CircularBuffer<int> gjkNoCollideIterStats(1);
 HistoricTally<long long, IterationTime> GJKCollidesIterationStatistics(iterationLabels, 1);
 HistoricTally<long long, IterationTime> GJKNoCollidesIterationStatistics(iterationLabels, 1);
 HistoricTally<long long, IterationTime> EPAIterationStatistics(iterationLabels, 1);
+};

@@ -2,6 +2,7 @@
 
 #include <limits>
 
+namespace P3D {
 #define EPSILON(T) epsilon<T>()
 #define PI pi<double>()
 #define E e<double>()
@@ -56,3 +57,4 @@ template<typename T>
 constexpr T sq3_2() {
 	return static_cast<T>(0.86602540378443864676372317075293618);
 }
+};

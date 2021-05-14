@@ -5,6 +5,7 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+namespace P3D {
 SineWaveController::SineWaveController(double minValue, double maxValue, double period) :
 	minValue(minValue),
 	maxValue(maxValue),
@@ -38,3 +39,4 @@ FullTaylor<double> SineWaveController::getFullTaylorExpansion() const {
 	result += offset;
 	return result;
 }
+};

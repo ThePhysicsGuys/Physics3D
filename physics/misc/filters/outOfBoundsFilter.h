@@ -4,6 +4,7 @@
 #include "../../datastructures/boundsTree.h"
 #include "../../part.h"
 
+namespace P3D {
 struct OutOfBoundsFilter {
 	Bounds bounds;
 
@@ -23,4 +24,5 @@ struct OutOfBoundsFilter {
 	bool operator()(const Part& part) const {
 		return true;
 	}
+};
 };

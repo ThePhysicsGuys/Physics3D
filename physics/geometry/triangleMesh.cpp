@@ -9,6 +9,7 @@
 #include <set>
 #include <math.h>
 
+namespace P3D {
 #pragma region bufManagement
 inline static size_t getOffset(size_t size) {
 	return (size + 7) & 0xFFFFFFFFFFFFFFF8;
@@ -96,7 +97,7 @@ MeshPrototype::MeshPrototype() :
 MeshPrototype::MeshPrototype(int vertexCount, int triangleCount) :
 	vertices(getOffset(vertexCount) * 3, 32),
 	triangles(getOffset(triangleCount) * 3, 32),
-	vertexCount(vertexCount), 
+	vertexCount(vertexCount),
 	triangleCount(triangleCount) {}
 
 MeshPrototype::MeshPrototype(int vertexCount, int triangleCount, UniqueAlignedPointer<int>&& triangles) :
@@ -125,7 +126,7 @@ Triangle MeshPrototype::getTriangle(int index) const {
 #pragma endregion
 
 #pragma region EditableMesh
-EditableMesh::EditableMesh(int vertexCount, int triangleCount) : 
+EditableMesh::EditableMesh(int vertexCount, int triangleCount) :
 	MeshPrototype(vertexCount, triangleCount) {}
 EditableMesh::EditableMesh(int vertexCount, int triangleCount, const UniqueAlignedPointer<int>& triangles) :
 	MeshPrototype(vertexCount, triangleCount, copy(triangles, triangleCount)) {}
@@ -281,8 +282,8 @@ TriangleMesh TriangleMesh::scaled(float scaleX, float scaleY, float scaleZ) cons
 	}
 	return TriangleMesh(std::move(result));
 }
-TriangleMesh TriangleMesh::scaled(DiagonalMat3f scale) const { 
-	return scaled(scale[0], scale[1], scale[2]); 
+TriangleMesh TriangleMesh::scaled(DiagonalMat3f scale) const {
+	return scaled(scale[0], scale[1], scale[2]);
 }
 
 TriangleMesh TriangleMesh::translatedAndScaled(Vec3f translation, DiagonalMat3f scale) const {
@@ -357,7 +358,7 @@ double TriangleMesh::getScaledMaxRadius(DiagonalMat3 scale) const {
 double TriangleMesh::getIntersectionDistance(const Vec3& origin, const Vec3& direction) const {
 	const double EPSILON = 0.0000001;
 	double t = std::numeric_limits<double>::max();
-	for (Triangle triangle : iterTriangles()) {
+	for(Triangle triangle : iterTriangles()) {
 		Vec3 v0 = this->getVertex(triangle.firstIndex);
 		Vec3 v1 = this->getVertex(triangle.secondIndex);
 		Vec3 v2 = this->getVertex(triangle.thirdIndex);
@@ -367,25 +368,25 @@ double TriangleMesh::getIntersectionDistance(const Vec3& origin, const Vec3& dir
 		Vec3 h = direction % edge2;
 
 		double a = edge1 * h;
-		if (a > -EPSILON && a < EPSILON) 
+		if(a > -EPSILON && a < EPSILON)
 			continue;
 
 		Vec3 s = origin - v0;
 		double f = 1.0 / a;
 		double u = f * (s * h);
 
-		if (u < 0.0 || u > 1.0) 
+		if(u < 0.0 || u > 1.0)
 			continue;
 
 		Vec3 q = s % edge1;
 		double v = direction * f * q;
 
-		if (v < 0.0 || u + v > 1.0) 
+		if(v < 0.0 || u + v > 1.0)
 			continue;
 
 		double r = edge2 * f * q;
-		if (r > EPSILON) {
-			if (r < t) 
+		if(r > EPSILON) {
+			if(r < t)
 				t = r;
 		} else {
 			//Log::debug("Line intersection but not a ray intersection");
@@ -399,7 +400,7 @@ double TriangleMesh::getIntersectionDistance(const Vec3& origin, const Vec3& dir
 
 TriangleMesh stripUnusedVertices(const Vec3f* vertices, const Triangle* triangles, int vertexCount, int triangleCount) {
 	bool* vertexIsReferenced = new bool[vertexCount];
-	for(int i = 0; i < vertexCount; i++) {vertexIsReferenced[i] = false;}
+	for(int i = 0; i < vertexCount; i++) { vertexIsReferenced[i] = false; }
 	for(int i = 0; i < triangleCount; i++) {
 		Triangle t = triangles[i];
 		vertexIsReferenced[t.firstIndex] = true;
@@ -433,7 +434,7 @@ TriangleMesh stripUnusedVertices(const Vec3f* vertices, const Triangle* triangle
 	delete[] vertexIsReferenced;
 	for(int i = 0; i < triangleCount; i++) {
 		Triangle t = triangles[i];
-		for(std::pair<int, int>& sub : substitutions){
+		for(std::pair<int, int>& sub : substitutions) {
 			if(t.firstIndex == sub.first) t.firstIndex = sub.second;
 			if(t.secondIndex == sub.first) t.secondIndex = sub.second;
 			if(t.thirdIndex == sub.first) t.thirdIndex = sub.second;
@@ -554,3 +555,4 @@ BoundingBox TriangleMesh::getBounds(const Mat3f& referenceFrame) const {
 }
 
 #pragma endregion
+};
