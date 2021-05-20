@@ -4,7 +4,7 @@
 #include "../graphics/shader/parser.h"
 #include "../util/log.h"
 
-namespace P3D {
+using namespace P3D;
 static const char* code = R"(
 struct Light {
 	vec3 position;
@@ -81,4 +81,3 @@ TEST_CASE(parseShader) {
 
 	Parser::Parse result = Parser::parse(code);
 }
-};

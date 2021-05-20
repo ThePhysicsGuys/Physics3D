@@ -9,7 +9,7 @@
 
 #include "randomValues.h"
 
-namespace P3D {
+using namespace P3D;
 #define REMAINS_CONSTANT(v) REMAINS_CONSTANT_TOLERANT(v, 0.0001)
 #define ASSERT(v) ASSERT_TOLERANT(v, 0.0001)
 
@@ -178,4 +178,3 @@ TEST_CASE(translatedAngularMomentum) {
 	ASSERT(angularMomentumFromVelocity == computedAngularMomentumFromVelocity);
 	ASSERT(angularMomentumTarget == computedAngularMomentumFromVelocityAndAngular);
 }
-};

@@ -18,7 +18,7 @@
 
 #include <functional>
 
-namespace P3D {
+using namespace P3D;
 #define ASSERT(cond) ASSERT_TOLERANT(cond, 0.05)
 
 #define DELTA_T 0.0001
@@ -525,4 +525,4 @@ TEST_CASE(attachPhysicalsWithLayers) {
 		ASSERT_TRUE(pairwiseCorrectlyGrouped(firstPhysParts, secondPhysParts, true));
 	}
 }
-};
+

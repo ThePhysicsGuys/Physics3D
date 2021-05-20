@@ -12,7 +12,8 @@
 #include <vector>
 #include <set>
 
-namespace P3D::NewBoundsTree {
+using namespace P3D;
+
 static void shuffleTreeRecursive(TreeTrunk& curTrunk, int curTrunkSize) {
 	for(int iter = 0; iter < (curTrunkSize - 1) * curTrunkSize; iter++) {
 		int index1 = generateInt(curTrunkSize);
@@ -497,7 +498,3 @@ TEST_CASE(testImproveStructureValidity) {
 		}
 	}
 }
-
-
-};
-};

@@ -14,7 +14,7 @@
 
 #include <cmath>
 
-namespace P3D {
+using namespace P3D;
 #define ASSERT(condition) ASSERT_TOLERANT(condition, 0.00000001)
 
 #define FOR_XYZ(start, end, delta) for(auto x = start; x < end; x += delta) for(auto y = start; y < end; y += delta) for(auto z = start; z < end; z += delta) 
@@ -240,4 +240,3 @@ TEST_CASE(rotationImplementationIdenticalGetXYZ) {
 		ASSERT(quatRot.getZ() == quatRot.localToGlobal(Vec3(0, 0, 1)));
 	}
 }
-};

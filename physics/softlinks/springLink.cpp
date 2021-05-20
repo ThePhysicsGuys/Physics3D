@@ -1,5 +1,3 @@
-
-
 #include "springLink.h"
 
 namespace P3D {

@@ -158,7 +158,7 @@ HingeConstraint* deserializeHingeConstraint(std::istream& istream) {
 void serializeBarConstraint(const BarConstraint& constraint, std::ostream& ostream) {
 	serialize<Vec3>(constraint.attachA, ostream);
 	serialize<Vec3>(constraint.attachB, ostream);
-	serialize<double>(constraint.length, ostream);
+	serialize<double>(constraint.barLength, ostream);
 }
 
 BarConstraint* deserializeBarConstraint(std::istream& istream) {

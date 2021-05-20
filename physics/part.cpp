@@ -115,7 +115,6 @@ BoundingBox Part::getLocalBounds() const {
 	return BoundingBox(-v, v);
 }
 
-#ifdef USE_NEW_BOUNDSTREE
 BoundsTemplate<float> Part::getBounds() const {
 	BoundingBox boundsOfHitbox = this->hitbox.getBounds(this->cframe.getRotation());
 
@@ -124,16 +123,6 @@ BoundsTemplate<float> Part::getBounds() const {
 
 	return BoundsTemplate<float>(boundsOfHitbox + getPosition());
 }
-#else
-Bounds Part::getBounds() const {
-	BoundingBox boundsOfHitbox = this->hitbox.getBounds(this->cframe.getRotation());
-	
-	assert(isVecValid(boundsOfHitbox.min));
-	assert(isVecValid(boundsOfHitbox.max));
-
-	return boundsOfHitbox + getPosition();
-}
-#endif
 
 void Part::scale(double scaleX, double scaleY, double scaleZ) {
 	Bounds oldBounds = this->getBounds();

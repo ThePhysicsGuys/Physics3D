@@ -109,7 +109,7 @@ bool StandardInputHandler::onKeyPressOrRepeat(Engine::KeyPressEvent& event) {
 }
 
 bool StandardInputHandler::onKeyPress(Engine::KeyPressEvent& event) {
-	using namespace Graphics::Debug;
+	using namespace Graphics::VisualDebug;
 	using namespace Engine;
 
 	Key key = event.getKey();

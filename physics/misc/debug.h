@@ -46,5 +46,5 @@ void setCFrameLogAction(void(*logger)(CFrame frame, CFrameType type));
 void setShapeLogAction(void(*logger)(const Polyhedron& shape, const GlobalCFrame& location));
 
 void saveIntersectionError(const Part& first, const Part& second, const char* reason);
-}
+};
 };

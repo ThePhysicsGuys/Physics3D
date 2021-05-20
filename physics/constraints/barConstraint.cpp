@@ -22,7 +22,7 @@ ConstraintMatrixPack BarConstraint::getMatrices(const PhysicalInfo& physA, const
 	ConstraintMatrixPair<1> cA = makeMatrices(physA, attachA, barAxis);
 	ConstraintMatrixPair<1> cB = makeMatrices(physB, attachB, barAxis);
 
-	double error0 = ::length(barAxis) - this->length;
+	double error0 = length(barAxis) - this->barLength;
 
 	double velocityA = cA.motionToEquation * physA.motion.getDerivAsVec6(0);
 	double velocityB = cB.motionToEquation * physB.motion.getDerivAsVec6(0);

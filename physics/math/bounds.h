@@ -6,8 +6,6 @@
 #include <fenv.h>
 
 namespace P3D {
-#define USE_NEW_BOUNDSTREE
-
 template<typename T>
 struct BoundsTemplate {
 	PositionTemplate<T> min;

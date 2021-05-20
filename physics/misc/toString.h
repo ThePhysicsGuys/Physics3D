@@ -19,7 +19,7 @@
 
 namespace P3D {
 template<typename T>
-inline std::ostream& operator<<(std::ostream& os, const UnmanagedLargeMatrix<T>& matrix) {
+inline std::ostream& operator<<(std::ostream& os, const P3D::UnmanagedLargeMatrix<T>& matrix) {
 	for(int i = 0; i < matrix.h; i++) {
 		for(int j = 0; j < matrix.w; j++) {
 			os << matrix(i, j) << '\t';
@@ -31,7 +31,7 @@ inline std::ostream& operator<<(std::ostream& os, const UnmanagedLargeMatrix<T>&
 }
 
 template<typename T, size_t Rows>
-inline std::ostream& operator<<(std::ostream& os, const UnmanagedVerticalFixedMatrix<T, Rows>& matrix) {
+inline std::ostream& operator<<(std::ostream& os, const P3D::UnmanagedVerticalFixedMatrix<T, Rows>& matrix) {
 	for(int i = 0; i < Rows; i++) {
 		for(int j = 0; j < matrix.cols; j++) {
 			os << matrix(i, j) << '\t';
@@ -43,7 +43,7 @@ inline std::ostream& operator<<(std::ostream& os, const UnmanagedVerticalFixedMa
 }
 
 template<typename T, size_t Cols>
-inline std::ostream& operator<<(std::ostream& os, const UnmanagedHorizontalFixedMatrix<T, Cols>& matrix) {
+inline std::ostream& operator<<(std::ostream& os, const P3D::UnmanagedHorizontalFixedMatrix<T, Cols>& matrix) {
 	for(int i = 0; i < matrix.rows; i++) {
 		for(int j = 0; j < Cols; j++) {
 			os << matrix(i, j) << '\t';
@@ -55,7 +55,7 @@ inline std::ostream& operator<<(std::ostream& os, const UnmanagedHorizontalFixed
 }
 
 template<typename T>
-inline std::ostream& operator<<(std::ostream& os, const UnmanagedLargeVector<T>& vector) {
+inline std::ostream& operator<<(std::ostream& os, const P3D::UnmanagedLargeVector<T>& vector) {
 	for(int i = 0; i < vector.n; i++) {
 		os << vector[i] << ',';
 	}
@@ -64,7 +64,7 @@ inline std::ostream& operator<<(std::ostream& os, const UnmanagedLargeVector<T>&
 }
 
 template<typename T, size_t Size>
-inline std::ostream& operator<<(std::ostream& os, const Vector<T, Size>& vector) {
+inline std::ostream& operator<<(std::ostream& os, const P3D::Vector<T, Size>& vector) {
 	os << std::fixed << std::setprecision(4);
 	os << '(';
 	for(size_t i = 0; i < Size - 1; i++) {
@@ -81,7 +81,7 @@ inline std::ostream& operator<<(std::ostream& os, const Vector<T, Size>& vector)
 }
 
 template<int64_t N>
-inline std::ostream& operator<<(std::ostream& os, Fix<N> f) {
+inline std::ostream& operator<<(std::ostream& os, P3D::Fix<N> f) {
 	int64_t intPart = f.value >> N;
 	int64_t frac = f.value & ((1ULL << N) - 1);
 
@@ -150,18 +150,18 @@ inline std::ostream& operator<<(std::ostream& os, Fix<N> f) {
 	return os;
 }
 
-inline std::ostream& operator<<(std::ostream& os, Position position) {
+inline std::ostream& operator<<(std::ostream& os, P3D::Position position) {
 	os << "(" << position.x << ", " << position.y << ", " << position.z << ")";
 	return os;
 }
 
-inline std::ostream& operator<<(std::ostream& os, BoundingBox box) {
+inline std::ostream& operator<<(std::ostream& os, P3D::BoundingBox box) {
 	os << "BoundingBox(" << box.min << ", " << box.max << ")";
 	return os;
 }
 
 template<typename N, size_t Width, size_t Height>
-inline std::ostream& operator<<(std::ostream& os, const Matrix<N, Height, Width>& matrix) {
+inline std::ostream& operator<<(std::ostream& os, const P3D::Matrix<N, Height, Width>& matrix) {
 	os << "(";
 
 	for(size_t row = 0; row < Height; row++) {
@@ -176,7 +176,7 @@ inline std::ostream& operator<<(std::ostream& os, const Matrix<N, Height, Width>
 }
 
 template<typename N, size_t Size>
-inline std::ostream& operator<<(std::ostream& os, const SymmetricMatrix<N, Size>& matrix) {
+inline std::ostream& operator<<(std::ostream& os, const P3D::SymmetricMatrix<N, Size>& matrix) {
 	os << "(";
 
 	for(size_t row = 0; row < Size; row++) {
@@ -191,7 +191,7 @@ inline std::ostream& operator<<(std::ostream& os, const SymmetricMatrix<N, Size>
 }
 
 template<typename N, size_t Size>
-inline std::ostream& operator<<(std::ostream& os, const DiagonalMatrix<N, Size>& matrix) {
+inline std::ostream& operator<<(std::ostream& os, const P3D::DiagonalMatrix<N, Size>& matrix) {
 	os << "Diag(";
 
 	for(size_t i = 0; i < Size; i++) {
@@ -202,23 +202,8 @@ inline std::ostream& operator<<(std::ostream& os, const DiagonalMatrix<N, Size>&
 	return os;
 }
 
-template<typename N, size_t Width, size_t Height>
-inline std::string str(const Matrix<N, Height, Width>& matrix) {
-	std::stringstream ss;
-	ss.precision(4);
-	ss << matrix;
-	return ss.str();
-}
 template<typename N, size_t Size>
-inline std::string str(const SymmetricMatrix<N, Size>& matrix) {
-	std::stringstream ss;
-	ss.precision(4);
-	ss << matrix;
-	return ss.str();
-}
-
-template<typename N, size_t Size>
-inline std::ostream& operator<<(std::ostream& os, const EigenValues<N, Size>& v) {
+inline std::ostream& operator<<(std::ostream& os, const P3D::EigenValues<N, Size>& v) {
 	os << "EigenValues(";
 	for(size_t i = 0; i < Size - 1; i++)
 		os << v[i] << ", ";
@@ -228,7 +213,7 @@ inline std::ostream& operator<<(std::ostream& os, const EigenValues<N, Size>& v)
 }
 
 template<typename T>
-inline std::ostream& operator<<(std::ostream& os, const Quaternion<T>& quat) {
+inline std::ostream& operator<<(std::ostream& os, const P3D::Quaternion<T>& quat) {
 	os << quat.w;
 	if(quat.i >= 0) os << '+';
 	os << quat.i << 'i';
@@ -240,23 +225,23 @@ inline std::ostream& operator<<(std::ostream& os, const Quaternion<T>& quat) {
 }
 
 template<typename T>
-inline std::ostream& operator<<(std::ostream& os, const RotationTemplate<T>& rotation) {
+inline std::ostream& operator<<(std::ostream& os, const P3D::RotationTemplate<T>& rotation) {
 	os << rotation.asRotationMatrix();
 	return os;
 }
 
 template<typename T>
-inline std::ostream& operator<<(std::ostream& os, const CFrameTemplate<T>& cframe) {
+inline std::ostream& operator<<(std::ostream& os, const P3D::CFrameTemplate<T>& cframe) {
 	os << "CFrame(" << cframe.position << ", " << cframe.rotation << ")";
 	return os;
 }
-inline std::ostream& operator<<(std::ostream& os, const GlobalCFrame& cframe) {
+inline std::ostream& operator<<(std::ostream& os, const P3D::GlobalCFrame& cframe) {
 	os << "GlobalCFrame(" << cframe.position << ", " << cframe.rotation << ")";
 	return os;
 }
 
 template<typename T, std::size_t Size>
-inline std::ostream& operator<<(std::ostream& os, const TaylorExpansion<T, Size>& taylor) {
+inline std::ostream& operator<<(std::ostream& os, const P3D::TaylorExpansion<T, Size>& taylor) {
 	if constexpr(Size > 0) {
 		os << taylor[0] << "x";
 		for(std::size_t i = 1; i < Size; i++) {
@@ -267,25 +252,25 @@ inline std::ostream& operator<<(std::ostream& os, const TaylorExpansion<T, Size>
 }
 
 template<typename T, std::size_t Size>
-inline std::ostream& operator<<(std::ostream& os, const FullTaylorExpansion<T, Size>& taylor) {
+inline std::ostream& operator<<(std::ostream& os, const P3D::FullTaylorExpansion<T, Size>& taylor) {
 	os << taylor.getConstantValue() << " + ";
 	os << taylor.getDerivatives();
 	return os;
 }
 
-inline std::ostream& operator<<(std::ostream& os, const TranslationalMotion& motion) {
+inline std::ostream& operator<<(std::ostream& os, const P3D::TranslationalMotion& motion) {
 	os << "{vel: " << motion.getVelocity();
 	os << ", accel: " << motion.getAcceleration() << "}";
 	return os;
 }
 
-inline std::ostream& operator<<(std::ostream& os, const RotationalMotion& motion) {
+inline std::ostream& operator<<(std::ostream& os, const P3D::RotationalMotion& motion) {
 	os << "{angularVel: " << motion.getAngularVelocity();
 	os << ", angularAccel: " << motion.getAngularAcceleration() << "}";
 	return os;
 }
 
-inline std::ostream& operator<<(std::ostream& os, const Motion& motion) {
+inline std::ostream& operator<<(std::ostream& os, const P3D::Motion& motion) {
 	os << "{vel: " << motion.getVelocity();
 	os << ", angularVel: " << motion.getAngularVelocity();
 	os << ", accel: " << motion.getAcceleration();
@@ -294,7 +279,7 @@ inline std::ostream& operator<<(std::ostream& os, const Motion& motion) {
 	return os;
 }
 
-inline std::ostream& operator<<(std::ostream& os, const RelativeMotion& relMotion) {
+inline std::ostream& operator<<(std::ostream& os, const P3D::RelativeMotion& relMotion) {
 	os << "{motion: " << relMotion.relativeMotion;
 	os << ", offset: " << relMotion.locationOfRelativeMotion << "}";
 

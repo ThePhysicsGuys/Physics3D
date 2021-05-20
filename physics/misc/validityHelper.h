@@ -145,21 +145,9 @@ bool isValidTriangle(Triangle t, int vertexCount);
 
 class Part;
 
-void treeValidCheck(const OldBoundsTree::TreeNode& rootNode);
-template<typename Boundable>
-inline void treeValidCheck(const OldBoundsTree::BoundsTree<Boundable>& tree) {
-	if(!tree.isEmpty()) {
-		treeValidCheck(tree.rootNode);
-	}
-}
-
 class MotorizedPhysical;
 
 bool isMotorizedPhysicalValid(const MotorizedPhysical* mainPhys);
-};
-
-
-namespace P3D::NewBoundsTree {
 
 template<typename Boundable>
 inline bool isBoundsTreeValidRecursive(const TreeTrunk& curNode, int curNodeSize, int depth = 0) {
@@ -206,7 +194,7 @@ bool isBoundsTreeValid(const BoundsTree<Boundable>& tree) {
 }
 
 template<typename Boundable>
-inline void treeValidCheck(const NewBoundsTree::BoundsTree<Boundable>& tree) {
+inline void treeValidCheck(const BoundsTree<Boundable>& tree) {
 	if(!isBoundsTreeValid(tree)) throw "tree invalid!";
 }
 

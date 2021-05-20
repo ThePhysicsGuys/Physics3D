@@ -7,8 +7,6 @@
 
 #include <assert.h>
 
-//using namespace P3D::OldBoundsTree;
-
 namespace P3D {
 WorldLayer::WorldLayer(ColissionLayer* parent) : parent(parent) {}
 
@@ -53,38 +51,26 @@ void WorldLayer::addPart(Part* newPart) {
 	tree.add(newPart);
 }
 
-static OldBoundsTree::TreeNode createNodeFor(MotorizedPhysical* phys, bool makeGroupHead) {
-	OldBoundsTree::TreeNode newNode(phys->rigidBody.mainPart, phys->rigidBody.mainPart->getBounds(), makeGroupHead);
-	phys->forEachPartExceptMainPart([&newNode](Part& part) {
-		newNode.addInside(OldBoundsTree::TreeNode(&part, part.getBounds(), false));
-	});
-	return newNode;
-}
-
-static void addMotorPhysToGroup(OldBoundsTree::BoundsTree<Part>& tree, MotorizedPhysical* phys, Part* group) {
-	tree.addToGroup(createNodeFor(phys, false), group, group->getBounds());
-}
-
-static void addMotorPhysToGroup(NewBoundsTree::BoundsTree<Part>& tree, MotorizedPhysical* phys, Part* group) {
+static void addMotorPhysToGroup(BoundsTree<Part>& tree, MotorizedPhysical* phys, Part* group) {
 	auto base = tree.getPrototype().getBaseTrunk();
-	NewBoundsTree::TrunkAllocator& alloc = tree.getPrototype().getAllocator();
-	NewBoundsTree::modifyGroupRecursive(alloc, base.first, base.second, group, group->getBounds(), [&](NewBoundsTree::TreeNodeRef& groupNode, const BoundsTemplate<float>& groupNodeBounds) {
+	TrunkAllocator& alloc = tree.getPrototype().getAllocator();
+	modifyGroupRecursive(alloc, base.first, base.second, group, group->getBounds(), [&](TreeNodeRef& groupNode, const BoundsTemplate<float>& groupNodeBounds) {
 		Part* mp = phys->getMainPart();
 		if(groupNode.isLeafNode()) {
-			NewBoundsTree::TreeTrunk* newTrunk = alloc.allocTrunk();
+			TreeTrunk* newTrunk = alloc.allocTrunk();
 			newTrunk->setSubNode(0, std::move(groupNode), groupNodeBounds);
-			newTrunk->setSubNode(1, NewBoundsTree::TreeNodeRef(mp), mp->getBounds());
-			groupNode = NewBoundsTree::TreeNodeRef(newTrunk, 2, true);
+			newTrunk->setSubNode(1, TreeNodeRef(mp), mp->getBounds());
+			groupNode = TreeNodeRef(newTrunk, 2, true);
 		} else {
-			NewBoundsTree::addRecursive(alloc, groupNode.asTrunk(), groupNode.getTrunkSize(), NewBoundsTree::TreeNodeRef(mp), mp->getBounds());
+			addRecursive(alloc, groupNode.asTrunk(), groupNode.getTrunkSize(), TreeNodeRef(mp), mp->getBounds());
 		}
-		NewBoundsTree::TreeTrunk& curTrunk = groupNode.asTrunk();
+		TreeTrunk& curTrunk = groupNode.asTrunk();
 		int curTrunkSize = groupNode.getTrunkSize();
 		phys->forEachPartExceptMainPart([&](Part& part) {
-			curTrunkSize = NewBoundsTree::addRecursive(alloc, curTrunk, curTrunkSize, NewBoundsTree::TreeNodeRef(&part), part.getBounds());
+			curTrunkSize = addRecursive(alloc, curTrunk, curTrunkSize, TreeNodeRef(&part), part.getBounds());
 		});
 		groupNode.setTrunkSize(curTrunkSize);
-		return NewBoundsTree::TrunkSIMDHelperFallback::getTotalBounds(curTrunk, curTrunkSize);
+		return TrunkSIMDHelperFallback::getTotalBounds(curTrunk, curTrunkSize);
 	});
 }
 
@@ -205,60 +191,12 @@ static bool runColissionPreTests(const Part& p1, const Part& p2) {
 	return true;
 }
 
-static void recursiveFindColissionsBetween(std::vector<Colission>& colissions, const OldBoundsTree::TreeNode& first, const OldBoundsTree::TreeNode& second) {
-	if(!intersects(first.bounds, second.bounds)) return;
-
-	if(first.isLeafNode() && second.isLeafNode()) {
-		Part* p1 = static_cast<Part*>(first.object);
-		Part* p2 = static_cast<Part*>(second.object);
-		if(runColissionPreTests(*p1, *p2)) {
-			colissions.push_back(Colission{p1, p2, Position(), Vec3()});
-		}
-	} else {
-		bool preferFirst = OldBoundsTree::computeCost(first.bounds) <= OldBoundsTree::computeCost(second.bounds);
-		if(preferFirst && !first.isLeafNode() || second.isLeafNode()) {
-			// split first
-
-			for(const OldBoundsTree::TreeNode& node : first) {
-				recursiveFindColissionsBetween(colissions, node, second);
-			}
-		} else {
-			// split second
-
-			for(const OldBoundsTree::TreeNode& node : second) {
-				recursiveFindColissionsBetween(colissions, first, node);
-			}
-		}
-	}
-}
-static void recursiveFindColissionsInternal(std::vector<Colission>& colissions, const OldBoundsTree::TreeNode& trunkNode) {
-	// within the same node
-	if(trunkNode.isLeafNode() || trunkNode.isGroupHead)
-		return;
-
-	for(int i = 0; i < trunkNode.nodeCount; i++) {
-		const OldBoundsTree::TreeNode& A = trunkNode[i];
-		recursiveFindColissionsInternal(colissions, A);
-		for(int j = i + 1; j < trunkNode.nodeCount; j++) {
-			const OldBoundsTree::TreeNode& B = trunkNode[j];
-			recursiveFindColissionsBetween(colissions, A, B);
-		}
-	}
-}
-
-static void findColissionsBetween(std::vector<Colission>& colissions, const OldBoundsTree::BoundsTree<Part>& treeA, const OldBoundsTree::BoundsTree<Part>& treeB) {
-	recursiveFindColissionsBetween(colissions, treeA.rootNode, treeB.rootNode);
-}
-static void findColissionsInternal(std::vector<Colission>& colissions, const OldBoundsTree::BoundsTree<Part>& tree) {
-	recursiveFindColissionsInternal(colissions, tree.rootNode);
-}
-
-static void findColissionsBetween(std::vector<Colission>& colissions, const NewBoundsTree::BoundsTree<Part>& treeA, const NewBoundsTree::BoundsTree<Part>& treeB) {
+static void findColissionsBetween(std::vector<Colission>& colissions, const BoundsTree<Part>& treeA, const BoundsTree<Part>& treeB) {
 	treeA.forEachColissionWith(treeB, [&colissions](Part* a, Part* b) {
 		colissions.push_back(Colission{a, b});
 	});
 }
-static void findColissionsInternal(std::vector<Colission>& colissions, const NewBoundsTree::BoundsTree<Part>& tree) {
+static void findColissionsInternal(std::vector<Colission>& colissions, const BoundsTree<Part>& tree) {
 	tree.forEachColission([&colissions](Part* a, Part* b) {
 		colissions.push_back(Colission{a, b});
 	});

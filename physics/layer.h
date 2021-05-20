@@ -12,7 +12,7 @@ class ColissionLayer;
 
 class WorldLayer {
 public:
-	ChosenBoundsTree tree;
+	BoundsTree<Part> tree;
 	ColissionLayer* parent;
 
 	explicit WorldLayer(ColissionLayer* parent);

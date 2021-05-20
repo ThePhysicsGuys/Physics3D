@@ -122,9 +122,9 @@ static void renderBarConstraint(const ConstraintLayer* cl, const GlobalCFrame& c
 	Position barCenter = avg(globalA, globalB);
 	Vec3 bar;
 	if(globalA != globalB) {
-		bar = withLength(Vec3(globalB - globalA), bc->length);
+		bar = withLength(Vec3(globalB - globalA), bc->barLength);
 	} else {
-		bar = Vec3(bc->length, 0, 0);
+		bar = Vec3(bc->barLength, 0, 0);
 	}
 
 	renderBar(barCenter - bar/2, bar, constraintBarThickness, constraintBarColor);

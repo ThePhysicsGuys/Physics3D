@@ -139,7 +139,6 @@
   <ItemGroup>
     <ClCompile Include="basicWorld.cpp" />
     <ClCompile Include="benchmark.cpp" />
-    <ClCompile Include="boundsTreeBenchmark.cpp" />
     <ClCompile Include="complexObjectBenchmark.cpp" />
     <ClCompile Include="ecsBenchmark.cpp" />
     <ClCompile Include="getBoundsPerformance.cpp" />

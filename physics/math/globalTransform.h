@@ -1,7 +1,5 @@
 #pragma once
 
-
-
 #include "position.h"
 #include "linalg/mat.h"
 #include "transform.h"

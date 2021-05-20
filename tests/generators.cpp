@@ -193,8 +193,6 @@ std::vector<Part> generateMotorizedPhysicalParts() {
 	return parts;
 }
 
-using namespace OldBoundsTree;
-
 void generateLayerAssignment(std::vector<Part>& parts, WorldPrototype& world) {
 	std::vector<Part*> layerParts(world.layers.size(), nullptr);
 
@@ -212,54 +210,4 @@ void generateLayerAssignment(std::vector<Part>& parts, WorldPrototype& world) {
 	}
 }
 
-TreeNode generateTreeNode(int branchInhibition) {
-	if(rand() % branchInhibition == 0) {
-		// generate branching node
-		int branches = (rand() % (MAX_BRANCHES - 2) + 2); // generate >=2 branches
-		TreeNode result = TreeNode::withEmptySubNodes();
-		result.nodeCount = branches;
-		for(int i = 0; i < branches; i++) {
-			result[i] = generateTreeNode(branchInhibition + 1); // to generate reasonably sized trees but not too big
-		}
-		result.recalculateBoundsFromSubBounds();
-		return result;
-	} else {
-		// generate leaf node
-		BasicBounded* newBasicBounded = new BasicBounded{generateBounds()};
-		return TreeNode(newBasicBounded, newBasicBounded->getBounds());
-	}
-}
-void assignGroupHeads(TreeNode& curNode) {
-	if(curNode.isLeafNode() || rand() % 3 == 0) {
-		curNode.isGroupHead = true;
-	} else {
-		for(TreeNode& subNode : curNode) {
-			assignGroupHeads(subNode);
-		}
-	}
-}
-
-BoundsTree<BasicBounded> generateFilledBoundsTree() {
-	TreeNode rootNode = generateTreeNode(2);
-	assignGroupHeads(rootNode);
-	BoundsTree<BasicBounded> result;
-	result.rootNode = std::move(rootNode);
-	return result;
-}
-
-BoundsTree<BasicBounded> generateBoundsTree() {
-	if(rand() % 10 == 0) {
-		return BoundsTree<BasicBounded>();
-	} else {
-		return generateFilledBoundsTree();
-	}
-}
-
-void* getRandomLeafObject(const TreeNode& node) {
-	if(node.isLeafNode()) {
-		return node.object;
-	} else {
-		return getRandomLeafObject(node.subTrees[rand() % node.nodeCount]);
-	}
-}
 };

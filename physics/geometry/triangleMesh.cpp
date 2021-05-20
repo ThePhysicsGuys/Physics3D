@@ -1,6 +1,7 @@
 #include "triangleMesh.h"
 
 #include "../misc/validityHelper.h"
+#include "../../util/cpuid.h"
 
 #include <stddef.h>
 #include <stdlib.h>
@@ -503,8 +504,6 @@ BoundingBox TriangleMesh::getBoundsFallback(const Mat3f& referenceFrame) const {
 
 	return BoundingBox(xmin, ymin, zmin, xmax, ymax, zmax);
 }
-
-#include "../../util/cpuid.h"
 
 int TriangleMesh::furthestIndexInDirection(const Vec3f& direction) const {
 	if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::AVX | Util::CPUIDCheck::AVX2 | Util::CPUIDCheck::FMA)) {

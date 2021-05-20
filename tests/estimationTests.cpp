@@ -6,7 +6,7 @@
 #include "../physics/geometry/shape.h"
 #include "../physics/misc/shapeLibrary.h"
 
-namespace P3D {
+using namespace P3D;
 TEST_CASE_SLOW(volumeApproximation) {
 	Polyhedron s = Library::house;
 
@@ -111,4 +111,3 @@ TEST_CASE_SLOW(inertiaApproximation) {
 	double v = s.getVolume();
 	ASSERT_TOLERANT(totalInertia == s.getInertia(CFrame()), v * v * 0.001);
 }
-};

@@ -47,5 +47,5 @@ void saveIntersectionError(const Part& first, const Part& second, const char* re
 
 	file.close();
 }
-}
+};
 };

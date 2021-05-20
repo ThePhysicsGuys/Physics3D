@@ -1,7 +1,4 @@
 #pragma once
-namespace P3D {
-struct ComputationBuffers;
-};
 
 #include "../math/linalg/vec.h"
 #include "convexShapeBuilder.h"

@@ -11,11 +11,8 @@ struct RayIntersectBoundsFilter {
 	RayIntersectBoundsFilter() = default;
 	RayIntersectBoundsFilter(const Ray& ray) : ray(ray) {}
 
-	bool operator()(const P3D::OldBoundsTree::TreeNode& node) const {
-		return doRayAndBoundsIntersect(node.bounds, this->ray);
-	}
-	std::array<bool, P3D::NewBoundsTree::BRANCH_FACTOR> operator()(const P3D::NewBoundsTree::TreeTrunk& trunk, int trunkSize) const {
-		std::array<bool, P3D::NewBoundsTree::BRANCH_FACTOR> results;
+	std::array<bool, BRANCH_FACTOR> operator()(const TreeTrunk& trunk, int trunkSize) const {
+		std::array<bool, BRANCH_FACTOR> results;
 		for(int i = 0; i < trunkSize; i++) {
 			results[i] = doRayAndBoundsIntersect(trunk.getBoundsOfSubNode(i), this->ray);
 		}

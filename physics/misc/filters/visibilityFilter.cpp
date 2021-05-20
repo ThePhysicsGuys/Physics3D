@@ -4,7 +4,6 @@
 #include "../../math/linalg/trigonometry.h"
 
 namespace P3D {
-using namespace OldBoundsTree;
 VisibilityFilter::VisibilityFilter(const Position& origin, Vec3 normals[5], double maxDepth) :
 	origin(origin),
 	up(normals[0]), down(normals[1]), left(normals[2]), right(normals[3]), forward(normals[4]),
@@ -63,10 +62,6 @@ VisibilityFilter VisibilityFilter::forSubWindow(const Position& origin, const Ve
 		maxDepth,
 		left, right, down, up
 	);
-}
-
-bool VisibilityFilter::operator()(const TreeNode& node) const {
-	return operator()(node.bounds);
 }
 
 bool VisibilityFilter::operator()(const Position& point) const {

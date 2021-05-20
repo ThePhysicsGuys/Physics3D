@@ -62,51 +62,9 @@ static void renderBoundsForDepth(const Bounds& bounds, int depth) {
 	renderBounds(bounds.expanded((10 - depth) * 0.002), getCyclingColor(depth));
 }
 
-static void recursiveRenderColTree(const P3D::OldBoundsTree::TreeNode& node, int depth) {
-	if (node.isLeafNode()) {
-		//renderBounds(node.bounds, GUI::COLOR::AQUA);
-	} else {
-		for (const P3D::OldBoundsTree::TreeNode& node : node) {
-			recursiveRenderColTree(node, depth + 1);
-		}
-	}
-
-	renderBoundsForDepth(node.bounds, depth);
-}
-
-static bool recursiveColTreeForOneObject(const P3D::OldBoundsTree::TreeNode& node, const Part* part, const Bounds& bounds, int depth) {
-	if (node.isLeafNode()) {
-		if (node.object == part)
-			return true;
-		/*for (const BoundedPhysical& p : *node.physicals) {
-			if (p.object == physical) {
-				return true;
-			}
-		}*/
-	} else {
-		//if (!intersects(node.bounds, bounds)) return false;
-		for (const P3D::OldBoundsTree::TreeNode& subNode : node) {
-			if (recursiveColTreeForOneObject(subNode, part, bounds, depth+1)) {
-				renderBoundsForDepth(node.bounds, depth);
-				return true;
-			}
-		}
-	}
-	return false;
-}
-
-static void renderTree(const P3D::OldBoundsTree::BoundsTree<Part>& tree) {
-	recursiveRenderColTree(tree.rootNode, 0);
-}
-static void renderTreeForOneObject(const P3D::OldBoundsTree::BoundsTree<Part>& tree, const Part& part) {
-	recursiveColTreeForOneObject(tree.rootNode, &part, part.getBounds(), 0);
-}
-
-
-
-static void recursiveRenderColTree(const P3D::NewBoundsTree::TreeTrunk& curTrunk, int curTrunkSize, int depth) {
+static void recursiveRenderColTree(const P3D::TreeTrunk& curTrunk, int curTrunkSize, int depth) {
 	for(int i = 0; i < curTrunkSize; i++) {
-		const P3D::NewBoundsTree::TreeNodeRef& subNode = curTrunk.subNodes[i];
+		const P3D::TreeNodeRef& subNode = curTrunk.subNodes[i];
 
 		if(subNode.isTrunkNode()) {
 			recursiveRenderColTree(subNode.asTrunk(), subNode.getTrunkSize(), depth + 1);
@@ -116,9 +74,9 @@ static void recursiveRenderColTree(const P3D::NewBoundsTree::TreeTrunk& curTrunk
 	}
 }
 
-static bool recursiveColTreeForOneObject(const P3D::NewBoundsTree::TreeTrunk& curTrunk, int curTrunkSize, const Part* part, const Bounds& bounds, int depth) {
+static bool recursiveColTreeForOneObject(const P3D::TreeTrunk& curTrunk, int curTrunkSize, const Part* part, const Bounds& bounds, int depth) {
 	for(int i = 0; i < curTrunkSize; i++) {
-		const P3D::NewBoundsTree::TreeNodeRef& subNode = curTrunk.subNodes[i];
+		const P3D::TreeNodeRef& subNode = curTrunk.subNodes[i];
 
 		if(subNode.isTrunkNode()) {
 			if(recursiveColTreeForOneObject(subNode.asTrunk(), subNode.getTrunkSize(), part, bounds, depth + 1)) {
@@ -134,11 +92,11 @@ static bool recursiveColTreeForOneObject(const P3D::NewBoundsTree::TreeTrunk& cu
 	return false;
 }
 
-static void renderTree(const P3D::NewBoundsTree::BoundsTree<Part>& tree) {
+static void renderTree(const P3D::BoundsTree<Part>& tree) {
 	auto baseTrunk = tree.getPrototype().getBaseTrunk();
 	recursiveRenderColTree(baseTrunk.first, baseTrunk.second, 0);
 }
-static void renderTreeForOneObject(const P3D::NewBoundsTree::BoundsTree<Part>& tree, const Part& part) {
+static void renderTreeForOneObject(const P3D::BoundsTree<Part>& tree, const Part& part) {
 	auto baseTrunk = tree.getPrototype().getBaseTrunk();
 	recursiveColTreeForOneObject(baseTrunk.first, baseTrunk.second, &part, part.getBounds(), 0);
 }
@@ -169,7 +127,7 @@ void DebugLayer::onEvent(Engine::Registry64& registry, Engine::Event& event) {
 void DebugLayer::onRender(Engine::Registry64& registry) {
 	using namespace Graphics;
 	using namespace Graphics::Renderer;
-	using namespace Graphics::Debug;
+	using namespace Graphics::VisualDebug;
 	using namespace Graphics::AppDebug;
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
@@ -185,7 +143,7 @@ void DebugLayer::onRender(Engine::Registry64& registry) {
 
 	for (const MotorizedPhysical* physical : screen->world->iterPhysicals()) {
 		Position com = physical->getCenterOfMass();
-		pointLog.add(ColoredPoint(com, ::Debug::CENTER_OF_MASS));
+		pointLog.add(ColoredPoint(com, P3D::Debug::CENTER_OF_MASS));
 	}
 
 	screen->world->syncReadOnlyOperation([this, &vecLog]() {
@@ -195,7 +153,7 @@ void DebugLayer::onRender(Engine::Registry64& registry) {
 			Motion partMotion = screen->selectedPart->getMotion();
 			Polyhedron asPoly = screen->selectedPart->hitbox.asPolyhedron();
 			for (const Vec3f& corner : asPoly.iterVertices()) {
-				vecLog.add(ColoredVector(selectedCFrame.localToGlobal(corner), partMotion.getVelocityOfPoint(selectedCFrame.localToRelative(corner)), ::Debug::VELOCITY));
+				vecLog.add(ColoredVector(selectedCFrame.localToGlobal(corner), partMotion.getVelocityOfPoint(selectedCFrame.localToRelative(corner)), P3D::Debug::VELOCITY));
 			}
 
 			if (colissionSpheresMode == SphereColissionRenderMode::SELECTED) {

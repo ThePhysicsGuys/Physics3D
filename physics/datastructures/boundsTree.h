@@ -15,10 +15,7 @@
 #include <iostream>
 #include <stack>
 
-#include "boundsTreeOld.h"
-// USE_NEW_BOUNDSTREE defined in bounds.h
-
-namespace P3D::NewBoundsTree {
+namespace P3D {
 constexpr int BRANCH_FACTOR = 8;
 static_assert((BRANCH_FACTOR & (BRANCH_FACTOR - 1)) == 0, "Branch factor must be power of 2");
 
@@ -1044,14 +1041,3 @@ struct BasicBounded {
 };
 
 };
-
-namespace P3D {
-class Part;
-
-#ifdef USE_NEW_BOUNDSTREE
-using ChosenBoundsTree = P3D::NewBoundsTree::BoundsTree<Part>;
-#else
-using ChosenBoundsTree = P3D::OldBoundsTree::BoundsTree<Part>;
-#endif
-};
-

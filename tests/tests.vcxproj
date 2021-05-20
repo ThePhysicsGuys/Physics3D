@@ -21,7 +21,6 @@
   <ItemGroup>
     <ClCompile Include="boundsTree2Tests.cpp" />
     <ClCompile Include="constraintTests.cpp" />
-    <ClCompile Include="dataStructureTests.cpp" />
     <ClCompile Include="ecsTests.cpp" />
     <ClCompile Include="estimateMotion.cpp" />
     <ClCompile Include="estimationTests.cpp" />

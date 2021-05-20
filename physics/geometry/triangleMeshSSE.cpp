@@ -1,13 +1,8 @@
 #include "triangleMesh.h"
 
-// SSE2 implementation for TriangleMesh functions
-namespace P3D {
-inline  size_t getOffset(size_t size) {
-	return (size + 7) & 0xFFFFFFFFFFFFFFF8;
-}
-};
-
 #include <immintrin.h>
+
+// SSE2 implementation for TriangleMesh functions
 namespace P3D {
 #ifdef _MSC_VER
 #define GET_SSE_ELEM(reg, index) reg.m128_f32[index]
@@ -23,11 +18,13 @@ int mm_extractv_epi32(__m128i a, int b) {
 
 #define GET_SSE_ELEMi(reg, index) mm_extractv_epi32(reg, index)
 #endif
-};
 
-namespace P3D {
 #define SWAP_2x2 0b01001110
 #define SWAP_1x1 0b10110001
+
+inline static size_t getOffset(size_t size) {
+	return (size + 7) & 0xFFFFFFFFFFFFFFF8;
+}
 
 #ifdef _MSC_VER
 inline  uint32_t countZeros(uint32_t mask) {

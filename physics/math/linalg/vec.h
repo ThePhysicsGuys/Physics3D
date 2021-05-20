@@ -4,6 +4,7 @@
 #include <cmath>
 #include <assert.h>
 
+namespace P3D {
 template<typename T, size_t Size>
 struct Vector {
 	T data[Size];
@@ -111,11 +112,11 @@ struct Vector<T, 2> {
 	constexpr size_t size() const { return 2; }
 
 	constexpr T& operator[](size_t index) noexcept {
-		return data[index]; 
+		return data[index];
 	}
 
 	constexpr const T& operator[](size_t index) const noexcept {
-		return data[index]; 
+		return data[index];
 	}
 
 	static constexpr Vector<T, 2> full(T v) noexcept {
@@ -141,7 +142,7 @@ struct Vector<T, 3> {
 
 	constexpr Vector() noexcept : data{0, 0, 0} {}
 	constexpr Vector(T x, T y, T z) noexcept : data{x, y, z} {};
-	
+
 	template<typename OtherT>
 	constexpr operator Vector<OtherT, 3>() const noexcept {
 		return Vector<OtherT, 3>(static_cast<OtherT>(this->data[0]), static_cast<OtherT>(this->data[1]), static_cast<OtherT>(this->data[2]));
@@ -150,7 +151,7 @@ struct Vector<T, 3> {
 	constexpr size_t size() const { return 3; }
 
 	constexpr T& operator[](size_t index) noexcept {
-		return data[index]; 
+		return data[index];
 	}
 
 	constexpr const T& operator[](size_t index) const noexcept {
@@ -160,9 +161,9 @@ struct Vector<T, 3> {
 	static constexpr Vector<T, 3> full(T v) noexcept {
 		return Vector<T, 3>(v, v, v);
 	}
-	
+
 	template<size_t SubSize>
-		constexpr Vector<T, SubSize> getSubVector(size_t startingAt = 0) const noexcept {
+	constexpr Vector<T, SubSize> getSubVector(size_t startingAt = 0) const noexcept {
 		Vector<T, SubSize> result;
 		for(size_t i = 0; i < SubSize; i++) {
 			result[i] = this->data[i + startingAt];
@@ -179,7 +180,7 @@ struct Vector<T, 4> {
 	};
 	constexpr Vector() noexcept : data{0, 0, 0, 0} {}
 	constexpr Vector(T x, T y, T z, T w) noexcept : data{x, y, z, w} {}
-	
+
 	template<typename OtherT>
 	constexpr operator Vector<OtherT, 4>() const noexcept {
 		return Vector<OtherT, 4>(static_cast<OtherT>(this->data[0]), static_cast<OtherT>(this->data[1]), static_cast<OtherT>(this->data[2]), static_cast<OtherT>(this->data[3]));
@@ -188,11 +189,11 @@ struct Vector<T, 4> {
 	constexpr size_t size() const { return 4; }
 
 	constexpr T& operator[](size_t index) noexcept {
-		return data[index]; 
+		return data[index];
 	}
 
 	constexpr const T& operator[](size_t index) const noexcept {
-		return data[index]; 
+		return data[index];
 	}
 
 	static constexpr Vector<T, 4> full(T v) noexcept {
@@ -207,7 +208,7 @@ struct Vector<T, 4> {
 		}
 		return result;
 	}
-}; 
+};
 
 typedef Vector<double, 1>		Vec1;
 typedef Vector<float, 1>		Vec1f;
@@ -241,9 +242,9 @@ typedef Vector<int, 6>			Vec6i;
 
 
 template<typename T1, typename T2, size_t Size>
-constexpr auto operator*(const Vector<T1, Size>& a, const Vector<T2, Size>& b) noexcept -> decltype(a[0]*b[0]+a[1]*b[1]) {
+constexpr auto operator*(const Vector<T1, Size>& a, const Vector<T2, Size>& b) noexcept -> decltype(a[0] * b[0] + a[1] * b[1]) {
 	decltype(a[0] * b[0] + a[1] * b[1]) result = a[0] * b[0];
-	for (size_t i = 1; i < Size; i++) {
+	for(size_t i = 1; i < Size; i++) {
 		result += a[i] * b[i];
 	}
 	return result;
@@ -262,7 +263,7 @@ constexpr auto dot(const Vector<T, Size>& vec) noexcept -> decltype(vec[0] * vec
 template<typename T1, typename T2, size_t Size>
 constexpr auto operator+(const Vector<T1, Size>& a, const Vector<T2, Size>& b) noexcept -> Vector<decltype(a[0] + b[0]), Size> {
 	Vector<decltype(a[0] + b[0]), Size> result;
-	for (size_t i = 0; i < Size; i++) {
+	for(size_t i = 0; i < Size; i++) {
 		result[i] = a[i] + b[i];
 	}
 	return result;
@@ -271,7 +272,7 @@ constexpr auto operator+(const Vector<T1, Size>& a, const Vector<T2, Size>& b) n
 template<typename T1, typename T2, size_t Size>
 constexpr auto operator-(const Vector<T1, Size>& a, const Vector<T2, Size>& b) noexcept -> Vector<decltype(a[0] - b[0]), Size> {
 	Vector<decltype(a[0] - b[0]), Size> result;
-	for (size_t i = 0; i < Size; i++) {
+	for(size_t i = 0; i < Size; i++) {
 		result[i] = a[i] - b[i];
 	}
 	return result;
@@ -280,16 +281,16 @@ constexpr auto operator-(const Vector<T1, Size>& a, const Vector<T2, Size>& b) n
 template<typename T1, typename T2, size_t Size>
 constexpr auto operator*(const Vector<T1, Size>& vec, const T2& factor) noexcept -> Vector<decltype(vec[0] * factor), Size> {
 	Vector<decltype(vec[0] * factor), Size> result;
-	for (size_t i = 0; i < Size; i++) {
+	for(size_t i = 0; i < Size; i++) {
 		result[i] = vec[i] * factor;
 	}
 	return result;
 }
 
 template<typename T1, typename T2, size_t Size>
-constexpr auto operator*(const T1& factor, const Vector<T2, Size>& vec) noexcept -> Vector<decltype(factor * vec[0]), Size> {
-	Vector<decltype(factor * vec[0]), Size> result;
-	for (size_t i = 0; i < Size; i++) {
+constexpr auto operator*(const T1& factor, const Vector<T2, Size>& vec) noexcept -> Vector<decltype(factor* vec[0]), Size> {
+	Vector<decltype(factor* vec[0]), Size> result;
+	for(size_t i = 0; i < Size; i++) {
 		result[i] = factor * vec[i];
 	}
 	return result;
@@ -298,7 +299,7 @@ constexpr auto operator*(const T1& factor, const Vector<T2, Size>& vec) noexcept
 template<typename T1, typename T2, size_t Size>
 constexpr auto operator/(const Vector<T1, Size>& vec, const T2& factor) noexcept -> Vector<decltype(vec[0] / factor), Size> {
 	Vector<decltype(vec[0] / factor), Size> result;
-	for (size_t i = 0; i < Size; i++) {
+	for(size_t i = 0; i < Size; i++) {
 		result[i] = vec[i] / factor;
 	}
 	return result;
@@ -307,7 +308,7 @@ constexpr auto operator/(const Vector<T1, Size>& vec, const T2& factor) noexcept
 template<typename T, size_t Size>
 constexpr Vector<T, Size> operator-(const Vector<T, Size>& vec) noexcept {
 	Vector<T, Size> result;
-	for (size_t i = 0; i < Size; i++) {
+	for(size_t i = 0; i < Size; i++) {
 		result[i] = -vec[i];
 	}
 	return result;
@@ -315,7 +316,7 @@ constexpr Vector<T, Size> operator-(const Vector<T, Size>& vec) noexcept {
 
 template<typename T1, typename T2, size_t Size>
 constexpr Vector<T1, Size>& operator+=(Vector<T1, Size>& vec, const Vector<T2, Size>& other) noexcept {
-	for (size_t i = 0; i < Size; i++) {
+	for(size_t i = 0; i < Size; i++) {
 		vec[i] += other[i];
 	}
 	return vec;
@@ -323,7 +324,7 @@ constexpr Vector<T1, Size>& operator+=(Vector<T1, Size>& vec, const Vector<T2, S
 
 template<typename T1, typename T2, size_t Size>
 constexpr Vector<T1, Size>& operator-=(Vector<T1, Size>& vec, const Vector<T2, Size>& other) noexcept {
-	for (size_t i = 0; i < Size; i++) {
+	for(size_t i = 0; i < Size; i++) {
 		vec[i] -= other[i];
 	}
 	return vec;
@@ -331,7 +332,7 @@ constexpr Vector<T1, Size>& operator-=(Vector<T1, Size>& vec, const Vector<T2, S
 
 template<typename T1, typename T2, size_t Size>
 constexpr Vector<T1, Size>& operator*=(Vector<T1, Size>& vec, const T2& factor) noexcept {
-	for (size_t i = 0; i < Size; i++) {
+	for(size_t i = 0; i < Size; i++) {
 		vec[i] *= factor;
 	}
 	return vec;
@@ -339,7 +340,7 @@ constexpr Vector<T1, Size>& operator*=(Vector<T1, Size>& vec, const T2& factor) 
 
 template<typename T1, typename T2, size_t Size>
 constexpr Vector<T1, Size>& operator/=(Vector<T1, Size>& vec, const T2& factor) noexcept {
-	for (size_t i = 0; i < Size; i++) {
+	for(size_t i = 0; i < Size; i++) {
 		vec[i] /= factor;
 	}
 	return vec;
@@ -409,19 +410,19 @@ constexpr Vector<T, Size + 1> join(const T& extraValue, const Vector<T, Size>& v
 	Vector<T, Size + 1> result;
 	result[0] = extraValue;
 	for(size_t i = 0; i < Size; i++) {
-		result[i+1] = vec[i];
+		result[i + 1] = vec[i];
 	}
 	return result;
 }
 template<typename T, size_t Size>
-constexpr Vector<T, Size - 1> withoutIndex(const Vector<T, Size> & vec, size_t indexToRemove) {
+constexpr Vector<T, Size - 1> withoutIndex(const Vector<T, Size>& vec, size_t indexToRemove) {
 	assert(indexToRemove < Size);
 	Vector<T, Size - 1> result;
 	for(size_t i = 0; i < indexToRemove; i++) {
 		result[i] = vec[i];
 	}
-	for(size_t i = indexToRemove+1; i < Size; i++) {
-		result[i-1] = vec[i];
+	for(size_t i = indexToRemove + 1; i < Size; i++) {
+		result[i - 1] = vec[i];
 	}
 	return result;
 }
@@ -432,7 +433,7 @@ template<typename T, size_t Size>
 constexpr T lengthSquared(const Vector<T, Size>& vec) noexcept {
 	T sum = vec[0] * vec[0];
 
-	for (size_t i = 1; i < Size; i++) {
+	for(size_t i = 1; i < Size; i++) {
 		sum += vec[i] * vec[i];
 	}
 	return sum;
@@ -455,7 +456,7 @@ constexpr bool isLongerThan(const Vector<T1, Size>& vec, const T2& length) noexc
 
 template<typename T1, typename T2, size_t Size>
 constexpr bool isShorterThan(const Vector<T1, Size>& vec, const T2& length) noexcept {
-	return lengthSquared(vec) < length* length;
+	return lengthSquared(vec) < length * length;
 }
 
 // vec
@@ -549,7 +550,7 @@ constexpr T pointToLineDistanceSquared(const Vector<T, Size>& line, const Vector
 template<typename T, size_t Size>
 constexpr Vector<T, Size> elementWiseMul(const Vector<T, Size>& first, const Vector<T, Size>& second) noexcept {
 	Vector<T, Size> result;
-	for (size_t i = 0; i < Size; i++)
+	for(size_t i = 0; i < Size; i++)
 		result[i] = first[i] * second[i];
 	return result;
 }
@@ -557,7 +558,7 @@ constexpr Vector<T, Size> elementWiseMul(const Vector<T, Size>& first, const Vec
 template<typename T, size_t Size>
 constexpr Vector<T, Size> elementWiseSquare(const Vector<T, Size>& vec) noexcept {
 	Vector<T, Size> result;
-	for (size_t i = 0; i < Size; i++)
+	for(size_t i = 0; i < Size; i++)
 		result[i] = vec[i] * vec[i];
 	return result;
 }
@@ -565,7 +566,7 @@ constexpr Vector<T, Size> elementWiseSquare(const Vector<T, Size>& vec) noexcept
 template<typename T, size_t Size>
 constexpr Vector<T, Size> elementWiseCube(const Vector<T, Size>& vec) noexcept {
 	Vector<T, Size> result;
-	for (size_t i = 0; i < Size; i++)
+	for(size_t i = 0; i < Size; i++)
 		result[i] = vec[i] * vec[i] * vec[i];
 	return result;
 }
@@ -581,16 +582,16 @@ constexpr Vector<T, 3> mulOppositesBiDir(const Vector<T, 3>& a, const Vector<T, 
 		a[1] * b[2] + a[2] * b[1],
 		a[2] * b[0] + a[0] * b[2],
 		a[0] * b[1] + a[1] * b[0]
-	);
+		);
 }
 // computes (vec.y * vec.z, vec.z * vec.x, vec.x * vec.y)
 template<typename T>
-constexpr Vector<T, 3> mulSelfOpposites(const Vector<T, 3> & vec) noexcept {
+constexpr Vector<T, 3> mulSelfOpposites(const Vector<T, 3>& vec) noexcept {
 	return Vector<T, 3>(vec[1] * vec[2], vec[2] * vec[0], vec[0] * vec[1]);
 }
 // computes (vec.y + vec.z, vec.z + vec.x, vec.x + vec.y)
 template<typename T>
-constexpr Vector<T, 3> addSelfOpposites(const Vector<T, 3> & vec) noexcept {
+constexpr Vector<T, 3> addSelfOpposites(const Vector<T, 3>& vec) noexcept {
 	return Vector<T, 3>(vec[1] + vec[2], vec[2] + vec[0], vec[0] + vec[1]);
 }
 
@@ -650,7 +651,7 @@ constexpr T sumElements(const Vector<T, Size>& vec) noexcept {
 }
 
 template<typename T, size_t Size>
-constexpr auto angleBetween(const Vector<T, Size>& first, const Vector<T, Size>& second) noexcept -> decltype(acos(normalize(first) * normalize(second))) {
+constexpr auto angleBetween(const Vector<T, Size>& first, const Vector<T, Size>& second) noexcept -> decltype(acos(normalize(first)* normalize(second))) {
 	return acos(normalize(first) * normalize(second));
 }
 
@@ -658,4 +659,4 @@ template<typename T, size_t Size>
 constexpr Vector<T, Size> bisect(const Vector<T, Size>& first, const Vector<T, Size>& second) noexcept {
 	return first * length(second) + second * length(first);
 }
-
+};

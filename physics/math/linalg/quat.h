@@ -4,6 +4,7 @@
 #include <cmath>
 #include "vec.h"
 
+namespace P3D {
 template<typename T>
 struct Quaternion {
 
@@ -160,7 +161,7 @@ Quaternion<T> conj(const Quaternion<T>& quat) {
 
 template<typename T>
 T lengthSquared(const Quaternion<T>& q) {
-	return q.w*q.w + q.i*q.i + q.j*q.j + q.k*q.k;
+	return q.w * q.w + q.i * q.i + q.j * q.j + q.k * q.k;
 }
 
 template<typename T>
@@ -182,3 +183,4 @@ template<typename T>
 Quaternion<T> inverse(const Quaternion<T>& quat) {
 	return ~quat;
 }
+};

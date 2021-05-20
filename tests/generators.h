@@ -150,14 +150,6 @@ HardConstraint* generateHardConstraint();
 void generateAttachment(Part& first, Part& second);
 std::vector<Part> generateMotorizedPhysicalParts();
 void generateLayerAssignment(std::vector<Part>& parts, WorldPrototype& world);
-P3D::OldBoundsTree::TreeNode generateTreeNode(int branchInhibition);
-P3D::OldBoundsTree::BoundsTree<P3D::OldBoundsTree::BasicBounded> generateFilledBoundsTree();
-P3D::OldBoundsTree::BoundsTree<P3D::OldBoundsTree::BasicBounded> generateBoundsTree();
-void* getRandomLeafObject(const P3D::OldBoundsTree::TreeNode& node);
-template<typename Boundable>
-Boundable* getRandomObjectFromTree(const P3D::OldBoundsTree::BoundsTree<Boundable>& tree) {
-	return static_cast<Boundable*>(getRandomLeafObject(tree.rootNode));
-}
 template<typename Collection>
 auto oneOf(const Collection& collection) -> decltype(collection[0]) {
 	return collection[generateSize_t(collection.size())];

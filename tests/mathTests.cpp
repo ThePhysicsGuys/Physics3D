@@ -19,7 +19,7 @@
 
 #include <algorithm>
 
-namespace P3D {
+using namespace P3D;
 #define ASSERT(condition) ASSERT_TOLERANT(condition, 0.00000001)
 
 #define DELTA_T 0.00001
@@ -445,4 +445,3 @@ TEST_CASE(testFixCastToInt) {
 		ASSERT_STRICT(static_cast<int64_t>(f) == static_cast<int64_t>(d));
 	}
 }
-};

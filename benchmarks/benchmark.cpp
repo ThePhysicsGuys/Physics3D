@@ -9,7 +9,6 @@
 #include "../util/terminalColor.h"
 #include "../util/parseCPUIDArgs.h"
 
-namespace P3D {
 std::vector<Benchmark*>* knownBenchmarks = nullptr;
 
 Benchmark::Benchmark(const char* name) : name(name) {
@@ -118,4 +117,3 @@ int main(int argc, const char** args) {
 
 	return 0;
 }
-};

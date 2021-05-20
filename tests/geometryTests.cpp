@@ -19,7 +19,7 @@
 
 #include "../util/cpuid.h"
 
-namespace P3D {
+using namespace P3D;
 #define ASSERT(condition) ASSERT_TOLERANT(condition, 0.00001)
 
 template<typename T, typename Tol, size_t Size>
@@ -259,4 +259,3 @@ TEST_CASE(testTriangleMeshOptimizedFurthestInDirection) {
 		}
 	}
 }
-};

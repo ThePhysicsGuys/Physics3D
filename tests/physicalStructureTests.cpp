@@ -12,7 +12,7 @@
 #include "../physics/physical.h"
 #include "../physics/hardconstraints/fixedConstraint.h"
 
-namespace P3D {
+using namespace P3D;
 #define ASSERT(x) ASSERT_STRICT(x)
 
 static CFrame cf() {
@@ -238,4 +238,3 @@ TEST_CASE(testAttachConnectedPhysicalToConnectedPhysical) {
 		delete p;
 	}
 }
-};

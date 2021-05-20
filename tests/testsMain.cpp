@@ -15,7 +15,6 @@
 #include "../util/parseCPUIDArgs.h"
 #include "../util/cmdParser.h"
 
-namespace P3D {
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
 static const char sepChar = '\\';
 #else
@@ -339,4 +338,3 @@ TestAdder::TestAdder(const char* file, const char* name, void(*f)(), TestType is
 
 	tests->push_back(Test(file, name, f, isSlow));
 }
-};

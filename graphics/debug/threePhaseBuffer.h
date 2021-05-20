@@ -4,6 +4,7 @@
 
 #include <mutex>
 
+namespace P3D {
 template<typename T>
 class ThreePhaseBuffer {
 	AddableBuffer<T> writeBuf;
@@ -40,7 +41,7 @@ public:
 	inline AddableBuffer<T>& pullOutputBuffer() {
 		std::lock_guard<std::mutex> lg(swapLock);
 
-		if (newDataAvailable) {
+		if(newDataAvailable) {
 			std::swap(static_cast<BufferWithCapacity<T>&>(readyBuf), static_cast<BufferWithCapacity<T>&>(outputBuf));
 
 			newDataAvailable = false;
@@ -50,4 +51,5 @@ public:
 
 		return outputBuf;
 	}
+};
 };

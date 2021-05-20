@@ -154,7 +154,6 @@
     <ClCompile Include="hardconstraints\hardConstraint.cpp" />
     <ClCompile Include="hardconstraints\hardPhysicalConnection.cpp" />
     <ClCompile Include="hardconstraints\motorConstraint.cpp" />
-    <ClCompile Include="datastructures\boundsTreeOld.cpp" />
     <ClCompile Include="misc\debug.cpp" />
     <ClCompile Include="geometry\computationBuffer.cpp" />
     <ClCompile Include="geometry\convexShapeBuilder.cpp" />
@@ -166,7 +165,6 @@
     <ClCompile Include="geometry\shapeBuilder.cpp" />
     <ClCompile Include="geometry\shapeClass.cpp" />
     <ClCompile Include="math\linalg\eigen.cpp" />
-    <ClCompile Include="math\linalg\largeMatrix.cpp" />
     <ClCompile Include="math\linalg\trigonometry.cpp" />
     <ClCompile Include="misc\filters\visibilityFilter.cpp" />
     <ClCompile Include="misc\shapeLibrary.cpp" />
@@ -203,7 +201,6 @@
     <ClInclude Include="hardconstraints\hardPhysicalConnection.h" />
     <ClInclude Include="hardconstraints\motorConstraint.h" />
     <ClInclude Include="datastructures\alignedPtr.h" />
-    <ClInclude Include="datastructures\boundsTreeOld.h" />
     <ClInclude Include="datastructures\buffers.h" />
     <ClInclude Include="datastructures\iteratorEnd.h" />
     <ClInclude Include="datastructures\iteratorFactory.h" />

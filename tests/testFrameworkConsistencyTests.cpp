@@ -10,7 +10,7 @@
 #include "../physics/misc/toString.h"
 #include "../physics/math/taylorExpansion.h"
 
-namespace P3D {
+using namespace P3D;
 #define DELTA_T 0.005
 
 TEST_CASE(testEstimateDerivativesOfComputeOverTime) {
@@ -20,4 +20,3 @@ TEST_CASE(testEstimateDerivativesOfComputeOverTime) {
 	FullTaylorExpansion<double, 5> endTaylor = estimateDerivatives(points, DELTA_T);
 	ASSERT_TOLERANT(startTaylor == endTaylor, 0.01);
 }
-};

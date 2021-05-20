@@ -12,7 +12,7 @@
 #include "../physics/hardconstraints/motorConstraint.h"
 #include "../physics/hardconstraints/sinusoidalPistonConstraint.h"
 
-namespace P3D {
+using namespace P3D;
 #define REMAINS_CONSTANT(v) REMAINS_CONSTANT_TOLERANT(v, 0.005)
 #define ASSERT(v) ASSERT_TOLERANT(v, 0.005)
 
@@ -264,4 +264,3 @@ TEST_CASE(testSimulateRelativeToRelativeMotion) {
 	ASSERT(estimatedMotion == calculatedMotion.relativeMotion);
 	ASSERT(p1 == calculatedMotion.locationOfRelativeMotion);
 }
-};

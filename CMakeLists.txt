@@ -67,7 +67,6 @@ add_library(physics STATIC
   physics/inertia.cpp
 
   physics/math/linalg/eigen.cpp
-  physics/math/linalg/largeMatrix.cpp
   physics/math/linalg/trigonometry.cpp
 
   physics/geometry/computationBuffer.cpp
@@ -86,7 +85,6 @@ add_library(physics STATIC
   physics/geometry/builtinShapeClasses.cpp
 
   physics/datastructures/aligned_alloc.cpp
-  physics/datastructures/boundsTreeOld.cpp
   physics/datastructures/boundsTree.cpp
 
   physics/hardconstraints/fixedConstraint.cpp
@@ -229,7 +227,6 @@ add_executable(tests
   tests/estimationTests.cpp
   tests/constraintTests.cpp
   tests/jointTests.cpp
-  tests/dataStructureTests.cpp
   tests/boundsTree2Tests.cpp
   tests/guiTests.cpp
   tests/indexedShapeTests.cpp

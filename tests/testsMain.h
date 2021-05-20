@@ -1,9 +1,9 @@
 #pragma once
 
 #include "compare.h"
+#include "../physics/misc/toString.h"
 #include <sstream>
 
-namespace P3D {
 class TestInterface {
 	size_t assertCount = 0;
 public:
@@ -44,16 +44,6 @@ extern thread_local TestInterface __testInterface;
 extern const bool reffableTrue;
 
 // Testing utils:
-
-template<typename T, std::size_t Size>
-std::ostream& operator<<(std::ostream& ostream, const std::array<T, Size>& arr) {
-	ostream << '{' << arr[0];
-	for(std::size_t i = 1; i < Size; i++) {
-		ostream << ", " << arr[i];
-	}
-	ostream << '}';
-	return ostream;
-}
 
 template<typename R, typename P>
 const char* errMsg(const R& first, const P& second, const char* sep) {
@@ -166,4 +156,3 @@ struct TolerantAssertBuilder {
 	if(ISFILLED_NAME) ASSERT_TOLERANT(PREV_VAL_NAME == (value), tolerance);\
 	ISFILLED_NAME = true;\
 }while(false)
-};
