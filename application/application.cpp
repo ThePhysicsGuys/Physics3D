@@ -57,20 +57,20 @@ TickerThread physicsThread;
 PlayerWorld world(1 / TICKS_PER_SECOND);
 Screen screen;
 
-void init(const Util::ParsedArgs& cmdArgs);
+void init(const ::Util::ParsedArgs& cmdArgs);
 void setupPhysics();
-void setupWorld(const Util::ParsedArgs& cmdArgs);
+void setupWorld(const ::Util::ParsedArgs& cmdArgs);
 void setupGL();
 void setupDebug();
 
 void loadFile(const char* file);
 
-void init(const Util::ParsedArgs& cmdArgs) {
+void init(const ::Util::ParsedArgs& cmdArgs) {
 	auto start = high_resolution_clock::now();
 
 	Log::init("latest.log");
 
-	Log::info(Util::printAndParseCPUIDArgs(cmdArgs));
+	Log::info(::Util::printAndParseCPUIDArgs(cmdArgs));
 	bool quickBoot = cmdArgs.hasFlag("quickBoot");
 
 	setupGL();
@@ -130,7 +130,7 @@ void setupGL() {
 	}
 }
 
-void setupWorld(const Util::ParsedArgs& cmdArgs) {
+void setupWorld(const ::Util::ParsedArgs& cmdArgs) {
 	Log::info("Initializing world");
 
 	world.addExternalForce(new DirectionalGravity(Vec3(0, -10.0, 0.0)));
@@ -255,11 +255,11 @@ void setupDebug() {
 void loadFile(const char* file) {
 	Log::info("Loading file %s", file);
 	auto startTime = high_resolution_clock::now();
-	if(Util::endsWith(file, ".parts")) {
+	if(::Util::endsWith(file, ".parts")) {
 		WorldImportExport::loadLoosePartsIntoWorld(file, world);
-	} else if(Util::endsWith(file, ".nativeParts")) {
+	} else if(::Util::endsWith(file, ".nativeParts")) {
 		WorldImportExport::loadNativePartsIntoWorld(file, world);
-	} else if(Util::endsWith(file, ".world")) {
+	} else if(::Util::endsWith(file, ".world")) {
 		WorldImportExport::loadWorld(file, world);
 	}
 	nanoseconds deltaTime = high_resolution_clock::now() - startTime;
