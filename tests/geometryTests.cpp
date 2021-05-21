@@ -17,7 +17,7 @@
 #include "testValues.h"
 #include "generators.h"
 
-#include "../util/cpuid.h"
+#include "../physics/cpuid.h"
 
 using namespace P3D;
 #define ASSERT(condition) ASSERT_TOLERANT(condition, 0.00001)

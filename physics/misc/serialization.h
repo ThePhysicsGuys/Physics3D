@@ -27,9 +27,9 @@
 
 #include "../externalforces/gravityForce.h"
 
-#include "../../util/serializeBasicTypes.h"
-#include "../../util/sharedObjectSerializer.h"
-#include "../../util/dynamicSerialize.h"
+#include "../serializeBasicTypes.h"
+#include "../sharedObjectSerializer.h"
+#include "../dynamicSerialize.h"
 
 namespace P3D {
 void serializePolyhedron(const Polyhedron& poly, std::ostream& ostream);

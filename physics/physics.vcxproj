@@ -130,8 +130,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="constraints\barConstraint.cpp" />
+    <ClCompile Include="cpuid.cpp" />
     <ClCompile Include="datastructures\aligned_alloc.cpp" />
     <ClCompile Include="datastructures\boundsTree.cpp" />
+    <ClCompile Include="serializeBasicTypes.cpp" />
     <ClCompile Include="softlinks\alignmentLink.cpp" />
     <ClCompile Include="softlinks\elasticLink.cpp" />
     <ClCompile Include="geometry\triangleMeshAVX.cpp">
@@ -183,8 +185,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="constraints\barConstraint.h" />
+    <ClInclude Include="cpuid.h" />
     <ClInclude Include="datastructures\aligned_alloc.h" />
     <ClInclude Include="datastructures\boundsTree.h" />
+    <ClInclude Include="dynamicSerialize.h" />
+    <ClInclude Include="serializeBasicTypes.h" />
+    <ClInclude Include="sharedObjectSerializer.h" />
     <ClInclude Include="softlinks\alignmentLink.h" />
     <ClInclude Include="catchable_assert.h" />
     <ClInclude Include="colissionBuffer.h" />

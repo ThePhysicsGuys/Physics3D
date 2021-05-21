@@ -2,6 +2,7 @@
 
 #include "serializeBasicTypes.h"
 
+namespace P3D {
 typedef uint32_t ClassIDType;
 template<typename BaseType, typename... ArgsToInstantiate>
 class DynamicSerializerRegistry {
@@ -78,12 +79,12 @@ public:
 			throw SerializationException("This class is not in the serialization registry!");
 		}
 		const DynamicSerializer* serializer = (*location).second;
-		::serialize<ClassIDType>(serializer->serializerID, ostream);
+		serializeBasicTypes<ClassIDType>(serializer->serializerID, ostream);
 		serializer->serialize(object, ostream);
 	}
 
 	BaseType* deserialize(std::istream& istream, ArgsToInstantiate... args) const {
-		ClassIDType serialID = ::deserialize<ClassIDType>(istream);
+		ClassIDType serialID = deserializeBasicTypes<ClassIDType>(istream);
 		auto location = deserializeRegistry.find(serialID);
 		if(location == deserializeRegistry.end()) {
 			throw SerializationException("Invalid dynamic class ID!");
@@ -91,4 +92,5 @@ public:
 		const DynamicSerializer* deserializer = (*location).second;
 		return deserializer->deserialize(istream, args...);
 	}
+};
 };

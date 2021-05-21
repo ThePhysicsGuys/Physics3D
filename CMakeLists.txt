@@ -41,12 +41,11 @@ add_library(util STATIC
   util/terminalColor.cpp
   util/log.cpp
   util/properties.cpp
-  util/serializeBasicTypes.cpp
   util/stringUtil.cpp
   util/fileUtils.cpp
   util/valueCycle.cpp
   util/systemVariables.cpp
-  util/cpuid.cpp
+  
 
   util/resource/resource.cpp
   util/resource/resourceLoader.cpp
@@ -65,6 +64,8 @@ add_library(physics STATIC
   physics/world.cpp
   physics/worldPhysics.cpp
   physics/inertia.cpp
+  physics/cpuid.cpp
+  physics/serializeBasicTypes.cpp
 
   physics/math/linalg/eigen.cpp
   physics/math/linalg/trigonometry.cpp

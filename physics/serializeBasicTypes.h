@@ -5,6 +5,7 @@
 #include <string>
 #include <type_traits>
 
+namespace P3D {
 class SerializationException : public std::exception {
 	std::string message;
 public:
@@ -16,16 +17,16 @@ public:
 	}
 };
 
-void serialize(const char* data, size_t size, std::ostream& ostream);
-void deserialize(char* buf, size_t size, std::istream& istream);
+void serializeBasicTypes(const char* data, size_t size, std::ostream& ostream);
+void deserializeBasicTypes(char* buf, size_t size, std::istream& istream);
 
 /*
 	Trivial value serialization
 	Included are: char, int, float, double, long, Fix, Vector, Matrix, SymmetricMatrix, DiagonalMatrix, CFrame, Transform, GlobalCFrame, GlobalTransform, Bounds, GlobalBounds
 */
 template<typename T, std::enable_if_t<std::is_trivially_copyable<T>::value, int> = 0>
-void serialize(const T& i, std::ostream& ostream) {
-	serialize(reinterpret_cast<const char*>(&i), sizeof(T), ostream);
+void serializeBasicTypes(const T& i, std::ostream& ostream) {
+	serializeBasicTypes(reinterpret_cast<const char*>(&i), sizeof(T), ostream);
 }
 
 /*
@@ -33,24 +34,24 @@ void serialize(const T& i, std::ostream& ostream) {
 	Included are: char, int, float, double, long, Fix, Vector, Matrix, SymmetricMatrix, DiagonalMatrix, CFrame, Transform, GlobalCFrame, GlobalTransform, Bounds, GlobalBounds
 */
 template<typename T, std::enable_if_t<std::is_trivially_copyable<T>::value, int> = 0>
-T deserialize(std::istream& istream) {
+T deserializeBasicTypes(std::istream& istream) {
 	union {
 		char buf[sizeof(T)];
 		T value;
 	} un{};
-	deserialize(un.buf, sizeof(T), istream);
+	deserializeBasicTypes(un.buf, sizeof(T), istream);
 	return un.value;
 }
 
 template<>
-void serialize<char>(const char& c, std::ostream& ostream);
+void serializeBasicTypes<char>(const char& c, std::ostream& ostream);
 template<>
-char deserialize<char>(std::istream& istream);
+char deserializeBasicTypes<char>(std::istream& istream);
 
 template<>
-void serialize<bool>(const bool& b, std::ostream& ostream);
+void serializeBasicTypes<bool>(const bool& b, std::ostream& ostream);
 template<>
-bool deserialize<bool>(std::istream& istream);
+bool deserializeBasicTypes<bool>(std::istream& istream);
 
 void serializeString(const std::string& str, std::ostream& ostream);
 std::string deserializeString(std::istream& istream);
@@ -58,14 +59,14 @@ std::string deserializeString(std::istream& istream);
 template<typename T>
 void serializeArray(const T* data, size_t size, std::ostream& ostream) {
 	for(size_t i = 0; i < size; i++) {
-		serialize<T>(data[i], ostream);
+		serializeBasicTypes<T>(data[i], ostream);
 	}
 }
 
 template<typename T>
 void deserializeArray(T* buf, size_t size, std::istream& istream) {
 	for(size_t i = 0; i < size; i++) {
-		buf[i] = deserialize<T>(istream);
+		buf[i] = deserializeBasicTypes<T>(istream);
 	}
 }
-
+};

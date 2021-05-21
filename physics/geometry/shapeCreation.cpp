@@ -4,7 +4,7 @@
 #include "polyhedron.h"
 #include "builtinShapeClasses.h"
 
-#include "../../util/cpuid.h"
+#include "../cpuid.h"
 
 namespace P3D {
 Shape sphereShape(double radius) {

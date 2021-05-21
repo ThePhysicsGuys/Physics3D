@@ -1,15 +1,12 @@
 #include "cpuid.h"
 
-
-
 #ifdef _WIN32
 #include <intrin.h>
 #endif
 
 #include <stdint.h>
 
-namespace Util {
-
+namespace P3D::Util {
 class CPUID {
 	uint32_t regs[4];
 

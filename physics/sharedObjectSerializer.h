@@ -7,6 +7,7 @@
 
 #include "serializeBasicTypes.h"
 
+namespace P3D {
 template<typename T, typename SerializeID = uint32_t>
 class SharedObjectSerializer {
 	SerializeID curPredefinedID = std::numeric_limits<SerializeID>::max();
@@ -41,7 +42,7 @@ public:
 	// The given deserializer must be of the form 'serialize(T, std::ostream&)'. The object may be passed by ref or const ref
 	template<typename Serializer>
 	void serializeRegistry(Serializer serialize, std::ostream& ostream) {
-		::serialize<SerializeID>(static_cast<SerializeID>(itemsYetToSerialize.size()), ostream);
+		serializeBasicTypes<SerializeID>(static_cast<SerializeID>(itemsYetToSerialize.size()), ostream);
 		for(const T& item : itemsYetToSerialize) {
 			serialize(item, ostream);
 		}
@@ -52,7 +53,7 @@ public:
 		auto found = objectToIDMap.find(obj);
 		if(found == objectToIDMap.end()) throw SerializationException("The given object was not registered!");
 
-		::serialize<SerializeID>((*found).second, ostream);
+		serializeBasicTypes<SerializeID>((*found).second, ostream);
 	}
 };
 
@@ -80,7 +81,7 @@ public:
 	// The given deserializer must be of the form 'T deserialize(std::istream&)', it may return references or const refs. 
 	template<typename Deserializer>
 	void deserializeRegistry(Deserializer deserialize, std::istream& istream) {
-		size_t numberOfObjectsToDeserialize = ::deserialize<SerializeID>(istream);
+		size_t numberOfObjectsToDeserialize = deserializeBasicTypes<SerializeID>(istream);
 		for(size_t i = 0; i < numberOfObjectsToDeserialize; i++) {
 			T object = deserialize(istream);
 			IDToObjectMap.emplace(curDynamicID, object);
@@ -89,7 +90,7 @@ public:
 	}
 
 	T deserializeObject(std::istream& istream) const {
-		SerializeID id = ::deserialize<SerializeID>(istream);
+		SerializeID id = deserializeBasicTypes<SerializeID>(istream);
 
 		auto found = IDToObjectMap.find(id);
 		if(found == IDToObjectMap.end()) throw SerializationException("There is no associated object for the id " + std::to_string(id));
@@ -126,13 +127,13 @@ public:
 	void serialize(const T& object, std::ostream& ostream) const {
 		auto iter = objectToIDMap.find(object);
 		if(iter != objectToIDMap.end()) {
-			::serialize<SerializeID>((*iter).second, ostream);
+			serializeBasicTypes<SerializeID>((*iter).second, ostream);
 		} else {
 			throw SerializationException("The given object was not registered");
 		}
 	}
 	T deserialize(std::istream& istream) const {
-		SerializeID id = ::deserialize<SerializeID>(istream);
+		SerializeID id = deserializeBasicTypes<SerializeID>(istream);
 		auto iter = IDToObjectMap.find(id);
 		if(iter != IDToObjectMap.end()) {
 			return (*iter).second;
@@ -140,4 +141,5 @@ public:
 			throw SerializationException("There is no registered object matching id " + std::to_string(id));
 		}
 	}
+};
 };
