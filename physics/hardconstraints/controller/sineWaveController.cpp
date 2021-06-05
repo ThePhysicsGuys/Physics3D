@@ -1,9 +1,7 @@
 #include "sineWaveController.h"
 
 #include "../../math/predefinedTaylorExpansions.h"
-
-#define _USE_MATH_DEFINES
-#include <math.h>
+#include "../../math/constants.h"
 
 namespace P3D {
 SineWaveController::SineWaveController(double minValue, double maxValue, double period) :
@@ -24,7 +22,7 @@ double SineWaveController::getValue() const {
 	double multiplier = (maxValue - minValue) / 2;
 	double offset = minValue + multiplier;
 
-	double currentAngle = currentStepInPeriod * (2 * M_PI / period);
+	double currentAngle = currentStepInPeriod * (2 * PI / period);
 
 	return sin(currentAngle) * multiplier + offset;
 }
@@ -33,9 +31,9 @@ FullTaylor<double> SineWaveController::getFullTaylorExpansion() const {
 	double multiplier = (maxValue - minValue) / 2;
 	double offset = minValue + multiplier;
 
-	double divPeriodToRadians = 2 * M_PI / period;
+	double divPeriodToRadians = 2 * PI / period;
 
-	FullTaylor<double> result = generateFullTaylorForSinWave<double, 3>(currentStepInPeriod, (2 * M_PI / period)) * multiplier;
+	FullTaylor<double> result = generateFullTaylorForSinWave<double, 3>(currentStepInPeriod, (2 * PI / period)) * multiplier;
 	result += offset;
 	return result;
 }

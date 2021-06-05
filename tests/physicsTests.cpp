@@ -5,16 +5,14 @@
 #include "simulation.h"
 #include "generators.h"
 
-#define _USE_MATH_DEFINES
-#include <math.h>
-
 #include "../physics/world.h"
 #include "../physics/inertia.h"
-#include "../physics/misc/shapeLibrary.h"
 #include "../physics/math/linalg/trigonometry.h"
 #include "../physics/math/linalg/eigen.h"
+#include "../physics/math/constants.h"
 #include "../physics/geometry/shape.h"
 #include "../physics/geometry/shapeCreation.h"
+#include "../physics/geometry/shapeLibrary.h"
 #include "../physics/externalforces/gravityForce.h"
 #include "../physics/hardconstraints/motorConstraint.h"
 #include "../physics/hardconstraints/sinusoidalPistonConstraint.h"
@@ -102,7 +100,7 @@ TEST_CASE(applyForceToRotate) {
 }
 
 TEST_CASE(momentToAngularVelocity) {
-	Part part(boxShape(1.0, 1.0, 1.0), GlobalCFrame(Rotation::rotY(M_PI / 2)), {1.0, 1.0, 0.7});
+	Part part(boxShape(1.0, 1.0, 1.0), GlobalCFrame(Rotation::rotY(PI / 2)), {1.0, 1.0, 0.7});
 	part.ensureHasParent();
 	MotorizedPhysical& p = *part.parent->mainPhysical;
 

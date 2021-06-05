@@ -1,10 +1,8 @@
 #include "builtinShapeClasses.h"
 
-#define _USE_MATH_DEFINES
-#include <math.h>
-
 #include "shapeCreation.h"
-#include "../misc/shapeLibrary.h"
+#include "shapeLibrary.h"
+#include "../math/constants.h"
 
 namespace P3D {
 CubeClass::CubeClass() : ShapeClass(8, Vec3(0, 0, 0), ScalableInertialMatrix(Vec3(8.0 / 3.0, 8.0 / 3.0, 8.0 / 3.0), Vec3(0, 0, 0)), CUBE_CLASS_ID) {}
@@ -69,7 +67,7 @@ Polyhedron CubeClass::asPolyhedron() const {
 
 
 
-SphereClass::SphereClass() : ShapeClass(4.0 / 3.0 * M_PI, Vec3(0, 0, 0), ScalableInertialMatrix(Vec3(4.0 / 15.0 * M_PI, 4.0 / 15.0 * M_PI, 4.0 / 15.0 * M_PI), Vec3(0, 0, 0)), SPHERE_CLASS_ID) {}
+SphereClass::SphereClass() : ShapeClass(4.0 / 3.0 * PI, Vec3(0, 0, 0), ScalableInertialMatrix(Vec3(4.0 / 15.0 * PI, 4.0 / 15.0 * PI, 4.0 / 15.0 * PI), Vec3(0, 0, 0)), SPHERE_CLASS_ID) {}
 
 bool SphereClass::containsPoint(Vec3 point) const {
 	return lengthSquared(point) <= 1.0;
@@ -142,11 +140,11 @@ Inertia of cyllinder:
 	Y = x + z = 7/12
 	Z = x + y = 1/2
 
-	x = 1/4 * M_PI * 2
-	y = 1/4 * M_PI * 2
-	z = 1/3 * M_PI * 2
+	x = 1/4 * PI * 2
+	y = 1/4 * PI * 2
+	z = 1/3 * PI * 2
 */
-CylinderClass::CylinderClass() : ShapeClass(M_PI * 2.0, Vec3(0, 0, 0), ScalableInertialMatrix(Vec3(M_PI / 2.0, M_PI / 2.0, M_PI * 2.0 / 3.0), Vec3(0, 0, 0)), CYLINDER_CLASS_ID) {}
+CylinderClass::CylinderClass() : ShapeClass(PI * 2.0, Vec3(0, 0, 0), ScalableInertialMatrix(Vec3(PI / 2.0, PI / 2.0, PI * 2.0 / 3.0), Vec3(0, 0, 0)), CYLINDER_CLASS_ID) {}
 
 bool CylinderClass::containsPoint(Vec3 point) const {
 	return std::abs(point.z) <= 1.0 && point.x * point.x + point.y + point.y <= 1.0;

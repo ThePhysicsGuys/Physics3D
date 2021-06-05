@@ -1,7 +1,7 @@
 #include "benchmark.h"
 
 #include "../physics/geometry/polyhedron.h"
-#include "../physics/misc/shapeLibrary.h"
+#include "../physics/geometry/shapeLibrary.h"
 #include "../physics/math/linalg/trigonometry.h"
 
 namespace P3D {

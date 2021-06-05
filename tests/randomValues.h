@@ -1,7 +1,5 @@
 #pragma once
 
-#define _USE_MATH_DEFINES
-#include <math.h>
 #include <stddef.h>
 
 #include <random>
@@ -10,7 +8,7 @@
 #include "../physics/math/linalg/vec.h"
 #include "../physics/math/linalg/mat.h"
 #include "../physics/math/cframe.h"
-
+#include "../physics/math/constants.h"
 #include "../physics/math/linalg/trigonometry.h"
 
 #include "../physics/motion.h"
@@ -68,7 +66,7 @@ Vector<T, Size> createRandomNonzeroVecTemplate() {
 // creates a random rotation
 template<typename T>
 RotationTemplate<T> createRandomRotationTemplate() {
-	Vector<T, 3> angles = createRandomNonzeroVecTemplate<T, 3>() * (M_PI / 2);
+	Vector<T, 3> angles = createRandomNonzeroVecTemplate<T, 3>() * (PI / 2);
 	return Rotation::fromEulerAngles(angles.x, angles.y, angles.z);
 }
 // creates a random rotation

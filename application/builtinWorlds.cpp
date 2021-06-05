@@ -1,8 +1,5 @@
 #include "core.h"
 
-#define _USE_MATH_DEFINES
-#include <math.h>
-
 #include "builtinWorlds.h"
 
 #include "worldBuilder.h"
@@ -21,6 +18,7 @@
 #include "../physics/constraints/hingeConstraint.h"
 #include "../physics/softlinks/springLink.h"
 #include "../physics/geometry/shapeClass.h"
+#include "../physics/math/constants.h"
 
 
 namespace P3D::Application {
@@ -30,7 +28,7 @@ using namespace WorldBuilder;
 void buildBenchmarkWorld(PlayerWorld& world) {
 	WorldBuilder::buildFloor(150.0, 150.0);
 
-	GlobalCFrame origin(0, 20, 0, Rotation::fromEulerAngles(0, M_PI / 4, M_PI / 4));
+	GlobalCFrame origin(0, 20, 0, Rotation::fromEulerAngles(0, PI / 4, PI / 4));
 	for(int i = 0; i < 10; i++) {
 		for(int j = 0; j < 10; j++) {
 			for(int k = 0; k < 10; k++) {

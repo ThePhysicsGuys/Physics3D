@@ -14,7 +14,7 @@
 
 #include "../physics/externalforces/gravityForce.h"
 #include "../physics/misc/toString.h"
-#include "../physics/misc/serialization.h"
+#include "../physics/misc/serialization/serialization.h"
 
 #include <fstream>
 #include <sstream>

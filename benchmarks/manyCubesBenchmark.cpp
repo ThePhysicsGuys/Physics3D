@@ -1,5 +1,5 @@
 
-#include "../physics/misc/shapeLibrary.h"
+#include "../physics/geometry/shapeLibrary.h"
 #include "../physics/geometry/shape.h"
 #include "../physics/geometry/shapeCreation.h"
 #include "worldBenchmark.h"

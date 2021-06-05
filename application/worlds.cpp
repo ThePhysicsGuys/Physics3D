@@ -6,7 +6,6 @@
 #include "view/screen.h"
 #include "input/standardInputHandler.h"
 #include "../physics/misc/debug.h"
-#include "../physics/constants.h"
 #include "../engine/options/keyboardOptions.h"
 
 #include "ecs/components.h"

@@ -12,7 +12,7 @@
 
 #include "../physics/geometry/shape.h"
 
-#include "../physics/misc/shapeLibrary.h"
+#include "../physics/geometry/shapeLibrary.h"
 
 #include "testValues.h"
 #include "generators.h"
@@ -169,11 +169,11 @@ TEST_CASE(testTriangleMeshOptimizedGetBounds) {
 		}
 		BoundingBox reference = mesh.getBoundsFallback();
 
-		if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::SSE | Util::CPUIDCheck::SSE2)) {
+		if(CPUIDCheck::hasTechnology(CPUIDCheck::SSE | CPUIDCheck::SSE2)) {
 			ASSERT(reference == mesh.getBoundsSSE());
 		}
 
-		if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::AVX | Util::CPUIDCheck::AVX2 | Util::CPUIDCheck::FMA)) {
+		if(CPUIDCheck::hasTechnology(CPUIDCheck::AVX | CPUIDCheck::AVX2 | CPUIDCheck::FMA)) {
 			ASSERT(reference == mesh.getBoundsAVX());
 		}
 	}
@@ -189,11 +189,11 @@ TEST_CASE(testTriangleMeshOptimizedGetBoundsRotated) {
 		Mat3f rot = generateMatrix<float, 3, 3>();
 		BoundingBox reference = mesh.getBoundsFallback(rot);
 
-		if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::SSE | Util::CPUIDCheck::SSE2)) {
+		if(CPUIDCheck::hasTechnology(CPUIDCheck::SSE | CPUIDCheck::SSE2)) {
 			ASSERT(reference == mesh.getBoundsSSE(rot));
 		}
 
-		if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::AVX | Util::CPUIDCheck::AVX2 | Util::CPUIDCheck::FMA)) {
+		if(CPUIDCheck::hasTechnology(CPUIDCheck::AVX | CPUIDCheck::AVX2 | CPUIDCheck::FMA)) {
 			ASSERT(reference == mesh.getBoundsAVX(rot));
 		}
 	}
@@ -210,19 +210,19 @@ TEST_CASE(testTriangleMeshOptimizedFurthestIndexInDirection) {
 		int reference = mesh.furthestIndexInDirectionFallback(dir);
 		logStream << "reference: " << reference << "\n";
 
-		if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::SSE | Util::CPUIDCheck::SSE2)) {
+		if(CPUIDCheck::hasTechnology(CPUIDCheck::SSE | CPUIDCheck::SSE2)) {
 			int sseVertex = mesh.furthestIndexInDirectionSSE(dir);
 			logStream << "sseVertex: " << sseVertex << "\n";
 			ASSERT(mesh.getVertex(reference) * dir == mesh.getVertex(sseVertex) * dir);
 		}
 
-		if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::SSE | Util::CPUIDCheck::SSE2 | Util::CPUIDCheck::SSE4_1)) {
+		if(CPUIDCheck::hasTechnology(CPUIDCheck::SSE | CPUIDCheck::SSE2 | CPUIDCheck::SSE4_1)) {
 			int sse4Vertex = mesh.furthestIndexInDirectionSSE4(dir);
 			logStream << "sse4Vertex: " << sse4Vertex << "\n";
 			ASSERT(mesh.getVertex(reference) * dir == mesh.getVertex(sse4Vertex) * dir);
 		}
 
-		if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::AVX | Util::CPUIDCheck::AVX2 | Util::CPUIDCheck::FMA)) {
+		if(CPUIDCheck::hasTechnology(CPUIDCheck::AVX | CPUIDCheck::AVX2 | CPUIDCheck::FMA)) {
 			int avxVertex = mesh.furthestIndexInDirectionAVX(dir);
 			logStream << "avxVertex: " << avxVertex << "\n";
 			ASSERT(mesh.getVertex(reference) * dir == mesh.getVertex(avxVertex) * dir);
@@ -240,19 +240,19 @@ TEST_CASE(testTriangleMeshOptimizedFurthestInDirection) {
 		Vec3 reference = mesh.furthestInDirectionFallback(dir);
 		logStream << "reference: " << reference << "\n";
 
-		if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::SSE | Util::CPUIDCheck::SSE2)) {
+		if(CPUIDCheck::hasTechnology(CPUIDCheck::SSE | CPUIDCheck::SSE2)) {
 			Vec3f sseVertex = mesh.furthestInDirectionSSE(dir);
 			logStream << "sseVertex: " << sseVertex << "\n";
 			ASSERT(reference * dir == sseVertex * dir); // dot with dir as we don't really care for the exact vertex in a tie
 		}
 
-		if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::SSE | Util::CPUIDCheck::SSE2 | Util::CPUIDCheck::SSE4_1)) {
+		if(CPUIDCheck::hasTechnology(CPUIDCheck::SSE | CPUIDCheck::SSE2 | CPUIDCheck::SSE4_1)) {
 			Vec3f sse4Vertex = mesh.furthestInDirectionSSE4(dir);
 			logStream << "sse4Vertex: " << sse4Vertex << "\n";
 			ASSERT(reference * dir == sse4Vertex * dir); // dot with dir as we don't really care for the exact vertex in a tie
 		}
 
-		if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::AVX | Util::CPUIDCheck::AVX2 | Util::CPUIDCheck::FMA)) {
+		if(CPUIDCheck::hasTechnology(CPUIDCheck::AVX | CPUIDCheck::AVX2 | CPUIDCheck::FMA)) {
 			Vec3f avxVertex = mesh.furthestInDirectionAVX(dir);
 			logStream << "avxVertex: " << avxVertex << "\n";
 			ASSERT(reference * dir == avxVertex * dir); // dot with dir as we don't really care for the exact vertex in a tie

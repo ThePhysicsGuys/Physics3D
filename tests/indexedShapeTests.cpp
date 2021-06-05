@@ -6,7 +6,7 @@
 #include "../physics/geometry/indexedShape.h"
 #include "../physics/geometry/shapeBuilder.h"
 #include "../physics/geometry/convexShapeBuilder.h"
-#include "../physics/misc/shapeLibrary.h"
+#include "../physics/geometry/shapeLibrary.h"
 #include "../physics/misc/validityHelper.h"
 
 using namespace P3D;

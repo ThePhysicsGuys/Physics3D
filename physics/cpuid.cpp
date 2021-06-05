@@ -6,7 +6,7 @@
 
 #include <stdint.h>
 
-namespace P3D::Util {
+namespace P3D {
 class CPUID {
 	uint32_t regs[4];
 

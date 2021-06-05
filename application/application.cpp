@@ -29,8 +29,7 @@
 #include "../physics/constraints/barConstraint.h"
 #include "../physics/softlinks/elasticLink.h"
 
-
-#include "../physics/misc/serialization.h"
+#include "../physics/misc/serialization/serialization.h"
 
 #include "worlds.h"
 #include "tickerThread.h"

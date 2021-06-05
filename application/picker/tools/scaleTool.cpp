@@ -10,7 +10,7 @@
 #include "view/screen.h"
 #include "shader/shaders.h"
 
-#include "../physics/misc/shapeLibrary.h"
+#include "../physics/geometry/shapeLibrary.h"
 #include "../physics/math/rotation.h"
 #include "../graphics/visualShape.h"
 #include "../graphics/mesh/primitive.h"

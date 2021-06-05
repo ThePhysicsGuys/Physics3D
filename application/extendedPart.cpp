@@ -5,7 +5,7 @@
 #include "ecs/components.h"
 #include "view/screen.h"
 #include "../engine/ecs/registry.h"
-#include "../physics/misc/serialization.h"
+#include "../physics/misc/serialization/serialization.h"
 #include "../graphics/meshRegistry.h"
 
 namespace P3D::Application {

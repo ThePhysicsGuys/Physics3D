@@ -4,7 +4,7 @@
 #include "../physics/misc/toString.h"
 
 #include "../physics/geometry/shape.h"
-#include "../physics/misc/shapeLibrary.h"
+#include "../physics/geometry/shapeLibrary.h"
 
 using namespace P3D;
 TEST_CASE_SLOW(volumeApproximation) {

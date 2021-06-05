@@ -2,7 +2,7 @@
 #include "meshRegistry.h"
 
 #include "../physics/math/constants.h"
-#include "../physics/misc/shapeLibrary.h"
+#include "../physics/geometry/shapeLibrary.h"
 #include "../physics/geometry/builtinShapeClasses.h"
 
 #include "buffers/bufferLayout.h"

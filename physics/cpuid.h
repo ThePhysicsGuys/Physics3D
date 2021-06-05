@@ -1,6 +1,6 @@
 #pragma once
 
-namespace P3D::Util {
+namespace P3D {
 class CPUIDCheck {
 	unsigned int available;
 

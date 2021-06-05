@@ -1,27 +1,25 @@
 #include "serialization.h"
 
-#include "../geometry/polyhedron.h"
-#include "../geometry/builtinShapeClasses.h"
-#include "../geometry/shape.h"
-#include "../geometry/shapeClass.h"
-#include "../part.h"
-#include "../world.h"
-#include "../hardconstraints/hardConstraint.h"
-#include "../hardconstraints/fixedConstraint.h"
-#include "../hardconstraints/motorConstraint.h"
-#include "../hardconstraints/sinusoidalPistonConstraint.h"
-
-#include "../constraints/ballConstraint.h"
-#include "../constraints/hingeConstraint.h"
-#include "../constraints/barConstraint.h"
-
-#include "../externalforces/gravityForce.h"
-
 #include <map>
 #include <set>
 #include <limits.h>
 #include <string>
 #include <iostream>
+
+#include "../../geometry/polyhedron.h"
+#include "../../geometry/builtinShapeClasses.h"
+#include "../../geometry/shape.h"
+#include "../../geometry/shapeClass.h"
+#include "../../part.h"
+#include "../../world.h"
+#include "../../hardconstraints/hardConstraint.h"
+#include "../../hardconstraints/fixedConstraint.h"
+#include "../../hardconstraints/motorConstraint.h"
+#include "../../hardconstraints/sinusoidalPistonConstraint.h"
+#include "../../constraints/ballConstraint.h"
+#include "../../constraints/hingeConstraint.h"
+#include "../../constraints/barConstraint.h"
+#include "../../externalforces/gravityForce.h"
 
 namespace P3D {
 #define CURRENT_VERSION_ID 2

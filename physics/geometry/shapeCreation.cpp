@@ -26,10 +26,10 @@ Shape polyhedronShape(const Polyhedron& poly) {
 
 	PolyhedronShapeClass* shapeClass;
 
-	if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::AVX | Util::CPUIDCheck::AVX2 | Util::CPUIDCheck::FMA)) {
+	if(CPUIDCheck::hasTechnology(CPUIDCheck::AVX | CPUIDCheck::AVX2 | CPUIDCheck::FMA)) {
 		shapeClass = new PolyhedronShapeClassAVX(poly.translatedAndScaled(-center, scale));
-	} else if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::SSE | Util::CPUIDCheck::SSE2)) {
-		if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::SSE4_1)) {
+	} else if(CPUIDCheck::hasTechnology(CPUIDCheck::SSE | CPUIDCheck::SSE2)) {
+		if(CPUIDCheck::hasTechnology(CPUIDCheck::SSE4_1)) {
 			shapeClass = new PolyhedronShapeClassSSE4(poly.translatedAndScaled(-center, scale));
 		} else {
 			shapeClass = new PolyhedronShapeClassSSE(poly.translatedAndScaled(-center, scale));

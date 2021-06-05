@@ -506,10 +506,10 @@ BoundingBox TriangleMesh::getBoundsFallback(const Mat3f& referenceFrame) const {
 }
 
 int TriangleMesh::furthestIndexInDirection(const Vec3f& direction) const {
-	if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::AVX | Util::CPUIDCheck::AVX2 | Util::CPUIDCheck::FMA)) {
+	if(CPUIDCheck::hasTechnology(CPUIDCheck::AVX | CPUIDCheck::AVX2 | CPUIDCheck::FMA)) {
 		return furthestIndexInDirectionAVX(direction);
-	} else if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::SSE | Util::CPUIDCheck::SSE2)) {
-		if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::SSE4_1)) {
+	} else if(CPUIDCheck::hasTechnology(CPUIDCheck::SSE | CPUIDCheck::SSE2)) {
+		if(CPUIDCheck::hasTechnology(CPUIDCheck::SSE4_1)) {
 			return furthestIndexInDirectionSSE4(direction);
 		} else {
 			return furthestIndexInDirectionSSE(direction);
@@ -520,10 +520,10 @@ int TriangleMesh::furthestIndexInDirection(const Vec3f& direction) const {
 }
 
 Vec3f TriangleMesh::furthestInDirection(const Vec3f& direction) const {
-	if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::AVX | Util::CPUIDCheck::AVX2 | Util::CPUIDCheck::FMA)) {
+	if(CPUIDCheck::hasTechnology(CPUIDCheck::AVX | CPUIDCheck::AVX2 | CPUIDCheck::FMA)) {
 		return furthestInDirectionAVX(direction);
-	} else if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::SSE | Util::CPUIDCheck::SSE2)) {
-		if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::SSE4_1)) {
+	} else if(CPUIDCheck::hasTechnology(CPUIDCheck::SSE | CPUIDCheck::SSE2)) {
+		if(CPUIDCheck::hasTechnology(CPUIDCheck::SSE4_1)) {
 			return furthestInDirectionSSE4(direction);
 		} else {
 			return furthestInDirectionSSE(direction);
@@ -534,9 +534,9 @@ Vec3f TriangleMesh::furthestInDirection(const Vec3f& direction) const {
 }
 
 BoundingBox TriangleMesh::getBounds() const {
-	if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::AVX | Util::CPUIDCheck::AVX2 | Util::CPUIDCheck::FMA)) {
+	if(CPUIDCheck::hasTechnology(CPUIDCheck::AVX | CPUIDCheck::AVX2 | CPUIDCheck::FMA)) {
 		return getBoundsAVX();
-	} else if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::SSE | Util::CPUIDCheck::SSE2)) {
+	} else if(CPUIDCheck::hasTechnology(CPUIDCheck::SSE | CPUIDCheck::SSE2)) {
 		return getBoundsSSE();
 	} else {
 		return getBoundsFallback();
@@ -544,9 +544,9 @@ BoundingBox TriangleMesh::getBounds() const {
 }
 
 BoundingBox TriangleMesh::getBounds(const Mat3f& referenceFrame) const {
-	if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::AVX | Util::CPUIDCheck::AVX2 | Util::CPUIDCheck::FMA)) {
+	if(CPUIDCheck::hasTechnology(CPUIDCheck::AVX | CPUIDCheck::AVX2 | CPUIDCheck::FMA)) {
 		return getBoundsAVX(referenceFrame);
-	} else if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::SSE | Util::CPUIDCheck::SSE2)) {
+	} else if(CPUIDCheck::hasTechnology(CPUIDCheck::SSE | CPUIDCheck::SSE2)) {
 		return getBoundsSSE(referenceFrame);
 	} else {
 		return getBoundsFallback(referenceFrame);

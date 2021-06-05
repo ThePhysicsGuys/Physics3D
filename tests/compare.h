@@ -1,7 +1,5 @@
 #pragma once
 
-#include "../physics/templateUtils.h"
-
 #include "../physics/math/linalg/vec.h"
 #include "../physics/math/linalg/largeMatrix.h"
 #include "../physics/math/linalg/mat.h"
@@ -18,6 +16,10 @@
 #include <utility>
 #include <array>
 #include <vector>
+#include <type_traits>
+
+#define IS_SUBCLASS_OF(Child, BaseClass) typename std::enable_if<std::is_base_of<BaseClass, Child>::value>::type* = nullptr
+#define IS_ARITHMETIC(Type) typename std::enable_if<std::is_arithmetic<Type>::value>::type* = nullptr
 
 template<typename Num1, typename Num2, typename Tol, IS_ARITHMETIC(Num1), IS_ARITHMETIC(Num2)>
 bool tolerantEquals(const Num1& first, const Num2& second, Tol tolerance) {

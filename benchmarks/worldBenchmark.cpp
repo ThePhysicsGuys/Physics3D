@@ -11,7 +11,7 @@
 #include "../physics/geometry/shapeCreation.h"
 #include "../physics/math/linalg/commonMatrices.h"
 
-#include "../physics/misc/shapeLibrary.h"
+#include "../physics/geometry/shapeLibrary.h"
 #include "../physics/misc/filters/outOfBoundsFilter.h"
 #include "../physics/misc/physicsProfiler.h"
 

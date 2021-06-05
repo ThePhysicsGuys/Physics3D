@@ -8,12 +8,13 @@
 
 #include "misc/debug.h"
 #include "misc/physicsProfiler.h"
-#include "constants.h"
 #include "../util/log.h"
 
 #include <vector>
 #include <cmath>
 #include <algorithm>
+
+#define COLLISSION_DEPTH_FORCE_MULTIPLIER 2000
 
 namespace P3D {
 /*

@@ -5,7 +5,7 @@
 
 #include "../graphics/debug/guiDebug.h"
 #include "../physics/geometry/shape.h"
-#include "../physics/misc/shapeLibrary.h"
+#include "../physics/geometry/shapeLibrary.h"
 #include "../physics/geometry/convexShapeBuilder.h"
 
 #include <array>

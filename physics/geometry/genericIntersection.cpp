@@ -8,7 +8,6 @@
 #include "../misc/debug.h"
 #include "../misc/physicsProfiler.h"
 #include "../misc/profiling.h"
-#include "../constants.h"
 #include "polyhedron.h"
 
 #include "../misc/validityHelper.h"
@@ -16,6 +15,10 @@
 #include "../catchable_assert.h"
 
 #include <stdexcept>
+
+
+#define GJK_MAX_ITER 200
+#define EPA_MAX_ITER 200
 
 namespace P3D {
 inline static void incDebugTally(HistoricTally<long long, IterationTime>& tally, int iterTime) {

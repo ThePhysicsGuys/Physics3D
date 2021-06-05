@@ -1,7 +1,7 @@
 #include "worldBenchmark.h"
 
 #include "../physics/world.h"
-#include "../physics/misc/shapeLibrary.h"
+#include "../physics/geometry/shapeLibrary.h"
 #include "../physics/math/linalg/commonMatrices.h"
 
 #include "../physics/geometry/shapeCreation.h"

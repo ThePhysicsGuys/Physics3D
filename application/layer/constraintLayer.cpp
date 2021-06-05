@@ -12,7 +12,7 @@
 #include "../physics/hardconstraints/sinusoidalPistonConstraint.h"
 #include "../physics/hardconstraints/motorConstraint.h"
 #include "../physics/misc/toString.h"
-#include "../physics/misc/shapeLibrary.h"
+#include "../physics/geometry/shapeLibrary.h"
 #include "../physics/physical.h"
 
 #include <typeindex>

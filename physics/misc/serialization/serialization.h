@@ -9,27 +9,25 @@
 #include <map>
 #include <unordered_map>
 
-#include "../math/fix.h"
-#include "../math/linalg/vec.h"
-#include "../math/linalg/mat.h"
-#include "../math/cframe.h"
-#include "../math/globalCFrame.h"
-#include "../geometry/polyhedron.h"
-#include "../geometry/shape.h"
-#include "../part.h"
-#include "../world.h"
-#include "../physical.h"
-#include "../hardconstraints/hardConstraint.h"
-#include "../hardconstraints/fixedConstraint.h"
-#include "../hardconstraints/motorConstraint.h"
+#include "../../math/fix.h"
+#include "../../math/linalg/vec.h"
+#include "../../math/linalg/mat.h"
+#include "../../math/cframe.h"
+#include "../../math/globalCFrame.h"
+#include "../../geometry/polyhedron.h"
+#include "../../geometry/shape.h"
+#include "../../part.h"
+#include "../../world.h"
+#include "../../physical.h"
+#include "../../hardconstraints/hardConstraint.h"
+#include "../../hardconstraints/fixedConstraint.h"
+#include "../../hardconstraints/motorConstraint.h"
+#include "../../constraints/ballConstraint.h"
+#include "../../externalforces/gravityForce.h"
 
-#include "../constraints/ballConstraint.h"
-
-#include "../externalforces/gravityForce.h"
-
-#include "../serializeBasicTypes.h"
-#include "../sharedObjectSerializer.h"
-#include "../dynamicSerialize.h"
+#include "serializeBasicTypes.h"
+#include "sharedObjectSerializer.h"
+#include "dynamicSerialize.h"
 
 namespace P3D {
 void serializePolyhedron(const Polyhedron& poly, std::ostream& ostream);
