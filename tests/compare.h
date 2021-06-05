@@ -1,17 +1,17 @@
 #pragma once
 
-#include "../physics/math/linalg/vec.h"
-#include "../physics/math/linalg/largeMatrix.h"
-#include "../physics/math/linalg/mat.h"
-#include "../physics/math/linalg/eigen.h"
-#include "../physics/math/cframe.h"
-#include "../physics/math/position.h"
-#include "../physics/math/globalCFrame.h"
-#include "../physics/math/taylorExpansion.h"
-#include "../physics/math/boundingBox.h"
+#include <Physics3D/math/linalg/vec.h>
+#include <Physics3D/math/linalg/largeMatrix.h>
+#include <Physics3D/math/linalg/mat.h>
+#include <Physics3D/math/linalg/eigen.h>
+#include <Physics3D/math/cframe.h>
+#include <Physics3D/math/position.h>
+#include <Physics3D/math/globalCFrame.h>
+#include <Physics3D/math/taylorExpansion.h>
+#include <Physics3D/math/boundingBox.h>
 
-#include "../physics/motion.h"
-#include "../physics/relativeMotion.h"
+#include <Physics3D/motion.h>
+#include <Physics3D/relativeMotion.h>
 
 #include <utility>
 #include <array>

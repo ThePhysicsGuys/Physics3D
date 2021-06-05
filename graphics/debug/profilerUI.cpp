@@ -13,8 +13,8 @@
 #include "path/path.h"
 #include "gui/gui.h"
 #include "font.h"
-#include "../physics/math/constants.h"
-#include "../physics/boundstree/boundsTree.h"
+#include <Physics3D/math/constants.h>
+#include <Physics3D/boundstree/boundsTree.h>
 
 namespace P3D::Graphics {
 

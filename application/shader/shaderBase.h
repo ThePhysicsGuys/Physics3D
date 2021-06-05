@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../physics/math/position.h"
-#include "../physics/math/globalCFrame.h"
-#include "../physics/math/linalg/mat.h"
+#include <Physics3D/math/position.h>
+#include <Physics3D/math/globalCFrame.h>
+#include <Physics3D/math/linalg/mat.h>
 
 #include "../graphics/resource/shaderResource.h"
 

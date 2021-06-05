@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../physics/math/linalg/vec.h"
-#include "../physics/math/linalg/mat.h"
-#include "../physics/math/rotation.h"
+#include <Physics3D/math/linalg/vec.h>
+#include <Physics3D/math/linalg/mat.h>
+#include <Physics3D/math/rotation.h>
 
 namespace P3D {
 extern const Vec3 vectors[13];

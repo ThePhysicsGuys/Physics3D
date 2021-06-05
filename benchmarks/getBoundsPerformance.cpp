@@ -1,8 +1,8 @@
 #include "benchmark.h"
 
-#include "../physics/geometry/polyhedron.h"
-#include "../physics/geometry/shapeLibrary.h"
-#include "../physics/math/linalg/trigonometry.h"
+#include <Physics3D/geometry/polyhedron.h>
+#include <Physics3D/geometry/shapeLibrary.h>
+#include <Physics3D/math/linalg/trigonometry.h>
 
 namespace P3D {
 class GetBounds : public Benchmark {

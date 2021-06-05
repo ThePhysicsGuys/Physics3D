@@ -1,13 +1,13 @@
 #include "testsMain.h"
 
-#include "../physics/boundstree/boundsTree.h"
+#include <Physics3D/boundstree/boundsTree.h>
 
 #include "testsMain.h"
 
 #include "compare.h"
 #include "generators.h"
-#include "../physics/misc/toString.h"
-#include "../physics/misc/validityHelper.h"
+#include <Physics3D/misc/toString.h>
+#include <Physics3D/misc/validityHelper.h>
 
 #include <vector>
 #include <set>

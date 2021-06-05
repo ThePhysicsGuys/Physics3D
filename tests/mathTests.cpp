@@ -4,18 +4,18 @@
 #include "testValues.h"
 #include "randomValues.h"
 #include "simulation.h"
-#include "../physics/misc/toString.h"
-#include "../physics/math/linalg/vec.h"
-#include "../physics/math/linalg/quat.h"
-#include "../physics/math/linalg/mat.h"
-#include "../physics/math/linalg/trigonometry.h"
-#include "../physics/math/linalg/largeMatrix.h"
-#include "../physics/math/linalg/largeMatrixAlgorithms.h"
-#include "../physics/math/linalg/eigen.h"
-#include "../physics/math/mathUtil.h"
-#include "../physics/math/taylorExpansion.h"
-#include "../physics/math/predefinedTaylorExpansions.h"
-#include "../physics/math/linalg/commonMatrices.h"
+#include <Physics3D/misc/toString.h>
+#include <Physics3D/math/linalg/vec.h>
+#include <Physics3D/math/linalg/quat.h>
+#include <Physics3D/math/linalg/mat.h>
+#include <Physics3D/math/linalg/trigonometry.h>
+#include <Physics3D/math/linalg/largeMatrix.h>
+#include <Physics3D/math/linalg/largeMatrixAlgorithms.h>
+#include <Physics3D/math/linalg/eigen.h>
+#include <Physics3D/math/mathUtil.h>
+#include <Physics3D/math/taylorExpansion.h>
+#include <Physics3D/math/predefinedTaylorExpansions.h>
+#include <Physics3D/math/linalg/commonMatrices.h>
 
 #include <algorithm>
 

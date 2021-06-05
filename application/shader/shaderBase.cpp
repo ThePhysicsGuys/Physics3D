@@ -2,7 +2,7 @@
 
 #include "shaderBase.h"
 
-#include "../physics/math/globalCFrame.h"
+#include <Physics3D/math/globalCFrame.h>
 #include "ecs/components.h"
 
 namespace P3D::Application {

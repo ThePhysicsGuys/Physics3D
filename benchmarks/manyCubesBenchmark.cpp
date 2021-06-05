@@ -1,10 +1,10 @@
 
-#include "../physics/geometry/shapeLibrary.h"
-#include "../physics/geometry/shape.h"
-#include "../physics/geometry/shapeCreation.h"
+#include <Physics3D/geometry/shapeLibrary.h>
+#include <Physics3D/geometry/shape.h>
+#include <Physics3D/geometry/shapeCreation.h>
 #include "worldBenchmark.h"
-#include "../physics/math/linalg/commonMatrices.h"
-#include "../physics/math/linalg/trigonometry.h"
+#include <Physics3D/math/linalg/commonMatrices.h>
+#include <Physics3D/math/linalg/trigonometry.h>
 
 namespace P3D {
 class ManyCubesBenchmark : public WorldBenchmark {

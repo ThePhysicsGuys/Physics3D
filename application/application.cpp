@@ -15,21 +15,21 @@
 #include "../graphics/texture.h"
 #include "../graphics/debug/guiDebug.h"
 #include "../graphics/debug/visualDebug.h"
-#include "../physics/geometry/shapeCreation.h"
-#include "../physics/math/linalg/commonMatrices.h"
-#include "../physics/part.h"
-#include "../physics/world.h"
-#include "../physics/externalforces/gravityForce.h"
-#include "../physics/misc/physicsProfiler.h"
-#include "../physics/hardconstraints/motorConstraint.h"
-#include "../physics/hardconstraints/sinusoidalPistonConstraint.h"
-#include "../physics/hardconstraints/fixedConstraint.h"
-#include "../physics/constraints/ballConstraint.h"
-#include "../physics/constraints/hingeConstraint.h"
-#include "../physics/constraints/barConstraint.h"
-#include "../physics/softlinks/elasticLink.h"
+#include <Physics3D/geometry/shapeCreation.h>
+#include <Physics3D/math/linalg/commonMatrices.h>
+#include <Physics3D/part.h>
+#include <Physics3D/world.h>
+#include <Physics3D/externalforces/gravityForce.h>
+#include <Physics3D/misc/physicsProfiler.h>
+#include <Physics3D/hardconstraints/motorConstraint.h>
+#include <Physics3D/hardconstraints/sinusoidalPistonConstraint.h>
+#include <Physics3D/hardconstraints/fixedConstraint.h>
+#include <Physics3D/constraints/ballConstraint.h>
+#include <Physics3D/constraints/hingeConstraint.h>
+#include <Physics3D/constraints/barConstraint.h>
+#include <Physics3D/softlinks/elasticLink.h>
 
-#include "../physics/misc/serialization/serialization.h"
+#include <Physics3D/misc/serialization/serialization.h>
 
 #include "worlds.h"
 #include "tickerThread.h"

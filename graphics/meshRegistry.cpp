@@ -1,9 +1,9 @@
 #include "core.h"
 #include "meshRegistry.h"
 
-#include "../physics/math/constants.h"
-#include "../physics/geometry/shapeLibrary.h"
-#include "../physics/geometry/builtinShapeClasses.h"
+#include <Physics3D/math/constants.h>
+#include <Physics3D/geometry/shapeLibrary.h>
+#include <Physics3D/geometry/builtinShapeClasses.h>
 
 #include "buffers/bufferLayout.h"
 #include "buffers/vertexBuffer.h"

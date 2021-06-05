@@ -4,9 +4,9 @@
 #include "extendedPart.h"
 
 #include "../graphics/debug/guiDebug.h"
-#include "../physics/geometry/shape.h"
-#include "../physics/geometry/shapeLibrary.h"
-#include "../physics/geometry/convexShapeBuilder.h"
+#include <Physics3D/geometry/shape.h>
+#include <Physics3D/geometry/shapeLibrary.h>
+#include <Physics3D/geometry/convexShapeBuilder.h>
 
 #include <array>
 

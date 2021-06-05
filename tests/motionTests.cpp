@@ -2,15 +2,15 @@
 
 #include "compare.h"
 #include "randomValues.h"
-#include "../physics/misc/toString.h"
+#include <Physics3D/misc/toString.h>
 #include "estimateMotion.h"
 
-#include "../physics/motion.h"
-#include "../physics/relativeMotion.h"
+#include <Physics3D/motion.h>
+#include <Physics3D/relativeMotion.h>
 
-#include "../physics/hardconstraints/hardPhysicalConnection.h"
-#include "../physics/hardconstraints/motorConstraint.h"
-#include "../physics/hardconstraints/sinusoidalPistonConstraint.h"
+#include <Physics3D/hardconstraints/hardPhysicalConnection.h>
+#include <Physics3D/hardconstraints/motorConstraint.h>
+#include <Physics3D/hardconstraints/sinusoidalPistonConstraint.h>
 
 using namespace P3D;
 #define REMAINS_CONSTANT(v) REMAINS_CONSTANT_TOLERANT(v, 0.005)

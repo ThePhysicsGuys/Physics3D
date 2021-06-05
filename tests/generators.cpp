@@ -2,11 +2,11 @@
 
 #include <vector>
 
-#include "../physics/hardconstraints/motorConstraint.h"
-#include "../physics/hardconstraints/sinusoidalPistonConstraint.h"
+#include <Physics3D/hardconstraints/motorConstraint.h>
+#include <Physics3D/hardconstraints/sinusoidalPistonConstraint.h>
 
-#include "../physics/geometry/convexShapeBuilder.h"
-#include "../physics/misc/toString.h"
+#include <Physics3D/geometry/convexShapeBuilder.h>
+#include <Physics3D/misc/toString.h>
 
 namespace P3D {
 static std::default_random_engine generator;

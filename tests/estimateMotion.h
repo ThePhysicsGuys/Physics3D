@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../physics/motion.h"
-#include "../physics/math/linalg/vec.h"
-#include "../physics/math/position.h"
-#include "../physics/math/globalCFrame.h"
+#include <Physics3D/motion.h>
+#include <Physics3D/math/linalg/vec.h>
+#include <Physics3D/math/position.h>
+#include <Physics3D/math/globalCFrame.h>
 
 #include <utility>
 

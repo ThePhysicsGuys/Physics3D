@@ -9,12 +9,12 @@
 #include "view/screen.h"
 #include "ecs/components.h"
 #include "../engine/ecs/registry.h"
-#include "../physics/world.h"
+#include <Physics3D/world.h>
 #include "../worlds.h"
 
-#include "../physics/externalforces/gravityForce.h"
-#include "../physics/misc/toString.h"
-#include "../physics/misc/serialization/serialization.h"
+#include <Physics3D/externalforces/gravityForce.h>
+#include <Physics3D/misc/toString.h>
+#include <Physics3D/misc/serialization/serialization.h>
 
 #include <fstream>
 #include <sstream>

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "../gui/color.h"
-#include "../physics/misc/profiling.h"
-#include "../physics/math/linalg/largeMatrix.h"
+#include <Physics3D/misc/profiling.h>
+#include <Physics3D/math/linalg/largeMatrix.h>
 
 namespace P3D {
 template<typename T>

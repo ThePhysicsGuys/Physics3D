@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../physics/misc/debug.h"
+#include <Physics3D/misc/debug.h>
 #include "../util/log.h"
 
 #include "threePhaseBuffer.h"

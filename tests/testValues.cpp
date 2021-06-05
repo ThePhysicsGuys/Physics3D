@@ -1,6 +1,6 @@
 #include "testValues.h"
 
-#include "../physics/math/rotation.h"
+#include <Physics3D/math/rotation.h>
 
 namespace P3D {
 const Vec3 vectors[13]{

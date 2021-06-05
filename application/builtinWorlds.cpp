@@ -10,15 +10,15 @@
 #include "ecs/components.h"
 #include "../graphics/meshRegistry.h"
 
-#include "../physics/geometry/shapeCreation.h"
-#include "../physics/hardconstraints/motorConstraint.h"
-#include "../physics/hardconstraints/sinusoidalPistonConstraint.h"
-#include "../physics/hardconstraints/fixedConstraint.h"
-#include "../physics/constraints/ballConstraint.h"
-#include "../physics/constraints/hingeConstraint.h"
-#include "../physics/softlinks/springLink.h"
-#include "../physics/geometry/shapeClass.h"
-#include "../physics/math/constants.h"
+#include <Physics3D/geometry/shapeCreation.h>
+#include <Physics3D/hardconstraints/motorConstraint.h>
+#include <Physics3D/hardconstraints/sinusoidalPistonConstraint.h>
+#include <Physics3D/hardconstraints/fixedConstraint.h>
+#include <Physics3D/constraints/ballConstraint.h>
+#include <Physics3D/constraints/hingeConstraint.h>
+#include <Physics3D/softlinks/springLink.h>
+#include <Physics3D/geometry/shapeClass.h>
+#include <Physics3D/math/constants.h>
 
 
 namespace P3D::Application {

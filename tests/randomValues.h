@@ -5,14 +5,14 @@
 #include <random>
 #include <array>
 
-#include "../physics/math/linalg/vec.h"
-#include "../physics/math/linalg/mat.h"
-#include "../physics/math/cframe.h"
-#include "../physics/math/constants.h"
-#include "../physics/math/linalg/trigonometry.h"
+#include <Physics3D/math/linalg/vec.h>
+#include <Physics3D/math/linalg/mat.h>
+#include <Physics3D/math/cframe.h>
+#include <Physics3D/math/constants.h>
+#include <Physics3D/math/linalg/trigonometry.h>
 
-#include "../physics/motion.h"
-#include "../physics/relativeMotion.h"
+#include <Physics3D/motion.h>
+#include <Physics3D/relativeMotion.h>
 
 namespace P3D {
 inline double createRandomDouble() {

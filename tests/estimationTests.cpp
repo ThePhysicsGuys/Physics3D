@@ -1,10 +1,10 @@
 #include "testsMain.h"
 
 #include "compare.h"
-#include "../physics/misc/toString.h"
+#include <Physics3D/misc/toString.h>
 
-#include "../physics/geometry/shape.h"
-#include "../physics/geometry/shapeLibrary.h"
+#include <Physics3D/geometry/shape.h>
+#include <Physics3D/geometry/shapeLibrary.h>
 
 using namespace P3D;
 TEST_CASE_SLOW(volumeApproximation) {

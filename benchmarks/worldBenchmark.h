@@ -1,7 +1,7 @@
 #pragma once
 
 #include "benchmark.h"
-#include "../physics/world.h"
+#include <Physics3D/world.h>
 
 namespace P3D {
 static const PartProperties basicProperties{1.0, 0.7, 0.5};

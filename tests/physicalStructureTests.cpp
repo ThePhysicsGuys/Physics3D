@@ -1,16 +1,16 @@
 #include "testsMain.h"
 
 #include "compare.h"
-#include "../physics/misc/toString.h"
+#include <Physics3D/misc/toString.h>
 
 #include "randomValues.h"
 #include "estimateMotion.h"
 
-#include "../physics/geometry/shape.h"
-#include "../physics/geometry/shapeCreation.h"
-#include "../physics/part.h"
-#include "../physics/physical.h"
-#include "../physics/hardconstraints/fixedConstraint.h"
+#include <Physics3D/geometry/shape.h>
+#include <Physics3D/geometry/shapeCreation.h>
+#include <Physics3D/part.h>
+#include <Physics3D/physical.h>
+#include <Physics3D/hardconstraints/fixedConstraint.h>
 
 using namespace P3D;
 #define ASSERT(x) ASSERT_STRICT(x)

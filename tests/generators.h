@@ -4,28 +4,28 @@
 #include <utility>
 #include <cstdint>
 
-#include "../physics/math/linalg/vec.h"
-#include "../physics/math/linalg/mat.h"
-#include "../physics/math/rotation.h"
-#include "../physics/math/cframe.h"
-#include "../physics/math/globalCFrame.h"
-#include "../physics/math/position.h"
-#include "../physics/math/bounds.h"
-#include "../physics/math/fix.h"
-#include "../physics/math/taylorExpansion.h"
-#include "../physics/geometry/shape.h"
-#include "../physics/geometry/shapeCreation.h"
-#include "../physics/geometry/polyhedron.h"
-#include "../physics/motion.h"
-#include "../physics/relativeMotion.h"
+#include <Physics3D/math/linalg/vec.h>
+#include <Physics3D/math/linalg/mat.h>
+#include <Physics3D/math/rotation.h>
+#include <Physics3D/math/cframe.h>
+#include <Physics3D/math/globalCFrame.h>
+#include <Physics3D/math/position.h>
+#include <Physics3D/math/bounds.h>
+#include <Physics3D/math/fix.h>
+#include <Physics3D/math/taylorExpansion.h>
+#include <Physics3D/geometry/shape.h>
+#include <Physics3D/geometry/shapeCreation.h>
+#include <Physics3D/geometry/polyhedron.h>
+#include <Physics3D/motion.h>
+#include <Physics3D/relativeMotion.h>
 
-#include "../physics/part.h"
-#include "../physics/physical.h"
-#include "../physics/hardconstraints/hardConstraint.h"
-#include "../physics/layer.h"
-#include "../physics/world.h"
+#include <Physics3D/part.h>
+#include <Physics3D/physical.h>
+#include <Physics3D/hardconstraints/hardConstraint.h>
+#include <Physics3D/layer.h>
+#include <Physics3D/world.h>
 
-#include "../physics/boundstree/boundsTree.h"
+#include <Physics3D/boundstree/boundsTree.h>
 
 namespace P3D {
 template<typename T>

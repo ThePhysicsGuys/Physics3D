@@ -3,14 +3,14 @@
 #include "compare.h"
 #include "testValues.h"
 
-#include "../physics/misc/toString.h"
+#include <Physics3D/misc/toString.h>
 
-#include "../physics/math/linalg/vec.h"
-#include "../physics/math/linalg/quat.h"
-#include "../physics/math/linalg/mat.h"
-#include "../physics/math/linalg/trigonometry.h"
-#include "../physics/math/rotation.h"
-#include "../physics/math/linalg/commonMatrices.h"
+#include <Physics3D/math/linalg/vec.h>
+#include <Physics3D/math/linalg/quat.h>
+#include <Physics3D/math/linalg/mat.h>
+#include <Physics3D/math/linalg/trigonometry.h>
+#include <Physics3D/math/rotation.h>
+#include <Physics3D/math/linalg/commonMatrices.h>
 
 #include <cmath>
 

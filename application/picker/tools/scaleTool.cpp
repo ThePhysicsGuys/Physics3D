@@ -6,12 +6,12 @@
 #include "application.h"
 #include "selectionTool.h"
 #include "translationTool.h"
-#include "../physics/misc/toString.h"
+#include <Physics3D/misc/toString.h>
 #include "view/screen.h"
 #include "shader/shaders.h"
 
-#include "../physics/geometry/shapeLibrary.h"
-#include "../physics/math/rotation.h"
+#include <Physics3D/geometry/shapeLibrary.h>
+#include <Physics3D/math/rotation.h>
 #include "../graphics/visualShape.h"
 #include "../graphics/mesh/primitive.h"
 #include "../graphics/mesh/indexedMesh.h"

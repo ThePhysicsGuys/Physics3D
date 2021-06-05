@@ -3,17 +3,17 @@
 #include "compare.h"
 #include "generators.h"
 #include "estimateMotion.h"
-#include "../physics/misc/toString.h"
+#include <Physics3D/misc/toString.h>
 
-#include "../physics/geometry/shape.h"
-#include "../physics/geometry/shapeCreation.h"
-#include "../physics/part.h"
-#include "../physics/physical.h"
-#include "../physics/layer.h"
-#include "../physics/world.h"
+#include <Physics3D/geometry/shape.h>
+#include <Physics3D/geometry/shapeCreation.h>
+#include <Physics3D/part.h>
+#include <Physics3D/physical.h>
+#include <Physics3D/layer.h>
+#include <Physics3D/world.h>
 
-#include "../physics/constraints/constraintGroup.h"
-#include "../physics/constraints/ballConstraint.h"
+#include <Physics3D/constraints/constraintGroup.h>
+#include <Physics3D/constraints/ballConstraint.h>
 
 using namespace P3D;
 #define ASSERT(cond) ASSERT_TOLERANT(cond, 0.05)

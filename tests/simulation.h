@@ -1,11 +1,11 @@
 #pragma once
 
 
-#include "../physics/math/linalg/vec.h"
-#include "../physics/math/taylorExpansion.h"
-#include "../physics/math/rotation.h"
-#include "../physics/math/cframe.h"
-#include "../physics/motion.h"
+#include <Physics3D/math/linalg/vec.h>
+#include <Physics3D/math/taylorExpansion.h>
+#include <Physics3D/math/rotation.h>
+#include <Physics3D/math/cframe.h>
+#include <Physics3D/motion.h>
 
 #include <array>
 

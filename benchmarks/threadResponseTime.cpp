@@ -6,7 +6,7 @@
 #include <thread>
 #include <vector>
 
-#include "../physics/threading/threadPool.h"
+#include <Physics3D/threading/threadPool.h>
 
 using namespace std::chrono;
 

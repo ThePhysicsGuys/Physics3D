@@ -6,14 +6,14 @@
 #include "../shader/shaders.h"
 #include "../graphics/renderer.h"
 #include "../graphics/meshRegistry.h"
-#include "../physics/constraints/ballConstraint.h"
-#include "../physics/constraints/hingeConstraint.h"
-#include "../physics/constraints/barConstraint.h"
-#include "../physics/hardconstraints/sinusoidalPistonConstraint.h"
-#include "../physics/hardconstraints/motorConstraint.h"
-#include "../physics/misc/toString.h"
-#include "../physics/geometry/shapeLibrary.h"
-#include "../physics/physical.h"
+#include <Physics3D/constraints/ballConstraint.h>
+#include <Physics3D/constraints/hingeConstraint.h>
+#include <Physics3D/constraints/barConstraint.h>
+#include <Physics3D/hardconstraints/sinusoidalPistonConstraint.h>
+#include <Physics3D/hardconstraints/motorConstraint.h>
+#include <Physics3D/misc/toString.h>
+#include <Physics3D/geometry/shapeLibrary.h>
+#include <Physics3D/physical.h>
 
 #include <typeindex>
 

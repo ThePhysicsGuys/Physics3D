@@ -13,8 +13,8 @@
 #include "../graphics/path/path.h"
 #include "../graphics/gui/gui.h"
 
-#include "../physics/misc/physicsProfiler.h"
-#include "../physics/misc/toString.h"
+#include <Physics3D/misc/physicsProfiler.h>
+#include <Physics3D/misc/toString.h>
 
 #include "worlds.h"
 

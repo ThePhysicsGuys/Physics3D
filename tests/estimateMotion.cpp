@@ -1,7 +1,7 @@
 #include "estimateMotion.h"
 
-#include "../physics/math/linalg/mat.h"
-#include "../physics/math/linalg/trigonometry.h"
+#include <Physics3D/math/linalg/mat.h>
+#include <Physics3D/math/linalg/trigonometry.h>
 
 namespace P3D {
 Vec3 getVelocityBySimulation(const Motion& m, const Vec3& point, double deltaT) {

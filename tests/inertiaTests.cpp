@@ -1,9 +1,9 @@
 #include "testsMain.h"
 #include "compare.h"
-#include "../physics/misc/toString.h"
+#include <Physics3D/misc/toString.h>
 
-#include "../physics/inertia.h"
-#include "../physics/geometry/shapeLibrary.h"
+#include <Physics3D/inertia.h>
+#include <Physics3D/geometry/shapeLibrary.h>
 
 #include "simulation.h"
 

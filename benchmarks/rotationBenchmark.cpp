@@ -1,6 +1,6 @@
 #include "benchmark.h"
 
-#include "../physics/math/rotation.h"
+#include <Physics3D/math/rotation.h>
 #include <random>
 
 namespace P3D {

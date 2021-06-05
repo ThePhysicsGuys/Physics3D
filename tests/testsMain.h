@@ -1,7 +1,7 @@
 #pragma once
 
 #include "compare.h"
-#include "../physics/misc/toString.h"
+#include <Physics3D/misc/toString.h>
 #include <sstream>
 
 class TestInterface {

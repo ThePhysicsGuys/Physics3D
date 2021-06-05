@@ -15,7 +15,7 @@
 #include "../engine/event/windowEvent.h"
 #include "../application/input/standardInputHandler.h"
 #include "../graphics/gui/gui.h"
-#include "../physics/misc/toString.h"
+#include <Physics3D/misc/toString.h>
 #include "../graphics/gui/imgui/imguiStyle.h"
 
 namespace P3D::Application {

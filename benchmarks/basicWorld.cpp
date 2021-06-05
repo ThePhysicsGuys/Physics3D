@@ -1,10 +1,10 @@
 #include "worldBenchmark.h"
 
-#include "../physics/world.h"
-#include "../physics/geometry/shapeLibrary.h"
-#include "../physics/math/linalg/commonMatrices.h"
+#include <Physics3D/world.h>
+#include <Physics3D/geometry/shapeLibrary.h>
+#include <Physics3D/math/linalg/commonMatrices.h>
 
-#include "../physics/geometry/shapeCreation.h"
+#include <Physics3D/geometry/shapeCreation.h>
 
 namespace P3D {
 class BasicWorldBenchmark : public WorldBenchmark {

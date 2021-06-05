@@ -1,13 +1,13 @@
 #include "testsMain.h"
 
 #include "compare.h"
-#include "../physics/misc/toString.h"
+#include <Physics3D/misc/toString.h>
 
-#include "../physics/geometry/indexedShape.h"
-#include "../physics/geometry/shapeBuilder.h"
-#include "../physics/geometry/convexShapeBuilder.h"
-#include "../physics/geometry/shapeLibrary.h"
-#include "../physics/misc/validityHelper.h"
+#include <Physics3D/geometry/indexedShape.h>
+#include <Physics3D/geometry/shapeBuilder.h>
+#include <Physics3D/geometry/convexShapeBuilder.h>
+#include <Physics3D/geometry/shapeLibrary.h>
+#include <Physics3D/misc/validityHelper.h>
 
 using namespace P3D;
 TEST_CASE(testIndexedShape) {

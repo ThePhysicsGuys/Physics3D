@@ -7,8 +7,8 @@
 
 #include <array>
 
-#include "../physics/misc/toString.h"
-#include "../physics/math/taylorExpansion.h"
+#include <Physics3D/misc/toString.h>
+#include <Physics3D/math/taylorExpansion.h>
 
 using namespace P3D;
 #define DELTA_T 0.005

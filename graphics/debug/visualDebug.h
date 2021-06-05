@@ -2,7 +2,7 @@
 
 #include "profilerUI.h"
 #include "guiDebug.h"
-#include "../physics/datastructures/buffers.h"
+#include <Physics3D/datastructures/buffers.h>
 
 namespace P3D::Graphics {
 

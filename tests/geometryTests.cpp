@@ -1,23 +1,23 @@
 #include "testsMain.h"
 
 #include "compare.h"
-#include "../physics/misc/toString.h"
+#include <Physics3D/misc/toString.h>
 
-#include "../physics/math/linalg/vec.h"
-#include "../physics/math/linalg/mat.h"
-#include "../physics/math/linalg/trigonometry.h"
-#include "../physics/math/linalg/eigen.h"
-#include "../physics/math/utils.h"
-#include "../physics/math/boundingBox.h"
+#include <Physics3D/math/linalg/vec.h>
+#include <Physics3D/math/linalg/mat.h>
+#include <Physics3D/math/linalg/trigonometry.h>
+#include <Physics3D/math/linalg/eigen.h>
+#include <Physics3D/math/utils.h>
+#include <Physics3D/math/boundingBox.h>
 
-#include "../physics/geometry/shape.h"
+#include <Physics3D/geometry/shape.h>
 
-#include "../physics/geometry/shapeLibrary.h"
+#include <Physics3D/geometry/shapeLibrary.h>
 
 #include "testValues.h"
 #include "generators.h"
 
-#include "../physics/misc/cpuid.h"
+#include <Physics3D/misc/cpuid.h>
 
 using namespace P3D;
 #define ASSERT(condition) ASSERT_TOLERANT(condition, 0.00001)

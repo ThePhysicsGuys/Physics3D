@@ -18,8 +18,8 @@
 
 #include "../graphics/gui/color.h"
 
-#include "../physics/math/linalg/vec.h"
-#include "../physics/boundstree/filters/visibilityFilter.h"
+#include <Physics3D/math/linalg/vec.h>
+#include <Physics3D/boundstree/filters/visibilityFilter.h>
 
 #include "../util/resource/resourceManager.h"
 #include "../layer/shadowLayer.h"

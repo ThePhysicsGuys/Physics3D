@@ -5,15 +5,15 @@
 #include <iostream>
 #include <sstream>
 #include <cstddef>
-#include "../physics/externalforces/gravityForce.h"
+#include <Physics3D/externalforces/gravityForce.h>
 
-#include "../physics/geometry/shape.h"
-#include "../physics/geometry/shapeCreation.h"
-#include "../physics/math/linalg/commonMatrices.h"
+#include <Physics3D/geometry/shape.h>
+#include <Physics3D/geometry/shapeCreation.h>
+#include <Physics3D/math/linalg/commonMatrices.h>
 
-#include "../physics/geometry/shapeLibrary.h"
-#include "../physics/boundstree/filters/outOfBoundsFilter.h"
-#include "../physics/misc/physicsProfiler.h"
+#include <Physics3D/geometry/shapeLibrary.h>
+#include <Physics3D/boundstree/filters/outOfBoundsFilter.h>
+#include <Physics3D/misc/physicsProfiler.h>
 
 namespace P3D {
 WorldBenchmark::WorldBenchmark(const char* name, int tickCount) : Benchmark(name), world(0.005), tickCount(tickCount) {

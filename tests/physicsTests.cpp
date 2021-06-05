@@ -1,22 +1,22 @@
 #include "testsMain.h"
 
 #include "compare.h"
-#include "../physics/misc/toString.h"
+#include <Physics3D/misc/toString.h>
 #include "simulation.h"
 #include "generators.h"
 
-#include "../physics/world.h"
-#include "../physics/inertia.h"
-#include "../physics/math/linalg/trigonometry.h"
-#include "../physics/math/linalg/eigen.h"
-#include "../physics/math/constants.h"
-#include "../physics/geometry/shape.h"
-#include "../physics/geometry/shapeCreation.h"
-#include "../physics/geometry/shapeLibrary.h"
-#include "../physics/externalforces/gravityForce.h"
-#include "../physics/hardconstraints/motorConstraint.h"
-#include "../physics/hardconstraints/sinusoidalPistonConstraint.h"
-#include "../physics/hardconstraints/fixedConstraint.h"
+#include <Physics3D/world.h>
+#include <Physics3D/inertia.h>
+#include <Physics3D/math/linalg/trigonometry.h>
+#include <Physics3D/math/linalg/eigen.h>
+#include <Physics3D/math/constants.h>
+#include <Physics3D/geometry/shape.h>
+#include <Physics3D/geometry/shapeCreation.h>
+#include <Physics3D/geometry/shapeLibrary.h>
+#include <Physics3D/externalforces/gravityForce.h>
+#include <Physics3D/hardconstraints/motorConstraint.h>
+#include <Physics3D/hardconstraints/sinusoidalPistonConstraint.h>
+#include <Physics3D/hardconstraints/fixedConstraint.h>
 #include "../util/log.h"
 
 

@@ -3,21 +3,21 @@
 #include "worldBuilder.h"
 
 #include "application.h"
-#include "../physics/math/mathUtil.h"
-#include "../physics/geometry/shape.h"
-#include "../physics/geometry/shapeCreation.h"
+#include <Physics3D/math/mathUtil.h>
+#include <Physics3D/geometry/shape.h>
+#include <Physics3D/geometry/shapeCreation.h>
 
 #include "../graphics/gui/gui.h"
 
 #include "../util/resource/resourceLoader.h"
 #include "../util/resource/resourceManager.h"
 #include "../graphics/resource/textureResource.h"
-#include "../physics/math/constants.h"
+#include <Physics3D/math/constants.h>
 #include "view/screen.h"
 #include "ecs/components.h"
 
-#include "../physics/constraints/ballConstraint.h"
-#include "../physics/constraints/hingeConstraint.h"
+#include <Physics3D/constraints/ballConstraint.h>
+#include <Physics3D/constraints/hingeConstraint.h>
 
 namespace P3D::Application {
 

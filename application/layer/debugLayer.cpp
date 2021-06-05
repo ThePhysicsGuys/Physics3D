@@ -10,11 +10,11 @@
 #include "../graphics/mesh/indexedMesh.h"
 #include "../graphics/debug/visualDebug.h"
 
-#include "../physics/boundstree/boundsTree.h"
-#include "../physics/geometry/polyhedron.h"
-#include "../physics/math/bounds.h"
-#include "../physics/physical.h"
-#include "../physics/layer.h"
+#include <Physics3D/boundstree/boundsTree.h>
+#include <Physics3D/geometry/polyhedron.h>
+#include <Physics3D/math/bounds.h>
+#include <Physics3D/physical.h>
+#include <Physics3D/layer.h>
 
 #include "worlds.h"
 #include "view/screen.h"
