@@ -1,6 +1,6 @@
 #include "testsMain.h"
 
-#include "../physics/datastructures/boundsTree.h"
+#include "../physics/boundstree/boundsTree.h"
 
 #include "testsMain.h"
 

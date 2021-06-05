@@ -5,7 +5,7 @@
 #include <utility>
 
 #include "../misc/validityHelper.h"
-#include "../catchable_assert.h"
+#include "../misc/catchable_assert.h"
 
 namespace P3D {
 ConvexShapeBuilder::ConvexShapeBuilder(Vec3f* vertBuf, Triangle* triangleBuf, int vertexCount, int triangleCount, TriangleNeighbors* neighborBuf, int* removalBuffer, EdgePiece* newTriangleBuffer)

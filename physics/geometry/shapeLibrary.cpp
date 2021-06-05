@@ -8,7 +8,7 @@
 #include "../math/linalg/trigonometry.h"
 #include "../math/constants.h"
 
-namespace P3D::Library {
+namespace P3D::ShapeLibrary {
 
 	Vec3f icosahedronVertices[]{
 		Vec3f(0, 0.5, g<float>() / 2), Vec3f(0, 0.5, -g<float>() / 2), Vec3f(0, -0.5, -g<float>() / 2), Vec3f(0, -0.5, g<float>() / 2),
@@ -77,10 +77,6 @@ namespace P3D::Library {
 	const Polyhedron house(houseVertices, houseTriangles, 10, 16);
 	const Polyhedron wedge(wedgeVertices, wedgeTriangles, 6, 8);
 
-	Polyhedron createCube(float side) {
-		return createBox(side, side, side);
-	}
-
 	Polyhedron createBox(float width, float height, float depth) {
 		float dx = float(width / 2.0);
 		float dy = float(height / 2.0);
@@ -97,6 +93,10 @@ namespace P3D::Library {
 			Vec3f(-dx, +dy, +dz)
 		};
 		return Polyhedron(vertBuf, boxTriangles, 8, 12);
+	}
+
+	Polyhedron createCube(float side) {
+		return createBox(side, side, side);
 	}
 
 

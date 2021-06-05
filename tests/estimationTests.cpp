@@ -8,7 +8,7 @@
 
 using namespace P3D;
 TEST_CASE_SLOW(volumeApproximation) {
-	Polyhedron s = Library::house;
+	Polyhedron s = ShapeLibrary::house;
 
 	BoundingBox b = s.getBounds();
 
@@ -40,7 +40,7 @@ TEST_CASE_SLOW(volumeApproximation) {
 }
 
 TEST_CASE_SLOW(centerOfMassApproximation) {
-	Polyhedron s = Library::house;
+	Polyhedron s = ShapeLibrary::house;
 
 	BoundingBox b = s.getBounds();
 
@@ -75,7 +75,7 @@ TEST_CASE_SLOW(centerOfMassApproximation) {
 
 TEST_CASE_SLOW(inertiaApproximation) {
 
-	Polyhedron s = Library::house;
+	Polyhedron s = ShapeLibrary::house;
 
 	BoundingBox b = s.getBounds();
 

@@ -14,7 +14,7 @@
 #include "../../ecs/components.h"
 #include "../../worlds.h"
 
-#include "../physics/misc/filters/rayIntersectsBoundsFilter.h"
+#include "../physics/boundstree/filters/rayIntersectsBoundsFilter.h"
 
 #include <optional>
 

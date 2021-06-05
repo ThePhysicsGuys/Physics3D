@@ -8,7 +8,7 @@
 #include "../graphics/gui/guiUtils.h"
 #include "../graphics/path/path.h"
 #include "../graphics/resource/textureResource.h"
-#include "../physics/misc/filters/visibilityFilter.h"
+#include "../physics/boundstree/filters/visibilityFilter.h"
 #include "../util/resource/resourceManager.h"
 #include "selectionTool.h"
 

@@ -95,7 +95,7 @@ void init(const ::Util::ParsedArgs& cmdArgs) {
 	
 	Log::info("Creating player");
 	// Player
-	screen.camera.attachment = new ExtendedPart(polyhedronShape(Library::createPrism(50, 0.3f, 1.5f)), GlobalCFrame(), {1.0, 5.0, 0.0}, "Player");
+	screen.camera.attachment = new ExtendedPart(polyhedronShape(ShapeLibrary::createPrism(50, 0.3f, 1.5f)), GlobalCFrame(), {1.0, 5.0, 0.0}, "Player");
 
 	if(!world.isValid()) {
 		throw "World not valid!";

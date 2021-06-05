@@ -2,7 +2,6 @@
 
 #include "../../math/linalg/vec.h"
 #include "../../math/bounds.h"
-#include "../../datastructures/boundsTree.h"
 #include "../../part.h"
 
 namespace P3D {

@@ -1,7 +1,7 @@
 #include "boundsTree.h"
 
 
-#include "aligned_alloc.h"
+#include "../datastructures/aligned_alloc.h"
 
 namespace P3D {
 // naive implementation, to be optimized

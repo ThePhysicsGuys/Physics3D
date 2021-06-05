@@ -20,7 +20,7 @@
 namespace P3D::Application {
 
 void ConstraintLayer::onInit(Engine::Registry64& registry) {
-	Graphics::VisualShape prismShape(Library::createPrism(6, 0.5, 1.0));
+	Graphics::VisualShape prismShape(ShapeLibrary::createPrism(6, 0.5, 1.0));
 	this->hexagon = Graphics::MeshRegistry::addMeshShape(prismShape);
 
 }

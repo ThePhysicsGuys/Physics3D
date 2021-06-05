@@ -2,6 +2,9 @@
 
 #include "../../../util/log.h"
 #include "../../math/linalg/trigonometry.h"
+#include "../../math/position.h"
+#include "../../math/bounds.h"
+#include "../../part.h"
 
 namespace P3D {
 VisibilityFilter::VisibilityFilter(const Position& origin, Vec3 normals[5], double maxDepth) :

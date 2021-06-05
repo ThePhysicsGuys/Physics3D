@@ -17,7 +17,7 @@
 #include "testValues.h"
 #include "generators.h"
 
-#include "../physics/cpuid.h"
+#include "../physics/misc/cpuid.h"
 
 using namespace P3D;
 #define ASSERT(condition) ASSERT_TOLERANT(condition, 0.00001)
@@ -62,7 +62,7 @@ bool isSymmetricTolerant(const Matrix<T, Size, Size>& m, Tol tolerance) {
 #define ASSERT_DIAGONAL(matrix) ASSERT_DIAGONAL_TOLERANT(matrix, 0.00000001)
 
 TEST_CASE(shapeVolume) {
-	Polyhedron boxShape = Library::createBox(2, 2, 2);
+	Polyhedron boxShape = ShapeLibrary::createBox(2, 2, 2);
 
 	CFramef transform(Vec3f(0.3f, 0.7f, -3.5f), Rotationf::fromEulerAngles(0.7f, 0.2f, 0.3f));
 
@@ -73,7 +73,7 @@ TEST_CASE(shapeVolume) {
 }
 
 TEST_CASE(shapeCenterOfMass) {
-	Polyhedron boxShape = Library::createBox(2.0, 2.0, 2.0);
+	Polyhedron boxShape = ShapeLibrary::createBox(2.0, 2.0, 2.0);
 
 	CFramef transform(Vec3f(0.3f, 0.7f, -3.5f), Rotationf::fromEulerAngles(0.7f, 0.2f, 0.3f));
 
@@ -83,7 +83,7 @@ TEST_CASE(shapeCenterOfMass) {
 }
 
 /*TEST_CASE(shapeInertiaMatrix) {
-	Polyhedron boxShape = Library::createBox(2.0, 2.0, 2.0);
+	Polyhedron boxShape = ShapeLibrary::createBox(2.0, 2.0, 2.0);
 
 	CFramef transform(Vec3f(0,0,0), rotationMatrixfromEulerAngles(0.7f, 0.2f, 0.3f));
 	Polyhedron transformedShape = boxShape.localToGlobal(transform);
@@ -92,15 +92,15 @@ TEST_CASE(shapeCenterOfMass) {
 
 	logf("Inertia of transformed boxShape: %s", str(transformedShape.getInertiaAroundCenterOfMass()).c_str());
 
-	Polyhedron h = Library::house;
-	Polyhedron newHouse = Library::house.translated(-Vec3f(Library::house.getCenterOfMass()));
+	Polyhedron h = ShapeLibrary::house;
+	Polyhedron newHouse = ShapeLibrary::house.translated(-Vec3f(ShapeLibrary::house.getCenterOfMass()));
 	Polyhedron rotatedHouse = newHouse.rotated(rotationMatrixfromEulerAngles(0.0, 0.3, 0.0));
 	logf("Inertia of House: %s", str(newHouse.getInertiaAroundCenterOfMass()).c_str());
 	logf("Inertia of Rotated House: %s", str(rotatedHouse.getInertiaAroundCenterOfMass()).c_str());
 }*/
 
 TEST_CASE(shapeInertiaRotationInvariance) {
-	Polyhedron testShape = Library::house.translated(-Vec3f(Library::house.getCenterOfMass()));
+	Polyhedron testShape = ShapeLibrary::house.translated(-Vec3f(ShapeLibrary::house.getCenterOfMass()));
 
 	Vec3 testMoment = Vec3(0.7, -3.2, 4.8);
 	Vec3 momentResult = ~testShape.getInertiaAroundCenterOfMass() * testMoment;
@@ -132,7 +132,7 @@ TEST_CASE(shapeInertiaRotationInvariance) {
 }
 
 TEST_CASE(shapeInertiaEigenValueInvariance) {
-	Polyhedron testShape = Library::house.translated(-Vec3f(Library::house.getCenterOfMass()));
+	Polyhedron testShape = ShapeLibrary::house.translated(-Vec3f(ShapeLibrary::house.getCenterOfMass()));
 
 	EigenValues<double, 3> initialEigenValues = getEigenDecomposition(testShape.getInertiaAroundCenterOfMass()).eigenValues;
 
@@ -155,8 +155,8 @@ TEST_CASE(testRayIntersection) {
 }
 
 TEST_CASE(testGetFurthestPointInDirection) {
-	for(Vec3f vertex : Library::icosahedron.iterVertices()) {
-		ASSERT(Library::icosahedron.furthestInDirection(vertex) == vertex);
+	for(Vec3f vertex : ShapeLibrary::icosahedron.iterVertices()) {
+		ASSERT(ShapeLibrary::icosahedron.furthestInDirection(vertex) == vertex);
 	}
 }
 

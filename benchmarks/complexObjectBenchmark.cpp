@@ -12,8 +12,8 @@ public:
 
 	void init() {
 		createFloor(50, 50, 10);
-		Polyhedron object = Library::icosahedron;
-		world.addPart(new Part(polyhedronShape(Library::createSphere(1.0, 7)), GlobalCFrame(0, 2.0, 0), basicProperties));
+		Polyhedron object = ShapeLibrary::icosahedron;
+		world.addPart(new Part(polyhedronShape(ShapeLibrary::createSphere(1.0, 7)), GlobalCFrame(0, 2.0, 0), basicProperties));
 	}
 } complexObjectBench;
 };

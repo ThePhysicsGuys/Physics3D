@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../math/bounds.h"
-#include "../../datastructures/boundsTree.h"
+#include "../boundsTree.h"
 #include "../../part.h"
 
 namespace P3D {

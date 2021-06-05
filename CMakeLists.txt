@@ -64,8 +64,6 @@ add_library(physics STATIC
   physics/world.cpp
   physics/worldPhysics.cpp
   physics/inertia.cpp
-  physics/cpuid.cpp
-  physics/serializeBasicTypes.cpp
 
   physics/math/linalg/eigen.cpp
   physics/math/linalg/trigonometry.cpp
@@ -84,10 +82,13 @@ add_library(physics STATIC
   physics/geometry/shapeClass.cpp
   physics/geometry/shapeCreation.cpp
   physics/geometry/builtinShapeClasses.cpp
+  physics/geometry/shapeLibrary.cpp
 
   physics/datastructures/aligned_alloc.cpp
-  physics/datastructures/boundsTree.cpp
 
+  physics/boundstree/boundsTree.cpp
+  physics/boundstree/filters/visibilityFilter.cpp
+  
   physics/hardconstraints/fixedConstraint.cpp
   physics/hardconstraints/hardConstraint.cpp
   physics/hardconstraints/hardPhysicalConnection.cpp
@@ -105,12 +106,13 @@ add_library(physics STATIC
   physics/softlinks/magneticLink.cpp
   physics/softlinks/alignmentLink.cpp
 
-  physics/misc/serialization.cpp
-  physics/misc/shapeLibrary.cpp
-  physics/misc/validityHelper.cpp
-  physics/misc/filters/visibilityFilter.cpp
   physics/misc/debug.cpp
+  physics/misc/cpuid.cpp
+  physics/misc/validityHelper.cpp
   physics/misc/physicsProfiler.cpp
+  
+  physics/misc/serialization/serialization.cpp
+  physics/misc/serialization/serializeBasicTypes.cpp
 )
 target_link_libraries(physics util)
 

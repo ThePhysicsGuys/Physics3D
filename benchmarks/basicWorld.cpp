@@ -13,7 +13,7 @@ public:
 
 	void init() {
 		createFloor(50, 50, 10);
-		//Polyhedron cube = Library::createCube(0.9);
+		//Polyhedron cube = ShapeLibrary::createCube(0.9);
 
 		for(int x = -5; x < 5; x++) {
 			for(int y = 0; y < 5; y++) {

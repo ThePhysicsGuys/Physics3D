@@ -5,8 +5,7 @@
 #include "geometry/intersection.h"
 
 #include "misc/validityHelper.h"
-
-#include "catchable_assert.h"
+#include "misc/catchable_assert.h"
 #include <stdexcept>
 #include <set>
 #include <utility>

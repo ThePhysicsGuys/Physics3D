@@ -12,7 +12,7 @@
 #include "../physics/math/linalg/commonMatrices.h"
 
 #include "../physics/geometry/shapeLibrary.h"
-#include "../physics/misc/filters/outOfBoundsFilter.h"
+#include "../physics/boundstree/filters/outOfBoundsFilter.h"
 #include "../physics/misc/physicsProfiler.h"
 
 namespace P3D {

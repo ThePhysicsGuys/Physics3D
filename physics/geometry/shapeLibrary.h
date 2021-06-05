@@ -2,14 +2,14 @@
 
 #include "../geometry/polyhedron.h"
 
-namespace P3D::Library {
+namespace P3D::ShapeLibrary {
 extern const Polyhedron icosahedron;
 extern const Polyhedron trianglePyramid;
 extern const Polyhedron house;
 extern const Polyhedron wedge;
 
-Polyhedron createCube(float side);
 Polyhedron createBox(float width, float height, float depth);
+Polyhedron createCube(float side);
 
 /*
 Creates a prism oriented along the Z axis with the given number of sides

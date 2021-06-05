@@ -5,7 +5,7 @@
 #include "../math/linalg/largeMatrix.h"
 #include "../math/cframe.h"
 #include "../motion.h"
-#include "../datastructures/boundsTree.h"
+#include "../boundstree/boundsTree.h"
 
 #include <cmath>
 

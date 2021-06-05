@@ -19,7 +19,7 @@
 #include "../graphics/gui/color.h"
 
 #include "../physics/math/linalg/vec.h"
-#include "../physics/misc/filters/visibilityFilter.h"
+#include "../physics/boundstree/filters/visibilityFilter.h"
 
 #include "../util/resource/resourceManager.h"
 #include "../layer/shadowLayer.h"

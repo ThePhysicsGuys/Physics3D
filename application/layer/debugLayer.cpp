@@ -10,7 +10,7 @@
 #include "../graphics/mesh/indexedMesh.h"
 #include "../graphics/debug/visualDebug.h"
 
-#include "../physics/datastructures/boundsTree.h"
+#include "../physics/boundstree/boundsTree.h"
 #include "../physics/geometry/polyhedron.h"
 #include "../physics/math/bounds.h"
 #include "../physics/physical.h"

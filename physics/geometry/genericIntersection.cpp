@@ -11,8 +11,7 @@
 #include "polyhedron.h"
 
 #include "../misc/validityHelper.h"
-
-#include "../catchable_assert.h"
+#include "../misc/catchable_assert.h"
 
 #include <stdexcept>
 

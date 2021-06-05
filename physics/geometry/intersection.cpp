@@ -11,7 +11,7 @@
 #include "../misc/validityHelper.h"
 #include "shapeClass.h"
 
-#include "../catchable_assert.h"
+#include "../misc/catchable_assert.h"
 
 #include <algorithm>
 

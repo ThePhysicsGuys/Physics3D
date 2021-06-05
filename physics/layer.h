@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "datastructures/boundsTree.h"
+#include "boundstree/boundsTree.h"
 #include "part.h"
 #include "colissionBuffer.h"
 

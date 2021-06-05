@@ -47,7 +47,7 @@ namespace P3D::Application {
 
 	static Polyhedron createBoxOnStick(float boxSide, float stickRadius) {
 		Vec2f vecs[] { { 0.0f, stickRadius }, { 1.0f - boxSide, stickRadius }, { 1.0f - boxSide, boxSide / sqrtf(2.0f) }, { 1.0f, boxSide / sqrtf(2.0f) }};
-		return Library::createRevolvedShape(0.0f, vecs, 4, 1.0f, 4).rotated(Rotation::rotZ(3.14159265359 / 4));
+		return ShapeLibrary::createRevolvedShape(0.0f, vecs, 4, 1.0f, 4).rotated(Rotation::rotZ(3.14159265359 / 4));
 	}
 	
 	void ScaleTool::onRegister() {
@@ -64,9 +64,9 @@ namespace P3D::Application {
 		// Create handle shapes
 		handleShape = VisualShape::generateSplitNormalsShape(createBoxOnStick(0.2f, 0.03f));
 		handleMesh = new IndexedMesh(handleShape);
-		centerShape = VisualShape::generateSplitNormalsShape(Library::createCube(0.2f));
+		centerShape = VisualShape::generateSplitNormalsShape(ShapeLibrary::createCube(0.2f));
 		centerMesh = new IndexedMesh(centerShape);
-		quadShape = VisualShape::generateSplitNormalsShape(Library::createBox(0.02, 0.25, 0.25).translated({ 0, 0.5, 0.5 }));
+		quadShape = VisualShape::generateSplitNormalsShape(ShapeLibrary::createBox(0.02, 0.25, 0.25).translated({ 0, 0.5, 0.5 }));
 		quadMesh = new IndexedMesh(quadShape);
 		
 		// Set idle status

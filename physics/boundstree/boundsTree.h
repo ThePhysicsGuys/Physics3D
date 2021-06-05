@@ -3,8 +3,8 @@
 #include "../math/fix.h"
 #include "../math/position.h"
 #include "../math/bounds.h"
-#include "iteratorEnd.h"
-#include "iteratorFactory.h"
+#include "../datastructures/iteratorEnd.h"
+#include "../datastructures/iteratorFactory.h"
 
 #include <cstdint>
 #include <utility>

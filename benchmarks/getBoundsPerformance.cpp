@@ -11,7 +11,7 @@ class GetBounds : public Benchmark {
 public:
 	GetBounds() : Benchmark("getBounds") {}
 
-	void init() override { this->poly = Library::createSphere(1.0, 2); }
+	void init() override { this->poly = ShapeLibrary::createSphere(1.0, 2); }
 	void run() override {
 		Mat3f m = rotationMatrixfromEulerAngles(0.1f, 0.05f, 0.7f);
 		for(size_t i = 0; i < 10000000; i++) {

@@ -77,7 +77,7 @@ TEST_CASE(buildConvexShape) {
 	Triangle newIcosaTriangles[40];
 	TriangleNeighbors icosaNeighBuf[40];
 
-	ConvexShapeBuilder icosaBuilder(Library::icosahedron, newIcosaVerts, newIcosaTriangles, icosaNeighBuf, builderRemovalBuffer, builderAddingBuffer);
+	ConvexShapeBuilder icosaBuilder(ShapeLibrary::icosahedron, newIcosaVerts, newIcosaTriangles, icosaNeighBuf, builderRemovalBuffer, builderAddingBuffer);
 
 	ASSERT_TRUE(isValid(icosaBuilder.toIndexedShape()));
 

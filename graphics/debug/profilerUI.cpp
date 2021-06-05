@@ -14,7 +14,7 @@
 #include "gui/gui.h"
 #include "font.h"
 #include "../physics/math/constants.h"
-#include "../physics/datastructures/boundsTree.h"
+#include "../physics/boundstree/boundsTree.h"
 
 namespace P3D::Graphics {
 

@@ -1,8 +1,9 @@
 #pragma once
 
 #include "../../math/bounds.h"
-#include "../../datastructures/boundsTree.h"
+#include "../../math/ray.h"
 #include "../../part.h"
+#include "../boundsTree.h"
 
 namespace P3D {
 struct RayIntersectBoundsFilter {

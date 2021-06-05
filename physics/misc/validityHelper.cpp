@@ -8,7 +8,7 @@
 #include "../geometry/indexedShape.h"
 #include "../../util/log.h"
 
-#include "../datastructures/boundsTree.h"
+#include "../boundstree/boundsTree.h"
 #include "../part.h"
 #include "../physical.h"
 

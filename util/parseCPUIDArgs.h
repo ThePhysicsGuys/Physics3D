@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../physics/cpuid.h"
+#include "../physics/misc/cpuid.h"
 
 #include "cmdParser.h"
 

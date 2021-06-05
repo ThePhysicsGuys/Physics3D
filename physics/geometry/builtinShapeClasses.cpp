@@ -62,7 +62,7 @@ Vec3f CubeClass::furthestInDirection(const Vec3f& direction) const {
 }
 
 Polyhedron CubeClass::asPolyhedron() const {
-	return Library::createCube(2.0);
+	return ShapeLibrary::createCube(2.0);
 }
 
 
@@ -108,7 +108,7 @@ Vec3f SphereClass::furthestInDirection(const Vec3f& direction) const {
 }
 
 Polyhedron SphereClass::asPolyhedron() const {
-	return Library::createSphere(1.0, 3);
+	return ShapeLibrary::createSphere(1.0, 3);
 }
 
 void SphereClass::setScaleX(double newX, DiagonalMat3& scale) const {
@@ -216,7 +216,7 @@ Vec3f CylinderClass::furthestInDirection(const Vec3f& direction) const {
 }
 
 Polyhedron CylinderClass::asPolyhedron() const {
-	return Library::createPrism(64, 1.0, 2.0);
+	return ShapeLibrary::createPrism(64, 1.0, 2.0);
 }
 
 void CylinderClass::setScaleX(double newX, DiagonalMat3& scale) const {

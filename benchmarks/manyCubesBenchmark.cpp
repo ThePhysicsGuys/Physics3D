@@ -29,7 +29,7 @@ public:
 		for(double x = minX; x < maxX; x += 1.01) {
 			for(double y = minY; y < maxY; y += 1.01) {
 				for(double z = minZ; z < maxZ; z += 1.01) {
-					Part* newCube = new Part(polyhedronShape(Library::createBox(1.0, 1.0, 1.0)), ref.localToGlobal(CFrame(x, y, z)), {1.0, 0.2, 0.5});
+					Part* newCube = new Part(polyhedronShape(ShapeLibrary::createBox(1.0, 1.0, 1.0)), ref.localToGlobal(CFrame(x, y, z)), {1.0, 0.2, 0.5});
 					world.addPart(newCube);
 				}
 			}

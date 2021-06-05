@@ -1,7 +1,7 @@
 #include "triangleMesh.h"
 
 #include "../misc/validityHelper.h"
-#include "../cpuid.h"
+#include "../misc/cpuid.h"
 
 #include <stddef.h>
 #include <stdlib.h>

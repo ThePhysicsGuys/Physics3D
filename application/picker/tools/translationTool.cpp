@@ -51,7 +51,7 @@ namespace P3D::Application {
 			{ 1.0f - arrowHeadLength, arrowHeadRadius }
 		};
 		
-		return Library::createRevolvedShape(0.0f, contour, 3, 1.0f, 24);
+		return ShapeLibrary::createRevolvedShape(0.0f, contour, 3, 1.0f, 24);
 	}
 	
 	void TranslationTool::onRegister() {
@@ -68,9 +68,9 @@ namespace P3D::Application {
 		// Create handle shapes
 		handleShape = VisualShape::generateSplitNormalsShape(createArrow(0.3f, 0.07f, 0.03f));
 		handleMesh = new IndexedMesh(handleShape);
-		centerShape = VisualShape::generateSmoothNormalsShape(Library::createSphere(0.13f, 3));
+		centerShape = VisualShape::generateSmoothNormalsShape(ShapeLibrary::createSphere(0.13f, 3));
 		centerMesh = new IndexedMesh(centerShape);
-		quadShape = VisualShape::generateSplitNormalsShape(Library::createBox(0.02, 0.25, 0.25).translated({0, 0.5, 0.5}));
+		quadShape = VisualShape::generateSplitNormalsShape(ShapeLibrary::createBox(0.02, 0.25, 0.25).translated({0, 0.5, 0.5}));
 		quadMesh = new IndexedMesh(quadShape);
 
 		// Set idle status

@@ -25,7 +25,7 @@
 #include "../physics/layer.h"
 #include "../physics/world.h"
 
-#include "../physics/datastructures/boundsTree.h"
+#include "../physics/boundstree/boundsTree.h"
 
 namespace P3D {
 template<typename T>
