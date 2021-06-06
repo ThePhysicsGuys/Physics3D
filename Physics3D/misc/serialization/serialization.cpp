@@ -19,7 +19,7 @@
 #include "../../constraints/ballConstraint.h"
 #include "../../constraints/hingeConstraint.h"
 #include "../../constraints/barConstraint.h"
-#include "../../externalforces/gravityForce.h"
+#include "../../externalforces/directionalGravity.h"
 
 namespace P3D {
 #define CURRENT_VERSION_ID 2

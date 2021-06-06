@@ -105,6 +105,9 @@ add_library(Physics3D STATIC
   Physics3D/softlinks/elasticLink.cpp
   Physics3D/softlinks/magneticLink.cpp
   Physics3D/softlinks/alignmentLink.cpp
+  
+  Physics3D/externalforces/directionalGravity.cpp
+  Physics3D/externalforces/externalForce.cpp
 
   Physics3D/misc/debug.cpp
   Physics3D/misc/cpuid.cpp

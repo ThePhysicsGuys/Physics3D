@@ -13,7 +13,7 @@
 #include <Physics3D/geometry/shape.h>
 #include <Physics3D/geometry/shapeCreation.h>
 #include <Physics3D/geometry/shapeLibrary.h>
-#include <Physics3D/externalforces/gravityForce.h>
+#include <Physics3D/externalforces/directionalGravity.h>
 #include <Physics3D/hardconstraints/motorConstraint.h>
 #include <Physics3D/hardconstraints/sinusoidalPistonConstraint.h>
 #include <Physics3D/hardconstraints/fixedConstraint.h>

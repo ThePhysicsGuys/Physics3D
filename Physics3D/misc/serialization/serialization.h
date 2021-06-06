@@ -23,7 +23,7 @@
 #include "../../hardconstraints/fixedConstraint.h"
 #include "../../hardconstraints/motorConstraint.h"
 #include "../../constraints/ballConstraint.h"
-#include "../../externalforces/gravityForce.h"
+#include "../../externalforces/directionalGravity.h"
 
 #include "serializeBasicTypes.h"
 #include "sharedObjectSerializer.h"

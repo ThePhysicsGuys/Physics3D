@@ -19,7 +19,7 @@
 #include <Physics3D/math/linalg/commonMatrices.h>
 #include <Physics3D/part.h>
 #include <Physics3D/world.h>
-#include <Physics3D/externalforces/gravityForce.h>
+#include <Physics3D/externalforces/directionalGravity.h>
 #include <Physics3D/misc/physicsProfiler.h>
 #include <Physics3D/hardconstraints/motorConstraint.h>
 #include <Physics3D/hardconstraints/sinusoidalPistonConstraint.h>

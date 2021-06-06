@@ -12,7 +12,7 @@
 #include <Physics3D/world.h>
 #include "../worlds.h"
 
-#include <Physics3D/externalforces/gravityForce.h>
+#include <Physics3D/externalforces/directionalGravity.h>
 #include <Physics3D/misc/toString.h>
 #include <Physics3D/misc/serialization/serialization.h>
 

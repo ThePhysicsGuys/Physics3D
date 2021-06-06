@@ -5,7 +5,7 @@
 #include <iostream>
 #include <sstream>
 #include <cstddef>
-#include <Physics3D/externalforces/gravityForce.h>
+#include <Physics3D/externalforces/directionalGravity.h>
 
 #include <Physics3D/geometry/shape.h>
 #include <Physics3D/geometry/shapeCreation.h>

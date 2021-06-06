@@ -1,22 +1,21 @@
 #pragma once
 
 #include <vector>
+#include <mutex>
+#include <memory>
 
 #include "part.h"
 #include "physical.h"
 #include "constraints/constraintGroup.h"
 #include "softlinks/softLink.h"
+#include "externalforces/externalForce.h"
 #include "datastructures/iterators.h"
 #include "datastructures/iteratorEnd.h"
 #include "layer.h"
 #include "colissionBuffer.h"
 #include "threading/threadPool.h"
-#include <mutex>
-
-#include <memory>
 
 namespace P3D {
-class ExternalForce;
 class WorldLayer;
 
 template<bool IsConst>
@@ -237,9 +236,6 @@ public:
 	WorldPrototype(WorldPrototype&&) = delete;
 	WorldPrototype& operator=(WorldPrototype&&) = delete;
 
-
-
-
 	virtual void tick();
 
 	virtual void addPart(Part* part, int layerIndex = 0);
@@ -315,26 +311,6 @@ public:
 		} else {
 			return IteratorFactoryWithEnd<ConstWorldIterator>(ConstWorldIterator());
 		}
-	}
-};
-
-class ExternalForce {
-public:
-	virtual void apply(WorldPrototype* world) = 0;
-	virtual double getPotentialEnergyForObject(const WorldPrototype* world, const Part&) const = 0;
-	virtual double getPotentialEnergyForObject(const WorldPrototype* world, const MotorizedPhysical& phys) const {
-		double total = 0.0;
-		for(const Part& p : phys.rigidBody) {
-			total += this->getPotentialEnergyForObject(world, p);
-		}
-		return total;
-	}
-	virtual double getTotalPotentialEnergyForThisForce(const WorldPrototype* world) const {
-		double total = 0.0;
-		for(MotorizedPhysical* p : world->iterPhysicals()) {
-			total += this->getPotentialEnergyForObject(world, *p);
-		}
-		return total;
 	}
 };
 

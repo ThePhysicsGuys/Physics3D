@@ -130,6 +130,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="constraints\barConstraint.cpp" />
+    <ClCompile Include="externalforces\externalForce.cpp" />
+    <ClCompile Include="externalforces\directionalGravity.cpp" />
     <ClCompile Include="misc\cpuid.cpp" />
     <ClCompile Include="datastructures\aligned_alloc.cpp" />
     <ClCompile Include="boundstree\boundsTree.cpp" />
@@ -185,6 +187,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="constraints\barConstraint.h" />
+    <ClInclude Include="externalforces\externalForce.h" />
     <ClInclude Include="misc\cpuid.h" />
     <ClInclude Include="datastructures\aligned_alloc.h" />
     <ClInclude Include="boundstree\boundsTree.h" />
@@ -268,7 +271,7 @@
     <ClInclude Include="boundstree\filters\outOfBoundsFilter.h" />
     <ClInclude Include="boundstree\filters\rayIntersectsBoundsFilter.h" />
     <ClInclude Include="boundstree\filters\visibilityFilter.h" />
-    <ClInclude Include="externalforces\gravityForce.h" />
+    <ClInclude Include="externalforces\directionalGravity.h" />
     <ClInclude Include="geometry\shapeLibrary.h" />
     <ClInclude Include="misc\toString.h" />
     <ClInclude Include="misc\validityHelper.h" />
