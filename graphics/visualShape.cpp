@@ -1,6 +1,6 @@
 #include "visualShape.h"
 
-#include "../physics/geometry/polyhedron.h"
+#include <Physics3D/geometry/polyhedron.h>
 
 namespace P3D::Graphics {
 

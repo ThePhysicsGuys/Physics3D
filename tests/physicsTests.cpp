@@ -1,27 +1,26 @@
 #include "testsMain.h"
 
 #include "compare.h"
-#include "../physics/misc/toString.h"
+#include <Physics3D/misc/toString.h>
 #include "simulation.h"
 #include "generators.h"
 
-#define _USE_MATH_DEFINES
-#include <math.h>
-
-#include "../physics/world.h"
-#include "../physics/inertia.h"
-#include "../physics/misc/shapeLibrary.h"
-#include "../physics/math/linalg/trigonometry.h"
-#include "../physics/math/linalg/eigen.h"
-#include "../physics/geometry/shape.h"
-#include "../physics/geometry/shapeCreation.h"
-#include "../physics/externalforces/gravityForce.h"
-#include "../physics/hardconstraints/motorConstraint.h"
-#include "../physics/hardconstraints/sinusoidalPistonConstraint.h"
-#include "../physics/hardconstraints/fixedConstraint.h"
+#include <Physics3D/world.h>
+#include <Physics3D/inertia.h>
+#include <Physics3D/math/linalg/trigonometry.h>
+#include <Physics3D/math/linalg/eigen.h>
+#include <Physics3D/math/constants.h>
+#include <Physics3D/geometry/shape.h>
+#include <Physics3D/geometry/shapeCreation.h>
+#include <Physics3D/geometry/shapeLibrary.h>
+#include <Physics3D/externalforces/gravityForce.h>
+#include <Physics3D/hardconstraints/motorConstraint.h>
+#include <Physics3D/hardconstraints/sinusoidalPistonConstraint.h>
+#include <Physics3D/hardconstraints/fixedConstraint.h>
 #include "../util/log.h"
 
 
+using namespace P3D;
 #define REMAINS_CONSTANT(v) REMAINS_CONSTANT_TOLERANT(v, 0.0005)
 #define ASSERT(v) ASSERT_TOLERANT(v, 0.0005)
 
@@ -44,8 +43,8 @@ TEST_CASE_SLOW(positionInvariance) {
 		WorldPrototype world(DELTA_T);
 		world.addExternalForce(new DirectionalGravity(Vec3(0, -1, 0)));
 
-		Part housePart(polyhedronShape(Library::house), origin.localToGlobal(houseRelative), {1.0, 1.0, 0.7});
-		Part icosaPart(polyhedronShape(Library::icosahedron), origin.localToGlobal(icosaRelative), {10.0, 0.7, 0.7});
+		Part housePart(polyhedronShape(ShapeLibrary::house), origin.localToGlobal(houseRelative), {1.0, 1.0, 0.7});
+		Part icosaPart(polyhedronShape(ShapeLibrary::icosahedron), origin.localToGlobal(icosaRelative), {10.0, 0.7, 0.7});
 		Part flooring(boxShape(200.0, 0.3, 200.0), origin, {1.0, 1.0, 0.7});
 
 		world.addPart(&housePart);
@@ -72,8 +71,8 @@ TEST_CASE_SLOW(rotationInvariance) {
 		WorldPrototype world(DELTA_T);
 		world.addExternalForce(new DirectionalGravity(Vec3(0, -1, 0)));
 
-		Part housePart(polyhedronShape(Library::house), origin.localToGlobal(houseRelative), {1.0, 1.0, 0.7});
-		Part icosaPart(polyhedronShape(Library::icosahedron), origin.localToGlobal(icosaRelative), {10.0, 0.7, 0.7});
+		Part housePart(polyhedronShape(ShapeLibrary::house), origin.localToGlobal(houseRelative), {1.0, 1.0, 0.7});
+		Part icosaPart(polyhedronShape(ShapeLibrary::icosahedron), origin.localToGlobal(icosaRelative), {10.0, 0.7, 0.7});
 		Part flooring(boxShape(200.0, 0.3, 200.0), origin, {1.0, 1.0, 0.7});
 
 		world.addPart(&housePart);
@@ -101,7 +100,7 @@ TEST_CASE(applyForceToRotate) {
 }
 
 TEST_CASE(momentToAngularVelocity) {
-	Part part(boxShape(1.0, 1.0, 1.0), GlobalCFrame(Rotation::rotY(M_PI / 2)), {1.0, 1.0, 0.7});
+	Part part(boxShape(1.0, 1.0, 1.0), GlobalCFrame(Rotation::rotY(PI / 2)), {1.0, 1.0, 0.7});
 	part.ensureHasParent();
 	MotorizedPhysical& p = *part.parent->mainPhysical;
 
@@ -309,8 +308,8 @@ TEST_CASE(inelasticColission2) {
 
 TEST_CASE(testChangeInertialBasis) {
 	Rotation rotation = Rotation::fromEulerAngles(0.6, 0.3, 0.7);
-	Polyhedron rotatedTriangle = Library::trianglePyramid.rotated(static_cast<Rotationf>(rotation));
-	SymmetricMat3 triangleInertia = Library::trianglePyramid.getInertia(CFrame());
+	Polyhedron rotatedTriangle = ShapeLibrary::trianglePyramid.rotated(static_cast<Rotationf>(rotation));
+	SymmetricMat3 triangleInertia = ShapeLibrary::trianglePyramid.getInertia(CFrame());
 	SymmetricMat3 rotatedTriangleInertia = rotatedTriangle.getInertia(CFrame());
 
 	ASSERT(getEigenDecomposition(triangleInertia).eigenValues == getEigenDecomposition(rotatedTriangleInertia).eigenValues);
@@ -358,7 +357,7 @@ TEST_CASE(testMultiPartPhysicalRotated) {
 }
 
 TEST_CASE(testShapeNativeScaling) {
-	Polyhedron testPoly = Library::createPointyPrism(4, 1.0f, 1.0f, 0.5f, 0.5f);
+	Polyhedron testPoly = ShapeLibrary::createPointyPrism(4, 1.0f, 1.0f, 0.5f, 0.5f);
 
 	Shape shape1(polyhedronShape(testPoly));
 	Shape shape2 = shape1.scaled(2.0, 4.0, 3.7);
@@ -369,10 +368,10 @@ TEST_CASE(testShapeNativeScaling) {
 }
 
 TEST_CASE(testPhysicalInertiaDerivatives) {
-	Polyhedron testPoly = Library::createPointyPrism(4, 1.0f, 1.0f, 0.5f, 0.5f);
+	Polyhedron testPoly = ShapeLibrary::createPointyPrism(4, 1.0f, 1.0f, 0.5f, 0.5f);
 
 	Part mainPart(polyhedronShape(testPoly), GlobalCFrame(), basicProperties);
-	Part part1_mainPart(polyhedronShape(Library::house), mainPart, 
+	Part part1_mainPart(polyhedronShape(ShapeLibrary::house), mainPart, 
 						new SinusoidalPistonConstraint(0.0, 2.0, 1.3), 
 						CFrame(0.3, 0.7, -0.5, Rotation::fromEulerAngles(0.7, 0.3, 0.7)), 
 						CFrame(0.1, 0.2, -0.5, Rotation::fromEulerAngles(0.2, -0.257, 0.4)), basicProperties);
@@ -384,7 +383,7 @@ TEST_CASE(testPhysicalInertiaDerivatives) {
 						new MotorConstraintTemplate<ConstantMotorTurner>(1.3),
 						CFrame(-0.3, 0.7, 0.5, Rotation::fromEulerAngles(0.7, 0.3, 0.7)),
 						CFrame(0.1, -0.2, -0.5, Rotation::fromEulerAngles(0.2, -0.257, 0.4)) , basicProperties);
-	Part part1_part1_part1_mainPart(polyhedronShape(Library::trianglePyramid), part1_part1_mainPart, 
+	Part part1_part1_part1_mainPart(polyhedronShape(ShapeLibrary::trianglePyramid), part1_part1_mainPart, 
 						new SinusoidalPistonConstraint(0.0, 2.0, 1.3),
 						CFrame(0.3, 0.7, -0.5, Rotation::fromEulerAngles(0.7, 0.3, 0.7)),
 						CFrame(0.1, 0.2, -0.5, Rotation::fromEulerAngles(0.2, -0.257, 0.4)), basicProperties);
@@ -412,7 +411,7 @@ TEST_CASE(testPhysicalInertiaDerivatives) {
 }
 
 TEST_CASE(testCenterOfMassKept) {
-	Polyhedron testPoly = Library::createPointyPrism(4, 1.0f, 1.0f, 0.5f, 0.5f);
+	Polyhedron testPoly = ShapeLibrary::createPointyPrism(4, 1.0f, 1.0f, 0.5f, 0.5f);
 
 	Part mainPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(), basicProperties);
 	Part part1_mainPart(boxShape(1.0, 1.0, 1.0), mainPart,
@@ -586,17 +585,17 @@ static Vec3 getTotalAngularMomentumOfPhysical(const MotorizedPhysical* motorPhys
 std::vector<Part> producePhysical() {
 	std::vector<Part> result;
 	result.reserve(10);
-	Part& mainPart = result.emplace_back(polyhedronShape(Library::house.rotated(Rotationf::fromEulerAngles(1.0f, -0.3f, 0.5f))), GlobalCFrame(), PartProperties{0.7, 0.2, 0.6});
+	Part& mainPart = result.emplace_back(polyhedronShape(ShapeLibrary::house.rotated(Rotationf::fromEulerAngles(1.0f, -0.3f, 0.5f))), GlobalCFrame(), PartProperties{0.7, 0.2, 0.6});
 
 	mainPart.ensureHasParent();
 
-	Part& part1_mainPart = result.emplace_back(polyhedronShape(Library::house), mainPart,
+	Part& part1_mainPart = result.emplace_back(polyhedronShape(ShapeLibrary::house), mainPart,
 											CFrame(0.3, 0.7, -0.5, Rotation::fromEulerAngles(0.7, 0.3, 0.7)), basicProperties);
 	Part& part2_mainPart = result.emplace_back(boxShape(1.0, 0.3, 2.0), mainPart,
 											CFrame(0.1, -0.2, -0.5, Rotation::fromEulerAngles(0.2, -0.257, 0.4)), basicProperties);
 	Part& part1_part1_mainPart = result.emplace_back(cylinderShape(1.0, 0.3), part1_mainPart,
 											CFrame(0.1, -0.2, -0.5, Rotation::fromEulerAngles(0.2, -0.257, 0.4)), basicProperties);
-	Part& part1_part1_part1_mainPart = result.emplace_back(polyhedronShape(Library::trianglePyramid), part1_part1_mainPart,
+	Part& part1_part1_part1_mainPart = result.emplace_back(polyhedronShape(ShapeLibrary::trianglePyramid), part1_part1_mainPart,
 											CFrame(0.1, 0.2, -0.5, Rotation::fromEulerAngles(0.2, -0.257, 0.4)), basicProperties);
 
 	return result;
@@ -605,11 +604,11 @@ std::vector<Part> producePhysical() {
 std::vector<Part> produceMotorizedPhysical() {
 	std::vector<Part> result;
 	result.reserve(10);
-	Part& mainPart = result.emplace_back(polyhedronShape(Library::house.rotated(Rotationf::fromEulerAngles(1.0f, -0.3f, 0.5f))), GlobalCFrame(), PartProperties{0.7, 0.2, 0.6});
+	Part& mainPart = result.emplace_back(polyhedronShape(ShapeLibrary::house.rotated(Rotationf::fromEulerAngles(1.0f, -0.3f, 0.5f))), GlobalCFrame(), PartProperties{0.7, 0.2, 0.6});
 
 	mainPart.ensureHasParent();
 
-	Part& part1_mainPart = result.emplace_back(polyhedronShape(Library::house), mainPart,
+	Part& part1_mainPart = result.emplace_back(polyhedronShape(ShapeLibrary::house), mainPart,
 						new SinusoidalPistonConstraint(0.0, 2.0, 1.3),
 						CFrame(0.3, 0.7, -0.5, Rotation::fromEulerAngles(0.7, 0.3, 0.7)),
 						CFrame(0.1, 0.2, -0.5, Rotation::fromEulerAngles(0.2, -0.257, 0.4)), basicProperties);
@@ -621,7 +620,7 @@ std::vector<Part> produceMotorizedPhysical() {
 							  new MotorConstraintTemplate<ConstantMotorTurner>(1.3),
 							  CFrame(-0.3, 0.7, 0.5, Rotation::fromEulerAngles(0.7, 0.3, 0.7)),
 							  CFrame(0.1, -0.2, -0.5, Rotation::fromEulerAngles(0.2, -0.257, 0.4)), basicProperties);
-	Part& part1_part1_part1_mainPart = result.emplace_back(polyhedronShape(Library::trianglePyramid), part1_part1_mainPart,
+	Part& part1_part1_part1_mainPart = result.emplace_back(polyhedronShape(ShapeLibrary::trianglePyramid), part1_part1_mainPart,
 									new SinusoidalPistonConstraint(0.0, 2.0, 1.3),
 									CFrame(0.3, 0.7, -0.5, Rotation::fromEulerAngles(0.7, 0.3, 0.7)),
 									CFrame(0.1, 0.2, -0.5, Rotation::fromEulerAngles(0.2, -0.257, 0.4)), basicProperties);
@@ -803,7 +802,7 @@ TEST_CASE(hardConstrainedFullRotationFollowsCorrectly) {
 }
 
 TEST_CASE(basicAngularMomentumOfSinglePart) {
-	Polyhedron testPoly = Library::createPointyPrism(4, 1.0f, 1.0f, 0.5f, 0.5f);
+	Polyhedron testPoly = ShapeLibrary::createPointyPrism(4, 1.0f, 1.0f, 0.5f, 0.5f);
 	Part mainPart(polyhedronShape(testPoly), GlobalCFrame(Position(1.3, 2.7, -2.6), Rotation::fromEulerAngles(0.6, -0.7, -0.3)), basicProperties);
 
 	mainPart.ensureHasParent();
@@ -845,11 +844,11 @@ TEST_CASE(basicMotorizedPhysicalTotalAngularMomentum) {
 
 	mainPart.ensureHasParent();
 
-	Part& part1_mainPart = result.emplace_back(polyhedronShape(Library::house), mainPart,
+	Part& part1_mainPart = result.emplace_back(polyhedronShape(ShapeLibrary::house), mainPart,
 											   new SinusoidalPistonConstraint(0.0, 2.0, 1.0),
 											   CFrame(0.0, 0.0, 0.0),
 											   CFrame(0.0, 0.0, 0.0), basicProperties);
-	/*Part& part2_mainPart = result.emplace_back(polyhedronShape(Library::house), mainPart,
+	/*Part& part2_mainPart = result.emplace_back(polyhedronShape(ShapeLibrary::house), mainPart,
 											   new MotorConstraintTemplate<ConstantMotorTurner>(1.7),
 											   CFrame(-0.3, 0.7, 0.5, Rotation::fromEulerAngles(0.7, 0.3, 0.7)),
 											   CFrame(0.7, -2.0, -0.5, Rotation::fromEulerAngles(0.2, -0.257, 0.4)), basicProperties);*/
@@ -879,15 +878,15 @@ TEST_CASE(totalInertiaOfPhysical) {
 TEST_CASE(totalInertiaOfBasicMotorizedPhysical) {
 	std::vector<Part> result;
 	result.reserve(10);
-	Part& mainPart = result.emplace_back(polyhedronShape(Library::house), GlobalCFrame(), basicProperties);
+	Part& mainPart = result.emplace_back(polyhedronShape(ShapeLibrary::house), GlobalCFrame(), basicProperties);
 
 	mainPart.ensureHasParent();
 
-	/*Part& part1_mainPart = result.emplace_back(polyhedronShape(Library::house), mainPart,
+	/*Part& part1_mainPart = result.emplace_back(polyhedronShape(ShapeLibrary::house), mainPart,
 											   new SinusoidalPistonConstraint(0.0, 2.0, 1.0),
 											   CFrame(0.0, 0.0, 0.0),
 											   CFrame(0.0, 0.0, 0.0), basicProperties);*/
-	Part& part2_mainPart = result.emplace_back(polyhedronShape(Library::house), mainPart,
+	Part& part2_mainPart = result.emplace_back(polyhedronShape(ShapeLibrary::house), mainPart,
 											   new MotorConstraintTemplate<ConstantMotorTurner>(1.7),
 											   CFrame(-0.3, 0.7, 0.5, Rotation::fromEulerAngles(0.7, 0.3, 0.7)),
 											   CFrame(0.7, -2.0, -0.5, Rotation::fromEulerAngles(0.2, -0.257, 0.4)), basicProperties);

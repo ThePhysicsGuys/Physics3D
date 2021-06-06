@@ -11,7 +11,7 @@
 #include "../graphics/buffers/frameBuffer.h"
 #include "../util/resource/resourceManager.h"
 #include "../graphics/meshRegistry.h"
-#include "../physics/misc/filters/visibilityFilter.h"
+#include <Physics3D/boundstree/filters/visibilityFilter.h>
 #include "ecs/components.h"
 #include "worlds.h"
 #include "application.h"

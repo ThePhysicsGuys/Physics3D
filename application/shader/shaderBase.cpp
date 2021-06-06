@@ -2,7 +2,7 @@
 
 #include "shaderBase.h"
 
-#include "../physics/math/globalCFrame.h"
+#include <Physics3D/math/globalCFrame.h>
 #include "ecs/components.h"
 
 namespace P3D::Application {
@@ -41,7 +41,7 @@ void StandardMeshShaderBase::updateModel(const Mat4f& modelMatrix) {
 }
 
 void StandardMeshShaderBase::updateModel(const GlobalCFrame& modelCFrame, const DiagonalMat3f& scale) {
-	updateModel(modelCFrame.asMat4WithPreScale(scale));
+	this->updateModel(modelCFrame.asMat4WithPreScale(scale));
 }
 
 #pragma endregion

@@ -1,6 +1,5 @@
 #pragma once
 
-
 class Benchmark {
 public:
 	const char* name;

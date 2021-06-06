@@ -1,6 +1,7 @@
 #pragma once
 
 #include "compare.h"
+#include <Physics3D/misc/toString.h>
 #include <sstream>
 
 class TestInterface {
@@ -44,16 +45,6 @@ extern const bool reffableTrue;
 
 // Testing utils:
 
-template<typename T, std::size_t Size>
-std::ostream& operator<<(std::ostream& ostream, const std::array<T, Size>& arr) {
-	ostream << '{' << arr[0];
-	for(std::size_t i = 1; i < Size; i++) {
-		ostream << ", " << arr[i];
-	}
-	ostream << '}';
-	return ostream;
-}
-
 template<typename R, typename P>
 const char* errMsg(const R& first, const P& second, const char* sep) {
 	std::stringstream s;
@@ -67,7 +58,7 @@ const char* errMsg(const R& first, const P& second, const char* sep) {
 
 	const char* data = msg.c_str();
 	char* dataBuf = new char[msg.size() + 1];
-	for (int i = 0; i < msg.size() + 1; i++)
+	for(int i = 0; i < msg.size() + 1; i++)
 		dataBuf[i] = data[i];
 
 	return dataBuf;
@@ -83,7 +74,7 @@ const char* errMsg(const R& first) {
 
 	const char* data = msg.c_str();
 	char* dataBuf = new char[msg.size() + 1];
-	for (int i = 0; i < msg.size() + 1; i++)
+	for(int i = 0; i < msg.size() + 1; i++)
 		dataBuf[i] = data[i];
 
 	return dataBuf;
@@ -105,12 +96,12 @@ public:
 
 	AssertComparer(int line, const T& arg) : line(line), arg(arg) {}
 
-	template<typename P> AssertComparer<bool> operator<(const P& other) const { if (!(arg < other)) { __ASSERT_FAILURE(line, errMsg(arg, other, "<")); }; return AssertComparer<bool>(this->line, reffableTrue); }
-	template<typename P> AssertComparer<bool> operator>(const P& other) const { if (!(arg > other)) { __ASSERT_FAILURE(line, errMsg(arg, other, ">")); }; return AssertComparer<bool>(this->line, reffableTrue); }
-	template<typename P> AssertComparer<bool> operator<=(const P& other) const { if (!(arg <= other)) { __ASSERT_FAILURE(line, errMsg(arg, other, "<=")); }; return AssertComparer<bool>(this->line, reffableTrue); }
-	template<typename P> AssertComparer<bool> operator>=(const P& other) const { if (!(arg >= other)) { __ASSERT_FAILURE(line, errMsg(arg, other, ">=")); }; return AssertComparer<bool>(this->line, reffableTrue); }
-	template<typename P> AssertComparer<bool> operator==(const P& other) const { if (!(arg == other)) { __ASSERT_FAILURE(line, errMsg(arg, other, "==")); }; return AssertComparer<bool>(this->line, reffableTrue); }
-	template<typename P> AssertComparer<bool> operator!=(const P& other) const { if (!(arg != other)) { __ASSERT_FAILURE(line, errMsg(arg, other, "!=")); }; return AssertComparer<bool>(this->line, reffableTrue); }
+	template<typename P> AssertComparer<bool> operator<(const P& other) const { if(!(arg < other)) { __ASSERT_FAILURE(line, errMsg(arg, other, "<")); }; return AssertComparer<bool>(this->line, reffableTrue); }
+	template<typename P> AssertComparer<bool> operator>(const P& other) const { if(!(arg > other)) { __ASSERT_FAILURE(line, errMsg(arg, other, ">")); }; return AssertComparer<bool>(this->line, reffableTrue); }
+	template<typename P> AssertComparer<bool> operator<=(const P& other) const { if(!(arg <= other)) { __ASSERT_FAILURE(line, errMsg(arg, other, "<=")); }; return AssertComparer<bool>(this->line, reffableTrue); }
+	template<typename P> AssertComparer<bool> operator>=(const P& other) const { if(!(arg >= other)) { __ASSERT_FAILURE(line, errMsg(arg, other, ">=")); }; return AssertComparer<bool>(this->line, reffableTrue); }
+	template<typename P> AssertComparer<bool> operator==(const P& other) const { if(!(arg == other)) { __ASSERT_FAILURE(line, errMsg(arg, other, "==")); }; return AssertComparer<bool>(this->line, reffableTrue); }
+	template<typename P> AssertComparer<bool> operator!=(const P& other) const { if(!(arg != other)) { __ASSERT_FAILURE(line, errMsg(arg, other, "!=")); }; return AssertComparer<bool>(this->line, reffableTrue); }
 };
 
 template<typename T, typename Tol>
@@ -123,11 +114,11 @@ public:
 	TolerantAssertComparer(int line, const T& arg, Tol tolerance) : line(line), arg(arg), tolerance(tolerance) {}
 
 	template<typename T2> TolerantAssertComparer<bool, Tol> operator<(const T2& other) const { if(!tolerantLessThan(arg, other, tolerance)) { __ASSERT_FAILURE(line, errMsg(arg, other, "<")); }; return TolerantAssertComparer<bool, Tol>(this->line, reffableTrue, this->tolerance); }
-	template<typename T2> TolerantAssertComparer<bool, Tol> operator>(const T2& other) const { if (!tolerantGreaterThan(arg, other, tolerance)) { __ASSERT_FAILURE(line, errMsg(arg, other, ">")); }; return TolerantAssertComparer<bool, Tol>(this->line, reffableTrue, this->tolerance); }
-	template<typename T2> TolerantAssertComparer<bool, Tol> operator<=(const T2& other) const { if (!tolerantLessOrEqual(arg, other, tolerance)) { __ASSERT_FAILURE(line, errMsg(arg, other, "<=")); }; return TolerantAssertComparer<bool, Tol>(this->line, reffableTrue, this->tolerance); }
-	template<typename T2> TolerantAssertComparer<bool, Tol> operator>=(const T2& other) const { if (!tolerantGreaterOrEqual(arg, other, tolerance)) { __ASSERT_FAILURE(line, errMsg(arg, other, ">=")); }; return TolerantAssertComparer<bool, Tol>(this->line, reffableTrue, this->tolerance); }
-	template<typename T2> TolerantAssertComparer<bool, Tol> operator==(const T2& other) const { if (!tolerantEquals(arg, other, tolerance)) { __ASSERT_FAILURE(line, errMsg(arg, other, "==")); }; return TolerantAssertComparer<bool, Tol>(this->line, reffableTrue, this->tolerance); }
-	template<typename T2> TolerantAssertComparer<bool, Tol> operator!=(const T2& other) const { if (!tolerantNotEquals(arg, other, tolerance)) { __ASSERT_FAILURE(line, errMsg(arg, other, "!=")); }; return TolerantAssertComparer<bool, Tol>(this->line, reffableTrue, this->tolerance); }
+	template<typename T2> TolerantAssertComparer<bool, Tol> operator>(const T2& other) const { if(!tolerantGreaterThan(arg, other, tolerance)) { __ASSERT_FAILURE(line, errMsg(arg, other, ">")); }; return TolerantAssertComparer<bool, Tol>(this->line, reffableTrue, this->tolerance); }
+	template<typename T2> TolerantAssertComparer<bool, Tol> operator<=(const T2& other) const { if(!tolerantLessOrEqual(arg, other, tolerance)) { __ASSERT_FAILURE(line, errMsg(arg, other, "<=")); }; return TolerantAssertComparer<bool, Tol>(this->line, reffableTrue, this->tolerance); }
+	template<typename T2> TolerantAssertComparer<bool, Tol> operator>=(const T2& other) const { if(!tolerantGreaterOrEqual(arg, other, tolerance)) { __ASSERT_FAILURE(line, errMsg(arg, other, ">=")); }; return TolerantAssertComparer<bool, Tol>(this->line, reffableTrue, this->tolerance); }
+	template<typename T2> TolerantAssertComparer<bool, Tol> operator==(const T2& other) const { if(!tolerantEquals(arg, other, tolerance)) { __ASSERT_FAILURE(line, errMsg(arg, other, "==")); }; return TolerantAssertComparer<bool, Tol>(this->line, reffableTrue, this->tolerance); }
+	template<typename T2> TolerantAssertComparer<bool, Tol> operator!=(const T2& other) const { if(!tolerantNotEquals(arg, other, tolerance)) { __ASSERT_FAILURE(line, errMsg(arg, other, "!=")); }; return TolerantAssertComparer<bool, Tol>(this->line, reffableTrue, this->tolerance); }
 };
 
 struct AssertBuilder {

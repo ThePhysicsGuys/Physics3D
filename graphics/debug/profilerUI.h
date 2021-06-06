@@ -1,18 +1,14 @@
 #pragma once
 
 #include "../gui/color.h"
-#include "../physics/misc/profiling.h"
-#include "../physics/math/linalg/largeMatrix.h"
+#include <Physics3D/misc/profiling.h>
+#include <Physics3D/math/linalg/largeMatrix.h>
 
-namespace P3D::OldBoundsTree {
+namespace P3D {
 template<typename T>
 struct BoundsTree;
-}
-namespace P3D::NewBoundsTree {
-template<typename T>
-struct BoundsTree;
-}
 class Part;
+}
 
 namespace P3D::Graphics {
 
@@ -102,7 +98,6 @@ struct SlidingChart {
 	Vec2 resize();
 };
 
-void renderTreeStructure(const P3D::OldBoundsTree::BoundsTree<Part>& tree, const Vec3f& treeColor, Vec2f origin, float allottedWidth);
-void renderTreeStructure(const P3D::NewBoundsTree::BoundsTree<Part>& tree, const Vec3f& treeColor, Vec2f origin, float allottedWidth);
+void renderTreeStructure(const P3D::BoundsTree<Part>& tree, const Color& treeColor, Vec2f origin, float allottedWidth);
 
 };

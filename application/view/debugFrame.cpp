@@ -15,8 +15,8 @@ void DebugFrame::onInit(Engine::Registry64& registry) {
 void DebugFrame::onRender(Engine::Registry64& registry) {
 	ImGui::Begin("Debug");
 	
-	using namespace ::Debug;
-	using namespace Graphics::Debug;
+	using namespace P3D::Debug;
+	using namespace P3D::Graphics::VisualDebug;
 	ImGui::SetNextTreeNodeOpen(true);
 	if (ImGui::TreeNode("Vectors")) {
 		ImGui::Checkbox("Info", &vectorDebugEnabled[INFO_VEC]);

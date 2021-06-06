@@ -34,24 +34,24 @@ const char* const graphicsDebugLabels[] {
 
 BreakdownAverageProfiler<GraphicsProcess> graphicsMeasure(graphicsDebugLabels, 60);
 
-namespace Debug {
+namespace VisualDebug {
 
-std::map<::Debug::VectorType, bool> vectorDebugEnabled {
-	{ ::Debug::INFO_VEC        , false },
-	{ ::Debug::VELOCITY        , false },
-	{ ::Debug::ACCELERATION    , false },
-	{ ::Debug::FORCE           , false },
-	{ ::Debug::ANGULAR_IMPULSE , false },
-	{ ::Debug::POSITION        , false },
-	{ ::Debug::MOMENT          , false },
-	{ ::Debug::IMPULSE         , false },
-	{ ::Debug::ANGULAR_VELOCITY, false }
+std::map<P3D::Debug::VectorType, bool> vectorDebugEnabled {
+	{ P3D::Debug::INFO_VEC        , false },
+	{ P3D::Debug::VELOCITY        , false },
+	{ P3D::Debug::ACCELERATION    , false },
+	{ P3D::Debug::FORCE           , false },
+	{ P3D::Debug::ANGULAR_IMPULSE , false },
+	{ P3D::Debug::POSITION        , false },
+	{ P3D::Debug::MOMENT          , false },
+	{ P3D::Debug::IMPULSE         , false },
+	{ P3D::Debug::ANGULAR_VELOCITY, false }
 };
 
-std::map<::Debug::PointType, bool> pointDebugEnabled {
-	{ ::Debug::INFO_POINT    , false },
-	{ ::Debug::CENTER_OF_MASS, false },
-	{ ::Debug::INTERSECTION  , false },
+std::map<P3D::Debug::PointType, bool> pointDebugEnabled {
+	{ P3D::Debug::INFO_POINT    , false },
+	{ P3D::Debug::CENTER_OF_MASS, false },
+	{ P3D::Debug::INTERSECTION  , false },
 };
 
 struct PointColorPair {
@@ -59,22 +59,22 @@ struct PointColorPair {
 	Vec3f color2;
 };
 
-std::map<::Debug::VectorType, Vec3f> vectorColors {
-	{ ::Debug::INFO_VEC        , Vec3f(0, 1, 0) },
-	{ ::Debug::VELOCITY        , Vec3f(0, 0, 1) },
-	{ ::Debug::ACCELERATION    , Vec3f(0, 1, 1) },
-	{ ::Debug::FORCE           , Vec3f(1, 0, 0) },
-	{ ::Debug::POSITION        , Vec3f(1, 1, 0) },
-	{ ::Debug::MOMENT          , Vec3f(1, 0, 1) },
-	{ ::Debug::IMPULSE         , Vec3f(0.5, 0.7, 1) },
-	{ ::Debug::ANGULAR_VELOCITY, Vec3f(0.75, 0.75, 0.75) },
-	{ ::Debug::ANGULAR_IMPULSE , Vec3f(0.8, 0.1, 0.4) }
+std::map<P3D::Debug::VectorType, Vec3f> vectorColors {
+	{ P3D::Debug::INFO_VEC        , Vec3f(0, 1, 0) },
+	{ P3D::Debug::VELOCITY        , Vec3f(0, 0, 1) },
+	{ P3D::Debug::ACCELERATION    , Vec3f(0, 1, 1) },
+	{ P3D::Debug::FORCE           , Vec3f(1, 0, 0) },
+	{ P3D::Debug::POSITION        , Vec3f(1, 1, 0) },
+	{ P3D::Debug::MOMENT          , Vec3f(1, 0, 1) },
+	{ P3D::Debug::IMPULSE         , Vec3f(0.5, 0.7, 1) },
+	{ P3D::Debug::ANGULAR_VELOCITY, Vec3f(0.75, 0.75, 0.75) },
+	{ P3D::Debug::ANGULAR_IMPULSE , Vec3f(0.8, 0.1, 0.4) }
 };
 
-std::map<::Debug::PointType, PointColorPair> pointColors {
-	{ ::Debug::INFO_POINT    , PointColorPair { Vec3f(1.0f, 0.5f, 0.0f), Vec3f(1.0f, 0.2f, 0.0f) }},
-	{ ::Debug::CENTER_OF_MASS, PointColorPair { Vec3f(1.0f, 1.0f, 0.0f), Vec3f(0.0f, 0.0f, 0.0f) }},
-	{ ::Debug::INTERSECTION  , PointColorPair { Vec3f(0.0f, 0.0f, 1.0f), Vec3f(0.0f, 1.0f, 0.0f) }},
+std::map<P3D::Debug::PointType, PointColorPair> pointColors {
+	{ P3D::Debug::INFO_POINT    , PointColorPair { Vec3f(1.0f, 0.5f, 0.0f), Vec3f(1.0f, 0.2f, 0.0f) }},
+	{ P3D::Debug::CENTER_OF_MASS, PointColorPair { Vec3f(1.0f, 1.0f, 0.0f), Vec3f(0.0f, 0.0f, 0.0f) }},
+	{ P3D::Debug::INTERSECTION  , PointColorPair { Vec3f(0.0f, 0.0f, 1.0f), Vec3f(0.0f, 1.0f, 0.0f) }},
 };
 
 AddableBuffer<float> visibleVectors(900);
@@ -87,11 +87,11 @@ int colTreeRenderMode = -1; // -2 for selected, -1 for none, n >= 0 for layer tr
 bool renderPiesEnabled = false;
 int fieldIndex = 0;
 
-void toggleVectorType(::Debug::VectorType type) {
+void toggleVectorType(P3D::Debug::VectorType type) {
 	vectorDebugEnabled[type] = !vectorDebugEnabled[type];
 }
 
-void togglePointType(::Debug::PointType type) {
+void togglePointType(P3D::Debug::PointType type) {
 	pointDebugEnabled[type] = !pointDebugEnabled[type];
 }
 

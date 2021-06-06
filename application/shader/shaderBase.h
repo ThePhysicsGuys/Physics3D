@@ -1,8 +1,10 @@
 #pragma once
 
-#include "../graphics/resource/shaderResource.h"
+#include <Physics3D/math/position.h>
+#include <Physics3D/math/globalCFrame.h>
+#include <Physics3D/math/linalg/mat.h>
 
-class GlobalCFrame;
+#include "../graphics/resource/shaderResource.h"
 
 namespace P3D::Application {
 	namespace Comp {

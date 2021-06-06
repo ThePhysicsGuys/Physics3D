@@ -15,22 +15,21 @@
 #include "../graphics/texture.h"
 #include "../graphics/debug/guiDebug.h"
 #include "../graphics/debug/visualDebug.h"
-#include "../physics/geometry/shapeCreation.h"
-#include "../physics/math/linalg/commonMatrices.h"
-#include "../physics/part.h"
-#include "../physics/world.h"
-#include "../physics/externalforces/gravityForce.h"
-#include "../physics/misc/physicsProfiler.h"
-#include "../physics/hardconstraints/motorConstraint.h"
-#include "../physics/hardconstraints/sinusoidalPistonConstraint.h"
-#include "../physics/hardconstraints/fixedConstraint.h"
-#include "../physics/constraints/ballConstraint.h"
-#include "../physics/constraints/hingeConstraint.h"
-#include "../physics/constraints/barConstraint.h"
-#include "../physics/softlinks/elasticLink.h"
+#include <Physics3D/geometry/shapeCreation.h>
+#include <Physics3D/math/linalg/commonMatrices.h>
+#include <Physics3D/part.h>
+#include <Physics3D/world.h>
+#include <Physics3D/externalforces/gravityForce.h>
+#include <Physics3D/misc/physicsProfiler.h>
+#include <Physics3D/hardconstraints/motorConstraint.h>
+#include <Physics3D/hardconstraints/sinusoidalPistonConstraint.h>
+#include <Physics3D/hardconstraints/fixedConstraint.h>
+#include <Physics3D/constraints/ballConstraint.h>
+#include <Physics3D/constraints/hingeConstraint.h>
+#include <Physics3D/constraints/barConstraint.h>
+#include <Physics3D/softlinks/elasticLink.h>
 
-
-#include "../physics/misc/serialization.h"
+#include <Physics3D/misc/serialization/serialization.h>
 
 #include "worlds.h"
 #include "tickerThread.h"
@@ -57,20 +56,20 @@ TickerThread physicsThread;
 PlayerWorld world(1 / TICKS_PER_SECOND);
 Screen screen;
 
-void init(const Util::ParsedArgs& cmdArgs);
+void init(const ::Util::ParsedArgs& cmdArgs);
 void setupPhysics();
-void setupWorld(const Util::ParsedArgs& cmdArgs);
+void setupWorld(const ::Util::ParsedArgs& cmdArgs);
 void setupGL();
 void setupDebug();
 
 void loadFile(const char* file);
 
-void init(const Util::ParsedArgs& cmdArgs) {
+void init(const ::Util::ParsedArgs& cmdArgs) {
 	auto start = high_resolution_clock::now();
 
 	Log::init("latest.log");
 
-	Log::info(Util::printAndParseCPUIDArgs(cmdArgs));
+	Log::info(::Util::printAndParseCPUIDArgs(cmdArgs));
 	bool quickBoot = cmdArgs.hasFlag("quickBoot");
 
 	setupGL();
@@ -96,7 +95,7 @@ void init(const Util::ParsedArgs& cmdArgs) {
 	
 	Log::info("Creating player");
 	// Player
-	screen.camera.attachment = new ExtendedPart(polyhedronShape(Library::createPrism(50, 0.3f, 1.5f)), GlobalCFrame(), {1.0, 5.0, 0.0}, "Player");
+	screen.camera.attachment = new ExtendedPart(polyhedronShape(ShapeLibrary::createPrism(50, 0.3f, 1.5f)), GlobalCFrame(), {1.0, 5.0, 0.0}, "Player");
 
 	if(!world.isValid()) {
 		throw "World not valid!";
@@ -130,7 +129,7 @@ void setupGL() {
 	}
 }
 
-void setupWorld(const Util::ParsedArgs& cmdArgs) {
+void setupWorld(const ::Util::ParsedArgs& cmdArgs) {
 	Log::info("Initializing world");
 
 	world.addExternalForce(new DirectionalGravity(Vec3(0, -10.0, 0.0)));
@@ -255,11 +254,11 @@ void setupDebug() {
 void loadFile(const char* file) {
 	Log::info("Loading file %s", file);
 	auto startTime = high_resolution_clock::now();
-	if(Util::endsWith(file, ".parts")) {
+	if(::Util::endsWith(file, ".parts")) {
 		WorldImportExport::loadLoosePartsIntoWorld(file, world);
-	} else if(Util::endsWith(file, ".nativeParts")) {
+	} else if(::Util::endsWith(file, ".nativeParts")) {
 		WorldImportExport::loadNativePartsIntoWorld(file, world);
-	} else if(Util::endsWith(file, ".world")) {
+	} else if(::Util::endsWith(file, ".world")) {
 		WorldImportExport::loadWorld(file, world);
 	}
 	nanoseconds deltaTime = high_resolution_clock::now() - startTime;

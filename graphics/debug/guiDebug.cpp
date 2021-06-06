@@ -2,10 +2,10 @@
 
 #include "guiDebug.h"
 #include "threePhaseBuffer.h"
-#include "../physics/misc/debug.h"
-#include "../physics/geometry/shape.h"
-#include "../physics/math/mathUtil.h"
-#include "../physics/geometry/polyhedron.h"
+#include <Physics3D/misc/debug.h>
+#include <Physics3D/geometry/shape.h>
+#include <Physics3D/math/mathUtil.h>
+#include <Physics3D/geometry/polyhedron.h>
 #include "../util/log.h"
 
 #include <GL/glew.h>

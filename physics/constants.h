@@ -1,5 +1,0 @@
-#pragma once
-
-#define GJK_MAX_ITER 200
-#define EPA_MAX_ITER 200
-#define COLLISSION_DEPTH_FORCE_MULTIPLIER 2000

@@ -31,7 +31,7 @@
       </ArrayItems>
     </Expand>
   </Type>
-  <Type Name="P3D::NewBoundsTree::TreeNodeRef">
+  <Type Name="P3D::TreeNodeRef">
     <DisplayString Condition="ptr == 0xADADADADADADADAD">Invalid</DisplayString>
     <DisplayString Condition="(ptr &amp; 0b111) == 0">LeafNode {(void*) ptr}</DisplayString>
     <DisplayString Condition="(ptr &amp; 0b111) != 0 &amp;&amp; (ptr &amp; 0b1000) == 0">TreeTrunk {{Size: {(ptr &amp; 0b111) + 1}}}</DisplayString>
@@ -44,7 +44,7 @@
       <Item Name="TreeTrunk" ExcludeView="simple" Condition="(ptr &amp; 0b111) != 0">(TreeTrunk*) (ptr &amp; 0xFFFFFFFFFFFFFFF0)</Item>
     </Expand>
   </Type>
-  <Type Name="P3D::NewBoundsTree::BoundsTreePrototype">
+  <Type Name="P3D::BoundsTreePrototype">
     <DisplayString>BoundsTree {{baseTrunkSize: {baseTrunkSize}}}</DisplayString>
     <Expand>
       <ArrayItems>

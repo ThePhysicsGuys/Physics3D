@@ -5,8 +5,7 @@
 #include "application.h"
 #include "view/screen.h"
 #include "input/standardInputHandler.h"
-#include "../physics/misc/debug.h"
-#include "../physics/constants.h"
+#include <Physics3D/misc/debug.h>
 #include "../engine/options/keyboardOptions.h"
 
 #include "ecs/components.h"

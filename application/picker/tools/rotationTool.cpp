@@ -9,9 +9,9 @@
 #include "view/screen.h"
 #include "shader/shaders.h"
 
-#include "../physics/misc/toString.h"
-#include "../physics/misc/shapeLibrary.h"
-#include "../physics/math/rotation.h"
+#include <Physics3D/misc/toString.h>
+#include <Physics3D/geometry/shapeLibrary.h>
+#include <Physics3D/math/rotation.h>
 #include "../graphics/visualShape.h"
 #include "../graphics/mesh/primitive.h"
 #include "../graphics/mesh/indexedMesh.h"
@@ -42,7 +42,7 @@ namespace P3D::Application {
 		line->resize(Vec3f(0, 0, -100000), Vec3f(0, 0, 100000));
 		
 		// Create handle shapes
-		handleShape = VisualShape::generateSmoothNormalsShape(Library::createTorus(1.0f, 0.03f, 80, 12));
+		handleShape = VisualShape::generateSmoothNormalsShape(ShapeLibrary::createTorus(1.0f, 0.03f, 80, 12));
 		handleMesh = new IndexedMesh(handleShape);
 
 		// Set idle status

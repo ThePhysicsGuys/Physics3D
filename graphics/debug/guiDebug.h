@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../physics/misc/debug.h"
+#include <Physics3D/misc/debug.h>
 #include "../util/log.h"
 
 #include "threePhaseBuffer.h"
@@ -18,17 +18,17 @@ bool logCall(const char* func, const char* file, int line);
 namespace AppDebug {
 struct ColoredVector {
 	Vec3 origin, vector;
-	::Debug::VectorType type;
+	P3D::Debug::VectorType type;
 	ColoredVector() = default;
-	ColoredVector(Vec3 origin, Vec3 vector, ::Debug::VectorType type) : origin(origin), vector(vector), type(type) {}
-	ColoredVector(Position origin, Vec3 vector, ::Debug::VectorType type) : origin(castPositionToVec3(origin)), vector(vector), type(type) {}
+	ColoredVector(Vec3 origin, Vec3 vector, P3D::Debug::VectorType type) : origin(origin), vector(vector), type(type) {}
+	ColoredVector(Position origin, Vec3 vector, P3D::Debug::VectorType type) : origin(castPositionToVec3(origin)), vector(vector), type(type) {}
 };
 struct ColoredPoint {
 	Vec3 point;
-	::Debug::PointType type;
+	P3D::Debug::PointType type;
 	ColoredPoint() = default;
-	ColoredPoint(Vec3 point, ::Debug::PointType type) : point(point), type(type) {}
-	ColoredPoint(Position point, ::Debug::PointType type) : point(castPositionToVec3(point)), type(type) {}
+	ColoredPoint(Vec3 point, P3D::Debug::PointType type) : point(point), type(type) {}
+	ColoredPoint(Position point, P3D::Debug::PointType type) : point(castPositionToVec3(point)), type(type) {}
 };
 
 void setupDebugHooks();
