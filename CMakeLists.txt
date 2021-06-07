@@ -117,7 +117,6 @@ add_library(Physics3D STATIC
   Physics3D/misc/serialization/serialization.cpp
   Physics3D/misc/serialization/serializeBasicTypes.cpp
 )
-target_link_libraries(Physics3D util)
 
 add_executable(benchmarks
   benchmarks/benchmark.cpp
@@ -130,11 +129,6 @@ add_executable(benchmarks
   benchmarks/ecsBenchmark.cpp
   benchmarks/threadResponseTime.cpp
 )
-
-target_link_libraries(benchmarks util)
-target_link_libraries(benchmarks Physics3D)
-target_link_libraries(benchmarks Threads::Threads)
-target_include_directories(benchmarks PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_library(imguiInclude STATIC
   include/imgui/imgui.cpp
@@ -192,12 +186,6 @@ add_library(graphics STATIC
   graphics/shader/gshader.cpp
 )
 
-target_link_libraries(graphics imguiInclude)
-target_link_libraries(graphics Physics3D)
-
-target_include_directories(graphics PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/graphics")
-target_include_directories(graphics PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-
 add_library(engine STATIC
   engine/core.cpp
 
@@ -217,10 +205,6 @@ add_library(engine STATIC
 
   engine/resource/meshResource.cpp
 )
-target_include_directories(engine PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/engine")
-target_include_directories(engine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-
-target_link_libraries(engine graphics)
 
 add_executable(tests 
   tests/testsMain.cpp
@@ -246,13 +230,6 @@ add_executable(tests
   tests/ecsTests.cpp
   tests/lexerTests.cpp
 )
-
-target_link_libraries(tests util)
-target_link_libraries(tests Physics3D)
-target_link_libraries(tests graphics)
-target_link_libraries(tests engine)
-target_link_libraries(tests Threads::Threads)
-target_include_directories(tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_executable(application
   application/core.cpp
@@ -308,9 +285,30 @@ add_executable(application
   application/view/environmentFrame.cpp
   application/view/toolbarFrame.cpp
 )
-target_include_directories(application PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/application")
-target_include_directories(application PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
+target_include_directories(tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(benchmarks PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(graphics PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(engine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(application PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(graphics PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/graphics")
+target_include_directories(engine PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/engine")
+target_include_directories(application PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/application")
+
+target_link_libraries(tests util)
+target_link_libraries(tests Physics3D)
+target_link_libraries(tests graphics)
+target_link_libraries(tests engine)
+target_link_libraries(tests Threads::Threads)
+
+target_link_libraries(benchmarks util)
+target_link_libraries(benchmarks Physics3D)
+target_link_libraries(benchmarks Threads::Threads)
+
+target_link_libraries(graphics imguiInclude)
+target_link_libraries(graphics Physics3D)
+
+target_link_libraries(engine graphics)
 
 target_link_libraries(application util)
 target_link_libraries(application Physics3D)

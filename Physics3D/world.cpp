@@ -1,7 +1,7 @@
 #include "world.h"
 
 #include <algorithm>
-#include "../util/log.h"
+#include "misc/debug.h"
 #include "layer.h"
 #include "misc/validityHelper.h"
 
@@ -18,13 +18,13 @@ namespace P3D {
 bool WorldPrototype::isValid() const {
 	for(const MotorizedPhysical* phys : iterPhysicals()) {
 		if(phys->world != this) {
-			Log::error("physicals's world is not correct!");
+			Debug::logError("physicals's world is not correct!");
 			DEBUGBREAK;
 			return false;
 		}
 
 		if(!isMotorizedPhysicalValid(phys)) {
-			Log::error("Physical invalid!");
+			Debug::logError("Physical invalid!");
 			DEBUGBREAK;
 			return false;
 		}
@@ -32,12 +32,12 @@ bool WorldPrototype::isValid() const {
 		bool result = true;
 		phys->forEachPart([&result](const Part& part) {
 			if(part.layer == nullptr) {
-				Log::error("Part in physical has no layer!");
+				Debug::logError("Part in physical has no layer!");
 				DEBUGBREAK;
 				result = false;
 			} else {
 				if(!part.layer->tree.contains(&part)) {
-					Log::error("Part not in tree!");
+					Debug::logError("Part not in tree!");
 					DEBUGBREAK;
 					result = false;
 				}
@@ -51,7 +51,7 @@ bool WorldPrototype::isValid() const {
 			treeValidCheck(l.tree);
 			for(const Part& p : l.tree) {
 				if(p.layer != &l) {
-					Log::error("Part contained in layer, but it's layer field is not the layer");
+					Debug::logError("Part contained in layer, but it's layer field is not the layer");
 					DEBUGBREAK;
 					return false;
 				}
@@ -149,7 +149,7 @@ void WorldPrototype::addPart(Part* part, int layerIndex) {
 	ASSERT_VALID;
 
 	if(part->layer) {
-		Log::warn("This part is already in a world");
+		Debug::logWarn("This part is already in a world");
 		ASSERT_VALID;
 		return;
 	}

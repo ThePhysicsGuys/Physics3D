@@ -2,8 +2,6 @@
 
 #include "inertia.h"
 
-#include "../util/log.h"
-
 #include "misc/validityHelper.h"
 
 #include <assert.h>

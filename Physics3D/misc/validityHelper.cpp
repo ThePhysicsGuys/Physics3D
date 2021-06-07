@@ -6,7 +6,7 @@
 
 #include "../geometry/polyhedron.h"
 #include "../geometry/indexedShape.h"
-#include "../../util/log.h"
+#include "../misc/debug.h"
 
 #include "../boundstree/boundsTree.h"
 #include "../part.h"
@@ -34,7 +34,7 @@ static bool isComplete(const TriangleMesh& mesh) {
 		std::pair<int, int> indexPairs[]{{t.firstIndex, t.secondIndex}, {t.secondIndex, t.thirdIndex}, {t.thirdIndex, t.firstIndex}};
 		for(std::pair<int, int> indexes : indexPairs) {
 			if(indexes.first == indexes.second) {
-				Log::warn("Invalid triangle! Triangle %d has a duplicate index! {%d, %d, %d}", i, t.firstIndex, t.secondIndex, t.thirdIndex);
+				Debug::logError("Invalid triangle! Triangle %d has a duplicate index! {%d, %d, %d}", i, t.firstIndex, t.secondIndex, t.thirdIndex);
 				verdict = false;
 			}
 			bool firstIsSmallerThanSecond = indexes.first < indexes.second;
@@ -62,7 +62,7 @@ static bool isComplete(const TriangleMesh& mesh) {
 
 		for(std::pair<int, HitCount> edge : everythingConnected) {
 			if(edge.second.ascendingCount != 1 || edge.second.descendingCount != 1) {
-				Log::warn("Edge {%d,%d} has bad triangles connected, ascendingCount: %d, descendingCount: %d", firstVertex, edge.first, edge.second.ascendingCount, edge.second.descendingCount);
+				Debug::logError("Edge {%d,%d} has bad triangles connected, ascendingCount: %d, descendingCount: %d", firstVertex, edge.first, edge.second.ascendingCount, edge.second.descendingCount);
 				verdict = false;
 			}
 		}
@@ -76,7 +76,7 @@ bool isValid(const TriangleMesh& mesh) {
 	for(int i = 0; i < mesh.triangleCount; i++) {
 		const Triangle& t = mesh.getTriangle(i);
 		if(!isValidTriangle(t, mesh.vertexCount)) {
-			Log::warn("Invalid triangle! Triangle %d {%d, %d, %d} points to a nonexistent vertex or has a duplicate index!", i, t.firstIndex, t.secondIndex, t.thirdIndex);
+			Debug::logError("Invalid triangle! Triangle %d {%d, %d, %d} points to a nonexistent vertex or has a duplicate index!", i, t.firstIndex, t.secondIndex, t.thirdIndex);
 			verdict = false;
 		}
 	}
@@ -94,7 +94,7 @@ bool isValid(const TriangleMesh& mesh) {
 	}
 	for(int i = 0; i < mesh.vertexCount; i++) {
 		if(usageCounts[i] == 0) {
-			Log::warn("Vertex %d unused!", i);
+			Debug::logError("Vertex %d unused!", i);
 			verdict = false;
 		}
 	}
@@ -104,17 +104,17 @@ bool isValid(const TriangleMesh& mesh) {
 
 bool isValid(const Polyhedron& poly) {
 	if(!isValid(static_cast<const TriangleMesh&>(poly))) {
-		Log::warn("Invalid polyhedron: bad TriangleMesh");
+		Debug::logError("Invalid polyhedron: bad TriangleMesh");
 		return false;
 	}
 	if(!isComplete(poly)) {
-		Log::warn("Invalid polyhedron: incomplete");
+		Debug::logError("Invalid polyhedron: incomplete");
 		return false;
 	}
 
 	// inverted to catch NaNs
 	if(!(poly.getVolume() > 0)) {
-		Log::warn("Invalid polyhedron: inverted! Volume=%f", poly.getVolume());
+		Debug::logError("Invalid polyhedron: inverted! Volume=%f", poly.getVolume());
 		return false;
 	}
 	return true;
@@ -153,13 +153,13 @@ static bool isConnectedPhysicalValid(const ConnectedPhysical* phys, const Motori
 
 static bool isPhysicalValid(const Physical* phys, const MotorizedPhysical* mainPhys) {
 	if(phys->mainPhysical != mainPhys) {
-		Log::error("Physical's parent is not mainPhys!");
+		Debug::logError("Physical's parent is not mainPhys!");
 		DEBUGBREAK;
 		return false;
 	}
 	for(const Part& part : phys->rigidBody) {
 		if(part.parent != phys) {
-			Log::error("part's parent's child is not part");
+			Debug::logError("part's parent's child is not part");
 			DEBUGBREAK;
 			return false;
 		}

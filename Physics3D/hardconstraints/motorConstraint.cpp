@@ -3,14 +3,14 @@
 #include "../math/linalg/trigonometry.h"
 #include "../math/constants.h"
 
-#include "../../util/log.h"
+#include "../misc/debug.h"
 
 namespace P3D {
 void ConstantMotorTurner::update(double deltaT) {
 	this->currentAngle = fmod(fmod(this->currentAngle + deltaT * speed, 2 * PI) + 2 * PI, 2 * PI);
 }
 
-void ConstantMotorTurner::invert() { Log::error("ConstantSpeedMotorConstraint::invert is not implemented!"); }
+void ConstantMotorTurner::invert() { Debug::logError("ConstantSpeedMotorConstraint::invert is not implemented!"); assert(false); }
 
 
 double ConstantMotorTurner::getValue() const {

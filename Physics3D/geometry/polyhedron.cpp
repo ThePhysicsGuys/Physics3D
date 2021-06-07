@@ -10,7 +10,6 @@
 #include "../math/linalg/trigonometry.h"
 #include "../math/utils.h"
 #include "../math/mathUtil.h"
-#include "../../util/log.h"
 #include "../misc/debug.h"
 #include "../misc/physicsProfiler.h"
 #include "../misc/validityHelper.h"

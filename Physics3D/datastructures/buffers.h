@@ -1,6 +1,7 @@
 #pragma once
 
-#include "../../util/log.h"
+#include <assert.h>
+
 #include "iteratorEnd.h"
 
 namespace P3D {
@@ -143,8 +144,7 @@ struct AddableBuffer : public BufferWithCapacity<T> {
 	AddableBuffer(size_t initialCapacity) : BufferWithCapacity<T>(initialCapacity) {}
 
 	AddableBuffer(T* data, size_t dataSize, size_t initialCapacity) : BufferWithCapacity<T>(initialCapacity), size(dataSize) {
-		if(data == nullptr)
-			Log::fatal("Could not create AddableBuffer of size: %d", initialCapacity);
+		assert(data != nullptr);
 
 		for(size_t i = 0; i < dataSize; i++)
 			this->data[i] = data[i];

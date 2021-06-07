@@ -10,7 +10,7 @@ A 3D physics engine, written in C++
 
 ## Project structure
 The Physics3D project consists of 7 projects, each with its own role:
-- The [physics](/physics) project contains the physics engine can be compiled separately.  
+- The [Physics3D](/Physics3D) project contains the physics engine can be compiled separately.  
 - The [graphics](/graphics) project contains all the logic to interact with OpenGL, visual debugging and gui code.
 - The [engine](/engine) project contains general concepts that can be applied in multiple environments like a layer systems and an event system.
 - The [util](/util) project contains code that can be used in all project, like logging, utilities and resource management.

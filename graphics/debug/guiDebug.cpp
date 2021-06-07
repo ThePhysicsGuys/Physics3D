@@ -98,7 +98,7 @@ void logShape(const Polyhedron& shape, const GlobalCFrame& location) {
 		}
 	}
 }
-}
+};
 
 void logTickStart() {
 
@@ -123,6 +123,8 @@ void setupDebugHooks() {
 	Debug::setPointLogAction(Logging::logPoint);
 	Debug::setCFrameLogAction(Logging::logCFrame);
 	Debug::setShapeLogAction(Logging::logShape);
+	// leave physics logging default printf
+	//Debug::setLogAction([](const char* format, std::va_list args) {Log::debug(format, ); })
 }
 
 /*

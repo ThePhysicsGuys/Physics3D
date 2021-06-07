@@ -1,7 +1,5 @@
 #include "physical.h"
 
-#include "../util/log.h"
-
 #include "inertia.h"
 #include "world.h"
 #include "math/linalg/mat.h"
@@ -96,7 +94,7 @@ void MotorizedPhysical::ensureWorld(WorldPrototype* world) {
 
 void Physical::makeMainPart(Part* newMainPart) {
 	if (rigidBody.getMainPart() == newMainPart) {
-		Log::warn("Attempted to replace mainPart with mainPart");
+		Debug::logWarn("Attempted to replace mainPart with mainPart");
 		return;
 	}
 	AttachedPart& atPart = rigidBody.getAttachFor(newMainPart);

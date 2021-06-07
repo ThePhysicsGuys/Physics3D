@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdarg>
+
 #include "../math/linalg/vec.h"
 #include "../math/position.h"
 #include "../math/cframe.h"
@@ -38,12 +40,18 @@ enum CFrameType {
 void logVector(Position origin, Vec3 vec, VectorType type);
 void logPoint(Position point, PointType type);
 void logCFrame(CFrame frame, CFrameType type);
-void logShape(const Polyhedron& shape);
+void logShape(const Polyhedron& shape, const GlobalCFrame& location);
+void log(const char* format, ...);
+void logWarn(const char* format, ...);
+void logError(const char* format, ...);
 
 void setVectorLogAction(void(*logger)(Position origin, Vec3 vec, VectorType type));
 void setPointLogAction(void(*logger)(Position point, PointType type));
 void setCFrameLogAction(void(*logger)(CFrame frame, CFrameType type));
 void setShapeLogAction(void(*logger)(const Polyhedron& shape, const GlobalCFrame& location));
+void setLogAction(void(*logger)(const char* format, std::va_list args));
+void setLogWarnAction(void(*logger)(const char* format, std::va_list args));
+void setLogErrorAction(void(*logger)(const char* format, std::va_list args));
 
 void saveIntersectionError(const Part& first, const Part& second, const char* reason);
 };

@@ -25,6 +25,7 @@ namespace Log {
 		}
 	}
 
+// the va_list must be recreated for both print and fprint
 #define va_logf(format, message) va_list args; va_start(args, format); vprintf(message.c_str(), args); va_end(args); if(logFile) {va_start(args, format); vfprintf(logFile, message.c_str(), args); va_end(args); fflush(logFile);}
 
 	void init(const char* logFileName) {

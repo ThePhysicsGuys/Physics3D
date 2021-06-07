@@ -1,6 +1,5 @@
 #include "visibilityFilter.h"
 
-#include "../../../util/log.h"
 #include "../../math/linalg/trigonometry.h"
 #include "../../math/position.h"
 #include "../../math/bounds.h"

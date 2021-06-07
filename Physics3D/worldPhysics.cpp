@@ -8,7 +8,6 @@
 
 #include "misc/debug.h"
 #include "misc/physicsProfiler.h"
-#include "../util/log.h"
 
 #include <vector>
 #include <cmath>
@@ -211,13 +210,13 @@ static PartIntersection safeIntersects(const Part& p1, const Part& p2) {
 	try {
 		return p1.intersects(p2);
 	} catch(const std::exception& err) {
-		Log::fatal("Error occurred during intersection: %s", err.what());
+		Debug::logError("Error occurred during intersection: %s", err.what());
 
 		Debug::saveIntersectionError(p1, p2, "colError");
 
 		throw err;
 	} catch(...) {
-		Log::fatal("Unknown error occured during intersection");
+		Debug::logError("Unknown error occured during intersection");
 
 		Debug::saveIntersectionError(p1, p2, "colError");
 

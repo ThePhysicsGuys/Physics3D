@@ -4,7 +4,6 @@
 #include "convexShapeBuilder.h"
 #include "computationBuffer.h"
 #include "../math/utils.h"
-#include "../../util/log.h"
 #include "../misc/debug.h"
 #include "../misc/physicsProfiler.h"
 #include "../misc/profiling.h"
@@ -214,7 +213,7 @@ std::optional<Tetrahedron> runGJKTransformed(const ColissionPair& info, Vec3f se
 		}
 	}
 
-	Log::warn("GJK iteration limit reached!");
+	Debug::logWarn("GJK iteration limit reached!");
 	incDebugTally(GJKNoCollidesIterationStatistics, GJK_MAX_ITER + 2);
 	return std::optional<Tetrahedron>();
 }
@@ -306,7 +305,7 @@ bool runEPATransformed(const ColissionPair& info, const Tetrahedron& s, Vec3f& i
 		}
 	}
 
-	Log::warn("EPA iteration limit exceeded! ");
+	Debug::logWarn("EPA iteration limit exceeded! ");
 	incDebugTally(EPAIterationStatistics, EPA_MAX_ITER);
 	return false;
 }
