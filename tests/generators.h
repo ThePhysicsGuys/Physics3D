@@ -165,3 +165,7 @@ template<typename Collection>
 auto oneOf(Collection& collection) -> decltype(collection[0]) {
 	return collection[generateSize_t(collection.size())];
 }
+template<typename T, size_t size>
+DiagonalMatrix<T, size> generateDiagonalMatrix() {
+	return DiagonalMatrix<T, size>();
+}

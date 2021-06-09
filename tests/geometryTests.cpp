@@ -18,6 +18,7 @@
 #include "generators.h"
 
 #include "../util/cpuid.h"
+#include "../physics/geometry/builtinShapeClasses.h"
 
 #define ASSERT(condition) ASSERT_TOLERANT(condition, 0.00001)
 
@@ -153,9 +154,36 @@ TEST_CASE(testRayIntersection) {
 	ASSERT_FALSE(rayTriangleIntersection(Vec3(-1.0, -0.3, -0.3), Vec3(1.0, 0.0, 0.0), Vec3(), Vec3(0.0, 0.0, 1.0), Vec3(0.0, 1.0, 0.0)).rayIntersectsTriangle());
 }
 
-TEST_CASE(testGetFurthestPointInDirection) {
-	for (Vec3f vertex : Library::icosahedron.iterVertices()) {
+TEST_CASE(testGetFurthestPointInDirectio) {
+	for(Vec3f vertex : Library::icosahedron.iterVertices()) {
 		ASSERT(Library::icosahedron.furthestInDirection(vertex) == vertex);
+	}
+}
+
+TEST_CASE(testForWedgeCornerAndPillShapes) {
+	for(int i = 0; i < 100; i++) {
+		Vec3 direction = generateVec3();
+		Vec3 points = generateVec3();
+		Vec3 origin = generateVec3();
+		Rotation rotation = generateRotation();
+		DiagonalMat3 scale = generateDiagonalMatrix<double, 3>();
+		TriangleMesh mesh = generateTriangleMesh();
+
+		ASSERT(CornerClass::instance.asPolyhedron().furthestInDirectionFallback(direction)
+			   == CornerClass::instance.furthestInDirection(direction));
+
+		ASSERT(mesh.getBoundsFallback(Mat3f(rotation.asRotationMatrix() * scale))
+			   == CornerClass::instance.getBounds(rotation, scale));
+		/*
+			ASSERT(CornerClass::instance.asPolyhedron().containsPoint(points)
+				== CornerClass::instance.containsPoint(points));
+		*/
+		ASSERT(CornerClass::instance.asPolyhedron().getScaledMaxRadiusSq(scale)
+			   == CornerClass::instance.getScaledMaxRadiusSq(scale));
+		/*
+			ASSERT(CornerClass::instance.asPolyhedron().getIntersectionDistance(origin, direction)
+			   == CornerClass::instance.getIntersectionDistance(origin, direction));
+		*/
 	}
 }
 
@@ -258,3 +286,4 @@ TEST_CASE(testTriangleMeshOptimizedFurthestInDirection) {
 		}
 	}
 }
+

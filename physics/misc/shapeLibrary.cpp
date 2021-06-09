@@ -50,6 +50,18 @@ Triangle houseTriangles[]{
 	{4, 5, 9}, {4, 9, 8}, {7, 8, 9}, {7, 9, 6} //roof2
 };
 
+Vec3f cornerVertices[]{
+	Vec3f(1.0f, 1.0f, 1.0f), Vec3f(-1.0f, 1.0f, 1.0f), Vec3f(1.0f, -1.0f, 1.0f),
+	Vec3f(1.0f, 1.0f, -1.0f)
+};
+
+Triangle cornerTriangles[]{
+	{0, 1, 2}, //forward 
+	{0, 1, 3}, //left 
+	{0, 2, 3}, //back 
+	{1, 2, 3}, //right 
+};
+
 Vec3f wedgeVertices[]{
 	Vec3f(-1.0f, -1.0f, -1.0f), Vec3f(-1.0f, -1.0f, 1.0f), Vec3f(1.0f, -1.0f, 1.0f), Vec3f(1.0f, -1.0f, -1.0f),
 	Vec3f(-1.0f,  1.0f, -1.0f), Vec3f(-1.0f,  1.0f, 1.0f)
@@ -75,7 +87,8 @@ Triangle boxTriangles[12] = {
 const Polyhedron icosahedron(icosahedronVertices, icosahedronTriangles, 12, 20);
 const Polyhedron trianglePyramid(trianglePyramidVertices, trianglePyramidTriangles, 4, 4);
 const Polyhedron house(houseVertices, houseTriangles, 10, 16);
-const Polyhedron wedge(wedgeVertices, wedgeTriangles, wedgeVertexCount, 8);
+const Polyhedron wedge{wedgeVertices, wedgeTriangles, wedgeVertexCount, 8};
+const Polyhedron corner{cornerVertices, cornerTriangles, cornerVertexCount, 4};
 
 Polyhedron createCube(float side) {
 	return createBox(side, side, side);

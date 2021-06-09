@@ -48,6 +48,10 @@
 
 #include "../util/stringUtil.h"
 
+#include "../physics/geometry/builtinShapeClasses.h"
+#include "../physics/misc/toString.h"
+
+
 #define TICKS_PER_SECOND 120.0
 #define TICK_SKIP_TIME std::chrono::milliseconds(1000)
 
@@ -141,7 +145,7 @@ void setupWorld(const Util::ParsedArgs& cmdArgs) {
 	PartProperties basicProperties{1.0, 0.7, 0.3};
 
 	WorldBuilder::buildFloorAndWalls(50.0, 50.0, 1.0);
-
+	/*
 	GlobalCFrame origin(0.0, 5.0, 0.0, Rotation::fromEulerAngles(-3.14 / 4, 3.14 / 4, 0.0));
 
 	for(int x = 0; x < 3; x++) {
@@ -152,7 +156,7 @@ void setupWorld(const Util::ParsedArgs& cmdArgs) {
 			}
 		}
 	}
-
+	
 	{
 		ExtendedPart* partA = new ExtendedPart(boxShape(1.0, 0.49, 3.0), GlobalCFrame(3.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "partA");
 		ExtendedPart* partB = new ExtendedPart(boxShape(1.0, 0.5, 3.0), GlobalCFrame(2.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "partB");
@@ -165,7 +169,7 @@ void setupWorld(const Util::ParsedArgs& cmdArgs) {
 		world.addPart(partA);
 		partA->attach(partB, new MotorConstraintTemplate<ConstantMotorTurner>(0.5), CFrame(0.0, 1.0, 0.0), CFrame(1.0, 0.0, 0.0));
 	}
-
+	*/
 	// Lights
 	{
 		Comp::Light::Attenuation attenuation = {1, 1, 1};
@@ -177,9 +181,12 @@ void setupWorld(const Util::ParsedArgs& cmdArgs) {
 		EntityBuilder(screen.registry).parent(lights).transform(Position(-10, 5, 10), 0.2).light(Graphics::Color(1, 0.84f, 0.69f), 500, attenuation).hitbox(&SphereClass::instance).mesh(sphereData);
 		EntityBuilder(screen.registry).parent(lights).transform(Position(0, 5, 0), 0.2).light(Graphics::Color(1, 0.90f, 0.75f), 400, attenuation).hitbox(&SphereClass::instance).mesh(sphereData);
 	}
-
-	return;
 	{
+		ExtendedPart* partA = new ExtendedPart(cornerShape(), GlobalCFrame(3.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "CORNER");
+		world.addPart(partA);
+	}
+
+	/*{
 		ExtendedPart* partA = new ExtendedPart(boxShape(1.0, 0.49, 3.0), GlobalCFrame(3.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "partA");
 		ExtendedPart* partB = new ExtendedPart(boxShape(1.0, 0.5, 3.0), GlobalCFrame(2.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "partB");
 		EntityBuilder(screen.registry, partA->entity).light(Graphics::Color(0.1, 0.94f, 0.49f), 500, Comp::Light::Attenuation{0.8, 0.5, 0.2});
@@ -204,7 +211,7 @@ void setupWorld(const Util::ParsedArgs& cmdArgs) {
 		world.addPart(partA);
 		world.addPart(partB);
 		world.addPart(partC);
-	}
+	}*/
 
 	//world.addLink(new MagneticLink({ CFrame{1.0, 0.0, 0.0}, partA }, { CFrame{0.0, 0.0, 0.0}, partB }, +8.0));
 	//world.addLink(new AlignmentLink({ CFrame{1.0, 0.0, 0.0}, partA}, { CFrame{0.0, 0.0, 0.0}, partB }));

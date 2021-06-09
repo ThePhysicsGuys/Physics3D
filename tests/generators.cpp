@@ -122,6 +122,10 @@ Bounds generateBounds() {
 	return Bounds(Position(min(a.x, b.x), min(a.y, b.y), min(a.z, b.z)), Position(max(a.x, b.x), max(a.y, b.y), max(a.z, b.z)));
 }
 
+DiagonalMat3 generateDiagonalMatrix() {
+	return DiagonalMat3();
+}
+
 Rotation generateRotation() {
 	return Rotation::fromEulerAngles(generateDouble() * 1.507075, generateDouble() * 1.507075, generateDouble() * 1.507075);
 }

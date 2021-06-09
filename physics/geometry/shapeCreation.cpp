@@ -22,6 +22,10 @@ Shape wedgeShape() {
 	return Shape{&WedgeClass::instance};
 }
 
+Shape cornerShape() {
+	return Shape{&CornerClass::instance};
+}
+
 Shape polyhedronShape(const Polyhedron& poly) {
 	BoundingBox bounds = poly.getBounds();
 	Vec3 center = bounds.getCenter();
