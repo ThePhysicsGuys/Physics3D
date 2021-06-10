@@ -15,6 +15,9 @@
 #include <Physics3D/boundstree/filters/outOfBoundsFilter.h>
 #include <Physics3D/misc/physicsProfiler.h>
 
+#include <Physics3D/world.h>
+#include <Physics3D/worldIteration.h>
+
 namespace P3D {
 WorldBenchmark::WorldBenchmark(const char* name, int tickCount) : Benchmark(name), world(0.005), tickCount(tickCount) {
 	world.addExternalForce(new DirectionalGravity(Vec3(0, -10, 0)));
@@ -30,9 +33,9 @@ void WorldBenchmark::run() {
 			Log::print("Location of object: %.5f %.5f %.5f\n", double(pos.x), double(pos.y), double(pos.z));
 
 			std::size_t partsOutOfBounds = 0;
-			for(const Part& p : world.iterPartsFiltered(OutOfBoundsFilter(Bounds(Position(-100.0, -100.0, -100.0), Position(100.0, 100.0, 100.0))))) {
+			world.forEachPartFiltered(OutOfBoundsFilter(Bounds(Position(-100.0, -100.0, -100.0), Position(100.0, 100.0, 100.0))), [&partsOutOfBounds](const Part&) {
 				partsOutOfBounds++;
-			}
+			});
 
 			Log::print("%d/%d parts out of bounds!\n", partsOutOfBounds, world.getPartCount());
 		}

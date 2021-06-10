@@ -19,7 +19,7 @@ namespace P3D {
 constexpr int BRANCH_FACTOR = 8;
 static_assert((BRANCH_FACTOR & (BRANCH_FACTOR - 1)) == 0, "Branch factor must be power of 2");
 
-class TreeTrunk;
+struct TreeTrunk;
 
 inline float computeCost(const BoundsTemplate<float>& bounds) {
 	Vec3f d = bounds.getDiagonal();
@@ -31,7 +31,7 @@ inline float computeAdditionCost(const BoundsTemplate<float>& oldBounds, const B
 }
 
 class TreeNodeRef {
-	friend class TreeTrunk;
+	friend struct TreeTrunk;
 
 	static constexpr std::uintptr_t SIZE_DATA_MASK = BRANCH_FACTOR - 1;
 	static constexpr std::uintptr_t GROUP_HEAD_MASK = BRANCH_FACTOR;
@@ -385,6 +385,23 @@ inline void forEachRecurse(const TreeTrunk& curTrunk, int curTrunkSize, const Fu
 			forEachRecurse<Boundable, Func>(subNode.asTrunk(), subNode.getTrunkSize(), func);
 		} else {
 			func(*static_cast<Boundable*>(subNode.asObject()));
+		}
+	}
+}
+
+// expects a filter of the form std::array<bool, BRANCH_FACTOR>(const TreeTrunk& trunk, int trunkSize)
+// expects a function of the form void(Boundable& object)
+template<typename Boundable, typename Filter, typename Func>
+inline void forEachFilteredRecurse(const TreeTrunk& curTrunk, int curTrunkSize, const Filter& filter, const Func& func) {
+	std::array<bool, BRANCH_FACTOR> passes = filter(curTrunk, curTrunkSize);
+	for(int i = 0; i < curTrunkSize; i++) {
+		if(passes[i]) {
+			const TreeNodeRef& subNode = curTrunk.subNodes[i];
+			if(subNode.isTrunkNode()) {
+				forEachFilteredRecurse<Boundable, Filter, Func>(subNode.asTrunk(), subNode.getTrunkSize(), filter, func);
+			} else {
+				func(*static_cast<Boundable*>(subNode.asObject()));
+			}
 		}
 	}
 }
@@ -987,6 +1004,12 @@ public:
 	template<typename Func>
 	void forEach(const Func& func) const {
 		forEachRecurse<Boundable, Func>(this->tree.baseTrunk, this->tree.baseTrunkSize, func);
+	}
+
+	// expects a function of the form void(Boundable& object)
+	template<typename Filter, typename Func>
+	void forEachFiltered(const Filter& filter, const Func& func) const {
+		forEachFilteredRecurse<Boundable, Filter, Func>(this->tree.baseTrunk, this->tree.baseTrunkSize, filter, func);
 	}
 
 	// expects a function of the form void(Boundable& object)

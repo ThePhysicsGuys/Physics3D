@@ -12,6 +12,7 @@
 #include "../../geometry/shapeClass.h"
 #include "../../part.h"
 #include "../../world.h"
+#include "../../layer.h"
 #include "../../hardconstraints/hardConstraint.h"
 #include "../../hardconstraints/fixedConstraint.h"
 #include "../../hardconstraints/motorConstraint.h"

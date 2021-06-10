@@ -141,7 +141,7 @@ void DebugLayer::onRender(Engine::Registry64& registry) {
 	AddableBuffer<ColoredVector>& vecLog = getVectorBuffer();
 	AddableBuffer<ColoredPoint>& pointLog = getPointBuffer();
 
-	for (const MotorizedPhysical* physical : screen->world->iterPhysicals()) {
+	for (const MotorizedPhysical* physical : screen->world->physicals) {
 		Position com = physical->getCenterOfMass();
 		pointLog.add(ColoredPoint(com, P3D::Debug::CENTER_OF_MASS));
 	}
@@ -173,7 +173,7 @@ void DebugLayer::onRender(Engine::Registry64& registry) {
 		}
 
 		if(colissionSpheresMode == SphereColissionRenderMode::ALL) {
-			for(MotorizedPhysical* phys : screen->world->iterPhysicals()) {
+			for(MotorizedPhysical* phys : screen->world->physicals) {
 				for(Part& part : phys->rigidBody) {
 					Color yellow = Graphics::Colors::YELLOW;
 					yellow.a = 0.5;

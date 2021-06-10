@@ -344,23 +344,23 @@ void WorldPrototype::handleConstraints() {
 }
 void WorldPrototype::update() {
 	physicsMeasure.mark(PhysicsProcess::UPDATING);
-	for(MotorizedPhysical* physical : iterPhysicals()) {
+	for(MotorizedPhysical* physical : this->physicals) {
 		physical->update(this->deltaT);
 	}
 
-	for(ColissionLayer& layer : layers) {
+	for(ColissionLayer& layer : this->layers) {
 		layer.refresh();
 	}
 	age++;
 
-	for(SoftLink* springLink : springLinks) {
+	for(SoftLink* springLink : this->springLinks) {
 		springLink->update();
 	}
 }
 
 double WorldPrototype::getTotalKineticEnergy() const {
 	double total = 0.0;
-	for(const MotorizedPhysical* p : iterPhysicals()) {
+	for(const MotorizedPhysical* p : this->physicals) {
 		total += p->getKineticEnergy();
 	}
 	return total;

@@ -8,7 +8,8 @@ namespace P3D {
 class Physical;
 class Part;
 
-struct PhysicalConstraint {
+class PhysicalConstraint {
+public:
 	inline PhysicalConstraint(Physical* physA, Physical* physB, Constraint* constraint) :
 		physA(physA), physB(physB), constraint(constraint) {}
 
@@ -21,7 +22,8 @@ struct PhysicalConstraint {
 	ConstraintMatrixPack getMatrices(double* matrixBuf, double* errorBuf) const;
 };
 
-struct ConstraintGroup {
+class ConstraintGroup {
+public:
 	std::vector<PhysicalConstraint> constraints; 
 
 	void add(Physical* first, Physical* second, Constraint* constraint);

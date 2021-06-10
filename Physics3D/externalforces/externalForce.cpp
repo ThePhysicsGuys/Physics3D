@@ -18,7 +18,7 @@ double ExternalForce::getPotentialEnergyForObject(const WorldPrototype* world, c
 
 double ExternalForce::getTotalPotentialEnergyForThisForce(const WorldPrototype* world) const {
 	double total = 0.0;
-	for(MotorizedPhysical* p : world->iterPhysicals()) {
+	for(MotorizedPhysical* p : world->physicals) {
 		total += this->getPotentialEnergyForObject(world, *p);
 	}
 	return total;

@@ -9,144 +9,11 @@
 #include "constraints/constraintGroup.h"
 #include "softlinks/softLink.h"
 #include "externalforces/externalForce.h"
-#include "datastructures/iterators.h"
-#include "datastructures/iteratorEnd.h"
-#include "layer.h"
 #include "colissionBuffer.h"
 #include "threading/threadPool.h"
 
 namespace P3D {
 class WorldLayer;
-
-template<bool IsConst>
-class WorldLayerIter {
-protected:
-	const_if<ColissionLayer, IsConst>* curLayer;
-	const_if<ColissionLayer, IsConst>* finalLayer;
-	const_if<WorldLayer, IsConst>* curWorldLayer;
-
-public:
-	// this ctor creates an iter which is immediately at it's end
-	WorldLayerIter() : curLayer(nullptr), finalLayer(nullptr), curWorldLayer(nullptr) {}
-
-	WorldLayerIter(const_if<ColissionLayer, IsConst>* firstLayer, const_if<ColissionLayer, IsConst>* finalLayer) :
-		curLayer(firstLayer),
-		finalLayer(finalLayer),
-		curWorldLayer(curLayer->subLayers) {}
-
-	bool operator!=(IteratorEnd) const {
-		return curLayer != finalLayer;
-	}
-	bool operator==(IteratorEnd) const {
-		return curLayer == finalLayer;
-	}
-
-	WorldLayerIter& operator++() {
-		++curWorldLayer;
-		if(curWorldLayer == curLayer->subLayers + ColissionLayer::NUMBER_OF_SUBLAYERS) {
-			++curLayer;
-			if(curLayer == finalLayer) return *this;
-			curWorldLayer = curLayer->subLayers;
-		}
-		return *this;
-	}
-
-	const_if<WorldLayer, IsConst>* operator*() const {
-		return curWorldLayer;
-	}
-};
-
-template<bool IsConst>
-class WorldIteratorTemplate {
-protected:
-	WorldLayerIter<IsConst> worldLayerIter;
-	decltype((*worldLayerIter)->tree.begin()) curIter;
-
-	inline void checkMoveToNextLayer() {
-		while(!(curIter != IteratorEnd())) {
-			++worldLayerIter;
-			if(worldLayerIter == IteratorEnd()) return;
-			curIter = (*worldLayerIter)->tree.begin();
-		}
-	}
-
-public:
-	WorldIteratorTemplate() = default;
-
-	WorldIteratorTemplate(const_if<ColissionLayer, IsConst>* firstLayer, const_if<ColissionLayer, IsConst>* finalLayer) :
-		worldLayerIter(firstLayer, finalLayer),
-		curIter((*worldLayerIter)->tree.begin()) {
-
-		assert(firstLayer != finalLayer);
-
-		checkMoveToNextLayer();
-	}
-
-	WorldIteratorTemplate& operator++() {
-		++curIter;
-		checkMoveToNextLayer();
-		return *this;
-	}
-
-	bool operator!=(IteratorEnd) const {
-		return this->worldLayerIter != IteratorEnd();
-	}
-
-	const_if<Part, IsConst>& operator*() const {
-		return *curIter;
-	}
-};
-
-template<bool IsConst, typename Filter>
-class FilteredWorldIteratorTemplate {
-protected:
-	WorldLayerIter<IsConst> worldLayerIter;
-	Filter filter;
-	decltype((*worldLayerIter)->tree.iterFiltered(filter).begin()) curIter;
-
-	inline void checkMoveToNextLayer() {
-		while(!(curIter != IteratorEnd())) {
-			++worldLayerIter;
-			if(worldLayerIter == IteratorEnd()) return;
-			curIter = (*worldLayerIter)->tree.iterFiltered(this->filter).begin();
-		}
-	}
-
-public:
-	FilteredWorldIteratorTemplate() = default;
-
-	FilteredWorldIteratorTemplate(const_if<ColissionLayer, IsConst>* firstLayer, const_if<ColissionLayer, IsConst>* finalLayer, const Filter& filter) :
-		worldLayerIter(firstLayer, finalLayer),
-		filter(filter),
-		curIter((*worldLayerIter)->tree.iterFiltered(this->filter).begin()) {
-
-		assert(firstLayer != finalLayer);
-
-		checkMoveToNextLayer();
-	}
-
-	FilteredWorldIteratorTemplate& operator++() {
-		++curIter;
-		checkMoveToNextLayer();
-		return *this;
-	}
-
-	bool operator!=(IteratorEnd) const {
-		return this->worldLayerIter != IteratorEnd();
-	}
-
-	const_if<Part, IsConst>& operator*() const {
-		return *curIter;
-	}
-};
-
-typedef WorldIteratorTemplate<false> WorldIterator;
-typedef WorldIteratorTemplate<true> ConstWorldIterator;
-
-template<typename Filter>
-using FilteredWorldIterator = FilteredWorldIteratorTemplate<false, Filter>;
-template<typename Filter>
-using FilteredConstWorldIterator = FilteredWorldIteratorTemplate<true, Filter>;
 
 class WorldPrototype {
 private:
@@ -204,12 +71,17 @@ protected:
 	virtual void deletePart(Part* partToDelete) const;
 
 public:
-	std::vector<ExternalForce*> externalForces;
-	std::vector<MotorizedPhysical*> physicals;
-	std::vector<ConstraintGroup> constraints;
-
+	// AABB trees for storing parts
 	std::vector<ColissionLayer> layers;
+	// Sparse matrix listing layer-layer colissions
+	std::vector<std::pair<int, int>> colissionMask;
+	
+	// All physicals
+	std::vector<MotorizedPhysical*> physicals;
 
+	// Extra world features
+	std::vector<ExternalForce*> externalForces;
+	std::vector<ConstraintGroup> constraints;
 	std::vector<SoftLink*> springLinks;
 
 	void addLink(SoftLink* link);
@@ -217,11 +89,6 @@ public:
 
 	ColissionBuffer curColissions;
 	ThreadPool pool;
-
-	/*
-		These lists signify which layers collide
-	*/
-	std::vector<std::pair<int, int>> colissionMask;
 
 	size_t age = 0;
 	size_t objectCount = 0;
@@ -246,6 +113,8 @@ public:
 	void setLayersCollide(int layer1, int layer2, bool collide);
 
 	int createLayer(bool collidesInternally, bool collidesWithOthers);
+
+	// deletes a layer, moves all parts from the deleted layer to layerToMoveTo
 	void deleteLayer(int layerIndex, int layerToMoveTo);
 
 
@@ -270,88 +139,23 @@ public:
 	void addExternalForce(ExternalForce* force);
 	void removeExternalForce(ExternalForce* force);
 
-
 	virtual bool isValid() const;
 
-	IteratorFactory<std::vector<MotorizedPhysical*>::iterator> iterPhysicals() { return IteratorFactory<std::vector<MotorizedPhysical*>::iterator>(physicals.begin(), physicals.end()); }
-	IteratorFactory<std::vector<MotorizedPhysical*>::const_iterator> iterPhysicals() const { return IteratorFactory<std::vector<MotorizedPhysical*>::const_iterator>(physicals.begin(), physicals.end()); }
+	// include worldIteration.h to use
+	// expects a function of the form void(Part& part)
+	template<typename Func>
+	void forEachPart(const Func& funcToRun) const;
 
-	template<typename Filter>
-	IteratorFactoryWithEnd<FilteredWorldIterator<Filter>> iterPartsFiltered(const Filter& filter) {
-		if(layers.size() > 0) {
-			ColissionLayer* fst = &layers[0];
-			return IteratorFactoryWithEnd<FilteredWorldIterator<Filter>>(FilteredWorldIterator<Filter>(fst, fst + layers.size(), filter));
-		} else {
-			return IteratorFactoryWithEnd<FilteredWorldIterator<Filter>>(FilteredWorldIterator<Filter>());
-		}
-	}
-
-	template<typename Filter>
-	IteratorFactoryWithEnd<FilteredConstWorldIterator<Filter>> iterPartsFiltered(const Filter& filter) const {
-		if(layers.size() > 0) {
-			const ColissionLayer* fst = &layers[0];
-			return IteratorFactoryWithEnd<FilteredConstWorldIterator<Filter>>(FilteredConstWorldIterator<Filter>(fst, fst + layers.size(), filter));
-		} else {
-			return IteratorFactoryWithEnd<FilteredConstWorldIterator<Filter>>(FilteredConstWorldIterator<Filter>());
-		}
-	}
-
-	inline IteratorFactoryWithEnd<WorldIterator> iterParts() {
-		if(layers.size() > 0) {
-			ColissionLayer* fst = &layers[0];
-			return IteratorFactoryWithEnd<WorldIterator>(WorldIterator(fst, fst + layers.size()));
-		} else {
-			return IteratorFactoryWithEnd<WorldIterator>(WorldIterator());
-		}
-	}
-	inline IteratorFactoryWithEnd<ConstWorldIterator> iterParts() const {
-		if(layers.size() > 0) {
-			const ColissionLayer* fst = &layers[0];
-			return IteratorFactoryWithEnd<ConstWorldIterator>(ConstWorldIterator(fst, fst + layers.size()));
-		} else {
-			return IteratorFactoryWithEnd<ConstWorldIterator>(ConstWorldIterator());
-		}
-	}
+	// include worldIteration.h to use
+	// expects a function of the form void(Part& part)
+	template<typename Func, typename Filter>
+	void forEachPartFiltered(const Filter& filter, const Func& funcToRun) const;
 };
 
 template<typename T = Part>
 class World : public WorldPrototype {
 public:
 	World(double deltaT) : WorldPrototype(deltaT) {}
-
-	template<typename Filter>
-	IteratorFactoryWithEnd<CastingIterator<FilteredWorldIterator<Filter>, T&>> iterPartsFiltered(const Filter& filter) {
-		return IteratorFactoryWithEnd<CastingIterator<FilteredWorldIterator<Filter>, T&>>(
-			CastingIterator<FilteredWorldIterator<Filter>, T&>(
-			WorldPrototype::iterPartsFiltered(filter).begin()
-			)
-			);
-	}
-
-	template<typename Filter>
-	IteratorFactoryWithEnd<CastingIterator<FilteredConstWorldIterator<Filter>, const T&>> iterPartsFiltered(const Filter& filter) const {
-		return IteratorFactoryWithEnd<CastingIterator<FilteredConstWorldIterator<Filter>, const T&>>(
-			CastingIterator<FilteredConstWorldIterator<Filter>, const T&>(
-			WorldPrototype::iterPartsFiltered(filter).begin()
-			)
-			);
-	}
-
-	IteratorFactoryWithEnd<CastingIterator<WorldIterator, T&>> iterParts() {
-		return IteratorFactoryWithEnd<CastingIterator<WorldIterator, T&>>(
-			CastingIterator<WorldIterator, T&>(
-			WorldPrototype::iterParts().begin()
-			)
-			);
-	}
-
-	IteratorFactoryWithEnd<CastingIterator<ConstWorldIterator, const T&>> iterParts() const {
-		return IteratorFactoryWithEnd<CastingIterator<ConstWorldIterator, const T&>>(
-			CastingIterator<ConstWorldIterator, const T&>(
-			WorldPrototype::iterParts().begin()
-			)
-			);
-	}
 
 	virtual void onCollide(Part* partA, Part* partB) {}
 	virtual void onCollide(T* partA, T* partB) {}
@@ -372,5 +176,15 @@ public:
 	void deletePart(Part* partToDelete) const final override {
 		this->deletePart(static_cast<T*>(partToDelete));
 	}
+
+	// include worldIteration.h to use
+	// expects a function of the form void(T& part)
+	template<typename Func>
+	void forEachPart(const Func& funcToRun) const;
+
+	// include worldIteration.h to use
+	// expects a function of the form void(T& part)
+	template<typename Func, typename Filter>
+	void forEachPartFiltered(const Filter& filter, const Func& funcToRun) const;
 };
 };

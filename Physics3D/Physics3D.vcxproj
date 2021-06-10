@@ -212,7 +212,6 @@
     <ClInclude Include="datastructures\buffers.h" />
     <ClInclude Include="datastructures\iteratorEnd.h" />
     <ClInclude Include="datastructures\iteratorFactory.h" />
-    <ClInclude Include="datastructures\iterators.h" />
     <ClInclude Include="layer.h" />
     <ClInclude Include="datastructures\monotonicTree.h" />
     <ClInclude Include="datastructures\compactPtrDataPair.h" />
@@ -295,6 +294,7 @@
     <ClInclude Include="threading\synchonizedWorld.h" />
     <ClInclude Include="threading\threadPool.h" />
     <ClInclude Include="world.h" />
+    <ClInclude Include="worldIteration.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

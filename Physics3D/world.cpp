@@ -4,6 +4,7 @@
 #include "misc/debug.h"
 #include "layer.h"
 #include "misc/validityHelper.h"
+#include "worldIteration.h"
 
 namespace P3D {
 // #define CHECK_WORLD_VALIDITY
@@ -16,7 +17,7 @@ namespace P3D {
 #pragma region worldValidity
 
 bool WorldPrototype::isValid() const {
-	for(const MotorizedPhysical* phys : iterPhysicals()) {
+	for(const MotorizedPhysical* phys : this->physicals) {
 		if(phys->world != this) {
 			Debug::logError("physicals's world is not correct!");
 			DEBUGBREAK;
@@ -248,11 +249,11 @@ void WorldPrototype::clear() {
 	}
 	this->physicals.clear();
 	std::vector<Part*> partsToDelete;
-	for(Part& p : this->iterParts()) {
-		p.parent = nullptr;
-		p.layer = nullptr;
-		partsToDelete.push_back(&p);
-	}
+	this->forEachPart([&partsToDelete](Part& part) {
+		part.parent = nullptr;
+		part.layer = nullptr;
+		partsToDelete.push_back(&part);
+	});
 	this->objectCount = 0;
 	for(ColissionLayer& cl : this->layers) {
 		for(WorldLayer& layer : cl.subLayers) {

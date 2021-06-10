@@ -56,6 +56,16 @@ public:
 		tree.maxImproveStructure();
 	}
 
+	template<typename Func>
+	void forEach(const Func& funcToRun) const {
+		tree.forEach(funcToRun);
+	}
+
+	template<typename Filter, typename Func>
+	void forEachFiltered(const Filter& filter, const Func& funcToRun) const {
+		tree.forEachFiltered(filter, funcToRun);
+	}
+
 	int getID() const;
 };
 
@@ -84,6 +94,20 @@ public:
 	void refresh();
 
 	void getInternalColissions(ColissionBuffer& curColissions) const;
+
+	template<typename Func>
+	void forEach(const Func& funcToRun) const {
+		for(const WorldLayer& subLayer : this->subLayers) {
+			subLayer.forEach(funcToRun);
+		}
+	}
+
+	template<typename Filter, typename Func>
+	void forEachFiltered(const Filter& filter, const Func& funcToRun) const {
+		for(const WorldLayer& subLayer : this->subLayers) {
+			subLayer.forEachFiltered(filter, funcToRun);
+		}
+	}
 
 	int getID() const;
 };

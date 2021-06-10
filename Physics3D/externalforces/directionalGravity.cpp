@@ -7,7 +7,7 @@
 
 namespace P3D {
 void DirectionalGravity::apply(WorldPrototype* world) {
-	for(MotorizedPhysical* p : world->iterPhysicals()) {
+	for(MotorizedPhysical* p : world->physicals) {
 		p->applyForceAtCenterOfMass(gravity * p->totalMass);
 	}
 }

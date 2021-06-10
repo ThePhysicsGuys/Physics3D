@@ -199,7 +199,7 @@ void ConstraintLayer::onRender(Engine::Registry64& registry) {
 	Shaders::maskShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
 
 	world->syncReadOnlyOperation([&]() {
-		for(MotorizedPhysical* phys : world->iterPhysicals()) {
+		for(MotorizedPhysical* phys : world->physicals) {
 			recurseRenderHardConstraints(this, *phys);
 		}
 

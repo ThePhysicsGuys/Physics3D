@@ -1,9 +1,9 @@
 #include "core.h"
 
-#include "GL/glew.h"
+#include <GL/glew.h>
+#include <stack>
 
 #include "renderer.h"
-#include <stack>
 
 namespace P3D::Graphics {
 

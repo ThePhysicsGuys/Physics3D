@@ -15,6 +15,8 @@
 
 #include <Physics3D/misc/physicsProfiler.h>
 #include <Physics3D/misc/toString.h>
+#include <Physics3D/world.h>
+#include <Physics3D/layer.h>
 
 #include "worlds.h"
 
