@@ -3,9 +3,9 @@
 #include <string>
 #include <variant>
 
-#include "../../physics/threading/synchonizedWorld.h"
+#include <Physics3D/threading/synchonizedWorld.h>
 #include "../application/extendedPart.h"
-#include "../physics/geometry/builtinShapeClasses.h"
+#include <Physics3D/geometry/builtinShapeClasses.h>
 #include "../graphics/visualData.h"
 
 namespace P3D::Application {

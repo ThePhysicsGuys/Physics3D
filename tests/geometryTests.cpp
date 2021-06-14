@@ -1,24 +1,25 @@
 #include "testsMain.h"
 
 #include "compare.h"
-#include "../physics/misc/toString.h"
+#include <Physics3D/misc/toString.h>
 
-#include "../physics/math/linalg/vec.h"
-#include "../physics/math/linalg/mat.h"
-#include "../physics/math/linalg/trigonometry.h"
-#include "../physics/math/linalg/eigen.h"
-#include "../physics/math/utils.h"
-#include "../physics/math/boundingBox.h"
+#include <Physics3D/math/linalg/vec.h>
+#include <Physics3D/math/linalg/mat.h>
+#include <Physics3D/math/linalg/trigonometry.h>
+#include <Physics3D/math/linalg/eigen.h>
+#include <Physics3D/math/utils.h>
+#include <Physics3D/math/boundingBox.h>
 
-#include "../physics/geometry/shape.h"
+#include <Physics3D/geometry/shape.h>
 
-#include "../physics/misc/shapeLibrary.h"
+#include <Physics3D/geometry/shapeLibrary.h>
 
 #include "testValues.h"
 #include "generators.h"
 
-#include "../util/cpuid.h"
+#include <Physics3D/misc/cpuid.h>
 
+using namespace P3D;
 #define ASSERT(condition) ASSERT_TOLERANT(condition, 0.00001)
 
 template<typename T, typename Tol, size_t Size>
@@ -35,8 +36,8 @@ bool isDiagonalTolerant(const Matrix<T, Size, Size>& m, Tol tolerance) {
 }
 template<typename T, typename Tol, size_t Size>
 bool isDiagonalTolerant(const SymmetricMatrix<T, Size>& m, Tol tolerance) {
-	for(size_t row = 0; row < Size-1; row++) {
-		for(size_t col = row+1; col < Size; col++) {
+	for(size_t row = 0; row < Size - 1; row++) {
+		for(size_t col = row + 1; col < Size; col++) {
 			if(!tolerantEquals<T>(m[row][col], 0, tolerance)) {
 				return false;
 			}
@@ -61,7 +62,7 @@ bool isSymmetricTolerant(const Matrix<T, Size, Size>& m, Tol tolerance) {
 #define ASSERT_DIAGONAL(matrix) ASSERT_DIAGONAL_TOLERANT(matrix, 0.00000001)
 
 TEST_CASE(shapeVolume) {
-	Polyhedron boxShape = Library::createBox(2, 2, 2);
+	Polyhedron boxShape = ShapeLibrary::createBox(2, 2, 2);
 
 	CFramef transform(Vec3f(0.3f, 0.7f, -3.5f), Rotationf::fromEulerAngles(0.7f, 0.2f, 0.3f));
 
@@ -72,17 +73,17 @@ TEST_CASE(shapeVolume) {
 }
 
 TEST_CASE(shapeCenterOfMass) {
-	Polyhedron boxShape = Library::createBox(2.0, 2.0, 2.0);
+	Polyhedron boxShape = ShapeLibrary::createBox(2.0, 2.0, 2.0);
 
 	CFramef transform(Vec3f(0.3f, 0.7f, -3.5f), Rotationf::fromEulerAngles(0.7f, 0.2f, 0.3f));
 
 	Polyhedron transformedShape = boxShape.localToGlobal(transform);
-	
+
 	ASSERT(transform.localToGlobal(boxShape.getCenterOfMass()) == transformedShape.getCenterOfMass());
 }
 
 /*TEST_CASE(shapeInertiaMatrix) {
-	Polyhedron boxShape = Library::createBox(2.0, 2.0, 2.0);
+	Polyhedron boxShape = ShapeLibrary::createBox(2.0, 2.0, 2.0);
 
 	CFramef transform(Vec3f(0,0,0), rotationMatrixfromEulerAngles(0.7f, 0.2f, 0.3f));
 	Polyhedron transformedShape = boxShape.localToGlobal(transform);
@@ -91,15 +92,15 @@ TEST_CASE(shapeCenterOfMass) {
 
 	logf("Inertia of transformed boxShape: %s", str(transformedShape.getInertiaAroundCenterOfMass()).c_str());
 
-	Polyhedron h = Library::house;
-	Polyhedron newHouse = Library::house.translated(-Vec3f(Library::house.getCenterOfMass()));
+	Polyhedron h = ShapeLibrary::house;
+	Polyhedron newHouse = ShapeLibrary::house.translated(-Vec3f(ShapeLibrary::house.getCenterOfMass()));
 	Polyhedron rotatedHouse = newHouse.rotated(rotationMatrixfromEulerAngles(0.0, 0.3, 0.0));
 	logf("Inertia of House: %s", str(newHouse.getInertiaAroundCenterOfMass()).c_str());
 	logf("Inertia of Rotated House: %s", str(rotatedHouse.getInertiaAroundCenterOfMass()).c_str());
 }*/
 
 TEST_CASE(shapeInertiaRotationInvariance) {
-	Polyhedron testShape = Library::house.translated(-Vec3f(Library::house.getCenterOfMass()));
+	Polyhedron testShape = ShapeLibrary::house.translated(-Vec3f(ShapeLibrary::house.getCenterOfMass()));
 
 	Vec3 testMoment = Vec3(0.7, -3.2, 4.8);
 	Vec3 momentResult = ~testShape.getInertiaAroundCenterOfMass() * testMoment;
@@ -111,12 +112,12 @@ TEST_CASE(shapeInertiaRotationInvariance) {
 	logStream << "Inertial eigenValues: " << getEigenDecomposition(testShape.getInertiaAroundCenterOfMass()).eigenValues.asDiagonalMatrix() << "\n";
 
 	for(const Rotation& testRotation : rotations) {
-		
+
 
 		Polyhedron rotatedShape = testShape.rotated(static_cast<Rotationf>(testRotation));
 
 		Vec3 rotatedTestMoment = testRotation * testMoment;
-		
+
 		SymmetricMat3 inertia = rotatedShape.getInertiaAroundCenterOfMass();
 
 		Vec3 rotatedMomentResult = ~inertia * rotatedTestMoment;
@@ -131,7 +132,7 @@ TEST_CASE(shapeInertiaRotationInvariance) {
 }
 
 TEST_CASE(shapeInertiaEigenValueInvariance) {
-	Polyhedron testShape = Library::house.translated(-Vec3f(Library::house.getCenterOfMass()));
+	Polyhedron testShape = ShapeLibrary::house.translated(-Vec3f(ShapeLibrary::house.getCenterOfMass()));
 
 	EigenValues<double, 3> initialEigenValues = getEigenDecomposition(testShape.getInertiaAroundCenterOfMass()).eigenValues;
 
@@ -154,8 +155,8 @@ TEST_CASE(testRayIntersection) {
 }
 
 TEST_CASE(testGetFurthestPointInDirection) {
-	for (Vec3f vertex : Library::icosahedron.iterVertices()) {
-		ASSERT(Library::icosahedron.furthestInDirection(vertex) == vertex);
+	for(Vec3f vertex : ShapeLibrary::icosahedron.iterVertices()) {
+		ASSERT(ShapeLibrary::icosahedron.furthestInDirection(vertex) == vertex);
 	}
 }
 
@@ -168,11 +169,11 @@ TEST_CASE(testTriangleMeshOptimizedGetBounds) {
 		}
 		BoundingBox reference = mesh.getBoundsFallback();
 
-		if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::SSE | Util::CPUIDCheck::SSE2)) {
+		if(CPUIDCheck::hasTechnology(CPUIDCheck::SSE | CPUIDCheck::SSE2)) {
 			ASSERT(reference == mesh.getBoundsSSE());
 		}
 
-		if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::AVX | Util::CPUIDCheck::AVX2 | Util::CPUIDCheck::FMA)) {
+		if(CPUIDCheck::hasTechnology(CPUIDCheck::AVX | CPUIDCheck::AVX2 | CPUIDCheck::FMA)) {
 			ASSERT(reference == mesh.getBoundsAVX());
 		}
 	}
@@ -188,11 +189,11 @@ TEST_CASE(testTriangleMeshOptimizedGetBoundsRotated) {
 		Mat3f rot = generateMatrix<float, 3, 3>();
 		BoundingBox reference = mesh.getBoundsFallback(rot);
 
-		if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::SSE | Util::CPUIDCheck::SSE2)) {
+		if(CPUIDCheck::hasTechnology(CPUIDCheck::SSE | CPUIDCheck::SSE2)) {
 			ASSERT(reference == mesh.getBoundsSSE(rot));
 		}
 
-		if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::AVX | Util::CPUIDCheck::AVX2 | Util::CPUIDCheck::FMA)) {
+		if(CPUIDCheck::hasTechnology(CPUIDCheck::AVX | CPUIDCheck::AVX2 | CPUIDCheck::FMA)) {
 			ASSERT(reference == mesh.getBoundsAVX(rot));
 		}
 	}
@@ -209,19 +210,19 @@ TEST_CASE(testTriangleMeshOptimizedFurthestIndexInDirection) {
 		int reference = mesh.furthestIndexInDirectionFallback(dir);
 		logStream << "reference: " << reference << "\n";
 
-		if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::SSE | Util::CPUIDCheck::SSE2)) {
+		if(CPUIDCheck::hasTechnology(CPUIDCheck::SSE | CPUIDCheck::SSE2)) {
 			int sseVertex = mesh.furthestIndexInDirectionSSE(dir);
 			logStream << "sseVertex: " << sseVertex << "\n";
 			ASSERT(mesh.getVertex(reference) * dir == mesh.getVertex(sseVertex) * dir);
 		}
 
-		if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::SSE | Util::CPUIDCheck::SSE2 | Util::CPUIDCheck::SSE4_1)) {
+		if(CPUIDCheck::hasTechnology(CPUIDCheck::SSE | CPUIDCheck::SSE2 | CPUIDCheck::SSE4_1)) {
 			int sse4Vertex = mesh.furthestIndexInDirectionSSE4(dir);
 			logStream << "sse4Vertex: " << sse4Vertex << "\n";
 			ASSERT(mesh.getVertex(reference) * dir == mesh.getVertex(sse4Vertex) * dir);
 		}
 
-		if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::AVX | Util::CPUIDCheck::AVX2 | Util::CPUIDCheck::FMA)) {
+		if(CPUIDCheck::hasTechnology(CPUIDCheck::AVX | CPUIDCheck::AVX2 | CPUIDCheck::FMA)) {
 			int avxVertex = mesh.furthestIndexInDirectionAVX(dir);
 			logStream << "avxVertex: " << avxVertex << "\n";
 			ASSERT(mesh.getVertex(reference) * dir == mesh.getVertex(avxVertex) * dir);
@@ -239,19 +240,19 @@ TEST_CASE(testTriangleMeshOptimizedFurthestInDirection) {
 		Vec3 reference = mesh.furthestInDirectionFallback(dir);
 		logStream << "reference: " << reference << "\n";
 
-		if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::SSE | Util::CPUIDCheck::SSE2)) {
+		if(CPUIDCheck::hasTechnology(CPUIDCheck::SSE | CPUIDCheck::SSE2)) {
 			Vec3f sseVertex = mesh.furthestInDirectionSSE(dir);
 			logStream << "sseVertex: " << sseVertex << "\n";
 			ASSERT(reference * dir == sseVertex * dir); // dot with dir as we don't really care for the exact vertex in a tie
 		}
 
-		if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::SSE | Util::CPUIDCheck::SSE2 | Util::CPUIDCheck::SSE4_1)) {
+		if(CPUIDCheck::hasTechnology(CPUIDCheck::SSE | CPUIDCheck::SSE2 | CPUIDCheck::SSE4_1)) {
 			Vec3f sse4Vertex = mesh.furthestInDirectionSSE4(dir);
 			logStream << "sse4Vertex: " << sse4Vertex << "\n";
 			ASSERT(reference * dir == sse4Vertex * dir); // dot with dir as we don't really care for the exact vertex in a tie
 		}
 
-		if(Util::CPUIDCheck::hasTechnology(Util::CPUIDCheck::AVX | Util::CPUIDCheck::AVX2 | Util::CPUIDCheck::FMA)) {
+		if(CPUIDCheck::hasTechnology(CPUIDCheck::AVX | CPUIDCheck::AVX2 | CPUIDCheck::FMA)) {
 			Vec3f avxVertex = mesh.furthestInDirectionAVX(dir);
 			logStream << "avxVertex: " << avxVertex << "\n";
 			ASSERT(reference * dir == avxVertex * dir); // dot with dir as we don't really care for the exact vertex in a tie

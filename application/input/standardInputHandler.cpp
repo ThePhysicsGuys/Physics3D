@@ -2,12 +2,16 @@
 
 #include "standardInputHandler.h"
 
+#include <Physics3D/misc/toString.h>
+#include <Physics3D/world.h>
+#include <Physics3D/layer.h>
+
+
 #include "../engine/input/keyboard.h"
 
 #include "../application/worldBuilder.h"
 #include "../engine/options/keyboardOptions.h"
 #include "../graphics/renderer.h"
-#include "../physics/misc/toString.h"
 #include "../application.h"
 #include "../graphics/gui/gui.h"
 #include "../graphics/debug/visualDebug.h"
@@ -109,7 +113,7 @@ bool StandardInputHandler::onKeyPressOrRepeat(Engine::KeyPressEvent& event) {
 }
 
 bool StandardInputHandler::onKeyPress(Engine::KeyPressEvent& event) {
-	using namespace Graphics::Debug;
+	using namespace Graphics::VisualDebug;
 	using namespace Engine;
 
 	Key key = event.getKey();

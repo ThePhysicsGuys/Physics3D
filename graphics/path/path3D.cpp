@@ -1,7 +1,7 @@
 #include "core.h"
 
 #include "path3D.h"
-#include "../physics/math/constants.h"
+#include <Physics3D/math/constants.h>
 
 #define DEFAULT_PATTERN_3D(color) [color] (int i, const Vec3f& p) { return color; }
 

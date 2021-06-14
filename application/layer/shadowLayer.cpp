@@ -1,8 +1,12 @@
 #include "core.h"
-
-#include "GL/glew.h"
-
 #include "shadowLayer.h"
+
+#include <GL/glew.h>
+
+#include <Physics3D/world.h>
+#include <Physics3D/worldIteration.h>
+#include <Physics3D/boundstree/filters/visibilityFilter.h>
+
 #include "view/screen.h"
 #include "../graphics/gui/gui.h"
 #include "../graphics/renderer.h"
@@ -11,7 +15,6 @@
 #include "../graphics/buffers/frameBuffer.h"
 #include "../util/resource/resourceManager.h"
 #include "../graphics/meshRegistry.h"
-#include "../physics/misc/filters/visibilityFilter.h"
 #include "ecs/components.h"
 #include "worlds.h"
 #include "application.h"
@@ -65,11 +68,11 @@ void ShadowLayer::onEvent(Engine::Registry64& registry, Engine::Event& event) {
 
 void ShadowLayer::renderScene(Engine::Registry64& registry) {
 	std::vector<ExtendedPart*> visibleParts;
-	screen.world->syncReadOnlyOperation([&visibleParts, &registry] () {
-		for (ExtendedPart& part : screen.world->iterParts())
+	screen.world->syncReadOnlyOperation([&visibleParts, &registry]() {
+		screen.world->forEachPart([&visibleParts](ExtendedPart& part) {
 			visibleParts.push_back(&part);
 		});
-
+	});
 	for (ExtendedPart* part : visibleParts) {
 		IRef<Comp::Mesh> mesh = registry.get<Comp::Mesh>(part->entity);
 

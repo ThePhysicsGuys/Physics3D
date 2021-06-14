@@ -8,8 +8,8 @@
 #include "ecs/components.h"
 #include "imgui/imgui.h"
 #include "../graphics/gui/imgui/imguiExtension.h"
-#include "../physics/misc/toString.h"
-#include "../physics/physical.h"
+#include <Physics3D/misc/toString.h>
+#include <Physics3D/physical.h>
 #include "../graphics/renderer.h"
 
 namespace P3D::Application {

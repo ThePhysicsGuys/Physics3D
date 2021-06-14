@@ -6,21 +6,21 @@
 #include "../shader/shaders.h"
 #include "../graphics/renderer.h"
 #include "../graphics/meshRegistry.h"
-#include "../physics/constraints/ballConstraint.h"
-#include "../physics/constraints/hingeConstraint.h"
-#include "../physics/constraints/barConstraint.h"
-#include "../physics/hardconstraints/sinusoidalPistonConstraint.h"
-#include "../physics/hardconstraints/motorConstraint.h"
-#include "../physics/misc/toString.h"
-#include "../physics/misc/shapeLibrary.h"
-#include "../physics/physical.h"
+#include <Physics3D/constraints/ballConstraint.h>
+#include <Physics3D/constraints/hingeConstraint.h>
+#include <Physics3D/constraints/barConstraint.h>
+#include <Physics3D/hardconstraints/sinusoidalPistonConstraint.h>
+#include <Physics3D/hardconstraints/motorConstraint.h>
+#include <Physics3D/misc/toString.h>
+#include <Physics3D/geometry/shapeLibrary.h>
+#include <Physics3D/physical.h>
 
 #include <typeindex>
 
 namespace P3D::Application {
 
 void ConstraintLayer::onInit(Engine::Registry64& registry) {
-	Graphics::VisualShape prismShape(Library::createPrism(6, 0.5, 1.0));
+	Graphics::VisualShape prismShape(ShapeLibrary::createPrism(6, 0.5, 1.0));
 	this->hexagon = Graphics::MeshRegistry::addMeshShape(prismShape);
 
 }
@@ -122,9 +122,9 @@ static void renderBarConstraint(const ConstraintLayer* cl, const GlobalCFrame& c
 	Position barCenter = avg(globalA, globalB);
 	Vec3 bar;
 	if(globalA != globalB) {
-		bar = withLength(Vec3(globalB - globalA), bc->length);
+		bar = withLength(Vec3(globalB - globalA), bc->barLength);
 	} else {
-		bar = Vec3(bc->length, 0, 0);
+		bar = Vec3(bc->barLength, 0, 0);
 	}
 
 	renderBar(barCenter - bar/2, bar, constraintBarThickness, constraintBarColor);
@@ -199,7 +199,7 @@ void ConstraintLayer::onRender(Engine::Registry64& registry) {
 	Shaders::maskShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
 
 	world->syncReadOnlyOperation([&]() {
-		for(MotorizedPhysical* phys : world->iterPhysicals()) {
+		for(MotorizedPhysical* phys : world->physicals) {
 			recurseRenderHardConstraints(this, *phys);
 		}
 

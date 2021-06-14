@@ -2,7 +2,7 @@
 
 #include "profilerUI.h"
 #include "guiDebug.h"
-#include "../physics/datastructures/buffers.h"
+#include <Physics3D/datastructures/buffers.h>
 
 namespace P3D::Graphics {
 
@@ -28,7 +28,7 @@ enum GraphicsProcess {
 extern const char* const graphicsDebugLabels[];
 extern BreakdownAverageProfiler<GraphicsProcess> graphicsMeasure;
 
-namespace Debug {
+namespace VisualDebug {
 
 enum class SphereColissionRenderMode : int {
 	NONE,
@@ -38,15 +38,15 @@ enum class SphereColissionRenderMode : int {
 
 extern bool renderPiesEnabled;
 extern AddableBuffer<float> visibleVectors;
-extern std::map<::Debug::VectorType, bool> vectorDebugEnabled;
-extern std::map<::Debug::PointType, bool> pointDebugEnabled;
+extern std::map<P3D::Debug::VectorType, bool> vectorDebugEnabled;
+extern std::map<P3D::Debug::PointType, bool> pointDebugEnabled;
 
 extern SphereColissionRenderMode colissionSpheresMode;
 extern int colTreeRenderMode;
 extern int fieldIndex;
 
-void toggleVectorType(::Debug::VectorType type);
-void togglePointType(::Debug::PointType type);
+void toggleVectorType(P3D::Debug::VectorType type);
+void togglePointType(P3D::Debug::PointType type);
 void updateVectorMesh(Graphics::VectorMesh* vectorMesh, AppDebug::ColoredVector* data, size_t size);
 void updatePointMesh(Graphics::PointMesh* pointMesh, AppDebug::ColoredPoint* data, size_t size);
 

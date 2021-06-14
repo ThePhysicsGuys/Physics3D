@@ -1,11 +1,12 @@
 
-#include "../physics/misc/shapeLibrary.h"
-#include "../physics/geometry/shape.h"
-#include "../physics/geometry/shapeCreation.h"
+#include <Physics3D/geometry/shapeLibrary.h>
+#include <Physics3D/geometry/shape.h>
+#include <Physics3D/geometry/shapeCreation.h>
 #include "worldBenchmark.h"
-#include "../physics/math/linalg/commonMatrices.h"
-#include "../physics/math/linalg/trigonometry.h"
+#include <Physics3D/math/linalg/commonMatrices.h>
+#include <Physics3D/math/linalg/trigonometry.h>
 
+namespace P3D {
 class ManyCubesBenchmark : public WorldBenchmark {
 public:
 	ManyCubesBenchmark() : WorldBenchmark("manyCubes", 10000) {}
@@ -28,10 +29,11 @@ public:
 		for(double x = minX; x < maxX; x += 1.01) {
 			for(double y = minY; y < maxY; y += 1.01) {
 				for(double z = minZ; z < maxZ; z += 1.01) {
-					Part* newCube = new Part(polyhedronShape(Library::createBox(1.0, 1.0, 1.0)), ref.localToGlobal(CFrame(x, y, z)), {1.0, 0.2, 0.5});
+					Part* newCube = new Part(polyhedronShape(ShapeLibrary::createBox(1.0, 1.0, 1.0)), ref.localToGlobal(CFrame(x, y, z)), {1.0, 0.2, 0.5});
 					world.addPart(newCube);
 				}
 			}
 		}
 	}
 } manyCubesBench;
+};

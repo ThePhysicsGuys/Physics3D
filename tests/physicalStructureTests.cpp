@@ -1,18 +1,18 @@
 #include "testsMain.h"
 
 #include "compare.h"
-#include "../physics/misc/toString.h"
+#include <Physics3D/misc/toString.h>
 
 #include "randomValues.h"
 #include "estimateMotion.h"
 
-#include "../physics/geometry/shape.h"
-#include "../physics/geometry/shapeCreation.h"
-#include "../physics/part.h"
-#include "../physics/physical.h"
-#include "../physics/hardconstraints/fixedConstraint.h"
+#include <Physics3D/geometry/shape.h>
+#include <Physics3D/geometry/shapeCreation.h>
+#include <Physics3D/part.h>
+#include <Physics3D/physical.h>
+#include <Physics3D/hardconstraints/fixedConstraint.h>
 
-
+using namespace P3D;
 #define ASSERT(x) ASSERT_STRICT(x)
 
 static CFrame cf() {
@@ -38,7 +38,7 @@ TEST_CASE(testManyAttachBasic) {
 	a->attach(b, cf());
 	a->attach(c, cf());
 	c->attach(d, cf());
-		
+
 	// a should be mainPart
 	ASSERT_TRUE(a->isMainPart());
 	ASSERT_FALSE(b->isMainPart());
@@ -105,7 +105,7 @@ TEST_CASE(testManyAttachComplex) {
 	a->attach(e1, cf());
 	a->attach(f2, cf());
 	g1->attach(a, cf());
-		
+
 	ASSERT_TRUE(a->parent->rigidBody.getPartCount() == 10);
 
 	Part* parts[]{a,b,c,d,e1,e2,f1,f2,g1,g2};
@@ -238,4 +238,3 @@ TEST_CASE(testAttachConnectedPhysicalToConnectedPhysical) {
 		delete p;
 	}
 }
-

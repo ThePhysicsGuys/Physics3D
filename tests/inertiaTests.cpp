@@ -1,21 +1,22 @@
 #include "testsMain.h"
 #include "compare.h"
-#include "../physics/misc/toString.h"
+#include <Physics3D/misc/toString.h>
 
-#include "../physics/inertia.h"
-#include "../physics/misc/shapeLibrary.h"
+#include <Physics3D/inertia.h>
+#include <Physics3D/geometry/shapeLibrary.h>
 
 #include "simulation.h"
 
 #include "randomValues.h"
 
+using namespace P3D;
 #define REMAINS_CONSTANT(v) REMAINS_CONSTANT_TOLERANT(v, 0.0001)
 #define ASSERT(v) ASSERT_TOLERANT(v, 0.0001)
 
 #define DELTA_T 0.0001
 
 TEST_CASE(movedInertialMatrixForBox) {
-	Polyhedron originalShape = Library::createBox(1.0, 2.0, 3.0);
+	Polyhedron originalShape = ShapeLibrary::createBox(1.0, 2.0, 3.0);
 	Vec3 translation(3.1, -2.7, 7.9);
 	Polyhedron translatedTriangle = originalShape.translated(translation);
 	SymmetricMat3 triangleInertia = originalShape.getInertia(CFrame());
@@ -25,7 +26,7 @@ TEST_CASE(movedInertialMatrixForBox) {
 }
 
 TEST_CASE(movedInertialMatrixForDifficuiltPart) {
-	Polyhedron originalShape = Library::trianglePyramid;
+	Polyhedron originalShape = ShapeLibrary::trianglePyramid;
 	Vec3 translation(3.1, -2.7, 7.9);
 	Polyhedron translatedTriangle = originalShape.translated(translation);
 	SymmetricMat3 triangleInertia = originalShape.getInertia(CFrame());
@@ -35,8 +36,8 @@ TEST_CASE(movedInertialMatrixForDifficuiltPart) {
 }
 
 TEST_CASE(inertiaTranslationDerivatives) {
-	SymmetricMat3 inert = Library::trianglePyramid.getInertia(CFrame());
-	double mass = Library::trianglePyramid.getVolume();
+	SymmetricMat3 inert = ShapeLibrary::trianglePyramid.getInertia(CFrame());
+	double mass = ShapeLibrary::trianglePyramid.getVolume();
 
 	Vec3 start(0.8, 0.4, 0.2);
 	TranslationalMotion motion(Vec3(0.3, 0.4, 0.5), Vec3(-0.8, 0.5, -0.3));
@@ -53,7 +54,7 @@ TEST_CASE(inertiaTranslationDerivatives) {
 }
 
 TEST_CASE(inertiaRotationDerivatives) {
-	SymmetricMat3 inert = Library::trianglePyramid.getInertia(CFrame());
+	SymmetricMat3 inert = ShapeLibrary::trianglePyramid.getInertia(CFrame());
 
 	Rotation start = Rotation::fromEulerAngles(0.8, 0.4, 0.2);
 	RotationalMotion motion(Vec3(0.3, 0.4, 0.5), Vec3(-0.8, 0.5, -0.3));
@@ -70,7 +71,7 @@ TEST_CASE(inertiaRotationDerivatives) {
 }
 
 TEST_CASE(inertiaTransformationDerivatives) {
-	Polyhedron centeredTrianglePyramid = Library::trianglePyramid.translated(-Library::trianglePyramid.getCenterOfMass());
+	Polyhedron centeredTrianglePyramid = ShapeLibrary::trianglePyramid.translated(-ShapeLibrary::trianglePyramid.getCenterOfMass());
 
 	SymmetricMat3 inert = centeredTrianglePyramid.getInertia(CFrame());
 	double mass = centeredTrianglePyramid.getVolume();
@@ -78,7 +79,7 @@ TEST_CASE(inertiaTransformationDerivatives) {
 	RotationalMotion rotation(Vec3(0.3, 0.4, 0.5), Vec3(-0.8, 0.5, -0.3));
 	TranslationalMotion translation(Vec3(-0.23, 0.25, -0.7), Vec3(-0.2, -0.7, 0.333));
 	Motion motion(translation, rotation);
-	
+
 	Vec3 startingTranslation(1.2, -0.7, 2.1);
 	Rotation startingRotation = Rotation::fromEulerAngles(0.5, -0.6, 0.7);
 	CFrame start(startingTranslation, startingRotation);
@@ -94,10 +95,10 @@ TEST_CASE(inertiaTransformationDerivatives) {
 	ASSERT(estimatedTaylor == inertialTaylor);
 }
 TEST_CASE(inertiaTransformationDerivativesForOffsetCenterOfMass) {
-	Vec3 com = Library::trianglePyramid.getCenterOfMass();
+	Vec3 com = ShapeLibrary::trianglePyramid.getCenterOfMass();
 
-	SymmetricMat3 inert = Library::trianglePyramid.getInertia(CFrame());
-	double mass = Library::trianglePyramid.getVolume();
+	SymmetricMat3 inert = ShapeLibrary::trianglePyramid.getInertia(CFrame());
+	double mass = ShapeLibrary::trianglePyramid.getVolume();
 
 	RotationalMotion rotation(Vec3(0.3, 0.4, 0.5), Vec3(-0.8, 0.5, -0.3));
 	TranslationalMotion translation(Vec3(-0.23, 0.25, -0.7), Vec3(-0.2, -0.7, 0.333));
@@ -145,7 +146,7 @@ TEST_CASE(premadeAngularMomentum) {
 	Vec3 offset(0, 0, cz);
 
 	Vec3 boxNotRotatingAngMom = getAngularMomentumFromOffsetOnlyVelocity(offset, vel, boxVolume);
-	Vec3 boxNotRotatingAngMom2 = getAngularMomentumFromOffset(offset, vel, Vec3(0,0,0), inertia, boxVolume);
+	Vec3 boxNotRotatingAngMom2 = getAngularMomentumFromOffset(offset, vel, Vec3(0, 0, 0), inertia, boxVolume);
 	ASSERT(boxNotRotatingAngMom == Vec3(velocityAngularMomentum, 0, 0));
 	ASSERT(boxNotRotatingAngMom == boxNotRotatingAngMom2);
 
@@ -154,7 +155,7 @@ TEST_CASE(premadeAngularMomentum) {
 }
 
 TEST_CASE(translatedAngularMomentum) {
-	Polyhedron simpleBox = Library::createCube(1.0f);
+	Polyhedron simpleBox = ShapeLibrary::createCube(1.0f);
 
 	SymmetricMat3 inertia = simpleBox.getInertiaAroundCenterOfMass();
 	double mass = simpleBox.getVolume();

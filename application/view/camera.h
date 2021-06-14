@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../physics/math/rotation.h"
-#include "../physics/math/globalCFrame.h"
+#include <Physics3D/math/rotation.h>
+#include <Physics3D/math/globalCFrame.h>
 
 namespace P3D::Engine {
 class Event;

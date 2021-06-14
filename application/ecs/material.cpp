@@ -3,7 +3,7 @@
 #include "material.h"
 
 #include "../graphics/texture.h"
-#include "../physics/math/mathUtil.h"
+#include <Physics3D/math/mathUtil.h>
 
 namespace P3D::Application::Comp {
 

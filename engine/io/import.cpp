@@ -5,7 +5,7 @@
 #include <fstream>
 
 #include "../util/stringUtil.h"
-#include "../physics/physical.h"
+#include <Physics3D/physical.h>
 #include "../graphics/visualShape.h"
 
 namespace P3D {

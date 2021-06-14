@@ -3,7 +3,7 @@
 #include "../graphics/shader/shader.h"
 #include "../graphics/resource/shaderResource.h"
 #include "../graphics/gui/color.h"
-#include "../physics/math/globalCFrame.h"
+#include <Physics3D/math/globalCFrame.h>
 #include "../shader/basicShader.h"
 #include "../shader/shaderBase.h"
 

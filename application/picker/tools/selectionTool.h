@@ -4,8 +4,8 @@
 #include "../engine/event/mouseEvent.h"
 #include "../engine/tool/stateTool.h"
 #include "../engine/ecs/registry.h"
-#include "../physics/math/ray.h"
-#include "../physics/math/linalg/vec.h"
+#include <Physics3D/math/ray.h>
+#include <Physics3D/math/linalg/vec.h>
 #include "../../ecs/components.h"
 #include "../selection.h"
 #include <optional>

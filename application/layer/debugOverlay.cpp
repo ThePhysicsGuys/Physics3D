@@ -13,8 +13,10 @@
 #include "../graphics/path/path.h"
 #include "../graphics/gui/gui.h"
 
-#include "../physics/misc/physicsProfiler.h"
-#include "../physics/misc/toString.h"
+#include <Physics3D/misc/physicsProfiler.h>
+#include <Physics3D/misc/toString.h>
+#include <Physics3D/world.h>
+#include <Physics3D/layer.h>
 
 #include "worlds.h"
 
@@ -36,7 +38,7 @@ void DebugOverlay::onInit(Engine::Registry64& registry) {
 }
 
 void DebugOverlay::onUpdate(Engine::Registry64& registry) {
-	using namespace Graphics::Debug;
+	using namespace Graphics::VisualDebug;
 	fieldIndex = 0;
 }
 
@@ -46,7 +48,7 @@ void DebugOverlay::onEvent(Engine::Registry64& registry, Engine::Event& event) {
 
 void DebugOverlay::onRender(Engine::Registry64& registry) {
 	using namespace Graphics;
-	using namespace Graphics::Debug;
+	using namespace Graphics::VisualDebug;
 	using namespace Graphics::Renderer;
 
 	Screen* screen = static_cast<Screen*>(this->ptr);

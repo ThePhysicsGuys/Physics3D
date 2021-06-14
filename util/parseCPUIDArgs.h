@@ -1,26 +1,24 @@
 #pragma once
 
-#include "cpuid.h"
+#include <Physics3D/misc/cpuid.h>
 
 #include "cmdParser.h"
 
 #include <string>
 
 namespace Util {
-
 inline std::string printAndParseCPUIDArgs(const ParsedArgs& cmdArgs) {
 	std::string message("Detected CPU Technologies: ");
-
-	for(size_t i = 0; i < CPUIDCheck::TECHNOLOGY_COUNT; i++) {
-		if(CPUIDCheck::hasTechnology(1U << i)) message.append(CPUIDCheck::NAMES[i]).append(" ");
+	for(size_t i = 0; i < P3D::CPUIDCheck::TECHNOLOGY_COUNT; i++) {
+		if(P3D::CPUIDCheck::hasTechnology(1U << i)) message.append(P3D::CPUIDCheck::NAMES[i]).append(" ");
 	}
 
 	bool disabledSomething = false;
 
-	for(int techI = 0; techI < CPUIDCheck::TECHNOLOGY_COUNT; techI++) {
-		if(cmdArgs.hasFlag(CPUIDCheck::NAMES[techI])) {
-			CPUIDCheck::disableTechnology(1 << techI);
-			message.append("\nDisabled technology -").append(CPUIDCheck::NAMES[techI]);
+	for(int techI = 0; techI < P3D::CPUIDCheck::TECHNOLOGY_COUNT; techI++) {
+		if(cmdArgs.hasFlag(P3D::CPUIDCheck::NAMES[techI])) {
+			P3D::CPUIDCheck::disableTechnology(1 << techI);
+			message.append("\nDisabled technology -").append(P3D::CPUIDCheck::NAMES[techI]);
 			disabledSomething = true;
 		}
 	}
@@ -28,8 +26,8 @@ inline std::string printAndParseCPUIDArgs(const ParsedArgs& cmdArgs) {
 	if(disabledSomething) {
 		message.append("\nEnabled CPU Technologies: ");
 
-		for(size_t i = 0; i < CPUIDCheck::TECHNOLOGY_COUNT; i++) {
-			if(CPUIDCheck::hasTechnology(1U << i)) message.append(CPUIDCheck::NAMES[i]).append(" ");
+		for(size_t i = 0; i < P3D::CPUIDCheck::TECHNOLOGY_COUNT; i++) {
+			if(P3D::CPUIDCheck::hasTechnology(1U << i)) message.append(P3D::CPUIDCheck::NAMES[i]).append(" ");
 		}
 	}
 

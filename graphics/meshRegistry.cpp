@@ -1,9 +1,9 @@
 #include "core.h"
 #include "meshRegistry.h"
 
-#include "../physics/math/constants.h"
-#include "../physics/misc/shapeLibrary.h"
-#include "../physics/geometry/builtinShapeClasses.h"
+#include <Physics3D/math/constants.h>
+#include <Physics3D/geometry/shapeLibrary.h>
+#include <Physics3D/geometry/builtinShapeClasses.h>
 
 #include "buffers/bufferLayout.h"
 #include "buffers/vertexBuffer.h"
@@ -93,7 +93,7 @@ VisualShape createCylinder(int sides, double radius, double height) {
 }
 
 VisualShape createSphere(double radius, int steps) {
-	Polyhedron sphere(Library::createSphere(static_cast<float>(radius), steps));
+	Polyhedron sphere(ShapeLibrary::createSphere(static_cast<float>(radius), steps));
 	VisualShape sphereShape = VisualShape(sphere);
 
 	Vec3f* normalBuffer = new Vec3f[sphereShape.vertexCount];
@@ -115,7 +115,7 @@ VisualShape createSphere(double radius, int steps) {
 }
 
 VisualShape createBox(float width, float height, float depth) {
-	Polyhedron box(Library::createBox(width, height, depth));
+	Polyhedron box(ShapeLibrary::createBox(width, height, depth));
 	VisualShape boxShape = VisualShape(box);
 
 	Vec3f* normalBuffer = new Vec3f[boxShape.vertexCount];

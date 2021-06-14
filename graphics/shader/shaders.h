@@ -2,7 +2,7 @@
 
 #include "shader.h"
 #include "../graphics/resource/shaderResource.h"
-#include "../physics/math/linalg/mat.h"
+#include <Physics3D/math/linalg/mat.h>
 
 namespace P3D::Graphics {
 class Texture;

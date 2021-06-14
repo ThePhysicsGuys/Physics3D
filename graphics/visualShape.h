@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../physics/math/linalg/vec.h"
-#include "../physics/geometry/shape.h"
-#include "../physics/geometry/triangleMesh.h"
-#include "../physics/datastructures/sharedArray.h"
+#include <Physics3D/math/linalg/vec.h>
+#include <Physics3D/geometry/shape.h>
+#include <Physics3D/geometry/triangleMesh.h>
+#include <Physics3D/datastructures/sharedArray.h>
 
 class Polyhedron;
 
