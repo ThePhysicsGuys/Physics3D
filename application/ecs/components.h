@@ -12,7 +12,7 @@ namespace P3D::Application {
 
 namespace Comp {
 
-struct Hitbox : RefCountable {
+struct Hitbox : RC {
 	std::variant<Shape, ExtendedPart*> hitbox;
 
 	Hitbox() : hitbox(Shape(&CubeClass::instance)) {}
@@ -49,7 +49,7 @@ struct Hitbox : RefCountable {
 	}
 };
 
-struct Transform : RefCountable {
+struct Transform : RC {
 	struct ScaledCFrame {
 		GlobalCFrame cframe;
 		DiagonalMat3 scale;
@@ -257,7 +257,7 @@ struct Transform : RefCountable {
 };
 
 // The name of an entity
-struct Name : RefCountable {
+struct Name : RC {
 	std::string name;
 
 	Name(const std::string& name) : name(name) {}
@@ -268,7 +268,7 @@ struct Name : RefCountable {
 };
 
 // The collider of the entity, as it is being physicsed in the engine 
-struct Collider : RefCountable {
+struct Collider : RC {
 	ExtendedPart* part;
 
 	Collider(ExtendedPart* part) : part(part) {}
@@ -279,7 +279,7 @@ struct Collider : RefCountable {
 };
 
 // The mesh of an entity, as it is rendered
-struct Mesh : public RefCountable {
+struct Mesh : public RC {
 	// The render mode, default is fill
 	int mode = 0x1B02;
 
@@ -297,7 +297,7 @@ struct Mesh : public RefCountable {
 	Mesh(int id, bool hasUVs, bool hasNormals) : id(id), hasUVs(hasUVs), hasNormals(hasNormals) {}
 };
 
-struct Light : public RefCountable {
+struct Light : public RC {
 	struct Attenuation {
 		float constant;
 		float linear;

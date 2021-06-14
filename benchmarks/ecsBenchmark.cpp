@@ -12,7 +12,7 @@ public:
 	std::vector<int> v { 1, 2, 3, 4, 5, 6 };
 	int errors = 0;
 	
-	struct A : public RefCountable {
+	struct A : public RC {
 		int i; 
 		
 		A(int i) : i(i) {}
@@ -50,7 +50,7 @@ public:
 	Registry64 registry;
 	int errors = 0;
 
-	struct A : public RefCountable { int i; A(int i) : i(i) {} };
+	struct A : public RC { int i; A(int i) : i(i) {} };
 
 	void init() override {
 		int amount = 1000000;

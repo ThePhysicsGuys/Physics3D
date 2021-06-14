@@ -86,8 +86,8 @@ std::optional<std::pair<Engine::Registry64::entity_type, Position>> SelectionToo
 	double closestIntersectionDistance = std::numeric_limits<double>::max();
 	auto view = screen.registry.view<Comp::Hitbox, Comp::Transform>();
 	for (auto entity : view) {
-		Ref<Comp::Hitbox> hitbox = view.get<Comp::Hitbox>(entity);
-		Ref<Comp::Transform> transform = view.get<Comp::Transform>(entity);
+		IRef<Comp::Hitbox> hitbox = view.get<Comp::Hitbox>(entity);
+		IRef<Comp::Transform> transform = view.get<Comp::Transform>(entity);
 		screen.world->syncReadOnlyOperation([&] () {
 			std::optional<double> distance = intersect(transform->getCFrame(), hitbox);
 			if (distance.has_value() && distance < closestIntersectionDistance) {
@@ -105,7 +105,7 @@ std::optional<std::pair<Engine::Registry64::entity_type, Position>> SelectionToo
 	return std::make_pair(intersectedEntity, intersection);
 }
 
-std::optional<double> SelectionTool::intersect(const GlobalCFrame& cframe, Ref<Comp::Hitbox> hitbox) {
+std::optional<double> SelectionTool::intersect(const GlobalCFrame& cframe, IRef<Comp::Hitbox> hitbox) {
 	Shape shape = hitbox->getShape();
 	Vec3 relativePosition = cframe.getPosition() - ray.origin;
 	double maxRadius = shape.getMaxRadius();

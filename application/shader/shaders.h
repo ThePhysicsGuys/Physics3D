@@ -92,8 +92,6 @@ struct PointShader : public ProjectionShaderBase {
 struct TestShader : public StandardMeshShaderBase {
 	inline TestShader() : StandardMeshShaderBase(), ShaderResource() {}
 	inline TestShader(const ShaderSource& shaderSource) : StandardMeshShaderBase(shaderSource.name, shaderSource.path, shaderSource), ShaderResource(shaderSource.name, shaderSource.path, shaderSource) {}
-
-	void updateDisplacement(Graphics::Texture* displacementMap);
 };
 
 struct LineShader : public ProjectionShaderBase {

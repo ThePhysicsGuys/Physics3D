@@ -127,13 +127,13 @@ bool _ecs_property_frame_start(Engine::Registry64& registry, Engine::Registry64:
 		ImGui::NextColumn(); \
 	}
 	
-void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const Ref<RefCountable>& component) {
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const IRef<RC>& component) {
 	std::string label(registry.getComponentName(index));
 
 	ImGui::CollapsingHeader(label.c_str(), ImGuiTreeNodeFlags_Leaf);
 }
 
-void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const Ref<Comp::Collider>& component) {
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const IRef<Comp::Collider>& component) {
 	ECS_PROPERTY_FRAME_START(registry, index);
 	
 	ExtendedPart* selectedPart = component->part;
@@ -203,7 +203,7 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_ty
 	ECS_PROPERTY_FRAME_END;
 }
 
-void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const Ref<Comp::Name>& component) {
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const IRef<Comp::Name>& component) {
 	ECS_PROPERTY_FRAME_START(registry, index);
 	
 	ECS_PROPERTY("Name:", ImGui::Text(component->name.c_str()));
@@ -211,7 +211,7 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_ty
 	ECS_PROPERTY_FRAME_END;
 }
 
-void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const Ref<Comp::Mesh>& component) {
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const IRef<Comp::Mesh>& component) {
 	ECS_PROPERTY_FRAME_START(registry, index);
 
 	ECS_PROPERTY("ID:", ImGui::Text(str(component->id).c_str()));
@@ -222,7 +222,7 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_ty
 	ECS_PROPERTY_FRAME_END;
 }
 
-void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const Ref<Comp::Material>& component) {
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const IRef<Comp::Material>& component) {
 	ECS_PROPERTY_FRAME_START(registry, index);
 
 	ECS_PROPERTY("Albedo", ImGui::ColorEdit4("##Albedo", component->albedo.data, ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_AlphaBar));
@@ -269,7 +269,7 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_ty
 	ECS_PROPERTY_FRAME_END;
 }
 
-void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const Ref<Comp::Light>& component) {
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const IRef<Comp::Light>& component) {
 	ECS_PROPERTY_FRAME_START(registry, index);
 
 	ECS_PROPERTY("Color", ImGui::ColorEdit3("##Color", component->color.data, ImGuiColorEditFlags_PickerHueWheel));
@@ -283,7 +283,7 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_ty
 	ECS_PROPERTY_FRAME_END;
 }
 
-void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const Ref<Comp::Transform>& component) {
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const IRef<Comp::Transform>& component) {
 
 	ECS_PROPERTY_FRAME_START(registry, index);
 
@@ -310,7 +310,7 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_ty
 
 }
 
-void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const Ref<Comp::Hitbox>& component) {
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const IRef<Comp::Hitbox>& component) {
 	ECS_PROPERTY_FRAME_START(registry, index);
 
 	bool standalone = component->isPartAttached();

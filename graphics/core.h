@@ -16,3 +16,4 @@
 #include "../physics/math/position.h"
 
 #include "../util/log.h"
+#include "../util/intrusivePointer.h"

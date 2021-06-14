@@ -40,7 +40,7 @@ public:
 	static void select(const Engine::Registry64::entity_type& entity);
 	static void toggle(const Engine::Registry64::entity_type& entity);
 	static std::optional<std::pair<Engine::Registry64::entity_type, Position>> getIntersectedEntity();
-	static std::optional<double> intersect(const GlobalCFrame& cframe, Ref<Comp::Hitbox> hitbox);
+	static std::optional<double> intersect(const GlobalCFrame& cframe, IRef<Comp::Hitbox> hitbox);
 	static std::optional<double> intersect(const GlobalCFrame& cframe, const Shape& shape);
 	static std::optional<double> intersect(const GlobalCFrame& cframe, const Graphics::VisualShape& shape);
 };

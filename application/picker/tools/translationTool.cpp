@@ -331,7 +331,7 @@ namespace P3D::Application {
 			if (SelectionTool::selection.size() > 1)
 				return;
 
-			Ref<Comp::Transform> transform = screen.registry.get<Comp::Transform>(SelectionTool::selection[0]);
+			IRef<Comp::Transform> transform = screen.registry.get<Comp::Transform>(SelectionTool::selection[0]);
 			if (transform.invalid())
 				return;
 			if (!transform->isPartAttached())

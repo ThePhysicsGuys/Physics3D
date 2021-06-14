@@ -71,7 +71,7 @@ void ShadowLayer::renderScene(Engine::Registry64& registry) {
 		});
 
 	for (ExtendedPart* part : visibleParts) {
-		Ref<Comp::Mesh> mesh = registry.get<Comp::Mesh>(part->entity);
+		IRef<Comp::Mesh> mesh = registry.get<Comp::Mesh>(part->entity);
 
 		if (!mesh.valid())
 			continue;

@@ -20,8 +20,8 @@ TEST_CASE(componentGeneration) {
 	Registry16 registry;
 	auto id = registry.create();
 
-	struct A : public RefCountable {};
-	struct B : public RefCountable {};
+	struct A : public RC {};
+	struct B : public RC {};
 
 	registry.add<A>(id);
 	registry.add<B>(id);
@@ -36,7 +36,7 @@ TEST_CASE(componentAccess) {
 	Registry16 registry;
 	auto id = registry.create();
 
-	struct A : public RefCountable {
+	struct A : public RC {
 		int a;
 		float b;
 
@@ -50,9 +50,9 @@ TEST_CASE(componentAccess) {
 
 
 TEST_CASE(viewTest) {
-	struct A : public RefCountable {};
-	struct B : public RefCountable {};
-	struct C : public RefCountable {};
+	struct A : public RC {};
+	struct B : public RC {};
+	struct C : public RC {};
 
 	using namespace P3D::Engine;
 	Registry16 registry;
@@ -121,7 +121,7 @@ TEST_CASE(getFromView) {
 	Registry16 registry;
 	auto id = registry.create();
 
-	struct A : public RefCountable {
+	struct A : public RC {
 		int idx = 0;
 		A(int idx) : idx(idx) {}
 	};

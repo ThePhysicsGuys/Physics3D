@@ -107,10 +107,10 @@ void ModelLayer::onUpdate(Engine::Registry64& registry) {
 
 	std::size_t index = 0;
 	for (auto entity : view) {
-		Ref<Comp::Light> light = view.get<Comp::Light>(entity);
+		IRef<Comp::Light> light = view.get<Comp::Light>(entity);
 
 		Position position;
-		Ref<Comp::Transform> transform = registry.get<Comp::Transform>(entity);
+		IRef<Comp::Transform> transform = registry.get<Comp::Transform>(entity);
 		if (transform.valid()) 
 			position = transform->getCFrame().getPosition();
 		
@@ -160,8 +160,8 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 		Engine::Registry64::entity_type entity = 0;
 		Comp::Transform transform;
 		Comp::Material material;
-		Ref<Comp::Mesh> mesh;
-		Ref<Comp::Collider> collider;
+		IRef<Comp::Mesh> mesh;
+		IRef<Comp::Collider> collider;
 	};
 	
 	std::map<double, EntityInfo> transparentEntities;
@@ -232,9 +232,9 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 
 		// Hitbox drawing
 		if (screen->selectedEntity) {
-			Ref<Comp::Transform> transform = registry.get<Comp::Transform>(screen->selectedEntity);
+			IRef<Comp::Transform> transform = registry.get<Comp::Transform>(screen->selectedEntity);
 			if (transform.valid()) {
-				Ref<Comp::Hitbox> hitbox = registry.get<Comp::Hitbox>(screen->selectedEntity);
+				IRef<Comp::Hitbox> hitbox = registry.get<Comp::Hitbox>(screen->selectedEntity);
 
 				if (hitbox.valid()) {
 					Shape shape = hitbox->getShape();
@@ -260,9 +260,9 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 		
 		// Hitbox drawing
 		for (auto entity : SelectionTool::selection) {
-			Ref<Comp::Transform> transform = registry.get<Comp::Transform>(entity);
+			IRef<Comp::Transform> transform = registry.get<Comp::Transform>(entity);
 			if (transform.valid()) {
-				Ref<Comp::Hitbox> hitbox = registry.get<Comp::Hitbox>(entity);
+				IRef<Comp::Hitbox> hitbox = registry.get<Comp::Hitbox>(entity);
 
 				if (hitbox.valid()) {
 					Shape shape = hitbox->getShape();

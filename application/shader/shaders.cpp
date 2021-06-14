@@ -180,14 +180,6 @@ void FontShader::updateTexture(Graphics::Texture* texture) {
 	setUniform("text", texture->getUnit());
 }
 
-// TestShader
-
-void TestShader::updateDisplacement(Graphics::Texture* displacementMap) {
-	bind();
-	displacementMap->bind();
-	setUniform("displacementMap", displacementMap->getUnit());
-}
-
 // SkyShader
 
 void SkyShader::updateTime(float time) {

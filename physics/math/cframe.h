@@ -116,7 +116,7 @@ public:
 		cframe.asMat4() * Vec4(p, 1.0) == cframe.localToGlobal(p)
 	*/
 	Matrix<T, 4, 4> asMat4() const {
-		return Matrix<T, 4, 4>(rotation.asRotationMatrix(), this->position, Vector<T, 3>::ZEROS(), static_cast<T>(1));
+		return Matrix<T, 4, 4>(rotation.asRotationMatrix(), this->position, Vector<T, 3>(), static_cast<T>(1));
 	}
 
 	/*
@@ -124,7 +124,7 @@ public:
 		cframe.asMat4WithPreScale(scale) * Vec4(p, 1.0) == cframe.localToGlobal(scale * p)
 	*/
 	Matrix<T, 4, 4> asMat4WithPreScale(const DiagonalMatrix<T, 3>& scale) const {
-		return Matrix<T, 4, 4>(rotation.asRotationMatrix() * scale, this->position, Vector<T, 3>::ZEROS(), static_cast<T>(1));
+		return Matrix<T, 4, 4>(rotation.asRotationMatrix() * scale, this->position, Vector<T, 3>(), static_cast<T>(1));
 	}
 
 	/*
