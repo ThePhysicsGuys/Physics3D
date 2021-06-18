@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <functional>
 #include <algorithm>
+#include <optional>
 #include <utility>
 #include <string>
 #include <vector>
@@ -14,6 +15,12 @@
 #include <Physics3D/math/linalg/mat.h>
 #include <Physics3D/math/linalg/trigonometry.h>
 #include <Physics3D/math/position.h>
+#include <Physics3D/datastructures/intrusivePointer.h>
 
 #include "../util/log.h"
-#include "../util/intrusivePointer.h"
+
+#ifdef _MSC_VER
+#define P3D_DEBUGBREAK __debugbreak()
+#else
+#define P3D_DEBUGBREAK raise(SIGTRAP)
+#endif

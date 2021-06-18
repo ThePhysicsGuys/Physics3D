@@ -20,4 +20,4 @@
 #include <Physics3D/math/position.h>
 
 #include "../util/log.h"
-#include "../util/intrusivePointer.h"
+#include <Physics3D/datastructures/intrusivePointer.h>

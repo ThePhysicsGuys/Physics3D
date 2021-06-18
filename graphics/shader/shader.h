@@ -1,86 +1,77 @@
 #pragma once
 
 #include "../bindable.h"
-#include "parser.h"
+#include "propertiesParser.h"
 
 namespace P3D::Graphics {
 
-struct ShaderStage {
-	std::string source;
-	Parser::Parse info;
+	class Shader : public Bindable {
+	public:
+		struct Stage {
+			using ID = unsigned;
+			static ID common;
+			static ID properties;
+			static ID vertex;
+			static ID geometry;
+			static ID fragment;
+			static ID tesselationControl;
+			static ID tesselationEvaluation;
+			static ID compute;
+			
+			std::string_view view;
+			
+			explicit Stage(const std::string_view& view);
+		};
 
-	ShaderStage();
-	ShaderStage(const std::string& source);
-};
+		struct Source {
+			std::string source;
+			std::unordered_map<Stage::ID, std::pair<std::size_t, std::size_t>> views;
+		};
 
-struct ShaderSource {
-	std::string name;
-	std::string path;
+		std::string name;
+		std::string code;
+		std::unordered_map<Stage::ID, Stage> stages;
+		std::unordered_map<std::string, int> uniforms;
+		std::vector<Property> properties;
 
-	std::string vertexSource;
-	std::string fragmentSource;
-	std::string geometrySource;
-	std::string tesselationControlSource;
-	std::string tesselationEvaluateSource;
-	std::string computeSource;
+		Shader();
+		Shader(const std::string& name, const std::string& path, bool isPath);
+		virtual ~Shader();
 
-	ShaderSource();
-	ShaderSource(const std::string& name, const std::string& path, const std::string& vertexSource, const std::string& fragmentSource, const std::string& geometrySource, const std::string& tesselationControlSource, const std::string& tesselationEvaluateSource, const std::string& computeSource);
-};
-
-class Shader : public Bindable {
-public:
-	enum ShaderFlag : char {
-		NONE = 0 << 0,
-		VERTEX = 1 << 0,
-		FRAGMENT = 1 << 1,
-		GEOMETRY = 1 << 2,
-		TESSELATION_CONTROL = 1 << 3,
-		TESSELATION_EVALUATE = 1 << 4,
-		COMPUTE = 1 << 5
+		Shader(const Shader&) = delete;
+		Shader(Shader&&) noexcept = delete;
+		Shader& operator=(const Shader&) = delete;
+		Shader& operator=(Shader&& other) noexcept = delete;
+				
+		[[nodiscard]] static GLID compile(const std::string& common, const std::string& source, Stage::ID stage);
+		[[nodiscard]] static GLID compile(const Source& source);
+		[[nodiscard]] static Source parse(std::istream& istream);
+		
+		void bind() override;
+		void unbind() override;
+		void close() override;
+		
+		[[nodiscard]] int getUniform(const std::string& uniform);
+		void addUniform(const std::string& uniform);
+		void createUniform(const std::string& uniform);
+		void setUniform(const std::string& uniform, int value);
+		void setUniform(const std::string& uniform, GLID value);
+		void setUniform(const std::string& uniform, float value);
+		void setUniform(const std::string& uniform, const Vec2f& value);
+		void setUniform(const std::string& uniform, const Vec3f& value);
+		void setUniform(const std::string& uniform, const Vec4f& value);
+		void setUniform(const std::string& uniform, const Mat2f& value);
+		void setUniform(const std::string& uniform, const Mat3f& value);
+		void setUniform(const std::string& uniform, const Mat4f& value);
+		void setUniform(const std::string& uniform, const Position& value);
 	};
 
-	char flags = NONE;
-	std::string name;
-
-	~Shader();
-	Shader(const Shader&) = delete;
-	Shader& operator=(Shader&& other);
-	Shader& operator=(const Shader&) = delete;
-
-	static GLID compile(const std::string& name, const std::string& source, unsigned int type);
-
-	int getUniform(const std::string& uniform) const;
-	void createUniform(const std::string& uniform);
-	void setUniform(const std::string& uniform, int value) const;
-	void setUniform(const std::string& uniform, GLID value) const;
-	void setUniform(const std::string& uniform, float value) const;
-	void setUniform(const std::string& uniform, const Vec2f& value) const;
-	void setUniform(const std::string& unfiorm, const Vec3f& value) const;
-	void setUniform(const std::string& unfiorm, const Vec4f& value) const;
-	void setUniform(const std::string& uniform, const Mat2f& value) const;
-	void setUniform(const std::string& uniform, const Mat3f& value) const;
-	void setUniform(const std::string& uniform, const Mat4f& value) const;
-	void setUniform(const std::string& uniform, const Position& value) const;
-
-	void bind() override;
-	void unbind() override;
-	void close() override;
-
-protected:
-	std::unordered_map<std::string, int> uniforms;
-
-	Shader();
-	Shader(const ShaderSource& shaderSource);
-	Shader(Shader&& other);
-
-	void addUniform(const std::string& uniform);
-	void addUniforms(const ShaderStage& stage);
-
-	virtual bool addShaderStage(const std::string& source, const ShaderFlag& flag) = 0;
-};
-
-ShaderSource parseShader(const std::string& name, const std::string& path);
-ShaderSource parseShader(const std::string& name, const std::string& path, std::istream& shaderTextStream);
-ShaderSource parseShader(const std::string& name, const std::string& path, const std::string& shaderText);
-};
+	class CShader : public Shader {
+	public:
+		CShader(const std::string& name, const std::string& path, bool isPath);
+		
+		void dispatch(unsigned int x, unsigned int y, unsigned int z);
+		void barrier(unsigned int flags);
+	};
+	
+}

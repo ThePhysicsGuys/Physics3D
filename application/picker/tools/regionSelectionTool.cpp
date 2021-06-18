@@ -36,8 +36,8 @@ namespace P3D::Application {
 
 		Renderer::beginScene();
 
-		Graphics::Shaders::guiShader.bind();
-		Graphics::Shaders::guiShader.setUniform("projectionMatrix", screen.camera.orthoMatrix);
+		Graphics::Shaders::guiShader->bind();
+		Graphics::Shaders::guiShader->setUniform("projectionMatrix", screen.camera.orthoMatrix);
 
 		Path::batch = GUI::batch;
 		if (getToolStatus() == kActive) {

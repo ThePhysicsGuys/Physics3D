@@ -12,8 +12,7 @@ struct Material;
 struct ExtendedPart;
 
 struct BasicShader : public StandardMeshShaderBase, public BasicShaderBase {
-	inline BasicShader() : StandardMeshShaderBase(), BasicShaderBase(), ShaderResource() {}
-	inline BasicShader(ShaderSource shaderSource) : StandardMeshShaderBase(shaderSource.name, shaderSource.path, shaderSource), BasicShaderBase(shaderSource.name, shaderSource.path, shaderSource), ShaderResource(shaderSource.name, shaderSource.path, shaderSource) {}
+	BasicShader() : ShaderResource("BasicShader", "../res/shaders/basic.shader"), StandardMeshShaderBase("BasicShader", "../res/shaders/basic.shader"), BasicShaderBase("BasicShader", "../res/shaders/basic.shader") {}
 
 	void updatePart(const ExtendedPart& part);
 	void updateTexture(bool textured);
@@ -21,8 +20,7 @@ struct BasicShader : public StandardMeshShaderBase, public BasicShaderBase {
 };
 
 struct InstanceShader : public InstancedMeshShaderBase, public BasicShaderBase {
-	inline InstanceShader() : InstancedMeshShaderBase(), BasicShaderBase(), ShaderResource() {}
-	inline InstanceShader(ShaderSource shaderSource) : InstancedMeshShaderBase(shaderSource.name, shaderSource.path, shaderSource), BasicShaderBase(shaderSource.name, shaderSource.path, shaderSource), ShaderResource(shaderSource.name, shaderSource.path, shaderSource) {}
+	InstanceShader() : ShaderResource("InstanceShader", "../res/shaders/instance.shader"), InstancedMeshShaderBase("InstanceShader", "../res/shaders/instance.shader"), BasicShaderBase("InstanceShader", "../res/shaders/instance.shader") {}
 
 	void updateTexture(bool textured);
 };

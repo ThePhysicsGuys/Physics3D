@@ -1,9 +1,11 @@
 #pragma once
 
+namespace P3D {
+
 struct RC {
     std::size_t count = 0;
 
-    void addRef() noexcept {
+    void refer() noexcept {
         count++;
     }
 
@@ -18,7 +20,7 @@ struct RC {
 
 template<typename T>
 void intrusive_ptr_add_ref(T* iptr) noexcept {
-    iptr->addRef();
+    iptr->refer();
 }
 
 template<typename T>
@@ -32,7 +34,7 @@ void intrusive_ptr_release(T* iptr) noexcept {
 template<typename T>
 class intrusive_ptr {
 protected:
-    template<typename U> friend class intrusive_ptr;
+    //template<typename U> friend class intrusive_ptr;
 
     T* ptr;
 
@@ -52,7 +54,7 @@ public:
     intrusive_ptr(intrusive_ptr&& iptr) noexcept : ptr(iptr.ptr) {
         iptr.ptr = nullptr;
     }
-	
+
     ~intrusive_ptr() noexcept {
         if (ptr)
             intrusive_ptr_release(ptr);
@@ -190,14 +192,14 @@ bool operator!=(const intrusive_ptr<T>& iptr, std::nullptr_t nptr) noexcept {
     return (iptr.get() != nullptr);
 }
 
-template<typename T>
-intrusive_ptr<T> make_intrusive(T* ptr) noexcept {
-    return intrusive_ptr<T>(ptr);
+template<typename T, typename... Args>
+intrusive_ptr<T> make_intrusive(Args&&... args) noexcept {
+    return intrusive_ptr<T>(new T(std::forward<Args>(args)...));
 }
 
 template <class T, class U>
 intrusive_ptr<T> intrusive_cast(const intrusive_ptr<U>& iptr) noexcept {
-    return make_intrusive(static_cast<T*>(iptr.get()));
+    return intrusive_ptr<T>(static_cast<T*>(iptr.get()));
 }
 
 template<typename T>
@@ -209,16 +211,4 @@ using SRef = std::shared_ptr<T>;
 template<typename T>
 using URef = std::unique_ptr<T>;
 
-template<typename T, typename... Args>
-IRef<T> createIRef(Args&&... args) noexcept {
-    return make_intrusive<T>(new T(std::forward<Args>(args)...));
-}
-
-template<typename T, typename... Args>
-SRef<T> createSRef(Args&&... args) noexcept {
-    return std::make_shared<T>(std::forward<Args>(args)...);
-}
-template<typename T, typename... Args>
-URef<T> createURef(Args&&... args) noexcept {
-    return std::make_unique<T>(std::forward<Args>(args)...);
 }

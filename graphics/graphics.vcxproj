@@ -189,12 +189,11 @@
     <ClCompile Include="resource\fontResource.cpp" />
     <ClCompile Include="resource\shaderResource.cpp" />
     <ClCompile Include="resource\textureResource.cpp" />
-    <ClCompile Include="shader\cshader.cpp" />
-    <ClCompile Include="shader\gshader.cpp" />
+    <ClCompile Include="shader\propertiesParser.cpp" />
+    <ClCompile Include="shader\shader.cpp" />
     <ClCompile Include="shader\lexer.cpp" />
     <ClCompile Include="shader\parser.cpp" />
     <ClCompile Include="shader\shaders.cpp" />
-    <ClCompile Include="shader\shader.cpp" />
     <ClCompile Include="renderer.cpp" />
     <ClCompile Include="texture.cpp" />
     <ClCompile Include="debug\visualDebug.cpp" />
@@ -247,8 +246,7 @@
     <ClInclude Include="resource\fontResource.h" />
     <ClInclude Include="resource\shaderResource.h" />
     <ClInclude Include="resource\textureResource.h" />
-    <ClInclude Include="shader\cshader.h" />
-    <ClInclude Include="shader\gshader.h" />
+    <ClInclude Include="shader\propertiesParser.h" />
     <ClInclude Include="shader\shader.h" />
     <ClInclude Include="shader\lexer.h" />
     <ClInclude Include="shader\parser.h" />

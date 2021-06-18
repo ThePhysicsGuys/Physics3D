@@ -133,7 +133,7 @@ void renderShaderTypeEditor(GShader* shader, const Parser::Local& uniform) {
 }
 */
 	
-void ResourceFrame::renderShaderStageInfo(ShaderResource* shader, const ShaderStage& stage) {
+/*void ResourceFrame::renderShaderStageInfo(ShaderResource* shader, const ShaderStage& stage) {
 	if (ImGui::TreeNode("Code")) {
 		ImGui::TextWrapped("%s", stage.source.c_str());
 
@@ -324,7 +324,7 @@ void ResourceFrame::renderShaderInfo(ShaderResource* shader) {
 	}
 
 	ImGui::EndChild();
-}
+}*/
 
 void ResourceFrame::onInit(Engine::Registry64& registry) {
 	
@@ -360,9 +360,9 @@ void ResourceFrame::onRender(Engine::Registry64& registry) {
 			case ResourceType::Font:
 				renderFontInfo(static_cast<FontResource*>(selectedResource));
 				break;
-			case ResourceType::GShader:
-				renderShaderInfo(static_cast<ShaderResource*>(selectedResource));
-				break;
+			//case ResourceType::GShader:
+			//	renderShaderInfo(static_cast<ShaderResource*>(selectedResource));
+			//	break;
 			default:
 				ImGui::Text("Visual respresentation not supported.");
 				break;

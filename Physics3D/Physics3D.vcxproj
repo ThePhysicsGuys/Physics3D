@@ -187,6 +187,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="constraints\barConstraint.h" />
+    <ClInclude Include="datastructures\intrusivePointer.h" />
     <ClInclude Include="externalforces\externalForce.h" />
     <ClInclude Include="misc\cpuid.h" />
     <ClInclude Include="datastructures\aligned_alloc.h" />

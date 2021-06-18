@@ -38,7 +38,6 @@ namespace P3D::Graphics {
 			case '|':
 			case '!':
 			case '?':
-			case ':':
 				return true;
 			default:
 				return false;
@@ -75,6 +74,9 @@ namespace P3D::Graphics {
 			popChar();
 
 		std::string_view type = view(start, current);
+
+		if (type == "true" || type == "false")
+			return Token(Token::Boolean, start, current);
 		
 		if (type == "in" || type == "out")
 			return Token(Token::InOut, start, current);
@@ -91,7 +93,7 @@ namespace P3D::Graphics {
 		if (type == "layout")
 			return Token(Token::Layout, start, current);
 
-		if (type == "bool" || type == "mat2" || type == "mat3" || type == "mat4" || type == "float" || type == "int" || type == "vec2" || type == "vec3" || type == "vec4" || type == "VS_OUT" || type == "void" || type == "sampler2D" || type == "sampler3D")
+		if (type == "bool" || type == "mat2" || type == "mat3" || type == "mat4" || type == "float" || type == "int" || type == "vec2" || type == "vec3" || type == "vec4" || type == "VS_OUT" || type == "void" || type == "sampler2D" || type == "sampler3D" || type == "color3" || type == "color4")
 			return Token(Token::Datatype, start, current);
 		
 		return Token(Token::Identifier, start, current);
@@ -267,6 +269,8 @@ namespace P3D::Graphics {
 				return lexEnd();
 			case '#':
 				return lexVersionOrPreprocessor();
+			case ':':
+				return lexChar(Token::Colon);
 			case '=':
 				return lexChar(Token::Equals);
 			case '(':

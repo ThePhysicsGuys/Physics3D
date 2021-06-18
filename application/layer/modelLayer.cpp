@@ -95,8 +95,8 @@ void ModelLayer::onInit(Engine::Registry64& registry) {
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
 	// Dont know anymore
-	Shaders::basicShader.updateTexture(false);
-	Shaders::instanceShader.updateTexture(false);
+	Shaders::basicShader->updateTexture(false);
+	Shaders::instanceShader->updateTexture(false);
 
 	// Instance batch manager
 	manager = new InstanceBatchManager<Uniform>(DEFAULT_UNIFORM_BUFFER_LAYOUT);
@@ -114,14 +114,14 @@ void ModelLayer::onUpdate(Engine::Registry64& registry) {
 		if (transform.valid()) 
 			position = transform->getCFrame().getPosition();
 		
-		Shaders::basicShader.updateLight(index, position, *light);
-		Shaders::instanceShader.updateLight(index, position, *light);
+		Shaders::basicShader->updateLight(index, position, *light);
+		Shaders::instanceShader->updateLight(index, position, *light);
 		
 		index += 1;
 	}
 
-	Shaders::basicShader.updateLightCount(index);
-	Shaders::instanceShader.updateLightCount(index);
+	Shaders::basicShader->updateLightCount(index);
+	Shaders::instanceShader->updateLightCount(index);
 }
 
 void ModelLayer::onEvent(Engine::Registry64& registry, Engine::Event& event) {
@@ -136,9 +136,9 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 	beginScene();
 
 	graphicsMeasure.mark(UPDATE);
-	Shaders::debugShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
-	Shaders::basicShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
-	Shaders::instanceShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
+	Shaders::debugShader->updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
+	Shaders::basicShader->updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
+	Shaders::instanceShader->updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
 
 	// Shadow
 	Vec3f from = { -10, 10, -10 };
@@ -149,9 +149,9 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 	activeTexture(1);
 	activeTexture(1);
 	bindTexture2D(ShadowLayer::depthMap);
-	Shaders::instanceShader.setUniform("shadowMap", 1);
-	Shaders::instanceShader.setUniform("lightMatrix", ShadowLayer::lighSpaceMatrix);
-	Shaders::instanceShader.updateSunDirection(sunDirection);
+	Shaders::instanceShader->setUniform("shadowMap", 1);
+	Shaders::instanceShader->setUniform("lightMatrix", ShadowLayer::lighSpaceMatrix);
+	Shaders::instanceShader->updateSunDirection(sunDirection);
 
 	graphicsMeasure.mark(PHYSICALS);
 	
@@ -209,12 +209,12 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 			}
 		}
 		
-		Shaders::instanceShader.bind();
+		Shaders::instanceShader->bind();
 		manager->submit();
 		
 
 		// Render transparent meshes
-		Shaders::basicShader.bind();
+		Shaders::basicShader->bind();
 		enableBlending();
 		for (auto iterator = transparentEntities.rbegin(); iterator != transparentEntities.rend(); ++iterator) {
 			EntityInfo info = iterator->second;
@@ -225,8 +225,8 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 			if (info.collider.valid())
 				info.material.albedo += getAlbedoForPart(screen, info.collider->part);
 
-			Shaders::basicShader.updateMaterial(info.material);
-			Shaders::basicShader.updateModel(info.transform.getModelMatrix());
+			Shaders::basicShader->updateMaterial(info.material);
+			Shaders::basicShader->updateModel(info.transform.getModelMatrix());
 			MeshRegistry::meshes[info.mesh->id]->render(info.mesh->mode);
 		}
 
@@ -245,7 +245,7 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 					
 					VisualData data = MeshRegistry::getOrCreateMeshFor(shape.baseShape);
 
-					Shaders::debugShader.updateModel(transform->getCFrame().asMat4WithPreScale(scale));
+					Shaders::debugShader->updateModel(transform->getCFrame().asMat4WithPreScale(scale));
 					MeshRegistry::meshes[data.id]->render();
 				}
 			}
@@ -254,7 +254,7 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 		auto shb = SelectionTool::selection.getHitbox();
 		if (scf.has_value() && shb.has_value()) {
 			VisualData data = MeshRegistry::getOrCreateMeshFor(shb->baseShape);
-			Shaders::debugShader.updateModel(scf.value().asMat4WithPreScale(shb->scale));
+			Shaders::debugShader->updateModel(scf.value().asMat4WithPreScale(shb->scale));
 			MeshRegistry::meshes[data.id]->render();
 		}
 		
@@ -272,7 +272,7 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 
 					VisualData data = MeshRegistry::getOrCreateMeshFor(shape.baseShape);
 
-					Shaders::debugShader.updateModel(transform->getCFrame().asMat4WithPreScale(shape.scale));
+					Shaders::debugShader->updateModel(transform->getCFrame().asMat4WithPreScale(shape.scale));
 					MeshRegistry::meshes[data.id]->render();
 				}
 			}

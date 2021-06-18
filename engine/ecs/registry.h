@@ -9,7 +9,7 @@
 #include <typeinfo>
 #include "../util/typetraits.h"
 #include "../util/iteratorUtils.h"
-#include "../util/intrusivePointer.h"
+#include "../Physics3D/datastructures/intrusivePointer.h"
 
 namespace P3D::Engine {
 
@@ -431,7 +431,7 @@ public:
 		if (entities_iterator == entities.end())
 			return IRef<Component>();
 
-		IRef<Component> component = make_intrusive(new Component(std::forward<Args>(args)...));
+		IRef<Component> component = make_intrusive<Component>(std::forward<Args>(args)...);
 		component_type index = getComponentIndex<Component>();
 
 		while (index >= components.size())
@@ -520,7 +520,7 @@ public:
 		entity_map* map = components[index];
 		auto component_iterator = map->find(entity);
 		if (component_iterator == map->end()) {
-			IRef<Component> component = make_intrusive(new Component(std::forward<Args>(args)...));
+			IRef<Component> component = make_intrusive<Component>(std::forward<Args>(args)...);
 
 			map->insert(std::make_pair(entity, intrusive_cast<RC>(component)));
 

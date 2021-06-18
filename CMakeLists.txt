@@ -45,7 +45,6 @@ add_library(util STATIC
   util/fileUtils.cpp
   util/valueCycle.cpp
   util/systemVariables.cpp
-  
 
   util/resource/resource.cpp
   util/resource/resourceLoader.cpp
@@ -182,8 +181,7 @@ add_library(graphics STATIC
   graphics/shader/lexer.cpp
   graphics/shader/parser.cpp
   graphics/shader/shaders.cpp
-  graphics/shader/cshader.cpp
-  graphics/shader/gshader.cpp
+  graphics/shader/propertiesParser.cpp
 )
 
 add_library(engine STATIC

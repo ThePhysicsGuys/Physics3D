@@ -33,17 +33,17 @@ Vec4f colors[] {
 };
 
 void renderSphere(double radius, const Position& position, const Color& color) {
-	Shaders::basicShader.updateMaterial(Comp::Material(color));
-	Shaders::basicShader.updateModel(join(Mat3f::IDENTITY() * float(radius), castPositionToVec3f(position), Vec3f(0.0f,0.0f,0.0f),1.0f));
+	Shaders::basicShader->updateMaterial(Comp::Material(color));
+	Shaders::basicShader->updateModel(join(Mat3f::IDENTITY() * float(radius), castPositionToVec3f(position), Vec3f(0.0f,0.0f,0.0f),1.0f));
 
-	Graphics::Library::sphere->render();
+	Library::sphere->render();
 }
 
 void renderBox(const GlobalCFrame& cframe, double width, double height, double depth, const Color& color) {
-	Shaders::basicShader.updateMaterial(Comp::Material(color));
-	Shaders::basicShader.updateModel(Mat4f(cframe.asMat4WithPreScale(DiagonalMat3{width, height, depth})));
+	Shaders::basicShader->updateMaterial(Comp::Material(color));
+	Shaders::basicShader->updateModel(Mat4f(cframe.asMat4WithPreScale(DiagonalMat3{width, height, depth})));
 
-	Graphics::Library::cube->render();
+	Library::cube->render();
 }
 
 void renderBounds(const Bounds& bounds, const Color& color) {
@@ -64,7 +64,7 @@ static void renderBoundsForDepth(const Bounds& bounds, int depth) {
 
 static void recursiveRenderColTree(const P3D::TreeTrunk& curTrunk, int curTrunkSize, int depth) {
 	for(int i = 0; i < curTrunkSize; i++) {
-		const P3D::TreeNodeRef& subNode = curTrunk.subNodes[i];
+		const TreeNodeRef& subNode = curTrunk.subNodes[i];
 
 		if(subNode.isTrunkNode()) {
 			recursiveRenderColTree(subNode.asTrunk(), subNode.getTrunkSize(), depth + 1);
@@ -74,9 +74,9 @@ static void recursiveRenderColTree(const P3D::TreeTrunk& curTrunk, int curTrunkS
 	}
 }
 
-static bool recursiveColTreeForOneObject(const P3D::TreeTrunk& curTrunk, int curTrunkSize, const Part* part, const Bounds& bounds, int depth) {
+static bool recursiveColTreeForOneObject(const TreeTrunk& curTrunk, int curTrunkSize, const Part* part, const Bounds& bounds, int depth) {
 	for(int i = 0; i < curTrunkSize; i++) {
-		const P3D::TreeNodeRef& subNode = curTrunk.subNodes[i];
+		const TreeNodeRef& subNode = curTrunk.subNodes[i];
 
 		if(subNode.isTrunkNode()) {
 			if(recursiveColTreeForOneObject(subNode.asTrunk(), subNode.getTrunkSize(), part, bounds, depth + 1)) {
@@ -92,11 +92,11 @@ static bool recursiveColTreeForOneObject(const P3D::TreeTrunk& curTrunk, int cur
 	return false;
 }
 
-static void renderTree(const P3D::BoundsTree<Part>& tree) {
+static void renderTree(const BoundsTree<Part>& tree) {
 	auto baseTrunk = tree.getPrototype().getBaseTrunk();
 	recursiveRenderColTree(baseTrunk.first, baseTrunk.second, 0);
 }
-static void renderTreeForOneObject(const P3D::BoundsTree<Part>& tree, const Part& part) {
+static void renderTreeForOneObject(const BoundsTree<Part>& tree, const Part& part) {
 	auto baseTrunk = tree.getPrototype().getBaseTrunk();
 	recursiveColTreeForOneObject(baseTrunk.first, baseTrunk.second, &part, part.getBounds(), 0);
 }
@@ -106,13 +106,13 @@ static void renderTreeForOneObject(const P3D::BoundsTree<Part>& tree, const Part
 void DebugLayer::onInit(Engine::Registry64& registry) {
 
 	// Origin init
-	originMesh = new Graphics::ArrayMesh(nullptr, 1, 3, Graphics::Renderer::POINT);
+	originMesh = new ArrayMesh(nullptr, 1, 3, Renderer::POINT);
 
 	// Vector init
-	vectorMesh = new Graphics::VectorMesh(nullptr, 0);
+	vectorMesh = new VectorMesh(nullptr, 0);
 
 	// Point init
-	pointMesh = new Graphics::PointMesh(nullptr, 0);
+	pointMesh = new PointMesh(nullptr, 0);
 
 }
 
@@ -126,9 +126,9 @@ void DebugLayer::onEvent(Engine::Registry64& registry, Engine::Event& event) {
 
 void DebugLayer::onRender(Engine::Registry64& registry) {
 	using namespace Graphics;
-	using namespace Graphics::Renderer;
-	using namespace Graphics::VisualDebug;
-	using namespace Graphics::AppDebug;
+	using namespace Renderer;
+	using namespace VisualDebug;
+	using namespace AppDebug;
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
 	beginScene();
@@ -143,7 +143,7 @@ void DebugLayer::onRender(Engine::Registry64& registry) {
 
 	for (const MotorizedPhysical* physical : screen->world->physicals) {
 		Position com = physical->getCenterOfMass();
-		pointLog.add(ColoredPoint(com, P3D::Debug::CENTER_OF_MASS));
+		pointLog.add(ColoredPoint(com, Debug::CENTER_OF_MASS));
 	}
 
 	screen->world->syncReadOnlyOperation([this, &vecLog]() {
@@ -153,19 +153,19 @@ void DebugLayer::onRender(Engine::Registry64& registry) {
 			Motion partMotion = screen->selectedPart->getMotion();
 			Polyhedron asPoly = screen->selectedPart->hitbox.asPolyhedron();
 			for (const Vec3f& corner : asPoly.iterVertices()) {
-				vecLog.add(ColoredVector(selectedCFrame.localToGlobal(corner), partMotion.getVelocityOfPoint(selectedCFrame.localToRelative(corner)), P3D::Debug::VELOCITY));
+				vecLog.add(ColoredVector(selectedCFrame.localToGlobal(corner), partMotion.getVelocityOfPoint(selectedCFrame.localToRelative(corner)), Debug::VELOCITY));
 			}
 
 			if (colissionSpheresMode == SphereColissionRenderMode::SELECTED) {
 				Physical& selectedPhys = *screen->selectedPart->parent;
 
 				for(Part& part : selectedPhys.rigidBody) {
-					Color yellow = Graphics::Colors::YELLOW;
+					Color yellow = Colors::YELLOW;
 					yellow.a = 0.5;
 					BoundingBox localBounds = screen->selectedPart->getLocalBounds();
 					renderBox(screen->selectedPart->getCFrame().localToGlobal(CFrame(localBounds.getCenter())), localBounds.getWidth(), localBounds.getHeight(), localBounds.getDepth(), yellow);
 
-					Color green = Graphics::Colors::GREEN;
+					Color green = Colors::GREEN;
 					green.a = 0.5;
 					renderSphere(part.maxRadius, part.getPosition(), green);
 				}
@@ -175,12 +175,12 @@ void DebugLayer::onRender(Engine::Registry64& registry) {
 		if(colissionSpheresMode == SphereColissionRenderMode::ALL) {
 			for(MotorizedPhysical* phys : screen->world->physicals) {
 				for(Part& part : phys->rigidBody) {
-					Color yellow = Graphics::Colors::YELLOW;
+					Color yellow = Colors::YELLOW;
 					yellow.a = 0.5;
 					BoundingBox localBounds = part.getLocalBounds();
 					renderBox(part.getCFrame().localToGlobal(CFrame(localBounds.getCenter())), localBounds.getWidth(), localBounds.getHeight(), localBounds.getDepth(), yellow);
 
-					Color green = Graphics::Colors::GREEN;
+					Color green = Colors::GREEN;
 					green.a = 0.5;
 					renderSphere(part.maxRadius, part.getPosition(), green);
 				}
@@ -206,17 +206,17 @@ void DebugLayer::onRender(Engine::Registry64& registry) {
 
 	// Render vector mesh
 	graphicsMeasure.mark(GraphicsProcess::VECTORS);
-	Shaders::vectorShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
+	Shaders::vectorShader->updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
 	vectorMesh->render();
 
 	// Render point mesh
 	graphicsMeasure.mark(GraphicsProcess::VECTORS);
-	Shaders::pointShader.updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
+	Shaders::pointShader->updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
 	pointMesh->render();
 
 	// Render origin mesh
 	graphicsMeasure.mark(GraphicsProcess::ORIGIN);
-	Shaders::originShader.updateProjection(screen->camera.viewMatrix, screen->camera.getViewRotation(), screen->camera.projectionMatrix, screen->camera.orthoMatrix, screen->camera.cframe.position);
+	Shaders::originShader->updateProjection(screen->camera.viewMatrix, screen->camera.getViewRotation(), screen->camera.projectionMatrix, screen->camera.orthoMatrix, screen->camera.cframe.position);
 	originMesh->render();
 
 	endScene();

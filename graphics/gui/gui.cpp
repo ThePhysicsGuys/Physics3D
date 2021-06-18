@@ -32,7 +32,7 @@ bool onWindowResize(const WindowInfo& info) {
 }
 
 void onUpdate(const Mat4f& orthoMatrix) {
-	Shaders::quadShader.updateProjection(orthoMatrix);
+	Shaders::quadShader->updateProjection(orthoMatrix);
 }
 
 void onClose() {

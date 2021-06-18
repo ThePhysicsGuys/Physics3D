@@ -82,19 +82,19 @@ void ShadowLayer::renderScene(Engine::Registry64& registry) {
 		if (mesh->id == -1)
 			continue;
 
-		Shaders::depthShader.updateModel(part->getCFrame().asMat4WithPreScale(part->hitbox.scale));
+		Shaders::depthShader->updateModel(part->getCFrame().asMat4WithPreScale(part->hitbox.scale));
 		Graphics::MeshRegistry::meshes[mesh->id]->render(mesh->mode);
 	}
 }
 
 void ShadowLayer::onRender(Engine::Registry64& registry) {
 	using namespace Graphics;
-	using namespace Graphics::Renderer;
+	using namespace Renderer;
 
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
-	Shaders::depthShader.bind();
-	Shaders::depthShader.updateLight(lighSpaceMatrix);
+	Shaders::depthShader->bind();
+	Shaders::depthShader->updateLight(lighSpaceMatrix);
 	glViewport(0, 0, WIDTH, HEIGHT);
 	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
 	glClear(GL_DEPTH_BUFFER_BIT);
