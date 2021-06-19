@@ -107,7 +107,9 @@ add_library(Physics3D STATIC
   
   Physics3D/externalforces/directionalGravity.cpp
   Physics3D/externalforces/externalForce.cpp
-
+  
+  Physics3D/threading/upgradeable_shared_mutex.cpp
+  
   Physics3D/misc/debug.cpp
   Physics3D/misc/cpuid.cpp
   Physics3D/misc/validityHelper.cpp
