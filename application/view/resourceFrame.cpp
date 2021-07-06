@@ -5,6 +5,7 @@
 #include "imgui/imgui.h"
 #include "shader/shaders.h"
 #include "../util/resource/resourceManager.h"
+#include "../graphics/gui/imgui/imguiExtension.h"
 #include "../graphics/resource/fontResource.h"
 #include "../graphics/resource/textureResource.h"
 #include "../graphics/texture.h"
@@ -77,254 +78,118 @@ void ResourceFrame::renderFontInfo(Font* font) {
 	}
 }
 
-/*
-void renderShaderTypeEditor(GShader* shader, const Parser::Local& uniform) {
-	Parser::Type type = Parser::parseType(uniform.type);
-	std::string name(uniform.name);
-	switch (type) {
-		case Parser::Type::None:
-		case Parser::Type::Void:
-		case Parser::Type::Struct:
-		case Parser::Type::VSOut:
-		case Parser::Type::Mat2:
-		case Parser::Type::Mat3:
-		case Parser::Type::Mat4:
-			ImGui::Text("No editor available");
-			ImGui::Text("No editor available");
-			break;
-		case Parser::Type::Int: {
-				int value = 0;
-				if (ImGui::InputInt(name.c_str(), &value))
-					shader->setUniform(name, value);
-			} break;
-		case Parser::Type::Float: {
-				float value = 0.0f;
-				if (ImGui::InputFloat(name.c_str(), &value))
-					shader->setUniform(name, value);
-			} break;
-		case Parser::Type::Vec2: {
-				Vec2f value = Vec2f(0, 0);
-				if (ImGui::InputFloat2(name.c_str(), value.data))
-					shader->setUniform(name, value);
-			} break;
-		case Parser::Type::Vec3: {
-				Vec3f value = Vec3f(0, 0, 0);
-				if (ImGui::InputFloat3(name.c_str(), value.data))
-					shader->setUniform(name, value);
-			} break;
-		case Parser::Type::Vec4: {
-				Vec4f value = Vec4f(0, 0, 0, 0);
-				if (ImGui::InputFloat4(name.c_str(), value.data))
-					shader->setUniform(name, value);
-			} break;
-		case Parser::Type::Sampler2D: {
-				int value = 0;
-				if (ImGui::InputInt(name.c_str(), &value))
-					shader->setUniform(name, value);
-			} break;
-		case Parser::Type::Sampler3D: {
-				int value = 0;
-				if (ImGui::InputInt(name.c_str(), &value))
-					shader->setUniform(name, value);
-			} break;
-		default:
-			break;
-	}
-}
-*/
+void renderPropertyEditor(ShaderResource* shader, Property& property) {
+	ImGui::PushID(&property);
+	std::string name(property.name);
+	std::string uniform(property.uniform);
+
+	auto renderVectorProperty = [&] (const char** labels, float* data, float** min, float** max) {
+		for (std::size_t i = 0; i < property.defaults.size(); i++) {
+			Property::Default& def = property.defaults.at(i);
+
+			*(data + i) = def.value;
+			*(min + i) = def.range.has_value() ? &def.range->min : nullptr;
+			*(max + i) = def.range.has_value() ? &def.range->max : nullptr;
+		}
+
+		PROPERTY_DESC_IF(name.c_str(), uniform.c_str(), ImGui::DragVecN("", labels, data, property.defaults.size(), 0.0f, 0.1f, false, min, max),
+			for (std::size_t i = 0; i < property.defaults.size(); i++) 
+				property.defaults.at(i).value = data[i];
+			);
+	};
 	
-/*void ResourceFrame::renderShaderStageInfo(ShaderResource* shader, const ShaderStage& stage) {
-	if (ImGui::TreeNode("Code")) {
-		ImGui::TextWrapped("%s", stage.source.c_str());
-
-		ImGui::TreePop();
-	}
-
-	if (stage.info.uniforms.size()) {
-		if (ImGui::TreeNode("Uniforms")) {
-			ImGui::Columns(5);
-			ImGui::Separator();
-			ImGui::Text("ID"); ImGui::NextColumn();
-			ImGui::Text("Name"); ImGui::NextColumn();
-			ImGui::Text("Type"); ImGui::NextColumn();
-			ImGui::Text("Array"); ImGui::NextColumn();
-			ImGui::Text("Edit"); ImGui::NextColumn();
-			ImGui::Separator();
-
-			for (const Parser::Local& uniform : stage.info.uniforms) {
-				std::string name(uniform.name.view(stage.source.c_str()));
-				std::string type(uniform.type.view(stage.source.c_str()));
-				ImGui::Text("%d", shader->getUniform(name)); ImGui::NextColumn();
-				ImGui::Text("%s", name.c_str()); ImGui::NextColumn();
-				ImGui::Text("%s", type.c_str()); ImGui::NextColumn();
-				if (uniform.amount != 0) ImGui::Text("yes: %d", uniform.amount); else ImGui::Text("no"); ImGui::NextColumn();
-				ImGui::Text("No editor available"); ImGui::NextColumn();
-				//if (!uniform.array) renderShaderTypeEditor(shader, uniform); else ImGui::Text("No editor available"); ImGui::NextColumn();
+	switch (property.type) {
+		case Property::Type::None: 
+			break;
+		case Property::Type::Bool: {
+			Property::Default& def = property.defaults[0];
+			bool value = def.value != 0.0f;
+			PROPERTY_DESC_IF(name.c_str(), uniform.c_str(), ImGui::Checkbox("", &value),
+				def.value = value ? 1.0f : 0.0f;
+			);
+				
+			break;
+		} case Property::Type::Int: {
+			Property::Default& def = property.defaults[0];
+			if (def.range.has_value()) {
+				int value = static_cast<int>(def.value);
+				PROPERTY_DESC_IF(name.c_str(), uniform.c_str(), ImGui::DragInt("", &value, 1.0f, static_cast<int>(def.range->min), static_cast<int>(def.range->max)),
+					def.value = static_cast<float>(value);
+				);
+			} else {
+				int value = static_cast<int>(def.value);
+				PROPERTY_DESC_IF(name.c_str(), uniform.c_str(), ImGui::InputInt("", &value),
+					def.value = static_cast<float>(value);
+				);
 			}
-			ImGui::Columns(1);
-			ImGui::Separator();
-			ImGui::TreePop();
-		}
-	}
-
-	if (stage.info.locals.size()) {
-		if (ImGui::TreeNode("Locals")) {
-			ImGui::Columns(3);
-			ImGui::Separator();
-			ImGui::Text("Name"); ImGui::NextColumn();
-			ImGui::Text("Type"); ImGui::NextColumn();
-			ImGui::Text("Array"); ImGui::NextColumn();
-			ImGui::Separator();
-
-			for (const Parser::Local& local : stage.info.locals) {
-				std::string name(local.name.view(stage.source.c_str()));
-				std::string type(local.type.view(stage.source.c_str()));
-				ImGui::Text("%s", name.c_str()); ImGui::NextColumn();
-				ImGui::Text("%s", type.c_str()); ImGui::NextColumn();
-				if (local.amount != 0)
-					ImGui::Text("yes: %d", local.amount);
-				else
-					ImGui::Text("no");
-
-				ImGui::NextColumn();
+		} break;
+		case Property::Type::Float: {
+			Property::Default& def = property.defaults[0];
+			if (def.range.has_value()) {
+				PROPERTY_DESC(name.c_str(), uniform.c_str(), ImGui::DragFloat("", &def.value, 1.0f, def.range->min, def.range->max););
+			} else {
+				PROPERTY_DESC(name.c_str(), uniform.c_str(), ImGui::InputFloat("", &def.value));
 			}
-			ImGui::Columns(1);
-			ImGui::Separator();
-			ImGui::TreePop();
-		}
+		} break;
+		case Property::Type::Vec2: {
+			float data[2], *min[2], *max[2];
+			const char* labels[2] { "X", "Y" };
+			renderVectorProperty(labels, data, min, max);
+			
+		} break;
+		case Property::Type::Vec3: {
+			float data[3], *min[3], *max[3];
+			const char* labels[3] { "X", "Y", "Z" };
+			renderVectorProperty(labels, data, min, max);
+		} break;
+		case Property::Type::Vec4: {
+			float data[4], *min[4], *max[4];
+			const char* labels[4] { "X", "Y", "Z", "W" };
+			renderVectorProperty(labels, data, min, max);
+		} break;
+		case Property::Type::Mat2: break;
+		case Property::Type::Mat3: break;
+		case Property::Type::Mat4: break;
+		case Property::Type::Col3: {
+			float data[3], *min[3], *max[3];
+			const char* labels[3] { "R", "G", "B" };
+			renderVectorProperty(labels, data, min, max);
+		} break;
+		case Property::Type::Col4: {
+			float data[4], *min[4], *max[4];
+			const char* labels[4] { "R", "G", "B", "A" };
+			renderVectorProperty(labels, data, min, max);
+		} break;
 	}
-
-	if (stage.info.globals.size()) {
-		if (ImGui::TreeNode("Globals")) {
-			ImGui::Columns(4);
-			ImGui::Separator();
-			ImGui::Text("Name"); ImGui::NextColumn();
-			ImGui::Text("IO"); ImGui::NextColumn();
-			ImGui::Text("Type"); ImGui::NextColumn();
-			ImGui::Text("Array"); ImGui::NextColumn();
-			ImGui::Separator();
-
-			for (const Parser::Global& global : stage.info.globals) {
-				std::string name(global.name.view(stage.source.c_str()));
-				std::string type(global.type.view(stage.source.c_str()));
-				ImGui::Text("%s", name.c_str()); ImGui::NextColumn();
-				ImGui::Text("%s", global.io == Parser::IO::In ? "in" : "out"); ImGui::NextColumn();
-				ImGui::Text("%s", type.c_str()); ImGui::NextColumn();
-				if (global.amount != 0)
-					ImGui::Text("yes: %d", global.amount);
-				else
-					ImGui::Text("no");
-
-				ImGui::NextColumn();
-			}
-			ImGui::Columns(1);
-			ImGui::Separator();
-			ImGui::TreePop();
-		}
-	}
-
-	if (stage.info.structs.size()) {
-		if (ImGui::TreeNode("Structs")) {
-			for (const auto& strctit : stage.info.structs) {
-				const Parser::Struct& strct = strctit.second;
-
-				if (ImGui::TreeNode(strct.name.string(stage.source.c_str()).c_str())) {
-					ImGui::Columns(3);
-					ImGui::Separator();
-					ImGui::Text("Name"); ImGui::NextColumn();
-					ImGui::Text("Type"); ImGui::NextColumn();
-					ImGui::Text("Array"); ImGui::NextColumn();
-					ImGui::Separator();
-
-					for (const Parser::Local& local : strct.locals) {
-						std::string name(local.name.view(stage.source.c_str()));
-						std::string type(local.type.view(stage.source.c_str()));
-						ImGui::Text("%s", name.c_str()); ImGui::NextColumn();
-						ImGui::Text("%s", type.c_str()); ImGui::NextColumn();
-						if (local.amount != 0)
-							ImGui::Text("yes: %d", local.amount);
-						else
-							ImGui::Text("no");
-
-						ImGui::NextColumn();
-					}
-					ImGui::Columns(1);
-					ImGui::Separator();
-					ImGui::TreePop();
-				}
-			}
-
-			ImGui::TreePop();
-		}
-	}
-
-	if (stage.info.defines.size()) {
-		if (ImGui::TreeNode("Defines")) {
-			ImGui::Columns(2);
-			ImGui::Separator();
-			ImGui::Text("Name"); ImGui::NextColumn();
-			ImGui::Text("Value"); ImGui::NextColumn();
-			ImGui::Separator();
-
-			for (const auto& define : stage.info.defines) {
-				ImGui::Text("%s", std::string(define.first).c_str()); ImGui::NextColumn();
-				ImGui::Text("%d", (int) define.second); ImGui::NextColumn();
-			}
-			ImGui::Columns(1);
-			ImGui::Separator();
-			ImGui::TreePop();
-		}
-	}
+	
+	ImGui::PopID();
 }
 	
 void ResourceFrame::renderShaderInfo(ShaderResource* shader) {
 	ImGui::BeginChild("Shaders");
 
+	PROPERTY_FRAME_START("Properties");
+
+	for (Property& property : shader->properties)
+		renderPropertyEditor(shader, property);
+
+	PROPERTY_FRAME_END;
+	
+	/*PROPERTY_FRAME_START("Code");
 	if (ImGui::BeginTabBar("##tabs")) {
-		if (shader->flags & shader->VERTEX) {
-			if (ImGui::BeginTabItem("Vertex")) {
-				renderShaderStageInfo(shader, shader->vertexStage);
-				ImGui::EndTabItem();
+		for (const auto& [id, stage] : shader->stages) {
+			if (ImGui::BeginTabItem(Shader::getStageName(id).c_str())) {
+				std::string code(stage.view);
+				ImGui::TextWrapped("%s", code.c_str());
 			}
 		}
-		if (shader->flags & shader->GEOMETRY) {
-			if (ImGui::BeginTabItem("Geometry")) {
-				renderShaderStageInfo(shader, shader->geometryStage);
-				ImGui::EndTabItem();
-			}
-		}
-		if (shader->flags & shader->TESSELATION_CONTROL) {
-			if (ImGui::BeginTabItem("Tesselation control")) {
-				renderShaderStageInfo(shader, shader->tesselationControlStage);
-				ImGui::EndTabItem();
-			}
-		}
-		if (shader->flags & shader->TESSELATION_EVALUATE) {
-			if (ImGui::BeginTabItem("Tesselation evaluate")) {
-				renderShaderStageInfo(shader, shader->tesselationEvaluationStage);
-				ImGui::EndTabItem();
-			}
-		}
-		if (shader->flags & shader->FRAGMENT) {
-			if (ImGui::BeginTabItem("Fragment")) {
-				renderShaderStageInfo(shader, shader->fragmentStage);
-				ImGui::EndTabItem();
-			}
-		}
+
 		ImGui::EndTabBar();
 	}
-
-	if (ImGui::Button("Reload")) {
-		ShaderSource shaderSource = parseShader(shader->getName(), shader->getPath());
-		if (shaderSource.vertexSource.empty() || shaderSource.fragmentSource.empty()) {
-			ImGui::EndChild();
-			return;
-		}
-		shader->reload(shaderSource);
-	}
-
+	PROPERTY_FRAME_END;*/
+	
 	ImGui::EndChild();
-}*/
+}
 
 void ResourceFrame::onInit(Engine::Registry64& registry) {
 	
@@ -337,9 +202,9 @@ void ResourceFrame::onRender(Engine::Registry64& registry) {
 	ImGui::Separator();
 
 	auto map = ResourceManager::getResourceMap();
-	for (auto iterator = map.begin(); iterator != map.end(); ++iterator) {
-		if (ImGui::TreeNodeEx(iterator->first.c_str(), ImGuiTreeNodeFlags_SpanFullWidth)) {
-			for (Resource* resource : iterator->second) {
+	for (auto& [name, resources] : map) {
+		if (ImGui::TreeNodeEx(name.c_str(), ImGuiTreeNodeFlags_SpanFullWidth)) {
+			for (Resource* resource : resources) {
 				if (ImGui::Selectable(resource->getName().c_str(), resource == selectedResource))
 					selectedResource = resource;
 			}
@@ -360,9 +225,9 @@ void ResourceFrame::onRender(Engine::Registry64& registry) {
 			case ResourceType::Font:
 				renderFontInfo(static_cast<FontResource*>(selectedResource));
 				break;
-			//case ResourceType::GShader:
-			//	renderShaderInfo(static_cast<ShaderResource*>(selectedResource));
-			//	break;
+			case ResourceType::Shader:
+				renderShaderInfo(static_cast<ShaderResource*>(selectedResource));
+				break;
 			default:
 				ImGui::Text("Visual respresentation not supported.");
 				break;

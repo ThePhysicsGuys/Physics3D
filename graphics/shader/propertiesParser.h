@@ -6,11 +6,12 @@ namespace P3D::Graphics {
 	
 // <type> <name> [(<uniform>)] [= <default> [(<start> : <stop>)]];
 // vec3 Poepie (inputColor) = 0.1 (0:1), 0.2 (-10,10), 0.3;
+
 struct Property {
 	
 	struct Range {
-		float start;
-		float stop;
+		float min;
+		float max;
 	};
 	
 	struct Default {
@@ -41,7 +42,7 @@ struct Property {
 	
 class PropertiesParser {
 public:
-	static std::vector<Property> parse(const char* code);
+	static std::vector<Property> parse(const char* source, std::string_view view);
 };
 
 }

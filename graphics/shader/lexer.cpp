@@ -157,7 +157,8 @@ namespace P3D::Graphics {
 	}
 
 	constexpr Lexer::Token Lexer::lexOperatorOrComment() noexcept {
-		if (peekChar() == '/') {
+		char next = peekChar();
+		if (next == '/') {
 			switch (peekChar(1)) {
 			case '\0':
 				return lexChar(Token::Operator);
@@ -173,6 +174,10 @@ namespace P3D::Graphics {
 				return lexOperator();
 			}
 		}
+
+		if (next == '-' || next == '+')
+			if (isDigit(peekChar(1)))
+				return lexNumber();
 
 		return lexOperator();
 	}

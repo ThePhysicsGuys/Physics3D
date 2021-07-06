@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 namespace P3D {
 
 struct RC {
@@ -34,7 +36,7 @@ void intrusive_ptr_release(T* iptr) noexcept {
 template<typename T>
 class intrusive_ptr {
 protected:
-    //template<typename U> friend class intrusive_ptr;
+    template<typename U> friend class intrusive_ptr;
 
     T* ptr;
 

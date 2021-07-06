@@ -152,15 +152,25 @@ namespace P3D::Graphics {
 		return std::nullopt;
 	}
 
-	std::vector<Property> PropertiesParser::parse(const char* code) {
+	std::vector<Property> PropertiesParser::parse(const char* source, std::string_view view) {
 		std::vector<Property> properties;
 
-		Lexer lexer(code);
+		std::string code(view);
+		std::size_t source_offset = std::distance(source, view.data());
+
+		Lexer lexer(code.data());
 		Lexer::Token current = lexer.next();
 		while (current.type != Lexer::Token::End) {
 			std::optional<Property> property = parseProperty(lexer, current);
-			if (property.has_value())
+			if (property.has_value()) {
+				std::size_t property_offset = source_offset + std::distance(code.c_str(), property->name.data());
+				property->name = std::string_view(source + property_offset, property->name.size());
+
+				std::size_t uniform_offset = source_offset + std::distance(code.c_str(), property->uniform.data());
+				property->uniform = std::string_view(source + uniform_offset, property->uniform.size());
+
 				properties.push_back(property.value());
+			}
 
 			current = lexer.next();
 		}

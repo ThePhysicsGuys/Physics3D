@@ -15,7 +15,7 @@
 #include <Physics3D/math/linalg/mat.h>
 #include <Physics3D/math/linalg/trigonometry.h>
 #include <Physics3D/math/position.h>
-#include <Physics3D/datastructures/intrusivePointer.h>
+#include <Physics3D/datastructures/smartPointers.h>
 
 #include "../util/log.h"
 
