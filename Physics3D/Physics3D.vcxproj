@@ -182,6 +182,7 @@
     <ClCompile Include="constraints\hingeConstraint.cpp" />
     <ClCompile Include="softlinks\softLink.cpp" />
     <ClCompile Include="softlinks\springLink.cpp" />
+    <ClCompile Include="threading\upgradeable_shared_mutex.cpp" />
     <ClCompile Include="world.cpp" />
     <ClCompile Include="worldPhysics.cpp" />
   </ItemGroup>
@@ -294,6 +295,7 @@
     <ClInclude Include="softlinks\springLink.h" />
     <ClInclude Include="threading\synchonizedWorld.h" />
     <ClInclude Include="threading\threadPool.h" />
+    <ClInclude Include="threading\upgradeable_shared_mutex.h" />
     <ClInclude Include="world.h" />
     <ClInclude Include="worldIteration.h" />
   </ItemGroup>
