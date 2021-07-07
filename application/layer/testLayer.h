@@ -1,16 +1,12 @@
 #pragma once
 
 #include "../engine/layer/layer.h"
-#include "../graphics/shader/shader.h"
 
 namespace P3D::Application {
 
 class Screen;
 
 class TestLayer : public Engine::Layer {
-private:
-	SRef<Graphics::CShader> shader;
-
 public:
 	TestLayer() : Layer() {};
 	TestLayer(Screen* screen, char flags = None) : Layer("TestLayer", screen, flags) {};

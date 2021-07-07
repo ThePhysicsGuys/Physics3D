@@ -60,7 +60,7 @@ void ImGuiLayer::onRender(Engine::Registry64& registry) {
 	max = ImVec2(max.x + pos.x, max.y + pos.y);
 	handler->viewport = Vec4(min.x, min.y, size.x, size.y);
 
-	Graphics::Texture* texture = screen->screenFrameBuffer->texture;
+	SRef<Graphics::Texture> texture = screen->screenFrameBuffer->texture;
 	ImGui::Image((void*) texture->getID(), size, ImVec2(0, 1), ImVec2(1, 0));
 	ImGui::End();
 

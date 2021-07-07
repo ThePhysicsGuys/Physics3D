@@ -1,6 +1,7 @@
 #include "core.h"
 
 #include "gui.h"
+#include "../util/resource/resourceManager.h"
 
 namespace P3D::Graphics {
 
@@ -8,13 +9,12 @@ namespace GUI {
 
 // Global
 WindowInfo windowInfo;
-FrameBuffer* guiFrameBuffer = nullptr;
 Font* font = nullptr;
 
 // Batch
 GuiBatch* batch;
 
-void onInit(const WindowInfo& info, FrameBuffer* screenFrameBuffer) {
+void onInit(const WindowInfo& info) {
 	// Init
 	Shaders::onInit();
 

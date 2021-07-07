@@ -27,7 +27,7 @@ struct BlurShader : public ShaderResource {
 	explicit BlurShader(const std::string& source) : ShaderResource("BlurShader", source, false) {}
 
 	void updateWidth(float width);
-	void updateTexture(Graphics::Texture* texture);
+	void updateTexture(SRef<Texture> texture);
 };
 
 namespace Shaders {

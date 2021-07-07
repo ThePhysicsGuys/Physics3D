@@ -44,7 +44,7 @@ void ResourceFrame::renderTextureInfo(Texture* texture) {
 
 void ResourceFrame::renderFontInfo(Font* font) {
 	if (ImGui::TreeNode("Atlas")) {
-		renderTextureInfo(font->getAtlas());
+		renderTextureInfo(font->getAtlas().get());
 		ImGui::TreePop();
 	}
 

@@ -14,26 +14,41 @@ private:
 public:
 	Vec2i dimension;
 
-	Texture* texture = nullptr;
-	RenderBuffer* renderBuffer = nullptr;
+	SRef<Texture> texture;
+	SRef<RenderBuffer> renderBuffer;
 
 	FrameBuffer(unsigned int width, unsigned int height);
-	FrameBuffer(Texture* colorAttachment, RenderBuffer* depthStencilAttachment);
-
-	~FrameBuffer();
-	FrameBuffer(FrameBuffer&& other);
-	FrameBuffer(const FrameBuffer&) = delete;
-	FrameBuffer& operator=(FrameBuffer&& other);
-	FrameBuffer& operator=(const FrameBuffer&) = delete;
-
-	void resize(Vec2i dimension);
+	FrameBuffer(SRef<Texture> colorAttachment, SRef<RenderBuffer> depthStencilAttachment);
+	virtual ~FrameBuffer();
 
 	void bind() override;
 	void unbind() override;
 	void close() override;
+	
+	void resize(const Vec2i& dimension);
+	void attach(SRef<Texture> texture);
+	void attach(SRef<RenderBuffer> renderBuffer);
+};
 
-	void attach(Texture* texture);
-	void attach(RenderBuffer* renderBuffer);
+class MainFrameBuffer : public Bindable {
+private:
+	MainFrameBuffer();
+
+public:
+	Vec2i dimension;
+
+	SRef<Texture> fragment;
+	SRef<Texture> brightness;
+	SRef<RenderBuffer> renderBuffer;
+
+	MainFrameBuffer(unsigned int width, unsigned int height);
+	virtual ~MainFrameBuffer();
+
+	void bind() override;
+	void unbind() override;
+	void close() override;
+	
+	void resize(const Vec2i& dimension);
 };
 
 class HDRTexture;
@@ -42,23 +57,18 @@ class HDRFrameBuffer : public Bindable {
 public:
 	Vec2i dimension;
 
-	HDRTexture* texture = nullptr;
-	RenderBuffer* renderBuffer = nullptr;
+	SRef<HDRTexture> texture;
+	SRef<RenderBuffer> renderBuffer;
 
 	HDRFrameBuffer();
 	HDRFrameBuffer(unsigned int width, unsigned int height);
-
-	~HDRFrameBuffer();
-	HDRFrameBuffer(HDRFrameBuffer&& other);
-	HDRFrameBuffer(const HDRFrameBuffer&) = delete;
-	HDRFrameBuffer& operator=(HDRFrameBuffer&& other);
-	HDRFrameBuffer& operator=(const HDRFrameBuffer&) = delete;
-
-	void resize(Vec2i dimension);
-
+	virtual ~HDRFrameBuffer();
+	
 	void bind() override;
 	void unbind() override;
 	void close() override;
+
+	void resize(const Vec2i& dimension);
 };
 
 
@@ -69,23 +79,18 @@ class MultisampleFrameBuffer : public Bindable {
 public:
 	Vec2i dimension;
 
-	MultisampleTexture* texture = nullptr;
-	MultisampleRenderBuffer* renderBuffer = nullptr;
+	SRef<MultisampleTexture> texture;
+	SRef<MultisampleRenderBuffer> renderBuffer;
 
 	MultisampleFrameBuffer();
 	MultisampleFrameBuffer(unsigned int width, unsigned int height, int samples);
-
 	~MultisampleFrameBuffer();
-	MultisampleFrameBuffer(MultisampleFrameBuffer&& other);
-	MultisampleFrameBuffer(const MultisampleFrameBuffer&) = delete;
-	MultisampleFrameBuffer& operator=(MultisampleFrameBuffer&& other);
-	MultisampleFrameBuffer& operator=(const MultisampleFrameBuffer&) = delete;
-
-	void resize(Vec2i dimension);
 
 	void bind() override;
 	void unbind() override;
 	void close() override;
+
+	void resize(const Vec2i& dimension);
 };
 
 class DepthTexture;
@@ -94,15 +99,10 @@ class DepthFrameBuffer : public Bindable {
 public:
 	unsigned int width;
 	unsigned int height;
-	DepthTexture* texture = nullptr;
+	SRef<DepthTexture> texture;
 
 	DepthFrameBuffer(unsigned int width, unsigned int height);
-
 	~DepthFrameBuffer();
-	DepthFrameBuffer(DepthFrameBuffer&& other);
-	DepthFrameBuffer(const DepthFrameBuffer&) = delete;
-	DepthFrameBuffer& operator=(DepthFrameBuffer&& other);
-	DepthFrameBuffer& operator=(const DepthFrameBuffer&) = delete;
 
 	void bind() override;
 	void unbind() override;

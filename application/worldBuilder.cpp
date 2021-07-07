@@ -67,7 +67,7 @@ void makeDominoTower(int floors, int circumference, Position origin) {
 
 void buildFloor(double width, double depth, int folder) {
 	ExtendedPart* floorExtendedPart = new ExtendedPart(boxShape(width, 1.0, depth), GlobalCFrame(0.0, 0.0, 0.0), { 2.0, 1.0, 0.3 }, "Floor", folder);
-	screen.registry.getOrAdd<Comp::Material>(floorExtendedPart->entity)->set(Comp::Material::ALBEDO, ResourceManager::get<Graphics::TextureResource>("floorMaterial"));
+	screen.registry.getOrAdd<Comp::Material>(floorExtendedPart->entity);// ->set(Comp::Material::ALBEDO, ResourceManager::get<Graphics::TextureResource>("floorMaterial"));
 	world.addTerrainPart(floorExtendedPart);
 }
 void buildFloorAndWalls(double width, double depth, double wallHeight, int folder) {

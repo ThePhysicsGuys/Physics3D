@@ -34,9 +34,9 @@ public:
 	Camera camera;
 	Engine::LayerStack layerStack;
 	EventHandler eventHandler;
-	Util::Properties properties;
+	Util::Properties properties;	
 	
-	Graphics::FrameBuffer* screenFrameBuffer = nullptr;
+	SRef<Graphics::FrameBuffer> screenFrameBuffer = nullptr;
 	Graphics::Quad* quad = nullptr;
 
 	Engine::Registry64::entity_type intersectedEntity = 0;
