@@ -83,10 +83,9 @@ void renderPropertyEditor(ShaderResource* shader, Property& property) {
 	std::string name(property.name);
 	std::string uniform(property.uniform);
 
-	auto renderVectorProperty = [&] (const char** labels, float* data, float** min, float** max) {
+	auto renderVectorProperty = [&] (const char** labels, float* data, float** min, float** max) -> bool {
 		for (std::size_t i = 0; i < property.defaults.size(); i++) {
 			Property::Default& def = property.defaults.at(i);
-
 			*(data + i) = def.value;
 			*(min + i) = def.range.has_value() ? &def.range->min : nullptr;
 			*(max + i) = def.range.has_value() ? &def.range->max : nullptr;
@@ -95,7 +94,45 @@ void renderPropertyEditor(ShaderResource* shader, Property& property) {
 		PROPERTY_DESC_IF(name.c_str(), uniform.c_str(), ImGui::DragVecN("", labels, data, property.defaults.size(), 0.0f, 0.1f, false, min, max),
 			for (std::size_t i = 0; i < property.defaults.size(); i++) 
 				property.defaults.at(i).value = data[i];
+			return true;
+		);
+
+		return false;
+	};
+
+	auto renderMatrixProperty = [&] (const char** labels, float* data, float** min, float** max) -> bool {	
+		for (std::size_t i = 0; i < property.defaults.size(); i++) {
+			Property::Default& def = property.defaults.at(i);
+			*(data + i) = def.value;
+			*(min + i) = def.range.has_value() ? &def.range->min : nullptr;
+			*(max + i) = def.range.has_value() ? &def.range->max : nullptr;
+		}
+
+		std::size_t size = 2;
+		if (property.defaults.size() == 9)
+			size = 3;
+		else if (property.defaults.size() == 16)
+			size = 4;
+		
+		bool result = false;
+		PROPERTY_DESC_IF(name.c_str(), uniform.c_str(), ImGui::DragVecN("", labels, data, size, 0.0f, 0.1f, false, min, max),
+			for (std::size_t i = 0; i < property.defaults.size(); i++)
+				property.defaults.at(i).value = data[i];
+
+			result = true;
+		);
+		
+		for (std::size_t j = 1; j < size; j++) {
+			std::size_t offset = j * size;
+			PROPERTY_IF("", ImGui::DragVecN("", labels + offset, data + offset, size, 0.0f, 0.1f, false, min + offset, max + offset),
+				for (std::size_t i = 0; i < property.defaults.size(); i++)
+					property.defaults.at(i).value = data[i];
 			);
+
+			result = true;
+		}
+
+		return result;
 	};
 	
 	switch (property.type) {
@@ -106,6 +143,7 @@ void renderPropertyEditor(ShaderResource* shader, Property& property) {
 			bool value = def.value != 0.0f;
 			PROPERTY_DESC_IF(name.c_str(), uniform.c_str(), ImGui::Checkbox("", &value),
 				def.value = value ? 1.0f : 0.0f;
+				shader->setUniform(uniform, value);
 			);
 				
 			break;
@@ -115,50 +153,84 @@ void renderPropertyEditor(ShaderResource* shader, Property& property) {
 				int value = static_cast<int>(def.value);
 				PROPERTY_DESC_IF(name.c_str(), uniform.c_str(), ImGui::DragInt("", &value, 1.0f, static_cast<int>(def.range->min), static_cast<int>(def.range->max)),
 					def.value = static_cast<float>(value);
+					shader->setUniform(uniform, value);
 				);
 			} else {
 				int value = static_cast<int>(def.value);
 				PROPERTY_DESC_IF(name.c_str(), uniform.c_str(), ImGui::InputInt("", &value),
 					def.value = static_cast<float>(value);
+					shader->setUniform(uniform, value);
 				);
 			}
 		} break;
 		case Property::Type::Float: {
 			Property::Default& def = property.defaults[0];
 			if (def.range.has_value()) {
-				PROPERTY_DESC(name.c_str(), uniform.c_str(), ImGui::DragFloat("", &def.value, 1.0f, def.range->min, def.range->max););
+				PROPERTY_DESC_IF(name.c_str(), uniform.c_str(), ImGui::DragFloat("", &def.value, 1.0f, def.range->min, def.range->max), 
+					shader->setUniform(uniform, def.value);
+				);
 			} else {
-				PROPERTY_DESC(name.c_str(), uniform.c_str(), ImGui::InputFloat("", &def.value));
+				PROPERTY_DESC_IF(name.c_str(), uniform.c_str(), ImGui::InputFloat("", &def.value),
+					shader->setUniform(uniform, def.value);
+				);
 			}
 		} break;
 		case Property::Type::Vec2: {
 			float data[2], *min[2], *max[2];
 			const char* labels[2] { "X", "Y" };
 			renderVectorProperty(labels, data, min, max);
-			
+			shader->setUniform(uniform, Vec2f { data[0], data[1] });
 		} break;
 		case Property::Type::Vec3: {
 			float data[3], *min[3], *max[3];
 			const char* labels[3] { "X", "Y", "Z" };
 			renderVectorProperty(labels, data, min, max);
+			shader->setUniform(uniform, Vec3f { data[0], data[1], data[2] });
 		} break;
 		case Property::Type::Vec4: {
 			float data[4], *min[4], *max[4];
 			const char* labels[4] { "X", "Y", "Z", "W" };
 			renderVectorProperty(labels, data, min, max);
+			shader->setUniform(uniform, Vec4f { data[0], data[1], data[2], data[3] });
 		} break;
-		case Property::Type::Mat2: break;
-		case Property::Type::Mat3: break;
-		case Property::Type::Mat4: break;
+		case Property::Type::Mat2: {
+			float data[4], *min[4], *max[4];
+			const char* labels[4] { "00", "01", "10", "11" };
+			renderMatrixProperty(labels, data, min, max);
+			shader->setUniform(uniform, Mat2f {
+				data[0], data[1], 
+				data[2], data[3] });
+		} break;
+		case Property::Type::Mat3: {
+			float data[9], *min[9], *max[9];
+			const char* labels[9] { "00", "01", "02", "10", "11", "12", "20", "21", "22" };
+			renderMatrixProperty(labels, data, min, max);
+			shader->setUniform(uniform, Mat3f { 
+				data[0], data[1], data[2],
+				data[3], data[4], data[5],
+				data[6], data[7], data[8] });
+		} break;
+		case Property::Type::Mat4: {
+			float data[16], *min[16], *max[16];
+			const char* labels[16] { "00", "01", "02", "03", "10", "11", "12", "13", "20", "21", "22", "23", "30", "31", "32", "33" };
+			renderMatrixProperty(labels, data, min, max);
+			shader->setUniform(uniform, Mat3f {
+				data[0], data[1], data[2], data[3],
+				data[4], data[5], data[6], data[7],
+				data[8], data[9], data[10], data[11],
+				data[12], data[13], data[14], data[15] });
+		} break;
 		case Property::Type::Col3: {
 			float data[3], *min[3], *max[3];
 			const char* labels[3] { "R", "G", "B" };
 			renderVectorProperty(labels, data, min, max);
+			shader->setUniform(uniform, Vec3f { data[0], data[1], data[2] });
 		} break;
 		case Property::Type::Col4: {
 			float data[4], *min[4], *max[4];
 			const char* labels[4] { "R", "G", "B", "A" };
 			renderVectorProperty(labels, data, min, max);
+			shader->setUniform(uniform, Vec4f { data[0], data[1], data[2], data[3] });
 		} break;
 	}
 	

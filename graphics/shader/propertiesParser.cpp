@@ -37,9 +37,9 @@ namespace P3D::Graphics {
 			{ Property::Type::Vec2, 2 },
 			{ Property::Type::Vec3, 3 },
 			{ Property::Type::Vec4, 4 },
-			{ Property::Type::Mat2, 2 },
-			{ Property::Type::Mat3, 3 },
-			{ Property::Type::Mat4, 4 },
+			{ Property::Type::Mat2, 4 },
+			{ Property::Type::Mat3, 9 },
+			{ Property::Type::Mat4, 16 },
 			{ Property::Type::Col3, 3 },
 			{ Property::Type::Col4, 4 },
 		} };
