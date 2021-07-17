@@ -154,7 +154,7 @@ void Screen::onInit(bool quickBoot) {
 
 	// Framebuffer init
 	quad = new Quad();
-	screenFrameBuffer = std::make_shared<FrameBuffer>(dimension.x, dimension.y);
+	screenFrameBuffer = std::make_shared<MainFrameBuffer>(dimension.x, dimension.y);
 
 	// GShader init
 	Shaders::onInit();
@@ -221,12 +221,10 @@ void Screen::onRender() {
 	using namespace Graphics;
 	using namespace Renderer;
 
-	// Set default settings
-	//defaultSettings(0);
-
 	// Init imgui
 	imguiLayer.begin();
 
+	// Set default settings
 	defaultSettings(screenFrameBuffer->getID());
 
 	// Render layers

@@ -38,7 +38,9 @@ public:
 	Vec2i dimension;
 
 	SRef<Texture> fragment;
-	SRef<Texture> brightness;
+	SRef<Texture> ca1;
+	SRef<Texture> ca2;
+	SRef<Texture> ca3;
 	SRef<RenderBuffer> renderBuffer;
 
 	MainFrameBuffer(unsigned int width, unsigned int height);

@@ -92,7 +92,10 @@ void main() {
 [fragment]
 
 // Out
-out vec4 outColor;
+layout (location = 0) out vec4 outColor;
+layout (location = 1) out vec4 ca1;
+layout (location = 2) out vec4 ca2;
+layout (location = 3) out vec4 ca3;
 
 // In
 smooth in vec2 fUV;
@@ -338,4 +341,8 @@ void main() {
 
 	// Outcolor
 	outColor = vec4(color, albedo.a);
+	
+	ca1 = vec4(V, 1.0);
+	ca2 = vec4(N, 1.0);
+	ca3 = vec4(Lo, 1.0);
 }

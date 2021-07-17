@@ -96,14 +96,20 @@ MainFrameBuffer::MainFrameBuffer(unsigned int width, unsigned int height) : Bind
 	fragment = std::make_shared<HDRTexture>(width, height);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fragment->getID(), 0);
 
-	brightness = std::make_shared<HDRTexture>(width, height);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, brightness->getID(), 0);
+	ca1 = std::make_shared<HDRTexture>(width, height);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, ca1->getID(), 0);
+
+	ca2 = std::make_shared<HDRTexture>(width, height);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, ca2->getID(), 0);
+
+	ca3 = std::make_shared<HDRTexture>(width, height);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, ca3->getID(), 0);
 
 	renderBuffer = std::make_shared<RenderBuffer>(width, height);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderBuffer->getID());
 
-	GLID attachements[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-	glDrawBuffers(2, attachements);
+	GLID attachements[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
+	glDrawBuffers(4, attachements);
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		Log::error("FrameBuffer object with id (%d) not complete", id);
@@ -128,7 +134,9 @@ void MainFrameBuffer::resize(const Vec2i& dimension) {
 	this->dimension = dimension;
 
 	fragment->resize(dimension.x, dimension.y);
-	brightness->resize(dimension.x, dimension.y);
+	ca1->resize(dimension.x, dimension.y);
+	ca2->resize(dimension.x, dimension.y);
+	ca3->resize(dimension.x, dimension.y);
 	renderBuffer->resize(dimension.x, dimension.y);
 }
 

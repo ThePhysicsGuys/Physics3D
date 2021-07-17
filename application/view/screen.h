@@ -7,12 +7,11 @@
 #include "../engine/layer/layerStack.h"
 #include "../engine/ecs/registry.h"
 #include "camera.h"
+#include "graphics/buffers/frameBuffer.h"
 
 namespace P3D::Graphics {
 struct Quad;
-class FrameBuffer;
-class HDRFrameBuffer;
-class IndexedMesh;
+class MainFrameBuffer;
 };
 
 namespace P3D::Application {
@@ -36,7 +35,7 @@ public:
 	EventHandler eventHandler;
 	Util::Properties properties;	
 	
-	SRef<Graphics::FrameBuffer> screenFrameBuffer = nullptr;
+	SRef<Graphics::MainFrameBuffer> screenFrameBuffer = nullptr;
 	Graphics::Quad* quad = nullptr;
 
 	Engine::Registry64::entity_type intersectedEntity = 0;

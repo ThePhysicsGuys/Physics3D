@@ -60,8 +60,20 @@ void ImGuiLayer::onRender(Engine::Registry64& registry) {
 	max = ImVec2(max.x + pos.x, max.y + pos.y);
 	handler->viewport = Vec4(min.x, min.y, size.x, size.y);
 
-	SRef<Graphics::Texture> texture = screen->screenFrameBuffer->texture;
+	SRef<Graphics::Texture> texture = screen->screenFrameBuffer->fragment;
 	ImGui::Image((void*) texture->getID(), size, ImVec2(0, 1), ImVec2(1, 0));
+	ImGui::End();
+	
+	ImGui::Begin("CA1");
+	ImGui::Image((void*) screen->screenFrameBuffer->ca1->getID(), size, ImVec2(0, 1), ImVec2(1, 0));
+	ImGui::End();
+
+	ImGui::Begin("CA2");
+	ImGui::Image((void*) screen->screenFrameBuffer->ca2->getID(), size, ImVec2(0, 1), ImVec2(1, 0));
+	ImGui::End();
+
+	ImGui::Begin("CA3");
+	ImGui::Image((void*) screen->screenFrameBuffer->ca3->getID(), size, ImVec2(0, 1), ImVec2(1, 0));
 	ImGui::End();
 
 	Graphics::renderImGuiStyleEditor();
