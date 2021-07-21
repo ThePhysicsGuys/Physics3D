@@ -153,8 +153,11 @@ void Screen::onInit(bool quickBoot) {
 	dimension = GLFW::getWindowSize();
 
 	// Framebuffer init
-	quad = new Quad();
 	screenFrameBuffer = std::make_shared<MainFrameBuffer>(dimension.x, dimension.y);
+
+	// Batch managers init
+	instanceManager = std::make_unique<DefaultInstanceBatchManager>(DEFAULT_UNIFORM_BUFFER_LAYOUT);
+	basicManager = std::make_unique<DefaultOrderedBatchManager>();
 
 	// GShader init
 	Shaders::onInit();

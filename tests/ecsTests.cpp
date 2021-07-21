@@ -1,7 +1,7 @@
 #include "testsMain.h"
 
 #include "../engine/ecs/registry.h"
-#include "../util/intrusivePointer.h"
+#include "../Physics3D/datastructures/smartPointers.h"
 #include "../application/ecs/components.h"
 
 namespace P3D {

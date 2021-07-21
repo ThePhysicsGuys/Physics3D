@@ -4,6 +4,7 @@
 
 #include "view/screen.h"
 #include "shader/shaders.h"
+#include "shader/basicShader.h"
 #include "extendedPart.h"
 #include "worlds.h"
 
@@ -12,10 +13,8 @@
 #include "ecs/material.h"
 
 #include "../graphics/meshRegistry.h"
-
 #include "../graphics/mesh/indexedMesh.h"
 #include "../graphics/debug/visualDebug.h"
-
 #include "../graphics/gui/color.h"
 
 #include <Physics3D/math/linalg/vec.h>
@@ -97,9 +96,6 @@ void ModelLayer::onInit(Engine::Registry64& registry) {
 	// Dont know anymore
 	Shaders::basicShader->updateTexture(false);
 	Shaders::instanceShader->updateTexture(false);
-
-	// Instance batch manager
-	manager = new InstanceBatchManager<Uniform>(DEFAULT_UNIFORM_BUFFER_LAYOUT);
 }
 
 void ModelLayer::onUpdate(Engine::Registry64& registry) {
@@ -146,7 +142,6 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 	Vec3f sunDirection = to - from;
 	ShadowLayer::lightView = lookAt(from, to);
 	ShadowLayer::lighSpaceMatrix = ShadowLayer::lightProjection * ShadowLayer::lightView;
-	activeTexture(1);
 	activeTexture(1);
 	bindTexture2D(ShadowLayer::depthMap);
 	Shaders::instanceShader->setUniform("shadowMap", 1);
@@ -197,7 +192,7 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 				if (info.collider.valid())
 					info.material.albedo += getAlbedoForPart(screen, info.collider->part);
 
-				Uniform uniform {
+				DefaultUniform uniform {
 					modelMatrix,
 					info.material.albedo,
 					info.material.metalness,
@@ -205,19 +200,13 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 					info.material.ao
 				};
 				
-				manager->add(info.mesh->id, uniform);
+				screen->instanceManager->add(info.mesh->id, uniform);
 			}
-		}
-		
-		Shaders::instanceShader->bind();
-		manager->submit();
-		
+		}		
 
 		// Render transparent meshes
-		Shaders::basicShader->bind();
-		enableBlending();
 		for (auto iterator = transparentEntities.rbegin(); iterator != transparentEntities.rend(); ++iterator) {
-			EntityInfo info = iterator->second;
+			EntityInfo& info = iterator->second;
 
 			if (info.mesh->id == -1)
 				continue;
@@ -225,31 +214,18 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 			if (info.collider.valid())
 				info.material.albedo += getAlbedoForPart(screen, info.collider->part);
 
-			Shaders::basicShader->updateMaterial(info.material);
-			Shaders::basicShader->updateModel(info.transform.getModelMatrix());
-			MeshRegistry::meshes[info.mesh->id]->render(info.mesh->mode);
+			DefaultUniform uniform {
+					info.transform.getModelMatrix(),
+					info.material.albedo,
+					info.material.metalness,
+					info.material.roughness,
+					info.material.ao
+			};
+			
+			screen->basicManager->add(info.mesh->id, uniform);
 		}
 
 		// Hitbox drawing
-		if (screen->selectedEntity) {
-			IRef<Comp::Transform> transform = registry.get<Comp::Transform>(screen->selectedEntity);
-			if (transform.valid()) {
-				IRef<Comp::Hitbox> hitbox = registry.get<Comp::Hitbox>(screen->selectedEntity);
-
-				if (hitbox.valid()) {
-					Shape shape = hitbox->getShape();
-					DiagonalMat3 scale = transform->getScale();
-
-					if (!hitbox->isPartAttached())
-						scale = scale * hitbox->getScale();		
-					
-					VisualData data = MeshRegistry::getOrCreateMeshFor(shape.baseShape);
-
-					Shaders::debugShader->updateModel(transform->getCFrame().asMat4WithPreScale(scale));
-					MeshRegistry::meshes[data.id]->render();
-				}
-			}
-		}
 		auto scf = SelectionTool::selection.getCFrame();
 		auto shb = SelectionTool::selection.getHitbox();
 		if (scf.has_value() && shb.has_value()) {
@@ -277,6 +253,10 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 				}
 			}
 		}
+
+		screen->instanceManager->submit(Shaders::instanceShader.get());
+		enableBlending();
+		screen->basicManager->submit(Shaders::basicShader.get());
 	});
 
 	endScene();

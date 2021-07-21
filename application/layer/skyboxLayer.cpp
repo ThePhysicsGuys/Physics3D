@@ -57,8 +57,8 @@ void updateStars(float time) {
 void SkyboxLayer::onInit(Engine::Registry64& registry) {
 	skyboxTexture = new CubeMap("../res/skybox/right.jpg", "../res/skybox/left.jpg", "../res/skybox/top.jpg", "../res/skybox/bottom.jpg", "../res/skybox/front.jpg", "../res/skybox/back.jpg");
 
-	ResourceManager::add<TextureResource>("night", "../res/textures/night.png");
-	ResourceManager::add<TextureResource>("uv", "../res/textures/uv.png");
+	//ResourceManager::add<TextureResource>("night", "../res/textures/night.png");
+	//ResourceManager::add<TextureResource>("uv", "../res/textures/uv.png");
 
 	lightColorCycle = SkyboxCycle(Color(0.42f, 0.45f, 0.90f), Color(1.0f, 0.95f, 0.95f), Color(1.0f, 0.45f, 0.56f), Color(1.0f, 0.87f, 0.6f), 3.0f, 8.0f, 18.0f);
 	skyColorCycle = SkyboxCycle(Color(0.31f, 0.44f, 0.64f), Color(0.96f, 0.93f, 0.9f), Color(0.996f, 0.77f, 0.57f), Color(1.0f, 0.94f, 0.67f), 3.0f, 8.0f, 18.0f);

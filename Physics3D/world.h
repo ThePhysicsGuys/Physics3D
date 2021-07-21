@@ -11,6 +11,7 @@
 #include "externalforces/externalForce.h"
 #include "colissionBuffer.h"
 #include "threading/threadPool.h"
+#include "layer.h"
 
 namespace P3D {
 class WorldLayer;

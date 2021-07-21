@@ -2,13 +2,6 @@
 
 namespace P3D::Graphics {
 
-#define DEFAULT_UNIFORM_BUFFER_LAYOUT \
-	BufferLayout({ \
-		BufferElement("vModelMatrix", BufferDataType::MAT4, true), \
-		BufferElement("vAlbedo", BufferDataType::FLOAT4, true), \
-		BufferElement("vMRAo", BufferDataType::FLOAT3, true) \
-	})
-
 namespace BufferDataType {
 
 struct Info {
@@ -69,5 +62,20 @@ struct BufferLayout {
 	
 	BufferLayout() : elements({}), stride(0) {}
 };
+
+struct DefaultUniform {
+	Mat4f modelMatrix = Mat4f::IDENTITY();
+	Vec4f albedo = Vec4f::full(1.0f);
+	float metalness = 1.0f;
+	float roughness = 1.0f;
+	float ao = 1.0f;
+};
+
+#define DEFAULT_UNIFORM_BUFFER_LAYOUT \
+	BufferLayout({ \
+		BufferElement("vModelMatrix", BufferDataType::MAT4, true), \
+		BufferElement("vAlbedo", BufferDataType::FLOAT4, true), \
+		BufferElement("vMRAo", BufferDataType::FLOAT3, true) \
+	})
 
 };
