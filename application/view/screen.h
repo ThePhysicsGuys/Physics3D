@@ -36,7 +36,7 @@ namespace Application {
 
 		Camera camera;
 		Engine::LayerStack layerStack;
-		EventHandler eventHandler;
+		EventHandler eventHandler;	
 		Util::Properties properties;
 
 		SRef<Graphics::MainFrameBuffer> screenFrameBuffer;

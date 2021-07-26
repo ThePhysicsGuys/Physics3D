@@ -20,6 +20,13 @@ struct Light;
 struct Material;
 struct ExtendedPart;
 
+struct OutlineShader : public ShaderResource {
+	OutlineShader() : ShaderResource("OutlineShader", "../res/shaders/outline.shader") {}
+
+	void updateColor(const Color& color);
+	void updateUnit(GLID id);
+};
+
 struct DepthBufferShader : public ShaderResource {
 	DepthBufferShader() : ShaderResource("DepthBufferShader", "../res/shaders/depthbuffer.shader") {}
 
@@ -114,7 +121,8 @@ extern SRef<SkyShader> skyShader;
 extern SRef<LightingShader> lightingShader;
 extern SRef<DebugShader> debugShader;
 extern SRef<DepthBufferShader> depthBufferShader;
-
+extern SRef<OutlineShader> outlineShader;
+	
 void onInit();
 void onClose();
 }

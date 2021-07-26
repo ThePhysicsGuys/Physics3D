@@ -26,7 +26,7 @@ void PostprocessLayer::onEvent(Engine::Registry64& registry, Engine::Event& even
 
 void PostprocessLayer::onRender(Engine::Registry64& registry) {
 	using namespace Graphics;
-	using namespace Graphics::Renderer;
+	using namespace Renderer;
 	Screen* screen = static_cast<Screen*>(this->ptr);
 }
 

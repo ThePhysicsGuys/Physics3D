@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../bindable.h"
+#include "../gui/color.h"
 #include "propertiesParser.h"
 
 namespace P3D::Graphics {
@@ -58,6 +59,7 @@ namespace P3D::Graphics {
 		void setUniform(const std::string& uniform, int value);
 		void setUniform(const std::string& uniform, GLID value);
 		void setUniform(const std::string& uniform, float value);
+		void setUniform(const std::string& uniform, const Color& color);
 		void setUniform(const std::string& uniform, const Vec2f& value);
 		void setUniform(const std::string& uniform, const Vec3f& value);
 		void setUniform(const std::string& uniform, const Vec4f& value);

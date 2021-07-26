@@ -331,6 +331,12 @@ namespace P3D::Graphics {
 		glUniform1f(location, value);
 	}
 
+	void Shader::setUniform(const std::string& uniform, const Color& value) {
+		int location = UNIFORM_CHECK(uniform);
+
+		glUniform4f(location, value.r, value.g, value.b, value.a);
+	}
+
 	void Shader::setUniform(const std::string& uniform, const Vec2f& value) {
 		int location = UNIFORM_CHECK(uniform);
 

@@ -23,6 +23,7 @@
 #include "layer/modelLayer.h"
 #include "layer/constraintLayer.h"
 #include "layer/testLayer.h"
+#include "layer/outlineLayer.h"
 #include "layer/pickerLayer.h"
 #include "layer/postprocessLayer.h"
 #include "layer/guiLayer.h"
@@ -124,6 +125,7 @@ CameraLayer cameraLayer;
 SkyboxLayer skyboxLayer;
 ModelLayer modelLayer;
 ConstraintLayer constraintLayer;
+OutlineLayer outlineLayer;
 ShadowLayer shadowLayer;
 PickerLayer pickerLayer;
 PostprocessLayer postprocessLayer;
@@ -168,6 +170,7 @@ void Screen::onInit(bool quickBoot) {
 	if(!quickBoot) skyboxLayer = SkyboxLayer(this);
 	modelLayer = ModelLayer(this);
 	constraintLayer = ConstraintLayer(this, Engine::Layer::NoUpdate | Engine::Layer::NoEvents);
+	outlineLayer = OutlineLayer(this);
 	shadowLayer = ShadowLayer(this);
 	debugLayer = DebugLayer(this);
 	pickerLayer = PickerLayer(this);
@@ -179,6 +182,7 @@ void Screen::onInit(bool quickBoot) {
 	if(!quickBoot) layerStack.pushLayer(&skyboxLayer);
 	layerStack.pushLayer(&constraintLayer);
 	layerStack.pushLayer(&modelLayer);
+	layerStack.pushLayer(&outlineLayer);
 	layerStack.pushLayer(&shadowLayer);
 	layerStack.pushLayer(&debugLayer);
 	layerStack.pushLayer(&pickerLayer);

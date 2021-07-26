@@ -129,8 +129,6 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 	using namespace Renderer;
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
-	beginScene();
-
 	graphicsMeasure.mark(UPDATE);
 	Shaders::debugShader->updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
 	Shaders::basicShader->updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
@@ -224,42 +222,7 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 			
 			screen->basicManager->add(info.mesh->id, uniform);
 		}
-
-		// Hitbox drawing
-		auto scf = SelectionTool::selection.getCFrame();
-		auto shb = SelectionTool::selection.getHitbox();
-		if (scf.has_value() && shb.has_value()) {
-			VisualData data = MeshRegistry::getOrCreateMeshFor(shb->baseShape);
-			Shaders::debugShader->updateModel(scf.value().asMat4WithPreScale(shb->scale));
-			MeshRegistry::meshes[data.id]->render();
-		}
-		
-		// Hitbox drawing
-		for (auto entity : SelectionTool::selection) {
-			IRef<Comp::Transform> transform = registry.get<Comp::Transform>(entity);
-			if (transform.valid()) {
-				IRef<Comp::Hitbox> hitbox = registry.get<Comp::Hitbox>(entity);
-
-				if (hitbox.valid()) {
-					Shape shape = hitbox->getShape();
-
-					if (!hitbox->isPartAttached())
-						shape = shape.scaled(transform->getScale());
-
-					VisualData data = MeshRegistry::getOrCreateMeshFor(shape.baseShape);
-
-					Shaders::debugShader->updateModel(transform->getCFrame().asMat4WithPreScale(shape.scale));
-					MeshRegistry::meshes[data.id]->render();
-				}
-			}
-		}
-
-		screen->instanceManager->submit(Shaders::instanceShader.get());
-		enableBlending();
-		screen->basicManager->submit(Shaders::basicShader.get());
 	});
-
-	endScene();
 }
 
 void ModelLayer::onClose(Engine::Registry64& registry) {

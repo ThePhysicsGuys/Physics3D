@@ -10,14 +10,14 @@ class ImGuiLayer : public Engine::Layer {
 public:
 	bool sceneHovered = false;
 
-	inline ImGuiLayer() : Layer() {};
-	inline ImGuiLayer(Screen* screen, char flags = None) : Layer("ImGui", screen, flags) {};
+	ImGuiLayer() : Layer() {};
+	ImGuiLayer(Screen* screen, char flags = None) : Layer("ImGui", screen, flags) {};
 
-	virtual void onInit(Engine::Registry64& registry) override;
-	virtual void onUpdate(Engine::Registry64& registry) override;
-	virtual void onEvent(Engine::Registry64& registry, Engine::Event& event) override;
-	virtual void onRender(Engine::Registry64& registry) override;
-	virtual void onClose(Engine::Registry64& registry) override;
+	void onInit(Engine::Registry64& registry) override;
+	void onUpdate(Engine::Registry64& registry) override;
+	void onEvent(Engine::Registry64& registry, Engine::Event& event) override;
+	void onRender(Engine::Registry64& registry) override;
+	void onClose(Engine::Registry64& registry) override;
 
 	void begin();
 	void end();

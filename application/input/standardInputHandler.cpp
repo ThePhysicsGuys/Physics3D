@@ -28,10 +28,10 @@
 namespace P3D::Application {
 
 #define KEY_BIND(name) \
-	if (key == name)
+	if (key == (name))
 
 #define KEY_RANGE(first, second) \
-	if (key > first && key < second)
+	if (key > (first) && key < (second))
 	
 StandardInputHandler::StandardInputHandler(GLFWwindow* window, Screen& screen) : InputHandler(window), screen(screen) {}
 
@@ -56,8 +56,6 @@ void StandardInputHandler::onEvent(Engine::Event& event) {
 bool StandardInputHandler::onWindowResize(Engine::WindowResizeEvent& event) {
 	Vec2i dimension = Vec2i(event.getWidth(), event.getHeight());
 
-	Graphics::Renderer::viewport(Vec2i(), dimension);
-
 	(*screen.eventHandler.windowResizeHandler) (screen, dimension);
 
 	return true;
@@ -67,8 +65,9 @@ bool StandardInputHandler::onFrameBufferResize(Engine::FrameBufferResizeEvent& e
 	Vec2i dimension = Vec2i(event.getWidth(), event.getHeight());
 
 	Graphics::Renderer::viewport(Vec2i(), dimension);
+
+	const float aspect = static_cast<float>(dimension.x) / static_cast<float>(dimension.y);
 	
-	float aspect = float(dimension.x) / float(dimension.y);
 	screen.camera.onUpdate(aspect);
 	screen.dimension = dimension;
 	screen.screenFrameBuffer->resize(screen.dimension);

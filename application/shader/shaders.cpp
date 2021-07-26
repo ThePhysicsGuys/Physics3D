@@ -7,8 +7,6 @@
 #include "../graphics/renderer.h"
 #include "../util/resource/resourceManager.h"
 
-#include <sstream>
-
 namespace P3D::Application {
 
 namespace Shaders {
@@ -29,6 +27,7 @@ SRef<LightingShader> lightingShader;
 SRef<SkyShader> skyShader;
 SRef<DebugShader> debugShader;
 SRef<DepthBufferShader> depthBufferShader;
+SRef<OutlineShader> outlineShader;
 
 void onInit() {
 
@@ -49,6 +48,7 @@ void onInit() {
 	lightingShader = std::make_shared<LightingShader>();
 	debugShader = std::make_shared<DebugShader>();
 	depthBufferShader = std::make_shared<DepthBufferShader>();
+	outlineShader = std::make_shared<OutlineShader>();
 
 	ResourceManager::add(basicShader.get());
 	ResourceManager::add(depthShader.get());
@@ -66,6 +66,7 @@ void onInit() {
 	ResourceManager::add(lightingShader.get());
 	ResourceManager::add(debugShader.get());
 	ResourceManager::add(depthBufferShader.get());
+	ResourceManager::add(outlineShader.get());
 }
 
 void onClose() {
@@ -85,6 +86,7 @@ void onClose() {
 	lightingShader->close();
 	debugShader->close();
 	depthBufferShader->close();
+	outlineShader->close();
 }
 
 }
@@ -168,6 +170,18 @@ void FontShader::updateTexture(SRef<Texture> texture) {
 void SkyShader::updateTime(float time) {
 	bind();
 	setUniform("time", time);
+}
+
+// OutlineShader
+	
+void OutlineShader::updateColor(const Color& color) {
+	bind();
+	setUniform("color", color);
+}
+
+void OutlineShader::updateUnit(GLID id) {
+	bind();
+	setUniform("image", id);
 }
 
 // DepthBufferShader

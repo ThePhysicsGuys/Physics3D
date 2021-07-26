@@ -2,6 +2,7 @@
 #include "constraintLayer.h"
 
 #include "worlds.h"
+#include "application.h"
 #include "../view/screen.h"
 #include "../shader/shaders.h"
 #include "../graphics/renderer.h"
@@ -29,10 +30,14 @@ void ConstraintLayer::onUpdate(Engine::Registry64& registry) {
 }
 
 static void renderObject(const VisualData& shape, const GlobalCFrame& cframe, const DiagonalMat3f& scale, const Comp::Material& material) {
-	Shaders::basicShader->updateMaterial(material);
-	Shaders::basicShader->updateTexture(false);
-	Shaders::basicShader->updateModel(cframe, scale);
-	MeshRegistry::meshes[shape.id]->render();
+	DefaultUniform uniform {
+		cframe.asMat4WithPreScale(scale),
+		material.albedo,
+		material.metalness,
+		material.roughness,
+		material.ao
+	};
+	screen.instanceManager->add(shape.id, uniform);
 }
 
 static void renderConstraintLineBetween(Position p1, Position p2) {
@@ -181,9 +186,9 @@ static void renderSpringLink(const GlobalCFrame& start) {
 	
 }
 
-/*static void renderSoftLinkConstraint(const ConstraintLayer* cl, const SoftLink* link) {
+static void renderSoftLinkConstraint(const ConstraintLayer* cl, const SoftLink* link) {
 	renderConstraintLineBetween(link->getGlobalPositionOfAttach2(), link->getGlobalPositionOfAttach1());
-}*/
+}
 
 void ConstraintLayer::onRender(Engine::Registry64& registry) {
 	using namespace Graphics;
@@ -191,30 +196,20 @@ void ConstraintLayer::onRender(Engine::Registry64& registry) {
 
 	Screen* screen = static_cast<Screen*>(this->ptr);
 	PlayerWorld* world = screen->world;
-	
-	beginScene();
-	enableBlending();
-
-	Shaders::basicShader->updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
-	Shaders::maskShader->updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
 
 	world->syncReadOnlyOperation([&]() {
-		for(MotorizedPhysical* phys : world->physicals) {
-			recurseRenderHardConstraints(this, *phys);
-		}
+		for(MotorizedPhysical* physical : world->physicals) 
+			recurseRenderHardConstraints(this, *physical);
 
-		for(const ConstraintGroup& g : world->constraints) {
-			for(const PhysicalConstraint& constraint : g.constraints) {
+		for(const ConstraintGroup& group : world->constraints) 
+			for(const PhysicalConstraint& constraint : group.constraints) 
 				renderConstraint(this, constraint);
-			}
-		}
-
-		/*for (const SoftLink* springLink : world->springLinks) {
-			renderSoftLinkConstraint(this, springLink);
-		}*/
 	});
 
-	endScene();
+	disableBlending();
+	screen->instanceManager->submit(Shaders::instanceShader.get());
+	enableBlending();
+	screen->basicManager->submit(Shaders::basicShader.get());
 }
 
 void ConstraintLayer::onEvent(Engine::Registry64& registry, Engine::Event& event) {

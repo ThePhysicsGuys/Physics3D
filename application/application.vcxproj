@@ -157,6 +157,7 @@
     <ClInclude Include="ecs\material.h" />
     <ClInclude Include="io\serialization.h" />
     <ClInclude Include="layer\imguiLayer.h" />
+    <ClInclude Include="layer\outlineLayer.h" />
     <ClInclude Include="layer\shadowLayer.h" />
     <ClInclude Include="layer\testLayer.h" />
     <ClInclude Include="layer\debugLayer.h" />
@@ -209,6 +210,7 @@
     </ClCompile>
     <ClCompile Include="ecs\material.cpp" />
     <ClCompile Include="io\serialization.cpp" />
+    <ClCompile Include="layer\outlineLayer.cpp" />
     <ClCompile Include="layer\shadowLayer.cpp" />
     <ClCompile Include="layer\imguiLayer.cpp" />
     <ClCompile Include="layer\postprocessLayer.cpp" />
@@ -272,6 +274,7 @@
     <None Include="..\res\shaders\line.shader" />
     <None Include="..\res\shaders\mask.shader" />
     <None Include="..\res\shaders\origin.shader" />
+    <None Include="..\res\shaders\outline.shader" />
     <None Include="..\res\shaders\point.shader" />
     <None Include="..\res\shaders\postprocess.shader" />
     <None Include="..\res\shaders\quad.shader" />

@@ -174,14 +174,18 @@ void IndexedMesh::fillUniformBuffer(const void* data, size_t sizeInBytes, GLFLAG
 }
 
 void IndexedMesh::render(GLFLAG mode) {
+	render(Renderer::FRONT_AND_BACK, mode);
+}
+
+void IndexedMesh::render(GLFLAG face, GLFLAG mode) {
 	vao->bind();
 	indexBuffer->bind();
 
-	Renderer::polygonMode(Renderer::FRONT_AND_BACK, mode);
+	Renderer::polygonMode(face, mode);
 	Renderer::drawElements(renderMode, triangleCount * 3, Renderer::UINT, 0);
 	Renderer::polygonMode(Renderer::FRONT_AND_BACK, Renderer::FILL);
 }
-
+	
 void IndexedMesh::renderInstanced(size_t primitives) {
 	renderInstanced(primitives, Renderer::FILL);
 }

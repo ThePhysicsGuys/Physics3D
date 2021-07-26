@@ -85,8 +85,8 @@ struct Quad : public Primitive {
 		float vertices[4][4] = {
 			{ position.x,				position.y				, 0.0f, 1.0f},
 			{ position.x,				position.y - dimension.y, 0.0f, 0.0f},
+			{ position.x + dimension.x, position.y				, 1.0f, 1.0f},
 			{ position.x + dimension.x, position.y - dimension.y, 1.0f, 0.0f},
-			{ position.x + dimension.x, position.y				, 1.0f, 1.0f}
 		};
 
 		Primitive::resize(vertices);
@@ -98,7 +98,7 @@ struct Quad : public Primitive {
 		polygonMode(FRONT_AND_BACK, mode);
 
 		bindVertexArray(vao);
-		drawArrays(QUADS, 0, 4);
+		drawArrays(0x0005, 0, 4);
 		bindVertexArray(0);
 
 		polygonMode(FRONT_AND_BACK, FILL);

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../graphics/batch/instanceBatchManager.h"
 #include "../engine/layer/layer.h"
 
 namespace P3D::Application {

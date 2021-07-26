@@ -83,7 +83,7 @@ void ShadowLayer::renderScene(Engine::Registry64& registry) {
 			continue;
 
 		Shaders::depthShader->updateModel(part->getCFrame().asMat4WithPreScale(part->hitbox.scale));
-		Graphics::MeshRegistry::meshes[mesh->id]->render(mesh->mode);
+		MeshRegistry::meshes[mesh->id]->render(mesh->mode);
 	}
 }
 
