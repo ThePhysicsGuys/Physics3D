@@ -11,44 +11,46 @@ namespace P3D::Application {
 
 namespace Shaders {
 	
-SRef<BasicShader> basicShader;
-SRef<DepthShader> depthShader;
-SRef<VectorShader> vectorShader;
-SRef<OriginShader> originShader;
-SRef<FontShader> fontShader;
-SRef<PostProcessShader> postProcessShader;
-SRef<SkyboxShader> skyboxShader;
-SRef<PointShader> pointShader;
-SRef<TestShader> testShader;
-SRef<LineShader> lineShader;
-SRef<MaskShader> maskShader;
-SRef<InstanceShader> instanceShader;
-SRef<LightingShader> lightingShader;
-SRef<SkyShader> skyShader;
-SRef<DebugShader> debugShader;
-SRef<DepthBufferShader> depthBufferShader;
-SRef<OutlineShader> outlineShader;
+URef<BasicShader> basicShader = nullptr;
+URef<DepthShader> depthShader = nullptr;
+URef<VectorShader> vectorShader = nullptr;
+URef<OriginShader> originShader = nullptr;
+URef<FontShader> fontShader = nullptr;
+URef<PostProcessShader> postProcessShader = nullptr;
+URef<SkyboxShader> skyboxShader = nullptr;
+URef<PointShader> pointShader = nullptr;
+URef<TestShader> testShader = nullptr;
+URef<LineShader> lineShader = nullptr;
+URef<MaskShader> maskShader = nullptr;
+URef<InstanceShader> instanceShader = nullptr;
+URef<LightingShader> lightingShader = nullptr;
+URef<SkyShader> skyShader = nullptr;
+URef<DebugShader> debugShader = nullptr;
+URef<DepthBufferShader> depthBufferShader = nullptr;
+URef<OutlineShader> outlineShader = nullptr;
+URef<BlurShader> blurShader = nullptr;
 
 void onInit() {
 
 	// GShader init
-	basicShader = std::make_shared<BasicShader>();
-	depthShader = std::make_shared<DepthShader>();
-	vectorShader = std::make_shared<VectorShader>();
-	fontShader = std::make_shared<FontShader>();
-	originShader = std::make_shared<OriginShader>();
-	postProcessShader = std::make_shared<PostProcessShader>();
-	skyboxShader = std::make_shared<SkyboxShader>();
-	pointShader = std::make_shared<PointShader>();
-	testShader = std::make_shared<TestShader>();
-	lineShader = std::make_shared<LineShader>();
-	maskShader = std::make_shared<MaskShader>();
-	instanceShader = std::make_shared<InstanceShader>();
-	skyShader = std::make_shared<SkyShader>();
-	lightingShader = std::make_shared<LightingShader>();
-	debugShader = std::make_shared<DebugShader>();
-	depthBufferShader = std::make_shared<DepthBufferShader>();
-	outlineShader = std::make_shared<OutlineShader>();
+	basicShader = std::make_unique<BasicShader>();
+	depthShader = std::make_unique<DepthShader>();
+	vectorShader = std::make_unique<VectorShader>();
+	fontShader = std::make_unique<FontShader>();
+	originShader = std::make_unique<OriginShader>();
+	postProcessShader = std::make_unique<PostProcessShader>();
+	skyboxShader = std::make_unique<SkyboxShader>();
+	pointShader = std::make_unique<PointShader>();
+	testShader = std::make_unique<TestShader>();
+	lineShader = std::make_unique<LineShader>();
+	maskShader = std::make_unique<MaskShader>();
+	instanceShader = std::make_unique<InstanceShader>();
+	skyShader = std::make_unique<SkyShader>();
+	lightingShader = std::make_unique<LightingShader>();
+	debugShader = std::make_unique<DebugShader>();
+	depthBufferShader = std::make_unique<DepthBufferShader>();
+	outlineShader = std::make_unique<OutlineShader>();
+	blurShader = std::make_unique<BlurShader>();
 
 	ResourceManager::add(basicShader.get());
 	ResourceManager::add(depthShader.get());
@@ -67,6 +69,7 @@ void onInit() {
 	ResourceManager::add(debugShader.get());
 	ResourceManager::add(depthBufferShader.get());
 	ResourceManager::add(outlineShader.get());
+	ResourceManager::add(blurShader.get());
 }
 
 void onClose() {
@@ -87,6 +90,7 @@ void onClose() {
 	debugShader->close();
 	depthBufferShader->close();
 	outlineShader->close();
+	blurShader->close();
 }
 
 }
@@ -170,6 +174,16 @@ void FontShader::updateTexture(SRef<Texture> texture) {
 void SkyShader::updateTime(float time) {
 	bind();
 	setUniform("time", time);
+}
+
+void BlurShader::updateDirection(bool horizontal) {
+	bind();
+	setUniform("horizontal", horizontal);
+}
+
+void BlurShader::updateUnit(int unit) {
+	bind();
+	setUniform("image", unit);
 }
 
 // OutlineShader

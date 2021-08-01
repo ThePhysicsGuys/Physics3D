@@ -261,6 +261,7 @@ add_executable(application
   application/layer/cameraLayer.cpp
   application/layer/shadowLayer.cpp
   application/layer/imguiLayer.cpp
+  application/layer/outlineLayer.cpp
 
   application/picker/ray.cpp
   application/picker/selection.cpp

@@ -2,7 +2,6 @@
 
 #include "../engine/layer/layer.h"
 #include "../graphics/buffers/frameBuffer.h"
-#include "graphics/mesh/primitive.h"
 
 namespace P3D::Application {
 
@@ -11,7 +10,6 @@ class Screen;
 class OutlineLayer : public Engine::Layer {
 private:
 	URef<Graphics::FrameBuffer> outlineFrameBuffer = nullptr;
-	URef<Graphics::Quad> quad = nullptr;
 	
 public:
 	OutlineLayer() : Layer() {}

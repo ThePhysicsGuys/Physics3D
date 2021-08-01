@@ -23,19 +23,10 @@ struct QuadShader : public ShaderResource {
 	void updateTexture(GLID texture, GLID unit, const Vec4f& color);
 };
 
-struct BlurShader : public ShaderResource {
-	explicit BlurShader(const std::string& source) : ShaderResource("BlurShader", source, false) {}
-
-	void updateWidth(float width);
-	void updateTexture(SRef<Texture> texture);
-};
-
 namespace Shaders {
 	
 extern SRef<GuiShader> guiShader;
 extern SRef<QuadShader> quadShader;
-extern SRef<BlurShader> horizontalBlurShader;
-extern SRef<BlurShader> verticalBlurShader;
 
 void onInit();
 void onClose();

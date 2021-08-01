@@ -1,22 +1,19 @@
 #include "core.h"
 #include "outlineLayer.h"
 
-#include "GL/glew.h"
 #include "ecs/components.h"
 #include "graphics/meshRegistry.h"
 #include "picker/tools/selectionTool.h"
 #include "shader/shaders.h"
 #include "application.h"
 #include "engine/event/windowEvent.h"
-#include "imgui/imgui.h"
 #include "view/screen.h"
-#include "input/standardInputHandler.h"
+#include "../graphics/mesh/primitive.h"
 
 namespace P3D::Application {
 	
 void OutlineLayer::onInit(Engine::Registry64& registry) {
 	outlineFrameBuffer = std::make_unique<FrameBuffer>(screen.dimension.x, screen.dimension.y);
-	quad = std::make_unique<Quad>();
 }
 
 void OutlineLayer::onEvent(Engine::Registry64& registry, Engine::Event& event) {
@@ -70,7 +67,7 @@ void OutlineLayer::onRender(Engine::Registry64& registry) {
 	outlineFrameBuffer->texture->bind();
 	Shaders::outlineShader->updateUnit(outlineFrameBuffer->texture->getUnit());
 	Shaders::outlineShader->updateColor(Colors::MAROON);
-	quad->render();
+	screen.quad->render();
 }
 
 }

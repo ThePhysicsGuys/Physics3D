@@ -9,7 +9,8 @@
 #include "camera.h"
 #include "graphics/buffers/frameBuffer.h"
 #include "graphics/batch/instanceBatchManager.h"
-#include "graphics/batch/OrderedBatchManager.h"
+#include "graphics/batch/orderedBatchManager.h"
+#include "graphics/mesh/primitive.h"
 
 namespace P3D {
 
@@ -39,6 +40,7 @@ namespace Application {
 		EventHandler eventHandler;	
 		Util::Properties properties;
 
+		URef<Graphics::Quad> quad = nullptr;
 		SRef<Graphics::MainFrameBuffer> screenFrameBuffer;
 		URef<Graphics::DefaultInstanceBatchManager> instanceManager;
 		URef<Graphics::DefaultOrderedBatchManager> basicManager;

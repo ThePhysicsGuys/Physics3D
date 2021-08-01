@@ -104,24 +104,32 @@ struct LightingShader : public BasicShaderBase {
 	LightingShader() : ShaderResource("LightingShader", "../res/shaders/lighting.shader"), BasicShaderBase("LightingShader", "../res/shaders/lighting.shader") {}
 };
 
+struct BlurShader : public ShaderResource {
+	BlurShader() : ShaderResource("BlurShader", "../res/shaders/blur.shader") {}
+
+	void updateDirection(bool horizontal);
+	void updateUnit(int unit);
+};
+
 namespace Shaders {
-extern SRef<BasicShader> basicShader;
-extern SRef<DepthShader> depthShader;
-extern SRef<VectorShader> vectorShader;
-extern SRef<OriginShader> originShader;
-extern SRef<FontShader> fontShader;
-extern SRef<PostProcessShader> postProcessShader;
-extern SRef<SkyboxShader> skyboxShader;
-extern SRef<PointShader> pointShader;
-extern SRef<TestShader> testShader;
-extern SRef<LineShader> lineShader;
-extern SRef<InstanceShader> instanceShader;
-extern SRef<MaskShader> maskShader;
-extern SRef<SkyShader> skyShader;
-extern SRef<LightingShader> lightingShader;
-extern SRef<DebugShader> debugShader;
-extern SRef<DepthBufferShader> depthBufferShader;
-extern SRef<OutlineShader> outlineShader;
+extern URef<BasicShader> basicShader;
+extern URef<DepthShader> depthShader;
+extern URef<VectorShader> vectorShader;
+extern URef<OriginShader> originShader;
+extern URef<FontShader> fontShader;
+extern URef<PostProcessShader> postProcessShader;
+extern URef<SkyboxShader> skyboxShader;
+extern URef<PointShader> pointShader;
+extern URef<TestShader> testShader;
+extern URef<LineShader> lineShader;
+extern URef<InstanceShader> instanceShader;
+extern URef<MaskShader> maskShader;
+extern URef<SkyShader> skyShader;
+extern URef<LightingShader> lightingShader;
+extern URef<DebugShader> debugShader;
+extern URef<DepthBufferShader> depthBufferShader;
+extern URef<OutlineShader> outlineShader;
+extern URef<BlurShader> blurShader;
 	
 void onInit();
 void onClose();

@@ -6,13 +6,13 @@
 
 [vertex]
 
-layout(location = 0) in vec4 positions;
+layout(location = 0) in vec4 vPositionUV;
 
 out vec2 fUV;
 
 void main() {
-	gl_Position = vec4(positions.xy, 0.0, 1.0);
-	fUV = positions.zw;
+	gl_Position = vec4(vPositionUV.xy, 0.0, 1.0);
+	fUV = vPositionUV.zw;
 }
 
 //------------------------------------------------------------------------------//
@@ -24,7 +24,6 @@ out vec4 outColor;
 in vec2 fUV;
 
 uniform sampler2D image;
-
 uniform bool horizontal;
 uniform float weight[5] = { 0.227027f, 0.1945946f, 0.1216216f, 0.054054f, 0.016216f };
 
@@ -43,5 +42,7 @@ void main() {
 			result += texture(image, fUV - vec2(0.0, offset.y * i)).rgb * weight[i];
 		}
 	}
-	outColor = vec4(result, 1.0);
+
+	//outColor = vec4(result, 1.0);
+	outColor = vec4(1, 0, 0, 1.0);
 }

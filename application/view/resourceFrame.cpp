@@ -166,7 +166,7 @@ void renderPropertyEditor(ShaderResource* shader, Property& property) {
 		case Property::Type::Float: {
 			Property::Default& def = property.defaults[0];
 			if (def.range.has_value()) {
-				PROPERTY_DESC_IF(name.c_str(), uniform.c_str(), ImGui::DragFloat("", &def.value, 1.0f, def.range->min, def.range->max), 
+				PROPERTY_DESC_IF(name.c_str(), uniform.c_str(), ImGui::DragFloat("", &def.value, (def.range->max - def.range->min) / 10.0f, def.range->min, def.range->max),
 					shader->setUniform(uniform, def.value);
 				);
 			} else {

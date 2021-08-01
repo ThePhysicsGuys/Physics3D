@@ -1,5 +1,6 @@
 [properties]
-vec3 test (PI) = 0, 1, 2 (-1:1);
+float threshold = 1.0 (0.0:2.0);
+float hdr = 1.0 (0.0:2.0);
 
 [common]
 
@@ -159,6 +160,7 @@ uniform vec3 sunColor = vec3(1, 1, 1);
 uniform float exposure = 0.8;
 uniform float gamma = 0.8;
 uniform float hdr = 1.0;
+uniform float threshold = 1.0;
 
 // Constants
 float PI = 3.14159265359;
@@ -342,7 +344,12 @@ void main() {
 	// Outcolor
 	outColor = vec4(color, albedo.a);
 	
-	ca1 = vec4(V, 1.0);
+	float brightness = dot(outColor.rgb, vec3(0.2126, 0.7152, 0.0722));
+	if (brightness > threshold)
+		ca1 = vec4(outColor.rgb, 1.0);
+	else
+		ca1 = vec4(0, 0, 0, 1);
+
 	ca2 = vec4(N, 1.0);
 	ca3 = vec4(Lo, 1.0);
 }

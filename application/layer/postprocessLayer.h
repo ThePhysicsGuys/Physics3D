@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../engine/layer/layer.h"
+#include "../graphics/buffers/frameBuffer.h"
 
 namespace P3D::Application {
 
@@ -8,7 +9,8 @@ class Screen;
 
 class PostprocessLayer : public Engine::Layer {
 private:
-	Engine::Registry64::entity_type entity;
+	URef<Graphics::HDRFrameBuffer> horizontalBlurFrameBuffer = nullptr;
+	URef<Graphics::HDRFrameBuffer> verticalBlurFrameBuffer = nullptr;
 	
 public:
 	PostprocessLayer() : Layer() {}

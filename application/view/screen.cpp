@@ -33,9 +33,8 @@
 #include "layer/shadowLayer.h"
 #include "layer/cameraLayer.h"
 #include "ecs/components.h"
-#include "../util/systemVariables.h"
 #include "frames.h"
-#include "imgui/imgui.h"
+#include "../util/systemVariables.h"
 
 struct GLFWwindow;
 
@@ -156,6 +155,7 @@ void Screen::onInit(bool quickBoot) {
 
 	// Framebuffer init
 	screenFrameBuffer = std::make_shared<MainFrameBuffer>(dimension.x, dimension.y);
+	quad = std::make_unique<Quad>();
 
 	// Batch managers init
 	instanceManager = std::make_unique<DefaultInstanceBatchManager>(DEFAULT_UNIFORM_BUFFER_LAYOUT);
@@ -182,11 +182,11 @@ void Screen::onInit(bool quickBoot) {
 	if(!quickBoot) layerStack.pushLayer(&skyboxLayer);
 	layerStack.pushLayer(&constraintLayer);
 	layerStack.pushLayer(&modelLayer);
+	layerStack.pushLayer(&postprocessLayer);
 	layerStack.pushLayer(&outlineLayer);
 	layerStack.pushLayer(&shadowLayer);
 	layerStack.pushLayer(&debugLayer);
 	layerStack.pushLayer(&pickerLayer);
-	layerStack.pushLayer(&postprocessLayer);
 	layerStack.pushLayer(&guiLayer);
 	layerStack.pushLayer(&debugOverlay);
 	//layerStack.pushLayer(&testLayer);
