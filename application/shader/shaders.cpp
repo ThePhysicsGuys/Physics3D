@@ -120,13 +120,13 @@ void DepthShader::updateLight(const Mat4f& lightMatrix) {
 
 // PostProcessShader
 
-void PostProcessShader::updateTexture(Graphics::Texture* texture) {
+void PostProcessShader::updateTexture(SRef<Texture> texture) {
 	bind();
 	texture->bind();
 	setUniform("textureSampler", texture->getUnit());
 }
 
-void PostProcessShader::updateTexture(Graphics::HDRTexture* texture) {
+void PostProcessShader::updateTexture(SRef<HDRTexture> texture) {
 	bind();
 	texture->bind();
 	setUniform("textureSampler", texture->getUnit());
@@ -157,7 +157,7 @@ void FontShader::updateProjection(const Mat4f& projectionMatrix) {
 	setUniform("projectionMatrix", projectionMatrix);
 }
 
-void FontShader::updateTexture(Graphics::Texture* texture) {
+void FontShader::updateTexture(SRef<Texture> texture) {
 	bind();
 	texture->bind();
 	setUniform("text", texture->getUnit());

@@ -224,7 +224,7 @@ void BlurShader::updateWidth(float width) {
 	setUniform("width", width);
 }
 
-void BlurShader::updateTexture(Graphics::Texture* texture) {
+void BlurShader::updateTexture(SRef<Texture> texture) {
 	bind();
 	texture->bind();
 	setUniform("image", texture->getUnit());

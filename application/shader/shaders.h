@@ -53,8 +53,8 @@ struct DepthShader : public StandardMeshShaderBase {
 struct PostProcessShader : public ShaderResource {
 	 PostProcessShader() : ShaderResource("PostProcessShader", "../res/shaders/postProcess.shader") {}
 
-	void updateTexture(Texture* texture);
-	void updateTexture(HDRTexture* texture);
+	void updateTexture(SRef<Texture> texture);
+	void updateTexture(SRef<HDRTexture> texture);
 };
 
 struct OriginShader : public ShaderResource {
@@ -68,7 +68,7 @@ struct FontShader : public ShaderResource {
 
 	void updateColor(const Color& color);
 	void updateProjection(const Mat4f& projectionMatrix);
-	void updateTexture(Texture* texture);
+	void updateTexture(SRef<Texture> texture);
 };
 
 struct VectorShader : public ProjectionShaderBase {

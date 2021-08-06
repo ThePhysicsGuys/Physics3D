@@ -26,9 +26,7 @@ namespace P3D::Graphics {
 		
 	}
 
-	Shader::Shader() {
-		
-	}
+	Shader::Shader() = default;
 
 	Shader::Shader(const std::string& name, const std::string& path, bool isPath) : name(name) {
 		Source source;
@@ -58,7 +56,10 @@ namespace P3D::Graphics {
 			this->stages.emplace(stage, Stage(std::string_view(this->code.data() + view.first, view.second)));
 
 		// Properties
-		this->properties = PropertiesParser::parse(this->code.data());
+		auto iterator = this->stages.find(Stage::properties);
+		if (iterator != this->stages.end()) {
+			this->properties = PropertiesParser::parse(this->code.data(), iterator->second.view);
+		}
 	}
 
 	Shader::~Shader() {
@@ -78,6 +79,27 @@ namespace P3D::Graphics {
 
 	void Shader::close() {
 		// Todo remove
+	}
+
+	std::string Shader::getStageName(const Stage::ID& stage) {
+		if (stage == Stage::common)
+			return std::string("common");
+		if (stage == Stage::properties)
+			return std::string("properties");
+		if (stage == Stage::vertex)
+			return std::string("vertex");
+		if (stage == Stage::fragment)
+			return std::string("fragment");
+		if (stage == Stage::geometry)
+			return std::string("geometry");
+		if (stage == Stage::tesselationControl)
+			return std::string("tesselation control");
+		if (stage == Stage::tesselationEvaluation)
+			return std::string("tesselation evaluation");
+		if (stage == Stage::compute)
+			return std::string("compute");
+
+		return std::string();
 	}
 
 	GLID Shader::compile(const Source& source) {
@@ -105,7 +127,7 @@ namespace P3D::Graphics {
 				continue;
 
 			std::string code = source.source.substr(view.first, view.second);
-			GLID id = Shader::compile(common, code, stage);
+			GLID id = compile(common, code, stage);
 			if (id == 0) {
 				Log::error("Compilation failed");
 
@@ -135,12 +157,12 @@ namespace P3D::Graphics {
 
 		return program;
 	}
-	
-	GLID Shader::compile(const std::string& common, const std::string& source, Stage::ID stage) {
+
+	GLID Shader::compile(const std::string& common, const std::string& source, const Stage::ID& stage) {
 		GLID id = glCreateShader(stage);
 
 		if (id == 0) {
-			Log::error("Failed to create a shader with stage [%d]", stage);
+			Log::error("Failed to create a %s stage", getStageName(stage).c_str());
 			return 0;
 		}
 
@@ -156,7 +178,7 @@ namespace P3D::Graphics {
 			char* message = static_cast<char*>(alloca(length * sizeof(char)));
 			glGetShaderInfoLog(id, length, &length, message);
 
-			Log::error("Compilation of shader stage [%d] failed", stage);
+			Log::error("Compilation of %s stage failed", getStageName(stage).c_str());
 			Log::error(message);
 
 			glDeleteShader(id);

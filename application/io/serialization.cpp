@@ -28,14 +28,14 @@ void WorldImportExport::registerTexture(Graphics::Texture* texture) {
 }
 
 static void serializeMaterial(const Comp::Material& material, std::ostream& ostream) {
-	textureSerializer.serialize(material.get(Comp::Material::ALBEDO), ostream);
-	textureSerializer.serialize(material.get(Comp::Material::NORMAL), ostream);
-	textureSerializer.serialize(material.get(Comp::Material::METALNESS), ostream);
-	textureSerializer.serialize(material.get(Comp::Material::ROUGHNESS), ostream);
-	textureSerializer.serialize(material.get(Comp::Material::AO), ostream);
-	textureSerializer.serialize(material.get(Comp::Material::GLOSS), ostream);
-	textureSerializer.serialize(material.get(Comp::Material::SPECULAR), ostream);
-	textureSerializer.serialize(material.get(Comp::Material::DISPLACEMENT), ostream);
+	textureSerializer.serialize(material.get(Comp::Material::ALBEDO).get(), ostream);
+	textureSerializer.serialize(material.get(Comp::Material::NORMAL).get(), ostream);
+	textureSerializer.serialize(material.get(Comp::Material::METALNESS).get(), ostream);
+	textureSerializer.serialize(material.get(Comp::Material::ROUGHNESS).get(), ostream);
+	textureSerializer.serialize(material.get(Comp::Material::AO).get(), ostream);
+	textureSerializer.serialize(material.get(Comp::Material::GLOSS).get(), ostream);
+	textureSerializer.serialize(material.get(Comp::Material::SPECULAR).get(), ostream);
+	textureSerializer.serialize(material.get(Comp::Material::DISPLACEMENT).get(), ostream);
 	serializeBasicTypes<Graphics::Color>(material.albedo, ostream);
 	serializeBasicTypes<float>(material.metalness, ostream);
 	serializeBasicTypes<float>(material.roughness, ostream);
@@ -43,14 +43,14 @@ static void serializeMaterial(const Comp::Material& material, std::ostream& ostr
 }
 
 static Comp::Material deserializeMaterial(std::istream& istream) {
-	Graphics::Texture* albedoMap = textureSerializer.deserialize(istream);
-	Graphics::Texture* normalMap = textureSerializer.deserialize(istream);
-	Graphics::Texture* metalnessMap = textureSerializer.deserialize(istream);
-	Graphics::Texture* roughnessMap = textureSerializer.deserialize(istream);
-	Graphics::Texture* aoMap = textureSerializer.deserialize(istream);
-	Graphics::Texture* glossMap = textureSerializer.deserialize(istream);
-	Graphics::Texture* specularMap = textureSerializer.deserialize(istream);
-	Graphics::Texture* displacementrMap = textureSerializer.deserialize(istream);
+	SRef<Graphics::Texture> albedoMap(textureSerializer.deserialize(istream));
+	SRef<Graphics::Texture> normalMap(textureSerializer.deserialize(istream));
+	SRef<Graphics::Texture> metalnessMap(textureSerializer.deserialize(istream));
+	SRef<Graphics::Texture> roughnessMap(textureSerializer.deserialize(istream));
+	SRef<Graphics::Texture> aoMap(textureSerializer.deserialize(istream));
+	SRef<Graphics::Texture> glossMap(textureSerializer.deserialize(istream));
+	SRef<Graphics::Texture> specularMap(textureSerializer.deserialize(istream));
+	SRef<Graphics::Texture> displacementrMap(textureSerializer.deserialize(istream));
 	Graphics::Color albedo = deserializeBasicTypes<Graphics::Color>(istream);
 	float metalness = deserializeBasicTypes<float>(istream);
 	float roughness = deserializeBasicTypes<float>(istream);

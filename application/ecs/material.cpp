@@ -11,7 +11,7 @@ Material::Material(const Graphics::Color& albedo, float metalness, float roughne
 	
 }
 
-void Material::set(Map map, Graphics::Texture* texture) {
+void Material::set(Map map, SRef<Graphics::Texture> texture) {
 	assert(powOf2(map));
 	maps[ctz(map)] = texture;
 	if (texture != nullptr)
@@ -26,7 +26,7 @@ void Material::reset(Map map) {
 	flags &= ~map;
 }
 
-Graphics::Texture* Material::get(Map map) const {
+SRef<Graphics::Texture> Material::get(Map map) const {
 	assert(powOf2(map));
 
 	return has(map) ? maps[ctz(map)] : nullptr;

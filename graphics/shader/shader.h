@@ -42,9 +42,10 @@ namespace P3D::Graphics {
 		Shader(Shader&&) noexcept = delete;
 		Shader& operator=(const Shader&) = delete;
 		Shader& operator=(Shader&& other) noexcept = delete;
-				
-		[[nodiscard]] static GLID compile(const std::string& common, const std::string& source, Stage::ID stage);
+
+		[[nodiscard]] static std::string getStageName(const Stage::ID& stage);
 		[[nodiscard]] static GLID compile(const Source& source);
+		[[nodiscard]] static GLID compile(const std::string& common, const std::string& source, const Stage::ID& stage);
 		[[nodiscard]] static Source parse(std::istream& istream);
 		
 		void bind() override;

@@ -9,7 +9,7 @@
 #include <typeinfo>
 #include "../util/typetraits.h"
 #include "../util/iteratorUtils.h"
-#include "../Physics3D/datastructures/intrusivePointer.h"
+#include "../Physics3D/datastructures/smartPointers.h"
 
 namespace P3D::Engine {
 
