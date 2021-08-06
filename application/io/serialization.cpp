@@ -69,9 +69,9 @@ static Comp::Material deserializeMaterial(std::istream& istream) {
 	return material;
 }
 
-class Serializer : public SerializationSession<ExtendedPart> {
+class Serializer : public SerializationSession<ExtendedPart, SynchronizedWorldPrototype> {
 public:
-	using SerializationSession<ExtendedPart>::SerializationSession;
+	using SerializationSession<ExtendedPart, SynchronizedWorldPrototype>::SerializationSession;
 	virtual void serializePartExternalData(const ExtendedPart& part, std::ostream& ostream) override {
 		// TODO integrate components into serialization
 		serializeMaterial(screen.registry.getOr<Comp::Material>(part.entity), ostream);
@@ -79,9 +79,9 @@ public:
 	}
 };
 
-class Deserializer : public DeSerializationSession<ExtendedPart> {
+class Deserializer : public DeSerializationSession<ExtendedPart, SynchronizedWorldPrototype> {
 public:
-	using DeSerializationSession<ExtendedPart>::DeSerializationSession;
+	using DeSerializationSession<ExtendedPart, SynchronizedWorldPrototype>::DeSerializationSession;
 	virtual ExtendedPart* deserializeExtendedPart(Part&& partPhysicalData, std::istream& istream) override {
 		Comp::Material material = deserializeMaterial(istream);
 		ExtendedPart* result = new ExtendedPart(std::move(partPhysicalData), deserializeString(istream));
@@ -119,7 +119,7 @@ void WorldImportExport::saveLooseParts(const char* fileName, size_t numberOfPart
 
 	file.close();
 }
-void WorldImportExport::loadLoosePartsIntoWorld(const char* fileName, World<ExtendedPart>& world) {
+void WorldImportExport::loadLoosePartsIntoWorld(const char* fileName, PlayerWorld& world) {
 	std::ifstream file;
 	openReadFile(file, fileName);
 
@@ -132,7 +132,7 @@ void WorldImportExport::loadLoosePartsIntoWorld(const char* fileName, World<Exte
 	}
 }
 
-void WorldImportExport::loadNativePartsIntoWorld(const char* fileName, World<ExtendedPart>& world) {
+void WorldImportExport::loadNativePartsIntoWorld(const char* fileName, PlayerWorld& world) {
 	std::ifstream file;
 	openReadFile(file, fileName);
 
@@ -146,7 +146,7 @@ void WorldImportExport::loadNativePartsIntoWorld(const char* fileName, World<Ext
 	}
 }
 
-void WorldImportExport::saveWorld(const char* fileName, const World<ExtendedPart>& world) {
+void WorldImportExport::saveWorld(const char* fileName, const PlayerWorld& world) {
 	std::ofstream file;
 	openWriteFile(file, fileName);
 
@@ -155,7 +155,7 @@ void WorldImportExport::saveWorld(const char* fileName, const World<ExtendedPart
 
 	file.close();
 }
-void WorldImportExport::loadWorld(const char* fileName, World<ExtendedPart>& world) {
+void WorldImportExport::loadWorld(const char* fileName, PlayerWorld& world) {
 	std::ifstream file;
 	openReadFile(file, fileName);
 

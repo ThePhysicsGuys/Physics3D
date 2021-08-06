@@ -150,6 +150,7 @@
     <ClInclude Include="builtinWorlds.h" />
     <ClInclude Include="ecs\components.h" />
     <ClInclude Include="ecs\entityBuilder.h" />
+    <ClInclude Include="input\playerController.h" />
     <ClInclude Include="io\saveDialog.h" />
     <ClInclude Include="layer\cameraLayer.h" />
     <ClInclude Include="layer\constraintLayer.h" />
@@ -198,6 +199,7 @@
   <ItemGroup>
     <ClCompile Include="application.cpp" />
     <ClCompile Include="builtinWorlds.cpp" />
+    <ClCompile Include="input\playerController.cpp" />
     <ClCompile Include="io\saveDialog.cpp" />
     <ClCompile Include="layer\cameraLayer.cpp" />
     <ClCompile Include="layer\constraintLayer.cpp" />

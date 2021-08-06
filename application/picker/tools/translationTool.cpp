@@ -17,6 +17,9 @@
 #include "../graphics/resource/textureResource.h"
 #include "../util/resource/resourceManager.h"
 
+#define PICKER_STRENGTH 100
+#define PICKER_SPEED_STRENGTH 12
+
 namespace P3D::Application {
 	
 	constexpr static Rotation transformations[] {
@@ -43,6 +46,8 @@ namespace P3D::Application {
 	static VisualShape centerShape;
 	static IndexedMesh* handleMesh;
 	static VisualShape handleShape;
+
+	MagnetForce TranslationTool::magnet(PICKER_STRENGTH, PICKER_SPEED_STRENGTH);
 
 	static Polyhedron createArrow(float arrowHeadLength, float arrowHeadRadius, float stickRadius) {
 		Vec2f contour[] {
@@ -75,6 +80,8 @@ namespace P3D::Application {
 
 		// Set idle status
 		setToolStatus(kIdle);
+
+		screen.world->addExternalForce(&TranslationTool::magnet);
 	}
 
 	void TranslationTool::onDeregister() {
@@ -255,7 +262,7 @@ namespace P3D::Application {
 			return false;
 
 		// Reset magnet point
-		screen.world->selectedPart = nullptr;
+		this->magnet.selectedPart = nullptr;
 
 		this->active = false;
 
@@ -337,8 +344,8 @@ namespace P3D::Application {
 			if (!transform->isPartAttached())
 				return;
 			
-			screen.world->selectedPart = transform->getPart();
-			screen.world->magnetPoint = planeIntersection;
+			TranslationTool::magnet.selectedPart = transform->getPart();
+			TranslationTool::magnet.magnetPoint = planeIntersection;
 		}
 	}
 

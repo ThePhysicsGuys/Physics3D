@@ -24,6 +24,7 @@
 #include <random>
 
 #include "layer/pickerLayer.h"
+#include "../picker/tools/translationTool.h"
 
 namespace P3D::Application {
 
@@ -127,7 +128,7 @@ bool StandardInputHandler::onKeyPress(Engine::KeyPressEvent& event) {
 			screen.world->asyncModification([world = screen.world, selectedPart = screen.selectedPart]() {
 				world->removePart(selectedPart);
 			});
-			screen.world->selectedPart = nullptr;
+			TranslationTool::magnet.selectedPart = nullptr;
 			screen.selectedPart = nullptr;
 		}
 	}

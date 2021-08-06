@@ -65,7 +65,7 @@ void setupDebug();
 void loadFile(const char* file);
 
 void init(const ::Util::ParsedArgs& cmdArgs) {
-	auto start = high_resolution_clock::now();
+	auto start = std::chrono::high_resolution_clock::now();
 
 	Log::init("latest.log");
 
@@ -106,8 +106,8 @@ void init(const ::Util::ParsedArgs& cmdArgs) {
 	Log::info("Initializing debug");
 	setupDebug();
 
-	auto stop = high_resolution_clock::now();
-	auto duration = duration_cast<milliseconds>(stop - start);
+	auto stop = std::chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
 	Log::info("Init Physics3D in %.4f ms", duration.count() / 1.0f);
 }
 
@@ -232,7 +232,8 @@ void setupWorld(const ::Util::ParsedArgs& cmdArgs) {
 }
 
 void setupPhysics() {
-	physicsThread = TickerThread(TICKS_PER_SECOND, TICK_SKIP_TIME, [] () {
+	physicsThread.~TickerThread();
+	new(&physicsThread) TickerThread(TICKS_PER_SECOND, TICK_SKIP_TIME, [] () {
 		physicsMeasure.mark(PhysicsProcess::OTHER);
 
 		Graphics::AppDebug::logTickStart();
@@ -253,7 +254,7 @@ void setupDebug() {
 
 void loadFile(const char* file) {
 	Log::info("Loading file %s", file);
-	auto startTime = high_resolution_clock::now();
+	auto startTime = std::chrono::high_resolution_clock::now();
 	if(::Util::endsWith(file, ".parts")) {
 		WorldImportExport::loadLoosePartsIntoWorld(file, world);
 	} else if(::Util::endsWith(file, ".nativeParts")) {
@@ -261,7 +262,7 @@ void loadFile(const char* file) {
 	} else if(::Util::endsWith(file, ".world")) {
 		WorldImportExport::loadWorld(file, world);
 	}
-	nanoseconds deltaTime = high_resolution_clock::now() - startTime;
+	std::chrono::nanoseconds deltaTime = std::chrono::high_resolution_clock::now() - startTime;
 	Log::info("File loaded, took %.4f ms", deltaTime.count() / 1E6);
 }
 

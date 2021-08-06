@@ -1,3 +1,4 @@
+#include "worldPhysics.h"
 
 #include "world.h"
 #include "layer.h"
@@ -185,27 +186,27 @@ void handleTerrainCollision(Part& part1, Part& part2, Position collisionPoint, V
 
 void WorldPrototype::tick() {
 
-	findColissions();
+	findColissionsParallel(*this, this->curColissions, this->pool);
 
 	physicsMeasure.mark(PhysicsProcess::EXTERNALS);
-	applyExternalForces();
+	applyExternalForces(*this);
 
-	handleColissions();
+	handleColissions(this->curColissions);
 
 	intersectionStatistics.nextTally();
 
-	handleConstraints();
+	handleConstraints(*this);
 
-	update();
+	update(*this);
 }
 
-void WorldPrototype::applyExternalForces() {
-	for(ExternalForce* force : externalForces) {
-		force->apply(this);
+void applyExternalForces(WorldPrototype& world) {
+	for(ExternalForce* force : world.externalForces) {
+		force->apply(&world);
 	}
 }
 
-static PartIntersection safeIntersects(const Part& p1, const Part& p2) {
+PartIntersection safeIntersects(const Part& p1, const Part& p2) {
 #ifdef CATCH_INTERSECTION_ERRORS
 	try {
 		return p1.intersects(p2);
@@ -227,8 +228,7 @@ static PartIntersection safeIntersects(const Part& p1, const Part& p2) {
 #endif
 }
 
-/*static void refineColission(std::vector<Colission>& colissions) {
-
+void refineColissions(std::vector<Colission>& colissions) {
 	for (size_t i = 0; i < colissions.size();) {
 
 		Colission& col = colissions[i];
@@ -254,17 +254,15 @@ static PartIntersection safeIntersects(const Part& p1, const Part& p2) {
 
 		}
 	}
-}*/
+}
 
-
-void WorldPrototype::parallelRefineColission(std::vector<Colission>& colissions) {
-
+void parallelRefineColissions(ThreadPool& threadPool, std::vector<Colission>& colissions) {
 	std::vector<Colission> wantedColission;
 	const size_t workEnd = colissions.size();
 	size_t currIndex = 0;
 	std::mutex colissionMutex, statsMutex, indexMutex, vecMutex;
 
-	this->pool.doInParallel([&] {
+	threadPool.doInParallel([&] {
 		while(true) {
 
 			indexMutex.lock();
@@ -294,7 +292,7 @@ void WorldPrototype::parallelRefineColission(std::vector<Colission>& colissions)
 				vecMutex.lock();
 				wantedColission.push_back(col);
 				vecMutex.unlock();
-			} 			else {
+			} else {
 
 				statsMutex.lock();
 				intersectionStatistics.addToTally(IntersectionResult::GJK_REJECT, 1);
@@ -307,26 +305,43 @@ void WorldPrototype::parallelRefineColission(std::vector<Colission>& colissions)
 	colissions.swap(wantedColission);
 }
 
-void WorldPrototype::findColissions() {
+void findColissions(WorldPrototype& world, ColissionBuffer& curColissions) {
 	physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
 	curColissions.clear();
 
-	for(const ColissionLayer& layer : layers) {
+	for(const ColissionLayer& layer : world.layers) {
 		if(layer.collidesInternally) {
 			layer.getInternalColissions(curColissions);
 		}
 	}
 
-	for(std::pair<int, int> collidingLayers : colissionMask) {
-		getColissionsBetween(layers[collidingLayers.first], layers[collidingLayers.second], curColissions);
+	for(std::pair<int, int> collidingLayers : world.colissionMask) {
+		getColissionsBetween(world.layers[collidingLayers.first], world.layers[collidingLayers.second], curColissions);
 	}
 
-	parallelRefineColission(curColissions.freePartColissions);
-	parallelRefineColission(curColissions.freeTerrainColissions);
-
+	refineColissions(curColissions.freePartColissions);
+	refineColissions(curColissions.freeTerrainColissions);
 }
 
-void WorldPrototype::handleColissions() {
+void findColissionsParallel(WorldPrototype& world, ColissionBuffer& curColissions, ThreadPool& threadPool) {
+	physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
+	curColissions.clear();
+
+	for(const ColissionLayer& layer : world.layers) {
+		if(layer.collidesInternally) {
+			layer.getInternalColissions(curColissions);
+		}
+	}
+
+	for(std::pair<int, int> collidingLayers : world.colissionMask) {
+		getColissionsBetween(world.layers[collidingLayers.first], world.layers[collidingLayers.second], curColissions);
+	}
+
+	parallelRefineColissions(threadPool, curColissions.freePartColissions);
+	parallelRefineColissions(threadPool, curColissions.freeTerrainColissions);
+}
+
+void handleColissions(ColissionBuffer& curColissions) {
 	physicsMeasure.mark(PhysicsProcess::COLISSION_HANDLING);
 	for(Colission c : curColissions.freePartColissions) {
 		handleCollision(*c.p1, *c.p2, c.intersection, c.exitVector);
@@ -336,24 +351,24 @@ void WorldPrototype::handleColissions() {
 	}
 }
 
-void WorldPrototype::handleConstraints() {
+void handleConstraints(WorldPrototype& world) {
 	physicsMeasure.mark(PhysicsProcess::CONSTRAINTS);
-	for(const ConstraintGroup& group : constraints) {
+	for(const ConstraintGroup& group : world.constraints) {
 		group.apply();
 	}
 }
-void WorldPrototype::update() {
+void update(WorldPrototype& world) {
 	physicsMeasure.mark(PhysicsProcess::UPDATING);
-	for(MotorizedPhysical* physical : this->physicals) {
-		physical->update(this->deltaT);
+	for(MotorizedPhysical* physical : world.physicals) {
+		physical->update(world.deltaT);
 	}
 
-	for(ColissionLayer& layer : this->layers) {
+	for(ColissionLayer& layer : world.layers) {
 		layer.refresh();
 	}
-	age++;
+	world.age++;
 
-	for(SoftLink* springLink : this->springLinks) {
+	for(SoftLink* springLink : world.springLinks) {
 		springLink->update();
 	}
 }

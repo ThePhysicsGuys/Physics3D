@@ -249,10 +249,9 @@ namespace P3D::Application {
 		if (event.getButton() != Mouse::LEFT)
 			return false;
 
-		// Reset magnet point
-		screen.world->selectedPart = nullptr;
-		
 		this->active = false;
+
+		TranslationTool::magnet.selectedPart = nullptr;
 
 		return false;
 	};

@@ -136,7 +136,7 @@ std::vector<NewType*> castVector(std::vector<OriginalType*>&& old) {
 	return result;
 }
 
-template<typename ExtendedPartType>
+template<typename ExtendedPartType, typename WorldSynchronisation>
 class SerializationSession : private SerializationSessionPrototype {
 protected:
 	using SerializationSessionPrototype::shapeSerializer;
@@ -160,7 +160,7 @@ public:
 	using SerializationSessionPrototype::SerializationSessionPrototype;
 
 
-	void serializeWorld(const World<ExtendedPartType>& world, std::ostream& ostream) {
+	void serializeWorld(const World<ExtendedPartType, WorldSynchronisation>& world, std::ostream& ostream) {
 		SerializationSessionPrototype::serializeWorld(world, ostream);
 	}
 
@@ -174,7 +174,7 @@ public:
 	}
 };
 
-template<typename ExtendedPartType>
+template<typename ExtendedPartType, typename WorldSynchronisation>
 class DeSerializationSession : private DeSerializationSessionPrototype {
 protected:
 	using DeSerializationSessionPrototype::shapeDeserializer;
@@ -188,7 +188,7 @@ private:
 public:
 	using DeSerializationSessionPrototype::DeSerializationSessionPrototype;
 
-	void deserializeWorld(World<ExtendedPartType>& world, std::istream& istream) { DeSerializationSessionPrototype::deserializeWorld(world, istream); }
+	void deserializeWorld(World<ExtendedPartType, WorldSynchronisation>& world, std::istream& istream) { DeSerializationSessionPrototype::deserializeWorld(world, istream); }
 	std::vector<ExtendedPartType*> deserializeParts(std::istream& istream) {
 		return castVector<ExtendedPartType>(DeSerializationSessionPrototype::deserializeParts(istream));
 	}

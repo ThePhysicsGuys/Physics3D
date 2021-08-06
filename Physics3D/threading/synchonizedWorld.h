@@ -10,8 +10,7 @@
 #include "../misc/physicsProfiler.h"
 
 namespace P3D {
-template<typename T = Part>
-class SynchronizedWorld : public World<T> {
+class SynchronizedWorldPrototype : public WorldPrototype {
 	mutable std::shared_mutex lock;
 	mutable std::mutex queueLock;
 	mutable std::mutex readQueueLock;
@@ -52,7 +51,7 @@ class SynchronizedWorld : public World<T> {
 
 public:
 
-	SynchronizedWorld<T>(double deltaT) : World<T>(deltaT) {}
+	SynchronizedWorldPrototype(double deltaT) : WorldPrototype(deltaT) {}
 
 	template<typename Func>
 	void syncModification(const Func& function) {
@@ -83,32 +82,9 @@ public:
 		}
 	}
 
-	virtual void tick() override {
-		SharedLockGuard mutLock(lock);
-
-		this->findColissions();
-
-		physicsMeasure.mark(PhysicsProcess::EXTERNALS);
-		this->applyExternalForces();
-
-		this->handleColissions();
-
-		intersectionStatistics.nextTally();
-
-		this->handleConstraints();
-
-		physicsMeasure.mark(PhysicsProcess::WAIT_FOR_LOCK);
-		mutLock.upgrade();
-		this->update();
-
-		physicsMeasure.mark(PhysicsProcess::QUEUE);
-		processQueue();
-
-		physicsMeasure.mark(PhysicsProcess::WAIT_FOR_LOCK);
-		mutLock.downgrade();
-
-		physicsMeasure.mark(PhysicsProcess::QUEUE);
-		processReadQueue();
-	}
+	void tick() override;
 };
+
+template<typename T = Part>
+using SynchronizedWorld = World<T, SynchronizedWorldPrototype>;
 };

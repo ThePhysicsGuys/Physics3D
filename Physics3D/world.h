@@ -13,7 +13,12 @@
 #include "threading/threadPool.h"
 
 namespace P3D {
+class Physical;
+class MotorizedPhysical;
+class ConnectedPhysical;
+class Part;
 class WorldLayer;
+class ColissionLayer;
 
 class WorldPrototype {
 private:
@@ -52,15 +57,7 @@ private:
 	*/
 	void notifyMainPhysicalObsolete(MotorizedPhysical* part);
 
-	void parallelRefineColission(std::vector<Colission>& colissions);
-
 protected:
-	// World tick steps
-	virtual void applyExternalForces();
-	virtual void findColissions();
-	virtual void handleColissions();
-	virtual void handleConstraints();
-	virtual void update();
 
 
 	// event handlers
@@ -152,10 +149,10 @@ public:
 	void forEachPartFiltered(const Filter& filter, const Func& funcToRun) const;
 };
 
-template<typename T = Part>
-class World : public WorldPrototype {
+template<typename T = Part, typename UnderlyingWorldPrototype = WorldPrototype>
+class World : public UnderlyingWorldPrototype {
 public:
-	World(double deltaT) : WorldPrototype(deltaT) {}
+	World(double deltaT) : UnderlyingWorldPrototype(deltaT) {}
 
 	virtual void onCollide(Part* partA, Part* partB) {}
 	virtual void onCollide(T* partA, T* partB) {}

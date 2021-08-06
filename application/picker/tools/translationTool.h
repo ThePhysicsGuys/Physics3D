@@ -5,6 +5,7 @@
 #include "../engine/tool/stateTool.h"
 #include "ecs/components.h"
 #include <optional>
+#include <Physics3D/externalforces/magnetForce.h>
 
 namespace P3D::Application {
 
@@ -22,8 +23,10 @@ private:
 	};
 
 	bool active = false;
-	
+
 public:
+	static MagnetForce magnet;
+
 	DEFINE_TOOL("Translate", "Translate entities by clicking and dragging or using the handles", Graphics::GLFW::Cursor::ARROW);
 	
 	~TranslationTool() = default;

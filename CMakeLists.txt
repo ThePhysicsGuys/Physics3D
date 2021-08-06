@@ -107,8 +107,11 @@ add_library(Physics3D STATIC
   
   Physics3D/externalforces/directionalGravity.cpp
   Physics3D/externalforces/externalForce.cpp
+  Physics3D/externalforces/magnetForce.cpp
   
   Physics3D/threading/upgradeable_shared_mutex.cpp
+  Physics3D/threading/synchronizedWorld.cpp
+  Physics3D/threading/worldTicker.cpp
   
   Physics3D/misc/debug.cpp
   Physics3D/misc/cpuid.cpp
@@ -245,6 +248,7 @@ add_executable(application
   application/ecs/material.cpp
 
   application/input/standardInputHandler.cpp
+  application/input/playerController.cpp
 
   application/io/saveDialog.cpp
   application/io/serialization.cpp

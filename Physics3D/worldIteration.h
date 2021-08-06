@@ -20,15 +20,15 @@ void WorldPrototype::forEachPartFiltered(const Filter& filter, const Func& funcT
 }
 
 // expects a function of the form void(T& part)
-template<typename T>
+template<typename T, typename WP>
 template<typename Func>
-void World<T>::forEachPart(const Func& funcToRun) const {
+void World<T, WP>::forEachPart(const Func& funcToRun) const {
 	static_cast<const WorldPrototype*>(this)->forEachPart([&funcToRun](Part& part) {funcToRun(static_cast<T&>(part)); });
 }
 // expects a function of the form void(T& part)
-template<typename T>
+template<typename T, typename WP>
 template<typename Func, typename Filter>
-void World<T>::forEachPartFiltered(const Filter& filter, const Func& funcToRun) const {
+void World<T, WP>::forEachPartFiltered(const Filter& filter, const Func& funcToRun) const {
 	static_cast<const WorldPrototype*>(this)->forEachPartFiltered(filter, [&funcToRun](Part& part) {funcToRun(static_cast<T&>(part)); });
 }
 };

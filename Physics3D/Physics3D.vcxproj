@@ -132,6 +132,7 @@
     <ClCompile Include="constraints\barConstraint.cpp" />
     <ClCompile Include="externalforces\externalForce.cpp" />
     <ClCompile Include="externalforces\directionalGravity.cpp" />
+    <ClCompile Include="externalforces\magnetForce.cpp" />
     <ClCompile Include="misc\cpuid.cpp" />
     <ClCompile Include="datastructures\aligned_alloc.cpp" />
     <ClCompile Include="boundstree\boundsTree.cpp" />
@@ -182,7 +183,9 @@
     <ClCompile Include="constraints\hingeConstraint.cpp" />
     <ClCompile Include="softlinks\softLink.cpp" />
     <ClCompile Include="softlinks\springLink.cpp" />
+    <ClCompile Include="threading\synchronizedWorld.cpp" />
     <ClCompile Include="threading\upgradeable_shared_mutex.cpp" />
+    <ClCompile Include="threading\worldTicker.cpp" />
     <ClCompile Include="world.cpp" />
     <ClCompile Include="worldPhysics.cpp" />
   </ItemGroup>
@@ -190,6 +193,7 @@
     <ClInclude Include="constraints\barConstraint.h" />
     <ClInclude Include="datastructures\intrusivePointer.h" />
     <ClInclude Include="externalforces\externalForce.h" />
+    <ClInclude Include="externalforces\magnetForce.h" />
     <ClInclude Include="misc\cpuid.h" />
     <ClInclude Include="datastructures\aligned_alloc.h" />
     <ClInclude Include="boundstree\boundsTree.h" />
@@ -296,6 +300,8 @@
     <ClInclude Include="threading\synchonizedWorld.h" />
     <ClInclude Include="threading\threadPool.h" />
     <ClInclude Include="threading\upgradeable_shared_mutex.h" />
+    <ClInclude Include="worldPhysics.h" />
+    <ClInclude Include="threading\worldTicker.h" />
     <ClInclude Include="world.h" />
     <ClInclude Include="worldIteration.h" />
   </ItemGroup>
