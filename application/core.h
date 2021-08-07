@@ -26,5 +26,6 @@
 #ifdef _MSC_VER
 	#define P3D_DEBUGBREAK __debugbreak()
 #else
+#include <csignal>
 	#define P3D_DEBUGBREAK raise(SIGTRAP)
 #endif

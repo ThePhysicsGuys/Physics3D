@@ -1,6 +1,6 @@
 #include "testsMain.h"
 
-#include <Physics3D/datastructures/intrusivePointer.h>
+#include <Physics3D/datastructures/smartPointers.h>
 #include "../engine/ecs/registry.h"
 #include "../application/ecs/components.h"
 
