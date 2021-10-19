@@ -212,7 +212,12 @@ void* TreeNodeRef::asObject() const {
 	return reinterpret_cast<TreeTrunk*>(ptr & ~SIZE_DATA_MASK);
 }
 
-typedef std::array<std::array<bool, BRANCH_FACTOR>, BRANCH_FACTOR> OverlapMatrix;
+struct OverlapMatrix {
+	bool overlapData[BRANCH_FACTOR*BRANCH_FACTOR];
+
+	inline bool* operator[](size_t idx) {return overlapData+BRANCH_FACTOR*idx;}
+	inline const bool* operator[](size_t idx) const {return overlapData+BRANCH_FACTOR*idx;}
+};
 
 struct TrunkSIMDHelperFallback {
 	static BoundsTemplate<float> getTotalBounds(const TreeTrunk& trunk, int upTo);
