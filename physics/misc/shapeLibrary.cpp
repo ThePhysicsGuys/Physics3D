@@ -51,15 +51,15 @@ Triangle houseTriangles[]{
 };
 
 Vec3f cornerVertices[]{
-	Vec3f(1.0f, 1.0f, 1.0f), Vec3f(-1.0f, 1.0f, 1.0f), Vec3f(1.0f, -1.0f, 1.0f),
-	Vec3f(1.0f, 1.0f, -1.0f)
+	Vec3f(-1.0f, -1.0f, -1.0f), Vec3f(-1.0f, -1.0f, 1.0f), 
+	Vec3f(-1.0f, 1.0f, -1.0f), Vec3f(1.0f, -1.0f, -1.0f)
 };
 
 Triangle cornerTriangles[]{
-	{0, 1, 2}, //forward 
-	{0, 1, 3}, //left 
-	{0, 2, 3}, //back 
-	{1, 2, 3}, //right 
+	{0, 1, 2},
+	{2, 3, 0},
+	{0, 3, 1},
+	{2, 1, 3}
 };
 
 Vec3f wedgeVertices[]{
@@ -68,11 +68,11 @@ Vec3f wedgeVertices[]{
 };
 
 Triangle wedgeTriangles[]{
-	{0, 2, 1}, {0, 3, 2}, // bottom
-	{0, 5, 4}, {0, 1, 5}, // back
-	{0, 4, 3}, // left side 
-	{1, 2, 5}, // right side
-	{2, 3, 4}, {2, 4, 5} // diagonalSide 
+	{0, 2, 1}, {0, 3, 2}, // bottom face
+	{0, 5, 4}, {0, 1, 5}, // back face
+	{0, 4, 3}, // left face
+	{1, 2, 5}, // right face
+	{2, 3, 4}, {2, 4, 5} // diagonal face
 };
 
 Triangle boxTriangles[12] = {
@@ -84,6 +84,8 @@ Triangle boxTriangles[12] = {
 	{4,5,7},{6,7,5}, // TOP
 };
 
+int wedgeVertexCount = 6;
+int cornerVertexCount = 4;
 const Polyhedron icosahedron(icosahedronVertices, icosahedronTriangles, 12, 20);
 const Polyhedron trianglePyramid(trianglePyramidVertices, trianglePyramidTriangles, 4, 4);
 const Polyhedron house(houseVertices, houseTriangles, 10, 16);

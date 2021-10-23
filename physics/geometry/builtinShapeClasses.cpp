@@ -1,4 +1,4 @@
-#include "builtinShapeClasses.h"
+﻿#include "builtinShapeClasses.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -238,9 +238,20 @@ void CylinderClass::setScaleY(double newY, DiagonalMat3& scale) const {
 WedgeClass::WedgeClass() : ShapeClass(4.0, Vec3(-1 / 3, 0, 1 / 3), ScalableInertialMatrix(Vec3(0.9030, 0.6032, 0.8411), Vec3(0.3517, 0.0210, 0.1667)), WEDGE_CLASS_ID) {}
 
 bool WedgeClass::containsPoint(Vec3 points) const {
-	return std::abs(points.x) <= 1.0 && std::abs(points.y) <= 1.0 && std::abs(points.z) <= 1.0;
+	return std::abs(points.x) <= 1.0 && std::abs(points.y) <= 1.0 && std::abs(points.z) <= 1.0 && points.x + points.y <= 0.0;
 }
 double WedgeClass::getIntersectionDistance(Vec3 origin, Vec3 direction) const {
+	/*
+	* BackfaceNormal(1, 0, 0)
+	* BottomfaceNormal(0, -1, 0)
+	* DiagonalNormal(1, 1, 0)
+	* RightTriangle(0, 0, 1)
+	* LeftTriangle(0, 0, -1)
+	- Get the distance to the plane, so that origin+distance*direction lies on the plane
+	- Then compute the actual intersection point on the plane, that's origin+distance*direction
+	- If the point is within the bounds of the face, then accept and return the intersection, else continue
+	- If none of the faces accepted the intersection, then no intersection
+	*/
 	if(origin.x < 0) {
 		origin.x = -origin.x;
 		direction.x = -direction.x;
@@ -252,32 +263,56 @@ double WedgeClass::getIntersectionDistance(Vec3 origin, Vec3 direction) const {
 	if(origin.z < 0) {
 		origin.z = -origin.z;
 		direction.z = -direction.z;
+	}	
+	//for bottom plane
+	{
+		double ty = (-1 - origin.y) / direction.y;
+		double y = origin.y + ty * direction.y;
+		if(std::abs(y) <= 1.0 && ty > 0) {
+			return ty;
+		}
 	}
-	//{0, -1, 0} y-direction normal.
-	//points on The plane = 0, -1, 0.
-	//pointsOnThePlane = origin + t*direction.
-	double distanceAlongLineFromOriginX = (1 - origin.x) / direction.x;
-	Vec3 intersX = origin + distanceAlongLineFromOriginX * direction;
-	if(std::abs(intersX.y) <= 1 && std::abs(intersX.z) <= 1) {
-		return distanceAlongLineFromOriginX;
+	//for back plane
+	{
+		double tx = (-1 - origin.x) / direction.x;
+		double x = origin.x + tx * direction.x;
+		if(std::abs(x) <= 1.0 && tx > 0) {
+			return tx;
+		}
 	}
-	double distanceAlongLineFromOriginY = (1 - origin.y) / direction.y;
-	Vec3 intersY = origin + distanceAlongLineFromOriginY * direction;
-	if(std::abs(intersY.x) <= 1 && std::abs(intersX.z) <= 1) {
-		return distanceAlongLineFromOriginY;
+	//left triangle
+	{
+		double tz = (-1 - origin.z) / direction.z ;
+		double z = origin.z + tz * direction.z;
+		if(std::abs(z) <= 1.0 && tz > 0) {
+			return tz;
+		}
 	}
-	double distanceAlongLineFromOriginZ = (1 - origin.z) / direction.z;
-	Vec3 intersZ = origin + distanceAlongLineFromOriginZ * direction;
-	if(std::abs(intersX.x) <= 1 && std::abs(intersX.y) <= 1) {
-		return distanceAlongLineFromOriginZ;
+	//right triangle
+	{
+		double tz = (1 - origin.z) / direction.z;
+		double z = origin.z + tz * direction.z;
+		if(std::abs(z) <= 1.0  && tz > 0) {
+			return tz;
+		}
+	}
+	{
+		//diagonal
+		const double dn = direction.x + direction.y;
+		double txy = (-origin.x - origin.y) / dn;
+		double x = origin.x + txy * direction.x;
+		double y = origin.y + txy * direction.y;
+		if(x + y <= 0.0 && txy > 0) {
+			return txy;
+		}
 	}
 	return std::numeric_limits<double>::infinity();
 }
 BoundingBox WedgeClass::getBounds(const Rotation& rotation, const DiagonalMat3& scale) const {
-	const Mat3& rot = rotation.asRotationMatrix();
+	const Mat3& rotMat = rotation.asRotationMatrix();
 	Vec3 scaleRot[3] = {};
 	for(size_t i = 0; i < 3; i++) {
-		scaleRot[i] = scale[i] * rot.getCol(i);
+		scaleRot[i] = scale[i] * rotMat.getCol(i);
 	}
 	const Vec3 vertices[] = {
 		-scaleRot[0] - scaleRot[1] - scaleRot[2],
@@ -291,7 +326,7 @@ BoundingBox WedgeClass::getBounds(const Rotation& rotation, const DiagonalMat3& 
 	double ymin = vertices[0].y; double ymax = vertices[0].y;
 	double zmin = vertices[0].z; double zmax = vertices[0].z;
 
-	for(size_t i = 1; i < 6; i++) {
+	for(size_t i = 1; i < Library::wedgeVertexCount; i++) {
 		const Vec3& current = vertices[i];
 		if(current.x < xmin) xmin = current.x;
 		if(current.x > xmax) xmax = current.x;
@@ -309,7 +344,7 @@ Vec3f WedgeClass::furthestInDirection(const Vec3f& direction) const {
 	float best = Library::wedgeVertices[0] * direction;
 	Vec3f bestVertex = Library::wedgeVertices[0];
 
-	for(size_t i = 1; i < 6; i++) {
+	for(size_t i = 1; i < Library::wedgeVertexCount; i++) {
 		float current = Library::wedgeVertices[i] * direction;
 		if(current > best) {
 			best = current;
@@ -325,11 +360,37 @@ Polyhedron WedgeClass::asPolyhedron() const {
 
 #pragma region CornerClass
 CornerClass::CornerClass() : ShapeClass(4 / 3, Vec3(-2 / 3, -2 / 3, -2 / 3), ScalableInertialMatrix(Vec3(-0.0333, -0.9500, -0.0333), Vec3(0.3500, -0.0667, 0.3500)), CORNER_CLASS_ID) {}
+
 bool CornerClass::containsPoint(Vec3 point) const {
-	return std::abs(point.x) <= 1.0 && std::abs(point.y) <= 1.0 && std::abs(point.z) <= 1.0;
+	return point.x == 0 && point.y == 0 && point.z == 0 && 1 - point.x - point.y - point.z == 0;
 }
 double CornerClass::getIntersectionDistance(Vec3 origin, Vec3 direction) const {
-	return 2.0;
+	
+	double tx = (-1 - origin.x) / direction.x;
+	double x = origin.x + tx * direction.x;
+	if(std::abs(x) <= 1.0 && tx > 0) {
+		return tx;
+	}
+	
+	double ty = (-1 - origin.y) / direction.y;
+	double y = origin.y + ty * direction.y;
+	if(std::abs(y) <= 1.0 && ty > 0) {
+		return ty;
+	}
+
+	double tz = (-1 - origin.z) / direction.z;
+	double z = origin.z + tz * direction.z;
+	if(std::abs(z) <= 1.0 && tz > 0) {
+		return tz;
+	}
+
+	const double dn = direction.x + direction.y + direction.z;
+	double t = (-1 - origin.x - origin.y - origin.z) / dn;
+	Vec3 point = origin + t * direction;
+	if(point.x + point.y + point.z <= 1.0 && t > 0) {
+		return t;
+	}
+	return std::numeric_limits<double>::infinity();
 }
 BoundingBox CornerClass::getBounds(const Rotation& rotation, const DiagonalMat3& scale) const {
 	const Mat3& rot = rotation.asRotationMatrix();
@@ -338,16 +399,16 @@ BoundingBox CornerClass::getBounds(const Rotation& rotation, const DiagonalMat3&
 		scaleRot[i] = scale[i] * rot.getCol(i);
 	}
 	const Vec3 vertices[] = {
-		scaleRot[0] + scaleRot[1] + scaleRot[2],
-	   -scaleRot[0] + scaleRot[1] + scaleRot[2],
-		scaleRot[0] - scaleRot[1] + scaleRot[2],
-		scaleRot[0] + scaleRot[1] - scaleRot[2],
+		-scaleRot[0] - scaleRot[1] - scaleRot[2],
+		-scaleRot[0] - scaleRot[1] + scaleRot[2],
+		-scaleRot[0] + scaleRot[1] - scaleRot[2],
+		scaleRot[0] - scaleRot[1] - scaleRot[2],
 	};
 	double xmin = vertices[0].x; double xmax = vertices[0].x;
 	double ymin = vertices[0].y; double ymax = vertices[0].y;
 	double zmin = vertices[0].z; double zmax = vertices[0].z;
 
-	for(size_t i = 1; i < 4; i++) {
+	for(size_t i = 1; i < Library::cornerVertexCount; i++) {
 		const Vec3& current = vertices[i];
 		if(current.x < xmin) xmin = current.x;
 		if(current.x > xmax) xmax = current.x;
@@ -377,6 +438,8 @@ Polyhedron CornerClass::asPolyhedron() const {
 	return Library::corner;
 }
 #pragma endregion
+//x2+y2+1/4(|z−a|+|z+a|−2a)2=r2
+
 
 #pragma region PolyhedronShapeClass
 PolyhedronShapeClass::PolyhedronShapeClass(Polyhedron&& poly) : poly(poly), ShapeClass(poly.getVolume(), poly.getCenterOfMass(), poly.getScalableInertiaAroundCenterOfMass(), CONVEX_POLYHEDRON_CLASS_ID) {}
@@ -439,5 +502,6 @@ const SphereClass SphereClass::instance;
 const CylinderClass CylinderClass::instance;
 const WedgeClass WedgeClass::instance;
 const CornerClass CornerClass::instance;
+//const PillClass PillClass::instance;
 
 

@@ -6,9 +6,9 @@
 #define CUBE_CLASS_ID 0
 #define SPHERE_CLASS_ID 1
 #define CYLINDER_CLASS_ID 2
-#define WEDGE_CLASS_ID 2
-#define CORNER_CLASS_ID 3
-#define PILL_CLASS_ID 4
+#define WEDGE_CLASS_ID 3
+#define CORNER_CLASS_ID 4
+#define PILL_CLASS_ID 5
 #define CONVEX_POLYHEDRON_CLASS_ID 10
 
 
@@ -74,6 +74,7 @@ public:
 	static const WedgeClass instance;
 };
 
+
 class CornerClass : public ShapeClass {
 	CornerClass();
 
@@ -88,22 +89,21 @@ public:
 	static const CornerClass instance;
 
 };
-/*
-	class PillClass : public ShapeClass {
-		PillClass();
 
-	public:
-		virtual bool containsPoint(Vec3 point) const override;
-		virtual double getIntersectionDistance(Vec3 origin, Vec3 direction) const override;
-		virtual BoundingBox getBounds(const Rotation& rotation, const DiagonalMat3& scale) const override;
-		virtual double getScaledMaxRadiusSq(DiagonalMat3 scale) const override;
-		virtual Vec3f furthestInDirection(const Vec3f& direction) const override;
-		virtual Polyhedron asPolyhedron() const override;
+/*class PillClass : public ShapeClass {
+	PillClass();
 
-		static const PillClass instance;
+public:
+	virtual bool containsPoint(Vec3 point) const override;
+	virtual double getIntersectionDistance(Vec3 origin, Vec3 direction) const override;
+	virtual BoundingBox getBounds(const Rotation& rotation, const DiagonalMat3& scale) const override;
+	virtual double getScaledMaxRadiusSq(DiagonalMat3 scale) const override;
+	virtual Vec3f furthestInDirection(const Vec3f& direction) const override;
+	virtual Polyhedron asPolyhedron() const override;
 
-	};
-*/
+	static const PillClass instance;
+};*/
+
 class PolyhedronShapeClass : public ShapeClass {
 protected:
 	Polyhedron poly;

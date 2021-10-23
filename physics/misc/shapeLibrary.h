@@ -10,8 +10,8 @@ extern const Polyhedron wedge;
 extern const Polyhedron corner;
 extern Vec3f wedgeVertices[6];
 extern Vec3f cornerVertices[4];
-constexpr int wedgeVertexCount = 6;
-constexpr int cornerVertexCount = 4;
+extern int wedgeVertexCount;
+extern int cornerVertexCount;
 
 Polyhedron createCube(float side);
 Polyhedron createBox(float width, float height, float depth);

@@ -169,21 +169,20 @@ TEST_CASE(testForWedgeCornerAndPillShapes) {
 		DiagonalMat3 scale = generateDiagonalMatrix<double, 3>();
 		TriangleMesh mesh = generateTriangleMesh();
 
-		ASSERT(CornerClass::instance.asPolyhedron().furthestInDirectionFallback(direction)
-			   == CornerClass::instance.furthestInDirection(direction));
+		//ASSERT(WedgeClass::instance.asPolyhedron().furthestInDirectionFallback(direction)
+			   //== WedgeClass::instance.furthestInDirection(direction));
 
-		ASSERT(mesh.getBoundsFallback(Mat3f(rotation.asRotationMatrix() * scale))
-			   == CornerClass::instance.getBounds(rotation, scale));
-		/*
-			ASSERT(CornerClass::instance.asPolyhedron().containsPoint(points)
-				== CornerClass::instance.containsPoint(points));
-		*/
-		ASSERT(CornerClass::instance.asPolyhedron().getScaledMaxRadiusSq(scale)
-			   == CornerClass::instance.getScaledMaxRadiusSq(scale));
-		/*
-			ASSERT(CornerClass::instance.asPolyhedron().getIntersectionDistance(origin, direction)
+		//ASSERT(mesh.getBoundsFallback(Mat3f(rotation.asRotationMatrix() * scale))
+			  // == WedgeClass::instance.getBounds(rotation, scale));
+		
+		/*ASSERT(WedgeClass::instance.asPolyhedron().getScaledMaxRadiusSq(scale)
+			   == WedgeClass::instance.getScaledMaxRadiusSq(scale));*/
+
+		//ASSERT(CornerClass::instance.asPolyhedron().containsPoint(points)
+			  // == CornerClass::instance.containsPoint(points));
+
+		ASSERT(CornerClass::instance.asPolyhedron().getIntersectionDistance(origin, direction)
 			   == CornerClass::instance.getIntersectionDistance(origin, direction));
-		*/
 	}
 }
 
