@@ -14,7 +14,7 @@ namespace P3D::Graphics {
 
 //! Texture
 
-Texture* Texture::_white = nullptr;
+SRef<Texture> Texture::_white;
 
 int getChannelsFromFormat(int format) {
 	switch (format) {
@@ -23,13 +23,10 @@ int getChannelsFromFormat(int format) {
 		case GL_BLUE:
 		case GL_ALPHA:
 			return 1;
-			break;
 		case GL_RGB:
 			return 3;
-			break;
 		case GL_RGBA:
 			return 4;
-			break;
 		default:
 			Log::warn("Unknown format: %x, assuming 4 channels", format);
 			return 4;
@@ -41,13 +38,10 @@ int getFormatFromChannels(int channels) {
 	switch (channels) {
 		case 1:
 			return GL_RED;
-			break;
 		case 3:
 			return GL_RGB;
-			break;
 		case 4:
 			return GL_RGBA;
-			break;
 		default:
 			Log::warn("Unknown amount of channels: %d, assuming RGB", channels);
 			return GL_RGB;
@@ -77,10 +71,10 @@ Texture Texture::load(const std::string& name) {
 	}
 }
 
-Texture* Texture::white() {
+SRef<Texture> Texture::white() {
 	if (_white == nullptr) {
 		Color buffer = Colors::WHITE;
-		_white = new Texture(1, 1, &buffer, GL_RGBA);
+		_white = std::make_shared<Texture>(1, 1, &buffer, GL_RGBA);
 	}
 
 	return _white;
@@ -106,8 +100,8 @@ Texture::Texture(int width, int height, const void* buffer, int target, int form
 	bind();
 	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	create(target, 0, internalFormat, width, height, 0, format, type, buffer);
 	glGenerateMipmap(GL_TEXTURE_2D);
 	unbind();
@@ -115,10 +109,6 @@ Texture::Texture(int width, int height, const void* buffer, int target, int form
 
 void Texture::create(int target, int level, int internalFormat, int width, int height, int border, int format, int type, const void* buffer) {
 	glTexImage2D(target, 0, internalFormat, width, height, 0, format, type, buffer);
-}
-
-Texture::~Texture() {
-	close();
 }
 
 Texture::Texture(Texture&& other) : Bindable(other.id), width(other.width), height(other.height), internalFormat(other.internalFormat), format(other.format), target(other.target), type(other.type), unit(other.unit), channels(other.channels) {
@@ -132,7 +122,7 @@ Texture::Texture(Texture&& other) : Bindable(other.id), width(other.width), heig
 	other.type = 0;
 	other.unit = 0;
 }
-
+	
 Texture& Texture::operator=(Texture&& other) {
 	if (this != &other) {
 		id = 0;
@@ -144,7 +134,6 @@ Texture& Texture::operator=(Texture&& other) {
 		channels = 0;
 		type = 0;
 		unit = 0;
-
 		std::swap(id, other.id);
 		std::swap(width, other.width);
 		std::swap(height, other.height);
@@ -155,8 +144,12 @@ Texture& Texture::operator=(Texture&& other) {
 		std::swap(unit, other.unit);
 		std::swap(channels, other.channels);
 	}
-
 	return *this;
+}
+
+Texture::~Texture() {
+	Log::warn("Closed texture #%d", id);
+	glDeleteTextures(1, &id);
 }
 
 void Texture::loadFrameBufferTexture(int width, int height) {
@@ -171,7 +164,7 @@ void Texture::resize(int width, int height, const void* buffer) {
 	unbind();
 }
 	
-Texture* Texture::colored(Color color) {
+SRef<Texture> Texture::colored(const Color& color) {
 	bind();
 	unsigned char* buffer = (unsigned char*) malloc(width * height * channels);
 
@@ -182,13 +175,13 @@ Texture* Texture::colored(Color color) {
 			for (int k = 0; k < channels; k++) {
 
 				int index = (i + height * j) * channels + k;
-				unsigned char value = static_cast<unsigned char>(buffer[index] * color[k]);
+				unsigned char value = static_cast<unsigned char>(buffer[index] * color.data[k]);
 				buffer[index] = value;
 			}
 		}
 	}
 
-	Texture* texture = new Texture(width, height, buffer, format);
+	SRef<Texture> texture = std::make_shared<Texture>(width, height, buffer, format);
 
 	free(buffer);
 
@@ -214,16 +207,11 @@ void Texture::unbind() {
 }
 
 void Texture::close() {
-	if (id != 0) {
-		Log::warn("Closed texture #%d", id);
-
-		glDeleteTextures(1, &id);
-		id = 0;
-	}
+	// Todo remove
 }
 
 float Texture::getAspect() const {
-	return ((float) width) / ((float) height);
+	return static_cast<float>(width) / static_cast<float>(height);
 }
 
 int Texture::getWidth() const {

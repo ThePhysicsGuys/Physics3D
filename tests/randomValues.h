@@ -1,21 +1,20 @@
 #pragma once
 
-#define _USE_MATH_DEFINES
-#include <math.h>
 #include <stddef.h>
 
 #include <random>
 #include <array>
 
-#include "../physics/math/linalg/vec.h"
-#include "../physics/math/linalg/mat.h"
-#include "../physics/math/cframe.h"
+#include <Physics3D/math/linalg/vec.h>
+#include <Physics3D/math/linalg/mat.h>
+#include <Physics3D/math/cframe.h>
+#include <Physics3D/math/constants.h>
+#include <Physics3D/math/linalg/trigonometry.h>
 
-#include "../physics/math/linalg/trigonometry.h"
+#include <Physics3D/motion.h>
+#include <Physics3D/relativeMotion.h>
 
-#include "../physics/motion.h"
-#include "../physics/relativeMotion.h"
-
+namespace P3D {
 inline double createRandomDouble() {
 	return 2.0 * rand() / RAND_MAX - 1.0;
 }
@@ -67,7 +66,7 @@ Vector<T, Size> createRandomNonzeroVecTemplate() {
 // creates a random rotation
 template<typename T>
 RotationTemplate<T> createRandomRotationTemplate() {
-	Vector<T, 3> angles = createRandomNonzeroVecTemplate<T, 3>() * (M_PI / 2);
+	Vector<T, 3> angles = createRandomNonzeroVecTemplate<T, 3>() * (PI / 2);
 	return Rotation::fromEulerAngles(angles.x, angles.y, angles.z);
 }
 // creates a random rotation
@@ -103,7 +102,7 @@ inline RelativeMotion createRandomRelativeMotion() {
 	return RelativeMotion(createRandomMotion(), createRandomCFrame());
 }
 
-template<typename T, std::size_t Size, T (*createFunc)()>
+template<typename T, std::size_t Size, T(*createFunc)()>
 inline Derivatives<T, Size> createRandomDerivatives() {
 	Derivatives<T, Size> result;
 
@@ -131,3 +130,4 @@ inline std::array<T, Size> createRandomArray() {
 
 	return result;
 }
+};

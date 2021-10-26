@@ -49,7 +49,7 @@ public:
 	}
 
 	void submit() override {
-		Shaders::guiShader.bind();
+		Shaders::guiShader->bind();
 
 		if (commandBuffer.empty()) 
 			pushCommand(0);
@@ -77,10 +77,10 @@ public:
 
 				// update shader
 				if (ID == 0) {
-					Shaders::guiShader.setTextured(false);
+					Shaders::guiShader->setTextured(false);
 				} else {
 					Renderer::bindTexture2D(ID);
-					Shaders::guiShader.setTextured(true);
+					Shaders::guiShader->setTextured(true);
 				}
 
 				lastCount = count;

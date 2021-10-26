@@ -3,16 +3,24 @@
 #include <unordered_map>
 #include <functional>
 #include <algorithm>
+#include <optional>
 #include <utility>
 #include <string>
 #include <vector>
 #include <cmath>
 #include <map>
 
-#include "../physics/math/linalg/vec.h"
-#include "../physics/math/fix.h"
-#include "../physics/math/linalg/mat.h"
-#include "../physics/math/linalg/trigonometry.h"
-#include "../physics/math/position.h"
+#include <Physics3D/math/linalg/vec.h>
+#include <Physics3D/math/fix.h>
+#include <Physics3D/math/linalg/mat.h>
+#include <Physics3D/math/linalg/trigonometry.h>
+#include <Physics3D/math/position.h>
+#include <Physics3D/datastructures/smartPointers.h>
 
 #include "../util/log.h"
+
+#ifdef _MSC_VER
+#define P3D_DEBUGBREAK __debugbreak()
+#else
+#define P3D_DEBUGBREAK raise(SIGTRAP)
+#endif

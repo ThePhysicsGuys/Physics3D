@@ -41,12 +41,10 @@ add_library(util STATIC
   util/terminalColor.cpp
   util/log.cpp
   util/properties.cpp
-  util/serializeBasicTypes.cpp
   util/stringUtil.cpp
   util/fileUtils.cpp
   util/valueCycle.cpp
   util/systemVariables.cpp
-  util/cpuid.cpp
 
   util/resource/resource.cpp
   util/resource/resourceLoader.cpp
@@ -57,63 +55,72 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL GNU)
 	target_link_libraries(util stdc++fs)
 endif()
 
-add_library(physics STATIC 
-  physics/part.cpp
-  physics/physical.cpp
-  physics/rigidBody.cpp
-  physics/layer.cpp
-  physics/world.cpp
-  physics/worldPhysics.cpp
-  physics/inertia.cpp
+add_library(Physics3D STATIC 
+  Physics3D/part.cpp
+  Physics3D/physical.cpp
+  Physics3D/rigidBody.cpp
+  Physics3D/layer.cpp
+  Physics3D/world.cpp
+  Physics3D/worldPhysics.cpp
+  Physics3D/inertia.cpp
 
-  physics/math/linalg/eigen.cpp
-  physics/math/linalg/largeMatrix.cpp
-  physics/math/linalg/trigonometry.cpp
+  Physics3D/math/linalg/eigen.cpp
+  Physics3D/math/linalg/trigonometry.cpp
 
-  physics/geometry/computationBuffer.cpp
-  physics/geometry/convexShapeBuilder.cpp
-  physics/geometry/genericIntersection.cpp
-  physics/geometry/indexedShape.cpp
-  physics/geometry/intersection.cpp
-  physics/geometry/triangleMesh.cpp
-  physics/geometry/triangleMeshSSE.cpp
-  physics/geometry/triangleMeshAVX.cpp
-  physics/geometry/polyhedron.cpp
-  physics/geometry/shape.cpp
-  physics/geometry/shapeBuilder.cpp
-  physics/geometry/shapeClass.cpp
-  physics/geometry/shapeCreation.cpp
-  physics/geometry/builtinShapeClasses.cpp
+  Physics3D/geometry/computationBuffer.cpp
+  Physics3D/geometry/convexShapeBuilder.cpp
+  Physics3D/geometry/genericIntersection.cpp
+  Physics3D/geometry/indexedShape.cpp
+  Physics3D/geometry/intersection.cpp
+  Physics3D/geometry/triangleMesh.cpp
+  Physics3D/geometry/triangleMeshSSE.cpp
+  Physics3D/geometry/triangleMeshAVX.cpp
+  Physics3D/geometry/polyhedron.cpp
+  Physics3D/geometry/shape.cpp
+  Physics3D/geometry/shapeBuilder.cpp
+  Physics3D/geometry/shapeClass.cpp
+  Physics3D/geometry/shapeCreation.cpp
+  Physics3D/geometry/builtinShapeClasses.cpp
+  Physics3D/geometry/shapeLibrary.cpp
 
-  physics/datastructures/aligned_alloc.cpp
-  physics/datastructures/boundsTreeOld.cpp
-  physics/datastructures/boundsTree.cpp
+  Physics3D/datastructures/aligned_alloc.cpp
 
-  physics/hardconstraints/fixedConstraint.cpp
-  physics/hardconstraints/hardConstraint.cpp
-  physics/hardconstraints/hardPhysicalConnection.cpp
-  physics/hardconstraints/motorConstraint.cpp
-  physics/hardconstraints/controller/sineWaveController.cpp
+  Physics3D/boundstree/boundsTree.cpp
+  Physics3D/boundstree/filters/visibilityFilter.cpp
   
-  physics/constraints/constraintGroup.cpp
-  physics/constraints/ballConstraint.cpp
-  physics/constraints/hingeConstraint.cpp
-  physics/constraints/barConstraint.cpp
+  Physics3D/hardconstraints/fixedConstraint.cpp
+  Physics3D/hardconstraints/hardConstraint.cpp
+  Physics3D/hardconstraints/hardPhysicalConnection.cpp
+  Physics3D/hardconstraints/motorConstraint.cpp
+  Physics3D/hardconstraints/controller/sineWaveController.cpp
   
-  physics/softlinks/softLink.cpp
-  physics/softlinks/springLink.cpp
-  physics/softlinks/elasticLink.cpp
-  physics/softlinks/magneticLink.cpp
-  physics/softlinks/alignmentLink.cpp
-
-  physics/misc/serialization.cpp
-  physics/misc/shapeLibrary.cpp
-  physics/misc/validityHelper.cpp
-  physics/misc/filters/visibilityFilter.cpp
-  physics/misc/debug.cpp
-  physics/misc/physicsProfiler.cpp
+  Physics3D/constraints/constraintGroup.cpp
+  Physics3D/constraints/ballConstraint.cpp
+  Physics3D/constraints/hingeConstraint.cpp
+  Physics3D/constraints/barConstraint.cpp
+  
+  Physics3D/softlinks/softLink.cpp
+  Physics3D/softlinks/springLink.cpp
+  Physics3D/softlinks/elasticLink.cpp
+  Physics3D/softlinks/magneticLink.cpp
+  Physics3D/softlinks/alignmentLink.cpp
+  
+  Physics3D/externalforces/directionalGravity.cpp
+  Physics3D/externalforces/externalForce.cpp
+  Physics3D/externalforces/magnetForce.cpp
+  
+  Physics3D/threading/upgradeable_shared_mutex.cpp
+  Physics3D/threading/synchronizedWorld.cpp
+  Physics3D/threading/worldTicker.cpp
+  
+  Physics3D/misc/debug.cpp
+  Physics3D/misc/cpuid.cpp
+  Physics3D/misc/validityHelper.cpp
+  Physics3D/misc/physicsProfiler.cpp
+  
+  Physics3D/misc/serialization/serialization.cpp
+  Physics3D/misc/serialization/serializeBasicTypes.cpp
 )
-target_link_libraries(physics util)
 
 add_executable(benchmarks
   benchmarks/benchmark.cpp
@@ -126,10 +133,6 @@ add_executable(benchmarks
   benchmarks/ecsBenchmark.cpp
   benchmarks/threadResponseTime.cpp
 )
-
-target_link_libraries(benchmarks util)
-target_link_libraries(benchmarks physics)
-target_link_libraries(benchmarks Threads::Threads)
 
 add_library(imguiInclude STATIC
   include/imgui/imgui.cpp
@@ -183,14 +186,8 @@ add_library(graphics STATIC
   graphics/shader/lexer.cpp
   graphics/shader/parser.cpp
   graphics/shader/shaders.cpp
-  graphics/shader/cshader.cpp
-  graphics/shader/gshader.cpp
+  graphics/shader/propertiesParser.cpp
 )
-
-target_link_libraries(graphics imguiInclude)
-target_link_libraries(graphics physics)
-
-target_include_directories(graphics PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/graphics")
 
 add_library(engine STATIC
   engine/core.cpp
@@ -211,9 +208,6 @@ add_library(engine STATIC
 
   engine/resource/meshResource.cpp
 )
-target_include_directories(engine PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/engine")
-
-target_link_libraries(engine graphics)
 
 add_executable(tests 
   tests/testsMain.cpp
@@ -229,7 +223,6 @@ add_executable(tests
   tests/estimationTests.cpp
   tests/constraintTests.cpp
   tests/jointTests.cpp
-  tests/dataStructureTests.cpp
   tests/boundsTree2Tests.cpp
   tests/guiTests.cpp
   tests/indexedShapeTests.cpp
@@ -240,12 +233,6 @@ add_executable(tests
   tests/ecsTests.cpp
   tests/lexerTests.cpp
 )
-
-target_link_libraries(tests util)
-target_link_libraries(tests physics)
-target_link_libraries(tests graphics)
-target_link_libraries(tests engine)
-target_link_libraries(tests Threads::Threads)
 
 add_executable(application
   application/core.cpp
@@ -261,6 +248,7 @@ add_executable(application
   application/ecs/material.cpp
 
   application/input/standardInputHandler.cpp
+  application/input/playerController.cpp
 
   application/io/saveDialog.cpp
   application/io/serialization.cpp
@@ -301,11 +289,33 @@ add_executable(application
   application/view/environmentFrame.cpp
   application/view/toolbarFrame.cpp
 )
+
+target_include_directories(tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(benchmarks PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(graphics PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(engine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(application PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(graphics PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/graphics")
+target_include_directories(engine PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/engine")
 target_include_directories(application PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/application")
 
+target_link_libraries(tests util)
+target_link_libraries(tests Physics3D)
+target_link_libraries(tests graphics)
+target_link_libraries(tests engine)
+target_link_libraries(tests Threads::Threads)
+
+target_link_libraries(benchmarks util)
+target_link_libraries(benchmarks Physics3D)
+target_link_libraries(benchmarks Threads::Threads)
+
+target_link_libraries(graphics imguiInclude)
+target_link_libraries(graphics Physics3D)
+
+target_link_libraries(engine graphics)
 
 target_link_libraries(application util)
-target_link_libraries(application physics)
+target_link_libraries(application Physics3D)
 target_link_libraries(application graphics)
 target_link_libraries(application engine)
 

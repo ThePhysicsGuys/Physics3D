@@ -14,15 +14,13 @@ namespace P3D::Graphics {
 #pragma region FrameBuffer
 
 //! FrameBuffer
-
-FrameBuffer::FrameBuffer() {
+	
+FrameBuffer::FrameBuffer(unsigned int width, unsigned int height) {
 	glGenFramebuffers(1, &id);
 	bind();
-}
-
-FrameBuffer::FrameBuffer(unsigned int width, unsigned int height) : FrameBuffer() {
-	texture = new Texture(width, height);
-	renderBuffer = new RenderBuffer(width, height);
+	
+	texture = std::make_shared<Texture>(width, height);
+	renderBuffer = std::make_shared<RenderBuffer>(width, height);
 
 	attach(texture);
 	attach(renderBuffer);
@@ -33,7 +31,10 @@ FrameBuffer::FrameBuffer(unsigned int width, unsigned int height) : FrameBuffer(
 	unbind();
 }
 
-FrameBuffer::FrameBuffer(Texture* colorAttachment, RenderBuffer* depthStencilAttachment) : FrameBuffer() {
+FrameBuffer::FrameBuffer(SRef<Texture> colorAttachment, SRef<RenderBuffer> depthStencilAttachment) {
+	glGenFramebuffers(1, &id);
+	bind();
+	
 	attach(colorAttachment);
 	attach(depthStencilAttachment);
 
@@ -44,29 +45,9 @@ FrameBuffer::FrameBuffer(Texture* colorAttachment, RenderBuffer* depthStencilAtt
 }
 
 FrameBuffer::~FrameBuffer() {
-	close();
-}
+	Log::warn("Closing framebuffer #%d", id);
 
-FrameBuffer::FrameBuffer(FrameBuffer&& other) {
-	id = other.id;
-	other.id = 0;
-
-	texture = other.texture;
-	other.texture = nullptr;
-
-	renderBuffer = other.renderBuffer;
-	other.renderBuffer = nullptr;
-}
-
-FrameBuffer& FrameBuffer::operator=(FrameBuffer&& other) {
-	if (this != &other) {
-		close();
-		std::swap(id, other.id);
-		std::swap(texture, other.texture);
-		std::swap(renderBuffer, other.renderBuffer);
-	}
-
-	return *this;
+	glDeleteFramebuffers(1, &id);
 }
 
 void FrameBuffer::bind() {
@@ -77,60 +58,98 @@ void FrameBuffer::unbind() {
 	Renderer::bindFramebuffer(0);
 }
 
-void FrameBuffer::resize(Vec2i dimension) {
+void FrameBuffer::resize(const Vec2i& dimension) {
 	this->dimension = dimension;
 
 	if (texture)
 		texture->resize(dimension.x, dimension.y);
-
 	if (renderBuffer)
 		renderBuffer->resize(dimension.x, dimension.y);
 }
 
-void FrameBuffer::attach(Texture* texture) {
+void FrameBuffer::attach(SRef<Texture> texture) {
 	bind();
 	this->texture = texture;
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture->getID(), 0);
 }
 
-void FrameBuffer::attach(RenderBuffer* renderBuffer) {
+void FrameBuffer::attach(SRef<RenderBuffer> renderBuffer) {
 	bind();
 	this->renderBuffer = renderBuffer;
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderBuffer->getID());
 }
 
 void FrameBuffer::close() {
-	Log::warn("Closing framebuffer #%d", id);
-
-	if (texture)
-		texture->close();
-
-	if (renderBuffer)
-		renderBuffer->close();
-
-	glDeleteFramebuffers(1, &id);
-
-	texture = nullptr;
-	renderBuffer = nullptr;
-	id = 0;
+	// TODO remove
 }
 
 #pragma endregion
 
+#pragma region FrameBuffer
+
+//! MainFrameBuffer
+
+MainFrameBuffer::MainFrameBuffer(unsigned int width, unsigned int height) : Bindable() {
+	glGenFramebuffers(1, &id);
+	bind();
+	
+	fragment = std::make_shared<HDRTexture>(width, height);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fragment->getID(), 0);
+
+	brightness = std::make_shared<HDRTexture>(width, height);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, brightness->getID(), 0);
+
+	renderBuffer = std::make_shared<RenderBuffer>(width, height);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderBuffer->getID());
+
+	GLID attachements[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+	glDrawBuffers(2, attachements);
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		Log::error("FrameBuffer object with id (%d) not complete", id);
+
+	unbind();
+}
+
+MainFrameBuffer::~MainFrameBuffer() {
+	Log::warn("Closing main framebuffer #%d", id);
+	glDeleteFramebuffers(1, &id);
+}
+
+void MainFrameBuffer::bind() {
+	Renderer::bindFramebuffer(id);
+}
+
+void MainFrameBuffer::unbind() {
+	Renderer::bindFramebuffer(0);
+}
+
+void MainFrameBuffer::resize(const Vec2i& dimension) {
+	this->dimension = dimension;
+
+	fragment->resize(dimension.x, dimension.y);
+	brightness->resize(dimension.x, dimension.y);
+	renderBuffer->resize(dimension.x, dimension.y);
+}
+
+void MainFrameBuffer::close() {
+	// TODO remove
+}
+
+#pragma endregion
+	
 #pragma region HDRFrameBuffer
 
 //! HDRFrameBuffer
 
-HDRFrameBuffer::HDRFrameBuffer() {
+HDRFrameBuffer::HDRFrameBuffer(unsigned int width, unsigned int height) {
 	glGenFramebuffers(1, &id);
 	bind();
-}
-
-HDRFrameBuffer::HDRFrameBuffer(unsigned int width, unsigned int height) : HDRFrameBuffer() {
-	texture = new HDRTexture(width, height);
+	
+	texture = std::make_shared<HDRTexture>(width, height);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture->getID(), 0);
 
-	renderBuffer = new RenderBuffer(width, height);
+	renderBuffer = std::make_shared<RenderBuffer>(width, height);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderBuffer->getID());
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
@@ -140,32 +159,12 @@ HDRFrameBuffer::HDRFrameBuffer(unsigned int width, unsigned int height) : HDRFra
 };
 
 HDRFrameBuffer::~HDRFrameBuffer() {
-	close();
+	Log::warn("Closing HDR framebuffer #%d", id);
+	glDeleteFramebuffers(1, &id);
 }
 
-HDRFrameBuffer::HDRFrameBuffer(HDRFrameBuffer&& other) {
-	id = other.id;
-	other.id = 0;
-
-	texture = other.texture;
-	other.texture = nullptr;
-
-	renderBuffer = other.renderBuffer;
-	other.renderBuffer = nullptr;
-}
-
-HDRFrameBuffer& HDRFrameBuffer::operator=(HDRFrameBuffer&& other) {
-	if (this != &other) {
-		close();
-		std::swap(id, other.id);
-		std::swap(texture, other.texture);
-		std::swap(renderBuffer, other.renderBuffer);
-	}
-
-	return *this;
-}
-
-void HDRFrameBuffer::resize(Vec2i dimension) {
+void HDRFrameBuffer::resize(const Vec2i& dimension) {
+	this->dimension = dimension;
 	if (texture)
 		texture->resize(dimension.x, dimension.y);
 	if (renderBuffer)
@@ -181,13 +180,7 @@ void HDRFrameBuffer::unbind() {
 };
 
 void HDRFrameBuffer::close() {
-	Log::warn("Closing HDR framebuffer #%d", id);
-
-	texture->close();
-	renderBuffer->close();
-
-	glDeleteFramebuffers(1, &id);
-	id = 0;
+	// TODO remove
 };
 
 #pragma endregion
@@ -196,16 +189,14 @@ void HDRFrameBuffer::close() {
 
 //! MultisampleFrameBuffer
 
-MultisampleFrameBuffer::MultisampleFrameBuffer() {
+MultisampleFrameBuffer::MultisampleFrameBuffer(unsigned int width, unsigned int height, int samples)  {
 	glGenFramebuffers(1, &id);
 	bind();
-}
 
-MultisampleFrameBuffer::MultisampleFrameBuffer(unsigned int width, unsigned int height, int samples) : MultisampleFrameBuffer() {
-	texture = new MultisampleTexture(width, height, samples);
+	texture = std::make_shared<MultisampleTexture>(width, height, samples);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, texture->getID(), 0);
 
-	renderBuffer = new MultisampleRenderBuffer(width, height, samples);
+	renderBuffer = std::make_shared<MultisampleRenderBuffer>(width, height, samples);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderBuffer->getID());
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
@@ -215,32 +206,13 @@ MultisampleFrameBuffer::MultisampleFrameBuffer(unsigned int width, unsigned int 
 };
 
 MultisampleFrameBuffer::~MultisampleFrameBuffer() {
-	close();
+	Log::warn("Closing multisample framebuffer #%d", id);
+	glDeleteFramebuffers(1, &id);
 }
 
-MultisampleFrameBuffer::MultisampleFrameBuffer(MultisampleFrameBuffer&& other) {
-	id = other.id;
-	other.id = 0;
-
-	texture = other.texture;
-	other.texture = nullptr;
-
-	renderBuffer = other.renderBuffer;
-	other.renderBuffer = nullptr;
-}
-
-MultisampleFrameBuffer& MultisampleFrameBuffer::operator=(MultisampleFrameBuffer&& other) {
-	if (this != &other) {
-		close();
-		std::swap(id, other.id);
-		std::swap(texture, other.texture);
-		std::swap(renderBuffer, other.renderBuffer);
-	}
-
-	return *this;
-}
-
-void MultisampleFrameBuffer::resize(Vec2i dimension) {
+void MultisampleFrameBuffer::resize(const Vec2i& dimension) {
+	this->dimension = dimension;
+	
 	if (texture)
 		texture->resize(dimension.x, dimension.y);
 	if (renderBuffer)
@@ -256,13 +228,7 @@ void MultisampleFrameBuffer::unbind() {
 };
 
 void MultisampleFrameBuffer::close() {
-	Log::warn("Closing multisample framebuffer #%d", id);
-
-	texture->close();
-	renderBuffer->close();
-
-	glDeleteFramebuffers(1, &id);
-	id = 0;
+	// TODO remove
 };
 
 #pragma endregion
@@ -272,41 +238,22 @@ void MultisampleFrameBuffer::close() {
 //! DepthFrameBuffer
 
 DepthFrameBuffer::DepthFrameBuffer(unsigned int width, unsigned int height) : width(width), height(height) {
-	texture = new DepthTexture(width, height);
 	glGenFramebuffers(1, &id);
-	Renderer::bindFramebuffer(id);
+	bind();
+
+	texture = std::make_shared<DepthTexture>(width, height);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture->getID(), 0);
+	
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
-	Renderer::bindFramebuffer(0);
+	
+	unbind();
 }
 
 DepthFrameBuffer::~DepthFrameBuffer() {
-	close();
-}
+	Log::warn("Closing depth framebuffer #%d", id);
 
-DepthFrameBuffer::DepthFrameBuffer(DepthFrameBuffer&& other) {
-	id = other.id;
-	other.id = 0;
-
-	width = other.width;
-	other.width = 0;
-
-	height = other.height;
-	other.height = 0;
-
-	texture = other.texture;
-	other.texture = nullptr;
-}
-
-DepthFrameBuffer& DepthFrameBuffer::operator=(DepthFrameBuffer&& other) {
-	if (this != &other) {
-		close();
-		std::swap(id, other.id);
-		std::swap(texture, other.texture);
-	}
-
-	return *this;
+	glDeleteFramebuffers(1, &id);
 }
 
 void DepthFrameBuffer::bind() {
@@ -318,11 +265,7 @@ void DepthFrameBuffer::unbind() {
 }
 
 void DepthFrameBuffer::close() {
-	Log::warn("Closing depth framebuffer #%d", id);
-
-	texture->close();
-	glDeleteFramebuffers(1, &id);
-	id = 0;
+	// TODO remove
 }
 
 #pragma endregion

@@ -1,8 +1,12 @@
 #include "core.h"
-
-#include "GL/glew.h"
-
 #include "shadowLayer.h"
+
+#include <GL/glew.h>
+
+#include <Physics3D/world.h>
+#include <Physics3D/worldIteration.h>
+#include <Physics3D/boundstree/filters/visibilityFilter.h>
+
 #include "view/screen.h"
 #include "../graphics/gui/gui.h"
 #include "../graphics/renderer.h"
@@ -11,7 +15,6 @@
 #include "../graphics/buffers/frameBuffer.h"
 #include "../util/resource/resourceManager.h"
 #include "../graphics/meshRegistry.h"
-#include "../physics/misc/filters/visibilityFilter.h"
 #include "ecs/components.h"
 #include "worlds.h"
 #include "application.h"
@@ -65,13 +68,13 @@ void ShadowLayer::onEvent(Engine::Registry64& registry, Engine::Event& event) {
 
 void ShadowLayer::renderScene(Engine::Registry64& registry) {
 	std::vector<ExtendedPart*> visibleParts;
-	screen.world->syncReadOnlyOperation([&visibleParts, &registry] () {
-		for (ExtendedPart& part : screen.world->iterParts())
+	screen.world->syncReadOnlyOperation([&visibleParts, &registry]() {
+		screen.world->forEachPart([&visibleParts](ExtendedPart& part) {
 			visibleParts.push_back(&part);
 		});
-
+	});
 	for (ExtendedPart* part : visibleParts) {
-		Ref<Comp::Mesh> mesh = registry.get<Comp::Mesh>(part->entity);
+		IRef<Comp::Mesh> mesh = registry.get<Comp::Mesh>(part->entity);
 
 		if (!mesh.valid())
 			continue;
@@ -79,19 +82,19 @@ void ShadowLayer::renderScene(Engine::Registry64& registry) {
 		if (mesh->id == -1)
 			continue;
 
-		Shaders::depthShader.updateModel(part->getCFrame().asMat4WithPreScale(part->hitbox.scale));
+		Shaders::depthShader->updateModel(part->getCFrame().asMat4WithPreScale(part->hitbox.scale));
 		Graphics::MeshRegistry::meshes[mesh->id]->render(mesh->mode);
 	}
 }
 
 void ShadowLayer::onRender(Engine::Registry64& registry) {
 	using namespace Graphics;
-	using namespace Graphics::Renderer;
+	using namespace Renderer;
 
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
-	Shaders::depthShader.bind();
-	Shaders::depthShader.updateLight(lighSpaceMatrix);
+	Shaders::depthShader->bind();
+	Shaders::depthShader->updateLight(lighSpaceMatrix);
 	glViewport(0, 0, WIDTH, HEIGHT);
 	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
 	glClear(GL_DEPTH_BUFFER_BIT);

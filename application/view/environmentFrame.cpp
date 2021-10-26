@@ -20,23 +20,23 @@ void EnvironmentFrame::onRender(Engine::Registry64& registry) {
 	ImGui::Begin("Environment");
 	
 	if (ImGui::SliderFloat("HDR", &hdr, 0, 1)) {
-		Shaders::basicShader.updateHDR(hdr);
-		Shaders::instanceShader.updateHDR(hdr);
+		Shaders::basicShader->updateHDR(hdr);
+		Shaders::instanceShader->updateHDR(hdr);
 	}
 
 	if (ImGui::SliderFloat("Gamma", &gamma, 0, 3)) {
-		Shaders::basicShader.updateGamma(gamma);
-		Shaders::instanceShader.updateGamma(gamma);
+		Shaders::basicShader->updateGamma(gamma);
+		Shaders::instanceShader->updateGamma(gamma);
 	}
 
 	if (ImGui::SliderFloat("Exposure", &exposure, 0, 2)) {
-		Shaders::basicShader.updateExposure(exposure);
+		Shaders::basicShader->updateExposure(exposure);
 		;
 	}
 
 	if (ImGui::ColorEdit3("Sun color", sunColor.data)) {
-		Shaders::basicShader.updateSunColor(sunColor);
-		Shaders::instanceShader.updateSunColor(sunColor);
+		Shaders::basicShader->updateSunColor(sunColor);
+		Shaders::instanceShader->updateSunColor(sunColor);
 	}
 
 	ImGui::End();

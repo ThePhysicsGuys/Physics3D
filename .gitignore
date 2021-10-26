@@ -38,3 +38,13 @@ build_debug/
 
 
 *.log
+
+SHADERed/
+
+res/xcf/
+
+*.ruleset
+
+Hexinator.lnk
+
+Physics3D.sln.DotSettings.user

@@ -9,8 +9,8 @@ namespace P3D::Application {
 
 void BasicShader::updatePart(const ExtendedPart& part) {
 	bind();
-	BasicShader::updateTexture(false);
-	BasicShader::updateModel(part.getCFrame(), DiagonalMat3f(part.hitbox.scale));
+	updateTexture(false);
+	updateModel(part.getCFrame(), DiagonalMat3f(part.hitbox.scale));
 }
 
 void BasicShader::updateMaterial(const Comp::Material& material) {

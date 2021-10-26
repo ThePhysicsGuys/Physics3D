@@ -89,7 +89,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)application</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)application;$(SolutionDir)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>core.h</PrecompiledHeaderFile>
@@ -99,7 +99,7 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)lib;$(OutDir)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;shell32.lib;comdlg32.lib;physics.lib;util.lib;graphics.lib;engine.lib</AdditionalDependencies>
+      <AdditionalDependencies>Physics3D.lib;util.lib;engine.lib;graphics.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/NODEFAULTLIB:LIBCMT</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
@@ -126,7 +126,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)application</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)application;$(SolutionDir)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_MBCS;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <EnablePREfast>false</EnablePREfast>
@@ -141,7 +141,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(SolutionDir)lib;$(OutDir)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;shell32.lib;comdlg32.lib;physics.lib;util.lib;engine.lib;graphics.lib</AdditionalDependencies>
+      <AdditionalDependencies>Physics3D.lib;util.lib;engine.lib;graphics.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/NODEFAULTLIB:LIBCMT</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
@@ -150,6 +150,7 @@
     <ClInclude Include="builtinWorlds.h" />
     <ClInclude Include="ecs\components.h" />
     <ClInclude Include="ecs\entityBuilder.h" />
+    <ClInclude Include="input\playerController.h" />
     <ClInclude Include="io\saveDialog.h" />
     <ClInclude Include="layer\cameraLayer.h" />
     <ClInclude Include="layer\constraintLayer.h" />
@@ -198,6 +199,7 @@
   <ItemGroup>
     <ClCompile Include="application.cpp" />
     <ClCompile Include="builtinWorlds.cpp" />
+    <ClCompile Include="input\playerController.cpp" />
     <ClCompile Include="io\saveDialog.cpp" />
     <ClCompile Include="layer\cameraLayer.cpp" />
     <ClCompile Include="layer\constraintLayer.cpp" />

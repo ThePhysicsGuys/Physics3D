@@ -1,17 +1,19 @@
 #include "worldBenchmark.h"
 
-#include "../physics/world.h"
-#include "../physics/misc/shapeLibrary.h"
-#include "../physics/geometry/shapeCreation.h"
-#include "../physics/math/linalg/commonMatrices.h"
+#include <Physics3D/world.h>
+#include <Physics3D/geometry/shapeLibrary.h>
+#include <Physics3D/geometry/shapeCreation.h>
+#include <Physics3D/math/linalg/commonMatrices.h>
 
+namespace P3D {
 class ComplexObjectBenchmark : public WorldBenchmark {
 public:
 	ComplexObjectBenchmark() : WorldBenchmark("complexObject", 10000) {}
 
 	void init() {
 		createFloor(50, 50, 10);
-		Polyhedron object = Library::icosahedron;
-		world.addPart(new Part(polyhedronShape(Library::createSphere(1.0, 7)), GlobalCFrame(0, 2.0, 0), basicProperties));
+		Polyhedron object = ShapeLibrary::icosahedron;
+		world.addPart(new Part(polyhedronShape(ShapeLibrary::createSphere(1.0, 7)), GlobalCFrame(0, 2.0, 0), basicProperties));
 	}
 } complexObjectBench;
+};

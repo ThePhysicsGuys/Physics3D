@@ -73,7 +73,7 @@ bool initGLEW() {
 
 void terminateGLFW() {
 	Log::info("Closing GLFW");
-	Graphics::GLFW::terminate();
+	GLFW::terminate();
 	Log::info("Closed GLFW");
 }
 
@@ -90,7 +90,7 @@ Screen::Screen(int width, int height, PlayerWorld* world) {
 	this->world = world;
 
 	// Create a windowed mode window and its OpenGL context 
-	GLFWwindow* context = Graphics::GLFW::createContext(width, height, "Physics3D");
+	GLFWwindow* context = GLFW::createContext(width, height, "Physics3D");
 
 	if (!GLFW::validContext(context)) {
 		Log::fatal("Invalid rendering context");
@@ -99,7 +99,7 @@ Screen::Screen(int width, int height, PlayerWorld* world) {
 	}
 
 	// Make the window's context current 
-	Graphics::GLFW::setCurrentContext(context);
+	GLFW::setCurrentContext(context);
 	
 	// already set using application resources on windows
 #ifndef _WIN32
@@ -154,7 +154,7 @@ void Screen::onInit(bool quickBoot) {
 
 	// Framebuffer init
 	quad = new Quad();
-	screenFrameBuffer = new FrameBuffer(dimension.x, dimension.y);
+	screenFrameBuffer = std::make_shared<FrameBuffer>(dimension.x, dimension.y);
 
 	// GShader init
 	Shaders::onInit();

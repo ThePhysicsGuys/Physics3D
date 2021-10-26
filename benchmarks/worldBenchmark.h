@@ -1,8 +1,9 @@
 #pragma once
 
 #include "benchmark.h"
-#include "../physics/world.h"
+#include <Physics3D/world.h>
 
+namespace P3D {
 static const PartProperties basicProperties{1.0, 0.7, 0.5};
 class WorldBenchmark : public Benchmark {
 protected:
@@ -16,4 +17,5 @@ public:
 	virtual void printResults(double timeTaken) override;
 
 	void createFloor(double w, double h, double wallHeight);
+};
 };

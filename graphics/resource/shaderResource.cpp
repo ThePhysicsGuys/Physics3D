@@ -7,10 +7,8 @@
 
 namespace P3D::Graphics {
 
-ShaderResource* ShaderAllocator::load(const std::string& name, const std::string& path) {
-	std::ifstream ifstream(path);
-	ShaderSource source = parseShader(name, path, ifstream);
-	return new ShaderResource(name, path, source);
+ShaderResource* ShaderAllocator::load(const std::string& name, const std::string& path) {;
+	return new ShaderResource(name, path, true);
 }
 
 };

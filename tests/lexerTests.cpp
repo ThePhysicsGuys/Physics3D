@@ -4,6 +4,7 @@
 #include "../graphics/shader/parser.h"
 #include "../util/log.h"
 
+using namespace P3D;
 static const char* code = R"(
 struct Light {
 	vec3 position;
@@ -57,7 +58,7 @@ TEST_CASE(lexVersionPreprocessor) {
 	Lexer lexer(code);
 
 	auto current = lexer.next();
-	while (current.type != Lexer::Token::End) {
+	while(current.type != Lexer::Token::End) {
 		Log::debug("%s[%s]", names[current.type], current.string(code).c_str());
 		current = lexer.next();
 	}
@@ -65,18 +66,18 @@ TEST_CASE(lexVersionPreprocessor) {
 
 TEST_CASE(lexShader) {
 	using namespace P3D::Graphics;
-	
+
 	Lexer lexer(code);
 
 	auto current = lexer.next();
-	while (current.type != Lexer::Token::End) {
+	while(current.type != Lexer::Token::End) {
 		Log::debug("%s[%s]", names[current.type], current.string(code).c_str());
 		current = lexer.next();
 	}
 }
 
 TEST_CASE(parseShader) {
-	using namespace P3D::Graphics;
+	using namespace Graphics;
 
 	Parser::Parse result = Parser::parse(code);
 }

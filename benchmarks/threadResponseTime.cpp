@@ -6,10 +6,11 @@
 #include <thread>
 #include <vector>
 
-#include "../physics/threading/threadPool.h"
+#include <Physics3D/threading/threadPool.h>
 
 using namespace std::chrono;
 
+namespace P3D {
 class ThreadCreateBenchmark : public Benchmark {
 public:
 	ThreadCreateBenchmark() : Benchmark("threadCreateResponseTime") {}
@@ -22,7 +23,7 @@ public:
 		std::mutex coutMutex;
 
 		std::cout << "\n";
-		auto work = [&start,&coutMutex]() {
+		auto work = [&start, &coutMutex]() {
 			auto response = high_resolution_clock::now();
 
 			nanoseconds delay = response - start;
@@ -33,7 +34,7 @@ public:
 			std::this_thread::sleep_for(milliseconds(1000));
 		};
 
-		std::vector<std::thread> threads(std::thread::hardware_concurrency()-1);
+		std::vector<std::thread> threads(std::thread::hardware_concurrency() - 1);
 
 		for(int iter = 0; iter < 5; iter++) {
 			std::cout << "Run " << iter << "\n";
@@ -70,7 +71,7 @@ public:
 			coutMutex.unlock();
 			std::this_thread::sleep_for(milliseconds(1000));
 		};
-		
+
 		std::vector<std::thread> threads(std::thread::hardware_concurrency() - 1);
 
 		ThreadPool threadPool;
@@ -85,4 +86,5 @@ public:
 	virtual void printResults(double timeTaken) override {}
 
 } threadPool;
+};
 

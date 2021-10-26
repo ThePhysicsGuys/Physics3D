@@ -11,13 +11,13 @@
 namespace P3D::Graphics {
 
 namespace Shaders {
-GuiShader guiShader;
-QuadShader quadShader;
-BlurShader horizontalBlurShader;
-BlurShader verticalBlurShader;
+SRef<GuiShader> guiShader;
+SRef<QuadShader> quadShader;
+SRef<BlurShader> horizontalBlurShader;
+SRef<BlurShader> verticalBlurShader;
 
 void onInit() {
-	std::string guiShaderSourceFile =
+	std::string guiShaderSource =
 		R"(
 			[common]
 			#version 330 core
@@ -43,7 +43,7 @@ void onInit() {
 			}
 		)";
 
-	std::string quadShaderSourceFile =
+	std::string quadShaderSource =
 		R"(
 			[common]
 			#version 330 core
@@ -66,7 +66,7 @@ void onInit() {
 			}
 		)";
 
-	std::string horizontalBlurShaderVertexSourceFile =
+	std::string horizontalBlurShaderVertexSource =
 		R"(
 			[common]
 			#version 330
@@ -96,7 +96,7 @@ void onInit() {
 			}
 		)";
 
-	std::string verticalBlurShaderVertexSourceFile =
+	std::string verticalBlurShaderVertexSource =
 		R"(
 			[common]
 			#version 330
@@ -126,7 +126,7 @@ void onInit() {
 			}
 		)";
 
-	std::string blurShaderFragmentSourceFile =
+	std::string blurShaderFragmentSource =
 		R"(
 			[fragment]
 			in vec2 fUV[15];
@@ -153,30 +153,26 @@ void onInit() {
 		)";
 
 	// GShader source init
-	std::string horizontalBlurShaderSourceFile(horizontalBlurShaderVertexSourceFile + blurShaderFragmentSourceFile);
-	std::string verticalBlurShaderSourceFile(verticalBlurShaderVertexSourceFile + blurShaderFragmentSourceFile);
-	ShaderSource guiShaderSource            = parseShader("GuiShader", "gui.shader", guiShaderSourceFile);
-	ShaderSource quadShaderSource           = parseShader("QuadShader", "quad.shader", quadShaderSourceFile);
-	ShaderSource horizontalBlurShaderSource = parseShader("HorizontalBlurShader", "horizontalBlur.shader", horizontalBlurShaderSourceFile);
-	ShaderSource verticalBlurShaderSource   = parseShader("VerticalBlurShader", "verticalBlur.shader", verticalBlurShaderSourceFile);
+	std::string horizontalBlurShaderSource(horizontalBlurShaderVertexSource + blurShaderFragmentSource);
+	std::string verticalBlurShaderSource(verticalBlurShaderVertexSource + blurShaderFragmentSource);
 
 	// GShader init
-	new(&guiShader) GuiShader(guiShaderSource);
-	new(&quadShader) QuadShader(quadShaderSource);
-	new(&horizontalBlurShader) BlurShader(horizontalBlurShaderSource);
-	new(&verticalBlurShader) BlurShader(verticalBlurShaderSource);
+	guiShader = std::make_shared<GuiShader>(guiShaderSource);
+	quadShader = std::make_shared<QuadShader>(quadShaderSource);
+	horizontalBlurShader = std::make_shared<BlurShader>(horizontalBlurShaderSource);
+	verticalBlurShader = std::make_shared<BlurShader>(verticalBlurShaderSource);
 
-	ResourceManager::add(&guiShader);
-	ResourceManager::add(&quadShader);
-	ResourceManager::add(&horizontalBlurShader);
-	ResourceManager::add(&verticalBlurShader);
+	ResourceManager::add(guiShader.get());
+	ResourceManager::add(quadShader.get());
+	ResourceManager::add(horizontalBlurShader.get());
+	ResourceManager::add(verticalBlurShader.get());
 }
 
 void onClose() {
-	horizontalBlurShader.close();
-	verticalBlurShader.close();
-	guiShader.close();
-	quadShader.close();
+	horizontalBlurShader->close();
+	verticalBlurShader->close();
+	guiShader->close();
+	quadShader->close();
 }
 }
 
@@ -228,7 +224,7 @@ void BlurShader::updateWidth(float width) {
 	setUniform("width", width);
 }
 
-void BlurShader::updateTexture(Graphics::Texture* texture) {
+void BlurShader::updateTexture(SRef<Texture> texture) {
 	bind();
 	texture->bind();
 	setUniform("image", texture->getUnit());

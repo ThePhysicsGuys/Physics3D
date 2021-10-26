@@ -28,7 +28,7 @@ namespace ImGui {
         return i1 | i2 | i3;
     }
 
-    inline bool DragVecN(const char* id, const char** labels, float* data, int components, float resetValue = 0.0f, float speed = 0.1f, bool resetAll = false, float* min = nullptr, float* max = nullptr) {
+    inline bool DragVecN(const char* id, const char** labels, float* data, int components, float resetValue = 0.0f, float speed = 0.1f, bool resetAll = false, float** min = nullptr, float** max = nullptr) {
         ImGuiWindow* window = GetCurrentWindow();
         if (window->SkipItems)
             return false;
@@ -69,7 +69,7 @@ namespace ImGui {
 			SameLine(0, GImGui->Style.ItemInnerSpacing.x);
     		
             PushID(i);
-            result |= DragScalar("", ImGuiDataType_Float, data + i, speed, min, max, "%.2f");
+            result |= DragScalar("", ImGuiDataType_Float, data + i, speed, *(min + i), *(max + i), "%.2f");
             PopID();
     		
             PopItemWidth();
@@ -99,7 +99,7 @@ namespace ImGui {
 
     inline bool DragVec3(const char* id, float values[3], float resetValue = 0.0f, float speed = 0.1f, bool resetAll = false, float* min = nullptr, float* max = nullptr) {
         const char* labels[] = { "X", "Y", "Z" };
-        return DragVecN(id, labels, values, 3, resetValue, speed, resetAll, min, max);
+        return DragVecN(id, labels, values, 3, resetValue, speed, resetAll, &min, &max);
     }
 
     inline void HelpMarker(const char* description) {
@@ -153,4 +153,81 @@ namespace ImGui {
     inline void EndToolBar() {
         End();
 	}
+	
 }
+
+#define PROPERTY_FRAME_START(label) \
+	if (ImGui::CollapsingHeader((label), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap)) { \
+		ImGui::Columns(2)
+
+#define PROPERTY_FRAME_END\
+		ImGui::Columns(1); \
+	}
+
+#define PROPERTY_DESC_IF(text, desc, widget, code) \
+	{ \
+		ImGui::TextUnformatted(text); \
+		ImGui::SameLine(); \
+		ImGui::HelpMarker(desc); \
+		ImGui::NextColumn(); \
+		ImGui::SetNextItemWidth(-1); \
+		if (widget) { \
+			code \
+		}; \
+		ImGui::NextColumn(); \
+	}
+
+#define PROPERTY_IF(text, widget, code) \
+	{ \
+		ImGui::TextUnformatted(text); \
+		ImGui::NextColumn(); \
+		ImGui::SetNextItemWidth(-1); \
+		if (widget) { \
+			code \
+		}; \
+		ImGui::NextColumn(); \
+	}
+
+#define PROPERTY_DESC(text, desc, widget) \
+	{ \
+		ImGui::TextUnformatted(text); \
+		ImGui::SameLine(); \
+		ImGui::HelpMarker(desc); \
+		ImGui::NextColumn(); \
+		ImGui::SetNextItemWidth(-1); \
+		widget; \
+		ImGui::NextColumn(); \
+	} 
+
+#define PROPERTY(text, widget) \
+	{ \
+		ImGui::TextUnformatted(text); \
+		ImGui::NextColumn(); \
+		ImGui::SetNextItemWidth(-1); \
+		widget; \
+		ImGui::NextColumn(); \
+	} 
+
+#define TITLE_DESC(text, desc, newline) \
+	{ \
+		if (newline) { \
+			ECS_PROPERTY("", ); \
+		} \
+		ImGui::TextColored(GImGui->Style.Colors[ImGuiCol_ButtonActive], text); \
+		ImGui::SameLine(); \
+		ImGui::HelpMarker(desc); \
+		ImGui::NextColumn(); \
+		ImGui::SetNextItemWidth(-1); \
+		ImGui::NextColumn(); \
+	}
+
+#define TITLE(text, newline) \
+	{ \
+		if (newline) { \
+			PROPERTY("", ); \
+		} \
+		ImGui::TextColored(GImGui->Style.Colors[ImGuiCol_ButtonActive], text); \
+		ImGui::NextColumn(); \
+		ImGui::SetNextItemWidth(-1); \
+		ImGui::NextColumn(); \
+	}

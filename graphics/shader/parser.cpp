@@ -290,6 +290,8 @@ namespace P3D::Graphics {
 
 		result.structs[name.string(lexer.code)] = Parser::Struct { name.range, locals };
 	}
+
+	
 	
 	Parser::Parse Parser::parse(const char* code) {
 		Parse result;

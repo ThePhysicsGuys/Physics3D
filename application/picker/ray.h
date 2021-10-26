@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../physics/math/ray.h"
+#include <Physics3D/math/ray.h>
 
 namespace P3D::Application {
 

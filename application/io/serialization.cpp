@@ -9,12 +9,12 @@
 #include "view/screen.h"
 #include "ecs/components.h"
 #include "../engine/ecs/registry.h"
-#include "../physics/world.h"
+#include <Physics3D/world.h>
 #include "../worlds.h"
 
-#include "../physics/externalforces/gravityForce.h"
-#include "../physics/misc/toString.h"
-#include "../physics/misc/serialization.h"
+#include <Physics3D/externalforces/directionalGravity.h>
+#include <Physics3D/misc/toString.h>
+#include <Physics3D/misc/serialization/serialization.h>
 
 #include <fstream>
 #include <sstream>
@@ -28,33 +28,33 @@ void WorldImportExport::registerTexture(Graphics::Texture* texture) {
 }
 
 static void serializeMaterial(const Comp::Material& material, std::ostream& ostream) {
-	textureSerializer.serialize(material.get(Comp::Material::ALBEDO), ostream);
-	textureSerializer.serialize(material.get(Comp::Material::NORMAL), ostream);
-	textureSerializer.serialize(material.get(Comp::Material::METALNESS), ostream);
-	textureSerializer.serialize(material.get(Comp::Material::ROUGHNESS), ostream);
-	textureSerializer.serialize(material.get(Comp::Material::AO), ostream);
-	textureSerializer.serialize(material.get(Comp::Material::GLOSS), ostream);
-	textureSerializer.serialize(material.get(Comp::Material::SPECULAR), ostream);
-	textureSerializer.serialize(material.get(Comp::Material::DISPLACEMENT), ostream);
-	::serialize<Graphics::Color>(material.albedo, ostream);
-	::serialize<float>(material.metalness, ostream);
-	::serialize<float>(material.roughness, ostream);
-	::serialize<float>(material.ao, ostream);
+	textureSerializer.serialize(material.get(Comp::Material::ALBEDO).get(), ostream);
+	textureSerializer.serialize(material.get(Comp::Material::NORMAL).get(), ostream);
+	textureSerializer.serialize(material.get(Comp::Material::METALNESS).get(), ostream);
+	textureSerializer.serialize(material.get(Comp::Material::ROUGHNESS).get(), ostream);
+	textureSerializer.serialize(material.get(Comp::Material::AO).get(), ostream);
+	textureSerializer.serialize(material.get(Comp::Material::GLOSS).get(), ostream);
+	textureSerializer.serialize(material.get(Comp::Material::SPECULAR).get(), ostream);
+	textureSerializer.serialize(material.get(Comp::Material::DISPLACEMENT).get(), ostream);
+	serializeBasicTypes<Graphics::Color>(material.albedo, ostream);
+	serializeBasicTypes<float>(material.metalness, ostream);
+	serializeBasicTypes<float>(material.roughness, ostream);
+	serializeBasicTypes<float>(material.ao, ostream);
 }
 
 static Comp::Material deserializeMaterial(std::istream& istream) {
-	Graphics::Texture* albedoMap = textureSerializer.deserialize(istream);
-	Graphics::Texture* normalMap = textureSerializer.deserialize(istream);
-	Graphics::Texture* metalnessMap = textureSerializer.deserialize(istream);
-	Graphics::Texture* roughnessMap = textureSerializer.deserialize(istream);
-	Graphics::Texture* aoMap = textureSerializer.deserialize(istream);
-	Graphics::Texture* glossMap = textureSerializer.deserialize(istream);
-	Graphics::Texture* specularMap = textureSerializer.deserialize(istream);
-	Graphics::Texture* displacementrMap = textureSerializer.deserialize(istream);
-	Graphics::Color albedo = ::deserialize<Graphics::Color>(istream);
-	float metalness = ::deserialize<float>(istream);
-	float roughness = ::deserialize<float>(istream);
-	float ao = ::deserialize<float>(istream);
+	SRef<Graphics::Texture> albedoMap(textureSerializer.deserialize(istream));
+	SRef<Graphics::Texture> normalMap(textureSerializer.deserialize(istream));
+	SRef<Graphics::Texture> metalnessMap(textureSerializer.deserialize(istream));
+	SRef<Graphics::Texture> roughnessMap(textureSerializer.deserialize(istream));
+	SRef<Graphics::Texture> aoMap(textureSerializer.deserialize(istream));
+	SRef<Graphics::Texture> glossMap(textureSerializer.deserialize(istream));
+	SRef<Graphics::Texture> specularMap(textureSerializer.deserialize(istream));
+	SRef<Graphics::Texture> displacementrMap(textureSerializer.deserialize(istream));
+	Graphics::Color albedo = deserializeBasicTypes<Graphics::Color>(istream);
+	float metalness = deserializeBasicTypes<float>(istream);
+	float roughness = deserializeBasicTypes<float>(istream);
+	float ao = deserializeBasicTypes<float>(istream);
 
 	Comp::Material material = Comp::Material(albedo, metalness, roughness, ao);
 	material.set(Comp::Material::ALBEDO, albedoMap);
@@ -69,22 +69,22 @@ static Comp::Material deserializeMaterial(std::istream& istream) {
 	return material;
 }
 
-class Serializer : public SerializationSession<ExtendedPart> {
+class Serializer : public SerializationSession<ExtendedPart, SynchronizedWorldPrototype> {
 public:
-	using SerializationSession<ExtendedPart>::SerializationSession;
+	using SerializationSession<ExtendedPart, SynchronizedWorldPrototype>::SerializationSession;
 	virtual void serializePartExternalData(const ExtendedPart& part, std::ostream& ostream) override {
 		// TODO integrate components into serialization
 		serializeMaterial(screen.registry.getOr<Comp::Material>(part.entity), ostream);
-		::serializeString(screen.registry.getOr<Comp::Name>(part.entity, "").name, ostream);
+		serializeString(screen.registry.getOr<Comp::Name>(part.entity, "").name, ostream);
 	}
 };
 
-class Deserializer : public DeSerializationSession<ExtendedPart> {
+class Deserializer : public DeSerializationSession<ExtendedPart, SynchronizedWorldPrototype> {
 public:
-	using DeSerializationSession<ExtendedPart>::DeSerializationSession;
+	using DeSerializationSession<ExtendedPart, SynchronizedWorldPrototype>::DeSerializationSession;
 	virtual ExtendedPart* deserializeExtendedPart(Part&& partPhysicalData, std::istream& istream) override {
 		Comp::Material material = deserializeMaterial(istream);
-		ExtendedPart* result = new ExtendedPart(std::move(partPhysicalData), ::deserializeString(istream));
+		ExtendedPart* result = new ExtendedPart(std::move(partPhysicalData), deserializeString(istream));
 
 		result->setMaterial(material);
 
@@ -119,7 +119,7 @@ void WorldImportExport::saveLooseParts(const char* fileName, size_t numberOfPart
 
 	file.close();
 }
-void WorldImportExport::loadLoosePartsIntoWorld(const char* fileName, World<ExtendedPart>& world) {
+void WorldImportExport::loadLoosePartsIntoWorld(const char* fileName, PlayerWorld& world) {
 	std::ifstream file;
 	openReadFile(file, fileName);
 
@@ -132,7 +132,7 @@ void WorldImportExport::loadLoosePartsIntoWorld(const char* fileName, World<Exte
 	}
 }
 
-void WorldImportExport::loadNativePartsIntoWorld(const char* fileName, World<ExtendedPart>& world) {
+void WorldImportExport::loadNativePartsIntoWorld(const char* fileName, PlayerWorld& world) {
 	std::ifstream file;
 	openReadFile(file, fileName);
 
@@ -146,7 +146,7 @@ void WorldImportExport::loadNativePartsIntoWorld(const char* fileName, World<Ext
 	}
 }
 
-void WorldImportExport::saveWorld(const char* fileName, const World<ExtendedPart>& world) {
+void WorldImportExport::saveWorld(const char* fileName, const PlayerWorld& world) {
 	std::ofstream file;
 	openWriteFile(file, fileName);
 
@@ -155,7 +155,7 @@ void WorldImportExport::saveWorld(const char* fileName, const World<ExtendedPart
 
 	file.close();
 }
-void WorldImportExport::loadWorld(const char* fileName, World<ExtendedPart>& world) {
+void WorldImportExport::loadWorld(const char* fileName, PlayerWorld& world) {
 	std::ifstream file;
 	openReadFile(file, fileName);
 

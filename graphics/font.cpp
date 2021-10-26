@@ -116,35 +116,11 @@ Font::Font(std::string font) {
 	FT_Done_Face(face);
 	FT_Done_FreeType(library);
 
-	atlas = Texture(atlasDimension, atlasDimension, pixels, GL_RGBA);
-}
-
-Font::~Font() {
-	close();
-}
-
-Font::Font(Font&& other) {
-	atlas = std::move(other.atlas);
-
-	for (int i = 0; i < CHARACTER_COUNT; i++) {
-		characters[i] = other.getCharacter(i);
-	}
-}
-
-Font& Font::operator=(Font&& other) {
-	if (this != &other) {
-		std::swap(atlas, other.atlas);
-
-		for (int i = 0; i < CHARACTER_COUNT; i++) {
-			characters[i] = other.getCharacter(i);
-		}
-	}
-
-	return *this;
+	atlas = std::make_shared<Texture>(atlasDimension, atlasDimension, pixels, GL_RGBA);
 }
 
 void Font::close() {
-	atlas.close();
+	// TODO remove
 }
 
 Vec2f Font::size(const std::string& text, double fontSize) {
@@ -176,19 +152,19 @@ Character& Font::getCharacter(unsigned int id) {
 }
 
 unsigned int Font::getAtlasID() const {
-	return atlas.getID();
+	return atlas->getID();
 }
 
 unsigned int Font::getAtlasWidth() const {
-	return atlas.getWidth();
+	return atlas->getWidth();
 }
 
 unsigned int Font::getAtlasHeight() const {
-	return atlas.getHeight();
+	return atlas->getHeight();
 }
 
-Texture* Font::getAtlas() {
-	return &atlas;
+SRef<Texture> Font::getAtlas() {
+	return atlas;
 }
 
 #pragma endregion

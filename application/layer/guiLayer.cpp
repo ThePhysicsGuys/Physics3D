@@ -50,8 +50,8 @@ void GuiLayer::onInit(Engine::Registry64& registry) {
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
 	// GUI init
-	GUI::onInit({ screen->dimension, screen->camera.aspect }, screen->screenFrameBuffer);
-	Graphics::Shaders::guiShader.init(screen->camera.orthoMatrix);
+	GUI::onInit({ screen->dimension, screen->camera.aspect });
+	Shaders::guiShader->init(screen->camera.orthoMatrix);
 }
 
 void GuiLayer::onUpdate(Engine::Registry64& registry) {

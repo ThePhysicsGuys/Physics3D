@@ -30,7 +30,7 @@ bool IconTreeNode(Engine::Registry64& registry, Engine::Registry64::entity_type 
 	if (ImGui::ButtonBehavior(button, id, &hovered, &held, true)) {
 		screen.selectedEntity = entity;
 		
-		Ref<Comp::Collider> model = registry.get<Comp::Collider>(entity);
+		IRef<Comp::Collider> model = registry.get<Comp::Collider>(entity);
 		if (model.valid())
 			screen.selectedPart = model->part;
 		

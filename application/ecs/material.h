@@ -9,9 +9,9 @@ class Texture;
 
 namespace P3D::Application::Comp {
 
-struct Material : public RefCountable {
+struct Material : public RC {
 private:
-	Graphics::Texture* maps[8];
+	SRef<Graphics::Texture> maps[8];
 
 public:
 	enum Map : short {
@@ -36,9 +36,9 @@ public:
 	Material(const Graphics::Color& albedo = Graphics::Color(1), float metalness = 1.0f, float roughness = 1.0f, float ao = 1.0f);
 
 	void reset(Map flag);
-	void set(Map flag, Graphics::Texture* map);
+	void set(Map flag, SRef<Graphics::Texture> map);
 	
-	[[nodiscard]] Graphics::Texture* get(Map map) const;
+	[[nodiscard]] SRef<Graphics::Texture> get(Map map) const;
 	[[nodiscard]] bool has(Map map) const;
 };
 

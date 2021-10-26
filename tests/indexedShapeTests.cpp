@@ -1,14 +1,15 @@
 #include "testsMain.h"
 
 #include "compare.h"
-#include "../physics/misc/toString.h"
+#include <Physics3D/misc/toString.h>
 
-#include "../physics/geometry/indexedShape.h"
-#include "../physics/geometry/shapeBuilder.h"
-#include "../physics/geometry/convexShapeBuilder.h"
-#include "../physics/misc/shapeLibrary.h"
-#include "../physics/misc/validityHelper.h"
+#include <Physics3D/geometry/indexedShape.h>
+#include <Physics3D/geometry/shapeBuilder.h>
+#include <Physics3D/geometry/convexShapeBuilder.h>
+#include <Physics3D/geometry/shapeLibrary.h>
+#include <Physics3D/misc/validityHelper.h>
 
+using namespace P3D;
 TEST_CASE(testIndexedShape) {
 	Vec3f verts[]{Vec3f(0.0, 0.0, 0.0), Vec3f(1.0, 0.0, 0.0), Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 1.0, 0.0)};
 	Triangle triangles[]{{0,1,2},{0,3,1},{0,2,3},{1,3,2}};
@@ -16,7 +17,7 @@ TEST_CASE(testIndexedShape) {
 	TriangleNeighbors neighBuf[4];
 
 	fillNeighborBuf(triangles, 4, neighBuf);
-	
+
 	IndexedShape s(verts, triangles, 4, 4, neighBuf);
 
 	ASSERT_TRUE(isValid(s));
@@ -76,7 +77,7 @@ TEST_CASE(buildConvexShape) {
 	Triangle newIcosaTriangles[40];
 	TriangleNeighbors icosaNeighBuf[40];
 
-	ConvexShapeBuilder icosaBuilder(Library::icosahedron, newIcosaVerts, newIcosaTriangles, icosaNeighBuf, builderRemovalBuffer, builderAddingBuffer);
+	ConvexShapeBuilder icosaBuilder(ShapeLibrary::icosahedron, newIcosaVerts, newIcosaTriangles, icosaNeighBuf, builderRemovalBuffer, builderAddingBuffer);
 
 	ASSERT_TRUE(isValid(icosaBuilder.toIndexedShape()));
 

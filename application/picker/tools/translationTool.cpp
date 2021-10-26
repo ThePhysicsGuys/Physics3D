@@ -5,17 +5,20 @@
 #include "worlds.h"
 #include "application.h"
 #include "selectionTool.h"
-#include "../../../physics/misc/toString.h"
+#include <Physics3D/misc/toString.h>
 #include "view/screen.h"
 #include "shader/shaders.h"
 
-#include "../physics/misc/shapeLibrary.h"
-#include "../physics/math/rotation.h"
+#include <Physics3D/geometry/shapeLibrary.h>
+#include <Physics3D/math/rotation.h>
 #include "../graphics/visualShape.h"
 #include "../graphics/mesh/primitive.h"
 #include "../graphics/mesh/indexedMesh.h"
 #include "../graphics/resource/textureResource.h"
 #include "../util/resource/resourceManager.h"
+
+#define PICKER_STRENGTH 100
+#define PICKER_SPEED_STRENGTH 12
 
 namespace P3D::Application {
 	
@@ -44,6 +47,8 @@ namespace P3D::Application {
 	static IndexedMesh* handleMesh;
 	static VisualShape handleShape;
 
+	MagnetForce TranslationTool::magnet(PICKER_STRENGTH, PICKER_SPEED_STRENGTH);
+
 	static Polyhedron createArrow(float arrowHeadLength, float arrowHeadRadius, float stickRadius) {
 		Vec2f contour[] {
 			{ 0.0f, stickRadius },
@@ -51,7 +56,7 @@ namespace P3D::Application {
 			{ 1.0f - arrowHeadLength, arrowHeadRadius }
 		};
 		
-		return Library::createRevolvedShape(0.0f, contour, 3, 1.0f, 24);
+		return ShapeLibrary::createRevolvedShape(0.0f, contour, 3, 1.0f, 24);
 	}
 	
 	void TranslationTool::onRegister() {
@@ -68,13 +73,15 @@ namespace P3D::Application {
 		// Create handle shapes
 		handleShape = VisualShape::generateSplitNormalsShape(createArrow(0.3f, 0.07f, 0.03f));
 		handleMesh = new IndexedMesh(handleShape);
-		centerShape = VisualShape::generateSmoothNormalsShape(Library::createSphere(0.13f, 3));
+		centerShape = VisualShape::generateSmoothNormalsShape(ShapeLibrary::createSphere(0.13f, 3));
 		centerMesh = new IndexedMesh(centerShape);
-		quadShape = VisualShape::generateSplitNormalsShape(Library::createBox(0.02, 0.25, 0.25).translated({0, 0.5, 0.5}));
+		quadShape = VisualShape::generateSplitNormalsShape(ShapeLibrary::createBox(0.02, 0.25, 0.25).translated({0, 0.5, 0.5}));
 		quadMesh = new IndexedMesh(quadShape);
 
 		// Set idle status
 		setToolStatus(kIdle);
+
+		screen.world->addExternalForce(&TranslationTool::magnet);
 	}
 
 	void TranslationTool::onDeregister() {
@@ -101,46 +108,46 @@ namespace P3D::Application {
 
 		auto status = getToolStatus();		
 		if (status == kTranslateX || status == kTranslateXY || status == kTranslateXZ) {
-			Shaders::maskShader.updateModel(modelX);
-			Shaders::maskShader.updateColor(Colors::RGB_R);
+			Shaders::maskShader->updateModel(modelX);
+			Shaders::maskShader->updateColor(Colors::RGB_R);
 			line->render();
 		}
 
 		if (status == kTranslateY || status == kTranslateXY || status == kTranslateYZ) {
-			Shaders::maskShader.updateModel(modelY);
-			Shaders::maskShader.updateColor(Colors::RGB_G);
+			Shaders::maskShader->updateModel(modelY);
+			Shaders::maskShader->updateColor(Colors::RGB_G);
 			line->render();
 		}
 
 		if (status == kTranslateZ || status == kTranslateXZ || status == kTranslateYZ) {
-			Shaders::maskShader.updateModel(modelZ);
-			Shaders::maskShader.updateColor(Colors::RGB_B);
+			Shaders::maskShader->updateModel(modelZ);
+			Shaders::maskShader->updateColor(Colors::RGB_B);
 			line->render();
 		}
 
-		Shaders::basicShader.updateModel(model);
-		Shaders::basicShader.updateMaterial(Comp::Material(Colors::WHITE));
+		Shaders::basicShader->updateModel(model);
+		Shaders::basicShader->updateMaterial(Comp::Material(Colors::WHITE));
 		centerMesh->render();
 
 		// X, XY
-		Shaders::basicShader.updateMaterial(Comp::Material(Colors::RGB_R));
-		Shaders::basicShader.updateModel(modelX);   
+		Shaders::basicShader->updateMaterial(Comp::Material(Colors::RGB_R));
+		Shaders::basicShader->updateModel(modelX);   
 		handleMesh->render();
-		Shaders::basicShader.updateMaterial(Comp::Material(Colors::RGB_B));
+		Shaders::basicShader->updateMaterial(Comp::Material(Colors::RGB_B));
 		quadMesh->render();
 		
 		// Y, XZ
-		Shaders::basicShader.updateModel(modelY);
-		Shaders::basicShader.updateMaterial(Comp::Material(Colors::RGB_G));
+		Shaders::basicShader->updateModel(modelY);
+		Shaders::basicShader->updateMaterial(Comp::Material(Colors::RGB_G));
 		handleMesh->render();
-		Shaders::basicShader.updateModel(modelXZ);
+		Shaders::basicShader->updateModel(modelXZ);
 		quadMesh->render();
 
 		// Z, YZ
-		Shaders::basicShader.updateMaterial(Comp::Material(Colors::RGB_B));
-		Shaders::basicShader.updateModel(modelZ);
+		Shaders::basicShader->updateMaterial(Comp::Material(Colors::RGB_B));
+		Shaders::basicShader->updateModel(modelZ);
 		handleMesh->render();
-		Shaders::basicShader.updateMaterial(Comp::Material(Colors::RGB_R));
+		Shaders::basicShader->updateMaterial(Comp::Material(Colors::RGB_R));
 		quadMesh->render();
 		
 	}
@@ -255,7 +262,7 @@ namespace P3D::Application {
 			return false;
 
 		// Reset magnet point
-		screen.world->selectedPart = nullptr;
+		this->magnet.selectedPart = nullptr;
 
 		this->active = false;
 
@@ -331,14 +338,14 @@ namespace P3D::Application {
 			if (SelectionTool::selection.size() > 1)
 				return;
 
-			Ref<Comp::Transform> transform = screen.registry.get<Comp::Transform>(SelectionTool::selection[0]);
+			IRef<Comp::Transform> transform = screen.registry.get<Comp::Transform>(SelectionTool::selection[0]);
 			if (transform.invalid())
 				return;
 			if (!transform->isPartAttached())
 				return;
 			
-			screen.world->selectedPart = transform->getPart();
-			screen.world->magnetPoint = planeIntersection;
+			TranslationTool::magnet.selectedPart = transform->getPart();
+			TranslationTool::magnet.magnetPoint = planeIntersection;
 		}
 	}
 

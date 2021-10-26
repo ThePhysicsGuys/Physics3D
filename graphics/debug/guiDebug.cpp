@@ -2,10 +2,10 @@
 
 #include "guiDebug.h"
 #include "threePhaseBuffer.h"
-#include "../physics/misc/debug.h"
-#include "../physics/geometry/shape.h"
-#include "../physics/math/mathUtil.h"
-#include "../physics/geometry/polyhedron.h"
+#include <Physics3D/misc/debug.h>
+#include <Physics3D/geometry/shape.h>
+#include <Physics3D/math/mathUtil.h>
+#include <Physics3D/geometry/polyhedron.h>
 #include "../util/log.h"
 
 #include <GL/glew.h>
@@ -98,7 +98,7 @@ void logShape(const Polyhedron& shape, const GlobalCFrame& location) {
 		}
 	}
 }
-}
+};
 
 void logTickStart() {
 
@@ -123,6 +123,8 @@ void setupDebugHooks() {
 	Debug::setPointLogAction(Logging::logPoint);
 	Debug::setCFrameLogAction(Logging::logCFrame);
 	Debug::setShapeLogAction(Logging::logShape);
+	// leave physics logging default printf
+	//Debug::setLogAction([](const char* format, std::va_list args) {Log::debug(format, ); })
 }
 
 /*

@@ -1,16 +1,17 @@
 #include "benchmark.h"
 
-#include "../physics/geometry/polyhedron.h"
-#include "../physics/misc/shapeLibrary.h"
-#include "../physics/math/linalg/trigonometry.h"
+#include <Physics3D/geometry/polyhedron.h>
+#include <Physics3D/geometry/shapeLibrary.h>
+#include <Physics3D/math/linalg/trigonometry.h>
 
+namespace P3D {
 class GetBounds : public Benchmark {
 	Polyhedron poly;
 	double result = 0;
 public:
 	GetBounds() : Benchmark("getBounds") {}
 
-	void init() override { this->poly = Library::createSphere(1.0, 2); }
+	void init() override { this->poly = ShapeLibrary::createSphere(1.0, 2); }
 	void run() override {
 		Mat3f m = rotationMatrixfromEulerAngles(0.1f, 0.05f, 0.7f);
 		for(size_t i = 0; i < 10000000; i++) {
@@ -21,6 +22,7 @@ public:
 		}
 	}
 } getBounds;
+};
 
 
 

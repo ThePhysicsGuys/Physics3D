@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../physics/math/linalg/vec.h"
+#include <Physics3D/math/linalg/vec.h>
 
 namespace P3D::Graphics {
 

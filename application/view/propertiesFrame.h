@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../engine/ecs/registry.h"
-#include "../physics/math/linalg/vec.h"
 
 namespace P3D::Application {
 	

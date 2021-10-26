@@ -13,11 +13,11 @@
 #include <map>
 #include <set>
 
-#include "../physics/math/linalg/vec.h"
-#include "../physics/math/fix.h"
-#include "../physics/math/linalg/mat.h"
-#include "../physics/math/linalg/trigonometry.h"
-#include "../physics/math/position.h"
+#include <Physics3D/math/linalg/vec.h>
+#include <Physics3D/math/fix.h>
+#include <Physics3D/math/linalg/mat.h>
+#include <Physics3D/math/linalg/trigonometry.h>
+#include <Physics3D/math/position.h>
+#include <Physics3D/datastructures/smartPointers.h>
 
 #include "../util/log.h"
-#include "../util/intrusivePointer.h"

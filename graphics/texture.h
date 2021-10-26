@@ -7,7 +7,7 @@ namespace P3D::Graphics {
 
 class Texture : public Bindable {
 private:
-	static Texture* _white;
+	static SRef<Texture> _white;
 
 protected:
 	int width;
@@ -23,17 +23,17 @@ protected:
 	virtual void create(int target, int level, int internalFormat, int width, int height, int border, int format, int type, const void* buffer);
 
 public:
-	Texture(int width, int height, const void* buffer, int target, int format, int internalFormat, int type);
-	Texture(int width, int height, const void* buffer, int format);
-	Texture(int width, int height);
 	Texture();
+	Texture(int width, int height);
+	Texture(int width, int height, const void* buffer, int format);
+	Texture(int width, int height, const void* buffer, int target, int format, int internalFormat, int type);
 
 	~Texture();
 	Texture(Texture&& other);
 	Texture(const Texture&) = delete;
 	Texture& operator=(Texture&& other);
 	Texture& operator=(const Texture&) = delete;
-
+	
 	virtual void bind(int unit);
 	virtual void bind() override;
 	virtual void unbind() override;
@@ -44,20 +44,20 @@ public:
 
 	void loadFrameBufferTexture(int width, int height);
 
-	Texture* colored(Color color);
+	SRef<Texture> colored(const Color& color);
 
 	static Texture load(const std::string& name);
-	static Texture* white();
+	static SRef<Texture> white();
 
-	float getAspect() const;
-	int getWidth() const;
-	int getHeight() const;
-	int getInternalFormat() const;
-	int getFormat() const;
-	int getTarget() const;
-	int getType() const;
-	int getChannels() const;
-	int getUnit() const;
+	[[nodiscard]] float getAspect() const;
+	[[nodiscard]] int getWidth() const;
+	[[nodiscard]] int getHeight() const;
+	[[nodiscard]] int getInternalFormat() const;
+	[[nodiscard]] int getFormat() const;
+	[[nodiscard]] int getTarget() const;
+	[[nodiscard]] int getType() const;
+	[[nodiscard]] int getChannels() const;
+	[[nodiscard]] int getUnit() const;
 
 	void setUnit(int unit);
 };

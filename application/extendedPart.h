@@ -3,7 +3,7 @@
 #include "ecs/material.h"
 #include "../graphics/visualData.h"
 #include "../graphics/visualShape.h"
-#include "../physics/part.h"
+#include <Physics3D/part.h>
 #include "../engine/ecs/registry.h"
 
 namespace P3D::Application {

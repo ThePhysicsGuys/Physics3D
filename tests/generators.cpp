@@ -2,12 +2,13 @@
 
 #include <vector>
 
-#include "../physics/hardconstraints/motorConstraint.h"
-#include "../physics/hardconstraints/sinusoidalPistonConstraint.h"
+#include <Physics3D/hardconstraints/motorConstraint.h>
+#include <Physics3D/hardconstraints/sinusoidalPistonConstraint.h>
 
-#include "../physics/geometry/convexShapeBuilder.h"
-#include "../physics/misc/toString.h"
+#include <Physics3D/geometry/convexShapeBuilder.h>
+#include <Physics3D/misc/toString.h>
 
+namespace P3D {
 static std::default_random_engine generator;
 
 int generateInt(int max) {
@@ -45,7 +46,7 @@ Polyhedron generateConvexPolyhedron() {
 			vecBuf[i].z = -vecBuf[i].z;
 		}
 	}
-	Triangle triangleBuf[MAX_POINT_COINT*2 * 10]{{0,1,2}, {0,2,3}, {0,3,1}, {3,2,1}};
+	Triangle triangleBuf[MAX_POINT_COINT * 2 * 10]{{0,1,2}, {0,2,3}, {0,3,1}, {3,2,1}};
 	TriangleNeighbors neighborBuf[MAX_POINT_COINT * 2 * 10];
 	int removalBuf[MAX_POINT_COINT * 2 * 10];
 	EdgePiece edgeBuf[MAX_POINT_COINT * 4 * 10];
@@ -96,7 +97,7 @@ TriangleMesh generateTriangleMesh() {
 	for(int i = numVertices; i < numTriangles; i++) {
 		mesh.setTriangle(i, generateTriangle(numVertices)); // extra triangles
 	}
-	
+
 	return TriangleMesh(std::move(mesh));
 }
 
@@ -196,8 +197,6 @@ std::vector<Part> generateMotorizedPhysicalParts() {
 	return parts;
 }
 
-using namespace P3D::OldBoundsTree;
-
 void generateLayerAssignment(std::vector<Part>& parts, WorldPrototype& world) {
 	std::vector<Part*> layerParts(world.layers.size(), nullptr);
 
@@ -215,53 +214,4 @@ void generateLayerAssignment(std::vector<Part>& parts, WorldPrototype& world) {
 	}
 }
 
-TreeNode generateTreeNode(int branchInhibition) {
-	if(rand() % branchInhibition == 0) {
-		// generate branching node
-		int branches = (rand() % (MAX_BRANCHES - 2) + 2); // generate >=2 branches
-		TreeNode result = TreeNode::withEmptySubNodes();
-		result.nodeCount = branches;
-		for(int i = 0; i < branches; i++) {
-			result[i] = generateTreeNode(branchInhibition + 1); // to generate reasonably sized trees but not too big
-		}
-		result.recalculateBoundsFromSubBounds();
-		return result;
-	} else {
-		// generate leaf node
-		BasicBounded* newBasicBounded = new BasicBounded{generateBounds()};
-		return TreeNode(newBasicBounded, newBasicBounded->getBounds());
-	}
-}
-void assignGroupHeads(TreeNode& curNode) {
-	if(curNode.isLeafNode() || rand() % 3 == 0) {
-		curNode.isGroupHead = true;
-	} else {
-		for(TreeNode& subNode : curNode) {
-			assignGroupHeads(subNode);
-		}
-	}
-}
-
-BoundsTree<BasicBounded> generateFilledBoundsTree() {
-	TreeNode rootNode = generateTreeNode(2);
-	assignGroupHeads(rootNode);
-	BoundsTree<BasicBounded> result;
-	result.rootNode = std::move(rootNode);
-	return result;
-}
-
-BoundsTree<BasicBounded> generateBoundsTree() {
-	if(rand() % 10 == 0) {
-		return BoundsTree<BasicBounded>();
-	} else {
-		return generateFilledBoundsTree();
-	}
-}
-
-void* getRandomLeafObject(const TreeNode& node) {
-	if(node.isLeafNode()) {
-		return node.object;
-	} else {
-		return getRandomLeafObject(node.subTrees[rand() % node.nodeCount]);
-	}
-}
+};

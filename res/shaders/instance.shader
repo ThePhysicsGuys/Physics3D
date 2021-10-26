@@ -1,3 +1,6 @@
+[properties]
+vec3 test (PI) = 0, 1, 2 (-1:1);
+
 [common]
 
 #version 330 core
@@ -155,7 +158,7 @@ uniform float gamma = 0.8;
 uniform float hdr = 1.0;
 
 // Constants
-const float PI = 3.14159265359;
+float PI = 3.14159265359;
 
 float ggxTrowbridgeReitz(vec3 N, vec3 H, float roughness) {
 	float alpha = roughness * roughness;

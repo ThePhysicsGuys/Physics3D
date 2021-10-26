@@ -1,9 +1,9 @@
 #include "core.h"
 
-#include "GL/glew.h"
+#include <GL/glew.h>
+#include <stack>
 
 #include "renderer.h"
-#include <stack>
 
 namespace P3D::Graphics {
 
@@ -226,7 +226,7 @@ const char* getShaderVersion() {
 }
 
 int parseShaderVersion(const char* version) {
-	return 100 * (version[0] - '0') + 10 * (version[2] - '0');
+	return 100 * (version[0] - '0') + 10 * (version[1] - '0');
 }
 
 void genBuffers(int count, GLID* id) {

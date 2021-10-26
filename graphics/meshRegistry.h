@@ -3,7 +3,7 @@
 #include "visualData.h"
 #include "visualShape.h"
 #include "mesh/indexedMesh.h"
-#include "../physics/geometry/shapeClass.h"
+#include <Physics3D/geometry/shapeClass.h>
 
 namespace P3D::Graphics::MeshRegistry {
 

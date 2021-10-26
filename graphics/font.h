@@ -43,24 +43,18 @@ struct Character {
 
 class Font {
 private:
-	Texture atlas;
+	SRef<Texture> atlas;
 	Character characters[CHARACTER_COUNT];
 
 public:
 	Font();
 	Font(std::string font);
 
-	~Font();
-	Font(Font&& other);
-	Font(const Font&) = delete;
-	Font& operator=(Font&& other);
-	Font& operator=(const Font&) = delete;
-
 	void close();
 
 	Vec2f size(const std::string& text, double scale);
 
-	Texture* getAtlas();
+	SRef<Texture> getAtlas();
 	Character& getCharacter(unsigned int id);
 	unsigned int getAtlasID() const;
 	unsigned int getAtlasWidth() const;

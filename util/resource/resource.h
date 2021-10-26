@@ -28,7 +28,7 @@ enum class ResourceType {
 	Mesh,
 	Font,
 	Texture,
-	GShader,
+	Shader,
 	OBJ
 };
 

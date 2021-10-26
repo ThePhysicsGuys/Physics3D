@@ -9,9 +9,9 @@
 #include "view/screen.h"
 #include "shader/shaders.h"
 
-#include "../physics/misc/toString.h"
-#include "../physics/misc/shapeLibrary.h"
-#include "../physics/math/rotation.h"
+#include <Physics3D/misc/toString.h>
+#include <Physics3D/geometry/shapeLibrary.h>
+#include <Physics3D/math/rotation.h>
 #include "../graphics/visualShape.h"
 #include "../graphics/mesh/primitive.h"
 #include "../graphics/mesh/indexedMesh.h"
@@ -42,7 +42,7 @@ namespace P3D::Application {
 		line->resize(Vec3f(0, 0, -100000), Vec3f(0, 0, 100000));
 		
 		// Create handle shapes
-		handleShape = VisualShape::generateSmoothNormalsShape(Library::createTorus(1.0f, 0.03f, 80, 12));
+		handleShape = VisualShape::generateSmoothNormalsShape(ShapeLibrary::createTorus(1.0f, 0.03f, 80, 12));
 		handleMesh = new IndexedMesh(handleShape);
 
 		// Set idle status
@@ -71,40 +71,40 @@ namespace P3D::Application {
 
 		auto status = getToolStatus();		
 		if (status == kRotateX) {
-			Shaders::maskShader.updateModel(modelX);
-			Shaders::maskShader.updateColor(Colors::RGB_R);
+			Shaders::maskShader->updateModel(modelX);
+			Shaders::maskShader->updateColor(Colors::RGB_R);
 			line->render();
 		}
 
 		if (status == kRotateY) {
-			Shaders::maskShader.updateModel(modelY);
-			Shaders::maskShader.updateColor(Colors::RGB_G);
+			Shaders::maskShader->updateModel(modelY);
+			Shaders::maskShader->updateColor(Colors::RGB_G);
 			line->render();
 		}
 
 		if (status == kRotateZ) {
-			Shaders::maskShader.updateModel(modelZ);
-			Shaders::maskShader.updateColor(Colors::RGB_B);
+			Shaders::maskShader->updateModel(modelZ);
+			Shaders::maskShader->updateColor(Colors::RGB_B);
 			line->render();
 		}
 
-		Shaders::basicShader.updateModel(modelC);
-		Shaders::basicShader.updateMaterial(Comp::Material(Colors::YELLOW));
+		Shaders::basicShader->updateModel(modelC);
+		Shaders::basicShader->updateMaterial(Comp::Material(Colors::YELLOW));
 		handleMesh->render();
 
 		// X
-		Shaders::basicShader.updateMaterial(Comp::Material(Colors::RGB_R));
-		Shaders::basicShader.updateModel(modelX);   
+		Shaders::basicShader->updateMaterial(Comp::Material(Colors::RGB_R));
+		Shaders::basicShader->updateModel(modelX);   
 		handleMesh->render();
 		
 		// Y
-		Shaders::basicShader.updateModel(modelY);
-		Shaders::basicShader.updateMaterial(Comp::Material(Colors::RGB_G));
+		Shaders::basicShader->updateModel(modelY);
+		Shaders::basicShader->updateMaterial(Comp::Material(Colors::RGB_G));
 		handleMesh->render();
 
 		// Z
-		Shaders::basicShader.updateMaterial(Comp::Material(Colors::RGB_B));
-		Shaders::basicShader.updateModel(modelZ);
+		Shaders::basicShader->updateMaterial(Comp::Material(Colors::RGB_B));
+		Shaders::basicShader->updateModel(modelZ);
 		handleMesh->render();
 		
 	}
@@ -203,10 +203,9 @@ namespace P3D::Application {
 		if (event.getButton() != Mouse::LEFT)
 			return false;
 
-		// Reset magnet point
-		screen.world->selectedPart = nullptr;
-
 		this->active = false;
+
+		TranslationTool::magnet.selectedPart = nullptr;
 
 		return false;
 	};

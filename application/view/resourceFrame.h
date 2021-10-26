@@ -18,7 +18,6 @@ private:
 	static void renderTextureInfo(Graphics::Texture* texture);
 	static void renderFontInfo(Graphics::Font* font);
 	static void renderShaderInfo(Graphics::ShaderResource* shader);
-	static void renderShaderStageInfo(Graphics::ShaderResource* shader, const Graphics::ShaderStage& stage);
 	
 public:
 	static Resource* selectedResource;

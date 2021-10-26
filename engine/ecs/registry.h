@@ -9,7 +9,7 @@
 #include <typeinfo>
 #include "../util/typetraits.h"
 #include "../util/iteratorUtils.h"
-#include "../util/intrusivePointer.h"
+#include "../Physics3D/datastructures/smartPointers.h"
 
 namespace P3D::Engine {
 
@@ -96,7 +96,7 @@ private:
 public:
 	using entity_set = std::set<representation_type, entity_compare>;
 	using entity_queue = std::queue<entity_type>;
-	using entity_map = std::unordered_map<entity_type, Ref<RefCountable>>;
+	using entity_map = std::unordered_map<entity_type, IRef<RC>>;
 	using type_map = std::unordered_map<component_type, std::string>;
 	using component_vector = std::vector<entity_map*>;
 
@@ -193,7 +193,7 @@ public:
 	template<typename... Components>
 	struct conjunction {
 		template<typename Component>
-		static Ref<Component> get(Registry<Entity>* registry, const entity_type& entity) {
+		static IRef<Component> get(Registry<Entity>* registry, const entity_type& entity) {
 			component_type index = registry->getComponentIndex<Component>();
 			entity_map* map = registry->components[index];
 
@@ -213,7 +213,7 @@ public:
 
 	struct no_type {
 		template<typename Component>
-		static Ref<Component> get(Registry<Entity>* registry, const entity_type& entity) {
+		static IRef<Component> get(Registry<Entity>* registry, const entity_type& entity) {
 			return registry->get<Component>(entity);
 		}
 	};
@@ -244,7 +244,7 @@ public:
 		}
 
 		template<typename Component>
-		Ref<Component> get(const entity_type& entity) {
+		IRef<Component> get(const entity_type& entity) {
 			return ViewType::template get<Component>(this->registry, entity);
 		}
 	};
@@ -426,22 +426,22 @@ public:
 	 * Instantiates a component using the given type and arguments and adds it to the given entity
 	 */
 	template<typename Component, typename... Args>
-	Ref<Component> add(const entity_type& entity, Args&&... args) noexcept {
+	IRef<Component> add(const entity_type& entity, Args&&... args) noexcept {
 		auto entities_iterator = entities.find(static_cast<representation_type>(entity));
 		if (entities_iterator == entities.end())
-			return Ref<Component>();
+			return IRef<Component>();
 
-		Ref<Component> component = make_intrusive(new Component(std::forward<Args>(args)...));
+		IRef<Component> component = make_intrusive<Component>(std::forward<Args>(args)...);
 		component_type index = getComponentIndex<Component>();
 
 		while (index >= components.size())
 			components.push_back(new entity_map());
 
 		entity_map* map = components[index];
-		auto result = map->insert(std::make_pair(entity, intrusive_cast<RefCountable>(component)));
+		auto result = map->insert(std::make_pair(entity, intrusive_cast<RC>(component)));
 
 		if (!result.second)
-			result.first->second = intrusive_cast<RefCountable>(component);
+			result.first->second = intrusive_cast<RC>(component);
 
 		return component;
 	}
@@ -487,19 +487,19 @@ public:
 	 * Returns the component of the given type from the given entity, nullptr if no such component exists
 	 */
 	template<typename Component>
-	[[nodiscard]] Ref<Component> get(const entity_type& entity) noexcept {
+	[[nodiscard]] IRef<Component> get(const entity_type& entity) noexcept {
 		auto entities_iterator = entities.find(static_cast<representation_type>(entity));
 		if (entities_iterator == entities.end())
-			return Ref<Component>();
+			return IRef<Component>();
 
 		component_type index = getComponentIndex<Component>();
 		if (index >= components.size())
-			return Ref<Component>();
+			return IRef<Component>();
 
 		entity_map* map = components[index];
 		auto component_iterator = map->find(entity);
 		if (component_iterator == map->end())
-			return Ref<Component>();
+			return IRef<Component>();
 
 		return intrusive_cast<Component>(component_iterator->second);
 	}
@@ -508,10 +508,10 @@ public:
 	 * Returns the component of the given type from the given entity, or creates one using the provides arguments and returns it.
 	 */
 	template<typename Component, typename... Args>
-	[[nodiscard]] Ref<Component> getOrAdd(const entity_type& entity, Args&&... args) {
+	[[nodiscard]] IRef<Component> getOrAdd(const entity_type& entity, Args&&... args) {
 		auto entities_iterator = entities.find(static_cast<representation_type>(entity));
 		if (entities_iterator == entities.end())
-			return Ref<Component>();
+			return IRef<Component>();
 
 		component_type index = getComponentIndex<Component>();
 		while (index >= components.size())
@@ -520,9 +520,9 @@ public:
 		entity_map* map = components[index];
 		auto component_iterator = map->find(entity);
 		if (component_iterator == map->end()) {
-			Ref<Component> component = make_intrusive(new Component(std::forward<Args>(args)...));
+			IRef<Component> component = make_intrusive<Component>(std::forward<Args>(args)...);
 
-			map->insert(std::make_pair(entity, intrusive_cast<RefCountable>(component)));
+			map->insert(std::make_pair(entity, intrusive_cast<RC>(component)));
 
 			return component;
 		}
@@ -535,7 +535,7 @@ public:
 	 */
 	template<typename Component, typename... Args>
 	[[nodiscard]] Component getOr(const entity_type& entity, Args&&... args) {
-		Ref<Component> result = get<Component>(entity);
+		IRef<Component> result = get<Component>(entity);
 		if (result == nullptr)
 			return Component(std::forward<Args>(args)...);
 		else
@@ -778,7 +778,7 @@ public:
 	template<typename... Type>
 	[[nodiscard]] auto view() noexcept {
 		if constexpr (sizeof...(Type) == 1)
-			if constexpr (std::is_base_of<RefCountable, Type...>::value)
+			if constexpr (std::is_base_of<RC, Type...>::value)
 				return view(type<conjunction<Type...>>{});
 			else 
 				return view(type<Type...>{});

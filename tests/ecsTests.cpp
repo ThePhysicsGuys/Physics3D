@@ -1,9 +1,10 @@
 #include "testsMain.h"
 
+#include <Physics3D/datastructures/smartPointers.h>
 #include "../engine/ecs/registry.h"
-#include "../util/intrusivePointer.h"
 #include "../application/ecs/components.h"
 
+namespace P3D {
 TEST_CASE(idGeneration) {
 	using namespace P3D::Engine;
 	Registry16 registry;
@@ -11,7 +12,7 @@ TEST_CASE(idGeneration) {
 	auto id2 = registry.create();
 	registry.destroy(id1);
 	auto id3 = registry.create();
-	
+
 	ASSERT_TRUE(id3 == id1);
 }
 
@@ -20,8 +21,8 @@ TEST_CASE(componentGeneration) {
 	Registry16 registry;
 	auto id = registry.create();
 
-	struct A : public RefCountable {};
-	struct B : public RefCountable {};
+	struct A : public RC {};
+	struct B : public RC {};
 
 	registry.add<A>(id);
 	registry.add<B>(id);
@@ -36,7 +37,7 @@ TEST_CASE(componentAccess) {
 	Registry16 registry;
 	auto id = registry.create();
 
-	struct A : public RefCountable {
+	struct A : public RC {
 		int a;
 		float b;
 
@@ -50,9 +51,9 @@ TEST_CASE(componentAccess) {
 
 
 TEST_CASE(viewTest) {
-	struct A : public RefCountable {};
-	struct B : public RefCountable {};
-	struct C : public RefCountable {};
+	struct A : public RC {};
+	struct B : public RC {};
+	struct C : public RC {};
 
 	using namespace P3D::Engine;
 	Registry16 registry;
@@ -76,9 +77,9 @@ TEST_CASE(viewTest) {
 	registry.add<C>(id3);
 	registry.add<C>(id4);
 	registry.add<C>(id5);
-	
+
 	std::size_t count = 0;
-	for (auto _ : registry.view<A, B, C>()) {
+	for(auto _ : registry.view<A, B, C>()) {
 		count++;
 	}
 
@@ -109,7 +110,7 @@ TEST_CASE(getChildren) {
 	id2 = registry.setParent(id2, parent);
 
 	std::size_t count = 0;
-	for (auto _ : registry.getChildren(parent)) {
+	for(auto _ : registry.getChildren(parent)) {
 		count++;
 	}
 
@@ -121,7 +122,7 @@ TEST_CASE(getFromView) {
 	Registry16 registry;
 	auto id = registry.create();
 
-	struct A : public RefCountable {
+	struct A : public RC {
 		int idx = 0;
 		A(int idx) : idx(idx) {}
 	};
@@ -131,8 +132,9 @@ TEST_CASE(getFromView) {
 	registry.add<A>(id, 3);
 
 	auto view = registry.view<A>();
-	for (auto entity : view) {
+	for(auto entity : view) {
 		intrusive_ptr<A> component = view.get<A>(entity);
 		ASSERT_TRUE(component->idx > 0 && component->idx < 4);
 	}
 }
+};

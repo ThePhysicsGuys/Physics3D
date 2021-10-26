@@ -2,35 +2,25 @@
 
 #include <chrono>
 #include <thread>
+#include <atomic>
 
 namespace P3D::Application {
-
-using namespace std::chrono;
 
 class TickerThread {
 private:
 	std::thread thread;
-	bool stopped = false;
-	double TPS;
-	double speed = 1.0;
-	milliseconds tickSkipTimeout;
+	std::atomic<bool> stopped = false;
+	std::atomic<double> TPS;
+	std::atomic<double> speed = 1.0;
+	std::chrono::milliseconds tickSkipTimeout;
 	void(*tickAction)();
 public:
 	TickerThread() : thread(), TPS(0.0), tickSkipTimeout(0), tickAction(nullptr) {};
-	TickerThread(double targetTPS, milliseconds tickSkipTimeout, void(*tickAction)());
+	TickerThread(double targetTPS, std::chrono::milliseconds tickSkipTimeout, void(*tickAction)());
 	~TickerThread();
 
-	TickerThread& operator=(TickerThread&& rhs) noexcept {
-		this->thread = std::thread();
-		this->stopped = rhs.stopped;
-		this->TPS = rhs.TPS;
-		this->tickSkipTimeout = rhs.tickSkipTimeout;
-		this->tickAction = rhs.tickAction;
-
-		return *this;
-	}
-
-	TickerThread& operator=(const TickerThread&) = delete;
+	TickerThread(TickerThread&& other) = default;
+	TickerThread& operator=(TickerThread&& other) = default;
 
 	void start();
 	void stop();

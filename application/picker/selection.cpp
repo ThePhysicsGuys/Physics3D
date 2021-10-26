@@ -14,11 +14,11 @@ namespace P3D::Application {
 	}
 
 	void Selection::expandSelection(const Engine::Registry64::entity_type& entity) {
-		Ref<Comp::Transform> transform = screen.registry.get<Comp::Transform>(entity);
+		IRef<Comp::Transform> transform = screen.registry.get<Comp::Transform>(entity);
 		if (transform.invalid())
 			return;
 
-		Ref<Comp::Hitbox> hitbox = screen.registry.get<Comp::Hitbox>(entity);
+		IRef<Comp::Hitbox> hitbox = screen.registry.get<Comp::Hitbox>(entity);
 		
 		if (selection.empty() || !this->boundingBox.has_value()) {
 			if (hitbox.valid())
@@ -26,7 +26,7 @@ namespace P3D::Application {
 			else
 				this->boundingBox = BoundingBox(0.2, 0.2, .2);
 		} else {
-			Ref<Comp::Transform> referenceTransform = screen.registry.get<Comp::Transform>(selection[0]);
+			IRef<Comp::Transform> referenceTransform = screen.registry.get<Comp::Transform>(selection[0]);
 			GlobalCFrame referenceFrame = referenceTransform->getCFrame();
 			CFrame relativeFrame = referenceFrame.globalToLocal(transform->getCFrame());
 
@@ -122,7 +122,7 @@ namespace P3D::Application {
 
 	void Selection::translate(const Vec3& translation) {
 		for (auto entity : this->selection) {
-			Ref<Comp::Transform> transform = screen.registry.get<Comp::Transform>(entity);
+			IRef<Comp::Transform> transform = screen.registry.get<Comp::Transform>(entity);
 			if (transform.valid())
 				transform->translate(translation);
 		}
@@ -135,7 +135,7 @@ namespace P3D::Application {
 		
 		Rotation rotation = Rotation::fromRotationVec(angle * normal);
 		for (auto entity : this->selection) {
-			Ref<Comp::Transform> transform = screen.registry.get<Comp::Transform>(entity);
+			IRef<Comp::Transform> transform = screen.registry.get<Comp::Transform>(entity);
 			
 			if (transform.valid()) {
 				transform->rotate(rotation);
@@ -152,7 +152,7 @@ namespace P3D::Application {
 			return;
 
 		for (auto entity : this->selection) {
-			Ref<Comp::Transform> transform = screen.registry.get<Comp::Transform>(entity);
+			IRef<Comp::Transform> transform = screen.registry.get<Comp::Transform>(entity);
 			Vec3 delta = transform->getPosition() - reference->getPosition();
 			Vec3 translation = elementWiseMul(delta, scale - Vec3(1.0, 1.0, 1.0));
 			transform->translate(translation);
@@ -167,7 +167,7 @@ namespace P3D::Application {
 			return std::nullopt;
 
 		if (this->size() == 1) {
-			Ref<Comp::Hitbox> hitbox = screen.registry.get<Comp::Hitbox>(this->selection[0]);
+			IRef<Comp::Hitbox> hitbox = screen.registry.get<Comp::Hitbox>(this->selection[0]);
 			if (hitbox.valid())
 				return hitbox->getShape();
 		}
@@ -179,7 +179,7 @@ namespace P3D::Application {
 		if (this->selection.empty())
 			return std::nullopt;
 
-		Ref<Comp::Transform> transform = screen.registry.get<Comp::Transform>(this->selection[0]);
+		IRef<Comp::Transform> transform = screen.registry.get<Comp::Transform>(this->selection[0]);
 		return GlobalCFrame(transform->getCFrame().localToGlobal(this->boundingBox->getCenter()), transform->getRotation());
 	}
 	

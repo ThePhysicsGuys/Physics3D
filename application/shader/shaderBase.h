@@ -1,8 +1,10 @@
 #pragma once
 
-#include "../graphics/resource/shaderResource.h"
+#include <Physics3D/math/position.h>
+#include <Physics3D/math/globalCFrame.h>
+#include <Physics3D/math/linalg/mat.h>
 
-class GlobalCFrame;
+#include "../graphics/resource/shaderResource.h"
 
 namespace P3D::Application {
 	namespace Comp {
@@ -11,11 +13,8 @@ namespace P3D::Application {
 
 	using namespace Graphics;
 
-struct Light;
-
 struct ProjectionShaderBase : public virtual ShaderResource {
-	inline ProjectionShaderBase() : ShaderResource() {}
-	inline ProjectionShaderBase(const std::string& name, const std::string& path, const ShaderSource& source) : ShaderResource(name, path, source) {}
+	ProjectionShaderBase(const std::string& name, const std::string& path, bool isPath = true) : ShaderResource(name, path, isPath) {}
 
 	void updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Position& viewPosition);
 	void updateProjectionMatrix(const Mat4f& projectionMatrix);
@@ -24,21 +23,18 @@ struct ProjectionShaderBase : public virtual ShaderResource {
 };
 
 struct StandardMeshShaderBase : public ProjectionShaderBase {
-	inline StandardMeshShaderBase() : ProjectionShaderBase() {}
-	inline StandardMeshShaderBase(const std::string& name, const std::string& path, const ShaderSource& source) : ProjectionShaderBase(name, path, source) {}
+	StandardMeshShaderBase(const std::string& name, const std::string& path, bool isPath = true) : ProjectionShaderBase(name, path, isPath) {}
 
 	void updateModel(const Mat4f& modelMatrix);
 	void updateModel(const GlobalCFrame& modelCFrame, const DiagonalMat3f& scale);
 };
 
 struct InstancedMeshShaderBase : public ProjectionShaderBase {
-	inline InstancedMeshShaderBase() : ProjectionShaderBase() {}
-	inline InstancedMeshShaderBase(const std::string& name, const std::string& path, const ShaderSource& source) : ProjectionShaderBase(name, path, source) {}
+	InstancedMeshShaderBase(const std::string& name, const std::string& path, bool isPath = true) : ProjectionShaderBase(name, path, isPath) {}
 };
 
 struct BasicShaderBase : public virtual ShaderResource {
-	inline BasicShaderBase() : ShaderResource() {}
-	inline BasicShaderBase(const std::string& name, const std::string& path, const ShaderSource& source) : ShaderResource(name, path, source) {}
+	BasicShaderBase(const std::string& name, const std::string& path, bool isPath = true) : ShaderResource(name, path, isPath) {}
 
 	void updateSunDirection(const Vec3f& sunDirection);
 	void updateSunColor(const Vec3f& sunColor);

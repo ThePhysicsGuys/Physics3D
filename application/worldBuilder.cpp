@@ -3,21 +3,21 @@
 #include "worldBuilder.h"
 
 #include "application.h"
-#include "../physics/math/mathUtil.h"
-#include "../physics/geometry/shape.h"
-#include "../physics/geometry/shapeCreation.h"
+#include <Physics3D/math/mathUtil.h>
+#include <Physics3D/geometry/shape.h>
+#include <Physics3D/geometry/shapeCreation.h>
 
 #include "../graphics/gui/gui.h"
 
 #include "../util/resource/resourceLoader.h"
 #include "../util/resource/resourceManager.h"
 #include "../graphics/resource/textureResource.h"
-#include "../physics/math/constants.h"
+#include <Physics3D/math/constants.h>
 #include "view/screen.h"
 #include "ecs/components.h"
 
-#include "../physics/constraints/ballConstraint.h"
-#include "../physics/constraints/hingeConstraint.h"
+#include <Physics3D/constraints/ballConstraint.h>
+#include <Physics3D/constraints/hingeConstraint.h>
 
 namespace P3D::Application {
 
@@ -32,13 +32,13 @@ PartProperties basicProperties{1.0, 0.7, 0.3};
 
 
 void init() {
-	wedge = polyhedronShape(Library::wedge);
-	treeTrunk = polyhedronShape(Library::createPrism(7, 0.5, 11.0).rotated(Rotation::Predefined::X_270));
-	icosahedron = polyhedronShape(Library::icosahedron);
-	triangle = polyhedronShape(Library::trianglePyramid);
+	wedge = polyhedronShape(ShapeLibrary::wedge);
+	treeTrunk = polyhedronShape(ShapeLibrary::createPrism(7, 0.5, 11.0).rotated(Rotation::Predefined::X_270));
+	icosahedron = polyhedronShape(ShapeLibrary::icosahedron);
+	triangle = polyhedronShape(ShapeLibrary::trianglePyramid);
 
 	Vec2f inbetweenPoints[3]{Vec2f(0.0f, 0.03f), Vec2f(0.7f, 0.03f), Vec2f(0.7f, 0.06f)};
-	arrow = polyhedronShape(Library::createRevolvedShape(0.0f, inbetweenPoints, 3, 1.0f, 50));
+	arrow = polyhedronShape(ShapeLibrary::createRevolvedShape(0.0f, inbetweenPoints, 3, 1.0f, 50));
 }
 
 void createDominoAt(const GlobalCFrame& cframe) {
@@ -67,7 +67,7 @@ void makeDominoTower(int floors, int circumference, Position origin) {
 
 void buildFloor(double width, double depth, int folder) {
 	ExtendedPart* floorExtendedPart = new ExtendedPart(boxShape(width, 1.0, depth), GlobalCFrame(0.0, 0.0, 0.0), { 2.0, 1.0, 0.3 }, "Floor", folder);
-	screen.registry.getOrAdd<Comp::Material>(floorExtendedPart->entity)->set(Comp::Material::ALBEDO, ResourceManager::get<Graphics::TextureResource>("floorMaterial"));
+	screen.registry.getOrAdd<Comp::Material>(floorExtendedPart->entity);// ->set(Comp::Material::ALBEDO, ResourceManager::get<Graphics::TextureResource>("floorMaterial"));
 	world.addTerrainPart(floorExtendedPart);
 }
 void buildFloorAndWalls(double width, double depth, double wallHeight, int folder) {
@@ -83,7 +83,7 @@ void buildFloorAndWalls(double width, double depth, double wallHeight, int folde
 	world.addTerrainPart(new ExtendedPart(boxShape(width, wallHeight, 0.7), GlobalCFrame(0.0, wallHeight / 2, -depth / 2), wallProperties, "Wall", floorWallFolder));
 }
 
-SpiderFactory::SpiderFactory(double spiderSize, int legCount) : spiderSize(spiderSize), legCount(legCount), bodyShape(polyhedronShape(Library::createPointyPrism(legCount, 0.5f, 0.2f, 0.1f, 0.1f))) {}
+SpiderFactory::SpiderFactory(double spiderSize, int legCount) : spiderSize(spiderSize), legCount(legCount), bodyShape(polyhedronShape(ShapeLibrary::createPointyPrism(legCount, 0.5f, 0.2f, 0.1f, 0.1f))) {}
 
 void SpiderFactory::buildSpider(const GlobalCFrame& spiderPosition, int folder) {
 	//ExtendedPart* spiderBody = createUniquePart(screen, createPointyPrism(legCount, 0.5, 0.2, 0.1, 0.1), spiderPosition, 1.0, 0.0, "SpiderBody");
