@@ -47,8 +47,8 @@
 
 #include "../util/stringUtil.h"
 
-#include "../physics/geometry/builtinShapeClasses.h"
-#include "../physics/misc/toString.h"
+#include <Physics3D/geometry/builtinShapeClasses.h>
+#include <Physics3D/misc/toString.h>
 
 
 #define TICKS_PER_SECOND 120.0

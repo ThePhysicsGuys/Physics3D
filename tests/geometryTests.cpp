@@ -18,6 +18,7 @@
 #include "generators.h"
 
 #include <Physics3D/misc/cpuid.h>
+#include <Physics3D/geometry/builtinShapeClasses.h>
 
 using namespace P3D;
 #define ASSERT(condition) ASSERT_TOLERANT(condition, 0.00001)
@@ -181,8 +182,8 @@ TEST_CASE(testForWedgeCornerAndPillShapes) {
 		//ASSERT(CornerClass::instance.asPolyhedron().containsPoint(points)
 			  // == CornerClass::instance.containsPoint(points));
 
-		ASSERT(CornerClass::instance.asPolyhedron().getIntersectionDistance(origin, direction)
-			   == CornerClass::instance.getIntersectionDistance(origin, direction));
+		ASSERT(WedgeClass::instance.asPolyhedron().getIntersectionDistance(origin, direction)
+			   == WedgeClass::instance.getIntersectionDistance(origin, direction));
 	}
 }
 

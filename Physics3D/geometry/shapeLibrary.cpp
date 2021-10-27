@@ -92,9 +92,6 @@ const Polyhedron house(houseVertices, houseTriangles, 10, 16);
 const Polyhedron wedge{wedgeVertices, wedgeTriangles, wedgeVertexCount, 8};
 const Polyhedron corner{cornerVertices, cornerTriangles, cornerVertexCount, 4};
 
-Polyhedron createCube(float side) {
-	return createBox(side, side, side);
-}
 
 Polyhedron createBox(float width, float height, float depth) {
 	float dx = float(width / 2.0);
@@ -114,6 +111,9 @@ Polyhedron createBox(float width, float height, float depth) {
 	return Polyhedron(vertBuf, boxTriangles, 8, 12);
 }
 
+Polyhedron createCube(float side) {
+	return createBox(side, side, side);
+}
 
 static void createTriangleRing(int ring1Start, int ring2Start, int size, EditableMesh& mesh, int offset) {
 	for(int i = 0; i < size - 1; i++) {
@@ -125,29 +125,32 @@ static void createTriangleRing(int ring1Start, int ring2Start, int size, Editabl
 	mesh.setTriangle(offset + last * 2 + 1, ring1Start, ring2Start, ring2Start + last);
 }
 
-	Polyhedron createBox(float width, float height, float depth) {
-		float dx = float(width / 2.0);
-		float dy = float(height / 2.0);
-		float dz = float(depth / 2.0);
+static void createTriangleRingReverse(int ring1Start, int ring2Start, int size, EditableMesh& mesh, int offset) {
+	for(int i = 0; i < size - 1; i++) {
+		mesh.setTriangle(offset + i * 2, ring1Start + i + 1, ring1Start + i, ring2Start + i);
+		mesh.setTriangle(offset + i * 2 + 1, ring1Start + i + 1, ring2Start + i, ring2Start + i + 1);
+	}
+	int last = size - 1;
+	mesh.setTriangle(offset + last * 2, ring1Start, ring1Start + last, ring2Start + last);
+	mesh.setTriangle(offset + last * 2 + 1, ring1Start, ring2Start + last, ring2Start);
+}
 
-		Vec3f vertBuf[8]{
-			Vec3f(-dx, -dy, -dz),
-			Vec3f(+dx, -dy, -dz),
-			Vec3f(+dx, +dy, -dz),
-			Vec3f(-dx, +dy, -dz),
-			Vec3f(-dx, -dy, +dz),
-			Vec3f(+dx, -dy, +dz),
-			Vec3f(+dx, +dy, +dz),
-			Vec3f(-dx, +dy, +dz)
-		};
-		return Polyhedron(vertBuf, boxTriangles, 8, 12);
+static void createTriangleFan(int topIndex, int startFan, int size, EditableMesh& mesh, int offset) {
+	for(int i = 0; i < size - 1; i++) {
+		mesh.setTriangle(offset + i, topIndex, startFan + i, startFan + i + 1);
 	}
 }
 
-	Polyhedron createCube(float side) {
-		return createBox(side, side, side);
+static void createTriangleFanReverse(int topIndex, int startFan, int size, EditableMesh& mesh, int offset) {
+	for(int i = 0; i < size - 1; i++) {
+		mesh.setTriangle(offset + i, topIndex, startFan + i + 1, startFan + i);
 	}
+}
 
+static void createTriangleCone(int topIndex, int startFan, int size, EditableMesh& mesh, int offset) {
+	createTriangleFan(topIndex, startFan, size, mesh, offset);
+	mesh.setTriangle(offset + size - 1, topIndex, startFan + size - 1, startFan);
+}
 
 static void createTriangleConeReverse(int topIndex, int startFan, int size, EditableMesh& mesh, int offset) {
 	createTriangleFanReverse(topIndex, startFan, size, mesh, offset);

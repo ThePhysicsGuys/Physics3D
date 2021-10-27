@@ -11,3 +11,4 @@ Shape boxShape(double width, double height, double depth);
 Shape polyhedronShape(const Polyhedron& poly);
 Shape wedgeShape();
 Shape cornerShape();
+}
