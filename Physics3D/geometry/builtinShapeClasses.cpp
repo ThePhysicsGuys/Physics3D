@@ -238,72 +238,43 @@ bool WedgeClass::containsPoint(Vec3 points) const {
 	return std::abs(points.x) <= 1.0 && std::abs(points.y) <= 1.0 && std::abs(points.z) <= 1.0 && points.x + points.y <= 0.0;
 }
 double WedgeClass::getIntersectionDistance(Vec3 origin, Vec3 direction) const {
-	/*
-	* BackfaceNormal(1, 0, 0)
-	* BottomfaceNormal(0, -1, 0)
-	* DiagonalNormal(1, 1, 0)
-	* RightTriangle(0, 0, 1)
-	* LeftTriangle(0, 0, -1)
-	- Get the distance to the plane, so that origin+distance*direction lies on the plane
-	- Then compute the actual intersection point on the plane, that's origin+distance*direction
-	- If the point is within the bounds of the face, then accept and return the intersection, else continue
-	- If none of the faces accepted the intersection, then no intersection
-	*/
-	if(origin.x < 0) {
-		origin.x = -origin.x;
-		direction.x = -direction.x;
-	}
-	if(origin.y < 0) {
-		origin.y = -origin.y;
-		direction.y = -direction.y;
-	}
-	if(origin.z < 0) {
-		origin.z = -origin.z;
-		direction.z = -direction.z;
-	}
-	//for bottom plane
 	{
 		double ty = (-1 - origin.y) / direction.y;
-		double y = origin.y + ty * direction.y;
-		if(std::abs(y) <= 1.0 && ty > 0) {
+		Vec3 y = origin + ty * direction;
+		if(std::abs(y.x) <= 1.0 && std::abs(y.z) <= 1.0 && ty > 0) {
 			return ty;
 		}
 	}
-	//for back plane
 	{
 		double tx = (-1 - origin.x) / direction.x;
-		double x = origin.x + tx * direction.x;
-		if(std::abs(x) <= 1.0 && tx > 0) {
+		Vec3 x = origin + tx * direction;
+		if(std::abs(x.y) <= 1.0 && std::abs(x.z) <= 1.0 && tx > 0) {
 			return tx;
 		}
 	}
-	//left triangle
 	{
 		double tz = (-1 - origin.z) / direction.z;
-		double z = origin.z + tz * direction.z;
-		if(std::abs(z) <= 1.0 && tz > 0) {
+		Vec3 z = origin + tz * direction;
+		if(std::abs(z.x) <= 1.0 && std::abs(z.y) <= 1.0 && tz > 0) {
 			return tz;
 		}
 	}
-	//right triangle
 	{
 		double tz = (1 - origin.z) / direction.z;
-		double z = origin.z + tz * direction.z;
-		if(std::abs(z) <= 1.0 && tz > 0) {
+		Vec3 z = origin + tz * direction;
+		if(std::abs(z.x) <= 1.0 && std::abs(z.y) <= 1.0 && tz > 0) {
 			return tz;
 		}
 	}
 	{
-		//diagonal
 		const double dn = direction.x + direction.y;
-		double txy = (-origin.x - origin.y) / dn;
-		double x = origin.x + txy * direction.x;
-		double y = origin.y + txy * direction.y;
-		if(x + y <= 0.0 && txy > 0) {
-			return txy;
+		double t = (-origin.x - origin.y) / dn;
+		Vec3 points = origin + t * direction;
+		if(this->containsPoint(points) && t > 0) {
+			return t;
 		}
 	}
-	return std::numeric_limits<double>::infinity();
+	return std::numeric_limits<double>::max();
 }
 BoundingBox WedgeClass::getBounds(const Rotation& rotation, const DiagonalMat3& scale) const {
 	const Mat3& rotMat = rotation.asRotationMatrix();
@@ -359,35 +330,34 @@ Polyhedron WedgeClass::asPolyhedron() const {
 CornerClass::CornerClass() : ShapeClass(4 / 3, Vec3(-2 / 3, -2 / 3, -2 / 3), ScalableInertialMatrix(Vec3(-0.0333, -0.9500, -0.0333), Vec3(0.3500, -0.0667, 0.3500)), CORNER_CLASS_ID) {}
 
 bool CornerClass::containsPoint(Vec3 point) const {
-	return point.x == 0 && point.y == 0 && point.z == 0 && 1 - point.x - point.y - point.z == 0;
+	return std::abs(point.x) <= 1.0 && std::abs(point.y) <= 1.0 && std::abs(point.z) <= 0 && -point.x - point.y - point.z <= 1.0;
 }
 double CornerClass::getIntersectionDistance(Vec3 origin, Vec3 direction) const {
-
 	double tx = (-1 - origin.x) / direction.x;
-	double x = origin.x + tx * direction.x;
-	if(std::abs(x) <= 1.0 && tx > 0) {
+	Vec3 x = origin + tx * direction;
+	if(std::abs(x.y) <= 1.0 && std::abs(x.z) <= 0.0 && tx > 0) {
 		return tx;
 	}
 
 	double ty = (-1 - origin.y) / direction.y;
-	double y = origin.y + ty * direction.y;
-	if(std::abs(y) <= 1.0 && ty > 0) {
+	Vec3 y = origin + ty * direction;
+	if(std::abs(y.x) <= 1.0 && std::abs(y.z) <= 1.0 && ty > 0) {
 		return ty;
 	}
 
 	double tz = (-1 - origin.z) / direction.z;
-	double z = origin.z + tz * direction.z;
-	if(std::abs(z) <= 1.0 && tz > 0) {
+	Vec3 z = origin + tz * direction;
+	if(std::abs(z.x) <= 1.0 && std::abs(z.y) <= 1.0 && tz > 0) {
 		return tz;
 	}
 
 	const double dn = direction.x + direction.y + direction.z;
 	double t = (-1 - origin.x - origin.y - origin.z) / dn;
-	Vec3 point = origin + t * direction;
-	if(point.x + point.y + point.z <= 1.0 && t > 0) {
+	Vec3 points = origin + t * direction;
+	if(this->containsPoint(points) && t > 0) {
 		return t;
 	}
-	return std::numeric_limits<double>::infinity();
+	return std::numeric_limits<double>::max();
 }
 BoundingBox CornerClass::getBounds(const Rotation& rotation, const DiagonalMat3& scale) const {
 	const Mat3& rot = rotation.asRotationMatrix();

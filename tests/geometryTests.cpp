@@ -162,7 +162,7 @@ TEST_CASE(testGetFurthestPointInDirection) {
 }
 
 TEST_CASE(testForWedgeCornerAndPillShapes) {
-	for(int i = 0; i < 100; i++) {
+	for(int i = 0; i < 2; i++) {
 		Vec3 direction = generateVec3();
 		Vec3 points = generateVec3();
 		Vec3 origin = generateVec3();
@@ -171,7 +171,7 @@ TEST_CASE(testForWedgeCornerAndPillShapes) {
 		TriangleMesh mesh = generateTriangleMesh();
 
 		//ASSERT(WedgeClass::instance.asPolyhedron().furthestInDirectionFallback(direction)
-			   //== WedgeClass::instance.furthestInDirection(direction));
+			  // == WedgeClass::instance.furthestInDirection(direction));
 
 		//ASSERT(mesh.getBoundsFallback(Mat3f(rotation.asRotationMatrix() * scale))
 			  // == WedgeClass::instance.getBounds(rotation, scale));
@@ -182,9 +182,10 @@ TEST_CASE(testForWedgeCornerAndPillShapes) {
 		//ASSERT(CornerClass::instance.asPolyhedron().containsPoint(points)
 			  // == CornerClass::instance.containsPoint(points));
 
-		ASSERT(WedgeClass::instance.asPolyhedron().getIntersectionDistance(origin, direction)
-			   == WedgeClass::instance.getIntersectionDistance(origin, direction));
+		ASSERT(CornerClass::instance.asPolyhedron().getIntersectionDistance(origin, direction)
+			   == CornerClass::instance.getIntersectionDistance(origin, direction));
 	}
+	
 }
 
 TEST_CASE(testTriangleMeshOptimizedGetBounds) {

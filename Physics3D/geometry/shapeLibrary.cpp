@@ -84,8 +84,8 @@ Triangle boxTriangles[12] = {
 	{4,5,7},{6,7,5}, // TOP
 };
 
-int wedgeVertexCount = 6;
-int cornerVertexCount = 4;
+const int wedgeVertexCount = 6;
+const int cornerVertexCount = 4;
 const Polyhedron icosahedron(icosahedronVertices, icosahedronTriangles, 12, 20);
 const Polyhedron trianglePyramid(trianglePyramidVertices, trianglePyramidTriangles, 4, 4);
 const Polyhedron house(houseVertices, houseTriangles, 10, 16);
