@@ -6,6 +6,7 @@
 #include <chrono>
 #include <iostream>
 #include <fstream>
+#include <filesystem>
 
 #include "view/screen.h"
 #include "ecs/material.h"
@@ -68,6 +69,8 @@ void init(const ::Util::ParsedArgs& cmdArgs) {
 	auto start = std::chrono::high_resolution_clock::now();
 
 	Log::init("latest.log");
+
+	std::filesystem::copy_file("../res/default_imgui.ini", "../res/imgui.ini", std::filesystem::copy_options::skip_existing);
 
 	Log::info(::Util::printAndParseCPUIDArgs(cmdArgs));
 	bool quickBoot = cmdArgs.hasFlag("quickBoot");

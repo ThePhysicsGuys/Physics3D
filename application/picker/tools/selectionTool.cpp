@@ -119,7 +119,7 @@ std::optional<double> SelectionTool::intersect(const GlobalCFrame& cframe, IRef<
 
 	double distance = shape.getIntersectionDistance(cframe.globalToLocal(ray.origin), cframe.relativeToLocal(ray.direction));
 
-	if (distance == 0.0 || distance == std::numeric_limits<double>::max())
+	if (distance < 0.0 || distance == std::numeric_limits<double>::max())
 		return std::nullopt;
 
 	return distance;
