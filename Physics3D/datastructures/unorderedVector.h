@@ -7,7 +7,6 @@ namespace P3D {
 template<typename T>
 class UnorderedVector : public std::vector<T> {
 public:
-	using std::vector<T>::vector;
 
 	inline void remove(T&& element) {
 		T* el = &element;

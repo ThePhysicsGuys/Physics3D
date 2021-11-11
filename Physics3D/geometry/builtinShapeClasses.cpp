@@ -1,10 +1,11 @@
-#include "builtinShapeClasses.h"
+﻿#include "builtinShapeClasses.h"
 
 #include "shapeCreation.h"
 #include "shapeLibrary.h"
 #include "../math/constants.h"
 
 namespace P3D {
+#pragma region CubeClass
 CubeClass::CubeClass() : ShapeClass(8, Vec3(0, 0, 0), ScalableInertialMatrix(Vec3(8.0 / 3.0, 8.0 / 3.0, 8.0 / 3.0), Vec3(0, 0, 0)), CUBE_CLASS_ID) {}
 
 bool CubeClass::containsPoint(Vec3 point) const {
@@ -41,7 +42,7 @@ double CubeClass::getIntersectionDistance(Vec3 origin, Vec3 direction) const {
 	Vec3 intersZ = origin + tz * direction;
 	if(std::abs(intersZ.x) <= 1.0 && std::abs(intersZ.y) <= 1.0) return tz;
 
-	return INFINITY;
+	return std::numeric_limits<double>::infinity();
 }
 
 BoundingBox CubeClass::getBounds(const Rotation& rotation, const DiagonalMat3& scale) const {
@@ -64,9 +65,9 @@ Vec3f CubeClass::furthestInDirection(const Vec3f& direction) const {
 Polyhedron CubeClass::asPolyhedron() const {
 	return ShapeLibrary::createCube(2.0);
 }
+#pragma endregion
 
-
-
+#pragma region SphereClass
 SphereClass::SphereClass() : ShapeClass(4.0 / 3.0 * PI, Vec3(0, 0, 0), ScalableInertialMatrix(Vec3(4.0 / 15.0 * PI, 4.0 / 15.0 * PI, 4.0 / 15.0 * PI), Vec3(0, 0, 0)), SPHERE_CLASS_ID) {}
 
 bool SphereClass::containsPoint(Vec3 point) const {
@@ -84,7 +85,7 @@ double SphereClass::getIntersectionDistance(Vec3 origin, Vec3 direction) const {
 	if(D >= 0) {
 		return (-b + -sqrt(D)) / a;
 	} else {
-		return INFINITY;
+		return std::numeric_limits<double>::infinity();
 	}
 }
 
@@ -128,9 +129,9 @@ void SphereClass::setScaleZ(double newZ, DiagonalMat3& scale) const {
 	scale[1] = newZ;
 	scale[2] = newZ;
 }
+#pragma endregion
 
-
-
+#pragma region CylinderClass
 /*
 Inertia of cyllinder:
 	z = V * 1/2
@@ -177,11 +178,11 @@ double CylinderClass::getIntersectionDistance(Vec3 origin, Vec3 direction) const
 			if(x * x + y * y <= 1.0) {
 				return t2;
 			} else {
-				return INFINITY;
+				return std::numeric_limits<double>::infinity();
 			}
 		}
 	} else {
-		return INFINITY;
+		return std::numeric_limits<double>::infinity();
 	}
 }
 
@@ -228,7 +229,184 @@ void CylinderClass::setScaleY(double newY, DiagonalMat3& scale) const {
 	scale[0] = newY;
 	scale[1] = newY;
 }
+#pragma endregion
 
+#pragma region WedgeClass
+WedgeClass::WedgeClass() : ShapeClass(4.0, Vec3(-1 / 3, 0, 1 / 3), ScalableInertialMatrix(Vec3(0.9030, 0.6032, 0.8411), Vec3(0.3517, 0.0210, 0.1667)), WEDGE_CLASS_ID) {}
+
+bool WedgeClass::containsPoint(Vec3 points) const {
+	return std::abs(points.x) <= 1.0 && std::abs(points.y) <= 1.0 && std::abs(points.z) <= 1.0 && points.x + points.y <= 0.0;
+}
+double WedgeClass::getIntersectionDistance(Vec3 origin, Vec3 direction) const {
+	{
+		double ty = (-1 - origin.y) / direction.y;
+		Vec3 y = origin + ty * direction;
+		if(std::abs(y.x) <= 1.0 && std::abs(y.z) <= 1.0 && ty > 0) {
+			return ty;
+		}
+	}
+	{
+		double tx = (-1 - origin.x) / direction.x;
+		Vec3 x = origin + tx * direction;
+		if(std::abs(x.y) <= 1.0 && std::abs(x.z) <= 1.0 && tx > 0) {
+			return tx;
+		}
+	}
+	{
+		double tz = (-1 - origin.z) / direction.z;
+		Vec3 z = origin + tz * direction;
+		if(std::abs(z.x) <= 1.0 && std::abs(z.y) <= 1.0 && tz > 0) {
+			return tz;
+		}
+	}
+	{
+		double tz = (1 - origin.z) / direction.z;
+		Vec3 z = origin + tz * direction;
+		if(std::abs(z.x) <= 1.0 && std::abs(z.y) <= 1.0 && tz > 0) {
+			return tz;
+		}
+	}
+	{
+		const double dn = direction.x + direction.y;
+		double t = (-origin.x - origin.y) / dn;
+		Vec3 points = origin + t * direction;
+		if(this->containsPoint(points) && t > 0) {
+			return t;
+		}
+	}
+	return std::numeric_limits<double>::max();
+}
+BoundingBox WedgeClass::getBounds(const Rotation& rotation, const DiagonalMat3& scale) const {
+	const Mat3& rotMat = rotation.asRotationMatrix();
+	Vec3 scaleRot[3] = {};
+	for(size_t i = 0; i < 3; i++) {
+		scaleRot[i] = scale[i] * rotMat.getCol(i);
+	}
+	const Vec3 vertices[] = {
+		-scaleRot[0] - scaleRot[1] - scaleRot[2],
+		-scaleRot[0] - scaleRot[1] + scaleRot[2],
+		 scaleRot[0] - scaleRot[1] + scaleRot[2],
+		 scaleRot[0] - scaleRot[1] - scaleRot[2],
+		-scaleRot[0] + scaleRot[1] - scaleRot[2],
+		-scaleRot[0] + scaleRot[1] + scaleRot[2],
+	};
+	double xmin = vertices[0].x; double xmax = vertices[0].x;
+	double ymin = vertices[0].y; double ymax = vertices[0].y;
+	double zmin = vertices[0].z; double zmax = vertices[0].z;
+
+	for(size_t i = 1; i < ShapeLibrary::wedgeVertexCount; i++) {
+		const Vec3& current = vertices[i];
+		if(current.x < xmin) xmin = current.x;
+		if(current.x > xmax) xmax = current.x;
+		if(current.y < ymin) ymin = current.y;
+		if(current.y > ymax) ymax = current.y;
+		if(current.z < zmin) zmin = current.z;
+		if(current.z > zmax) zmax = current.z;
+	}
+	return BoundingBox{xmin, ymin, zmin, xmax, ymax, zmax};
+}
+double WedgeClass::getScaledMaxRadiusSq(DiagonalMat3 scale) const {
+	return scale[0] * scale[0] + scale[1] * scale[1] + scale[2] * scale[2];
+}
+Vec3f WedgeClass::furthestInDirection(const Vec3f& direction) const {
+	float best = ShapeLibrary::wedgeVertices[0] * direction;
+	Vec3f bestVertex = ShapeLibrary::wedgeVertices[0];
+
+	for(size_t i = 1; i < ShapeLibrary::wedgeVertexCount; i++) {
+		float current = ShapeLibrary::wedgeVertices[i] * direction;
+		if(current > best) {
+			best = current;
+			bestVertex = ShapeLibrary::wedgeVertices[i];
+		}
+	}
+	return bestVertex;
+}
+Polyhedron WedgeClass::asPolyhedron() const {
+	return ShapeLibrary::wedge;
+}
+#pragma endregion
+
+#pragma region CornerClass
+CornerClass::CornerClass() : ShapeClass(4 / 3, Vec3(-2 / 3, -2 / 3, -2 / 3), ScalableInertialMatrix(Vec3(-0.0333, -0.9500, -0.0333), Vec3(0.3500, -0.0667, 0.3500)), CORNER_CLASS_ID) {}
+
+bool CornerClass::containsPoint(Vec3 point) const {
+	return std::abs(point.x) <= 1.0 && std::abs(point.y) <= 1.0 && std::abs(point.z) <= 0 && -point.x - point.y - point.z <= 1.0;
+}
+double CornerClass::getIntersectionDistance(Vec3 origin, Vec3 direction) const {
+	double tx = (-1 - origin.x) / direction.x;
+	Vec3 x = origin + tx * direction;
+	if(std::abs(x.y) <= 1.0 && std::abs(x.z) <= 0.0 && tx > 0) {
+		return tx;
+	}
+
+	double ty = (-1 - origin.y) / direction.y;
+	Vec3 y = origin + ty * direction;
+	if(std::abs(y.x) <= 1.0 && std::abs(y.z) <= 1.0 && ty > 0) {
+		return ty;
+	}
+
+	double tz = (-1 - origin.z) / direction.z;
+	Vec3 z = origin + tz * direction;
+	if(std::abs(z.x) <= 1.0 && std::abs(z.y) <= 1.0 && tz > 0) {
+		return tz;
+	}
+
+	const double dn = direction.x + direction.y + direction.z;
+	double t = (-1 - origin.x - origin.y - origin.z) / dn;
+	Vec3 points = origin + t * direction;
+	if(this->containsPoint(points) && t > 0) {
+		return t;
+	}
+	return std::numeric_limits<double>::max();
+}
+BoundingBox CornerClass::getBounds(const Rotation& rotation, const DiagonalMat3& scale) const {
+	const Mat3& rot = rotation.asRotationMatrix();
+	Vec3 scaleRot[3] = {};
+	for(size_t i = 0; i < 3; i++) {
+		scaleRot[i] = scale[i] * rot.getCol(i);
+	}
+	const Vec3 vertices[] = {
+		-scaleRot[0] - scaleRot[1] - scaleRot[2],
+		-scaleRot[0] - scaleRot[1] + scaleRot[2],
+		-scaleRot[0] + scaleRot[1] - scaleRot[2],
+		scaleRot[0] - scaleRot[1] - scaleRot[2],
+	};
+	double xmin = vertices[0].x; double xmax = vertices[0].x;
+	double ymin = vertices[0].y; double ymax = vertices[0].y;
+	double zmin = vertices[0].z; double zmax = vertices[0].z;
+
+	for(size_t i = 1; i < ShapeLibrary::cornerVertexCount; i++) {
+		const Vec3& current = vertices[i];
+		if(current.x < xmin) xmin = current.x;
+		if(current.x > xmax) xmax = current.x;
+		if(current.y < ymin) ymin = current.y;
+		if(current.y > ymax) ymax = current.y;
+		if(current.z < zmin) zmin = current.z;
+		if(current.z > zmax) zmax = current.z;
+	}
+	return BoundingBox{xmin, ymin, zmin, xmax, ymax, zmax};
+}
+double CornerClass::getScaledMaxRadiusSq(DiagonalMat3 scale) const {
+	return scale[0] * scale[0] + scale[1] * scale[1] + scale[2] * scale[2];
+}
+Vec3f CornerClass::furthestInDirection(const Vec3f& direction) const {
+	float bestDir = ShapeLibrary::cornerVertices[0] * direction;
+	Vec3f bestVertex = ShapeLibrary::cornerVertices[0];
+	for(int i = 1; i < ShapeLibrary::cornerVertexCount; i++) {
+		float currBest = ShapeLibrary::cornerVertices[i] * direction;
+		if(currBest > bestDir) {
+			bestDir = currBest;
+			bestVertex = ShapeLibrary::cornerVertices[i];
+		}
+	}
+	return bestVertex;
+}
+Polyhedron CornerClass::asPolyhedron() const {
+	return ShapeLibrary::corner;
+}
+#pragma endregion
+
+#pragma region PolyhedronShapeClass
 PolyhedronShapeClass::PolyhedronShapeClass(Polyhedron&& poly) : poly(poly), ShapeClass(poly.getVolume(), poly.getCenterOfMass(), poly.getScalableInertiaAroundCenterOfMass(), CONVEX_POLYHEDRON_CLASS_ID) {}
 
 bool PolyhedronShapeClass::containsPoint(Vec3 point) const {
@@ -252,7 +430,9 @@ Vec3f PolyhedronShapeClass::furthestInDirection(const Vec3f& direction) const {
 Polyhedron PolyhedronShapeClass::asPolyhedron() const {
 	return poly;
 }
+#pragma endregion
 
+#pragma region PolyhedronShapeClassAVX
 BoundingBox PolyhedronShapeClassAVX::getBounds(const Rotation& rotation, const DiagonalMat3& scale) const {
 	return poly.getBoundsAVX(Mat3f(rotation.asRotationMatrix() * scale));
 }
@@ -280,8 +460,12 @@ BoundingBox PolyhedronShapeClassFallback::getBounds(const Rotation& rotation, co
 Vec3f PolyhedronShapeClassFallback::furthestInDirection(const Vec3f& direction) const {
 	return poly.furthestInDirectionFallback(direction);
 }
+#pragma endregion
 
 const CubeClass CubeClass::instance;
 const SphereClass SphereClass::instance;
 const CylinderClass CylinderClass::instance;
+const WedgeClass WedgeClass::instance;
+const CornerClass CornerClass::instance;
 };
+

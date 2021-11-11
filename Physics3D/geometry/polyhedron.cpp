@@ -51,7 +51,7 @@ bool Polyhedron::containsPoint(Vec3f point) const {
 	Vec3f ray(1, 0, 0);
 
 	bool isExiting = false;
-	double bestD = static_cast<double>(INFINITY);
+	double bestD = std::numeric_limits<double>::infinity();
 
 	for(const Triangle& tri : iterTriangles()) {
 		RayIntersection<float> r = rayTriangleIntersection(point, ray, this->getVertex(tri.firstIndex), this->getVertex(tri.secondIndex), this->getVertex(tri.thirdIndex));

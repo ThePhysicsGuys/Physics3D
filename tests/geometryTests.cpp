@@ -18,6 +18,7 @@
 #include "generators.h"
 
 #include <Physics3D/misc/cpuid.h>
+#include <Physics3D/geometry/builtinShapeClasses.h>
 
 using namespace P3D;
 #define ASSERT(condition) ASSERT_TOLERANT(condition, 0.00001)
@@ -160,6 +161,33 @@ TEST_CASE(testGetFurthestPointInDirection) {
 	}
 }
 
+TEST_CASE(testForWedgeCornerAndPillShapes) {
+	for(int i = 0; i < 2; i++) {
+		Vec3 direction = generateVec3();
+		Vec3 points = generateVec3();
+		Vec3 origin = generateVec3();
+		Rotation rotation = generateRotation();
+		DiagonalMat3 scale = generateDiagonalMatrix<double, 3>();
+		TriangleMesh mesh = generateTriangleMesh();
+
+		//ASSERT(WedgeClass::instance.asPolyhedron().furthestInDirectionFallback(direction)
+			  // == WedgeClass::instance.furthestInDirection(direction));
+
+		//ASSERT(mesh.getBoundsFallback(Mat3f(rotation.asRotationMatrix() * scale))
+			  // == WedgeClass::instance.getBounds(rotation, scale));
+		
+		/*ASSERT(WedgeClass::instance.asPolyhedron().getScaledMaxRadiusSq(scale)
+			   == WedgeClass::instance.getScaledMaxRadiusSq(scale));*/
+
+		//ASSERT(CornerClass::instance.asPolyhedron().containsPoint(points)
+			  // == CornerClass::instance.containsPoint(points));
+
+		ASSERT(CornerClass::instance.asPolyhedron().getIntersectionDistance(origin, direction)
+			   == CornerClass::instance.getIntersectionDistance(origin, direction));
+	}
+	
+}
+
 TEST_CASE(testTriangleMeshOptimizedGetBounds) {
 	for(int iter = 0; iter < 1000; iter++) {
 		TriangleMesh mesh = generateTriangleMesh();
@@ -259,3 +287,4 @@ TEST_CASE(testTriangleMeshOptimizedFurthestInDirection) {
 		}
 	}
 }
+

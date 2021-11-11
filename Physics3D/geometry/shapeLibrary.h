@@ -7,6 +7,11 @@ extern const Polyhedron icosahedron;
 extern const Polyhedron trianglePyramid;
 extern const Polyhedron house;
 extern const Polyhedron wedge;
+extern const Polyhedron corner;
+extern Vec3f wedgeVertices[6];
+extern Vec3f cornerVertices[4];
+extern const int wedgeVertexCount;
+extern const int cornerVertexCount;
 
 Polyhedron createBox(float width, float height, float depth);
 Polyhedron createCube(float side);
