@@ -93,8 +93,10 @@ void WorldLayer::moveOutOfGroup(Part* part) {
 }
 
 void WorldLayer::removePart(Part* partToRemove) {
+	assert(partToRemove->layer == this);
 	tree.remove(partToRemove);
 	parent->world->onPartRemoved(partToRemove);
+	partToRemove->layer = nullptr;
 }
 
 void WorldLayer::notifyPartBoundsUpdated(const Part* updatedPart, const Bounds& oldBounds) {

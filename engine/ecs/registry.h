@@ -415,7 +415,7 @@ public:
 			for (auto map : components) {
 				auto component_iterator = map->find(entity);
 				if (component_iterator != map->end()) {
-					delete component_iterator->second.get(); // TODO fix
+					// the component's intrusive_ptr will clean up the component
 					map->erase(component_iterator);
 				}
 			}

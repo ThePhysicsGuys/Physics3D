@@ -79,6 +79,14 @@ ExtendedPart::ExtendedPart(const Shape& hitbox, ExtendedPart* attachTo, const CF
 		screen.registry.add<Comp::Name>(this->entity, name);
 }
 
+ExtendedPart::~ExtendedPart() {
+	// have to do the same as Part's destructor here, because if I don't then PlayerWorld tries to update a deleted entity
+	this->removeFromWorld();
+	if(this->entity != screen.registry.null_entity) {
+		screen.registry.destroy(this->entity);
+	}
+}
+
 void ExtendedPart::setMaterial(const Comp::Material& material) {
 	screen.registry.add<Comp::Material>(this->entity, material);
 }

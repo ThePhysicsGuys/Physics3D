@@ -18,6 +18,8 @@ struct RC {
     bool shared() noexcept {
         return count == 1;
     }
+
+    virtual ~RC() {}
 };
 
 template<typename T>

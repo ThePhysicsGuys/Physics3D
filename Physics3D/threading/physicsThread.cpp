@@ -8,17 +8,24 @@
 namespace P3D {
 using namespace std::chrono;
 
-PhysicsThread::PhysicsThread(void(&tickFunction)(WorldPrototype*), std::chrono::milliseconds tickSkipTimeout, unsigned int threadCount) : 
+static void emptyFunc(WorldPrototype*) {}
+PhysicsThread::PhysicsThread(WorldPrototype* world, void(&tickFunction)(WorldPrototype*), std::chrono::milliseconds tickSkipTimeout, unsigned int threadCount) : 
+	world(world),
 	tickFunction(tickFunction),
 	tickSkipTimeout(tickSkipTimeout),
 	threadPool(threadCount == 0 ? std::thread::hardware_concurrency() : threadCount) {}
 
+PhysicsThread::PhysicsThread(WorldPrototype* world, std::chrono::milliseconds tickSkipTimeout, unsigned int threadCount) : 
+	PhysicsThread(world, emptyFunc, tickSkipTimeout, threadCount) {}
+
+PhysicsThread::PhysicsThread(void(&tickFunction)(WorldPrototype*), std::chrono::milliseconds tickSkipTimeout, unsigned int threadCount) : 
+	PhysicsThread(nullptr, tickFunction, tickSkipTimeout, threadCount) {}
+
+PhysicsThread::PhysicsThread(std::chrono::milliseconds tickSkipTimeout, unsigned int threadCount) : 
+	PhysicsThread(nullptr, emptyFunc, tickSkipTimeout, threadCount) {}
+
 PhysicsThread::~PhysicsThread() {
 	this->stop();
-}
-
-void PhysicsThread::setWorld(WorldPrototype* newWorld) {
-	this->world = newWorld;
 }
 
 void PhysicsThread::runTick() {
@@ -65,7 +72,7 @@ void PhysicsThread::start() {
 }
 void PhysicsThread::stop() {
 	this->shouldStop = true;
-	this->thread.join();
+	if(this->thread.joinable()) this->thread.join();
 }
 }
 

@@ -57,8 +57,8 @@
 
 namespace P3D::Application {
 
-PhysicsThread physicsThread(Graphics::AppDebug::logTickEnd, TICK_SKIP_TIME);
 PlayerWorld world(1 / TICKS_PER_SECOND);
+PhysicsThread physicsThread(&world, Graphics::AppDebug::logTickEnd, TICK_SKIP_TIME);
 Screen screen;
 
 void init(const ::Util::ParsedArgs& cmdArgs);
@@ -100,16 +100,10 @@ void init(const ::Util::ParsedArgs& cmdArgs) {
 	Log::info("Initializing screen");
 	screen.onInit(quickBoot);
 	
-	Log::info("Creating player");
-	// Player
-	screen.camera.attachment = new ExtendedPart(polyhedronShape(ShapeLibrary::createPrism(50, 0.3f, 1.5f)), GlobalCFrame(), {1.0, 5.0, 0.0}, "Player");
-
 	if(!world.isValid()) {
 		throw "World not valid!";
 	}
 
-	Log::info("Initializing physics");
-	setupPhysics();
 	Log::info("Initializing debug");
 	setupDebug();
 
@@ -243,10 +237,6 @@ void setupWorld(const ::Util::ParsedArgs& cmdArgs) {
 	world.constraints.push_back(std::move(cg));*/
 }
 
-void setupPhysics() {
-	physicsThread.setWorld(&world);
-}
-
 void setupDebug() {
 	Graphics::AppDebug::setupDebugHooks();
 }
@@ -351,12 +341,13 @@ void runTick() {
 void toggleFlying() {
 	world.asyncModification([] () {
 		if (screen.camera.flying) {
+			Log::info("Creating player");
 			screen.camera.flying = false;
-			screen.camera.attachment->setCFrame(GlobalCFrame(screen.camera.cframe.getPosition()));
+			screen.camera.attachment = new ExtendedPart(polyhedronShape(ShapeLibrary::createPrism(50, 0.3f, 1.5f)), GlobalCFrame(screen.camera.cframe.getPosition()), {1.0, 5.0, 0.0}, "Player");
 			screen.world->addPart(screen.camera.attachment);
-			screen.camera.attachment->parent->mainPhysical->momentResponse = SymmetricMat3::ZEROS();
 		} else {
-			screen.world->removePart(screen.camera.attachment);
+			Log::info("Destroying player");
+			delete screen.camera.attachment;
 			screen.camera.flying = true;
 		}
 		});

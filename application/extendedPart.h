@@ -20,6 +20,7 @@ public:
 	ExtendedPart(const Shape& hitbox, const GlobalCFrame& position, const PartProperties& properties, const std::string& name = "", const Entity& parent = 0);
 	ExtendedPart(const Shape& hitbox, const GlobalCFrame& position, const PartProperties& properties, const VisualData& visualData, const std::string& name = "", const Entity& parent = 0);
 	ExtendedPart(const Shape& hitbox, ExtendedPart* attachTo, const CFrame& attach, const PartProperties& properties, const std::string& name = "", const Entity& parent = 0);
+	~ExtendedPart();
 
 	void setMaterial(const Comp::Material& material);
 	void setName(const std::string& name);

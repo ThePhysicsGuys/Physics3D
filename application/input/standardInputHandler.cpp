@@ -125,8 +125,8 @@ bool StandardInputHandler::onKeyPress(Engine::KeyPressEvent& event) {
 
 	KEY_BIND(KeyboardOptions::Part::remove) {
 		if (screen.selectedPart != nullptr) {
-			screen.world->asyncModification([world = screen.world, selectedPart = screen.selectedPart]() {
-				world->removePart(selectedPart);
+			screen.world->asyncModification([selectedPart = screen.selectedPart]() {
+				delete selectedPart;
 			});
 			TranslationTool::magnet.selectedPart = nullptr;
 			screen.selectedPart = nullptr;
