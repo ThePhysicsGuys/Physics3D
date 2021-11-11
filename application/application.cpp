@@ -147,7 +147,7 @@ void setupWorld(const ::Util::ParsedArgs& cmdArgs) {
 	PartProperties basicProperties{1.0, 0.7, 0.3};
 
 	WorldBuilder::buildFloorAndWalls(50.0, 50.0, 1.0);
-	/*
+	
 	GlobalCFrame origin(0.0, 5.0, 0.0, Rotation::fromEulerAngles(-3.14 / 4, 3.14 / 4, 0.0));
 
 	for(int x = 0; x < 3; x++) {
@@ -171,7 +171,7 @@ void setupWorld(const ::Util::ParsedArgs& cmdArgs) {
 		world.addPart(partA);
 		partA->attach(partB, new MotorConstraintTemplate<ConstantMotorTurner>(0.5), CFrame(0.0, 1.0, 0.0), CFrame(1.0, 0.0, 0.0));
 	}
-	*/
+	
 	// Lights
 	{
 		Comp::Light::Attenuation attenuation = {1, 1, 1};
@@ -184,8 +184,10 @@ void setupWorld(const ::Util::ParsedArgs& cmdArgs) {
 		EntityBuilder(screen.registry).parent(lights).transform(Position(0, 5, 0), 0.2).light(Graphics::Color(1, 0.90f, 0.75f), 400, attenuation).hitbox(&SphereClass::instance).mesh(sphereData);
 	}
 	{
-		ExtendedPart* partA = new ExtendedPart(cornerShape(), GlobalCFrame(3.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "CORNER");
-		world.addPart(partA);
+		ExtendedPart* cornerPart = new ExtendedPart(cornerShape(), GlobalCFrame(3.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "CORNER");
+		ExtendedPart* wedgePart = new ExtendedPart(wedgeShape(), GlobalCFrame(-3.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "WEDGE");
+		world.addPart(cornerPart);
+		world.addPart(wedgePart);
 	}
 
 	/*{
