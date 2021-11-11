@@ -185,7 +185,7 @@
     <ClCompile Include="softlinks\springLink.cpp" />
     <ClCompile Include="threading\synchronizedWorld.cpp" />
     <ClCompile Include="threading\upgradeable_shared_mutex.cpp" />
-    <ClCompile Include="threading\worldTicker.cpp" />
+    <ClCompile Include="threading\physicsThread.cpp" />
     <ClCompile Include="world.cpp" />
     <ClCompile Include="worldPhysics.cpp" />
   </ItemGroup>
@@ -301,7 +301,7 @@
     <ClInclude Include="threading\threadPool.h" />
     <ClInclude Include="threading\upgradeable_shared_mutex.h" />
     <ClInclude Include="worldPhysics.h" />
-    <ClInclude Include="threading\worldTicker.h" />
+    <ClInclude Include="threading\physicsThread.h" />
     <ClInclude Include="world.h" />
     <ClInclude Include="worldIteration.h" />
   </ItemGroup>

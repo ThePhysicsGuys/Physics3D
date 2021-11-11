@@ -3,11 +3,11 @@
 #include "../worldPhysics.h"
 
 namespace P3D {
-void SynchronizedWorldPrototype::tick() {
+void SynchronizedWorldPrototype::tick(ThreadPool& threadPool) {
 
 	SharedLockGuard mutLock(lock);
 
-	findColissionsParallel(*this, this->curColissions, this->pool);
+	findColissionsParallel(*this, this->curColissions, threadPool);
 
 	physicsMeasure.mark(PhysicsProcess::EXTERNALS);
 	applyExternalForces(*this);

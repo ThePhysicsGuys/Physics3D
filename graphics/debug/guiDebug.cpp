@@ -104,7 +104,7 @@ void logTickStart() {
 
 }
 
-void logTickEnd() {
+void logTickEnd(WorldPrototype* world) {
 	vecBuf.pushWriteBuffer();
 	pointBuf.pushWriteBuffer();
 }

@@ -26,7 +26,7 @@ class ThreadPool {
 	bool shouldExit = false;
 
 public:
-	ThreadPool() : threads(std::thread::hardware_concurrency() - 1) {
+	ThreadPool(unsigned int numThreads) : threads(numThreads - 1) {
 		for(std::thread& t : threads) {
 			t = std::thread([this]() {
 				std::unique_lock<std::mutex> selfLock(mtx); // locks mtx
@@ -48,6 +48,7 @@ public:
 			});
 		}
 	}
+	ThreadPool() : ThreadPool(std::thread::hardware_concurrency()) {}
 
 	// cleanup
 	~ThreadPool() {

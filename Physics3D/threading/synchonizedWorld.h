@@ -82,7 +82,7 @@ public:
 		}
 	}
 
-	void tick() override;
+	virtual void tick(ThreadPool& threadPool) override;
 };
 
 template<typename T = Part>

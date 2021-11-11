@@ -31,9 +31,9 @@
 #include <Physics3D/softlinks/elasticLink.h>
 
 #include <Physics3D/misc/serialization/serialization.h>
+#include <Physics3D/threading/physicsThread.h>
 
 #include "worlds.h"
-#include "tickerThread.h"
 #include "worldBuilder.h"
 
 #include "io/serialization.h"
@@ -57,7 +57,7 @@
 
 namespace P3D::Application {
 
-TickerThread physicsThread;
+PhysicsThread physicsThread(Graphics::AppDebug::logTickEnd, TICK_SKIP_TIME);
 PlayerWorld world(1 / TICKS_PER_SECOND);
 Screen screen;
 
@@ -184,8 +184,8 @@ void setupWorld(const ::Util::ParsedArgs& cmdArgs) {
 		EntityBuilder(screen.registry).parent(lights).transform(Position(0, 5, 0), 0.2).light(Graphics::Color(1, 0.90f, 0.75f), 400, attenuation).hitbox(&SphereClass::instance).mesh(sphereData);
 	}
 	{
-		ExtendedPart* cornerPart = new ExtendedPart(cornerShape(), GlobalCFrame(3.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "CORNER");
-		ExtendedPart* wedgePart = new ExtendedPart(wedgeShape(), GlobalCFrame(-3.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "WEDGE");
+		ExtendedPart* cornerPart = new ExtendedPart(cornerShape(), GlobalCFrame(3.0, 3.0, -5.0), {1.0, 1.0, 1.0}, "CORNER");
+		ExtendedPart* wedgePart = new ExtendedPart(wedgeShape(), GlobalCFrame(-3.0, 3.0, -5.0), {1.0, 1.0, 1.0}, "WEDGE");
 		world.addPart(cornerPart);
 		world.addPart(wedgePart);
 	}
@@ -244,20 +244,7 @@ void setupWorld(const ::Util::ParsedArgs& cmdArgs) {
 }
 
 void setupPhysics() {
-	physicsThread.~TickerThread();
-	new(&physicsThread) TickerThread(TICKS_PER_SECOND, TICK_SKIP_TIME, [] () {
-		physicsMeasure.mark(PhysicsProcess::OTHER);
-
-		Graphics::AppDebug::logTickStart();
-		world.tick();
-		Graphics::AppDebug::logTickEnd();
-
-		physicsMeasure.end();
-
-		GJKCollidesIterationStatistics.nextTally();
-		GJKNoCollidesIterationStatistics.nextTally();
-		EPAIterationStatistics.nextTally();
-	});
+	physicsThread.setWorld(&world);
 }
 
 void setupDebug() {
@@ -350,11 +337,11 @@ bool isPaused() {
 }
 
 void setSpeed(double newSpeed) {
-	physicsThread.setSpeed(newSpeed);
+	physicsThread.speed = newSpeed;
 }
 
 double getSpeed() {
-	return physicsThread.getSpeed();
+	return physicsThread.speed;
 }
 
 void runTick() {

@@ -7,6 +7,10 @@
 
 #include <stdexcept>
 
+namespace P3D {
+class WorldPrototype;
+};
+
 namespace P3D::Graphics {
 
 #define ASSERT(x) if (!(x)) throw std::logic_error("Assert failed")
@@ -33,8 +37,7 @@ struct ColoredPoint {
 
 void setupDebugHooks();
 
-void logTickStart();
-void logTickEnd();
+void logTickEnd(WorldPrototype* world);
 
 void logFrameStart();
 void logFrameEnd();

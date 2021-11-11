@@ -10,7 +10,6 @@
 #include "softlinks/softLink.h"
 #include "externalforces/externalForce.h"
 #include "colissionBuffer.h"
-#include "threading/threadPool.h"
 
 namespace P3D {
 class Physical;
@@ -19,6 +18,7 @@ class ConnectedPhysical;
 class Part;
 class WorldLayer;
 class ColissionLayer;
+class ThreadPool;
 
 class WorldPrototype {
 private:
@@ -83,10 +83,7 @@ public:
 
 	void addLink(SoftLink* link);
 
-
 	ColissionBuffer curColissions;
-	ThreadPool pool;
-
 	size_t age = 0;
 	size_t objectCount = 0;
 	double deltaT;
@@ -100,7 +97,8 @@ public:
 	WorldPrototype(WorldPrototype&&) = delete;
 	WorldPrototype& operator=(WorldPrototype&&) = delete;
 
-	virtual void tick();
+	virtual void tick(ThreadPool& threadPool);
+	void tick();
 
 	virtual void addPart(Part* part, int layerIndex = 0);
 	virtual void removePart(Part* part);

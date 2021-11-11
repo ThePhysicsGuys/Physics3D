@@ -184,9 +184,9 @@ void handleTerrainCollision(Part& part1, Part& part2, Position collisionPoint, V
 	===== World Tick =====
 */
 
-void WorldPrototype::tick() {
+void WorldPrototype::tick(ThreadPool& threadPool) {
 
-	findColissionsParallel(*this, this->curColissions, this->pool);
+	findColissionsParallel(*this, this->curColissions, threadPool);
 
 	physicsMeasure.mark(PhysicsProcess::EXTERNALS);
 	applyExternalForces(*this);
@@ -198,6 +198,11 @@ void WorldPrototype::tick() {
 	handleConstraints(*this);
 
 	update(*this);
+}
+
+void WorldPrototype::tick() {
+	ThreadPool singleThreadPool(1);
+	this->tick(singleThreadPool);
 }
 
 void applyExternalForces(WorldPrototype& world) {

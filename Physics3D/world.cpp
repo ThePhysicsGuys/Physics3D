@@ -5,6 +5,7 @@
 #include "layer.h"
 #include "misc/validityHelper.h"
 #include "worldIteration.h"
+#include "threading/threadPool.h"
 
 namespace P3D {
 // #define CHECK_WORLD_VALIDITY

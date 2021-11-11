@@ -181,7 +181,6 @@
     <ClInclude Include="shader\basicShader.h" />
     <ClInclude Include="shader\shaderBase.h" />
     <ClInclude Include="shader\shaders.h" />
-    <ClInclude Include="tickerThread.h" />
     <ClInclude Include="picker\ray.h" />
     <ClInclude Include="view\camera.h" />
     <ClInclude Include="view\debugFrame.h" />
@@ -235,7 +234,6 @@
     <ClCompile Include="shader\basicShader.cpp" />
     <ClCompile Include="shader\shaderBase.cpp" />
     <ClCompile Include="shader\shaders.cpp" />
-    <ClCompile Include="tickerThread.cpp" />
     <ClCompile Include="view\camera.cpp" />
     <ClCompile Include="view\debugFrame.cpp" />
     <ClCompile Include="view\ecsFrame.cpp" />

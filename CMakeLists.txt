@@ -111,7 +111,7 @@ add_library(Physics3D STATIC
   
   Physics3D/threading/upgradeable_shared_mutex.cpp
   Physics3D/threading/synchronizedWorld.cpp
-  Physics3D/threading/worldTicker.cpp
+  Physics3D/threading/physicsThread.cpp
   
   Physics3D/misc/debug.cpp
   Physics3D/misc/cpuid.cpp
@@ -240,7 +240,6 @@ add_executable(application
   application/eventHandler.cpp
   application/extendedPart.cpp
   application/resources.cpp
-  application/tickerThread.cpp
   application/worldBuilder.cpp
   application/builtinWorlds.cpp
   application/worlds.cpp
