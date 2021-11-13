@@ -224,8 +224,6 @@ public:
 	double totalMass;
 	Vec3 totalCenterOfMass;
 
-	WorldPrototype* world = nullptr;
-
 	SymmetricMat3 forceResponse;
 	SymmetricMat3 momentResponse;
 
@@ -283,7 +281,7 @@ public:
 	InternalMotionTree getInternalRelativeMotionTree(UnmanagedArray<MonotonicTreeNode<RelativeMotion>>&& mem) const noexcept;
 	COMMotionTree getCOMMotionTree(UnmanagedArray<MonotonicTreeNode<RelativeMotion>>&& mem) const noexcept;
 
-	void ensureWorld(WorldPrototype* world);
+	WorldPrototype* getWorld() const;
 
 	void update(double deltaT);
 

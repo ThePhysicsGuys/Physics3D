@@ -339,10 +339,13 @@ void runTick() {
 }
 
 void toggleFlying() {
-	world.asyncModification([] () {
+	// Through using syncModification, we ensure that the creation or deletion of the player shape is not handled by the physics thread, thus avoiding a race condition with the Registry
+	// TODO this is not a proper solution, it should be an asyncModification! But at least it fixes the sporadic crash
+	world.syncModification([] () {
 		if (screen.camera.flying) {
 			Log::info("Creating player");
 			screen.camera.flying = false;
+			// this modifies Registry, which may or may not be a race condition
 			screen.camera.attachment = new ExtendedPart(polyhedronShape(ShapeLibrary::createPrism(50, 0.3f, 1.5f)), GlobalCFrame(screen.camera.cframe.getPosition()), {1.0, 5.0, 0.0}, "Player");
 			screen.world->addPart(screen.camera.attachment);
 		} else {

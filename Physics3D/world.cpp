@@ -19,7 +19,7 @@ namespace P3D {
 
 bool WorldPrototype::isValid() const {
 	for(const MotorizedPhysical* phys : this->physicals) {
-		if(phys->world != this) {
+		if(phys->getWorld() != this) {
 			Debug::logError("physicals's world is not correct!");
 			DEBUGBREAK;
 			return false;
@@ -158,8 +158,6 @@ void WorldPrototype::addPart(Part* part, int layerIndex) {
 
 	part->ensureHasParent();
 	physicals.push_back(part->parent->mainPhysical);
-	part->parent->mainPhysical->world = this;
-
 
 	WorldLayer* worldLayer = &layers[layerIndex].subLayers[ColissionLayer::FREE_PARTS_LAYER];
 	part->parent->mainPhysical->forEachPart([worldLayer](Part& p) {
@@ -206,7 +204,6 @@ static void createNewNodeFor(MotorizedPhysical* motorPhys, BoundsTree<Part>& lay
 
 void WorldPrototype::addPhysicalWithExistingLayers(MotorizedPhysical* motorPhys) {
 	physicals.push_back(motorPhys);
-	motorPhys->world = this;
 
 	std::vector<FoundLayerRepresentative> foundLayers = findAllLayersIn(motorPhys);
 
@@ -285,7 +282,6 @@ void WorldPrototype::optimizeLayers() {
 
 void WorldPrototype::notifyNewPhysicalCreated(MotorizedPhysical* newPhysical) {
 	physicals.push_back(newPhysical);
-	newPhysical->world = this;
 }
 
 static void assignLayersForPhysicalRecurse(const Physical& phys, std::vector<std::pair<WorldLayer*, std::vector<const Part*>>>& foundLayers) {
@@ -304,8 +300,8 @@ static void assignLayersForPhysicalRecurse(const Physical& phys, std::vector<std
 }
 
 void WorldPrototype::notifyPhysicalHasBeenSplit(const MotorizedPhysical* mainPhysical, MotorizedPhysical* newlySplitPhysical) {
-	assert(mainPhysical->world == this);
-	assert(newlySplitPhysical->world == nullptr);
+	assert(mainPhysical->getWorld() == this);
+	assert(newlySplitPhysical->getWorld() == nullptr);
 	this->notifyNewPhysicalCreated(newlySplitPhysical);
 
 	std::vector<std::pair<WorldLayer*, std::vector<const Part*>>> layersThatNeedToBeSplit;
@@ -360,16 +356,16 @@ static void removePhysicalFromList(std::vector<MotorizedPhysical*>& physicals, M
 }
 
 void WorldPrototype::notifyPhysicalsMerged(const MotorizedPhysical* firstPhysical, MotorizedPhysical* secondPhysical) {
-	assert(firstPhysical->world == this);
+	assert(firstPhysical->getWorld() == this);
 
-	if(secondPhysical->world != nullptr) {
-		assert(secondPhysical->world == this);
+	if(secondPhysical->getWorld() != nullptr) {
+		assert(secondPhysical->getWorld() == this);
 		removePhysicalFromList(this->physicals, secondPhysical);
 	}
 }
 
 void WorldPrototype::notifyNewPartAddedToPhysical(const MotorizedPhysical* physical, Part* newPart) {
-	assert(physical->world == this);
+	assert(physical->getWorld() == this);
 
 	onPartAdded(newPart);
 }
