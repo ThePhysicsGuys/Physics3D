@@ -18,6 +18,6 @@ public:
 
 	virtual CFrame getRelativeCFrame() const = 0;
 
-	virtual ~HardConstraint() {}
+	virtual ~HardConstraint();
 };
 };

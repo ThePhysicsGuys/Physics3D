@@ -1,4 +1,5 @@
 #include "ballConstraint.h"
+#include "constraintImpl.h"
 
 namespace P3D {
 int BallConstraint::maxNumberOfParameters() const {

@@ -2,7 +2,7 @@
 
 
 #include "../math/linalg/vec.h"
-#include "softConstraint.h"
+#include "constraint.h"
 
 namespace P3D {
 struct BarConstraint : public Constraint {

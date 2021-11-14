@@ -1,8 +1,7 @@
 #pragma once
 
 #include <vector>
-#include "../math/linalg/vec.h"
-#include "softConstraint.h"
+#include "constraint.h"
 
 namespace P3D {
 class Physical;
@@ -24,11 +23,11 @@ public:
 
 class ConstraintGroup {
 public:
-	std::vector<PhysicalConstraint> constraints; 
+	std::vector<PhysicalConstraint> constraints;
 
 	void add(Physical* first, Physical* second, Constraint* constraint);
 	void add(Part* first, Part* second, Constraint* constraint);
 
 	void apply() const;
 };
-};
+}

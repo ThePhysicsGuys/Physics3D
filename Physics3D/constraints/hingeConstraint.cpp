@@ -1,4 +1,5 @@
 #include "hingeConstraint.h"
+#include "constraintImpl.h"
 
 namespace P3D {
 int HingeConstraint::maxNumberOfParameters() const {

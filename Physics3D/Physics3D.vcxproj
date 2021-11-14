@@ -129,7 +129,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="constraints\barConstraint.cpp" />
     <ClCompile Include="externalforces\externalForce.cpp" />
     <ClCompile Include="externalforces\directionalGravity.cpp" />
     <ClCompile Include="externalforces\magnetForce.cpp" />
@@ -148,7 +147,10 @@
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
     <ClCompile Include="softlinks\magneticLink.cpp" />
+    <ClCompile Include="constraints\constraint.cpp" />
     <ClCompile Include="constraints\ballConstraint.cpp" />
+    <ClCompile Include="constraints\hingeConstraint.cpp" />
+    <ClCompile Include="constraints\barConstraint.cpp" />
     <ClCompile Include="constraints\constraintGroup.cpp" />
     <ClCompile Include="geometry\builtinShapeClasses.cpp" />
     <ClCompile Include="geometry\shapeCreation.cpp" />
@@ -180,7 +182,6 @@
     <ClCompile Include="misc\serialization\serialization.cpp" />
     <ClCompile Include="rigidBody.cpp" />
     <ClCompile Include="layer.cpp" />
-    <ClCompile Include="constraints\hingeConstraint.cpp" />
     <ClCompile Include="softlinks\softLink.cpp" />
     <ClCompile Include="softlinks\springLink.cpp" />
     <ClCompile Include="threading\synchronizedWorld.cpp" />
@@ -190,7 +191,6 @@
     <ClCompile Include="worldPhysics.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="constraints\barConstraint.h" />
     <ClInclude Include="datastructures\smartPointers.h" />
     <ClInclude Include="externalforces\externalForce.h" />
     <ClInclude Include="externalforces\magnetForce.h" />
@@ -206,14 +206,20 @@
     <ClInclude Include="softlinks\elasticLink.h" />
     <ClInclude Include="softlinks\magneticLink.h" />
     <ClInclude Include="math\linalg\largeMatrixAlgorithms.h" />
+    <ClInclude Include="constraints\constraint.h" />
+    <ClInclude Include="constraints\constraintImpl.h" />
+    <ClInclude Include="constraints\barConstraint.h" />
     <ClInclude Include="constraints\ballConstraint.h" />
+    <ClInclude Include="constraints\hingeConstraint.h" />
     <ClInclude Include="constraints\constraintGroup.h" />
+    <ClInclude Include="hardconstraints\hardConstraint.h" />
     <ClInclude Include="hardconstraints\constraintTemplates.h" />
-    <ClInclude Include="hardconstraints\controller\constController.h" />
-    <ClInclude Include="hardconstraints\controller\sineWaveController.h" />
     <ClInclude Include="hardconstraints\fixedConstraint.h" />
     <ClInclude Include="hardconstraints\hardPhysicalConnection.h" />
     <ClInclude Include="hardconstraints\motorConstraint.h" />
+    <ClInclude Include="hardconstraints\sinusoidalPistonConstraint.h" />
+    <ClInclude Include="hardconstraints\controller\constController.h" />
+    <ClInclude Include="hardconstraints\controller\sineWaveController.h" />
     <ClInclude Include="datastructures\alignedPtr.h" />
     <ClInclude Include="datastructures\buffers.h" />
     <ClInclude Include="datastructures\iteratorEnd.h" />
@@ -241,7 +247,6 @@
     <ClInclude Include="geometry\shape.h" />
     <ClInclude Include="geometry\shapeBuilder.h" />
     <ClInclude Include="geometry\shapeClass.h" />
-    <ClInclude Include="hardconstraints\hardConstraint.h" />
     <ClInclude Include="math\bounds.h" />
     <ClInclude Include="math\cframe.h" />
     <ClInclude Include="math\fix.h" />
@@ -286,15 +291,12 @@
     <ClInclude Include="physical.h" />
     <ClInclude Include="math\vec4.h" />
     <ClInclude Include="misc\physicsProfiler.h" />
-    <ClInclude Include="hardconstraints\sinusoidalPistonConstraint.h" />
     <ClInclude Include="misc\profiling.h" />
     <ClInclude Include="geometry\scalableInertialMatrix.h" />
     <ClInclude Include="misc\serialization\serialization.h" />
     <ClInclude Include="relativeMotion.h" />
     <ClInclude Include="rigidBody.h" />
     <ClInclude Include="threading\sharedLockGuard.h" />
-    <ClInclude Include="constraints\hingeConstraint.h" />
-    <ClInclude Include="constraints\softConstraint.h" />
     <ClInclude Include="softlinks\softLink.h" />
     <ClInclude Include="softlinks\springLink.h" />
     <ClInclude Include="threading\synchonizedWorld.h" />

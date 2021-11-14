@@ -12,13 +12,34 @@
 #include <Physics3D/layer.h>
 #include <Physics3D/world.h>
 
+#include <Physics3D/constraints/constraint.h>
 #include <Physics3D/constraints/constraintGroup.h>
 #include <Physics3D/constraints/ballConstraint.h>
+#include <Physics3D/constraints/constraintImpl.h>
 
 using namespace P3D;
 #define ASSERT(cond) ASSERT_TOLERANT(cond, 0.05)
 
 #define DELTA_T 0.0001
+
+TEST_CASE(testConstraintMatrixPack) {
+	Matrix<double, 6, 4> paramToMotionA = generateMatrix<double, 6, 4>();
+	Matrix<double, 6, 4> paramToMotionB = generateMatrix<double, 6, 4>();
+	Matrix<double, 4, 6> motionToEqA = generateMatrix<double, 4, 6>();
+	Matrix<double, 4, 6> motionToEqB = generateMatrix<double, 4, 6>();
+	Matrix<double, 4, NUMBER_OF_ERROR_DERIVATIVES> errorMat = generateMatrix<double, 4, NUMBER_OF_ERROR_DERIVATIVES>();
+
+	double matrixBuf[6 * 4 * 4];
+	double errorBuf[6 * NUMBER_OF_ERROR_DERIVATIVES];
+
+	ConstraintMatrixPack cmp(matrixBuf, errorBuf, paramToMotionA, paramToMotionB, motionToEqA, motionToEqB, errorMat);
+
+	ASSERT(cmp.getParameterToMotionMatrixA() == paramToMotionA);
+	ASSERT(cmp.getParameterToMotionMatrixB() == paramToMotionB);
+	ASSERT(cmp.getMotionToEquationMatrixA() == motionToEqA);
+	ASSERT(cmp.getMotionToEquationMatrixB() == motionToEqB);
+	ASSERT(cmp.getErrorMatrix() == errorMat);
+}
 
 TEST_CASE(testBallConstraintMatrices) {
 	Part firstPart(boxShape(1.0, 2.0, 3.0), GlobalCFrame(Position(0.0, 0.0, 0.0)), {0.3, 0.7, 0.9});

@@ -1,5 +1,7 @@
 #include "constraintGroup.h"
 
+#include "constraintImpl.h"
+
 #include "../math/linalg/largeMatrix.h"
 #include "../math/linalg/largeMatrixAlgorithms.h"
 #include "../math/linalg/mat.h"

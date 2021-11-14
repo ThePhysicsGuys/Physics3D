@@ -21,4 +21,4 @@ struct HardPhysicalConnection {
 	void update(double deltaT);
 	HardPhysicalConnection inverted()&&;
 };
-};
+}

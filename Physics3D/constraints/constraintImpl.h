@@ -1,5 +1,4 @@
-#pragma once
-
+#include "constraint.h"
 
 #include "../math/linalg/mat.h"
 #include "../math/linalg/largeMatrix.h"
@@ -77,9 +76,4 @@ public:
 		return UnmanagedHorizontalFixedMatrix<double, NUMBER_OF_ERROR_DERIVATIVES>(errorData, size);
 	}
 };
-
-struct Constraint {
-	virtual int maxNumberOfParameters() const = 0;
-	virtual ConstraintMatrixPack getMatrices(const PhysicalInfo& physA, const PhysicalInfo& physB, double* matrixBuf, double* errorBuf) const = 0;
-};
-};
+}

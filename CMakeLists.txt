@@ -94,6 +94,7 @@ add_library(Physics3D STATIC
   Physics3D/hardconstraints/motorConstraint.cpp
   Physics3D/hardconstraints/controller/sineWaveController.cpp
   
+  Physics3D/constraints/constraint.cpp
   Physics3D/constraints/constraintGroup.cpp
   Physics3D/constraints/ballConstraint.cpp
   Physics3D/constraints/hingeConstraint.cpp

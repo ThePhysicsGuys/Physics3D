@@ -1,4 +1,5 @@
 #include "barConstraint.h"
+#include "constraintImpl.h"
 
 namespace P3D {
 int BarConstraint::maxNumberOfParameters() const {
