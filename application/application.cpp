@@ -74,8 +74,6 @@ void init(const ::Util::ParsedArgs& cmdArgs) {
 
 	Log::init("latest.log");
 
-	std::filesystem::copy_file("../res/default_imgui.ini", "../res/imgui.ini", std::filesystem::copy_options::skip_existing);
-
 	Log::info(::Util::printAndParseCPUIDArgs(cmdArgs));
 	bool quickBoot = cmdArgs.hasFlag("quickBoot");
 
@@ -128,6 +126,8 @@ void setupGL() {
 		std::cin.get();
 		stop(-1);
 	}
+
+	std::filesystem::copy_file("../res/default_imgui.ini", "../res/imgui.ini", std::filesystem::copy_options::skip_existing);
 }
 
 void setupWorld(const ::Util::ParsedArgs& cmdArgs) {
@@ -301,29 +301,20 @@ void stop(int returnCode) {
 
 
 // Ticks
-
-bool paused = true;
-
 void togglePause() {
-	if (paused) {
-		unpause();
-	} else {
-		pause();
-	}
+	physicsThread.toggleRunning();
 }
 
 void pause() {
 	physicsThread.stop();
-	paused = true;
 }
 
 void unpause() {
 	physicsThread.start();
-	paused = false;
 }
 
 bool isPaused() {
-	return paused;
+	return !physicsThread.isRunning();
 }
 
 void setSpeed(double newSpeed) {

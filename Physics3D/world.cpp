@@ -268,20 +268,11 @@ size_t WorldPrototype::getLayerCount() const {
 	return this->layers.size();
 }
 
-void WorldPrototype::notifyMainPhysicalObsolete(MotorizedPhysical* motorPhys) {
-	physicals.erase(std::remove(physicals.begin(), physicals.end(), motorPhys));
-
-	ASSERT_VALID;
-}
 void WorldPrototype::optimizeLayers() {
 	for(ColissionLayer& layer : layers) {
 		layer.subLayers[ColissionLayer::TERRAIN_PARTS_LAYER].optimize();
 	}
 	ASSERT_VALID;
-}
-
-void WorldPrototype::notifyNewPhysicalCreated(MotorizedPhysical* newPhysical) {
-	physicals.push_back(newPhysical);
 }
 
 static void assignLayersForPhysicalRecurse(const Physical& phys, std::vector<std::pair<WorldLayer*, std::vector<const Part*>>>& foundLayers) {
@@ -302,7 +293,7 @@ static void assignLayersForPhysicalRecurse(const Physical& phys, std::vector<std
 void WorldPrototype::notifyPhysicalHasBeenSplit(const MotorizedPhysical* mainPhysical, MotorizedPhysical* newlySplitPhysical) {
 	assert(mainPhysical->getWorld() == this);
 	assert(newlySplitPhysical->getWorld() == nullptr);
-	this->notifyNewPhysicalCreated(newlySplitPhysical);
+	this->physicals.push_back(newlySplitPhysical);
 
 	std::vector<std::pair<WorldLayer*, std::vector<const Part*>>> layersThatNeedToBeSplit;
 	assignLayersForPhysicalRecurse(*newlySplitPhysical, layersThatNeedToBeSplit);
@@ -341,33 +332,6 @@ void WorldPrototype::notifyPhysicalHasBeenSplit(const MotorizedPhysical* mainPhy
 	assert(this->isValid());*/
 
 
-}
-
-static void removePhysicalFromList(std::vector<MotorizedPhysical*>& physicals, MotorizedPhysical* physToRemove) {
-	for(MotorizedPhysical*& item : physicals) {
-		if(item == physToRemove) {
-			item = std::move(physicals.back());
-			physicals.pop_back();
-
-			return;
-		}
-	}
-	throw std::logic_error("No physical found to remove!");
-}
-
-void WorldPrototype::notifyPhysicalsMerged(const MotorizedPhysical* firstPhysical, MotorizedPhysical* secondPhysical) {
-	assert(firstPhysical->getWorld() == this);
-
-	if(secondPhysical->getWorld() != nullptr) {
-		assert(secondPhysical->getWorld() == this);
-		removePhysicalFromList(this->physicals, secondPhysical);
-	}
-}
-
-void WorldPrototype::notifyNewPartAddedToPhysical(const MotorizedPhysical* physical, Part* newPart) {
-	assert(physical->getWorld() == this);
-
-	onPartAdded(newPart);
 }
 
 void WorldPrototype::onPartAdded(Part* newPart) {}

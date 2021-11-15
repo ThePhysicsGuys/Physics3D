@@ -100,6 +100,8 @@ public:
 	Physical(const Physical&) = delete;
 	void operator=(const Physical&) = delete;
 
+	WorldPrototype* getWorld() const;
+
 	void setCFrame(const GlobalCFrame& newCFrame);
 	void setPartCFrame(Part* part, const GlobalCFrame& newCFrame);
 	inline const GlobalCFrame& getCFrame() const { return rigidBody.getCFrame(); }
@@ -280,8 +282,6 @@ public:
 	}
 	InternalMotionTree getInternalRelativeMotionTree(UnmanagedArray<MonotonicTreeNode<RelativeMotion>>&& mem) const noexcept;
 	COMMotionTree getCOMMotionTree(UnmanagedArray<MonotonicTreeNode<RelativeMotion>>&& mem) const noexcept;
-
-	WorldPrototype* getWorld() const;
 
 	void update(double deltaT);
 

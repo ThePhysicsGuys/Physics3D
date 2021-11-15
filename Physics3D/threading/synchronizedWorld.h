@@ -53,11 +53,13 @@ public:
 
 	SynchronizedWorldPrototype(double deltaT) : WorldPrototype(deltaT) {}
 
+	/*Use as syncModification([&](){}), references allowed*/
 	template<typename Func>
 	void syncModification(const Func& function) {
 		std::lock_guard<std::shared_mutex> lg(lock);
 		function();
 	}
+	/*Use as syncModification([=](){}), references NOT allowed. Function may not be executed within the enclosing scope!*/
 	template<typename Func>
 	void asyncModification(const Func& function) {
 		if(lock.try_lock()) {
@@ -67,11 +69,13 @@ public:
 			pushOperation(function);
 		}
 	}
+	/*Use as syncModification([&](){}), references allowed*/
 	template<typename Func>
 	void syncReadOnlyOperation(const Func& function) const {
 		SharedLockGuard lg(lock);
 		function();
 	}
+	/*Use as syncModification([=](){}), references NOT allowed. Function may not be executed within the enclosing scope!*/
 	template<typename Func>
 	void asyncReadOnlyOperation(const Func& function) const {
 		if(lock.try_lock_shared()) {

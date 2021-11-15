@@ -1,3 +1,5 @@
+#pragma once
+
 #include "constraint.h"
 
 #include "../math/linalg/mat.h"

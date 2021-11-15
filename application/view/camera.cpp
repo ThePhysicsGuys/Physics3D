@@ -59,11 +59,11 @@ void Camera::rotate(Screen& screen, double dalpha, double dbeta, double dgamma, 
 
 	cframe.rotation = Rotation::rotY(currentAngularVelocity * dbeta) * cframe.rotation * Rotation::rotX(currentAngularVelocity * dalpha);
 
-	if (leftDragging) {
+	/*if (leftDragging) {
 		screen.world->asyncModification([&screen] () {
 			// TODO Picker::moveGrabbedEntityLateral(screen);
 		});
-	}
+	}*/
 	// Accelerate camera rotation
 	if (accelerating)
 		currentAngularVelocity += angularVelocity * angularVelocityIncrease;

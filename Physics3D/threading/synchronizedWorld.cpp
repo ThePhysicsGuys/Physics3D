@@ -1,4 +1,4 @@
-#include "synchonizedWorld.h"
+#include "synchronizedWorld.h"
 
 #include "../worldPhysics.h"
 

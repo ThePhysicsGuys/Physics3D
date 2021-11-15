@@ -264,7 +264,7 @@ namespace P3D::Application {
 		if (status == kIdle)
 			return false;
 
-		screen.world->asyncModification([&] () {
+		screen.world->asyncModification([this, status] () {
 			switch (status) {
 				case kScaleX:
 					scaleAlongLine({ 1, 0, 0 });

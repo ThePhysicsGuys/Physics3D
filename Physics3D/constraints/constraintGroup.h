@@ -24,6 +24,7 @@ public:
 class ConstraintGroup {
 public:
 	std::vector<PhysicalConstraint> constraints;
+	//std::vector<MotorizedPhysical*> physicals;
 
 	void add(Physical* first, Physical* second, Constraint* constraint);
 	void add(Part* first, Part* second, Constraint* constraint);

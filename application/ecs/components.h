@@ -3,7 +3,7 @@
 #include <string>
 #include <variant>
 
-#include <Physics3D/threading/synchonizedWorld.h>
+#include <Physics3D/threading/synchronizedWorld.h>
 #include "../application/extendedPart.h"
 #include <Physics3D/geometry/builtinShapeClasses.h>
 #include "../graphics/visualData.h"

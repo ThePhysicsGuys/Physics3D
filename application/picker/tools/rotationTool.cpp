@@ -218,7 +218,7 @@ namespace P3D::Application {
 		if (status == kIdle)
 			return false;
 
-		screen.world->asyncModification([&] () {
+		screen.world->asyncModification([this, status] () {
 			switch (status) {
 				case kRotateX:
 					rotateAroundLine({ 1, 0, 0 });

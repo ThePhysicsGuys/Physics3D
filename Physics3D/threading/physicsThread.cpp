@@ -42,12 +42,14 @@ void PhysicsThread::runTick() {
 }
 
 void PhysicsThread::start() {
-	this->shouldStop = false;
+	assert(!this->shouldBeRunning);
+	if(this->thread.joinable()) this->thread.join();
+	this->shouldBeRunning = true;
 
 	this->thread = std::thread([this] () {
 		time_point<system_clock> nextTarget = system_clock::now();
 
-		while (!(this->shouldStop)) {
+		while (this->shouldBeRunning) {
 
 			microseconds tickTime = microseconds((long long) (1000000 * this->world->deltaT / this->speed));
 
@@ -70,9 +72,28 @@ void PhysicsThread::start() {
 		}
 	});
 }
+void PhysicsThread::stopAsync() {
+	this->shouldBeRunning = false;
+}
 void PhysicsThread::stop() {
-	this->shouldStop = true;
+	this->stopAsync();
 	if(this->thread.joinable()) this->thread.join();
 }
+bool PhysicsThread::isRunning() {
+	return this->shouldBeRunning;
 }
-
+void PhysicsThread::toggleRunningAsync() {
+	if(this->shouldBeRunning) {
+		this->stopAsync();
+	} else {
+		this->start();
+	}
+}
+void PhysicsThread::toggleRunning() {
+	if(this->shouldBeRunning) {
+		this->stop();
+	} else {
+		this->start();
+	}
+}
+}

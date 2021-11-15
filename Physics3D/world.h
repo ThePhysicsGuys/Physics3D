@@ -29,33 +29,10 @@ private:
 	friend class WorldLayer;
 	friend class ColissionLayer;
 
-
-	/*
-		This method is called by World or Physical when new MotorizedPhysicals are created which need to be added to the list
-	*/
-	void notifyNewPhysicalCreated(MotorizedPhysical* newPhysical);
-
 	/*
 		Splits newlySplitPhysical from mainPhysical in the world tree, also adds the new physical to the list of physicals
 	*/
 	void notifyPhysicalHasBeenSplit(const MotorizedPhysical* mainPhysical, MotorizedPhysical* newlySplitPhysical);
-
-	/*
-		Merges the trees for two physicals.
-		firstPhysical must be part of this world,
-		secondPhysical may or may not be in the world, but is not allowed to be in a different world
-	*/
-	void notifyPhysicalsMerged(const MotorizedPhysical* firstPhysical, MotorizedPhysical* secondPhysical);
-	/*
-		Adds a new part that wasn't previously in the tree to the group of the given physical
-	*/
-	void notifyNewPartAddedToPhysical(const MotorizedPhysical* physical, Part* newPart);
-
-	/*
-		Called when a MainPhysical has become obsolete
-		This usually happens right before the physical is deleted
-	*/
-	void notifyMainPhysicalObsolete(MotorizedPhysical* part);
 
 protected:
 
@@ -75,6 +52,8 @@ public:
 	
 	// All physicals
 	std::vector<MotorizedPhysical*> physicals;
+
+	void addPhysicalWithExistingLayers(MotorizedPhysical* motorPhys);
 
 	// Extra world features
 	std::vector<ExternalForce*> externalForces;
@@ -111,9 +90,6 @@ public:
 
 	// deletes a layer, moves all parts from the deleted layer to layerToMoveTo
 	void deleteLayer(int layerIndex, int layerToMoveTo);
-
-
-	void addPhysicalWithExistingLayers(MotorizedPhysical* motorPhys);
 
 	void optimizeLayers();
 

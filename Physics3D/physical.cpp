@@ -7,10 +7,12 @@
 
 #include "misc/debug.h"
 #include "misc/validityHelper.h"
+#include "misc/unreachable.h"
 
 #include "layer.h"
 
 #include <algorithm>
+#include <cassert>
 
 
 /*
@@ -239,10 +241,24 @@ void Physical::attachPhysical(Physical* phys, HardConstraint* constraint, const 
 	this->attachPhysical(phys->makeMainPhysical(), constraint, attachToThis, attachToThat);
 }
 
+static void removePhysicalFromList(std::vector<MotorizedPhysical*>& physicals, MotorizedPhysical* physToRemove) {
+	for(MotorizedPhysical*& item : physicals) {
+		if(item == physToRemove) {
+			item = std::move(physicals.back());
+			physicals.pop_back();
+			return;
+		}
+	}
+	unreachable(); // No physical found to remove!
+}
+
 void Physical::attachPhysical(MotorizedPhysical* phys, HardConstraint* constraint, const CFrame& attachToThis, const CFrame& attachToThat) {
-	WorldPrototype* world = this->mainPhysical->getWorld();
+	WorldPrototype* world = this->getWorld();
 	if(world != nullptr) {
-		world->notifyPhysicalsMerged(this->mainPhysical, mainPhysical);
+		if(mainPhysical->getWorld() != nullptr) {
+			assert(mainPhysical->getWorld() == world);
+			removePhysicalFromList(world->physicals, mainPhysical);
+		}
 	}
 
 	ConnectedPhysical childToAdd(std::move(*phys), this, constraint, attachToThat, attachToThis);
@@ -261,9 +277,9 @@ void Physical::attachPhysical(MotorizedPhysical* phys, HardConstraint* constrain
 
 void Physical::attachPart(Part* part, HardConstraint* constraint, const CFrame& attachToThis, const CFrame& attachToThat) {
 	if(part->parent == nullptr) {
-		WorldPrototype* world = this->mainPhysical->getWorld();
+		WorldPrototype* world = this->getWorld();
 		if(world != nullptr) {
-			world->notifyNewPartAddedToPhysical(this->mainPhysical, part);
+			world->onPartAdded(part);
 		}
 		childPhysicals.push_back(ConnectedPhysical(Physical(part, this->mainPhysical), this, constraint, attachToThat, attachToThis));
 		childPhysicals.back().refreshCFrame();
@@ -310,10 +326,12 @@ void Physical::attachPhysical(MotorizedPhysical* phys, const CFrame& attachment)
 		conPhysOnThis.refreshCFrameRecursive();
 	}
 
-	WorldPrototype* world = this->mainPhysical->getWorld();
+	WorldPrototype* world = this->getWorld();
 	if(world != nullptr) {
-		assert(phys->getWorld() == nullptr || phys->getWorld() == world);
-		world->notifyPhysicalsMerged(this->mainPhysical, phys->mainPhysical);
+		if(phys->getWorld() != nullptr) {
+			assert(phys->getWorld() == world);
+			removePhysicalFromList(world->physicals, phys->mainPhysical);
+		}
 	}
 
 	delete phys;
@@ -335,9 +353,9 @@ void Physical::attachPart(Part* part, const CFrame& attachment) {
 			}
 		}
 	} else {
-		WorldPrototype* world = this->mainPhysical->getWorld();
+		WorldPrototype* world = this->getWorld();
 		if(world != nullptr) {
-			world->notifyNewPartAddedToPhysical(this->mainPhysical, part);
+			world->onPartAdded(part);
 		}
 		part->parent = this;
 		rigidBody.attach(part, attachment);
@@ -346,7 +364,7 @@ void Physical::attachPart(Part* part, const CFrame& attachment) {
 }
 
 void Physical::detachAllChildPhysicals() {
-	WorldPrototype* world = this->mainPhysical->getWorld();
+	WorldPrototype* world = this->getWorld();
 	for(ConnectedPhysical& child : childPhysicals) {
 		MotorizedPhysical* newPhys = new MotorizedPhysical(std::move(static_cast<Physical&>(child)));
 		
@@ -361,7 +379,7 @@ void Physical::detachAllChildPhysicals() {
 void Physical::detachFromRigidBody(Part* part) {
 	part->parent = nullptr;
 	rigidBody.detach(part);
-	WorldPrototype* world = this->mainPhysical->getWorld();
+	WorldPrototype* world = this->getWorld();
 	// TODO?
 }
 
@@ -437,7 +455,7 @@ void Physical::detachPartAssumingMultipleParts(Part* part) {
 void Physical::detachPart(Part* part) {
 	assert(part->parent == this);
 
-	WorldPrototype* world = this->mainPhysical->getWorld();
+	WorldPrototype* world = this->getWorld();
 
 	if(rigidBody.getPartCount() == 1) {
 		assert(part == rigidBody.getMainPart());
@@ -463,7 +481,7 @@ void Physical::detachPart(Part* part) {
 		MotorizedPhysical* newPhys = new MotorizedPhysical(part);
 		part->parent = newPhys;
 		if(world != nullptr) {
-			world->notifyNewPhysicalCreated(newPhys);
+			world->physicals.push_back(newPhys);
 		}
 	}
 }
@@ -483,9 +501,9 @@ void Physical::removePart(Part* part) {
 			self.parent->childPhysicals.remove(std::move(self));
 			mainPhys->refreshPhysicalProperties();
 		} else {
-			WorldPrototype* mainPhysWorld = mainPhys->getWorld();
+			WorldPrototype* mainPhysWorld = this->getWorld();
 			if(mainPhysWorld != nullptr) {
-				mainPhysWorld->notifyMainPhysicalObsolete(mainPhys);
+				removePhysicalFromList(mainPhysWorld->physicals, mainPhys);
 			}
 			delete mainPhys;
 		}
@@ -744,7 +762,7 @@ void Physical::applyForceToPhysical(Vec3 origin, Vec3 force) {
 
 #pragma region getters
 
-WorldPrototype* MotorizedPhysical::getWorld() const {
+WorldPrototype* Physical::getWorld() const {
 	return this->rigidBody.mainPart->getWorld();
 }
 
