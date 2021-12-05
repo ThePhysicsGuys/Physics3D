@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(Physics3D VERSION 1.9)
+project(Physics3D-application VERSION 1.0)
 
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 message(STATUS "Building with: ${CMAKE_CXX_COMPILER_ID}")
@@ -55,73 +55,8 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL GNU)
 	target_link_libraries(util stdc++fs)
 endif()
 
-add_library(Physics3D STATIC 
-  Physics3D/part.cpp
-  Physics3D/physical.cpp
-  Physics3D/rigidBody.cpp
-  Physics3D/layer.cpp
-  Physics3D/world.cpp
-  Physics3D/worldPhysics.cpp
-  Physics3D/inertia.cpp
-
-  Physics3D/math/linalg/eigen.cpp
-  Physics3D/math/linalg/trigonometry.cpp
-
-  Physics3D/geometry/computationBuffer.cpp
-  Physics3D/geometry/convexShapeBuilder.cpp
-  Physics3D/geometry/genericIntersection.cpp
-  Physics3D/geometry/indexedShape.cpp
-  Physics3D/geometry/intersection.cpp
-  Physics3D/geometry/triangleMesh.cpp
-  Physics3D/geometry/triangleMeshSSE.cpp
-  Physics3D/geometry/triangleMeshAVX.cpp
-  Physics3D/geometry/polyhedron.cpp
-  Physics3D/geometry/shape.cpp
-  Physics3D/geometry/shapeBuilder.cpp
-  Physics3D/geometry/shapeClass.cpp
-  Physics3D/geometry/shapeCreation.cpp
-  Physics3D/geometry/builtinShapeClasses.cpp
-  Physics3D/geometry/shapeLibrary.cpp
-
-  Physics3D/datastructures/aligned_alloc.cpp
-
-  Physics3D/boundstree/boundsTree.cpp
-  Physics3D/boundstree/filters/visibilityFilter.cpp
-  
-  Physics3D/hardconstraints/fixedConstraint.cpp
-  Physics3D/hardconstraints/hardConstraint.cpp
-  Physics3D/hardconstraints/hardPhysicalConnection.cpp
-  Physics3D/hardconstraints/motorConstraint.cpp
-  Physics3D/hardconstraints/controller/sineWaveController.cpp
-  
-  Physics3D/constraints/constraint.cpp
-  Physics3D/constraints/constraintGroup.cpp
-  Physics3D/constraints/ballConstraint.cpp
-  Physics3D/constraints/hingeConstraint.cpp
-  Physics3D/constraints/barConstraint.cpp
-  
-  Physics3D/softlinks/softLink.cpp
-  Physics3D/softlinks/springLink.cpp
-  Physics3D/softlinks/elasticLink.cpp
-  Physics3D/softlinks/magneticLink.cpp
-  Physics3D/softlinks/alignmentLink.cpp
-  
-  Physics3D/externalforces/directionalGravity.cpp
-  Physics3D/externalforces/externalForce.cpp
-  Physics3D/externalforces/magnetForce.cpp
-  
-  Physics3D/threading/upgradeable_shared_mutex.cpp
-  Physics3D/threading/synchronizedWorld.cpp
-  Physics3D/threading/physicsThread.cpp
-  
-  Physics3D/misc/debug.cpp
-  Physics3D/misc/cpuid.cpp
-  Physics3D/misc/validityHelper.cpp
-  Physics3D/misc/physicsProfiler.cpp
-  
-  Physics3D/misc/serialization/serialization.cpp
-  Physics3D/misc/serialization/serializeBasicTypes.cpp
-)
+# Adds the Physics3D library
+add_subdirectory(Physics3D)
 
 add_executable(benchmarks
   benchmarks/benchmark.cpp
