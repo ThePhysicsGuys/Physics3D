@@ -10,17 +10,18 @@ A 3D physics engine, written in C++
 
 ## Project structure
 The Physics3D project consists of 7 projects, each with its own role:
-- The [Physics3D](/Physics3D) project contains the physics engine can be compiled separately.  
+- The [Physics3D](/Physics3D) project contains the physics engine can be compiled separately.
 - The [graphics](/graphics) project contains all the logic to interact with OpenGL, visual debugging and gui code.
 - The [engine](/engine) project contains general concepts that can be applied in multiple environments like a layer systems and an event system.
 - The [util](/util) project contains code that can be used in all project, like logging, utilities and resource management.
 - The [application](/application) project contains an executable example application for visualizing, debugging and testing the physics engine. This project depends on the engine, graphics and physics project. Every project, including the physics project depends on util. 
 - The [tests](/tests) project contains an executable with unit test for the physics engine.
 - The [benchmarks](/benchmarks) project contains an executable with benchmarks to evaluate the physics engine's performance.
+- [examples](/examples) contains minimal examples on how to use the library. These include a bare bones graphics implementation. 
 
 ## Dependencies
 ### Application & engine & graphics
-- [GLFW](https://www.glfw.org/) Verified working with GLFW 3.2.1  
+- [GLFW](https://www.glfw.org/) Verified working with GLFW 3.2.1
 - [GLEW](http://glew.sourceforge.net/) Verified with GLEW 2.1.0
 - [stb_image](https://github.com/nothings/stb) Verified with stb_image.h v2.22
 - [FreeType](https://www.freetype.org/) Verified with FreeType v2.9.0
