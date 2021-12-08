@@ -274,7 +274,7 @@ double WedgeClass::getIntersectionDistance(Vec3 origin, Vec3 direction) const {
 			return t;
 		}
 	}
-	return std::numeric_limits<double>::max();
+	return std::numeric_limits<double>::infinity();
 }
 BoundingBox WedgeClass::getBounds(const Rotation& rotation, const DiagonalMat3& scale) const {
 	const Mat3& rotMat = rotation.asRotationMatrix();
@@ -327,7 +327,7 @@ Polyhedron WedgeClass::asPolyhedron() const {
 #pragma endregion
 
 #pragma region CornerClass
-CornerClass::CornerClass() : ShapeClass(4 / 3, Vec3(-2 / 3, -2 / 3, -2 / 3), ScalableInertialMatrix(Vec3(-0.0333, -0.9500, -0.0333), Vec3(0.3500, -0.0667, 0.3500)), CORNER_CLASS_ID) {}
+CornerClass::CornerClass() : ShapeClass(4 / 3, Vec3(-2 / 3, -2 / 3, -2 / 3), ScalableInertialMatrix(Vec3(0.2000, 0.2000, 0.2000), Vec3(0.0667, 0.0667, 0.0667)), CORNER_CLASS_ID) {}
 
 bool CornerClass::containsPoint(Vec3 point) const {
 	return std::abs(point.x) <= 1.0 && std::abs(point.y) <= 1.0 && std::abs(point.z) <= 0 && -point.x - point.y - point.z <= 1.0;
@@ -357,7 +357,7 @@ double CornerClass::getIntersectionDistance(Vec3 origin, Vec3 direction) const {
 	if(this->containsPoint(points) && t > 0) {
 		return t;
 	}
-	return std::numeric_limits<double>::max();
+	return std::numeric_limits<double>::infinity();
 }
 BoundingBox CornerClass::getBounds(const Rotation& rotation, const DiagonalMat3& scale) const {
 	const Mat3& rot = rotation.asRotationMatrix();
