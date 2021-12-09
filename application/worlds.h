@@ -2,11 +2,11 @@
 
 #include "extendedPart.h"
 #include <Physics3D/math/position.h>
-#include <Physics3D/threading/synchronizedWorld.h>
+#include <Physics3D/world.h>
 
 namespace P3D::Application {
 
-class PlayerWorld : public SynchronizedWorld<ExtendedPart> {
+class PlayerWorld : public World<ExtendedPart> {
 public:
 	PlayerWorld(double deltaT);
 

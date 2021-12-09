@@ -3,10 +3,11 @@
 #include <string>
 #include <variant>
 
-#include <Physics3D/threading/synchronizedWorld.h>
-#include "../application/extendedPart.h"
 #include <Physics3D/geometry/builtinShapeClasses.h>
+#include <Physics3D/threading/upgradeableMutex.h>
+#include "../application/extendedPart.h"
 #include "../graphics/visualData.h"
+#include "../worlds.h"
 
 namespace P3D::Application {
 
@@ -77,18 +78,20 @@ struct Transform : RC {
 	}
 
 	template<typename Function>
-	void asyncModify(SynchronizedWorld<ExtendedPart>* world, const Function& function) {
-		if (isPartAttached()) 
-			world->asyncModification(function);
-		else
+	void asyncModify(PlayerWorld* world, UpgradeableMutex& worldMutex, const Function& function) {
+		if (isPartAttached()) {
+			std::unique_lock<UpgradeableMutex>(worldMutex);
+			function();
+		} else
 			function();
 	}
 
 	template<typename Function>
-	void syncRead(SynchronizedWorld<ExtendedPart>* world, const Function& function) {
-		if (isPartAttached())
-			world->syncReadOnlyOperation(function);
-		else
+	void syncRead(PlayerWorld* world, UpgradeableMutex& worldMutex, const Function& function) {
+		if (isPartAttached()) {
+			std::unique_lock<UpgradeableMutex>(worldMutex);
+			function();
+		} else
 			function();
 	}
 

@@ -37,6 +37,7 @@ namespace Log {
 	}
 	void stop() {
 		fclose(logFile);
+		logFile = nullptr; // set to nullptr to prevent logs after program end from crashing the program by writing to an invalid file
 	}
 
 	std::string topSubject() {

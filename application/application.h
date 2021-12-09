@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Physics3D/threading/upgradeableMutex.h>
+
 namespace P3D::Engine {
 class Event;
 };
@@ -10,6 +12,7 @@ class Screen;
 class PlayerWorld;
 
 extern PlayerWorld world;
+extern UpgradeableMutex worldMutex;
 extern Screen screen;
 
 void pause();

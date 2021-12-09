@@ -17,6 +17,7 @@
 #include <Physics3D/misc/toString.h>
 #include <Physics3D/world.h>
 #include <Physics3D/layer.h>
+#include <Physics3D/threading/upgradeableMutex.h>
 
 #include "worlds.h"
 
@@ -109,8 +110,10 @@ void DebugOverlay::onRender(Engine::Registry64& registry) {
 		iterationChart.position = Vec2f(-leftSide + 0.1f, -0.3f);
 		iterationChart.render();
 
-		graphicsMeasure.mark(GraphicsProcess::WAIT_FOR_LOCK);
-		screen->world->syncReadOnlyOperation([this]() {
+		{
+			graphicsMeasure.mark(GraphicsProcess::WAIT_FOR_LOCK);
+			std::shared_lock<UpgradeableMutex> worldReadLock(*screen->worldMutex);
+
 			Screen* screen = static_cast<Screen*>(this->ptr);
 
 			graphicsMeasure.mark(GraphicsProcess::PROFILER);
@@ -128,7 +131,7 @@ void DebugOverlay::onRender(Engine::Registry64& registry) {
 					i++;
 				}
 			}
-		});
+		}
 
 		/*fpsSlidingChart.add("Fps 1", Graphics::graphicsMeasure.getAvgTPS());
 		fpsSlidingChart.add("Fps 2", physicsMeasure.getAvgTPS());

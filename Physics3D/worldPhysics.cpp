@@ -185,24 +185,61 @@ void handleTerrainCollision(Part& part1, Part& part2, Position collisionPoint, V
 */
 
 void WorldPrototype::tick(ThreadPool& threadPool) {
-
-	findColissionsParallel(*this, this->curColissions, threadPool);
-
-	physicsMeasure.mark(PhysicsProcess::EXTERNALS);
-	applyExternalForces(*this);
-
-	handleColissions(this->curColissions);
-
-	intersectionStatistics.nextTally();
-
-	handleConstraints(*this);
-
-	update(*this);
+	tickWorldUnsynchronized(*this, threadPool);
 }
 
 void WorldPrototype::tick() {
 	ThreadPool singleThreadPool(1);
-	this->tick(singleThreadPool);
+	tickWorldUnsynchronized(*this, singleThreadPool);
+}
+
+void tickWorldUnsynchronized(WorldPrototype& world, ThreadPool& threadPool) {
+	physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
+	findColissionsParallel(world, world.curColissions, threadPool);
+
+	physicsMeasure.mark(PhysicsProcess::EXTERNALS);
+	applyExternalForces(world);
+
+	physicsMeasure.mark(PhysicsProcess::COLISSION_HANDLING);
+	handleColissions(world.curColissions);
+
+	physicsMeasure.mark(PhysicsProcess::OTHER);
+	intersectionStatistics.nextTally();
+
+	physicsMeasure.mark(PhysicsProcess::CONSTRAINTS);
+	handleConstraints(world);
+
+	physicsMeasure.mark(PhysicsProcess::UPDATING);
+	update(world);
+}
+
+void tickWorldSynchronized(WorldPrototype& world, ThreadPool& threadPool, UpgradeableMutex& worldMutex) {
+	physicsMeasure.mark(PhysicsProcess::WAIT_FOR_LOCK);
+	worldMutex.lock_upgradeable();
+
+	physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
+	findColissionsParallel(world, world.curColissions, threadPool);
+
+	physicsMeasure.mark(PhysicsProcess::EXTERNALS);
+	applyExternalForces(world);
+
+	physicsMeasure.mark(PhysicsProcess::COLISSION_HANDLING);
+	handleColissions(world.curColissions);
+
+	physicsMeasure.mark(PhysicsProcess::OTHER);
+	intersectionStatistics.nextTally();
+
+	physicsMeasure.mark(PhysicsProcess::CONSTRAINTS);
+	handleConstraints(world);
+
+	physicsMeasure.mark(PhysicsProcess::WAIT_FOR_LOCK);
+	worldMutex.upgrade();
+
+	physicsMeasure.mark(PhysicsProcess::UPDATING);
+	update(world);
+
+	physicsMeasure.mark(PhysicsProcess::WAIT_FOR_LOCK);
+	worldMutex.unlock();
 }
 
 void applyExternalForces(WorldPrototype& world) {
@@ -311,7 +348,6 @@ void parallelRefineColissions(ThreadPool& threadPool, std::vector<Colission>& co
 }
 
 void findColissions(WorldPrototype& world, ColissionBuffer& curColissions) {
-	physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
 	curColissions.clear();
 
 	for(const ColissionLayer& layer : world.layers) {
@@ -329,7 +365,6 @@ void findColissions(WorldPrototype& world, ColissionBuffer& curColissions) {
 }
 
 void findColissionsParallel(WorldPrototype& world, ColissionBuffer& curColissions, ThreadPool& threadPool) {
-	physicsMeasure.mark(PhysicsProcess::COLISSION_OTHER);
 	curColissions.clear();
 
 	for(const ColissionLayer& layer : world.layers) {
@@ -347,7 +382,6 @@ void findColissionsParallel(WorldPrototype& world, ColissionBuffer& curColission
 }
 
 void handleColissions(ColissionBuffer& curColissions) {
-	physicsMeasure.mark(PhysicsProcess::COLISSION_HANDLING);
 	for(Colission c : curColissions.freePartColissions) {
 		handleCollision(*c.p1, *c.p2, c.intersection, c.exitVector);
 	}
@@ -357,13 +391,11 @@ void handleColissions(ColissionBuffer& curColissions) {
 }
 
 void handleConstraints(WorldPrototype& world) {
-	physicsMeasure.mark(PhysicsProcess::CONSTRAINTS);
 	for(const ConstraintGroup& group : world.constraints) {
 		group.apply();
 	}
 }
 void update(WorldPrototype& world) {
-	physicsMeasure.mark(PhysicsProcess::UPDATING);
 	for(MotorizedPhysical* physical : world.physicals) {
 		physical->update(world.deltaT);
 	}

@@ -15,7 +15,7 @@
 namespace P3D::Application {
 
 
-PlayerWorld::PlayerWorld(double deltaT) : SynchronizedWorld<ExtendedPart>(deltaT) {
+PlayerWorld::PlayerWorld(double deltaT) : World<ExtendedPart>(deltaT) {
 	this->addExternalForce(new PlayerController());
 }
 

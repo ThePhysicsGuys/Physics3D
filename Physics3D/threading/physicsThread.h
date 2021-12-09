@@ -4,6 +4,7 @@
 #include <atomic>
 
 #include "threadPool.h"
+#include "upgradeableMutex.h"
 
 namespace P3D {
 class WorldPrototype;
@@ -17,12 +18,13 @@ public:
 	std::atomic<double> speed = 1.0;
 	std::atomic<std::chrono::milliseconds> tickSkipTimeout;
 	WorldPrototype* world;
+	UpgradeableMutex* worldMutex;
 	void(*tickFunction)(WorldPrototype*);
 
-	PhysicsThread(std::chrono::milliseconds tickSkipTimeout = std::chrono::milliseconds(1000), unsigned int threadCount = 0);
-	PhysicsThread(WorldPrototype* world, std::chrono::milliseconds tickSkipTimeout = std::chrono::milliseconds(1000), unsigned int threadCount = 0);
+	PhysicsThread(WorldPrototype* world, UpgradeableMutex* worldMutex, void(&tickFunction)(WorldPrototype*), std::chrono::milliseconds tickSkipTimeout = std::chrono::milliseconds(1000), unsigned int threadCount = 0);
+	PhysicsThread(WorldPrototype* world, UpgradeableMutex* worldMutex, std::chrono::milliseconds tickSkipTimeout = std::chrono::milliseconds(1000), unsigned int threadCount = 0);
 	PhysicsThread(void(&tickFunction)(WorldPrototype*), std::chrono::milliseconds tickSkipTimeout = std::chrono::milliseconds(1000), unsigned int threadCount = 0);
-	PhysicsThread(WorldPrototype* world, void(&tickFunction)(WorldPrototype*), std::chrono::milliseconds tickSkipTimeout = std::chrono::milliseconds(1000), unsigned int threadCount = 0);
+	PhysicsThread(std::chrono::milliseconds tickSkipTimeout = std::chrono::milliseconds(1000), unsigned int threadCount = 0);
 	~PhysicsThread();
 	// Runs one tick. The PhysicsThread must not be running!
 	void runTick();

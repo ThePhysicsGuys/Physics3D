@@ -10,6 +10,7 @@
 #include "../graphics/mesh/indexedMesh.h"
 #include "../graphics/debug/visualDebug.h"
 
+#include <Physics3D/threading/upgradeableMutex.h>
 #include <Physics3D/boundstree/boundsTree.h>
 #include <Physics3D/geometry/polyhedron.h>
 #include <Physics3D/math/bounds.h>
@@ -141,22 +142,23 @@ void DebugLayer::onRender(Engine::Registry64& registry) {
 	AddableBuffer<ColoredVector>& vecLog = getVectorBuffer();
 	AddableBuffer<ColoredPoint>& pointLog = getPointBuffer();
 
-	for (const MotorizedPhysical* physical : screen->world->physicals) {
-		Position com = physical->getCenterOfMass();
-		pointLog.add(ColoredPoint(com, Debug::CENTER_OF_MASS));
-	}
+	{
+		std::shared_lock<UpgradeableMutex> worldReadLock(*screen->worldMutex);
+		for(const MotorizedPhysical* physical : screen->world->physicals) {
+			Position com = physical->getCenterOfMass();
+			pointLog.add(ColoredPoint(com, Debug::CENTER_OF_MASS));
+		}
 
-	screen->world->syncReadOnlyOperation([this, &vecLog]() {
 		Screen* screen = static_cast<Screen*>(this->ptr);
-		if (screen->selectedPart != nullptr) {
+		if(screen->selectedPart != nullptr) {
 			const GlobalCFrame& selectedCFrame = screen->selectedPart->getCFrame();
 			Motion partMotion = screen->selectedPart->getMotion();
 			Polyhedron asPoly = screen->selectedPart->hitbox.asPolyhedron();
-			for (const Vec3f& corner : asPoly.iterVertices()) {
+			for(const Vec3f& corner : asPoly.iterVertices()) {
 				vecLog.add(ColoredVector(selectedCFrame.localToGlobal(corner), partMotion.getVelocityOfPoint(selectedCFrame.localToRelative(corner)), Debug::VELOCITY));
 			}
 
-			if (colissionSpheresMode == SphereColissionRenderMode::SELECTED) {
+			if(colissionSpheresMode == SphereColissionRenderMode::SELECTED) {
 				Physical& selectedPhys = *screen->selectedPart->parent;
 
 				for(Part& part : selectedPhys.rigidBody) {
@@ -194,8 +196,8 @@ void DebugLayer::onRender(Engine::Registry64& registry) {
 		} else if(colTreeRenderMode >= 0) {
 			renderTree(getLayerByID(screen->world->layers, colTreeRenderMode)->tree);
 		}
-	});
-
+		worldReadLock.unlock(); // unlock_shared
+	}
 
 	disableDepthTest();
 

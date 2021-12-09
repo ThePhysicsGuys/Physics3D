@@ -9,20 +9,22 @@ namespace P3D {
 using namespace std::chrono;
 
 static void emptyFunc(WorldPrototype*) {}
-PhysicsThread::PhysicsThread(WorldPrototype* world, void(&tickFunction)(WorldPrototype*), std::chrono::milliseconds tickSkipTimeout, unsigned int threadCount) : 
+
+PhysicsThread::PhysicsThread(WorldPrototype* world, UpgradeableMutex* worldMutex, void(&tickFunction)(WorldPrototype*), std::chrono::milliseconds tickSkipTimeout, unsigned int threadCount) :
 	world(world),
+	worldMutex(worldMutex),
 	tickFunction(tickFunction),
 	tickSkipTimeout(tickSkipTimeout),
 	threadPool(threadCount == 0 ? std::thread::hardware_concurrency() : threadCount) {}
 
-PhysicsThread::PhysicsThread(WorldPrototype* world, std::chrono::milliseconds tickSkipTimeout, unsigned int threadCount) : 
-	PhysicsThread(world, emptyFunc, tickSkipTimeout, threadCount) {}
+PhysicsThread::PhysicsThread(WorldPrototype* world, UpgradeableMutex* worldMutex, std::chrono::milliseconds tickSkipTimeout, unsigned int threadCount) :
+	PhysicsThread(world, worldMutex, emptyFunc, tickSkipTimeout, threadCount) {}
 
 PhysicsThread::PhysicsThread(void(&tickFunction)(WorldPrototype*), std::chrono::milliseconds tickSkipTimeout, unsigned int threadCount) : 
-	PhysicsThread(nullptr, tickFunction, tickSkipTimeout, threadCount) {}
+	PhysicsThread(nullptr, nullptr, tickFunction, tickSkipTimeout, threadCount) {}
 
 PhysicsThread::PhysicsThread(std::chrono::milliseconds tickSkipTimeout, unsigned int threadCount) : 
-	PhysicsThread(nullptr, emptyFunc, tickSkipTimeout, threadCount) {}
+	PhysicsThread(nullptr, nullptr, emptyFunc, tickSkipTimeout, threadCount) {}
 
 PhysicsThread::~PhysicsThread() {
 	this->stop();
@@ -32,6 +34,8 @@ void PhysicsThread::runTick() {
 	physicsMeasure.mark(PhysicsProcess::OTHER);
 
 	this->world->tick(this->threadPool);
+
+	physicsMeasure.mark(PhysicsProcess::OTHER);
 	tickFunction(this->world);
 
 	physicsMeasure.end();

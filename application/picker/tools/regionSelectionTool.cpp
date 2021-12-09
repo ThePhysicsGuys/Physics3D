@@ -99,20 +99,18 @@ namespace P3D::Application {
 			VisibilityFilter visibilityFilter = VisibilityFilter::forSubWindow(screen.camera.cframe.position, screen.camera.getForwardDirection(), screen.camera.getUpDirection(), screen.camera.fov, screen.camera.aspect, screen.camera.zfar, left, right, down, up);
 
 			auto view = screen.registry.view<Comp::Hitbox, Comp::Transform>();
+			std::shared_lock<UpgradeableMutex> worldReadLock(*screen.worldMutex);
 			for (auto entity : view) {
 				IRef<Comp::Hitbox> hitbox = view.get<Comp::Hitbox>(entity);
 				IRef<Comp::Transform> transform = view.get<Comp::Transform>(entity);
-				screen.world->syncReadOnlyOperation([&] () {
-					Shape shape = hitbox->getShape();
-					if (!transform->isPartAttached())
-						shape = shape.scaled(transform->getScale());
 
-					Bounds bounds = shape.getBounds(transform->getRotation()) + transform->getPosition();
-					if (!visibilityFilter(bounds))
-						return;
+				Shape shape = hitbox->getShape();
+				if (!transform->isPartAttached())
+					shape = shape.scaled(transform->getScale());
 
+				Bounds bounds = shape.getBounds(transform->getRotation()) + transform->getPosition();
+				if (visibilityFilter(bounds))
 					SelectionTool::select(entity);
-				});
 			}
 		}
 

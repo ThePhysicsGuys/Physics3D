@@ -123,10 +123,10 @@ public:
 	void forEachPartFiltered(const Filter& filter, const Func& funcToRun) const;
 };
 
-template<typename T = Part, typename UnderlyingWorldPrototype = WorldPrototype>
-class World : public UnderlyingWorldPrototype {
+template<typename T = Part>
+class World : public WorldPrototype {
 public:
-	World(double deltaT) : UnderlyingWorldPrototype(deltaT) {}
+	World(double deltaT) : WorldPrototype(deltaT) {}
 
 	virtual void onCollide(Part* partA, Part* partB) {}
 	virtual void onCollide(T* partA, T* partB) {}

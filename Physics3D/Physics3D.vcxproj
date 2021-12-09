@@ -180,8 +180,7 @@
     <ClCompile Include="externalforces\externalForce.cpp" />
     <ClCompile Include="externalforces\directionalGravity.cpp" />
     <ClCompile Include="externalforces\magnetForce.cpp" />
-    <ClCompile Include="threading\synchronizedWorld.cpp" />
-    <ClCompile Include="threading\upgradeable_shared_mutex.cpp" />
+    <ClCompile Include="threading\upgradeableMutex.cpp" />
     <ClCompile Include="threading\physicsThread.cpp" />
     <ClCompile Include="misc\cpuid.cpp" />
     <ClCompile Include="misc\physicsProfiler.cpp" />
@@ -280,9 +279,8 @@
     <ClInclude Include="externalforces\directionalGravity.h" />
     <ClInclude Include="externalforces\magnetForce.h" />
     <ClInclude Include="threading\sharedLockGuard.h" />
-    <ClInclude Include="threading\synchronizedWorld.h" />
     <ClInclude Include="threading\threadPool.h" />
-    <ClInclude Include="threading\upgradeable_shared_mutex.h" />
+    <ClInclude Include="threading\upgradeableMutex.h" />
     <ClInclude Include="threading\physicsThread.h" />
     <ClInclude Include="misc\debug.h" />
     <ClInclude Include="misc\unreachable.h" />

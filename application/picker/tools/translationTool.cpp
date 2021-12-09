@@ -11,6 +11,7 @@
 
 #include <Physics3D/geometry/shapeLibrary.h>
 #include <Physics3D/math/rotation.h>
+#include <Physics3D/threading/upgradeableMutex.h>
 #include "../graphics/visualShape.h"
 #include "../graphics/mesh/primitive.h"
 #include "../graphics/mesh/indexedMesh.h"
@@ -277,37 +278,34 @@ namespace P3D::Application {
 		if (status == kIdle)
 			return false;
 
-		screen.world->asyncModification([this, status] () {
-			switch (status) {
-				case kTranslateX:
-					translateAlongLine({ 1, 0, 0 });
-					break;
-				case kTranslateY:
-					translateAlongLine({ 0, 1, 0 });
-					break;
-				case kTranslateZ:
-					translateAlongLine({ 0, 0, 1 });
-					break;
-				case kTranslateC:
-					translateInPlane(screen.camera.cframe.rotation * Vec3(0, 0, 1), false);
-					break;
-				case kTranslateXY:
-					translateInPlane({ 0, 0, 1 });
-					break;
-				case kTranslateXZ:
-					translateInPlane({ 0, 1, 0 });
-					break;
-				case kTranslateYZ:
-					translateInPlane({ 1, 0, 0 });
-					break;
-				default:
-					return false;
-			}
+		std::unique_lock<UpgradeableMutex> worldWriteLock(*screen.worldMutex);
+		switch (status) {
+			case kTranslateX:
+				translateAlongLine({ 1, 0, 0 });
+				break;
+			case kTranslateY:
+				translateAlongLine({ 0, 1, 0 });
+				break;
+			case kTranslateZ:
+				translateAlongLine({ 0, 0, 1 });
+				break;
+			case kTranslateC:
+				translateInPlane(screen.camera.cframe.rotation * Vec3(0, 0, 1), false);
+				break;
+			case kTranslateXY:
+				translateInPlane({ 0, 0, 1 });
+				break;
+			case kTranslateXZ:
+				translateInPlane({ 0, 1, 0 });
+				break;
+			case kTranslateYZ:
+				translateInPlane({ 1, 0, 0 });
+				break;
+			default:
+				return false;
+		}
 
-			return true;
-		});
-
-		return false;
+		return true;
 	}
 
 	void TranslationTool::translateInPlane(const Vec3& normal, bool local) {

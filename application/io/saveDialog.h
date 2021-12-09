@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../worlds.h"
-
 namespace P3D::Application {
 
-void saveWorld(const PlayerWorld& world);
-void openWorld(PlayerWorld& world);
-
+constexpr size_t MAX_PATH_LENGTH = 1024;
+// returns true if user selected save
+bool saveWorldDialog(char* worldFilePath);
+// returns true if user selected open
+bool openWorldDialog(char* worldFilePath);
 };

@@ -15,7 +15,6 @@
 #include <Physics3D/geometry/shapeCreation.h>
 #include <Physics3D/geometry/shapeLibrary.h>
 #include <Physics3D/threading/physicsThread.h>
-#include <Physics3D/threading/synchronizedWorld.h>
 #include <Physics3D/externalforces/directionalGravity.h>
 
 #include <stdio.h>
@@ -329,24 +328,23 @@ public:
 		Part(shape, position, properties), meshIndex(meshRegistry.getMeshIndexFor(shape.baseShape)), color(color) {}
 };
 
-void render(SynchronizedWorld<CustomPart>& world, RenderShader& shader) {
+void render(World<CustomPart>& world, UpgradeableMutex& worldMutex, RenderShader& shader) {
 	Mat4f viewMatrix = lookAt(Vec3f(12.0f, 6.0f, 15.0f), Vec3f(0.0f, 0.0f, 0.0f), Vec3f(0.0f, 1.0f, 0.0f));
 	Mat4f projectionMatrix = perspective(0.8f, 4.0f/3.0f, 0.1f, 100.0f);
 
 	shader.setPVMatrix(projectionMatrix * viewMatrix);
 
 	// multithreaded application, must use synchronization with PhysicsThread
-	world.syncReadOnlyOperation([&world, &shader]() {
-		world.forEachPart([&](const CustomPart& part) {
-			const ArrayMesh& mesh = meshRegistry[part.meshIndex];
-			mesh.bind();
+	std::shared_lock<UpgradeableMutex> worldReadLock(worldMutex);
+	world.forEachPart([&](const CustomPart& part) {
+		const ArrayMesh& mesh = meshRegistry[part.meshIndex];
+		mesh.bind();
 
-			shader.setPartColor(part.color);
-			shader.setModelMatrix(part.getCFrame().asMat4WithPreScale(part.hitbox.scale));
-			mesh.render();
+		shader.setPartColor(part.color);
+		shader.setModelMatrix(part.getCFrame().asMat4WithPreScale(part.hitbox.scale));
+		mesh.render();
 
-			mesh.unbind();
-		});
+		mesh.unbind();
 	});
 }
 
@@ -369,7 +367,8 @@ int main(int argc, const char** argv) {
 	RenderShader shader;
 
 	// World constructor accepts the tick delay. This code creates a world to run at 100 TPS. 
-	SynchronizedWorld<CustomPart> world(1 / 100.0);
+	World<CustomPart> world(1 / 100.0);
+	UpgradeableMutex worldMutex;
 	
 	PartProperties basicProperties;
 	basicProperties.density = 1.0;
@@ -410,13 +409,13 @@ int main(int argc, const char** argv) {
 	world.addPart(icosahedron.get());
 
 	// We can set part velocities and other properties. 
-	icosahedron->setAngularVelocity(Vec3(0.0, 10.0, 0.0));
+	icosahedron->setAngularVelocity(Vec3(5.0, 5.0, 0.0));
 
 	// External Force memory is also not managed by the engine. 
 	std::unique_ptr<DirectionalGravity> gravity = std::make_unique<DirectionalGravity>(Vec3(0.0, -10.0, 0.0));
 	world.addExternalForce(gravity.get());
 
-	PhysicsThread physicsThread(&world);
+	PhysicsThread physicsThread(&world, &worldMutex);
 	physicsThread.start();
 
 	shader.setLightDirection(normalize(Vec3f(0.4f, -1.0f, 0.2f)));
@@ -426,7 +425,7 @@ int main(int argc, const char** argv) {
 		// Clear the screen. 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		render(world, shader);
+		render(world, worldMutex, shader);
 
 		// Swap buffers
 		glfwSwapBuffers(window);

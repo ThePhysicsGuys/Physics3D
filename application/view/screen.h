@@ -8,6 +8,10 @@
 #include "../engine/ecs/registry.h"
 #include "camera.h"
 
+namespace P3D {
+class UpgradeableMutex;
+};
+
 namespace P3D::Graphics {
 struct Quad;
 class FrameBuffer;
@@ -29,6 +33,7 @@ public:
 	Engine::Registry64 registry;
 
 	PlayerWorld* world;
+	UpgradeableMutex* worldMutex;
 	Vec2i dimension;
 
 	Camera camera;
@@ -47,7 +52,7 @@ public:
 	Position selectedPoint;
 
 	Screen();
-	Screen(int width, int height, PlayerWorld* world);
+	Screen(int width, int height, PlayerWorld* world, UpgradeableMutex* worldMutex);
 
 	void onInit(bool quickBoot);
 	void onUpdate();

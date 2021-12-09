@@ -58,11 +58,11 @@
 namespace P3D::Application {
 
 PlayerWorld world(1 / TICKS_PER_SECOND);
-PhysicsThread physicsThread(&world, Graphics::AppDebug::logTickEnd, TICK_SKIP_TIME);
+UpgradeableMutex worldMutex;
+PhysicsThread physicsThread(&world, &worldMutex, Graphics::AppDebug::logTickEnd, TICK_SKIP_TIME);
 Screen screen;
 
 void init(const ::Util::ParsedArgs& cmdArgs);
-void setupPhysics();
 void setupWorld(const ::Util::ParsedArgs& cmdArgs);
 void setupGL();
 void setupDebug();
@@ -118,7 +118,7 @@ void setupGL() {
 		stop(-1);
 	}
 
-	new(&screen) Screen(1800, 900, &world);
+	new(&screen) Screen(1800, 900, &world, &worldMutex);
 
 	Log::info("Initializing GLEW");
 	if (!initGLEW()) {
@@ -184,7 +184,7 @@ void setupWorld(const ::Util::ParsedArgs& cmdArgs) {
 		world.addPart(wedgePart);
 	}
 
-	/*{
+	{
 		ExtendedPart* partA = new ExtendedPart(boxShape(1.0, 0.49, 3.0), GlobalCFrame(3.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "partA");
 		ExtendedPart* partB = new ExtendedPart(boxShape(1.0, 0.5, 3.0), GlobalCFrame(2.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "partB");
 		EntityBuilder(screen.registry, partA->entity).light(Graphics::Color(0.1, 0.94f, 0.49f), 500, Comp::Light::Attenuation{0.8, 0.5, 0.2});
@@ -209,13 +209,13 @@ void setupWorld(const ::Util::ParsedArgs& cmdArgs) {
 		world.addPart(partA);
 		world.addPart(partB);
 		world.addPart(partC);
-	}*/
+	}
 
 	//world.addLink(new MagneticLink({ CFrame{1.0, 0.0, 0.0}, partA }, { CFrame{0.0, 0.0, 0.0}, partB }, +8.0));
 	//world.addLink(new AlignmentLink({ CFrame{1.0, 0.0, 0.0}, partA}, { CFrame{0.0, 0.0, 0.0}, partB }));
-	return;
+	//return;
 	
-	/*ExtendedPart* partA = new ExtendedPart(boxShape(5.0, 10.0, 5.0), GlobalCFrame(0.0, 6.0, 0.0), WorldBuilder::basicProperties);
+	ExtendedPart* partA = new ExtendedPart(boxShape(5.0, 10.0, 5.0), GlobalCFrame(0.0, 6.0, 0.0), WorldBuilder::basicProperties);
 	ExtendedPart* partB = new ExtendedPart(sphereShape(0.45), GlobalCFrame(8.0, 6.0, 0.0), WorldBuilder::basicProperties);
 	ExtendedPart* partC = new ExtendedPart(boxShape(0.9, 0.15, 0.15), GlobalCFrame(9.0, 6.0, 0.0), WorldBuilder::basicProperties);
 	ExtendedPart* partD = new ExtendedPart(boxShape(0.9, 0.15, 0.15), GlobalCFrame(10.0, 6.0, 0.0), WorldBuilder::basicProperties);
@@ -234,7 +234,7 @@ void setupWorld(const ::Util::ParsedArgs& cmdArgs) {
 	cg.add(partB->parent, partC->parent, new BallConstraint(Vec3(0.5, 0.0, 0.0), Vec3(-0.5, 0.0, 0.0)));
 	cg.add(partC->parent, partD->parent, new BallConstraint(Vec3(0.5, 0.0, 0.0), Vec3(-0.5, 0.0, 0.0)));
 	cg.add(partD->parent, partE->parent, new BallConstraint(Vec3(0.5, 0.0, 0.0), Vec3(-0.5, 0.0, 0.0)));
-	world.constraints.push_back(std::move(cg));*/
+	world.constraints.push_back(std::move(cg));
 }
 
 void setupDebug() {
@@ -267,11 +267,21 @@ bool onKeyPress(Engine::KeyPressEvent& keyEvent) {
 	Key pressedKey = keyEvent.getKey();
 	if(pressedKey == Keyboard::KEY_S && keyEvent.getModifiers().isCtrlPressed()) {
 		handler->setKey(Keyboard::KEY_S, false);
-		saveWorld(world);
+		char pathBuffer[MAX_PATH_LENGTH];
+		if(saveWorldDialog(pathBuffer)) {
+			Log::info("Saving world to: %s", pathBuffer);
+			std::unique_lock<UpgradeableMutex>(worldMutex);
+			WorldImportExport::saveWorld(pathBuffer, world);
+		}
 		return true;
 	} else if(pressedKey == Keyboard::KEY_O && keyEvent.getModifiers().isCtrlPressed()) {
 		handler->setKey(Keyboard::KEY_O, false);
-		openWorld(world);
+		char pathBuffer[MAX_PATH_LENGTH];
+		if(openWorldDialog(pathBuffer)) {
+			Log::info("Opening world: %s", pathBuffer);
+			std::unique_lock<UpgradeableMutex>(worldMutex);
+			WorldImportExport::loadWorld(pathBuffer, world);
+		}
 		return true;
 	} else {
 		return false;
@@ -332,21 +342,20 @@ void runTick() {
 void toggleFlying() {
 	// Through using syncModification, we ensure that the creation or deletion of the player shape is not handled by the physics thread, thus avoiding a race condition with the Registry
 	// TODO this is not a proper solution, it should be an asyncModification! But at least it fixes the sporadic crash
-	world.syncModification([] () {
-		if (screen.camera.flying) {
-			Log::info("Creating player");
-			screen.camera.flying = false;
-			// this modifies Registry, which may or may not be a race condition
-			screen.camera.attachment = new ExtendedPart(polyhedronShape(ShapeLibrary::createPrism(50, 0.3f, 1.5f)), GlobalCFrame(screen.camera.cframe.getPosition()), {1.0, 5.0, 0.0}, "Player");
-			screen.world->addPart(screen.camera.attachment);
-		} else {
-			Log::info("Destroying player");
-			delete screen.camera.attachment;
-			screen.camera.flying = true;
-		}
-		});
+	std::unique_lock<UpgradeableMutex> worldLock(worldMutex);
+	if (screen.camera.flying) {
+		Log::info("Creating player");
+		screen.camera.flying = false;
+		// this modifies Registry, which may or may not be a race condition
+		screen.camera.attachment = new ExtendedPart(polyhedronShape(ShapeLibrary::createPrism(50, 0.3f, 1.5f)), GlobalCFrame(screen.camera.cframe.getPosition()), {1.0, 5.0, 0.0}, "Player");
+		screen.world->addPart(screen.camera.attachment);
+	} else {
+		Log::info("Destroying player");
+		delete screen.camera.attachment;
+		screen.camera.flying = true;
 	}
-};
+}
+}; // namespace P3D::Application
 
 int main(int argc, const char** args) {
 	using namespace P3D::Application;

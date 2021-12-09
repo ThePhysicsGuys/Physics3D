@@ -4,8 +4,9 @@
 #include "math/linalg/vec.h"
 #include "math/position.h"
 #include "colissionBuffer.h"
-#include "threading/threadPool.h"
 #include "world.h"
+#include "threading/threadPool.h"
+#include "threading/upgradeableMutex.h"
 
 namespace P3D {
 void handleCollision(Part& part1, Part& part2, Position collisionPoint, Vec3 exitVector);
@@ -19,5 +20,8 @@ void applyExternalForces(WorldPrototype& world);
 void handleColissions(ColissionBuffer& curColissions);
 void handleConstraints(WorldPrototype& world);
 void update(WorldPrototype& world);
+
+void tickWorldUnsynchronized(WorldPrototype& world, ThreadPool& threadPool);
+void tickWorldSynchronized(WorldPrototype& world, ThreadPool& threadPool, UpgradeableMutex& worldMutex);
 };
 

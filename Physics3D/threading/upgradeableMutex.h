@@ -40,9 +40,14 @@ mtx.final_downgrade();
 // State is consistent with previous read and write sections.
 mtx.unlock_shared();
 // Other writers now allowed.
+
+
+All function names are formatted snake_case to be compatible with std::lock and std::shared_lock
 */
-class upgradeable_shared_mutex {
+class UpgradeableMutex {
 	std::shared_mutex stateMutex;
+
+	// Only one thread can be upgrading or have an exclusive lock at a time
 	std::mutex writerLockout;
 
 public:
@@ -57,16 +62,16 @@ public:
 	void unlock_shared();
 	
 	// Unlocked -> Shared Upgradeable
-	void lock_shared_upgradeable();
+	void lock_upgradeable();
 	// Shared Upgradeable -> Unlocked
-	void unlock_shared_upgradeable();
+	void unlock_upgradeable();
 
 	// Shared Upgradeable -> Exclusive
 	void upgrade();
 	// Exclusive -> Shared Upgradeable
 	void downgrade();
 	// Exclusive -> Shared
-	void final_downgrade();
+	void final_downgrade(); // calling final_downgrade instead of downgrade will allow another lock_upgradeable to make a reservation
 	// Shared Upgradeable -> Shared
 	void cancel_upgrade();
 };

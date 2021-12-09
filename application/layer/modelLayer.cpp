@@ -165,7 +165,9 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 	};
 	
 	std::map<double, EntityInfo> transparentEntities;
-	screen->world->syncReadOnlyOperation([this, &transparentEntities, screen, &registry] () {
+
+	{
+		std::shared_lock<UpgradeableMutex> worldReadLock(*screen->worldMutex);
 		VisibilityFilter filter = VisibilityFilter::forWindow(screen->camera.cframe.position, screen->camera.getForwardDirection(), screen->camera.getUpDirection(), screen->camera.fov, screen->camera.aspect, screen->camera.zfar);
 
 		auto view = registry.view<Comp::Mesh>();
@@ -277,7 +279,7 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 				}
 			}
 		}
-	});
+	}
 
 	endScene();
 }

@@ -15,6 +15,7 @@
 #include "../../worlds.h"
 
 #include <Physics3D/boundstree/filters/rayIntersectsBoundsFilter.h>
+#include <Physics3D/threading/upgradeableMutex.h>
 
 #include <optional>
 
@@ -85,16 +86,18 @@ std::optional<std::pair<Engine::Registry64::entity_type, Position>> SelectionToo
 	Engine::Registry64::entity_type intersectedEntity = 0;
 	double closestIntersectionDistance = std::numeric_limits<double>::max();
 	auto view = screen.registry.view<Comp::Hitbox, Comp::Transform>();
-	for (auto entity : view) {
-		IRef<Comp::Hitbox> hitbox = view.get<Comp::Hitbox>(entity);
-		IRef<Comp::Transform> transform = view.get<Comp::Transform>(entity);
-		screen.world->syncReadOnlyOperation([&] () {
+
+	{
+		std::shared_lock<UpgradeableMutex> worldReadLock(*screen.worldMutex);
+		for(auto entity : view) {
+			IRef<Comp::Hitbox> hitbox = view.get<Comp::Hitbox>(entity);
+			IRef<Comp::Transform> transform = view.get<Comp::Transform>(entity);
 			std::optional<double> distance = intersect(transform->getCFrame(), hitbox);
-			if (distance.has_value() && distance < closestIntersectionDistance) {
+			if(distance.has_value() && distance < closestIntersectionDistance) {
 				closestIntersectionDistance = *distance;
 				intersectedEntity = entity;
 			}
-		});
+		}
 	}
 
 	if (intersectedEntity == 0)

@@ -81,14 +81,12 @@ Screen::Screen() {
 	
 };
 
-Screen::Screen(int width, int height, PlayerWorld* world) {
+Screen::Screen(int width, int height, PlayerWorld* world, UpgradeableMutex* worldMutex) : world(world), worldMutex(worldMutex) {
 	using namespace Graphics;
 
 	// Init registry component order
 	registry.init<Comp::Name, Comp::Transform, Comp::Collider>();
 	
-	this->world = world;
-
 	// Create a windowed mode window and its OpenGL context 
 	GLFWwindow* context = GLFW::createContext(width, height, "Physics3D");
 

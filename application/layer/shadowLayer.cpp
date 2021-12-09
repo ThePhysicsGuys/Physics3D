@@ -68,11 +68,12 @@ void ShadowLayer::onEvent(Engine::Registry64& registry, Engine::Event& event) {
 
 void ShadowLayer::renderScene(Engine::Registry64& registry) {
 	std::vector<ExtendedPart*> visibleParts;
-	screen.world->syncReadOnlyOperation([&visibleParts, &registry]() {
-		screen.world->forEachPart([&visibleParts](ExtendedPart& part) {
-			visibleParts.push_back(&part);
-		});
+	std::shared_lock<UpgradeableMutex> worldReadLock(*screen.worldMutex);
+
+	screen.world->forEachPart([&visibleParts](ExtendedPart& part) {
+		visibleParts.push_back(&part);
 	});
+
 	for (ExtendedPart* part : visibleParts) {
 		IRef<Comp::Mesh> mesh = registry.get<Comp::Mesh>(part->entity);
 

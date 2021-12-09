@@ -69,9 +69,9 @@ static Comp::Material deserializeMaterial(std::istream& istream) {
 	return material;
 }
 
-class Serializer : public SerializationSession<ExtendedPart, SynchronizedWorldPrototype> {
+class Serializer : public SerializationSession<ExtendedPart> {
 public:
-	using SerializationSession<ExtendedPart, SynchronizedWorldPrototype>::SerializationSession;
+	using SerializationSession<ExtendedPart>::SerializationSession;
 	virtual void serializePartExternalData(const ExtendedPart& part, std::ostream& ostream) override {
 		// TODO integrate components into serialization
 		serializeMaterial(screen.registry.getOr<Comp::Material>(part.entity), ostream);
@@ -79,9 +79,9 @@ public:
 	}
 };
 
-class Deserializer : public DeSerializationSession<ExtendedPart, SynchronizedWorldPrototype> {
+class Deserializer : public DeSerializationSession<ExtendedPart> {
 public:
-	using DeSerializationSession<ExtendedPart, SynchronizedWorldPrototype>::DeSerializationSession;
+	using DeSerializationSession<ExtendedPart>::DeSerializationSession;
 	virtual ExtendedPart* deserializeExtendedPart(Part&& partPhysicalData, std::istream& istream) override {
 		Comp::Material material = deserializeMaterial(istream);
 		ExtendedPart* result = new ExtendedPart(std::move(partPhysicalData), deserializeString(istream));

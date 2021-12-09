@@ -12,6 +12,7 @@
 
 #include <Physics3D/geometry/shapeLibrary.h>
 #include <Physics3D/math/rotation.h>
+#include <Physics3D/threading/upgradeableMutex.h>
 #include "../graphics/visualShape.h"
 #include "../graphics/mesh/primitive.h"
 #include "../graphics/mesh/indexedMesh.h"
@@ -264,40 +265,36 @@ namespace P3D::Application {
 		if (status == kIdle)
 			return false;
 
-		screen.world->asyncModification([this, status] () {
-			switch (status) {
-				case kScaleX:
-					scaleAlongLine({ 1, 0, 0 });
-					break;
-				case kScaleY:
-					scaleAlongLine({ 0, 1, 0 });
-					break;
-				case kScaleZ:
-					scaleAlongLine({ 0, 0, 1 });
-					break;
-				case kScaleXYZ:
-					scaleXYZ();
-					break;
-				case kScaleXY:
-					scaleInPlane({ 0, 0, 1 });
-					break;
-				case kScaleXZ:
-					scaleInPlane({ 0, 1, 0 });
-					break;
-				case kScaleYZ:
-					scaleInPlane({ 1, 0, 0 });
-					break;
-				case kTranslateC:
-					TranslationTool::translateInPlane(screen.camera.cframe.rotation * Vec3(0, 0, 1), false);
-					break;
-				default:
-					return false;
-			}
-
-			return true;
-		});
-
-		return false;
+		std::unique_lock<UpgradeableMutex> worldLock(*screen.worldMutex);
+		switch (status) {
+			case kScaleX:
+				scaleAlongLine({ 1, 0, 0 });
+				break;
+			case kScaleY:
+				scaleAlongLine({ 0, 1, 0 });
+				break;
+			case kScaleZ:
+				scaleAlongLine({ 0, 0, 1 });
+				break;
+			case kScaleXYZ:
+				scaleXYZ();
+				break;
+			case kScaleXY:
+				scaleInPlane({ 0, 0, 1 });
+				break;
+			case kScaleXZ:
+				scaleInPlane({ 0, 1, 0 });
+				break;
+			case kScaleYZ:
+				scaleInPlane({ 1, 0, 0 });
+				break;
+			case kTranslateC:
+				TranslationTool::translateInPlane(screen.camera.cframe.rotation * Vec3(0, 0, 1), false);
+				break;
+			default:
+				return false;
+		}
+		return true;
 	}
 
 	void ScaleTool::scaleAlongLine(const Vec3& direction) {

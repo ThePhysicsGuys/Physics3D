@@ -14,6 +14,7 @@
 #include <Physics3D/misc/toString.h>
 #include <Physics3D/geometry/shapeLibrary.h>
 #include <Physics3D/physical.h>
+#include <Physics3D/threading/upgradeableMutex.h>
 
 #include <typeindex>
 
@@ -190,7 +191,6 @@ void ConstraintLayer::onRender(Engine::Registry64& registry) {
 	using namespace Renderer;
 
 	Screen* screen = static_cast<Screen*>(this->ptr);
-	PlayerWorld* world = screen->world;
 	
 	beginScene();
 	enableBlending();
@@ -198,21 +198,22 @@ void ConstraintLayer::onRender(Engine::Registry64& registry) {
 	Shaders::basicShader->updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
 	Shaders::maskShader->updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
 
-	world->syncReadOnlyOperation([&]() {
-		for(MotorizedPhysical* phys : world->physicals) {
+	{
+		std::shared_lock<UpgradeableMutex> worldReadLock(*screen->worldMutex);
+		for(MotorizedPhysical* phys : screen->world->physicals) {
 			recurseRenderHardConstraints(this, *phys);
 		}
 
-		for(const ConstraintGroup& g : world->constraints) {
+		for(const ConstraintGroup& g : screen->world->constraints) {
 			for(const PhysicalConstraint& constraint : g.constraints) {
 				renderConstraint(this, constraint);
 			}
 		}
 
-		/*for (const SoftLink* springLink : world->springLinks) {
+		/*for (const SoftLink* springLink : screen->world->springLinks) {
 			renderSoftLinkConstraint(this, springLink);
 		}*/
-	});
+	}
 
 	endScene();
 }

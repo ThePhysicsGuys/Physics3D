@@ -102,11 +102,10 @@ bool StandardInputHandler::onKeyPressOrRepeat(Engine::KeyPressEvent& event) {
 	}
 
 	KEY_BIND(Keyboard::KEY_O) {
-		world.asyncModification([]() {
-			Position pos(0.0 + (rand() % 100) * 0.001, 1.0 + (rand() % 100) * 0.001, 0.0 + (rand() % 100) * 0.001);
+		std::unique_lock<UpgradeableMutex> worldLock(*screen.worldMutex);
+		Position pos(0.0 + (rand() % 100) * 0.001, 1.0 + (rand() % 100) * 0.001, 0.0 + (rand() % 100) * 0.001);
+		WorldBuilder::createDominoAt(GlobalCFrame(pos, Rotation::fromEulerAngles(0.2, 0.3, 0.7)));
 
-			WorldBuilder::createDominoAt(GlobalCFrame(pos, Rotation::fromEulerAngles(0.2, 0.3, 0.7)));
-		}); 
 		Log::info("Created domino! There are %d objects in the world! ", screen.world->getPartCount());
 	}
 
@@ -125,9 +124,8 @@ bool StandardInputHandler::onKeyPress(Engine::KeyPressEvent& event) {
 
 	KEY_BIND(KeyboardOptions::Part::remove) {
 		if (screen.selectedPart != nullptr) {
-			screen.world->asyncModification([selectedPart = screen.selectedPart]() {
-				delete selectedPart;
-			});
+			std::unique_lock<UpgradeableMutex> worldLock(*screen.worldMutex);
+			delete screen.selectedPart;
 			TranslationTool::magnet.selectedPart = nullptr;
 			screen.selectedPart = nullptr;
 		}
@@ -159,9 +157,12 @@ bool StandardInputHandler::onKeyPress(Engine::KeyPressEvent& event) {
 	
 	KEY_BIND(KeyboardOptions::World::valid) {
 		Log::debug("Checking World::isValid()");
-		screen.world->asyncReadOnlyOperation([world = screen.world]() {
-			world->isValid();
-		});
+		std::shared_lock<UpgradeableMutex> worldReadLock(*screen.worldMutex);
+		if(screen.world->isValid()) {
+			Log::info("World is valid!");
+		} else {
+			Log::info("World is not valid!");
+		}
 	}
 	
 	KEY_BIND(KeyboardOptions::Edit::rotate) {

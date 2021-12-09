@@ -11,7 +11,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2 /Oi /ot /GL")
 else()
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -fno-math-errno")
 
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
 
@@ -77,8 +77,7 @@ add_library(Physics3D STATIC
   externalforces/externalForce.cpp
   externalforces/magnetForce.cpp
   
-  threading/upgradeable_shared_mutex.cpp
-  threading/synchronizedWorld.cpp
+  threading/upgradeableMutex.cpp
   threading/physicsThread.cpp
   
   misc/debug.cpp
