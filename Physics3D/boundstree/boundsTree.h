@@ -91,7 +91,7 @@ public:
 	inline void setTrunkSize(int newSize) {
 		assert(isTrunkNode());
 		assert(newSize >= 2 && newSize <= BRANCH_FACTOR);
-		this->ptr = this->ptr & ~SIZE_DATA_MASK | (newSize - 1);
+		this->ptr = (this->ptr & ~SIZE_DATA_MASK) | (newSize - 1);
 	}
 	inline void setObject(void* newObject) {
 		assert(isLeafNode());

@@ -48,7 +48,6 @@
 
 #include "../util/stringUtil.h"
 
-#include <Physics3D/geometry/builtinShapeClasses.h>
 #include <Physics3D/misc/toString.h>
 
 
@@ -171,15 +170,15 @@ void setupWorld(const ::Util::ParsedArgs& cmdArgs) {
 		Comp::Light::Attenuation attenuation = {1, 1, 1};
 		auto lights = EntityBuilder(screen.registry).name("Lights").get();
 		auto sphereData = Graphics::MeshRegistry::getOrCreateMeshFor(&SphereClass::instance);
-		EntityBuilder(screen.registry).parent(lights).transform(Position(10, 5, -10), 0.2).light(Graphics::Color(1, 0.84f, 0.69f), 300, attenuation).hitbox(&SphereClass::instance).mesh(sphereData);
-		EntityBuilder(screen.registry).parent(lights).transform(Position(10, 5, 10), 0.2).light(Graphics::Color(1, 0.84f, 0.69f), 300, attenuation).hitbox(&SphereClass::instance).mesh(sphereData);
-		EntityBuilder(screen.registry).parent(lights).transform(Position(-10, 5, -10), 0.2).light(Graphics::Color(1, 0.84f, 0.69f), 200, attenuation).hitbox(&SphereClass::instance).mesh(sphereData);
-		EntityBuilder(screen.registry).parent(lights).transform(Position(-10, 5, 10), 0.2).light(Graphics::Color(1, 0.84f, 0.69f), 500, attenuation).hitbox(&SphereClass::instance).mesh(sphereData);
-		EntityBuilder(screen.registry).parent(lights).transform(Position(0, 5, 0), 0.2).light(Graphics::Color(1, 0.90f, 0.75f), 400, attenuation).hitbox(&SphereClass::instance).mesh(sphereData);
+		EntityBuilder(screen.registry).parent(lights).transform(Position(10, 5, -10), 0.2).light(Graphics::Color(1, 0.84f, 0.69f), 300, attenuation).hitbox(sphereShape(1.0)).mesh(sphereData);
+		EntityBuilder(screen.registry).parent(lights).transform(Position(10, 5, 10), 0.2).light(Graphics::Color(1, 0.84f, 0.69f), 300, attenuation).hitbox(sphereShape(1.0)).mesh(sphereData);
+		EntityBuilder(screen.registry).parent(lights).transform(Position(-10, 5, -10), 0.2).light(Graphics::Color(1, 0.84f, 0.69f), 200, attenuation).hitbox(sphereShape(1.0)).mesh(sphereData);
+		EntityBuilder(screen.registry).parent(lights).transform(Position(-10, 5, 10), 0.2).light(Graphics::Color(1, 0.84f, 0.69f), 500, attenuation).hitbox(sphereShape(1.0)).mesh(sphereData);
+		EntityBuilder(screen.registry).parent(lights).transform(Position(0, 5, 0), 0.2).light(Graphics::Color(1, 0.90f, 0.75f), 400, attenuation).hitbox(sphereShape(1.0)).mesh(sphereData);
 	}
 	{
-		ExtendedPart* cornerPart = new ExtendedPart(cornerShape(), GlobalCFrame(3.0, 3.0, -5.0), {1.0, 1.0, 1.0}, "CORNER");
-		ExtendedPart* wedgePart = new ExtendedPart(wedgeShape(), GlobalCFrame(-3.0, 3.0, -5.0), {1.0, 1.0, 1.0}, "WEDGE");
+		ExtendedPart* cornerPart = new ExtendedPart(cornerShape(2.0, 2.0, 2.0), GlobalCFrame(3.0, 3.0, -5.0), {1.0, 1.0, 1.0}, "CORNER");
+		ExtendedPart* wedgePart = new ExtendedPart(wedgeShape(2.0, 2.0, 2.0), GlobalCFrame(-3.0, 3.0, -5.0), {1.0, 1.0, 1.0}, "WEDGE");
 		world.addPart(cornerPart);
 		world.addPart(wedgePart);
 	}
@@ -221,11 +220,11 @@ void setupWorld(const ::Util::ParsedArgs& cmdArgs) {
 	//world.addLink(new AlignmentLink({ CFrame{1.0, 0.0, 0.0}, partA}, { CFrame{0.0, 0.0, 0.0}, partB }));
 	//return;
 	
-	ExtendedPart* partA = new ExtendedPart(boxShape(5.0, 10.0, 5.0), GlobalCFrame(0.0, 6.0, 0.0), WorldBuilder::basicProperties);
-	ExtendedPart* partB = new ExtendedPart(sphereShape(0.45), GlobalCFrame(8.0, 6.0, 0.0), WorldBuilder::basicProperties);
-	ExtendedPart* partC = new ExtendedPart(boxShape(0.9, 0.15, 0.15), GlobalCFrame(9.0, 6.0, 0.0), WorldBuilder::basicProperties);
-	ExtendedPart* partD = new ExtendedPart(boxShape(0.9, 0.15, 0.15), GlobalCFrame(10.0, 6.0, 0.0), WorldBuilder::basicProperties);
-	ExtendedPart* partE = new ExtendedPart(cylinderShape(0.3, 1.3), GlobalCFrame(11.0, 6.0, 0.0), WorldBuilder::basicProperties);
+	ExtendedPart* partA = new ExtendedPart(boxShape(5.0, 10.0, 5.0), GlobalCFrame(0.0, 6.0, -10.0), WorldBuilder::basicProperties);
+	ExtendedPart* partB = new ExtendedPart(sphereShape(0.45), GlobalCFrame(8.0, 6.0, -10.0), WorldBuilder::basicProperties);
+	ExtendedPart* partC = new ExtendedPart(boxShape(0.9, 0.15, 0.15), GlobalCFrame(9.0, 6.0, -10.0), WorldBuilder::basicProperties);
+	ExtendedPart* partD = new ExtendedPart(boxShape(0.9, 0.15, 0.15), GlobalCFrame(10.0, 6.0, -10.0), WorldBuilder::basicProperties);
+	ExtendedPart* partE = new ExtendedPart(cylinderShape(0.3, 1.3), GlobalCFrame(11.0, 6.0, -10.0), WorldBuilder::basicProperties);
 
 	world.createLayer(false, true);
 

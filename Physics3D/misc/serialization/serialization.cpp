@@ -59,11 +59,11 @@ Polyhedron deserializePolyhedron(std::istream& istream) {
 }
 
 void ShapeSerializer::include(const Shape& shape) {
-	sharedShapeClassSerializer.include(shape.baseShape);
+	sharedShapeClassSerializer.include(shape.baseShape.get());
 }
 
 void ShapeSerializer::serializeShape(const Shape& shape, std::ostream& ostream) const {
-	sharedShapeClassSerializer.serializeIDFor(shape.baseShape, ostream);
+	sharedShapeClassSerializer.serializeIDFor(shape.baseShape.get(), ostream);
 	serializeBasicTypes<double>(shape.getWidth(), ostream);
 	serializeBasicTypes<double>(shape.getHeight(), ostream);
 	serializeBasicTypes<double>(shape.getDepth(), ostream);
@@ -74,7 +74,7 @@ Shape ShapeDeserializer::deserializeShape(std::istream& istream) const {
 	double width = deserializeBasicTypes<double>(istream);
 	double height = deserializeBasicTypes<double>(istream);
 	double depth = deserializeBasicTypes<double>(istream);
-	return Shape(baseShape, width, height, depth);
+	return Shape(intrusive_ptr<const ShapeClass>(baseShape), width, height, depth);
 }
 
 void serializeFixedConstraint(const FixedConstraint& object, std::ostream& ostream) {}

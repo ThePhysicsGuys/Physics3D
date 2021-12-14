@@ -5,6 +5,10 @@
 #include "imgui/imgui.h"
 #include "shader/shaders.h"
 
+// include this because we have a bit of code that uses it. 
+#include "../layer/skyboxLayer.h"
+
+
 namespace P3D::Application {
 
 float EnvironmentFrame::hdr = 1.0f;
@@ -40,6 +44,12 @@ void EnvironmentFrame::onRender(Engine::Registry64& registry) {
 	}
 
 	ImGui::End();
+
+
+	ImGui::Begin("Skybox");
+	ImGui::Checkbox("New sky", &useNewSky);
+	ImGui::Text("Time: %f", time);
+	ImGui::Checkbox("Pauze", &pauze);
+	ImGui::End();
 }
-	
 }

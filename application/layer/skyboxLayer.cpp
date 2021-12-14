@@ -15,8 +15,6 @@
 #include "../util/resource/resourceManager.h"
 #include "../graphics/mesh/primitive.h"
 
-#include "imgui/imgui.h"
-
 namespace P3D::Application {
 
 SkyboxCycle lightColorCycle;
@@ -33,8 +31,12 @@ float starBrightness;
 
 CubeMap* skyboxTexture = nullptr;
 
-bool pressed;
+float getScroll(const Screen* screen) {
+	return static_cast<float>(std::atan2(screen->camera.viewMatrix(1, 0), screen->camera.viewMatrix(0, 0)) / screen->camera.fov / 2.0);
+}
+bool useNewSky;
 bool pauze;
+float time;
 
 void updateMist(float time) {
 	float mistFactor;
@@ -66,8 +68,6 @@ void SkyboxLayer::onInit(Engine::Registry64& registry) {
 	mistColorCycle = SkyboxCycle(Color(0.29f, 0.41f, 0.61f), Color(0.96f, 0.9f, 0.77f), Color(1.0f, 0.68f, 0.85f), Color(1.0f, 0.87f, 0.82f), 3.0f, 8.0f, 18.0f);
 }
 
-float time;
-
 void SkyboxLayer::onUpdate(Engine::Registry64& registry) {
 	if (!pauze)
 		time = fmod((float) (glfwGetTime() / 30.0), 1.0f);
@@ -94,12 +94,7 @@ void SkyboxLayer::onRender(Engine::Registry64& registry) {
 	
 	beginScene();
 
-	ImGui::Begin("Skybox");
-
-	ImGui::Checkbox("New sky", &pressed);
-	ImGui::Text("Time: %f", time);
-	ImGui::Checkbox("Pauze", &pauze);
-	if (pressed) {
+	if (useNewSky) {
 		disableCulling();
 		disableDepthMask();
 		enableBlending();
@@ -110,9 +105,8 @@ void SkyboxLayer::onRender(Engine::Registry64& registry) {
 		Shaders::skyShader->setUniform("starBrightness", starBrightness);
 		Shaders::skyShader->setUniform("skyColor", Vec3f(skyColor));
 		Shaders::skyShader->setUniform("horizonColor", Vec3f(horizonColor));
-		float scroll = (float) (std::atan2(screen->camera.viewMatrix(1, 0), screen->camera.viewMatrix(0, 0)) / screen->camera.fov / 2.0);
-		ImGui::Text("Scroll: %f", scroll);
-
+		
+		float scroll = getScroll(screen);
 		Shaders::skyShader->setUniform("scroll", scroll);
 		Shaders::skyShader->setUniform("time", time);
 		Shaders::skyShader->setUniform("skyboxSize", 550.0f);
@@ -128,8 +122,6 @@ void SkyboxLayer::onRender(Engine::Registry64& registry) {
 
 		Library::sphere->render();
 	}
-
-	ImGui::End();
 
 	endScene();
 }

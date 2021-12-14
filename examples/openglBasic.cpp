@@ -24,68 +24,6 @@
 
 using namespace P3D;
 
-GLuint LoadShaders(const char* vertexShaderSourceCode, const char* fragmentShaderSourceCode) {
-	// Create the shaders
-	GLuint VertexShaderID = glCreateShader(GL_VERTEX_SHADER);
-	GLuint FragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
-
-	GLint Result = GL_FALSE;
-	int InfoLogLength;
-
-	// Compile Vertex Shader
-	printf("Compiling vertex shader\n");
-	glShaderSource(VertexShaderID, 1, &vertexShaderSourceCode , NULL);
-	glCompileShader(VertexShaderID);
-
-	// Check Vertex Shader
-	glGetShaderiv(VertexShaderID, GL_COMPILE_STATUS, &Result);
-	glGetShaderiv(VertexShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength);
-	if ( InfoLogLength > 0 ){
-		std::vector<char> VertexShaderErrorMessage(InfoLogLength+1);
-		glGetShaderInfoLog(VertexShaderID, InfoLogLength, NULL, &VertexShaderErrorMessage[0]);
-		printf("%s\n", &VertexShaderErrorMessage[0]);
-	}
-
-	// Compile Fragment Shader
-	printf("Compiling fragment shader\n");
-	glShaderSource(FragmentShaderID, 1, &fragmentShaderSourceCode , NULL);
-	glCompileShader(FragmentShaderID);
-
-	// Check Fragment Shader
-	glGetShaderiv(FragmentShaderID, GL_COMPILE_STATUS, &Result);
-	glGetShaderiv(FragmentShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength);
-	if ( InfoLogLength > 0 ){
-		std::vector<char> FragmentShaderErrorMessage(InfoLogLength+1);
-		glGetShaderInfoLog(FragmentShaderID, InfoLogLength, NULL, &FragmentShaderErrorMessage[0]);
-		printf("%s\n", &FragmentShaderErrorMessage[0]);
-	}
-
-	// Link the program
-	printf("Linking program\n");
-	GLuint ProgramID = glCreateProgram();
-	glAttachShader(ProgramID, VertexShaderID);
-	glAttachShader(ProgramID, FragmentShaderID);
-	glLinkProgram(ProgramID);
-
-	// Check the program
-	glGetProgramiv(ProgramID, GL_LINK_STATUS, &Result);
-	glGetProgramiv(ProgramID, GL_INFO_LOG_LENGTH, &InfoLogLength);
-	if ( InfoLogLength > 0 ){
-		std::vector<char> ProgramErrorMessage(InfoLogLength+1);
-		glGetProgramInfoLog(ProgramID, InfoLogLength, NULL, &ProgramErrorMessage[0]);
-		printf("%s\n", &ProgramErrorMessage[0]);
-	}
-	
-	glDetachShader(ProgramID, VertexShaderID);
-	glDetachShader(ProgramID, FragmentShaderID);
-	
-	glDeleteShader(VertexShaderID);
-	glDeleteShader(FragmentShaderID);
-
-	return ProgramID;
-}
-
-
 GLFWwindow* initWindow() {
 	// Initialise GLFW
 	if(!glfwInit()) {
@@ -171,6 +109,68 @@ void main(){
   color = fragmentColor;
 }
 )";
+
+GLuint loadShaders(const char* vertexShaderSourceCode, const char* fragmentShaderSourceCode) {
+	// Create the shaders
+	GLuint VertexShaderID = glCreateShader(GL_VERTEX_SHADER);
+	GLuint FragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
+
+	GLint Result = GL_FALSE;
+	int InfoLogLength;
+
+	// Compile Vertex Shader
+	printf("Compiling vertex shader\n");
+	glShaderSource(VertexShaderID, 1, &vertexShaderSourceCode , NULL);
+	glCompileShader(VertexShaderID);
+
+	// Check Vertex Shader
+	glGetShaderiv(VertexShaderID, GL_COMPILE_STATUS, &Result);
+	glGetShaderiv(VertexShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength);
+	if ( InfoLogLength > 0 ){
+		std::vector<char> VertexShaderErrorMessage(InfoLogLength+1);
+		glGetShaderInfoLog(VertexShaderID, InfoLogLength, NULL, &VertexShaderErrorMessage[0]);
+		printf("%s\n", &VertexShaderErrorMessage[0]);
+	}
+
+	// Compile Fragment Shader
+	printf("Compiling fragment shader\n");
+	glShaderSource(FragmentShaderID, 1, &fragmentShaderSourceCode , NULL);
+	glCompileShader(FragmentShaderID);
+
+	// Check Fragment Shader
+	glGetShaderiv(FragmentShaderID, GL_COMPILE_STATUS, &Result);
+	glGetShaderiv(FragmentShaderID, GL_INFO_LOG_LENGTH, &InfoLogLength);
+	if ( InfoLogLength > 0 ){
+		std::vector<char> FragmentShaderErrorMessage(InfoLogLength+1);
+		glGetShaderInfoLog(FragmentShaderID, InfoLogLength, NULL, &FragmentShaderErrorMessage[0]);
+		printf("%s\n", &FragmentShaderErrorMessage[0]);
+	}
+
+	// Link the program
+	printf("Linking program\n");
+	GLuint ProgramID = glCreateProgram();
+	glAttachShader(ProgramID, VertexShaderID);
+	glAttachShader(ProgramID, FragmentShaderID);
+	glLinkProgram(ProgramID);
+
+	// Check the program
+	glGetProgramiv(ProgramID, GL_LINK_STATUS, &Result);
+	glGetProgramiv(ProgramID, GL_INFO_LOG_LENGTH, &InfoLogLength);
+	if ( InfoLogLength > 0 ){
+		std::vector<char> ProgramErrorMessage(InfoLogLength+1);
+		glGetProgramInfoLog(ProgramID, InfoLogLength, NULL, &ProgramErrorMessage[0]);
+		printf("%s\n", &ProgramErrorMessage[0]);
+	}
+	
+	glDetachShader(ProgramID, VertexShaderID);
+	glDetachShader(ProgramID, FragmentShaderID);
+	
+	glDeleteShader(VertexShaderID);
+	glDeleteShader(FragmentShaderID);
+
+	return ProgramID;
+}
+
 class RenderShader {
 	GLuint programID;
 
@@ -181,7 +181,7 @@ class RenderShader {
 
 public:
 	RenderShader() {
-		GLuint programID = LoadShaders(basicVertexShader, basicFragmentShader);
+		GLuint programID = loadShaders(basicVertexShader, basicFragmentShader);
 		glUseProgram(programID);
 		
 		modelMatrixID = glGetUniformLocation(programID, "modelMatrix");
@@ -213,11 +213,12 @@ class ArrayMesh {
 	GLuint normalsBuffer;
 
 	size_t triangleCount;
+	constexpr static GLuint INVALID = 0;
 public:
+	ArrayMesh() : vertexArrayID(INVALID), vertexBuffer(INVALID), normalsBuffer(INVALID) {}
 	ArrayMesh(const float* vertexData, const float* normalsData, size_t triangleCount) : triangleCount(triangleCount) {
 		glGenVertexArrays(1, &vertexArrayID);
 		glBindVertexArray(vertexArrayID);
-
 		// benerate buffers
 		GLuint buffers[2];
 		glGenBuffers(2, buffers);
@@ -232,6 +233,33 @@ public:
 		glBindBuffer(GL_ARRAY_BUFFER, normalsBuffer);
 		glBufferData(GL_ARRAY_BUFFER, triangleCount * 3 * 3 * sizeof(float), normalsData, GL_STATIC_DRAW);
 	}
+	~ArrayMesh() {
+		if(vertexArrayID != INVALID) {
+			GLuint buffers[2]{vertexBuffer, normalsBuffer};
+			glDeleteBuffers(2, buffers);
+			glDeleteVertexArrays(1, &vertexArrayID);
+		}
+	}
+	ArrayMesh(ArrayMesh&) = delete;
+	ArrayMesh& operator=(ArrayMesh&) = delete;
+	ArrayMesh(ArrayMesh&& other) noexcept : 
+		vertexArrayID(other.vertexArrayID), 
+		vertexBuffer(other.vertexBuffer), 
+		normalsBuffer(other.normalsBuffer), 
+		triangleCount(other.triangleCount) {
+		
+		other.vertexArrayID = INVALID;
+		other.vertexBuffer = INVALID;
+		other.normalsBuffer = INVALID;
+	}
+	ArrayMesh& operator=(ArrayMesh&& other) noexcept {
+		std::swap(this->vertexArrayID, other.vertexArrayID);
+		std::swap(this->vertexBuffer, other.vertexBuffer);
+		std::swap(this->normalsBuffer, other.normalsBuffer);
+		std::swap(this->triangleCount, other.triangleCount);
+		return *this;
+	}
+
 	void bind() const {
 		// 1st attribute buffer : vertices
 		glEnableVertexAttribArray(0);
@@ -266,6 +294,11 @@ public:
 	}
 };
 
+/*
+	To optimally reuse our ArrayMeshes so we don't use too much vram, we create just one arrayMesh for each ShapeClass. 
+	All Parts (no matter the size / scale) that have the same underlying ShapeClass will get the same ArrayMesh index. 
+	This class manages the conversion and registration of these meshes. 
+*/
 class MeshRegistry {
 	std::vector<const ShapeClass*> knownShapeClasses;
 	std::vector<ArrayMesh> meshes;
@@ -318,6 +351,8 @@ MeshRegistry meshRegistry;
 
 class CustomPart : public Part {
 public:
+	// This index is the visual shape of the part, it indexes into MeshRegistry to find the proper ArrayMesh to draw. 
+	// For ease this is generated from the base shape's shapeClass. 
 	int meshIndex;
 	Color color;
 
@@ -325,7 +360,7 @@ public:
 		Part(shape, position, properties), meshIndex(meshIndex), color(color) {}
 
 	CustomPart(const Shape& shape, const GlobalCFrame& position, const PartProperties& properties, Color color) : 
-		Part(shape, position, properties), meshIndex(meshRegistry.getMeshIndexFor(shape.baseShape)), color(color) {}
+		Part(shape, position, properties), meshIndex(meshRegistry.getMeshIndexFor(shape.baseShape.get())), color(color) {}
 };
 
 void render(World<CustomPart>& world, UpgradeableMutex& worldMutex, RenderShader& shader) {
@@ -397,7 +432,7 @@ int main(int argc, const char** argv) {
 		basicProperties, 
 		Colors::GREEN);
 	std::unique_ptr<CustomPart> icosahedron = std::make_unique<CustomPart>(
-		polyhedronShape(ShapeLibrary::octahedron), 
+		polyhedronShape(ShapeLibrary::icosahedron), 
 		GlobalCFrame(4.0, 1.3, 4.0), 
 		basicProperties, 
 		Colors::RED);

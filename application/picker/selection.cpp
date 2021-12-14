@@ -34,7 +34,7 @@ namespace P3D::Application {
 				BoundingBox rotatedBounds = hitbox->getShape().getBounds(relativeFrame.getRotation());
 				this->boundingBox = this->boundingBox->expanded(relativeFrame.getPosition() + rotatedBounds.min).expanded(relativeFrame.getPosition() + rotatedBounds.max);
 			} else {
-				this->boundingBox = this->boundingBox->expanded(Shape(&CubeClass::instance, 0.2, 0.2, 0.2).getBounds(relativeFrame.getRotation()));
+				this->boundingBox = this->boundingBox->expanded(boxShape(0.2, 0.2, 0.2).getBounds(relativeFrame.getRotation()));
 			}
 		}
 	}
@@ -172,7 +172,7 @@ namespace P3D::Application {
 				return hitbox->getShape();
 		}
 
-		return Shape(&CubeClass::instance, boundingBox->getWidth(), boundingBox->getHeight(), boundingBox->getDepth());
+		return boxShape(boundingBox->getWidth(), boundingBox->getHeight(), boundingBox->getDepth());
 	}
 
 	std::optional<GlobalCFrame> Selection::getCFrame() const {

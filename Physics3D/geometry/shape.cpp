@@ -5,9 +5,22 @@
 
 namespace P3D {
 Shape::Shape() : baseShape(nullptr), scale{1,1,1} {}
-Shape::Shape(const ShapeClass* baseShape, DiagonalMat3 scale) : baseShape(baseShape), scale(scale) {}
-Shape::Shape(const ShapeClass* baseShape) : baseShape(baseShape), scale{1,1,1} {}
-Shape::Shape(const ShapeClass* baseShape, double width, double height, double depth) : baseShape(baseShape), scale{width / 2, height / 2, depth / 2} {}
+Shape::Shape(intrusive_ptr<const ShapeClass> baseShape, DiagonalMat3 scale) : 
+	baseShape(std::move(baseShape)), scale(scale) {}
+
+Shape::Shape(intrusive_ptr<const ShapeClass> baseShape) : 
+	baseShape(std::move(baseShape)), scale{1,1,1} {}
+
+Shape::Shape(intrusive_ptr<const ShapeClass> baseShape, double width, double height, double depth) : 
+	baseShape(std::move(baseShape)), scale{width / 2, height / 2, depth / 2} {}
+
+// defined here so that ShapeClass destructor does not need to be called externally
+Shape::~Shape() {}
+
+Shape::Shape(Shape&&) = default;
+Shape& Shape::operator=(Shape&&) = default;
+Shape::Shape(const Shape&) = default;
+Shape& Shape::operator=(const Shape&) = default;
 
 bool Shape::containsPoint(Vec3 point) const {
 	return baseShape->containsPoint(~scale * point);

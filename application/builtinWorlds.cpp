@@ -17,7 +17,6 @@
 #include <Physics3D/constraints/ballConstraint.h>
 #include <Physics3D/constraints/hingeConstraint.h>
 #include <Physics3D/softlinks/springLink.h>
-#include <Physics3D/geometry/shapeClass.h>
 #include <Physics3D/math/constants.h>
 
 
@@ -388,7 +387,7 @@ void buildShowcaseWorld(Screen& screen, PlayerWorld& world) {
 	}
 
 	Shape torusShape = polyhedronShape(ShapeLibrary::createTorus(1.0f, 0.6f, 80, 80));
-	Graphics::MeshRegistry::registerMeshFor(torusShape.baseShape, Graphics::VisualShape::generateSmoothNormalsShape(torusShape.baseShape->asPolyhedron()));
+	Graphics::MeshRegistry::registerMeshFor(torusShape.baseShape.get(), Graphics::VisualShape::generateSmoothNormalsShape(torusShape.baseShape->asPolyhedron()));
 	world.addPart(new ExtendedPart(torusShape, Position(-10.0, 3.0, 0.0), basicProperties, "Torus"));
 
 

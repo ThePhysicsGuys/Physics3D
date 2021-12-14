@@ -21,7 +21,6 @@ MagnetForce::MagnetForce(Part& selectedPart, Vec3 localSelectedPoint, Position m
 void MagnetForce::apply(WorldPrototype* world) {
 	if(selectedPart != nullptr && selectedPart->parent != nullptr) {
 		MotorizedPhysical* selectedPhysical = selectedPart->parent->mainPhysical;
-		GlobalCFrame cframe = selectedPhysical->getCFrame();
 
 		// Magnet force
 		Position absoluteSelectedPoint = selectedPart->getCFrame().localToGlobal(localSelectedPoint);

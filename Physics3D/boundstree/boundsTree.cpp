@@ -606,6 +606,7 @@ void BoundsTreePrototype::transferGroupTo(const void* groupRep, const BoundsTemp
 	this->baseTrunkSize = grabbed.resultingGroupSize;
 
 	bool groupBWasFound = addRecursive(destinationTree.allocator, destinationTree.baseTrunk, destinationTree.baseTrunkSize, std::move(grabbed.nodeRef), grabbed.nodeBounds);
+	assert(groupBWasFound);
 }
 void BoundsTreePrototype::remove(const void* objectToRemove, const BoundsTemplate<float>& bounds) {
 	int resultingBaseSize = removeRecursive(allocator, baseTrunk, baseTrunkSize, objectToRemove, bounds);
@@ -753,43 +754,6 @@ void BoundsTreePrototype::clear() {
 	this->baseTrunkSize = 0;
 }
 
-static void improveTrunkHorizontalOld(TreeTrunk& trunk, int trunkSize) {
-	TreeNodeRef allSubSubNodes[BRANCH_FACTOR * BRANCH_FACTOR];
-	BoundsArray<BRANCH_FACTOR* BRANCH_FACTOR> allSubNodeBounds;
-	int subSubNodeCount = 0;
-
-	for(int i = 0; i < trunkSize; i++) {
-		TreeNodeRef& subNode = trunk.subNodes[i];
-
-		if(subNode.isTrunkNode() && !subNode.isGroupHead()) { // no redistributing groups
-			TreeTrunk& subTrunk = subNode.asTrunk();
-			int subNodeSize = subNode.getTrunkSize();
-
-			for(int subI = 0; subI < subNodeSize; subI++) {
-				allSubSubNodes[subSubNodeCount] = std::move(subTrunk.subNodes[subI]);
-				allSubNodeBounds.setBounds(subSubNodeCount, subTrunk.getBoundsOfSubNode(i));
-				subSubNodeCount++;
-			}
-		} else {
-			allSubSubNodes[subSubNodeCount] = std::move(subNode);
-			allSubNodeBounds.setBounds(subSubNodeCount, trunk.getBoundsOfSubNode(i));
-			subSubNodeCount++;
-		}
-	}
-
-	// 0 - 1  - 2  - 3  - 4  - 5  - 6  - 7  - 8  Num TrunkNodes
-	// 0 - 9  - 16 - 23 - 30 - 37 - 44 - 51 - 58 Min to trunk
-	// 8 - 15 - 22 - 29 - 36 - 43 - 50 - 57 - 64 Max to trunk
-
-	// 0 - 1 - 2  - 3  - 4
-	// 0 - 5 - 8  - 11 - 14
-	// 4 - 7 - 10 - 13 - 16
-	int numberOfResultingTrunks = (subSubNodeCount - 2) / (BRANCH_FACTOR - 1);
-	int numberOfFreeNodes = subSubNodeCount - numberOfResultingTrunks * BRANCH_FACTOR;
-
-
-}
-
 // means that this trunk and it's subtrunks cannot be improved
 static bool isLeafTrunk(TreeTrunk& trunk, int trunkSize) {
 	for(int subNodeI = 0; subNodeI < trunkSize; subNodeI++) {
@@ -797,25 +761,6 @@ static bool isLeafTrunk(TreeTrunk& trunk, int trunkSize) {
 		if(!subNode.isGroupHeadOrLeaf()) return false;
 	}
 	return true;
-}
-
-static std::pair<int, float> findBestMovingCost(TreeTrunk& trunk, int trunkSize, TreeTrunk& subTrunk, int subTrunkSize, int subNodeI, int subSubNodeI) {
-	BoundsTemplate<float> extraBounds = subTrunk.getBoundsOfSubNode(subSubNodeI);
-
-	int wantsToMoveTo = -1;
-	float bestCost = computeAdditionCost(TrunkSIMDHelperFallback::getTotalBoundsWithout(subTrunk, subTrunkSize, subSubNodeI), extraBounds);
-
-	std::array<float, BRANCH_FACTOR> allCosts = TrunkSIMDHelperFallback::computeAllExtentionCosts(trunk, trunkSize, extraBounds);
-
-	for(int i = 0; i < trunkSize; i++) {
-		if(i == subNodeI) continue;
-		if(allCosts[i] < bestCost) {
-			bestCost = allCosts[i];
-			wantsToMoveTo = i;
-		}
-	}
-
-	return std::pair<int, float>(wantsToMoveTo, bestCost);
 }
 
 static void improveTrunkHorizontal(TrunkAllocator& alloc, TreeTrunk& trunk) {

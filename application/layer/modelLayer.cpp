@@ -245,7 +245,7 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 					if (!hitbox->isPartAttached())
 						scale = scale * hitbox->getScale();		
 					
-					VisualData data = MeshRegistry::getOrCreateMeshFor(shape.baseShape);
+					VisualData data = MeshRegistry::getOrCreateMeshFor(shape.baseShape.get());
 
 					Shaders::debugShader->updateModel(transform->getCFrame().asMat4WithPreScale(scale));
 					MeshRegistry::meshes[data.id]->render();
@@ -255,7 +255,7 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 		auto scf = SelectionTool::selection.getCFrame();
 		auto shb = SelectionTool::selection.getHitbox();
 		if (scf.has_value() && shb.has_value()) {
-			VisualData data = MeshRegistry::getOrCreateMeshFor(shb->baseShape);
+			VisualData data = MeshRegistry::getOrCreateMeshFor(shb->baseShape.get());
 			Shaders::debugShader->updateModel(scf.value().asMat4WithPreScale(shb->scale));
 			MeshRegistry::meshes[data.id]->render();
 		}
@@ -272,7 +272,7 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 					if (!hitbox->isPartAttached())
 						shape = shape.scaled(transform->getScale());
 
-					VisualData data = MeshRegistry::getOrCreateMeshFor(shape.baseShape);
+					VisualData data = MeshRegistry::getOrCreateMeshFor(shape.baseShape.get());
 
 					Shaders::debugShader->updateModel(transform->getCFrame().asMat4WithPreScale(shape.scale));
 					MeshRegistry::meshes[data.id]->render();

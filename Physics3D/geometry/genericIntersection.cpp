@@ -64,20 +64,6 @@ static NearestSurface getNearestSurface(const ConvexShapeBuilder& builder) {
 	return NearestSurface{best, bestDistSq};
 }
 
-static int furthestIndexInDirection(Vec3* vertices, int vertexCount, Vec3 direction) {
-	double bestDot = vertices[0] * direction;
-	int bestVertexIndex = 0;
-	for(int i = 1; i < vertexCount; i++) {
-		double newD = vertices[i] * direction;
-		if(newD > bestDot) {
-			bestDot = newD;
-			bestVertexIndex = i;
-		}
-	}
-
-	return bestVertexIndex;
-}
-
 static MinkPoint getSupport(const ColissionPair& info, const Vec3f& searchDirection) {
 	Vec3f furthest1 = info.scaleFirst * info.first.furthestInDirection(info.scaleFirst * searchDirection);  // in local space of first
 	Vec3f transformedSearchDirection = -info.transform.relativeToLocal(searchDirection);

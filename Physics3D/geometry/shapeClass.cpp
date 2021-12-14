@@ -1,11 +1,14 @@
 #include "shapeClass.h"
 
 namespace P3D {
-ShapeClass::ShapeClass(double volume, Vec3 centerOfMass, ScalableInertialMatrix inertia, int intersectionClassID) :
+ShapeClass::ShapeClass(double volume, Vec3 centerOfMass, ScalableInertialMatrix inertia, std::size_t intersectionClassID) :
 	volume(volume),
 	centerOfMass(centerOfMass),
 	inertia(inertia),
-	intersectionClassID(intersectionClassID) {}
+	intersectionClassID(intersectionClassID),
+	refCount(0) {}
+
+ShapeClass::~ShapeClass() {}
 
 double ShapeClass::getScaledMaxRadius(DiagonalMat3 scale) const {
 	return sqrt(this->getScaledMaxRadiusSq(scale));

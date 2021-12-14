@@ -8,6 +8,7 @@
 #include "../application/extendedPart.h"
 #include "../graphics/visualData.h"
 #include "../worlds.h"
+#include <Physics3D/geometry/shapeCreation.h>
 
 namespace P3D::Application {
 
@@ -16,9 +17,8 @@ namespace Comp {
 struct Hitbox : RC {
 	std::variant<Shape, ExtendedPart*> hitbox;
 
-	Hitbox() : hitbox(Shape(&CubeClass::instance)) {}
+	Hitbox() : hitbox(boxShape(2.0, 2.0, 2.0)) {}
 	Hitbox(ExtendedPart* part) : hitbox(part) {}
-	Hitbox(const ShapeClass* shapeClass) : hitbox(Shape(shapeClass)) {}
 	Hitbox(const Shape& shape) : hitbox(shape) {}
 
 	Shape getShape() {

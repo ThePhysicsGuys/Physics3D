@@ -6,7 +6,10 @@
 
 namespace P3D {
 #pragma region CubeClass
-CubeClass::CubeClass() : ShapeClass(8, Vec3(0, 0, 0), ScalableInertialMatrix(Vec3(8.0 / 3.0, 8.0 / 3.0, 8.0 / 3.0), Vec3(0, 0, 0)), CUBE_CLASS_ID) {}
+CubeClass::CubeClass() : ShapeClass(8, Vec3(0, 0, 0), ScalableInertialMatrix(Vec3(8.0 / 3.0, 8.0 / 3.0, 8.0 / 3.0), Vec3(0, 0, 0)), CUBE_CLASS_ID) {
+	// CubeClass is a singleton instance, starting refCount >= 1 ensures it is never deleted
+	this->refCount = 1;
+}
 
 bool CubeClass::containsPoint(Vec3 point) const {
 	return std::abs(point.x) <= 1.0 && std::abs(point.y) <= 1.0 && std::abs(point.z) <= 1.0;
@@ -68,7 +71,10 @@ Polyhedron CubeClass::asPolyhedron() const {
 #pragma endregion
 
 #pragma region SphereClass
-SphereClass::SphereClass() : ShapeClass(4.0 / 3.0 * PI, Vec3(0, 0, 0), ScalableInertialMatrix(Vec3(4.0 / 15.0 * PI, 4.0 / 15.0 * PI, 4.0 / 15.0 * PI), Vec3(0, 0, 0)), SPHERE_CLASS_ID) {}
+SphereClass::SphereClass() : ShapeClass(4.0 / 3.0 * PI, Vec3(0, 0, 0), ScalableInertialMatrix(Vec3(4.0 / 15.0 * PI, 4.0 / 15.0 * PI, 4.0 / 15.0 * PI), Vec3(0, 0, 0)), SPHERE_CLASS_ID) {
+	// SphereClass is a singleton instance, starting refCount >= 1 ensures it is never deleted
+	this->refCount = 1;
+}
 
 bool SphereClass::containsPoint(Vec3 point) const {
 	return lengthSquared(point) <= 1.0;
@@ -145,7 +151,10 @@ Inertia of cyllinder:
 	y = 1/4 * PI * 2
 	z = 1/3 * PI * 2
 */
-CylinderClass::CylinderClass() : ShapeClass(PI * 2.0, Vec3(0, 0, 0), ScalableInertialMatrix(Vec3(PI / 2.0, PI / 2.0, PI * 2.0 / 3.0), Vec3(0, 0, 0)), CYLINDER_CLASS_ID) {}
+CylinderClass::CylinderClass() : ShapeClass(PI * 2.0, Vec3(0, 0, 0), ScalableInertialMatrix(Vec3(PI / 2.0, PI / 2.0, PI * 2.0 / 3.0), Vec3(0, 0, 0)), CYLINDER_CLASS_ID) {
+	// CylinderClass is a singleton instance, starting refCount >= 1 ensures it is never deleted
+	this->refCount = 1;
+}
 
 bool CylinderClass::containsPoint(Vec3 point) const {
 	return std::abs(point.z) <= 1.0 && point.x * point.x + point.y + point.y <= 1.0;
@@ -232,7 +241,10 @@ void CylinderClass::setScaleY(double newY, DiagonalMat3& scale) const {
 #pragma endregion
 
 #pragma region WedgeClass
-WedgeClass::WedgeClass() : ShapeClass(4.0, Vec3(-1 / 3, 0, 1 / 3), ScalableInertialMatrix(Vec3(0.9030, 0.6032, 0.8411), Vec3(0.3517, 0.0210, 0.1667)), WEDGE_CLASS_ID) {}
+WedgeClass::WedgeClass() : ShapeClass(4.0, Vec3(-1 / 3, 0, 1 / 3), ScalableInertialMatrix(Vec3(0.9030, 0.6032, 0.8411), Vec3(0.3517, 0.0210, 0.1667)), WEDGE_CLASS_ID) {
+	// WedgeClass is a singleton instance, starting refCount >= 1 ensures it is never deleted
+	this->refCount = 1;
+}
 
 bool WedgeClass::containsPoint(Vec3 points) const {
 	return std::abs(points.x) <= 1.0 && std::abs(points.y) <= 1.0 && std::abs(points.z) <= 1.0 && points.x + points.y <= 0.0;
@@ -327,7 +339,10 @@ Polyhedron WedgeClass::asPolyhedron() const {
 #pragma endregion
 
 #pragma region CornerClass
-CornerClass::CornerClass() : ShapeClass(4 / 3, Vec3(-2 / 3, -2 / 3, -2 / 3), ScalableInertialMatrix(Vec3(0.2000, 0.2000, 0.2000), Vec3(0.0667, 0.0667, 0.0667)), CORNER_CLASS_ID) {}
+CornerClass::CornerClass() : ShapeClass(4 / 3, Vec3(-2 / 3, -2 / 3, -2 / 3), ScalableInertialMatrix(Vec3(0.2000, 0.2000, 0.2000), Vec3(0.0667, 0.0667, 0.0667)), CORNER_CLASS_ID) {
+	// CornerClass is a singleton instance, starting refCount >= 1 ensures it is never deleted
+	this->refCount = 1;
+}
 
 bool CornerClass::containsPoint(Vec3 point) const {
 	return std::abs(point.x) <= 1.0 && std::abs(point.y) <= 1.0 && std::abs(point.z) <= 0 && -point.x - point.y - point.z <= 1.0;

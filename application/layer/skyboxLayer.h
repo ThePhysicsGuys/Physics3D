@@ -26,6 +26,12 @@ public:
 
 class Screen;
 
+float getScroll(const Screen* screen);
+extern bool useNewSky;
+extern bool pauze;
+extern float time;
+
+
 class SkyboxLayer : public Engine::Layer {
 public:
 	SkyboxLayer() : Layer() {}

@@ -6,25 +6,27 @@
 
 #include "../misc/cpuid.h"
 
+#include "../datastructures/smartPointers.h"
+
 namespace P3D {
+Shape boxShape(double width, double height, double depth) {
+	return Shape(intrusive_ptr<const ShapeClass>(&CubeClass::instance), width, height, depth);
+}
+
+Shape wedgeShape(double width, double height, double depth) {
+	return Shape(intrusive_ptr<const ShapeClass>(&WedgeClass::instance), width, height, depth);
+}
+
+Shape cornerShape(double width, double height, double depth) {
+	return Shape(intrusive_ptr<const ShapeClass>(&CornerClass::instance), width, height, depth);
+}
+
 Shape sphereShape(double radius) {
-	return Shape(&SphereClass::instance, radius * 2, radius * 2, radius * 2);
+	return Shape(intrusive_ptr<const ShapeClass>(&SphereClass::instance), radius * 2, radius * 2, radius * 2);
 }
 
 Shape cylinderShape(double radius, double height) {
-	return Shape(&CylinderClass::instance, radius * 2, radius * 2, height);
-}
-
-Shape boxShape(double width, double height, double depth) {
-	return Shape(&CubeClass::instance, width, height, depth);
-}
-
-Shape wedgeShape() {
-	return Shape{&WedgeClass::instance};
-}
-
-Shape cornerShape() {
-	return Shape{&CornerClass::instance};
+	return Shape(intrusive_ptr<const ShapeClass>(&CylinderClass::instance), radius * 2, radius * 2, height);
 }
 
 
@@ -47,6 +49,6 @@ Shape polyhedronShape(const Polyhedron& poly) {
 		shapeClass = new PolyhedronShapeClassFallback(poly.translatedAndScaled(-center, scale));
 	}
 
-	return Shape(shapeClass, bounds.getWidth(), bounds.getHeight(), bounds.getDepth());
+	return Shape(intrusive_ptr<const ShapeClass>(shapeClass), bounds.getWidth(), bounds.getHeight(), bounds.getDepth());
 }
 };

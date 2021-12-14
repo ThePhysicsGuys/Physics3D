@@ -6,20 +6,27 @@
 #include "../math/linalg/mat.h"
 #include "../math/cframe.h"
 #include "../math/transform.h"
+#include "../datastructures/smartPointers.h"
 
 namespace P3D {
 class ShapeClass;
 class Polyhedron;
 
 class Shape {
-	Shape(const ShapeClass* baseShape, DiagonalMat3 scale);
 public:
-	const ShapeClass* baseShape;
+	intrusive_ptr<const ShapeClass> baseShape;
 	DiagonalMat3 scale;
-public:
+
 	Shape();
-	Shape(const ShapeClass* baseShape);
-	Shape(const ShapeClass* baseShape, double width, double height, double depth);
+	Shape(intrusive_ptr<const ShapeClass> baseShape);
+	Shape(intrusive_ptr<const ShapeClass> baseShape, DiagonalMat3 scale);
+	Shape(intrusive_ptr<const ShapeClass> baseShape, double width, double height, double depth);
+	~Shape();
+
+	Shape(Shape&&);
+	Shape& operator=(Shape&&);
+	Shape(const Shape&);
+	Shape& operator=(const Shape&);
 
 	[[nodiscard]] bool containsPoint(Vec3 point) const;
 	[[nodiscard]] double getIntersectionDistance(Vec3 origin, Vec3 direction) const;

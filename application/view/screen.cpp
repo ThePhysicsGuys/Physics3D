@@ -130,6 +130,7 @@ DebugLayer debugLayer;
 TestLayer testLayer;
 DebugOverlay debugOverlay;
 
+bool USE_IMGUI = true;
 
 void Screen::onInit(bool quickBoot) {
 	// Log init
@@ -158,31 +159,31 @@ void Screen::onInit(bool quickBoot) {
 	Shaders::onInit();
 
 	// Layer creation
-	imguiLayer = ImGuiLayer(this);
+	if(USE_IMGUI) imguiLayer = ImGuiLayer(this);
 	cameraLayer = CameraLayer(this);
 	if(!quickBoot) skyboxLayer = SkyboxLayer(this);
 	modelLayer = ModelLayer(this);
 	constraintLayer = ConstraintLayer(this, Engine::Layer::NoUpdate | Engine::Layer::NoEvents);
 	shadowLayer = ShadowLayer(this);
-	debugLayer = DebugLayer(this);
+	if(USE_IMGUI) debugLayer = DebugLayer(this);
 	pickerLayer = PickerLayer(this);
 	postprocessLayer = PostprocessLayer(this);
-	guiLayer = GuiLayer(this);
+	if(USE_IMGUI) guiLayer = GuiLayer(this);
 	//testLayer = TestLayer(this);
-	debugOverlay = DebugOverlay(this);
+	if(USE_IMGUI) debugOverlay = DebugOverlay(this);
 
 	if(!quickBoot) layerStack.pushLayer(&skyboxLayer);
 	layerStack.pushLayer(&constraintLayer);
 	layerStack.pushLayer(&modelLayer);
 	layerStack.pushLayer(&shadowLayer);
-	layerStack.pushLayer(&debugLayer);
+	if(USE_IMGUI) layerStack.pushLayer(&debugLayer);
 	layerStack.pushLayer(&pickerLayer);
 	layerStack.pushLayer(&postprocessLayer);
-	layerStack.pushLayer(&guiLayer);
-	layerStack.pushLayer(&debugOverlay);
+	if(USE_IMGUI) layerStack.pushLayer(&guiLayer);
+	if(USE_IMGUI) layerStack.pushLayer(&debugOverlay);
 	//layerStack.pushLayer(&testLayer);
 	layerStack.pushLayer(&cameraLayer);
-	layerStack.pushLayer(&imguiLayer);
+	if(USE_IMGUI) layerStack.pushLayer(&imguiLayer);
 
 	// Layer init
 	layerStack.onInit(registry);
@@ -192,7 +193,7 @@ void Screen::onInit(bool quickBoot) {
 	handler->onFrameBufferResize(event);
 
 	// Init frames
-	Frames::onInit(registry);
+	if(USE_IMGUI) Frames::onInit(registry);
 }
 
 void Screen::onUpdate() {
@@ -223,7 +224,7 @@ void Screen::onRender() {
 	//defaultSettings(0);
 
 	// Init imgui
-	imguiLayer.begin();
+	if(USE_IMGUI) imguiLayer.begin();
 
 	defaultSettings(screenFrameBuffer->getID());
 
@@ -231,7 +232,11 @@ void Screen::onRender() {
 	layerStack.onRender(registry);
 
 	// Render imgui
-	imguiLayer.end();
+	if(USE_IMGUI) imguiLayer.end();
+
+	if(!USE_IMGUI) glBindFramebuffer(GL_DRAW_FRAMEBUFFER, screenFrameBuffer->getID());
+
+	glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, 0);
 
 	graphicsMeasure.mark(GraphicsProcess::FINALIZE);
 

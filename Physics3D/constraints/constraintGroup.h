@@ -9,13 +9,12 @@ class Part;
 
 class PhysicalConstraint {
 public:
-	inline PhysicalConstraint(Physical* physA, Physical* physB, Constraint* constraint) :
-		physA(physA), physB(physB), constraint(constraint) {}
-
-	Constraint* constraint;
-
 	Physical* physA;
 	Physical* physB;
+	Constraint* constraint;
+
+	inline PhysicalConstraint(Physical* physA, Physical* physB, Constraint* constraint) :
+		physA(physA), physB(physB), constraint(constraint) {}
 
 	int maxNumberOfParameters() const;
 	ConstraintMatrixPack getMatrices(double* matrixBuf, double* errorBuf) const;

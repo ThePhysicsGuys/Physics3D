@@ -10,7 +10,6 @@ public:
 
 	inline void remove(T&& element) {
 		T* el = &element;
-		T* frnt = &std::vector<T>::front();
 		assert(el >= frnt);
 
 		T* bck = &std::vector<T>::back();

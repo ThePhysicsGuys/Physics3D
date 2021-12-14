@@ -61,7 +61,7 @@ void ImGuiLayer::onRender(Engine::Registry64& registry) {
 	handler->viewport = Vec4(min.x, min.y, size.x, size.y);
 
 	SRef<Graphics::Texture> texture = screen->screenFrameBuffer->texture;
-	ImGui::Image((void*) texture->getID(), size, ImVec2(0, 1), ImVec2(1, 0));
+	ImGui::Image((void*) (std::intptr_t) texture->getID(), size, ImVec2(0, 1), ImVec2(1, 0));
 	ImGui::End();
 
 	Graphics::renderImGuiStyleEditor();

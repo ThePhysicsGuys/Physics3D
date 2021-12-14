@@ -7,22 +7,31 @@
 #include "genericCollidable.h"
 #include "scalableInertialMatrix.h"
 
+#include <atomic>
+
 namespace P3D {
 class Polyhedron;
 
 // a ShapeClass is defined as a shape with dimentions -1..1 in all axes. All functions work on scaled versions of the shape. 
 // examples include: 
 //    Sphere of radius=1
+//    Cylinder of radius=1, height=2
 //    Cube of 2x2x2
-//    Custom polygon of 2x2x2
+//    Custom polygon bounded by a 2x2x2 box
 class ShapeClass : public GenericCollidable {
 public:
-	const double volume;
-	const Vec3 centerOfMass;
-	const ScalableInertialMatrix inertia;
-	const int intersectionClassID;
+	// For intrusive_ptr. MUST be named refCount, see datastructures/smartPointers.h
+	mutable std::atomic<std::size_t> refCount;
+	
+	std::size_t intersectionClassID;
+	double volume;
+	Vec3 centerOfMass;
+	ScalableInertialMatrix inertia;
 
-	ShapeClass(double volume, Vec3 centerOfMass, ScalableInertialMatrix inertia, int intersectionClassID);
+
+
+	ShapeClass(double volume, Vec3 centerOfMass, ScalableInertialMatrix inertia, std::size_t intersectionClassID);
+	virtual ~ShapeClass();
 
 	virtual bool containsPoint(Vec3 point) const = 0;
 	virtual double getIntersectionDistance(Vec3 origin, Vec3 direction) const = 0;
