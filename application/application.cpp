@@ -211,6 +211,12 @@ void setupWorld(const ::Util::ParsedArgs& cmdArgs) {
 		world.addPart(partC);
 	}
 
+	ExtendedPart* octahedron = new ExtendedPart(polyhedronShape(ShapeLibrary::octahedron), GlobalCFrame(-7.0, 3.0, 8.0), WorldBuilder::basicProperties);
+	ExtendedPart* icosahedron = new ExtendedPart(polyhedronShape(ShapeLibrary::icosahedron), GlobalCFrame(-7.0, 3.0, 10.0), WorldBuilder::basicProperties);
+
+	world.addPart(octahedron);
+	world.addPart(icosahedron);
+
 	//world.addLink(new MagneticLink({ CFrame{1.0, 0.0, 0.0}, partA }, { CFrame{0.0, 0.0, 0.0}, partB }, +8.0));
 	//world.addLink(new AlignmentLink({ CFrame{1.0, 0.0, 0.0}, partA}, { CFrame{0.0, 0.0, 0.0}, partB }));
 	//return;

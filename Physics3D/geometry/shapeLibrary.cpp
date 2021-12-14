@@ -10,10 +10,27 @@
 
 namespace P3D::ShapeLibrary {
 
+Vec3f octahedronVertices[]{
+	Vec3f(-0.5, 0.0, 0.0), Vec3f(0.5, 0.0, 0.0),
+	Vec3f(0.0, -0.5, 0.0), Vec3f(0.0, 0.5, 0.0),
+	Vec3f(0.0, 0.0, -0.5), Vec3f(0.0, 0.0, 0.5),
+};
+
+Triangle octahedronTriangles[]{
+	{0,2,4},
+	{0,4,3},
+	{0,3,5},
+	{0,5,2},
+	{1,4,2},
+	{1,3,4},
+	{1,5,3},
+	{1,2,5}
+};
+
 Vec3f icosahedronVertices[]{
-	Vec3f(0, 1.0, g<float>() / 2), Vec3f(0, 1.0, -g<float>() / 2), Vec3f(0, -1.0, -g<float>() / 2), Vec3f(0, -1.0, g<float>() / 2),
-	Vec3f(1.0, g<float>() / 2, 0), Vec3f(1.0, -g<float>() / 2, 0), Vec3f(-1.0, -g<float>() / 2, 0), Vec3f(-1.0, g<float>() / 2, 0),
-	Vec3f(g<float>() / 2, 0, 1.0), Vec3f(-g<float>() / 2, 0, 1.0), Vec3f(-g<float>() / 2, 0, -1.0), Vec3f(g<float>() / 2, 0, -1.0),
+	Vec3f(0, 0.5, g<float>() / 2), Vec3f(0, 0.5, -g<float>() / 2), Vec3f(0, -0.5, -g<float>() / 2), Vec3f(0, -0.5, g<float>() / 2),
+	Vec3f(0.5, g<float>() / 2, 0), Vec3f(0.5, -g<float>() / 2, 0), Vec3f(-0.5, -g<float>() / 2, 0), Vec3f(-0.5, g<float>() / 2, 0),
+	Vec3f(g<float>() / 2, 0, 0.5), Vec3f(-g<float>() / 2, 0, 0.5), Vec3f(-g<float>() / 2, 0, -0.5), Vec3f(g<float>() / 2, 0, -0.5),
 };
 
 Triangle icosahedronTriangles[]{
@@ -35,9 +52,9 @@ Triangle trianglePyramidTriangles[]{
 };
 
 Vec3f houseVertices[]{
-	Vec3f(-1.0f, 0.0f, -1.0f), Vec3f(-1.0f, 0.0f, 1.0f), Vec3f(1.0f, 0.0f, 1.0f), Vec3f(1.0f, 0.0f, -1.0f),
-	Vec3f(-1.0f, 1.0f, -1.0f), Vec3f(-1.0f, 1.0f, 1.0f), Vec3f(1.0f, 1.0f, 1.0f), Vec3f(1.0f, 1.0f, -1.0f),
-	Vec3f(0.0f, 1.5f, -1.0f), Vec3f(0.0f, 1.5f, 1.0f)
+	Vec3f(-0.5f, 0.0f, -0.5f), Vec3f(-0.5f, 0.0f, 0.5f), Vec3f(0.5f, 0.0f, 0.5f), Vec3f(0.5f, 0.0f, -0.5f),
+	Vec3f(-0.5f, 1.0f, -0.5f), Vec3f(-0.5f, 1.0f, 0.5f), Vec3f(0.5f, 1.0f, 0.5f), Vec3f(0.5f, 1.0f, -0.5f),
+	Vec3f(0.0f, 1.5f, -5.0f), Vec3f(0.0f, 1.5f, 0.5f)
 };
 
 Triangle houseTriangles[]{
@@ -86,6 +103,7 @@ Triangle boxTriangles[12] = {
 
 const int wedgeVertexCount = 6;
 const int cornerVertexCount = 4;
+const Polyhedron octahedron(octahedronVertices, octahedronTriangles, 6, 8);
 const Polyhedron icosahedron(icosahedronVertices, icosahedronTriangles, 12, 20);
 const Polyhedron trianglePyramid(trianglePyramidVertices, trianglePyramidTriangles, 4, 4);
 const Polyhedron house(houseVertices, houseTriangles, 10, 16);

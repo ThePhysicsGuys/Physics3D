@@ -397,7 +397,7 @@ int main(int argc, const char** argv) {
 		basicProperties, 
 		Colors::GREEN);
 	std::unique_ptr<CustomPart> icosahedron = std::make_unique<CustomPart>(
-		polyhedronShape(ShapeLibrary::icosahedron), 
+		polyhedronShape(ShapeLibrary::octahedron), 
 		GlobalCFrame(4.0, 1.3, 4.0), 
 		basicProperties, 
 		Colors::RED);
