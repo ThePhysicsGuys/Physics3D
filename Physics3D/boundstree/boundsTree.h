@@ -265,9 +265,14 @@ inline BoundsTemplate<float> TreeNodeRef::recalculateBoundsRecursive(const GetOb
 }
 
 class TrunkAllocator {
-	size_t allocationCount = 0;
+	size_t allocationCount;
 public:
+	TrunkAllocator();
 	~TrunkAllocator();
+	TrunkAllocator(const TrunkAllocator&) = delete;
+	TrunkAllocator& operator=(const TrunkAllocator&) = delete;
+	TrunkAllocator(TrunkAllocator&& other) noexcept;
+	TrunkAllocator& operator=(TrunkAllocator&& other) noexcept;
 	TreeTrunk* allocTrunk();
 	void freeTrunk(TreeTrunk* trunk);
 	void freeAllTrunks(TreeTrunk& baseTrunk, int baseTrunkSize);

@@ -7,10 +7,9 @@ namespace P3D {
 template<typename T>
 class UnorderedVector : public std::vector<T> {
 public:
-
 	inline void remove(T&& element) {
 		T* el = &element;
-		assert(el >= frnt);
+		assert(el >= &std::vector<T>::front());
 
 		T* bck = &std::vector<T>::back();
 

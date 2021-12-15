@@ -40,15 +40,25 @@ Triangle icosahedronTriangles[]{
 	{10, 7 , 1}, {10, 9, 7 }, {9, 10, 6}, {9, 6 , 3}, {3, 6, 5 },
 };
 
+Vec3f tetrahedronVertices[]{
+	Vec3f(1.0f, 1.0f, 1.0f),
+	Vec3f(1.0f, -1.0f, -1.0f),
+	Vec3f(-1.0f, -1.0f, 1.0f),
+	Vec3f(-1.0f, 1.0f, -1.0f)
+};
+
+Triangle tetrahedronTriangles[]{
+	{0, 2, 1}, 
+	{0, 3, 2}, 
+	{0, 1, 3}, 
+	{1, 2, 3}
+};
+
 Vec3f trianglePyramidVertices[]{
 	Vec3f(0.0f, 0.0f, 0.0f),
 	Vec3f(1.0f, 0.0f, 0.0f),
 	Vec3f(0.0f, 1.0f, 0.0f),
 	Vec3f(0.0f, 0.0f, 1.0f)
-};
-
-Triangle trianglePyramidTriangles[]{
-	{0, 2, 1}, {0, 3, 2}, {0, 1, 3}, {1, 2, 3}
 };
 
 Vec3f houseVertices[]{
@@ -103,9 +113,10 @@ Triangle boxTriangles[12] = {
 
 const int wedgeVertexCount = 6;
 const int cornerVertexCount = 4;
+const Polyhedron tetrahedron(tetrahedronVertices, tetrahedronTriangles, 4, 4);
 const Polyhedron octahedron(octahedronVertices, octahedronTriangles, 6, 8);
 const Polyhedron icosahedron(icosahedronVertices, icosahedronTriangles, 12, 20);
-const Polyhedron trianglePyramid(trianglePyramidVertices, trianglePyramidTriangles, 4, 4);
+const Polyhedron trianglePyramid(trianglePyramidVertices, tetrahedronTriangles, 4, 4);
 const Polyhedron house(houseVertices, houseTriangles, 10, 16);
 const Polyhedron wedge{wedgeVertices, wedgeTriangles, wedgeVertexCount, 8};
 const Polyhedron corner{cornerVertices, cornerTriangles, cornerVertexCount, 4};

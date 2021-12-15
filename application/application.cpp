@@ -210,9 +210,11 @@ void setupWorld(const ::Util::ParsedArgs& cmdArgs) {
 		world.addPart(partC);
 	}
 
+	ExtendedPart* tetrahedron = new ExtendedPart(polyhedronShape(ShapeLibrary::tetrahedron), GlobalCFrame(-7.0, 3.0, 6.0), WorldBuilder::basicProperties);
 	ExtendedPart* octahedron = new ExtendedPart(polyhedronShape(ShapeLibrary::octahedron), GlobalCFrame(-7.0, 3.0, 8.0), WorldBuilder::basicProperties);
 	ExtendedPart* icosahedron = new ExtendedPart(polyhedronShape(ShapeLibrary::icosahedron), GlobalCFrame(-7.0, 3.0, 10.0), WorldBuilder::basicProperties);
 
+	world.addPart(tetrahedron);
 	world.addPart(octahedron);
 	world.addPart(icosahedron);
 

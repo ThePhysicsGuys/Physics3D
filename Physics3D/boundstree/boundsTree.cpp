@@ -533,16 +533,26 @@ static bool insertGroupIntoGroup(TrunkAllocator& sourceAlloc, TrunkAllocator& de
 }
 
 
-
+TrunkAllocator::TrunkAllocator() : allocationCount(0) {}
 TrunkAllocator::~TrunkAllocator() {
 	assert(this->allocationCount == 0);
 }
+TrunkAllocator::TrunkAllocator(TrunkAllocator&& other) noexcept : allocationCount(other.allocationCount) {
+	other.allocationCount = 0;
+}
+TrunkAllocator& TrunkAllocator::operator=(TrunkAllocator&& other) noexcept {
+	std::swap(this->allocationCount, other.allocationCount);
+	return *this;
+}
+
 TreeTrunk* TrunkAllocator::allocTrunk() {
 	this->allocationCount++;
+	std::cout << "allocTrunk " << this->allocationCount << std::endl;
 	return static_cast<TreeTrunk*>(aligned_malloc(sizeof(TreeTrunk), alignof(TreeTrunk)));
 }
 void TrunkAllocator::freeTrunk(TreeTrunk* trunk) {
 	this->allocationCount--;
+	std::cout << "freeTrunk " << this->allocationCount << std::endl;
 	aligned_free(trunk);
 }
 void TrunkAllocator::freeAllTrunks(TreeTrunk& baseTrunk, int baseTrunkSize) {

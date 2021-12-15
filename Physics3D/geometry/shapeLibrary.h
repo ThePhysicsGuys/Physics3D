@@ -3,6 +3,7 @@
 #include "../geometry/polyhedron.h"
 
 namespace P3D::ShapeLibrary {
+extern const Polyhedron tetrahedron;
 extern const Polyhedron octahedron;
 extern const Polyhedron icosahedron;
 extern const Polyhedron trianglePyramid;
