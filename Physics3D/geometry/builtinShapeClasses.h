@@ -93,7 +93,7 @@ class PolyhedronShapeClass : public ShapeClass {
 protected:
 	Polyhedron poly;
 public:
-	PolyhedronShapeClass(Polyhedron&& poly);
+	PolyhedronShapeClass(Polyhedron&& poly) noexcept;
 
 	virtual bool containsPoint(Vec3 point) const override;
 	virtual double getIntersectionDistance(Vec3 origin, Vec3 direction) const override;

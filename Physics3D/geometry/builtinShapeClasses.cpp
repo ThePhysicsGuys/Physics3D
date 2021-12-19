@@ -345,33 +345,33 @@ CornerClass::CornerClass() : ShapeClass(4 / 3, Vec3(-2 / 3, -2 / 3, -2 / 3), Sca
 }
 
 bool CornerClass::containsPoint(Vec3 point) const {
-	return std::abs(point.x) <= 1.0 && std::abs(point.y) <= 1.0 && std::abs(point.z) <= 0 && -point.x - point.y - point.z <= 1.0;
+	return std::abs(point.x) <= 1.0 && std::abs(point.y) <= 1.0 && std::abs(point.z) <= 1.0 && -point.x - point.y - point.z <= 1.0;
 }
 double CornerClass::getIntersectionDistance(Vec3 origin, Vec3 direction) const {
-	double tx = (-1 - origin.x) / direction.x;
-	Vec3 x = origin + tx * direction;
-	if(std::abs(x.y) <= 1.0 && std::abs(x.z) <= 0.0 && tx > 0) {
-		return tx;
-	}
+	//double tx = (-1 - origin.x) / direction.x;
+	//Vec3 x = origin + tx * direction;
+	//if(std::abs(x.y) <= 1.0 && std::abs(x.z) <= 1.0 && tx > 0) {
+	//	return tx;
+	//}
 
-	double ty = (-1 - origin.y) / direction.y;
-	Vec3 y = origin + ty * direction;
-	if(std::abs(y.x) <= 1.0 && std::abs(y.z) <= 1.0 && ty > 0) {
-		return ty;
-	}
+	//double ty = (-1 - origin.y) / direction.y;
+	//Vec3 y = origin + ty * direction;
+	//if(std::abs(y.x) <= 1.0 && std::abs(y.z) <= 1.0 && ty > 0) {
+	//	return ty;
+	//}
 
-	double tz = (-1 - origin.z) / direction.z;
-	Vec3 z = origin + tz * direction;
-	if(std::abs(z.x) <= 1.0 && std::abs(z.y) <= 1.0 && tz > 0) {
-		return tz;
-	}
+	//double tz = (-1 - origin.z) / direction.z;
+	//Vec3 z = origin + tz * direction;
+	//if(std::abs(z.x) <= 1.0 && std::abs(z.y) <= 1.0 && tz > 0) {
+	//	return tz;
+	//}
 
-	const double dn = direction.x + direction.y + direction.z;
+	/*const double dn = direction.x + direction.y + direction.z;
 	double t = (-1 - origin.x - origin.y - origin.z) / dn;
 	Vec3 points = origin + t * direction;
 	if(this->containsPoint(points) && t > 0) {
 		return t;
-	}
+	}*/
 	return std::numeric_limits<double>::infinity();
 }
 BoundingBox CornerClass::getBounds(const Rotation& rotation, const DiagonalMat3& scale) const {
@@ -422,7 +422,7 @@ Polyhedron CornerClass::asPolyhedron() const {
 #pragma endregion
 
 #pragma region PolyhedronShapeClass
-PolyhedronShapeClass::PolyhedronShapeClass(Polyhedron&& poly) : poly(poly), ShapeClass(poly.getVolume(), poly.getCenterOfMass(), poly.getScalableInertiaAroundCenterOfMass(), CONVEX_POLYHEDRON_CLASS_ID) {}
+PolyhedronShapeClass::PolyhedronShapeClass(Polyhedron&& poly) noexcept : poly(std::move(poly)), ShapeClass(poly.getVolume(), poly.getCenterOfMass(), poly.getScalableInertiaAroundCenterOfMass(), CONVEX_POLYHEDRON_CLASS_ID) {}
 
 bool PolyhedronShapeClass::containsPoint(Vec3 point) const {
 	return poly.containsPoint(point);
