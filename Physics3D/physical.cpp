@@ -13,7 +13,7 @@
 
 #include <algorithm>
 #include <cassert>
-
+#include <stdexcept>
 
 /*
 	===== Physical Structure =====
@@ -23,17 +23,13 @@ namespace P3D {
 #pragma region structure
 
 Physical::Physical(Part* part, MotorizedPhysical* mainPhysical) : rigidBody(part), mainPhysical(mainPhysical) {
-	if (part->parent != nullptr) {
-		throw "This part is already in another physical!";
-	}
+	assert(part->parent == nullptr);
 	part->parent = this;
 }
 
 Physical::Physical(RigidBody&& rigidBody, MotorizedPhysical* mainPhysical) : rigidBody(std::move(rigidBody)), mainPhysical(mainPhysical) {
 	for(Part& p : this->rigidBody) {
-		if(p.parent != nullptr) {
-			throw "This part is already in another physical!";
-		}
+		assert(p.parent == nullptr);
 		p.parent = this;
 	}
 }
@@ -235,9 +231,10 @@ void Physical::removeChild(ConnectedPhysical* child) {
 	childPhysicals.pop_back();
 }
 
-
-
 void Physical::attachPhysical(Physical* phys, HardConstraint* constraint, const CFrame& attachToThis, const CFrame& attachToThat) {
+	if(this->mainPhysical == phys->mainPhysical) {
+		throw std::invalid_argument("Attempting to create HardConstraint loop");
+	}
 	this->attachPhysical(phys->makeMainPhysical(), constraint, attachToThis, attachToThat);
 }
 
@@ -340,17 +337,17 @@ void Physical::attachPhysical(MotorizedPhysical* phys, const CFrame& attachment)
 }
 
 void Physical::attachPart(Part* part, const CFrame& attachment) {
-	if (part->parent != nullptr) { // part is already in a physical
-		if (part->parent == this) {
-			throw "Part already attached to this physical!";
+	if(part->parent != nullptr) { // part is already in a physical
+		if(part->parent->mainPhysical == this->mainPhysical) {
+			throw std::invalid_argument("Part already attached to this physical!");
+		}
+
+		// attach other part's entire physical
+		if(part->isMainPart()) {
+			attachPhysical(part->parent, attachment);
 		} else {
-			// attach other part's entire physical
-			if (part->isMainPart()) {
-				attachPhysical(part->parent, attachment);
-			} else {
-				CFrame newAttach = attachment.localToGlobal(~part->parent->rigidBody.getAttachFor(part).attachment);
-				attachPhysical(part->parent, newAttach);
-			}
+			CFrame newAttach = attachment.localToGlobal(~part->parent->rigidBody.getAttachFor(part).attachment);
+			attachPhysical(part->parent, newAttach);
 		}
 	} else {
 		WorldPrototype* world = this->getWorld();
