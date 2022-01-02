@@ -8,6 +8,7 @@
 #include "../engine/options/keyboardOptions.h"
 #include "application.h"
 #include "screen.h"
+#include "picker/tools/toolSpacing.h"
 
 namespace P3D::Application {
 
@@ -25,7 +26,10 @@ void ToolbarFrame::onRender(Engine::Registry64& registry) {
 	for (Engine::ToolManager& toolManager : PickerLayer::toolManagers) {
 		for (Engine::Tool* tool : toolManager) {
 			bool selected = toolManager.isSelected(tool);
-			if (ImGui::ToolBarButton(tool, selected)) {
+			if (dynamic_cast<ToolSpacing*>(tool) != nullptr) {
+				ImGui::SameLine();
+				ImGui::BulletText("");
+			} else if (ImGui::ToolBarButton(tool, selected)) {
 				if (selected)
 					toolManager.deselectTool();
 				else

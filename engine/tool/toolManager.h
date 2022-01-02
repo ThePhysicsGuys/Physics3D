@@ -22,10 +22,6 @@ public:
 
 	template<typename DerivedTool, typename... Args>
 	std::enable_if_t<std::is_base_of_v<Tool, DerivedTool>, bool> registerTool(Args&&... args) {
-		auto iterator = std::find_if(tools.begin(), tools.end(), [] (Tool* tool) { return tool->getName() == DerivedTool::getStaticName(); });
-		if (iterator != tools.end())
-			return false;
-
 		DerivedTool* tool = new DerivedTool(std::forward<Args>(args)...);
 		tools.push_back(tool);
 		tool->onRegister();

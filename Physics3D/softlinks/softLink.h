@@ -5,7 +5,7 @@
 
 namespace P3D {
 class SoftLink {
-protected:
+public:
 	struct AttachedPart {
 		AttachedPart(CFrame attachment, Part* part);
 		CFrame attachment = CFrame{};
@@ -15,7 +15,6 @@ protected:
 	AttachedPart attachedPart1;
 	AttachedPart attachedPart2;
 
-public:
 	SoftLink(const SoftLink& other) = delete;
 	SoftLink& operator=(const SoftLink& other) = delete;
 	SoftLink(SoftLink&& other) = delete;

@@ -15,6 +15,14 @@
 #include "../picker/tools/rotationTool.h"
 #include "../picker/tools/scaleTool.h"
 #include "../picker/ray.h"
+#include "picker/tools/attachmentTool.h"
+#include "picker/tools/elasticLinkTool.h"
+#include "picker/tools/fixedConstraintTool.h"
+#include "picker/tools/magneticLinkTool.h"
+#include "picker/tools/motorConstraintTool.h"
+#include "picker/tools/pistonConstraintTool.h"
+#include "picker/tools/springLinkTool.h"
+#include "picker/tools/toolSpacing.h"
 
 namespace P3D::Application {
 
@@ -27,6 +35,20 @@ void PickerLayer::onInit(Engine::Registry64& registry) {
 	toolManager.registerTool<TranslationTool>();
 	toolManager.registerTool<RotationTool>();
 	toolManager.registerTool<ScaleTool>();
+	
+	toolManager.registerTool<ToolSpacing>();
+
+	toolManager.registerTool<AttachmentTool>();
+	toolManager.registerTool<FixedConstraintTool>();
+	toolManager.registerTool<MotorConstraintTool>();
+	toolManager.registerTool<PistonConstraintTool>();
+
+	toolManager.registerTool<ToolSpacing>();
+	
+	toolManager.registerTool<MagneticLinkTool>();
+	toolManager.registerTool<SpringLinkTool>();
+	toolManager.registerTool<ElasticLinkTool>();
+	
 	toolManager.selectTool<TranslationTool>();
 
 	toolManagers.push_back(std::move(toolManager));

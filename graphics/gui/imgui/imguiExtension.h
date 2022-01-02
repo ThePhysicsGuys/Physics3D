@@ -127,8 +127,10 @@ namespace ImGui {
 
 		SameLine();
         ImVec4 bg = selected ? ImVec4(0.2, 0.2, 0.2, 0.5) : ImVec4(0, 0, 0, 0);
+        ImGui::PushID(name);
         bool result = ImageButton((ImTextureID) image->getID(), ImVec2(25, 25), ImVec2(0, 1), ImVec2(1, 0), 2, bg);
-
+        ImGui::PopID();
+		
 		PopStyleVar(2);
 		
         if (IsItemHovered()) {

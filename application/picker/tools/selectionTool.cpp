@@ -82,12 +82,38 @@ void SelectionTool::select(const Engine::Registry64::entity_type& entity) {
 	selection.add(entity);
 }
 
+std::optional<std::pair<Engine::Registry64::entity_type, Position>> SelectionTool::getIntersectedCollider() {
+	Engine::Registry64::entity_type intersectedEntity = 0;
+	double closestIntersectionDistance = std::numeric_limits<double>::max();
+
+	{
+		auto view = screen.registry.view<Comp::Hitbox, Comp::Transform, Comp::Collider>();
+		std::shared_lock<UpgradeableMutex> worldReadLock(*screen.worldMutex);
+		for (auto entity : view) {
+			IRef<Comp::Hitbox> hitbox = view.get<Comp::Hitbox>(entity);
+			IRef<Comp::Transform> transform = view.get<Comp::Transform>(entity);
+			std::optional<double> distance = intersect(transform->getCFrame(), hitbox);
+			if (distance.has_value() && distance < closestIntersectionDistance) {
+				closestIntersectionDistance = *distance;
+				intersectedEntity = entity;
+			}
+		}
+	}
+
+	if (intersectedEntity == 0)
+		return std::nullopt;
+
+	Position intersection = ray.origin + ray.direction * closestIntersectionDistance;
+
+	return std::make_pair(intersectedEntity, intersection);
+}
+
 std::optional<std::pair<Engine::Registry64::entity_type, Position>> SelectionTool::getIntersectedEntity() {
 	Engine::Registry64::entity_type intersectedEntity = 0;
 	double closestIntersectionDistance = std::numeric_limits<double>::max();
-	auto view = screen.registry.view<Comp::Hitbox, Comp::Transform>();
 
 	{
+		auto view = screen.registry.view<Comp::Hitbox, Comp::Transform>();
 		std::shared_lock<UpgradeableMutex> worldReadLock(*screen.worldMutex);
 		for(auto entity : view) {
 			IRef<Comp::Hitbox> hitbox = view.get<Comp::Hitbox>(entity);
