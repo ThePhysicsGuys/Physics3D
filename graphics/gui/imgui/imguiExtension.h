@@ -148,7 +148,7 @@ namespace ImGui {
     }
 
     inline void ToolBarSpacing() {
-        SameLine();
+        SameLine(0, 30);
         Spacing();
 	}
 	

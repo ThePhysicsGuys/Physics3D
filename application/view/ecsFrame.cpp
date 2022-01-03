@@ -171,8 +171,8 @@ void ECSFrame::renderEntity(Engine::Registry64& registry, const Engine::Registry
 }
 
 void ECSFrame::onInit(Engine::Registry64& registry) {
-	folderIcon = ResourceManager::add<Graphics::TextureResource>("folder", "../res/textures/icons/folder.png");
-	objectIcon = ResourceManager::add<Graphics::TextureResource>("object", "../res/textures/icons/cube.png");
+	folderIcon = ResourceManager::add<Graphics::TextureResource>("folder", "../res/textures/icons/Folder.png");
+	objectIcon = ResourceManager::add<Graphics::TextureResource>("object", "../res/textures/icons/Cube.png");
 }
 
 
