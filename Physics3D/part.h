@@ -105,7 +105,7 @@ public:
 	void setAngularVelocity(Vec3 angularVelocity);
 	void setMotion(Vec3 velocity, Vec3 angularVelocity);
 
-
+	bool isTerrainPart() const;
 	bool isMainPart() const;
 	void makeMainPart();
 

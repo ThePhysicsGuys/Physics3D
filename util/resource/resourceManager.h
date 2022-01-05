@@ -13,7 +13,6 @@ class ResourceManager {
 	friend Resource;
 
 private:
-
 	struct CountedResource {
 		Resource* value;
 		int count;
@@ -60,6 +59,10 @@ private:
 		}
 	}
 
+	ResourceManager();
+	~ResourceManager();
+
+public:
 	template<typename T>
 	static T* getDefaultResource() {
 		//Log::subject("DEFAULT");
@@ -84,10 +87,6 @@ private:
 		}
 	}
 
-	ResourceManager();
-	~ResourceManager();
-
-public:
 	template<typename T, typename = std::enable_if<std::is_base_of<Resource, T>::value>>
 	static T* get(const std::string& name) {
 		//Log::subject s("GET");

@@ -405,7 +405,7 @@ void update(WorldPrototype& world) {
 	}
 	world.age++;
 
-	for(SoftLink* springLink : world.springLinks) {
+	for(SoftLink* springLink : world.softLinks) {
 		springLink->update();
 	}
 }
@@ -436,6 +436,6 @@ double WorldPrototype::getTotalEnergy() const {
 }
 
 void WorldPrototype::addLink(SoftLink* link) {
-	springLinks.push_back(link);
+	softLinks.push_back(link);
 }
 };
