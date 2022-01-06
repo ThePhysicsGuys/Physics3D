@@ -93,6 +93,9 @@ namespace P3D::Application {
 	}
 
 	void Selection::remove(const Engine::Registry64::entity_type& entity, bool recalculateBounds) {
+		if (entity == Engine::Registry64::null_entity)
+			return;
+
 		auto iterator = std::find(this->selection.begin(), this->selection.end(), entity);
 		if (iterator == this->selection.end())
 			return;
@@ -180,6 +183,9 @@ namespace P3D::Application {
 			return std::nullopt;
 
 		IRef<Comp::Transform> transform = screen.registry.get<Comp::Transform>(this->selection[0]);
+		if (transform.invalid())
+			return std::nullopt;
+
 		return GlobalCFrame(transform->getCFrame().localToGlobal(this->boundingBox->getCenter()), transform->getRotation());
 	}
 	
@@ -197,6 +203,19 @@ namespace P3D::Application {
 	
 	std::vector<Engine::Registry64::entity_type>::iterator Selection::end() {
 		return this->selection.end();
+	}
+
+	std::optional<Engine::Registry64::entity_type> Selection::first() const {
+		if (selection.empty())
+			return std::nullopt;
+
+		return selection[0];
+	}
+	std::optional<Engine::Registry64::entity_type> Selection::last() const {
+		if (selection.empty())
+			return std::nullopt;
+
+		return selection[selection.size() - 1];
 	}
 
 

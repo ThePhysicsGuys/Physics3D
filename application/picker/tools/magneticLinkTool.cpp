@@ -40,8 +40,8 @@ void MagneticLinkTool::linkSelection() {
 			continue;
 
 		CFrame cframe = parentCollider->part->getCFrame().globalToLocal(childCollider->part->getCFrame());
-		SoftLink::AttachedPart part1(cframe, parentCollider->part);
-		SoftLink::AttachedPart part2(CFrame(), childCollider->part);
+		AttachedPart part1 { cframe, parentCollider->part };
+		AttachedPart part2 { CFrame(), childCollider->part };
 		MagneticLink* link = new MagneticLink(part1, part2, 1.0);
 
 		screen.worldMutex->lock();

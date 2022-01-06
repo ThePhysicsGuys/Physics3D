@@ -16,6 +16,7 @@ protected:
 
 private:
 	bool keys[GLFW_KEY_LAST + 1];
+	bool modifiers[1];
 	double timestamp[GLFW_KEY_LAST + 1];
 	void keyCallback(int key, int action, int mods);
 	void cursorCallback(double x, double y);

@@ -72,6 +72,27 @@ public:
 
 		return *this;
 	}
+		
+	template<typename... Args>
+	EntityBuilder& attachment(Args&&... args) {
+		this->registry.add<Comp::Attachment>(this->entity, std::forward<Args>(args)...);
+
+		return *this;
+	}
+
+	template<typename... Args>
+	EntityBuilder& softLink(Args&&... args) {
+		this->registry.add<Comp::SoftLink>(this->entity, std::forward<Args>(args)...);
+
+		return *this;
+	}
+
+	template<typename... Args>
+	EntityBuilder& hardConstraint(Args&&... args) {
+		this->registry.add<Comp::HardConstraint>(this->entity, std::forward<Args>(args)...);
+
+		return *this;
+	}
 };
 
 }

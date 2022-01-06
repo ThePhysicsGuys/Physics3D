@@ -41,8 +41,8 @@ void SpringLinkTool::linkSelection() {
 			continue;
 
 		CFrame cframe = parentCollider->part->getCFrame().globalToLocal(childCollider->part->getCFrame());
-		SoftLink::AttachedPart part1(cframe, parentCollider->part);
-		SoftLink::AttachedPart part2(CFrame(), childCollider->part);
+		AttachedPart part1 { cframe, parentCollider->part };
+		AttachedPart part2 { CFrame(), childCollider->part };
 		SpringLink* link = new SpringLink(part1, part2, 5.0, 1.0);
 
 		screen.worldMutex->lock();

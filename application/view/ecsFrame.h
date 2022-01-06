@@ -13,6 +13,7 @@ namespace P3D {
 }
 
 namespace P3D::Application {
+
 	struct ECSFrame {
 	private:
 		static void renderEntity(Engine::Registry64& registry, const Engine::Registry64::entity_type& entity);
@@ -20,11 +21,10 @@ namespace P3D::Application {
 		static void renderSoftLinks(Engine::Registry64& registry, const Engine::Registry64::entity_type& entity, const Comp::Collider& collider, const std::vector<SoftLink*>& softLinks);
 		static void renderAttachments(Engine::Registry64& registry, const Engine::Registry64::entity_type& entity, const Comp::Collider& collider, const std::vector<Part*>& attachments);
 
+
 	public:
 		static void onInit(Engine::Registry64& registry);
 		static void onRender(Engine::Registry64& registry);
-
 	};
-
 
 }

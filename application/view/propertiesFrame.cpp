@@ -3,7 +3,6 @@
 #include "propertiesFrame.h"
 
 #include "screen.h"
-#include "application.h"
 #include "extendedPart.h"
 #include "ecs/components.h"
 #include "imgui/imgui.h"
@@ -11,6 +10,7 @@
 #include <Physics3D/misc/toString.h>
 #include <Physics3D/physical.h>
 #include "../graphics/renderer.h"
+#include "picker/tools/selectionTool.h"
 
 namespace P3D::Application {
 
@@ -270,7 +270,7 @@ void PropertiesFrame::onInit(Engine::Registry64& registry) {
 void PropertiesFrame::onRender(Engine::Registry64& registry) {
 	ImGui::Begin("Properties");
 	
-	if (screen.selectedEntity == Engine::Registry64::null_entity) {
+	if (SelectionTool::selection.empty()) {
 		std::string label = "Select an entity to see properties";
 		auto [wx, wy] = ImGui::GetContentRegionAvail();
 		auto [tx, ty] = ImGui::CalcTextSize(label.c_str());
@@ -283,8 +283,22 @@ void PropertiesFrame::onRender(Engine::Registry64& registry) {
 		return;
 	}
 
+	if (SelectionTool::selection.isMultiSelection()) {
+		std::string label = "Multiple entities selected";
+		auto [wx, wy] = ImGui::GetContentRegionAvail();
+		auto [tx, ty] = ImGui::CalcTextSize(label.c_str());
+		auto [cx, cy] = ImGui::GetCursorPos();
+		ImVec2 cursor = ImVec2(cx + (wx - tx) / 2.0f, cy + (wy - ty) / 2.0f);
+		ImGui::SetCursorPos(cursor);
+		ImGui::Text(label.c_str());
+
+		ImGui::End();
+		return;
+	}
+
 	// Dispatch component frames
-	auto components = registry.getComponents(screen.selectedEntity);
+	Engine::Registry64::entity_type selectedEntity = *SelectionTool::selection.first();
+	auto components = registry.getComponents(selectedEntity);
 	for (auto [index, component] : components) {
 		ENTITY_DISPATCH_START(index);
 		ENTITY_DISPATCH(index, Comp::Name, registry, component);
@@ -323,7 +337,7 @@ void PropertiesFrame::onRender(Engine::Registry64& registry) {
 					errorModalMessage = "This component can not be deleted.";
 					showErrorModal = true;
 				} else {
-					registry.remove(screen.selectedEntity, deletedComponentIndex);
+					registry.remove(selectedEntity, deletedComponentIndex);
 				}
 			}
 		}
