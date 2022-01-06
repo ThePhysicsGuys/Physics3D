@@ -44,12 +44,7 @@ public:
 	SRef<Graphics::FrameBuffer> screenFrameBuffer = nullptr;
 	Graphics::Quad* quad = nullptr;
 
-	Engine::Registry64::entity_type intersectedEntity = 0;
-	Engine::Registry64::entity_type selectedEntity = 0;
-	ExtendedPart* intersectedPart = nullptr;
 	ExtendedPart* selectedPart = nullptr;
-	Position intersectedPoint;
-	Position selectedPoint;
 
 	Screen();
 	Screen(int width, int height, PlayerWorld* world, UpgradeableMutex* worldMutex);

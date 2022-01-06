@@ -9,6 +9,7 @@
 #include <typeinfo>
 #include "../util/typetraits.h"
 #include "../util/iteratorUtils.h"
+#include "../util/stringUtil.h"
 #include "../Physics3D/datastructures/smartPointers.h"
 
 namespace P3D::Engine {
@@ -346,9 +347,8 @@ public:
 		component_type index = component_index<Component>::index();
 		if (index >= type_mapping.size()) {
 			std::string fullName = typeid(Component).name();
-			std::size_t colonIndex = fullName.find_last_of(':');
-			std::string name = (colonIndex == std::string::npos) ? fullName.substr(fullName.find_last_of(' ') + 1) : fullName.substr(colonIndex + 1);
-
+			std::string camelCase = Util::demangle(fullName);
+			std::string name = Util::decamel(camelCase);
 			type_mapping.insert(std::make_pair(index, name));
 		}
 

@@ -7,6 +7,9 @@
 
 namespace Util {
 
+	std::string demangle(const std::string& fullName);
+	std::string decamel(const std::string& string);
+
 	std::vector<std::string> split(const std::string& string, char splitter);
 
 	bool startsWith(const std::string& string, const std::string& prefix);
@@ -14,9 +17,9 @@ namespace Util {
 
 	std::string until(const std::string& string, char end);
 
-	std::string ltrim(std::string string);
-	std::string rtrim(std::string string);
-	std::string trim(std::string string);
+	std::string ltrim(const std::string& string);
+	std::string rtrim(const std::string& string);
+	std::string trim(const std::string& string);
 
 	template<typename... Args>
 	std::string format(const std::string& format, Args... args) {
