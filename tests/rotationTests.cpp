@@ -22,7 +22,7 @@ using namespace P3D;
 TEST_CASE(testFromRotationVecInvertsFromRotationMatrix) {
 	FOR_XYZ(-1.55, 1.55, 0.13) {
 		Vec3 v(x, y, z);
-		Rotation rot = Rotation::fromRotationVec(v);
+		Rotation rot = Rotation::fromRotationVector(v);
 
 		Vec3 resultingVec = rot.asRotationVector();
 
@@ -34,7 +34,7 @@ TEST_CASE(testFromRotationVecInvertsFromRotationMatrix) {
 
 		Vec3 rotVec = m.asRotationVector();
 
-		Rotation resultingRot = Rotation::fromRotationVec(rotVec);
+		Rotation resultingRot = Rotation::fromRotationVector(rotVec);
 
 		// logStream << "m = " << m << "\n  rotVec = " << rotVec << "  resultingMat = " << resultingMat;
 

@@ -1,29 +1,28 @@
 #include "core.h"
-#include "springLinkTool.h"
+#include "alignmentLinkTool.h"
 
 #include "application.h"
 #include "selectionTool.h"
 #include "graphics/resource/textureResource.h"
-#include "Physics3D/softlinks/springLink.h"
 #include "util/resource/resourceManager.h"
 #include "view/screen.h"
 
 namespace P3D::Application {
 
-void SpringLinkTool::onRegister() {
+void AlignmentLinkTool::onRegister() {
 	auto path = "../res/textures/icons/" + getName() + ".png";
 	ResourceManager::add<Graphics::TextureResource>(getName(), path);
 }
 
-void SpringLinkTool::onDeregister() {
+void AlignmentLinkTool::onDeregister() {
 	// Remove texture
 }
 
-void SpringLinkTool::onSelect() {
+void AlignmentLinkTool::onSelect() {
 	linkSelection();
 }
 
-void SpringLinkTool::linkSelection() {
+void AlignmentLinkTool::linkSelection() {
 	if (SelectionTool::selection.size() < 2)
 		return;
 
@@ -40,9 +39,9 @@ void SpringLinkTool::linkSelection() {
 			continue;
 
 		CFrame cframe = parentCollider->part->getCFrame().globalToLocal(childCollider->part->getCFrame());
-		AttachedPart part1 { cframe, parentCollider->part };
-		AttachedPart part2 { CFrame(), childCollider->part };
-		SpringLink* link = new SpringLink(part1, part2, 5.0, 1.0);
+		AttachedPart partA { cframe, parentCollider->part };
+		AttachedPart partB { CFrame(), childCollider->part };
+		AlignmentLink* link = new AlignmentLink(partA, partB);
 
 		screen.worldMutex->lock();
 		try {

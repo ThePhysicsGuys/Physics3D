@@ -68,7 +68,7 @@ public:
 		return MatrixRotationTemplate<T>::rotZ(gamma) * MatrixRotationTemplate<T>::rotX(alpha) * MatrixRotationTemplate<T>::rotY(beta);
 	}
 	static MatrixRotationTemplate fromDirection(const Vector<T, 3>& direction, const Vector<T, 3>& up = { 0, 1, 0 });
-	static MatrixRotationTemplate fromRotationVec(const Vector<T, 3>& rotationVector);
+	static MatrixRotationTemplate fromRotationVector(const Vector<T, 3>& rotationVector);
 	static MatrixRotationTemplate fromRotationMatrix(const Matrix<T, 3, 3>& rotationMatrix);
 	static MatrixRotationTemplate fromRotationQuaternion(const Quaternion<T>& rotationQuaternion);
 
@@ -321,7 +321,7 @@ MatrixRotationTemplate<T> MatrixRotationTemplate<T>::fromRotationQuaternion(cons
 	return MatrixRotationTemplate<T>(rotationMatrixFromQuaternion(rotationQuaternion));
 }
 template<typename T>
-MatrixRotationTemplate<T> MatrixRotationTemplate<T>::fromRotationVec(const Vector<T, 3>& rotationVector) {
+MatrixRotationTemplate<T> MatrixRotationTemplate<T>::fromRotationVector(const Vector<T, 3>& rotationVector) {
 	return MatrixRotationTemplate<T>(rotationMatrixFromRotationVec(rotationVector));
 }
 

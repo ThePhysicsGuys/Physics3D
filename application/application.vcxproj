@@ -171,6 +171,7 @@
     <ClInclude Include="extendedPart.h" />
     <ClInclude Include="input\standardInputHandler.h" />
     <ClInclude Include="picker\selection.h" />
+    <ClInclude Include="picker\tools\alignmentLinkTool.h" />
     <ClInclude Include="picker\tools\attachmentTool.h" />
     <ClInclude Include="picker\tools\elasticLinkTool.h" />
     <ClInclude Include="picker\tools\fixedConstraintTool.h" />
@@ -222,6 +223,7 @@
     <ClCompile Include="layer\imguiLayer.cpp" />
     <ClCompile Include="layer\postprocessLayer.cpp" />
     <ClCompile Include="picker\selection.cpp" />
+    <ClCompile Include="picker\tools\alignmentLinkTool.cpp" />
     <ClCompile Include="picker\tools\attachmentTool.cpp" />
     <ClCompile Include="picker\tools\elasticLinkTool.cpp" />
     <ClCompile Include="picker\tools\fixedConstraintTool.cpp" />

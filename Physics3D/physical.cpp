@@ -653,7 +653,7 @@ void MotorizedPhysical::update(double deltaT) {
 	Vec3 deltaCOM = this->totalCenterOfMass - oldCenterOfMass;
 	Vec3 movementOfCenterOfMass = motionOfCenterOfMass.getVelocity() * deltaT + accel * deltaT * deltaT * 0.5 - getCFrame().localToRelative(deltaCOM);
 
-	rotateAroundCenterOfMass(Rotation::fromRotationVec(motionOfCenterOfMass.getAngularVelocity() * deltaT));
+	rotateAroundCenterOfMass(Rotation::fromRotationVector(motionOfCenterOfMass.getAngularVelocity() * deltaT));
 	translateUnsafeRecursive(movementOfCenterOfMass);
 
 	Vec3 angularMomentumAfter = getTotalAngularMomentum();
@@ -738,7 +738,7 @@ void MotorizedPhysical::applyAngularDrag(Vec3 angularDrag) {
 	Vec3 localAngularDrag = getCFrame().relativeToLocal(angularDrag);
 	Vec3 localRotAcc = momentResponse * localAngularDrag;
 	Vec3 rotAcc = getCFrame().localToRelative(localRotAcc);
-	rotateAroundCenterOfMass(Rotation::fromRotationVec(rotAcc));
+	rotateAroundCenterOfMass(Rotation::fromRotationVector(rotAcc));
 }
 
 

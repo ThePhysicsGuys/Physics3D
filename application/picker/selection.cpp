@@ -136,7 +136,7 @@ namespace P3D::Application {
 		if (!reference.has_value())
 			return;
 		
-		Rotation rotation = Rotation::fromRotationVec(angle * normal);
+		Rotation rotation = Rotation::fromRotationVector(angle * normal);
 		for (auto entity : this->selection) {
 			IRef<Comp::Transform> transform = screen.registry.get<Comp::Transform>(entity);
 			
@@ -171,8 +171,10 @@ namespace P3D::Application {
 
 		if (this->size() == 1) {
 			IRef<Comp::Hitbox> hitbox = screen.registry.get<Comp::Hitbox>(this->selection[0]);
-			if (hitbox.valid())
-				return hitbox->getShape();
+			if (hitbox.invalid())
+				return std::nullopt;
+
+			return hitbox->getShape();
 		}
 
 		return boxShape(boundingBox->getWidth(), boundingBox->getHeight(), boundingBox->getDepth());

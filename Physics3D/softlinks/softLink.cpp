@@ -2,58 +2,53 @@
 
 namespace P3D {
 
-	SoftLink::SoftLink(const AttachedPart& attachedPart1, const AttachedPart& attachedPart2)
-		: attachedPart1{ attachedPart1 }
-		, attachedPart2{ attachedPart2 } {}
+SoftLink::SoftLink(const AttachedPart& attachedPartA, const AttachedPart& attachedPartB)
+	: attachedPartA(attachedPartA)
+	, attachedPartB(attachedPartB) {}
 
-	SoftLink::~SoftLink() = default;
+SoftLink::~SoftLink() = default;
 
-	GlobalCFrame SoftLink::getGlobalCFrameOfAttach1() const {
-		return this->attachedPart1.part->getCFrame();
-	}
+GlobalCFrame SoftLink::getGlobalCFrameOfAttachmentA() const {
+	return this->attachedPartA.part->getCFrame();
+}
 
-	GlobalCFrame SoftLink::getGlobalCFrameOfAttach2() const {
-		return this->attachedPart2.part->getCFrame();
-	}
+GlobalCFrame SoftLink::getGlobalCFrameOfAttachmentB() const {
+	return this->attachedPartB.part->getCFrame();
+}
 
-	CFrame SoftLink::getLocalCFrameOfAttach1() const {
-		return this->attachedPart1.attachment;
-	}
+CFrame SoftLink::getLocalCFrameOfAttachmentA() const {
+	return this->attachedPartA.attachment;
+}
 
-	CFrame SoftLink::getLocalCFrameOfAttach2() const {
-		return this->attachedPart2.attachment;
-	}
+CFrame SoftLink::getLocalCFrameOfAttachmentB() const {
+	return this->attachedPartB.attachment;
+}
 
-	CFrame SoftLink::getRelativeOfAttach1() const {
-		return this->getGlobalCFrameOfAttach1().localToRelative(this->attachedPart1.attachment);
+CFrame SoftLink::getRelativeOfAttachmentA() const {
+	return this->getGlobalCFrameOfAttachmentA().localToRelative(this->attachedPartA.attachment);
 
-	}
+}
+CFrame SoftLink::getRelativeOfAttachmentB() const {
+	return this->getGlobalCFrameOfAttachmentB().localToRelative(this->attachedPartB.attachment);
+}
 
-	CFrame SoftLink::getRelativeOfAttach2() const {
-		return this->getGlobalCFrameOfAttach2().localToRelative(this->attachedPart2.attachment);
-	}
+Position SoftLink::getGlobalPositionOfAttachmentB() const {
+	return this->getGlobalCFrameOfAttachmentB().getPosition();
+}
+Position SoftLink::getGlobalPositionOfAttachmentA() const {
+	return this->getGlobalCFrameOfAttachmentA().getPosition();
+}
+Vec3 SoftLink::getLocalPositionOfAttachmentA() const {
+	return this->getLocalCFrameOfAttachmentA().getPosition();
+}
+Vec3 SoftLink::getLocalPositionOfAttachmentB() const {
+	return this->getLocalCFrameOfAttachmentB().getPosition();
+}
+Vec3 SoftLink::getRelativePositionOfAttachmentA() const {
+	return this->getRelativeOfAttachmentA().getPosition();
+}
+Vec3 SoftLink::getRelativePositionOfAttachmentB() const {
+	return this->getRelativeOfAttachmentB().getPosition();
+}
 
-	Position SoftLink::getGlobalPositionOfAttach2() const {
-		return this->getGlobalCFrameOfAttach2().getPosition();
-	}
-
-	Position SoftLink::getGlobalPositionOfAttach1() const {
-		return this->getGlobalCFrameOfAttach1().getPosition();
-	}
-
-	Vec3 SoftLink::getLocalPositionOfAttach1() const {
-		return this->getLocalCFrameOfAttach1().getPosition();
-	}
-
-	Vec3 SoftLink::getLocalPositionOfAttach2() const {
-		return this->getLocalCFrameOfAttach2().getPosition();
-	}
-
-	Vec3 SoftLink::getRelativePositionOfAttach1() const {
-		return this->getRelativeOfAttach1().getPosition();
-	}
-
-	Vec3 SoftLink::getRelativePositionOfAttach2() const {
-		return this->getRelativeOfAttach1().getPosition();
-	}
 };

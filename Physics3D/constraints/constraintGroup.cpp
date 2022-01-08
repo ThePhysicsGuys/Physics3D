@@ -137,9 +137,9 @@ void ConstraintGroup::apply() const {
 			GlobalCFrame& mainPACF = constraints[i].physA->mainPhysical->rigidBody.mainPart->cframe;
 			GlobalCFrame& mainPBCF = constraints[i].physB->mainPhysical->rigidBody.mainPart->cframe;
 			mainPACF.position += offsetAngularEffectOnA.getSubVector<3>(0);
-			mainPACF.rotation = Rotation::fromRotationVec(offsetAngularEffectOnA.getSubVector<3>(3)) * mainPACF.rotation;
+			mainPACF.rotation = Rotation::fromRotationVector(offsetAngularEffectOnA.getSubVector<3>(3)) * mainPACF.rotation;
 			mainPBCF.position += offsetAngularEffectOnB.getSubVector<3>(0);
-			mainPBCF.rotation = Rotation::fromRotationVec(offsetAngularEffectOnB.getSubVector<3>(3)) * mainPBCF.rotation;
+			mainPBCF.rotation = Rotation::fromRotationVector(offsetAngularEffectOnB.getSubVector<3>(3)) * mainPBCF.rotation;
 
 			Vector<double, 6> velAngularEffectOnA = effectOnA.getCol(1);
 			Vector<double, 6> velAngularEffectOnB = effectOnB.getCol(1);

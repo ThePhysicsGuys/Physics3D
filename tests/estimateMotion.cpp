@@ -5,7 +5,7 @@
 
 namespace P3D {
 Vec3 getVelocityBySimulation(const Motion& m, const Vec3& point, double deltaT) {
-	Rotation rotation = Rotation::fromRotationVec(m.getAngularVelocity() * deltaT);
+	Rotation rotation = Rotation::fromRotationVector(m.getAngularVelocity() * deltaT);
 	Vec3 delta = m.getVelocity() * deltaT + (rotation * point - point);
 	return delta / deltaT;
 }
@@ -17,8 +17,8 @@ Motion getMotionBySimulation(const Motion& m, const Vec3& point, double deltaT) 
 	Vec3 angularVel2 = m.getAngularVelocity() + m.getAngularAcceleration() * deltaT;
 	Vec3 rotVec1 = m.getAngularVelocity() * deltaT;
 	Vec3 rotVec2 = angularVel2 * deltaT;
-	Rotation rotation1 = Rotation::fromRotationVec(rotVec1);
-	Rotation rotation2 = Rotation::fromRotationVec(rotVec2);
+	Rotation rotation1 = Rotation::fromRotationVector(rotVec1);
+	Rotation rotation2 = Rotation::fromRotationVector(rotVec2);
 
 	Vec3 pos0 = point;
 	Vec3 pos1 = mainVel1 * deltaT + rotation1 * pos0;
@@ -102,6 +102,6 @@ Motion estimateMotion(const GlobalCFrame& step1, const GlobalCFrame& step2, cons
 CFrame simulateForTime(const Motion& motion, const CFrame& startingCFrame, double deltaT) {
 	Movement mov = motion.getMovementAfterDeltaT(deltaT);
 
-	return CFrame(startingCFrame.getPosition() + mov.translation, Rotation::fromRotationVec(mov.rotation) * startingCFrame.getRotation());
+	return CFrame(startingCFrame.getPosition() + mov.translation, Rotation::fromRotationVector(mov.rotation) * startingCFrame.getRotation());
 }
 };

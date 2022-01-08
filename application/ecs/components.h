@@ -6,9 +6,13 @@
 #include <Physics3D/geometry/builtinShapeClasses.h>
 #include <Physics3D/threading/upgradeableMutex.h>
 #include <Physics3D/geometry/shapeCreation.h>
+#include "Physics3D/softlinks/elasticLink.h"
+#include "Physics3D/softlinks/magneticLink.h"
+#include "Physics3D/softlinks/springLink.h"
 #include "../application/extendedPart.h"
 #include "../graphics/visualData.h"
 #include "../worlds.h"
+#include "Physics3D/softlinks/alignmentLink.h"
 
 namespace P3D::Application {
 
@@ -382,15 +386,59 @@ namespace P3D::Application {
 		};
 
 		struct SoftLink : public RC {
-			P3D::SoftLink* softLink;
+			P3D::SoftLink* link;
 
-			SoftLink(P3D::SoftLink* softLink) : softLink(softLink) {}
+			SoftLink(P3D::SoftLink* link) : link(link) {}
+
+			void setPositionA(const Vec3& position) {
+				link->attachedPartA.attachment.position = position;
+			}
+
+			void setPositionB(const Vec3& position) {
+				link->attachedPartB.attachment.position = position;
+			}
+
+			Vec3 getPositionA() const {
+				return link->attachedPartA.attachment.position;
+			}
+
+			Vec3 getPositionB() const {
+				return link->attachedPartB.attachment.position;
+			}
+		};
+
+		struct MagneticLink : public SoftLink {
+			MagneticLink(P3D::MagneticLink* link) : SoftLink(link) {}
+		};
+
+		struct SpringLink : public SoftLink {
+			SpringLink(P3D::SpringLink* link) : SoftLink(link) {}
+		};
+
+		struct ElasticLink : public SoftLink {
+			ElasticLink(P3D::ElasticLink* link) : SoftLink(link) {}
+		};
+
+		struct AlignmentLink : public SoftLink {
+			AlignmentLink(P3D::AlignmentLink* link) : SoftLink(link) {}
 		};
 
 		struct HardConstraint : public RC {
 			HardPhysicalConnection* hardConstraint;
 
 			HardConstraint(HardPhysicalConnection* hardConstraint) : hardConstraint(hardConstraint) {}
+
+			CFrame* getChildAttachment() {
+				return &hardConstraint->attachOnChild;
+			}
+
+			CFrame* getParentAttachment() {
+				return &hardConstraint->attachOnParent;
+			}
+		};
+
+		struct FixedConstraint : public HardConstraint {
+			FixedConstraint(HardPhysicalConnection* connection) : HardConstraint(connection) {}
 		};
 	}
 

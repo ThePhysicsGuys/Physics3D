@@ -15,6 +15,7 @@
 #include "../picker/tools/rotationTool.h"
 #include "../picker/tools/scaleTool.h"
 #include "../picker/ray.h"
+#include "picker/tools/alignmentLinkTool.h"
 #include "picker/tools/attachmentTool.h"
 #include "picker/tools/elasticLinkTool.h"
 #include "picker/tools/fixedConstraintTool.h"
@@ -48,6 +49,7 @@ void PickerLayer::onInit(Engine::Registry64& registry) {
 	toolManager.registerTool<MagneticLinkTool>();
 	toolManager.registerTool<SpringLinkTool>();
 	toolManager.registerTool<ElasticLinkTool>();
+	toolManager.registerTool<AlignmentLinkTool>();
 	
 	toolManager.selectTool<TranslationTool>();
 

@@ -15,9 +15,6 @@ struct ExtendedPart;
 namespace P3D::Application {
 
 class SelectionTool : public Engine::Tool {
-
-	bool active = false;
-	
 public:
 	DEFINE_TOOL("Select", "Selects one or multiple entities.", Graphics::GLFW::Cursor::ARROW);
 	
@@ -27,7 +24,7 @@ public:
 	static std::optional<Position> selectedPoint;
 	static std::optional<Position> intersectedPoint;
 
-	~SelectionTool() = default;	
+	~SelectionTool() override = default;	
 
 	void onRegister() override;
 	void onDeregister() override;

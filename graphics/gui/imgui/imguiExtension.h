@@ -190,6 +190,34 @@ namespace ImGui {
 		ImGui::NextColumn(); \
 	}
 
+#define PROPERTY_DESC_IF_LOCK(text, desc, widget, code) \
+	{ \
+		ImGui::TextUnformatted(text); \
+		ImGui::SameLine(); \
+		ImGui::HelpMarker(desc); \
+		ImGui::NextColumn(); \
+		ImGui::SetNextItemWidth(-1); \
+		if (widget) { \
+			screen.worldMutex->lock() \
+			code \
+			screen.worldMutex->unlock() \
+		}; \
+		ImGui::NextColumn(); \
+	}
+
+#define PROPERTY_IF_LOCK(text, widget, code) \
+	{ \
+		ImGui::TextUnformatted(text); \
+		ImGui::NextColumn(); \
+		ImGui::SetNextItemWidth(-1); \
+		if (widget) { \
+			screen.worldMutex->lock(); \
+			code \
+			screen.worldMutex->unlock(); \
+		}; \
+		ImGui::NextColumn(); \
+	}
+
 #define PROPERTY_DESC(text, desc, widget) \
 	{ \
 		ImGui::TextUnformatted(text); \

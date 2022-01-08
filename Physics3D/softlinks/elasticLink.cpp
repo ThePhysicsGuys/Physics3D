@@ -1,33 +1,34 @@
 #include "elasticLink.h"
 
 namespace P3D {
-ElasticLink::ElasticLink(AttachedPart part1, AttachedPart part2, const double restLength, const double stiffness) :
-	SoftLink{ part1, part2},
-	restLength{ restLength },
-	stiffness{ stiffness } {
-}
+ElasticLink::ElasticLink(const AttachedPart& partA, const AttachedPart& partB, double restLength, double stiffness)
+	: SoftLink(partA, partB)
+	, restLength(restLength)
+	, stiffness(stiffness) {}
 
 void ElasticLink::update() {
-	auto optionalVec3 = forceAppliedToTheLink();
+	auto optionalForce = forceAppliedToTheLink();
 
-	if (!optionalVec3) {
+	if (!optionalForce)
 		return;
-	}
-	Vec3 force = optionalVec3.value();
-	this->attachedPart1.part->applyForce(this->getRelativePositionOfAttach2(), force);
-	this->attachedPart2.part->applyForce(this->getRelativePositionOfAttach1(), -force);
+
+	Vec3 force = optionalForce.value();
+
+	this->attachedPartA.part->applyForce(this->getRelativePositionOfAttachmentB(), force);
+	this->attachedPartB.part->applyForce(this->getRelativePositionOfAttachmentA(), -force);
 }
 
 std::optional<Vec3> ElasticLink::forceAppliedToTheLink() {
-	Vec3 forceVector = this->getGlobalPositionOfAttach1() - this->getGlobalPositionOfAttach2();
-	double len = length(forceVector);
+	Vec3 difference = this->getGlobalPositionOfAttachmentA() - this->getGlobalPositionOfAttachmentB();
+	double distance = length(difference);
 
-	if (len <= this->restLength) {
+	if (distance <= this->restLength)
 		return std::nullopt;
-	}
-	double lenTimesStiffness = std::abs(len - this->restLength) * this->stiffness;
-	const Vec3 forceDirection = normalize(forceVector);
-	Vec3 force = lenTimesStiffness * -forceDirection;
-	return std::optional<Vec3>{force};
+
+	double magnitude = std::abs(distance - this->restLength) * this->stiffness;
+	Vec3 forceDirection = normalize(difference);
+	Vec3 force = magnitude * -forceDirection;
+
+	return force;
 }
 };

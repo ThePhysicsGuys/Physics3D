@@ -6,7 +6,22 @@
 
 namespace Util {
 
+static std::string demangle_win(const std::string& fullName) {
+	std::string name = fullName;
+
+	std::size_t angleIndex = name.find_first_of('<');
+	if (angleIndex != std::string::npos)
+		name = name.substr(0, angleIndex);
+
+	std::size_t colonIndex = name.find_last_of(':');
+	if (colonIndex != std::string::npos)
+		name = name.substr(colonIndex + 1);
+
+	return name;
+}
+
 #ifdef __GNUG__
+
 	#include <cstdlib>
 	#include <memory>
 	#include <cxxabi.h>
@@ -14,22 +29,25 @@ namespace Util {
 	std::string demangle(const std::string& fullName) {
 		int status = 0;
 
-		std::unique_ptr<char, void(*)(void*)> result {
+		std::unique_ptr<char, void(*)(void*)> demangled {
 			abi::__cxa_demangle(fullName.c_str(), NULL, NULL, &status),
 			std::free
 		};
 
-		return (status == 0) ? result.get() : fullName;
+		if (status != 0)
+			return fullName;
+
+		std::string result = demangled.get();
+		std::string name = demangle_win(result);
+
+		return name;
 	}
 
 #elif _MSC_VER
 
-std::string demangle(const std::string& fullName) {
-	std::size_t colonIndex = fullName.find_last_of(':');
-	std::string name = (colonIndex == std::string::npos) ? fullName.substr(fullName.find_last_of(' ') + 1) : fullName.substr(colonIndex + 1);
-
-	return name;
-}
+	std::string demangle(const std::string& fullName) {
+		return demangle_win(fullName);
+	}
 
 #else
 

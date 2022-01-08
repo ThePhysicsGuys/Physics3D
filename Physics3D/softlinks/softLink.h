@@ -8,8 +8,8 @@ namespace P3D {
 
 	class SoftLink {
 	public:
-		AttachedPart attachedPart1;
-		AttachedPart attachedPart2;
+		AttachedPart attachedPartA;
+		AttachedPart attachedPartB;
 
 		SoftLink(const SoftLink& other) = delete;
 		SoftLink& operator=(const SoftLink& other) = delete;
@@ -19,24 +19,24 @@ namespace P3D {
 		virtual ~SoftLink();
 		virtual void update() = 0;
 
-		SoftLink(const AttachedPart& attachedPart1, const AttachedPart& attachedPart2);
+		SoftLink(const AttachedPart& attachedPartA, const AttachedPart& attachedPartB);
 
-		GlobalCFrame getGlobalCFrameOfAttach1() const;
-		GlobalCFrame getGlobalCFrameOfAttach2() const;
+		GlobalCFrame getGlobalCFrameOfAttachmentA() const;
+		GlobalCFrame getGlobalCFrameOfAttachmentB() const;
 
-		CFrame getLocalCFrameOfAttach1() const;
-		CFrame getLocalCFrameOfAttach2() const;
+		CFrame getLocalCFrameOfAttachmentA() const;
+		CFrame getLocalCFrameOfAttachmentB() const;
 
-		CFrame getRelativeOfAttach1() const;
-		CFrame getRelativeOfAttach2() const;
+		CFrame getRelativeOfAttachmentA() const;
+		CFrame getRelativeOfAttachmentB() const;
 
-		Position getGlobalPositionOfAttach1() const;
-		Position getGlobalPositionOfAttach2() const;
+		Position getGlobalPositionOfAttachmentA() const;
+		Position getGlobalPositionOfAttachmentB() const;
 
-		Vec3 getLocalPositionOfAttach1() const;
-		Vec3 getLocalPositionOfAttach2() const;
+		Vec3 getLocalPositionOfAttachmentA() const;
+		Vec3 getLocalPositionOfAttachmentB() const;
 
-		Vec3 getRelativePositionOfAttach1() const;
-		Vec3 getRelativePositionOfAttach2() const;
+		Vec3 getRelativePositionOfAttachmentA() const;
+		Vec3 getRelativePositionOfAttachmentB() const;
 	};
 };

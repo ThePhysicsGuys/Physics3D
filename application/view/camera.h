@@ -4,7 +4,7 @@
 #include <Physics3D/math/globalCFrame.h>
 
 namespace P3D::Engine {
-class Event;
+struct Event;
 class MouseDragEvent;
 class MouseScrollEvent;
 class KeyReleaseEvent;

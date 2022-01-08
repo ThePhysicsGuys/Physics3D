@@ -27,7 +27,7 @@ std::array<Rotation, Size + 1> computeRotationOverTime(Rotation start, TaylorExp
 	std::array<Rotation, Size + 1> result;
 
 	for(std::size_t i = 0; i < Size + 1; i++) {
-		result[i] = Rotation::fromRotationVec(derivatives(deltaT * i)) * start;
+		result[i] = Rotation::fromRotationVector(derivatives(deltaT * i)) * start;
 	}
 
 	return result;
@@ -45,7 +45,7 @@ inline std::array<CFrame, 3> computeCFrameOverTime(CFrame start, Motion motion, 
 	for(std::size_t i = 0; i < 3; i++) {
 		double t = deltaT * i;
 		Vec3 offset = start.getPosition() + motion.translation.getOffsetAfterDeltaT(t);
-		Rotation rot = Rotation::fromRotationVec(motion.rotation.getRotationAfterDeltaT(t)) * start.getRotation();
+		Rotation rot = Rotation::fromRotationVector(motion.rotation.getRotationAfterDeltaT(t)) * start.getRotation();
 
 		result[i] = CFrame(offset, rot);
 	}
