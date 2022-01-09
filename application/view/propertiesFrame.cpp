@@ -47,25 +47,25 @@ bool _ecs_property_frame_start(Engine::Registry64& registry, Engine::Registry64:
 	if ((index) == -1) \
 		continue
 
-#define ENTITY_DISPATCH(index, type, registry, component) \
+#define ENTITY_DISPATCH(registry, entity, index, type, component) \
 	else if ((index) == (registry).getComponentIndex<type>()) \
-		renderEntity(registry, index, intrusive_cast<type>(component))
+		renderEntity(registry, entity, index, intrusive_cast<type>(component))
 
-#define ENTITY_DISPATCH_END(index, registry, component) \
+#define ENTITY_DISPATCH_END(registry, entity, index, component) \
 	else \
-		renderEntity(registry, index, component)
+		renderEntity(registry, entity, index, component)
 
 #define ECS_PROPERTY_FRAME_START(registry, index) \
 	if (_ecs_property_frame_start(registry, index)) { \
 		ImGui::Columns(2)
 
-void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const IRef<RC>& component) {
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<RC>& component) {
 	std::string label(registry.getComponentName(index));
 
 	ImGui::CollapsingHeader(label.c_str(), ImGuiTreeNodeFlags_Leaf);
 }
 
-void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const IRef<Comp::Collider>& component) {
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<Comp::Collider>& component) {
 	ECS_PROPERTY_FRAME_START(registry, index);
 
 	ExtendedPart* selectedPart = component->part;
@@ -127,7 +127,7 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_ty
 	PROPERTY_FRAME_END;
 }
 
-void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const IRef<Comp::Name>& component) {
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<Comp::Name>& component) {
 	ECS_PROPERTY_FRAME_START(registry, index);
 
 	PROPERTY("Name:", ImGui::Text(component->name.c_str()));
@@ -135,7 +135,7 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_ty
 	PROPERTY_FRAME_END;
 }
 
-void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const IRef<Comp::Mesh>& component) {
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<Comp::Mesh>& component) {
 	ECS_PROPERTY_FRAME_START(registry, index);
 
 	PROPERTY("ID:", ImGui::Text(str(component->id).c_str()));
@@ -146,7 +146,7 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_ty
 	PROPERTY_FRAME_END;
 }
 
-void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const IRef<Comp::Material>& component) {
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<Comp::Material>& component) {
 	ECS_PROPERTY_FRAME_START(registry, index);
 
 	PROPERTY("Albedo", ImGui::ColorEdit4("##Albedo", component->albedo.data, ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_AlphaBar));
@@ -214,7 +214,7 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_ty
 	PROPERTY_FRAME_END;
 }
 
-void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const IRef<Comp::Light>& component) {
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<Comp::Light>& component) {
 	ECS_PROPERTY_FRAME_START(registry, index);
 
 	PROPERTY("Color", ImGui::ColorEdit3("##Color", component->color.data, ImGuiColorEditFlags_PickerHueWheel));
@@ -228,7 +228,7 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_ty
 	PROPERTY_FRAME_END;
 }
 
-void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const IRef<Comp::Transform>& component) {
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<Comp::Transform>& component) {
 
 	ECS_PROPERTY_FRAME_START(registry, index);
 
@@ -261,7 +261,7 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_ty
 	PROPERTY_FRAME_END;
 }
 
-void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const IRef<Comp::Hitbox>& component) {
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<Comp::Hitbox>& component) {
 	ECS_PROPERTY_FRAME_START(registry, index);
 
 	bool standalone = component->isPartAttached();
@@ -284,49 +284,111 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_ty
 	PROPERTY_FRAME_END;
 }
 
-void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const IRef<Comp::Attachment>& component) {
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<Comp::Attachment>& component) {
 	ECS_PROPERTY_FRAME_START(registry, index);
 
 	bool isAttachmentToMainPart = !component->isAttachmentToMainPart;
 	Vec3f attachmentPosition = component->attachment->position;
 	Vec3f attachmentRotation = component->attachment->rotation.asRotationVector();
+	bool isEditingFrame = registry.has<Comp::Transform>(entity);
 
 	PROPERTY(
 		"Is attachment to the main part:",
 		ImGui::Checkbox("##ToMainPart", &isAttachmentToMainPart);
 	);
 
-	PROPERTY_IF_LOCK(
-		"Position:",
-		ImGui::DragVec3("##AttachmentPosition", attachmentPosition.data, 0, 0.1f, true),
-		component->setAttachment(CFrame(attachmentPosition, Rotation::fromRotationVector(attachmentRotation)));
-	);
+	if (isEditingFrame) {
+		PROPERTY_DESC(
+			"Position:", 
+			"Use the tranform component to edit the position", 
+			ImGui::Text("(%f, %f, %f)", attachmentPosition.x, attachmentPosition.y, attachmentPosition.z)
+		);
+		PROPERTY_DESC(
+			"Rotation:",
+			"Use the tranform component to edit the rotation",
+			ImGui::Text("(%f, %f, %f)", attachmentRotation.x, attachmentRotation.y, attachmentRotation.z);
+		);
+	} else {
+		PROPERTY_IF_LOCK(
+			"Position:",
+			ImGui::DragVec3("##AttachmentPosition", attachmentPosition.data, 0, 0.1f, true),
+			component->setAttachment(CFrame(attachmentPosition, Rotation::fromRotationVector(attachmentRotation)));
+		);
 
-	PROPERTY_IF_LOCK(
-		"Rotation:",
-		ImGui::DragVec3("##AttachmentRotation", attachmentRotation.data, 0.01f, 0.02f, true),
-		component->setAttachment(CFrame(attachmentPosition, Rotation::fromRotationVector(attachmentRotation)));
-	);
+		PROPERTY_IF_LOCK(
+			"Rotation:",
+			ImGui::DragVec3("##AttachmentRotation", attachmentRotation.data, 0.01f, 0.02f, true),
+			component->setAttachment(CFrame(attachmentPosition, Rotation::fromRotationVector(attachmentRotation)));
+		);
+
+		PROPERTY_IF(
+			"",
+			ImGui::Button("Edit"),
+			registry.add<Comp::Transform>(entity, component->attachment)->addCallback([] () {Log::debug("Edit"); });
+		);
+	}
 
 	PROPERTY_FRAME_END;
 }
 
-void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const IRef<Comp::MagneticLink>& component) {
-	ECS_PROPERTY_FRAME_START(registry, index);
+void renderSoftlink(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Comp::SoftLink* component) {
+	ExtendedPart* partA = reinterpret_cast<ExtendedPart*>(component->link->attachedPartA.part);
+	ExtendedPart* partB = reinterpret_cast<ExtendedPart*>(component->link->attachedPartB.part);
+	if (partA == nullptr || partB == nullptr)
+		return;
 
-	MagneticLink* link = dynamic_cast<MagneticLink*>(component->link);
-
+	IRef<Comp::Name> nameA = registry.get<Comp::Name>(partA->entity);
+	IRef<Comp::Name> nameB = registry.get<Comp::Name>(partB->entity);
 	Vec3f positionA = component->getPositionA();
 	Vec3f positionB = component->getPositionB();
-	float magneticStrength = static_cast<float>(link->magneticStrength);
+	IRef<Comp::Transform> transform = registry.get<Comp::Transform>(entity);
 
-	TITLE("Attachment A", true);
-	PROPERTY("Part", ImGui::Text("Part A"));
-	PROPERTY_IF_LOCK("Position", ImGui::DragVec3("##TransformPositionA", positionA.data, 0, 0.1f, true), component->setPositionA(positionA););
+	bool isEditingFrame = transform.valid() && transform->isCFrameAttached();
+	bool isEditingFrameA = isEditingFrame && std::get<CFrame*>(transform->cframe) == &component->link->attachedPartA.attachment;
+	bool isEditingFrameB = isEditingFrame && std::get<CFrame*>(transform->cframe) == &component->link->attachedPartB.attachment;
+	
+	TITLE("Attachment A", false);
+	PROPERTY("Part", ImGui::Text(nameA.valid() ? nameA->name.c_str() : "Part A"));
+	if (isEditingFrameA) {
+		PROPERTY_DESC(
+			"Position:",
+			"Use the tranform component to edit the position",
+			ImGui::Text("(%f, %f, %f)", positionA.x, positionA.y, positionA.z)
+		);
+	} else {
+		PROPERTY_IF_LOCK("Position", ImGui::DragVec3("##TransformPositionA", positionA.data, 0, 0.1f, true), component->setPositionA(positionA););
+		PROPERTY_IF(
+			"",
+			ImGui::Button("Edit##EditCFrameA"),
+			registry.add<Comp::Transform>(entity, &component->link->attachedPartA.attachment)->addCallback([] () {Log::debug("EditA"); });
+		);
+	}
 
 	TITLE("Attachment B", true);
-	PROPERTY("Part", ImGui::Text("Part B"));
-	PROPERTY_IF_LOCK("Position:", ImGui::DragVec3("##TransformPositionB", positionB.data, 0, 0.1f, true), component->setPositionA(positionB););
+	PROPERTY("Part", ImGui::Text(nameB.valid() ? nameB->name.c_str() : "Part B"));
+	if (isEditingFrameB) {
+		PROPERTY_DESC(
+			"Position:",
+			"Use the tranform component to edit the position",
+			ImGui::Text("(%f, %f, %f)", positionB.x, positionB.y, positionB.z)
+		);
+	} else {
+		PROPERTY_IF_LOCK("Position", ImGui::DragVec3("##TransformPositionB", positionB.data, 0, 0.1f, true), component->setPositionB(positionB););
+		PROPERTY_IF(
+			"",
+			ImGui::Button("Edit##EditCFrameB"),
+			registry.add<Comp::Transform>(entity, &component->link->attachedPartB.attachment)->addCallback([] () {Log::debug("EditB"); });
+		);
+	}
+}
+
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<Comp::MagneticLink>& component) {
+	ECS_PROPERTY_FRAME_START(registry, index);
+
+	renderSoftlink(registry, entity, component.get());
+
+	MagneticLink* link = dynamic_cast<MagneticLink*>(component->link);
+	float magneticStrength = static_cast<float>(link->magneticStrength);
 
 	TITLE("Properties", true);
 	PROPERTY_IF_LOCK(
@@ -338,23 +400,14 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_ty
 	PROPERTY_FRAME_END;
 }
 
-void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const IRef<Comp::ElasticLink>& component) {
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<Comp::ElasticLink>& component) {
 	ECS_PROPERTY_FRAME_START(registry, index);
+
+	renderSoftlink(registry, entity, component.get());
 
 	ElasticLink* link = dynamic_cast<ElasticLink*>(component->link);
-
-	Vec3f positionA = component->getPositionA();
-	Vec3f positionB = component->getPositionB();
 	float restLenght = static_cast<float>(link->restLength);
 	float stiffness = static_cast<float>(link->stiffness);
-
-	TITLE("Attachment A", true);
-	PROPERTY("Part", ImGui::Text("Part A"));
-	PROPERTY_IF_LOCK("Position", ImGui::DragVec3("##TransformPositionA", positionA.data, 0, 0.1f, true), component->setPositionA(positionA););
-
-	TITLE("Attachment B", true);
-	PROPERTY("Part", ImGui::Text("Part B"));
-	PROPERTY_IF_LOCK("Position:", ImGui::DragVec3("##TransformPositionB", positionB.data, 0, 0.1f, true), component->setPositionA(positionB););
 
 	TITLE("Properties", true);
 	PROPERTY_IF_LOCK("Length", ImGui::DragFloat("##RestLength", &restLenght, 0, 0.1f, true), link->restLength = static_cast<double>(restLenght););
@@ -363,23 +416,14 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_ty
 	PROPERTY_FRAME_END;
 }
 
-void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const IRef<Comp::SpringLink>& component) {
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<Comp::SpringLink>& component) {
 	ECS_PROPERTY_FRAME_START(registry, index);
+
+	renderSoftlink(registry, entity, component.get());
 
 	SpringLink* link = dynamic_cast<SpringLink*>(component->link);
-
-	Vec3f positionA = component->getPositionA();
-	Vec3f positionB = component->getPositionB();
 	float restLenght = static_cast<float>(link->restLength);
 	float stiffness = static_cast<float>(link->stiffness);
-
-	TITLE("Attachment A", true);
-	PROPERTY("Part", ImGui::Text("Part A"));
-	PROPERTY_IF_LOCK("Position", ImGui::DragVec3("##TransformPositionA", positionA.data, 0, 0.1f, true), component->setPositionA(positionA););
-
-	TITLE("Attachment B", true);
-	PROPERTY("Part", ImGui::Text("Part B"));
-	PROPERTY_IF_LOCK("Position:", ImGui::DragVec3("##TransformPositionB", positionB.data, 0, 0.1f, true), component->setPositionA(positionB););
 
 	TITLE("Properties", true);
 	PROPERTY_IF_LOCK("Length", ImGui::DragFloat("##RestLength", &restLenght, 0, 0.1f, true), link->restLength = static_cast<double>(restLenght););
@@ -388,26 +432,17 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_ty
 	PROPERTY_FRAME_END;
 }
 
-void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const IRef<Comp::AlignmentLink>& component) {
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<Comp::AlignmentLink>& component) {
 	ECS_PROPERTY_FRAME_START(registry, index);
+
+	renderSoftlink(registry, entity, component.get());
 
 	AlignmentLink* link = dynamic_cast<AlignmentLink*>(component->link);
 
-	Vec3f positionA = component->getPositionA();
-	Vec3f positionB = component->getPositionB();
-
-	TITLE("Attachment A", true);
-	PROPERTY("Part", ImGui::Text("Part A"));
-	PROPERTY_IF_LOCK("Position", ImGui::DragVec3("##TransformPositionA", positionA.data, 0, 0.1f, true), component->setPositionA(positionA););
-
-	TITLE("Attachment B", true);
-	PROPERTY("Part", ImGui::Text("Part B"));
-	PROPERTY_IF_LOCK("Position:", ImGui::DragVec3("##TransformPositionB", positionB.data, 0, 0.1f, true), component->setPositionA(positionB););
-
 	PROPERTY_FRAME_END;
 }
 
-void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const IRef<Comp::FixedConstraint>& component) {
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<Comp::FixedConstraint>& component) {
 	ECS_PROPERTY_FRAME_START(registry, index);
 
 	FixedConstraint* link = dynamic_cast<FixedConstraint*>(component->hardConstraint->constraintWithParent.get());
@@ -483,24 +518,23 @@ void PropertiesFrame::onRender(Engine::Registry64& registry) {
 
 	// Dispatch component frames
 	Engine::Registry64::entity_type selectedEntity = SelectionTool::selection.first().value();
-	Log::debug("selected: %d, self: %d, parent: %d", selectedEntity, registry.getSelf(selectedEntity), registry.getParent(selectedEntity));
 	auto components = registry.getComponents(selectedEntity);
 	for (auto [index, component] : components) {
 		ENTITY_DISPATCH_START(index);
-		ENTITY_DISPATCH(index, Comp::Name, registry, component);
-		ENTITY_DISPATCH(index, Comp::Transform, registry, component);
-		ENTITY_DISPATCH(index, Comp::Collider, registry, component);
-		ENTITY_DISPATCH(index, Comp::Mesh, registry, component);
-		ENTITY_DISPATCH(index, Comp::Material, registry, component);
-		ENTITY_DISPATCH(index, Comp::Light, registry, component);
-		ENTITY_DISPATCH(index, Comp::Hitbox, registry, component);
-		ENTITY_DISPATCH(index, Comp::Attachment, registry, component);
-		ENTITY_DISPATCH(index, Comp::MagneticLink, registry, component);
-		ENTITY_DISPATCH(index, Comp::SpringLink, registry, component);
-		ENTITY_DISPATCH(index, Comp::ElasticLink, registry, component);
-		ENTITY_DISPATCH(index, Comp::AlignmentLink, registry, component);
-		ENTITY_DISPATCH(index, Comp::FixedConstraint, registry, component);
-		ENTITY_DISPATCH_END(index, registry, component);
+		ENTITY_DISPATCH(registry, selectedEntity, index, Comp::Name, component);
+		ENTITY_DISPATCH(registry, selectedEntity, index, Comp::Transform, component);
+		ENTITY_DISPATCH(registry, selectedEntity, index, Comp::Collider, component);
+		ENTITY_DISPATCH(registry, selectedEntity, index, Comp::Mesh, component);
+		ENTITY_DISPATCH(registry, selectedEntity, index, Comp::Material, component);
+		ENTITY_DISPATCH(registry, selectedEntity, index, Comp::Light, component);
+		ENTITY_DISPATCH(registry, selectedEntity, index, Comp::Hitbox, component);
+		ENTITY_DISPATCH(registry, selectedEntity, index, Comp::Attachment, component);
+		ENTITY_DISPATCH(registry, selectedEntity, index, Comp::MagneticLink, component);
+		ENTITY_DISPATCH(registry, selectedEntity, index, Comp::SpringLink, component);
+		ENTITY_DISPATCH(registry, selectedEntity, index, Comp::ElasticLink, component);
+		ENTITY_DISPATCH(registry, selectedEntity, index, Comp::AlignmentLink, component);
+		ENTITY_DISPATCH(registry, selectedEntity, index, Comp::FixedConstraint, component);
+		ENTITY_DISPATCH_END(registry, selectedEntity, index, component);
 	}
 
 	// Add new Component

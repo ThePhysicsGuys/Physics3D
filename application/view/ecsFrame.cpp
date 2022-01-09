@@ -64,7 +64,6 @@ static bool IconTreeNode(const char* label, ImGuiTreeNodeFlags flags, GLID icon,
 			onPressed();
 	}
 
-
 	ImU32 color = ImGui::GetColorU32(ImGuiCol_Button);
 	if (held || selected)
 		color = ImGui::GetColorU32(ImGuiCol_ButtonActive);

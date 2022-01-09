@@ -83,6 +83,7 @@ namespace P3D::Application {
 			};
 
 			std::variant<ScaledCFrame, ExtendedPart*, CFrame*> cframe;
+			std::function<void()> onChange;
 
 			Transform() : cframe(ScaledCFrame()) {}
 			Transform(ExtendedPart* part) : cframe(part) {}
@@ -92,6 +93,10 @@ namespace P3D::Application {
 			Transform(const GlobalCFrame& cframe) : cframe(cframe) {}
 			Transform(const GlobalCFrame& cframe, double scale) : cframe(ScaledCFrame(cframe, scale)) {}
 			Transform(const GlobalCFrame& cframe, const DiagonalMat3& scale) : cframe(ScaledCFrame(cframe, scale)) {}
+
+			void addCallback(const std::function<void()>& onChange) {
+				this->onChange = onChange;
+			}
 
 			bool isPartAttached() {
 				return std::holds_alternative<ExtendedPart*>(this->cframe);
@@ -132,25 +137,38 @@ namespace P3D::Application {
 			}
 
 			void translate(const Vec3& translation) {
-				if (std::holds_alternative<ExtendedPart*>(this->cframe)) {
+				if (isPartAttached()) {
 					std::get<ExtendedPart*>(this->cframe)->translate(translation);
+				} else if (isCFrameAttached()) {
+					std::get<CFrame*>(this->cframe)->position += translation;
+					
 				} else {
 					std::get<ScaledCFrame>(this->cframe).cframe.position += translation;
 				}
+
+				if (onChange != nullptr)
+					onChange();
 			}
 
 			void rotate(const Rotation& rotation) {
-				if (std::holds_alternative<ExtendedPart*>(this->cframe)) {
+				if (isPartAttached()) {
 					ExtendedPart* part = std::get<ExtendedPart*>(this->cframe);
 					part->setCFrame(part->getCFrame().rotated(rotation));
+				} else if (isCFrameAttached()) {
+					std::get<CFrame*>(this->cframe)->rotation = rotation;
 				} else {
 					std::get<ScaledCFrame>(this->cframe).cframe.rotate(rotation);
 				}
+
+				if (onChange != nullptr)
+					onChange();
 			}
 
 			void scale(double scaleX, double scaleY, double scaleZ) {
-				if (std::holds_alternative<ExtendedPart*>(this->cframe)) {
+				if (isPartAttached()) {
 					std::get<ExtendedPart*>(this->cframe)->scale(scaleX, scaleY, scaleZ);
+				} else if (isCFrameAttached()) {
+
 				} else {
 					std::get<ScaledCFrame>(this->cframe).scale[0] *= scaleX;
 					std::get<ScaledCFrame>(this->cframe).scale[1] *= scaleY;
