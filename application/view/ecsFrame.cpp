@@ -30,6 +30,9 @@ namespace P3D::Application {
 Graphics::TextureResource* folderIcon;
 Graphics::TextureResource* entityIcon;
 Graphics::TextureResource* colliderIcon;
+Graphics::TextureResource* terrainIcon;
+Graphics::TextureResource* mainColliderIcon;
+Graphics::TextureResource* childColliderIcon;
 Graphics::TextureResource* attachmentsIcon;
 Graphics::TextureResource* hardConstraintsIcon;
 Graphics::TextureResource* softLinksIcon;
@@ -53,12 +56,14 @@ static bool IconTreeNode(const char* label, ImGuiTreeNodeFlags flags, GLID icon,
 	bool leaf = (flags & ImGuiTreeNodeFlags_Leaf) != 0;
 
 	bool hovered, held;
-	if (ImGui::ButtonBehavior(button, id, &hovered, &held, ImGuiButtonFlags_PressedOnClickRelease)) {
-		onPressed();
-
-		if (!leaf)
-			window->DC.StateStorage->SetInt(id, opened ? 0 : 1);
+	if (ImGui::ButtonBehavior(button, id, &hovered, &held, ImGuiButtonFlags_PressedOnClickRelease | ImGuiButtonFlags_PressedOnDoubleClick)) {
+		if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+			if (!leaf)
+				window->DC.StateStorage->SetInt(id, opened ? 0 : 1);
+		} else 
+			onPressed();
 	}
+
 
 	ImU32 color = ImGui::GetColorU32(ImGuiCol_Button);
 	if (held || selected)
@@ -105,7 +110,8 @@ static bool EntityTreeNode(Engine::Registry64& registry,
                            Engine::Registry64::entity_type entity,
                            IRef<Comp::Collider> collider,
                            ImGuiTreeNodeFlags flags,
-                           const char* label) {
+                           const char* label,
+                           GLID icon) {
 
 	auto onPressed = [&]() {
 		if (ImGui::GetIO().KeyCtrl)
@@ -119,7 +125,6 @@ static bool EntityTreeNode(Engine::Registry64& registry,
 			screen.selectedPart = collider->part;
 	};
 
-	GLID icon = collider.valid() ? colliderIcon->getID() : flags & ImGuiTreeNodeFlags_Leaf ? entityIcon->getID() : folderIcon->getID();
 	bool selected = SelectionTool::selection.contains(entity);
 
 	ImGui::PushID(static_cast<int>(entity));
@@ -157,16 +162,36 @@ void ECSFrame::renderEntity(Engine::Registry64& registry, const Engine::Registry
 	}
 
 	// Collect attachments
-	std::vector<Part*> attachments;
+	std::vector<std::pair<Part*, Part*>> attachments;
 	if (!terrain && collider.valid()) {
-		collider->part->parent->rigidBody.forEachAttachedPart([&attachments](Part& attachment) {
-			attachments.push_back(&attachment);
-		});
+		RigidBody* rigidBody = &collider->part->parent->rigidBody;
+		if (collider->part->isMainPart()) {
+			rigidBody->forEachAttachedPart([&attachments, &collider, &rigidBody] (Part& attachment) {
+				if (collider->part != &attachment)
+					attachments.emplace_back(rigidBody->mainPart, &attachment);
+			});
+		} else {
+			attachments.emplace_back(collider->part, rigidBody->mainPart);
+		}
 	}
 
 	// Entity node
+	GLID icon = entityIcon->getID();
+	if (collider.valid()) {
+		if (collider->part->isTerrainPart()) 
+			icon = terrainIcon->getID();
+		else if (!attachments.empty()) {
+			if (collider->part->isMainPart())
+				icon = mainColliderIcon->getID();
+			else
+				icon = childColliderIcon->getID();
+		} else
+			icon = colliderIcon->getID();
+	}
+
+
 	bool expandable = !leaf || !hardConstraints.empty() || !softLinks.empty() || !attachments.empty();
-	bool open = EntityTreeNode(registry, entity, collider, expandable ? baseFlags : leafFlags, name.c_str());
+	bool open = EntityTreeNode(registry, entity, collider, expandable ? baseFlags : leafFlags, name.c_str(), icon);
 
 	// Render popup
 	if (ImGui::BeginPopupContextItem()) {
@@ -272,7 +297,7 @@ void ECSFrame::renderEntity(Engine::Registry64& registry, const Engine::Registry
 }
 
 template <typename Link, typename Tool, typename Component, typename BaseLink>
-bool softConstraintDispatch(Engine::Registry64& registry, const std::vector<BaseLink*>& links, std::size_t index) {
+bool softLinkDispatch(Engine::Registry64& registry, const std::vector<BaseLink*>& links, std::size_t index) {
 	BaseLink* baseLink = links[index];
 
 	if (Link* link = dynamic_cast<Link*>(baseLink)) {
@@ -335,6 +360,33 @@ bool hardConstraintDispatch(Engine::Registry64& registry, const std::vector<Hard
 	return false;
 }
 
+void attachmentDispatch(Engine::Registry64& registry, const std::vector<std::pair<Part*, Part*>>& attachments, std::size_t index) {
+	Part* from = attachments[index].first;
+	Part* to = attachments[index].second;
+	Part* childPart = to->isMainPart() ? from : to;
+
+	std::string name = Util::format("Attachment %d", index + 1);
+
+	bool selected = selectedNode == childPart;
+
+	auto onPressed = [&] {
+		SelectionTool::selection.clear();
+		selectedNodeEntity = registry.destroy(selectedNodeEntity);
+		if (selectedNode != childPart) {
+			Engine::Registry64::entity_type entity = registry.create();
+			registry.add<Comp::Name>(entity, name);
+			registry.add<Comp::Attachment>(entity, from, to);
+
+			selectedNode = childPart;
+			selectedNodeEntity = entity;
+			SelectionTool::select(selectedNodeEntity);
+		} else
+			selectedNode = nullptr;
+	};
+
+	IconTreeNode(name.c_str(), leafFlags, ResourceManager::get<Graphics::TextureResource>(AttachmentTool::getStaticName())->getID(), selected, onPressed);
+}
+
 void ECSFrame::renderHardConstraints(Engine::Registry64& registry,
                                      const Engine::Registry64::entity_type& entity,
                                      const Comp::Collider& collider,
@@ -363,10 +415,10 @@ void ECSFrame::renderSoftLinks(Engine::Registry64& registry,
 		ImGui::PushID(softLinks[index]);
 
 		bool dispatched = false;
-		dispatched |= softConstraintDispatch<MagneticLink, MagneticLinkTool, Comp::MagneticLink>(registry, softLinks, index);
-		dispatched |= softConstraintDispatch<ElasticLink, ElasticLinkTool, Comp::ElasticLink>(registry, softLinks, index);
-		dispatched |= softConstraintDispatch<SpringLink, SpringLinkTool, Comp::SpringLink>(registry, softLinks, index);
-		dispatched |= softConstraintDispatch<AlignmentLink, AlignmentLinkTool, Comp::AlignmentLink>(registry, softLinks, index);
+		dispatched |= softLinkDispatch<MagneticLink, MagneticLinkTool, Comp::MagneticLink>(registry, softLinks, index);
+		dispatched |= softLinkDispatch<ElasticLink, ElasticLinkTool, Comp::ElasticLink>(registry, softLinks, index);
+		dispatched |= softLinkDispatch<SpringLink, SpringLinkTool, Comp::SpringLink>(registry, softLinks, index);
+		dispatched |= softLinkDispatch<AlignmentLink, AlignmentLinkTool, Comp::AlignmentLink>(registry, softLinks, index);
 
 		if (!dispatched)
 			IconTreeNode("Unknown soft link", leafFlags, softLinksIcon->getID(), selectedNode == softLinks[index], [] {});
@@ -378,41 +430,12 @@ void ECSFrame::renderSoftLinks(Engine::Registry64& registry,
 void ECSFrame::renderAttachments(Engine::Registry64& registry,
                                  const Engine::Registry64::entity_type& entity,
                                  const Comp::Collider& collider,
-                                 const std::vector<Part*>& attachments) {
-
-	auto onPressed = [&](Part* attachment, const std::string& name) {
-		SelectionTool::selection.remove(selectedNodeEntity);
-		registry.destroy(selectedNodeEntity);
-		selectedNodeEntity = Engine::Registry64::null_entity;
-
-		if (selectedNode != attachment) {
-			AttachedPart* part = &collider.part->parent->rigidBody.getAttachFor(attachment);
-
-			selectedNode = attachment;
-			selectedNodeEntity = EntityBuilder(registry).name(name).attachment(part).get();
-
-			SelectionTool::selection.clear();
-			SelectionTool::select(selectedNodeEntity);
-		} else {
-			selectedNode = nullptr;
-		}
-	};
+                                 const std::vector<std::pair<Part*, Part*>>& attachments) {
 
 	for (std::size_t index = 0; index < attachments.size(); index++) {
-		Part* attachment = attachments[index];
-		ImGui::PushID(attachment);
+		ImGui::PushID(attachments[index].second);
 
-		bool selected = selectedNode == attachment;
-		std::string name = Util::format("Attachment %d", index);
-
-		IconTreeNode(name.c_str(),
-		             leafFlags,
-		             ResourceManager::get<Graphics::TextureResource>(AttachmentTool::getStaticName())->getID(),
-		             selected,
-		             [&] {
-			             onPressed(attachment, name);
-		             }
-		);
+		attachmentDispatch(registry, attachments, index);
 
 		ImGui::PopID();
 	}
@@ -422,6 +445,9 @@ void ECSFrame::onInit(Engine::Registry64& registry) {
 	folderIcon = ResourceManager::add<Graphics::TextureResource>("folder", "../res/textures/icons/Folder.png");
 	entityIcon = ResourceManager::add<Graphics::TextureResource>("entity", "../res/textures/icons/Entity.png");
 	colliderIcon = ResourceManager::add<Graphics::TextureResource>("collider", "../res/textures/icons/Collider.png");
+	terrainIcon = ResourceManager::add<Graphics::TextureResource>("terrain collider", "../res/textures/icons/Terrain Collider.png");
+	mainColliderIcon = ResourceManager::add<Graphics::TextureResource>("main collider", "../res/textures/icons/Main Collider.png");
+	childColliderIcon = ResourceManager::add<Graphics::TextureResource>("child collider", "../res/textures/icons/Child Collider.png");
 	hardConstraintsIcon = ResourceManager::add<Graphics::TextureResource>("hard constraints", "../res/textures/icons/Hard Constraints.png");
 	softLinksIcon = ResourceManager::add<Graphics::TextureResource>("soft constraints", "../res/textures/icons/Soft Constraints.png");
 	attachmentsIcon = ResourceManager::add<Graphics::TextureResource>("attachments", "../res/textures/icons/Attachments.png");

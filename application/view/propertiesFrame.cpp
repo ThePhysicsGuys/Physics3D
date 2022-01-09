@@ -287,18 +287,26 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_ty
 void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const IRef<Comp::Attachment>& component) {
 	ECS_PROPERTY_FRAME_START(registry, index);
 
-	/*CFrame& frame = component->attachment->attachment;
-	PROPERTY_IF(
-		"Position:",
-		ImGui::DragVec3("TransformPosition", position.data, 0, 0.1, true),
-		component->setPosition(castVec3fToPosition(position));
+	bool isAttachmentToMainPart = !component->isAttachmentToMainPart;
+	Vec3f attachmentPosition = component->attachment->position;
+	Vec3f attachmentRotation = component->attachment->rotation.asRotationVector();
+
+	PROPERTY(
+		"Is attachment to the main part:",
+		ImGui::Checkbox("##ToMainPart", &isAttachmentToMainPart);
 	);
 
-	PROPERTY_IF(
+	PROPERTY_IF_LOCK(
+		"Position:",
+		ImGui::DragVec3("##AttachmentPosition", attachmentPosition.data, 0, 0.1f, true),
+		component->setAttachment(CFrame(attachmentPosition, Rotation::fromRotationVector(attachmentRotation)));
+	);
+
+	PROPERTY_IF_LOCK(
 		"Rotation:",
-		ImGui::DragVec3("TransformRotation", rotation.data, 0.01f, 0.02f, true),
-		component->setRotation(Rotation::fromRotationVec(rotation));
-	);*/
+		ImGui::DragVec3("##AttachmentRotation", attachmentRotation.data, 0.01f, 0.02f, true),
+		component->setAttachment(CFrame(attachmentPosition, Rotation::fromRotationVector(attachmentRotation)));
+	);
 
 	PROPERTY_FRAME_END;
 }
@@ -434,7 +442,7 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_ty
 	);
 	PROPERTY_IF_LOCK(
 		"Position",
-		ImGui::DragVec3("##ChilRotation", childRotation.data, 0, 0.1f, true),
+		ImGui::DragVec3("##ChildRotation", childRotation.data, 0, 0.1f, true),
 		childCFrame->rotation = Rotation::fromRotationVector(childRotation);
 	);
 
@@ -478,13 +486,20 @@ void PropertiesFrame::onRender(Engine::Registry64& registry) {
 	Log::debug("selected: %d, self: %d, parent: %d", selectedEntity, registry.getSelf(selectedEntity), registry.getParent(selectedEntity));
 	auto components = registry.getComponents(selectedEntity);
 	for (auto [index, component] : components) {
-		ENTITY_DISPATCH_START(index); ENTITY_DISPATCH(index, Comp::Name, registry, component);
-		ENTITY_DISPATCH(index, Comp::Transform, registry, component); ENTITY_DISPATCH(index, Comp::Collider, registry, component);
-		ENTITY_DISPATCH(index, Comp::Mesh, registry, component); ENTITY_DISPATCH(index, Comp::Material, registry, component);
-		ENTITY_DISPATCH(index, Comp::Light, registry, component); ENTITY_DISPATCH(index, Comp::Hitbox, registry, component);
-		ENTITY_DISPATCH(index, Comp::Attachment, registry, component); ENTITY_DISPATCH(index, Comp::MagneticLink, registry, component);
-		ENTITY_DISPATCH(index, Comp::SpringLink, registry, component); ENTITY_DISPATCH(index, Comp::ElasticLink, registry, component);
-		ENTITY_DISPATCH(index, Comp::AlignmentLink, registry, component); ENTITY_DISPATCH(index, Comp::FixedConstraint, registry, component);
+		ENTITY_DISPATCH_START(index);
+		ENTITY_DISPATCH(index, Comp::Name, registry, component);
+		ENTITY_DISPATCH(index, Comp::Transform, registry, component);
+		ENTITY_DISPATCH(index, Comp::Collider, registry, component);
+		ENTITY_DISPATCH(index, Comp::Mesh, registry, component);
+		ENTITY_DISPATCH(index, Comp::Material, registry, component);
+		ENTITY_DISPATCH(index, Comp::Light, registry, component);
+		ENTITY_DISPATCH(index, Comp::Hitbox, registry, component);
+		ENTITY_DISPATCH(index, Comp::Attachment, registry, component);
+		ENTITY_DISPATCH(index, Comp::MagneticLink, registry, component);
+		ENTITY_DISPATCH(index, Comp::SpringLink, registry, component);
+		ENTITY_DISPATCH(index, Comp::ElasticLink, registry, component);
+		ENTITY_DISPATCH(index, Comp::AlignmentLink, registry, component);
+		ENTITY_DISPATCH(index, Comp::FixedConstraint, registry, component);
 		ENTITY_DISPATCH_END(index, registry, component);
 	}
 
@@ -525,6 +540,7 @@ void PropertiesFrame::onRender(Engine::Registry64& registry) {
 	// Error Modal
 	if (showErrorModal)
 		ImGui::OpenPopup("Error##ErrorModal");
+
 	if (ImGui::BeginPopupModal("Error##ErrorModal", 0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize)) {
 		ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), errorModalMessage.c_str());
 		if (ImGui::Button("Ok##ErrorModalClose", ImVec2(-1, 0))) {

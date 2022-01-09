@@ -19,7 +19,7 @@ namespace P3D::Application {
 		static void renderEntity(Engine::Registry64& registry, const Engine::Registry64::entity_type& entity);
 		static void renderHardConstraints(Engine::Registry64& registry, const Engine::Registry64::entity_type& entity, const Comp::Collider& collider, const std::vector<HardPhysicalConnection*>& hardConstraints);
 		static void renderSoftLinks(Engine::Registry64& registry, const Engine::Registry64::entity_type& entity, const Comp::Collider& collider, const std::vector<SoftLink*>& softLinks);
-		static void renderAttachments(Engine::Registry64& registry, const Engine::Registry64::entity_type& entity, const Comp::Collider& collider, const std::vector<Part*>& attachments);
+		static void renderAttachments(Engine::Registry64& registry, const Engine::Registry64::entity_type& entity, const Comp::Collider& collider, const std::vector<std::pair<Part*, Part*>>& attachments);
 
 
 	public:

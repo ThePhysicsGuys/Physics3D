@@ -380,9 +380,23 @@ namespace P3D::Application {
 		};
 
 		struct Attachment : public RC {
-			AttachedPart* attachment;
+			Part* from;
+			Part* to;
 
-			Attachment(AttachedPart* attachment) : attachment(attachment) {}
+			CFrame* attachment;
+			bool isAttachmentToMainPart = false;
+
+			Attachment(Part* from, Part* to) : from(from), to(to) {
+				this->isAttachmentToMainPart = to->isMainPart();
+				this->attachment = &to->parent->rigidBody.getAttachFor(isAttachmentToMainPart ? from : to).attachment;
+			}
+
+			void setAttachment(const CFrame& cframe) {
+				if (isAttachmentToMainPart)
+					to->parent->rigidBody.setAttachFor(from, cframe);
+				else
+					to->parent->rigidBody.setAttachFor(to, cframe);
+			}
 		};
 
 		struct SoftLink : public RC {
