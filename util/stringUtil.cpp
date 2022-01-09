@@ -6,6 +6,70 @@
 
 namespace Util {
 
+static std::string demangle_win(const std::string& fullName) {
+	std::string name = fullName;
+
+	std::size_t angleIndex = name.find_first_of('<');
+	if (angleIndex != std::string::npos)
+		name = name.substr(0, angleIndex);
+
+	std::size_t colonIndex = name.find_last_of(':');
+	if (colonIndex != std::string::npos)
+		name = name.substr(colonIndex + 1);
+
+	return name;
+}
+
+#ifdef __GNUG__
+
+	#include <cstdlib>
+	#include <memory>
+	#include <cxxabi.h>
+
+	std::string demangle(const std::string& fullName) {
+		int status = 0;
+
+		std::unique_ptr<char, void(*)(void*)> demangled {
+			abi::__cxa_demangle(fullName.c_str(), NULL, NULL, &status),
+			std::free
+		};
+
+		if (status != 0)
+			return fullName;
+
+		std::string result = demangled.get();
+		std::string name = demangle_win(result);
+
+		return name;
+	}
+
+#elif _MSC_VER
+
+	std::string demangle(const std::string& fullName) {
+		return demangle_win(fullName);
+	}
+
+#else
+
+	std::string demangle(const std::string& fullName) {
+		return fullName;
+	}
+
+#endif
+
+std::string decamel(const std::string& string) {
+	std::string result = string;
+
+	if (result.empty())
+		return result;
+
+	for (std::size_t index = string.size() - 1; index >= 1; index--)
+		if (isupper(string[index]))
+			result.insert(index, " ");
+
+	return result;
+}
+
 std::vector<std::string> split(const std::string& string, char splitter) {
 	std::vector<std::string> elements;
 	size_t length = string.size();
@@ -64,21 +128,29 @@ std::string until(const std::string& string, char end) {
 	return string;
 }
 
-std::string ltrim(std::string string) {
-	string.erase(string.begin(), std::find_if(string.begin(), string.end(), [] (int ch) {
-		return ch != ' ' && ch != '\t' && ch != '\n' && ch != '\r';
-		}));
-	return string;
+std::string ltrim(const std::string& string) {
+	std::string result = string;
+	auto iterator = std::find_if(result.begin(),
+	                             result.end(),
+	                             [](int ch) {
+		                             return ch != ' ' && ch != '\t' && ch != '\n' && ch != '\r';
+	                             });
+	result.erase(result.begin(), iterator);
+	return result;
 }
 
-std::string rtrim(std::string string) {
-	string.erase(std::find_if(string.rbegin(), string.rend(), [] (int ch) {
-		return ch != ' ' && ch != '\t' && ch != '\n' && ch != '\r';
-		}).base(), string.end());
-	return string;
+std::string rtrim(const std::string& string) {
+	std::string result = string;
+	auto iterator = std::find_if(result.rbegin(),
+	                             result.rend(),
+	                             [](int ch) {
+		                             return ch != ' ' && ch != '\t' && ch != '\n' && ch != '\r';
+	                             });
+	result.erase(iterator.base(), result.end());
+	return result;
 }
 
-std::string trim(std::string string) {
+std::string trim(const std::string& string) {
 	return ltrim(rtrim(string));
 }
 

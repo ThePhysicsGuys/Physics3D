@@ -1,48 +1,42 @@
 #pragma once
 
 #include "../math/linalg/vec.h"
+#include "../rigidBody.h"
 #include "../part.h"
 
 namespace P3D {
-class SoftLink {
-protected:
-	struct AttachedPart {
-		AttachedPart(CFrame attachment, Part* part);
-		CFrame attachment = CFrame{};
-		Part* part{ nullptr };
+
+	class SoftLink {
+	public:
+		AttachedPart attachedPartA;
+		AttachedPart attachedPartB;
+
+		SoftLink(const SoftLink& other) = delete;
+		SoftLink& operator=(const SoftLink& other) = delete;
+		SoftLink(SoftLink&& other) = delete;
+		SoftLink& operator=(SoftLink&& other) = delete;
+
+		virtual ~SoftLink();
+		virtual void update() = 0;
+
+		SoftLink(const AttachedPart& attachedPartA, const AttachedPart& attachedPartB);
+
+		GlobalCFrame getGlobalCFrameOfAttachmentA() const;
+		GlobalCFrame getGlobalCFrameOfAttachmentB() const;
+
+		CFrame getLocalCFrameOfAttachmentA() const;
+		CFrame getLocalCFrameOfAttachmentB() const;
+
+		CFrame getRelativeOfAttachmentA() const;
+		CFrame getRelativeOfAttachmentB() const;
+
+		Position getGlobalPositionOfAttachmentA() const;
+		Position getGlobalPositionOfAttachmentB() const;
+
+		Vec3 getLocalPositionOfAttachmentA() const;
+		Vec3 getLocalPositionOfAttachmentB() const;
+
+		Vec3 getRelativePositionOfAttachmentA() const;
+		Vec3 getRelativePositionOfAttachmentB() const;
 	};
-
-	AttachedPart attachedPart1;
-	AttachedPart attachedPart2;
-
-public:
-	SoftLink(const SoftLink& other) = delete;
-	SoftLink& operator=(const SoftLink& other) = delete;
-	SoftLink(SoftLink&& other) = delete;
-	SoftLink& operator=(SoftLink&& other) = delete;
-
-
-	virtual ~SoftLink();
-	virtual void update() = 0;
-
-	SoftLink(const AttachedPart& part1, const AttachedPart& part2);
-
-	GlobalCFrame getGlobalCFrameOfAttach1() const;
-	GlobalCFrame getGlobalCFrameOfAttach2() const;
-
-	CFrame getLocalCFrameOfAttach1() const;
-	CFrame getLocalCFrameOfAttach2() const;
-
-	CFrame getRelativeOfAttach1() const;
-	CFrame getRelativeOfAttach2() const;
-
-	Position getGlobalPositionOfAttach1() const;
-	Position getGlobalPositionOfAttach2() const;
-
-	Vec3 getLocalPositionOfAttach1() const;
-	Vec3 getLocalPositionOfAttach2() const;
-
-	Vec3 getRelativePositionOfAttach1() const;
-	Vec3 getRelativePositionOfAttach2() const;
-};
 };

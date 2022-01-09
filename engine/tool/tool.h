@@ -12,7 +12,7 @@ class Event;
 	inline static std::string getStaticName() { return name; } \
 	inline static std::string getStaticDescription() { return description; } \
 	inline int getCursorType() { return cursor; } \
-
+	
 class Tool {
 
 public:

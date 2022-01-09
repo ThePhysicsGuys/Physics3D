@@ -1,5 +1,7 @@
 #pragma once
 
+#include <sstream>
+
 #include "../engine/ecs/registry.h"
 #include "components.h"
 
@@ -69,6 +71,48 @@ public:
 	template<typename... Args>
 	EntityBuilder& hitbox(Args&&... args) {
 		this->registry.add<Comp::Hitbox>(this->entity, std::forward<Args>(args)...);
+
+		return *this;
+	}
+		
+	template<typename... Args>
+	EntityBuilder& attachment(Args&&... args) {
+		this->registry.add<Comp::Attachment>(this->entity, std::forward<Args>(args)...);
+
+		return *this;
+	}
+
+	template<typename... Args>
+	EntityBuilder& magneticLink(Args&&... args) {
+		this->registry.add<Comp::MagneticLink>(this->entity, std::forward<Args>(args)...);
+
+		return *this;
+	}
+
+	template<typename... Args>
+	EntityBuilder& elasticLink(Args&&... args) {
+		this->registry.add<Comp::ElasticLink>(this->entity, std::forward<Args>(args)...);
+
+		return *this;
+	}
+
+	template<typename... Args>
+	EntityBuilder& springLink(Args&&... args) {
+		this->registry.add<Comp::SpringLink>(this->entity, std::forward<Args>(args)...);
+
+		return *this;
+	}
+
+	template<typename... Args>
+	EntityBuilder& alignmentLink(Args&&... args) {
+		this->registry.add<Comp::AlignmentLink>(this->entity, std::forward<Args>(args)...);
+
+		return *this;
+	}
+
+	template<typename... Args>
+	EntityBuilder& fixedConstraint(Args&&... args) {
+		this->registry.add<Comp::FixedConstraint>(this->entity, std::forward<Args>(args)...);
 
 		return *this;
 	}

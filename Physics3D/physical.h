@@ -70,11 +70,11 @@ protected:
 	template<typename Func>
 	void forEachPartInThisAndChildren(const Func& func);
 
-	// expects a function of type void(const HardPhysicalConnection&, const Physical& parent, const Physical& child)
+	// expects a function of type void(const Physical& parent, const ConnectedPhysical& child)
 	template<typename Func>
 	void forEachHardConstraintInChildren(const Func& func) const;
 
-	// expects a function of type void(HardPhysicalConnection&, Physical& parent, Physical& child)
+	// expects a function of type void(Physical& parent, ConnectedPhysical& child)
 	template<typename Func>
 	void forEachHardConstraintInChildren(const Func& func);
 
@@ -101,6 +101,10 @@ public:
 	void operator=(const Physical&) = delete;
 
 	WorldPrototype* getWorld() const;
+
+	// expects a function of type void(const Physical& parent, const ConnectedPhysical& child)
+	template<typename Func>
+	void forEachHardConstraint(const Func& func);
 
 	void setCFrame(const GlobalCFrame& newCFrame);
 	void setPartCFrame(Part* part, const GlobalCFrame& newCFrame);
@@ -389,6 +393,19 @@ template<typename Func>
 void Physical::forEachPartInThisAndChildren(const Func& func) {
 	this->rigidBody.forEachPart(func);
 	this->forEachPartInChildren(func);
+}
+
+// expects a function of type void(const Physical& parent, const ConnectedPhysical& child)
+template<typename Func>
+void Physical::forEachHardConstraint(const Func& func) {
+	if(!this->isMainPhysical()) {
+		ConnectedPhysical* conThis = static_cast<ConnectedPhysical*>(this);
+		func(*conThis->parent, *conThis);
+	}
+
+	for(ConnectedPhysical& conPhys : this->childPhysicals) {
+		func(*this, conPhys);
+	}
 }
 
 // expects a function of type void(const Physical& parent, const ConnectedPhysical& child)

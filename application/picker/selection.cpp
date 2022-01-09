@@ -93,6 +93,9 @@ namespace P3D::Application {
 	}
 
 	void Selection::remove(const Engine::Registry64::entity_type& entity, bool recalculateBounds) {
+		if (entity == Engine::Registry64::null_entity)
+			return;
+
 		auto iterator = std::find(this->selection.begin(), this->selection.end(), entity);
 		if (iterator == this->selection.end())
 			return;
@@ -133,7 +136,7 @@ namespace P3D::Application {
 		if (!reference.has_value())
 			return;
 		
-		Rotation rotation = Rotation::fromRotationVec(angle * normal);
+		Rotation rotation = Rotation::fromRotationVector(angle * normal);
 		for (auto entity : this->selection) {
 			IRef<Comp::Transform> transform = screen.registry.get<Comp::Transform>(entity);
 			
@@ -168,8 +171,10 @@ namespace P3D::Application {
 
 		if (this->size() == 1) {
 			IRef<Comp::Hitbox> hitbox = screen.registry.get<Comp::Hitbox>(this->selection[0]);
-			if (hitbox.valid())
-				return hitbox->getShape();
+			if (hitbox.invalid())
+				return std::nullopt;
+
+			return hitbox->getShape();
 		}
 
 		return boxShape(boundingBox->getWidth(), boundingBox->getHeight(), boundingBox->getDepth());
@@ -180,6 +185,9 @@ namespace P3D::Application {
 			return std::nullopt;
 
 		IRef<Comp::Transform> transform = screen.registry.get<Comp::Transform>(this->selection[0]);
+		if (transform.invalid())
+			return std::nullopt;
+
 		return GlobalCFrame(transform->getCFrame().localToGlobal(this->boundingBox->getCenter()), transform->getRotation());
 	}
 	
@@ -197,6 +205,19 @@ namespace P3D::Application {
 	
 	std::vector<Engine::Registry64::entity_type>::iterator Selection::end() {
 		return this->selection.end();
+	}
+
+	std::optional<Engine::Registry64::entity_type> Selection::first() const {
+		if (selection.empty())
+			return std::nullopt;
+
+		return selection[0];
+	}
+	std::optional<Engine::Registry64::entity_type> Selection::last() const {
+		if (selection.empty())
+			return std::nullopt;
+
+		return selection[selection.size() - 1];
 	}
 
 

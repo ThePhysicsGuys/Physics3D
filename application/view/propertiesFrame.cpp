@@ -7,9 +7,13 @@
 #include "extendedPart.h"
 #include "ecs/components.h"
 #include "imgui/imgui.h"
-#include "../graphics/gui/imgui/imguiExtension.h"
+#include "picker/tools/selectionTool.h"
+
 #include <Physics3D/misc/toString.h>
 #include <Physics3D/physical.h>
+#include "Physics3D/hardconstraints/fixedConstraint.h"
+
+#include "../graphics/gui/imgui/imguiExtension.h"
 #include "../graphics/renderer.h"
 
 namespace P3D::Application {
@@ -43,72 +47,62 @@ bool _ecs_property_frame_start(Engine::Registry64& registry, Engine::Registry64:
 	if ((index) == -1) \
 		continue
 
-#define ENTITY_DISPATCH(index, type, registry, component) \
+#define ENTITY_DISPATCH(registry, entity, index, type, component) \
 	else if ((index) == (registry).getComponentIndex<type>()) \
-		renderEntity(registry, index, intrusive_cast<type>(component))
+		renderEntity(registry, entity, index, intrusive_cast<type>(component))
 
-#define ENTITY_DISPATCH_END(index, registry, component) \
+#define ENTITY_DISPATCH_END(registry, entity, index, component) \
 	else \
-		renderEntity(registry, index, component)
-	
+		renderEntity(registry, entity, index, component)
+
 #define ECS_PROPERTY_FRAME_START(registry, index) \
 	if (_ecs_property_frame_start(registry, index)) { \
 		ImGui::Columns(2)
-	
-void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const IRef<RC>& component) {
+
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<RC>& component) {
 	std::string label(registry.getComponentName(index));
 
 	ImGui::CollapsingHeader(label.c_str(), ImGuiTreeNodeFlags_Leaf);
 }
 
-void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const IRef<Comp::Collider>& component) {
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<Comp::Collider>& component) {
 	ECS_PROPERTY_FRAME_START(registry, index);
-	
+
 	ExtendedPart* selectedPart = component->part;
 	Motion motion = selectedPart->getMotion();
 	Vec3f velocity = motion.getVelocity();
 	Vec3f angularVelocity = motion.getAngularVelocity();
 
-	float mass = selectedPart->getMass();
-	float friction = selectedPart->getFriction();
-	float density = selectedPart->getDensity();
-	float bouncyness = selectedPart->getBouncyness();
+	float mass = static_cast<float>(selectedPart->getMass());
+	float friction = static_cast<float>(selectedPart->getFriction());
+	float density = static_cast<float>(selectedPart->getDensity());
+	float bouncyness = static_cast<float>(selectedPart->getBouncyness());
 	Vec3f conveyorEffect = selectedPart->getConveyorEffect();
 
 	TITLE("Part Info", false);
-	PROPERTY_IF("Velocity:", ImGui::DragVec3("##Velocity", velocity.data, 0, 0.1, true),
-		selectedPart->setVelocity(velocity);
-	);
-	PROPERTY_IF("Angular velocity:", ImGui::DragVec3("##AngularVelocity", angularVelocity.data, 0, 0.1, true),
-		selectedPart->setAngularVelocity(angularVelocity);
-	);
+	PROPERTY_IF_LOCK("Velocity:", ImGui::DragVec3("##Velocity", velocity.data, 0, 0.1, true), selectedPart->setVelocity(velocity););
+	PROPERTY_IF_LOCK("Angular velocity:",
+	            ImGui::DragVec3("##AngularVelocity", angularVelocity.data, 0, 0.1, true),
+	            selectedPart->setAngularVelocity(angularVelocity););
 	PROPERTY("Acceleration:", ImGui::Text(str(motion.getAcceleration()).c_str()));
 	PROPERTY("Angular acceleration:", ImGui::Text(str(motion.getAngularAcceleration()).c_str()));
-	
-	PROPERTY_IF("Mass:", ImGui::DragFloat("##Mass", &mass, 0.05f),
-		selectedPart->setMass(mass);
-	);
+
+	PROPERTY_IF_LOCK("Mass:", ImGui::DragFloat("##Mass", &mass, 0.05f), selectedPart->setMass(mass););
 
 	TITLE("Part Properties", true);
-	PROPERTY_IF("Friction:", ImGui::DragFloat("##Friction", &friction, 0.05f),
-		selectedPart->setFriction(friction);
-	);
-	PROPERTY_IF("Density:", ImGui::DragFloat("##Density", &density, 0.05f),
-		selectedPart->setDensity(density);
-	);
-	PROPERTY_IF("Bouncyness:", ImGui::DragFloat("##Bouncyness", &bouncyness, 0.05f),
-		selectedPart->setBouncyness(bouncyness);
-	);
-	PROPERTY_IF("Conveyor effect:", ImGui::DragVec3("##ConveyorEffect", conveyorEffect.data, 0, 0.1, true),
-		selectedPart->setConveyorEffect(conveyorEffect);
-	);
-	
+	PROPERTY_IF_LOCK("Friction:", ImGui::DragFloat("##Friction", &friction, 0.05f), selectedPart->setFriction(friction););
+	PROPERTY_IF_LOCK("Density:", ImGui::DragFloat("##Density", &density, 0.05f), selectedPart->setDensity(density););
+	PROPERTY_IF_LOCK("Bouncyness:", ImGui::DragFloat("##Bouncyness", &bouncyness, 0.05f), selectedPart->setBouncyness(bouncyness););
+	PROPERTY_IF_LOCK("Conveyor effect:",
+	            ImGui::DragVec3("##ConveyorEffect", conveyorEffect.data, 0, 0.1, true),
+	            selectedPart->setConveyorEffect(conveyorEffect););
+
 	PROPERTY("Inertia:", ImGui::Text(str(selectedPart->getInertia()).c_str()));
 
 	if (selectedPart->parent != nullptr) {
 		const MotorizedPhysical* physical = selectedPart->parent->mainPhysical;
 		Motion comMotion = physical->getMotionOfCenterOfMass();
-		
+
 		TITLE("Physical Info:", true);
 		PROPERTY("Total impulse:", ImGui::Text(str(physical->getTotalImpulse()).c_str()));
 		PROPERTY("Total angular momentum:", ImGui::Text(str(physical->getTotalAngularMomentum()).c_str()));
@@ -119,27 +113,29 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_ty
 	}
 
 	static volatile ExtendedPart* sp = nullptr;
-	if (sp != nullptr) sp = selectedPart;
+	if (sp != nullptr)
+		sp = selectedPart;
 
 	TITLE("Debug", true);
-	
-	PROPERTY_IF("Debug part:", ImGui::Button("Debug"), 
-		Log::debug("Debugging part %d", reinterpret_cast<uint64_t>(sp));
-		P3D_DEBUGBREAK;
+
+	PROPERTY_IF(
+		"Debug part:", 
+		ImGui::Button("Debug"), 
+		Log::debug("Debugging part %d", reinterpret_cast<uint64_t>(sp)); P3D_DEBUGBREAK;
 	);
-	
+
 	PROPERTY_FRAME_END;
 }
 
-void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const IRef<Comp::Name>& component) {
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<Comp::Name>& component) {
 	ECS_PROPERTY_FRAME_START(registry, index);
-	
+
 	PROPERTY("Name:", ImGui::Text(component->name.c_str()));
-	
+
 	PROPERTY_FRAME_END;
 }
 
-void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const IRef<Comp::Mesh>& component) {
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<Comp::Mesh>& component) {
 	ECS_PROPERTY_FRAME_START(registry, index);
 
 	PROPERTY("ID:", ImGui::Text(str(component->id).c_str()));
@@ -150,54 +146,75 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_ty
 	PROPERTY_FRAME_END;
 }
 
-void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const IRef<Comp::Material>& component) {
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<Comp::Material>& component) {
 	ECS_PROPERTY_FRAME_START(registry, index);
 
 	PROPERTY("Albedo", ImGui::ColorEdit4("##Albedo", component->albedo.data, ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_AlphaBar));
 	PROPERTY("Metalness", ImGui::SliderFloat("##Metalness", &component->metalness, 0, 1));
 	PROPERTY("Roughness", ImGui::SliderFloat("##Roughness", &component->roughness, 0, 1));
 	PROPERTY("Ambient occlusion", ImGui::SliderFloat("##AO", &component->ao, 0, 1));
-	
+
 	if (component->flags != 0) {
 		TITLE("Textures:", true);
 		float size = ImGui::GetTextLineHeightWithSpacing();
 		if (component->has(Comp::Material::ALBEDO)) 
-			PROPERTY("Albedo", ImGui::Image((ImTextureID) component->get(Comp::Material::ALBEDO)->getID(), ImVec2(size, size)));
-		
-		
+			PROPERTY(
+				"Albedo",
+				ImGui::Image(reinterpret_cast<ImTextureID>(component->get(Comp::Material::ALBEDO)->getID()), ImVec2(size, size))
+			);
+
+
 		if (component->has(Comp::Material::NORMAL)) 
-			PROPERTY("Normal", ImGui::Image((ImTextureID) component->get(Comp::Material::NORMAL)->getID(), ImVec2(size, size)));
-		
-		
-		if (component->has(Comp::Material::METALNESS)) 
-			PROPERTY("Metalness", ImGui::Image((ImTextureID) component->get(Comp::Material::METALNESS)->getID(), ImVec2(size, size)));
-		
-	
+			PROPERTY(
+				"Normal",
+				ImGui::Image(reinterpret_cast<ImTextureID>(component->get(Comp::Material::NORMAL)->getID()), ImVec2(size, size))
+			);
+
+
+		if (component->has(Comp::Material::METALNESS))
+			PROPERTY(
+				"Metalness",
+				ImGui::Image(reinterpret_cast<ImTextureID>(component->get(Comp::Material::METALNESS)->getID()), ImVec2(size, size))
+			);
+
+
 		if (component->has(Comp::Material::ROUGHNESS)) 
-			PROPERTY("Roughness", ImGui::Image((ImTextureID) component->get(Comp::Material::ROUGHNESS)->getID(), ImVec2(size, size)));
-		
-			
+			PROPERTY(
+				"Roughness",
+				ImGui::Image(reinterpret_cast<ImTextureID>(component->get(Comp::Material::ROUGHNESS)->getID()), ImVec2(size, size))
+			);
+
+
 		if (component->has(Comp::Material::AO)) 
-			PROPERTY("Ambient occlusion", ImGui::Image((ImTextureID) component->get(Comp::Material::AO)->getID(), ImVec2(size, size)));
-		
-			
+			PROPERTY("Ambient occlusion",
+				ImGui::Image(reinterpret_cast<ImTextureID>(component->get(Comp::Material::AO)->getID()), ImVec2(size, size))
+			);
+
+
 		if (component->has(Comp::Material::GLOSS)) 
-			PROPERTY("Gloss", ImGui::Image((ImTextureID) component->get(Comp::Material::GLOSS)->getID(), ImVec2(size, size)));
-		
-			
+			PROPERTY("Gloss",
+				ImGui::Image(reinterpret_cast<ImTextureID>(component->get(Comp::Material::GLOSS)->getID()), ImVec2(size, size))
+			);
+
+
 		if (component->has(Comp::Material::SPECULAR)) 
-			PROPERTY("Specular", ImGui::Image((ImTextureID) component->get(Comp::Material::SPECULAR)->getID(), ImVec2(size, size)));
-		
-			
+			PROPERTY(
+				"Specular",
+				ImGui::Image(reinterpret_cast<ImTextureID>(component->get(Comp::Material::SPECULAR)->getID()), ImVec2(size, size))
+			);
+
+
 		if (component->has(Comp::Material::DISPLACEMENT)) 
-			PROPERTY("Displacement", ImGui::Image((ImTextureID) component->get(Comp::Material::DISPLACEMENT)->getID(), ImVec2(size, size)));
-		
+			PROPERTY(
+				"Displacement",
+				ImGui::Image(reinterpret_cast<ImTextureID>(component->get(Comp::Material::DISPLACEMENT)->getID()), ImVec2(size, size))
+			);
 	}
-		
+
 	PROPERTY_FRAME_END;
 }
 
-void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const IRef<Comp::Light>& component) {
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<Comp::Light>& component) {
 	ECS_PROPERTY_FRAME_START(registry, index);
 
 	PROPERTY("Color", ImGui::ColorEdit3("##Color", component->color.data, ImGuiColorEditFlags_PickerHueWheel));
@@ -211,7 +228,7 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_ty
 	PROPERTY_FRAME_END;
 }
 
-void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const IRef<Comp::Transform>& component) {
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<Comp::Transform>& component) {
 
 	ECS_PROPERTY_FRAME_START(registry, index);
 
@@ -219,26 +236,32 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_ty
 	Vec3f rotation = component->getRotation().asRotationVector();
 	DiagonalMat3f scale = component->getScale();
 	bool standalone = component->isPartAttached();
-	
+
 	PROPERTY_DESC("Standalone", "Whether the transform and scale is coming from the part", ImGui::Checkbox("##TransformHitbox", &standalone));
-	PROPERTY_IF("Position:", ImGui::DragVec3("TransformPosition", position.data, 0, 0.1, true),
+
+	PROPERTY_IF_LOCK(
+		"Position:",
+		ImGui::DragVec3("TransformPosition", position.data, 0, 0.1, true),
 		component->setPosition(castVec3fToPosition(position));
 	);
 
-	PROPERTY_IF("Rotation:", ImGui::DragVec3("TransformRotation", rotation.data, 0.01f, 0.02f, true),
-		component->setRotation(Rotation::fromRotationVec(rotation));
+	PROPERTY_IF_LOCK(
+		"Rotation:",
+		ImGui::DragVec3("##TransformRotation", rotation.data, 0.01f, 0.02f, true),
+		component->setRotation(Rotation::fromRotationVector(rotation));
 	);
 
 	float min = 0.01f;
-	PROPERTY_IF("Scale:", ImGui::DragVec3("TransformScale", scale.data, 1.0f, 0.01f, true, &min),
+	PROPERTY_IF_LOCK(
+		"Scale:", 
+		ImGui::DragVec3("##TransformScale", scale.data, 1.0f, 0.01f, true, &min), 
 		component->setScale(scale);
 	);
-	
-	PROPERTY_FRAME_END;
 
+	PROPERTY_FRAME_END;
 }
 
-void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_type index, const IRef<Comp::Hitbox>& component) {
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<Comp::Hitbox>& component) {
 	ECS_PROPERTY_FRAME_START(registry, index);
 
 	bool standalone = component->isPartAttached();
@@ -250,9 +273,7 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_ty
 	PROPERTY("Volume:", ImGui::Text(str(shape.getVolume()).c_str()));
 	PROPERTY("Center of mass:", ImGui::Text(str(shape.getCenterOfMass()).c_str()));
 	float min = 0.01f;
-	PROPERTY_IF("Scale:", ImGui::DragVec3("HitboxScale", scale.data, 1, 0.01f, true, &min),
-		component->setScale(scale);
-	);
+	PROPERTY_IF_LOCK("Scale:", ImGui::DragVec3("HitboxScale", scale.data, 1, 0.01f, true, &min), component->setScale(scale););
 
 	TITLE("Bounding box", true);
 	PROPERTY("Width:", ImGui::Text(str(shape.getWidth()).c_str()));
@@ -262,15 +283,214 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::component_ty
 
 	PROPERTY_FRAME_END;
 }
-	
-void PropertiesFrame::onInit(Engine::Registry64& registry) {
-	
+
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<Comp::Attachment>& component) {
+	ECS_PROPERTY_FRAME_START(registry, index);
+
+	bool isAttachmentToMainPart = !component->isAttachmentToMainPart;
+	Vec3f attachmentPosition = component->attachment->position;
+	Vec3f attachmentRotation = component->attachment->rotation.asRotationVector();
+	bool isEditingFrame = registry.has<Comp::Transform>(entity);
+
+	PROPERTY(
+		"Is attachment to the main part:",
+		ImGui::Checkbox("##ToMainPart", &isAttachmentToMainPart);
+	);
+
+	if (isEditingFrame) {
+		PROPERTY_DESC(
+			"Position:", 
+			"Use the tranform component to edit the position", 
+			ImGui::Text("(%f, %f, %f)", attachmentPosition.x, attachmentPosition.y, attachmentPosition.z)
+		);
+		PROPERTY_DESC(
+			"Rotation:",
+			"Use the tranform component to edit the rotation",
+			ImGui::Text("(%f, %f, %f)", attachmentRotation.x, attachmentRotation.y, attachmentRotation.z);
+		);
+	} else {
+		PROPERTY_IF_LOCK(
+			"Position:",
+			ImGui::DragVec3("##AttachmentPosition", attachmentPosition.data, 0, 0.1f, true),
+			component->setAttachment(CFrame(attachmentPosition, Rotation::fromRotationVector(attachmentRotation)));
+		);
+
+		PROPERTY_IF_LOCK(
+			"Rotation:",
+			ImGui::DragVec3("##AttachmentRotation", attachmentRotation.data, 0.01f, 0.02f, true),
+			component->setAttachment(CFrame(attachmentPosition, Rotation::fromRotationVector(attachmentRotation)));
+		);
+
+		PROPERTY_IF(
+			"",
+			ImGui::Button("Edit"),
+			registry.add<Comp::Transform>(entity, component->attachment)->addCallback([] () {Log::debug("Edit"); });
+		);
+	}
+
+	PROPERTY_FRAME_END;
 }
+
+void renderSoftlink(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Comp::SoftLink* component) {
+	ExtendedPart* partA = reinterpret_cast<ExtendedPart*>(component->link->attachedPartA.part);
+	ExtendedPart* partB = reinterpret_cast<ExtendedPart*>(component->link->attachedPartB.part);
+	if (partA == nullptr || partB == nullptr)
+		return;
+
+	IRef<Comp::Name> nameA = registry.get<Comp::Name>(partA->entity);
+	IRef<Comp::Name> nameB = registry.get<Comp::Name>(partB->entity);
+	Vec3f positionA = component->getPositionA();
+	Vec3f positionB = component->getPositionB();
+	IRef<Comp::Transform> transform = registry.get<Comp::Transform>(entity);
+
+	bool isEditingFrame = transform.valid() && transform->isCFrameAttached();
+	bool isEditingFrameA = isEditingFrame && std::get<CFrame*>(transform->cframe) == &component->link->attachedPartA.attachment;
+	bool isEditingFrameB = isEditingFrame && std::get<CFrame*>(transform->cframe) == &component->link->attachedPartB.attachment;
+	
+	TITLE("Attachment A", false);
+	PROPERTY("Part", ImGui::Text(nameA.valid() ? nameA->name.c_str() : "Part A"));
+	if (isEditingFrameA) {
+		PROPERTY_DESC(
+			"Position:",
+			"Use the tranform component to edit the position",
+			ImGui::Text("(%f, %f, %f)", positionA.x, positionA.y, positionA.z)
+		);
+	} else {
+		PROPERTY_IF_LOCK("Position", ImGui::DragVec3("##TransformPositionA", positionA.data, 0, 0.1f, true), component->setPositionA(positionA););
+		PROPERTY_IF(
+			"",
+			ImGui::Button("Edit##EditCFrameA"),
+			registry.add<Comp::Transform>(entity, &component->link->attachedPartA.attachment)->addCallback([] () {Log::debug("EditA"); });
+		);
+	}
+
+	TITLE("Attachment B", true);
+	PROPERTY("Part", ImGui::Text(nameB.valid() ? nameB->name.c_str() : "Part B"));
+	if (isEditingFrameB) {
+		PROPERTY_DESC(
+			"Position:",
+			"Use the tranform component to edit the position",
+			ImGui::Text("(%f, %f, %f)", positionB.x, positionB.y, positionB.z)
+		);
+	} else {
+		PROPERTY_IF_LOCK("Position", ImGui::DragVec3("##TransformPositionB", positionB.data, 0, 0.1f, true), component->setPositionB(positionB););
+		PROPERTY_IF(
+			"",
+			ImGui::Button("Edit##EditCFrameB"),
+			registry.add<Comp::Transform>(entity, &component->link->attachedPartB.attachment)->addCallback([] () {Log::debug("EditB"); });
+		);
+	}
+}
+
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<Comp::MagneticLink>& component) {
+	ECS_PROPERTY_FRAME_START(registry, index);
+
+	renderSoftlink(registry, entity, component.get());
+
+	MagneticLink* link = dynamic_cast<MagneticLink*>(component->link);
+	float magneticStrength = static_cast<float>(link->magneticStrength);
+
+	TITLE("Properties", true);
+	PROPERTY_IF_LOCK(
+		"Magnetic strength",
+		ImGui::DragFloat("##MagneticStrength", &magneticStrength, 0, 0.1f, true),
+		link->magneticStrength = static_cast<double>(magneticStrength);
+	);
+
+	PROPERTY_FRAME_END;
+}
+
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<Comp::ElasticLink>& component) {
+	ECS_PROPERTY_FRAME_START(registry, index);
+
+	renderSoftlink(registry, entity, component.get());
+
+	ElasticLink* link = dynamic_cast<ElasticLink*>(component->link);
+	float restLenght = static_cast<float>(link->restLength);
+	float stiffness = static_cast<float>(link->stiffness);
+
+	TITLE("Properties", true);
+	PROPERTY_IF_LOCK("Length", ImGui::DragFloat("##RestLength", &restLenght, 0, 0.1f, true), link->restLength = static_cast<double>(restLenght););
+	PROPERTY_IF_LOCK("Stiffness", ImGui::DragFloat("##Stiffness", &stiffness, 0, 0.1f, true), link->stiffness = static_cast<double>(stiffness););
+
+	PROPERTY_FRAME_END;
+}
+
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<Comp::SpringLink>& component) {
+	ECS_PROPERTY_FRAME_START(registry, index);
+
+	renderSoftlink(registry, entity, component.get());
+
+	SpringLink* link = dynamic_cast<SpringLink*>(component->link);
+	float restLenght = static_cast<float>(link->restLength);
+	float stiffness = static_cast<float>(link->stiffness);
+
+	TITLE("Properties", true);
+	PROPERTY_IF_LOCK("Length", ImGui::DragFloat("##RestLength", &restLenght, 0, 0.1f, true), link->restLength = static_cast<double>(restLenght););
+	PROPERTY_IF_LOCK("Stiffness", ImGui::DragFloat("##Stiffness", &stiffness, 0, 0.1f, true), link->stiffness = static_cast<double>(stiffness););
+
+	PROPERTY_FRAME_END;
+}
+
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<Comp::AlignmentLink>& component) {
+	ECS_PROPERTY_FRAME_START(registry, index);
+
+	renderSoftlink(registry, entity, component.get());
+
+	AlignmentLink* link = dynamic_cast<AlignmentLink*>(component->link);
+
+	PROPERTY_FRAME_END;
+}
+
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<Comp::FixedConstraint>& component) {
+	ECS_PROPERTY_FRAME_START(registry, index);
+
+	FixedConstraint* link = dynamic_cast<FixedConstraint*>(component->hardConstraint->constraintWithParent.get());
+
+	CFrame* parentCFrame = component->getParentAttachment();
+	Vec3f parentPosition = parentCFrame->position;
+	Vec3f parentRotation = parentCFrame->rotation.asRotationVector();
+
+	CFrame* childCFrame = component->getChildAttachment();
+	Vec3f childPosition = childCFrame->position;
+	Vec3f childRotation = childCFrame->rotation.asRotationVector();
+
+	TITLE("Parent", true);
+	PROPERTY("Part", ImGui::Text("Part A"));
+	PROPERTY_IF_LOCK(
+		"Position",
+		ImGui::DragVec3("##ParentPosition", parentPosition.data, 0, 0.1f, true),
+		parentCFrame->position = parentPosition;
+	);
+	PROPERTY_IF_LOCK(
+		"Position",
+		ImGui::DragVec3("##ParentRotation", parentRotation.data, 0, 0.1f, true),
+		parentCFrame->rotation = Rotation::fromRotationVector(parentRotation);
+	);
+
+	TITLE("Child", true);
+	PROPERTY("Part", ImGui::Text("Part B"));
+	PROPERTY_IF_LOCK(
+		"Position",
+		ImGui::DragVec3("##ChildPosition", childPosition.data, 0, 0.1f, true),
+		childCFrame->position = childPosition;
+	);
+	PROPERTY_IF_LOCK(
+		"Position",
+		ImGui::DragVec3("##ChildRotation", childRotation.data, 0, 0.1f, true),
+		childCFrame->rotation = Rotation::fromRotationVector(childRotation);
+	);
+
+	PROPERTY_FRAME_END;
+}
+
+
+void PropertiesFrame::onInit(Engine::Registry64& registry) { }
 
 void PropertiesFrame::onRender(Engine::Registry64& registry) {
 	ImGui::Begin("Properties");
-	
-	if (screen.selectedEntity == Engine::Registry64::null_entity) {
+
+	if (SelectionTool::selection.empty()) {
 		std::string label = "Select an entity to see properties";
 		auto [wx, wy] = ImGui::GetContentRegionAvail();
 		auto [tx, ty] = ImGui::CalcTextSize(label.c_str());
@@ -283,18 +503,38 @@ void PropertiesFrame::onRender(Engine::Registry64& registry) {
 		return;
 	}
 
+	if (SelectionTool::selection.isMultiSelection()) {
+		std::string label = "Multiple entities selected";
+		auto [wx, wy] = ImGui::GetContentRegionAvail();
+		auto [tx, ty] = ImGui::CalcTextSize(label.c_str());
+		auto [cx, cy] = ImGui::GetCursorPos();
+		ImVec2 cursor = ImVec2(cx + (wx - tx) / 2.0f, cy + (wy - ty) / 2.0f);
+		ImGui::SetCursorPos(cursor);
+		ImGui::Text(label.c_str());
+
+		ImGui::End();
+		return;
+	}
+
 	// Dispatch component frames
-	auto components = registry.getComponents(screen.selectedEntity);
+	Engine::Registry64::entity_type selectedEntity = SelectionTool::selection.first().value();
+	auto components = registry.getComponents(selectedEntity);
 	for (auto [index, component] : components) {
 		ENTITY_DISPATCH_START(index);
-		ENTITY_DISPATCH(index, Comp::Name, registry, component);
-		ENTITY_DISPATCH(index, Comp::Transform, registry, component);
-		ENTITY_DISPATCH(index, Comp::Collider, registry, component);
-		ENTITY_DISPATCH(index, Comp::Mesh, registry, component);
-		ENTITY_DISPATCH(index, Comp::Material, registry, component);
-		ENTITY_DISPATCH(index, Comp::Light, registry, component);
-		ENTITY_DISPATCH(index, Comp::Hitbox, registry, component);
-		ENTITY_DISPATCH_END(index, registry, component);
+		ENTITY_DISPATCH(registry, selectedEntity, index, Comp::Name, component);
+		ENTITY_DISPATCH(registry, selectedEntity, index, Comp::Transform, component);
+		ENTITY_DISPATCH(registry, selectedEntity, index, Comp::Collider, component);
+		ENTITY_DISPATCH(registry, selectedEntity, index, Comp::Mesh, component);
+		ENTITY_DISPATCH(registry, selectedEntity, index, Comp::Material, component);
+		ENTITY_DISPATCH(registry, selectedEntity, index, Comp::Light, component);
+		ENTITY_DISPATCH(registry, selectedEntity, index, Comp::Hitbox, component);
+		ENTITY_DISPATCH(registry, selectedEntity, index, Comp::Attachment, component);
+		ENTITY_DISPATCH(registry, selectedEntity, index, Comp::MagneticLink, component);
+		ENTITY_DISPATCH(registry, selectedEntity, index, Comp::SpringLink, component);
+		ENTITY_DISPATCH(registry, selectedEntity, index, Comp::ElasticLink, component);
+		ENTITY_DISPATCH(registry, selectedEntity, index, Comp::AlignmentLink, component);
+		ENTITY_DISPATCH(registry, selectedEntity, index, Comp::FixedConstraint, component);
+		ENTITY_DISPATCH_END(registry, selectedEntity, index, component);
 	}
 
 	// Add new Component
@@ -304,14 +544,14 @@ void PropertiesFrame::onRender(Engine::Registry64& registry) {
 		std::vector<const char*> components;
 		for (Engine::Registry64::component_type index = 0; index < Engine::Registry64::component_index<void>::index(); index++)
 			components.push_back(registry.getComponentName(index).data());
-		
+
 		static int item_current = 0;
 		ImGui::SetNextItemWidth(-1);
 		ImGui::ListBox("##ComponentsModal", &item_current, components.data(), components.size(), 6);
-		
+
 		if (ImGui::Button("Cancel", ImVec2(-1, 0)))
 			ImGui::CloseCurrentPopup();
-		
+
 		ImGui::EndPopup();
 	}
 
@@ -323,19 +563,18 @@ void PropertiesFrame::onRender(Engine::Registry64& registry) {
 					errorModalMessage = "This component can not be deleted.";
 					showErrorModal = true;
 				} else {
-					registry.remove(screen.selectedEntity, deletedComponentIndex);
+					registry.remove(selectedEntity, deletedComponentIndex);
 				}
 			}
 		}
-		if (ImGui::MenuItem("Component info")) {
-			
-		}
+		if (ImGui::MenuItem("Component info")) { }
 		ImGui::EndPopup();
 	}
 
 	// Error Modal
-	if (showErrorModal) 
+	if (showErrorModal)
 		ImGui::OpenPopup("Error##ErrorModal");
+
 	if (ImGui::BeginPopupModal("Error##ErrorModal", 0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize)) {
 		ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), errorModalMessage.c_str());
 		if (ImGui::Button("Ok##ErrorModalClose", ImVec2(-1, 0))) {
@@ -344,8 +583,8 @@ void PropertiesFrame::onRender(Engine::Registry64& registry) {
 		}
 		ImGui::EndPopup();
 	}
-	
+
 	ImGui::End();
 }
-	
+
 }

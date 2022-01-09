@@ -103,11 +103,11 @@ public:
 		return ptr;
 	}
 
-	[[nodiscard]] bool valid() noexcept {
+	[[nodiscard]] bool valid() const noexcept {
 		return ptr != nullptr;
 	}
 
-	[[nodiscard]] bool invalid() noexcept {
+	[[nodiscard]] bool invalid() const noexcept {
 		return ptr == nullptr;
 	}
 

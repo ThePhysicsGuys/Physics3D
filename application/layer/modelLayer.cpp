@@ -84,8 +84,8 @@ static Color getAmbientForPartForSelected(Screen* screen, Part* part) {
 static Color getAlbedoForPart(Screen* screen, ExtendedPart* part) {
 	Color computedAmbient = getAmbientForPartForSelected(screen, part);
 
-	if (part->entity == screen->intersectedEntity)
-		computedAmbient = Vec4f(computedAmbient) + Vec4f(-0.1f, -0.1f, -0.1f, 0);
+	// if (part->entity is intersected)
+	//	computedAmbient = Vec4f(computedAmbient) + Vec4f(-0.1f, -0.1f, -0.1f, 0);
 
 	return computedAmbient;
 }
@@ -232,26 +232,6 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 			MeshRegistry::meshes[info.mesh->id]->render(info.mesh->mode);
 		}
 
-		// Hitbox drawing
-		if (screen->selectedEntity) {
-			IRef<Comp::Transform> transform = registry.get<Comp::Transform>(screen->selectedEntity);
-			if (transform.valid()) {
-				IRef<Comp::Hitbox> hitbox = registry.get<Comp::Hitbox>(screen->selectedEntity);
-
-				if (hitbox.valid()) {
-					Shape shape = hitbox->getShape();
-					DiagonalMat3 scale = transform->getScale();
-
-					if (!hitbox->isPartAttached())
-						scale = scale * hitbox->getScale();		
-					
-					VisualData data = MeshRegistry::getOrCreateMeshFor(shape.baseShape.get());
-
-					Shaders::debugShader->updateModel(transform->getCFrame().asMat4WithPreScale(scale));
-					MeshRegistry::meshes[data.id]->render();
-				}
-			}
-		}
 		auto scf = SelectionTool::selection.getCFrame();
 		auto shb = SelectionTool::selection.getHitbox();
 		if (scf.has_value() && shb.has_value()) {

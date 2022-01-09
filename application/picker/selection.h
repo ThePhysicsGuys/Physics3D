@@ -42,6 +42,8 @@ namespace P3D::Application {
 		[[nodiscard]] std::vector<Engine::Registry64::entity_type>::const_iterator end() const;
 		[[nodiscard]] std::vector<Engine::Registry64::entity_type>::iterator begin();
 		[[nodiscard]] std::vector<Engine::Registry64::entity_type>::iterator end();
+		[[nodiscard]] std::optional<Engine::Registry64::entity_type> first() const;
+		[[nodiscard]] std::optional<Engine::Registry64::entity_type> last() const;
 	};
 	
 }

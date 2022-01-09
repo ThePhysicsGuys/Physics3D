@@ -2,6 +2,8 @@
 
 #include "toolManager.h"
 
+#include "buttonTool.h"
+
 namespace P3D::Engine {
 	
 	ToolManager::ToolManager(): activeTool(nullptr) {
@@ -77,27 +79,40 @@ namespace P3D::Engine {
 			return false;
 
 		Tool* tool = *iterator;
+		
+		if (dynamic_cast<ButtonTool*>(tool) != nullptr) {
+			tool->onSelect();
+			tool->onDeselect();
+		} else {
+			if (activeTool != nullptr)
+				activeTool->onDeselect();
 
-		if (activeTool != nullptr)
-			activeTool->onDeselect();
-
-		activeTool = tool;
-		activeTool->onSelect();
+			activeTool = tool;
+			activeTool->onSelect();
+		}
 
 		return true;
 	}
 
 	bool ToolManager::selectTool(Tool* tool) {
 		auto iterator = std::find(tools.begin(), tools.end(), tool);
+		if (iterator == tools.end())
+			return false;
+		
 		if (tool == nullptr)
 			return deselectTool();
 
-		if (activeTool != nullptr)
-			activeTool->onDeselect();
+		if (dynamic_cast<ButtonTool*>(tool) != nullptr) {
+			tool->onSelect();
+			tool->onDeselect();
+		} else {
+			if (activeTool != nullptr)
+				activeTool->onDeselect();
 
-		activeTool = tool;
-		activeTool->onSelect();
-
+			activeTool = tool;
+			activeTool->onSelect();
+		}
+		
 		return true;
 	}
 

@@ -156,6 +156,7 @@
     <ClInclude Include="layer\layerStack.h" />
     <ClInclude Include="options\keyboardOptions.h" />
     <ClInclude Include="resource\meshResource.h" />
+    <ClInclude Include="tool\buttonTool.h" />
     <ClInclude Include="tool\stateTool.h" />
     <ClInclude Include="tool\tool.h" />
     <ClInclude Include="tool\toolManager.h" />

@@ -8,15 +8,16 @@
 #include "../engine/options/keyboardOptions.h"
 #include "application.h"
 #include "screen.h"
+#include "picker/tools/toolSpacing.h"
 
 namespace P3D::Application {
 
 void ToolbarFrame::onInit(Engine::Registry64& registry) {
 	std::string path = "../res/textures/icons/";
-	ResourceManager::add<Graphics::TextureResource>("play", path + "play.png");
-	ResourceManager::add<Graphics::TextureResource>("pause", path + "pause.png");
-	ResourceManager::add<Graphics::TextureResource>("tick", path + "tick.png");
-	ResourceManager::add<Graphics::TextureResource>("reset", path + "reset.png");
+	ResourceManager::add<Graphics::TextureResource>("play", path + "Play.png");
+	ResourceManager::add<Graphics::TextureResource>("pause", path + "Pause.png");
+	ResourceManager::add<Graphics::TextureResource>("tick", path + "Tick.png");
+	ResourceManager::add<Graphics::TextureResource>("reset", path + "Reset.png");
 }
 
 void ToolbarFrame::onRender(Engine::Registry64& registry) {
@@ -25,7 +26,10 @@ void ToolbarFrame::onRender(Engine::Registry64& registry) {
 	for (Engine::ToolManager& toolManager : PickerLayer::toolManagers) {
 		for (Engine::Tool* tool : toolManager) {
 			bool selected = toolManager.isSelected(tool);
-			if (ImGui::ToolBarButton(tool, selected)) {
+			if (dynamic_cast<ToolSpacing*>(tool) != nullptr) {
+				ImGui::SameLine();
+				ImGui::BulletText("");
+			} else if (ImGui::ToolBarButton(tool, selected)) {
 				if (selected)
 					toolManager.deselectTool();
 				else
@@ -47,12 +51,7 @@ void ToolbarFrame::onRender(Engine::Registry64& registry) {
 		handler->onEvent(event);
 	}
 
-	/*ImGui::ToolBarButton("Play / Pause", "Play / Pause the simulation", "object");
-	ImGui::ToolBarButton("Play / Pause", "Play / Pause the simulation", "folder_open");
-	ImGui::ToolBarButton("Play / Pause", "Play / Pause the simulation", "folder_closed");
-	ImGui::ToolBarSpacing();
-	ImGui::ToolBarButton("Play / Pause", "Play / Pause the simulation", "default");*/
-	
+
 	ImGui::EndToolBar();
 }
 	

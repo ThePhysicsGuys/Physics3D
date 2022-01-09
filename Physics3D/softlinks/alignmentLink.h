@@ -5,16 +5,19 @@
 namespace P3D {
 class AlignmentLink : public SoftLink {
 public:
+	Rotation offset;
+
+	AlignmentLink(const AttachedPart& partA, const AttachedPart& partB);
+	~AlignmentLink() override = default;
+
 	AlignmentLink(const AlignmentLink& other) = delete;
 	AlignmentLink& operator=(const AlignmentLink& other) = delete;
-	AlignmentLink(AlignmentLink&& other) = default;
-	AlignmentLink& operator=(AlignmentLink&& other) = default;
+	AlignmentLink(AlignmentLink&& other) = delete;
+	AlignmentLink& operator=(AlignmentLink&& other) = delete;
 
-	AlignmentLink(const AttachedPart& part1, const AttachedPart& part2);
 	void update() override;
 
 private:
 	[[nodiscard]] Vec3 getGlobalMoment() noexcept;
-	Rotation offset;
 };
 };

@@ -9,6 +9,7 @@
 #include <typeinfo>
 #include "../util/typetraits.h"
 #include "../util/iteratorUtils.h"
+#include "../util/stringUtil.h"
 #include "../Physics3D/datastructures/smartPointers.h"
 
 namespace P3D::Engine {
@@ -345,10 +346,9 @@ public:
 	[[nodiscard]] component_type getComponentIndex() {
 		component_type index = component_index<Component>::index();
 		if (index >= type_mapping.size()) {
-			std::string fullName = typeid(Component).name();
-			std::size_t colonIndex = fullName.find_last_of(':');
-			std::string name = (colonIndex == std::string::npos) ? fullName.substr(fullName.find_last_of(' ') + 1) : fullName.substr(colonIndex + 1);
-
+			std::string fullName = Util::typeName<Component>();
+			std::string camelCase = Util::demangle(fullName);
+			std::string name = Util::decamel(camelCase);
 			type_mapping.insert(std::make_pair(index, name));
 		}
 
@@ -401,11 +401,11 @@ public:
 	}
 
 	/**
-	 * Removes the given entity from the registry
+	 * Removes the given entity from the registry, returns the null entity if the entity is successfully removed
 	 */
-	void destroy(const entity_type& entity) noexcept {
+	entity_type destroy(const entity_type& entity) noexcept {
 		if (entity == null_entity)
-			return;
+			return null_entity;
 
 		auto entities_iterator = entities.find(static_cast<representation_type>(entity));
 		if (entities_iterator != entities.end()) {
@@ -419,7 +419,11 @@ public:
 					map->erase(component_iterator);
 				}
 			}
+
+			return null_entity;
 		}
+
+		return entity;
 	}
 
 	/**

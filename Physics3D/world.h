@@ -58,7 +58,7 @@ public:
 	// Extra world features
 	std::vector<ExternalForce*> externalForces;
 	std::vector<ConstraintGroup> constraints;
-	std::vector<SoftLink*> springLinks;
+	std::vector<SoftLink*> softLinks;
 
 	void addLink(SoftLink* link);
 

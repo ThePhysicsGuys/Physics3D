@@ -175,6 +175,10 @@ void Part::setMotion(Vec3 velocity, Vec3 angularVelocity) {
 	setVelocity(velocity);
 }
 
+bool Part::isTerrainPart() const {
+	return parent == nullptr;
+}
+
 void Part::translate(Vec3 translation) {
 	Bounds oldBounds = this->getBounds();
 	if(this->parent != nullptr) {

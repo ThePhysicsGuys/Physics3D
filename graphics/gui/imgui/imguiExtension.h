@@ -127,8 +127,10 @@ namespace ImGui {
 
 		SameLine();
         ImVec4 bg = selected ? ImVec4(0.2, 0.2, 0.2, 0.5) : ImVec4(0, 0, 0, 0);
+        ImGui::PushID(name);
         bool result = ImageButton((ImTextureID) image->getID(), ImVec2(25, 25), ImVec2(0, 1), ImVec2(1, 0), 2, bg);
-
+        ImGui::PopID();
+		
 		PopStyleVar(2);
 		
         if (IsItemHovered()) {
@@ -146,7 +148,7 @@ namespace ImGui {
     }
 
     inline void ToolBarSpacing() {
-        SameLine();
+        SameLine(0, 30);
         Spacing();
 	}
 	
@@ -184,6 +186,34 @@ namespace ImGui {
 		ImGui::SetNextItemWidth(-1); \
 		if (widget) { \
 			code \
+		}; \
+		ImGui::NextColumn(); \
+	}
+
+#define PROPERTY_DESC_IF_LOCK(text, desc, widget, code) \
+	{ \
+		ImGui::TextUnformatted(text); \
+		ImGui::SameLine(); \
+		ImGui::HelpMarker(desc); \
+		ImGui::NextColumn(); \
+		ImGui::SetNextItemWidth(-1); \
+		if (widget) { \
+			screen.worldMutex->lock() \
+			code \
+			screen.worldMutex->unlock() \
+		}; \
+		ImGui::NextColumn(); \
+	}
+
+#define PROPERTY_IF_LOCK(text, widget, code) \
+	{ \
+		ImGui::TextUnformatted(text); \
+		ImGui::NextColumn(); \
+		ImGui::SetNextItemWidth(-1); \
+		if (widget) { \
+			screen.worldMutex->lock(); \
+			code \
+			screen.worldMutex->unlock(); \
 		}; \
 		ImGui::NextColumn(); \
 	}
