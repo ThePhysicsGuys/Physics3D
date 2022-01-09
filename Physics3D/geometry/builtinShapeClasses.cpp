@@ -4,6 +4,7 @@
 #include "shapeLibrary.h"
 #include "../math/constants.h"
 
+
 namespace P3D {
 #pragma region CubeClass
 CubeClass::CubeClass() : ShapeClass(8, Vec3(0, 0, 0), ScalableInertialMatrix(Vec3(8.0 / 3.0, 8.0 / 3.0, 8.0 / 3.0), Vec3(0, 0, 0)), CUBE_CLASS_ID) {
@@ -249,43 +250,54 @@ bool WedgeClass::containsPoint(Vec3 points) const {
 	return std::abs(points.x) <= 1.0 && std::abs(points.y) <= 1.0 && std::abs(points.z) <= 1.0 && points.x + points.y <= 0.0;
 }
 double WedgeClass::getIntersectionDistance(Vec3 origin, Vec3 direction) const {
+	double currMin = std::numeric_limits<double>::max();
 	{
 		double ty = (-1 - origin.y) / direction.y;
-		Vec3 y = origin + ty * direction;
-		if(std::abs(y.x) <= 1.0 && std::abs(y.z) <= 1.0 && ty > 0) {
-			return ty;
+		Vec3 intersY = origin + ty * direction;
+		if(std::abs(intersY.x) <= 1.0 && std::abs(intersY.z) <= 1.0 && intersY.x <= 1.0  && ty > 0) {
+			if(ty < currMin) {
+				currMin = ty;
+			}
 		}
 	}
 	{
 		double tx = (-1 - origin.x) / direction.x;
-		Vec3 x = origin + tx * direction;
-		if(std::abs(x.y) <= 1.0 && std::abs(x.z) <= 1.0 && tx > 0) {
-			return tx;
+		Vec3 intersX = origin + tx * direction;
+		if(std::abs(intersX.y) <= 1.0 && std::abs(intersX.z) <= 1.0 && intersX.y <= 1.0 && tx > 0) {
+			if(tx < currMin) {
+				currMin = tx;
+			}
 		}
 	}
 	{
 		double tz = (-1 - origin.z) / direction.z;
-		Vec3 z = origin + tz * direction;
-		if(std::abs(z.x) <= 1.0 && std::abs(z.y) <= 1.0 && tz > 0) {
-			return tz;
+		Vec3 intersZ = origin + tz * direction;
+		if(std::abs(intersZ.x) <= 1.0 && std::abs(intersZ.y) <= 1.0 && intersZ.x + intersZ.y <= 0.0 && tz > 0) {
+			if(tz < currMin) {
+				currMin = tz;
+			}
 		}
 	}
 	{
 		double tz = (1 - origin.z) / direction.z;
-		Vec3 z = origin + tz * direction;
-		if(std::abs(z.x) <= 1.0 && std::abs(z.y) <= 1.0 && tz > 0) {
-			return tz;
+		Vec3 intersZ = origin + tz * direction;
+		if(std::abs(intersZ.x) <= 1.0 && std::abs(intersZ.y) <= 1.0 && intersZ.x + intersZ.y <= 0.0 && tz > 0) {
+			if(tz < currMin) {
+				currMin = tz;
+			}
 		}
 	}
 	{
 		const double dn = direction.x + direction.y;
 		double t = (-origin.x - origin.y) / dn;
-		Vec3 points = origin + t * direction;
-		if(this->containsPoint(points) && t > 0) {
-			return t;
+		Vec3 point = origin + t * direction;
+		if(std::abs(point.x) <= 1.0 && std::abs(point.y) <= 1.0 && std::abs(point.z) <= 1.0 && t > 0) {
+			if(t < currMin) {
+				currMin = t;
+			}
 		}
 	}
-	return std::numeric_limits<double>::infinity();
+	return currMin;
 }
 BoundingBox WedgeClass::getBounds(const Rotation& rotation, const DiagonalMat3& scale) const {
 	const Mat3& rotMat = rotation.asRotationMatrix();
@@ -293,6 +305,9 @@ BoundingBox WedgeClass::getBounds(const Rotation& rotation, const DiagonalMat3& 
 	for(size_t i = 0; i < 3; i++) {
 		scaleRot[i] = scale[i] * rotMat.getCol(i);
 	}
+
+	/*Vec3f(-1.0f, -1.0f, -1.0f), Vec3f(-1.0f, -1.0f, 1.0f), Vec3f(1.0f, -1.0f, 1.0f), Vec3f(1.0f, -1.0f, -1.0f),
+		Vec3f(-1.0f, 1.0f, -1.0f), Vec3f(-1.0f, 1.0f, 1.0f)*/
 	const Vec3 vertices[] = {
 		-scaleRot[0] - scaleRot[1] - scaleRot[2],
 		-scaleRot[0] - scaleRot[1] + scaleRot[2],
@@ -343,34 +358,50 @@ CornerClass::CornerClass() : ShapeClass(4 / 3, Vec3(-2 / 3, -2 / 3, -2 / 3), Sca
 	this->refCount = 1;
 }
 bool CornerClass::containsPoint(Vec3 point) const {
-	return std::abs(point.x) <= 1.0 && std::abs(point.y) <= 1.0 && std::abs(point.z) <= 1.0 && -point.x - point.y - point.z <= 1.0;
+	return point.x >= -1.0 && point.y >= -1.0 && point.z >= -1.0 && point.x + point.y + point.z <= -1.0;
 }
 double CornerClass::getIntersectionDistance(Vec3 origin, Vec3 direction) const {
+	/*
+		-x - 1			= 0;
+		-y - 1			= 0;
+		-z - 1			= 0;
+		x + y + z + 1	= 0;
+	*/
+	double currMin = std::numeric_limits<double>::max();
+
 	double tx = (-1 - origin.x) / direction.x;
-	Vec3 x = origin + tx * direction;
-	if(std::abs(x.y) <= 1.0 && std::abs(x.z) <= 1.0 && tx > 0) {
-		return tx;
+	Vec3 intersX = origin + tx * direction;
+	if(intersX.y >= -1.0 && intersX.z >= -1.0 && intersX.y + intersX.z <= 0.0 && tx > 0) {
+		if(tx < currMin) {
+			currMin = tx;
+		}
 	}
 
 	double ty = (-1 - origin.y) / direction.y;
-	Vec3 y = origin + ty * direction;
-	if(std::abs(y.x) <= 1.0 && std::abs(y.z) <= 1.0 && ty > 0) {
-		return ty;
+	Vec3 intersY = origin + ty * direction;
+	if(intersY.x >= -1.0 && intersY.z >= -1.0 && intersY.x + intersY.z <= 0.0 && ty > 0) {
+		if(ty < currMin) {
+			currMin = ty;
+		}
 	}
 
 	double tz = (-1 - origin.z) / direction.z;
-	Vec3 z = origin + tz * direction;
-	if(std::abs(z.x) <= 1.0 && std::abs(z.y) <= 1.0 && tz > 0) {
-		return tz;
+	Vec3 intersZ = origin + tz * direction;
+	if(intersZ.x >= -1.0 && intersZ.y >= -1.0 && intersZ.x + intersZ.y <= 0.0 && tz > 0) {
+		if(tz < currMin) {
+			currMin = tz;
+		}
 	}
 
 	const double dn = direction.x + direction.y + direction.z;
 	double t = (-1 - origin.x - origin.y - origin.z) / dn;
-	Vec3 points = origin + t * direction;
-	if(this->containsPoint(points) && t > 0) {
-		return t;
+	Vec3 point = origin + t * direction;
+	if(point.x >= -1.0 && point.y >= -1.0 && point.z >= -1.0 && t > 0) {
+		if(t < currMin) {
+			currMin = t;
+		}
 	}
-	return std::numeric_limits<double>::infinity();
+	return currMin;
 }
 BoundingBox CornerClass::getBounds(const Rotation& rotation, const DiagonalMat3& scale) const {
 	const Mat3& rot = rotation.asRotationMatrix();
