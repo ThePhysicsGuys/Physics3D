@@ -2,6 +2,7 @@
 
 #include <string>
 #include <variant>
+#include <functional>
 
 #include <Physics3D/geometry/builtinShapeClasses.h>
 #include <Physics3D/threading/upgradeableMutex.h>
