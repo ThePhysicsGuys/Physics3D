@@ -141,6 +141,7 @@ namespace P3D::Application {
 			IRef<Comp::Transform> transform = screen.registry.get<Comp::Transform>(entity);
 			
 			if (transform.valid()) {
+				//transform->rotate(normal, angle);
 				transform->rotate(rotation);
 				Vec3 delta = transform->getPosition() - reference->getPosition();
 				Vec3 translation = rotation * delta - delta;

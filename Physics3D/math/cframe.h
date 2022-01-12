@@ -90,6 +90,14 @@ public:
 		return rotation;
 	}
 
+	void translate(const Vector<T, 3>& delta) {
+		this->position += delta;
+	}
+
+	void rotate(const Rotation& rot) {
+		this->rotation = rot * this->rotation;
+	}
+
 	CFrameTemplate<T>& operator+=(const Vector<T, 3>& delta) {
 		position += delta;
 		return *this;

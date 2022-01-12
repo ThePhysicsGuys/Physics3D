@@ -25,7 +25,7 @@ void PlayerWorld::onPartAdded(ExtendedPart* part) {
 
 void PlayerWorld::onPartRemoved(ExtendedPart* part) {
 	screen.registry.remove<Comp::Collider>(part->entity);
-	screen.registry.get<Comp::Transform>(part->entity)->cframe = Comp::Transform::ScaledCFrame { part->getCFrame(), part->hitbox.scale };
+	screen.registry.get<Comp::Transform>(part->entity)->setRoot(Comp::Transform::ScaledCFrame { part->getCFrame(), part->hitbox.scale });
 }
 
 };

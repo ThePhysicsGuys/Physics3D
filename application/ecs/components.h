@@ -12,6 +12,7 @@
 #include "../application/extendedPart.h"
 #include "../graphics/visualData.h"
 #include "../worlds.h"
+#include "Physics3D/misc/toString.h"
 #include "Physics3D/softlinks/alignmentLink.h"
 
 namespace P3D::Application {
@@ -59,7 +60,9 @@ namespace P3D::Application {
 				GlobalCFrame cframe;
 				DiagonalMat3 scale;
 
-				ScaledCFrame() : scale(DiagonalMat3::IDENTITY()) {}
+				ScaledCFrame()
+					: cframe(GlobalCFrame())
+					, scale(DiagonalMat3::IDENTITY()) {}
 
 				ScaledCFrame(const Position& position)
 					: cframe(position)
@@ -80,70 +83,156 @@ namespace P3D::Application {
 				ScaledCFrame(const GlobalCFrame& cframe, const DiagonalMat3& scale)
 					: cframe(cframe)
 					, scale(scale) {}
+
+				void translate(const Vec3& translation) {
+					this->cframe.translate(translation);
+				}
+
+				void rotate(const Rotation& rotation) {
+					this->cframe.rotate(rotation);
+				}
 			};
 
-			std::variant<ScaledCFrame, ExtendedPart*, CFrame*> cframe;
+			std::variant<ExtendedPart*, ScaledCFrame> root;
+			std::variant<CFrame, CFrame*> offset;
+
 			std::function<void()> onChange;
 
-			Transform() : cframe(ScaledCFrame()) {}
-			Transform(ExtendedPart* part) : cframe(part) {}
-			Transform(CFrame* cframe) : cframe(cframe) {}
-			Transform(const Position& position) : cframe(position) {}
-			Transform(const Position& position, double scale) : cframe(ScaledCFrame(position, scale)) {}
-			Transform(const GlobalCFrame& cframe) : cframe(cframe) {}
-			Transform(const GlobalCFrame& cframe, double scale) : cframe(ScaledCFrame(cframe, scale)) {}
-			Transform(const GlobalCFrame& cframe, const DiagonalMat3& scale) : cframe(ScaledCFrame(cframe, scale)) {}
+			Transform()
+				: root(ScaledCFrame())
+				, offset(nullptr) {}
+
+			Transform(ExtendedPart* root)
+				: root(root)
+				, offset(nullptr) {}
+
+			Transform(ExtendedPart* root, CFrame* offset)
+				: root(root)
+				, offset(offset) {}
+
+			Transform(ExtendedPart* root, const CFrame& offset)
+				: root(root)
+				, offset(offset) {}
+
+			Transform(const Position& position)
+				: root(ScaledCFrame(position))
+				, offset(nullptr) {}
+
+			Transform(const Position& position, double scale)
+				: root(ScaledCFrame(position, scale))
+				, offset(nullptr) {}
+
+			Transform(const GlobalCFrame& cframe)
+				: root(ScaledCFrame(cframe))
+				, offset(nullptr) {}
+
+			Transform(const GlobalCFrame& cframe, double scale)
+				: root(ScaledCFrame(cframe, scale))
+				, offset(nullptr) {}
+
+			Transform(const GlobalCFrame& cframe, const DiagonalMat3& scale)
+				: root(ScaledCFrame(cframe, scale))
+				, offset(nullptr) {}
+
+			bool isRootPart() {
+				return std::holds_alternative<ExtendedPart*>(this->root);
+			}
+
+			bool isRootCFrame() {
+				return std::holds_alternative<ScaledCFrame>(this->root);
+			}
+
+			bool hasOffset() {
+				return std::holds_alternative<CFrame>(this->offset) || std::holds_alternative<CFrame*>(this->offset) && std::get<CFrame*>(this->offset) != nullptr;
+			}
+
+			bool isOffsetStoredLocal() {
+				if (!hasOffset())
+					return false;
+
+				return std::holds_alternative<CFrame>(this->offset);
+			}
+
+			bool isOffsetStoredRemote() {
+				if (!hasOffset())
+					return false;
+
+				return std::holds_alternative<CFrame*>(this->offset);
+			}
 
 			void addCallback(const std::function<void()>& onChange) {
 				this->onChange = onChange;
 			}
 
-			bool isPartAttached() {
-				return std::holds_alternative<ExtendedPart*>(this->cframe);
+			void setRoot(ExtendedPart* root) {
+				this->root = root;
 			}
 
-			bool isCFrameAttached() {
-				return std::holds_alternative<CFrame*>(this->cframe);
+			void setRoot(const ScaledCFrame& root) {
+				this->root = root;
+			}
+
+			void setOffset(CFrame* offset) {
+				this->offset = offset;
+			}
+
+			void setOffset(const CFrame& offset) {
+				this->offset = offset;
 			}
 
 			template <typename Function>
-			void asyncModify(PlayerWorld* world, UpgradeableMutex& worldMutex, const Function& function) {
-				if (isPartAttached() || isCFrameAttached()) {
-					std::unique_lock<UpgradeableMutex> (worldMutex);
+			void modify(UpgradeableMutex& mutex, const Function& function) {
+				if (isRootPart() || isOffsetStoredRemote()) {
+					mutex.lock();
 					function();
+					mutex.unlock();
 				} else
 					function();
-			}
 
-			template <typename Function>
-			void syncRead(PlayerWorld* world, UpgradeableMutex& worldMutex, const Function& function) {
-				if (isPartAttached() || isCFrameAttached()) {
-					std::unique_lock<UpgradeableMutex> (worldMutex);
-					function();
-				} else
-					function();
-			}
-
-			void setPart(ExtendedPart* part) {
-				this->cframe = part;
-			}
-
-			void setCFrame(CFrame* cframe) {
-				this->cframe = cframe;
-			}
-
-			ExtendedPart* getPart() {
-				return std::get<ExtendedPart*>(this->cframe);
+				if (onChange != nullptr)
+					onChange();
 			}
 
 			void translate(const Vec3& translation) {
-				if (isPartAttached()) {
-					std::get<ExtendedPart*>(this->cframe)->translate(translation);
-				} else if (isCFrameAttached()) {
-					std::get<CFrame*>(this->cframe)->position += translation;
-					
+				if (hasOffset()) {
+					Vec3 relativeTranslation = getRootCFrame().relativeToLocal(translation);
+
+					if (isOffsetStoredLocal()) {
+						std::get<CFrame>(this->offset).translate(relativeTranslation);
+					} else {
+						std::get<CFrame*>(this->offset)->translate(relativeTranslation);
+					}
 				} else {
-					std::get<ScaledCFrame>(this->cframe).cframe.position += translation;
+					if (isRootPart()) {
+						std::get<ExtendedPart*>(this->root)->translate(translation);
+					} else {
+						std::get<ScaledCFrame>(this->root).translate(translation);
+					}
+				}
+
+				if (onChange != nullptr)
+					onChange();
+			}
+
+			void rotate(const Vec3& normal, double angle) {
+				if (hasOffset()) {
+					Vec3 relativeNormal = getRootCFrame().relativeToLocal(normal);
+					Rotation relativeRotation = Rotation::fromRotationVector(relativeNormal * angle);
+
+					if (isOffsetStoredLocal()) {
+						std::get<CFrame>(this->offset).rotate(relativeRotation);
+					} else {
+						std::get<CFrame*>(this->offset)->rotate(relativeRotation);
+					}
+				} else {
+					Rotation rotation = Rotation::fromRotationVector(normal * angle);
+
+					if (isRootPart()) {
+						ExtendedPart* part = std::get<ExtendedPart*>(this->root);
+						part->setCFrame(part->getCFrame().rotated(rotation));
+					} else {
+						std::get<ScaledCFrame>(this->root).rotate(rotation);
+					}
 				}
 
 				if (onChange != nullptr)
@@ -151,13 +240,22 @@ namespace P3D::Application {
 			}
 
 			void rotate(const Rotation& rotation) {
-				if (isPartAttached()) {
-					ExtendedPart* part = std::get<ExtendedPart*>(this->cframe);
-					part->setCFrame(part->getCFrame().rotated(rotation));
-				} else if (isCFrameAttached()) {
-					std::get<CFrame*>(this->cframe)->rotation = rotation;
+				if (hasOffset()) {
+					Rotation rootRotation = getRootCFrame().getRotation();
+					Rotation relativeRotation = ~rootRotation * rotation * rootRotation;
+
+					if (isOffsetStoredLocal()) {
+						std::get<CFrame>(this->offset).rotate(relativeRotation);
+					} else {
+						std::get<CFrame*>(this->offset)->rotate(relativeRotation);
+					}
 				} else {
-					std::get<ScaledCFrame>(this->cframe).cframe.rotate(rotation);
+					if (isRootPart()) {
+						ExtendedPart* part = std::get<ExtendedPart*>(this->root);
+						part->setCFrame(part->getCFrame().rotated(rotation));
+					} else {
+						std::get<ScaledCFrame>(this->root).rotate(rotation);
+					}
 				}
 
 				if (onChange != nullptr)
@@ -165,38 +263,60 @@ namespace P3D::Application {
 			}
 
 			void scale(double scaleX, double scaleY, double scaleZ) {
-				if (isPartAttached()) {
-					std::get<ExtendedPart*>(this->cframe)->scale(scaleX, scaleY, scaleZ);
-				} else if (isCFrameAttached()) {
-
+				if (isRootPart()) {
+					std::get<ExtendedPart*>(this->root)->scale(scaleX, scaleY, scaleZ);
 				} else {
-					std::get<ScaledCFrame>(this->cframe).scale[0] *= scaleX;
-					std::get<ScaledCFrame>(this->cframe).scale[1] *= scaleY;
-					std::get<ScaledCFrame>(this->cframe).scale[2] *= scaleZ;
+					std::get<ScaledCFrame>(this->root).scale *= DiagonalMat3({ scaleX, scaleY, scaleZ });
+				}
+
+				if (onChange != nullptr)
+					onChange();
+			}
+
+			GlobalCFrame getRootCFrame() {
+				if (isRootPart()) {
+					return std::get<ExtendedPart*>(this->root)->getCFrame();
+				} else {
+					return std::get<ScaledCFrame>(this->root).cframe;
+				}
+			}
+
+			CFrame getOffsetCFrame() {
+				if (hasOffset()) {
+					if (isOffsetStoredLocal())
+						return std::get<CFrame>(this->offset);
+					else
+						return *std::get<CFrame*>(this->offset);
+				} else {
+					return CFrame();
 				}
 			}
 
 			GlobalCFrame getCFrame() {
-				if (isPartAttached()) {
-					return std::get<ExtendedPart*>(this->cframe)->getCFrame();
-				} else if (isCFrameAttached()) {
-					CFrame* relativeFrame = std::get<CFrame*>(this->cframe);
-					return GlobalCFrame(castVec3ToPosition(relativeFrame->position), relativeFrame->rotation);
-				} else {
-					return std::get<ScaledCFrame>(this->cframe).cframe;
-				}
+				GlobalCFrame rootCFrame = getRootCFrame();
+				CFrame offsetCFrame = getOffsetCFrame();
+
+				return rootCFrame.localToGlobal(offsetCFrame);
 			}
 
 			void setCFrame(const GlobalCFrame& cframe) {
-				if (isPartAttached()) {
-					std::get<ExtendedPart*>(this->cframe)->setCFrame(cframe);
-				} else if (isCFrameAttached()) {
-					CFrame* relativeFrame = std::get<CFrame*>(this->cframe);
-					relativeFrame->position = castPositionToVec3(cframe.position);
-					relativeFrame->rotation = cframe.rotation;
+				if (hasOffset()) {
+					CFrame relativeCFrame = getRootCFrame().globalToLocal(cframe);
+					if (isOffsetStoredLocal()) {
+						std::get<CFrame>(this->offset) = relativeCFrame;
+					} else {
+						*std::get<CFrame*>(this->offset) = relativeCFrame;
+					}
 				} else {
-					std::get<ScaledCFrame>(this->cframe).cframe = cframe;
+					if (isRootPart()) {
+						std::get<ExtendedPart*>(this->root)->setCFrame(cframe);
+					} else {
+						std::get<ScaledCFrame>(this->root).cframe = cframe;
+					}
 				}
+
+				if (onChange != nullptr)
+					onChange();
 			}
 
 			Position getPosition() {
@@ -204,17 +324,10 @@ namespace P3D::Application {
 			}
 
 			void setPosition(const Position& position) {
-				if (isPartAttached()) {
-					ExtendedPart* part = std::get<ExtendedPart*>(this->cframe);
-					GlobalCFrame cframe = part->getCFrame();
-					cframe.position = position;
+				GlobalCFrame cframe = getCFrame();
+				cframe.position = position;
 
-					part->setCFrame(cframe);
-				} else if (isCFrameAttached()) {
-					std::get<CFrame*>(this->cframe)->position = castPositionToVec3(position);
-				} else {
-					std::get<ScaledCFrame>(this->cframe).cframe.position = position;
-				}
+				setCFrame(cframe);
 			}
 
 			Rotation getRotation() {
@@ -222,99 +335,93 @@ namespace P3D::Application {
 			}
 
 			void setRotation(const Rotation& rotation) {
-				if (isPartAttached()) {
-					ExtendedPart* part = std::get<ExtendedPart*>(this->cframe);
-					GlobalCFrame cframe = part->getCFrame();
-					cframe.rotation = rotation;
+				GlobalCFrame cframe = getCFrame();
+				cframe.rotation = rotation;
 
-					part->setCFrame(cframe);
-				} else if (isCFrameAttached()) {
-					std::get<CFrame*>(this->cframe)->rotation = rotation;
-				} else {
-					std::get<ScaledCFrame>(this->cframe).cframe.rotation = rotation;
-				}
+				setCFrame(cframe);
 			}
 
 			DiagonalMat3 getScale() {
-				if (isPartAttached()) {
-					return std::get<ExtendedPart*>(this->cframe)->hitbox.scale;
-				} else if (isCFrameAttached()) {
-					return DiagonalMat3::IDENTITY();
+				if (isRootPart()) {
+					return std::get<ExtendedPart*>(this->root)->hitbox.scale;
 				} else {
-					return std::get<ScaledCFrame>(this->cframe).scale;
+					return std::get<ScaledCFrame>(this->root).scale;
 				}
 			}
 
 			void setScale(const DiagonalMat3& scale) {
-				if (isPartAttached()) {
-					std::get<ExtendedPart*>(this->cframe)->setScale(scale);
-				} else if (isCFrameAttached()) { } else {
-					std::get<ScaledCFrame>(this->cframe).scale = scale;
+				if (isRootPart()) {
+					std::get<ExtendedPart*>(this->root)->setScale(scale);
+				} else {
+					std::get<ScaledCFrame>(this->root).scale = scale;
 				}
+
+				if (onChange != nullptr)
+					onChange();
 			}
 
 			double getWidth() {
-				if (isPartAttached()) {
-					return std::get<ExtendedPart*>(this->cframe)->hitbox.getWidth();
-				} else if (isCFrameAttached()) {
-					return 0;
+				if (isRootPart()) {
+					return std::get<ExtendedPart*>(this->root)->hitbox.getWidth();
 				} else {
-					return std::get<ScaledCFrame>(this->cframe).scale[0] * 2;
+					return std::get<ScaledCFrame>(this->root).scale[0] * 2;
 				}
 			}
 
 			void setWidth(double width) {
-				if (isPartAttached()) {
-					std::get<ExtendedPart*>(this->cframe)->hitbox.setWidth(width);
-				} else if (isCFrameAttached()) { } else {
-					std::get<ScaledCFrame>(this->cframe).scale[0] = width / 2;
+				if (isRootPart()) {
+					std::get<ExtendedPart*>(this->root)->hitbox.setWidth(width);
+				} else {
+					std::get<ScaledCFrame>(this->root).scale[0] = width / 2;
 				}
+
+				if (onChange != nullptr)
+					onChange();
 			}
 
 			double getHeight() {
-				if (isPartAttached()) {
-					return std::get<ExtendedPart*>(this->cframe)->hitbox.getHeight();
-				} else if (isCFrameAttached()) {
-					return 0;
+				if (isRootPart()) {
+					return std::get<ExtendedPart*>(this->root)->hitbox.getHeight();
 				} else {
-					return std::get<ScaledCFrame>(this->cframe).scale[1] * 2;
+					return std::get<ScaledCFrame>(this->root).scale[1] * 2;
 				}
 			}
 
 			void setHeight(double height) {
-				if (isPartAttached()) {
-					std::get<ExtendedPart*>(this->cframe)->hitbox.setHeight(height);
-				} else if (isCFrameAttached()) { } else {
-					std::get<ScaledCFrame>(this->cframe).scale[1] = height / 2;
+				if (isRootPart()) {
+					std::get<ExtendedPart*>(this->root)->hitbox.setHeight(height);
+				} else {
+					std::get<ScaledCFrame>(this->root).scale[1] = height / 2;
 				}
+
+				if (onChange != nullptr)
+					onChange();
 			}
 
 			double getDepth() {
-				if (isPartAttached()) {
-					return std::get<ExtendedPart*>(this->cframe)->hitbox.getDepth();
-				} else if (isCFrameAttached()) {
-					return 0;
+				if (isRootPart()) {
+					return std::get<ExtendedPart*>(this->root)->hitbox.getDepth();
 				} else {
-					return std::get<ScaledCFrame>(this->cframe).scale[2] * 2;
+					return std::get<ScaledCFrame>(this->root).scale[2] * 2;
 				}
 			}
 
 			void setDepth(double depth) {
-				if (isPartAttached()) {
-					std::get<ExtendedPart*>(this->cframe)->hitbox.setDepth(depth);
-				} else if (isCFrameAttached()) { } else {
-					std::get<ScaledCFrame>(this->cframe).scale[2] = depth / 2;
+				if (isRootPart()) {
+					std::get<ExtendedPart*>(this->root)->hitbox.setDepth(depth);
+				} else {
+					std::get<ScaledCFrame>(this->root).scale[2] = depth / 2;
 				}
+
+				if (onChange != nullptr)
+					onChange();
 			}
 
 			double getMaxRadius() {
-				if (isPartAttached()) {
-					return std::get<ExtendedPart*>(this->cframe)->hitbox.getMaxRadius();
-				} else if (isCFrameAttached()) {
-					return 0;
+				if (isRootPart()) {
+					return std::get<ExtendedPart*>(this->root)->hitbox.getMaxRadius();
 				} else {
-					DiagonalMat3 scale = std::get<ScaledCFrame>(this->cframe).scale;
-					return length(Vec3{scale[0], scale[1], scale[2]});
+					return length(Vec3 { getWidth(), getHeight(), getDepth() });
 				}
 			}
 
@@ -406,14 +513,19 @@ namespace P3D::Application {
 
 			Attachment(Part* from, Part* to) : from(from), to(to) {
 				this->isAttachmentToMainPart = to->isMainPart();
-				this->attachment = &to->parent->rigidBody.getAttachFor(isAttachmentToMainPart ? from : to).attachment;
+				this->attachment = &to->parent->rigidBody.getAttachFor(getChildPart()).attachment;
 			}
 
 			void setAttachment(const CFrame& cframe) {
-				if (isAttachmentToMainPart)
-					to->parent->rigidBody.setAttachFor(from, cframe);
-				else
-					to->parent->rigidBody.setAttachFor(to, cframe);
+				to->parent->rigidBody.setAttachFor(getChildPart(), cframe);
+			}
+
+			ExtendedPart* getMainPart() {
+				return reinterpret_cast<ExtendedPart*>(isAttachmentToMainPart ? to : from);
+			}
+
+			ExtendedPart* getChildPart() {
+				return reinterpret_cast<ExtendedPart*>(isAttachmentToMainPart ? from : to);
 			}
 		};
 

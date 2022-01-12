@@ -339,10 +339,10 @@ namespace P3D::Application {
 			IRef<Comp::Transform> transform = screen.registry.get<Comp::Transform>(SelectionTool::selection[0]);
 			if (transform.invalid())
 				return;
-			if (!transform->isPartAttached())
+			if (!transform->isRootPart())
 				return;
 			
-			TranslationTool::magnet.selectedPart = transform->getPart();
+			TranslationTool::magnet.selectedPart = std::get<ExtendedPart*>(transform->root);
 			TranslationTool::magnet.magnetPoint = planeIntersection;
 		}
 	}

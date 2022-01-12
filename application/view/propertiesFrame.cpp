@@ -235,13 +235,17 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type 
 	Vec3f position = castPositionToVec3f(component->getPosition());
 	Vec3f rotation = component->getRotation().asRotationVector();
 	DiagonalMat3f scale = component->getScale();
-	bool standalone = component->isPartAttached();
+	bool standalone = component->isRootPart();
 
 	PROPERTY_DESC("Standalone", "Whether the transform and scale is coming from the part", ImGui::Checkbox("##TransformHitbox", &standalone));
 
+	if (component->hasOffset()) {
+		TITLE("Global CFrame", true);
+	}
+
 	PROPERTY_IF_LOCK(
 		"Position:",
-		ImGui::DragVec3("TransformPosition", position.data, 0, 0.1, true),
+		ImGui::DragVec3("##TransformPosition", position.data, 0, 0.1, true),
 		component->setPosition(castVec3fToPosition(position));
 	);
 
@@ -257,6 +261,25 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type 
 		ImGui::DragVec3("##TransformScale", scale.data, 1.0f, 0.01f, true, &min), 
 		component->setScale(scale);
 	);
+
+	if (component->hasOffset()) {
+		CFrame relativeCFrame = component->getOffsetCFrame();
+		Vec3f relativePosition = relativeCFrame.getPosition();
+		Vec3f relativeRotation = relativeCFrame.getRotation().asRotationVector();
+
+		TITLE("Relative CFrame", true);
+		PROPERTY_IF_LOCK(
+			"Position:",
+			ImGui::DragVec3("##TransformRelativePosition", relativePosition.data, 0, 0.1, true),
+			component->setPosition(castVec3fToPosition(relativePosition));
+		);
+
+		PROPERTY_IF_LOCK(
+			"Rotation:",
+			ImGui::DragVec3("##TransformRelativeRotation", relativeRotation.data, 0.01f, 0.02f, true),
+			component->setRotation(Rotation::fromRotationVector(relativeRotation));
+		);
+	}
 
 	PROPERTY_FRAME_END;
 }
@@ -324,7 +347,7 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type 
 		PROPERTY_IF(
 			"",
 			ImGui::Button("Edit"),
-			registry.add<Comp::Transform>(entity, component->attachment)->addCallback([] () {Log::debug("Edit"); });
+			registry.add<Comp::Transform>(entity, component->getMainPart(), component->attachment)->addCallback([] () {Log::debug("Edit"); });
 		);
 	}
 
@@ -337,15 +360,15 @@ void renderSoftlink(Engine::Registry64& registry, Engine::Registry64::entity_typ
 	if (partA == nullptr || partB == nullptr)
 		return;
 
-	IRef<Comp::Name> nameA = registry.get<Comp::Name>(partA->entity);
-	IRef<Comp::Name> nameB = registry.get<Comp::Name>(partB->entity);
 	Vec3f positionA = component->getPositionA();
 	Vec3f positionB = component->getPositionB();
+	IRef<Comp::Name> nameA = registry.get<Comp::Name>(partA->entity);
+	IRef<Comp::Name> nameB = registry.get<Comp::Name>(partB->entity);
 	IRef<Comp::Transform> transform = registry.get<Comp::Transform>(entity);
 
-	bool isEditingFrame = transform.valid() && transform->isCFrameAttached();
-	bool isEditingFrameA = isEditingFrame && std::get<CFrame*>(transform->cframe) == &component->link->attachedPartA.attachment;
-	bool isEditingFrameB = isEditingFrame && std::get<CFrame*>(transform->cframe) == &component->link->attachedPartB.attachment;
+	bool isEditingFrame = transform.valid() && transform->isOffsetStoredRemote();
+	bool isEditingFrameA = isEditingFrame && std::get<CFrame*>(transform->offset) == &component->link->attachedPartA.attachment;
+	bool isEditingFrameB = isEditingFrame && std::get<CFrame*>(transform->offset) == &component->link->attachedPartB.attachment;
 	
 	TITLE("Attachment A", false);
 	PROPERTY("Part", ImGui::Text(nameA.valid() ? nameA->name.c_str() : "Part A"));
@@ -360,7 +383,7 @@ void renderSoftlink(Engine::Registry64& registry, Engine::Registry64::entity_typ
 		PROPERTY_IF(
 			"",
 			ImGui::Button("Edit##EditCFrameA"),
-			registry.add<Comp::Transform>(entity, &component->link->attachedPartA.attachment)->addCallback([] () {Log::debug("EditA"); });
+			registry.add<Comp::Transform>(entity, partA, &component->link->attachedPartA.attachment); SelectionTool::selection.recalculateSelection();
 		);
 	}
 
@@ -377,7 +400,7 @@ void renderSoftlink(Engine::Registry64& registry, Engine::Registry64::entity_typ
 		PROPERTY_IF(
 			"",
 			ImGui::Button("Edit##EditCFrameB"),
-			registry.add<Comp::Transform>(entity, &component->link->attachedPartB.attachment)->addCallback([] () {Log::debug("EditB"); });
+			registry.add<Comp::Transform>(entity, partB, &component->link->attachedPartB.attachment); SelectionTool::selection.recalculateSelection();
 		);
 	}
 }
@@ -455,6 +478,9 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type 
 	Vec3f childPosition = childCFrame->position;
 	Vec3f childRotation = childCFrame->rotation.asRotationVector();
 
+	//IRef<Comp::Name> nameA = registry.get<Comp::Name>(component->hardConstraint->constraintWithParent->);
+	//IRef<Comp::Name> nameB = registry.get<Comp::Name>(partB->entity);
+
 	TITLE("Parent", true);
 	PROPERTY("Part", ImGui::Text("Part A"));
 	PROPERTY_IF_LOCK(
@@ -463,7 +489,7 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type 
 		parentCFrame->position = parentPosition;
 	);
 	PROPERTY_IF_LOCK(
-		"Position",
+		"Rotation",
 		ImGui::DragVec3("##ParentRotation", parentRotation.data, 0, 0.1f, true),
 		parentCFrame->rotation = Rotation::fromRotationVector(parentRotation);
 	);
@@ -476,7 +502,7 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type 
 		childCFrame->position = childPosition;
 	);
 	PROPERTY_IF_LOCK(
-		"Position",
+		"Rotation",
 		ImGui::DragVec3("##ChildRotation", childRotation.data, 0, 0.1f, true),
 		childCFrame->rotation = Rotation::fromRotationVector(childRotation);
 	);

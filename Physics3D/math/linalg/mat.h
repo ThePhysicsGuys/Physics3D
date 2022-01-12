@@ -1212,6 +1212,13 @@ DiagonalMatrix<T, Size>& operator*=(DiagonalMatrix<T, Size>& mat, const T& facto
 	return mat;
 }
 template<typename T, std::size_t Size>
+DiagonalMatrix<T, Size>& operator*=(DiagonalMatrix<T, Size>& mat, const DiagonalMatrix<T, Size>& other) {
+	for (std::size_t i = 0; i < Size; i++) {
+		mat[i] *= other[i];
+	}
+	return mat;
+}
+template<typename T, std::size_t Size>
 DiagonalMatrix<T, Size>& operator/=(DiagonalMatrix<T, Size>& mat, const T& factor) {
 	for (std::size_t i = 0; i < Size; i++) {
 		mat[i] /= factor;

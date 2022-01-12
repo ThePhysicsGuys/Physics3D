@@ -105,7 +105,7 @@ namespace P3D::Application {
 				IRef<Comp::Transform> transform = view.get<Comp::Transform>(entity);
 
 				Shape shape = hitbox->getShape();
-				if (!transform->isPartAttached())
+				if (!transform->isRootPart())
 					shape = shape.scaled(transform->getScale());
 
 				Bounds bounds = shape.getBounds(transform->getRotation()) + transform->getPosition();
