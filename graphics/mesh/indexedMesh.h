@@ -5,6 +5,9 @@
 #include "../buffers/bufferLayout.h"
 #include "../renderer.h"
 
+#include "../buffers/indexBuffer.h"
+#include "../buffers/vertexBuffer.h"
+
 namespace P3D::Graphics {
 
 class IndexBuffer;

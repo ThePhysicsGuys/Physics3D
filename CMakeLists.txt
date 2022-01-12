@@ -208,7 +208,15 @@ add_executable(application
   application/picker/tools/rotationTool.cpp
   application/picker/tools/scaleTool.cpp
   application/picker/tools/regionSelectionTool.cpp
-
+  application/picker/tools/attachmentTool.cpp
+  application/picker/tools/fixedConstraintTool.cpp
+  application/picker/tools/motorConstraintTool.cpp
+  application/picker/tools/pistonConstraintTool.cpp
+  application/picker/tools/elasticLinkTool.cpp
+  application/picker/tools/magneticLinkTool.cpp
+  application/picker/tools/springLinkTool.cpp
+  application/picker/tools/alignmentLinkTool.cpp
+  
   application/shader/shaders.cpp
   application/shader/basicShader.cpp
   application/shader/shaderBase.cpp
