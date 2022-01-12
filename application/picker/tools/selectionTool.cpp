@@ -109,7 +109,7 @@ std::optional<std::pair<Engine::Registry64::entity_type, Position>> SelectionToo
 }
 
 std::optional<std::pair<Engine::Registry64::entity_type, Position>> SelectionTool::getIntersectedEntity() {
-	Engine::Registry64::entity_type intersectedEntity = 0;
+	Engine::Registry64::entity_type intersectedEntity = Engine::Registry64::null_entity;
 	double closestIntersectionDistance = std::numeric_limits<double>::max();
 
 	{

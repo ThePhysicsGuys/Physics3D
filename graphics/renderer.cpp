@@ -233,8 +233,16 @@ void genBuffers(int count, GLID* id) {
 	glGenBuffers(count, id);
 }
 
+void delBuffers(int count, GLID* id) {
+	glDeleteBuffers(count, id);
+}
+
 void genVertexArrays(int count, GLID* id) {
 	glGenVertexArrays(count, id);
+}
+
+void delVertexArrays(int count, GLID* id) {
+	glDeleteVertexArrays(count, id);
 }
 
 void bindBuffer(GLFLAG target, GLID id) {

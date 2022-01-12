@@ -4,7 +4,6 @@
 #include "../engine/event/mouseEvent.h"
 #include "../engine/tool/stateTool.h"
 #include "ecs/components.h"
-#include <optional>
 #include <Physics3D/externalforces/magnetForce.h>
 
 namespace P3D::Application {

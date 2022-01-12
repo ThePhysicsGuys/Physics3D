@@ -45,7 +45,14 @@ protected:
 
 		bindBuffer(ARRAY_BUFFER, 0);
 		bindVertexArray(0);
-	};
+	}
+
+	~Primitive() {
+		using namespace Renderer;
+
+		delBuffers(1, &vbo);
+		delVertexArrays(1, &vao);
+	}
 };
 
 

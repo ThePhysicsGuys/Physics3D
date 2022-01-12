@@ -82,6 +82,8 @@ extern int parseShaderVersion(const char* version);
 
 extern void genBuffers(int count, GLID* id);
 extern void genVertexArrays(int count, GLID* id);
+void delBuffers(int count, GLID* id);
+void delVertexArrays(int count, GLID* id);
 extern void bindBuffer(GLFLAG target, GLID id);
 extern void bufferData(GLFLAG target, int size, int offset, GLFLAG type);
 extern void bufferSubData(GLFLAG target, int offset, int size, const void* pointer);

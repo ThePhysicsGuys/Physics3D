@@ -20,6 +20,7 @@ namespace P3D::Application {
 		[[nodiscard]] std::size_t size() const;
 		[[nodiscard]] bool contains(const Engine::Registry64::entity_type& entity) const;
 		[[nodiscard]] bool isMultiSelection() const;
+		[[nodiscard]] bool isSingleSelection() const;
 		[[nodiscard]] Engine::Registry64::entity_type& operator[](int index);
 		
 		void add(const Selection& other, bool recalculateBounds = true);

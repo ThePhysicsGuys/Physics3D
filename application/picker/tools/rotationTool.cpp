@@ -9,7 +9,6 @@
 #include "view/screen.h"
 #include "shader/shaders.h"
 
-#include <Physics3D/misc/toString.h>
 #include <Physics3D/geometry/shapeLibrary.h>
 #include <Physics3D/math/rotation.h>
 #include <Physics3D/threading/upgradeableMutex.h>
@@ -27,8 +26,12 @@ namespace P3D::Application {
 		Rotation::Predefined::IDENTITY // Z
 	};
 
-	static LinePrimitive* line = nullptr;
-	static IndexedMesh* handleMesh;
+	static std::optional<Position> startPosition;
+
+	static URef<LinePrimitive> deltaLine = nullptr;
+	static URef<LinePrimitive> unitLine = nullptr;
+	static URef<LinePrimitive> infiniteLine = nullptr;
+	static URef<IndexedMesh> handleMesh;
 	static VisualShape handleShape;
 	
 	void RotationTool::onRegister() {
@@ -39,12 +42,16 @@ namespace P3D::Application {
 		ResourceManager::add<TextureResource>(getName(), path);
 
 		// Create alignment line
-		line = new LinePrimitive();
-		line->resize(Vec3f(0, 0, -100000), Vec3f(0, 0, 100000));
+		deltaLine = std::make_unique<LinePrimitive>();
+		unitLine = std::make_unique<LinePrimitive>();
+		infiniteLine = std::make_unique<LinePrimitive>();
+
+		unitLine->resize(Vec3f(0, 0, 0), Vec3f(0, 0, 1));
+		infiniteLine->resize(Vec3f(0, 0, -100000), Vec3f(0, 0, 100000));
 		
 		// Create handle shapes
 		handleShape = VisualShape::generateSmoothNormalsShape(ShapeLibrary::createTorus(1.0f, 0.03f, 80, 12));
-		handleMesh = new IndexedMesh(handleShape);
+		handleMesh = std::make_unique<IndexedMesh>(handleShape);
 
 		// Set idle status
 		setToolStatus(kIdle);
@@ -71,23 +78,23 @@ namespace P3D::Application {
 		Mat4f modelC = GlobalCFrame(cframe->getPosition(), Rotation::fromDirection(Vec3(screen.camera.cframe.position - cframe->getPosition()))).asMat4();
 
 		auto status = getToolStatus();		
-		if (status == kRotateX) {
-			Shaders::maskShader->updateModel(modelX);
-			Shaders::maskShader->updateColor(Colors::RGB_R);
-			line->render();
-		}
+		Shaders::maskShader->updateModel(modelX);
+		Shaders::maskShader->updateColor(Colors::RGB_R);
+		unitLine->render();
+		if (status == kRotateX)
+			infiniteLine->render();
 
-		if (status == kRotateY) {
-			Shaders::maskShader->updateModel(modelY);
-			Shaders::maskShader->updateColor(Colors::RGB_G);
-			line->render();
-		}
+		Shaders::maskShader->updateModel(modelY);
+		Shaders::maskShader->updateColor(Colors::RGB_G);
+		unitLine->render();
+		if (status == kRotateY) 
+			infiniteLine->render();
 
-		if (status == kRotateZ) {
-			Shaders::maskShader->updateModel(modelZ);
-			Shaders::maskShader->updateColor(Colors::RGB_B);
-			line->render();
-		}
+		Shaders::maskShader->updateModel(modelZ);
+		Shaders::maskShader->updateColor(Colors::RGB_B);
+		unitLine->render();
+		if (status == kRotateZ) 
+			infiniteLine->render();
 
 		Shaders::basicShader->updateModel(modelC);
 		Shaders::basicShader->updateMaterial(Comp::Material(Colors::YELLOW));
@@ -107,7 +114,14 @@ namespace P3D::Application {
 		Shaders::basicShader->updateMaterial(Comp::Material(Colors::RGB_B));
 		Shaders::basicShader->updateModel(modelZ);
 		handleMesh->render();
-		
+
+		if (startPosition.has_value() && active) {
+			Shaders::basicShader->updateMaterial(Comp::Material(Colors::ORANGE));
+			Shaders::basicShader->updateModel(GlobalCFrame(startPosition.value()), DiagonalMat3::IDENTITY() * 0.5);
+			Vec3f doubleRelativePosition = (castPositionToVec3f(cframe->position) - castPositionToVec3f(startPosition.value())) * 2.0f;
+			deltaLine->resize(Vec3f(), doubleRelativePosition);
+			deltaLine->render();
+		}
 	}
 
 	void RotationTool::onUpdate() {
@@ -193,6 +207,9 @@ namespace P3D::Application {
 		// Set the selected point 
 		SelectionTool::selectedPoint = SelectionTool::intersectedPoint;
 
+		// Set start position
+		startPosition = SelectionTool::selectedPoint;
+
 		// Set edit status to active
 		this->active = true;
 
@@ -204,9 +221,14 @@ namespace P3D::Application {
 		if (event.getButton() != Mouse::LEFT)
 			return false;
 
+		// Set inactive
 		this->active = false;
 
+		// Reset magnet
 		TranslationTool::magnet.selectedPart = nullptr;
+
+		// Clear start position
+		startPosition = std::nullopt;
 
 		return false;
 	};

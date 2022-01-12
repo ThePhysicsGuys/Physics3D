@@ -13,13 +13,13 @@ struct VisualShape;
 
 class IndexedMesh : public AbstractMesh {
 public:
-	IndexBuffer* indexBuffer = nullptr;
-	VertexBuffer* vertexBuffer = nullptr;
-	VertexBuffer* normalBuffer = nullptr;
-	VertexBuffer* uvBuffer = nullptr;
-	VertexBuffer* tangentBuffer = nullptr;
-	VertexBuffer* bitangentBuffer = nullptr;
-	VertexBuffer* uniformBuffer = nullptr;
+	URef<IndexBuffer> indexBuffer = nullptr;
+	URef<VertexBuffer> vertexBuffer = nullptr;
+	URef<VertexBuffer> normalBuffer = nullptr;
+	URef<VertexBuffer> uvBuffer = nullptr;
+	URef<VertexBuffer> tangentBuffer = nullptr;
+	URef<VertexBuffer> bitangentBuffer = nullptr;
+	URef<VertexBuffer> uniformBuffer = nullptr;
 
 	std::size_t vertexCount;
 	std::size_t triangleCount;
@@ -27,7 +27,7 @@ public:
 	IndexedMesh(const VisualShape& shape);
 	IndexedMesh(const float* vertices, const float* normals, const float* uvs, const unsigned int* indices, std::size_t vertexCount, std::size_t triangleCount);
 
-	~IndexedMesh();
+	virtual ~IndexedMesh();
 	IndexedMesh(IndexedMesh&& other);
 	IndexedMesh(const IndexedMesh&) = delete;
 	IndexedMesh& operator=(IndexedMesh&& other);

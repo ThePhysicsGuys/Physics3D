@@ -40,12 +40,16 @@ namespace P3D::Application {
 		2  // YZ
 	};
 
-	static LinePrimitive* line = nullptr;
-	static IndexedMesh* quadMesh;
+	static std::optional<Position> startPosition;
+
+	static URef<LinePrimitive> deltaLine = nullptr;
+	static URef<LinePrimitive> infiniteLine = nullptr;
+
+	static URef<IndexedMesh> quadMesh;
 	static VisualShape quadShape;
-	static IndexedMesh* centerMesh;
+	static URef<IndexedMesh> centerMesh;
 	static VisualShape centerShape;
-	static IndexedMesh* handleMesh;
+	static URef<IndexedMesh> handleMesh;
 	static VisualShape handleShape;
 
 	MagnetForce TranslationTool::magnet(PICKER_STRENGTH, PICKER_SPEED_STRENGTH);
@@ -68,16 +72,17 @@ namespace P3D::Application {
 		ResourceManager::add<TextureResource>(getName(), path);
 
 		// Create alignment line
-		line = new LinePrimitive();
-		line->resize(Vec3f(0, 0, -100000), Vec3f(0, 0, 100000));
+		deltaLine = std::make_unique<LinePrimitive>();
+		infiniteLine = std::make_unique<LinePrimitive>();
+		infiniteLine->resize(Vec3f(0, 0, -100000), Vec3f(0, 0, 100000));
 		
 		// Create handle shapes
 		handleShape = VisualShape::generateSplitNormalsShape(createArrow(0.3f, 0.07f, 0.03f));
-		handleMesh = new IndexedMesh(handleShape);
+		handleMesh = std::make_unique<IndexedMesh>(handleShape);
 		centerShape = VisualShape::generateSmoothNormalsShape(ShapeLibrary::createSphere(0.13f, 3));
-		centerMesh = new IndexedMesh(centerShape);
+		centerMesh = std::make_unique<IndexedMesh>(centerShape);
 		quadShape = VisualShape::generateSplitNormalsShape(ShapeLibrary::createBox(0.02, 0.25, 0.25).translated({0, 0.5, 0.5}));
-		quadMesh = new IndexedMesh(quadShape);
+		quadMesh = std::make_unique<IndexedMesh>(quadShape);
 
 		// Set idle status
 		setToolStatus(kIdle);
@@ -101,6 +106,13 @@ namespace P3D::Application {
 		if (!cframe.has_value())
 			return;
 
+		std::optional<GlobalCFrame> rootCFrame;
+		if (SelectionTool::selection.isSingleSelection()) {
+			IRef<Comp::Transform> rootTransform = screen.registry.get<Comp::Transform>(SelectionTool::selection.first().value());
+			if (rootTransform.valid() && rootTransform->hasOffset())
+				rootCFrame = rootTransform->getRootCFrame();
+		}
+
 		Mat4f model = cframe->asMat4();
 		Mat4f modelX = model * joinDiagonal(Mat3f(transformations[0].asRotationMatrix()), 1.0f);
 		Mat4f modelY = model * joinDiagonal(Mat3f(transformations[1].asRotationMatrix()), 1.0f);
@@ -111,21 +123,22 @@ namespace P3D::Application {
 		if (status == kTranslateX || status == kTranslateXY || status == kTranslateXZ) {
 			Shaders::maskShader->updateModel(modelX);
 			Shaders::maskShader->updateColor(Colors::RGB_R);
-			line->render();
+			infiniteLine->render();
 		}
 
 		if (status == kTranslateY || status == kTranslateXY || status == kTranslateYZ) {
 			Shaders::maskShader->updateModel(modelY);
 			Shaders::maskShader->updateColor(Colors::RGB_G);
-			line->render();
+			infiniteLine->render();
 		}
 
 		if (status == kTranslateZ || status == kTranslateXZ || status == kTranslateYZ) {
 			Shaders::maskShader->updateModel(modelZ);
 			Shaders::maskShader->updateColor(Colors::RGB_B);
-			line->render();
+			infiniteLine->render();
 		}
 
+		// Center
 		Shaders::basicShader->updateModel(model);
 		Shaders::basicShader->updateMaterial(Comp::Material(Colors::WHITE));
 		centerMesh->render();
@@ -150,7 +163,41 @@ namespace P3D::Application {
 		handleMesh->render();
 		Shaders::basicShader->updateMaterial(Comp::Material(Colors::RGB_R));
 		quadMesh->render();
-		
+
+		// Root XYZ
+		if (rootCFrame.has_value()) {
+			Mat4f rootModel = rootCFrame.value().asMat4WithPreScale(DiagonalMat3::IDENTITY() * 0.25);
+			Mat4f rootModelX = rootModel * joinDiagonal(Mat3f(transformations[0].asRotationMatrix()), 1.0f);
+			Mat4f rootModelY = rootModel * joinDiagonal(Mat3f(transformations[1].asRotationMatrix()), 1.0f);
+			Mat4f rootModelZ = rootModel * joinDiagonal(Mat3f(transformations[2].asRotationMatrix()), 1.0f);
+			
+			Shaders::basicShader->updateMaterial(Comp::Material(Colors::WHITE));
+			Shaders::basicShader->updateModel(rootModel);
+			centerMesh->render();
+			Shaders::basicShader->updateMaterial(Comp::Material(Colors::RGB_R));
+			Shaders::basicShader->updateModel(rootModelX);
+			handleMesh->render();
+			Shaders::basicShader->updateMaterial(Comp::Material(Colors::RGB_G));
+			Shaders::basicShader->updateModel(rootModelY);
+			handleMesh->render();
+			Shaders::basicShader->updateMaterial(Comp::Material(Colors::RGB_B));
+			Shaders::basicShader->updateModel(rootModelZ);
+			handleMesh->render();
+			Shaders::basicShader->updateModel(Mat4::IDENTITY());
+			Shaders::basicShader->updateMaterial(Comp::Material(Colors::GRAY));
+			deltaLine->resize(castPositionToVec3f(rootCFrame.value().position), castPositionToVec3f(cframe.value().position));
+			deltaLine->render();
+		}
+
+		// Delta line
+		if (startPosition.has_value() && active) {
+			Shaders::basicShader->updateMaterial(Comp::Material(Colors::ORANGE));
+			Shaders::basicShader->updateModel(GlobalCFrame(startPosition.value()), DiagonalMat3::IDENTITY() * 0.5);
+			Vec3f doubleRelativePosition = (castPositionToVec3f(cframe->position) - castPositionToVec3f(startPosition.value())) * 2.0f;
+			deltaLine->resize(Vec3f(), doubleRelativePosition);
+			deltaLine->render();
+			centerMesh->render();
+		}
 	}
 
 	void TranslationTool::onUpdate() {
@@ -251,6 +298,10 @@ namespace P3D::Application {
 		// Set the selected point 
 		SelectionTool::selectedPoint = SelectionTool::intersectedPoint;
 
+		// Set start position
+		std::optional<GlobalCFrame> selectionCFrame = SelectionTool::selection.getCFrame();
+		startPosition = selectionCFrame.has_value() ? std::make_optional(selectionCFrame->position) : std::nullopt;
+
 		// Set edit status to active
 		this->active = true;
 
@@ -265,7 +316,11 @@ namespace P3D::Application {
 		// Reset magnet point
 		this->magnet.selectedPart = nullptr;
 
+		// Set inactive
 		this->active = false;
+
+		// Reset old position
+		startPosition = std::nullopt;
 
 		return false;
 	}

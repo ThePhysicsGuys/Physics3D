@@ -59,6 +59,10 @@ namespace P3D::Application {
 		return size() > 1;
 	}
 
+	bool Selection::isSingleSelection() const {
+		return size() == 1;
+	}
+
 	Engine::Registry64::entity_type& Selection::operator[](int index) {
 		return this->selection[index];
 	}

@@ -29,71 +29,71 @@ IndexedMesh::IndexedMesh(const VisualShape& shape) : AbstractMesh(), vertexCount
 	BufferLayout vertexBufferLayout = {
 	{{ "vPosition", BufferDataType::FLOAT3 }}
 	};
-	vertexBuffer = new VertexBuffer(vertexBufferLayout, vertices, 3 * vertexCount * sizeof(float));
+	vertexBuffer = std::make_unique<VertexBuffer>(vertexBufferLayout, vertices, 3 * vertexCount * sizeof(float));
 
 	BufferLayout normalBufferLayout = {
 		{{ "vNormal", BufferDataType::FLOAT3 }}
 	};
-	normalBuffer = new VertexBuffer(normalBufferLayout, reinterpret_cast<float const*>(shape.normals.get()), 3 * vertexCount * sizeof(float));
+	normalBuffer = std::make_unique<VertexBuffer>(normalBufferLayout, reinterpret_cast<float const*>(shape.normals.get()), 3 * vertexCount * sizeof(float));
 
 	BufferLayout uvBufferLayout = {
 		{{ "vUV", BufferDataType::FLOAT2 }}
 	};
-	uvBuffer = new VertexBuffer(uvBufferLayout, reinterpret_cast<float const*>(shape.uvs.get()), 2 * vertexCount * sizeof(float));
+	uvBuffer = std::make_unique<VertexBuffer>(uvBufferLayout, reinterpret_cast<float const*>(shape.uvs.get()), 2 * vertexCount * sizeof(float));
 
 	BufferLayout tangentBufferLayout = {
 		{{ "vTangent", BufferDataType::FLOAT3 }}
 	};
-	tangentBuffer = new VertexBuffer(tangentBufferLayout, reinterpret_cast<float const*>(shape.tangents.get()), 3 * vertexCount * sizeof(float));
+	tangentBuffer = std::make_unique<VertexBuffer>(tangentBufferLayout, reinterpret_cast<float const*>(shape.tangents.get()), 3 * vertexCount * sizeof(float));
 
 	BufferLayout bitangentBufferLayout = {
 		{{ "vBitangent", BufferDataType::FLOAT3 }}
 	};
-	bitangentBuffer = new VertexBuffer(bitangentBufferLayout, reinterpret_cast<float const*>(shape.bitangents.get()), 3 * vertexCount * sizeof(float));
+	bitangentBuffer = std::make_unique<VertexBuffer>(bitangentBufferLayout, reinterpret_cast<float const*>(shape.bitangents.get()), 3 * vertexCount * sizeof(float));
 
-	indexBuffer = new IndexBuffer(triangles, 3 * triangleCount);
+	indexBuffer = std::make_unique<IndexBuffer>(triangles, 3 * triangleCount);
 
-	vao->addBuffer(vertexBuffer);
-	vao->addBuffer(normalBuffer);
-	vao->addBuffer(uvBuffer);
-	vao->addBuffer(tangentBuffer);
-	vao->addBuffer(bitangentBuffer);
+	vao->addBuffer(vertexBuffer.get());
+	vao->addBuffer(normalBuffer.get());
+	vao->addBuffer(uvBuffer.get());
+	vao->addBuffer(tangentBuffer.get());
+	vao->addBuffer(bitangentBuffer.get());
 }
 
 IndexedMesh::IndexedMesh(const float* vertices, const float* normals, const float* uvs, const unsigned int* indices, std::size_t vertexCount, std::size_t triangleCount) : AbstractMesh(), vertexCount(vertexCount), triangleCount(triangleCount) {
 	BufferLayout vertexBufferLayout = {
 		{{ "vposition", BufferDataType::FLOAT3 }}
 	};
-	vertexBuffer = new VertexBuffer(vertexBufferLayout, vertices, 3 * vertexCount * sizeof(float));
+	vertexBuffer = std::make_unique<VertexBuffer>(vertexBufferLayout, vertices, 3 * vertexCount * sizeof(float));
 
 	BufferLayout normalBufferLayout = {
 		{{ "vnormal", BufferDataType::FLOAT3 }}
 	};
-	normalBuffer = new VertexBuffer(normalBufferLayout, normals, 3 * vertexCount * sizeof(float));
+	normalBuffer = std::make_unique<VertexBuffer>(normalBufferLayout, normals, 3 * vertexCount * sizeof(float));
 
 	BufferLayout uvBufferLayout = {
 		{{ "vUV", BufferDataType::FLOAT2 }}
 	};
-	uvBuffer = new VertexBuffer(uvBufferLayout, uvs, 2 * vertexCount * sizeof(float));
-
-	indexBuffer = new IndexBuffer(indices, 3 * triangleCount);
+	uvBuffer = std::make_unique<VertexBuffer>(uvBufferLayout, uvs, 2 * vertexCount * sizeof(float));
 
 	// TODO Generate tangents and bitangents
 	BufferLayout tangentBufferLayout = {
 		{{ "vTangent", BufferDataType::FLOAT3 }}
 	};
-	tangentBuffer = new VertexBuffer(tangentBufferLayout, nullptr, 0);
+	tangentBuffer = std::make_unique<VertexBuffer>(tangentBufferLayout, nullptr, 0);
 
 	BufferLayout bitangentBufferLayout = {
 		{{ "vBitangent", BufferDataType::FLOAT3 }}
 	};
-	bitangentBuffer = new VertexBuffer(bitangentBufferLayout, nullptr, 0);
+	bitangentBuffer = std::make_unique<VertexBuffer>(bitangentBufferLayout, nullptr, 0);
 
-	vao->addBuffer(vertexBuffer);
-	vao->addBuffer(normalBuffer);
-	vao->addBuffer(uvBuffer);
-	vao->addBuffer(tangentBuffer);
-	vao->addBuffer(bitangentBuffer);
+	indexBuffer = std::make_unique<IndexBuffer>(indices, 3 * triangleCount);
+
+	vao->addBuffer(vertexBuffer.get());
+	vao->addBuffer(normalBuffer.get());
+	vao->addBuffer(uvBuffer.get());
+	vao->addBuffer(tangentBuffer.get());
+	vao->addBuffer(bitangentBuffer.get());
 }
 
 IndexedMesh::~IndexedMesh() {
@@ -103,14 +103,15 @@ IndexedMesh::~IndexedMesh() {
 
 IndexedMesh::IndexedMesh(IndexedMesh&& other) {
 	vao = other.vao;
-	
-	indexBuffer = other.indexBuffer;
-	vertexBuffer = other.vertexBuffer;
-	normalBuffer = other.normalBuffer;
-	uvBuffer = other.uvBuffer;
-	tangentBuffer = other.tangentBuffer;
-	bitangentBuffer = other.bitangentBuffer;
-	uniformBuffer = other.uniformBuffer;
+
+	indexBuffer.swap(other.indexBuffer);
+	vertexBuffer.swap(other.vertexBuffer);
+	normalBuffer.swap(other.normalBuffer);
+	uvBuffer.swap(other.uvBuffer);
+	tangentBuffer.swap(other.tangentBuffer);
+	bitangentBuffer.swap(other.bitangentBuffer);
+	uniformBuffer.swap(other.uniformBuffer);
+	indexBuffer.swap(other.indexBuffer);
 
 	vertexCount = other.vertexCount;
 	triangleCount = other.triangleCount;
@@ -154,7 +155,7 @@ void IndexedMesh::render() {
 }
 
 void IndexedMesh::addUniformBuffer(VertexBuffer* uniformBuffer) {
-	this->uniformBuffer = uniformBuffer;
+	this->uniformBuffer = URef<VertexBuffer>(uniformBuffer);
 
 	vao->addBuffer(uniformBuffer);
 }
