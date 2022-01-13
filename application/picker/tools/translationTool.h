@@ -40,8 +40,8 @@ public:
 	bool onMouseRelease(Engine::MouseReleaseEvent& event);
 	bool onMouseDrag(Engine::MouseDragEvent& event);
 	
-	static void translateInPlane(const Vec3& normal, bool local = true);
-	static void translateAlongLine(const Vec3& direction, bool local = true);
+	static void translateInPlane(const Vec3& normal, bool clamp = false, bool local = true);
+	static void translateAlongLine(const Vec3& direction, bool clamp = false, bool local = true);
 };
 
 };

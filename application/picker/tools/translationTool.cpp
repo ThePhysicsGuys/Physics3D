@@ -17,6 +17,7 @@
 #include "../graphics/mesh/indexedMesh.h"
 #include "../graphics/resource/textureResource.h"
 #include "../util/resource/resourceManager.h"
+#include "imgui/imgui.h"
 
 #define PICKER_STRENGTH 100
 #define PICKER_SPEED_STRENGTH 12
@@ -333,28 +334,30 @@ namespace P3D::Application {
 		if (status == kIdle)
 			return false;
 
+		bool clamp = ImGui::GetIO().KeyAlt;
+
 		std::unique_lock<UpgradeableMutex> worldWriteLock(*screen.worldMutex);
 		switch (status) {
 			case kTranslateX:
-				translateAlongLine({ 1, 0, 0 });
+				translateAlongLine({ 1, 0, 0 }, clamp);
 				break;
 			case kTranslateY:
-				translateAlongLine({ 0, 1, 0 });
+				translateAlongLine({ 0, 1, 0 }, clamp);
 				break;
 			case kTranslateZ:
-				translateAlongLine({ 0, 0, 1 });
+				translateAlongLine({ 0, 0, 1 }, clamp);
 				break;
 			case kTranslateC:
-				translateInPlane(screen.camera.cframe.rotation * Vec3(0, 0, 1), false);
+				translateInPlane(screen.camera.cframe.rotation * Vec3(0, 0, 1), clamp, false);
 				break;
 			case kTranslateXY:
-				translateInPlane({ 0, 0, 1 });
+				translateInPlane({ 0, 0, 1 }, clamp);
 				break;
 			case kTranslateXZ:
-				translateInPlane({ 0, 1, 0 });
+				translateInPlane({ 0, 1, 0 }, clamp);
 				break;
 			case kTranslateYZ:
-				translateInPlane({ 1, 0, 0 });
+				translateInPlane({ 1, 0, 0 }, clamp);
 				break;
 			default:
 				return false;
@@ -363,13 +366,13 @@ namespace P3D::Application {
 		return true;
 	}
 
-	void TranslationTool::translateInPlane(const Vec3& normal, bool local) {
+	void TranslationTool::translateInPlane(const Vec3& normal, bool clamp, bool local) {
 		if (SelectionTool::selection.empty())
 			return;
 
 		Vec3 direction;
+		std::optional<GlobalCFrame> cframe = SelectionTool::selection.getCFrame();
 		if (local) {
-			std::optional<GlobalCFrame> cframe = SelectionTool::selection.getCFrame();
 			if (!cframe.has_value())
 				return;
 
@@ -383,6 +386,15 @@ namespace P3D::Application {
 
 		if (isPaused()) {
 			Vec3 translation = planeIntersection - *SelectionTool::selectedPoint;
+
+			// Clamp to grid
+			if (clamp) {
+				Vec3 resultingPosition = castPositionToVec3(cframe->translated(translation).getPosition());
+				Vec3 clampedPosition = Vec3(round(resultingPosition.x), round(resultingPosition.y), round(resultingPosition.z));
+				Vec3 difference = resultingPosition - clampedPosition;
+				translation -= difference;
+			}
+
 			*SelectionTool::selectedPoint += translation;
 			
 			SelectionTool::selection.translate(translation);
@@ -402,7 +414,7 @@ namespace P3D::Application {
 		}
 	}
 
-	void TranslationTool::translateAlongLine(const Vec3& direction, bool local) {
+	void TranslationTool::translateAlongLine(const Vec3& direction, bool clamp, bool local) {
 		// Closest point on ray1 (A + s * a) from ray2 (B + t * b). Ray1 is the ray from the parts' center in the direction of the edit tool, ray2 is the mouse ray. Directions a and b are normalized. Only s is calculated.
 		if (SelectionTool::selection.empty())
 			return;
@@ -425,6 +437,14 @@ namespace P3D::Application {
 		// Translation, relative to tool intersection
 		Vec3 translationCorrection = ray1.direction * (ray1.direction * (*SelectionTool::selectedPoint - cframe->getPosition()));
 		Vec3 translation = s * ray1.direction - translationCorrection;
+
+		// Clamp to grid
+		if (clamp) {
+			Vec3 resultingPosition = castPositionToVec3(cframe->translated(translation).getPosition());
+			Vec3 clampedPosition = Vec3(round(resultingPosition.x), round(resultingPosition.y), round(resultingPosition.z));
+			Vec3 difference = resultingPosition - clampedPosition;
+			translation -= difference;
+		}
 
 		*SelectionTool::selectedPoint += translation;
 		SelectionTool::selection.translate(translation);

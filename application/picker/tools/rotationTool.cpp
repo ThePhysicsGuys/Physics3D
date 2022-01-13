@@ -46,7 +46,7 @@ namespace P3D::Application {
 		unitLine = std::make_unique<LinePrimitive>();
 		infiniteLine = std::make_unique<LinePrimitive>();
 
-		unitLine->resize(Vec3f(0, 0, 0), Vec3f(0, 0, 1));
+		unitLine->resize(Vec3f(0, 0, 0), Vec3f(0, 0, 0.5));
 		infiniteLine->resize(Vec3f(0, 0, -100000), Vec3f(0, 0, 100000));
 		
 		// Create handle shapes
