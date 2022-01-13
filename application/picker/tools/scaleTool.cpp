@@ -18,6 +18,7 @@
 #include "../graphics/mesh/indexedMesh.h"
 #include "../graphics/resource/textureResource.h"
 #include "../util/resource/resourceManager.h"
+#include "imgui/imgui.h"
 
 namespace P3D::Application {
 	
@@ -265,6 +266,8 @@ namespace P3D::Application {
 		if (status == kIdle)
 			return false;
 
+		bool clamp = ImGui::GetIO().KeyAlt;
+
 		std::unique_lock<UpgradeableMutex> worldLock(*screen.worldMutex);
 		switch (status) {
 			case kScaleX:
@@ -289,7 +292,7 @@ namespace P3D::Application {
 				scaleInPlane({ 1, 0, 0 });
 				break;
 			case kTranslateC:
-				TranslationTool::translateInPlane(screen.camera.cframe.rotation * Vec3(0, 0, 1), false);
+				TranslationTool::translateInPlane(screen.camera.cframe.rotation * Vec3(0, 0, 1), clamp, false);
 				break;
 			default:
 				return false;

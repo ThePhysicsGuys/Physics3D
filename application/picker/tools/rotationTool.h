@@ -23,7 +23,7 @@ private:
 public:
 	DEFINE_TOOL("Rotate", "Rotate entities by using the handles", Graphics::GLFW::Cursor::ARROW);
 
-	~RotationTool() = default;	
+	virtual ~RotationTool() override = default;	
 
 	void onRegister() override;
 	void onDeregister() override;
@@ -35,7 +35,7 @@ public:
 	bool onMouseRelease(Engine::MouseReleaseEvent& event);
 	bool onMouseDrag(Engine::MouseDragEvent& event);
 
-	static void rotateAroundLine(const Vec3& direction, bool local = true);
+	static void rotateAroundLine(const Vec3& direction, bool clamp, bool local);
 };
 
 };

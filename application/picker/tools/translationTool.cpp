@@ -102,10 +102,14 @@ namespace P3D::Application {
 
 	void TranslationTool::onRender() {
 		using namespace Graphics;
-		
+
 		std::optional<GlobalCFrame> cframe = SelectionTool::selection.getCFrame();
 		if (!cframe.has_value())
 			return;
+
+		bool local = !ImGui::GetIO().KeyCtrl;
+		if (!local)
+			cframe = GlobalCFrame(cframe->position);
 
 		std::optional<GlobalCFrame> rootCFrame;
 		if (SelectionTool::selection.isSingleSelection()) {
@@ -217,6 +221,10 @@ namespace P3D::Application {
 		std::optional<GlobalCFrame> cframe = SelectionTool::selection.getCFrame();
 		if (!cframe.has_value())
 			return;
+
+		bool local = !ImGui::GetIO().KeyCtrl;
+		if (!local)
+			cframe = GlobalCFrame(cframe->position);
 		
 		GlobalCFrame frame = *cframe;
 		for (char status = kTranslateX; status <= kTranslateYZ; status++) {
@@ -335,29 +343,30 @@ namespace P3D::Application {
 			return false;
 
 		bool clamp = ImGui::GetIO().KeyAlt;
+		bool local = !ImGui::GetIO().KeyCtrl;
 
 		std::unique_lock<UpgradeableMutex> worldWriteLock(*screen.worldMutex);
 		switch (status) {
 			case kTranslateX:
-				translateAlongLine({ 1, 0, 0 }, clamp);
+				translateAlongLine({ 1, 0, 0 }, clamp, local);
 				break;
 			case kTranslateY:
-				translateAlongLine({ 0, 1, 0 }, clamp);
+				translateAlongLine({ 0, 1, 0 }, clamp, local);
 				break;
 			case kTranslateZ:
-				translateAlongLine({ 0, 0, 1 }, clamp);
+				translateAlongLine({ 0, 0, 1 }, clamp, local);
 				break;
 			case kTranslateC:
 				translateInPlane(screen.camera.cframe.rotation * Vec3(0, 0, 1), clamp, false);
 				break;
 			case kTranslateXY:
-				translateInPlane({ 0, 0, 1 }, clamp);
+				translateInPlane({ 0, 0, 1 }, clamp, local);
 				break;
 			case kTranslateXZ:
-				translateInPlane({ 0, 1, 0 }, clamp);
+				translateInPlane({ 0, 1, 0 }, clamp, local);
 				break;
 			case kTranslateYZ:
-				translateInPlane({ 1, 0, 0 }, clamp);
+				translateInPlane({ 1, 0, 0 }, clamp, local);
 				break;
 			default:
 				return false;
@@ -376,7 +385,7 @@ namespace P3D::Application {
 			if (!cframe.has_value())
 				return;
 
-			direction = cframe->localToRelative(normal);
+			direction = cframe->getRotation().localToGlobal(normal);
 		} else {
 			direction = normal;
 		}
@@ -389,10 +398,16 @@ namespace P3D::Application {
 
 			// Clamp to grid
 			if (clamp) {
-				Vec3 resultingPosition = castPositionToVec3(cframe->translated(translation).getPosition());
-				Vec3 clampedPosition = Vec3(round(resultingPosition.x), round(resultingPosition.y), round(resultingPosition.z));
-				Vec3 difference = resultingPosition - clampedPosition;
-				translation -= difference;
+				if (local) {
+					Vec3 localTranslation = cframe->getRotation().globalToLocal(translation);
+					localTranslation = Vec3(round(localTranslation.x), round(localTranslation.y), round(localTranslation.z));
+					translation = cframe->getRotation().localToGlobal(localTranslation);
+				} else {
+					Vec3 resultingPosition = castPositionToVec3(cframe->translated(translation).getPosition());
+					Vec3 clampedPosition = Vec3(round(resultingPosition.x), round(resultingPosition.y), round(resultingPosition.z));
+					Vec3 difference = resultingPosition - clampedPosition;
+					translation -= difference;
+				}
 			}
 
 			*SelectionTool::selectedPoint += translation;
@@ -440,10 +455,16 @@ namespace P3D::Application {
 
 		// Clamp to grid
 		if (clamp) {
-			Vec3 resultingPosition = castPositionToVec3(cframe->translated(translation).getPosition());
-			Vec3 clampedPosition = Vec3(round(resultingPosition.x), round(resultingPosition.y), round(resultingPosition.z));
-			Vec3 difference = resultingPosition - clampedPosition;
-			translation -= difference;
+			if (local) {
+				Vec3 localTranslation = cframe->getRotation().globalToLocal(translation);
+				localTranslation = Vec3(round(localTranslation.x), round(localTranslation.y), round(localTranslation.z));
+				translation = cframe->getRotation().localToGlobal(localTranslation);
+			} else {
+				Vec3 resultingPosition = castPositionToVec3(cframe->translated(translation).getPosition());
+				Vec3 clampedPosition = Vec3(round(resultingPosition.x), round(resultingPosition.y), round(resultingPosition.z));
+				Vec3 difference = resultingPosition - clampedPosition;
+				translation -= difference;
+			}
 		}
 
 		*SelectionTool::selectedPoint += translation;

@@ -17,6 +17,7 @@
 #include "../graphics/mesh/indexedMesh.h"
 #include "../graphics/resource/textureResource.h"
 #include "../util/resource/resourceManager.h"
+#include "imgui/imgui.h"
 
 namespace P3D::Application {
 	
@@ -70,6 +71,10 @@ namespace P3D::Application {
 		std::optional<GlobalCFrame> cframe = SelectionTool::selection.getCFrame();
 		if (!cframe.has_value())
 			return;
+
+		bool local = !ImGui::GetIO().KeyCtrl;
+		if (!local)
+			cframe = GlobalCFrame(cframe->position);
 
 		Mat4f model = cframe->asMat4();
 		Mat4f modelX = model * joinDiagonal(Mat3f(transformations[0].asRotationMatrix()), 1.0f);
@@ -140,7 +145,11 @@ namespace P3D::Application {
 		std::optional<GlobalCFrame> cframe = SelectionTool::selection.getCFrame();
 		if (!cframe.has_value())
 			return;
-		
+
+		bool local = !ImGui::GetIO().KeyCtrl;
+		if (!local)
+			cframe = GlobalCFrame(cframe->position);
+
 		GlobalCFrame frame = *cframe;
 		for (char status = kRotateX; status <= kRotateC; status++) {
 			if (status == kRotateC) {
@@ -241,22 +250,25 @@ namespace P3D::Application {
 		if (status == kIdle)
 			return false;
 
+		bool clamp = ImGui::GetIO().KeyAlt;
+		bool local = !ImGui::GetIO().KeyCtrl;
+
 		std::unique_lock<UpgradeableMutex> worldWriteLock(*screen.worldMutex);
 		switch (status) {
 			case kRotateX:
-				rotateAroundLine({ 1, 0, 0 });
+				rotateAroundLine({ 1, 0, 0 }, clamp, local);
 				break;
 			case kRotateY:
-				rotateAroundLine({ 0, 1, 0 });
+				rotateAroundLine({ 0, 1, 0 }, clamp, local);
 				break;
 			case kRotateZ:
-				rotateAroundLine({ 0, 0, 1 });
+				rotateAroundLine({ 0, 0, 1 }, clamp, local);
 				break;
 			case kRotateC:
-				rotateAroundLine(screen.camera.cframe.rotation * Vec3(0, 0, 1), false);
+				rotateAroundLine(screen.camera.cframe.rotation * Vec3(0, 0, 1), clamp, false);
 				break;
 			case kTranslateC:
-				TranslationTool::translateInPlane(screen.camera.cframe.rotation * Vec3(0, 0, 1), false);
+				TranslationTool::translateInPlane(screen.camera.cframe.rotation * Vec3(0, 0, 1), clamp, false);
 				break;
 			default:
 				return false;
@@ -264,7 +276,7 @@ namespace P3D::Application {
 		return true;
 	}
 
-	void RotationTool::rotateAroundLine(const Vec3& direction, bool local) {
+	void RotationTool::rotateAroundLine(const Vec3& direction, bool clamp, bool local) {
 		if (SelectionTool::selection.empty())
 			return;
 
@@ -307,10 +319,17 @@ namespace P3D::Application {
 
 		double angle = sign * acos(cosa);
 
-		// Update last intersectionVector
-		SelectionTool::selectedPoint = position + intersectionVector;
+		if (clamp) {
+			double rad15 = 0.261799;
+			angle = angle - fmod(angle, rad15);
+		}
 
-		// Apply rotation
-		SelectionTool::selection.rotate(normal, angle);
+		if (angle != 0.0) {
+			// Update last intersectionVector
+			SelectionTool::selectedPoint = position + intersectionVector;
+
+			// Apply rotation
+			SelectionTool::selection.rotate(normal, angle);
+		}
 	}
 }
