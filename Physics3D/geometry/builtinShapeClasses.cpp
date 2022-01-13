@@ -246,29 +246,27 @@ WedgeClass::WedgeClass() : ShapeClass(4.0, Vec3(-1 / 3, 0, 1 / 3), ScalableInert
 	// WedgeClass is a singleton instance, starting refCount >= 1 ensures it is never deleted
 	this->refCount = 1;
 }
-bool WedgeClass::containsPoint(Vec3 points) const {
-	return std::abs(points.x) <= 1.0 && std::abs(points.y) <= 1.0 && std::abs(points.z) <= 1.0 && points.x + points.y <= 0.0;
+bool WedgeClass::containsPoint(Vec3 point) const {
+	return std::abs(point.x) <= 1.0 && std::abs(point.y) <= 1.0 && std::abs(point.z) <= 1.0 && point.x + point.y <= 0.0;
 }
 double WedgeClass::getIntersectionDistance(Vec3 origin, Vec3 direction) const {
 	double currMin = std::numeric_limits<double>::max();
-	{
-		double ty = (-1 - origin.y) / direction.y;
-		Vec3 intersY = origin + ty * direction;
-		if(std::abs(intersY.x) <= 1.0 && std::abs(intersY.z) <= 1.0 && intersY.x <= 1.0  && ty > 0) {
-			if(ty < currMin) {
-				currMin = ty;
-			}
+
+	double ty = (-1 - origin.y) / direction.y;
+	Vec3 intersY = origin + ty * direction;
+	if(std::abs(intersY.x) <= 1.0 && std::abs(intersY.z) <= 1.0 && intersY.x <= 1.0  && ty > 0) {
+		if(ty < currMin) {
+			currMin = ty;
 		}
 	}
-	{
-		double tx = (-1 - origin.x) / direction.x;
-		Vec3 intersX = origin + tx * direction;
-		if(std::abs(intersX.y) <= 1.0 && std::abs(intersX.z) <= 1.0 && intersX.y <= 1.0 && tx > 0) {
-			if(tx < currMin) {
-				currMin = tx;
-			}
+	double tx = (-1 - origin.x) / direction.x;
+	Vec3 intersX = origin + tx * direction;
+	if(std::abs(intersX.y) <= 1.0 && std::abs(intersX.z) <= 1.0 && intersX.y <= 1.0 && tx > 0) {
+		if(tx < currMin) {
+			currMin = tx;
 		}
 	}
+	
 	{
 		double tz = (-1 - origin.z) / direction.z;
 		Vec3 intersZ = origin + tz * direction;
@@ -287,14 +285,12 @@ double WedgeClass::getIntersectionDistance(Vec3 origin, Vec3 direction) const {
 			}
 		}
 	}
-	{
-		const double dn = direction.x + direction.y;
-		double t = (-origin.x - origin.y) / dn;
-		Vec3 point = origin + t * direction;
-		if(std::abs(point.x) <= 1.0 && std::abs(point.y) <= 1.0 && std::abs(point.z) <= 1.0 && t > 0) {
-			if(t < currMin) {
-				currMin = t;
-			}
+	const double dn = direction.x + direction.y;
+	double t = (-origin.x - origin.y) / dn;
+	Vec3 point = origin + t * direction;
+	if(std::abs(point.x) <= 1.0 && std::abs(point.y) <= 1.0 && std::abs(point.z) <= 1.0 && t > 0) {
+		if(t < currMin) {
+			currMin = t;
 		}
 	}
 	return currMin;
@@ -302,12 +298,9 @@ double WedgeClass::getIntersectionDistance(Vec3 origin, Vec3 direction) const {
 BoundingBox WedgeClass::getBounds(const Rotation& rotation, const DiagonalMat3& scale) const {
 	const Mat3& rotMat = rotation.asRotationMatrix();
 	Vec3 scaleRot[3] = {};
-	for(size_t i = 0; i < 3; i++) {
+	for(int i = 0; i < 3; i++) {
 		scaleRot[i] = scale[i] * rotMat.getCol(i);
 	}
-
-	/*Vec3f(-1.0f, -1.0f, -1.0f), Vec3f(-1.0f, -1.0f, 1.0f), Vec3f(1.0f, -1.0f, 1.0f), Vec3f(1.0f, -1.0f, -1.0f),
-		Vec3f(-1.0f, 1.0f, -1.0f), Vec3f(-1.0f, 1.0f, 1.0f)*/
 	const Vec3 vertices[] = {
 		-scaleRot[0] - scaleRot[1] - scaleRot[2],
 		-scaleRot[0] - scaleRot[1] + scaleRot[2],
@@ -320,7 +313,7 @@ BoundingBox WedgeClass::getBounds(const Rotation& rotation, const DiagonalMat3& 
 	double ymin = vertices[0].y; double ymax = vertices[0].y;
 	double zmin = vertices[0].z; double zmax = vertices[0].z;
 
-	for(size_t i = 1; i < ShapeLibrary::wedgeVertexCount; i++) {
+	for(int i = 1; i < ShapeLibrary::wedgeVertexCount; i++) {
 		const Vec3& current = vertices[i];
 		if(current.x < xmin) xmin = current.x;
 		if(current.x > xmax) xmax = current.x;
@@ -338,7 +331,7 @@ Vec3f WedgeClass::furthestInDirection(const Vec3f& direction) const {
 	float best = ShapeLibrary::wedgeVertices[0] * direction;
 	Vec3f bestVertex = ShapeLibrary::wedgeVertices[0];
 
-	for(size_t i = 1; i < ShapeLibrary::wedgeVertexCount; i++) {
+	for(int i = 1; i < ShapeLibrary::wedgeVertexCount; i++) {
 		float current = ShapeLibrary::wedgeVertices[i] * direction;
 		if(current > best) {
 			best = current;
@@ -376,7 +369,6 @@ double CornerClass::getIntersectionDistance(Vec3 origin, Vec3 direction) const {
 			currMin = tx;
 		}
 	}
-
 	double ty = (-1 - origin.y) / direction.y;
 	Vec3 intersY = origin + ty * direction;
 	if(intersY.x >= -1.0 && intersY.z >= -1.0 && intersY.x + intersY.z <= 0.0 && ty > 0) {
@@ -384,7 +376,6 @@ double CornerClass::getIntersectionDistance(Vec3 origin, Vec3 direction) const {
 			currMin = ty;
 		}
 	}
-
 	double tz = (-1 - origin.z) / direction.z;
 	Vec3 intersZ = origin + tz * direction;
 	if(intersZ.x >= -1.0 && intersZ.y >= -1.0 && intersZ.x + intersZ.y <= 0.0 && tz > 0) {
@@ -392,7 +383,6 @@ double CornerClass::getIntersectionDistance(Vec3 origin, Vec3 direction) const {
 			currMin = tz;
 		}
 	}
-
 	const double dn = direction.x + direction.y + direction.z;
 	double t = (-1 - origin.x - origin.y - origin.z) / dn;
 	Vec3 point = origin + t * direction;
@@ -404,23 +394,23 @@ double CornerClass::getIntersectionDistance(Vec3 origin, Vec3 direction) const {
 	return currMin;
 }
 BoundingBox CornerClass::getBounds(const Rotation& rotation, const DiagonalMat3& scale) const {
-	const Mat3& rot = rotation.asRotationMatrix();
-	Vec3 scaleRot[3] = {};
-	for(size_t i = 0; i < 3; i++) {
+	const Mat3f& rot = rotation.asRotationMatrix();
+	Vec3f scaleRot[3] = {};
+	for(int i = 0; i < 3; i++) {
 		scaleRot[i] = scale[i] * rot.getCol(i);
 	}
-	const Vec3 vertices[] = {
+	const Vec3f vertices[] = {
 		-scaleRot[0] - scaleRot[1] - scaleRot[2],
 		-scaleRot[0] - scaleRot[1] + scaleRot[2],
 		-scaleRot[0] + scaleRot[1] - scaleRot[2],
-		scaleRot[0] - scaleRot[1] - scaleRot[2],
+		 scaleRot[0] - scaleRot[1] - scaleRot[2],
 	};
 	double xmin = vertices[0].x; double xmax = vertices[0].x;
 	double ymin = vertices[0].y; double ymax = vertices[0].y;
 	double zmin = vertices[0].z; double zmax = vertices[0].z;
 
-	for(size_t i = 1; i < ShapeLibrary::cornerVertexCount; i++) {
-		const Vec3& current = vertices[i];
+	for(int i = 1; i < ShapeLibrary::cornerVertexCount; i++) {
+		const Vec3f& current = vertices[i];
 		if(current.x < xmin) xmin = current.x;
 		if(current.x > xmax) xmax = current.x;
 		if(current.y < ymin) ymin = current.y;
