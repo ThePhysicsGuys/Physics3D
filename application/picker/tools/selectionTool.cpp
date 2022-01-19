@@ -82,6 +82,11 @@ void SelectionTool::select(const Engine::Registry64::entity_type& entity) {
 	selection.add(entity);
 }
 
+void SelectionTool::single(const Engine::Registry64::entity_type& entity) {
+	selection.clear();
+	selection.add(entity);
+}
+
 std::optional<std::pair<Engine::Registry64::entity_type, Position>> SelectionTool::getIntersectedCollider() {
 	Engine::Registry64::entity_type intersectedEntity = 0;
 	double closestIntersectionDistance = std::numeric_limits<double>::max();

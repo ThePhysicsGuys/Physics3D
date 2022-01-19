@@ -49,6 +49,7 @@ Graphics::TextureResource* polygonClassIcon;
 Graphics::TextureResource* shownIcon;
 Graphics::TextureResource* hiddenIcon;
 Graphics::TextureResource* physicsIcon;
+Graphics::TextureResource* addIcon;
 
 static int nodeIndex = 0;
 static void* selectedNode = nullptr;
@@ -125,7 +126,7 @@ static void drawLineBetween(const ImRect& button1, const ImRect& button2, float 
 		ImMax(button1.Max.y, button2.Max.y) + yExtent / 2
 	);
 
-	GImGui->CurrentWindow->DrawList->AddLine(pos1, pos2, ImGui::GetColorU32(ImVec4(1, 1, 1, 0.5)));
+	GImGui->CurrentWindow->DrawList->AddLine(pos1, pos2, ImGui::GetColorU32(ImVec4(0.7f, 0.7f, 0.7f, 0.3f)));
 }
 
 static void drawLine(const ImVec2& pos1, const ImVec2& pos2) {
@@ -133,8 +134,11 @@ static void drawLine(const ImVec2& pos1, const ImVec2& pos2) {
 }
 
 static void HeaderNode() {
+	ImGuiWindow* window = ImGui::GetCurrentWindow();
+	if (window->SkipItems)
+		return;
+
 	ImGuiContext& g = *GImGui;
-	ImGuiWindow* window = g.CurrentWindow;
 
 	float arrowWidth = g.FontSize;
 	float buttonSize = g.FontSize + g.Style.FramePadding.y * 2;
@@ -173,11 +177,14 @@ static void HeaderNode() {
 }
 
 template <typename OnPressed>
-static bool IconTreeNode(Engine::Registry64& registry, const char* label, ImGuiTreeNodeFlags flags, GLID mainIcon, bool selected, const OnPressed& onPressed, Engine::Registry64::entity_type entity = 0) {
+static bool IconTreeNode(ImU32 id, Engine::Registry64& registry, const char* label, ImGuiTreeNodeFlags flags, GLID mainIcon, bool selected, const OnPressed& onPressed, Engine::Registry64::entity_type entity = 0) {
+	ImGuiWindow* window = ImGui::GetCurrentWindow();
+	if (window->SkipItems)
+		return false;
+
 	// ID
 	ImGuiContext& g = *GImGui;
-	ImGuiWindow* window = g.CurrentWindow;
-	ImU32 mainId = window->GetID(label);
+	ImU32 mainId = id == 0 ? window->GetID(label) : id;
 	ImU32 arrowId = window->GetID("Arrow");
 	ImU32 colliderId = window->GetID("Collider");
 	ImU32 meshId = window->GetID("Mesh");
@@ -305,7 +312,7 @@ static bool IconTreeNode(Engine::Registry64& registry, const char* label, ImGuiT
 	return opened;
 }
 
-static bool EntityTreeNode(Engine::Registry64& registry,
+static bool EntityTreeNode(ImU32 id, Engine::Registry64& registry,
                            Engine::Registry64::entity_type entity,
                            IRef<Comp::Collider> collider,
                            ImGuiTreeNodeFlags flags,
@@ -326,21 +333,48 @@ static bool EntityTreeNode(Engine::Registry64& registry,
 
 	bool selected = SelectionTool::selection.contains(entity);
 
-	ImGui::PushID(static_cast<int>(entity));
-	bool result = IconTreeNode(registry, label, flags, icon, selected, onPressed, entity);
-	ImGui::PopID();
+	bool result = IconTreeNode(id, registry, label, flags, icon, selected, onPressed, entity);
 
 	return result;
+}
+
+static bool ColliderMenuItem(const char* label, GLID icon, bool selected = false, bool enabled = true) {
+	ImGuiWindow* window = ImGui::GetCurrentWindow();
+	if (window->SkipItems)
+		return false;
+
+	ImGuiContext& g = *GImGui;
+	ImVec2 pos = window->DC.CursorPos;
+	ImVec2 labelSize = ImGui::CalcTextSize(label, nullptr, true);
+
+	ImGuiSelectableFlags flags = ImGuiSelectableFlags_SelectOnRelease | ImGuiSelectableFlags_SetNavIdOnHover | (enabled ? 0 : ImGuiSelectableFlags_Disabled);
+
+	float minWidth = window->DC.MenuColumns.DeclColumns(labelSize.x, 0, IM_FLOOR(g.FontSize * 1.20f)); // Feedback for next frame
+	float extraWidth = ImMax(0.0f, ImGui::GetContentRegionAvail().x - minWidth);
+
+	if (selected)
+		ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_TabActive));
+	bool pressed = ImGui::Selectable(label, false, flags | ImGuiSelectableFlags_SpanAvailWidth, ImVec2(minWidth, 0.0f));
+	if (selected)
+		ImGui::PopStyleColor(1);
+
+	ImVec2 start = pos + ImVec2(window->DC.MenuColumns.Pos[2] + extraWidth, 0);
+	ImVec2 end = start + ImVec2(labelSize.y, labelSize.y);
+	drawIcon(icon, start, end);
+
+	return pressed;
 }
 
 void ECSFrame::renderEntity(Engine::Registry64& registry, const Engine::Registry64::entity_type& entity) {
 	if (entity == selectedNodeEntity)
 		return;
 
+	ImGui::PushID(static_cast<int>(entity));
+
 	auto children = registry.getChildren(entity);
 	bool leaf = children.begin() == registry.end();
 	auto collider = registry.get<Comp::Collider>(entity);
-	auto mesh = registry.get<Comp::Mesh>(entity);
+
 	bool terrain = collider.valid() && collider->part->parent == nullptr;
 	std::string name = registry.getOr<Comp::Name>(entity, std::to_string(entity)).name;
 
@@ -376,25 +410,29 @@ void ECSFrame::renderEntity(Engine::Registry64& registry, const Engine::Registry
 	}
 
 	// Entity node
+	ImU32 id = GImGui->CurrentWindow->GetID(name.c_str());
 	bool expandable = !leaf || !hardConstraints.empty() || !softLinks.empty() || !attachments.empty();
-	bool open = EntityTreeNode(registry, entity, collider, expandable ? baseFlags : leafFlags, name.c_str(), 0);
+	ImGuiTreeNodeFlags flags = expandable ? baseFlags : leafFlags;
+	bool open = EntityTreeNode(id, registry, entity, collider, flags, name.c_str(), 0);
 
 	// Render popup
 	if (ImGui::BeginPopupContextItem()) {
 		if (collider.valid()) {
 			if (ImGui::BeginMenu("Change collider shape")) {
-				DiagonalMat3 scale = collider->part->hitbox.scale;
 				std::unique_lock<UpgradeableMutex> lock(worldMutex);
 
-				if (ImGui::MenuItem("Box"))
+				DiagonalMat3 scale = collider->part->hitbox.scale;
+				const ShapeClass* shape = collider->part->getShape().baseShape.get();
+
+				if (ColliderMenuItem("Box", cubeClassIcon->getID(), shape == &CubeClass::instance))
 					collider->part->setShape(boxShape(scale[0], scale[1], scale[2]));
-				if (ImGui::MenuItem("Sphere"))
+				if (ColliderMenuItem("Sphere", sphereClassIcon->getID(), shape == &SphereClass::instance))
 					collider->part->setShape(sphereShape(scale[0]));
-				if (ImGui::MenuItem("Cylinder"))
+				if (ColliderMenuItem("Cylinder", cylinderClassIcon->getID(), shape == &CylinderClass::instance))
 					collider->part->setShape(cylinderShape(scale[0], scale[1]));
-				if (ImGui::MenuItem("Corner"))
+				if (ColliderMenuItem("Corner", cornerClassIcon->getID(), shape == &CornerClass::instance))
 					collider->part->setShape(cornerShape(scale[0], scale[1], scale[2]));
-				if (ImGui::MenuItem("Wedge"))
+				if (ColliderMenuItem("Wedge", wedgeClassIcon->getID(), shape == &WedgeClass::instance))
 					collider->part->setShape(wedgeShape(scale[0], scale[1], scale[2]));
 
 				ImGui::EndMenu();
@@ -404,44 +442,42 @@ void ECSFrame::renderEntity(Engine::Registry64& registry, const Engine::Registry
 		// Collapse / unfold
 		if (!leaf) {
 			if (open) {
-				if (ImGui::BeginMenu("Collapse")) {
-					if (ImGui::MenuItem("Node")) {}
-					if (ImGui::MenuItem("Recursively")) {}
-					ImGui::EndMenu();
-				}
+				if (ImGui::MenuItem("Collapse"))
+					GImGui->CurrentWindow->DC.StateStorage->SetInt(id, 0);
 			} else {
-				if (ImGui::MenuItem("Unfold node")) {
-					if (ImGui::MenuItem("Node")) {}
-					if (ImGui::MenuItem("Recursively")) {}
-					ImGui::EndMenu();
-				}
+				if (ImGui::MenuItem("Expand")) 
+					GImGui->CurrentWindow->DC.StateStorage->SetInt(id, 1);
 			}
 		}
 
 		// Rename
 		if (ImGui::BeginMenu("Rename")) {
-			char* buffer = new char[name.size() + 1];
-			//strcpy(buffer, node->getName().c_str());
-			ImGui::Text("Edit name:");
-			ImGui::InputText("##edit", buffer, name.size() + 1);
-			if (ImGui::Button("Apply")) {
-				std::string newName(buffer);
-				registry.get<Comp::Name>(entity)->name = newName;
-			}
-			ImGui::EndMenu();
+			static char buffer[20] = "";
+			if (buffer[0] == '\0')
+				strcpy(buffer, name.c_str());
 
-			delete[] buffer;
+			ImGui::Text("Edit name:");
+			ImGui::InputText("##edit", buffer, IM_ARRAYSIZE(buffer));
+			if (ImGui::Button("Apply")) 
+				registry.get<Comp::Name>(entity)->name = buffer;
+			
+			ImGui::EndMenu();
 		}
 
 		// Add
-		if (ImGui::BeginMenu("Add")) {
-			if (ImGui::MenuItem("Entity")) {}
-			if (ImGui::MenuItem("Folder")) {}
-			ImGui::EndMenu();
+		ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImVec4(0.458f, 0.776f, 0.298f, 1.0f)));
+		if (ImGui::MenuItem("Add")) {
+			auto newEntity = registry.create();
+			SelectionTool::single(newEntity);
 		}
+		ImGui::PopStyleColor();
 
 		// Delete
-		if (ImGui::MenuItem("Delete")) {}
+		ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImVec4(0.929f, 0.262f, 0.212f, 1.0f)));
+		if (ImGui::MenuItem("Delete")) {
+			registry.destroy(entity);
+		}
+		ImGui::PopStyleColor();
 
 		ImGui::EndPopup();
 	}
@@ -450,7 +486,7 @@ void ECSFrame::renderEntity(Engine::Registry64& registry, const Engine::Registry
 	if (open) {
 		// Render attachments
 		if (!attachments.empty()) {
-			if (IconTreeNode(registry, "Attachments", baseFlags, attachmentsIcon->getID(), false, []() {})) {
+			if (IconTreeNode(0, registry, "Attachments", baseFlags, attachmentsIcon->getID(), false, []() {})) {
 				renderAttachments(registry, entity, *collider, attachments);
 				ImGui::TreePop();
 			}
@@ -458,7 +494,7 @@ void ECSFrame::renderEntity(Engine::Registry64& registry, const Engine::Registry
 
 		// Render hard constraints
 		if (!hardConstraints.empty()) {
-			if (IconTreeNode(registry, "Hard Constraints", baseFlags, hardConstraintsIcon->getID(), false, []() {})) {
+			if (IconTreeNode(0, registry, "Hard Constraints", baseFlags, hardConstraintsIcon->getID(), false, []() {})) {
 				renderHardConstraints(registry, entity, *collider, hardConstraints);
 				ImGui::TreePop();
 			}
@@ -466,7 +502,7 @@ void ECSFrame::renderEntity(Engine::Registry64& registry, const Engine::Registry
 
 		// Render soft links
 		if (!softLinks.empty()) {
-			if (IconTreeNode(registry, "Soft Links", baseFlags, softLinksIcon->getID(), false, []() {})) {
+			if (IconTreeNode(0, registry, "Soft Links", baseFlags, softLinksIcon->getID(), false, []() {})) {
 				renderSoftLinks(registry, entity, *collider, softLinks);
 				ImGui::TreePop();
 			}
@@ -500,6 +536,7 @@ void ECSFrame::renderEntity(Engine::Registry64& registry, const Engine::Registry
 		}
 		ImGui::EndDragDropTarget();
 	}*/
+	ImGui::PopID();
 }
 
 template <typename Link, typename Tool, typename Component, typename BaseLink>
@@ -526,7 +563,7 @@ bool softLinkDispatch(Engine::Registry64& registry, const std::vector<BaseLink*>
 				selectedNode = nullptr;
 		};
 
-		IconTreeNode(registry, name.c_str(), leafFlags, ResourceManager::get<Graphics::TextureResource>(Tool::getStaticName())->getID(), selected, onPressed);
+		IconTreeNode(0, registry, name.c_str(), leafFlags, ResourceManager::get<Graphics::TextureResource>(Tool::getStaticName())->getID(), selected, onPressed);
 
 		return true;
 	}
@@ -558,7 +595,7 @@ bool hardConstraintDispatch(Engine::Registry64& registry, const std::vector<Hard
 				selectedNode = nullptr;
 		};
 
-		IconTreeNode(registry, name.c_str(), leafFlags, ResourceManager::get<Graphics::TextureResource>(Tool::getStaticName())->getID(), selected, onPressed);
+		IconTreeNode(0, registry, name.c_str(), leafFlags, ResourceManager::get<Graphics::TextureResource>(Tool::getStaticName())->getID(), selected, onPressed);
 
 		return true;
 	}
@@ -590,7 +627,7 @@ void attachmentDispatch(Engine::Registry64& registry, const std::vector<std::pai
 			selectedNode = nullptr;
 	};
 
-	IconTreeNode(registry, name.c_str(), leafFlags, ResourceManager::get<Graphics::TextureResource>(AttachmentTool::getStaticName())->getID(), selected, onPressed);
+	IconTreeNode(0, registry, name.c_str(), leafFlags, ResourceManager::get<Graphics::TextureResource>(AttachmentTool::getStaticName())->getID(), selected, onPressed);
 }
 
 void ECSFrame::renderHardConstraints(Engine::Registry64& registry,
@@ -606,7 +643,7 @@ void ECSFrame::renderHardConstraints(Engine::Registry64& registry,
 		dispatched |= hardConstraintDispatch<ConstantSpeedMotorConstraint, MotorConstraintTool, Comp::HardConstraint>(registry, hardConstraints, index);
 
 		if (!dispatched) 
-			IconTreeNode(registry, "Unknown hard constraint", leafFlags, hardConstraintsIcon->getID(), selectedNode == hardConstraints[index], []() {});
+			IconTreeNode(0, registry, "Unknown hard constraint", leafFlags, hardConstraintsIcon->getID(), selectedNode == hardConstraints[index], []() {});
 
 		ImGui::PopID();
 	}
@@ -627,7 +664,7 @@ void ECSFrame::renderSoftLinks(Engine::Registry64& registry,
 		dispatched |= softLinkDispatch<AlignmentLink, AlignmentLinkTool, Comp::AlignmentLink>(registry, softLinks, index);
 
 		if (!dispatched)
-			IconTreeNode(registry, "Unknown soft link", leafFlags, softLinksIcon->getID(), selectedNode == softLinks[index], [] {});
+			IconTreeNode(0, registry, "Unknown soft link", leafFlags, softLinksIcon->getID(), selectedNode == softLinks[index], [] {});
 			
 		ImGui::PopID();
 	}
@@ -668,6 +705,7 @@ void ECSFrame::onInit(Engine::Registry64& registry) {
 	shownIcon = ResourceManager::add<Graphics::TextureResource>("shown", "../res/textures/icons/Eye.png");
 	hiddenIcon = ResourceManager::add<Graphics::TextureResource>("hidden", "../res/textures/icons/Hidden.png");
 	physicsIcon = ResourceManager::add<Graphics::TextureResource>("physics", "../res/textures/icons/Physics.png");
+	addIcon = ResourceManager::add<Graphics::TextureResource>("add", "../res/textures/icons/Add.png");
 }
 
 
