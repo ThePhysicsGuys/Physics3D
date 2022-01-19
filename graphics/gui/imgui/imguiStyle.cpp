@@ -53,7 +53,7 @@ void renderImGuiStyleEditor() {
 void setupImGuiLayoutStyle(ImGuiStyle* style) {
     ImGuiIO& io = ImGui::GetIO();
 
-    io.Fonts->AddFontFromFileTTF("../res/fonts/droid.ttf", 15);
+    io.Fonts->AddFontFromFileTTF("../res/fonts/droid.ttf", 20);
 
     style->WindowPadding = ImVec2(8, 10);
     style->FramePadding = ImVec2(10, 5);

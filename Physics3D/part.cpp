@@ -179,6 +179,15 @@ bool Part::isTerrainPart() const {
 	return parent == nullptr;
 }
 
+const Shape& Part::getShape() const {
+	return this->hitbox;
+}
+void Part::setShape(Shape newShape) {
+	Bounds oldBounds = this->getBounds();
+	this->hitbox = std::move(newShape);
+	recalculateAndUpdateParent(this, oldBounds);
+}
+
 void Part::translate(Vec3 translation) {
 	Bounds oldBounds = this->getBounds();
 	if(this->parent != nullptr) {

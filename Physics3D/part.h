@@ -109,6 +109,9 @@ public:
 	bool isMainPart() const;
 	void makeMainPart();
 
+	const Shape& getShape() const;
+	void setShape(Shape newShape);
+
 	void translate(Vec3 translation);
 
 	double getWidth() const;

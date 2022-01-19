@@ -17,8 +17,7 @@
 #include <Physics3D/threading/physicsThread.h>
 #include <Physics3D/externalforces/directionalGravity.h>
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
 #include <vector>
 #include <memory>
 
@@ -39,9 +38,8 @@ GLFWwindow* initWindow() {
 
 
 	// Open a window and create its OpenGL context
-	GLFWwindow* window;
-	window = glfwCreateWindow( 1024, 768, "Physics3D Demo", NULL, NULL);
-	if(window == NULL) {
+	GLFWwindow* window = glfwCreateWindow( 1024, 768, "Physics3D Demo", nullptr, nullptr);
+	if(window == nullptr) {
 		std::cerr << "Failed to open GLFW window." << std::endl;
 		glfwTerminate();
 		return nullptr;
@@ -215,7 +213,7 @@ class ArrayMesh {
 	size_t triangleCount;
 	constexpr static GLuint INVALID = 0;
 public:
-	ArrayMesh() : vertexArrayID(INVALID), vertexBuffer(INVALID), normalsBuffer(INVALID) {}
+	ArrayMesh() : vertexArrayID(INVALID), vertexBuffer(INVALID), normalsBuffer(INVALID), triangleCount(0) {}
 	ArrayMesh(const float* vertexData, const float* normalsData, size_t triangleCount) : triangleCount(triangleCount) {
 		glGenVertexArrays(1, &vertexArrayID);
 		glBindVertexArray(vertexArrayID);

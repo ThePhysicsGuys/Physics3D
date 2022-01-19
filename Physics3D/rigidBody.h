@@ -137,7 +137,7 @@ namespace P3D {
 		}
 
 		PartIter begin() {
-			if (parts.size() == 0) {
+			if (parts.empty()) {
 				return PartIter(nullptr, nullptr, mainPart);
 			} else {
 				return PartIter(&parts[0], &parts[0] + parts.size(), mainPart);
@@ -145,7 +145,7 @@ namespace P3D {
 		}
 
 		ConstPartIter begin() const {
-			if (parts.size() == 0) {
+			if (parts.empty()) {
 				return ConstPartIter(nullptr, nullptr, mainPart);
 			} else {
 				return ConstPartIter(&parts[0], &parts[0] + parts.size(), mainPart);

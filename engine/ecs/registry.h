@@ -492,6 +492,9 @@ public:
 	 */
 	template<typename Component>
 	[[nodiscard]] IRef<Component> get(const entity_type& entity) noexcept {
+		if (entity == null_entity)
+			return IRef<Component>();
+
 		auto entities_iterator = entities.find(static_cast<representation_type>(entity));
 		if (entities_iterator == entities.end())
 			return IRef<Component>();
