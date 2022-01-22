@@ -172,7 +172,7 @@ std::optional<double> SelectionTool::intersect(const GlobalCFrame& cframe, const
 	return distance;
 }
 
-std::optional<double> SelectionTool::intersect(const GlobalCFrame& cframe, const VisualShape& shape) {
+std::optional<double> SelectionTool::intersect(const GlobalCFrame& cframe, const ExtendedTriangleMesh& shape) {
 	Vec3 relativePosition = cframe.getPosition() - ray.origin;
 	//double maxRadius = shape.getMaxRadius();
 	//if (pointToLineDistanceSquared(ray.direction, relativePosition) > maxRadius * maxRadius)

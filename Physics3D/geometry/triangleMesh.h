@@ -96,10 +96,12 @@ public:
 class TriangleMesh : public MeshPrototype {
 protected:
 	TriangleMesh(UniqueAlignedPointer<float>&& vertices, UniqueAlignedPointer<int>&& triangles, int vertexCount, int triangleCount);
-public:
 
+public:
 	TriangleMesh() = default;
 	TriangleMesh(int vertexCount, int triangleCount, const Vec3f* vertices, const Triangle* triangles);
+
+	~TriangleMesh() = default;
 	TriangleMesh(TriangleMesh&&) noexcept = default;
 	TriangleMesh& operator=(TriangleMesh&&) noexcept = default;
 	TriangleMesh(const TriangleMesh&) = default;
@@ -123,6 +125,7 @@ public:
 	[[nodiscard]] TriangleMesh translatedAndScaled(Vec3f translation, DiagonalMat3f scale) const;
 
 	[[nodiscard]] Vec3f getNormalVecOfTriangle(Triangle triangle) const;
+	void computeNormals(Vec3f* buffer) const;
 
 	[[nodiscard]] CircumscribingSphere getCircumscribingSphere() const;
 	[[nodiscard]] double getMaxRadius() const;

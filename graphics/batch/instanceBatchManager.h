@@ -17,7 +17,7 @@ public:
 	InstanceBatchManager(const BufferLayout& uniformBufferLayout) : uniformBufferLayout(uniformBufferLayout) {}
 
 	template<typename... Args>
-	void add(GLID mesh, Args&&... uniform) {
+	void add(std::size_t mesh, Args&&... uniform) {
 		if (mesh >= MeshRegistry::meshes.size()) {
 			Log::error("Trying to add a mesh that has not been registered in the mesh registry");
 			return;
@@ -30,7 +30,7 @@ public:
 		iterator->second->add(std::forward<Args>(uniform)...);
 	}
 
-	void submit(GLID mesh) {
+	void submit(std::size_t mesh) {
 		if (batches.count(mesh) != 0)
 			batches.at(mesh)->submit();
 	}

@@ -3,7 +3,7 @@
 #include <Physics3D/threading/upgradeableMutex.h>
 
 namespace P3D::Engine {
-class Event;
+struct Event;
 };
 
 namespace P3D::Application {

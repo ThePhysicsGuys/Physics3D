@@ -6,7 +6,7 @@
 
 #include "../util/stringUtil.h"
 #include <Physics3D/physical.h>
-#include "../graphics/visualShape.h"
+#include "../graphics/extendedTriangleMesh.h"
 
 namespace P3D {
 
@@ -167,7 +167,7 @@ struct Face {
 	}
 };
 
-Graphics::VisualShape reorder(const std::vector<Vec3f>& positions, const std::vector<Vec3f>& normals, const std::vector<Vec2f>& uvs, const std::vector<Face>& faces, const Flags& flags) {
+Graphics::ExtendedTriangleMesh reorder(const std::vector<Vec3f>& positions, const std::vector<Vec3f>& normals, const std::vector<Vec2f>& uvs, const std::vector<Face>& faces, const Flags& flags) {
 	
 	// Positions
 	Vec3f* positionArray = new Vec3f[positions.size()];
@@ -235,10 +235,16 @@ Graphics::VisualShape reorder(const std::vector<Vec3f>& positions, const std::ve
 		}
 	}
 
-	return Graphics::VisualShape(positionArray, (int) positions.size(), triangleArray, (int) faces.size(), SharedArrayPtr<const Vec3f>(normalArray), SharedArrayPtr<const Vec2f>(uvArray), SharedArrayPtr<const Vec3f>(tangentArray), SharedArrayPtr<const Vec3f>(bitangentArray));
+	Graphics::ExtendedTriangleMesh result(positionArray, static_cast<int>(positions.size()), triangleArray, static_cast<int>(faces.size()));
+	result.setNormalBuffer(SharedArrayPtr<const Vec3f>(normalArray));
+	result.setUVBuffer(SharedArrayPtr<const Vec2f>(uvArray));
+	result.setTangentBuffer(SharedArrayPtr<const Vec3f>(tangentArray));
+	result.setBitangentBuffer(SharedArrayPtr<const Vec3f>(bitangentArray));
+
+	return result;
 }
 
-Graphics::VisualShape loadBinaryObj(std::istream& input) {
+Graphics::ExtendedTriangleMesh loadBinaryObj(std::istream& input) {
 	char flag = Import::read<char>(input);
 	int vertexCount = Import::read<int>(input);
 	int triangleCount = Import::read<int>(input);
@@ -311,10 +317,16 @@ Graphics::VisualShape loadBinaryObj(std::istream& input) {
 		}
 	}
 
-	return Graphics::VisualShape(vertices, vertexCount, triangles, triangleCount, SharedArrayPtr<const Vec3f>(normals), SharedArrayPtr<const Vec2f>(uvs), SharedArrayPtr<const Vec3f>(tangents), SharedArrayPtr<const Vec3f>(bitangents));
+	Graphics::ExtendedTriangleMesh result(vertices, vertexCount, triangles, triangleCount);
+	result.setNormalBuffer(SharedArrayPtr<const Vec3f>(normals));
+	result.setUVBuffer(SharedArrayPtr<const Vec2f>(uvs));
+	result.setTangentBuffer(SharedArrayPtr<const Vec3f>(tangents));
+	result.setBitangentBuffer(SharedArrayPtr<const Vec3f>(bitangents));
+
+	return result;
 }
 
-Graphics::VisualShape loadNonBinaryObj(std::istream& input) {
+Graphics::ExtendedTriangleMesh loadNonBinaryObj(std::istream& input) {
 	std::vector<Vec3f> vertices;
 	std::vector<Vec3f> normals;
 	std::vector<Vec2f> uvs;
@@ -325,7 +337,7 @@ Graphics::VisualShape loadNonBinaryObj(std::istream& input) {
 	while (getline(input, line)) {
 		std::vector<std::string> tokens = Util::split(line, ' ');
 
-		if (tokens.size() == 0)
+		if (tokens.empty())
 			continue;
 
 		if (tokens[0] == "v") {
@@ -358,34 +370,26 @@ Graphics::VisualShape loadNonBinaryObj(std::istream& input) {
 	return reorder(vertices, normals, uvs, faces, flags);
 }
 
-Graphics::VisualShape OBJImport::load(std::istream& file, bool binary) {
+Graphics::ExtendedTriangleMesh OBJImport::load(std::istream& file, bool binary) {
 	if (binary)
 		return loadBinaryObj(file);
 	else
 		return loadNonBinaryObj(file);
 }
 
-Graphics::VisualShape OBJImport::load(const std::string& file) {
+Graphics::ExtendedTriangleMesh OBJImport::load(const std::string& file) {
 	bool binary;
 	if (Util::endsWith(file, ".bobj"))
 		binary = true;
 	else if (Util::endsWith(file, ".obj"))
 		binary = false;
 	else
-		return Graphics::VisualShape();
+		return Graphics::ExtendedTriangleMesh();
 
 	return OBJImport::load(file, binary);
 }
 
-Graphics::VisualShape OBJImport::load(const std::string& file, bool binary) {
-	/*struct stat buffer;
-	if (stat(file.c_str(), &buffer) == -1) {
-		Log::subject(file.c_str());
-		Log::error("File not found: %s", file.c_str());
-
-		return Graphics::VisualShape();
-	}*/
-
+Graphics::ExtendedTriangleMesh OBJImport::load(const std::string& file, bool binary) {
 	std::ifstream input;
 
 	if (binary)
@@ -393,7 +397,7 @@ Graphics::VisualShape OBJImport::load(const std::string& file, bool binary) {
 	else
 		input.open(file);
 
-	Graphics::VisualShape shape = load(input, binary);
+	Graphics::ExtendedTriangleMesh shape = load(input, binary);
 
 	input.close();
 

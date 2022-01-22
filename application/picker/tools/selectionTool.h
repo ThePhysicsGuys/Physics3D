@@ -42,7 +42,7 @@ public:
 	static std::optional<std::pair<Engine::Registry64::entity_type, Position>> getIntersectedCollider();
 	static std::optional<double> intersect(const GlobalCFrame& cframe, IRef<Comp::Hitbox> hitbox);
 	static std::optional<double> intersect(const GlobalCFrame& cframe, const Shape& shape);
-	static std::optional<double> intersect(const GlobalCFrame& cframe, const Graphics::VisualShape& shape);
+	static std::optional<double> intersect(const GlobalCFrame& cframe, const Graphics::ExtendedTriangleMesh& shape);
 };
 
 };

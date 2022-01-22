@@ -11,7 +11,7 @@
 namespace P3D {
 class Polyhedron : public TriangleMesh {
 public:
-	Polyhedron() : TriangleMesh() {};
+	Polyhedron() : TriangleMesh() {}
 	explicit Polyhedron(const TriangleMesh& mesh);
 	explicit Polyhedron(TriangleMesh&& mesh) noexcept;
 	explicit Polyhedron(const MeshPrototype& mesh);
@@ -27,8 +27,6 @@ public:
 	Polyhedron translatedAndScaled(Vec3f translation, DiagonalMat3f scale) const;
 
 	bool containsPoint(Vec3f point) const;
-
-	void computeNormals(Vec3f* buffer) const;
 
 	double getVolume() const;
 	Vec3 getCenterOfMass() const;

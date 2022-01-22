@@ -10,69 +10,89 @@
 
 namespace P3D::Application {
 
-ExtendedPart::ExtendedPart(Part&& part, const VisualData& visualData, const std::string& name, const Entity& parent) : Part(std::move(part)) {
-	if (this->entity == screen.registry.null_entity)
+ExtendedPart::ExtendedPart(Part&& part, const Graphics::Comp::Mesh& mesh, const std::string& name, const Entity& parent)
+	: Part(std::move(part)) {
+	if (this->entity == Engine::Registry64::null_entity)
 		this->entity = screen.registry.create();
 
-	if (parent != screen.registry.null_entity)
+	if (parent != Engine::Registry64::null_entity)
 		screen.registry.setParent(this->entity, parent);
-	
-	screen.registry.add<Comp::Mesh>(this->entity, visualData);
-	screen.registry.add<Comp::Hitbox>(this->entity, this);
-	screen.registry.add<Comp::Transform>(this->entity, this);
-	if (!name.empty()) 
-		screen.registry.add<Comp::Name>(this->entity, name);
-}
 
-ExtendedPart::ExtendedPart(const Shape& hitbox, const GlobalCFrame& position, const PartProperties& properties, const VisualData& visualData, const std::string& name, const Entity& parent) : Part(hitbox, position, properties) {
-	if (this->entity == screen.registry.null_entity)
-		this->entity = screen.registry.create();
-
-	if (parent != screen.registry.null_entity)
-		screen.registry.setParent(this->entity, parent);
-	
-	screen.registry.add<Comp::Mesh>(this->entity, visualData);
+	screen.registry.add<Graphics::Comp::Mesh>(this->entity, mesh);
 	screen.registry.add<Comp::Hitbox>(this->entity, this);
 	screen.registry.add<Comp::Transform>(this->entity, this);
 	if (!name.empty())
 		screen.registry.add<Comp::Name>(this->entity, name);
 }
 
-ExtendedPart::ExtendedPart(Part&& part, const std::string& name, const Entity& parent) : Part(std::move(part)) {
-	if (this->entity == screen.registry.null_entity)
+ExtendedPart::ExtendedPart(const Shape& hitbox,
+                           const GlobalCFrame& position,
+                           const PartProperties& properties,
+                           const Graphics::Comp::Mesh& mesh,
+                           const std::string& name,
+                           const Entity& parent)
+	: Part(hitbox, position, properties) {
+	if (this->entity == Engine::Registry64::null_entity)
 		this->entity = screen.registry.create();
 
-	if (parent != screen.registry.null_entity)
+	if (parent != Engine::Registry64::null_entity)
 		screen.registry.setParent(this->entity, parent);
-	
-	screen.registry.add<Comp::Mesh>(this->entity, Graphics::MeshRegistry::getOrCreateMeshFor(part.hitbox.baseShape.get()));
-	screen.registry.add<Comp::Hitbox>(this->entity, this);
-	screen.registry.add<Comp::Transform>(this->entity, this);
-	if (!name.empty())
-		screen.registry.add<Comp::Name>(this->entity, name);
-}
-ExtendedPart::ExtendedPart(const Shape& hitbox, const GlobalCFrame& position, const PartProperties& properties, const std::string& name, const Entity& parent) : Part(hitbox, position, properties) {
-	if (this->entity == screen.registry.null_entity)
-		this->entity = screen.registry.create();
 
-	if (parent != screen.registry.null_entity)
-		screen.registry.setParent(this->entity, parent);
-	
-	screen.registry.add<Comp::Mesh>(this->entity, Graphics::MeshRegistry::getOrCreateMeshFor(hitbox.baseShape.get()));
+	screen.registry.add<Graphics::Comp::Mesh>(this->entity, mesh);
 	screen.registry.add<Comp::Hitbox>(this->entity, this);
 	screen.registry.add<Comp::Transform>(this->entity, this);
 	if (!name.empty())
 		screen.registry.add<Comp::Name>(this->entity, name);
 }
 
-ExtendedPart::ExtendedPart(const Shape& hitbox, ExtendedPart* attachTo, const CFrame& attach, const PartProperties& properties, const std::string& name, const Entity& parent) : Part(hitbox, *attachTo, attach, properties) {
-	if (this->entity == screen.registry.null_entity)
+ExtendedPart::ExtendedPart(Part&& part, const std::string& name, const Entity& parent)
+	: Part(std::move(part)) {
+	if (this->entity == Engine::Registry64::null_entity)
 		this->entity = screen.registry.create();
 
-	if (parent != screen.registry.null_entity)
+	if (parent != Engine::Registry64::null_entity)
 		screen.registry.setParent(this->entity, parent);
 
-	screen.registry.add<Comp::Mesh>(this->entity, Graphics::MeshRegistry::getOrCreateMeshFor(hitbox.baseShape.get()));
+	screen.registry.add<Graphics::Comp::Mesh>(this->entity, Graphics::MeshRegistry::getMesh(part.hitbox.baseShape.get()));
+	screen.registry.add<Comp::Hitbox>(this->entity, this);
+	screen.registry.add<Comp::Transform>(this->entity, this);
+	if (!name.empty())
+		screen.registry.add<Comp::Name>(this->entity, name);
+}
+
+ExtendedPart::ExtendedPart(const Shape& hitbox,
+                           const GlobalCFrame& position,
+                           const PartProperties& properties,
+                           const std::string& name,
+                           const Entity& parent)
+	: Part(hitbox, position, properties) {
+	if (this->entity == Engine::Registry64::null_entity)
+		this->entity = screen.registry.create();
+
+	if (parent != Engine::Registry64::null_entity)
+		screen.registry.setParent(this->entity, parent);
+
+	screen.registry.add<Graphics::Comp::Mesh>(this->entity, Graphics::MeshRegistry::getMesh(hitbox.baseShape.get()));
+	screen.registry.add<Comp::Hitbox>(this->entity, this);
+	screen.registry.add<Comp::Transform>(this->entity, this);
+	if (!name.empty())
+		screen.registry.add<Comp::Name>(this->entity, name);
+}
+
+ExtendedPart::ExtendedPart(const Shape& hitbox,
+                           ExtendedPart* attachTo,
+                           const CFrame& attach,
+                           const PartProperties& properties,
+                           const std::string& name,
+                           const Entity& parent)
+	: Part(hitbox, *attachTo, attach, properties) {
+	if (this->entity == Engine::Registry64::null_entity)
+		this->entity = screen.registry.create();
+
+	if (parent != Engine::Registry64::null_entity)
+		screen.registry.setParent(this->entity, parent);
+
+	screen.registry.add<Graphics::Comp::Mesh>(this->entity, Graphics::MeshRegistry::getMesh(hitbox.baseShape.get()));
 	screen.registry.add<Comp::Hitbox>(this->entity, this);
 	screen.registry.add<Comp::Transform>(this->entity, this);
 	if (!name.empty())
@@ -82,9 +102,8 @@ ExtendedPart::ExtendedPart(const Shape& hitbox, ExtendedPart* attachTo, const CF
 ExtendedPart::~ExtendedPart() {
 	// have to do the same as Part's destructor here, because if I don't then PlayerWorld tries to update a deleted entity
 	this->removeFromWorld();
-	if(this->entity != screen.registry.null_entity) {
+	if (this->entity != Engine::Registry64::null_entity) 
 		screen.registry.destroy(this->entity);
-	}
 }
 
 void ExtendedPart::setMaterial(const Comp::Material& material) {
@@ -102,5 +121,5 @@ void ExtendedPart::setColor(const Graphics::Color& color) {
 Graphics::Color ExtendedPart::getColor() const {
 	return screen.registry.get<Comp::Material>(this->entity)->albedo;
 }
-	
+
 };

@@ -3,22 +3,19 @@
 #include "../misc/validityHelper.h"
 #include "../misc/cpuid.h"
 
-#include <stddef.h>
-#include <stdlib.h>
-#include <cstring>
 #include <vector>
 #include <set>
-#include <math.h>
+#include <cmath>
 
 namespace P3D {
 #pragma region bufManagement
-inline static size_t getOffset(size_t size) {
+static size_t getOffset(size_t size) {
 	return (size + 7) & 0xFFFFFFFFFFFFFFF8;
 }
-inline static UniqueAlignedPointer<float> createParallelVecBuf(size_t size) {
+static UniqueAlignedPointer<float> createParallelVecBuf(size_t size) {
 	return UniqueAlignedPointer<float>(getOffset(size) * 3, 32);
 }
-inline static UniqueAlignedPointer<int> createParallelTriangleBuf(size_t size) {
+static UniqueAlignedPointer<int> createParallelTriangleBuf(size_t size) {
 	return UniqueAlignedPointer<int>(getOffset(size) * 3, 32);
 }
 
@@ -302,6 +299,26 @@ Vec3f TriangleMesh::getNormalVecOfTriangle(Triangle triangle) const {
 	return (this->getVertex(triangle.secondIndex) - v0) % (this->getVertex(triangle.thirdIndex) - v0);
 }
 
+void TriangleMesh::computeNormals(Vec3f* buffer) const {
+	// TODO parallelize
+	for (Triangle triangle : iterTriangles()) {
+		Vec3f v0 = this->getVertex(triangle.firstIndex);
+		Vec3f v1 = this->getVertex(triangle.secondIndex);
+		Vec3f v2 = this->getVertex(triangle.thirdIndex);
+
+		Vec3f D10 = normalize(v1 - v0);
+		Vec3f D20 = normalize(v2 - v0);
+		Vec3f D21 = normalize(v2 - v1);
+
+		buffer[triangle.firstIndex] += D10 % D20;
+		buffer[triangle.secondIndex] += D10 % D21;
+		buffer[triangle.thirdIndex] += D20 % D21;
+	}
+
+	for (int i = 0; i < vertexCount; i++) {
+		buffer[i] = normalize(buffer[i]);
+	}
+}
 
 
 CircumscribingSphere TriangleMesh::getCircumscribingSphere() const {

@@ -56,7 +56,7 @@ public:
 
 	template<typename... Args>
 	EntityBuilder& mesh(Args&&... args) {
-		this->registry.add<Comp::Mesh>(this->entity, std::forward<Args>(args)...);
+		this->registry.add<Graphics::Comp::Mesh>(this->entity, std::forward<Args>(args)...);
 
 		return *this;
 	}

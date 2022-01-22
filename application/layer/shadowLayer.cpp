@@ -22,8 +22,8 @@
 
 namespace P3D::Application {
 
-float near = 0.001;
-float far = 100;
+float near = 0.001f;
+float far = 100.0f;
 
 Mat4f ShadowLayer::lightProjection = ortho(-25.0, 25.0, -25.0, 25.0, near, far);
 Mat4f ShadowLayer::lightView = lookAt({ -15.0, 15.0, -15.0 }, { 0.0, 0.0, 0.0 }, { 0.0, 1.0, 0.0 });
@@ -75,7 +75,7 @@ void ShadowLayer::renderScene(Engine::Registry64& registry) {
 	});
 
 	for (ExtendedPart* part : visibleParts) {
-		IRef<Comp::Mesh> mesh = registry.get<Comp::Mesh>(part->entity);
+		IRef<Graphics::Comp::Mesh> mesh = registry.get<Graphics::Comp::Mesh>(part->entity);
 
 		if (!mesh.valid())
 			continue;
@@ -87,7 +87,7 @@ void ShadowLayer::renderScene(Engine::Registry64& registry) {
 			continue;
 
 		Shaders::depthShader->updateModel(part->getCFrame().asMat4WithPreScale(part->hitbox.scale));
-		Graphics::MeshRegistry::meshes[mesh->id]->render(mesh->mode);
+		Graphics::MeshRegistry::meshes[mesh->id]->render();
 	}
 }
 

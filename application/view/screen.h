@@ -2,7 +2,7 @@
 
 #include "../eventHandler.h"
 #include "../util/properties.h"
-#include "../graphics/visualShape.h"
+#include "../graphics/extendedTriangleMesh.h"
 #include "../engine/event/event.h"
 #include "../engine/layer/layerStack.h"
 #include "../engine/ecs/registry.h"

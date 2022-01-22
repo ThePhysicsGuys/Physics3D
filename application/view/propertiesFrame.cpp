@@ -135,13 +135,24 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type 
 	PROPERTY_FRAME_END;
 }
 
-void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<Comp::Mesh>& component) {
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<Graphics::Comp::Mesh>& component) {
+	using namespace Graphics::Comp;
+
 	ECS_PROPERTY_FRAME_START(registry, index);
 
+	bool normals = component->flags & Mesh::Flags_Normal;
+	bool uvs = component->flags & Mesh::Flags_UV;
+	bool tangents = component->flags & Mesh::Flags_Tangent;
+	bool bitangents = component->flags & Mesh::Flags_Bitangent;
+
 	PROPERTY("ID:", ImGui::Text(str(component->id).c_str()));
-	PROPERTY("Mode:", ImGui::Text(component->mode == Graphics::Renderer::FILL ? "Fill" : "Wireframe"));
-	PROPERTY("Normals:", ImGui::Text(component->hasNormals ? "Yes" : "No"));
-	PROPERTY("UVs:", ImGui::Text(component->hasUVs ? "Yes" : "No"));
+	PROPERTY("Visible:", ImGui::Checkbox("##Visible", &component->visible));
+
+	TITLE("Flags", true);
+	PROPERTY("Normals:", ImGui::Checkbox("##Normals", &normals));
+	PROPERTY("UVs:", ImGui::Checkbox("##UVs", &uvs));
+	PROPERTY("Tangents:", ImGui::Checkbox("##Tangents", &tangents));
+	PROPERTY("Bitangents:", ImGui::Checkbox("##Bitangents", &bitangents));
 
 	PROPERTY_FRAME_END;
 }
@@ -550,7 +561,7 @@ void PropertiesFrame::onRender(Engine::Registry64& registry) {
 		ENTITY_DISPATCH(registry, selectedEntity, index, Comp::Name, component);
 		ENTITY_DISPATCH(registry, selectedEntity, index, Comp::Transform, component);
 		ENTITY_DISPATCH(registry, selectedEntity, index, Comp::Collider, component);
-		ENTITY_DISPATCH(registry, selectedEntity, index, Comp::Mesh, component);
+		ENTITY_DISPATCH(registry, selectedEntity, index, Graphics::Comp::Mesh, component);
 		ENTITY_DISPATCH(registry, selectedEntity, index, Comp::Material, component);
 		ENTITY_DISPATCH(registry, selectedEntity, index, Comp::Light, component);
 		ENTITY_DISPATCH(registry, selectedEntity, index, Comp::Hitbox, component);

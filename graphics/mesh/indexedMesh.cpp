@@ -5,12 +5,12 @@
 #include "buffers/indexBuffer.h"
 #include "buffers/vertexBuffer.h"
 #include "buffers/vertexArray.h"
-#include "visualShape.h"
+#include "extendedTriangleMesh.h"
 #include "renderer.h"
 
 namespace P3D::Graphics {
 
-IndexedMesh::IndexedMesh(const VisualShape& shape) : AbstractMesh(), vertexCount(shape.vertexCount), triangleCount(shape.triangleCount) {
+IndexedMesh::IndexedMesh(const ExtendedTriangleMesh& shape) : AbstractMesh(), vertexCount(shape.vertexCount), triangleCount(shape.triangleCount) {
 	float* vertices = new float[shape.vertexCount * 3];
 	for (int i = 0; i < vertexCount; i++) {
 		Vec3f vertex = shape.getVertex(i);

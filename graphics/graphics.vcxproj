@@ -197,7 +197,7 @@
     <ClCompile Include="renderer.cpp" />
     <ClCompile Include="texture.cpp" />
     <ClCompile Include="debug\visualDebug.cpp" />
-    <ClCompile Include="visualShape.cpp" />
+    <ClCompile Include="extendedTriangleMesh.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\imgui\imconfig.h" />
@@ -224,6 +224,7 @@
     <ClInclude Include="core.h" />
     <ClInclude Include="debug\guiDebug.h" />
     <ClInclude Include="debug\profilerUI.h" />
+    <ClInclude Include="ecs\components.h" />
     <ClInclude Include="font.h" />
     <ClInclude Include="gui\color.h" />
     <ClInclude Include="gui\gui.h" />
@@ -254,8 +255,7 @@
     <ClInclude Include="texture.h" />
     <ClInclude Include="debug\threePhaseBuffer.h" />
     <ClInclude Include="debug\visualDebug.h" />
-    <ClInclude Include="visualData.h" />
-    <ClInclude Include="visualShape.h" />
+    <ClInclude Include="extendedTriangleMesh.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\res\shaders\gui.shader" />

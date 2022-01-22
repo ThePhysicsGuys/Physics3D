@@ -12,7 +12,7 @@ namespace P3D::Graphics {
 
 class IndexBuffer;
 class VertexBuffer;
-struct VisualShape;
+struct ExtendedTriangleMesh;
 
 class IndexedMesh : public AbstractMesh {
 public:
@@ -27,7 +27,7 @@ public:
 	std::size_t vertexCount;
 	std::size_t triangleCount;
 
-	IndexedMesh(const VisualShape& shape);
+	IndexedMesh(const ExtendedTriangleMesh& shape);
 	IndexedMesh(const float* vertices, const float* normals, const float* uvs, const unsigned int* indices, std::size_t vertexCount, std::size_t triangleCount);
 
 	virtual ~IndexedMesh();

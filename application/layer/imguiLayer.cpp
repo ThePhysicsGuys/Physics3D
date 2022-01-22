@@ -67,7 +67,7 @@ void ImGuiLayer::onRender(Engine::Registry64& registry) {
 	Graphics::renderImGuiStyleEditor();
 
 	if (Graphics::GUI::windowInfo.dimension.x != size.x || Graphics::GUI::windowInfo.dimension.y != size.y) {
-		Engine::FrameBufferResizeEvent event(size.x, size.y);
+		Engine::FrameBufferResizeEvent event(static_cast<unsigned>(size.x), static_cast<unsigned>(size.y));
 		handler->onFrameBufferResize(event);
 	}
 }

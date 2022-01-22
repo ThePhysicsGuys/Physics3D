@@ -54,7 +54,7 @@ void buildShowcaseWorld(Screen& screen, PlayerWorld& world) {
 
 		ExtendedPart* partA = new ExtendedPart(boxShape(1.0, 0.49, 3.0), GlobalCFrame(3.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "partA");
 		ExtendedPart* partB = new ExtendedPart(boxShape(1.0, 0.5, 3.0), GlobalCFrame(2.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "partA");
-		EntityBuilder(screen.registry, partA->entity).light(Graphics::Color(0.1, 0.94f, 0.49f), 500, Comp::Light::Attenuation{0.8, 0.5, 0.2});
+		EntityBuilder(screen.registry, partA->entity).light(Graphics::Color(0.1f, 0.94f, 0.49f), 500, Comp::Light::Attenuation{0.8, 0.5, 0.2});
 
 		world.addPart(partA);
 		world.addPart(partB);
@@ -387,7 +387,7 @@ void buildShowcaseWorld(Screen& screen, PlayerWorld& world) {
 	}
 
 	Shape torusShape = polyhedronShape(ShapeLibrary::createTorus(1.0f, 0.6f, 80, 80));
-	Graphics::MeshRegistry::registerMeshFor(torusShape.baseShape.get(), Graphics::VisualShape::generateSmoothNormalsShape(torusShape.baseShape->asPolyhedron()));
+	Graphics::MeshRegistry::registerShapeClass(torusShape.baseShape.get(), Graphics::ExtendedTriangleMesh::generateSmoothNormalsShape(torusShape.baseShape->asPolyhedron()));
 	world.addPart(new ExtendedPart(torusShape, Position(-10.0, 3.0, 0.0), basicProperties, "Torus"));
 
 

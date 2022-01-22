@@ -1,8 +1,7 @@
 #pragma once
 
 #include "ecs/material.h"
-#include "../graphics/visualData.h"
-#include "../graphics/visualShape.h"
+#include "../graphics/extendedTriangleMesh.h"
 #include <Physics3D/part.h>
 #include "../engine/ecs/registry.h"
 
@@ -16,10 +15,11 @@ public:
 
 	ExtendedPart() = default;
 	ExtendedPart(Part&& part, const std::string& name = "", const Entity& parent = 0);
-	ExtendedPart(Part&& part, const VisualData& visualData, const std::string& name = "", const Entity& parent = 0);
+	ExtendedPart(Part&& part, const Graphics::Comp::Mesh& mesh, const std::string& name = "", const Entity& parent = 0);
 	ExtendedPart(const Shape& hitbox, const GlobalCFrame& position, const PartProperties& properties, const std::string& name = "", const Entity& parent = 0);
-	ExtendedPart(const Shape& hitbox, const GlobalCFrame& position, const PartProperties& properties, const VisualData& visualData, const std::string& name = "", const Entity& parent = 0);
+	ExtendedPart(const Shape& hitbox, const GlobalCFrame& position, const PartProperties& properties, const Graphics::Comp::Mesh& mesh, const std::string& name = "", const Entity& parent = 0);
 	ExtendedPart(const Shape& hitbox, ExtendedPart* attachTo, const CFrame& attach, const PartProperties& properties, const std::string& name = "", const Entity& parent = 0);
+
 	~ExtendedPart();
 
 	void setMaterial(const Comp::Material& material);

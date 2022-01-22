@@ -21,19 +21,18 @@
 namespace P3D::Application {
 
 void ConstraintLayer::onInit(Engine::Registry64& registry) {
-	VisualShape prismShape(ShapeLibrary::createPrism(6, 0.5, 1.0));
-	this->hexagon = Graphics::MeshRegistry::addMeshShape(prismShape);
 
 }
+
 void ConstraintLayer::onUpdate(Engine::Registry64& registry) {
 
 }
 
-static void renderObject(const VisualData& shape, const GlobalCFrame& cframe, const DiagonalMat3f& scale, const Comp::Material& material) {
+static void renderObject(const Graphics::Comp::Mesh& shape, const GlobalCFrame& cframe, const DiagonalMat3f& scale, const Comp::Material& material) {
 	Shaders::basicShader->updateMaterial(material);
 	Shaders::basicShader->updateTexture(false);
 	Shaders::basicShader->updateModel(cframe, scale);
-	MeshRegistry::meshes[shape.id]->render();
+	MeshRegistry::get(shape)->render();
 }
 
 static void renderConstraintLineBetween(Position p1, Position p2) {
@@ -68,7 +67,7 @@ static void renderBar(GlobalCFrame cframe, Vec3 delta, float thickness, Color co
 	renderObject(MeshRegistry::box, cframe.localToGlobal(CFrame(delta/2, rotation)), DiagonalMat3f{thickness, thickness, float(length(delta) / 2)}, Comp::Material(color));
 }
 
-static void renderPiston(const ConstraintLayer* cl, const SinusoidalPistonConstraint* piston, const GlobalCFrame& start, const GlobalCFrame& end, int segments, float minThickness, float maxThickness) {
+static void renderPiston(const SinusoidalPistonConstraint* piston, const GlobalCFrame& start, const GlobalCFrame& end, int segments, float minThickness, float maxThickness) {
 	Vec3 delta = start.globalToLocal(end).getPosition();
 	Vec3 step = delta / segments;
 
@@ -91,12 +90,12 @@ static void renderPiston(const ConstraintLayer* cl, const SinusoidalPistonConstr
 	renderObject(MeshRegistry::sphere, end, DiagonalMat3f::IDENTITY() * maxThickness * 1.2f, Comp::Material(Color(0.0f, 1.0f, 0.0f, 1.0f)));
 }
 
-static void renderMotor(const ConstraintLayer* cl, const ConstantSpeedMotorConstraint* motor, const GlobalCFrame& start, const GlobalCFrame& end) {
-	renderObject(cl->hexagon, start.localToGlobal(CFrame(Vec3(0, 0, 0.05))), DiagonalMat3f{0.2f, 0.2f, 0.1f}, Comp::Material(Color(1.0f, 1.0f, 0.0f, 1.0f)));
-	renderObject(cl->hexagon, end.localToGlobal(CFrame(Vec3(0, 0, -0.05))), DiagonalMat3f{0.2f, 0.2f, 0.1f}, Comp::Material(Color(0.7f, 0.7f, 0.0f, 1.0f)));
+static void renderMotor(const ConstantSpeedMotorConstraint* motor, const GlobalCFrame& start, const GlobalCFrame& end) {
+	renderObject(MeshRegistry::hexagon, start.localToGlobal(CFrame(Vec3(0, 0, 0.05))), DiagonalMat3f{0.2f, 0.2f, 0.1f}, Comp::Material(Color(1.0f, 1.0f, 0.0f, 1.0f)));
+	renderObject(MeshRegistry::hexagon, end.localToGlobal(CFrame(Vec3(0, 0, -0.05))), DiagonalMat3f{0.2f, 0.2f, 0.1f}, Comp::Material(Color(0.7f, 0.7f, 0.0f, 1.0f)));
 }
 
-static void renderBallConstraint(const ConstraintLayer* cl, const GlobalCFrame& cframeA, const GlobalCFrame& cframeB, const BallConstraint* bc) {
+static void renderBallConstraint(const GlobalCFrame& cframeA, const GlobalCFrame& cframeB, const BallConstraint* bc) {
 	renderBar(cframeA, bc->attachA, constraintBarThickness, constraintBarColor);
 	renderBar(cframeB, bc->attachB, constraintBarThickness, constraintBarColor);
 
@@ -104,7 +103,7 @@ static void renderBallConstraint(const ConstraintLayer* cl, const GlobalCFrame& 
 	renderObject(MeshRegistry::sphere, cframeB.localToGlobal(CFrame(bc->attachB)), DiagonalMat3f::IDENTITY() * outerBallThickness, outerConstraintColor);
 }
 
-static void renderHingeConstraint(const ConstraintLayer* cl, const GlobalCFrame& cframeA, const GlobalCFrame& cframeB, const HingeConstraint* hc) {
+static void renderHingeConstraint(const GlobalCFrame& cframeA, const GlobalCFrame& cframeB, const HingeConstraint* hc) {
 	renderBar(cframeA, hc->attachA, constraintBarThickness, constraintBarColor);
 	renderBar(cframeB, hc->attachB, constraintBarThickness, constraintBarColor);
 
@@ -114,7 +113,7 @@ static void renderHingeConstraint(const ConstraintLayer* cl, const GlobalCFrame&
 	renderObject(MeshRegistry::cylinder, cframeB.localToGlobal(atB), DiagonalMat3f::IDENTITY() * outerBallThickness, outerConstraintColor);
 }
 
-static void renderBarConstraint(const ConstraintLayer* cl, const GlobalCFrame& cframeA, const GlobalCFrame& cframeB, const BarConstraint* bc) {
+static void renderBarConstraint(const GlobalCFrame& cframeA, const GlobalCFrame& cframeB, const BarConstraint* bc) {
 	renderBar(cframeA, bc->attachA, constraintBarThickness, constraintBarColor);
 	renderBar(cframeB, bc->attachB, constraintBarThickness, constraintBarColor);
 	Position globalA = cframeA.localToGlobal(bc->attachA);
@@ -137,7 +136,7 @@ static void renderBarConstraint(const ConstraintLayer* cl, const GlobalCFrame& c
 	renderObject(MeshRegistry::sphere, barCenter + bar / 2, DiagonalMat3f::IDENTITY() * outerBallThickness, outerConstraintColor);
 }
 
-static void renderHardConstraint(const ConstraintLayer* cl, const ConnectedPhysical& conPhys) {
+static void renderHardConstraint( const ConnectedPhysical& conPhys) {
 	GlobalCFrame cframeOfConPhys = conPhys.getCFrame();
 	GlobalCFrame cframeOfParent = conPhys.parent->getCFrame();
 
@@ -151,29 +150,29 @@ static void renderHardConstraint(const ConstraintLayer* cl, const ConnectedPhysi
 	GlobalCFrame endOfConstraint = cframeOfParent.localToGlobal(conPhys.connectionToParent.attachOnParent);
 	const auto& info(typeid(*constraint));
 	if (info == typeid(SinusoidalPistonConstraint)) {
-		renderPiston(cl, static_cast<const SinusoidalPistonConstraint*>(constraint), startOfConstraint, endOfConstraint, 3, 0.1f, 0.12f);
+		renderPiston(dynamic_cast<const SinusoidalPistonConstraint*>(constraint), startOfConstraint, endOfConstraint, 3, 0.1f, 0.12f);
 	} else if (info == typeid(ConstantSpeedMotorConstraint)) {
-		renderMotor(cl, static_cast<const ConstantSpeedMotorConstraint*>(constraint), startOfConstraint, endOfConstraint);
+		renderMotor(dynamic_cast<const ConstantSpeedMotorConstraint*>(constraint), startOfConstraint, endOfConstraint);
 	}
 }
 
-static void recurseRenderHardConstraints(const ConstraintLayer* cl, const Physical& physical) {
+static void recurseRenderHardConstraints(const Physical& physical) {
 	for(const ConnectedPhysical& conPhys : physical.childPhysicals) {
-		renderHardConstraint(cl, conPhys);
-		recurseRenderHardConstraints(cl, conPhys);
+		renderHardConstraint(conPhys);
+		recurseRenderHardConstraints(conPhys);
 	}
 }
 
-static void renderConstraint(const ConstraintLayer* cl, const PhysicalConstraint& constraint) {
+static void renderConstraint(const PhysicalConstraint& constraint) {
 	const auto& info(typeid(*constraint.constraint));
 	GlobalCFrame cfA = constraint.physA->getCFrame();
 	GlobalCFrame cfB = constraint.physB->getCFrame();
 	if(info == typeid(BallConstraint)) {
-		renderBallConstraint(cl, cfA, cfB, static_cast<const BallConstraint*>(constraint.constraint));
+		renderBallConstraint(cfA, cfB, dynamic_cast<const BallConstraint*>(constraint.constraint));
 	} else if(info == typeid(HingeConstraint)) {
-		renderHingeConstraint(cl, cfA, cfB, static_cast<const HingeConstraint*>(constraint.constraint));
+		renderHingeConstraint(cfA, cfB, dynamic_cast<const HingeConstraint*>(constraint.constraint));
 	} else if(info == typeid(BarConstraint)) {
-		renderBarConstraint(cl, cfA, cfB, static_cast<const BarConstraint*>(constraint.constraint));
+		renderBarConstraint(cfA, cfB, dynamic_cast<const BarConstraint*>(constraint.constraint));
 	}
 }
 
@@ -201,12 +200,12 @@ void ConstraintLayer::onRender(Engine::Registry64& registry) {
 	{
 		std::shared_lock<UpgradeableMutex> worldReadLock(*screen->worldMutex);
 		for(MotorizedPhysical* phys : screen->world->physicals) {
-			recurseRenderHardConstraints(this, *phys);
+			recurseRenderHardConstraints(*phys);
 		}
 
 		for(const ConstraintGroup& g : screen->world->constraints) {
 			for(const PhysicalConstraint& constraint : g.constraints) {
-				renderConstraint(this, constraint);
+				renderConstraint(constraint);
 			}
 		}
 

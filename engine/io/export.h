@@ -1,7 +1,7 @@
 #pragma once
 
 namespace P3D::Graphics {
-struct VisualShape;
+struct ExtendedTriangleMesh;
 };
 
 namespace P3D {
@@ -23,7 +23,7 @@ namespace Export {
 };
 
 namespace OBJExport {
-	void save(const std::string& file, const Graphics::VisualShape&, bool binary = false);
+	void save(const std::string& file, const Graphics::ExtendedTriangleMesh&, bool binary = false);
 };
 
 };

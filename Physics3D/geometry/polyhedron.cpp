@@ -1,19 +1,9 @@
 #include "polyhedron.h"
 
-#include <stdlib.h>
-#include <cstring>
-#include <vector>
-#include <set>
-#include <math.h>
-
 #include "../math/linalg/vec.h"
-#include "../math/linalg/trigonometry.h"
 #include "../math/utils.h"
-#include "../math/mathUtil.h"
 #include "../misc/debug.h"
-#include "../misc/physicsProfiler.h"
 #include "../misc/validityHelper.h"
-#include "shape.h"
 
 namespace P3D {
 Polyhedron::Polyhedron(const Vec3f* vertices, const Triangle* triangles, int vertexCount, int triangleCount) :
@@ -64,27 +54,6 @@ bool Polyhedron::containsPoint(Vec3f point) const {
 	}
 
 	return isExiting;
-}
-
-// TODO parallelize
-void Polyhedron::computeNormals(Vec3f* buffer) const {
-	for(Triangle triangle : iterTriangles()) {
-		Vec3f v0 = this->getVertex(triangle.firstIndex);
-		Vec3f v1 = this->getVertex(triangle.secondIndex);
-		Vec3f v2 = this->getVertex(triangle.thirdIndex);
-
-		Vec3f D10 = normalize(v1 - v0);
-		Vec3f D20 = normalize(v2 - v0);
-		Vec3f D21 = normalize(v2 - v1);
-
-		buffer[triangle.firstIndex] += D10 % D20;
-		buffer[triangle.secondIndex] += D10 % D21;
-		buffer[triangle.thirdIndex] += D20 % D21;
-	}
-
-	for(int i = 0; i < vertexCount; i++) {
-		buffer[i] = normalize(buffer[i]);
-	}
 }
 
 double Polyhedron::getVolume() const {

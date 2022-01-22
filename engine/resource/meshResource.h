@@ -3,7 +3,7 @@
 #include "../util/resource/resource.h"
 
 #include "../graphics/mesh/indexedMesh.h"
-#include "../graphics/visualShape.h"
+#include "../graphics/extendedTriangleMesh.h"
 
 namespace P3D::Engine {
 
@@ -17,15 +17,15 @@ public:
 class MeshResource : public Resource {
 private:
 	Graphics::IndexedMesh* mesh;
-	Graphics::VisualShape shape;
+	Graphics::ExtendedTriangleMesh shape;
 public:
 	DEFINE_RESOURCE(Mesh, "../res/fonts/default/default.ttf");
 
-	MeshResource(const std::string& path, Graphics::IndexedMesh* mesh, Graphics::VisualShape shape) : Resource(path, path), mesh(mesh), shape(shape) {
+	MeshResource(const std::string& path, Graphics::IndexedMesh* mesh, Graphics::ExtendedTriangleMesh shape) : Resource(path, path), mesh(mesh), shape(shape) {
 
 	}
 
-	MeshResource(const std::string& name, const std::string& path, Graphics::IndexedMesh* mesh, Graphics::VisualShape shape) : Resource(name, path), mesh(mesh), shape(shape) {
+	MeshResource(const std::string& name, const std::string& path, Graphics::IndexedMesh* mesh, Graphics::ExtendedTriangleMesh shape) : Resource(name, path), mesh(mesh), shape(shape) {
 
 	}
 
@@ -33,7 +33,7 @@ public:
 		return mesh;
 	};
 
-	Graphics::VisualShape getShape() {
+	Graphics::ExtendedTriangleMesh getShape() {
 		return shape;
 	}
 

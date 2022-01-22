@@ -160,7 +160,7 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 		Engine::Registry64::entity_type entity = 0;
 		Comp::Transform transform;
 		Comp::Material material;
-		IRef<Comp::Mesh> mesh;
+		IRef<Graphics::Comp::Mesh> mesh;
 		IRef<Comp::Collider> collider;
 	};
 	
@@ -170,12 +170,12 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 		std::shared_lock<UpgradeableMutex> worldReadLock(*screen->worldMutex);
 		VisibilityFilter filter = VisibilityFilter::forWindow(screen->camera.cframe.position, screen->camera.getForwardDirection(), screen->camera.getUpDirection(), screen->camera.fov, screen->camera.aspect, screen->camera.zfar);
 
-		auto view = registry.view<Comp::Mesh>();
+		auto view = registry.view<Graphics::Comp::Mesh>();
 		for (auto entity : view) {
 			EntityInfo info;
 			info.entity = entity;
 			
-			info.mesh = view.get<Comp::Mesh>(entity);
+			info.mesh = view.get<Graphics::Comp::Mesh>(entity);
 			if (!info.mesh.valid())
 				continue;
 
@@ -234,13 +234,13 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 
 			Shaders::basicShader->updateMaterial(info.material);
 			Shaders::basicShader->updateModel(info.transform.getModelMatrix());
-			MeshRegistry::meshes[info.mesh->id]->render(info.mesh->mode);
+			MeshRegistry::meshes[info.mesh->id]->render();
 		}
 
 		auto scf = SelectionTool::selection.getCFrame();
 		auto shb = SelectionTool::selection.getHitbox();
 		if (scf.has_value() && shb.has_value()) {
-			VisualData data = MeshRegistry::getOrCreateMeshFor(shb->baseShape.get());
+			Graphics::Comp::Mesh data = MeshRegistry::getMesh(shb->baseShape.get());
 			Shaders::debugShader->updateModel(scf.value().asMat4WithPreScale(shb->scale));
 			MeshRegistry::meshes[data.id]->render();
 		}
@@ -257,7 +257,7 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 					if (!hitbox->isPartAttached())
 						shape = shape.scaled(transform->getScale());
 
-					VisualData data = MeshRegistry::getOrCreateMeshFor(shape.baseShape.get());
+					Graphics::Comp::Mesh data = MeshRegistry::getMesh(shape.baseShape.get());
 
 					Shaders::debugShader->updateModel(transform->getCFrame().asMat4WithPreScale(shape.scale));
 					MeshRegistry::meshes[data.id]->render();

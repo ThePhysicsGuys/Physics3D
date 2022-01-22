@@ -12,7 +12,7 @@
 #include <Physics3D/geometry/shapeLibrary.h>
 #include <Physics3D/math/rotation.h>
 #include <Physics3D/threading/upgradeableMutex.h>
-#include "../graphics/visualShape.h"
+#include "../graphics/extendedTriangleMesh.h"
 #include "../graphics/mesh/primitive.h"
 #include "../graphics/mesh/indexedMesh.h"
 #include "../graphics/resource/textureResource.h"
@@ -33,7 +33,7 @@ namespace P3D::Application {
 	static URef<LinePrimitive> unitLine = nullptr;
 	static URef<LinePrimitive> infiniteLine = nullptr;
 	static URef<IndexedMesh> handleMesh;
-	static VisualShape handleShape;
+	static ExtendedTriangleMesh handleShape;
 	
 	void RotationTool::onRegister() {
 		using namespace Graphics;
@@ -51,7 +51,7 @@ namespace P3D::Application {
 		infiniteLine->resize(Vec3f(0, 0, -100000), Vec3f(0, 0, 100000));
 		
 		// Create handle shapes
-		handleShape = VisualShape::generateSmoothNormalsShape(ShapeLibrary::createTorus(1.0f, 0.03f, 80, 12));
+		handleShape = ExtendedTriangleMesh::generateSmoothNormalsShape(ShapeLibrary::createTorus(1.0f, 0.03f, 80, 12));
 		handleMesh = std::make_unique<IndexedMesh>(handleShape);
 
 		// Set idle status

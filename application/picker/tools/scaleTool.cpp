@@ -6,14 +6,13 @@
 #include "application.h"
 #include "selectionTool.h"
 #include "translationTool.h"
-#include <Physics3D/misc/toString.h>
 #include "view/screen.h"
 #include "shader/shaders.h"
 
 #include <Physics3D/geometry/shapeLibrary.h>
 #include <Physics3D/math/rotation.h>
 #include <Physics3D/threading/upgradeableMutex.h>
-#include "../graphics/visualShape.h"
+#include "../graphics/extendedTriangleMesh.h"
 #include "../graphics/mesh/primitive.h"
 #include "../graphics/mesh/indexedMesh.h"
 #include "../graphics/resource/textureResource.h"
@@ -41,11 +40,11 @@ namespace P3D::Application {
 
 	static LinePrimitive* line = nullptr;
 	static IndexedMesh* quadMesh;
-	static VisualShape quadShape;
+	static ExtendedTriangleMesh quadShape;
 	static IndexedMesh* handleMesh;
-	static VisualShape handleShape;
+	static ExtendedTriangleMesh handleShape;
 	static IndexedMesh* centerMesh;
-	static VisualShape centerShape;
+	static ExtendedTriangleMesh centerShape;
 
 	static Polyhedron createBoxOnStick(float boxSide, float stickRadius) {
 		Vec2f vecs[] { { 0.0f, stickRadius }, { 1.0f - boxSide, stickRadius }, { 1.0f - boxSide, boxSide / sqrtf(2.0f) }, { 1.0f, boxSide / sqrtf(2.0f) }};
@@ -64,11 +63,11 @@ namespace P3D::Application {
 		line->resize(Vec3f(0, 0, -100000), Vec3f(0, 0, 100000));
 		
 		// Create handle shapes
-		handleShape = VisualShape::generateSplitNormalsShape(createBoxOnStick(0.2f, 0.03f));
+		handleShape = ExtendedTriangleMesh::generateSplitNormalsShape(createBoxOnStick(0.2f, 0.03f));
 		handleMesh = new IndexedMesh(handleShape);
-		centerShape = VisualShape::generateSplitNormalsShape(ShapeLibrary::createCube(0.2f));
+		centerShape = ExtendedTriangleMesh::generateSplitNormalsShape(ShapeLibrary::createCube(0.2f));
 		centerMesh = new IndexedMesh(centerShape);
-		quadShape = VisualShape::generateSplitNormalsShape(ShapeLibrary::createBox(0.02, 0.25, 0.25).translated({ 0, 0.5, 0.5 }));
+		quadShape = ExtendedTriangleMesh::generateSplitNormalsShape(ShapeLibrary::createBox(0.02f, 0.25f, 0.25f).translated({ 0, 0.5, 0.5 }));
 		quadMesh = new IndexedMesh(quadShape);
 		
 		// Set idle status
@@ -161,7 +160,7 @@ namespace P3D::Application {
 		
 		GlobalCFrame frame = *cframe;
 		for (char status = kScaleX; status <= kScaleYZ; status++) {
-			VisualShape shape;
+			ExtendedTriangleMesh shape;
 			switch (status) {
 				case kScaleXYZ:
 					shape = centerShape;

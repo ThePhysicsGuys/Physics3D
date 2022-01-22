@@ -5,14 +5,13 @@
 #include "worlds.h"
 #include "application.h"
 #include "selectionTool.h"
-#include <Physics3D/misc/toString.h>
 #include "view/screen.h"
 #include "shader/shaders.h"
 
 #include <Physics3D/geometry/shapeLibrary.h>
 #include <Physics3D/math/rotation.h>
 #include <Physics3D/threading/upgradeableMutex.h>
-#include "../graphics/visualShape.h"
+#include "../graphics/extendedTriangleMesh.h"
 #include "../graphics/mesh/primitive.h"
 #include "../graphics/mesh/indexedMesh.h"
 #include "../graphics/resource/textureResource.h"
@@ -47,11 +46,11 @@ namespace P3D::Application {
 	static URef<LinePrimitive> infiniteLine = nullptr;
 
 	static URef<IndexedMesh> quadMesh;
-	static VisualShape quadShape;
+	static ExtendedTriangleMesh quadShape;
 	static URef<IndexedMesh> centerMesh;
-	static VisualShape centerShape;
+	static ExtendedTriangleMesh centerShape;
 	static URef<IndexedMesh> handleMesh;
-	static VisualShape handleShape;
+	static ExtendedTriangleMesh handleShape;
 
 	MagnetForce TranslationTool::magnet(PICKER_STRENGTH, PICKER_SPEED_STRENGTH);
 
@@ -78,11 +77,11 @@ namespace P3D::Application {
 		infiniteLine->resize(Vec3f(0, 0, -100000), Vec3f(0, 0, 100000));
 		
 		// Create handle shapes
-		handleShape = VisualShape::generateSplitNormalsShape(createArrow(0.3f, 0.07f, 0.03f));
+		handleShape = ExtendedTriangleMesh::generateSplitNormalsShape(createArrow(0.3f, 0.07f, 0.03f));
 		handleMesh = std::make_unique<IndexedMesh>(handleShape);
-		centerShape = VisualShape::generateSmoothNormalsShape(ShapeLibrary::createSphere(0.13f, 3));
+		centerShape = ExtendedTriangleMesh::generateSmoothNormalsShape(ShapeLibrary::createSphere(0.13f, 3));
 		centerMesh = std::make_unique<IndexedMesh>(centerShape);
-		quadShape = VisualShape::generateSplitNormalsShape(ShapeLibrary::createBox(0.02, 0.25, 0.25).translated({0, 0.5, 0.5}));
+		quadShape = ExtendedTriangleMesh::generateSplitNormalsShape(ShapeLibrary::createBox(0.02f, 0.25f, 0.25f).translated({0, 0.5, 0.5}));
 		quadMesh = std::make_unique<IndexedMesh>(quadShape);
 
 		// Set idle status
@@ -228,7 +227,7 @@ namespace P3D::Application {
 		
 		GlobalCFrame frame = *cframe;
 		for (char status = kTranslateX; status <= kTranslateYZ; status++) {
-			VisualShape shape;
+			ExtendedTriangleMesh shape;
 			switch (status) {
 				case kTranslateC:
 					shape = centerShape;

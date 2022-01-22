@@ -2,7 +2,7 @@
 
 #include "export.h"
 
-#include "../graphics/visualShape.h"
+#include "../graphics/extendedTriangleMesh.h"
 
 #include <fstream>
 #include <sstream>
@@ -80,7 +80,7 @@ std::string Export::str(double num) {
 	OBJExport
 */
 
-void saveBinaryObj(std::string filename, const Graphics::VisualShape& shape) {
+void saveBinaryObj(std::string filename, const Graphics::ExtendedTriangleMesh& shape) {
 	Util::warnIfFileExists(filename);
 
 	std::ofstream output;
@@ -133,7 +133,7 @@ void saveBinaryObj(std::string filename, const Graphics::VisualShape& shape) {
 	output.close();
 }
 
-void saveNonBinaryObj(const std::string& filename, const Graphics::VisualShape& shape) {
+void saveNonBinaryObj(const std::string& filename, const Graphics::ExtendedTriangleMesh& shape) {
 	Util::warnIfFileExists(filename);
 
 	std::ofstream output;
@@ -179,7 +179,7 @@ void saveNonBinaryObj(const std::string& filename, const Graphics::VisualShape& 
 	output.close();
 }
 
-void OBJExport::save(const std::string& filename, const Graphics::VisualShape& shape, bool binary) {
+void OBJExport::save(const std::string& filename, const Graphics::ExtendedTriangleMesh& shape, bool binary) {
 	if (binary)
 		saveBinaryObj(filename, shape);
 	else

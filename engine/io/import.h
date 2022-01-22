@@ -3,7 +3,7 @@
 #include <istream>
 
 namespace P3D::Graphics {
-struct VisualShape;
+struct ExtendedTriangleMesh;
 };
 
 namespace P3D {
@@ -27,9 +27,9 @@ namespace Import {
 };
 
 namespace OBJImport {
-	Graphics::VisualShape load(std::istream& file, bool binary = false);
-	Graphics::VisualShape load(const std::string& file, bool binary);
-	Graphics::VisualShape load(const std::string& file);
+	Graphics::ExtendedTriangleMesh load(std::istream& file, bool binary = false);
+	Graphics::ExtendedTriangleMesh load(const std::string& file, bool binary);
+	Graphics::ExtendedTriangleMesh load(const std::string& file);
 };
 
 };

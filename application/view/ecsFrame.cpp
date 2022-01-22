@@ -76,22 +76,22 @@ static GLID getColliderIcon(IRef<Comp::Collider> collider) {
 	return polygonClassIcon->getID();
 }
 
-static GLID getMeshIcon(IRef<Comp::Mesh> mesh) {
+static GLID getMeshIcon(IRef<Graphics::Comp::Mesh> mesh) {
 	using namespace Graphics::MeshRegistry;
 
 	if (mesh.invalid())
 		return -1;
 
-	int shape = mesh->id;
-	if (shape == getOrCreateMeshFor(&CubeClass::instance).id)
+	std::size_t shape = mesh->id;
+	if (shape == getID(&CubeClass::instance))
 		return cubeClassIcon->getID();
-	if (shape == getOrCreateMeshFor(&SphereClass::instance).id)
+	if (shape == getID(&SphereClass::instance))
 		return sphereClassIcon->getID();
-	if (shape == getOrCreateMeshFor(&CornerClass::instance).id)
+	if (shape == getID(&CornerClass::instance))
 		return cornerClassIcon->getID();
-	if (shape == getOrCreateMeshFor(&WedgeClass::instance).id)
+	if (shape == getID(&WedgeClass::instance))
 		return wedgeClassIcon->getID();
-	if (shape == getOrCreateMeshFor(&CylinderClass::instance).id)
+	if (shape == getID(&CylinderClass::instance))
 		return cylinderClassIcon->getID();
 
 	return polygonClassIcon->getID();
@@ -214,7 +214,7 @@ static bool IconTreeNode(ImU32 id, Engine::Registry64& registry, const char* lab
 	bool even = nodeIndex++ % 2 == 0;
 
 	// Get entity components
-	auto mesh = registry.get<Comp::Mesh>(entity);
+	auto mesh = registry.get<Graphics::Comp::Mesh>(entity);
 	auto collider = registry.get<Comp::Collider>(entity);
 
 	// Main button

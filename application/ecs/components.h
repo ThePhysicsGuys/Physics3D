@@ -11,7 +11,6 @@
 #include "Physics3D/softlinks/magneticLink.h"
 #include "Physics3D/softlinks/springLink.h"
 #include "../application/extendedPart.h"
-#include "../graphics/visualData.h"
 #include "../worlds.h"
 #include "Physics3D/misc/toString.h"
 #include "Physics3D/softlinks/alignmentLink.h"
@@ -454,44 +453,6 @@ namespace P3D::Application {
 			ExtendedPart* operator->() const {
 				return part;
 			}
-		};
-
-		// The mesh of an entity, as it is rendered
-		struct Mesh : public RC {
-			// The render mode, default is fill
-			int mode = 0x1B02;
-
-			// The mesh id in the mesh registry
-			int id;
-
-			// Whether the mesh has UV coordinates
-			bool hasUVs;
-
-			// Whether the mesh has normal vectors
-			bool hasNormals;
-
-			// Whether the mesh is visible
-			bool visible;
-
-			Mesh(const VisualData& data)
-				: mode(data.mode)
-				, id(data.id)
-				, hasUVs(data.hasUVs)
-				, hasNormals(data.hasNormals)
-				, visible(true) {}
-
-			Mesh(int mode, int id, bool hasUVs, bool hasNormals)
-				: mode(mode)
-				, id(id)
-				, hasUVs(hasUVs)
-				, hasNormals(hasNormals)
-				, visible(true) {}
-
-			Mesh(int id, bool hasUVs, bool hasNormals)
-				: id(id)
-				, hasUVs(hasUVs)
-				, hasNormals(hasNormals)
-				, visible(true) {}
 		};
 
 		struct Light : public RC {
