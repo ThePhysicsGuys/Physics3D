@@ -181,6 +181,9 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 
 			if (info.mesh->id == -1)
 				continue;
+
+			if (!info.mesh->visible)
+				continue;
 			
 			info.collider = registry.get<Comp::Collider>(entity);
 			if (info.collider.valid())
@@ -213,7 +216,6 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 		
 		Shaders::instanceShader->bind();
 		manager->submit();
-		
 
 		// Render transparent meshes
 		Shaders::basicShader->bind();
@@ -222,6 +224,9 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 			EntityInfo info = iterator->second;
 
 			if (info.mesh->id == -1)
+				continue;
+
+			if (!info.mesh->visible)
 				continue;
 
 			if (info.collider.valid())

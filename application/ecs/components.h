@@ -470,22 +470,28 @@ namespace P3D::Application {
 			// Whether the mesh has normal vectors
 			bool hasNormals;
 
+			// Whether the mesh is visible
+			bool visible;
+
 			Mesh(const VisualData& data)
 				: mode(data.mode)
 				, id(data.id)
 				, hasUVs(data.hasUVs)
-				, hasNormals(data.hasNormals) {}
+				, hasNormals(data.hasNormals)
+				, visible(true) {}
 
 			Mesh(int mode, int id, bool hasUVs, bool hasNormals)
 				: mode(mode)
 				, id(id)
 				, hasUVs(hasUVs)
-				, hasNormals(hasNormals) {}
+				, hasNormals(hasNormals)
+				, visible(true) {}
 
 			Mesh(int id, bool hasUVs, bool hasNormals)
 				: id(id)
 				, hasUVs(hasUVs)
-				, hasNormals(hasNormals) {}
+				, hasNormals(hasNormals)
+				, visible(true) {}
 		};
 
 		struct Light : public RC {

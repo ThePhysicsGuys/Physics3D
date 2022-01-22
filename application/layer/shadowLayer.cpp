@@ -83,6 +83,9 @@ void ShadowLayer::renderScene(Engine::Registry64& registry) {
 		if (mesh->id == -1)
 			continue;
 
+		if (!mesh->visible)
+			continue;
+
 		Shaders::depthShader->updateModel(part->getCFrame().asMat4WithPreScale(part->hitbox.scale));
 		Graphics::MeshRegistry::meshes[mesh->id]->render(mesh->mode);
 	}

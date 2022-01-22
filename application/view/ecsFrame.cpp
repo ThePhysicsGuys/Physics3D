@@ -216,7 +216,6 @@ static bool IconTreeNode(ImU32 id, Engine::Registry64& registry, const char* lab
 	// Get entity components
 	auto mesh = registry.get<Comp::Mesh>(entity);
 	auto collider = registry.get<Comp::Collider>(entity);
-	bool visible = mesh.valid() && mesh->mode == static_cast<int>(Graphics::Renderer::FILL);
 
 	// Main button
 	bool mainHovered, mainHeld;
@@ -238,12 +237,11 @@ static bool IconTreeNode(ImU32 id, Engine::Registry64& registry, const char* lab
 
 	// Visibility Button
 	if (mesh.valid()) {
+		bool visible = mesh->visible;
 		bool visibilityHovered, visibilityHeld;
-		if (ImGui::ButtonBehavior(visibilityButton, meshId, &visibilityHovered, &visibilityHeld, ImGuiButtonFlags_PressedOnClickRelease)) {
-			if (entity != Engine::Registry64::null_entity)
-				if (mesh.valid())
-					mesh->mode = static_cast<GLFLAG>(mesh->mode) == Graphics::Renderer::FILL ? Graphics::Renderer::WIREFRAME : Graphics::Renderer::FILL;
-		}
+		if (ImGui::ButtonBehavior(visibilityButton, meshId, &visibilityHovered, &visibilityHeld, ImGuiButtonFlags_PressedOnClickRelease))
+			mesh->visible = !mesh->visible;
+
 		drawButton(visibilityButton, true, selected, visibilityHeld, false);
 		if (!visible)
 			drawIcon(hiddenIcon->getID(), visibilityButton.Min + ImVec2(0, buttonPadding), visibilityButton.Max - ImVec2(0, buttonPadding));
