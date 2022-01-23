@@ -84,10 +84,9 @@ add_library(graphics STATIC
   graphics/bindable.cpp
   graphics/core.cpp
   graphics/font.cpp
-  graphics/meshLibrary.cpp
   graphics/renderer.cpp
   graphics/texture.cpp
-  graphics/visualShape.cpp
+  graphics/extendedTriangleMesh.cpp
   graphics/meshRegistry.cpp
 
   graphics/buffers/bufferLayout.cpp

@@ -176,7 +176,6 @@
     <ClCompile Include="gui\gui.cpp" />
     <ClCompile Include="gui\guiUtils.cpp" />
     <ClCompile Include="gui\imgui\imguiStyle.cpp" />
-    <ClCompile Include="meshLibrary.cpp" />
     <ClCompile Include="meshRegistry.cpp" />
     <ClCompile Include="mesh\abstractMesh.cpp" />
     <ClCompile Include="mesh\arrayMesh.cpp" />
@@ -232,7 +231,6 @@
     <ClInclude Include="gui\imgui\imguiStyle.h" />
     <ClInclude Include="gui\imgui\imguiExtension.h" />
     <ClInclude Include="gui\orderedVector.h" />
-    <ClInclude Include="meshLibrary.h" />
     <ClInclude Include="meshRegistry.h" />
     <ClInclude Include="mesh\abstractMesh.h" />
     <ClInclude Include="mesh\arrayMesh.h" />

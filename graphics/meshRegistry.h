@@ -22,10 +22,13 @@ void init();
 Comp::Mesh registerShape(const ExtendedTriangleMesh& mesh);
 Comp::Mesh registerShapeClass(const ShapeClass* shapeClass, const ExtendedTriangleMesh& mesh);
 Comp::Mesh registerShapeClass(const ShapeClass* shapeClass);
+
 Comp::Mesh getMesh(const ShapeClass* shapeClass);
 std::size_t getID(const ShapeClass* shapeClass);
+
 IndexedMesh* get(std::size_t id);
 IndexedMesh* get(const Comp::Mesh& mesh);
+IndexedMesh* get(const ShapeClass* shapeClass);
 
 ExtendedTriangleMesh createCube(float size);
 ExtendedTriangleMesh createBox(float width, float height, float depth);

@@ -3,7 +3,6 @@
 #include "debugLayer.h"
 
 #include "../graphics/renderer.h"
-#include "../graphics/meshLibrary.h"
 #include "../graphics/mesh/arrayMesh.h"
 #include "../graphics/mesh/pointMesh.h"
 #include "../graphics/mesh/vectorMesh.h"
@@ -20,6 +19,7 @@
 #include "worlds.h"
 #include "view/screen.h"
 #include "ecs/material.h"
+#include "graphics/meshRegistry.h"
 #include "shader/shaders.h"
 
 namespace P3D::Application {
@@ -37,14 +37,14 @@ void renderSphere(double radius, const Position& position, const Color& color) {
 	Shaders::basicShader->updateMaterial(Comp::Material(color));
 	Shaders::basicShader->updateModel(join(Mat3f::IDENTITY() * float(radius), castPositionToVec3f(position), Vec3f(0.0f,0.0f,0.0f),1.0f));
 
-	Library::sphere->render();
+	Graphics::MeshRegistry::get(Graphics::MeshRegistry::sphere)->render();
 }
 
 void renderBox(const GlobalCFrame& cframe, double width, double height, double depth, const Color& color) {
 	Shaders::basicShader->updateMaterial(Comp::Material(color));
 	Shaders::basicShader->updateModel(Mat4f(cframe.asMat4WithPreScale(DiagonalMat3{width, height, depth})));
 
-	Library::cube->render();
+	Graphics::MeshRegistry::get(Graphics::MeshRegistry::box)->render();
 }
 
 void renderBounds(const Bounds& bounds, const Color& color) {

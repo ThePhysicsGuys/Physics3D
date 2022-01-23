@@ -235,4 +235,8 @@ IndexedMesh* get(const Comp::Mesh& mesh) {
 	return get(mesh.id);
 }
 
+IndexedMesh* get(const ShapeClass* shapeClass) {
+	return get(getID(shapeClass));
+}
+
 };

@@ -1,3 +1,4 @@
+#include "core.h"
 #include "extendedTriangleMesh.h"
 
 #include <Physics3D/geometry/polyhedron.h>

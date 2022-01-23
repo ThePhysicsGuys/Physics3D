@@ -15,7 +15,6 @@
 #include "../graphics/buffers/frameBuffer.h"
 #include "../engine/options/keyboardOptions.h"
 #include "../input/standardInputHandler.h"
-#include "../graphics/meshLibrary.h"
 #include "../worlds.h"
 #include "../engine/event/windowEvent.h"
 #include "../util/resource/resourceManager.h"
@@ -142,9 +141,6 @@ void Screen::onInit(bool quickBoot) {
 	// load options from properties
 	Engine::KeyboardOptions::load(properties);
 
-	// Library init
-	Library::onInit();
-
 	// InputHandler init
 	handler = new StandardInputHandler(GLFW::getCurrentContext(), *this);
 
@@ -252,8 +248,6 @@ void Screen::onClose() {
 	screenFrameBuffer->close();
 
 	layerStack.onClose(registry);
-
-	Library::onClose();
 
 	ResourceManager::close();
 

@@ -7,13 +7,12 @@
 #include "view/screen.h"
 #include "../graphics/renderer.h"
 #include "../graphics/texture.h"
-#include "../graphics/mesh/indexedMesh.h"
-#include "../graphics/meshLibrary.h"
 #include "../graphics/debug/visualDebug.h"
 #include "../graphics/resource/textureResource.h"
 #include "../graphics/gui/guiUtils.h"
 #include "../util/resource/resourceManager.h"
 #include "../graphics/mesh/primitive.h"
+#include "graphics/meshRegistry.h"
 
 namespace P3D::Application {
 
@@ -111,7 +110,8 @@ void SkyboxLayer::onRender(Engine::Registry64& registry) {
 		Shaders::skyShader->setUniform("time", time);
 		Shaders::skyShader->setUniform("skyboxSize", 550.0f);
 		Shaders::skyShader->setUniform("segmentCount", 25.0f);
-		Library::sphere->render();
+
+		Graphics::MeshRegistry::get(Graphics::MeshRegistry::sphere)->render();
 	} else {
 		disableCulling();
 		disableDepthMask();
@@ -120,7 +120,7 @@ void SkyboxLayer::onRender(Engine::Registry64& registry) {
 		Shaders::skyboxShader->updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
 		skyboxTexture->bind();
 
-		Library::sphere->render();
+		Graphics::MeshRegistry::get(Graphics::MeshRegistry::sphere)->render();
 	}
 
 	endScene();

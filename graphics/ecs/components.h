@@ -33,7 +33,7 @@ struct Mesh : public RC {
 		, flags(flags)
 		, visible(true) {}
 
-	bool valid() {
+	bool valid() const {
 		return id != -1;
 	}
 };
