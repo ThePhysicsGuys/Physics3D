@@ -125,10 +125,7 @@ ExtendedTriangleMesh createSphere(double radius, int steps) {
 
 ExtendedTriangleMesh createBox(float width, float height, float depth) {
 	Polyhedron box(ShapeLibrary::createBox(width, height, depth));
-	ExtendedTriangleMesh boxShape = ExtendedTriangleMesh(box);
-
-	Vec3f* normalBuffer = new Vec3f[boxShape.vertexCount];
-	box.computeNormals(normalBuffer);
+	ExtendedTriangleMesh boxShape = ExtendedTriangleMesh::generateSplitNormalsShape(box);
 
 	Vec2f* uvBuffer = new Vec2f[boxShape.triangleCount * 3];
 	for (std::size_t ti = 0; ti < boxShape.triangleCount; ti++) {
@@ -152,7 +149,6 @@ ExtendedTriangleMesh createBox(float width, float height, float depth) {
 		}
 	}
 
-	boxShape.setNormalBuffer(SharedArrayPtr<const Vec3f>(normalBuffer));
 	boxShape.setUVBuffer(SharedArrayPtr<const Vec2f>(uvBuffer));
 
 	return boxShape;
@@ -171,7 +167,7 @@ ExtendedTriangleMesh createHexagon(float radius, float height) {
 void init() {
 	sphere = registerShapeClass(&SphereClass::instance, ExtendedTriangleMesh::generateSmoothNormalsShape(SphereClass::instance.asPolyhedron()));
 	cylinder = registerShapeClass(&CylinderClass::instance, createCylinder(64, 1.0, 2.0));
-	box = registerShapeClass(&CubeClass::instance);
+	box = registerShapeClass(&CubeClass::instance, createCube(2));
 	wedge = registerShapeClass(&WedgeClass::instance);
 	corner = registerShapeClass(&CornerClass::instance);
 	hexagon = registerShape(createHexagon(0.5, 1.0));

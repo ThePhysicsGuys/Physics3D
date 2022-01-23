@@ -321,7 +321,7 @@ namespace P3D::Graphics {
 
 	void Shader::setUniform(const std::string& uniform, int value) {
 		int location = UNIFORM_CHECK(uniform);
-		
+
 		glUniform1i(location, value);
 	}
 

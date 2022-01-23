@@ -1,5 +1,5 @@
 [properties]
-vec3 test (PI) = 0, 1, 2 (-1:1);
+int mode = 0;
 
 [common]
 
@@ -104,6 +104,18 @@ flat in vec4 fAlbedo;
 flat in float fRoughness;
 flat in float fMetalness;
 flat in float fAmbientOcclusion;
+
+const int Mode_Default = 0;
+const int Mode_Position = 1;
+const int Mode_Normal = 2;
+const int Mode_UV = 3;
+const int Mode_LightSpace = 4;
+const int Mode_Albedo = 5;
+const int Mode_Metalness = 6;
+const int Mode_Roughness = 7;
+const int Mode_AO = 8;
+
+uniform int mode = 1;
 
 // General
 vec3 N;
@@ -337,5 +349,25 @@ void main() {
 	color = pow(color, vec3(1.0 / gamma));
 
 	// Outcolor
-	outColor = vec4(color, albedo.a);
+	if (mode == Mode_Default)
+		outColor = vec4(color, albedo.a);
+	else if (mode == Mode_Position)
+		outColor = vec4(fPosition, 1.0);
+	else if (mode == Mode_Normal)
+		outColor = vec4(fNormal, 1.0);
+	else if (mode == Mode_UV)
+		outColor = vec4(fUV, 0.0, 1.0);
+	else if (mode == Mode_LightSpace)
+		outColor = vec4(fLightSpacePosition);
+	else if (mode == Mode_Albedo)
+		outColor = vec4(fAlbedo);
+	else if (mode == Mode_Metalness)
+		outColor = vec4(vec3(fMetalness), 1.0);
+	else if (mode == Mode_Roughness)
+		outColor = vec4(vec3(fRoughness), 1.0);
+	else if (mode == Mode_AO)
+		outColor = vec4(vec3(fAmbientOcclusion), 1.0);
+	else
+		outColor = vec4(1.0, 0.0, 1.0, 1.0);
+
 }
