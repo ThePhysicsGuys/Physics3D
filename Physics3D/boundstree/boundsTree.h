@@ -213,7 +213,7 @@ void* TreeNodeRef::asObject() const {
 }
 
 struct OverlapMatrix {
-	bool overlapData[BRANCH_FACTOR*BRANCH_FACTOR];
+	bool overlapData[BRANCH_FACTOR*BRANCH_FACTOR]{};
 
 	inline bool* operator[](size_t idx) {return overlapData+BRANCH_FACTOR*idx;}
 	inline const bool* operator[](size_t idx) const {return overlapData+BRANCH_FACTOR*idx;}
