@@ -7,17 +7,15 @@
 
 namespace P3D::Graphics {
 
-template<typename Uniform>
 class InstanceBatchManager {
 private:
 	BufferLayout uniformBufferLayout;
-	std::unordered_map<GLID, InstanceBatch<Uniform>*> batches;
+	std::unordered_map<std::size_t, InstanceBatch> batches;
 
 public:
 	InstanceBatchManager(const BufferLayout& uniformBufferLayout) : uniformBufferLayout(uniformBufferLayout) {}
 
-	template<typename... Args>
-	void add(std::size_t mesh, Args&&... uniform) {
+	void add(std::size_t mesh, const Mat4f& modelMatrix, const Comp::Material& material) {
 		if (mesh >= MeshRegistry::meshes.size()) {
 			Log::error("Trying to add a mesh that has not been registered in the mesh registry");
 			return;
@@ -25,29 +23,32 @@ public:
 
 		auto iterator = batches.find(mesh);
 		if (iterator == batches.end()) 
-			iterator = batches.insert(std::make_pair(mesh, new InstanceBatch<Uniform>(mesh, uniformBufferLayout))).first;
+			iterator = batches.emplace(mesh, InstanceBatch(mesh, uniformBufferLayout)).first;
 
-		iterator->second->add(std::forward<Args>(uniform)...);
-	}
+		InstanceBatch::Uniform uniform {
+			modelMatrix,
+			material.albedo,
+			material.metalness,
+			material.roughness,
+			material.ao
+		};
 
-	void submit(std::size_t mesh) {
+		iterator->second.add(uniform);
+	}									  
+
+	void submit(std::size_t mesh) {		 
 		if (batches.count(mesh) != 0)
-			batches.at(mesh)->submit();
+			batches.at(mesh).submit();
 	}
 
 	void submit() {
 		for (auto& [mesh, batch] : batches)
-			batch->submit();
+			batch.submit();
 	}
 
 	void clear() {
 		for (auto& [mesh, batch] : batches)
-			batch->clear();
-	}
-
-	void close() {
-		for (auto& [mesh, batch] : batches)
-			batch->close();
+			batch.clear();
 	}
 };
 

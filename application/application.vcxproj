@@ -155,7 +155,6 @@
     <ClInclude Include="layer\cameraLayer.h" />
     <ClInclude Include="layer\constraintLayer.h" />
     <ClInclude Include="core.h" />
-    <ClInclude Include="ecs\material.h" />
     <ClInclude Include="io\serialization.h" />
     <ClInclude Include="layer\imguiLayer.h" />
     <ClInclude Include="layer\shadowLayer.h" />
@@ -217,7 +216,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">core.h</PrecompiledHeaderFile>
     </ClCompile>
-    <ClCompile Include="ecs\material.cpp" />
     <ClCompile Include="io\serialization.cpp" />
     <ClCompile Include="layer\shadowLayer.cpp" />
     <ClCompile Include="layer\imguiLayer.cpp" />

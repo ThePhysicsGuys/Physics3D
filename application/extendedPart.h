@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ecs/material.h"
+#include "../graphics/ecs/components.h"
 #include "../graphics/extendedTriangleMesh.h"
 #include <Physics3D/part.h>
 #include "../engine/ecs/registry.h"
@@ -22,7 +22,7 @@ public:
 
 	~ExtendedPart();
 
-	void setMaterial(const Comp::Material& material);
+	void setMaterial(const Graphics::Comp::Material& material);
 	void setName(const std::string& name);
 
 	void setColor(const Graphics::Color& color);

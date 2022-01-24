@@ -107,8 +107,8 @@ void buildShowcaseWorld(Screen& screen, PlayerWorld& world) {
 	// hollow box
 	WorldBuilder::HollowBoxParts parts = WorldBuilder::buildHollowBox(Bounds(Position(12.0, 3.0, 14.0), Position(20.0, 8.0, 20.0)), 0.3);
 
-	parts.front->setMaterial(Comp::Material(Graphics::Color(0.4f, 0.6f, 1.0f, 0.3f)));
-	parts.back->setMaterial(Comp::Material(Graphics::Color(0.4f, 0.6f, 1.0f, 0.3f)));
+	parts.front->setMaterial(Graphics::Comp::Material(Graphics::Color(0.4f, 0.6f, 1.0f, 0.3f)));
+	parts.back->setMaterial(Graphics::Comp::Material(Graphics::Color(0.4f, 0.6f, 1.0f, 0.3f)));
 
 	// Rotating walls
 	/*ExtendedPart* rotatingWall = new ExtendedPart(boxShape(5.0, 3.0, 0.5), GlobalCFrame(Position(-12.0, 1.7, 0.0)), {1.0, 1.0, 0.7});
@@ -150,7 +150,7 @@ void buildShowcaseWorld(Screen& screen, PlayerWorld& world) {
 		for(double y = minY; y < maxY; y += 1.00001) {
 			for(double z = minZ; z < maxZ; z += 1.00001) {
 				ExtendedPart* newCube = new ExtendedPart(boxShape(1.0, 1.0, 1.0), GlobalCFrame(Position(x - 5, y + 10, z - 5)), {1.0, 1.0, 0.0}, "Box", cubeFolder);
-				newCube->setMaterial(Comp::Material(Vec4f(float((x - minX) / (maxX - minX)), float((y - minY) / (maxY - minY)), float((z - minZ) / (maxZ - minZ)), 1.0f)));
+				newCube->setMaterial(Graphics::Comp::Material(Vec4f(float((x - minX) / (maxX - minX)), float((y - minY) / (maxY - minY)), float((z - minZ) / (maxZ - minZ)), 1.0f)));
 
 				world.addPart(newCube);
 				world.addPart(new ExtendedPart(sphereShape(0.5), GlobalCFrame(Position(x + 5, y + 1, z - 5)), {1.0, 0.2, 0.5}, "Sphere", sphereFolder));

@@ -28,7 +28,7 @@ void ConstraintLayer::onUpdate(Engine::Registry64& registry) {
 
 }
 
-static void renderObject(const Graphics::Comp::Mesh& shape, const GlobalCFrame& cframe, const DiagonalMat3f& scale, const Comp::Material& material) {
+static void renderObject(const Graphics::Comp::Mesh& shape, const GlobalCFrame& cframe, const DiagonalMat3f& scale, const Graphics::Comp::Material& material) {
 	Shaders::basicShader->updateMaterial(material);
 	Shaders::basicShader->updateTexture(false);
 	Shaders::basicShader->updateModel(cframe, scale);
@@ -45,17 +45,17 @@ static void renderConstraintLineBetween(Position p1, Position p2) {
 
 	Rotation rot = Rotation::faceY(delta);
 
-	renderObject(MeshRegistry::box, GlobalCFrame(center, rot), DiagonalMat3f{0.2f, float(length(delta) / 2), 0.2f}, Comp::Material(Color(1.0f, 0.0f, 0.0f, 1.0f)));
-	renderObject(MeshRegistry::box, GlobalCFrame(p1, rot), DiagonalMat3f{0.25f, 0.25f, 0.25f}, Comp::Material(Color(0.0f, 1.0f, 0.0f, 1.0f)));
-	renderObject(MeshRegistry::box, GlobalCFrame(p2, rot), DiagonalMat3f{0.25f, 0.25f, 0.25f}, Comp::Material(Color(0.0f, 1.0f, 0.0f, 1.0f)));
+	renderObject(MeshRegistry::box, GlobalCFrame(center, rot), DiagonalMat3f{0.2f, float(length(delta) / 2), 0.2f}, Graphics::Comp::Material(Color(1.0f, 0.0f, 0.0f, 1.0f)));
+	renderObject(MeshRegistry::box, GlobalCFrame(p1, rot), DiagonalMat3f{0.25f, 0.25f, 0.25f}, Graphics::Comp::Material(Color(0.0f, 1.0f, 0.0f, 1.0f)));
+	renderObject(MeshRegistry::box, GlobalCFrame(p2, rot), DiagonalMat3f{0.25f, 0.25f, 0.25f}, Graphics::Comp::Material(Color(0.0f, 1.0f, 0.0f, 1.0f)));
 }
 
 static Color constraintBarColor = Colors::RGB_R;
 constexpr static float constraintBarThickness = 0.02f;
 constexpr static float innerBallThickness = 0.06f;
 constexpr static float outerBallThickness = 0.07f;
-static Comp::Material innerConstraintColor = Comp::Material(Color(0.0f, 0.0f, 1.0f, 1.0f));
-static Comp::Material outerConstraintColor = Comp::Material(Color(0.0f, 0.0f, 1.0f, 0.7f));
+static Graphics::Comp::Material innerConstraintColor = Graphics::Comp::Material(Color(0.0f, 0.0f, 1.0f, 1.0f));
+static Graphics::Comp::Material outerConstraintColor = Graphics::Comp::Material(Color(0.0f, 0.0f, 1.0f, 0.7f));
 
 
 static void renderBar(GlobalCFrame cframe, Vec3 delta, float thickness, Color color) {
@@ -64,7 +64,7 @@ static void renderBar(GlobalCFrame cframe, Vec3 delta, float thickness, Color co
 
 	Rotation rotation = Rotation::faceZ(delta);
 
-	renderObject(MeshRegistry::box, cframe.localToGlobal(CFrame(delta/2, rotation)), DiagonalMat3f{thickness, thickness, float(length(delta) / 2)}, Comp::Material(color));
+	renderObject(MeshRegistry::box, cframe.localToGlobal(CFrame(delta/2, rotation)), DiagonalMat3f{thickness, thickness, float(length(delta) / 2)}, Graphics::Comp::Material(color));
 }
 
 static void renderPiston(const SinusoidalPistonConstraint* piston, const GlobalCFrame& start, const GlobalCFrame& end, int segments, float minThickness, float maxThickness) {
@@ -81,18 +81,18 @@ static void renderPiston(const SinusoidalPistonConstraint* piston, const GlobalC
 
 		float thickness = i / (segments - 1.0f) * (maxThickness - minThickness) + minThickness;
 
-		Comp::Material mat = (i%2 == 0) ? Comp::Material(Color(1.0f, 0.8f, 0.1f, 1.0f)) : Comp::Material(Color(0.9f, 0.9f, 0.9f, 1.0f));
+		Graphics::Comp::Material mat = (i%2 == 0) ? Graphics::Comp::Material(Color(1.0f, 0.8f, 0.1f, 1.0f)) : Graphics::Comp::Material(Color(0.9f, 0.9f, 0.9f, 1.0f));
 
 		renderObject(MeshRegistry::cylinder, start.localToGlobal(CFrame(center, rot)), DiagonalMat3f{thickness, thickness, float(length(step) / 2)}, mat);
 	}
 
-	renderObject(MeshRegistry::sphere, start, DiagonalMat3f::IDENTITY() * minThickness * 1.2f, Comp::Material(Color(0.0f, 1.0f, 0.0f, 1.0f)));
-	renderObject(MeshRegistry::sphere, end, DiagonalMat3f::IDENTITY() * maxThickness * 1.2f, Comp::Material(Color(0.0f, 1.0f, 0.0f, 1.0f)));
+	renderObject(MeshRegistry::sphere, start, DiagonalMat3f::IDENTITY() * minThickness * 1.2f, Graphics::Comp::Material(Color(0.0f, 1.0f, 0.0f, 1.0f)));
+	renderObject(MeshRegistry::sphere, end, DiagonalMat3f::IDENTITY() * maxThickness * 1.2f, Graphics::Comp::Material(Color(0.0f, 1.0f, 0.0f, 1.0f)));
 }
 
 static void renderMotor(const ConstantSpeedMotorConstraint* motor, const GlobalCFrame& start, const GlobalCFrame& end) {
-	renderObject(MeshRegistry::hexagon, start.localToGlobal(CFrame(Vec3(0, 0, 0.05))), DiagonalMat3f{0.2f, 0.2f, 0.1f}, Comp::Material(Color(1.0f, 1.0f, 0.0f, 1.0f)));
-	renderObject(MeshRegistry::hexagon, end.localToGlobal(CFrame(Vec3(0, 0, -0.05))), DiagonalMat3f{0.2f, 0.2f, 0.1f}, Comp::Material(Color(0.7f, 0.7f, 0.0f, 1.0f)));
+	renderObject(MeshRegistry::hexagon, start.localToGlobal(CFrame(Vec3(0, 0, 0.05))), DiagonalMat3f{0.2f, 0.2f, 0.1f}, Graphics::Comp::Material(Color(1.0f, 1.0f, 0.0f, 1.0f)));
+	renderObject(MeshRegistry::hexagon, end.localToGlobal(CFrame(Vec3(0, 0, -0.05))), DiagonalMat3f{0.2f, 0.2f, 0.1f}, Graphics::Comp::Material(Color(0.7f, 0.7f, 0.0f, 1.0f)));
 }
 
 static void renderBallConstraint(const GlobalCFrame& cframeA, const GlobalCFrame& cframeB, const BallConstraint* bc) {
@@ -177,7 +177,7 @@ static void renderConstraint(const PhysicalConstraint& constraint) {
 }
 
 static void renderSpringLink(const GlobalCFrame& start) {
-	renderObject(MeshRegistry::sphere, start.localToGlobal(CFrame(Vec3(0, 0, 0.05))), DiagonalMat3f{ 0.2f, 0.2f, 0.1f }, Comp::Material(Color(1.0f, 1.0f, 0.0f, 1.0f)));
+	renderObject(MeshRegistry::sphere, start.localToGlobal(CFrame(Vec3(0, 0, 0.05))), DiagonalMat3f{ 0.2f, 0.2f, 0.1f }, Graphics::Comp::Material(Color(1.0f, 1.0f, 0.0f, 1.0f)));
 	
 }
 

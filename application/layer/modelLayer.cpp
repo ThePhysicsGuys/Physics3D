@@ -9,10 +9,9 @@
 
 #include "../engine/ecs/registry.h"
 #include "ecs/components.h"
-#include "ecs/material.h"
 
 #include "../graphics/meshRegistry.h"
-
+#include "../graphics/ecs/components.h"
 #include "../graphics/mesh/indexedMesh.h"
 #include "../graphics/debug/visualDebug.h"
 
@@ -99,7 +98,7 @@ void ModelLayer::onInit(Engine::Registry64& registry) {
 	Shaders::instanceShader->updateTexture(false);
 
 	// Instance batch manager
-	manager = new InstanceBatchManager<Uniform>(DEFAULT_UNIFORM_BUFFER_LAYOUT);
+	manager = new InstanceBatchManager(DEFAULT_UNIFORM_BUFFER_LAYOUT);
 }
 
 void ModelLayer::onUpdate(Engine::Registry64& registry) {
@@ -159,7 +158,7 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 	struct EntityInfo {
 		Engine::Registry64::entity_type entity = 0;
 		Comp::Transform transform;
-		Comp::Material material;
+		Graphics::Comp::Material material;
 		IRef<Graphics::Comp::Mesh> mesh;
 		IRef<Comp::Collider> collider;
 	};
@@ -191,7 +190,7 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 					continue;
 
 			info.transform = registry.getOr<Comp::Transform>(entity);
-			info.material = registry.getOr<Comp::Material>(entity);
+			info.material = registry.getOr<Graphics::Comp::Material>(entity);
 			
 			if (info.material.albedo.a < 1.0f) {
 				double distance = lengthSquared(Vec3(screen->camera.cframe.position - info.transform.getPosition()));
@@ -201,16 +200,8 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 
 				if (info.collider.valid())
 					info.material.albedo += getAlbedoForPart(screen, info.collider->part);
-
-				Uniform uniform {
-					modelMatrix,
-					info.material.albedo,
-					info.material.metalness,
-					info.material.roughness,
-					info.material.ao
-				};
 				
-				manager->add(info.mesh->id, uniform);
+				manager->add(info.mesh->id, modelMatrix, info.material);
 			}
 		}
 		

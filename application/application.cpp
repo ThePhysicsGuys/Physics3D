@@ -9,11 +9,11 @@
 #include <filesystem>
 
 #include "view/screen.h"
-#include "ecs/material.h"
 #include "ecs/entityBuilder.h"
 #include "input/standardInputHandler.h"
 #include "ecs/components.h"
 #include "../graphics/texture.h"
+#include "../graphics/ecs/components.h"
 #include "../graphics/debug/guiDebug.h"
 #include "../graphics/debug/visualDebug.h"
 #include <Physics3D/geometry/shapeCreation.h>
@@ -49,6 +49,9 @@
 #include "../util/stringUtil.h"
 
 #include <Physics3D/misc/toString.h>
+
+#include "graphics/resource/textureResource.h"
+#include "util/resource/resourceManager.h"
 
 
 #define TICKS_PER_SECOND 120.0
@@ -143,11 +146,23 @@ void setupWorld(const ::Util::ParsedArgs& cmdArgs) {
 	
 	GlobalCFrame origin(0.0, 5.0, 0.0, Rotation::fromEulerAngles(-3.14 / 4, 3.14 / 4, 0.0));
 
-	for(int x = 0; x < 3; x++) {
-		for(int y = 0; y < 3; y++) {
-			for(int z = 0; z < 3; z++) {
+	// Load textures
+	/*Graphics::TextureResource* wallAlbedo = ResourceManager::add<Graphics::TextureResource>("wall albedo", "../res/textures/wall/wall_color.jpg");
+	Graphics::TextureResource* wallNormal = ResourceManager::add<Graphics::TextureResource>("wall normal", "../res/textures/wall/wall_normal.jpg");*/
+
+	int n = 3;
+	for(int x = 0; x < n; x++) {
+		for(int y = 0; y < n; y++) {
+			for(int z = 0; z < n; z++) {
 				GlobalCFrame cf = origin.localToGlobal(CFrame(x, y, z));
-				world.addPart(new ExtendedPart(boxShape(0.5, 0.5, 0.5), cf, basicProperties, "part"));
+				std::string name = "part " + std::to_string((x * n + y) * n + z);
+				ExtendedPart* part = new ExtendedPart(boxShape(0.5, 0.5, 0.5), cf, basicProperties, name);
+
+				/*IRef<Comp::Material> material = screen.registry.add<Comp::Material>(part->entity);
+				material->set(Comp::Material::ALBEDO, SRef<Graphics::Texture>(wallAlbedo));
+				material->set(Comp::Material::NORMAL, SRef<Graphics::Texture>(wallNormal));*/
+
+				world.addPart(part);
 			}
 		}
 	}

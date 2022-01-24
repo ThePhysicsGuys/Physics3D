@@ -2,7 +2,7 @@
 
 #include "basicShader.h"
 
-#include "ecs/material.h"
+#include "../graphics/ecs/components.h"
 #include "extendedPart.h"
 
 namespace P3D::Application {
@@ -13,7 +13,7 @@ void BasicShader::updatePart(const ExtendedPart& part) {
 	updateModel(part.getCFrame(), DiagonalMat3f(part.hitbox.scale));
 }
 
-void BasicShader::updateMaterial(const Comp::Material& material) {
+void BasicShader::updateMaterial(const Graphics::Comp::Material& material) {
 	bind();
 	setUniform("material.albedo", Vec4f(material.albedo));
 	setUniform("material.metalness", material.metalness);

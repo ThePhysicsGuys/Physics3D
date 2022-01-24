@@ -144,28 +144,28 @@ namespace P3D::Application {
 
 		// Center
 		Shaders::basicShader->updateModel(model);
-		Shaders::basicShader->updateMaterial(Comp::Material(Colors::WHITE));
+		Shaders::basicShader->updateMaterial(Graphics::Comp::Material(Colors::WHITE));
 		centerMesh->render();
 
 		// X, XY
-		Shaders::basicShader->updateMaterial(Comp::Material(Colors::RGB_R));
+		Shaders::basicShader->updateMaterial(Graphics::Comp::Material(Colors::RGB_R));
 		Shaders::basicShader->updateModel(modelX);   
 		handleMesh->render();
-		Shaders::basicShader->updateMaterial(Comp::Material(Colors::RGB_B));
+		Shaders::basicShader->updateMaterial(Graphics::Comp::Material(Colors::RGB_B));
 		quadMesh->render();
 		
 		// Y, XZ
 		Shaders::basicShader->updateModel(modelY);
-		Shaders::basicShader->updateMaterial(Comp::Material(Colors::RGB_G));
+		Shaders::basicShader->updateMaterial(Graphics::Comp::Material(Colors::RGB_G));
 		handleMesh->render();
 		Shaders::basicShader->updateModel(modelXZ);
 		quadMesh->render();
 
 		// Z, YZ
-		Shaders::basicShader->updateMaterial(Comp::Material(Colors::RGB_B));
+		Shaders::basicShader->updateMaterial(Graphics::Comp::Material(Colors::RGB_B));
 		Shaders::basicShader->updateModel(modelZ);
 		handleMesh->render();
-		Shaders::basicShader->updateMaterial(Comp::Material(Colors::RGB_R));
+		Shaders::basicShader->updateMaterial(Graphics::Comp::Material(Colors::RGB_R));
 		quadMesh->render();
 
 		// Root XYZ
@@ -175,27 +175,27 @@ namespace P3D::Application {
 			Mat4f rootModelY = rootModel * joinDiagonal(Mat3f(transformations[1].asRotationMatrix()), 1.0f);
 			Mat4f rootModelZ = rootModel * joinDiagonal(Mat3f(transformations[2].asRotationMatrix()), 1.0f);
 			
-			Shaders::basicShader->updateMaterial(Comp::Material(Colors::WHITE));
+			Shaders::basicShader->updateMaterial(Graphics::Comp::Material(Colors::WHITE));
 			Shaders::basicShader->updateModel(rootModel);
 			centerMesh->render();
-			Shaders::basicShader->updateMaterial(Comp::Material(Colors::RGB_R));
+			Shaders::basicShader->updateMaterial(Graphics::Comp::Material(Colors::RGB_R));
 			Shaders::basicShader->updateModel(rootModelX);
 			handleMesh->render();
-			Shaders::basicShader->updateMaterial(Comp::Material(Colors::RGB_G));
+			Shaders::basicShader->updateMaterial(Graphics::Comp::Material(Colors::RGB_G));
 			Shaders::basicShader->updateModel(rootModelY);
 			handleMesh->render();
-			Shaders::basicShader->updateMaterial(Comp::Material(Colors::RGB_B));
+			Shaders::basicShader->updateMaterial(Graphics::Comp::Material(Colors::RGB_B));
 			Shaders::basicShader->updateModel(rootModelZ);
 			handleMesh->render();
 			Shaders::basicShader->updateModel(Mat4::IDENTITY());
-			Shaders::basicShader->updateMaterial(Comp::Material(Colors::GRAY));
+			Shaders::basicShader->updateMaterial(Graphics::Comp::Material(Colors::GRAY));
 			deltaLine->resize(castPositionToVec3f(rootCFrame.value().position), castPositionToVec3f(cframe.value().position));
 			deltaLine->render();
 		}
 
 		// Delta line
 		if (startPosition.has_value() && active) {
-			Shaders::basicShader->updateMaterial(Comp::Material(Colors::ORANGE));
+			Shaders::basicShader->updateMaterial(Graphics::Comp::Material(Colors::ORANGE));
 			Shaders::basicShader->updateModel(GlobalCFrame(startPosition.value()), DiagonalMat3::IDENTITY() * 0.5);
 			Vec3f doubleRelativePosition = (castPositionToVec3f(cframe->position) - castPositionToVec3f(startPosition.value())) * 2.0f;
 			deltaLine->resize(Vec3f(), doubleRelativePosition);

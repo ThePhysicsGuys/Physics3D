@@ -102,26 +102,26 @@ namespace P3D::Application {
 			infiniteLine->render();
 
 		Shaders::basicShader->updateModel(modelC);
-		Shaders::basicShader->updateMaterial(Comp::Material(Colors::YELLOW));
+		Shaders::basicShader->updateMaterial(Graphics::Comp::Material(Colors::YELLOW));
 		handleMesh->render();
 
 		// X
-		Shaders::basicShader->updateMaterial(Comp::Material(Colors::RGB_R));
+		Shaders::basicShader->updateMaterial(Graphics::Comp::Material(Colors::RGB_R));
 		Shaders::basicShader->updateModel(modelX);   
 		handleMesh->render();
 		
 		// Y
 		Shaders::basicShader->updateModel(modelY);
-		Shaders::basicShader->updateMaterial(Comp::Material(Colors::RGB_G));
+		Shaders::basicShader->updateMaterial(Graphics::Comp::Material(Colors::RGB_G));
 		handleMesh->render();
 
 		// Z
-		Shaders::basicShader->updateMaterial(Comp::Material(Colors::RGB_B));
+		Shaders::basicShader->updateMaterial(Graphics::Comp::Material(Colors::RGB_B));
 		Shaders::basicShader->updateModel(modelZ);
 		handleMesh->render();
 
 		if (startPosition.has_value() && active) {
-			Shaders::basicShader->updateMaterial(Comp::Material(Colors::ORANGE));
+			Shaders::basicShader->updateMaterial(Graphics::Comp::Material(Colors::ORANGE));
 			Shaders::basicShader->updateModel(GlobalCFrame(startPosition.value()), DiagonalMat3::IDENTITY() * 0.5);
 			Vec3f doubleRelativePosition = (castPositionToVec3f(cframe->position) - castPositionToVec3f(startPosition.value())) * 2.0f;
 			deltaLine->resize(Vec3f(), doubleRelativePosition);

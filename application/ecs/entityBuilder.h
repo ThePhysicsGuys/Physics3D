@@ -63,7 +63,7 @@ public:
 
 	template<typename... Args>
 	EntityBuilder& material(Args&&... args) {
-		this->registry.add<Comp::Material>(this->entity, std::forward<Args>(args)...);
+		this->registry.add<Graphics::Comp::Material>(this->entity, std::forward<Args>(args)...);
 
 		return *this;
 	}

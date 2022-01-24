@@ -179,8 +179,6 @@ add_executable(application
   application/builtinWorlds.cpp
   application/worlds.cpp
 
-  application/ecs/material.cpp
-
   application/input/standardInputHandler.cpp
   application/input/playerController.cpp
 

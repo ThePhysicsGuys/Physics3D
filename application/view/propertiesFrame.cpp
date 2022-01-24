@@ -157,7 +157,7 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type 
 	PROPERTY_FRAME_END;
 }
 
-void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<Comp::Material>& component) {
+void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<Graphics::Comp::Material>& component) {
 	ECS_PROPERTY_FRAME_START(registry, index);
 
 	PROPERTY("Albedo", ImGui::ColorEdit4("##Albedo", component->albedo.data, ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_AlphaBar));
@@ -165,62 +165,61 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type 
 	PROPERTY("Roughness", ImGui::SliderFloat("##Roughness", &component->roughness, 0, 1));
 	PROPERTY("Ambient occlusion", ImGui::SliderFloat("##AO", &component->ao, 0, 1));
 
-	if (component->flags != 0) {
-		TITLE("Textures:", true);
-		float size = ImGui::GetTextLineHeightWithSpacing();
-		if (component->has(Comp::Material::ALBEDO)) 
-			PROPERTY(
-				"Albedo",
-				ImGui::Image(reinterpret_cast<ImTextureID>(component->get(Comp::Material::ALBEDO)->getID()), ImVec2(size, size))
-			);
+	TITLE("Textures:", true);
+	float size = ImGui::GetTextLineHeightWithSpacing();
+	if (component->has(Graphics::Comp::Material::Map_Albedo)) 
+		PROPERTY(
+			"Albedo",
+			ImGui::Image(reinterpret_cast<ImTextureID>(component->get(Graphics::Comp::Material::Map_Albedo)->getID()), ImVec2(size, size))
+		);
 
 
-		if (component->has(Comp::Material::NORMAL)) 
-			PROPERTY(
-				"Normal",
-				ImGui::Image(reinterpret_cast<ImTextureID>(component->get(Comp::Material::NORMAL)->getID()), ImVec2(size, size))
-			);
+	if (component->has(Graphics::Comp::Material::Map_Normal))
+		PROPERTY(
+			"Normal",
+			ImGui::Image(reinterpret_cast<ImTextureID>(component->get(Graphics::Comp::Material::Map_Normal)->getID()), ImVec2(size, size))
+		);
 
 
-		if (component->has(Comp::Material::METALNESS))
-			PROPERTY(
-				"Metalness",
-				ImGui::Image(reinterpret_cast<ImTextureID>(component->get(Comp::Material::METALNESS)->getID()), ImVec2(size, size))
-			);
+	if (component->has(Graphics::Comp::Material::Map_Metalness))
+		PROPERTY(
+			"Metalness",
+			ImGui::Image(reinterpret_cast<ImTextureID>(component->get(Graphics::Comp::Material::Map_Metalness)->getID()), ImVec2(size, size))
+		);
 
 
-		if (component->has(Comp::Material::ROUGHNESS)) 
-			PROPERTY(
-				"Roughness",
-				ImGui::Image(reinterpret_cast<ImTextureID>(component->get(Comp::Material::ROUGHNESS)->getID()), ImVec2(size, size))
-			);
+	if (component->has(Graphics::Comp::Material::Map_Roughness))
+		PROPERTY(
+			"Roughness",
+			ImGui::Image(reinterpret_cast<ImTextureID>(component->get(Graphics::Comp::Material::Map_Roughness)->getID()), ImVec2(size, size))
+		);
 
 
-		if (component->has(Comp::Material::AO)) 
-			PROPERTY("Ambient occlusion",
-				ImGui::Image(reinterpret_cast<ImTextureID>(component->get(Comp::Material::AO)->getID()), ImVec2(size, size))
-			);
+	if (component->has(Graphics::Comp::Material::Map_AO))
+		PROPERTY("Ambient occlusion",
+			ImGui::Image(reinterpret_cast<ImTextureID>(component->get(Graphics::Comp::Material::Map_AO)->getID()), ImVec2(size, size))
+		);
 
 
-		if (component->has(Comp::Material::GLOSS)) 
-			PROPERTY("Gloss",
-				ImGui::Image(reinterpret_cast<ImTextureID>(component->get(Comp::Material::GLOSS)->getID()), ImVec2(size, size))
-			);
+	if (component->has(Graphics::Comp::Material::Map_Gloss))
+		PROPERTY("Gloss",
+			ImGui::Image(reinterpret_cast<ImTextureID>(component->get(Graphics::Comp::Material::Map_Gloss)->getID()), ImVec2(size, size))
+		);
 
 
-		if (component->has(Comp::Material::SPECULAR)) 
-			PROPERTY(
-				"Specular",
-				ImGui::Image(reinterpret_cast<ImTextureID>(component->get(Comp::Material::SPECULAR)->getID()), ImVec2(size, size))
-			);
+	if (component->has(Graphics::Comp::Material::Map_Specular))
+		PROPERTY(
+			"Specular",
+			ImGui::Image(reinterpret_cast<ImTextureID>(component->get(Graphics::Comp::Material::Map_Specular)->getID()), ImVec2(size, size))
+		);
 
 
-		if (component->has(Comp::Material::DISPLACEMENT)) 
-			PROPERTY(
-				"Displacement",
-				ImGui::Image(reinterpret_cast<ImTextureID>(component->get(Comp::Material::DISPLACEMENT)->getID()), ImVec2(size, size))
-			);
-	}
+	if (component->has(Graphics::Comp::Material::Map_Displacement))
+		PROPERTY(
+			"Displacement",
+			ImGui::Image(reinterpret_cast<ImTextureID>(component->get(Graphics::Comp::Material::Map_Displacement)->getID()), ImVec2(size, size))
+		);
+	
 
 	PROPERTY_FRAME_END;
 }
@@ -562,7 +561,7 @@ void PropertiesFrame::onRender(Engine::Registry64& registry) {
 		ENTITY_DISPATCH(registry, selectedEntity, index, Comp::Transform, component);
 		ENTITY_DISPATCH(registry, selectedEntity, index, Comp::Collider, component);
 		ENTITY_DISPATCH(registry, selectedEntity, index, Graphics::Comp::Mesh, component);
-		ENTITY_DISPATCH(registry, selectedEntity, index, Comp::Material, component);
+		ENTITY_DISPATCH(registry, selectedEntity, index, Graphics::Comp::Material, component);
 		ENTITY_DISPATCH(registry, selectedEntity, index, Comp::Light, component);
 		ENTITY_DISPATCH(registry, selectedEntity, index, Comp::Hitbox, component);
 		ENTITY_DISPATCH(registry, selectedEntity, index, Comp::Attachment, component);

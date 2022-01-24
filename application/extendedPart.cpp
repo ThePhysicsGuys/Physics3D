@@ -106,8 +106,8 @@ ExtendedPart::~ExtendedPart() {
 		screen.registry.destroy(this->entity);
 }
 
-void ExtendedPart::setMaterial(const Comp::Material& material) {
-	screen.registry.add<Comp::Material>(this->entity, material);
+void ExtendedPart::setMaterial(const Graphics::Comp::Material& material) {
+	screen.registry.add<Graphics::Comp::Material>(this->entity, material);
 }
 
 void ExtendedPart::setName(const std::string& name) {
@@ -115,11 +115,11 @@ void ExtendedPart::setName(const std::string& name) {
 }
 
 void ExtendedPart::setColor(const Graphics::Color& color) {
-	screen.registry.getOrAdd<Comp::Material>(this->entity)->albedo = color;
+	screen.registry.getOrAdd<Graphics::Comp::Material>(this->entity)->albedo = color;
 }
 
 Graphics::Color ExtendedPart::getColor() const {
-	return screen.registry.get<Comp::Material>(this->entity)->albedo;
+	return screen.registry.get<Graphics::Comp::Material>(this->entity)->albedo;
 }
 
 };

@@ -115,7 +115,7 @@ const int Mode_Metalness = 6;
 const int Mode_Roughness = 7;
 const int Mode_AO = 8;
 
-uniform int mode = 1;
+uniform int mode = Mode_Default;
 
 // General
 vec3 N;

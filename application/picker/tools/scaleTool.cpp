@@ -116,28 +116,28 @@ namespace P3D::Application {
 		}
 
 		Shaders::basicShader->updateModel(model);
-		Shaders::basicShader->updateMaterial(Comp::Material(Colors::WHITE));
+		Shaders::basicShader->updateMaterial(Graphics::Comp::Material(Colors::WHITE));
 		centerMesh->render();
 
 		// X, XY
-		Shaders::basicShader->updateMaterial(Comp::Material(Colors::RGB_R));
+		Shaders::basicShader->updateMaterial(Graphics::Comp::Material(Colors::RGB_R));
 		Shaders::basicShader->updateModel(modelX);
 		handleMesh->render();
-		Shaders::basicShader->updateMaterial(Comp::Material(Colors::RGB_B));
+		Shaders::basicShader->updateMaterial(Graphics::Comp::Material(Colors::RGB_B));
 		quadMesh->render();
 
 		// Y, XZ
 		Shaders::basicShader->updateModel(modelY);
-		Shaders::basicShader->updateMaterial(Comp::Material(Colors::RGB_G));
+		Shaders::basicShader->updateMaterial(Graphics::Comp::Material(Colors::RGB_G));
 		handleMesh->render();
 		Shaders::basicShader->updateModel(modelXZ);
 		quadMesh->render();
 
 		// Z, YZ
-		Shaders::basicShader->updateMaterial(Comp::Material(Colors::RGB_B));
+		Shaders::basicShader->updateMaterial(Graphics::Comp::Material(Colors::RGB_B));
 		Shaders::basicShader->updateModel(modelZ);
 		handleMesh->render();
-		Shaders::basicShader->updateMaterial(Comp::Material(Colors::RGB_R));
+		Shaders::basicShader->updateMaterial(Graphics::Comp::Material(Colors::RGB_R));
 		quadMesh->render();
 	}
 

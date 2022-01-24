@@ -2,12 +2,12 @@
 
 #include "shaderBase.h"
 
+namespace P3D::Graphics::Comp {
+struct Material;
+}
+
 namespace P3D::Application {
 using namespace Graphics;
-
-namespace Comp {
-struct Material;
-};
 
 struct ExtendedPart;
 
@@ -16,7 +16,7 @@ struct BasicShader : public StandardMeshShaderBase, public BasicShaderBase {
 
 	void updatePart(const ExtendedPart& part);
 	void updateTexture(bool textured);
-	void updateMaterial(const Comp::Material& material);
+	void updateMaterial(const Graphics::Comp::Material& material);
 };
 
 struct InstanceShader : public InstancedMeshShaderBase, public BasicShaderBase {
