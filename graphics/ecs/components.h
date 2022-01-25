@@ -1,5 +1,7 @@
 #pragma once
 
+#include <set>
+
 #include "../graphics/texture.h"
 #include "../graphics/gui/color.h"
 #include "Physics3D/datastructures/smartPointers.h"
@@ -42,11 +44,13 @@ struct Mesh : public RC {
 };
 
 struct Material : public RC {
+	static constexpr std::size_t MAP_COUNT = 8;
+
 private:
-	SRef<Graphics::Texture> maps[8];
+	SRef<Graphics::Texture> maps[MAP_COUNT];
 
 public:
-	typedef short Map;
+	typedef int Map;
 	inline static Map Map_None         = 0 << 0;
 	inline static Map Map_Albedo       = 1 << 0;
 	inline static Map Map_Normal       = 1 << 1;
@@ -69,15 +73,57 @@ public:
 	}
 
 	void reset(Map map) {
+		if (map == Map_None)
+			return;
+
 		maps[ctz(map)] = nullptr;
 	}
 
 	[[nodiscard]] SRef<Graphics::Texture> get(Map map) const {
+		if (map == Map_None)
+			return nullptr;
+
 		return maps[ctz(map)];
 	}
 
+	[[nodiscard]] SRef<Graphics::Texture> get(std::size_t index) const {
+		if (index >= MAP_COUNT)
+			return nullptr;
+
+		return maps[index];
+	}
+
+	/*[[nodiscard]] std::map<Map, Graphics::Texture*> getTextures() const {
+		std::map<Map, Graphics::Texture*> result;
+
+		for (std::size_t index = 0; index < MAP_COUNT; index++)
+			if (maps[index] != nullptr)
+				result.emplace(1 << index, maps[index]);
+
+		return result;
+	}*/
+
+	[[nodiscard]] int getTextureCount() const {
+		return has(Map_Albedo) + has(Map_Normal) + has(Map_Metalness) + has(Map_Roughness) + has(Map_AO) + has(Map_Gloss) + has(Map_Specular) + has(Map_Displacement);
+	}
+
 	[[nodiscard]] bool has(Map map) const {
+		if (map == Map_None)
+			return false;
+
 		return maps[ctz(map)] != nullptr;
+	}
+
+	[[nodiscard]] Map getMaps() const {
+		return Map_None
+			| (has(Map_Albedo) ? Map_Albedo : Map_None)
+			| (has(Map_Normal) ? Map_Normal : Map_None)
+			| (has(Map_Metalness) ? Map_Metalness : Map_None)
+			| (has(Map_Roughness) ? Map_Roughness : Map_None)
+			| (has(Map_AO) ? Map_AO : Map_None)
+			| (has(Map_Gloss) ? Map_Gloss : Map_None)
+			| (has(Map_Specular) ? Map_Specular : Map_None)
+			| (has(Map_Displacement) ? Map_Displacement : Map_None);
 	}
 };
 

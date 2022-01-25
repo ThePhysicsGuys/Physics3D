@@ -98,7 +98,7 @@ void ModelLayer::onInit(Engine::Registry64& registry) {
 	Shaders::instanceShader->updateTexture(false);
 
 	// Instance batch manager
-	manager = new InstanceBatchManager(DEFAULT_UNIFORM_BUFFER_LAYOUT);
+	manager = new InstanceBatchManager(Shaders::instanceShader, DEFAULT_UNIFORM_BUFFER_LAYOUT);
 }
 
 void ModelLayer::onUpdate(Engine::Registry64& registry) {
@@ -145,10 +145,9 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 	Vec3f sunDirection = to - from;
 	ShadowLayer::lightView = lookAt(from, to);
 	ShadowLayer::lighSpaceMatrix = ShadowLayer::lightProjection * ShadowLayer::lightView;
-	activeTexture(1);
-	activeTexture(1);
-	bindTexture2D(ShadowLayer::depthMap);
-	Shaders::instanceShader->setUniform("shadowMap", 1);
+	Renderer::activeTexture(32);
+	Renderer::bindTexture2D(ShadowLayer::depthMap);
+	Shaders::instanceShader->setUniform("shadowMap", 32);
 	Shaders::instanceShader->setUniform("lightMatrix", ShadowLayer::lighSpaceMatrix);
 	Shaders::instanceShader->updateSunDirection(sunDirection);
 
@@ -204,8 +203,7 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 				manager->add(info.mesh->id, modelMatrix, info.material);
 			}
 		}
-		
-		Shaders::instanceShader->bind();
+
 		manager->submit();
 
 		// Render transparent meshes

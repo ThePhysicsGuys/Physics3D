@@ -6,7 +6,8 @@ namespace P3D::Graphics {
 	BufferLayout({ \
 		BufferElement("vModelMatrix", BufferDataType::MAT4, true), \
 		BufferElement("vAlbedo", BufferDataType::FLOAT4, true), \
-		BufferElement("vMRAo", BufferDataType::FLOAT3, true) \
+		BufferElement("vMRAo", BufferDataType::FLOAT3, true), \
+		BufferElement("vTextureFlags", BufferDataType::INT, true) \
 	})
 
 namespace BufferDataType {
@@ -33,6 +34,7 @@ struct Info {
 
 extern const Info NONE;
 extern const Info BOOL;
+extern const Info UINT;
 extern const Info INT;
 extern const Info INT2;
 extern const Info INT3;

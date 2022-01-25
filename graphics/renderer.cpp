@@ -229,6 +229,12 @@ int parseShaderVersion(const char* version) {
 	return 100 * (version[0] - '0') + 10 * (version[1] - '0');
 }
 
+int getMaxTextureUnits() {
+	int result;
+	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS_ARB, &result);
+	return result;
+}
+
 void genBuffers(int count, GLID* id) {
 	glGenBuffers(count, id);
 }

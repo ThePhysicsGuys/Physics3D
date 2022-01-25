@@ -78,6 +78,7 @@ extern const char* getVendor();
 extern const char* getVersion();
 extern const char* getRenderer();
 extern const char* getShaderVersion();
+extern int getMaxTextureUnits();
 extern int parseShaderVersion(const char* version);
 
 extern void genBuffers(int count, GLID* id);

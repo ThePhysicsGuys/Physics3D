@@ -147,8 +147,8 @@ void setupWorld(const ::Util::ParsedArgs& cmdArgs) {
 	GlobalCFrame origin(0.0, 5.0, 0.0, Rotation::fromEulerAngles(-3.14 / 4, 3.14 / 4, 0.0));
 
 	// Load textures
-	/*Graphics::TextureResource* wallAlbedo = ResourceManager::add<Graphics::TextureResource>("wall albedo", "../res/textures/wall/wall_color.jpg");
-	Graphics::TextureResource* wallNormal = ResourceManager::add<Graphics::TextureResource>("wall normal", "../res/textures/wall/wall_normal.jpg");*/
+	Graphics::TextureResource* wallAlbedo = ResourceManager::add<Graphics::TextureResource>("wall albedo", "../res/textures/wall/wall_color.jpg");
+	Graphics::TextureResource* wallNormal = ResourceManager::add<Graphics::TextureResource>("wall normal", "../res/textures/wall/wall_normal.jpg");
 
 	int n = 3;
 	for(int x = 0; x < n; x++) {
@@ -158,9 +158,9 @@ void setupWorld(const ::Util::ParsedArgs& cmdArgs) {
 				std::string name = "part " + std::to_string((x * n + y) * n + z);
 				ExtendedPart* part = new ExtendedPart(boxShape(0.5, 0.5, 0.5), cf, basicProperties, name);
 
-				/*IRef<Comp::Material> material = screen.registry.add<Comp::Material>(part->entity);
-				material->set(Comp::Material::ALBEDO, SRef<Graphics::Texture>(wallAlbedo));
-				material->set(Comp::Material::NORMAL, SRef<Graphics::Texture>(wallNormal));*/
+				IRef<Graphics::Comp::Material> material = screen.registry.add<Graphics::Comp::Material>(part->entity);
+				material->set(Graphics::Comp::Material::Map_Albedo, SRef<Graphics::Texture>(wallAlbedo));
+				material->set(Graphics::Comp::Material::Map_Normal, SRef<Graphics::Texture>(wallNormal));
 
 				world.addPart(part);
 			}

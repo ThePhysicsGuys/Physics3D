@@ -2,9 +2,9 @@
 
 #include "profilerUI.h"
 
-#include "../application/picker/selection.h" // reverse dependency -- BAAAAD
-#include "../application/picker/tools/selectionTool.h" // reverse dependency -- BAAAAD
-#include "../application/extendedPart.h" // reverse dependency -- BAAAAD
+#include "../application/picker/selection.h"
+#include "../application/picker/tools/selectionTool.h"
+#include "../application/extendedPart.h"
 
 #include <sstream>
 #include <GL/glew.h>

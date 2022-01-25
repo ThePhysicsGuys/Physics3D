@@ -109,6 +109,9 @@ Screen::Screen(int width, int height, PlayerWorld* world, UpgradeableMutex* worl
 	Log::info("OpenGL shader version: (%s)", Renderer::getShaderVersion());
 
 	SystemVariables::set("OPENGL_SHADER_VERSION", Renderer::parseShaderVersion(Renderer::getShaderVersion()));
+	SystemVariables::set("MAX_TEXTURE_IMAGE_UNITS", Renderer::getMaxTextureUnits());
+
+	Log::info("OpenGL maximum texture units: %d", Renderer::getMaxTextureUnits());
 }
 
 

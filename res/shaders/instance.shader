@@ -57,6 +57,7 @@ layout(location = 4) in vec3 vBitangent;
 layout(location = 5) in mat4 vModelMatrix;
 layout(location = 9) in vec4 vAlbedo;
 layout(location = 10) in vec3 vMRAo;
+layout(location = 11) in int vTextureFlags;
 
 smooth out vec3 fPosition;
 smooth out vec2 fUV;
@@ -67,6 +68,7 @@ flat out vec4 fAlbedo;
 flat out float fMetalness;
 flat out float fRoughness;
 flat out float fAmbientOcclusion;
+flat out int fTextureFlags;
 
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
@@ -77,6 +79,7 @@ void main() {
 	fMetalness = vMRAo.x;
 	fRoughness = vMRAo.y;
 	fAmbientOcclusion = vMRAo.z;
+	fTextureFlags = vTextureFlags;
 
 	fUV = vUV;
 	fPosition = applyT3(vModelMatrix, vPosition);
@@ -104,16 +107,28 @@ flat in vec4 fAlbedo;
 flat in float fRoughness;
 flat in float fMetalness;
 flat in float fAmbientOcclusion;
+flat in int fTextureFlags;
 
-const int Mode_Default = 0;
-const int Mode_Position = 1;
-const int Mode_Normal = 2;
-const int Mode_UV = 3;
-const int Mode_LightSpace = 4;
-const int Mode_Albedo = 5;
-const int Mode_Metalness = 6;
-const int Mode_Roughness = 7;
-const int Mode_AO = 8;
+const int Flag_Size         = 4;
+const int Flag_Albedo       = 7 * Flag_Size;
+const int Flag_Normal       = 6 * Flag_Size;
+const int Flag_Metalness    = 5 * Flag_Size;
+const int Flag_Roughness    = 4 * Flag_Size;
+const int Flag_AO           = 3 * Flag_Size;
+const int Flag_Gloss        = 2 * Flag_Size;
+const int Flag_Specular     = 1 * Flag_Size;
+const int Flag_Displacement = 0 * Flag_Size;
+						    
+const int Mode_Default      = 0;
+const int Mode_Position     = 1;
+const int Mode_Normal       = 2;
+const int Mode_UV           = 3;
+const int Mode_LightSpace   = 4;
+const int Mode_Albedo       = 5;
+const int Mode_Metalness    = 6;
+const int Mode_Roughness    = 7;
+const int Mode_AO           = 8;
+const int Mode_TextureFlags = 9;
 
 uniform int mode = Mode_Default;
 
@@ -125,13 +140,14 @@ float roughness;
 float metalness;
 float ambientOcclusion;
 
-// Structs
+// Attenuation
 struct Attenuation {
 	float constant;
 	float linear;
 	float exponent;
 };
 
+// Light
 struct Light {
 	vec3 position;
 	vec3 color;
@@ -139,14 +155,9 @@ struct Light {
 	Attenuation attenuation;
 };
 
-struct Material {
-	sampler2D albedoMap;
-	sampler2D normalMap;
-	sampler2D metalnessMap;
-	sampler2D roughnessMap;
-	sampler2D ambientOcclusionMap;
-	int textured;
-};
+#define maxLights 10
+uniform int lightCount;
+uniform Light lights[maxLights];
 
 // Shadow
 uniform sampler2D shadowMap;
@@ -154,13 +165,9 @@ uniform sampler2D shadowMap;
 // Transform
 uniform vec3 viewPosition;
 
-// Light
-#define maxLights 10
-uniform int lightCount;
-uniform Light lights[maxLights];
-
-// Material
-uniform Material material;
+// Textures
+//uniform sampler2D textures[##MAX_TEXTURE_IMAGE_UNITS];
+uniform sampler2D textures[31];
 
 // Environment
 uniform vec3 sunDirection = vec3(1, 1, 1);
@@ -280,8 +287,30 @@ vec3 calcLightColor(Light light) {
 	return Lo;
 }
 
-vec3 getNormalFromMap() {
-	vec3 tangentNormal = texture(material.normalMap, fUV).xyz * 2.0 - 1.0;
+int getTextureMapIndex(int flag) {
+	return (fTextureFlags >> flag) & 0xF;
+}
+
+vec4 getTextureMap(int map) {
+	return texture(textures[map - 1], fUV);
+}
+
+vec4 getAlbedo() {
+	int map = getTextureMapIndex(Flag_Albedo);
+	
+	if (map == 0)
+		return fAlbedo;
+
+	return getTextureMap(map);
+}
+
+vec3 getNormal() {
+	int map = getTextureMapIndex(Flag_Normal);
+
+	if (map == 0)
+		return normalize(fNormal);
+
+	vec3 tangentNormal = getTextureMap(map).xyz * 2.0 - 1.0;
 
 	vec3 Q1 = dFdx(fPosition);
 	vec3 Q2 = dFdy(fPosition);
@@ -296,39 +325,47 @@ vec3 getNormalFromMap() {
 	return TBN * tangentNormal;
 }
 
+float getMetalness() {
+	int map = getTextureMapIndex(Flag_Metalness);
+
+	if (map == 0)
+		return fMetalness;
+
+	return getTextureMap(map).r;
+}
+
+float getRoughness() {
+	int map = getTextureMapIndex(Flag_Roughness);
+
+	if (map == 0)
+		return fRoughness;
+
+	return getTextureMap(map).r;
+}
+
+float getAmbientOcclusion() {
+	int map = getTextureMapIndex(Flag_AO);
+
+	if (map == 0)
+		return fAmbientOcclusion;
+
+	return getTextureMap(map).r;
+}
+
 void main() {
-	/*if (material.textured == 1) {
-		N = normalize(fNormal);
-		//N = normalize(getNormalFromMap());
+	albedo = getAlbedo();
+	roughness = getRoughness();
+	metalness = getMetalness();
+	ambientOcclusion = getAmbientOcclusion();
 
-		albedo = vec4(fUV, 1, 1); 
-		//albedo = texture(material.albedoMap, fUV);
-		//albedo = albedo * albedo;
-		/*roughness =  texture(material.roughnessMap, fUV).r;
-		metalness = texture(material.metalnessMap, fUV).r;
-		ambientOcclusion = texture(material.ambientOcclusionMap, fUV).r;*/
-		/*roughness = fRoughness;
-		metalness = fMetalness;
-		ambientOcclusion = fAmbientOcclusion;
-	} else {*/
-		N = normalize(fNormal);
-
-		//albedo = vec4(fUV, 0, 1);
-		albedo = fAlbedo;
-		roughness = fRoughness;
-		metalness = fMetalness;
-		ambientOcclusion = fAmbientOcclusion;
-	/*}*/
-
+	N = getNormal();
 	V = normalize(viewPosition - fPosition);
 
 	// Light calculations
 	vec3 Lo = vec3(0);
-	for (int i = 0; i < min(maxLights, lightCount); i++) {
-		if (lights[i].intensity > 0) {
+	for (int i = 0; i < min(maxLights, lightCount); i++)
+		if (lights[i].intensity > 0)
 			Lo += calcLightColor(lights[i]);
-		}
-	}
 
 	// Ambient
 	vec3 ambient = albedo.rgb * ambientOcclusion;
@@ -367,6 +404,13 @@ void main() {
 		outColor = vec4(vec3(fRoughness), 1.0);
 	else if (mode == Mode_AO)
 		outColor = vec4(vec3(fAmbientOcclusion), 1.0);
+	else if (mode == Mode_TextureFlags)
+		outColor = vec4(
+			getTextureMapIndex(Flag_Albedo), 
+			getTextureMapIndex(Flag_Normal), 
+			getTextureMapIndex(Flag_Roughness), 
+			1.0
+		);
 	else
 		outColor = vec4(1.0, 0.0, 1.0, 1.0);
 
