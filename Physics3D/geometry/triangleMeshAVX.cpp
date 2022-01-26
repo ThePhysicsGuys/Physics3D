@@ -1,34 +1,10 @@
 #include "triangleMesh.h"
+#include "triangleMeshCommon.h"
 
 #include <immintrin.h>
 
 // AVX2 implementation for TriangleMesh functions
 namespace P3D {
-inline static size_t getOffset(size_t size) {
-	return (size + 7) & 0xFFFFFFFFFFFFFFF8;
-}
-
-#ifdef _MSC_VER
-inline static uint32_t countZeros(uint32_t x) {
-	unsigned long ret;
-	_BitScanForward(&ret, x);
-	return (int) ret;
-}
-#else
-inline static uint32_t countZeros(uint32_t x) {
-	return __builtin_ctz(x);
-}
-#endif
-
-#ifdef _MSC_VER
-#define GET_AVX_ELEM(reg, index) reg.m256_f32[index]
-#else
-#define GET_AVX_ELEM(reg, index) reg[index]
-#endif
-
-#define SWAP_2x2 0b01001110
-#define SWAP_1x1 0b10110001
-
 inline __m256i _mm256_blendv_epi32(__m256i a, __m256i b, __m256 mask) {
 	return _mm256_castps_si256(
 		_mm256_blendv_ps(

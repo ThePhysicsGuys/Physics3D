@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /arch:AVX2")
+	# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /arch:AVX2")
 
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2 /Oi /ot /GL")
 else()
@@ -41,6 +41,7 @@ add_library(Physics3D STATIC
   geometry/intersection.cpp
   geometry/triangleMesh.cpp
   geometry/triangleMeshSSE.cpp
+  geometry/triangleMeshSSE4.cpp
   geometry/triangleMeshAVX.cpp
   geometry/polyhedron.cpp
   geometry/shape.cpp
@@ -88,3 +89,14 @@ add_library(Physics3D STATIC
   misc/serialization/serialization.cpp
   misc/serialization/serializeBasicTypes.cpp
 )
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+  set_source_files_properties(geometry/triangleMeshSSE.cpp PROPERTIES COMPILE_FLAGS /arch:SSE2)
+  set_source_files_properties(geometry/triangleMeshSSE4.cpp PROPERTIES COMPILE_FLAGS /arch:SSE2)
+  set_source_files_properties(geometry/triangleMeshAVX.cpp PROPERTIES COMPILE_FLAGS /arch:AVX2)
+else()
+  set_source_files_properties(geometry/triangleMeshSSE.cpp PROPERTIES COMPILE_FLAGS -msse2) # Up to SSE2
+  set_source_files_properties(geometry/triangleMeshSSE4.cpp PROPERTIES COMPILE_FLAGS -msse4.1) # Up to SSE4_1
+  set_source_files_properties(geometry/triangleMeshAVX.cpp PROPERTIES COMPILE_FLAGS -mfma) # Includes AVX, AVX2 and FMA
+endif()
+

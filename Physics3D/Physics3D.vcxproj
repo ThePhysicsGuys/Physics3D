@@ -159,6 +159,10 @@
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
+    <ClCompile Include="geometry\triangleMeshSSE4.cpp">
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+    </ClCompile>
     <ClCompile Include="datastructures\aligned_alloc.cpp" />
     <ClCompile Include="boundstree\boundsTree.cpp" />
     <ClCompile Include="boundstree\filters\visibilityFilter.cpp" />
@@ -232,6 +236,7 @@
     <ClInclude Include="geometry\genericIntersection.h" />
     <ClInclude Include="geometry\shapeCreation.h" />
     <ClInclude Include="geometry\triangleMesh.h" />
+    <ClInclude Include="geometry\triangleMeshCommon.h" />
     <ClInclude Include="geometry\intersection.h" />
     <ClInclude Include="geometry\builtinShapeClasses.h" />
     <ClInclude Include="geometry\polyhedron.h" />
