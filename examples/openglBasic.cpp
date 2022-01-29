@@ -78,7 +78,8 @@ namespace Colors {
 }
 
 const char* const basicVertexShader = R"(
-#version 330 core
+#version 300 es
+precision highp float;
 layout(location = 0) in vec3 vertexPosition_modelspace;
 layout(location = 1) in vec3 vertexNormal_modelspace;
 
@@ -93,17 +94,18 @@ void main(){
   // Output position of the vertex, in clip space : pvMatrix * modelMatrix * position
   gl_Position = pvMatrix * modelMatrix * vec4(vertexPosition_modelspace,1);
   vec3 vertexNormal_worldspace = mat3(modelMatrix) * vertexNormal_modelspace;
-  float brightness = (dot(-vertexNormal_worldspace, lightDirection) + 1) / 2;
+  float brightness = (dot(-vertexNormal_worldspace, lightDirection) + 1.0f) / 2.0f;
   //fragmentColor = vec3(brightness, brightness, brightness);
   fragmentColor = brightness * partColor;
 }
 )";
 
 const char* basicFragmentShader = R"(
-#version 330 core
+#version 300 es
+precision highp float;
 out vec3 color;
 in vec3 fragmentColor;
-void main(){
+void main() {
   color = fragmentColor;
 }
 )";
