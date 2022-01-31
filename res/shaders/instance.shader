@@ -391,19 +391,19 @@ void main() {
 	else if (mode == Mode_Position)
 		outColor = vec4(fPosition, 1.0);
 	else if (mode == Mode_Normal)
-		outColor = vec4(fNormal, 1.0);
+		outColor = vec4(N, 1.0);
 	else if (mode == Mode_UV)
 		outColor = vec4(fUV, 0.0, 1.0);
 	else if (mode == Mode_LightSpace)
 		outColor = vec4(fLightSpacePosition);
 	else if (mode == Mode_Albedo)
-		outColor = vec4(fAlbedo);
+		outColor = vec4(albedo);
 	else if (mode == Mode_Metalness)
-		outColor = vec4(vec3(fMetalness), 1.0);
+		outColor = vec4(vec3(metalness), 1.0);
 	else if (mode == Mode_Roughness)
-		outColor = vec4(vec3(fRoughness), 1.0);
+		outColor = vec4(vec3(roughness), 1.0);
 	else if (mode == Mode_AO)
-		outColor = vec4(vec3(fAmbientOcclusion), 1.0);
+		outColor = vec4(vec3(ambientOcclusion), 1.0);
 	else if (mode == Mode_TextureFlags)
 		outColor = vec4(
 			getTextureMapIndex(Flag_Albedo), 

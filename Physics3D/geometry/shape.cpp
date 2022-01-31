@@ -6,13 +6,19 @@
 namespace P3D {
 Shape::Shape() : baseShape(nullptr), scale{1,1,1} {}
 Shape::Shape(intrusive_ptr<const ShapeClass> baseShape, DiagonalMat3 scale) : 
-	baseShape(std::move(baseShape)), scale(scale) {}
+	baseShape(std::move(baseShape)), scale(scale) {
+	assert(this->baseShape);
+}
 
 Shape::Shape(intrusive_ptr<const ShapeClass> baseShape) : 
-	baseShape(std::move(baseShape)), scale{1,1,1} {}
+	baseShape(std::move(baseShape)), scale{1,1,1} {
+	assert(this->baseShape);
+}
 
-Shape::Shape(intrusive_ptr<const ShapeClass> baseShape, double width, double height, double depth) : 
-	baseShape(std::move(baseShape)), scale{width / 2, height / 2, depth / 2} {}
+Shape::Shape(intrusive_ptr<const ShapeClass> baseShape, double width, double height, double depth) :
+	baseShape(std::move(baseShape)), scale{width / 2, height / 2, depth / 2} {
+	assert(this->baseShape);
+}
 
 // defined here so that ShapeClass destructor does not need to be called externally
 Shape::~Shape() {}

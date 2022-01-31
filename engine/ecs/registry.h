@@ -686,10 +686,6 @@ private:
 
 		extract_smallest_component<Components...>(smallest_component, smallest_size, other_components);
 
-		entity_map* map = this->components[smallest_component];
-		component_map_iterator first(map->begin());
-		component_map_iterator last(map->end());
-
 		auto filter = [this, other_components] (const component_map_iterator& iterator) {
 			for (component_type component : other_components) {
 				auto component_iterator = this->components[component]->find(iterator->first);
@@ -704,6 +700,14 @@ private:
 			return iterator->first;
 		};
 
+		entity_map* map = this->components[smallest_component];
+		/*if (map == nullptr) {
+			component_map_iterator iterator {};
+			return filter_transform_view<conjunction<Component, Components...>>(iterator, iterator, filter, transform);
+		}*/
+
+		component_map_iterator first(map->begin());
+		component_map_iterator last(map->end());
 		return filter_transform_view<conjunction<Component, Components...>>(first, last, filter, transform);
 	}
 
