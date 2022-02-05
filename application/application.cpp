@@ -50,6 +50,7 @@
 
 #include <Physics3D/misc/toString.h>
 
+#include "builtinWorlds.h"
 #include "graphics/resource/textureResource.h"
 #include "util/resource/resourceManager.h"
 
@@ -137,7 +138,7 @@ void setupWorld(const ::Util::ParsedArgs& cmdArgs) {
 
 	world.addExternalForce(new DirectionalGravity(Vec3(0, -10.0, 0.0)));
 
-
+	//buildDebugWorld(screen, world); return;
 	//buildShowcaseWorld(screen, world); return;
 
 	PartProperties basicProperties{1.0, 0.7, 0.3};

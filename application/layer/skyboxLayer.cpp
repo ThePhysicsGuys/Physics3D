@@ -28,7 +28,7 @@ Color horizonColor;
 Vec2f mist;
 float starBrightness;
 
-CubeMap* skyboxTexture = nullptr;
+Graphics::CubeMap* SkyboxLayer::skyboxTexture = nullptr;
 
 float getScroll(const Screen* screen) {
 	return static_cast<float>(std::atan2(screen->camera.viewMatrix(1, 0), screen->camera.viewMatrix(0, 0)) / screen->camera.fov / 2.0);

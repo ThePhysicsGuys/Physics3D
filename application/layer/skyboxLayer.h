@@ -4,6 +4,12 @@
 #include "../util/valueCycle.h"
 #include "../graphics/gui/color.h"
 
+namespace P3D {
+namespace Graphics {
+	class CubeMap;
+}
+}
+
 namespace P3D::Application {
 
 struct SkyboxCycle : public Util::ValueCycle<Graphics::Color, Util::linear> {
@@ -34,6 +40,8 @@ extern float time;
 
 class SkyboxLayer : public Engine::Layer {
 public:
+	static Graphics::CubeMap* skyboxTexture;
+
 	SkyboxLayer() : Layer() {}
 	SkyboxLayer(Screen* screen, char flags = NoEvents) : Layer("Skybox", screen, flags) {}
 

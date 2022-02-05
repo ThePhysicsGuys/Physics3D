@@ -400,4 +400,32 @@ void buildShowcaseWorld(Screen& screen, PlayerWorld& world) {
 	world.addPart(new ExtendedPart(arrorShape, Position(-7.0, 3.0, 0.0), basicProperties, "ArrowPoints"));
 }
 
+void buildDebugWorld(Screen& screen, PlayerWorld& world) {
+	WorldBuilder::buildFloorAndWalls(50.0, 50.0, 1.0);
+	
+	Comp::Light::Attenuation attenuation = { 1, 1, 1 };
+	auto lights = EntityBuilder(screen.registry).name("Lights").get();
+	auto sphereData = Graphics::MeshRegistry::getMesh(&SphereClass::instance);
+	EntityBuilder(screen.registry).parent(lights).transform(Position(10, 5, -10), 0.2).light(Graphics::Color(1, 0.84f, 0.69f), 300, attenuation).hitbox(sphereShape(1.0)).mesh(sphereData);
+	EntityBuilder(screen.registry).parent(lights).transform(Position(10, 5, 10), 0.2).light(Graphics::Color(1, 0.84f, 0.69f), 300, attenuation).hitbox(sphereShape(1.0)).mesh(sphereData);
+	EntityBuilder(screen.registry).parent(lights).transform(Position(-10, 5, -10), 0.2).light(Graphics::Color(1, 0.84f, 0.69f), 200, attenuation).hitbox(sphereShape(1.0)).mesh(sphereData);
+	EntityBuilder(screen.registry).parent(lights).transform(Position(-10, 5, 10), 0.2).light(Graphics::Color(1, 0.84f, 0.69f), 500, attenuation).hitbox(sphereShape(1.0)).mesh(sphereData);
+
+	auto parent = EntityBuilder(screen.registry).name("Spheres").get();
+	int s = 10;
+	for (int x = 0; x < s; x++) {
+		for (int y = 0; y < s; y++) {
+			for (int z = 0; z < s; z++) {
+				ExtendedPart* part = new ExtendedPart(sphereShape(0.45), Position(x, 2 + y, z), PartProperties(), "Sphere", parent);
+				auto mat = screen.registry.add<Graphics::Comp::Material>(part->entity, Graphics::Colors::RED);
+				mat->metalness = 1.0f * x / s;
+				mat->roughness = 1.0f * y / s;
+				mat->ao = 1.0f * z / s;
+				world.addTerrainPart(part);
+			}
+		}
+	}
+	
+}
+
 };

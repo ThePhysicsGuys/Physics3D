@@ -168,19 +168,20 @@ uniform vec3 viewPosition;
 // Textures
 //uniform sampler2D textures[##MAX_TEXTURE_IMAGE_UNITS];
 uniform sampler2D textures[31];
+uniform samplerCube skyboxTexture;
 
 // Environment
 uniform vec3 sunDirection = vec3(1, 1, 1);
 uniform vec3 sunColor = vec3(1, 1, 1);
 uniform float exposure = 0.8;
-uniform float gamma = 0.8;
+uniform float gamma = 1.0;
 uniform float hdr = 1.0;
 
 // Constants
 float PI = 3.14159265359;
+float TWOPI = 6.28318531;
 
-float ggxTrowbridgeReitz(vec3 N, vec3 H, float roughness) {
-	float alpha = roughness * roughness;
+float ggxTrowbridgeReitz(vec3 N, vec3 H, float alpha) {
 	float alpha2 = alpha * alpha;
 	float NdotH = max(dot(N, H), 0.0);
 	float NdotH2 = NdotH * NdotH;
@@ -192,9 +193,9 @@ float ggxTrowbridgeReitz(vec3 N, vec3 H, float roughness) {
 	return numerator / denominator;
 }
 
-float ggxSchlick(float NdotV, float roughness) {
-	float r = roughness + 1.0;
-	float k = (r * r) / 8.0;
+float ggxSchlick(float NdotV, float alpha) {
+	float t = alpha + 1.0;
+	float k = (t * t) / 8.0;
 
 	float numerator = NdotV;
 	float denominator = NdotV * (1.0 - k) + k;
@@ -202,17 +203,16 @@ float ggxSchlick(float NdotV, float roughness) {
 	return numerator / denominator;
 }
 
-float smith(vec3 N, vec3 V, vec3 L, float roughness) {
+float smith(vec3 N, vec3 V, vec3 L, float k) {
 	float NdotV = max(dot(N, V), 0.0);
 	float NdotL = max(dot(N, L), 0.0);
-	float ggx2 = ggxSchlick(NdotV, roughness);
-	float ggx1 = ggxSchlick(NdotL, roughness);
+	float ggx2 = ggxSchlick(NdotV, k);
+	float ggx1 = ggxSchlick(NdotL, k);
 
 	return ggx1 * ggx2;
 }
 
 vec3 fresnelSchlick(float cosTheta, vec3 F0) {
-	// F0: surface reflection at zero incidence
 	return F0 + (1.0 - F0) * pow(1.0 - min(cosTheta, 1.0), 5.0);
 }
 
@@ -255,36 +255,124 @@ vec3 calcLightColor(Light light) {
 	vec3 L = normalize(light.position - fPosition);
 	vec3 H = normalize(V + L);
 	float distance = length(light.position - fPosition);
+	float cosTheta = max(dot(H, V), 0.0);
+
 	float scaledDistance = distance/* / light.intensity*/;
 	float attenuation = 1.0 / (light.attenuation.constant + light.attenuation.linear * scaledDistance + light.attenuation.exponent * scaledDistance * scaledDistance);
 	//float attenuation = 1.0 / (distance * distance);
-	vec3 radiance = light.color * attenuation * light.intensity;
+	vec3 radiance = light.color * attenuation * light.intensity * cosTheta;
 
 	// Fresnel
 	vec3 F0_NM = vec3(0.04); // Non metallic F0
 	vec3 F0 = mix(F0_NM, albedo.rgb, metalness);
-	float cosTheta = max(dot(H, V), 0.0);
 	vec3 F = fresnelSchlick(cosTheta, F0);
 
-	// DFG
-	float D = ggxTrowbridgeReitz(N, H, roughness);
-	float G = smith(N, V, L, roughness);
-	vec3 DFG = D * F * G;
-
 	// Cook Torrance
-	vec3 numerator = DFG;
-	float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0);
-	vec3 specular = numerator / max(denominator, 0.001);
+	float NDF = ggxTrowbridgeReitz(N, H, roughness * roughness);
+	float G = smith(N, V, L, roughness);
+	vec3 numerator = NDF * F * G;
+	float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001;
+	vec3 specular = numerator / denominator;
 
 	// Light contribution constants
 	vec3 kS = F;
-	vec3 kD = vec3(1.0) - kS;
-	kD *= 1.0 - metalness;
+	vec3 kD = (vec3(1.0) - kS) * (1.0 - metalness);
 
 	float NdotL = max(dot(N, L), 0.0);
-	vec3 Lo = (kD * albedo.rgb / PI + specular) * radiance * NdotL;
+	vec3 Lo = (kD / PI * albedo.rgb + specular) * radiance * NdotL;
 
 	return Lo;
+}
+
+float hash(float p) { 
+	p = fract(p * 0.011); 
+	p *= p + 7.5; 
+	p *= p + p; 
+	return fract(p); 
+}
+
+float hash(vec2 p) { 
+	vec3 p3 = fract(vec3(p.xyx) * 0.13); 
+	p3 += dot(p3, p3.yzx + 3.333); 
+	return fract((p3.x + p3.y) * p3.z);
+}
+
+float noise(float x) {
+	float i = floor(x);
+	float f = fract(x);
+	float u = f * f * (3.0 - 2.0 * f);
+	return mix(hash(i), hash(i + 1.0), u);
+}
+
+float noise(vec2 x) {
+	vec2 i = floor(x);
+	vec2 f = fract(x);
+
+	float a = hash(i);
+	float b = hash(i + vec2(1.0, 0.0));
+	float c = hash(i + vec2(0.0, 1.0));
+	float d = hash(i + vec2(1.0, 1.0));
+
+	vec2 u = f * f * (3.0 - 2.0 * f);
+	return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
+}
+
+float noise(vec3 x) {
+	const vec3 step = vec3(110, 241, 171);
+
+	vec3 i = floor(x);
+	vec3 f = fract(x);
+
+	float n = dot(i, step);
+
+	vec3 u = f * f * (3.0 - 2.0 * f);
+	return mix(mix(mix(hash(n + dot(step, vec3(0, 0, 0))), hash(n + dot(step, vec3(1, 0, 0))), u.x),
+		mix(hash(n + dot(step, vec3(0, 1, 0))), hash(n + dot(step, vec3(1, 1, 0))), u.x), u.y),
+		mix(mix(hash(n + dot(step, vec3(0, 0, 1))), hash(n + dot(step, vec3(1, 0, 1))), u.x),
+			mix(hash(n + dot(step, vec3(0, 1, 1))), hash(n + dot(step, vec3(1, 1, 1))), u.x), u.y), u.z);
+}
+
+float fbm(vec3 x) {
+	float v = 0.0;
+	float a = 0.5;
+	vec3 shift = vec3(100);
+	for (int i = 0; i < 5; ++i) {
+		v += a * noise(x);
+		x = x * 2.0 + shift;
+		a *= 0.5;
+	}
+	return v;
+}
+
+float Sin(float x) {
+	x = mod(x, TWOPI);
+	float B = 4 / PI;
+	float C = -4 / (PI * PI);
+
+	return -(B * x + C * x * ((x < 0) ? -x : x));
+}
+
+vec3 skybox() {
+	vec3 wo = normalize(viewPosition - fPosition);
+	vec3 wi = reflect(-wo, N);
+
+	vec3 w = -wi;
+	vec3 u = cross(vec3(0.0, 1.0, 0.0), w);
+	vec3 v = cross(w, u);
+
+	int samples = 20;
+	vec3 result = vec3(0.0);
+	for (int s = 1; s <= samples; s++) {
+		float progress = float(s) / float(samples);
+		float angle = (10.0 + noise(fPosition)) * TWOPI * progress;
+		vec3 offset = sin(angle - PI / 2.0) * u + sin(angle) * v;
+		vec3 scaledOffset = (1.0 - metalness) * offset * mix(0.02, 0.35, progress);
+		vec3 ws = normalize(wi + scaledOffset);
+		result += texture(skyboxTexture, ws).xyz;
+	}
+	result /= samples;
+	
+	return result;
 }
 
 int getTextureMapIndex(int flag) {
@@ -301,7 +389,8 @@ vec4 getAlbedo() {
 	if (map == 0)
 		return fAlbedo;
 
-	return getTextureMap(map);
+	vec4 result = getTextureMap(map);
+	return vec4(pow(result.rgb, vec3(2.2)), albedo.a);
 }
 
 vec3 getNormal() {
@@ -368,7 +457,7 @@ void main() {
 			Lo += calcLightColor(lights[i]);
 
 	// Ambient
-	vec3 ambient = albedo.rgb * ambientOcclusion;
+	vec3 ambient = albedo.rgb * mix(vec3(ambientOcclusion), skybox(), metalness);
 
 	// Directional
 	vec3 Ld = calcDirectionalLight();
@@ -377,7 +466,7 @@ void main() {
 	float shadow = calcShadow();
 
 	// Combine ambient and lighting
-	vec3 color = ambient + (1.0 - shadow) * Ld + Lo;
+	vec3 color = ambient + (1.0 - shadow) * Ld * ambient + Lo;
 
 	// HDR 
 	color = hdr * (vec3(1.0) - exp(-color * exposure)) + (1.0 - hdr) * color;
@@ -414,4 +503,5 @@ void main() {
 	else
 		outColor = vec4(1.0, 0.0, 1.0, 1.0);
 
+	//outColor = vec4(vec3(fbm(fNormal)), 1.0);
 }

@@ -20,6 +20,7 @@
 #include <Physics3D/math/linalg/vec.h>
 #include <Physics3D/boundstree/filters/visibilityFilter.h>
 
+#include "skyboxLayer.h"
 #include "../util/resource/resourceManager.h"
 #include "../layer/shadowLayer.h"
 
@@ -134,6 +135,7 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 
 	beginScene();
 
+	// Matrices
 	graphicsMeasure.mark(UPDATE);
 	Shaders::debugShader->updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
 	Shaders::basicShader->updateProjection(screen->camera.viewMatrix, screen->camera.projectionMatrix, screen->camera.cframe.position);
@@ -150,6 +152,10 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 	Shaders::instanceShader->setUniform("shadowMap", 32);
 	Shaders::instanceShader->setUniform("lightMatrix", ShadowLayer::lighSpaceMatrix);
 	Shaders::instanceShader->updateSunDirection(sunDirection);
+
+	// Skybox
+	Shaders::instanceShader->setUniform("skyboxTexture", 31);
+	SkyboxLayer::skyboxTexture->bind(31);
 
 	graphicsMeasure.mark(PHYSICALS);
 	
