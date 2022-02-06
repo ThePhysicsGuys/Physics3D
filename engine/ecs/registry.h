@@ -192,7 +192,7 @@ private:
 
 public:
 	template <typename... Components>
-	struct conjunction {
+	struct conj {
 		template <typename Component>
 		static IRef<Component> get(Registry<Entity>* registry, const entity_type& entity) {
 			component_type index = registry->getComponentIndex<Component>();
@@ -205,12 +205,18 @@ public:
 	};
 
 	template <typename... Components>
-	struct disjunction {
+	struct disj {
 		template <typename Component>
 		static IRef<Component> get(Registry<Entity>* registry, const entity_type& entity) {
 			return registry->get<Component>(entity);
 		}
 	};
+
+	template <typename ComponentA, typename ComponentB>
+	struct exor {};
+
+	template <typename T>
+	struct neg;
 
 	struct no_type {
 		template <typename Component>
@@ -335,6 +341,58 @@ private:
 		return basic_view<ViewType, iterator_type>(this, start, stop);
 	}
 
+	//-------------------------------------------------------------------------------------//
+	// Filter matching                                                                     //
+	//-------------------------------------------------------------------------------------//
+
+	template <typename Component>
+	struct match {
+		constexpr std::enable_if_t<std::is_base_of_v<RC, Component>, bool> operator()(const entity_type& entity) {
+			return has<Component>(entity);
+		}
+	};
+
+	template <typename Component>
+	struct match<neg<Component>> {
+		constexpr bool operator()(const entity_type& entity) {
+			return !match<Component>()(entity);
+		}
+	};
+
+	template <typename Component>
+	struct match<conj<Component>> {
+		constexpr bool operator()(const entity_type& entity) {
+			return match<Component>()(entity);
+		}
+	};
+
+	template <typename Component>
+	struct match<disj<Component>> {
+		constexpr bool operator()(const entity_type& entity) {
+			return match<Component>()(entity);
+		}
+	};
+
+	template <typename Component, typename... Components>
+	struct match<conj<Component, Components...>> {
+		constexpr bool operator()(const entity_type& entity) {
+			return match<Component>()(entity) && match<conj<Components...>>()(entity);
+		}
+	};
+
+	template <typename Component, typename... Components>
+	struct match<disj<Component, Components...>> {
+		constexpr bool operator()(const entity_type& entity) {
+			return match<Component>()(entity) || match<disj<Components...>>()(entity);
+		}
+	};
+
+	template <typename ComponentA, typename ComponentB>
+	struct match<exor<ComponentA, ComponentB>> {
+		constexpr bool operator()(const entity_type& entity) {
+			return match<ComponentA>()(entity) != match<ComponentB>()(entity);
+		}
+	};
 
 	//-------------------------------------------------------------------------------------//
 	// Mutators                                                                            //
@@ -669,7 +727,7 @@ public:
 	 */
 private:
 	template <typename Component, typename... Components>
-	[[nodiscard]] auto view(type<conjunction<Component, Components...>>) noexcept {
+	[[nodiscard]] auto view(type<conj<Component, Components...>>) noexcept {
 		static_assert(unique_types<Component, Components...>);
 
 		std::vector<component_type> other_components;
@@ -697,14 +755,14 @@ private:
 		entity_map* map = this->components[smallest_component];
 		component_map_iterator first(map->begin());
 		component_map_iterator last(map->end());
-		return filter_transform_view<conjunction<Component, Components...>>(first, last, filter, transform);
+		return filter_transform_view<conj<Component, Components...>>(first, last, filter, transform);
 	}
 
 	/**
 	 * Returns an iterator which iterates over all entities having any of the given components
 	 */
 	template <typename... Components>
-	[[nodiscard]] auto view(type<disjunction<Components...>>) noexcept {
+	[[nodiscard]] auto view(type<disj<Components...>>) noexcept {
 		static_assert(unique_types<Components...>);
 		entity_set entities;
 		insert_entities<Components...>(entities);
@@ -713,7 +771,7 @@ private:
 			return entities.find(*iterator) != entities.end();
 		};
 
-		return filter_view<disjunction<Components...>>(this->entities.begin(), this->entities.end(), filter);
+		return filter_view<disj<Components...>>(this->entities.begin(), this->entities.end(), filter);
 	}
 
 public:
@@ -751,6 +809,21 @@ public:
 	}
 
 	/**
+	 * Returns a view that iterates over all entities which satisfy the given filter
+	 */
+	template <typename Filter>
+	[[nodiscard]] auto filter() {
+		entity_set_iterator first = this->entities.begin();
+		entity_set_iterator last = this->entities.end();
+
+		auto filter = [] (const entity_set_iterator& iterator) {
+			return !match<Filter>()(*iterator);
+		};
+
+		return filter_view<no_type, entity_set_iterator>(first, last, filter);
+	}
+
+	/**
 	 * Returns a view that iterates over all entities and outputs the transformed entity
 	 */
 	template <typename Transform>
@@ -771,6 +844,21 @@ public:
 
 		return filter_transform_view<no_type, entity_set_iterator>(first, last, filter, transform);
 	}
+
+	/**
+	 * Returns a view that iterates over all entities which satisfy the given filter and outputs the transformed entity
+	 */
+	template <typename Filter, typename Transform>
+	[[nodiscard]] auto filter_transform(const Transform& transform) {
+		entity_set_iterator first = this->entities.begin();
+		entity_set_iterator last = this->entities.end();
+
+		auto filter = [] (const entity_set_iterator& iterator) {
+			return !match<Filter>()(*iterator);
+		};
+
+		return filter_transform_view<no_type, entity_set_iterator>(first, last, filter, transform);
+	}
 	
 	/**
 	 * Returns an iterator which iterates over all entities which satisfy the view type
@@ -779,11 +867,11 @@ public:
 	[[nodiscard]] auto view() noexcept {
 		if constexpr (sizeof...(Type) == 1)
 			if constexpr (std::is_base_of_v<RC, Type...>)
-				return view(type<conjunction<Type...>>{});
+				return view(type<conj<Type...>>{});
 			else 
 				return view(type<Type...>{});
 		else 
-			return view(type<conjunction<Type...>>{});
+			return view(type<conj<Type...>>{});
 		
 	}
 };

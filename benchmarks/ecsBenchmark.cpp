@@ -61,7 +61,7 @@ public:
 
 	void run() override {
 		int i = 0;
-		auto view = registry.view<Registry64::conjunction<A>>();
+		auto view = registry.view<Registry64::conj<A>>();
 		for(auto entity : view) {
 			auto comp = view.get<A>(entity);
 			if(comp->i != i)
