@@ -213,6 +213,7 @@ add_executable(application
   application/picker/tools/magneticLinkTool.cpp
   application/picker/tools/springLinkTool.cpp
   application/picker/tools/alignmentLinkTool.cpp
+  application/picker/tools/pathTool.cpp
   
   application/shader/shaders.cpp
   application/shader/basicShader.cpp

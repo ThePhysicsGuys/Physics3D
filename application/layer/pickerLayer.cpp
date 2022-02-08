@@ -21,6 +21,7 @@
 #include "picker/tools/fixedConstraintTool.h"
 #include "picker/tools/magneticLinkTool.h"
 #include "picker/tools/motorConstraintTool.h"
+#include "picker/tools/pathTool.h"
 #include "picker/tools/pistonConstraintTool.h"
 #include "picker/tools/springLinkTool.h"
 #include "picker/tools/toolSpacing.h"
@@ -51,6 +52,10 @@ void PickerLayer::onInit(Engine::Registry64& registry) {
 	toolManager.registerTool<ElasticLinkTool>();
 	toolManager.registerTool<AlignmentLinkTool>();
 	
+	toolManager.registerTool<ToolSpacing>();
+
+	toolManager.registerTool<PathTool>();
+
 	toolManager.selectTool<TranslationTool>();
 
 	toolManagers.push_back(std::move(toolManager));

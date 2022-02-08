@@ -176,6 +176,7 @@
     <ClInclude Include="picker\tools\fixedConstraintTool.h" />
     <ClInclude Include="picker\tools\magneticLinkTool.h" />
     <ClInclude Include="picker\tools\motorConstraintTool.h" />
+    <ClInclude Include="picker\tools\pathTool.h" />
     <ClInclude Include="picker\tools\pistonConstraintTool.h" />
     <ClInclude Include="picker\tools\regionSelectionTool.h" />
     <ClInclude Include="picker\tools\rotationTool.h" />
@@ -227,6 +228,7 @@
     <ClCompile Include="picker\tools\fixedConstraintTool.cpp" />
     <ClCompile Include="picker\tools\magneticLinkTool.cpp" />
     <ClCompile Include="picker\tools\motorConstraintTool.cpp" />
+    <ClCompile Include="picker\tools\pathTool.cpp" />
     <ClCompile Include="picker\tools\pistonConstraintTool.cpp" />
     <ClCompile Include="picker\tools\regionSelectionTool.cpp" />
     <ClCompile Include="picker\tools\rotationTool.cpp" />
