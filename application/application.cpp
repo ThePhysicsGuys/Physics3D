@@ -51,6 +51,7 @@
 #include <Physics3D/misc/toString.h>
 
 #include "builtinWorlds.h"
+#include "graphics/ecs/materials.h"
 #include "graphics/resource/textureResource.h"
 #include "util/resource/resourceManager.h"
 
@@ -159,9 +160,9 @@ void setupWorld(const ::Util::ParsedArgs& cmdArgs) {
 				std::string name = "part " + std::to_string((x * n + y) * n + z);
 				ExtendedPart* part = new ExtendedPart(boxShape(0.5, 0.5, 0.5), cf, basicProperties, name);
 
-				IRef<Graphics::Comp::Material> material = screen.registry.add<Graphics::Comp::Material>(part->entity);
-				material->set(Graphics::Comp::Material::Map_Albedo, SRef<Graphics::Texture>(wallAlbedo));
-				material->set(Graphics::Comp::Material::Map_Normal, SRef<Graphics::Texture>(wallNormal));
+				IRef<Graphics::Comp::Material> material = screen.registry.add<Graphics::Comp::Material>(part->entity, Graphics::Materials::GREEN);
+				//material->set(Graphics::Comp::Material::Map_Albedo, SRef<Graphics::Texture>(wallAlbedo));
+				//material->set(Graphics::Comp::Material::Map_Normal, SRef<Graphics::Texture>(wallNormal));
 
 				world.addPart(part);
 			}
@@ -171,12 +172,16 @@ void setupWorld(const ::Util::ParsedArgs& cmdArgs) {
 	{
 		ExtendedPart* partA = new ExtendedPart(boxShape(1.0, 0.49, 3.0), GlobalCFrame(3.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "partA");
 		ExtendedPart* partB = new ExtendedPart(boxShape(1.0, 0.5, 3.0), GlobalCFrame(2.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "partB");
+		screen.registry.add<Graphics::Comp::Material>(partA->entity, Graphics::Materials::GOLD);
+		screen.registry.add<Graphics::Comp::Material>(partB->entity, Graphics::Materials::SILVER);
 		world.addPart(partA);
 		partA->attach(partB, CFrame(0.0, 1.0, 0.0));
 	}
 	{
 		ExtendedPart* partA = new ExtendedPart(boxShape(1.0, 0.49, 3.0), GlobalCFrame(-3.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "partA");
 		ExtendedPart* partB = new ExtendedPart(boxShape(1.0, 0.5, 3.0), GlobalCFrame(-2.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "partB");
+		screen.registry.add<Graphics::Comp::Material>(partA->entity, Graphics::Materials::RED);
+		screen.registry.add<Graphics::Comp::Material>(partB->entity, Graphics::Materials::BLUE);
 		world.addPart(partA);
 		partA->attach(partB, new MotorConstraintTemplate<ConstantMotorTurner>(0.5), CFrame(0.0, 1.0, 0.0), CFrame(1.0, 0.0, 0.0));
 	}
@@ -195,6 +200,8 @@ void setupWorld(const ::Util::ParsedArgs& cmdArgs) {
 	{
 		ExtendedPart* cornerPart = new ExtendedPart(cornerShape(2.0, 2.0, 2.0), GlobalCFrame(3.0, 3.0, -5.0), {1.0, 1.0, 1.0}, "CORNER");
 		ExtendedPart* wedgePart = new ExtendedPart(wedgeShape(2.0, 2.0, 2.0), GlobalCFrame(-3.0, 3.0, -5.0), {1.0, 1.0, 1.0}, "WEDGE");
+		screen.registry.add<Graphics::Comp::Material>(cornerPart->entity, Graphics::Materials::metalDiffuse(Graphics::Colors::ACCENT));
+		screen.registry.add<Graphics::Comp::Material>(wedgePart->entity, Graphics::Materials::metalNoReflection(Graphics::Colors::FUCHSIA));
 		world.addPart(cornerPart);
 		world.addPart(wedgePart);
 	}

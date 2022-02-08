@@ -25,6 +25,8 @@ struct ColorTemplate {
 	constexpr ColorTemplate(const Vector<T, 3>& rgb) : r(rgb.x), g(rgb.y), b(rgb.z), a(static_cast<T>(1)) {}
 	constexpr ColorTemplate(const Vector<T, 4> rgba) : r(rgba.x), g(rgba.y), b(rgba.z), a(rgba.w) {}
 
+	~ColorTemplate() = default;
+
 	constexpr operator Vector<T, 3>() const {
 		return Vector<T, 3> { r, g, b };
 	}

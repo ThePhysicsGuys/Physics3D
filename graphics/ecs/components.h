@@ -51,14 +51,14 @@ private:
 
 public:
 	typedef int Map;
-	inline static Map Map_None         = 0 << 0;
-	inline static Map Map_Albedo       = 1 << 0;
-	inline static Map Map_Normal       = 1 << 1;
-	inline static Map Map_Metalness    = 1 << 2;
-	inline static Map Map_Roughness    = 1 << 3;
-	inline static Map Map_AO           = 1 << 4;
-	inline static Map Map_Gloss        = 1 << 5;
-	inline static Map Map_Specular     = 1 << 6;
+	inline static Map Map_None = 0 << 0;
+	inline static Map Map_Albedo = 1 << 0;
+	inline static Map Map_Normal = 1 << 1;
+	inline static Map Map_Metalness = 1 << 2;
+	inline static Map Map_Roughness = 1 << 3;
+	inline static Map Map_AO = 1 << 4;
+	inline static Map Map_Gloss = 1 << 5;
+	inline static Map Map_Specular = 1 << 6;
 	inline static Map Map_Displacement = 1 << 7;
 
 	Color albedo;
@@ -66,7 +66,13 @@ public:
 	float roughness;
 	float ao;
 
-	Material(const Color& albedo = Color(1), float metalness = 1.0f, float roughness = 1.0f, float ao = 1.0f) : albedo(albedo), metalness(metalness), roughness(roughness), ao(ao) {}
+	constexpr Material(const Color& albedo = Color(1), float metalness = 0.0f, float roughness = 1.0f, float ao = 1.0f)
+		: albedo(albedo)
+		, metalness(metalness)
+		, roughness(roughness)
+		, ao(ao) {}
+
+	~Material() override = default;
 
 	void set(Map map, SRef<Graphics::Texture> texture) {
 		maps[ctz(map)] = texture;
@@ -104,7 +110,8 @@ public:
 	}*/
 
 	[[nodiscard]] int getTextureCount() const {
-		return has(Map_Albedo) + has(Map_Normal) + has(Map_Metalness) + has(Map_Roughness) + has(Map_AO) + has(Map_Gloss) + has(Map_Specular) + has(Map_Displacement);
+		return has(Map_Albedo) + has(Map_Normal) + has(Map_Metalness) + has(Map_Roughness) + has(Map_AO) + has(Map_Gloss) + has(Map_Specular) +
+			has(Map_Displacement);
 	}
 
 	[[nodiscard]] bool has(Map map) const {
@@ -115,15 +122,11 @@ public:
 	}
 
 	[[nodiscard]] Map getMaps() const {
-		return Map_None
-			| (has(Map_Albedo) ? Map_Albedo : Map_None)
-			| (has(Map_Normal) ? Map_Normal : Map_None)
-			| (has(Map_Metalness) ? Map_Metalness : Map_None)
-			| (has(Map_Roughness) ? Map_Roughness : Map_None)
-			| (has(Map_AO) ? Map_AO : Map_None)
-			| (has(Map_Gloss) ? Map_Gloss : Map_None)
-			| (has(Map_Specular) ? Map_Specular : Map_None)
-			| (has(Map_Displacement) ? Map_Displacement : Map_None);
+		return Map_None | (has(Map_Albedo) ? Map_Albedo : Map_None) | (has(Map_Normal) ? Map_Normal : Map_None) | (
+			has(Map_Metalness) ? Map_Metalness : Map_None) | (has(Map_Roughness) ? Map_Roughness : Map_None) | (has(Map_AO) ? Map_AO : Map_None) | (
+			has(Map_Gloss) ? Map_Gloss : Map_None) | (has(Map_Specular) ? Map_Specular : Map_None) | (has(Map_Displacement)
+			? Map_Displacement
+			: Map_None);
 	}
 };
 

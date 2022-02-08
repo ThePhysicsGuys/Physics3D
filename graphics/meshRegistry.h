@@ -30,6 +30,10 @@ IndexedMesh* get(std::size_t id);
 IndexedMesh* get(const Comp::Mesh& mesh);
 IndexedMesh* get(const ShapeClass* shapeClass);
 
+void generateCylindricalUVs(ExtendedTriangleMesh& mesh);
+void generateSphericalUVs(ExtendedTriangleMesh& mesh);
+void generateLightProbeUVs(ExtendedTriangleMesh& mesh);
+
 ExtendedTriangleMesh createCube(float size);
 ExtendedTriangleMesh createBox(float width, float height, float depth);
 ExtendedTriangleMesh createSphere(double radius, int steps = 1);

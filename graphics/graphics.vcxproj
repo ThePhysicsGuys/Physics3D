@@ -224,6 +224,7 @@
     <ClInclude Include="debug\guiDebug.h" />
     <ClInclude Include="debug\profilerUI.h" />
     <ClInclude Include="ecs\components.h" />
+    <ClInclude Include="ecs\materials.h" />
     <ClInclude Include="font.h" />
     <ClInclude Include="gui\color.h" />
     <ClInclude Include="gui\gui.h" />

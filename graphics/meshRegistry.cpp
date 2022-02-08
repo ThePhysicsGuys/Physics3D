@@ -164,6 +164,70 @@ ExtendedTriangleMesh createHexagon(float radius, float height) {
 	return hexagonMesh;
 }
 
+void generateCylindricalUVs(ExtendedTriangleMesh& mesh) {
+	BoundingBox b = mesh.getBounds();
+
+	Vec2f* uvBuffer = new Vec2f[mesh.vertexCount];
+	for (int i = 0; i < mesh.vertexCount; i++) {
+		Vec3f p = mesh.getVertex(i);
+		p.x /= static_cast<float>(b.getWidth());
+		p.y /= static_cast<float>(b.getHeight());
+		p.z /= static_cast<float>(b.getDepth());
+
+		float phi = std::atan2(p.x, p.z);
+		float u = phi / two_pi<float>();
+		float v = (p.y + 1.0f) / 2.0f;
+
+		uvBuffer[i] = Vec2f(u, v);
+	}
+
+	mesh.setUVBuffer(SharedArrayPtr<const Vec2f>(uvBuffer));
+}
+
+void generateSphericalUVs(ExtendedTriangleMesh& mesh) {
+	BoundingBox b = mesh.getBounds();
+
+	Vec2f* uvBuffer = new Vec2f[mesh.vertexCount];
+	for (int i = 0; i < mesh.vertexCount; i++) {
+		Vec3f p = mesh.getVertex(i);
+		p.x /= static_cast<float>(b.getWidth());
+		p.y /= static_cast<float>(b.getHeight());
+		p.z /= static_cast<float>(b.getDepth());
+
+		float phi = std::atan2(p.x, p.z);
+		float theta = std::acos(p.y);
+		float u = phi / two_pi<float>();
+		float v = 1.0f - theta * pi<float>();
+
+		uvBuffer[i] = Vec2f(u, v);
+	}
+
+	mesh.setUVBuffer(SharedArrayPtr<const Vec2f>(uvBuffer));
+}
+
+void generateLightProbeUVs(ExtendedTriangleMesh& mesh) {
+	BoundingBox b = mesh.getBounds();
+
+	Vec2f* uvBuffer = new Vec2f[mesh.vertexCount];
+	for (int i = 0; i < mesh.vertexCount; i++) {
+		Vec3f p = mesh.getVertex(i);
+		p.x /= static_cast<float>(b.getWidth());
+		p.y /= static_cast<float>(b.getHeight());
+		p.z /= static_cast<float>(b.getDepth());
+
+		float alpha = std::acos(p.z);
+		float sinBeta = p.y / std::sqrt(p.x * p.x + p.y * p.y);
+		float cosBeta = p.x / std::sqrt(p.x * p.x + p.y * p.y);
+
+		float u = (1.0f + alpha / pi<float>() * cosBeta) / 2.0f;
+		float v = (1.0f + alpha / pi<float>() * sinBeta) / 2.0f;
+
+		uvBuffer[i] = Vec2f(u, v);
+	}
+
+	mesh.setUVBuffer(SharedArrayPtr<const Vec2f>(uvBuffer));
+}
+
 void init() {
 	sphere = registerShapeClass(&SphereClass::instance, ExtendedTriangleMesh::generateSmoothNormalsShape(SphereClass::instance.asPolyhedron()));
 	cylinder = registerShapeClass(&CylinderClass::instance, createCylinder(64, 1.0, 2.0));
@@ -199,6 +263,7 @@ Comp::Mesh registerShapeClass(const ShapeClass* shapeClass) {
 		return iterator->second;
 
 	ExtendedTriangleMesh shape = ExtendedTriangleMesh::generateSplitNormalsShape(shapeClass->asPolyhedron());
+	generateSphericalUVs(shape);
 	return registerShapeClass(shapeClass, shape);
 }
 
