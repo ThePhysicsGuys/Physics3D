@@ -23,6 +23,7 @@ void onInit(const WindowInfo& info) {
 
 	// font
 	GUI::font = ResourceManager::add<FontResource>("font", "../res/fonts/droid.ttf");
+	//font->getAtlas()->generateMipmap();
 }
 
 bool onWindowResize(const WindowInfo& info) {

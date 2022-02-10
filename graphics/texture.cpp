@@ -97,14 +97,13 @@ Texture::Texture(int width, int height, const void* buffer, int target, int form
 
 	channels = getChannelsFromFormat(format);
 
-	bind();
+	Texture::bind();
+	Texture::create(target, 0, internalFormat, width, height, 0, format, type, buffer);
 	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	create(target, 0, internalFormat, width, height, 0, format, type, buffer);
-	glGenerateMipmap(GL_TEXTURE_2D);
-	unbind();
+	Texture::unbind();
 }
 
 void Texture::create(int target, int level, int internalFormat, int width, int height, int border, int format, int type, const void* buffer) {
@@ -148,6 +147,9 @@ Texture& Texture::operator=(Texture&& other) {
 }
 
 Texture::~Texture() {
+	if (id == 0)
+		return;
+
 	Log::warn("Closed texture #%d", id);
 	glDeleteTextures(1, &id);
 }
@@ -186,6 +188,12 @@ SRef<Texture> Texture::colored(const Color& color) {
 	free(buffer);
 
 	return texture;
+}
+
+void Texture::generateMipmap() {
+	bind();
+	glGenerateMipmap(target);
+	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 }
 
 void Texture::resize(int width, int height) {
@@ -319,9 +327,10 @@ void CubeMap::load(const std::string& right, const std::string& left, const std:
 
 		format = internalFormat = getFormatFromChannels(channels);
 
-		if (data)
+		if (data) {
 			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, format, width, height, 0, internalFormat, type, data);
-		else {
+			//glGenerateMipmap(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i);
+		} else {
 			Log::subject s(faces[i]);
 			Log::error("Failed to load texture");
 		}

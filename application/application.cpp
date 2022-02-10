@@ -150,7 +150,9 @@ void setupWorld(const ::Util::ParsedArgs& cmdArgs) {
 
 	// Load textures
 	Graphics::TextureResource* wallAlbedo = ResourceManager::add<Graphics::TextureResource>("wall albedo", "../res/textures/wall/wall_color.jpg");
+	wallAlbedo->generateMipmap();
 	Graphics::TextureResource* wallNormal = ResourceManager::add<Graphics::TextureResource>("wall normal", "../res/textures/wall/wall_normal.jpg");
+	wallNormal->generateMipmap();
 
 	int n = 3;
 	for(int x = 0; x < n; x++) {
@@ -161,8 +163,8 @@ void setupWorld(const ::Util::ParsedArgs& cmdArgs) {
 				ExtendedPart* part = new ExtendedPart(boxShape(0.5, 0.5, 0.5), cf, basicProperties, name);
 
 				IRef<Graphics::Comp::Material> material = screen.registry.add<Graphics::Comp::Material>(part->entity, Graphics::Materials::GREEN);
-				//material->set(Graphics::Comp::Material::Map_Albedo, SRef<Graphics::Texture>(wallAlbedo));
-				//material->set(Graphics::Comp::Material::Map_Normal, SRef<Graphics::Texture>(wallNormal));
+				material->set(Graphics::Comp::Material::Map_Albedo, SRef<Graphics::Texture>(wallAlbedo));
+				material->set(Graphics::Comp::Material::Map_Normal, SRef<Graphics::Texture>(wallNormal));
 
 				world.addPart(part);
 			}

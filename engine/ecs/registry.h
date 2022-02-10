@@ -6,7 +6,6 @@
 #include <cstdint>
 #include <type_traits>
 #include <unordered_map>
-#include <typeinfo>
 #include "../util/typetraits.h"
 #include "../util/iteratorUtils.h"
 #include "../util/stringUtil.h"
@@ -191,6 +190,31 @@ private:
 	struct type {};
 
 public:
+	struct no_type {
+		template <typename Component>
+		static IRef<Component> get(Registry<Entity>* registry, const entity_type& entity) {
+			return registry->get<Component>(entity);
+		}
+	};
+
+	template <typename Component>
+	struct only {
+		template <typename UnsafeComponent>
+		static IRef<UnsafeComponent> get(Registry<Entity>* registry, const entity_type& entity) {
+			return registry->get<UnsafeComponent>(entity);
+		}
+
+		template <>
+		static IRef<Component> get(Registry<Entity>* registry, const entity_type& entity) {
+			component_type index = registry->getComponentIndex<Component>();
+			entity_map* map = registry->components[index];
+
+			auto component_iterator = map->find(entity);
+
+			return intrusive_cast<Component>(component_iterator->second);
+		}
+	};
+
 	template <typename... Components>
 	struct conj {
 		template <typename Component>
@@ -217,13 +241,6 @@ public:
 
 	template <typename T>
 	struct neg;
-
-	struct no_type {
-		template <typename Component>
-		static IRef<Component> get(Registry<Entity>* registry, const entity_type& entity) {
-			return registry->get<Component>(entity);
-		}
-	};
 
 
 	//-------------------------------------------------------------------------------------//
@@ -726,6 +743,25 @@ public:
 	 * Returns an iterator which iterates over all entities having all the given components
 	 */
 private:
+	template <typename Component, typename...>
+	[[nodiscard]] auto view(type<only<Component>>) noexcept {
+		component_type component = getComponentIndex<Component>();
+
+		entity_map* map = this->components[component];
+		component_map_iterator first(map->begin());
+		component_map_iterator last(map->end());
+
+		auto filter = [this] (const component_map_iterator& iterator) {
+				return true;
+		};
+
+		auto transform = [] (const component_map_iterator& iterator) {
+			return iterator->first;
+		};
+
+		return filter_transform_view<only<Component>>(first, last, filter, transform);
+	}
+
 	template <typename Component, typename... Components>
 	[[nodiscard]] auto view(type<conj<Component, Components...>>) noexcept {
 		static_assert(unique_types<Component, Components...>);
@@ -867,7 +903,7 @@ public:
 	[[nodiscard]] auto view() noexcept {
 		if constexpr (sizeof...(Type) == 1)
 			if constexpr (std::is_base_of_v<RC, Type...>)
-				return view(type<conj<Type...>>{});
+				return view(type<only<Type...>>{});
 			else 
 				return view(type<Type...>{});
 		else 

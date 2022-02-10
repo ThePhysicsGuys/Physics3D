@@ -45,6 +45,7 @@ public:
 	void loadFrameBufferTexture(int width, int height);
 
 	SRef<Texture> colored(const Color& color);
+	void generateMipmap();
 
 	static Texture load(const std::string& name);
 	static SRef<Texture> white();
