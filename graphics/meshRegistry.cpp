@@ -237,6 +237,14 @@ void init() {
 	hexagon = registerShape(createHexagon(0.5, 1.0));
 }
 
+Comp::Mesh registerShape(IndexedMesh* mesh, Comp::Mesh::Flags flags) {
+	std::size_t id = meshes.size();
+
+	meshes.push_back(mesh);
+
+	return Comp::Mesh(id, flags);
+}
+
 Comp::Mesh registerShape(const ExtendedTriangleMesh& mesh) {
 	std::size_t id = meshes.size();
 

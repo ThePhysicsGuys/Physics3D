@@ -19,6 +19,10 @@
 #include <Physics3D/softlinks/springLink.h>
 #include <Physics3D/math/constants.h>
 
+#include "engine/resource/meshResource.h"
+#include "graphics/resource/textureResource.h"
+#include "util/resource/resourceManager.h"
+#include "graphics/meshRegistry.h"
 
 namespace P3D::Application {
 
@@ -426,6 +430,34 @@ void buildDebugWorld(Screen& screen, PlayerWorld& world) {
 		}
 	}
 	
+}
+
+void buildBallWorld(Screen& screen, PlayerWorld& world) {
+	WorldBuilder::buildFloorAndWalls(50.0, 50.0, 1.0);
+
+	Comp::Light::Attenuation attenuation = { 1, 1, 1 };
+	auto lights = EntityBuilder(screen.registry).name("Lights").get();
+	auto sphereData = Graphics::MeshRegistry::getMesh(&SphereClass::instance);
+	EntityBuilder(screen.registry).parent(lights).transform(Position(10, 5, -10), 0.2).light(Graphics::Color(1, 0.84f, 0.69f), 300, attenuation).hitbox(sphereShape(1.0)).mesh(sphereData);
+	EntityBuilder(screen.registry).parent(lights).transform(Position(10, 5, 10), 0.2).light(Graphics::Color(1, 0.84f, 0.69f), 300, attenuation).hitbox(sphereShape(1.0)).mesh(sphereData);
+	EntityBuilder(screen.registry).parent(lights).transform(Position(-10, 5, -10), 0.2).light(Graphics::Color(1, 0.84f, 0.69f), 200, attenuation).hitbox(sphereShape(1.0)).mesh(sphereData);
+	EntityBuilder(screen.registry).parent(lights).transform(Position(-10, 5, 10), 0.2).light(Graphics::Color(1, 0.84f, 0.69f), 500, attenuation).hitbox(sphereShape(1.0)).mesh(sphereData);
+
+	Engine::MeshResource* ball = ResourceManager::add<Engine::MeshResource>("ball", "../res/models/ball.obj");
+	Graphics::Comp::Mesh mesh = Graphics::MeshRegistry::registerShape(ball->getShape());
+	Graphics::TextureResource* ballAlbedo = ResourceManager::add<Graphics::TextureResource>("ball albedo", "../res/textures/ball/ball_color.png");
+	Graphics::TextureResource* ballNormal = ResourceManager::add<Graphics::TextureResource>("ball normal", "../res/textures/ball/ball_normal.png");
+	Graphics::TextureResource* ballMetal = ResourceManager::add<Graphics::TextureResource>("ball metal", "../res/textures/ball/ball_metal.png");
+	Graphics::TextureResource* ballGloss = ResourceManager::add<Graphics::TextureResource>("ball gloss", "../res/textures/ball/ball_gloss.png");
+	Graphics::TextureResource* ballAO = ResourceManager::add<Graphics::TextureResource>("ball ao", "../res/textures/ball/ball_ao.png");
+
+	auto entity = EntityBuilder(screen.registry).transform(Position(0, 8, 0)).mesh(mesh).hitbox(boxShape(10, 10, 10)).get();
+	auto material = screen.registry.add<Graphics::Comp::Material>(entity);
+	material->set(Graphics::Comp::Material::Map_Albedo, SRef<Graphics::Texture>(dynamic_cast<Graphics::Texture*>(ballAlbedo)));
+	material->set(Graphics::Comp::Material::Map_Normal, SRef<Graphics::Texture>(dynamic_cast<Graphics::Texture*>(ballNormal)));
+	material->set(Graphics::Comp::Material::Map_Metalness, SRef<Graphics::Texture>(dynamic_cast<Graphics::Texture*>(ballMetal)));
+	material->set(Graphics::Comp::Material::Map_Roughness, SRef<Graphics::Texture>(dynamic_cast<Graphics::Texture*>(ballGloss)));
+	material->set(Graphics::Comp::Material::Map_AO, SRef<Graphics::Texture>(dynamic_cast<Graphics::Texture*>(ballAO)));
 }
 
 };

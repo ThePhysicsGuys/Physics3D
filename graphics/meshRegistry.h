@@ -19,6 +19,7 @@ extern Comp::Mesh hexagon;
 
 void init();
 
+Comp::Mesh registerShape(IndexedMesh* mesh, Comp::Mesh::Flags flags);
 Comp::Mesh registerShape(const ExtendedTriangleMesh& mesh);
 Comp::Mesh registerShapeClass(const ShapeClass* shapeClass, const ExtendedTriangleMesh& mesh);
 Comp::Mesh registerShapeClass(const ShapeClass* shapeClass);

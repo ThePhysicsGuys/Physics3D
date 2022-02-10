@@ -23,6 +23,8 @@ int getChannelsFromFormat(int format) {
 		case GL_BLUE:
 		case GL_ALPHA:
 			return 1;
+		case GL_RG:
+			return 2;
 		case GL_RGB:
 			return 3;
 		case GL_RGBA:
@@ -38,6 +40,8 @@ int getFormatFromChannels(int channels) {
 	switch (channels) {
 		case 1:
 			return GL_RED;
+		case 2:
+			return GL_RG;
 		case 3:
 			return GL_RGB;
 		case 4:
@@ -52,7 +56,7 @@ Texture Texture::load(const std::string& name) {
 	int width;
 	int height;
 	int channels;
-	stbi_set_flip_vertically_on_load(true);
+	//stbi_set_flip_vertically_on_load(true);
 	unsigned char* data = stbi_load(name.c_str(), &width, &height, &channels, 0);
 
 	if (data) {

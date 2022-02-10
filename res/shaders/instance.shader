@@ -333,8 +333,8 @@ vec3 getNormal() {
 	if (map == 0)
 		return normalize(fNormal);
 
-	return getTextureMap(map).rgb;
-	/*vec3 tangentNormal = getTextureMap(map).xyz * 2.0 - 1.0;
+	//return getTextureMap(map).rgb;
+	vec3 tangentNormal = getTextureMap(map).xyz * 2.0 - 1.0;
 
 	vec3 Q1 = dFdx(fPosition);
 	vec3 Q2 = dFdy(fPosition);
@@ -346,7 +346,7 @@ vec3 getNormal() {
 	vec3 B = -normalize(cross(N, T));
 	mat3 TBN = mat3(T, B, N);
 
-	return TBN * tangentNormal;*/
+	return TBN * tangentNormal;
 }
 
 float getMetalness() {
@@ -355,7 +355,7 @@ float getMetalness() {
 	if (map == 0)
 		return fMetalness;
 
-	return getTextureMap(map).r;
+	return fMetalness * getTextureMap(map).r;
 }
 
 float getRoughness() {
@@ -364,7 +364,7 @@ float getRoughness() {
 	if (map == 0)
 		return fRoughness;
 
-	return getTextureMap(map).r;
+	return fRoughness * getTextureMap(map).r;
 }
 
 float getAmbientOcclusion() {
@@ -373,7 +373,7 @@ float getAmbientOcclusion() {
 	if (map == 0)
 		return fAmbientOcclusion;
 
-	return getTextureMap(map).r;
+	return fAmbientOcclusion * getTextureMap(map).r;
 }
 
 vec3 hsv2rgb(vec3 c) {
