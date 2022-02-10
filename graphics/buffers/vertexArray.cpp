@@ -38,14 +38,9 @@ VertexArray& VertexArray::operator=(VertexArray&& other) {
 
 void VertexArray::bind() {
 	glBindVertexArray(id);
-	/*for (unsigned int i = 0; i < attributeArrayOffset; i++)
-		glEnableVertexAttribArray(i);*/
 }
 
 void VertexArray::unbind() {
-	/*glBindVertexArray(id);
-	for (unsigned int i = 0; i < attributeArrayOffset; i++)
-		glDisableVertexAttribArray(i);*/
 	glBindVertexArray(0);
 }
 
@@ -61,7 +56,10 @@ void VertexArray::addBuffer(VertexBuffer* buffer) {
 
 		for (size_t j = 0; j < iterations; j++) {
 			glEnableVertexAttribArray(attributeArrayOffset);
-			glVertexAttribPointer(attributeArrayOffset, element.info.count, element.info.type, element.normalized, buffer->layout.stride, (const void*) offset);
+			if (element.info.integral)
+				glVertexAttribIPointer(attributeArrayOffset, element.info.count, element.info.type, buffer->layout.stride, (const void*) offset);
+			else
+				glVertexAttribPointer(attributeArrayOffset, element.info.count, element.info.type, element.normalized, buffer->layout.stride, (const void*) offset);
 
 			if (element.instanced)
 				glVertexAttribDivisor(attributeArrayOffset, 1);

@@ -22,11 +22,10 @@ struct BasicShader : public StandardMeshShaderBase, public BasicShaderBase {
 
 struct InstanceShader : public InstancedMeshShaderBase, public BasicShaderBase {
 	InstanceShader() : ShaderResource("InstanceShader", "../res/shaders/instance.shader"), InstancedMeshShaderBase("InstanceShader", "../res/shaders/instance.shader"), BasicShaderBase("InstanceShader", "../res/shaders/instance.shader") {
-		for (int i = 0; i < 31; i++)
+		InstanceShader::bind();
+		for (int i = 0; i < 31; i++) 
 			setUniform(Util::format("textures[%d]", i), i);
 	}
-
-	void updateTexture(bool textured);
 };
 
 };

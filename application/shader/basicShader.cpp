@@ -31,14 +31,4 @@ void BasicShader::updateTexture(bool textured) {
 	setUniform("material.textured", textured);
 }
 
-void InstanceShader::updateTexture(bool textured) {
-	bind();
-	setUniform("material.albedoMap", 0);
-	setUniform("material.normalMap", 1);
-	setUniform("material.metalnessMap", 2);
-	setUniform("material.roughnessMap", 3);
-	setUniform("material.ambientOcclusionMap", 4);
-	setUniform("material.textured", textured);
-}
-
 };

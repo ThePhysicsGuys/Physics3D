@@ -9,7 +9,7 @@ class VertexBuffer;
 
 class VertexArray : public Bindable {
 public:
-	size_t attributeArrayOffset;
+	unsigned attributeArrayOffset;
 
 	VertexArray();
 

@@ -2,6 +2,8 @@
 
 #include "modelLayer.h"
 
+#include <GL/glew.h>
+
 #include "view/screen.h"
 #include "shader/shaders.h"
 #include "extendedPart.h"
@@ -96,7 +98,6 @@ void ModelLayer::onInit(Engine::Registry64& registry) {
 
 	// Dont know anymore
 	Shaders::basicShader->updateTexture(false);
-	Shaders::instanceShader->updateTexture(false);
 
 	// Instance batch manager
 	manager = new InstanceBatchManager(Shaders::instanceShader, DEFAULT_UNIFORM_BUFFER_LAYOUT);
@@ -210,7 +211,9 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 			}
 		}
 
+		Shaders::instanceShader->bind();
 		manager->submit();
+
 
 		// Render transparent meshes
 		Shaders::basicShader->bind();

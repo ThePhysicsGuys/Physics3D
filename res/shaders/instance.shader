@@ -58,7 +58,7 @@ layout(location = 4) in vec3 vBitangent;
 layout(location = 5) in mat4 vModelMatrix;
 layout(location = 9) in vec4 vAlbedo;
 layout(location = 10) in vec3 vMRAo;
-layout(location = 11) in int vTextureFlags;
+layout(location = 11) in uvec2 vTextureFlags;
 
 smooth out vec3 fPosition;
 smooth out vec2 fUV;
@@ -69,7 +69,7 @@ flat out vec4 fAlbedo;
 flat out float fMetalness;
 flat out float fRoughness;
 flat out float fAmbientOcclusion;
-flat out int fTextureFlags;
+flat out uvec2 fTextureFlags;
 
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
@@ -108,28 +108,27 @@ flat in vec4 fAlbedo;
 flat in float fRoughness;
 flat in float fMetalness;
 flat in float fAmbientOcclusion;
-flat in int fTextureFlags;
+flat in uvec2 fTextureFlags;
 
-const int Flag_Size         = 4;
-const int Flag_Albedo       = 7 * Flag_Size;
-const int Flag_Normal       = 6 * Flag_Size;
-const int Flag_Metalness    = 5 * Flag_Size;
-const int Flag_Roughness    = 4 * Flag_Size;
-const int Flag_AO           = 3 * Flag_Size;
-const int Flag_Gloss        = 2 * Flag_Size;
-const int Flag_Specular     = 1 * Flag_Size;
-const int Flag_Displacement = 0 * Flag_Size;
+const ivec2 Flag_Albedo       = ivec2(0, 24);
+const ivec2 Flag_Normal       = ivec2(0, 16);
+const ivec2 Flag_Metalness    = ivec2(0, 8);
+const ivec2 Flag_Roughness    = ivec2(0, 0);
+const ivec2 Flag_AO           = ivec2(1, 24);
+const ivec2 Flag_Gloss        = ivec2(1, 16);
+const ivec2 Flag_Specular     = ivec2(1, 8);
+const ivec2 Flag_Displacement = ivec2(1, 0);
 						    
-const int Mode_Default      = 0;
-const int Mode_Position     = 1;
-const int Mode_Normal       = 2;
-const int Mode_UV           = 3;
-const int Mode_LightSpace   = 4;
-const int Mode_Albedo       = 5;
-const int Mode_Metalness    = 6;
-const int Mode_Roughness    = 7;
-const int Mode_AO           = 8;
-const int Mode_TextureFlags = 9;
+const int Mode_Default        = 0;
+const int Mode_Position       = 1;
+const int Mode_Normal         = 2;
+const int Mode_UV             = 3;
+const int Mode_LightSpace     = 4;
+const int Mode_Albedo         = 5;
+const int Mode_Metalness      = 6;
+const int Mode_Roughness      = 7;
+const int Mode_AO             = 8;
+const int Mode_TextureFlags   = 9;
 
 uniform int mode = Mode_Default;
 
@@ -311,11 +310,11 @@ vec3 skybox() {
 	return result;
 }
 
-int getTextureMapIndex(int flag) {
-	return (fTextureFlags >> flag) & 0xF;
+int getTextureMapIndex(ivec2 flag) {
+	return int((fTextureFlags[flag.x] >> uint(flag.y)) & uint(0xFF));
 }
 
-vec4 getTextureMap(int map) {
+vec4 getTextureMap(flat int map) {
 	return texture(textures[map - 1], fUV);
 }
 
@@ -325,8 +324,7 @@ vec4 getAlbedo() {
 	if (map == 0)
 		return fAlbedo;
 
-	vec4 result = getTextureMap(map);
-	return vec4(pow(result.rgb, vec3(2.2)), albedo.a);
+	return vec4(getTextureMap(map).rgb, 1.0);
 }
 
 vec3 getNormal() {
@@ -335,7 +333,8 @@ vec3 getNormal() {
 	if (map == 0)
 		return normalize(fNormal);
 
-	vec3 tangentNormal = getTextureMap(map).xyz * 2.0 - 1.0;
+	return getTextureMap(map).rgb;
+	/*vec3 tangentNormal = getTextureMap(map).xyz * 2.0 - 1.0;
 
 	vec3 Q1 = dFdx(fPosition);
 	vec3 Q2 = dFdy(fPosition);
@@ -347,7 +346,7 @@ vec3 getNormal() {
 	vec3 B = -normalize(cross(N, T));
 	mat3 TBN = mat3(T, B, N);
 
-	return TBN * tangentNormal;
+	return TBN * tangentNormal;*/
 }
 
 float getMetalness() {
@@ -375,6 +374,12 @@ float getAmbientOcclusion() {
 		return fAmbientOcclusion;
 
 	return getTextureMap(map).r;
+}
+
+vec3 hsv2rgb(vec3 c) {
+	vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+	vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+	return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
 }
 
 void main() {
@@ -430,14 +435,9 @@ void main() {
 	else if (mode == Mode_AO)
 		outColor = vec4(vec3(ambientOcclusion), 1.0);
 	else if (mode == Mode_TextureFlags)
-		outColor = vec4(
-			getTextureMapIndex(Flag_Albedo), 
-			getTextureMapIndex(Flag_Normal), 
-			getTextureMapIndex(Flag_Roughness), 
-			1.0
-		);
+		outColor = vec4(vec3(float(getTextureMapIndex(Flag_Albedo)) / 3.0), 1.0);
 	else
-		outColor = vec4(1.0, 0.0, 1.0, 1.0);
+		outColor = vec4(hsv2rgb(vec3(mod(gl_PrimitiveID, 50) / 50.0, 1.0, 1.0)), 1.0);
 
 	//outColor = vec4(vec3(fbm(fNormal)), 1.0);
 }

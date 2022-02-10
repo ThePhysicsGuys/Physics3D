@@ -8,6 +8,9 @@
 #include "../mesh/indexedMesh.h"
 #include "../buffers/bufferLayout.h"
 #include "../meshRegistry.h"
+#include "graphics/debug/guiDebug.h"
+#include "shader/shaders.h"
+#include "util/stringUtil.h"
 #include "util/systemVariables.h"
 
 namespace P3D::Graphics {
@@ -20,7 +23,8 @@ public:
 		float metalness = 1.0f;
 		float roughness = 1.0f;
 		float ao = 1.0f;
-		unsigned textures = 0;
+		unsigned textureFlags1;
+		unsigned textureFlags2;
 	};
 
 private:
@@ -50,7 +54,7 @@ public:
 	bool add(const Mat4f& modelMatrix, const Comp::Material& material) {
 		using namespace Comp;
 
-		unsigned textureFlag = 0;
+		std::uint64_t textureFlags = 0;
 		int textureCount = material.getTextureCount();
 		if (textureCount > 0) {
 			int maxTextures = SystemVariables::get("MAX_TEXTURE_IMAGE_UNITS");
@@ -85,11 +89,10 @@ public:
 
 			// Create texture flag
 			for (std::size_t index = 0; index < Material::MAP_COUNT; index++) {
-				textureFlag <<= 4;
-
+				textureFlags <<= 8;
 				SRef<Texture> texture = material.get(index);
 				if (texture != nullptr)
-					textureFlag |= textureBuffer[texture->getID()] + 1;
+					textureFlags |= static_cast<std::uint64_t>(textureBuffer[texture->getID()] + 1u);
 			}
 		}
 
@@ -99,7 +102,8 @@ public:
 			material.metalness,
 			material.roughness,
 			material.ao,
-			textureFlag
+			static_cast<unsigned>(textureFlags >> 32),
+			static_cast<unsigned>(textureFlags & 0xFFFFFFFF)
 		};
 
 		uniformBuffer.push_back(uniform);
@@ -110,7 +114,7 @@ public:
 	void addTexture(GLID id) {
 		auto iterator = textureBuffer.find(id);
 		if (iterator == textureBuffer.end())
-			textureBuffer[id] = static_cast<unsigned>(textureBuffer.size());
+			textureBuffer[id] = static_cast<int>(textureBuffer.size());
 	}
 
 	void bindTextures() {
@@ -118,8 +122,6 @@ public:
 			Renderer::activeTexture(unit);
 			Renderer::bindTexture2D(id);
 		}
-
-		Renderer::activeTexture(0);
 	}
 
 	void submit() {
