@@ -80,9 +80,9 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type 
 	Vec3f conveyorEffect = selectedPart->getConveyorEffect();
 
 	TITLE("Part Info", false);
-	PROPERTY_IF_LOCK("Velocity:", ImGui::DragVec3("##Velocity", velocity.data, 0, 0.1, true), selectedPart->setVelocity(velocity););
+	PROPERTY_IF_LOCK("Velocity:", ImGui::DragVec3("##Velocity", velocity.data, 0, nullptr, true), selectedPart->setVelocity(velocity););
 	PROPERTY_IF_LOCK("Angular velocity:",
-	            ImGui::DragVec3("##AngularVelocity", angularVelocity.data, 0, 0.1, true),
+	            ImGui::DragVec3("##AngularVelocity", angularVelocity.data, 0, nullptr, true),
 	            selectedPart->setAngularVelocity(angularVelocity););
 	PROPERTY("Acceleration:", ImGui::Text(str(motion.getAcceleration()).c_str()));
 	PROPERTY("Angular acceleration:", ImGui::Text(str(motion.getAngularAcceleration()).c_str()));
@@ -94,7 +94,7 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type 
 	PROPERTY_IF_LOCK("Density:", ImGui::DragFloat("##Density", &density, 0.05f), selectedPart->setDensity(density););
 	PROPERTY_IF_LOCK("Bouncyness:", ImGui::DragFloat("##Bouncyness", &bouncyness, 0.05f), selectedPart->setBouncyness(bouncyness););
 	PROPERTY_IF_LOCK("Conveyor effect:",
-	            ImGui::DragVec3("##ConveyorEffect", conveyorEffect.data, 0, 0.1, true),
+	            ImGui::DragVec3("##ConveyorEffect", conveyorEffect.data, 0, nullptr, true),
 	            selectedPart->setConveyorEffect(conveyorEffect););
 
 	PROPERTY("Inertia:", ImGui::Text(str(selectedPart->getInertia()).c_str()));
@@ -255,20 +255,23 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type 
 
 	PROPERTY_IF_LOCK(
 		"Position:",
-		ImGui::DragVec3("##TransformPosition", position.data, 0, 0.1, true),
+		ImGui::DragVec3("##TransformPosition", position.data, 0.0f, nullptr, true),
 		component->setPosition(castVec3fToPosition(position));
 	);
 
+	float rotationSpeeds[] = { 0.02f, 0.02f, 0.02f };
 	PROPERTY_IF_LOCK(
 		"Rotation:",
-		ImGui::DragVec3("##TransformRotation", rotation.data, 0.01f, 0.02f, true),
+		ImGui::DragVec3("##TransformRotation", rotation.data, 0.0f, rotationSpeeds, true),
 		component->setRotation(Rotation::fromRotationVector(rotation));
 	);
 
 	float min = 0.01f;
+	float* mins[] = { &min, &min, &min };
+	float scaleSpeeds[] = { 0.01f, 0.01f, 0.01f };
 	PROPERTY_IF_LOCK(
 		"Scale:", 
-		ImGui::DragVec3("##TransformScale", scale.data, 1.0f, 0.01f, true, &min), 
+		ImGui::DragVec3("##TransformScale", scale.data, 1.0f, scaleSpeeds, true, mins),
 		component->setScale(scale);
 	);
 
@@ -280,13 +283,13 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type 
 		TITLE("Relative CFrame", true);
 		PROPERTY_IF_LOCK(
 			"Position:",
-			ImGui::DragVec3("##TransformRelativePosition", relativePosition.data, 0, 0.1, true),
+			ImGui::DragVec3("##TransformRelativePosition", relativePosition.data, 0.0f, nullptr, true),
 			component->setPosition(castVec3fToPosition(relativePosition));
 		);
 
 		PROPERTY_IF_LOCK(
 			"Rotation:",
-			ImGui::DragVec3("##TransformRelativeRotation", relativeRotation.data, 0.01f, 0.02f, true),
+			ImGui::DragVec3("##TransformRelativeRotation", relativeRotation.data, 0.0f, rotationSpeeds, true),
 			component->setRotation(Rotation::fromRotationVector(relativeRotation));
 		);
 	}
@@ -305,8 +308,10 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type 
 	PROPERTY_DESC("Standalone", "Whether the hitbox is coming from the part", ImGui::Checkbox("##HitboxStandalone", &standalone));
 	PROPERTY("Volume:", ImGui::Text(str(shape.getVolume()).c_str()));
 	PROPERTY("Center of mass:", ImGui::Text(str(shape.getCenterOfMass()).c_str()));
+
 	float min = 0.01f;
-	PROPERTY_IF_LOCK("Scale:", ImGui::DragVec3("HitboxScale", scale.data, 1, 0.01f, true, &min), component->setScale(scale););
+	float* mins[] = { &min, &min, &min };
+	PROPERTY_IF_LOCK("Scale:", ImGui::DragVec3("HitboxScale", scale.data, 1, nullptr, true, mins), component->setScale(scale););
 
 	TITLE("Bounding box", true);
 	PROPERTY("Width:", ImGui::Text(str(shape.getWidth()).c_str()));
@@ -344,13 +349,14 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type 
 	} else {
 		PROPERTY_IF_LOCK(
 			"Position:",
-			ImGui::DragVec3("##AttachmentPosition", attachmentPosition.data, 0, 0.1f, true),
+			ImGui::DragVec3("##AttachmentPosition", attachmentPosition.data, 0.0f, nullptr, true),
 			component->setAttachment(CFrame(attachmentPosition, Rotation::fromRotationVector(attachmentRotation)));
 		);
 
+		float rotationSpeeds[] = { 0.02f, 0.02f, 0.02f };
 		PROPERTY_IF_LOCK(
 			"Rotation:",
-			ImGui::DragVec3("##AttachmentRotation", attachmentRotation.data, 0.01f, 0.02f, true),
+			ImGui::DragVec3("##AttachmentRotation", attachmentRotation.data, 0.0f, rotationSpeeds, true),
 			component->setAttachment(CFrame(attachmentPosition, Rotation::fromRotationVector(attachmentRotation)));
 		);
 
@@ -389,7 +395,7 @@ void renderSoftlink(Engine::Registry64& registry, Engine::Registry64::entity_typ
 			ImGui::Text("(%f, %f, %f)", positionA.x, positionA.y, positionA.z)
 		);
 	} else {
-		PROPERTY_IF_LOCK("Position", ImGui::DragVec3("##TransformPositionA", positionA.data, 0, 0.1f, true), component->setPositionA(positionA););
+		PROPERTY_IF_LOCK("Position", ImGui::DragVec3("##TransformPositionA", positionA.data, 0, nullptr, true), component->setPositionA(positionA););
 		PROPERTY_IF(
 			"",
 			ImGui::Button("Edit##EditCFrameA"),
@@ -406,7 +412,7 @@ void renderSoftlink(Engine::Registry64& registry, Engine::Registry64::entity_typ
 			ImGui::Text("(%f, %f, %f)", positionB.x, positionB.y, positionB.z)
 		);
 	} else {
-		PROPERTY_IF_LOCK("Position", ImGui::DragVec3("##TransformPositionB", positionB.data, 0, 0.1f, true), component->setPositionB(positionB););
+		PROPERTY_IF_LOCK("Position", ImGui::DragVec3("##TransformPositionB", positionB.data, 0, nullptr, true), component->setPositionB(positionB););
 		PROPERTY_IF(
 			"",
 			ImGui::Button("Edit##EditCFrameB"),
@@ -495,12 +501,12 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type 
 	PROPERTY("Part", ImGui::Text("Part A"));
 	PROPERTY_IF_LOCK(
 		"Position",
-		ImGui::DragVec3("##ParentPosition", parentPosition.data, 0, 0.1f, true),
+		ImGui::DragVec3("##ParentPosition", parentPosition.data, 0, nullptr, true),
 		parentCFrame->position = parentPosition;
 	);
 	PROPERTY_IF_LOCK(
 		"Rotation",
-		ImGui::DragVec3("##ParentRotation", parentRotation.data, 0, 0.1f, true),
+		ImGui::DragVec3("##ParentRotation", parentRotation.data, 0, nullptr, true),
 		parentCFrame->rotation = Rotation::fromRotationVector(parentRotation);
 	);
 
@@ -508,12 +514,12 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type 
 	PROPERTY("Part", ImGui::Text("Part B"));
 	PROPERTY_IF_LOCK(
 		"Position",
-		ImGui::DragVec3("##ChildPosition", childPosition.data, 0, 0.1f, true),
+		ImGui::DragVec3("##ChildPosition", childPosition.data, 0, nullptr, true),
 		childCFrame->position = childPosition;
 	);
 	PROPERTY_IF_LOCK(
 		"Rotation",
-		ImGui::DragVec3("##ChildRotation", childRotation.data, 0, 0.1f, true),
+		ImGui::DragVec3("##ChildRotation", childRotation.data, 0, nullptr, true),
 		childCFrame->rotation = Rotation::fromRotationVector(childRotation);
 	);
 

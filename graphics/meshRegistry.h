@@ -16,6 +16,7 @@ extern Comp::Mesh cylinder;
 extern Comp::Mesh wedge;
 extern Comp::Mesh corner;
 extern Comp::Mesh hexagon;
+extern Comp::Mesh quad;
 
 void init();
 

@@ -22,6 +22,52 @@ Comp::Mesh cylinder;
 Comp::Mesh wedge;
 Comp::Mesh corner;
 Comp::Mesh hexagon;
+Comp::Mesh quad;
+
+ExtendedTriangleMesh createQuad(const Vec3f& center, const Vec3f& normal, const Vec2f& dimension) {
+	Vec3f up(0.0f, 1.0f, 0.0f);
+	Vec3f u = up % normal;
+	Vec3f v = normal % u;
+
+	Vec3f du = u * dimension.x / 2.0f;
+	Vec3f dv = v * dimension.y / 2.0f;
+	Vec3f bl = center - du - dv;
+	Vec3f br = center + du - dv;
+	Vec3f tl = center - du + dv;
+	Vec3f tr = center + du + dv;
+
+	Vec3f* vertexBuffer = new Vec3f[4] {
+		bl,
+		br,
+		tl,
+		tr
+	};
+
+	Triangle* triangleBuffer = new Triangle[2] {
+		Triangle { 0, 1, 3 },
+		Triangle { 0, 3, 2 }
+	};
+
+	Vec3f* normalBuffer = new Vec3f[4] {
+		normal,
+		normal,
+		normal,
+		normal,
+	};
+
+	Vec2f* uvBuffer = new Vec2f[4] {
+		Vec2f { 0.0f, 0.0f },
+		Vec2f { 1.0f, 0.0f },
+		Vec2f { 0.0f, 1.0f },
+		Vec2f { 1.0f, 1.0f },
+	};
+
+	ExtendedTriangleMesh mesh(vertexBuffer, 4, triangleBuffer, 2);
+	mesh.setNormalBuffer(SharedArrayPtr<const Vec3f>(normalBuffer));
+	mesh.setUVBuffer(SharedArrayPtr<const Vec2f>(uvBuffer));
+
+	return mesh;
+}
 
 ExtendedTriangleMesh createCylinder(int sides, double radius, double height) {
 	if (sides < 2)
@@ -235,6 +281,7 @@ void init() {
 	wedge = registerShapeClass(&WedgeClass::instance);
 	corner = registerShapeClass(&CornerClass::instance);
 	hexagon = registerShape(createHexagon(0.5, 1.0));
+	quad = registerShape(createQuad(Vec3f(0.0f, 2.0f, 0.0f), Vec3f(0.0f, 0.0f, 1.0f), Vec2f(1.0f, 1.0f)));
 }
 
 Comp::Mesh registerShape(IndexedMesh* mesh, Comp::Mesh::Flags flags) {

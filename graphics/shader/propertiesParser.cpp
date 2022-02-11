@@ -9,17 +9,17 @@ namespace P3D::Graphics {
 		std::string_view type = token.view(lexer.code);
 
 		static std::unordered_map<std::string_view, Property::Type> map { {
-			{ "bool", Property::Type::Bool },
-			{ "int", Property::Type::Int },
+			{ "bool" , Property::Type::Bool  },
+			{ "int"  , Property::Type::Int   },
 			{ "float", Property::Type::Float },
-			{ "vec2", Property::Type::Vec2 },
-			{ "vec3", Property::Type::Vec3 },
-			{ "vec4", Property::Type::Vec4 },
-			{ "mat2", Property::Type::Mat2 },
-			{ "mat3", Property::Type::Mat3 },
-			{ "mat4", Property::Type::Mat4 },
-			{ "col3", Property::Type::Col3 },
-			{ "col4", Property::Type::Col4 },
+			{ "vec2" , Property::Type::Vec2  },
+			{ "vec3" , Property::Type::Vec3  },
+			{ "vec4" , Property::Type::Vec4  },
+			{ "mat2" , Property::Type::Mat2  },
+			{ "mat3" , Property::Type::Mat3  },
+			{ "mat4" , Property::Type::Mat4  },
+			{ "col3" , Property::Type::Col3  },
+			{ "col4" , Property::Type::Col4  },
 		} };
 		
 		auto iterator = map.find(type);
@@ -31,17 +31,17 @@ namespace P3D::Graphics {
 
 	std::size_t arity(const Property::Type& type) {
 		static std::unordered_map<Property::Type, std::size_t> map { {
-			{ Property::Type::Bool, 1 },
-			{ Property::Type::Int, 1 },
-			{ Property::Type::Float, 1 },
-			{ Property::Type::Vec2, 2 },
-			{ Property::Type::Vec3, 3 },
-			{ Property::Type::Vec4, 4 },
-			{ Property::Type::Mat2, 4 },
-			{ Property::Type::Mat3, 9 },
-			{ Property::Type::Mat4, 16 },
-			{ Property::Type::Col3, 3 },
-			{ Property::Type::Col4, 4 },
+			{ Property::Type::Bool , 1  },
+			{ Property::Type::Int  , 1  },
+			{ Property::Type::Float, 1  },
+			{ Property::Type::Vec2 , 2  },
+			{ Property::Type::Vec3 , 3  },
+			{ Property::Type::Vec4 , 4  },
+			{ Property::Type::Mat2 , 4  },
+			{ Property::Type::Mat3 , 9  },
+			{ Property::Type::Mat4 , 16 },
+			{ Property::Type::Col3 , 3  },
+			{ Property::Type::Col4 , 4  },
 		} };
 
 		return map.at(type);

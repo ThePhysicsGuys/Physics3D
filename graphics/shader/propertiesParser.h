@@ -5,7 +5,7 @@
 namespace P3D::Graphics {
 	
 // <type> <name> [(<uniform>)] [= <default> [(<start> : <stop>)]];
-// vec3 Poepie (inputColor) = 0.1 (0:1), 0.2 (-10,10), 0.3;
+// vec3 TheInputColor (inputColor) = 0.1 (0:1), 0.2 (-10,10), 0.3;
 
 struct Property {
 	
@@ -17,6 +17,7 @@ struct Property {
 	struct Default {
 		float value = 0.0;
 		std::optional<Range> range;
+		std::optional<float> step;
 	};
 
 	enum class Type {

@@ -83,15 +83,16 @@ void renderPropertyEditor(ShaderResource* shader, Property& property) {
 	std::string name(property.name);
 	std::string uniform(property.uniform);
 
-	auto renderVectorProperty = [&] (const char** labels, float* data, float** min, float** max) -> bool {
+	auto renderVectorProperty = [&] (const char** labels, float* data, float* speed, float** min, float** max) -> bool {
 		for (std::size_t i = 0; i < property.defaults.size(); i++) {
 			Property::Default& def = property.defaults.at(i);
 			*(data + i) = def.value;
+			*(speed + i) = def.step.value_or(0.1f);
 			*(min + i) = def.range.has_value() ? &def.range->min : nullptr;
 			*(max + i) = def.range.has_value() ? &def.range->max : nullptr;
 		}
 
-		PROPERTY_DESC_IF(name.c_str(), uniform.c_str(), ImGui::DragVecN("", labels, data, property.defaults.size(), 0.0f, 0.1f, false, min, max),
+		PROPERTY_DESC_IF(name.c_str(), uniform.c_str(), ImGui::DragVecN("", labels, data, property.defaults.size(), 0.0f, speed, false, min, max),
 			for (std::size_t i = 0; i < property.defaults.size(); i++) 
 				property.defaults.at(i).value = data[i];
 			return true;
@@ -100,10 +101,11 @@ void renderPropertyEditor(ShaderResource* shader, Property& property) {
 		return false;
 	};
 
-	auto renderMatrixProperty = [&] (const char** labels, float* data, float** min, float** max) -> bool {	
+	auto renderMatrixProperty = [&] (const char** labels, float* data, float* speed, float** min, float** max) -> bool {	
 		for (std::size_t i = 0; i < property.defaults.size(); i++) {
 			Property::Default& def = property.defaults.at(i);
 			*(data + i) = def.value;
+			*(speed + i) = def.step.value_or(0.1f);
 			*(min + i) = def.range.has_value() ? &def.range->min : nullptr;
 			*(max + i) = def.range.has_value() ? &def.range->max : nullptr;
 		}
@@ -115,7 +117,7 @@ void renderPropertyEditor(ShaderResource* shader, Property& property) {
 			size = 4;
 		
 		bool result = false;
-		PROPERTY_DESC_IF(name.c_str(), uniform.c_str(), ImGui::DragVecN("", labels, data, size, 0.0f, 0.1f, false, min, max),
+		PROPERTY_DESC_IF(name.c_str(), uniform.c_str(), ImGui::DragVecN("", labels, data, size, 0.0f, speed, false, min, max),
 			for (std::size_t i = 0; i < property.defaults.size(); i++)
 				property.defaults.at(i).value = data[i];
 
@@ -124,7 +126,7 @@ void renderPropertyEditor(ShaderResource* shader, Property& property) {
 		
 		for (std::size_t j = 1; j < size; j++) {
 			std::size_t offset = j * size;
-			PROPERTY_IF("", ImGui::DragVecN("", labels + offset, data + offset, size, 0.0f, 0.1f, false, min + offset, max + offset),
+			PROPERTY_IF("", ImGui::DragVecN("", labels + offset, data + offset, size, 0.0f, speed, false, min + offset, max + offset),
 				for (std::size_t i = 0; i < property.defaults.size(); i++)
 					property.defaults.at(i).value = data[i];
 			);
@@ -181,39 +183,39 @@ void renderPropertyEditor(ShaderResource* shader, Property& property) {
 			}
 		} break;
 		case Property::Type::Vec2: {
-			float data[2], *min[2], *max[2];
+			float data[2], speed[2], *min[2], *max[2];
 			const char* labels[2] { "X", "Y" };
-			renderVectorProperty(labels, data, min, max);
+			renderVectorProperty(labels, data, speed, min, max);
 			shader->bind();
 			shader->setUniform(uniform, Vec2f { data[0], data[1] });
 		} break;
 		case Property::Type::Vec3: {
-			float data[3], *min[3], *max[3];
+			float data[3], speed[3], *min[3], *max[3];
 			const char* labels[3] { "X", "Y", "Z" };
-			renderVectorProperty(labels, data, min, max);
+			renderVectorProperty(labels, data, speed, min, max);
 			shader->bind();
 			shader->setUniform(uniform, Vec3f { data[0], data[1], data[2] });
 		} break;
 		case Property::Type::Vec4: {
-			float data[4], *min[4], *max[4];
+			float data[4], speed[4], *min[4], *max[4];
 			const char* labels[4] { "X", "Y", "Z", "W" };
-			renderVectorProperty(labels, data, min, max);
+			renderVectorProperty(labels, data, speed, min, max);
 			shader->bind();
 			shader->setUniform(uniform, Vec4f { data[0], data[1], data[2], data[3] });
 		} break;
 		case Property::Type::Mat2: {
-			float data[4], *min[4], *max[4];
+			float data[4], speed[4], *min[4], *max[4];
 			const char* labels[4] { "00", "01", "10", "11" };
-			renderMatrixProperty(labels, data, min, max);
+			renderMatrixProperty(labels, data, speed, min, max);
 			shader->bind();
 			shader->setUniform(uniform, Mat2f {
 				data[0], data[1], 
 				data[2], data[3] });
 		} break;
 		case Property::Type::Mat3: {
-			float data[9], *min[9], *max[9];
+			float data[9], speed[9], *min[9], *max[9];
 			const char* labels[9] { "00", "01", "02", "10", "11", "12", "20", "21", "22" };
-			renderMatrixProperty(labels, data, min, max);
+			renderMatrixProperty(labels, data, speed, min, max);
 			shader->bind();
 			shader->setUniform(uniform, Mat3f { 
 				data[0], data[1], data[2],
@@ -221,9 +223,9 @@ void renderPropertyEditor(ShaderResource* shader, Property& property) {
 				data[6], data[7], data[8] });
 		} break;
 		case Property::Type::Mat4: {
-			float data[16], *min[16], *max[16];
+			float data[16], speed[16], *min[16], *max[16];
 			const char* labels[16] { "00", "01", "02", "03", "10", "11", "12", "13", "20", "21", "22", "23", "30", "31", "32", "33" };
-			renderMatrixProperty(labels, data, min, max);
+			renderMatrixProperty(labels, data, speed, min, max);
 			shader->bind();
 			shader->setUniform(uniform, Mat3f {
 				data[0], data[1], data[2], data[3],
@@ -232,16 +234,16 @@ void renderPropertyEditor(ShaderResource* shader, Property& property) {
 				data[12], data[13], data[14], data[15] });
 		} break;
 		case Property::Type::Col3: {
-			float data[3], *min[3], *max[3];
+			float data[3], speed[3], *min[3], *max[3];
 			const char* labels[3] { "R", "G", "B" };
-			renderVectorProperty(labels, data, min, max);
+			renderVectorProperty(labels, data, speed, min, max);
 			shader->bind();
 			shader->setUniform(uniform, Vec3f { data[0], data[1], data[2] });
 		} break;
 		case Property::Type::Col4: {
-			float data[4], *min[4], *max[4];
+			float data[4], speed[4], *min[4], *max[4];
 			const char* labels[4] { "R", "G", "B", "A" };
-			renderVectorProperty(labels, data, min, max);
+			renderVectorProperty(labels, data, speed, min, max);
 			shader->bind();
 			shader->setUniform(uniform, Vec4f { data[0], data[1], data[2], data[3] });
 		} break;
@@ -277,7 +279,32 @@ void ResourceFrame::renderShaderInfo(ShaderResource* shader) {
 }
 
 void ResourceFrame::onInit(Engine::Registry64& registry) {
-	
+	const char* colors[] = {
+		"B12829FF", // Red Idle
+		"611C1DFF", // Red Hover
+		"852828FF", // Red Active
+
+		"269032FF", // Green Idle
+		"1C6124FF", // Green Hover
+		"288533FF", // Green Active
+
+		"2847B1FF", // Blue Idle
+		"1C2C61FF", // Blue Hover
+		"283E85FF", // Blue Active
+	};
+#define IM_F32_TO_INT8_SAT(_VAL)        ((int)(ImSaturate(_VAL) * 255.0f + 0.5f))               // Saturated, always 
+	for (int id = 0; id < 9; id++) {
+		int i[4];
+		sscanf(colors[id], "%02X%02X%02X%02X", (unsigned int*) &i[0], (unsigned int*) &i[1], (unsigned int*) &i[2], (unsigned int*) &i[3]);
+		ImVec4 col = {
+			i[0] / 255.0f,
+			i[1] / 255.0f,
+			i[2] / 255.0f,
+			i[3] / 255.0f,
+		};
+		ImU32 c = ImGui::ColorConvertFloat4ToU32(col);
+		Log::debug("%u",c);
+	}
 }
 
 void ResourceFrame::onRender(Engine::Registry64& registry) {

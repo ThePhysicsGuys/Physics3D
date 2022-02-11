@@ -19,7 +19,7 @@ struct Ray {
 	double hitPlane(const Position& point, const Vec3& normal) const {
 		double denominator = direction * normal;
 
-		if (denominator < EPSILON)
+		if (std::abs(denominator) < EPSILON)
 			return std::numeric_limits<double>::infinity();
 
 		double t = (point - origin) * normal / denominator;

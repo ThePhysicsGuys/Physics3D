@@ -28,23 +28,26 @@ namespace ImGui {
         return i1 | i2 | i3;
     }
 
-    inline bool DragVecN(const char* id, const char** labels, float* data, int components, float resetValue = 0.0f, float speed = 0.1f, bool resetAll = false, float** min = nullptr, float** max = nullptr) {
+    inline bool DragVecN(const char* id, const char** labels, float* data, int components, float resetValue = 0.0f, float* speed = nullptr, bool resetAll = false, float** min = nullptr, float** max = nullptr, ImU32* colors = nullptr) {
         ImGuiWindow* window = GetCurrentWindow();
         if (window->SkipItems)
             return false;
+
+		if (data == nullptr)
+			return false;;
 
         bool result = false;
     	
         float size = GImGui->Style.ItemInnerSpacing.x * 2.0f;
         for (int i = 0; i < components; i++) {
-            float label_size = CalcTextSize(labels[i], NULL, true).x;
+            float label_size = CalcTextSize(labels[i], nullptr, true).x;
             float padding_size = GImGui->Style.FramePadding.x * 2.0f;
             float spacing_size = GImGui->Style.ItemInnerSpacing.x * 2.0f;
             size += label_size + padding_size + spacing_size;
         }
 
 		if (resetAll) {
-            float label_size = CalcTextSize("Reset", NULL, true).x;
+            float label_size = CalcTextSize("Reset", nullptr, true).x;
             float padding_size = GImGui->Style.FramePadding.x * 2.0f;
             float spacing_size = GImGui->Style.ItemInnerSpacing.x * 2.0f;
             size += label_size + padding_size + spacing_size;
@@ -57,29 +60,37 @@ namespace ImGui {
         PushID(id);
 
     	for (int i = 0; i < components; i++) {
-
             if (i > 0)
                 SameLine(0, GImGui->Style.ItemInnerSpacing.x);
+
+    		if (colors) {
+				PushStyleColor(ImGuiCol_Button, colors[3 * i + 0]);
+				PushStyleColor(ImGuiCol_ButtonHovered, colors[3 * i + 1]);
+				PushStyleColor(ImGuiCol_ButtonActive, colors[3 * i + 2]);
+			}
 
             if(Button(labels[i])) {
                 *(data + i) = resetValue;
                 result = true;
-            }    		
-    		
+            }
+
+			if (colors)
+				PopStyleColor(3);
+
 			SameLine(0, GImGui->Style.ItemInnerSpacing.x);
-    		
+
             PushID(i);
-            result |= DragScalar("", ImGuiDataType_Float, data + i, speed, *(min + i), *(max + i), "%.2f");
+            result |= DragScalar("", ImGuiDataType_Float, data + i, speed == nullptr ? 0.1f : *(speed + i), min == nullptr ? nullptr : *(min + i), max == nullptr ? nullptr : *(max + i), "%.2f");
             PopID();
+
+	
     		
             PopItemWidth();
     	}
 
 		if (resetAll) {
             SameLine(0, GImGui->Style.ItemInnerSpacing.x);
-			//if (Button("Reset")) {
-			
-            //PushStyleVar(ImGuiStyleVar_FrameRounding, 0);
+
             PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, -1));
 			if (ImageButton((ImTextureID) ResourceManager::get<P3D::Graphics::TextureResource>("reset")->getID(), ImVec2(20, 20), ImVec2(0, 1), ImVec2(1, 0))) {
 				for (int i = 0; i < components; i++)
@@ -97,9 +108,23 @@ namespace ImGui {
         return result;
     }
 
-    inline bool DragVec3(const char* id, float values[3], float resetValue = 0.0f, float speed = 0.1f, bool resetAll = false, float* min = nullptr, float* max = nullptr) {
+    inline bool DragVec3(const char* id, float values[3], float resetValue = 0.0f, float* speed = nullptr, bool resetAll = false, float** min = nullptr, float** max = nullptr) {
         const char* labels[] = { "X", "Y", "Z" };
-        return DragVecN(id, labels, values, 3, resetValue, speed, resetAll, &min, &max);
+		ImU32 colors[] = {
+			4280887473, // Red Idle
+			4280097889, // Red Hover
+			4280821893, // Red Active
+
+			4281503782, // Green Idle
+			4280574236, // Green Hover
+			4281566504, // Green Active
+			
+			4289808168, // Blue Idle
+			4284558364, // Blue Hover
+			4286922280, // Blue Active
+		};
+
+        return DragVecN(id, labels, values, 3, resetValue, speed, resetAll, min, max, colors);
     }
 
     inline void HelpMarker(const char* description) {

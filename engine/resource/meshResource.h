@@ -31,10 +31,10 @@ public:
 
 	Graphics::IndexedMesh* getMesh() {
 		return mesh;
-	};
+	}
 
-	Graphics::ExtendedTriangleMesh getShape() {
-		return shape;
+	Graphics::ExtendedTriangleMesh* getShape() {
+		return &shape;
 	}
 
 	virtual void close() override {
