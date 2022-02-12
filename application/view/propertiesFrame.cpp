@@ -18,6 +18,11 @@
 
 namespace P3D::Application {
 
+Graphics::TextureResource* materialIcon;
+Graphics::TextureResource* hitboxIcon;
+Graphics::TextureResource* lightIcon;
+Graphics::TextureResource* nameIcon;
+
 Engine::Registry64::component_type deletedComponentIndex = static_cast<Engine::Registry64::component_type>(-1);
 std::string errorModalMessage = "";
 bool showErrorModal = false;
@@ -43,6 +48,78 @@ bool _ecs_property_frame_start(Engine::Registry64& registry, Engine::Registry64:
 	return open;
 }
 
+bool _ecs_property_frame_start2(Engine::Registry64& registry, Engine::Registry64::component_type index, GLID icon = 0) {
+	ImGuiWindow* window = ImGui::GetCurrentWindow();
+	if (window->SkipItems)
+		return false;
+
+	// ID
+	ImGuiContext& g = *GImGui;
+	std::string label((registry).getComponentName(index));
+
+	ImGui::PushID(index);
+
+	ImU32 mainId = window->GetID(label.c_str());
+	ImU32 arrowId = window->GetID("Arrow");
+	ImU32 editId = window->GetID("Edit");
+
+	// Constants
+	float arrowWidth = g.FontSize;
+	float buttonSize = g.FontSize + g.Style.FramePadding.y;
+	float buttonMargin = g.Style.ItemInnerSpacing.x;
+	float arrowOffset = std::abs(g.FontSize - arrowWidth) / 2.0f;
+	float buttonPadding = 10.0;
+
+	ImVec2 pos = window->DC.CursorPos;
+	ImVec2 startPos = ImVec2(pos.x - window->DC.Indent.x + g.Style.WindowPadding.x, pos.y + g.Style.ItemSpacing.y);
+	ImVec2 endPos = ImVec2(startPos.x + ImGui::GetContentRegionMax().x - g.Style.WindowPadding.x, startPos.y + buttonSize);
+	ImRect arrowButton(ImVec2(startPos.x + g.Style.WindowPadding.x, startPos.y), ImVec2(startPos.x + g.Style.WindowPadding.x + arrowWidth, startPos.y + buttonSize));
+	ImRect mainButton(ImVec2(arrowButton.Max.x + buttonPadding, startPos.y), endPos);
+	ImRect iconButton(ImVec2(mainButton.Min.x + buttonPadding, startPos.y), ImVec2(mainButton.Min.x + buttonPadding + buttonSize, startPos.y + buttonSize));
+	ImVec2 textPos = ImVec2(iconButton.Max.x + buttonPadding, startPos.y + g.Style.FramePadding.y / 2.0);
+	ImRect totalSize = ImRect(startPos, endPos);
+	ImRect bb = ImRect(ImVec2(startPos.x, startPos.y - g.Style.ItemSpacing.y), ImVec2(endPos.x, endPos.y + g.Style.ItemSpacing.y));
+
+	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0, 0.0, 0.0, 0.0));
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, GImGui->Style.Colors[ImGuiCol_HeaderActive]);
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, GImGui->Style.Colors[ImGuiCol_HeaderHovered]);
+
+	// Main button
+	bool opened = ImGui::TreeNodeBehaviorIsOpen(mainId, ImGuiTreeNodeFlags_DefaultOpen);
+	bool mainHovered, mainHeld;
+	if (ImGui::ButtonBehavior(mainButton, mainId, &mainHovered, &mainHeld, ImGuiButtonFlags_PressedOnClickRelease | ImGuiButtonFlags_PressedOnDoubleClick)) {
+		if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+				window->DC.StateStorage->SetInt(mainId, opened ? 0 : 1);
+		}
+	}
+	ImGui::DrawButton(totalSize, false, false, mainHeld, mainHovered, 12);
+
+	// Arrow button
+	bool arrowHovered, arrowHeld;
+	if (ImGui::ButtonBehavior(arrowButton, arrowId, &arrowHovered, &arrowHeld, ImGuiButtonFlags_PressedOnClickRelease)) {
+		window->DC.StateStorage->SetInt(mainId, opened ? 0 : 1);
+	}
+	ImGui::DrawButton(arrowButton, true, false, arrowHeld, false, 12);
+	ImGui::RenderArrow(window->DrawList, ImVec2(arrowButton.Min.x + arrowOffset, textPos.y), ImGui::GetColorU32(ImGuiCol_Text), opened ? ImGuiDir_Down : ImGuiDir_Right, 1.0f);
+
+	// Icon
+	ImGui::DrawIcon(icon, iconButton.Min, iconButton.Max);
+
+	// Text
+	ImGui::RenderText(textPos, label.c_str());
+	ImGui::PopStyleColor(3);
+
+	ImGui::ItemSize(bb, g.Style.FramePadding.y);
+	ImGui::ItemAdd(bb, mainId);
+
+	//if (opened)
+		ImGui::TreePush(label.c_str());
+
+	ImGui::PopID();
+
+	return opened;
+}
+
 #define ENTITY_DISPATCH_START(index) \
 	if ((index) == -1) \
 		continue
@@ -55,9 +132,14 @@ bool _ecs_property_frame_start(Engine::Registry64& registry, Engine::Registry64:
 	else \
 		renderEntity(registry, entity, index, component)
 
-#define ECS_PROPERTY_FRAME_START(registry, index) \
-	if (_ecs_property_frame_start(registry, index)) { \
+#define ECS_PROPERTY_FRAME_START(registry, index, icon) \
+	if (_ecs_property_frame_start2(registry, index, icon)) { \
 		ImGui::Columns(2)
+
+#define ECS_PROPERTY_FRAME_END \
+		ImGui::Columns(1); \
+		ImGui::TreePop(); \
+	}
 
 void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<RC>& component) {
 	std::string label(registry.getComponentName(index));
@@ -66,7 +148,7 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type 
 }
 
 void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<Comp::Collider>& component) {
-	ECS_PROPERTY_FRAME_START(registry, index);
+	ECS_PROPERTY_FRAME_START(registry, index, ResourceManager::get<Graphics::TextureResource>("collider")->getID());
 
 	ExtendedPart* selectedPart = component->part;
 	Motion motion = selectedPart->getMotion();
@@ -124,21 +206,21 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type 
 		Log::debug("Debugging part %d", reinterpret_cast<uint64_t>(sp)); P3D_DEBUGBREAK;
 	);
 
-	PROPERTY_FRAME_END;
+	ECS_PROPERTY_FRAME_END;
 }
 
 void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<Comp::Name>& component) {
-	ECS_PROPERTY_FRAME_START(registry, index);
+	ECS_PROPERTY_FRAME_START(registry, index, nameIcon->getID());
 
 	PROPERTY("Name:", ImGui::Text(component->name.c_str()));
 
-	PROPERTY_FRAME_END;
+	ECS_PROPERTY_FRAME_END;
 }
 
 void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<Graphics::Comp::Mesh>& component) {
 	using namespace Graphics::Comp;
 
-	ECS_PROPERTY_FRAME_START(registry, index);
+	ECS_PROPERTY_FRAME_START(registry, index, ResourceManager::get<Graphics::TextureResource>("polygon")->getID());
 
 	bool normals = component->flags & Mesh::Flags_Normal;
 	bool uvs = component->flags & Mesh::Flags_UV;
@@ -154,11 +236,11 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type 
 	PROPERTY("Tangents:", ImGui::Checkbox("##Tangents", &tangents));
 	PROPERTY("Bitangents:", ImGui::Checkbox("##Bitangents", &bitangents));
 
-	PROPERTY_FRAME_END;
+	ECS_PROPERTY_FRAME_END;
 }
 
 void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<Graphics::Comp::Material>& component) {
-	ECS_PROPERTY_FRAME_START(registry, index);
+	ECS_PROPERTY_FRAME_START(registry, index, materialIcon->getID());
 
 	PROPERTY("Albedo", ImGui::ColorEdit4("##Albedo", component->albedo.data, ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_AlphaBar));
 	PROPERTY("Metalness", ImGui::SliderFloat("##Metalness", &component->metalness, 0, 1));
@@ -221,11 +303,11 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type 
 		);
 	
 
-	PROPERTY_FRAME_END;
+	ECS_PROPERTY_FRAME_END;
 }
 
 void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<Comp::Light>& component) {
-	ECS_PROPERTY_FRAME_START(registry, index);
+	ECS_PROPERTY_FRAME_START(registry, index, lightIcon->getID());
 
 	PROPERTY("Color", ImGui::ColorEdit3("##Color", component->color.data, ImGuiColorEditFlags_PickerHueWheel));
 	PROPERTY("Intensity", ImGui::DragFloat("##Intensity", &component->intensity));
@@ -235,12 +317,12 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type 
 	PROPERTY("Linear", ImGui::SliderFloat("##Linear", &component->attenuation.linear, 0, 2));
 	PROPERTY("Exponent", ImGui::SliderFloat("##Exponent", &component->attenuation.exponent, 0, 2));
 
-	PROPERTY_FRAME_END;
+	ECS_PROPERTY_FRAME_END;
 }
 
 void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<Comp::Transform>& component) {
 
-	ECS_PROPERTY_FRAME_START(registry, index);
+	ECS_PROPERTY_FRAME_START(registry, index, ResourceManager::get<Graphics::TextureResource>("cframe")->getID());
 
 	Vec3f position = castPositionToVec3f(component->getPosition());
 	Vec3f rotation = component->getRotation().asRotationVector();
@@ -294,11 +376,11 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type 
 		);
 	}
 
-	PROPERTY_FRAME_END;
+	ECS_PROPERTY_FRAME_END;
 }
 
 void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<Comp::Hitbox>& component) {
-	ECS_PROPERTY_FRAME_START(registry, index);
+	ECS_PROPERTY_FRAME_START(registry, index, hitboxIcon->getID());
 
 	bool standalone = component->isPartAttached();
 	Shape shape = component->getShape();
@@ -319,11 +401,11 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type 
 	PROPERTY("Depth:", ImGui::Text(str(shape.getHeight()).c_str()));
 	PROPERTY("Max radius:", ImGui::Text(str(shape.getMaxRadius()).c_str()));
 
-	PROPERTY_FRAME_END;
+	ECS_PROPERTY_FRAME_END;
 }
 
 void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<Comp::Attachment>& component) {
-	ECS_PROPERTY_FRAME_START(registry, index);
+	ECS_PROPERTY_FRAME_START(registry, index, ResourceManager::get<Graphics::TextureResource>("attachments")->getID());
 
 	bool isAttachmentToMainPart = !component->isAttachmentToMainPart;
 	Vec3f attachmentPosition = component->attachment->position;
@@ -367,7 +449,7 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type 
 		);
 	}
 
-	PROPERTY_FRAME_END;
+	ECS_PROPERTY_FRAME_END;
 }
 
 void renderSoftlink(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Comp::SoftLink* component) {
@@ -422,7 +504,7 @@ void renderSoftlink(Engine::Registry64& registry, Engine::Registry64::entity_typ
 }
 
 void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<Comp::MagneticLink>& component) {
-	ECS_PROPERTY_FRAME_START(registry, index);
+	ECS_PROPERTY_FRAME_START(registry, index, ResourceManager::get<Graphics::TextureResource>("Magnetic Link")->getID());
 
 	renderSoftlink(registry, entity, component.get());
 
@@ -436,11 +518,11 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type 
 		link->magneticStrength = static_cast<double>(magneticStrength);
 	);
 
-	PROPERTY_FRAME_END;
+	ECS_PROPERTY_FRAME_END;
 }
 
 void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<Comp::ElasticLink>& component) {
-	ECS_PROPERTY_FRAME_START(registry, index);
+	ECS_PROPERTY_FRAME_START(registry, index, ResourceManager::get<Graphics::TextureResource>("Elastic Link")->getID());
 
 	renderSoftlink(registry, entity, component.get());
 
@@ -452,11 +534,11 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type 
 	PROPERTY_IF_LOCK("Length", ImGui::DragFloat("##RestLength", &restLenght, 0, 0.1f, true), link->restLength = static_cast<double>(restLenght););
 	PROPERTY_IF_LOCK("Stiffness", ImGui::DragFloat("##Stiffness", &stiffness, 0, 0.1f, true), link->stiffness = static_cast<double>(stiffness););
 
-	PROPERTY_FRAME_END;
+	ECS_PROPERTY_FRAME_END;
 }
 
 void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<Comp::SpringLink>& component) {
-	ECS_PROPERTY_FRAME_START(registry, index);
+	ECS_PROPERTY_FRAME_START(registry, index, ResourceManager::get<Graphics::TextureResource>("Spring Link")->getID());
 
 	renderSoftlink(registry, entity, component.get());
 
@@ -468,21 +550,21 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type 
 	PROPERTY_IF_LOCK("Length", ImGui::DragFloat("##RestLength", &restLenght, 0, 0.1f, true), link->restLength = static_cast<double>(restLenght););
 	PROPERTY_IF_LOCK("Stiffness", ImGui::DragFloat("##Stiffness", &stiffness, 0, 0.1f, true), link->stiffness = static_cast<double>(stiffness););
 
-	PROPERTY_FRAME_END;
+	ECS_PROPERTY_FRAME_END;
 }
 
 void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<Comp::AlignmentLink>& component) {
-	ECS_PROPERTY_FRAME_START(registry, index);
+	ECS_PROPERTY_FRAME_START(registry, index, ResourceManager::get<Graphics::TextureResource>("Alignmnent Link")->getID());
 
 	renderSoftlink(registry, entity, component.get());
 
 	AlignmentLink* link = dynamic_cast<AlignmentLink*>(component->link);
 
-	PROPERTY_FRAME_END;
+	ECS_PROPERTY_FRAME_END;
 }
 
 void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type entity, Engine::Registry64::component_type index, const IRef<Comp::FixedConstraint>& component) {
-	ECS_PROPERTY_FRAME_START(registry, index);
+	ECS_PROPERTY_FRAME_START(registry, index, ResourceManager::get<Graphics::TextureResource>("Fixed Constraint")->getID());
 
 	FixedConstraint* link = dynamic_cast<FixedConstraint*>(component->hardConstraint->constraintWithParent.get());
 
@@ -523,11 +605,16 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type 
 		childCFrame->rotation = Rotation::fromRotationVector(childRotation);
 	);
 
-	PROPERTY_FRAME_END;
+	ECS_PROPERTY_FRAME_END;
 }
 
 
-void PropertiesFrame::onInit(Engine::Registry64& registry) { }
+void PropertiesFrame::onInit(Engine::Registry64& registry) {
+	materialIcon = ResourceManager::add<Graphics::TextureResource>("material", "../res/textures/icons/Material.png");
+	hitboxIcon = ResourceManager::add<Graphics::TextureResource>("hitbox", "../res/textures/icons/Hitbox.png");
+	lightIcon = ResourceManager::add<Graphics::TextureResource>("light", "../res/textures/icons/Light.png");
+	nameIcon = ResourceManager::add<Graphics::TextureResource>("name", "../res/textures/icons/Name.png");
+}
 
 void PropertiesFrame::onRender(Engine::Registry64& registry) {
 	ImGui::Begin("Properties");

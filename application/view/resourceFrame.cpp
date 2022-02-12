@@ -279,32 +279,6 @@ void ResourceFrame::renderShaderInfo(ShaderResource* shader) {
 }
 
 void ResourceFrame::onInit(Engine::Registry64& registry) {
-	const char* colors[] = {
-		"B12829FF", // Red Idle
-		"611C1DFF", // Red Hover
-		"852828FF", // Red Active
-
-		"269032FF", // Green Idle
-		"1C6124FF", // Green Hover
-		"288533FF", // Green Active
-
-		"2847B1FF", // Blue Idle
-		"1C2C61FF", // Blue Hover
-		"283E85FF", // Blue Active
-	};
-#define IM_F32_TO_INT8_SAT(_VAL)        ((int)(ImSaturate(_VAL) * 255.0f + 0.5f))               // Saturated, always 
-	for (int id = 0; id < 9; id++) {
-		int i[4];
-		sscanf(colors[id], "%02X%02X%02X%02X", (unsigned int*) &i[0], (unsigned int*) &i[1], (unsigned int*) &i[2], (unsigned int*) &i[3]);
-		ImVec4 col = {
-			i[0] / 255.0f,
-			i[1] / 255.0f,
-			i[2] / 255.0f,
-			i[3] / 255.0f,
-		};
-		ImU32 c = ImGui::ColorConvertFloat4ToU32(col);
-		Log::debug("%u",c);
-	}
 }
 
 void ResourceFrame::onRender(Engine::Registry64& registry) {

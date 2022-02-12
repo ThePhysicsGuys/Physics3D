@@ -6,14 +6,58 @@
 #include "imgui/imgui_internal.h"
 #include "../engine/tool/tool.h"
 
-#define IMGUI_DEFINE_MATH_OPERATORS
-
 namespace ImGui {
 
-	inline ImVec2 operator+(const ImVec2& lhs, const ImVec2& rhs) {
-        return ImVec2(lhs.x + rhs.x, lhs.y + rhs.y);
+	inline void DrawLineBetween(const ImRect& button1, const ImRect& button2, float yExtent = 0) {
+		ImVec2 pos1 = ImVec2(
+			button1.Max.x + (button2.Min.x - button1.Max.x) / 2,
+			ImMin(button1.Min.y, button2.Min.y) - yExtent / 2
+		);
+		ImVec2 pos2 = ImVec2(
+			pos1.x,
+			ImMax(button1.Max.y, button2.Max.y) + yExtent / 2
+		);
+
+		GImGui->CurrentWindow->DrawList->AddLine(pos1, pos2, ImGui::GetColorU32(ImVec4(0.7f, 0.7f, 0.7f, 0.3f)));
 	}
-	
+
+	inline void DrawLine(const ImVec2& pos1, const ImVec2& pos2) {
+		GImGui->CurrentWindow->DrawList->AddLine(pos1, pos2, ImGui::GetColorU32(ImVec4(0.7f, 0.7f, 0.7f, 0.3f)));
+	}
+
+	// Draw buttons
+	inline void DrawButton(const ImRect& button, bool even, bool selected, bool held, bool hovered, float rounding = 0.0f) {
+		ImU32 color = even ? ImGui::GetColorU32(ImVec4(0, 0, 0, 0)) : ImGui::GetColorU32(ImVec4(0.4f, 0.4f, 0.4f, 0.1f));
+		if (held || selected)
+			color = ImGui::GetColorU32(ImGuiCol_ButtonActive);
+		else if (hovered)
+			color = ImGui::GetColorU32(ImGuiCol_ButtonHovered);
+
+		GImGui->CurrentWindow->DrawList->AddRectFilled(ImVec2(button.Min.x, button.Min.y - GImGui->Style.ItemSpacing.y / 2), ImVec2(button.Max.x, button.Max.y + GImGui->Style.ItemSpacing.y / 2), color, rounding);
+	}
+
+	// Draw icons
+	inline void DrawIcon(GLID icon, const ImVec2& min, const ImVec2& max) {
+		if (icon == 0)
+			return;
+
+		GImGui->CurrentWindow->DrawList->AddImage(reinterpret_cast<ImTextureID>(icon), min, max);
+	}
+
+	inline ImU32 HexToImU32(const char* hex) {
+		int i[4];
+		sscanf(hex, "%02X%02X%02X%02X", (unsigned int*) &i[0], (unsigned int*) &i[1], (unsigned int*) &i[2], (unsigned int*) &i[3]);
+
+		ImVec4 col = {
+			i[0] / 255.0f,
+			i[1] / 255.0f,
+			i[2] / 255.0f,
+			i[3] / 255.0f,
+		};
+
+		return ImGui::ColorConvertFloat4ToU32(col);
+	}
+
     inline bool InputDouble3(const char* label, double v[3], ImGuiInputTextFlags flags) {
         char format[16] = "%f";
         return InputScalarN(label, ImGuiDataType_Double, v, 3, NULL, NULL, format, flags);

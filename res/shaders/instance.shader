@@ -61,8 +61,8 @@ layout(location = 10) in vec3 vMRAo;
 layout(location = 11) in uvec2 vTextureFlags;
 
 smooth out vec3 fPosition;
-smooth out vec2 fUV;
 smooth out vec3 fNormal;
+smooth out vec2 fUV;
 smooth out vec4 fLightSpacePosition;
 
 flat out vec4 fAlbedo;

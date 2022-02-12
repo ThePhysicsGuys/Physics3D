@@ -12,6 +12,7 @@
 #include "../graphics/resource/textureResource.h"
 #include "../graphics/meshRegistry.h"
 #include "../util/resource/resourceManager.h"
+#include "graphics/gui/imgui/imguiExtension.h"
 #include "Physics3D/hardconstraints/fixedConstraint.h"
 #include "Physics3D/hardconstraints/motorConstraint.h"
 #include "Physics3D/softlinks/elasticLink.h"
@@ -97,42 +98,6 @@ static GLID getMeshIcon(IRef<Graphics::Comp::Mesh> mesh) {
 	return polygonClassIcon->getID();
 }
 
-// Draw buttons
-static void drawButton(const ImRect& button, bool even, bool selected, bool held, bool hovered) {
-	ImU32 color = even ? ImGui::GetColorU32(ImVec4(0, 0, 0, 0)) : ImGui::GetColorU32(ImVec4(0.4f, 0.4f, 0.4f, 0.1f));
-	if (held || selected)
-		color = ImGui::GetColorU32(ImGuiCol_ButtonActive);
-	else if (hovered)
-		color = ImGui::GetColorU32(ImGuiCol_ButtonHovered);
-
-	GImGui->CurrentWindow->DrawList->AddRectFilled(button.Min - ImVec2(0, GImGui->Style.ItemSpacing.y / 2), button.Max + ImVec2(0, GImGui->Style.ItemSpacing.y / 2), color);
-};
-
-// Draw icons
-static void drawIcon(GLID icon, const ImVec2& min, const ImVec2& max) {
-	if (icon == 0)
-		return;
-
-	GImGui->CurrentWindow->DrawList->AddImage(reinterpret_cast<ImTextureID>(icon), min, max, ImVec2(0, 1), ImVec2(1, 0));
-}
-
-static void drawLineBetween(const ImRect& button1, const ImRect& button2, float yExtent = 0) {
-	ImVec2 pos1 = ImVec2(
-		button1.Max.x + (button2.Min.x - button1.Max.x) / 2,
-		ImMin(button1.Min.y, button2.Min.y) - yExtent / 2
-	);
-	ImVec2 pos2 = ImVec2(
-		pos1.x,
-		ImMax(button1.Max.y, button2.Max.y) + yExtent / 2
-	);
-
-	GImGui->CurrentWindow->DrawList->AddLine(pos1, pos2, ImGui::GetColorU32(ImVec4(0.7f, 0.7f, 0.7f, 0.3f)));
-}
-
-static void drawLine(const ImVec2& pos1, const ImVec2& pos2) {
-	GImGui->CurrentWindow->DrawList->AddLine(pos1, pos2, ImGui::GetColorU32(ImVec4(0.7f, 0.7f, 0.7f, 0.3f)));
-}
-
 static void HeaderNode() {
 	ImGuiWindow* window = ImGui::GetCurrentWindow();
 	if (window->SkipItems)
@@ -160,14 +125,14 @@ static void HeaderNode() {
 	window->DrawList->AddRectFilled(totalSize.Min - ImVec2(0, GImGui->Style.ItemSpacing.y / 2), totalSize.Max + ImVec2(0, GImGui->Style.ItemSpacing.y / 2), ImGui::GetColorU32(ImGuiCol_TabUnfocusedActive));
 
 	// Icons
-	drawIcon(shownIcon->getID(), visibilityButton.Min + ImVec2(0, buttonPadding), visibilityButton.Max - ImVec2(0, buttonPadding));
-	drawIcon(entityIcon->getID(), iconButton.Min + ImVec2(buttonPadding, buttonPadding), iconButton.Max - ImVec2(buttonPadding, buttonPadding));
-	drawIcon(physicsIcon->getID(), colliderButton.Min + ImVec2(0, buttonPadding), colliderButton.Max - ImVec2(0, buttonPadding));
+	ImGui::DrawIcon(shownIcon->getID(), visibilityButton.Min + ImVec2(0, buttonPadding), visibilityButton.Max - ImVec2(0, buttonPadding));
+	ImGui::DrawIcon(entityIcon->getID(), iconButton.Min + ImVec2(buttonPadding, buttonPadding), iconButton.Max - ImVec2(buttonPadding, buttonPadding));
+	ImGui::DrawIcon(physicsIcon->getID(), colliderButton.Min + ImVec2(0, buttonPadding), colliderButton.Max - ImVec2(0, buttonPadding));
 
 	// Lines
-	drawLineBetween(visibilityButton, arrowButton, g.Style.ItemSpacing.y);
-	drawLineBetween(iconButton, colliderButton, g.Style.ItemSpacing.y);
-	drawLineBetween(colliderButton, mainButton, g.Style.ItemSpacing.y);
+	ImGui::DrawLineBetween(visibilityButton, arrowButton, g.Style.ItemSpacing.y);
+	ImGui::DrawLineBetween(iconButton, colliderButton, g.Style.ItemSpacing.y);
+	ImGui::DrawLineBetween(colliderButton, mainButton, g.Style.ItemSpacing.y);
 
 	// Text
 	ImGui::RenderText(textPos, "Name");
@@ -226,14 +191,14 @@ static bool IconTreeNode(ImU32 id, Engine::Registry64& registry, const char* lab
 		} else
 			onPressed();
 	}
-	drawButton(totalSize, even, selected, mainHeld, mainHovered);
+	ImGui::DrawButton(totalSize, even, selected, mainHeld, mainHovered);
 	if (mainIcon == 0) {
 		if (mesh.invalid())
 			mainIcon = leaf ? entityIcon->getID() : opened ? openFolderIcon->getID() : folderIcon->getID();
 		else
 			mainIcon = getMeshIcon(mesh);
 	}
-	drawIcon(mainIcon, iconButton.Min, iconButton.Max);
+	ImGui::DrawIcon(mainIcon, iconButton.Min, iconButton.Max);
 
 	// Visibility Button
 	if (mesh.valid()) {
@@ -242,11 +207,11 @@ static bool IconTreeNode(ImU32 id, Engine::Registry64& registry, const char* lab
 		if (ImGui::ButtonBehavior(visibilityButton, meshId, &visibilityHovered, &visibilityHeld, ImGuiButtonFlags_PressedOnClickRelease))
 			mesh->visible = !mesh->visible;
 
-		drawButton(visibilityButton, true, selected, visibilityHeld, false);
+		ImGui::DrawButton(visibilityButton, true, selected, visibilityHeld, false);
 		if (!visible)
-			drawIcon(hiddenIcon->getID(), visibilityButton.Min + ImVec2(0, buttonPadding), visibilityButton.Max - ImVec2(0, buttonPadding));
+			ImGui::DrawIcon(hiddenIcon->getID(), visibilityButton.Min + ImVec2(0, buttonPadding), visibilityButton.Max - ImVec2(0, buttonPadding));
 		else if (visibilityHovered)
-			drawIcon(shownIcon->getID(), visibilityButton.Min + ImVec2(0, buttonPadding), visibilityButton.Max - ImVec2(0, buttonPadding));
+			ImGui::DrawIcon(shownIcon->getID(), visibilityButton.Min + ImVec2(0, buttonPadding), visibilityButton.Max - ImVec2(0, buttonPadding));
 	}
 
 	// Arrow button
@@ -256,7 +221,7 @@ static bool IconTreeNode(ImU32 id, Engine::Registry64& registry, const char* lab
 			if (!leaf)
 				window->DC.StateStorage->SetInt(mainId, opened ? 0 : 1);
 		}
-		drawButton(arrowButton, true, selected, arrowHeld, false);
+		ImGui::DrawButton(arrowButton, true, selected, arrowHeld, false);
 		ImGui::RenderArrow(window->DrawList, ImVec2(arrowButton.Min.x + arrowOffset, textPos.y), ImGui::GetColorU32(ImGuiCol_Text), opened ? ImGuiDir_Down : ImGuiDir_Right, 1.0f);
 	}
 
@@ -277,7 +242,7 @@ static bool IconTreeNode(ImU32 id, Engine::Registry64& registry, const char* lab
 				}
 			}
 		}
-		drawButton(colliderButton, true, selected, colliderHeld, false);
+		ImGui::DrawButton(colliderButton, true, selected, colliderHeld, false);
 		std::string text;
 		if (collider->part->isTerrainPart()) {
 			text = "T";
@@ -293,7 +258,7 @@ static bool IconTreeNode(ImU32 id, Engine::Registry64& registry, const char* lab
 	}
 
 	// Lines
-	drawLine(
+	ImGui::DrawLine(
 		ImVec2(visibilityButton.Max.x + buttonMargin / 2, visibilityButton.Min.y - g.Style.ItemSpacing.y / 2), 
 		ImVec2(visibilityButton.Max.x + buttonMargin / 2, visibilityButton.Max.y + g.Style.ItemSpacing.y / 2)
 	);
@@ -358,7 +323,7 @@ static bool ColliderMenuItem(const char* label, GLID icon, bool selected = false
 
 	ImVec2 start = pos + ImVec2(window->DC.MenuColumns.Pos[2] + extraWidth, 0);
 	ImVec2 end = start + ImVec2(labelSize.y, labelSize.y);
-	drawIcon(icon, start, end);
+	ImGui::DrawIcon(icon, start, end);
 
 	return pressed;
 }
