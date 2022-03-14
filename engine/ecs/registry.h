@@ -65,7 +65,7 @@ class Registry {
 	//-------------------------------------------------------------------------------------//
 	// Contructor                                                                          //
 	//-------------------------------------------------------------------------------------//
-	
+
 public:
 	Registry() = default;
 	~Registry() = default;
@@ -73,7 +73,7 @@ public:
 	Registry(const Registry&) = delete;
 	Registry& operator=(const Registry&) = delete;
 	Registry& operator=(Registry&&) = delete;
-	
+
 	//-------------------------------------------------------------------------------------//
 	// Types                                                                               //
 	//-------------------------------------------------------------------------------------//
@@ -180,7 +180,7 @@ public:
 		}
 	};
 
-	
+
 	//-------------------------------------------------------------------------------------//
 	// View types                                                                          //
 	//-------------------------------------------------------------------------------------//
@@ -201,17 +201,17 @@ public:
 	struct only {
 		template <typename UnsafeComponent>
 		static IRef<UnsafeComponent> get(Registry<Entity>* registry, const entity_type& entity) {
-			return registry->get<UnsafeComponent>(entity);
-		}
+			if (std::is_same_v<UnsafeComponent, Component>) {
+				component_type index = registry->getComponentIndex<Component>();
+				entity_map* map = registry->components[index];
 
-		template <>
-		static IRef<Component> get(Registry<Entity>* registry, const entity_type& entity) {
-			component_type index = registry->getComponentIndex<Component>();
-			entity_map* map = registry->components[index];
-
-			auto component_iterator = map->find(entity);
-
-			return intrusive_cast<Component>(component_iterator->second);
+				auto component_iterator = map->find(entity);
+				printf("Safe");
+				return intrusive_cast<UnsafeComponent>(component_iterator->second);
+			} else {
+				printf("Unsafe");
+				return registry->get<UnsafeComponent>(entity);
+			}
 		}
 	};
 
@@ -289,7 +289,7 @@ public:
 private:
 	template <typename... Components>
 	std::enable_if_t<sizeof...(Components) == 0> init() {}
-	
+
 	template <typename... Components>
 	std::enable_if_t<sizeof...(Components) == 0> extract_smallest_component(component_type& smallest_component, std::size_t& smallest_size, std::vector<component_type>& other_components) {}
 
@@ -325,7 +325,7 @@ private:
 
 		insert_entities<Components...>(entities);
 	}
-	
+
 	template <typename ViewType, typename Iterator, typename Filter>
 	auto filter_view(const Iterator& first, const Iterator& last, const Filter& filter) noexcept {
 		using iterator_type = filter_iterator<Iterator, iterator_end, Filter>;
@@ -349,7 +349,7 @@ private:
 		iterator_end stop;
 		return basic_view<ViewType, iterator_type>(this, start, stop);
 	}
-	
+
 	template <typename ViewType, typename Iterator>
 	auto default_view(const Iterator& first, const Iterator& last) noexcept {
 		using iterator_type = default_iterator<Iterator, iterator_end>;
@@ -364,50 +364,50 @@ private:
 
 	template <typename Component>
 	struct match {
-		constexpr std::enable_if_t<std::is_base_of_v<RC, Component>, bool> operator()(const entity_type& entity) {
-			return has<Component>(entity);
+		constexpr std::enable_if_t<std::is_base_of_v<RC, Component>, bool> operator()(Registry<Entity>& registry, const entity_type& entity) {
+			return registry.has<Component>(entity);
 		}
 	};
 
 	template <typename Component>
 	struct match<neg<Component>> {
-		constexpr bool operator()(const entity_type& entity) {
-			return !match<Component>()(entity);
+		constexpr bool operator()(Registry<Entity>& registry, const entity_type& entity) {
+			return !match<Component>()(registry, entity);
 		}
 	};
 
 	template <typename Component>
 	struct match<conj<Component>> {
-		constexpr bool operator()(const entity_type& entity) {
-			return match<Component>()(entity);
+		constexpr bool operator()(Registry<Entity>& registry, const entity_type& entity) {
+			return match<Component>()(registry, entity);
 		}
 	};
 
 	template <typename Component>
 	struct match<disj<Component>> {
-		constexpr bool operator()(const entity_type& entity) {
-			return match<Component>()(entity);
+		constexpr bool operator()(Registry<Entity>& registry, const entity_type& entity) {
+			return match<Component>()(registry, entity);
 		}
 	};
 
 	template <typename Component, typename... Components>
 	struct match<conj<Component, Components...>> {
-		constexpr bool operator()(const entity_type& entity) {
-			return match<Component>()(entity) && match<conj<Components...>>()(entity);
+		constexpr bool operator()(Registry<Entity>& registry, const entity_type& entity) {
+			return match<Component>()(registry, entity) && match<conj<Components...>>()(registry, entity);
 		}
 	};
 
 	template <typename Component, typename... Components>
 	struct match<disj<Component, Components...>> {
-		constexpr bool operator()(const entity_type& entity) {
-			return match<Component>()(entity) || match<disj<Components...>>()(entity);
+		constexpr bool operator()(Registry<Entity>& registry, const entity_type& entity) {
+			return match<Component>()(registry, entity) || match<disj<Components...>>()(registry, entity);
 		}
 	};
 
 	template <typename ComponentA, typename ComponentB>
 	struct match<exor<ComponentA, ComponentB>> {
-		constexpr bool operator()(const entity_type& entity) {
-			return match<ComponentA>()(entity) != match<ComponentB>()(entity);
+		constexpr bool operator()(Registry<Entity>& registry, const entity_type& entity) {
+			return match<ComponentA>()(registry, entity) != match<ComponentB>()(registry, entity);
 		}
 	};
 
@@ -424,9 +424,7 @@ public:
 	[[nodiscard]] component_type getComponentIndex() {
 		component_type index = component_index<Component>::index();
 		if (index >= this->type_mapping.size()) {
-			std::string fullName = Util::typeName<Component>();
-			std::string camelCase = Util::demangle(fullName);
-			std::string name = Util::decamel(camelCase);
+			std::string name = typeid(Component).name();
 			this->type_mapping.insert(std::make_pair(index, name));
 		}
 
@@ -450,7 +448,7 @@ public:
 	[[nodiscard]] std::string_view getComponentName() {
 		return this->type_mapping.at(getComponentIndex<Component>());
 	}
-	
+
 	/**
 	 * Initializes the component vector to create an order in the components
 	 */
@@ -460,7 +458,7 @@ public:
 
 		init<Components...>();
 	}
-	
+
 	/**
 	 * Creates a new entity with an empty parent and adds it to the registry
 	 */
@@ -534,7 +532,7 @@ public:
 	bool remove(const entity_type& entity, const component_type& index) noexcept {
 		if (index >= this->components.size())
 			return false;
-		
+
 		auto entities_iterator = this->entities.find(static_cast<representation_type>(entity));
 		if (entities_iterator == this->entities.end())
 			return false;
@@ -546,7 +544,7 @@ public:
 
 		map->erase(component_iterator);
 		// Todo check if really destroyed
-		
+
 		return true;
 	}
 
@@ -560,7 +558,7 @@ public:
 
 		return remove(entity, index);
 	}
-	
+
 	//-------------------------------------------------------------------------------------//
 	// Getters                                                                               //
 	//-------------------------------------------------------------------------------------//
@@ -668,7 +666,7 @@ public:
 
 		return null_entity;
 	}
-	
+
 	/**
 	 * Returns the self id of the given entity
 	 */
@@ -738,12 +736,12 @@ public:
 	//-------------------------------------------------------------------------------------//
 	// Views                                                                               //
 	//-------------------------------------------------------------------------------------//
-	
+
 	/**
 	 * Returns an iterator which iterates over all entities having all the given components
 	 */
 private:
-	template <typename Component, typename...>
+	template <typename Component>
 	[[nodiscard]] auto view(type<only<Component>>) noexcept {
 		component_type component = getComponentIndex<Component>();
 
@@ -752,7 +750,7 @@ private:
 		component_map_iterator last(map->end());
 
 		auto filter = [this] (const component_map_iterator& iterator) {
-				return true;
+			return true;
 		};
 
 		auto transform = [] (const component_map_iterator& iterator) {
@@ -812,7 +810,7 @@ private:
 
 public:
 	/**
-	 * Returns a view which iterates over the components of the given entity 
+	 * Returns a view which iterates over the components of the given entity
 	 */
 	[[nodiscard]] auto getComponents(const entity_type& entity) noexcept {
 		component_vector_iterator first = components.begin();
@@ -834,7 +832,7 @@ public:
 	}
 
 	/**
-	 * Returns a view that iterates over all entities which satisfy the given filter 
+	 * Returns a view that iterates over all entities which satisfy the given filter
 	 */
 	template <typename Filter>
 	[[nodiscard]] auto filter(const Filter& filter) {
@@ -852,8 +850,8 @@ public:
 		entity_set_iterator first = this->entities.begin();
 		entity_set_iterator last = this->entities.end();
 
-		auto filter = [] (const entity_set_iterator& iterator) {
-			return !match<Filter>()(*iterator);
+		auto filter = [this] (const entity_set_iterator& iterator) {
+			return !match<Filter>()(*this, *iterator);
 		};
 
 		return filter_view<no_type, entity_set_iterator>(first, last, filter);
@@ -895,7 +893,7 @@ public:
 
 		return filter_transform_view<no_type, entity_set_iterator>(first, last, filter, transform);
 	}
-	
+
 	/**
 	 * Returns an iterator which iterates over all entities which satisfy the view type
 	 */
@@ -904,11 +902,11 @@ public:
 		if constexpr (sizeof...(Type) == 1)
 			if constexpr (std::is_base_of_v<RC, Type...>)
 				return view(type<only<Type...>>{});
-			else 
+			else
 				return view(type<Type...>{});
-		else 
+		else
 			return view(type<conj<Type...>>{});
-		
+
 	}
 };
 
