@@ -422,7 +422,9 @@ public:
 	[[nodiscard]] component_type getComponentIndex() {
 		component_type index = component_index<Component>::index();
 		if (index >= this->type_mapping.size()) {
-			std::string name = typeid(Component).name();
+			std::string fullName = Util::typeName<Component>();
+			std::string camelCase = Util::demangle(fullName);
+			std::string name = Util::decamel(camelCase);
 			this->type_mapping.insert(std::make_pair(index, name));
 		}
 
