@@ -78,7 +78,7 @@ namespace ImGui {
             return false;
 
 		if (data == nullptr)
-			return false;;
+			return false;
 
         bool result = false;
     	

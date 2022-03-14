@@ -206,12 +206,10 @@ public:
 				entity_map* map = registry->components[index];
 
 				auto component_iterator = map->find(entity);
-				printf("Safe");
 				return intrusive_cast<UnsafeComponent>(component_iterator->second);
-			} else {
-				printf("Unsafe");
-				return registry->get<UnsafeComponent>(entity);
-			}
+			} 
+
+			return registry->get<UnsafeComponent>(entity);
 		}
 	};
 

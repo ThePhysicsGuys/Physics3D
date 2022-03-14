@@ -19,7 +19,7 @@ struct ColorTemplate {
 
 	constexpr ColorTemplate() : r(static_cast<T>(0)), g(static_cast<T>(0)), b(static_cast<T>(0)), a(static_cast<T>(1)) {}
 	constexpr ColorTemplate(T r, T g, T b) : r(r), g(g), b(b), a(a) {}
-	constexpr ColorTemplate(T r, T g, T b, T a) : r(r), g(g), b(b), a(static_cast<T>(1)) {}
+	constexpr ColorTemplate(T r, T g, T b, T a) : r(r), g(g), b(b), a(a) {}
 	constexpr ColorTemplate(T value) : r(value), g(value), b(value), a(static_cast<T>(1)) {}
 	constexpr ColorTemplate(T value, T a) : r(value), g(value), b(value), a(a) {}
 	constexpr ColorTemplate(const Vector<T, 3>& rgb) : r(rgb.x), g(rgb.y), b(rgb.z), a(static_cast<T>(1)) {}

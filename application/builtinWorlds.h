@@ -8,4 +8,5 @@ void buildBenchmarkWorld(PlayerWorld& world);
 void buildShowcaseWorld(Screen& screen, PlayerWorld& world);
 void buildDebugWorld(Screen& screen, PlayerWorld& world);
 void buildBallWorld(Screen& screen, PlayerWorld& world);
+void buildFloorWorld(Screen& screen, PlayerWorld& world);
 };

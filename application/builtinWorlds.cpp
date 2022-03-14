@@ -42,20 +42,12 @@ void buildBenchmarkWorld(PlayerWorld& world) {
 }
 
 void buildShowcaseWorld(Screen& screen, PlayerWorld& world) {
+	buildFloorWorld(screen, world);
+
 	// Part factories
 	WorldBuilder::SpiderFactory spiderFactories[]{{0.5, 4},{0.5, 6},{0.5, 8},{0.5, 10}};
-
-	WorldBuilder::buildFloorAndWalls(50.0, 50.0, 1.0);
 	
-	{ // Lights
-		Comp::Light::Attenuation attenuation = {1, 1, 1};
-		auto lights = EntityBuilder(screen.registry).name("Lights").get();
-		EntityBuilder(screen.registry).parent(lights).transform(Position(10, 5, -10)).light(Graphics::Color(1, 0.84f, 0.69f), 300, attenuation);
-		EntityBuilder(screen.registry).parent(lights).transform(Position(10, 5, 10)).light(Graphics::Color(1, 0.84f, 0.69f), 300, attenuation);
-		EntityBuilder(screen.registry).parent(lights).transform(Position(-10, 5, -10)).light(Graphics::Color(1, 0.84f, 0.69f), 200, attenuation);
-		EntityBuilder(screen.registry).parent(lights).transform(Position(-10, 5, 10)).light(Graphics::Color(1, 0.84f, 0.69f), 500, attenuation);
-		EntityBuilder(screen.registry).parent(lights).transform(Position(0, 5, 0)).light(Graphics::Color(1, 0.90f, 0.75f), 400, attenuation);
-
+	{
 		ExtendedPart* partA = new ExtendedPart(boxShape(1.0, 0.49, 3.0), GlobalCFrame(3.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "partA");
 		ExtendedPart* partB = new ExtendedPart(boxShape(1.0, 0.5, 3.0), GlobalCFrame(2.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "partA");
 		EntityBuilder(screen.registry, partA->entity).light(Graphics::Color(0.1f, 0.94f, 0.49f), 500, Comp::Light::Attenuation{0.8, 0.5, 0.2});
@@ -405,15 +397,7 @@ void buildShowcaseWorld(Screen& screen, PlayerWorld& world) {
 }
 
 void buildDebugWorld(Screen& screen, PlayerWorld& world) {
-	WorldBuilder::buildFloorAndWalls(50.0, 50.0, 1.0);
-	
-	Comp::Light::Attenuation attenuation = { 1, 1, 1 };
-	auto lights = EntityBuilder(screen.registry).name("Lights").get();
-	auto sphereData = Graphics::MeshRegistry::getMesh(&SphereClass::instance);
-	EntityBuilder(screen.registry).parent(lights).transform(Position(10, 5, -10), 0.2).light(Graphics::Color(1, 0.84f, 0.69f), 300, attenuation).hitbox(sphereShape(1.0)).mesh(sphereData);
-	EntityBuilder(screen.registry).parent(lights).transform(Position(10, 5, 10), 0.2).light(Graphics::Color(1, 0.84f, 0.69f), 300, attenuation).hitbox(sphereShape(1.0)).mesh(sphereData);
-	EntityBuilder(screen.registry).parent(lights).transform(Position(-10, 5, -10), 0.2).light(Graphics::Color(1, 0.84f, 0.69f), 200, attenuation).hitbox(sphereShape(1.0)).mesh(sphereData);
-	EntityBuilder(screen.registry).parent(lights).transform(Position(-10, 5, 10), 0.2).light(Graphics::Color(1, 0.84f, 0.69f), 500, attenuation).hitbox(sphereShape(1.0)).mesh(sphereData);
+	buildFloorWorld(screen, world);
 
 	auto parent = EntityBuilder(screen.registry).name("Spheres").get();
 	int s = 10;
@@ -432,7 +416,7 @@ void buildDebugWorld(Screen& screen, PlayerWorld& world) {
 	
 }
 
-void buildBallWorld(Screen& screen, PlayerWorld& world) {
+void buildFloorWorld(Screen& screen, PlayerWorld& world) {
 	WorldBuilder::buildFloorAndWalls(50.0, 50.0, 1.0);
 
 	Comp::Light::Attenuation attenuation = { 1, 1, 1 };
@@ -442,9 +426,13 @@ void buildBallWorld(Screen& screen, PlayerWorld& world) {
 	EntityBuilder(screen.registry).parent(lights).transform(Position(10, 5, 10), 0.2).light(Graphics::Color(1, 0.84f, 0.69f), 300, attenuation).hitbox(sphereShape(1.0)).mesh(sphereData);
 	EntityBuilder(screen.registry).parent(lights).transform(Position(-10, 5, -10), 0.2).light(Graphics::Color(1, 0.84f, 0.69f), 200, attenuation).hitbox(sphereShape(1.0)).mesh(sphereData);
 	EntityBuilder(screen.registry).parent(lights).transform(Position(-10, 5, 10), 0.2).light(Graphics::Color(1, 0.84f, 0.69f), 500, attenuation).hitbox(sphereShape(1.0)).mesh(sphereData);
+}
+
+void buildBallWorld(Screen& screen, PlayerWorld& world) {
+	buildFloorWorld(screen, world);
 
 	Engine::MeshResource* ball = ResourceManager::add<Engine::MeshResource>("ball", "../res/models/ball.obj");
-	Graphics::Comp::Mesh mesh = Graphics::MeshRegistry::registerShape(ball->getShape());
+	Graphics::Comp::Mesh mesh = Graphics::MeshRegistry::registerShape(*ball->getShape());
 	Graphics::TextureResource* ballAlbedo = ResourceManager::add<Graphics::TextureResource>("ball albedo", "../res/textures/ball/ball_color.png");
 	Graphics::TextureResource* ballNormal = ResourceManager::add<Graphics::TextureResource>("ball normal", "../res/textures/ball/ball_normal.png");
 	Graphics::TextureResource* ballMetal = ResourceManager::add<Graphics::TextureResource>("ball metal", "../res/textures/ball/ball_metal.png");

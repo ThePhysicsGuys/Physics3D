@@ -51,6 +51,7 @@
 #include <Physics3D/misc/toString.h>
 
 #include "builtinWorlds.h"
+#include "engine/resource/meshResource.h"
 #include "graphics/ecs/materials.h"
 #include "graphics/resource/textureResource.h"
 #include "util/resource/resourceManager.h"
@@ -139,6 +140,8 @@ void setupWorld(const ::Util::ParsedArgs& cmdArgs) {
 
 	world.addExternalForce(new DirectionalGravity(Vec3(0, -10.0, 0.0)));
 
+	//buildFloorWorld(screen, world); return;
+	//buildBallWorld(screen, world); return;
 	//buildDebugWorld(screen, world); return;
 	//buildShowcaseWorld(screen, world); return;
 
@@ -150,8 +153,8 @@ void setupWorld(const ::Util::ParsedArgs& cmdArgs) {
 
 	// Load textures
 	Graphics::TextureResource* wallAlbedo = ResourceManager::add<Graphics::TextureResource>("wall albedo", "../res/textures/wall/wall_color.jpg");
-	wallAlbedo->generateMipmap();
 	Graphics::TextureResource* wallNormal = ResourceManager::add<Graphics::TextureResource>("wall normal", "../res/textures/wall/wall_normal.jpg");
+	wallAlbedo->generateMipmap();
 	wallNormal->generateMipmap();
 
 	int n = 3;
