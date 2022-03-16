@@ -15,7 +15,6 @@ protected:
 	GLFWwindow* window;
 
 private:
-	bool keys[GLFW_KEY_LAST + 1];
 	bool modifiers[1];
 	double timestamp[GLFW_KEY_LAST + 1];
 	void keyCallback(int key, int action, int mods);
@@ -29,6 +28,7 @@ private:
 
 	double keyInterval = 0.2;
 public:
+	bool keys[GLFW_KEY_LAST + 1];
 	char anyKey = 0;
 
 	bool rightDragging = false;

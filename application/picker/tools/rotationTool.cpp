@@ -17,7 +17,9 @@
 #include "../graphics/mesh/indexedMesh.h"
 #include "../graphics/resource/textureResource.h"
 #include "../util/resource/resourceManager.h"
+#include "engine/input/keyboard.h"
 #include "imgui/imgui.h"
+#include "input/standardInputHandler.h"
 
 namespace P3D::Application {
 	
@@ -72,7 +74,7 @@ namespace P3D::Application {
 		if (!cframe.has_value())
 			return;
 
-		bool local = !ImGui::GetIO().KeyCtrl;
+		bool local = !handler->keys[Engine::Keyboard::KEY_LEFT_CONTROL.getCode()];
 		if (!local)
 			cframe = GlobalCFrame(cframe->position);
 
@@ -146,7 +148,7 @@ namespace P3D::Application {
 		if (!cframe.has_value())
 			return;
 
-		bool local = !ImGui::GetIO().KeyCtrl;
+		bool local = !handler->keys[Engine::Keyboard::KEY_LEFT_CONTROL.getCode()];
 		if (!local)
 			cframe = GlobalCFrame(cframe->position);
 
@@ -250,8 +252,8 @@ namespace P3D::Application {
 		if (status == kIdle)
 			return false;
 
-		bool clamp = ImGui::GetIO().KeyAlt;
-		bool local = !ImGui::GetIO().KeyCtrl;
+		bool clamp = handler->keys[Engine::Keyboard::KEY_LEFT_ALT.getCode()];
+		bool local = !handler->keys[Engine::Keyboard::KEY_LEFT_CONTROL.getCode()];
 
 		std::unique_lock<UpgradeableMutex> worldWriteLock(*screen.worldMutex);
 		switch (status) {
