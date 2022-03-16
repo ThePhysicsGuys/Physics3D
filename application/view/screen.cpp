@@ -219,23 +219,24 @@ void Screen::onRender() {
 	using namespace Graphics;
 	using namespace Renderer;
 
-	// Set default settings
-	//defaultSettings(0);
-
-	// Init imgui
-	if(USE_IMGUI) imguiLayer.begin();
-
+	// Reset screen framebuffer
 	defaultSettings(screenFrameBuffer->getID());
+
+	if (USE_IMGUI)
+		imguiLayer.begin();
 
 	// Render layers
 	layerStack.onRender(registry);
 
-	// Render imgui
-	if(USE_IMGUI) imguiLayer.end();
+	if (USE_IMGUI)
+		imguiLayer.end();
 
-	if(!USE_IMGUI) glBindFramebuffer(GL_DRAW_FRAMEBUFFER, screenFrameBuffer->getID());
-
-	glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, 0);
+	if (!USE_IMGUI) {
+		// Blit screen framebuffer to main framebuffer
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, screenFrameBuffer->getID());
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+		glBlitFramebuffer(0, 0, screenFrameBuffer->dimension.x, screenFrameBuffer->dimension.y, 0, 0, dimension.x, dimension.y, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+	}
 
 	graphicsMeasure.mark(GraphicsProcess::FINALIZE);
 
