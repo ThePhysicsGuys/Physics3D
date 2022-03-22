@@ -63,8 +63,8 @@ ExtendedTriangleMesh createQuad(const Vec3f& center, const Vec3f& normal, const 
 	};
 
 	ExtendedTriangleMesh mesh(vertexBuffer, 4, triangleBuffer, 2);
-	mesh.setNormalBuffer(SharedArrayPtr<const Vec3f>(normalBuffer));
-	mesh.setUVBuffer(SharedArrayPtr<const Vec2f>(uvBuffer));
+	mesh.setNormalBuffer(SRef<const Vec3f[]>(normalBuffer));
+	mesh.setUVBuffer(SRef<const Vec2f[]>(uvBuffer));
 
 	return mesh;
 }
@@ -140,8 +140,8 @@ ExtendedTriangleMesh createCylinder(int sides, double radius, double height) {
 	}
 
 	ExtendedTriangleMesh cylinderShape(vertexBuffer, vertexCount, triangleBuffer, triangleCount);
-	cylinderShape.setNormalBuffer(SharedArrayPtr<const Vec3f>(normalBuffer));
-	cylinderShape.setUVBuffer(SharedArrayPtr<const Vec2f>(uvBuffer));
+	cylinderShape.setNormalBuffer(SRef<const Vec3f[]>(normalBuffer));
+	cylinderShape.setUVBuffer(SRef<const Vec2f[]>(uvBuffer));
 
 	return cylinderShape;
 }
@@ -163,8 +163,8 @@ ExtendedTriangleMesh createSphere(double radius, int steps) {
 		i++;
 	}
 
-	sphereShape.setNormalBuffer(SharedArrayPtr<const Vec3f>(normalBuffer));
-	sphereShape.setUVBuffer(SharedArrayPtr<const Vec2f>(uvBuffer));
+	sphereShape.setNormalBuffer(SRef<const Vec3f[]>(normalBuffer));
+	sphereShape.setUVBuffer(SRef<const Vec2f[]>(uvBuffer));
 
 	return sphereShape;
 }
@@ -195,7 +195,7 @@ ExtendedTriangleMesh createBox(float width, float height, float depth) {
 		}
 	}
 
-	boxShape.setUVBuffer(SharedArrayPtr<const Vec2f>(uvBuffer));
+	boxShape.setUVBuffer(SRef<const Vec2f[]>(uvBuffer));
 
 	return boxShape;
 }
@@ -227,7 +227,7 @@ void generateCylindricalUVs(ExtendedTriangleMesh& mesh) {
 		uvBuffer[i] = Vec2f(u, v);
 	}
 
-	mesh.setUVBuffer(SharedArrayPtr<const Vec2f>(uvBuffer));
+	mesh.setUVBuffer(SRef<const Vec2f[]>(uvBuffer));
 }
 
 void generateSphericalUVs(ExtendedTriangleMesh& mesh) {
@@ -248,7 +248,7 @@ void generateSphericalUVs(ExtendedTriangleMesh& mesh) {
 		uvBuffer[i] = Vec2f(u, v);
 	}
 
-	mesh.setUVBuffer(SharedArrayPtr<const Vec2f>(uvBuffer));
+	mesh.setUVBuffer(SRef<const Vec2f[]>(uvBuffer));
 }
 
 void generateLightProbeUVs(ExtendedTriangleMesh& mesh) {
@@ -271,7 +271,7 @@ void generateLightProbeUVs(ExtendedTriangleMesh& mesh) {
 		uvBuffer[i] = Vec2f(u, v);
 	}
 
-	mesh.setUVBuffer(SharedArrayPtr<const Vec2f>(uvBuffer));
+	mesh.setUVBuffer(SRef<const Vec2f[]>(uvBuffer));
 }
 
 void init() {

@@ -144,6 +144,7 @@ void setupWorld(const ::Util::ParsedArgs& cmdArgs) {
 	//buildBallWorld(screen, world); return;
 	//buildDebugWorld(screen, world); return;
 	//buildShowcaseWorld(screen, world); return;
+	buildBoxWorld(screen, world); return;
 
 	PartProperties basicProperties{1.0, 0.7, 0.3};
 

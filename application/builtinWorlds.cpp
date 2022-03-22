@@ -448,4 +448,24 @@ void buildBallWorld(Screen& screen, PlayerWorld& world) {
 	material->set(Graphics::Comp::Material::Map_AO, SRef<Graphics::Texture>(dynamic_cast<Graphics::Texture*>(ballAO)));
 }
 
+void buildBoxWorld(Screen& screen, PlayerWorld& world) {
+	buildFloorWorld(screen, world);
+
+	Engine::MeshResource* ball = ResourceManager::add<Engine::MeshResource>("ball", "../res/models/box_t.obj");
+	Graphics::ExtendedTriangleMesh shape = *ball->getShape();
+	const Vec3f* normals = shape.normals.get();
+	Graphics::Comp::Mesh mesh = Graphics::MeshRegistry::registerShape(shape);
+	Graphics::TextureResource* boxAlbedo = ResourceManager::add<Graphics::TextureResource>("box albedo", "../res/textures/box/MetalPlates006_1K_Color.jpg");
+	Graphics::TextureResource* boxNormal = ResourceManager::add<Graphics::TextureResource>("box normal", "../res/textures/box/MetalPlates006_1K_NormalGL.jpg");
+	Graphics::TextureResource* boxMetalness = ResourceManager::add<Graphics::TextureResource>("box metal", "../res/textures/box/MetalPlates006_1K_Metalness.jpg");
+	Graphics::TextureResource* boxRougness = ResourceManager::add<Graphics::TextureResource>("box roughness", "../res/textures/box/MetalPlates006_1K_Roughness.jpg");
+
+	auto entity = EntityBuilder(screen.registry).transform(Position(0, 8, 0)).mesh(mesh).hitbox(boxShape(10, 10, 10)).get();
+	auto material = screen.registry.add<Graphics::Comp::Material>(entity);
+	material->set(Graphics::Comp::Material::Map_Albedo, SRef<Graphics::Texture>(dynamic_cast<Graphics::Texture*>(boxAlbedo)));
+	//material->set(Graphics::Comp::Material::Map_Normal, SRef<Graphics::Texture>(dynamic_cast<Graphics::Texture*>(boxNormal)));
+	material->set(Graphics::Comp::Material::Map_Metalness, SRef<Graphics::Texture>(dynamic_cast<Graphics::Texture*>(boxMetalness)));
+	material->set(Graphics::Comp::Material::Map_Roughness, SRef<Graphics::Texture>(dynamic_cast<Graphics::Texture*>(boxRougness)));
+}
+
 };

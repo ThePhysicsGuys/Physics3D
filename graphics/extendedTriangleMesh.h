@@ -11,13 +11,10 @@ class Polyhedron;
 namespace P3D::Graphics {
 
 struct ExtendedTriangleMesh : public TriangleMesh {
-	typedef SharedArrayPtr<const Vec3f> SVec3f;
-	typedef SharedArrayPtr<const Vec2f> SVec2f;
-
-	SVec3f normals;
-	SVec2f uvs;
-	SVec3f tangents;
-	SVec3f bitangents;
+	SRef<const Vec3f[]> normals;
+	SRef<const Vec2f[]> uvs;
+	SRef<const Vec3f[]> tangents;
+	SRef<const Vec3f[]> bitangents;
 
 	ExtendedTriangleMesh()
 		: TriangleMesh()
@@ -27,23 +24,24 @@ struct ExtendedTriangleMesh : public TriangleMesh {
 		, bitangents(nullptr) {}
 
 	ExtendedTriangleMesh(const Vec3f* vertices, int vertexCount, const Triangle* triangles, int triangleCount)
-		: TriangleMesh(vertexCount, triangleCount, vertices, triangles) {}
+		: TriangleMesh(vertexCount, triangleCount, vertices, triangles) {
+	}
 
 	explicit ExtendedTriangleMesh(const TriangleMesh& shape) : TriangleMesh(shape) {}
 
-	void setNormalBuffer(const SVec3f& normals) {
+	void setNormalBuffer(const SRef<const Vec3f[]>& normals) {
 		this->normals = normals;
 	}
 
-	void setUVBuffer(const SVec2f& uvs) {
+	void setUVBuffer(const SRef<const Vec2f[]>& uvs) {
 		this->uvs = uvs;
 	}
 
-	void setTangentBuffer(const SVec3f& tangents) {
+	void setTangentBuffer(const SRef<const Vec3f[]>& tangents) {
 		this->tangents = tangents;
 	}
 
-	void setBitangentBuffer(const SVec3f& bitangents) {
+	void setBitangentBuffer(const SRef<const Vec3f[]>& bitangents) {
 		this->bitangents = bitangents;
 	}
 

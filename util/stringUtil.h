@@ -16,7 +16,7 @@ namespace Util {
 	}
 
 	std::vector<std::string> split(const std::string& string, char splitter);
-
+	std::vector<std::string_view> split_view(const std::string_view& string, char splitter);
 	bool startsWith(const std::string& string, const std::string& prefix);
 	bool endsWith(const std::string& string, const std::string& suffix);
 

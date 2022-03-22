@@ -11,7 +11,7 @@ ExtendedTriangleMesh ExtendedTriangleMesh::generateSmoothNormalsShape(const Tria
 	underlyingMesh.computeNormals(normalBuffer);
 
 	ExtendedTriangleMesh result(underlyingMesh);
-	result.setNormalBuffer(SharedArrayPtr<const Vec3f>(normalBuffer));
+	result.setNormalBuffer(SRef<const Vec3f[]>(normalBuffer));
 
 	return result;
 }
@@ -44,7 +44,7 @@ ExtendedTriangleMesh ExtendedTriangleMesh::generateSplitNormalsShape(const Trian
 	}
 
 	ExtendedTriangleMesh result(TriangleMesh(underlyingMesh.triangleCount * 3, underlyingMesh.triangleCount, newVertices, newTriangles));
-	result.setNormalBuffer(SharedArrayPtr<const Vec3f>(newNormals));
+	result.setNormalBuffer(SRef<const Vec3f[]>(newNormals));
 
 	return result;
 }

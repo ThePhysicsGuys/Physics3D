@@ -88,6 +88,24 @@ std::vector<std::string> split(const std::string& string, char splitter) {
 	return elements;
 }
 
+std::vector<std::string_view> split_view(const std::string_view& string, char splitter) {
+	std::vector<std::string_view> elements;
+	size_t length = string.size();
+	size_t start = 0;
+
+	for (size_t i = 0; i < length; i++) {
+		if (string[i] == splitter) {
+			elements.push_back(string.substr(start, i - start));
+			start = i + 1;
+		}
+	}
+
+	if (start < length)
+		elements.push_back(string.substr(start, length - start));
+
+	return elements;
+}
+
 bool startsWith(const std::string& string, const std::string& prefix) {
 	size_t l1 = string.length();
 	size_t l2 = prefix.length();

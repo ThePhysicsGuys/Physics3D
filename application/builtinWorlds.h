@@ -9,4 +9,5 @@ void buildShowcaseWorld(Screen& screen, PlayerWorld& world);
 void buildDebugWorld(Screen& screen, PlayerWorld& world);
 void buildBallWorld(Screen& screen, PlayerWorld& world);
 void buildFloorWorld(Screen& screen, PlayerWorld& world);
+void buildBoxWorld(Screen& screen, PlayerWorld& world);
 };

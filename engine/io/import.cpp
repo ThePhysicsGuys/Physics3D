@@ -3,6 +3,7 @@
 #include "import.h"
 
 #include <fstream>
+#include <optional>
 
 #include "../util/stringUtil.h"
 #include <Physics3D/physical.h>
@@ -113,97 +114,107 @@ T Import::read(std::istream& input) {
 */
 
 struct Vertex {
-	int position = -1;
-	int normal = -1;
-	int uv = -1;
+	int position;
+	std::optional<int> normal;
+	std::optional<int> uv;
 
-	inline Vertex(const std::string& line) {
-		std::vector<std::string> tokens = Util::split(line, '/');
+	Vertex() : position(0), normal(std::nullopt), uv(std::nullopt) {}
+
+	Vertex(const std::string_view& line) {
+		std::vector<std::string_view> tokens = Util::split_view(line, '/');
 		size_t length = tokens.size();
 
 		// Positions
-		position = std::stoi(tokens[0]) - 1;
+		position = std::stoi(std::string(tokens[0])) - 1;
 
 		// Uvs
-		if (length > 1) 
-			uv = tokens[1].size() > 0 ? std::stoi(tokens[1]) - 1 : -1;
+		if (length > 1 && !tokens[1].empty())
+			uv = std::stoi(std::string(tokens[1])) - 1;
 
 		// Normals
-		if (length > 2)
-			normal = tokens[2].size() > 0 ? std::stoi(tokens[2]) - 1 : -1;
+		if (length > 2 && !tokens[2].empty())
+			normal = std::stoi(std::string(tokens[2])) - 1;
+	}
+
+	bool operator==(const Vertex& other) const {
+		return position == other.position && normal == other.normal && uv == other.uv;
 	}
 };
 
-struct Flags {
-	bool normals;
-	bool uvs;
+struct VertexHasher {
+	size_t operator()(const P3D::Vertex& vertex) const {
+
+		size_t result = std::hash<int>()(vertex.position);
+
+		if (vertex.normal.has_value())
+			result = result >> 1 ^ std::hash<int>()(vertex.normal.value()) << 1;
+
+		if (vertex.uv.has_value())
+			result = result >> 1 ^ std::hash<int>()(vertex.uv.value()) << 1;
+
+		return result;
+	}
 };
 
 struct Face {
-	Vertex v1;
-	Vertex v2;
-	Vertex v3;
+	Vertex vertices[3];
 
-	inline Face(const Vertex& v1, const Vertex& v2, const Vertex& v3) : v1(v1), v2(v2), v3(v3) {};
-
-	inline Vertex& operator[] (int index) {
-		switch (index) {
-			case 0: return v1;
-			case 1: return v2;
-			case 2: return v3;
-		}
-
-		throw "Subscript out of range";
+	Face(const Vertex& v1, const Vertex& v2, const Vertex& v3) {
+		vertices[0] = v1;
+		vertices[1] = v2;
+		vertices[2] = v3;
 	}
 
-	inline const Vertex& operator[] (int index) const {
-		switch (index) {
-			case 0: return v1;
-			case 1: return v2;
-			case 2: return v3;
-		}
+	Vertex& operator[](std::size_t index) {
+		assert(index < 3);
 
-		throw "Subscript out of range";
+		return vertices[index];
+	}
+
+	const Vertex& operator[](int index) const {
+		assert(index < 3);
+
+		return vertices[index];
 	}
 };
 
-Graphics::ExtendedTriangleMesh reorder(const std::vector<Vec3f>& positions, const std::vector<Vec3f>& normals, const std::vector<Vec2f>& uvs, const std::vector<Face>& faces, const Flags& flags) {
-	
+Graphics::ExtendedTriangleMesh reorderWithoutSharedVerticesSupport(const std::vector<Vec3f>& positions, const std::vector<Vec3f>& normals, const std::vector<Vec2f>& uvs, const std::vector<Face>& faces) {
 	// Positions
 	Vec3f* positionArray = new Vec3f[positions.size()];
-	for (int i = 0; i < positions.size(); i++) 
+	for (std::size_t i = 0; i < positions.size(); i++)
 		positionArray[i] = positions[i];
-	
+
 	// Normals
 	Vec3f* normalArray = nullptr;
-	if (flags.normals) 
+	if (!normals.empty())
 		normalArray = new Vec3f[positions.size()];
 
-	// UVs
+	// UVs, tangents and bitangents
 	Vec2f* uvArray = nullptr;
 	Vec3f* tangentArray = nullptr;
 	Vec3f* bitangentArray = nullptr;
-	if (flags.uvs) {
+	if (!uvs.empty()) {
 		uvArray = new Vec2f[positions.size()];
 		tangentArray = new Vec3f[positions.size()];
 		bitangentArray = new Vec3f[positions.size()];
 	}
+
 	// Triangles
 	Triangle* triangleArray = new Triangle[faces.size()];
-	for (int i = 0; i < faces.size(); i++) {
-		const Face& face = faces[i];
+	for (std::size_t faceIndex = 0; faceIndex < faces.size(); faceIndex++) {
+		const Face& face = faces[faceIndex];
 
 		// Save triangle
-		triangleArray[i] = { face.v1.position, face.v2.position, face.v3.position };
+		triangleArray[faceIndex] = Triangle { face.vertices[0].position, face.vertices[1].position, face.vertices[2].position };
 
-		// Calculate (bi)tangents
+		// Calculate tangent and bitangent
 		Vec3f tangent;
 		Vec3f bitangent;
-		if (flags.uvs) {
-			Vec3f edge1 = positions[face.v2.position] - positions[face.v1.position];
-			Vec3f edge2 = positions[face.v3.position] - positions[face.v1.position];
-			Vec2f dUV1 = uvs[face.v2.uv] - uvs[face.v1.uv];
-			Vec2f dUV2 = uvs[face.v3.uv] - uvs[face.v1.uv];
+		if (uvArray) {
+			Vec3f edge1 = positions[face.vertices[1].position] - positions[face.vertices[0].position];
+			Vec3f edge2 = positions[face.vertices[2].position] - positions[face.vertices[0].position];
+			Vec2f dUV1 = uvs[*face.vertices[1].uv] - uvs[*face.vertices[0].uv];
+			Vec2f dUV2 = uvs[*face.vertices[2].uv] - uvs[*face.vertices[0].uv];
 
 			float f = 1.0f / (dUV1.x * dUV2.y - dUV2.x * dUV1.y);
 
@@ -218,17 +229,16 @@ Graphics::ExtendedTriangleMesh reorder(const std::vector<Vec3f>& positions, cons
 			bitangent = normalize(bitangent);
 		}
 
-		for (int i = 0; i < 3; i++) {
-			const Vertex& vertex = face[i];
+		for (int vertexIndex = 0; vertexIndex < 3; vertexIndex++) {
+			const Vertex& vertex = face[vertexIndex];
 
 			// Save normal
-			if (flags.normals && vertex.normal != -1) 
-				normalArray[vertex.position] = normals[vertex.normal];
+			if (normalArray && vertex.normal.has_value())
+				normalArray[vertex.position] = normals[*vertex.normal];
 
-			// Save uv
-			if (flags.uvs && vertex.uv != -1) {
-				Vec2f uv = Vec2f(uvs[vertex.uv].x, 1.0 - uvs[vertex.uv].y);
-				uvArray[vertex.position] = uv;
+			// Save uv, tangent and bitangent
+			if (uvArray && vertex.uv.has_value()) {
+				uvArray[vertex.position] = uvs[*vertex.uv];
 				tangentArray[vertex.position] = tangent;
 				bitangentArray[vertex.position] = bitangent;
 			}
@@ -236,10 +246,80 @@ Graphics::ExtendedTriangleMesh reorder(const std::vector<Vec3f>& positions, cons
 	}
 
 	Graphics::ExtendedTriangleMesh result(positionArray, static_cast<int>(positions.size()), triangleArray, static_cast<int>(faces.size()));
-	result.setNormalBuffer(SharedArrayPtr<const Vec3f>(normalArray));
-	result.setUVBuffer(SharedArrayPtr<const Vec2f>(uvArray));
-	result.setTangentBuffer(SharedArrayPtr<const Vec3f>(tangentArray));
-	result.setBitangentBuffer(SharedArrayPtr<const Vec3f>(bitangentArray));
+	result.setNormalBuffer(SRef<const Vec3f[]>(normalArray));
+	result.setUVBuffer(SRef<const Vec2f[]>(uvArray));
+	result.setTangentBuffer(SRef<const Vec3f[]>(tangentArray));
+	result.setBitangentBuffer(SRef<const Vec3f[]>(bitangentArray));
+
+	return result;
+}
+
+Graphics::ExtendedTriangleMesh reorderWithSharedVerticesSupport(const std::vector<Vec3f>& positions, const std::vector<Vec3f>& normals, const std::vector<Vec2f>& uvs, const std::vector<Face>& faces) {
+	std::unordered_map<Vertex, int, VertexHasher> mapping;
+
+	// Get index of each vertex - uv - normal tuple
+	auto getIndex = [&mapping] (const Vertex& vertex) -> int {
+		auto iterator = mapping.find(vertex);
+		if (iterator == mapping.end()) {
+			int index = static_cast<int>(mapping.size());
+			mapping.emplace(vertex, index);
+
+			return index;
+		}
+
+		return iterator->second;
+	};
+
+	// Fill triangle array
+	Triangle* triangleArray = new Triangle[faces.size()];
+	for (std::size_t faceIndex = 0; faceIndex < faces.size(); faceIndex++) {
+		const Face& face = faces[faceIndex];
+
+		const Vertex& v0 = face.vertices[0];
+		const Vertex& v1 = face.vertices[1];
+		const Vertex& v2 = face.vertices[2];
+
+		int i0 = getIndex(v0);
+		int i1 = getIndex(v1);
+		int i2 = getIndex(v2);
+
+		// Save triangle
+		triangleArray[faceIndex] = Triangle { i0, i1, i2 };
+	}
+
+	// Array size
+	std::size_t size = mapping.size();
+
+	// Positions
+	Vec3f* positionArray = new Vec3f[size];
+
+	// Normals
+	Vec3f* normalArray = nullptr;
+	if (!normals.empty())
+		normalArray = new Vec3f[size];
+
+	// UV
+	Vec2f* uvArray = nullptr;
+	if (!uvs.empty()) 
+		uvArray = new Vec2f[size];
+
+	// Fill arrays
+	for (const auto& [vertex, index] : mapping) {
+		// Store position
+		positionArray[index] = positions[vertex.position];
+		
+		// Store normal
+		if (normalArray && vertex.normal.has_value())
+			normalArray[index] = normals[*vertex.normal];
+
+		// Store uv
+		if (uvArray && vertex.uv.has_value()) 
+			uvArray[index] = uvs[*vertex.uv];
+	}
+
+	Graphics::ExtendedTriangleMesh result(positionArray, size, triangleArray, static_cast<int>(faces.size()));
+	result.setNormalBuffer(SRef<const Vec3f[]>(normalArray));
+	result.setUVBuffer(SRef<const Vec2f[]>(uvArray));
 
 	return result;
 }
@@ -318,10 +398,10 @@ Graphics::ExtendedTriangleMesh loadBinaryObj(std::istream& input) {
 	}
 
 	Graphics::ExtendedTriangleMesh result(vertices, vertexCount, triangles, triangleCount);
-	result.setNormalBuffer(SharedArrayPtr<const Vec3f>(normals));
-	result.setUVBuffer(SharedArrayPtr<const Vec2f>(uvs));
-	result.setTangentBuffer(SharedArrayPtr<const Vec3f>(tangents));
-	result.setBitangentBuffer(SharedArrayPtr<const Vec3f>(bitangents));
+	result.setNormalBuffer(SRef<const Vec3f[]>(normals));
+	result.setUVBuffer(SRef<const Vec2f[]>(uvs));
+	result.setTangentBuffer(SRef<const Vec3f[]>(tangents));
+	result.setBitangentBuffer(SRef<const Vec3f[]>(bitangents));
 
 	return result;
 }
@@ -331,43 +411,44 @@ Graphics::ExtendedTriangleMesh loadNonBinaryObj(std::istream& input) {
 	std::vector<Vec3f> normals;
 	std::vector<Vec2f> uvs;
 	std::vector<Face> faces;
-	Flags flags = { false, false };
 
 	std::string line;
 	while (getline(input, line)) {
-		std::vector<std::string> tokens = Util::split(line, ' ');
+		std::vector<std::string_view> tokens = Util::split_view(line, ' ');
 
 		if (tokens.empty())
 			continue;
 
 		if (tokens[0] == "v") {
-			Vec3f vertex = Vec3f(stof(tokens[1]), stof(tokens[2]), stof(tokens[3]));
-			vertices.push_back(vertex);
+			float x = std::stof(std::string(tokens[1]));
+			float y = std::stof(std::string(tokens[2]));
+			float z = std::stof(std::string(tokens[3]));
+
+			vertices.emplace_back(x, y, z);
 		} else if (tokens[0] == "f") {
 			Vertex v1(tokens[1]);
 			Vertex v2(tokens[2]);
 			Vertex v3(tokens[3]);
 
-			Face face = Face(v1, v2, v3);
-			faces.push_back(face);
+			faces.emplace_back(v1, v2, v3);
 
-			if (tokens.size() > 4) {
-				Vertex v4 = tokens[4];
-				Face face = Face(v1, v3, v4);
-				faces.push_back(face);
-			}
+			if (tokens.size() > 4)
+				faces.emplace_back(v1, v3, Vertex(tokens[4]));
 		} else if (tokens[0] == "vt") {
-			flags.uvs = true;
-			Vec2f uv = Vec2f(stof(tokens[1]), stof(tokens[2]));
-			uvs.push_back(uv);
+			float u = std::stof(std::string(tokens[1]));
+			float v = std::stof(std::string(tokens[2]));
+
+			uvs.emplace_back(u, v);
 		} else if (tokens[0] == "vn") {
-			flags.normals = true;
-			Vec3f normal = Vec3f(stof(tokens[1]), stof(tokens[2]), stof(tokens[3]));
-			normals.push_back(normal);
+			float x = std::stof(std::string(tokens[1]));
+			float y = std::stof(std::string(tokens[2]));
+			float z = std::stof(std::string(tokens[3]));
+
+			normals.emplace_back(x, y, z);
 		}
 	}
 
-	return reorder(vertices, normals, uvs, faces, flags);
+	return reorderWithSharedVerticesSupport(vertices, normals, uvs, faces);
 }
 
 Graphics::ExtendedTriangleMesh OBJImport::load(std::istream& file, bool binary) {
@@ -408,4 +489,4 @@ Graphics::ExtendedTriangleMesh OBJImport::load(const std::string& file, bool bin
 	End of OBJImport
 */
 
-};
+}
