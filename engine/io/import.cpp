@@ -436,7 +436,7 @@ Graphics::ExtendedTriangleMesh loadNonBinaryObj(std::istream& input) {
 				faces.emplace_back(v1, v3, Vertex(tokens[4]));
 		} else if (tokens[0] == "vt") {
 			float u = std::stof(std::string(tokens[1]));
-			float v = std::stof(std::string(tokens[2]));
+			float v = 1.0f - std::stof(std::string(tokens[2]));
 
 			uvs.emplace_back(u, v);
 		} else if (tokens[0] == "vn") {

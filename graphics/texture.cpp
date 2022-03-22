@@ -56,7 +56,9 @@ Texture Texture::load(const std::string& name) {
 	int width;
 	int height;
 	int channels;
+
 	//stbi_set_flip_vertically_on_load(true);
+
 	unsigned char* data = stbi_load(name.c_str(), &width, &height, &channels, 0);
 
 	if (data) {
