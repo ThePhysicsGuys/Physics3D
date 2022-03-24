@@ -11,24 +11,24 @@ namespace P3D::Application {
 
 void ProjectionShaderBase::updateProjection(const Mat4f& viewMatrix, const Mat4f& projectionMatrix, const Position& viewPosition) {
 	bind();
-	setUniform("viewMatrix", viewMatrix);
-	setUniform("projectionMatrix", projectionMatrix);
-	setUniform("viewPosition", viewPosition);
+	setUniform("uViewMatrix", viewMatrix);
+	setUniform("uProjectionMatrix", projectionMatrix);
+	setUniform("uViewPosition", viewPosition);
 }
 
 void ProjectionShaderBase::updateProjectionMatrix(const Mat4f& projectionMatrix) {
 	bind();
-	setUniform("projectionMatrix", projectionMatrix);
+	setUniform("uProjectionMatrix", projectionMatrix);
 }
 
 void ProjectionShaderBase::updateViewMatrix(const Mat4f& viewMatrix) {
 	bind();
-	setUniform("viewMatrix", viewMatrix);
+	setUniform("uViewMatrix", viewMatrix);
 }
 
 void ProjectionShaderBase::updateViewPosition(const Position& viewPosition) {
 	bind();
-	setUniform("viewPosition", viewPosition);
+	setUniform("uViewPosition", viewPosition);
 }
 
 #pragma endregion
@@ -37,7 +37,7 @@ void ProjectionShaderBase::updateViewPosition(const Position& viewPosition) {
 
 void StandardMeshShaderBase::updateModel(const Mat4f& modelMatrix) {
 	bind();
-	setUniform("modelMatrix", modelMatrix);
+	setUniform("uModelMatrix", modelMatrix);
 }
 
 void StandardMeshShaderBase::updateModel(const GlobalCFrame& modelCFrame, const DiagonalMat3f& scale) {
@@ -51,13 +51,13 @@ void StandardMeshShaderBase::updateModel(const GlobalCFrame& modelCFrame, const 
 void BasicShaderBase::updateLightCount(std::size_t lightCount) {
 	bind();
 
-	setUniform("lightCount", static_cast<int>(lightCount));
+	setUniform("uLightCount", static_cast<int>(lightCount));
 }
 	
 void BasicShaderBase::updateLight(std::size_t index, const Position& position, const Comp::Light& light) {
 	bind();
 
-	std::string variable = "lights[" + std::to_string(static_cast<int>(index)) + "].";
+	std::string variable = "uLights[" + std::to_string(static_cast<int>(index)) + "].";
 
 	// position
 	setUniform(variable + "position", position);
@@ -80,27 +80,27 @@ void BasicShaderBase::updateLight(std::size_t index, const Position& position, c
 
 void BasicShaderBase::updateSunDirection(const Vec3f& sunDirection) {
 	bind();
-	setUniform("sunDirection", sunDirection);
+	setUniform("uSunDirection", sunDirection);
 }
 
 void BasicShaderBase::updateSunColor(const Vec3f& sunColor) {
 	bind();
-	setUniform("sunColor", sunColor);
+	setUniform("uSunColor", sunColor);
 }
 
 void BasicShaderBase::updateGamma(float gamma) {
 	bind();
-	setUniform("gamma", gamma);
+	setUniform("uGamma", gamma);
 }
 
 void BasicShaderBase::updateHDR(float hdr) {
 	bind();
-	setUniform("hdr", hdr);
+	setUniform("uHDR", hdr);
 }
 
 void BasicShaderBase::updateExposure(float exposure) {
 	bind();
-	setUniform("exposure", exposure);
+	setUniform("uExposure", exposure);
 }
 
 #pragma endregion

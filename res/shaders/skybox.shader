@@ -10,10 +10,9 @@ layout (location = 0) in vec3 vposition;
 
 out vec3 ftextureUV;
 
-uniform mat4 projectionMatrix;
-uniform mat4 viewMatrix;
-uniform vec3 viewPosition;
-uniform vec3 lightDirection;
+uniform mat4 uProjectionMatrix;
+uniform mat4 uViewMatrix;
+uniform vec3 uLightDirection;
 
 const float PI = 3.141592654;
 const vec4 Esun = vec4(1.0, 1.0, 1.0, 12.0);
@@ -53,8 +52,8 @@ vec3 scatter(float h, float s, float cosphi) {
 }
 
 void main() {
-	vec4 position = projectionMatrix * vec4((viewMatrix * vec4(vposition, 0.0)).xyz, 1.0);
-	vec3 light = lightDirection;
+	vec4 position = uProjectionMatrix * vec4((uViewMatrix * vec4(vposition, 0.0)).xyz, 1.0);
+	vec3 light = uLightDirection;
 	vec3 normal = vposition;
 
 	/*float distance = (1.05 - pow(normal.y, 0.2)) * 150000;
@@ -75,9 +74,9 @@ out vec4 outColor;
 
 in vec3 ftextureUV;
 
-uniform samplerCube skyboxTexture;
+uniform samplerCube uSkyboxTexture;
 
 void main() {    
-	vec4 skybox = texture(skyboxTexture, ftextureUV);
+	vec4 skybox = texture(uSkyboxTexture, ftextureUV);
 	outColor = skybox;
 }

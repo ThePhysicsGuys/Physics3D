@@ -78,7 +78,7 @@ void terminateGLFW() {
 
 Screen::Screen() {
 	
-};
+}
 
 Screen::Screen(int width, int height, PlayerWorld* world, UpgradeableMutex* worldMutex) : world(world), worldMutex(worldMutex) {
 	using namespace Graphics;

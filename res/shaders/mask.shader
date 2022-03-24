@@ -8,13 +8,12 @@
 
 layout(location = 0) in vec3 vPosition;
 
-uniform mat4 projectionMatrix;
-uniform mat4 modelMatrix;
-uniform mat4 viewMatrix;
-uniform vec3 viewPosition;
+uniform mat4 uProjectionMatrix;
+uniform mat4 uModelMatrix;
+uniform mat4 uViewMatrix;
 
 void main() {
-	gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(vPosition, 1.0);
+	gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(vPosition, 1.0);
 }
 
 //------------------------------------------------------------------------------//

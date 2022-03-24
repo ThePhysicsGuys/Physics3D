@@ -51,7 +51,7 @@ struct DepthShader : public StandardMeshShaderBase {
 };
 
 struct PostProcessShader : public ShaderResource {
-	 PostProcessShader() : ShaderResource("PostProcessShader", "../res/shaders/postProcess.shader") {}
+	 PostProcessShader() : ShaderResource("PostProcessShader", "../res/shaders/postprocess.shader") {}
 
 	void updateTexture(SRef<Texture> texture);
 	void updateTexture(SRef<HDRTexture> texture);

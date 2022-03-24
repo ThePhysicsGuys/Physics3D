@@ -11,11 +11,11 @@ layout (location = 1) in vec4 vcolor;
 
 out vec4 fcolor;
 
-uniform mat4 viewMatrix;
-uniform mat4 projectionMatrix;
+uniform mat4 uViewMatrix;
+uniform mat4 uProjectionMatrix;
 
 void main() {
-	gl_Position = projectionMatrix * viewMatrix * vec4(vposition, 1.0);
+	gl_Position = uProjectionMatrix * uViewMatrix * vec4(vposition, 1.0);
 	fcolor = vcolor;
 }
 
