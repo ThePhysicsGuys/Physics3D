@@ -4,15 +4,8 @@ INSTALLPATH="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 cd $INSTALLPATH/..
 
 sudo add-apt-repository universe
-sudo apt-get install build-essential
-sudo apt-get install freeglut3
-sudo apt-get install freeglut3-dev
-sudo apt-get install mesa-common-dev
-sudo apt-get install libglfw3
-sudo apt-get install libglfw3-dev
-sudo apt-get install libglew-dev
-sudo apt-get install git
-sudo apt-get install libfreetype6-dev
+sudo apt update
+sudo apt-get install build-essential freeglut3 freeglut3-dev mesa-common-dev libglfw3 libglfw3-dev libglew-dev git libfreetype6-dev
 sudo apt install cmake
 
 
