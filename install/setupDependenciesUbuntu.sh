@@ -5,7 +5,7 @@ cd $INSTALLPATH/..
 
 sudo add-apt-repository universe
 sudo apt update
-sudo apt-get install build-essential freeglut3 freeglut3-dev mesa-common-dev libglfw3 libglfw3-dev libglew-dev git libfreetype6-dev
+sudo apt-get install build-essential freeglut3 freeglut3-dev mesa-common-dev libglfw3 libglfw3-dev libglew-dev git libfreetype6-dev libgl1-mesa-dev
 sudo apt install cmake
 
 
