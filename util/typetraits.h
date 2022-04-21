@@ -22,3 +22,9 @@ inline constexpr auto unique_types = std::true_type {};
 
 template<typename T, typename... Rest>
 inline constexpr auto unique_types<T, Rest...> = std::bool_constant<(!std::is_same_v<T, Rest> && ...) && unique_types<Rest...>> {};
+
+/**
+ * Determine if the first type is part of the parameter pack
+ */
+template<typename T, typename... Ts>
+inline constexpr auto is_part_of = std::disjunction_v<std::is_same<T, Ts>...>;

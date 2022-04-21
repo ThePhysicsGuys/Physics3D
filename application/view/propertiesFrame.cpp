@@ -647,8 +647,9 @@ void PropertiesFrame::onRender(Engine::Registry64& registry) {
 
 	// Dispatch component frames
 	Engine::Registry64::entity_type selectedEntity = SelectionTool::selection.first().value();
-	auto components = registry.getComponents(selectedEntity);
-	for (auto [index, component] : components) {
+	auto allComponents = registry.getComponents(selectedEntity);
+	for (auto [index, components] : allComponents) {
+		auto component = *components.begin();
 		ENTITY_DISPATCH_START(index);
 		ENTITY_DISPATCH(registry, selectedEntity, index, Comp::Name, component);
 		ENTITY_DISPATCH(registry, selectedEntity, index, Comp::Transform, component);
