@@ -217,10 +217,10 @@ TriangleMesh::TriangleMesh(int vertexCount, int triangleCount, const Vec3f* vert
 
 	index = 0;
 	for(size_t i = 0; i < triangleCount; i++) {
-        aValues[index] = triangles[i].firstIndex;
+ 		aValues[index] = triangles[i].firstIndex;
 		bValues[index] = triangles[i].secondIndex;
 		cValues[index] = triangles[i].thirdIndex;
-	    index++;
+		index++;
 		index += triangleOffset * ((index % triangleOffset) == 0) * 2;
     }
 
