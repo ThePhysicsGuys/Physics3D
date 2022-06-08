@@ -76,7 +76,7 @@ bool isValid(const TriangleMesh& mesh) {
 	for(int i = 0; i < mesh.triangleCount; i++) {
 		const Triangle& t = mesh.getTriangle(i);
 		if(!isValidTriangle(t, mesh.vertexCount)) {
-			Debug::logError("Invalid triangle! Triangle %d {%d, %d, %d} points to a nonexistent vertex or has a duplicate index!", i, t.firstIndex, t.secondIndex, t.thirdIndex);
+			Debug::logError("Invalid triangle! Triangle %d {%d, %d, %d} points to a nonexistent vertex or has a duplicate index!\n", i, t.firstIndex, t.secondIndex, t.thirdIndex);
 			verdict = false;
 		}
 	}
@@ -104,17 +104,18 @@ bool isValid(const TriangleMesh& mesh) {
 
 bool isValid(const Polyhedron& poly) {
 	if(!isValid(static_cast<const TriangleMesh&>(poly))) {
-		Debug::logError("Invalid polyhedron: bad TriangleMesh");
+		Debug::logError("Invalid polyhedron: bad TriangleMesh\n");
 		return false;
 	}
 	if(!isComplete(poly)) {
-		Debug::logError("Invalid polyhedron: incomplete");
+		Debug::logError("Invalid polyhedron: incomplete\n");
 		return false;
 	}
 
 	// inverted to catch NaNs
 	if(!(poly.getVolume() > 0)) {
-		Debug::logError("Invalid polyhedron: inverted! Volume=%f", poly.getVolume());
+	  
+		Debug::logError("Invalid polyhedron: inverted! Volume=%f\n", poly.getVolume());
 		return false;
 	}
 	return true;

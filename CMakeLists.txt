@@ -8,6 +8,15 @@ message(STATUS "Building with: ${CMAKE_CXX_COMPILER_ID}")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+	set(CMAKE_CXX_FLAGS "-g")
+	set(CMAKE_C_FLAGS "-g")
+elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Ofast -march=native -mtune=native -ftree-loop-distribution -floop-interchange -freorder-blocks-and-partition ")
+endif()
+
+
+
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /arch:AVX2")
 

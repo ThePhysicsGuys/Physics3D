@@ -72,7 +72,10 @@ double Polyhedron::getVolume() const {
 
 		total += nz * (v0.z + v1.z + v2.z);
 	}
-
+	if(((total / 6)<=0)){
+	  printf("");
+	}
+	
 	return total / 6;
 }
 

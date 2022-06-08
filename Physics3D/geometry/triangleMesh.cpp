@@ -3,6 +3,8 @@
 #include "../misc/validityHelper.h"
 #include "../misc/cpuid.h"
 
+#include <cstdio>
+#include <math.h>
 #include <vector>
 #include <set>
 #include <cmath>
@@ -10,7 +12,9 @@
 namespace P3D {
 #pragma region bufManagement
 static size_t getOffset(size_t size) {
-	return (size + 7) & 0xFFFFFFFFFFFFFFF8;
+        return (size + 7) & 0xFFFFFFFFFFFFFFF8;
+ 
+
 }
 static UniqueAlignedPointer<float> createParallelVecBuf(size_t size) {
 	return UniqueAlignedPointer<float>(getOffset(size) * 3, 32);
@@ -33,7 +37,7 @@ static UniqueAlignedPointer<T> copy(const UniqueAlignedPointer<T>& buf, size_t s
 
 template<typename T>
 static void fixFinalBlock(T* buf, size_t size) {
-	size_t offset = getOffset(size);
+	size_t offset = ((size + 7) & 0xFFFFFFFFFFFFFFF8);
 	T* xValues = buf;
 	T* yValues = buf + offset;
 	T* zValues = buf + 2 * offset;
@@ -41,7 +45,7 @@ static void fixFinalBlock(T* buf, size_t size) {
 	for(size_t i = size; i < offset; i++) {
 		xValues[i] = xValues[size - 1];
 		yValues[i] = yValues[size - 1];
-		zValues[i] = zValues[size - 1];
+                zValues[i] = zValues[size - 1];
 	}
 }
 #pragma endregion
@@ -93,7 +97,7 @@ MeshPrototype::MeshPrototype() :
 	triangleCount(0) {}
 
 MeshPrototype::MeshPrototype(int vertexCount, int triangleCount) :
-	vertices(getOffset(vertexCount) * 3, 32),
+        vertices(getOffset(vertexCount) * 3, 32),
 	triangles(getOffset(triangleCount) * 3, 32),
 	vertexCount(vertexCount),
 	triangleCount(triangleCount) {}
@@ -112,14 +116,14 @@ MeshPrototype::MeshPrototype(int vertexCount, int triangleCount, UniqueAlignedPo
 
 Vec3f MeshPrototype::getVertex(int index) const {
 	assert(index >= 0 && index < vertexCount);
-	size_t offset = getOffset(vertexCount);
-	return Vec3f(this->vertices[index], this->vertices[index + offset], this->vertices[index + 2 * offset]);
+	size_t currect_index = (index/8)*8*2+index;//getOffset(vertexCount);
+	return Vec3f(this->vertices[currect_index], this->vertices[currect_index+8], this->vertices[currect_index+8*2]);
 }
 
 Triangle MeshPrototype::getTriangle(int index) const {
 	assert(index >= 0 && index < triangleCount);
-	size_t offset = getOffset(triangleCount);
-	return Triangle{triangles[index], triangles[index + offset], triangles[index + 2 * offset]};
+	size_t currect_index = (index/8)*8*2+index;//getOffset(triangleCount);
+	return Triangle{triangles[currect_index], triangles[currect_index+8], triangles[currect_index+8*2]};
 }
 #pragma endregion
 
@@ -136,35 +140,35 @@ EditableMesh::EditableMesh(MeshPrototype&& mesh) noexcept : MeshPrototype(std::m
 
 void EditableMesh::setVertex(int index, Vec3f newVertex) {
 	assert(index >= 0 && index < vertexCount);
-	size_t offset = getOffset(vertexCount);
-	this->vertices[index] = newVertex.x;
-	this->vertices[index + offset] = newVertex.y;
-	this->vertices[index + 2 * offset] = newVertex.z;
+	size_t correct_index = (index/8)*8*2+index;//getOffset(vertexCount);
+	this->vertices[correct_index] = newVertex.x;
+	this->vertices[correct_index + 8] = newVertex.y;
+	this->vertices[correct_index + 2 * 8] = newVertex.z;
 }
 void EditableMesh::setVertex(int index, float x, float y, float z) {
 	assert(index >= 0 && index < vertexCount);
-	size_t offset = getOffset(vertexCount);
-	this->vertices[index] = x;
-	this->vertices[index + offset] = y;
-	this->vertices[index + 2 * offset] = z;
+	size_t correct_index = (index/8)*8*2+index; //getOffset(vertexCount);
+	this->vertices[correct_index] = x;
+	this->vertices[correct_index + 8] = y;
+	this->vertices[correct_index + 2 * 8] = z;
 }
 void EditableMesh::setTriangle(int index, Triangle newTriangle) {
 	assert(index >= 0 && index < triangleCount);
 	assert(isValidTriangle(newTriangle, vertexCount));
 
-	size_t offset = getOffset(triangleCount);
-	this->triangles[index] = newTriangle.firstIndex;
-	this->triangles[index + offset] = newTriangle.secondIndex;
-	this->triangles[index + 2 * offset] = newTriangle.thirdIndex;
+	size_t correct_index = (index/8)*8*2+index;//getOffset(triangleCount);
+	this->triangles[correct_index] = newTriangle.firstIndex;
+	this->triangles[correct_index + 8] = newTriangle.secondIndex;
+	this->triangles[correct_index + 2 * 8] = newTriangle.thirdIndex;
 }
 void EditableMesh::setTriangle(int index, int a, int b, int c) {
 	assert(index >= 0 && index < triangleCount);
 	assert(isValidTriangle(Triangle{a,b,c}, vertexCount));
 
-	size_t offset = getOffset(triangleCount);
-	this->triangles[index] = a;
-	this->triangles[index + offset] = b;
-	this->triangles[index + 2 * offset] = c;
+	size_t correct_index = (index/8)*8*2+index;//getOffset(triangleCount);
+	this->triangles[correct_index] = a;
+	this->triangles[correct_index + 8] = b;
+	this->triangles[correct_index + 2 * 8] = c;
 }
 #pragma endregion
 
@@ -177,31 +181,82 @@ TriangleMesh::TriangleMesh(UniqueAlignedPointer<float>&& vertices, UniqueAligned
 TriangleMesh::TriangleMesh(int vertexCount, int triangleCount, const Vec3f* vertices, const Triangle* triangles) :
 	MeshPrototype(vertexCount, triangleCount) {
 
-	size_t vertexOffset = getOffset(vertexCount);
+        size_t vertexOffset = 8;//getOffset(vertexCount);
 
+	
+	//printf("vertex_count = ori:%d, now: %lu\ntriangle_count = ori:%d, now: %lu\n", vertexCount, getOffset(vertexCount) * 3, triangleCount, getOffset(triangleCount) * 3),
+	
+	//printf("TriangleMesh::TriangleMesh->vertex_offset = %lu\n", vertexOffset);
+	
+	//printf("TriangleMesh::TriangleMesh->vertexCount = %d\n", vertexCount);
+	
 	float* xValues = this->vertices.get();
 	float* yValues = xValues + vertexOffset;
 	float* zValues = yValues + vertexOffset;
 
+	unsigned int a = 0;
 	for(size_t i = 0; i < vertexCount; i++) {
-		xValues[i] = vertices[i].x;
-		yValues[i] = vertices[i].y;
-		zValues[i] = vertices[i].z;
+	    xValues[a] = vertices[i].x;
+	    yValues[a] = vertices[i].y;
+	    zValues[a] = vertices[i].z;
+	    /*  printf("x = %f\n", xValues[a]);
+	    printf("y = %f\n", yValues[a]);
+	    printf("z = %f\n", zValues[a]);
+	    */a++;
+	    a+=vertexOffset*((a%vertexOffset)==0)*2;
+	    //printf("a = %u\n", a);
+	    
 	}
-	fixFinalBlock(this->vertices.get(), vertexCount);
 
-	size_t triangleOffset = getOffset(triangleCount);
+	unsigned int last_index = a-1;
+	unsigned int size_left =  (((vertexCount + 7) & 0xFFFFFFFFFFFFFFF8)*3-vertexCount*3)/3;
+	//	printf("a*3 = %d", a*3);
+	//	printf("size_left = %u\n", size_left);
+	for(unsigned int i=a; i<a+size_left; i++){
+	  xValues[i] = xValues[last_index];
+	  yValues[i] = yValues[last_index];
+	  zValues[i] = zValues[last_index];
+	  //  printf("xValues[%d] = %f\n", i, xValues[i]);
+	}
+	
+	//fixFinalBlock(this->vertices.get(), vertexCount);
 
+	size_t triangleOffset = 8;//getOffset(triangleCount);
+
+	
+	
 	int* aValues = this->triangles.get();
 	int* bValues = aValues + triangleOffset;
 	int* cValues = bValues + triangleOffset;
 
+	a = 0;
 	for(size_t i = 0; i < triangleCount; i++) {
-		aValues[i] = triangles[i].firstIndex;
-		bValues[i] = triangles[i].secondIndex;
-		cValues[i] = triangles[i].thirdIndex;
+        	aValues[a] = triangles[i].firstIndex;
+		bValues[a] = triangles[i].secondIndex;
+		cValues[a] = triangles[i].thirdIndex;
+		/*	printf("a = %d\n", aValues[a]);
+		printf("b = %d\n", bValues[a]);
+		printf("c = %d\n", cValues[a]);
+		*/a++;
+		a+=triangleOffset*((a%triangleOffset)==0)*2;
+	        //printf("a_index = %u\n", a);
 	}
-	fixFinalBlock(this->triangles.get(), triangleCount);
+
+	
+	last_index = a-1;
+	size_left =  ((((triangleCount + 7) & 0xFFFFFFFFFFFFFFF8)*3-triangleCount*3)/3);
+	//printf("a*3 = %d", a*3);
+	//printf("size_left = %u\n", size_left);
+	for(unsigned int i=a; i<a+size_left; i++){
+	  aValues[i] = aValues[last_index];
+	  bValues[i] = bValues[last_index];
+	  cValues[i] = cValues[last_index];
+	  /*printf("aValues[%d] = %d\n", i, aValues[i]);
+	  printf("bValues[%d] = %d\n", i, bValues[i]);
+	  printf("cValues[%d] = %d\n", i, cValues[i]);
+	  */}
+		
+	//fixFinalBlock(this->triangles.get(), triangleCount);
 
 	assert(isValid(*this));
 }
@@ -221,10 +276,16 @@ TriangleMesh::TriangleMesh(MeshPrototype&& mesh) noexcept :
 }
 
 IteratorFactory<ShapeVertexIter> TriangleMesh::iterVertices() const {
-	return IteratorFactory<ShapeVertexIter>(ShapeVertexIter{vertices, getOffset(vertexCount)}, ShapeVertexIter{vertices + vertexCount, getOffset(vertexCount)});
+  return IteratorFactory<ShapeVertexIter>(ShapeVertexIter{vertices, 8, 0},
+					  ShapeVertexIter{&vertices[getOffset(vertexCount) * 3 -
+								    ((getOffset(vertexCount)*3-vertexCount*3)/3) - 8*2 -
+								    1 * (vertexCount%8==0)], 8, 0});
 }
 IteratorFactory<ShapeTriangleIter> TriangleMesh::iterTriangles() const {
-	return IteratorFactory<ShapeTriangleIter>(ShapeTriangleIter{triangles, getOffset(triangleCount)}, ShapeTriangleIter{triangles + triangleCount, getOffset(triangleCount)});
+  return IteratorFactory<ShapeTriangleIter>(ShapeTriangleIter{triangles, 8, 0},
+					    ShapeTriangleIter{&triangles[getOffset(triangleCount) *3 -
+									 ((getOffset(triangleCount)*3-triangleCount*3)/3) - 8*2 -
+									 1 * (triangleCount%8==0)], 8, 0});
 }
 
 void TriangleMesh::getTriangles(Triangle* triangleBuf) const {

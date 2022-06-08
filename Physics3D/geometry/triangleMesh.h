@@ -23,35 +23,44 @@ struct Triangle {
 	int& operator[](int i) { return indexes[i]; }
 	const int& operator[](int i) const { return indexes[i]; }
 };
-
+  
 struct ShapeVertexIter {
 	float* curVertex;
 	size_t offset;
+        size_t index;
 	Vec3f operator*() const {
-		return Vec3f{*curVertex, *(curVertex + offset), *(curVertex + 2 * offset)};
+	  // size_t correct_index =  (index/offset)*offset+8*2+index;
+		return Vec3f{curVertex[index], (curVertex[index+offset]), (curVertex[index + 2 * offset])};
 	}
 	void operator++() {
-		++curVertex;
+	  index++;
+	  index+=offset*((index%offset)==0)*2;
 	}
 	bool operator!=(const ShapeVertexIter& other) const {
-		return curVertex != other.curVertex;
+	  // size_t correct_index =  (index/offset)*offset+8*2+index;
+	  return &curVertex[index] != other.curVertex;
 	}
 };
 
 struct ShapeTriangleIter {
 	int* curTriangle;
 	size_t offset;
-	Triangle operator*() const {
-		return Triangle{*curTriangle, *(curTriangle + offset), *(curTriangle + 2 * offset)};
+        size_t index;
+        Triangle operator*() const {
+	  //size_t correct_index =  (index/offset)*offset*2+index;
+	  return Triangle{curTriangle[index], (curTriangle[index + offset]), (curTriangle[index + 2 * offset])};
 	}
 	void operator++() {
-		++curTriangle;
-	}
+	  index++;
+	  index+=offset*((index%offset)==0)*2;
+        }
 	bool operator!=(const ShapeTriangleIter& other) const {
-		return curTriangle != other.curTriangle;
+	  //size_t correct_index =  (index/offset)*offset*2+index;
+		return &curTriangle[index] != other.curTriangle;
 	}
 	bool operator==(const ShapeTriangleIter& other) const {
-		return curTriangle == other.curTriangle;
+	  // size_t correct_index =  (index/offset)*offset*2+index;
+	  return &curTriangle[index] == other.curTriangle;
 	}
 };
 

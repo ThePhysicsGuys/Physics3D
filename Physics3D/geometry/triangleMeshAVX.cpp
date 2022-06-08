@@ -30,8 +30,8 @@ int TriangleMesh::furthestIndexInDirectionAVX(const Vec3f& direction) const {
 
 	size_t offset = getOffset(vertexCount);
 	const float* xValues = this->vertices;
-	const float* yValues = this->vertices + offset;
-	const float* zValues = this->vertices + 2 * offset;
+	const float* yValues = this->vertices + 8;
+	const float* zValues = this->vertices + 2 * 8;
 
 	__m256 bestDot = _mm256_fmadd_ps(dz, _mm256_load_ps(zValues), _mm256_fmadd_ps(dy, _mm256_load_ps(yValues), _mm256_mul_ps(dx, _mm256_load_ps(xValues))));
 
@@ -40,7 +40,7 @@ int TriangleMesh::furthestIndexInDirectionAVX(const Vec3f& direction) const {
 	for(size_t blockI = 1; blockI < (vertexCount + 7) / 8; blockI++) {
 		__m256i indices = _mm256_set1_epi32(int(blockI));
 
-		__m256 dot = _mm256_fmadd_ps(dz, _mm256_load_ps(zValues + blockI * 8), _mm256_fmadd_ps(dy, _mm256_load_ps(yValues + blockI * 8), _mm256_mul_ps(dx, _mm256_load_ps(xValues + blockI * 8))));
+		__m256 dot = _mm256_fmadd_ps(dz, _mm256_load_ps(zValues + blockI * 24), _mm256_fmadd_ps(dy, _mm256_load_ps(yValues + blockI * 24), _mm256_mul_ps(dx, _mm256_load_ps(xValues + blockI * 24))));
 
 		__m256 whichAreMax = _mm256_cmp_ps(dot, bestDot, _CMP_GT_OQ); // Greater than, false if dot == NaN
 		bestDot = _mm256_blendv_ps(bestDot, dot, whichAreMax);
@@ -73,8 +73,8 @@ Vec3f TriangleMesh::furthestInDirectionAVX(const Vec3f& direction) const {
 
 	size_t offset = getOffset(vertexCount);
 	const float* xValues = this->vertices;
-	const float* yValues = this->vertices + offset;
-	const float* zValues = this->vertices + 2 * offset;
+	const float* yValues = this->vertices + 8;
+	const float* zValues = this->vertices + 16;
 
 	__m256 bestX = _mm256_load_ps(xValues);
 	__m256 bestY = _mm256_load_ps(yValues);
@@ -82,20 +82,21 @@ Vec3f TriangleMesh::furthestInDirectionAVX(const Vec3f& direction) const {
 
 	__m256 bestDot = _mm256_fmadd_ps(dz, bestZ, _mm256_fmadd_ps(dy, bestY, _mm256_mul_ps(dx, bestX)));
 
+	
 	for(size_t blockI = 1; blockI < (vertexCount + 7) / 8; blockI++) {
-		__m256i indices = _mm256_set1_epi32(int(blockI));
-
-		__m256 xVal = _mm256_load_ps(xValues + blockI * 8);
-		__m256 yVal = _mm256_load_ps(yValues + blockI * 8);
-		__m256 zVal = _mm256_load_ps(zValues + blockI * 8);
-
-		__m256 dot = _mm256_fmadd_ps(dz, zVal, _mm256_fmadd_ps(dy, yVal, _mm256_mul_ps(dx, xVal)));
-
-		__m256 whichAreMax = _mm256_cmp_ps(dot, bestDot, _CMP_GT_OQ); // Greater than, false if dot == NaN
-		bestDot = _mm256_blendv_ps(bestDot, dot, whichAreMax);
-		bestX = _mm256_blendv_ps(bestX, xVal, whichAreMax);
-		bestY = _mm256_blendv_ps(bestY, yVal, whichAreMax);
-		bestZ = _mm256_blendv_ps(bestZ, zVal, whichAreMax);
+	  __m256i indices = _mm256_set1_epi32(int(blockI));
+	  __m256 xVal = _mm256_load_ps(xValues + blockI * 24);
+	  __m256 yVal = _mm256_load_ps(yValues + blockI * 24);
+	  __m256 zVal = _mm256_load_ps(zValues + blockI * 24);
+	  
+	  __m256 dot = _mm256_fmadd_ps(dz, zVal, _mm256_fmadd_ps(dy, yVal, _mm256_mul_ps(dx, xVal))); 
+	  
+	  __m256 whichAreMax = _mm256_cmp_ps(dot, bestDot, _CMP_LT_OQ); // Greater than, false if dot == NaN
+	
+	  bestDot = _mm256_blendv_ps(dot, bestDot, whichAreMax);
+	  bestX = _mm256_blendv_ps(xVal, bestX, whichAreMax);
+	  bestY = _mm256_blendv_ps(yVal, bestY, whichAreMax);
+	  bestZ = _mm256_blendv_ps(zVal, bestZ, whichAreMax);
 	}
 
 	// now we find the max of the remaining 8 elements
@@ -148,8 +149,8 @@ BoundingBox TriangleMesh::getBoundsAVX() const {
 
 	size_t offset = getOffset(vertexCount);
 	const float* xValues = this->vertices;
-	const float* yValues = this->vertices + offset;
-	const float* zValues = this->vertices + 2 * offset;
+	const float* yValues = this->vertices + 8;
+	const float* zValues = this->vertices + 2 * 8;
 
 	__m256 xMax = _mm256_load_ps(xValues);
 	__m256 xMin = xMax;
@@ -160,9 +161,9 @@ BoundingBox TriangleMesh::getBoundsAVX() const {
 
 	for(size_t blockI = 1; blockI < (vertexCount + 7) / 8; blockI++) {
 
-		__m256 xVal = _mm256_load_ps(xValues + blockI * 8);
-		__m256 yVal = _mm256_load_ps(yValues + blockI * 8);
-		__m256 zVal = _mm256_load_ps(zValues + blockI * 8);
+		__m256 xVal = _mm256_load_ps(xValues + blockI * 24);
+		__m256 yVal = _mm256_load_ps(yValues + blockI * 24);
+		__m256 zVal = _mm256_load_ps(zValues + blockI * 24);
 
 		xMax = _mm256_max_ps(xMax, xVal);
 		yMax = _mm256_max_ps(yMax, yVal);
@@ -181,8 +182,8 @@ BoundingBox TriangleMesh::getBoundsAVX(const Mat3f& referenceFrame) const {
 
 	size_t offset = getOffset(vertexCount);
 	const float* xValues = this->vertices;
-	const float* yValues = this->vertices + offset;
-	const float* zValues = this->vertices + 2 * offset;
+	const float* yValues = this->vertices + 8;
+	const float* zValues = this->vertices + 2 * 8;
 
 	float mxx = referenceFrame(0, 0);
 	float mxy = referenceFrame(0, 1);
@@ -207,9 +208,9 @@ BoundingBox TriangleMesh::getBoundsAVX(const Mat3f& referenceFrame) const {
 	__m256 zMax = zMin;
 
 	for(size_t blockI = 1; blockI < (vertexCount + 7) / 8; blockI++) {
-		__m256 xVal = _mm256_load_ps(xValues + blockI * 8);
-		__m256 yVal = _mm256_load_ps(yValues + blockI * 8);
-		__m256 zVal = _mm256_load_ps(zValues + blockI * 8);
+		__m256 xVal = _mm256_load_ps(xValues + blockI * 24);
+		__m256 yVal = _mm256_load_ps(yValues + blockI * 24);
+		__m256 zVal = _mm256_load_ps(zValues + blockI * 24);
 
 		__m256 dotX = _mm256_fmadd_ps(_mm256_set1_ps(mxz), zVal, _mm256_fmadd_ps(_mm256_set1_ps(mxy), yVal, _mm256_mul_ps(_mm256_set1_ps(mxx), xVal)));
 		xMin = _mm256_min_ps(xMin, dotX);

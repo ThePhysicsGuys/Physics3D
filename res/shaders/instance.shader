@@ -316,7 +316,7 @@ int getTextureMapIndex(int flag) {
 }
 
 vec4 getTextureMap(int map) {
-	return texture(textures[map - 1], fUV);
+	return texture(textures[0], fUV);
 }
 
 vec4 getAlbedo() {
