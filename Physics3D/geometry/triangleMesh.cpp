@@ -194,12 +194,12 @@ TriangleMesh::TriangleMesh(int vertexCount, int triangleCount, const Vec3f* vert
 	    yValues[index] = vertices[i].y;
 	    zValues[index] = vertices[i].z;
 	    index++;
-	    index+=vertexOffset * ((index % vertexOffset) == 0) * 2;
+	    index += vertexOffset * ((index % vertexOffset) == 0) * 2;
 	    
 	}
 
 	unsigned int lastIndex = index - 1;
-	unsigned int sizeLeft = getOffset(vertexCount) * 3 - vertexCount * 3) / 3;
+	unsigned int sizeLeft = (getOffset(vertexCount) * 3 - vertexCount * 3) / 3;
     for(unsigned int i = index; i < index + sizeLeft; i++){
 	  xValues[i] = xValues[lastIndex];
 	  yValues[i] = yValues[lastIndex];
@@ -226,7 +226,7 @@ TriangleMesh::TriangleMesh(int vertexCount, int triangleCount, const Vec3f* vert
 
 	
 	lastIndex = index - 1;
-	sizeLeft =  ((((triangleCount + 7) & 0xFFFFFFFFFFFFFFF8) * 3 - triangleCount * 3) / 3);
+	sizeLeft =  (getOffset(triangleCount) * 3 - triangleCount * 3) / 3;
 	
 	for(unsigned int i=index; i < index + sizeLeft; i++){
 	  aValues[i] = aValues[lastIndex];
