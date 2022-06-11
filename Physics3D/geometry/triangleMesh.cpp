@@ -197,6 +197,9 @@ TriangleMesh::TriangleMesh(int vertexCount, int triangleCount, const Vec3f* vert
 	    
 	}
 
+	if((index % BLOCK_WIDTH) == 0)
+		index -= BLOCK_WIDTH * 2;
+
 	unsigned int lastIndex = index - 1;
 	unsigned int sizeLeft = (getOffset(vertexCount) * 3 - vertexCount * 3) / 3;
     for(unsigned int i = index; i < index + sizeLeft; i++){
@@ -221,6 +224,8 @@ TriangleMesh::TriangleMesh(int vertexCount, int triangleCount, const Vec3f* vert
 			index += BLOCK_WIDTH * 2;
     }
 
+	if((index % BLOCK_WIDTH) == 0)
+		index -= BLOCK_WIDTH * 2;
 	
 	lastIndex = index - 1;
 	sizeLeft =  (getOffset(triangleCount) * 3 - triangleCount * 3) / 3;
@@ -237,15 +242,15 @@ TriangleMesh::TriangleMesh(int vertexCount, int triangleCount, const Vec3f* vert
 
 TriangleMesh::TriangleMesh(const MeshPrototype& mesh) :
 	MeshPrototype(mesh) {
-	fixFinalBlock(this->vertices.get(), vertexCount);
-	fixFinalBlock(this->triangles.get(), triangleCount);
+	//fixFinalBlock(this->vertices.get(), vertexCount);
+	//fixFinalBlock(this->triangles.get(), triangleCount);
 	assert(isValid(*this));
 }
 
 TriangleMesh::TriangleMesh(MeshPrototype&& mesh) noexcept :
 	MeshPrototype(std::move(mesh)) {
-	fixFinalBlock(this->vertices.get(), vertexCount);
-	fixFinalBlock(this->triangles.get(), triangleCount);
+	//fixFinalBlock(this->vertices.get(), vertexCount);
+	//fixFinalBlock(this->triangles.get(), triangleCount);
 	assert(isValid(*this));
 }
 
