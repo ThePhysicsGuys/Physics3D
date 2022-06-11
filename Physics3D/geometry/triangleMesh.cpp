@@ -37,15 +37,22 @@ static UniqueAlignedPointer<T> copy(const UniqueAlignedPointer<T>& buf, size_t s
 
 template<typename T>
 static void fixFinalBlock(T* buf, size_t size) {
-	size_t offset = ((size + 7) & 0xFFFFFFFFFFFFFFF8);
-	T* xValues = buf;
-	T* yValues = buf + offset;
-	T* zValues = buf + 2 * offset;
+	
+	unsigned int totalValues = getOffset(size) * 3;
+	unsigned int unusableValues_n = ((getOffset(size) * 3 - size * 3) / 3);
+	
+	unsigned int offset = totalValues -  unusableValues_n;
 
-	for(size_t i = size; i < offset; i++) {
-		xValues[i] = xValues[size - 1];
-		yValues[i] = yValues[size - 1];
-        zValues[i] = zValues[size - 1];
+	T* xValues = buf + offset - 8 * 2;
+	T* yValues = buf + offset - 8;
+	T* zValues = buf + offset;
+
+	unsigned int index = 0;
+
+	for(size_t i = index; i < unusableValues_n; i++) {
+		xValues[i] = xValues[-1];
+		yValues[i] = yValues[-1];
+        zValues[i] = zValues[-1];
 	}
 }
 #pragma endregion
@@ -242,15 +249,15 @@ TriangleMesh::TriangleMesh(int vertexCount, int triangleCount, const Vec3f* vert
 
 TriangleMesh::TriangleMesh(const MeshPrototype& mesh) :
 	MeshPrototype(mesh) {
-	//fixFinalBlock(this->vertices.get(), vertexCount);
-	//fixFinalBlock(this->triangles.get(), triangleCount);
+	fixFinalBlock(this->vertices.get(), vertexCount);
+	fixFinalBlock(this->triangles.get(), triangleCount);
 	assert(isValid(*this));
 }
 
 TriangleMesh::TriangleMesh(MeshPrototype&& mesh) noexcept :
 	MeshPrototype(std::move(mesh)) {
-	//fixFinalBlock(this->vertices.get(), vertexCount);
-	//fixFinalBlock(this->triangles.get(), triangleCount);
+	fixFinalBlock(this->vertices.get(), vertexCount);
+	fixFinalBlock(this->triangles.get(), triangleCount);
 	assert(isValid(*this));
 }
 
