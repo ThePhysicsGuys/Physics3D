@@ -149,8 +149,8 @@ Vec3f TriangleMesh::furthestInDirectionSSE4(const Vec3f& direction) const {
 		__m128 zVal2 = _mm_load_ps(verticesPointer + BLOCK_WIDTH * 2 + 4);
 
 
-		__m128 dot1 = custom_fmadd_ps(dz, zVal1, custom_fmadd_ps(dy, yVal1, _mm_mul_ps(dx, xVal1)));
-		__m128 dot2 = custom_fmadd_ps(dz, zVal2, custom_fmadd_ps(dy, yVal2, _mm_mul_ps(dx, xVal2)));
+		dot1 = custom_fmadd_ps(dz, zVal1, custom_fmadd_ps(dy, yVal1, _mm_mul_ps(dx, xVal1)));
+		dot2 = custom_fmadd_ps(dz, zVal2, custom_fmadd_ps(dy, yVal2, _mm_mul_ps(dx, xVal2)));
 	
 		//Compare greater than, returns false if either operand is NaN.
 		whichAreMax1 = _mm_cmpgt_ps(bestDot1, dot1);
@@ -166,10 +166,6 @@ Vec3f TriangleMesh::furthestInDirectionSSE4(const Vec3f& direction) const {
 		bestY2 = _mm_blendv_ps(yVal2, bestY2, whichAreMax2);
 		bestZ1 = _mm_blendv_ps(zVal1, bestZ1, whichAreMax1);
 		bestZ2 = _mm_blendv_ps(zVal2, bestZ2, whichAreMax2);
-	
-
-
-
 	
 	
 	}
