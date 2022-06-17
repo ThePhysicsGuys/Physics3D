@@ -101,25 +101,36 @@ Vec3f TriangleMesh::furthestInDirectionSSE4(const Vec3f& direction) const {
 	size_t offset = getOffset(vertexCount);
 	const float* xValues = this->vertices;
 
-	__m128 bestX = _mm_load_ps(xValues);
-	__m128 bestY = _mm_load_ps(xValues + BLOCK_WIDTH);
-	__m128 bestZ = _mm_load_ps(xValues + BLOCK_WIDTH * 2);
+	__m128 bestX1 = _mm_load_ps(xValues);
+	__m128 bestY1 = _mm_load_ps(xValues + BLOCK_WIDTH);
+	__m128 bestZ1 = _mm_load_ps(xValues + BLOCK_WIDTH * 2);
 
-	__m128 bestDot = custom_fmadd_ps(dz, bestZ, custom_fmadd_ps(dy, bestY, _mm_mul_ps(dx, bestX)));
+	__m128 bestX2 = bestX1;
+	__m128 bestY2 = bestY1;
+	__m128 bestZ2 = bestZ1;
 
-	__m128 xVal = _mm_load_ps(xValues + 4);
-	__m128 yVal = _mm_load_ps(xValues + BLOCK_WIDTH + 4);
-	__m128 zVal = _mm_load_ps(xValues + BLOCK_WIDTH * 2 + 4);
+	__m128 bestDot1 = custom_fmadd_ps(dz, bestZ1, custom_fmadd_ps(dy, bestY1, _mm_mul_ps(dx, bestX1)));
 
-	__m128 dot = custom_fmadd_ps(dz, zVal, custom_fmadd_ps(dy, yVal, _mm_mul_ps(dx, xVal)));
+	__m128 bestDot2 = bestDot1;
+
+	__m128 xVal1 = _mm_load_ps(xValues + 4);
+	__m128 yVal1 = _mm_load_ps(xValues + BLOCK_WIDTH + 4);
+	__m128 zVal1 = _mm_load_ps(xValues + BLOCK_WIDTH * 2 + 4);
+
+	__m128 dot1 = custom_fmadd_ps(dz, zVal1, custom_fmadd_ps(dy, yVal1, _mm_mul_ps(dx, xVal1)));
+
+	__m128 dot2 = dot1;
 
 	//Compare greater than, returns false if either operand is NaN.
-	__m128 whichAreMax = _mm_cmpgt_ps(dot, bestDot);
+	__m128 whichAreMax1 = _mm_cmpgt_ps(bestDot1, dot1);
 
-	bestDot = _mm_blendv_ps(bestDot, dot, whichAreMax);
-	bestX = _mm_blendv_ps(bestX, xVal, whichAreMax);
-	bestY = _mm_blendv_ps(bestY, yVal, whichAreMax);
-	bestZ = _mm_blendv_ps(bestZ, zVal, whichAreMax);
+	//Compare greater than, returns false if either operand is NaN.
+	__m128 whichAreMax2 = whichAreMax1;
+
+	bestDot1 = _mm_blendv_ps(dot1, bestDot1, whichAreMax1);
+	bestX1 = _mm_blendv_ps(xVal1, bestX1, whichAreMax1);
+	bestY1 = _mm_blendv_ps(yVal1, bestY1, whichAreMax1);
+	bestZ1 = _mm_blendv_ps(zVal1, bestZ1, whichAreMax1); 
 	
 
 	const float *verticesEnd = xValues + offset * 3;
@@ -129,37 +140,45 @@ Vec3f TriangleMesh::furthestInDirectionSSE4(const Vec3f& direction) const {
 	  	verticesPointer += BLOCK_WIDTH * 3) {
 		//__m128i indices = _mm_set1_epi32(static_cast<int>(blockI));
 
-		__m128 xVal = _mm_load_ps(verticesPointer);
-		__m128 yVal = _mm_load_ps(verticesPointer + BLOCK_WIDTH);
-		__m128 zVal = _mm_load_ps(verticesPointer + BLOCK_WIDTH * 2);
+		__m128 xVal1 = _mm_load_ps(verticesPointer);
+		__m128 yVal1 = _mm_load_ps(verticesPointer + BLOCK_WIDTH);
+		__m128 zVal1 = _mm_load_ps(verticesPointer + BLOCK_WIDTH * 2);
 
-		__m128 dot = custom_fmadd_ps(dz, zVal, custom_fmadd_ps(dy, yVal, _mm_mul_ps(dx, xVal)));
+		__m128 xVal2 = _mm_load_ps(verticesPointer + 4);
+		__m128 yVal2 = _mm_load_ps(verticesPointer + BLOCK_WIDTH + 4);
+		__m128 zVal2 = _mm_load_ps(verticesPointer + BLOCK_WIDTH * 2 + 4);
 
-		//Compare greater than, returns false if either operand is NaN.
-		__m128 whichAreMax = _mm_cmpgt_ps(dot, bestDot);
 
-		bestDot = _mm_blendv_ps(bestDot, dot, whichAreMax);
-		bestX = _mm_blendv_ps(bestX, xVal, whichAreMax);
-		bestY = _mm_blendv_ps(bestY, yVal, whichAreMax);
-		bestZ = _mm_blendv_ps(bestZ, zVal, whichAreMax);
+		dot1 = custom_fmadd_ps(dz, zVal1, custom_fmadd_ps(dy, yVal1, _mm_mul_ps(dx, xVal1)));
+		dot2 = custom_fmadd_ps(dz, zVal2, custom_fmadd_ps(dy, yVal2, _mm_mul_ps(dx, xVal2)));
 	
-	
-		xVal = _mm_load_ps(verticesPointer + 4);
-		yVal = _mm_load_ps(verticesPointer + BLOCK_WIDTH + 4);
-		zVal = _mm_load_ps(verticesPointer + BLOCK_WIDTH * 2 + 4);
-
-		dot = custom_fmadd_ps(dz, zVal, custom_fmadd_ps(dy, yVal, _mm_mul_ps(dx, xVal)));
-
 		//Compare greater than, returns false if either operand is NaN.
-		whichAreMax = _mm_cmpgt_ps(dot, bestDot);
+		whichAreMax1 = _mm_cmpgt_ps(bestDot1, dot1);
+		//Compare greater than, returns false if either operand is NaN.
+		whichAreMax2 = _mm_cmpgt_ps(bestDot2, dot2);
 
-		bestDot = _mm_blendv_ps(bestDot, dot, whichAreMax);
-		bestX = _mm_blendv_ps(bestX, xVal, whichAreMax);
-		bestY = _mm_blendv_ps(bestY, yVal, whichAreMax);
-		bestZ = _mm_blendv_ps(bestZ, zVal, whichAreMax);
+
+		bestDot1 = _mm_blendv_ps(dot1, bestDot1, whichAreMax1);
+		bestDot2 = _mm_blendv_ps(dot2, bestDot2, whichAreMax2);
+		bestX1 = _mm_blendv_ps(xVal1, bestX1, whichAreMax1);
+		bestX2 = _mm_blendv_ps(xVal2, bestX2, whichAreMax2);
+		bestY1 = _mm_blendv_ps(yVal1, bestY1, whichAreMax1);
+		bestY2 = _mm_blendv_ps(yVal2, bestY2, whichAreMax2);
+		bestZ1 = _mm_blendv_ps(zVal1, bestZ1, whichAreMax1);
+		bestZ2 = _mm_blendv_ps(zVal2, bestZ2, whichAreMax2);
 	
 	
 	}
+
+		//Compare greater than, returns false if either operand is NaN.
+		__m128 whichAreMax = _mm_cmpgt_ps(bestDot1, bestDot2);
+
+
+		__m128 bestDot = _mm_blendv_ps(bestDot2, bestDot1, whichAreMax);
+		__m128 bestX = _mm_blendv_ps(bestX2, bestX1, whichAreMax);
+		__m128 bestY = _mm_blendv_ps(bestY2, bestY1, whichAreMax);
+		__m128 bestZ = _mm_blendv_ps(bestZ2, bestZ1, whichAreMax);
+		
 
 	__m128 swap4x4 = _mm_shuffle_ps(bestDot, bestDot, 1);
 	__m128 bestDotInternalMax = _mm_max_ps(bestDot, swap4x4);

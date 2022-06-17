@@ -265,17 +265,18 @@ IteratorFactory<ShapeVertexIter> TriangleMesh::iterVertices() const {
 
 	unsigned int totalVertices = getOffset(vertexCount) * 3;
 	unsigned int unusableVertices_n = ((getOffset(vertexCount) * 3 - vertexCount * 3) / 3);
-	bool isMulOfBlockWidth = (vertexCount % 8 == 0);
+	bool isMulOfBlockWidth = (vertexCount % BLOCK_WIDTH == 0);
   return IteratorFactory<ShapeVertexIter>(ShapeVertexIter{vertices, 0},
-					  ShapeVertexIter{&vertices[totalVertices - unusableVertices_n - 8 * 2 - isMulOfBlockWidth], 0});
+					  ShapeVertexIter{&vertices[totalVertices - unusableVertices_n - BLOCK_WIDTH * 2 + BLOCK_WIDTH * 2 * isMulOfBlockWidth], 0});
 }
 IteratorFactory<ShapeTriangleIter> TriangleMesh::iterTriangles() const {
 
 	unsigned int totalTriangles = getOffset(triangleCount) * 3;
 	unsigned int unusableTriangles_n = ((getOffset(triangleCount) * 3 - triangleCount * 3) / 3);
-	bool isMulOfBlockWidth = (triangleCount % 8 == 0);
+	bool isMulOfBlockWidth = (triangleCount % BLOCK_WIDTH == 0);
   return IteratorFactory<ShapeTriangleIter>(ShapeTriangleIter{triangles, 0},
-					    ShapeTriangleIter{&triangles[totalTriangles - unusableTriangles_n - 8 * 2 - isMulOfBlockWidth], 0});
+					    ShapeTriangleIter{&triangles[totalTriangles - unusableTriangles_n - BLOCK_WIDTH * 2 +
+						 BLOCK_WIDTH * 2 * isMulOfBlockWidth], 0});
 }
 
 void TriangleMesh::getTriangles(Triangle* triangleBuf) const {
