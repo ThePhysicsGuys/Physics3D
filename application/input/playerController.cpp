@@ -22,6 +22,7 @@ void PlayerController::apply(WorldPrototype* world) {
 	if(!screen.camera.flying) {
 		using namespace Engine;
 		ExtendedPart* player = screen.camera.attachment;
+		Physical* playerPhys = player->getPhysical();
 
 		Vec3f playerX = screen.camera.cframe.rotation * Vec3(1, 0, 0);
 		Vec3f playerZ = screen.camera.cframe.rotation * Vec3(0, 0, 1);
@@ -42,11 +43,11 @@ void PlayerController::apply(WorldPrototype* world) {
 
 		Vec3 runVector = (lengthSquared(total) >= 0.00005) ? normalize(total) * RUN_SPEED : Vec3(0, 0, 0);
 		Vec3 desiredSpeed = runVector;
-		Vec3 actualSpeed = player->parent->getMotion().getVelocity();
+		Vec3 actualSpeed = playerPhys->getMotion().getVelocity();
 		Vec3 speedToGain = desiredSpeed - actualSpeed;
 		speedToGain.y = 0;
 
-		player->parent->mainPhysical->applyForceAtCenterOfMass(speedToGain * player->getMass() * AIR_RUN_SPEED_FACTOR);
+		playerPhys->mainPhysical->applyForceAtCenterOfMass(speedToGain * player->getMass() * AIR_RUN_SPEED_FACTOR);
 
 		if(handler->getKey(KeyboardOptions::Move::jump))
 			runVector += Vec3(0, JUMP_SPEED, 0);

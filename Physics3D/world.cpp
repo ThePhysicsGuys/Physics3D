@@ -119,7 +119,7 @@ void WorldPrototype::setLayersCollide(int layer1, int layer2, bool collide) {
 }
 
 int WorldPrototype::createLayer(bool collidesInternally, bool collidesWithOthers) {
-	int layerIndex = layers.size();
+	int layerIndex = static_cast<int>(layers.size());
 	layers.emplace_back(this, collidesInternally);
 	if(collidesWithOthers) {
 		for(int i = 0; i < layerIndex; i++) {
@@ -156,21 +156,21 @@ void WorldPrototype::addPart(Part* part, int layerIndex) {
 		return;
 	}
 
-	part->ensureHasParent();
-	physicals.push_back(part->parent->mainPhysical);
+	Physical* partPhys = part->ensureHasPhysical();
+	physicals.push_back(partPhys->mainPhysical);
 
 	WorldLayer* worldLayer = &layers[layerIndex].subLayers[ColissionLayer::FREE_PARTS_LAYER];
-	part->parent->mainPhysical->forEachPart([worldLayer](Part& p) {
+	partPhys->mainPhysical->forEachPart([worldLayer](Part& p) {
 		p.layer = worldLayer;
 	});
-	createNodeFor(worldLayer->tree, part->parent->mainPhysical);
+	createNodeFor(worldLayer->tree, partPhys->mainPhysical);
 
 
-	objectCount += part->parent->mainPhysical->getNumberOfPartsInThisAndChildren();
+	objectCount += partPhys->mainPhysical->getNumberOfPartsInThisAndChildren();
 
 	ASSERT_VALID;
 
-	part->parent->mainPhysical->forEachPart([this](Part& p) {
+	partPhys->mainPhysical->forEachPart([this](Part& p) {
 		this->onPartAdded(&p);
 	});
 
@@ -264,8 +264,8 @@ void WorldPrototype::clear() {
 	}
 }
 
-size_t WorldPrototype::getLayerCount() const {
-	return this->layers.size();
+int WorldPrototype::getLayerCount() const {
+	return static_cast<int>(this->layers.size());
 }
 
 void WorldPrototype::optimizeLayers() {

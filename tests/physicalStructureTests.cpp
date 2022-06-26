@@ -25,7 +25,7 @@ static Part* createPart() {
 
 TEST_CASE(testBasicCreateDestroy) {
 	Part* p = createPart();
-	p->ensureHasParent();
+	p->ensureHasPhysical();
 	delete p;
 }
 
@@ -71,7 +71,7 @@ TEST_CASE(testManualDetach) {
 	ASSERT_TRUE(b->isMainPart());
 
 	a->detach();
-	ASSERT(c->parent->rigidBody.mainPart != a);
+	ASSERT(c->getPhysical()->rigidBody.mainPart != a);
 
 	delete b;
 	delete a;
@@ -106,12 +106,12 @@ TEST_CASE(testManyAttachComplex) {
 	a->attach(f2, cf());
 	g1->attach(a, cf());
 
-	ASSERT_TRUE(a->parent->rigidBody.getPartCount() == 10);
+	ASSERT_TRUE(a->getPhysical()->rigidBody.getPartCount() == 10);
 
 	Part* parts[]{a,b,c,d,e1,e2,f1,f2,g1,g2};
-	Physical* parent = a->parent;
+	Physical* aParent = a->getPhysical();
 	for(Part* p : parts) {
-		ASSERT_TRUE(p->parent == parent);
+		ASSERT_TRUE(p->getPhysical() == aParent);
 		delete p;
 	}
 }
@@ -122,22 +122,22 @@ TEST_CASE(testBasicMakeMainPhysical) {
 
 	a->attach(b, new FixedConstraint(), cf(), cf());
 
-	ASSERT_TRUE(a->parent != nullptr);
-	ASSERT_TRUE(b->parent != nullptr);
+	ASSERT_TRUE(a->getPhysical() != nullptr);
+	ASSERT_TRUE(b->getPhysical() != nullptr);
 
-	ASSERT_TRUE(a->parent->isMainPhysical());
-	ASSERT_FALSE(b->parent->isMainPhysical());
+	ASSERT_TRUE(a->getPhysical()->isMainPhysical());
+	ASSERT_FALSE(b->getPhysical()->isMainPhysical());
 
-	MotorizedPhysical* m = b->parent->mainPhysical;
-	MotorizedPhysical* resultingMain = b->parent->makeMainPhysical();
+	MotorizedPhysical* m = b->getMainPhysical();
+	MotorizedPhysical* resultingMain = b->getPhysical()->makeMainPhysical();
 	ASSERT_TRUE(resultingMain == m);
 
-	ASSERT_TRUE(b->parent->isMainPhysical());
-	ASSERT_FALSE(a->parent->isMainPhysical());
+	ASSERT_TRUE(b->getPhysical()->isMainPhysical());
+	ASSERT_FALSE(a->getPhysical()->isMainPhysical());
 
-	ASSERT_TRUE(a->parent->childPhysicals.size() == 0);
-	ASSERT_TRUE(b->parent->childPhysicals.size() == 1);
-	ASSERT_TRUE(&b->parent->childPhysicals[0] == a->parent);
+	ASSERT_TRUE(a->getPhysical()->childPhysicals.size() == 0);
+	ASSERT_TRUE(b->getPhysical()->childPhysicals.size() == 1);
+	ASSERT_TRUE(&b->getPhysical()->childPhysicals[0] == a->getPhysical());
 	ASSERT_TRUE(a->isValid());
 	ASSERT_TRUE(b->isValid());
 }
@@ -161,7 +161,7 @@ TEST_CASE(testAdvancedMakeMainPhysical) {
 	const int partCount = 7;
 	Part* parts[partCount]{a,b,c,d,e,f,g};
 
-	MotorizedPhysical* m = a->parent->mainPhysical;
+	MotorizedPhysical* m = a->getMainPhysical();
 
 	GlobalCFrame cframesBefore[partCount];
 	for(int i = 0; i < partCount; i++) {
@@ -176,7 +176,7 @@ TEST_CASE(testAdvancedMakeMainPhysical) {
 		cframesBefore[i] = cfr;
 	}
 
-	MotorizedPhysical* resultingMain = f->parent->makeMainPhysical();
+	MotorizedPhysical* resultingMain = f->getPhysical()->makeMainPhysical();
 	ASSERT_TRUE(resultingMain == m);
 	ASSERT_TRUE(m->isValid());
 
@@ -228,10 +228,10 @@ TEST_CASE(testAttachConnectedPhysicalToConnectedPhysical) {
 
 	Part* parts[]{a,b,c,d,e,f,g,a2,b2,c2,d2,e2,f2,g2};
 
-	MotorizedPhysical* mainPhys = a->parent->mainPhysical;
+	MotorizedPhysical* mainPhys = a->getMainPhysical();
 
 	for(Part* p : parts) {
-		ASSERT_TRUE(p->parent->mainPhysical == mainPhys);
+		ASSERT_TRUE(p->getMainPhysical() == mainPhys);
 	}
 
 	for(Part* p : parts) {

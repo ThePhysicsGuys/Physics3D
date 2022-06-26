@@ -23,11 +23,9 @@ namespace P3D {
 
 void handleCollision(Part& part1, Part& part2, Position collisionPoint, Vec3 exitVector) {
 	Debug::logPoint(collisionPoint, Debug::INTERSECTION);
-	Physical& parent1 = *part1.parent;
-	Physical& parent2 = *part2.parent;
-
-	MotorizedPhysical& phys1 = *parent1.mainPhysical;
-	MotorizedPhysical& phys2 = *parent2.mainPhysical;
+	
+	MotorizedPhysical& phys1 = *part1.getPhysical()->mainPhysical;
+	MotorizedPhysical& phys2 = *part2.getPhysical()->mainPhysical;
 
 	double sizeOrder = std::min(part1.maxRadius, part2.maxRadius);
 	if(lengthSquared(exitVector) <= 1E-8 * sizeOrder * sizeOrder) {
@@ -111,8 +109,7 @@ void handleCollision(Part& part1, Part& part2, Position collisionPoint, Vec3 exi
 */
 void handleTerrainCollision(Part& part1, Part& part2, Position collisionPoint, Vec3 exitVector) {
 	Debug::logPoint(collisionPoint, Debug::INTERSECTION);
-	Physical& parent1 = *part1.parent;
-	MotorizedPhysical& phys1 = *parent1.mainPhysical;
+	MotorizedPhysical& phys1 = *part1.getPhysical()->mainPhysical;
 
 	double sizeOrder = std::min(part1.maxRadius, part2.maxRadius);
 	if(lengthSquared(exitVector) <= 1E-8 * sizeOrder * sizeOrder) {
@@ -132,7 +129,7 @@ void handleTerrainCollision(Part& part1, Part& part2, Position collisionPoint, V
 
 	phys1.applyForce(collissionRelP1, depthForce);
 
-	//Vec3 rigidBodyToPart = part1.getCFrame().getPosition() - parent1.rigidBody.getCenterOfMass();
+	//Vec3 rigidBodyToPart = part1.getCFrame().getPosition() - part1.getPhysical()->rigidBody.getCenterOfMass();
 	Vec3 partToColission = collisionPoint - part1.getPosition();
 	Vec3 relativeVelocity = part1.getMotion().getVelocityOfPoint(partToColission) - part1.properties.conveyorEffect + part2.getCFrame().localToRelative(part2.properties.conveyorEffect);
 

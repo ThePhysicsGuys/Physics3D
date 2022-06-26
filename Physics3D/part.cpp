@@ -21,8 +21,9 @@ void recalculate(Part* part) {
 
 void recalculateAndUpdateParent(Part* part, const Bounds& oldBounds) {
 	recalculate(part);
-	if(part->parent != nullptr) {
-		part->parent->notifyPartPropertiesChanged(part);
+	Physical* phys = part->getPhysical();
+	if(phys != nullptr) {
+		phys->notifyPartPropertiesChanged(part);
 	}
 	if(part->layer != nullptr) part->layer->notifyPartBoundsUpdated(part, oldBounds);
 }
@@ -89,7 +90,8 @@ int Part::getLayerID() const {
 }
 
 void Part::removeFromWorld() {
-	if(this->parent) this->parent->removePart(this);
+	Physical* partPhys = this->getPhysical();
+	if(partPhys) partPhys->removePart(this);
 	if(this->layer) this->layer->removePart(this);
 }
 
@@ -137,10 +139,11 @@ void Part::setScale(const DiagonalMat3& scale) {
 
 void Part::setCFrame(const GlobalCFrame& newCFrame) {
 	Bounds oldBounds = this->getBounds();
-	if(this->parent == nullptr) {
-		this->cframe = newCFrame;
+	Physical* partPhys = this->getPhysical();
+	if(partPhys) {
+		partPhys->setPartCFrame(this, newCFrame);
 	} else {
-		this->parent->setPartCFrame(this, newCFrame);
+		this->cframe = newCFrame;
 	}
 	if(this->layer != nullptr) this->layer->notifyPartGroupBoundsUpdated(this, oldBounds);
 }
@@ -152,23 +155,23 @@ Vec3 Part::getAngularVelocity() const {
 	return this->getMotion().getAngularVelocity();
 }
 Motion Part::getMotion() const {
-	if(parent == nullptr) return Motion();
-	Motion parentsMotion = parent->getMotion();
+	if(this->getPhysical() == nullptr) return Motion();
+	Motion parentsMotion = this->getPhysical()->getMotion();
 	if(this->isMainPart()) {
 		return parentsMotion;
 	} else {
-		Vec3 offset = parent->rigidBody.getAttachFor(this).attachment.getPosition();
+		Vec3 offset = this->getAttachToMainPart().getPosition();
 		return parentsMotion.getMotionOfPoint(offset);
 	}
 }
 
 void Part::setVelocity(Vec3 velocity) {
 	Vec3 oldVel = this->getVelocity();
-	parent->mainPhysical->motionOfCenterOfMass.translation.translation[0] += (velocity - oldVel);
+	this->getMainPhysical()->motionOfCenterOfMass.translation.translation[0] += (velocity - oldVel);
 }
 void Part::setAngularVelocity(Vec3 angularVelocity) {
 	Vec3 oldAngularVel = this->getAngularVelocity();
-	parent->mainPhysical->motionOfCenterOfMass.rotation.rotation[0] += (angularVelocity - oldAngularVel);
+	this->getMainPhysical()->motionOfCenterOfMass.rotation.rotation[0] += (angularVelocity - oldAngularVel);
 }
 void Part::setMotion(Vec3 velocity, Vec3 angularVelocity) {
 	setAngularVelocity(angularVelocity); // angular velocity must come first, as it affects the velocity that setVelocity() uses
@@ -176,7 +179,7 @@ void Part::setMotion(Vec3 velocity, Vec3 angularVelocity) {
 }
 
 bool Part::isTerrainPart() const {
-	return parent == nullptr;
+	return this->getPhysical() == nullptr;
 }
 
 const Shape& Part::getShape() const {
@@ -190,8 +193,9 @@ void Part::setShape(Shape newShape) {
 
 void Part::translate(Vec3 translation) {
 	Bounds oldBounds = this->getBounds();
-	if(this->parent != nullptr) {
-		this->parent->mainPhysical->translate(translation);
+	Physical* phys = this->getPhysical();
+	if(phys) {
+		phys->mainPhysical->translate(translation);
 	} else {
 		this->cframe += translation;
 	}
@@ -266,15 +270,21 @@ void Part::setConveyorEffect(const Vec3& conveyorEffect) {
 }
 
 void Part::applyForce(Vec3 relativeOrigin, Vec3 force) {
-	Vec3 originOffset = this->getPosition() - this->parent->mainPhysical->getPosition();
-	this->parent->mainPhysical->applyForce(originOffset + relativeOrigin, force);
+	Physical* phys = this->getPhysical();
+	assert(phys != nullptr);
+	Vec3 originOffset = this->getPosition() - phys->mainPhysical->getPosition();
+	phys->mainPhysical->applyForce(originOffset + relativeOrigin, force);
 }
 void Part::applyForceAtCenterOfMass(Vec3 force) {
-	Vec3 originOffset = this->getCenterOfMass() - this->parent->mainPhysical->getPosition();
-	this->parent->mainPhysical->applyForce(originOffset, force);
+	Physical* phys = this->getPhysical();
+	assert(phys != nullptr);
+	Vec3 originOffset = this->getCenterOfMass() - phys->mainPhysical->getPosition();
+	phys->mainPhysical->applyForce(originOffset, force);
 }
 void Part::applyMoment(Vec3 moment) {
-	this->parent->mainPhysical->applyMoment(moment);
+	Physical* phys = this->getPhysical();
+	assert(phys != nullptr);
+	phys->mainPhysical->applyMoment(moment);
 }
 
 static void mergePartLayers(Part* first, Part* second, const std::vector<FoundLayerRepresentative>& layersOfFirst, const std::vector<FoundLayerRepresentative>& layersOfSecond) {
@@ -296,8 +306,9 @@ static void updateGroupBounds(std::vector<FoundLayerRepresentative>& layers, std
 
 static std::vector<Part*> getAllPartsInPhysical(Part* rep) {
 	std::vector<Part*> result;
-	if(rep->parent != nullptr) {
-		rep->parent->mainPhysical->forEachPart([&result](Part& part) {
+	Physical* repPhys = rep->getPhysical();
+	if(repPhys != nullptr) {
+		repPhys->mainPhysical->forEachPart([&result](Part& part) {
 			result.push_back(&part);
 		});
 	} else {
@@ -352,19 +363,15 @@ static void mergeLayersAround(Part* first, Part* second, PhysicalMergeFunc merge
 
 void Part::attach(Part* other, const CFrame& relativeCFrame) {
 	mergeLayersAround(this, other, [&]() {
-		if(this->parent == nullptr) {
-			this->parent = new MotorizedPhysical(this);
-			this->parent->attachPart(other, relativeCFrame);
-		} else {
-			this->parent->attachPart(other, this->transformCFrameToParent(relativeCFrame));
-		}
+		Physical* partPhys = this->ensureHasPhysical();
+		partPhys->attachPart(other, this->transformCFrameToParent(relativeCFrame));
 	});
 }
 
 void Part::attach(Part* other, HardConstraint* constraint, const CFrame& attachToThis, const CFrame& attachToThat) {
 	mergeLayersAround(this, other, [&]() {
-		this->ensureHasParent();
-		this->parent->attachPart(other, constraint, attachToThis, attachToThat);
+		Physical* partPhys = this->ensureHasPhysical();
+		partPhys->attachPart(other, constraint, attachToThis, attachToThat);
 	});
 }
 
@@ -376,17 +383,40 @@ void Part::detach() {
 	}
 }
 
-void Part::ensureHasParent() {
+Physical* Part::getPhysical() const {
+	return this->parent;
+}
+void Part::setRigidBodyPhysical(Physical* phys) {
+	this->parent = phys;
+	this->parent->rigidBody.mainPart->parent = phys;
+	for(AttachedPart& p : this->parent->rigidBody.parts) {
+		p.part->parent = phys;
+	}
+}
+MotorizedPhysical* Part::getMainPhysical() const {
+	Physical* phys = this->getPhysical();
+	return phys->mainPhysical;
+}
+Physical* Part::ensureHasPhysical() {
 	if(this->parent == nullptr) {
 		this->parent = new MotorizedPhysical(this);
 	}
+	return this->parent;
+}
+bool Part::hasAttachedParts() const {
+	Physical* thisPhys = this->getPhysical();
+	return thisPhys != nullptr && !thisPhys->rigidBody.parts.empty();
+}
+CFrame& Part::getAttachToMainPart() const {
+	assert(!this->isMainPart());
+	return this->parent->rigidBody.getAttachFor(this).attachment;
 }
 
-CFrame Part::transformCFrameToParent(const CFrame& cframeRelativeToPart) {
+CFrame Part::transformCFrameToParent(const CFrame& cframeRelativeToPart) const {
 	if(this->isMainPart()) {
 		return cframeRelativeToPart;
 	} else {
-		return this->parent->rigidBody.getAttachFor(this).attachment.localToGlobal(cframeRelativeToPart);
+		return this->getAttachToMainPart().localToGlobal(cframeRelativeToPart);
 	}
 }
 

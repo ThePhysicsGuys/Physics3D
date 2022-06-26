@@ -66,11 +66,12 @@ public:
 	float roughness;
 	float ao;
 
-	constexpr Material(const Color& albedo = Color(1), float metalness = 0.0f, float roughness = 1.0f, float ao = 1.0f)
+	constexpr Material(Color albedo = Color(1), float metalness = 0.0f, float roughness = 1.0f, float ao = 1.0f)
 		: albedo(albedo)
 		, metalness(metalness)
 		, roughness(roughness)
-		, ao(ao) {}
+		, ao(ao)
+		, maps{} {}
 
 	~Material() override = default;
 

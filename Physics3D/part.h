@@ -56,10 +56,10 @@ class Part {
 	friend class ConstraintGroup;
 
 	GlobalCFrame cframe;
+	Physical* parent = nullptr;
 
 public:
 	WorldLayer* layer = nullptr;
-	Physical* parent = nullptr;
 	Shape hitbox;
 	double maxRadius;
 	PartProperties properties;
@@ -92,8 +92,6 @@ public:
 	SymmetricMat3 getInertia() const { return hitbox.getInertia() * properties.density; }
 	const GlobalCFrame& getCFrame() const { return cframe; }
 	void setCFrame(const GlobalCFrame& newCFrame);
-
-	CFrame transformCFrameToParent(const CFrame& cframeRelativeToPart);
 
 	Vec3 getVelocity() const;
 	Vec3 getAngularVelocity() const;
@@ -136,10 +134,16 @@ public:
 	void applyForceAtCenterOfMass(Vec3 force);
 	void applyMoment(Vec3 moment);
 
-	void ensureHasParent();
-
 	int getLayerID() const;
 
+	CFrame& getAttachToMainPart() const;
+	CFrame transformCFrameToParent(const CFrame& cframeRelativeToPart) const;
+	Physical* getPhysical() const;
+	void setRigidBodyPhysical(Physical* phys);
+	MotorizedPhysical* getMainPhysical() const;
+	Physical* ensureHasPhysical();
+
+	bool hasAttachedParts() const;
 	void attach(Part* other, const CFrame& relativeCFrame);
 	void attach(Part* other, HardConstraint* constraint, const CFrame& attachToThis, const CFrame& attachToThat);
 	void detach();

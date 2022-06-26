@@ -36,9 +36,7 @@ void ConstraintGroup::add(Physical* first, Physical* second, Constraint* constra
 	this->constraints.push_back(PhysicalConstraint(first, second, constraint));
 }
 void ConstraintGroup::add(Part* first, Part* second, Constraint* constraint) {
-	first->ensureHasParent();
-	second->ensureHasParent();
-	this->constraints.push_back(PhysicalConstraint(first->parent, second->parent, constraint));
+	this->constraints.push_back(PhysicalConstraint(first->ensureHasPhysical(), second->ensureHasPhysical(), constraint));
 }
 
 void ConstraintGroup::apply() const {

@@ -481,11 +481,11 @@ namespace P3D::Application {
 
 			Attachment(Part* from, Part* to) : from(from), to(to) {
 				this->isAttachmentToMainPart = to->isMainPart();
-				this->attachment = &to->parent->rigidBody.getAttachFor(getChildPart()).attachment;
+				this->attachment = &getChildPart()->getAttachToMainPart();
 			}
 
 			void setAttachment(const CFrame& cframe) {
-				to->parent->rigidBody.setAttachFor(getChildPart(), cframe);
+				to->getPhysical()->rigidBody.setAttachFor(getChildPart(), cframe);
 			}
 
 			ExtendedPart* getMainPart() {

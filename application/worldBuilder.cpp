@@ -324,10 +324,10 @@ void buildCar(const GlobalCFrame& location, int folder) {
 	world.addPart(wheel4);
 
 	ConstraintGroup car;
-	car.add(carBody->parent, wheel1->parent, new BallConstraint(Vec3(0.8, 0.0, 0.8), Vec3(0,0,0)));
-	car.add(carBody->parent, wheel2->parent, new BallConstraint(Vec3(0.8, 0.0, -0.8), Vec3(0,0,0)));
-	car.add(carBody->parent, wheel3->parent, new BallConstraint(Vec3(-0.8, 0.0, 0.8), Vec3(0,0,0)));
-	car.add(carBody->parent, wheel4->parent, new BallConstraint(Vec3(-0.8, 0.0, -0.8), Vec3(0,0,0)));
+	car.add(carBody, wheel1, new BallConstraint(Vec3(0.8, 0.0, 0.8), Vec3(0,0,0)));
+	car.add(carBody, wheel2, new BallConstraint(Vec3(0.8, 0.0, -0.8), Vec3(0,0,0)));
+	car.add(carBody, wheel3, new BallConstraint(Vec3(-0.8, 0.0, 0.8), Vec3(0,0,0)));
+	car.add(carBody, wheel4, new BallConstraint(Vec3(-0.8, 0.0, -0.8), Vec3(0,0,0)));
 	world.constraints.push_back(std::move(car));
 }
 }

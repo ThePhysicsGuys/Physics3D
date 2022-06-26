@@ -158,7 +158,7 @@ static bool isPhysicalValid(const Physical* phys, const MotorizedPhysical* mainP
 		return false;
 	}
 	for(const Part& part : phys->rigidBody) {
-		if(part.parent != phys) {
+		if(part.getPhysical() != phys) {
 			Debug::logError("part's parent's child is not part");
 			DEBUGBREAK;
 			return false;

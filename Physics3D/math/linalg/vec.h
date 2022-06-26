@@ -9,7 +9,7 @@ template<typename T, size_t Size>
 struct Vector {
 	T data[Size];
 
-	constexpr Vector() noexcept {
+	constexpr Vector() noexcept : data{} {
 		for(T& item : this->data) {
 			item = 0;
 		}

@@ -67,7 +67,7 @@ void PhysicsThread::start() {
 				// We're behind schedule
 				milliseconds tickSkipTimeout = this->tickSkipTimeout.load();
 				if (nextTarget < curTime - tickSkipTimeout) {
-					int ticksToSkip = (curTime - nextTarget).count() / (1000.0 * tickSkipTimeout.count());
+					double ticksToSkip = (curTime - nextTarget).count() / (1000.0 * tickSkipTimeout.count());
 					std::cout << "Can't keep up! Skipping " << ticksToSkip << " ticks!";
 
 					nextTarget = curTime;
