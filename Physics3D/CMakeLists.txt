@@ -54,6 +54,7 @@ add_library(Physics3D STATIC
   datastructures/aligned_alloc.cpp
 
   boundstree/boundsTree.cpp
+  boundstree/boundsTreeAVX.cpp
   boundstree/filters/visibilityFilter.cpp
   
   hardconstraints/fixedConstraint.cpp
