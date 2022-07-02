@@ -32,11 +32,7 @@ static UniqueAlignedPointer<T> copy(const UniqueAlignedPointer<T>& buf, size_t s
 
 	memcpy(result.get(), buf, sizeof(T) * totalBufSize);
 
-/*
-	for(size_t i = 0; i < totalBufSize; i++) {
-		result[i] = buf[i];
-	}
-*/
+
 	return result;
 }
 
