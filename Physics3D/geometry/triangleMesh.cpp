@@ -8,6 +8,7 @@
 #include <vector>
 #include <set>
 #include <cmath>
+#include <string.h>
 
 namespace P3D {
 #pragma region bufManagement
@@ -28,9 +29,9 @@ static UniqueAlignedPointer<T> copy(const UniqueAlignedPointer<T>& buf, size_t s
 	size_t totalBufSize = getOffset(size) * 3;
 	UniqueAlignedPointer<T> result(totalBufSize, 32);
 
-	for(size_t i = 0; i < totalBufSize; i++) {
-		result[i] = buf[i];
-	}
+
+	memcpy(result.get(), buf, sizeof(T) * totalBufSize);
+
 
 	return result;
 }
