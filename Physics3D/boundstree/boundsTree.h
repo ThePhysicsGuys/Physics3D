@@ -233,6 +233,7 @@ struct TrunkSIMDHelperFallback {
 	// indexed result[a][b]
 	static OverlapMatrix computeBoundsOverlapMatrix(const TreeTrunk& trunkA, int trunkASize, const TreeTrunk& trunkB, int trunkBSize);
 	static OverlapMatrix computeBoundsOverlapMatrixAVX(const TreeTrunk& trunkA, int trunkASize, const TreeTrunk& trunkB, int trunkBSize);
+	static OverlapMatrix computeBoundsOverlapMatrixSSE(const TreeTrunk& trunkA, int trunkASize, const TreeTrunk& trunkB, int trunkBSize);
 	// indexed result[i][j] with j >= i+1
 	static OverlapMatrix computeInternalBoundsOverlapMatrix(const TreeTrunk& trunk, int trunkSize);
 
