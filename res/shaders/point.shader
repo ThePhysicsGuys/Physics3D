@@ -35,26 +35,26 @@ in float gsize[];
 
 out vec3 fcolor;
 
-uniform mat4 uViewMatrix;
-uniform mat4 uProjectionMatrix;
-uniform vec3 uViewPosition;
+uniform mat4 viewMatrix;
+uniform mat4 projectionMatrix;
+uniform vec3 viewPosition;
 
 void makeTriangle(vec4 a, vec4 b, vec4 c, vec3 color) {
 	fcolor = color;
-	gl_Position = uProjectionMatrix * uViewMatrix * a;
+	gl_Position = projectionMatrix * viewMatrix * a;
 	EmitVertex();
 
-	gl_Position = uProjectionMatrix * uViewMatrix * b;
+	gl_Position = projectionMatrix * viewMatrix * b;
 	EmitVertex();
 
-	gl_Position = uProjectionMatrix * uViewMatrix * c;
+	gl_Position = projectionMatrix * viewMatrix * c;
 	EmitVertex();
 	EndPrimitive();
 }
 
 void main() {
 	vec4 origin = gl_in[0].gl_Position;
-	float size = gsize[0] * sqrt(length(origin.xyz-uViewPosition));
+	float size = gsize[0] * sqrt(length(origin.xyz-viewPosition));
 	vec3 colorA = gcolor1[0];
 	vec3 colorB = gcolor2[0];
 	vec4 xPos = origin + vec4(size, 0, 0, 0);

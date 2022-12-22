@@ -30,6 +30,7 @@ void ConstraintLayer::onUpdate(Engine::Registry64& registry) {
 
 static void renderObject(const Graphics::Comp::Mesh& shape, const GlobalCFrame& cframe, const DiagonalMat3f& scale, const Graphics::Comp::Material& material) {
 	Shaders::basicShader->updateMaterial(material);
+	Shaders::basicShader->updateTexture(false);
 	Shaders::basicShader->updateModel(cframe, scale);
 	MeshRegistry::get(shape)->render();
 }

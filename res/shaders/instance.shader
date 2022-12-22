@@ -1,7 +1,6 @@
 [properties]
-
-int mode (uMode) = 0;
-int uReflectionSamples = 8;
+int mode = 0;
+int reflectionSamples = 8;
 
 [common]
 
@@ -72,9 +71,9 @@ flat out float fRoughness;
 flat out float fAmbientOcclusion;
 flat out uvec2 fTextureFlags;
 
-uniform mat4 uViewMatrix;
-uniform mat4 uProjectionMatrix;
-uniform mat4 uLightMatrix;
+uniform mat4 viewMatrix;
+uniform mat4 projectionMatrix;
+uniform mat4 lightMatrix;
 
 void main() {
 	fAlbedo = vAlbedo;
@@ -87,9 +86,9 @@ void main() {
 	fPosition = applyT3(vModelMatrix, vPosition);
 	mat3 normalMatrix = transpose(inverse(mat3(vModelMatrix)));
 	fNormal = normalMatrix * vNormal;
-	fLightSpacePosition = applyT(uLightMatrix, fPosition);
+	fLightSpacePosition = applyT(lightMatrix, fPosition);
 
-	gl_Position = applyT(uProjectionMatrix * uViewMatrix, fPosition);
+	gl_Position = applyT(projectionMatrix * viewMatrix, fPosition);
 }
 
 //------------------------------------------------------------------------------//
@@ -111,7 +110,6 @@ flat in float fMetalness;
 flat in float fAmbientOcclusion;
 flat in uvec2 fTextureFlags;
 
-// Flags
 const ivec2 Flag_Albedo       = ivec2(0, 24);
 const ivec2 Flag_Normal       = ivec2(0, 16);
 const ivec2 Flag_Metalness    = ivec2(0, 8);
@@ -120,8 +118,7 @@ const ivec2 Flag_AO           = ivec2(1, 24);
 const ivec2 Flag_Gloss        = ivec2(1, 16);
 const ivec2 Flag_Specular     = ivec2(1, 8);
 const ivec2 Flag_Displacement = ivec2(1, 0);
-						   
-// Modes
+						    
 const int Mode_Default        = 0;
 const int Mode_Position       = 1;
 const int Mode_Normal         = 2;
@@ -133,7 +130,7 @@ const int Mode_Roughness      = 7;
 const int Mode_AO             = 8;
 const int Mode_TextureFlags   = 9;
 
-uniform int uMode = Mode_Default;
+uniform int mode = Mode_Default;
 
 // General
 vec3 N;
@@ -159,28 +156,27 @@ struct Light {
 };
 
 #define maxLights 10
-uniform int uLightCount;
-uniform Light uLights[maxLights];
+uniform int lightCount;
+uniform Light lights[maxLights];
 
 // Shadow
-uniform sampler2D uShadowMap;
+uniform sampler2D shadowMap;
 
 // Transform
-uniform vec3 uViewPosition;
+uniform vec3 viewPosition;
 
 // Textures
-//uniform sampler2D uTextures[##MAX_TEXTURE_IMAGE_UNITS];
-uniform sampler2D uTextures[31];
-uniform samplerCube uSkyboxTexture;
+//uniform sampler2D textures[##MAX_TEXTURE_IMAGE_UNITS];
+uniform sampler2D textures[31];
+uniform samplerCube skyboxTexture;
 
 // Environment
-uniform int uReflectionSamples = 10;
-uniform vec3 uSunDirection = vec3(1, 1, 1);
-uniform vec3 uSunColor = vec3(1, 1, 1);
-uniform float uExposure = 0.8;
-uniform float uGamma = 1.0;
-uniform float uHDR = 1.0;
-
+uniform int reflectionSamples = 10;
+uniform vec3 sunDirection = vec3(1, 1, 1);
+uniform vec3 sunColor = vec3(1, 1, 1);
+uniform float exposure = 0.8;
+uniform float gamma = 1.0;
+uniform float hdr = 1.0;
 
 // Constants
 float PI = 3.14159265359;
@@ -222,10 +218,9 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0) {
 }
 
 vec3 calcDirectionalLight() {
-	vec3 L = normalize(uSunDirection);
+	vec3 L = normalize(sunDirection);
 	float directionalFactor = 0.4 * max(dot(N, -L), 0.0);
-	vec3 directional = directionalFactor * uSunColor;
-
+	vec3 directional = directionalFactor * sunColor;
 	return directional;
 }
 
@@ -241,13 +236,13 @@ float calcShadow() {
 
 	// check whether current frag pos is in shadow
 	//float bias = 0.005;
-	float bias = max(0.05 * (1.0 - dot(N, -uSunDirection)), 0.005);
+	float bias = max(0.05 * (1.0 - dot(N, -sunDirection)), 0.005);
 	float currentDepth = projCoords.z;
 	float shadow = 0.0;
-	vec2 texelSize = 0.5 / textureSize(uShadowMap, 0);
+	vec2 texelSize = 0.5 / textureSize(shadowMap, 0);
 	for (int x = -2; x <= 2; ++x) {
 		for (int y = -2; y <= 2; ++y) {
-			float pcfDepth = texture(uShadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
+			float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
 			shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
 		}
 	}
@@ -293,24 +288,24 @@ vec3 calcLightColor(Light light) {
 float rand(float n) { return fract(sin(n) * 43758.5453123); }
 
 vec3 skybox() {
-	vec3 wo = normalize(uViewPosition - fPosition);
+	vec3 wo = normalize(viewPosition - fPosition);
 	vec3 wi = reflect(-wo, N);
 
 	vec3 w = -wi;
 	vec3 u = cross(vec3(0.0, 1.0, 0.0), w);
 	vec3 v = cross(w, u);
 
-	vec3 result = texture(uSkyboxTexture, wi).rgb;
-	for (int s = 1; s <= uReflectionSamples; s++) {
-		float progress = float(s) / float(uReflectionSamples);
+	vec3 result = texture(skyboxTexture, wi).rgb;
+	for (int s = 1; s <= reflectionSamples; s++) {
+		float progress = float(s) / float(reflectionSamples);
 		float angle = (10.0 + 3.0 * rand(s)) * TWOPI * progress;
 		vec3 offset = cos(angle) * u + sin(angle) * v;
 		vec3 scaledOffset = (1.0 - metalness) * offset * mix(0.02, 0.35, progress);
 		vec3 ws = normalize(wi + scaledOffset);
-		result += texture(uSkyboxTexture, ws).rgb;
+		result += texture(skyboxTexture, ws).rgb;
 	}
 
-	result /= max(float(uReflectionSamples), 1.0);
+	result /= max(float(reflectionSamples), 1.0);
 	
 	return result;
 }
@@ -320,7 +315,7 @@ int getTextureMapIndex(ivec2 flag) {
 }
 
 vec4 getTextureMap(flat int map) {
-	return texture(uTextures[map - 1], fUV);
+	return texture(textures[map - 1], fUV);
 }
 
 vec4 getAlbedo() {
@@ -394,13 +389,13 @@ void main() {
 	ambientOcclusion = getAmbientOcclusion();
 
 	N = getNormal();
-	V = normalize(uViewPosition - fPosition);
+	V = normalize(viewPosition - fPosition);
 
 	// Light calculations
 	vec3 Lo = vec3(0);
-	for (int i = 0; i < min(maxLights, uLightCount); i++)
-		if (uLights[i].intensity > 0)
-			Lo += calcLightColor(uLights[i]);
+	for (int i = 0; i < min(maxLights, lightCount); i++)
+		if (lights[i].intensity > 0)
+			Lo += calcLightColor(lights[i]);
 
 	// Ambient
 	vec3 ambient = albedo.rgb * mix(vec3(ambientOcclusion), skybox(), metalness);
@@ -415,31 +410,31 @@ void main() {
 	vec3 color = ambient + (1.0 - shadow) * Ld * ambient + Lo;
 
 	// HDR 
-	color = uHDR * (vec3(1.0) - exp(-color * uExposure)) + (1.0 - uHDR) * color;
+	color = hdr * (vec3(1.0) - exp(-color * exposure)) + (1.0 - hdr) * color;
 
 	// Gamma
-	color = pow(color, vec3(1.0 / uGamma));
+	color = pow(color, vec3(1.0 / gamma));
 
 	// Outcolor
-	if (uMode == Mode_Default)
+	if (mode == Mode_Default)
 		outColor = vec4(color, albedo.a);
-	else if (uMode == Mode_Position)
+	else if (mode == Mode_Position)
 		outColor = vec4(fPosition, 1.0);
-	else if (uMode == Mode_Normal)
+	else if (mode == Mode_Normal)
 		outColor = vec4(N, 1.0);
-	else if (uMode == Mode_UV)
+	else if (mode == Mode_UV)
 		outColor = vec4(fUV, 0.0, 1.0);
-	else if (uMode == Mode_LightSpace)
+	else if (mode == Mode_LightSpace)
 		outColor = vec4(fLightSpacePosition);
-	else if (uMode == Mode_Albedo)
+	else if (mode == Mode_Albedo)
 		outColor = vec4(albedo);
-	else if (uMode == Mode_Metalness)
+	else if (mode == Mode_Metalness)
 		outColor = vec4(vec3(metalness), 1.0);
-	else if (uMode == Mode_Roughness)
+	else if (mode == Mode_Roughness)
 		outColor = vec4(vec3(roughness), 1.0);
-	else if (uMode == Mode_AO)
+	else if (mode == Mode_AO)
 		outColor = vec4(vec3(ambientOcclusion), 1.0);
-	else if (uMode == Mode_TextureFlags)
+	else if (mode == Mode_TextureFlags)
 		outColor = vec4(vec3(float(getTextureMapIndex(Flag_Albedo)) / 3.0), 1.0);
 	else
 		outColor = vec4(hsv2rgb(vec3(mod(gl_PrimitiveID, 50) / 50.0, 1.0, 1.0)), 1.0);

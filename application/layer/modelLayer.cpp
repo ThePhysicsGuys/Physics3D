@@ -27,8 +27,6 @@
 #include "../layer/shadowLayer.h"
 
 #include "../graphics/batch/instanceBatchManager.h"
-#include "engine/event/keyEvent.h"
-#include "input/standardInputHandler.h"
 #include "picker/tools/selectionTool.h"
 
 namespace P3D::Application {
@@ -98,6 +96,9 @@ void ModelLayer::onInit(Engine::Registry64& registry) {
 	using namespace Graphics;
 	Screen* screen = static_cast<Screen*>(this->ptr);
 
+	// Dont know anymore
+	Shaders::basicShader->updateTexture(false);
+
 	// Instance batch manager
 	manager = new InstanceBatchManager(Shaders::instanceShader, DEFAULT_UNIFORM_BUFFER_LAYOUT);
 }
@@ -125,16 +126,7 @@ void ModelLayer::onUpdate(Engine::Registry64& registry) {
 }
 
 void ModelLayer::onEvent(Engine::Registry64& registry, Engine::Event& event) {
-	/*Engine::EventDispatcher dispatcher(event);
-	dispatcher.dispatch<Engine::KeyPressEvent>([] (Engine::KeyPressEvent& keyPressEvent) {
-		auto code = keyPressEvent.getKey().getCode();
-		if (Engine::Keyboard::KEY_NUMPAD_0.getCode() <= code && code <= Engine::Keyboard::KEY_NUMPAD_9.getCode() && handler->keys[Engine::Keyboard::KEY_LEFT_CONTROL.getCode()]) {
-			Shaders::instanceShader->setUniform("uMode", keyPressEvent.getKey().getCode() - Engine::Keyboard::KEY_NUMPAD_0.getCode());
 
-			return false;
-		}
-
-	});*/
 }
 		
 void ModelLayer::onRender(Engine::Registry64& registry) {
@@ -154,23 +146,16 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 	Vec3f from = { -10, 10, -10 };
 	Vec3f to = { 0, 0, 0 };
 	Vec3f sunDirection = to - from;
-
 	ShadowLayer::lightView = lookAt(from, to);
 	ShadowLayer::lighSpaceMatrix = ShadowLayer::lightProjection * ShadowLayer::lightView;
 	Renderer::activeTexture(32);
 	Renderer::bindTexture2D(ShadowLayer::depthMap);
-
-	Shaders::basicShader->setUniform("uShadowMap", 32);
-	Shaders::instanceShader->setUniform("uShadowMap", 32);
-	Shaders::basicShader->setUniform("uLightMatrix", ShadowLayer::lighSpaceMatrix);
-	Shaders::instanceShader->setUniform("uLightMatrix", ShadowLayer::lighSpaceMatrix);
-
+	Shaders::instanceShader->setUniform("shadowMap", 32);
+	Shaders::instanceShader->setUniform("lightMatrix", ShadowLayer::lighSpaceMatrix);
 	Shaders::instanceShader->updateSunDirection(sunDirection);
-	Shaders::basicShader->updateSunDirection(sunDirection);
 
 	// Skybox
-	Shaders::basicShader->setUniform("uSkyboxTexture", 31);
-	Shaders::instanceShader->setUniform("uSkyboxTexture", 31);
+	Shaders::instanceShader->setUniform("skyboxTexture", 31);
 	SkyboxLayer::skyboxTexture->bind(31);
 
 	graphicsMeasure.mark(PHYSICALS);
@@ -214,11 +199,9 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 			info.material = registry.getOr<Graphics::Comp::Material>(entity);
 			
 			if (info.material.albedo.a < 1.0f) {
-			//if (info.material.albedo.a < 1.0f) {
 				double distance = lengthSquared(Vec3(screen->camera.cframe.position - info.transform.getPosition()));
 				transparentEntities.insert(std::make_pair(distance, info));
 			} else {
-			/*} else {
 				Mat4f modelMatrix = info.transform.getModelMatrix();
 
 				if (info.collider.valid())
@@ -226,7 +209,6 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 				
 				manager->add(info.mesh->id, modelMatrix, info.material);
 			}
-			}*/
 		}
 
 		Shaders::instanceShader->bind();
@@ -236,7 +218,6 @@ void ModelLayer::onRender(Engine::Registry64& registry) {
 		// Render transparent meshes
 		Shaders::basicShader->bind();
 		enableBlending();
-		enableCulling();
 		for (auto iterator = transparentEntities.rbegin(); iterator != transparentEntities.rend(); ++iterator) {
 			EntityInfo info = iterator->second;
 
