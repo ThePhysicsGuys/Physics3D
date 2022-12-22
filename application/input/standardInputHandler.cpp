@@ -142,10 +142,11 @@ bool StandardInputHandler::onKeyPress(Engine::KeyPressEvent& event) {
 	
 	KEY_BIND(KeyboardOptions::Part::makeMainPhysical) {
 		if (screen.selectedPart) {
-			if (screen.selectedPart->parent != nullptr) {
-				if (!screen.selectedPart->parent->isMainPhysical()) {
+			Physical* selectedPartPhysical = screen.selectedPart->getPhysical();
+			if (selectedPartPhysical != nullptr) {
+				if (!selectedPartPhysical->isMainPhysical()) {
 					Log::info("Made %s the main physical", screen.registry.getOr<Comp::Name>(screen.selectedPart->entity, "").name.c_str());
-					((ConnectedPhysical*) screen.selectedPart->parent)->makeMainPhysical();
+					((ConnectedPhysical*) selectedPartPhysical)->makeMainPhysical();
 				} else {
 					Log::warn("This physical is already the main physical!");
 				}

@@ -266,10 +266,10 @@ void setupWorld(const ::Util::ParsedArgs& cmdArgs) {
 	world.addPart(partE, 1);
 
 	ConstraintGroup cg;
-	cg.add(partA->parent, partB->parent, new BallConstraint(Vec3(7.0, 0.0, 0.0), Vec3(-1.0, 0.0, 0.0)));
-	cg.add(partB->parent, partC->parent, new BallConstraint(Vec3(0.5, 0.0, 0.0), Vec3(-0.5, 0.0, 0.0)));
-	cg.add(partC->parent, partD->parent, new BallConstraint(Vec3(0.5, 0.0, 0.0), Vec3(-0.5, 0.0, 0.0)));
-	cg.add(partD->parent, partE->parent, new BallConstraint(Vec3(0.5, 0.0, 0.0), Vec3(-0.5, 0.0, 0.0)));
+	cg.add(partA, partB, new BallConstraint(Vec3(7.0, 0.0, 0.0), Vec3(-1.0, 0.0, 0.0)));
+	cg.add(partB, partC, new BallConstraint(Vec3(0.5, 0.0, 0.0), Vec3(-0.5, 0.0, 0.0)));
+	cg.add(partC, partD, new BallConstraint(Vec3(0.5, 0.0, 0.0), Vec3(-0.5, 0.0, 0.0)));
+	cg.add(partD, partE, new BallConstraint(Vec3(0.5, 0.0, 0.0), Vec3(-0.5, 0.0, 0.0)));
 	world.constraints.push_back(std::move(cg));
 }
 

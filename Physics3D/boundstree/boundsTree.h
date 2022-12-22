@@ -232,6 +232,8 @@ struct TrunkSIMDHelperFallback {
 	static std::array<bool, BRANCH_FACTOR> computeOverlapsWith(const TreeTrunk& trunk, int trunkSize, const BoundsTemplate<float>& bounds);
 	// indexed result[a][b]
 	static OverlapMatrix computeBoundsOverlapMatrix(const TreeTrunk& trunkA, int trunkASize, const TreeTrunk& trunkB, int trunkBSize);
+	static OverlapMatrix computeBoundsOverlapMatrixAVX(const TreeTrunk& trunkA, int trunkASize, const TreeTrunk& trunkB, int trunkBSize);
+	static OverlapMatrix computeBoundsOverlapMatrixSSE(const TreeTrunk& trunkA, int trunkASize, const TreeTrunk& trunkB, int trunkBSize);
 	// indexed result[i][j] with j >= i+1
 	static OverlapMatrix computeInternalBoundsOverlapMatrix(const TreeTrunk& trunk, int trunkSize);
 

@@ -151,7 +151,7 @@ public:
 	void detachPart(Part* part);
 	/*
 		removes a part from this Physical
-		After this method: part->parent == nullptr
+		After this method: part->hasPhysical() == false
 		As opposed to Physical::detachPart(Part*)
 
 		this Physical may no longer be valid after calling removePart

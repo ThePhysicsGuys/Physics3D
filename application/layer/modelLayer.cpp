@@ -47,17 +47,21 @@ static RelationToSelectedPart getRelationToSelectedPart(const Part* selectedPart
 	if (testPart == selectedPart)
 		return RelationToSelectedPart::SELF;
 
-	if (selectedPart->parent != nullptr && testPart->parent != nullptr) {
-		if (testPart->parent == selectedPart->parent) {
-			if (testPart->isMainPart())
+	Physical* selectedPartPhysical = selectedPart->getPhysical();
+	Physical* testPartPhysical = testPart->getPhysical();
+	if (selectedPartPhysical != nullptr && testPartPhysical != nullptr) {
+		if (testPartPhysical == testPartPhysical) {
+			if(testPart->isMainPart()) {
 				return RelationToSelectedPart::MAINPART;
-			else
+			} else {
 				return RelationToSelectedPart::DIRECT_ATTACH;
-		} else if (testPart->parent->mainPhysical == selectedPart->parent->mainPhysical) {
-			if (testPart->parent->isMainPhysical())
+			}
+		} else if (testPartPhysical->mainPhysical == selectedPartPhysical->mainPhysical) {
+			if(testPartPhysical->isMainPhysical()) {
 				return RelationToSelectedPart::MAINPHYSICAL_ATTACH;
-			else
+			} else {
 				return RelationToSelectedPart::PHYSICAL_ATTACH;
+			}
 		}
 	}
 

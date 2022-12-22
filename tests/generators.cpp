@@ -187,7 +187,7 @@ std::vector<Part> generateMotorizedPhysicalParts() {
 	int size = rand() % 5 + 1;
 	std::vector<Part> parts(size);
 	parts[0] = generatePart();
-	if(generateBool()) parts[0].ensureHasParent();
+	if(generateBool()) parts[0].ensureHasPhysical();
 
 	for(int i = 1; i < size; i++) {
 		parts[i] = generatePart();

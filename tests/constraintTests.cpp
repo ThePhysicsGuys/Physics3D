@@ -26,11 +26,11 @@ using namespace P3D;
 TEST_CASE(testMotionOfPhysicalSinglePart) {
 	Part p1(sphereShape(1.0), GlobalCFrame(0.0, 0.0, 0.0), {1.0, 1.0, 1.0});
 
-	p1.ensureHasParent();
+	Physical* p1Phys = p1.ensureHasPhysical();
 
 	Motion COMMotion(Vec3(1.0, 0.7, 1.3), Vec3(-0.3, 1.7, -1.1));
 
-	p1.parent->mainPhysical->motionOfCenterOfMass = COMMotion;
+	p1Phys->mainPhysical->motionOfCenterOfMass = COMMotion;
 
 	Vec3 p1calculatedVelBefore = p1.getMotion().getVelocity();
 
@@ -38,11 +38,11 @@ TEST_CASE(testMotionOfPhysicalSinglePart) {
 
 	Position p1PosBefore = p1.getCenterOfMass();
 
-	p1.parent->mainPhysical->update(DELTA_T);
+	p1Phys->mainPhysical->update(DELTA_T);
 
 	Position p1PosMid = p1.getCenterOfMass();
 
-	p1.parent->mainPhysical->update(DELTA_T);
+	p1Phys->mainPhysical->update(DELTA_T);
 
 	Position p1PosAfter = p1.getCenterOfMass();
 
@@ -59,7 +59,8 @@ TEST_CASE(testMotionOfPhysicalPartsBasic) {
 
 	Motion COMMotion(Vec3(1.0, 0.7, 1.3), Vec3(0, 0, 0));
 
-	p1.parent->mainPhysical->motionOfCenterOfMass = COMMotion;
+	Physical* p1Phys = p1.getPhysical();
+	p1.getMainPhysical()->motionOfCenterOfMass = COMMotion;
 
 	Vec3 p1calculatedVelBefore = p1.getMotion().getVelocity();
 	Vec3 p2calculatedVelBefore = p2.getMotion().getVelocity();
@@ -70,12 +71,12 @@ TEST_CASE(testMotionOfPhysicalPartsBasic) {
 	Position p1PosBefore = p1.getCenterOfMass();
 	Position p2PosBefore = p2.getCenterOfMass();
 
-	p1.parent->mainPhysical->update(DELTA_T);
+	p1.getMainPhysical()->update(DELTA_T);
 
 	Position p1PosMid = p1.getCenterOfMass();
 	Position p2PosMid = p2.getCenterOfMass();
 
-	p1.parent->mainPhysical->update(DELTA_T);
+	p1.getMainPhysical()->update(DELTA_T);
 
 	Position p1PosAfter = p1.getCenterOfMass();
 	Position p2PosAfter = p2.getCenterOfMass();
@@ -96,12 +97,12 @@ TEST_CASE(testMotionOfPhysicalPartsRotation) {
 
 	Motion COMMotion(Vec3(0, 0, 0), Vec3(-0.3, 1.7, -1.1));
 
-	p1.parent->mainPhysical->motionOfCenterOfMass = COMMotion;
+	p1.getMainPhysical()->motionOfCenterOfMass = COMMotion;
 
 	Vec3 p1calculatedVelBefore = p1.getMotion().getVelocity();
 	Vec3 p2calculatedVelBefore = p2.getMotion().getVelocity();
 
-	logStream << p1.parent->getMotion() << "\n";
+	logStream << p1.getPhysical()->getMotion() << "\n";
 	logStream << p1.getMotion() << "\n";
 	logStream << p2.getMotion() << "\n";
 
@@ -111,12 +112,12 @@ TEST_CASE(testMotionOfPhysicalPartsRotation) {
 	GlobalCFrame p1CFrameBefore = p1.getCFrame();
 	GlobalCFrame p2CFrameBefore = p2.getCFrame();
 
-	p1.parent->mainPhysical->update(DELTA_T);
+	p1.getMainPhysical()->update(DELTA_T);
 
 	GlobalCFrame p1CFrameMid = p1.getCFrame();
 	GlobalCFrame p2CFrameMid = p2.getCFrame();
 
-	p1.parent->mainPhysical->update(DELTA_T);
+	p1.getMainPhysical()->update(DELTA_T);
 
 	GlobalCFrame p1CFrameAfter = p1.getCFrame();
 	GlobalCFrame p2CFrameAfter = p2.getCFrame();
@@ -138,7 +139,7 @@ TEST_CASE(testMotionOfPhysicalPartsBasicFixedConstraint) {
 
 	Motion COMMotion(Vec3(1.0, 0.7, 1.3), Vec3(0, 0, 0));
 
-	p1.parent->mainPhysical->motionOfCenterOfMass = COMMotion;
+	p1.getMainPhysical()->motionOfCenterOfMass = COMMotion;
 
 	Vec3 p1calculatedVelBefore = p1.getMotion().getVelocity();
 	Vec3 p2calculatedVelBefore = p2.getMotion().getVelocity();
@@ -149,12 +150,12 @@ TEST_CASE(testMotionOfPhysicalPartsBasicFixedConstraint) {
 	Position p1PosBefore = p1.getCenterOfMass();
 	Position p2PosBefore = p2.getCenterOfMass();
 
-	p1.parent->mainPhysical->update(DELTA_T);
+	p1.getMainPhysical()->update(DELTA_T);
 
 	Position p1PosMid = p1.getCenterOfMass();
 	Position p2PosMid = p2.getCenterOfMass();
 
-	p1.parent->mainPhysical->update(DELTA_T);
+	p1.getMainPhysical()->update(DELTA_T);
 
 	Position p1PosAfter = p1.getCenterOfMass();
 	Position p2PosAfter = p2.getCenterOfMass();
@@ -176,12 +177,12 @@ TEST_CASE(testMotionOfPhysicalPartsRotationFixedConstraint) {
 
 	Motion COMMotion(Vec3(0, 0, 0), Vec3(-0.3, 1.7, -1.1));
 
-	p1.parent->mainPhysical->motionOfCenterOfMass = COMMotion;
+	p1.getMainPhysical()->motionOfCenterOfMass = COMMotion;
 
 	Vec3 p1calculatedVelBefore = p1.getMotion().getVelocity();
 	Vec3 p2calculatedVelBefore = p2.getMotion().getVelocity();
 
-	logStream << p1.parent->getMotion() << "\n";
+	logStream << p1.getPhysical()->getMotion() << "\n";
 	logStream << p1.getMotion() << "\n";
 	logStream << p2.getMotion() << "\n";
 
@@ -191,12 +192,12 @@ TEST_CASE(testMotionOfPhysicalPartsRotationFixedConstraint) {
 	Position p1PosBefore = p1.getCenterOfMass();
 	Position p2PosBefore = p2.getCenterOfMass();
 
-	p1.parent->mainPhysical->update(DELTA_T);
+	p1.getMainPhysical()->update(DELTA_T);
 
 	Position p1PosMid = p1.getCenterOfMass();
 	Position p2PosMid = p2.getCenterOfMass();
 
-	p1.parent->mainPhysical->update(DELTA_T);
+	p1.getMainPhysical()->update(DELTA_T);
 
 	Position p1PosAfter = p1.getCenterOfMass();
 	Position p2PosAfter = p2.getCenterOfMass();
@@ -217,7 +218,7 @@ TEST_CASE(testMotionOfPhysicalParts) {
 
 	Motion COMMotion(Vec3(1.0, 0.7, 1.3), Vec3(-0.3, 1.7, -1.1));
 
-	p1.parent->mainPhysical->motionOfCenterOfMass = COMMotion;
+	p1.getMainPhysical()->motionOfCenterOfMass = COMMotion;
 
 	Vec3 p1calculatedVelBefore = p1.getMotion().getVelocity();
 	Vec3 p2calculatedVelBefore = p2.getMotion().getVelocity();
@@ -228,12 +229,12 @@ TEST_CASE(testMotionOfPhysicalParts) {
 	Position p1PosBefore = p1.getCenterOfMass();
 	Position p2PosBefore = p2.getCenterOfMass();
 
-	p1.parent->mainPhysical->update(DELTA_T);
+	p1.getMainPhysical()->update(DELTA_T);
 
 	Position p1PosMid = p1.getCenterOfMass();
 	Position p2PosMid = p2.getCenterOfMass();
 
-	p1.parent->mainPhysical->update(DELTA_T);
+	p1.getMainPhysical()->update(DELTA_T);
 
 	Position p1PosAfter = p1.getCenterOfMass();
 	Position p2PosAfter = p2.getCenterOfMass();
@@ -259,8 +260,8 @@ TEST_CASE(testMotionOfPhysicalJointsBasic) {
 
 	Motion COMMotion(Vec3(1.0, 0.7, 1.3), Vec3(0, 0, 0));
 
-	p1.parent->mainPhysical->motionOfCenterOfMass = COMMotion;
-	p1e.parent->mainPhysical->motionOfCenterOfMass = COMMotion;
+	p1.getMainPhysical()->motionOfCenterOfMass = COMMotion;
+	p1e.getMainPhysical()->motionOfCenterOfMass = COMMotion;
 
 	ASSERT(p1.getMotion() == p1e.getMotion());
 	ASSERT(p2.getMotion() == p2e.getMotion());
@@ -278,13 +279,13 @@ TEST_CASE(testMotionOfPhysicalJointsRotation) {
 
 	Motion COMMotion(Vec3(0, 0, 0), Vec3(-0.3, 1.7, -1.1));
 
-	p1.parent->mainPhysical->motionOfCenterOfMass = COMMotion;
-	p1e.parent->mainPhysical->motionOfCenterOfMass = COMMotion;
+	p1.getMainPhysical()->motionOfCenterOfMass = COMMotion;
+	p1e.getMainPhysical()->motionOfCenterOfMass = COMMotion;
 
-	logStream << p1.parent->getMotion() << "\n";
+	logStream << p1.getPhysical()->getMotion() << "\n";
 	logStream << p1.getMotion() << "\n";
 	logStream << p2.getMotion() << "\n";
-	logStream << p1e.parent->getMotion() << "\n";
+	logStream << p1e.getPhysical()->getMotion() << "\n";
 	logStream << p1e.getMotion() << "\n";
 	logStream << p2e.getMotion() << "\n";
 
@@ -304,13 +305,13 @@ TEST_CASE(testMotionOfPhysicalJoints) {
 
 	Motion COMMotion(Vec3(1.0, 0.7, 1.3), Vec3(-0.3, 1.7, -1.1));
 
-	p1.parent->mainPhysical->motionOfCenterOfMass = COMMotion;
-	p1e.parent->mainPhysical->motionOfCenterOfMass = COMMotion;
+	p1.getMainPhysical()->motionOfCenterOfMass = COMMotion;
+	p1e.getMainPhysical()->motionOfCenterOfMass = COMMotion;
 
-	logStream << p1.parent->getMotion() << "\n";
+	logStream << p1.getPhysical()->getMotion() << "\n";
 	logStream << p1.getMotion() << "\n";
 	logStream << p2.getMotion() << "\n";
-	logStream << p1e.parent->getMotion() << "\n";
+	logStream << p1e.getPhysical()->getMotion() << "\n";
 	logStream << p1e.getMotion() << "\n";
 	logStream << p2e.getMotion() << "\n";
 
@@ -328,8 +329,8 @@ TEST_CASE(testFixedConstraintProperties) {
 
 	p1e.attach(&p2e, new FixedConstraint(), CFrame(0.3, -0.8, 0.0), CFrame(-0.7, -0.8, 0));
 
-	MotorizedPhysical* phys1 = p1.parent->mainPhysical;
-	MotorizedPhysical* phys1e = p1e.parent->mainPhysical;
+	MotorizedPhysical* phys1 = p1.getMainPhysical();
+	MotorizedPhysical* phys1e = p1e.getMainPhysical();
 
 	ASSERT(p1.getCFrame() == GlobalCFrame(0.0, 0.0, 0.0));
 	ASSERT(p2.getCFrame() == GlobalCFrame(1.0, 0.0, 0.0));
@@ -356,8 +357,8 @@ TEST_CASE(testApplyForceToFixedConstraint) {
 
 	p1e.attach(&p2e, new FixedConstraint(), attach, CFrame());
 
-	MotorizedPhysical* phys1 = p1.parent->mainPhysical;
-	MotorizedPhysical* phys1e = p1e.parent->mainPhysical;
+	MotorizedPhysical* phys1 = p1.getMainPhysical();
+	MotorizedPhysical* phys1e = p1e.getMainPhysical();
 
 	phys1->applyForceAtCenterOfMass(Vec3(2.7, 3.9, -2.3));
 	phys1e->applyForceAtCenterOfMass(Vec3(2.7, 3.9, -2.3));
@@ -402,8 +403,8 @@ TEST_CASE(testPlainAttachAndFixedConstraintIndistinguishable) {
 	Vec3 impulse(1.3, 4.7, 0.2);
 	Vec3 impulsePos(2.6, 1.7, 2.8);
 
-	MotorizedPhysical* main1 = firstPart.parent->mainPhysical;
-	MotorizedPhysical* main2 = firstPart2.parent->mainPhysical;
+	MotorizedPhysical* main1 = firstPart.getMainPhysical();
+	MotorizedPhysical* main2 = firstPart2.getMainPhysical();
 
 	main1->applyImpulse(impulsePos, impulse);
 	main2->applyImpulse(impulsePos, impulse);
@@ -425,7 +426,7 @@ TEST_CASE(testInternalMotionOfCenterOfMass) {
 
 	firstPart.attach(&secondPart, piston, CFrame(0.0, 0.0, 1.0), CFrame(0.0, 0.0, -1.0));
 
-	MotorizedPhysical* phys = firstPart.parent->mainPhysical;
+	MotorizedPhysical* phys = firstPart.getMainPhysical();
 
 	Vec3 original = phys->totalCenterOfMass;
 
@@ -445,7 +446,7 @@ TEST_CASE(testInternalMotionOfCenterOfMass) {
 }
 
 static bool haveSameMotorPhys(const Part& first, const Part& second) {
-	return first.parent != nullptr && second.parent != nullptr && first.parent->mainPhysical == second.parent->mainPhysical;
+	return first.getPhysical() != nullptr && second.getPhysical() != nullptr && first.getMainPhysical() == second.getMainPhysical();
 }
 
 TEST_CASE(attachPhysicalsNoLayers) {

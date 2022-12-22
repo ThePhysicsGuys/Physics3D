@@ -116,7 +116,7 @@ inline bool isCFrameValid(const CFrameTemplate<T>& cframe) {
 
 template<typename T, std::size_t DerivationCount>
 inline bool isTaylorExpansionValid(const TaylorExpansion<T, DerivationCount>& taylor) {
-	for(Vec3 v : taylor) {
+	for(const Vec3& v : taylor) {
 		if(!isVecValid(v)) return false;
 	}
 	return true;

@@ -2,6 +2,8 @@
 
 #include "bindable.h"
 
+#include <Physics3D/math/linalg/vec.h>
+
 typedef unsigned int GLFLAG;
 
 namespace P3D::Graphics {

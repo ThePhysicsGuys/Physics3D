@@ -100,7 +100,7 @@ public:
 		return objectCount;
 	}
 
-	size_t getLayerCount() const;
+	int getLayerCount() const;
 
 	virtual double getTotalKineticEnergy() const;
 	virtual double getTotalPotentialEnergy() const;

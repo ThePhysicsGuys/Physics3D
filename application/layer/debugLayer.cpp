@@ -159,7 +159,7 @@ void DebugLayer::onRender(Engine::Registry64& registry) {
 			}
 
 			if(colissionSpheresMode == SphereColissionRenderMode::SELECTED) {
-				Physical& selectedPhys = *screen->selectedPart->parent;
+				Physical& selectedPhys = *screen->selectedPart->getPhysical();
 
 				for(Part& part : selectedPhys.rigidBody) {
 					Color yellow = Colors::YELLOW;

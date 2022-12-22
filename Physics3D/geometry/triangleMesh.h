@@ -1,5 +1,7 @@
 #pragma once
 
+#define BLOCK_WIDTH 8
+
 #include "../math/linalg/vec.h"
 #include "../math/cframe.h"
 #include "../math/boundingBox.h"
@@ -23,35 +25,42 @@ struct Triangle {
 	int& operator[](int i) { return indexes[i]; }
 	const int& operator[](int i) const { return indexes[i]; }
 };
-
+  
 struct ShapeVertexIter {
 	float* curVertex;
-	size_t offset;
+	size_t index;
 	Vec3f operator*() const {
-		return Vec3f{*curVertex, *(curVertex + offset), *(curVertex + 2 * offset)};
+		return Vec3f{curVertex[index], (curVertex[index + BLOCK_WIDTH]), (curVertex[index + 2 * BLOCK_WIDTH])};
 	}
 	void operator++() {
-		++curVertex;
+	  index++;
+	  if((index % BLOCK_WIDTH) == 0)
+	  	index += BLOCK_WIDTH * 2;
 	}
 	bool operator!=(const ShapeVertexIter& other) const {
-		return curVertex != other.curVertex;
+	  // size_t correct_index =  (index/offset)*offset+8*2+index;
+	  return &curVertex[index] != other.curVertex;
 	}
 };
 
 struct ShapeTriangleIter {
 	int* curTriangle;
-	size_t offset;
+	size_t index;
 	Triangle operator*() const {
-		return Triangle{*curTriangle, *(curTriangle + offset), *(curTriangle + 2 * offset)};
+	  return Triangle{curTriangle[index], (curTriangle[index + BLOCK_WIDTH]), (curTriangle[index + 2 * BLOCK_WIDTH])};
 	}
 	void operator++() {
-		++curTriangle;
-	}
+	  index++;
+	  if((index % BLOCK_WIDTH) == 0)
+	  	index += BLOCK_WIDTH * 2;
+    }
 	bool operator!=(const ShapeTriangleIter& other) const {
-		return curTriangle != other.curTriangle;
+	  //size_t correct_index =  (index/offset)*offset*2+index;
+		return &curTriangle[index] != other.curTriangle;
 	}
 	bool operator==(const ShapeTriangleIter& other) const {
-		return curTriangle == other.curTriangle;
+	  // size_t correct_index =  (index/offset)*offset*2+index;
+	  return &curTriangle[index] == other.curTriangle;
 	}
 };
 

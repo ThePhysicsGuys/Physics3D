@@ -38,10 +38,7 @@ Physical::Physical(Physical&& other) noexcept :
 	rigidBody(std::move(other.rigidBody)), 
 	mainPhysical(other.mainPhysical),
 	childPhysicals(std::move(other.childPhysicals)) {
-	this->rigidBody.mainPart->parent = this;
-	for(AttachedPart& p : this->rigidBody.parts) {
-		p.part->parent = this;
-	}
+	this->rigidBody.mainPart->setRigidBodyPhysical(this);
 	for(ConnectedPhysical& p : this->childPhysicals) {
 		p.parent = this;
 	}
@@ -51,10 +48,7 @@ Physical& Physical::operator=(Physical&& other) noexcept {
 	this->rigidBody = std::move(other.rigidBody);
 	this->mainPhysical = other.mainPhysical;
 	this->childPhysicals = std::move(other.childPhysicals);
-	this->rigidBody.mainPart->parent = this;
-	for(AttachedPart& p : this->rigidBody.parts) {
-		p.part->parent = this;
-	}
+	this->rigidBody.mainPart->setRigidBodyPhysical(this);
 	for(ConnectedPhysical& p : this->childPhysicals) {
 		p.parent = this;
 	}
@@ -273,15 +267,16 @@ void Physical::attachPhysical(MotorizedPhysical* phys, HardConstraint* constrain
 }
 
 void Physical::attachPart(Part* part, HardConstraint* constraint, const CFrame& attachToThis, const CFrame& attachToThat) {
-	if(part->parent == nullptr) {
+	Physical* partPhys = part->getPhysical();
+	if(partPhys) {
+		attachPhysical(partPhys, constraint, attachToThis, part->transformCFrameToParent(attachToThat));
+	} else {
 		WorldPrototype* world = this->getWorld();
 		if(world != nullptr) {
 			world->onPartAdded(part);
 		}
 		childPhysicals.push_back(ConnectedPhysical(Physical(part, this->mainPhysical), this, constraint, attachToThat, attachToThis));
 		childPhysicals.back().refreshCFrame();
-	} else {
-		attachPhysical(part->parent, constraint, attachToThis, part->transformCFrameToParent(attachToThat));
 	}
 
 	mainPhysical->refreshPhysicalProperties();
@@ -308,9 +303,7 @@ void Physical::attachPhysical(Physical* phys, const CFrame& attachment) {
 void Physical::attachPhysical(MotorizedPhysical* phys, const CFrame& attachment) {
 	this->childPhysicals.reserve(this->childPhysicals.size() + phys->childPhysicals.size());
 
-	for(Part& p : phys->rigidBody) {
-		p.parent = this;
-	}
+	phys->rigidBody.mainPart->setRigidBodyPhysical(this);
 	this->rigidBody.attach(std::move(phys->rigidBody), attachment);
 	
 
@@ -337,17 +330,18 @@ void Physical::attachPhysical(MotorizedPhysical* phys, const CFrame& attachment)
 }
 
 void Physical::attachPart(Part* part, const CFrame& attachment) {
-	if(part->parent != nullptr) { // part is already in a physical
-		if(part->parent->mainPhysical == this->mainPhysical) {
+	Physical* partPhys = part->getPhysical();
+	if(partPhys != nullptr) { // part is already in a physical
+		if(partPhys->mainPhysical == this->mainPhysical) {
 			throw std::invalid_argument("Part already attached to this physical!");
 		}
 
 		// attach other part's entire physical
 		if(part->isMainPart()) {
-			attachPhysical(part->parent, attachment);
+			attachPhysical(partPhys, attachment);
 		} else {
-			CFrame newAttach = attachment.localToGlobal(~part->parent->rigidBody.getAttachFor(part).attachment);
-			attachPhysical(part->parent, newAttach);
+			CFrame newAttach = attachment.localToGlobal(~part->getAttachToMainPart());
+			attachPhysical(partPhys, newAttach);
 		}
 	} else {
 		WorldPrototype* world = this->getWorld();
@@ -435,7 +429,7 @@ COMMotionTree MotorizedPhysical::getCOMMotionTree(UnmanagedArray<MonotonicTreeNo
 }
 
 void Physical::detachPartAssumingMultipleParts(Part* part) {
-	assert(part->parent == this);
+	assert(part->getPhysical() == this);
 	assert(rigidBody.getPartCount() > 1);
 
 	if(part == rigidBody.getMainPart()) {
@@ -450,7 +444,7 @@ void Physical::detachPartAssumingMultipleParts(Part* part) {
 }
 
 void Physical::detachPart(Part* part) {
-	assert(part->parent == this);
+	assert(part->getPhysical() == this);
 
 	WorldPrototype* world = this->getWorld();
 
@@ -484,7 +478,7 @@ void Physical::detachPart(Part* part) {
 }
 
 void Physical::removePart(Part* part) {
-	assert(part->parent == this);
+	assert(part->getPhysical() == this);
 
 	if(rigidBody.getPartCount() == 1) {
 		assert(part == rigidBody.getMainPart());
@@ -1053,8 +1047,9 @@ std::vector<FoundLayerRepresentative> findAllLayersIn(MotorizedPhysical* phys) {
 
 std::vector<FoundLayerRepresentative> findAllLayersIn(Part* part) {
 	if(part->layer != nullptr) {
-		if(part->parent != nullptr) {
-			return findAllLayersIn(part->parent->mainPhysical);
+		Physical* partPhys = part->getPhysical();
+		if(partPhys) {
+			return findAllLayersIn(partPhys->mainPhysical);
 		} else {
 			return std::vector<FoundLayerRepresentative>{FoundLayerRepresentative{part->layer, part}};
 		}

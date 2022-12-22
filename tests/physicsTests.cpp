@@ -89,20 +89,19 @@ TEST_CASE_SLOW(rotationInvariance) {
 
 TEST_CASE(applyForceToRotate) {
 	Part part(boxShape(1.0, 1.0, 1.0), GlobalCFrame(0,0,0, Rotation::fromEulerAngles(0.3, 0.7, 0.9)), {1.0, 1.0, 0.7});
-	part.ensureHasParent();
+	Physical* partPhys = part.ensureHasPhysical();
 
 	Vec3 relAttach = Vec3(1.0, 0.0, 0.0);
 	Vec3 force = Vec3(0.0, 1.0, 0.0);
 
-	part.parent->mainPhysical->applyForce(relAttach, force);
-	ASSERT(part.parent->mainPhysical->totalForce == force);
-	ASSERT(part.parent->mainPhysical->totalMoment == Vec3(0.0, 0.0, 1.0));
+	partPhys->mainPhysical->applyForce(relAttach, force);
+	ASSERT(partPhys->mainPhysical->totalForce == force);
+	ASSERT(partPhys->mainPhysical->totalMoment == Vec3(0.0, 0.0, 1.0));
 }
 
 TEST_CASE(momentToAngularVelocity) {
 	Part part(boxShape(1.0, 1.0, 1.0), GlobalCFrame(Rotation::rotY(PI / 2)), {1.0, 1.0, 0.7});
-	part.ensureHasParent();
-	MotorizedPhysical& p = *part.parent->mainPhysical;
+	MotorizedPhysical& p = *part.ensureHasPhysical()->mainPhysical;
 
 	Vec3 moment(1.0, 0.0, 0.0);
 
@@ -116,8 +115,7 @@ TEST_CASE(momentToAngularVelocity) {
 
 TEST_CASE(rotationImpulse) {
 	Part part(boxShape(0.2, 20.0, 0.2), GlobalCFrame(0,0,0), {1.0, 1.0, 0.7});
-	part.ensureHasParent();
-	MotorizedPhysical& veryLongBoxPhysical = *part.parent->mainPhysical;
+	MotorizedPhysical& veryLongBoxPhysical = *part.ensureHasPhysical()->mainPhysical;
 
 	Vec3 xMoment = Vec3(1.0, 0.0, 0.0);
 	Vec3 yMoment = Vec3(0.0, 1.0, 0.0);
@@ -131,8 +129,8 @@ TEST_CASE(rotationImpulse) {
 
 /*TEST_CASE(testPointAcceleration) {
 	Part testPart(boxShape(1.0, 2.0, 3.0), GlobalCFrame(0,0,0), {1.0, 1.0, 0.7});
-	testPart.ensureHasParent();
-	MotorizedPhysical& testPhys = *testPart.parent->mainPhysical;
+	testPart.ensureHasPhysical();
+	MotorizedPhysical& testPhys = *testPart.getMainPhysical();
 	Vec3 localPoint(3, 5, 7);
 	Vec3 force(-4, -3, 0.5);
 	double deltaT = 0.00001;
@@ -156,8 +154,8 @@ TEST_CASE(rotationImpulse) {
 
 /*TEST_CASE(testGetPointAccelerationMatrix) {
 	Part testPart(boxShape(1.0, 2.0, 3.0), GlobalCFrame(0,0,0), {1.0, 1.0, 0.7});
-	testPart.ensureHasParent();
-	MotorizedPhysical& testPhys = *testPart.parent->mainPhysical;
+	testPart.ensureHasPhysical();
+	MotorizedPhysical& testPhys = *testPart.getMainPhysical();
 	Vec3 localPoint(3, 5, 7);
 	Vec3 force(-4, -3, 0.5);
 
@@ -173,8 +171,7 @@ TEST_CASE(rotationImpulse) {
 }*/
 TEST_CASE(impulseTest) {
 	Part part(boxShape(1.0, 2.0, 2.5), GlobalCFrame(0,0,0), {1.0, 1.0, 0.7});
-	part.ensureHasParent();
-	MotorizedPhysical& p = *part.parent->mainPhysical;
+	MotorizedPhysical& p = *part.ensureHasPhysical()->mainPhysical;
 
 	p.applyImpulseAtCenterOfMass(Vec3(15, 0, 0));
 	ASSERT(p.getMotion().getVelocity() == Vec3(3,0,0));
@@ -189,8 +186,7 @@ TEST_CASE(impulseTest) {
 
 TEST_CASE(testPointAccelMatrixImpulse) {
 	Part part(boxShape(1.0, 2.0, 3.0), GlobalCFrame(7.6, 3.4, 3.9, Rotation::fromEulerAngles(1.1, 0.7, 0.9)), {1.0, 1.0, 0.7});
-	part.ensureHasParent();
-	MotorizedPhysical& p = *part.parent->mainPhysical;
+	MotorizedPhysical& p = *part.ensureHasPhysical()->mainPhysical;
 
 	Vec3 localPoint(0.8, 0.6, 0.9);
 	Vec3 localImpulse(0.3, -0.7, 0.6);
@@ -206,8 +202,7 @@ TEST_CASE(testPointAccelMatrixImpulse) {
 
 TEST_CASE(inelasticColission) {
 	Part part(boxShape(1.0, 2.0, 3.0), GlobalCFrame(7.6, 3.4, 3.9, Rotation::fromEulerAngles(1.1, 0.7, 0.9)), {1.0, 1.0, 0.7});
-	part.ensureHasParent();
-	MotorizedPhysical& p = *part.parent->mainPhysical;
+	MotorizedPhysical& p = *part.ensureHasPhysical()->mainPhysical;
 
 	Vec3 localPoint(0.8, 0.6, 0.9);
 	Vec3 relativePoint = p.getCFrame().localToRelative(localPoint);
@@ -253,8 +248,7 @@ TEST_CASE(inelasticColission) {
 
 TEST_CASE(inelasticColission2) {
 	Part part(boxShape(1.0, 2.0, 3.0), GlobalCFrame(/*Vec3(7.6, 3.4, 3.9), rotationMatrixfromEulerAngles(1.1, 0.7, 0.9)*/), {1.0, 1.0, 0.7});
-	part.ensureHasParent();
-	MotorizedPhysical& p = *part.parent->mainPhysical;
+	MotorizedPhysical& p = *part.ensureHasPhysical()->mainPhysical;
 
 	Vec3 localPoint(0.8, 0.6, 0.9);
 	Vec3 relativePoint = p.getCFrame().localToRelative(localPoint);
@@ -324,12 +318,12 @@ TEST_CASE(testMultiPartPhysicalSimple) {
 	Part p2(box2, GlobalCFrame(), {10.0, 0.5, 0.5});
 	Part doubleP(doubleBox, GlobalCFrame(), {10.0, 0.5, 0.5});
 
-	p1.ensureHasParent();
-	MotorizedPhysical& phys = *p1.parent->mainPhysical;
+	p1.ensureHasPhysical();
+	MotorizedPhysical& phys = *p1.getMainPhysical();
 	phys.attachPart(&p2, CFrame(Vec3(1.0, 0.0, 0.0)));
 
-	doubleP.ensureHasParent();
-	MotorizedPhysical& phys2 = *doubleP.parent->mainPhysical;
+	doubleP.ensureHasPhysical();
+	MotorizedPhysical& phys2 = *doubleP.getMainPhysical();
 
 	ASSERT(phys.totalMass == p1.getMass() + p2.getMass());
 	ASSERT(phys.totalCenterOfMass == Vec3(0.5, 0, 0));
@@ -388,7 +382,7 @@ TEST_CASE(testPhysicalInertiaDerivatives) {
 						CFrame(0.3, 0.7, -0.5, Rotation::fromEulerAngles(0.7, 0.3, 0.7)),
 						CFrame(0.1, 0.2, -0.5, Rotation::fromEulerAngles(0.2, -0.257, 0.4)), basicProperties);
 
-	MotorizedPhysical* motorPhys = mainPart.parent->mainPhysical;
+	MotorizedPhysical* motorPhys = mainPart.getMainPhysical();
 
 	std::size_t size = motorPhys->getNumberOfPhysicalsInThisAndChildren() - 1;
 	UnmanagedArray<MonotonicTreeNode<RelativeMotion>> arr(new MonotonicTreeNode<RelativeMotion>[size], size);
@@ -419,7 +413,7 @@ TEST_CASE(testCenterOfMassKept) {
 						CFrame(0.0, 0.0, 0.0, Rotation::Predefined::IDENTITY),
 						CFrame(0.0, 0.0, 0.0, Rotation::Predefined::IDENTITY), basicProperties);
 
-	ALLOCA_COMMotionTree(t, mainPart.parent->mainPhysical, size);
+	ALLOCA_COMMotionTree(t, mainPart.getMainPhysical(), size);
 
 	logStream << t.getRelativePosOfMain();
 
@@ -437,7 +431,7 @@ TEST_CASE(testBasicAngularMomentum) {
 						CFrame(0.0, 0.0, 0.0, Rotation::Predefined::IDENTITY),
 						CFrame(0.0, 0.0, 0.0, Rotation::Predefined::IDENTITY), basicProperties);
 
-	ALLOCA_COMMotionTree(t, mainPart.parent->mainPhysical, size);
+	ALLOCA_COMMotionTree(t, mainPart.getMainPhysical(), size);
 
 	SymmetricMat3 inertia = attachedPart.getInertia();
 	Vec3 angularVel = constraint->getRelativeMotion().relativeMotion.getAngularVelocity();
@@ -457,7 +451,7 @@ TEST_CASE(testBasicAngularMomentumTurned) {
 					  CFrame(0.0, 0.0, 0.0, Rotation::Predefined::IDENTITY), basicProperties);
 
 	
-	ALLOCA_COMMotionTree(t, mainPart.parent->mainPhysical, size);
+	ALLOCA_COMMotionTree(t, mainPart.getMainPhysical(), size);
 
 	SymmetricMat3 inertia = attachedPart.getInertia();
 	Vec3 angularVel = constraint->getRelativeMotion().relativeMotion.getAngularVelocity();
@@ -488,7 +482,7 @@ TEST_CASE(testFixedConstraintAngularMomentum) {
 						CFrame(0.0, 0.0, 0.0, Rotation::Predefined::IDENTITY),
 						CFrame(-offset, 0.0, 0.0, Rotation::Predefined::IDENTITY), basicProperties);
 
-	ALLOCA_COMMotionTree(t1, mainPart1.parent->mainPhysical, size1);
+	ALLOCA_COMMotionTree(t1, mainPart1.getMainPhysical(), size1);
 
 	MotorConstraintTemplate<ConstantMotorTurner>* constraint2 = new MotorConstraintTemplate<ConstantMotorTurner>(motorSpeed);
 
@@ -502,7 +496,7 @@ TEST_CASE(testFixedConstraintAngularMomentum) {
 	Part attachedPart2B(boxShape(1.0, 1.0, 1.0), attachedPart2,
 						CFrame(-offset, 0.0, 0.0, Rotation::Predefined::IDENTITY), basicProperties);
 
-	ALLOCA_COMMotionTree(t2, mainPart2.parent->mainPhysical, size2);
+	ALLOCA_COMMotionTree(t2, mainPart2.getMainPhysical(), size2);
 	
 	ASSERT(t1.totalMass == t2.totalMass);
 	ASSERT(t1.centerOfMass == t2.centerOfMass);
@@ -587,7 +581,7 @@ std::vector<Part> producePhysical() {
 	result.reserve(10);
 	Part& mainPart = result.emplace_back(polyhedronShape(ShapeLibrary::house.rotated(Rotationf::fromEulerAngles(1.0f, -0.3f, 0.5f))), GlobalCFrame(), PartProperties{0.7, 0.2, 0.6});
 
-	mainPart.ensureHasParent();
+	mainPart.ensureHasPhysical();
 
 	Part& part1_mainPart = result.emplace_back(polyhedronShape(ShapeLibrary::house), mainPart,
 											CFrame(0.3, 0.7, -0.5, Rotation::fromEulerAngles(0.7, 0.3, 0.7)), basicProperties);
@@ -606,7 +600,7 @@ std::vector<Part> produceMotorizedPhysical() {
 	result.reserve(10);
 	Part& mainPart = result.emplace_back(polyhedronShape(ShapeLibrary::house.rotated(Rotationf::fromEulerAngles(1.0f, -0.3f, 0.5f))), GlobalCFrame(), PartProperties{0.7, 0.2, 0.6});
 
-	mainPart.ensureHasParent();
+	mainPart.ensureHasPhysical();
 
 	Part& part1_mainPart = result.emplace_back(polyhedronShape(ShapeLibrary::house), mainPart,
 						new SinusoidalPistonConstraint(0.0, 2.0, 1.3),
@@ -717,7 +711,7 @@ TEST_CASE(basicFullRotationSymmetryInvariance) {
 	Part nyPart(box, centerPart, CFrame(0.0, -1.0, 0.0), basicProperties);
 	Part nzPart(box, centerPart, CFrame(0.0, 0.0, -1.0), basicProperties);
 
-	MotorizedPhysical* motorPhys = centerPart.parent->mainPhysical;
+	MotorizedPhysical* motorPhys = centerPart.getMainPhysical();
 
 	FullGlobalDiagnostic reference = runDiagnosticForCFrame(motorPhys, GlobalCFrame(origin));
 	logStream << reference;
@@ -744,7 +738,7 @@ TEST_CASE(angularMomentumOverLocalToGlobal) {
 	Position origin(-143.3, 700.3, 1000.0);
 	
 	std::vector<Part> phys = produceMotorizedPhysical();
-	MotorizedPhysical* motorPhys = phys[0].parent->mainPhysical;
+	MotorizedPhysical* motorPhys = phys[0].getMainPhysical();
 
 
 	Motion motionOfCOM = Motion(Vec3(1.3, 0.7, -2.1), Vec3(2.1, 0.7, 3.7));
@@ -780,7 +774,7 @@ TEST_CASE(hardConstrainedFullRotationFollowsCorrectly) {
 	Part nyPart(box, centerPart, new SinusoidalPistonConstraint(1.0, 3.0, 1.0), CFrame(0.0, 0.0, 0.0, Rotation::Predefined::X_270), CFrame(0.0, 0.0, 0.0), basicProperties);
 	Part nxPart(box, centerPart, new SinusoidalPistonConstraint(1.0, 3.0, 1.0), CFrame(0.0, 0.0, 0.0, Rotation::Predefined::Y_270), CFrame(0.0, 0.0, 0.0), basicProperties);
 
-	MotorizedPhysical* p = centerPart.parent->mainPhysical;
+	MotorizedPhysical* p = centerPart.getMainPhysical();
 
 	FullGlobalDiagnostic reference = runDiagnosticForCFrame(p, GlobalCFrame(origin));
 	logStream << reference;
@@ -805,20 +799,20 @@ TEST_CASE(basicAngularMomentumOfSinglePart) {
 	Polyhedron testPoly = ShapeLibrary::createPointyPrism(4, 1.0f, 1.0f, 0.5f, 0.5f);
 	Part mainPart(polyhedronShape(testPoly), GlobalCFrame(Position(1.3, 2.7, -2.6), Rotation::fromEulerAngles(0.6, -0.7, -0.3)), basicProperties);
 
-	mainPart.ensureHasParent();
+	mainPart.ensureHasPhysical();
 
-	MotorizedPhysical* motorPhys = mainPart.parent->mainPhysical;
+	MotorizedPhysical* motorPhys = mainPart.getMainPhysical();
 
 	motorPhys->motionOfCenterOfMass = Motion(Vec3(2.0, 3.0, 1.0), Vec3(-1.7, 3.3, 12.0));
 
-	ALLOCA_COMMotionTree(t, mainPart.parent->mainPhysical, size);
+	ALLOCA_COMMotionTree(t, mainPart.getMainPhysical(), size);
 
 	ASSERT(motorPhys->getTotalAngularMomentum() == getTotalAngularMomentumOfPhysical(motorPhys));
 }
 
 TEST_CASE(motorizedPhysicalAngularMomentum) {
 	std::vector<Part> phys = produceMotorizedPhysical();
-	MotorizedPhysical* motorPhys = phys[0].parent->mainPhysical;
+	MotorizedPhysical* motorPhys = phys[0].getMainPhysical();
 
 	ALLOCA_COMMotionTree(t, motorPhys, size);
 
@@ -828,7 +822,7 @@ TEST_CASE(motorizedPhysicalAngularMomentum) {
 
 TEST_CASE(physicalTotalAngularMomentum) {
 	std::vector<Part> phys = producePhysical();
-	MotorizedPhysical* motorPhys = phys[0].parent->mainPhysical;
+	MotorizedPhysical* motorPhys = phys[0].getMainPhysical();
 
 	motorPhys->motionOfCenterOfMass = Motion(Vec3(2.0, 3.0, 1.0), Vec3(-1.7, 3.3, 12.0));
 
@@ -842,7 +836,7 @@ TEST_CASE(basicMotorizedPhysicalTotalAngularMomentum) {
 	result.reserve(10);
 	Part& mainPart = result.emplace_back(boxShape(1.0, 1.0, 1.0), GlobalCFrame(), basicProperties);
 
-	mainPart.ensureHasParent();
+	mainPart.ensureHasPhysical();
 
 	Part& part1_mainPart = result.emplace_back(polyhedronShape(ShapeLibrary::house), mainPart,
 											   new SinusoidalPistonConstraint(0.0, 2.0, 1.0),
@@ -857,7 +851,7 @@ TEST_CASE(basicMotorizedPhysicalTotalAngularMomentum) {
 											   CFrame(-0.3, 0.7, 0.5, Rotation::fromEulerAngles(0.7, 0.3, 0.7)),
 											   CFrame(0.7, -2.0, -0.5, Rotation::fromEulerAngles(0.2, -0.257, 0.4)), basicProperties);*/
 
-	MotorizedPhysical* motorPhys = result[0].parent->mainPhysical;
+	MotorizedPhysical* motorPhys = result[0].getMainPhysical();
 
 	motorPhys->motionOfCenterOfMass = Motion(Vec3(0.0, 0.0, 0.0), Vec3(-1.7, 3.3, 12.0));
 
@@ -868,7 +862,7 @@ TEST_CASE(basicMotorizedPhysicalTotalAngularMomentum) {
 
 TEST_CASE(totalInertiaOfPhysical) {
 	std::vector<Part> phys = producePhysical();
-	MotorizedPhysical* motorPhys = phys[0].parent->mainPhysical;
+	MotorizedPhysical* motorPhys = phys[0].getMainPhysical();
 
 	ALLOCA_COMMotionTree(t, motorPhys, size);
 
@@ -880,7 +874,7 @@ TEST_CASE(totalInertiaOfBasicMotorizedPhysical) {
 	result.reserve(10);
 	Part& mainPart = result.emplace_back(polyhedronShape(ShapeLibrary::house), GlobalCFrame(), basicProperties);
 
-	mainPart.ensureHasParent();
+	mainPart.ensureHasPhysical();
 
 	/*Part& part1_mainPart = result.emplace_back(polyhedronShape(ShapeLibrary::house), mainPart,
 											   new SinusoidalPistonConstraint(0.0, 2.0, 1.0),
@@ -895,7 +889,7 @@ TEST_CASE(totalInertiaOfBasicMotorizedPhysical) {
 												CFrame(-0.3, 0.7, 0.5, Rotation::fromEulerAngles(0.7, 0.3, 0.7)),
 												CFrame(0.7, -2.0, -0.5, Rotation::fromEulerAngles(0.2, -0.257, 0.4)), basicProperties);*/
 
-	MotorizedPhysical* motorPhys = result[0].parent->mainPhysical;
+	MotorizedPhysical* motorPhys = result[0].getMainPhysical();
 
 	ALLOCA_COMMotionTree(t, motorPhys, size);
 
@@ -904,21 +898,21 @@ TEST_CASE(totalInertiaOfBasicMotorizedPhysical) {
 
 TEST_CASE(totalCenterOfMassOfPhysical) {
 	std::vector<Part> phys = producePhysical();
-	MotorizedPhysical* motorPhys = phys[0].parent->mainPhysical;
+	MotorizedPhysical* motorPhys = phys[0].getMainPhysical();
 
 	ASSERT(motorPhys->getCenterOfMass() == getTotalCenterOfMassOfPhysical(motorPhys));
 }
 
 TEST_CASE(totalCenterOfMassOfMotorizedPhysical) {
 	std::vector<Part> phys = produceMotorizedPhysical();
-	MotorizedPhysical* motorPhys = phys[0].parent->mainPhysical;
+	MotorizedPhysical* motorPhys = phys[0].getMainPhysical();
 
 	ASSERT(motorPhys->getCenterOfMass() == getTotalCenterOfMassOfPhysical(motorPhys));
 }
 
 TEST_CASE(totalVelocityOfCenterOfMassOfPhysical) {
 	std::vector<Part> phys = producePhysical();
-	MotorizedPhysical* motorPhys = phys[0].parent->mainPhysical;
+	MotorizedPhysical* motorPhys = phys[0].getMainPhysical();
 
 	motorPhys->motionOfCenterOfMass = motionOfCOM;
 
@@ -927,7 +921,7 @@ TEST_CASE(totalVelocityOfCenterOfMassOfPhysical) {
 
 TEST_CASE(totalVelocityOfCenterOfMassOfMotorizedPhysical) {
 	std::vector<Part> phys = produceMotorizedPhysical();
-	MotorizedPhysical* motorPhys = phys[0].parent->mainPhysical;
+	MotorizedPhysical* motorPhys = phys[0].getMainPhysical();
 
 	motorPhys->motionOfCenterOfMass = motionOfCOM;
 
@@ -936,7 +930,7 @@ TEST_CASE(totalVelocityOfCenterOfMassOfMotorizedPhysical) {
 
 TEST_CASE(totalInertiaOfMotorizedPhysical) {
 	std::vector<Part> phys = produceMotorizedPhysical();
-	MotorizedPhysical* motorPhys = phys[0].parent->mainPhysical;
+	MotorizedPhysical* motorPhys = phys[0].getMainPhysical();
 
 	ALLOCA_COMMotionTree(t, motorPhys, size);
 
@@ -945,7 +939,7 @@ TEST_CASE(totalInertiaOfMotorizedPhysical) {
 
 TEST_CASE(motorizedPhysicalTotalAngularMomentum) {
 	std::vector<Part> phys = produceMotorizedPhysical();
-	MotorizedPhysical* motorPhys = phys[0].parent->mainPhysical;
+	MotorizedPhysical* motorPhys = phys[0].getMainPhysical();
 
 	motorPhys->motionOfCenterOfMass = Motion(Vec3(2.0, 3.0, 1.0), Vec3(-1.7, 3.3, 12.0));
 
@@ -957,7 +951,7 @@ TEST_CASE(motorizedPhysicalTotalAngularMomentum) {
 TEST_CASE(conservationOfAngularMomentum) {
 	std::vector<Part> phys = produceMotorizedPhysical();
 
-	MotorizedPhysical* motorPhys = phys[0].parent->mainPhysical;
+	MotorizedPhysical* motorPhys = phys[0].getMainPhysical();
 
 	motorPhys->motionOfCenterOfMass = Motion(Vec3(2.0, 3.0, 1.0), Vec3(-1.7, 3.3, 12.0));
 
@@ -973,7 +967,7 @@ TEST_CASE(conservationOfAngularMomentum) {
 TEST_CASE(conservationOfCenterOfMass) {
 	std::vector<Part> phys = produceMotorizedPhysical();
 
-	MotorizedPhysical* motorPhys = phys[0].parent->mainPhysical;
+	MotorizedPhysical* motorPhys = phys[0].getMainPhysical();
 
 	motorPhys->motionOfCenterOfMass = Motion(Vec3(0.0, 0.0, 0.0), Vec3(-1.7, 3.3, 12.0));
 
@@ -989,7 +983,7 @@ TEST_CASE(conservationOfCenterOfMass) {
 TEST_CASE(angularMomentumVelocityInvariance) {
 	std::vector<Part> phys = produceMotorizedPhysical();
 
-	MotorizedPhysical* motorPhys = phys[0].parent->mainPhysical;
+	MotorizedPhysical* motorPhys = phys[0].getMainPhysical();
 
 	motorPhys->motionOfCenterOfMass = Motion(Vec3(0.0, 0.0, 0.0), Vec3(-1.7, 3.3, 12.0));
 
@@ -1009,7 +1003,7 @@ TEST_CASE(setVelocity) {
 	for(int iter = 0; iter < 100; iter++) {
 		std::vector<Part> phys = produceMotorizedPhysical();
 
-		MotorizedPhysical* motorPhys = phys[0].parent->mainPhysical;
+		MotorizedPhysical* motorPhys = phys[0].getMainPhysical();
 		motorPhys->motionOfCenterOfMass = generateMotion();
 
 		Part& p = oneOf(phys);

@@ -86,7 +86,7 @@ void buildShowcaseWorld(Screen& screen, PlayerWorld& world) {
 
 		world.addPart(sateliteBody);
 
-		sateliteBody->parent->mainPhysical->motionOfCenterOfMass.rotation.rotation[0] = Vec3(0, 2, 0);
+		sateliteBody->getMainPhysical()->motionOfCenterOfMass.rotation.rotation[0] = Vec3(0, 2, 0);
 	}
 
 
@@ -111,8 +111,8 @@ void buildShowcaseWorld(Screen& screen, PlayerWorld& world) {
 	ExtendedPart* rotatingWall2 = new ExtendedPart(boxShape(5.0, 3.0, 0.5), GlobalCFrame(Position(-12.0, 1.7, 5.0)), {1.0, 1.0, 0.7});
 	world.addPart(rotatingWall, true);
 	world.addPart(rotatingWall2, true);
-	rotatingWall->parent->mainPhysical->motionOfCenterOfMass.angularVelocity = Vec3(0, -0.7, 0);
-	rotatingWall2->parent->mainPhysical->motionOfCenterOfMass.angularVelocity = Vec3(0, 0.7, 0);*/
+	rotatingWall->getMainPhysical()->motionOfCenterOfMass.angularVelocity = Vec3(0, -0.7, 0);
+	rotatingWall2->getMainPhysical()->motionOfCenterOfMass.angularVelocity = Vec3(0, 0.7, 0);*/
 
 	// Many many parts
 	/*for(int i = 0; i < 3; i++) {
@@ -173,8 +173,8 @@ void buildShowcaseWorld(Screen& screen, PlayerWorld& world) {
 
 	ConstraintGroup group;
 
-	group.add(ropeA->parent, ropeB->parent, new BallConstraint(Vec3(0.0, 0.0, -2.0), Vec3(0.0, 0.0, 2.0)));
-	group.add(ropeB->parent, ropeC->parent, new BallConstraint(Vec3(0.0, 0.0, -2.0), Vec3(0.0, 0.0, 2.0)));
+	group.add(ropeA, ropeB, new BallConstraint(Vec3(0.0, 0.0, -2.0), Vec3(0.0, 0.0, 2.0)));
+	group.add(ropeB, ropeC, new BallConstraint(Vec3(0.0, 0.0, -2.0), Vec3(0.0, 0.0, 2.0)));
 
 	world.constraints.push_back(group);
 
@@ -189,7 +189,7 @@ void buildShowcaseWorld(Screen& screen, PlayerWorld& world) {
 	world.addPart(ep1);
 	world.addPart(ap1);
 
-	ep1->parent->mainPhysical->applyAngularImpulse(Vec3(1.0, 0.5, 0.0) * 1);
+	ep1->getMainPhysical()->applyAngularImpulse(Vec3(1.0, 0.5, 0.0) * 1);
 
 	ExtendedPart* ep1ap2 = new ExtendedPart(boxShape(0.5, 0.5, 0.5), ep1, CFrame(-0.5, 0.5, 0.5), {1.0, 1.0, 1.0}, "Ep1Ap2");
 	ExtendedPart* ep2 = new ExtendedPart(boxShape(1.0, 2.0, 1.0), GlobalCFrame(-3.0, 3.0, 0.0), {1.0, 1.0, 1.0}, "MainPart");
@@ -200,7 +200,7 @@ void buildShowcaseWorld(Screen& screen, PlayerWorld& world) {
 	world.addPart(ep2);
 	world.addPart(ap2);
 
-	ep2->parent->mainPhysical->applyAngularImpulse(Vec3(1.0, 0.5, 0.0) * 1);
+	ep2->getMainPhysical()->applyAngularImpulse(Vec3(1.0, 0.5, 0.0) * 1);
 
 	//SoftLink.
 	{
@@ -246,7 +246,7 @@ void buildShowcaseWorld(Screen& screen, PlayerWorld& world) {
 
 		world.addPart(f2);
 
-		f2->parent->mainPhysical->motionOfCenterOfMass.rotation.angularVelocity = angularVel;
+		f2->getMainPhysical()->motionOfCenterOfMass.rotation.angularVelocity = angularVel;
 	}
 
 	{
@@ -263,7 +263,7 @@ void buildShowcaseWorld(Screen& screen, PlayerWorld& world) {
 
 		world.addPart(f2);
 
-		f2->parent->mainPhysical->motionOfCenterOfMass.rotation.angularVelocity = angularVel;
+		f2->getMainPhysical()->motionOfCenterOfMass.rotation.angularVelocity = angularVel;
 	}*/
 
 	{
@@ -301,7 +301,7 @@ void buildShowcaseWorld(Screen& screen, PlayerWorld& world) {
 
 		world.addPart(poweredCarBody);
 
-		//poweredCarBody->parent->mainPhysical->motionOfCenterOfMass.angularVelocity = Vec3(0.0, 1.0, 0.0);
+		//poweredCarBody->getMainPhysical()->motionOfCenterOfMass.angularVelocity = Vec3(0.0, 1.0, 0.0);
 	}
 
 	{
@@ -339,7 +339,7 @@ void buildShowcaseWorld(Screen& screen, PlayerWorld& world) {
 
 		world.addPart(mainBlock);
 
-		mainBlock->parent->mainPhysical->motionOfCenterOfMass.rotation.rotation[0] = Vec3(0, 2, 0);
+		mainBlock->getMainPhysical()->motionOfCenterOfMass.rotation.rotation[0] = Vec3(0, 2, 0);
 	}
 
 	{
@@ -357,8 +357,8 @@ void buildShowcaseWorld(Screen& screen, PlayerWorld& world) {
 
 		ConstraintGroup group;
 
-		group.add(box1->parent, box3->parent, new HingeConstraint(Vec3(1.5, 0.0, 0.0), Vec3(0.0, 1.0, 0.0), Vec3(-1.5, 0.0, 0.0), Vec3(0.0, 1.0, 0.0)));
-		group.add(box2->parent, box1->parent, new HingeConstraint(Vec3(1.5, 0.0, 0.0), Vec3(0.0, 1.0, 0.0), Vec3(-1.5, 0.0, 0.0), Vec3(0.0, 1.0, 0.0)));
+		group.add(box1, box3, new HingeConstraint(Vec3(1.5, 0.0, 0.0), Vec3(0.0, 1.0, 0.0), Vec3(-1.5, 0.0, 0.0), Vec3(0.0, 1.0, 0.0)));
+		group.add(box2, box1, new HingeConstraint(Vec3(1.5, 0.0, 0.0), Vec3(0.0, 1.0, 0.0), Vec3(-1.5, 0.0, 0.0), Vec3(0.0, 1.0, 0.0)));
 		//group.add(box3->parent, box2->parent, new HingeConstraint(Vec3(1.5, 0.0, 0.0), Vec3(0.0, 1.0, 0.0), Vec3(-1.5, 0.0, 0.0), Vec3(0.0, 1.0, 0.0)));
 
 		world.constraints.push_back(std::move(group));
@@ -375,9 +375,9 @@ void buildShowcaseWorld(Screen& screen, PlayerWorld& world) {
 
 		ConstraintGroup group;
 
-		group.add(box1->parent, box3->parent, new BallConstraint(Vec3(1.0, 0.0, 0.7), Vec3(-1.0, 0.0, 0.7)));
-		group.add(box2->parent, box1->parent, new BallConstraint(Vec3(1.0, 0.0, 0.7), Vec3(-1.0, 0.0, 0.7)));
-		group.add(box3->parent, box2->parent, new BallConstraint(Vec3(1.0, 0.0, 0.7), Vec3(-1.0, 0.0, 0.7)));
+		group.add(box1, box3, new BallConstraint(Vec3(1.0, 0.0, 0.7), Vec3(-1.0, 0.0, 0.7)));
+		group.add(box2, box1, new BallConstraint(Vec3(1.0, 0.0, 0.7), Vec3(-1.0, 0.0, 0.7)));
+		group.add(box3, box2, new BallConstraint(Vec3(1.0, 0.0, 0.7), Vec3(-1.0, 0.0, 0.7)));
 
 		world.constraints.push_back(std::move(group));
 	}

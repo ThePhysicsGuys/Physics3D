@@ -78,8 +78,9 @@ void WorldLayer::addIntoGroup(Part* newPart, Part* group) {
 	assert(newPart->layer == nullptr);
 	assert(group->layer == this);
 
-	if(newPart->parent != nullptr) {
-		MotorizedPhysical* mainPhys = newPart->parent->mainPhysical;
+	Physical* partPhys = newPart->getPhysical();
+	if(partPhys != nullptr) {
+		MotorizedPhysical* mainPhys = partPhys->mainPhysical;
 		addMotorPhysToGroup(tree, mainPhys, group);
 		mainPhys->forEachPart([this](Part& p) {p.layer = this; });
 	} else {
@@ -125,7 +126,7 @@ void WorldLayer::joinPartsIntoNewGroup(Part* p1, Part* p2) {
 }
 
 int WorldLayer::getID() const {
-	return (parent->getID() * ColissionLayer::NUMBER_OF_SUBLAYERS) + (this - parent->subLayers);
+	return (parent->getID() * ColissionLayer::NUMBER_OF_SUBLAYERS) + static_cast<int>(this - parent->subLayers);
 }
 WorldLayer* getLayerByID(std::vector<ColissionLayer>& knownLayers, int id) {
 	return &knownLayers[id / ColissionLayer::NUMBER_OF_SUBLAYERS].subLayers[id % ColissionLayer::NUMBER_OF_SUBLAYERS];
@@ -134,11 +135,11 @@ const WorldLayer* getLayerByID(const std::vector<ColissionLayer>& knownLayers, i
 	return &knownLayers[id / ColissionLayer::NUMBER_OF_SUBLAYERS].subLayers[id % ColissionLayer::NUMBER_OF_SUBLAYERS];
 }
 int getMaxLayerID(const std::vector<ColissionLayer>& knownLayers) {
-	return knownLayers.size() * ColissionLayer::NUMBER_OF_SUBLAYERS;
+	return static_cast<int>(knownLayers.size()) * ColissionLayer::NUMBER_OF_SUBLAYERS;
 }
 
 int ColissionLayer::getID() const {
-	return this - &world->layers[0];
+	return static_cast<int>(this - &world->layers[0]);
 }
 
 ColissionLayer::ColissionLayer() : world(nullptr), collidesInternally(true), subLayers{WorldLayer(this), WorldLayer(this)} {}

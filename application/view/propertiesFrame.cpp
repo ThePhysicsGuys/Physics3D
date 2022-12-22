@@ -181,8 +181,9 @@ void renderEntity(Engine::Registry64& registry, Engine::Registry64::entity_type 
 
 	PROPERTY("Inertia:", ImGui::Text(str(selectedPart->getInertia()).c_str()));
 
-	if (selectedPart->parent != nullptr) {
-		const MotorizedPhysical* physical = selectedPart->parent->mainPhysical;
+	Physical* selectedPartPhys = selectedPart->getPhysical();
+	if (selectedPartPhys != nullptr) {
+		const MotorizedPhysical* physical = selectedPartPhys->mainPhysical;
 		Motion comMotion = physical->getMotionOfCenterOfMass();
 
 		TITLE("Physical Info:", true);

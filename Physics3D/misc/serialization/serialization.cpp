@@ -374,14 +374,14 @@ static void assertVersionCorrect(std::istream& istream) {
 void SerializationSessionPrototype::serializeWorldLayer(const WorldLayer& layer, std::ostream& ostream) {
 	uint32_t numberOfUnPhysicaledPartsInLayer = 0;
 	layer.tree.forEach([&numberOfUnPhysicaledPartsInLayer](const Part& p) {
-		if(p.parent == nullptr) {
+		if(p.getPhysical() == nullptr) {
 			numberOfUnPhysicaledPartsInLayer++;
 		}
 	});
 
 	serializeBasicTypes<uint32_t>(numberOfUnPhysicaledPartsInLayer, ostream);
 	layer.tree.forEach([this, &ostream](const Part& p) {
-		if(p.parent == nullptr) {
+		if(p.getPhysical() == nullptr) {
 			serializeBasicTypes<GlobalCFrame>(p.getCFrame(), ostream);
 			this->serializePartData(p, ostream);
 		}
@@ -395,7 +395,7 @@ void SerializationSessionPrototype::serializeWorld(const WorldPrototype& world, 
 	for(const ColissionLayer& clayer : world.layers) {
 		for(const WorldLayer& layer : clayer.subLayers) {
 			layer.tree.forEach([this](const Part& p) {
-				if(p.parent == nullptr) {
+				if(p.getPhysical() == nullptr) {
 					collectPartInformation(p);
 				}
 			});
@@ -420,7 +420,7 @@ void SerializationSessionPrototype::serializeWorld(const WorldPrototype& world, 
 		serializeWorldLayer(layer.subLayers[ColissionLayer::TERRAIN_PARTS_LAYER], ostream);
 	}
 
-	serializeBasicTypes<uint32_t>(world.physicals.size(), ostream);
+	serializeBasicTypes<uint32_t>(static_cast<uint32_t>(world.physicals.size()), ostream);
 	for(const MotorizedPhysical* p : world.physicals) {
 		serializeMotorizedPhysicalInContext(*p, ostream);
 	}
@@ -432,7 +432,7 @@ void SerializationSessionPrototype::serializeWorld(const WorldPrototype& world, 
 			this->serializeConstraintInContext(c, ostream);
 		}
 	}
-	serializeBasicTypes<uint32_t>(world.externalForces.size(), ostream);
+	serializeBasicTypes<uint32_t>(static_cast<uint32_t>(world.externalForces.size()), ostream);
 	for(ExternalForce* force : world.externalForces) {
 		dynamicExternalForceSerializer.serialize(*force, ostream);
 	}

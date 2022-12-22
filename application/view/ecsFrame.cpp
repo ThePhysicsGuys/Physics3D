@@ -246,11 +246,12 @@ static bool IconTreeNode(ImU32 id, Engine::Registry64& registry, const char* lab
 		std::string text;
 		if (collider->part->isTerrainPart()) {
 			text = "T";
-		} else if (!collider->part->parent->rigidBody.parts.empty()) {
-			if (collider->part->isMainPart())
+		} else if(collider->part->hasAttachedParts()) {
+			if(collider->part->isMainPart()) {
 				text = "M";
-			else
+			} else {
 				text = "C";
+			}
 		}
 
 		ImVec2 textSize = ImGui::CalcTextSize(text.c_str());
@@ -338,41 +339,41 @@ void ECSFrame::renderEntity(Engine::Registry64& registry, const Engine::Registry
 	bool leaf = children.begin() == registry.end();
 	auto collider = registry.get<Comp::Collider>(entity);
 
-	bool terrain = collider.valid() && collider->part->parent == nullptr;
-	std::string name = registry.getOr<Comp::Name>(entity, std::to_string(entity)).name;
-
-	// Collect hard constraints
 	std::vector<HardPhysicalConnection*> hardConstraints;
-	if (!terrain && collider.valid()) {
-		collider->part->parent->forEachHardConstraint([&hardConstraints](Physical& parent, ConnectedPhysical& child) {
-			hardConstraints.push_back(&child.connectionToParent);
-		});
-	}
-
-	// Collect soft links
 	std::vector<SoftLink*> softLinks;
-	if (!terrain && collider.valid()) {
-		for (SoftLink* softLink : world.softLinks) {
-			if (softLink->attachedPartA.part == collider->part || softLink->attachedPartB.part == collider->part)
-				softLinks.push_back(softLink);
-		}
-	}
-
-	// Collect attachments
 	std::vector<std::pair<Part*, Part*>> attachments;
-	if (!terrain && collider.valid()) {
-		RigidBody* rigidBody = &collider->part->parent->rigidBody;
-		if (collider->part->isMainPart()) {
-			rigidBody->forEachAttachedPart([&attachments, &collider, &rigidBody] (Part& attachment) {
-				if (collider->part != &attachment)
-					attachments.emplace_back(rigidBody->mainPart, &attachment);
+	if(collider.valid()) {
+		Physical* colliderPhysical = collider->part->getPhysical();
+		bool isFreePart = !collider->part->isTerrainPart();
+
+		if(isFreePart) {
+			// Collect hard constraints
+			colliderPhysical->forEachHardConstraint([&hardConstraints](Physical& parent, ConnectedPhysical& child) {
+				hardConstraints.push_back(&child.connectionToParent);
 			});
-		} else {
-			attachments.emplace_back(collider->part, rigidBody->mainPart);
+
+			// Collect soft links
+			for(SoftLink* softLink : world.softLinks) {
+				if(softLink->attachedPartA.part == collider->part || softLink->attachedPartB.part == collider->part)
+					softLinks.push_back(softLink);
+			}
+
+			// Collect attachments
+			RigidBody* rigidBody = &colliderPhysical->rigidBody;
+			if(collider->part->isMainPart()) {
+				rigidBody->forEachAttachedPart([&attachments, &collider, &rigidBody](Part& attachment) {
+					if(collider->part != &attachment) {
+						attachments.emplace_back(rigidBody->mainPart, &attachment);
+					}
+				});
+			} else {
+				attachments.emplace_back(collider->part, rigidBody->mainPart);
+			}
 		}
 	}
 
 	// Entity node
+	std::string name = registry.getOr<Comp::Name>(entity, std::to_string(entity)).name;
 	ImU32 id = GImGui->CurrentWindow->GetID(name.c_str());
 	bool expandable = !leaf || !hardConstraints.empty() || !softLinks.empty() || !attachments.empty();
 	ImGuiTreeNodeFlags flags = expandable ? baseFlags : leafFlags;
