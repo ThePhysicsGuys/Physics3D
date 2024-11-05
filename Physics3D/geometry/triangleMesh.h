@@ -7,7 +7,7 @@
 #include "../math/boundingBox.h"
 #include "../datastructures/alignedPtr.h"
 #include "../datastructures/iteratorFactory.h"
-
+#include <stdint.h>
 namespace P3D {
 struct Triangle {
 	union {

@@ -93,7 +93,7 @@ public:
 			vertexBuffer = std::move(other.vertexBuffer);
 			indexBuffer = std::move(other.indexBuffer);
 
-			indexCounter = std::move(other.indexBuffer);
+			indexCounter = std::move(other.indexCounter);
 			currentIndex = std::move(other.currentIndex);
 
 			vertexPointer = std::move(other.vertexPointer);

@@ -16,6 +16,8 @@
 #include "hardconstraints/hardConstraint.h"
 #include "hardconstraints/hardPhysicalConnection.h"
 
+#include <stdint.h>
+
 namespace P3D {
 typedef Vec3 Vec3Local;
 typedef Vec3 Vec3Relative;
