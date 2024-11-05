@@ -3,7 +3,8 @@
 #include <stddef.h>
 #include <cmath>
 #include <assert.h>
-
+#include <experimental/simd>
+#include <iostream>
 namespace P3D {
 template<typename T, size_t Size>
 struct Vector {
@@ -241,9 +242,36 @@ typedef Vector<long long, 6>	Vec6l;
 typedef Vector<int, 6>			Vec6i;
 
 
+// template<typename T1, typename T2, size_t Size>
+// constexpr auto operator*(const Vector<T1, Size>& a, const Vector<T2, Size>& b) noexcept -> decltype(a[0] * b[0] + a[1] * b[1]) {
+// 	decltype(a[0] * b[0] + a[1] * b[1]) result = a[0] * b[0];
+// 	for(size_t i = 1; i < Size; i++) {
+// 		result += a[i] * b[i];
+// 	}
+// 	return result;
+// }
+
+namespace stdx = std::experimental;
+
+
 template<typename T1, typename T2, size_t Size>
-constexpr auto operator*(const Vector<T1, Size>& a, const Vector<T2, Size>& b) noexcept -> decltype(a[0] * b[0] + a[1] * b[1]) {
-	decltype(a[0] * b[0] + a[1] * b[1]) result = a[0] * b[0];
+requires std::is_arithmetic_v<T1> && std::is_arithmetic_v<T2>
+constexpr auto operator*(const Vector<T1, Size>& a, const Vector<T2, Size>& b) noexcept -> decltype(a[0] * b[0]) {
+	stdx::fixed_size_simd<decltype(a[0] * b[0]), Size> result;
+	stdx::fixed_size_simd<T1, Size> a_simd(&a[0], stdx::element_aligned);
+	stdx::fixed_size_simd<T2, Size> b_simd(&b[0], stdx::element_aligned);
+	result = a_simd * b_simd;
+	return stdx::reduce(result);
+	// decltype(a[0] * b[0] + a[1] * b[1]) result = a[0] * b[0];
+	// for(size_t i = 1; i < Size; i++) {
+	// 	result += a[i] * b[i];
+	// }
+	// return result;
+}
+template<typename T1, typename T2, size_t Size>
+requires (!(std::is_arithmetic_v<T1> && std::is_arithmetic_v<T2>))
+constexpr auto operator*(const Vector<T1, Size>& a, const Vector<T2, Size>& b) noexcept -> decltype(a[0] * b[0]) {
+	decltype(a[0] * b[0]) result = a[0] * b[0];
 	for(size_t i = 1; i < Size; i++) {
 		result += a[i] * b[i];
 	}
@@ -251,16 +279,43 @@ constexpr auto operator*(const Vector<T1, Size>& a, const Vector<T2, Size>& b) n
 }
 
 template<typename T1, typename T2, size_t Size>
-constexpr auto dot(const Vector<T1, Size>& a, const Vector<T2, Size>& b) noexcept -> decltype(a[0] * b[0] + a[1] * b[1]) {
+constexpr auto dot(const Vector<T1, Size>& a, const Vector<T2, Size>& b) noexcept -> decltype(a[0] * b[0]) {
 	return a * b;
 }
 
 template<typename T, size_t Size>
-constexpr auto dot(const Vector<T, Size>& vec) noexcept -> decltype(vec[0] * vec[0] + vec[1] * vec[1]) {
+constexpr auto dot(const Vector<T, Size>& vec) noexcept -> decltype(vec[0] * vec[0]) {
 	return vec * vec;
 }
 
+// template<typename T1, typename T2, size_t Size>
+// constexpr auto operator+(const Vector<T1, Size>& a, const Vector<T2, Size>& b) noexcept -> Vector<decltype(a[0] + b[0]), Size> {
+// 	Vector<decltype(a[0] + b[0]), Size> result;
+// 	for(size_t i = 0; i < Size; i++) {
+// 		result[i] = a[i] + b[i];
+// 	}
+// 	return result;
+// }
+
 template<typename T1, typename T2, size_t Size>
+requires std::is_arithmetic_v<T1> && std::is_arithmetic_v<T2>
+constexpr auto operator+(const Vector<T1, Size>& a, const Vector<T2, Size>& b) noexcept -> Vector<decltype(a[0] + b[0]), Size> {
+	stdx::fixed_size_simd<decltype(a[0] + b[0]), Size> result;
+	stdx::fixed_size_simd<T1, Size> a_simd(&a[0], stdx::element_aligned);
+	stdx::fixed_size_simd<T2, Size> b_simd(&b[0], stdx::element_aligned);
+	result = a_simd + b_simd;
+	Vector<decltype(a[0] + b[0]), Size> result_vec;
+	result.copy_to(result_vec.data, stdx::element_aligned);
+	return result_vec;
+	// Vector<decltype(a[0] + b[0]), Size> result;
+	// for(size_t i = 0; i < Size; i++) {
+	// 	result[i] = a[i] + b[i];
+	// }
+	// return result;
+}
+
+template<typename T1, typename T2, size_t Size>
+requires (!(std::is_arithmetic_v<T1> && std::is_arithmetic_v<T2>))
 constexpr auto operator+(const Vector<T1, Size>& a, const Vector<T2, Size>& b) noexcept -> Vector<decltype(a[0] + b[0]), Size> {
 	Vector<decltype(a[0] + b[0]), Size> result;
 	for(size_t i = 0; i < Size; i++) {
@@ -270,6 +325,7 @@ constexpr auto operator+(const Vector<T1, Size>& a, const Vector<T2, Size>& b) n
 }
 
 template<typename T1, typename T2, size_t Size>
+requires (!(std::is_arithmetic_v<T1> && std::is_arithmetic_v<T2>))
 constexpr auto operator-(const Vector<T1, Size>& a, const Vector<T2, Size>& b) noexcept -> Vector<decltype(a[0] - b[0]), Size> {
 	Vector<decltype(a[0] - b[0]), Size> result;
 	for(size_t i = 0; i < Size; i++) {
@@ -279,6 +335,25 @@ constexpr auto operator-(const Vector<T1, Size>& a, const Vector<T2, Size>& b) n
 }
 
 template<typename T1, typename T2, size_t Size>
+requires std::is_arithmetic_v<T1> && std::is_arithmetic_v<T2>
+constexpr auto operator-(const Vector<T1, Size>& a, const Vector<T2, Size>& b) noexcept -> Vector<decltype(a[0] - b[0]), Size> {
+	stdx::fixed_size_simd<decltype(a[0] - b[0]), Size> result;
+	stdx::fixed_size_simd<T1, Size> a_simd(&a[0], stdx::element_aligned);
+	stdx::fixed_size_simd<T2, Size> b_simd(&b[0], stdx::element_aligned);
+	result = a_simd - b_simd;
+	Vector<decltype(a[0] - b[0]), Size> result_vec;
+	result.copy_to(result_vec.data, stdx::element_aligned);
+	return result_vec;
+
+	// Vector<decltype(a[0] - b[0]), Size> result;
+	// for(size_t i = 0; i < Size; i++) {
+	// 	result[i] = a[i] - b[i];
+	// }
+	// return result;
+}
+
+template<typename T1, typename T2, size_t Size>
+requires (!(std::is_arithmetic_v<T1> && std::is_arithmetic_v<T2>))
 constexpr auto operator*(const Vector<T1, Size>& vec, const T2& factor) noexcept -> Vector<decltype(vec[0] * factor), Size> {
 	Vector<decltype(vec[0] * factor), Size> result;
 	for(size_t i = 0; i < Size; i++) {
@@ -288,6 +363,26 @@ constexpr auto operator*(const Vector<T1, Size>& vec, const T2& factor) noexcept
 }
 
 template<typename T1, typename T2, size_t Size>
+requires std::is_arithmetic_v<T1> && std::is_arithmetic_v<T2>
+constexpr auto operator*(const Vector<T1, Size>& vec, const T2& factor) noexcept -> Vector<decltype(vec[0] * factor), Size> {
+	// store decltype(vec[0] * factor) as a data type for use later
+	decltype(vec[0] * factor) type;
+	stdx::fixed_size_simd<decltype(type), Size> result;
+	stdx::fixed_size_simd<decltype(type), Size> vec_simd(&vec[0], stdx::element_aligned);
+	stdx::fixed_size_simd<decltype(type), Size> factor_simd = factor;
+	result = vec_simd * factor_simd;
+	Vector<decltype(type), Size> result_vec;
+	result.copy_to(result_vec.data, stdx::element_aligned);
+	return result_vec;
+	// Vector<decltype(vec[0] * factor), Size> result;
+	// for(size_t i = 0; i < Size; i++) {
+	// 	result[i] = vec[i] * factor;
+	// }
+	// return result;
+}
+
+template<typename T1, typename T2, size_t Size>
+requires (!(std::is_arithmetic_v<T1> && std::is_arithmetic_v<T2>))
 constexpr auto operator*(const T1& factor, const Vector<T2, Size>& vec) noexcept -> Vector<decltype(factor* vec[0]), Size> {
 	Vector<decltype(factor* vec[0]), Size> result;
 	for(size_t i = 0; i < Size; i++) {
@@ -297,6 +392,26 @@ constexpr auto operator*(const T1& factor, const Vector<T2, Size>& vec) noexcept
 }
 
 template<typename T1, typename T2, size_t Size>
+requires std::is_arithmetic_v<T1> && std::is_arithmetic_v<T2>
+constexpr auto operator*(const T1& factor, const Vector<T2, Size>& vec) noexcept -> Vector<decltype(factor* vec[0]), Size> {
+	decltype(factor* vec[0]) type;
+	stdx::fixed_size_simd<decltype(type), Size> result;
+	stdx::fixed_size_simd<decltype(type), Size> factor_simd = factor;
+	stdx::fixed_size_simd<decltype(type), Size> vec_simd(&vec[0], stdx::element_aligned);
+	result = factor_simd * vec_simd;
+	Vector<decltype(type), Size> result_vec;
+	result.copy_to(result_vec.data, stdx::element_aligned);
+	return result_vec;
+
+	// Vector<decltype(factor* vec[0]), Size> result;
+	// for(size_t i = 0; i < Size; i++) {
+	// 	result[i] = factor * vec[i];
+	// }
+	// return result;
+}
+
+template<typename T1, typename T2, size_t Size>
+requires (!(std::is_arithmetic_v<T1> && std::is_arithmetic_v<T2>))
 constexpr auto operator/(const Vector<T1, Size>& vec, const T2& factor) noexcept -> Vector<decltype(vec[0] / factor), Size> {
 	Vector<decltype(vec[0] / factor), Size> result;
 	for(size_t i = 0; i < Size; i++) {
@@ -305,7 +420,27 @@ constexpr auto operator/(const Vector<T1, Size>& vec, const T2& factor) noexcept
 	return result;
 }
 
+template<typename T1, typename T2, size_t Size>
+requires std::is_arithmetic_v<T1> && std::is_arithmetic_v<T2>
+constexpr auto operator/(const Vector<T1, Size>& vec, const T2& factor) noexcept -> Vector<decltype(vec[0] / factor), Size> {
+	decltype(vec[0] / factor) type;
+	stdx::fixed_size_simd<decltype(type), Size> result;
+	stdx::fixed_size_simd<decltype(type), Size> vec_simd(&vec[0], stdx::element_aligned);
+	stdx::fixed_size_simd<decltype(type), Size> factor_simd = factor;
+	result = vec_simd / factor_simd;
+	Vector<decltype(type), Size> result_vec;
+	result.copy_to(result_vec.data, stdx::element_aligned);
+	return result_vec;
+
+	// Vector<decltype(vec[0] / factor), Size> result;
+	// for(size_t i = 0; i < Size; i++) {
+	// 	result[i] = vec[i] / factor;
+	// }
+	// return result;
+}
+
 template<typename T, size_t Size>
+requires (!(std::is_arithmetic_v<T>))
 constexpr Vector<T, Size> operator-(const Vector<T, Size>& vec) noexcept {
 	Vector<T, Size> result;
 	for(size_t i = 0; i < Size; i++) {
@@ -314,7 +449,24 @@ constexpr Vector<T, Size> operator-(const Vector<T, Size>& vec) noexcept {
 	return result;
 }
 
+template<typename T, size_t Size>
+requires std::is_arithmetic_v<T>
+constexpr Vector<T, Size> operator-(const Vector<T, Size>& vec) noexcept {
+	stdx::fixed_size_simd<T, Size> result(&vec[0], stdx::element_aligned);
+	result = -result;
+	Vector<T, Size> result_vec;
+	result.copy_to(result_vec.data, stdx::element_aligned);
+	return result_vec;
+
+	// Vector<T, Size> result;
+	// for(size_t i = 0; i < Size; i++) {
+	// 	result[i] = -vec[i];
+	// }
+	// return result;
+}
+
 template<typename T1, typename T2, size_t Size>
+requires (!(std::is_arithmetic_v<T1> && std::is_arithmetic_v<T2>))
 constexpr Vector<T1, Size>& operator+=(Vector<T1, Size>& vec, const Vector<T2, Size>& other) noexcept {
 	for(size_t i = 0; i < Size; i++) {
 		vec[i] += other[i];
@@ -323,6 +475,22 @@ constexpr Vector<T1, Size>& operator+=(Vector<T1, Size>& vec, const Vector<T2, S
 }
 
 template<typename T1, typename T2, size_t Size>
+requires std::is_arithmetic_v<T1> && std::is_arithmetic_v<T2>
+constexpr Vector<T1, Size>& operator+=(Vector<T1, Size>& vec, const Vector<T2, Size>& other) noexcept {
+	stdx::fixed_size_simd<T1, Size> vec_simd(&vec[0], stdx::element_aligned);
+	stdx::fixed_size_simd<T2, Size> other_simd(&other[0], stdx::element_aligned);
+	vec_simd += other_simd;
+	vec_simd.copy_to(vec.data, stdx::element_aligned);
+	return vec;
+
+	// for(size_t i = 0; i < Size; i++) {
+	// 	vec[i] += other[i];
+	// }
+	// return vec;
+}
+
+template<typename T1, typename T2, size_t Size>
+requires (!(std::is_arithmetic_v<T1> && std::is_arithmetic_v<T2>))
 constexpr Vector<T1, Size>& operator-=(Vector<T1, Size>& vec, const Vector<T2, Size>& other) noexcept {
 	for(size_t i = 0; i < Size; i++) {
 		vec[i] -= other[i];
@@ -331,6 +499,22 @@ constexpr Vector<T1, Size>& operator-=(Vector<T1, Size>& vec, const Vector<T2, S
 }
 
 template<typename T1, typename T2, size_t Size>
+requires std::is_arithmetic_v<T1> && std::is_arithmetic_v<T2>
+constexpr Vector<T1, Size>& operator-=(Vector<T1, Size>& vec, const Vector<T2, Size>& other) noexcept {
+	stdx::fixed_size_simd<T1, Size> vec_simd(&vec[0], stdx::element_aligned);
+	stdx::fixed_size_simd<T2, Size> other_simd(&other[0], stdx::element_aligned);
+	vec_simd -= other_simd;
+	vec_simd.copy_to(vec.data, stdx::element_aligned);
+	return vec;
+
+	// for(size_t i = 0; i < Size; i++) {
+	// 	vec[i] -= other[i];
+	// }
+	// return vec;
+}
+
+template<typename T1, typename T2, size_t Size>
+requires (!(std::is_arithmetic_v<T1> && std::is_arithmetic_v<T2>))
 constexpr Vector<T1, Size>& operator*=(Vector<T1, Size>& vec, const T2& factor) noexcept {
 	for(size_t i = 0; i < Size; i++) {
 		vec[i] *= factor;
@@ -339,11 +523,42 @@ constexpr Vector<T1, Size>& operator*=(Vector<T1, Size>& vec, const T2& factor) 
 }
 
 template<typename T1, typename T2, size_t Size>
+requires std::is_arithmetic_v<T1> && std::is_arithmetic_v<T2>
+constexpr Vector<T1, Size>& operator*=(Vector<T1, Size>& vec, const T2& factor) noexcept {
+	stdx::fixed_size_simd<T1, Size> vec_simd(&vec[0], stdx::element_aligned);
+	stdx::fixed_size_simd<T2, Size> factor_simd = factor;
+	vec_simd *= factor_simd;
+	vec_simd.copy_to(vec.data, stdx::element_aligned);
+	return vec;
+
+	// for(size_t i = 0; i < Size; i++) {
+	// 	vec[i] *= factor;
+	// }
+	// return vec;
+}
+
+template<typename T1, typename T2, size_t Size>
+requires (!(std::is_arithmetic_v<T1> && std::is_arithmetic_v<T2>))
 constexpr Vector<T1, Size>& operator/=(Vector<T1, Size>& vec, const T2& factor) noexcept {
 	for(size_t i = 0; i < Size; i++) {
 		vec[i] /= factor;
 	}
 	return vec;
+}
+
+template<typename T1, typename T2, size_t Size>
+requires std::is_arithmetic_v<T1> && std::is_arithmetic_v<T2>
+constexpr Vector<T1, Size>& operator/=(Vector<T1, Size>& vec, const T2& factor) noexcept {
+	stdx::fixed_size_simd<T1, Size> vec_simd(&vec[0], stdx::element_aligned);
+	stdx::fixed_size_simd<T2, Size> factor_simd = factor;
+	vec_simd /= factor_simd;
+	vec_simd.copy_to(vec.data, stdx::element_aligned);
+	return vec;
+
+	// for(size_t i = 0; i < Size; i++) {
+	// 	vec[i] /= factor;
+	// }
+	// return vec;
 }
 
 template<typename T1, typename T2>
@@ -431,12 +646,7 @@ constexpr Vector<T, Size - 1> withoutIndex(const Vector<T, Size>& vec, size_t in
 
 template<typename T, size_t Size>
 constexpr T lengthSquared(const Vector<T, Size>& vec) noexcept {
-	T sum = vec[0] * vec[0];
-
-	for(size_t i = 1; i < Size; i++) {
-		sum += vec[i] * vec[i];
-	}
-	return sum;
+	return vec * vec;
 }
 
 template<typename T, size_t Size>
@@ -486,12 +696,26 @@ constexpr Vector<T, Size> normalize(const Vector<T, Size>& vec) noexcept {
 	return vec / length(vec);
 }
 
+// template<typename T, size_t Size>
+// constexpr Vector<T, Size> abs(const Vector<T, Size>& vec) noexcept {
+// 	Vector<T, Size> result;
+// 	for(size_t i = 0; i < Size; i++)
+// 		result[i] = std::abs(vec[i]);
+// 	return result;
+// }
+
 template<typename T, size_t Size>
 constexpr Vector<T, Size> abs(const Vector<T, Size>& vec) noexcept {
-	Vector<T, Size> result;
-	for(size_t i = 0; i < Size; i++)
-		result[i] = std::abs(vec[i]);
-	return result;
+	stdx::fixed_size_simd<T, Size> vec_simd(&vec[0], stdx::element_aligned);
+	vec_simd = stdx::abs(vec_simd);
+	Vector<T, Size> result_vec;
+	vec_simd.copy_to(result_vec.data, stdx::element_aligned);
+	return result_vec;
+
+	// Vector<T, Size> result;
+	// for(size_t i = 0; i < Size; i++)
+	// 	result[i] = std::abs(vec[i]);
+	// return result;
 }
 
 /**
@@ -547,15 +771,34 @@ constexpr T pointToLineDistanceSquared(const Vector<T, Size>& line, const Vector
 	return lengthSquared(point - project(point, line));
 }
 
+
 template<typename T, size_t Size>
+requires (!(std::is_arithmetic_v<T>))
 constexpr Vector<T, Size> elementWiseMul(const Vector<T, Size>& first, const Vector<T, Size>& second) noexcept {
 	Vector<T, Size> result;
 	for(size_t i = 0; i < Size; i++)
 		result[i] = first[i] * second[i];
 	return result;
 }
+template<typename T, size_t Size>
+requires std::is_arithmetic_v<T>
+constexpr Vector<T, Size> elementWiseMul(const Vector<T, Size>& first, const Vector<T, Size>& second) noexcept {
+	stdx::fixed_size_simd<T, Size> result;
+	stdx::fixed_size_simd<T, Size> first_simd(&first[0], stdx::element_aligned);
+	stdx::fixed_size_simd<T, Size> second_simd(&second[0], stdx::element_aligned);
+	result = first_simd * second_simd;
+	Vector<T, Size> result_vec;
+	result.copy_to(result_vec.data, stdx::element_aligned);
+	return result_vec;
+
+	// Vector<T, Size> result;
+	// for(size_t i = 0; i < Size; i++)
+	// 	result[i] = first[i] * second[i];
+	// return result;
+}
 
 template<typename T, size_t Size>
+requires (!(std::is_arithmetic_v<T>))
 constexpr Vector<T, Size> elementWiseSquare(const Vector<T, Size>& vec) noexcept {
 	Vector<T, Size> result;
 	for(size_t i = 0; i < Size; i++)
@@ -564,11 +807,44 @@ constexpr Vector<T, Size> elementWiseSquare(const Vector<T, Size>& vec) noexcept
 }
 
 template<typename T, size_t Size>
+requires std::is_arithmetic_v<T>
+constexpr Vector<T, Size> elementWiseSquare(const Vector<T, Size>& vec) noexcept {
+	stdx::fixed_size_simd<T, Size> result;
+	stdx::fixed_size_simd<T, Size> vec_simd(&vec[0], stdx::element_aligned);
+	result = vec_simd * vec_simd;
+	Vector<T, Size> result_vec;
+	result.copy_to(result_vec.data, stdx::element_aligned);
+	return result_vec;
+
+	// Vector<T, Size> result;
+	// for(size_t i = 0; i < Size; i++)
+	// 	result[i] = vec[i] * vec[i];
+	// return result;
+}
+
+template<typename T, size_t Size>
+requires (!(std::is_arithmetic_v<T>))
 constexpr Vector<T, Size> elementWiseCube(const Vector<T, Size>& vec) noexcept {
 	Vector<T, Size> result;
 	for(size_t i = 0; i < Size; i++)
 		result[i] = vec[i] * vec[i] * vec[i];
 	return result;
+}
+
+template<typename T, size_t Size>
+requires std::is_arithmetic_v<T>
+constexpr Vector<T, Size> elementWiseCube(const Vector<T, Size>& vec) noexcept {
+	stdx::fixed_size_simd<T, Size> result;
+	stdx::fixed_size_simd<T, Size> vec_simd(&vec[0], stdx::element_aligned);
+	result = vec_simd * vec_simd * vec_simd;
+	Vector<T, Size> result_vec;
+	result.copy_to(result_vec.data, stdx::element_aligned);
+	return result_vec;
+
+	// Vector<T, Size> result;
+	// for(size_t i = 0; i < Size; i++)
+	// 	result[i] = vec[i] * vec[i] * vec[i];
+	// return result;
 }
 
 /* computes (

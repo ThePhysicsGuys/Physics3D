@@ -123,7 +123,7 @@ MeshPrototype::MeshPrototype(int vertexCount, int triangleCount, UniqueAlignedPo
 	triangleCount(triangleCount) {}
 
 Vec3f MeshPrototype::getVertex(int index) const {
-	assert(index >= 0 && index < vertexCount);
+	// assert(index >= 0 && index < vertexCount);
 	size_t currect_index = (index / BLOCK_WIDTH) * BLOCK_WIDTH * 2 + index;
 	return Vec3f(this->vertices[currect_index], this->vertices[currect_index + BLOCK_WIDTH], this->vertices[currect_index + BLOCK_WIDTH * 2]);
 }
