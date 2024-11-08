@@ -773,32 +773,32 @@ constexpr T pointToLineDistanceSquared(const Vector<T, Size>& line, const Vector
 
 
 template<typename T, size_t Size>
-requires (!(std::is_arithmetic_v<T>))
+// requires (!(std::is_arithmetic_v<T>))
 constexpr Vector<T, Size> elementWiseMul(const Vector<T, Size>& first, const Vector<T, Size>& second) noexcept {
 	Vector<T, Size> result;
 	for(size_t i = 0; i < Size; i++)
 		result[i] = first[i] * second[i];
 	return result;
 }
-template<typename T, size_t Size>
-requires std::is_arithmetic_v<T>
-constexpr Vector<T, Size> elementWiseMul(const Vector<T, Size>& first, const Vector<T, Size>& second) noexcept {
-	stdx::fixed_size_simd<T, Size> result;
-	stdx::fixed_size_simd<T, Size> first_simd(&first[0], stdx::element_aligned);
-	stdx::fixed_size_simd<T, Size> second_simd(&second[0], stdx::element_aligned);
-	result = first_simd * second_simd;
-	Vector<T, Size> result_vec;
-	result.copy_to(result_vec.data, stdx::element_aligned);
-	return result_vec;
+// template<typename T, size_t Size>
+// requires std::is_arithmetic_v<T>
+// constexpr Vector<T, Size> elementWiseMul(const Vector<T, Size>& first, const Vector<T, Size>& second) noexcept {
+// 	stdx::fixed_size_simd<T, Size> result;
+// 	stdx::fixed_size_simd<T, Size> first_simd(&first[0], stdx::element_aligned);
+// 	stdx::fixed_size_simd<T, Size> second_simd(&second[0], stdx::element_aligned);
+// 	result = first_simd * second_simd;
+// 	Vector<T, Size> result_vec;
+// 	result.copy_to(result_vec.data, stdx::element_aligned);
+// 	return result_vec;
 
-	// Vector<T, Size> result;
-	// for(size_t i = 0; i < Size; i++)
-	// 	result[i] = first[i] * second[i];
-	// return result;
-}
+// 	// Vector<T, Size> result;
+// 	// for(size_t i = 0; i < Size; i++)
+// 	// 	result[i] = first[i] * second[i];
+// 	// return result;
+// }
 
 template<typename T, size_t Size>
-requires (!(std::is_arithmetic_v<T>))
+// requires (!(std::is_arithmetic_v<T>))
 constexpr Vector<T, Size> elementWiseSquare(const Vector<T, Size>& vec) noexcept {
 	Vector<T, Size> result;
 	for(size_t i = 0; i < Size; i++)
@@ -806,24 +806,24 @@ constexpr Vector<T, Size> elementWiseSquare(const Vector<T, Size>& vec) noexcept
 	return result;
 }
 
-template<typename T, size_t Size>
-requires std::is_arithmetic_v<T>
-constexpr Vector<T, Size> elementWiseSquare(const Vector<T, Size>& vec) noexcept {
-	stdx::fixed_size_simd<T, Size> result;
-	stdx::fixed_size_simd<T, Size> vec_simd(&vec[0], stdx::element_aligned);
-	result = vec_simd * vec_simd;
-	Vector<T, Size> result_vec;
-	result.copy_to(result_vec.data, stdx::element_aligned);
-	return result_vec;
+// template<typename T, size_t Size>
+// requires std::is_arithmetic_v<T>
+// constexpr Vector<T, Size> elementWiseSquare(const Vector<T, Size>& vec) noexcept {
+// 	stdx::fixed_size_simd<T, Size> result;
+// 	stdx::fixed_size_simd<T, Size> vec_simd(&vec[0], stdx::element_aligned);
+// 	result = vec_simd * vec_simd;
+// 	Vector<T, Size> result_vec;
+// 	result.copy_to(result_vec.data, stdx::element_aligned);
+// 	return result_vec;
 
-	// Vector<T, Size> result;
-	// for(size_t i = 0; i < Size; i++)
-	// 	result[i] = vec[i] * vec[i];
-	// return result;
-}
+// 	// Vector<T, Size> result;
+// 	// for(size_t i = 0; i < Size; i++)
+// 	// 	result[i] = vec[i] * vec[i];
+// 	// return result;
+// }
 
 template<typename T, size_t Size>
-requires (!(std::is_arithmetic_v<T>))
+// requires (!(std::is_arithmetic_v<T>))
 constexpr Vector<T, Size> elementWiseCube(const Vector<T, Size>& vec) noexcept {
 	Vector<T, Size> result;
 	for(size_t i = 0; i < Size; i++)
@@ -831,21 +831,21 @@ constexpr Vector<T, Size> elementWiseCube(const Vector<T, Size>& vec) noexcept {
 	return result;
 }
 
-template<typename T, size_t Size>
-requires std::is_arithmetic_v<T>
-constexpr Vector<T, Size> elementWiseCube(const Vector<T, Size>& vec) noexcept {
-	stdx::fixed_size_simd<T, Size> result;
-	stdx::fixed_size_simd<T, Size> vec_simd(&vec[0], stdx::element_aligned);
-	result = vec_simd * vec_simd * vec_simd;
-	Vector<T, Size> result_vec;
-	result.copy_to(result_vec.data, stdx::element_aligned);
-	return result_vec;
+// template<typename T, size_t Size>
+// requires std::is_arithmetic_v<T>
+// constexpr Vector<T, Size> elementWiseCube(const Vector<T, Size>& vec) noexcept {
+// 	stdx::fixed_size_simd<T, Size> result;
+// 	stdx::fixed_size_simd<T, Size> vec_simd(&vec[0], stdx::element_aligned);
+// 	result = vec_simd * vec_simd * vec_simd;
+// 	Vector<T, Size> result_vec;
+// 	result.copy_to(result_vec.data, stdx::element_aligned);
+// 	return result_vec;
 
-	// Vector<T, Size> result;
-	// for(size_t i = 0; i < Size; i++)
-	// 	result[i] = vec[i] * vec[i] * vec[i];
-	// return result;
-}
+// 	// Vector<T, Size> result;
+// 	// for(size_t i = 0; i < Size; i++)
+// 	// 	result[i] = vec[i] * vec[i] * vec[i];
+// 	// return result;
+// }
 
 /* computes (
 	a.y * b.z + a.z * b.y,
