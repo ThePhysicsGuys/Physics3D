@@ -455,12 +455,14 @@ void forEachColissionWithRecursive(const TreeTrunk& trunk, int trunkSize, Bounda
 		}
 	}
 }
+//before = 0m17.620s;
+//after = 0m15.310s;
 
 // expects a function of the form void(Boundable*, Boundable*)
 // Calls the given function for each pair of leaf nodes from the two trunks 
 template<typename Boundable, typename SIMDHelper, typename Func>
 void forEachColissionBetweenRecursive(const TreeTrunk& trunkA, int trunkASize, const TreeTrunk& trunkB, int trunkBSize, const Func& func) {
-	OverlapMatrix overlapBetween = SIMDHelper::computeBoundsOverlapMatrix(trunkA, trunkASize, trunkB, trunkBSize);
+	OverlapMatrix overlapBetween = SIMDHelper::computeBoundsOverlapMatrixAVX(trunkA, trunkASize, trunkB, trunkBSize);
 
 	for(int a = 0; a < trunkASize; a++) {
 		const TreeNodeRef& aNode = trunkA.subNodes[a];

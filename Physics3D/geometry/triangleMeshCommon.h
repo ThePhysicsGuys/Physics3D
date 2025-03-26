@@ -2,6 +2,7 @@
 
 #include "triangleMesh.h"
 #include <immintrin.h>
+#include <stdint.h>
 
 namespace P3D {
 #ifdef _MSC_VER
