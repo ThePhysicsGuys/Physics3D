@@ -158,7 +158,7 @@ CylinderClass::CylinderClass() : ShapeClass(PI * 2.0, Vec3(0, 0, 0), ScalableIne
 }
 
 bool CylinderClass::containsPoint(Vec3 point) const {
-	return std::abs(point.z) <= 1.0 && point.x * point.x + point.y + point.y <= 1.0;
+	return std::abs(point.z) <= 1.0 && point.x * point.x + point.y * point.y <= 1.0;
 }
 
 double CylinderClass::getIntersectionDistance(Vec3 origin, Vec3 direction) const {
